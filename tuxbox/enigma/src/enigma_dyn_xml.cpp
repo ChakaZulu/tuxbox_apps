@@ -45,6 +45,7 @@ extern eString zap[5][5];
 extern eString firmwareLevel(eString verid);
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 extern eString removeBadChars(eString s);
+extern eString getIP(void);
 
 static eString getimageinfoXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -415,9 +416,9 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 				if (!genre)
 					genre = "n/a";
 
-				
-				result << "<epg id=\"" << i << "\">" 
-					<< "<date>" 
+
+				result << "<epg id=\"" << i << "\">"
+					<< "<date>"
 					<< std::setw(2) << t->tm_mday << '.'
 					<< std::setw(2) << t->tm_mon+1 << "</date><time>"
 					<< std::setw(2) << t->tm_hour << ':'
@@ -433,7 +434,7 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 				result << "<ref>" << ref2string(ref) << "</ref>"
 					<< "<start>" << event.start_time << "</start>"
 					<< "<duration>" << event.duration << "</duration>";
-				
+
 				result  << "<descr>" << tmp << "</descr>"
 					<< "<channel>" << filter_string(current->service_name)  << "</channel>";
 #endif
@@ -446,19 +447,19 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 			}
 			else
 			{
-				result << "<epg id=\"" << i << "\">" 
+				result << "<epg id=\"" << i << "\">"
 					<< eString().sprintf("<eventid>%x", event.event_id) << "</eventid><date>"
 					<< std::setw(2) << t->tm_mday << '.'
 					<< std::setw(2) << t->tm_mon+1 << "</date><time>"
 					<< std::setw(2) << t->tm_hour << ':'
 					<< std::setw(2) << t->tm_min << "</time>"
-					<< "<description>" << description << "</description></epg>\n";					
+					<< "<description>" << description << "</description></epg>\n";
 			}
 			i++;
 		}
 	}
 	eEPGCache::getInstance()->Unlock();
-	
+
 	result << "</content>";
 
 	return result.str();
@@ -489,14 +490,14 @@ static eString getepgdetailsXML(eString request, eString dirpath, eString opts, 
 	// search for the event... to get the description...
 	result << "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
 	//result << <ref>" << ref2string(ref) << "</ref><id>" << eventid << "</id>";
-	
+
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
 		eServiceReference ref = sapi->service;
 		//eServiceReference ref(string2ref(serviceRef));
 		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
-		
+
 		//result << "<current>" << current << "</current>";
 		eEPGCache::getInstance()->Lock();
 		if (current)
@@ -517,7 +518,7 @@ static eString getepgdetailsXML(eString request, eString dirpath, eString opts, 
 						eDebug("[ENIGMA_DYN] getEPGDetails: found extended description = %s", ext_description.c_str());
 					}
 				}
-				
+
 				if (!ext_description)
 					ext_description = "No detailed information available";
 
@@ -536,43 +537,37 @@ static eString getepgdetailsXML(eString request, eString dirpath, eString opts, 
 
 	result << "</content>";
 	eEPGCache::getInstance()->Unlock();
-	
+
 	return result.str();
-}
-
-static eString getIPaddr()
-{
-	eString tmp;
-	int sd;
-	struct ifreq ifr;
-	sd=socket(AF_INET, SOCK_DGRAM, 0);
-	if (sd < 0)
-		return "?.?.?.?-socket-error";
-	memset(&ifr, 0, sizeof(ifr));
-	ifr.ifr_addr.sa_family = AF_INET; // fixes problems with some linux vers.
-	strncpy(ifr.ifr_name, "eth0", sizeof(ifr.ifr_name));
-	if (ioctl(sd, SIOCGIFADDR, &ifr) < 0)
-		return "?.?.?.?-ioctl-error";
-	close(sd);
-
-	return eString().sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 }
 
 static eString mplayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString vpid, apid;
-
-	vpid = eString().sprintf("%04x", Decoder::current.vpid);
-	apid = eString().sprintf("%04x", Decoder::current.apid);
+	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
+	eString apid = eString().sprintf("%04x", Decoder::current.apid);
 
 	content->local_header["Content-Type"]="video/mpegfile";
-	content->local_header["Cache-Control"] = "no-cache";	
+	content->local_header["Cache-Control"] = "no-cache";
 	content->local_header["vpid"] = vpid;
 	content->local_header["apid"] = apid;
-		
-	return "http://" + getIPaddr() + ":31339/" + vpid  +"," + apid;
+
+	return "http://" + getIP() + ":31339/" + vpid  + "," + apid;
 }
 
+static eString vlc(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
+	eString apid = eString().sprintf("%04x", Decoder::current.apid);
+	eString pmt = eString().sprintf("%04x", Decoder::current.pmtpid);
+
+	content->local_header["Content-Type"]="video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["vpid"] = vpid;
+	content->local_header["apid"] = apid;
+	content->local_header["pmt"] = pmt;
+
+	return "http://" + getIP() + ":31339/0," + pmt + "," + vpid  + "," + apid;
+}
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
@@ -582,6 +577,7 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/epgdetails", getepgdetailsXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/imginfo", getimageinfoXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/audio", getAudioChannelsXML, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/mplayer", mplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mplayer, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/vlc.pls", vlc, lockWeb);
 }
 #endif

@@ -57,7 +57,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.3.1"
+#define WEBIFVERSION "2.4.0"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -1121,7 +1121,7 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 	return closeWindow(content, "", 500);
 }
 
-static eString getIP()
+eString getIP()
 {
 	eString tmp;
 	int sd;
@@ -2613,6 +2613,21 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 {
 	content->local_header["Content-Type"]="audio/mpegfile";
 	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
+}
+
+static eString videopls(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
+	eString apid = eString().sprintf("%04x", Decoder::current.apid);
+	eString pmt = eString().sprintf("%04x", Decoder::current.pmtpid);
+
+	content->local_header["Content-Type"]="video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache";
+	content->local_header["vpid"] = vpid;
+	content->local_header["apid"] = apid;
+	content->local_header["pmt"] = pmt;
+
+	return "http://" + getIP() + ":31339/0," + pmt + "," + vpid  + "," + apid;
 }
 
 #define CHANNELWIDTH 200
@@ -4952,6 +4967,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/showRemoteControl", showRemoteControl, lockWeb);
 	dyn_resolver->addDyn("GET", "/satFinder", satFinder, lockWeb);
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
+	dyn_resolver->addDyn("GET", "/video.pls", videopls, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 //	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);

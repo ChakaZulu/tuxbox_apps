@@ -181,8 +181,7 @@
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td id="ip">&nbsp;</td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
-									<td>vpid:&nbsp;</td>
-									<td id="vpid">&nbsp;</td>
+									<td>vpid:&nbsp;<a id="vpid" href="video.pls">&nbsp;</a></td>
 									<td>&nbsp;<img src="squ.png">&nbsp;</td>
 									<td>apid:&nbsp;<a id="apid" href="audio.m3u">&nbsp;</a></td>
 								</tr>
