@@ -1,6 +1,6 @@
 all:: pac
 
-#CC=powerpc-linux-gcc
+CC=powerpc-linux-gcc
 CDEBUGFLAGS=-g -O2 -Wall -pedantic
 INCLUDES=-I.
 OBJS=main.o rcinput.o draw.o maze.o
