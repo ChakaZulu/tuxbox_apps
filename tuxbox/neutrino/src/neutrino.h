@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.21 2001/10/02 23:16:48 McClean Exp $
+//  $Id: neutrino.h,v 1.22 2001/10/04 23:21:13 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.22  2001/10/04 23:21:13  McClean
+//  cleanup
+//
 //  Revision 1.21  2001/10/02 23:16:48  McClean
 //  game interface
 //
@@ -126,7 +129,6 @@ class CNeutrinoApp : public CMenuTarget
 
 	bool				nRun;
 	int				    mode;
-	char				volume;
 	bool				mute;
 		
     channel_msg         firstchannel;

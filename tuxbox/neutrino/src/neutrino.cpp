@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.54 2001/10/04 23:16:20 McClean Exp $
+        $Id: neutrino.cpp,v 1.55 2001/10/04 23:21:13 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.55  2001/10/04 23:21:13  McClean
+  cleanup
+
   Revision 1.54  2001/10/04 23:16:20  McClean
   get volume from controld
 
@@ -1164,7 +1167,6 @@ void CNeutrinoApp::SelectAPID()
 void CNeutrinoApp::InitZapper()
 {
 	g_RemoteControl->setZapper(zapit);
-	volume = 100;
 
 	if (!zapit)
 		channelsInit();
@@ -1555,7 +1557,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.54 2001/10/04 23:16:20 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.55 2001/10/04 23:21:13 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

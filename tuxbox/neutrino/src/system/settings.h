@@ -8,7 +8,9 @@ struct SNeutrinoSettings
 	int video_Signal;
 	int video_Format;
 
+	//misc
     int epg_byname;
+
 	//audio
 	int audio_Stereo;
 	int audio_DolbyDigital;
