@@ -4750,8 +4750,6 @@ void eZapMain::runPluginEPG()
 
 void eZapMain::showEPGList(eServiceReferenceDVB service)
 {
-	if (!isEPG)
-		return;
 	if (service.type != eServiceReference::idDVB)
 		return;
 	eEPGCache::getInstance()->Lock();
