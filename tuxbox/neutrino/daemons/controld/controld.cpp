@@ -42,15 +42,15 @@
 
 #include <zapit/client/zapitclient.h>
 
-#include <basicserver.h>
-#include <configfile.h>
-#include <eventserver.h>
-#include <tuxbox.h>
-
 #include <controldclient/controldclient.h>
 #include <controldclient/controldMsg.h>
 //#include <lcddclient/lcddclient.h>
 #include <timerdclient/timerdclient.h>
+
+#include <basicserver.h>
+#include <configfile.h>
+#include <eventserver.h>
+#include <tuxbox.h>
 
 #include "eventwatchdog.h"
 #include "driver/audio.h"
@@ -76,7 +76,7 @@ struct Ssettings
 	int  videooutput;
 	int  videoformat;
 
-	char boxtype; // not part of the config - set by setBoxType()
+	CControldClient::tuxbox_maker_t boxtype; // not part of the config - set by setBoxType()
 } settings;
 
 int	nokia_scart[7];
@@ -251,7 +251,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		format= 0;
 
 	avsiosfncFormat = format;
-	if (settings.boxtype == CControldClient::BOXTYPE_PHILIPS) // Philips
+	if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
 	{
 		switch (format)
 		{
@@ -477,15 +477,15 @@ void switch_vcr( bool vcr_on)
 	{
 		//turn to scart-input
 		printf("[controld]: switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
-		if (settings.boxtype == 2) // Sagem
+		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
 		{
 			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], sagem_scart[4], sagem_scart[5], sagem_scart[6]);
 		}
-		else if (settings.boxtype == 1) // Nokia
+		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_NOKIA)
 		{
 			routeVideo(nokia_scart[0], nokia_scart[1], nokia_scart[2], nokia_scart[3], nokia_scart[4], nokia_scart[5], nokia_scart[6]);
 		}
-		else if (settings.boxtype == 3) // Philips
+		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
 		{
 			routeVideo(philips_scart[0], philips_scart[1], philips_scart[2], philips_scart[3], philips_scart[4], philips_scart[5], philips_scart[6]);
 		}
@@ -493,15 +493,15 @@ void switch_vcr( bool vcr_on)
 	else
 	{	//turn to dvb...
 		printf("[controld]: switch to dvb-input... (%s)\n", BoxNames[settings.boxtype]);
-		if (settings.boxtype == 2) // Sagem
+		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
 		{
 			routeVideo( sagem_dvb[0], sagem_dvb[1], sagem_dvb[2], sagem_dvb[3], sagem_dvb[4], sagem_dvb[5], settings.videooutput);
 		}
-		else if (settings.boxtype == 1) // Nokia
+		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_NOKIA)
 		{
 			routeVideo( nokia_dvb[0], nokia_dvb[1], nokia_dvb[2], nokia_dvb[3], nokia_dvb[4], nokia_dvb[5], settings.videooutput);
 		}
-		else if (settings.boxtype == 3) // Philips
+		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
 		{
 			routeVideo( philips_dvb[0], philips_dvb[1], philips_dvb[2], philips_dvb[3], philips_dvb[4], philips_dvb[5], settings.videooutput);
 		}
@@ -576,13 +576,20 @@ void setBoxType()
 {
 	switch ( tuxbox_get_vendor() )
 	{
-	case TUXBOX_VENDOR_SAGEM:	settings.boxtype= CControldClient::BOXTYPE_SAGEM;
+	case TUXBOX_VENDOR_SAGEM:
+		settings.boxtype = CControldClient::TUXBOX_MAKER_SAGEM;
 		break;
-	case TUXBOX_VENDOR_PHILIPS:	settings.boxtype= CControldClient::BOXTYPE_PHILIPS;
+	case TUXBOX_VENDOR_PHILIPS:
+		settings.boxtype = CControldClient::TUXBOX_MAKER_PHILIPS;
 		break;
 	case TUXBOX_VENDOR_NOKIA:
+		settings.boxtype = CControldClient::TUXBOX_MAKER_NOKIA;
+		break;
+	case TUXBOX_VENDOR_DREAM_MM:
+		settings.boxtype = CControldClient::TUXBOX_MAKER_DREAM_MM;
+		break;
 	default:
-		settings.boxtype= CControldClient::BOXTYPE_NOKIA;
+		settings.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
 	}
 
 	printf("[controld] Boxtype detected: (%d, %d, %s %s)\n", tuxbox_get_vendor(), settings.boxtype, tuxbox_get_vendor_str(), tuxbox_get_model_str());
@@ -783,7 +790,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.92 2003/02/19 17:08:26 waldi Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.93 2003/02/19 18:02:50 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;

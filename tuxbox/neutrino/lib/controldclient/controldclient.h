@@ -65,10 +65,16 @@ class CControldClient:private CBasicClient
 		static const bool VOLUME_MUTE = true;
 		static const bool VOLUME_UNMUTE = false;
 
-		//BoxType
-		static const char BOXTYPE_NOKIA   = 1;
-		static const char BOXTYPE_SAGEM   = 2;
-		static const char BOXTYPE_PHILIPS = 3;
+		//BoxType  /* cf. driver/include/tuxbox/tuxbox_info.h */
+		typedef enum tuxbox_maker
+			{
+				TUXBOX_MAKER_UNKNOWN			= 0,
+				TUXBOX_MAKER_NOKIA			= 1,
+				TUXBOX_MAKER_SAGEM			= 2,
+				TUXBOX_MAKER_PHILIPS			= 3,
+				TUXBOX_MAKER_DREAM_MM			= 4,
+			}
+		tuxbox_maker_t;
 
 		//scartmode
 		static const char SCARTMODE_ON  = 1;
@@ -138,17 +144,13 @@ class CControldClient:private CBasicClient
 		char getVideoOutput();
 
 		/*
-			setVideoOutput(char) : Setzten des Boxentyps ( nokia / sagem / philips )
-			Parameter: BOXTYPE_NOKIA   = nokia dbox
-			           BOXTYPE_SAGEM   = sagem
-			           BOXTYPE_PHILIPS = philips
-
+			setBoxType(CControldClient::tuxbox_vendor_t) : Setzten des Boxentyps ( nokia / sagem / philips )
 		*/
-		void setBoxType(char);
-		char getBoxType();
+		void setBoxType(const CControldClient::tuxbox_maker_t);
+		CControldClient::tuxbox_maker_t getBoxType();
 
 		/*
-			setVideoOutput(char) : Scartmode ( an / aus )
+			setScartMode(char) : Scartmode ( an / aus )
 			Parameter: SCARTMODE_ON  = auf scartinput schalten
 			           SCARTMODE_OFF = wieder dvb anzeigen
 

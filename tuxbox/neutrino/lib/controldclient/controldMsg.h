@@ -26,6 +26,7 @@
 
 
 #include <connection/basicmessage.h>
+#include <controldclient/controldclient.h>
 
 
 #define CONTROLD_UDS_NAME "/tmp/controld.sock"
@@ -105,7 +106,7 @@ class CControld : public CBasicMessage
 
 		struct commandBoxType
 		{
-			unsigned char boxtype;
+			CControldClient::tuxbox_maker_t boxtype;
 		};
 
 		struct commandScartMode
@@ -146,7 +147,7 @@ class CControld : public CBasicMessage
 
 		struct responseBoxType
 		{
-			unsigned char boxtype;
+			CControldClient::tuxbox_maker_t boxtype;
 		};
 
 		struct responseScartMode
