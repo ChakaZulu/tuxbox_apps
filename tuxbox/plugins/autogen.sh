@@ -39,24 +39,32 @@ if test "$DIE" -eq 1; then
 	exit 1
 fi
 
+if [ "$1" = "copy" ]; then
+	COPY="-c";
+fi
+
 if [ ! -e acinclude.m4 ]; then
 	for i in .. ../.. ../../..; do
 		if [ -e `pwd`/$i/acinclude.m4 ]; then
-			ln -s `pwd`/$i/acinclude.m4 .
+			if [ $COPY ]; then
+				cp `pwd`/$i/acinclude.m4 .
+                        else
+                                ln -s `pwd`/$i/acinclude.m4 .
+                        fi
 		fi
 	done
 fi
 
 echo "Generating configuration files for $package, please wait...."
 
-echo "  aclocal"
-aclocal
+echo "  aclocal $ACLOCAL_FLAGS"
+aclocal $ACLOCAL_FLAGS
 echo "  libtoolize --automake"
-libtoolize --automake
+libtoolize --automake $COPY
 echo "  autoconf"
 autoconf
 echo "  autoheader"
 autoheader
 echo "  automake --add-missing"
-automake --add-missing 
+automake --add-missing $COPY
 

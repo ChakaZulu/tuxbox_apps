@@ -2,7 +2,6 @@ SUBDIRS = font
 
 INCLUDES = \
 	@FREETYPE_CFLAGS@ \
-	-I@DRIVER@ \
 	-I$(top_srcdir)/include
 
 noinst_LTLIBRARIES = tuxtxt.la

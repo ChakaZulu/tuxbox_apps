@@ -1,0 +1,27 @@
+Source: tuxbox-plugins
+Priority: optional
+Maintainer: Bastian Blank <waldi@debian.org>
+Build-Depends: debhelper (>> 3.0.0), gcc-3.2, zlib1g-dev, libcurl-dev, libfreetype6-dev, tuxbox-driver-dev
+Standards-Version: 3.5.7
+
+Package: tuxbox-plugins
+Section: utils
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: tuxbox-plugins-udeb
+Section: debian-installer
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: tuxbox-plugins-dev
+Section: devel
+Architecture: all
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
