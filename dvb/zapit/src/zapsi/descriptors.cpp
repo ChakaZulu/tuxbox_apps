@@ -1,7 +1,17 @@
 #include <stdio.h>
 #include <map>
+#include <string>
 #include <map.h>
 #include "sdt.h"
+#include "scan.h"
+
+
+
+std::map<int,transpondermap> scantransponders;
+std::map<int,scanchannel> scanchannels;
+std::string curr_chan_name;
+
+#define NVOD_HACK;
 
 int stuffing_desc(char *buffer)
 {
@@ -10,13 +20,13 @@ int stuffing_desc(char *buffer)
 
 int linkage_desc(char *buffer)
 {
-	printf("Linkange-descriptor to be implemented\n");
+	//printf("Linkange-descriptor to be implemented\n");
 	return buffer[1]+2;
 }
 
 int priv_data_desc(char *buffer)
 {
-	printf("Private data descriptor\n");
+	//printf("Private data descriptor\n");
 	return buffer[1]+2;
 }
 
@@ -52,37 +62,52 @@ int service_list_desc(char *buffer)
 
 int cable_deliv_system_desc(char *buffer, int tsid)
 {
-	int len = buffer[1];
-	int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100)   + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
-	int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
-	int fec_inner = (buffer[12]&0xF0);
-	
-	//printf("frequency: %d\n",freq);
-	//printf("Symbol_rate: %d\n",symbolrate);
-	//printf("FEC_inner: %d\n",fec_inner);
-	
-	transponders.insert(std::pair<int,transponder>(tsid, transponder(tsid,freq,symbolrate,0,0,fec_inner,0)));
-	
-	//tune(freq,symbolrate);
-	
-	return len+2;
+  int len = buffer[1];
+  int freq = (((buffer[2] & 0xf0) >> 4) * 10000) + ((buffer[2] & 0xf) * 1000) + (((buffer[3] & 0xf0) >> 4) * 100) + ((buffer[3] & 0xf)*10) + (((buffer[4]&0xf0)>>4)) ;
+  int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
+  int fec_inner = (buffer[12]&0xF);
+  
+  //printf("frequency: %d\n",freq);
+  //printf("Symbol_rate: %d\n",symbolrate);
+  //printf("FEC_inner: %d\n",fec_inner);
+  if (fec_inner == 15)
+  	fec_inner = 0;
+  
+  if (scantransponders.count(tsid) == 0)
+    {
+    	printf("New transponder\n");
+	printf("tsid: %04x\n",tsid);
+	printf("frequency: %d\n", freq);
+	printf("Symbolrate: %d\n", symbolrate);
+	printf("FEC_inner: %d\n",fec_inner);
+      	scantransponders.insert(std::pair<int,transpondermap>(tsid, transpondermap(tsid,freq,symbolrate,fec_inner)));
+      }
+
+  return len+2;
 }
 
 int sat_deliv_system_desc(char *buffer, int tsid)
 {
-	int len = buffer[1];
-	int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100) + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
-	int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
-	int fec_inner = (buffer[12]&0xF0);
-	int polarisation = ((buffer[8]&0x6)>>5);
+  int len = buffer[1];
+  int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100) + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
+  int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
+  int fec_inner = (buffer[12]&0xF);
+  int polarization = ((buffer[8]&0x60)>>5);
+  
+
 	
-	printf("tsid: %04x\n", tsid);
-	printf("frequency: %d\n", freq);
-	printf("Polarisation: %d\n", polarisation);
-	printf("Symbolrate: %d\n", symbolrate);
-	printf("FEC_inner: %d\n",fec_inner);
+	if (scantransponders.count(tsid) == 0)
+	{
+	  printf("New transponder\n");
+	  printf("tsid: %04x\n",tsid);
+	  printf("frequency: %d\n", freq);
+	  printf("Polarization: %d\n", polarization);
+	  printf("Symbolrate: %d\n", symbolrate);
+	  printf("FEC_inner: %d\n",fec_inner);
+	  scantransponders.insert(std::pair<int,transpondermap>(tsid, transpondermap(tsid,freq,symbolrate,fec_inner,polarization)));
+
+	}
 	
-	transponders.insert(std::pair<int,transponder>(tsid, transponder(tsid,freq,symbolrate,polarisation,0,fec_inner,0)));
 	return len+2;
 }
 
@@ -94,7 +119,7 @@ int terr_deliv_system_desc(char *buffer)
 
 int multilingual_network_name_desc(char *buffer)
 {
-	printf("Multilingual network name descriptor\n");
+	//printf("Multilingual network name descriptor\n");
 	
 	return buffer[1]+2;
 }
@@ -114,23 +139,23 @@ int freq_list_desc(char *buffer)
 
 int cell_list_desc(char *buffer)
 {
-	printf("Cell-list-descriptor\nWho has a DVB-T Dbox?\n");
+	//printf("Cell-list-descriptor\nWho has a DVB-T Dbox?\n");
 	return buffer[1]+2;
 }
 
 int cell_freq_list_desc(char *buffer)
 {
-	printf("Cell-list-descriptor\nWho has a DVB-T Dbox?\n");
+	//printf("Cell-list-descriptor\nWho has a DVB-T Dbox?\n");
 	return buffer[1]+2;
 }
 
 int announcement_support_desc(char *buffer)
 {
-	printf("No announcements\n");
+	//printf("No announcements\n");
 	return buffer[1]+2;
 }
 
-int service_name_desc(char *buffer, int sid, int tsid, int onid)
+int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 {
 	int len = buffer[1];
 	int i=0; 
@@ -138,6 +163,7 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid)
 	int service_name_len = buffer[name_len+4];
 	std::string provname;
 	std::string servicename;
+	std::map<int,scanchannel>::iterator I = scanchannels.find((tsid<<16)+sid);
 	int service_type = buffer[2];
 	
 	
@@ -146,18 +172,114 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid)
 	for (i = 0; i<name_len; i++)
 	{
 		//if (isprint(buffer[i+4]))
-			provname += buffer[i+4];
+			//provname += buffer[i+4];
+			switch (buffer[i+4]) {
+     				case '&':
+        				provname += "&amp;";
+        			break;
+      				case '<':
+        				provname += "&lt;";
+        			break;
+      				case '\"':
+       					provname += "&quot;";
+        			break;
+      				case 0x81:
+      				case 0x82:
+        			break;
+      				case 0x86:
+				//        provname += "<b>";
+        			break;
+      				case 0x87:
+				//        provname += "</b>";
+        			break;
+      				case 0x8a:
+				//      provname += "<br/>";
+        			break;
+      				default:
+        			if (buffer[i+4]<32)
+          			break;
+        			if ((buffer[i+4]>=32) && (buffer[i+4]<128))
+          				provname += buffer[i+4];
+          			else if (buffer[i+4] == 128)
+           				;
+        			else
+        			{
+        				char val[5];
+        				sprintf(val, "%d", buffer[i+4]);
+          				provname += "&#";
+          				provname += val;
+          				provname += ";";	
+          			}
+		}
 	}
 	
 	for (i=0;i<service_name_len;i++)
 	{
-	  //if (isprint(buffer[i+name_len+5]))
-	  servicename += buffer[i+name_len+5];		
+		//if (isprint(buffer[i+name_len+5]))
+			//servicename += buffer[i+name_len+5];
+			
+			switch (buffer[i+name_len+5]) {
+     				case '&':
+        				servicename += "&amp;";
+        			break;
+      				case '<':
+        				servicename += "&lt;";
+        			break;
+      				case '\"':
+       					servicename += "&quot;";
+        			break;
+      				case 0x81:
+      				case 0x82:
+        			break;
+      				case 0x86:
+				//        servicename += "<b>";
+        			break;
+      				case 0x87:
+				//        servicename += "</b>";
+        			break;
+      				case 0x8a:
+				//      servicename += "<br/>";
+        			break;
+      				default:
+        			if (buffer[i+name_len+5]<32)
+          			break;
+        			if ((buffer[i+name_len+5]>=32) && (buffer[i+name_len+5]<128))
+          				servicename += buffer[i+name_len+5];
+          			else if (buffer[i+name_len+5] == 128)
+           				;
+        			else
+        			{
+        				char val[5];
+        				sprintf(val, "%d", buffer[i+name_len+5]);
+          				servicename += "&#";
+          				servicename += val;
+          				servicename += ";";	
+          			}
+		}
 	}
 	
 	printf("provider: %s\n",provname.c_str());
 	printf("service: %s\n",servicename.c_str());
-
+	
+	if (scan_mode)
+	{
+#ifdef NVOD_HACK	
+	curr_chan_name = servicename;
+#endif
+	if (scanchannels.count((tsid<<16)+sid) != 0)
+	{
+		printf("Found a channel in map\n");
+		I->second.name = servicename;
+		I->second.onid = onid;
+		I->second.service_type = service_type;
+	}
+	else
+	{
+		scanchannels.insert(std::pair<int,scanchannel>((tsid<<16)+sid,scanchannel(servicename,sid,tsid,onid,service_type)));
+	}
+	}
+	
+	
 	return len+2;
 }
 
@@ -184,24 +306,51 @@ int country_availability_desc(char *buffer)
 }
 	
 
-int nvod_ref_desc(char *buffer,int tsid)
+int nvod_ref_desc(char *buffer,int tsid,bool scan_mode)
 {
-  int len = buffer[1];
-  std::string servicename = "NVOD";
+	int len = buffer[1];
+	std::string servicename;
 
-  printf("NVOD on:\n");
-  for (int i = 0; i<len;i++)
-    {
-      int tsid, onid, sid;
-      
-      tsid = (buffer[i+2]<<16)|buffer[(++i)+2];
-      onid = (buffer[(++i)+2]<<16)|buffer[(++i)+2];
-      sid = (buffer[(++i)+2]<<16)|buffer[(++i)+2];
-      
-      printf("tsid: %04x, onid: %04x, sid: %04x\n",tsid,onid,sid);
-      nvodchannels.insert(std::pair<int,channel>((onid<<16)+sid,channel(servicename,0,0,0,0,0,sid,tsid,onid,2)));
-    }
-  return len+2;
+#ifdef NVOD_HACK
+	int number = 1;
+	//printf("NVOD on:\n");
+	for (int i = 0; i<len;i++)
+	{
+		int tsid, onid, sid;
+		char number_c[3];
+
+		sprintf(number_c,"%d", number++);
+		servicename = curr_chan_name + "/" + number_c;
+		printf("\n\nFound nvod-reference: %s\n\n",servicename.c_str());
+		tsid = (buffer[i+2]<<16)|buffer[(++i)+2];
+		onid = (buffer[(++i)+2]<<16)|buffer[(++i)+2];
+		sid = (buffer[(++i)+2]<<16)|buffer[(++i)+2];
+		
+		printf("tsid: %04x, onid: %04x, sid: %04x\n",tsid,onid,sid);
+		if (scan_mode)
+		{
+			if (scanchannels.count((tsid<<16)+sid) != 0)
+		  	{
+		    	printf("Found a channel in map\n");
+		    	std::map<int,scanchannel>::iterator I = scanchannels.find((tsid<<16)+sid);
+		    	I->second.name = servicename;
+		    	I->second.onid = onid;
+		    	I->second.service_type = 1;
+		  	}
+			else
+		  	{
+		    	scanchannels.insert(std::pair<int,scanchannel>((tsid<<16)+sid,scanchannel(servicename,sid,tsid,onid,1)));
+			}
+		}
+		else
+		{
+			nvodchannels.insert(std::pair<int,channel>((onid<<16)+sid,channel(servicename,0,0,0,0,0,sid,tsid,onid,1)));
+		}
+	}
+	
+#endif	
+	
+	return len+2;
 }
 
 int time_shift_service_desc(char *buffer)

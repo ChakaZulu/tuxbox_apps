@@ -14,6 +14,9 @@
 
 #define DEMUX_DEV "/dev/ost/demux0"
 
+
+extern std::string curr_chan_name;
+
 int sdt(uint osid, bool scan_mode)
 {
   struct dmxSctFilterParams flt;
@@ -100,7 +103,7 @@ int sdt(uint osid, bool scan_mode)
 		desc_tot += bouquet_name_desc(&buffer[current_i+desc_tot]);
 		break;
 	      case 0x48: 
-		desc_tot += service_name_desc(&buffer[current_i+desc_tot],sid,tsid,network_id);
+		desc_tot += service_name_desc(&buffer[current_i+desc_tot],sid,tsid,network_id,scan_mode);
 		break;
 	      case 0x49:
 		desc_tot += country_availability_desc(&buffer[current_i+desc_tot]);
@@ -109,7 +112,7 @@ int sdt(uint osid, bool scan_mode)
 		desc_tot += linkage_desc(&buffer[current_i+desc_tot]);
 		break;
 	      case 0x4b:
-		desc_tot += nvod_ref_desc(&buffer[current_i+desc_tot],tsid);
+		desc_tot += nvod_ref_desc(&buffer[current_i+desc_tot],tsid,scan_mode);
 		break;
 	      case 0x4c:
 		desc_tot += time_shift_service_desc(&buffer[current_i+desc_tot]);

@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.10 2001/10/10 17:09:24 field Exp $
+  $Id: zapit.cpp,v 1.11 2001/10/10 23:48:17 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.11  2001/10/10 23:48:17  faralla
+  scanning added
+
   Revision 1.10  2001/10/10 17:09:24  field
   cmd 0d angepasst
 
@@ -1575,6 +1578,24 @@ void parse_command()
 	    }
 	}
       break;
+      case 'g':
+      	allchans_tv.clear();
+      	allchans_radio.clear();
+      	allnumchannels_tv.clear();
+      	allnumchannels_radio.clear();
+      	allnamechannels_tv.clear();
+      	allnamechannels_radio.clear();
+      	
+      	start_scan();
+      	
+      	prepare_channels();
+      	
+      	status = "00g";
+      	if (send(connfd, status, strlen(status),0) == -1) {
+	perror("Could not send any retun\n");
+	return;
+	}
+      break;
 	default:  
       status = "000";
       //printf("zapit is sending back a status-msg %s\n", status);
@@ -1629,7 +1650,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.10 2001/10/10 17:09:24 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.11 2001/10/10 23:48:17 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   
   testmsg = load_settings();
@@ -1640,7 +1661,7 @@ int main(int argc, char **argv) {
   caid = get_caid();
   
   memset(&pids_desc, 0, sizeof(pids));
-  
+
   if (prepare_channels() <0) {
     printf("Error parsing Services\n");
     exit(-1);
