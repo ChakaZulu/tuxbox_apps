@@ -114,8 +114,8 @@ static eString beautifyBouquetName(eString bouquet_name)
 		bouquet_name="TVP";
 	else if (bouquet_name.find("RVTS") != eString::npos)
 		bouquet_name="RVTS";
-	else if (bouquet_name=="ABsat")
-		bouquet_name="AB sat";
+	else if (bouquet_name=="AB SAT")
+		bouquet_name="ABSAT";
 	else if (bouquet_name=="Astra-Net")
 		bouquet_name="ASTRA";
 	else if (bouquet_name=="CSAT")
