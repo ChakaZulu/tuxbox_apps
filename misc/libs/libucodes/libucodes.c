@@ -11,7 +11,7 @@ struct Sucode
 };
 
 
-struct Sucode ucodes[] = 
+static struct Sucode ucodes[] = 
 {
 "fece1d3324e0917b921d814490d8a824","avia500v093",
 "7373f3934263b3c3ea1d0f500f0044a5","avia500v110",
