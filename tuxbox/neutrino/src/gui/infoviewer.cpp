@@ -195,7 +195,7 @@ neutrino->showProfiling("vor Schatten;");
 
 			while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 			{
-				g_RCInput->getMsgAbsoluteTimeout( &msg, &data, timeoutEnd );
+				g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 				if ( msg == CRCInput::RC_help )
 				{
@@ -330,10 +330,9 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	else if ( msg == messages::EVT_TIMESET )
 	{
 		gotTime = true;
-		return messages_return::unhandled;
 	}
-	else
-		return messages_return::unhandled;
+
+	return messages_return::unhandled;
 }
 
 

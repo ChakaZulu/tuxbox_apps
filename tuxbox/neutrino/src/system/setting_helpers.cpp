@@ -196,14 +196,14 @@ void showSubchan(string subChannelName)
 		int y = g_settings.screen_StartY + 10;
 		g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
 		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
-		
+
 		long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
 		int res = messages_return::none;
 		uint msg; uint data;
 
 		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 		{
-			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, timeoutEnd );
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 			res = neutrino->handleMsg( msg, data );
 
 			if ( res == messages_return::unhandled )
@@ -359,3 +359,11 @@ void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
 
 	ShowMsg( "networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack );
 }
+
+long long getcurrenttime()
+{
+	struct timeval tv;
+	gettimeofday( &tv, NULL );
+	return (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+}
+

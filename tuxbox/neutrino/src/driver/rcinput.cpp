@@ -229,26 +229,40 @@ long long CRCInput::calcTimeoutEnd_MS( int Timeout )
 }
 
 
-void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, long long TimeoutEnd, bool bAllowRepeatLR= false)
+void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, long long *TimeoutEnd, bool bAllowRepeatLR= false)
 {
 	struct timeval tv;
 
 	gettimeofday( &tv, NULL );
 	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 
-	int diff = ( TimeoutEnd - timeNow ) / 100000;
+	int diff = ( *TimeoutEnd - timeNow ) / 100000;
 
 	if ( diff < 0 )
 		diff = 0;
 
 	getMsg( msg, data, diff, bAllowRepeatLR );
+
+	if ( *msg == messages::EVT_TIMESET )
+	{
+		// recalculate timeout....
+		gettimeofday( &tv, NULL );
+		timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+		timeval* old_time = (timeval*) data;
+		long long timeOld = (long long) old_time->tv_usec + (long long)((long long) old_time->tv_sec * (long long) 1000000);
+
+		*TimeoutEnd= *TimeoutEnd - timeOld + timeNow;
+
+		printf("EVT_TIMESET - recalculate timeout\n%llx - %llx - %llx\n", timeNow, timeOld, *TimeoutEnd );
+	}
 }
 
 /**************************************************************************
 *	get rc-key - timeout can be specified
 *
 **************************************************************************/
-void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR= false)
+void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 {
 	static long long last_keypress=0;
 	long long getKeyBegin;
@@ -381,7 +395,8 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 							if (emsg.eventID==CSectionsdClient::EVT_TIMESET)
 							{
 								*msg = messages::EVT_TIMESET;
-								*data = 0;
+								*data = (unsigned) p;
+								dont_delete_p = true;
 							}
 							else if (emsg.eventID==CSectionsdClient::EVT_GOT_CN_EPG)
 							{

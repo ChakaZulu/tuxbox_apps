@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.26 2002/03/25 18:24:24 field Exp $
+$Id: rcinput.h,v 1.27 2002/04/10 16:39:19 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.27  2002/04/10 16:39:19  field
+ Timeset bugfix (beim scan zb)
+
  Revision 1.26  2002/03/25 18:24:24  field
  Scan gefixt ;)
 
@@ -192,11 +195,13 @@ class CRCInput
 		static bool isNumeric(int key);
 
 		static string getKeyName(int);
+
+
 		long long calcTimeoutEnd( int Timeout );
 		long long calcTimeoutEnd_MS( int Timeout );
 
-		void getMsgAbsoluteTimeout(uint *msg, uint* data, long long TimeoutEnd, bool bAllowRepeatLR= false);
-		void getMsg(uint *msg, uint* data, int Timeout=-1, bool bAllowRepeatLR= false);     //get message :)
+		void getMsgAbsoluteTimeout(uint *msg, uint* data, long long *TimeoutEnd, bool bAllowRepeatLR= false);
+		void getMsg(uint *msg, uint* data, int Timeout= -1, bool bAllowRepeatLR= false);     //get message :)
 		void postMsg(uint msg, uint data, bool Priority = true );  // push message back into buffer
 		void clearMsg();						// Msgs aus der Schleife löschen - löscht zZ ALLES :(
 };

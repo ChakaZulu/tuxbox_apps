@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.218 2002/04/08 18:48:40 Simplex Exp $
+        $Id: neutrino.cpp,v 1.219 2002/04/10 16:39:19 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -336,7 +336,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_subchannel_up = CRCInput::RC_right;
 	g_settings.key_subchannel_down = CRCInput::RC_left;
 
-	if ( g_settings.box_Type == 2 )
+	if ( g_Controld->getBoxType() == 2 )
 	{
 		// Sagem - andere Defaults...
 		strcpy(g_settings.repeat_blocker, "150");
@@ -2253,7 +2253,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.218 2002/04/08 18:48:40 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.219 2002/04/10 16:39:19 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

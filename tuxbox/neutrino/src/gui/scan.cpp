@@ -99,7 +99,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 		while ( ! ( msg == CRCInput::RC_timeout ) )
 		{
-			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, timeoutEnd );
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 			if ( msg == messages::EVT_SCAN_SATELLITE )
 			{
@@ -135,6 +135,9 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			{
 				finish= true;
 			}
+			else
+			if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
+				delete (unsigned char*) data;
 		}
 	}
 

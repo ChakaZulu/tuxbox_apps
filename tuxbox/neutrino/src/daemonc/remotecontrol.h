@@ -96,12 +96,11 @@ class CSubService
 		string          subservice_name;
 };
 
-//typedef std::multiset <CSubService, std::less<CSubService> > CSubServiceListSorted;
 typedef std::vector<CSubService> CSubServiceListSorted;
 
 class CRemoteControl
 {
-		bool							waiting_for_zap_completion;
+		long long						zap_completion_timeout;
 
 		void getNVODs();
 		void processAPIDnames();

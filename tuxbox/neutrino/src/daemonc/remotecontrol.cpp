@@ -38,7 +38,7 @@ CRemoteControl::CRemoteControl()
 {
 	current_onid_sid = 0;
 	current_sub_onid_sid = 0;
-	waiting_for_zap_completion = false;
+	zap_completion_timeout = 0;
 	current_EPGid= 0;
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
     selected_apid = 0;
@@ -49,7 +49,7 @@ CRemoteControl::CRemoteControl()
 
 int CRemoteControl::handleMsg(uint msg, uint data)
 {
-	if ( waiting_for_zap_completion )
+	if ( zap_completion_timeout != 0 )
 	{
     	if ( ( msg == messages::EVT_ZAP_COMPLETE ) ||
     		 ( msg == messages:: EVT_ZAP_FAILED ) ||
@@ -58,12 +58,12 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 			if ( data != current_onid_sid )
 			{
 				g_Zapit->zapTo_serviceID_NOWAIT( current_onid_sid );
-				waiting_for_zap_completion = true;
+				zap_completion_timeout = getcurrenttime() + 2 * (long long) 1000000;
 
 				return messages_return::handled;
 			}
 			else
-				waiting_for_zap_completion = false;
+				zap_completion_timeout = 0;
 		}
 	}
 
@@ -364,10 +364,11 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 		g_ActionLog->println(buf);
 	#endif
 
-	if ( !waiting_for_zap_completion )
+	long long now = getcurrenttime();
+	if ( zap_completion_timeout < now )
 	{
 		g_Zapit->zapTo_serviceID_NOWAIT( onid_sid );
-		waiting_for_zap_completion = true;
+		zap_completion_timeout = now + 2 * (long long) 1000000;
 	}
 }
 
