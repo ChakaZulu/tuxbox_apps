@@ -1089,7 +1089,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			}
 		}
 
-		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser("satsetup.satellite", scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == DISEQC_1_2)/*, new CSatelliteNotifier*/, NULL, false);
+		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser("satsetup.satellite", scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == NO_DISEQC)/*, new CSatelliteNotifier*/, NULL, false);
 		for (uint i=0; i < satList.size(); i++)
 		{
 			ojSat->addOption(satList[i].satName);
@@ -3564,7 +3564,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.480 2003/07/30 21:33:36 homar Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.481 2003/08/01 08:17:49 obi Exp $\n\n");
 
 	tzset();
 	initGlobals();
