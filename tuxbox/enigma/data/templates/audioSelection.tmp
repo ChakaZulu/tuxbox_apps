@@ -10,7 +10,7 @@
 			<select name="audio" size="1">
 				#AUDIOCHANS#
 			</select>
-			<br><br>
+			&nbsp;&nbsp;
 			<input type="submit" value="  Select  ">
 		</form>
 	</body>
