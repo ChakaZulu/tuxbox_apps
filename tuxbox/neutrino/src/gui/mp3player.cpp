@@ -71,10 +71,10 @@ CMP3PlayerGui::CMP3PlayerGui()
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	filebrowser = new CFileBrowser();
-	filebrowser->multi_select = true;
-	filebrowser->select_dirs = true;
+	filebrowser->Multi_Select = true;
+	filebrowser->Select_Dirs = true;
 	mp3filter.addFilter("mp3");
-	filebrowser->filter = &mp3filter;
+	filebrowser->Filter = &mp3filter;
 	Path = "/";
 }
 

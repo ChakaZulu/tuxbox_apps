@@ -50,6 +50,7 @@
 #include "infoviewer.h"
 
 #include "widget/menue.h"
+#include "widget/progresswindow.h"
 
 
 using namespace std;
@@ -87,7 +88,10 @@ public:
 		FILE_PICTURE
 	};
 
-	int CFile::getType();
+	int		getType();
+	string	getFileName();
+	string	getPath();
+
 	CFile(){Marked = false; Size=0;Mode=0;};
 	off_t Size;
 	string Name;
@@ -105,7 +109,7 @@ class CFileBrowser
 		CFileList		filelist;
 		CFileList		selected_filelist;
 		bool			readDir(string dirname);
-		void			addRecursiveDir(CFileList * re_filelist, string path);
+		void			addRecursiveDir(CFileList * re_filelist, string path, CProgressWindow * progress = NULL);
 
 		unsigned int	selected;
 		unsigned int	liststart;
@@ -131,17 +135,17 @@ class CFileBrowser
 		void hide();
 
 	public:
-		string			path;
-		bool			multi_select;
-		bool			select_dirs;
-		CFileFilter *	filter;
+		string			Path;
+		bool			Multi_Select;
+		bool			Select_Dirs;
+		CFileFilter *	Filter;
 
 		CFileBrowser();
 		~CFileBrowser();
 
-		bool exec(string Dirname);
-		string getFileName();
-		CFileList *getSelectedFiles();
+		bool		exec(string Dirname);
+		CFile		*getSelectedFile();
+		CFileList	*getSelectedFiles();
 
 		
 };

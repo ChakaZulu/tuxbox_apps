@@ -40,6 +40,8 @@
 #include "filebrowser.h"
 
 
+//------------------------------------------------------------------------
+
 int CFile::getType()
 {
 	if(S_ISDIR(Mode))
@@ -58,6 +60,35 @@ int CFile::getType()
 			return FILE_PICTURE;
 	}
 	return FILE_UNKNOWN;
+}
+
+//------------------------------------------------------------------------
+
+string CFile::getFileName()		// return name.extension or folder name without trailing /
+{
+	int namepos = Name.rfind("/");
+	if( namepos >= 0)
+	{
+		return Name.substr(namepos + 1, Name.length() - namepos);
+	}
+	else
+		return Name;
+	
+}
+
+//------------------------------------------------------------------------
+
+string CFile::getPath()			// return complete path including trailing /
+{
+	int pos = 0;
+	string tpath;
+
+	if((pos = Name.rfind("/")) > 1)
+	{
+		tpath = Name.substr(0,pos+1);
+	}else
+		tpath = "/";
+	return (tpath);
 }
 
 //------------------------------------------------------------------------
@@ -88,10 +119,10 @@ CFileBrowser::CFileBrowser()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 
-	filter = NULL;
+	Filter = NULL;
 	use_filter = true;
-	multi_select = false;
-	select_dirs = false;
+	Multi_Select = false;
+	Select_Dirs = false;
 	selected = 0;
 
 	width  = 500;
@@ -119,12 +150,12 @@ CFileBrowser::~CFileBrowser()
 
 //------------------------------------------------------------------------
 
-string CFileBrowser::getFileName()
+CFile *CFileBrowser::getSelectedFile()
 {
 	if(filelist[selected].Name.length() > 0)
-		return path + filelist[selected].Name;
+		return &filelist[selected];
 	else
-		return "";
+		return NULL;
 }
 
 //------------------------------------------------------------------------
@@ -136,21 +167,44 @@ CFileList *CFileBrowser::getSelectedFiles()
 
 //------------------------------------------------------------------------
 
+void CFileBrowser::ChangeDir(string filename)
+{
+	if(filename == "..")
+	{
+		int pos = (Path.substr(0,Path.length()-1)).rfind("/");
+		string newpath = Path.substr(0,pos);
+//		printf("path: %s filename: %s newpath: %s\n",Path.c_str(),filename.c_str(),newpath.c_str());
+		readDir(newpath);
+		name = newpath;
+	}
+	else
+	{
+		readDir( filename );
+		name = filename;
+	}
+	paintHead();
+	paint();
+}
+
+//------------------------------------------------------------------------
+
 bool CFileBrowser::readDir(string dirname)
 {
 struct stat statbuf;
 struct dirent **namelist;
 int n;
 
-	path = dirname;
-
-	if(dirname[dirname.length()-1]!='/')
-		path = path + "/";
+	Path = dirname;
+	
+	if(dirname[dirname.length()-1] != '/')
+	{
+		Path = Path + "/";
+	}
 
 	filelist.clear();
-	n = scandir(path.c_str(), &namelist, 0, alphasort);
+	n = scandir(Path.c_str(), &namelist, 0, alphasort);
 	if (n < 0)
-		perror(("Filebrowser scandir: "+path).c_str());
+		perror(("Filebrowser scandir: "+Path).c_str());
 	else 
 	{
 		for(int i = 0; i < n;i++)
@@ -158,14 +212,15 @@ int n;
 		CFile file;
 			if(strcmp(namelist[i]->d_name,".") != 0)
 			{
-				file.Name = namelist[i]->d_name;
-				if(stat((path + file.Name).c_str(),&statbuf) != 0)
+				file.Name = Path + namelist[i]->d_name;
+//				printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
+				if(stat((file.Name).c_str(),&statbuf) != 0)
 					perror("stat error");
 				file.Mode = statbuf.st_mode;
 				file.Size = statbuf.st_size;
 
-				if(filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
-					if(!filter->matchFilter(file.Name))
+				if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+					if(!Filter->matchFilter(file.Name))
 					{
 						free(namelist[i]);
 						continue;
@@ -215,11 +270,11 @@ bool CFileBrowser::exec(string Dirname)
 
 		if ( msg == CRCInput::RC_yellow )
 		{
-			if(multi_select)
+			if(Multi_Select)
 			{
-				if(filelist[selected].Name != "..")
+				if(filelist[selected].getFileName() != "..")
 				{
-					if( (S_ISDIR(filelist[selected].Mode) && select_dirs) || !S_ISDIR(filelist[selected].Mode) )
+					if( (S_ISDIR(filelist[selected].Mode) && Select_Dirs) || !S_ISDIR(filelist[selected].Mode) )
 					{
 						filelist[selected].Marked = !filelist[selected].Marked;
 						paintItem(selected - liststart);
@@ -290,7 +345,7 @@ bool CFileBrowser::exec(string Dirname)
 		}
 		else if ( msg == CRCInput::RC_right )
 		{
-			if(S_ISDIR(filelist[selected].Mode))
+			if(S_ISDIR(filelist[selected].Mode) && (filelist[selected].getFileName() != "..") )
 			{
 					ChangeDir(filelist[selected].Name);
 			}
@@ -304,37 +359,29 @@ bool CFileBrowser::exec(string Dirname)
 		}
 		else if ( msg == CRCInput::RC_blue )
 		{
-			if(filter != NULL)
+			if(Filter != NULL)
 			{
 				use_filter = !use_filter;
-				ChangeDir("");
+				ChangeDir(Path);
 			}
 		}
 		else if ( msg == CRCInput::RC_home )
 		{
-			if(multi_select)
-				res = true;
 			loop = false;
 		}
 		else if (msg==CRCInput::RC_ok)
 		{
-			if(multi_select)
+			
+			if( filelist[selected].getFileName() == "..")
 			{
-				if(filelist[selected].Name != "..")
-				{
-					if( (S_ISDIR(filelist[selected].Mode) && select_dirs) || !S_ISDIR(filelist[selected].Mode) )
-					{
-						filelist[selected].Marked = !filelist[selected].Marked;
-						paintItem(selected - liststart);
-					}
-				}
+				ChangeDir("..");
 			}
 			else
 			{
 				string filename = filelist[selected].Name;
 				if ( filename.length() > 1 )
 				{
-					if(S_ISDIR(filelist[selected].Mode))
+					if((!Multi_Select) && S_ISDIR(filelist[selected].Mode))
 					{
 						ChangeDir(filelist[selected].Name);
 					}
@@ -360,16 +407,21 @@ bool CFileBrowser::exec(string Dirname)
 
 	selected_filelist.clear();
 
-	if(res && multi_select)
+	if(res && Multi_Select)
 	{
+		CProgressWindow * progress = new CProgressWindow();
+		progress->setTitle(g_Locale->getText("filebrowser.scan"));
+		progress->exec(NULL,"");
 		for(unsigned int i = 0; i < filelist.size();i++)
 			if(filelist[i].Marked)
 			{
 				if(S_ISDIR(filelist[i].Mode))
-					addRecursiveDir(&selected_filelist,filelist[i].Name);
+					addRecursiveDir(&selected_filelist,filelist[i].Name, progress);
 				else
 					selected_filelist.push_back(filelist[i]);
 			}
+		progress->hide();
+		delete progress;
 	}
 
 	#ifdef USEACTIONLOG
@@ -379,34 +431,47 @@ bool CFileBrowser::exec(string Dirname)
 	return res;
 }
 
-void CFileBrowser::addRecursiveDir(CFileList * re_filelist, string path)
+//------------------------------------------------------------------------
+
+void CFileBrowser::addRecursiveDir(CFileList * re_filelist, string rpath, CProgressWindow * progress)
 {
 struct stat statbuf;
 struct dirent **namelist;
 int n;
+CFile file;
 
-	if(path[path.length()-1]!='/')
-		path = path + "/";
+	if(rpath[rpath.length()-1]!='/')
+	{
+		rpath = rpath + "/";
+	}
 
-	n = scandir(path.c_str(), &namelist, 0, alphasort);
+	
+	n = scandir(rpath.c_str(), &namelist, 0, alphasort);
 	if (n < 0)
-		perror(("Recursive scandir: "+path).c_str());
+		perror(("Recursive scandir: "+rpath).c_str());
 	else 
 	{
+		if(progress)
+		{
+			progress->showStatusMessage(rpath);
+		}
 		for(int i = 0; i < n;i++)
 		{
-		CFile file;
+			if(progress)
+			{
+				progress->showGlobalStatus(100/n*i);
+			}
 			if( (strcmp(namelist[i]->d_name,".") != 0) && (strcmp(namelist[i]->d_name,"..") != 0) )
 			{
-				file.Name = path + namelist[i]->d_name;
+				file.Name = rpath + namelist[i]->d_name;
 				if(stat((file.Name).c_str(),&statbuf) != 0)
 					perror("stat error");
 				file.Mode = statbuf.st_mode;
 				file.Size = statbuf.st_size;
 
-				if(filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+				if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
 				{
-					if(!filter->matchFilter(file.Name))
+					if(!Filter->matchFilter(file.Name))
 					{
 						free(namelist[i]);
 						continue;
@@ -415,7 +480,7 @@ int n;
 				if(!S_ISDIR(file.Mode))
 					re_filelist->push_back(file);
 				else
-					addRecursiveDir(re_filelist,file.Name);
+					addRecursiveDir(re_filelist,file.Name, progress);
 			}
 			free(namelist[i]);
 		}
@@ -423,25 +488,6 @@ int n;
 	}
 }
 
-//------------------------------------------------------------------------
-
-void CFileBrowser::ChangeDir(string filename)
-{
-	if(filename == "..")
-	{
-		int pos = path.substr(0,path.length()-1).rfind("/");
-		string newpath = path.substr(0,pos);
-		readDir(newpath);
-		name = newpath;
-	}
-	else
-	{
-		readDir( path + filename );
-		name = filename;
-	}
-	paintHead();
-	paint();
-}
 
 //------------------------------------------------------------------------
 
@@ -481,7 +527,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 		if ( actual_file->Name.length() > 0 )
 		{
 			if (liststart+pos==selected)
-				CLCD::getInstance()->showMenuText(0, actual_file->Name.c_str() );
+				CLCD::getInstance()->showMenuText(0, actual_file->getFileName().c_str() );
 			switch(actual_file->getType())
 			{
 				case CFile::FILE_MP3 : 
@@ -498,7 +544,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 			}
 			frameBuffer->paintIcon(fileicon, x+5 , ypos +7 );
 			
-			g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight+3, width -(35+170) , actual_file->Name.c_str(), color);
+			g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight+3, width -(35+170) , actual_file->getFileName().c_str(), color);
 
 			if( S_ISREG(actual_file->Mode) )
 			{
@@ -551,20 +597,17 @@ void CFileBrowser::paintFoot()
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
 			frameBuffer->paintIcon("ok.raw", x +3 , by -3);
-			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText(multi_select?"filebrowser.mark":"filebrowser.select").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select").c_str(), COL_INFOBAR);
 		}
 
-		if(multi_select)
+		if(Multi_Select)
 		{
-			frameBuffer->paintIcon("home.raw", x + (1 * dx), by - 3);
-			g_Fonts->infobar_small->RenderString(x + 35 + (1 * dx), ty, dx - 35, g_Locale->getText("filebrowser.commit").c_str(), COL_INFOBAR);
-
 			frameBuffer->paintIcon("gelb.raw", x + (2 * dx), by);
 			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark").c_str(), COL_INFOBAR);
 			
 		}
 
-		if(filter != NULL)
+		if(Filter != NULL)
 		{
 			frameBuffer->paintIcon("blau.raw", x + (3 * dx), by);
 			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, g_Locale->getText("filebrowser.filter").c_str(), COL_INFOBAR);
