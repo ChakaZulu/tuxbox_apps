@@ -8,13 +8,8 @@
 		</p>
 		<p>
 			<a href="/wap?mode=epg">EPG</a><br/>
-			<a href="#zap">ZAP</a><br/>
+			<a href="/wap?mode=zap">ZAP</a><br/>
 			<a href="#ctl">CONTROL</a>
-		</p>
-	</card>
-	<card id="zap" title="Zap">
-		<p>
-			This function is not available yet.
 		</p>
 	</card>
 	<card id="ctl" title="Control">
