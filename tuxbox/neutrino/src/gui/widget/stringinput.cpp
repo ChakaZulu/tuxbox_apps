@@ -367,7 +367,7 @@ CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size,
 {
 	last_digit = -1;				// no key pressed yet
 	const char CharList[10][10] = { "0 -/()<>=",	// 9 characters
-					"1.,:!?",
+					"1.,:!?\\",
 					"abc2ä",
 					"def3",
 					"ghi4",
