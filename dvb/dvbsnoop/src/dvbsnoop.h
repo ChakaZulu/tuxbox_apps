@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.10 2003/10/16 19:02:29 rasc Exp $
+$Id: dvbsnoop.h,v 1.11 2003/10/17 19:14:40 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -8,6 +8,9 @@ $Id: dvbsnoop.h,v 1.10 2003/10/16 19:02:29 rasc Exp $
    (c) rasc
 
 $Log: dvbsnoop.h,v $
+Revision 1.11  2003/10/17 19:14:40  rasc
+no message
+
 Revision 1.10  2003/10/16 19:02:29  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -45,7 +48,6 @@ dvbsnoop v0.7  -- Commit to CVS
 
 */
 
-#define DVBSNOOP_VERSION  "1.0a"
 
 
 #include <stdio.h>
@@ -72,6 +74,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #define pes_type pesType
 #endif
 
+#include "version.h"
 #include "helper.h"
 #include "dvb_str.h"
 #include "output.h"
