@@ -45,7 +45,7 @@
 #include <basicserver.h>
 #include <configfile.h>
 #include <eventserver.h>
-#include <tuxbox.h>
+#include <libtuxbox.h>
 
 #include <controldclient/controldclient.h>
 #include <controldclient/controldMsg.h>
@@ -783,7 +783,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.90 2003/02/10 11:09:46 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.91 2003/02/19 14:31:17 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
