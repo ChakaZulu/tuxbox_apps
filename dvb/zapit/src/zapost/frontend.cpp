@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.43 2003/02/28 19:41:14 obi Exp $
+ * $Id: frontend.cpp,v 1.44 2003/03/02 23:10:15 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -266,29 +266,67 @@ struct dvb_frontend_event CFrontend::getEvent(void)
 	return event;
 }
 
+#ifdef DEBUG_SEC_TIMING
+
+#define TIMER_START()									\
+	struct timeval tv, tv2;								\
+	unsigned int msec;								\
+	gettimeofday(&tv, NULL)
+
+#define TIMER_STOP()									\
+	gettimeofday(&tv2, NULL);							\
+	msec = ((tv2.tv_sec - tv.tv_sec) * 1000) + ((tv2.tv_usec - tv.tv_usec) / 1000); \
+	INFO("%u msec", msec)
+
+#else /* DEBUG_SEC_TIMING */
+
+#define TIMER_START() \
+	do {} while (0)
+
+#define TIMER_STOP() \
+	do {} while (0)
+
+#endif /* DEBUG_SEC_TIMING */
+
 void CFrontend::secSetTone(fe_sec_tone_mode_t toneMode)
 {
+	TIMER_START();
+
 	if (fop(ioctl, FE_SET_TONE, toneMode) == 0)
 		currentToneMode = toneMode;
+
+	TIMER_STOP();
 }
 
 void CFrontend::secSetVoltage(fe_sec_voltage_t voltage, uint32_t ms)
 {
+	TIMER_START();
+	
 	if (fop(ioctl, FE_SET_VOLTAGE, voltage) == 0) {
 		currentVoltage = voltage;
 		usleep(1000 * ms);
 	}
+	
+	TIMER_STOP();
 }
 
 void CFrontend::secResetOverload(void)
 {
+	TIMER_START();
+
 	fop(ioctl, FE_DISEQC_RESET_OVERLOAD);
+
+	TIMER_STOP();
 }
 
 void CFrontend::sendDiseqcCommand(struct dvb_diseqc_master_cmd *cmd, uint32_t ms)
 {
+	TIMER_START();
+
 	if (fop(ioctl, FE_DISEQC_SEND_MASTER_CMD, cmd) == 0)
 		usleep(1000 * ms);
+
+	TIMER_STOP();
 }
 
 uint32_t CFrontend::getDiseqcReply(int timeout_ms)
@@ -297,8 +335,12 @@ uint32_t CFrontend::getDiseqcReply(int timeout_ms)
 
 	reply.timeout = timeout_ms;
 
+	TIMER_START();
+
 	if (fop(ioctl, FE_DISEQC_RECV_SLAVE_REPLY, &reply) < 0)
 		return 0;
+
+	TIMER_STOP();
 
 	/* timeout */
 	if (reply.msg_len == 0)
@@ -320,8 +362,12 @@ uint32_t CFrontend::getDiseqcReply(int timeout_ms)
 
 void CFrontend::sendToneBurst(fe_sec_mini_cmd_t burst, uint32_t ms)
 {
+	TIMER_START();
+
 	if (fop(ioctl, FE_DISEQC_SEND_BURST, burst) == 0)
 		usleep(1000 * ms);
+
+	TIMER_STOP();
 }
 
 void CFrontend::setDiseqcType(diseqc_t newDiseqcType)
@@ -509,9 +555,7 @@ void CFrontend::setSec(uint8_t sat_no, uint8_t pol, bool high_band, uint32_t fre
 	}
 
 	if ((diseqcType >= DISEQC_1_1) && (repeats)) {
-
 		for (uint16_t i = 0; i < repeats; i++) {
-
 			uint8_t again = 0;
 
 			usleep(1000 * 100);	/* wait at least 100ms before retransmission */
@@ -531,9 +575,7 @@ void CFrontend::setSec(uint8_t sat_no, uint8_t pol, bool high_band, uint32_t fre
 
 			if (again == 2)
 				repeats++;
-
 		}
-
 	}
 
 	if (diseqcType == SMATV_REMOTE_TUNING)
