@@ -26,7 +26,7 @@ function poschannel(box, direction)
 		for (i=1; i < box.length  ; i++) {
 			if (box.options[i].selected==true) {
 				buffer = new Option(box.options[i].text, box.options[i].value);
-				box.options[i].selected==false
+				box.options[i].selected=false;
 				box.options[i]= new Option(box.options[i-1].text, box.options[i-1].value);
 				box.options[i-1]=buffer;
 				box.options[i-1].selected=true;
@@ -36,7 +36,7 @@ function poschannel(box, direction)
 		for (i=box.length-2; i >= 0  ; i--) {
 			if (box.options[i].selected==true) {
 				buffer = new Option(box.options[i].text, box.options[i].value);
-				box.options[i].selected==false
+				box.options[i].selected=false;
 				box.options[i]=new Option(box.options[i+1].text, box.options[i+1].value);
 				box.options[i+1]=buffer;
 				box.options[i+1].selected=true;
