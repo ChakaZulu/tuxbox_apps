@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.87 2001/11/22 13:19:00 field Exp $
+//  $Id: sectionsd.cpp,v 1.88 2002/01/06 03:03:13 McClean Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.88  2002/01/06 03:03:13  McClean
+//  busybox 0.60 workarround
+//
 //  Revision 1.87  2001/11/22 13:19:00  field
 //  Liefert nun auch nur NEXT Epg ab
 //
@@ -1408,7 +1411,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.87 2001/11/22 13:19:00 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.88 2002/01/06 03:03:13 McClean Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3062,26 +3065,14 @@ static int listenSocket=0;
 // Just to get our listen socket closed cleanly
 static void signalHandler(int signum)
 {
-  if(listenSocket)
-    close(listenSocket);
-  listenSocket=0;
-/*
-  if(signum==SIGABRT)
-    printf("received SIGABRT\n");
-  else if(signum==SIGINT)
-    printf("received SIGINT\n");
-  else if(signum==SIGUSR1)
-    printf("received SIGUSR1\n");
-  else if(signum==SIGHUP)
-    printf("received SIGHUP\n");
-  else if(signum==SIGQUIT)
-    printf("received SIGQUIT\n");
-  else if(signum==SIGTSTP)
-    printf("received SIGSTP\n");
-  else if(signum==SIGTERM)
-    printf("received SIGTERM\n");
-*/
-  exit(0);
+  //only exit on sigkill
+  if(signum==SIGKILL)
+  {
+    if(listenSocket)
+      close(listenSocket);
+    listenSocket=0;
+    exit(0);
+  }
 }
 
 int main(int argc, char **argv)
@@ -3090,7 +3081,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.87 2001/11/22 13:19:00 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.88 2002/01/06 03:03:13 McClean Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
@@ -3114,8 +3105,9 @@ struct sockaddr_in serverAddr;
 
   // from here on forked
 
-  signal(SIGTERM, signalHandler); // killall
-  signal(SIGINT, signalHandler); // CTRL-C
+  //catch all signals... (busybox workaround)
+  for(int x=0;x<32;x++)
+     signal(x,signalHandler);
 
   // den Port fuer die Clients oeffnen
   listenSocket = socket(AF_INET, SOCK_STREAM, 0);

@@ -34,6 +34,7 @@
 #include <sys/timeb.h>
 #include <time.h>
 #include "pthread.h"
+#include <signal.h>
 
 /* Signal quality */
 #include <ost/frontend.h>
@@ -44,8 +45,8 @@
 
 class FontsDef
 {
-        public:
-                Font *channelname; Font* time; Font *menutitle; Font *menu;
+	public:
+		Font *channelname; Font* time; Font *menutitle; Font *menu;
 };
 
 CLCDDisplay		display;
@@ -254,6 +255,12 @@ void * TimeThread (void *)
 	return NULL;
 }
 
+void sig_catch(int sig)
+{
+	printf("[lcdd] Signal: %d\n", sig);
+}
+
+
 int main(int argc, char **argv)
 {
 	debugoutput = true;
@@ -331,6 +338,11 @@ int main(int argc, char **argv)
 
 	/* alles geladen, daemonize Now! ;) */
 	if (fork() != 0) return 0;
+
+	//workarround for buggy busybox :(
+	for(int x=0;x<32;x++)
+		 signal(x,sig_catch);
+	//signal(SIGINT,sig_catch);
 
 	/* Thread erst nach dem forken erstellen, da sonst Abbruch */
 	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
