@@ -54,14 +54,14 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 
 		//----------------------------
 
-		void setTitle( string title );
-
 		virtual void paint();
-		virtual void hide();
 
 	public:
 
 		CProgressWindow();
+		void setTitle( string title );
+		virtual void hide();
+
 		virtual int exec( CMenuTarget* parent, string actionKey );
 
 		virtual void showGlobalStatus(int prog);
