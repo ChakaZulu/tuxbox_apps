@@ -92,80 +92,75 @@ int eStreamWatchdog::getVCRActivity()
 
 void eStreamWatchdog::reloadSettings()
 {
-	if ( Decoder::current.vpid != -1 )
+	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
+	int frate=0;
+	if (bitstream)
 	{
-		FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
-		int frate=0;
-		if (bitstream)
+		char buffer[100];
+		int aspect=0;
+		while (fgets(buffer, 100, bitstream))
 		{
-			char buffer[100];
-			int aspect=0;
-			while (fgets(buffer, 100, bitstream))
-			{
-				if (!strncmp(buffer, "A_RATIO: ", 9))
-					aspect=atoi(buffer+9);
-				if (!strncmp(buffer, "F_RATE: ", 8))
-					frate=atoi(buffer+8);
-			}
-			fclose(bitstream);
-			switch (aspect)
-			{
-				case 1:
-				case 2:
-				default:
-					isanamorph=0;
-					break;
-				case 3:
-				case 4:
-					isanamorph=1;
-			}
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+			if (!strncmp(buffer, "F_RATE: ", 8))
+				frate=atoi(buffer+8);
 		}
-
-		/*emit*/ AspectRatioChanged(isanamorph);
-
-		int videoDisplayFormat=VIDEO_LETTER_BOX;
-		int doanamorph=0;
-		unsigned int pin8; // Letterbox
-		eConfig::getInstance()->getKey("/elitedvb/video/pin8", pin8);
-		switch (pin8)
-		{
-			case 0:
-				doanamorph=0;
-				videoDisplayFormat=isanamorph?VIDEO_LETTER_BOX:VIDEO_PAN_SCAN;
-				break;
-			case 1:
-				doanamorph=0;
-				videoDisplayFormat=VIDEO_PAN_SCAN;
-				break;
-			case 2:
-				doanamorph=isanamorph;
-				videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
-				break;
-			case 3:
-				doanamorph=1;
-				videoDisplayFormat=VIDEO_CENTER_CUT_OUT;
-				break;
-		}
-
-		eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );
-
-		eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
-
-		switch (frate)
+		fclose(bitstream);
+		switch (aspect)
 		{
 			case 1:
 			case 2:
-			case 3:
-			case 6:
-				eAVSwitch::getInstance()->setVSystem(vsPAL);
+			default:
+				isanamorph=0;
 				break;
+			case 3:
 			case 4:
-			case 5:
-			case 7:
-			case 8:
-				eAVSwitch::getInstance()->setVSystem(vsNTSC);
-				break;
+				isanamorph=1;
 		}
+	}
+	/*emit*/ AspectRatioChanged(isanamorph);
+
+	int videoDisplayFormat=VIDEO_LETTER_BOX;
+	int doanamorph=0;
+	unsigned int pin8; // Letterbox
+	eConfig::getInstance()->getKey("/elitedvb/video/pin8", pin8);
+	switch (pin8)
+	{
+		case 0:
+			doanamorph=0;
+			videoDisplayFormat=isanamorph?VIDEO_LETTER_BOX:VIDEO_PAN_SCAN;
+			break;
+		case 1:
+			doanamorph=0;
+			videoDisplayFormat=VIDEO_PAN_SCAN;
+			break;
+		case 2:
+			doanamorph=isanamorph;
+			videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
+			break;
+		case 3:
+			doanamorph=1;
+			videoDisplayFormat=VIDEO_CENTER_CUT_OUT;
+			break;
+	}
+	eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );
+
+	eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
+
+	switch (frate)
+	{
+		case 1:
+		case 2:
+		case 3:
+		case 6:
+			eAVSwitch::getInstance()->setVSystem(vsPAL);
+			break;
+		case 4:
+		case 5:
+		case 7:
+		case 8:
+			eAVSwitch::getInstance()->setVSystem(vsNTSC);
+			break;
 	}
 	unsigned int auto_vcr_switching=1;
 	eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", auto_vcr_switching );
