@@ -2522,13 +2522,10 @@ struct addToString
 	}
 	void operator()(const eServiceReference& s)
 	{
-		eServiceReferenceDVB &bla((eServiceReferenceDVB&)s);
-		if (current.getTransportStreamID() == bla.getTransportStreamID() &&
-				 current.getOriginalNetworkID() == bla.getOriginalNetworkID() &&
-				 current.getDVBNamespace() == bla.getDVBNamespace())
+		if (onSameTP(current,(eServiceReferenceDVB&)s))
 		{
 			dest+=s.toString();
-			eServiceDVB *service = (eServiceDVB*) eServiceInterface::getInstance()->addRef(s);
+			eServiceDVB *service = eTransponderList::getInstance()->searchService(s);
 			if (service)
 			{
 				for(int i=0; i < (int)eServiceDVB::cacheMax; ++i)
@@ -2537,7 +2534,6 @@ struct addToString
 					if (d != -1)
 						dest+=eString().sprintf(";%02d%04x", i, d);
 				}
-				eServiceInterface::getInstance()->removeRef(s);
 			}
 			dest+='\n';
 		}
