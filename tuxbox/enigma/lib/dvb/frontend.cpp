@@ -117,7 +117,8 @@ void eFrontend::timeout()
 			timer2.stop();
 			if (!inScan)
 			{
-				transponder->tune();
+				if ( transponder )
+					transponder->tune();
 				++needreset;
 			}
 		}

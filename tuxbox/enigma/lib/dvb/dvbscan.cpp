@@ -43,7 +43,8 @@ bool eDVBScanController::abort()
 }
 
 
-eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
+eDVBScanController::eDVBScanController(eDVB &dvb)
+	: eDVBController(dvb), transponder(0)
 {
 	cancel=0;
 	CONNECT(dvb.tPAT.tableReady, eDVBScanController::PATready);
@@ -76,7 +77,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		eDebug("[SCAN] eventTunedIn");
 		if (knownTransponder.size())
 		{
-			if (transponder==event.transponder)
+			if (transponder && transponder==event.transponder)
 				dvb.event(eDVBScanEvent(event.err?eDVBScanEvent::eventScanTuneError:eDVBScanEvent::eventScanTuneOK));
 		}
 		break;
@@ -324,6 +325,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 	}
 		break;
 	case eDVBScanEvent::eventScanCompleted:
+		transponder=0;
 		eDebug("scan has finally completed.");
 
 		dvb.settings->saveServices();
