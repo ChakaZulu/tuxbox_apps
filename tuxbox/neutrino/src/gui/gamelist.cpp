@@ -28,11 +28,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.17 2001/12/05 21:17:50 rasc Exp $
+$Id: gamelist.cpp,v 1.18 2001/12/05 21:38:09 rasc Exp $
 
 $Log: gamelist.cpp,v $
-Revision 1.17  2001/12/05 21:17:50  rasc
-gamelist 2-spaltig mit description... Font muss noch verbessert werden
+Revision 1.18  2001/12/05 21:38:09  rasc
+gamelist: eigener Fontdef fuer 2-zeiliges Menue
 
 
 */
@@ -54,13 +54,8 @@ CGameList::CGameList(string Name)
 	height = 440;
 	theight= g_Fonts->menu_title->getHeight();
 //
-	fheight1= g_Fonts->eventlist_itemLarge->getHeight();
-	{
-	  int h1,h2; 
-		h1 = g_Fonts->eventlist_itemSmall->getHeight();
-		h2 = g_Fonts->eventlist_datetime->getHeight();
-		fheight2 = (h1 > h2) ? h1 : h2;
-	}
+	fheight1= g_Fonts->gamelist_itemLarge->getHeight();
+	fheight2= g_Fonts->gamelist_itemSmall->getHeight();
 	fheight = fheight1 + fheight2 + 2;
 //
 	listmaxshow = (height-theight-0)/fheight;
@@ -167,7 +162,6 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			    tmp->desc = info.desc;
 			    tmp->depend = info.depend;
 				tmp->filename = pluginname;
-printf ("Gamelist: name: _%s_ desc: _%s_ depend: _%s_\n",info.name,info.desc,info.depend);
 				gamelist.insert(gamelist.end(), tmp);
 			}
 			free(namelist[count]);
@@ -275,11 +269,10 @@ void CGameList::paintItem(int pos)
 	if(liststart+pos<gamelist.size())
 	{
 		game* aktgame = gamelist[liststart+pos];
-		g_Fonts->eventlist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name.c_str(), color);
-		g_Fonts->eventlist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc.c_str(), color);
+		// 2001-12-05 rasc: fonts sind in neutrino.cpp definiert
+		g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name.c_str(), color);
+		g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc.c_str(), color);
 
-// g_Fonts->eventlist_itemSmall->getHeight();
-// g_Fonts->eventlist_datetime->getHeight();
 	}
 }
 
