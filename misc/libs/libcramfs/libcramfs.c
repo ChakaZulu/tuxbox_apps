@@ -8,34 +8,36 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <linux/fs.h>
-#include <linux/cramfs_fs.h>
+#include "cramfs_fs.h"
 #include <zlib.h>
 
 #define PAD_SIZE 512
 #define PAGE_CACHE_SIZE (4096)
+#define FILEERROR -2
+#define FILEINVALID -3
+#define WRONGCRC -4
 
-int cramfs_crc(char *filename)
+struct cramfs_super super;	/* just find the cramfs superblock once */
+static int start = 0;
+static int fd;
+
+int cramfs_init(char *filename)
 {
-	struct cramfs_super super;	/* just find the cramfs superblock once */
-	int start = 0;
-	int fd;
 	size_t length;
 	struct stat st;
-	void *buf;
-	u32 crc;
 
 	/* find the physical size of the file or block device */
 	if (stat(filename, &st) < 0) {
-		return -2;
+		return FILEERROR;
 	}
 	fd = open(filename, O_RDONLY);
 	if (fd < 0) {
-		return -2;
+		return FILEERROR;
 	}
 	if (S_ISBLK(st.st_mode)) {
 		if (ioctl(fd, BLKGETSIZE, length) < 0) {
 			fprintf(stderr, "unable to determine device size: %s\n", filename);
-			return -2;
+			return FILEERROR;
 		}
 		length = length * 512;
 	}
@@ -44,18 +46,18 @@ int cramfs_crc(char *filename)
 	}
 	else {
 		fprintf(stderr, "not a block device or file: %s\n", filename);
-		return -3;
+		return FILEINVALID;
 	}
 
 	if (length < sizeof(struct cramfs_super)) {
 		fprintf(stderr, "file length too short\n");
-		return -3;
+		return FILEINVALID;
 	}
 
 	/* find superblock */
 	if (read(fd, &super, sizeof(super)) != sizeof(super)) {
 		fprintf(stderr, "read failed: %s\n", filename);
-		return -3;
+		return FILEINVALID;
 	}
 	if (super.magic == CRAMFS_32(CRAMFS_MAGIC)) {
 		start = 0;
@@ -64,7 +66,7 @@ int cramfs_crc(char *filename)
 		lseek(fd, PAD_SIZE, SEEK_SET);
 		if (read(fd, &super, sizeof(super)) != sizeof(super)) {
 			fprintf(stderr, "read failed: %s\n", filename);
-			return -3;
+			return FILEINVALID;
 		}
 		if (super.magic == CRAMFS_32(CRAMFS_MAGIC)) {
 			start = PAD_SIZE;
@@ -74,7 +76,7 @@ int cramfs_crc(char *filename)
 	/* superblock tests */
 	if (super.magic != CRAMFS_32(CRAMFS_MAGIC)) {
 		fprintf(stderr, "superblock magic not found\n");
-		return -3;
+		return FILEINVALID;
 	}
 #if __BYTE_ORDER == __BIG_ENDIAN
 	super.size = CRAMFS_32(super.size);
@@ -87,20 +89,20 @@ int cramfs_crc(char *filename)
 #endif /* __BYTE_ORDER == __BIG_ENDIAN */
 	if (super.flags & ~CRAMFS_SUPPORTED_FLAGS) {
 	fprintf(stderr, "unsupported filesystem features\n");
-		return -3;
+		return FILEINVALID;
 	}
 	if (super.size < PAGE_CACHE_SIZE) {
 		fprintf(stderr, "superblock size (%d) too small\n", super.size);
-		return -3;
+		return FILEINVALID;
 	}
 	if (super.flags & CRAMFS_FLAG_FSID_VERSION_2) {
 		if (super.fsid.files == 0) {
 			fprintf(stderr, "zero file count\n");
-			return -3;
+			return FILEINVALID;
 		}
 		if (length < super.size) {
 			fprintf(stderr, "file length too short\n");
-			return -3;
+			return FILEINVALID;
 		}
 		else if (length > super.size) {
 			fprintf(stderr, "warning: file extends past end of filesystem\n");
@@ -112,10 +114,39 @@ int cramfs_crc(char *filename)
 
 	if (!(super.flags & CRAMFS_FLAG_FSID_VERSION_2)) {
 		fprintf(stderr, "unable to test CRC: old cramfs format\n");
-		return -3;
+		return FILEINVALID;
+	}
+	return 1;
+}
+
+int cramfs_name(char *filename, char *opt_name)
+{
+	int a;
+	a=cramfs_init(filename);
+	if(a!=1) {
+		close(fd);
+		return a;
 	}
 
-// start crc
+	strncpy(opt_name, super.name, sizeof(super.name));
+	opt_name[(sizeof(super.name))]=0;
+//	printf("libcramfs: Name: %s\n", opt_name);
+	
+	close(fd);
+	return 1;
+}
+
+int cramfs_crc(char *filename)
+{
+	int a;
+	u32 crc;
+	void *buf;
+	a=cramfs_init(filename);
+	if(a!=1) {
+		close(fd);
+		return a;
+	}
+
 	crc = crc32(0L, Z_NULL, 0);
 
 	buf = mmap(NULL, super.size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
@@ -138,14 +169,16 @@ int cramfs_crc(char *filename)
 		buf = malloc(4096);
 		if (!buf) {
 			printf("malloc failed");
-			return -3;
+			close(fd);
+			return FILEINVALID;
 		}
 		lseek(fd, start, SEEK_SET);
 		for (;;) {
 			retval = read(fd, buf, 4096);
 			if (retval < 0) {
 				printf("read failed: %s", filename);
-				return -3;
+				close(fd);
+				return FILEINVALID;
 			}
 			else if (retval == 0) {
 				break;
@@ -163,10 +196,11 @@ int cramfs_crc(char *filename)
 		free(buf);
 	}
 
-//printf("Comp. CRC: %x\nRead CRC: %x\n", crc, super.fsid.crc);
+//	printf("libcramfs: Comp. CRC: %x\nlibcramfs: Read CRC: %x\n", crc, super.fsid.crc);
 	if (crc != super.fsid.crc) {
-		return -4;
+		close(fd);
+		return WRONGCRC;
 	}
-
+	close(fd);
 	return 1;
 }
