@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.163 2002/04/24 18:51:18 field Exp $
+ * $Id: zapit.cpp,v 1.164 2002/04/28 05:38:51 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -142,9 +142,7 @@ extern short curr_sat;
 extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
-#ifdef USE_EXTERNAL_CAMD
-static int camdpid = -1;
-#else
+#ifndef USE_EXTERNAL_CAMD
 pthread_t dec_thread;
 #endif /* USE_EXTERNAL_CAMD */
 
@@ -273,12 +271,6 @@ void *decode_thread(void *ptr)
 	decode_vals *vals = (decode_vals *) ptr;
 
 	debug("[zapit] starting decode_thread\n");
-
-	if (vals->new_tp == true)
-	{
-		debug("[zapit] resetting cam\n");
-		cam->reset();
-	}
 
 	if ((channel->getEcmPid() != NONE) && (channel->getEcmPid() != INVALID))
 	{
@@ -454,6 +446,8 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 			/* ... or fail. */
 			return -3;
 		}
+
+		cam->reset();
 	}
 	else
 	{
@@ -530,35 +524,16 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 
 
 #ifdef USE_EXTERNAL_CAMD
-	switch ((camdpid = fork()))
+	if ((channel->getEcmPid() != NONE) && (channel->getEcmPid() != INVALID))
 	{
-	case -1:
-		perror("[zapit] fork");
-		break;
-	case 0:
-		char *vpidbuf = (char*) malloc(5);
-		sprintf(vpidbuf, "%x", channel->getVideoPid());
-		char *apidbuf = (char*) malloc(5);
-		sprintf(apidbuf, "%x", channel->getAudioPid());
-		char *pmtpidbuf = (char*) malloc(5);
-		sprintf(pmtpidbuf, "%x", channel->getPmtPid());
-		char *cadescrbuf;
-		if ((channel->getEcmPid() != NONE) && (channel->getEcmPid() != INVALID))
-		{
-			cadescrbuf = (char*) malloc(13);
-			sprintf(cadescrbuf, "0904%04x%04x", cam->getCaSystemId(), channel->getEcmPid());
-		}
-		else
-		{
-			cadescrbuf = NULL;
-		}
+		debug("[zapit] setting ecm pid %04x\n", channel->getEcmPid());
+		cam->setEcm(channel);
+	}
 
-		if (execlp("/bin/camd", "camd", vpidbuf, apidbuf, pmtpidbuf, cadescrbuf, NULL) < 0)
-		{
-			perror("[zapit] execlp");
-			exit(0);
-		}
-		break;
+	if ((new_transponder == true) && (channel->getEmmPid() != NONE) && (channel->getEmmPid() != INVALID))
+	{
+		debug("[zapit] setting emm pid %04x\n", channel->getEmmPid());
+		cam->setEmm(channel);
 	}
 #else
 	decode_vals *vals = (decode_vals*) malloc(sizeof(decode_vals));
@@ -678,6 +653,13 @@ int changeapid (uint8_t pid_nr)
 
 	/* update current channel */
 	channel->setAudioChannel(pid_nr);
+
+#ifdef USE_EXTERNAL_CAMD
+	if ((channel->getEcmPid() != NONE) && (channel->getEcmPid() != INVALID))
+	{
+		cam->setEcm(channel);
+	}
+#endif
 
 	return 8;
 }
@@ -1900,7 +1882,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.163 2002/04/24 18:51:18 field Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.164 2002/04/28 05:38:51 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2377,14 +2359,6 @@ int stopPlayBack()
 #ifndef DBOX2
 	vbi_fd = stopVbi(vbi_fd);
 #endif /* DBOX2 */
-
-#ifdef USE_EXTERNAL_CAMD
-	if (camdpid != -1)
-	{
-		kill(camdpid, SIGTERM);
-		waitpid(camdpid, 0, 0);
-	}
-#endif /* USE_EXTERNAL_CAMD */
 
 	if (audio_fd != -1)
 	{

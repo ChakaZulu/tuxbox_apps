@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.9 2002/04/19 14:53:29 obi Exp $
+ * $Id: cam.h,v 1.10 2002/04/28 05:38:51 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -32,7 +32,14 @@ class CCam
 	private:
 		bool initialized;
 		uint16_t caSystemId;
-		int ca_fd;
+
+#ifdef USE_EXTERNAL_CAMD
+		uint8_t camdBuffer[2 + 255];
+		int camdSocket;
+
+		bool camdConnect ();
+		void camdDisconnect ();
+#endif
 
 		uint16_t readCaSystemId ();
 		ca_msg_t CCam::getMessage (uint16_t length);
