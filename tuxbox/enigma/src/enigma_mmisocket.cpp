@@ -15,8 +15,8 @@ int eSocketMMIHandler::send_to_mmisock( void* buf, size_t len)
 	else if ( (uint)ret != len )
 		eDebug("[eSocketMMIHandler] only %d bytes sent.. %d bytes should be sent", ret, len );
 	else
-		return ret;
-	return 0;
+		return 0;
+	return ret;
 }
 
 eSocketMMIHandler::eSocketMMIHandler()
