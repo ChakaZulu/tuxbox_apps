@@ -145,7 +145,6 @@ bool CRecordingNotifier::changeNotify(string OptionName, void*)
       toDisable[4]->setActive(true);
       toDisable[5]->setActive(true);
       toDisable[6]->setActive(false);
-      toDisable[7]->setActive(false);
    }
    else if(g_settings.recording_type==2)
    {
