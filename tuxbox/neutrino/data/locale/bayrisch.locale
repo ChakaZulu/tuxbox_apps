@@ -646,9 +646,9 @@ timerlist.modeselect Modus auswäihn
 timerlist.modetv Ferhsegn
 timerlist.moderadio Radio hern
 timersettings.separator Timer Eistellunga
-timersettings.record_safety_time Aufnemma - Korrekturzeid
-timersettings.record_safety_time.hint_1 De Zeid in Minutn (00=aus) werd beim Startn
-timersettings.record_safety_time.hint_2 vom Timer obzogn
+timersettings.record_safety_time_before Aufnemma - Korrekturzeid
+timersettings.record_safety_time_before.hint_1 De Zeid in Minutn (00=aus) werd beim Startn
+timersettings.record_safety_time_before.hint_2 vom Timer obzogn
 timersettings.record_safety_time_after Aufnahmeend Korretua
 timersettings.record_safety_time_after.hint_1 Korrekturzeid in Minutn (00=aus), de aufd
 timersettings.record_safety_time_after.hint_2 Endzeid vom jeweilign Timer aufigrechent werd

@@ -143,8 +143,6 @@ streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
 streamingmenu.streaming_ac3_enabled Obsluga AC3
 streamingmenu.off Wyl
 streamingmenu.on Wl
-streamingmenu.streaming_res_horiz Horizontal Resolution
-streamingmenu.streaming_res_vert Vertical Resolution
 streamingmenu.streaming_force_transcode Force Transcoding
 streamingmenu.streaming_resolution Resolution
 streamingmenu.352x288 352x288
@@ -386,9 +384,9 @@ flashupdate.reboot restartuje....
 flashupdate.updatemode Tryb aktualizacji
 flashupdate.updatemode_manual recznie (ftp)
 flashupdate.updatemode_internet internet
-flashupdate.currentversion Biezaca wersja
 flashupdate.currentversion_sep Biezaca wersja
 flashupdate.currentversiondate Data
+flashupdate.currentversiontime unset
 flashupdate.currentversionbaseversion Baseimage
 flashupdate.currentversionsnapshot Typ Image
 flashupdate.checkupdate Szukaj nowej wersji

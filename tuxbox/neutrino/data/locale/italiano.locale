@@ -171,7 +171,7 @@ colormenu.fade Fader
 colormenu.timing Timing
 
 colorthememenu.head Sciegli Tema
-colorthememenu.neutrino_Theme Neutrino Tema
+colorthememenu.neutrino_theme Neutrino Tema
 colorthememenu.classic_theme Classico
 
 colormenusetup.head Colori Menu
@@ -370,7 +370,7 @@ flashupdate.head Aggiornamento
 flashupdate.action in Azione:
 flashupdate.globalprogress Status Generale:
 flashupdate.getinfofile Carica Info Versione
-flashupdate.getinfofileerrore impossibbile caricare Info
+flashupdate.getinfofileerror impossibbile caricare Info
 flashupdate.getupdatefile Carica Update
 flashupdate.getupdatefileerror impossibbile caricare Update
 flashupdate.cantopenfile impossibbile aprire il File
@@ -639,16 +639,16 @@ timerlist.menunew nuovo timer
 timerlist.reload ricarica
 timerlist.modify modifica
 timerlist.message messaggio
-timerlist.apid Audio PIDs
+timerlist.apids Audio PIDs
 timerlist.bouquetselect scegli Bouquet
 timerlist.channelselect Scegli canale
 timerlist.modeselect Scegli Modo
 timerlist.modetv Modo TV
 timerlist.moderadio Modo Radio
 timersettings.separator impostazione Timer
-timersettings.record_safety_time Correttura partenza registrazione
-timersettings.record_safety_time.hint_1 Correttura in Min. (00=off), 
-timersettings.record_safety_time.hint_2 Che vengono tolti al Timer
+timersettings.record_safety_time_before Correttura partenza registrazione
+timersettings.record_safety_time_before.hint_1 Correttura in Min. (00=off), 
+timersettings.record_safety_time_before.hint_2 Che vengono tolti al Timer
 timersettings.record_safety_time_after Correttura fine registrazione
 timersettings.record_safety_time_after.hint_1 Correttura in Min. (00=off), 
 timersettings.record_safety_time_after.hint_2 che vengono aggiunti al timer
@@ -762,8 +762,8 @@ apids.hint_1 Inoltrare i dati APIDs per Streamen,
 apids.hint_2 Diviso con ' ' in Formato hexadecimale
 
 pictureviewer.head Lettore immaggini
-pictureviewer.sortorder cambiamento ordine
-pictureviewer.show vedi immaggine
+pictureviewer.sortorder.date unset
+pictureviewer.sortorder.filename unset
 pictureviewer.slideshow vedi immagine in slideshow 
 pictureviewer.show Vedi
 pictureviewer.slideshow Vedi tipo Diashow
