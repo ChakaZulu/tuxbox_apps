@@ -3184,7 +3184,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 	}
 
 	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#ffffff>"
-		"<!-- " << sapi->service << "-->" << std::endl <<
+		"<!-- " << sapi->service.toString() << "-->" << std::endl <<
 		"<table cellspacing=5 cellpadding=0 border=0>"
 		"<tr><td>Name:</td><td>" << name << "</td></tr>"
 		"<tr><td>Provider:</td><td>" << provider << "</td></tr>";
