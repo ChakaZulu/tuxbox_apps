@@ -1,6 +1,6 @@
 installdir = $(DATADIR)/neutrino/locale
 
 install_DATA = \
-	deutsch.locale english.locale french.locale polski.locale \
-	slovensky.locale tuerkce.locale
+	bayrisch.locale bosanski.locale deutsch.locale english.locale \
+	polski.locale schweizerdeutsch.locale
 
