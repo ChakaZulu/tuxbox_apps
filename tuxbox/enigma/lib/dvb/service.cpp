@@ -194,7 +194,7 @@ extern bool checkPin( int pin, const char * text );
 int eServiceInterface::play(const eServiceReference &s, int workaround )
 {
 	int pLockActive = eConfig::getInstance()->pLockActive();
-	if ( s.isLocked() && pLockActive && !checkPin( eConfig::getInstance()->getParentalPin(), _("parental") ) )
+	if ( !workaround && s.isLocked() && pLockActive && !checkPin( eConfig::getInstance()->getParentalPin(), _("parental") ) )
 	{
 		eWarning("service is parentallocked... don't play");
 		return -1;
