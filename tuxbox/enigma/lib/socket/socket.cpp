@@ -2,7 +2,7 @@
 #include <asm/ioctls.h>
 #include <unistd.h>
 #include <errno.h>
-
+#include <linux/serial.h>
 #include <lib/socket/socket.h>
 
 void eSocket::close()
@@ -85,7 +85,7 @@ int eSocket::setSocket(int s, int iss, eMainloop *ml)
 	socketdesc=s;
 	issocket=iss;
 	fcntl(socketdesc, F_SETFL, O_NONBLOCK);
-	last_break = 0xFFFFFFFF;
+	last_break = -1;
 
 	if (rsn)
 		delete rsn;  
@@ -113,18 +113,14 @@ void eSocket::notifier(int what)
 					close();
 					return;
 				}
-			} else		// when operating on terminals, check for break
+			} 
+			else		// when operating on terminals, check for break
 			{
-					// where is this struct defined?
-				struct async_icount {
-					unsigned long cts, dsr, rng, dcd, tx, rx;
-					unsigned long frame, parity, overrun, brk;
-					unsigned long buf_overrun;
-				} icount;
-
+				serial_icounter_struct icount;
+				memset(&icount, 0, sizeof(icount));
 				if (!ioctl(getDescriptor(), TIOCGICOUNT, &icount))
 				{
-					if (last_break == 0xFFFFFFFF)
+					if (last_break == -1)
 						last_break = icount.brk;
 					else if (last_break != icount.brk)
 					{
@@ -138,6 +134,8 @@ void eSocket::notifier(int what)
 						return;
 					}
 				}
+				else
+					eDebug("TIOCGICOUNT failed(%m)");
 			}
 			int r;
 			if ((r=readbuffer.fromfile(getDescriptor(), bytesavail)) != bytesavail)
@@ -183,7 +181,7 @@ void eSocket::notifier(int what)
 		}
 	} else if (what & eSocketNotifier::Hungup)
 	{
-		if (mystate == Connection || mystate == Closing)
+		if (mystate == Connection || (mystate == Closing && issocket) )
 		{
 			writebuffer.clear();
 			close();

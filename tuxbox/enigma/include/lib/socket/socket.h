@@ -18,7 +18,7 @@ class eSocket: public Object
 {
 	int mystate;
 	int issocket;
-	unsigned int last_break;
+	int last_break;
 private:
 	int socketdesc;
 	eIOBuffer readbuffer;
