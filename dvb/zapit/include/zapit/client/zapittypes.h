@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.3 2002/11/02 17:21:15 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.4 2002/12/07 23:07:18 thegoodguy Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -49,5 +49,11 @@ typedef enum {
 	DISEQC_2_2
 } diseqc_t;
 
+/* video display formats (cf. video_displayformat_t in driver/dvb/include/linux/dvb/video.h): */
+typedef enum {   
+        ZAPIT_VIDEO_PAN_SCAN,       /* use pan and scan format */
+	ZAPIT_VIDEO_LETTER_BOX,     /* use letterbox format */
+	ZAPIT_VIDEO_CENTER_CUT_OUT  /* use center cut out format */
+} video_display_format_t;
 
 #endif /* __zapittypes_h__ */

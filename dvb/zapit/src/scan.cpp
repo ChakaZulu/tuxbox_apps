@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.85 2002/11/28 23:45:32 obi Exp $
+ * $Id: scan.cpp,v 1.86 2002/12/07 23:07:18 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -245,7 +245,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 		return;
 	}
 
-	for (tallchans_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
+	for (tallchans::const_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
 		if ((cI->second.getTransportStreamId() == transport_stream_id) && (cI->second.getOriginalNetworkId() == original_network_id)) {
 			if (cI->second.getName().length() == 0)
 				fprintf(fd,

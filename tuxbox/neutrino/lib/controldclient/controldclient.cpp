@@ -36,7 +36,7 @@
 #include <controldclient/controldclient.h>
 
 
-void CControldClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
+void CControldClient::send(const unsigned char command, const char* data = NULL, const unsigned int size = 0)
 {
 	CBasicClient::send(CONTROLD_UDS_NAME, CControld::ACTVERSION, command, data, size);
 }

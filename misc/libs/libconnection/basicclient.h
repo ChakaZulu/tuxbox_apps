@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.h,v 1.2 2002/12/07 19:14:54 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.h,v 1.3 2002/12/07 23:07:21 thegoodguy Exp $
  *
  * Basic Client Class (Neutrino) - DBoxII-Project
  *
@@ -33,9 +33,9 @@ class CBasicClient
 
  protected:
 	bool open_connection(const char* socketname);
-	bool send_data(char* data, const size_t size);
+	bool send_data(const char* data, const size_t size);
 	bool receive_data(char* data, const size_t size);
-	bool send(const char* socketname, const unsigned char version, const unsigned char command, char* data = NULL, const unsigned int size = 0);
+	bool send(const char* socketname, const unsigned char version, const unsigned char command, const char* data = NULL, const unsigned int size = 0);
 	void close_connection();
 	
 	CBasicClient();

@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.15 2002/10/12 20:19:44 obi Exp $
+ * $Id: channel.h,v 1.16 2002/12/07 23:07:20 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -77,16 +77,16 @@ class CZapitChannel
 		~CZapitChannel ();
 
 		/* get methods - read only variables */
-		t_service_id          getServiceId()         { return service_id; }
-		t_transport_stream_id getTransportStreamId() { return transport_stream_id; }
-		t_original_network_id getOriginalNetworkId() { return original_network_id; }
-		unsigned char         getServiceType()       { return serviceType; }
-		unsigned char         getDiSEqC()            { return DiSEqC; }
-		t_channel_id          getChannelID()         { return CREATE_CHANNEL_ID; }
-		uint32_t              getTsidOnid()          { return (transport_stream_id << 16) | original_network_id; }
+		t_service_id          getServiceId()         const { return service_id; }
+		t_transport_stream_id getTransportStreamId() const { return transport_stream_id; }
+		t_original_network_id getOriginalNetworkId() const { return original_network_id; }
+		unsigned char         getServiceType()       const { return serviceType; }
+		unsigned char         getDiSEqC()            const { return DiSEqC; }
+		t_channel_id          getChannelID()         const { return CREATE_CHANNEL_ID; }
+		uint32_t              getTsidOnid()          const { return (transport_stream_id << 16) | original_network_id; }
 
 		/* get methods - read and write variables */
-		std::string getName()			{ return name; }
+		const std::string getName()                  const { return name; }
 		unsigned char getAudioChannelCount()	{ return audioChannels.size(); }
 		unsigned short getPcrPid()		{ return pcrPid; }
 		unsigned short getPmtPid()		{ return pmtPid; }

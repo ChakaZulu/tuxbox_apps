@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.33 2002/12/02 13:41:42 thegoodguy Exp $
+	$Id: timerdclient.h,v 1.34 2002/12/07 23:07:20 thegoodguy Exp $
 
 	License: GPL
 
@@ -36,7 +36,7 @@
 class CTimerdClient:private CBasicClient
 {
 	private:
-		bool send(const unsigned char command, char* data, const unsigned int size);
+		bool send(const unsigned char command, const char* data, const unsigned int size);
 
 	public:
 		enum events

@@ -37,7 +37,7 @@
 #include <lcddclient/lcddclient.h>
 
 
-bool CLcddClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
+bool CLcddClient::send(const unsigned char command, const char* data = NULL, const unsigned int size = 0)
 {
 	return CBasicClient::send(LCDD_UDS_NAME, CLcddMsg::ACTVERSION, command, data, size);
 }

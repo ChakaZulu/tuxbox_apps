@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.68 2002/12/07 19:14:54 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.69 2002/12/07 23:07:19 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -52,7 +52,7 @@ std::string Utf8_to_Latin1(const std::string s)
 	return r;
 }
 
-bool CZapitClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
+bool CZapitClient::send(const unsigned char command, const char* data, const unsigned int size)
 {
 	return CBasicClient::send(ZAPIT_UDS_NAME, CZapitMessages::ACTVERSION, command, data, size);
 }
@@ -346,7 +346,7 @@ void CZapitClient::commitBouquetChange()
 	close_connection();
 }
 
-void CZapitClient::muteAudio (bool mute)
+void CZapitClient::muteAudio(const bool mute)
 {
 	CZapitMessages::commandBoolean msg;
 
@@ -357,7 +357,7 @@ void CZapitClient::muteAudio (bool mute)
 	close_connection();
 }
 
-void CZapitClient::setVolume (unsigned int left, unsigned int right)
+void CZapitClient::setVolume(const unsigned int left, const unsigned int right)
 {
 	CZapitMessages::commandVolume msg;
 
@@ -456,7 +456,7 @@ void CZapitClient::setScanBouquetMode( bouquetMode mode)
 /***********************************************/
 
 /* adds bouquet at the end of the bouquetlist*/
-void CZapitClient::addBouquet(std::string name)
+void CZapitClient::addBouquet(const std::string name)
 {
 	CZapitMessages::commandAddBouquet msg;
 
@@ -662,7 +662,7 @@ bool CZapitClient::isPlayBackActive()
 	return response.activated;
 }
 
-void CZapitClient::setDisplayFormat (int format)
+void CZapitClient::setDisplayFormat(const video_display_format_t format)
 {
 	CZapitMessages::commandInt msg;
 	msg.val = format;
@@ -670,7 +670,7 @@ void CZapitClient::setDisplayFormat (int format)
 	close_connection();
 }
 
-void CZapitClient::setAudioMode (int mode)
+void CZapitClient::setAudioMode(const int mode)
 {
 	CZapitMessages::commandInt msg;
 	msg.val = mode;
@@ -678,7 +678,7 @@ void CZapitClient::setAudioMode (int mode)
 	close_connection();
 }
 
-void CZapitClient::setRecordMode( bool activate )
+void CZapitClient::setRecordMode(const bool activate)
 {
 	CZapitMessages::commandSetRecordMode msg;
 	msg.activate = activate;
@@ -697,7 +697,7 @@ bool CZapitClient::isRecordModeActive()
 	return response.activated;
 }
 
-void CZapitClient::registerEvent(unsigned int eventID, unsigned int clientID, std::string udsName)
+void CZapitClient::registerEvent(const unsigned int eventID, const unsigned int clientID, const std::string udsName)
 {
 	CEventServer::commandRegisterEvent msg;
 
@@ -711,7 +711,7 @@ void CZapitClient::registerEvent(unsigned int eventID, unsigned int clientID, st
 	close_connection();
 }
 
-void CZapitClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
+void CZapitClient::unRegisterEvent(const unsigned int eventID, const unsigned int clientID)
 {
 	CEventServer::commandUnRegisterEvent msg;
 
@@ -722,4 +722,3 @@ void CZapitClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 
 	close_connection();
 }
-

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.39 2002/12/07 19:14:54 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.40 2002/12/07 23:07:20 thegoodguy Exp $
 
 	License: GPL
 
@@ -29,7 +29,7 @@
 #include <timerdclient/timerdclient.h>
 
 
-bool CTimerdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
+bool CTimerdClient::send(const unsigned char command, const char* data = NULL, const unsigned int size = 0)
 {
 	return CBasicClient::send(TIMERD_UDS_NAME, CTimerdMsg::ACTVERSION, command, data, size);
 }

@@ -62,7 +62,7 @@ class CSectionsdClient : private CBasicClient
  private:
 
 	int readResponse(char* data = NULL, int size= 0);
-	bool send(const unsigned char command, char* data, const unsigned int size);
+	bool send(const unsigned char command, const char* data, const unsigned int size);
 
  public:
 		enum events

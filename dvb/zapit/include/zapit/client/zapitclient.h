@@ -33,7 +33,7 @@
 class CZapitClient:public CBasicClient
 {
  private:
-	bool send(const unsigned char command, char* data, const unsigned int size);
+	bool send(const unsigned char command, const char* data = NULL, const unsigned int size = 0);
 
 
  public:
@@ -257,16 +257,16 @@ class CZapitClient:public CBasicClient
 	int getMode();
 
 	/* set RecordMode*/
-	void setRecordMode( bool activate );
+	void setRecordMode(const bool activate);
 
 	/* get RecordMode*/
 	bool isRecordModeActive();
 
 	/* mute audio */
-	void muteAudio( bool mute );
+	void muteAudio(const bool mute);
 
 	/* set audio volume */
-	void setVolume( unsigned int left, unsigned int right );
+	void setVolume(const unsigned int left, const unsigned int right);
 
 
 	/****************************************/
@@ -302,7 +302,7 @@ class CZapitClient:public CBasicClient
 	/****************************************/
 
 	/* adds bouquet at the end of the bouquetlist*/
-	void addBouquet(std::string name);
+	void addBouquet(const std::string name);
 
 	/* moves a bouquet from one position to another */
 	/* bouquets are numbered starting at 0 */
@@ -369,7 +369,7 @@ class CZapitClient:public CBasicClient
 	void startPlayBack();
 	void stopPlayBack();
 	bool isPlayBackActive();
-	void setDisplayFormat(int mode);
+	void setDisplayFormat(const video_display_format_t mode);
 	void setAudioMode(int mode);
 
 	/****************************************/
@@ -381,12 +381,12 @@ class CZapitClient:public CBasicClient
 	/*
 	  ein beliebiges Event anmelden
 	*/
-	void registerEvent(unsigned int eventID, unsigned int clientID, std::string udsName);
+	void registerEvent(const unsigned int eventID, const unsigned int clientID, const std::string udsName);
 
 	/*
 	  ein beliebiges Event abmelden
 	*/
-	void unRegisterEvent(unsigned int eventID, unsigned int clientID);
+	void unRegisterEvent(const unsigned int eventID, const unsigned int clientID);
 
 };
 

@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.28 2002/12/07 19:14:55 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.29 2002/12/07 23:07:20 thegoodguy Exp $
 
   License: GPL
 
@@ -18,93 +18,6 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-  $Log: sectionsdclient.cpp,v $
-  Revision 1.28  2002/12/07 19:14:55  thegoodguy
-  Move more code to basicclient & make sectionsd use basicserver
-
-  Revision 1.27  2002/11/03 22:26:55  thegoodguy
-  Use more frequently types defined in zapittypes.h(not complete), fix some warnings, some code cleanup
-
-  Revision 1.26  2002/10/15 20:39:48  woglinde
-
-
-  mostly coding styles, adding license to some files,
-  using dos2unix on one file
-
-  Revision 1.25  2002/10/14 20:03:56  thegoodguy
-  Use CBasicClient in sectionsdclient, too ; always close_connection (even when the sectionsd did not respond)
-
-  Revision 1.24  2002/10/13 21:21:49  thegoodguy
-  Cleanup includes
-
-  Revision 1.23  2002/10/13 11:35:03  woglinde
-
-
-  yeah, its done neutrino compiles now again,
-  you can go on and find bugs
-
-  Revision 1.22  2002/10/13 05:42:51  woglinde
-
-
-  2nd round of moving headers in lib/include
-
-  Revision 1.21  2002/10/07 10:46:09  thegoodguy
-  Enhancement in Clientlib (setEventsAreOldInMinutes) & code cleanup
-
-  Revision 1.20  2002/09/25 22:15:09  thegoodguy
-  Small bugfix (thx to gcc: "comparison is always false due to limited range of data type")
-
-  Revision 1.19  2002/09/24 22:29:06  thegoodguy
-  Code cleanup (kick out onid_sid)
-
-  Revision 1.18  2002/07/27 17:14:51  obi
-  no more warnings
-
-  Revision 1.17  2002/04/18 13:09:53  field
-  Sectionsd auf clientlib umgestellt :)
-
-  Revision 1.14  2002/04/17 15:58:24  field
-  Anpassungen
-
-  Revision 1.13  2002/04/15 12:33:44  field
-  Wesentlich verbessertes Paket-Handling (CPU-Last sollte viel besser sein
-  *g*)
-
-  Revision 1.12  2002/04/12 15:47:28  field
-  laestigen Bug in der glibc2.2.5 umschifft
-
-  Revision 1.11  2002/03/30 03:54:31  dirch
-  sectionsd_close vergessen ;)
-
-  Revision 1.10  2002/03/30 03:45:37  dirch
-  getChannelEvents() gefixt, getEPGid() and getEPGidShort() added
-
-  Revision 1.9  2002/03/28 14:58:30  dirch
-  getChannelEvents() gefixt
-
-  Revision 1.8  2002/03/22 17:12:06  field
-  Weitere Updates, compiliert wieder
-
-  Revision 1.6  2002/03/20 21:42:30  McClean
-  add channel-event functionality
-
-  Revision 1.5  2002/03/18 15:08:50  field
-  Updates...
-
-  Revision 1.4  2002/03/18 09:32:51  field
-  nix bestimmtes...
-
-  Revision 1.2  2002/03/07 18:33:43  field
-  ClientLib angegangen, Events angefangen
-
-  Revision 1.1  2002/01/07 21:28:22  McClean
-  initial
-
-  Revision 1.1  2002/01/06 19:10:06  Simplex
-  made clientlib for zapit
-  implemented bouquet-editor functions in lib
-
 
 */
 
@@ -139,7 +52,7 @@ int CSectionsdClient::readResponse(char* data, int size)
 }
 
 
-bool CSectionsdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
+bool CSectionsdClient::send(const unsigned char command, const char* data = NULL, const unsigned int size = 0)
 {
 	sectionsd::msgRequestHeader msgHead;
 

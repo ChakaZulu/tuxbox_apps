@@ -39,10 +39,10 @@
 
 class CLcddClient:private CBasicClient
 {
-	private:
-		bool send(const unsigned char command, char* data, const unsigned int size);
-
-	public:
+ private:
+	bool send(const unsigned char command, const char* data, const unsigned int size);
+	
+ public:
 		void setMode(char mode, std::string head="");
 		void setMenuText(char pos, std::string text, char highlight=0);
 		void setServiceName(std::string name);  // name must be UTF-8 encoded

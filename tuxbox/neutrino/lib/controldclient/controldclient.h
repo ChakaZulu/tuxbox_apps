@@ -37,9 +37,9 @@ using namespace std;
 
 class CControldClient:private CBasicClient
 {
-		void send(const unsigned char command, char* data, const unsigned int size);
+	void send(const unsigned char command, const char* data, const unsigned int size);
 
-	public:
+ public:
 
 		enum events
 		{
