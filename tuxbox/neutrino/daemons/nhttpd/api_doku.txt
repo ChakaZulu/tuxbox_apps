@@ -1,0 +1,421 @@
+nhttpd /control api doku
+-------------------------------------
+
+
+Der Neutrino HTTP-Server läuft auf Port 80. Die Steuerfunktionen für externe Programme sind unter dem Context /control/ zu finden. 
+Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
+
+1. Die Kanalliste
+Handler: http://dbox/control/channellist
+
+Parameter: keine
+Rückgabe:
+
+Es wird die gesamte Kanalliste von Neutrino zurückgegeben. Jede Zeile wird von einem Enter (\n) von der Nächsten getrennt. Eine Zeile enthält ein Programm.
+
+Rückgabe-Format: ONIDSID Programmname
+
+Die ONIDSID dient als Handle für weitere Operationen wie Zappen oder EPG.
+
+Beispiel:
+
+>>>http://dbox/control/channellist
+82536 AB MOTEURS
+82537 AB 1
+82538 ANIMAUX
+82539 ENCYCLOPEDIA
+82540 ZIK'/XXL
+ 
+ 
+
+
+
+2. EPG-Abfrage
+Handler: http://dbox/control/epg
+
+Parameter: keine
+Rückgabe:
+
+Es werden alle verfügbaren EPG's aller Programme, zur aktuellen Zeit zurückgegeben. Jede Zeile wird von einem Enter (\n) von der Nächsten getrennt. Eine Zeile enthält die Information über die aktuell laufende Sendung.
+
+Rückgabe-Format: ONIDSID EVENTID Titel der Sendung
+
+Die EVENTID dient als Handle um genauere Informationen abzufragen.
+
+Beispiel:
+
+>>>http://dbox/control/epg
+69530 4556718105 Planet RTL
+69531 4556783630 News on the Hour
+74537 4884856871 Journal télévisé belge
+74540 4885053468 Porta a porta
+ 
+ 
+
+
+Parameter: ONIDSID
+Rückgabe:
+
+Als Rückgabe wird die Eventliste des durch die ONIDSID identifizierten Senders gesendet, das heisst eine Liste, was für Filme auf einem Sender kommen. Jede Zeile wird von einem Enter (\n) von der Nächsten getrennt.
+
+Rückgabe-Format: ONIDSID EVENTID Titel der Sendung
+
+Die EVENTID dient als Handle um genauere EPG-Informationen abzufragen.
+
+Beispiel:
+
+>>>http://dbox/control/epg?69530
+00010f9a0017 22.11 23:00 30 De Magazin
+00010f9a0018 22.11 23:30 30 De Journal
+00010f9a0019 23.11 00:00 60 Planet RTL
+ 
+ 
+
+
+Parameter: eventid=EVENTID
+Rückgabe:
+
+Es wird die ausführliche Beschreibung eines Films zurückgegeben. Diese besteht aus einem Titel, einer allgemeinen Info und der Beschreibung.
+Titel Info und Beschreibung derwen mit einem Enter (\n) vonneinander getrennt. Es muss beachtet werden, dass in der Beschreibung weitere Enter vorkommen können.
+
+Rückgabe-Format:
+       Titel
+       Info
+       Beschreibung
+
+
+Beispiel:
+
+>>>http://dbox/control/epg?eventid=008500296150
+Outer Limits - Die unbekannte Dimension
+Mission Mars III
+Drei amerikanische Astronauten befinden sich nach einer Mars-Expedition auf dem Rückflug zur Erde. Bald machen sie eine Grauen erregenden Entdeckung: Eine unbekannte Lebensform hat von einem der drei Besitz ergriffen.
+CDN 1995. Von Tibor Takacs, mit Jay O. Sanders, Matt Craven, Michael Dorn.
+ 
+ 
+
+
+
+3. Die DBox herunterfahren
+Handler: http://dbox/control/shutdown
+
+Parameter: keine
+Rückgabe:
+
+Es wird der Text ok bei Erfolg oder error im Fehlerfall zurückgegeben. Die Dbox geht bei ok sofort in den Standby-Mode.
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/shutdown
+ok
+ 
+ 
+
+
+
+4. Lautstärke-Steuerung
+Handler: http://dbox/control/volume
+
+Parameter: keine
+Rückgabe:
+
+Es wird die aktuell eingestellte Lautstärke zurückgegeben - die Werte bewegen sich zwischen 0 (leise) und 100 (laut).
+
+Rückgabe-Format: Lautstärke
+
+Beispiel:
+
+>>>http://dbox/control/volume
+80
+ 
+ 
+
+
+Parameter: Lautstärke
+Rückgabe:
+
+Es kann die Lautstärke eingestellt werden - die Werte müssen sich zwischen 0 (leise) und 100 (laut) bewegen. Es sollten nur Werte in 5er-Schritten gesetzt werden (5,10,...).
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/volume?40
+ok
+ 
+ 
+
+
+Parameter: mute
+Rückgabe:
+
+Die Audio-Ausgabe wird abgeschaltet. Es kommt als Bestätigung der String mute zurück.
+
+Rückgabe-Format: ok
+
+Beispiel:
+
+>>>http://dbox/control/volume?mute
+mute
+ 
+ 
+
+
+Parameter: unmute
+Rückgabe:
+
+Die Audio-Ausgabe wird wieder eingeschaltet. Es kommt als Bestätigung der String unmute zurück.
+
+Rückgabe-Format: ok
+
+Beispiel:
+
+>>>http://dbox/control/volume?mute
+unmute
+ 
+ 
+
+
+Parameter: status
+Rückgabe:
+
+Es wird der Status (ob gerade mute aktiv ist) zurückgegeben.
+0 - unmuted
+1 - mute
+
+Rückgabe-Format: 0 oder 1
+
+Beispiel:
+
+>>>http://dbox/control/volume?status
+1
+ 
+ 
+
+
+
+5. Programm umschalten / Recode-Mode Steuerung
+Handler: http://dbox/control/zapto
+
+Parameter: keine
+Rückgabe:
+
+Es wird die ONIDSID des aktuell laufenden Senders zurückgegeben
+
+Rückgabe-Format: ONIDSID
+
+Beispiel:
+
+>>>http://dbox/control/zapto
+69531
+ 
+ 
+
+
+Parameter: getpids
+Rückgabe:
+
+Es werden die VPID und die APID des laufenden Senders angezeigt. Die beiden Werte sind durch ein Enter voneinander getrennt.
+
+Rückgabe-Format:
+       VPID
+       APID
+
+Beispiel:
+
+>>>http://dbox/control/zapto?getpids
+305
+306
+ 
+ 
+
+
+Parameter: stopplayback
+Rückgabe:
+Stoppt die Decodierung um Graben zu können. Zusätzlich wird der Sectionsd gestoppt. Rückgabewert sollte 002 für Erfolg sein.
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/zapto?stopplayback
+ok
+ 
+ 
+
+
+Parameter: startplayback
+Rückgabe:
+Startet die Decodierung nach dem Graben wieder, Sectionsd wird auch wieder gestartet. Rückgabewert sollte 002 für Erfolg sein.
+
+Rückgabe-Format: ok
+
+Beispiel:
+
+>>>http://dbox/control/zapto?startplayback
+ok
+ 
+ 
+
+
+Parameter: stopsectionsd
+Rückgabe:
+Stoppt den Sectionsd zum Grabben. Rückgabewert sollte 002 für Erfolg sein.
+
+Rückgabe-Format: 0k
+
+Beispiel:
+
+>>>http://dbox/control/zapto?stopsectionsd
+ok
+ 
+ 
+
+
+Parameter: startsectionsd
+Rückgabe:
+Startet Sectionsd nach dem Graben wieder. Rückgabewert sollte 002 für Erfolg sein.
+
+Rückgabe-Format: ok
+
+Beispiel:
+
+>>>http://dbox/control/zapto?startsectionsd
+ok
+ 
+ 
+
+
+Parameter: ONIDSID
+Rückgabe:
+
+Zappt auf den angegebenen Kanal. Als Rückgabe ist im Erfolgsfall 0Ad zu erwarten.
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/zapto?69531 
+ok  
+ 
+
+
+
+6. Datum von der Box abfragen
+Handler: http://dbox/control/getdate
+
+Parameter: keine
+Rückgabe:
+
+Es wird das Datum zurückgegeben.
+
+Rückgabe-Format: dd.mm.yyyy
+
+Beispiel:
+
+>>>http://dbox/control/getdate
+11.01.2002
+ 
+ 
+
+
+
+7. Uhrzeit von der Box abfragen
+Handler: http://dbox/control/gettime
+
+Parameter: keine
+Rückgabe:
+
+Es wird die Uhrzeit zurückgegeben.
+
+Rückgabe-Format: hh:mm:ss
+
+Beispiel:
+
+>>>http://dbox/control/gettime
+13:25:07
+ 
+ 
+
+
+
+8. Streaminformationen abfragen
+Handler: http://dbox/control/info
+
+Parameter: streaminfo
+Rückgabe:
+
+Es werden Streaminfos zurückgegeben. Die Werte sind durch Enter (\n) getrennt
+
+Rückgabe-Format: X_res Y_res Bitrate VideoFormat Framerate AudioFormat
+
+Beispiel:
+
+>>>http://dbox/control/info?streaminfo
+480
+576
+997500
+4:3
+25
+joint stereo
+
+ 9. Aktuellen Kanal abfragen
+Handler: http://dbox/control/getonidsid
+
+Parameter: 
+Rückgabe:
+
+Es wird die ONIDSID des aktuellen Kanals zurückgegeben.
+
+Rückgabe-Format: ONIDSID
+
+Beispiel:
+
+>>>http://dbox/control/getonidsid
+93647
+
+10. services.xml lesen
+Handler: http://dbox/control/getservices
+
+Parameter: 
+Rückgabe:
+
+Es wird der Inhalt der Datei /var/tuxbox/config/zapit/services.xml zurückgegeben.
+
+
+Beispiel:
+
+>>>http://dbox/control/getservices
+<?xml version="1.0" encoding="iso-8859-1"?>
+<ZAPIT>
+<cable>
+<transponder transportID="00001" networkID="0">
+<cable frequency="04020" symbolRate="06900" fec="0" polarity="0"/>
+...
+
+
+11 bouquets.xml auslesen
+Handler: http://dbox/control/getbouquets
+
+Parameter: 
+Rückgabe:
+
+Es wird der Inhalt der Datei /var/tuxbox/config/zapit/bouquet.xml zurückgegeben.
+
+
+Beispiel:
+
+>>>http://dbox/control/getbouquets
+
+<?xml version="1.0" encoding="iso-8859-1"?>
+<ZAPIT>
+        <Bouquet name="beispielbouquet" hidden="0" locked="0">
+                <channel serviceID="6d67" name="3sat" onid="0001"/>
+...
+
+
+ 
+
+
