@@ -38,7 +38,9 @@
 
 #include "gui/widget/menue.h"
 #include "gui/color.h"
+#include "gui/progressstatus.h"
 #include "libmd5sum/libmd5sum.h"
+
 #include "dbox/fp.h"
 
 
@@ -47,41 +49,11 @@
 using namespace std;
 
 
-class CFlashTool_StatusViewer
-{
-	public:
-		virtual void showGlobalStatus(int prog){};
-		virtual int getGlobalStatus(){return 0;};
-		virtual void showLocalStatus(int prog){};
-		virtual void showStatusMessage(string text){};
-};
-
-
-class CFlashTool
-{
-		CFlashTool_StatusViewer* statusViewer;
-		string mtdDevice;
-		string ErrorMessage;
-
-		bool erase();
-
-	public:
-		CFlashTool();
-		string getErrorMessage();
-
-		void setMTDDevice( string mtddevice );
-		void setStatusViewer( CFlashTool_StatusViewer* statusview );
-
-		bool program( string filename );
-
-};
-
-
 class CHTTPUpdater
 {
 		string						BasePath;
 
-		CFlashTool_StatusViewer*	statusViewer;
+		CProgress_StatusViewer*	statusViewer;
 
 		static int show_progress( void *clientp, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow);
 
@@ -90,7 +62,7 @@ class CHTTPUpdater
 		string						VersionFile;
 
 		CHTTPUpdater();
-		void setStatusViewer( CFlashTool_StatusViewer* statusview );
+		void setStatusViewer( CProgress_StatusViewer* statusview );
 
 		bool getInfo();
 		bool getFile( string version );
@@ -98,7 +70,7 @@ class CHTTPUpdater
 };
 
 
-class CFlashUpdate : public CMenuTarget, CFlashTool_StatusViewer
+class CFlashUpdate : public CMenuTarget, CProgress_StatusViewer
 {
 	private:
 

@@ -34,16 +34,12 @@
 #include "update.h"
 #include "neutrino.h"
 #include "gui/widget/messagebox.h"
+#include "system/flashtool.h"
 
-#include <sys/ioctl.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/mount.h>
-
-#include <linux/mtd/mtd.h>
 
 #include <curl/curl.h>
 #include <curl/types.h>
@@ -53,167 +49,6 @@
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
 
-CFlashTool::CFlashTool()
-{
-	statusViewer = NULL;
-	mtdDevice = "";
-	ErrorMessage = "";
-}
-
-string CFlashTool::getErrorMessage()
-{
-	return ErrorMessage;
-}
-
-void CFlashTool::setMTDDevice( string mtddevice )
-{
-	mtdDevice = mtddevice;
-}
-
-void CFlashTool::setStatusViewer( CFlashTool_StatusViewer* statusview )
-{
-	statusViewer = statusview;
-}
-
-bool CFlashTool::program( string filename )
-{
-	int	fd1, fd2;
-	long	filesize;
-
-	if(statusViewer)
-	{
-		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage("");
-	}
-
-	if(mtdDevice=="")
-	{
-		ErrorMessage = "mtd-device not set";
-		return false;
-	}
-
-	if(mtdDevice=="")
-	{
-		ErrorMessage = "filename not set";
-		return false;
-	}
-
-	if( (fd1 = open( filename.c_str(), O_RDONLY )) < 0 )
-	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenfile");
-		return false;
-	}
-
-	filesize = lseek( fd1, 0, SEEK_END);
-	lseek( fd1, 0, SEEK_SET);
-
-	if(filesize==0)
-	{
-		ErrorMessage = g_Locale->getText("flashupdate.fileis0bytes");
-		return false;
-	}
-
-	printf("filesize: %ld\n", filesize);
-
-
-	if(statusViewer)
-	{
-		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.eraseingflash"));
-	}
-
-	if(!erase())
-	{
-		return false;
-	}
-
-	if(statusViewer)
-	{
-		statusViewer->showGlobalStatus(75);
-		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.programmingflash"));
-	}
-
-	if( (fd2 = open( mtdDevice.c_str(), O_WRONLY )) < 0 )
-	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenmtd");
-		close(fd1);
-		return false;
-	}
-
-	char buf[1024];
-	long fsize = filesize;
-	while(fsize>0)
-	{
-		long block = fsize;
-		if(block>(long)sizeof(buf))
-		{
-			block = sizeof(buf);
-		}
-		read( fd1, &buf, block);
-		write( fd2, &buf, block);
-		fsize -= block;
-		char prog = char(100-(100./filesize*fsize));
-		if(statusViewer)
-		{
-			statusViewer->showLocalStatus(prog);
-		}
-	}
-
-	if(statusViewer)
-	{
-		statusViewer->showGlobalStatus(100);
-		statusViewer->showLocalStatus(100);
-		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.ready"));
-	}
-
-	close(fd1);
-	close(fd2);
-	return true;
-}
-
-bool CFlashTool::erase()
-{
-	int		fd;
-	mtd_info_t	meminfo;
-	erase_info_t	erase;
-
-	if( (fd = open( mtdDevice.c_str(), O_RDWR )) < 0 )
-	{
-		ErrorMessage = g_Locale->getText("flashupdate.cantopenmtd");
-		return false;
-	}
-
-	if( ioctl( fd, MEMGETINFO, &meminfo ) != 0 )
-	{
-		ErrorMessage = "can't get mtd-info";
-		return false;
-	}
-
-	erase.length = meminfo.erasesize;
-	for (erase.start = 0; erase.start < meminfo.size;erase.start += meminfo.erasesize)
-	{
-		/*
-		printf( "\rErasing %u Kibyte @ %x -- %2u %% complete.",
-		                 meminfo.erasesize/1024, erase.start,
-		                 erase.start*100/meminfo.size );
-		*/
-		if(statusViewer)
-		{
-			statusViewer->showLocalStatus( char(erase.start*100./meminfo.size));
-		}
-
-		if(ioctl( fd, MEMERASE, &erase) != 0)
-		{
-			ErrorMessage = "erase error";
-			close(fd);
-			return false;
-		}
-	}
-
-	close(fd);
-	return true;
-}
 
 
 CHTTPUpdater::CHTTPUpdater()
@@ -258,7 +93,7 @@ CHTTPUpdater::CHTTPUpdater()
 	statusViewer = NULL;
 }
 
-void CHTTPUpdater::setStatusViewer( CFlashTool_StatusViewer* statusview )
+void CHTTPUpdater::setStatusViewer( CProgress_StatusViewer* statusview )
 {
 	statusViewer = statusview;
 }
@@ -267,7 +102,7 @@ void CHTTPUpdater::setStatusViewer( CFlashTool_StatusViewer* statusview )
 int CHTTPUpdater::show_progress( void *clientp, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow)
 {
 
-	((CFlashTool_StatusViewer*)clientp)->showLocalStatus( int( dlnow*100.0/dltotal ) );
+	((CProgress_StatusViewer*)clientp)->showLocalStatus( int( dlnow*100.0/dltotal ) );
 	return 0;
 }
 
