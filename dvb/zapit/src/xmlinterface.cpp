@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.17 2002/12/22 22:56:57 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.18 2002/12/23 10:47:04 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -22,25 +22,41 @@
  */
 
 #include <stdio.h>
+
+
+#ifdef USE_LIBXML
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/parserInternals.h>
+#else  /* USE_LIBXML */
 #include <xmltok.h>
+#endif /* USE_LIBXML */
+
 
 #include <zapit/debug.h>
 #include <zapit/xmlinterface.h>
 
 xmlNodePtr xmlGetNextOccurence(xmlNodePtr cur, const char * s)
 {
-    while ((cur != NULL) && (strcmp(xmlGetName(cur), s) != 0))
-	cur = cur->xmlNextNode;
-
-    return cur;
+	while ((cur != NULL) && (strcmp(xmlGetName(cur), s) != 0))
+		cur = cur->xmlNextNode;
+	return cur;
 };
+
 
 std::string Unicode_Character_to_UTF8(const int character)
 {
+#ifdef USE_LIBXML
+	xmlChar buf[5];
+	int length = xmlCopyChar(4, buf, character);
+	return std::string((char*)buf, length);
+#else  /* USE_LIBXML */
 	char buf[XML_UTF8_ENCODE_MAX];
 	int length = XmlUtf8Encode(character, buf);
 	return std::string(buf, length);
+#endif /* USE_LIBXML */
 }
+
 
 std::string convert_UTF8_To_UTF8_XML(const std::string s)
 {
@@ -92,10 +108,37 @@ std::string convert_to_UTF8(const std::string s)
 	return r;
 }
 
+#ifdef USE_LIBXML
+xmlDocPtr parseXmlFile(const std::string filename)
+{
+	xmlDocPtr doc;
+	xmlNodePtr cur;
+	
+	doc = xmlParseFile(filename.c_str());
+
+	if (doc == NULL)
+	{
+		WARN("Error parsing \"%s\"", filename.c_str());
+		return NULL;
+	}
+	else
+	{
+		cur = xmlDocGetRootElement(doc);
+		if (cur == NULL)
+		{
+			WARN("Empty document\n");
+			xmlFreeDoc(doc);
+			return NULL;
+		}
+		else
+			return doc;
+	}
+}
+#else /* USE_LIBXML */
 xmlDocPtr parseXmlFile(const std::string filename)
 {
 	char buffer[2048];
-	xmlDocPtr tree_parser;
+	XMLTreeParser* tree_parser;
 	size_t done;
 	size_t length;
 	FILE* xml_file;
@@ -138,3 +181,4 @@ xmlDocPtr parseXmlFile(const std::string filename)
 	}
 	return tree_parser;
 }
+#endif /* USE_LIBXML */

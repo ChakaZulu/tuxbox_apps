@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.14 2002/12/22 22:56:57 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.15 2002/12/23 10:47:04 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -24,17 +24,27 @@
 #ifndef __xmlinterface_h__
 #define __xmlinterface_h__
 
+
 #include <string>
 
+
+#ifdef USE_LIBXML
+#include <libxml/parser.h>
+#define xmlNextNode next
+inline char*      xmlGetAttribute     (xmlNodePtr cur, const char * s) { return (char *)xmlGetProp(cur, (const xmlChar *)s); };
+inline char*      xmlGetName          (xmlNodePtr cur)                 { return (char *)(cur->name); };
+
+#else  /* use libxmltree */
 #include <xmltree/xmltree.h>
 typedef XMLTreeParser* xmlDocPtr;
 typedef XMLTreeNode*   xmlNodePtr;
 #define xmlChildrenNode GetChild()
 #define xmlNextNode     GetNext()
-inline xmlNodePtr xmlDocGetRootElement(xmlDocPtr  doc)           { return doc->RootNode(); };
-inline void       xmlFreeDoc          (xmlDocPtr  doc)           { delete doc; };
-inline char*      xmlGetAttribute     (xmlNodePtr cur, char * s) { return cur->GetAttributeValue(s); };
-inline char*      xmlGetName          (xmlNodePtr cur)           { return cur->GetType();  };
+inline xmlNodePtr xmlDocGetRootElement(xmlDocPtr  doc)                 { return doc->RootNode(); };
+inline void       xmlFreeDoc          (xmlDocPtr  doc)                 { delete doc; };
+inline char*      xmlGetAttribute     (xmlNodePtr cur, char * s)       { return cur->GetAttributeValue(s); };
+inline char*      xmlGetName          (xmlNodePtr cur)                 { return cur->GetType();  };
+#endif /* USE_LIBXML */
 
 
 xmlNodePtr xmlGetNextOccurence        (xmlNodePtr cur, const char * s);
