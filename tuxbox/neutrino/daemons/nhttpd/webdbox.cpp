@@ -510,6 +510,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 	{
 		if (strcmp(request->Filename->c_str(),"controlpanel.dbox2") == 0)
 		{	//funktionen für controlpanel links
+			request->SendPlainHeader("text/html");
 			if (request->ParameterList->Count > 0)
 			{
 //				request->ParameterList->PrintParameterList();
