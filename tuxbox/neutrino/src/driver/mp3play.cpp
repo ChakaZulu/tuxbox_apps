@@ -654,7 +654,7 @@ void* CMP3Player::PlayThread(void * filename)
 	FILE *fp;
 	int soundfd;
 	soundfd=::open("/dev/sound/dsp",O_WRONLY);
-	if (soundfd < 0)
+	if (soundfd != -1)
 	{
 		fp = ::fopen((char *)filename,"r");
 		if (fp!=NULL)
