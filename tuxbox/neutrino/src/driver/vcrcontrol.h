@@ -99,7 +99,7 @@ class CVCRControl
 				bool	StopSectionsd;
 		};
 
-//	private:
+	private:
 
 		class CDevice			// basisklasse für die devices
 		{
@@ -173,8 +173,11 @@ class CVCRControl
 		static CVCRControl* getInstance();
 
 		CDeviceMap Devices;
+		
 		int registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo);
 		int registeredDevices(){return Devices.size();};
+		void setDeviceOptions(int deviceID, CDeviceInfo *deviceInfo);
+
 		int getDeviceState(int deviceid = 0){ if (Devices[deviceid] != NULL) return Devices[deviceid]->deviceState; else return CMD_VCR_UNKNOWN;};
 		bool Stop(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Stop(); else return false;};
 		bool Record(CTimerEvent::EventInfo *eventinfo,int deviceID = 0)

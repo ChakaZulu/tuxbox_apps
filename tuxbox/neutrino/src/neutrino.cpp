@@ -1907,10 +1907,12 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 		{
 			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
-					((CVCRControl::CServerDevice *) CVCRControl::getInstance())->StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
-					((CVCRControl::CServerDevice *) CVCRControl::getInstance())->StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
-					CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *) data);
-					streamstatus = 1;
+				CVCRControl::CServerDeviceInfo serverinfo;
+				serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
+				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
+				CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
+				CVCRControl::getInstance()->Record((CTimerEvent::EventInfo *) data);
+				streamstatus = 1;
 			}
 			else
 				printf("Keine vcr Devices registriert\n");
@@ -2659,8 +2661,10 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 		{
 			eventinfo.onidSid = g_RemoteControl->current_onid_sid;
 			eventinfo.epgID = g_RemoteControl->current_EPGid;
-			((CVCRControl::CServerDevice *) CVCRControl::getInstance())->StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
-			((CVCRControl::CServerDevice *) CVCRControl::getInstance())->StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
+			CVCRControl::CServerDeviceInfo serverinfo;
+			serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
+			serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
+			CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
 			CVCRControl::getInstance()->Record(&eventinfo);
 		}
 		else
@@ -2685,7 +2689,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.294 2002/07/05 03:24:31 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.295 2002/07/05 18:20:43 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

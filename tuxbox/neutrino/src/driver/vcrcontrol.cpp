@@ -70,19 +70,42 @@ CVCRControl::~CVCRControl()
 	}
 
 }
-
 //-------------------------------------------------------------------------
+
+void CVCRControl::setDeviceOptions(int deviceID, CDeviceInfo *deviceInfo)
+{
+	if(Devices[deviceID]->deviceType == DEVICE_SERVER)
+	{
+		CServerDevice * device = (CServerDevice *) Devices[deviceID];		
+		CServerDeviceInfo *serverinfo = (CServerDeviceInfo *) deviceInfo;
+		if(serverinfo->Name.length() > 0)
+			device->Name = serverinfo->Name;
+		if(serverinfo->ServerAddress.length() > 0)
+			device->ServerAddress = serverinfo->ServerAddress;
+		if(serverinfo->ServerPort > 0)
+			device->ServerPort = serverinfo->ServerPort;
+		device->StopPlayBack = serverinfo->StopPlayBack;
+		device->StopSectionsd = serverinfo->StopSectionsd;
+	}
+}
+//-------------------------------------------------------------------------
+
 int CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo)
 {
 	static int i = 0;
 	if (deviceType == DEVICE_SERVER)
 	{
 		CServerDevice * device =  new CServerDevice(i++);		
-		CServerDeviceInfo *serverinfo = (CServerDeviceInfo *) deviceInfo;
+//		CServerDeviceInfo *serverinfo = (CServerDeviceInfo *) deviceInfo;
+		Devices[device->deviceID] = (CDevice*) device;
+		setDeviceOptions(device->deviceID,deviceInfo);
+/*
 		device->Name = deviceInfo->Name;
 		device->ServerAddress = serverinfo->ServerAddress;
 		device->ServerPort = serverinfo->ServerPort;
-		Devices[device->deviceID] = (CDevice*) device;
+		device->StopPlayBack = serverinfo->StopPlayBack;
+		device->StopSectionsd = serverinfo->StopSectionsd;
+*/
 		printf("CVCRControl registered new serverdevice: %u %s\n",device->deviceID,device->Name.c_str());
 		return device->deviceID;
 	}
