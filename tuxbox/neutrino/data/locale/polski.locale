@@ -109,6 +109,7 @@ recordingmenu.server_wakeup Uruchamianie nagrywania przez siec
 recordingmenu.server_mac MAC adres
 recordingmenu.setupnow wykonaj zmiany 
 recordingmenu.no_scart nie przelaczaj w tryb Euro
+
 ping.ok osiagalny (ping)
 ping.unreachable nieosiagalny
 ping.protocol nieosiagalny (blad hosta lub protokolu )
@@ -406,7 +407,7 @@ cam.wrong UWAGA, TWOJA KARTA \nJEST NIEZGODNA  Z CAMALPHA.BIN!!\n\Czy ponawiac t
 ucodes.failure UWAGA, brak µCodes!\n\nWyslij je przez FTP (lub przez DBox-BootManager),\npotem zrestartuj DBox'a!
 
 stringinput.caps duze/male
-stringinput.caps unset
+stringinput.clear usun wszystko
 
 streamingserver.noconnect Brak polaczenia do streaming-serwera.\nRnagrywanie anulowane.
 

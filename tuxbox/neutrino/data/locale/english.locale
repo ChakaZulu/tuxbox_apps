@@ -11,7 +11,7 @@ mainmenu.tvmode TV-Mode
 mainmenu.radiomode Radio-Mode
 mainmenu.scartmode Scart-Mode
 mainmenu.games Games
-mainmenu.mp3player unset
+mainmenu.mp3player MP3 Player
 mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Shutdown
 mainmenu.settings Settings
@@ -109,6 +109,7 @@ recordingmenu.server_wakeup recording server WOL
 recordingmenu.server_mac MAC address
 recordingmenu.setupnow activate changes
 recordingmenu.no_scart do not switch to scart mode
+
 ping.ok is reachable (ping)
 ping.unreachable is unreachable
 ping.protocol is unreachable (host or protocol error)
@@ -667,4 +668,3 @@ nfs.mounterror mount error
 nfs.umount Umount NFS volume
 nfs.umounterror error umounting volume
 nfs.alreadymounted directory already mounted
-

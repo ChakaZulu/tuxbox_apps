@@ -108,6 +108,7 @@ recordingmenu.vcr unset
 recordingmenu.server_wakeup unset
 recordingmenu.server_mac unset
 recordingmenu.setupnow unset
+recordingmenu.no_scart unset
 
 ping.ok dosiahnutelny (ping)
 ping.unreachable nedosiahnutelny (unreachable)
@@ -406,7 +407,7 @@ cam.wrong Pozor, vasa smartcard\n nie kompatibilna s CAM_ALPHA.BIN!!!\n\nMa sa t
 ucodes.failure unset
 
 stringinput.caps velke/male pismena
-stringinput.caps unset
+stringinput.clear unset
 
 streamingserver.noconnect unset
 

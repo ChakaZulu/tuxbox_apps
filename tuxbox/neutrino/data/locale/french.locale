@@ -108,6 +108,7 @@ recordingmenu.vcr unset
 recordingmenu.server_wakeup unset
 recordingmenu.server_mac unset
 recordingmenu.setupnow unset
+recordingmenu.no_scart unset
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable
@@ -406,7 +407,7 @@ cam.wrong ATTENTION, VOTRE CARTE \nN'EST PAS IDENTIQUE AVEC CAMALPHA.BIN!!\n\nVo
 ucodes.failure ATTENTION, µCodes n'est pas trouvez!\n\ntransfer avec FTP s'il vous-plaît (ou DBox-BootManager),\net reset votre DBox!
 
 stringinput.caps avec caps / sans caps
-stringinput.caps unset
+stringinput.clear unset
 
 streamingserver.noconnect Streamingserver n'est pas connecter.\nStreaming est interrupter.
 

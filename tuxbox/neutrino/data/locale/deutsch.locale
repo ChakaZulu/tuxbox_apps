@@ -109,6 +109,7 @@ recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
 recordingmenu.setupnow Einstellungen jetzt übernehmen
 recordingmenu.no_scart Unterdrücke Scart-Umschaltung
+
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)
 ping.protocol ist nicht erreichbar (Host or protocol error)

@@ -108,6 +108,7 @@ recordingmenu.vcr unset
 recordingmenu.server_wakeup unset
 recordingmenu.server_mac unset
 recordingmenu.setupnow unset
+recordingmenu.no_scart unset
 
 ping.ok !5 |234[|-|48|_3 (P!/\/&)
 ping.unreachable ¡$ |_|/\/|234[|-|48|3
@@ -406,7 +407,7 @@ cam.wrong 4++3/\/7¡0|\|, J0*|2 [4|2|) \/\/|]03$ |\|0'|' /\/\4+[|-| [4/\/\4|P|-|4
 ucodes.failure 4'|'73|\|+!*/\/, µ[*|)35 [0µ||) /\/07 |33 |=0|_||\||)!\|\|\/\/p|3453 µp|_*4|] +|-|3/\/\ \/!4 |=7p (0|2 |]|3*><-|3*0+/\/\4/\/4@3|2),\/\/+|-|3|\| |23$+4|2'|' j0*|2 |]|3*><!
 
 stringinput.caps [4p5 / /\/* [4p5
-stringinput.caps unset
+stringinput.clear unset
 
 streamingserver.noconnect /\/* [*/\//\/3['|'¡0/\/ '|'0 57|234/\/\!|\|6$3|2\/3|2.\/\/|23[0|2|]!|\|6 [4/\/[3|_3|).
 

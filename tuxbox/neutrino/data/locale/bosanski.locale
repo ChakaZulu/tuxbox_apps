@@ -108,6 +108,7 @@ recordingmenu.vcr video rikorder
 recordingmenu.server_wakeup server za snimanje wol
 recordingmenu.server_mac mac adresa
 recordingmenu.setupnow namjescenje sada preuzeti
+recordingmenu.no_scart unset
 
 ping.ok pristupan (ping)
 ping.unreachable nije pristupan (unreachable)
@@ -406,7 +407,7 @@ cam.wrong Paznja, vas cam_alpha.bin ne pase\nuz vasu smart-karticu!!!\n\nHocete 
 ucodes.failure Paznja, nisu nadjeni ucodesi!\n\nMolim sa ftpeom (ili dbox-bootmanagerom)\npostaviti, i dbox2 ponovno startovati!
 
 stringinput.caps velika/mala slova
-stringinput.caps unset
+stringinput.clear unset
 
 streamingserver.noconnect Ne postoji veza sa streamingserverom.\nPrekid snimanja.
 

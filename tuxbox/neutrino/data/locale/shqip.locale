@@ -108,6 +108,7 @@ recordingmenu.vcr unset
 recordingmenu.server_wakeup unset
 recordingmenu.server_mac unset
 recordingmenu.setupnow unset
+recordingmenu.no_scart unset
 
 ping.ok dakord (ping) 
 ping.unreachable nuk është dakord (unreachable) 
@@ -406,6 +407,7 @@ cam.wrong Ndalu, cam_alpha.bin juaj nuk përpjeket\nme smartcarten e juaj!!!\n\nA
 ucodes.failure Ndalo! nuk jan gjet ucodesi!\n\nVetem me ftp-n (ose dbox-bootmanager)\nmi vu, edhe dbox-in prap mi startu! 
 
 stringinput.caps të medha/të vogla shkronjat 
+stringinput.clear unset
 
 streamingserver.noconnect Ska lidhje me streamingserver-in.\nNdalje e inxhizimit. 
 

@@ -108,6 +108,7 @@ recordingmenu.vcr unset
 recordingmenu.server_wakeup unset
 recordingmenu.server_mac unset
 recordingmenu.setupnow unset
+recordingmenu.no_scart unset
 
 ping.ok e raggiungibile (ping)
 ping.unreachable non e raggiungibile (unreachable)
@@ -406,7 +407,7 @@ cam.wrong Attenzione la vostra CAM_ALPHA.BIN non e adatta\nper la vostra Smart-C
 ucodes.failure Attenzione non sono stati trovati le µCodes !\nCaricarle via FTP (oppure DBox-BootManager)\ e riavviare il  DBox !
 
 stringinput.caps Caratteri grandi/piccoli
-stringinput.caps unset
+stringinput.clear unset
 
 streamingserver.noconnect Nessun contatto con la Streamingserver.\nLa registrazione verra interrotta.
 
