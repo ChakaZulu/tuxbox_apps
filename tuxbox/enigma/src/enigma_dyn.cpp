@@ -1589,7 +1589,7 @@ public:
 					 return;
 		}
 #endif
-		eString short_description;
+		eString short_description, event_start, event_duration;
 		eService *service = iface.addRef(e);
 		if (service)
 		{
@@ -1598,7 +1598,7 @@ public:
 			if (evt)
 			{
 				timeMap::const_iterator It;
-				for (It = evt->begin(); It != evt->end(); It++)
+				for (It = evt->begin(); (It != evt->end() && short_description == ""); It++)
 				{
 					EITEvent event(*It->second);
 					time_t now = time(0) + eDVB::getInstance()->time_difference;
@@ -1611,6 +1611,10 @@ public:
 							if (descriptor->Tag() == DESCR_SHORT_EVENT)
 							{
 								short_description = ((ShortEventDescriptor*)descriptor)->event_name;
+								tm t = *localtime(&event.start_time);
+								event_start = eString().sprintf("%02d:%02d", t.tm_hour, t.tm_min);
+								event_duration = eString().sprintf("%d", event.duration / 60);
+								break; /* we have everything we wanted */
 							}
 						}
 					}
@@ -1618,12 +1622,11 @@ public:
 			}
 			eEPGCache::getInstance()->Unlock();
 
-
 			result1 += "\"" + ref2string(e) + "\", ";
 			eString tmp = filter_string(service->service_name);
 			tmp.strReplace("\"", "'");
 			if (short_description)
-				short_description = " - " + short_description;
+				short_description = " - " + event_start + " (" + event_duration + ") " + short_description;
 			result2 += "\"" + tmp + short_description + "\", ";
 			iface.removeRef(e);
 		}
@@ -1751,6 +1754,9 @@ static eString getZapContent2(eString mode, eString path)
 		result.strReplace("#CHANNELREFS#", channelrefs);
 		result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
 		result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+		int autobouquetchange = 0;
+		eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
+		result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
 	}
 
 	return result;
@@ -1840,6 +1846,7 @@ static eString getZapContent3(eString mode, eString path)
 	tmpFile.strReplace("#CHANNELREFS#", channelrefs);
 	tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
 	tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+	result.strReplace("#AUTOBOUQUETCHANGE#", "0");
 
 	result = readFile(TEMPLATE_DIR + "rec.tmp");
 	result.strReplace("#ZAPDATA#", tmpFile);
