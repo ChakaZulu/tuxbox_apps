@@ -28,7 +28,10 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
+
 #include <driver/vcrcontrol.h>
+
+#include <driver/encoding.h>
 
 #include <gui/widget/messagebox.h>
 
@@ -338,7 +341,7 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 //		std::string extAudioPID= "error";
 		std::string extEPGTitle= "not available";
 
-		std::string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n<neutrino commandversion=\"1\">\n\t<record command=\"";
+		std::string extMessage = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n<neutrino commandversion=\"1\">\n\t<record command=\"";
 		switch(command)
 		{
 		case CMD_VCR_RECORD:
@@ -411,7 +414,8 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 			CShortEPGData epgdata;
 			if (sdc.getEPGidShort(epgid, &epgdata))
 			{
-				extEPGTitle=epgdata.title;
+#warning fixme sectionsd should deliver data in UTF-8 format
+				extEPGTitle = Latin1_to_UTF8(epgdata.title);
 			}
 		}
 		
