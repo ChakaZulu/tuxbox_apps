@@ -548,7 +548,6 @@ CMP3Player* CMP3Player::getInstance()
 
 void* CMP3Player::PlayThread(void * filename)
 {
-	CMP3Player::getInstance()->state = PLAY;
 	FILE *fp;
 	FILE *soundfd;
 	soundfd=::fopen("/dev/sound/dsp","w");
@@ -582,6 +581,7 @@ bool CMP3Player::play(const char *filename)
 	if(true)
 	{
 		stop();
+		state = PLAY;
 		if (pthread_create (&thrPlay, NULL, PlayThread,(void *) filename) != 0 )
 		{
 			perror("mp3play: pthread_create(PlayThread)");

@@ -171,7 +171,6 @@ int CMP3PlayerGui::show()
 	while(loop)
 	{
 		showTime();
-		showMP3Info();
 		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_mp3)
 		{
 			// stop if mode was changed in another thread
@@ -454,22 +453,19 @@ void CMP3PlayerGui::paintItem(int pos)
 		color	= COL_MENUCONTENT;
 
 	if(liststart+pos==selected)
-	{
 		color = COL_MENUCONTENTSELECTED;
-		paintItemID3DetailsLine(pos);
-	}
+
 	if(liststart+pos==(unsigned)current)
-	{
 		color = color+2;
-	}
 
 	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, color);
 	if(liststart+pos<playlist.size())
 	{
-		if(playlist[liststart+pos].Artist == "")
+		if(playlist[liststart+pos].Title == "")
 		{
 			// id3tag noch nicht geholt
 			get_id3(&playlist[liststart+pos]);
+			get_mp3info(&playlist[liststart+pos]);
 			if(m_state==PLAY)
 				usleep(100*1000);
 		}
@@ -496,6 +492,10 @@ void CMP3PlayerGui::paintItem(int pos)
 				tmp += " (" + playlist[liststart+pos].Album + ")";
  		}  
 		g_Fonts->menu->RenderString(x+10,ypos+fheight, width-25, tmp.c_str(), color, fheight);
+
+		if(liststart+pos==selected)
+			paintItemID3DetailsLine(pos);
+		
 		if(liststart+pos==selected && m_state==STOP)
 			CLCD::getInstance()->showMP3(playlist[liststart+pos].Artist, playlist[liststart+pos].Title, 
 												  playlist[liststart+pos].Album);
@@ -570,12 +570,12 @@ void CMP3PlayerGui::paintInfo()
 		frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED);
 		char sNr[20];
 		sprintf(sNr, ": %2d", current+1);
-		int w=g_Fonts->menu->getRenderWidth(g_Locale->getText("mp3player.playing") + sNr);
+		string tmp=g_Locale->getText("mp3player.playing") + sNr + " (" + playlist[current].Duration + ")";
+		int w=g_Fonts->menu->getRenderWidth(tmp);
 		int xstart=(width-w)/2;
 		if(xstart < 10)
 			xstart=10;
-		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, g_Locale->getText("mp3player.playing") + sNr, COL_MENUCONTENTSELECTED);
-		string tmp;
+		g_Fonts->menu->RenderString(x+xstart, y + 4 + 1*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED);
 		if(playlist[current].Title!="" && playlist[current].Artist!="")
 			tmp=playlist[current].Title + " / " + playlist[current].Artist;
 		else
@@ -585,6 +585,11 @@ void CMP3PlayerGui::paintInfo()
 		if(xstart < 10)
 			xstart=10;
 		g_Fonts->menu->RenderString(x+xstart, y +4+ 2*fheight, width- 20, tmp, COL_MENUCONTENTSELECTED);
+		tmp = playlist[current].Bitrate + " / " + playlist[current].Samplerate + " / " + playlist[current].ChannelMode + 
+			" / " + playlist[current].Layer + " / " + playlist[current].Duration;
+		frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED);
+		xstart = ((width - 20 - g_Fonts->infobar_small->getRenderWidth( tmp ))/2)+10;
+		g_Fonts->infobar_small->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, tmp, COL_MENUCONTENTSELECTED);
 		showTime();
 	}
 }
@@ -617,10 +622,121 @@ void CMP3PlayerGui::paint()
 }
 
 //------------------------------------------------------------------------
+#define BUFFER_SIZE 2016*2 // at least 2 frames (max bitrate) to recognize VBR
+void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
+{
+   FILE* in;
+   struct mad_stream	Stream;
+	struct mad_header	Header;
+	struct mad_header	Header2;
+	unsigned char		InputBuffer[BUFFER_SIZE];
+   int ReadSize;
+   int filesize;
+   in = fopen(mp3->Filename.c_str(),"r");
+   if(in==NULL)
+      return;
+
+	mad_stream_init(&Stream);
+   ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+	if(m_state==PLAY)
+		usleep(15000);
+	
+	// Check for sync mark (some encoder produce data befor 1st frame in mp3 stream)
+	if(InputBuffer[0]!=0xff || (InputBuffer[1]&0xe0)!=0xe0)
+	{
+		//skip to first sync mark
+		int n=0,j=0;
+		while((InputBuffer[n]!=0xff || (InputBuffer[n+1]&0xe0)!=0xe0) && ReadSize > 0)
+		{
+			n++;
+			j++;
+			if(n > ReadSize-2)
+			{
+				j--;
+				n=0;
+				fseek(in, -1, SEEK_CUR);
+				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+				if(m_state==PLAY)
+					usleep(15000);
+			}
+		}
+		if(ReadSize > 0)
+		{
+			fseek(in, j, SEEK_SET);
+			ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+			if(m_state==PLAY)
+				usleep(15000);
+		}
+		else
+			return;
+	}
+   mad_stream_buffer(&Stream,InputBuffer,ReadSize);
+   int ret=mad_header_decode(&Header,&Stream);
+
+	int counter=0;
+	mp3->VBR=false;
+	while(ret==0)
+	{
+		//check 2nd frame header to recognize vbr
+		ret=mad_header_decode(&Header2,&Stream);
+		counter++;
+		if(ret==0 && (Header.bitrate != Header2.bitrate || mp3->VBR))
+		{
+			mp3->VBR=true;
+			// calc avg bitrate
+			Header.bitrate=(Header.bitrate*(counter-1)+Header2.bitrate)/counter; // Dummy for VBR
+		}
+		// check as many frames as in buffer (ret==0)
+	}
+	if(m_state==PLAY)
+		usleep(15000);
+	mad_stream_finish(&Stream);
+   // filesize
+	fseek(in, 0, SEEK_END);
+   filesize=ftell(in);
+   fclose(in);
+
+   char tmp[20];
+	if(mp3->VBR)
+		sprintf(tmp,"VBR %lu kbps",Header.bitrate / 1000);
+	else
+		sprintf(tmp,"%lu kbps",Header.bitrate / 1000);
+   mp3->Bitrate=tmp;
+	sprintf(tmp,"%u kHz",Header.samplerate / 1000);
+   mp3->Samplerate=tmp;
+   sprintf(tmp, "%lu:%02lu", filesize*8/Header.bitrate/60, filesize*8/Header.bitrate%60);
+   mp3->Duration=tmp;
+	/* Convert the layer number to it's printed representation. */
+	switch(Header.layer)
+	{
+		case MAD_LAYER_I:
+			mp3->Layer="layer I";
+			break;
+		case MAD_LAYER_II:
+			mp3->Layer="layer II";
+			break;
+		case MAD_LAYER_III:
+			mp3->Layer="layer III";
+			break;
+	}
+	/* Convert the audio mode to it's printed representation. */
+	switch(Header.mode)
+	{
+		case MAD_MODE_SINGLE_CHANNEL:
+			mp3->ChannelMode="single channel";
+			break;
+		case MAD_MODE_DUAL_CHANNEL:
+			mp3->ChannelMode="dual channel";
+			break;
+		case MAD_MODE_JOINT_STEREO:
+			mp3->ChannelMode="joint stereo";
+			break;
+		case MAD_MODE_STEREO:
+			mp3->ChannelMode="normal stereo";
+			break;
+	}
+}
 //------------------------------------------------------------------------
-
-// shameless stolen from player.c (mad)
-
 void CMP3PlayerGui::get_id3(CMP3 *mp3)
 {
 	unsigned int i;
@@ -870,7 +986,8 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 			frameBuffer->paintBoxRel(x,         ypos2, width ,info_height, col1);
 			// paint id3 infobox 
 			frameBuffer->paintBoxRel(x+2, ypos2 +2 , width-4, info_height-4, COL_MENUCONTENTDARK);
-			g_Fonts->menu->RenderString(x+10, ypos2 + /*2+*/ 1*fheight, width- 20, playlist[selected].Title.c_str(), COL_MENUCONTENTDARK);
+			g_Fonts->menu->RenderString(x+10, ypos2 + /*2+*/ 1*fheight, width- 80, playlist[selected].Title.c_str(), COL_MENUCONTENTDARK);
+			g_Fonts->menu->RenderString(x+width-75, ypos2 + /*2+*/ 1*fheight, 70, playlist[selected].Duration.c_str(), COL_MENUCONTENTDARK);
  			string tmp = playlist[selected].Artist;
 			if(playlist[selected].Album!="")
 				tmp += " (" + playlist[selected].Album + ")";
@@ -905,6 +1022,7 @@ void CMP3PlayerGui::play(int pos)
 	{
 		// id3tag noch nicht geholt
 		get_id3(&playlist[pos]);
+		get_mp3info(&playlist[pos]);
 	}
 	m_mp3info="";
 	m_starttime = time(NULL);
@@ -934,17 +1052,6 @@ void CMP3PlayerGui::showTime()
 		int w=g_Fonts->menu->getRenderWidth("000:00");
 		frameBuffer->paintBoxRel(x+width-w-5, y+4, w+3, 1*fheight, COL_MENUCONTENTSELECTED);
 		g_Fonts->menu->RenderString(x+width-w-10, y+4 + 1*fheight, w, sTime, COL_MENUCONTENTSELECTED);
-	}
-}
-
-void CMP3PlayerGui::showMP3Info()
-{
-	if(m_state==PLAY && m_mp3info!=CMP3Player::getInstance()->getMp3Info())
-	{
-		m_mp3info=CMP3Player::getInstance()->getMp3Info();
-		frameBuffer->paintBoxRel(x + 10, y+ 4 + 2*fheight, width-20, sheight, COL_MENUCONTENTSELECTED);
-		int xstart = ((width - 20 - g_Fonts->infobar_small->getRenderWidth( m_mp3info ))/2)+10;
-		g_Fonts->infobar_small->RenderString(x+ xstart, y+4 + 2*fheight+sheight, width- 2*xstart, m_mp3info, COL_MENUCONTENTSELECTED);
 	}
 }
 

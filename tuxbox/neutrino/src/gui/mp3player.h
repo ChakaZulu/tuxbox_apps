@@ -50,6 +50,12 @@ public:
 	string Album;
 	string Year;
 	string Comment;
+   string ChannelMode;
+   string Bitrate;
+   string Samplerate;
+   string Layer;
+	string Duration;
+	bool VBR;
 	int Index;
 };
 
@@ -102,6 +108,7 @@ class CMP3PlayerGui : public CMenuTarget
 		void hide();
 
 		void get_id3(CMP3 * mp3);
+		void get_mp3info(CMP3 * mp3);
 		CFileFilter mp3filter;
 		void paintItemID3DetailsLine (int pos);
 		void clearItemID3DetailsLine ();
