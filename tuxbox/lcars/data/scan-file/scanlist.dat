@@ -1,13 +1,14 @@
-#Freq, SmbR,  H0/V1, FEC
+#Freq, SmbR,  H0/V1, FEC, DISECQ (-1=Auto)
 #
-## -- Astra
-11837, 27500, 0, 3
-11746, 27500, 1, 3
+## -- Astra 19.2E
+11837, 27500, 0, 3,  0
+11746, 27500, 1, 3, -1
 #
-## -- EutelSat
+## -- EutelSat 13.2E
 # -- ARGH - Eutelsat sendet nicht ueberall einen NIT!
-11054, 27500, 0, 4   # Telekom
-11604, 27500, 0, 4   # ARD 
-11804, 27500, 1, 2   # RAI
-12597, 27500, 1, 3   # ANN 
-12539, 27500, 0, 3   # Eutelsat SkyPlex
+# -- jemand erbarme sich und trage transponder ein (rasc)
+11054, 27500, 0, 4,  1   # Telekom
+11604, 27500, 0, 4,  1   # ARD 
+11804, 27500, 1, 2,  1   # RAI
+12597, 27500, 1, 3,  1   # ANN 
+12539, 27500, 0, 3, -1   # Eutelsat SkyPlex
