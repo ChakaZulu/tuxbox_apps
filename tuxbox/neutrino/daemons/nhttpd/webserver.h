@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.20 2003/01/09 22:36:06 dirch Exp $
+        $Id: webserver.h,v 1.21 2003/03/07 22:06:04 thegoodguy Exp $
 
         License: GPL
 
@@ -87,7 +87,6 @@ public:
 
 	int SocketConnect(Tmconnect * con,int Port);
 	void SetSockOpts();
-	void SaveConfig();
 	void ReadConfig();
 
 	friend class CWebserverRequest;

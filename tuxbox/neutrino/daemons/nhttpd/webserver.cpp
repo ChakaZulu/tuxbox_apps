@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.24 2003/03/03 00:11:00 obi Exp $
+	$Id: webserver.cpp,v 1.25 2003/03/07 22:06:04 thegoodguy Exp $
 
 	License: GPL
 
@@ -85,45 +85,28 @@ CWebserver::~CWebserver()
 void CWebserver::ReadConfig()
 {
 	CConfigFile	*Config = new CConfigFile(',');
-	if (!Config->loadConfig(NHTTPD_CONFIGFILE) )
-	{
-		SaveConfig();
-		Config->loadConfig(NHTTPD_CONFIGFILE);
-	}
-	Port = Config->getInt32("Port");
-	THREADS = Config->getBool("THREADS");
-	CDEBUG::getInstance()->Verbose = Config->getBool("VERBOSE");
-	CDEBUG::getInstance()->Log = Config->getBool("LOG");
-	MustAuthenticate = Config->getBool("Authenticate");
-	PrivateDocumentRoot = Config->getString("PrivatDocRoot");
-	PublicDocumentRoot = Config->getString("PublicDocRoot");
-	NewGui = Config->getBool("NewGui");
-	Zapit_XML_Path = Config->getString("Zapit_XML_Path");
-	AuthUser = Config->getString("AuthUser");
-	AuthPassword = Config->getString("AuthPassword");
+
+	Config->loadConfig(NHTTPD_CONFIGFILE);
+
+	Port = Config->getInt32("Port", 80);
+	THREADS = Config->getBool("THREADS",true);
+	CDEBUG::getInstance()->Verbose = Config->getBool("VERBOSE",false);
+	CDEBUG::getInstance()->Log = Config->getBool("LOG",false);
+	MustAuthenticate = Config->getBool("Authenticate",false);
+	PrivateDocumentRoot = Config->getString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
+	PublicDocumentRoot = Config->getString("PublicDocRoot",PUBLICDOCUMENTROOT);
+	NewGui = Config->getBool("NewGui",true);
+	Zapit_XML_Path = Config->getString("Zapit_XML_Path","/var/tuxbox/config/zapit");
+	AuthUser = Config->getString("AuthUser","root");
+	AuthPassword = Config->getString("AuthPassword","dbox2");
+
+	if (Config->getUnknownKeyQueryedFlag() == true)
+		Config->saveConfig(NHTTPD_CONFIGFILE);
+
 	delete Config;
 }
 //-------------------------------------------------------------------------
 
-void CWebserver::SaveConfig()
-{
-	CConfigFile	*Config = new CConfigFile(',');
-	Config->setBool("NewGui",true);
-	Config->setInt32("Port", 80);
-	Config->setBool("THREADS",true);
-	Config->setBool("VERBOSE",false);
-	Config->setBool("LOG",false);
-	Config->setBool("Authenticate",false);
-	Config->setString("AuthUser","root");
-	Config->setString("AuthPassword","dbox2");
-	Config->setString("PublicDocRoot",PUBLICDOCUMENTROOT);
-	Config->setString("PrivatDocRoot",PRIVATEDOCUMENTROOT);
-	Config->setString("Zapit_XML_Path","/var/tuxbox/config/zapit");
-	Config->saveConfig(NHTTPD_CONFIGFILE);
-	delete Config;
-}
-
-//-------------------------------------------------------------------------
 bool CWebserver::Init(bool debug)
 {
 	return true;
