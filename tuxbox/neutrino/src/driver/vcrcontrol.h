@@ -42,8 +42,8 @@
 
 class CVCRControl
 {
-	public:
-		typedef enum CVCRStates 
+ public:
+	typedef enum CVCRStates 
 		{
 			CMD_VCR_UNKNOWN =	0,
 			CMD_VCR_RECORD	=	1,
@@ -51,184 +51,153 @@ class CVCRControl
 			CMD_VCR_PAUSE	=	3,
 			CMD_VCR_RESUME	=	4,
 			CMD_VCR_AVAILABLE =	5
-		}CVCRCommand;
-
-		enum CVCRDevices
+		} CVCRCommand;
+	
+	enum CVCRDevices
 		{
 			DEVICE_VCR,
 			DEVICE_SERVER,
 			DEVICE_FILE
 		};
 
-
-		class CDeviceInfo
+	class CDevice			// basisklasse für die devices
 		{
+		public:
+			int sock_fd;
+			int last_mode;
+			virtual CVCRDevices getDeviceType(void) const = 0;
+			CVCRStates  deviceState;
+			virtual bool Stop() = 0;
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "") = 0;
+			virtual bool Pause() = 0;
+			virtual bool Resume() = 0;
+			virtual bool IsAvailable() = 0;
+			CDevice() { deviceState = CMD_VCR_STOP; };
+			virtual ~CDevice(){};
 		};
 
-		class CVCRDeviceInfo : public CDeviceInfo
+	class CVCRDevice : public CDevice		// VCR per IR
 		{
 		public:
 			bool  SwitchToScart;
+			
+			virtual CVCRDevices getDeviceType(void) const
+				{
+					return DEVICE_VCR;
+				};
+			virtual bool Stop(); 
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
+			virtual bool Pause();
+			virtual bool Resume();
+			virtual bool IsAvailable() { return true; };
+			CVCRDevice(bool switchtoscart) { SwitchToScart = switchtoscart; };
+			virtual ~CVCRDevice(){};
 		};
-		
-		class CFileAndServerDeviceInfo : public CDeviceInfo		
+
+	class CFileAndServerDevice : public CDevice
 		{
-			public:
-				bool StopPlayBack;
-				bool StopSectionsd;
-				CFileAndServerDeviceInfo() { StopPlayBack = false; StopSectionsd = true; };
+		protected:
+			void RestoreNeutrino(void);
+			void CutBackNeutrino(const t_channel_id channel_id, const int mode);
+			std::string getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids) const;
+
+		public:
+			bool	StopPlayBack;
+			bool	StopSectionsd;
+
+			virtual bool Pause()
+				{
+					return false;
+				};
+
+			virtual bool Resume()
+				{
+					return false;
+				};
+
+			virtual bool IsAvailable()
+				{
+					return true;
+				};
 		};
 
-		class CFileDeviceInfo : public CFileAndServerDeviceInfo		
-		{
-			public:
-				std::string	Directory;
-				unsigned int	SplitSize;
-				bool            Use_O_Sync;
-				bool            StreamAllAudioPids;
-				CFileDeviceInfo() : CFileAndServerDeviceInfo() { Directory = ""; SplitSize = 0; StreamAllAudioPids = true; Use_O_Sync = true; };
-		};
-
-		class CServerDeviceInfo : public CFileAndServerDeviceInfo
-		{
-			public:
-				std::string	ServerAddress;
-				unsigned int    ServerPort;
-				CServerDeviceInfo() : CFileAndServerDeviceInfo() { ServerAddress = ""; ServerPort = 0; };
-		};
-
-	private:
-
-		class CDevice			// basisklasse für die devices
-		{
-			public:
-				int sock_fd;
-				int last_mode;
-				virtual CVCRDevices getDeviceType(void) const = 0;
-				CVCRStates  deviceState;
-				virtual bool Stop() = 0;
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = ""){return false;};
-				virtual bool Pause() = 0;
-				virtual bool Resume() = 0;
-				virtual bool IsAvailable() = 0;
-				CDevice(){deviceState = CMD_VCR_STOP;};
-				virtual ~CDevice(){};
-		};
-
-		class CVCRDevice : public CDevice		// VCR per IR
+	class CFileDevice : public CFileAndServerDevice
 		{
 		public:
-			bool  SwitchToScart;
+			std::string  Directory;
+			unsigned int SplitSize;
+			bool         Use_O_Sync;
+			bool         StreamAllAudioPids;
+				
+			virtual CVCRDevices getDeviceType(void) const
+				{
+					return DEVICE_FILE;
+				};
+				
+			virtual bool Stop(); 
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
 
-				virtual CVCRDevices getDeviceType(void) const
-					{
-						return DEVICE_VCR;
-					};
-				virtual bool Stop(); 
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
-				virtual bool Pause();
-				virtual bool Resume();
-				virtual bool IsAvailable(){return true;};
-				CVCRDevice() {};
-				virtual ~CVCRDevice(){};
+			CFileDevice(const bool stopplayback, const bool stopsectionsd, const char * const directory, const unsigned int splitsize, const bool use_o_sync, const bool stream_all_audio_pids)
+				{
+					StopPlayBack       = stopplayback;
+					StopSectionsd      = stopsectionsd;
+					Directory          = directory;
+					SplitSize          = splitsize;
+					Use_O_Sync         = use_o_sync;
+					StreamAllAudioPids = stream_all_audio_pids;
+				};
+			virtual ~CFileDevice()
+				{
+				};
 		};
 
-		class CFileAndServerDevice : public CDevice
-			{
-			protected:
-				void RestoreNeutrino(void);
-				void CutBackNeutrino(const t_channel_id channel_id, const int mode);
-				std::string getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids) const;
-
-			public:
-				bool	StopPlayBack;
-				bool	StopSectionsd;
-
-				virtual bool Pause()
-					{
-						return false;
-					};
-				virtual bool Resume()
-					{
-						return false;
-					};
-
-				virtual bool IsAvailable()
-					{
-						return true;
-					};
-			};
-
-		class CFileDevice : public CFileAndServerDevice
-			{
-			public:
-				std::string  Directory;
-				unsigned int SplitSize;
-				bool         Use_O_Sync;
-				bool         StreamAllAudioPids;
-				
-				virtual CVCRDevices getDeviceType(void) const
-					{
-						return DEVICE_FILE;
-					};
-				
-				virtual bool Stop(); 
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
-				
-				CFileDevice()
-					{
-					};
-				virtual ~CFileDevice()
-					{
-					};
-			};
-
-		class CServerDevice : public CFileAndServerDevice // externer Streamingserver per tcp
+	class CServerDevice : public CFileAndServerDevice // externer Streamingserver per tcp
 		{
-			private:
-				bool serverConnect();
-				void serverDisconnect();
+		private:
+			bool serverConnect();
+			void serverDisconnect();
 
-				bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0, const event_id_t epgid = 0, const std::string & apids = "");
+			bool sendCommand(CVCRCommand command, const t_channel_id channel_id = 0, const event_id_t epgid = 0, const std::string & apids = "");
 
-			public:
-				std::string  ServerAddress;
-				unsigned int ServerPort;
+		public:
+			std::string  ServerAddress;
+			unsigned int ServerPort;
 
-				virtual CVCRDevices getDeviceType(void) const
-					{
-						return DEVICE_SERVER;
-					};
+			virtual CVCRDevices getDeviceType(void) const
+				{
+					return DEVICE_SERVER;
+				};
 
-				virtual bool Stop();
-				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");
+			virtual bool Stop();
+			virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");
 
-				CServerDevice() {};			
-				virtual ~CServerDevice(){};
+			CServerDevice(const bool stopplayback, const bool stopsectionsd, const char * const serveraddress, const unsigned int serverport)
+				{
+					StopPlayBack       = stopplayback;
+					StopSectionsd      = stopsectionsd;
+					ServerAddress      = serveraddress;
+					ServerPort         = serverport;
+				};
+			virtual ~CServerDevice(){};
 		};
 
-//		typedef std::map<int, CDevice*> CDeviceMap;
-	
+ public:
+	CVCRControl();
+	~CVCRControl();
+	static CVCRControl * getInstance();
 
-	public:
-		CVCRControl();
-		~CVCRControl();
-		static CVCRControl* getInstance();
-
-//		CDeviceMap Devices;
-		CDevice *Device;
+	CDevice * Device;
 		
-		bool registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo);
-		void unregisterDevice();
+	void registerDevice(CDevice * const device);
+	void unregisterDevice();
 
-		inline bool isDeviceRegistered(void) const { return (Device != NULL); };
-		void setDeviceOptions(CDeviceInfo *deviceInfo);
+	inline bool isDeviceRegistered(void) const { return (Device != NULL); };
 
-		inline CVCRStates getDeviceState(void) const { return Device->deviceState; };
-		bool Stop(){return Device->Stop();};
-		bool Record(const CTimerd::RecordingInfo * const eventinfo);
-		bool Pause(){return Device->Pause();};
-		bool Resume(){return Device->Resume();};
+	inline CVCRStates getDeviceState(void) const { return Device->deviceState; };
+	bool Stop(){return Device->Stop();};
+	bool Record(const CTimerd::RecordingInfo * const eventinfo);
+	bool Pause(){return Device->Pause();};
+	bool Resume(){return Device->Resume();};
 };
 
 

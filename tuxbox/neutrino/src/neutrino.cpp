@@ -2716,41 +2716,35 @@ void CNeutrinoApp::InitZapper()
 
 void CNeutrinoApp::setupRecordingDevice(void)
 {
+	CVCRControl::CDevice * recordingdevice;
+
 	if (g_settings.recording_type == RECORDING_SERVER)
 	{
-		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
 		unsigned int port;
 		sscanf(g_settings.recording_server_port, "%u", &port);
-		info->ServerPort = port;
-		info->ServerAddress = g_settings.recording_server_ip;
-		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
-		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
-		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_SERVER,info);
-		delete info;		
+
+		recordingdevice = new CVCRControl::CServerDevice((g_settings.recording_stopplayback == 1), (g_settings.recording_stopsectionsd == 1), g_settings.recording_server_ip.c_str(), port);
+
+		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}
 	else if (g_settings.recording_type == RECORDING_FILE)
 	{
-		CVCRControl::CFileDeviceInfo * info = new CVCRControl::CFileDeviceInfo;
 		unsigned int splitsize;
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
-		info->SplitSize = splitsize;
-		info->Use_O_Sync = g_settings.recording_use_o_sync;
-		info->Directory = g_settings.network_nfs_recordingdir;
-		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
-		info->StopSectionsd = (g_settings.recording_stopsectionsd == 1);
-		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_FILE, info);
-		delete info;
+		
+		recordingdevice = new CVCRControl::CFileDevice((g_settings.recording_stopplayback == 1), (g_settings.recording_stopsectionsd == 1), g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_stream_all_audio_pids);
+
+		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}
 	else if(g_settings.recording_type == RECORDING_VCR)
 	{
-		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
-		info->SwitchToScart = (g_settings.recording_vcr_no_scart==0);
-		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_VCR,info);
-		delete info;
+		recordingdevice = new CVCRControl::CVCRDevice((g_settings.recording_vcr_no_scart == 0));
+
+		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}
 	else
 	{
-		if(CVCRControl::getInstance()->isDeviceRegistered())
+		if (CVCRControl::getInstance()->isDeviceRegistered())
 			CVCRControl::getInstance()->unregisterDevice();
 	}
 }

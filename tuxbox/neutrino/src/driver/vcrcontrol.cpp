@@ -96,53 +96,11 @@ CVCRControl::~CVCRControl()
 	if(Device)
 		delete Device;
 }
+
 //-------------------------------------------------------------------------
-
-void CVCRControl::setDeviceOptions(CDeviceInfo *deviceInfo)
-{
-	if (Device)
-	{
-		if (Device->getDeviceType() == DEVICE_FILE)
-		{
-			CFileDevice * device = (CFileDevice *) Device;
-			CFileDeviceInfo * serverinfo = (CFileDeviceInfo *) deviceInfo;
-
-			if (!(serverinfo->Directory.empty()))
-				device->Directory = serverinfo->Directory;
-			device->SplitSize = serverinfo->SplitSize;
-			device->Use_O_Sync = serverinfo->Use_O_Sync;
-			device->StreamAllAudioPids = serverinfo->StreamAllAudioPids;
-
-			device->StopPlayBack = serverinfo->StopPlayBack;
-			device->StopSectionsd = serverinfo->StopSectionsd;
-		}
-		else if(Device->getDeviceType() == DEVICE_SERVER)
-		{
-			CServerDevice * device = (CServerDevice *) Device;
-			CServerDeviceInfo *serverinfo = (CServerDeviceInfo *) deviceInfo;
-
-			if (!(serverinfo->ServerAddress.empty()))
-				device->ServerAddress = serverinfo->ServerAddress;
-			if (serverinfo->ServerPort > 0)
-				device->ServerPort = serverinfo->ServerPort;
-
-			device->StopPlayBack = serverinfo->StopPlayBack;
-			device->StopSectionsd = serverinfo->StopSectionsd;
-		}
-		else if(Device->getDeviceType() == DEVICE_VCR)
-		{
-			CVCRDevice * device = (CVCRDevice *) Device;
-			CVCRDeviceInfo *serverinfo = (CVCRDeviceInfo *) deviceInfo;
-
-			device->SwitchToScart = serverinfo->SwitchToScart;
-		}
-	}
-}
-//-------------------------------------------------------------------------
-
 void CVCRControl::unregisterDevice()
 {
-	if(Device)
+	if (Device)
 	{
 		delete Device;
 		Device = NULL;
@@ -150,36 +108,12 @@ void CVCRControl::unregisterDevice()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo)
+void CVCRControl::registerDevice(CDevice * const device)
 {
-	if(Device)
+	if (Device)
 		unregisterDevice();
-
-	if(deviceType == DEVICE_SERVER)
-	{
-		CServerDevice * device =  new CServerDevice();
-		Device = (CDevice*) device;
-		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new server device: %s\n", "server");
-	}
-	else if(deviceType == DEVICE_VCR)
-	{
-		CVCRDevice * device = new CVCRDevice();
-		Device = (CDevice*) device;
-		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new vcr device: %s\n", "vcr");
-	}
-	else if(deviceType == DEVICE_FILE)
-	{
-		CFileDevice * device = new CFileDevice();
-		Device = (CDevice*) device;
-		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new file device: %s\n", "file");
-	}
-	else
-		return false;
-
-	return true;
+	
+	Device = device;
 }
 
 //-------------------------------------------------------------------------
