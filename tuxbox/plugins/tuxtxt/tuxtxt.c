@@ -426,7 +426,7 @@ void SetPosX(int column)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.79 $";
+	char cvs_revision[] = "$Revision: 1.80 $";
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -667,6 +667,7 @@ int Init()
 	swapupdown      = 0;
 	showhex         = 0;
 	showflof        = 1;
+	show39          = 1;
 
 	if ((conf = fopen(TUXTXTCONF, "rt")) == 0)
 	{
@@ -712,6 +713,8 @@ int Init()
 	            screenmode = ival;
 			else if (1 == sscanf(line, "ShowFLOF %d", &ival))
 	            showflof = ival;
+			else if (1 == sscanf(line, "Show39 %d", &ival))
+	            show39 = ival;
 		}
 		fclose(conf);
 	}
@@ -744,7 +747,7 @@ int Init()
 
 	/* calculate font dimensions */
 	displaywidth = (ex-sx);
-	fontheight = (ey-sy) / 25;
+	fontheight = 21;//(ey-sy) / 25;
 	fontwidth = fontwidth_normal = (ex-sx) / 40;
 	fontwidth_topmenumain = (TV43STARTX-sx) / 40;
 	fontwidth_topmenusmall = (ex- TV43STARTX) / TOPMENUCHARS;
@@ -988,7 +991,7 @@ int Init()
 
 void CleanUp()
 {
-	int i, n, curscreenmode = screenmode;
+	int curscreenmode = screenmode;
 	
 	/* hide pig */
 	if (screenmode)
@@ -1082,6 +1085,8 @@ void CleanUp()
 			fprintf(conf, "OverlayTransparency %X\n", tr1[transp2-1]);
 			fprintf(conf, "TTFWidthFactor %d\n", TTFWIDTHFACTOR);
 			fprintf(conf, "Screenmode %d\n", curscreenmode);
+			fprintf(conf, "ShowFLOF %d\n", showflof);
+			fprintf(conf, "Show39 %d\n", show39);
 			fclose(conf);
 		}
 	}
@@ -2095,19 +2100,19 @@ void PageInput(int Number)
 	switch (inputcounter)
 	{
 	case 2:
-		SetPosX(8);
+		SetPosX(1);
 		RenderCharFB(Number | '0', black<<4 | white);
 		RenderCharFB('-', black<<4 | white);
 		RenderCharFB('-', black<<4 | white);
 		break;
 
 	case 1:
-		SetPosX(9);
+		SetPosX(2);
 		RenderCharFB(Number | '0', black<<4 | white);
 		break;
 
 	case 0:
-		SetPosX(10);
+		SetPosX(3);
 		RenderCharFB(Number | '0', black<<4 | white);
 		break;
 	}
@@ -2759,7 +2764,6 @@ void SwitchScreenMode(int newscreenmode)
 #endif
 
 		int fw, fh, tx, ty, tw, th;
-		int sm = 0;
 
 
 		if (screenmode==1) /* split with topmenu */
@@ -2767,8 +2771,8 @@ void SwitchScreenMode(int newscreenmode)
 			fw = fontwidth_topmenumain;
 			fh = fontheight;
 			tw = TV43WIDTH;
-			displaywidth= (TV43STARTX     -sx);
 #if CFGTTF 
+			displaywidth= (TV43STARTX     -sx);
 		StartX = sx; //+ (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
 #endif
 			tx = TV43STARTX;
@@ -2783,7 +2787,9 @@ void SwitchScreenMode(int newscreenmode)
 			ty = TV169FULLSTARTY;
 			tw = TV169FULLWIDTH;
 			th = TV169FULLHEIGHT;
+#if CFGTTF
 			displaywidth= (TV169FULLSTARTX-sx);
+#endif
 		}
 		
 #if CFGTTF 
@@ -3116,7 +3122,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		return;
 	}
 
-	typettf.font.pix_width  = (FT_UShort) curfontwidth * TTFWIDTHFACTOR - 2;
+//	typettf.font.pix_width  = (FT_UShort) curfontwidth * TTFWIDTHFACTOR - 2;
 #ifndef DREAMBOX
 	if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit, NULL)) != 0)
 #else
@@ -3668,7 +3674,7 @@ void RenderPage()
 		}
 
 		/* display first column?  */
-		nofirst = 1;
+		nofirst = show39;
 		for (row = 1; row < 24; row++)
 		{
 			if (page_char[row*40] != ' ' && page_char[row*40] != 0x00 && page_char[row*40] != 0xFF && page_atrb[row*40] != (black <<4 | black)) {nofirst = 0; break;}
@@ -3786,7 +3792,7 @@ void showlink(int column, int linkpage, int Attrib)
 #if CFGTTF
 				FillRect(PosX, PosY+yoffset, displaywidth, fontheight, black);
 #else
-				FillRect(PosX, PosY+yoffset, 40*oldfontwidth, fontheight, black);
+				FillRect(PosX, PosY+yoffset, (40-nofirst)*oldfontwidth, fontheight, black);
 #endif
 			}
 			p = page_char+24*40;
@@ -3811,7 +3817,11 @@ void showlink(int column, int linkpage, int Attrib)
 				{
 					RenderCharBB(*l , Attrib);
 				}
+#if CFGTTF
 				FillRect(PosX, PosY+yoffset, (StartX+displaywidth)-PosX, fontheight, Attrib>>4);
+#else
+				FillRect(PosX, PosY+yoffset, (StartX+(40-nofirst)*oldfontwidth)-PosX, fontheight, Attrib>>4);
+#endif
 				PosX += (fontwidth/2);
 			}
 		}
@@ -3838,7 +3848,7 @@ void CreateLine25()
 	if (maxadippg >= 0)
 		decode_adip();
 
-	if (showflof && flofpages[page][0] != 0) // FLOF-Navigation present
+	if (!showhex && showflof && flofpages[page][0] != 0) // FLOF-Navigation present
 	{
 		prev_100 = flofpages[page][0];
 		prev_10  = flofpages[page][1];
@@ -4036,7 +4046,6 @@ void CopyBB2FB()
 	else
 		fillcolor = black;
 
-	memset(dst - StartY*var_screeninfo.xres, fillcolor, StartY*var_screeninfo.xres);
 
 	if (screenmode == 1) /* copy topmenu in normal height (since PIG also keeps dimensions) */
 	{
@@ -4058,6 +4067,11 @@ void CopyBB2FB()
 	else
 		screenwidth = var_screeninfo.xres;
 		
+	for (i = StartY; i>0;i--)
+	{
+		memset(dst - i*var_screeninfo.xres, fillcolor, screenwidth);
+	}
+
 	for (i = 12*fontheight; i; i--)
 	{
 		memcpy(dst, src, screenwidth);
@@ -4069,7 +4083,10 @@ void CopyBB2FB()
 
 	if (!pagecatching)
 		memcpy(dst, lfb + (StartY+24*fontheight)*var_screeninfo.xres, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
-	memset(dst + var_screeninfo.xres*fontheight, fillcolor, var_screeninfo.xres * (var_screeninfo.yres - StartY - 25*fontheight));
+	for (i = 0; i<var_screeninfo.yres - StartY - 25*fontheight;i++)
+	{
+		memset(dst + var_screeninfo.xres*(fontheight+i), fillcolor, screenwidth);
+	}
 }
 
 /******************************************************************************
@@ -4259,7 +4276,7 @@ void DecodePage()
 	memcpy(&page_char[32], &timestring, 8);
 
 	/* check for newsflash & subtitle */
-	if (dehamming[page_char[11-6]] & 12 && !screenmode)
+	if (dehamming[page_char[11-6]] & 12 && !screenmode && is_dec(page))
 		boxed = 1;
 	else
 		boxed = 0;
@@ -4268,7 +4285,17 @@ void DecodePage()
 	if (boxed)
 		memset(&page_char, ' ', 40);
 	else
-		memcpy(&page_char, " TuxTxt ", 8);
+	{
+//		memcpy(&page_char, " TuxTxt ", 8);
+		memcpy(&page_char, "        ", 8);
+		hex2str(page_char+3, page);
+		if (subpage != 0)
+		{
+			hex2str(page_char+6, subpage);
+			*(page_char+4) ='/';
+		}
+
+	}
 
 	if (!is_dec(page))
 	{
@@ -4276,7 +4303,7 @@ void DecodePage()
 		unsigned char *p, c, n, h, parityerror = 0;
 
 		/* show (usually nonexistent) page number for hex pages */
-		hex2str(page_char + 8 + 2, page);
+//		hex2str(page_char + 8 + 2, page);
 
 		for (i = 0; i < 8 + 3; i++)
 			page_atrb[i] = black<<4 | white;

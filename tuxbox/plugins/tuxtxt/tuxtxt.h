@@ -79,10 +79,10 @@
 #endif
 #endif
 
+int TTFWIDTHFACTOR = 4; /* FIXME: otherwise too much space btw chars */
 #if CFGTTF 
 int fontheight, fontwidth, fontwidth_normal, fontwidth_small, fontwidth_topmenumain, fontwidth_topmenusmall, ascender;
 int ymosaic[4];
-int TTFWIDTHFACTOR = 4; /* FIXME: otherwise too much space btw chars */
 int displaywidth;
 #define fontwidth_small_lcd 8
 #else
@@ -387,7 +387,7 @@ int cached_pages, page_receiving, current_page[9], current_subpage[9];
 int page, subpage, lastpage, pageupdate, zap_subpage_manual;
 int current_national_subset;
 int inputcounter;
-int zoommode, screenmode, transpmode, hintmode, boxed, nofirst, savedscreenmode, showflof;
+int zoommode, screenmode, transpmode, hintmode, boxed, nofirst, savedscreenmode, showflof,show39;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
 int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, national_subset, auto_national, swapupdown, showhex, menulanguage;
