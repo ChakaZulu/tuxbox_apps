@@ -352,10 +352,10 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 
 #ifdef FB_USE_PALETTE
 	fb_pixel_t bgcolor = color;
-	int fgcolor = ((int)(color | 7)) + 1;
+	int fgcolor = (((((int)color) + 2) | 7) - 2) + 1;
 #else
 	fb_pixel_t bgcolor = frameBuffer->realcolor[color];
-	int fgcolor = frameBuffer->realcolor[color | 7];
+	int fgcolor = frameBuffer->realcolor[(((((int)color) + 2) | 7) - 2)];
 #endif 
 	int delta = fgcolor - bgcolor;
 	
@@ -451,8 +451,7 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 		pen1=x;
 		lastindex=index;
 	}
-
-    //printf("RenderStat: %d %d %d \n", renderer->cacheManager->num_nodes, renderer->cacheManager->num_bytes, renderer->cacheManager->max_bytes);
+	//printf("RenderStat: %d %d %d \n", renderer->cacheManager->num_nodes, renderer->cacheManager->num_bytes, renderer->cacheManager->max_bytes);
 	pthread_mutex_unlock( &renderer->render_mutex );
 }
 
