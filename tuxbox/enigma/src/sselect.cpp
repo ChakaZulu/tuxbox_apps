@@ -507,6 +507,7 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 				-2, mask, 0xFFFFFFFF );
 		iface->enterDirectory(bla, signal);
 		iface->leaveDirectory(bla);
+		services->sort();
 	}
 	else
 	{
