@@ -2,7 +2,7 @@ AC_INIT([libdvb++],[0.1],[obi@saftware.de])
 VERSION=0.1
 
 AM_INIT_AUTOMAKE([libdvb++],[$VERSION])
-AC_CONFIG_HEADERS([config.h])
+AM_CONFIG_HEADER([config.h])
 
 AC_PROG_CXX
 AC_PROG_LIBTOOL
