@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <math.h>
 
-#include "lcd-ks0713.h"
+#include <dbox/lcd-ks0713.h>
 
 void print_status( int fd )
 {

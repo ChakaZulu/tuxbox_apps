@@ -31,7 +31,7 @@ main(int argc, char **argv)
 		return -1;
 	}
 
-	arg = EVENT_VCR_OFF | EVENT_VHSIZE_CHANGE | EVENT_ARATIO_CHANGE;
+	arg = EVENT_VCR_CHANGED | EVENT_VHSIZE_CHANGE | EVENT_ARATIO_CHANGE;
 
 	if ( ioctl(fd,EVENT_SET_FILTER,arg) < 0 )
 		perror("ioctl");
