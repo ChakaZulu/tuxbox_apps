@@ -563,6 +563,9 @@ static eString getZapContent(eString mode, eString path)
 		}
 	}
 
+	if (result == "")
+		result = "No Info available";
+
 	return result;
 }
 
@@ -576,22 +579,43 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "links")
 	{
-		result = "no links available.";
+		result = "Select one of the link categories on the left";
+	}
+	else
+	if (mode == "linksOfficialSites")
+	{
+		result = read_file(TEMPLATE_DIR+"linksOfficialSites.tmp");
+		if (result == "")
+			result = "No links available";
+	}
+	else
+	if (mode == "linksOtherSites")
+	{
+		result = read_file(TEMPLATE_DIR+"linksOtherSites.tmp");
+		if (result == "")
+			result = "No links available";
+	}
+	else
+	if (mode == "linksForums")
+	{
+		result = read_file(TEMPLATE_DIR+"linksForums.tmp");
+		if (result == "")
+			result = "No links available";
 	}
 	else
 	if (mode == "about")
 	{
-		result = "Enigma Web Control Version 0.2";
+		result = "Enigma Web Control Version 0.2a";
 	}
 	else
 	if (mode == "aboutDreambox")
 	{
-		result = "This is a d(ream)box.";
+		result = read_file(TEMPLATE_DIR+"aboutDreambox.tmp");
 	}
 	else
 	if (mode == "aboutDMM")
 	{
-		result = "DMM is a multimedia company.";
+		result = read_file(TEMPLATE_DIR+"aboutDMM.tmp");
 	}
 	else
 	if (mode == "menuShutdown")
@@ -602,7 +626,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menu")
 	{
-		result = "Control your box using the commands on the left.";
+		result = "Control your box using the commands on the left";
 	}
 	else
 	if (mode == "menuReboot")
@@ -626,7 +650,7 @@ static eString getContent(eString mode, eString path)
 		}
 		else
 		{
-			result = "Enigma is already awake.";
+			result = "Enigma is already awake";
 		}
 	}
 	else
@@ -634,7 +658,7 @@ static eString getContent(eString mode, eString path)
 	{
 		if (eZapStandby::getInstance())
 		{
-			result = "Enigma is already sleeping.";
+			result = "Enigma is already sleeping";
 		}
 		else
 		{
@@ -645,16 +669,15 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menuFBShot")
 	{
-		result = "     ";
+		result = " ";
 	}
 	else
 	if (mode == "menuScreenShot")
 	{
-		result = "     ";
+		result = " ";
 	}
-
-	if (result.length() < 3)
-		result = "not available yet...";
+	else
+		result = mode + " is not available yet";
 
 	return result;
 }
@@ -764,7 +787,7 @@ static eString getEITC()
 	}
 	else
 	{
-		result="no eit";
+		result=" ";
 	}
 
 	return result;
@@ -782,7 +805,7 @@ static eString getStats()
 	int sec=atoi(read_file("/proc/uptime").c_str());
 
 	result="<span class=\"white\">";
-	result+=eString().sprintf("%d:%02dm up", sec/3600, (sec%3600)/60);
+	result+=eString().sprintf("%d:%02dh up", sec/3600, (sec%3600)/60);
 	result+="</span> | ";
 
 	tmp=read_file("/proc/mounts");
@@ -801,8 +824,9 @@ static eString getStats()
 	result+="<span class=\"white\">"+getIP()+"</span>";
 
 	result+=" | ";
-	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
+	tmp.sprintf("<span class=\"white\">booted %d times</span>", bootcount);
 	result+=tmp;
+	result+=" | ";
 
 	ivpid=Decoder::current.vpid;
 	iapid=Decoder::current.apid;
@@ -1294,8 +1318,8 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 		if(sapi && sapi->service)
 		{
-			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">epg</a></u>");
-			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">si</a></u>");
+			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\"></a></u>");
+			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\"></a></u>");
 		}
 		else
 		{
