@@ -27,6 +27,45 @@ CGameList::~CGameList()
 	gamelist.clear();
 }
 
+static	int	_loadInfo( const char *fname, struct SPluginInfo *info )
+{
+	FILE	*fp;
+	char	buffer[ 512 ];
+	char	*p;
+
+	*info->name=0;
+	*info->depend=0;
+	*info->desc=0;
+
+	fp=fopen( fname , "r" );
+	if ( !fp )
+		return -1;
+	while( fgets(buffer,512,fp) )
+	{
+		if ( !*buffer )
+			continue;
+		p=strchr(buffer,'\n');
+		if ( p )
+			*p=0;
+		p=strchr(buffer,'=');
+		if ( !p )
+			continue;
+		*p=0;
+		p++;
+		if ( !strcmp(buffer,"name") )
+			strcpy(info->name,p);
+		else if ( !strcmp(buffer,"desc") )
+			strcpy(info->desc,p);
+		else if ( !strcmp(buffer,"depend") )
+			strcpy(info->depend,p);
+// rest ist erstma egal
+	}
+	fclose(fp);
+
+	if ( !*info->name || !*info->desc )
+		return -2;
+	return 0;
+}
 
 //void CGameList::exec()
 int CGameList::exec(CMenuTarget* parent, string actionKey)
@@ -62,35 +101,21 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		for(int count=0;count<n;count++)
 		{
 			SPluginInfo		info;
-			void			*handle;
-			PluginInfoProc	getInfo;
-			char			*error;
 			string			filen = namelist[count]->d_name;
-			int				pos = filen.find(".so");
+			int				pos = filen.find(".cfg");
 			if(pos!=-1)
 			{
 				string pluginname = filen.substr(0,pos);
 				printf("found game plugin: %s\n", pluginname.c_str());
-				handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_LAZY);
-				if (!handle)
-				{
-					fputs (dlerror(), stderr);
-					break;
-				}
-				
-				getInfo = (PluginInfoProc)dlsym(handle,(pluginname+"_getInfo").c_str());
-				if ((error = dlerror()) != NULL)
-				{
-					fputs(error, stderr);
-					break;
-				}
-				getInfo(&info);
+				if (_loadInfo( ("/usr/lib/neutrino/games/"+filen).c_str(), &info ) )
+					continue;
+
 				game* tmp = new game();
 			    tmp->name = info.name;
 			    tmp->desc = info.desc;
+			    tmp->depend = info.depend;
 				tmp->filename = pluginname;
 				gamelist.insert(gamelist.end(), tmp);
-				dlclose(handle);
 			}
 			free(namelist[count]);
 		}
@@ -222,10 +247,8 @@ void CGameList::runGame(int selected )
 {
 	printf("PLUGINDEMO------------------------------------------------\n\n");
 	void			*handle;
-	PluginInfoProc	getInfo;
 	PluginExecProc	execPlugin;
 	char			*error;
-	SPluginInfo		info;
 	char			*p;
 	char			*np;
 	char			*argv[20];
@@ -233,33 +256,17 @@ void CGameList::runGame(int selected )
 	int				argc;
 	int				i;
 	char			depstring[129];
+	const char		*dep;
 
 	string pluginname = gamelist[selected]->filename;
 
-	handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_LAZY);
-	if (!handle)
-	{
-		fputs (dlerror(), stderr);
-		return;
-	}
-	
-	getInfo = (PluginInfoProc) dlsym(handle,(pluginname+"_getInfo").c_str());
-	if ((error = dlerror()) != NULL)
-	{
-		fputs(error, stderr);
-		return;
-	}
-
-	getInfo(&info);
-	printf("Plugin Name: %s\n", info.name);
-	printf("Plugin Desc: %s\n", info.desc);
-	dlclose(handle);
+	dep=gamelist[selected]->depend.c_str();
 
 	/* first we need depend-libs */
 	depstring[0] = 0;
-	if (( info.pluginversion > 0 ) && strlen( info.depend ))
+	if ( strlen( dep ))
 	{
-		memcpy(depstring,info.depend,sizeof(info.depend));
+		memcpy(depstring,dep,sizeof(dep));
 		depstring[128] = 0;
 	}
 

@@ -22,6 +22,7 @@ class CGameList : public CMenuTarget
 		string      filename;
         string      name;
 		string		desc;
+		string		depend;
     };
 
 	unsigned int		liststart;
