@@ -31,7 +31,7 @@
 
 #include "mp3play.h"
 
-#include "mad.h"
+#include <mad.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -82,6 +82,7 @@ static enum mad_flow output(void *data,
   mad_fixed_t const *left_ch, *right_ch;
 
   /* pcm->samplerate contains the sampling frequency */
+printf("%i: output\n",__LINE__);
 
   nchannels = pcm->channels;
   nsamples  = pcm->length;
@@ -91,6 +92,8 @@ static enum mad_flow output(void *data,
   while (nsamples--) {
     signed int sample;
 
+    printf("%i: while samples\n",__LINE__);
+
     /* output sample(s) in 16-bit signed little-endian PCM */
 
     sample = scale(*left_ch++);
@@ -98,6 +101,7 @@ static enum mad_flow output(void *data,
     fputc((sample >> 8) & 0xff,soundfd);
 
     if (nchannels == 2) {
+	printf("%i: 2 channels\n",__LINE__);
       sample = scale(*right_ch++);
       fputc((sample >> 0) & 0xff,soundfd);
       fputc((sample >> 8) & 0xff,soundfd);
@@ -114,8 +118,53 @@ static enum mad_flow error(void *data,
   printf("decoding error 0x%04x (%s) at byte offset %u\n",
 	  stream->error, mad_stream_errorstr(stream),
 	  stream->this_frame - bdata->start);
-  return MAD_FLOW_BREAK;
+  return MAD_FLOW_CONTINUE; // MAD_FLOW_BREAK;
 }
+
+/*
+ * NAME:	decode->input_read()
+ * DESCRIPTION:	(re)fill decoder input buffer by reading a file descriptor
+ */
+/*
+static
+enum mad_flow decode_input_read(void *data, struct mad_stream *stream)
+{
+  struct player *player = data;
+  struct input *input = &player->input;
+  int len;
+
+  if (input->eof)
+    return MAD_FLOW_STOP;
+
+  if (stream->next_frame) {
+    memmove(input->data, stream->next_frame,
+	    input->length = &input->data[input->length] - stream->next_frame);
+  }
+
+  do {
+    len = read(input->fd, input->data + input->length,
+	       MPEG_BUFSZ - input->length);
+  }
+  while (len == -1 && errno == EINTR);
+
+  if (len == -1) {
+    error("input", ":read");
+    return MAD_FLOW_BREAK;
+  }
+  else if (len == 0) {
+    input->eof = 1;
+
+    assert(MPEG_BUFSZ - input->length >= MAD_BUFFER_GUARD);
+
+    while (len < MAD_BUFFER_GUARD)
+      input->data[input->length + len++] = 0;
+  }
+
+  mad_stream_buffer(stream, input->data, input->length += len);
+
+  return MAD_FLOW_CONTINUE;
+}
+*/
 
 void CMP3Player::play(){
 
@@ -137,6 +186,7 @@ void CMP3Player::play(){
 	if (fdm == MAP_FAILED)
 	{
 		printf("mmap failed!\n");
+		perror("mmap");
 		return;
 	}
 
@@ -168,5 +218,4 @@ void CMP3Player::play(){
 	::ioctl(fileno(soundfd), SNDCTL_DSP_RESET);
 	fclose(soundfd);
 }
-
 
