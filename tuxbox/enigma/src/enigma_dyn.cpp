@@ -510,13 +510,13 @@ static eString getVolBar()
 	{
 		result+="<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(";
 		result+=eString().setNum(i, 10);
-		result+=")\">||</a></span></td>";
+		result+=")\"><img src=\"trans.gif\" border=0></a></span></td>";
 	}
 	for(int i=(volume/10)+1;i<=(100/10);i++)
 	{
 		result+="<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(";
 		result+=eString().setNum(i, 10);
-		result+=")\">||</a></span></td>";
+		result+=")\"><img src=\"trans.gif\" border=0></a></span></td>";
 	}
 
 	result+="<td>";
