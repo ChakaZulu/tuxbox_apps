@@ -171,6 +171,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void SelectAPID();
 		void SelectNVOD();
 		void CmdParser(int argc, char **argv);
+		bool getEnvironment(const char* name, int* value);
 		void ShowStreamFeatures();
 
         long long last_profile_call;

@@ -2025,18 +2025,43 @@ void CNeutrinoApp::setupRecordingDevice(void)
    }
 }
 
+bool CNeutrinoApp::getEnvironment(const char* name, int* value)
+{
+	char* content = getenv(name);
+	if (content == NULL)
+	{
+		dprintf( DEBUG_NORMAL, "[neutrino] Fatal Error: Environment variable %s not set. Bye.\n\n", name);
+		return false;
+	}
+	sscanf(content, "%x", value);
+	return true;
+}
+
 int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
 
-	g_info.box_Type = atoi(getenv("mID"));
+	char* mID = getenv("mID");
+	if (mID == NULL)
+	{
+		dprintf( DEBUG_NORMAL, "[neutrino] Fatal Error: Environment variable mID not set. Bye.\n\n");
+		return 1;
+	}
+	g_info.box_Type = atoi(mID);
+
 	g_info.gtx_ID = -1;
-	sscanf(getenv("gtxID"), "%x", &g_info.gtx_ID);
+	if (!getEnvironment("gtxID", &g_info.gtx_ID))
+		return 1;
+
 	g_info.enx_ID = -1;
-	sscanf(getenv("enxID"), "%x", &g_info.enx_ID);
+	if (!getEnvironment("enxID", &g_info.enx_ID))
+		return 1;
+
 	g_info.fe = 0;
-	sscanf(getenv("fe"), "%x", &g_info.fe);
-	//printf("box_Type: %d, gtxID: %d, enxID: %d, fe: %d\n", g_info.box_Type, g_info.gtx_ID, g_info.enx_ID, g_info.fe);
+	if (!getEnvironment("fe", &g_info.fe))
+		return 1;
+
+	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d, gtxID: %d, enxID: %d, fe: %d\n", g_info.box_Type, g_info.gtx_ID, g_info.enx_ID, g_info.fe);
 
 
 
@@ -3226,7 +3251,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.360 2002/11/13 20:44:44 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.361 2002/11/18 14:13:39 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
