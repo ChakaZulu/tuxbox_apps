@@ -211,7 +211,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		if (!page)
 		{
 			//eDebug("page not found");
-			page = (struct subtitle_page*)malloc(sizeof(struct subtitle_page));
+			page = new subtitle_page;
 			page->page_regions = 0;
 			page->regions = 0;
 			page->page_id = page_id;
@@ -237,7 +237,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			while (page->page_regions)
 			{
 				struct subtitle_page_region *p = page->page_regions->next;
-				free(page->page_regions);
+				delete page->page_regions;
 				page->page_regions = p;
 			}
 		}
@@ -261,7 +261,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			struct subtitle_page_region *pr;
 			
 				// append new entry to list
-			pr = (struct subtitle_page_region*) malloc(sizeof(struct subtitle_page_region));
+			pr = new subtitle_page_region;
 			pr->next = 0;
 			*r = pr;
 			r = &pr->next;
@@ -313,21 +313,22 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		
 		if (!region)
 		{
-			*pregion = region = (struct subtitle_region*) malloc(sizeof(struct subtitle_region));
+			*pregion = region = new subtitle_region;
 			region->next = 0;
-		} else if (region->region_version_number != region_version_number)
+		}
+		else if (region->region_version_number != region_version_number)
 		{
 			struct subtitle_region_object *objects = region->region_objects;
 			while (objects)
 			{
 				struct subtitle_region_object *n = objects->next;
-				free(objects);
+				delete objects;
 				objects = n;
 			}
-			free(region->region_buffer);
-		} else 
+			delete [] region->region_buffer;
+		}
+		else 
 			break;
-		
 		
 		//eDebug("region %d:%d update", page_id, region_id);
 			
@@ -341,9 +342,9 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		region->region_height  = *segment++ << 8;
 		region->region_height |= *segment++;
 		processed_length += 2;
-		
-		region->region_buffer = (__u8*)malloc(region->region_height * region->region_width);
-		
+
+		region->region_buffer = new __u8[region->region_height * region->region_width];
+
 		int region_level_of_compatibility, region_depth;
 		
 		region_level_of_compatibility = (*segment >> 5) & 7;
@@ -389,7 +390,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			
 			struct subtitle_region_object *object;
 			
-			object = (struct subtitle_region_object*)malloc(sizeof(struct subtitle_region_object));
+			object = new subtitle_region_object;
 
 			*pobject = object;
 			object->next = 0;
@@ -449,7 +450,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		
 		if (!clut)
 		{
-			*pclut = clut = (struct subtitle_clut*) malloc(sizeof(struct subtitle_clut));
+			*pclut = clut = new subtitle_clut;
 			clut->next = 0;
 		} else if (clut->CLUT_version_number == CLUT_version_number)
 			break;
@@ -726,7 +727,7 @@ void subtitle_reset(struct subtitle_ctx *sub)
 		while (page->page_regions)
 		{
 			struct subtitle_page_region *p = page->page_regions->next;
-			free(page->page_regions);
+			delete page->page_regions;
 			page->page_regions = p;
 		}
 			/* free regions */
@@ -738,13 +739,13 @@ void subtitle_reset(struct subtitle_ctx *sub)
 			{
 				struct subtitle_region_object *obj = region->region_objects;
 				region->region_objects = obj->next;
-				free(obj);
+				delete obj;
 			}
 			
-			free(region->region_buffer);
-			
+			delete [] region->region_buffer;
+
 			page->regions = region->next;
-			free(region);
+			delete region;
 		}
 			
 			/* free CLUTs */
@@ -752,11 +753,11 @@ void subtitle_reset(struct subtitle_ctx *sub)
 		{
 			struct subtitle_clut *clut = page->cluts;
 			page->cluts = clut->next;
-			free(clut);
+			delete clut;
 		}
 		
 		sub->pages = page->next;
-		free(page);
+		delete page;
 	}
 }
 

@@ -138,7 +138,7 @@ void eSubtitleWidget::processNext()
 
 		subtitle_process_pes(subtitle, pes.pkt, pes.len);
 
-		delete pes.pkt;
+		delete [] pes.pkt;
 	}
 
 	unsigned long long current = 0;
@@ -150,7 +150,7 @@ void eSubtitleWidget::processNext()
 		{
 			pes_packet_s pkt = queue.front();
 			queue.pop();
-			delete pkt.pkt;
+			delete [] pkt.pkt;
 		}
 		return;
 	}
@@ -334,7 +334,7 @@ eSubtitleWidget::~eSubtitleWidget()
 	{
 		pes_packet_s pkt = queue.front();
 		queue.front();
-		delete pkt.pkt;
+		delete [] pkt.pkt;
 	}
 	delete subtitle;
 }
@@ -346,14 +346,20 @@ int eSubtitleWidget::getCurPid()
 
 void eSubtitleWidget::stop()
 {
-	pid=-1;
-	delete sn;
-	sn = 0;
-	subtitle_screen_enable(subtitle, 0);
-	subtitle_reset(subtitle);
-	if (fd != -1)
-		::close(fd);
-	eSkin::getActive()->setPalette(gFBDC::getInstance());
+	if ( sn )
+	{
+		pid=-1;
+		delete sn;
+		sn = 0;
+		subtitle_screen_enable(subtitle, 0);
+		subtitle_reset(subtitle);
+		if (fd != -1)
+		{
+			::close(fd);
+			fd = -1;
+		}
+		eSkin::getActive()->setPalette(gFBDC::getInstance());
+	}
 }
 
 void eSubtitleWidget::globalFocusHasChanged(const eWidget* newFocus)

@@ -5836,6 +5836,7 @@ void eZapMain::showEPG_Streaminfo()
 
 void eZapMain::startService(const eServiceReference &_serviceref, int err)
 {
+	subtitle->stop();
 	eAVSwitch::getInstance()->selectAudioChannel(0);
 
 	audioselps.clear();
