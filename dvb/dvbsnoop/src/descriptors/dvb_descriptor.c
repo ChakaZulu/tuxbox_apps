@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.19 2003/11/26 23:54:47 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.20 2003/12/26 23:27:39 rasc Exp $ 
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: dvb_descriptor.c,v 1.19 2003/11/26 23:54:47 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.20  2003/12/26 23:27:39  rasc
+DSM-CC  UNT section
+
 Revision 1.19  2003/11/26 23:54:47  rasc
 -- bugfixes on Linkage descriptor
 
@@ -2935,7 +2938,7 @@ void descriptorDVB_DataBroadcast (u_char *b)
 		 	printhexdump_buf (4,  b+1, d.selector_length-1);
 
  } else if (d.data_broadcast_id == 0x000A) {
-	 /* $$$ TODO TR 102 006 */
+	 /* TR 102 006 */
 
  		typedef struct  _descSUI {
     		   int      OUI_data_length;

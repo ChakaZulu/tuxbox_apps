@@ -1,12 +1,10 @@
 /*
-$Id: dsmcc_str.h,v 1.9 2003/12/17 23:15:05 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.10 2003/12/26 23:27:40 rasc Exp $ 
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
@@ -18,6 +16,9 @@ $Id: dsmcc_str.h,v 1.9 2003/12/17 23:15:05 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.10  2003/12/26 23:27:40  rasc
+DSM-CC  UNT section
+
 Revision 1.9  2003/12/17 23:15:05  rasc
 PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 
@@ -77,6 +78,9 @@ char *dsmccStrOUI  (u_int id);
 char *dsmccStr_Command_ID  (u_int id);
 char *dsmccStr_SelectMode_ID  (u_int id);
 char *dsmccStr_DirectionIndicator (u_int id);
+
+char *dsmccStr_DescriptorType (u_int id);
+char *dsmccStr_SpecifierType (u_int id);
 
 
 

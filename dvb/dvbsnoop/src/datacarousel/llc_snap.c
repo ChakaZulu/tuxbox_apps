@@ -1,5 +1,5 @@
 /*
-$Id: llc_snap.c,v 1.2 2003/11/26 20:31:50 rasc Exp $
+$Id: llc_snap.c,v 1.3 2003/12/26 23:27:39 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: llc_snap.c,v 1.2 2003/11/26 20:31:50 rasc Exp $
 
 
 $Log: llc_snap.c,v $
+Revision 1.3  2003/12/26 23:27:39  rasc
+DSM-CC  UNT section
+
 Revision 1.2  2003/11/26 20:31:50  rasc
 no message
 
@@ -54,7 +57,7 @@ int  llc_snap (int v, u_char *b)
   out_nl (v,"LLC:");
   dsap = outBit_Sx_NL (v," DSAP: ",  		b, 0, 8);
   ssap = outBit_Sx_NL (v," SSAP: ",  		b, 8, 8);
-  ctrl = outBit_Sx_NL (v," Control: ", 	b,16, 8);
+  ctrl = outBit_Sx_NL (v," Control: ",	 	b,16, 8);
   
   out_nl (v,"SNAP:");
   oui   = outBit_Sx_NL (v," Org. Unique ID: ", 		b,24,24);
@@ -68,6 +71,8 @@ int  llc_snap (int v, u_char *b)
 }
 
 /*
+ *
+ * $$$ TODO
  *
  LLCSNAP() -- This structure shall contain the datagram according to the ISO/IEC 8802-2 Logical Link Control
 (LLC) and ISO/IEC 8802-1a SubNetwork Attachment Point (SNAP) specifications. In LLC Type 1 operation,

@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.15 2003/11/26 23:54:48 rasc Exp $
+$Id: sectables.c,v 1.16 2003/12/26 23:27:40 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: sectables.c,v 1.15 2003/11/26 23:54:48 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.16  2003/12/26 23:27:40  rasc
+DSM-CC  UNT section
+
 Revision 1.15  2003/11/26 23:54:48  rasc
 -- bugfixes on Linkage descriptor
 
@@ -70,6 +73,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "sectables.h"
+
 #include "pat.h"
 #include "cat.h"
 #include "pmt.h"
@@ -88,7 +92,11 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "userdef.h"
 #include "datacarousel/datagram.h"
 #include "datacarousel/ints.h"
+#include "datacarousel/unts.h"
 #include "testdata/test0x1d.h"
+
+#include "misc/output.h"
+#include "misc/hexprint.h"
 
 
 
@@ -245,6 +253,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x46, 0x46,  decode_SDT	},
      /* res. */
      {  0x4A, 0x4A,  decode_BAT	},
+     {  0x4C, 0x4C,  decode_DSMCC_UNT },
      {  0x4C, 0x4C,  decode_DSMCC_INT },
      {  0x4E, 0x6E,  decode_EIT	},  /*  4 different types */
      {  0x70, 0x70,  decode_TDT },
@@ -288,8 +297,9 @@ void  guess_table (u_char *buf, int len, u_int pid)
   out_nl (2,"Guess table from table id...");
 
   if (t->func == NULL) {
-   	out_SB_NL (2,"Unknown, reserved or not implemented - TableID: ",table_id);
+   	out_SB_NL (2,"Unknown, reserved or not (yet) implemented - TableID: ",table_id);
 	out_nl    (2,"--> %s",dvbstrTableID (table_id));
+	printhexdump_buf (5,buf,len);
 	return;
   }
 

@@ -1,5 +1,5 @@
 /*
-$Id: ints.c,v 1.10 2003/12/26 23:27:39 rasc Exp $
+$Id: unts.c,v 1.1 2003/12/26 23:27:39 rasc Exp $
 
 
  DVBSNOOP
@@ -10,21 +10,15 @@ $Id: ints.c,v 1.10 2003/12/26 23:27:39 rasc Exp $
  (c) 2001-2003   Rainer.Scherg@gmx.de
 
 
- --  INT Section
- --  IP/MAC Notification Section
- --  DSM-CC Data Carousel  EN 301 192 
+ -- UNT Section  (Update Notification Table)
+ -- DSM-CC Data Carousel  TR 102 006
 
 
 
-$Log: ints.c,v $
-Revision 1.10  2003/12/26 23:27:39  rasc
+$Log: unts.c,v $
+Revision 1.1  2003/12/26 23:27:39  rasc
 DSM-CC  UNT section
 
-Revision 1.9  2003/11/26 23:54:46  rasc
--- bugfixes on Linkage descriptor
-
-Revision 1.8  2003/10/29 20:54:56  rasc
-more PES stuff, DSM descriptors, testdata
 
 
 
@@ -34,9 +28,8 @@ more PES stuff, DSM descriptors, testdata
 
 
 #include "dvbsnoop.h"
-#include "ints.h"
+#include "unts.h"
 #include "dsmcc_misc.h"
-
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "descriptors/dsm_int_unt_descriptor.h"
@@ -46,9 +39,9 @@ more PES stuff, DSM descriptors, testdata
 
 
 
-void decode_DSMCC_INT (u_char *b, int len)
+
+void decode_DSMCC_UNT (u_char *b, int len)
 {
- /* EN 301 192 7.x */
 
  int        len1,i;
  u_int      table_id;
@@ -56,10 +49,10 @@ void decode_DSMCC_INT (u_char *b, int len)
 
 
 
- out_nl (3,"INT-decoding....");
+ out_nl (3,"UNT-decoding....");
  table_id = outBit_S2x_NL (3,"Table_ID: ",	b, 0, 8,
 				(char *(*)(u_int))dvbstrTableID );
- if (table_id != 0x4c) {
+ if (table_id != 0x4b) {
    out_nl (3,"wrong Table ID");
    return;
  }
@@ -71,7 +64,7 @@ void decode_DSMCC_INT (u_char *b, int len)
  section_length = outBit_Sx_NL (5,"section_length: ",	b,12,12);
  outBit_S2x_NL(3,"Action_type: ",		b,24, 8,
 			(char *(*)(u_int))dsmccStrAction_Type );
- outBit_Sx_NL (3,"Platform_id_hash: ",		b,32, 8);
+ outBit_Sx_NL (3,"OUI_hash: ",			b,32, 8);
  outBit_Sx_NL (6,"reserved_3: ",		b,40, 2);
 
  outBit_Sx_NL (3,"Version_number: ",		b,42, 5);
@@ -79,8 +72,8 @@ void decode_DSMCC_INT (u_char *b, int len)
  outBit_Sx_NL (3,"Section_number: ",		b,48, 8);
  outBit_Sx_NL (3,"Last_section_number: ",	b,56, 8);
 
- outBit_S2x_NL(3,"Platform_id: ",		b,64,24,
-			(char *(*)(u_int))dsmccStrPlatform_ID );
+ outBit_S2x_NL(3,"OUI: ",			b,64,24,
+			(char *(*)(u_int))dsmccStrOUI );
  outBit_S2x_NL(3,"Processing_order: ",		b,88, 8,
 			(char *(*)(u_int))dsmccStrProcessing_order);
 
@@ -89,24 +82,42 @@ void decode_DSMCC_INT (u_char *b, int len)
 
 
 
- i = dsmcc_pto_descriptor_loop ("platform",b); 
- b   += i;
+ /* common descriptor loop */
+
+ i = dsmcc_pto_descriptor_loop ("common",b); 
+ b    += i;
  len1 -= i;
 
+
+
  while (len1 > 4) {
- 	i = dsmcc_pto_descriptor_loop ("target",b); 
-	b   += i;
+	int len2;
+
+	i= dsmcc_CompatibilityDescriptor(b);
+	b    += i;
 	len1 -= i;
 
- 	i = dsmcc_pto_descriptor_loop ("operational",b); 
-	b   += i;
-	len1 -= i;
+	len2 = outBit_Sx_NL (3,"platform_loop_length: ",	b, 0,16);
+	b    += 2;
+	len1 -= 2;
+
+	while (len2 > 0) {
+
+ 		i = dsmcc_pto_descriptor_loop ("target",b); 
+		b    += i;
+		len1 -= i;
+		len2 -= i;
+
+ 		i = dsmcc_pto_descriptor_loop ("operational",b); 
+		b    += i;
+		len1 -= i;
+		len2 -= i;
+	}
  }
 
 
  outBit_Sx_NL (5,"CRC: ",	b,0,32);
 }
-
 
 
 
