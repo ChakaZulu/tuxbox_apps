@@ -45,7 +45,7 @@ ePictureViewer::ePictureViewer(): messages(this, 1)
 {
 	if (!instance)
 		instance = this;
-		
+
 	fh_root = NULL;
 	m_scaling = NONE;
 	m_aspect = 4.0 / 3;
@@ -65,7 +65,7 @@ ePictureViewer::ePictureViewer(): messages(this, 1)
 	m_NextPic_YPos = 0;
 	m_NextPic_XPan = 0;
 	m_NextPic_YPan = 0;
-	int xs, ys;
+	int xs = 0, ys = 0;
 	getCurrentRes(&xs, &ys);
 	m_startx = 0;
 	m_endx = xs - 1;
@@ -73,9 +73,9 @@ ePictureViewer::ePictureViewer(): messages(this, 1)
 	m_endy = ys - 1;
 
 	m_busy_buffer = NULL;
-	
+
 	init_handlers();
-	
+
 	CONNECT(messages.recv_msg, ePictureViewer::gotMessage);
 	run();
 }
@@ -85,8 +85,8 @@ ePictureViewer::~ePictureViewer()
 	messages.send(Message::quit);
 	if ( thread_running() )
 		kill();
-	if (instance==this)
-		instance=0;
+	if (instance == this)
+		instance = 0;
 }
 
 void ePictureViewer::thread()
@@ -126,8 +126,8 @@ void ePictureViewer::add_format(int (*picsize)(const char *, int *, int*, int, i
 {
 	CFormathandler *fhn;
 	fhn = (CFormathandler *) malloc(sizeof(CFormathandler));
-	fhn->get_size = picsize; 
-	fhn->get_pic = picread; 
+	fhn->get_size = picsize;
+	fhn->get_pic = picread;
 	fhn->id_pic = id;
 	fhn->next = fh_root; 
 	fh_root = fhn;
@@ -158,7 +158,7 @@ ePictureViewer::CFormathandler * ePictureViewer::fh_getsize(const char *name, in
 	for (fh = fh_root; fh != NULL; fh = fh->next)
 	{
 		if (fh->id_pic(name))
-			if (fh->get_size(name, x, y, width_wanted, height_wanted) == FH_ERROR_OK) 
+			if (fh->get_size(name, x, y, width_wanted, height_wanted) == FH_ERROR_OK)
 				return(fh);
 	}
 	return(NULL);

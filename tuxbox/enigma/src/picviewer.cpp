@@ -1,5 +1,3 @@
-#ifdef PICVIEWER
-
 #include <algorithm>
 #include <list>
 
@@ -77,19 +75,24 @@ void ePicViewerStyleSelector::entrySelected(eListBoxEntryText* e)
 		int selection = (int)e->getKey();
 		switch(selection)
 		{
-			case 1: printf("[PICVIEWER] show slide now...\n");
-//				ePictureViewer::getInstance()->displayImage("picture.jpg");
+			case 1:
+			{
+				printf("[PICVIEWER] show slide now...\n");
+				eServiceReference sref = eServiceInterface::getInstance()->service;
+				printf("[PICTUREVIEWER] show %s\n", sref.path.c_str());
+				ePictureViewer::getInstance()->displayImage(sref.path);
 				break;
+			}
 			case 2:
+			{
 				printf("[PICVIEWER] show slideshow now...\n");
 				/*
 				for (all pics in directory)
 					ePictureViewer::getInstance()->displayImage("picture.jpg");
 				*/
 				break;
+			}
 		}
 	}
 	close(-1);
 }
-#endif
-

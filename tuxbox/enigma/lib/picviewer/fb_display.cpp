@@ -91,10 +91,20 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
 
 void getCurrentRes(int *x, int *y)
 {
-    struct fb_var_screeninfo *var;
-    var = fbClass::getInstance()->getScreenInfo();
-    *x = var->xres;
-    *y = var->yres;
+	struct fb_var_screeninfo *var;
+	if (fbClass::getInstance())
+	{
+		var = fbClass::getInstance()->getScreenInfo();
+		*x = var->xres;
+		*y = var->yres;
+		printf("[FB_DISPLAY] getCurrentRes: %d x %d\n", *x, *y);
+	}
+	else
+	{
+		printf("[FB_DISPLAY] getCurrentRes: no fb available yet.\n");
+		*x = 720;
+		*y = 576;
+	}
 }
 
 void make332map(struct fb_cmap *map)
