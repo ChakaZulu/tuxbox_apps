@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.47 2001/11/15 11:42:41 McClean Exp $
+// $Id: infoviewer.cpp,v 1.48 2001/11/21 20:20:09 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.48  2001/11/21 20:20:09  field
+// Perspektiven gefixt
+//
 // Revision 1.47  2001/11/15 11:42:41  McClean
 // gpl-headers added
 //
@@ -431,7 +434,7 @@ void CInfoViewer::showData()
     {
         CSubChannel_Infos subChannels= g_RemoteControl->getSubChannels();
 
-        if ( subChannels.are_subchannels )
+        if ( SubServiceList.size()> 0 )
         {
             string activeID= getActiveChannelID();
             if ( !subChannels.has_subChannels_for( activeID ) )
@@ -449,7 +452,8 @@ void CInfoViewer::showData()
                 showButtonNVOD(true);
             }
         }
-        else
+
+        if ( !subChannels.are_subchannels )
         {
             if ( subChannels.has_subChannels_for( getActiveChannelID() ) )
             {
@@ -626,7 +630,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 
                     gettimeofday(&now, NULL);
                     TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-                    abs_wait.tv_sec += 2;
+                    abs_wait.tv_sec += 1;
 
                     pthread_mutex_trylock( &InfoViewer->epg_mutex );
                     pthread_cond_timedwait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex, &abs_wait );
@@ -801,11 +805,13 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 Flag = (unsigned char)* dp;
                 dp+= sizeof(unsigned char);
                 SubServiceCount= *((unsigned short *)dp);
+                //printf("got %d SubServiceCount\n", SubServiceCount);
                 dp+= sizeof(unsigned short);
                 for (int count= 0; count< SubServiceCount; count++)
                 {
                     SubService* aSubService = new SubService();
                     aSubService->name = dp;
+                    //printf("SubServiceName %s\n", aSubService->name.c_str());
                     dp+= strlen(dp)+1;
                     aSubService->transportStreamId= *((unsigned short *)dp);
                     dp+= sizeof(unsigned short);
