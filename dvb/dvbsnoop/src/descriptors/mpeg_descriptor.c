@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.18 2004/02/24 23:03:05 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.19 2004/03/31 21:14:23 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: mpeg_descriptor.c,v 1.18 2004/02/24 23:03:05 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.19  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.18  2004/02/24 23:03:05  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()
@@ -97,6 +101,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
+#include "misc/pid_mem.h"
 
 
 
@@ -569,6 +574,8 @@ void descriptorMPEG_CA (u_char *b)
  d.CA_system_ID			 = getBits (b, 0, 16, 16);
  d.reserved			 = getBits (b, 0, 32, 3);
  d.CA_PID			 = getBits (b, 0, 35, 13);
+
+ store_PidToMem (d.CA_PID);
 
 
 

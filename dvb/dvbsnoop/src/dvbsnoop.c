@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.25 2004/03/21 00:37:46 rasc Exp $
+$Id: dvbsnoop.c,v 1.26 2004/03/31 21:14:22 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,10 @@ $Id: dvbsnoop.c,v 1.25 2004/03/21 00:37:46 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.26  2004/03/31 21:14:22  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.25  2004/03/21 00:37:46  rasc
 Query FrontEnd Info  (option: -s feinfo)
 
@@ -131,6 +135,8 @@ int main(int argc, char **argv)
   /*
     -- init options and cmdline parsing
   */
+
+  init_PidMemory ();
 
 
   if (! cmdline_options (argc,argv, &opt) ) return (-1);

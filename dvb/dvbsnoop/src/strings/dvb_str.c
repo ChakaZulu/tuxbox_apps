@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.48 2004/03/21 00:37:47 rasc Exp $
+$Id: dvb_str.c,v 1.49 2004/03/31 21:14:23 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: dvb_str.c,v 1.48 2004/03/21 00:37:47 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.49  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.48  2004/03/21 00:37:47  rasc
 Query FrontEnd Info  (option: -s feinfo)
 
@@ -695,6 +699,33 @@ char *dvbstrStream_TYPE (u_int flag)
 
   return findTableID (Table, flag);
 }
+
+/*
+ -- Programm Map Table   Stream Type  (Short String ID: ""=Unkown, "S"=Section, "P"=PES)
+ -- only important types...
+*/
+char *dvbstrStream_TYPE_SHORT (u_int flag)
+{
+  // see dvbstrStream_TYPE
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "" },
+     {  0x01, 0x04,  "P" },
+     {  0x05, 0x05,  "S" },
+     {  0x06, 0x06,  "P" },
+     {  0x07, 0x07,  "" },
+     {  0x08, 0x09,  "P" },
+     {  0x0A, 0x0A,  "" },
+     {  0x0B, 0x0B,  "S" },
+     {  0x0C, 0x0C,  "P" },
+     {  0x0D, 0x0D,  "S" },
+     {  0x0E, 0x0E,  "P" },
+     {  0x0F, 0xFF,  "" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, flag);
+}
+
 
 
 

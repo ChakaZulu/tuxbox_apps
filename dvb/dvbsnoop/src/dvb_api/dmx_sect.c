@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.20 2004/02/15 22:22:28 rasc Exp $
+$Id: dmx_sect.c,v 1.21 2004/03/31 21:14:23 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dmx_sect.c,v 1.20 2004/02/15 22:22:28 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.21  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.20  2004/02/15 22:22:28  rasc
 cmd option: -hexdumpbuffer -nohexdumpbuffer
 
@@ -95,6 +99,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/output.h"
 #include "misc/hexprint.h"
 #include "misc/print_header.h"
+#include "misc/pid_mem.h"
 
 #include "sections/sectables.h"
 #include "dvb_api.h"
@@ -106,10 +111,59 @@ dvbsnoop v0.7  -- Commit to CVS
 #define SECT_BUF_SIZE (256*1024)
 
 static long  sect_read (int fd, u_char *buf, long buflen);
+static int   doReadSECT_2 (OPTION *opt);
 
 
+
+
+
+/* 
+ -- read sections
+ -- single pid sections or spider pid sections (opt.)
+ */
 
 int  doReadSECT (OPTION *opt)
+{
+   int    status;
+
+
+   // -- first pid
+   status = doReadSECT_2 (opt);
+   mark_PidMem_as_used (opt->pid);
+
+   if (status) return status;
+
+
+   // -- spider option requested?
+   if (opt->spider_pid) {
+   	u_int  pid;
+
+	while (1) {
+		pid = get_UnusedPidFromMem ();
+		if (pid == INVALID_PID) break;
+
+		// new spidered pid
+		opt->pid = pid;
+		status = doReadSECT_2 (opt);
+		mark_PidMem_as_used (pid);
+
+		if (status) return status;
+	}
+
+   }
+
+   return status;
+}
+
+
+
+
+
+/* 
+ -- read single section
+ */
+
+static int  doReadSECT_2 (OPTION *opt)
 
 {
   int     fd;
@@ -225,7 +279,7 @@ int  doReadSECT (OPTION *opt)
 
     // count packets ?
     if (opt->packet_count > 0) {
-       if (--opt->packet_count == 0) break;
+       if (count >= opt->packet_count) break;
     }
 
 

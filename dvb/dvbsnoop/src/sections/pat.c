@@ -1,5 +1,5 @@
 /*
-$Id: pat.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
+$Id: pat.c,v 1.9 2004/03/31 21:14:23 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: pat.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: pat.c,v $
+Revision 1.9  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.8  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -56,6 +60,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "pat.h"
 #include "strings/dvb_str.h"
 #include "misc/output.h"
+#include "misc/pid_mem.h"
 
 
 
@@ -143,6 +148,8 @@ void decode_PAT (u_char *b, int len)
 	pl.reserved		 = getBits (b, 0, 16, 3);
 	pl.network_pmt_PID	 = getBits (b, 0, 19, 13);
 	b += 4;
+
+	store_PidToMem (pl.network_pmt_PID);
 
  	out_NL (3);
 	out_SW_NL (3,"Program_number: ",pl.program_number);

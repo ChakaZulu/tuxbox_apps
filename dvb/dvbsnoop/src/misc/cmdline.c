@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.31 2004/03/21 00:37:47 rasc Exp $
+$Id: cmdline.c,v 1.32 2004/03/31 21:14:23 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cmdline.c,v 1.31 2004/03/21 00:37:47 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.32  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.31  2004/03/21 00:37:47  rasc
 Query FrontEnd Info  (option: -s feinfo)
 
@@ -172,6 +176,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->mask = 0;
   opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
   opt->crc = 0;
+  opt->spider_pid = 0;
   opt->packet_count = 0;
   opt->packet_header_sync = 1;
   opt->packet_mode = SECT;
@@ -211,7 +216,10 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-nohexdumpbuffer")) opt->buffer_hexdump = 0;
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
      else if (!strcmp (argv[i],"-nph")) opt->buffer_hexdump = 0; // old option  use -ph and -nhdb/-hdb
-     else if (!strcmp (argv[i],"-if")) {
+     else if (!strcmp (argv[i],"-spiderpid")) {
+	 opt->spider_pid = 1;
+	 opt->packet_count = 1;
+     } else if (!strcmp (argv[i],"-if")) {
 	 opt->inpPidFile = argv[++i];		// input filename
 	 if (!opt->inpPidFile) opt->inpPidFile = ""; 
 	 if (!strcmp(opt->inpPidFile,"-"))  opt->inpPidFile = "/dev/stdin"; 
@@ -314,6 +322,7 @@ static void usage (void)
     printf("   -sync:        Simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -nosync:      No header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -n count:     receive count packets (0=no limit) [-n 0]\n");
+    printf("   -spiderpid:   snoop referenced pids (sets -n 1) \n");
     printf("   -b:           binary output of packets (disables other output)\n");
     printf("   -if:          input file, reads from binary file instead of demux device\n");
     printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");

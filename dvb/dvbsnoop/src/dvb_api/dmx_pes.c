@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.25 2004/02/15 22:22:28 rasc Exp $
+$Id: dmx_pes.c,v 1.26 2004/03/31 21:14:23 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,10 @@ $Id: dmx_pes.c,v 1.25 2004/02/15 22:22:28 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.26  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.25  2004/02/15 22:22:28  rasc
 cmd option: -hexdumpbuffer -nohexdumpbuffer
 
@@ -266,7 +270,7 @@ int  doReadPES (OPTION *opt)
 
     // count packets ?
     if (opt->packet_count > 0) {
-       if (--opt->packet_count == 0) break;
+       if (count >= opt->packet_count) break;
     }
 
 

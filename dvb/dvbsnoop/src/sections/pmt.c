@@ -1,5 +1,5 @@
 /*
-$Id: pmt.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
+$Id: pmt.c,v 1.9 2004/03/31 21:14:23 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: pmt.c,v 1.8 2004/02/12 21:21:21 rasc Exp $
 
 
 $Log: pmt.c,v $
+Revision 1.9  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.8  2004/02/12 21:21:21  rasc
 MHP AIT descriptors
 some smaller changes
@@ -57,6 +61,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
 #include "misc/output.h"
+#include "misc/pid_mem.h"
 
 
 
@@ -131,6 +136,7 @@ void decode_PMT (u_char *b, int len)
  }
 
 
+
  out_SB_NL (3,"section_syntax_indicator: ",p.section_syntax_indicator);
  out_SB_NL (6,"(fixed): ",0);
  out_SB_NL (6,"reserved_1: ",p.reserved_1);
@@ -146,6 +152,8 @@ void decode_PMT (u_char *b, int len)
 
  out_SB_NL (6,"reserved_3: ",p.reserved_3);
  out_SW_NL (3,"PCR PID: ",p.pcr_pid);
+ // store_PidToMem (p.pcr_pid);    $$$ TODO PCR is no section...
+
  out_SB_NL (6,"reserved_4: ",p.reserved_4);
  out_SW_NL (5,"Program_info_length: ",p.program_info_length);
 
@@ -175,6 +183,10 @@ void decode_PMT (u_char *b, int len)
    p2.elementary_PID		 = getBits (b, 0, 11, 13);
    p2.reserved_2		 = getBits (b, 0, 24,  4);
    p2.ES_info_length		 = getBits (b, 0, 28, 12);
+
+   if (*dvbstrStream_TYPE_SHORT (p2.stream_type) == 'S') {	// SECTION?
+   	store_PidToMem (p2.elementary_PID);			// $$$ TODO maybe PES-Spider too?
+   }
 
    out_NL (3);
    out_S2B_NL (3,"Stream_type: ",p2.stream_type,

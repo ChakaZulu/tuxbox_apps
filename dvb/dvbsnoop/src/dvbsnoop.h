@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.18 2004/01/01 20:09:15 rasc Exp $
+$Id: dvbsnoop.h,v 1.19 2004/03/31 21:14:22 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: dvbsnoop.h,v 1.18 2004/01/01 20:09:15 rasc Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.19  2004/03/31 21:14:22  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.18  2004/01/01 20:09:15  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -82,7 +86,7 @@ dvbsnoop v0.7  -- Commit to CVS
 */
 
 #ifndef __DVBSNOOP_H
-#define __DVBSNOOP_H 1
+#define __DVBSNOOP_H 
 
 #include <stdio.h>
 #include <stdlib.h>

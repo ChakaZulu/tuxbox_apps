@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.19 2004/03/10 21:05:53 rasc Exp $ 
+$Id: dvb_str.h,v 1.20 2004/03/31 21:14:23 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: dvb_str.h,v 1.19 2004/03/10 21:05:53 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.20  2004/03/31 21:14:23  rasc
+New: Spider section pids  (snoop referenced section pids),
+some minor changes
+
 Revision 1.19  2004/03/10 21:05:53  rasc
 WSS (Wide Screen Signalling)  data decoding
 
@@ -90,6 +94,7 @@ char *dvbstrHandover_TYPE(u_int tag);
 char *dvbstrOrigin_TYPE(u_int tag);
 char *dvbstrService_TYPE(u_int tag);
 char *dvbstrStream_TYPE(u_int tag);
+char *dvbstrStream_TYPE_SHORT (u_int flag);
 char *dvbstrAudio_TYPE(u_int tag);
 char *dvbstrCASystem_ID(u_int id);
 char *dvbstrDataBroadcast_ID(u_int flag);
