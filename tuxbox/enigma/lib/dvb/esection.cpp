@@ -149,10 +149,16 @@ eSection::~eSection()
 		eDebug("deleted still locked table");
 }
 
-	int eSection::start( const char* dmxdev )
+int eSection::start( const char* dmxdev )
 {
 	if (timer && (version==-1) && !(flags&SECREAD_NOTIMEOUT))
-		timer->start((pid==0x14)?90000:10000, true);
+		timer->start(
+			pid == 0x14 /* TOT/TDT */ ? 90000 :
+			pid == 0x10     /* NIT */ ? 12000 :
+			pid == 0x00     /* PAT */ ?  2500 :
+			pid == 0x11     /* SDT */ ?  5000 :
+			pid == 0x12     /* EIT */ ?  4000 :
+			tableid == 0x02 /* PMT */ ?  2500 : 10000, true);
 	return setFilter(pid, tableid, tableidext, version, dmxdev);
 }
 

@@ -111,21 +111,28 @@ eDVB::eDVB()
 	case eSystemInfo::dbox2Sagem:
 		new eAVSwitchSagem;
 		break;
-#ifdef ENABLE_RFMOD
-	case eSystemInfo::DM5600:
-		new eRFmod;
-		eRFmod::getInstance()->init();
-#endif
 	case eSystemInfo::dbox2Nokia:
 	default:
 		new eAVSwitchNokia;
 		break;
 	}
 
+#ifdef ENABLE_RFMOD
+	if ( eSystemInfo::getInstance()->hasRFMod() )
+	{
+		new eRFmod;
+		eRFmod::getInstance()->init();
+	}
+#endif
+
 //	tMHWEIT=0;
 
 		// init dvb recorder
 	recorder=0;
+
+#ifndef DISABLE_FILE
+	CONNECT( gotPMT, eDVB::recUpdatePIDs );
+#endif
 
 	eDebug("eDVB::eDVB done.");
 }
@@ -238,14 +245,63 @@ void eDVB::configureNetwork()
 }
 
 #ifndef DISABLE_FILE
+void eDVB::recUpdatePIDs( PMT *pmt )
+{
+	if (recorder && pmt)
+	{
+		pmt->lock();
+
+		if (Decoder::parms.pmtpid != -1)  // PMT
+			recorder->addNewPID(Decoder::parms.pmtpid);
+
+		recorder->addNewPID(0); // PAT
+
+		recorder->addNewPID(pmt->PCR_PID);  // PCR
+
+		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
+		{
+			int record=0;
+			switch (i->stream_type)
+			{
+			case 1:	// video..
+			case 2:
+				record=1;
+				break;
+			case 3:	// audio..
+			case 4:
+				record=1;
+				break;
+			case 6:
+				for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
+				{
+					if (it->Tag() == DESCR_AC3)
+						record=1;
+#ifdef RECORD_TELETEXT
+					if (it->Tag() == DESCR_TELETEXT)
+						record=1;
+#endif
+				}
+				break;
+			}
+			if (record)
+				recorder->addNewPID(i->elementary_PID);
+		}
+		pmt->unlock();
+		recorder->validatePIDs();
+	}
+}
+
 void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 {
 	if (recorder)
 		recEnd();
+
 	recorder=new eDVBRecorder();
+
 	recorder->open(filename);
+
 	CONNECT(recorder->recMessage, eDVB::recMessage);
-	
+
 	PMT *pmt=getPMT();
 	if (!pmt)
 	{
@@ -257,14 +313,16 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 			recorder->addPID(Decoder::parms.tpid);
 		if (Decoder::parms.pcrpid != -1)
 			recorder->addPID(Decoder::parms.pcrpid);
-	} else
+	}
+	else
 	{
-		recorder->addPID(pmt->PCR_PID);
+
 #ifdef RECORD_ECM
 		for (ePtrList<Descriptor>::iterator i(pmt->program_info.begin()); i != pmt->program_info.end(); ++i)
 			if (i->Tag() == 9)
 				recorder->addPID(((CADescriptor*)*i)->CA_PID);
 #endif
+
 		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 		{
 			int record=0;
@@ -301,7 +359,10 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 		pmt->unlock();
 	}
 
+	recorder->addPID(pmt->PCR_PID);
+
 	recorder->addPID(0); // PAT
+
 	if (Decoder::parms.pmtpid != -1)
 		recorder->addPID(Decoder::parms.pmtpid);
 

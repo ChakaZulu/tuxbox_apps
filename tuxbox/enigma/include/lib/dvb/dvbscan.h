@@ -56,13 +56,16 @@ class eDVBScanController: public eDVBController, public Object
 	void NITready(int error);
 	void ONITready(int error);
 	void BATready(int error);
-	
+	void FreeCheckFinished();
+
 	std::list<eTransponder> knownTransponder;
 	std::list<eTransponder> changedTransponder;
 	std::list<eTransponder>::iterator current;
 
 	int handleSDT(const SDT *sdt);
 
+	void freeCheckFinished();
+	Signal0<void> freeCheckFinishedCallback;
 public:
 	enum
 	{
@@ -73,7 +76,8 @@ public:
 		flagSkipKnownNIT=8,
 		flagClearList=16,
 		flagSkipOtherOrbitalPositions=32,
-		flagNoCircularPolarization=64
+		flagNoCircularPolarization=64,
+		flagOnlyFree=128
 	};
 
 	eDVBScanController(eDVB &dvb);
@@ -91,7 +95,8 @@ public:
 	void setSkipKnownNIT(int skip);
 	void setSkipOtherOrbitalPositions(int skipOtherOP);
 	void setNoCircularPolarization(int nocircular);
-	
+	void setOnlyFree(int onlyFree);
+
 	void start();
 };
 

@@ -36,8 +36,9 @@ eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
 	CONNECT(dvb.tNIT.tableReady, eDVBScanController::NITready);
 	CONNECT(dvb.tONIT.tableReady, eDVBScanController::ONITready);
 	CONNECT(dvb.tBAT.tableReady, eDVBScanController::BATready);
+	CONNECT(freeCheckFinishedCallback, eDVBScanController::freeCheckFinished );
 
-	flags=flagNetworkSearch|flagClearList;
+	flags=0;
 #if DEBUG_TO_FILE
 	FILE *out = fopen("bla.out", "a");
 	if ( !out )
@@ -169,10 +170,16 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 				}
 			}
 			sdt->unlock();
+
+			if ( flags & flagOnlyFree )
+			{
+				dvb.setState(eDVBScanState(eDVBScanState::stateScanWait));
+				break;
+			}
 		}
 
-		scanOK|=1;
 		eDebug("scanOK %d", scanOK);
+		scanOK|=1;
 		if (scanOK==15)
 			dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanComplete));
 
@@ -358,6 +365,9 @@ int eDVBScanController::handleSDT(const SDT *sdt)
 	transponder = &real;
 	// set transponder to stateOK
 	transponder->state=eTransponder::stateOK;
+	// set flagOnlyFree in Transponder...
+	if ( flags & flagOnlyFree )
+		transponder->state |= eTransponder::stateOnlyFree;
 
 	if (old) // scan for duplicate TPs after TSID / ONID Update
 		for (std::list<eTransponder>::iterator it(current); it != knownTransponder.end(); it++)
@@ -374,8 +384,10 @@ int eDVBScanController::handleSDT(const SDT *sdt)
 	if (knownNetworks.count(onid.get()))
 		known=1;
 
-		// insert the services
-	dvb.settings->getTransponders()->handleSDT(sdt, dvb_namespace, onid, tsid);
+	if ( flags & flagOnlyFree )
+		dvb.settings->getTransponders()->handleSDT(sdt, dvb_namespace, onid, tsid, &freeCheckFinishedCallback );
+	else
+		dvb.settings->getTransponders()->handleSDT(sdt, dvb_namespace, onid, tsid );
 
 	return known;
 }
@@ -524,7 +536,22 @@ void eDVBScanController::setNoCircularPolarization(int nocircular)
 
 }
 
+void eDVBScanController::setOnlyFree(int onlyFree)
+{
+	if ( onlyFree )
+		flags|=flagOnlyFree;
+	else
+		flags&=~flagOnlyFree;
+}
+
 void eDVBScanController::start()
 {
 	dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanBegin));
+}
+
+void eDVBScanController::freeCheckFinished()
+{
+	scanOK|=1;
+	if (scanOK==15)
+		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanComplete));
 }

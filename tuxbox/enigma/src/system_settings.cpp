@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.2 2003/09/07 00:03:58 ghostrider Exp $
+ * $Id: system_settings.cpp,v 1.3 2003/09/25 21:08:59 ghostrider Exp $
  */
 
 #include <system_settings.h>
@@ -41,7 +41,8 @@ eSystemSettings::eSystemSettings()
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	CONNECT((new eListBoxEntryMenu(&list, _("A/V Settings"), eString().sprintf("(%d) %s", ++entry, _("open A/V settings")) ))->selected, eSystemSettings::av_settings);
 #ifdef ENABLE_RFMOD
-	CONNECT((new eListBoxEntryMenu(&list, _("UHF Modulator"), eString().sprintf("(%d) %s", ++entry, _("open UHF-Modulator setup")) ))->selected, eSystemSettings::uhf_modulator);
+	if ( eSystemInfo::getInstance()->hasRFMod() )
+		CONNECT((new eListBoxEntryMenu(&list, _("UHF Modulator"), eString().sprintf("(%d) %s", ++entry, _("open UHF-Modulator setup")) ))->selected, eSystemSettings::uhf_modulator);
 #endif
 #ifndef DISABLE_FILE
 	if ( eSystemInfo::getInstance()->hasHDD() )

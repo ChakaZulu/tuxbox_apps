@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.16 2003/09/07 00:03:56 ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.17 2003/09/25 21:08:59 ghostrider Exp $
  */
 
 #include <enigma_scan.h>
@@ -36,7 +36,9 @@
 #include <lib/system/info.h>
 
 eZapScan::eZapScan()
-	:eSetupWindow(_("Service Searching"), 7, 400)
+	:eSetupWindow(_("Service Searching"),
+	eSystemInfo::getInstance()->getFEType()
+		== eSystemInfo::feSatellite ? 8 : 7, 400)
 {
 	int entry=0;
 	move(ePoint(160, 140));
@@ -48,6 +50,9 @@ eZapScan::eZapScan()
 		new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	}
 	CONNECT((new eListBoxEntryMenu(&list, _("Automatic Transponder Scan"), eString().sprintf("(%d) %s", ++entry, _("open automatic transponder scan"))))->selected, eZapScan::sel_autoScan);
+	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )  // only when a sat box is avail we shows a satellite config
+		CONNECT((new eListBoxEntryMenu(&list, _("Automatic Multisat Scan"), eString().sprintf("(%d) %s", ++entry, _("open automatic transponder scan"))))->selected, eZapScan::sel_multiScan);
+
 	CONNECT((new eListBoxEntryMenu(&list, _("Manual Transponder Scan"), eString().sprintf("(%d) %s", ++entry, _("open manual transponder scan"))))->selected, eZapScan::sel_manualScan);
 }
 
@@ -60,6 +65,18 @@ void eZapScan::sel_autoScan()
 #endif
 	hide();
 	setup.exec(TransponderScan::stateAutomatic);
+	show();
+}
+
+void eZapScan::sel_multiScan()
+{
+#ifndef DISABLE_LCD
+	TransponderScan setup(LCDTitle, LCDElement);
+#else
+	TransponderScan setup;
+#endif
+	hide();
+	setup.exec(TransponderScan::stateMulti);
 	show();
 }
 

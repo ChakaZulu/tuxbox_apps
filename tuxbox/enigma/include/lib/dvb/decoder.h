@@ -47,6 +47,7 @@ public:
 	static void setVideoFormat( int format );
 	static int  displayIFrame(const char *frame, int len);
 	static int  displayIFrameFromFile(const char *filename);
+	static void showPicture(int i=1);
 };
 
 #endif

@@ -22,6 +22,7 @@ private:
 	void sel_rotorConfig();
 	void sel_transponderEdit();
 	void sel_autoScan();
+	void sel_multiScan();
 	void sel_manualScan();
 public:
 	static eLNB* getRotorLNB(int silent);

@@ -88,7 +88,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
 				break;
 			}
-			if (n->state!=eTransponder::stateOK)
+			if ( !(n->state&eTransponder::stateOK) )
 			{
 				eDebug("couldn't tune (state is %x)", n->state);
 				service_state=ENOENT;
@@ -327,12 +327,18 @@ void eDVBServiceController::SDTready(int error)
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
-			if (dvb.settings->getTransponders()->handleSDT(sdt, service.getDVBNamespace()))
-				dvb.serviceListChanged();
-
+			if ( transponder->state & eTransponder::stateOnlyFree )
+				dvb.settings->getTransponders()->handleSDT(sdt, service.getDVBNamespace(), -1, -1, &freeCheckFinishedCallback );
+			else
+				dvb.settings->getTransponders()->handleSDT(sdt, service.getDVBNamespace());
 			sdt->unlock();
 		}
 	}
+}
+
+void eDVBServiceController::freeCheckFinished()
+{
+	eDebug("freeCheckFinished");
 }
 
 void eDVBServiceController::PMTready(int error)

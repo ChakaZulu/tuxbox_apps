@@ -256,14 +256,15 @@ struct saveTransponder: public std::unary_function<const eTransponder&, void>
 	}
 	void operator()(eTransponder &t)
 	{
-		if (t.state!=eTransponder::stateOK)
-			return;
-		fprintf(f, "%08x:%04x:%04x\n", t.dvb_namespace.get(), t.transport_stream_id.get(), t.original_network_id.get());
-		if (t.cable.valid)
-			fprintf(f, "\tc %d:%d:%d:%d\n", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion, t.cable.modulation);
-		if (t.satellite.valid)
-			fprintf(f, "\ts %d:%d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.orbital_position, t.satellite.inversion);
-		fprintf(f, "/\n");
+		if (t.state&eTransponder::stateOK)
+		{
+			fprintf(f, "%08x:%04x:%04x\n", t.dvb_namespace.get(), t.transport_stream_id.get(), t.original_network_id.get());
+			if (t.cable.valid)
+				fprintf(f, "\tc %d:%d:%d:%d", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion, t.cable.modulation);
+			if (t.satellite.valid)
+				fprintf(f, "\ts %d:%d:%d:%d:%d:%d", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.orbital_position, t.satellite.inversion);
+			fprintf(f, ":%d\n/\n", t.state & eTransponder::stateOnlyFree );
+		}
 	}
 	~saveTransponder()
 	{
@@ -324,18 +325,21 @@ void eDVBSettings::loadServices()
 			fgets(line, 256, f);
 			if (!strcmp(line, "/\n"))
 				break;
+			int onlyFree=0;
 			if (line[1]=='s')
 			{
 				int frequency, symbol_rate, polarisation, fec, sat, inversion=INVERSION_OFF;
-				sscanf(line+2, "%d:%d:%d:%d:%d:%d", &frequency, &symbol_rate, &polarisation, &fec, &sat, &inversion);
+				sscanf(line+2, "%d:%d:%d:%d:%d:%d:%d", &frequency, &symbol_rate, &polarisation, &fec, &sat, &inversion, &onlyFree);
 				t.setSatellite(frequency, symbol_rate, polarisation, fec, sat, inversion);
 			}
 			if (line[1]=='c')
 			{
 				int frequency, symbol_rate, inversion=INVERSION_OFF, modulation=3;
-				sscanf(line+2, "%d:%d:%d:%d", &frequency, &symbol_rate, &inversion, &modulation);
+				sscanf(line+2, "%d:%d:%d:%d:%d", &frequency, &symbol_rate, &inversion, &modulation, &onlyFree);
 				t.setCable(frequency, symbol_rate, inversion, modulation);
 			}
+			if ( onlyFree )
+				t.state |= eTransponder::stateOnlyFree;
 		}
 	}
 

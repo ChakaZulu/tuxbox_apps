@@ -80,8 +80,6 @@ class eServiceSelector: public eWindow
 	eTimer ciDelay;
 
 	eListBoxEntryService *goUpEntry;
-protected:
-	int eventHandler(const eWidgetEvent &event);
 private:
 	void pathUp();
 	void fillServiceList(const eServiceReference &ref);
@@ -96,6 +94,7 @@ private:
 	void updateCi();
 	void doSPFlags(const eServiceReference &ref);
 public:
+	int eventHandler(const eWidgetEvent &event);
 	void setKeyDescriptions(bool editMode=false);
 	void forEachServiceRef( Signal1<void,const eServiceReference&>, bool );
 	int movemode;

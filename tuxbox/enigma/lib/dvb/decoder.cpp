@@ -655,9 +655,9 @@ void Decoder::startTrickmode()
 			eDebug("VIDEO_FAST_FORWARD failed (%m)");
 		if (fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0)<0)
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
+		if (fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_MUTE,1)<0)
+			eDebug("AUDIO_SET_MUTE failed (%m)");
 	}
-	if (fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_MUTE,1)<0)
-		eDebug("AUDIO_SET_MUTE failed (%m)");
 }
 
 void Decoder::stopTrickmode()
@@ -669,9 +669,9 @@ void Decoder::stopTrickmode()
 			eDebug("VIDEO_CONTINUE failed (%m)");
 		if (fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1)<0)
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
+		if (fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_MUTE,0)<0)
+			eDebug("AUDIO_SET_MUTE failed (%m)");
 	}
-	if (fd.audio != -1 && ::ioctl(fd.audio, AUDIO_SET_MUTE,0)<0)
-		eDebug("AUDIO_SET_MUTE failed (%m)");
 }
 
 void Decoder::addCADescriptor(__u8 *descriptor)
@@ -701,11 +701,27 @@ int Decoder::displayIFrame(const char *frame, int len)
 		write(fdv, &buf, 128);
 	}
 
-	if (::ioctl(fd.video, VIDEO_SET_BLANK, 0) < 0 )
-		eDebug("VIDEO_SET_BLANK failed (%m)");
+	showPicture();
 
 	close(fdv);
 	return 0;
+}
+
+void Decoder::showPicture( int i )
+{
+	int wasOpen = fd.video != -1;
+
+	if (!wasOpen)
+		fd.video = open(VIDEO_DEV, O_RDWR);
+
+	if (::ioctl(fd.video, VIDEO_SET_BLANK, !i) < 0 )
+		eDebug("VIDEO_SET_BLANK failed (%m)");
+
+	if (!wasOpen)
+	{
+		close(fd.video);
+		fd.video = -1;
+	}
 }
 
 int Decoder::displayIFrameFromFile(const char *filename)

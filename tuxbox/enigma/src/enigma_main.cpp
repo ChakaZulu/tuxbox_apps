@@ -2097,7 +2097,7 @@ void eZapMain::handleNVODService(SDTEntry *sdtentry)
 	eServiceInterface::getInstance()->removeRef(eServiceInterface::getInstance()->service);
 }
 
-void eZapMain::showServiceSelector(int dir, eServiceReference root, eServiceReference path, int newmode )
+void eZapMain::showServiceSelector(int dir, int newTarget )
 {
 	hide();
 
@@ -2118,8 +2118,39 @@ void eZapMain::showServiceSelector(int dir, eServiceReference root, eServiceRefe
 			savedmode[m]=modeLast[m];
 	int oldmode=mode;
 
-	if ( newmode != -1 && newmode != mode )
-		setMode(newmode);
+	if ( newTarget )
+	{
+		eActionMap *amap = eActionMapList::getInstance()->findActionMap("serviceSelector");
+		eAction *action=0;
+		int newMode=-1;
+		switch (newTarget)
+		{
+			case pathRoot:
+				newMode=modeFile;
+			case pathAll:
+				action = amap->findAction("showAll");
+				break;
+			case pathPlaylist:
+				newMode=modeFile;
+			case pathProvider:
+				action = amap->findAction("showProvider");
+				break;
+			case pathBouquets:
+				action = amap->findAction("showBouquets");
+				break;
+			case pathRecordings:
+				newMode = modeFile;
+			case pathSatellites:
+				action = amap->findAction("showSatellites");
+				break;
+		}
+		if ( action )
+		{
+			if ( mode != newMode )
+				setMode( newMode );
+			e->eventHandler( eWidgetEvent(eWidgetEvent::evtAction, action));
+		}
+	}
 
 	e->selectService(eServiceInterface::getInstance()->service);
 	const eServiceReference *service = e->choose(dir); // reset path only when NOT showing specific list
@@ -2704,7 +2735,7 @@ int eZapMain::recordDVR(int onoff, int user, const char *timer_descr )
 				int ret = mb.exec();
 				mb.hide();
 				if ( ret == eMessageBox::btYes )
-					showServiceSelector( eServiceSelector::dirLast, eServiceStructureHandler::getRoot(eServiceStructureHandler::modeFile), recordingsref, modeFile );
+					showServiceSelector( eServiceSelector::dirLast, pathRecordings );
 			}
 		}
 		return 0;
@@ -3469,7 +3500,7 @@ void eZapMain::addServiceToUserBouquet(eServiceReference *service, int dontask)
 		s.exec();
 		s.hide();
 
-		if ( s.curSel != eServiceReference() )
+		if ( s.curSel )
 		{
 			currentSelectedUserBouquetRef = s.curSel;
 			currentSelectedUserBouquet = (ePlaylist*)eServiceInterface::getInstance()->addRef( currentSelectedUserBouquetRef );
@@ -4058,7 +4089,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			showEPG_Streaminfo();
 		else if (event.action == &i_numberActions->key0)
 		{
-			if ( !playlistmode && playlist->getConstList().size() > 1 )
+			if ( handleState() && !playlistmode && playlist->getConstList().size() > 1 )
 			{
 				std::list<ePlaylistEntry>::iterator prev,last;
 				last = playlist->getList().end();
@@ -4097,20 +4128,14 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_numberActions->key9)
 			num=9;
 		else if (mode != modeFile && event.action == &i_enigmaMainActions->showUserBouquets)
-			showServiceSelector( -1, mode==modeTV?userTVBouquetsRef:userRadioBouquetsRef );
+			showServiceSelector( -1, pathBouquets );
 		else if (mode != modeFile && event.action == &i_enigmaMainActions->showDVBBouquets)
-		{
-			eServiceReference root = eServiceStructureHandler::getRoot(mode==modeTV?eServiceStructureHandler::modeTV:eServiceStructureHandler::modeRadio);
-			if ( mode == modeTV )
-				showServiceSelector( -1, root, eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, (1<<4)|(1<<1), 0xFFFFFFFF) );
-			else
-				showServiceSelector( -1, root, eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, 1<<2, 0xFFFFFFFF ) );
-		}
+			showServiceSelector( -1, pathProvider );
 #ifndef DISABLE_FILE
 		else if (event.action == &i_enigmaMainActions->showRecMovies)
-			showServiceSelector( eServiceSelector::dirLast, eServiceStructureHandler::getRoot(eServiceStructureHandler::modeFile), recordingsref, modeFile );
+			showServiceSelector( eServiceSelector::dirLast, pathRecordings );
 		else if (event.action == &i_enigmaMainActions->showPlaylist)
-			showServiceSelector( -1, playlistref );
+			showServiceSelector( -1, pathPlaylist );
 #endif
 		else if (event.action == &i_enigmaMainActions->modeRadio)
 		{
@@ -5278,8 +5303,8 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 
 	eListBoxEntry *prev=0;
 
-	if ( !(ref.flags & eServiceReference::isDirectory)
-		&& ( ref.type == 0x1000 // mp3
+	if ( (ref.flags & eServiceReference::isDirectory)
+		&& (ref != eServiceReference()) && ( ref.type == 0x1000 // mp3
 		|| ( ref.flags & eServiceReference::mustDescent )
 		|| ( ref.type == eServiceReference::idDVB && ref.path ) ) )
 			prev = new eListBoxEntryText(&list, _("add service to playlist"), (void*)3);
@@ -5295,33 +5320,36 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 
 	if (path.type == eServicePlaylistHandler::ID)
 	{
-		// not in file mode
-		if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
+		if (ref)  // valid entry? ( GO UP is not valid )
 		{
-			// copy complete provider to bouquets
-			if ( ref.flags & eServiceReference::flagDirectory )
-				prev = new eListBoxEntryText(&list, _("duplicate bouquet"), (void*)8);
-			else // add dvb service to specific bouquet
+			// not in file mode
+			if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 			{
-				prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4);
-				if ( path.type == eServicePlaylistHandler::ID )
-					prev = new eListBoxEntryText(&list, _("add marker"), (void*)13);
+				// copy complete provider to bouquets
+				if ( ref.flags & eServiceReference::flagDirectory )
+					prev = new eListBoxEntryText(&list, _("duplicate bouquet"), (void*)8);
+				else // add dvb service to specific bouquet
+				{
+					prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4);
+					if ( path.type == eServicePlaylistHandler::ID )
+						prev = new eListBoxEntryText(&list, _("add marker"), (void*)13);
+				}
+				prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 			}
+
+			// rename bouquet
+			if ( (ref.type == eServicePlaylistHandler::ID) )
+				prev = new eListBoxEntryText(&list, _("rename"), (void*)7);
+
+			// rename dvb service
+			if ( ref.type == eServiceReference::idDVB )
+				prev = new eListBoxEntryText(&list, _("rename"), (void*)9);
+
+			// all what contain in a playlists is deleteable
+				prev = new eListBoxEntryText(&list, _("delete"), (void*)1);
+
 			prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 		}
-
-		// rename bouquet
-		if ( (ref.type == eServicePlaylistHandler::ID) )
-			prev = new eListBoxEntryText(&list, _("rename"), (void*)7);
-
-		// rename dvb service
-		if ( ref.type == eServiceReference::idDVB )
-			prev = new eListBoxEntryText(&list, _("rename"), (void*)9);
-
-		// all what contain in a playlists is deleteable
-		prev = new eListBoxEntryText(&list, _("delete"), (void*)1);
-
-		prev = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 
 		// move mode in playlists
 		if ( eZap::getInstance()->getServiceSelector()->movemode )
@@ -5329,7 +5357,7 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 		else
 			prev = new eListBoxEntryText(&list, _("enable move mode"), (void*)2);
 	}
-	else  // not in a playlist
+	else if (ref) // not in a playlist
 	{
 		// not in file mode
 		if ( eZapMain::getInstance()->getMode() != eZapMain::modeFile )
@@ -5361,12 +5389,15 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	// options for activated parental locking
 	if ( eConfig::getInstance()->getParentalPin() )
 	{
-		if ( prev->isSelectable() )
-			new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
-		if ( ref.isLocked() )
-			new eListBoxEntryText(&list, _("unlock"), (void*)11);
-		else
-			new eListBoxEntryText(&list, _("lock"), (void*)10);
+		if (ref)
+		{
+			if ( prev->isSelectable() )
+				new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+			if ( ref.isLocked() )
+				new eListBoxEntryText(&list, _("unlock"), (void*)11);
+			else
+				new eListBoxEntryText(&list, _("lock"), (void*)10);
+		}
 
 		if ( eConfig::getInstance()->pLockActive() )
 			new eListBoxEntryText(&list, _("disable parental lock"), (void*)12 );

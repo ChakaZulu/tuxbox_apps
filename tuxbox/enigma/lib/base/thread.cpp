@@ -13,11 +13,20 @@ eThread::eThread()
 	alive=0;
 }
 
-void eThread::run()
+void eThread::run( int prio, int policy )
 {
 	alive=1;
-	pthread_create(&the_thread, 0, wrapper, this);
-}
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	if (prio)
+	{
+		struct sched_param p;
+		p.__sched_priority=prio;
+		pthread_attr_setschedpolicy(&attr, policy );
+		pthread_attr_setschedparam(&attr, &p);
+	}
+	pthread_create(&the_thread, &attr, wrapper, this);
+}                     
 
 eThread::~eThread()
 {

@@ -123,12 +123,13 @@ public:
 		controllerService
 	};
 	
-	
+
 protected:
 	int controllertype;
 	eDVBController *controller;
 
 private:
+	void recUpdatePIDs(PMT*);
 	void tunedIn(eTransponder*, int);
 	eDVBState state;
 	int mID;

@@ -12,8 +12,8 @@ public:
 	bool thread_running() { return alive; }
 	eThread();
 	virtual ~eThread();
-	
-	void run();
+
+	void run(int prio=0, int policy=0);
 
 	virtual void thread()=0;
 	

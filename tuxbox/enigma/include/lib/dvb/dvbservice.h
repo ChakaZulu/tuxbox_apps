@@ -43,6 +43,8 @@ public:
 
 class eDVBServiceController: public eDVBController, public Object
 {
+	Signal0<void> freeCheckFinishedCallback;
+	void freeCheckFinished();
 public:
 		/* current service */
 	eServiceReferenceDVB service,  // meta-service

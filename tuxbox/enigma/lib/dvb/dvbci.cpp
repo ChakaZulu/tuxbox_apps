@@ -181,10 +181,13 @@ void eDVBCI::mmi_end()
 void eDVBCI::mmi_enqansw(unsigned char *buf)
 {
 //	eDebug("got mmi_answer");
-	unsigned char buffer[ buf[0]+7 ];
-	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08",4);
-	memcpy(buffer+7, buf, buf[0] );
-	sendTPDU(0xA0,buf[0]+7,1,buffer);
+	unsigned char buffer[ buf[0]+8 ];
+	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08",7);
+	memcpy(buffer+7, buf, buf[0]+1 );
+	for (int i=0; i < buf[0]+8; i++ )
+		eDebugNoNewLine("%02x ", buffer[i]);
+	eDebug("");
+	sendTPDU(0xA0,buf[0]+8,1,buffer);
 }
 
 void eDVBCI::mmi_menuansw(int val)
@@ -778,7 +781,13 @@ void eDVBCI::handle_spdu(unsigned int tpdu_tc_id,unsigned char *data,int len)
 						if(sessions[i].service_class == 0x400041)
 						{
 							sessions[i].state=STATE_FREE;
-							printf("freeing session %d\n",i);
+							eDebug("freeing session %d\n",i);
+							if ( i == 4 )
+							{
+								eDebug("close mmi after session free");
+								char *buf="\x9f\x88\x00\x00";
+								ci_mmi_progress(buf,4);
+							}
 							break;
 						}
 				sendTPDU(0xA0,5,tpdu_tc_id,buffer);

@@ -16,6 +16,18 @@ class eFEStatusWidget;
 class eDVBEvent;
 class eDVBState;
 
+struct scanEntry
+{
+	tpPacket *packet;
+	bool onlyFree;
+	bool operator < ( const scanEntry& e ) const
+	{
+		if ( !packet || e.packet )
+			return 0;
+		return packet->orbital_position < e.packet->orbital_position;
+	}
+};
+
 class tsSelectType: public eWidget
 {
 	eListBox<eListBoxEntryText> *list;
@@ -31,7 +43,7 @@ class tsManual: public eWidget
 	eButton *b_start;
 	eTransponderWidget *transponder_widget;
 	eFEStatusWidget *festatus_widget;
-	eCheckbox *c_clearlist, *c_searchnit, *c_useonit, *c_usebat;
+	eCheckbox *c_onlyFree, *c_searchnit, *c_useonit, *c_usebat;
 	eTimer updateTimer;
 	void start();
 	void abort();
@@ -47,8 +59,7 @@ class tsAutomatic: public eWidget
 {
 	eButton *b_start;
 	eComboBox *l_network;
-	eCheckbox *c_eraseall;
-	eCheckbox *c_nocircular;
+	eCheckbox *c_onlyFree, *c_nocircular;
 	eLabel *l_status;
 	std::list<eTransponder>::iterator current_tp, last_tp;
 	int automatic;
@@ -75,6 +86,7 @@ public:
 class tsScan: public eWidget
 {
 	eTimer timer;
+	eLabel *status;
 	eLabel *timeleft, *service_name, *service_provider, *services_scanned, *transponder_scanned;
 	eProgress *progress;
 	int tpLeft, scantime;
@@ -87,7 +99,34 @@ protected:
 	void addedTransponder( eTransponder* );
 public:
 	int tpScanned, newTVServices, newRadioServices, newDataServices, servicesScanned, newTransponders;
-	tsScan(eWidget *parent);
+	tsScan(eWidget *parent, eString satText="");
+};
+
+class eListBoxEntrySat: public eListBoxEntryText
+{
+	eTextPara *statePara;
+	const eString& redraw(gPainter *, const eRect&, gColor, gColor, gColor, gColor, int );
+public:
+	enum {
+		stateNotScan,
+		stateScan,
+		stateScanFree
+	};
+	int state;
+	void invalidate();
+	tpPacket *getTransponders() { return (tpPacket*) key; }
+	eListBoxEntrySat( eListBox<eListBoxEntrySat>*, tpPacket* );
+};
+
+class tsMultiSatScan: public eWidget
+{
+	eButton *start;
+	eListBox<eListBoxEntrySat> *satellites;
+	int eventHandler( const eWidgetEvent& );
+	void entrySelected( eListBoxEntrySat * );
+public:
+	tsMultiSatScan(eWidget *parent);
+	void getSatsToScan( std::list<scanEntry> &);
 };
 
 class TransponderScan: public eWindow
@@ -99,13 +138,16 @@ class TransponderScan: public eWindow
 #ifndef DISABLE_LCD
 	eWidget *LCDElement, *LCDTitle;
 #endif
+	std::list<scanEntry> toScan;
 public:
 	enum tState
 	{
 		stateMenu,
 		stateManual,
 		stateAutomatic,
+		stateMulti,
 		stateScan,
+		stateMultiScan,
 		stateDone,
 		stateEnd
 	};

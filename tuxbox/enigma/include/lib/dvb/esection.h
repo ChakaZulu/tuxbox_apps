@@ -200,15 +200,21 @@ public:
 		
 		if (!current->ready)
 			eFatal("was soll das denn? not ready? ICH GLAUBE ES HACKT!");
-			
+
+		Table *cur = current,
+					*nex = next;
+
 		/*emit*/ tableReady(0);
 
-		next=(Table*)current->createNext();
-		if (next)
+		if ( nex == next && cur == current )
 		{
-			CONNECT(next->tableReady, eAUTable::slotTableReady);
-			
-			next->start();
+			next=(Table*)current->createNext();
+
+			if (next)
+			{
+				CONNECT(next->tableReady, eAUTable::slotTableReady);
+				next->start();
+			}
 		}
 	}
 };

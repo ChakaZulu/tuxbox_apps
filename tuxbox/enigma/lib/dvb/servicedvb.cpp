@@ -713,9 +713,7 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 			if (recording)
 			{
 				startPlayback(current_filename, 1);
-				int fd = Decoder::getVideoDevice();
-				if (::ioctl(fd, VIDEO_SET_BLANK, 0) < 0 )
-					eDebug("VIDEO_SET_BLANK failed (%m)");
+				Decoder::showPicture();
 			}
 			else
 #endif

@@ -206,6 +206,9 @@ void enigmaMMI::gotMMIData( const char* data, int len )
 {
 	char *dest = new char[len];
 	memcpy( dest, data, len );
+/*	for (int i=0; i < len; i++)
+		eDebugNoNewLine("%02x ", data[i]);
+	eDebug("");*/
 	mmi_messages.send( eMMIMsg( dest, len ) );
 }
 
@@ -215,7 +218,6 @@ int enigmaMMI::eventHandler( const eWidgetEvent &e )
 	{
 		case eWidgetEvent::execBegin:
 			show();
-			responseTimer.start(30000);
 			mmi_messages.start();
 			conn = CONNECT(ci->ci_mmi_progress, enigmaMMI::gotMMIData );
 			return 1;
@@ -338,6 +340,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 	if( !memcmp(data+rp,TAG_MMI_CLOSE,TAG_LENGTH) )
 	{
+		eDebug("mmi_close");
 		rp += 3;
 		if ( *(data+rp) ) // timeout is set
 		{
@@ -387,7 +390,7 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 		memcpy(text,data+rp,size-2);
 
 		eDebug("TEXT:%s",text);
-
+		hideWaitForCIAnswer();
 		eMMIEnqWindow wnd(text, nrcount, blind );
 		open = &wnd;
 		int ret = wnd.exec();
@@ -597,7 +600,7 @@ eString eMMIEnqWindow::getAnswer()
 	ret="";
 	for ( int i=0; i < num; i++ )
 		ret += (char)(input->getNumber( i )+0x30);
-	eDebug("ret = %d", ret.c_str() );
+//	eDebug("ret = %s", ret.c_str() );
 	return ret;
 }
 

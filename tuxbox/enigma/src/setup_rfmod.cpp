@@ -77,13 +77,15 @@ eZapRFmodSetup::eZapRFmodSetup()
 	cl->move(ePoint(40,145));
 	cl->resize(eSize(200,40));
 
+	chan=21;
 	eConfig::getInstance()->getKey("/elitedvb/rfmod/channel",chan);
+
 	Channel=new eListBox<eListBoxEntryText>(this,cl);
 	Channel->loadDeco();
 	Channel->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	Channel->move(ePoint(220, 145));
 	Channel->resize(eSize(100,34));
-		
+
 	eListBoxEntryText* clentrys[49];
 
 	for(int i=21;i<70;i++)
@@ -100,6 +102,7 @@ eZapRFmodSetup::eZapRFmodSetup()
 	fl->move(ePoint(40,185));
 	fl->resize(eSize(200,40));
 
+	finetune=0;
 	eConfig::getInstance()->getKey("/elitedvb/rfmod/finetune",finetune);
 	FineTune=new eListBox<eListBoxEntryText>(this,fl);
 	FineTune->loadDeco();

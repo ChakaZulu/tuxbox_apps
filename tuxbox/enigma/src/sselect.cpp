@@ -445,15 +445,14 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	services->beginAtomic();
 	services->clearList();
 
-	if ( eZapMain::getInstance()->getMode() == eZapMain::modeFile
-		&& !movemode && path.size() > 1 && style != styleCombiColumn )
+	if ( path.size() > 1 && style != styleCombiColumn )
 		goUpEntry = new eListBoxEntryService(services, eServiceReference(), eListBoxEntryService::flagIsReturn);
 	else
 		goUpEntry = 0;
 
 	eServiceInterface *iface=eServiceInterface::getInstance();
 	ASSERT(iface);
-	
+
 	Signal1<void,const eServiceReference&> signal;
 	CONNECT(signal, eServiceSelector::addService);
 	
@@ -779,7 +778,7 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 					eZapMain::getInstance()->toggleMoveMode(this);
 				return;
 			}
-			else
+			else if ( ref )
 			{
 				services->setMoveMode(1);
 				eListBoxEntryService::selectedToMove=entry;
@@ -1409,7 +1408,7 @@ void eServiceSelector::setStyle(int newStyle, bool force)
 
 void eServiceSelector::bouquetSelChanged( eListBoxEntryService *entry)
 {
-	if ( entry && entry->service != eServiceReference() )
+	if ( entry && entry->service )
 	{
 		ci->clear();
 		services->beginAtomic();
@@ -1506,6 +1505,17 @@ void eServiceSelector::enterDirectory(const eServiceReference &ref)
 	actualize();
 	if (!selectService( eServiceInterface::getInstance()->service ))
 		services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
+
+	// we have a problem when selection not changes..
+	// the listbox don't emit "selected"... then our current
+	// selected entry is not valid.. to prevent this we set
+	// it manual...
+	eListBoxEntryService *cur = services->getCurrent();
+	if ( cur )
+		selected = cur->service;
+	else
+		selected = eServiceReference();
+
 	services->endAtomic();
 }
 

@@ -2020,7 +2020,7 @@ void eTimerEditView::showServiceSelector()
 	sel.setPath(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeTvRadio),eServiceReference() );
 	sel.setStyle(eServiceSelector::styleSingleColumn);
 
-/*	if ( tmpService != eServiceReference() )
+/*	if ( tmpService )
 		sel.selectServiceRecursive( tmpService );*/
 
 	const eServiceReference *ref = sel.choose(-1);

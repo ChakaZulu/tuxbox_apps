@@ -5,12 +5,12 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
-#if HAVE_DVB_API_VERSION == 3
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
+#if HAVE_DVB_API_VERSION == 3
 #include <lib/dvb/frontend.h>
 #include <tuxbox.h>
 #endif
@@ -140,6 +140,12 @@ eSystemInfo::eSystemInfo()
 			}
 		default:
 			break;
+	}
+	int fd = open ("/dev/rfmod0", O_RDWR);
+	if ( fd >= 0 )
+	{
+		hasrfmod=1;
+		close(fd);
 	}
 #endif
 }

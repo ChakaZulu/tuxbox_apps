@@ -231,7 +231,7 @@ public:
 
 	enum
 	{
-		stateToScan, stateError, stateOK
+		stateOK = 1, stateToScan = 2, stateOnlyFree = 4, stateError = 8
 	};
 	int state;
 
@@ -417,8 +417,8 @@ public:
 	eServiceReference()
 		: type(idInvalid), flags(0)
 	{
+		memset(data, 0, sizeof(data));
 	}
-
 	eServiceReference(int type, int flags)
 		: type(type), flags(flags)
 	{
@@ -737,7 +737,7 @@ protected:
 	int addNetwork(tpPacket &p, XMLTreeNode *node, int type);
 };
 
-class eTransponderList: public existNetworks
+class eTransponderList: public existNetworks, public Object
 {
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
@@ -747,9 +747,18 @@ class eTransponderList: public existNetworks
 	std::map<int,eServiceReferenceDVB> channel_number;
 	friend class eLNB;
 	friend class eSatellite;
-//	ePlaylist *newServices;
-//	eServiceReference newServicesRef;
+
+	eServiceReferenceDVB newService;
+	ePtrList<SDTEntry>::const_iterator curSDTEntry;
+	Signal0<void> *callback;
+	std::set<eServiceID> newServiceIds;
+	void gotPMT(int);
+	void addService();
+	PMT *pmt; // for only free check
+	void leaveService( const eServiceReferenceDVB& );
 public:
+
+	void leaveTransponder( eTransponder* );
 	std::map<tsref,int> TimeOffsetMap;
 	void readTimeOffsetData( const char* filename );
 	void writeTimeOffsetData( const char* filename );
@@ -777,7 +786,7 @@ public:
 
 	eTransponder &createTransponder(eDVBNamespace dvb_namespace,eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eServiceDVB &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
-	int handleSDT(const SDT *sdt, eDVBNamespace dvb_namespace, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1);
+	void handleSDT(const SDT *sdt, eDVBNamespace dvb_namespace, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1, Signal0<void> *callback=0 );
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
 

@@ -896,7 +896,8 @@ SDTEntry::SDTEntry(sdt_descr_t *descr)
 	service_id=HILO(descr->service_id);
 	EIT_schedule_flag=descr->EIT_schedule_flag;
 	EIT_present_following_flag=descr->EIT_present_following_flag;
-
+	running_status=descr->running_status;
+	free_CA_mode=descr->free_ca_mode;
 	int dlen=HILO(descr->descriptors_loop_length)+SDT_DESCR_LEN;
 	int ptr=SDT_DESCR_LEN;
 	while (ptr<dlen)

@@ -312,6 +312,7 @@ public:
 	enum { modeTV, modeRadio, modeFile, modeEnd };
 	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32, recNgrab=64, statePaused=128 };
 	enum { messageGoSleep=2, messageShutdown, messageNoRecordSpaceLeft };
+	enum { pathBouquets=1, pathProvider=2, pathRecordings=4, pathPlaylist=8, pathAll=16, pathRoot=32, pathSatellites=64 };
 
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock,
@@ -404,7 +405,7 @@ private:
 	void handleNVODService(SDTEntry *sdtentry);
 
 	// actions
-	void showServiceSelector(int dir, eServiceReference root=eServiceReference(), eServiceReference path=eServiceReference(), int newmode=-1 );
+	void showServiceSelector(int dir, int newTarget=0 );
 	void nextService(int add=0);
 	void prevService();
 	void playlistNextService();

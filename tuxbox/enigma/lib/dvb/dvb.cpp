@@ -578,6 +578,8 @@ void eTransponderList::writeTimeOffsetData( const char* filename )
 }
 
 eTransponderList::eTransponderList()
+	:curSDTEntry(ePtrList<SDTEntry>().end())
+	,callback(0), pmt(0)
 {
 	if (!instance)
 		instance = this;
@@ -591,6 +593,8 @@ eTransponderList::eTransponderList()
 	newServices->load(CONFIGDIR "/enigma/newservices.epl");
 */
 
+	CONNECT( eDVB::getInstance()->leaveTransponder, eTransponderList::leaveTransponder );
+	CONNECT( eDVB::getInstance()->leaveService, eTransponderList::leaveService );
 	readLNBData();
 }
 
@@ -701,22 +705,44 @@ eServiceDVB &eTransponderList::createService(const eServiceReferenceDVB &service
 	return (*i).second;
 }
 
-int eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOriginalNetworkID onid, eTransportStreamID tsid)
+void eTransponderList::leaveService( const eServiceReferenceDVB& )
 {
-	eDebug("TransponderList handleSDT");
-	std::set<eServiceID> s;
-	int changed=0;
-	bool newAdded;
+	leaveTransponder(0);
+}
 
+void eTransponderList::leaveTransponder( eTransponder* )
+{
+	newServiceIds.clear();
+	delete pmt;
+	pmt=0;
+	this->callback=0;
+}
+
+void eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOriginalNetworkID onid, eTransportStreamID tsid, Signal0<void> *callback )
+{
 	if (onid.get() == -1)
 		onid=sdt->original_network_id;
 	if (tsid.get() == -1)
 		tsid=sdt->transport_stream_id;
 
-	for (ePtrList<SDTEntry>::const_iterator i(sdt->entries); i != sdt->entries.end(); ++i)
+	if ( callback )
+	{
+		delete pmt;
+		pmt=0;
+		this->callback = callback;
+		curSDTEntry = sdt->entries;
+	}
+	else if ( !this->callback )
+	{
+		delete pmt;
+		pmt=0;
+		curSDTEntry = sdt->entries;
+	}
+
+	for (; curSDTEntry != sdt->entries.end(); ++curSDTEntry )
 	{
 		int service_type=-1;
-		for (ePtrList<Descriptor>::const_iterator d(i->descriptors); d != i->descriptors.end(); ++d)
+		for (ePtrList<Descriptor>::const_iterator d(curSDTEntry->descriptors); d != curSDTEntry->descriptors.end(); ++d)
 			if (d->Tag()==DESCR_SERVICE)
 			{
 				const ServiceDescriptor *nd=(ServiceDescriptor*)*d;
@@ -726,30 +752,56 @@ int eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOri
 
 		if (service_type == -1)
 			continue;
-		
-		eServiceReferenceDVB sref=
+
+		newService =
 				eServiceReferenceDVB(
 					eDVBNamespace(dvbnamespace),
 					eTransportStreamID(tsid), 
 					eOriginalNetworkID(onid), 
-					eServiceID(i->service_id),
+					eServiceID(curSDTEntry->service_id),
 					service_type);
 
-		eServiceDVB &service=createService(sref, -1, &newAdded);
-		service.update(*i);
-		s.insert(eServiceID(i->service_id));
+		if ( this->callback )  // we must check if service is scrambled..
+		{
+			if ( !eDVB::getInstance()->tPAT.ready() )
+			{
+				eDebug("PAT not ready...");
+				continue;
+			}
+			PAT * pat = eDVB::getInstance()->tPAT.getCurrent();
+			if ( !pat )
+			{
+				eDebug("no PAT in handleSDT.. ignore service");
+				continue;
+			}
+			PATEntry *pe = pat->searchService(curSDTEntry->service_id);
+			if ( !pe )
+			{
+				eDebug("no PAT Entry for service_id %04x.. ignore service", curSDTEntry->service_id);
+				pat->unlock();
+				continue;
+			}
+			int pmtpid = pe->program_map_PID;
+			pat->unlock();
+			delete pmt;
+			pmt=new PMT( pmtpid, curSDTEntry->service_id );
+			CONNECT( pmt->tableReady, eTransponderList::gotPMT );
+			pmt->start();
+			return;
+		}
 
-//		eDebug("service_found, newadded = %i", newAdded);
-		/*emit*/ service_found(sref, newAdded);
+		addService();
 	}
+
+	bool changed=false;
 
 	for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(services.begin()); i != services.end(); ++i)
 		if ((!(i->second.dxflags & eServiceDVB::dxNoDVB)) &&  // never ever touch non-dvb services
 				(i->first.getOriginalNetworkID() == onid)	&& // if service on this on
 				(i->first.getTransportStreamID() == tsid) && 	// and on this transponder (war das "first" hier wichtig?)
 				(i->first.getDVBNamespace() == dvbnamespace) && // and in this namespace
-				(s.find(i->first.getServiceID())==s.end())) // but does not exist
-			{
+				(newServiceIds.find(i->first.getServiceID())==newServiceIds.end())) // but does not exist
+		{
 				for (std::map<int,eServiceReferenceDVB>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
 					if (i->first == m->second)
 					{
@@ -758,9 +810,99 @@ int eTransponderList::handleSDT(const SDT *sdt, eDVBNamespace dvbnamespace, eOri
 					}
 				services.erase(i->first);
 				i=services.begin();
-				changed=1;
+				changed=true;
+		}
+
+	newServiceIds.clear();
+
+	if ( this->callback )  // all SDT Entrys checked ?
+	{
+		delete pmt;
+		pmt=0;
+
+		Signal0<void> &cb = *this->callback;
+
+		this->callback = 0;
+		/*emit*/ cb();
+	}
+
+	if ( changed )
+		/* emit */ eDVB::getInstance()->serviceListChanged();
+}
+
+
+void eTransponderList::addService()
+{
+	bool newAdded;
+
+	eServiceDVB &service=createService(newService, -1, &newAdded);
+	service.update(*curSDTEntry);
+	newServiceIds.insert(eServiceID(curSDTEntry->service_id));
+
+//		eDebug("service_found, newadded = %i", newAdded);
+	/*emit*/ service_found(newService, newAdded);
+}
+
+void eTransponderList::gotPMT(int err)
+{
+	if ( !err )
+	{
+		pmt->lock();
+
+		bool scrambled=false;
+
+		for (ePtrList<Descriptor>::const_iterator i(pmt->program_info); i != pmt->program_info.end(); ++i)
+			if (i->Tag()==9)	// CADescriptor
+			{
+				scrambled=true;
+				break;
 			}
-	return changed;
+
+		if (!scrambled)
+		{
+			for (ePtrList<PMTEntry>::iterator pe(pmt->streams); pe != pmt->streams.end(); ++pe)
+			{
+				switch (pe->stream_type)
+				{
+					case 1: // ISO/IEC 11172 Video
+					case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
+					case 3: // ISO/IEC 11172 Audio
+					case 4: // ISO/IEC 13818-3 Audio
+					case 6:
+						for (ePtrList<Descriptor>::const_iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
+							if (i->Tag()==9)	// CADescriptor
+							{
+								scrambled=true;
+								break;
+							}
+					default:
+						break;
+				}
+				if ( scrambled )
+					break;
+			}
+		}
+
+		pmt->unlock();
+
+		if (!scrambled)
+			addService();
+	}
+	else
+		eDebug("gotPMT err(%d)");
+
+	if ( !eDVB::getInstance()->tSDT.ready() )
+	{
+		eDebug("SDT not ready..");
+		return;
+	}
+	SDT *sdt = eDVB::getInstance()->tSDT.getCurrent();
+	if ( sdt )
+	{
+		++curSDTEntry;
+		handleSDT(sdt, newService.getDVBNamespace(), newService.getOriginalNetworkID(), newService.getTransportStreamID(), 0 );
+		sdt->unlock();
+	}
 }
 
 eTransponder *eTransponderList::searchTS(eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id)

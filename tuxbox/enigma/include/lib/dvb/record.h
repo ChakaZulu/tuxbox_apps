@@ -9,6 +9,7 @@
 #include <lib/base/thread.h>
 #include <lib/base/eerror.h>
 #include <lib/base/estring.h>
+#include <lib/base/buffer.h>
 
 #include <set>
 
@@ -20,13 +21,18 @@
  * asynchronously. Internally this is done with a \c eMessagePump.
  * \todo Howto disable this warning?
  */
+
+class eIOBuffer;
+
 class eDVBRecorder: private eThread, eMainloop, public Object
 {
+	enum { stateRunning = 1, stateStopped = 0 };
 	struct eDVBRecorderMessage
 	{
 		enum eCode
 		{
 			mOpen, mAddPID, mRemovePID, mRemoveAllPIDs, mClose, mStart, mStop, mExit, mWrite,
+			mAddNewPID, mValidatePIDs,
 			rWriteError, // disk full etc.
 		} code;
 		union
@@ -54,36 +60,43 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 			return pid < p.pid;
 		}
 	};
-	
+
 	std::set<pid_t> pids;
-	
+	std::set<pid_t> newpids;
+
 	int dvrfd;
 	int outfd;
 
 	eSocketNotifier *sn;
-	
+
 	eLock lock;
 	eString filename;
 	int splits, splitsize;
 	int size;
-	
+	int state;
+
 	void openFile(int suffix=0);
 	void dataAvailable(int what);
 
 	eFixedMessagePump<eDVBRecorderMessage> messagepump;
 	eFixedMessagePump<eDVBRecorderMessage> rmessagepump;
+
+	eIOBuffer buffer;
+
 	void thread();
 	void gotMessage(const eDVBRecorderMessage &msg);
 	void gotBackMessage(const eDVBRecorderMessage &msg);
 
 	void s_open(const char *filename);
-	void s_addPID(int pid);
+	std::pair<std::set<pid_t>::iterator,bool> s_addPID(int pid);
 	void s_removePID(int pid);
 	void s_removeAllPIDs();
 	void s_close();
 	void s_start();
 	void s_stop();
 	void s_exit();
+	// funktions for PID updates ( after got new PMT )
+	void s_validatePIDs();
 public:
 		/// the constructor
 	eDVBRecorder();
@@ -161,7 +174,7 @@ public:
 	{
 		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mClose));
 	}
-	
+
 	/**
 	 * \brief Writes a section into the stream.
 	 *
@@ -170,6 +183,16 @@ public:
 	 * Len will be fetched out of table.
 	 */
 	void writeSection(void *data, int pid);
+
+	void addNewPID(int pid)
+	{
+		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mAddNewPID, pid));
+	}
+
+	void validatePIDs()
+	{
+		messagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::mValidatePIDs));
+	}
 
 	enum { recWriteError };
 	Signal1<void,int> recMessage;

@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.8 2003/09/10 20:21:10 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.9 2003/09/25 21:08:59 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -451,8 +451,8 @@ eHarddiskMenu::eHarddiskMenu(int dev): dev(dev)
 
 	sbar = new eStatusBar(this); sbar->setName("statusbar");
 
-	new eListBoxEntryText( *fs, ("reiserfs"), (void*) 0 );
 	new eListBoxEntryText( *fs, ("ext3"), (void*) 1 );
+	new eListBoxEntryText( *fs, ("reiserfs"), (void*) 0 );
 	fs->setCurrent((void*)1);
   
 	if (eSkin::getActive()->build(this, "eHarddiskMenu"))
