@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.62 2002/12/22 21:25:12 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.63 2002/12/22 21:50:21 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -34,7 +34,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC)
 	uint8_t tmp;
 
 	/* read all transponders */
-	while ((node != NULL) && (!strcmp(node->GetType(), "transponder"))) {
+	while ((node != NULL) && (!strcmp(xmlGetName(node), "transponder"))) {
 
 		/* common */
 		GET_ATTR(node, "id", "%hx", transport_stream_id);
