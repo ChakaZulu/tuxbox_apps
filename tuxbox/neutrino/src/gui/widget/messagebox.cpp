@@ -38,14 +38,13 @@
 //#define borderwidth 4
 
 
-CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const std::string Icon, const int Width, uint Default, uint ShowButtons, const bool utf8_encoded)
+CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const char * const Icon, const int Width, const uint Default, const uint ShowButtons)
 {
 	theight = g_Fonts->menu_title->getHeight();
 	fheight = g_Fonts->menu->getHeight();
 
-	iconfile = Icon;
+	iconfile = Icon ? Icon : "";
 	caption  = Caption;
-	utf8     = utf8_encoded;
 	Text     = Text + "\n";
 	text.clear();
 
@@ -71,7 +70,7 @@ CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBo
 
 	for (unsigned int i= 0; i< text.size(); i++)
 	{
-		int nw= g_Fonts->menu->getRenderWidth(text[i], utf8_encoded) + 20; // UTF-8
+		int nw= g_Fonts->menu->getRenderWidth(text[i], true) + 20; // UTF-8
 		if ( nw> width )
 			width= nw;
 	}
@@ -118,7 +117,7 @@ void CMessageBox::paintHead()
 
 	window->paintBoxRel(0, theight + 0, width, height - (theight + 0), (CFBWindow::color_t)COL_MENUCONTENT);
 	for (unsigned int i = 0; i < text.size(); i++)
-		window->RenderString(g_Fonts->menu, 10, (theight + 0) + (fheight >> 1) + fheight * (i + 1), width, text[i], (CFBWindow::color_t)COL_MENUCONTENT, 0, utf8); // UTF-8
+		window->RenderString(g_Fonts->menu, 10, (theight + 0) + (fheight >> 1) + fheight * (i + 1), width, text[i], (CFBWindow::color_t)COL_MENUCONTENT, 0, true); // UTF-8
 
 }
 
@@ -335,9 +334,9 @@ int CMessageBox::exec(int timeout)
 	return res;
 }
 
-int ShowMsg(const std::string Caption, std::string Text, uint Default, uint ShowButtons, const std::string Icon, int Width, int timeout, const bool utf8_encoded)
+int ShowMsgUTF(const char * const Caption, std::string Text, const uint Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
 {
-   	CMessageBox* messageBox = new CMessageBox(Caption, Text, NULL, Icon, Width, Default, ShowButtons, utf8_encoded);
+   	CMessageBox* messageBox = new CMessageBox(Caption, Text, NULL, Icon, Width, Default, ShowButtons);
 	messageBox->exec(timeout);
 	int res = messageBox->result;
 	delete messageBox;

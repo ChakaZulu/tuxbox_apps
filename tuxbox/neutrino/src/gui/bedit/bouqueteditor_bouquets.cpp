@@ -200,7 +200,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				if (bouquetsChanged)
 				{
-					int result = ShowMsg("bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), CMessageBox::mbrYes, CMessageBox::mbAll, "", 450, -1, true); // UTF-8
+					int result = ShowMsgUTF("bouqueteditor.name", g_Locale->getText("bouqueteditor.savechanges?"), CMessageBox::mbrYes, CMessageBox::mbAll); // UTF-8
 
 					switch( result )
 					{

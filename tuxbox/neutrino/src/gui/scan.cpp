@@ -121,7 +121,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	
 	g_Sectionsd->setPauseScanning(false);
 	
-	ShowMsg("messagebox.info", success ? g_Locale->getText("scants.finished") : g_Locale->getText("scants.failed"), CMessageBox::mbBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
+	ShowMsgUTF("messagebox.info", success ? g_Locale->getText("scants.finished") : g_Locale->getText("scants.failed"), CMessageBox::mbBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 	return menu_return::RETURN_REPAINT;
 }

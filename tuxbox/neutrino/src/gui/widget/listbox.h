@@ -25,25 +25,18 @@
 #ifndef __listbox__
 #define __listbox__
 
-#include <string>
-
-#include <neutrinoMessages.h>
+#include "menue.h"
 
 #include <driver/framebuffer.h>
 
-#include "menue.h"
-#include "messagebox.h"
-
-
-using namespace std;
+#include <string>
 
 class CListBox : public CMenuWidget
 {
 	protected:
 		CFrameBuffer*	frameBuffer;
-		string		caption;
-		string		saveBoxCaption, saveBoxText;
-		int			saveBoxDefaultSelection;
+		bool            modified;
+		std::string	caption;
 		int		width;
 		int		height;
 		int		x;
@@ -59,11 +52,7 @@ class CListBox : public CMenuWidget
 		unsigned int	numwidth;
 		int 		ButtonHeight;
 
-		bool		toSave;
-
 		//----------------------------
-
-		void setTitle( string title );
 
 		virtual void paintItem(int pos);
 		virtual void paint();
@@ -90,15 +79,11 @@ class CListBox : public CMenuWidget
 		virtual void paintItem(uint itemNr, int paintNr, bool selected);
 
 		//------Benutzung von setModified---------
-		void setModified( bool modified = true );
-		void setSaveDialogText(string title, string text);
-		virtual void onSaveData(){};
-
+		void setModified(void);
 
 	public:
-		//konstruktor UNBEDINGT aufrufen!
-		CListBox(); 
-		virtual int exec(CMenuTarget* parent, string actionKey);
+		CListBox(const char * const Caption); 
+		virtual int exec(CMenuTarget* parent, std::string actionKey);
 };
 
 

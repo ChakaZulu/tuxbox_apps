@@ -106,7 +106,7 @@ int CFavorites::exec(CMenuTarget* parent, std::string)
 		parent->hide();
 	
 	if (!bouquetList) {
-		ShowMsg("favorites.bouquetname", g_Locale->getText("favorites.nobouquets"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
+		ShowMsgUTF("favorites.bouquetname", g_Locale->getText("favorites.nobouquets"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		return res;
 	}
 
@@ -128,7 +128,7 @@ int CFavorites::exec(CMenuTarget* parent, std::string)
 
 	if (status) str +=  g_Locale->getText("favorites.finalhint");
 
-	ShowMsg("favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
+	ShowMsgUTF("favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 //	if (status) {
 //		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );

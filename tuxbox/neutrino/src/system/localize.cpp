@@ -138,8 +138,7 @@ void CLocaleManager::loadLocale(std::string locale)
 						 (strcmp(buf, "epglist.noevents") == 0)
 						 )) ||
 			    ((buf[0] == 'f') && (
-						 (strcmp(buf, "flashupdate.actionreadflash") == 0) ||
-						 (strcmp(buf, "flashupdate.reallyflashmtd") == 0)
+						 (strcmp(buf, "flashupdate.actionreadflash") == 0)
 						 ))
 			    )
 				text = CZapitClient::Utf8_to_Latin1(text);

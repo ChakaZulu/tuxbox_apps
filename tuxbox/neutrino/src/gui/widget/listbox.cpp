@@ -27,19 +27,16 @@
 #include "listbox.h"
 
 
-CListBox::CListBox()
+CListBox::CListBox(const char * const Caption)
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	caption = "";
-	saveBoxCaption = "";
-	saveBoxText = 	 "";
-	saveBoxDefaultSelection = CMessageBox::mbrNo;
+	caption = Caption;
 	liststart = 0;
 	selected =  0;
 	width =  400;
 	height = 420;
 	ButtonHeight = 25;
-	toSave = false;
+	modified = false;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
@@ -48,21 +45,9 @@ CListBox::CListBox()
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 }
 
-void CListBox::setTitle( string title )
+void CListBox::setModified(void)
 {
-	caption = title;
-}
-
-void CListBox::setSaveDialogText(string title, string text)
-{
-	saveBoxCaption = title;
-	saveBoxText = text;
-
-}
-
-void CListBox::setModified( bool modified)
-{
-	toSave = modified;
+	modified = true;
 }
 
 void CListBox::paint()
@@ -154,7 +139,7 @@ void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 	g_Fonts->channellist->RenderString(x + 10, ypos+ fheight, width-20, "demo", color);
 }
 
-int CListBox::exec(CMenuTarget* parent, string actionKey)
+int CListBox::exec(CMenuTarget* parent, std::string actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 	selected=0;
@@ -169,7 +154,7 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 	paintFoot();
 
 	bool loop=true;
-	toSave = false;
+	modified = false;
 	while (loop)
 	{
 		uint msg; uint data;
@@ -263,15 +248,6 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 		{
 			CNeutrinoApp::getInstance()->handleMsg( msg, data );
 			// kein canceling...
-		}
-	}
-
-	//want2save?
-	if((toSave) && (saveBoxCaption!="") && (saveBoxText!=""))
-	{
-		if( ShowMsg ( saveBoxCaption, saveBoxText, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo ) == CMessageBox::mbrYes )
-		{
-			onSaveData();
 		}
 	}
 

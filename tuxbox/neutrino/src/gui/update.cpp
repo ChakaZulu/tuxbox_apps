@@ -220,7 +220,7 @@ bool CFlashUpdate::checkVersion4Update()
 		return false;
 	}
 	delete versionInfo;
-	return (ShowMsg("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw", 450, -1, true) == CMessageBox::mbrYes); // UTF-8
+	return (ShowMsgUTF("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") == CMessageBox::mbrYes); // UTF-8
 }
 
 int CFlashUpdate::exec(CMenuTarget* parent, string)
@@ -343,12 +343,14 @@ void CFlashExpert::readmtd(int readmtd)
 void CFlashExpert::writemtd(string filename, int mtdNumber)
 {
 	char message[500];
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+	sprintf(message, g_Locale->getText("flashupdate.reallyflashmtd").c_str(), Latin1_to_UTF8(filename).c_str(), Latin1_to_UTF8(CMTDInfo::getInstance()->getMTDName(mtdNumber)).c_str());
+#else
 	sprintf(message, g_Locale->getText("flashupdate.reallyflashmtd").c_str(), filename.c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
+#endif
+	if (ShowMsgUTF("messagebox.info", message, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw") != CMessageBox::mbrYes) // UTF-8
+		return;
 
-    if ( ShowMsg ( "messagebox.info", message , CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
-    {
-    	return;
-    }
 	setTitle(g_Locale->getText("flashupdate.titlewriteflash")); // UTF-8
 	paint();
 	showGlobalStatus(0);

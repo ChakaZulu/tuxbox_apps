@@ -41,9 +41,8 @@
 
 
 CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
-	:CListBox()
+	:CListBox(Caption.c_str())
 {
-	setTitle(Caption);
 	bouquet = Bouquet;
 	mode =    Mode;
 	width =   500;
@@ -69,7 +68,7 @@ bool CBEChannelSelectWidget::isChannelInBouquet( int index)
 
 bool CBEChannelSelectWidget::hasChanged()
 {
-	return toSave;
+	return modified;
 }
 
 void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)

@@ -44,10 +44,10 @@
 #include <neutrino.h>
 
 #include <gui/streaminfo.h>
-#include <gui/widget/messagebox.h>
 
 #include "setting_helpers.h"
 
+#include <gui/widget/messagebox.h>
 
 extern "C" int pinghost( const char *hostname );
 
@@ -240,7 +240,7 @@ bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 	
 	if (!messageShowed)
 	{
-		ShowMsg("messagebox.info", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw", 450, -1, true); // UTF-8
+		ShowMsgUTF("messagebox.info", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw"); // UTF-8
 		messageShowed = true;
 	}
 
@@ -496,7 +496,7 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string actionKey)
 	checkFile(UCODEDIR "/cam-alpha.bin", (char*) &res);
 	text += res;
 
-	ShowMsg("ucodecheck.head", text, CMessageBox::mbrBack, CMessageBox::mbBack, "", 450, -1, true); // UTF-8
+	ShowMsgUTF("ucodecheck.head", text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 	return 1;
 }
 
@@ -559,7 +559,7 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	text += "\ndboxupdate.berlios.de: ";
 	text += mypinghost("195.37.77.138");
 
-	ShowMsg("networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack, "", 450, -1, true); // UTF-8
+	ShowMsgUTF("networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 }
 
 void showCurrentNetworkSettings()
@@ -598,7 +598,7 @@ void showCurrentNetworkSettings()
 		text += ": ";
 		text += router;
 	}
-	ShowMsg("networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack, "", 450, -1, true); // UTF-8
+	ShowMsgUTF("networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 }
 
 unsigned long long getcurrenttime()

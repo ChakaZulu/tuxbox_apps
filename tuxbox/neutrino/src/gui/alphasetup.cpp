@@ -205,7 +205,7 @@ int CAlphaSetup::exec(CMenuTarget* parent, std::string)
 			case CRCInput::RC_home:
 				if ((*alpha1 != alpha1_alt) || (*alpha2 != alpha2_alt))
 				{
-					if (ShowMsg(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel, "", 380, -1, true) == CMessageBox::mbrCancel) // UTF-8
+					if (ShowMsgUTF(name.c_str(), g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel) // UTF-8
 					{
 						break;
 					}

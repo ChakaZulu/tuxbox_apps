@@ -844,7 +844,7 @@ void CNeutrinoApp::doChecks()
 		fclose(fd);
 	ucodes_ok= ucodes_ok&&(fd);
 	if (!ucodes_ok)
-		ShowMsg("messagebox.error", g_Locale->getText("ucodes.failure"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw", 450, -1, true); // UTF-8
+		ShowMsgUTF("messagebox.error", g_Locale->getText("ucodes.failure"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw"); // UTF-8
 }
 
 
@@ -2952,7 +2952,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 	{
 		if( mode != mode_scart )
-			skipShutdownTimer = (ShowMsg("messagebox.info", g_Locale->getText("shutdowntimer.announce"), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "", 450, 5, true) == CMessageBox::mbrYes); // UTF-8
+			skipShutdownTimer = (ShowMsgUTF("messagebox.info", g_Locale->getText("shutdowntimer.announce"), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes); // UTF-8
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
 	{
@@ -2977,7 +2977,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if (msg == NeutrinoMessages::EVT_EXTMSG)
 	{
 		if (mode != mode_scart)
-			ShowMsg("messagebox.info", std::string((char *) data), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
+			ShowMsgUTF("messagebox.info", std::string((char *) data), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
@@ -2990,7 +2990,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			text.replace(pos,1,"\n");
 		}
 		if( mode != mode_scart )
-			ShowMsg("timerlist.type.remind", text, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 0, -1, true); // UTF-8
+			ShowMsgUTF("timerlist.type.remind", text, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
