@@ -1,3 +1,4 @@
+#ifdef ENABLE_DYN_XML
 #include <map>
 #include <time.h>
 #include <fcntl.h>
@@ -41,71 +42,9 @@
 using namespace std;
 
 extern eString zap[5][5];
-extern eString getEITC(eString result);
-extern eString getCurService();
 extern eString firmwareLevel(eString verid);
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
-
-eString removeXMLBadChars(eString s)
-{
-//	s.strReplace("\x00", "");
-	s.strReplace("\x01", "");
-	s.strReplace("\x02", "");
-	s.strReplace("\x03", "");
-	s.strReplace("\x04", "");
-	s.strReplace("\x05", "");
-	s.strReplace("\x06", "");
-	s.strReplace("\x07", "");
-	s.strReplace("\x08", "");
-	s.strReplace("\x09", "");
-	s.strReplace("\x0a", "");
-	s.strReplace("\x0b", "");
-	s.strReplace("\x0c", "");
-	s.strReplace("\x0d", "");
-	s.strReplace("\x0e", "");
-	s.strReplace("\x0f", "");
-	s.strReplace("\x10", "");
-	s.strReplace("\x11", "");
-	s.strReplace("\x12", "");
-	s.strReplace("\x13", "");
-	s.strReplace("\x14", "");
-	s.strReplace("\x15", "");
-	s.strReplace("\x16", "");
-	s.strReplace("\x17", "");
-	s.strReplace("\x18", "");
-	s.strReplace("\x19", "");
-	s.strReplace("\x1a", "");
-	s.strReplace("\x1b", "");
-	s.strReplace("\x1c", "");
-	s.strReplace("\x1d", "");
-	s.strReplace("\x1e", "");
-	s.strReplace("\x1f", "");
-	return s;
-}
-
-struct countTimer
-{
-	int &count;
-	bool repeating;
-	countTimer(int &count,bool repeating)
-		:count(count), repeating(repeating)
-	{
-	}
-
-	void operator()(ePlaylistEntry *se)
-	{
-		if (se->type&ePlaylistEntry::isRepeating)
-		{
-			if (repeating)
-				++count;
-		}
-		else
-		{
-			if (!repeating)
-				++count;
-		}
-	}
-};
+extern eString removeBadChars(eString s);
 
 static eString getimageinfoXML(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -129,11 +68,6 @@ static eString getimageinfoXML(eString request, eString dirpath, eString opts, e
 
 	return result.str();
 }
-
-//TODO:
-//<boquets bname="Servicenumbers" bpath="4097:7:0:33fc5:0:0:0:0:0:0:%2fvar%2ftuxbox%2fconfig%2fenigma%2fuserbouquet%2e33fc5%2etv"
-//  <name path="1:0:1:a:2:85:c00000:0:0:0:">Test1</name>
-//</boquets>
 
 class eXMLNavigatorListDirectory: public Object
 {
@@ -159,11 +93,9 @@ public:
 
 		if (!(e.flags & eServiceReference::isDirectory))
 			result += "<name path=\"" + serviceRef + "\">";
-			//result += "<a href=\"/xml?mode=zapto,path=" + serviceRef + "\">";
-		else{
+		else
 			result += "<name path=\"" + serviceRef + "\">";
-			//result += "<a href=\"/xml?mode=zap,path=" + serviceRef + "\">";
-		}
+
 		eService *service = iface.addRef(e);
 		if (!service)
 			result += "n/a";
@@ -209,57 +141,66 @@ static eString getXMLZapContent(eString path)
 	return result;
 }
 
-struct getXMLEntryString
+static eString zaplist(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::stringstream &result;
-	bool repeating;
+	eString result;
 
-	getXMLEntryString(std::stringstream &result, bool repeating)
-		:result(result), repeating(repeating)
-	{
+	std::map<eString,eString> opt = getRequestOptions(opts, ',');
+	eString mode = opt["mode"];
+	eString spath = opt["path"];
+
+	content->local_header["Content-Type"]="text/xml; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
+
+	result = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>";
+
+	if (mode == "tv"){
+		result += "<zapmode id=\"TV-BOUQUETS\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
+	}else	if (mode == "tvprov")	{
+		result += "<zapmode id=\"TV-PROVIDER\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODETV][ZAPSUBMODEPROVIDERS];
+	}else	if (mode == "tvsat")	{
+		result += "<zapmode id=\"TV-SATELLITES\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODETV][ZAPSUBMODESATELLITES];
+	}else if (mode == "radio"){
+		result += "<zapmode id=\"RADIO-BOUQUETS\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODERADIO][ZAPSUBMODEBOUQUETS];
+	}else if (mode == "radioprov"){
+		result += "<zapmode id=\"RADIO-PROVIDERS\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODERADIO][ZAPSUBMODEPROVIDERS];
+	}else if (mode == "radiosat"){
+		result += "<zapmode id=\"RADIO-SATELLITES\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODERADIO][ZAPSUBMODESATELLITES];
+	}else if (mode == "datasat"){
+		result += "<zapmode id=\"DATA-SATELLITES\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODEDATA][ZAPSUBMODESATELLITES];
+	}else if (mode == "dataprov"){
+		result += "<zapmode id=\"DATA-PROVIDERS\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODEDATA][ZAPSUBMODEPROVIDERS];
+	}else if (mode == "movie"){
+		result += "<zapmode id=\"RECORDINGS\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODERECORDINGS][ZAPSUBMODECATEGORY];
+	}else{
+		result += "<zapmode id=\"TV-BOUQUETS\">";
+		if (opts.find("path") == eString::npos)
+			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
 	}
+	result += getXMLZapContent(spath);
+	result += "</zapmode>";
+	result += "</content>";
 
-	void operator()(ePlaylistEntry* se)
-	{
-		if (!repeating && se->type & ePlaylistEntry::isRepeating)
-			return;
-		if (repeating && !(se->type & ePlaylistEntry::isRepeating))
-			return;
-		tm startTime = *localtime(&se->time_begin);
-		time_t time_end = se->time_begin + se->duration;
-		tm endTime = *localtime(&time_end);
-
-		eString description = se->service.descr;
-		eString channel = getLeft(description, '/');
-		if (!channel)
-		{
-			eService *service = eDVB::getInstance()->settings->getTransponders()->searchService(se->service);
-			if (service)
-				channel = filter_string(service->service_name);
-		}
-		if (!channel)
-			channel = "No channel available";
-
-		description = getRight(description, '/');
-		if (!description)
-			description = "No description available";
-
-		result 	<< std::setw(2) << startTime.tm_mday << '.'
-			<< std::setw(2) << startTime.tm_mon+1 << ". - "
-			<< std::setw(2) << startTime.tm_hour << ':'
-			<< std::setw(2) << startTime.tm_min
-			<< " / "
-			<< std::setw(2) << endTime.tm_mday << '.'
-			<< std::setw(2) << endTime.tm_mon+1 << ". - "
-		 	<< std::setw(2) << endTime.tm_hour << ':'
-			<< std::setw(2) << endTime.tm_min
-			<< "<br/>"
-			<< channel
-			<< "<br/>"
-			<< description
-			<< "<br/>";
-	}
-};
+	return result;
+}
 
 static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -273,7 +214,7 @@ static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPC
 	time(&atime);
 	atime += eDVB::getInstance()->time_difference;
 	result = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>"
-		"<content>\n"
+		"<content>"
 		"<title>Enigma Status</title>"
 		"<currenttime>" + eString(ctime(&atime)) + "</currenttime>"
 		"<standby>";
@@ -358,7 +299,7 @@ static eString doStatusXML(eString request, eString dirpath, eString opt, eHTTPC
 	result += "<sid>" + sid + "</sid>";
 	result += "<pmt>" + pmt + "</pmt>";
 	result += "<videoformat>" + vidform + "</videoformat>";
-	result += "</content>\n";
+	result += "</content>";
 	
 	return result;
 }
@@ -383,7 +324,7 @@ static eString getAudioChannelsXML(eString request, eString dirpath, eString opt
 			else
 				result << eString().sprintf("<audio pid=\"0x%04x\">", it->pmtentry->elementary_PID);
 
-			result << removeXMLBadChars(it->text);
+			result << removeBadChars(it->text);
 			result << "</audio>";
 		}
 	}
@@ -415,13 +356,8 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 	if (!sapi)
 		return "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content id=\"sapi\">No EPG available</content>";
 
-	eString serviceRef = opt["ref"];
-//	if (serviceRef)
-//		ref = string2ref(serviceRef);
-//	else
-		ref = sapi->service;
-
-	eDebug("[ENIGMA_DYN] getcurepg: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
+	//eString serviceRef = opt["ref"];
+	ref = sapi->service;
 
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 
@@ -524,7 +460,7 @@ static eString getcurepgXML(eString request, eString dirpath, eString opts, eHTT
 	eEPGCache::getInstance()->Unlock();
 	
 	result << "</content>";
-	
+
 	return result.str();
 }
 
@@ -547,7 +483,6 @@ static eString getepgdetailsXML(eString request, eString dirpath, eString opts, 
 
 	std::map<eString, eString> opt = getRequestOptions(opts, '=');
 	eString eventID = opt["id"];
-
 
 	sscanf(eventID.c_str(), "%x", &eventid);
 
@@ -604,51 +539,49 @@ static eString getepgdetailsXML(eString request, eString dirpath, eString opts, 
 	
 	return result.str();
 }
-static eString xml_web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+
+static eString getIPaddr()
 {
-	eString result;
+	eString tmp;
+	int sd;
+	struct ifreq ifr;
+	sd=socket(AF_INET, SOCK_DGRAM, 0);
+	if (sd < 0)
+		return "?.?.?.?-socket-error";
+	memset(&ifr, 0, sizeof(ifr));
+	ifr.ifr_addr.sa_family = AF_INET; // fixes problems with some linux vers.
+	strncpy(ifr.ifr_name, "eth0", sizeof(ifr.ifr_name));
+	if (ioctl(sd, SIOCGIFADDR, &ifr) < 0)
+		return "?.?.?.?-ioctl-error";
+	close(sd);
 
-	std::map<eString,eString> opt = getRequestOptions(opts, ',');
-	eString mode = opt["mode"];
-	eString spath = opt["path"];
-
-	content->local_header["Content-Type"]="text/xml; charset=utf-8";
-	content->local_header["Cache-Control"] = "no-cache";
-
-	if (mode == "zap")
-	{
-		if (opts.find("path") == eString::npos)
-			spath = zap[ZAPMODETV][ZAPSUBMODEBOUQUETS];
-		
-		result = readFile(TEMPLATE_DIR + "wapzap.tmp");
-		result.strReplace("#BODY#", getXMLZapContent(spath));
-	}
-	else
-	if (mode == "zapto")
-	{
-		eServiceReference current_service = string2ref(spath);
-
-		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
-			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
-
-		result = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><content>Zap complete.</content>";
-	}
-	else
-	{
-		result = readFile(TEMPLATE_DIR + "wap.tmp");
-		result = getEITC(result);
-		result.strReplace("#SERVICE#", getCurService());
-	}
-
-	return result;
+	return eString().sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 }
+
+static eString mplayer(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString vpid, apid;
+
+	vpid = eString().sprintf("%04x", Decoder::current.vpid);
+	apid = eString().sprintf("%04x", Decoder::current.apid);
+
+	content->local_header["Content-Type"]="video/mpegfile";
+	content->local_header["Cache-Control"] = "no-cache";	
+	content->local_header["vpid"] = vpid;
+	content->local_header["apid"] = apid;
+		
+	return "http://" + getIPaddr() + ":31339/" + vpid  +"," + apid;
+}
+
 
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-	dyn_resolver->addDyn("GET", "/xml", xml_web_root, lockWeb);
-	dyn_resolver->addDyn("GET", "/xml/status", doStatusXML, false);
+	dyn_resolver->addDyn("GET", "/xml", doStatusXML, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/zap", zaplist, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/epg", getcurepgXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/epgdetails", getepgdetailsXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/imginfo", getimageinfoXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/audio", getAudioChannelsXML, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/mplayer", mplayer, lockWeb);
 }
+#endif
