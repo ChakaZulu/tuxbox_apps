@@ -34,7 +34,7 @@ miscsettings.boxtype DBox Hersteller
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
 
-audiomenu.head Ton-Einstellungen
+audiomenu.head Audio-Einstellungen
 audiomenu.stereo Stereo
 audiomenu.dolbydigital Dolby Digital
 
