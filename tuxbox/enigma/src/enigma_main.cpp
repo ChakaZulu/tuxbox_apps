@@ -1609,7 +1609,6 @@ eZapMain::~eZapMain()
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 		eDBoxLCD::getInstance()->switchLCD(0);
 #endif
-	delete subtitle;
 
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 	eConfig::getInstance()->setKey("/ezap/ui/playlistmode", playlistmode);
