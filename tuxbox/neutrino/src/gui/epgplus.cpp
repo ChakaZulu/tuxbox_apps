@@ -39,6 +39,7 @@
 #include <gui/channellist.h>
 
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
+#include <driver/rcinput.h>
 #include <driver/screen_max.h>
 
 #include <algorithm>
@@ -969,7 +970,7 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 
 				this->paint();
 			}
-			else if (msg == (neutrino_msg_t)g_settings.key_channelList_addrecord)
+			else if (msg == (neutrino_msg_t) CRCInput::RC_red)
 			{
 				#ifdef DEBUG_
 					std::cout << "add record timer 1" << std::endl;
@@ -1012,7 +1013,7 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 						printf("timerd not available\n");
 				}
 			}
-			else if ( msg == (neutrino_msg_t) g_settings.key_channelList_addremind )
+			else if ( msg == (neutrino_msg_t) CRCInput::RC_yellow)
 			{
 				#ifdef DEBUG_
 					std::cout << "add reminder" << std::endl;
