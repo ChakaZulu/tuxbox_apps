@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.244 2002/09/30 12:58:04 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.245 2002/09/30 19:53:08 wjoost Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1056,7 +1056,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.244 2002/09/30 12:58:04 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.245 2002/09/30 19:53:08 wjoost Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1397,14 +1397,16 @@ int startPlayBack()
 	/* start demux filters */
 	setDmxPesFilter(dmx_pcr_fd, DMX_OUT_DECODER, DMX_PES_PCR, channel->getPcrPid());
 	setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid());
-	setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, channel->getVideoPid());
+	if (currentMode & TV_MODE)
+		setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, channel->getVideoPid());
 
 	video->setSource(VIDEO_SOURCE_DEMUX);
 	video->start();
 
 	startDmxFilter(dmx_pcr_fd);
 	startDmxFilter(dmx_audio_fd);
-	startDmxFilter(dmx_video_fd);
+	if (currentMode & TV_MODE)
+		startDmxFilter(dmx_video_fd);
 
 	/* set bypass mode */
 	if (channel->getAudioChannel())
