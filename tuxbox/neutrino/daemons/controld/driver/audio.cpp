@@ -90,17 +90,22 @@ void audioControl::setVolume(char volume)
 
 void audioControl::setMute(bool mute)
 {
-	int fd;
+	int fd, a;
+	
+	if(mute)
+		a=AVS_MUTE;
+	else
+		a=AVS_UNMUTE;
 
-	if ((fd = open("/dev/ost/audio0",O_RDWR)) <= 0)
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
 		perror("open");
 		return;
 	}
 
-	if (ioctl(fd,AUDIO_SET_MUTE, mute) < 0)
+	if (ioctl(fd,AVSIOSMUTE, &a) < 0)
 	{
-		perror("AUDIO_SET_MUTE:");
+		perror("AVSIOSMUTE:");
 		return;
 	}
 	close(fd);
