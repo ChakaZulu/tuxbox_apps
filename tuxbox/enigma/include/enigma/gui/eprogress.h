@@ -1,8 +1,8 @@
 #ifndef __eprogress_h
 #define __eprogress_h
 
-#include "ewidget.h"
-#include "grc.h"
+#include <core/gui/ewidget.h>
+#include <core/gdi/grc.h>
 
 /**
  * \brief A progressbar.
