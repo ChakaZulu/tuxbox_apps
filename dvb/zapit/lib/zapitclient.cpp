@@ -1,8 +1,6 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.27 2002/04/20 11:55:24 Simplex Exp $
-
   License: GPL
 
   This program is free software; you can redistribute it and/or modify
@@ -18,92 +16,23 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-  $Log: zapitclient.cpp,v $
-  Revision 1.27  2002/04/20 11:55:24  Simplex
-  Command for setting BouquetMode
-
-  Revision 1.26  2002/04/14 10:55:25  obi
-  small fixes
-
-  Revision 1.25  2002/04/14 10:16:05  Simplex
-  new commands for scan configuration
-
-  Revision 1.24  2002/04/14 08:45:08  Simplex
-  renamed sattelite to satellite ;)
-
-  Revision 1.23  2002/04/08 20:51:19  Simplex
-  cmd for getting satellite list
-
-  Revision 1.22  2002/04/05 15:12:13  rasc
-  -- existsChannelInBouquet  (True/False)
-
-  Revision 1.21  2002/04/05 01:14:18  rasc
-  -- Favorites Bouquet handling (Easy Add Channels)
-
-  Revision 1.20  2002/04/04 14:41:08  rasc
-  - New functions in zapitclient for handling favorites
-    - test if a bouquet exists
-
-  Revision 1.18  2002/03/25 00:07:45  McClean
-  use UDS - add getLastChannel
-
-  Revision 1.17  2002/03/24 22:42:26  McClean
-  add getServiceID for clientlib
-
-  Revision 1.16  2002/03/24 14:55:37  field
-  Updates, Clientlib
-
-  Revision 1.15  2002/03/23 19:03:39  field
-  Clientlib massiv ausgebaut
-
-  Revision 1.14  2002/03/22 17:12:59  field
-  Clientlib-Updates
-
-  Revision 1.13  2002/03/14 20:42:47  McClean
-  fixme
-
-  Revision 1.12  2002/03/14 20:16:38  McClean
-  final addition of ts-scan (new commandinterface)
-
-  Revision 1.11  2002/03/14 19:57:35  McClean
-  add ts-scan functions to clientlib
-
-  Revision 1.10  2002/03/03 20:40:35  Simplex
-  handling locked and hidden bouquets
-
-  Revision 1.9  2002/02/09 22:03:24  Simplex
-  speed up discarding BQ-Ed. changes
-
-  Revision 1.8  2002/02/09 16:11:04  Simplex
-  extended the getchannels functions, bug fix
-
-  Revision 1.7  2002/02/09 01:29:24  Simplex
-  command for send all channels
-
-  Revision 1.6  2002/02/06 19:37:27  Simplex
-  added command "zapto channelnumber"
-
-  Revision 1.5  2002/02/04 23:17:31  Simplex
-  reinit channels, saving bouquets
-
-  Revision 1.4  2002/01/29 23:17:54  Simplex
-  bugfix
-
-  Revision 1.3  2002/01/12 22:07:01  Simplex
-  method for zapping with bouquet and channel
-
-  Revision 1.2  2002/01/07 21:14:24  Simplex
-  functions for start and stop videoplayback
-
-  Revision 1.1  2002/01/06 19:10:06  Simplex
-  made clientlib for zapit
-  implemented bouquet-editor functions in lib
-
-
 */
 
 #include "zapitclient.h"
+
+#include <stdio.h>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 CZapitClient::CZapitClient()
 {
@@ -843,6 +772,22 @@ void CZapitClient::stopPlayBack()
 	send((char*)&msgHead, sizeof(msgHead));
 	zapit_close();
 }
+
+void CZapitClient::setRecordMode( bool activate )
+{
+	commandHead msgHead;
+	commandSetRecordMode msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SET_RECORD_MODE;
+
+	msg.activate = activate;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
 
 void CZapitClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
 {
