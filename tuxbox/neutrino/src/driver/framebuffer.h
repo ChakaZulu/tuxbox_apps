@@ -29,6 +29,7 @@
 #include <linux/fb.h>
 #include <linux/vt.h>
 
+#include <stdint.h>
 #include <string>
 
 #include <gui/widget/component.h>
@@ -45,10 +46,19 @@ class CFrameBuffer
 
 		struct rgbData
 		{
-			unsigned char r;
-			unsigned char g;
-			unsigned char b;
-		};
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+		} __attribute__ ((packed));
+
+		struct rawHeader
+		{
+			uint8_t width_lo;
+			uint8_t width_hi;
+			uint8_t height_lo;
+			uint8_t height_hi;
+			uint8_t transp;
+		} __attribute__ ((packed));
 
 		std::string	iconBasePath;
 
