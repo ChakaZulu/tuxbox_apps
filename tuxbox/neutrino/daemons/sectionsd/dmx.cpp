@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.15 2003/03/01 15:37:21 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.16 2003/03/01 16:18:22 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -104,11 +104,11 @@ int DMX::stop(void)
 {
 	int rc;
 	
-	pthread_mutex_lock(&start_stop_mutex);
+	lock();
 	
 	rc = immediate_stop();
 	
-	pthread_mutex_unlock(&start_stop_mutex);
+	unlock();
 	
 	return rc;
 }
@@ -268,7 +268,7 @@ int DMX::real_pause(void)
 	if (!fd)
 		return 1;
 
-	pthread_mutex_lock(&start_stop_mutex);
+	lock();
 
 	if (real_pauseCounter == 0)
 	{
@@ -279,14 +279,14 @@ int DMX::real_pause(void)
 		{
 			closefd();
 			perror("[sectionsd] DMX: DMX_STOP");
-			pthread_mutex_unlock(&start_stop_mutex);
+			unlock();
 			return 2;
 		}
 #endif
 	}
 
 	//dprintf("real_pause: %d\n", real_pauseCounter);
-	pthread_mutex_unlock(&start_stop_mutex);
+	unlock();
 
 	return 0;
 }
@@ -296,7 +296,7 @@ int DMX::real_unpause(void)
 	if (!fd)
 		return 1;
 
-	pthread_mutex_lock(&start_stop_mutex);
+	lock();
 
 	if (real_pauseCounter == 0)
 	{
@@ -317,8 +317,7 @@ int DMX::real_unpause(void)
 	//    else
 	//dprintf("real_unpause NOT DONE: %d\n", real_pauseCounter);
 
-
-	pthread_mutex_unlock(&start_stop_mutex);
+	unlock();
 
 	return 0;
 }
@@ -327,22 +326,25 @@ int DMX::request_pause(void)
 {
 	real_pause(); // unlocked
 
-	pthread_mutex_lock(&start_stop_mutex);
+	lock();
 	//dprintf("request_pause: %d\n", real_pauseCounter);
-
+	
 	real_pauseCounter++;
-	pthread_mutex_unlock(&start_stop_mutex);
-
+	
+	unlock();
+	
 	return 0;
 }
 
 
 int DMX::request_unpause(void)
 {
-	pthread_mutex_lock(&start_stop_mutex);
+	lock();
+
 	//dprintf("request_unpause: %d\n", real_pauseCounter);
 	--real_pauseCounter;
-	pthread_mutex_unlock(&start_stop_mutex);
+
+	unlock();
 
 	real_unpause(); // unlocked
 
@@ -386,7 +388,7 @@ int DMX::change(const int new_filter_index)
 		return 1;
 
 	showProfiling("changeDMX: before pthread_mutex_lock(&start_stop_mutex)");
-        pthread_mutex_lock(&start_stop_mutex);
+        lock();
 
 	showProfiling("changeDMX: after pthread_mutex_lock(&start_stop_mutex)");
 
@@ -418,7 +420,7 @@ int DMX::change(const int new_filter_index)
 		if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1)
 		{
 			perror("[sectionsd] open dmx: ");
-			pthread_mutex_unlock(&start_stop_mutex);
+			unlock();
 			return 2;
 		}
 
@@ -426,7 +428,7 @@ int DMX::change(const int new_filter_index)
 		{
 			closefd();
 			perror("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
-			pthread_mutex_unlock(&start_stop_mutex);
+			unlock();
 			return 3;
 		}
 
@@ -437,7 +439,7 @@ int DMX::change(const int new_filter_index)
 			       ? DMX_IMMEDIATE_START : DMX_IMMEDIATE_START | DMX_CHECK_CRC))
 		{
 			closefd();
-			pthread_mutex_unlock(&start_stop_mutex);
+			unlock();
 			return 3;
 		}
 
@@ -460,7 +462,7 @@ int DMX::change(const int new_filter_index)
 	if (timeset)
 		lastChanged = time(NULL);
 
-	pthread_mutex_unlock(&start_stop_mutex);
+	unlock();
 
 	return 0;
 }
