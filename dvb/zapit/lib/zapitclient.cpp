@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.18 2002/03/25 00:07:45 McClean Exp $
+  $Id: zapitclient.cpp,v 1.19 2002/04/02 23:08:04 rasc Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.19  2002/04/02 23:08:04  rasc
+  -- ...existBouquet: check if Bouquet exists (returns true/false)
+
   Revision 1.18  2002/03/25 00:07:45  McClean
   use UDS - add getLastChannel
 
@@ -514,6 +517,33 @@ void CZapitClient::moveBouquet( unsigned int bouquet, unsigned int newPos)
 	send((char*)&msg, sizeof(msg));
 	zapit_close();
 }
+
+//
+// -- check if Bouquet-Name exists (2002-04-02 rasc)
+// -- Return true/false
+//
+bool CZapitClient::existsBouquet( string name)
+{
+        commandHead msgHead;
+        commandExistsBouquet msg;
+	responseGeneralTrueFalse response;
+
+        msgHead.version=ACTVERSION;
+        msgHead.cmd=CMD_BQ_EXISTS_BOUQUET;
+
+        strncpy( msg.name, name.c_str(), 30);
+
+        zapit_connect();
+        send((char*)&msgHead, sizeof(msgHead));
+        send((char*)&msg, sizeof(msg));
+
+#warning "Help me here! Please someone check this: simplex?? (rasc)"
+	receive((char* )&response, sizeof(response));
+        zapit_close();
+	return response.status;
+}
+ 
+
 
 /* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
 void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode = MODE_CURRENT)

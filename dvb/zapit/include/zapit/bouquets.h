@@ -1,3 +1,14 @@
+// $Id: bouquets.h,v 1.12 2002/04/02 23:08:04 rasc Exp $
+//
+//
+// $Log: bouquets.h,v $
+// Revision 1.12  2002/04/02 23:08:04  rasc
+// -- ...existBouquet: check if Bouquet exists (returns true/false)
+//
+//
+//
+
+
 #ifndef __bouquets__
 #define __bouquets__
 
@@ -126,6 +137,7 @@ class CBouquetManager
 		CBouquet* addBouquet( string name);
 		void deleteBouquet( uint id);
 		void deleteBouquet( string name);
+		bool CBouquetManager::existsBouquet( string name);
 		void moveBouquet( uint oldId, uint newId);
 
 		void saveAsLast( uint BouquetId, uint channelNr);

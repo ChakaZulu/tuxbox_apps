@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.113 2002/04/02 15:18:57 obi Exp $
+  $Id: zapit.cpp,v 1.114 2002/04/02 23:08:04 rasc Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2491,7 +2491,9 @@ void parse_command()
 
 	else if (rmsg.version == CZapitClient::ACTVERSION)
 	{
-		CZapitClient::responseCmd response;
+		CZapitClient::responseCmd              response;
+		CZapitClient::responseGeneralTrueFalse responseTrueFalse;	// 2002-04-03 rasc
+
 		switch( rmsg.cmd)
 		{
 			case CZapitClient::CMD_ZAPTO :
@@ -2621,8 +2623,22 @@ void parse_command()
 			case CZapitClient::CMD_BQ_RENAME_BOUQUET :
 				CZapitClient::commandRenameBouquet msgRenameBouquet;
 				read( connfd, &msgRenameBouquet, sizeof(msgRenameBouquet));
+				g_BouquetMan->addBouquet(msgAddBouquet.name);
 				g_BouquetMan->Bouquets[msgRenameBouquet.bouquet-1]->Name = msgRenameBouquet.name;
 			break;
+
+			case CZapitClient::CMD_BQ_EXISTS_BOUQUET :		// 2002-04-03 rasc
+				bool  status;
+				CZapitClient::commandExistsBouquet msgExistsBouquet;
+				read( connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
+				status = g_BouquetMan->existsBouquet(msgExistsBouquet.name);
+
+				// send back: found  true/false
+				responseTrueFalse.status = status;
+				send( connfd, &responseTrueFalse, sizeof(responseTrueFalse),0);
+#warning "Help needed here, someone check this please: simplex?? (rasc)"
+			break;
+
 
 			case CZapitClient::CMD_BQ_MOVE_BOUQUET :
 				CZapitClient::commandMoveBouquet msgMoveBouquet;
@@ -2838,7 +2854,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.113 2002/04/02 15:18:57 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.114 2002/04/02 23:08:04 rasc Exp $\n\n");
 
 	if (argc > 1)
 	{

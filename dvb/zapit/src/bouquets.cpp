@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.17 2002/03/14 20:52:48 Simplex Exp $
+  $Id: bouquets.cpp,v 1.18 2002/04/02 23:08:04 rasc Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.18  2002/04/02 23:08:04  rasc
+  -- ...existBouquet: check if Bouquet exists (returns true/false)
+
   Revision 1.17  2002/03/14 20:52:48  Simplex
   small fix
 
@@ -671,6 +674,23 @@ void CBouquetManager::deleteBouquet( string name)
 		delete bouquet;
 	}
 }
+
+//
+// -- Find Bouquet-Name, if BQ exists   (2002-04-02 rasc)
+// -- Return: True/false
+//
+bool CBouquetManager::existsBouquet( string name)
+{
+
+	BouquetList::iterator it;
+	uint i;
+	for (i=0, it = Bouquets.begin(); (i<Bouquets.size()) && (Bouquets[i]->Name != name); i++, it++);
+
+	if (i<Bouquets.size()) return true;
+	else return false;
+}
+
+
 
 void CBouquetManager::moveBouquet( uint oldId, uint newId)
 {
