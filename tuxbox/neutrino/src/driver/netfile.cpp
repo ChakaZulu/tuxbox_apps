@@ -1255,12 +1255,13 @@ int f_status(FILE *stream, void (*cb)(void*))
   if(!stream)
   {
     strcpy(err_txt, "NULL pointer as stream id\n");
+    printf("NULL pointer as stream id\n");
     return -1;
   }
   
   /* lookup the stream ID in the cache table */
   i = getCacheSlot(stream);
-
+  printf("Slot %d\n",i);
   if(cache[i].fd == stream)
   {
     /* hook the users function into the steam filter */

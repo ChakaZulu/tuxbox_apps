@@ -233,6 +233,7 @@ int CMP3PlayerGui::show()
 		{
 			updateTimes();
 			updateMP3Infos();
+			updateScInfos();
 		}
 
 		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_mp3)
@@ -1557,3 +1558,42 @@ void CMP3PlayerGui::screensaver(bool on)
 		m_idletime=time(NULL);
 	}
 }
+
+void CMP3PlayerGui::updateScInfos()
+{
+	bool updateScreen=false,updateLcd=false;
+	if (!CMP3Player::getInstance()->getScArtist().empty() &&
+		 CMP3Player::getInstance()->getScArtist() != curr_mp3.Artist)
+	{
+		curr_mp3.Artist = CMP3Player::getInstance()->getScArtist();
+		updateScreen=true;
+		updateLcd=true;
+	}
+	if (!CMP3Player::getInstance()->getScTitle().empty() &&
+		 CMP3Player::getInstance()->getScTitle() != curr_mp3.Title)
+	{
+		curr_mp3.Title = CMP3Player::getInstance()->getScTitle();
+		updateScreen=true;
+		updateLcd=true;
+	}
+	if (!CMP3Player::getInstance()->getScStation().empty() &&
+		 CMP3Player::getInstance()->getScStation() != curr_mp3.Album)
+	{
+		curr_mp3.Album = CMP3Player::getInstance()->getScStation();
+		updateLcd=true;
+	}
+	if (CMP3Player::getInstance()->getScBuffered()!=0)
+	{
+		char perc[4];
+		sprintf(perc,"%d",CMP3Player::getInstance()->getScBuffered() * 100 / 65535);
+		curr_mp3.Album = perc;
+		curr_mp3.Album += "% ";
+		curr_mp3.Album += CMP3Player::getInstance()->getScStation();
+		updateLcd=true;
+	}
+	if(updateLcd)
+		paintLCD();
+	if(updateScreen)
+		paintInfo();
+}
+

@@ -690,6 +690,11 @@ CMP3Player* CMP3Player::getInstance()
 	return mp3player;
 }
 
+void ShoutcastCallback(void *arg)
+{
+	CMP3Player::getInstance()->sc_callback(arg);
+}
+
 void* CMP3Player::PlayThread(void * filename)
 {
 	FILE *fp;
@@ -700,10 +705,17 @@ void* CMP3Player::PlayThread(void * filename)
 		fp = ::fopen((char *)filename,"r");
 		if (fp!=NULL)
 		{
-         /* Calc file length */
+			/* add callback function for shoutcast */
+			if (fstatus(fp, ShoutcastCallback) < 0)
+			{
+				fprintf(stderr,"Error adding shoutcast callback!\n%s",err_txt);
+			}
+         
+			/* Calc file length */
          fseek(fp, 0, SEEK_END);
          CMP3Player::getInstance()->m_filesize=ftell(fp);
          rewind(fp);
+
 			/* Decode stdin to stdout. */
 			int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
 			if(Status > 0)
@@ -729,6 +741,7 @@ bool CMP3Player::play(const char *filename, bool highPrio)
 	strcpy(m_mp3info,"");
 	strcpy(m_timePlayed,"0:00");
 	strcpy(m_timeTotal,"0:00");
+	CMP3Player::getInstance()->clearScData();
 	do_loop = true;
 	state = PLAY;
 	pthread_attr_t attr;
@@ -780,4 +793,23 @@ bool CMP3Player::avs_mute(bool mute)
 	 }
 	 return (b==AVS_MUTE);
 }
+
+void CMP3Player::sc_callback(void *arg)
+{
+  CSTATE *state = (CSTATE*)arg;
+  m_sc_artist = state->artist;
+  m_sc_title = state->title;
+  m_sc_station = state->station;
+  m_sc_buffered = state->buffered;
+  //printf("Callback %s %s %d\n",state->artist, state->title, state->buffered);
+}
+
+void CMP3Player::clearScData()
+{
+  m_sc_artist = "";
+  m_sc_title = "";
+  m_sc_station = "";
+  m_sc_buffered=0;
+}
+
 

@@ -137,6 +137,7 @@ class CMP3PlayerGui : public CMenuTarget
 	int getNext();
 	void updateMP3Infos();
 	void updateTimes(const bool force = false);
+	void updateScInfos();
 	void showMP3Info();
    void screensaver(bool on);
 

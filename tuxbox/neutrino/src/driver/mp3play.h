@@ -65,12 +65,18 @@ class CMP3Player
    unsigned int m_samplerate;
    bool m_vbr;
 
+	std::string m_sc_title;
+	std::string m_sc_artist;
+	std::string m_sc_station;
+	int m_sc_buffered;
+
 
 	const char		*MadErrorString(const struct mad_stream *Stream);
 	signed short MadFixedToSShort(const mad_fixed_t Fixed);
 	void				CreateInfo();
 	int				MpegAudioDecoder(FILE *InputFp,int OutputFd);
 	bool SetDSP(int soundfd, struct mad_header *Header);
+	void clearScData();
 
 public:
 	enum State {STOP = 0, PLAY, PAUSE, FF, REV};
@@ -86,7 +92,11 @@ public:
    char* getTimePlayed(){return m_timePlayed;}
    char* getTimeTotal(){return m_timeTotal;}
 	bool avs_mute(bool mute);
-
+	void sc_callback(void *arg);
+	std::string & getScArtist() {return m_sc_artist;}
+	std::string & getScTitle() {return m_sc_title;}
+	std::string & getScStation() {return m_sc_station;}
+	int getScBuffered() {return m_sc_buffered;}
 	CMP3Player();
 	~CMP3Player();
 
