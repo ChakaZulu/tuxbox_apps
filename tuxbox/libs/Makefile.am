@@ -3,6 +3,5 @@ AUTOMAKE_OPTIONS = gnu
 SUBDIRS = \
 	libavs \
 	liblcddisplay \
-	liblircdclient \
-	libtuxbox
+	liblircdclient
 
