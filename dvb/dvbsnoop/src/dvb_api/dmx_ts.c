@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.23 2004/04/15 03:38:50 rasc Exp $
+$Id: dmx_ts.c,v 1.24 2004/04/15 22:29:22 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dmx_ts.c,v 1.23 2004/04/15 03:38:50 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.24  2004/04/15 22:29:22  rasc
+PMT: some brainded section check
+TS: filter single pids from multi-pid ts-input-file
+minor enhancements
+
 Revision 1.23  2004/04/15 03:38:50  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -247,7 +252,7 @@ int  doReadTS (OPTION *opt)
 
        // -- subdecode prev. collected TS data
        if (opt->printdecode && opt->ts_subdecode) {
-	       ts2SecPes_subdecode (b, n);
+	       ts2SecPes_subdecode (b, n, opt->pid);
        }
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.3 2004/04/15 10:53:22 rasc Exp $
+$Id: ts2secpes.c,v 1.4 2004/04/15 22:29:23 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,11 @@ $Id: ts2secpes.c,v 1.3 2004/04/15 10:53:22 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.4  2004/04/15 22:29:23  rasc
+PMT: some brainded section check
+TS: filter single pids from multi-pid ts-input-file
+minor enhancements
+
 Revision 1.3  2004/04/15 10:53:22  rasc
 minor changes
 
@@ -56,6 +61,7 @@ typedef struct _TS_SUBDEC {
 	int	pid;
 	int     invalid;		// content is invalid
 	int     continuity_counter;	// 4 bit max !!
+	int     packet_counter;
 } TS_SUBDEC;
 
 
@@ -75,6 +81,7 @@ int ts2SecPesInit (void)
   tsd.pid = -1;
   tsd.invalid = TSD_error;
   tsd.continuity_counter = -1;
+  tsd.packet_counter = 0;
   return tsd.mem_handle;
 }
 
@@ -109,6 +116,7 @@ int ts2SecPes_AddPacketStart (int pid, int cc, u_char *b, u_int len)
     tsd.invalid = TSD_no_error;
     tsd.pid = pid;
     tsd.continuity_counter = cc;
+    tsd.packet_counter = 1;
     packetMem_clear (tsd.mem_handle);
     if (! packetMem_add_data (tsd.mem_handle,b,len)) {
 	tsd.invalid = TSD_mem_error;
@@ -142,6 +150,7 @@ int ts2SecPes_AddPacketContinue (int pid, int cc, u_char *b, u_int len)
 	if (!packetMem_add_data (tsd.mem_handle,b,len) ) {
 		tsd.invalid = TSD_mem_error;
 	} else {
+    		tsd.packet_counter++;
 	  	return 1;
 	}
     }
@@ -159,7 +168,7 @@ int ts2SecPes_AddPacketContinue (int pid, int cc, u_char *b, u_int len)
 // -- check TS buffer and push data to sub decoding buffer
 // -- on new packet start, output old packet data
 //
-void ts2SecPes_subdecode (u_char *b, int len)
+void ts2SecPes_subdecode (u_char *b, int len, u_int opt_pid)
 {
     u_int  transport_error_indicator;		
     u_int  payload_unit_start_indicator;		
@@ -170,10 +179,16 @@ void ts2SecPes_subdecode (u_char *b, int len)
 
  
 
+ pid				 = getBits (b, 0,11,13);
+
+ // -- filter pid?
+ if (opt_pid >= 0 && opt_pid <= MAX_PID) {
+	 if (opt_pid != pid)  return;
+ }
+ 
 
  transport_error_indicator	 = getBits (b, 0, 8, 1);
  payload_unit_start_indicator	 = getBits (b, 0, 9, 1);
- pid				 = getBits (b, 0,11,13);
  transport_scrambling_control	 = getBits (b, 0,24, 2);
  adaptation_field_control	 = getBits (b, 0,26, 2);
  continuity_counter		 = getBits (b, 0,28, 4);
@@ -235,8 +250,9 @@ void ts2SecPes_Output_subdecode (void)
 
      indent (+1);
      out_NL (3);
-     out_nl (3,"TS-Packet(s) sub-decoding:");
-     out_nl (3,"==========================");
+     out_nl (3,"TS-Packet(s) sub-decoding (%4d packet(s) for PID 0x%04x stored):",
+		     tsd.packet_counter,tsd.pid & 0xFFFF);
+     out_nl (3,"==================================================================");
 
 
      if (! packetMem_length (tsd.mem_handle) ) {

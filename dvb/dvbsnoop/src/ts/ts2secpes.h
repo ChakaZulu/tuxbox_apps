@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.h,v 1.1 2004/04/15 03:40:39 rasc Exp $
+$Id: ts2secpes.h,v 1.2 2004/04/15 22:29:23 rasc Exp $
 
 
    
@@ -23,7 +23,7 @@ void ts2SecPesFree (void);
 int  ts2SecPes_AddPacketStart (int pid, int cc, u_char *b, u_int len);
 int  ts2SecPes_AddPacketContinue (int pid, int cc, u_char *b, u_int len);
 
-void ts2SecPes_subdecode (u_char *b, int len);
+void ts2SecPes_subdecode (u_char *b, int len, u_int pid);
 void ts2SecPes_Output_subdecode (void);
 
 

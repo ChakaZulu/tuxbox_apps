@@ -1,5 +1,5 @@
 /*
-$Id: pmt.c,v 1.9 2004/03/31 21:14:23 rasc Exp $
+$Id: pmt.c,v 1.10 2004/04/15 22:29:22 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: pmt.c,v 1.9 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: pmt.c,v $
+Revision 1.10  2004/04/15 22:29:22  rasc
+PMT: some brainded section check
+TS: filter single pids from multi-pid ts-input-file
+minor enhancements
+
 Revision 1.9  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -64,6 +69,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/pid_mem.h"
 
 
+const char *pmt_fatal_err="==> Something is seriously wrong with this descriptor or section!";
 
 
 void decode_PMT (u_char *b, int len)
@@ -74,7 +80,7 @@ void decode_PMT (u_char *b, int len)
     u_int      table_id;
     u_int      section_syntax_indicator;		
     u_int      reserved_1;
-    u_int      section_length;
+    int        section_length;
     u_int      program_number;
     u_int      reserved_2;
     u_int      version_number;
@@ -84,7 +90,7 @@ void decode_PMT (u_char *b, int len)
     u_int      reserved_3;
     u_int      pcr_pid;
     u_int      reserved_4;
-    u_int      program_info_length;
+    int        program_info_length;
 
     // N  descriptor
     // N1 PMT_LIST2
@@ -98,7 +104,7 @@ void decode_PMT (u_char *b, int len)
     u_int      reserved_1; 
     u_int      elementary_PID;
     u_int      reserved_2;
-    u_int      ES_info_length;
+    int        ES_info_length;
 
     // N2 descriptor
 
@@ -175,6 +181,7 @@ void decode_PMT (u_char *b, int len)
  out_NL (3);
 
 
+ out_nl (3,"Stream_type loop: ");
  indent (+1);
  while (len1 > 4) {
 
@@ -196,6 +203,15 @@ void decode_PMT (u_char *b, int len)
    out_SB_NL (6,"reserved_2: ",p2.reserved_2);
    out_SW_NL (5,"ES_info_length: ",p2.ES_info_length);
 
+   // -- this is due to some braindead providers
+   if (p2.ES_info_length > (len1-4)) {
+     out_nl (3,pmt_fatal_err);
+     out_nl (3,"...abort");
+     indent (-1);
+     return;
+   }
+
+
    b    += 5;
    len1 -= 5;
    len2 = p2.ES_info_length;
@@ -206,10 +222,14 @@ void decode_PMT (u_char *b, int len)
 
       x = descriptor (b, DVB_SI);
       len2 -= x;
-      b += x;
       len1 -= x;
+      b += x;
    }
    indent (-1);
+
+   // -- this is due to some braindead providers
+   if (len2 < 0) out_nl (3,pmt_fatal_err);
+
    out_NL (3);
 
 

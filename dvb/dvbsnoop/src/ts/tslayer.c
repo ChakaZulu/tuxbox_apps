@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.18 2004/04/15 03:38:51 rasc Exp $
+$Id: tslayer.c,v 1.19 2004/04/15 22:29:23 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,11 @@ $Id: tslayer.c,v 1.18 2004/04/15 03:38:51 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.19  2004/04/15 22:29:23  rasc
+PMT: some brainded section check
+TS: filter single pids from multi-pid ts-input-file
+minor enhancements
+
 Revision 1.18  2004/04/15 03:38:51  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -96,7 +101,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-void decodeTS_buf (u_char *b, int len, int pid)
+void decodeTS_buf (u_char *b, int len, u_int opt_pid)
 {
  /* IS13818-1  2.4.3.2  */
 
@@ -132,7 +137,20 @@ void decodeTS_buf (u_char *b, int len, int pid)
  if (len != 188) {
    out_nl (3,"Fixed packet length is wrong (not 188)!!!\n");
  }
- 
+
+
+
+ t.pid				 = getBits (b, 0,11, 13);
+
+ // -- filter pid?  (e.g. if multi-pid-ts-file)
+ if (opt_pid >= 0 && opt_pid <= MAX_PID) {
+	 if (opt_pid != t.pid) {
+ 		out_SW_NL(6,"skipped packet, assigned PID: ",t.pid);
+		return;
+	 }
+ }
+
+
  t.transport_error_indicator	 = getBits (b, 0, 8, 1);
  t.payload_unit_start_indicator	 = getBits (b, 0, 9, 1);
  t.transport_priority		 = getBits (b, 0,10, 1);

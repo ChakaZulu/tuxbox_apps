@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.h,v 1.6 2004/04/05 17:32:14 rasc Exp $
+$Id: tslayer.h,v 1.7 2004/04/15 22:29:23 rasc Exp $
 
 
    
@@ -18,7 +18,7 @@ $Id: tslayer.h,v 1.6 2004/04/05 17:32:14 rasc Exp $
 #define __TS_LAYER_H 1
 
 
-void decodeTS_buf (u_char *b, int len, int pid);
+void decodeTS_buf (u_char *b, int len, u_int pid);
 int  ts_adaptation_field (u_char *b);
 int  ts_adaptation_field_extension (u_char *b);
 
