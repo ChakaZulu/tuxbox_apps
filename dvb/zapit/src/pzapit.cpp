@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.13 2002/04/20 11:56:19 Simplex Exp $
+ * $Id: pzapit.cpp,v 1.14 2002/04/20 22:13:29 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -29,10 +29,12 @@
 int usage (std::string basename)
 {
 	std::cout << "bouquet list: " << basename << std::endl;
-	std::cout << "channel list: " << basename << " [-r] <bouquet-number>" << std::endl;
-	std::cout << "zap by number: " << basename << " [-r] <bouquet-number> <channel-number>" << std::endl;
-	std::cout << "zap by name: " << basename << "[-r] <channel-name>" << std::endl;
-	std::cout << "-r enables radio mode" << std::endl;
+	std::cout << "channel list: " << basename << " [-ra] <bouquet-number>" << std::endl;
+	std::cout << "zap by number: " << basename << " [-ra] <bouquet-number> <channel-number>" << std::endl;
+	std::cout << "zap by name: " << basename << " [-ra] <channel-name>" << std::endl;
+	std::cout << "(-ra toggles radio mode)" << std::endl;
+	std::cout << "switch record mode on/off: " << basename << " -re" << std::endl;
+	std::cout << "start/stop playback: " << basename << " -p" << std::endl;
 	std::cout << std::endl;
 	std::cout << "change audio pid: " << basename << " -a <audio-number>" << std::endl;
 	std::cout << std::endl;
@@ -57,6 +59,8 @@ int main (int argc, char** argv)
 	int audio = 0;
 	char* channelName = NULL;
 
+	bool playback = false;
+	bool recordmode = false;
 	bool radio = false;
 	bool reload = false;
 	bool show_satellites = false;
@@ -100,7 +104,12 @@ int main (int argc, char** argv)
 				return usage(argv[0]);
 			}
 		}
-		else if (!strncmp(argv[i], "-r", 2))
+		else if (!strncmp(argv[i], "-p", 2))
+		{
+			playback = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-ra", 3))
 		{
 			if (i < argc - 1)
 			{
@@ -111,6 +120,11 @@ int main (int argc, char** argv)
 			{
 				return usage(argv[0]);
 			}
+		}
+		else if (!strncmp(argv[i], "-re", 3))
+		{
+			recordmode = true;
+			continue;
 		}
 		else if (!strncmp(argv[i], "-se", 3))
 		{
@@ -175,6 +189,31 @@ int main (int argc, char** argv)
 	{
 		std::cout << "reloading channels" << std::endl;
 		zapit->reinitChannels();
+		delete zapit;
+		return 0;
+	}
+
+	if (playback)
+	{
+		if (zapit->isPlayBackActive())
+		{
+			zapit->stopPlayBack();
+		}
+		else
+		{
+			zapit->startPlayBack();
+		}
+
+		if (!recordmode)
+		{
+			delete zapit;
+			return 0;
+		}
+	}
+
+	if (recordmode)
+	{
+		zapit->setRecordMode(!zapit->isRecordModeActive());
 		delete zapit;
 		return 0;
 	}
