@@ -51,7 +51,15 @@ int main(int argc, char *args[]) {
 	FILE *f;
 	struct ani_header ah;
 	screen_t *ani;
-	int t;
+	int t, loop, loopcount;
+
+	if (argc < 2) {
+		printf("aniplay (C) 2001 Ge0rG\n");
+		printf("	%s <file.ani> [<loopcount>]\n");
+		exit(1);
+	}
+	loopcount=0;
+	if (argc==3) loopcount=atoi(args[2]);
 
 	f = fopen(args[1], "r");
 	fread(&ah, 1, sizeof(ah), f);
@@ -59,14 +67,17 @@ int main(int argc, char *args[]) {
 	fread(ani, sizeof(screen_t), ah.count, f);
 	fclose(f);
 
+
 	init();
 
 	t = 0;
-	while (1) {
-		draw_screen(ani[t]);
-		t++;
-		if (t == ah.count) t = 0;
-		usleep(ah.delay);
+	loop = 0;
+	while ((loop<loopcount) || (loopcount==0)) {
+		for (t=0; t<ah.count; t++) {
+			draw_screen(ani[t]);
+			usleep(ah.delay);
+		}
+		loop++;
 	}
 	clr();
 	return 0;
