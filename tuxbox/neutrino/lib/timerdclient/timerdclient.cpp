@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.29 2002/10/15 20:39:48 woglinde Exp $
+	$Id: timerdclient.cpp,v 1.30 2002/10/15 22:42:11 Zwen Exp $
 
 	License: GPL
 
@@ -36,11 +36,11 @@ bool CTimerdClient::send(const unsigned char command, char* data = NULL, const u
 
 	open_connection(TIMERD_UDS_NAME);
 
-	if (!send_data((char*)&msgHead, sizeof(msgHead)))
-	    return false;
-	
-	if (size != 0)
-	    return send_data(data, size);
+	if(!send_data((char*)&msgHead, sizeof(msgHead)))
+		return false;
+
+	if(size != 0)
+		return send_data(data, size);
 
 	return true;
 }
@@ -77,7 +77,7 @@ void CTimerdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 
 int CTimerdClient::setSleeptimer(time_t announcetime, time_t alarmtime, int timerid)
 {
-int timerID;
+	int timerID;
 
 	if(timerid == 0)
 		timerID = getSleeptimerID();
@@ -93,7 +93,7 @@ int timerID;
 		timerID = addTimerEvent(CTimerd::TIMER_SLEEPTIMER,NULL,announcetime,alarmtime,0);
 	}
 
-	return timerID;	
+	return timerID;   
 }
 //-------------------------------------------------------------------------
 
@@ -101,9 +101,9 @@ int CTimerdClient::getSleeptimerID()
 {
 	send(CTimerd::CMD_GETSLEEPTIMER);
 	CTimerd::responseGetSleeptimer response;
-	if (!receive_data((char*)&response, sizeof(CTimerd::responseGetSleeptimer)))
+	if(!receive_data((char*)&response, sizeof(CTimerd::responseGetSleeptimer)))
 		response.eventID =0;
-	close_connection();	
+	close_connection();  
 	return response.eventID;
 }
 //-------------------------------------------------------------------------
@@ -130,7 +130,7 @@ void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
 	send(CTimerd::CMD_GETTIMERLIST);
 	timerlist.clear();
 	CTimerd::responseGetTimer response;
-	while ( receive_data((char*)&response, sizeof(CTimerd::responseGetTimer)))
+	while( receive_data((char*)&response, sizeof(CTimerd::responseGetTimer)))
 	{
 		if(response.eventState != CTimerd::TIMERSTATE_TERMINATED)
 			timerlist.insert( timerlist.end(), response);
@@ -188,7 +188,7 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_
 	msgModifyTimer.stopTime = stopdiff;
 
 	send(CTimerd::CMD_RESCHEDULETIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
-	
+
 	CTimerd::responseStatus response;
 	receive_data((char*)&response, sizeof(response));
 
@@ -227,11 +227,11 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 	msgAddTimer.eventRepeat = evrepeat;
 
 	int length;
-	if ( evType == CTimerd::TIMER_SHUTDOWN || evType == CTimerd::TIMER_SLEEPTIMER )
+	if( evType == CTimerd::TIMER_SHUTDOWN || evType == CTimerd::TIMER_SLEEPTIMER )
 	{
 		length = 0;
 	}
-	else if (evType == CTimerd::TIMER_NEXTPROGRAM || evType == CTimerd::TIMER_ZAPTO || evType == CTimerd::TIMER_RECORD )
+	else if(evType == CTimerd::TIMER_NEXTPROGRAM || evType == CTimerd::TIMER_ZAPTO || evType == CTimerd::TIMER_RECORD )
 	{
 		length = sizeof( CTimerd::EventInfo);
 	}
@@ -265,16 +265,16 @@ void CTimerdClient::removeTimerEvent( int evId)
 	CTimerd::commandRemoveTimer msgRemoveTimer;
 
 	msgRemoveTimer.eventID  = evId;
- 
+
 	send(CTimerd::CMD_REMOVETIMER, (char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
 
-	close_connection();	
+	close_connection();  
 }
 //-------------------------------------------------------------------------
 
 bool CTimerdClient::isTimerdAvailable()
 {
-	if (!send(CTimerd::CMD_TIMERDAVAILABLE))
+	if(!send(CTimerd::CMD_TIMERDAVAILABLE))
 		return false;
 
 	CTimerd::responseAvailable response;
@@ -286,7 +286,7 @@ bool CTimerdClient::isTimerdAvailable()
 bool CTimerdClient::shutdown()
 {
 	send(CTimerd::CMD_SHUTDOWN);
-	
+
 	CTimerd::responseStatus response;
 	receive_data((char*)&response, sizeof(response));
 
@@ -299,8 +299,9 @@ void CTimerdClient::modifyTimerAPid(int eventid, uint apid)
 	CTimerd::commandSetAPid data;
 	data.eventID=eventid;
 	data.apid=apid;
-	send(CTimerd::CMD_SETAPID, (char*) &data, sizeof(data));	
+	send(CTimerd::CMD_SETAPID, (char*) &data, sizeof(data)); 
+	close_connection();
 }
-	
+
 //-------------------------------------------------------------------------
 

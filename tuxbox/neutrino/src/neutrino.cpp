@@ -2535,8 +2535,10 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
 				CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
 
-				CVCRControl::getInstance()->Record((CTimerd::EventInfo *) data);
-				streamstatus = 1;
+				if (CVCRControl::getInstance()->Record((CTimerd::EventInfo *) data))
+               streamstatus = 1;
+            else
+               streamstatus = 0;
 			}
 			else
 				printf("Keine vcr Devices registriert\n");
@@ -3084,13 +3086,18 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 			{
 				eventinfo.channel_id = g_RemoteControl->current_channel_id;
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
+            eventinfo.apid = 0;
 
 				CVCRControl::CServerDeviceInfo serverinfo;
 				serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
 				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
 				CVCRControl::getInstance()->setDeviceOptions(0,&serverinfo);
 
-				CVCRControl::getInstance()->Record(&eventinfo);
+				if (CVCRControl::getInstance()->Record(&eventinfo)==false)
+            {
+               streamstatus=0;
+               return false;
+            }
 			}
 			else
 			{
@@ -3114,7 +3121,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.341 2002/10/15 17:36:09 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.342 2002/10/15 22:42:11 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

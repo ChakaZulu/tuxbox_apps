@@ -218,9 +218,12 @@ void CStreamInfo::paint()
 			sprintf((char*) buf2, " 0x%04x",  g_RemoteControl->current_PIDs.APIDs[i].pid );
 
 			if (i > 0)
-			strcat((char*) buf, ",");
-
-			strcat((char*) buf, buf2);
+			{
+				strcat((char*) buf, ",");
+				strcat((char*) buf, buf2+4);
+			}
+			else
+				strcat((char*) buf, buf2);
 		}
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT);

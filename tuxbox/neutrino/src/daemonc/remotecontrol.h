@@ -53,83 +53,83 @@ struct st_rmsg
 
 class CSubService
 {
-	public:
-		CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const string &asubservice_name)
-		{
-			original_network_id = aoriginal_network_id;
-			service_id          = aservice_id;
-			transport_stream_id = atransport_stream_id;
-			startzeit=0;
-			dauer=0;
-			subservice_name= asubservice_name;
-		}
-		CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const time_t &astartzeit, const unsigned adauer)
-		{
-			original_network_id = aoriginal_network_id;
-			service_id          = aservice_id;
-			transport_stream_id = atransport_stream_id;
-			startzeit=astartzeit;
-			dauer=adauer;
-			subservice_name= "";
-		}
+public:
+	CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const string &asubservice_name)
+	{
+		original_network_id = aoriginal_network_id;
+		service_id          = aservice_id;
+		transport_stream_id = atransport_stream_id;
+		startzeit=0;
+		dauer=0;
+		subservice_name= asubservice_name;
+	}
+	CSubService(const t_service_id &aservice_id, const t_transport_stream_id &atransport_stream_id, const t_original_network_id &aoriginal_network_id, const time_t &astartzeit, const unsigned adauer)
+	{
+		original_network_id = aoriginal_network_id;
+		service_id          = aservice_id;
+		transport_stream_id = atransport_stream_id;
+		startzeit=astartzeit;
+		dauer=adauer;
+		subservice_name= "";
+	}
 
-		t_service_id          service_id;
-		t_transport_stream_id transport_stream_id;
-		t_original_network_id original_network_id;
-		time_t                startzeit;
-		unsigned              dauer;
-		string                subservice_name;
+	t_service_id          service_id;
+	t_transport_stream_id transport_stream_id;
+	t_original_network_id original_network_id;
+	time_t                startzeit;
+	unsigned              dauer;
+	string                subservice_name;
 };
 
 typedef std::vector<CSubService> CSubServiceListSorted;
 
 class CRemoteControl
 {
-		unsigned int				current_programm_timer;
-		unsigned long long			zap_completion_timeout;
+	unsigned int            current_programm_timer;
+	unsigned long long         zap_completion_timeout;
 
-		void getNVODs();
-		void processAPIDnames();
-		void getSubChannels();
-		void copySubChannelsToZapit();
+	void getNVODs();
+	void getSubChannels();
+	void copySubChannelsToZapit();
 
-	public:
-		string					current_channel_name;
-		t_channel_id				current_channel_id;
-		t_channel_id				current_sub_channel_id;
-		unsigned long long			current_EPGid;
-		unsigned long long			next_EPGid;
-		CZapitClient::responseGetPIDs		current_PIDs;
+public:
+	string               current_channel_name;
+	t_channel_id            current_channel_id;
+	t_channel_id            current_sub_channel_id;
+	unsigned long long         current_EPGid;
+	unsigned long long         next_EPGid;
+	CZapitClient::responseGetPIDs    current_PIDs;
 
-		// APID - Details
-		bool					has_ac3;
-		bool					has_unresolved_ctags;
+	// APID - Details
+	bool              has_ac3;
+	bool              has_unresolved_ctags;
 
-		// SubChannel/NVOD - Details
-		CSubServiceListSorted			subChannels;
-		int					selected_subchannel;
-		bool                        		are_subchannels;
-		bool					needs_nvods;
-		int					director_mode;
+	// SubChannel/NVOD - Details
+	CSubServiceListSorted         subChannels;
+	int               selected_subchannel;
+	bool                             are_subchannels;
+	bool              needs_nvods;
+	int               director_mode;
 
-		// Video / Parental-Lock
-		bool					is_video_started;
-		unsigned int				zapCount;
+	// Video / Parental-Lock
+	bool              is_video_started;
+	unsigned int            zapCount;
 
-		CRemoteControl();
-		void zapTo_ChannelID(const t_channel_id channel_id, string channame, bool start_video = true );
-		void startvideo();
-		void stopvideo();
-		void queryAPIDs();
-		void setAPID(uint APID);
-		string setSubChannel(unsigned numSub, bool force_zap = false );
-		string subChannelUp();
-		string subChannelDown();
+	CRemoteControl();
+	void zapTo_ChannelID(const t_channel_id channel_id, string channame, bool start_video = true );
+	void startvideo();
+	void stopvideo();
+	void queryAPIDs();
+	void setAPID(uint APID);
+	void processAPIDnames();
+	string setSubChannel(unsigned numSub, bool force_zap = false );
+	string subChannelUp();
+	string subChannelDown();
 
-		void radioMode();
-		void tvMode();
+	void radioMode();
+	void tvMode();
 
-		int handleMsg(uint msg, uint data);
+	int handleMsg(uint msg, uint data);
 };
 
 
