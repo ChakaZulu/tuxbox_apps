@@ -652,6 +652,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	audioStreams.clear();
 	videoStreams.clear();
 
+	ePtrList<PMTEntry>::iterator TTXIt=pmt->streams.end();
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
@@ -673,30 +674,33 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 			{
 				isca+=checkCA(calist, pe->ES_info, pmt->program_number);
 				audioStream stream(pe);
-				for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
+				for (ePtrList<Descriptor>::iterator ii(pe->ES_info); ii != pe->ES_info.end(); ++ii)
 				{
-					switch( i->Tag() )
+					switch( ii->Tag() )
 					{
 						case DESCR_AC3:
 							stream.isAC3=1;
 							break;
 						case DESCR_REGISTRATION:
-							if (!memcmp(((RegistrationDescriptor*)*i)->format_identifier, "DTS", 3))
+							if (!memcmp(((RegistrationDescriptor*)*ii)->format_identifier, "DTS", 3))
 								stream.isDTS=1;
 							break;
 						case DESCR_TELETEXT:
 							if ( (!teletext) || (pe->elementary_PID == tpid) )
+							{
+								TTXIt = i;
 								teletext=pe;
+							}
 							break;
 						case DESCR_ISO639_LANGUAGE:
-							stream.text=getISO639Description(((ISO639LanguageDescriptor*)*i)->language_code);
+							stream.text=getISO639Description(((ISO639LanguageDescriptor*)*ii)->language_code);
 							break;
 						case DESCR_STREAM_ID:
-							stream.component_tag=((StreamIdentifierDescriptor*)*i)->component_tag;
+							stream.component_tag=((StreamIdentifierDescriptor*)*ii)->component_tag;
 							break;
 						case DESCR_LESRADIOS:
 						{
-							LesRadiosDescriptor *d = (LesRadiosDescriptor*)*i;
+							LesRadiosDescriptor *d = (LesRadiosDescriptor*)*ii;
 							if ( d->id && d->name )
 								stream.text.sprintf("%d.) %s", d->id, d->name.c_str());
 							else
@@ -735,6 +739,15 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 				break;
 		}
 	}
+	ePtrList<PMTEntry>::iterator tmp = pmt->streams.end();
+	if (TTXIt != tmp)
+	{
+		// move teletext to the end of the list
+		--tmp;
+		if ( tmp != TTXIt )
+			std::iter_swap(tmp, TTXIt);
+	}
+
 	int needAC3Workaround=0;
 	switch (eSystemInfo::getInstance()->getHwType())
 	{
