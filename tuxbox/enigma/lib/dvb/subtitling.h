@@ -9,6 +9,7 @@
 
 class eSubtitleWidget: public eWidget
 {
+	int pid;
 	std::set<int> pageids;
 	void gotData(int);
 	eSocketNotifier *sn;
@@ -40,6 +41,7 @@ class eSubtitleWidget: public eWidget
 public:
 	void start(int pid, const std::set<int> &pageids);
 	void stop();
+	int getCurPid();
 	eSubtitleWidget();
 	~eSubtitleWidget();
 	static eSubtitleWidget *getInstance() { return instance; }

@@ -67,7 +67,7 @@ void eSubtitleWidget::processPESPacket(unsigned char *pkt, int len)
 	unsigned long long current = 0;
 	if (Decoder::getSTC(current))
 		eDebug("bloed, going unsyced");
-//	eDebug("DEMUX STC: %08llx\n", current);
+	eDebug("DEMUX STC: %08llx\n", current);
 	
 	unsigned long long pts = 0;
 	
@@ -251,9 +251,9 @@ void eSubtitleWidget::start(int pid, const std::set<int> &ppageids)
 	
 	sn = new eSocketNotifier(eApp, fd, eSocketNotifier::Read);
 	CONNECT(sn->activated, eSubtitleWidget::gotData);
-		
+
 	struct dmxPesFilterParams f;
-	f.pid = pid;
+	this->pid = f.pid = pid;
 	f.input = DMX_IN_FRONTEND;
 	f.output = DMX_OUT_TAP;
 	f.pesType = DMX_PES_OTHER;
@@ -338,8 +338,14 @@ eSubtitleWidget::~eSubtitleWidget()
 	}
 }
 
+int eSubtitleWidget::getCurPid()
+{
+	return pid;
+}
+
 void eSubtitleWidget::stop()
 {
+	pid=-1;
 	delete sn;
 	sn = 0;
 	subtitle_screen_enable(subtitle, 0);
