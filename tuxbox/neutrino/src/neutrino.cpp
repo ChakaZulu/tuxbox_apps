@@ -1467,58 +1467,64 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 {
-	recordingSettings.addItem( new CMenuSeparator() );
-	recordingSettings.addItem( new CMenuForwarder("menu.back") );
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-	CMenuOptionChooser* oj = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type, true, this);
-	oj->addOption(0, "recordingmenu.off");
-	oj->addOption(1, "recordingmenu.server");
-	oj->addOption(2, "recordingmenu.vcr");
-	recordingSettings.addItem( oj );
-
 	CIPInput*   recordingSettings_server_ip= new CIPInput("recordingmenu.server_ip",  g_settings.recording_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
 	CStringInput*  recordingSettings_server_port= new CStringInput("recordingmenu.server_port", g_settings.recording_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
 
-
-	recordingSettings.addItem( new CMenuForwarder("recordingmenu.server_ip", true, g_settings.recording_server_ip,recordingSettings_server_ip));
-	recordingSettings.addItem( new CMenuForwarder("recordingmenu.server_port", true, g_settings.recording_server_port,recordingSettings_server_port));
-
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-	oj = new CMenuOptionChooser("recordingmenu.server_wakeup", &g_settings.recording_server_wakeup, true);
-	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");
-	recordingSettings.addItem( oj );
-
+	CMenuForwarder* mf1 = new CMenuForwarder("recordingmenu.server_ip", (g_settings.recording_type==1), g_settings.recording_server_ip,recordingSettings_server_ip);
+	CMenuForwarder* mf2 = new CMenuForwarder("recordingmenu.server_port", (g_settings.recording_type==1), g_settings.recording_server_port,recordingSettings_server_port);
 
 	CMACInput *recordingSettings_server_mac= new CMACInput("recordingmenu.server_mac",  g_settings.recording_server_mac, "ipsetup.hint_1", "ipsetup.hint_2");
-	recordingSettings.addItem( new CMenuForwarder("recordingmenu.server_mac", true, g_settings.recording_server_mac,recordingSettings_server_mac));
+	CMenuForwarder *mf3 = new CMenuForwarder("recordingmenu.server_mac", (g_settings.recording_type==1 && g_settings.recording_server_wakeup==1),   g_settings.recording_server_mac,
+                                            recordingSettings_server_mac);
+	CRecordingNotifier2 *RecordingNotifier2 =
+      new CRecordingNotifier2(mf3);
+	CMenuOptionChooser*	oj2 = new CMenuOptionChooser("recordingmenu.server_wakeup", &g_settings.recording_server_wakeup,
+																	  (g_settings.recording_type==1), RecordingNotifier2);
+	oj2->addOption(0, "options.off");
+	oj2->addOption(1, "options.on");
 
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	oj = new CMenuOptionChooser("recordingmenu.stopplayback", &g_settings.recording_stopplayback, true);
-	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");
-	recordingSettings.addItem( oj );
+	CMenuOptionChooser* oj3 = new CMenuOptionChooser("recordingmenu.stopplayback", &g_settings.recording_stopplayback, (g_settings.recording_type==1));
+	oj3->addOption(0, "options.off");
+	oj3->addOption(1, "options.on");
 
-	oj = new CMenuOptionChooser("recordingmenu.stopsectionsd", &g_settings.recording_stopsectionsd, true);
-	oj->addOption(0, "options.off");
-	oj->addOption(1, "options.on");
-	recordingSettings.addItem( oj );
-
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	CMenuOptionChooser* oj4 = new CMenuOptionChooser("recordingmenu.stopsectionsd", &g_settings.recording_stopsectionsd, (g_settings.recording_type==1));
+	oj4->addOption(0, "options.off");
+	oj4->addOption(1, "options.on");
 
 	CStringInput*  recordingSettings_vcr_devicename= new CStringInputSMS("recordingmenu.vcr_devicename", g_settings.recording_vcr_devicename, 20, "ipsetup.hint_1", "ipsetup.hint_2","abcdefghijklmnopqrstuvwxyz0123456789-. ");
-//	CMenuForwarder *m1 = new CMenuForwarder("recordingmenu.vcr_devicename",true, g_settings.recording_vcr_devicename, recordingSettings_vcr_devicename );
-	recordingSettings.addItem( new CMenuForwarder("recordingmenu.vcr_devicename", true, g_settings.recording_vcr_devicename,recordingSettings_vcr_devicename));
+	CMenuForwarder *mf4 = new CMenuForwarder("recordingmenu.vcr_devicename", (g_settings.recording_type==2), g_settings.recording_vcr_devicename, recordingSettings_vcr_devicename );
 
 	CStringInput *timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "timersettings.record_safety_time.hint_1", "timersettings.record_safety_time.hint_2","0123456789 ");
+	CMenuForwarder *mf5 = new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time );
+
+	CRecordingNotifier *RecordingNotifier = 
+		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,mf4);
+	
+   CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type, 
+                                                    true, RecordingNotifier);
+	oj1->addOption(0, "recordingmenu.off");
+	oj1->addOption(1, "recordingmenu.server");
+	oj1->addOption(2, "recordingmenu.vcr");
+	
+	recordingSettings.addItem( new CMenuSeparator() );
+	recordingSettings.addItem( new CMenuForwarder("menu.back") );
+	recordingSettings.addItem( new CMenuForwarder("recordingmenu.setupnow", true, "", this, "recording"));
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem( oj1);
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem( mf1);
+	recordingSettings.addItem( mf2);
+	recordingSettings.addItem( oj2);
+	recordingSettings.addItem( mf3);
+	recordingSettings.addItem( oj3 );
+	recordingSettings.addItem( oj4);
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	recordingSettings.addItem( mf4);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
-	recordingSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
+	recordingSettings.addItem( mf5);
 
 	recordingstatus = 0;
-
 }
 
 void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value)
@@ -1929,8 +1935,13 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
 		info->Name = g_settings.recording_vcr_devicename;
 		vcrControl->registerDevice(CVCRControl::DEVICE_VCR,info);
-
+      delete info;
 	}
+   else
+   {
+      if(vcrControl->isDeviceRegistered())
+         vcrControl->unregisterDevice();
+   }
 }
 
 int CNeutrinoApp::run(int argc, char **argv)
@@ -2993,13 +3004,15 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		showNetwork( );
 	}
-
 	else if(actionKey=="savesettings")
 	{
 		g_Controld->saveSettings();
 		saveSetup();
 	}
-
+	else if(actionKey=="recording")
+	{
+      setupRecordingDevice();
+   }
 	return returnval;
 }
 
@@ -3011,15 +3024,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 {
 	printf("OptionName: %s\n",OptionName.c_str());
-	if(OptionName.compare("recordingmenu.recording_type") == 0)
-	{
-		if(g_settings.recording_type == 0) 
-			if(vcrControl->isDeviceRegistered())
-				vcrControl->unregisterDevice();
-		else
-			setupRecordingDevice();
-	}
-	else if(OptionName.substr(0,9).compare("fontsize.") == 0)
+	if(OptionName.substr(0,9).compare("fontsize.") == 0)
 	{
 		SetupFonts();
 	}
@@ -3068,7 +3073,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.351 2002/10/26 16:55:45 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.352 2002/10/28 17:56:53 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

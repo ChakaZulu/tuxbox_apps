@@ -104,6 +104,7 @@ recordingmenu.server server
 recordingmenu.vcr vcr
 recordingmenu.server_wakeup recording server WOL
 recordingmenu.server_mac MAC address
+recordingmenu.setupnow activate changes
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable

@@ -104,6 +104,7 @@ recordingmenu.server Serva
 recordingmenu.vcr Video Recorda
 recordingmenu.server_wakeup Serva zum Aufnemma (WOL)
 recordingmenu.server_mac MAC-Adressn
+recordingmenu.setupnow los moachs !
 
 ping.ok kumt wos (ping)
 ping.unreachable kumt nix (unreachable)

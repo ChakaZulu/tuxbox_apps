@@ -104,6 +104,7 @@ recordingmenu.server unset
 recordingmenu.vcr unset
 recordingmenu.server_wakeup unset
 recordingmenu.server_mac unset
+recordingmenu.setupnow unset
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable

@@ -117,17 +117,56 @@ bool CDHCPNotifier::changeNotify(string OptionName, void*)
 	return true;
 }
 
-CRecordingNotifier::CRecordingNotifier( int* recording_type)
+CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, 
+                                        CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, 
+                                        CMenuItem* i7)
 {
-	Recording_Type = recording_type;
+   toDisable[0]=i1;
+   toDisable[1]=i2;
+   toDisable[2]=i3;
+   toDisable[3]=i4;
+   toDisable[4]=i5;
+   toDisable[5]=i6;
+   toDisable[6]=i7;
 }
-
 bool CRecordingNotifier::changeNotify(string OptionName, void*)
 {
-// something sucks here :(
-//	toDisable->setActive(g_settings.vcr_recording==0);
-	
-	return true;
+   if(g_settings.recording_type==0)
+   {
+      for(int i=0;i<7;i++)
+         toDisable[i]->setActive(false);
+   }
+   else if(g_settings.recording_type==1)
+   {
+      toDisable[0]->setActive(true);
+      toDisable[1]->setActive(true);
+      toDisable[2]->setActive(true);
+      toDisable[3]->setActive(g_settings.recording_server_wakeup==1);
+      toDisable[4]->setActive(true);
+      toDisable[5]->setActive(true);
+      toDisable[6]->setActive(false);
+   }
+   else if(g_settings.recording_type==2)
+   {
+      toDisable[0]->setActive(false);
+      toDisable[1]->setActive(false);
+      toDisable[2]->setActive(false);
+      toDisable[3]->setActive(false);
+      toDisable[4]->setActive(false);
+      toDisable[5]->setActive(false);
+      toDisable[6]->setActive(true);
+   }
+   return true;
+}
+
+CRecordingNotifier2::CRecordingNotifier2( CMenuItem* i1)
+{
+   toDisable[0]=i1;
+}
+bool CRecordingNotifier2::changeNotify(string OptionName, void*)
+{
+   toDisable[0]->setActive(g_settings.recording_server_wakeup==1);
+   return true;
 }
 
 bool CConsoleDestChangeNotifier::changeNotify(string OptionName, void *Data)

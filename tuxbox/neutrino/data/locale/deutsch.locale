@@ -104,6 +104,7 @@ recordingmenu.server Server
 recordingmenu.vcr Video Rekorder
 recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
+recordingmenu.setupnow Einstellungen jetzt übernehmen
 
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)

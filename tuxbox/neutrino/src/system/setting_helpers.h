@@ -63,15 +63,25 @@ class CDHCPNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 		void startStopDhcp();
 };
-
 class CRecordingNotifier : public CChangeObserver
 {
 	private:
-		int *Recording_Type;
+		CMenuItem* toDisable[7];
 	public:
-	CRecordingNotifier( int* recording_type);
-	bool changeNotify(string OptionName, void*);
+		CRecordingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
+		bool changeNotify(string OptionName, void*);
 };
+
+class CRecordingNotifier2 : public CChangeObserver
+{
+	private:
+		CMenuItem* toDisable[1];
+	public:
+		CRecordingNotifier2( CMenuItem* );
+		bool changeNotify(string OptionName, void*);
+};
+
+
 /*
 class CCableSpectalInversionNotifier : public CChangeObserver
 {
