@@ -38,6 +38,7 @@
 
 #include <global.h>
 #include <neutrino.h>
+#include <driver/screen_max.h>
 
 #include <iostream>
 
@@ -133,7 +134,6 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 			if ((*item)->getType() == Drawable::DTYPE_PAGEBREAK)
 				pagebreak = true;
 		}
-		if (lineWidth > maxWidth)
 			maxWidth = lineWidth;
 		m_height += maxHeight;
 		if (m_height > HINTBOXEXT_MAX_HEIGHT || pagebreak) {
@@ -171,7 +171,7 @@ void CHintBoxExt::init(const neutrino_locale_t Caption, const int Width, const c
 // 	printf("pages: %d, startEntryVec: %d\n",page+1,m_startEntryOfPage.size()-1);
 // 	printf("maxEntries: %d\n", m_maxEntriesPerPage);
 
-	m_width = maxWidth;
+	m_width = w_max(maxWidth,borderwidth); 
 	m_currentPage = 0;
 	m_pages = page + 1;
 	unsigned int additional_width;
