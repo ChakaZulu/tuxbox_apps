@@ -145,11 +145,11 @@ bookmarkmanager.select select
 bouqueteditor.add Add
 bouqueteditor.bouquetname Name of bouquets
 bouqueteditor.delete Delete
-bouqueteditor.discardingchanges Discarding changes. Please wait ..
+bouqueteditor.discardingchanges Discarding changes. Please be patient.
 bouqueteditor.hide Hide
 bouqueteditor.lock Lock
 bouqueteditor.move Move
-bouqueteditor.name Bouquet-editor
+bouqueteditor.name bouquet editor
 bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.rename Rename
 bouqueteditor.return ready
@@ -617,8 +617,8 @@ scants.transponders Transponders:
 screensetup.lowerright green = setup lower right
 screensetup.upperleft red = setup upper left
 servicemenu.head Service
-servicemenu.reload Reload Channel-lists
-servicemenu.reload_hint Reloading Channel-lists,\nplease wait...
+servicemenu.reload Reload channel lists
+servicemenu.reload_hint Reloading channel lists,\nplease be patient.
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
 servicemenu.update Software Update
@@ -641,6 +641,7 @@ streaminfo.framerate_unknown Framerate: unknown
 streaminfo.head Stream-Information
 streaminfo.not_available not available
 streaminfo.resolution Resolution
+streaminfo.signal reception signal
 streaming.buffer_overflow The recording was aborted,\nsince the data could not be written fast enough.
 streaming.busy One or several recording processes are active.\nIf you encounter this message and no recording is active, please restart Neutrino.
 streaming.dir_not_writable The recording directory is not writable.\nRecording will not work.
