@@ -45,7 +45,7 @@ class CHTTPTool
 		int	iGlobalProgressBegin;
 
 		CProgress_StatusViewer*	statusViewer;
-		static int show_progress( void *clientp, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow);
+		static int show_progress( void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
 
 	public:
 		CHTTPTool();
