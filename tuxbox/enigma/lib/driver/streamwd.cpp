@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include "ost/video.h"
+#include <linux/dvb/video.h>
 #include <dbox/event.h>
 
 #include <lib/base/eerror.h>
