@@ -519,16 +519,28 @@ void CPictureViewerGui::paintItem(int pos)
 {
 //	printf("paintItem{\n");
 	int ypos = y+ theight + 0 + pos*fheight;
-	int color;
-	if( (liststart+pos < playlist.size()) && (pos % 2) )
-		color = COL_MENUCONTENTDARK;
+
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+
+	if ((liststart+pos < playlist.size()) && (pos & 1) )
+	{
+		color   = COL_MENUCONTENTDARK;
+		bgcolor = COL_MENUCONTENTDARK_PLUS_0;
+	}
 	else
+	{
 		color	= COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
 
-	if(liststart+pos==selected)
-		color = COL_MENUCONTENTSELECTED;
+	if (liststart+pos == selected)
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
 
-	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, bgcolor);
 	if(liststart+pos<playlist.size())
 	{
 		std::string tmp = playlist[liststart+pos].Name;
@@ -551,7 +563,7 @@ void CPictureViewerGui::paintHead()
 {
 //	printf("paintHead{\n");
 	std::string strCaption = g_Locale->getText("pictureviewer.head");
-	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+10);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
 	int ypos=y+0;
@@ -575,8 +587,8 @@ void CPictureViewerGui::paintFoot()
 //	printf("paintFoot{\n");
 	int ButtonWidth = (width-20) / 4;
 	int ButtonWidth2 = (width-50) / 2;
-	frameBuffer->paintBoxRel(x,y+(height-2*buttonHeight), width,2*buttonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y+(height-2*buttonHeight), COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+(height-2*buttonHeight), width,2*buttonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y+(height-2*buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
 
 	if (!playlist.empty())
 	{
@@ -590,8 +602,7 @@ void CPictureViewerGui::paintFoot()
 			tmp += g_Locale->getText("pictureviewer.sortorder.date");
 		else if(m_sort==DATE)
 			tmp += g_Locale->getText("pictureviewer.sortorder.filename");
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth2 +53 , y+(height-buttonHeight)+24 - 4, 
-														 ButtonWidth2- 28, tmp, COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth2 +53 , y+(height-buttonHeight)+24 - 4, ButtonWidth2- 28, tmp, COL_INFOBAR, 0, true); // UTF-8
 
 
 		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - 2 * buttonHeight) + 4, ButtonWidth, 4, PictureViewerButtons);

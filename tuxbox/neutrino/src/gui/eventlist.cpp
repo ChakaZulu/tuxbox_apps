@@ -342,24 +342,28 @@ void EventList::hide()
 
 void EventList::paintItem(unsigned int pos)
 {
-	fb_pixel_t color;
+	uint8_t    color;
+	fb_pixel_t bgcolor;
 	int ypos = y+ theight+0 + pos*fheight;
 	std::string datetime1_str, datetime2_str, duration_str;
 
 	if (liststart+pos==selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
 	else if (liststart+pos == current_event )
 	{
-		color = COL_MENUCONTENT_PLUS_1;
+		color   = COL_MENUCONTENT + 1;
+		bgcolor = COL_MENUCONTENT_PLUS_1;
 	}
 	else
 	{
-		color = COL_MENUCONTENT;
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x, ypos, width- 15, fheight, bgcolor);
 
 	if(liststart+pos<evtlist.size())
 	{
@@ -411,7 +415,7 @@ void EventList::paintHead()
 	char l_name[100];
 	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head"), name.c_str()); // UTF-8
 
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
 

@@ -334,13 +334,13 @@ void CMotorControl::hide()
 void CMotorControl::paintLine(int x, int * y, int width, char * txt)
 {
 	*y += mheight;
-	frameBuffer->paintBoxRel(x, *y - mheight, width, mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, *y - mheight, width, mheight, COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y, width, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintLine(int x, int y, int width, char * txt)
 {
-	//frameBuffer->paintBoxRel(x, y - mheight, width, mheight, COL_MENUCONTENT);
+	//frameBuffer->paintBoxRel(x, y - mheight, width, mheight, COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y, width, txt, COL_MENUCONTENT);
 }
 
@@ -356,7 +356,7 @@ void CMotorControl::paintSeparator(int xpos, int * ypos, int width, char * txt)
 	stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(txt);
 	stringstartposX = 0;
 	stringstartposX = (xpos + (width >> 1)) - (stringwidth >> 1);
-	frameBuffer->paintBoxRel(stringstartposX - 5, *ypos - mheight, stringwidth + 10, mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(stringstartposX - 5, *ypos - mheight, stringwidth + 10, mheight, COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposX, *ypos, stringwidth, txt, COL_MENUCONTENT);
 }
 
@@ -419,9 +419,9 @@ void CMotorControl::paintStatus()
 void CMotorControl::paint()
 {
 	ypos = y;
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x + 10, ypos + hheight, width, g_Locale->getText("motorcontrol.head"), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
 
 	ypos += hheight + (mheight >> 1) - 10;
 	ypos_menue = ypos;

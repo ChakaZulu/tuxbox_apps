@@ -638,27 +638,30 @@ void CGameList::paintItem(int pos)
 {
 	int ypos = (y+theight) + pos*fheight;
 	int itemheight = fheight;
-	int color = COL_MENUCONTENT;
+
+	uint8_t    color   = COL_MENUCONTENT;
+	fb_pixel_t bgcolor = COL_MENUCONTENT_PLUS_0;
 	if (liststart+pos==selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
 
 	if(liststart+pos==0)
 	{	//back is half-height...
 		itemheight = (fheight / 2) + 3;
-		frameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
-		frameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT_PLUS_5);
-		frameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT_PLUS_2);
+		frameBuffer->paintBoxRel(x     , ypos + itemheight    , width     , 15, COL_MENUCONTENT_PLUS_0);
+		frameBuffer->paintBoxRel(x + 10, ypos + itemheight + 5, width - 20,  1, COL_MENUCONTENT_PLUS_5);
+		frameBuffer->paintBoxRel(x + 10, ypos + itemheight + 6, width - 20,  1, COL_MENUCONTENT_PLUS_2);
 	}
 	else if(liststart==0)
 	{
 		ypos -= (fheight / 2) - 15;
 		if(pos==(int)listmaxshow-1)
-			frameBuffer->paintBoxRel(x,ypos+itemheight, width, (fheight / 2)-15, COL_MENUCONTENT);
+			frameBuffer->paintBoxRel(x,ypos+itemheight, width, (fheight / 2)-15, COL_MENUCONTENT_PLUS_0);
 
 	}
-	frameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
+	frameBuffer->paintBoxRel(x, ypos, width, itemheight, bgcolor);
 
 
 	if(liststart+pos<gamelist.size())
@@ -672,9 +675,9 @@ void CGameList::paintItem(int pos)
 void CGameList::paintHead()
 {
 	if(listmaxshow > gamelist.size()+1)
-		frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
+		frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD_PLUS_0);
 	else
-		frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD);
+		frameBuffer->paintBoxRel(x,y, width+15,theight, COL_MENUHEAD_PLUS_0);
 
 	frameBuffer->paintIcon("games.raw",x+8,y+5);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+38,y+theight+1, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8

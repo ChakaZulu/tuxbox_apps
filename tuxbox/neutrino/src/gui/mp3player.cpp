@@ -526,7 +526,7 @@ int CMP3PlayerGui::show()
 				sprintf(str,"%d",val);
 				int w = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getRenderWidth(str);
 				int h = g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->getHeight();
-				frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6 );
+				frameBuffer->paintBoxRel(x1 - 7, y1 - h - 5, w + 14, h + 10, COL_MENUCONTENT_PLUS_6);
 				frameBuffer->paintBoxRel(x1 - 4, y1 - h - 3, w +  8, h +  6, COL_MENUCONTENTSELECTED_PLUS_0);
 				g_Font[SNeutrinoSettings::FONT_TYPE_CHANNEL_NUM_ZAP]->RenderString(x1,y1,w+1,str,COL_MENUCONTENTSELECTED,0);
 				g_RCInput->getMsg( &msg, &data, 100 ); 
@@ -614,20 +614,51 @@ void CMP3PlayerGui::hide()
 void CMP3PlayerGui::paintItem(int pos)
 {
 	int ypos = y + title_height + theight + pos*fheight;
-	int color;
+	uint8_t    color;
+	fb_pixel_t bgcolor;
 
 	if ((pos + liststart) == selected)
-		color = COL_MENUCONTENTSELECTED;
+	{
+		if ((pos + liststart) == (unsigned)current)
+		{
+			color   = COL_MENUCONTENTSELECTED;
+			bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+		}
+		else
+		{
+			color   = COL_MENUCONTENTSELECTED + 2;
+			bgcolor = COL_MENUCONTENTSELECTED_PLUS_2;
+		}
+	}
 	else
 		if (((pos + liststart) < playlist.size()) && (pos & 1))
-			color = COL_MENUCONTENTDARK;
+		{
+			if ((pos + liststart) == (unsigned)current)
+			{
+				color   = COL_MENUCONTENTDARK;
+				bgcolor = COL_MENUCONTENTDARK_PLUS_0;
+			}
+			else
+			{
+				color   = COL_MENUCONTENTDARK + 2;
+				bgcolor = COL_MENUCONTENTDARK_PLUS_2;
+			}
+		}
 		else
-			color = COL_MENUCONTENT;
-	
-	if ((pos + liststart) == (unsigned)current)
-		color += 2;
+		{
+			if ((pos + liststart) == (unsigned)current)
+			{
+				color   = COL_MENUCONTENT;
+				bgcolor = COL_MENUCONTENT_PLUS_0;
+			}
+			else
+			{
+				color   = COL_MENUCONTENT + 2;
+				bgcolor = COL_MENUCONTENT_PLUS_2;
+			}
+		}
 
-	frameBuffer->paintBoxRel(x, ypos, width - 15, fheight, color);
+	frameBuffer->paintBoxRel(x, ypos, width - 15, fheight, bgcolor);
 
 	if ((pos + liststart) < playlist.size())
 	{

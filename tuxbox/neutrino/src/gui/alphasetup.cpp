@@ -246,9 +246,9 @@ void CAlphaSetup::hide()
 
 void CAlphaSetup::paint()
 {
-	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT_PLUS_0);
 
 	paintSlider(x+10, y+hheight, alpha1,g_Locale->getText("gtxalpha.alpha1"),"red", true);
 	paintSlider(x+10, y+hheight+mheight, alpha2,g_Locale->getText("gtxalpha.alpha2"),"green", false);
@@ -259,7 +259,7 @@ void CAlphaSetup::paintSlider(const int x, const int y, const unsigned char * co
 	if (!spos)
 		return;
 	int sspos = (*spos)*100/8;
-	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT_PLUS_0);
 	frameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
 	std::string iconfile = "volumeslider2";
 	if (selected)

@@ -456,15 +456,25 @@ void CTimerList::hide()
 void CTimerList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight*2;
-	int color;
-	if(pos % 2)
-		color = COL_MENUCONTENTDARK;
-	else
-		color	= COL_MENUCONTENT;
 
-	if(liststart+pos==selected)
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+
+	if (pos & 1)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTDARK;
+		bgcolor = COL_MENUCONTENTDARK_PLUS_0;
+	}
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
+
+	if (liststart + pos == selected)
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
 
 	int real_width=width;
@@ -473,7 +483,7 @@ void CTimerList::paintItem(int pos)
 		real_width-=15; //scrollbar
 	}
 	
-	frameBuffer->paintBoxRel(x,ypos, real_width, 2*fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, real_width, 2*fheight, bgcolor);
 	if(liststart+pos<timerlist.size())
 	{
 		CTimerd::responseGetTimer & timer = timerlist[liststart+pos];
@@ -564,7 +574,7 @@ void CTimerList::paintItem(int pos)
 
 void CTimerList::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintIcon("timer.raw",x+5,y+4);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("timerlist.name"), COL_MENUHEAD, 0, true); // UTF-8
 
@@ -583,8 +593,8 @@ const struct button_label TimerListButtons[3] =
 void CTimerList::paintFoot()
 {
 	int ButtonWidth = (width - 20) / 4;
-	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	if (timerlist.empty())
 		::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + ButtonWidth + 10, y + height + 4, ButtonWidth, 2, &(TimerListButtons[1]));
@@ -614,12 +624,12 @@ void CTimerList::paint()
 	{
 		int ypos = y+ theight;
 		int sb = 2*fheight* listmaxshow;
-		frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
+		frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb, COL_MENUCONTENT_PLUS_1);
 
 		int sbc= ((timerlist.size()- 1)/ listmaxshow)+ 1;
 		float sbh= (sb- 4)/ sbc;
 
-		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(page_nr * sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
+		frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(page_nr * sbh) , 11, int(sbh), COL_MENUCONTENT_PLUS_3);
 	}
 
 	paintFoot();

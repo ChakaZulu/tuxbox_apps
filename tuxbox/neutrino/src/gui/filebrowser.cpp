@@ -788,7 +788,8 @@ void CFileBrowser::hide()
 void CFileBrowser::paintItem(unsigned int pos)
 {
 	int colwidth1, colwidth2, colwidth3, colwidth1_dir, colwidth2_dir;
-	int color;
+	uint8_t color;
+	fb_pixel_t bgcolor;
 	int ypos = y+ theight+0 + pos*fheight;
 	CFile * actual_file = NULL;
 	std::string fileicon;
@@ -796,21 +797,26 @@ void CFileBrowser::paintItem(unsigned int pos)
 	colwidth2_dir = 180;
 	colwidth1_dir = width - 35 - colwidth2_dir - 10;
 	
-	if (liststart+pos==selected)
+	if (liststart + pos == selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 		paintFoot();
 	}
 	else
 	{
-		color = COL_MENUCONTENT;//DARK;
+		color   = COL_MENUCONTENT;//DARK;
+		bgcolor = COL_MENUCONTENT_PLUS_0;//DARK;
 	}
 	
 	if( (liststart + pos) < filelist.size() )
 	{
 		actual_file = &filelist[liststart+pos];
-		if(actual_file->Marked)
-			color = color+2;
+		if (actual_file->Marked)
+		{
+			color += 2;
+			bgcolor = (liststart + pos == selected) ? COL_MENUCONTENTSELECTED_PLUS_2 : COL_MENUCONTENT_PLUS_2;
+		}
 
 		if (g_settings.filebrowser_showrights == 0 && S_ISREG(actual_file->Mode))
 		{
@@ -824,7 +830,7 @@ void CFileBrowser::paintItem(unsigned int pos)
 		}
 		colwidth1 = width - 35 - colwidth2 - colwidth3 - 10;
 
-		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
 
 		if ( actual_file->Name.length() > 0 )
 		{
@@ -906,7 +912,7 @@ void CFileBrowser::paintItem(unsigned int pos)
 		}
 	}
 	else
-		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, COL_MENUCONTENT/*DARK*/);
+		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, COL_MENUCONTENT_PLUS_0/*DARK*/);
 }
 
 //------------------------------------------------------------------------
@@ -915,7 +921,7 @@ void CFileBrowser::paintHead()
 {
 	char l_name[100];
 
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
 	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // ISO-8859-1
@@ -948,7 +954,7 @@ void CFileBrowser::paintFoot()
 	int ty2 = by2 + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
 
 	//Background
-	frameBuffer->paintBoxRel(x, y + height - (2 * foheight ), width, (2 * foheight ), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y + height - (2 * foheight ), width, (2 * foheight ), COL_MENUHEAD_PLUS_0);
 
 	if (!(filelist.empty()))
 	{
