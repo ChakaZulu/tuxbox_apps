@@ -71,7 +71,7 @@ int CFavorites::addChannelToFavorites()
 	channel_id = g_Zapit->getCurrentServiceID();
 
 	if ( ! g_Zapit->existsChannelInBouquet(bouquet_id, channel_id) ) {
-		g_Zapit->addChannelToBouquet(bouquet_id, channel_id);
+		g_Zapit->addChannelToBouquet(bouquet_id - 1, channel_id);
 		status |= 2;
 	}
 

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.3 2002/10/03 15:28:24 dirch Exp $
+	$Id: controlapi.cpp,v 1.4 2002/10/03 19:05:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -620,7 +620,7 @@ char *buffer = new char[500];
 
 	for(unsigned int i = 0; i < Parent->BouquetList.size();i++)
 	{
-		sprintf(buffer,"%u %s\n",Parent->BouquetList[i].bouquet_nr,Parent->BouquetList[i].name);
+		sprintf(buffer,"%u %s\n", (Parent->BouquetList[i].bouquet_nr) + 1, Parent->BouquetList[i].name);
 		request->SocketWrite(buffer);
 	}
 	delete[] buffer;

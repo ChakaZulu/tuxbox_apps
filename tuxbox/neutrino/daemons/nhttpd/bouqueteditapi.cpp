@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.2 2002/10/03 17:20:59 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.3 2002/10/03 19:05:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -214,7 +214,7 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 			request->SocketWrite("<Script language=\"Javascript\" src=\"/channels.js\">\n</script>\n");
 			request->SocketWrite("<h1>Bouquet-Editor edit Bouquet</h1>\n");
 			CZapitClient::BouquetChannelList BChannelList;
-			Parent->Zapit->getBouquetChannels(selected, BChannelList, CZapitClient::MODE_CURRENT);
+			Parent->Zapit->getBouquetChannels(selected - 1, BChannelList, CZapitClient::MODE_CURRENT);
 			CZapitClient::BouquetChannelList::iterator channels = BChannelList.begin();
 			request->SocketWrite("<FORM action=\"editchannels\" method=\"POST\" name=\"channels\" enctype=\"x-www-form-urlencoded\">\n");
 			request->SocketWrite("<INPUT TYPE=\"HIDDEN\" name=\"selected\" value=\"");
@@ -269,22 +269,22 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 		if (request->ParameterList["selected"] != "") {
 			int selected = atoi(request->ParameterList["selected"].c_str());
 			CZapitClient::BouquetChannelList BChannelList;
-			Parent->Zapit->getBouquetChannels(selected, BChannelList, CZapitClient::MODE_CURRENT);
+			Parent->Zapit->getBouquetChannels(selected - 1, BChannelList, CZapitClient::MODE_CURRENT);
 			CZapitClient::BouquetChannelList::iterator channels = BChannelList.begin();
 			for(; channels != BChannelList.end();channels++)
 			{
-				Parent->Zapit->removeChannelFromBouquet(selected, channels->channel_id);
+				Parent->Zapit->removeChannelFromBouquet(selected - 1, channels->channel_id);
 			}
 			string bchannels = request->ParameterList["bchannels"];
 			int pos;
 			while ((pos = bchannels.find(',')) >= 0) {
 				string bchannel = bchannels.substr(0, pos);
 				bchannels = bchannels.substr(pos+1, bchannels.length());
-				Parent->Zapit->addChannelToBouquet(selected, atoi(bchannel.c_str()));
+				Parent->Zapit->addChannelToBouquet(selected - 1, atoi(bchannel.c_str()));
 				
 			}
 			if (bchannels.length() > 0)
-				Parent->Zapit->addChannelToBouquet(selected, atoi(bchannels.c_str()));
+				Parent->Zapit->addChannelToBouquet(selected - 1, atoi(bchannels.c_str()));
 			Parent->Zapit->renumChannellist();
 			Parent->UpdateBouquets();
 			request->Send302("/bouquetedit/main#akt");
@@ -312,36 +312,36 @@ void CBouqueteditAPI::BEShowBouquets(CWebserverRequest* request, unsigned int se
 	request->SocketWrite("<table>");
 	for(; bouquet != AllBouquetList.end();bouquet++)
 	{
-		if (selected == bouquet->bouquet_nr) {
+		if (selected == bouquet->bouquet_nr + 1) {
 			request->SocketWrite("<tr><td class=\"c\">");
 			request->SocketWrite("<a name=\"akt\"></a>");
 		} else
-			if (bouquet->bouquet_nr % 2 == 1)
+			if ((bouquet->bouquet_nr + 1) % 2 == 1)
 				request->SocketWrite("<tr><td class=\"a\">");
 			else
 				request->SocketWrite("<tr><td class=\"b\">");
 		
-		sprintf(outbuff, "<a href=\"main?selected=%i#akt\">%s</a>", bouquet->bouquet_nr, bouquet->name);
+		sprintf(outbuff, "<a href=\"main?selected=%i#akt\">%s</a>", bouquet->bouquet_nr + 1, bouquet->name);
 		request->SocketWrite(outbuff);
-		if (selected == bouquet->bouquet_nr)
+		if (selected == bouquet->bouquet_nr + 1)
 		{
 			request->SocketWrite("</td><td class=\"c\">");
 			sprintf(outbuff, 
 			"<a href=\"edit?selected=%i\">edit</a>"
 			" <a href=\"rename?selected=%i&name=%s\">rename</a>"
 			" <a href=\"delete?selected=%i&name=%s\">delete</a>", 
-			bouquet->bouquet_nr,
-			bouquet->bouquet_nr, bouquet->name,
-			bouquet->bouquet_nr, bouquet->name);
+			bouquet->bouquet_nr + 1,
+			bouquet->bouquet_nr + 1, bouquet->name,
+			bouquet->bouquet_nr + 1, bouquet->name);
 			request->SocketWrite(outbuff);
 			
-			if (bouquet->bouquet_nr > 1) {
-				sprintf(outbuff, " <a href=\"move?selected=%i&action=up#akt\">up</a>", bouquet->bouquet_nr);
+			if (bouquet->bouquet_nr > 0) {
+				sprintf(outbuff, " <a href=\"move?selected=%i&action=up#akt\">up</a>", bouquet->bouquet_nr + 1);
 				request->SocketWrite(outbuff);
 			}
 			
-			if (bouquet->bouquet_nr < bouquetSize) {
-				sprintf(outbuff, " <a href=\"move?selected=%i&action=down#akt\">down</a>", bouquet->bouquet_nr);
+			if (bouquet->bouquet_nr + 1 < bouquetSize) {
+				sprintf(outbuff, " <a href=\"move?selected=%i&action=down#akt\">down</a>", bouquet->bouquet_nr + 1);
 				request->SocketWrite(outbuff);
 			}
 			request->SocketWrite("</td></tr>\n");

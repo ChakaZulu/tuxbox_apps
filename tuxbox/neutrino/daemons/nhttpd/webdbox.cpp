@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.37 2002/09/24 08:09:19 dirch Exp $
+	$Id: webdbox.cpp,v 1.38 2002/10/03 19:05:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -221,7 +221,7 @@ bool CWebDbox::GetBouquets(void)
 bool CWebDbox::GetBouquet(unsigned int BouquetNr)
 {
 	BouquetsList[BouquetNr].clear();
-	Zapit->getBouquetChannels(BouquetNr,BouquetsList[BouquetNr]);
+	Zapit->getBouquetChannels(BouquetNr - 1, BouquetsList[BouquetNr]);
 	return true;
 }
 //-------------------------------------------------------------------------

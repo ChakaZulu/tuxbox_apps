@@ -354,7 +354,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		{
 			if (state == beDefault)
 			{
-				CBEChannelWidget* channelWidget = new CBEChannelWidget( Bouquets[ selected].name, selected + 1);
+				CBEChannelWidget* channelWidget = new CBEChannelWidget( Bouquets[ selected].name, selected);
 				channelWidget->exec( this, "");
 				if (channelWidget->hasChanged())
 					bouquetsChanged = true;

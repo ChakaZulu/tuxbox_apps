@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.5 2002/10/03 15:28:24 dirch Exp $
+	$Id: webapi.cpp,v 1.6 2002/10/03 19:05:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -491,8 +491,8 @@ string classname;
 	CZapitClient::BouquetList::iterator bouquet = Parent->BouquetList.begin();
 	for(; bouquet != Parent->BouquetList.end();bouquet++)
 	{
-		classname = (bouquet->bouquet_nr == (uint) BouquetNr)?" class=\"bouquet\"":"";
-		sprintf(buffer,"<tr height=\"20\"%s><td><a class=bouquets href=\"javascript:goto('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?bouquet=%d');\">%s</a></td></tr>\n",classname.c_str(),bouquet->bouquet_nr,bouquet->bouquet_nr,bouquet->name);
+		classname = ((bouquet->bouquet_nr + 1) == (uint) BouquetNr)?" class=\"bouquet\"":"";
+		sprintf(buffer,"<tr height=\"20\"%s><td><a class=bouquets href=\"javascript:goto('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?bouquet=%d');\">%s</a></td></tr>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
 		request->SocketWrite(buffer);
 	}
 	request->SocketWrite("</table>\n");

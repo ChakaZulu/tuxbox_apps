@@ -217,10 +217,12 @@ class CZapitClient:public CBasicClient
 	void setAudioChannel( unsigned channel );
 
 	/* gets all bouquets */
+	/* exception: bouquets are numbered starting at 0 in this routine! */
 	void getBouquets( BouquetList& bouquets, bool emptyBouquetsToo = false);
 
 	/* gets all channels that are in specified bouquet */
-	void getBouquetChannels( unsigned int bouquet, BouquetChannelList& channels, channelsMode mode = MODE_CURRENT);
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode = MODE_CURRENT);
 
 	/* gets all channels */
 	void getChannels( BouquetChannelList& channels, channelsMode mode = MODE_CURRENT, channelsOrder order = SORT_BOUQUET);
@@ -303,7 +305,8 @@ class CZapitClient:public CBasicClient
 	void renameBouquet(const unsigned int bouquet, std::string newName);
 
 	/* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
-	void moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode = MODE_CURRENT);
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void moveChannel(const unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode = MODE_CURRENT);
 
 	// -- check if Bouquet-Name exists (2002-04-02 rasc)
 	// -- Return bq_id or 0
@@ -318,9 +321,11 @@ class CZapitClient:public CBasicClient
 	/* adds a channel at the end of then channel list to specified bouquet */
 	/* same channels can be in more than one bouquet */
 	/* bouquets can contain both tv and radio channels */
+	/* exception: bouquets are numbered starting at 0 in this routine! */
 	void addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_id);
 
 	/* removes a channel from specified bouquet */
+	/* exception: bouquets are numbered starting at 0 in this routine! */
 	void removeChannelFromBouquet(const unsigned int bouquet, const t_channel_id channel_id);
 
 	/* set a bouquet's lock-state*/

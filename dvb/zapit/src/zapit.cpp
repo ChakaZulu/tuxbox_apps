@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.250 2002/10/03 02:04:22 obi Exp $
+ * $Id: zapit.cpp,v 1.251 2002/10/03 19:05:12 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1063,7 +1063,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.250 2002/10/03 02:04:22 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.251 2002/10/03 19:05:12 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1332,15 +1332,13 @@ void sendAPIDs()
 }
 
 
-void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode)
+void sendBouquetChannels(const unsigned int bouquet, CZapitClient::channelsMode mode)
 {
-	if ((bouquet < 1) || (bouquet > bouquetManager->Bouquets.size()))
+	if (bouquet >= bouquetManager->Bouquets.size())
 	{
 		printf("[zapit] invalid bouquet number: %d", bouquet);
 		return;
 	}
-
-	bouquet--;
 
 	if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode == CZapitClient::MODE_RADIO))
 		internalSendChannels(&(bouquetManager->Bouquets[bouquet]->radioChannels), bouquetManager->radioChannelsBegin().getNrofFirstChannelofBouquet(bouquet));
