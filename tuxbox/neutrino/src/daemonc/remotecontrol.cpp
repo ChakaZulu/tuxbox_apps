@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.19 2001/10/15 17:27:19 field Exp $
+// $Id: remotecontrol.cpp,v 1.20 2001/10/16 17:00:13 faralla Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.20  2001/10/16 17:00:13  faralla
+// nvod nearly ready
+//
 // Revision 1.19  2001/10/15 17:27:19  field
 // nvods (fast) implementiert (umschalten funkt noch nicht)
 //
@@ -95,7 +98,7 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
             //printf("dataLength: %u\n", resp.dataLength);
             char *p=pData;
 
-            (short)nvods->count_nvods = -1;
+            (short)nvods->count_nvods = 0;
             while(p<pData+resp.dataLength)
             {
                 nvods->count_nvods+= 1;
@@ -269,8 +272,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                                         // !!! AUSKOMMENTIERT, weil das tut noch nicht... !!!
 
-                                                        //RemoteControl->remotemsg.cmd= 'i';
-                                                        //do_immediatly = true;
+                                                        RemoteControl->remotemsg.cmd= 'i';
+                                                        do_immediatly = true;
                                                     }
                                                 }
                                                 else
@@ -302,8 +305,10 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                         break;
                                     }
                         case 'i':   {
+                        		printf("Telling zapit the number of nvod-chans: %d\n",RemoteControl->nvods_int.count_nvods);
+                        		write(sock_fd, &RemoteControl->nvods_int.count_nvods, 2);
                                         printf("Sending NVODs to zapit\n");
-                                        for(int count=0;count<RemoteControl->nvods_int.count_nvods;count++)
+                                        for(int count=1;count<=RemoteControl->nvods_int.count_nvods;count++)
                                         {
                                             printf("Sending %d\n", count);
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].onid_sid, 4);
