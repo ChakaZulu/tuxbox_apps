@@ -116,6 +116,7 @@ bool CStreamingNotifier::changeNotify(string OptionName, void*)
       toDisable[2]->setActive(false);
       toDisable[3]->setActive(false);
       toDisable[4]->setActive(false);
+      toDisable[5]->setActive(false);
    }
    else if(g_settings.streaming_type==1)
    {
@@ -124,6 +125,7 @@ bool CStreamingNotifier::changeNotify(string OptionName, void*)
       toDisable[2]->setActive(true);
       toDisable[3]->setActive(true);
       toDisable[4]->setActive(true);
+      toDisable[5]->setActive(true);
    }
    return true;
 }
