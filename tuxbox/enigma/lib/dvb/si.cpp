@@ -608,8 +608,7 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr): Descriptor
 
 	int ptr = sizeof(struct eit_extended_descriptor_struct);
 	__u8* data = (__u8*) descr;
-	for (int i = 0; i < item_description_length; i++)
-		item_description+=data[ptr++];
+	item_description.append((char*)data, item_description_length);
 }
 
 eString ExtendedEventDescriptor::toString()
