@@ -5,7 +5,6 @@ INCLUDES = \
 	-I$(top_srcdir)/src \
 	@CONNECTION_CFLAGS@ \
 	@EVENTSERVER_CFLAGS@ \
-	-I@DRIVER@ \
 	-I$(top_srcdir)/lib
 
 
