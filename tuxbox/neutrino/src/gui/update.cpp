@@ -357,6 +357,36 @@ CFlashUpdate::CFlashUpdate()
 	y=(576-height)>>1;
 }
 
+void CFlashUpdate::stopEPGScanning( bool off )
+{
+  char rip[]="127.0.0.1";
+
+  int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  SAI servaddr;
+  memset(&servaddr,0,sizeof(servaddr));
+  servaddr.sin_family=AF_INET;
+  servaddr.sin_port=htons(sectionsd::portNumber);
+  inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+  if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1) {
+    perror("Couldn't connect to sectionsd!");
+    return;
+  }
+
+  sectionsd::msgRequestHeader req;
+    req.version = 2;
+    req.command = sectionsd::pauseScanning;
+    req.dataLength = 4;
+    write(sock_fd, &req, sizeof(req));
+	int stopit = 0;
+	if(off)
+	{
+		stopit=1;
+	}
+    write(sock_fd, &stopit, req.dataLength);
+
+    close(sock_fd);
+}
 
 int CFlashUpdate::exec(CMenuTarget* parent, string)
 {
@@ -366,7 +396,11 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	{
 		parent->hide();
 	}
+	stopEPGScanning( true );
+
 	paint();
+
+	stopEPGScanning( false );
 
 	bool doLoop = true;
 

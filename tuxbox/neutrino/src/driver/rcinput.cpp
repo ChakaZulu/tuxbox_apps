@@ -30,14 +30,14 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.32 2002/02/27 22:51:13 field Exp $
+ $Id: rcinput.cpp,v 1.33 2002/02/28 01:49:27 field Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
- Revision 1.32  2002/02/27 22:51:13  field
- Tasten kaputt gefixt - sollte wieder gehen :)
+ Revision 1.33  2002/02/28 01:49:27  field
+ Ein/Aus Handling verbessert, SectionsD gepaused beim Update
 
  Revision 1.30  2002/02/25 19:32:26  field
  Events <-> Key-Handling umgestellt! SEHR BETA!
@@ -581,11 +581,12 @@ int CRCInput::translate(int code)
 				return RC_up;
 				case 0x20:
 				case 0x40:
-				case 0x10:
-				case 0x9f:
 				case 0xaf:
 				case 0xcf:
 				return RC_nokey;
+				case 0x10:
+				case 0x9f:
+				return RC_standby_release;
 		}
 	}
 	else if (!(code&0x00))

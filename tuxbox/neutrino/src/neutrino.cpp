@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.176 2002/02/27 22:51:12 field Exp $
+        $Id: neutrino.cpp,v 1.177 2002/02/28 01:49:27 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.176  2002/02/27 22:51:12  field
-  Tasten kaputt gefixt - sollte wieder gehen :)
+  Revision 1.177  2002/02/28 01:49:27  field
+  Ein/Aus Handling verbessert, SectionsD gepaused beim Update
 
   Revision 1.175  2002/02/27 20:25:16  chrissi
   network test menu entry added
@@ -2216,9 +2216,13 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	if ( msg == CRCInput::RC_standby )
 	{
 		// trigger StandBy
+		struct timeval tv;
+		gettimeofday( &tv, NULL );
+		standby_pressed_at = (tv.tv_sec*1000000) + tv.tv_usec;
+
 		if ( mode == mode_standby )
 		{
-        	g_RCInput->pushbackMsg( messages::STANDBY_OFF, 0 );
+        	g_RCInput->insertMsgAtTop( messages::STANDBY_OFF, 0 );
 		}
 		else if ( !g_settings.shutdown_real )
 		{
@@ -2232,10 +2236,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			if(timeout1>timeout)
 				timeout=timeout1;
 
-			struct timeval tv;
-			gettimeofday( &tv, NULL );
-			long long starttime = (tv.tv_sec*1000000) + tv.tv_usec;
-
 			uint msg; uint data;
 			int diff = 0;
 			long long endtime;
@@ -2248,19 +2248,30 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				{
 					gettimeofday( &tv, NULL );
 					endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-					diff = int((endtime-starttime)/100000. );
+					diff = int((endtime - standby_pressed_at)/100000. );
 				}
 
 			} while ( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
 
-			g_RCInput->pushbackMsg( ( diff >= 10 ) ? messages::SHUTDOWN : messages::STANDBY_ON, 0 );
-
+			g_RCInput->insertMsgAtTop( ( diff >= 10 ) ? messages::SHUTDOWN : messages::STANDBY_ON, 0 );
         }
         else
         {
-        	g_RCInput->pushbackMsg( messages::SHUTDOWN, 0 );
+        	g_RCInput->insertMsgAtTop( messages::SHUTDOWN, 0 );
 		}
 		return messages_return::cancel_all;
+	}
+	else if ( msg == CRCInput::RC_standby_release )
+	{
+		struct timeval tv;
+		gettimeofday( &tv, NULL );
+		long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
+		int diff = int((endtime - standby_pressed_at)/100000. );
+		if ( diff >= 10 )
+		{
+        	g_RCInput->insertMsgAtTop( messages::SHUTDOWN, 0 );
+        	return messages_return::cancel_all;
+        }
 	}
 	else if ( ( msg == CRCInput::RC_plus ) ||
 			  ( msg == CRCInput::RC_minus ) )
@@ -2676,7 +2687,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.176 2002/02/27 22:51:12 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.177 2002/02/28 01:49:27 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

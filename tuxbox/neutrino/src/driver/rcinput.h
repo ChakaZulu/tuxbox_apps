@@ -30,14 +30,14 @@
 */
 
 /*
-$Id: rcinput.h,v 1.19 2002/02/27 22:51:13 field Exp $
+$Id: rcinput.h,v 1.20 2002/02/28 01:49:27 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
- Revision 1.19  2002/02/27 22:51:13  field
- Tasten kaputt gefixt - sollte wieder gehen :)
+ Revision 1.20  2002/02/28 01:49:27  field
+ Ein/Aus Handling verbessert, SectionsD gepaused beim Update
 
  Revision 1.17  2002/02/26 17:24:16  field
  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
@@ -134,6 +134,10 @@ class CRCInput
 
 	public:
 		//rc-code definitions
+		static const uint RC_MaxRC = 0x3F;
+		static const uint RC_KeyBoard = 0x4000;
+		static const uint RC_Events 	 = 0x80000000;
+		static const uint RC_Messages = 0x90000000;
 		enum
 		{
 		    RC_standby=0x10, RC_home=0x1F, RC_setup=0x18, RC_0=0x0, RC_1=0x1,
@@ -142,13 +146,12 @@ class CRCInput
 		    RC_red=0x13, RC_page_up=0x54, RC_page_down=0x53, RC_up=0xC, RC_down=0xD,
 		    RC_left=0xB, RC_right=0xA, RC_ok=0xE, RC_plus=0x15, RC_minus=0x16,
 		    RC_spkr=0xF, RC_help=0x17, RC_top_left=27, RC_top_right=28, RC_bottom_left=29, RC_bottom_right=30,
+		    RC_standby_release= RC_MaxRC+ 1,
 		    RC_timeout	= 0xFFFFFFFF,
 		    RC_nokey	= 0xFFFFFFFE
 		};
 
-		static const int RC_KeyBoard = 0x4000;
-		static const int RC_Events 	 = 0x80000000;
-		static const int RC_Messages = 0x90000000;
+
 
 		//only used for plugins (games) !!
 		int getFileHandle()

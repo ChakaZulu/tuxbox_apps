@@ -139,6 +139,7 @@ class CFlashUpdate : public CMenuTarget, CFlashTool_StatusViewer
 		void showGlobalStatus(int prog);
 		void showLocalStatus(int prog);
 		void showStatusMessage(string text);
+		void stopEPGScanning( bool onoff );
 
 	public:
 

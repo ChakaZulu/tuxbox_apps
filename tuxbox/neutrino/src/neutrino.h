@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.54 2002/02/27 22:51:13 field Exp $
+//  $Id: neutrino.h,v 1.55 2002/02/28 01:49:27 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,8 +31,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
-//  Revision 1.54  2002/02/27 22:51:13  field
-//  Tasten kaputt gefixt - sollte wieder gehen :)
+//  Revision 1.55  2002/02/28 01:49:27  field
+//  Ein/Aus Handling verbessert, SectionsD gepaused beim Update
 //
 //  Revision 1.53  2002/02/27 20:25:16  chrissi
 //  network test menu entry added
@@ -291,6 +291,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		bool				softupdate;
 		bool				fromflash;
 		int					streamstatus;
+		long long 			standby_pressed_at;
 
 		channel_msg         firstchannel;
 		st_rmsg				sendmessage;
