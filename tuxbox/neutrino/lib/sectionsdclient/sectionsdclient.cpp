@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.15 2002/04/18 10:43:56 field Exp $
+  $Id: sectionsdclient.cpp,v 1.16 2002/04/18 12:25:09 field Exp $
 
   License: GPL
 
@@ -20,8 +20,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
-  Revision 1.15  2002/04/18 10:43:56  field
-  Clientlib
+  Revision 1.16  2002/04/18 12:25:09  field
+  Vereinfachungen, neue cmds
 
   Revision 1.14  2002/04/17 15:58:24  field
   Anpassungen
@@ -533,20 +533,19 @@ CChannelEventList CSectionsdClient::getEventsServiceKey( unsigned serviceKey )
 	return eList;
 }
 
-
-
-bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEPGData * epgdata)
+bool CSectionsdClient::getActualEPGServiceKey( unsigned serviceKey, CEPGData * epgdata)
 {
 	sectionsd::msgRequestHeader req;
 	req.version = 2;
 
-	req.command = sectionsd::epgEPGid;
-	req.dataLength = 12;
+	req.command = sectionsd::actualEPGchannelID;
+	req.dataLength = sizeof(serviceKey);
+	epgdata->title = "";
+
 	if ( sectionsd_connect() )
 	{
 		send((char*)&req, sizeof(req));
-		send((char*)&eventid, sizeof(eventid));
-		send((char*)&starttime,sizeof(starttime));
+		send((char*)&serviceKey, sizeof(serviceKey));
 
 		int nBufSize = readResponse();
 		if( nBufSize > 0)
@@ -572,7 +571,60 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 			epgdata->userClassification = dp;
 			dp+=strlen(dp)+1;
 			epgdata->fsk = *dp++;
-//			printf("titel: %s\n",epgdata->title.c_str());
+
+			epgdata->epg_times.startzeit = ((sectionsd::sectionsdTime *) dp)->startzeit;
+			epgdata->epg_times.dauer = ((sectionsd::sectionsdTime *) dp)->dauer;
+			dp+= sizeof(sectionsd::sectionsdTime);
+
+			delete[] pData;
+			return true;
+		}
+		else
+			printf("no response from sectionsd\n");
+	}
+	else
+		printf("no connection to sectionsd\n");
+	return false;
+}
+
+
+bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEPGData * epgdata)
+{
+	sectionsd::msgRequestHeader req;
+	req.version = 2;
+
+	req.command = sectionsd::epgEPGid;
+	req.dataLength = sizeof(eventid)+ sizeof(starttime);
+	if ( sectionsd_connect() )
+	{
+		send((char*)&req, sizeof(req));
+		send((char*)&eventid, sizeof(eventid));
+		send((char*)&starttime, sizeof(starttime));
+
+		int nBufSize = readResponse();
+		if( nBufSize > 0)
+		{
+			char* pData = new char[nBufSize];
+			receive(pData, nBufSize);
+			sectionsd_close();
+
+			char* dp = pData;
+
+
+			epgdata->eventID = *((unsigned long long *)dp);
+			dp+= sizeof(epgdata->eventID);
+
+			epgdata->title = dp;
+			dp+=strlen(dp)+1;
+			epgdata->info1 = dp;
+			dp+=strlen(dp)+1;
+			epgdata->info2 = dp;
+			dp+=strlen(dp)+1;
+			epgdata->contentClassification = dp;
+			dp+=strlen(dp)+1;
+			epgdata->userClassification = dp;
+			dp+=strlen(dp)+1;
+			epgdata->fsk = *dp++;
 
 			epgdata->epg_times.startzeit = ((sectionsd::sectionsdTime *) dp)->startzeit;
 			epgdata->epg_times.dauer = ((sectionsd::sectionsdTime *) dp)->dauer;

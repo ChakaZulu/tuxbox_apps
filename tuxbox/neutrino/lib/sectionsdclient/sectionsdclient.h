@@ -42,10 +42,6 @@ class CEPGData
 		string 		title;
 		string 		info1;
 		string 		info2;
-		string 		date;
-		string 		start;
-		string 		end;
-		int			done;
 		char		fsk;
 		string 		contentClassification;
 		string 		userClassification;
@@ -55,10 +51,6 @@ class CEPGData
 		title	= "";
 		info1 	= "";
 		info2 	= "";
-		date 	= "";
-		start 	= "";
-		end 	= "";
-		done 	= -1;
 		fsk	= 0;
 		contentClassification	= "";
 		userClassification		= "";
@@ -115,9 +107,11 @@ class CSectionsdClient
 
 		CChannelEventList getEventsServiceKey( unsigned serviceKey );
 
-		bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEPGData * epgdata);
+		bool getEPGid( unsigned long long eventid, time_t starttime, CEPGData * epgdata);
 
-		bool CSectionsdClient::getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata);
+		bool getActualEPGServiceKey( unsigned serviceKey, CEPGData * epgdata);
+
+		bool getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata);
 
 
 		/*
