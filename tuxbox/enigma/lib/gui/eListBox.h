@@ -29,6 +29,7 @@ public:
 	void remove(T* e);
 	const gFont& getEntryFnt()	{		return entryFnt;	}
 	eListBox(eWidget *parent, int FontSize=20);
+	~eListBox();
 
 	void keyDown(int rc);
 	void keyUp(int rc);
@@ -131,8 +132,7 @@ inline void eListBox<T>::append(T* entry)
 template <class T>
 inline void eListBox<T>::remove(T* entry)
 {
-		childs.take(entry);
-
+	childs.take(entry);
 //	if (auto_actualize)
 		actualize();
 }
@@ -218,7 +218,17 @@ inline eListBox<T>::eListBox(eWidget *parent, int ih)
 		have_focus(0),
 		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size))
 {
-	childs.setAutoDelete(true);
+	childs.setAutoDelete(false);	// machen wir selber
+}
+
+template <class T>
+inline eListBox<T>::~eListBox()
+{
+	while (childs.begin() != childs.end())
+	{
+		T* l=childs.front();
+		delete l;
+	}
 }
 
 template <class T>
