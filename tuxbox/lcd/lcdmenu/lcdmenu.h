@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.h,v 1.13 2002/08/17 08:04:58 obi Exp $
+ * $Id: lcdmenu.h,v 1.14 2002/10/13 04:18:12 obi Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -30,15 +30,17 @@
 #include <string>
 #include <vector>
 
-#include "configfile.h"
-#include "liblcddisplay.h"
-#include "rcinput.h"
-
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #else
 #define CONFIGDIR "/var/tuxbox/config"
 #endif
+
+#include <configfile.h>
+#include <lcddisplay/fontrenderer.h>
+#include <lcddisplay/lcddisplay.h>
+
+#include "rcinput.h"
 
 #define LEFTALIGNED	0
 #define CENTERED	1
