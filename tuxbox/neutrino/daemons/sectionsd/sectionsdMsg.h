@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.32 2002/03/22 17:12:06 field Exp $
+//  $Id: sectionsdMsg.h,v 1.33 2002/04/15 12:33:44 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,10 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.33  2002/04/15 12:33:44  field
+//  Wesentlich verbessertes Paket-Handling (CPU-Last sollte viel besser sein
+//  *g*)
+//
 //  Revision 1.32  2002/03/22 17:12:06  field
 //  Weitere Updates, compiliert wieder
 //
@@ -148,7 +152,7 @@ struct sectionsd
 		unsigned dauer;
 	} __attribute__ ((packed)) ;
 
-	static const int numberOfCommands=25;
+	static const int numberOfCommands=26;
 	enum commands
 	{
 		actualEPGchannelName=0,
@@ -175,7 +179,8 @@ struct sectionsd
 		getEPGPrevNext,
 		getIsTimeSet,
 		serviceChanged,
-		LinkageDescriptorsUniqueKey
+		LinkageDescriptorsUniqueKey,
+		pauseSorting
 	};
 
 	static const int numberOfCommands_v3=2;

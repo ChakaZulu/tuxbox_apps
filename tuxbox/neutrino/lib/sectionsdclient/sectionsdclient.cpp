@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.12 2002/04/12 15:47:28 field Exp $
+  $Id: sectionsdclient.cpp,v 1.13 2002/04/15 12:33:44 field Exp $
 
   License: GPL
 
@@ -20,6 +20,10 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.13  2002/04/15 12:33:44  field
+  Wesentlich verbessertes Paket-Handling (CPU-Last sollte viel besser sein
+  *g*)
+
   Revision 1.12  2002/04/12 15:47:28  field
   laestigen Bug in der glibc2.2.5 umschifft
 
@@ -181,6 +185,22 @@ bool CSectionsdClient::getIsTimeSet()
 	}
 	else
 		return false;
+}
+
+void CSectionsdClient::setPauseSorting( bool doPause )
+{
+	sectionsd::msgRequestHeader msg;
+
+	msg.version = 2;
+	msg.command = sectionsd::pauseSorting;
+	int PauseIt = ( doPause ) ? 1 : 0;
+	msg.dataLength = sizeof( PauseIt );
+
+	sectionsd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&PauseIt, msg.dataLength);
+	readResponse();
+	sectionsd_close();
 }
 
 void CSectionsdClient::setPauseScanning( bool doPause )

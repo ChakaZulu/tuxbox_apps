@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.113 2002/04/12 15:47:27 field Exp $
+//  $Id: sectionsd.cpp,v 1.114 2002/04/15 12:33:44 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,10 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.114  2002/04/15 12:33:44  field
+//  Wesentlich verbessertes Paket-Handling (CPU-Last sollte viel besser sein
+//  *g*)
+//
 //  Revision 1.113  2002/04/12 15:47:27  field
 //  laestigen Bug in der glibc2.2.5 umschifft
 //
@@ -370,14 +374,11 @@
 #include "timerdclient.h"
 #include "../timermanager.h"
 
-// 5 Minuten Zyklus...
-// Zeit die fuer die scheduled eit's benutzt wird (in Sekunden)
-#define TIME_EIT_SCHEDULED 60
+// 10 Minuten Zyklus...
+#define TIME_EIT_SCHEDULED_PAUSE 10* 60
 
-#define TIME_EIT_SCHEDULED_PAUSE 230
-
-// Zeit die fuer die present/following (und nvods) eit's benutzt wird (in Sekunden)
-#define TIME_EIT_PRESENT 10
+// Zeit die fuer die gewartet wird, bevor der Filter weitergeschaltet wird, falls es automatisch nicht klappt
+#define TIME_EIT_SKIPPING 60
 
 // Timeout bei tcp/ip connections in s
 #define TIMEOUT_CONNECTIONS 2
@@ -600,7 +601,7 @@ static void addEvent(const SIevent &evt)
 		mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
 
 /*      auskommentiert - das ist ein Performance-WAHNSINN
-		*g* da muss eine bessere Lösung her
+		*g* da muss eine bessere Lösung her (und die ist schon unterwegs)
 
             if (timerd)
             {
@@ -660,32 +661,28 @@ static void addNVODevent(const SIevent &evt)
 
 static void removeNewEvents(void)
 {
-  // Alte events loeschen
-  time_t zeit=time(NULL);
+	// Alte events loeschen
+	time_t zeit=time(NULL);
 
-  // Mal umgekehrt wandern
-  for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-    if(e->first->times.begin()->startzeit>zeit+secondsToCache)
-      deleteEvent(e->first->uniqueKey());
-//    else
-//      break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
-  return;
+	// Mal umgekehrt wandern
+	for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
+		if(e->first->times.begin()->startzeit>zeit+secondsToCache)
+			deleteEvent(e->first->uniqueKey());
+	return;
 }
 
 static void removeOldEvents(const long seconds)
 {
-  // Alte events loeschen
-  time_t zeit=time(NULL);
-  for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
-    if(e->first->times.begin()->startzeit+(long)e->first->times.begin()->dauer<zeit-seconds)
-      deleteEvent(e->first->uniqueKey());
-    else
-      break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
-  return;
+	// Alte events loeschen
+	time_t zeit=time(NULL);
+	for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
+		if(e->first->times.begin()->startzeit+(long)e->first->times.begin()->dauer<zeit-seconds)
+			deleteEvent(e->first->uniqueKey());
+		else
+			break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
+	return;
 }
 
-//typedef SmartPtr<class SIservice, RefCounted, DisallowConversion, AssertCheckStrict>
-//typedef Loki::SmartPtr<class SIservice, Loki::RefCounted, Loki::DisallowConversion, Loki::NoCheck>
 //  SIservicePtr;
 typedef boost::shared_ptr<class SIservice>
   SIservicePtr;
@@ -709,18 +706,6 @@ struct OrderServiceName
 
 typedef std::map<const SIservicePtr, SIservicePtr, OrderServiceName > MySIservicesOrderServiceName;
 static MySIservicesOrderServiceName mySIservicesOrderServiceName;
-
-/*
-// Loescht ein Event aus allen Mengen
-static void deleteService(const unsigned short serviceID)
-{
-  MySIservicesOrderServiceID::iterator s=mySIservicesOrderServiceID.find(serviceID);
-  if(s!=mySIservicesOrderServiceID.end()) {
-    mySIservicesOrderServiceName.erase(s->second);
-    mySIservicesOrderServiceID.erase(serviceID);
-  }
-}
-*/
 
 // Fuegt ein Service in alle Mengen ein
 static void addService(const SIservice &s)
@@ -849,12 +834,6 @@ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
 //------------------------------------------------------------
 // class DMX
 //------------------------------------------------------------
-
-// zum stoppen/starten des DMX waehrend eines TCP/IP-Requests
-// sollte man evtl. semaphoren nehmen, da momentan
-// durch das lock waehrend eines requests praktisch nur eine
-// Anfrage bearbeitet werden kann da andere requests auf
-// das lock warten
 class DMX {
   public:
     DMX(unsigned char p, unsigned short bufferSizeInKB, int nCRC=0)
@@ -923,7 +902,7 @@ class DMX {
 	int request_pause(void);
     int request_unpause(void);
 
-    int change(bool set_Scheduled); // locks while changing
+    int change(int new_filter_index); // locks while changing
 
 	void lock(void)
 	{
@@ -995,8 +974,8 @@ int DMX::start(void)
   	memset (&flt, 0, sizeof (struct dmxSctFilterParams));
 //  memset (&flt.filter, 0, sizeof (struct dmxFilter));
   	flt.pid              = pID;
-  	flt.filter.filter[0] = filters[0].filter; // current/next
-  	flt.filter.mask[0]   = filters[0].mask; // -> 4e und 4f
+  	flt.filter.filter[0] = filters[filter_index].filter; // current/next
+  	flt.filter.mask[0]   = filters[filter_index].mask; // -> 4e und 4f
   	flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
 
   	if (ioctl (fd, DMX_SET_FILTER, &flt) == -1)
@@ -1106,12 +1085,8 @@ int DMX::unpause(void)
   return 0;
 }
 
-int DMX::change(bool set_Scheduled)
+int DMX::change(int new_filter_index)
 {
-	int new_filter_index= 0;
-	if(set_Scheduled)
-	    new_filter_index= 1;
-
 	if (!fd)
 		return 1;
 
@@ -1131,7 +1106,7 @@ int DMX::change(bool set_Scheduled)
 	}
 
 	if(pID==0x12) // Nur bei EIT
-		dprintf("changeDMX -> %s\n", (new_filter_index==0) ? "current/next %d" : "scheduled %d", new_filter_index );
+		dprintf("changeDMX -> %s (%d)\n", (new_filter_index==0) ? "current/next" : "scheduled", new_filter_index );
 
 	if (ioctl (fd, DMX_STOP, 0) == -1)
 	{
@@ -1147,7 +1122,7 @@ int DMX::change(bool set_Scheduled)
     flt.pid              = pID;
     flt.filter.filter[0] = filters[new_filter_index].filter;
     flt.filter.mask[0]   = filters[new_filter_index].mask;
-    dprintf("changeDMX newfilter %x %x\n", flt.filter.filter[0], flt.filter.mask[0]);
+    //dprintf("changeDMX newfilter %x %x\n", flt.filter.filter[0], flt.filter.mask[0]);
     flt.flags            = DMX_IMMEDIATE_START;
     if ( ( new_filter_index!= 0 ) && (!noCRC) )
       		flt.flags|=DMX_CHECK_CRC;
@@ -1382,34 +1357,53 @@ struct connectionData {
 
 static void commandPauseScanning(struct connectionData *client, char *data, const unsigned dataLength)
 {
-  if(dataLength!=4)
-    return;
-  int pause=*(int *)data;
-  if(pause && pause!=1)
-    return;
-  dprintf("Request of %s scanning.\n", pause ? "stop" : "continue" );
-  if(scanning && pause)
-  {
+	if(dataLength!=4)
+		return;
+	int pause=*(int *)data;
 
-    dmxEIT.request_pause();
-    dmxSDT.request_pause();
-//    dmxTOT.real_pause();
-    scanning=0;
+	if(pause && pause!=1)
+		return;
+	dprintf("Request of %s scanning.\n", pause ? "stop" : "continue" );
+	if(scanning && pause)
+	{
+		dmxEIT.request_pause();
+		dmxSDT.request_pause();
+		//dmxTOT.real_pause();
+		scanning=0;
+	}
+	else if(!pause && !scanning)
+	{
+		dmxSDT.request_unpause();
+		dmxEIT.request_unpause();
+		//dmxTOT.real_unpause();
+		scanning=1;
+	}
 
-  }
-  else if(!pause && !scanning)
-  {
+	struct sectionsd::msgResponseHeader msgResponse;
+	msgResponse.dataLength=0;
+	writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	return;
+}
 
-    dmxSDT.request_unpause();
-    dmxEIT.request_unpause();
-//    dmxTOT.real_unpause();
-    scanning=1;
-  }
+static void commandPauseSorting(struct connectionData *client, char *data, const unsigned dataLength)
+{
+	if(dataLength!=4)
+		return;
+	int pause=*(int *)data;
+	if(pause && pause!=1)
+		return;
 
-  struct sectionsd::msgResponseHeader msgResponse;
-  msgResponse.dataLength=0;
-  writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
-  return;
+	dprintf("Request of %s sorting events.\n", pause ? "stop" : "continue" );
+
+	if(pause)
+		dmxEIT.pause();
+	else
+		dmxEIT.unpause();
+
+	struct sectionsd::msgResponseHeader msgResponse;
+	msgResponse.dataLength=0;
+	writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	return;
 }
 
 static void commandDumpAllServices(struct connectionData *client, char *data, const unsigned dataLength)
@@ -1574,7 +1568,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.113 2002/04/12 15:47:27 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.114 2002/04/15 12:33:44 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1865,8 +1859,10 @@ static void commandLinkageDescriptorsUniqueKey(struct connectionData *client, ch
 	return;
 }
 
-static unsigned	messaging_current_ServiceKey = 0;
-static int 		messaging_current_Section_MaxID = -1;
+static unsigned	messaging_current_servicekey = 0;
+std::vector<int> messaging_skipped_sections_ID [0x22];		// 0x4e .. 0x6f
+static int 		messaging_sections_max_ID [0x22];			// 0x4e .. 0x6f
+static int 		messaging_sections_got_all [0x22];			// 0x4e .. 0x6f
 static bool		messaging_wants_current_next_Event = false;
 static time_t 	messaging_last_requested = time(NULL);
 
@@ -1883,20 +1879,25 @@ static void commandserviceChanged(struct connectionData *client, char *data, con
     bool doWakeUp = false;
 
     dprintf("[sectionsd] Service changed to 0x%x\n", *uniqueServiceKey);
-showProfiling("before lock");
+showProfiling("before messaging lock");
 	time_t zeit=time(NULL);
     lockMessaging();
-    if ( ( messaging_current_ServiceKey != *uniqueServiceKey ) ||
+    if ( ( messaging_current_servicekey != *uniqueServiceKey ) ||
     	 ( zeit > ( messaging_last_requested+ 5 ) ) )
     {
-    	messaging_current_ServiceKey = *uniqueServiceKey;
-		messaging_current_Section_MaxID = -1;
+    	messaging_current_servicekey = *uniqueServiceKey;
+    	for ( int i= 0x4e; i<= 0x6f; i++)
+    	{
+    		messaging_skipped_sections_ID[i- 0x4e].clear();
+    		messaging_sections_max_ID[i- 0x4e] = -1;
+    		messaging_sections_got_all[i- 0x4e] = false;
+    	}
 
 		doWakeUp = true;
 	}
 	messaging_wants_current_next_Event = *requestCN_Event;
-	unlockMessaging();
-showProfiling("after unlock");
+
+showProfiling("before wakeup");
 	messaging_last_requested = zeit;
 
 	if ( doWakeUp )
@@ -1907,16 +1908,19 @@ showProfiling("after unlock");
 		{
 			dprintf("[sectionsd] requesting current_next event...\n");
 			// aufwecken - mit current-next
-			dmxEIT.change( false );
+			dmxEIT.change( 0 );
 		}
 		else
 		{
 			// aufwecken - mit scheduled
-    		dmxEIT.change( true );
+    		dmxEIT.change( 1 );
     	}
     }
     else
     	dprintf("[sectionsd] ignoring wakeup request...\n");
+
+    unlockMessaging();
+
 showProfiling("after doWakeup");
 
     struct sectionsd::msgResponseHeader msgResponse;
@@ -2756,7 +2760,8 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectio
 	commandGetEPGPrevNext,
 	commandGetIsTimeSet,
 	commandserviceChanged,
-	commandLinkageDescriptorsUniqueKey
+	commandLinkageDescriptorsUniqueKey,
+	commandPauseSorting
 };
 
 static void *connectionThread(void *conn)
@@ -2802,8 +2807,6 @@ static void *connectionThread(void *conn)
 			else if(header.version==3 && header.command<sectionsd::numberOfCommands_v3)
 			{
 				int connfd= client->connectionSocket;
-				printf("int connfd=%d\n", connfd);
-
 
             	if ( header.command == sectionsd::CMD_registerEvents )
             	{
@@ -3238,7 +3241,16 @@ static void *eitThread(void *)
 	unsigned timeoutInSeconds=1;
 	bool sendToSleepNow= false;
     dmxEIT.addfilter( 0x4f, (0xff- 0x01) );
-    dmxEIT.addfilter( 0x50, (0xff- 0x0f) );
+    dmxEIT.addfilter( 0x50, (0xff) );
+    dmxEIT.addfilter( 0x51, (0xff) );
+    dmxEIT.addfilter( 0x53, (0xff- 0x01) );
+    dmxEIT.addfilter( 0x57, (0xff- 0x03) );
+    dmxEIT.addfilter( 0x5b, (0xff- 0x03) );
+    dmxEIT.addfilter( 0x5f, (0xff- 0x03) );
+    dmxEIT.addfilter( 0x63, (0xff- 0x03) );
+    dmxEIT.addfilter( 0x67, (0xff- 0x03) );
+    dmxEIT.addfilter( 0x6b, (0xff- 0x03) );
+    dmxEIT.addfilter( 0x6f, (0xff- 0x03) );
 
     try
     {
@@ -3249,40 +3261,60 @@ static void *eitThread(void *)
         dmxEIT.start(); // -> unlock
         for(;;)
         {
-            if(timeoutsDMX>CHECK_RESTART_DMX_AFTER_TIMEOUTS-1)
+
+        	time_t zeit=time(NULL);
+
+            if(timeoutsDMX>=CHECK_RESTART_DMX_AFTER_TIMEOUTS-1)
             {
                 lockServices();
                 lockMessaging();
 
                 MySIservicesOrderUniqueKey::iterator si=mySIservicesOrderUniqueKey.end();
                 //dprintf("timeoutsDMX %x\n",currentServiceKey);
-                if ( messaging_current_ServiceKey )
-                    si=mySIservicesOrderUniqueKey.find( messaging_current_ServiceKey );
-
-				unlockMessaging();
+                if ( messaging_current_servicekey )
+                    si=mySIservicesOrderUniqueKey.find( messaging_current_servicekey );
 
                 if(si!=mySIservicesOrderUniqueKey.end())
                 {
-                    //dprintf("timeoutsDMX -Flags: %d - %d\n", si->second->eitPresentFollowingFlag(), si->second->eitScheduleFlag());
-                    if (((!si->second->eitScheduleFlag())&&(dmxEIT.filter_index==1)) ||
-                        ((!si->second->eitPresentFollowingFlag())&&(dmxEIT.filter_index==0)))
+                    if ( ( ( dmxEIT.filter_index==0 ) && ( !si->second->eitPresentFollowingFlag() ) ) ||
+                    	 ( ( dmxEIT.filter_index==1 ) && ( !si->second->eitScheduleFlag() ) ) )
                     {
                         timeoutsDMX=0;
-                        dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (not broadcast)\n", messaging_current_ServiceKey );
+                        dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (not broadcast)\n", messaging_current_servicekey );
 
-                		if(dmxEIT.filter_index==0) // try with scheduled-epg
-                		{
-	                        dmxEIT.change( true );
+						dmxEIT.change( dmxEIT.filter_index+ 1 );
+					}
+					else
+					if ( dmxEIT.filter_index> 1 )
+					{
+						bool dont_change = false;
+						for ( int i= (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i<= dmxEIT.filters[dmxEIT.filter_index].filter; i++)
+						{
+							//dprintf("%x - %x |", i, messaging_sections_max_ID[i- 0x4e]);
+							if ( messaging_sections_max_ID[i- 0x4e] != -1 )
+							{
+								dont_change= true;
+								break;
+							}
 						}
-						else
-							sendToSleepNow= true;
+                        //dprintf("\n");
+						if ( !dont_change )
+						{
+							if ( dmxEIT.filter_index < ( dmxEIT.filters.size()- 1 ) )
+							{
+								dmxEIT.change(dmxEIT.filter_index+ 1);
+								dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (skipping to next filter)\n", messaging_current_servicekey );
 
+    	            			timeoutsDMX=0;
+							}
+							else
+                	        	sendToSleepNow = true;
+						}
                     }
                 }
+                unlockMessaging();
                 unlockServices();
             }
-
-            time_t zeit=time(NULL);
 
             if(timeoutsDMX>=CHECK_RESTART_DMX_AFTER_TIMEOUTS)
             {
@@ -3325,46 +3357,50 @@ static void *eitThread(void *)
 
             if(timeset)
             { // Nur wenn ne richtige Uhrzeit da ist
-                if(dmxEIT.filter_index==1)
+				if( (sendToSleepNow) )
                 {
-                    if( (zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED) || (sendToSleepNow) )
-                    {
-                    	sendToSleepNow= false;
-                    	struct timespec abs_wait;
-        				struct timeval now;
+					sendToSleepNow= false;
+                    struct timespec abs_wait;
+        			struct timeval now;
 
-                    	gettimeofday(&now, NULL);
-                        TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-                        abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
+                    gettimeofday(&now, NULL);
+					TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
+					abs_wait.tv_sec += (TIME_EIT_SCHEDULED_PAUSE);
 
-						dmxEIT.real_pause();
-						pthread_mutex_lock( &dmxEIT.start_stop_mutex );
-						dprintf("dmxEIT: going to sleep...\n");
+					dmxEIT.real_pause();
+					pthread_mutex_lock( &dmxEIT.start_stop_mutex );
+					dprintf("dmxEIT: going to sleep...\n");
 
-                        int rs=pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
+					int rs=pthread_cond_timedwait( &dmxEIT.change_cond, &dmxEIT.start_stop_mutex, &abs_wait );
 
-                        if (rs==ETIMEDOUT)
-                        {
-							dprintf("dmxEIT: waking up again - looking for new events :)\n");
-							pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
-							dmxEIT.change( false ); // -> restart
-						}
-						else if (rs==0)
-						{
-                        	dprintf("dmxEIT: waking up again - requested from .change()\n");
-							pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
-						}
-                        else
-                        {
-                        	dprintf("dmxEIT:  waking up again - unknown reason?!\n");
-                        	pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
-                        	dmxEIT.real_unpause();
-                        }
-
+					if (rs==ETIMEDOUT)
+					{
+						dprintf("dmxEIT: waking up again - looking for new events :)\n");
+						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
+						dmxEIT.change( 0 ); // -> restart
+					}
+					else if (rs==0)
+					{
+						dprintf("dmxEIT: waking up again - requested from .change()\n");
+						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
+					}
+					else
+					{
+						dprintf("dmxEIT:  waking up again - unknown reason?!\n");
+						pthread_mutex_unlock( &dmxEIT.start_stop_mutex );
+						dmxEIT.real_unpause();
                     }
                 }
-                else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
-                    dmxEIT.change( true );
+                else if(zeit>dmxEIT.lastChanged + TIME_EIT_SKIPPING )
+                {
+                	lockMessaging();
+                    if ( dmxEIT.filter_index < ( dmxEIT.filters.size()- 1 ) )
+					{
+						dmxEIT.change(dmxEIT.filter_index+ 1);
+						dprintf("[eitThread] skipping to next filter (> TIME_EIT_SKIPPING)\n", messaging_current_servicekey );
+					}
+					unlockMessaging();
+				};
             }
             dmxEIT.lock();
             int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
@@ -3418,8 +3454,6 @@ static void *eitThread(void *)
                 continue;
             }
 
-            if ((header.table_id>= 0x4E) && (header.table_id<= 0x6F))
-            {
             if((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
             {
                 // Wir wollen nur aktuelle sections
@@ -3488,45 +3522,90 @@ static void *eitThread(void *)
                 } // if
 
 				lockMessaging();
-                if ( ( header.table_id== 0x4E ) && ( header.table_id_extension == ( messaging_current_ServiceKey & 0xFFFF ) ) )
+                if ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) )
 				{
-                	if (!header.section_number && !header.last_section_number)
-                    {
-                    	// nur eine section...
-                    	dprintf("[eitThread] got all current_next packages... (only one!)\n");
-						dmxEIT.change( true );
-					}
-                    else
-                    {
-						if ( messaging_current_Section_MaxID == -1 )
+					if ( !messaging_sections_got_all[header.table_id- 0x4e] )
+					{
+                		if ( !header.section_number && !header.last_section_number )
                     	{
-							messaging_current_Section_MaxID= header.section_number;
+                    		// nur eine section...
+	                    	dprintf("[eitThread] got all packages for table_id 0x%x... (only one!)\n", header.table_id);
+							messaging_sections_got_all[header.table_id- 0x4e] = true;
+						}
+            	        else
+                	    {
+							if ( messaging_sections_max_ID[header.table_id- 0x4e] == -1 )
+                    		{
+								messaging_sections_max_ID[header.table_id- 0x4e] = header.section_number;
+	                        }
+    	                    else
+        	                {
+            	            	if ( !messaging_sections_got_all[header.table_id- 0x4e] )
+                	        	{
+                    	    		for ( std::vector<int>::iterator i= messaging_skipped_sections_ID[header.table_id- 0x4e].begin();
+                        				  i!= messaging_skipped_sections_ID[header.table_id- 0x4e].end(); ++i )
+                        				if ( *i == header.section_number)
+	                        			{
+											messaging_skipped_sections_ID[header.table_id- 0x4e].erase(i);
+											break;
+										}
 
-                        }
-                        else
-                        {
-                        	if ( ( messaging_current_Section_MaxID == header.section_number ) )
-                        	{
-                        		// alle current-next- pakete für den messaging_current_ServiceKey da!
-                        		dprintf("[eitThread] got all current_next packages...\n");
-                        		if ( messaging_wants_current_next_Event )
-                        		{
-                        			messaging_wants_current_next_Event = false;
-                					eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_ServiceKey, sizeof(messaging_current_ServiceKey) );
-                                }
-                        		dmxEIT.change( true );
-                        	}
-                       	}
-					}
+    	                    		if ( ( messaging_sections_max_ID[header.table_id- 0x4e] == header.section_number ) &&
+        	                			 ( messaging_skipped_sections_ID[header.table_id- 0x4e].size() == 0 ) )
+            	            		{
+                	        			// alle pakete für den ServiceKey da!
+                    	    			dprintf("[eitThread] got all packages for table_id 0x%x\n", header.table_id);
+                        				messaging_sections_got_all[header.table_id- 0x4e] = true;
+                        			}
+                        		}
+	                       	}
+						}
+
+						if ( messaging_wants_current_next_Event && messaging_sections_got_all[0] )
+            	        {
+            	        	dprintf("[eitThread] got all current_next - sending event!\n");
+                	        messaging_wants_current_next_Event = false;
+                			eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_servicekey, sizeof(messaging_current_servicekey) );
+	                    }
+
+						// überprüfen, ob nächster Filter gewünscht :)
+						int	change_filter = 0;
+						for ( int i= (dmxEIT.filters[dmxEIT.filter_index].filter & dmxEIT.filters[dmxEIT.filter_index].mask); i<= dmxEIT.filters[dmxEIT.filter_index].filter; i++)
+						{
+							if ( messaging_sections_got_all[i- 0x4e] )
+								change_filter++;
+							else
+							if ( messaging_sections_max_ID[i- 0x4e] != -1 )
+							{
+								change_filter= -1;
+								break;
+							}
+						}
+
+						if ( change_filter > 0 )
+						{
+							if ( dmxEIT.filter_index < ( dmxEIT.filters.size()- 1 ) )
+								dmxEIT.change(dmxEIT.filter_index+ 1);
+							else
+                        		sendToSleepNow = true;
+						}
+    				}
 				}
 				unlockMessaging();
 
             } // if
             else
             {
+            	lockMessaging();
+            	if ( header.table_id_extension == ( messaging_current_servicekey & 0xFFFF ) )
+            	{
+            		if ( messaging_sections_max_ID[header.table_id- 0x4e] != -1 )
+	            		messaging_skipped_sections_ID[header.table_id- 0x4e].push_back(header.section_number);
+            	}
+            	unlockMessaging();
+
                 delete[] buf;
-                dprintf("[eitThread] skipped sections: pauseCounter %d\n", dmxEIT.pauseCounter);
-            }
+                dprintf("[eitThread] skipped sections for table 0x%x\n", header.table_id);
             }
         } // for
     } // try
@@ -3548,66 +3627,80 @@ static void *eitThread(void *)
 //---------------------------------------------------------------------
 static void *houseKeepingThread(void *)
 {
-  try {
-  dprintf("housekeeping-thread started.\n");
-  for(;;) {
-    int rc=5*60;  // sleep 2 minutes
-    while(rc)
-      rc=sleep(rc);
-    dprintf("housekeeping.\n");
-    dmxEIT.pause();
-    dmxSDT.pause();
-    struct mallinfo speicherinfo1;
-    if(debug)
-      // Speicher-Info abfragen
-      speicherinfo1=mallinfo();
-    lockEvents();
-//    unsigned anzEventsAlt=events.size();
-/*
-    lockServices();
-    events.mergeAndRemoveTimeShiftedEvents(services);
-    unlockServices();
-    if(events.size()!=anzEventsAlt)
-      printf("Removed %d time-shifted events.\n", anzEventsAlt-events.size());
-*/
-    unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
-    removeOldEvents(oldEventsAre); // alte Events
-    if(mySIeventsOrderUniqueKey.size()!=anzEventsAlt) {
-      dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo1.uordblks);
-      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo1.arena, speicherinfo1.arena/1024, (float)speicherinfo1.arena/(1024.*1024));
-      dprintf("Removed %d old events.\n", anzEventsAlt-mySIeventsOrderUniqueKey.size());
-    }
-    dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderUniqueKey.size());
-    dprintf("Number of sptr events (service-id, start time, event-id): %u\n", mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.size());
-    dprintf("Number of sptr events (end time, service-id, event-id): %u\n", mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.size());
-    dprintf("Number of sptr nvod events (event-ID): %u\n", mySIeventsNVODorderUniqueKey.size());
-    dprintf("Number of cached meta-services: %u\n", mySIeventUniqueKeysMetaOrderServiceUniqueKey.size());
-    unlockEvents();
-    if(debug) {
-      lockServices();
-      dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
-      dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
-      dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
-      unlockServices();
-    }
-    if(debug) {
-      // Speicher-Info abfragen
-      struct mallinfo speicherinfo=mallinfo();
-      dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
-      dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
-    }
-    dmxSDT.unpause();
-    dmxEIT.unpause();
-  } // for endlos
-  } // try
-  catch (std::exception& e) {
-    fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
-  }
-  catch (...) {
-    fprintf(stderr, "Caught Exception in housekeeping-thread!\n");
-  }
-  dprintf("housekeeping-thread ended\n");
-  return 0;
+	try
+	{
+		dprintf("housekeeping-thread started.\n");
+		for(;;)
+		{
+			int rc=5*60;  // sleep 5 minutes
+			while(rc)
+				rc=sleep(rc);
+
+			while (!scanning)
+				sleep(1);	// wait for streaming to end...
+
+			dprintf("housekeeping.\n");
+			dmxEIT.pause();
+			dmxSDT.pause();
+
+			struct mallinfo speicherinfo1;
+			if(debug)
+			{
+				// Speicher-Info abfragen
+				speicherinfo1=mallinfo();
+			}
+
+			lockEvents();
+
+			unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
+			removeOldEvents(oldEventsAre); // alte Events
+			if(mySIeventsOrderUniqueKey.size()!=anzEventsAlt)
+			{
+				dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo1.uordblks);
+				dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo1.arena, speicherinfo1.arena/1024, (float)speicherinfo1.arena/(1024.*1024));
+				dprintf("Removed %d old events.\n", anzEventsAlt-mySIeventsOrderUniqueKey.size());
+			}
+			dprintf("Number of sptr events (event-ID): %u\n", mySIeventsOrderUniqueKey.size());
+			dprintf("Number of sptr events (service-id, start time, event-id): %u\n", mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.size());
+			dprintf("Number of sptr events (end time, service-id, event-id): %u\n", mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.size());
+			dprintf("Number of sptr nvod events (event-ID): %u\n", mySIeventsNVODorderUniqueKey.size());
+			dprintf("Number of cached meta-services: %u\n", mySIeventUniqueKeysMetaOrderServiceUniqueKey.size());
+
+			unlockEvents();
+
+			if(debug)
+			{
+				lockServices();
+				dprintf("Number of services: %u\n", mySIservicesOrderUniqueKey.size());
+				dprintf("Number of services (name): %u\n", mySIservicesOrderServiceName.size());
+				dprintf("Number of cached nvod-services: %u\n", mySIservicesNVODorderUniqueKey.size());
+				unlockServices();
+			}
+
+			if(debug)
+			{
+				// Speicher-Info abfragen
+				struct mallinfo speicherinfo=mallinfo();
+				dprintf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
+				dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
+			}
+
+			dmxSDT.unpause();
+			dmxEIT.unpause();
+
+		} // for endlos
+	} // try
+	catch (std::exception& e)
+	{
+		fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+	}
+	catch (...)
+	{
+		fprintf(stderr, "Caught Exception in housekeeping-thread!\n");
+	}
+	dprintf("housekeeping-thread ended\n");
+
+	return 0;
 }
 
 static void printHelp(void)
@@ -3638,7 +3731,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.113 2002/04/12 15:47:27 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.114 2002/04/15 12:33:44 field Exp $\n");
 	try
 	{
 

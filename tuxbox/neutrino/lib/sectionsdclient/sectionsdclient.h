@@ -50,7 +50,7 @@ class CEPGData
 		string 		contentClassification;
 		string 		userClassification;
 
-	CEPGData(){	
+	CEPGData(){
 		eventID = 0;
 		title	= "";
 		info1 	= "";
@@ -106,6 +106,8 @@ class CSectionsdClient
 		bool getIsTimeSet();
 
 		void setPauseScanning( bool doPause );
+
+		void setPauseSorting( bool doPause );
 
 		void setServiceChanged( unsigned ServiceKey, bool requestEvent );
 
