@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.h,v 1.2 2004/03/21 18:02:45 rasc Exp $
+$Id: fe_misc.h,v 1.3 2004/03/27 22:34:03 rasc Exp $
 
 
  DVBSNOOP
@@ -44,10 +44,29 @@ void out_status_detail (int v, fe_status_t s);
 
 #if DVB_API_VERSION != 1
 
-// -- only API3
+// -- only > API3
 
+int  print_FE_BasicCapabilities (int v, int f);
+int  print_FE_CurrentParameters (int v, int f);
+
+void print_FE_QPSK_param (int v, struct dvb_qpsk_parameters qp);
+void print_FE_QAM_param  (int v, struct dvb_qam_parameters qp);
+void print_FE_OFDM_param (int v, struct dvb_ofdm_parameters op);
+
+
+fe_type_t  read_FEType(int f);
 int read_FEInfo(int f, struct dvb_frontend_info *fi);
 int read_FEParam(int f, struct dvb_frontend_parameters *p);
+
+
+const char *festr_FE_code_rate (fe_code_rate_t fec);
+const char *festr_FE_modulation (fe_modulation_t modulation);
+const char *festr_FE_bandwidth (fe_bandwidth_t bandwidth);
+const char *festr_FE_transmit_mode (fe_transmit_mode_t transmit_mode);
+const char *festr_FE_guard_interval (fe_guard_interval_t guard_interval);
+const char *festr_FE_hierarchy (fe_hierarchy_t hierarchy);
+
+
 
 #endif
 
