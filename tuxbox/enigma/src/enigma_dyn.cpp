@@ -2304,8 +2304,7 @@ public:
 						colWidth = eventDuration  / 60 * d_min;
 						if (colWidth > 0)
 						{
-							result << "<td width=" << colWidth << ">"
-								<< "<span class=\"epg\">";
+							result << "<td width=" << colWidth << ">";
 #ifndef DISABLE_FILE
 							result << "<a href=\"javascript:record('"
 								<< "ref=" << ref2string(ref)
@@ -2326,15 +2325,15 @@ public:
 								<< " (" << event.duration / 60 << " min)"
 
 								<< "<br><b>"
-								
+
 								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\'>"
 								<< short_description
 								<< "</a>"
-								
-								<< "</b></span><br>\n";
+
+								<< "</b><br>\n";
 
 							if (eventDuration >= 15 * 60)
-								result << "<span class=\"white\">" << ext_description << "</span>";
+								result << filter_string(ext_description);
 
 							result << "</td>";
 							tablePos += colWidth;
@@ -2351,7 +2350,7 @@ public:
 			}
 		}
 	}
-	
+
 	eMEPG(time_t start, const eServiceReference & bouquetRef)
 		:hours(6)   // horizontally visible hours
 		,d_min(10)  // distance on time scale for 1 minute
@@ -2360,7 +2359,7 @@ public:
 		,tableWidth((end - start) / 60 * d_min + 200)
 	{
 		Signal1<void, const eServiceReference&> cbSignal;
-		CONNECT(cbSignal, eMEPG::getcurepg);                    
+		CONNECT(cbSignal, eMEPG::getcurepg);
 		eServiceInterface::getInstance()->enterDirectory(bouquetRef, cbSignal);
 		eServiceInterface::getInstance()->leaveDirectory(bouquetRef);
 	}
@@ -2410,7 +2409,8 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	eMEPG mepg(start, bouquetRef);
 
 	eString result = readFile(TEMPLATE_DIR + "mepg.tmp");
-	result.strReplace("#BODY#", mepg.getTimeScale() + mepg.getMultiEPG());
+	result.strReplace("#TIMESCALE#", mepg.getTimeScale());
+	result.strReplace("#BODY#", mepg.getMultiEPG());
 	return result;
 }
 
