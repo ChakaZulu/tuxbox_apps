@@ -154,7 +154,10 @@ CZapitClient::SatelliteList satList;
 CVCRControl::CDevice * recordingdevice = NULL;
 
 #define NEUTRINO_SETTINGS_FILE          CONFIGDIR "/neutrino.conf"
+#define NEUTRINO_RECORDING_START_SCRIPT CONFIGDIR "/recording.start"
 #define NEUTRINO_RECORDING_ENDED_SCRIPT CONFIGDIR "/recording.end"
+#define NEUTRINO_ENTER_STANDBY_SCRIPT CONFIGDIR "/standby.on"
+#define NEUTRINO_LEAVE_STANDBY_SCRIPT CONFIGDIR "/standby.off"
 #define NEUTRINO_SCAN_SETTINGS_FILE     CONFIGDIR "/scan.conf"
 #define NEUTRINO_PARENTALLOCKED_FILE    DATADIR   "/neutrino/.plocked"
 
@@ -2886,6 +2889,9 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 	{
 		if(recordingstatus == 1)
 		{
+			puts("[neutrino.cpp] executing " NEUTRINO_RECORDING_START_SCRIPT ".");
+			if (system(NEUTRINO_RECORDING_START_SCRIPT) != 0)
+			perror(NEUTRINO_RECORDING_START_SCRIPT "failed");
 			CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 			eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
 			CEPGData		epgData;
@@ -3621,6 +3627,9 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	}
 	else if (msg == NeutrinoMessages::RECORD_START)
 	{
+		puts("[neutrino.cpp] executing " NEUTRINO_RECORDING_START_SCRIPT ".");
+		if (system(NEUTRINO_RECORDING_START_SCRIPT) != 0)
+		perror(NEUTRINO_RECORDING_START_SCRIPT "failed");
 		/* set nextRecordingInfo to current event (replace other scheduled recording if available) */
 
 		/*
@@ -4228,6 +4237,10 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
+	
+		puts("[neutrino.cpp] executing " NEUTRINO_ENTER_STANDBY_SCRIPT ".");
+		if (system(NEUTRINO_ENTER_STANDBY_SCRIPT) != 0)
+		perror(NEUTRINO_ENTER_STANDBY_SCRIPT "failed");
 
 		lastMode = mode;
 		mode = mode_standby;
@@ -4242,6 +4255,10 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
+
+		puts("[neutrino.cpp] executing " NEUTRINO_LEAVE_STANDBY_SCRIPT ".");
+		if (system(NEUTRINO_LEAVE_STANDBY_SCRIPT) != 0)
+		perror(NEUTRINO_LEAVE_STANDBY_SCRIPT "failed");
 
 		//Send ir
 		CIRSend irs("sboff");
