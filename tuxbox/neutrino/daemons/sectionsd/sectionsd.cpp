@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.1 2001/06/27 11:59:44 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.2 2001/07/06 10:25:04 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.2  2001/07/06 10:25:04  fnbrd
+//  Debug-Zeug raus.
+//
 //  Revision 1.1  2001/06/27 11:59:44  fnbrd
 //  Angepasst an gcc 3.0
 //
@@ -87,7 +90,8 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
     removeControlCodes(servicename);
       // Jetz pruefen ob der Servicename der gewuenschte ist
 //      printf("Servicename: '%s'\n", servicename);
-    if(!strcmp(servicename, serviceName)) {
+    printf("testing '%s'\n", servicename);
+    if(!strcasecmp(servicename, serviceName)) {
       // Event (serviceid) suchen
       time_t zeit=time(NULL);
       for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
@@ -95,8 +99,8 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
           for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
             if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
               return *e;
+      break;
     }
-    break;
   }
   return nullEvt;
 }
@@ -109,39 +113,31 @@ inline int readNbytes(int fd, char *buf, int n, unsigned timeoutInSeconds)
 {
 int j;
 
-  printf("Request for %d bytes\n", n);
   for(j=0; j<n;) {
     struct pollfd ufds;
-//    memset(&ufds, 0, sizeof(ufds));
     ufds.fd=fd;
     ufds.events=POLLIN;
-//    ufds.events=POLLIN|POLLPRI;
     ufds.revents=0;
     int rc=poll(&ufds, 1, timeoutInSeconds*1000);
     if(!rc)
       return 0; // timeout
+    else if(rc<0 && errno==EINTR)
+      continue; // interuppted
     else if(rc<0) {
-      if(errno==EINTR) {
-        printf("interrupted");
-        // interuppted
-	continue;
-      }
-      else {
-        perror ("poll");
-        printf("errno: %d\n", errno);
-        return -1;
-      }
+      perror ("poll");
+      printf("errno: %d\n", errno);
+      return -1;
     }
     int r=read (fd, buf, n-j);
-    if(r<=0) {
+    if(r>0) {
+      j+=r;
+      buf+=r;
+    }
+    else if(r<=0 && errno!=EINTR) {
       perror ("read");
       return -1;
     }
-    j+=r;
-    buf+=r;
-    printf("Got %d bytes (%d overall)\n", r, j);
   }
-  printf("Got %d overall\n", j);
   return j;
 }
 
@@ -158,7 +154,7 @@ static void oldDaemonCommands(struct connectionData *client)
   if(readNbytes(client->connectionSocket, (char *)&request, sizeof(request) , 2)>0) {
     // do
     int nResultDataSize=0;
-    char* pResultData;
+    char* pResultData=0;
 
     printf("Request of actual EPG for '%s'\n", request.Name);
 
@@ -404,14 +400,13 @@ static void *houseKeepingThread(void *)
 }
 
 int main(void)
-//int main(int argc, char** argv)
 {
 pthread_t threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 int listenSocket;
-struct sockaddr_in clientAddr, serverAddr;
+struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.1 2001/06/27 11:59:44 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.2 2001/07/06 10:25:04 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
@@ -435,10 +430,7 @@ struct sockaddr_in clientAddr, serverAddr;
     return 3;
   }
 
-
   // SDT-Thread starten
-
-  printf("Hi1\n");
 
   rc=pthread_create(&threadSDT, 0, sdtThread, 0);
   if(rc) {
@@ -446,9 +438,6 @@ struct sockaddr_in clientAddr, serverAddr;
     fprintf(stderr, "failed to create sdt-thread (rc=%d)\n", rc);
     return 1;
   }
-
-  printf("Hi\n");
-
 
   // EIT-Thread starten
   rc=pthread_create(&threadEIT, 0, eitThread, 0);
@@ -466,7 +455,7 @@ struct sockaddr_in clientAddr, serverAddr;
 
 
   // Unsere Endlosschliefe
-  socklen_t clientInputLen = sizeof(clientAddr);
+  socklen_t clientInputLen = sizeof(connectionData::clientAddr);
   for(;;) {
     // wir warten auf eine Verbindung
     struct connectionData *client=new connectionData; // Wird vom Thread freigegeben
@@ -480,7 +469,7 @@ struct sockaddr_in clientAddr, serverAddr;
       return 4;
     }
   }
-  printf("sectionsd stopped\n");
+  printf("sectionsd ended\n");
   return 0;
 }
 
