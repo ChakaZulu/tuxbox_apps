@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: flashimagecramfs.cpp,v 1.1 2002/05/28 18:51:27 waldi Exp $
+ * $Id: flashimagecramfs.cpp,v 1.2 2002/05/28 18:52:32 waldi Exp $
  */
 
 #include <flashimagecramfs.hpp>
@@ -187,7 +187,6 @@ int FlashImage::FlashImageCramFS::verify ( Crypto::evp::key::key & key, const Cr
 
     while ( i )
     {
-      std::cout << "read: " << std::string ( buf, 4096 ) << std::endl;
       stream.read ( buf, 4096 );
       verify.update ( buf, 4096 );
       i--;
