@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.40 2001/07/25 20:46:21 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.41 2001/07/26 00:58:09 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.41  2001/07/26 00:58:09  fnbrd
+//  Fixed one bug when time was not set.
+//
 //  Revision 1.40  2001/07/25 20:46:21  fnbrd
 //  Neue Kommandos, kleine interne Verbesserungen.
 //
@@ -154,7 +157,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <time.h>
-
+#include <sys/resource.h> // getrusage
 #include <set>
 #include <map>
 #include <algorithm>
@@ -291,17 +294,17 @@ static void deleteEvent(const unsigned long long uniqueKey)
 }
 
 // Fuegt ein Event in alle Mengen ein
-static void addEvent(const SIevent &e)
+static void addEvent(const SIevent &evt)
 {
-  SIeventPtr s(new SIevent(e));
+  SIeventPtr e(new SIevent(evt));
   // Damit in den nicht nach Event-ID sortierten Mengen
   // Mehrere Events mit gleicher ID sind, diese vorher loeschen
-  deleteEvent(s->uniqueKey());
+  deleteEvent(e->uniqueKey());
   // Pruefen ob es ein Meta-Event ist
-  MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i=mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(SIservice::makeUniqueKey(s->originalNetworkID, s->serviceID));
+  MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator i=mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(SIservice::makeUniqueKey(e->originalNetworkID, e->serviceID));
   if(i!=mySIeventUniqueKeysMetaOrderServiceUniqueKey.end()) {
     // ist ein MetaEvent, d.h. mit Zeiten fuer NVOD-Event
-    if(s->times.size()) {
+    if(e->times.size()) {
       // D.h. wir fuegen die Zeiten in das richtige Event ein
       MySIeventsOrderUniqueKey::iterator ie=mySIeventsOrderUniqueKey.find(i->second);
       if(ie!=mySIeventsOrderUniqueKey.end()) {
@@ -315,38 +318,38 @@ static void addEvent(const SIevent &e)
           mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(ie->second, ie->second));
    	}
         // Und die Zeiten im Event updaten
-        ie->second->times.insert(s->times.begin(), s->times.end());
+        ie->second->times.insert(e->times.begin(), e->times.end());
       }
     }
   }
   else {
     // normales Event
-    mySIeventsOrderUniqueKey.insert(std::make_pair(s->uniqueKey(), s));
-    if(s->times.size()) {
+    mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
+    if(e->times.size()) {
       // diese beiden Mengen enthalten nur Events mit Zeiten
-      mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(s, s));
-      mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(s, s));
+      mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
+      mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
     }
   }
 }
 
-static void addNVODevent(const SIevent &e)
+static void addNVODevent(const SIevent &evt)
 {
-  SIeventPtr s(new SIevent(e));
-  MySIeventsOrderUniqueKey::iterator e2=mySIeventsOrderUniqueKey.find(s->uniqueKey());
+  SIeventPtr e(new SIevent(evt));
+  MySIeventsOrderUniqueKey::iterator e2=mySIeventsOrderUniqueKey.find(e->uniqueKey());
   if(e2!=mySIeventsOrderUniqueKey.end()) {
     // bisher gespeicherte Zeiten retten
-    s->times.insert(e2->second->times.begin(), e2->second->times.end());
+    e->times.insert(e2->second->times.begin(), e2->second->times.end());
   }
   // Damit in den nicht nach Event-ID sortierten Mengen
   // Mehrere Events mit gleicher ID sind, diese vorher loeschen
-  deleteEvent(s->uniqueKey());
-  mySIeventsOrderUniqueKey.insert(std::make_pair(s->uniqueKey(), s));
-  mySIeventsNVODorderUniqueKey.insert(std::make_pair(s->uniqueKey(), s));
-  if(s->times.size()) {
+  deleteEvent(e->uniqueKey());
+  mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
+  mySIeventsNVODorderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
+  if(e->times.size()) {
     // diese beiden Mengen enthalten nur Events mit Zeiten
-    mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(s, s));
-    mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(s, s));
+    mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
+    mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
   }
 }
 
@@ -606,7 +609,8 @@ int DMX::start(void)
     return 4;
   }
   isScheduled=false;
-  lastChanged=time(NULL);
+  if(timeset) // Nur wenn ne richtige Uhrzeit da ist
+    lastChanged=time(NULL);
   unlock();
   return 0;
 }
@@ -672,7 +676,8 @@ int DMX::change(void)
     unlock();
     return 3;
   }
-  lastChanged=time(NULL);
+  if(timeset) // Nur wenn ne richtige Uhrzeit da ist
+    lastChanged=time(NULL);
   unlock();
   return 0;
 }
@@ -869,7 +874,7 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
     }
     lockEvents();
     int serviceIDfound=0;
-    for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
+    for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++) {
       if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey) {
         serviceIDfound=1;
         char strZeit[50];
@@ -885,6 +890,7 @@ static void commandAllEventsChannelName(struct connectionData *client, char *dat
       } // if = serviceID
       else if(serviceIDfound)
         break; // sind nach serviceID und startzeit sortiert -> nicht weiter suchen
+    }
     unlockEvents();
     if(dmxEIT.unpause()) {
       delete[] evtList;
@@ -919,9 +925,13 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 //  unsigned anzServices=services.size();
   unlockServices();
   struct mallinfo speicherinfo=mallinfo();
+  struct rusage resourceUsage;
+//  getrusage(RUSAGE_CHILDREN, &resourceUsage);
+//  getrusage(RUSAGE_SELF, &resourceUsage);
   time_t zeit=time(NULL);
-  char stati[1024];
+  char stati[2024];
   sprintf(stati,
+    "$Id: sectionsd.cpp,v 1.41 2001/07/26 00:58:09 fnbrd Exp $"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -930,10 +940,13 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
     "Number of cached events: %u\n"
     "Number of cached nvod-events: %u\n"
     "Number of cached meta-services: %u\n"
+//    "Resource-usage: maxrss: %ld ixrss: %ld idrss: %ld isrss: %ld\n"
     "Total size of memory occupied by chunks handed out by malloc: %d\n"
     "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
     ctime(&zeit),
-    secondsToCache/(60*60L), oldEventsAre/60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices, speicherinfo.uordblks,
+    secondsToCache/(60*60L), oldEventsAre/60, anzServices, anzNVODservices, anzEvents, anzNVODevents, anzMetaServices,
+//    resourceUsage.ru_maxrss, resourceUsage.ru_ixrss, resourceUsage.ru_idrss, resourceUsage.ru_isrss,
+    speicherinfo.uordblks,
     speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024.)
     );
   struct msgSectionsdResponseHeader responseHeader;
@@ -1640,12 +1653,14 @@ const unsigned timeoutInSeconds=2;
     return 0;
   for(;;) {
     time_t zeit=time(NULL);
-    if(dmxEIT.isScheduled) {
-      if(zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED)
+    if(timeset) { // Nur wenn ne richtige Uhrzeit da ist
+      if(dmxEIT.isScheduled) {
+        if(zeit>dmxEIT.lastChanged+TIME_EIT_SCHEDULED)
+          dmxEIT.change(); // -> lock, unlock
+      }
+      else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
         dmxEIT.change(); // -> lock, unlock
     }
-    else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
-      dmxEIT.change(); // -> lock, unlock
     dmxEIT.lock();
     int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
@@ -1820,7 +1835,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.40 2001/07/25 20:46:21 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.41 2001/07/26 00:58:09 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
