@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.33 2003/09/03 22:00:40 gagga Exp $
+        $Id: movieplayer.cpp,v 1.34 2003/09/04 22:56:39 zwen Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -147,6 +147,8 @@ CMoviePlayerGui::CMoviePlayerGui ()
   videofilefilter.addFilter ("ts");
   videofilefilter.addFilter ("ps");
   videofilefilter.addFilter ("mpg");
+  videofilefilter.addFilter ("m2p");
+  videofilefilter.addFilter ("avi");
   filebrowser->Filter = &videofilefilter;
   if (strlen (g_settings.network_nfs_moviedir) != 0)
     Path = g_settings.network_nfs_moviedir;
@@ -302,8 +304,20 @@ ReceiveStreamThread (void *mrl)
   httpres = sendGetRequest(addurl);
   
   // add sout (URL encoded)
-  // Example: ?sout=#transcode{vcodec=mpgv,vb=2000,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
-  std::string souturl = baseurl + "?sout=%23transcode%7Bvcodec%3Dmpgv%2Cvb%3D" + g_settings.streaming_videorate + "%2Cacodec%3Dmpga%2Cab%3D" + g_settings.streaming_audiorate + "%2Cchannels%3D2%7D%3Aduplicate%7Bdst%3Dstd%7Baccess%3Dhttp%2Cmux%3Dts%2Curl%3D%3A" + g_settings.streaming_server_port + "%2Fdboxstream%7D%7D";
+  // Example(mit transcode zu mpeg1): ?sout=#transcode{vcodec=mpgv,vb=2000,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
+  // Example(ohne transcode zu mpeg1): ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
+  //TODO make this nicer :-)
+  std::string souturl;
+  if(!memcmp((char*)mrl, "vcd:", 4) || addurl.substr(addurl.length()-4) == ".mpg" || addurl.substr(addurl.length()-4) == ".m2p")
+  {
+	  // no transcode
+	  souturl = baseurl + "?sout=%23duplicate%7Bdst%3Dstd%7Baccess%3Dhttp%2Cmux%3Dts%2Curl%3D%3A" + g_settings.streaming_server_port + "%2Fdboxstream%7D%7D";
+  }
+  else
+  {
+	  // with transcode
+	  souturl = baseurl + "?sout=%23transcode%7Bvcodec%3Dmpgv%2Cvb%3D" + g_settings.streaming_videorate + "%2Cacodec%3Dmpga%2Cab%3D" + g_settings.streaming_audiorate + "%2Cchannels%3D2%7D%3Aduplicate%7Bdst%3Dstd%7Baccess%3Dhttp%2Cmux%3Dts%2Curl%3D%3A" + g_settings.streaming_server_port + "%2Fdboxstream%7D%7D";
+  }
   httpres = sendGetRequest(souturl);
 
   // play MRL
@@ -1033,7 +1047,7 @@ CMoviePlayerGui::PlayFile (void)
 	{
 	  open_filebrowser = false;
 	  filename = NULL;
-	  if (filebrowser->exec (Path))
+	  if (filebrowser->exec (g_settings.network_nfs_moviedir))
 	    {
 	      Path = filebrowser->getCurrentDir ();
 	      if ((filename =
