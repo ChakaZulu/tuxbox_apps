@@ -664,59 +664,70 @@ int eListBoxBase::moveSelection(int dir, bool sendSelected)
 			break;
 
 		case dirUp:
-			if ( current == childs.begin() )				// wrap around?
+		{
+			bool first=true;
+			while (first || !current->isSelectable() )
 			{
-				direction=+1;
-				top = bottom = current = childs.end();
-				--current;
-				int cnt = childs.size()%(MaxEntries*columns);
-				for (int i = 0; i < (cnt?cnt:MaxEntries*columns); ++i, --top)
-					if (top == childs.begin())
-						break;
-			} else
-			{
-				direction=-1;
-				if (current-- == top) // new top must set
+				first=false;
+				if ( current == childs.begin() )				// wrap around?
 				{
-					for (int i = 0; i < MaxEntries*columns; ++i, --top)
+					direction=+1;
+					top = bottom = current = childs.end();
+					--current;
+					int cnt = childs.size()%(MaxEntries*columns);
+					for (int i = 0; i < (cnt?cnt:MaxEntries*columns); ++i, --top)
 						if (top == childs.begin())
 							break;
-					bottom=top;
-					for (int i = 0; i < MaxEntries*columns; ++i, ++bottom)
-						if (bottom == childs.end())
-							break;
-				}
-			}
-			if( !current->isSelectable() )
-				current--;
-		break;
-
-		case dirDown:
-			if ( current == --ePtrList<eListBoxEntry>::iterator(childs.end()) )				// wrap around?
-			{
-				direction=-1;
-				top = current = bottom = childs.begin(); 	// goto first
-				for (int i = 0; i < MaxEntries * columns; ++i, ++bottom)
-					if ( bottom == childs.end() )
-						break;
-			}
-			else
-			{
-				direction=+1;
-				if (++current == bottom)   // ++current ??
+				} 
+				else
 				{
-					for (int i = 0; i<MaxEntries * columns; ++i)
+					direction=-1;
+					if (current-- == top) // new top must set
 					{
-						if (bottom != childs.end() )
-							++bottom;
-						if (top != childs.end() )
-							++top;
+						for (int i = 0; i < MaxEntries*columns; ++i, --top)
+							if (top == childs.begin())
+								break;
+						bottom=top;
+						for (int i = 0; i < MaxEntries*columns; ++i, ++bottom)
+							if (bottom == childs.end())
+								break;
 					}
 				}
 			}
-			if( !current->isSelectable() )
-				current++;
+		}
+		break;
+
+		case dirDown:
+		{
+			bool first=true;
+			while (first || !current->isSelectable() )
+			{
+				first=false;
+				if ( current == --ePtrList<eListBoxEntry>::iterator(childs.end()) )				// wrap around?
+				{
+					direction=-1;
+					top = current = bottom = childs.begin(); 	// goto first
+					for (int i = 0; i < MaxEntries * columns; ++i, ++bottom)
+						if ( bottom == childs.end() )
+							break;
+				}
+				else
+				{
+					direction=+1;
+					if (++current == bottom)   // ++current ??
+					{
+						for (int i = 0; i<MaxEntries * columns; ++i)
+						{
+							if (bottom != childs.end() )
+								++bottom;
+							if (top != childs.end() )
+								++top;
+						}
+					}
+				}
+			}
 			break;
+		}
 		case dirFirst:
 			direction=-1;
 			top = current = bottom = childs.begin(); 	// goto first;
