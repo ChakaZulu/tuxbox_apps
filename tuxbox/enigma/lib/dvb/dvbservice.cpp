@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbci.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 #include <lib/dvb/eaudio.h>
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
