@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.10 2004/05/06 13:31:34 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.11 2004/05/06 15:30:41 thegoodguy Exp $
  * 
  * streaming to file/disc
  * 
@@ -33,6 +33,9 @@
 #endif
 
 #include <stream2file.h>
+
+#include <eventserver.h>
+#include <neutrinoMessages.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -80,7 +83,7 @@ static int dvrfd;
 
 static unsigned char demuxfd_count = 0;
 
-static unsigned char exit_flag;
+static stream2file_status_t exit_flag = STREAM2FILE_STATUS_IDLE;
 static unsigned char busy_count = 0;
 
 static pthread_t demux_thread[MAXPIDS];
@@ -165,7 +168,7 @@ void * FileThread(void * v_arg)
 				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
 				{
 					perror("[stream2file]: error opening outfile");
-					exit_flag = 1;
+					exit_flag = STREAM2FILE_STATUS_WRITE_OPEN_FAILURE;
 					pthread_exit(NULL);
 				}
 				remfile = splitsize;
@@ -190,7 +193,7 @@ void * FileThread(void * v_arg)
 				{
 					if (errno != EAGAIN)
 					{
-						exit_flag = 1;
+						exit_flag = STREAM2FILE_STATUS_WRITE_FAILURE;
 						perror("[stream2file]: error in write");
 						goto terminate_thread;
 					}
@@ -224,7 +227,7 @@ void * FileThread(void * v_arg)
 		}
 		else
 		{
-			if (exit_flag)
+			if (exit_flag != STREAM2FILE_STATUS_RUNNING)
 				goto terminate_thread;
 			usleep(1000);
 		}
@@ -268,7 +271,7 @@ void * DMXThread(void * v_arg)
 	pthread_create(&file_thread, 0, FileThread, &filename_data);
 
 	if (v_arg == &dvrfd)
-		while (!exit_flag)
+		while (exit_flag == STREAM2FILE_STATUS_RUNNING)
 		{
 			r = read(*(int *)v_arg, &(buf[0]), TS_SIZE);
 			if (r > 0)
@@ -285,13 +288,13 @@ void * DMXThread(void * v_arg)
 	// TODO: Retry
 	if (written != r - offset) {
 		printf("PANIC: wrote less than requested to ringbuffer, written %d, requested %d\n", written, r - offset);
-		exit_flag = 1;
+		exit_flag = STREAM2FILE_STATUS_BUFFER_OVERFLOW;
 	}
 	todo = IN_SIZE - (r - offset);
 
 	/* IN_SIZE > TS_SIZE => todo > 0 */
 
-	while (!exit_flag)
+	while (exit_flag == STREAM2FILE_STATUS_RUNNING)
 	{
 		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
 		todo2 = todo - vec[0].len;
@@ -304,12 +307,12 @@ void * DMXThread(void * v_arg)
 			if (((size_t)todo2) > vec[1].len)
 			{
 				printf("PANIC: not enough space in ringbuffer, available %d, needed %d\n", vec[0].len + vec[1].len, todo + todo2);
-				exit_flag = 1;
+				exit_flag = STREAM2FILE_STATUS_BUFFER_OVERFLOW;
 			}
 			todo = vec[0].len;
 		}
 
-		while (!exit_flag)
+		while (exit_flag == STREAM2FILE_STATUS_RUNNING)
 		{
 			r = read(*(int *)v_arg, vec[0].buf, todo);
 			
@@ -354,6 +357,14 @@ void * DMXThread(void * v_arg)
 
 	busy_count--;
 
+	if ((v_arg == &dvrfd) || (v_arg == (&(demuxfd[0]))))
+	{
+		CEventServer eventServer;
+		eventServer.registerEvent2(NeutrinoMessages::EVT_RECORDING_ENDED, CEventServer::INITID_NEUTRINO, "/tmp/neutrino.sock");
+		eventServer.sendEvent(NeutrinoMessages::EVT_RECORDING_ENDED, CEventServer::INITID_NEUTRINO, &exit_flag, sizeof(exit_flag));
+		printf("[stream2file] pthreads exit code: %u\n", exit_flag);
+	}
+
 	pthread_exit(NULL);
 }
 
@@ -373,8 +384,6 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 	busy_count++;
 
-	exit_flag = 0;
-
 	strcpy(myfilename, filename);
 
 	// write stream information (should wakeup the disk from standby, too)
@@ -390,8 +399,6 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		busy_count--;
 		return STREAM2FILE_INVALID_DIRECTORY;
 	}
-
-
 
 	if (splitsize < TS_SIZE)
 	{
@@ -430,10 +437,12 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			busy_count--;
 			return STREAM2FILE_DVR_OPEN_FAILURE;
 		}
+		exit_flag = STREAM2FILE_STATUS_RUNNING;
 		pthread_create(&demux_thread[0], 0, DMXThread, &dvrfd);
 	}
 	else
 	{
+		exit_flag = STREAM2FILE_STATUS_RUNNING;
 		for (unsigned int i = 0; i < numpids; i++)
 		{
 			busy_count++;
@@ -447,9 +456,11 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 stream2file_error_msg_t stop_recording(void)
 {
-	exit_flag = 1;
-
-	// pthread_join(demux_thread, NULL);
-
-	return STREAM2FILE_OK;
+	if (exit_flag == STREAM2FILE_STATUS_RUNNING)
+	{
+		exit_flag = STREAM2FILE_STATUS_IDLE;
+		return STREAM2FILE_OK;
+	}
+	else
+		return STREAM2FILE_RECORDING_THREADS_FAILED;
 }

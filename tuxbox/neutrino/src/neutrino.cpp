@@ -3298,7 +3298,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if (msg == NeutrinoMessages::EVT_EXTMSG)
 	{
 		if (mode != mode_scart)
-			ShowMsgUTF("messagebox.info", std::string((char *) data), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			ShowMsgUTF("messagebox.info", (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}

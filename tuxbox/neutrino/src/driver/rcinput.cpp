@@ -34,6 +34,7 @@
 #endif
 
 #include <driver/rcinput.h>
+#include <driver/stream2file.h>
 
 #include <dbox/fp.h>
 #include <stdio.h>
@@ -1041,6 +1042,17 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 							default :
 								printf("[neutrino] event INITID_TIMERD - unknown eventID 0x%x\n",  emsg.eventID );
 
+						}
+					}
+					else if (emsg.initiatorID == CEventServer::INITID_NEUTRINO)
+					{
+						if (read_bytes == sizeof(stream2file_status_t))
+						{
+							char * msgbody = new char[50];
+
+							sprintf(msgbody, "[stream2file] pthreads exit code: %u\n", * (stream2file_status_t *) p);
+							*msg  = NeutrinoMessages::EVT_EXTMSG;
+							*data = (neutrino_msg_data_t) msgbody;
 						}
 					}
 					else if (emsg.initiatorID == CEventServer::INITID_GENERIC_INPUT_EVENT_PROVIDER)
