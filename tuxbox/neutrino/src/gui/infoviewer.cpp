@@ -1,38 +1,41 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 //
-// $Id: infoviewer.cpp,v 1.65 2002/01/28 19:52:32 field Exp $
+// $Id: infoviewer.cpp,v 1.66 2002/01/28 23:46:47 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.66  2002/01/28 23:46:47  field
+// Boxtyp automatisch, Vol im Scartmode, Kleinigkeiten
+//
 // Revision 1.65  2002/01/28 19:52:32  field
 // Streaminfo ausfuehrlicher
 //
@@ -465,6 +468,9 @@ void CInfoViewer::showData()
                                 struct      tm *pStartZeit = localtime(&subChannels.list[sel].startzeit);
                                 sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
                                 runningPercent=(unsigned)((float)(time(NULL)-subChannels.list[sel].startzeit)/(float)subChannels.list[sel].dauer*100.);
+
+                                unsigned rest = ( (subChannels.list[sel].startzeit + subChannels.list[sel].dauer) - time(NULL) ) / 60;
+								sprintf((char*) &runningRest, "%d min", rest);
                                 if (runningPercent>100)
                                         runningPercent=0;
 

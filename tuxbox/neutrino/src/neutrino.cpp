@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.138 2002/01/28 20:50:42 field Exp $
+        $Id: neutrino.cpp,v 1.139 2002/01/28 23:46:47 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.139  2002/01/28 23:46:47  field
+  Boxtyp automatisch, Vol im Scartmode, Kleinigkeiten
+
   Revision 1.138  2002/01/28 20:50:42  field
   Streaminfo besser
 
@@ -1335,7 +1338,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, true, new CBoxTypeSetupNotifier, false );
+	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, false, new CBoxTypeSetupNotifier, false );
 	oj->addOption(1, "Nokia");
 	oj->addOption(2, "Sagem");
 	oj->addOption(3, "Philips");
@@ -2142,7 +2145,7 @@ bool CNeutrinoApp::onPaintNotify(string MenuName)
 	return false;
 }
 
-void CNeutrinoApp::AudioMuteToggle()
+void CNeutrinoApp::AudioMuteToggle(bool bDoPaint)
 {
 	int dx = 40;
 	int dy = 40;
@@ -2150,26 +2153,35 @@ void CNeutrinoApp::AudioMuteToggle()
 	int y = g_settings.screen_StartY;
 	if ( !mute )
 	{
-		g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-		g_FrameBuffer->paintIcon("mute.raw", x+5, y+5);
+		if (bDoPaint)
+		{
+			g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
+			g_FrameBuffer->paintIcon("mute.raw", x+5, y+5);
+		}
 		g_Controld->Mute();
 	}
 	else
 	{
-		g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+		if (bDoPaint)
+		{
+			g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+		}
 		g_Controld->UnMute();
 	}
 	mute = !mute;
 }
 
-void CNeutrinoApp::setVolume(int key)
+void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 {
 	int dx = 256;
 	int dy = 40;
 	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
 	int y = g_settings.screen_EndY- 100;
 
-	g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
+	if (bDoPaint)
+	{
+		g_FrameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
+	}
 
 	char volume = g_Controld->getVolume();
 
@@ -2199,9 +2211,12 @@ void CNeutrinoApp::setVolume(int key)
 
 		g_Controld->setVolume(volume);
 
-		int vol = volume<<1;
-		g_FrameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
-		g_FrameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+		if (bDoPaint)
+		{
+			int vol = volume<<1;
+			g_FrameBuffer->paintBoxRel(x+40, y+12, 200, 15, COL_INFOBAR+1);
+			g_FrameBuffer->paintBoxRel(x+40, y+12, vol, 15, COL_INFOBAR+3);
+        }
 
 		if ( key != CRCInput::RC_timeout )
 		{
@@ -2210,8 +2225,10 @@ void CNeutrinoApp::setVolume(int key)
 
 	}
 	while ( key != CRCInput::RC_timeout );
-
-	g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+    if (bDoPaint)
+	{
+		g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+	}
 }
 
 void CNeutrinoApp::tvMode()
@@ -2248,7 +2265,21 @@ void CNeutrinoApp::scartMode()
 	g_Controld->setScartMode( 1 );
 	g_RCInput->clear();
 	printf("scartmode-loop\n");
-	while (g_RCInput->getKey(100)!=CRCInput::RC_home);
+
+	int key;
+	do
+	{
+		key = g_RCInput->getKey(100);
+		if (key==CRCInput::RC_spkr)
+		{	//mute
+			AudioMuteToggle( false );
+		}
+		else if ((key==CRCInput::RC_plus) || (key==CRCInput::RC_minus))
+		{	//volume
+			setVolume( key, false );
+		}
+	} while (key != CRCInput::RC_home);
+
 	printf("scartmode-loopended\n");
 	g_Controld->setScartMode( 0 );
 
@@ -2384,7 +2415,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.138 2002/01/28 20:50:42 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.139 2002/01/28 23:46:47 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
