@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.16 2003/11/30 18:40:28 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.17 2004/02/19 08:49:05 thegoodguy Exp $
 
 	License: GPL
 
@@ -313,7 +313,11 @@ CZapitClient::BouquetChannelList::iterator channels;
 		channels = BChannelList.begin();
 		for(; channels != BChannelList.end();channels++)
 		{
-			request->printf("<OPTION VALUE=\"%i\">%s</OPTION>\n", channels->channel_id,channels->name);
+			request->printf("<option value=\""
+					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+					"\">%s</option>\n",
+					channels->channel_id,
+					channels->name);
 		}
 		request->SocketWrite("</SELECT>\n");
 
@@ -331,7 +335,11 @@ CZapitClient::BouquetChannelList::iterator channels;
 		for(; channels != BChannelList.end();channels++)
 		{
 			if (!Parent->Zapit->existsChannelInBouquet(selected - 1, channels->channel_id)){
-				request->printf("<OPTION VALUE=\"%i\">%s</OPTION>\n", channels->channel_id,channels->name);
+				request->printf("<option value=\""
+						PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+						"\">%s</option>\n",
+						channels->channel_id,
+						channels->name);
 			}
 		}
 		request->SocketWrite("</SELECT>\n");
@@ -355,7 +363,8 @@ bool CBouqueteditAPI::changeBouquet(CWebserverRequest* request)
 {
         if(!request->Authenticate())    
                 return false;   
-	if (request->ParameterList["selected"] != "") {
+	if (!(request->ParameterList["selected"].empty()))
+	{
 		int selected = atoi(request->ParameterList["selected"].c_str());
 		CZapitClient::BouquetChannelList BChannelList;
 		Parent->Zapit->getBouquetChannels(selected - 1, BChannelList, CZapitClient::MODE_CURRENT);
@@ -364,16 +373,20 @@ bool CBouqueteditAPI::changeBouquet(CWebserverRequest* request)
 		{
 			Parent->Zapit->removeChannelFromBouquet(selected - 1, channels->channel_id);
 		}
-		std::string bchannels = request->ParameterList["bchannels"];
-		std::string::size_type pos;
-		while ((pos = bchannels.find(',')) != std::string::npos) {
-			std::string bchannel = bchannels.substr(0, pos);
-			bchannels = bchannels.substr(pos+1, bchannels.length());
-			Parent->Zapit->addChannelToBouquet(selected - 1, atoi(bchannel.c_str()));
-			
+
+		t_channel_id channel_id;
+		int delta;
+		const char * bchannels = request->ParameterList["bchannels"].c_str();
+		while (sscanf(bchannels,
+			      SCANF_CHANNEL_ID_TYPE
+			      "%n",
+			      &channel_id,
+			      &delta) > 0)
+		{
+			Parent->Zapit->addChannelToBouquet(selected - 1, channel_id);
+			bchannels += (delta + 1); /* skip the separating ',', too */
 		}
-		if (bchannels.length() > 0)
-			Parent->Zapit->addChannelToBouquet(selected - 1, atoi(bchannels.c_str()));
+
 		Parent->Zapit->renumChannellist();
 		Parent->UpdateBouquets();
 		request->Send302((char*)("/bouquetedit/main?selected=" + request->ParameterList["selected"] + "#akt").c_str());

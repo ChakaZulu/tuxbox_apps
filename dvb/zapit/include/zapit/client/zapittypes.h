@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.20 2004/02/17 16:26:05 thegoodguy Exp $
+ * $Id: zapittypes.h,v 1.21 2004/02/19 08:49:05 thegoodguy Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -50,6 +50,8 @@ typedef uint32_t t_channel_id;
 #define CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id,original_network_id,transport_stream_id) ((original_network_id << 16) | service_id)
 #define CREATE_CHANNEL_ID CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(service_id, original_network_id, transport_stream_id)
 #define PRINTF_CHANNEL_ID_TYPE "%08x"
+#define PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS "%x"
+#define SCANF_CHANNEL_ID_TYPE "%x"
 
 typedef uint64_t t_channel_id64;
 #define CREATE_CHANNEL_ID64 (((uint64_t)satellitePosition << 48) | ((uint64_t) transport_stream_id << 32) | ((uint64_t)original_network_id << 16) | (uint64_t)service_id)
