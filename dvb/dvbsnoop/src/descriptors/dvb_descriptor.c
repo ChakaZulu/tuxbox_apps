@@ -1,15 +1,13 @@
 /*
-$Id: dvb_descriptor.c,v 1.22 2003/12/27 22:02:43 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.23 2004/01/01 20:09:19 rasc Exp $ 
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -20,6 +18,12 @@ $Id: dvb_descriptor.c,v 1.22 2003/12/27 22:02:43 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.23  2004/01/01 20:09:19  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.22  2003/12/27 22:02:43  rasc
 dsmcc INT UNT descriptors started
 
@@ -112,6 +116,12 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 /*
   determine descriptor type and print it...
+
+  EN 300 468:
+  descriptor_tag: The descriptor tag is an 8-bit field which identifies
+  each descriptor. Those values with MPEG-2 normative meaning are described
+  in ISO/IEC 13818-1 [1].
+
   return byte length
 */
 

@@ -1,20 +1,28 @@
 /*
-$Id: dvbsnoop.h,v 1.17 2003/12/15 20:09:48 rasc Exp $
+$Id: dvbsnoop.h,v 1.18 2004/01/01 20:09:15 rasc Exp $
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de
+
+
+
+
 
 
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.18  2004/01/01 20:09:15  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.17  2003/12/15 20:09:48  rasc
 no message
 
@@ -86,6 +94,12 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "strings/dvb_str.h"
 #include "misc/helper.h"
 #include "misc/output.h"
+
+
+/* some defs */
+#define MAX_PID    0x1FFF
+#define DUMMY_PID  0xFFFF	/* special if no pid is needed */
+#define INVALID_PID  0xFEFE	/* a invalid PID*/
 
 
 #endif

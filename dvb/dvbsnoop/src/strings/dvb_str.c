@@ -1,23 +1,30 @@
 /*
-$Id: dvb_str.c,v 1.32 2003/12/30 14:05:38 rasc Exp $
+$Id: dvb_str.c,v 1.33 2004/01/01 20:09:40 rasc Exp $
 
 
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
-  
+ (c) 2001-2004   Rainer.Scherg@gmx.de
+
 
   -- DVB-Strings
   -- dvb decoder helper functions
 
-  --- $$$ TODO: store table strings in external text files, to be
-  ---           more flexible
 
 
 
 
 
 $Log: dvb_str.c,v $
+Revision 1.33  2004/01/01 20:09:40  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.32  2003/12/30 14:05:38  rasc
 just some annotations, so I do not forget these over Sylvester party...
 (some alkohol may reformat parts of /devbrain/0 ... )
@@ -372,6 +379,23 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
   return findTableID (Tags, tag);
 }
 
+
+/*
+ -- current_next_indicator
+ -- ISO/IEC13818-1|ITU H.222.0
+*/
+
+char *dvbstrCurrentNextIndicator (u_int flag)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "valid next" },
+     {  0x01, 0x01,  "valid now" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, flag);
+}
 
 
 
@@ -2431,4 +2455,13 @@ char *dvbstrPESDataIdentifier (u_int i)
 
 
 
+
+
+
+/* Annotation:
+
+  --- $$$ TODO: store table strings in external text files, to be
+  ---           more flexible
+
+*/
 

@@ -1,6 +1,5 @@
 /*
-$Id: pes_dsmcc.c,v 1.4 2003/12/27 22:02:44 rasc Exp $
-
+$Id: pes_dsmcc.c,v 1.5 2004/01/01 20:09:29 rasc Exp $
 
 
  DVBSNOOP
@@ -8,7 +7,7 @@ $Id: pes_dsmcc.c,v 1.4 2003/12/27 22:02:44 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
 
@@ -17,6 +16,12 @@ $Id: pes_dsmcc.c,v 1.4 2003/12/27 22:02:44 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.5  2004/01/01 20:09:29  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/12/27 22:02:44  rasc
 dsmcc INT UNT descriptors started
 
@@ -38,7 +43,7 @@ PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 
 
 #include "dvbsnoop.h"
-#include "descriptors/dsm_descriptor.h"
+#include "descriptors/descriptor.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -324,9 +329,7 @@ static void  dsmcc_program_stream_descriptorlist_loop (u_char *b, int len)
 		len--;
   	  }
 
-	  len2 = b[1] + 2;	// descr. length + tag field
-	  descriptorDSMCC (b);
-
+	  len2 = descriptor (b, DSMCC);
 	  b += len2;
 	  len -= len2;
 

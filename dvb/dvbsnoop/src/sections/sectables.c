@@ -1,15 +1,13 @@
 /*
-$Id: sectables.c,v 1.17 2003/12/27 00:21:16 rasc Exp $
+$Id: sectables.c,v 1.18 2004/01/01 20:09:31 rasc Exp $
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- For more information please see: ISO 13818 (-1) and ETSI 300 468
@@ -17,6 +15,12 @@ $Id: sectables.c,v 1.17 2003/12/27 00:21:16 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.18  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.17  2003/12/27 00:21:16  rasc
 dsmcc section tables
 
@@ -126,7 +130,9 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
   if (getVerboseLevel() < 2) return;
 
 
-  out_nl (2,"PID:  %u (0x%04x)",pid,pid);
+  if (pid != DUMMY_PID) {
+  	out_nl (2,"PID:  %u (0x%04x)",pid,pid);
+  }
   table_id = buf[0];
 
   switch (pid) {

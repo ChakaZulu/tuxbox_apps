@@ -1,5 +1,5 @@
 /*
-$Id: ints.c,v 1.11 2003/12/27 14:35:00 rasc Exp $
+$Id: ints.c,v 1.12 2004/01/01 20:09:16 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: ints.c,v 1.11 2003/12/27 14:35:00 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
  --  INT Section
@@ -17,6 +17,12 @@ $Id: ints.c,v 1.11 2003/12/27 14:35:00 rasc Exp $
 
 
 $Log: ints.c,v $
+Revision 1.12  2004/01/01 20:09:16  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.11  2003/12/27 14:35:00  rasc
 dvb-t descriptors
 DSM-CC: SSU Linkage/DataBroadcast descriptors
@@ -43,7 +49,6 @@ more PES stuff, DSM descriptors, testdata
 
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
-#include "descriptors/dsm_int_unt_descriptor.h"
 #include "misc/output.h"
 
 
@@ -79,7 +84,8 @@ void decode_DSMCC_INT (u_char *b, int len)
  outBit_Sx_NL (6,"reserved_3: ",		b,40, 2);
 
  outBit_Sx_NL (3,"Version_number: ",		b,42, 5);
- outBit_Sx_NL (3,"Current_next_indicator: ",	b,47, 1);
+ outBit_S2x_NL(3,"Current_next_indicator: ",	b,47, 1,
+			(char *(*)(u_long))dvbstrCurrentNextIndicator );
  outBit_Sx_NL (3,"Section_number: ",		b,48, 8);
  outBit_Sx_NL (3,"Last_section_number: ",	b,56, 8);
 

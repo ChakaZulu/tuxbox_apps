@@ -1,19 +1,26 @@
 /*
-$Id: pkt_time.c,v 1.7 2003/12/20 08:43:07 obi Exp $
+$Id: pkt_time.c,v 1.8 2004/01/01 20:09:26 rasc Exp $
+
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+
+
 
 
 
 $Log: pkt_time.c,v $
+Revision 1.8  2004/01/01 20:09:26  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.7  2003/12/20 08:43:07  obi
 fixed last commit
 

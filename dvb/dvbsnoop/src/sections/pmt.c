@@ -1,12 +1,26 @@
 /*
-$Id: pmt.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
+$Id: pmt.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
-   -- PMT section
 
-   (c) rasc
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+
+
+ -- PMT section  (Transport Stream Program Map Section)
+
 
 
 $Log: pmt.c,v $
+Revision 1.5  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/10/24 22:17:21  rasc
 code reorg...
 
@@ -114,7 +128,8 @@ void decode_PMT (u_char *b, int len)
 
  out_SB_NL (6,"reserved_2: ",p.reserved_2);
  out_SB_NL (3,"Version_number: ",p.version_number);
- out_SB_NL (3,"Current_next_indicator: ",p.current_next_indicator);
+ 
+ out_S2B_NL(3,"current_next_indicator: ",p.current_next_indicator, dvbstrCurrentNextIndicator(p.current_next_indicator));
  out_SB_NL (3,"Section_number: ",p.section_number);
  out_SB_NL (3,"Last_Section_number: ",p.last_section_number);
 
@@ -131,7 +146,7 @@ void decode_PMT (u_char *b, int len)
  while (len2 > 0) {
    int x;
 
-   x = descriptor (b);
+   x = descriptor (b, DVB_SI);
    len2 -= x;
    b += x;
    len1 -= x;
@@ -162,7 +177,7 @@ void decode_PMT (u_char *b, int len)
    while (len2 > 0) {
       int x;
 
-      x = descriptor (b);
+      x = descriptor (b, DVB_SI);
       len2 -= x;
       b += x;
       len1 -= x;

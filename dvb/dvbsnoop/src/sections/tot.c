@@ -1,13 +1,29 @@
 /*
-$Id: tot.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
+$Id: tot.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
-   -- TOT section
-   -- Time Offset Table
-   -- ETSI EN 300 468     5.2.6
 
-   (c) rasc
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+
+
+ -- TOT section
+ -- Time Offset Table
+ -- ETSI EN 300 468     5.2.6
+
+
+
 
 $Log: tot.c,v $
+Revision 1.5  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/10/24 22:17:21  rasc
 code reorg...
 
@@ -100,7 +116,7 @@ void decode_TOT (u_char *b, int len)
  while (len1 > 0) {
    int x;
 
-   x = descriptor (b);
+   x = descriptor (b, DVB_SI);
    len1 -= x;
    b += x;
  }

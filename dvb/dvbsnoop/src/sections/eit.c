@@ -1,14 +1,29 @@
 /*
-$Id :
+$Id: eit.c,v 1.7 2004/01/01 20:09:31 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+
+
 
    -- EIT section
    -- Event Information Table
    -- ETSI EN 300 469  5.2.4
 
-   (c) rasc
 
 
 $Log: eit.c,v $
+Revision 1.7  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.6  2003/10/24 22:45:07  rasc
 code reorg...
 
@@ -124,10 +139,12 @@ void decode_EIT (u_char *b, int len)
 
  out_S2W_NL (3,"Service_ID: ",e.service_id,
 	" --> refers to PMS program_number"); 
+ if (e.service_id == 0xFFFF) out_nl (3,"  ==> EIT is scrambled");
 
  out_SB_NL (6,"reserved_3: ",e.reserved_3);
  out_SB_NL (3,"Version_number: ",e.version_number);
- out_SB_NL (3,"Current_next_indicator: ",e.current_next_indicator);
+ 
+ out_S2B_NL(3,"current_next_indicator: ",e.current_next_indicator, dvbstrCurrentNextIndicator(e.current_next_indicator));
  out_SB_NL (3,"Section_number: ",e.section_number);
  out_SB_NL (3,"Last_Section_number: ",e.last_section_number);
 
@@ -177,7 +194,7 @@ void decode_EIT (u_char *b, int len)
    while (len2 > 0) {
       int x;
 
-      x = descriptor (b);
+      x = descriptor (b, DVB_SI);
       b    += x;
       len2 -= x;
    }

@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.17 2003/12/30 14:05:37 rasc Exp $
+$Id: helper.c,v 1.18 2004/01/01 20:09:26 rasc Exp $
 
 
  DVBSNOOP
@@ -7,12 +7,18 @@ $Id: helper.c,v 1.17 2003/12/30 14:05:37 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
 
 
 $Log: helper.c,v $
+Revision 1.18  2004/01/01 20:09:26  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.17  2003/12/30 14:05:37  rasc
 just some annotations, so I do not forget these over Sylvester party...
 (some alkohol may reformat parts of /devbrain/0 ... )

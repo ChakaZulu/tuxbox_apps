@@ -1,21 +1,26 @@
 /*
-$Id: dvb_str.h,v 1.14 2003/11/26 19:55:34 rasc Exp $ 
+$Id: dvb_str.h,v 1.15 2004/01/01 20:09:40 rasc Exp $ 
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de
+
 
  -- dvb decoder helper functions
 
 
 
 $Log: dvb_str.h,v $
+Revision 1.15  2004/01/01 20:09:40  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.14  2003/11/26 19:55:34  rasc
 no message
 
@@ -58,6 +63,7 @@ char *dvbstrStreamContent_Component_TYPE (u_int i);
 char *dvbstrTableID (u_int id);
 char *dvbstrMPEGDescriptorTAG (u_int tag);
 char *dvbstrDVBDescriptorTAG (u_int tag);
+char *dvbstrCurrentNextIndicator (u_int flag);
 char *dvbstrWEST_EAST_FLAG (u_int tag);
 char *dvbstrPolarisation_FLAG (u_int tag);
 char *dvbstrModulationCable_FLAG(u_int flag);

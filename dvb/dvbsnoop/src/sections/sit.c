@@ -1,14 +1,27 @@
 /*
-$Id: sit.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
+$Id: sit.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
 
    -- SIT section
    -- Selection Information Table
    -- ETSI EN 300 469  7.1.2
 
-   (c) rasc
 
 
 $Log: sit.c,v $
+Revision 1.5  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/10/24 22:17:21  rasc
 code reorg...
 
@@ -113,7 +126,7 @@ void decode_SIT (u_char *b, int len)
  out_SB_NL (6,"reserved_4: ",s.reserved_4);
 
  out_SB_NL (3,"Version_number: ",s.version_number);
- out_SB_NL (3,"Current_next_indicator: ",s.current_next_indicator);
+ out_S2B_NL(3,"current_next_indicator: ",s.current_next_indicator, dvbstrCurrentNextIndicator(s.current_next_indicator));
  out_SB_NL (3,"Section_number: ",s.section_number);
  out_SB_NL (3,"Last_Section_number: ",s.last_section_number);
 
@@ -129,7 +142,7 @@ void decode_SIT (u_char *b, int len)
  while (len2 > 0) {
    int x;
 
-   x = descriptor (b);
+   x = descriptor (b, DVB_SI);
    len2 -= x;
    b += x;
    len1 -= x;
@@ -163,7 +176,7 @@ void decode_SIT (u_char *b, int len)
    while (len2 > 0) {
       int x;
 
-      x = descriptor (b);
+      x = descriptor (b, DVB_SI);
       len2 -= x;
       b += x;
       len1 -= x;

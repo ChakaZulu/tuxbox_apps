@@ -1,11 +1,26 @@
 /*
-$Id: cat.c,v 1.7 2003/10/26 22:02:53 rasc Exp $
+$Id: cat.c,v 1.8 2004/01/01 20:09:31 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+
 
  -- CAT Section
- -- rasc
-   (c) rasc
+
+
 
 $Log: cat.c,v $
+Revision 1.8  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.7  2003/10/26 22:02:53  rasc
 fix
 
@@ -83,13 +98,14 @@ void decode_CAT (u_char *b, int len)
     return;
  }
 
- out_SB_NL (3,"section_syntax_indicator: ",c.section_syntax_indicator);
+
+ out_SB_NL (3,"section_syntax_indicator: ",c.section_syntax_indicator); 
  out_SB_NL (6,"(fixed): ",0);
  out_SB_NL (6,"reserved_1: ",c.reserved_1);
  out_SW_NL (5,"Section_length: ",c.section_length);
  out_SB_NL (6,"reserved_2: ",c.reserved_2);
  out_SB_NL (3,"Version_number: ",c.version_number);
- out_SB_NL (3,"Current_next_indicator: ",c.current_next_indicator);
+ out_S2B_NL(3,"current_next_indicator: ",c.current_next_indicator, dvbstrCurrentNextIndicator(c.current_next_indicator));
  out_SB_NL (3,"Section_number: ",c.section_number);
  out_SB_NL (3,"Last_Section_number: ",c.last_section_number);
 
@@ -106,7 +122,7 @@ void decode_CAT (u_char *b, int len)
  while (len1 > 4) {
    int i;
 
-   i     =  descriptor (b);
+   i     =  descriptor (b, MPEG);
    len1 -= i;
    b    += i;
    

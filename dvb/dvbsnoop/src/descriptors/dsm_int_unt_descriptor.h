@@ -1,5 +1,5 @@
 /*
-$Id: dsm_int_unt_descriptor.h,v 1.6 2003/12/29 22:14:53 rasc Exp $ 
+$Id: dsm_int_unt_descriptor.h,v 1.7 2004/01/01 20:09:19 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsm_int_unt_descriptor.h,v 1.6 2003/12/29 22:14:53 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Private TAG Space  DSM-CC   INT, UNT, ...
@@ -16,6 +16,12 @@ $Id: dsm_int_unt_descriptor.h,v 1.6 2003/12/29 22:14:53 rasc Exp $
 
 
 $Log: dsm_int_unt_descriptor.h,v $
+Revision 1.7  2004/01/01 20:09:19  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.6  2003/12/29 22:14:53  rasc
 more dsm-cc INT UNT descriptors
 
@@ -53,7 +59,7 @@ void descriptorDSMCC_target_MAC_address (u_char *b);
 void descriptorDSMCC_target_serial_number (u_char *b);
 void descriptorDSMCC_target_IP_address (u_char *b);
 void descriptorDSMCC_target_IPv6_address (u_char *b);
-
+void descriptorDSMCC_ssu_subgroup_association_descriptor (u_char *b);
 void descriptorDSMCC_IP_MAC_platform_name (u_char *b);
 void descriptorDSMCC_IP_MAC_platform_provider_name (u_char *b);
 void descriptorDSMCC_target_MAC_address_range (u_char *b);
@@ -61,8 +67,8 @@ void descriptorDSMCC_target_IP_slash (u_char *b);
 void descriptorDSMCC_target_IP_source_slash (u_char *b);
 void descriptorDSMCC_target_IPv6_slash (u_char *b);
 void descriptorDSMCC_target_IPv6_source_slash (u_char *b);
-
-
+void descriptorDSMCC_IP_MAC_StreamLocation (u_char *b);
+void descriptorDSMCC_ISP_access_mode_descriptor (u_char *b);
 
 
 #endif

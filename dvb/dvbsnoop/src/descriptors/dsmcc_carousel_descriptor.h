@@ -1,15 +1,13 @@
 /*
-$Id: dsmcc_carousel_descriptor.h,v 1.5 2003/12/27 18:17:17 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.h,v 1.6 2004/01/01 20:09:19 rasc Exp $ 
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
  -- Private TAG Space  DSM-CC
@@ -18,6 +16,12 @@ $Id: dsmcc_carousel_descriptor.h,v 1.5 2003/12/27 18:17:17 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.h,v $
+Revision 1.6  2004/01/01 20:09:19  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.5  2003/12/27 18:17:17  rasc
 dsmcc PES dsmcc_program_stream_descriptorlist
 

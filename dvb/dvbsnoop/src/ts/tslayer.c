@@ -1,18 +1,28 @@
 /*
-$Id: tslayer.c,v 1.9 2003/12/17 23:21:35 rasc Exp $
+$Id: tslayer.c,v 1.10 2004/01/01 20:09:43 rasc Exp $
 
-   -- Transport Stream Decode/Table section
 
-   
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de
 
 
 
+ -- Transport Stream Decode/Table section
+
+   
 
 
 $Log: tslayer.c,v $
+Revision 1.10  2004/01/01 20:09:43  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.9  2003/12/17 23:21:35  rasc
 PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 

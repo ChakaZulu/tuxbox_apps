@@ -1,25 +1,29 @@
 /*
-$Id: mpeg_descriptor.c,v 1.9 2003/11/26 16:27:45 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.10 2004/01/01 20:09:20 rasc Exp $
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
 
- -- MPEG Descriptors  ISO/IEC 13818-2
+ -- MPEG Descriptors  ISO/IEC 13818-1
  -- all descriptors are returning their length used in buffer
 
 
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.10  2004/01/01 20:09:20  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.9  2003/11/26 16:27:45  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function

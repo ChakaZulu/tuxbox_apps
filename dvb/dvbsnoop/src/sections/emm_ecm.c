@@ -1,13 +1,35 @@
 /*
-$Id: emm_ecm.c,v 1.7 2003/10/24 22:17:21 rasc Exp $
+$Id: emm_ecm.c,v 1.8 2004/01/01 20:09:31 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de
+
 
 
    -- EMM / ECM Data packet
 
-   (c) rasc
 
 
 $Log: emm_ecm.c,v $
+Revision 1.8  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.7  2003/10/24 22:17:21  rasc
 code reorg...
 

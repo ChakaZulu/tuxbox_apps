@@ -1,5 +1,5 @@
 /*
-$Id: dsm_int_unt_descriptor.c,v 1.7 2003/12/29 22:14:53 rasc Exp $ 
+$Id: dsm_int_unt_descriptor.c,v 1.8 2004/01/01 20:09:19 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsm_int_unt_descriptor.c,v 1.7 2003/12/29 22:14:53 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- Private TAG Space  DSM-CC INT UNT
@@ -17,6 +17,12 @@ $Id: dsm_int_unt_descriptor.c,v 1.7 2003/12/29 22:14:53 rasc Exp $
 
 
 $Log: dsm_int_unt_descriptor.c,v $
+Revision 1.8  2004/01/01 20:09:19  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.7  2003/12/29 22:14:53  rasc
 more dsm-cc INT UNT descriptors
 
@@ -50,6 +56,7 @@ more PES stuff, DSM descriptors, testdata
 #include "descriptor.h"
 #include "dsm_descriptor.h"
 #include "dvb_descriptor.h"
+#include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -62,6 +69,17 @@ more PES stuff, DSM descriptors, testdata
 /*
   determine descriptor type and print it...
   !!! DSMCC descriptors are in a private tag space !!!
+
+  EN 301 192:
+  Descriptors from the DVB SI range (0x40 - 0x7F) shall have their standard
+  semantics as defined in EN 300 468 [2].
+  Equally MPEG descriptors in the range 0x00 - 0x3F can not be used in the
+  INT.  Note that descriptor tags from 0x00 to 0x3F share a common descriptor
+  name space with UNT descriptors (see TS 102 006 [19]).
+  All descriptors may appear more than once in the INT sub-table at the
+  locations indicated above. In the case of name_descriptors multiple
+  occurrences require different ISO 639 language codes.
+
 
   return byte length
 */
@@ -93,17 +111,17 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
 
   switch (b[0]) {
 
-// {  0x01, 0x01,  "scheduling_descriptor" },
-//     {  0x02, 0x02,  "update_descriptor" },
-//     {  0x03, 0x03,  "ssu_location_descriptor" },
-//     {  0x04, 0x04,  "message_descriptor" },
-//     {  0x05, 0x05,  "ssu_event_name_descriptor" },
+// {  0x01, 0x01,  "scheduling_descriptor" },	// $$$ TODO
+//     {  0x02, 0x02,  "update_descriptor" },	// $$$ TODO
+//     {  0x03, 0x03,  "ssu_location_descriptor" },	// $$$ TODO
+//     {  0x04, 0x04,  "message_descriptor" },	// $$$ TODO
+//     {  0x05, 0x05,  "ssu_event_name_descriptor" },	// $$$ TODO
      case 0x06:  descriptorDSMCC_target_smartcard (b); break;
      case 0x07:  descriptorDSMCC_target_MAC_address (b); break;
      case 0x08:  descriptorDSMCC_target_serial_number (b); break;
      case 0x09:  descriptorDSMCC_target_IP_address (b); break;
      case 0x0A:  descriptorDSMCC_target_IPv6_address (b); break;
-//     {  0x0B, 0x0B,  "ssu_subgroup_association_descriptor" },
+     case 0x0B:  descriptorDSMCC_ssu_subgroup_association_descriptor (b); break;
      case 0x0C:  descriptorDSMCC_IP_MAC_platform_name (b); break;
      case 0x0D:  descriptorDSMCC_IP_MAC_platform_provider_name (b); break;
      case 0x0E:  descriptorDSMCC_target_MAC_address_range (b); break;
@@ -111,13 +129,9 @@ int  descriptorDSMCC_INT_UNT_Private  (u_char *b)
      case 0x10:  descriptorDSMCC_target_IP_source_slash (b); break;
      case 0x11:  descriptorDSMCC_target_IPv6_slash (b); break;
      case 0x12:  descriptorDSMCC_target_IPv6_source_slash (b); break;
-//     0x13 IP/MAC stream_location_descriptor
-//     {  0x14, 0x14,  "ISP_access_mode_descriptor" },	/// ???? $$$ TODO
-//     {  0x14, 0x3F,  "reserved" },
-//     {  0x80, 0xFE,  "user_private_descriptor" },
-
-
-
+     case 0x13:  descriptorDSMCC_IP_MAC_StreamLocation (b); break;
+     case 0x14:  descriptorDSMCC_ISP_access_mode_descriptor (b); break;
+     // DVB SI scope...
      case 0x57:  descriptorDVB_Telephone (b);  break;
      case 0x5F:  descriptorDVB_PrivateDataSpecifier (b);  break;
 
@@ -334,24 +348,32 @@ static struct IPv6ADDR *_getIPv6Addr (u_char *b, struct IPv6ADDR *x)
 
 
 
+/*
+  0x0B - ssu_subgroup_association_descriptor
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_ssu_subgroup_association_descriptor (u_char *b)
+{
+
+ // descriptor_tag	= b[0];
+ // len			= b[1];
+
+  outBit_Sx    (4,"subgroup_tag: ",		b, 16, 24);
+  outBit_Sx_NL (4," ",				b, 40, 16);
+
+ // TS 102 006:
+ // subgroup_tag (40 bit): the least significant 16 bits of this field shall
+ // contain the same value as the subgroup_association_descriptor in
+ // the GroupInfoBytes in the GroupInfoIndication structure of the
+ // DSI message. This is a unique value under the defining authority
+ // of the holder of the OUI conveyed in the field's most significant
+ // 24 bits.
+ // Note that no relationship between this OUI and any other OUI
+ // in the system is implied.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 
 
 
@@ -594,12 +616,48 @@ void descriptorDSMCC_target_IPv6_source_slash (u_char *b)
 
 
 
+/*
+  0x13 - IP_MAC_StreamLocation
+  ETSI EN 301 192  (ISO 13818-6)
+*/
+
+void descriptorDSMCC_IP_MAC_StreamLocation (u_char *b)
+{
+
+ // descriptor_tag	= b[0];
+ // len			= b[1];
+
+
+  outBit_S2x_NL (4,"Network_id: ",		b, 16, 16,
+			(char *(*)(u_long)) dvbstrNetworkIdent_ID);
+  outBit_S2x_NL (4,"Original_network_id: ",	b, 32, 16,
+			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
+  outBit_Sx_NL  (4,"transport_stream_ID: ",	b, 48, 16);
+  outBit_Sx     (4,"service_ID: ",		b, 64, 16);
+		out_nl (4," --> refers to PMS program_number"); 
+  outBit_Sx_NL  (4,"component_tag: ",		b, 80,  8);
+
+}
 
 
 
 
 
+/*
+  0x14 - ISP_access_mode_descriptor
+  ETSI EN 301 192  (ISO 13818-6)
+*/
 
+void descriptorDSMCC_ISP_access_mode_descriptor (u_char *b)
+{
+
+ // descriptor_tag	= b[0];
+ // len			= b[1];
+
+  outBit_S2x_NL (4,"Access_mode: ",		b, 16, 8,
+			(char *(*)(u_long)) dsmccStr_AccessMode );
+
+}
 
 
 

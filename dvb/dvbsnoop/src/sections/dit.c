@@ -1,14 +1,29 @@
 /*
-$Id $
+$Id: dit.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
+
+
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+
 
    -- DIT section
    -- Discontinuity Information Table
    -- ETSI EN 300 468     5.2.9
 
-   (c) rasc
+
 
 
 $Log: dit.c,v $
+Revision 1.5  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/10/24 22:45:06  rasc
 code reorg...
 

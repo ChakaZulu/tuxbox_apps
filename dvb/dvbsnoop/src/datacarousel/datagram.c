@@ -1,14 +1,13 @@
 /*
-$Id: datagram.c,v 1.13 2003/12/26 23:27:38 rasc Exp $
+$Id: datagram.c,v 1.14 2004/01/01 20:09:16 rasc Exp $
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
  --  DATAGRAM section
@@ -17,6 +16,12 @@ $Id: datagram.c,v 1.13 2003/12/26 23:27:38 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.14  2004/01/01 20:09:16  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.13  2003/12/26 23:27:38  rasc
 DSM-CC  UNT section
 
@@ -174,7 +179,7 @@ void decode_DSMCC_DATAGRAM (u_char *b, int len)
 
  out_SB_NL (3,"LLC_SNAP_flag: ",d.LLC_SNAP_flag);
 
- out_SB_NL (3,"Current_next_indicator: ",d.current_next_indicator);
+ out_S2B_NL(3,"current_next_indicator: ",d.current_next_indicator, dvbstrCurrentNextIndicator(d.current_next_indicator));
  out_SB_NL (3,"Section_number: ",d.section_number);
  out_SB_NL (3,"Last_Section_number: ",d.last_section_number);
 

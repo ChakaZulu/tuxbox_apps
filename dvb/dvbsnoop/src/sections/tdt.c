@@ -1,14 +1,28 @@
 /*
-$Id: tdt.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
+$Id: tdt.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
-   -- TDT section
-   -- Time Date Table
-   -- ETSI EN 300 468     5.2.5
 
-   (c) rasc
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+
+
+ -- TDT section
+ -- Time Date Table
+ -- ETSI EN 300 468     5.2.5
+
 
 
 $Log: tdt.c,v $
+Revision 1.5  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/10/24 22:17:21  rasc
 code reorg...
 
@@ -30,7 +44,6 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "tdt.h"
-#include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
@@ -56,7 +69,6 @@ void decode_TDT (u_char *b, int len)
 
 
  TDT        t;
- //int        len1;
 
 
  

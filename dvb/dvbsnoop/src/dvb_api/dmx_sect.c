@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.13 2003/12/28 22:53:40 rasc Exp $
+$Id: dmx_sect.c,v 1.14 2004/01/01 20:09:23 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dmx_sect.c,v 1.13 2003/12/28 22:53:40 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
  --  Sections Streams
@@ -18,6 +18,12 @@ $Id: dmx_sect.c,v 1.13 2003/12/28 22:53:40 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.14  2004/01/01 20:09:23  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.13  2003/12/28 22:53:40  rasc
 some minor changes/cleanup
 
@@ -86,7 +92,7 @@ int  doReadSECT (OPTION *opt)
 
 {
   int     fd;
-  u_char  buf[SECT_BUF_SIZE]; /* data buffer */
+  u_char  buf[SECT_BUF_SIZE]; 		/* data buffer */
   long    count;
   int     i;
   char    *f;
@@ -137,7 +143,7 @@ int  doReadSECT (OPTION *opt)
 
 
 /*
-  -- read packets for pid
+  -- read SECTION packets for pid
 */
 
   count = 0;
@@ -180,7 +186,7 @@ int  doReadSECT (OPTION *opt)
        if (opt->printdecode) {
           decodeSections_buf (buf,n ,opt->pid);
           out_nl (3,"==========================================================");
-          out_nl (3,"");
+          out_NL (3);
        }
     } // bin_out
 
@@ -246,5 +252,8 @@ static long  sect_read (int fd, u_char *buf, long buflen)
 
     return n;
 }
+
+
+
 
 

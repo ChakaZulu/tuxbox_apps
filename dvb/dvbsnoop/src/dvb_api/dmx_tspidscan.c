@@ -1,20 +1,25 @@
 /*
-$Id: dmx_tspidscan.c,v 1.10 2003/12/28 14:00:26 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.11 2004/01/01 20:09:23 rasc Exp $
 
 
  DVBSNOOP
  a dvb sniffer  and mpeg2 stream analyzer tool
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
- Brute force scan all pids on a transponder
- scanpids principle is based on the sourcefile getpids.c from 'obi'
+ -- Brute force scan all pids on a transponder
+ -- scanpids principle is based on the sourcefile getpids.c from 'obi'
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.11  2004/01/01 20:09:23  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.10  2003/12/28 14:00:26  rasc
 bugfix: section read from input file
 some changes on packet header output

@@ -1,12 +1,26 @@
 /*
-$Id: st.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
+$Id: st.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
-   -- ST section (stuffing)
 
-   (c) rasc
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+
+
+ -- ST section (stuffing)
+
 
 
 $Log: st.c,v $
+Revision 1.5  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/10/24 22:17:21  rasc
 code reorg...
 
@@ -28,7 +42,6 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "st.h"
-#include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"

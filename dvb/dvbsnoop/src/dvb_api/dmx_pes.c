@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.16 2003/12/30 14:05:37 rasc Exp $
+$Id: dmx_pes.c,v 1.17 2004/01/01 20:09:23 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dmx_pes.c,v 1.16 2003/12/30 14:05:37 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
  -- PE Streams
@@ -19,6 +19,12 @@ $Id: dmx_pes.c,v 1.16 2003/12/30 14:05:37 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.17  2004/01/01 20:09:23  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.16  2003/12/30 14:05:37  rasc
 just some annotations, so I do not forget these over Sylvester party...
 (some alkohol may reformat parts of /devbrain/0 ... )
@@ -106,7 +112,8 @@ int  doReadPES (OPTION *opt)
 
 {
   int     fd;
-  u_char  buf[READ_BUF_SIZE]; /* data buffer */
+  u_char  buf[READ_BUF_SIZE]; 		/* data buffer */
+  u_char  *b;				/* ptr to packet start */
   long    count;
   int     i;
   char    *f;
@@ -161,7 +168,7 @@ int  doReadPES (OPTION *opt)
 
 
 /*
-  -- read packets for pid
+  -- read PES packet for pid
 */
 
   count = 0;
@@ -176,8 +183,10 @@ int  doReadPES (OPTION *opt)
 
     if (opt->packet_header_sync) {
     	n = pes_SyncRead(fd,buf,sizeof(buf), &skipped_bytes);
+	b = buf;
     } else {
     	n = pes_UnsyncRead(fd,buf,sizeof(buf));
+	b = buf;
     }
 
 
@@ -195,7 +204,7 @@ int  doReadPES (OPTION *opt)
     if (opt->binary_out) {
 
        // direct write to FD 1 ( == stdout)
-       write (1, buf,n);
+       write (1, b, n);
 
     } else {
 
@@ -204,16 +213,16 @@ int  doReadPES (OPTION *opt)
 
 
        if (opt->printhex) {
-           printhex_buf (0,buf, n);
+           printhex_buf (0, b, n);
            out_NL(0);
        }
 
 
        // decode protocol
        if (opt->printdecode) {
-          decodePES_buf (buf,n ,opt->pid);
+          decodePES_buf (b, n ,opt->pid);
           out_nl (3,"==========================================================");
-          out_nl (3,"");
+          out_NL (3);
        }
     } // bin_out
 
@@ -291,6 +300,91 @@ static long pes_UnsyncRead (int fd, u_char *buf, u_long len)
 static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes)
 
 {
+    long    n1,n2;
+    long    l;
+    u_long  sync;
+
+    
+
+    // -- simple PES sync... seek for 0x000001 (PES_SYNC_BYTE)
+    // -- $$$ Q: has this to be byteshifted or bit shifted???
+    //
+    // ISO/IEC 13818-1:
+    // -- packet_start_code_prefix -- The packet_start_code_prefix is
+    // -- a 24-bit code. Together with the stream_id that follows it constitutes
+    // -- a packet start code that identifies the beginning of a packet.
+    // -- The packet_start_code_prefix  is the bit string '0000 0000 0000 0000
+    // -- 0000 0001' (0x000001).
+    // ==>   Check the stream_id with "dvb_str.c", if you do changes!
+ 
+
+    *skipped_bytes = 0;
+    sync = 0xFFFFFFFF;
+    while (1) {
+	u_char c;
+
+    	n1 = read(fd,buf+3,1);
+	if (n1 <= 0) return n1;			// error or strange, abort
+
+	// -- byte shift for packet_start_code_prefix
+	// -- sync found? 0x000001 + valid StreamID
+
+	c = buf[3];
+	sync = (sync << 8) | c;
+	if ( ((sync & 0xFFFFFF00) == 0x00000100) && (c >= 0xBC) ) break;
+
+	(*skipped_bytes)++;			// sync skip counter
+    }
+
+
+    // -- Sync found!
+
+    buf[0] = 0x00;   // write packet_start_code_prefix to buffer
+    buf[1] = 0x00;
+    buf[2] = 0x01;
+    // buf[3] = streamID == recent read
+
+
+    // -- read more 2 bytes (packet length)
+    // -- read rest ...
+
+    n1 = read(fd,buf+4,2);
+    if (n1 == 2) {
+        l = (buf[4]<<8) + buf[5];		// PES packet size...
+
+	if (l > 0) {
+           if ( (l+6) > len) {
+		fprintf (stderr,"buffer to small on pes read (%ld)\n",l);
+	   	return -1;		// prevent buffer overflow
+	   }
+
+           n2 = read(fd, buf+6, (unsigned int) l );
+           n1 = (n2 < 0) ? n2 : 6+n2;		// we already read 4+2 bytes
+	}
+    }
+
+
+    return n1;
+}
+
+
+
+
+
+
+
+#if 0
+
+// $$ old pes_SyncRead
+
+/*
+  -- read PES packet (Synced)
+  -- return: len // read()-return code
+*/
+
+static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes)
+
+{
     long    n,n1;
     long    l;
 
@@ -356,6 +450,12 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
 
     return n;
 }
+
+#endif
+
+
+
+
 
 
 

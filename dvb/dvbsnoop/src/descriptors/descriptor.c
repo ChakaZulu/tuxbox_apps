@@ -1,18 +1,26 @@
 /*
-$Id: descriptor.c,v 1.13 2003/12/29 22:14:53 rasc Exp $
-
-  dvbsnoop
-  (c) Rainer Scherg 2001-2003
+$Id: descriptor.c,v 1.14 2004/01/01 20:09:19 rasc Exp $
 
 
-  Descriptor Section
-  - MPEG
-  - DVB
-  - DSM-CC  (todo)
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+
+
+ -- Descriptor Section
 
 
 
 $Log: descriptor.c,v $
+Revision 1.14  2004/01/01 20:09:19  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.13  2003/12/29 22:14:53  rasc
 more dsm-cc INT UNT descriptors
 
@@ -51,6 +59,8 @@ kleiner Fehler
 #include "descriptor.h"
 #include "mpeg_descriptor.h"
 #include "dvb_descriptor.h"
+#include "dsm_descriptor.h"
+#include "dsm_int_unt_descriptor.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
@@ -65,8 +75,7 @@ kleiner Fehler
   return byte length
 */
 
-int  descriptor  (u_char *b)
-	// $$$ TODO    scope sollte mit uebergeben werden (DSMCC, MPEG, DVB_SI, DSMCC_INT_UNT)
+int  descriptor  (u_char *b, DTAG_SCOPE scope)
 
 {
  int len;
@@ -83,14 +92,28 @@ int  descriptor  (u_char *b)
   indent (+1);
 
 
+  switch  (scope) {
 
-  // Context of descriptors
-  // $$$ To be improved!!!
- 
-  if (id < 0x40) {
-	  descriptorMPEG (b);
-  } else {
-	  descriptorDVB (b);
+     case DSMCC:
+		descriptorDSMCC (b);
+		break;
+
+     case DSMCC_INT_UNT:
+  		if (id < 0x40)	descriptorDSMCC_INT_UNT_Private (b);
+		else 		descriptorDVB (b);
+		break;
+
+     case MHP:
+		descriptor_any (b);	// $$$ TODO
+		break;
+
+     case MPEG:
+     case DVB_SI:
+     default:
+  		if (id < 0x40)	descriptorMPEG (b);
+		else	 	descriptorDVB (b);
+		break;
+
   }
 
 

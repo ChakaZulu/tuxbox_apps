@@ -1,6 +1,5 @@
 /*
-$Id: pespacket.c,v 1.15 2003/12/27 14:35:01 rasc Exp $
-
+$Id: pespacket.c,v 1.16 2004/01/01 20:09:29 rasc Exp $
 
 
  DVBSNOOP
@@ -8,7 +7,7 @@ $Id: pespacket.c,v 1.15 2003/12/27 14:35:01 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
 
 
 
@@ -17,6 +16,12 @@ $Id: pespacket.c,v 1.15 2003/12/27 14:35:01 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.16  2004/01/01 20:09:29  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.15  2003/12/27 14:35:01  rasc
 dvb-t descriptors
 DSM-CC: SSU Linkage/DataBroadcast descriptors
@@ -76,6 +81,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvbsnoop.h"
 #include "pespacket.h"
 #include "pes_dsmcc.h"
+#include "pes_psm.h"
 #include "misc/hexprint.h"
 
 
@@ -138,6 +144,9 @@ void decodePES_buf (u_char *b, u_int len, int pid)
  switch (p.stream_id) {
 
 	case 0xBC:		// program_stream_map
+		PES_decodePSM (b, len2);
+		break;
+
 	case 0xBF:		// private_stream_2  (EN301192-1.3.1 S.10)
 	case 0xF0:		// ECM
 	case 0xF1:		// EMM
@@ -612,6 +621,12 @@ void PES_data_packet (u_char *b, int len)
 }
 
 
+
+
+
+// Annotations: 
+//
+// $$$ TODO  0x000001B9    ISO 13818-1/H.222.0 2.5.3.1  End Progam Stream ???
 
 
 

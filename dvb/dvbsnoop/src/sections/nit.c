@@ -1,12 +1,26 @@
 /*
-$Id: nit.c,v 1.5 2003/10/24 22:17:21 rasc Exp $
+$Id: nit.c,v 1.6 2004/01/01 20:09:31 rasc Exp $
 
-   -- NIT section
 
-   (c) rasc
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+
+
+ -- NIT section
+
 
 
 $Log: nit.c,v $
+Revision 1.6  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.5  2003/10/24 22:17:21  rasc
 code reorg...
 
@@ -119,7 +133,8 @@ void decode_NIT (u_char *b, int len)
 	dvbstrNetworkIdent_ID(n.network_id)); 
  out_SB_NL (6,"reserved_3: ",n.reserved_3);
  out_SB_NL (3,"Version_number: ",n.version_number);
- out_SB_NL (3,"Current_next_indicator: ",n.current_next_indicator);
+ 
+ out_S2B_NL(3,"current_next_indicator: ",n.current_next_indicator, dvbstrCurrentNextIndicator(n.current_next_indicator));
  out_SB_NL (3,"Section_number: ",n.section_number);
  out_SB_NL (3,"Last_Section_number: ",n.last_section_number);
  out_SB_NL (6,"reserved_4: ",n.reserved_4);
@@ -135,7 +150,7 @@ void decode_NIT (u_char *b, int len)
  while ( l1 > 0 ) {
    int x;
 
-   x = descriptor (b); 
+   x = descriptor (b, DVB_SI); 
    l1 -= x;
    b += x;
  }
@@ -180,7 +195,7 @@ void decode_NIT (u_char *b, int len)
     while (l2 > 0) {
       int x;
 
-      x = descriptor (b);
+      x = descriptor (b, DVB_SI);
       b  += x;
       l2 -= x;
       l1 -= x;

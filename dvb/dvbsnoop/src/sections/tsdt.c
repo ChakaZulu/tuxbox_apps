@@ -1,15 +1,13 @@
 /*
-$Id: tsdt.c,v 1.7 2003/11/26 19:55:34 rasc Exp $
+$Id: tsdt.c,v 1.8 2004/01/01 20:09:31 rasc Exp $
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
 
 
    -- TSDT section
@@ -19,6 +17,12 @@ $Id: tsdt.c,v 1.7 2003/11/26 19:55:34 rasc Exp $
 
 
 $Log: tsdt.c,v $
+Revision 1.8  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.7  2003/11/26 19:55:34  rasc
 no message
 
@@ -99,6 +103,7 @@ void decode_TSDT (u_char *b, int len)
  out_SW_NL (5,"Section_length: ",t.section_length);
  out_SL_NL (6,"reserved_3: ",t.reserved_3);
  out_SB_NL (3,"Version_number: ",t.version_number);
+ out_S2B_NL(3,"current_next_indicator: ",t.current_next_indicator, dvbstrCurrentNextIndicator(t.current_next_indicator));
  out_SB_NL (3,"Current_next_indicator: ",t.current_next_indicator);
  out_SB_NL (3,"Section_number: ",t.section_number);
  out_SB_NL (3,"Last_Section_number: ",t.last_section_number);
@@ -108,7 +113,7 @@ void decode_TSDT (u_char *b, int len)
  while (len1 > 4) {
    int x;
 
-   x = descriptor (b);
+   x = descriptor (b, MPEG);
    b   += x;
    len1 -= x;
  }

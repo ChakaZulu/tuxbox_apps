@@ -1,17 +1,28 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.10 2003/12/27 18:17:17 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.11 2004/01/01 20:09:19 rasc Exp $ 
 
 
-  dvbsnoop
-  (c) Rainer Scherg 2001-2003
+ DVBSNOOP
 
-  Private TAG Space  DSM-CC
-  DSM-CC Descriptors  ISO 13818-6  // TR 102 006
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
+
+
+ -- Private TAG Space  DSM-CC
+ -- DSM-CC Descriptors  ISO 13818-6  // TR 102 006
 
 
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.11  2004/01/01 20:09:19  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.10  2003/12/27 18:17:17  rasc
 dsmcc PES dsmcc_program_stream_descriptorlist
 

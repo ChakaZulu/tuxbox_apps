@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.15 2003/12/30 14:05:37 rasc Exp $
+$Id: dmx_ts.c,v 1.16 2004/01/01 20:09:23 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dmx_ts.c,v 1.15 2003/12/30 14:05:37 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
 
 
  -- Transport Streams
@@ -18,6 +18,12 @@ $Id: dmx_ts.c,v 1.15 2003/12/30 14:05:37 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.16  2004/01/01 20:09:23  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.15  2003/12/30 14:05:37  rasc
 just some annotations, so I do not forget these over Sylvester party...
 (some alkohol may reformat parts of /devbrain/0 ... )
@@ -92,7 +98,8 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-static long ts_SyncRead (int fd, u_char *buf, long buflen, long *skipped_bytes);
+// $$ static long ts_SyncRead (int fd, u_char *buf, long max_buflen, long *skipped_bytes);
+static long ts_SyncRead2 (int fd, u_char *buf, long max_buflen, long *skipped_bytes);
 
 
 
@@ -103,6 +110,7 @@ int  doReadTS (OPTION *opt)
 {
   int     fd_dmx = 0, fd_dvr = 0;
   u_char  buf[READ_BUF_SIZE]; 	/* data buffer */
+  u_char  *b;			/* ptr for packet start */
   long    count;
   int     i;
   char    *f;
@@ -163,7 +171,7 @@ int  doReadTS (OPTION *opt)
 
 
 /*
-  -- read packets for pid
+  -- read TS packets for pid
 */
 
   count = 0;
@@ -173,9 +181,13 @@ int  doReadTS (OPTION *opt)
 
 
     if (opt->packet_header_sync) {
-    	n = ts_SyncRead(fd_dvr,buf,sizeof(buf), &skipped_bytes);
+    	// $$ n = ts_SyncRead (fd_dvr,buf,sizeof(buf), &skipped_bytes);
+	// $$ b = buf;
+    	n = ts_SyncRead2 (fd_dvr,buf,sizeof(buf), &skipped_bytes);
+        b = buf+(skipped_bytes % TS_PACKET_LEN);
     } else {
     	n = read(fd_dvr,buf,sizeof(buf));
+	b = buf;
     }
 
 
@@ -193,7 +205,7 @@ int  doReadTS (OPTION *opt)
     if (opt->binary_out) {
 
        // direct write to FD 1 ( == stdout)
-       write (1, buf,n);
+       write (1, b, n);
 
     } else {
 
@@ -202,23 +214,23 @@ int  doReadTS (OPTION *opt)
 
 
        if (opt->printhex) {
-           printhex_buf (0,buf, n);
+           printhex_buf (0, b, n);
            out_NL(0);
        }
 
 
        // decode protocol
        if (opt->printdecode) {
-          decodeTS_buf (buf,n ,opt->pid);
+          decodeTS_buf (b, n ,opt->pid);
           out_nl (3,"==========================================================");
-          out_nl (3,"");
+          out_NL (3);
        }
     } // bin_out
 
 
 
     // Clean Buffer
-//    if (n > 0 && n < sizeof(buf)) memset (buf,0,n+1); 
+//    if (n > 0 && n < sizeof(b)) memset (buf,0,n+1); 
 
 
     // count packets ?
@@ -246,6 +258,60 @@ int  doReadTS (OPTION *opt)
 }
 
 
+
+/*
+ * -- sync read (optimized = avoid multiple byte reads)
+ * -- Seek TS sync-byte and read packet in buffer
+ * -- ATTENTION:  packet is not stored at buf[0]
+ *  --       -->  packet starts at buf[skipped_bytes % TS_PACKET_LEN] !!!
+ * -- return: equivalent to read();
+ */
+
+static long  ts_SyncRead2 (int fd, u_char *buf, long max_buflen, long *skipped_bytes)
+
+{
+    int    n1,n2;
+    int    i;
+    int    found;
+
+
+    // -- simple TS sync...
+    // -- $$$ to be improved:
+    // -- $$$  (best would be: check if buf[188] is also a sync byte)
+ 
+
+    *skipped_bytes = 0;
+    found = 0;
+    while (! found) {
+    	n1 = read(fd,buf,TS_PACKET_LEN);
+    	if (n1 <= 0) return n1;			// error or strange, abort
+
+    	for (i=0;i<n1; i++) {			// search sync byte
+		if (buf[i] == TS_SYNC_BYTE) {
+			found = 1;
+			break;
+		}
+    	}
+    	*skipped_bytes += i;
+    }
+
+    // -- Sync found!
+    // -- read skipped number of bytes per read try
+
+    if (i == 0) return n1;			// already complete packet read...
+
+    n2 = read(fd,buf+n1,TS_PACKET_LEN-n1+i);	// continue read TS packet
+    if (n2 >=0) n2 = n1+n2-i; ;			// should be TS_PACKET_LEN anyway...
+
+    return n2;
+}
+
+
+
+
+
+#if 0
+// $$ old routine....
 
 /*
  * -- sync read
@@ -282,6 +348,10 @@ static long  ts_SyncRead (int fd, u_char *buf, long buflen, long *skipped_bytes)
 
     return n;
 }
+
+#endif
+
+
 
 
 

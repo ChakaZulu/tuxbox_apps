@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.13 2003/12/29 22:14:54 rasc Exp $
+$Id: dsmcc_str.c,v 1.14 2004/01/01 20:09:40 rasc Exp $
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dsmcc_str.c,v 1.13 2003/12/29 22:14:54 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de
 
 
  -- DSM-CC -Strings
@@ -15,6 +15,12 @@ $Id: dsmcc_str.c,v 1.13 2003/12/29 22:14:54 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.14  2004/01/01 20:09:40  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.13  2003/12/29 22:14:54  rasc
 more dsm-cc INT UNT descriptors
 
@@ -575,6 +581,36 @@ char *dsmccStr_SpecifierType (u_int id)
 
   return findTableID (TableIDs, id);
 }
+
+
+
+
+/*
+  -- DSM-CC (INT) AccessMode
+  --  e.g. from ISO 13818-6 // EN 301 192
+  --  
+*/
+
+char *dsmccStr_AccessMode (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "not used" },
+	{ 0x01, 0x01,   "dialup" },
+	{ 0x02, 0xFF,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+
+
+
+
 
 
 

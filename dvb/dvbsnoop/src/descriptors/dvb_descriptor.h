@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.h,v 1.6 2003/12/27 18:17:17 rasc Exp $ 
+$Id: dvb_descriptor.h,v 1.7 2004/01/01 20:09:19 rasc Exp $ 
 
 
  DVBSNOOP
@@ -7,7 +7,7 @@ $Id: dvb_descriptor.h,v 1.6 2003/12/27 18:17:17 rasc Exp $
  a dvb sniffer  and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de (rasc)
 
 
  -- DVB Descriptors  ETSI 300 468
@@ -15,6 +15,12 @@ $Id: dvb_descriptor.h,v 1.6 2003/12/27 18:17:17 rasc Exp $
 
 
 $Log: dvb_descriptor.h,v $
+Revision 1.7  2004/01/01 20:09:19  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.6  2003/12/27 18:17:17  rasc
 dsmcc PES dsmcc_program_stream_descriptorlist
 

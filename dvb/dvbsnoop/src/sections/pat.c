@@ -1,11 +1,26 @@
 /*
-$Id: pat.c,v 1.4 2003/10/24 22:17:21 rasc Exp $
+$Id: pat.c,v 1.5 2004/01/01 20:09:31 rasc Exp $
 
-   -- PAT section
 
-   (c) rasc
+ DVBSNOOP
+
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2004   Rainer.Scherg@gmx.de  (rasc)
+
+
+ -- PAT section
+
+
 
 $Log: pat.c,v $
+Revision 1.5  2004/01/01 20:09:31  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.4  2003/10/24 22:17:21  rasc
 code reorg...
 
@@ -27,7 +42,6 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "pat.h"
-#include "descriptors/descriptor.h"
 #include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
@@ -98,7 +112,7 @@ void decode_PAT (u_char *b, int len)
  out_SW_NL (3,"Transport_Stream_ID: ",p.transport_stream_id);
  out_SB_NL (6,"reserved_2: ",p.reserved_2);
  out_SB_NL (3,"Version_number: ",p.version_number);
- out_SB_NL (3,"Current_next_indicator: ",p.current_next_indicator);
+ out_S2B_NL(3,"current_next_indicator: ",p.current_next_indicator, dvbstrCurrentNextIndicator(p.current_next_indicator));
  out_SB_NL (3,"Section_number: ",p.section_number);
  out_SB_NL (3,"Last_Section_number: ",p.last_section_number);
 

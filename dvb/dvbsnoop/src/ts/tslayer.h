@@ -1,13 +1,14 @@
 /*
+$Id: tslayer.h,v 1.5 2004/01/01 20:09:43 rasc Exp $
 
+
+   
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de
 
 
 */

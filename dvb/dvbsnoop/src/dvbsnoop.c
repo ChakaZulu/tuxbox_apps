@@ -1,12 +1,12 @@
 /*
-$Id: dvbsnoop.c,v 1.19 2003/12/28 14:00:25 rasc Exp $
+$Id: dvbsnoop.c,v 1.20 2004/01/01 20:09:15 rasc Exp $
 
  DVBSNOOP
 
- a dvb sniffer  and mpeg2 stream analyzer tool
+ a dvb sniffer and mpeg2 stream analyzer tool
  http://dvbsnoop.sourceforge.net/
 
- (c) 2001-2003   Rainer.Scherg@gmx.de
+ (c) 2001-2004   Rainer.Scherg@gmx.de
 
 
 
@@ -14,6 +14,12 @@ $Id: dvbsnoop.c,v 1.19 2003/12/28 14:00:25 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.20  2004/01/01 20:09:15  rasc
+DSM-CC INT/UNT descriptors
+PES-sync changed, TS sync changed,
+descriptor scope
+other changes
+
 Revision 1.19  2003/12/28 14:00:25  rasc
 bugfix: section read from input file
 some changes on packet header output
