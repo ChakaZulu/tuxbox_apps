@@ -60,7 +60,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.7.1"
+#define WEBIFVERSION "2.7.2"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -2543,7 +2543,19 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 	content->local_header["apid"] = apid;
 	content->local_header["pmt"] = pmt;
 
-	return "http://" + getIP() + ":31339/0," + pmt + "," + vpid  + "," + apid;
+	eString apids;	
+	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		std::list<eDVBServiceController::audioStream> &astreams(sapi->audioStreams);
+		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
+			;it != astreams.end(); ++it)
+		{
+			apids += "," + eString().sprintf("%04x", it->pmtentry->elementary_PID);
+		}
+	}
+
+	return "http://" + getIP() + ":31339/0," + pmt + "," + vpid  + apids;
 }
 
 #define CHANNELWIDTH 200
