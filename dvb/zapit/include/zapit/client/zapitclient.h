@@ -33,8 +33,8 @@
 class CZapitClient:public CBasicClient
 {
  private:
-	bool send(const unsigned char command, const char* data = NULL, const unsigned int size = 0);
-
+	virtual const unsigned char   getVersion   () const;
+	virtual const          char * getSocketName() const;
 
  public:
 	enum events

@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.144 2002/12/07 19:14:54 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.145 2002/12/08 10:46:10 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1624,7 +1624,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.144 2002/12/07 19:14:54 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.145 2002/12/08 10:46:10 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3130,7 +3130,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		{
 			dprintf("version: %hhd, cmd: %hhd, numbytes: %d\n", header.version, header.command, readbytes);
 
-			if (header.version == sectionsd::ACTVERSION && header.command < sectionsd::numberOfCommands)
+			if (header.command < sectionsd::numberOfCommands)
 			{
 				dprintf("data length: %hd\n", header.dataLength);
 				char *data = new char[header.dataLength + 1];
@@ -4238,7 +4238,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.144 2002/12/07 19:14:54 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.145 2002/12/08 10:46:10 thegoodguy Exp $\n");
 
 	try
 	{

@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.29 2002/12/07 23:07:20 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.30 2002/12/08 10:46:11 thegoodguy Exp $
 
   License: GPL
 
@@ -35,6 +35,16 @@
 #include <sectionsdclient/sectionsdclient.h>
 
 
+const unsigned char   CSectionsdClient::getVersion   () const
+{
+	return sectionsd::ACTVERSION;
+}
+
+const          char * CSectionsdClient::getSocketName() const
+{
+	return SECTIONSD_UDS_NAME;
+}
+
 int CSectionsdClient::readResponse(char* data, int size)
 {
 	struct sectionsd::msgResponseHeader responseHeader;
@@ -52,15 +62,15 @@ int CSectionsdClient::readResponse(char* data, int size)
 }
 
 
-bool CSectionsdClient::send(const unsigned char command, const char* data = NULL, const unsigned int size = 0)
+bool CSectionsdClient::send(const unsigned char command, const char* data, const unsigned int size)
 {
 	sectionsd::msgRequestHeader msgHead;
 
-	msgHead.version    = sectionsd::ACTVERSION;
+	msgHead.version    = getVersion();
 	msgHead.command    = command;
 	msgHead.dataLength = size;
 
-	open_connection(SECTIONSD_UDS_NAME); // if the return value is false, the next send_data call will return false, too
+	open_connection(); // if the return value is false, the next send_data call will return false, too
 
         if (!send_data((char*)&msgHead, sizeof(msgHead)))
             return false;
@@ -450,21 +460,17 @@ bool CSectionsdClient::getActualEPGServiceKey(const t_channel_id channel_id, CEP
 }
 
 
-bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEPGData * epgdata)
+bool CSectionsdClient::getEPGid(const unsigned long long eventid, const time_t starttime, CEPGData * epgdata)
 {
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
+	sectionsd::commandGetEPGid msg;
 
-	req.command = sectionsd::epgEPGid;
-	req.dataLength = sizeof(eventid)+ sizeof(starttime);
-	if (open_connection(SECTIONSD_UDS_NAME))
+	msg.eventid   = eventid;
+	msg.starttime = starttime; 
+
+	if (send(sectionsd::epgEPGid, (char *)&msg, sizeof(msg)))
 	{
-		send_data((char*)&req, sizeof(req));
-		send_data((char*)&eventid, sizeof(eventid));
-		send_data((char*)&starttime, sizeof(starttime));
-
 		int nBufSize = readResponse();
-		if( nBufSize > 0)
+		if (nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
 			receive_data(pData, nBufSize);
@@ -505,7 +511,7 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 }
 
 
-bool CSectionsdClient::getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata)
+bool CSectionsdClient::getEPGidShort(const unsigned long long eventid, CShortEPGData * epgdata)
 {
 	if (send(sectionsd::epgEPGidShort, (char*)&eventid, sizeof(eventid)))
 	{

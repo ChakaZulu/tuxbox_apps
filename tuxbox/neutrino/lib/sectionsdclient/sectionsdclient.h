@@ -60,9 +60,11 @@ typedef vector<CChannelEvent> CChannelEventList;
 class CSectionsdClient : private CBasicClient
 {
  private:
+	virtual const unsigned char   getVersion   () const;
+	virtual const          char * getSocketName() const;
 
-	int readResponse(char* data = NULL, int size= 0);
-	bool send(const unsigned char command, const char* data, const unsigned int size);
+	int readResponse(char* data = NULL, int size = 0);
+	bool send(const unsigned char command, const char* data = NULL, const unsigned int size = 0);
 
  public:
 		enum events
@@ -93,11 +95,11 @@ class CSectionsdClient : private CBasicClient
 
 		CChannelEventList getEventsServiceKey(const t_channel_id channel_id);
 
-		bool getEPGid( unsigned long long eventid, time_t starttime, CEPGData * epgdata);
+		bool getEPGid(const unsigned long long eventid, const time_t starttime, CEPGData * epgdata);
 
 		bool getActualEPGServiceKey(const t_channel_id channel_id, CEPGData * epgdata);
 
-		bool getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata);
+		bool getEPGidShort(const unsigned long long eventid, CShortEPGData * epgdata);
 
 
 		/*

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.8 2002/12/07 23:07:21 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.9 2002/12/08 10:46:10 thegoodguy Exp $
  *
  * Basic Client Class (Neutrino) - DBoxII-Project
  *
@@ -38,7 +38,7 @@ CBasicClient::CBasicClient()
 	sock_fd = -1;
 }
 
-bool CBasicClient::open_connection(const char* socketname)
+bool CBasicClient::open_connection()
 {
 	close_connection();
 
@@ -47,13 +47,13 @@ bool CBasicClient::open_connection(const char* socketname)
 
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, socketname);              // no length check !!!
+	strcpy(servaddr.sun_path, getSocketName());              // no length check !!!
 	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
 
 	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
 		printf("[CBasicClient] socket failed.\n");
-		perror(socketname);
+		perror(getSocketName());
 		sock_fd = -1;
 		return false;
 	}
@@ -61,7 +61,7 @@ bool CBasicClient::open_connection(const char* socketname)
 	if (connect(sock_fd, (struct sockaddr*) &servaddr, clilen) < 0)
 	{
 		printf("[CBasicClient] connect failed.\n");
-		perror(socketname);
+		perror(getSocketName());
 		close_connection();
 		return false;
 	}
@@ -84,7 +84,8 @@ bool CBasicClient::send_data(const char* data, const size_t size)
 
 	if (write(sock_fd, data, size) < 0) // better: == -1
 	{
-		perror("[CBasicClient] send failed.\n");
+		printf("[CBasicClient] send failed.\n");
+		perror(getSocketName());
 		return false;
 	}
 	
@@ -99,13 +100,13 @@ bool CBasicClient::receive_data(char* data, const size_t size)
 		return (read(sock_fd, data, size) > 0);  // case size == 0 uncorrect handled ?
 }
 
-bool CBasicClient::send(const char* socketname, const unsigned char version, const unsigned char command, const char* data, const unsigned int size)
+bool CBasicClient::send(const unsigned char command, const char* data, const unsigned int size)
 {
 	CBasicMessage::Header msgHead;
-	msgHead.version = version;
+	msgHead.version = getVersion();
 	msgHead.cmd     = command;
 
-	open_connection(socketname); // if the return value is false, the next send_data call will return false, too
+	open_connection(); // if the return value is false, the next send_data call will return false, too
 
 	if (!send_data((char*)&msgHead, sizeof(msgHead)))
 	    return false;

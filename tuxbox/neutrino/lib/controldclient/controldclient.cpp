@@ -36,9 +36,14 @@
 #include <controldclient/controldclient.h>
 
 
-void CControldClient::send(const unsigned char command, const char* data = NULL, const unsigned int size = 0)
+const unsigned char   CControldClient::getVersion   () const
 {
-	CBasicClient::send(CONTROLD_UDS_NAME, CControld::ACTVERSION, command, data, size);
+	return CControld::ACTVERSION;
+}
+
+const          char * CControldClient::getSocketName() const
+{
+	return CONTROLD_UDS_NAME;
 }
 
 void  CControldClient::shutdown()

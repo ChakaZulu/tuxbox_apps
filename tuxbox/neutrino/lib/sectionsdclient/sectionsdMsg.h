@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.3 2002/12/07 19:14:55 thegoodguy Exp $
+//  $Id: sectionsdMsg.h,v 1.4 2002/12/08 10:46:11 thegoodguy Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -107,6 +107,12 @@ struct sectionsd
 		numberOfCommands        // <- no actual command, end of command marker
 	};
 
+	struct commandGetEPGid
+	{
+		unsigned long long eventid;
+		time_t             starttime;
+	};
+
 	struct commandSetServiceChanged
 	{
 		t_channel_id channel_id;
@@ -122,7 +128,7 @@ struct sectionsd
 	struct responseGetComponentTags
 	{
 		std::string component; 			// Text aus dem Component Descriptor
-    	unsigned char componentType; 	// Component Descriptor
+		unsigned char componentType; 	// Component Descriptor
 		unsigned char componentTag; 	// Component Descriptor
 		unsigned char streamContent; 	// Component Descriptor
 	};

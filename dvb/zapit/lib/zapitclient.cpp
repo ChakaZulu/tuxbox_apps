@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.69 2002/12/07 23:07:19 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.70 2002/12/08 10:46:10 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -52,11 +52,15 @@ std::string Utf8_to_Latin1(const std::string s)
 	return r;
 }
 
-bool CZapitClient::send(const unsigned char command, const char* data, const unsigned int size)
+const unsigned char   CZapitClient::getVersion   () const
 {
-	return CBasicClient::send(ZAPIT_UDS_NAME, CZapitMessages::ACTVERSION, command, data, size);
+	return CZapitMessages::ACTVERSION;
 }
 
+const          char * CZapitClient::getSocketName() const
+{
+	return ZAPIT_UDS_NAME;
+}
 
 void CZapitClient::shutdown()
 {

@@ -40,8 +40,9 @@
 class CLcddClient:private CBasicClient
 {
  private:
-	bool send(const unsigned char command, const char* data, const unsigned int size);
-	
+	virtual const unsigned char   getVersion   () const;
+	virtual const          char * getSocketName() const;
+
  public:
 		void setMode(char mode, std::string head="");
 		void setMenuText(char pos, std::string text, char highlight=0);
