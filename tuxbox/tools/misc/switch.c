@@ -21,6 +21,12 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.12  2002/07/25 00:17:38  woglinde
+ *
+ *
+ *
+ *   fixing some compiler warnings
+ *
  *   Revision 1.11  2002/02/23 20:22:29  woglinde
  *   fixing compiler warnings mulitple-literal strings
  *
@@ -52,7 +58,7 @@
  *
  *
  *
- *   $Revision: 1.11 $
+ *   $Revision: 1.12 $
  *
  */
 
@@ -226,9 +232,9 @@ void volume_show() {
     perror("AVSIOGMUTE:");
   }
   if (i)
-    printf(" (muted)",i);
+    printf(" (muted)");
   else
-    printf(" (unmuted)",i);
+    printf(" (unmuted)");
   printf("\n");
 }
 

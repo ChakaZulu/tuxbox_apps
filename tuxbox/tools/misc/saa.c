@@ -48,6 +48,7 @@ int vps()
 
 	/* 0: ??? 1: mono 2: stereo 3: dual sound */
 	data[1] |= 2;
+	return 0;
 }
 
 
@@ -81,7 +82,7 @@ int read_powersave()
 }
 
 /** */
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int fd;
 	int count=1;
@@ -121,7 +122,7 @@ main(int argc, char **argv)
       if(argc<3)
 	  {
 		help(argv[0]);
-		return;
+		return 0;
 	  }
 
 	  arg = atoi(argv[count+1]);
@@ -131,7 +132,7 @@ main(int argc, char **argv)
       if(argc<3)
 	  {
 		read_powersave();
-		return;
+		return 0;
 	  }
       else
 	  {
