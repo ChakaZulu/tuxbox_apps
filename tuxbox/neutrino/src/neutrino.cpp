@@ -2642,6 +2642,8 @@ void CNeutrinoApp::ExitRun()
 	dprintf(DEBUG_INFO, "exit\n");
 	//shutdown screen
 	g_lcdd->shutdown();
+	// timerd beenden und wakeup programmieren
+	g_Timerd->shutdown();
 
 	for(int x=0;x<256;x++)
 		frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
@@ -3048,7 +3050,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.331 2002/09/24 20:59:11 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.332 2002/09/24 21:35:42 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
