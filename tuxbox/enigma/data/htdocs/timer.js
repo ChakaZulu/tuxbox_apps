@@ -17,9 +17,9 @@ function editTimerEvent(xy)
 	NewWindow('/editTimerEvent?'+xy, 'editTimer', '750', '200', 'no');
 }
 
-function deleteTimerEvent()
+function deleteTimerEvent(xy)
 {
-	win=window.open("/deleteTimerEvent", "switchStatus", "width=1, height=1, left=0, top=0");
+	win=window.open("/deleteTimerEvent?"+xy, "switchStatus", "width=1, height=1, left=0, top=0");
 	win.focus();
 	parent.setTimeout("reload()", 500);
 }
