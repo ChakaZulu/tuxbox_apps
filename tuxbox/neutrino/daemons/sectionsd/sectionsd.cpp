@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.27 2001/07/19 22:02:13 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.28 2001/07/20 00:02:47 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,8 +23,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
-//  Revision 1.27  2001/07/19 22:02:13  fnbrd
-//  Mehr Befehle.
+//  Revision 1.28  2001/07/20 00:02:47  fnbrd
+//  Kleiner Hack fuer besseres Zusammenspiel mit Neutrino.
 //
 //  Revision 1.26  2001/07/19 14:12:30  fnbrd
 //  Noch ein paar Kleinigkeiten verbessert.
@@ -154,7 +154,7 @@ static pthread_mutex_t dmxSDTlock=PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t dmxEITnvodLock=PTHREAD_MUTEX_INITIALIZER;
 static int dmxEITfd=0;
 static int dmxSDTfd=0;
-static int dmxEITfd2=0;
+//static int dmxEITfd2=0;
 static int timeset=0;
 static SIevent nullEvt; // Null-Event, falls keins gefunden
 
@@ -394,7 +394,34 @@ static int stopDMXsdt(void)
   return 0;
 }
 
+#ifdef NO_ZAPD_NEUTRINO_HACK
+static int pauseDMXsdt(void)
+{
+  pthread_mutex_lock(&dmxSDTlock);
+  if (ioctl (dmxSDTfd, DMX_STOP, 0) == -1) {
+    close(dmxSDTfd);
+    dmxSDTfd=0;
+    perror ("DMX_STOP");
+    return 1;
+  }
+  return 0;
+}
 
+static int unpauseDMXsdt(void)
+{
+  if (ioctl (dmxSDTfd, DMX_START, 0) == -1) {
+    close(dmxSDTfd);
+    dmxSDTfd=0;
+    perror ("DMX_START");
+    pthread_mutex_unlock(&dmxSDTlock);
+    return 4;
+  }
+  pthread_mutex_unlock(&dmxSDTlock);
+  return 0;
+}
+#endif
+
+/*
 static int startDMXeitNVOD(void)
 {
   if (ioctl (dmxEITfd2, DMX_START, 0) == -1) {
@@ -419,6 +446,7 @@ static int stopDMXeitNVOD(void)
   }
   return 0;
 }
+*/
 
 // Liefert die ServiceID zu einem Namen
 // 0 bei Misserfolg
@@ -672,6 +700,10 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   return;
 }
 
+#ifdef NO_ZAPD_NEUTRINO_HACK
+static int currentNextWasOk=0;
+#endif
+
 // Mostly copied from epgd (something bugfixed ;) )
 static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, unsigned dataLength)
 {
@@ -737,6 +769,9 @@ static void commandCurrentNextInfoChannelName(struct connectionData *client, cha
   if( nResultDataSize > 0 ) {
     write(client->connectionSocket, pResultData, nResultDataSize);
     delete[] pResultData;
+#ifdef NO_ZAPD_NEUTRINO_HACK
+    currentNextWasOk=1;
+#endif
   }
   else
     dprintf("current/next EPG not found!\n");
@@ -901,6 +936,23 @@ struct connectionData *client=(struct connectionData *)conn;
   close(client->connectionSocket);
   dprintf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
   delete client;
+#ifdef NO_ZAPD_NEUTRINO_HACK
+  if(currentNextWasOk) {
+    // Damit nach dem umschalten der camd/pzap usw. schneller anlaeuft.
+    currentNextWasOk=0;
+    if(pauseDMXeit())
+      return 0;
+    if(pauseDMXsdt())
+      return 0;
+    int rc=5;
+    while(rc)
+      rc=sleep(rc);
+    if(unpauseDMXsdt())
+      return 0;
+    if(unpauseDMXeit())
+      return 0;
+  }
+#endif
   return 0;
 }
 
@@ -1350,7 +1402,7 @@ static void *houseKeepingThread(void *)
 {
   dprintf("housekeeping-thread started.\n");
   for(;;) {
-    int rc=2*60;  // sleep 2 minutes
+    int rc=5*60;  // sleep 2 minutes
     while(rc)
       rc=sleep(rc);
     dprintf("housekeeping.\n");
@@ -1416,7 +1468,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.27 2001/07/19 22:02:13 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.28 2001/07/20 00:02:47 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
