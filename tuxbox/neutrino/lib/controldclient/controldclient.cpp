@@ -69,7 +69,8 @@ CControldClient::tuxbox_maker_t CControldClient::getBoxType()
 
 	send(CControld::CMD_GETBOXTYPE);
 
-	receive_data((char*)&rmsg, sizeof(rmsg));
+	if (!receive_data((char*)&rmsg, sizeof(rmsg)))
+		rmsg.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
 
 	close_connection();
 
