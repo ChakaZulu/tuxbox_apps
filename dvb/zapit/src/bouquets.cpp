@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.86 2003/06/13 21:13:44 digi_casi Exp $
+ * $Id: bouquets.cpp,v 1.87 2003/06/16 20:54:10 digi_casi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -277,6 +277,7 @@ void CBouquetManager::saveBouquets(void)
 	}
 	
 	fprintf(bouq_fd, "</zapit>\n");
+	fclose(bouq_fd);
 }
 
 void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char * providerName)
@@ -309,6 +310,7 @@ void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char *
 		}
 	
 		fprintf(bouq_fd, "</zapit>\n");
+		fclose(bouq_fd);
 	}
 	else
 	{
