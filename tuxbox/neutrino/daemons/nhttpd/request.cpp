@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.20 2002/06/09 19:55:39 Leahcim Exp $
+	$Id: request.cpp,v 1.21 2002/06/13 08:26:20 dirch Exp $
 
 	License: GPL
 
@@ -373,7 +373,7 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 	FILE *output;
 	int count = 0;
 
-	SocketWrite("HTTP/1.1 100 Continue \n");		// Erstmal weitere Daten anfordern
+	SocketWrite("HTTP/1.1 100 Continue \r\n\r\n");		// Erstmal weitere Daten anfordern
 
 	if(HeaderList["Content-Length"] != "")
 	{
@@ -446,11 +446,11 @@ void CWebserverRequest::Send302(char *URI)
 		printf(URI);
 		printf("\n");
 	}
-	SocketWrite("HTTP/1.0 302 Moved Permanently\n");
+	SocketWrite("HTTP/1.0 302 Moved Permanently\r\n");
 	SocketWrite("Location: ");
 	SocketWrite(URI);
 	SocketWrite("\n");
-	SocketWrite("Content-Type: text/plain\n\n");
+	SocketWrite("Content-Type: text/plain\r\n\r\n");
 	SocketWrite("302 : Object moved\n\nIf you dont get redirected click <a href=\"");
 	SocketWrite(URI);
 	SocketWrite("\">here</a>\n");
@@ -460,16 +460,16 @@ void CWebserverRequest::Send302(char *URI)
 void CWebserverRequest::Send404Error()
 {
 	if(Parent->DEBUG) printf("Sende 404 Error\n");
-	SocketWrite("HTTP/1.0 404 Not Found\n");		//404 - file not found
-	SocketWrite("Content-Type: text/plain\n\n");
+	SocketWrite("HTTP/1.0 404 Not Found\r\n");		//404 - file not found
+	SocketWrite("Content-Type: text/plain\r\n\r\n");
 	SocketWrite("404 : File not found\n\nThe requested file was not found on this dbox ;)\n");
 	HttpStatus = 404;
 }
 //-------------------------------------------------------------------------
 void CWebserverRequest::Send500Error()
 {
-	SocketWrite("HTTP/1.0 500 InternalError\n");		//500 - internal error
-	SocketWrite("Content-Type: text/plain\n\n");
+	SocketWrite("HTTP/1.0 500 InternalError\r\n");		//500 - internal error
+	SocketWrite("Content-Type: text/plain\r\n\r\n");
 	SocketWrite("500 : InternalError\n\nPerhaps some parameters missing ? ;)");
 	HttpStatus = 500;
 	if(Parent->DEBUG) printf("500 : InternalError\n");
@@ -478,7 +478,7 @@ void CWebserverRequest::Send500Error()
 
 void CWebserverRequest::SendPlainHeader(string contenttype)
 {
-	SocketWrite("HTTP/1.0 200 OK\nContent-Type: " + contenttype + "\n\n");
+	SocketWrite("HTTP/1.0 200 OK\nContent-Type: " + contenttype + "\r\n\r\n");
 	HttpStatus = 200;
 }
 
@@ -592,7 +592,7 @@ bool CWebserverRequest::SendResponse()
 		if(Parent->DEBUG) printf("Normale Datei\n");
 		if( (tmpint = OpenFile(Path,Filename) ) != -1 )		// Testen ob Datei auf Platte geöffnet werden kann
 		{											// Wenn Datei geöffnet werden konnte
-			SocketWrite("HTTP/1.0 200 OK\n");		
+			SocketWrite("HTTP/1.0 200 OK\r\n");		
 			HttpStatus = 200;
 			if( FileExt == "" )		// Anhand der Dateiendung den Content bestimmen
 				ContentType = "text/html";
