@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.55 2003/10/03 23:17:00 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.56 2003/10/07 16:51:29 obi Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -433,7 +433,7 @@ ReceiveStreamThread (void *mrl)
 	streamingrunning = 1;
 	int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
 
-	struct pollfd poller[0];
+	struct pollfd poller[1];
 	poller[0].fd = skt;
 	poller[0].events = POLLIN | POLLPRI;
 	int pollret;
