@@ -36,7 +36,7 @@ extern	void	dblDrawFrame( void );
 #define	SND_LETSGO		5
 
 static	int	portfolio[8];		// Wieviele Stopper/Buddler/Lemmings
-static	int	level=1;
+static	int	level=2;
 		int	main_x=660;
 static	Sprite	*deko[15];
 static	Sprite	*lemm[100];
@@ -718,6 +718,7 @@ void	RunKey( void )
 static	int		step=2;
 static	int		cnt=0;
 static	int		zcnt=0;
+static	int		lastc=0;
 	int			nac;
 	int			sel_type=0;
 
@@ -726,7 +727,7 @@ static	int		zcnt=0;
 		if ( step == 2 )
 			return;
 		zcnt++;
-		if ( zcnt > 4 )
+		if ( zcnt > 3 )
 		{
 			step=2;
 			cnt=0;
@@ -746,6 +747,11 @@ static	int		zcnt=0;
 		step=4;
 	else
 		step=2;
+
+	if (( step != 2 ) && ( actcode != lastc ))
+		step=2;
+
+	lastc=actcode;
 
 	switch( actcode )
 	{

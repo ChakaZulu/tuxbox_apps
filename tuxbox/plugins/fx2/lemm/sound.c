@@ -23,6 +23,7 @@ static	void	_run_sound( void *ptr )
 {
 	int				sz;
 	int				i;
+	int				dores=1;
 	unsigned char	*data;
 	struct timeval	tv;
 
@@ -32,8 +33,13 @@ static	void	_run_sound( void *ptr )
 		tv.tv_sec=0;
 		select( 0,0,0,0,&tv);
 		if ( !playidx )
+		{
+			i=1;
+			ioctl(sound_fd,SNDCTL_DSP_SYNC,&i);
 			continue;
-		i=play[playidx-1];
+		}
+	
+		i=play[0];
 		playidx--;
 		if ( i < 0 )
 			break;
@@ -50,6 +56,8 @@ static	void	_run_sound( void *ptr )
 		i=1;
 		if ( !playidx )
 			ioctl(sound_fd,SNDCTL_DSP_SYNC,&i);
+		else
+			playidx=0;
 	}
 	if ( sound_fd >= 0 )
 		close( sound_fd );
@@ -91,8 +99,7 @@ void	SoundPlay( int pnr )
 {
 	if ( sound_fd==-2)
 		return;
-	if ( playidx == 20 )
-		return;
-	play[ playidx ]=pnr;
+	if ( playidx < 1 )
+		play[ playidx ]=pnr;
 	playidx++;
 }
