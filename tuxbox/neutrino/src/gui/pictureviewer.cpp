@@ -139,12 +139,8 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	// tell neutrino we're in pic_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_pic );
 	// remember last mode
-	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() /*| NeutrinoMessages::norezap*/);
-	// halt playback
-	bool pb = g_Zapit->isPlayBackActive();
-	if(pb)
-		g_Zapit->stopPlayBack();
-	// Stop sectionsd
+	m_LastMode=(CNeutrinoApp::getInstance()->getLastMode() | NeutrinoMessages::norezap);
+
 	g_Sectionsd->setPauseScanning(true); 
 
 	show();
@@ -155,10 +151,6 @@ int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
 	//if(frameBuffer->getActive())
 	//	memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 
-	//Start Playback again if halted
-	if(pb)
-		g_Zapit->startPlayBack();
-	
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
@@ -408,9 +400,12 @@ int CPictureViewerGui::show()
 		}
 		else if(msg==CRCInput::RC_setup)
 		{
-			CNFSSmallMenu nfsMenu;
-			nfsMenu.exec(this, "");
-			update=true;
+			if(m_state==MENU)
+			{
+				CNFSSmallMenu nfsMenu;
+				nfsMenu.exec(this, "");
+				update=true;
+			}
 		}
 		else if(msg == NeutrinoMessages::CHANGEMODE)
 		{

@@ -49,7 +49,13 @@ void blit2FB(void *fbbuff,
 	unsigned int xp, unsigned int yp,
 	unsigned int xoffs, unsigned int yoffs,
 	int cpp);
-void clearFB(int cpp);
+void clearFB(int bpp,int cpp);
+inline unsigned short make16color(uint32_t r, uint32_t g, 
+											 uint32_t b, uint32_t rl, 
+											 uint32_t ro, uint32_t gl, 
+											 uint32_t go, uint32_t bl, 
+											 uint32_t bo, uint32_t tl, 
+											 uint32_t to);
 
 void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y_pan, int x_offs, int y_offs)
 {
@@ -73,7 +79,7 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
     fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
     /* ClearFB if image is smaller */
     if(x_size < (int)var->xres || y_size < (int)var->yres)
-       clearFB(bp);
+       clearFB(var->bits_per_pixel, bp);
     blit2FB(fbbuff, x_size, y_size, var->xres, var->yres, x_pan, y_pan, x_offs, y_offs, bp);
     free(fbbuff);
 }
@@ -164,11 +170,38 @@ void blit2FB(void *fbbuff,
 	 }
 }
 
-void clearFB(int cpp)
+void clearFB(int bpp, int cpp)
 {
    int x,y;
    getCurrentRes(&x,&y);
-   memset(lfb, 0, x*y*cpp);
+	unsigned int stride = CFrameBuffer::getInstance()->getStride();
+	
+	switch(cpp){
+		case 2:
+			{
+				uint32_t rl, ro, gl, go, bl, bo, tl, to;
+				unsigned int i;
+				struct fb_var_screeninfo *var;
+				var = CFrameBuffer::getInstance()->getScreenInfo();
+				rl = (var->red).length;
+				ro = (var->red).offset;
+				gl = (var->green).length;
+				go = (var->green).offset;
+				bl = (var->blue).length;
+				bo = (var->blue).offset;
+				tl = (var->transp).length;
+				to = (var->transp).offset;
+				short black=make16color(0,0,0, rl, ro, gl, go, bl, bo, tl, to);
+				unsigned short *s_fbbuff = (unsigned short *) malloc(y*stride/2 * sizeof(unsigned short));
+				for(i = 0; i < y*stride/2; i++)
+				   s_fbbuff[i] = black;
+				memcpy(lfb, s_fbbuff, y*stride);
+				free(s_fbbuff);
+			}
+			break;
+		default:
+			memset(lfb, 0, stride*y*cpp);
+	}
 }
 
 inline unsigned char make8color(unsigned char r, unsigned char g, unsigned char b)
@@ -181,18 +214,23 @@ inline unsigned char make8color(unsigned char r, unsigned char g, unsigned char 
 
 inline unsigned short make15color(unsigned char r, unsigned char g, unsigned char b)
 {
-    return (
+    return ( 
 	(((b >> 3) & 31) << 10) |
 	(((g >> 3) & 31) << 5)  |
 	 ((r >> 3) & 31)        );
 }
 
-inline unsigned short make16color(const unsigned char r, const unsigned char g, const unsigned char b, const unsigned char rl, const unsigned char ro, const unsigned char gl, const unsigned char go, const unsigned char bl, const unsigned char bo)
+inline unsigned short make16color(uint32_t r, uint32_t g, uint32_t b, 
+											 uint32_t rl, uint32_t ro, 
+											 uint32_t gl, uint32_t go, 
+											 uint32_t bl, uint32_t bo, 
+											 uint32_t tl, uint32_t to)
 {
     return (
-	    ((r >> (8 - rl)) << ro) |
-	    ((g >> (8 - gl)) << go) |
-	    ((b >> (8 - bl)) << bo));
+		 ((0xFF >> (8 - tl)) << to) |
+	    ((r    >> (8 - rl)) << ro) |
+	    ((g    >> (8 - gl)) << go) |
+	    ((b    >> (8 - bl)) << bo));
 }
 
 void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp)
@@ -202,9 +240,9 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
     unsigned char *c_fbbuff;
     unsigned short *s_fbbuff;
     unsigned int *i_fbbuff;
-    unsigned char rl, ro, gl, go, bl, bo;
-
-    struct fb_var_screeninfo *var;
+    uint32_t rl, ro, gl, go, bl, bo, tl, to;
+    
+	 struct fb_var_screeninfo *var;
     var = CFrameBuffer::getInstance()->getScreenInfo();
     rl = (var->red).length;
     ro = (var->red).offset;
@@ -212,8 +250,12 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
     go = (var->green).offset;
     bl = (var->blue).length;
     bo = (var->blue).offset;
+    tl = (var->transp).length;
+    to = (var->transp).offset;
+	 
+	 s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
 
-    switch(bpp)
+	 switch(bpp)
     {
 	case 8:
 	    *cpp = 1;
@@ -234,10 +276,8 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
 	    s_fbbuff = (unsigned short *) malloc(count * sizeof(unsigned short));
 	    fbbuff = (void *) malloc(count * 2);
 	    for(i = 0; i < count ; i++)
-	    {
-		    s_fbbuff[i] = make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo);
-	    }
-	    fbbuff = (void *) s_fbbuff;
+			 s_fbbuff[i]=make16color(rgbbuff[i*3], rgbbuff[i*3+1], rgbbuff[i*3+2], rl, ro, gl, go, bl, bo, tl, to);
+		 fbbuff = (void *) s_fbbuff;
 	    break;
 	case 24:
 	case 32:
