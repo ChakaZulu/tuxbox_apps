@@ -1,8 +1,8 @@
 /*
- * $Id: frontend.cpp,v 1.10 2002/04/24 12:29:10 obi Exp $
+ * $Id: frontend.cpp,v 1.11 2002/04/24 15:40:54 field Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -212,7 +212,7 @@ const int32_t CFrontend::getSignalStrength ()
 const int32_t CFrontend::getSignalNoiseRatio ()
 {
 	int32_t snr;
-	
+
 	if (ioctl(frontend_fd, FE_READ_SNR, &snr) < 0)
 	{
 		perror("FE_READ_SNR");
@@ -316,7 +316,7 @@ const bool CFrontend::getEvent ()
 
 	failed = true;
 
-	switch (poll(pfd, 1, 1000))
+	switch (poll(pfd, 1, 50))
 	{
 	case -1:
 		perror("[CFrontend::getEvent] poll");

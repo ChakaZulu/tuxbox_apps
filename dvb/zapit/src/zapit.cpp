@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.161 2002/04/24 13:45:13 happydude Exp $
+ * $Id: zapit.cpp,v 1.162 2002/04/24 15:40:54 field Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1883,7 +1883,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.161 2002/04/24 13:45:13 happydude Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.162 2002/04/24 15:40:54 field Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2436,7 +2436,7 @@ unsigned int zapTo_ServiceID (unsigned int serviceID, bool isSubService )
 	}
 
 	if ( !( result & CZapitClient::ZAP_OK ) )
-		eventServer->sendEvent(CZapitClient::EVT_ZAP_FAILED, CEventServer::INITID_ZAPIT, &serviceID, sizeof(serviceID) );
+		eventServer->sendEvent(( isSubService )?CZapitClient::EVT_ZAP_SUB_FAILED:CZapitClient::EVT_ZAP_FAILED, CEventServer::INITID_ZAPIT, &serviceID, sizeof(serviceID) );
 	else
 	{
 		if ( isSubService )
