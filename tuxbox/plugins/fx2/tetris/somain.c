@@ -23,6 +23,7 @@
 extern	int				debug;
 extern	int				doexit;
 extern	unsigned short	actcode;
+extern	unsigned short	realcode;
 extern	long			score;
 
 static	char			*proxy_addr=0;
@@ -38,6 +39,7 @@ static	void	SaveGame( void )
 	char		*user="nobody";
 	int			x;
 	char		*p;
+	struct timeval	tv;
 
 	if ( !score || !hscore )
 		return;
@@ -48,7 +50,6 @@ static	void	SaveGame( void )
 		RcGetActCode();
 
 	actcode=0xee;
-	de=doexit;
 	doexit=0;
 	while( !doexit )
 	{
@@ -71,7 +72,7 @@ static	void	SaveGame( void )
 /* clean name */
 	x = strlen(user);
 	p=user;
-	for( p=user; *p; x--; p++ )
+	for( p=user; *p; x--, p++ )
 	{
 		if (( *p == ' ' ) || ( *p == '&' ) || ( *p == '/' ))
 			memcpy(p,p+1,x);
