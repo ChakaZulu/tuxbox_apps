@@ -120,6 +120,9 @@ void CListBox::paintItem(unsigned int itemNr, int paintNr, bool selected)
 {
 	int ypos = y+ theight + paintNr*getItemHeight();
 
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+	
 	if (selected)
 	{
 		color   = COL_MENUCONTENTSELECTED;
