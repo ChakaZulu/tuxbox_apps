@@ -902,6 +902,10 @@ static eString getLeftNavi(eString mode, eString path)
 		result += button(110, "Plugins", LEFTNAVICOLOR, "?mode=controlPlugins");
 		result += "<br>";
 		result += button(110, "Timer", LEFTNAVICOLOR, "?mode=controlTimerList");
+#ifndef DISABLE_FILE
+		result += "<br>";
+		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
+#endif
 	}
 	else
 
@@ -2000,6 +2004,51 @@ static eString aboutDreambox(void)
 
 	return result.str();
 }
+
+#ifndef	DISABLE_FILE
+bool rec_movies()
+{
+	bool result = false;
+	FILE *rec = fopen("/hdd/movie/recordings.epl", "w");
+	if (rec)
+	{
+		fprintf(rec, _("#NAME Aufgenommene Filme\n"));
+
+		struct dirent **namelist;
+		int n = scandir("/hdd/movie", &namelist, 0, alphasort);
+		if (n > 0)
+		{
+			for (int i = 0; i < n; i++)
+			{
+				eString filen = namelist[i]->d_name;
+				if ((filen.find(".ts") != eString::npos) && (filen.find(".ts.") == eString::npos))
+				{
+					fprintf(rec, "#SERVICE: 1:0:1:0:0:0:000000:0:0:0:/hdd/movie/%s\n", filen.c_str());
+					fprintf(rec, "#DESCRIPTION: %s\n", getLeft(filen, '.').c_str());
+					fprintf(rec, "#TYPE 16385\n");
+					fprintf(rec, "/hdd/movie/%s\n", filen.c_str());
+				}
+				free(namelist[i]);
+			}
+			free(namelist);
+			result = true;
+		}
+		fclose(rec);
+		eZapMain::getInstance()->loadRecordings();
+	}
+	return result;
+}
+
+static eString recoverRecordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result;
+	if (rec_movies())
+		result = closeWindow(content, "Movies recovered successfully.", 500);
+	else
+		result = closeWindow(content, "Movies could not be recoverd.", 500);
+	return result;
+}
+#endif
 
 struct countTimer
 {
@@ -4344,6 +4393,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadRecordings", load_recordings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveRecordings", save_recordings, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/recoverRecordings", recoverRecordings, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/deleteMovie", deleteMovie, lockWeb);
 #endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadPlaylist", load_playlist, lockWeb);
