@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.153 2002/02/10 14:17:34 McClean Exp $
+        $Id: neutrino.cpp,v 1.154 2002/02/10 14:37:56 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.154  2002/02/10 14:37:56  McClean
+  fix standby-exit bug
+
   Revision 1.153  2002/02/10 14:17:34  McClean
   simplify usage (part 2)
 
@@ -1957,18 +1960,18 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				printf("standby-loopended\n");
 				g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
 				g_Controld->videoPowerDown(false);
+				#ifdef USEACTIONLOG
+					if(mode==mode_tv)
+					{	
+						g_ActionLog->println("mode: tv");
+					}
+					else if(mode==mode_radio)
+					{	
+						g_ActionLog->println("mode: radio");
+					}
 
-				//re-set mode
-				if(mode==mode_radio)
-				{
-					mode = -1;
-					radioMode();
-				}
-				else if(mode==mode_tv)
-				{
-					mode = -1;
-					tvMode();
-				}
+				#endif
+				g_RCInput->clear();
 			}
 			else
 			{
@@ -2383,7 +2386,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.153 2002/02/10 14:17:34 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.154 2002/02/10 14:37:56 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
