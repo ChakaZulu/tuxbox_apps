@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.61 2003/05/11 15:23:42 digi_casi Exp $
+ * $Id: descriptors.cpp,v 1.62 2003/05/16 18:50:11 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -474,7 +474,20 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
  		break;
  	case ST_NVOD_REFERENCE_SERVICE:
  	case ST_NVOD_TIME_SHIFTED_SERVICE:
- 	{
+ 	case ST_DATA_BROADCAST_SERVICE:
+ 	case ST_RCS_MAP:
+ 	case ST_RCS_FLS:
+ 	default:
+ 		found_data_chans++;
+ 		eventServer->sendEvent(CZapitClient::EVT_SCAN_FOUND_DATA_CHAN, CEventServer::INITID_ZAPIT, &found_data_chans, sizeof(found_data_chans));
+ 		break;
+ 	}
+ 	switch (service_type) {
+ 	case ST_DIGITAL_TELEVISION_SERVICE:
+	case ST_DIGITAL_RADIO_SOUND_SERVICE:
+	case ST_NVOD_REFERENCE_SERVICE:
+	case ST_NVOD_TIME_SHIFTED_SERVICE:
+	{
 		CBouquet* bouquet;
 		int bouquetId;
 
@@ -499,16 +512,12 @@ void service_descriptor(const unsigned char * const buffer, const t_service_id s
  //		test.ServiceName = serviceName;
  //		INFO ( " Sendername : %s ! " , test.ServiceName);
  //		eventServer->sendEvent(CZapitClient::EVT_SCAN_FOUND_A_CHAN, CEventServer::INITID_ZAPIT, &test, sizeof(test));
+
 		break;
 	}
- 	case ST_DATA_BROADCAST_SERVICE:
- 	case ST_RCS_MAP:
- 	case ST_RCS_FLS:
- 	default:
- 		found_data_chans++;
- 		eventServer->sendEvent(CZapitClient::EVT_SCAN_FOUND_DATA_CHAN, CEventServer::INITID_ZAPIT, &found_data_chans, sizeof(found_data_chans));
- 		break;
- 	}
+	default:
+		break;
+	}
 }
 
 /* 0x49 */
