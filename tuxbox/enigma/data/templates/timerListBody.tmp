@@ -1,4 +1,4 @@
-<h2>Regular Timers</h2>
+<h2>One-time Timer Events</h2>
 <table width=100% border=1 rules=all>
 	<thead>
 		<th align="left">Delete</th>
@@ -13,7 +13,7 @@
 		#TIMER_REGULAR#
 	</tbody>
 </table>
-<h2>Repeated Timers</h2>
+<h2>Repeating Timer Events</h2>
 <table width=100% border=1 rules=all>
 	<thead>
 		<th align="left">Delete</th>

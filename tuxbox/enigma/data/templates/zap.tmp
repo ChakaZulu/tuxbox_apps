@@ -8,7 +8,7 @@
 				<select style="width: 210px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=30></select>
 			</td>
 			<td>
-				<select style="width: 440px; font-weight: bold;" onChange=channelChange() name="channel" size=30></select>
+				<select style="width: 410px; font-weight: bold;" onChange=channelChange() name="channel" size=30></select>
 			</td>
 		</tr>
 	</table>
@@ -19,7 +19,7 @@
 			<button name="mepg" style="width: 100px; background-color: #CB0303" value="MEPG" onClick=javascript:mepg()><span class="button">Multi-EPG</span></button>
 			<button name="epg" style="width: 100px; background-color: #12259E" value="EPG" onClick=javascript:epg()><span class="button">EPG</span></button>
 		</td>
-		<td style="width: 450px" align=center>
+		<td style="width: 410px" align=center>
 			<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>
 			&nbsp;&nbsp;
 			<a href="javascript:zapChannelForward()"><img src="down.gif" border="0"></a>

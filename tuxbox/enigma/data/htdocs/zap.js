@@ -27,9 +27,11 @@ function zapChannelBackward()
 }
 function bouquetChange()
 {
-	currentBouquet = document.channelselector.bouquet.selectedIndex;
-	currentChannel = -1;
-	loadChannels(currentBouquet, currentChannel);
+	var channel = -1;
+	var bouquet = document.channelselector.bouquet.selectedIndex;
+	if (bouquet == currentBouquet)
+		channel = currentChannel;
+	loadChannels(bouquet, channel);
 }
 function epg()
 {

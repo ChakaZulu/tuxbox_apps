@@ -1363,6 +1363,7 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 }
 #endif
 
+#if 0
 struct countDVBServices: public Object
 {
 	int &count;
@@ -1383,6 +1384,7 @@ struct countDVBServices: public Object
 		++count;
 	}
 };
+
 
 class eWebNavigatorListDirectory: public Object
 {
@@ -1451,6 +1453,7 @@ public:
 		num++;
 	}
 };
+#endif
 
 class eWebNavigatorListDirectory2: public Object
 {
@@ -1854,7 +1857,7 @@ static eString aboutDreambox(void)
 	result << "<table border=0 cellspacing=0 cellpadding=0>";
 
 	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
-		result << "<img src=\"dm7000.jpg\" width=\"650\" border=\"0\"><br><br>";
+		result << "<img src=\"dm7000.jpg\" width=\"620\" border=\"0\"><br><br>";
 
 	result  << "<tr><td>Model:</td><td>" << eSystemInfo::getInstance()->getModel() << "</td></tr>"
 		<< "<tr><td>Manufacturer:</td><td>" << eSystemInfo::getInstance()->getManufacturer() << "</td></tr>"
@@ -2028,13 +2031,13 @@ static eString getControlTimerList()
 		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No regular timer events available")) + "</td></tr>";
 	result.strReplace("#TIMER_REGULAR#", tableBody);
 
-	// repeated timers
+	// repeating timers
 	count = 0;
 	eTimerManager::getInstance()->forEachEntry(countTimer(count, true));
 	if (count)
 		tableBody = genTimerListTableBody(1);
 	else
-		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No repeated timer events available")) + "</td></tr>";
+		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString(_("No repeating timer events available")) + "</td></tr>";
 	result.strReplace("#TIMER_REPEATED#", tableBody);
 
 	// buttons
@@ -2784,6 +2787,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 
 static eString getchannelinfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"));
 	result.strReplace("#SERVICENAME#", getCurService());
 

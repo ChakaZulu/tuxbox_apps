@@ -25,6 +25,10 @@ body {
 	background-color: #ffffff;
 }
 
+#headbody {
+	background-image: url(bg.png);
+}
+
 td {
 	font-size: 13px;
 }
@@ -49,8 +53,8 @@ a:hover {
 
 #contentcell {
 	background-color: #ffffff;
-	padding-left: 10px; 
-	padding-top: 10px; 
+	padding-left: 10px;
+	padding-top: 10px;
 	padding-right: 10px;
 	padding-bottom: 10px;
 }
@@ -145,6 +149,5 @@ a:hover {
 
 #megatable {
 	border: 1px solid #98A4B6;
-	margin-bottom: 30px;
 }
 
