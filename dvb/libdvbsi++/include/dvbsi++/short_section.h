@@ -1,5 +1,5 @@
 /*
- * $Id: short_section.h,v 1.2 2004/02/13 17:51:07 obi Exp $
+ * $Id: short_section.h,v 1.3 2005/01/01 15:23:38 mws Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -35,6 +35,7 @@ class ShortSection
 
 	public:
 		ShortSection(const uint8_t * const buffer);
+		virtual ~ShortSection();
 
 		static const uint8_t CRC32 = 0;
 		static const uint16_t LENGTH = 1024;

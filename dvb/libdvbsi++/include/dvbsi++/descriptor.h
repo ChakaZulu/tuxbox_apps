@@ -1,5 +1,5 @@
 /*
- * $Id: descriptor.h,v 1.2 2004/02/13 17:51:07 obi Exp $
+ * $Id: descriptor.h,v 1.3 2005/01/01 15:23:38 mws Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -32,6 +32,7 @@ class Descriptor
 
 	public:
 		Descriptor(const uint8_t * const buffer);
+		virtual ~Descriptor();
 
 		uint8_t getTag(void) const;
 		uint8_t getLength(void) const;
