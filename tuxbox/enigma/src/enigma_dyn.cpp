@@ -225,13 +225,6 @@ static eString channels_getcurrent(eString request, eString path, eString opt, e
 	return result+"\r\n";
 }
 
-
-static void unpack(__u32 l, int *t)
-{
-	for (int i=0; i<4; i++)
-		*t++=(l>>((3-i)*8))&0xFF;
-}
-
 static eString getVolume()
 {
 	return eString().setNum((63-eDVB::getInstance()->volume)*100/63, 10);
@@ -480,106 +473,10 @@ static eString getCurService()
 		return "no channel selected";
 }
 
-static eString web_root(eString request, eString path, eString opts, eHTTPConnection *content)
+
+static eString getEITC()
 {
-	eString result="";
-	QMap<eString,eString> opt=getRequestOptions(opts);
-	content->local_header["Content-Type"]="text/html";
-
-	eString mode=opt["mode"];
-	eString bid="0";
-
-	if(opt["bouquetid"])
-		bid=opt["bouquetid"];
-
-	int bouquetid=atoi(bid.c_str());
-
-	result+=read_file(TEMPLATE_DIR+"index.tmp");
-
-	eString apid, vpid;
-	int iapid, ivpid;
-	eString radioc, tvc, aboutc, linksc, updatesc;
-	eString cop;
-	eString navi;
-	eString stats;
-	eString tmp;
-	__u32 myipp=0;
-	int myip[4];
-	int bootcount=0;
-	
-	stats+="<span class=\"white\">";
-	int sec=atoi(read_file("/proc/uptime").c_str());
-	stats+=eString().sprintf("%d:%02dm up", sec/3600, (sec%3600)/60);
-	stats+="</span> | ";
-
-	tmp=read_file("/proc/mounts");
-	if(tmp.find("cramfs")!=eString::npos)
-	{
-		stats+="<span class=\"white\">running from flash</span>";
-	}
-	else
-	{
-		stats+="<span class=\"white\">running via net</span>";
-	}
-	stats+=" | ";
-
-	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
-
-	stats+="<span class=\"white\">"+getIP()+"</span>";
-
-	stats+=" | ";
-	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
-	stats+=tmp;
-
-	ivpid=Decoder::parms.vpid;
-	iapid=Decoder::parms.apid;
-	if(ivpid==0xffffffff)
-		vpid="none";
-	else
-		vpid.sprintf("0x%x", ivpid);
-	if(iapid==0xffffffff)
-		apid="none";
-	else
-		apid.sprintf("0x%x", iapid);
-	tmp.sprintf("<span class=\"white\">vpid: %s</span> | <a class=\"audio\" href=\"/audio.m3u\">apid: %s</a>", vpid.c_str(), apid.c_str());
-	stats+=tmp;
-	tvc="normal";
-	radioc="normal";
-	aboutc="normal";
-	linksc="normal";
-	updatesc="normal";
-
-	if(!mode)
-		mode="tv";
-	if(mode=="tv")
-		tvc="white";
-	if(mode=="radio")
-		radioc="white";
-	if(mode=="about")
-		aboutc="white";
-	if(mode=="links")
-		linksc="white";
-	if(mode=="updates")
-		updatesc="white";
-
-	navi ="<a class=\"";
-	navi+=tvc;
-	navi+="\" href=\"/?mode=tv\">tv</a> | <a class=\"";
-	navi+=radioc;
-	navi+="\" href=\"/?mode=radio\">radio</a> | <a class=\"";
-	navi+=aboutc;
-	navi+="\" href=\"/?mode=about\">about</a> | <a class=\"";
-	navi+=linksc;
-	navi+="\" href=\"/?mode=links\">links</a> | <a class=\"";
-	navi+=updatesc;
-	navi+="\" href=\"/?mode=updates\">updates</a>";
-
-	tmp="<span class=\"titel\">"+mode+"</span>";
-	tmp.upper();
-
-	cop=getContent(mode, bouquetid);
-
-	eString eitc;
+	eString result;
 
 	EIT *eit=eDVB::getInstance()->getEIT();
 	
@@ -648,33 +545,152 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 		}
 
 		if(now_time!="") {
-			eitc+=read_file(TEMPLATE_DIR+"eit.tmp");
-			eitc.strReplace("#NOWT#", now_time);
-			eitc.strReplace("#NOWD#", now_duration);
-			eitc.strReplace("#NOWST#", now_text);
-			eitc.strReplace("#NOWLT#", filter_string(now_longtext));
-			eitc.strReplace("#NEXTT#", next_time);
-			eitc.strReplace("#NEXTD#", next_duration);
-			eitc.strReplace("#NEXTST#", next_text);
-			eitc.strReplace("#NEXTLT#", filter_string(next_longtext));
+			result=read_file(TEMPLATE_DIR+"eit.tmp");
+			result.strReplace("#NOWT#", now_time);
+			result.strReplace("#NOWD#", now_duration);
+			result.strReplace("#NOWST#", now_text);
+			result.strReplace("#NOWLT#", filter_string(now_longtext));
+			result.strReplace("#NEXTT#", next_time);
+			result.strReplace("#NEXTD#", next_duration);
+			result.strReplace("#NEXTST#", next_text);
+			result.strReplace("#NEXTLT#", filter_string(next_longtext));
 		} else {
-			eitc+"eit undefined";
+			result="eit undefined";
 		}	
 		eit->unlock();
 	}
 	else
 	{
-		eitc+="no eit";
+		result="no eit";
 	}
 
-	result.strReplace("#STATS#", stats);
-	result.strReplace("#NAVI#", navi);
-	result.strReplace("#MODE#", tmp);
-	result.strReplace("#COP#", cop);
+	return result;
+}
+
+
+static eString getStats()
+{
+	eString result;
+	eString apid, vpid;
+	eString tmp;
+	int iapid=0, ivpid=0, bootcount=0;
+
+
+	int sec=atoi(read_file("/proc/uptime").c_str());
+
+	result="<span class=\"white\">";
+	result+=eString().sprintf("%d:%02dm up", sec/3600, (sec%3600)/60);
+	result+="</span> | ";
+
+	tmp=read_file("/proc/mounts");
+	if(tmp.find("cramfs")!=eString::npos)
+	{
+		result+="<span class=\"white\">running from flash</span>";
+	}
+	else
+	{
+		result+="<span class=\"white\">running via net</span>";
+	}
+	result+=" | ";
+
+	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
+
+	result+="<span class=\"white\">"+getIP()+"</span>";
+
+	result+=" | ";
+	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
+	result+=tmp;
+
+	ivpid=Decoder::parms.vpid;
+	iapid=Decoder::parms.apid;
+	if(ivpid==0xffffffff)
+		vpid="none";
+	else
+		vpid.sprintf("0x%x", ivpid);
+	if(iapid==0xffffffff)
+		apid="none";
+	else
+		apid.sprintf("0x%x", iapid);
+	tmp.sprintf("<span class=\"white\">vpid: %s</span> | <a class=\"audio\" href=\"/audio.m3u\">apid: %s</a>", vpid.c_str(), apid.c_str());
+	result+=tmp;
+
+	return result;
+}
+
+static eString getNavi(eString mode)
+{
+	eString radioc, tvc, aboutc, linksc, updatesc;
+	eString result;
+
+	tvc="normal";
+	radioc="normal";
+	aboutc="normal";
+	linksc="normal";
+	updatesc="normal";
+
+	if(mode=="tv")
+		tvc="white";
+	if(mode=="radio")
+		radioc="white";
+	if(mode=="about")
+		aboutc="white";
+	if(mode=="links")
+		linksc="white";
+	if(mode=="updates")
+		updatesc="white";
+
+
+	result="<a class=\"";
+	result+=tvc;
+	result+="\" href=\"/?mode=tv\">tv</a> | <a class=\"";
+	result+=radioc;
+	result+="\" href=\"/?mode=radio\">radio</a> | <a class=\"";
+	result+=aboutc;
+	result+="\" href=\"/?mode=about\">about</a> | <a class=\"";
+	result+=linksc;
+	result+="\" href=\"/?mode=links\">links</a> | <a class=\"";
+	result+=updatesc;
+	result+="\" href=\"/?mode=updates\">updates</a>";
+
+	return result;
+}
+
+static eString getMode(eString mode)
+{
+	eString result;
+	mode.upper();
+	result="<span class=\"titel\">"+mode+"</span>";
+	return result;
+}
+
+static eString web_root(eString request, eString path, eString opts, eHTTPConnection *content)
+{
+	eString result;
+	QMap<eString,eString> opt=getRequestOptions(opts);
+	content->local_header["Content-Type"]="text/html";
+
+	eString mode=opt["mode"];
+	eString bid="0";
+
+	if(opt["bouquetid"])
+		bid=opt["bouquetid"];
+
+	int bouquetid=atoi(bid.c_str());
+
+	if(!mode)
+		mode="tv";
+
+	result=read_file(TEMPLATE_DIR+"index.tmp");
+
+	result.strReplace("#STATS#", getStats());
+	result.strReplace("#NAVI#", getNavi(mode));
+	result.strReplace("#MODE#", getMode(mode));
+	result.strReplace("#COP#", getContent(mode, bouquetid));
+
 	if((mode=="tv")||
            (mode=="radio"))
 	{
-		result.strReplace("#EIT#", eitc);
+		result.strReplace("#EIT#", getEITC() );
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
 		if(eDVB::getInstance()->service)
 		{
