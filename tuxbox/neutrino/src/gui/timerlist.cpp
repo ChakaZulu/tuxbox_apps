@@ -47,6 +47,7 @@
 #include <gui/color.h>
 #include <gui/eventlist.h>
 #include <gui/infoviewer.h>
+#include <gui/channellist.h>
 
 #include <gui/widget/buttons.h>
 #include <gui/widget/hintbox.h>
@@ -1026,7 +1027,21 @@ bool askUserOnTimerConflict(time_t announceTime, time_t stopTime)
 	     it != overlappingTimers.end();it++) 
 	{
 		timerbuf += CTimerList::convertTimerType2String(it->eventType);
-		timerbuf += ": ";
+		timerbuf += " (";
+		timerbuf += CTimerList::convertChannelId2String(it->channel_id); // UTF-8
+		if(it->epgID != 0)
+		{
+			CEPGData epgdata;
+			if (g_Sectionsd->getEPGid(it->epgID, it->epg_starttime, &epgdata))
+			{
+#warning fixme sectionsd should deliver data in UTF-8 format
+				timerbuf += ":";
+				timerbuf += Latin1_to_UTF8(epgdata.title);
+			}
+		}
+		timerbuf += ")";
+
+		timerbuf += ":\n";
 		char at[25] = {0};
 		struct tm *annTime = localtime(&(it->announceTime));
 		strftime(at,20,"%d.%m. %H:%M",annTime);
