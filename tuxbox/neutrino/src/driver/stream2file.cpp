@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.17 2004/11/03 10:25:25 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.18 2004/12/15 10:56:21 diemade Exp $
  * 
  * streaming to file/disc
  * 
@@ -72,7 +72,7 @@ extern "C" {
 // TS_SIZE is 188
 #define IN_SIZE		(TS_SIZE * 362)
 
-#define RINGBUFFERSIZE IN_SIZE * 20
+//#define RINGBUFFERSIZE IN_SIZE * 20
 
 /* demux buffer size */
 #define DMX_BUFFER_SIZE (256 * 1024)
@@ -98,6 +98,7 @@ static pthread_t demux_thread[MAXPIDS];
 static bool use_o_sync;
 static bool use_fdatasync;
 static unsigned long long limit;
+static unsigned int ringbuffersize;
 
 static char myfilename[512];
 
@@ -263,7 +264,7 @@ void * DMXThread(void * v_arg)
 	struct pollfd pfd = {*(int*)v_arg, POLLIN|POLLERR,0 };
 	int pres;
 
-	ringbuffer_t * ringbuf = ringbuffer_create(RINGBUFFERSIZE);
+	ringbuffer_t * ringbuf = ringbuffer_create(ringbuffersize);
 
 	filename_data.ringbuffer = ringbuf;
 
@@ -408,7 +409,8 @@ stream2file_error_msg_t start_recording(const char * const filename,
 					const unsigned long long splitsize,
 					const unsigned int numpids,
 					const unsigned short * const pids,
-					const bool write_ts)
+					const bool write_ts,
+					const unsigned int ringbuffers)
 {
 	int fd;
 	char buf[FILENAMEBUFFERSIZE];
@@ -454,6 +456,11 @@ stream2file_error_msg_t start_recording(const char * const filename,
 
 	use_o_sync    = with_o_sync;
 	use_fdatasync = with_fdatasync;
+
+	if (ringbuffers < 20)
+		ringbuffersize = IN_SIZE * 20;
+	else
+		ringbuffersize = IN_SIZE * ringbuffers;
 
 	for (unsigned int i = 0; i < numpids; i++)
 	{

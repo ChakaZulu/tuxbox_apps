@@ -384,8 +384,8 @@ infoviewer.noepg Keine EPG-Information verfügbar
 infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar.
 infoviewer.selecttime Startzeiten
 infoviewer.streaminfo Features
-infoviewer.subservice Bildregie
 infoviewer.subchan_disp_pos Unterkanalanzeige
+infoviewer.subservice Bildregie
 infoviewer.waittime Warte auf Uhrzeit...
 ipsetup.hint_1 Benutzen Sie 0..9 oder hoch/runter
 ipsetup.hint_2 OK speichert, Home bricht ab
@@ -656,6 +656,7 @@ recordingmenu.help Aufnahmegeräte:\n-----------------------\nServer:\nauf PC mi
 recordingmenu.no_scart Unterdrücke Scart-Umschaltung
 recordingmenu.off aus
 recordingmenu.recording_type Aufnahme Gerät
+recordingmenu.ringbuffers Anz. Ringpuffer
 recordingmenu.server Server
 recordingmenu.server_ip Aufnahmeserver IP
 recordingmenu.server_mac Mac Adresse

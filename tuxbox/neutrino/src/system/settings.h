@@ -165,6 +165,7 @@ struct SNeutrinoSettings
 	int  recording_use_fdatasync;
 	int  recording_stream_all_audio_pids;
 	int  recording_stream_vtxt_pid;
+	char recording_ringbuffers[10];
 
 	//streaming
 	int  streaming_type;

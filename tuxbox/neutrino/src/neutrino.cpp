@@ -652,6 +652,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_use_fdatasync         = configfile.getBool("recordingmenu.use_fdatasync"        , false);
 	g_settings.recording_stream_all_audio_pids = configfile.getBool("recordingmenu.stream_all_audio_pids", true );
 	g_settings.recording_stream_vtxt_pid       = configfile.getBool("recordingmenu.stream_vtxt_pid"      , false);
+	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recording_ringbuffers", "20").c_str() );
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
@@ -970,6 +971,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool  ("recordingmenu.use_fdatasync"        , g_settings.recording_use_fdatasync        );
 	configfile.setBool  ("recordingmenu.stream_all_audio_pids", g_settings.recording_stream_all_audio_pids);
 	configfile.setBool  ("recordingmenu.stream_vtxt_pid"      , g_settings.recording_stream_vtxt_pid      );
+	configfile.setString("recordingmenu.ringbuffers"          , g_settings.recording_ringbuffers);
 
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
@@ -2110,8 +2112,11 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
 
 	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_VTXT_PID, &g_settings.recording_stream_vtxt_pid, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+
+	CStringInput * recordingSettings_ringbuffers = new CStringInput(LOCALE_RECORDINGMENU_RINGBUFFERS, g_settings.recording_ringbuffers, 2, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
+	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_RECORDINGMENU_RINGBUFFERS, (g_settings.recording_type == RECORDING_FILE), g_settings.recording_ringbuffers,recordingSettings_ringbuffers);
 	
-	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6, oj7, oj8, oj9);
+	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6, oj7, oj8, oj9,mf9);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, RECORDINGMENU_RECORDING_TYPE_OPTIONS, RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT, true, RecordingNotifier);
 
@@ -2136,6 +2141,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_RECORDINGMENU_FILESETTINGSSEPARATOR));
 	recordingSettings.addItem( mf7);
 	recordingSettings.addItem( mf8);
+	recordingSettings.addItem( mf9);
 	recordingSettings.addItem(oj6);
 	recordingSettings.addItem(oj7);
 	recordingSettings.addItem(oj8);
@@ -2833,10 +2839,11 @@ void CNeutrinoApp::setupRecordingDevice(void)
 	}
 	else if (g_settings.recording_type == RECORDING_FILE)
 	{
-		unsigned int splitsize;
+		unsigned int splitsize, ringbuffers;
 		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
+		sscanf(g_settings.recording_ringbuffers, "%u", &ringbuffers);
 		
-		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_all_audio_pids, g_settings.recording_stream_vtxt_pid);
+		recordingdevice = new CVCRControl::CFileDevice(g_settings.recording_stopplayback, g_settings.recording_stopsectionsd, g_settings.network_nfs_recordingdir, splitsize, g_settings.recording_use_o_sync, g_settings.recording_use_fdatasync, g_settings.recording_stream_all_audio_pids, g_settings.recording_stream_vtxt_pid, ringbuffers);
 
 		CVCRControl::getInstance()->registerDevice(recordingdevice);
 	}
@@ -4327,7 +4334,6 @@ bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 	}
 	return false;
 }
-
 
 
 /**************************************************************************************

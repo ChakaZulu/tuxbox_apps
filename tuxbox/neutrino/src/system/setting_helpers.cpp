@@ -138,7 +138,7 @@ CRecordingNotifier::CRecordingNotifier(CMenuItem* i1 , CMenuItem* i2 , CMenuItem
                                        CMenuItem* i4 , CMenuItem* i5 , CMenuItem* i6 ,
                                        CMenuItem* i7 , CMenuItem* i8 , CMenuItem* i9 ,
 				       CMenuItem* i10, CMenuItem* i11, CMenuItem* i12,
-				       CMenuItem* i13)
+				       CMenuItem* i13, CMenuItem* i14)
 {
 	toDisable[ 0] = i1;
 	toDisable[ 1] = i2;
@@ -153,6 +153,7 @@ CRecordingNotifier::CRecordingNotifier(CMenuItem* i1 , CMenuItem* i2 , CMenuItem
 	toDisable[10] = i11;
 	toDisable[11] = i12;
 	toDisable[12] = i13;
+	toDisable[13] = i14;
 }
 bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 {
@@ -170,6 +171,7 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 		   toDisable[10]->setActive(true);
 		   toDisable[11]->setActive(true);
 		   toDisable[12]->setActive(true);
+		   toDisable[13]->setActive(true);
 	   }
    }
    else if (g_settings.recording_type == CNeutrinoApp::RECORDING_SERVER)
@@ -187,6 +189,7 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 	   toDisable[10]->setActive(false);
 	   toDisable[11]->setActive(false);
 	   toDisable[12]->setActive(false);
+	   toDisable[13]->setActive(false);
    }
    else if (g_settings.recording_type == CNeutrinoApp::RECORDING_VCR)
    {
@@ -203,6 +206,7 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 	   toDisable[10]->setActive(false);
 	   toDisable[11]->setActive(false);
 	   toDisable[12]->setActive(false);
+	   toDisable[13]->setActive(false);
    }
    
    return true;

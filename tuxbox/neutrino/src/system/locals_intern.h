@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.30 2004/11/29 19:04:29 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.31 2004/12/15 10:56:21 diemade Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -411,8 +411,8 @@ const char * locale_real_names[] =
 	"infoviewer.notavailable",
 	"infoviewer.selecttime",
 	"infoviewer.streaminfo",
-	"infoviewer.subservice",
 	"infoviewer.subchan_disp_pos",
+	"infoviewer.subservice",
 	"infoviewer.waittime",
 	"ipsetup.hint_1",
 	"ipsetup.hint_2",
@@ -683,6 +683,7 @@ const char * locale_real_names[] =
 	"recordingmenu.no_scart",
 	"recordingmenu.off",
 	"recordingmenu.recording_type",
+	"recordingmenu.ringbuffers",
 	"recordingmenu.server",
 	"recordingmenu.server_ip",
 	"recordingmenu.server_mac",
