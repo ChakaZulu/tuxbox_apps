@@ -2,6 +2,9 @@ menu.back naspät
 
 options.off vypnut
 options.on zapnut
+options.serial unset
+options.fb unset
+options.null unset
 
 mainmenu.head hlavne menu
 mainmenu.tvmode TV-modus
@@ -12,9 +15,9 @@ mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown vypnut dbox
 mainmenu.settings nastavenia
 mainmenu.service service menu
-mainmenu.streaming Streaming (nahravat)
-mainmenu.streaming_start start
-mainmenu.streaming_stop stop
+mainmenu.recording Streaming (nahravat)
+mainmenu.recording_start start
+mainmenu.recording_stop stop
 
 servicemenu.head service menu
 servicemenu.update aktualizovat software
@@ -39,7 +42,9 @@ mainsettings.language jazyk
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Siet
+mainsettings.recording unset
 mainsettings.colors Farby
+mainsettings.lcd unset
 mainsettings.keybinding nastavenie dial. ovladania
 mainsettings.misc ine nastavenia
 mainsettings.scan Scan settings
@@ -48,6 +53,8 @@ miscsettings.head ine nastavenia
 miscsettings.shutdown_real soft standby
 miscsettings.boxtype dbox vyrobca
 miscsettings.startneutrinodirect Neutrino priamo nastartovat
+miscsettings.general unset
+miscsettings.fb_destination unset
 
 languagesetup.head nastavenie jazyka
 languagesetup.select jazyk
@@ -58,6 +65,9 @@ audiomenu.monoright mono vpravo
 audiomenu.monoleft mono vlavo
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
+audiomenu.avs_control unset
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head Video nastavenia
 videomenu.screensetup nastavenie obrazu
@@ -81,9 +91,20 @@ networkmenu.netmask maska siete
 networkmenu.broadcast Broadcast
 networkmenu.gateway standartna gateway
 networkmenu.nameserver Nameserver
-networkmenu.usestreamserver Streamingserver pouzit
-networkmenu.streamingserver Streamingserver
-networkmenu.streamingserverport Port
+
+recordingmenu.head unset
+recordingmenu.recording_type unset
+recordingmenu.server_ip unset
+recordingmenu.server_port unset
+recordingmenu.stopplayback unset
+recordingmenu.stopsectionsd unset
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
+recordingmenu.setupnow unset
 
 ping.ok dosiahnutelny (ping)
 ping.unreachable nedosiahnutelny (unreachable)
@@ -96,6 +117,7 @@ ipsetup.hint_2 alebo hore/dole, OK zachovava, Home vracia
 colormenu.head nastavenie farby
 colormenu.statusbar ukazovatel
 colormenu.themeselect Theme vybrat
+colormenu.font unset
 colormenu.menucolors farby v menu
 colormenu.background farba pozadia
 colormenu.background_head farba pozadia
@@ -120,7 +142,6 @@ repeatblocker.hint_1 najkratsi cas (ms) medzi 2 stlaceniami tlacitka
 repeatblocker.hint_2 0 vypina blokator (cervena je " ")
 
 keybindingmenu.RC Dialkove ovladanie
-keybindingmenu.repeatblock Blokator opakovania tlacitka
 keybindingmenu.repeatblock Oddialenie opakovania
 keybindingmenu.repeatblockgeneric Zacatie oddialenia
 keybindingmenu.head Nastavenie tlacitka
@@ -135,6 +156,8 @@ keybindingmenu.pagedown nasledujuca strana
 keybindingmenu.pagedown_head nasledujuca strana
 keybindingmenu.cancel Zoznam kanalov zavriet
 keybindingmenu.cancel_head Zoznam kanalov zavriet
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup predchadzajuci kanal
 keybindingmenu.channelup_head predchadzajuci kanal
 keybindingmenu.channeldown nasledujuci kanal
@@ -156,6 +179,16 @@ colorchooser.red cerv
 colorchooser.green zelena
 colorchooser.blue modra
 colorchooser.alpha alpha
+
+lcdmenu.head unset
+lcdmenu.inverse unset
+lcdmenu.power unset
+lcdmenu.lcdcontroler unset
+
+lcdcontroler.head unset
+lcdcontroler.contrast unset
+lcdcontroler.brightness unset 
+lcdcontroler.brightnessstandby unset
 
 keychoosermenu.setnew nove tlacitko nastavit
 keychoosermenu.setnone ziadne tlacitko
@@ -259,7 +292,7 @@ scants.bouquet Bouquets
 scants.bouquet_leave nezmenit
 scants.bouquet_create nove vytvorit
 scants.bouquet_erase vymazat
-scants.bouquet.finished Hladanie kanalov uspesne ukoncene!
+scants.finished Hladanie kanalov uspesne ukoncene!
 
 flashupdate.head Aktualisierung
 flashupdate.action Aktion:
@@ -343,8 +376,11 @@ settings.noconffile No neutrino-settings found.\nUseing defaults.
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 
 cam.wrong Pozor, vasa smartcard\n nie kompatibilna s CAM_ALPHA.BIN!!!\n\nMa sa toto upozornenie opakovat?
+ucodes.failure unset
 
 stringinput.caps velke/male pismena
+
+streamingserver.noconnect unset
 
 GENRE.MOVIE.0 Film / Drama
 GENRE.MOVIE.1 Kriminalfilm/Thriller
@@ -440,6 +476,9 @@ parentallock.never nikdy
 parentallock.onstart pri starte
 parentallock.changetolocked pri uzavretych bouquetoch
 parentallock.onsignal pri vysielanom uzavreti
+parentallock.lockedsender unset
+parentallock.lockedprogram unset
+parentallock.head unset
 
 parentallock.lockage vysielania
 parentallock.lockage12 od 12 rokov uzavriet
@@ -453,6 +492,7 @@ pinprotection.wrongcode Prosim, zadajte este raz novy PIN!
 pinprotection.head PIN
 
 favorites.bouquetname My Favorites
+favorites.nobouquets unset
 favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds...
 favorites.menueadd add channel to favorites
 favorites.bqcreated Bouquet "My Favorites" has been created...\n
@@ -463,5 +503,97 @@ favorites.finalhint \nUse the bouqueteditor to modify your favorites.\n
 sleeptimerbox.title Sleeptimer
 sleeptimerbox.hint1 Shutdown time in min.
 sleeptimerbox.hint2 The dbox2 will shutdown after this time.
+sleeptimerbox.announce unset
 
-timerbar.channelswitch Timed switch
+zaptotimer.announce unset
+recordtimer.announce unset
+shutdowntimer.announce unset
+
+timerbar.channelswitch unset
+timerbar.recordevent unset
+timer.eventtimed.title unset
+timer.eventtimed.msg unset
+timer.eventrecord.title unset
+timer.eventrecord.msg unset
+timerlist.name unset
+timerlist.delete unset
+timerlist.empty unset
+timerlist.type.shutdown unset
+timerlist.type.nextprogram unset
+timerlist.type.zapto unset
+timerlist.type.standby unset
+timerlist.type.record unset
+timerlist.type.remind unset
+timerlist.type.sleeptimer unset
+timerlist.type.unknown unset
+timerlist.repeat.once unset
+timerlist.repeat.daily unset
+timerlist.repeat.weekly unset
+timerlist.repeat.biweekly unset
+timerlist.repeat.fourweekly unset
+timerlist.repeat.monthly unset
+timerlist.repeat.byeventdescription unset
+timerlist.repeat.unknown unset
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
+timerlist.program.unknown unset
+timerlist.standby.off unset
+timerlist.standby.on unset
+timerlist.alarmtime unset
+timerlist.stoptime unset
+timerlist.new unset
+timerlist.menumodify unset
+timerlist.type unset
+timerlist.repeat unset
+timerlist.save unset
+timerlist.standby unset
+timerlist.channel unset
+timerlist.menunew unset
+timerlist.reload unset
+timerlist.modify unset
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
+
+fontsize.menu unset
+fontsize.menu_title unset
+fontsize.menu_info unset
+fontsize.epg_title unset
+fontsize.epg_info1 unset
+fontsize.epg_info2 unset
+fontsize.epg_date unset
+fontsize.alert unset
+fontsize.eventlist_title unset
+fontsize.eventlist_itemlarge unset
+fontsize.eventlist_itemsmall unset
+fontsize.eventlist_datetime unset
+fontsize.channellist unset
+fontsize.channellist_descr unset
+fontsize.channellist_number unset
+fontsize.channel_num_zap unset
+fontsize.infobar_number unset
+fontsize.infobar_channame unset
+fontsize.infobar_info unset
+fontsize.infobar_small unset
+
+fontmenu.head Schriftgrössen unset
+fontmenu.channellist unset
+fontmenu.eventlist unset
+fontmenu.epg unset
+fontmenu.infobar unset
+
+colormenu.gtx_alpha unset
+gtxalpha.alpha1 tr1
+gtxalpha.alpha2 tr2
