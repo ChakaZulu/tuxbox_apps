@@ -50,6 +50,7 @@ CRemoteControl::CRemoteControl()
 	director_mode = 0;
 	current_programm_timer = 0;
 	is_video_started= true;
+	zapCount = 0;
 }
 
 int CRemoteControl::handleMsg(uint msg, uint data)
@@ -496,11 +497,15 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame, boo
 	selected_subchannel = -1;
 	needs_nvods = false;
 	director_mode = 0;
+	zapCount++;
 
 	#ifdef USEACTIONLOG
-		char buf[1000];
-		sprintf((char*) buf, "zapto: %08x \"%s\"", onid_sid, channame.c_str() );
-		g_ActionLog->println(buf);
+		if(channame!="")
+		{
+			char buf[1000];
+			sprintf((char*) buf, "zapto: %08x \"%s\"", onid_sid, channame.c_str() );
+			g_ActionLog->println(buf);
+		}
 	#endif
 
 	long long now = getcurrenttime();

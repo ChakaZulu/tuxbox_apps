@@ -109,6 +109,7 @@ class CRemoteControl
 
 		// Video / Parental-Lock
 		bool							is_video_started;
+		unsigned int					zapCount;
 
 		CRemoteControl();
 		void zapTo_onid_sid( unsigned int onid_sid, string channame, bool start_video = true );

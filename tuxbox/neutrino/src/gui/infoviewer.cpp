@@ -500,7 +500,16 @@ void CInfoViewer::showIcon_VTXT()
 
 void CInfoViewer::showFailure()
 {
-	ShowHint ( "messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430 );
+	if(g_RemoteControl->zapCount==1)
+	{
+		//böser workarround für startbug
+		printf("initial zap failed - rezap\n");
+		g_RemoteControl->zapTo_onid_sid( g_RemoteControl->current_onid_sid, "", true );
+	}
+	else
+	{
+		ShowHint ( "messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430 );
+	}
 }
 
 int CInfoViewer::handleMsg(uint msg, uint data)
