@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.85 2001/11/26 20:58:14 McClean Exp $
+        $Id: neutrino.cpp,v 1.86 2001/12/01 23:13:50 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.86  2001/12/01 23:13:50  Simplex
+  new video format option: autodetect 16:9
+
   Revision 1.85  2001/11/26 20:58:14  McClean
   *** empty log message ***
 
@@ -296,7 +299,7 @@ static void initGlobals(void)
   g_UcodeCheck = NULL;
 
   g_Locale = NULL;
-
+  g_WatchDog = NULL;
 }
 // Ende globale Variablen
 
@@ -1187,6 +1190,12 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	oj = new CMenuOptionChooser("videomenu.videoformat", &g_settings.video_Format, true, videoSetupNotifier);
 		oj->addOption(2, "videomenu.videoformat_43");
 		oj->addOption(1, "videomenu.videoformat_169");
+		oj->addOption(0, "videomenu.videoformat_autodetect");
+
+	if (g_settings.video_Format==0) // autodetect has to be initialized
+	{
+		videoSetupNotifier->changeNotify("videomenu.videoformat");
+	}
 
 	videoSettings.addItem( oj );
 }
@@ -1744,7 +1753,7 @@ int CNeutrinoApp::run(int argc, char **argv)
     g_ScreenSetup = new CScreenSetup;
     g_EventList = new EventList;
 	g_Update = new CFlashUpdate;
-
+	g_WatchDog = new CStreamWatchDog;
 
 //    printf("\nCNeutrinoApp::run - objects initialized...\n\n");
 	g_Locale->loadLocale(g_settings.language);
@@ -1988,7 +1997,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.85 2001/11/26 20:58:14 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.86 2001/12/01 23:13:50 Simplex Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
