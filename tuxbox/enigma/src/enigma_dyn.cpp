@@ -374,18 +374,27 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 						eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM500)
 			{
 				eZap::getInstance()->quit();
-				return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated...</body></html>";
+				if (requester == "webif")
+					return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated...</body></html>";
+				else
+					return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>";
 			}
 		}
 		else if (command=="reboot")
 		{
 			eZap::getInstance()->quit(4);
-			return "<html>" CHARSETMETA "<head><title>Reboot</title></head><body>Reboot initiated...</body></html>";
+			if (requester == "webif")
+				return "<html>" CHARSETMETA "<head><title>Reboot</title></head><body>Reboot initiated...</body></html>";
+			else
+				return "<html>" CHARSETMETA "<head><title>Reboot</title></head><body>Reboot initiated.</body></html>";
 		}
 		else if (command=="restart")
 		{
 			eZap::getInstance()->quit(2);
-			return "<html>" CHARSETMETA "<head><title>Restart Enigma</title></head><body>Restart initiated...</body></html>";
+			if (requester == "webif")
+				return "<html>" CHARSETMETA "<head><title>Restart Enigma</title></head><body>Restart initiated...</body></html>";
+			else
+				return "<html>" CHARSETMETA "<head><title>Restart of enigma is initiated.</title></head><body>Restart initiated</body></html>";
 		}
 		else if (command=="wakeup")
 		{
@@ -395,19 +404,25 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 				if (requester == "webif")
 					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma is waking up...</body></html>";
 				else
-					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma is waking up</body></html>";
+					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma is waking up.</body></html>";
 			}
 			if (requester == "webif")
 				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma doesn't sleep.</body></html>";
 			else
-				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma doesn't sleep</body></html>";
+				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma doesn't sleep :)</body></html>";
 		}
 		else if (command=="standby")
 		{
 			if (eZapStandby::getInstance())
-				return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>Enigma is already sleeping.</body></html>";
+				if (requester == "webif")
+					return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>Enigma is already sleeping.</body></html>";
+				else
+					return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>enigma is already sleeping</body></html>";
 			eZapMain::getInstance()->gotoStandby();
-			return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>Standby initiated...</body></html>";
+			if (requester == "webif")
+				return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>Standby initiated...</body></html>";
+			else
+				return "<html>" CHARSETMETA "<head><title>Standby</title></head><body>enigma is sleeping now</body></html>";
 		}
 	}
 	return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.(valid commands are: shutdown, reboot, restart, standby, wakeup) </body></html>";
@@ -1629,9 +1644,11 @@ public:
 		{
 			tm* t = localtime(&i);
 			result << "<td width=" << d_min * 15 << ">"
+//				<< tablePos << "<br>"
 				<< std::setfill('0')
 				<< std::setw(2) << t->tm_mday << '.'
-				<< std::setw(2) << t->tm_mon+1 << ". - "
+				<< std::setw(2) << t->tm_mon+1 << "."
+				<< "<br>"
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min << ' '
 				<< "</td>";
@@ -1679,6 +1696,11 @@ public:
 								time_t eventEnd = event.start_time + event.duration;
 								int eventDuration = 0;
 								int colWidth = 0;
+								if ((eventStart > end) || (eventEnd < tableTime))
+								{
+									eventDuration = 0;
+								}
+								else
 								if ((eventStart < tableTime) && (eventEnd > tableTime))
 								{
 									eventDuration = eventEnd - tableTime;
@@ -1699,7 +1721,7 @@ public:
 									eventDuration = event.duration;
 								}
 
-								if (eventDuration < 15 * 60)
+								if ((eventDuration > 0) && (eventDuration < 15 * 60))
 									eventDuration = 15 * 60;
 
 								if (tableTime + eventDuration > end)
@@ -1712,12 +1734,14 @@ public:
 									result << "<td width=" << colWidth << ">"
 										<< "<span class=\"epg\">";
 #if 0
-										<< tablePos << "/" << colWidth << ":"
+									result << tablePos << "/" << colWidth << ":"
 										<< std::setfill('0')
 										<< std::setw(2) << t2->tm_mday << '.'
 										<< std::setw(2) << t2->tm_mon+1 << ". - "
 										<< std::setw(2) << t2->tm_hour << ':'
 										<< std::setw(2) << t2->tm_min << ' '
+										<< "<br>"
+										<< eventDuration
 										<< "<br>";
 #endif
 #ifndef DISABLE_FILE
