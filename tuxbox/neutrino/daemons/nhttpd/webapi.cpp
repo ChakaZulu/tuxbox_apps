@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.35 2003/03/14 07:20:01 obi Exp $
+	$Id: webapi.cpp,v 1.36 2003/03/14 07:22:56 obi Exp $
 
 	License: GPL
 
@@ -623,8 +623,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			request->printf("<TD CLASS=\"%cepg\">",classname);
 			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx>",event->eventID);
 //			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
-			if ((event) && (event->description.size()) && (event->description.c_str()))
-				request->printf("%s&nbsp;%s&nbsp;", timestr, event->description.c_str()); 
+			request->printf("%s&nbsp;%s&nbsp;", timestr, event->description.c_str()); 
 
 			request->printf("<font size=-3><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>", (time(NULL) - event->startTime)/60,event->duration / 60,prozent);
 
