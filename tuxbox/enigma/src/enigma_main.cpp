@@ -74,7 +74,7 @@ QString NVODStream::getText(int col=0) const
 			if ((event->start_time <= now) && (now < endtime))
 			{
 				int perc=(now-event->start_time)*100/event->duration;
-				s+=+" ("+QString().sprintf("%d%%, %d.%02d DM lost)", perc, perc*6/100, (perc*6)%100);
+				s+=+" ("+QString().sprintf("%d%%, %d.%02d Euro lost)", perc, perc*3/100, (perc*3)%100);
 			}
 			return s;
 		}
@@ -96,7 +96,7 @@ eNVODSelector::eNVODSelector(): eWindow(0)
 {
 	setText("NVOD");
 	move(QPoint(100, 100));
-	resize(QSize(420, 380));
+	resize(QSize(440, 380));
 	list=new eListbox(this, eListbox::tLitebar, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(QPoint(0, 0));
 	list->resize(getClientSize());

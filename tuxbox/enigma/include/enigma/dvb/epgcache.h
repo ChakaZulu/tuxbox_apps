@@ -157,12 +157,12 @@ inline void eEPGCache::startEPG()
 
 inline void eEPGCache::stopEPG()
 {
+	zapTimer.stop();
 	if (isRunning)
 	{
-		qDebug("[EPGC] stop caching events");
+		abort();
 		isRunning=0;
-		timeout();
-		zapTimer.stop();
+		qDebug("[EPGC] stop caching events");
 	}
 }
 

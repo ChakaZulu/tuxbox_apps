@@ -29,6 +29,9 @@ void eEPGCache::timeUpdated()
 
 int eEPGCache::sectionRead(__u8 *data)
 {
+		if (*data >= 0x70 || *data < 0x50)
+			return 0;
+
 		eit_t *eit = (eit_t*) data;
 		int service_id=HILO(eit->service_id);
 		int original_network_id=HILO(eit->original_network_id);
@@ -40,11 +43,6 @@ int eEPGCache::sectionRead(__u8 *data)
 		sref SREF = sref(original_network_id,service_id);
 		time_t TM;
 		
-		if (*data >= 0x70)
-			return 0;
-		if (*data < 0x4E)	// < 0x50 wenn present&following geskippt werden soll
-			return 0;
-
   	updateMap::iterator It = temp.find(SREF);
 			
 		if (It == temp.end())
