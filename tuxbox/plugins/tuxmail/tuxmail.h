@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.h,v $
+ * Revision 1.7  2005/03/22 09:35:20  lazyt
+ * lcd support for daemon (LCD=Y/N, GUI should support /tmp/lcd.locked)
+ *
  * Revision 1.6  2005/02/26 10:23:48  lazyt
  * workaround for corrupt mail-db
  * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
@@ -56,10 +59,12 @@
 #include <plugin.h>
 
 #define SCKFILE "/tmp/tuxmaild.socket"
+#define LCKFILE "/tmp/lcd.locked"
 #define RUNFILE "/var/etc/.tuxmaild"
 #define CFGPATH "/var/tuxbox/config/tuxmail/"
 #define CFGFILE "tuxmail.conf"
 #define SPMFILE "spamlist"
+
 #define MAXMAIL 100
 
 //rc codes

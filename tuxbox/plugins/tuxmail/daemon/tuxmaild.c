@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.12  2005/03/22 09:35:21  lazyt
+ * lcd support for daemon (LCD=Y/N, GUI should support /tmp/lcd.locked)
+ *
  * Revision 1.11  2005/03/14 17:45:27  lazyt
  * simple base64 & quotedprintable decoding
  *
@@ -60,7 +63,7 @@ int ReadConf()
 
 	//open config
 
-		if(!(fd_conf = fopen(CFGPATH CFGFILE, "r")))
+		if(!(fd_conf = fopen(CFGPATH CFGFILE, "r+")))
 		{
 			printf("TuxMailD <generate new Config, please modify and restart Daemon>\n");
 
@@ -82,7 +85,8 @@ int ReadConf()
 			fprintf(fd_conf, "LOGMODE=S\n\n");
 			fprintf(fd_conf, "SAVEDB=Y\n\n");
 			fprintf(fd_conf, "AUDIO=Y\n");
-			fprintf(fd_conf, "VIDEO=1\n\n");
+			fprintf(fd_conf, "VIDEO=1\n");
+			fprintf(fd_conf, "LCD=Y\n\n");
 			fprintf(fd_conf, "ADMIN=Y\n\n");
 			fprintf(fd_conf, "WEBPORT=80\n");
 			fprintf(fd_conf, "WEBUSER=\n");
@@ -100,7 +104,7 @@ int ReadConf()
 	//clear database
 
 		memset(account_db, 0, sizeof(account_db));
-		startdelay = intervall = pop3log = logmode = savedb = audio = video = webport = webuser[0] = webpass[0] = 0;
+		startdelay = intervall = pop3log = logmode = savedb = audio = video = lcd = admin = webport = webuser[0] = webpass[0] = 0;
 
 	//fill database
 
@@ -119,6 +123,10 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "AUDIO="))) sscanf(ptr + 6, "%c", &audio);
 
 			else if((ptr = strstr(line_buffer, "VIDEO="))) sscanf(ptr + 6, "%d", &video);
+
+			else if((ptr = strstr(line_buffer, "LCD="))) sscanf(ptr + 4, "%c", &lcd);
+
+			else if((ptr = strstr(line_buffer, "ADMIN="))) sscanf(ptr + 6, "%c", &admin);
 
 			else if((ptr = strstr(line_buffer, "WEBPORT="))) sscanf(ptr + 8, "%d", &webport);
 			else if((ptr = strstr(line_buffer, "WEBUSER="))) sscanf(ptr + 8, "%s", &webuser[0]);
@@ -177,11 +185,11 @@ int ReadConf()
 
 	//check for update
 
-		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !webport)
+		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !lcd || !admin || !webport)
 		{
 			printf("TuxMailD <missing Param(s), update Config>\n");
 
-			fd_conf = freopen(CFGPATH CFGFILE, "w", fd_conf);
+			rewind(fd_conf);
 
 			if(!startdelay) startdelay = 30;
 			if(!intervall) intervall = 15;
@@ -190,6 +198,8 @@ int ReadConf()
 			if(!savedb) savedb = 'Y';
 			if(!audio) audio = 'Y';
 			if(!video) video = 1;
+			if(!lcd) lcd = 'Y';
+			if(!admin) admin = 'Y';
 			if(!webport) webport = 80;
 
 			fprintf(fd_conf, "STARTDELAY=%d\n", startdelay);
@@ -198,7 +208,9 @@ int ReadConf()
 			fprintf(fd_conf, "LOGMODE=%c\n\n", logmode);
 			fprintf(fd_conf, "SAVEDB=%c\n\n", savedb);
 			fprintf(fd_conf, "AUDIO=%c\n", audio);
-			fprintf(fd_conf, "VIDEO=%d\n\n", video);
+			fprintf(fd_conf, "VIDEO=%d\n", video);
+			fprintf(fd_conf, "LCD=%c\n\n", lcd);
+			fprintf(fd_conf, "ADMIN=%c\n\n", admin);
 			fprintf(fd_conf, "WEBPORT=%d\n", webport);
 			fprintf(fd_conf, "WEBUSER=%s\n", webuser);
 			fprintf(fd_conf, "WEBPASS=%s\n", webpass);
@@ -259,6 +271,18 @@ int ReadConf()
 		{
 			printf("TuxMailD <VIDEO=%d invalid, set to \"1\">\n", video);
 			video = 1;
+		}
+
+		if(lcd != 'Y' && lcd != 'N')
+		{
+			printf("TuxMailD <LCD=%c invalid, set to \"Y\">\n", lcd);
+			lcd = 'Y';
+		}
+
+		if(admin != 'Y' && admin != 'N')
+		{
+			printf("TuxMailD <ADMIN=%c invalid, set to \"Y\">\n", admin);
+			admin = 'Y';
 		}
 
 		if(webport < 1 || webport > 65535)
@@ -1018,10 +1042,87 @@ void PlaySound()
 }
 
 /******************************************************************************
+ * RenderLCDDigit
+ ******************************************************************************/
+
+void RenderLCDDigit(int digit, int sx, int sy)
+{
+	int x, y;
+
+	for(y = 0; y < 15; y++)
+	{
+		for(x = 0; x < 10; x++)
+		{
+			if(lcd_digits[digit*15*10 + x + y*10])
+			    lcd_buffer[sx + x + ((sy + y)/8)*120] |= 1 << ((sy + y)%8);
+			else
+			    lcd_buffer[sx + x + ((sy + y)/8)*120] &= ~(1 << ((sy + y)%8));
+		}
+	}
+}
+
+/******************************************************************************
+ * ShowLCD
+ ******************************************************************************/
+
+void ShowLCD(int mails)
+{
+    int fd_lcd;
+    int x, y;
+    static int sum = 0;
+
+    // mark lcd as locked
+
+	if(unlink(LCKFILE))
+	    sum = mails;
+	else
+	    sum += mails;
+
+	fclose(fopen(LCKFILE, "w"));
+
+    // clear counter area
+
+	for(y = 0; y < 15; y++)
+	    for(x = 0; x < 34; x++)
+		lcd_buffer[74 + x + ((23 + y)/8)*120] &= ~(1 << ((23 + y)%8));
+
+    // set new counter
+
+	if(sum > 99)
+	{
+    	    RenderLCDDigit(sum/100, 74, 23);
+    	    RenderLCDDigit(sum%100/10, 86, 23);
+    	    RenderLCDDigit(sum%10, 98, 23);
+	}
+	else if(sum > 9)
+	{
+    	    RenderLCDDigit(sum/10, 80, 23);
+    	    RenderLCDDigit(sum%10, 92, 23);
+	}
+	else
+    	    RenderLCDDigit(sum, 86, 23);
+
+    // copy to lcd
+
+	if((fd_lcd = open(LCD, O_RDWR)) == -1)
+	{
+	    printf("TuxMailD <could not open LCD>\n");
+
+	    lcd = 'N';
+	}
+	else
+	{
+    	    write(fd_lcd, &lcd_buffer, sizeof(lcd_buffer));
+
+	    close(fd_lcd);
+	}
+}
+
+/******************************************************************************
  * NotifyUser
  ******************************************************************************/
 
-void NotifyUser()
+void NotifyUser(int mails)
 {
 	int loop;
 	struct sockaddr_in SockAddr;
@@ -1031,9 +1132,15 @@ void NotifyUser()
 	char http_cmd3[] = "GET /control/message?nmsg=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
 	char http_cmd4[] = "GET /control/message?popup=Neue%20Nachrichten%20liegen%20auf%20dem%20Server:%0A%0A";
 
+	//lcd notify
+
+	    if(lcd == 'Y')
+		ShowLCD(mails);
+
 	//audio notify
 
-		if(audio == 'Y') PlaySound();
+		if(audio == 'Y')
+		    PlaySound();
 
 	//video notify
 
@@ -1128,7 +1235,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.11 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.12 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -1256,7 +1363,8 @@ int main(int argc, char **argv)
 					else printf("TuxMailD <Account %d skipped>\n", account);
 				}
 
-				if(mailstatus) NotifyUser();
+				if(mailstatus)
+				    NotifyUser(mailstatus);
 			}
 
 			sleep(intervall * 60);

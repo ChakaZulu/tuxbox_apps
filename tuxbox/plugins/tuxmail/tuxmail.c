@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.11  2005/03/22 09:35:20  lazyt
+ * lcd support for daemon (LCD=Y/N, GUI should support /tmp/lcd.locked)
+ *
  * Revision 1.10  2005/02/26 10:23:48  lazyt
  * workaround for corrupt mail-db
  * add ADMIN=Y/N to conf (N to disable mail deletion via plugin)
@@ -922,7 +925,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.10 $";
+	char cvs_revision[] = "$Revision: 1.11 $";
 	int loop, account, mailindex;
 	FILE *fd_run;
 	FT_Error error;
@@ -1308,6 +1311,10 @@ void plugin_exec(PluginParam *par)
 			ShowMailInfo(account, mailindex);
 
 		}while(rccode != RC_HOME);
+
+	// reset lcd lock
+
+	    unlink(LCKFILE);
 
 	//update database
 
