@@ -141,3 +141,26 @@ ucodecheck.avia500 Avia 500
 ucodecheck.avia600 Avia 600
 ucodecheck.ucode UCode
 ucodecheck.cam-alpha Cam-Alpha
+
+date.Mon  Mon
+date.Tue  Tue
+date.Wed  Wed
+date.Thu  Thu
+date.Fri  Fri
+date.Sat  Sat
+date.Sun  Sun
+
+date.Jan  Jan
+date.Feb  Feb
+date.Mar  Mar
+date.Apr  Apr
+date.May  May
+date.Jun  Jun
+date.Jul  Jul
+date.Aug  Aug
+date.Sep  Sep
+date.Oct  Oct
+date.Nov  Nov
+date.Dec  Dec
+
+

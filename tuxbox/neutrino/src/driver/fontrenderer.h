@@ -1,8 +1,13 @@
 /*
-$Id: fontrenderer.h,v 1.12 2001/09/27 11:23:50 field Exp $
+$Id: fontrenderer.h,v 1.13 2001/10/14 14:30:47 rasc Exp $
 
 
 $Log: fontrenderer.h,v $
+Revision 1.13  2001/10/14 14:30:47  rasc
+-- EventList Darstellung ueberarbeitet
+-- kleiner Aenderungen und kleinere Bugfixes
+-- locales erweitert..
+
 Revision 1.12  2001/09/27 11:23:50  field
 Numzap gefixt, kleiner Bugfixes
 
@@ -104,11 +109,17 @@ class FontsDef
                 Font 
 			*menu, 
 			*menu_title,
-            *menu_info,
+			*menu_info,
 			*epg_title, 
 			*epg_info1, // epg_info1 should be same size as info2, but italic!
 			*epg_info2, 
 			*epg_date,
+
+			*eventlist_title,
+			*eventlist_itemLarge,
+			*eventlist_datetime,
+			*eventlist_itemSmall,
+
 			*alert, 
 			*channellist,
 			*channellist_number,
@@ -117,7 +128,7 @@ class FontsDef
 			*infobar_number,
 			*infobar_channame,
 			*infobar_info,
-            *infobar_small,
+			*infobar_small,
 			
 			*fixedabr20; // fixed arial black 20
 };

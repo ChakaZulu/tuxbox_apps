@@ -1,9 +1,14 @@
 #ifndef EVENTLIST_HPP
 #define EVENTLIST_HPP
 //
-// $Id: eventlist.h,v 1.8 2001/10/04 19:28:44 fnbrd Exp $
+// $Id: eventlist.h,v 1.9 2001/10/14 14:30:47 rasc Exp $
 //
 // $Log: eventlist.h,v $
+// Revision 1.9  2001/10/14 14:30:47  rasc
+// -- EventList Darstellung ueberarbeitet
+// -- kleiner Aenderungen und kleinere Bugfixes
+// -- locales erweitert..
+//
 // Revision 1.8  2001/10/04 19:28:44  fnbrd
 // Eventlist benutzt ID bei zapit und laesst sich per rot wieder schliessen.
 //
@@ -56,7 +61,9 @@ class EventList
   private:
     struct event {
         epg_event   epg;
-        string      datetimeduration;
+        string      datetime1_str;
+        string      datetime2_str;
+        string      duration_str;
     };
 
     void removeAllEvents(void);
@@ -67,6 +74,8 @@ class EventList
     unsigned int		listmaxshow;
     unsigned int		numwidth;
     int			fheight; // Fonthoehe Channellist-Inhalt
+    int			fheight1,fheight2;
+    int			fwidth1,fwidth2;
     int			theight; // Fonthoehe Channellist-Titel
 
     int			key;

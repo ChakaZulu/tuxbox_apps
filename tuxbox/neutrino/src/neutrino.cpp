@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.61 2001/10/11 20:59:35 rasc Exp $
+        $Id: neutrino.cpp,v 1.62 2001/10/14 14:30:47 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,11 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.62  2001/10/14 14:30:47  rasc
+  -- EventList Darstellung ueberarbeitet
+  -- kleiner Aenderungen und kleinere Bugfixes
+  -- locales erweitert..
+
   Revision 1.61  2001/10/11 20:59:35  rasc
   clearbuffer() fuer RC-Input bei Start
 
@@ -694,6 +699,13 @@ void CNeutrinoApp::SetupFonts()
 
 	g_Fonts->epg_date=g_fontRenderer->getFont("Arial", "Regular", 15);
 	g_Fonts->alert=g_fontRenderer->getFont("Arial", "Regular", 100);
+
+      // -- Fonts for eventlist (why this not in Eventlist Class?)
+	g_Fonts->eventlist_title=g_fontRenderer->getFont("Arial", "Regular", 30);
+	g_Fonts->eventlist_itemLarge=g_fontRenderer->getFont("Arial", "Bold", 20);
+	g_Fonts->eventlist_itemSmall=g_fontRenderer->getFont("Arial", "Regular", 14);
+//	g_Fonts->eventlist_datetime=g_fontRenderer->getFont("Arial", "Italic", 16);
+	g_Fonts->eventlist_datetime=g_fontRenderer->getFont("Arial", "Regular", 16);
 
 	g_Fonts->channellist=g_fontRenderer->getFont("Arial", "Regular", 20);
 	g_Fonts->channellist_number=g_fontRenderer->getFont("Arial", "Regular", 14);
@@ -1517,7 +1529,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.61 2001/10/11 20:59:35 rasc Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.62 2001/10/14 14:30:47 rasc Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

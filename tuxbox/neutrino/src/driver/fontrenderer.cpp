@@ -1,4 +1,17 @@
-// misc font / text rendering functions
+/* 
+$Id: fontrenderer.cpp,v 1.12 2001/10/14 14:30:47 rasc Exp $
+
+-- misc font / text rendering functions
+
+$Log: fontrenderer.cpp,v $
+Revision 1.12  2001/10/14 14:30:47  rasc
+-- EventList Darstellung ueberarbeitet
+-- kleiner Aenderungen und kleinere Bugfixes
+-- locales erweitert..
+
+
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,7 +1,12 @@
 //
-// $Id: infoviewer.cpp,v 1.36 2001/10/10 17:17:13 field Exp $
+// $Id: infoviewer.cpp,v 1.37 2001/10/14 14:30:47 rasc Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.37  2001/10/14 14:30:47  rasc
+// -- EventList Darstellung ueberarbeitet
+// -- kleiner Aenderungen und kleinere Bugfixes
+// -- locales erweitert..
+//
 // Revision 1.36  2001/10/10 17:17:13  field
 // zappen auf onid_sid umgestellt
 //
@@ -271,7 +276,6 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
              ( ( key != CRCInput::RC_ok ) || ( CalledFromNumZap ) ) &&
              ( ( key != CRCInput::RC_home ) || ( CalledFromNumZap ) ) )
         {
-//$$$            g_RCInput->addKey2Buffer(key);
             g_RCInput->pushbackKey(key);
         };
 
