@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = gnu
 
 SUBDIRS = \
-	etherwake
+	etherwake fbshot
 
