@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.14 2003/03/01 14:58:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.15 2003/03/01 15:37:21 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -232,7 +232,6 @@ int DMX::immediate_start(void)
 	if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1)
 	{
 		perror("[sectionsd] open dmx");
-		pthread_mutex_unlock(&start_stop_mutex);
 		return 2;
 	}
 
@@ -240,14 +239,12 @@ int DMX::immediate_start(void)
 	{
 		closefd();
 		perror("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
-		pthread_mutex_unlock(&start_stop_mutex);
 		return 3;
 	}
 
 	if (!setfilter(fd, pID, filters[filter_index].filter, filters[filter_index].mask, DMX_IMMEDIATE_START | DMX_CHECK_CRC))
 	{
 		closefd();
-		pthread_mutex_unlock(&start_stop_mutex);
 		return 4;
 	}
 	return 0;
