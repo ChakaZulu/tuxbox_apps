@@ -2199,6 +2199,7 @@ eString getConfigSwapFile(void)
 	return result;
 }
 
+#if 0
 eString getConfigMultiBoot(void)
 {
 	eString result;
@@ -2219,6 +2220,7 @@ eString getConfigMultiBoot(void)
 
 	return result;
 }
+#endif
 
 eString getConfigSettings(void)
 {
@@ -2526,12 +2528,14 @@ static eString getContent(eString mode, eString path, eString opts)
 		result += getConfigSwapFile();
 	}
 	else
+#if 0
 	if (mode == "configMultiBoot")
 	{
 		result = getTitle("CONFIG: Multi-Boot");
 		result += getConfigMultiBoot();
 	}
 	else
+#endif
 	if (mode == "configSettings")
 	{
 		result = getTitle("CONFIG: Settings");
