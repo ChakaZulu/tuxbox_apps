@@ -18,7 +18,7 @@
 			<key name="9" code="09" picture="key.9" />
 			<key name="tv" code="0c" picture="key.15" />
 			<key name="power" code="0f" />
-			<key name="menu" code="20" picture="key.13" />
+			<key name="menu" code="20" picture="key.32" />
 			<key name="up" code="21" />
 			<key name="down" code="22" />
 			<key name="left" code="23" />
