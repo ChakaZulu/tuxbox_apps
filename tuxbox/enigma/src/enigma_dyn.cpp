@@ -1120,13 +1120,13 @@ static eString getRecordingStat()
 
 static eString getEITC(eString result)
 {
+	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext = "&nbsp;";
+	eString next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
+
 	EIT *eit = eDVB::getInstance()->getEIT();
 
 	if (eit)
 	{
-		eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext = "&nbsp;";
-		eString next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
-
 		int p = 0;
 
 		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
@@ -1185,7 +1185,7 @@ static eString getEITC(eString result)
 		 	}
 		}
 
-		if (now_time != "")
+		if (now_time != "&nbsp;")
 		{
 			now_longtext = filter_string(now_longtext);
 			if (now_longtext.find("&nbsp;") == 0)
@@ -1215,9 +1215,6 @@ static eString getVolBar()
 	std::stringstream result;
 	int volume = atoi(getVolume().c_str());
 
-	result << "<table id=\"volumebar\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
-		"<tr>";
-
 	for (int i = 1; i <= 10; i++)
 	{
 		result << "<td width=\"15\" height=\"8\">"
@@ -1230,16 +1227,20 @@ static eString getVolBar()
 			"</td>";
 	}
 
-	result << "<td>"
-		"<a href=\"javascript:Mute(" << eAVSwitch::getInstance()->getMute() << ")\">";
-	if (eAVSwitch::getInstance()->getMute())
-		result << "<img src=\"speak_off.gif\" border=0></a>";
-	else
-		result << "<img src=\"speak_on.gif\" border=0></a>";
-	result << "</td>"
+	return result.str();
+}
 
-		<< "</tr>"
-		<< "</table>";
+static eString getMute()
+{
+	std::stringstream result;
+
+	result << "<a href=\"javascript:Mute(" << eAVSwitch::getInstance()->getMute() << ")\">";
+	if (eAVSwitch::getInstance()->getMute())
+		result << "<img src=\"speak_off.gif\" border=0>";
+	else
+		result << "<img src=\"speak_on.gif\" border=0>";
+	result << "</a>";
+
 	return result.str();
 }
 
@@ -1264,8 +1265,6 @@ static eString getVideoBar()
 		videopos = (current * 10) / total;
 	}
 
-	result << "<table id=\"videobar\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
-		"<tr>";
 
 	for (int i = 1; i <= 10; i++)
 	{
@@ -1279,9 +1278,8 @@ static eString getVideoBar()
 			"</td>";
 	}
 
-	result << "<td>&nbsp;&nbsp;-" << min << ":" << sec << "</td>"
-		"</tr>"
-		"</table>";
+	result << "<td>&nbsp;&nbsp;-" << min << ":" << sec << "</td>";
+
 	return result.str();
 }
 
@@ -2384,6 +2382,7 @@ static eString getEITC2(eString result)
 	result.strReplace("#NEXTD#", next_duration);
 	result.strReplace("#NEXTST#", next_text);
 	result.strReplace("#VOLBAR#", getVolBar());
+	result.strReplace("#MUTE#", getMute());
 	result.strReplace("#SERVICENAME#", getCurService());
 	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
@@ -2696,6 +2695,7 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
+	eString description, ext_description;
 	result << std::setfill('0');
 
 	eService* current;
@@ -2706,7 +2706,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
-		return "sapi is not available.";
+		return "No EPG available";
 
 	eServiceReference ref = (serviceRef == "undefined") ? sapi->service : string2ref(serviceRef);
 
@@ -2715,61 +2715,74 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 
 	if (!current)
-		return "EPG is not yet ready.";
+		return "No EPG available";
 
 	eEPGCache::getInstance()->Lock();
 	const timeMap* evt = eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref);
 
 	if (!evt)
-		result << "EPG is not yet available.";
+		return "No EPG available";
 	else
 	{
 		timeMap::const_iterator It;
 
 		for(It=evt->begin(); It!= evt->end(); It++)
 		{
+			ext_description = "";
 			EITEvent event(*It->second);
 			for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 			{
-				Descriptor *descriptor=*d;
+				Descriptor *descriptor = *d;
+				if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
+				{
+					ext_description += ((ExtendedEventDescriptor*)descriptor)->text;
+				}
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
-					tm* t = localtime(&event.start_time);
-					result << "<tr valign=\"middle\">";
-#ifndef DISABLE_FILE
-					result << "<td>"
-						<< "<a href=\"javascript:record('"
-						<< "ref=" << ref2string(ref)
-						<< "&ID=" << std::hex << event.event_id << std::dec
-						<< "&start=" << event.start_time
-						<< "&duration=" << event.duration
-						<< "&descr=" << ((ShortEventDescriptor*)descriptor)->event_name
-						<< "&channel=" << filter_string(current->service_name)
-						<< "')\"><img src=\"timer.gif\" border=0></a>"
-						<< "</td>";
-#endif
-					result << "<td>"
-						<< std::setw(2) << t->tm_mday << '.'
-						<< std::setw(2) << t->tm_mon+1 << ". - "
-						<< std::setw(2) << t->tm_hour << ':'
-						<< std::setw(2) << t->tm_min << ' '
-						<< "<a href=\"javascript:EPGDetails('"
-						<< "ref=" << ref2string(ref)
-						<< "&ID=" << std::hex << event.event_id << std::dec
-						<< "')\">"
-						<< ((ShortEventDescriptor*)descriptor)->event_name
-						<< "</a>"
-						<< "</td>"
-						<< "</tr>\n";				}
+					description = ((ShortEventDescriptor*)descriptor)->event_name;
+				}
 			}
+
+			tm* t = localtime(&event.start_time);
+			result << "<tr valign=\"middle\">"
+				<< "<td>"
+				<< "<span class=\"time\">"
+				<< std::setw(2) << t->tm_mday << '.'
+				<< std::setw(2) << t->tm_mon+1 << ". - "
+				<< std::setw(2) << t->tm_hour << ':'
+				<< std::setw(2) << t->tm_min << ' '
+				<< "</span>"
+				<< "</td>";
+#ifndef DISABLE_FILE
+			result << "<td>"
+				<< "<a href=\"javascript:record('"
+				<< "ref=" << ref2string(ref)
+				<< "&ID=" << std::hex << event.event_id << std::dec
+				<< "&start=" << event.start_time
+				<< "&duration=" << event.duration
+				<< "&descr=" << filter_string(description)
+				<< "&channel=" << filter_string(current->service_name)
+				<< "')\"><img src=\"timer.gif\" border=0></a>"
+				<< "</td>";
+#endif
+			result << "<td>"
+				<< "<span class=\"event\">"
+				<< filter_string(description)
+				<< "</span>"
+				<< "<br>"
+				<< "<span class=\"description\">"
+				<< filter_string(ext_description)
+				<< "</span>"
+				<< "</td>"
+				<< "</tr>\n";
 		}
 	}
 	eEPGCache::getInstance()->Unlock();
 
-	eString tmp2 = readFile(TEMPLATE_DIR + "epg.tmp");
-	tmp2.strReplace("#CHANNEL#", filter_string(current->service_name));
-	tmp2.strReplace("#BODY#", result.str());
-	return tmp2;
+	eString tmp = readFile(TEMPLATE_DIR + "epg.tmp");
+	tmp.strReplace("#CHANNEL#", filter_string(current->service_name));
+	tmp.strReplace("#BODY#", result.str());
+	return tmp;
 }
 
 static eString getstreaminfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -3667,8 +3680,8 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
-	int duration = eventEndTime - eventStartTime;
 #if 0
+	int duration = eventEndTime - eventStartTime;
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
 	// printf("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d\n", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
