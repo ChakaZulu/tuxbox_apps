@@ -10,13 +10,15 @@ class eServerSocket: public eSocket
 		eSocket *socket;
 
 		eServerSocket(int port);
-		~eServerSocket();
+		virtual ~eServerSocket();
 		bool ok();
-		
-	private:
-		int okflag;
-		void incomingConnection(int handle);
 
+	protected:
+		virtual void newConnection(int socket)=0;
+
+	private:
+		void incomingConnection(int handle);		
+		int okflag;
 };
 
 #endif /* __serversocket_h */

@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include "eerror.h"
 
+int strnicmp(const char*, const char*, int);
+
 class eString : public std::string
 {
 public:

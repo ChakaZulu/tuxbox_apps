@@ -6,13 +6,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-
 #include <fcntl.h>
 
 #include <core/base/ebase.h>
 #include <core/base/eerror.h>
-#include <sigc++/signal_system.h>
 #include <core/base/estring.h>
+#include <include/libsig_comp.h>
+
 
 class eSocket: public Object
 {

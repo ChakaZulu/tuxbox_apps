@@ -1,9 +1,5 @@
 #include "serversocket.h"
 
-#include "httpd.h"
-
-eHTTPD *eHTTPD::instance;
-
 bool eServerSocket::ok()
 {
 	return okflag;
@@ -24,7 +20,8 @@ void eServerSocket::incomingConnection(int handle)
 			(socklen_t*)&clientlen);
 	if(clientfd<0)
 		eDebug("[SERVERSOCKET] error on accept()");
-	eHTTPD::getInstance()->newConnection(clientfd);
+
+	newConnection(clientfd);
 }
 
 eServerSocket::eServerSocket(int port)

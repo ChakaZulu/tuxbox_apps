@@ -123,14 +123,11 @@ class eHTTPD: public eServerSocket
 	ePtrList<eHTTPPathResolver> resolver;
 private:// slots:
 	void oneConnectionClosed();
-	static eHTTPD *instance;
 	eHTTPConnection *conn;
 	
 public:
 	eHTTPD(int port);
 	void newConnection(int socket);
-
-	static eHTTPD *getInstance() { return instance; }
 
 	void addResolver(eHTTPPathResolver *r) { resolver.push_back(r); }
 	void removeResolver(eHTTPPathResolver *r) { resolver.remove(r); }

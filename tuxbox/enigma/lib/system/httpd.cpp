@@ -545,7 +545,6 @@ void eHTTPConnection::gotError(int)
 
 eHTTPD::eHTTPD(int port): eServerSocket(port)
 {
-	instance=this;
 	new eHTTPGarbage;
 	if (!ok())
 		eDebug("[NET] httpd server FAILED on port %d", port);
