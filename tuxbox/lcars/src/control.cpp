@@ -725,6 +725,92 @@ int control::runCommand(command_class command, bool val)
 					system("rm /var/etc/.lcars");
 				}
 			}
+			else if (command.args[0] == "IP")
+			{
+				osd_obj->createIP();
+				if (command.args[1] == "BoxIP")
+				{
+					osd_obj->setIPn(0, settings_obj->getIP(0));
+					osd_obj->setIPn(1, settings_obj->getIP(1));
+					osd_obj->setIPn(2, settings_obj->getIP(2));
+					osd_obj->setIPn(3, settings_obj->getIP(3));
+					osd_obj->setIPDescription("Please enter IP-address!");
+				}
+				else if (command.args[1] == "ServerIP")
+				{
+					osd_obj->setIPn(0, settings_obj->getserverIP(0));
+					osd_obj->setIPn(1, settings_obj->getserverIP(1));
+					osd_obj->setIPn(2, settings_obj->getserverIP(2));
+					osd_obj->setIPn(3, settings_obj->getserverIP(3));
+					osd_obj->setIPDescription("Please enter LCARS-Server IP-address!");
+				}
+				else if (command.args[1] == "GatewayIP")
+				{
+					osd_obj->setIPn(0, settings_obj->getgwIP(0));
+					osd_obj->setIPn(1, settings_obj->getgwIP(1));
+					osd_obj->setIPn(2, settings_obj->getgwIP(2));
+					osd_obj->setIPn(3, settings_obj->getgwIP(3));
+					osd_obj->setIPDescription("Please enter gateway's IP-address!");
+				}
+				else if (command.args[1] == "DNSIP")
+				{
+					osd_obj->setIPn(0, settings_obj->getdnsIP(0));
+					osd_obj->setIPn(1, settings_obj->getdnsIP(1));
+					osd_obj->setIPn(2, settings_obj->getdnsIP(2));
+					osd_obj->setIPn(3, settings_obj->getdnsIP(3));				
+					osd_obj->setIPDescription("Please enter DNS-IP-address!");
+				}
+				osd_obj->addCommand("SHOW ip");
+				osd_obj->addCommand("COMMAND ip position 0");
+				
+				unsigned short key = 0;
+				int number = 0;
+				do
+				{
+					key = rc_obj->read_from_rc();
+					number = rc_obj->get_number();
+
+					if (number != -1)
+					{
+						osd_obj->setIP(number);
+						osd_obj->setIPNextPosition();
+					}
+					else if (key == RC_RIGHT)
+					{
+						osd_obj->setIPNextPosition();
+					}
+					else if (key == RC_LEFT)
+					{
+						osd_obj->setIPPrevPosition();
+					}
+				} while ( key != RC_OK && key != RC_HOME);
+				
+				if (key == RC_OK)
+				{
+					if (command.args[1] == "BoxIP")
+					{
+						settings_obj->setIP(osd_obj->getIPPart(0), osd_obj->getIPPart(1), osd_obj->getIPPart(2), osd_obj->getIPPart(3));
+					}
+					else if (command.args[1] == "ServerIP")
+					{
+						settings_obj->setserverIP(osd_obj->getIPPart(0), osd_obj->getIPPart(1), osd_obj->getIPPart(2), osd_obj->getIPPart(3));
+						update_obj->ip[0] = osd_obj->getIPPart(0);
+						update_obj->ip[1] = osd_obj->getIPPart(1);
+						update_obj->ip[2] = osd_obj->getIPPart(2);
+						update_obj->ip[3] = osd_obj->getIPPart(3);
+					}
+					if (command.args[1] == "GatewayIP")
+					{
+						settings_obj->setgwIP(osd_obj->getIPPart(0), osd_obj->getIPPart(1), osd_obj->getIPPart(2), osd_obj->getIPPart(3));					
+					}
+					if (command.args[1] == "DNSIP")
+					{
+						settings_obj->setdnsIP(osd_obj->getIPPart(0), osd_obj->getIPPart(1), osd_obj->getIPPart(2), osd_obj->getIPPart(3));
+						
+					}
+				}
+				osd_obj->addCommand("HIDE ip");
+			} // IP
 		}
 		else if (command.command == C_Var)
 		{

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.12  2003/01/05 21:37:07  TheDOC
+setting ips is now possible
+
 Revision 1.11  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -235,7 +238,7 @@ void settings::setIP(char n1, char n2, char n3, char n4)
 	std::stringstream ostr;
 	ostr << "ifconfig eth0 " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << " &" << std::ends;
 	std::string command = ostr.str();
-	//std::cout << command << std::endl;
+	std::cout << command << std::endl;
 
 	setting.ip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
 
@@ -283,7 +286,7 @@ void settings::setgwIP(char n1, char n2, char n3, char n4)
 	std::stringstream ostr;
 	ostr << "route add default gw " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << std::ends;
 	std::string command = ostr.str();
-	//std::cout << command << std::endl;
+	std::cout << command << std::endl;
 	system(command.c_str());
 
 	setting.gwip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
@@ -299,7 +302,7 @@ void settings::setdnsIP(char n1, char n2, char n3, char n4)
 	std::stringstream ostr;
 	ostr << "echo \"nameserver " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << "\" > /etc/resolv.conf" << std::ends;
 	std::string command = ostr.str();
-	//std::cout << command << std::endl;
+	std::cout << command << std::endl;
 	system(command.c_str());
 
 	setting.dnsip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
