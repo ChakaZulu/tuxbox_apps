@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.9 2003/05/11 09:50:55 digi_casi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/settings.h,v 1.10 2003/05/11 11:52:50 digi_casi Exp $
  *
  * zapit's settings - d-box2 linux project
  *
@@ -48,6 +48,7 @@
 #define FRONTEND_DEVICE "/dev/dvb/adapter0/frontend0"
 #define VIDEO_DEVICE    "/dev/dvb/adapter0/video0"
 
+#define SEC_DEVICE      "/dev/dvb/card0/sec0" //for compatibility with rel_alexW
 
 #define CAMD_UDS_NAME  "/tmp/camd.socket"
 
