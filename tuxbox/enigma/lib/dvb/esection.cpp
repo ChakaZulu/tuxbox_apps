@@ -22,6 +22,7 @@ QList<eSection> eSection::active;
 eSection::eSection(int pid, int tableid, int tableidext, int version, int flags, int tableidmask): pid(pid), tableid(tableid), tableidext(tableidext), tableidmask(tableidmask), flags(flags), version(version)
 {
 	handle=-1;
+	printf("%x init\n", this);
 	notifier=0;
 	section=0;
 	lockcount=0;
@@ -60,6 +61,7 @@ void eSection::closeFilter()
 {
 	if (handle>=0)
 	{
+		printf("%x close\n", this);
 		delete notifier;
 		notifier=0;
 		timer->stop();
@@ -75,54 +77,69 @@ int crc32(void *, int len)
 
 void eSection::data(int socket)
 {
-	if (lockcount)
-		qFatal("eSection::data on locked section!");
-	timer->start(10000, true);
-#ifdef DBOX
-	if (read(handle, buf, 3)<0)
+	if (handle==-1)
 	{
-		perror("read section");
-	}
-	int seclen=0;
-	seclen |= ((buf[1] & 0x0F) << 8);
-	seclen |= (buf[2] & 0xFF);
-	read(handle, buf+3, seclen);
-	seclen+=3;
-	if (crc32((char*)buf, seclen))
-	{
-		printf("CRC check failed!\n");
+		qDebug("spourious dataReady");
 		return;
 	}
-#else
-	if (read(handle, buf, 16384)<0)
+	while (1)
 	{
-		perror("read section");
-	}
-#endif
-	maxsec=buf[7];
-	
-	// printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
-
-	version=buf[5];
-
-	if ((!(flags&SECREAD_INORDER)) || (section==buf[6]))
-	{
-		int err;
-		if ((err=sectionRead(buf)))
+		if (lockcount)
+			qFatal("eSection::data on locked section!");
+		timer->start(10000, true);
+		int e;
+#ifdef DBOX
+		if (read(handle, buf, 3)<0)
 		{
-			if (err>0)
-				err=0;
-			closeFilter();
-			sectionFinish(err);
+			if (errno==EAGAIN)
+				break;
+			perror("read section");
+			break;
+		}
+		int seclen=0;
+		seclen |= ((buf[1] & 0x0F) << 8);
+		seclen |= (buf[2] & 0xFF);
+		read(handle, buf+3, seclen);
+		seclen+=3;
+		if (crc32((char*)buf, seclen))
+		{
+			printf("CRC check failed!\n");
 			return;
 		}
-		section=buf[6]+1;
-	}
+#else
+		if (read(handle, buf, 16384)<0)
+		{
+			if (errno==EAGAIN)
+				break;
+			perror("read section");
+			break;
+		}
+#endif
+		maxsec=buf[7];
+	
+		// printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
 
-	if ((section>maxsec) && (flags&SECREAD_INORDER))		// last section?
-	{
-		closeFilter();										// stop feeding
-		sectionFinish(0);
+		version=buf[5];
+
+		if ((!(flags&SECREAD_INORDER)) || (section==buf[6]))
+		{
+			int err;
+			if ((err=sectionRead(buf)))
+			{
+				if (err>0)
+					err=0;
+				closeFilter();
+				sectionFinish(err);
+				return;
+			}
+			section=buf[6]+1;
+		}
+
+		if ((section>maxsec) && (flags&SECREAD_INORDER))		// last section?
+		{
+			closeFilter();										// stop feeding
+			sectionFinish(0);
+		}
 	}
 }
 
@@ -160,10 +177,12 @@ int eSection::setFilter(int pid, __u8 *data, __u8 *mask, int len)
 #endif
 
 	closeFilter();
-	handle=open(DEMUX, O_RDWR);
+	handle=open(DEMUX, O_RDWR|O_NONBLOCK);
+	printf("%x open %d\n", this, handle);
 	if (handle<0)
 	{
 		perror(DEMUX);
+		qFatal("DEMUX OPEN FAILED");
 		return -errno;
 	}
 	notifier=new QSocketNotifier(handle, QSocketNotifier::Read);
@@ -184,6 +203,14 @@ int eSection::setFilter(int pid, __u8 *data, __u8 *mask, int len)
 		secFilterParams.filter.filter[i]=i<len?data[i]:0;
 		secFilterParams.filter.mask[i]=i<len?mask[i]:0;
 	}
+
+	printf("%02x: ", pid);
+	for (int i=0; i<DMX_FILTER_SIZE; i++)
+		printf("%02x ", secFilterParams.filter.filter[i]);
+	printf("\n    ");
+	for (int i=0; i<DMX_FILTER_SIZE; i++)
+		printf("%02x ", secFilterParams.filter.mask[i]);
+	printf("\n");
 
 	if (ioctl(handle, DMX_SET_FILTER, &secFilterParams) < 0)
 	{
