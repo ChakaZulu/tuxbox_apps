@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.152 2003/02/06 16:42:04 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.153 2003/02/17 19:15:14 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1147,7 +1147,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.152 2003/02/06 16:42:04 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.153 2003/02/17 19:15:14 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2709,7 +2709,7 @@ static void *sdtThread(void *)
 
 	try
 	{
-		dprintf("sdt-thread started.\n");
+		dprintf("[%sThread] pid %d start\n", "sdt", getpid());
 
 		int timeoutsDMX = 0;
 		dmxSDT.start(); // -> unlock
@@ -3068,7 +3068,7 @@ static void *timeThread(void *)
 
 	try
 	{
-		dprintf("time-thread started.\n");
+		dprintf("[%sThread] pid %d start\n", "time", getpid());
 
 		do
 		{
@@ -3282,7 +3282,7 @@ static void *eitThread(void *)
 
 	try
 	{
-		dputs("[eitThread] start");
+		dprintf("[%sThread] pid %d start\n", "eit", getpid());
 		int timeoutsDMX = 0;
 		time_t lastRestarted = time(NULL);
 		dmxEIT.start(); // -> unlock
@@ -3761,7 +3761,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.152 2003/02/06 16:42:04 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.153 2003/02/17 19:15:14 thegoodguy Exp $\n");
 
 	try
 	{
