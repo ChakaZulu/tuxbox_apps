@@ -140,7 +140,7 @@ int CTimerList::show()
 	{
 		if(update)
 		{
-			hide();
+//			hide();
 			updateEvents();
 			update=false;
 			if(timerlist.size()==0)
@@ -205,22 +205,6 @@ int CTimerList::show()
 		else if(msg==CRCInput::RC_red)
 		{
 			Timer->removeTimerEvent(timerlist[selected].eventID);
-			CProgressWindow *progress = new CProgressWindow();
-			progress->setTitle ("timerlist.deleting");
-			progress->exec(this, "");
-			progress->showGlobalStatus(0);
-			progress->showLocalStatus(0);
-			sleep(1);
-			progress->showGlobalStatus(33);
-			progress->showLocalStatus(33);
-			sleep(1);
-			progress->showGlobalStatus(66);
-			progress->showLocalStatus(66);
-			sleep(1);
-			progress->showGlobalStatus(100);
-			progress->showLocalStatus(100);
-			progress->hide();
-			delete progress;
 			update=true;
 		}
 		else if((msg==CRCInput::RC_green) ||
