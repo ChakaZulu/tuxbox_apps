@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.208 2002/03/29 00:49:25 flfs Exp $
+        $Id: neutrino.cpp,v 1.209 2002/03/30 13:25:55 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1798,6 +1798,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if ( ( msg == messages::EVT_BOUQUETSCHANGED ) ||
 			  ( msg == messages::EVT_SERVICESCHANGED ) )
 	{
+		channelsInit();
 		tvMode( true );
 
 		// auf der sicheren Seite...
@@ -2206,7 +2207,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.208 2002/03/29 00:49:25 flfs Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.209 2002/03/30 13:25:55 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 
