@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.149 2002/04/20 20:55:59 McClean Exp $
+ * $Id: zapit.cpp,v 1.150 2002/04/20 21:22:05 Simplex Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -269,7 +269,7 @@ int save_settings (bool write)
 		CBouquetManager::radioChannelIterator cit = g_BouquetMan->radioChannelsFind(channel->getOnidSid());
 		if (cit != g_BouquetMan->radioChannelsEnd())
 		{
-			config->setInt("lastChannel", (*cit)->getChannelNumber());
+			config->setInt("lastChannelRadio", (*cit)->getChannelNumber());
 			config->setInt("lastChannelMode", 1);
 		}
 	}
@@ -278,7 +278,7 @@ int save_settings (bool write)
 		CBouquetManager::tvChannelIterator cit = g_BouquetMan->tvChannelsFind(channel->getOnidSid());
 		if (cit != g_BouquetMan->tvChannelsEnd())
 		{
-			config->setInt("lastChannel", (*cit)->getChannelNumber());
+			config->setInt("lastChannelTV", (*cit)->getChannelNumber());
 			config->setInt("lastChannelMode", 0);
 		}
 	}
@@ -294,7 +294,7 @@ int save_settings (bool write)
 channel_msg load_settings()
 {
 	channel_msg output_msg;
-
+	string valueName;
 	if (config->getInt("lastChannelMode"))
 	{
 		output_msg.mode = 'r';
@@ -303,8 +303,8 @@ channel_msg load_settings()
 	{
 		output_msg.mode = 't';
 	}
-
-	output_msg.chan_nr = config->getInt("lastChannel");
+	valueName = Radiomode_on ? "lastChannelRadio" : "lastChannelTV";
+	output_msg.chan_nr = config->getInt( valueName, 1);
 
 	return output_msg;
 }
@@ -1919,7 +1919,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.149 2002/04/20 20:55:59 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.150 2002/04/20 21:22:05 Simplex Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2432,7 +2432,7 @@ unsigned zapTo (unsigned int bouquet, unsigned int channel)
 	if (currentMode & RADIO_MODE)
 	{
 		channels = g_BouquetMan->Bouquets[bouquet - 1]->radioChannels;
-	} 
+	}
 	else
 	{
 		channels = g_BouquetMan->Bouquets[bouquet - 1]->tvChannels;
