@@ -217,8 +217,8 @@ eZap::eZap(int argc, char **argv)
 
 #ifdef ENABLE_DYN_CONF
 #ifndef DISABLE_FILE
-	extern void initHDDSettings(void);
-	initHDDSettings();
+	extern void initHDDparms(void);
+	initHDDparms();
 
 	int swapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
