@@ -253,33 +253,36 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		//
 		else if (msg==CRCInput::RC_up || msg==(neutrino_msg_t)g_settings.key_channelList_pageup)
 		{
-			int step = 0;
-			int prev_selected = selected;
+			if (!(Bouquets.empty()))
+			{
+				int step = 0;
+				int prev_selected = selected;
 
-			step = (msg == (neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
-			selected -= step;
-			if((prev_selected-step) < 0)		// because of uint
-			{
-				selected = Bouquets.size()-1;
-			}
+				step = (msg == (neutrino_msg_t)g_settings.key_channelList_pageup) ? listmaxshow : 1;  // browse or step 1
+				selected -= step;
+				if((prev_selected-step) < 0)		// because of uint
+				{
+					selected = Bouquets.size()-1;
+				}
 
-			if (state == beDefault)
-			{
-				paintItem(prev_selected - liststart);
-				unsigned int oldliststart = liststart;
-				liststart = (selected/listmaxshow)*listmaxshow;
-				if(oldliststart!=liststart)
+				if (state == beDefault)
 				{
-					paint();
+					paintItem(prev_selected - liststart);
+					unsigned int oldliststart = liststart;
+					liststart = (selected/listmaxshow)*listmaxshow;
+					if(oldliststart!=liststart)
+					{
+						paint();
+					}
+					else
+					{
+						paintItem(selected - liststart);
+					}
 				}
-				else
+				else if (state == beMoving)
 				{
-					paintItem(selected - liststart);
+					internalMoveBouquet(prev_selected, selected);
 				}
-			}
-			else if (state == beMoving)
-			{
-				internalMoveBouquet(prev_selected, selected);
 			}
 		}
 		else if (msg==CRCInput::RC_down || msg==(neutrino_msg_t)g_settings.key_channelList_pagedown)
@@ -327,25 +330,31 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		}
 		else if(msg==CRCInput::RC_yellow)
 		{
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if (state == beDefault)
-				beginMoveBouquet();
-			paintItem(selected - liststart);
+			if (selected < Bouquets.size()) /* Bouquets.size() might be 0 */
+			{
+				liststart = (selected/listmaxshow)*listmaxshow;
+				if (state == beDefault)
+					beginMoveBouquet();
+				paintItem(selected - liststart);
+			}
 		}
 		else if(msg==CRCInput::RC_blue)
 		{
-			if (state == beDefault)
-			switch (blueFunction)
+			if (selected < Bouquets.size()) /* Bouquets.size() might be 0 */
 			{
-				case beRename:
-					renameBouquet();
-				break;
-				case beHide:
-					switchHideBouquet();
-				break;
-				case beLock:
-					switchLockBouquet();
-				break;
+				if (state == beDefault)
+					switch (blueFunction)
+					{
+					case beRename:
+						renameBouquet();
+						break;
+					case beHide:
+						switchHideBouquet();
+						break;
+					case beLock:
+						switchLockBouquet();
+						break;
+					}
 			}
 		}
 		else if(msg==CRCInput::RC_setup)
@@ -369,14 +378,17 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 		{
 			if (state == beDefault)
 			{
-				CBEChannelWidget* channelWidget = new CBEChannelWidget( Bouquets[ selected].name, selected);
-				channelWidget->exec( this, "");
-				if (channelWidget->hasChanged())
-					bouquetsChanged = true;
-				delete channelWidget;
-				paintHead();
-				paint();
-				paintFoot();
+				if (selected < Bouquets.size()) /* Bouquets.size() might be 0 */
+				{
+					CBEChannelWidget* channelWidget = new CBEChannelWidget(Bouquets[selected].name, selected);
+					channelWidget->exec( this, "");
+					if (channelWidget->hasChanged())
+						bouquetsChanged = true;
+					delete channelWidget;
+					paintHead();
+					paint();
+					paintFoot();
+				}
 			}
 			else if (state == beMoving)
 			{
@@ -409,11 +421,14 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 
 void CBEBouquetWidget::deleteBouquet()
 {
+	if (selected >= Bouquets.size()) /* Bouquets.size() might be 0 */
+		return;
+
 	g_Zapit->deleteBouquet(selected);
 	Bouquets.clear();
 	g_Zapit->getBouquets(Bouquets, true);
 	if (selected >= Bouquets.size())
-		selected--;
+		selected = Bouquets.empty() ? 0 : (Bouquets.size() - 1);
 	bouquetsChanged = true;
 	paint();
 }
@@ -426,7 +441,7 @@ void CBEBouquetWidget::addBouquet()
 		g_Zapit->addBouquet(ZapitTools::Latin1_to_UTF8(newName.c_str()).c_str());
 		Bouquets.clear();
 		g_Zapit->getBouquets(Bouquets, true);
-		selected = Bouquets.size() - 1;
+		selected = Bouquets.empty() ? 0 : (Bouquets.size() - 1);
 		bouquetsChanged = true;
 	}
 	paintHead();
