@@ -15,7 +15,7 @@
 #define CMD_MAXLEN 1024
 #define VERSION "0.1a"
 
-void help(char addr) {
+void help(char addr, int speed) {
   printf("commands:
 address [any|polar|elevation]    DiSEqC device to address (30/31/32)
                                  current address: %02X
@@ -35,12 +35,16 @@ store <value>                    store position <value>
 goto <value>                     goto position <value>
 drive <value>(.<value>)          drive to angular position
 recalc (<value> (<value>))       recalculate satellite positions
+speed <value>                    motor speed (1-4) (current: %d)
 exit                             leave
-\n",addr);
+\n",addr,speed);
 }
 
 int main(int argc, char **argv) {
-  int device,count,foo;
+  int device,count,speed;
+  char foo;
+  secVoltage volt;
+  struct secStatus state;
   struct secCmdSequence seq;
   struct secCommand cmd;
   struct secDiseqcCmd diseqc;
@@ -59,12 +63,43 @@ int main(int argc, char **argv) {
   seq.numCommands=1;
   seq.miniCommand=SEC_MINI_NONE;
 
+  ioctl(device,SEC_GET_STATUS,&state);
+  if ((state.selVolt == SEC_VOLTAGE_OFF) || (state.selVolt == SEC_VOLTAGE_LT)) {
+    volt=SEC_VOLTAGE_13;
+    ioctl(device,SEC_SET_VOLTAGE,volt);
+    ioctl(device,SEC_GET_STATUS,&state);
+    if ((state.selVolt == SEC_VOLTAGE_OFF) || (state.selVolt == SEC_VOLTAGE_LT)) {
+      printf("Couldn't set bus power\n");
+      exit(1);
+    }
+  }
+  
+  if (state.selVolt == SEC_VOLTAGE_13) speed=1;
+  else if (state.selVolt == SEC_VOLTAGE_13_5) speed=2;
+  else if (state.selVolt == SEC_VOLTAGE_18) speed=3;
+  else if (state.selVolt == SEC_VOLTAGE_18_5) speed=4;
+
   while((strcmp(command,"quit") != 0) && (strcmp(command,"exit") != 0)) {
     
-    diseqc.cmd=0;
+    diseqc.cmd=0; 
 
-    if (strcmp(command,"help") == 0)
-      help(diseqc.addr);
+    if (strcmp(command,"help") == 0) {
+      ioctl(device,SEC_GET_STATUS,&state);
+    if ((state.selVolt == SEC_VOLTAGE_OFF) || (state.selVolt == SEC_VOLTAGE_LT)) {
+      volt=SEC_VOLTAGE_13;
+      ioctl(device,SEC_SET_VOLTAGE,volt);
+      ioctl(device,SEC_GET_STATUS,&state);
+      if ((state.selVolt == SEC_VOLTAGE_OFF) || (state.selVolt == SEC_VOLTAGE_LT)) {
+	printf("Couldn't set bus power\n");
+	exit(1);
+      }
+    }
+    else if (volt == SEC_VOLTAGE_13) speed=1;
+    else if (volt == SEC_VOLTAGE_13_5) speed=2;
+    else if (volt == SEC_VOLTAGE_18) speed=3;
+    else if (volt == SEC_VOLTAGE_18_5) speed=4;
+    help(diseqc.addr,speed);
+    }
     else if(strncmp(command,"address",7) == 0) {
       for(count=7;(count<strlen(command))&&(command[count]==0x20);count++) {}
       if(strcmp(&command[count],"any") == 0)
@@ -126,7 +161,7 @@ int main(int argc, char **argv) {
       diseqc.cmd=0x6F;
     }
     else if(strncmp(command,"east",4) == 0) {
-      for(count=4;(command[count]>=0x30)&&(command[count]<=0x39)&&(count<strlen(command));count++) {}
+      for(count=4;(command[count]==0x20)&&(count<strlen(command));count++) {}
       if (count < strlen(command)) {
 	foo=atoi(&command[count]);
 	diseqc.params[0]=foo;
@@ -137,7 +172,7 @@ int main(int argc, char **argv) {
       diseqc.cmd=0x68;
     }
     else if(strncmp(command,"west",4) == 0) {
-      for(count=4;(command[count]>=0x30)&&(command[count]<=0x39)&&(count<strlen(command));count++) {}
+      for(count=4;(command[count]==0x20)&&(count<strlen(command));count++) {}
       if (count < strlen(command)) {
 	foo=atoi(&command[count]);
 	diseqc.params[0]=foo;
@@ -172,6 +207,18 @@ int main(int argc, char **argv) {
 	diseqc.params[0]=foo;
 	diseqc.numParams=1;
 	diseqc.cmd=0x6A;
+      }
+      else printf("no value given\n");
+    }
+    else if(strncmp(command,"speed",5) == 0) {
+      for(count=5;((command[count]<0x31)||(command[count]>0x34))&&(count<strlen(command));count++) {}
+      if (count < strlen(command)) {
+	speed=command[count]-0x30;
+	if (speed == 1) volt=SEC_VOLTAGE_13;
+	else if (speed == 2) volt=SEC_VOLTAGE_13_5;
+	else if (speed == 3) volt=SEC_VOLTAGE_18;
+	else if (speed == 4) volt=SEC_VOLTAGE_18_5;
+	ioctl(device,SEC_SET_VOLTAGE,volt);
       }
       else printf("no value given\n");
     }
