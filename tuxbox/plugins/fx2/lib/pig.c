@@ -68,6 +68,18 @@ void	Fx2StopPig( void )
 	fd=-1;
 }
 
+void	Fx2PigPause( void )
+{
+	if ( fd != -1 )
+		avia_pig_hide(fd);
+}
+
+void	Fx2PigResume( void )
+{
+	if ( fd != -1 )
+		avia_pig_show(fd);
+}
+
 #else
 void	Fx2SetPig( int x, int y, int width, int height )
 {
@@ -79,6 +91,14 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 	return;
 }
 void	Fx2StopPig( void )
+{
+	return;
+}
+void	Fx2PigPause( void )
+{
+	return;
+}
+void	Fx2PigResume( void )
 {
 	return;
 }

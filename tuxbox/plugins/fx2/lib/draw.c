@@ -27,6 +27,7 @@
 
 #include <draw.h>
 #include <rcinput.h>
+#include <pig.h>
 
 static	int							fd = -1;
 static	struct fb_var_screeninfo	screeninfo;
@@ -469,6 +470,9 @@ static int			pos[64] =
 54, 28, 18, 46, 60, 9, 30, 38, 62, 26, 15, 13, 41, 22, 40, 45
 };
 
+
+	Fx2PigPause();
+
 	back = malloc( available );
 	if ( back )		// dimm out
 	{
@@ -515,6 +519,7 @@ static int			pos[64] =
 
 		free(back);
 	}
+	Fx2PigResume();
 
 	tv.tv_usec = 0;
 	tv.tv_sec = 2;
@@ -528,6 +533,7 @@ static int			pos[64] =
 
 #include <draw.h>
 #include <rcinput.h>
+#include <pig.h>
 
 static	Display			*dpy = 0;
 static	Window			window;
