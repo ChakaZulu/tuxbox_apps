@@ -474,7 +474,12 @@ void	RemoveCompl( void )
 		DelLines( li1, li2 );
 
 	if ( lines )
+	{
+		/* points for lines */
+		score += ((level+1)*lines);
+
 		level+=(lines-1);
+	}
 }
 
 void	BoardInitialize( void )
