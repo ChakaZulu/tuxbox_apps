@@ -59,7 +59,7 @@ FBFontRenderClass::FBFontRenderClass()
 	font = NULL;
 
 	int maxbytes= 4 *1024*1024;
-	dprintf(DEBUG_INFO, "[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
+	dprintf(DEBUG_INFO, "[FONT] Intializing font cache, using max. %dMB...\n", maxbytes/1024/1024);
 	fflush(stdout);
 	if (FTC_Manager_New(library, 10, 20, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 	{
@@ -351,17 +351,15 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	FT_Vector kerning;
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
 
-	int coff=(color+ 2)%8;
 	unsigned char colors[256];
 
-	for (int i= 0; i< 8; i++ )
+	int coff = 7 - ((color + 2) & 7);
+	for (int i = (256 - 32); i >= 0; i -= 32)
 	{
-		int c = i- coff; // c = 0..7
-		if (c< 0)
-			c= 0;
-		c= color + c;
-		for (int j= i*32; j< (i+1)*32; j++)
-			colors[j]= c;
+		memset(&(colors[i]), coff + color, 32);
+
+		if (coff != 0)
+			coff--;
 	}
 	
 	int spread_by = 0;
@@ -397,11 +395,8 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 		}
 
 		// width clip
-		if(x + glyph->xadvance + spread_by > left + width)
-		{
-			pthread_mutex_unlock( &renderer->render_mutex );
-			return;
-		}
+		if (x + glyph->xadvance + spread_by > left + width)
+			break;
 
 		//kerning
 		if(use_kerning)
@@ -410,18 +405,13 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 			x+=(kerning.x+32)>>6; // kerning!
 		}
 
-		int rx=x+glyph->left;
-		int ry=y-glyph->top;
+		int stride = frameBuffer->getStride();
+		__u8 * d   = frameBuffer->getFrameBufferPointer() + stride * (y - glyph->top) + (x + glyph->left);
+		__u8 * s   = glyph->buffer;
+		int w      = glyph->width;
+		int h      = glyph->height;
+		int pitch  = glyph->pitch;
 
-		__u8 *d=frameBuffer->getFrameBufferPointer() + frameBuffer->getStride()*ry + rx;
-		__u8 *s=glyph->buffer;
-
-
-
-		int w =	glyph->width;
-		int h =	glyph->height;
-		int stride= frameBuffer->getStride();
-		int pitch = glyph->pitch;
 		for (int ay=0; ay<h; ay++)
 		{
 			__u8 *td=d;
@@ -429,11 +419,6 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 			int ax;
 			for (ax=0; ax < w + spread_by; ax++)
 			{
-/*				int c = (*s++>>5)- coff; // c = 0..7
-				if (c< 0)
-					c= 0;
-				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
-*/
 				if (stylemodifier != Font::Embolden)
 					*td++= colors[*s++];
 				else
@@ -524,15 +509,14 @@ int Font::getRenderWidth(const char *text, const bool utf8_encoded)
 		lastindex=index;
 	}
 
-	int spread_by = 0;
 	if (stylemodifier == Font::Embolden)
 	{
-		spread_by = (fontwidth / 6) - 1;
+		int spread_by = (fontwidth / 6) - 1;
 		if (spread_by < 1)
 			spread_by = 1;
-	}
 
-	x += spread_by; 
+		x += spread_by;
+	}
 
 	pthread_mutex_unlock( &renderer->render_mutex );
 
