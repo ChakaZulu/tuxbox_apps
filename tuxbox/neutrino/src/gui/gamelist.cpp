@@ -204,7 +204,8 @@ void CGameList::paintItem(int pos)
 void CGameList::paintHead()
 {
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_FrameBuffer->paintIcon("games.raw",x+8,y+5);
+	g_Fonts->menu_title->RenderString(x+38,y+theight+1, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 }
 
 void CGameList::paint()

@@ -1,11 +1,14 @@
 //
-// $Id: eventlist.cpp,v 1.17 2001/10/18 22:01:31 field Exp $
+// $Id: eventlist.cpp,v 1.18 2001/10/22 15:24:48 McClean Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.18  2001/10/22 15:24:48  McClean
+// small designupdate
+//
 // Revision 1.17  2001/10/18 22:01:31  field
 // kleiner Bugfix
 //
@@ -436,7 +439,7 @@ void EventList::paintHead()
     snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str() );
 
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->eventlist_title->RenderString(x+10,y+theight+0, width, l_name, COL_MENUHEAD);
+	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD);
 }
 
 void EventList::paint()
