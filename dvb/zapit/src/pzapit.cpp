@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.37 2002/12/04 08:50:51 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.38 2002/12/20 19:19:46 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -54,6 +54,8 @@ int usage (std::string basename)
 	std::cout << "set volume: " << basename << " -vol <0..64>" << std::endl;
 	std::cout << "register neutrino as event client: " << basename << " -rn" << std::endl;
 	std::cout << "shutdown zapit: " << basename << " -kill" << std::endl;
+	std::cout << "enter standby: " << basename << " -esb" << std::endl;
+	std::cout << "leave standby: " << basename << " -lsb" << std::endl;
 	return -1;
 }
 
@@ -84,6 +86,8 @@ int main (int argc, char** argv)
 	bool scan = false;
 	bool zapByName = false;
 	bool killzapit = false;
+	bool enterStandby = false;
+	bool leaveStandby = false;
 	uint32_t diseqc[5];
 
 	/* command line */
@@ -129,9 +133,19 @@ int main (int argc, char** argv)
 			reload = true;
 			continue;
 		}
+		else if (!strncmp(argv[i], "-esb", 4))
+		{
+			enterStandby = true;
+			continue;
+		}
 		else if (!strncmp(argv[i], "-kill", 5))
 		{
 			killzapit = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-lsb", 4))
+		{
+			leaveStandby = true;
 			continue;
 		}
 		else if (!strncmp(argv[i], "-rn", 3))
@@ -251,6 +265,18 @@ int main (int argc, char** argv)
 	{
 		zapit.shutdown();
 		std::cout << "zapit shot down :)" << std::endl;
+		return 0;
+	}
+
+	if (enterStandby)
+	{
+		zapit.setStandby(true);
+		return 0;
+	}
+
+	if (leaveStandby)
+	{
+		zapit.setStandby(false);
 		return 0;
 	}
 

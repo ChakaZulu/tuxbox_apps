@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.59 2002/12/10 00:44:00 Homar Exp $
+ * $Id: getservices.cpp,v 1.60 2002/12/20 19:19:46 obi Exp $
  */
 
 #include <stdio.h>
@@ -62,6 +62,24 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 			feparams.u.qam.fec_inner = (fe_code_rate_t) tmp;
 			GET_ATTR(node, "modulation", "%hhu", tmp);
 			feparams.u.qam.modulation = CFrontend::getModulation(tmp);
+		}
+
+		/* terrestrial */
+		else if (DiSEqC == 0xFE) {
+			GET_ATTR(node, "bandwidth", "%hhu", tmp);
+			feparams.u.ofdm.bandwidth = (fe_bandwidth_t) tmp;
+			GET_ATTR(node, "code_rate_HP", "%hhu", tmp);
+			feparams.u.ofdm.code_rate_HP = (fe_code_rate_t) tmp;
+			GET_ATTR(node, "code_rate_LP", "%hhu", tmp);
+			feparams.u.ofdm.code_rate_LP = (fe_code_rate_t) tmp;
+			GET_ATTR(node, "constellation", "%hhu", tmp);
+			feparams.u.ofdm.constellation = (fe_modulation_t) tmp;
+			GET_ATTR(node, "transmission_mode", "%hhu", tmp);
+			feparams.u.ofdm.transmission_mode = (fe_transmit_mode_t) tmp;
+			GET_ATTR(node, "guard_interval", "%hhu", tmp);
+			feparams.u.ofdm.guard_interval = (fe_guard_interval_t) tmp;
+			GET_ATTR(node, "hierarchy_information", "%hhu", tmp);
+			feparams.u.ofdm.hierarchy_information = (fe_hierarchy_t) tmp;
 		}
 
 		/* satellite */
@@ -152,22 +170,22 @@ void FindTransponder (XMLTreeNode *search)
 
 	while (search)
 	{
-		/* cable */
 		if (!(strcmp(search->GetType(), "cable")))
-		{
-			INFO("going to parse cable %s", search->GetAttributeValue("name"));
-			ParseTransponders(search->GetChild(), 0xFF);
-		}
+			DiSEqC = 0xff;
 
-		/* satellite */
 		else if (!(strcmp(search->GetType(), "sat")))
-		{
-			INFO("going to parse satellite %s", search->GetAttributeValue("name"));
 			GET_ATTR(search, "diseqc", "%hhu", DiSEqC);
-			ParseTransponders(search->GetChild(), DiSEqC);
+
+		else if (!(strcmp(search->GetType(), "terrestrial")))
+			DiSEqC = 0xfe;
+
+		else {
+			search = search->GetNext();
+			continue;
 		}
 
-		/* hop to next satellite */
+		INFO("going to parse dvb-%c provider %s", search->GetType()[0], search->GetAttributeValue("name"));
+		ParseTransponders(search->GetChild(), DiSEqC);
 		search = search->GetNext();
 	}
 }

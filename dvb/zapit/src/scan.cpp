@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.87 2002/12/17 22:02:37 obi Exp $
+ * $Id: scan.cpp,v 1.88 2002/12/20 19:19:46 obi Exp $
  */
 
 #include <fcntl.h>
@@ -63,7 +63,7 @@ void stop_scan()
 }
 
 
-int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun (uint32_t TsidOnid, dvb_frontend_parameters feparams, uint8_t polarity, uint8_t DiSEqC)
+int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun (uint32_t TsidOnid, struct dvb_frontend_parameters *feparams, uint8_t polarity, uint8_t DiSEqC)
 {
 	if (scantransponders.find(TsidOnid) == scantransponders.end())
 	{
@@ -86,7 +86,7 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun (uint32_t TsidOnid, dvb_f
 				(
 					(TsidOnid >> 16),
 					TsidOnid,
-					feparams,
+					*feparams,
 					polarity,
 					DiSEqC
 				)
@@ -101,50 +101,18 @@ int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun (uint32_t TsidOnid, dvb_f
 
 
 /* build transponder for cable-users with sat-feed*/
-int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, fe_code_rate_t fec_inner, fe_modulation_t modulation)
+int build_bf_transponder(struct dvb_frontend_parameters *feparams)
 {
-	dvb_frontend_parameters feparams;
-
-	if (frontend->getInfo()->type != FE_QAM)
-		return -1;
-
-	feparams.frequency = frequency;
-	feparams.inversion = INVERSION_AUTO;
-	feparams.u.qam.symbol_rate = symbol_rate;
-	feparams.u.qam.fec_inner = fec_inner;
-	feparams.u.qam.modulation = modulation;
-
-	if (!frontend->tuneFrequency(&feparams, 0, 0))
+	if (!frontend->tuneFrequency(feparams, 0, 0))
 		return -1;
 
 	return bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(get_sdt_TsidOnid(), feparams, 0, 0);
 }
 
 
-int get_nits (uint32_t frequency, uint32_t symbol_rate, fe_code_rate_t fec_inner, uint8_t polarization, uint8_t DiSEqC, fe_modulation_t modulation)
+int get_nits (struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t DiSEqC)
 {
-	dvb_frontend_parameters feparams;
-	feparams.frequency = frequency;
-	feparams.inversion = INVERSION_AUTO;
-
-	switch (frontend->getInfo()->type) {
-	case FE_QPSK:
-		feparams.u.qpsk.symbol_rate = symbol_rate;
-		feparams.u.qpsk.fec_inner = fec_inner;
-		break;
-
-	case FE_QAM:
-		feparams.u.qam.symbol_rate = symbol_rate;
-		feparams.u.qam.fec_inner = fec_inner;
-		feparams.u.qam.modulation = modulation;
-		break;
-
-	case FE_OFDM:
-	default:
-		return -1;
-	}
-
-	if (!frontend->tuneFrequency(&feparams, polarization, DiSEqC))
+	if (!frontend->tuneFrequency(feparams, polarization, DiSEqC))
 		return -1;
 
 	if ((status = parse_nit(DiSEqC)) <= -2) /* nit unavailable */
@@ -313,12 +281,7 @@ void *start_scanthread(void *param)
 	char type[8];
 
 	uint8_t diseqc_pos = 0;
-
-	uint32_t frequency;
-	uint32_t symbol_rate;
-	uint8_t polarization;
-	uint8_t fec_inner;
-	uint8_t modulation;
+	uint8_t polarization = 0;
 
 	bool satfeed = false;
 
@@ -336,12 +299,14 @@ void *start_scanthread(void *param)
 	switch (frontend->getInfo()->type) {
 	case FE_QPSK:	/* satellite frontend */
 		strcpy(type, "sat");
-		modulation = 0;
 		break;
 
 	case FE_QAM:	/* cable frontend */
 		strcpy(type, "cable");
-		polarization = 0;
+		break;
+
+	case FE_OFDM:	/* terrestrial frontend */
+		strcpy(type, "terrestrial");
 		break;
 
 	default:	/* unsupported frontend */
@@ -375,11 +340,11 @@ void *start_scanthread(void *param)
 			continue;
 		}
 
-		/* Special mode for cable-users with sat-feed*/
-		if (!strcmp(type, "cable") && search->GetAttributeValue("satfeed"))
-			if (!strcmp(search->GetAttributeValue("satfeed"),"true"))
-				satfeed = true;
-
+		/* Special mode for cable-users with sat-feed */
+		if (frontend->getInfo()->type == FE_QAM)
+			if (!strcmp(type, "cable") && search->GetAttributeValue("satfeed"))
+				if (!strcmp(search->GetAttributeValue("satfeed"), "true"))
+					satfeed = true;
 
 		/* increase sat counter */
 		curr_sat++;
@@ -395,29 +360,54 @@ void *start_scanthread(void *param)
 		/* read all transponders */
 		while ((transponder) && (!strcmp(transponder->GetType(), "transponder")))
 		{
-			/* generic */
-			sscanf(transponder->GetAttributeValue("frequency"), "%u", &frequency);
-			sscanf(transponder->GetAttributeValue("symbol_rate"), "%u", &symbol_rate);
-			sscanf(transponder->GetAttributeValue("fec_inner"), "%hhu", &fec_inner);
+			uint8_t tmp;
+			dvb_frontend_parameters feparams;
+
+			sscanf(transponder->GetAttributeValue("frequency"), "%u", &feparams.frequency);
+			feparams.inversion = INVERSION_AUTO;
 
 			/* cable */
 			if (frontend->getInfo()->type == FE_QAM)
 			{
-				sscanf(transponder->GetAttributeValue("modulation"), "%hhu", &modulation);
+				sscanf(transponder->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qam.symbol_rate);
+				sscanf(transponder->GetAttributeValue("fec_inner"), "%hhu", &tmp);
+				feparams.u.qam.fec_inner = (fe_code_rate_t) tmp;
+				sscanf(transponder->GetAttributeValue("modulation"), "%hhu", &tmp);
+				feparams.u.qam.modulation = (fe_modulation_t) tmp;
 			}
 
 			/* satellite */
-			else
+			else if (frontend->getInfo()->type == FE_QPSK)
 			{
+				sscanf(transponder->GetAttributeValue("symbol_rate"), "%u", &feparams.u.qpsk.symbol_rate);
+				sscanf(transponder->GetAttributeValue("fec_inner"), "%hhu", &tmp);
+				feparams.u.qpsk.fec_inner = (fe_code_rate_t) tmp;
 				sscanf(transponder->GetAttributeValue("polarization"), "%hhu", &polarization);
 			}
 
-			if (!strcmp(type,"cable") && satfeed)
-				/* build special transponder for cable with satfeed*/
-				status = build_bf_transponder(frequency, symbol_rate, (fe_code_rate_t) fec_inner, CFrontend::getModulation(modulation));
-			else
-				/* read network information table */
-				status = get_nits(frequency, symbol_rate, (fe_code_rate_t) fec_inner, polarization, diseqc_pos, CFrontend::getModulation(modulation));
+			/* terrestrial */
+			else if (frontend->getInfo()->type == FE_OFDM)
+			{
+				sscanf(transponder->GetAttributeValue("bandwidth"), "%hhu", &tmp);
+				feparams.u.ofdm.bandwidth = (fe_bandwidth_t) tmp;
+				feparams.u.ofdm.code_rate_HP = FEC_AUTO;
+				feparams.u.ofdm.code_rate_LP = FEC_AUTO;
+				feparams.u.ofdm.constellation = QAM_AUTO;
+				feparams.u.ofdm.transmission_mode = TRANSMISSION_MODE_AUTO;
+				feparams.u.ofdm.guard_interval = GUARD_INTERVAL_AUTO;
+				feparams.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
+			}
+
+			/* build special transponder for cable with satfeed */
+			if (!strcmp(type,"cable") && satfeed) {
+				status = build_bf_transponder(&feparams);
+			}
+
+			/* read network information table */
+			else {
+				status = get_nits(&feparams, polarization, diseqc_pos);
+			}
+
 			/* next transponder */
 			transponder = transponder->GetNext();
 		}

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.72 2002/12/18 14:02:08 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.73 2002/12/20 19:19:46 obi Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -678,6 +678,13 @@ void CZapitClient::saveBouquets()
 	close_connection();
 }
 
+void CZapitClient::setStandby(const bool enable)
+{
+	CZapitMessages::commandBoolean msg;
+	msg.truefalse = enable;
+	send(CZapitMessages::CMD_SET_STANDBY, (char*)&msg, sizeof(msg));
+	close_connection();
+}
 
 void CZapitClient::startPlayBack()
 {

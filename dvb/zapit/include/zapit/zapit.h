@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.64 2002/10/17 20:51:18 thegoodguy Exp $
+ * $Id: zapit.h,v 1.65 2002/12/20 19:19:46 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -29,5 +29,7 @@ unsigned int zapTo(const unsigned int channel);
 unsigned int zapTo(const unsigned int bouquet, const unsigned int channel);
 unsigned int zapTo_ChannelID(const t_channel_id channel_id, const bool isSubService);
 void sendAPIDs(int connfd);
+void enterStandby(void);
+void leaveStandby(void);
 
 #endif /* __zapit_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.38 2002/12/17 23:07:50 obi Exp $
+ * $Id: frontend.cpp,v 1.39 2002/12/20 19:19:47 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -158,6 +158,7 @@ unsigned int CFrontend::getFrequency ()
 			return currentFrequency + lnbOffsetsHigh[currentDiseqc];
 
 	case FE_QAM:
+	case FE_OFDM:
 	default:
 		return currentFrequency;
 	}

@@ -368,6 +368,7 @@ class CZapitClient:public CBasicClient
 	/*					*/
 	/****************************************/
 
+	void setStandby(const bool enable);
 	void startPlayBack();
 	void stopPlayBack();
 	bool isPlayBackActive();

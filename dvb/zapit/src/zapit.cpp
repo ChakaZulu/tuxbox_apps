@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.277 2002/12/18 12:39:14 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.278 2002/12/20 19:19:46 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -92,7 +92,7 @@ int debug = 0;
 /* near video on demand */
 tallchans nvodchannels;         //  tallchans defined in "bouquets.h"
 std::string nvodname;
-bool current_is_nvod;
+bool current_is_nvod = false;
 
 /* file descriptors */
 int dmx_audio_fd = -1;
@@ -112,57 +112,9 @@ extern short curr_sat;
 extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
-bool shutdown_requested = false;
+bool standby = true;
 
-void CZapitDestructor()
-{
-	if (shutdown_requested)
-	{
-		sleep(1);
-		return;
-	}
-
-	shutdown_requested = true;
-
-	save_settings(true);
-
-	stopPlayBack();
-
-	if (dmx_audio_fd != -1)
-		close(dmx_audio_fd);
-	if (dmx_pcr_fd != -1)
-		close(dmx_pcr_fd);
-	if (dmx_teletext_fd != -1)
-		close(dmx_teletext_fd);
-	if (dmx_video_fd != -1)
-		close(dmx_video_fd);
-
-	if (cam != NULL)
-	    delete cam;
-	if (video != NULL)
-	    delete video;
-	if (audio != NULL)
-	    delete audio;
-	if (frontend != NULL)
-	    delete frontend;
-
-	// remove this in class
-	exit(0);
-}
-
-void signal_handler (int signum)
-{
-	switch (signum) {
-	case SIGUSR1:
-		debug = !debug;
-		break;
-	default:
-		CZapitDestructor();
-		break;
-	}
-}
-
-void save_settings (bool write)
+void saveSettings (bool write)
 {
 	if (channel != NULL)
 	{
@@ -202,9 +154,8 @@ CZapitClient::responseGetLastChannel load_settings()
  * - stop teletext, video, audio, pcr
  * - tune
  * - set up pids
- * - send channel name to lcdd
- * - start descrambler
  * - start pcr, audio, video, teletext
+ * - start descrambler
  *
  * return 0 on success
  * return -1 otherwise
@@ -286,7 +237,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 	if (channel->getServiceType() == NVOD_REFERENCE_SERVICE)
 	{
 		current_is_nvod = true;
-		save_settings(false);
+		saveSettings(false);
 		return 0;
 	}
 
@@ -353,7 +304,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 
 	cam->setCaPmt(channel->getCaPmt());
 
-	save_settings(false);
+	saveSettings(false);
 
 	return 0;
 }
@@ -463,6 +414,10 @@ void parseScanInputXml()
 		scanInputParser = parseXmlFile(string(CABLES_XML));
 		break;
 
+	case FE_OFDM:
+		scanInputParser = parseXmlFile(string(TERRESTRIAL_XML));
+		break;
+
 	default:
 		WARN("Unknown type %d", frontend->getInfo()->type);
 		return;
@@ -511,608 +466,497 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
 	DBG("cmd %d (version %d) received", rmsg.cmd, rmsg.version);
 
-		switch (rmsg.cmd)
-		{
-			case CZapitMessages::CMD_SHUTDOWN:
-			{
-				return false;
-			}
-			case CZapitMessages::CMD_ZAPTO:
-			{
-				CZapitMessages::commandZapto msgZapto;
-				read(connfd, &msgZapto, sizeof(msgZapto)); // bouquet & channel number are already starting at 0!
-				zapTo(msgZapto.bouquet, msgZapto.channel);
-				break;
-			}
-			case CZapitMessages::CMD_ZAPTO_CHANNELNR:
-			{
-				CZapitMessages::commandZaptoChannelNr msgZaptoChannelNr;
-				read(connfd, &msgZaptoChannelNr, sizeof(msgZaptoChannelNr)); // bouquet & channel number are already starting at 0!
-				zapTo(msgZaptoChannelNr.channel);
-				break;
-			}
-			case CZapitMessages::CMD_ZAPTO_SERVICEID:
-			case CZapitMessages::CMD_ZAPTO_SUBSERVICEID:
-			{
-				CZapitMessages::commandZaptoServiceID msgZaptoServiceID;
-				CZapitMessages::responseZapComplete msgResponseZapComplete;
-				read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
-				msgResponseZapComplete.zapStatus = zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID));
-				send(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete), 0);
-				break;
-			}
-			case CZapitMessages::CMD_ZAPTO_SERVICEID_NOWAIT:
-			case CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT:
-			{
-				CZapitMessages::commandZaptoServiceID msgZaptoServiceID;
-				read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
-				zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
-				break;
-			}
-			case CZapitMessages::CMD_GET_LAST_CHANNEL:
-			{
-				CZapitClient::responseGetLastChannel responseGetLastChannel;
-				responseGetLastChannel = load_settings();
-				send(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel), 0); // bouquet & channel number are already starting at 0!
-				break;
-			}
-			case CZapitMessages::CMD_SET_AUDIOCHAN:
-			{
-				CZapitMessages::commandSetAudioChannel msgSetAudioChannel;
-				read(connfd, &msgSetAudioChannel, sizeof(msgSetAudioChannel));
-				changeapid(msgSetAudioChannel.channel);
-				break;
-			}
-			case CZapitMessages::CMD_SET_MODE:
-			{
-				CZapitMessages::commandSetMode msgSetMode;
-				read(connfd, &msgSetMode, sizeof(msgSetMode));
-				if (msgSetMode.mode == CZapitClient::MODE_TV)
-				{
-					setTVMode();
-				}
-				else if (msgSetMode.mode == CZapitClient::MODE_RADIO)
-				{
-					setRadioMode();
-				}
-				break;
-			}
-			case CZapitMessages::CMD_GET_MODE:
-			{
-				CZapitMessages::responseGetMode msgGetMode;
-				msgGetMode.mode = (CZapitClient::channelsMode) getMode();
-				send(connfd, &msgGetMode, sizeof(msgGetMode), 0);
-				break;
-			}
-			case CZapitMessages::CMD_GET_CURRENT_SERVICEID:
-			{
-				CZapitMessages::responseGetCurrentServiceID msgCurrentSID;
-				msgCurrentSID.channel_id = channel->getChannelID();
-				send(connfd, &msgCurrentSID, sizeof(msgCurrentSID), 0);
-				break;
-			}
-			case CZapitMessages::CMD_GET_CURRENT_SERVICEINFO:
-			{
-				CZapitClient::CCurrentServiceInfo msgCurrentServiceInfo;
-				msgCurrentServiceInfo.onid = channel->getOriginalNetworkId();
-				msgCurrentServiceInfo.sid = channel->getServiceId();
-				msgCurrentServiceInfo.tsid = channel->getTransportStreamId();
-				msgCurrentServiceInfo.vdid = channel->getVideoPid();
-				msgCurrentServiceInfo.apid = channel->getAudioPid();
-				msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
-				msgCurrentServiceInfo.pcrpid = channel->getPcrPid();
-				msgCurrentServiceInfo.tsfrequency = frontend->getFrequency();
-				if (frontend->getInfo()->type == FE_QPSK)
-				{
-					msgCurrentServiceInfo.polarisation = frontend->getPolarization();
-				}
-				else
-				{
-					msgCurrentServiceInfo.polarisation = 2;
-				}
-				msgCurrentServiceInfo.diseqc = channel->getDiSEqC();
-				send(connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo), 0);
-				break;
-			}
-			case CZapitMessages::CMD_GET_BOUQUETS:
-			{
-				CZapitMessages::commandGetBouquets msgGetBouquets;
-				read(connfd, &msgGetBouquets, sizeof(msgGetBouquets));
-				sendBouquets(connfd, msgGetBouquets.emptyBouquetsToo); // bouquet & channel number are already starting at 0!
-				break;
-			}
-			case CZapitMessages::CMD_GET_BOUQUET_CHANNELS:
-			{
-				CZapitMessages::commandGetBouquetChannels msgGetBouquetChannels;
-				read(connfd, &msgGetBouquetChannels, sizeof(msgGetBouquetChannels));
-				sendBouquetChannels(connfd, msgGetBouquetChannels.bouquet, msgGetBouquetChannels.mode); // bouquet & channel number are already starting at 0!
-				break;
-			}
-			case CZapitMessages::CMD_GET_CHANNELS:
-			{
-				CZapitMessages::commandGetChannels msgGetChannels;
-				read(connfd, &msgGetChannels, sizeof(msgGetChannels));
-				sendChannels(connfd, msgGetChannels.mode, msgGetChannels.order); // bouquet & channel number are already starting at 0!
-				break;
-			}
-			case CZapitMessages::CMD_BQ_RESTORE:
-			{
-				CZapitMessages::responseCmd response;
-				bouquetManager->restoreBouquets();
-				response.cmd = CZapitMessages::CMD_READY;
-				send(connfd, &response, sizeof(response), 0);
-				break;
-			}
-			case CZapitMessages::CMD_REINIT_CHANNELS:
-			{
-				CZapitMessages::responseCmd response;
-				prepare_channels();
-				response.cmd = CZapitMessages::CMD_READY;
-				send(connfd, &response, sizeof(response), 0);
-				eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_COMMIT_CHANGE:
-			{
-				CZapitMessages::responseCmd response;
-				bouquetManager->renumServices();
-				response.cmd = CZapitMessages::CMD_READY;
-				send(connfd, &response, sizeof(response), 0);
-				eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
-				break;
-			}
-			case CZapitMessages::CMD_SCANSTART:
-				start_scan();
-				break;
+	if ((standby) && (rmsg.cmd != CZapitMessages::CMD_SET_STANDBY)) {
+		WARN("cmd %d refused in standby mode", rmsg.cmd);
+		return true;
+	}
 
-			case CZapitMessages::CMD_SCANREADY:
-			{
-				CZapitMessages::responseIsScanReady msgResponseIsScanReady;
-				msgResponseIsScanReady.satellite = curr_sat;
-				msgResponseIsScanReady.transponder = found_transponders;
-				msgResponseIsScanReady.services = found_channels;
-				if (scan_runs > 0)
-				{
-					msgResponseIsScanReady.scanReady = false;
-				}
-				else
-				{
-					msgResponseIsScanReady.scanReady = true;
-				}
-				send(connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady), 0);
-				break;
-			}
-			case CZapitMessages::CMD_SCANGETSATLIST:
-			{
-				if (scanInputParser == NULL)
-				{
-					parseScanInputXml();
+	switch (rmsg.cmd) {
+	case CZapitMessages::CMD_SHUTDOWN:
+		return false;
 
-					if (scanInputParser == NULL)
-						break;
-				}
+	case CZapitMessages::CMD_ZAPTO:
+	{
+		CZapitMessages::commandZapto msgZapto;
+		read(connfd, &msgZapto, sizeof(msgZapto)); // bouquet & channel number are already starting at 0!
+		zapTo(msgZapto.bouquet, msgZapto.channel);
+		break;
+	}
+	
+	case CZapitMessages::CMD_ZAPTO_CHANNELNR:
+	{
+		CZapitMessages::commandZaptoChannelNr msgZaptoChannelNr;
+		read(connfd, &msgZaptoChannelNr, sizeof(msgZaptoChannelNr)); // bouquet & channel number are already starting at 0!
+		zapTo(msgZaptoChannelNr.channel);
+		break;
+	}
 
-				CZapitClient::responseGetSatelliteList msgResponseGetSatelliteList;
-				XMLTreeNode *search = scanInputParser->RootNode()->GetChild();
+	case CZapitMessages::CMD_ZAPTO_SERVICEID:
+	case CZapitMessages::CMD_ZAPTO_SUBSERVICEID:
+	{
+		CZapitMessages::commandZaptoServiceID msgZaptoServiceID;
+		CZapitMessages::responseZapComplete msgResponseZapComplete;
+		read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
+		msgResponseZapComplete.zapStatus = zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID));
+		send(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete), 0);
+		break;
+	}
 
-				while (search != NULL)
-				{
-					strncpy(msgResponseGetSatelliteList.satName, search->GetAttributeValue("name"), sizeof(msgResponseGetSatelliteList.satName));
-					send(connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList), 0);
-					search = search->GetNext();
-				}
-				break;
-			}
-			case CZapitMessages::CMD_SCANSETSCANSATLIST:
-			{
-				CZapitClient::commandSetScanSatelliteList sat;
-				scanProviders.clear();
-				while (read(connfd, &sat, sizeof(sat)))
-				{
-					INFO("adding %s (diseqc %d)", sat.satName, sat.diseqc);
-					scanProviders[sat.diseqc] = sat.satName;
-				}
-				break;
-			}
-			case CZapitMessages::CMD_SCANSETDISEQCTYPE:
-			{
-				diseqc_t diseqc;
-				read(connfd, &diseqc, sizeof(diseqc));
-				frontend->setDiseqcType(diseqc);
-				INFO("set diseqc type %d", diseqc);
-				break;
-			}
-			case CZapitMessages::CMD_SCANSETDISEQCREPEAT:
-			{
-				uint32_t repeats;
-				read(connfd, &repeats, sizeof(repeats));
-				frontend->setDiseqcRepeats(repeats);
-				INFO("set diseqc repeats to %d", repeats);
-				break;
-			}
-			case CZapitMessages::CMD_SCANSETBOUQUETMODE:
-				read(connfd, &bouquetMode, sizeof(bouquetMode));
-				break;
+	case CZapitMessages::CMD_ZAPTO_SERVICEID_NOWAIT:
+	case CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT:
+	{
+		CZapitMessages::commandZaptoServiceID msgZaptoServiceID;
+		read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
+		zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_LAST_CHANNEL:
+	{
+		CZapitClient::responseGetLastChannel responseGetLastChannel;
+		responseGetLastChannel = load_settings();
+		send(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel), 0); // bouquet & channel number are already starting at 0!
+		break;
+	}
+	
+	case CZapitMessages::CMD_SET_AUDIOCHAN:
+	{
+		CZapitMessages::commandSetAudioChannel msgSetAudioChannel;
+		read(connfd, &msgSetAudioChannel, sizeof(msgSetAudioChannel));
+		changeapid(msgSetAudioChannel.channel);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SET_MODE:
+	{
+		CZapitMessages::commandSetMode msgSetMode;
+		read(connfd, &msgSetMode, sizeof(msgSetMode));
+		if (msgSetMode.mode == CZapitClient::MODE_TV)
+			setTVMode();
+		else if (msgSetMode.mode == CZapitClient::MODE_RADIO)
+			setRadioMode();
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_MODE:
+	{
+		CZapitMessages::responseGetMode msgGetMode;
+		msgGetMode.mode = (CZapitClient::channelsMode) getMode();
+		send(connfd, &msgGetMode, sizeof(msgGetMode), 0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_CURRENT_SERVICEID:
+	{
+		CZapitMessages::responseGetCurrentServiceID msgCurrentSID;
+		msgCurrentSID.channel_id = channel->getChannelID();
+		send(connfd, &msgCurrentSID, sizeof(msgCurrentSID), 0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_CURRENT_SERVICEINFO:
+	{
+		CZapitClient::CCurrentServiceInfo msgCurrentServiceInfo;
+		msgCurrentServiceInfo.onid = channel->getOriginalNetworkId();
+		msgCurrentServiceInfo.sid = channel->getServiceId();
+		msgCurrentServiceInfo.tsid = channel->getTransportStreamId();
+		msgCurrentServiceInfo.vdid = channel->getVideoPid();
+		msgCurrentServiceInfo.apid = channel->getAudioPid();
+		msgCurrentServiceInfo.vtxtpid = channel->getTeletextPid();
+		msgCurrentServiceInfo.pcrpid = channel->getPcrPid();
+		msgCurrentServiceInfo.tsfrequency = frontend->getFrequency();
+		if (frontend->getInfo()->type == FE_QPSK)
+			msgCurrentServiceInfo.polarisation = frontend->getPolarization();
+		else
+			msgCurrentServiceInfo.polarisation = 2;
+		msgCurrentServiceInfo.diseqc = channel->getDiSEqC();
+		send(connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo), 0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_BOUQUETS:
+	{
+		CZapitMessages::commandGetBouquets msgGetBouquets;
+		read(connfd, &msgGetBouquets, sizeof(msgGetBouquets));
+		sendBouquets(connfd, msgGetBouquets.emptyBouquetsToo); // bouquet & channel number are already starting at 0!
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_BOUQUET_CHANNELS:
+	{
+		CZapitMessages::commandGetBouquetChannels msgGetBouquetChannels;
+		read(connfd, &msgGetBouquetChannels, sizeof(msgGetBouquetChannels));
+		sendBouquetChannels(connfd, msgGetBouquetChannels.bouquet, msgGetBouquetChannels.mode); // bouquet & channel number are already starting at 0!
+		break;
+	}
+	
+	case CZapitMessages::CMD_GET_CHANNELS:
+	{
+		CZapitMessages::commandGetChannels msgGetChannels;
+		read(connfd, &msgGetChannels, sizeof(msgGetChannels));
+		sendChannels(connfd, msgGetChannels.mode, msgGetChannels.order); // bouquet & channel number are already starting at 0!
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_RESTORE:
+	{
+		CZapitMessages::responseCmd response;
+		bouquetManager->restoreBouquets();
+		response.cmd = CZapitMessages::CMD_READY;
+		send(connfd, &response, sizeof(response), 0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_REINIT_CHANNELS:
+	{
+		CZapitMessages::responseCmd response;
+		prepare_channels();
+		response.cmd = CZapitMessages::CMD_READY;
+		send(connfd, &response, sizeof(response), 0);
+		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_COMMIT_CHANGE:
+	{
+		CZapitMessages::responseCmd response;
+		bouquetManager->renumServices();
+		response.cmd = CZapitMessages::CMD_READY;
+		send(connfd, &response, sizeof(response), 0);
+		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SCANSTART:
+		start_scan();
+		break;
 
-			case CZapitMessages::CMD_SET_RECORD_MODE:
-			{
-				CZapitMessages::commandSetRecordMode msgSetRecordMode;
-				read(connfd, &msgSetRecordMode, sizeof(msgSetRecordMode));
-				if (msgSetRecordMode.activate)
-				{
-					setRecordMode();
-				}
-				else
-				{
-					unsetRecordMode();
-				}
-				break;
-			}
-			case CZapitMessages::CMD_GET_RECORD_MODE:
-			{
-				CZapitMessages::responseGetRecordModeState msgGetRecordModeState;
-				msgGetRecordModeState.activated = (currentMode & RECORD_MODE);
-				send(connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState), 0);
-				break;
-			}
-			case CZapitMessages::CMD_SB_GET_PLAYBACK_ACTIVE:
-			{
-				CZapitMessages::responseGetPlaybackState msgGetPlaybackState;
-				if (video->isPlaying())
-				{
-					msgGetPlaybackState.activated = 1;
-				}
-				else
-				{
-					msgGetPlaybackState.activated = 0;
-				}
-				send(connfd, &msgGetPlaybackState, sizeof(msgGetPlaybackState), 0);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_ADD_BOUQUET:
-			{
-				CZapitMessages::commandAddBouquet msgAddBouquet;
-				read(connfd, &msgAddBouquet, sizeof(msgAddBouquet));
-				bouquetManager->addBouquet(convert_to_UTF8(std::string(msgAddBouquet.name)));
-				break;
-			}
-			case CZapitMessages::CMD_BQ_DELETE_BOUQUET:
-			{
-				CZapitMessages::commandDeleteBouquet msgDeleteBouquet;
-				read(connfd, &msgDeleteBouquet, sizeof(msgDeleteBouquet)); // bouquet & channel number are already starting at 0!
-				bouquetManager->deleteBouquet(msgDeleteBouquet.bouquet);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_RENAME_BOUQUET:
-			{
-				CZapitMessages::commandRenameBouquet msgRenameBouquet;
-				read(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet)); // bouquet & channel number are already starting at 0!
-				if (msgRenameBouquet.bouquet < bouquetManager->Bouquets.size())
-					bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = convert_to_UTF8(std::string(msgRenameBouquet.name));
-				break;
-			}
-			case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:
-			{
-				CZapitMessages::commandExistsBouquet msgExistsBouquet;
-				CZapitMessages::responseGeneralInteger responseInteger;
-				read(connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
-				responseInteger.number = bouquetManager->existsBouquet(convert_to_UTF8(std::string(msgExistsBouquet.name)));
-				send(connfd, &responseInteger, sizeof(responseInteger), 0); // bouquet & channel number are already starting at 0!
-				break;
-			}
-			case CZapitMessages::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET:
-			{
-				CZapitMessages::commandExistsChannelInBouquet msgExistsChInBq;
-				CZapitMessages::responseGeneralTrueFalse responseBool;
-				read(connfd, &msgExistsChInBq, sizeof(msgExistsChInBq)); // bouquet & channel number are already starting at 0!
-				responseBool.status = bouquetManager->existsChannelInBouquet(msgExistsChInBq.bouquet, msgExistsChInBq.channel_id);
-				send(connfd, &responseBool, sizeof(responseBool), 0);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_MOVE_BOUQUET:
-			{
-				CZapitMessages::commandMoveBouquet msgMoveBouquet;
-				read(connfd, &msgMoveBouquet, sizeof(msgMoveBouquet)); // bouquet & channel number are already starting at 0!
-				bouquetManager->moveBouquet(msgMoveBouquet.bouquet, msgMoveBouquet.newPos);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_ADD_CHANNEL_TO_BOUQUET:
-			{
-				CZapitMessages::commandAddChannelToBouquet msgAddChannelToBouquet;
-				read(connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet)); // bouquet & channel number are already starting at 0!
-				addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.channel_id);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET:
-			{
-				CZapitMessages::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
-				read(connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet)); // bouquet & channel number are already starting at 0!
-				if (msgRemoveChannelFromBouquet.bouquet < bouquetManager->Bouquets.size())
-					bouquetManager->Bouquets[msgRemoveChannelFromBouquet.bouquet]->removeService(msgRemoveChannelFromBouquet.channel_id);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_MOVE_CHANNEL:
-			{
-				CZapitMessages::commandMoveChannel msgMoveChannel;
-				read(connfd, &msgMoveChannel, sizeof(msgMoveChannel)); // bouquet & channel number are already starting at 0!
-				if (msgMoveChannel.bouquet < bouquetManager->Bouquets.size())
-					bouquetManager->Bouquets[msgMoveChannel.bouquet]->moveService(msgMoveChannel.oldPos, msgMoveChannel.newPos, (((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
-				break;
-			}
-			case CZapitMessages::CMD_BQ_SET_LOCKSTATE:
-			{
-				CZapitMessages::commandBouquetState msgBouquetLockState;
-				read(connfd, &msgBouquetLockState, sizeof(msgBouquetLockState)); // bouquet & channel number are already starting at 0!
-				if (msgBouquetLockState.bouquet < bouquetManager->Bouquets.size())
-					bouquetManager->Bouquets[msgBouquetLockState.bouquet]->bLocked = msgBouquetLockState.state;
-				break;
-			}
-			case CZapitMessages::CMD_BQ_SET_HIDDENSTATE:
-			{
-				CZapitMessages::commandBouquetState msgBouquetHiddenState;
-				read(connfd, &msgBouquetHiddenState, sizeof(msgBouquetHiddenState)); // bouquet & channel number are already starting at 0!
-				if (msgBouquetHiddenState.bouquet < bouquetManager->Bouquets.size())
-					bouquetManager->Bouquets[msgBouquetHiddenState.bouquet]->bHidden = msgBouquetHiddenState.state;
-				break;
-			}
-			case CZapitMessages::CMD_BQ_RENUM_CHANNELLIST:
-				bouquetManager->renumServices();
-				break;
+	case CZapitMessages::CMD_SCANREADY:
+	{
+		CZapitMessages::responseIsScanReady msgResponseIsScanReady;
+		msgResponseIsScanReady.satellite = curr_sat;
+		msgResponseIsScanReady.transponder = found_transponders;
+		msgResponseIsScanReady.services = found_channels;
+		if (scan_runs > 0)
+			msgResponseIsScanReady.scanReady = false;
+		else
+			msgResponseIsScanReady.scanReady = true;
+		send(connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady), 0);
+		break;
+	}
 
-			case CZapitMessages::CMD_BQ_SAVE_BOUQUETS:
-			{
-				CZapitMessages::responseCmd response;
-				bouquetManager->saveBouquets();
-				response.cmd = CZapitMessages::CMD_READY;
-				send(connfd, &response, sizeof(response), 0);
-				break;
-			}
-			case CZapitMessages::CMD_SB_START_PLAYBACK:
-				playbackStopForced = false;
-				startPlayBack();
-				break;
-
-			case CZapitMessages::CMD_SB_STOP_PLAYBACK:
-				stopPlayBack();
-				playbackStopForced = true;
-				break;
-
-			case CZapitMessages::CMD_SET_DISPLAY_FORMAT:
-			{
-				CZapitMessages::commandInt msg;
-				read(connfd, &msg, sizeof(msg));
-				video->setCroppingMode((video_displayformat_t) msg.val);
-				break;
-			}
-
-			case CZapitMessages::CMD_SET_AUDIO_MODE:
-			{
-				CZapitMessages::commandInt msg;
-				read(connfd, &msg, sizeof(msg));
-				audio->selectChannel((audio_channel_select_t) msg.val);
-				break;
-			}
-
-			case CZapitMessages::CMD_GETPIDS:
-			{
-				CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
-				responseGetOtherPIDs.vpid = channel->getVideoPid();
-				responseGetOtherPIDs.ecmpid = NONE; // TODO: remove
-				responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
-				responseGetOtherPIDs.pcrpid = channel->getPcrPid();
-				responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
-				send(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs), 0);
-				sendAPIDs(connfd);
-				break;
-			}
-			case CZapitMessages::CMD_SETSUBSERVICES:
-			{
-				CZapitClient::commandAddSubServices msgAddSubService;
-
-				while (read(connfd, &msgAddSubService, sizeof(msgAddSubService)))
-				{
-					t_original_network_id original_network_id = msgAddSubService.original_network_id;
-					t_service_id          service_id          = msgAddSubService.service_id;
-					nvodchannels.insert
-					(
-					    std::pair <t_channel_id, CZapitChannel>
-					    (
-						CREATE_CHANNEL_ID,
-						CZapitChannel
-						(
-						    "NVOD",
-						    service_id,
-						    msgAddSubService.transport_stream_id,
-						    original_network_id,
-						    1,
-						    channel->getDiSEqC(),
-						    channel->getCA_STATUS()
-						)
-					    )
-					);
-				}
-
-				current_is_nvod = true;
-				break;
-			}
-			case CZapitMessages::CMD_REGISTEREVENTS:
-				eventServer->registerEvent(connfd);
-				break;
-
-			case CZapitMessages::CMD_UNREGISTEREVENTS :
-				eventServer->unRegisterEvent(connfd);
-				break;
-
-			case CZapitMessages::CMD_MUTE:
-			{
-				CZapitMessages::commandBoolean msgBoolean;
-				read(connfd, &msgBoolean, sizeof(msgBoolean));
-				if (msgBoolean.truefalse)
-				{
-					audio->mute();
-				}
-				else
-				{
-					audio->unmute();
-				}
-				break;
-			}
-			case CZapitMessages::CMD_SET_VOLUME:
-			{
-				CZapitMessages::commandVolume msgVolume;
-				read(connfd, &msgVolume, sizeof(msgVolume));
-				audio->setVolume(msgVolume.left, msgVolume.right);
-				break;
-			}
-			default:
-				WARN("unknown command %d (version %d)", rmsg.cmd, CZapitMessages::ACTVERSION);
+	case CZapitMessages::CMD_SCANGETSATLIST:
+	{
+		if (!scanInputParser) {
+			parseScanInputXml();
+			if (!scanInputParser)
 				break;
 		}
+
+		CZapitClient::responseGetSatelliteList msgResponseGetSatelliteList;
+		XMLTreeNode *search = scanInputParser->RootNode()->GetChild();
+
+		while (search) {
+			strncpy(msgResponseGetSatelliteList.satName, search->GetAttributeValue("name"), sizeof(msgResponseGetSatelliteList.satName));
+			send(connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList), 0);
+			search = search->GetNext();
+		}
+		break;
+	}
+
+	case CZapitMessages::CMD_SCANSETSCANSATLIST:
+	{
+		CZapitClient::commandSetScanSatelliteList sat;
+		scanProviders.clear();
+		while (read(connfd, &sat, sizeof(sat))) {
+			DBG("adding %s (diseqc %d)", sat.satName, sat.diseqc);
+			scanProviders[sat.diseqc] = sat.satName;
+		}
+		break;
+	}
+	
+	case CZapitMessages::CMD_SCANSETDISEQCTYPE:
+	{
+		diseqc_t diseqc;
+		read(connfd, &diseqc, sizeof(diseqc));
+		frontend->setDiseqcType(diseqc);
+		DBG("set diseqc type %d", diseqc);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SCANSETDISEQCREPEAT:
+	{
+		uint32_t repeats;
+		read(connfd, &repeats, sizeof(repeats));
+		frontend->setDiseqcRepeats(repeats);
+		DBG("set diseqc repeats to %d", repeats);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SCANSETBOUQUETMODE:
+		read(connfd, &bouquetMode, sizeof(bouquetMode));
+		break;
+
+	case CZapitMessages::CMD_SET_RECORD_MODE:
+	{
+		CZapitMessages::commandSetRecordMode msgSetRecordMode;
+		read(connfd, &msgSetRecordMode, sizeof(msgSetRecordMode));
+		if (msgSetRecordMode.activate)
+			setRecordMode();
+		else
+			unsetRecordMode();
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_RECORD_MODE:
+	{
+		CZapitMessages::responseGetRecordModeState msgGetRecordModeState;
+		msgGetRecordModeState.activated = (currentMode & RECORD_MODE);
+		send(connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState), 0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SB_GET_PLAYBACK_ACTIVE:
+	{
+		CZapitMessages::responseGetPlaybackState msgGetPlaybackState;
+		if (video->isPlaying())
+			msgGetPlaybackState.activated = 1;
+		else
+			msgGetPlaybackState.activated = 0;
+		send(connfd, &msgGetPlaybackState, sizeof(msgGetPlaybackState), 0);
+		break;
+	}
+
+	case CZapitMessages::CMD_BQ_ADD_BOUQUET:
+	{
+		CZapitMessages::commandAddBouquet msgAddBouquet;
+		read(connfd, &msgAddBouquet, sizeof(msgAddBouquet));
+		bouquetManager->addBouquet(convert_to_UTF8(std::string(msgAddBouquet.name)));
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_DELETE_BOUQUET:
+	{
+		CZapitMessages::commandDeleteBouquet msgDeleteBouquet;
+		read(connfd, &msgDeleteBouquet, sizeof(msgDeleteBouquet)); // bouquet & channel number are already starting at 0!
+		bouquetManager->deleteBouquet(msgDeleteBouquet.bouquet);
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_RENAME_BOUQUET:
+	{
+		CZapitMessages::commandRenameBouquet msgRenameBouquet;
+		read(connfd, &msgRenameBouquet, sizeof(msgRenameBouquet)); // bouquet & channel number are already starting at 0!
+		if (msgRenameBouquet.bouquet < bouquetManager->Bouquets.size())
+			bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = convert_to_UTF8(std::string(msgRenameBouquet.name));
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:
+	{
+		CZapitMessages::commandExistsBouquet msgExistsBouquet;
+		CZapitMessages::responseGeneralInteger responseInteger;
+		read(connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
+		responseInteger.number = bouquetManager->existsBouquet(convert_to_UTF8(std::string(msgExistsBouquet.name)));
+		send(connfd, &responseInteger, sizeof(responseInteger), 0); // bouquet & channel number are already starting at 0!
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET:
+	{
+		CZapitMessages::commandExistsChannelInBouquet msgExistsChInBq;
+		CZapitMessages::responseGeneralTrueFalse responseBool;
+		read(connfd, &msgExistsChInBq, sizeof(msgExistsChInBq)); // bouquet & channel number are already starting at 0!
+		responseBool.status = bouquetManager->existsChannelInBouquet(msgExistsChInBq.bouquet, msgExistsChInBq.channel_id);
+		send(connfd, &responseBool, sizeof(responseBool), 0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_MOVE_BOUQUET:
+	{
+		CZapitMessages::commandMoveBouquet msgMoveBouquet;
+		read(connfd, &msgMoveBouquet, sizeof(msgMoveBouquet)); // bouquet & channel number are already starting at 0!
+		bouquetManager->moveBouquet(msgMoveBouquet.bouquet, msgMoveBouquet.newPos);
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_ADD_CHANNEL_TO_BOUQUET:
+	{
+		CZapitMessages::commandAddChannelToBouquet msgAddChannelToBouquet;
+		read(connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet)); // bouquet & channel number are already starting at 0!
+		addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.channel_id);
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET:
+	{
+		CZapitMessages::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
+		read(connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet)); // bouquet & channel number are already starting at 0!
+		if (msgRemoveChannelFromBouquet.bouquet < bouquetManager->Bouquets.size())
+			bouquetManager->Bouquets[msgRemoveChannelFromBouquet.bouquet]->removeService(msgRemoveChannelFromBouquet.channel_id);
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_MOVE_CHANNEL:
+	{
+		CZapitMessages::commandMoveChannel msgMoveChannel;
+		read(connfd, &msgMoveChannel, sizeof(msgMoveChannel)); // bouquet & channel number are already starting at 0!
+		if (msgMoveChannel.bouquet < bouquetManager->Bouquets.size())
+			bouquetManager->Bouquets[msgMoveChannel.bouquet]->moveService(msgMoveChannel.oldPos, msgMoveChannel.newPos,
+					(((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT)
+					 || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
+		break;
+	}
+
+	case CZapitMessages::CMD_BQ_SET_LOCKSTATE:
+	{
+		CZapitMessages::commandBouquetState msgBouquetLockState;
+		read(connfd, &msgBouquetLockState, sizeof(msgBouquetLockState)); // bouquet & channel number are already starting at 0!
+		if (msgBouquetLockState.bouquet < bouquetManager->Bouquets.size())
+			bouquetManager->Bouquets[msgBouquetLockState.bouquet]->bLocked = msgBouquetLockState.state;
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_SET_HIDDENSTATE:
+	{
+		CZapitMessages::commandBouquetState msgBouquetHiddenState;
+		read(connfd, &msgBouquetHiddenState, sizeof(msgBouquetHiddenState)); // bouquet & channel number are already starting at 0!
+		if (msgBouquetHiddenState.bouquet < bouquetManager->Bouquets.size())
+			bouquetManager->Bouquets[msgBouquetHiddenState.bouquet]->bHidden = msgBouquetHiddenState.state;
+		break;
+	}
+	
+	case CZapitMessages::CMD_BQ_RENUM_CHANNELLIST:
+		bouquetManager->renumServices();
+		break;
+
+	
+	case CZapitMessages::CMD_BQ_SAVE_BOUQUETS:
+	{
+		CZapitMessages::responseCmd response;
+		bouquetManager->saveBouquets();
+		response.cmd = CZapitMessages::CMD_READY;
+		send(connfd, &response, sizeof(response), 0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SB_START_PLAYBACK:
+		playbackStopForced = false;
+		startPlayBack();
+		break;
+
+		
+	case CZapitMessages::CMD_SB_STOP_PLAYBACK:
+		stopPlayBack();
+		playbackStopForced = true;
+		break;
+
+	case CZapitMessages::CMD_SET_DISPLAY_FORMAT:
+	{
+		CZapitMessages::commandInt msg;
+		read(connfd, &msg, sizeof(msg));
+		video->setCroppingMode((video_displayformat_t) msg.val);
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_AUDIO_MODE:
+	{
+		CZapitMessages::commandInt msg;
+		read(connfd, &msg, sizeof(msg));
+		audio->selectChannel((audio_channel_select_t) msg.val);
+		break;
+	}
+
+	case CZapitMessages::CMD_GETPIDS:
+	{
+		CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
+		responseGetOtherPIDs.vpid = channel->getVideoPid();
+		responseGetOtherPIDs.ecmpid = NONE; // TODO: remove
+		responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
+		responseGetOtherPIDs.pcrpid = channel->getPcrPid();
+		responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
+		send(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs), 0);
+		sendAPIDs(connfd);
+		break;
+	}
+
+	case CZapitMessages::CMD_SETSUBSERVICES:
+	{
+		CZapitClient::commandAddSubServices msgAddSubService;
+
+		while (read(connfd, &msgAddSubService, sizeof(msgAddSubService)))
+		{
+			t_original_network_id original_network_id = msgAddSubService.original_network_id;
+			t_service_id          service_id          = msgAddSubService.service_id;
+			nvodchannels.insert
+			(
+				std::pair <t_channel_id, CZapitChannel>
+				(
+					CREATE_CHANNEL_ID,
+					CZapitChannel
+					(
+					    "NVOD",
+					    service_id,
+					    msgAddSubService.transport_stream_id,
+					    original_network_id,
+					    1,
+					    channel->getDiSEqC(),
+					    channel->getCA_STATUS()
+					)
+				)
+			);
+		}
+
+		current_is_nvod = true;
+		break;
+	}
+
+	case CZapitMessages::CMD_REGISTEREVENTS:
+		eventServer->registerEvent(connfd);
+		break;
+
+	case CZapitMessages::CMD_UNREGISTEREVENTS :
+		eventServer->unRegisterEvent(connfd);
+		break;
+
+	case CZapitMessages::CMD_MUTE:
+	{
+		CZapitMessages::commandBoolean msgBoolean;
+		read(connfd, &msgBoolean, sizeof(msgBoolean));
+		if (msgBoolean.truefalse)
+			audio->mute();
+		else
+			audio->unmute();
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_VOLUME:
+	{
+		CZapitMessages::commandVolume msgVolume;
+		read(connfd, &msgVolume, sizeof(msgVolume));
+		audio->setVolume(msgVolume.left, msgVolume.right);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SET_STANDBY:
+	{
+		CZapitMessages::commandBoolean msgBoolean;
+		read(connfd, &msgBoolean, sizeof(msgBoolean));
+		if (msgBoolean.truefalse)
+			enterStandby();
+		else
+			leaveStandby();
+		break;
+	}
+	
+	default:
+		WARN("unknown command %d (version %d)", rmsg.cmd, CZapitMessages::ACTVERSION);
+		break;
+	}
 
 	DBG("cmd %d processed", rmsg.cmd);
 
 	return true;
-}
-
-int main (int argc, char **argv)
-{
-	CZapitClient::responseGetLastChannel test_lastchannel;
-	int i;
-
-	fprintf(stdout, "$Id: zapit.cpp,v 1.277 2002/12/18 12:39:14 thegoodguy Exp $\n");
-
-	if (argc > 1)
-	{
-		for (i = 1; i < argc ; i++)
-		{
-			if (!strcmp(argv[i], "-d"))
-			{
-				debug = true;
-			}
-			else if (!strcmp(argv[i], "-q"))
-			{
-				/* don't say anything */
-				int fd;
-
-				close(STDOUT_FILENO);
-				if ((fd = open("/dev/null", O_WRONLY)) != STDOUT_FILENO)
-					close(fd);
-
-				close(STDERR_FILENO);
-				if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
-					close(fd);
-			}
-			else
-			{
-				fprintf(stdout, "Usage: %s [-d] [-q]\n", argv[0]);
-				exit(0);
-			}
-		}
-	}
-
-	scan_runs = 0;
-	found_transponders = 0;
-	found_channels = 0;
-	curr_sat = -1;
-
-	/* load configuration or set defaults if no configuration file exists */
-	if (!config.loadConfig(CONFIGFILE))
-		WARN("%s not found", CONFIGFILE);
-
-	/* create bouquet manager */
-	bouquetManager = new CBouquetManager();
-
-	test_lastchannel = load_settings();
-
-	if (test_lastchannel.mode == 'r')
-		setRadioMode();
-	else
-		setTVMode();
-
-	if (prepare_channels() < 0)
-		WARN("error parsing services");
-	else
-		INFO("channels have been loaded succesfully");
-
-	/* initialize frontend */
-	frontend = new CFrontend();
-
-	if (!frontend->isInitialized())
-	{
-		WARN("unable to initialize frontend device");
-		CZapitDestructor();
-	}
-	else
-	{
-		char tmp[16];
-
-		frontend->setDiseqcType((diseqc_t) config.getInt32("diseqcType", NO_DISEQC));
-		frontend->setDiseqcRepeats(config.getInt32("diseqcRepeats", 0));
-
-		for (i = 0; i < MAX_LNBS; i++)
-		{
-			/* low offset */
-			sprintf(tmp, "lnb%d_OffsetLow", i);
-			frontend->setLnbOffset(false, i, config.getInt32(tmp, 9750000));
-			/* high offset */
-			sprintf(tmp, "lnb%d_OffsetHigh", i);
-			frontend->setLnbOffset(true, i, config.getInt32(tmp, 10600000));
-		}
-	}
-
-	audio = new CAudio();
-
-	if (!audio->isInitialized())
-		WARN("unable to initialize audio device");
-
-	video = new CVideo();
-
-	if (!video->isInitialized())
-		WARN("unable to initialize video device");
-
-	/* initialize cam */
-	cam = new CCam();
-
-	signal(SIGHUP, signal_handler);
-	signal(SIGTERM, signal_handler);
-	signal(SIGUSR1, signal_handler);
-
-	CBasicServer zapit_server;
-
-	if (!zapit_server.prepare(ZAPIT_UDS_NAME))
-		return -1;
-
-	if (debug == false)
-	{
-		switch (fork())
-		{
-			case -1: /* can't fork */
-				ERROR("fork");
-				return -1;
-
-			case 0: /* child, process becomes a daemon */
-				if (setsid() == -1)
-				{
-					ERROR("setsid");
-					return -1;
-				}
-				break;
-
-			default: /* parent returns to calling process */
-				return 0;
-		}
-	}
-
-	// create eventServer
-	eventServer = new CEventServer;
-
-	zapit_server.run(parse_command, CZapitMessages::ACTVERSION);
-
-	CZapitDestructor(); // <- should not return
-
-	sleep(5);
-
-	return 1;
 }
 
 /****************************************************************/
@@ -1374,6 +1218,107 @@ int stopPlayBack()
 	return 0;
 }
 
+void enterStandby(void)
+{
+	if (standby)
+	{
+		sleep(1);
+		return;
+	}
+
+	standby = true;
+
+	saveSettings(true);
+
+	stopPlayBack();
+
+	if (dmx_audio_fd != -1) {
+		close(dmx_audio_fd);
+		dmx_audio_fd = -1;
+	}
+	
+	if (dmx_pcr_fd != -1) {
+		close(dmx_pcr_fd);
+		dmx_pcr_fd = -1;
+	}
+
+	if (dmx_teletext_fd != -1) {
+		close(dmx_teletext_fd);
+		dmx_teletext_fd = -1;
+	}
+
+	if (dmx_video_fd != -1) {
+		close(dmx_video_fd);
+		dmx_video_fd = -1;
+	}
+
+	if (audio) {
+		audio->mute();
+		delete audio;
+		audio = NULL;
+	}
+
+	if (cam) {
+		delete cam;
+		cam = NULL;
+	}
+
+	if (frontend) {
+		delete frontend;
+		frontend = NULL;
+	}
+
+	if (video) {
+		delete video;
+		video = NULL;
+	}
+}
+
+void leaveStandby(void)
+{
+	if (!audio) {
+		audio = new CAudio();
+		audio->unmute();
+	}
+
+	if (!cam) {
+		cam = new CCam();
+	}
+
+	if (!frontend) {
+		frontend = new CFrontend();
+	}
+
+	if (!video) {
+		video = new CVideo();
+	}
+
+	frontend->setDiseqcType((diseqc_t) config.getInt32("diseqcType", NO_DISEQC));
+	frontend->setDiseqcRepeats(config.getInt32("diseqcRepeats", 0));
+
+	for (unsigned int i = 0; i < MAX_LNBS; i++) {
+		char tmp[16];
+		sprintf(tmp, "lnb%d_OffsetLow", i);
+		frontend->setLnbOffset(false, i, config.getInt32(tmp, 9750000));
+		sprintf(tmp, "lnb%d_OffsetHigh", i);
+		frontend->setLnbOffset(true, i, config.getInt32(tmp, 10600000));
+	}
+
+	if (!audio->isInitialized())
+		WARN("unable to initialize audio device");
+
+	if (!frontend->isInitialized())
+		WARN("unable to initialize frontend device");
+
+	if (!video->isInitialized())
+		WARN("unable to initialize video device");
+
+	if (channel)
+		zapit(channel->getChannelID(), current_is_nvod);
+
+	standby = false;
+}
+
 unsigned zapTo(const unsigned int bouquet, const unsigned int channel)
 {
 	if (bouquet >= bouquetManager->Bouquets.size())
@@ -1435,3 +1380,122 @@ unsigned zapTo(const unsigned int channel)
 	else
 		return 0;
 }
+
+void signal_handler (int signum)
+{
+	switch (signum) {
+	case SIGUSR1:
+		debug = !debug;
+		break;
+	default:
+		enterStandby();
+		exit(0);
+	}
+}
+
+int main (int argc, char **argv)
+{
+	CZapitClient::responseGetLastChannel test_lastchannel;
+	int i;
+
+	fprintf(stdout, "$Id: zapit.cpp,v 1.278 2002/12/20 19:19:46 obi Exp $\n");
+
+	if (argc > 1)
+	{
+		for (i = 1; i < argc ; i++)
+		{
+			if (!strcmp(argv[i], "-d"))
+			{
+				debug = true;
+			}
+			else if (!strcmp(argv[i], "-q"))
+			{
+				/* don't say anything */
+				int fd;
+
+				close(STDOUT_FILENO);
+				if ((fd = open("/dev/null", O_WRONLY)) != STDOUT_FILENO)
+					close(fd);
+
+				close(STDERR_FILENO);
+				if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
+					close(fd);
+			}
+			else
+			{
+				fprintf(stdout, "Usage: %s [-d] [-q]\n", argv[0]);
+				exit(0);
+			}
+		}
+	}
+
+	scan_runs = 0;
+	found_transponders = 0;
+	found_channels = 0;
+	curr_sat = -1;
+
+	/* load configuration or set defaults if no configuration file exists */
+	if (!config.loadConfig(CONFIGFILE))
+		WARN("%s not found", CONFIGFILE);
+
+	/* create bouquet manager */
+	bouquetManager = new CBouquetManager();
+
+	test_lastchannel = load_settings();
+
+	if (test_lastchannel.mode == 'r')
+		setRadioMode();
+	else
+		setTVMode();
+
+	if (prepare_channels() < 0)
+		WARN("error parsing services");
+	else
+		INFO("channels have been loaded succesfully");
+
+	signal(SIGHUP, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGUSR1, signal_handler);
+
+	leaveStandby();
+
+	CBasicServer zapit_server;
+
+	if (!zapit_server.prepare(ZAPIT_UDS_NAME))
+		return -1;
+
+	if (debug == false)
+	{
+		switch (fork())
+		{
+			case -1: /* can't fork */
+				ERROR("fork");
+				return -1;
+
+			case 0: /* child, process becomes a daemon */
+				if (setsid() == -1)
+				{
+					ERROR("setsid");
+					return -1;
+				}
+				break;
+
+			default: /* parent returns to calling process */
+				return 0;
+		}
+	}
+
+	// create eventServer
+	eventServer = new CEventServer;
+
+	zapit_server.run(parse_command, CZapitMessages::ACTVERSION);
+
+	enterStandby();
+
+	delete bouquetManager;
+	delete eventServer;
+
+	return 0;
+}
+
+
