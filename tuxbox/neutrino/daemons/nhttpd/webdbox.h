@@ -99,7 +99,7 @@ public:
 	bool ShowControlpanel(CWebserverRequest* request);
 	void ShowCurrentStreamInfo(CWebserverRequest* request);
 	bool ShowEpg(CWebserverRequest* request,string EpgID,string Startzeit = "");
-	void ShowEPG(CWebserverRequest *request,CEPGData *epg);
+	void ShowEPG(CWebserverRequest *request,string Title, string Info1, string Info2);
 	bool ShowActualEpg(CWebserverRequest *request);
 
 
