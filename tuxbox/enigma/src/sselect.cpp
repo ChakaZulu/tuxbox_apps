@@ -394,31 +394,21 @@ void eServiceSelector::setKeyDescriptions( bool editMode )
 	}
 }
 
+extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
+
 void eServiceSelector::addService(const eServiceReference &ref)
 {
 	if ( eZap::getInstance()->getServiceSelector() == this )
 	{
 #ifndef DISABLE_FILE
-		if ((eDVB::getInstance()->recorder || streaming) && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
-		{
-			eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
-			if (streaming)
-			{
-				eServiceReferenceDVB &str = (eServiceReferenceDVB&) streamingRef;
-				if ( str.getTransportStreamID() != Ref.getTransportStreamID() ||
-					str.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
-					str.getDVBNamespace() != Ref.getDVBNamespace() )
-					return;
-			}
-			else
-			{
-				eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-				if ( rec.getTransportStreamID() != Ref.getTransportStreamID() ||
-					rec.getOriginalNetworkID() != Ref.getOriginalNetworkID() ||
-					rec.getDVBNamespace() != Ref.getDVBNamespace() )
-					return;
-			}
-		}
+		eServiceReferenceDVB temp;
+		eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
+		eServiceReferenceDVB &rec =
+			eDVB::getInstance()->recorder ? eDVB::getInstance()->recorder->recRef :
+			streaming ? (eServiceReferenceDVB&) streamingRef :
+			temp;
+		if ( rec && !onSameTP(Ref,rec) )
+			return;
 #endif
 	}
 	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
