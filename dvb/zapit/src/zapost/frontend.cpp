@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.7 2002/04/22 02:47:02 obi Exp $
+ * $Id: frontend.cpp,v 1.8 2002/04/22 18:11:56 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -316,7 +316,7 @@ const bool CFrontend::getEvent ()
 
 	failed = true;
 
-	switch (poll(pfd, 1, 1000))
+	switch (poll(pfd, 1, 2000))
 	{
 	case -1:
 		perror("[CFrontend::getEvent] poll");
