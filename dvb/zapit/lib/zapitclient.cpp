@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.1 2002/01/06 19:10:06 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.2 2002/01/07 21:14:24 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.2  2002/01/07 21:14:24  Simplex
+  functions for start and stop videoplayback
+
   Revision 1.1  2002/01/06 19:10:06  Simplex
   made clientlib for zapit
   implemented bouquet-editor functions in lib
@@ -210,6 +213,29 @@ void CZapitClient::renumChannellist()
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
 	msgHead.cmd=CMD_BQ_RENUM_CHANNELLIST;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	zapit_close();
+}
+
+
+void CZapitClient::startPlayBack()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SB_START_PLAYBACK;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	zapit_close();
+}
+
+void CZapitClient::stopPlayBack()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SB_STOP_PLAYBACK;
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
