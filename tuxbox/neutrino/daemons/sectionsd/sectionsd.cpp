@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.133 2002/10/02 17:52:49 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.134 2002/10/02 21:00:15 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.134  2002/10/02 21:00:15  thegoodguy
+//  Only read 3 bytes of eit table first, fixed memory leak & locking problem
+//
 //  Revision 1.133  2002/10/02 17:52:49  thegoodguy
 //  Make driver developers happy :)
 //
@@ -1897,7 +1900,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.133 2002/10/02 17:52:49 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.134 2002/10/02 21:00:15 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4190,7 +4193,7 @@ static void *eitThread(void *)
 
 			dmxEIT.lock();
 			dputs("[eitThread] read");
-			int rc = dmxEIT.read((char *) & header, sizeof(header), timeoutInMSeconds);
+			int rc = dmxEIT.read((char *) &header, 3, timeoutInMSeconds);
 
 			if (!rc)
 			{
@@ -4211,7 +4214,7 @@ static void *eitThread(void *)
 
 			timeoutsDMX = 0;
 			buf = new char[3 + header.section_length];
-
+			
 			if (!buf)
 			{
 				dmxEIT.closefd();
@@ -4219,15 +4222,9 @@ static void *eitThread(void *)
 				fprintf(stderr, "[eitThread] Not enough memory!\n");
 				break;
 			}
-
-			// Den Header kopieren
-			memcpy(buf, &header, min((unsigned int)(3 + header.section_length), sizeof(header)));
-
-			if (header.section_length > 5)
-			    rc = dmxEIT.read(buf + sizeof(header), header.section_length - 5, timeoutInMSeconds);
-
-			if (header.section_length < 5)
-			    continue;
+			    
+			if (header.section_length > 0)
+				rc = dmxEIT.read(buf + 3, header.section_length, timeoutInMSeconds);
 
 			dmxEIT.unlock();
 
@@ -4250,11 +4247,22 @@ static void *eitThread(void *)
 				continue;
 			}
 
+			if (header.section_length < 5)
+			{
+				delete[] buf;
+				continue;
+			}
+
 			if (((header.table_id ^ dmxEIT.filters[dmxEIT.filter_index].filter) & dmxEIT.filters[dmxEIT.filter_index].mask) != 0)
 			{
-			    dprintf("[eitThread] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", dmxEIT.filters[dmxEIT.filter_index].filter, dmxEIT.filters[dmxEIT.filter_index].mask, header.table_id);
-			    continue;
+				dprintf("[eitThread] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", dmxEIT.filters[dmxEIT.filter_index].filter, dmxEIT.filters[dmxEIT.filter_index].mask, header.table_id);
+				delete[] buf;
+				continue;
 			}
+
+			// Den Header kopieren
+			memcpy(buf, &header, 3);
+			memcpy(((char *)&header) + 3, buf + 3, min((unsigned int)header.section_length, sizeof(header) - 3));
 
 			if ((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
 			{
@@ -4565,7 +4573,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.133 2002/10/02 17:52:49 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.134 2002/10/02 21:00:15 thegoodguy Exp $\n");
 
 	try
 	{
