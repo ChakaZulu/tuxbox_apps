@@ -5,32 +5,45 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
- *    V1.7 (LazyT): speedup?, neutrino look ;)                                *
- *    V1.6 (LazyT): added transparency mode                                   *
- *    V1.5 (LazyT): added newsflash/subtitle support                          *
- *    V1.4 (LazyT): skip not received pages on +/-10, some mods               *
- *    V1.3 (LazyT): segfault fixed                                            *
- *    V1.2 (trh)  : made it work under enigma                                 *
- *    V1.1 (LazyT): added tuxtxt to cvs                                       *
+ *    V1.8: zap subpages, picture&text mode, subtitle fixed                   *
+ *    V1.7: speedup?, neutrino look ;)                                        *
+ *    V1.6: added transparency mode                                           *
+ *    V1.5: added newsflash/subtitle support                                  *
+ *    V1.4: skip not received pages on +/-10, some mods                       *
+ *    V1.3: segfault fixed                                                    *
+ *    V1.2: made it work under enigma                                         *
+ *    V1.1: added tuxtxt to cvs                                               *
  ******************************************************************************/
 
 #include "tuxtxt.h"
 
 /******************************************************************************
- * entry function                                                             *
+ * plugin_exec                                                                *
  ******************************************************************************/
 
 void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.7 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox Team\n\n");
+		printf("\nTuxTxt 1.8 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
+		vtxtpid = -1;
+		fb = -1;
+		rc = -1;
+		sx = -1;
+		ex = -1;
+		sy = -1;
+		ey = -1;
+
 		for(; par; par = par->next)
 		{
-			if(!strcmp(par->id, P_ID_FBUFFER))
+			if (!strcmp(par->id, P_ID_VTXTPID))
+			{
+				vtxtpid = atoi(par->val);
+			}
+			else if(!strcmp(par->id, P_ID_FBUFFER))
 			{
 				fb = atoi(par->val);
 			}
@@ -38,21 +51,17 @@ void plugin_exec(PluginParam *par)
 			{
 				rc = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_VTXTPID))
-			{
-				vtxtpid = atoi(par->val);
-			}
 			else if (!strcmp(par->id, P_ID_OFF_X))
 			{
 				sx = atoi(par->val);
 			}
-			else if (!strcmp(par->id, P_ID_OFF_Y))
-			{
-				sy = atoi(par->val);
-			}
 			else if (!strcmp(par->id, P_ID_END_X))
 			{
 				ex = atoi(par->val);
+			}
+			else if (!strcmp(par->id, P_ID_OFF_Y))
+			{
+				sy = atoi(par->val);
 			}
 			else if (!strcmp(par->id, P_ID_END_Y))
 			{
@@ -60,423 +69,114 @@ void plugin_exec(PluginParam *par)
 			}
 		}
 
-		if(fb == -1 || rc == -1 || vtxtpid == -1 || sx == -1 || sy == -1 || ex == -1 || ey == -1)
+		if(vtxtpid == -1 || fb == -1 || rc == -1 || sx == -1 || ex == -1 || sy == -1 || ey == -1)
 		{
-			printf("invalid params: fb = %d, rc = %d, vtxtpid = %X, sx = %d, ex = %d, sy = %d, ey = %d\nTuxtxt aborted!\n\n", fb, rc, vtxtpid, sx, ex, sy, ey);
+			printf("TuxTxt <Invalid Param(s)>\n");
 			return;
 		}
 
-	//init
+	//initialisations
 
-		if(!Init())
-		{
-			printf("TuxTxt aborted!\n\n");
-			return;
-		}
+		if(Init() == 0) return;
 
 	//main loop
 
 		do
 		{
-			if(GetRCCode())
+			if(GetRCCode() == 1)
 			{
 				switch(RCCode)
 				{
-					case RC_0:	//direct page number or page 100
-
-									if(PageInputCount == 2)
-									{
-										PageInput = 0;
-										PageInputCount = 2;
-										Page = 0x100;
-										update = 1;
-									}
-									else
-									{
-										RenderPageNumber('0');
-										PageInputCount--;
-									}
+					case RC_UP:		GetNextPageOne();
 									break;
 
-					case RC_1:	//direct page number
-
-									RenderPageNumber('1');
-									PageInput |= 1 << PageInputCount*4;
-									PageInputCount--;
+					case RC_DOWN:	GetPrevPageOne();
 									break;
 
-					case RC_2:	//direct page number
-
-									RenderPageNumber('2');
-									PageInput |= 2 << PageInputCount*4;
-									PageInputCount--;
+					case RC_RIGHT:	GetNextPageTen();
 									break;
 
-					case RC_3:	//direct page number
-
-									RenderPageNumber('3');
-									PageInput |= 3 << PageInputCount*4;
-									PageInputCount--;
+					case RC_LEFT:	GetPrevPageTen();
 									break;
 
-					case RC_4:	//direct page number
-
-									RenderPageNumber('4');
-									PageInput |= 4 << PageInputCount*4;
-									PageInputCount--;
+					case RC_PLUS:	GetNextSubPage();
 									break;
 
-					case RC_5:	//direct page number
-
-									RenderPageNumber('5');
-									PageInput |= 5 << PageInputCount*4;
-									PageInputCount--;
+					case RC_MINUS:	GetPrevSubPage();
 									break;
 
-					case RC_6:	//direct page number
-
-									RenderPageNumber('6');
-									PageInput |= 6 << PageInputCount*4;
-									PageInputCount--;
+					case RC_0:		PageInput(0);
 									break;
 
-					case RC_7:	//direct page number
-
-									RenderPageNumber('7');
-									PageInput |= 7 << PageInputCount*4;
-									PageInputCount--;
+					case RC_1:		PageInput(1);
 									break;
 
-					case RC_8:	//direct page number
-
-									RenderPageNumber('8');
-									PageInput |= 8 << PageInputCount*4;
-									PageInputCount--;
+					case RC_2:		PageInput(2);
 									break;
 
-					case RC_9:	//direct page number
-
-									if(PageInputCount == 2)
-									{
-									  break;
-									}
-									else
-									{
-										RenderPageNumber('9');
-										PageInput |= 9 << PageInputCount*4;
-									}
-
-									PageInputCount--;
+					case RC_3:		PageInput(3);
 									break;
 
-					case RC_UP:	//page +1
-
-									PageInput = 0;
-									PageInputCount = 2;
-
-									if(Page < 0x899)
-									{
-										Page++;
-
-										if((Page & 0x00F) > 0x09)
-										{
-											Page += 0x06;
-										}
-
-										if((Page & 0x0F0) > 0x90)
-										{
-											Page += 0x60;
-										}
-									}
-									else
-									{
-										Page = 0x100;
-									}
-
-								//skip not received pages
-
-									if(pagetable[Page] == 0)
-									{
-										for( ; Page < 0x900; Page++)
-										{
-											if(Page > 0x899)
-											{
-												Page = 0x100;
-											}
-
-											if(pagetable[Page] == 1)
-											{
-												break;
-											}
-										}
-									}
-
-								//feedback
-
-									PosX = StartX + 8*fontwidth;
-									PosY = StartY;
-									RenderCharFB('-', white);
-									RenderCharFB('-', white);
-									RenderCharFB('>', white);
-
-									update = 1;
+					case RC_4:		PageInput(4);
 									break;
 
-					case RC_DOWN://page -1
-
-									PageInput = 0;
-									PageInputCount = 2;
-
-									if(Page > 0x100)
-									{
-										Page--;
-
-										if((Page & 0x00F) > 0x09)
-										{
-											Page -= 0x06;
-										}
-
-										if((Page & 0x0F0) > 0x90)
-										{
-											Page -= 0x60;
-										}
-									}
-									else
-									{
-										Page = 0x899;
-									}
-
-								//skip not received pages
-
-									if(pagetable[Page] == 0)
-									{
-										for( ; Page > 0x100; Page--)
-										{
-											if(pagetable[Page] == 1)
-											{
-												break;
-											}
-										}
-									}
-
-								//feedback
-
-									PosX = StartX + 8*fontwidth;
-									PosY = StartY;
-									RenderCharFB('<', white);
-									RenderCharFB('-', white);
-									RenderCharFB('-',white);
-
-									update = 1;
+					case RC_5:		PageInput(5);
 									break;
 
-					case RC_RIGHT://page +10
-
-									PageInput = 0;
-									PageInputCount = 2;
-									Page &= 0xFF0;
-
-									if((Page & 0x0F0) == 0x90)
-									{
-										Page += 0x70;
-									}
-									else
-									{
-										Page += 0x10;
-									}
-
-									if(Page == 0x900)
-									{
-										Page = 0x100;
-									}
-
-								//skip not received pages
-
-									if(pagetable[Page] == 0)
-									{
-										for( ; Page < 0x900; Page+=0x10)
-										{
-											if(Page > 0x899)
-											{
-												Page = 0x100;
-											}
-
-											if(pagetable[Page] == 1)
-											{
-												break;
-											}
-										}
-									}
-
-								//feedback
-
-									PosX = StartX + 8*fontwidth;
-									PosY = StartY;
-									RenderCharFB('-', white);
-									RenderCharFB('>', white);
-									RenderCharFB('>', white);
-
-									update = 1;
+					case RC_6:		PageInput(6);
 									break;
 
-					case RC_LEFT://page -10
-
-									PageInput = 0;
-									PageInputCount = 2;
-
-									if((Page & 0x00F) == 0)
-									{
-										Page -= 0x10;
-									}
-									else
-									{
-										Page &= 0xFF0;
-									}
-
-									if((Page & 0x0F0) == 0xF0)
-									{
-										Page &= 0xFF0;
-										Page -= 0x60;
-									}
-
-									if(Page == 0x090)
-									{
-										Page = 0x890;
-									}
-
-								//skip not received pages
-
-									if(pagetable[Page] == 0)
-									{
-										for( ; Page > 0x100; Page-=0x10)
-										{
-											if(pagetable[Page] == 1)
-											{
-												break;
-											}
-										}
-									}
-
-								//feedback
-
-									PosX = StartX + 8*fontwidth;
-									PosY = StartY;
-									RenderCharFB('<', white);
-									RenderCharFB('<', white);
-									RenderCharFB('-', white);
-
-									update = 1;
+					case RC_7:		PageInput(7);
 									break;
 
-					case RC_OK:	//set display mode
+					case RC_8:		PageInput(8);
+									break;
 
-								visible++;
+					case RC_9:		PageInput(9);
+									break;
 
-								switch(visible)
-								{
-									case 3:	//same as hidden but reset modecounter
+					case RC_OK:		SwitchTranspMode();
+									break;
 
-											 visible = 0;
-
-									case 0:	//hidden
-
-											ClearFramebuffer(transp);
-
-											PosX = StartX + fontwidth*3;
-											PosY = StartY + fontheight*2;
-											RenderCharFB(249, transp<<4 | yellow);
-											RenderCharFB(250, transp<<4 | yellow);
-											RenderCharFB(251, transp<<4 | yellow);
-											PosX = StartX + fontwidth*3;
-											PosY = StartY + fontheight*3;
-											RenderCharFB(252, transp<<4 | yellow);
-											RenderCharFB(253, transp<<4 | yellow);
-											RenderCharFB(254, transp<<4 | yellow);
-											break;
-
-									case 1:	//normal
-									case 2:	//transp
-											update = 1;
-											break;
-								}
-
-								show_string = 1;
-								break;
-				}
-
-				if(PageInputCount < 0)
-				{
-					Page = PageInput;
-					PageInput = 0;
-					PageInputCount = 2;
-					update = 1;
-					show_string = 1;
+					case RC_DBOX:	SwitchScreenMode();
+									break;
 				}
 			}
 
-			RenderPage();
+			//update page or timestring
+
+				RenderPage();
+
 		}
 		while(RCCode != RC_HOME);
 
-	//cleanup
+	//exit
 
-		printf("stopping decode-thread...");
-		if(pthread_cancel(thread_id1) != 0)
-		{
-			printf("cancel failed!\n\n");
-			return;
-		}
-		if(pthread_join(thread_id1, &thread_result1) != 0)
-		{
-			printf("join failed!\n\n");
-			return;
-		}
-		printf("done\n\n");
-
-		ioctl(dmx, DMX_STOP);
-
-		close(dmx);
-
-		FT_Done_FreeType(library);
-
-		munmap(lfb, fix_screeninfo.smem_len);
-
-		free(pagebuffer);
+		CleanUp();
 }
 
 /******************************************************************************
- * init                                                                       *
+ * Init                                                                       *
  ******************************************************************************/
 
 int Init()
 {
 	struct dmxPesFilterParams dmx_flt;
-
-	//calculate screen position
-
-		if(ex-sx >= 40*fontwidth)
-		{
-			StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
-		}
-		else
-		{
-			StartX = ex - 40*fontwidth;
-		}
-
-		if(ey-sy >= 24*fontheight)
-		{
-			StartY = sy + (((ey-sy) - 24*fontheight) / 2);
-		}
-		else
-		{
-			StartY = sy + fontheight/2;
-		}
+	int error;
 
 	//open demuxer
 
-		if((dmx = open("/dev/ost/demux0", O_RDWR | O_NONBLOCK)) == -1)
+		if((dmx = open("/dev/ost/demux0", O_RDWR)) == -1)
 		{
-			perror("open demuxer failed");
+			perror("TuxTxt <open /dev/ost/demux0>");
+			return 0;
+		}
+
+	//open pig
+
+		if((pig = open("/dev/dbox/pig0", O_RDONLY)) == -1)
+		{
+			perror("TuxTxt <open /dev/dbox/pig0>");
 			return 0;
 		}
 
@@ -485,48 +185,43 @@ int Init()
 		fcntl(rc, F_SETFL, O_NONBLOCK);
 		ioctl(rc, RC_IOCTL_BCODES, 1);
 
-	//allocate pagebuffer & init all buffers
-
-		if((pagebuffer = malloc(0x899 * 40*24)) == 0)
-		{
-			perror("allocate pagebuffers failed");
-			return 0;
-		}
-
-		memset(pagebuffer, ' ', 0x899 * 40*24);
-		memset(pagetable, 0, 0x899);
-		memset(page_char, ' ', sizeof(page_char));
-		memset(page_atrb, transp<<4 | transp, sizeof(page_atrb));
-
 	//init fontlibrary
 
-		if(FT_Init_FreeType(&library) != 0)
+		if((error = FT_Init_FreeType(&library)) != 0)
 		{
-			printf("init fontlibrary failed!\n");
+			printf("TuxTxt <FT_Init_FreeType => 0x%.2X>", error);
 			return 0;
 		}
 
 	//load font
 
-		if(FT_New_Face(library, FONTDIR "/tuxtxt.fon", 0, &face) != 0)
+		if((error = FT_New_Face(library,"/share/fonts/tuxtxt.fon", 0, &face)) != 0)
 		{
-			printf("loading font \"tuxtxt.fon\" failed!\n");
+			printf("TuxTxt <FT_New_Face => 0x%.2X>", error);
 			return 0;
 		}
 
 	//set fontsize
 
-		if(FT_Set_Pixel_Sizes(face, fontwidth, fontheight) != 0)
+		fontwidth  = 16;
+		fontheight = 22;
+
+		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
 		{
-			printf("setting fontsize %dx%d failed!\n", fontwidth, fontheight);
+			printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
 			return 0;
 		}
+
+	//center screen
+
+		StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
+		StartY = sy + (((ey-sy) - 24*fixfontheight) / 2);
 
 	//get fixed screeninfo
 
 		if (ioctl(fb, FBIOGET_FSCREENINFO, &fix_screeninfo) == -1)
 		{
-			perror("getting fixed screeninfo failed");
+			perror("TuxTxt <FBIOGET_FSCREENINFO>");
 			return 0;
 		}
 
@@ -534,7 +229,7 @@ int Init()
 
 		if (ioctl(fb, FBIOGET_VSCREENINFO, &var_screeninfo) == -1)
 		{
-			perror("getting variable screeninfo failed");
+			perror("TuxTxt <FBIOGET_VSCREENINFO>");
 			return 0;
 		}
 
@@ -542,7 +237,7 @@ int Init()
 
 		if (ioctl(fb, FBIOPUTCMAP, &colormap) == -1)
 		{
-			perror("setting palette failed");
+			perror("TuxTxt <FBIOPUTCMAP>");
 			return 0;
 		}
 
@@ -552,11 +247,32 @@ int Init()
 
 		if(!lfb)
 		{
-			perror("mapping framebuffer failed");
+			perror("TuxTxt <mmap>");
 			return 0;
 		}
 
-	//set filter
+	//init data
+
+		memset(&cachetable, 0, sizeof(cachetable));
+		memset(&subpagetable, 0xFF, sizeof(subpagetable));
+		memset(&backbuffer, black, sizeof(backbuffer));
+
+		page_atrb[32] = transp<<4 | transp;
+
+		inputcounter = 2;
+
+		current_page	= -1;
+		current_subpage	= -1;
+
+		page	 = 0x100;
+		lastpage = 0x100;
+		subpage	 = 0;
+
+		pageupdate = 0;
+
+		zap_subpage_manual = 0;
+
+	//set filter & start demuxer
 
 		dmx_flt.pid		= vtxtpid;
 		dmx_flt.input	= DMX_IN_FRONTEND;
@@ -566,43 +282,655 @@ int Init()
 
 		if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
 		{
-			perror("set filter failed");
+			perror("TuxTxt <DMX_SET_PES_FILTER>");
 			return 0;
 		}
+
+	//show infobar
+
+		RenderPageNotFound();
 
 	//create decode-thread
 
-		printf("starting decode-thread...");
-		if(pthread_create(&thread_id1, NULL, DecodePacket, NULL) != 0)
+		if(pthread_create(&thread_id, NULL, CacheThread, NULL) != 0)
 		{
-			perror("could not create decode-thread");
+			perror("TuxTxt <pthread_create>");
 			return 0;
 		}
-		printf("done\n");
 
-	//init successfully
+	//init successfull
 
 		return 1;
 }
 
 /******************************************************************************
- * clear framebuffer                                                          *
+ * Cleanup                                                                    *
  ******************************************************************************/
 
-void ClearFramebuffer(int color)
+void CleanUp()
 {
-	memset(lfb, color, var_screeninfo.xres * var_screeninfo.yres);
+	int clear_page, clear_subpage;
+
+	//hide pig
+
+		avia_pig_hide(pig);
+
+	//stop decode-thread
+
+		if(pthread_cancel(thread_id) != 0)
+		{
+			perror("TuxTxt <pthread_cancel>");
+			return;
+		}
+
+		if(pthread_join(thread_id, &thread_result) != 0)
+		{
+			perror("TuxTxt <pthread_join>");
+			return;
+		}
+
+	//stop & close demuxer
+
+		ioctl(dmx, DMX_STOP);
+		close(dmx);
+
+	//close freetype
+
+		FT_Done_FreeType(library);
+
+	//unmap framebuffer
+
+		munmap(lfb, fix_screeninfo.smem_len);
+
+	//free pagebuffers
+
+		for(clear_page = 0; clear_page < 0x8FF; clear_page++)
+		{
+			for(clear_subpage = 0; clear_subpage < 0x79; clear_subpage++)
+			{
+				if(cachetable[clear_page][clear_subpage] != 0);
+				{
+					free(cachetable[clear_page][clear_subpage]);
+				}
+			}
+		}
 }
 
 /******************************************************************************
- * render char to backbuffer                                                  *
+ * PageInput                                                                  *
  ******************************************************************************/
 
-void RenderChar(int Char, int Attribute)
+void PageInput(int Number)
+{
+	static int temp_page;
+
+	//clear temp_page
+
+		if(inputcounter == 2) temp_page = 0;
+
+	//check for 0 & 9 on first position
+
+		if(Number == 0 && inputcounter == 2)
+		{
+			//show feedback
+
+				PosX = StartX + 8*fontwidth;
+				PosY = StartY;
+				RenderCharFB('<', white);
+				RenderCharFB('0', white);
+				RenderCharFB('>', white);
+
+			//set page
+
+				temp_page = 0x100;
+
+				inputcounter = -1;
+		}
+		else if(Number == 9 && inputcounter == 2)
+		{
+			//show feedback
+
+				PosX = StartX + 8*fontwidth;
+				PosY = StartY;
+				RenderCharFB('<', white);
+				RenderCharFB('9', white);
+				RenderCharFB('>', white);
+
+			//set page
+
+				temp_page = lastpage;
+
+				inputcounter = -1;
+		}
+
+	//show pageinput
+
+		PosY = StartY;
+
+		switch(inputcounter)
+		{
+			case 2:	PosX = StartX + 8*fontwidth;
+					RenderCharFB(Number | '0', white);
+					RenderCharFB('-', white);
+					RenderCharFB('-', white);
+					break;
+
+			case 1:	PosX = StartX + 9*fontwidth;
+					RenderCharFB(Number | '0', white);
+					break;
+
+			case 0:	PosX = StartX + 10*fontwidth;
+					RenderCharFB(Number | '0', white);
+					break;
+		}
+
+	//generate pagenumber
+
+		temp_page |= Number << inputcounter*4;
+
+		inputcounter--;
+
+		if(inputcounter < 0)
+		{
+			//disable subpage zapping
+
+				zap_subpage_manual = 0;
+
+			//reset input
+
+				inputcounter = 2;
+
+			//set new page
+
+				lastpage = page;
+
+				page = temp_page;
+
+			//check cache
+
+				if(subpagetable[page] != 0xFF)
+				{
+					subpage = subpagetable[page];
+					pageupdate = 1;
+					printf("TuxTxt <DirectInput => %.3X-%.2X>\n", page, subpage);
+				}
+				else
+				{
+					RenderPageNotFound();
+					printf("TuxTxt <DirectInput => %.3X not found>\n", page);
+				}
+		}
+}
+
+/******************************************************************************
+ * GetNextPageOne                                                             *
+ ******************************************************************************/
+
+void GetNextPageOne()
+{
+	//disable subpage zapping
+
+		zap_subpage_manual = 0;
+
+	//abort pageinput
+
+		inputcounter = 2;
+
+	//show feedback
+
+		PosX = StartX + 8*fontwidth;
+		PosY = StartY;
+		RenderCharFB('-', white);
+		RenderCharFB('-', white);
+		RenderCharFB('>', white);
+
+	//find next cached page
+
+		lastpage = page;
+
+		do
+		{
+			page++;
+
+			//skip hex pages
+
+				if((page & 0x00F) > 0x009) page += 0x006;
+				if((page & 0x0F0) > 0x090) page += 0x060;
+
+			//wrap around
+
+				if(page > 0x899) page = 0x100;
+
+		}while(subpagetable[page] == 0xFF);
+
+	//update page
+
+		subpage = subpagetable[page];
+		pageupdate = 1;
+		printf("TuxTxt <NextPageOne => %.3X-%.2X>\n", page, subpage);
+}
+
+/******************************************************************************
+ * GetPrevPageOne                                                             *
+ ******************************************************************************/
+
+void GetPrevPageOne()
+{
+	//disable subpage zapping
+
+		zap_subpage_manual = 0;
+
+	//abort pageinput
+
+		inputcounter = 2;
+
+	//show feedback
+
+		PosX = StartX + 8*fontwidth;
+		PosY = StartY;
+		RenderCharFB('<', white);
+		RenderCharFB('-', white);
+		RenderCharFB('-', white);
+
+	//find previous cached page
+
+		lastpage = page;
+
+		do
+		{
+			page--;
+
+			//skip hex pages
+
+				if((page & 0x00F) > 0x009) page -= 0x006;
+				if((page & 0x0F0) > 0x090) page -= 0x060;
+
+			//wrap around
+
+				if(page < 0x100) page = 0x899;
+
+		}while(subpagetable[page] == 0xFF);
+
+	//update page
+
+		subpage = subpagetable[page];
+		pageupdate = 1;
+		printf("TuxTxt <PrevPageOne => %.3X-%.2X>\n", page, subpage);
+}
+
+/******************************************************************************
+ * GetNextPageTen                                                             *
+ ******************************************************************************/
+
+void GetNextPageTen()
+{
+	//disable subpage zapping
+
+		zap_subpage_manual = 0;
+
+	//abort pageinput
+
+		inputcounter = 2;
+
+	//show feedback
+
+		PosX = StartX + 8*fontwidth;
+		PosY = StartY;
+		RenderCharFB('-', white);
+		RenderCharFB('>', white);
+		RenderCharFB('>', white);
+
+	//find next cached page
+
+		lastpage = page;
+
+		page &= 0xFF0;
+
+		do
+		{
+			//find next ten
+
+				if((page & 0x0F0) == 0x090) page += 0x070;
+				else						page += 0x010;
+
+			//wrap around
+
+				if(page >= 0x900) page = 0x100;
+
+		}while(subpagetable[page] == 0xFF);
+
+	//update page
+
+		subpage = subpagetable[page];
+		pageupdate = 1;
+		printf("TuxTxt <NextPageTen => %.3X-%.2X>\n", page, subpage);
+}
+
+/******************************************************************************
+ * GetPrevPageTen                                                             *
+ ******************************************************************************/
+
+void GetPrevPageTen()
+{
+	//disable subpage zapping
+
+		zap_subpage_manual = 0;
+
+	//abort pageinput
+
+		inputcounter = 2;
+
+	//show feedback
+
+		PosX = StartX + 8*fontwidth;
+		PosY = StartY;
+		RenderCharFB('<', white);
+		RenderCharFB('<', white);
+		RenderCharFB('-', white);
+
+	//find previous cached page
+
+		lastpage = page;
+
+		if(page & 0x00F) page += 0x010;
+
+		page &= 0xFF0;
+
+		do
+		{
+			//find previous ten
+
+				if((page & 0x0F0) == 0x000) page -= 0x070;
+				else 						page -= 0x010;
+
+			//wrap around
+
+				if(page <= 0x090) page = 0x890;
+
+		}while(subpagetable[page] == 0xFF);
+
+	//update page
+
+		subpage = subpagetable[page];
+		pageupdate = 1;
+		printf("TuxTxt <PrevPageTen => %.3X-%.2X>\n", page, subpage);
+}
+
+/******************************************************************************
+ * GetNextSubPage                                                             *
+ ******************************************************************************/
+
+void GetNextSubPage()
+{
+	int loop;
+
+	//abort pageinput
+
+		inputcounter = 2;
+
+	//search subpage
+
+		if(subpage != 0)
+		{
+			//enable manual subpage zapping
+
+				zap_subpage_manual = 1;
+
+			//search next subpage
+
+				for(loop = subpage + 1; loop <= 0x79; loop++)
+				{
+					if(cachetable[page][loop] != 0)
+					{
+						//show feedback
+
+							PosX = StartX + 8*fontwidth;
+							PosY = StartY;
+							RenderCharFB('S', white);
+							RenderCharFB('+', white);
+							RenderCharFB('1', white);
+
+						//update page
+
+							subpage = loop;
+							pageupdate = 1;
+							printf("TuxTxt <NextSubPage => %.3X-%.2X>\n", page, subpage);
+							return;
+					}
+				}
+
+				for(loop = 1; loop < subpage; loop++)
+				{
+					if(cachetable[page][loop] != 0)
+					{
+						//show feedback
+
+							PosX = StartX + 8*fontwidth;
+							PosY = StartY;
+							RenderCharFB('S', white);
+							RenderCharFB('+', white);
+							RenderCharFB('1', white);
+
+						//update page
+
+							subpage = loop;
+							pageupdate = 1;
+							printf("TuxTxt <NextSubPage => %.3X-%.2X>\n", page, subpage);
+							return;
+					}
+				}			
+
+				printf("TuxTxt <NextSubPage => no other SubPage>\n");
+		}
+		else
+		{
+			printf("TuxTxt <NextSubPage => no SubPages>\n");
+		}
+}
+
+/******************************************************************************
+ * GetPrevSubPage                                                             *
+ ******************************************************************************/
+
+void GetPrevSubPage()
+{
+	int loop;
+
+	//abort pageinput
+
+		inputcounter = 2;
+
+	//search subpage
+
+		if(subpage != 0)
+		{
+			//enable manual subpage zapping
+
+				zap_subpage_manual = 1;
+
+			//search previous subpage
+
+				for(loop = subpage - 1; loop > 0x00; loop--)
+				{
+					if(cachetable[page][loop] != 0)
+					{
+						//show feedback
+
+							PosX = StartX + 8*fontwidth;
+							PosY = StartY;
+							RenderCharFB('S', white);
+							RenderCharFB('-', white);
+							RenderCharFB('1', white);
+
+						//update page
+
+							subpage = loop;
+							pageupdate = 1;
+							printf("TuxTxt <PrevSubPage => %.3X-%.2X>\n", page, subpage);
+							return;
+					}
+				}
+
+				for(loop = 0x79; loop > subpage; loop--)
+				{
+					if(cachetable[page][loop] != 0)
+					{
+						//show feedback
+
+							PosX = StartX + 8*fontwidth;
+							PosY = StartY;
+							RenderCharFB('S', white);
+							RenderCharFB('-', white);
+							RenderCharFB('1', white);
+
+						//update page
+
+							subpage = loop;
+							pageupdate = 1;
+							printf("TuxTxt <PrevSubPage => %.3X-%.2X>\n", page, subpage);
+							return;
+					}
+				}			
+
+				printf("TuxTxt <PrevSubPage => no other SubPage>\n");
+		}
+		else
+		{
+			printf("TuxTxt <PrevSubPage => no SubPages>\n");
+		}
+}
+
+/******************************************************************************
+ * SwitchTranspMode                                                           *
+ ******************************************************************************/
+
+void SwitchTranspMode()
+{
+	if(!screenmode)
+	{
+		//toggle mode
+
+			transpmode++;
+			transpmode &= 1;
+
+			printf("TuxTxt <SwitchTranspMode => %d>\n", transpmode);
+
+			pageupdate = 1;
+	}
+}
+
+/******************************************************************************
+ * SwitchScreenMode                                                           *
+ ******************************************************************************/
+
+void SwitchScreenMode()
+{
+	int error;
+
+	//reset transparency mode
+
+		if(transpmode) SwitchTranspMode();
+
+	//toggle mode
+
+		screenmode++;
+		screenmode &= 1;
+
+		printf("TuxTxt <SwitchScreenMode => %d>\n", screenmode);
+
+		pageupdate = 1;
+
+	//clear backbuffer
+
+		memset(&backbuffer, black, sizeof(backbuffer));
+
+	//set mode
+
+		if(screenmode == 0)
+		{
+			fontwidth  = 16;
+			fontheight = 22;
+
+			avia_pig_hide(pig);
+		}
+		else
+		{
+			fontwidth  =  8;
+			fontheight = 21;
+
+			avia_pig_set_pos(pig, (StartX+269), (StartY+20));
+			avia_pig_set_size(pig, 320, 504);
+			avia_pig_show(pig);
+		}
+
+		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
+		{
+			printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
+		}
+}
+
+/******************************************************************************
+ * RenderCharFB                                                               *
+ ******************************************************************************/
+
+void RenderCharFB(int Char, int Attribute)
 {
 	int Row, Pitch, Bit, x = 0, y = 0;
+	int error;
 
-	//skip doubleheight char
+	//load char
+
+		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		{
+			printf("TuxTxt <FT_Load_Char => 0x%.2X>\n", error);
+			PosX += fontwidth;
+			return;
+		}
+
+	//render char
+
+		for(Row = 0; Row < fixfontheight; Row++)
+		{
+			for(Pitch = 0; Pitch < face->glyph->bitmap.pitch; Pitch++)
+			{
+				for(Bit = 7; Bit >= 0; Bit--)
+				{
+					if((face->glyph->bitmap.buffer[Row * face->glyph->bitmap.pitch + Pitch]) & 1<<Bit)
+					{
+						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute & 15;
+					}
+					else
+					{
+						if(transpmode)
+						{
+							Attribute &= 0xFF0F;
+							Attribute |= transp<<4;
+						}
+
+						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute>>4 & 15;
+					}
+
+					x++;
+				}
+			}
+
+			x = 0;
+			y++;
+		}
+
+	PosX += fontwidth;
+}
+
+/******************************************************************************
+ * RenderCharBB                                                               *
+ ******************************************************************************/
+
+void RenderCharBB(int Char, int Attribute)
+{
+	int Row, Pitch, Bit, x = 0, y = 0;
+	int error;
+
+	//skip doubleheight chars in lower line
 
 		if(Char == 0xFF)
 		{
@@ -612,15 +940,16 @@ void RenderChar(int Char, int Attribute)
 
 	//load char
 
-		if(FT_Load_Char(face, Char + (((Attribute>>8) & 3)*(128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME) != 0)
+		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
-			printf("load char %.2X failed!\n", Char);
+			printf("TuxTxt <FT_Load_Char %.3d => 0x%.2X>\n", Char, error);
+			PosX += fontwidth;
 			return;
 		}
 
 	//render char
 
-		for(Row = 0; Row < face->glyph->bitmap.rows; Row++)
+		for(Row = 0; Row < fixfontheight; Row++)
 		{
 			for(Pitch = 0; Pitch < face->glyph->bitmap.pitch; Pitch++)
 			{
@@ -630,25 +959,19 @@ void RenderChar(int Char, int Attribute)
 					{
 						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = Attribute & 15;
 
-						if((Attribute>>10) & 1)
-						{
-							backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = Attribute & 15;
-						}
+						if(Attribute & 1<<9) backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = Attribute & 15;
 					}
 					else
 					{
-						if(visible == 2)
+						if(transpmode)
 						{
 							Attribute &= 0xFF0F;
 							Attribute |= transp<<4;
 						}
 
-						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = (Attribute>>4) & 15;
+						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = Attribute>>4 & 15;
 
-						if((Attribute>>10) & 1)
-						{
-							backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = (Attribute>>4) & 15;
-						}
+						if(Attribute & 1<<9) backbuffer[(x+PosX) + ((y+PosY+1)*var_screeninfo.xres)] = Attribute>>4 & 15;
 					}
 
 					x++;
@@ -658,649 +981,376 @@ void RenderChar(int Char, int Attribute)
 			x = 0;
 			y++;
 
-			if((Attribute>>10) & 1)
-			{
-				y++;
-			}
+			if(Attribute & 1<<9) y++;
 		}
 
 	PosX += fontwidth;
 }
 
 /******************************************************************************
- * render char to framebuffer                                                 *
+ * RenderPageNotFound                                                         *
  ******************************************************************************/
 
-void RenderCharFB(int Char, int Attribute)
+void RenderPageNotFound()
 {
-	int Row, Pitch, Bit, x = 0, y = 0;
-
-	//skip doubleheight char
-
-		if(Char == 0xFF)
-		{
-			PosX += fontwidth;
-			return;
-		}
-
-	//load char
-
-		if(FT_Load_Char(face, Char + (((Attribute>>8) & 3)*(128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME) != 0)
-		{
-			printf("load char %.2X failed!\n", Char);
-			return;
-		}
-
-	//render char
-
-		for(Row = 0; Row < face->glyph->bitmap.rows; Row++)
-		{
-			for(Pitch = 0; Pitch < face->glyph->bitmap.pitch; Pitch++)
-			{
-				for(Bit = 7; Bit >= 0; Bit--)
-				{
-					if((face->glyph->bitmap.buffer[Row * face->glyph->bitmap.pitch + Pitch]) & 1<<Bit)
-					{
-						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute & 15;
-
-						if((Attribute>>10) & 1)
-						{
-							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute & 15;
-						}
-					}
-					else
-					{
-						if(visible == 2)
-						{
-							Attribute &= 0xFF0F;
-							Attribute |= transp<<4;
-						}
-
-						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = (Attribute>>4) & 15;
-
-						if((Attribute>>15) & 1)
-						{
-							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = (Attribute>>4) & 15;
-						}
-					}
-
-					x++;
-				}
-			}
-
-			x = 0;
-			y++;
-
-			if((Attribute>>10) & 1)
-			{
-				y++;
-			}
-		}
-
-	PosX += fontwidth;
-}
-
-/******************************************************************************
- * render pagenumber to framebuffer                                           *
- ******************************************************************************/
-
-void RenderPageNumber(int Char)
-{
-	PosX = StartX;
-	PosY = StartY;
-
-	//render page number to backbuffer
-
-		switch(PageInputCount)
-		{
-			case 2:
-					PosX += 16*8;
-					RenderCharFB(Char, white);
-					RenderCharFB('-',  white);
-					RenderCharFB('-',  white);
-					break;
-
-			case 1:
-					PosX += 16*9;
-					RenderCharFB(Char, white);
-					break;
-
-			case 0:
-					PosX += 16*10;
-					RenderCharFB(Char, white);
-					break;
-		}
-}
-
-/******************************************************************************
- * render string to framebuffer                                               *
- ******************************************************************************/
-
-void RenderString()
-{
+	int byte;
+	int fbcolor, timecolor;
 	char message_1[] = "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט";
 	char message_2[] = "ד Seite ??? nicht vorhanden: warte...הי";
 	char message_3[] = "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי";
 	char message_4[] = "כלללללללללללללללללללללללללללללללללללללך";
 
-	int x;
+	//set colors
 
-	show_string = 0;
+		if(screenmode == 1)
+		{
+			fbcolor   = black;
+			timecolor = black;
+		}
+		else
+		{
+
+			fbcolor   = transp;
+			timecolor = transp<<4 | transp;
+		}
 
 	//clear framebuffer
 
-		ClearFramebuffer(transp);
+		memset(lfb, fbcolor, var_screeninfo.xres * var_screeninfo.yres);
+
+	//hide timestring
+
+		page_atrb[32] = timecolor;
 
 	//set pagenumber
 
-		message_2[ 8] = (Page >> 8) | '0';
-		message_2[ 9] = (Page & 0x0F0)>>4 | '0';
-		message_2[10] = (Page & 0x00F) | '0';
+		message_2[ 8] = (page >> 8) | '0';
+		message_2[ 9] = (page & 0x0F0)>>4 | '0';
+		message_2[10] = (page & 0x00F) | '0';
 
-	//render strings to framebuffer
+	//render infobar
 
 		PosX = StartX + fontwidth-3;
-		PosY = StartY + fontheight*18;
-		for(x = 0; x < 38; x++)
+		PosY = StartY + fixfontheight*18;
+		for(byte = 0; byte < 38; byte++)
 		{
-			RenderCharFB(message_1[x], menu1<<4 | menu2);
+			RenderCharFB(message_1[byte], menu1<<4 | menu2);
 		}
-		RenderCharFB(message_1[38], transp<<4 | menu2);
+		RenderCharFB(message_1[38], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
-		PosY = StartY + fontheight*19;
+		PosY = StartY + fixfontheight*19;
 		RenderCharFB(message_2[0], menu1<<4 | menu2);
-		for(x = 1; x < 37; x++)
+		for(byte = 1; byte < 37; byte++)
 		{
-			RenderCharFB(message_2[x], menu1<<4 | white);
+			RenderCharFB(message_2[byte], menu1<<4 | white);
 		}
 		RenderCharFB(message_2[37], menu1<<4 | menu2);
-		RenderCharFB(message_2[38], transp<<4 | menu2);
+		RenderCharFB(message_2[38], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
-		PosY = StartY + fontheight*20;
-		for(x = 0; x < 38; x++)
+		PosY = StartY + fixfontheight*20;
+		for(byte = 0; byte < 38; byte++)
 		{
-			RenderCharFB(message_3[x], menu1<<4 | menu2);
+			RenderCharFB(message_3[byte], menu1<<4 | menu2);
 		}
-		RenderCharFB(message_3[38], transp<<4 | menu2);
+		RenderCharFB(message_3[38], fbcolor<<4 | menu2);
 
 		PosX = StartX + fontwidth-3;
-		PosY = StartY + fontheight*21;
-		for(x = 0; x < 39; x++)
+		PosY = StartY + fixfontheight*21;
+		for(byte = 0; byte < 39; byte++)
 		{
-			RenderCharFB(message_4[x], transp<<4 | menu2);
+			RenderCharFB(message_4[byte], fbcolor<<4 | menu2);
 		}
 }
 
 /******************************************************************************
- * render page to framebuffer                                                 *
+ * RenderPage                                                                 *
  ******************************************************************************/
 
 void RenderPage()
 {
-	int row, col;
+	int row, col, byte;
 
-	if(visible)
-	{	
-		if(update && Page != current_page)
-		{
-			if(pagetable[Page] == 1)
-			{
-				update = 0;
-				show_string = 1;
-				PosY = StartY;
+	if(pageupdate == 1 && current_page != page && inputcounter == 2)
+	{
+		//reset update flag
 
-				//build page
+			pageupdate = 0;
 
-					DecodePage();
+		//decode page
 
-				//render to backbuffer
-
-					for(row = 0; row < 24; row++)
-					{
-						PosX = StartX;
-
-						for(col = 0; col < 40; col++)
-						{
-							RenderChar(page_char[row*40 + col], page_atrb[row*40 + col]);
-						}
-
-						PosY += fontheight;
-					}
-
-				//update framebuffer
-
-					memcpy(lfb, &backbuffer, sizeof(backbuffer));
-			}
+			if(subpagetable[page] != 0xFF) DecodePage();
 			else
 			{
-				if(show_string)
-				{
-					RenderString();
-				}
+				RenderPageNotFound();
+				return;
 			}
-		}
-		else
-		{
-			PosX = StartX + 32*fontwidth;
+
+		//render page
+
 			PosY = StartY;
 
-			//copy time
+			for(row = 0; row < 24; row++)
+			{
+				PosX = StartX;
 
-				memcpy(&page_char[32], &timestring[0], 8);
-
-			//render time
-
-				for(col = 32; col < 40; col++)
+				for(col = 0; col < 40; col++)
 				{
-					RenderCharFB(page_char[col], page_atrb[col]);
+					RenderCharBB(page_char[row*40 + col], page_atrb[row*40 + col]);
 				}
-		}
+
+				PosY += fixfontheight;
+			}
+
+		//update framebuffer
+
+			memcpy(lfb, &backbuffer, sizeof(backbuffer));
 	}
 	else
 	{
-		if(update == 1)
-		{
-			PosX = StartX + fontwidth*3;
-			PosY = StartY + fontheight*2;
-			RenderCharFB(243, transp<<4 | yellow);
-			RenderCharFB(244, transp<<4 | yellow);
-			RenderCharFB(245, transp<<4 | yellow);
-			PosX = StartX + fontwidth*3;
-			PosY = StartY + fontheight*3;
-			RenderCharFB(246, transp<<4 | yellow);
-			RenderCharFB(247, transp<<4 | yellow);
-			RenderCharFB(248, transp<<4 | yellow);
-		}
+		//update timestring
+
+			PosX = StartX + 32*fontwidth;
+			PosY = StartY;
+
+			for(byte = 0; byte < 8; byte++)
+			{
+				RenderCharFB(timestring[byte], page_atrb[32]);
+			}
 	}
 }
 
 /******************************************************************************
- * decode a teletext page                                                     *
+ * DecodePage                                                                 *
  ******************************************************************************/
 
 void DecodePage()
 {
-	int col, row, loop;
-	int foreground, background, charset, doubleheight, boxed, page_is_boxed = 0;
+	int row, col;
+	int hide = 0, clear, loop;
+	int foreground, background, doubleheight, charset;
 
-	//copy page to decode buffer, modify header & update time
+	//copy page to decode buffer
 
-		memcpy(&page_char[0], &pagebuffer[Page*40*24], sizeof(page_char));
-		memcpy(&page_char[0], " TuxTxt ", 8);
-		memcpy(&page_char[32], &timestring[0], 8);
+		if(zap_subpage_manual) memcpy(&page_char, cachetable[page][subpage], PAGESIZE);
+		else				   memcpy(&page_char, cachetable[page][subpagetable[page]], PAGESIZE);
 
-	//decode page
+	//update timestring
 
-	for(row = 0; row < 24; row++)
-	{
-		//start-of-row default conditions
+		memcpy(&page_char[32], &timestring, 8);
 
-			foreground = white;
-			background = black;
-			doubleheight = 0;
-			charset = 0;
-			boxed = 0;
-			//steady ?
-			//release mosaic ?
+	//check for newsflash & subtitle
 
-		for(col = 0; col < 40; col++)
+		if(dehamming[page_char[11-6]] & 12 && !screenmode) hide = 1;
+
+	//modify header
+
+		if(hide) memset(&page_char, ' ', 40);
+		else     memcpy(&page_char, " TuxTxt ", 8);
+
+	//decode
+
+		for(row = 0; row < 24; row++)
 		{
-			if(page_char[row*40 + col] < ' ')
-			{
-				switch(page_char[row*40 + col])
+			//start-of-row default conditions
+
+				foreground = white;
+				background = black;
+				doubleheight = 0;
+				charset = 0;
+
+				if(hide == 1 && memchr(&page_char[row*40], start_box, 40) == 0)
 				{
-					//set-at codes
+					foreground = transp;
+					background = transp;
+				}
+
+			for(col = 0; col < 40; col++)
+			{
+				if(page_char[row*40 + col] < ' ')
+				{
+					switch(page_char[row*40 + col])
+					{
+						case alpha_black:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = black;
+												charset = 0;
+												break;
+
+						case alpha_red:			page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = red;
+												charset = 0;
+												break;
+
+						case alpha_green:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = green;
+												charset = 0;
+												break;
+
+						case alpha_yellow:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = yellow;
+												charset = 0;
+												break;
+
+						case alpha_blue:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = blue;
+												charset = 0;
+												break;
+
+						case alpha_magenta:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = magenta;
+												charset = 0;
+												break;
+
+						case alpha_cyan:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = cyan;
+												charset = 0;
+												break;
+
+						case alpha_white:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												foreground = white;
+												charset = 0;
+												break;
+
+						case flash:				page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												//todo
+												break;
 
 						case steady:			//todo
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												break;
+
+						case end_box:			page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												if(hide)
+												{
+													foreground = transp;
+													background = transp;
+												}
+												break;
+
+						case start_box:			page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												if(hide) for(clear = 0; clear < col; clear++) page_atrb[row*40 + clear] = transp<<4 | transp;
 												break;
 
 						case normal_size:		doubleheight = 0;
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												break;
 
-						case conceal:			//todo
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												break;
-
-						case contiguous_mosaic:	//charset = 1;
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												break;
-
-						case separated_mosaic:	//charset = 2;
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												break;
-
-						case black_background:	background = black;
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												break;
-
-						case new_background:	background = foreground;
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												break;
-
-						case hold_mosaic:
-												page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												break;
-
-					//set-after codes
-
-						case alpha_black:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = black;
-												charset = 0;
-												break;
-
-						case alpha_red:			page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = red;
-												charset = 0;
-												break;
-
-						case alpha_green:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = green;
-												charset = 0;
-												break;
-
-						case alpha_yellow:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = yellow;
-												charset = 0;
-												break;
-
-						case alpha_blue:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = blue;
-												charset = 0;
-												break;
-
-						case alpha_magenta:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = magenta;
-												charset = 0;
-												break;
-
-						case alpha_cyan:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = cyan;
-												charset = 0;
-												break;
-
-						case alpha_white:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												foreground = white;
-												charset = 0;
-												break;
-
-						case flash:				page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												//todo
-												break;
-
-						case end_box:			page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-												boxed = 0;
-												break;
-
-						case start_box:			page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-
-												if(page_char[row*40 + col +1] == start_box)
-												{
-													boxed = 1;
-													page_is_boxed = 1;
-												}
-
-												break;
-
-						case double_height:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case double_height:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												doubleheight = 1;
 												break;
 
-						case double_width:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case double_width:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 
-						case double_size:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case double_size:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 
-						case mosaic_black:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_black:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = black;
 												charset = 1;
 												break;
 
-						case mosaic_red:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_red:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = red;
 												charset = 1;
 												break;
 
-						case mosaic_green:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_green:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = green;
 												charset = 1;
 												break;
 
-						case mosaic_yellow:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_yellow:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = yellow;
 												charset = 1;
 												break;
 
-						case mosaic_blue:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_blue:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = blue;
 												charset = 1;
 												break;
 
-						case mosaic_magenta:	page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_magenta:	page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = magenta;
 												charset = 1;
 												break;
 
-						case mosaic_cyan:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_cyan:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = cyan;
 												charset = 1;
 												break;
 
-						case mosaic_white:		page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case mosaic_white:		page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												foreground = white;
 												charset = 1;
 												break;
 
-						case esc:				page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case conceal:			//todo
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												break;
+
+						case contiguous_mosaic:	//todo
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												break;
+
+						case separated_mosaic:	//todo
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												break;
+
+						case esc:				page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
 
-						case release_mosaic:	page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
+						case black_background:	background = black;
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												break;
+
+						case new_background:	background = foreground;
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												break;
+
+						case hold_mosaic:		//todo
+												page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+												break;
+
+						case release_mosaic:	page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
 												//todo
 												break;
-				}
-
-				//show spacing attribute as space
-
-					page_char[row*40 + col] = ' ';
-			}
-			else
-			{
-				page_atrb[row*40 + col] = boxed<<11 | doubleheight<<10 | charset<<8 | background<<4 | foreground;
-
-				//skip doubleheight in lower line
-
-					if(doubleheight)
-					{
-						page_char[(row+1)*40 + col] = 255;
 					}
-			}
-		}
 
-		//search line for doubleheight chars
+					//show spacing attribute as space
 
-			if(memchr(&page_char[(row+1)*40], 255, 40) != 0)
-			{
-				for(loop = 0; loop < 40; loop++)
-				{
-					page_atrb[(row+1)*40 + loop] = (page_atrb[row*40 + loop] & 0xF0) | (page_atrb[row*40 + loop] & 0xF0)>>4;
+						page_char[row*40 + col] = ' ';
 				}
-
-				row++;
-			}
-	}
-
-	//search page for boxed chars
-
-		if(page_is_boxed)
-		{
-			for(loop = 0; loop < 40*24; loop++)
-			{
-				if(((page_atrb[loop]>>11) & 1) != 1)
+				else
 				{
-					page_atrb[loop] = transp<<4 | transp;
+					page_atrb[row*40 + col] = doubleheight<<9 | charset<<8 | background<<4 | foreground;
+
+					//skip doubleheight chars in lower line
+
+						if(doubleheight) page_char[(row+1)*40 + col] = 0xFF;
 				}
 			}
+
+			//copy attribute to lower line if doubleheight
+
+				if(memchr(&page_char[(row+1)*40], 0xFF, 40) != 0)
+				{
+					for(loop = 0; loop < 40; loop++)
+					{
+						page_atrb[(row+1)*40 + loop] = (page_atrb[row*40 + loop] & 0xF0) | (page_atrb[row*40 + loop] & 0xF0)>>4;
+					}
+
+					row++;
+				}
 		}
 }
 
 /******************************************************************************
- * decode a teletext pes-packet                                               *
- ******************************************************************************/
-
-void *DecodePacket(void *arg)
-{
-	unsigned char pes_packet[184];
-	unsigned char vtxt_line[45];
-
-	int line, byte, bit;
-	int packet_number;
-	int deham1, deham2, deham3;
-
-	while(1)
-	{
-		//check for exit
-
-			pthread_testcancel();
-
-		//read pes packet
-
-			if(read(dmx, &pes_packet, sizeof(pes_packet)) == sizeof(pes_packet))
-			{
-				//analyze the vtxt-packet
-
-					for(line = 0; line < 4; line++)
-					{
-						if((pes_packet[line*0x2E] == 0x02 || pes_packet[line*0x2E] == 0x03) && (pes_packet[line*0x2E + 1] == 0x2C))
-						{
-							//clear vtxtline-buffer
-
-								memset(&vtxt_line, 0, sizeof(vtxt_line));
-
-							//convert the vtxtline from lsb to msb (skip everything before magazin & packet)
-
-								for(byte = 3; byte <= sizeof(vtxt_line); byte++)
-								{
-									for(bit = 0; bit <= 7; bit++)
-									{
-										if(pes_packet[line*0x2E + 1 + byte] & 1<<bit)
-										{
-											vtxt_line[byte] |= 128>>bit;
-										}
-									}
-								}
-
-							//decode packet number
-
-								deham1 = (dehamming[vtxt_line[3]] & 8) >> 3;
-								deham2 = dehamming[vtxt_line[4]] << 1;
-
-								if(deham1 == 0xFF || deham2 == 0xFF)
-								{
-									printf("biterror in packet detected - skipping...\n");
-									goto SkipPacket;
-								}
-
-								packet_number = deham1 | deham2;
-
-							//analyze packet
-
-								if(packet_number == 0)								//page header
-								{
-									//remove parity bit from data bytes (dirty, i know...)
-
-										for(byte = 13; byte < 45; byte++)
-										{
-											vtxt_line[byte] &= 127;
-										}
-
-									//decode pagenumber
-
-										deham1 = (dehamming[vtxt_line[3]] & 7) << 8;
-										deham2 = dehamming[vtxt_line[6]] << 4;
-										deham3 = dehamming[vtxt_line[5]];
-
-										if(deham1 == 0xFF || deham2 == 0xFF || deham3 == 0xFF)
-										{
-											printf("biterror in pageheader detected - skipping...\n");
-											current_page = -1;
-											goto SkipPacket;
-										}
-
-										current_page = deham1 | deham2 | deham3;
-
-									//copy time info
-
-										memcpy(&timestring[0], &vtxt_line[37], 8);
-
-									//mod pagenumber, skip hex-pages and set cachetable
-
-										if(current_page < 0x100)
-										{
-											current_page += 0x800;
-										}
-
-										if(((current_page & 0x0F0) > 0x090) || ((current_page & 0x00F) > 0x009))
-										{
-											current_page = -1;
-											goto SkipPacket;
-										}
-
-										pagetable[current_page] = 1;
-
-									//get subpage
-
-										//todo?
-
-									//get controlbits
-
-										//todo?
-
-									//set update flag
-
-										if(current_page == Page && PageInputCount == 2)
-										{
-											update = 1;
-										}
-								}
-								else if(packet_number < 24 && current_page != -1)	//displayable packet for valid page
-								{
-									//remove parity bit from data bytes (dirty, i know...)
-
-										for(byte = 5; byte < 45; byte++)
-										{
-											vtxt_line[byte] &= 127;
-										}
-								}
-								else												//non displayable packet
-								{
-									goto SkipPacket;
-								}
-
-							//copy packet to pagebuffer
-
-								memcpy(&pagebuffer[current_page*40*24 + packet_number*40], &vtxt_line[5], 40);
-SkipPacket:;
-						}
-					}
-			}
-			else
-			{
-				//no data available
-
-					usleep(1000000/100);
-			}
-	}
-}
-
-/******************************************************************************
- * check remotecontrol                                                        *
+ * GetRCCode                                                                  *
  ******************************************************************************/
 
 int GetRCCode()
@@ -1321,68 +1371,61 @@ int GetRCCode()
 					{
 						switch(RCCode)
 						{
-							case RC1_0:
-											RCCode = RC_0;
+							case RC1_UP:	RCCode = RC_UP;
 											break;
 
-							case RC1_1:
-											RCCode = RC_1;
+							case RC1_DOWN:	RCCode = RC_DOWN;
 											break;
 
-							case RC1_2:
-											RCCode = RC_2;
+							case RC1_RIGHT:	RCCode = RC_RIGHT;
 											break;
 
-							case RC1_3:
-											RCCode = RC_3;
+							case RC1_LEFT:	RCCode = RC_LEFT;
 											break;
 
-							case RC1_4:
-											RCCode = RC_4;
+							case RC1_PLUS:	RCCode = RC_PLUS;
 											break;
 
-							case RC1_5:
-											RCCode = RC_5;
+							case RC1_MINUS:	RCCode = RC_MINUS;
 											break;
 
-							case RC1_6:
-											RCCode = RC_6;
+							case RC1_0:		RCCode = RC_0;
 											break;
 
-							case RC1_7:
-											RCCode = RC_7;
+							case RC1_1:		RCCode = RC_1;
 											break;
 
-							case RC1_8:
-											RCCode = RC_8;
+							case RC1_2:		RCCode = RC_2;
 											break;
 
-							case RC1_9:
-											RCCode = RC_9;
+							case RC1_3:		RCCode = RC_3;
 											break;
 
-							case RC1_RIGHT:
-											RCCode = RC_RIGHT;
+							case RC1_4:		RCCode = RC_4;
 											break;
 
-							case RC1_LEFT:
-											RCCode = RC_LEFT;
+							case RC1_5:		RCCode = RC_5;
 											break;
 
-							case RC1_UP:
-											RCCode = RC_UP;
+							case RC1_6:		RCCode = RC_6;
 											break;
 
-							case RC1_DOWN:
-											RCCode = RC_DOWN;
+							case RC1_7:		RCCode = RC_7;
 											break;
 
-							case RC1_HOME:
-											RCCode = RC_HOME;
+							case RC1_8:		RCCode = RC_8;
 											break;
 
-							case RC1_OK:
-											RCCode = RC_OK;
+							case RC1_9:		RCCode = RC_9;
+											break;
+
+							case RC1_OK:	RCCode = RC_OK;
+											break;
+
+							case RC1_DBOX:	RCCode = RC_DBOX;
+											break;
+
+							case RC1_HOME:	RCCode = RC_HOME;
 											break;
 						}
 					}
@@ -1407,4 +1450,188 @@ int GetRCCode()
 				usleep(1000000/100);
 				return 0;
 		}
+}
+
+/******************************************************************************
+ * CacheThread                                                                *
+ ******************************************************************************/
+
+void *CacheThread(void *arg)
+{
+	unsigned char pes_packet[184];
+	unsigned char vtxt_row[1+45];
+	int line, byte, bit;
+	int b1, b2, b3, b4;
+	int packet_number;
+
+	while(1)
+	{
+		//check stopsignal
+
+			pthread_testcancel();
+
+		//read packet
+
+			read(dmx, &pes_packet, sizeof(pes_packet));
+
+		//analyze it
+
+			for(line = 0; line < 4; line++)
+			{
+				if((pes_packet[line*0x2E] == 0x02 || pes_packet[line*0x2E] == 0x03) && (pes_packet[line*0x2E + 1] == 0x2C))
+				{
+					//clear rowbuffer
+
+						memset(&vtxt_row, 0, sizeof(vtxt_row));
+
+					//convert row from lsb to msb (begin with magazin number)
+
+						for(byte = 4; byte <= 45; byte++)
+						{
+							for(bit = 0; bit <= 7; bit++)
+							{
+								if(pes_packet[line*0x2E + byte] & 1<<bit)
+								{
+									vtxt_row[byte] |= 128>>bit;
+								}
+							}
+						}
+
+					//get packet number
+
+						b1 = dehamming[vtxt_row[4]] & 8;
+						b2 = dehamming[vtxt_row[5]];
+
+						if(b1 == 0xFF || b2 == 0xFF)
+						{
+							printf("TuxTxt <Biterror in Packet>\n");
+							goto SkipPacket;
+						}
+
+						packet_number = b1>>3 | b2<<1;
+
+					//analyze row
+
+						if(packet_number == 0)
+						{
+							//remove parity bit from data bytes (dirty, i know...)
+
+								for(byte = 14; byte <= 45; byte++)
+								{
+									vtxt_row[byte] &= 127;
+								}
+
+							//get pagenumber
+
+								b1 = dehamming[vtxt_row[4]] & 7;
+								b2 = dehamming[vtxt_row[7]];
+								b3 = dehamming[vtxt_row[6]];
+
+								if(b1 == 0xFF || b2 == 0xFF || b3 == 0xFF)
+								{
+									current_page = -1;
+									printf("TuxTxt <Biterror in Page>\n");
+									goto SkipPacket;
+								}
+
+								if(b2 > 9 || b3 > 9)
+								{
+									current_page = -1;
+									goto SkipPacket;
+								}
+								else
+								{
+									current_page = b1<<8 | b2<<4 | b3;
+								}
+
+								if(current_page < 0x100)
+								{
+									current_page += 0x800;
+								}
+
+							//get subpagenumber
+
+								b1 = dehamming[vtxt_row[11]] & 3;
+								b2 = dehamming[vtxt_row[10]];
+								b3 = dehamming[vtxt_row[9]] & 7;
+								b4 = dehamming[vtxt_row[8]];
+
+								if(b1 == 0xFF || b2 == 0xFF || b3 == 0xFF || b4 == 0xFF)
+								{
+									current_subpage = -1;
+									printf("TuxTxt <Biterror in SubPage>\n");
+									goto SkipPacket;
+								}
+
+								if(b1 != 0 || b2 != 0 || b3 > 7 || b4 > 9)
+								{
+									current_subpage = -1;
+									goto SkipPacket;
+								}
+								else
+								{
+									current_subpage = b1<<12 | b2<<8 | b3<<4 | b4;
+								}
+
+							//check cachetable and allocate memory if needed
+
+								if(cachetable[current_page][current_subpage] == 0)
+								{
+//									printf("TuxTxt <Adding Page %.3X-%.2X>\n", current_page, current_subpage);
+									cachetable[current_page][current_subpage] = malloc(PAGESIZE);
+									memset(cachetable[current_page][current_subpage], ' ', PAGESIZE);
+								}
+
+							//store current subpage for this page
+
+								subpagetable[current_page] = current_subpage;
+
+							//copy timestring
+
+								memcpy(&timestring, &vtxt_row[38], 8);
+
+							//set update flag
+
+								if(current_page == page) pageupdate = 1;
+
+							//check controlbits
+
+								if(dehamming[vtxt_row[9]] & 8)	//C4 -> erase page
+								{
+//									printf("TuxTxt <Erase Page => %.3X-%.2X>\n", current_page, current_subpage);
+									memset(cachetable[current_page][current_subpage], ' ', PAGESIZE);
+								}
+
+//								if(dehamming[vtxt_row[12]] & 2)	//C7 -> suppress header
+//								{
+//									printf("TuxTxt <Suppress Header => %.3X-%.2X>\n", current_page, current_subpage);
+//									goto SkipPacket;
+//								}
+
+//								if(dehamming[vtxt_row[12]] & 8)	//C10 -> inhibit display
+//								{
+//									printf("TuxTxt <Inhibit Display => %.3X-%.2X>\n", current_page, current_subpage);
+//									current_page = -1;
+//								}
+						}
+						else if(packet_number < 24)
+						{
+							//remove parity bit from data bytes (dirty, i know...)
+
+								for(byte = 6; byte <= 45; byte++)
+								{
+									vtxt_row[byte] &= 127;
+								}
+						}
+
+					//copy row to pagebuffer
+
+						if(current_page != -1 && current_subpage != -1 && packet_number < 24)
+						{
+							memcpy(cachetable[current_page][current_subpage] + packet_number*40, &vtxt_row[6], 40);
+						}
+SkipPacket:;
+				}
+			}
+	}
 }

@@ -1,27 +1,25 @@
-#include <linux/fb.h>
+#include <fcntl.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
+#include <unistd.h>
 #include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <unistd.h>
-#include <pthread.h>
 
+#include <dbox/avia_pig.h>
 #include <dbox/fp.h>
 #include <ost/dmx.h>
 #include <plugin.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
 #include "config.h"
 
-//fontdefinition
+#define PAGESIZE 40*24
 
-#define fontwidth	16
-#define fontheight	21
+#define fixfontheight 21
 
 //colortable
 
@@ -127,49 +125,73 @@
 #define	RC_DBOX		0x18
 #define	RC_HOME		0x1F
 
-int  Init();
-void RenderCharFB(int Char, int Attribute);
-void RenderChar(int Char, int Attribute);
-void RenderPageNumber(int Char);
-void RenderString();
-void RenderPage();
-void *DecodePacket(void *arg);
-void DecodePage();
-int  GetRCCode();
-void ClearFramebuffer(int color);
+//functions
 
-unsigned short rd[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8};
-unsigned short gn[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8};
-unsigned short bl[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8};
-unsigned short tr[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x7FFF , 0x7FFF };
-struct fb_cmap colormap = {0, 11, rd, gn, bl, tr};
+void CleanUp();
+void PageInput(int Number);
+void GetNextPageOne();
+void GetPrevPageOne();
+void GetNextPageTen();
+void GetPrevPageTen();
+void GetNextSubPage();
+void GetPrevSubPage();
+void SwitchTranspMode();
+void SwitchScreenMode();
+void RenderCharFB(int Char, int Attribute);
+void RenderCharBB(int Char, int Attribute);
+void RenderPageNotFound();
+void RenderPage();
+void DecodePage();
+void *CacheThread(void *arg);
+int Init();
+int  GetRCCode();
+
+//framebuffer stuff
 
 unsigned char *lfb = 0;
 struct fb_var_screeninfo var_screeninfo;
 struct fb_fix_screeninfo fix_screeninfo;
 
+//freetype stuff
+
 FT_Library	library;
 FT_Face		face;
 
-int dmx, rc = -1, fb = -1;
+//some data
 
-int PosX, PosY, StartX,	StartY, sx = -1, sy = -1, ex = -1, ey = -1;
+int dmx, pig, rc, fb;
+int sx, ex, sy, ey;
+int vtxtpid;
+int PosX, PosY, StartX, StartY;
+int current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subpage_manual;
+int inputcounter;
+int screenmode, transpmode;
+int fontwidth, fontheight;
 
-pthread_t thread_id1;
-void *thread_result1;
+pthread_t thread_id;
+void *thread_result;
 
 unsigned short RCCode;
 
-int Page = 0x100, PageInput = 0, PageInputCount = 2, update = 1, visible = 1, show_string = 1;
+//buffers
 
-int packet, current_page = -1, vtxtpid = -1;
-
-unsigned char *pagebuffer;
-unsigned char  pagetable[0x899];
 unsigned char  backbuffer[720*576];
 unsigned char  timestring[8];
-unsigned char  page_char[40*24];
-unsigned short page_atrb[40*24];// ????:b:h:cc:bbbb:ffff -> ?=reserved, b=boxed, h=double height, c=charset, b=background, f=forground
+unsigned char  page_char[PAGESIZE];
+unsigned short page_atrb[PAGESIZE];	// ??????:h:c:bbbb:ffff -> ?=reserved, h=double height, c=charset, b=background, f=forground
+
+//cachetables
+
+unsigned char *cachetable[0x900][0x80];
+unsigned char subpagetable[0x900];
+
+//colormap
+
+unsigned short rd[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8};
+unsigned short gn[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8};
+unsigned short bl[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8};
+unsigned short tr[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 };
+struct fb_cmap colormap = {0, 11, rd, gn, bl, tr};
 
 //hamming table
 
