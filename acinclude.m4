@@ -5,9 +5,6 @@ AM_MAINTAINER_MODE
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
-AC_DISABLE_STATIC
-AM_PROG_LIBTOOL
-
 AC_ARG_WITH(target,
 	[  --with-target=TARGET    target for compilation [[native,cdk]]],
 	[TARGET="$withval"],[TARGET="native"])
@@ -76,17 +73,6 @@ AC_SUBST(targetprefix)
 AC_SUBST(targetdatadir)
 AC_SUBST(targetsysconfdir)
 AC_SUBST(targetlocalstatedir)
-
-AC_PROG_INSTALL
-])
-
-AC_DEFUN_ONCE([TUXBOX_APPS_LANG_C],[
-AC_PROG_CC
-])
-
-AC_DEFUN_ONCE([TUXBOX_APPS_LANG_CXX],[
-AC_PROG_CXX
-AC_HEADER_STDC
 ])
 
 AC_DEFUN_ONCE([TUXBOX_APPS_DIRECTORY],[

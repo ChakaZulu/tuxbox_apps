@@ -1,8 +1,10 @@
-AC_INIT(Makefile.am)
-AM_INIT_AUTOMAKE(tuxbox-apps-dvb-dvbsnoop, 0.0.1)
+AC_INIT(tuxbox-apps-dvb-dvbsnoop,0.0.1,,dvbsnoop)
+AM_INIT_AUTOMAKE(dvbsnoop,0.0.1)
 
 TUXBOX_APPS
-TUXBOX_APPS_LANG_C
+
+AC_PROG_CC
+
 TUXBOX_APPS_DVB
 
 AC_OUTPUT([
