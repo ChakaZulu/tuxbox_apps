@@ -1351,6 +1351,11 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		mtdexpert->addItem(GenericMenuSeparatorLine);
 		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd", true, NULL, fe, "readflashmtd") );
 		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, NULL, fe, "writeflashmtd") );
+		mtdexpert->addItem(GenericMenuSeparatorLine);
+
+		CStringInputSMS * updateSettings_url_file = new CStringInputSMS("flashupdate.url_file", g_settings.softupdate_url_file, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
+		mtdexpert->addItem(new CMenuForwarder("flashupdate.url_file", true, g_settings.softupdate_url_file, updateSettings_url_file));
+
 		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, NULL, mtdexpert ) );
 
 		updateSettings->addItem(GenericMenuSeparatorLine);
@@ -1392,9 +1397,6 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionsnapshot", false, (char*) &releasetype, NULL ));
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
-
-		CStringInputSMS * updateSettings_url_file = new CStringInputSMS("flashupdate.url_file", g_settings.softupdate_url_file, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
-		updateSettings->addItem(new CMenuForwarder("flashupdate.url_file", true, g_settings.softupdate_url_file, updateSettings_url_file));
 
 		CStringInputSMS * updateSettings_proxy = new CStringInputSMS("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23, "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2", "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyserver", true, g_settings.softupdate_proxyserver, updateSettings_proxy ) );
