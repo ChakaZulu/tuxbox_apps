@@ -207,6 +207,10 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
+	// restore volume display
+	char current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
+	CLCD::getInstance()->showVolume(current_volume);
+
 	// always exit all	
 	return menu_return::RETURN_EXIT_ALL;
 }
