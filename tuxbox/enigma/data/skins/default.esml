@@ -387,6 +387,7 @@
 			<eLabel text="Threshold:" name="lThreshold" position="10:145" size="240:35" vcenter="on"/>
 			<eNumber name="threshold" position="260:145" size="e-100:35" helptext="enter LNB threshold frequency (0..9, ok)" loadDeco="" />
 			<eCheckbox name="increased_voltage" text="increased voltage" position="10:190" size="e-10:30" helptext="0,5V higher LNB Voltage (for long cables) (ok)" loadDeco="" />
+			<eCheckbox name="relais_12V_out" text="12V output on" position="10:230" size="e-10:30" helptext="turn 12V output on (for 12V relais) (ok)" loadDeco="" />
 			<eButton name="save" text="save" position="10:e-100" size="220:40" helptext="save changes and use current selected LNB for the chosen satellite" loadDeco="" shortcut="green" />
 			<eButton name="next" text="next page" position="240:e-100" size="220:40" helptext="goto next page (DiSEqC)" loadDeco="" shortcut="blue" />
 		</eLNBPage>

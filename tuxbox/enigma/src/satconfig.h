@@ -104,7 +104,7 @@ class eLNBPage : public eWidget
 	eNumber *lofH, *lofL, *threshold;
 	eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
 	eButton *next; // shows the DiSEqC Configuration Dialog
-	eCheckbox *increased_voltage;
+	eCheckbox *increased_voltage, *relais_12V_out;
 	eStatusBar *statusbar;
     
 	void numSelected(int*);

@@ -321,6 +321,7 @@ void eLNB::setDefaultOptions()
 	lof_lo=9750000;
 	lof_threshold=11700000;
 	increased_voltage=0;
+	relais_12V_out=0;
 }
 
 eSatellite *eLNB::addSatellite(int orbital_position)
@@ -1123,7 +1124,11 @@ void eTransponderList::readLNBData()
 
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/IncreasedVoltage").c_str(), tmpint);
 		lnb.setIncreasedVoltage(tmpint);
-    
+
+		tmpint=0;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/12VRelaisOut").c_str(), tmpint);
+		lnb.set12VOut(tmpint);
+     
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DiSEqCMode").c_str(), tmpint );
 		lnb.getDiSEqC().DiSEqCMode = (eDiSEqC::tDiSEqCMode) tmpint;
 
@@ -1285,6 +1290,7 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/lofL").c_str());
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/lofThreshold").c_str());
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/IncreasedVoltage").c_str());
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/12VRelaisOut").c_str());
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/DiSEqCMode").c_str());
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/MiniDiSEqCParam").c_str());
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/DiSEqCParam").c_str());
@@ -1325,6 +1331,7 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofL").c_str(), it->getLOFLo() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofThreshold").c_str(), it->getLOFThreshold() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/IncreasedVoltage").c_str(), it->getIncreasedVoltage() );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/12VRelaisOut").c_str(), it->get12VOut() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCMode").c_str(), (int) it->getDiSEqC().DiSEqCMode );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/MiniDiSEqCParam").c_str(), (int) it->getDiSEqC().MiniDiSEqCParam );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCParam").c_str(), (int) it->getDiSEqC().DiSEqCParam );

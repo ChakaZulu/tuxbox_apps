@@ -740,7 +740,7 @@ struct eDiSEqC
 class eLNB
 {
 	unsigned int lof_hi, lof_lo, lof_threshold;
-	int increased_voltage;
+	int increased_voltage, relais_12V_out;
 	ePtrList<eSatellite> satellites;
 	eTransponderList &tplist;
 	eDiSEqC DiSEqC;
@@ -753,10 +753,12 @@ public:
 	void setLOFLo(unsigned int lof_lo) { this->lof_lo=lof_lo; }
 	void setLOFThreshold(unsigned int lof_threshold) { this->lof_threshold=lof_threshold; }
 	void setIncreasedVoltage( int inc ) { increased_voltage = inc; }
+	void set12VOut(int state) { relais_12V_out = state; }
 	unsigned int getLOFHi() const { return lof_hi; }
 	unsigned int getLOFLo() const { return lof_lo; }
 	unsigned int getLOFThreshold() const { return lof_threshold; }
 	int getIncreasedVoltage() const { return increased_voltage; }
+	int get12VOut() { return relais_12V_out; }
 	eDiSEqC& getDiSEqC() { return DiSEqC; }
 	eSatellite *addSatellite(int orbital_position);
 	void deleteSatellite(eSatellite *satellite);

@@ -11,6 +11,7 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbwidgets.h>
+#include <lib/system/info.h>
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	:refresh(0)
@@ -945,6 +946,7 @@ void eLNBSetup::onSave()
 	p->setLOFHi( LNBPage->lofH->getNumber() * 1000 );
 	p->setLOFThreshold( LNBPage->threshold->getNumber() * 1000 );
 	p->setIncreasedVoltage( LNBPage->increased_voltage->isChecked() );
+	p->set12VOut( LNBPage->relais_12V_out->isChecked() );
 
 	p->getDiSEqC().MiniDiSEqCParam = (eDiSEqC::tMiniDiSEqCParam) (int) DiSEqCPage->MiniDiSEqCParam->getCurrent()->getKey();
 	p->getDiSEqC().DiSEqCMode = (eDiSEqC::tDiSEqCMode) (int) DiSEqCPage->DiSEqCMode->getCurrent()->getKey();
@@ -1051,6 +1053,9 @@ eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
 
 	increased_voltage = new eCheckbox( this );
 	increased_voltage->setName("increased_voltage");
+
+	relais_12V_out = new eCheckbox( this );
+	relais_12V_out->setName("relais_12V_out");
                                        
 	save = new eButton(this);
 	save->setName("save");
@@ -1077,6 +1082,9 @@ eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
 	CONNECT( lofL->selected, eLNBPage::numSelected);
 	CONNECT( lofH->selected, eLNBPage::numSelected);
 	CONNECT( threshold->selected, eLNBPage::numSelected);
+
+	if ( eSystemInfo::getInstance()->getHwType() != eSystemInfo::DM7020 )
+		relais_12V_out->hide();
  // on exec we begin in eventHandler execBegin
 }
 
@@ -1086,16 +1094,19 @@ void eLNBPage::lnbChanged( eListBoxEntryText *lnb )
 	int l2 = 10600000;
 	int l3 = 11700000;
 	int incVoltage = 0;
+	int relais12V = 0;
 	if ( lnb && lnb->getKey() )
 	{
 		l1 = ((eLNB*)lnb->getKey())->getLOFLo();
 		l2 = ((eLNB*)lnb->getKey())->getLOFHi();
 		l3 = ((eLNB*)lnb->getKey())->getLOFThreshold();
 		incVoltage = ((eLNB*)lnb->getKey())->getIncreasedVoltage();
+		relais12V = ((eLNB*)lnb->getKey())->get12VOut();
 	}
 	lofL->setNumber( l1 / 1000 );
 	lofH->setNumber( l2 / 1000 );
 	increased_voltage->setCheck( incVoltage );
+	relais_12V_out->setCheck( relais12V );
 	threshold->setNumber( l3 / 1000 );
 }
 
