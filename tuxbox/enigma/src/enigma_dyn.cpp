@@ -60,7 +60,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.7.2"
+#define WEBIFVERSION "2.7.3"
 
 #define KEYBOARDNORMAL 0
 #define KEYBOARDVIDEO 1
@@ -2528,13 +2528,14 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 	eProcessUtils::killProcess("streamts");
 	eString vpid = eString().sprintf("%04x", Decoder::current.vpid);
 	eString apid = eString().sprintf("%04x", Decoder::current.apid);
-	eString pmt = eString().sprintf("%04x", Decoder::current.pmtpid);
+	eString pmtpid = eString().sprintf("%04x", Decoder::current.pmtpid);
+	eString pcrpid = eString().sprintf("%04x", Decoder::current.pcrpid);
 
 	content->local_header["Content-Type"]="video/mpegfile";
 	content->local_header["Cache-Control"] = "no-cache";
 	content->local_header["vpid"] = vpid;
 	content->local_header["apid"] = apid;
-	content->local_header["pmt"] = pmt;
+	content->local_header["pmt"] = pmtpid;
 
 	eString apids;	
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
@@ -2548,7 +2549,7 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 		}
 	}
 
-	return "http://" + getIP() + ":31339/0," + pmt + "," + vpid  + apids;
+	return "http://" + getIP() + ":31339/0," + pmtpid + "," + vpid  + apids + pcrpid;
 }
 
 #define CHANNELWIDTH 200
