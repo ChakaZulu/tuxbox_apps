@@ -243,5 +243,5 @@ void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const string 
 	iconfile +=".raw";
 	frameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
 
-	g_Fonts->menu->RenderString(x,y+mheight, width, text.c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x,y+mheight, width, text, COL_MENUCONTENT, 0, true); // UTF-8
 }

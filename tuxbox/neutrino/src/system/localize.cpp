@@ -142,10 +142,8 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(keystr, "apidselector", 12) != 0) &&
 			    (strncmp(keystr, "audiomenu", 9) != 0) &&
 			    (strncmp(keystr, "bouqueteditor", 13) != 0) &&
-			    (strncmp(keystr, "cablesetup", 10) != 0) &&
-			    (strncmp(keystr, "colormenu", 9) != 0) &&
-			    (strncmp(keystr, "colorstatusbar", 14) != 0) &&
-			    (strncmp(keystr, "colorthememenu", 14) != 0) &&
+			    (strncmp(keystr, "cab", 3) != 0) &&
+			    (strncmp(keystr, "co", 2) != 0) &&
 			    (strncmp(keystr, "file", 4) != 0) &&
 			    (strncmp(keystr, "fontmenu", 8) != 0) &&
 			    (strncmp(keystr, "fontsize", 8) != 0) &&
@@ -157,10 +155,8 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(keystr, "messagebox", 10) != 0) &&
 			    (strncmp(keystr, "miscsettings", 12) != 0) &&
 			    (strncmp(keystr, "mp3", 3) != 0) &&
-			    (strncmp(keystr, "networkmenu", 11) != 0) &&
-			    (strncmp(keystr, "nfs", 3) != 0) &&
-			    (strncmp(keystr, "nvodselector", 12) != 0) &&
-			    (strncmp(keystr, "options", 7) != 0) &&
+			    (strncmp(keystr, "n", 1) != 0) &&
+			    (strncmp(keystr, "o", 1) != 0) &&
 			    (strncmp(keystr, "parentallock", 12) != 0) &&
 			    (strncmp(keystr, "pictureviewer", 13) != 0) &&
 			    (strncmp(keystr, "recordingmenu", 13) != 0) &&
