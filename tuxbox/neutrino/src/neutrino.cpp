@@ -3103,6 +3103,11 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{	// NVODs
 				SelectNVOD();
 			}
+			else if (CRCInput::isNumeric(msg) && g_RemoteControl->director_mode )
+			{
+				g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
+				g_InfoViewer->showSubchan();
+			}
 			else if( ( msg == (neutrino_msg_t) g_settings.key_quickzap_up ) || ( msg == (neutrino_msg_t) g_settings.key_quickzap_down ) )
 			{
 				//quickzap
@@ -3125,25 +3130,19 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				g_InfoViewer->showSubchan();
 			}
 			else if( msg == (neutrino_msg_t) g_settings.key_zaphistory )
-      {
-        // Zap-History "Bouquet"
-        channelList->numericZap( msg );
-      }
+			{
+				// Zap-History "Bouquet"
+				channelList->numericZap( msg );
+			}
 			else if( msg == (neutrino_msg_t) g_settings.key_lastchannel )
-      {
-        // Quick Zap
-        channelList->numericZap( msg );
-      }
+			{
+				// Quick Zap
+				channelList->numericZap( msg );
+			}
 			else if (CRCInput::isNumeric(msg))
 			{ 
-        //numeric zap 
-				if( g_RemoteControl->director_mode )
-				{
-					g_RemoteControl->setSubChannel(CRCInput::getNumericValue(msg));
-					g_InfoViewer->showSubchan();
-				}
-				else
-					channelList->numericZap( msg );
+				//numeric zap 
+				channelList->numericZap( msg );
 			}
 			else
 			{
