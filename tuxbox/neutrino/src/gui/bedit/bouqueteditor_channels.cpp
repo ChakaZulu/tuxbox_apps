@@ -18,6 +18,7 @@ CBEChannelWidget::CBEChannelWidget(string Caption, unsigned int Bouquet)
 	state = beDefault;
 	caption = Caption;
 	bouquet = Bouquet;
+	mode = CZapitClient::MODE_TV;
 }
 
 void CBEChannelWidget::paintItem(int pos)
@@ -81,19 +82,21 @@ void CBEChannelWidget::paintHead()
 
 void CBEChannelWidget::paintFoot()
 {
-	int ButtonWidth = width / 3;
+	int ButtonWidth = width / 4;
 	g_FrameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
 	g_FrameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	g_FrameBuffer->paintIcon("rot.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
+	g_FrameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
 
-	g_FrameBuffer->paintIcon("gruen.raw", x+width- 2* ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
+	g_FrameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
 
-	g_FrameBuffer->paintIcon("gelb.raw", x+width- ButtonWidth+ 8, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
+	g_FrameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
 
+	g_FrameBuffer->paintIcon("blau.raw", x+width- ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.switchmode").c_str(), COL_INFOBAR);
 }
 
 void CBEChannelWidget::hide()
@@ -109,7 +112,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 	}
 
 	Channels.clear();
-	g_Zapit->getBouquetChannels( bouquet, Channels);
+	g_Zapit->getBouquetChannels( bouquet, Channels, mode);
 	paintHead();
 	paint();
 	paintFoot();
@@ -192,6 +195,19 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 			if (state == beDefault)
 				addChannel();
 		}
+		else if(key==CRCInput::RC_blue)
+		{
+			if (state == beDefault)
+			{
+				if (mode == CZapitClient::MODE_TV)
+					mode = CZapitClient::MODE_RADIO;
+				else
+					mode = CZapitClient::MODE_TV;
+				Channels.clear();
+				g_Zapit->getBouquetChannels( bouquet, Channels, mode);
+				paint();
+			}
+		}
 		else if(key==CRCInput::RC_yellow)
 		{
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -233,7 +249,7 @@ void CBEChannelWidget::deleteChannel()
 {
 	g_Zapit->removeChannelFromBouquet( bouquet, Channels[selected].onid_sid);
 	Channels.clear();
-	g_Zapit->getBouquetChannels( bouquet, Channels);
+	g_Zapit->getBouquetChannels( bouquet, Channels, mode);
 	if (selected >= Channels.size())
 		selected--;
 	channelsChanged = true;
@@ -243,7 +259,7 @@ void CBEChannelWidget::deleteChannel()
 void CBEChannelWidget::addChannel()
 {
 	printf("new\n");
-	CBEChannelSelectWidget* channelSelectWidget = new CBEChannelSelectWidget(caption, bouquet);
+	CBEChannelSelectWidget* channelSelectWidget = new CBEChannelSelectWidget(caption, bouquet, mode);
 	printf("exec\n");
 	channelSelectWidget->exec(this, "");
 	printf("exec done\n");
@@ -251,7 +267,7 @@ void CBEChannelWidget::addChannel()
 	{
 		channelsChanged = true;
 		Channels.clear();
-		g_Zapit->getBouquetChannels( bouquet, Channels);
+		g_Zapit->getBouquetChannels( bouquet, Channels, mode);
 	}
 	delete channelSelectWidget;
 	paintHead();
@@ -271,9 +287,9 @@ void CBEChannelWidget::finishMoveChannel()
 	state = beDefault;
 	if (newPosition != origPosition)
 	{
-		g_Zapit->moveChannel( bouquet, origPosition+1, newPosition+1);
+		g_Zapit->moveChannel( bouquet, origPosition+1, newPosition+1, mode);
 		Channels.clear();
-		g_Zapit->getBouquetChannels( bouquet, Channels);
+		g_Zapit->getBouquetChannels( bouquet, Channels, mode);
 		channelsChanged = true;
 	}
 	paint();

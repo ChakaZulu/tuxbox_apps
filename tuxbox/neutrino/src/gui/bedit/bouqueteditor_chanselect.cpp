@@ -1,7 +1,7 @@
 #include "bouqueteditor_chanselect.h"
 #include "../global.h"
 
-CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet)
+CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
 {
 	selected = 0;
 	width = 500;
@@ -16,6 +16,7 @@ CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouq
 	liststart = 0;
 	caption = Caption;
 	bouquet = Bouquet;
+	mode = Mode;
 }
 
 void CBEChannelSelectWidget::paintItem(int pos)
@@ -38,6 +39,7 @@ void CBEChannelSelectWidget::paintItem(int pos)
 	}
 	else
 	{
+		g_FrameBuffer->paintBackgroundBoxRel(x+8,ypos+4, 16, fheight-4);
 		g_FrameBuffer->paintBoxRel(x+8,ypos+4, 16, fheight-4, color);
 	}
 }
@@ -107,9 +109,9 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 	Channels.clear();
 	bouquetChannels.clear();
 	printf("getting bc\n");
-	g_Zapit->getBouquetChannels( bouquet, bouquetChannels);
+	g_Zapit->getBouquetChannels( bouquet, bouquetChannels, mode);
 	printf("getting c\n");
-	g_Zapit->getChannels( Channels);
+	g_Zapit->getChannels( Channels, mode, CZapitClient::SORT_ALPHA);
 	printf("getting done\n");
 	paintHead();
 	paint();
@@ -162,6 +164,23 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 				paintItem(selected - liststart);
 			}
 		}
+		else if (key==g_settings.key_channelList_pageup)
+		{
+			selected+=listmaxshow;
+			if (selected>Channels.size()-1)
+				selected=0;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			paint();
+		}
+		else if (key==g_settings.key_channelList_pagedown)
+		{
+			if ((int(selected)-int(listmaxshow))<0)
+				selected=Channels.size()-1;
+			else
+				selected -= listmaxshow;
+			liststart = (selected/listmaxshow)*listmaxshow;
+			paint();
+		}
 		else if(key==CRCInput::RC_yellow)
 		{
 			switchChannel();
@@ -190,8 +209,9 @@ void CBEChannelSelectWidget::switchChannel()
 	{
 		g_Zapit->addChannelToBouquet( bouquet, Channels[selected].onid_sid);
 	}
-	g_Zapit->getBouquetChannels( bouquet, bouquetChannels);
-	paintItem( selected);
+	bouquetChannels.clear();
+	g_Zapit->getBouquetChannels( bouquet, bouquetChannels, mode);
+	paintItem( selected - liststart);
 }
 
 bool CBEChannelSelectWidget::isChannelInBouquet( int index)

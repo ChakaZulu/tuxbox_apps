@@ -26,6 +26,7 @@ using namespace std;
 
 		string caption;
 		unsigned int bouquet;
+		CZapitClient::channelsMode mode;
 
 		int		width;
 		int		height;
@@ -42,7 +43,7 @@ using namespace std;
 		void hide();
 
 	public:
-		CBEChannelSelectWidget( string Caption, unsigned int Bouquet);
+		CBEChannelSelectWidget( string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode);
 
 		CZapitClient::BouquetChannelList	Channels;        // list of all channels
 		CZapitClient::BouquetChannelList	bouquetChannels; // list of chans that are currently selected

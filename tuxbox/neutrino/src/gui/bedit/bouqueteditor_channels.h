@@ -31,7 +31,9 @@ using namespace std;
 
 		int 				ButtonHeight;
 		string				caption;
-		bool	channelsChanged;
+		bool				channelsChanged;
+
+		CZapitClient::channelsMode mode;
 
 		unsigned int bouquet;
 

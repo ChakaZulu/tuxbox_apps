@@ -269,6 +269,7 @@ bouqueteditor.savechanges? Do you want to save the changes?
 bouqueteditor.savingchanges Saving changes. Please wait ...
 bouqueteditor.discardingchanges Discarding changes. Please wait ..
 bouqueteditor.switch channel add/remove
+bouqueteditor.switchmode TV/Radio
 
 messagebox.yes Yes
 messagebox.no No
