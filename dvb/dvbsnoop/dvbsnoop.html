@@ -74,13 +74,13 @@ License:
 	 <P>dvbsnoop is based on the <A HREF="http://www.linuxtv.org">linux dvb
 		api</A>. You need to have the dvb driver installed on your computer to use
 		dvbsnoop. dvbsnoop is text-based, so it should work on any unix based system,
-		which offers you shell access and dvb support installed.</P>
-	 <H3> Getting the Source</H3>
+		which offers you shell access and dvb support installed.</P> 
+	 <H3> Getting the Source</H3> 
 	 <P>Download a tarball for dvbsnoop at:
 		<A
 		 HREF="http://sourceforge.net/projects/dvbsnoop">http://sourceforge.net/projects/dvbsnoop</A>.<BR>Unpack
 		the tar archive using the '<I>gzip -d</I> ...' and '<I>tar xvf ...</I>'
-		commands.</P>
+		commands.</P> 
 	 <P>Or get the latest source from the cvs at:
 		<A HREF="http://cvs.tuxbox.org/">http://cvs.tuxbox.org/</A>:<BR><I>cvs
 		-d:pserver:anonymous@cvs.tuxbox.org:/cvs/tuxbox login</I><BR><I>cvs
@@ -156,9 +156,11 @@ make
 		  <TD>dvr device [/dev/dvb/adapter0/dvr0]</TD> 
 		</TR> 
 		<TR> 
-		  <TD>-s [sec|ts|pes]</TD> 
+		  <TD VALIGN="TOP">-s [sec|ts|pes|pidscan]</TD> 
 		  <TD></TD> 
-		  <TD>stream type [-s sec]</TD> 
+		  <TD>snoop type [-s sec]<BR>&nbsp;sec = Sections,<BR>&nbsp; ts =
+			 Transport Stream<BR>&nbsp;pes = Packetized Elementary Stream.,<BR>&nbsp;pidscan
+			 = transponder PID scan</TD> 
 		</TR> 
 		<TR> 
 		  <TD>-f filter</TD> 
@@ -534,7 +536,14 @@ CRC: 3952000829 (0xeb8ebf3d)
 		streams.</P> 
 	 <H4>dvbsnoop -if ts-stream.pid0x1000.file &nbsp; -s ts 0x00</H4> 
 	 <P>Read a data stream from file and analyze the stream.<BR>It is important
-		that you specify mode (si, pes, ...) and pid!</P> 
+		that you specify mode (si, pes, ...) and pid!</P>
+	 <P></P>
+	 <H4>dvbsnoop -pd 9 -s pidscan</H4> 
+	 <P>Scan tuned transponder for PIDs. This may take 1-3 minutes.<BR>This mode
+		tries to reveal all pids transmitted on a transponder, even pids which are not
+		present in PAT, PMT, etc.<BR><BR>Remark: The PID-SCAN snoop will only detect
+		pids, which are transmitted during the scan phase. Pids with a low repetition
+		rate may not be detected.</P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>Pitfalls...</H2> 
 	 <P><B>dvbsnoop tries to decode every data it gets....</B><BR>E.g. if you
@@ -660,12 +669,12 @@ CRC: 3952000829 (0xeb8ebf3d)
 			 HREF="http://www.linuxdvb.tv/">http://www.linuxdvb.tv/</A></TD> 
 		  <TD>&nbsp;</TD> 
 		  <TD>... just have a look</TD> 
-		</TR>
-		<TR>
+		</TR> 
+		<TR> 
 		  <TD VALIGN="TOP"><A
-			 HREF="http://www.dbox2.info">http://www.dbox2.info</A></TD>
-		  <TD>&nbsp;</TD>
-		  <TD>a portal site about the dbox2 set top box.</TD>
+			 HREF="http://www.dbox2.info">http://www.dbox2.info</A></TD> 
+		  <TD>&nbsp;</TD> 
+		  <TD>a portal site about the dbox2 set top box.</TD> 
 		</TR> 
 		<TR> 
 		  <TD VALIGN="TOP"><A

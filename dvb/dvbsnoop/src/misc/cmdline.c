@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.10 2003/12/07 23:36:13 rasc Exp $
+$Id: cmdline.c,v 1.11 2003/12/09 21:02:31 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.10 2003/12/07 23:36:13 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.11  2003/12/09 21:02:31  rasc
+transponder pid-scan improved (should be sufficient now)
+
 Revision 1.10  2003/12/07 23:36:13  rasc
 pidscan on transponder
 - experimental(!)
@@ -134,8 +137,10 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
          if (!strcmp (s,"sec")) opt->packet_mode = SECT;
          else if (!strcmp (s,"ts")) opt->packet_mode = TS;
          else if (!strcmp (s,"pes")) opt->packet_mode = PES;
-         else if (!strcmp (s,"pidscan")) opt->packet_mode = PIDSCAN;
-         else opt->help = 1;
+         else if (!strcmp (s,"pidscan")) {
+		 	opt->packet_mode = PIDSCAN;
+			opt->pid = 0;	// dummy to avoid usage output
+	 } else opt->help = 1;
      } else if (isdigit (argv[i][0])) {
        /* PID */   
        opt->pid = str2i(argv[i]);
