@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.361 2005/01/18 07:53:07 diemade Exp $
+ * $Id: zapit.cpp,v 1.362 2005/01/18 10:18:00 diemade Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1594,7 +1594,8 @@ void setDemuxMode(int demux_mode)
 	else
                 aviaExtDriver->playbackSPTS();
 
-	if (videoDecoder->getPlayState() == VIDEO_PLAYING) {
+	if ((videoDecoder->getPlayState() == VIDEO_PLAYING)  && (channel)) {
+		//printf("[zapit] restarting playback after changing demux mode\n");
 		stopPlayBack();
 		playbackStopForced = true;
 		sleep(1);
@@ -1767,7 +1768,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.361 2005/01/18 07:53:07 diemade Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.362 2005/01/18 10:18:00 diemade Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
