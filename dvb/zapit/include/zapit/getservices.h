@@ -1,6 +1,9 @@
 #ifndef __getservices__
 #define __getservices__
 
+#include <map>
+#include <string>
+
 struct channel {
   std::string name;
   time_t last_update;
@@ -80,7 +83,6 @@ typedef struct pids{
         apid_struct apids[max_num_apids];
         uint ecmpid;
 }pids;
-
 
 
 extern std::map<uint, transponder>transponders;
