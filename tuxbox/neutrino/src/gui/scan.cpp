@@ -142,6 +142,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			if ( msg == NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS )
 			{
 				char cb[21];
+				if (found_transponder == 0) data = 0;
 				sprintf(cb, "%d/%d", data,found_transponder);
 				frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
 				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);

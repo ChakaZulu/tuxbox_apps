@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.97 2003/03/03 22:18:22 mws Exp $
+ * $Id: scan.cpp,v 1.98 2003/03/04 22:53:31 mws Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -418,7 +418,7 @@ void *start_scanthread(void *param)
 			transponder = transponder->xmlNextNode;
 			/* msg to neutrino */
 			processed_transponders++;
-			eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS, CEventServer::INITID_ZAPIT, &processed_transponders,sizeof(processed_transponders));
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS, CEventServer::INITID_ZAPIT, &processed_transponders, sizeof(processed_transponders));
 		}
 
 		/* 
