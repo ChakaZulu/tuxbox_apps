@@ -65,14 +65,7 @@ eString eTransponder::satellite::toString()
 {
 	eString ret;
 	if (valid)
-	{
-		ret =  eString().sprintf("%d", frequency) + ":";
-		ret += eString().sprintf("%d", symbol_rate) + ":";
-		ret += eString().sprintf("%d", polarisation) + ":";
-		ret += eString().sprintf("%d", fec) + ":";
-		ret += eString().sprintf("%d", orbital_position) + ":";
-		ret += eString().sprintf("%d", inversion) + ":";
-	}
+		ret = eString().sprintf("%d:%d:%d:%d:%d:%d:", frequency, symbol_rate, polarisation, fec, orbital_position, inversion);
 	return ret;
 }
 
