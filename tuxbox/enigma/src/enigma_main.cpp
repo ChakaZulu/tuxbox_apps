@@ -4768,7 +4768,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			_("information"),
 			eMessageBox::btOK|eMessageBox::iconInfo,
 			eMessageBox::btOK,
-		10000);
+		10);
 		mb.show();
 		mb.exec();
 		mb.hide();
