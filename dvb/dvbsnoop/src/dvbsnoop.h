@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.19 2004/03/31 21:14:22 rasc Exp $
+$Id: dvbsnoop.h,v 1.20 2004/07/24 11:44:44 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,13 @@ $Id: dvbsnoop.h,v 1.19 2004/03/31 21:14:22 rasc Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.20  2004/07/24 11:44:44  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.19  2004/03/31 21:14:22  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -95,7 +102,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include <ctype.h>
 
 #include "version.h"
-#include "strings/dvb_str.h"
 #include "misc/helper.h"
 #include "misc/output.h"
 

@@ -7,6 +7,7 @@ noinst_HEADERS = \
 	dsmcc.h \
 	ints.h \
 	unts.h \
+	mpe_fec.h \
 	datagram.h \
 	dsmcc_ddb.h \
 	dsmcc_unm.h \
@@ -27,6 +28,7 @@ libdatacarousel_a_SOURCES = \
 	dsmcc.c \
 	ints.c \
 	unts.c \
+	mpe_fec.c \
 	datagram.c \
 	dsmcc_ddb.c \
 	dsmcc_unm.c \

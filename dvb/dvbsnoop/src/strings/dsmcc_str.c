@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.32 2004/02/24 23:03:07 rasc Exp $
+$Id: dsmcc_str.c,v 1.33 2004/07/24 11:44:45 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,13 @@ $Id: dsmcc_str.c,v 1.32 2004/02/24 23:03:07 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.33  2004/07/24 11:44:45  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.32  2004/02/24 23:03:07  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()
@@ -134,40 +141,8 @@ some updates to dvbsnoop...
 
 #include "dvbsnoop.h"
 #include "dsmcc_str.h"
+#include "strtable_misc.h"
 
-
-
-typedef struct _STR_TABLE {
-    u_int    from;          /* e.g. from id 1  */
-    u_int    to;            /*      to   id 3  */
-    u_char   *str;          /*      is   string xxx */
-} STR_TABLE;
-
-
-
-
-/*
-  -- match id in range from STR_TABLE
-*/
-
-static char *findTableID (STR_TABLE *t, u_int id)
-
-{
-
-  while (t->str) {
-    if (t->from <= id && t->to >= id)
-       return t->str;
-    t++;
-  }
-
-  return ">>ERROR: not (yet) defined... Report!<<";
-}
-
-
-
-
-
-/* -----------------------------------------  */
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.10 2004/05/24 20:18:17 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.11 2004/07/24 11:44:44 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,13 @@ $Id: mhp_ait_descriptor.c,v 1.10 2004/05/24 20:18:17 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.11  2004/07/24 11:44:44  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.10  2004/05/24 20:18:17  rasc
 bugfix: AIT descriptor transport_protocol_label (reported by Stéphane Esté-Gracias)
 
@@ -69,6 +76,7 @@ some AIT descriptors
 #include "mhp_ait_descriptor.h"
 #include "dvb_descriptor.h"
 #include "datacarousel/mhp_misc.h"
+#include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.21 2004/04/05 17:32:13 rasc Exp $ 
+$Id: dvb_str.h,v 1.22 2004/07/24 11:44:45 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,13 @@ $Id: dvb_str.h,v 1.21 2004/04/05 17:32:13 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.22  2004/07/24 11:44:45  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.21  2004/04/05 17:32:13  rasc
 mass typo fix adaption --> adaptation
 
@@ -77,7 +84,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 
 #ifndef __DVB_STR_H
-#define __DVB_STR_H 1
+#define __DVB_STR_H 
 
 
 char *dvbstrBouquetTable_ID (u_int i);
@@ -171,6 +178,16 @@ char *dvbstrWSS_copy_generation_bit (u_int i);
 
 char *dvbstrCountryCode_ID (u_int i);
 char *dvbstrPrivateDataSpecifier_ID (u_int i);
+
+
+/* EN 301 192 v1.4.1 updates */
+
+char *dvbstrTimeSlice_bit_used (u_int i);
+char *dvbstrMPE_FEC_algo (u_int i);
+char *dvbstrMPE_FEC_max_burst_size (u_int i);
+char *dvbstrMPE_FEC_frame_rows (u_int i);
+char *dvbstrMPE_FEC_max_average_rate (u_int i);
+char *dvbstrMPE_FEC_table_frame_boundary (u_int i);
 
 
 

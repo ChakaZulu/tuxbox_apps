@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.h,v 1.9 2004/02/07 01:28:01 rasc Exp $ 
+$Id: descriptor.h,v 1.10 2004/07/24 11:44:44 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,13 @@ $Id: descriptor.h,v 1.9 2004/02/07 01:28:01 rasc Exp $
 
 
 $Log: descriptor.h,v $
+Revision 1.10  2004/07/24 11:44:44  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.9  2004/02/07 01:28:01  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -50,7 +57,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 // Descriptor tag space/scope...
 typedef enum {
 	MPEG, DVB_SI,
-	DSMCC_STREAM, DSMCC_CAROUSEL, DSMCC_INT_UNT, MHP_AIT
+	DSMCC_STREAM, DSMCC_CAROUSEL, DSMCC_INT_UNT, MHP_AIT, TVA_RNT
 } DTAG_SCOPE;
 
 

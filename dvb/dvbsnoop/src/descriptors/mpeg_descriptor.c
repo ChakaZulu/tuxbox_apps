@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.19 2004/03/31 21:14:23 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.20 2004/07/24 11:44:44 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,13 @@ $Id: mpeg_descriptor.c,v 1.19 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.20  2004/07/24 11:44:44  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.19  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -1340,11 +1347,11 @@ void descriptorMPEG_stream_event (u_char *b)
 
    outBit_Sx_NL (4,"eventId: ",		  		b,16,16);
    outBit_Sx_NL (6,"reserved: ",		  	b,32,31);
-   t = outBit64_Sx (4,"eventNPT: ",		  	b,79,33);
+   t = outBit64_Sx (4,"eventNPT: ",		  	b,63,33);
        out_nl_calc_NPT (4,t); 
    
-   b += 10;
-   len -= 8;
+   b += 12;
+   len -= 10;
 
    print_private_data (4, b, len);
 

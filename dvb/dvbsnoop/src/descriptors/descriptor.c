@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.23 2004/02/07 01:28:01 rasc Exp $
+$Id: descriptor.c,v 1.24 2004/07/24 11:44:44 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,13 @@ $Id: descriptor.c,v 1.23 2004/02/07 01:28:01 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.24  2004/07/24 11:44:44  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.23  2004/02/07 01:28:01  rasc
 MHP Application  Information Table
 some AIT descriptors
@@ -139,6 +146,10 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 
      case MHP_AIT:
 		descriptorMHP_AIT (b);
+		break;
+
+     case TVA_RNT:		// TS 102 323
+//$$$ TODO		descriptorTVA_RNT (b);
 		break;
 
      case MPEG:

@@ -1,4 +1,4 @@
-AC_INIT([dvbsnoop],[1.3.35],[rasc@users.sourceforge.net])
+AC_INIT([dvbsnoop],[1.3.41],[rasc@users.sourceforge.net])
 AM_INIT_AUTOMAKE([dist-bzip2 no-define])
 
 AC_PROG_CC

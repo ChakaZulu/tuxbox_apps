@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.31 2004/04/15 03:38:50 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.32 2004/07/24 11:44:44 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,13 @@ $Id: dvb_descriptor.c,v 1.31 2004/04/15 03:38:50 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.32  2004/07/24 11:44:44  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.31  2004/04/15 03:38:50  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -230,7 +237,12 @@ int  descriptorDVB  (u_char *b)
      case 0x70:  descriptorDVB_AdaptationFieldData(b);  break;
      case 0x71:  descriptorDVB_ServiceIdentifier(b);  break;
      case 0x72:  descriptorDVB_ServiceAvailability(b);  break;
-
+     case 0x73:  descriptorDVB_DefaultAuthority(b);  break;
+     case 0x74:  descriptorDVB_RelatedContent(b);  break;
+     case 0x75:  descriptorDVB_TVA_ID(b);  break;
+     case 0x76:  descriptorDVB_ContentIdentifier(b);  break;
+     case 0x77:  descriptorDVB_TimesliceFecIdentifier(b);  break;
+     case 0x78:  descriptorDVB_ECM_RepetitionRate(b);  break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -3313,7 +3325,6 @@ void descriptorDVB_AC3  (u_char *b)
 */
 
 void descriptorDVB_AncillaryData  (u_char *b)
-
 {
 
  typedef struct  _descAncillaryData {
@@ -3363,7 +3374,6 @@ void descriptorDVB_AncillaryData  (u_char *b)
 */
 
 void descriptorDVB_CellList  (u_char *b)
-
 {
  int len;
 
@@ -3424,7 +3434,6 @@ void descriptorDVB_CellList  (u_char *b)
 */
 
 void descriptorDVB_CellFrequencyLink  (u_char *b)
-
 {
  int len;
 
@@ -3486,7 +3495,6 @@ void descriptorDVB_CellFrequencyLink  (u_char *b)
 */
 
 void descriptorDVB_AnnouncementSupport (u_char *b)
-
 {
 
  typedef struct  _descAnnouncementSupport {
@@ -3598,7 +3606,6 @@ void descriptorDVB_AnnouncementSupport (u_char *b)
 */
 
 void descriptorDVB_ApplicationSignalling (u_char *b)
-
 {
 
  typedef struct  _descApplSignalling {
@@ -3653,7 +3660,6 @@ void descriptorDVB_ApplicationSignalling (u_char *b)
 */
 
 void descriptorDVB_AdaptationFieldData (u_char *b)
-
 {
 
  typedef struct  _descAdaptationFieldData {
@@ -3704,7 +3710,6 @@ void descriptorDVB_AdaptationFieldData (u_char *b)
 */
 
 void descriptorDVB_ServiceIdentifier (u_char *b)
-
 {
  int  len;
 
@@ -3723,7 +3728,6 @@ void descriptorDVB_ServiceIdentifier (u_char *b)
 */
 
 void descriptorDVB_ServiceAvailability (u_char *b)
-
 {
 
  typedef struct  _descServiceAvailability {
@@ -3769,6 +3773,162 @@ void descriptorDVB_ServiceAvailability (u_char *b)
  indent (-1);
 
 }
+
+
+
+
+
+
+/*
+  0x73 Default Authority descriptor 
+  ETSI TS 102 323 
+*/
+
+void descriptorDVB_DefaultAuthority (u_char *b)
+{
+  descriptor_any (b);   // $$$ TODO
+}
+
+
+
+
+/*
+  0x74 Related Content descriptor 
+  ETSI TS 102 323 
+*/
+
+void descriptorDVB_RelatedContent (u_char *b)
+{
+  descriptor_any (b);   // $$$ TODO
+}
+
+
+
+
+
+/*
+  0x75 TVA ID descriptor 
+  ETSI TS 102 323 
+*/
+
+void descriptorDVB_TVA_ID (u_char *b)
+{
+  descriptor_any (b);   // $$$ TODO
+}
+
+
+
+
+
+/*
+  0x76 Content Identifier descriptor 
+  ETSI TS 102 323 
+*/
+
+void descriptorDVB_ContentIdentifier (u_char *b)
+{
+  descriptor_any (b);   // $$$ TODO
+}
+
+
+
+
+/*
+  0x77 time_slice_fec_identifier descriptor 
+  ETSI EN 301 192  1.4.1
+*/
+
+void descriptorDVB_TimesliceFecIdentifier (u_char *b)
+{
+  int 	len;
+  int   tslice, mpe_fec;
+  int	frame_size;
+  int   mbd, tslice_fec_id;
+
+
+  // tag	 = b[0];
+  len       	 = b[1];
+
+
+
+
+  // -- prefetch value
+  tslice_fec_id = getBits (b, 0, 36, 4);
+
+
+
+  tslice  = outBit_S2x_NL (4,"time_slicing: ", 	b,16, 1,
+		 	(char *(*)(u_long)) dvbstrTimeSlice_bit_used );
+  mpe_fec = outBit_S2x_NL (4,"mpe_fec: ",	b,17, 2,
+		 	(char *(*)(u_long)) dvbstrMPE_FEC_algo );
+
+  outBit_Sx_NL  (6,"reserved: ",	  	b,19, 2);
+
+
+  frame_size = outBit_Sx_NL  (4,"frame_size: ",	b,21, 3);
+  if (tslice_fec_id == 0) {
+     if (tslice)  out_nl (4,"  ==> max burst size: %s",
+		  	dvbstrMPE_FEC_max_burst_size (frame_size) );
+     if (mpe_fec) out_nl (4,"  ==> MPE-FEC frame rows: %s", 
+			dvbstrMPE_FEC_frame_rows (frame_size) );
+  } else {
+     out_nl  (4,"  ==> not defined ");
+  }
+
+
+
+  mbd = outBit_Sx (4,"max_burst_duration: ",	b,24,8);
+  if (tslice_fec_id == 0) {
+  	if (tslice)  out_nl  (4," [= %ld msec]",(mbd+1)*20);
+  	else         out_nl  (4," [reserved]");
+  } else {
+     out_nl  (4," [not defined]");
+  }
+
+
+
+  if (tslice_fec_id == 0) {
+	  outBit_S2x_NL  (4,"max_average_rate: ",	b,32, 4,
+		 	(char *(*)(u_long)) dvbstrMPE_FEC_max_average_rate );
+  } else {
+	  outBit_Sx      (4,"max_average_rate: ",	b,32, 4);
+  	  out_nl         (4," [not defined]");
+  }
+
+
+  outBit_Sx_NL  (4,"time_slice_fec_id: ",	b,36, 4);
+  b   += 5;
+  len -= 3;
+  print_databytes (4,"id_selector_bytes:", b,len);
+}
+
+
+
+
+/*
+  0x78 ECM RepetitionRate descriptor 
+  ETSI EN 301 192  1.4.1
+*/
+
+void descriptorDVB_ECM_RepetitionRate (u_char *b)
+{
+  int len;
+
+  // tag	 = b[0];
+  len       	 = b[1];
+
+
+ outBit_S2x_NL  (4,"CA_systemID: ",  		b,16,16,
+		 	(char *(*)(u_long)) dvbstrCASystem_ID );
+ outBit_S2Tx_NL (4,"ECM_repetition_rate: ",  	b,32,16,"msec.");
+
+ b   += 6;
+ len -= 4;
+ print_private_data (4, b, len);
+
+}
+
+
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.26 2004/02/24 23:03:08 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.27 2004/07/24 11:44:45 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,13 @@ $Id: dsmcc_str.h,v 1.26 2004/02/24 23:03:08 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.27  2004/07/24 11:44:45  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.26  2004/02/24 23:03:08  rasc
 private data of DSMCC::DSI
 BIOP::ServiceGatewayInformation()
@@ -113,7 +120,7 @@ some updates to dvbsnoop...
 
 
 #ifndef __DSMCC_H
-#define __DSMCC_H 1
+#define __DSMCC_H 
 
 
 char *dsmccStrDSMCC_CAROUSEL_DescriptorTAG (u_int i);

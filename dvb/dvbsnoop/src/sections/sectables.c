@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.21 2004/02/20 22:18:42 rasc Exp $
+$Id: sectables.c,v 1.22 2004/07/24 11:44:45 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,13 @@ $Id: sectables.c,v 1.21 2004/02/20 22:18:42 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.22  2004/07/24 11:44:45  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.21  2004/02/20 22:18:42  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -115,8 +122,10 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "datacarousel/datagram.h"
 #include "datacarousel/ints.h"
 #include "datacarousel/unts.h"
+#include "datacarousel/mpe_fec.h"
 #include "testdata/test0x1d.h"
 
+#include "strings/dvb_str.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
 
@@ -150,6 +159,8 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
   table_id = buf[0];
 
   switch (pid) {
+	  // $$$ TODO ...
+	  // $$$ we should only prinbt what tables are expected and go to guess table...
 
 	case  0x000:		/* PAT  Program Association Table */
 		decode_PAT  (buf, len);
@@ -178,6 +189,7 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 	case  0x012:		/* EIT, ST  */
 		if (table_id == 0x72)   decode_ST  (buf,len);
 		else                    decode_EIT (buf,len);
+		// $$$ TODO CIT (TS 102 323 [36])
 		break; 
 
 	case  0x013:		/* RST, ST  */
@@ -192,11 +204,19 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 		break; 
 
 	case  0x015:		/* Net Sync  */
-		// $$$$
+		// $$$$ TODO
+		out_nl (3,"Network Synchronization Packet");
+		break; 
+
+	case  0x016:		/* resolution notification section (TS102323) */
+//$$$  TODO		if      (table_id == 0x74) decode_RNT  (buf,len);
+//$$$		else 	                   guess_table (buf, len, pid);
+                guess_table (buf, len, pid);
 		break; 
 
 	case  0x01C:		/* Inband Signalling  */
-		// $$$$
+		// $$$$ TODO
+		out_nl (3,"Inband Signalling Packet");
 		break; 
 
 	case  0x01D:		/* Measurement */
@@ -286,6 +306,16 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x72, 0x72,  decode_ST  },
      {  0x73, 0x73,  decode_TOT },
      {  0x74, 0x74,  decode_MHP_AIT },
+
+// collisison mit AIT ??? $$$ TODO
+// 0x74 resolution notification section (TS 102 323 [36])  (RNT)
+// 0x75 container section (TS 102 323 [36])
+// 0x76 related content section (TS 102 323 [36])
+// 0x77 content identifier section (TS 102 323 [36])  (CIT)
+
+
+     {  0x78, 0x78,  decode_MPE_FEC },		// EN 301 192 v1.4.1
+
      /* res. */
      {  0x7E, 0x7E,  decode_DIT },
      {  0x7F, 0x7F,  decode_SIT },

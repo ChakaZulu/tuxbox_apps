@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.51 2004/04/15 10:53:22 rasc Exp $
+$Id: dvb_str.c,v 1.52 2004/07/24 11:44:45 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,13 @@ $Id: dvb_str.c,v 1.51 2004/04/15 10:53:22 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.52  2004/07/24 11:44:45  rasc
+EN 301 192 update
+ - New: ECM_repetition_rate_descriptor (EN 301 192 v1.4.1)
+ - New: time_slice_fec_identifier_descriptor (EN 301 192 v1.4.1)
+ - New: Section MPE_FEC  EN 301 192 v1.4
+ - Bugfixes
+
 Revision 1.51  2004/04/15 10:53:22  rasc
 minor changes
 
@@ -200,40 +207,9 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #include "dvbsnoop.h"
 #include "dvb_str.h"
+#include "strtable_misc.h"
 
 
-
-typedef struct _STR_TABLE {
-    u_int    from;          /* e.g. from id 1  */
-    u_int    to;            /*      to   id 3  */
-    u_char   *str;          /*      is   string xxx */
-} STR_TABLE;
-
-
-
-
-/*
-  -- match id in range from STR_TABLE
-*/
-
-static char *findTableID (STR_TABLE *t, u_int id)
-
-{
-
-  while (t->str) {
-    if (t->from <= id && t->to >= id)
-       return t->str;
-    t++;
-  }
-
-  return ">>ERROR: not (yet) defined... Report!<<";
-}
-
-
-
-
-
-/* -----------------------------------------  */
 
 
 
@@ -288,7 +264,12 @@ char *dvbstrTableID (u_int id)
      {  0x72, 0x72,  "Stuffing Table (ST)" },
      {  0x73, 0x73,  "Time Offset Table (TOT)" },
      {  0x74, 0x74,  "MHP- Application Information Table (AIT)" }, /* MHP */
-     {  0x75, 0x7D,  "reserved" },
+     {  0x75, 0x75,  "Container Table (CT)" }, 			/* TS 102 323 */
+     {  0x76, 0x76,  "Related Content Table (RCT)" }, 		/* TS 102 323 */
+     {  0x77, 0x77,  "Content Identifier Table (CIT)" }, 	/* TS 102 323 */
+     {  0x78, 0x78,  "MPE-FEC Table (MFT)" }, 			/* EN 301 192 v1.4.1*/
+     {  0x79, 0x79,  "Resolution Notification Table (RNT)" },	/* TS 102 323 */
+     {  0x79, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "Discontinuity Information Table (DIT)" },
      {  0x7F, 0x7F,  "Selection Information Table (SIT)" },
      {  0x80, 0x8F,  "DVB CA message section (EMM/ECM)" },   /* ITU-R BT.1300 ref. */
@@ -423,7 +404,13 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x70, 0x70,  "adaptation_field_data_descriptor" },
      {  0x71, 0x71,  "service_identifier_descriptor" },
      {  0x72, 0x72,  "service_availability_descriptor" },
-     {  0x73, 0x7F,  "reserved_descriptor" },
+     {  0x73, 0x73,  "default_authority_descriptor" }, 		// EN 300 468 v1.6.1, TS 102 323
+     {  0x74, 0x74,  "related_content_descriptor" }, 		// EN 300 468 v1.6.1, TS 102 323
+     {  0x75, 0x75,  "TVA_id_descriptor" }, 			// EN 300 468 v1.6.1, TS 102 323
+     {  0x76, 0x76,  "content_identifier_descriptor" }, 	// EN 300 468 v1.6.1, TS 102 323
+     {  0x77, 0x77,  "time_slice_fec_identifier_descriptor" }, 	// EN 300 468 v1.6.1
+     {  0x78, 0x78,  "ECM_repetition_rate_descriptor" }, 	// EN 300 468 v1.6.1
+     {  0x79, 0x7F,  "reserved_descriptor" },
      {  0x80, 0xAF,  "User defined/ATSC reserved" },		/* ETR 211e02 */
      {  0xB0, 0xFE,  "User defined" },
      {  0xFF, 0xFF,  "Forbidden" },
@@ -699,6 +686,7 @@ char *dvbstrStream_TYPE (u_int flag)
 
      {  0x15, 0x7F,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
      // $$$ ATSC ID Names could be includes...
+     // $$$ streamtype == 0x90 at MPE_FEC , see EN 301192 v1.4.1 s9.5
      {  0x80, 0xFF,  "User private" },
      {  0,0, NULL }
   };
@@ -2894,6 +2882,140 @@ char *dvbstrWSS_copy_generation_bit (u_int i)
 
   return findTableID (Table, i);
 }
+
+
+
+
+
+
+
+/*
+  -- Timeslice used bit
+  -- ETSI EN 301 192  v1.4.1
+*/
+
+char *dvbstrTimeSlice_bit_used (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "not used" },
+	{ 0x01, 0x01,   "used" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+/*
+  -- MPE_FEC algo
+  -- ETSI EN 301 192  v1.4.1
+*/
+
+char *dvbstrMPE_FEC_algo (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "MPE-FEC not used" },
+	{ 0x01, 0x01,   "MPE-FEC used // Reed-Solomon (255,191,64)" },
+	{ 0x02, 0x03,   "reserved" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- MPE_FEC  max burst size
+  -- ETSI EN 301 192  v1.4.1
+*/
+
+char *dvbstrMPE_FEC_max_burst_size (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "512 kbits" },
+	{ 0x01, 0x01,   "1024 kbits" },
+	{ 0x02, 0x02,   "1536 kbits" },
+	{ 0x03, 0x03,   "2048 kbits" },
+	{ 0x04, 0x07,   "reserved" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- MPE_FEC  frame rows
+  -- ETSI EN 301 192 v1.4.1
+*/
+
+char *dvbstrMPE_FEC_frame_rows (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "256" },
+	{ 0x01, 0x01,   "512" },
+	{ 0x02, 0x02,   "768" },
+	{ 0x03, 0x03,   "1024" },
+	{ 0x04, 0x07,   "reserved" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- MPE_FEC  max average rate
+  -- ETSI EN 301 192  v1.4.1
+*/
+
+char *dvbstrMPE_FEC_max_average_rate (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "16 kbps" },
+	{ 0x01, 0x01,   "32 kbps" },
+	{ 0x02, 0x02,   "64 kbps" },
+	{ 0x03, 0x03,   "128 kbps" },
+	{ 0x04, 0x04,   "256 kbps" },
+	{ 0x05, 0x05,   "512 kbps" },
+	{ 0x06, 0x06,   "1024 kbps" },
+	{ 0x07, 0x07,   "2048 kbps" },
+	{ 0x08, 0x0F,   "reserved" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- MPE_FEC  table_frame_boundary
+  -- ETSI EN 301 192  v1.4.1
+*/
+
+char *dvbstrMPE_FEC_table_frame_boundary (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "" },
+	{ 0x01, 0x01,   "last section (current burst or MEC_FEC frame)" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+
+
+
+
 
 
 
