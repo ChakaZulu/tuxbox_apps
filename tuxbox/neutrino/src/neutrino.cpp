@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.36 2001/09/18 14:57:51 field Exp $
+        $Id: neutrino.cpp,v 1.37 2001/09/18 20:20:26 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.37  2001/09/18 20:20:26  field
+  Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
+  vorbereitet
+
   Revision 1.36  2001/09/18 14:57:51  field
   tzset eingebaut, id wird beim starten ausgegeben
 
@@ -146,6 +150,7 @@ static void initGlobals(void)
 
   g_EpgData = NULL;
   g_InfoViewer = NULL;
+  g_EventList = NULL;
   g_StreamInfo = NULL;
   g_ScreenSetup = NULL;
 
@@ -172,7 +177,6 @@ CNeutrinoApp::CNeutrinoApp()
 
 	mode = 0;
 	channelList = NULL;
-  eventlist = NULL;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -184,8 +188,6 @@ CNeutrinoApp::~CNeutrinoApp()
 {
 	if (channelList)
 		delete channelList;
-  if (channelList)
-    delete eventlist;
 }
 
 void CNeutrinoApp::setupNetwork(bool force)
@@ -610,11 +612,11 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
-    g_Fonts->menu=          g_fontRenderer->getFont("Arial", "Regular", 20);
-    g_Fonts->menu_title=    g_fontRenderer->getFont("Arial", "Regular", 30);
-    g_Fonts->menu_info=     g_fontRenderer->getFont("Arial", "Regular", 16);
+    g_Fonts->menu =         g_fontRenderer->getFont("Arial", "Regular", 20);
+    g_Fonts->menu_title =   g_fontRenderer->getFont("Arial", "Regular", 30);
+    g_Fonts->menu_info =    g_fontRenderer->getFont("Arial", "Regular", 16);
 
-	g_Fonts->epg_title=g_fontRenderer->getFont("Arial", "Regular", 30);
+    g_Fonts->epg_title =    g_fontRenderer->getFont("Arial", "Regular", 30);
 	
 	g_Fonts->epg_info1=g_fontRenderer->getFont("Arial", "Italic", 17); // info1 must be same size as info2, but italic
 	g_Fonts->epg_info2=g_fontRenderer->getFont("Arial", "Regular", 17);
@@ -628,8 +630,9 @@ void CNeutrinoApp::SetupFonts()
 	g_Fonts->infobar_number=g_fontRenderer->getFont("Arial", "Regular", 50);
 	g_Fonts->infobar_channame=g_fontRenderer->getFont("Arial", "Regular", 30);
 	g_Fonts->infobar_info=g_fontRenderer->getFont("Arial", "Regular", 20);
-
     g_Fonts->infobar_small=g_fontRenderer->getFont("Arial", "Regular", 14);
+//    g_Fonts->info_symbols = g_fontRenderer->getFont("Marlett", "Regular", 18);
+//    g_Fonts->info_symbols = g_fontRenderer->getFont("Arial", "Regular", 18);
 
 	g_Fonts->fixedabr20=g_fontRenderer->getFont("Arial Black", "Regular", 20);
 }
@@ -956,11 +959,12 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 			{	//channellist
 				channelList->exec();
 			}
-			else if (key==CRCInput::RC_yellow)
+// mal nur in den infoviewer verlagert... sonst sind tasten fix belegt
+/*			else if (key==CRCInput::RC_yellow)
 			{	// eventlist
 				eventlist->setName(channelList->getActiveChannelName());
 				eventlist->exec(channelList->getActiveChannelName());
-			}
+			} */
 			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
 			{
 				//quickzap
@@ -1040,6 +1044,7 @@ int CNeutrinoApp::run(int argc, char **argv)
     g_InfoViewer = new CInfoViewer;
     g_StreamInfo = new CStreamInfo;
     g_ScreenSetup = new CScreenSetup;
+    g_EventList = new EventList;
 
 
     printf("\nCNeutrinoApp::run - objects initialized...\n\n");
@@ -1056,7 +1061,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	setupNetwork();
 
 	channelList = new CChannelList( 1, "channellist.head" );
-	eventlist = new EventList( 1, "channellist.head" );
+
 
 	//Main settings
 	CMenuWidget mainSettings("mainmenu.head", "settings.raw");
@@ -1277,7 +1282,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.36 2001/09/18 14:57:51 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.37 2001/09/18 20:20:26 field Exp $\n\n");
     tzset();
 
     initGlobals();

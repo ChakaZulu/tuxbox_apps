@@ -48,7 +48,10 @@ class CInfoViewer
         pthread_cond_t      epg_cond;
         pthread_mutex_t     epg_mutex;
 
+
 		int					InfoHeightY;
+        int					InfoHeightY_Info;
+        bool                ShowInfo_Info;
 		int					BoxEndX;
 		int					BoxEndY;
 		int					BoxStartX;

@@ -35,7 +35,8 @@ fontRenderClass::fontRenderClass()
 	AddFont("/usr/lib/fonts/Arial.ttf");
 	AddFont("/usr/lib/fonts/Arial_Bold.ttf");
 	AddFont("/usr/lib/fonts/Arial_Italic.ttf");
-	AddFont("/usr/lib/fonts/Arial_Black.ttf");
+    AddFont("/usr/lib/fonts/Arial_Black.ttf");
+    AddFont("/usr/lib/fonts/Marlett.ttf");
 
 	printf("[FONT] Intializing font cache...");
 	fflush(stdout);

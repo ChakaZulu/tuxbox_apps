@@ -1,7 +1,11 @@
 // 
-// $Id: global.h,v 1.5 2001/09/17 18:37:40 fnbrd Exp $
+// $Id: global.h,v 1.6 2001/09/18 20:20:26 field Exp $
 //
 // $Log: global.h,v $
+// Revision 1.6  2001/09/18 20:20:26  field
+// Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
+// vorbereitet
+//
 // Revision 1.5  2001/09/17 18:37:40  fnbrd
 // inserted id and log.
 //
@@ -21,6 +25,7 @@
 
 #include "widget/screensetup.h"
 #include "helpers/settings.h"
+#include "widget/eventlist.hpp"
 #include "helpers/locale.h"
 
 #ifndef NEUTRINO_CPP
@@ -41,6 +46,7 @@ NEUTRINO_CPP  CFrameBuffer    *g_FrameBuffer;
 
 NEUTRINO_CPP  CEpgData        *g_EpgData;
 NEUTRINO_CPP  CInfoViewer     *g_InfoViewer;
+NEUTRINO_CPP  EventList       *g_EventList;
 NEUTRINO_CPP  CStreamInfo     *g_StreamInfo;
 
 NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;

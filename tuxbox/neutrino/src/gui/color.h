@@ -1,8 +1,13 @@
 #ifndef __color__
 #define __color__
 
+#define COL_INFOBAR_GREEN		254-8*5-5
+#define COL_INFOBAR_RED 		254-8*5-4
+#define COL_INFOBAR_YELLOW		254-8*5-3
+#define COL_INFOBAR_BLUE		254-8*5-2
 #define COL_INFOBAR_SHADOW		254-8*5-1
 #define COL_INFOBAR			254-8*5
+
 #define COL_MENUHEAD			254-8*4
 #define COL_MENUCONTENT			254-8*3
 #define COL_MENUCONTENTSELECTED		254-8*2

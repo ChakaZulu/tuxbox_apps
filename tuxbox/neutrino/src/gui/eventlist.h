@@ -1,9 +1,13 @@
 #ifndef EVENTLIST_HPP
 #define EVENTLIST_HPP
 //
-// $Id: eventlist.h,v 1.3 2001/09/18 14:58:20 field Exp $
+// $Id: eventlist.h,v 1.4 2001/09/18 20:20:26 field Exp $
 //
 // $Log: eventlist.h,v $
+// Revision 1.4  2001/09/18 20:20:26  field
+// Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
+// vorbereitet
+//
 // Revision 1.3  2001/09/18 14:58:20  field
 // Eventlist verbessert
 //
@@ -64,9 +68,8 @@ class EventList
     void hide();
 
   public:
-    EventList(int Key=-1, const std::string& Name="");
+    EventList();
     ~EventList();
-    void setName(const string& Name);
     void exec(const string& channelname);
 };
 

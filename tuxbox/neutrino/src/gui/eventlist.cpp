@@ -1,7 +1,11 @@
 //
-// $Id: eventlist.cpp,v 1.5 2001/09/18 15:26:09 field Exp $
+// $Id: eventlist.cpp,v 1.6 2001/09/18 20:20:26 field Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.6  2001/09/18 20:20:26  field
+// Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
+// vorbereitet
+//
 // Revision 1.5  2001/09/18 15:26:09  field
 // Handelt nun auch "kein epg"
 //
@@ -150,10 +154,8 @@ void EventList::readEvents(const std::string& channelname)
     return;
 }
 
-EventList::EventList(int Key=-1, const std::string &Name)
+EventList::EventList()
 {
-	key = Key;
-	name = Name;
 	selected = 0;
     current_event = 0;
 
@@ -180,19 +182,14 @@ EventList::~EventList()
   removeAllEvents();
 }
 
-void EventList::setName(const std::string& Name)
-{
-	name = Name;
-}
-
 void EventList::exec(const std::string& channelname)
 {
+  name = channelname;
   paintHead();
   readEvents(channelname);
   paint();
 	
 	int oldselected = selected;
-	int zapOnExit = false;
 	bool loop=true;
 	while (loop)
 	{
@@ -257,7 +254,6 @@ void EventList::exec(const std::string& channelname)
 		}
 		else if (key==CRCInput::RC_ok)
 		{
-			zapOnExit = true;
 			loop=false;
 		}
 	}
@@ -271,11 +267,20 @@ void EventList::hide()
 
 void EventList::paintItem(int pos)
 {
+    int color;
 	int ypos = y+ theight+0 + pos*fheight;
-	int color = COL_MENUCONTENT;
+
 	if (liststart+pos==selected)
 	{
 		color = COL_MENUCONTENTSELECTED;
+	}
+    else if (liststart+pos == current_event )
+	{
+		color = COL_MENUCONTENTINACTIVE;
+	}
+    else
+   	{
+		color = COL_MENUCONTENT;
 	}
 
 	g_FrameBuffer->paintBoxRel(x,ypos, width, fheight, color);
