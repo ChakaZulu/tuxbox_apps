@@ -208,15 +208,15 @@ int eMountPoint::mount()
 							rc = -4; //NFS filesystem not supported
 						break;
 					case 1: /* CIFS */
-						if(fileSystemIsSupported("cifs"))
+						if (fileSystemIsSupported("cifs"))
 						{
 							cmd = "mount -t cifs //";
 							cmd += ip + "/" + mp.mountDir + " " + mp.localDir + " -o user=";
-							cmd += (mp.userName != "") ? mp.userName : "anonymous";
-							if (mp.password != "")
+							cmd += (mp.userName) ? mp.userName : "anonymous";
+							if (mp.password)
 								cmd += "pass=" + mp.password;
 							cmd += ",unc=//" + ip + "/" + mp.mountDir;
-							if (useoptions != "")
+							if (useoptions)
 								cmd += "," + useoptions;
 						}
 						else
@@ -244,7 +244,7 @@ int eMountPoint::mount()
 					pthread_mutex_destroy(&g_mut1);
 					pthread_cond_destroy(&g_cond1);
 
-					if (g_mntstatus1 != 0)
+					if (g_mntstatus1)
 						rc = -5; //mount failed (timeout)
 					else
 						mp.mounted = true; //everything is fine :-)
@@ -285,7 +285,6 @@ eMountMgr::eMountMgr()
 
 eMountMgr::~eMountMgr()
 {
-
 }
 
 int eMountMgr::addMountPoint(t_mount pmp)
@@ -409,7 +408,7 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			tmp.strReplace("#FSTYPE#", type);
 			tmp.strReplace("#AUTO#", eString().sprintf("%d", mp_it->mp.automount));
 			eString options = mp_it->mp.options;
-			if (mp_it->mp.ownOptions != "")
+			if (mp_it->mp.ownOptions)
 				options += ", " + mp_it->mp.ownOptions;
 			tmp.strReplace("#OPTIONS#", mp_it->mp.options);
 			tmp.strReplace("#RSIZE#", eString().sprintf("%d", mp_it->mp.rsize));
@@ -434,7 +433,7 @@ void eMountMgr::addMountedFileSystems()
 	t_mount mp;
 
 	in.open("/proc/mounts", std::ifstream::in);
-	while(getline(in, buffer, '\n'))
+	while (getline(in, buffer, '\n'))
 	{
 		mountDev = mountOn = mountType = "";
 		tmp.str(buffer);

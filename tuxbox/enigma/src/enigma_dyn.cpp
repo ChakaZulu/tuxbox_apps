@@ -1096,7 +1096,6 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 
 eString getIP()
 {
-	eString tmp;
 	int sd;
 	struct ifreq ifr;
 	sd=socket(AF_INET, SOCK_DGRAM, 0);
@@ -1117,7 +1116,7 @@ static eString getVolBar()
 	std::stringstream result;
 	int volume = (eAVSwitch::getInstance()->getMute()) ? 0 : 63 - eAVSwitch::getInstance()->getVolume();
 
-	for (int i = 9; i <= 63; i+=6)
+	for (int i = 9; i <= 63; i += 6)
 	{
 		result << "<td width=\"15\" height=\"8\">"
 			"<a href=\"javascript:setVol(" << i << ")\">";
@@ -2180,7 +2179,7 @@ static eString getControlScreenShot(void)
 		if (pdaScreen == 1)
 			winxres = 160;
 		if (Decoder::current.vpid != -1)
-			bitstream=fopen("/proc/bus/bitstream", "rt");
+			bitstream = fopen("/proc/bus/bitstream", "rt");
 		if (bitstream)
 		{
 			char buffer[100];
