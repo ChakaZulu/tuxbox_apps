@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.45 2002/08/31 19:13:07 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.46 2002/09/01 09:23:48 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -50,31 +50,6 @@ CBouquet::~CBouquet()
 		delete tvChannels[i];
 	for (unsigned int i=0; i<radioChannels.size(); i++)
 		delete radioChannels[i];
-}
-
-CZapitChannel* CBouquet::getChannelByName (char* serviceName, unsigned char serviceType)
-{
-	CZapitChannel* result = NULL;
-
-	ChannelList* channels = &tvChannels;
-	switch (serviceType)
-	{
-		case 0:
-		case 1:
-		case 4: channels = &tvChannels; break;
-		case 2: channels = &radioChannels; break;
-	}
-
-	unsigned int i;
-	for (i=0; i<channels->size(), (*channels)[i]->getName() != string(serviceName); i++);
-
-	if (i<channels->size())
-		result = (*channels)[i];
-
-	if ((serviceType==0) && (result==NULL))
-		result = getChannelByName(serviceName, 2);
-
-	return( result);
 }
 
 //
