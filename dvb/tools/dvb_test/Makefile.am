@@ -7,6 +7,7 @@ bin_PROGRAMS = \
 	video \
 	test_clip \
 	test_clip_vls \
+        test_clip_vlc \
 	stream_to_ts \
 	test_clip_pes \
 	test_sections \
@@ -16,6 +17,8 @@ bin_PROGRAMS = \
 	test_av \
 	test_stillimage
 
+test_clip_vlc_LDADD = 	-lpthread
+
 diseqc_SOURCES = diseqc.c
 set22k_SOURCES = set22k.c
 sendburst_SOURCES = sendburst.c
@@ -24,6 +27,8 @@ setpid_SOURCES = setpid.c
 video_SOURCES = video.c
 test_clip_SOURCES = test_clip.c
 test_clip_pes_SOURCES = test_clip_pes.c
+test_clip_vlc_SOURCES = test_clip_vlc.c ringbuffer.c
+test_clip_vls_SOURCES = test_clip_vls.c 
 test_sections_SOURCES = test_sections.c hex_dump.c
 test_sec_ne_SOURCES = test_sec_ne.c hex_dump.c
 test_pes_SOURCES = test_pes.c hex_dump.c
