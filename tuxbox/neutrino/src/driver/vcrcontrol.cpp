@@ -429,6 +429,10 @@ bool CVCRControl::CFileDevice::Stop()
 
 	bool return_value = (::stop_recording() == STREAM2FILE_OK);
 
+	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
+	if ((actmode == 1) && (!g_settings.misc_spts)) // actual mode is SPTS and settings require PES
+		g_Zapit->PlaybackPES(); // restore PES mode
+
 	RestoreNeutrino();
 
 	deviceState = CMD_VCR_STOP;
@@ -447,6 +451,22 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	       mode);
 
 	CutBackNeutrino(channel_id, mode);
+
+	int repeatcount=0;
+	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
+	bool sptsmode=false;
+	if ((actmode == -1) || !g_settings.recording_in_spts_mode) // no aviaEXT loaded or switchoption not set
+	{
+		sptsmode = g_settings.misc_spts;
+	}
+	else if ((actmode != 1) && g_settings.recording_in_spts_mode) // actual mode is not SPTS and switchoption is set
+	{
+		g_Zapit->PlaybackSPTS();
+		while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 1)) {
+			sleep(1); 
+		}
+		sptsmode = true;
+	}
 
 #define MAXPIDS		64
 	unsigned short pids[MAXPIDS];
@@ -580,7 +600,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 							      ((unsigned long long)SplitSize) * 1048576ULL,
 							      numpids,
 							      pids,
-							      g_settings.misc_spts,
+							      sptsmode,
 							      RingBuffers);
 
 
