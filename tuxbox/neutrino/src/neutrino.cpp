@@ -323,6 +323,7 @@ int CNeutrinoApp::loadSetup()
 
 	//misc
 	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
+	g_settings.shutdown_real_rcdelay = configfile.getInt32( "shutdown_real_rcdelay", true );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
 	g_settings.show_camwarning = configfile.getInt32( "show_camwarning", 1 );
 	strcpy(g_settings.record_safety_time_before, configfile.getString( "record_safety_time_before", "00").c_str());
@@ -450,33 +451,33 @@ int CNeutrinoApp::loadSetup()
 	g_settings.screen_EndY = configfile.getInt32( "screen_EndY", 555 );
 
 	//font configuration
-	strcpy( g_settings.fontsize_menu    ,  configfile.getString( "fontsize_menu", "20").c_str() );
-	strcpy( g_settings.fontsize_menu_title ,  configfile.getString( "fontsize_menu_title", "30").c_str() );
-	strcpy( g_settings.fontsize_menu_info  ,  configfile.getString( "fontsize_menu_info", "16").c_str() );
-	strcpy( g_settings.fontsize_epg_title  ,  configfile.getString( "fontsize_epg_title", "25").c_str() );
-	strcpy( g_settings.fontsize_epg_info1  ,  configfile.getString( "fontsize_epg_info1", "17").c_str() );
-	strcpy( g_settings.fontsize_epg_info2  ,  configfile.getString( "fontsize_epg_info2", "17").c_str() );
-	strcpy( g_settings.fontsize_epg_date   ,  configfile.getString( "fontsize_epg_date", "15").c_str() );
-	strcpy( g_settings.fontsize_alert      ,  configfile.getString( "fontsize_alert", "100").c_str() );
-	strcpy( g_settings.fontsize_eventlist_title     ,  configfile.getString( "fontsize_eventlist_title", "30").c_str() );
-	strcpy( g_settings.fontsize_eventlist_itemlarge, configfile.getString( "fontsize_eventlist_itemlarge", "20").c_str() );
-	strcpy( g_settings.fontsize_eventlist_itemsmall, configfile.getString( "fontsize_eventlist_itemsmall", "14").c_str() );
-	strcpy( g_settings.fontsize_eventlist_datetime , configfile.getString( "fontsize_eventlist_datetime", "16").c_str() );
+	strcpy( g_settings.fontsize_menu		, configfile.getString( "fontsize_menu", DEFAULT_FONTSIZE_MENU).c_str() );
+	strcpy( g_settings.fontsize_menu_title		, configfile.getString( "fontsize_menu_title", DEFAULT_FONTSIZE_MENU_TITLE).c_str() );
+	strcpy( g_settings.fontsize_menu_info		, configfile.getString( "fontsize_menu_info", DEFAULT_FONTSIZE_MENU_INFO).c_str() );
+	strcpy( g_settings.fontsize_epg_title		, configfile.getString( "fontsize_epg_title", DEFAULT_FONTSIZE_EPG_TITLE).c_str() );
+	strcpy( g_settings.fontsize_epg_info1		, configfile.getString( "fontsize_epg_info1", DEFAULT_FONTSIZE_EPG_INFO1).c_str() );
+	strcpy( g_settings.fontsize_epg_info2		, configfile.getString( "fontsize_epg_info2", DEFAULT_FONTSIZE_EPG_INFO2).c_str() );
+	strcpy( g_settings.fontsize_epg_date		, configfile.getString( "fontsize_epg_date", DEFAULT_FONTSIZE_EPG_DATE).c_str() );
+	strcpy( g_settings.fontsize_alert		, configfile.getString( "fontsize_alert", DEFAULT_FONTSIZE_ALERT).c_str() );
+	strcpy( g_settings.fontsize_eventlist_title	, configfile.getString( "fontsize_eventlist_title", DEFAULT_FONTSIZE_EVENTLIST_TITLE).c_str() );
+	strcpy( g_settings.fontsize_eventlist_itemlarge	, configfile.getString( "fontsize_eventlist_itemlarge", DEFAULT_FONTSIZE_EVENTLIST_ITEMLARGE).c_str() );
+	strcpy( g_settings.fontsize_eventlist_itemsmall	, configfile.getString( "fontsize_eventlist_itemsmall", DEFAULT_FONTSIZE_EVENTLIST_ITEMSMALL).c_str() );
+	strcpy( g_settings.fontsize_eventlist_datetime	, configfile.getString( "fontsize_eventlist_datetime", DEFAULT_FONTSIZE_EVENTLIST_DATETIME).c_str() );
 
-	strcpy( g_settings.fontsize_gamelist_itemlarge	,  configfile.getString( "fontsize_gamelist_itemlarge", "20").c_str() );
-	strcpy( g_settings.fontsize_gamelist_itemsmall	,  configfile.getString( "fontsize_gamelist_itemsmall", "16").c_str() );
+	strcpy( g_settings.fontsize_gamelist_itemlarge	, configfile.getString( "fontsize_gamelist_itemlarge", DEFAULT_FONTSIZE_GAMELIST_ITEMLARGE).c_str() );
+	strcpy( g_settings.fontsize_gamelist_itemsmall	, configfile.getString( "fontsize_gamelist_itemsmall", DEFAULT_FONTSIZE_GAMELIST_ITEMSMALL).c_str() );
 
-	strcpy( g_settings.fontsize_channellist         ,  configfile.getString( "fontsize_channellist", "20").c_str() );
-	strcpy( g_settings.fontsize_channellist_descr   ,  configfile.getString( "fontsize_channellist_descr", "20").c_str() );
-	strcpy( g_settings.fontsize_channellist_number , configfile.getString( "fontsize_channellist_number", "14").c_str() );
-	strcpy( g_settings.fontsize_channel_num_zap     ,  configfile.getString( "fontsize_channel_num_zap", "40").c_str() );
+	strcpy( g_settings.fontsize_channellist		, configfile.getString( "fontsize_channellist", DEFAULT_FONTSIZE_CHANNELLIST).c_str() );
+	strcpy( g_settings.fontsize_channellist_descr	, configfile.getString( "fontsize_channellist_descr", DEFAULT_FONTSIZE_CHANNELLIST_DESCR).c_str() );
+	strcpy( g_settings.fontsize_channellist_number	, configfile.getString( "fontsize_channellist_number", DEFAULT_FONTSIZE_CHANNELLIST_NUMBER).c_str() );
+	strcpy( g_settings.fontsize_channel_num_zap	, configfile.getString( "fontsize_channel_num_zap", DEFAULT_FONTSIZE_CHANNEL_NUM_ZAP).c_str() );
 
-	strcpy( g_settings.fontsize_infobar_number      , configfile.getString( "fontsize_infobar_number", "50").c_str() );
-	strcpy( g_settings.fontsize_infobar_channame , configfile.getString( "fontsize_infobar_channame", "30").c_str() );
-	strcpy( g_settings.fontsize_infobar_info     , configfile.getString( "fontsize_infobar_info", "20").c_str() );
-	strcpy( g_settings.fontsize_infobar_small    , configfile.getString( "fontsize_infobar_small", "14").c_str() );
+	strcpy( g_settings.fontsize_infobar_number	, configfile.getString( "fontsize_infobar_number", DEFAULT_FONTSIZE_INFOBAR_NUMBER).c_str() );
+	strcpy( g_settings.fontsize_infobar_channame	, configfile.getString( "fontsize_infobar_channame", DEFAULT_FONTSIZE_INFOBAR_CHANNAME).c_str() );
+	strcpy( g_settings.fontsize_infobar_info	, configfile.getString( "fontsize_infobar_info", DEFAULT_FONTSIZE_INFOBAR_INFO).c_str() );
+	strcpy( g_settings.fontsize_infobar_small	, configfile.getString( "fontsize_infobar_small", DEFAULT_FONTSIZE_INFOBAR_SMALL).c_str() );
 
-	strcpy( g_settings.fontsize_filebrowser_item, configfile.getString( "fontsize_filebrowser_item", "16").c_str() );
+	strcpy( g_settings.fontsize_filebrowser_item	, configfile.getString( "fontsize_filebrowser_item", DEFAULT_FONTSIZE_FILEBROWSER_ITEM).c_str() );
 
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
@@ -494,19 +495,19 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
 	//timing  (Einheit= 1 sec )
-	g_settings.timing_menu = configfile.getInt32( "timing_menu", 60 );
-	g_settings.timing_chanlist = configfile.getInt32( "timing_chanlist", 60 );
-	g_settings.timing_epg = configfile.getInt32( "timing_epg", 2* 60 );
-	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", 6 );
-	g_settings.timing_filebrowser = configfile.getInt32( "timing_filebrowser", 60 );
+	g_settings.timing_menu = configfile.getInt32( "timing_menu", DEFAULT_TIMING_MENU );
+	g_settings.timing_chanlist = configfile.getInt32( "timing_chanlist", DEFAULT_TIMING_CHANLIST );
+	g_settings.timing_epg = configfile.getInt32( "timing_epg", 2* DEFAULT_TIMING_EPG );
+	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", DEFAULT_TIMING_INFOBAR );
+	g_settings.timing_filebrowser = configfile.getInt32( "timing_filebrowser", DEFAULT_TIMING_FILEBROWSER );
 
 	//lcdd
-	g_settings.lcd_brightness =  configfile.getInt32("lcd_brightness", 0xff);
-	g_settings.lcd_standbybrightness = configfile.getInt32("lcd_standbybrightness", 0xaa);
-	g_settings.lcd_contrast = configfile.getInt32("lcd_contrast", 0x0F);
-	g_settings.lcd_power = configfile.getInt32("lcd_power", 0x01);
-	g_settings.lcd_inverse = configfile.getInt32("lcd_inverse", 0x00);
-	g_settings.lcd_show_volume = configfile.getInt32("lcd_show_volume", 1);
+	g_settings.lcd_brightness =  configfile.getInt32("lcd_brightness", DEFAULT_LCD_BRIGHTNESS);
+	g_settings.lcd_standbybrightness = configfile.getInt32("lcd_standbybrightness", DEFAULT_LCD_STANDBYBRIGHTNESS);
+	g_settings.lcd_contrast = configfile.getInt32("lcd_contrast", DEFAULT_LCD_CONTRAST);
+	g_settings.lcd_power = configfile.getInt32("lcd_power", DEFAULT_LCD_POWER);
+	g_settings.lcd_inverse = configfile.getInt32("lcd_inverse", DEFAULT_LCD_INVERSE);
+	g_settings.lcd_show_volume = configfile.getInt32("lcd_show_volume", DEFAULT_LCD_SHOW_VOLUME);
 
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
@@ -552,6 +553,7 @@ void CNeutrinoApp::saveSetup()
 
 	//misc
 	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
+	configfile.setInt32( "shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay );
 	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock );
 	configfile.setInt32( "show_camwarning", g_settings.show_camwarning );
 	configfile.setString( "record_safety_time_before", g_settings.record_safety_time_before );
@@ -982,7 +984,6 @@ void CNeutrinoApp::SetupTiming()
 	sprintf(g_settings.timing_epg_string,"%d",g_settings.timing_epg);
 	sprintf(g_settings.timing_infobar_string,"%d",g_settings.timing_infobar);
 	sprintf(g_settings.timing_filebrowser_string,"%d",g_settings.timing_filebrowser);
-	
 }
 
 
@@ -1313,7 +1314,13 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.general" ) );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.shutdown_real", &g_settings.shutdown_real, true );
+	CMenuOptionChooser *m1 = new CMenuOptionChooser("miscsettings.shutdown_real_rcdelay", &g_settings.shutdown_real_rcdelay, !g_settings.shutdown_real );
+	m1->addOption(0, "options.off");
+	m1->addOption(1, "options.on");
+
+	CMiscNotifier* miscNotifier = new CMiscNotifier( m1 );
+
+	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.shutdown_real", &g_settings.shutdown_real, true, miscNotifier );
 	oj->addOption(1, "options.off");
 	oj->addOption(0, "options.on");
 	miscSettings.addItem( oj );
@@ -1388,8 +1395,9 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	keySetupNotifier->changeNotify("initial", NULL);
 
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
-	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
- 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));	
+	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, g_settings.repeat_genericblocker, keySettings_repeatBlocker ));
+ 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, g_settings.repeat_blocker, keySettings_repeat_genericblocker ));	
+	miscSettings.addItem( m1 );
 }
 
 
@@ -1660,6 +1668,8 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	AddFontSettingItem(fontSettings_Epg, "fontsize.epg_info1", g_settings.fontsize_epg_info1);
 	AddFontSettingItem(fontSettings_Epg, "fontsize.epg_info2", g_settings.fontsize_epg_info2);
 	AddFontSettingItem(fontSettings_Epg, "fontsize.epg_date", g_settings.fontsize_epg_date);
+	fontSettings_Epg.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Epg.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def1", this) );
 
 	fontSettings_Eventlist.addItem( new CMenuSeparator() );
 	fontSettings_Eventlist.addItem( new CMenuForwarder("menu.back") );
@@ -1668,12 +1678,16 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemlarge", g_settings.fontsize_eventlist_itemlarge);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemsmall", g_settings.fontsize_eventlist_itemsmall);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_datetime", g_settings.fontsize_eventlist_datetime);
+	fontSettings_Eventlist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Eventlist.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def2", this) );
 
 	fontSettings_Gamelist.addItem( new CMenuSeparator() );
 	fontSettings_Gamelist.addItem( new CMenuForwarder("menu.back") );
 	fontSettings_Gamelist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemlarge);
 	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemSmall", g_settings.fontsize_gamelist_itemsmall);
+	fontSettings_Gamelist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Gamelist.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def3", this) );
 
 	fontSettings_Channellist.addItem( new CMenuSeparator() );
 	fontSettings_Channellist.addItem( new CMenuForwarder("menu.back") );
@@ -1682,6 +1696,8 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	AddFontSettingItem(fontSettings_Channellist, "fontsize.channellist_descr", g_settings.fontsize_channellist_descr);
 	AddFontSettingItem(fontSettings_Channellist, "fontsize.channellist_number", g_settings.fontsize_channellist_number);
 	AddFontSettingItem(fontSettings_Channellist, "fontsize.channel_num_zap", g_settings.fontsize_channel_num_zap);
+	fontSettings_Channellist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Channellist.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def4", this) );
 
 	fontSettings_Infobar.addItem( new CMenuSeparator() );
 	fontSettings_Infobar.addItem( new CMenuForwarder("menu.back") );
@@ -1690,6 +1706,8 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	AddFontSettingItem(fontSettings_Infobar, "fontsize.infobar_channame", g_settings.fontsize_infobar_channame);
 	AddFontSettingItem(fontSettings_Infobar, "fontsize.infobar_info", g_settings.fontsize_infobar_info);
 	AddFontSettingItem(fontSettings_Infobar, "fontsize.infobar_small", g_settings.fontsize_infobar_small);
+	fontSettings_Infobar.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings_Infobar.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def5", this) );
 
 	fontSettings.addItem( new CMenuSeparator() );
 	fontSettings.addItem( new CMenuForwarder("menu.back") );
@@ -1706,6 +1724,8 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	fontSettings.addItem( new CMenuForwarder("fontmenu.infobar", true,"", &fontSettings_Infobar) );
 	fontSettings.addItem( new CMenuForwarder("fontmenu.gamelist", true,"", &fontSettings_Gamelist) );
 	AddFontSettingItem(fontSettings, "fontsize.filebrowser_item", g_settings.fontsize_filebrowser_item);
+	fontSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	fontSettings.addItem( new CMenuForwarder("options.default", true, "", this, "fontsize.def6", this) );
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fontSettings )
@@ -1719,11 +1739,6 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	InitColorThemesSettings(*colorSettings_Themes);
 
 	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", colorSettings_Themes) );
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-	colorSettings.addItem( new CMenuForwarder("colormenu.font", true,"", &fontSettings) );
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
 	CMenuWidget *colorSettings_menuColors = new CMenuWidget("colormenusetup.head", "settings.raw", 400, 400);
 	InitColorSettingsMenuColors(*colorSettings_menuColors);
 	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, "", colorSettings_menuColors) );
@@ -1731,6 +1746,12 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	CMenuWidget *colorSettings_statusbarColors = new CMenuWidget("colormenu.statusbar", "settings.raw");
 	InitColorSettingsStatusBarColors(*colorSettings_statusbarColors);
 	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
+
+	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	colorSettings.addItem( new CMenuForwarder("colormenu.font", true,"", &fontSettings) );
+	CMenuWidget *colorSettings_timing = new CMenuWidget("colormenu.timing", "settings.raw");
+	InitColorSettingsTiming(*colorSettings_timing);
+	colorSettings.addItem( new CMenuForwarder("timing.head", true, "", colorSettings_timing) );
 
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	if(g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA)
@@ -1745,11 +1766,6 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 		CAlphaSetup* chAlphaSetup = new CAlphaSetup("colormenu.gtx_alpha", &g_settings.gtx_alpha1, &g_settings.gtx_alpha2, NULL);
 		colorSettings.addItem( new CMenuForwarder("colormenu.gtx_alpha", true, "", chAlphaSetup ));
 	}
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-	CMenuWidget *colorSettings_timing = new CMenuWidget("colormenu.timing", "settings.raw");
-	InitColorSettingsTiming(*colorSettings_timing);
-	colorSettings.addItem( new CMenuForwarder("timing.head", true, "", colorSettings_timing) );
 }
 
 
@@ -1843,6 +1859,9 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 
 	CStringInput*  colorSettings_timing_filebrowser = new CStringInput("timing.filebrowser", g_settings.timing_filebrowser_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.filebrowser", true,  g_settings.timing_filebrowser_string, colorSettings_timing_filebrowser ) );
+
+	colorSettings_timing.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	colorSettings_timing.addItem( new CMenuForwarder("options.default", true, "", this, "osd.def") );
 }
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
@@ -2561,6 +2580,10 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			if( mode == mode_standby )
 			{
 				g_RCInput->postMsg( NeutrinoMessages::STANDBY_OFF, 0 );
+			}
+			else if( !g_settings.shutdown_real && !g_settings.shutdown_real_rcdelay )
+			{
+				g_RCInput->postMsg( NeutrinoMessages::STANDBY_ON, 0 );
 			}
 			else if( !g_settings.shutdown_real )
 			{
@@ -3345,6 +3368,9 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="savesettings")
 	{
+	 	CHintBox* hintBox= new CHintBox( "messagebox.info", g_Locale->getText("mainsettings.savesettingsnow_hint"), "info.raw", 450 );
+		hintBox->paint();
+
 		g_Controld->saveSettings();
 		networkConfig.automatic_start = (network_automatic_start == 1);
 		networkConfig.commitConfig();
@@ -3358,6 +3384,9 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 			CNeutrinoApp::getInstance()->getScanSettings().toMotorPosList(motorPosList);
 			g_Zapit->setScanMotorPosList(motorPosList);
 		}
+
+		hintBox->hide();
+		delete hintBox;
 	}
 	else if(actionKey=="recording")
 	{
@@ -3365,8 +3394,69 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="reloadchannels")
 	{
-		dprintf(DEBUG_INFO, "reloading channels...\n");
+	 	CHintBox* hintBox= new CHintBox( "messagebox.info", g_Locale->getText("servicemenu.reload_hint"), "info.raw", 450 );
+		hintBox->paint();
+
 		g_Zapit->reinitChannels();
+
+		hintBox->hide();
+		delete hintBox;
+	}
+	else if(actionKey=="fontsize.def1")
+	{
+		strcpy( g_settings.fontsize_epg_title	, DEFAULT_FONTSIZE_EPG_TITLE );
+		strcpy( g_settings.fontsize_epg_info1	, DEFAULT_FONTSIZE_EPG_INFO1 );
+		strcpy( g_settings.fontsize_epg_info2	, DEFAULT_FONTSIZE_EPG_INFO2 );
+		strcpy( g_settings.fontsize_epg_date	, DEFAULT_FONTSIZE_EPG_DATE );
+		changeNotify("fontsize.", NULL);
+	}
+	else if(actionKey=="fontsize.def2")
+	{
+		strcpy( g_settings.fontsize_eventlist_title	, DEFAULT_FONTSIZE_EVENTLIST_TITLE );
+		strcpy( g_settings.fontsize_eventlist_itemlarge	, DEFAULT_FONTSIZE_EVENTLIST_ITEMLARGE );
+		strcpy( g_settings.fontsize_eventlist_itemsmall	, DEFAULT_FONTSIZE_EVENTLIST_ITEMSMALL );
+		strcpy( g_settings.fontsize_eventlist_datetime	, DEFAULT_FONTSIZE_EVENTLIST_DATETIME );
+		changeNotify("fontsize.", NULL);
+	}
+	else if(actionKey=="fontsize.def3")
+	{
+		strcpy( g_settings.fontsize_gamelist_itemlarge	, DEFAULT_FONTSIZE_GAMELIST_ITEMLARGE );
+		strcpy( g_settings.fontsize_gamelist_itemsmall	, DEFAULT_FONTSIZE_GAMELIST_ITEMSMALL );
+		changeNotify("fontsize.", NULL);
+	}
+	else if(actionKey=="fontsize.def4")
+	{
+		strcpy( g_settings.fontsize_channellist		, DEFAULT_FONTSIZE_CHANNELLIST );
+		strcpy( g_settings.fontsize_channellist_descr	, DEFAULT_FONTSIZE_CHANNELLIST_DESCR );
+		strcpy( g_settings.fontsize_channellist_number	, DEFAULT_FONTSIZE_CHANNELLIST_NUMBER );
+		strcpy( g_settings.fontsize_channel_num_zap	, DEFAULT_FONTSIZE_CHANNEL_NUM_ZAP );
+		changeNotify("fontsize.", NULL);
+	}
+	else if(actionKey=="fontsize.def5")
+	{
+		strcpy( g_settings.fontsize_infobar_number	, DEFAULT_FONTSIZE_INFOBAR_NUMBER );
+		strcpy( g_settings.fontsize_infobar_channame	, DEFAULT_FONTSIZE_INFOBAR_CHANNAME );
+		strcpy( g_settings.fontsize_infobar_info	, DEFAULT_FONTSIZE_INFOBAR_INFO );
+		strcpy( g_settings.fontsize_infobar_small	, DEFAULT_FONTSIZE_INFOBAR_SMALL );
+		changeNotify("fontsize.", NULL);
+	}
+	else if(actionKey=="fontsize.def6")
+	{
+		strcpy( g_settings.fontsize_alert		, DEFAULT_FONTSIZE_ALERT );
+		strcpy( g_settings.fontsize_menu		, DEFAULT_FONTSIZE_MENU );
+		strcpy( g_settings.fontsize_menu_title		, DEFAULT_FONTSIZE_MENU_TITLE );
+		strcpy( g_settings.fontsize_menu_info		, DEFAULT_FONTSIZE_MENU_INFO );
+		strcpy( g_settings.fontsize_filebrowser_item	, DEFAULT_FONTSIZE_FILEBROWSER_ITEM );
+		changeNotify("fontsize.", NULL);
+	}
+	else if(actionKey=="osd.def")
+	{
+		sprintf(g_settings.timing_menu_string,		"%d", DEFAULT_TIMING_MENU);
+		sprintf(g_settings.timing_chanlist_string,	"%d", DEFAULT_TIMING_CHANLIST);
+		sprintf(g_settings.timing_epg_string,		"%d", DEFAULT_TIMING_EPG);
+		sprintf(g_settings.timing_infobar_string,	"%d", DEFAULT_TIMING_INFOBAR);
+		sprintf(g_settings.timing_filebrowser_string,	"%d", DEFAULT_TIMING_FILEBROWSER);
+		changeNotify("timing.", NULL);
 	}
 	return returnval;
 }
@@ -3381,7 +3471,13 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 //	printf("OptionName: %s\n",OptionName.c_str());
 	if(OptionName.substr(0,9).compare("fontsize.") == 0)
 	{
+	 	CHintBox* hintBox= new CHintBox( "messagebox.info", g_Locale->getText("fontsize.hint"), "info.raw", 450 );
+		hintBox->paint();
+
 		SetupFonts();
+
+		hintBox->hide();
+		delete hintBox;
 	}
 	else if(OptionName.substr(0,7).compare("timing.") == 0)
 	{
@@ -3446,7 +3542,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.474 2003/07/08 12:50:20 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.475 2003/07/10 17:15:31 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();

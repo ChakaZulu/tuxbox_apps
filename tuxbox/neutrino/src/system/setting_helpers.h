@@ -80,6 +80,14 @@ class CRecordingNotifier2 : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 
+class CMiscNotifier : public CChangeObserver
+{
+	private:
+		CMenuItem* toDisable[1];
+	public:
+		CMiscNotifier( CMenuItem* );
+		bool changeNotify(string OptionName, void*);
+};
 
 /*
 class CCableSpectalInversionNotifier : public CChangeObserver
@@ -88,6 +96,7 @@ class CCableSpectalInversionNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 */
+
 class CLcdNotifier : public CChangeObserver
 {
 	private:

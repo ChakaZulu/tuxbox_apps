@@ -45,6 +45,7 @@ struct SNeutrinoSettings
 
 	//misc
 	int shutdown_real;
+	int shutdown_real_rcdelay;
 	int shutdown_showclock;
 	int show_camwarning;
 	char record_safety_time_before[3];
@@ -236,6 +237,55 @@ struct SNeutrinoSettings
 	int   mp3player_follow;
 	char  mp3player_screensaver[3];
 };
+
+/* some default Values */
+
+// Font sizes
+#define DEFAULT_FONTSIZE_MENU			"20"
+#define DEFAULT_FONTSIZE_MENU_TITLE		"30"
+#define DEFAULT_FONTSIZE_MENU_INFO		"16"
+
+#define DEFAULT_FONTSIZE_EPG_TITLE		"25"
+#define DEFAULT_FONTSIZE_EPG_INFO1		"17"
+#define DEFAULT_FONTSIZE_EPG_INFO2		"17"
+#define DEFAULT_FONTSIZE_EPG_DATE		"15"
+#define DEFAULT_FONTSIZE_ALERT			"100"
+#define DEFAULT_FONTSIZE_EVENTLIST_TITLE	"30"
+#define DEFAULT_FONTSIZE_EVENTLIST_ITEMLARGE	"20"
+#define DEFAULT_FONTSIZE_EVENTLIST_ITEMSMALL	"14"
+#define DEFAULT_FONTSIZE_EVENTLIST_DATETIME	"16"
+
+#define DEFAULT_FONTSIZE_GAMELIST_ITEMLARGE	"20"
+#define DEFAULT_FONTSIZE_GAMELIST_ITEMSMALL	"16"
+
+#define DEFAULT_FONTSIZE_CHANNELLIST		"20"
+#define DEFAULT_FONTSIZE_CHANNELLIST_DESCR	"20"
+#define DEFAULT_FONTSIZE_CHANNELLIST_NUMBER	"14"
+#define DEFAULT_FONTSIZE_CHANNEL_NUM_ZAP	"40"
+
+#define DEFAULT_FONTSIZE_INFOBAR_NUMBER		"50"
+#define DEFAULT_FONTSIZE_INFOBAR_CHANNAME	"30"
+#define DEFAULT_FONTSIZE_INFOBAR_INFO		"20"
+#define DEFAULT_FONTSIZE_INFOBAR_SMALL		"14"
+
+#define DEFAULT_FONTSIZE_FILEBROWSER_ITEM	"16"
+
+// lcdd
+#define DEFAULT_LCD_BRIGHTNESS			0xff
+#define DEFAULT_LCD_STANDBYBRIGHTNESS		0xaa
+#define DEFAULT_LCD_CONTRAST			0x0F
+#define DEFAULT_LCD_POWER			0x01
+#define DEFAULT_LCD_INVERSE			0x00
+#define DEFAULT_LCD_SHOW_VOLUME			1
+
+//timing
+#define DEFAULT_TIMING_MENU			60
+#define DEFAULT_TIMING_CHANLIST			60
+#define DEFAULT_TIMING_EPG			120
+#define DEFAULT_TIMING_INFOBAR			6
+#define DEFAULT_TIMING_FILEBROWSER		60
+
+/* end default values */
 
 struct SglobalInfo
 {

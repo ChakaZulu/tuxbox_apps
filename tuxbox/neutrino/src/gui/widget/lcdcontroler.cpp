@@ -122,7 +122,7 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 							break;
 						case 3:
 							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENTSELECTED);
-							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("lcdcontroler.default"), COL_MENUCONTENTSELECTED);
+							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENTSELECTED);
 							break;
 					}
 				}
@@ -148,7 +148,7 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 							paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby", true);
 							CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 							frameBuffer->paintBoxRel(x, y+hheight+mheight*3+mheight/2, width, mheight, COL_MENUCONTENT);
-							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("lcdcontroler.default"), COL_MENUCONTENT);
+							g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT);
 							break;
 						case 3:
 							break;
@@ -255,10 +255,10 @@ int CLcdControler::exec(CMenuTarget* parent, string)
 			case CRCInput::RC_ok:
 				if (selected==3)	// default Werte benutzen
 				{
-					brightness = 0xff;
-					brightnessstandby = 0xaa;
-					contrast = 0x0F;
-					selected = 0;
+					brightness		= DEFAULT_LCD_BRIGHTNESS;
+					brightnessstandby	= DEFAULT_LCD_STANDBYBRIGHTNESS;
+					contrast		= DEFAULT_LCD_CONTRAST;
+					selected		= 0;
 					setLcd();
 					paint();
 					break;
@@ -303,7 +303,7 @@ void CLcdControler::paint()
 	paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby",false);
 
 	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT+3 );
-	g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("lcdcontroler.default"), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT);
 }
 
 void CLcdControler::paintSlider(int x, int y, unsigned int spos, float factor, string text, string iconname, bool selected)

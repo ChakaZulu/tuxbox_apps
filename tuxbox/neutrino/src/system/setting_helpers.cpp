@@ -148,6 +148,16 @@ bool CRecordingNotifier2::changeNotify(string OptionName, void*)
    return true;
 }
 
+CMiscNotifier::CMiscNotifier( CMenuItem* i1)
+{
+   toDisable[0]=i1;
+}
+bool CMiscNotifier::changeNotify( string OptionName, void* )
+{
+   toDisable[0]->setActive(!g_settings.shutdown_real);
+   return true;
+}
+
 bool CConsoleDestChangeNotifier::changeNotify(string OptionName, void *Data)
 {
 	int value = *(int *)Data;
