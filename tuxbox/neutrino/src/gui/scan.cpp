@@ -179,6 +179,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 					frameBuffer->paintBoxRel(xpos1, ypos+1*mheight, width-xpos1-105, mheight, COL_MENUCONTENT); //new position set
 					g_Fonts->menu->RenderString(xpos1, ypos+ 2*mheight, width-xpos1, cb, COL_MENUCONTENT);
 					found_transponder = data;
+					delete (unsigned char*) data;
 					break;
 
 				case NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS:
@@ -186,12 +187,14 @@ int CScanTs::exec(CMenuTarget* parent, string)
 					sprintf(cb1, "%d/%d", data,found_transponder);
 					frameBuffer->paintBoxRel(xpos1, ypos+1*mheight, width-xpos1-105, mheight, COL_MENUCONTENT); // new position set
 					g_Fonts->menu->RenderString(xpos1, ypos+ 2*mheight, width-xpos1, cb1, COL_MENUCONTENT);
+					delete (unsigned char*) data;
 					break;
 
 				case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY:          //will be  enlarged to receive a structure
 					sprintf(cb1, "%u",data );
 					frameBuffer->paintBoxRel(xpos4, ypos+2*mheight,100, mheight, COL_MENUCONTENT); // new position set
 					g_Fonts->menu->RenderString(xpos4, ypos+3*mheight,100, cb1, COL_MENUCONTENT);
+					delete (unsigned char*) data;
 					break;
 				case NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP:          //will be  enlarged to receive a structure
 					if ( data == 0 )  {
@@ -202,6 +205,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 					frameBuffer->paintBoxRel(xpos4+100,ypos+2*mheight,30, mheight, COL_MENUCONTENT); // new position set
 					g_Fonts->menu->RenderString(xpos4+100, ypos+3*mheight,30, cb2, COL_MENUCONTENT);
+					delete (unsigned char*) data;
 					break;
 				case NeutrinoMessages::EVT_SCAN_PROVIDER:
 					frameBuffer->paintBoxRel(x+ 10, ypos+ 4* mheight+2, width-x-10, mheight, COL_MENUCONTENT);
@@ -217,11 +221,13 @@ int CScanTs::exec(CMenuTarget* parent, string)
 					sprintf(cb, " = %d", data);
 					frameBuffer->paintBoxRel(x +210, ypos+ 8*mheight, 70, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
 					g_Fonts->menu->RenderString(x + 210, ypos+ 9*mheight,130, cb, COL_MENUCONTENT);
+					delete (unsigned char*) data;
 					break;
 				case NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN:
 					sprintf(cb, "%d", data);
 					frameBuffer->paintBoxRel(x +8, ypos+8*mheight,60, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
 					g_Fonts->menu->RenderString(x + 10, ypos+ 9* mheight, 70, cb, COL_MENUCONTENT);
+					delete (unsigned char*) data;
 					break;
 /*  the goodguy hier ist der gui part
 				case NeutrinoMessages::EVT_SCAN_FOUND_A_CHAN:
@@ -242,17 +248,20 @@ int CScanTs::exec(CMenuTarget* parent, string)
 					sprintf(cb, "%d", data);
 					frameBuffer->paintBoxRel(x +68, ypos+8*mheight,60, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
 					g_Fonts->menu->RenderString(x + 72, ypos+ 9* mheight, 40, cb, COL_MENUCONTENT);
+					delete (unsigned char*) data;
 					break;
 				case NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN:
 					sprintf(cb, "%d", data);
 					frameBuffer->paintBoxRel(x +146, ypos+8*mheight,60, mheight , COL_MENUCONTENT);   //ist nen bischen zu tief
 					g_Fonts->menu->RenderString(x + 148, ypos+ 9* mheight, 70, cb, COL_MENUCONTENT);
+					delete (unsigned char*) data;
 					break;
 				case NeutrinoMessages::EVT_SCAN_COMPLETE:
 				case NeutrinoMessages::EVT_SCAN_FAILED:
     					success  = (msg == NeutrinoMessages::EVT_SCAN_COMPLETE);
 					istheend = true;
 					msg      = CRCInput::RC_timeout;
+					delete (unsigned char*) data;
 					break;
 				default:
 					if ((msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) ) delete (unsigned char*) data;
