@@ -204,11 +204,19 @@ void * DmxTSReader( void * Ptr )
 			fflush(stderr);
 			exit(-1);
 		}
+		if ( -1 == ioctl(CurStream->fd, DMX_SET_BUFFER_SIZE, // 1024*1024) ) { 
+			 CurStream->BufPacketNum * NET_DATA_PER_PACKET * DMX_BUF_FACTOR) ) { 
+			perror("ERROR: main() - dmx set buffer ioctl");
+			fprintf(stderr, "EXIT\n");
+			fflush(stderr);
+			exit(-1);
+		}
+
 		Stream[u].Filter.input=DMX_IN_FRONTEND;
 		Stream[u].Filter.output=DMX_OUT_TS_TAP;
 		Stream[u].Filter.pes_type=DMX_PES_OTHER;
-		Stream[u].Filter.flags=0;
-		//Stream[u].Filter.flags=DMX_IMMEDIATE_START;
+		//Stream[u].Filter.flags=0;
+		Stream[u].Filter.flags=DMX_IMMEDIATE_START;
 		if (-1==ioctl(Stream[u].fd, DMX_SET_PES_FILTER, &(Stream[u].Filter)) ) {
 			perror("ERROR: main() - DMX_SET_PES_FILTER ioctl");
 			fprintf(stderr, "EXIT\n");
@@ -311,8 +319,8 @@ void * DmxReader( void * Ptr )
    CurStream->Filter.input=DMX_IN_FRONTEND;
    CurStream->Filter.output=DMX_OUT_TAP;
    CurStream->Filter.pes_type=DMX_PES_OTHER;
-   CurStream->Filter.flags=0;
-   //CurStream->Filter.flags=DMX_IMMEDIATE_START;
+   //CurStream->Filter.flags=0;
+   CurStream->Filter.flags=DMX_IMMEDIATE_START;
 
    if (-1==ioctl(CurStream->fd, DMX_SET_PES_FILTER, &(CurStream->Filter)) ) {
       perror("ERROR: main() - DMX_SET_PES_FILTER ioctl");
@@ -566,11 +574,11 @@ int main ()
       }
    }
 
-   if (TSMode) {
-      Stream[StreamNum].Filter.pid = 0;
-      AVString[StreamNum] = 'a';
-      Stream[StreamNum++].BufPacketNum = AUDIO_BUF_PACKET_NUM;
-   }
+   //if (TSMode) {
+   //   Stream[StreamNum].Filter.pid = 0;
+   //   AVString[StreamNum] = 'a';
+   //   Stream[StreamNum++].BufPacketNum = AUDIO_BUF_PACKET_NUM;
+   //}
 
    for ( i=0; i<ExtraPidNum; i++) { 
       Stream[StreamNum].Filter.pid = ExtraPid[i];
@@ -790,7 +798,7 @@ int main ()
    printf("EXIT\n" );
    fflush(stdout);
 
-	if (TSMode) {
+	if (Bouquet != 0 && TSMode) {
 		zapit.startPlayBack();  // TS-Streaming geht sonst nicht!
 	}
    return 0;
