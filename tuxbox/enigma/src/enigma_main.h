@@ -405,6 +405,11 @@ public:
 	void stop();
 	void pause();
 	void record();
+	void startSkip(int dir);
+	void repeatSkip(int dir);
+	void stopSkip(int dir);
+	enum { skipForward, skipReverse };
+	int skipping;
 #endif
 private:
 	void nextService(int add=0);
@@ -429,18 +434,13 @@ private:
 	void runPluginExt();
 	void showEPGList(eServiceReferenceDVB ref);
 	void showEPG();
-	void showEPG_Streaminfo();	
+	void showEPG_Streaminfo();
 	void showInfobar();
 	void hideInfobar();
 	void showHelp( ePtrList<eAction>*, int );
 
 #ifndef DISABLE_FILE
-	enum { skipForward, skipReverse };
 	int skipcounter;
-	int skipping;
-	void startSkip(int dir);
-	void repeatSkip(int dir);
-	void stopSkip(int dir);
 #endif
 
 	void showServiceMenu(eServiceSelector*);
