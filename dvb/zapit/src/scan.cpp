@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.100 2003/03/14 08:22:04 obi Exp $
+ * $Id: scan.cpp,v 1.101 2003/03/23 21:24:24 mws Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -38,7 +38,7 @@
 short scan_runs;
 short curr_sat;
 static int status = 0;
-
+uint processed_transponders;
 
 
 CBouquetManager* scanBouquetManager;
@@ -55,7 +55,7 @@ extern std::map <uint8_t, std::string> scanProviders;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 
-uint processed_transponders = 0;
+
 
 void stop_scan(const bool success)
 {
@@ -318,7 +318,7 @@ void *start_scanthread(void *)
 	bool satfeed = false;
 
 	scanBouquetManager = new CBouquetManager();
-
+	processed_transponders = 0;
 	curr_sat = 0;
 
         if ((type = getFrontendName()) == NULL)
