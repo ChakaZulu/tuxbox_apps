@@ -810,8 +810,8 @@ static eString getChannelNavi(void)
 #ifndef DISABLE_FILE
 			result += button(100, "Record", RED, "javascript:DVRrecord('start')");
 			result += button(100, "Stop", BLUE, "javascript:DVRrecord('stop')");
-		}
 #endif
+		}
 	}
 
 	return result;
@@ -2090,16 +2090,14 @@ struct getEntryString
 		if (!description)
 			description = _("No description available");
 
-		result << "<tr>";
+		result << "<tr>"
+			<< "<td align=center><a href=\"javascript:deleteTimerEvent(\'"
+			<< "ref=" << ref2string(se->service)
+			<< "&start=" << se->time_begin
+			<< "&type=" << se->type
+			<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
 		if (!repeating)
 		{
-			result  << "<td align=center><a href=\"javascript:deleteTimerEvent(\'"
-				<< "ref=" << ref2string(se->service)
-				<< "&ID=" << std::hex << se->event_id << std::dec
-				<< "&start=" << se->time_begin
-				<< "&duration=" << se->duration
-				<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
-
 			result << "<td align=center><a href=\"javascript:editTimerEvent(\'"
 				<< "ref=" << ref2string(se->service)
 				<< "&start=" << se->time_begin
@@ -2107,10 +2105,11 @@ struct getEntryString
 				<< "&ID=" << std::hex << se->event_id << std::dec
 				<< "&channel=" << channel
 				<< "&descr=" << description
+				<< "&type=" << se->type
 				<< "\')\"><img src=\"edit.gif\" border=0 height=20></a></td>";
 		}
 		else
-			result << "<td>&nbsp;</td><td>&nbsp;</td>";
+			result << "<td>&nbsp;</td>";
 
 		if (se->type & ePlaylistEntry::stateFinished)
 			result << "<td align=center><img src=\"on.gif\"></td>";
@@ -3838,20 +3837,17 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 {
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
-	eString eventID = opt["ID"];
+	eString eventType = opt["type"];
 	eString eventStartTime = opt["start"];
-	eString eventDuration = opt["duration"];
 
-	int eventid;
-	sscanf(eventID.c_str(), "%x", &eventid);
-	printf("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
+	eDebug("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, type = %s, start = %s", serviceRef.c_str(), eventType.c_str(), eventStartTime.c_str());
 
-	EITEvent evt;
-	evt.start_time = atoi(eventStartTime.c_str());
-	evt.duration = atoi(eventDuration.c_str());
-	evt.event_id = eventid;
-	eServiceReference ref = string2ref(serviceRef);
-	eTimerManager::getInstance()->deleteEventFromTimerList(&ref, &evt);
+	ePlaylistEntry e(
+		string2ref(serviceRef), 
+		atoi(eventStartTime.c_str()), 
+		-1, -1, atoi(eventType.c_str()));
+	
+	eTimerManager::getInstance()->deleteEventFromTimerList(e);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	content->code=204;
 	content->code_descr="No Content";
@@ -3880,7 +3876,12 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
+
+	// to find old event in timerlist..
 	eString serviceRef = opt["ref"];
+	eString oldEventType = opt["old_type"];
+	eString oldStartTime = opt["old_stime"];
+
 	eString eventID = opt["ID"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
@@ -3892,6 +3893,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString emin = opt["emin"];
 	eString description = httpUnescape(opt["descr"]);
 	eString channel = httpUnescape(opt["channel"]);
+	eString after_event = opt["after_event"];
 
 	time_t now = time(0)+eDVB::getInstance()->time_difference;
 	tm start = *localtime(&now);
@@ -3910,19 +3912,51 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
 	int duration = eventEndTime - eventStartTime;
+	int oldType = atoi(oldEventType.c_str());
 
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
 	// printf("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d\n", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
 	//								end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
 
-	EITEvent evt;
-	evt.start_time = eventStartTime;
-	evt.duration = duration;
-	evt.event_id = eventid;
-	printf("[CHANGETIMER] startTime = %d, startDuration = %d, eventID = %x\n", evt.start_time, evt.duration, evt.event_id);
 	eServiceReference ref = string2ref(serviceRef);
-	eTimerManager::getInstance()->modifyEventInTimerList(&ref, &evt, channel + "/" + description);
+
+	ePlaylistEntry oldEvent(
+		ref,
+		atoi(oldStartTime.c_str()), 
+		-1, -1, oldType);
+
+	if ( oldStartTime < now && eventStartTime >= now )
+	{
+		oldType &= 
+			~(ePlaylistEntry::stateRunning|
+				ePlaylistEntry::statePaused|
+				ePlaylistEntry::stateFinished|
+				ePlaylistEntry::stateError|
+				ePlaylistEntry::errorNoSpaceLeft|
+				ePlaylistEntry::errorUserAborted|
+				ePlaylistEntry::errorZapFailed|
+				ePlaylistEntry::errorOutdated);
+		oldType &= ~(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown);
+		oldType |= ePlaylistEntry::stateWaiting;
+		oldType |= atoi(after_event.c_str());
+	}
+
+	ref.descr = channel + "/" + description;
+	ePlaylistEntry newEvent(
+		ref,
+		eventStartTime,
+		duration, 
+		eventid,
+		oldType);
+
+	// TODO : overlapp checking !!!
+	// change modifyEventInTimerList.. and return state values.. 
+	// i.e. overlap check failed.. event currently running .. all ok.. or whatever..
+	// than ask user what todo.. and call another once modifyEventInTimerList.. 
+	// with parameter force
+
+	eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return "<script language=\"javascript\">window.close();</script>";
 }
@@ -3960,9 +3994,9 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
 
+#if 0
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
-#if 0
 	int duration = eventEndTime - eventStartTime;
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
@@ -3981,6 +4015,30 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	return "<html><body>This function is not working yet.</body></html>";
 }
 
+static eString buildAfterEventOpts(int type)
+{
+	std::stringstream afterOpts;
+	if ( type & ePlaylistEntry::doGoSleep || type & ePlaylistEntry::doShutdown )
+		afterOpts << "<option value=\"0\">";
+	else 
+		afterOpts << "<option selected value=\"0\">";
+	afterOpts << _("Nothing")
+		<< "</option>";
+	if ( type & ePlaylistEntry::doGoSleep )
+		afterOpts << "<option selected value=\"" << ePlaylistEntry::doGoSleep << "\">";
+	else 
+		afterOpts << "<option value=\"" << ePlaylistEntry::doGoSleep << "\">";
+	afterOpts << _("Standby")
+		<< "</option>";
+	if ( type & ePlaylistEntry::doShutdown )
+		afterOpts << "<option selected value=\"" << ePlaylistEntry::doShutdown << "\">";
+	else 
+		afterOpts << "<option value=\"" << ePlaylistEntry::doShutdown << "\">";
+	afterOpts << _("Shutdown")
+		<< "</option>";
+	return afterOpts.str();
+}
+
 static eString editTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -3990,19 +4048,32 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	eString eventStartTime = opt["start"];
 	eString eventDuration = opt["duration"];
 	eString description = httpUnescape(opt["descr"]);
+
+	// this is only for renamed services ( or subservices )... changing this in the edit dialog has no effect to
+	// the recording service	
 	eString channel = httpUnescape(opt["channel"]);
+
+	eString eventType = opt["type"];
 
 	time_t eventStart = atoi(eventStartTime.c_str());
 	time_t eventEnd = eventStart + atoi(eventDuration.c_str());
 	tm start = *localtime(&eventStart);
 	tm end = *localtime(&eventEnd);
+	int evType = atoi(eventType.c_str());
 
 	// printf("[ENIGMA_DYN] editTimerEvent: serviceRef = %s, ID = %s, start = %s, duration = %s\n", serviceRef.c_str(), eventID.c_str(), eventStartTime.c_str(), eventDuration.c_str());
 
+	// TODO: check if ( type & ePlaylistEntry::isRepeating ) 
+	// .. then load another template.. with checkboxes for weekdays..
 	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
 
+	result.strReplace("#AFTERTEXT#", _("After Event:"));
+	result.strReplace("#AFTEROPTS#", buildAfterEventOpts(evType));
 	result.strReplace("#EVENTID#", eventID);
+// these three values we need to find the old event in timerlist...
 	result.strReplace("#SERVICEREF#", serviceRef);
+	result.strReplace("#OLD_TYPE#", eventType);
+	result.strReplace("#OLD_STIME#", eventStartTime);
 
 	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
 	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
