@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.143 2005/01/24 19:19:21 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.144 2005/01/24 23:52:29 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -348,6 +348,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 	bool emptyTransponder = true;
 
 	for (tallchans::const_iterator cI = allchans.begin(); cI != allchans.end(); cI++)
+	{
 		if (cI->second.getTransponderId() == transponder_id)
 		{
 			if (emptyTransponder)
@@ -412,6 +413,7 @@ void write_transponder(FILE *fd, const transponder_id_t transponder_id, const tr
 					convert_UTF8_To_UTF8_XML(cI->second.getName().c_str()).c_str(),
 					cI->second.getServiceType());
 		}
+	}
 
 	if (!emptyTransponder)
 		fprintf(fd, "\t\t</transponder>\n");
@@ -443,7 +445,7 @@ bool write_provider(FILE *fd, const char * const frontendType, const char * cons
 					fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\">\n", frontendType, provider_name, tI->second.DiSEqC);
 				}
 			}
-			write_transponder(fd, tI->first, tI->second);
+			write_transponder(fd, CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first), tI->second.original_network_id, tI->second.transport_stream_id), tI->second);
 		}
 	}
 	
@@ -509,6 +511,17 @@ void scan_provider(xmlNodePtr search, const char * const providerName, uint8_t d
 	{
 		if (GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first) == satellite_position)
 		{
+			for (tallchans::iterator cI = allchans.begin(); cI != allchans.end(); )
+			{
+				if (cI->second.getTransponderId() == tI->first)
+				{
+					tallchans::iterator remove_this = cI;
+					cI++;
+					allchans.erase(remove_this);
+				}
+				else
+					cI++;
+			}
 			stiterator tmp = tI;
 			tI++;
 			transponders.erase(tmp);
@@ -808,7 +821,7 @@ int scan_transponder(TP_params *TP)
 	{
 		/* channels */
 		for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
-			write_transponder(fd, tI->first, tI->second);
+			write_transponder(fd, CREATE_TRANSPONDER_ID_FROM_SATELLITEPOSITION_ORIGINALNETWORK_TRANSPORTSTREAM_ID(GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first), tI->second.original_network_id, tI->second.transport_stream_id), tI->second);
 		fprintf(fd, "\t</%s>\n", frontendType);
 		allchans.clear();
 		transponders.clear();
