@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.83 2002/11/18 00:27:56 obi Exp $
+ * $Id: scan.cpp,v 1.84 2002/11/27 03:42:36 obi Exp $
  */
 
 #include <fcntl.h>
@@ -63,6 +63,43 @@ void stop_scan()
 }
 
 
+int bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun (uint32_t TsidOnid, dvb_frontend_parameters feparams, uint8_t polarity, uint8_t DiSEqC)
+{
+	if (scantransponders.find(TsidOnid) == scantransponders.end())
+	{
+		found_transponders++;
+
+		eventServer->sendEvent
+		(
+			CZapitClient::EVT_SCAN_NUM_TRANSPONDERS,
+			CEventServer::INITID_ZAPIT,
+			&found_transponders,
+			sizeof(found_transponders)
+		);
+
+		scantransponders.insert
+		(
+			std::pair <unsigned int, transpondermap>
+			(
+				TsidOnid,
+				transpondermap
+				(
+					(TsidOnid >> 16),
+					TsidOnid,
+					feparams,
+					polarity,
+					DiSEqC
+				)
+			)
+		);
+
+		return 0;
+	}
+
+	return 1;
+}
+
+
 /* build transponder for cable-users with sat-feed*/
 int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, fe_code_rate_t fec_inner, fe_modulation_t modulation)
 {
@@ -80,7 +117,7 @@ int build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, fe_code_rate_
 	if (!frontend->tuneFrequency(&feparams, 0, 0))
 		return -1;
 
-	return fake_pat(get_sdt_TsidOnid(), feparams, 0, 0);
+	return bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(get_sdt_TsidOnid(), feparams, 0, 0);
 }
 
 
@@ -111,7 +148,7 @@ int get_nits (uint32_t frequency, uint32_t symbol_rate, fe_code_rate_t fec_inner
 		return -1;
 
 	if ((status = parse_nit(DiSEqC)) <= -2) /* nit unavailable */
-		status = fake_pat(get_sdt_TsidOnid(), feparams, polarization, DiSEqC);
+		status = bla_hiess_mal_fake_pat_hat_aber_nix_mit_pat_zu_tun(get_sdt_TsidOnid(), feparams, polarization, DiSEqC);
 
 	return status;
 }
