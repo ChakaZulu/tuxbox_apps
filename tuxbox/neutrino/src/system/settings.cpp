@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.18 2003/05/13 19:46:04 digi_casi Exp $
+        $Id: settings.cpp,v 1.19 2003/05/14 07:48:19 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -237,7 +237,7 @@ bool CScanSettings::saveSettings(const std::string fileName)
 		{
 			fd = fopen(MOTORCONFIGFILE, "w");
 			for (i = 0; i < satCount; i++)
-				fprintf(fd, "\"%s\" %d\n", satName[i], satMotorPos[i]+1);
+				fprintf(fd, "%s:%d\n", satName[i], satMotorPos[i]+1);
 			fclose(fd);
 		}
 	}
