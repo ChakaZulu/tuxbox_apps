@@ -29,13 +29,15 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "epgview.h"
+
 #include <global.h>
 #include <neutrino.h>
 
-#include "epgview.h"
-
 #include "widget/hintbox.h"
 #include "widget/messagebox.h"
+
+#include "driver/encoding.h"
 
 CEpgData::CEpgData()
 {
@@ -61,7 +63,7 @@ void CEpgData::start()
 
 }
 
-void CEpgData::addTextToArray(std::string text)
+void CEpgData::addTextToArray(std::string text) // UTF-8
 {
 	//printf("line: >%s<\n", text.c_str() );
 	if (text==" ")
@@ -79,10 +81,10 @@ void CEpgData::addTextToArray(std::string text)
 	}
 }
 
-void CEpgData::processTextToArray( string text )
+void CEpgData::processTextToArray(std::string text) // UTF-8
 {
-	string	aktLine = "";
-	string	aktWord = "";
+	std::string	aktLine = "";
+	std::string	aktWord = "";
 	int	aktWidth = 0;
 	text+= " ";
 	char* text_= (char*) text.c_str();
@@ -133,17 +135,15 @@ void CEpgData::showText( int startPos, int ypos )
 	int textCount = epgText.size();
 	int y=ypos;
 	int linecount=medlinecount;
-	string t;
 	int sb = linecount* medlineheight;
 	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT);
 
 	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
 	{
-		t=epgText[i];
 		if ( i< info1_lines )
-			g_Fonts->epg_info1->RenderString(sx+10, y+medlineheight, ox- 15- 15, t.c_str(), COL_MENUCONTENT);
+			g_Fonts->epg_info1->RenderString(sx+10, y+medlineheight, ox- 15- 15, epgText[i], COL_MENUCONTENT, 0, true); // UTF-8
 		else
-			g_Fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox- 15- 15, t.c_str(), COL_MENUCONTENT);
+			g_Fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox- 15- 15, epgText[i], COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
 	frameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT+ 1);
@@ -155,9 +155,9 @@ void CEpgData::showText( int startPos, int ypos )
 	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 }
 
-string GetGenre( char contentClassification )
+std::string GetGenre(const char contentClassification) // UTF-8
 {
-	string res= "UNKNOWN";
+	std::string res= "UNKNOWN";
 	char subClass[2];
 	sprintf( subClass, "%d", (contentClassification&0x0F) );
 
@@ -267,7 +267,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 		frameBuffer->paintBackgroundBoxRel(g_settings.screen_StartX, g_settings.screen_StartY, 50, height+5);
 	}
 
-	if (epgData.title.length() == 0) /* no epg info found */
+	if (epgData.title.empty()) /* no epg info found */
 	{
 		ShowHintUTF("messagebox.info", g_Locale->getText("epgviewer.notfound")); // UTF-8
 		return res;
@@ -276,8 +276,8 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 
 
 	int pos;
-	string text1 = epgData.title;
-	string text2 = "";
+	std::string text1 = epgData.title;
+	std::string text2 = "";
 	if ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 )
 	{
 		do
@@ -301,36 +301,33 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 		frameBuffer->paintBackgroundBox (sx, sy- oldtoph- 1, sx+ ox, sy- toph);
 	}
 
-	if(epgData.info1.length()!=0)
-	{
-		processTextToArray( epgData.info1.c_str() );
-	}
+	if (!epgData.info1.empty())
+		processTextToArray(Latin1_to_UTF8(epgData.info1));
+
 	info1_lines = epgText.size();
 
 	//scan epg-data - sort to list
-	if ( ( epgData.info2.length()==0 ) && (info1_lines == 0) )
-	{
-		epgData.info2= g_Locale->getText("epgviewer.nodetailed");
-	}
-
-	processTextToArray( epgData.info2.c_str() );
+	if ((epgData.info2.empty()) && (info1_lines == 0))
+		processTextToArray(g_Locale->getText("epgviewer.nodetailed")); // UTF-8
+	else
+		processTextToArray(Latin1_to_UTF8(epgData.info2));
 
 	if (epgData.fsk > 0)
 	{
 		char _tfsk[11];
 		sprintf (_tfsk, "FSK: ab %d", epgData.fsk );
-		processTextToArray( _tfsk );
+		processTextToArray( _tfsk ); // UTF-8
 	}
 
 	if (epgData.contentClassification.length()> 0)
-		processTextToArray( GetGenre(epgData.contentClassification[0]) );
+		processTextToArray(GetGenre(epgData.contentClassification[0])); // UTF-8
 //	processTextToArray( epgData.userClassification.c_str() );
 
 
 	// -- display more screenings on the same channel
 	// -- 2002-05-03 rasc
-	processTextToArray("\n") ;
-	processTextToArray(g_Locale->getText("epgviewer.More_Screenings")+":");
+	processTextToArray("\n"); // UTF-8
+	processTextToArray(g_Locale->getText("epgviewer.More_Screenings")+":"); // UTF-8
 	FollowScreenings(channel_id, epgData.title);
 
 
@@ -342,7 +339,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 
 	//show date-time....
 	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
-	string fromto;
+	std::string fromto;
 	int widthl,widthr;
 	fromto= epg_start+ " - "+ epg_end;
 
@@ -606,14 +603,13 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 // -- 2002-05-03 rasc
 //
 
-int CEpgData::FollowScreenings (const t_channel_id channel_id, string title)
+int CEpgData::FollowScreenings (const t_channel_id channel_id, std::string title)
 
 {
   CChannelEventList::iterator e;
   time_t		curtime;
   struct  tm		*tmStartZeit;
-  string		datetime_str;
-  string		screening_dates;
+  std::string		screening_dates;
   int			count;
   char			tmpstr[256];
 
@@ -631,28 +627,26 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, string title)
 			count++;
 			tmStartZeit = localtime(&(e->startTime));
 
+			screening_dates += "    ";
+
 			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
-			datetime_str = std::string( g_Locale->getText(tmpstr) );
-			datetime_str += std::string(".");
+			screening_dates = g_Locale->getText(tmpstr);
+			screening_dates += '.';
 
 			strftime(tmpstr, sizeof(tmpstr), "  %d.", tmStartZeit );
-			datetime_str += std::string( tmpstr );
+			screening_dates += tmpstr;
 
 			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
-			datetime_str += std::string( g_Locale->getText(tmpstr) );
+			screening_dates += g_Locale->getText(tmpstr);
 
 			strftime(tmpstr, sizeof(tmpstr), ".  %H:%M ", tmStartZeit );
-			datetime_str += std::string( tmpstr );
+			screening_dates += tmpstr;
 
-			// this is quick&dirty
-			screening_dates += "    ";
-			screening_dates += datetime_str;
 			screening_dates += "\n";
 		}
 	}
 
-	if (count) processTextToArray( screening_dates );
-	else       processTextToArray( "---\n" );
+	processTextToArray(count ? screening_dates : "---\n"); // UTF-8
 
 	return count;
 }

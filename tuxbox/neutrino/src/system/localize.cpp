@@ -134,13 +134,8 @@ void CLocaleManager::loadLocale(std::string locale)
 #warning dhcp     is missing in locales (used in neutrino.cpp)
 #warning NFS/CIFS is missing in locales (used in neutrino.cpp)
 			if (
-			    (buf[0] == 'G') ||
-			    ((buf[0] == 'd') && (
-						(strcmp(buf, "dhcp") != 0)
-						)) ||
 			    ((buf[0] == 'e') && (
-						 (strncmp(buf, "epgviewer.not", 13) != 0) &&
-						 (strcmp(buf, "epglist.head") != 0)
+						 (strcmp(buf, "epglist.noevents") == 0)
 						 )) ||
 			    ((buf[0] == 'f') && (
 						 (strcmp(buf, "flashupdate.actionreadflash") == 0) ||

@@ -373,26 +373,26 @@ void EventList::paintItem(unsigned int pos)
 
 
 			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
-			datetime1_str = std::string( g_Locale->getText(tmpstr) );
+			datetime1_str = g_Locale->getText(tmpstr);
 
 			strftime(tmpstr, sizeof(tmpstr), ". %H:%M, ", tmStartZeit );
-			datetime1_str += std::string( tmpstr );
+			datetime1_str += tmpstr;
 
 			strftime(tmpstr, sizeof(tmpstr), " %d. ", tmStartZeit );
-			datetime2_str = std::string( tmpstr );
-			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
-			datetime2_str += std::string( g_Locale->getText(tmpstr) );
-			datetime2_str += std::string(".");
+			datetime2_str = tmpstr;
 
-        	sprintf(tmpstr, "[%d min]", evtlist[liststart+pos].duration / 60 );
-        	duration_str = std::string( tmpstr );
-        }
+			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
+			datetime2_str += g_Locale->getText(tmpstr);
+
+			datetime2_str += '.';
+
+			sprintf(tmpstr, "[%d min]", evtlist[liststart+pos].duration / 60 );
+			duration_str = tmpstr;
+		}
 
 		// 1st line
-		g_Fonts->eventlist_datetime->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,
-		        datetime1_str.c_str(), color);
-		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20,
-		        datetime2_str.c_str(), color);
+		g_Fonts->eventlist_datetime->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,            datetime1_str, color, 0, true); // UTF-8
+		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20, datetime2_str, color, 0, true); // UTF-8
 
 		int seit = ( evtlist[liststart+pos].startTime - time(NULL) ) / 60;
 		if ( (seit> 0) && (seit<100) && (duration_str.length()!=0) )
@@ -403,8 +403,7 @@ void EventList::paintItem(unsigned int pos)
 
 			g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20- w, ypos+ fheight1+3, fwidth2, beginnt, color);
 		}
-		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2,
-		        duration_str.c_str(), color);
+		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2, duration_str, color, 0, true); // UTF-8
 		// 2nd line
 		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25- 20,
 		        evtlist[liststart+pos].description.c_str(), color);
@@ -414,7 +413,7 @@ void EventList::paintItem(unsigned int pos)
 void EventList::paintHead()
 {
 	char l_name[100];
-	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str()); // epglist.head must be UTF-8 encoded
+	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str()); // UTF-8
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD, 0, true); // UTF-8
