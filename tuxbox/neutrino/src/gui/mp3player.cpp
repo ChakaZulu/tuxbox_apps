@@ -619,7 +619,7 @@ void CMP3PlayerGui::paintItem(int pos)
 		char sNr[20];
 		sprintf(sNr, "%2d : ", pos + liststart + 1);
 		std::string tmp=sNr;
- 		std::string artist="Aritst?";
+ 		std::string artist="Artist?";
 		std::string title="Title?";
 		
 		if (!playlist[pos + liststart].Artist.empty())
