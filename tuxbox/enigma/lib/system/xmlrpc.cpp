@@ -361,11 +361,6 @@ void eXMLRPCResponse::haveData(void *data, int len)
 	}
 }
 
-void xmlrpc_initialize(eHTTPD *httpd)
-{
-	httpd->addResolver(new eHTTPXMLRPCResolver);
-}
-
 void xmlrpc_addMethod(eString methodName, int (*proc)(std::vector<eXMLRPCVariant>&, ePtrList<eXMLRPCVariant>&))
 {
 	rpcproc[methodName]=proc;

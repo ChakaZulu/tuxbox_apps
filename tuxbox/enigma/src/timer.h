@@ -31,7 +31,7 @@ class eTimerManager: public Object
 		zap, prepareEvent, startCountdown, setNextEvent,
 		startEvent, pauseEvent, restartEvent, stopEvent,
 		startRecording, stopRecording, restartRecording,
-		pauseRecording, spinUpHarddiscs
+		pauseRecording, spinUpHarddiscs, oldService
 	} nextAction;
 
 	eTimer actionTimer;  // to start timer related actions
@@ -45,6 +45,7 @@ class eTimerManager: public Object
 // the timerlist self...
 	ePlaylist *timerlist;
 	eServiceReference timerlistref;
+	eServiceReference playbackRef;
 
 // nextStarting event, or the current running Event
 	std::list<ePlaylistEntry>::iterator nextStartingEvent;
@@ -59,8 +60,6 @@ class eTimerManager: public Object
 // this Method is called multiple at the start of the eTimerManager....
 	void waitClock();
 
-// handle all eit related timer stuff ( for smart Timers)
-	void EITready(int);
 	void writeToLogfile( const char *str );
 	void writeToLogfile( eString str );
 public:

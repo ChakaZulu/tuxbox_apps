@@ -21,11 +21,11 @@
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/audio.h>
+#define AUDIO_DEV "/dev/dvb/card0/audio0"
 #else
 #include <linux/dvb/audio.h>
+#define AUDIO_DEV "/dev/dvb/adapter0/audio0"
 #endif
-
-#define VIDEO_FLUSH_BUFFER    0
 
 /*
 	note: mp3 decoding is done in ONE seperate thread with multiplexed input/
@@ -205,15 +205,15 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 		outputsn[1]=0;
 	} else
 	{
-		Decoder::parms.vpid=0x1ffe;
-		Decoder::parms.apid=0x1ffe;
+		Decoder::parms.vpid=0x1FFF;
+		Decoder::parms.apid=0x1FFF;
 		Decoder::parms.pcrpid=-1;
 		Decoder::parms.audio_type=DECODE_AUDIO_MPEG;
 		Decoder::Set();
-		
+
 		dspfd[0]=::open("/dev/video", O_WRONLY|O_NONBLOCK);
 		dspfd[1]=::open("/dev/sound/dsp1", O_WRONLY|O_NONBLOCK);
-		
+
 		if ((dspfd[0]<0) || (dspfd[1]<0))
 		{
 			if (dspfd[0]>=0)
@@ -227,6 +227,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 			outputsn[1]=0;
 		} else
 		{
+			Decoder::setMpegDevice(dspfd[0]);
 			outputsn[0]=new eSocketNotifier(this, dspfd[0], eSocketNotifier::Write, 0);
 			CONNECT(outputsn[0]->activated, eMP3Decoder::outputReady);
 			outputsn[1]=new eSocketNotifier(this, dspfd[1], eSocketNotifier::Write, 0);
@@ -533,10 +534,7 @@ void eMP3Decoder::dspSync()
 		eDebug("SNDCTL_DSP_RESET failed (%m)");
 
 	if (type == codecMPG)
-	{
-		if (::ioctl(dspfd[0], VIDEO_FLUSH_BUFFER) < 0)
-			eDebug("VIDEO_FLUSH_BUFFER failed (%m)");
-	}
+		Decoder::flushClipBuffer();
 	Decoder::flushBuffer();
 }
 
@@ -588,14 +586,21 @@ void eMP3Decoder::decodeMore(int what)
 			skipping=false;
 			if ( type == codecMPG )
 				Decoder::stopTrickmode();
-			else if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 1) < 0)
-				eDebug("AUDIO_SET_MUTE error (%m)");
 		}
 	}
 }
 
 eMP3Decoder::~eMP3Decoder()
 {
+	int fd = Decoder::getAudioDevice();
+	bool wasOpen = fd != -1;
+	if (!wasOpen)
+		fd = open(AUDIO_DEV, O_RDWR);
+	if (ioctl(fd, AUDIO_SET_MUTE, 0) < 0)
+		eDebug("AUDIO_SET_MUTE error (%m)");
+	if (!wasOpen)
+		close(fd);
+
 	kill(); // wait for thread exit.
 
 	if (inputsn)
@@ -613,6 +618,7 @@ eMP3Decoder::~eMP3Decoder()
 	if (http)
 		delete http;
 	delete audiodecoder;
+	Decoder::setMpegDevice(-1);
 	Decoder::SetStreamType(TYPE_PES);
 	Decoder::parms.vpid=-1;
 	Decoder::parms.apid=-1;
@@ -639,6 +645,8 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		break;
 	case eMP3DecoderMessage::exit:
 		eDebug("got quit message..");
+		if ( state == statePause )
+			Decoder::Resume();
 		dspSync();
 		quit();
 		break;
@@ -668,7 +676,6 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 					dspSync();
 					audiodecoder->resync();
 					Decoder::Pause();      
-//					Decoder::realPause();
 				}
 				else
 					dspSync();
@@ -685,7 +692,6 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			{
 				Decoder::Resume();
 				checkFlow(0);
-//				Decoder::realResume();
 			}
 		}
 		else
@@ -700,7 +706,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		if ( type == codecMPG && audiodecoder )
 		{
 			int position = getPosition(1);
-			Decoder::Pause(false);
+			Decoder::Pause(0);
 			((eMPEGDemux*)audiodecoder)->setAudioStream(message.parm);
 			::lseek(sourcefd, position, SEEK_SET);
 			input.clear();
@@ -716,9 +722,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		if ( !skipping )
 		{
 			skipping=true;
-/*			if ( type == codecMPG )
-				Decoder::startTrickmode();
-			else*/ if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 1) < 0)
+			if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 1) < 0)
 				eDebug("AUDIO_SET_MUTE error (%m)");
 		}
 		break;
@@ -726,9 +730,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		if ( skipping )
 		{
 			skipping=false;
-/*			if ( type == codecMPG )
-				Decoder::stopTrickmode();
-			else*/ if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 0) < 0)
+			if (ioctl(Decoder::getAudioDevice(), AUDIO_SET_MUTE, 0) < 0)
 				eDebug("AUDIO_SET_MUTE error (%m)");
 		}
 		break;
@@ -806,13 +808,15 @@ int eMP3Decoder::getPosition(int real)
 	if ( type == codecMPG && real)
 	{
 		unsigned int position=::lseek(sourcefd, 0, SEEK_CUR);
+		if ( !position )
+			return 0;
 		eDebug("position = %d", position);
 		position-=1024*1024*2;// latency
 		position-=input.size();
 		position-=output.size();
 		position-=output2.size()*audio_tracks;
 		position-=getOutputDelay(0);
-		return position>=0?position:0;
+		return position>0?position:0;
 	}
 	recalcPosition();
 	eLocker l(poslock);
@@ -876,7 +880,7 @@ eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 	return new eServiceMP3(service.path.c_str());
 }
 
-int eServiceHandlerMP3::play(const eServiceReference &service)
+int eServiceHandlerMP3::play(const eServiceReference &service, int workaround )
 {
 	if ( service.path )
 	{
@@ -895,8 +899,11 @@ int eServiceHandlerMP3::play(const eServiceReference &service)
 	else
 		return -1;
 
-	decoder=new eMP3Decoder(service.data[0], service.path.c_str(), this);
-	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::start));
+	if (!workaround)
+	{
+		decoder=new eMP3Decoder(service.data[0], service.path.c_str(), this);
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::start));
+	}
 	
 	if (!decoder->getError())
 		state=statePlaying;
@@ -953,7 +960,7 @@ int eServiceHandlerMP3::serviceCommand(const eServiceCommand &cmd)
 		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::skip, cmd.parm));
 		break;
 	case eServiceCommand::cmdSeekAbsolute:
-		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::seek, cmd.parm));
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::seekreal, cmd.parm));
 		if ( cmd.parm == 0 && state == statePause )
 			state = stateStopped;
 		break;
@@ -1022,9 +1029,9 @@ int eServiceHandlerMP3::getState()
 	return state;
 }
 
-int eServiceHandlerMP3::stop()
+int eServiceHandlerMP3::stop( int workaround )
 {
-	if ( decoder )
+	if ( decoder && !workaround )
 	{
 		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::exit));
 		delete decoder;

@@ -231,7 +231,7 @@ eZapOsdSetup::eZapOsdSetup()
 	CONNECT( sGamma->changed, eZapOsdSetup::gammaChanged );
 
 	simpleMainMenu=new eCheckbox(this);
-	simpleMainMenu->setText(_("Show listbox like Mainmenu"));
+	simpleMainMenu->setText(_("Show Mainmenu like Listbox"));
 	simpleMainMenu->setHelpText(_("show the Mainmenu in normal listbox style"));
 	simpleMainMenu->move(ePoint(20,140));
 	simpleMainMenu->resize(eSize(350,35));

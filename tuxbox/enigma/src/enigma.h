@@ -14,6 +14,10 @@ class eInit;
 class eRCKey;
 class eHTTPD;
 class eHTTPConnection;
+class eHTTPDynPathResolver;
+class eHTTPFilePathResolver;
+class eHTTPXMLRPCResolver;
+class eHTTPLogResolver;
 
 extern eWidget *currentFocus;
 
@@ -26,9 +30,13 @@ class eZap: public eApplication, public Object
 #ifndef DISABLE_LCD
 	eWidget *desktop_lcd;
 #endif
-	
+
 	eHTTPD *httpd;
 	eHTTPConnection *serialhttpd;
+	eHTTPDynPathResolver *dyn_resolver;
+	eHTTPFilePathResolver *fileresolver;
+	eHTTPXMLRPCResolver *xmlrpcresolver;
+	eHTTPLogResolver *logresolver;
 
 	void keyEvent(const eRCKey &key);
 	void status();
@@ -66,6 +74,7 @@ public:
 	{
 		return serviceSelector;
 	}
+	void reconfigureHTTPServer();
 	
 	eZap(int argc, char **argv);
 	~eZap();

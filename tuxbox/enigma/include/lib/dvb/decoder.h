@@ -26,18 +26,20 @@ class Decoder
 {
 	static struct fd
 	{
-		static int video, audio, demux_video, demux_audio, demux_pcr, demux_vtxt;
+		static int video, audio, demux_video, demux_audio, demux_pcr, demux_vtxt, mpeg;
 	} fd;
 public:
 	static decoderParameters current;
-	static bool locked;
+	static int locked;
 	static int getAudioDevice()	{ return fd.audio; }
 	static int getVideoDevice()	{ return fd.video; }
+	static int getMpegDevice()	{ return fd.mpeg; }
+	static void setMpegDevice(int fdm)	{ fd.mpeg = fdm; }
 	static decoderParameters parms;
 	static int Initialize();
 	static void Close();
 	static void Flush();
-	static void Pause( bool disableAudio=true );
+	static void Pause( int flags=1 );
 	static void Resume( bool enableAudio=true );
 	static void addCADescriptor(__u8 *descriptor);
 	static int Set();
@@ -48,7 +50,11 @@ public:
 	static void setVideoFormat( int format );
 	static int  displayIFrame(const char *frame, int len);
 	static int  displayIFrameFromFile(const char *filename);
-	static void showPicture(int i=1);
+// non api functions
+	static void flushClipBuffer();
+	static void clearScreen();
+	static void getVideoPTS( unsigned int &dest );
+	static void setAutoFlushScreen(int);
 };
 
 #endif

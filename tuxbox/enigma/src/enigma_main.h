@@ -271,7 +271,7 @@ class TextEditWindow: public eWindow
 	eTextInputField *input;
 	eTextInputFieldHelpWidget *image;
 	eLabel *descr;
-	eButton *save;
+	int eventHandler( const eWidgetEvent &e );
 public:
 	TextEditWindow( const char *InputFieldDescr, const char* useableChar=0 );
 	const eString& getEditText() { return input->getText(); }
@@ -525,7 +525,7 @@ public:
 	void playlistPrevService();
 
 #ifndef DISABLE_FILE
-	int recordDVR(int onoff, int user, const char* event_name=0 ); // starts recording
+	int recordDVR(int onoff, int user, time_t evtime=0, const char* event_name=0 ); // starts recording
 	const eServiceReference& getRecordingsref() { return recordingsref; }
 #endif
 
@@ -573,6 +573,8 @@ public:
 	void receiveMMIMessageCI2( const char* data, int len );
 	void handleMMIMessage( const eMMIMessage &msg );
 #endif
+
+	int switchToNum( int num );
 
 	eZapMain();
 	~eZapMain();

@@ -79,6 +79,7 @@
 		<map name="textinputfield.helpwidget.big" font="lcd" size="50" />
 		<map name="textinputfield.helpwidget.bigger" font="lcd" size="90" />
 		<map name="textinputfield.helpwidget.normal" font="Replacement" size="30" />
+		<map name="textinputfield.helpwidget.small" font="Replacement" size="20" />
 	</fontalias>
 
 	<images basepath="" target="fb">
@@ -146,6 +147,7 @@
 	</images>
 	
 	<images basepath="countries">
+		<img name="country_da" src="da.png" />
 		<img name="country_hu" src="hu.png" />
 		<img name="country_ae" src="ae.png" />
 		<img name="country_de" src="de.png" />
@@ -826,7 +828,7 @@
 	</object>
 
 	<object name="eTextInputFieldHelpWidget">
-		<eTextInputFieldHelpWidget size="430:180" >
+		<eTextInputFieldHelpWidget size="430:255" >
 			<eLabel text="&#49;" position="10:2" size="25:42" font="textinputfield.helpwidget.big" vcenter="on" />
 			<eLabel name="one" position="30:2" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
 			<eLabel text="&#50;" position="155:2" size="25:42" font="textinputfield.helpwidget.big" vcenter="on"/>
@@ -851,16 +853,21 @@
 			<eLabel name="zero" position="175:135" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
 			<eLabel text="&gt;" position="295:135" size="25:42" font="textinputfield.helpwidget.bigger" vcenter="on"/>
 			<eLabel name="special_two" position="315:135" size="105:42" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="abc &lt;-&gt; ABC" position="5:185" size="200:25" shortcut="yellow" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="abc2 &lt;-&gt; 2abc" position="220:185" size="210:25" shortcut="blue" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="vol+" position="5:e-33" size="40:25" font="textinputfield.helpwidget.normal" vcenter="on" />
+			<eLabel text="insert" position="45:e-33" size="170:25" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
+			<eLabel text="vol-" position="220:e-33" size="40:25" font="textinputfield.helpwidget.normal" vcenter="on" />
+			<eLabel text="remove" position="260:e-33" size="170:25" font="textinputfield.helpwidget.normal" vcenter="on" align="center" />
 		</eTextInputFieldHelpWidget>
 	</object>
 
 	<object name="TextEditWindow">
-		<TextEditWindow cposition="120:100" csize="450:400" >
+		<TextEditWindow cposition="120:100" csize="450:410" >
 			<eLabel name="descr" position="10:10" size="e-10:30" />
 			<eTextInputField name="inputfield" position="10:50" size="e-10:40" loadDeco="eNumber" helptext="press ok to enter the name" />
-			<eTextInputFieldHelpWidget name="image" pixmap="textinput_white" position="10:104" size="e-10:180" />
-			<eButton name="save" text="save" position="10:e-100" size="220:40" loadDeco="" helptext="save changes and close window" shortcut="green" />
-			<eStatusbar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
+			<eTextInputFieldHelpWidget name="image" pixmap="textinput_white" position="10:104" size="e-10:255" />
+			<eStatusbar name="statusbar" position="0:e-35" size="e:e" loadDeco="" />
 		</TextEditWindow>
 	</object>
 

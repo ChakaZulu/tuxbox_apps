@@ -156,7 +156,7 @@ public:
 	eServiceHandlerMP3();
 	~eServiceHandlerMP3();
 
-	int play(const eServiceReference &service);
+	int play(const eServiceReference &service, int workaround=0 );
 	int serviceCommand(const eServiceCommand &cmd);
 	
 	eString getInfo(int id);
@@ -164,8 +164,8 @@ public:
 	int getState();
 	int getErrorInfo();
 
-	int stop();
-	
+	int stop(int workaround=0);
+
 	int getPosition(int what);
 	int getErrorInfo() const;
 

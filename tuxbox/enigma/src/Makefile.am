@@ -13,7 +13,8 @@ enigma_SOURCES = \
 	setup_extra.cpp rotorconfig.cpp setup_rfmod.cpp wizard_language.cpp wizard_scan.cpp \
 	engrab.cpp setupengrab.cpp helpwindow.cpp tpeditwindow.cpp enigma_web.cpp enigma_epg.cpp \
 	wizard_timezone.cpp elirc.cpp hotplug.cpp enigma_bouquet.cpp setup_window.cpp \
-	system_settings.cpp time_settings.cpp software_update.cpp enigma_standby.cpp
+	system_settings.cpp time_settings.cpp software_update.cpp enigma_standby.cpp \
+	enigma_mmisocket.cpp
 
 enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/driver/libenigma_driver.a \

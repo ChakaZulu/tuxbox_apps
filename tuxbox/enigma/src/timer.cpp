@@ -12,6 +12,8 @@
 #include <lib/system/init_num.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/servicestructure.h>
+#include <lib/dvb/decoder.h>
+#include <lib/dvb/servicedvb.h>
 #include <lib/gui/emessage.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/textinput.h>
@@ -276,7 +278,37 @@ void eTimerManager::actionHandler()
 	switch( nextAction )
 	{
 		case zap:
-// check if the time to next starting ev
+		{
+#ifndef DISABLE_FILE
+			eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) nextStartingEvent->service;
+			eServiceReferenceDVB &rec = (eServiceReferenceDVB&) eServiceInterface::getInstance()->service;
+
+			int canHandleTwoServices=0;
+			eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+			if (handler && handler->getFlags() & eServiceHandlerDVB::flagIsScrambled)
+			{
+				eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices",
+					canHandleTwoServices);
+			}
+			else
+				canHandleTwoServices=1;
+
+			long t = getSecondsToBegin();
+			if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
+				&& t > HDD_PREPARE_TIME+10
+				&& rec && ( rec.path || ( canHandleTwoServices &&
+				rec.getTransportStreamID() == Ref.getTransportStreamID() &&
+				rec.getOriginalNetworkID() == Ref.getOriginalNetworkID() &&
+				rec.getDVBNamespace() == Ref.getDVBNamespace() ) ) )
+			{
+				// we dont zap now.. playback is running.. will zap immediate before eventbegin
+				t -= (HDD_PREPARE_TIME+10);
+				eDebug("[eTimerManager] can Zap later... in %d sec", t);
+				nextAction=zap;
+				actionTimer.start( t*1000, true );
+				break;
+			}
+#endif
 			eDebug("[eTimerManager] zapToChannel");
 			writeToLogfile(eString().sprintf("--> actionHandler() calldepth=%d zap", ++calldepth));
 			if ( !(nextStartingEvent->type&ePlaylistEntry::doFinishOnly) )
@@ -287,7 +319,7 @@ void eTimerManager::actionHandler()
 			if ( nextStartingEvent->service &&
 					eServiceInterface::getInstance()->service != nextStartingEvent->service )
 			{
-				eDebug("[eTimerManager] change to the right service");
+				eDebug("[eTimerManager] change to the correct service");
 				writeToLogfile("must zap to new service");
 				conn = CONNECT( eDVB::getInstance()->switchedService, eTimerManager::switchedService );
 				eString save = nextStartingEvent->service.descr;
@@ -301,27 +333,49 @@ void eTimerManager::actionHandler()
 					writeToLogfile("Parentallocking is active.. disable");
 					eConfig::getInstance()->locked=false;  // then disable for zap
 				}
+#ifndef DISABLE_FILE
+// workaround for start recording in background when a playback
+// is running or the service is on the same transponder and satellite
+				if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
+					&& rec && ( rec.path || ( canHandleTwoServices &&
+					rec.getTransportStreamID() == Ref.getTransportStreamID() &&
+					rec.getOriginalNetworkID() == Ref.getOriginalNetworkID() &&
+					rec.getDVBNamespace() == Ref.getDVBNamespace() ) ) )
+				{
+					eDebug("[eTimerManager] change to service in background :)");
+					writeToLogfile("zap to correct service in background :)");
+					playbackRef = eServiceInterface::getInstance()->service;
+					Decoder::locked=2;
+					eServiceInterface::getInstance()->play( nextStartingEvent->service, 1 );
+				}
+				else
+#endif
+				{
+					eDebug("[eTimerManager] must zap in foreground :(");
+					writeToLogfile("zap to correct service in foreground :(");
+					playbackRef=eServiceReference();
+					// switch to service
+					eZapMain::getInstance()->playService( nextStartingEvent->service, eZapMain::psSetMode );
+				}
 
-				// switch to service
-				eZapMain::getInstance()->playService( nextStartingEvent->service, eZapMain::psSetMode );
+				nextStartingEvent->service.descr=save;
 
 				if ( pLockActive )  // reenable Parental locking
 				{
 					writeToLogfile("reenable parentallocking");
 					eConfig::getInstance()->locked=true;
 				}
-
-				nextStartingEvent->service.descr=save;
 			}
 			else
 			{
 				writeToLogfile("we are always on the correct service");
-				eDebug("[eTimerManager] we are always on the right service... do not change service");
+				eDebug("[eTimerManager] we are always on the correct service... do not change service");
 				nextAction=startCountdown;
 				actionTimer.start(0, true);
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d", calldepth--));
-			break;
+		}
+		break;
 
 #ifndef DISABLE_NETWORK
 		case prepareEvent:
@@ -385,13 +439,6 @@ void eTimerManager::actionHandler()
 				// any service change stops now the Running Event and set it to userAborted
 //				conn = CONNECT( eDVB::getInstance()->leaveService, eTimerManager::leaveService );
 			}
-			if ( nextStartingEvent->type & ePlaylistEntry::isSmartTimer )
-			{
-				writeToLogfile("is smarttimer event");
-				conn2 = CONNECT( eDVB::getInstance()->tEIT.tableReady, eTimerManager::EITready );
-				EITready(0);  // check current eit now !
-			}
-			else
 			{
 				long t = getSecondsToBegin();
 				nextAction=startEvent;
@@ -433,12 +480,10 @@ void eTimerManager::actionHandler()
 				writeToLogfile("SwitchTimerEvent... do nothing");
 			}
 
-			if ( !(nextStartingEvent->type & ePlaylistEntry::isSmartTimer) )
-			{
-				nextAction = stopEvent;
-				actionTimer.start( getSecondsToEnd() * 1000, true );
-				writeToLogfile(eString().sprintf("stopEvent in %d seconds", getSecondsToEnd()) );
-			}
+			nextAction = stopEvent;
+			actionTimer.start( getSecondsToEnd() * 1000, true );
+			writeToLogfile(eString().sprintf("stopEvent in %d seconds", getSecondsToEnd()) );
+
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d startEvent", calldepth--));
 			break;
 
@@ -531,8 +576,6 @@ void eTimerManager::actionHandler()
 			eDebug("[eTimerManager] setNextEvent");
 			if (conn.connected() )
 				conn.disconnect();
-			if (conn2.connected() )
-				conn2.disconnect();
 			nextStartingEvent=timerlist->getList().end();
 			int timeToNextEvent=INT_MAX, count=0;
 			// parse events... invalidate old, set nextEvent Timer
@@ -633,47 +676,31 @@ void eTimerManager::actionHandler()
 				writeToLogfile(eString().sprintf(" - starts at %02d.%02d, %02d:%02d", evtTime.tm_mday, evtTime.tm_mon+1, evtTime.tm_hour, evtTime.tm_min));
 				writeToLogfile(eString().sprintf(" - event type is %d, %08X", nextStartingEvent->type, nextStartingEvent->type ));
 				long t = getSecondsToBegin();
-/*				int prepareTime = 0;
-				if ( nextStartingEvent->type & ePlaylistEntry::isSmartTimer )
-				{  // EIT related zapping ....
-					if ( t > prepareTime )
-					{
-						nextAction=prepareEvent;
-						actionTimer.start( (t - 360) * 1000, true ); // set the Timer to eventBegin - 6 min
-					}
-					else  // time to begin is under 6 min or the event is currently running
-					{
-						nextAction=zap;
-						actionHandler();
-					}
-				}
-				else*/
+
+				nextAction=zap;
+				if ( nextStartingEvent->type & ePlaylistEntry::RecTimerEntry )
 				{
-					nextAction=zap;
-					if ( nextStartingEvent->type & ePlaylistEntry::RecTimerEntry )
-					{
-						writeToLogfile(" - is a RecTimerEnty");
+					writeToLogfile(" - is a RecTimerEnty");
 #ifndef DISABLE_NETWORK
-						if ( nextStartingEvent->type & ePlaylistEntry::recNgrab )
-						{
-							writeToLogfile(" - is a recNgrab Event.. attend WOL_PREPARE_TIME");
-							t -= WOL_PREPARE_TIME; // for send WOL Signal
-							nextAction=prepareEvent;
-							writeToLogfile("nextAction = prepareEvent");
-						}
-						else
-#endif
-						{
-							t -= ZAP_BEFORE_TIME;
-							writeToLogfile("nextAction = zap");
-						}
+					if ( nextStartingEvent->type & ePlaylistEntry::recNgrab )
+					{
+						writeToLogfile(" - is a recNgrab Event.. attend WOL_PREPARE_TIME");
+						t -= WOL_PREPARE_TIME; // for send WOL Signal
+						nextAction=prepareEvent;
+						writeToLogfile("nextAction = prepareEvent");
 					}
 					else
+#endif
+					{
+						t -= ZAP_BEFORE_TIME;
 						writeToLogfile("nextAction = zap");
-					// set the Timer to eventBegin
-					writeToLogfile(eString().sprintf("   starts in %d seconds", t ));
-					actionTimer.startLongTimer(t);
+					}
 				}
+				else
+					writeToLogfile("nextAction = zap");
+				// set the Timer to eventBegin
+				writeToLogfile(eString().sprintf("   starts in %d seconds", t ));
+				actionTimer.startLongTimer(t);
 			}
 			else
 			{
@@ -694,10 +721,11 @@ void eTimerManager::actionHandler()
 //				eDebug("nextStartingEvent->service.data[0] = %d", nextStartingEvent->service.data[0] );
 //				eDebug("nextStartingEvent->service.descr = %s", nextStartingEvent->service.descr.c_str() );
 				eString recordDescr;
+				time_t tmp=0;
 				if ( nextStartingEvent->type & ePlaylistEntry::isRepeating )
 				{
 					writeToLogfile("repeating");
-					time_t tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, false );
+					tmp = getNextEventStartTime( nextStartingEvent->time_begin, nextStartingEvent->duration, nextStartingEvent->type, false );
 					const eString &descr=getEventDescrFromEPGCache( nextStartingEvent->service, tmp+nextStartingEvent->duration/2 );
 					if ( descr ) // build Episode Information
 					{
@@ -719,12 +747,25 @@ void eTimerManager::actionHandler()
 				{
 					writeToLogfile(eString().sprintf("call eZapMain::getInstance()->recordDVR(1,0,%s)",descr.length()?descr.c_str():""));
 					eDebug("[eTimerManager] start DVR");
-					int result = eZapMain::getInstance()->recordDVR(1, 0, descr.length()?descr.c_str():0 );
+
+					if ( !tmp )
+						tmp = nextStartingEvent->time_begin + (nextStartingEvent->duration/2);
+					else
+						tmp += nextStartingEvent->duration/2;
+
+					int result = eZapMain::getInstance()->recordDVR(1, 0, tmp, descr.length()?descr.c_str():0 );
 					writeToLogfile(eString().sprintf("result is %d", result));
 					if (result < 0)
 					{
 							/* recording did not start due an error. an error message will already be displayed on the screen. */
-						abortEvent(ePlaylistEntry::errorNoSpaceLeft);
+							abortEvent(ePlaylistEntry::errorNoSpaceLeft);
+					}
+
+					if ( playbackRef )
+					{
+						writeToLogfile("we have playbackRef...zap back to old service");
+						conn2 = CONNECT( eDVB::getInstance()->switchedService, eTimerManager::switchedService );
+						eServiceInterface::getInstance()->play( playbackRef, -1 );
 					}
 				}
 				else
@@ -830,6 +871,15 @@ void eTimerManager::actionHandler()
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d pauseRecording", calldepth--));
 			break;
+		case oldService:
+			Decoder::locked=0;
+			playbackRef = eServiceReference();
+			conn2.disconnect();
+			writeToLogfile("actionHandler() back on old service.. set stoptimer..");
+			nextAction = stopEvent;
+			actionTimer.start( getSecondsToEnd() * 1000, true );
+			writeToLogfile(eString().sprintf("stopEvent in %d seconds", getSecondsToEnd()) );
+			break;
 		default:
 		{
 			writeToLogfile(eString().sprintf("unhandled timer action %d !!!", nextAction));
@@ -840,19 +890,34 @@ void eTimerManager::actionHandler()
 
 void eTimerManager::switchedService( const eServiceReferenceDVB &ref, int err)
 {
-	writeToLogfile("--> switchedService()");
-	if ( err == -ENOSTREAM || nextStartingEvent->service != (eServiceReference&)ref )
+	if ( err == -ENOSTREAM )
 	{
 		writeToLogfile("call abortEvent");
 		abortEvent( ePlaylistEntry::errorZapFailed );
 	}
-	else  // zap okay
+	else if ( ref == (eServiceReference&)playbackRef )
 	{
-		writeToLogfile("call startCountdown");
-		nextAction=startCountdown;
+		writeToLogfile("switchedService back on playbackref :)");
+		// back on old service.. reconnect enigma to dvb kram..
+		nextAction=oldService;
 		actionTimer.start(0,true);
 	}
-	writeToLogfile("<-- switchedService()");
+	else
+	{
+		writeToLogfile("--> switchedService()");
+		if ( nextStartingEvent->service != (eServiceReference&)ref )
+		{
+			writeToLogfile("call abortEvent");
+			abortEvent( ePlaylistEntry::errorZapFailed );
+		}
+		else  // zap okay
+		{
+			writeToLogfile("call startCountdown");
+			nextAction=startCountdown;
+			actionTimer.start(0,true);
+		}
+		writeToLogfile("<-- switchedService()");
+	}
 }
 
 void eTimerManager::abortEvent( int err )
@@ -872,74 +937,15 @@ void eTimerManager::abortEvent( int err )
 
 void eTimerManager::leaveService( const eServiceReferenceDVB& ref )
 {
+	if ( ref == playbackRef )
+	{
+		eDebug("leaveplaybackRef");
+		return;
+	}
 	writeToLogfile(eString().sprintf("--> leaveService %s", ref.toString().c_str() ));
 	eDebug("[eTimerManager] leaveService");
 	abortEvent( ePlaylistEntry::errorUserAborted );
 	writeToLogfile("<-- leaveService");
-}
-
-void eTimerManager::EITready( int error )
-{
-	eDebug("[eTimerManager] EITready %s", strerror(-error));
-	if (!error)
-	{
-		EIT *eit = eDVB::getInstance()->getEIT();
-		if ( eit )
-		{
-			for (ePtrList<EITEvent>::const_iterator event(eit->events); event != eit->events.end(); ++event)		// always take the first one
-			{
-				if ( nextStartingEvent != timerlist->getList().end() && event->event_id == nextStartingEvent->event_id )
-				{
-					eDebugNoNewLine("running_status(%d) = ", event->running_status );
-					switch( event->running_status )
-					{
-						case 0:
-							eDebug("undefined");
-							// premiere world sends either undefined or running
-						case 1:
-							eDebug("not running");
-							if ( nextStartingEvent->type & ePlaylistEntry::stateRunning )
-							{
-								nextAction=stopEvent;
-								actionHandler();
-							}
-							break;
-
-						case 2:
-							eDebug("starts in few seconds");
-							break;
-
-						case 3:
-							eDebug("pausing");
-							if ( nextStartingEvent->type & ePlaylistEntry::stateRunning )
-							{
-								nextAction=pauseEvent;
-								actionHandler();
-							}
-							break;
-
-						case 4:
-							eDebug("running");
-							// HERE WE MUST LATER HANDLE REPEATING EVENTS !!
-							// stateWaiting is removed, when the event was running once
-							if ( nextStartingEvent->type & ePlaylistEntry::stateWaiting )
-								nextAction=startEvent;
-							else if ( nextStartingEvent->type & ePlaylistEntry::statePaused )
-								nextAction=restartEvent;
-							else
-								break;
-							actionHandler();
-							break;
-						case 5 ... 7:
-							eDebug("reserved for future use");
-							break;
-					}
-					break;
-				}
-			}
-			eit->unlock();
-		}
-	}
 }
 
 long eTimerManager::getSecondsToBegin()
@@ -2111,6 +2117,7 @@ void eTimerEditView::showServiceSelector()
 	sel.setLCD(LCDTitle, LCDElement);
 #endif
 	hide();
+	sel.getFirstBouquetServiceNum.connect( slot( *eZapMain::getInstance(), &eZapMain::getFirstBouquetServiceNum) );
 	sel.getRoot.connect( slot( *eZapMain::getInstance(), &eZapMain::getRoot) );
 	sel.setPath(eServiceReference(eServiceReference::idDVB,
 				eServiceReference::flagDirectory|eServiceReference::shouldSort,

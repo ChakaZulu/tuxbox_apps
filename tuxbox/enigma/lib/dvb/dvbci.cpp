@@ -92,7 +92,6 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			ci->start();
 			ci_state=0;
 		}
-//		::ioctl(fd,CI_RESET);
 		dataAvailable(0);
 		break;
 	case eDVBCIMessage::reset:
@@ -113,12 +112,15 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 	case eDVBCIMessage::init:
 //		eDebug("[DVBCI] got init message..");
 		if(ci_state)
+		{
+			versions.clear();
 			newService();
+		}
 		else
 			ci_progress(_("no module"));	
 		break;
 	case eDVBCIMessage::go:
-		newService(message.sid);
+		newService();
 		break;
 	case eDVBCIMessage::mmi_begin:
 //		eDebug("[DVBCI] got mmi_begin message..");
@@ -153,6 +155,9 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 //		eDebug("[DVBCI] got PMTaddPID message..");
 //		eDebug("addPID %04x, type %02x", message.pid, message.streamtype );
 		PMTaddPID(message.sid,message.pid,message.streamtype);
+		break;
+	case eDVBCIMessage::PMTsetVersion:
+		PMTsetVersion(message.sid, message.pid);
 		break;
 	case eDVBCIMessage::PMTaddDescriptor:
 //		eDebug("[DVBCI] got PMTaddDescriptor message..");
@@ -231,22 +236,67 @@ void eDVBCI::mmi_menuansw(int val)
 	sendTPDU(0xA0,9,1,buffer);
 }
 
-void eDVBCI::PMTflush(int sid)
+void eDVBCI::PMTsetVersion(int sid, int version)
 {
-	for (std::map<int, std::list<tempPMT_t> >::iterator it( services.begin() );
-		it != services.end(); )
+	for (CIServiceMap::iterator it( services.begin() );
+		it != services.end(); ++it )
 	{
-		if ( it->first == sid || sid == -1 )
+		if ( it->first == sid )
 		{
-			for (std::list<tempPMT_t>::iterator i(it->second.begin());
+			for (std::list<tempPMT_t>::iterator i( it->second.begin() );
 				i != it->second.end(); )
 			{
 				if ( i->type == 2 )
 					delete [] i->descriptor;
 				i = it->second.erase(i);
 			}
-			services.erase(it);
-			it = services.begin();
+			break;
+		}
+	}
+	tempPMT_t tmp;
+	tmp.type=0;
+	tmp.version=version;
+	services[sid].push_back(tmp);
+}
+
+void eDVBCI::PMTflush(int sid)
+{
+	for (CIServiceMap::iterator it( services.begin() );
+		it != services.end(); )
+	{
+		if ( it->first == sid || sid == -1 )
+		{
+			bool scrambled=false;
+			std::map<int,int>::iterator d = versions.find(it->first);
+			if ( d != versions.end() )
+			{
+				for (std::list<tempPMT_t>::iterator i( it->second.begin() );
+					i != it->second.end(); )
+				{
+					if ( i->type == 2 )
+					{
+						delete [] i->descriptor;
+						i = it->second.erase(i);
+						scrambled=true;
+					}
+					else
+						++i;
+				}
+				if (scrambled)
+				{
+					int oldvers = d->second;
+					it->second.front().version=((oldvers&0xC1)|((oldvers+2)&0x3E));
+					newService();  // i hope the ci give now this "slot" free
+				}
+			}
+
+			versions.erase(it->first); // remove from last send version map
+
+			services.erase(it);        // remove from known service map
+			if ( sid == -1 )
+				it=services.begin();     // start at begin of the map
+			else
+				break;     // the only one service is flushed.. break now
 		}
 		else
 			++it;
@@ -273,7 +323,7 @@ void eDVBCI::PMTaddDescriptor(int sid, unsigned char *data)
 	services[sid].push_back(entry);
 }
 
-void eDVBCI::newService(int update)
+void eDVBCI::newService()
 {
 	//eDebug("got new %d PMT entrys",tempPMTentrys);
 	ci_progress(appName);	
@@ -297,24 +347,35 @@ void eDVBCI::newService(int update)
 	for (std::map<int, std::list<tempPMT_t> >::iterator it = services.begin();
 		it != services.end(); ++it )
 	{
-//		eDebug("service id %04x", it->first );
 		cnt++;
 		capmt[3]=i;			//session_id
 		capmt[7]=0x81;
 
-		capmt[9] = update ? 0x05 /*update*/ : 0x03 /*only*/;
-/*		services.size() > 1 ?
-				cnt == 1 ? 0x01 :  // first
-				cnt < services.size() ? 0x00 : // more
-				0x02 : // last
-				0x03; // only*/
+		if ( !versions.size() )
+			capmt[9] = 0x03;   // only
+		else 
+		{
+			std::map<int,int>::iterator i = versions.find(it->first);
+			if ( i != versions.end() )
+			{
+				if (it->second.front().version != i->second)
+					capmt[9]=0x05;  // update
+				else
+					continue;  // this is the same pmt version.. don't send..
+			}
+			else
+				capmt[9]=0x04;  // new service.. add
+		}
+
+		// store new PMT version
+		versions[it->first]=it->second.front().version;
 
 //		eDebug("ca_pmt_list_management = %d", capmt[9]);
 
 		capmt[10]=(unsigned char)((it->first>>8) & 0xff);			//prg-nr
 		capmt[11]=(unsigned char)(it->first & 0xff);					//prg-nr
 
-		capmt[12]=0x00;	//reserved - version - current/next
+		capmt[12]=it->second.front().version;	//reserved - version - current/next
 		capmt[13]=0x00;	//reserved - prg-info len
 		capmt[14]=0x00;	//prg-info len
 
@@ -364,12 +425,8 @@ void eDVBCI::newService(int update)
 			}
 		}
 
-		//capmt[8]=wp-8;
-
 		capmt[lenpos]=((len & 0xf00)>>8);
 		capmt[lenpos+1]=(len & 0xff);
-
-		//sendTPDU(0xA0,wp,1,capmt);
 
 		create_sessionobject(capmt+4,capmt+9,wp-9,session);
 
@@ -446,7 +503,7 @@ void eDVBCI::pushCAIDs()
 	if(!sapi)
 		return;
 
-	eDebug("count for caids: %d",caidcount);
+//	eDebug("count for caids: %d",caidcount);
 	eLocker s(eDVBServiceController::availCALock);
 	for(unsigned int i=0;i<caidcount;i++)
 		sapi->availableCASystems.insert(caids[i]);
@@ -484,7 +541,7 @@ void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_i
 			else
 				delete [] buffer;
 		}
-		else
+		else  // already data in queue.. push to end of queue
 		{
 //			eDebug("queuesize = %d.. append new data to queue", queue.size());
 			queue.push( queueData(tc_id, buffer, len+5) );
@@ -662,7 +719,8 @@ void eDVBCI::ca_manager(unsigned int session)
 				eDebug("[DVBCI] [CA MANAGER] send ca_pmt\n");
 
 				//sendCAPMT();
-				newService();
+				versions.clear();
+				newService();  // send with "only" service
 				sessions[session].internal_state=2;
 
 				break;

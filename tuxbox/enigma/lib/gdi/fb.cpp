@@ -88,6 +88,8 @@ int fbClass::SetMode(unsigned int nxRes, unsigned int nyRes, unsigned int nbpp)
 {
 	screeninfo.xres_virtual=screeninfo.xres=nxRes;
 	screeninfo.yres_virtual=screeninfo.yres=nyRes;
+	screeninfo.height=0;
+	screeninfo.width=0;
 	screeninfo.xoffset=screeninfo.yoffset=0;
 	screeninfo.bits_per_pixel=nbpp;
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &screeninfo)<0)

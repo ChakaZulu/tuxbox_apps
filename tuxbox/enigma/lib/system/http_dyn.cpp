@@ -34,10 +34,12 @@ eHTTPDynPathResolver::eHTTPDynPathResolver()
 	dyn.setAutoDelete(true);
 }
 
-void eHTTPDynPathResolver::addDyn(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection*))
+void eHTTPDynPathResolver::addDyn(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection*), bool mustAuth)
 {
-	dyn.push_back(new eHTTPDynEntry(request, path, function));
+	dyn.push_back(new eHTTPDynEntry(request, path, function, mustAuth ) );
 }
+
+extern int checkAuth(const eString cauth);
 
 eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
@@ -52,8 +54,19 @@ eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString pa
 		opt="";
 	}
 	for (ePtrList<eHTTPDynEntry>::iterator i(dyn); i != dyn.end(); ++i)
+	{
 		if ((i->path==p) && (i->request==request))
 		{
+			if (i->mustAuth)
+			{
+				std::map<std::string, std::string>::iterator i=conn->remote_header.find("Authorization");
+				if ((i == conn->remote_header.end()) || checkAuth(i->second))
+				{
+					conn->local_header["WWW-Authenticate"]="Basic realm=\"dreambox\"";
+					return new eHTTPError(conn, 401); // auth req'ed
+				}
+			}
+
 			conn->code=-1;
 			eString s=i->function(request, path, opt, conn);
 
@@ -62,5 +75,6 @@ eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString pa
 
 			return new eHTTPError(conn, 500);
 		}
+	}
 	return 0;
 }

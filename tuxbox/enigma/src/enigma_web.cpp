@@ -233,13 +233,6 @@ eHTTPLog::~eHTTPLog()
 {
 }
 
-class eHTTPLogResolver: public eHTTPPathResolver
-{
-public:
-	eHTTPLogResolver();
-	eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn);
-};
-
 eHTTPLogResolver::eHTTPLogResolver()
 {
 }
@@ -430,13 +423,12 @@ static eString erc_epg(eString request, eString dirpath, eString opt, eHTTPConne
 	return res;
 }
 
-void ezapInitializeWeb(eHTTPD *httpd, eHTTPDynPathResolver *dyn_resolver)
+void ezapInitializeWeb(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/dyn2/", web_root);
 	dyn_resolver->addDyn("GET", "/dyn2/services", xml_services);
 
 	dyn_resolver->addDyn("GET", "/erc/services", erc_services);
 	dyn_resolver->addDyn("GET", "/erc/epg", erc_epg);
-	httpd->addResolver(new eHTTPLogResolver);
 }
 

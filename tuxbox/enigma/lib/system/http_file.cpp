@@ -126,7 +126,7 @@ int CheckUnixPassword(const char *user, const char *pass)
 	return !!strcmp(cres, cpwd);
 }
 
-static int checkAuth(const eString cauth)
+int checkAuth(const eString cauth)
 {
 	eString auth;
 	if (cauth.left(6) != "Basic ")

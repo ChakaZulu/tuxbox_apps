@@ -15,7 +15,7 @@ class eListBoxEntryText;
 
 class eZapNetworkSetup: public eWindow
 {
-	eNumber *ip, *netmask, *dns, *gateway;
+	eNumber *ip, *netmask, *dns, *gateway, *port;
 	eButton *ok, *abort;
 	eCheckbox *dosetup;
 	eLabel *lNameserver, *lGateway;

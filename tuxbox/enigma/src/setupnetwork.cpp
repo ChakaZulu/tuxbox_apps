@@ -4,6 +4,7 @@
 
 #include <netinet/in.h>
 
+#include <enigma.h>
 #include <lib/base/i18n.h>
 #include <lib/dvb/edvb.h>
 #include <lib/gui/elabel.h>
@@ -245,6 +246,11 @@ void updatePPPConfig( const eString &secrets, int flags )
 		eString strUser = '\'' + secrets.left(ppos) + "\'\n";
 		helper( source, dest, spos, dpos, "USER=", strUser.c_str() );
 	}
+	int webifport=80;
+	eConfig::getInstance()->getKey("/elitedvb/network/webifport", webifport);
+	eString s;
+	s.sprintf("%d\n", webifport);
+	helper( source, dest, spos, dpos, "ENIGMA_WEB_IF_PORT=", s.c_str() );
 	helper( source, dest, spos, dpos, "REJECT_WWW=", flags&1?"yes\n":"no\n" );
 	helper( source, dest, spos, dpos, "REJECT_TELNET=", flags&2?"yes\n":"no\n" );
 	helper( source, dest, spos, dpos, "REJECT_SAMBA=", flags&4?"yes\n":"no\n" );
@@ -280,6 +286,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	int sdosetup=0;
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 	int connectionType=0;
+	int webifport=80;
 
 	eConfig::getInstance()->getKey("/elitedvb/network/ip", sip);
 	eConfig::getInstance()->getKey("/elitedvb/network/netmask", snetmask);
@@ -287,6 +294,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	eConfig::getInstance()->getKey("/elitedvb/network/gateway", sgateway);
 	eConfig::getInstance()->getKey("/elitedvb/network/dosetup", sdosetup);
 	eConfig::getInstance()->getKey("/elitedvb/network/connectionType", connectionType);
+	eConfig::getInstance()->getKey("/elitedvb/network/webifport", webifport);
 
 	eLabel *l=new eLabel(this);
 	l->setText("IP:");
@@ -419,36 +427,57 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	dosetup=new eCheckbox(this, sdosetup, 1);
 	dosetup->setText(_("Configure Network"));
-	dosetup->move(ePoint(100, 210));
+	dosetup->move(ePoint(20, 215));
 	dosetup->resize(eSize(fd+4+240, fd+4));
 	dosetup->setHelpText(_("enable/disable network config (ok)"));
+
+	l = new eLabel(this);
+	l->setText("Port:");
+	l->move(ePoint(280+fd+4, 215));
+	l->resize(eSize(80, fd+4));
+
+	port=new eNumber(this, 1, 0, 65536, 5, 0, 0, l);
+	port->move(ePoint(370, 213));
+	port->resize(eSize(70, fd+10));
+	port->setFlags(eNumber::flagDrawPoints);
+	port->setHelpText(_("enter port of the Web Interface (0..9, left, right)"));
+	port->setNumber(webifport);
+	port->loadDeco();
+	CONNECT(port->selected, eZapNetworkSetup::fieldSelected);
 
 #ifdef ENABLE_PPPOE
 	int flags = getRejectFlags();
 	rejectWWW=new eCheckbox(this, flags&1, 1);
 	rejectWWW->setText("WWW");
-	rejectWWW->move(ePoint(20,245));
+	rejectWWW->move(ePoint(20,255));
 	rejectWWW->resize(eSize(90, fd+4));
-	rejectWWW->setHelpText(_("reject incoming connections on port 80"));
+	eString t = _("reject incoming connections on port 80");
+	unsigned int pos = t.find("80");
+	if (pos != eString::npos )
+	{
+		t.erase(pos,2);
+		t.insert(pos,eString().sprintf("%d", webifport));
+	}
+	rejectWWW->setHelpText(t);
 	rejectWWW->hide();
 
 	rejectTelnet=new eCheckbox(this, flags&2, 1);
 	rejectTelnet->setText("Telnet");
-	rejectTelnet->move(ePoint(130,245));
+	rejectTelnet->move(ePoint(130,255));
 	rejectTelnet->resize(eSize(90, fd+4));
 	rejectTelnet->setHelpText(_("reject incoming connections on port 23"));
 	rejectTelnet->hide();
 
 	rejectSamba=new eCheckbox(this, flags&4, 1);
 	rejectSamba->setText("Samba");
-	rejectSamba->move(ePoint(240,245));
+	rejectSamba->move(ePoint(240,255));
 	rejectSamba->resize(eSize(100, fd+4));
 	rejectSamba->setHelpText(_("reject incoming connections on ports 137,138,139"));
 	rejectSamba->hide();
 
 	rejectFTP=new eCheckbox(this, flags&8, 1);
 	rejectFTP->setText("FTP");
-	rejectFTP->move(ePoint(360,245));
+	rejectFTP->move(ePoint(360,255));
 	rejectFTP->resize(eSize(70, fd+4));
 	rejectFTP->setHelpText(_("reject incoming connections on ports 21"));
 	rejectFTP->hide();
@@ -520,12 +549,16 @@ void eZapNetworkSetup::okPressed()
 	int sdosetup=dosetup->isChecked();
 	int type = (int) combo_type->getCurrent()->getKey();
 
+	int oldport=80;
+	eConfig::getInstance()->getKey("/elitedvb/network/webifport", oldport);
+
 	eConfig::getInstance()->setKey("/elitedvb/network/ip", sip);
 	eConfig::getInstance()->setKey("/elitedvb/network/netmask", snetmask);
 	eConfig::getInstance()->setKey("/elitedvb/network/dns", sdns);
 	eConfig::getInstance()->setKey("/elitedvb/network/gateway", sgateway);
 	eConfig::getInstance()->setKey("/elitedvb/network/dosetup", sdosetup);
 	eConfig::getInstance()->setKey("/elitedvb/network/connectionType", type );
+	eConfig::getInstance()->setKey("/elitedvb/network/webifport", port->getNumber());
 	eConfig::getInstance()->flush();
 
 #ifdef ENABLE_PPPOE
@@ -547,6 +580,9 @@ void eZapNetworkSetup::okPressed()
 
 	if ( sdosetup )
 		eDVB::getInstance()->configureNetwork();
+
+	if ( oldport != port->getNumber() )
+		eZap::getInstance()->reconfigureHTTPServer();
 
 	close(0);
 }

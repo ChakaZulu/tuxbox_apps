@@ -1,6 +1,6 @@
 #ifndef __enigma_xmlrpc_h
 #define __enigma_xmlrpc_h
 
-void ezapInitializeXMLRPC(eHTTPD *dyn_resolver);
+void ezapInitializeXMLRPC();
 
 #endif /* __enigma_xmlrpc_h */

@@ -22,6 +22,13 @@ public:
 	virtual eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn)=0;
 };
 
+class eHTTPLogResolver: public eHTTPPathResolver
+{
+public:
+	eHTTPLogResolver();
+	eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn);
+};
+
 class eHTTPDataSource
 {
 protected:

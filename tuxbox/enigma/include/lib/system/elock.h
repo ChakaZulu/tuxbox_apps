@@ -26,6 +26,7 @@ class eLock
 	int pid;
 	int counter, max;
 public:
+	int getDiff() { return max - counter; }
 	void lock(int res=100);
 	void unlock(int res=100);
 

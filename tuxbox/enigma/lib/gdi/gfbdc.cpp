@@ -16,6 +16,7 @@ gFBDC::gFBDC()
 		eFatal("no framebuffer available");
 
 	fb->SetMode(720, 576, 8);
+
 	for (int y=0; y<576; y++)																		 // make whole screen transparent
 		memset(fb->lfb+y*fb->Stride(), 0x00, fb->Stride());
 
@@ -161,4 +162,4 @@ void gFBDC::reloadSettings()
 	setPalette();
 }
 
-eAutoInitP0<gFBDC> init_gFBDC(eAutoInitNumbers::graphic+1, "GFBDC");
+eAutoInitP0<gFBDC> init_gFBDC(eAutoInitNumbers::graphic-1, "GFBDC");

@@ -19,15 +19,16 @@ class eHTTPDynPathResolver: public eHTTPPathResolver
 	{
 		eString request, path;
 		eString (*function)(eString request, eString path, eString opt, eHTTPConnection *content);
+		bool mustAuth;
 		
-		eHTTPDynEntry(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *))
-			: request(request), path(path), function(function)
+		eHTTPDynEntry(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *), bool auth)
+			: request(request), path(path), function(function), mustAuth(auth)
 		{
 		}
 	};
 	ePtrList<eHTTPDynEntry> dyn;
 public:
-	void addDyn(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *conn));
+	void addDyn(eString request, eString path, eString (*function)(eString, eString, eString, eHTTPConnection *conn), bool mustAuth=false );
 	eHTTPDynPathResolver();
 	eHTTPDataSource *getDataSource(eString request, eString path, eHTTPConnection *conn);
 };

@@ -164,7 +164,10 @@ int eDBoxLCD::switchLCD(int state)
 eDBoxLCD::~eDBoxLCD()
 {
 	if (lcdfd>0)
+	{
 		close(lcdfd);
+		lcdfd=0;
+	}
 }
 
 eDBoxLCD *eDBoxLCD::getInstance()

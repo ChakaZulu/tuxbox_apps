@@ -16,6 +16,7 @@
 #include <lib/base/eerror.h>
 #include <lib/gdi/lcd.h>
 #include <lib/gdi/font.h>
+#include <lib/gdi/grc.h>
 #include <lib/driver/rc.h>
 #include <lib/driver/streamwd.h>
 #include <lib/dvb/edvb.h>
@@ -23,6 +24,8 @@
 #include <lib/gui/emessage.h>
 #include <lib/gui/eskin.h>
 #include <lib/system/info.h>
+
+ePluginThread *ePluginThread::instance=0;
 
 eString getInfo(const char *file, const char *info)
 {
@@ -209,6 +212,11 @@ eString eZapPlugins::execPluginByName(const char* name)
 			{
 				fclose(fp);
 				ePlugin p(0, Path.c_str());
+				if (ePluginThread::getInstance())
+				{
+					eDebug("currently one plugin is running.. dont start another one!!");
+					return _("E: currently another plugin is running...");
+				}
 				execPlugin(&p);
 				return "OK";
 			}
@@ -216,179 +224,13 @@ eString eZapPlugins::execPluginByName(const char* name)
 				return eString().sprintf(_("plugin '%s' not found"), name );
 		}
 	}
-	return _("no name given");
+	return _("E: no name given");
 }
 
 void eZapPlugins::execPlugin(ePlugin* plugin)
 {
-	void *libhandle[20];
-	int argc=0;
-	eString argv[20];
-
-	if (plugin->depend)
-	{
- 		char	depstring[129];
-		char	*p;
-		char	*np;
-
-		strcpy(depstring, plugin->depend.c_str());
-
-		p=depstring;
-
-		while(p)
-		{
-			np=strchr(p,',');
-			if ( np )
-				*np=0;
-
-			for ( int i=0; i < 3; i++ )
-			{
-				eString str;
-				if (np)
-					str.assign( p, np-p );
-				else
-					str.assign( p );
-
-				FILE *fp=fopen((PluginPath[i]+str).c_str(), "rb");
-				if ( fp )
-				{
-					fclose(fp);
-					argv[argc++] = PluginPath[i]+str;
-					break;
-				}
-			}
-			p=np?np+1:0;
-		}
-	}
-
-	argv[argc++]=plugin->sopath;
-
-	int i;
-	eDebug("pluginname is %s", plugin->pluginname.c_str());
-
-	if (plugin->needfb)
-		MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
-
-	if (plugin->needrc)
-		MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
-
-#ifndef DISABLE_LCD
-	if (plugin->needlcd)
-		MakeParam(P_ID_LCD, eDBoxLCD::getInstance()->lock() );
-#endif
-
-	int tpid = -1;
-	if (plugin->needvtxtpid)
-	{
-		if(Decoder::current.tpid==-1)
-		{
-			MakeParam(P_ID_VTXTPID, 0);
-		}
-		else
-		{
-			MakeParam(P_ID_VTXTPID, Decoder::current.tpid);
-		}
-		// stop vtxt reinsertion
-		tpid = Decoder::current.tpid;
-		if (tpid != -1)
-		{
-			eDebug("stop vtxt reinsertion");
-			Decoder::parms.tpid=-1;
-			Decoder::Set();
-		}
-	}
-	if (plugin->needoffsets)
-	{
-		int left=20, top=20, right=699, bottom=555;
-		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/left", left);
-		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/top", top);
-		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/right", right);
-		eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/bottom", bottom);
-		MakeParam(P_ID_OFF_X, left);
-		MakeParam(P_ID_OFF_Y, top);
-		MakeParam(P_ID_END_X, right);
-		MakeParam(P_ID_END_Y, bottom);
-	}
-
-/*	for(PluginParam *par = first; par; par=par->next )
-	{
-		printf ("id: %s - val: %s\n", par->id, par->val);
-		printf("%p\n", par->next);
-	}*/
-
-	for (i=0; i<argc; i++)
-	{
-		eDebug("loading %s" , argv[i].c_str());
-		libhandle[i]=dlopen(argv[i].c_str(), RTLD_NOW|RTLD_GLOBAL);
-		if (!libhandle[i])
-		{
-			const char *de=dlerror();
-			eDebug(de);
-			hide();
-			eMessageBox msg(de, "plugin loading failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
-			msg.show();
-			msg.exec();
-			msg.hide();
-			break;
-		}
-	}
-	
-	if (i==argc)
-	{
-		eDebug("would exec plugin %s", plugin->sopath.c_str());
-
-		PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
-		if (!execPlugin)
-		{
-			hide();
-			eMessageBox msg("The symbol plugin_exec was not found. sorry.", "plugin executing failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
-			msg.show();
-			msg.exec();
-			msg.hide();
-		}
-		else
-		{
-			eDebug("exec Plugin now...");
-			execPlugin(first);
-			dlclose(libhandle[i-1]);
-			eDebug("exec done...");
-		}
-
-		while (i--)
-			dlclose(libhandle[i]);
-	}
-
-	while (first)  // Parameter Liste freigegeben
-	{
-		tmp = first->next;
-		delete first;
-		first = tmp;
-	}
-
-	if (plugin->needfb)
-		fbClass::getInstance()->unlock();
-	
-	if (plugin->needrc)
-		eRCInput::getInstance()->unlock();
-
-#ifndef DISABLE_LCD
-	if (plugin->needlcd)
-	{
-		eDBoxLCD::getInstance()->unlock();
-		eZapLCD::getInstance()->invalidate();
-	}
-#endif
-
-	if (plugin->needvtxtpid)
-	{
-		// start vtxt reinsertion
-		if (tpid != -1)
-		{
-			eDebug("restart vtxt reinsertion");
-			Decoder::parms.tpid = tpid;
-			Decoder::Set();
-		}
-	}
+	ePluginThread *p = new ePluginThread(plugin, PluginPath, in_loop?this:0);
+	p->start();
 }
 
 void eZapPlugins::selected(ePlugin *plugin)
@@ -398,9 +240,216 @@ void eZapPlugins::selected(ePlugin *plugin)
 		close(0);
 		return;
 	}
-	int wasVisible = isVisible();
-	hide();
 	execPlugin(plugin);
+}
+
+void ePluginThread::start()
+{
+	wasVisible = wnd ? wnd->isVisible() : 0;
+
+	if (!thread_running())
+	{
+		argc=0;
+		eString argv[20];
+
+		if (depend)
+		{
+			char depstring[129];
+			char *p;
+			char *np;
+
+			strcpy(depstring, depend.c_str());
+
+			p=depstring;
+
+			while(p)
+			{
+				np=strchr(p,',');
+				if ( np )
+					*np=0;
+
+				for ( int i=0; i < 3; i++ )
+				{
+					eString str;
+					if (np)
+						str.assign( p, np-p );
+					else
+						str.assign( p );
+
+					FILE *fp=fopen((PluginPath[i]+str).c_str(), "rb");
+					if ( fp )
+					{
+						fclose(fp);
+						argv[argc++] = PluginPath[i]+str;
+						break;
+					}
+				}
+				p=np?np+1:0;
+			}
+		}
+
+		argv[argc++]=sopath;
+
+		int i;
+		eDebug("pluginname is %s %d", pluginname.c_str(), wasVisible);
+
+		for (i=0; i<argc; i++)
+		{
+			eDebug("loading %s" , argv[i].c_str());
+			libhandle[i]=dlopen(argv[i].c_str(), RTLD_GLOBAL|RTLD_NOW);
+			if (!libhandle[i])
+			{
+				const char *de=dlerror();
+				eDebug(de);
+				eMessageBox msg(de, "plugin loading failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
+				msg.show();
+				msg.exec();
+				msg.hide();
+				break;
+			}
+		}
+		if (i<argc)  // loading of one dependencie failed... close the other
+		{
+			while(i)
+				dlclose(libhandle[--i]);
+			if (wasVisible)
+				wnd->show();
+		}
+		else
+		{
+			eDebug("would exec plugin %s", sopath.c_str());
+			PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
+			if (!execPlugin)
+				// show messagebox.. and close after 5 seconds...
+			{
+				eMessageBox msg("The symbol plugin_exec was not found. sorry.", "plugin executing failed", eMessageBox::btOK, eMessageBox::btOK, 5 );
+				msg.show();
+				msg.exec();
+				msg.hide();
+			}
+			else
+			{
+				if (needrc)
+					MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
+
+				if ( wasVisible )
+					wnd->hide();
+
+				while(gRC::getInstance().queuelock.getDiff())
+					usleep(1000);
+
+				if (needfb)
+					MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
+
+#ifndef DISABLE_LCD
+				if (needlcd)
+					MakeParam(P_ID_LCD, eDBoxLCD::getInstance()->lock() );
+#endif
+
+				if (needvtxtpid)
+				{
+					if(Decoder::current.tpid==-1)
+						MakeParam(P_ID_VTXTPID, 0);
+					else
+						MakeParam(P_ID_VTXTPID, Decoder::current.tpid);
+			// stop vtxt reinsertion
+					tpid = Decoder::current.tpid;
+					if (tpid != -1)
+					{
+						eDebug("stop vtxt reinsertion");
+						Decoder::parms.tpid=-1;
+						Decoder::Set();
+					}
+				}
+
+				if (needoffsets)
+				{
+					int left=20, top=20, right=699, bottom=555;
+					eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/left", left);
+					eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/top", top);
+					eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/right", right);
+					eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/bottom", bottom);
+					MakeParam(P_ID_OFF_X, left);
+					MakeParam(P_ID_OFF_Y, top);
+					MakeParam(P_ID_END_X, right);
+					MakeParam(P_ID_END_Y, bottom);
+				}
+
+/*				for(PluginParam *par = first; par; par=par->next )
+				{
+					printf ("id: %s - val: %s\n", par->id, par->val);
+					printf("%p\n", par->next);
+				}*/
+
+				if (!dlsym(libhandle[i-1], "_ZN7eWidgetD0Ev") &&
+						!dlsym(libhandle[i-1], "_ZN11eDecoWidgetD0Ev") )
+				{
+					eDebug("start plugin thread...");
+					run();  // start thread
+				}
+				else      
+				{
+					eDebug("start plugin in current thread");
+					thread();
+					thread_finished();
+				}
+			}
+		}
+	}
+	else
+		eDebug("don't start plugin.. another one is running");
+}
+
+void ePluginThread::thread()
+{
+	if ( thread_running() )
+		eDebug("plugin thread running.. execute plugin now");
+	else
+		eDebug("execute plugin now");
+	PluginExec execPlugin = (PluginExec) dlsym(libhandle[argc-1], "plugin_exec");
+	execPlugin(first);
+	eDebug("execute plugin finished");
+}
+
+void ePluginThread::thread_finished()
+{
+	while (argc)
+		dlclose(libhandle[--argc]);
+
+	while (first)  // Parameter Liste freigegeben
+	{
+		tmp = first->next;
+		delete first;
+		first = tmp;
+	}
+
+	if (needfb)
+		fbClass::getInstance()->unlock();
+
+#ifndef DISABLE_LCD
+	if (needlcd)
+	{
+		eDBoxLCD::getInstance()->unlock();
+		eZapLCD::getInstance()->invalidate();
+	}
+#endif
+
 	if ( wasVisible )
-		show();
+		wnd->show();
+
+	if (needrc)
+		eRCInput::getInstance()->unlock();
+
+	if (needvtxtpid)
+	{
+		// start vtxt reinsertion
+		if (tpid != -1 && Decoder::current.tpid == -1)
+		{
+			eDebug("restart vtxt reinsertion");
+			Decoder::parms.tpid = tpid;
+			Decoder::Set();
+		}
+	}
+
+	delete this;
 }

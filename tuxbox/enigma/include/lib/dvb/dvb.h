@@ -21,11 +21,11 @@ class eDVB;
 #include <lib/system/elock.h>
 
 #ifndef MIN
-	#define MIN(a,b) (a < b ? a : b)
+	#define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 #ifndef MAX
-	#define MAX(a,b) (a > b ? a : b)
+	#define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
 class eTransponderList;
@@ -519,6 +519,7 @@ public:
 
 class eServicePath
 {
+	friend struct ePlaylistEntry;
 	std::list<eServiceReference> path;
 public:
 	bool operator != ( const eServicePath& p ) const

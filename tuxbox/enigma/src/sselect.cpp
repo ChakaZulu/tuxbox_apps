@@ -1562,7 +1562,7 @@ eServiceSelector::eServiceSelector()
 	addActionMap(&i_numberActions->map);
 
 	setHelpID(33);
-	if ( this == eZap::getInstance()->getServiceSelector() )
+	if ( !eZap::getInstance()->getServiceSelector() )
 	{
 		addActionToHelpList(&i_serviceSelectorActions->deletePressed);
 		addActionToHelpList(&i_serviceSelectorActions->markPressed);
@@ -1574,13 +1574,13 @@ eServiceSelector::eServiceSelector()
 		addActionToHelpList(&i_serviceSelectorActions->showSatellites);
 	addActionToHelpList(&i_serviceSelectorActions->showProvider);
 	addActionToHelpList(&i_serviceSelectorActions->showBouquets);
-	if ( this == eZap::getInstance()->getServiceSelector() )
+	if ( !eZap::getInstance()->getServiceSelector() )
 		addActionToHelpList(&i_serviceSelectorActions->showMenu);
 	addActionToHelpList(&i_serviceSelectorActions->toggleStyle);
 	addActionToHelpList(&i_serviceSelectorActions->toggleFocus);
 	addActionToHelpList(&i_serviceSelectorActions->gotoPrevMarker);
 	addActionToHelpList(&i_serviceSelectorActions->gotoNextMarker);
-	if ( this == eZap::getInstance()->getServiceSelector() )
+	if ( !eZap::getInstance()->getServiceSelector() )
 		addActionToHelpList(&i_serviceSelectorActions->showEPGSelector);
 	addActionToHelpList(&i_serviceSelectorActions->pathUp);
 	addActionToHelpList(&i_serviceSelectorActions->modeTV);

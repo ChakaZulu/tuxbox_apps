@@ -12,6 +12,7 @@ class eDVBCI;
 class eTextInputField;
 class eWindow;
 class eStatusBar;
+class eCheckbox;
 
 struct eMMIMsg
 {
@@ -79,12 +80,14 @@ class enigmaCI: public eWindow
 {
 	eButton *ok,*reset,*init,*app;
 	eButton *reset2,*init2,*app2;
+	eCheckbox *twoServices;
 
 	eStatusBar *status;
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
 
 private:
+	void handleTwoServicesChecked(int);
 	void okPressed();
 	void resetPressed();
 	void initPressed();

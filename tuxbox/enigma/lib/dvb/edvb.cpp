@@ -280,47 +280,43 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 		recEnd();
 
 	PMT *pmt=getPMT();
-	recorder=new eDVBRecorder(pmt);
+	PAT *pat=tPAT.ready()?tPAT.getCurrent():0;
+	recorder=new eDVBRecorder(pmt, pat);
+	if ( pat )
+		pat->unlock();
 	recorder->recRef=(eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
 
 	eServiceHandler *handler = eServiceInterface::getInstance()->getService();
 
-	int fd = open("/var/.zap", O_RDONLY);
-	if ( fd < 0 )
-		recorder->scrambled = handler->getFlags() & eServiceHandler::flagIsScrambled;
-	else
-	{
-		close(fd);
-		recorder->scrambled = false;
-	}
+	recorder->scrambled = handler->getFlags() & eServiceHandler::flagIsScrambled;
 
 	recorder->open(filename);
 
 	CONNECT(recorder->recMessage, eDVB::recMessage);
 
-	recorder->addPID(0); // PAT
+//	recorder->addNewPID(0); // PAT
 
-	if (Decoder::parms.pmtpid != -1)
-		recorder->addPID(Decoder::parms.pmtpid);
+//	if (Decoder::parms.pmtpid != -1)
+//		recorder->addNewPID(Decoder::parms.pmtpid);
 
 	if (!pmt)
 	{
-		if (Decoder::parms.apid != -1)
-			recorder->addPID(Decoder::parms.apid);
+  if (Decoder::parms.apid != -1)
+			recorder->addNewPID(Decoder::parms.apid);
 		if (Decoder::parms.vpid != -1)
-			recorder->addPID(Decoder::parms.vpid);
+			recorder->addNewPID(Decoder::parms.vpid);
 		if (Decoder::parms.tpid != -1)
-			recorder->addPID(Decoder::parms.tpid);
+			recorder->addNewPID(Decoder::parms.tpid);
 		if (Decoder::parms.pcrpid != -1)
-			recorder->addPID(Decoder::parms.pcrpid);
+			recorder->addNewPID(Decoder::parms.pcrpid);
 	}
 	else
 	{
-		recorder->addPID(pmt->PCR_PID);
+		recorder->addNewPID(pmt->PCR_PID);
 #ifdef RECORD_ECM
 		for (ePtrList<Descriptor>::iterator i(pmt->program_info.begin()); i != pmt->program_info.end(); ++i)
 			if (i->Tag() == 9)
-				recorder->addPID(((CADescriptor*)*i)->CA_PID);
+				recorder->addNewPID(((CADescriptor*)*i)->CA_PID);
 #endif
 		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 		{
@@ -348,11 +344,11 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 				break;
 			}
 			if (record)
-				recorder->addPID(i->elementary_PID);
+				recorder->addNewPID(i->elementary_PID);
 #ifdef RECORD_ECM
 			for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
 				if (it->Tag() == 9)
-					recorder->addPID(((CADescriptor*)*it)->CA_PID);
+					recorder->addNewPID(((CADescriptor*)*it)->CA_PID);
 #endif
 		}
 		pmt->unlock();
@@ -442,9 +438,12 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 	sit[2]|=(pos-3)&0xFF;
 
 	// generate CRC :)
-	
+
+	unsigned int cc=0;
 	// write section.
-	recorder->writeSection(sit, 0x1f);
+	recorder->writeSection(sit, 0x1f, cc);
+
+	recorder->validatePIDs();
 }
 
 void eDVB::recPause()

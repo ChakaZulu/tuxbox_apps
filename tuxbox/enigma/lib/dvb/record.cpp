@@ -17,6 +17,55 @@
 #define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
 #endif
 
+static int section_length(const unsigned char *buf)
+{
+	return ((buf[1] << 8) | buf[2]) & 0x0fff;
+}
+
+static int ts_header(unsigned char *dest, int pusi, int pid, int scrmbl, int adap, unsigned int &cc)
+{
+	dest[0] = 0x47;
+	dest[1] = (!!pusi << 6) | (pid >> 8);
+	dest[2] = pid;
+	dest[3] = (scrmbl << 6) | (adap << 4) | (cc++ & 0x0f);
+
+	return 4;
+}
+
+static int section2ts(unsigned char *dest, const unsigned char *src, int pid, unsigned int &ccount )
+{
+	unsigned char *orig = dest;
+	int pusi = 1;
+	int len, cplen;
+
+	orig = dest;
+
+	for (len = section_length(src) + 3; len > 0; len -= cplen) {
+		dest += ts_header(dest, pusi, pid, 0, 1, ccount);
+
+		if (pusi) {
+			*dest++ = 0x00;	/* pointer_field */
+			cplen = MIN(len, 183);
+			pusi = 0;
+		}
+		else {
+			cplen = MIN(len, 184);
+		}
+
+		memcpy(dest, src, cplen);
+		dest += cplen;
+		src += cplen;
+	}
+
+	if ((cplen = (dest - orig) % 188)) {
+		cplen = 188 - cplen;
+		memset(dest, 0xff, cplen);
+		dest += cplen;
+	}
+
+	return dest - orig;
+}
+
 int eDVBRecorder::flushBuffer()
 {
 	if (!bufptr)
@@ -35,19 +84,17 @@ int eDVBRecorder::flushBuffer()
 
 void eDVBRecorder::thread()
 {
-	int wr=-1;
 	while (state == stateRunning)
 	{
-		wr=0;
-//		singleLock s(bufferLock);
+		singleLock s(bufferLock);
 
-		int r = ::read(dvrfd, buf+bufptr, 65536-bufptr );
+		int r = ::read(dvrfd, buf+bufptr, 65424-bufptr );
 		if ( r < 0 )
 			continue;
 
 		bufptr += r;
 
-		if ( bufptr > 65535 )
+		if ( bufptr > 65423 )
 			if (flushBuffer())
 				state = stateError;
 
@@ -71,8 +118,8 @@ void eDVBRecorder::PMTready(int error)
 			eDVBCaPMTClientHandler::distribute_gotPMT(recRef, pmt);
 
 			eDebug("UpdatePIDs");
-			addNewPID(0); // PAT
-			addNewPID(pmt->pid);  // PMT
+//			addNewPID(0); // PAT
+//			addNewPID(pmt->pid);  // PMT
 			addNewPID(pmt->PCR_PID);  // PCR
 
 			for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
@@ -110,6 +157,9 @@ void eDVBRecorder::PMTready(int error)
 					addNewPID(i->elementary_PID);
 			}
 			validatePIDs();
+
+			delete [] PmtData;
+			PmtData = pmt->getRAW();
 
 			pmt->unlock();
 		}
@@ -225,8 +275,6 @@ void eDVBRecorder::addNewPID(int pid)
 
 void eDVBRecorder::validatePIDs()
 {
-	if (state != stateRunning)
-		return;
 	eDebug("validatePIDs");
 	for (std::set<pid_t>::iterator it(pids.begin()); it != pids.end(); ++it )
 	{
@@ -252,7 +300,7 @@ void eDVBRecorder::validatePIDs()
 			}
 		}
 		else
-			eDebug("error while add new pid");
+			eDebug("error during add new pid");
 	}
 	newpids.clear();
 }
@@ -285,6 +333,9 @@ void eDVBRecorder::start()
 		eDebug("run thread");
 		run();
 	}
+	while(!thread_running() )
+		usleep(1000);
+	PatPmtTimer.start(0,true);
 
 	for (std::set<pid_t>::iterator i(pids.begin()); i != pids.end(); ++i)
 	{
@@ -304,9 +355,9 @@ void eDVBRecorder::stop()
 	if ( state == stateStopped )
 		return;
 
-	eDebug("eDVBRecorder::stop()");
 	state = stateStopped;
 
+	PatPmtTimer.stop();
 	int timeout=20;
 	while ( thread_running() && timeout )
 	{
@@ -342,8 +393,10 @@ void eDVBRecorder::close()
 		kill(true);
 }
 
-eDVBRecorder::eDVBRecorder(PMT *pmt)
-:state(stateStopped), rmessagepump(eApp, 1), dvrfd(-1), outfd(-1), bufptr(0)
+eDVBRecorder::eDVBRecorder(PMT *pmt,PAT *pat)
+:state(stateStopped), rmessagepump(eApp, 1), dvrfd(-1) ,outfd(-1)
+,bufptr(0), PatPmtTimer(eApp), PmtData(NULL), PatData(NULL)
+,PmtCC(0), PatCC(0)
 {
 	CONNECT(rmessagepump.recv_msg, eDVBRecorder::gotBackMessage);
 	rmessagepump.start();
@@ -351,64 +404,72 @@ eDVBRecorder::eDVBRecorder(PMT *pmt)
 	if (pmt)
 	{
 		CONNECT( tPMT.tableReady, eDVBRecorder::PMTready );
-		tPMT.start((PMT*)pmt->createNext());
+		// use DEMUX1_DEV when it can handle.. but at moment not :(
+		tPMT.start((PMT*)pmt->createNext(), DEMUX1_DEV );
+		PmtData=pmt->getRAW();
+		pmtpid=pmt->pid;
+		CONNECT( PatPmtTimer.timeout, eDVBRecorder::PatPmtWrite);
+		if (pat)
+		{
+			PAT p;
+			p.entries.setAutoDelete(false);
+			p.version=pat->version;
+			p.transport_stream_id=pat->transport_stream_id;
+			for (ePtrList<PATEntry>::iterator it(pat->entries);
+				it != pat->entries.end(); ++it)
+			{
+				if ( it->program_map_PID == pmtpid )
+				{
+					p.entries.push_back(*it);
+					PatData=p.getRAW();
+					break;
+				}
+			}
+		}
 	}
-//	pthread_mutex_init(&bufferLock, 0);
+	pthread_mutex_init(&bufferLock, 0);
 }
 
 eDVBRecorder::~eDVBRecorder()
 {
+	delete [] PatData;
+	delete [] PmtData;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if ( sapi && sapi->service != recRef )
 		eDVBCaPMTClientHandler::distribute_leaveService(recRef);
 	close();
 }
 
-void eDVBRecorder::writeSection(void *data, int pid)
+void eDVBRecorder::writeSection(void *data, int pid, unsigned int &cc)
 {
-	if ( state != stateStopped )
+	if ( !data )
 		return;
 
-	__u8 *table=(__u8*)data;
-	int len=(table[1]<<8)&0x1F;
-	len|=table[2];
+	__u8 secbuf[4096];
 
-	len+=3;
+	int len = section2ts(secbuf, (__u8*)data, pid, cc);
 
-	int first=1;
-	int cc=0;
-	
-	while (len)
+	if ( len )
 	{
-		// generate header:
-		__u8 packet[188]; // yes, malloc
-		int pos=0;
-		packet[pos++]=0x47;        // sync_byte
-		packet[pos]=pid>>8;        // pid
-		if (first)
-			packet[pos]|=1<<6;       // PUSI
-		pos++;
-		packet[pos++]=pid&0xFF;    // pid
-		packet[pos++]=cc++|0x10;   // continuity counter, adaption_field_control
-		if (first)
-			packet[pos++]=0;
-		int tc=len;
-		if (tc > (188-pos))
-			tc=188-pos;
-		memcpy(packet+pos, table, tc);
-		len-=tc;
-		pos+=tc;
-		memset(packet+pos, 0xFF, 188-pos);
+		singleLock s(bufferLock);
 
-//		singleLock s(bufferLock);
-
-		memcpy(buf+bufptr, packet, 188);
-		bufptr += 188;
-
-		if ( bufptr > 65535 )
+		if ( (bufptr+len) > 65423 )
 			flushBuffer();
 
-		first=0;
+		memcpy(buf+bufptr, secbuf, len);
+		bufptr+=len;
 	}
 }
+
+void eDVBRecorder::PatPmtWrite()
+{
+	if ( PatData )
+		writeSection(PatData, 0, PatCC );
+
+	if ( PmtData )
+		writeSection(PmtData, pmtpid, PmtCC );
+
+	PatPmtTimer.start(1500,true);
+}
+
 #endif //DISABLE_FILE

@@ -218,8 +218,8 @@ public:
 	eEPGCache();
 	~eEPGCache();
 	static eEPGCache *getInstance() { return instance; }
-	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id);
-	EITEvent *lookupEvent(const eServiceReferenceDVB &service, time_t=0);
+	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain=false );
+	EITEvent *lookupEvent(const eServiceReferenceDVB &service, time_t=0, bool plain=false );
 	const eventMap* getEventMap(const eServiceReferenceDVB &service);
 	const timeMap* getTimeMap(const eServiceReferenceDVB &service);
 	const std::list<NVODReferenceEntry>* getNVODRefList(const eServiceReferenceDVB &service);

@@ -131,7 +131,7 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int 
 	char *defaultproto="http";
 	std::string proto, host, path;
 	int port=80;
-	
+
 	int state=0; // 0 proto, 1 host, 2 port 3 path
 	
 	while (*uri)

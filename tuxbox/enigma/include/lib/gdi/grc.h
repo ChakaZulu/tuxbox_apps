@@ -127,11 +127,10 @@ class gRC
 	static void *thread_wrapper(void *ptr);
 	pthread_t the_thread;
 	void *thread();
-	
-	eLock queuelock;
-	
+
 	queueRingBuffer<gOpcode> queue;
 public:
+	eLock queuelock;
 	gRC();
 	virtual ~gRC();
 
@@ -140,7 +139,7 @@ public:
 		static int collected=0;
 		queue.enqueue(o);
 		collected++;
-		if (o.opcode==gOpcode::end)
+		if (o.opcode==gOpcode::end||o.opcode==gOpcode::shutdown)
 		{
 			queuelock.unlock(collected);
 #ifdef SYNC_PAINT

@@ -39,19 +39,8 @@ void ELirc::sendcommand(std::string cmd)
 	std::cout << "[elirc.cpp]Sending: " << ostr.str() << std::endl;
 }
 
-void handle_sig_pipe (int i)
-{
-  return;
-}
-
 void ELirc::sendcommandlist(std::string filename)
 {
-	struct sigaction act;
-	act.sa_handler = handle_sig_pipe;
-	sigemptyset (&act.sa_mask);
-	act.sa_flags = 0;
-	sigaction (SIGPIPE, &act, NULL);
-
 	struct sockaddr_un addr;
 
 	addr.sun_family=AF_UNIX;

@@ -90,6 +90,7 @@ void eAVSwitch::init()
 
 	setInput(0);
 	setActive(1);		// in setActive is volume or mute set to current state
+	changeVolume(0,0);
 }
 
 eAVSwitch *eAVSwitch::getInstance()
@@ -148,8 +149,21 @@ int eAVSwitch::setVolume(int vol)
 #else
 			audio_mixer_t mix;
 #endif
-			mix.volume_left=(vol*vol)/64;
-			mix.volume_right=(vol*vol)/64;
+			int tmp=1;
+			if ( eConfig::getInstance()->getKey("/ezap/audio/outputLeft", tmp) )
+				eConfig::getInstance()->setKey("/ezap/audio/outputLeft", tmp);
+			if ( tmp )
+				mix.volume_left=(vol*vol)/64;
+			else
+				mix.volume_left=63;  // mute
+
+			tmp=1;
+			if ( eConfig::getInstance()->getKey("/ezap/audio/outputRight", tmp) )
+				eConfig::getInstance()->setKey("/ezap/audio/outputRight", tmp);
+			if (tmp)
+				mix.volume_right=(vol*vol)/64;
+			else
+				mix.volume_right=63;
 
 			int fd = Decoder::getAudioDevice();
 
@@ -166,7 +180,6 @@ int eAVSwitch::setVolume(int vol)
 			return ret;
 		}
 	}
-
 	return ioctl(avsfd, AVSIOSVOL, &vol);
 }
 
@@ -192,7 +205,8 @@ void eAVSwitch::changeVolume(int abs, int vol)
 
 	setVolume( (63-volume) * 65536/64 );
 
-	sendVolumeChanged();
+	if ( vol )
+		sendVolumeChanged();
 }
 
 void eAVSwitch::changeVCRVolume(int abs, int vol)

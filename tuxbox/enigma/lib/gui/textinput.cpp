@@ -13,13 +13,14 @@
 struct texteditActions
 {
 	eActionMap map;
-	eAction capslock, swapnum, insertchar, deletechar;
+	eAction capslock, swapnum, insertchar, deletechar, showHelp;
 	texteditActions():
 		map("textedit", "enigma global"),
 		capslock(map, "capslock", _("enable/disable capslock"), eAction::prioDialog),
 		swapnum(map, "swapnum", _("put numbers before/after characters"), eAction::prioDialog),
 		insertchar(map, "insertchar", _("insert blank at cursor position"), eAction::prioDialog),
-		deletechar(map, "deletechar", _("remove the character at the cursor position"), eAction::prioDialog)
+		deletechar(map, "deletechar", _("remove the character at the cursor position"), eAction::prioDialog),
+		showHelp(map, "showHelp", _("shows the textinputfield help"), eAction::prioDialog )
 	{
 	}
 };
@@ -30,7 +31,7 @@ std::map< eString, std::vector<std::pair< eString,eString > > > eTextInputField:
 
 eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFieldHelpWidget *hlp, const char *deco )
 	:eButton( parent, descr, 1, deco), maxChars(0), lastKey(-1), editMode(false),
-	editHelpText(_("ok=leave edit mode, yellow=enable/disable capslock, blue=put numbers before/after chars")), nextCharTimer(eApp),
+	editHelpText(_("press ok to save (help is available)")), nextCharTimer(eApp),
 	useableChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789öü"
 	"ĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîï°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ"
 	" +-.,:?!\"';_*/()<=>%#@&"), capslock(false), swapNum(false), editLabel(0), helpwidget(hlp)
@@ -47,6 +48,8 @@ eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFiel
 	eConfig::getInstance()->getKey("/elitedvb/language", language);
 	if (language && strstr(language,"ru_RU"))
 		table=1;
+	if ( helpwidget )
+		editHelpText=_("press ok to save");
 	updateHelpWidget();
 }
 
@@ -294,6 +297,55 @@ void eTextInputField::drawCursor()
 	delete painter;
 }
 
+void eTextInputField::toggleState()
+{
+	nextCharTimer.stop();
+	if ( editMode )
+	{
+		editLabel->hide();
+		setText(editLabel->getText());
+		delete editLabel;
+		editLabel=0;
+
+		setHelpText(oldHelpText);
+
+		while ( text.length() && text[text.length()-1] == ' ' )
+			text.erase( text.length()-1 );
+
+		editMode=false;
+		/* emit */ selected();
+
+		eWindow::globalCancel(eWindow::ON);
+	}
+	else
+	{
+		oldText=text;
+		editMode=true;
+		/* emit */ selected();
+		capslock=0;
+		while(scroll.size())
+			scroll.pop();
+		eRect tmp = deco_selected?crect_selected:deco?crect:clientrect;
+		editLabel=new eLabel(this,0,0);
+		editLabel->hide();
+		editLabel->move(tmp.topLeft());
+		scroll.push( std::pair<int,int>(0,tmp.width()) );
+		eSize tmpSize=tmp.size();
+		tmpSize.setWidth( tmp.width()*5 );
+		editLabel->resize(tmpSize);
+		editLabel->setText(text.removeChars('\x86').
+			removeChars('\x87').removeChars('\xC2').
+			removeChars('\x05'));
+		oldHelpText=helptext;
+		setText("");
+		editLabel->show();
+		setHelpText(editHelpText);
+		curPos=0;
+		drawCursor();
+		eWindow::globalCancel(eWindow::OFF);
+	}
+}
+
 int eTextInputField::eventHandler( const eWidgetEvent &event )
 {
 	if (editLabel)
@@ -346,6 +398,19 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 					updated();
 				}
 			}
+			else if ( event.action == &i_texteditActions->showHelp && !helpwidget )
+			{
+				eTextInputFieldHelpWindow wnd;
+				helpwidget = wnd.helpwidget;
+				updateHelpWidget();
+				eWindow::globalCancel(eWindow::ON);
+				wnd.show();
+				wnd.exec();
+				wnd.hide();
+				helpwidget=0;
+				drawCursor();
+				eWindow::globalCancel(eWindow::OFF);
+			}
 			else if ( (event.action == &i_cursorActions->up ||
 				event.action == &i_cursorActions->down) && editMode )
 			{
@@ -392,54 +457,7 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				nextChar();
 			}
 			else if (event.action == &i_cursorActions->ok)
-			{
-				nextCharTimer.stop();
-				if ( editMode )
-				{
-					editLabel->hide();
-					setText(editLabel->getText());
-					delete editLabel;
-					editLabel=0;
-
-					setHelpText(oldHelpText);
-
-					while ( text.length() && text[text.length()-1] == ' ' )
-						text.erase( text.length()-1 );
-
-					editMode=false;
-					/* emit */ selected();
-
-					eWindow::globalCancel(eWindow::ON);
-					break;
-				}
-				else
-				{
-					oldText=text;
-					editMode=true;
-					/* emit */ selected();
-					capslock=0;
-					while(scroll.size())
-						scroll.pop();
-					eRect tmp = deco_selected?crect_selected:deco?crect:clientrect;
-					editLabel=new eLabel(this,0,0);
-					editLabel->hide();
-					editLabel->move(tmp.topLeft());
-					scroll.push( std::pair<int,int>(0,tmp.width()) );
-					eSize tmpSize=tmp.size();
-					tmpSize.setWidth( tmp.width()*5 );
-					editLabel->resize(tmpSize);
-					editLabel->setText(text.removeChars('\x86').
-						removeChars('\x87').removeChars('\xC2').
-						removeChars('\x05'));
-					oldHelpText=helptext;
-					setText("");
-					editLabel->show();
-					setHelpText(editHelpText);
-					curPos=0;
-					drawCursor();
-					eWindow::globalCancel(eWindow::OFF);
-				}
-			}
+				toggleState();
 			else if ( editMode && event.action == &i_cursorActions->cancel )
 			{
 				delete editLabel;
@@ -449,6 +467,7 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				setText(oldText);
 				setHelpText(oldHelpText);
 				eWindow::globalCancel(eWindow::ON);
+				cancelPressed();
 				break;
 			}
 			else if (event.action == &i_numberActions->key0)
@@ -594,8 +613,11 @@ void eTextInputFieldHelpWidget::redrawWidget(gPainter *target, const eRect & are
 	target->fill(eRect(0,44,size.width(),2));
 	target->fill(eRect(0,89,size.width(),2));
 	target->fill(eRect(0,133,size.width(),2));
-	target->fill(eRect(1+fieldwidth,0,2,size.height()));
-	target->fill(eRect(1+fieldwidth*2,0,2,size.height()));
+	target->fill(eRect(0,size.height()-77,size.width(),2));
+	target->fill(eRect(0,size.height()-40,size.width(),2));
+	target->fill(eRect(1+fieldwidth,0,2,size.height()-75));
+	target->fill(eRect(1+fieldwidth*2,0,2,size.height()-75));
+	target->fill(eRect(1+size.width()/2,size.height()-75,2,size.height()));
 }
 
 eTextInputFieldHelpWidget::eTextInputFieldHelpWidget(eWidget *parent)

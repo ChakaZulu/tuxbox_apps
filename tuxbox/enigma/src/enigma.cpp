@@ -68,21 +68,25 @@ void eZap::status()
 {
 }
 
-#include <lib/base/ringbuffer.h>
+void handle_sig_pipe (int i)
+{
+	eDebug("SIGPIPE");
+	return;
+}
 
-extern void ezapInitializeWeb(eHTTPD *httpd, eHTTPDynPathResolver *dyn_resolver);
+extern void ezapInitializeWeb(eHTTPDynPathResolver *dyn_resolver);
 // extern void ezapInitializeNetCMD(eHTTPD *httpd, eHTTPDynPathResolver *dyn_resolver);
 
 eZap::eZap(int argc, char **argv)
 	: eApplication(/*argc, argv, 0*/)
+	,httpd(0), serialhttpd(0), dyn_resolver(0), fileresolver(0)
+	,xmlrpcresolver(0), logresolver(0), serviceSelector(0)
 {
 	int bootcount;
 
 #ifndef DISABLE_LCD
 	eZapLCD *pLCD;
 #endif
-	eHTTPDynPathResolver *dyn_resolver;
-	eHTTPFilePathResolver *fileresolver;
 
 	instance = this;
 	
@@ -178,75 +182,7 @@ eZap::eZap(int argc, char **argv)
 	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 #endif
 
-	dyn_resolver = new eHTTPDynPathResolver();
-	ezapInitializeDyn(dyn_resolver);
-
-	fileresolver = new eHTTPFilePathResolver();
-	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www", 2); /* TODO: make user configurable */
-	fileresolver->addTranslation(CONFIGDIR , "/config", 3);
-	fileresolver->addTranslation("/", "/root", 3);
-	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/", 2);
-
-	eDebug("[ENIGMA] starting httpd");
-	httpd = new eHTTPD(80, eApp);
-
-#ifndef DISABLE_NETWORK
-	ezapInitializeXMLRPC(httpd);
-#endif
-	ezapInitializeWeb(httpd, dyn_resolver);
-	httpd->addResolver(dyn_resolver);
-	httpd->addResolver(fileresolver);
-
-	serialhttpd=0;
-	bool SerialConsoleActivated=false;
-	FILE *f=fopen("/proc/cmdline", "rt");
-	if (f)
-	{
-		char *cmdline=NULL;
-		size_t len = 0;
-		getline( &cmdline, &len, f );
-		SerialConsoleActivated = strstr( cmdline, "console=ttyS0" ) != NULL;
-		fclose(f);
-		free(cmdline);
-		if ( SerialConsoleActivated )
-			eDebug("console=ttyS0 detected...disable enigma serial http interface");
-		else
-			eDebug("activate enigma serial http interface");
-	}
-
-	if ( !SerialConsoleActivated )
-	{
-		eDebug("[ENIGMA] starting httpd on serial port...");
-		int fd=::open("/dev/tts/0", O_RDWR);
-
-		if (fd < 0)
-			eDebug("[ENIGMA] serial port error (%m)");
-		else
-		{
-			struct termios tio;
-			bzero(&tio, sizeof(tio));
-			tio.c_cflag = B115200 /*| CRTSCTS*/ | CS8 | CLOCAL | CREAD;
-			tio.c_iflag = IGNPAR;
-			tio.c_oflag = 0;
-			tio.c_lflag = 0;
-			tio.c_cc[VTIME] = 0;
-			tio.c_cc[VMIN] = 1;
-			tcflush(fd, TCIFLUSH);
-			tcsetattr(fd, TCSANOW, &tio); 
-
-			logOutputConsole=0; // disable enigma logging to console
-			klogctl(8, 0, 1); // disable kernel log to serial
-
-			char *banner="Welcome to the enigma serial access.\r\n"
-					"you may start a HTTP session now if you send a \"break\".\r\n";
-			write(fd, banner, strlen(banner));
-			serialhttpd = new eHTTPConnection(fd, 0, httpd, 1);
-//			char *i="GET /version HTTP/1.0\n\n";
-//			char *i="GET /menu.cr HTTP/1.0\n\n";
-			char *i="GET /log/debug HTTP/1.0\n\n";
-			serialhttpd->inject(i, strlen(i));
-		}
-	}
+	reconfigureHTTPServer();
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
 
@@ -275,7 +211,99 @@ eZap::eZap(int argc, char **argv)
 		eConfig::getInstance()->setKey("/ezap/serviceselector/showButtons", 1 );
 		serviceSelector->setStyle( serviceSelector->getStyle(), true );
 	}
+
+	struct sigaction act;
+	act.sa_handler = handle_sig_pipe;
+	sigemptyset (&act.sa_mask);
+	act.sa_flags = 0;
+	sigaction (SIGPIPE, &act, NULL);
+	eDebug("set SIGPIPE handler");
+
 	init->setRunlevel(eAutoInitNumbers::main);
+}
+
+void eZap::reconfigureHTTPServer()
+{
+	delete serialhttpd;
+	delete httpd;
+
+	dyn_resolver = new eHTTPDynPathResolver();
+	ezapInitializeDyn(dyn_resolver);
+	ezapInitializeWeb(dyn_resolver);
+
+	fileresolver = new eHTTPFilePathResolver();
+	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www", 2); /* TODO: make user configurable */
+	fileresolver->addTranslation(CONFIGDIR , "/config", 3);
+	fileresolver->addTranslation("/", "/root", 3);
+	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/", 2);
+
+	logresolver = new eHTTPLogResolver();
+
+#ifndef DISABLE_NETWORK
+	xmlrpcresolver = new eHTTPXMLRPCResolver();
+	ezapInitializeXMLRPC();
+#endif
+
+	int port=80;
+	eConfig::getInstance()->getKey("/elitedvb/network/webifport", port);
+	eDebug("[ENIGMA] starting httpd");
+	httpd = new eHTTPD(port, eApp);
+	httpd->addResolver(xmlrpcresolver);
+	httpd->addResolver(logresolver);
+	httpd->addResolver(dyn_resolver);
+	httpd->addResolver(fileresolver);
+
+	bool SerialConsoleActivated=false;
+	FILE *f=fopen("/proc/cmdline", "rt");
+	if (f)
+	{
+		char *cmdline=NULL;
+		size_t len = 0;
+		getline( &cmdline, &len, f );
+		SerialConsoleActivated = strstr( cmdline, "console=ttyS0" ) != NULL;
+		fclose(f);
+		free(cmdline);
+		if ( SerialConsoleActivated )
+			eDebug("console=ttyS0 detected...disable enigma serial http interface");
+		else
+			eDebug("activate enigma serial http interface");
+	}
+
+#if 1
+	if ( !SerialConsoleActivated )
+	{
+		eDebug("[ENIGMA] starting httpd on serial port...");
+		int fd=::open("/dev/tts/0", O_RDWR);
+
+		if (fd < 0)
+			eDebug("[ENIGMA] serial port error (%m)");
+		else
+		{
+			struct termios tio;
+			bzero(&tio, sizeof(tio));
+			tio.c_cflag = B115200 /*| CRTSCTS*/ | CS8 | CLOCAL | CREAD;
+			tio.c_iflag = IGNPAR;
+			tio.c_oflag = 0;
+			tio.c_lflag = 0;
+			tio.c_cc[VTIME] = 0;
+			tio.c_cc[VMIN] = 1;
+			tcflush(fd, TCIFLUSH);
+			tcsetattr(fd, TCSANOW, &tio);
+
+			logOutputConsole=0; // disable enigma logging to console
+			klogctl(8, 0, 1); // disable kernel log to serial
+
+			char *banner="Welcome to the enigma serial access.\r\n"
+					"you may start a HTTP session now if you send a \"break \".\r\n";
+			write(fd, banner, strlen(banner));
+			serialhttpd = new eHTTPConnection(fd, 0, httpd, 1);
+//			char *i="GET /version HTTP/1.0\n\n";
+//			char *i="GET /menu.cr HTTP/1.0\n\n";
+			char *i="GET /log/debug HTTP/1.0\n\n";
+			serialhttpd->inject(i, strlen(i));
+		}
+	}
+#endif
 }
 
 eZap::~eZap()
@@ -291,10 +319,8 @@ eZap::~eZap()
 	for (std::list<void*>::iterator i(plugins.begin()); i != plugins.end(); ++i)
 		dlclose(*i);
 
-	if (serialhttpd)
-		delete serialhttpd;
-    
 	delete httpd;
+
 	delete init;
 	instance = 0;
 }

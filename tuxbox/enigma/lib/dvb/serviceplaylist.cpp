@@ -65,9 +65,9 @@ int ePlaylist::load(const char *filename)
 		{
 			if (!strncmp(line, "#SERVICE: ", 10))
 			{
-				eServiceReference ref(line+10);
+				eServicePath path(line+10);
 				entries++;
-				list.push_back(ref);
+				list.push_back(path);
 				ignore_next=1;
 			}
 			else if (!strncmp(line, "#DESCRIPTION: ", 14))
@@ -82,7 +82,7 @@ int ePlaylist::load(const char *filename)
 			else if (!strncmp(line, "#CURRENT_POSITION ", 18))
 				list.back().current_position=atoi(line+18);
 			else if (!strncmp(line, "#TYPE ", 6))
-				list.back().type=atoi(line+6);		
+				list.back().type=atoi(line+6);
 			else if (!strncmp(line, "#EVENT_ID ", 10))
 				list.back().event_id=atoi(line+10);
 			else if (!strncmp(line, "#TIME_BEGIN ", 12))
@@ -149,7 +149,13 @@ int ePlaylist::save(const char *filename)
 		goto err;
 	for (std::list<ePlaylistEntry>::iterator i(list.begin()); i != list.end(); ++i)
 	{
-		if ( fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str()) < 0 )
+		if ( i->services.size() > 1 )
+		{
+			eServicePath p = i->services;
+			if ( fprintf(f, "#SERVICE: %s\r\n", p.toString().c_str()) < 0 )
+				goto err;
+		}
+		else if ( fprintf(f, "#SERVICE: %s\r\n", i->service.toString().c_str()) < 0 )
 			goto err;
 		if ( i->service.descr &&
 			fprintf(f, "#DESCRIPTION: %s\r\n", i->service.descr.c_str()) < 0 )
@@ -290,7 +296,7 @@ void eServicePlaylistHandler::enterDirectory(const eServiceReference &dir, Signa
 		ePlaylist *service=(ePlaylist*)addRef(dir);
 		if (!service)
 			return;
-	
+
 		for (std::list<ePlaylistEntry>::const_iterator i(service->getConstList().begin()); i != service->getConstList().end(); ++i)
 			callback(*i);
 

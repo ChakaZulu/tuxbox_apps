@@ -4,6 +4,7 @@
 
 #include <time.h>
 
+#include <lib/dvb/decoder.h>
 #include <lib/dvb/edvb.h>
 #include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvb.h>
@@ -107,6 +108,8 @@ void eZapLCDMain::setServiceName(eString name)
 
 void eZapLCDMain::leaveService(const eServiceReferenceDVB &service)
 {
+	if (Decoder::locked==2)  // timer zap in background
+		return;
 	Progress->hide();
 	ServiceName->setText("");
 }

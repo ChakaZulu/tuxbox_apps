@@ -6,6 +6,7 @@
 #include <libsig_comp.h>
 #include <lib/base/ebase.h>
 #include <lib/base/eptrlist.h>
+#include <lib/base/estring.h>
 
 #define SECREAD_INORDER	1			// read them in order (read full tables)
 #define SECREAD_CRC			2			// check CRCs
@@ -79,6 +80,7 @@ public:
 	eTable(int pid, int tableid, int tableidext=-1, int version=-1);
 	eTable();
 	virtual eTable *createNext();
+	virtual __u8* getRAW() { return NULL; }
 	int incrementVersion(int version) { return (version&0xC1)|((version+2)&0x3E); }
 	int error;
 	int ready;
@@ -87,6 +89,7 @@ public:
 class eAUGTable: public Object
 {
 protected:
+	eString dmxdev;
 	void slotTableReady(int);
 public:
 	Signal1<void, int> tableReady;
@@ -100,8 +103,8 @@ class eAUTable: public eAUGTable
 	int first;
 public:
 	eAUTable()
+		:current(0), next(0), first(0)
 	{
-		current=next=0;
 	}
 
 	~eAUTable()
@@ -110,20 +113,24 @@ public:
 		delete next;
 	}
 	
-	int start(Table *cur)
+	int start(Table *cur, const char *demuxdev=DEMUX0)
 	{
+		dmxdev=demuxdev;
 		first=1;
 		if (current)
 			delete current;
 		current=0;
+
 		if (next)
 			delete next;
 		next=cur;
+
 		if (cur)
 		{
 			CONNECT(next->tableReady, eAUTable::slotTableReady);
-			return next->start();
-		} else
+			return next->start(dmxdev.c_str());
+		}
+		else
 			return 0;
 	}
 	
@@ -172,13 +179,9 @@ public:
 
 	void getNext(int error)
 	{
-/*		eDebug("eAUTable: got table (ready %d, error %d", next->ready, next->error);
-		if ( current )
-			eDebug("current lockcount = %d", current->getLockCount() );*/
 		if (current && current->getLockCount())
-		{
 			delete next;
-		} else
+		else
 		{
 			if (error)
 			{
@@ -188,7 +191,8 @@ public:
 					/*emit*/ tableReady(error);
 				first=0;
 				return;
-			} else
+			}
+			else
 			{
 				if (current)
 					delete current;
@@ -213,7 +217,7 @@ public:
 			if (next)
 			{
 				CONNECT(next->tableReady, eAUTable::slotTableReady);
-				next->start();
+				next->start(dmxdev.c_str());
 			}
 		}
 	}

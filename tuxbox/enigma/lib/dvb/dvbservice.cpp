@@ -16,6 +16,14 @@
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/record.h>
 
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/dmx.h>
+#define DEMUX1_DEV "/dev/dvb/card0/demux1"
+#else
+#include <linux/dvb/dmx.h>
+#define DEMUX1_DEV "/dev/dvb/adapter0/demux1"
+#endif
+
 std::set<eDVBCaPMTClient*> eDVBCaPMTClientHandler::capmtclients;
 eLock eDVBServiceController::availCALock;
 
@@ -193,7 +201,19 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		}
 
 		if (!nopmt && service.getServiceID().get() ) // if not a dvb service, don't even try to search a PAT, PMT etc.
-			dvb.tPAT.start(new PAT());
+		{
+// workaround for zap in background before recordings
+			if ( Decoder::locked == 2 && !eDVB::getInstance()->recorder )
+			{
+				eDebug("start PAT on demux1");
+				dvb.tPAT.start(new PAT(), DEMUX1_DEV);
+			}
+			else
+			{
+				eDebug("start PAT on demux0");
+				dvb.tPAT.start(new PAT());
+			}
+		}
 
 		if (nopmt || ( service.path.size() && !service.getServiceID().get() ) )
 		{
@@ -333,7 +353,19 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			return;
 		}
 		dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPMT));
-		dvb.tPMT.start(new PMT(pmtpid, service.getServiceID().get()));
+
+// workaround for zap in background before recordings
+		if ( Decoder::locked == 2 && !service.path && !eDVB::getInstance()->recorder )
+		{
+			eDebug("start PMT on demux1");
+			dvb.tPMT.start(new PMT(pmtpid, service.getServiceID().get()), DEMUX1_DEV );
+		}
+		else
+		{
+			eDebug("start PMT on demux0");
+			dvb.tPMT.start(new PMT(pmtpid, service.getServiceID().get()));
+		}
+
 		break;
 	}	
 	case eDVBServiceEvent::eventServiceGotPMT:
@@ -355,7 +387,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		else
 			eDebug("nee, doch nicht (state ist %d)", (int)dvb.getState());
 		break;
-	}
+	}                             
 	case eDVBServiceEvent::eventServiceGotSDT:
 	{
 		if (dvb.getState() != eDVBServiceState::stateServiceGetSDT)
@@ -378,6 +410,34 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		Decoder::Set();
 		break;
 	case eDVBServiceEvent::eventServiceSwitched:
+		if ( service.path )
+		{
+			eString filename = service.path;
+			filename.erase(filename.length()-2, 2);
+			filename+="eit";
+			int fd = ::open( filename.c_str(), O_RDONLY );
+			if ( fd > -1 )
+			{
+				__u8 buf[4096];
+				int rd = ::read(fd, buf, 4096);
+				::close(fd);
+				if ( rd > 12 /*EIT_LOOP_SIZE*/ )
+				{
+					EITEvent *evt = new EITEvent( (eit_event_struct*)buf );
+					EIT *e=new EIT();
+					evt->free_CA_mode=0;
+					e->ts=EIT::tsFaked;
+					e->type=EIT::typeNowNext;
+					e->version_number=0;
+					e->current_next_indicator=0;
+					e->transport_stream_id=service.getTransportStreamID().get();
+					e->original_network_id=service.getOriginalNetworkID().get();
+					e->events.push_back(evt);
+					e->ready=1;
+					dvb.tEIT.inject(e);
+				}
+			}
+		}
 		/*emit*/ dvb.enterService(service);
 	case eDVBServiceEvent::eventServiceFailed:
 		/*emit*/ dvb.switchedService(service, -service_state);
@@ -523,7 +583,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	int sac3default=eAudio::getInstance()->getAC3default();
 
-	if ( Decoder::current.pcrpid != pmt->PCR_PID && !service.path.size() )
+	if ( Decoder::parms.pcrpid != pmt->PCR_PID && !service.path.size() )
 		Decoder::parms.pcrpid = pmt->PCR_PID;
 
 	// get last selected audio / video pid from pid cache
@@ -652,7 +712,8 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	if ( service && !service.path
 #ifndef DISABLE_FILE
-		&& !( eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef == service)
+		&& Decoder::locked != 2 // leave service for (timer) zap in Background
+		&& !(eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef == service)
 #endif
 		)
 		eDVBCaPMTClientHandler::distribute_leaveService(service); // capmt handler call..
@@ -679,11 +740,13 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	if (service)
 	{
-		if ( !service.path && service )
-		{
-			lastPMTVersion=-1;
+		if ( service && !service.path
+#ifndef DISABLE_FILE
+			&& !( Decoder::locked == 2 && eDVB::getInstance()->recorder )
+#endif
+		)
 			eDVBCaPMTClientHandler::distribute_enterService(service); // capmt handler call..
-		}
+
 		dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitch));
 	}
 
@@ -705,30 +768,32 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 }
 
 #ifndef DISABLE_CI
-void eDVBServiceController::handlePMT( const eServiceReferenceDVB &ref, PMT *pmt)
+void eDVBServiceController::handlePMT(const eServiceReferenceDVB &ref, PMT *pmt)
 {
-	if ( ref != service )
+	if ( CIServices.find(ref) != CIServices.end() )
 	{
-		eDebug("[eDVBServiceController(CI)] handlePMT for another service as the current service... ignore");
-		return;
+		int prevPMTVersion = CIServices[ref];
+		if ( prevPMTVersion == pmt->version )
+		{
+			eDebug("[eDVBCIHandler] dont send pmt with self pmt version");
+			return;
+		}
 	}
-	if ( lastPMTVersion == pmt->version_number )
+	else
 	{
-		eDebug("[eDVBServiceController(CI)] don't handle the same pmt version twice");
+		eDebug("[eDVBCIHandler] get PMT for unknow service");
 		return;
 	}
 
-	int sid = pmt->program_number;
-	int update = lastPMTVersion != -1;
-	lastPMTVersion = pmt->version_number;
+	int sid= pmt->program_number;
 
 	if ( eSystemInfo::getInstance()->hasCI() )
 		calist.clear();
 
 	if ( DVBCI )
-		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, -1));
+		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTsetVersion, pmt->program_number, pmt->version, -1 ));
 	if ( DVBCI2 )
-		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, -1));
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTsetVersion, pmt->program_number, pmt->version, -1 ));
 
 	for (ePtrList<Descriptor>::const_iterator i(pmt->program_info);
 		i != pmt->program_info.end(); ++i)
@@ -794,9 +859,37 @@ void eDVBServiceController::handlePMT( const eServiceReferenceDVB &ref, PMT *pmt
 		}
 	}
 	if ( DVBCI )
-		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go, update));
+		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
 	if ( DVBCI2 )
-		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go, update));
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+	CIServices[ref]=pmt->version;
+}
+
+void eDVBServiceController::enterService( const eServiceReferenceDVB &service)
+{
+	if (!service)
+		return;
+	if ( CIServices.find(service) == CIServices.end() )
+	{
+//		eDebug("[eDVBCIHandler] new service %s", service.toString().c_str() );
+		CIServices[service]=-1;
+	}
+}
+
+void eDVBServiceController::leaveService( const eServiceReferenceDVB &service)
+{
+	if (!service)
+		return;
+	std::map<eServiceReferenceDVB,int>::iterator it = CIServices.find(service);
+	if ( it != CIServices.end() )
+	{
+//		eDebug("[eDVBCIHandler] leave service %s", service.toString().c_str() );
+		CIServices.erase(it);
+		if ( DVBCI )
+			DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, service.getServiceID().get() ));
+		if ( DVBCI2 )
+			DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, service.getServiceID().get() ));
+	}
 }
 #endif
 

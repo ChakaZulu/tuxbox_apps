@@ -2,18 +2,19 @@
 #include <stdio.h>
 #include <lib/base/eerror.h>
 
-void thread_completed(void *p)
+void eThread::thread_completed(void *ptr)
 {
+	eThread *p = (eThread*) ptr;
 	eDebug("thread has completed..");
-	int *alive = (int*)p;
-	*alive=0;
+	p->alive=0;
+	p->thread_finished();
 }
 
 void *eThread::wrapper(void *ptr)
 {
 	eThread *p = (eThread*)ptr;
 	p->alive=1;
-	pthread_cleanup_push( thread_completed, (void*)&p->alive );
+	pthread_cleanup_push( thread_completed, (void*)p );
 	p->thread();
 	pthread_exit(0);
 	pthread_cleanup_pop(0);
@@ -28,7 +29,7 @@ void eThread::run( int prio, int policy )
 {
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
-	if (prio)
+	if (prio||policy)
 	{
 		struct sched_param p;
 		p.__sched_priority=prio;

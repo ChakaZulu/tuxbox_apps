@@ -217,6 +217,8 @@ int eListBoxBase::eventHandler(const eWidgetEvent &event)
 				moveSelection(dirPageUp);
 			else if ((event.action == &i_listActions->pagedown) && !(flags & flagNoPageMovement))
 				moveSelection(dirPageDown);
+			else if ( !childs.empty() && current->eventHandler(event) )
+				return 1;
 			else if ((event.action == &i_cursorActions->up) && !(flags & flagNoUpDownMovement))
 				moveSelection(dirUp);
 			else if ((event.action == &i_cursorActions->down) && !(flags & flagNoUpDownMovement))
@@ -1083,4 +1085,91 @@ const eString& eListBoxEntryCheck::redraw(gPainter *rc, const eRect& rect, gColo
 	}
 
 	return text;
+}
+
+eListBoxEntryMulti::eListBoxEntryMulti( eListBox<eListBoxEntryMulti> *lb, const char *hlptext )
+	:eListBoxEntryText( (eListBox<eListBoxEntryText>*)lb, 0, 0, (int)eTextPara::dirCenter, hlptext ),
+	cur(entrys.end())
+{
+}
+
+void eListBoxEntryMulti::add( const char *text, int key )
+{
+	entrys.push_back( std::pair< int, eString>(key,text) );
+}
+
+void eListBoxEntryMulti::add( const eString &text, int key )
+{
+	entrys.push_back( std::pair< int, eString>(key,text) );
+}
+
+void eListBoxEntryMulti::setCurrent(int key)
+{
+	for ( std::list< std::pair< int, eString > >::iterator it(entrys.begin())
+		;it != entrys.end(); ++it )
+	{
+		if ( it->first == key )
+		{
+			cur=it;
+			text = cur->second;
+			this->key = (void*) cur->first;
+			if ( para )
+			{
+				para->destroy();
+				para=0;
+			}
+			listbox->invalidateCurrent();
+			listbox->selchanged(this);
+			break;
+		}
+	}
+}
+
+int eListBoxEntryMulti::eventHandler( const eWidgetEvent &e )
+{
+	switch(e.type)
+	{
+		case eWidgetEvent::evtAction:
+			if ( e.action == &i_listActions->pageup )
+			{
+				std::list< std::pair< int, eString > >::iterator it(cur);
+				--it;
+				if ( it != entrys.end() )
+				{
+					--cur;
+					text = cur->second;
+					key = (void*) cur->first;
+					if ( para )
+					{
+						para->destroy();
+						para=0;
+						listbox->invalidateCurrent();
+						listbox->selchanged(this);
+					}
+				}
+				return 1;
+			}
+			else if ( e.action == &i_listActions->pagedown )
+			{
+				std::list< std::pair< int, eString > >::iterator it(cur);
+				++it;
+				if ( it != entrys.end() )
+				{
+					++cur;
+					text = cur->second;
+					key = (void*) cur->first;
+					if ( para )
+					{
+						para->destroy();
+						para=0;
+						listbox->invalidateCurrent();
+						listbox->selchanged(this);
+					}
+				}
+				return 1;
+			}
+		default:
+			break;
+	}
+	return 0;
 }

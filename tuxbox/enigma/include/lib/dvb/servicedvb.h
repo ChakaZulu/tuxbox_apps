@@ -129,7 +129,7 @@ public:
 	~eServiceHandlerDVB();
 	eService *lookupService(const eServiceReference &service);
 
-	int play(const eServiceReference &service);
+	int play(const eServiceReference &service, int workaround=0 );
 
 		// record	
 	int serviceCommand(const eServiceCommand &cmd);
@@ -148,7 +148,7 @@ public:
 	int getState();
 	int getErrorInfo();
 
-	int stop();
+	int stop( int workaround = 0 );
 
 	void loadNode(eServiceCache<eServiceHandlerDVB>::eNode &node, const eServiceReference &ref);
 	eService *createService(const eServiceReference &node);

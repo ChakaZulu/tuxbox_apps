@@ -44,7 +44,6 @@ eSatfind::eSatfind(eFrontend *fe)
 
 	transponder = new eComboBox(this, 5);
 	transponder->setName("transponder");
-	CONNECT(transponder->selchanged, eSatfind::tpChanged);
 
 	CONNECT(updateTimer.timeout, eSatfind::update);
 
@@ -75,6 +74,8 @@ eSatfind::eSatfind(eFrontend *fe)
 
 	CONNECT( eFrontend::getInstance()->s_RotorRunning, eSatfind::RotorRunning );
 	CONNECT( eFrontend::getInstance()->tunedIn, eSatfind::tunedIn );
+
+	CONNECT(transponder->selchanged, eSatfind::tpChanged);
 
 	setHelpID(44);
 }

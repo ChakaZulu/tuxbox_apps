@@ -21,9 +21,13 @@ struct session_struct
 
 struct tempPMT_t
 {
-	int type;     //0=prg-nr 1=pid 2=descriptor
+	int type;  // 0 = version 1=pid 2=descriptor
 	unsigned char *descriptor;
-	unsigned short pid;
+	union
+	{
+		unsigned short pid;
+		unsigned short version;
+	};
 	unsigned short streamtype;
 };
 
@@ -67,11 +71,13 @@ struct _lpduQueueHeader
 	ptrlpduQueueElem firstLPDU;
 };
 
+#define CIServiceMap std::map<int, std::list<tempPMT_t> >
 
 class eDVBCI: private eThread, public eMainloop, public Object
 {
 	static int instance_count;
 	std::priority_queue<queueData> queue;
+	bool newTransponder;
 protected:
 	enum
 	{
@@ -88,7 +94,8 @@ protected:
 
 	int tempPMTentrys;
 
-	std::map<int, std::list<tempPMT_t> > services;
+	CIServiceMap services;
+	std::map<int,int> versions;
 
 	struct session_struct sessions[32];
 
@@ -104,20 +111,20 @@ protected:
 	lpduQueueHeader lpduSendQueues[MAXTRANSPORTSESSIONS];
 	lpduQueueHeader lpduReceiveQueues[MAXTRANSPORTSESSIONS];
 
-
 	ptrlpduQueueElem eDVBCI::AllocLpduQueueElem(unsigned char t_c_id);
 	int eDVBCI::lpduQueueElemIsMore(ptrlpduQueueElem curElem);
-	
-	
+
 	//----------------------
 
 	void clearCAIDs();
 	void addCAID(int caid);	
 	void pushCAIDs();	
+	void addService(int program);
 	void PMTflush(int program);
 	void PMTaddPID(int sid, int pid,int streamtype);
 	void PMTaddDescriptor(int sid, unsigned char *data);
-	void newService(int update=0);
+	void PMTsetVersion(int sid, int version);
+	void newService();
 	void create_sessionobject(unsigned char *tag,unsigned char *data,unsigned int len,int session);
 
 	bool sendData(unsigned char tc_id,unsigned char *data,unsigned int len);	
@@ -151,12 +158,8 @@ public:
 			reset, 
 			init,
 			exit,
-			flush,
-			addDescr,
-			addVideo,
-			addAudio,
-			es,
 			go,
+			PMTsetVersion,
 			PMTflush,
 			PMTaddPID,
 			PMTaddDescriptor,
@@ -166,14 +169,13 @@ public:
 			mmi_menuansw,
 			getcaids,
 			enable_ts,
-			disable_ts
+			disable_ts,
 		};
 		int type;
 		int sid;
 		unsigned char *data;
 		int pid;
 		int streamtype;
-
 
 		eDVBCIMessage() { }
 		eDVBCIMessage(int type): type(type) { }

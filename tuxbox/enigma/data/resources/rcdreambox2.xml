@@ -90,8 +90,9 @@
 		<actionmap name="textedit">
 			<action name="insertchar" key="volup" flags="mr" />
 			<action name="deletechar" key="voldown" flags="mr" />
-			<action name="capslock" key="yellow" flags="mr" />
-			<action name="swapnum" key="blue" flags="mr" />
+			<action name="capslock" key="yellow" flags="m" />
+			<action name="swapnum" key="blue" flags="m" />
+			<action name="showHelp" key="help" flags="m" />
 		</actionmap>
 
 		<actionmap name="helpwindow">

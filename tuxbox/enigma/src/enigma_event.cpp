@@ -216,19 +216,31 @@ void eEventDisplay::setEvent(EITEvent *event)
 		eString _eventDate="";
 		eString _eventTime="";
 
-		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
-		if (begin)
+		if ( ref.path )
 		{
-			valid |= 1;
-			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
-			_eventDate=eString().sprintf("%02d.%02d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
+			_eventDate.sprintf(_("Original duration: %d min"), event->duration/60 );
+			eSize s = eventDate->getSize();
+			eSize s2 = eventTime->getSize();
+			s2.setHeight(0);
+			s+=s2;
+			eventDate->resize(s);
 		}
-		time_t endtime=event->start_time+event->duration;
-		tm *end=event->start_time!=-1?localtime(&endtime):0;
-		if (end)
+		else
 		{
-			valid |= 2;
-			_eventTime+=eString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
+			tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
+			if (begin)
+			{
+				valid |= 1;
+				_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
+				_eventDate=eString().sprintf("%02d.%02d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
+			}
+			time_t endtime=event->start_time+event->duration;
+			tm *end=event->start_time!=-1?localtime(&endtime):0;
+			if (end)
+			{
+				valid |= 2;
+				_eventTime+=eString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
+			}
 		}
 
 		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
@@ -259,6 +271,9 @@ void eEventDisplay::setEvent(EITEvent *event)
 		if (!_title)
 			_title = _("no information is available");
 
+		if ( !ref.path )
+			channel->setText(service);
+
 		eventTime->setText(_eventTime);
 		eventDate->setText(_eventDate);
 
@@ -268,8 +283,6 @@ void eEventDisplay::setEvent(EITEvent *event)
 			long_description->setText(_("no description is available"));
 		else
 			long_description->setText(_long_description);
-
-		channel->setText(service);
 
 		checkTimerIcon(event);
 	} 

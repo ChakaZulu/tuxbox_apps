@@ -41,6 +41,7 @@ struct ePlaylistEntry
 		Su=524288, Mo=1048576, Tue=2097152,
 		Wed=4194304, Thu=8388608, Fr=16777216, Sa=33554432
 	};
+	eServicePath services;
 	eServiceReference service;
 	union
 	{
@@ -52,19 +53,25 @@ struct ePlaylistEntry
 	int duration,
 			type;  // event type and current state of timer events...
 	ePlaylistEntry(const eServiceReference &ref)
-		:service(ref), current_position(-1), time_begin(-1), duration(-1), type(PlaylistEntry)
+		:services(ref), service(services.path.back()), current_position(-1), time_begin(-1), duration(-1), type(PlaylistEntry)
 	{ }
 	ePlaylistEntry(const eServiceReference &ref, int current_position)
-		:service(ref), current_position(current_position), time_begin(-1), duration(-1), type(PlaylistEntry)
+		:services(ref), service(services.path.back()), current_position(current_position), time_begin(-1), duration(-1), type(PlaylistEntry)
 	{ }
 	ePlaylistEntry(const eServiceReference &ref, int time_begin, int duration, int event_id=-1, int type=SwitchTimerEntry )
-		:service(ref), event_id(event_id), time_begin(time_begin), duration(duration), type(type)
+		:services(ref), service(services.path.back()), event_id(event_id), time_begin(time_begin), duration(duration), type(type)
 	{ }
+	ePlaylistEntry(const eServicePath &p)
+		:services(p), service(services.path.back()), current_position(-1), time_begin(-1), duration(-1), type(PlaylistEntry)
+	{ }
+	const eServicePath &getPath() const { return services; }
 	operator eServiceReference &() { return service; }
 	operator const eServiceReference &() const { return service; }
+	operator const eServicePath &() const { return services; }
+
 	bool operator == (const eServiceReference &r) const
 	{
-			return r == service;
+		return r == service;
 	}
 	bool operator == (const ePlaylistEntry &e) const
 	{

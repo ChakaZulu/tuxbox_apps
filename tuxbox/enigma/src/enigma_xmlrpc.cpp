@@ -366,9 +366,8 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 	return 0;
 }
 
-void ezapInitializeXMLRPC(eHTTPD *httpd)
+void ezapInitializeXMLRPC()
 {
-	xmlrpc_initialize(httpd);
 	xmlrpc_addMethod("test.test", testrpc);
 	xmlrpc_addMethod("getList", getList);
 	xmlrpc_addMethod("zapTo", zapTo);

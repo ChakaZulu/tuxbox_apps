@@ -22,7 +22,7 @@ eService *eServiceHandler::createService(const eServiceReference &node)
 	return 0;
 }
 
-int eServiceHandler::play(const eServiceReference &service)
+int eServiceHandler::play(const eServiceReference &service, int workaround)
 {
 	(void)service;
 	return -1;
@@ -74,7 +74,7 @@ int eServiceHandler::getErrorInfo()
 	return 0;
 }
 
-int eServiceHandler::stop()
+int eServiceHandler::stop( int workaround )
 {
 	return 0;
 }
@@ -130,14 +130,15 @@ void eServiceInterface::handleServiceEvent(const eServiceEvent &evt)
 	serviceEvent(evt);
 }
 
-int eServiceInterface::switchServiceHandler(int id)
+int eServiceInterface::switchServiceHandler(int id, int workaround )
 {
 	if (currentServiceHandler && (currentServiceHandler->getID() == id))
 	{
-		currentServiceHandler->stop();
+		currentServiceHandler->stop(workaround);
 		return 0;
 	}
-	stop();
+
+	stop(workaround);
 	eServiceHandler *handler=getServiceHandler(id);
 	if (!handler)
 		return -1;
@@ -190,7 +191,7 @@ eServiceHandler *eServiceInterface::getServiceHandler(int id)
 
 extern bool checkPin( int pin, const char * text );
 
-int eServiceInterface::play(const eServiceReference &s)
+int eServiceInterface::play(const eServiceReference &s, int workaround )
 {
 	int pLockActive = eConfig::getInstance()->pLockActive();
 	if ( s.isLocked() && pLockActive && !checkPin( eConfig::getInstance()->getParentalPin(), _("parental") ) )
@@ -198,22 +199,22 @@ int eServiceInterface::play(const eServiceReference &s)
 		eWarning("service is parentallocked... don't play");
 		return -1;
 	}
-	if (switchServiceHandler(s.type))
+	if (switchServiceHandler(s.type, workaround))
 	{
 		eWarning("couldn't play service type %d", s.type);
 		return -1;
 	}
 	service=s;
 	addRef(s);
-	return currentServiceHandler->play(s);
+	return currentServiceHandler->play(s, workaround);
 }
 
-int eServiceInterface::stop()
+int eServiceInterface::stop(int workaround)
 {
 	if (!currentServiceHandler)
 		return -1;
 	removeRef(service);
-	int res=currentServiceHandler->stop();
+	int res=currentServiceHandler->stop(workaround);
 	conn.disconnect();
 	currentServiceHandler=0;
 	service=eServiceReference();

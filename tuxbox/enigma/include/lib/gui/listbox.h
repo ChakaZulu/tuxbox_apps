@@ -157,6 +157,10 @@ public:
 	{
 		return false;
 	}
+	virtual int eventHandler( const eWidgetEvent &e )
+	{
+		return 0;
+	}
 	virtual const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state )=0;
 	void drawEntryRect(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state);
 	void drawEntryBorder(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF);
@@ -273,6 +277,18 @@ public:
 	Signal1<void,bool> selected;
 	eListBoxEntryCheck( eListBox<eListBoxEntry> *lb, const char* text, const char* regkey, const eString& hlptxt="" );
 	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
+};
+
+class eListBoxEntryMulti: public eListBoxEntryText
+{
+	std::list< std::pair< int, eString > > entrys;
+	std::list< std::pair< int, eString > >::iterator cur;
+public:
+	eListBoxEntryMulti( eListBox<eListBoxEntryMulti> *lb, const char *hlptext );
+	void add( const char *text, int key );
+	void add( const eString &text, int key );
+	int eventHandler( const eWidgetEvent &e );
+	void setCurrent( int );
 };
 
 template <class T>

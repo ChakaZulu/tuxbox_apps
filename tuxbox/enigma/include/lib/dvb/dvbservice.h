@@ -91,7 +91,6 @@ class eDVBServiceController
 {
 	Signal0<void> freeCheckFinishedCallback;
 	void freeCheckFinished();
-	int lastPMTVersion;
 public:
 		/* current service */
 	eServiceReferenceDVB service,  // meta-service
@@ -117,8 +116,11 @@ public:
 #ifndef DISABLE_CI
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
+	std::map< eServiceReferenceDVB, int > CIServices;
 	// for CI handling
 	void handlePMT(const eServiceReferenceDVB &, PMT*);
+	void enterService( const eServiceReferenceDVB &service);
+	void leaveService( const eServiceReferenceDVB &service);
 #endif
 
 	// set pids... detect used ca systems

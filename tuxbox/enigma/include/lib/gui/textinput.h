@@ -2,6 +2,7 @@
 #define __LIB_GUI_TEXTINPUT_H__
 
 #include <lib/gui/ebutton.h>
+#include <lib/gui/ewindow.h>
 #include <stack>
 #include <map>
 #include <vector>
@@ -13,11 +14,6 @@ class eTextInputField: public eButton
 	int table;
 	int curPos;
 	unsigned int maxChars;
-	int eventHandler( const eWidgetEvent &);
-	void redrawWidget( gPainter *target, const eRect &area );
-	void drawCursor();
-	void updated();
-	void nextChar();
 	int lastKey;
 	bool editMode;
 	eString oldText;
@@ -33,6 +29,11 @@ class eTextInputField: public eButton
 	std::stack< std::pair<int,int> > scroll;
 	static std::map< eString, std::vector<std::pair< eString,eString > > > keymappings;
 	eTextInputFieldHelpWidget *helpwidget;
+	int eventHandler( const eWidgetEvent &);
+	void redrawWidget( gPainter *target, const eRect &area );
+	void drawCursor();
+	void updated();
+	void nextChar();
 	void lostFocus();
 	void updateHelpWidget();
 public:
@@ -43,6 +44,8 @@ public:
 	void setNextCharTimeout( unsigned int );
 	void setEditHelpText( eString str ) { editHelpText=str; }
 	bool inEditMode() const { return editMode; }
+	void toggleState();
+	Signal0<void> cancelPressed;
 };
 
 class eTextInputFieldHelpWidget : public eWidget
@@ -52,6 +55,22 @@ class eTextInputFieldHelpWidget : public eWidget
 	eLabel *keys[12];
 public:
 	eTextInputFieldHelpWidget(eWidget *parent);
+};
+
+class eTextInputFieldHelpWindow: public eWindow
+{
+public:
+	eTextInputFieldHelpWidget *helpwidget;
+	eTextInputFieldHelpWindow::eTextInputFieldHelpWindow()
+		:eWindow(1)
+	{
+		cresize(eSize(430,255));
+		move(ePoint(120,100));
+		setText(_("Textinputfield Help"));
+		helpwidget=new eTextInputFieldHelpWidget(this);
+		helpwidget->resize(clientrect.size());
+		helpwidget->move(ePoint(0,0));
+	}
 };
 
 #endif

@@ -1196,6 +1196,7 @@ void eTransponderList::writeLNBData()
 
 
 eServiceReference::eServiceReference(const eString &string)
+	:type(idInvalid), flags(0)
 {
 	const char *c=string.c_str();
 	int pathl=-1;
@@ -1233,6 +1234,8 @@ void eServicePath::setString( const eString& str )
 		i=i2;
 		++i;
 	}
+	if ( !path.size() && str.length() )
+		path.push_back( eServiceReference(str) );
 }
 
 std::set<eServiceReference,eServiceReference::Parental_Compare> eServiceReference::locked;

@@ -7,6 +7,7 @@
 
 #include <lib/gdi/grc.h>
 #include <lib/gdi/font.h>
+#include <lib/gdi/lcd.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
@@ -34,11 +35,16 @@ gRC::gRC(): queuelock(MAXSIZE), queue(2048)
 
 gRC::~gRC()
 {
+	fbClass::getInstance()->lock();
+	eDBoxLCD::getInstance()->lock();
+	instance=0;
 	gOpcode o;
 	o.dc=0;
 	o.opcode=gOpcode::shutdown;
 	submit(o);
-	instance=0;
+	eDebug("waiting for gRC thread shutdown");
+	pthread_join(the_thread, 0);
+	eDebug("gRC thread has finished");
 }
 
 void *gRC::thread()

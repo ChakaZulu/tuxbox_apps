@@ -61,7 +61,8 @@ int Decoder::fd::demux_video;
 int Decoder::fd::demux_audio;
 int Decoder::fd::demux_pcr;
 int Decoder::fd::demux_vtxt;
-bool Decoder::locked=false;
+int Decoder::fd::mpeg;
+int Decoder::locked=0;
 
 static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *descriptors)
 {
@@ -94,7 +95,7 @@ static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *
 	
 	for (int i=0; i<descriptor_length; i++)
 		sprintf(descriptor+i*2, "%02x", descriptors[i]);
-	
+
 	switch (lastpid=fork())
 	{
 	case -1:
@@ -127,51 +128,46 @@ int Decoder::Initialize()
 	parms.descriptor_length=0;
 	parms.restart_camd=0;
 	current=parms;
-	fd.video = fd.audio = fd.demux_video = fd.demux_audio =	fd.demux_pcr = fd.demux_vtxt = -1;
+	fd.video = fd.audio = fd.demux_video = fd.demux_audio = fd.demux_pcr = fd.demux_vtxt = fd.mpeg = -1;
 	return 0;
 }
 
 void Decoder::Close()
 {	
 	Flush();
-	eDebug("fd video = %d, audio = %d, demux_video = %d, demux_audio = %d, demux_pcr = %d, demux_vtxt = %d",
-					fd.video, fd.audio, fd.demux_video, fd.demux_audio, fd.demux_pcr, fd.demux_vtxt);
+	eDebug("fd video = %d, audio = %d, demux_video = %d, demux_audio = %d, demux_pcr = %d, demux_vtxt = %d, mpeg = %d",
+					fd.video, fd.audio, fd.demux_video, fd.demux_audio, fd.demux_pcr, fd.demux_vtxt, fd.mpeg);
 }
 
 void Decoder::Flush()
 {
-	eDebug("Decoder::Flush()");
+//	eDebug("Decoder::Flush()");
 	parms.vpid = parms.apid = parms.tpid = parms.pcrpid = -1;
 	parms.audio_type=parms.descriptor_length=parms.restart_camd=0;
 	Set();
 }
 
-void Decoder::Pause( bool disableAudio )
+void Decoder::Pause( int flags )
+// flags & 1 = disableAudio
+// flags & 2 = onlyFreeze
 {
 	eDebug("Decoder::Pause()");
 	if (fd.video != -1)
 	{
 		if ( ::ioctl(fd.video, VIDEO_FREEZE) < 0 )
 			eDebug("VIDEO_FREEZE failed (%m)");
-		if ( fd.audio != -1 && current.vpid == 0x1FFE && current.apid == 0x1FFE )
+		if ( flags & 2 )
+			return;
+		if ( fd.audio != -1 )
 		{
 			if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 0) < 0 )
 				eDebug("AUDIO_SET_AV_SYNC failed (%m)");
-			if ( disableAudio )
+			if ( flags & 1 )
 			{
 				if ( ::ioctl(fd.audio, AUDIO_SET_MUTE, 1 )<0)
 					eDebug("AUDIO_SET_MUTE failed (%m)");
-				else
-					eDebug("audio_pause (success)");
 			}
 		}
-	}
-	if ( fd.audio != -1 && current.vpid != 0x1FFE && current.apid != 0x1FFE )  // not Video Clip mode
-	{
-		if (::ioctl(fd.audio, AUDIO_STOP)<0)
-			eDebug("AUDIO_STOP failed(%m)");
-		else
-			eDebug("audio_pause (success)");
 	}
 }
 
@@ -180,24 +176,18 @@ void Decoder::Resume(bool enableAudio)
 	eDebug("Decoder::Resume()");
 	if (fd.video != -1)
 	{
-		if (::ioctl(fd.video, VIDEO_PLAY)<0)
+//		clearScreen();
+		if (::ioctl(fd.video, VIDEO_CONTINUE)<0)
 			eDebug("VIDEO_CONTINUE failed(%m)");
 		if ( ::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1 ) < 0 )
 			eDebug("AUDIO_SET_AV_SYNC failed (%m)");
-		if ( enableAudio && current.vpid == 0x1FFE && current.apid == 0x1FFE )  // Video Clip Mode
+		if ( enableAudio )  // Video Clip Mode
 		{
 			if (::ioctl(fd.audio, AUDIO_SET_MUTE, 0 )<0)
 				eDebug("AUDIO_SET_MUTE failed (%m)");
 			else
 				eDebug("audio_pause (success)");
 		}
-	}
-	if ( fd.audio != -1 && current.vpid != 0x1FFE && current.apid != 0x1FFE )  // not Video Clip Mode
-	{
-		if (::ioctl(fd.audio, AUDIO_PLAY)<0)
-			eDebug("AUDIO_PLAY failed (%m)");
-		else
-			eDebug("audio continue (success)");
 	}
 }
 
@@ -430,7 +420,6 @@ int Decoder::Set()
 				else
 					eDebug("ok");
 			}
-			usleep(100);
 
 			if ( astatus.playState != AUDIO_STOPPED /* current.apid != -1*/ )
 			{
@@ -574,6 +563,30 @@ int Decoder::Set()
 		}
 		if ( (changed & 0x0F) != 2 )  //  only apid changed
 		{
+			if ( parms.pcrpid != -1 )
+			{
+				eDebugNoNewLine("DMX_START (pcr) - ");
+				if (::ioctl(fd.demux_pcr, DMX_START)<0)
+					eDebug("failed (%m)");
+				else
+					eDebug("ok");
+			}
+			else if ( parms.apid != -1 && parms.vpid != -1 )
+			{
+				eDebugNoNewLine("enabling av sync mode - ");
+				if (::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1)<0)
+					eDebug("failed (%m)");
+				else
+					eDebug("ok");
+			}
+			if ( parms.vpid != -1 )
+			{
+				eDebugNoNewLine("DMX_START (video) - ");
+				if (::ioctl(fd.demux_video, DMX_START)<0)
+					eDebug("failed (%m)");
+				else
+						eDebug("ok");
+			}
 			if ( parms.vpid != -1 )
 			{
 				eDebugNoNewLine("VIDEO_PLAY - ");
@@ -601,31 +614,6 @@ int Decoder::Set()
 				close(fd.audio);
 				fd.audio = -1;
 //				eDebug("fd.audio closed");
-			}
-
-			if ( parms.pcrpid != -1 )
-			{
-				eDebugNoNewLine("DMX_START (pcr) - ");
-				if (::ioctl(fd.demux_pcr, DMX_START)<0)
-					eDebug("failed (%m)");
-				else
-					eDebug("ok");
-			}
-			else if ( parms.apid != -1 && parms.vpid != -1 )
-			{
-				eDebugNoNewLine("enabling av sync mode - ");
-				if (::ioctl(fd.audio, AUDIO_SET_AV_SYNC, 1)<0)
-					eDebug("failed (%m)");
-				else
-					eDebug("ok");
-			}
-			if ( parms.vpid != -1 )
-			{
-				eDebugNoNewLine("DMX_START (video) - ");
-				if (::ioctl(fd.demux_video, DMX_START)<0)
-					eDebug("failed (%m)");
-				else
-						eDebug("ok");
 			}
 		}
 
@@ -693,12 +681,14 @@ int Decoder::displayIFrame(const char *frame, int len)
 		Set();
 	}
 
-	int fd = open(VIDEO_DEV, O_RDWR);
-	if (::ioctl(fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY )<0)
+	int wasOpen = fd.video != -1;
+	if (!wasOpen)
+		fd.video = open(VIDEO_DEV, O_RDWR);
+	if (::ioctl(fd.video, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_MEMORY )<0)
 		eDebug("VIDEO_SELECT_SOURCE failed (%m)");
-	if (::ioctl(fd, VIDEO_CLEAR_BUFFER)<0 )
+	if ( ::ioctl(fd.video, VIDEO_CLEAR_BUFFER)<0 )
 		eDebug("VIDEO_CLEAR_BUFFER failed (%m)");
-	if ( ::ioctl(fd, VIDEO_PLAY) < 0 )
+	if ( ::ioctl(fd.video, VIDEO_PLAY) < 0 )
 		eDebug("VIDEO_PLAY failed (%m)");
 
 	for ( int i=0; i < 2; i++ )
@@ -708,29 +698,16 @@ int Decoder::displayIFrame(const char *frame, int len)
 	memset(&buf, 0, 128);
 	write(fdv, &buf, 128);
 
-	close(fd);
-
-	showPicture();
+	setAutoFlushScreen(0);
+	if ( !wasOpen )
+	{
+		::close(fd.video);
+		fd.video=-1;
+	}
+	setAutoFlushScreen(1);
 
 	close(fdv);
 	return 0;
-}
-
-void Decoder::showPicture( int i )
-{
-	int wasOpen = fd.video != -1;
-
-	if (!wasOpen)
-		fd.video = open(VIDEO_DEV, O_RDWR);
-
-	if (::ioctl(fd.video, VIDEO_SET_BLANK, !i) < 0 )
-		eDebug("VIDEO_SET_BLANK failed (%m)");
-
-	if (!wasOpen)
-	{
-		close(fd.video);
-		fd.video = -1;
-	}
 }
 
 int Decoder::displayIFrameFromFile(const char *filename)
@@ -751,4 +728,72 @@ int Decoder::displayIFrameFromFile(const char *filename)
 	int res=displayIFrame(buffer, size);
 	delete[] buffer;
 	return res;
+}
+
+// Non DVB API Functions and ioctls
+
+#define VIDEO_FLUSH_CLIP_BUFFER 0
+#define VIDEO_GET_PTS           _IOR('o', 1, unsigned int*)
+#define VIDEO_SET_AUTOFLUSH     _IOW('o', 2, int)
+#define VIDEO_CLEAR_SCREEN      3
+
+void Decoder::flushClipBuffer()
+{
+	int wasOpen = fd.mpeg != -1;
+	if ( !wasOpen )
+		fd.mpeg = ::open("/dev/video", O_WRONLY);
+	{
+		if (::ioctl(fd.mpeg, VIDEO_FLUSH_CLIP_BUFFER) < 0)
+			eDebug("VIDEO_FLUSH_BUFFER failed (%m)");
+	}
+	if (!wasOpen)
+	{
+		::close(fd.mpeg);
+		fd.mpeg = -1;
+	}
+}
+
+void Decoder::clearScreen()
+{
+	int wasOpen = fd.mpeg != -1;
+	if ( !wasOpen )
+		fd.mpeg=::open("/dev/video", O_WRONLY);
+	if ( fd.mpeg > -1 )
+	{
+		if ( ::ioctl(fd.mpeg, VIDEO_CLEAR_SCREEN) < 0 )
+			eDebug("VIDEO_CLEAR_SCREEN failed (%m)");
+		if (!wasOpen)
+		{
+			::close(fd.mpeg);
+			fd.mpeg = -1;
+		}
+	}
+}
+
+void Decoder::getVideoPTS( unsigned int &dest )
+{
+	if ( fd.mpeg == -1 )
+	{
+		eDebug("MPEG Decoder fd not valid.. dont get PTS");
+		return;
+	}
+	if ( ::ioctl(fd.mpeg, VIDEO_GET_PTS, &dest) < 0 )
+		eDebug("VIDEO_GET_PTS failed (%m)");
+}
+
+void Decoder::setAutoFlushScreen( int on )
+{
+	int wasOpen = fd.mpeg != -1;
+	if ( !wasOpen )
+		fd.mpeg = ::open("/dev/video", O_WRONLY);
+	if ( fd.mpeg > -1 )
+	{
+		if ( ::ioctl(fd.mpeg, VIDEO_SET_AUTOFLUSH, on) < 0 )
+			eDebug("VIDEO_SET_AUTOFLUSH failed (%m)");
+		if (!wasOpen)
+		{
+			::close(fd.mpeg);
+			fd.mpeg = -1;
+		}
+	}
 }

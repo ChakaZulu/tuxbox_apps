@@ -49,7 +49,7 @@ void eDVBCAHandler::leaveTransponder( eTransponder* t )
 
 void CAService::sendCAPMT( PMT *pmt )
 {
-	if ( pmt->version_number == lastPMTVersion )
+	if ( pmt->version == lastPMTVersion )
 	{
 		eDebug("[eDVBCAHandler] dont send the self pmt version");
 		return;
@@ -62,7 +62,7 @@ void CAService::sendCAPMT( PMT *pmt )
 	capmt[7]=(unsigned char)((pmt->program_number>>8) & 0xff);			//prg-nr
 	capmt[8]=(unsigned char)(pmt->program_number & 0xff);					//prg-nr
 
-	capmt[9]=0x00;	//reserved - version - current/next
+	capmt[9]=pmt->version;	//reserved - version - current/next
 	capmt[10]=0x00;	//reserved - prg-info len
 	capmt[11]=0x00;	//prg-info len
 
@@ -96,7 +96,7 @@ void CAService::sendCAPMT( PMT *pmt )
 	capmt[29]=pmt->pid>>8;
 	capmt[30]=pmt->pid&0xFF;
 
-	lastPMTVersion=pmt->version_number;
+	lastPMTVersion=pmt->version;
 	int lenpos=10;
 	int len=19;
 	int first=0;

@@ -8,8 +8,6 @@
 #include <sys/ioctl.h>
 #include <lib/base/eerror.h>
 
-#define VIDEO_GET_PTS _IOR('o', 1, unsigned int*)
-
 unsigned long eMPEGDemux::getLong()
 {
 	unsigned long c;
@@ -227,10 +225,10 @@ a:
 				case 0xD0 ... 0xDF:
 				{
 					int &cnt = audiostreams[code];
-					if ( cnt < 30 )
+					if ( cnt < 10 )
 					{
 						cnt++;
-						if ( cnt == 30 )
+						if ( cnt == 10 )
 						{
 							eDebug("/*emit*/ (*newastreamid)(%02x)", code);
 							if ( !curAudioStreamID )
@@ -247,6 +245,14 @@ a:
 				case 0xE0 ... 0xEF:  // Video Stream
 				{
 					int length=getBits(16);
+					if ( length > minFrameLength )
+					{
+						if ( (minFrameLength+2048) > length )
+							minFrameLength=length;
+						else
+							minFrameLength+=2048;
+						eDebug("minFrameLength now %d", minFrameLength );
+					}
 					unsigned char buffer[6+length];
 					int p=0;
 
@@ -266,14 +272,14 @@ a:
 
 					if ( length )
 					{
-						if ( input.read(buffer+p, length) != length )
-						{
-							eDebug("read Error");
-							minFrameLength+=4096;
+						int rd = input.read(buffer+p, length);
+						if ( rd != length ) 
+						{  // buffer empty.. put all data back in input buffer
+							input.write(buffer, p+rd);
+							return written;
 						}
 /*						else
 							eDebug("read %04x bytes", length);*/
-						
 						p+=length;
 					}
 
@@ -304,10 +310,10 @@ a:
 						// here we have subid 0x80 .. 0x87
 						code |= (subid << 8);
 						int &cnt = audiostreams[code];
-						if ( cnt < 30 )
+						if ( cnt < 10 )
 						{
 							cnt++;
-							if ( cnt == 30 )
+							if ( cnt == 10 )
 							{
 								eDebug("found new AC3 stream subid %02x", subid);
 								eDebug("/*emit*/ (*newastreamid)(%04x)", code);
@@ -325,8 +331,7 @@ a:
 					if ( syncbuffer.size() )
 					{
 						unsigned int VideoPTS=0xFFFFFFFF;
-						if ( ::ioctl(fd, VIDEO_GET_PTS, &VideoPTS) < 0 )
-							eDebug("GET PTS failes (%m)");
+						Decoder::getVideoPTS(VideoPTS);
 						if ( VideoPTS != 0xFFFFFFFF )
 						{
 							std::list<syncAudioPacket>::iterator it( syncbuffer.begin() );
@@ -365,8 +370,8 @@ a:
 													 VideoPTS = 0xFFFFFFFF,
 													 pos=5;
 							while( buffer[++pos] == 0xFF );  // stuffing überspringen
-								if ( (buffer[pos] & 0xC0) == 0x40 ) // buffer scale size
-									pos+=2;
+							if ( (buffer[pos] & 0xC0) == 0x40 ) // buffer scale size
+								pos+=2;
 							if ( ((buffer[pos] & 0xF0) == 0x20) ||  //MPEG1
 									 ((buffer[pos] & 0xF0) == 0x30) ||  //MPEG1
 									 ((buffer[pos] & 0xC0) == 0x80) )   //MPEG2
@@ -392,8 +397,7 @@ a:
 //									eDebug("APTS %08x", AudioPTS);
 								}
 							}
-							if ( ::ioctl(fd, VIDEO_GET_PTS, &VideoPTS) < 0 )
-								eDebug("GET PTS failes (%m)");
+							Decoder::getVideoPTS(VideoPTS);
 							if ( VideoPTS != 0xFFFFFFFF && abs(VideoPTS - AudioPTS) <= 0x1000 )
 							{
 								synced=1;
@@ -428,7 +432,7 @@ a:
 					for (std::map<int,int>::iterator it(audiostreams.begin());
 						it != audiostreams.end();)
 					{
-						if ( it->second < 30 )
+						if ( it->second < 10 )
 						{
 							audiostreams.erase(it);
 							it = audiostreams.begin();

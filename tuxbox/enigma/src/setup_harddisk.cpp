@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.12 2003/11/05 13:33:37 ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.13 2004/02/15 20:52:17 ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -103,28 +103,34 @@ int freeDiskspace(int dev, eString mp="")
 
 static int numPartitions(int dev)
 {
-	FILE *f=fopen("/proc/partitions", "rb");
-	if (!f)
-		return 0;
 	eString path;
 	int host=dev/4;
 	int bus=!!(dev&2);
 	int target=!!(dev&1);
-	path.sprintf("ide/host%d/bus%d/target%d/lun0/", host, bus, target);
+
+	path.sprintf("ls /dev/ide/host%d/bus%d/target%d/lun0/ > /tmp/tmp.out", host, bus, target);
+	system( path.c_str() );
+
+	FILE *f=fopen("/tmp/tmp.out", "rb");
+	if (!f)
+	{
+		eDebug("fopen failed");
+		return -1;
+	}
 
 	int numpart=-1;		// account for "disc"
-	
 	while (1)
 	{
 		char line[1024];
 		if (!fgets(line, 1024, f))
 			break;
-		if (line[1] != ' ')
-			continue;
-		if (!strncmp(line+22, path.c_str(), path.size()))
+		if ( !strncmp(line, "disc", 4) )
+			numpart++;
+		if ( !strncmp(line, "part", 4) )
 			numpart++;
 	}
 	fclose(f);
+	system("rm /tmp/tmp.out");
 	return numpart;
 }
 

@@ -63,25 +63,30 @@ class eDVBRecorder: private eThread, public Object
 
 	int splits, splitsize, size, dvrfd, outfd;
 
-//	pthread_mutex_t bufferLock;
+	pthread_mutex_t bufferLock;
 
 	eString filename;
 
-	char buf[65536+188];  // 188 bytes vor manual inject.. in buffer
+	char buf[65424]; 
 	int bufptr;
 
 	void thread();
 	void gotBackMessage(const eDVBRecorderMessage &msg);
 	inline int flushBuffer();
 	int openFile(int suffix=0);
+	void PatPmtWrite();
+	eTimer PatPmtTimer;
+	__u8 *PmtData, *PatData;
+	unsigned int PmtCC, PatCC;
+	int pmtpid;
+	eAUTable<PMT> tPMT;
 public:
 	void PMTready(int error);
-	eAUTable<PMT> tPMT;
 	eString getFilename() { return filename; }
 	eServiceReferenceDVB recRef;
 	bool scrambled;
 		/// the constructor
-	eDVBRecorder(PMT *);
+	eDVBRecorder(PMT *, PAT*);
 		/// the destructor
 	~eDVBRecorder();
 
@@ -137,7 +142,7 @@ public:
 	 * File must be already opened.
 	 * Len will be fetched out of table.
 	 */
-	void writeSection(void *data, int pid);
+	void writeSection(void *data, int pid, unsigned int &cc);
 
 	/**
 	 * \brief Adds a PID to running recording.

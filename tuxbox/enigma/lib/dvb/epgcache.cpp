@@ -311,7 +311,7 @@ eEPGCache::~eEPGCache()
 			delete It->second;
 }
 
-EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_id)
+EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_id, bool plain)
 {
 	uniqueEPGKey key( service );
 
@@ -322,7 +322,11 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_
 		if ( i != It->second.first.end() )
 		{
 			if ( service.getServiceType() == 4 ) // nvod ref
-				return lookupEvent( service, i->second->getStartTime() );
+				return lookupEvent( service, i->second->getStartTime(), plain );
+			else if ( plain )
+		// get plain data... not in EITEvent Format !!!
+		// before use .. cast it to eit_event_struct*
+				return (EITEvent*) i->second->get();
 			else
 				return new EITEvent( *i->second );
 		}
@@ -332,7 +336,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_
 	return 0;
 }
 
-EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t)
+EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t, bool plain )
 // if t == 0 we search the current event...
 {
 	uniqueEPGKey key(service);
@@ -367,6 +371,10 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t)
 									{
 										if ( HILO( i->second->get()->event_id ) == event_id )
 										{
+											if ( plain )
+												// get plain data... not in EITEvent Format !!!
+												// before use .. cast it to eit_event_struct*
+												return (EITEvent*) i->second->get();
 											EITEvent *evt = new EITEvent( *i->second );
 											evt->start_time = refEvt.start_time;
 											evt->duration = refEvt.duration;
@@ -393,7 +401,13 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t)
 				const eit_event_struct* eit_event = i->second->get();
 				int duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
 				if ( t <= i->first+duration )
+				{
+					if ( plain )
+						// get plain data... not in EITEvent Format !!!
+						// before use .. cast it to eit_event_struct*
+						return (EITEvent*) i->second->get();
 					return new EITEvent( *i->second );
+				}
 			}
 		}
 
@@ -403,7 +417,13 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t)
 			int duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
 			time_t begTime = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);
 			if ( t >= begTime && t <= begTime+duration) // then we have found
+			{
+				if ( plain )
+					// get plain data... not in EITEvent Format !!!
+					// before use .. cast it to eit_event_struct*
+					return (EITEvent*) i->second->get();
 				return new EITEvent( *i->second );
+			}
 		}
 	}
 	return 0;
@@ -414,6 +434,7 @@ void eEPGCache::enterService(const eServiceReferenceDVB &service, int err)
 	if ( service.path )
 	{
 		eDebug("[EPGC] dont start ... its a replay");
+		/*emit*/ EPGAvail(0);
 		return;
 	}
 

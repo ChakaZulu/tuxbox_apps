@@ -325,8 +325,8 @@ public:
 	PATEntry(int program_number, int program_map_PID): program_number(program_number), program_map_PID(program_map_PID)
 	{
 	}
-  int program_number;
-  int program_map_PID;
+	int program_number;
+	int program_map_PID;
 };
 
 class PAT: public eTable
@@ -346,6 +346,8 @@ public:
 
 	int transport_stream_id;
 	ePtrList<PATEntry> entries;
+
+	__u8 *getRAW();
 };
 
 class SDTEntry
@@ -388,12 +390,18 @@ protected:
 	int data(__u8 *data);
 public:
 	PMT(int pid, int service_id, int version=-1);
+	~PMT();
 
 	int program_number, PCR_PID, pid, version_number;
 
 	eTable *createNext();
 	ePtrList< Descriptor > program_info;
+	ePtrList<__u8> program_infoPlain;
+
 	ePtrList<PMTEntry> streams;
+	ePtrList<__u8> streamsPlain;
+
+	__u8* getRAW();
 };
 
 class NITEntry
@@ -450,10 +458,12 @@ public:
 	EIT(int type, int service_id=-1, int ts=tsActual, int version=-1);
 	EIT( const EIT* eit );
 	EIT();
+	~EIT();
 	eTable *createNext();
 	
 	int type, ts, service_id, version_number, current_next_indicator, transport_stream_id, original_network_id;
 	ePtrList<EITEvent> events;
+	ePtrList<__u8> eventsPlain;
 };
 
 class TDT: public eTable

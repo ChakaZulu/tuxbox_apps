@@ -1232,14 +1232,41 @@ int eFrontend::tune(eTransponder *trans,
 				double declination=calcDeclination( SiteLat, azimuth, elevation );
 				double satHourAngle=calcSatHourangle( azimuth, elevation, declination, SiteLat );
 				eDebug("azimuth=%lf, elevation=%lf, declination=%lf, PolarmountHourAngle=%lf", azimuth, elevation, declination, satHourAngle );
-				
-				int tmp=(int)round( fabs( 180 - satHourAngle ) * 10.0 );
-				RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
 
-				if (satHourAngle < 180)  // the east
-					RotorCmd |= 0xE000;
-				else                     // west
-					RotorCmd |= 0xD000;
+				//
+				// xphile: USALS fix for southern hemisphere
+				//		
+				if (SiteLat >= 0)
+				{
+					//
+					// Northern Hemisphere
+					//
+					int tmp=(int)round( fabs( 180 - satHourAngle ) * 10.0 );
+					RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
+	
+					if (satHourAngle < 180)  // the east
+						RotorCmd |= 0xE000;
+					else                     // west
+						RotorCmd |= 0xD000;
+				}
+				else
+				{
+					//
+					// Southern Hemisphere
+					//
+					if (satHourAngle < 180)  // the east
+					{
+						int tmp=(int)round( fabs( satHourAngle ) * 10.0 );
+						RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
+						RotorCmd |= 0xD000;
+					}
+					else
+					{                     // west
+						int tmp=(int)round( fabs( 360 - satHourAngle ) * 10.0 );
+						RotorCmd = (tmp/10)*0x10 + gotoXTable[ tmp % 10 ];
+						RotorCmd |= 0xE000;
+					}
+				}
 
 				eDebug("RotorCmd = %04x", RotorCmd);
 			}

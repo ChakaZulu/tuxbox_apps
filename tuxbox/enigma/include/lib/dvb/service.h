@@ -101,7 +101,7 @@ public:
 	virtual ~eServiceHandler();
 	virtual eService *createService(const eServiceReference &node);
 
-	virtual int play(const eServiceReference &service);
+	virtual int play(const eServiceReference &service, int workaround=0 );
 
 		// current service
 	virtual int serviceCommand(const eServiceCommand &cmd);
@@ -121,14 +121,14 @@ public:
 
 	static int getFlags();
 	virtual int getState();
-	
+
 		// get visual flags
 	virtual int getAspectRatio();
 
 	virtual int getErrorInfo();
-	
-	virtual int stop();
-	
+
+	virtual int stop(int workaround=0);
+
 		// position query
 	enum {
 		posQueryLength,	// query length (in seconds)
@@ -157,7 +157,7 @@ class eServiceInterface: public Object
 {
 	eServiceHandler *currentServiceHandler;
 	std::map<int,eServiceHandler*> handlers;
-	int switchServiceHandler(int id);
+	int switchServiceHandler(int id, int workaround=0);
 	
 	SigC::Connection conn;
 	void handleServiceEvent(const eServiceEvent &event);
@@ -172,17 +172,17 @@ public:
 	int unregisterHandler(int id);
 	eServiceHandler *getServiceHandler(int id);
 
-	int play(const eServiceReference &service);
-	
+	int play(const eServiceReference &service, int workaround=0 );
+
 		// service related functions
 	Signal1<void,const eServiceEvent &> serviceEvent;
-	
+
 	eServiceHandler *getService()
 	{
 		return currentServiceHandler;
 	}
-	
-	int stop();
+
+	int stop(int workaround=0);
 
 	eServiceReference service;
 		

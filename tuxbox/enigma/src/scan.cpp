@@ -927,7 +927,7 @@ int TransponderScan::Exec()
 		{
 			Decoder::Flush();
 			showScanPic();
-			Decoder::locked=true;
+			Decoder::locked=1;
 			if ( !service )
 				service = eServiceInterface::getInstance()->service;
 
@@ -991,7 +991,7 @@ int TransponderScan::Exec()
 		{
 			Decoder::Flush();
 			showScanPic();
-			Decoder::locked=true;
+			Decoder::locked=1;
 
 			if ( !service )
 				service = eServiceInterface::getInstance()->service;
@@ -1045,7 +1045,7 @@ int TransponderScan::Exec()
 
 			Decoder::Flush();
 			showScanPic();
-			Decoder::locked=true;
+			Decoder::locked=1;
 
 			if ( !service )
 				service = eServiceInterface::getInstance()->service;
@@ -1225,6 +1225,7 @@ int TransponderScan::Exec()
 	}
 	hide();
 	eDVB::getInstance()->setMode(eDVB::controllerService);
+	Decoder::clearScreen();
 
 	return ret;
 }
@@ -1244,7 +1245,7 @@ int TransponderScan::eventHandler( const eWidgetEvent &event )
 		case eWidgetEvent::execDone:
 			if ( Decoder::locked )
 			{
-				Decoder::locked=false;
+				Decoder::locked=0;
 				Decoder::Flush();
 				if ( service && ( !last_orbital_pos || ((((eServiceReferenceDVB&)service).getDVBNamespace().get() & 0xFFFF0000) >> 16 ) == last_orbital_pos ) )
 				{

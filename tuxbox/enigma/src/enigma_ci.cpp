@@ -7,6 +7,7 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbci.h>
 #include <lib/gui/elabel.h>
+#include <lib/gui/echeckbox.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/enumber.h>
 #include <lib/gui/textinput.h>
@@ -35,8 +36,8 @@ enigmaCI::enigmaCI()
 	else
 	{
 		setText(_("Common Interface Module"));
-		move(ePoint(160, 146));
-		cresize(eSize(350, 200));
+		move(ePoint(160, 120));
+		cresize(eSize(350, 250));
 	}
 
 	reset=new eButton(this);
@@ -95,6 +96,18 @@ enigmaCI::enigmaCI()
 
 		CONNECT(app2->selected, enigmaCI::app2Pressed);		
 	}
+	else
+	{
+		int handleTwo=0;
+		eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices", handleTwo);
+		twoServices = new eCheckbox(this);
+		twoServices->move(ePoint(10,133));
+		twoServices->resize(eSize(330,fd+10));
+		twoServices->setCheck(handleTwo);
+		twoServices->setText(_("can handle two services"));
+		twoServices->setHelpText(_("can your CI descramble two services at the same time?"));
+		CONNECT(twoServices->checked, enigmaCI::handleTwoServicesChecked);
+	}
 
 	status = new eStatusBar(this);	
 	status->move( ePoint(0, clientrect.height()-50) );
@@ -115,6 +128,11 @@ enigmaCI::~enigmaCI()
 {
 	if (status)
 		delete status;
+}
+
+void enigmaCI::handleTwoServicesChecked(int val)
+{
+	eConfig::getInstance()->setKey("/ezap/ci/handleTwoServices", val);
 }
 
 void enigmaCI::updateCIinfo(const char *buffer)
@@ -538,8 +556,8 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 eMMIEnqWindow::eMMIEnqWindow( const eString &titleBarText, const eString &text, int num, bool blind )
 	:num(num)
 {
-	cmove( ePoint(120,140) );
-	cresize( eSize(520,250) );
+	cmove( ePoint(100,140) );
+	cresize( eSize(520,280) );
 	setText(titleBarText);
 
 	int valinit[num];
@@ -552,7 +570,7 @@ eMMIEnqWindow::eMMIEnqWindow( const eString &titleBarText, const eString &text, 
 	if(blind)
 		input->setFlags(eNumber::flagHideInput);
 
-	int newHeight = size.height() - getClientSize().height() + 100;
+	int newHeight = size.height() - getClientSize().height() + 115;
 
 	if ( text )
 	{
@@ -575,8 +593,8 @@ eMMIEnqWindow::eMMIEnqWindow( const eString &titleBarText, const eString &text, 
 	resize( eSize( getSize().width(), newHeight ) );
 
 	eStatusBar *statusbar=new eStatusBar(this);
-	statusbar->move( ePoint(0, clientrect.height()-30 ) );
-	statusbar->resize( eSize( clientrect.width(), 30) );
+	statusbar->move( ePoint(0, clientrect.height()-50 ) );
+	statusbar->resize( eSize( clientrect.width(), 50) );
 	statusbar->loadDeco();
 	CONNECT( input->selected, eMMIEnqWindow::okPressed );
 }
