@@ -66,7 +66,7 @@ void eHTTPStream::processMetaData()
 	metadata[metadatapointer]=0;
 	metaDataUpdated((const char*)metadata);
 //	eDebug("processing metadata! %s", metadata);
-	
+
 	metadatapointer=0;
 }
 
@@ -110,8 +110,9 @@ void eHTTPStream::haveData(void *vdata, int len)
 			int meta=len;
 			if (meta > metadataleft)
 				meta=metadataleft;
-			
+
 			memcpy(metadata+metadatapointer, data, meta);
+
 			metadatapointer+=meta;
 			data+=meta;
 			len-=meta;
@@ -275,6 +276,12 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	maxOutputBufferSize=256*1024;
 	minOutputBufferSize=8*1024;
 
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&lock, &attr);
+	pthread_mutexattr_destroy(&attr);
+
 	run();
 }
 
@@ -282,7 +289,7 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 void eMP3Decoder::metaDataUpdated(eString meta)
 {
 	{
-		eLocker locker(poslock);
+		singleLock s(lock);  // must protect access on metadata array
 		eString streamTitle, streamUrl;
 		if (meta.left(6) == "Stream")
 			while (!meta.empty())
@@ -333,7 +340,7 @@ void eMP3Decoder::streamingDone(int err)
 {
 	if (err || !http || http->code != 200)
 	{
-		eLocker locker(poslock);
+		singleLock s(lock);  // must protect access on http_status
 		if (err)
 		{
 			switch (err)
@@ -368,6 +375,7 @@ eHTTPDataSource *eMP3Decoder::createStreamSink(eHTTPConnection *conn)
 	stream=new eHTTPStream(conn, input);
 	CONNECT(stream->dataAvailable, eMP3Decoder::decodeMoreHTTP);
 	CONNECT(stream->metaDataUpdated, eMP3Decoder::metaDataUpdated);
+	singleLock s(lock);  // must protect access on http_status
 	http_status=_("buffering...");
 	handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
 	return stream;
@@ -381,6 +389,7 @@ void eMP3Decoder::thread()
 void eMP3Decoder::outputReady(int what)
 {
 	(void)what;
+	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	if (type != codecMPG)
 	{
 		if ( ( pcmsettings.reconfigure 
@@ -408,6 +417,7 @@ void eMP3Decoder::outputReady(int what)
 void eMP3Decoder::outputReady2(int what)
 {
 	(void)what;
+	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	output2.tofile(dspfd[1], 65536);
 	checkFlow(0);
 }
@@ -492,6 +502,7 @@ void eMP3Decoder::checkFlow(int last)
 		{
 			Signal1<void, unsigned int> callback;
 			CONNECT(callback, eMP3Decoder::newAudioStreamIdFound);
+			singleLock s(lock); // protect access on all eIOBuffer
 			samples=audiodecoder->decodeMore(last, 16384, &callback);
 		}
 		if (samples < 0)
@@ -520,6 +531,7 @@ void eMP3Decoder::checkFlow(int last)
 //		eDebug("statePlaying...");
 		if ( !inputsn && http )
 		{
+			singleLock s(lock);  // must protect access on http_status
 			http_status=_("playing...");
 			handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::status));
 		}
@@ -532,7 +544,7 @@ void eMP3Decoder::checkFlow(int last)
 
 void eMP3Decoder::recalcPosition()
 {
-	eLocker l(poslock);
+	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	if (audiodecoder->getAverageBitrate() > 0)
 	{
 		if (filelength != -1)
@@ -590,6 +602,7 @@ void eMP3Decoder::decodeMore(int what)
 
 	while ( input.size() < audiodecoder->getMinimumFramelength() )
 	{
+		singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 		if (input.fromfile(sourcefd, audiodecoder->getMinimumFramelength()) < audiodecoder->getMinimumFramelength())
 		{
 			eDebug("couldn't read %d bytes", audiodecoder->getMinimumFramelength());
@@ -650,6 +663,7 @@ eMP3Decoder::~eMP3Decoder()
 	Decoder::parms.pcrpid=-1;
 	Decoder::parms.audio_type=DECODE_AUDIO_MPEG;
 	Decoder::Set();
+	pthread_mutex_destroy(&lock);
 }
 
 void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
@@ -697,6 +711,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 				state=statePause;
 				if ( type == codecMPG )
 				{
+					singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 					::lseek(sourcefd, getPosition(1), SEEK_SET);
 					input.clear();
 					output.clear();
@@ -724,6 +739,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		}
 		else
 		{
+			singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 			output.clear();
 			if (outputsn[1])
 				output2.clear();
@@ -733,6 +749,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 	case eMP3DecoderMessage::setAudioStream:
 		if ( type == codecMPG && audiodecoder )
 		{
+			singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 			int position = getPosition(1);
 			Decoder::Pause(0);
 			((eMPEGDemux*)audiodecoder)->setAudioStream(message.parm);
@@ -795,13 +812,17 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			else
 				offset+=br/1000;
 			if (message.type == eMP3DecoderMessage::skip)
+			{
+				singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 				offset+=::lseek64(sourcefd, 0, SEEK_CUR);
+			}
 			if (offset<0)
 				offset=0;
 		}
 		else
 			offset=message.parm;
 
+		singleLock s(lock); // must protect access on all eIOBuffer and position
 		input.clear();
 		if ( ::lseek64(sourcefd, offset, SEEK_SET) < 0 )
 			eDebug("seek error (%m)");
@@ -810,7 +831,6 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 			output2.clear();
 		dspSync();
 		audiodecoder->resync();
-
 		checkFlow(0);
 
 		break;
@@ -820,7 +840,7 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 
 eString eMP3Decoder::getInfo(int id)
 {
-	eLocker l(poslock);
+	singleLock s(lock);  // must protect access on http_status and metadata
 	switch (id)
 	{
 	case 0:
@@ -838,6 +858,7 @@ int eMP3Decoder::getPosition(int real)
 	if (sourcefd < 0)
 		return -1;
 
+	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	if ( type == codecMPG && real)
 	{
 		unsigned int position=::lseek(sourcefd, 0, SEEK_CUR);
@@ -866,7 +887,6 @@ int eMP3Decoder::getPosition(int real)
 		return position;
 	}
 	recalcPosition();
-	eLocker l(poslock);
 	if (real)
 	{
 			// our file pos
@@ -899,7 +919,7 @@ int eMP3Decoder::getLength(int real)
 {
 	if (sourcefd < 0)
 		return -1;
-	eLocker l(poslock);
+	singleLock s(lock); // must protect access on all eIOBuffer, position, outputbr
 	if (real)
 		return filelength;
 	return length+output.size()/(outputbr/8);

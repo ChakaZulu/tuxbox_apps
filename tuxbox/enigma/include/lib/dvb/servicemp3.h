@@ -76,13 +76,13 @@ class eMP3Decoder: public eThread, public eMainloop, public Object
 	eAudioDecoder::pcmSettings pcmsettings;
 	
 	int filelength;
-	
+
 	int length;
 	int position;
 	int seekbusy;
-	eLock poslock;
+	pthread_mutex_t lock;
 	int audio_tracks;
-	
+
 	void dspSync();
 	void newAudioStreamIdFound( unsigned int );
 

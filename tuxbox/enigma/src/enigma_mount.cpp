@@ -227,6 +227,8 @@ int eMountPoint::mount()
 					if (rc1 == ETIMEDOUT)
 						pthread_cancel(g_mnt1);
 					pthread_mutex_unlock(&g_mut1);
+					pthread_mutex_destroy(&g_mut1);
+					pthread_cond_destroy(&g_cond1);
 
 					if (g_mntstatus1 != 0)
 						rc = -5; //mount failed (timeout)

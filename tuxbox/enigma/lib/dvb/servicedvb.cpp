@@ -37,7 +37,7 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 {
 	state=stateInit;
 
-	pthread_mutex_init(&poslock,0);
+	pthread_mutex_init(&poslock, 0);
 
 	int count=0;
 	seekbusy=0;
@@ -140,9 +140,12 @@ int eDVRPlayerThread::openFile(int slice)
 			slicesize=lseek64(sourcefd, 0, SEEK_END);
 			if (slicesize <= 0)
 				slicesize=1024*1024*1024;
-			lseek64(sourcefd, 0, SEEK_SET);
+			position=lseek64(sourcefd, 0, SEEK_SET);
 		} else
+		{
 			slicesize=1024*1024*1024;
+			position=lseek64(sourcefd, 0, SEEK_CUR);
+		}
 	}
 	if (sourcefd >= 0)
 	{
@@ -172,7 +175,7 @@ void eDVRPlayerThread::outputReady(int what)
 		return;
 #endif
 
-	seekbusy-=buffer.tofile(dvrfd, 65424);
+	seekbusy-=buffer.tofile(dvrfd,65424);
 
 	if (seekbusy < 0)
 		seekbusy=0;
@@ -228,12 +231,16 @@ void eDVRPlayerThread::readMore(int what)
 		eDebug("wrong state (%d)", state);
 		return;
 	}
-	
+
 	int flushbuffer=0;
-	
+
 	if (buffer.size() < maxBufferSize)
 	{
-		if (buffer.fromfile(sourcefd, maxBufferSize) < maxBufferSize)
+		int rd = 0;
+		rd = buffer.fromfile(sourcefd, maxBufferSize);
+		position+=rd;
+
+		if ( rd < maxBufferSize)
 		{
 			int next=1;
 			if (livemode)
@@ -241,7 +248,7 @@ void eDVRPlayerThread::readMore(int what)
 				struct stat s;
 				eString tfilename=filename;
 				tfilename += eString().sprintf(".%03d", slice+1);
-				
+
 				if (::stat(tfilename.c_str(), &s) < 0)
 				{
 					eDebug("no next file, stateFileEnd");
@@ -251,9 +258,8 @@ void eDVRPlayerThread::readMore(int what)
 					next=0;
 				}
 			}
-			if (next)
-				if (openFile(++slice)) // if no next part found, else continue there...
-					flushbuffer=1;
+			if (next && openFile(++slice)) // if no next part found, else continue there...
+				flushbuffer=1;
 		}
 	}
 
@@ -264,14 +270,14 @@ void eDVRPlayerThread::readMore(int what)
 		state=statePlaying;
 		outputsn->start();
 	}
-	
+
 	if (flushbuffer)
 	{
 		state=stateFileEnd;
 		if (inputsn)
 			inputsn->stop();
 	}
-	
+
 	if ((state == statePlaying) && (buffer.size() >= maxBufferSize))
 	{
 		state=stateBufferFull;
@@ -300,22 +306,20 @@ eDVRPlayerThread::~eDVRPlayerThread()
 		::close(dvrfd);
 	if (sourcefd >= 0)
 		::close(sourcefd);
+	pthread_mutex_destroy(&poslock);
 }
 
 void eDVRPlayerThread::updatePosition()
 {
+	int slice=0;
+	struct stat s;
+	filelength=0;
+	while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
 	{
-		singleLock l(poslock);
-		int slice=0;
-		struct stat s;
-		filelength=0;
-		while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
-		{
-			filelength+=s.st_size/1880;
-			slice++;
-		}
+		filelength+=s.st_size/1880;
+		slice++;
 	}
-	
+
 	if (state == stateFileEnd)
 	{
 		eDebug("file end reached, retrying..");
@@ -327,15 +331,14 @@ void eDVRPlayerThread::updatePosition()
 
 int eDVRPlayerThread::getPosition(int real)
 {
-	singleLock l(poslock);
-	if (real)
-		return ((::lseek(sourcefd, 0, SEEK_CUR)-buffer.size()) / 1880) + slice*(slicesize/1880);
-	return (((::lseek(sourcefd, 0, SEEK_CUR)-buffer.size()) / 1880) + slice*(slicesize/1880)) / 250;
+	int ret = (position / 1880) + slice * (slicesize/1880);
+	if (!real)
+		ret /= 250;
+	return ret;
 }
 
 int eDVRPlayerThread::getLength(int real)
 {
-	singleLock l(poslock);
 	if (real)
 		return filelength;
 	return filelength/250;
@@ -355,7 +358,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		}
 		livemode=message.parm;
 		if (livemode)
-			liveupdatetimer.start(1000); 
+			liveupdatetimer.start(1000);
 		else
 			liveupdatetimer.stop();
 		break;
@@ -426,7 +429,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			buffer.clear();
 			offset-=(buffer.size()+1000*1000); // account for pvr buffer
 			if (message.type == eDVRPlayerThreadMessage::skip)
-				offset+=lseek64(sourcefd, 0, SEEK_CUR)+slice*slicesize;
+				offset+=position+slice*slicesize;
 			if (offset<0)
 				offset=0;
 		} else
@@ -434,7 +437,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			buffer.clear();
 			offset=((off64_t)message.parm)*1880;
 		}
-		
+
 		if ((offset / slicesize) != slice)
 		{
 			slice=offset/slicesize;
@@ -444,21 +447,21 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 				state=stateError;
 			}
 		}
-		
+
 		if (state != stateError)
 		{
-			::lseek64(sourcefd, offset%slicesize, SEEK_SET);
+			position=::lseek64(sourcefd, offset%slicesize, SEEK_SET);
 			dvrFlush();
 			buffer.clear();
 		}
-		
+
 		if (state == statePlaying)
 		{
 			if (inputsn)
 				inputsn->start();
 			state=stateBuffering;
 		}
-		
+
 		break;
 	}
 	}

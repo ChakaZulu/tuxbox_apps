@@ -240,6 +240,7 @@ public:
 	~eMainloop()
 	{
 		existing_loops.remove(this);
+		pthread_mutex_destroy(&recalcLock);
 	}
 	int looplevel() { return loop_level; }
 
