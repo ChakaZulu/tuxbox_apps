@@ -129,7 +129,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
 
 
-		void doChecks();
+		bool ucodes_available(void);
 		void firstChannel();
 		void setupColors_classic();
 		void setupColors_neutrino();

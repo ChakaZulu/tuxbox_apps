@@ -1070,32 +1070,31 @@ void CNeutrinoApp::firstChannel()
 
 /**************************************************************************************
 *                                                                                     *
-*          CNeutrinoApp -  doChecks, check if card fits cam		              *
+*          CNeutrinoApp -  ucodes_available, check if ucodes are available            *
 *                                                                                     *
 **************************************************************************************/
 
-void CNeutrinoApp::doChecks()
+bool CNeutrinoApp::ucodes_available(void)
 {
-	FILE* fd;
+	FILE * fd;
+
 	fd = fopen(UCODEDIR "/avia500.ux", "r");
-	if(fd)
+	if (fd)
 		fclose(fd);
-	bool ucodes_ok= (fd);
+
+	bool ucodes_ok = (fd);
+
 	fd = fopen(UCODEDIR "/avia600.ux", "r");
-	if(fd)
+	if (fd)
 		fclose(fd);
-	ucodes_ok= ucodes_ok||(fd);
-/*	ucode.bin no longer needed, since built-in *
-	fd = fopen(UCODEDIR "/ucode.bin", "r");
-	if(fd)
-		fclose(fd);
-	ucodes_ok= ucodes_ok&&(fd);*/
+	ucodes_ok = ucodes_ok || (fd);
+
 	fd = fopen(UCODEDIR "/cam-alpha.bin", "r");
-	if(fd)
+	if (fd)
 		fclose(fd);
-	ucodes_ok= ucodes_ok&&(fd);
-	if (!ucodes_ok)
-		DisplayErrorMessage(g_Locale->getText(LOCALE_UCODES_FAILURE));
+	ucodes_ok = ucodes_ok && (fd);
+
+	return ucodes_ok;
 }
 
 
@@ -2944,8 +2943,17 @@ int CNeutrinoApp::run(int argc, char **argv)
 	if (display_language_selection)
 		languageSettings.exec(NULL, "");
 
-	//ucodes testen
-	doChecks();
+	InitNetworkSettings(networkSettings);
+
+	if (!ucodes_available())
+	{
+		/* display error message */
+		DisplayErrorMessage(g_Locale->getText(LOCALE_UCODES_FAILURE));
+
+		/* show network settings dialog */
+		networkSettings.exec(NULL, "");
+	}
+
 	//settins
 	if(loadSettingsErg==1)
 	{
@@ -2964,9 +2972,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//init programm
 	InitZapper();
-
-	//network Setup
-	InitNetworkSettings(networkSettings);
 
 	//Recording Setup
 	InitRecordingSettings(recordingSettings);
