@@ -29,7 +29,7 @@ control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c
 	loadMenus();
 	loadModes();
 	loadSubs();
-	startThread();	
+	startThread();
 }
 
 void control::run()
@@ -39,7 +39,7 @@ void control::run()
 
 command_class control::parseCommand(std::string cmd)
 {
-	std::cout << "Parsing " << cmd << std::endl;
+	//std::cout << "Parsing " << cmd << std::endl;
 	command_class tmp_command;
 	tmp_command.args.clear();
 	tmp_command.var.clear();
@@ -47,11 +47,11 @@ command_class control::parseCommand(std::string cmd)
 
 	if (cmd[0] == 9)
 		cmd = cmd.substr(1, cmd.length());
-	
+
 	std::string tmp_string;
 	std::istringstream iss(cmd);
 
-	
+
 	getline(iss, tmp_string, ' ');
 	if (tmp_string[0] == '#')
 	{
@@ -79,7 +79,7 @@ command_class control::parseCommand(std::string cmd)
 		if (getline(iss2, val, '='))
 			tmp_command.if_value = val;
 		tmp_command.if_var = name;
-		
+
 		getline(iss, tmp_new, '\n');
 		command_class tmp2_command = parseCommand(tmp_new);
 		tmp_command.cmd_class = tmp2_command.cmd_class;
@@ -92,7 +92,7 @@ command_class control::parseCommand(std::string cmd)
 	{
 		tmp_command.if_type = ELSE;
 		std::string tmp_new;
-			
+
 		getline(iss, tmp_new, '\n');
 		command_class tmp2_command = parseCommand(tmp_new);
 		tmp_command.cmd_class = tmp2_command.cmd_class;
@@ -149,13 +149,13 @@ command_class control::parseCommand(std::string cmd)
 	{
 		tmp_command.cmd_class = IR;
 	}
-	else 
+	else
 	{
 		std::cout << "Error in Command: Unknown Commandclass (" << tmp_string << ") on String:" << std::endl << cmd << std::endl;
 		exit(1);
 	}
 
-	
+
 
 
 	getline(iss, tmp_string, ' ');
@@ -259,12 +259,12 @@ command_class control::parseCommand(std::string cmd)
 	{
 		tmp_command.command = C_Get;
 	}
-	else 
+	else
 	{
 		std::cout << "Error in Command: Unknown Command (" << tmp_string << ") on String:" << std::endl << cmd << std::endl;
 		exit(1);
 	}
-	
+
 	if (tmp_command.command != C_direct)
 	{
 		while(getline(iss, tmp_string, ' '))
@@ -273,13 +273,13 @@ command_class control::parseCommand(std::string cmd)
 			if (tmp_string[0] == '%')
 			{
 				tmp_command.var.insert(tmp_command.var.end(), tmp_command.args.size() - 1);
-				std::cout << "INserting Var" << std::endl;
+				//std::cout << "INserting Var" << std::endl;
 			}
-				/*if (tmp_command.command != C_Set || tmp_command.cmd_class != CONTROL)
-				{
-					tmp_command.var.insert(tmp_command.var.end(), tmp_command.args.size() - 1);
-					std::cout << "INserting Var" << std::endl;
-				}*/
+			/*if (tmp_command.command != C_Set || tmp_command.cmd_class != CONTROL)
+			{
+				tmp_command.var.insert(tmp_command.var.end(), tmp_command.args.size() - 1);
+				//std::cout << "INserting Var" << std::endl;
+			}*/
 		}
 	}
 	else
@@ -287,14 +287,14 @@ command_class control::parseCommand(std::string cmd)
 		getline(iss, tmp_string, '\n');
 		tmp_command.args.insert(tmp_command.args.end(), tmp_string);
 	}
-	
+
 	return tmp_command;
 }
 
 void control::dumpchannel(int channelnr)
 {
 	int position = (int) (channelnr / 10);
-	
+
 	osd_obj->createList();
 	for (int i = position * 10; i < position * 10 + 10; i++)
 	{
@@ -306,12 +306,12 @@ void control::dumpchannel(int channelnr)
 
 int control::runCommand(command_class command, bool val)
 {
-	std::cout << "Parsing command class-index " << command.cmd_class << " command-index " << command.command << std::endl;
+	//std::cout << "Parsing command class-index " << command.cmd_class << " command-index " << command.command << std::endl;
 
 	switch (command.if_type)
 	{
 	case IF:
-		std::cout << "If executing" << std::endl;
+		//std::cout << "If executing" << std::endl;
 		{
 			std::string val = "true";
 			if (command.if_value != "")
@@ -338,7 +338,7 @@ int control::runCommand(command_class command, bool val)
 	for (int i = 0; (unsigned int) i < command.var.size(); i++)
 	{
 		command.args[command.var[i]] = vars->getvalue(command.args[command.var[i]]);
-		std::cout << "Getting value again " << command.args[command.var[i]] << std::endl;
+		//std::cout << "Getting value again " << command.args[command.var[i]] << std::endl;
 	}
 
 	switch (command.cmd_class)
@@ -424,11 +424,11 @@ int control::runCommand(command_class command, bool val)
 			{
 				if(command.args[1] == "Selected")
 				{
-					std::cout << "Selected Get" << std::endl;
+					//std::cout << "Selected Get" << std::endl;
 					std::string cmd = "%";
 					cmd.append(command.args[2]);
 					vars->setvalue(cmd, selected_channel);
-				}	
+				}
 			}
 			else if(command.args[0] == "Select")
 			{
@@ -463,7 +463,7 @@ int control::runCommand(command_class command, bool val)
 					int selected = newpos % 10;
 					std::stringstream ostr;
 					ostr << "COMMAND list select_item " << selected << std::ends;
-					
+
 					osd_obj->addCommand(ostr.str());
 					selected_channel = newpos;
 				}
@@ -483,7 +483,7 @@ int control::runCommand(command_class command, bool val)
 					int selected = newpos % 10;
 					std::stringstream ostr;
 					ostr << "COMMAND list select_item " << selected << std::ends;
-					
+
 					osd_obj->addCommand(ostr.str());
 					selected_channel = newpos;
 				}
@@ -504,7 +504,7 @@ int control::runCommand(command_class command, bool val)
 					int selected = newpos % 10;
 					std::stringstream ostr;
 					ostr << "COMMAND list select_item " << selected << std::ends;
-					
+
 					osd_obj->addCommand(ostr.str());
 					selected_channel = newpos;
 				}
@@ -525,15 +525,15 @@ int control::runCommand(command_class command, bool val)
 					int selected = newpos % 10;
 					std::stringstream ostr;
 					ostr << "COMMAND list select_item " << selected << std::ends;
-					
+
 					osd_obj->addCommand(ostr.str());
 					selected_channel = newpos;
 				}
 			}
 		}
-		
-		
-		break;	
+
+
+		break;
 	case HARDWARE:
 		if (command.command == C_Set)
 		{
@@ -571,7 +571,7 @@ int control::runCommand(command_class command, bool val)
 					on_time--;
 			}
 			else
-				on_time = 0;
+				on_time = 0xfff;
 
 			ioctl(fpfd, FP_IOCTL_SET_WAKEUP_TIMER, &on_time);
 			ioctl(fpfd, FP_IOCTL_GET_WAKEUP_TIMER, &on_time);
@@ -602,7 +602,7 @@ int control::runCommand(command_class command, bool val)
 						break;
 					}
 				}
-				else 
+				else
 				{
 					checker_obj->aratioCheck();
 				}
@@ -612,7 +612,7 @@ int control::runCommand(command_class command, bool val)
 				hardware_obj->switch_mute();
 			}
 		}
-		
+
 		break;
 	case RC:
 		if (command.command == C_Wait)
@@ -717,7 +717,7 @@ int control::runCommand(command_class command, bool val)
 					vars->setvalue(command.args[3], channels_obj->getServiceName(atoi(command.args[2].c_str())));
 				}
 			}
-			
+
 		}
 		else if (command.command == C_Add)
 		{
@@ -776,7 +776,7 @@ int control::runCommand(command_class command, bool val)
 						}
 					}
 				}
-			
+
 			}
 		}
 		break;
@@ -821,7 +821,7 @@ int control::runCommand(command_class command, bool val)
 				channels_obj->zapLastChannel();
 				channels_obj->setCurrentOSDProgramInfo(osd_obj);
 				channels_obj->receiveCurrentEIT();
-				
+
 			}
 			else if (command.args[0] == "Down")
 			{
@@ -832,7 +832,7 @@ int control::runCommand(command_class command, bool val)
 				channels_obj->setCurrentChannel(cn);
 				channels_obj->setCurrentOSDProgramInfo(osd_obj);
 				channels_obj->receiveCurrentEIT();
-				
+
 			}
 			else if (command.args[0] == "Up")
 			{
@@ -843,11 +843,11 @@ int control::runCommand(command_class command, bool val)
 				channels_obj->setCurrentChannel(cn);
 				channels_obj->setCurrentOSDProgramInfo(osd_obj);
 				channels_obj->receiveCurrentEIT();
-				
+
 			}
 			else if (command.args[0] == "Zap")
 			{
-				std::cout << "Zap current Channel" << std::endl;
+				//std::cout << "Zap current Channel" << std::endl;
 				channels_obj->zapCurrentChannel();
 			}
 			else if (command.args[0] == "Audio")
@@ -880,7 +880,7 @@ int control::runCommand(command_class command, bool val)
 			{
 				channels_obj->saveTS();
 			}
-			
+
 		}
 		else if (command.command == C_Perspectives)
 		{
@@ -917,7 +917,7 @@ int control::runCommand(command_class command, bool val)
 			{
 				channels_obj->parsePerspectives();
 			}
-			
+
 		}
 		else if (command.command == C_Load)
 		{
@@ -973,7 +973,7 @@ int control::runCommand(command_class command, bool val)
 			else if (command.args[0] == "RemoveFromMenu")
 			{
 				int number = osd_obj->menuSelectedIndex();
-				std::cout << "Number: " << number << std::endl;
+				//std::cout << "Number: " << number << std::endl;
 				timer_obj->rmTimer(timer_obj->getDumpedChannel(number), timer_obj->getDumpedStarttime(number));
 			}
 		}
@@ -1049,9 +1049,9 @@ int control::runCommand(command_class command, bool val)
 			{
 				eit_obj->dumpEvent(atoi(command.args[1].c_str()));
 			}
-			
+
 		}
-		break;	
+		break;
 	case FB:
 		if (command.command == C_direct)
 		{
@@ -1082,16 +1082,16 @@ int control::runCommand(command_class command, bool val)
 		{
 			ir_obj->sendCommand(command.args[0]);
 		}
-		break;	
+		break;
 	}
-	
+
 
 	return 0;
 }
 
 bool control::checkSetting(std::string var)
 {
-	std::cout << "Checking " << var << std::endl;
+	//std::cout << "Checking " << var << std::endl;
 	if (var == "%SETTINGS_LETTERBOX")
 	{
 		return (checker_obj->get_16_9_mode() == 2);
@@ -1137,26 +1137,26 @@ void control::loadModes()
 {
 	std::ifstream inFile;
 	std::vector<std::string> line;
-	
+
 	inFile.open(CONFIGDIR "/lcars/modes.lcars");
 	if (!inFile)
 	{
 		perror("modes.lcars");
 	}
-	
+
 	std::string tmp_string;
 	while(getline(inFile, tmp_string))
 		line.insert(line.end(), tmp_string);
 	inFile.close();
-	
+
 	int i = 0;
 	while ((unsigned int) i < line.size() - 1)
 	{
 		std::istringstream iss(line[i]);
-		std::cout << "std::endline: " << line[i] << std::endl;
+		//std::cout << "std::endline: " << line[i] << std::endl;
 		if (line[i++] != "------")
 		{
-			std::cout << "Error in menus.lcars: ------ missing in line " << (i + 1)<< std::endl;
+			//std::cout << "Error in menus.lcars: ------ missing in line " << (i + 1)<< std::endl;
 		}
 
 		mode mode;
@@ -1165,7 +1165,7 @@ void control::loadModes()
 		while(line[i] == "+++")
 		{
 			i++;
-			std::cout << i << " " << line[i] << std::endl;
+			//std::cout << i << " " << line[i] << std::endl;
 			if (line[i] == "Title:")
 			{
 				i++;
@@ -1184,7 +1184,7 @@ void control::loadModes()
 				while(line[++i][0] == 9)
 				{
 					mode.init_commands.insert(mode.init_commands.end(), parseCommand(line[i]));
-					
+
 				}
 				continue;
 			}
@@ -1199,7 +1199,7 @@ void control::loadModes()
 					{
 						if (line[i].substr(0, 8) == "<NUMBERS")
 						{
-							std::cout << "NUMBERS++++++++" << std::endl;
+							//std::cout << "NUMBERS++++++++" << std::endl;
 							val = rc_obj->parseKey(line[i].substr(0, line[i].length() - 1)); // Still to add
 						}
 						else
@@ -1214,7 +1214,7 @@ void control::loadModes()
 					while(line[++i][0] == 9)
 					{
 						tmp_commands.insert(tmp_commands.end(), parseCommand(line[i]));
-						std::cout << val << " - " << line[i].substr(1, line[i].length() - 1) << std::endl;
+						//std::cout << val << " - " << line[i].substr(1, line[i].length() - 1) << std::endl;
 					}
 					mode.keys[val] = tmp_commands;
 				}
@@ -1224,11 +1224,11 @@ void control::loadModes()
 			{
 				std::cout << "Error in modes.lcars: unknown thing in line " << (i + 1)<< std::endl;
 			}
-			
+
 			//i++;
 
 		}
-		std::cout << "Adding Index " << mode.index << std::endl;
+		//std::cout << "Adding Index " << mode.index << std::endl;
 		modes[mode.index] = mode;
 		//getline(iss, cmd, '=');
 		//getline(iss, parm, '=');
@@ -1240,26 +1240,26 @@ void control::loadSubs()
 	std::ifstream inFile;
 	std::vector<std::string> line;
 	subs.clear();
-	
+
 	inFile.open(CONFIGDIR "/lcars/subs.lcars");
 	if (!inFile)
 	{
 		perror("subs.lcars");
 	}
-	
+
 	std::string tmp_string;
 	while(getline(inFile, tmp_string))
 		line.insert(line.end(), tmp_string);
 	inFile.close();
-	
+
 	int i = 0;
 	while ((unsigned int) i < line.size() - 1)
 	{
 		std::istringstream iss(line[i]);
-		std::cout << "std::endline: " << line[i] << std::endl;
+		//std::cout << "std::endline: " << line[i] << std::endl;
 		if (line[i++] != "------")
 		{
-			std::cout << "Error in subs.lcars: ------ missing in line " << (i + 1)<< std::endl;
+			//std::cout << "Error in subs.lcars: ------ missing in line " << (i + 1)<< std::endl;
 		}
 
 		std::string title;
@@ -1267,7 +1267,7 @@ void control::loadSubs()
 		while(line[i] == "+++")
 		{
 			i++;
-			std::cout << i << " " << line[i] << std::endl;
+			//std::cout << i << " " << line[i] << std::endl;
 			if (line[i] == "Title:")
 			{
 				i++;
@@ -1280,30 +1280,30 @@ void control::loadSubs()
 				while(line[++i][0] == 9)
 				{
 					tmp_commands.insert(tmp_commands.end(), parseCommand(line[i]));
-					
+
 				}
 				continue;
 			}
 			else
 			{
-				std::cout << "Error in subs.lcars: unknown thing in line " << (i + 1)<< std::endl;
+				//std::cout << "Error in subs.lcars: unknown thing in line " << (i + 1)<< std::endl;
 			}
-			
+
 			//i++;
 
 		}
-		//std::cout << "Adding Index " << mode.index << std::endl;
+		////std::cout << "Adding Index " << mode.index << std::endl;
 		subs[title] = tmp_commands;
 		//modes[mode.index] = mode;
 		//getline(iss, cmd, '=');
 		//getline(iss, parm, '=');
 	}
-	std::cout << "Sub-Parsing ended" << std::endl;
+	//std::cout << "Sub-Parsing ended" << std::endl;
 }
 
 void control::runSub(std::string name)
 {
-	std::cout << "Running Sub " << name << std::endl;
+	//std::cout << "Running Sub " << name << std::endl;
 	commandlist tmp_commands;
 	tmp_commands = subs.find(name)->second;
 	for (int i = 0; (unsigned int) i < tmp_commands.size(); i++)
@@ -1326,18 +1326,18 @@ void control::runMode(int modeNumber)
 void control::runMode()
 {
 	quit_modes = false;
-	
+
 	while(!quit_modes)
 	{
 		mode mode = modes.find(current_mode)->second;
 
-		std::cout << "Running Mode #" << mode.index << " titled \"" << mode.title << "\"" << std::endl;
+		//std::cout << "Running Mode #" << mode.index << " titled \"" << mode.title << "\"" << std::endl;
 
 		if (mode.init_commands.size() > 0)
 		{
 			for (int i = 0; (unsigned int) i < mode.init_commands.size(); i++)
 			{
-				std::cout << "Init" << std::endl;
+				//std::cout << "Init" << std::endl;
 				runCommand(mode.init_commands[i]);
 			}
 		}
@@ -1348,18 +1348,18 @@ void control::runMode()
 			{
 				unsigned short key;
 				key = rc_obj->read_from_rc();
-				std::cout << "size of keys: " << mode.keys.size() << std::endl;
+				//std::cout << "size of keys: " << mode.keys.size() << std::endl;
 				if (mode.keys.count(key) != 0)
 				{
-					std::cout << "Found key!" << std::endl;
+					//std::cout << "Found key!" << std::endl;
 					commandlist commands = mode.keys.find(key)->second;
 					for (int i = 0; (unsigned int) i < commands.size(); i++)
 					{
 						runCommand(commands[i]);
 					}
 				}
-				else
-					std::cout << "Key not found" << std::endl;
+				//else
+				//std::cout << "Key not found" << std::endl;
 			}
 		}
 	}
@@ -1369,26 +1369,26 @@ void control::loadMenus()
 {
 	std::ifstream inFile;
 	std::vector<std::string> line;
-	
+
 	inFile.open(CONFIGDIR "/lcars/menus.lcars");
 	if (!inFile)
 	{
 		perror("menus.lcars");
 	}
-	
+
 	std::string tmp_string;
 	while(getline(inFile, tmp_string))
 		line.insert(line.end(), tmp_string);
 	inFile.close();
-	
+
 	int i = 0;
 	while ((unsigned int) i < line.size() - 1)
 	{
 		std::istringstream iss(line[i]);
-		std::cout << "std::endline: " << line[i] << std::endl;
+		//std::cout << "std::endline: " << line[i] << std::endl;
 		if (line[i++] != "------")
 		{
-			std::cout << "Error in menus.lcars: ------ missing in line " << (i + 1)<< std::endl;
+			//std::cout << "Error in menus.lcars: ------ missing in line " << (i + 1)<< std::endl;
 		}
 
 		menu menu;
@@ -1396,7 +1396,7 @@ void control::loadMenus()
 		while(line[i] == "+++")
 		{
 			i++;
-			std::cout << i << " " << line[i] << std::endl;
+			//std::cout << i << " " << line[i] << std::endl;
 			if (line[i] == "Title:")
 			{
 				i++;
@@ -1415,7 +1415,7 @@ void control::loadMenus()
 				while(line[++i][0] == 9)
 				{
 					menu.init_commands.insert(menu.init_commands.end(), parseCommand(line[i]));
-					
+
 				}
 				continue;
 			}
@@ -1441,11 +1441,11 @@ void control::loadMenus()
 					case '!':
 						val = atoi(value.substr(1).c_str());
 						type = 2;
-						printf("%d\n", line[i+1][0]);
+						//printf("%d\n", line[i+1][0]);
 						while(line[++i][0] == 9)
 						{
 							tmp_switches.insert(tmp_switches.end(), line[i].substr(1, line[i].length() - 1));
-							std::cout << "tmp_switches: " << line[i].substr(1, line[i].length() - 1) << std::endl;
+							//std::cout << "tmp_switches: " << line[i].substr(1, line[i].length() - 1) << std::endl;
 						}
 						i--;
 						break;
@@ -1462,7 +1462,7 @@ void control::loadMenus()
 						type = 0;
 						break;
 					}
-					
+
 
 					if (menu.entries.count(val) == 0)
 					{
@@ -1470,10 +1470,10 @@ void control::loadMenus()
 						tmp_entry.description = description;
 						tmp_entry.type = type;
 						tmp_entry.switches = tmp_switches;
-						std::cout << "Size: " << tmp_switches.size() << std::endl;
+						//std::cout << "Size: " << tmp_switches.size() << std::endl;
 						menu.entries[val] = tmp_entry;
 						menu.sort.insert(menu.sort.end(), val);
-						std::cout << "Added " << description << " of type " << type << " as value " << val << std::endl;
+						//std::cout << "Added " << description << " of type " << type << " as value " << val << std::endl;
 					}
 					else
 					{
@@ -1481,13 +1481,13 @@ void control::loadMenus()
 						it->second.description = description;
 						it->second.type = type;
 						it->second.switches = tmp_switches;
-						std::cout << "Size: " << tmp_switches.size() << std::endl;
+						//std::cout << "Size: " << tmp_switches.size() << std::endl;
 						menu.sort.insert(menu.sort.end(), val);
 					}
 
 					i++;
 				}
-				std::cout << menu.entries.size() << "Entries added" << std::endl;
+				//std::cout << menu.entries.size() << "Entries added" << std::endl;
 				continue;
 			}
 			else if (line[i] == "Actions:")
@@ -1501,12 +1501,12 @@ void control::loadMenus()
 					while(line[++i][0] == 9)
 					{
 						tmp_commands.insert(tmp_commands.end(), parseCommand(line[i]));
-						std::cout << val << " - " << line[i].substr(1, line[i].length() - 1) << std::endl;
+						//std::cout << val << " - " << line[i].substr(1, line[i].length() - 1) << std::endl;
 					}
 					if (menu.entries.count(val) == 0)
 					{
 						menu_entry tmp_entry;
-						
+
 						tmp_entry.action_commands = tmp_commands;
 						menu.entries[val] = tmp_entry;
 					}
@@ -1528,12 +1528,12 @@ void control::loadMenus()
 					while(line[++i][0] == 9)
 					{
 						tmp_commands.insert(tmp_commands.end(), line[i].substr(1, line[i].length() - 1));
-						std::cout << val << " - " << line[i].substr(1, line[i].length() - 1) << std::endl;
+						//std::cout << val << " - " << line[i].substr(1, line[i].length() - 1) << std::endl;
 					}
 					if (menu.entries.count(val) == 0)
 					{
 						menu_entry tmp_entry;
-						
+
 						tmp_entry.value_commands = tmp_commands;
 						menu.entries[val] = tmp_entry;
 					}
@@ -1547,48 +1547,48 @@ void control::loadMenus()
 			}
 			else
 			{
-				std::cout << "Error in menus.lcars: unknown thing in line " << (i + 1)<< std::endl;
+				//std::cout << "Error in menus.lcars: unknown thing in line " << (i + 1)<< std::endl;
 			}
-			
+
 			//i++;
 
 		}
-		std::cout << "Adding Index " << menu.index << std::endl;
+		//std::cout << "Adding Index " << menu.index << std::endl;
 		menus[menu.index] = menu;
 		//getline(iss, cmd, '=');
 		//getline(iss, parm, '=');
 	}
 
-	std::cout << "Read " << line.size() << " lines of Menu-Config" << std::endl;
+	//std::cout << "Read " << line.size() << " lines of Menu-Config" << std::endl;
 }
 
 void control::getMenu(int menuNumber)
 {
 	menu tmp_menu = menus[menuNumber];
-	
+
 	osd_obj->createMenu();
 	osd_obj->setMenuTitle(tmp_menu.title);
 
-	
+
 	for (int i = 0; (unsigned int) i < tmp_menu.sort.size(); i++)
 	{
 		std::map<int, menu_entry>::iterator it = tmp_menu.entries.find(tmp_menu.sort[i]);
 		osd_obj->addMenuEntry(it->first, it->second.description, it->second.type);
 		if (it->second.type == 2)
 		{
-			std::cout << "Size: " << it->second.switches.size() << std::endl;
+			//std::cout << "Size: " << it->second.switches.size() << std::endl;
 			for (int j = 0; (unsigned int) j < it->second.switches.size(); j++)
 			{
-				std::cout << "Value: " << it->second.switches[j] << std::endl;
+				//std::cout << "Value: " << it->second.switches[j] << std::endl;
 				osd_obj->addSwitchParameter(i, it->second.switches[j]);
 			}
 			bool set = false;
 			if ((int) it->second.value_commands.size() > 0)
 			{
-				
+
 				for (int j = 0; (unsigned int)j < it->second.value_commands.size(); j++)
 				{
-					//std::cout << it->second.value_commands[j] << " is value" << std::endl;
+					////std::cout << it->second.value_commands[j] << " is value" << std::endl;
 					if (checkSetting(it->second.value_commands[j]))
 					{
 						set = true;
@@ -1618,10 +1618,10 @@ void control::openMenu(int menuNumber)
 	vars->setvalue("%PLUGINMENU", "false");
 	for (int i = 0; (unsigned int) i < tmp_menu.init_commands.size(); i++)
 	{
-		std::cout << "Init" << std::endl;
+		//std::cout << "Init" << std::endl;
 		runCommand(tmp_menu.init_commands[i]);
 	}
-	
+
 	osd_obj->addCommand("SHOW menu");
 	osd_obj->addCommand("COMMAND menu select next");
 
@@ -1662,12 +1662,12 @@ void control::openMenu(int menuNumber)
 		}
 		if (number > 0 && number < 30 && vars->getvalue("%PLUGINMENU") == "true")
 		{
-			std::cout << "NUUUUMBER: " << number << std::endl;
+			//std::cout << "NUUUUMBER: " << number << std::endl;
 			osd_obj->addCommand("HIDE menu");
 			//teletext_obj->stopReinsertion();
 			if (plugins_obj->getShowPig(number - 1))
 			{
-				pig_obj->hide();	
+				pig_obj->hide();
 				pig_obj->setSize(plugins_obj->getSizeX(number - 1), plugins_obj->getSizeY(number - 1));
 				pig_obj->setStack(1);
 				pig_obj->show();
@@ -1695,13 +1695,13 @@ void control::openMenu(int menuNumber)
 
 			for (int i = 0; (unsigned int) i < tmp_menu.init_commands.size(); i++)
 			{
-				std::cout << "Init" << std::endl;
+				//std::cout << "Init" << std::endl;
 				runCommand(tmp_menu.init_commands[i]);
 			}
-	
+
 			osd_obj->addCommand("SHOW menu");
 			osd_obj->addCommand("COMMAND menu select next");
-			
+
 		}
 		else if (number != -1 && number < 30)
 		{
@@ -1732,7 +1732,7 @@ void control::openMenu(int menuNumber)
 						selected++;
 						if ((unsigned int)selected == it->second.switches.size())
 							selected = 0;
-							
+
 						osd_obj->setSelected(i, selected);
 
 						runCommand(it->second.action_commands[it->second.switches.size() - selected - 1]);
@@ -1743,36 +1743,36 @@ void control::openMenu(int menuNumber)
 						runCommand(it->second.action_commands[0], osd_obj->getSelected(i));
 
 					}
-				
+
 					osd_obj->selectEntry(number);
-					std::cout << "Selected: " << i << std::endl;
+					//std::cout << "Selected: " << i << std::endl;
 
 				}
 				else if (it->second.type == 0)
 				{
 					int old_menu = osd_obj->menuSelectedIndex();
 					osd_obj->addCommand("HIDE menu");
-					std::cout << it->second.action_commands.size() << std::endl;
+					//std::cout << it->second.action_commands.size() << std::endl;
 					for (int j = 0; (unsigned int) j < it->second.action_commands.size(); j++)
 					{
-						//std::cout << "Mark1" << std::endl;
-						//std::cout << it->second.action_commands[j] << std::endl;
+						////std::cout << "Mark1" << std::endl;
+						////std::cout << it->second.action_commands[j] << std::endl;
 						if (runCommand(it->second.action_commands[j]) == 1)
 						{
-							getMenu(menuNumber);						
+							getMenu(menuNumber);
 						}
-						
+
 					}
 					osd_obj->addCommand("SHOW menu");
 
 					std::stringstream ostr;
 					ostr << "COMMAND menu select " << old_menu << std::ends;
-					
+
 					osd_obj->addCommand(ostr.str());
 				}
-				
+
 			}
-			std::cout << "Number " << number << " selected." << std::endl;
+			//std::cout << "Number " << number << " selected." << std::endl;
 		}
 		else if (number > 29)
 		{
@@ -1784,7 +1784,7 @@ void control::openMenu(int menuNumber)
 			{
 				if (runCommand(it->second.action_commands[j]) == 1)
 				{
-					getMenu(menuNumber);						
+					getMenu(menuNumber);
 				}
 			}
 			tmp_menu = menus[menuNumber];
@@ -1793,10 +1793,10 @@ void control::openMenu(int menuNumber)
 
 			for (int i = 0; (unsigned int) i < tmp_menu.init_commands.size(); i++)
 			{
-				std::cout << "Init" << std::endl;
+				//std::cout << "Init" << std::endl;
 				runCommand(tmp_menu.init_commands[i]);
 			}
-	
+
 			osd_obj->addCommand("SHOW menu");
 			osd_obj->addCommand("COMMAND menu select next");
 		}

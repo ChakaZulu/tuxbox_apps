@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.9  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.8  2002/05/31 22:33:14  TheDOC
 i hate perspectives
 
@@ -63,7 +66,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 enum
 {
-	CHANNEL, LINKAGE, NVOD
+    CHANNEL, LINKAGE, NVOD
 };
 
 struct channel
@@ -139,18 +142,18 @@ struct transportstream
 
 struct ltstr2
 {
-  bool operator()(transponder s1, transponder s2) const
-  {
-    if (s1.TS < s2.TS)
-		return true;
-	else if (s1.TS > s2.TS)
-		return false;
-	else
-		if (s1.ONID < s2.ONID)
+	bool operator()(transponder s1, transponder s2) const
+	{
+		if (s1.TS < s2.TS)
 			return true;
-		else
+		else if (s1.TS > s2.TS)
 			return false;
-  }
+		else
+			if (s1.ONID < s2.ONID)
+				return true;
+			else
+				return false;
+	}
 };
 
 class channels
@@ -180,7 +183,7 @@ class channels
 	std::queue<int> last_channels;
 	std::vector<linkage> linkage_perspectives;
 	linkage tmp_link;
-public:	
+public:
 	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v);
 	channels(settings *setting, pat *p1, pmt *p2);
 
@@ -196,7 +199,7 @@ public:
 	std::string getPerspectiveName(int number);
 
 	// end multiperspective-stuff
-	
+
 	void zapCurrentChannel();
 	void zapLastChannel();
 	void setCurrentOSDProgramInfo(osd *osd_obj);
@@ -210,7 +213,7 @@ public:
 
 	event getCurrentNow() { return now; }
 	event getCurrentNext() { return next; }
-	
+
 	void clearChannels() { basic_channellist.clear(); basic_TSlist.clear(); }
 
 	void addChannel(); // Adds a channel at the end and sets current position to new channel
@@ -274,7 +277,7 @@ public:
 	std::string getCurrentProviderName();
 
 	bool addTS(int TS, int ONID, int FREQU, int SYMBOL, int POLARIZATION = -1, int FEC = -1, int diseqc = 1);
-	
+
 	int getFrequency(int TS, int ONID);
 	int getSymbolrate(int TS, int ONID);
 	int getPolarization(int TS, int ONID);
@@ -295,7 +298,7 @@ public:
 	int getCurrentPolarization() { return (*cur_pos_TS).second.POLARIZATION; }
 	int getCurrentFEC() { return (*cur_pos_TS).second.FEC; }
 	int getCurrentDiseqc() { return (*cur_pos_TS).second.diseqc; }
-	
+
 
 	void dumpTS();
 	void dumpChannels();

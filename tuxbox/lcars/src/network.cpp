@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.8  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.7  2002/05/21 04:37:42  TheDOC
 http-update... new web-frontend in http://dbox/file/start.htm... will be main index soon
 
@@ -76,7 +79,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 network::network(container &contain, rc *r, control *c, variables *v) : cont(contain)
 {
-	xmlrpc_obj.setObjects(&cont);
+	//xmlrpc_obj.setObjects(&cont);
 	rc_obj = r;
 	control_obj = c;
 	vars = v;
@@ -92,7 +95,7 @@ std::string network::replace_vars(std::string tmp_string)
 	{
 		std::string::size_type pos = work_string.find("%");
 		if (std::string::npos == pos)
-		quit = true;
+			quit = true;
 		else
 		{
 			position += pos;
@@ -130,7 +133,7 @@ std::string network::replace_vars(std::string tmp_string)
 					work_string = work_string.substr(1);
 					position++;
 				}
-				std::cout << work_string << std::endl;
+				//std::cout << work_string << std::endl;
 			}
 		}
 	} while(!quit);
@@ -151,9 +154,9 @@ std::string network::getfile(std::string name)
 {
 	std::ifstream inFile;
 	std::string httpfile;
-										
+
 	inFile.open(name.c_str());
-	
+
 	std::string tmp_string;
 	while(getline(inFile, tmp_string))
 		httpfile.append(tmp_string);
@@ -164,7 +167,7 @@ std::string network::getfile(std::string name)
 void *network::startlistening(void *object)
 {
 	network *n = (network *) object;
-	
+
 	int file_descriptor, inbound_connection, read_size;
 	struct sockaddr_in server_address, inbound_address;
 	socklen_t inbound_address_size;
@@ -190,7 +193,7 @@ void *network::startlistening(void *object)
 
 	while(1)
 	{
-	
+
 		if (listen(file_descriptor, 5) < 0)
 		{
 			perror("listen()");
@@ -209,7 +212,7 @@ void *network::startlistening(void *object)
 		n->inbound_connection = inbound_connection;
 
 		address_holder = (unsigned char*) &inbound_address.sin_addr.s_addr;
-		printf("Connection from %d.%d.%d.%d\n", address_holder[0], address_holder[1], address_holder[2], address_holder[3]);
+		//printf("Connection from %d.%d.%d.%d\n", address_holder[0], address_holder[1], address_holder[2], address_holder[3]);
 
 		char command[20][10000];
 		if ((read_size = read(inbound_connection, buffer, 10000)) < 0)
@@ -217,10 +220,10 @@ void *network::startlistening(void *object)
 			perror("read()");
 			exit(5);
 		}
-		printf("Bytes read: %d\n", read_size);
+		//printf("Bytes read: %d\n", read_size);
 
 		buffer[read_size] = '\0';
-		printf("%s", buffer);
+		//printf("%s", buffer);
 
 		int parm_count = 0;
 		int act_pos = 0;
@@ -244,10 +247,10 @@ void *network::startlistening(void *object)
 		command[parm_count][act_pos - 1] = '\0';
 		parm_count++;
 
-		printf ("%d Parameter\n", parm_count);
+		//printf ("%d Parameter\n", parm_count);
 		for (int i = 0; i < parm_count; i++)
 		{
-			printf("Parameter %d: %s\n", i, command[i]);
+			//printf("Parameter %d: %s\n", i, command[i]);
 		}
 
 		std::string headerok = "HTTP/1.1 200 OK\nConnection: close\nContent-Type: text/html\n\r\n";
@@ -259,11 +262,11 @@ void *network::startlistening(void *object)
 		{
 			std::string line(command[i]);
 			std::string parm[20];
-			
+
 			std::istringstream iss(line);
 			int counter = 0;
 			while(std::getline(iss, parm[counter++], ' '));
-			
+
 
 			if (parm[0] == "GET")
 			{
@@ -272,10 +275,10 @@ void *network::startlistening(void *object)
 				int counter2 = 0;
 				while(std::getline(iss2, path[counter2++], '/'));
 
-				
+
 				if (path[1] == "" && counter2 == 2)
 				{
-					printf("GET root\n");
+					//printf("GET root\n");
 					write(inbound_connection, headerok.c_str(), headerok.length());
 					write(inbound_connection, (*n->cont.settings_obj).getVersion().c_str(), (*n->cont.settings_obj).getVersion().length());
 					strcpy(writebuffer, "<br><br><a href=\"/channels/gethtmlchannels\">Channellist</a>");
@@ -301,9 +304,9 @@ void *network::startlistening(void *object)
 					{
 						std::ifstream inFile;
 						std::string httpfile;
-											
+
 						inFile.open(filename.c_str());
-	
+
 						std::string tmp_string;
 						while(getline(inFile, tmp_string))
 							httpfile.append(tmp_string);
@@ -312,15 +315,15 @@ void *network::startlistening(void *object)
 					}
 					else
 					{
-			
+
 						int fd = open(filename.c_str(), O_RDONLY);
 						char c;
 						while(read(fd, &c, 1))
 							write(inbound_connection, &c, 1);
 						close(fd);
 					}
-						
-					
+
+
 				}
 				else if (path[1] == "version")
 				{
@@ -332,13 +335,13 @@ void *network::startlistening(void *object)
 					if (path[2] == "getcurrent")
 					{
 						write(inbound_connection, headerok.c_str(), headerok.length());
-						sprintf(writebuffer, "%d", (*n->cont.channels_obj).getCurrentChannelNumber()); 
+						sprintf(writebuffer, "%d", (*n->cont.channels_obj).getCurrentChannelNumber());
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 					}
 					else if (path[2] == "numberchannels")
 					{
 						write(inbound_connection, headerok.c_str(), headerok.length());
-						sprintf(writebuffer, "%d", (*n->cont.channels_obj).numberChannels()); 
+						sprintf(writebuffer, "%d", (*n->cont.channels_obj).numberChannels());
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 					}
 					else if (path[2] == "gethtmlchannels")
@@ -347,7 +350,7 @@ void *network::startlistening(void *object)
 						write(inbound_connection, "<table>", 7);
 						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
 						{
-							sprintf(writebuffer, "<tr><td>%d</td><td><a href=\"zapto/%d\">%s</a></td></tr>\n", count, count, (*n->cont.channels_obj).getServiceName(count).c_str()); 
+							sprintf(writebuffer, "<tr><td>%d</td><td><a href=\"zapto/%d\">%s</a></td></tr>\n", count, count, (*n->cont.channels_obj).getServiceName(count).c_str());
 							write(inbound_connection, writebuffer, strlen(writebuffer));
 						}
 						write(inbound_connection, "</table>", 8);
@@ -358,7 +361,7 @@ void *network::startlistening(void *object)
 						for (int count = 0; count < (*n->cont.channels_obj).numberChannels(); count++)
 						{
 							channel tmp_chan = (*n->cont.channels_obj).getChannelByNumber(count);
-							sprintf(writebuffer, "%d %s<br>\n", count, tmp_chan.serviceName); 
+							sprintf(writebuffer, "%d %s<br>\n", count, tmp_chan.serviceName);
 							write(inbound_connection, writebuffer, strlen(writebuffer));
 						}
 					}
@@ -379,38 +382,38 @@ void *network::startlistening(void *object)
 					else if (path[2] == "zapto")
 					{
 						int number = atoi(path[3].c_str());
-																	
+
 						(*n->cont.channels_obj).setCurrentChannel(number);
-	
+
 						(*n->cont.channels_obj).zapCurrentChannel();
 						(*n->cont.channels_obj).setCurrentOSDProgramInfo(n->cont.osd_obj);
-						
+
 						(*n->cont.channels_obj).receiveCurrentEIT();
 						(*n->cont.channels_obj).setCurrentOSDProgramEIT(n->cont.osd_obj);
 						(*n->cont.channels_obj).updateCurrentOSDProgramAPIDDescr(n->cont.osd_obj);
-	
+
 						write(inbound_connection, headerok.c_str(), headerok.length());
 						write(inbound_connection, "Done!<br>\n", 10);
-						
+
 						if ((*n->cont.channels_obj).getCurrentAPIDcount() == 1)
 							sprintf(writebuffer, "VPID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0));
 						else
 							sprintf(writebuffer, "VPID: %x APID: %x APID: %x<br>\n", (*n->cont.channels_obj).getCurrentVPID(), (*n->cont.channels_obj).getCurrentAPID(0), (*n->cont.channels_obj).getCurrentAPID(1));
 						write(inbound_connection, writebuffer, strlen(writebuffer));
-						
+
 						n->writetext("<br><hr>\n");
 						event tmp_event;
 						char text[100];
 						for (int i = 0; i < 2; i++)
 						{
 							tmp_event = (i == 0) ? (*n->cont.eit_obj).getNow() : (*n->cont.eit_obj).getNext();
-							
+
 							sprintf(text, "%s - <a href=/epg/%s>%s</a><br>\n", ctime(&tmp_event.starttime), (i == 0) ? "now" : "next", tmp_event.event_name);
 							n->writetext(text);
-							
+
 						}
 						n->writetext("<hr><br>\n");
-	
+
 						strcpy(writebuffer, "<br><a href=\"/video/stop\">Video stop</a>");
 						write(inbound_connection, writebuffer, strlen(writebuffer));
 					}
@@ -427,13 +430,13 @@ void *network::startlistening(void *object)
 					else if (path[2] == "start")
 					{
 						(*n->cont.zap_obj).dmx_start();
-	
+
 						write(inbound_connection, headerok.c_str(), headerok.length());
 						write(inbound_connection, "Done!", 6);
 					}
 
 				}
-				
+
 				else if (path[1] == "epg")
 				{
 					char text[1000];
@@ -604,7 +607,7 @@ void *network::startlistening(void *object)
 
 
 				}
-				
+
 				else if (path[1] == "datadir")
 				{
 					std::string filename = DATADIR "/lcars/" + path[2];
@@ -624,14 +627,14 @@ void *network::startlistening(void *object)
 			{
 				post = true;
 				postline = command[i];
-				std::cout << "Postline: " << postline << std::endl;
+				//std::cout << "Postline: " << postline << std::endl;
 			}
 		}
 		if (post)
 		{
 			std::string line(postline);
 			std::string parm[20];
-			
+
 			std::istringstream iss(line);
 			int counter = 0;
 			while(std::getline(iss, parm[counter++], ' '));
@@ -641,7 +644,7 @@ void *network::startlistening(void *object)
 			int counter2 = 0;
 			while(std::getline(iss2, path[counter2++], '/'));
 
-			std::cout << "PATH[1]: " << path[1] << std::endl;
+			//std::cout << "PATH[1]: " << path[1] << std::endl;
 			if (path[1] == "command")
 			{
 				std::string parameters(command[parm_count - 1]);
@@ -654,7 +657,7 @@ void *network::startlistening(void *object)
 					var_list.insert(var_list.end(), tmp_string);
 				for (int i = 0; (unsigned int) i < var_list.size(); i++)
 				{
-					std::cout << "command2" << std::endl;				
+					//std::cout << "command2" << std::endl;
 					std::stringstream iss2(var_list[i]);
 					std::getline(iss2, tmp_string, '=');
 					if (tmp_string == "command")
@@ -668,17 +671,17 @@ void *network::startlistening(void *object)
 						break;
 					}
 				}
-				
+
 				if (tmp_string == "command")
 				{
 					std::replace(command.begin(), command.end(), '+', ' ');
-					std::cout << "Command: " << command << std::endl;
+					//std::cout << "Command: " << command << std::endl;
 					n->control_obj->runCommand(n->control_obj->parseCommand(command));
 				}
 				else if (tmp_string == "sub")
 				{
 					std::replace(command.begin(), command.end(), '+', ' ');
-					std::cout << "Command: " << command << std::endl;
+					//std::cout << "Command: " << command << std::endl;
 					n->control_obj->runSub(command);
 				}
 				std::string response = "<html><body><form action=\"http://192.168.40.4/command\" method=post><input type=text name=command size=80><br><input type=submit name=submit value=\"Befehl ausfuehren\"><br></form><form action=\"http://192.168.40.4/command\" method=post><input type=text name=sub size=80><br><input type=submit name=submit value=\"Sub starten\"></form></body></html>";
@@ -686,21 +689,21 @@ void *network::startlistening(void *object)
 				write(inbound_connection, response.c_str(), response.length());
 
 			}
-			else if (path[1] == "SID2")
+			/*else if (path[1] == "SID2")
 			{
 				std::string request(buffer);
 				std::string xml = request.substr(request.find("\r\n\r\n"));
-				std::cout << "Parsing\n" << std::endl;
+				//std::cout << "Parsing\n" << std::endl;
 				n->xmlrpc_obj.setInput(xml);
 				n->xmlrpc_obj.parse();
-				std::cout << "End Parsing\n" << std::endl;
+				//std::cout << "End Parsing\n" << std::endl;
 				xml = n->xmlrpc_obj.getOutput();
-				
-				//std::cout << xml << std::endl;
-				std::cout << "Making HTTP\n" << std::endl;
+
+				////std::cout << xml << std::endl;
+				//std::cout << "Making HTTP\n" << std::endl;
 				std::stringstream ostr;
 				ostr.clear();
-	
+
 				ostr << "HTTP/1.1 200 OK\r\n";
 				ostr << "Connection: close\r\n";
 				ostr << "Content-Length: " << xml.length() << "\r\n";
@@ -708,15 +711,15 @@ void *network::startlistening(void *object)
 				ostr << "Date: Fri, 17 Jul 1998 19:55:08 GMT\r\n";
 				ostr << "Server: LCARS Webserver\r\n\r\n";
 				ostr << xml << std::ends;
-	
+
 				std::string send = ostr.str();
-				std::cout << "Sending now XML\n" << std::endl;
-				//std::cout << send << std::endl;
+				//std::cout << "Sending now XML\n" << std::endl;
+				////std::cout << send << std::endl;
 				write(inbound_connection, send.c_str(), send.length());
-			}
-			
+			}*/
+
 		}
 
 		close(inbound_connection);
-	} 
+	}
 }

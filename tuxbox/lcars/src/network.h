@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.h,v $
+Revision 1.7  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.6  2002/05/21 04:37:42  TheDOC
 http-update... new web-frontend in http://dbox/file/start.htm... will be main index soon
 
@@ -44,7 +47,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <pthread.h>
 
 #include "container.h"
-#include "xmlrpc.h"
+//#include "xmlrpc.h"
 #include "rc.h"
 #include "control.h"
 #include "variables.h"
@@ -54,14 +57,14 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 class network
 {
 	pthread_t thread;
-	
+
 public:
 	control *control_obj;
 	variables *vars;
 	std::string replace_vars(std::string tmp_string);
 	std::string getfile(std::string name);
 	bool update_enabled;
-	xmlrpc xmlrpc_obj;
+	//xmlrpc xmlrpc_obj;
 	container cont;
 	rc *rc_obj;
 	void writetext(std::string text);

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.7  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.6  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -74,7 +77,7 @@ settings::settings(cam *c)
 	int type = -1;
 	isGTX = false;
 
-	printf("----------------> SETTINGS <--------------------\n");
+	//printf("----------------> SETTINGS <--------------------\n");
 	fp = fopen("/proc/bus/dbox", "r");
 	while (!feof(fp))
 	{
@@ -97,24 +100,24 @@ settings::settings(cam *c)
 				isGTX = false;
 			}
 		}
-	
-	}	
+
+	}
 	fclose(fp);
 
-	if (box == 3)
-		printf ("Sagem-Box\n");
-	else if (box == 1)
-		printf("Nokia-Box\n");
-	else if (box == 2)
-		printf("Philips-Box\n");
-	else
-		printf("Unknown Box\n");
-	
+	//if (box == 3)
+	//printf ("Sagem-Box\n");
+	//else if (box == 1)
+	//printf("Nokia-Box\n");
+	//else if (box == 2)
+	//printf("Philips-Box\n");
+	//else
+	//printf("Unknown Box\n");
+
 	isCable = (type == DBOX_FE_CABLE);
 
 	CAID = cam_obj->getCAID();
-	printf("Set-CAID: %x\n", CAID);
-	
+	//printf("Set-CAID: %x\n", CAID);
+
 	oldTS = -1;
 	usediseqc = true;
 	setting.timeoffset = 60;
@@ -142,7 +145,7 @@ int settings::getEMMpid(int TS)
 {
 	if (EMM < 2 || oldTS != TS || TS == -1)
 	{
-		printf("Getting EMM\n");
+		//printf("Getting EMM\n");
 		EMM = find_emmpid(CAID);
 		oldTS = TS;
 	}
@@ -192,8 +195,8 @@ int settings::find_emmpid(int ca_system_id) {
 	count=8;
 	while(count<r-1)
 	{
-    	if ((((buffer[count+2]<<8)|buffer[count+3]) == ca_system_id) && (buffer[count+2] == ((0x18|0x27)&0xD7)))
-		return (((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
+		if ((((buffer[count+2]<<8)|buffer[count+3]) == ca_system_id) && (buffer[count+2] == ((0x18|0x27)&0xD7)))
+			return (((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
 		count+=buffer[count+1]+2;
 	}
 	return 0;
@@ -225,10 +228,10 @@ int settings::getTransparentColor()
 void settings::setIP(char n1, char n2, char n3, char n4)
 {
 	std::stringstream ostr;
-	ostr << "ifconfig eth0 " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << " &" << std::ends; 
+	ostr << "ifconfig eth0 " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << " &" << std::ends;
 	std::string command = ostr.str();
-	std::cout << command << std::endl;
-	
+	//std::cout << command << std::endl;
+
 	setting.ip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
 
 	system(command.c_str());
@@ -244,23 +247,23 @@ void settings::setIP(char n1, char n2, char n3, char n4)
 	//sin.sin_len    = sizeof sin;
 	char test[] = "192.168.40.4";
 	if (inet_aton(test, &sin.sin_addr)==0) { // 0 if error occurs
-		printf("failed conversion\n");
+		//printf("failed conversion\n");
 	}
 
 	strcpy(ifr.ifr_name, "eth0");
 	memcpy(&ifr.ifr_addr, &sin, sizeof(ifr.ifr_addr));
-	printf("IP: %x\n", ifr.ifr_addr);
+	//printf("IP: %x\n", ifr.ifr_addr);
 	if ((sk = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
-		printf("no socket\n");
+		//printf("no socket\n");
 	}
 
 	if (ioctl(sk, SIOCSIFADDR, &ifr)==-1) {
-		printf("didn't set IP: %s\n", strerror(errno));
+		//printf("didn't set IP: %s\n", strerror(errno));
 	}
 
 	memcpy(&sin, &ifr.ifr_addr, sizeof(sin));
 	//ptr = inet_ntoa((unsigned char*) sin.sin_addr);
-	//printf("IP Address is :%s\n",ptr);
+	////printf("IP Address is :%s\n",ptr);
 	close (sk);*/
 
 }
@@ -273,9 +276,9 @@ char settings::getIP(char number)
 void settings::setgwIP(char n1, char n2, char n3, char n4)
 {
 	std::stringstream ostr;
-	ostr << "route add default gw " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << std::ends; 
+	ostr << "route add default gw " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << std::ends;
 	std::string command = ostr.str();
-	std::cout << command << std::endl;
+	//std::cout << command << std::endl;
 	system(command.c_str());
 
 	setting.gwip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
@@ -289,9 +292,9 @@ char settings::getgwIP(char number)
 void settings::setdnsIP(char n1, char n2, char n3, char n4)
 {
 	std::stringstream ostr;
-	ostr << "echo \"nameserver " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << "\" > /etc/resolv.conf" << std::ends; 
+	ostr << "echo \"nameserver " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << "\" > /etc/resolv.conf" << std::ends;
 	std::string command = ostr.str();
-	std::cout << command << std::endl;
+	//std::cout << command << std::endl;
 	system(command.c_str());
 
 	setting.dnsip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
@@ -361,9 +364,9 @@ void settings::loadSettings()
 	int linecount = 0;
 
 	inFile.open(CONFIGDIR "/lcars/lcars.conf");
-	
+
 	while(linecount < 20 && getline(inFile, line[linecount++]));
-	
+
 	for (int i = 0; i < linecount; i++)
 	{
 		std::istringstream iss(line[i]);
@@ -389,7 +392,7 @@ void settings::loadSettings()
 			}
 			if (ipcount != 4)
 			{
-				std::cout << "Error in Config-File on " << cmd << std::endl;
+				//std::cout << "Error in Config-File on " << cmd << std::endl;
 				continue;
 			}
 			else

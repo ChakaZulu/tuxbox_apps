@@ -67,7 +67,7 @@ Index:
 2
 +++
 Init:
-	CONTROL Add PIDs VPID APIDs SID PMT TS
+	CONTROL Add PIDs SID PMT VPID APIDs PCR TS ONID
 ------
 +++
 Title:

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.h,v $
+Revision 1.6  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.5  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -52,6 +55,8 @@ struct linkage
 	int VPID;
 	int APIDcount;
 	int APID[10];
+	int PMT;
+	int PCR;
 };
 
 struct event
@@ -79,32 +84,32 @@ struct event
 
 struct eit_header
 {
-	unsigned char table_id:8;
-	unsigned char section_syntax_indicator :1;
-	unsigned char reserved_future_use:1;
-	unsigned char reserved:2;
-	unsigned short section_length:12;
-	unsigned short service_id:16;
-	unsigned char reserved2:2;
-	unsigned char version_number:5;
-	unsigned char current_next_indicator:1;
-	unsigned char section_number:8;
-	unsigned char last_section_number:8;
-	unsigned short transport_stream_id:16;
-	unsigned short original_network_id:16;
-	unsigned char segment_last_section_number:8;
-	unsigned char last_table_id:8;
+unsigned char table_id:8;
+unsigned char section_syntax_indicator :1;
+unsigned char reserved_future_use:1;
+unsigned char reserved:2;
+unsigned short section_length:12;
+unsigned short service_id:16;
+unsigned char reserved2:2;
+unsigned char version_number:5;
+unsigned char current_next_indicator:1;
+unsigned char section_number:8;
+unsigned char last_section_number:8;
+unsigned short transport_stream_id:16;
+unsigned short original_network_id:16;
+unsigned char segment_last_section_number:8;
+unsigned char last_table_id:8;
 }__attribute__ ((packed));
 
 struct event_header
 {
-	unsigned short event_id:16;
-	unsigned short start_time_mjd:16;
-	unsigned int start_time_time:24;
-	unsigned int duration:24;
-	unsigned char running_status:3;
-	unsigned char free_CA_mode:1;
-	unsigned short descriptors_loop_length:12;
+unsigned short event_id:16;
+unsigned short start_time_mjd:16;
+unsigned int start_time_time:24;
+unsigned int duration:24;
+unsigned char running_status:3;
+unsigned char free_CA_mode:1;
+unsigned short descriptors_loop_length:12;
 }__attribute__ ((packed));
 
 struct sid
@@ -153,22 +158,22 @@ class eit
 	variables *vars;
 
 	std::queue<std::string> command_queue;
-	
+
 	int lastSID;
-	
+
 	int audio_comp;
 
 	pthread_t eitThread;
 	pthread_mutex_t mutex;
- 
-    static void* start_eitqueue( void * );
+
+	static void* start_eitqueue( void * );
 	std::map<int, struct event> eventid_event;
 	std::map<time_t, int> time_eventid;
 	std::multimap<struct sid, std::multimap<time_t, int>, ltstr> sid_eventid;
 
 	int act_schedcomponent, act_nowcomponent, act_nextcomponent;
 
-public:	
+public:
 	eit(settings *s, osd *o, variables *v);
 	event getNow() { return now; }
 	event getNext() { return next; }
@@ -190,14 +195,14 @@ public:
 	event getEvent(int eventid);
 	void dumpEvent(int eventid);
 	void dumpNextEvent(int eventid);
-    void dumpPrevEvent(int eventid);
-	
+	void dumpPrevEvent(int eventid);
+
 	void dumpNextSchedulingComponent();
 	void dumpPrevSchedulingComponent();
-	
+
 	void dumpNextNowComponent();
 	void dumpPrevNowComponent();
-	
+
 	void dumpNextNextComponent();
 	void dumpPrevNextComponent();
 

@@ -20,7 +20,7 @@ class ir
 	int fd;
 	std::string device;
 	void writeCommand(std::string);
-public:	
+public:
 	ir();
 	void setDevice(std::string dev) { device = dev; }
 	void sendCommand(std::string cmd);

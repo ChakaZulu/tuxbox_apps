@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: descriptors.h,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -27,18 +30,18 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 */
 struct short_event_descriptor_header
 {
-	unsigned char descriptor_tag:8;
-	unsigned char descriptor_length:8;
+unsigned char descriptor_tag:8;
+unsigned char descriptor_length:8;
 	unsigned char language_code[3];
-	unsigned char event_name_length:8;	
+unsigned char event_name_length:8;
 }__attribute__ ((packed));
 
 struct extended_event_descriptor_header
 {
-	unsigned char descriptor_tag:8;
-	unsigned char descriptor_length:8;
-	unsigned char descriptor_number:4;
-	unsigned char last_descriptor_number:4;
+unsigned char descriptor_tag:8;
+unsigned char descriptor_length:8;
+unsigned char descriptor_number:4;
+unsigned char last_descriptor_number:4;
 	unsigned char language_code[3];
-	unsigned char length_of_items:8;	
+unsigned char length_of_items:8;
 }__attribute__ ((packed));

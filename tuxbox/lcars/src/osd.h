@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.h,v $
+Revision 1.7  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.6  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -50,7 +53,7 @@ typedef std::vector<std::string> command_list;
 class osd
 {
 	variables *vars;
-	
+
 	struct list_entry
 	{
 		int index;
@@ -66,9 +69,9 @@ class osd
 	int circle[20];
 	int circlesmall[20];
 	int circlemiddle[20];
-	
+
 	fbClass *fb;
-	
+
 	// ProgramInfo
 	std::string serviceName;
 	int serviceNumber;
@@ -92,7 +95,7 @@ class osd
 	command_list prog_com_list_nowdescription;
 	command_list prog_com_list_nexttime;
 	command_list prog_com_list_nextdescription;
-	
+
 	// NumberEntry
 	int number;
 	std::string numberText;
@@ -154,11 +157,11 @@ class osd
 	short ip_position;
 	std::string ip_description;
 	std::queue<std::string> command_queue;
-	
+
 	pthread_t osdThread;
- 
-    static void* start_osdqueue( void * );
-public:	
+
+	static void* start_osdqueue( void * );
+public:
 	bool proginfo_shown;
 	time_t proginfo_hidetime;
 	int start_thread();
@@ -209,7 +212,7 @@ public:
 	void setProgramCommandListNowDescription(command_list list) { prog_com_list_nowdescription = list; }
 	void setProgramCommandListNextTime(command_list list) { prog_com_list_nexttime = list; }
 	void setProgramCommandListNextDescription(command_list list) { prog_com_list_nextdescription = list; }
-	
+
 
 	void createEPG();
 	void setEPGEventName(std::string input);

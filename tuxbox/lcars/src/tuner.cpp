@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.13  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.12  2002/05/18 04:31:02  TheDOC
 Warningelimination
 
@@ -100,13 +103,13 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 	if (setting->boxIsSat())
 	{
 
-// $$$ rasc
-// Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
-// Ebenso die ZF fuer die LNBs (1 + 2) fuer jeweils Hi und Lo - Band
-// die Werte hier sind Standard fuer das Ku-Band, allerdings waere es
-// interessant auch andere Werte zu haben (z.B. 10 GHz ZF, oder 4 GHz ZF)
-// Dies ist sinnvoll, wenn man die dbox fuer den Sat-DX Empfang, oder
-// aeltere LNBs (naja) nutzen moechte.
+		// $$$ rasc
+		// Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
+		// Ebenso die ZF fuer die LNBs (1 + 2) fuer jeweils Hi und Lo - Band
+		// die Werte hier sind Standard fuer das Ku-Band, allerdings waere es
+		// interessant auch andere Werte zu haben (z.B. 10 GHz ZF, oder 4 GHz ZF)
+		// Dies ist sinnvoll, wenn man die dbox fuer den Sat-DX Empfang, oder
+		// aeltere LNBs (naja) nutzen moechte.
 
 		if (frequ > 11700)
 		{
@@ -125,7 +128,7 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 		}
 		else
 		{
-			seq.voltage=SEC_VOLTAGE_13;	
+			seq.voltage=SEC_VOLTAGE_13;
 		}
 
 		frontp.u.qpsk.FEC_inner = getFEC(fec);
@@ -140,10 +143,10 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 		cmd.u.diseqc.addr=0x10;
 		cmd.u.diseqc.cmd=0x38;
 		cmd.u.diseqc.numParams=1;
-		cmd.u.diseqc.params[0]=0xF0 
-				| ((dis*4) & 0x0F) 
-				| ((seq.voltage == SEC_VOLTAGE_18)     ? 2 : 0)
-				| ((seq.continuousTone == SEC_TONE_ON) ? 1 : 0);
+		cmd.u.diseqc.params[0]=0xF0
+		                       | ((dis*4) & 0x0F)
+		                       | ((seq.voltage == SEC_VOLTAGE_18)     ? 2 : 0)
+		                       | ((seq.continuousTone == SEC_TONE_ON) ? 1 : 0);
 
 		seq.miniCommand=SEC_MINI_NONE;
 		seq.numCommands=1;
@@ -191,7 +194,7 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 		perror("OPEN FRONTEND DEVICE");
 		exit(1);
 	}
-	
+
 	if (ioctl(frontend, FE_SET_FRONTEND, &frontp) < 0)
 	{
 		perror("FE_SET_FRONTEND");
@@ -204,8 +207,8 @@ int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 
 #ifdef DEBUG
 	printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
-		(long)frequ,(long)frontp.Frequency,(int)polarization ,(int)fec,
-		(long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
+	        (long)frequ,(long)frontp.Frequency,(int)polarization ,(int)fec,
+	        (long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
 
 	printf ("... Tuner-Lock Status: %ld\n",status);
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.h,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -43,7 +46,7 @@ class pat
 	int oldpatTS;
 	int ONID;
 	std::multimap<int, struct pat_entry> pat_list;
-public:	
+public:
 	bool readPAT();
 	int getTS() { return (*pat_list.begin()).second.TS; }
 	int getONID() { return ONID; }

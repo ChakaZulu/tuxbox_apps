@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.9  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.8  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -56,13 +59,13 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 void plugins::loadPlugins()
 {
-	printf("Checking plugins-directory\n");
-	printf("Dir: %s\n", PLUGINDIR "/");
+	//printf("Checking plugins-directory\n");
+	//printf("Dir: %s\n", PLUGINDIR "/");
 
 	struct dirent **namelist;
-	
+
 	int number_of_files = scandir(PLUGINDIR, &namelist, 0, alphasort);
-	
+
 	number_of_plugins = 0;
 	plugin_list.clear();
 	for (int i = 0; i < number_of_files; i++)
@@ -85,11 +88,11 @@ void plugins::loadPlugins()
 			new_plugin.sofile.append(".so");
 
 			parseCfg(&new_plugin);
-			
+
 			plugin_list.insert(plugin_list.end(), new_plugin);
 		}
 	}
-	printf("%d plugins found...\n", number_of_plugins);
+	//printf("%d plugins found...\n", number_of_plugins);
 
 }
 
@@ -133,9 +136,9 @@ void plugins::parseCfg(plugin *plugin_data)
 	int linecount = 0;
 
 	inFile.open(plugin_data->cfgfile.c_str());
-	
+
 	while(linecount < 20 && getline(inFile, line[linecount++]));
-	
+
 	plugin_data->fb = false;
 	plugin_data->rc = false;
 	plugin_data->lcd = false;
@@ -202,8 +205,8 @@ void plugins::parseCfg(plugin *plugin_data)
 	}
 
 	inFile.close();
-	
-	/*printf("Name: %s\n", plugin_data->cfgfile.c_str());
+
+	/*//printf("Name: %s\n", plugin_data->cfgfile.c_str());
 	fd = fopen(plugin_data->cfgfile.c_str(), "rt");
 
 	char text[512];
@@ -242,22 +245,22 @@ void plugins::parseCfg(plugin *plugin_data)
 
 PluginParam* plugins::makeParam(std::string id, PluginParam *next)
 {
-	std::cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << std::endl;
-	
+	//std::cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << std::endl;
+
 	PluginParam *startparam = new PluginParam;
 	startparam->next = next;
 	startparam->id = new char[id.length() + 2];
 	startparam->val = new char[params.find(id)->second.length() + 2];
 	strcpy(startparam->id, id.c_str());
 	strcpy(startparam->val, params.find(id)->second.c_str());
-	
-	std::cout << "Startparam: " << (int) startparam << std::endl;
+
+	//std::cout << "Startparam: " << (int) startparam << std::endl;
 	return startparam;
 }
 
 void plugins::startPlugin(int number)
 {
-	std::cout << "Plugin-Number: " << number << std::endl;
+	//std::cout << "Plugin-Number: " << number << std::endl;
 	PluginExec execPlugin;
 	char depstring[129];
 	char			*argv[20];
@@ -283,28 +286,28 @@ void plugins::startPlugin(int number)
 
 	if (plugin_list[number].fb)
 	{
-		std::cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<std::endl;
+		//std::cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<std::endl;
 		startparam = makeParam(P_ID_FBUFFER, startparam);
-		std::cout << "New Startparam: " << startparam << std::endl;
-		std::cout << "New Tmpparam: " << tmpparam << std::endl;
+		//std::cout << "New Startparam: " << startparam << std::endl;
+		//std::cout << "New Tmpparam: " << tmpparam << std::endl;
 
 
 	}
 	if (plugin_list[number].rc)
 	{
-		std::cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << std::endl;
+		//std::cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << std::endl;
 
 		startparam = makeParam(P_ID_RCINPUT, startparam);
 	}
 	if (plugin_list[number].lcd)
 	{
-		std::cout << "With LCD " << std::endl;
+		//std::cout << "With LCD " << std::endl;
 
 		startparam = makeParam(P_ID_LCD, startparam);
 	}
 	if (plugin_list[number].vtxtpid)
 	{
-		std::cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << std::endl;
+		//std::cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << std::endl;
 
 		startparam = makeParam(P_ID_VTXTPID, startparam);
 	}
@@ -323,18 +326,18 @@ void plugins::startPlugin(int number)
 	//PluginParam *par = startparam;
 	/*for( ; par; par=par->next )
 	{
-		printf ("id: %s - val: %s\n", par->id, par->val);
-		printf("%d\n", par->next);
+		//printf ("id: %s - val: %s\n", par->id, par->val);
+		//printf("%d\n", par->next);
 	}*/
 
-	std::cout << "Mark-2" << std::endl;
+	//std::cout << "Mark-2" << std::endl;
 
 	std::string pluginname = plugin_list[number].filename;
 
 	strcpy(depstring, plugin_list[number].depend.c_str());
 
-	std::cout << "Mark-1" << std::endl;
-	
+	//std::cout << "Mark-1" << std::endl;
+
 	argc=0;
 	if ( depstring[0] )
 	{
@@ -346,28 +349,28 @@ void plugins::startPlugin(int number)
 			np = strchr(p,',');
 			if ( !np )
 				break;
-		
+
 			*np=0;
 			p=np+1;
 			if ( argc == 20 )	// mehr nicht !
 				break;
 		}
 	}
-	std::cout << "Mark0" << std::endl;
+	//std::cout << "Mark0" << std::endl;
 	for( i=0; i<argc; i++ )
 	{
 		std::string libname = argv[i];
-		printf("try load shared lib : %s\n",argv[i]);
-		libhandle[i] = dlopen ( *argv[i] == '/' ? 
-			argv[i] : (PLUGINDIR "/"+libname).c_str(),
-			RTLD_NOW | RTLD_GLOBAL );
+		//printf("try load shared lib : %s\n",argv[i]);
+		libhandle[i] = dlopen ( *argv[i] == '/' ?
+		                        argv[i] : (PLUGINDIR "/"+libname).c_str(),
+		                        RTLD_NOW | RTLD_GLOBAL );
 		if ( !libhandle )
 		{
 			fputs (dlerror(), stderr);
 			break;
 		}
 	}
-	std::cout << "Mark1" << std::endl;
+	//std::cout << "Mark1" << std::endl;
 	while ( i == argc )		// alles geladen
 	{
 		handle = dlopen ( plugin_list[number].sofile.c_str(), RTLD_NOW);
@@ -385,10 +388,10 @@ void plugins::startPlugin(int number)
 			//should unload libs!
 			break;
 		}
-		printf("try exec...\n");
+		//printf("try exec...\n");
 		execPlugin(startparam);
 		dlclose(handle);
-		printf("exec done...\n");
+		//printf("exec done...\n");
 		//restore framebuffer...
 		//redraw menue...
 		break;	// break every time - never loop - run once !!!

@@ -7,13 +7,13 @@ ir::ir()
 
 void ir::writeCommand(std::string cmd)
 {
-	write(fd, cmd.c_str(), cmd.length());	
+	write(fd, cmd.c_str(), cmd.length());
 }
 
 void ir::sendCommand(std::string cmd)
 {
 	struct sockaddr_un addr;
-	
+
 	addr.sun_family=AF_UNIX;
 	strcpy(addr.sun_path, "/dev/lircd");
 	fd=socket(AF_UNIX,SOCK_STREAM,0);

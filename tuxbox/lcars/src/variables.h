@@ -20,11 +20,11 @@ public:
 	variables();
 	std::string getvalue(std::string name);
 	void setvalue(std::string name, std::string value);
-	void setvalue(std::string name, int value);	
+	void setvalue(std::string name, int value);
 	bool isavailable(std::string name);
 
 	void addEvent(std::string event);
 	std::string waitForEvent();
-};	
+};
 
 #endif

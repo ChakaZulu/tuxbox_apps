@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
+Revision 1.8  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.7  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -51,16 +54,16 @@ timer::timer(hardware *h, channels *c, zap *z, tuner *t, osd *o, variables *v)
 
 int timer::start_thread()
 {
-	
+
 	int status;
 
-	printf("1\n");
+	//printf("1\n");
 	pthread_mutex_init(&mutex, NULL);
-	printf("1\n");
+	//printf("1\n");
 	status = pthread_create( &timerThread,
-                           NULL,
-                           start_timer,
-                           (void *)this );
+	                         NULL,
+	                         start_timer,
+	                         (void *)this );
 	return status;
 
 }
@@ -80,7 +83,7 @@ void* timer::start_timer( void * this_ptr )
 		{
 			sleep(5);
 		}
-		
+
 		t->runTimer();
 		sleep(5);
 	}
@@ -98,8 +101,8 @@ void timer::addTimer(time_t starttime, int type, std::string comment, int durati
 	new_timer.status = 0;
 	new_timer.type = type;
 	strcpy(new_timer.comment, comment.c_str());
-	
-	printf("New timer: %s %d\n", ctime(&starttime), new_timer.type);
+
+	//printf("New timer: %s %d\n", ctime(&starttime), new_timer.type);
 
 	pthread_mutex_lock( &mutex );
 	timer_list.insert(std::pair<time_t, struct timer_entry>(starttime, new_timer));
@@ -131,7 +134,7 @@ void timer::runTimer()
 
 	timer_list.erase(it);
 	pthread_mutex_unlock( &mutex );
-	
+
 	saveTimer();
 
 	if (act_timer.type == 0)
@@ -148,14 +151,14 @@ void timer::runTimer()
 		(*channels_obj).setCurrentOSDProgramInfo(osd_obj);
 		(*hardware_obj).fnc(0);
 		(*hardware_obj).fnc(2);
-					
+
 		(*channels_obj).receiveCurrentEIT();
 		(*channels_obj).setCurrentOSDProgramEIT(osd_obj);
 		(*channels_obj).updateCurrentOSDProgramAPIDDescr(osd_obj);
 
 		vars->addEvent("VCR_START");
-		std::cout << "Starttime: " << act_timer.starttime << std::endl << "Duration: " << act_timer.duration << std::endl;
-		//std::cout << (act_timer.starttime + (act_timer.duration / 60)) << std::endl;
+		//std::cout << "Starttime: " << act_timer.starttime << std::endl << "Duration: " << act_timer.duration << std::endl;
+		////std::cout << (act_timer.starttime + (act_timer.duration / 60)) << std::endl;
 		addTimer((act_timer.starttime + act_timer.duration ) - 1, 3, "stop-vcr");
 	}
 	else if (act_timer.type == 3)
@@ -196,11 +199,11 @@ void timer::dumpTimer()
 
 void timer::rmTimer(int channel, time_t starttime)
 {
-	printf("Start Removing Timer\n");
+	//printf("Start Removing Timer\n");
 	pthread_mutex_lock( &mutex );
 	timer_list.erase(timer_list.find(starttime));
 	pthread_mutex_unlock( &mutex );
-	printf("End Removing Timer\n");
+	//printf("End Removing Timer\n");
 }
 
 void timer::saveTimer()
@@ -214,7 +217,7 @@ void timer::saveTimer()
 	}
 
 	pthread_mutex_lock(&mutex);
-	
+
 	for (std::multimap<time_t, struct timer_entry>::iterator it = timer_list.begin(); it != timer_list.end(); ++it)
 	{
 		struct timer_entry tmp_timer = (*it).second;
@@ -222,7 +225,7 @@ void timer::saveTimer()
 	}
 
 	pthread_mutex_unlock(&mutex);
-	
+
 	close(fd);
 }
 
@@ -236,7 +239,7 @@ void timer::loadTimer()
 	}
 
 	pthread_mutex_lock(&mutex);
-	
+
 	struct timer_entry tmp_timer;
 	while(read(fd, &tmp_timer, sizeof(timer_entry)))
 	{

@@ -74,7 +74,7 @@ class control
 	typedef std::vector<command_class> commandlist;
 	typedef std::vector<std::string> string_commandlist;
 	typedef std::map<int, commandlist> keylist;
-	
+
 	struct mode
 	{
 		int index;
@@ -85,7 +85,7 @@ class control
 
 	int selected_channel;
 	Service last_read;
-	
+
 	int current_mode;
 	bool leave_mode;
 	bool quit_modes;
@@ -97,7 +97,7 @@ class control
 	// Subs
 	std::map<std::string, commandlist> subs;
 	void loadSubs();
-	
+
 
 	// Helps
 	void dumpchannel(int channelnr);
@@ -120,10 +120,10 @@ class control
 		std::vector<int> sort;
 	};
 	std::map<int, menu> menus;
-	
+
 	// Menues laden
 	void loadMenus();
-	
+
 	// Menue oeffnen und starten
 	void openMenu(int menuNumber);
 
@@ -133,10 +133,10 @@ class control
 	// Menue schliessen
 	void closeMenu();
 
-	
-	// Aktuelles Kommando sofort ausfuehren 
+
+	// Aktuelles Kommando sofort ausfuehren
 	bool checkSetting(std::string var);
-	
+
 	bool lastcheck;
 
 	pthread_t thread;

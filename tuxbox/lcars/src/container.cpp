@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: container.cpp,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -39,5 +42,5 @@ container::container(zap *z, channels *c, fbClass *f, osd *o, settings *s, tuner
 	pmt_obj = pm;
 	eit_obj = e;
 	scan_obj = sc;
-	printf("CONTAINER: %d\n", (*channels_obj).numberChannels());
+	//printf("CONTAINER: %d\n", (*channels_obj).numberChannels());
 }

@@ -9,7 +9,7 @@ fbClass::fbClass(variables *v, int x, int y, int bpp)
 	if ((fd = open("/dev/console", O_RDWR)) < 0)
 		perror ("/dev/console");
 	else if (ioctl(fd, KDSETMODE, KD_GRAPHICS) < 0)
-	//else if (ioctl(fd, KDSETMODE, KD_TEXT) < 0)
+		//else if (ioctl(fd, KDSETMODE, KD_TEXT) < 0)
 		perror("KDSETMODE");
 	close (fd);
 
@@ -26,7 +26,7 @@ fbClass::fbClass(variables *v, int x, int y, int bpp)
 		exit(2);
 	}
 
-	
+
 	if (ioctl(fbfd, FBIOGET_VSCREENINFO, &old_vinfo))
 	{
 		perror("FBIOGET_VSCREENINFO");
@@ -35,9 +35,9 @@ fbClass::fbClass(variables *v, int x, int y, int bpp)
 
 	setMode(x, y, bpp);
 
-    cmap.start  = 0;
-    cmap.len = 256;
-    cmap.red = r;
+	cmap.start  = 0;
+	cmap.len = 256;
+	cmap.red = r;
 	cmap.green = g;
 	cmap.blue = b;
 	cmap.transp = tr;
@@ -62,7 +62,7 @@ void fbClass::test()
 	/*png_byte *header = malloc(sizeof(png_byte) * 100);
 	int number = 8;
 	bool is_png;
-	
+
 	FILE *fp = fopen(CONFIGDIR "/lcars/skin/skin.png", "rb");
 	if (!fp)
 	{
@@ -76,7 +76,7 @@ void fbClass::test()
 		perror("Isn't PNG");
 		return;
 	}
-*/
+	*/
 }
 
 
@@ -88,7 +88,7 @@ void fbClass::runCommand(std::string command_string)
 	std::getline(iss, command, ' ');
 	int values_int[10];
 	std::string value;
-	printf("Command (fb): %s\n", command_string.c_str());
+	//printf("Command (fb): %s\n", command_string.c_str());
 
 	if (command == "FILLBOX")
 	{
@@ -97,9 +97,7 @@ void fbClass::runCommand(std::string command_string)
 		{
 			values_int[i++] = atoi(value.c_str());
 		}
-		if (i < 4)
-			std::cout << "Syntax error: Too few arguments to FILLBOX" << std::endl;
-		else
+		if (i >= 4)
 		{
 			fillBox(values_int[0], values_int[1], values_int[2], values_int[3], values_int[4]);
 		}
@@ -112,9 +110,7 @@ void fbClass::runCommand(std::string command_string)
 			values_int[i++] = atoi(value.c_str());
 		}
 
-		if (i < 7)
-			std::cout << "Syntax error: Too few arguments to SETFADE" << std::endl;
-		else
+		if (i >= 7)
 		{
 			setFade(values_int[0], values_int[1], values_int[2], values_int[3], values_int[4], values_int[5], values_int[6]);
 		}
@@ -140,7 +136,7 @@ void fbClass::runCommand(std::string command_string)
 	}
 	else if (command == "CLEARSCREEN")
 	{
-		printf("ClearScreen\n");
+		//printf("ClearScreen\n");
 		clearScreen();
 	}
 	else if (command == "SETTEXTSIZE")
@@ -148,7 +144,7 @@ void fbClass::runCommand(std::string command_string)
 		std::getline(iss, value, ' ');
 		float val;
 		sscanf(value.c_str(), "%f", &val);
-		std::cout << "Value: " << val << std::endl;
+		//std::cout << "Value: " << val << std::endl;
 
 		setTextSize(val);
 	}
@@ -158,7 +154,7 @@ void fbClass::setMode(int x, int y, int bpp)
 {
 	int screensize;
 
-	std::cout << "Changing FB-Mode to x: " << x << " y: " << y << " bpp: " << bpp << std::endl;
+	//std::cout << "Changing FB-Mode to x: " << x << " y: " << y << " bpp: " << bpp << std::endl;
 
 	memcpy(&vinfo, &old_vinfo, sizeof(struct fb_var_screeninfo));
 	memcpy(&finfo, &old_finfo, sizeof(struct fb_fix_screeninfo));
@@ -171,7 +167,7 @@ void fbClass::setMode(int x, int y, int bpp)
 		perror("FBIOPUT_VSCREENINFO");
 		exit(3);
 	}
-	
+
 	if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo))
 	{
 		perror("FBIOGET_FSCREENINFO");
@@ -213,7 +209,7 @@ void fbClass::fillBox(int x1, int y1, int x2, int y2, int color)
 		{
 			*((unsigned short int*)(fbp + x_calc[x] + y_calc[y1])) = color;
 		}
-		
+
 		for (int y = y1 + 1; y < y2; y++)
 		{
 			memcpy((fbp + x_calc[x1] + y_calc[y]), fbp + x_calc[x1] + y_calc[y1], size);
@@ -241,7 +237,7 @@ void fbClass::setFade(int color, int r_start, int g_start, int b_start, int r_st
 		int r = r_start + (int) ((r_stop - r_start) * percent);
 		int g = g_start + (int) ((g_stop - g_start) * percent);
 		int b = b_start + (int) ((b_stop - b_start) * percent);
-		
+
 		int act_color = color * COLORFADE + i;
 		setPalette(act_color, r, g, b, 0);
 		fades[color][i] = act_color;
@@ -265,8 +261,8 @@ void fbClass::setPixel(int x, int y, int color)
 		memset((unsigned short int*)(fbp + x_calc[x] + y_calc[y]), color, 1);
 	else
 		*((unsigned short int*)(fbp + x_calc[x] + y_calc[y])) = color;
-	
-	//printf("X: %d - Y: %d - %d\n", x_calc[x], y_calc[y], fbp + x_calc[x] + y_calc[y]);
+
+	////printf("X: %d - Y: %d - %d\n", x_calc[x], y_calc[y], fbp + x_calc[x] + y_calc[y]);
 }
 
 unsigned short int fbClass::getPixel(int x, int y)
@@ -301,7 +297,7 @@ int fbClass::getWidth(char c)
 			}
 		}
 	}
-	
+
 	if (!found)
 	{
 		error = FT_Load_Char(face, c, FT_LOAD_RENDER);//| FT_LOAD_MONOCHROME );
@@ -321,13 +317,13 @@ int fbClass::getWidth(char c)
 		{
 			int y_position = y_pos * font.pitch;
 			for (int x_pos = 0; x_pos < font.pitch; x_pos++)
-			{		
+			{
 				font.bitmap[position++] = (&slot->bitmap)->buffer[x_pos+y_position];
 			}
 		}
 		cache.insert(std::pair<char const, struct font_cache>(c, font));
 	}
-	
+
 	return width;
 }
 
@@ -335,48 +331,48 @@ int fbClass::getWidth(char c)
 void fbClass::loadFonts(std::string standardfont, std::string vtfont)
 {
 	int error;
-	
+
 	error = FT_Init_FreeType( &library );
 	if (error)
 	{
 		perror("FT_Init_FreeType");
 		return;
 	}
-	
+
 	error = FT_New_Face( library,
-                         standardfont.c_str(),
-                         0,
-                         &face );
-    if ( error == FT_Err_Unknown_File_Format )
-    {
+	                     standardfont.c_str(),
+	                     0,
+	                     &face );
+	if ( error == FT_Err_Unknown_File_Format )
+	{
 		perror("FT_New_Face");
 		return;
 	}
 	else if ( error )
-    {
+	{
 		perror("FT_New_Face");
 		return;
-    }
-	
+	}
+
 	slot = face->glyph;
 
 	error = FT_New_Face( library,
-                         vtfont.c_str(),
-                         0,
-                         &face_vt );
-    if ( error == FT_Err_Unknown_File_Format )
-    {
+	                     vtfont.c_str(),
+	                     0,
+	                     &face_vt );
+	if ( error == FT_Err_Unknown_File_Format )
+	{
 		perror("FT_New_Face");
 		return;
 	}
 	else if ( error )
-    {
+	{
 		perror("FT_New_Face");
 		return;
-    }
-	
+	}
+
 	slot_vt = face_vt->glyph;
-	
+
 	setTextSize(0.5);
 }
 
@@ -384,15 +380,15 @@ void fbClass::setTextSize(float setfactor)
 {
 	int error;
 
-	
-	factor = setfactor;
-	
-	error = FT_Set_Pixel_Sizes(
-              face,   /* handle to face object            */
-              0,      /* pixel_width                      */
-              (int) (40 * factor) );   /* pixel_height                     */
 
-	
+	factor = setfactor;
+
+	error = FT_Set_Pixel_Sizes(
+	            face,   /* handle to face object            */
+	            0,      /* pixel_width                      */
+	            (int) (40 * factor) );   /* pixel_height                     */
+
+
 	if (ycorrector.count(setfactor) < 1)
 	{
 		FT_Load_Char(face, 'A', FT_LOAD_RENDER);
@@ -413,13 +409,13 @@ void fbClass::draw_bitmap(font_cache font, int x, int y, int color)
 		for (int x_pos = 0; x_pos < font.pitch; x_pos++)
 		{
 			long int location;
-		
+
 			location = x_calc[x + x_pos] + y_calc_temp;
-			//printf("Font: %d\n", font.bitmap[x_pos+y_position]);
+			////printf("Font: %d\n", font.bitmap[x_pos+y_position]);
 			//if (font.bitmap[x_pos+y_position] > 100)
-				//memset((unsigned short int*)(fbp + x_calc[x + x_pos] + y_calc[y + y_pos]), fades[color][fade_down[font.bitmap[x_pos+y_position]]], 1);
+			//memset((unsigned short int*)(fbp + x_calc[x + x_pos] + y_calc[y + y_pos]), fades[color][fade_down[font.bitmap[x_pos+y_position]]], 1);
 			setPixel(x + x_pos, y + y_pos, fades[color][fade_down[font.bitmap[x_pos+y_position]]]);
-				
+
 			//usleep(100);
 			//setPixel(x + x_pos, y + y_pos, fades[color][fade_down[font.bitmap[x_pos+y_position]]]);
 			//*((unsigned short int*)(fbp + location)) = fades[color][fade_down[font.bitmap[x_pos+y_position]]];
@@ -432,7 +428,7 @@ void fbClass::putText(int xpos, int ypos, int color, std::string text, int max_s
 	char c_text[500];
 	strcpy(c_text, text.c_str());
 	putText(xpos, ypos, color, c_text, max_size, alignment);
-	
+
 }
 
 void fbClass::putText(int xpos, int ypos, int color, int i, int max_size, int alignment)
@@ -440,7 +436,7 @@ void fbClass::putText(int xpos, int ypos, int color, int i, int max_size, int al
 	char c_text[500];
 	sprintf(c_text, "%d", i);
 	putText(xpos, ypos, color, c_text, max_size,alignment);
-	
+
 }
 
 
@@ -479,7 +475,7 @@ void fbClass::putText(int xpos, int ypos, int color, char text[500], int max_siz
 			}
 		}
 
-	
+
 		if (!found)
 		{
 			error = FT_Load_Char(face, text[n], FT_LOAD_RENDER);//| FT_LOAD_MONOCHROME );
@@ -501,17 +497,17 @@ void fbClass::putText(int xpos, int ypos, int color, char text[500], int max_siz
 			{
 				int y_position = y_pos * font.pitch;
 				for (int x_pos = 0; x_pos < font.pitch; x_pos++)
-				{		
+				{
 					font.bitmap[position++] = (&slot->bitmap)->buffer[x_pos+y_position];
 				}
 			}
 			cache.insert(std::pair<char const, struct font_cache>(text[n], font));
 		}
-         
+
 		// now, draw to our target surface
 		if (pen_x + font.left + font.width > endx && max_size > -1)
 			break;
-		//printf ("Bearing: %d\n", font.bearingY);
+		////printf ("Bearing: %d\n", font.bearingY);
 		if (alignment == 0)
 		{
 			draw_bitmap( font, pen_x + font.left, pen_y - font.top + (*ycorrector.find(factor)).second, color );
@@ -522,8 +518,8 @@ void fbClass::putText(int xpos, int ypos, int color, char text[500], int max_siz
 			draw_bitmap( font, pen_x - font.advancex + font.left, pen_y - font.top + (*ycorrector.find(factor)).second, color );
 			pen_x -= font.advancex + 2;
 		}
-		                        
-		// increment pen position 
+
+		// increment pen position
 
 	}
 }

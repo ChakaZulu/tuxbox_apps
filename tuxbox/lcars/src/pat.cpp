@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.cpp,v $
+Revision 1.5  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -79,7 +82,7 @@ bool pat::readPAT()
 
 		pat_list.clear();
 
-		
+
 		for (int i = 8; i < r - 5; i += 4)
 		{
 			if ((buffer[i] << 8) | buffer[i + 1] == 0)
@@ -90,12 +93,12 @@ bool pat::readPAT()
 				temp_pat.TS = transport_stream_id;
 				temp_pat.SID = (buffer[i] << 8) | buffer[i + 1];
 				temp_pat.PMT = ((buffer[i + 2] & 0x1f) << 8 | buffer[i + 3]);
-			
+
 				pat_list.insert(std::pair<int, struct pat_entry>(temp_pat.SID, temp_pat));
 			}
 		}
 	}
-	
+
 	return (r > 0);
 }
 

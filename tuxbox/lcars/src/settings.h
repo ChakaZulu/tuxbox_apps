@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.h,v $
+Revision 1.6  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -87,7 +90,7 @@ class settings
 	cam *cam_obj;
 	std::string version;
 	setting_s setting;
-public:	
+public:
 	settings(cam *c);
 	void initme();
 	bool boxIsCable();
@@ -95,7 +98,7 @@ public:
 	int getCAID();
 	int getTransparentColor();
 	int getEMMpid(int TS = -1);
-	
+
 	void setIP(char n1, char n2, char n3, char n4);
 	char getIP(char number);
 
@@ -131,7 +134,7 @@ public:
 
 	void setProxyPort(int port) { setting.proxy_port = port; }
 	int getProxyPort() { return setting.proxy_port; }
-		
+
 	int getBox() { return box; }
 	bool boxIsGTX() { return isGTX; }
 	void setDiseqc(bool use) { usediseqc = use; }

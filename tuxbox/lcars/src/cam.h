@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: cam.h,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -31,7 +34,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 class cam
 {
 	void sendCAM(void *command, unsigned int len);
-	
+
 	unsigned short ONID;
 	unsigned short TS;
 	unsigned short SID;

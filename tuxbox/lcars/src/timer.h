@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.h,v $
+Revision 1.7  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.6  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -70,11 +73,11 @@ class timer
 {
 	pthread_t timerThread;
 	pthread_mutex_t mutex;
- 
-    static void* start_timer( void * );
+
+	static void* start_timer( void * );
 
 	std::multimap<time_t, struct timer_entry> timer_list;
-    
+
 	hardware *hardware_obj;
 	channels *channels_obj;
 	zap *zap_obj;
@@ -84,7 +87,7 @@ class timer
 
 	time_t dumped_starttimes[20];
 	int dumped_channels[20];
-public:	
+public:
 	timer(hardware *h, channels *c, zap *z, tuner *t, osd *o, variables *v);
 	int start_thread();
 

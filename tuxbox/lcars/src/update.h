@@ -43,9 +43,9 @@ public:
 	unsigned char ip[4];
 	std::string sourcedir;
 	int cramfsmtd;
-	
+
 	void run(int type);
-	
+
 };
 
 #endif

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.h,v $
+Revision 1.8  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.7  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -80,7 +83,7 @@ class plugins
 		bool offsets;
 
 	};
-	
+
 	int fb, rc, lcd, pid;
 	int number_of_plugins;
 	std::string plugin_dir;
@@ -89,7 +92,7 @@ class plugins
 	void parseCfg(plugin *plugin_data);
 
 	std::map<std::string, std::string> params;
-public:	
+public:
 	void loadPlugins();
 
 	void setPluginDir(std::string dir) { plugin_dir = dir; }
@@ -113,7 +116,7 @@ public:
 	int getPosY(int number) { return plugin_list[number].posy; }
 	int getSizeX(int number) { return plugin_list[number].sizex; }
 	int getSizeY(int number) { return plugin_list[number].sizey; }
-	
+
 	void startPlugin(int number);
 };
 

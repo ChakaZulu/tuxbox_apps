@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tot.cpp,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -46,14 +49,14 @@ tot::tot(settings *s)
 
 int tot::start_thread()
 {
-	
-  int status;
-  
-  status = pthread_create( &timeThread,
-                           NULL,
-                           start_timereader,
-                           (void *)this );
-  return status;
+
+	int status;
+
+	status = pthread_create( &timeThread,
+	                         NULL,
+	                         start_timereader,
+	                         (void *)this );
+	return status;
 
 }
 
@@ -63,14 +66,14 @@ void* tot::start_timereader( void * this_ptr )
 	int fd, r;
 	struct dmxSctFilterParams flt;
 	unsigned char buffer[BSIZE];
-	time_t acttime = 0;	
-	
+	time_t acttime = 0;
+
 	while(1)
 	{
 		// Lies den TOT
 		if ((fd=open("/dev/ost/demux0", O_RDONLY)) < 0)
 			perror("TDT open");
-		
+
 		memset (&flt.filter, 0, sizeof (struct dmxFilter));
 		r = BSIZE;
 		flt.pid            = 0x14;
@@ -78,23 +81,23 @@ void* tot::start_timereader( void * this_ptr )
 		flt.filter.mask[0] = 0xFF;
 		flt.timeout        = 0;
 		flt.flags          = DMX_IMMEDIATE_START | DMX_ONESHOT;
-		
+
 		if (ioctl(fd, DMX_SET_FILTER, &flt) < 0)
 			perror("TDT ioctl");
 		r=read(fd, buffer, r);
 		ioctl(fd,DMX_STOP,0);
-	
+
 		close(fd);
 		if (r == 0)
 			continue;
-	
+
 		int time = (buffer[5] << 16) | (buffer[6] << 8) | buffer[7];
 		int mjd = (buffer[3] << 8) | buffer[4];
-		printf("Time: %x - MJD: %x\n", time, mjd);
+		//printf("Time: %x - MJD: %x\n", time, mjd);
 		acttime = dvbtimeToLinuxTime(mjd, time);
-		printf("----------Aktuelle Zeit: %d\n", (int)acttime);
-		printf("----------Aktuelle Zeit: %s\n", ctime(&acttime));
-	
+		//printf("----------Aktuelle Zeit: %d\n", (int)acttime);
+		//printf("----------Aktuelle Zeit: %s\n", ctime(&acttime));
+
 		int descriptors_length = ((buffer[8] & 0x0f) << 8) | buffer[9];
 
 		int position = 10;
@@ -103,30 +106,30 @@ void* tot::start_timereader( void * this_ptr )
 		{
 			int descriptor_tag = buffer[position];
 			int descriptor_length = buffer[position + 1];
-	
-				
+
+
 			if (descriptor_tag == 0x58)
 			{
 				int number_offsets = (int) (descriptor_length / 13);
-	
+
 				for (int i = 0; i < number_offsets; i++)
 				{
 					if (buffer[position + i * 13 + 2] == 'D' && buffer[position + i * 13 + 3] == 'E' && buffer[position + i * 13 + 4] == 'U')
 					{
-						offset = (((buffer[position + i * 13 + 6] & 0xf0) >> 4) * 10 + (buffer[position + i * 13 + 6] & 0xf)) * 60 + ((buffer[position + i * 13 + 7] & 0xf0) >> 4) * 10 + (buffer[position + i * 13 + 7] & 0xf); 
+						offset = (((buffer[position + i * 13 + 6] & 0xf0) >> 4) * 10 + (buffer[position + i * 13 + 6] & 0xf)) * 60 + ((buffer[position + i * 13 + 7] & 0xf0) >> 4) * 10 + (buffer[position + i * 13 + 7] & 0xf);
 					}
 				}
-	
-			
+
+
 			}
 			position += 2 + descriptor_length;
 		}
 
-		
+
 		acttime += offset * 60L;
 		stime(&acttime);
 		(*t->setting).setTimeOffset(offset);
-		printf("Offsetttttt: %d\n", offset);
+		//printf("Offsetttttt: %d\n", offset);
 		sleep(900);
 	}
 

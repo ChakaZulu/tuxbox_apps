@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: nit.cpp,v $
+Revision 1.5  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -43,7 +46,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 int nit::getTransportStreams(channels *channels, int diseqc)
 {
-	
+
 	long fd, r;
 	struct dmxSctFilterParams flt;
 	unsigned char buffer[BSIZE];
@@ -51,21 +54,21 @@ int nit::getTransportStreams(channels *channels, int diseqc)
 
 	// Lies den NIT
 	fd=open("/dev/ost/demux0", O_RDONLY);
-	
+
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
-	
+
 	flt.pid            = 0x10;
 	flt.filter.filter[0] = 0x41;
 	flt.filter.mask[0] = 0xF0;
 	flt.timeout        = 10000;
 	flt.flags          = DMX_IMMEDIATE_START | DMX_CHECK_CRC; // | DMX_ONESHOT;
-	
+
 	ioctl(fd, DMX_SET_FILTER, &flt);
-	
+
 	int sec_counter = 0;
 	do
 	{
-		r = BSIZE;	
+		r = BSIZE;
 		r=read(fd, buffer, r);
 		if (r < 1)
 			return 0;
@@ -84,18 +87,18 @@ int nit::getTransportStreams(channels *channels, int diseqc)
 			int symbol = 0;
 			int polarization = -1;
 			int fec = -1;
-			
+
 			int descriptors_length = ((buffer[startbyte + 4 + counter] & 0x0f) << 8) | buffer[startbyte + 5 + counter];
 			int start = startbyte + counter + 6;
 			while (start < startbyte + counter + 6 + descriptors_length)
 			{
-				
+
 				if (buffer[start] == 0x44) // cable
 				{
 					frequ = (((buffer[start + 2] & 0xf0) >> 4) * 1000) + ((buffer[start + 2] & 0xf) * 100) + (((buffer[start + 3] & 0xf0) >> 4) * 10) + ((buffer[start + 3] & 0xf));
 					frequ *= 10;
 					symbol = (((buffer[start + 9] & 0xf0) >> 4) * 100000) + ((buffer[start + 9] & 0xf) * 10000) + (((buffer[start + 10] & 0xf0) >> 4) * 1000) + ((buffer[start + 10] & 0xf) * 100) + (((buffer[start + 11] & 0xf0) >> 4) * 10) + ((buffer[start + 11] & 0xf));
-					printf ("%d %d %d %d %d %d %d %d\n", (buffer[start + 2] & 0xf0) >> 4, (buffer[start + 2] & 0x0f), ((buffer[start + 3] & 0xf0) >> 4), (buffer[start + 3] & 0xf), (buffer[start + 4] & 0xf0)>>4, (buffer[start + 4] & 0xf), (buffer[start + 5] & 0xf0)>>4, (buffer[start + 5] & 0xf));
+					//printf ("%d %d %d %d %d %d %d %d\n", (buffer[start + 2] & 0xf0) >> 4, (buffer[start + 2] & 0x0f), ((buffer[start + 3] & 0xf0) >> 4), (buffer[start + 3] & 0xf), (buffer[start + 4] & 0xf0)>>4, (buffer[start + 4] & 0xf), (buffer[start + 5] & 0xf0)>>4, (buffer[start + 5] & 0xf));
 					countTS++;
 				}
 				else if (buffer[start] == 0x43) // sat
@@ -107,7 +110,7 @@ int nit::getTransportStreams(channels *channels, int diseqc)
 					countTS++;
 				}
 				start += buffer[start + 1] + 2;
-			
+
 			}
 			(*channels).addTS(transport_stream_id, original_network_id, frequ, symbol, polarization, fec, diseqc);
 
@@ -117,7 +120,7 @@ int nit::getTransportStreams(channels *channels, int diseqc)
 	} while( buffer[7] != sec_counter++);
 	ioctl(fd,DMX_STOP,0);
 	close (fd);
-	printf("Found Transponders: %d\n", countTS);
+	//printf("Found Transponders: %d\n", countTS);
 
 	return countTS;
 }

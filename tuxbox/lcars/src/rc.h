@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.h,v $
+Revision 1.5  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -109,17 +112,17 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 class rc
 {
 	int fp;
-	unsigned short last_read;	
+	unsigned short last_read;
 	int rc_codes[NUMBER_RCS][25];
 
 	pthread_t rcThread;
 	pthread_t keyboardThread;
 	pthread_mutex_t mutex;
-		
-    static void* start_rcqueue( void * );
+
+	static void* start_rcqueue( void * );
 	static void* start_keyboardqueue( void * );
 	settings *setting;
-	
+
 public:
 	bool rcstop;
 	pthread_mutex_t blockingmutex;
@@ -128,7 +131,7 @@ public:
 
 	rc(hardware *h, settings *s);
 	~rc();
-	
+
 	int parseKey(std::string key);
 
 	void stoprc();

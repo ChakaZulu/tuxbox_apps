@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: serial.cpp,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -43,9 +46,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
-      
 
-volatile int STOP=false; 
+
+volatile int STOP=false;
 
 serial::serial(container &contain) : cont(contain)
 {
@@ -54,7 +57,7 @@ serial::serial(container &contain) : cont(contain)
 void serial::init()
 {
 	struct termios newtio;
-        
+
 	fd = open(MODEMDEVICE, O_RDWR | O_NOCTTY);
 	if (fd <0)
 	{
@@ -67,13 +70,13 @@ void serial::init()
 	newtio.c_iflag = IGNPAR;
 	newtio.c_oflag=0;
 	newtio.c_lflag=0;
-  
+
 	newtio.c_cc[VMIN]=1;
 	newtio.c_cc[VTIME]=0;
-	
+
 	tcflush(fd, TCIFLUSH);
 	tcsetattr(fd,TCSANOW,&newtio);
-	
+
 }
 
 void serial::startThread()
@@ -88,7 +91,7 @@ void serial::startThread()
 void *serial::startlistening(void *object)
 {
 	serial *s = (serial *) object;
-  
+
 	int res;
 	char buf[255];
 	char input[5];
@@ -100,68 +103,68 @@ void *serial::startlistening(void *object)
 			input[i] = 0;
 			buf[i] = 0;
 		}
-	
-	    do
+
+		do
 		{
 			for (int i = 1; i < 4; i++)
 				input[i - 1] = input[i];
 			res = read(s->fd, buf, 255);
-			
-			printf("%c\n", buf[0]);
+
+			//printf("%c\n", buf[0]);
 			input[3] = buf[0];
-			
+
 			input[4] = 0;
-			printf("String buf: %c%c%c%c\n", buf[0], buf[1], buf[2], buf[3]);
-			printf("String input: %c%c%c%c\n", input[0], input[1], input[2], input[3]);
+			//printf("String buf: %c%c%c%c\n", buf[0], buf[1], buf[2], buf[3]);
+			//printf("String input: %c%c%c%c\n", input[0], input[1], input[2], input[3]);
 			if (!strncmp(input, "CBEG", 4))
 			{
-				printf("OK\n");
+				//printf("OK\n");
 			}
 			else
 			{
-				
+
 			}
 		} while(strncmp(input, "CBEG", 4) && strncmp(buf, "CBEG", 4));
 
 		if (!strncmp(input, "CBEG", 4) || !strncmp(buf, "CBEG", 4))
 		{
-			printf("OK\n");
+			//printf("OK\n");
 			write(s->fd, "\015OK\015\012", 5);
 		}
 		else
 			write(s->fd, "KO\n\r", 4); // If this happens, your box is seriously damaged ;)
-	
+
 		char buffer[255];
 		char text[255];
-		
+
 		time_t act_time = time(0);
 		bool available = false;
 		while ((!(available = s->char_available())) && (time(0) - act_time < 2));
 		if (!available)
 			continue;
-		
+
 		res = read(s->fd, buffer, 255);
-	
-		printf("Serial request: %c\n", buffer[0]);
-		
+
+		//printf("Serial request: %c\n", buffer[0]);
+
 		unsigned char crc;
 
 		switch(buffer[0])
 		{
 		case 'A': // Send size of channellist
 			sprintf(text, "%08x\n\r", (*s->cont.channels_obj).numberChannels() * sizeof(dvbchannel)); // Size of channellist
-			
-			printf("%s\n", text);
+
+			//printf("%s\n", text);
 			write(s->fd, text, 10);
 			break;
-		
+
 		case 'B': // Send channellist
 
 			crc = 0x55;
 			for (int i = 0; i < (*s->cont.channels_obj).numberChannels(); i++)
 			{
 				dvbchannel tmp_chan = (*s->cont.channels_obj).getDVBChannel(i);
-				
+
 				memcpy(&buffer, &tmp_chan, sizeof(dvbchannel));
 				for (int i = 0; i < (int) sizeof(dvbchannel); i++)
 				{
@@ -171,13 +174,13 @@ void *serial::startlistening(void *object)
 				crc ^= 0x0A;
 			}
 			write(s->fd, &crc, 1);
-			printf("CRC_calc: %d\n", crc);
+			//printf("CRC_calc: %d\n", crc);
 			break;
-		
+
 		case 'C': // Get the channellist and save it
 			{
 				channels channels(s->cont.settings_obj, s->cont.pat_obj, s->cont.pmt_obj);
-				
+
 				bool available;
 
 				crc = 0x55;
@@ -193,34 +196,34 @@ void *serial::startlistening(void *object)
 						if (!available)
 							break;
 						res = read(s->fd, &buffer[start], 64);
-						
+
 						start += res;
-						
+
 						if (res == 1)
-							printf("%d\n", buffer[0]);
+							//printf("%d\n", buffer[0]);
 
-						printf("res: %d start: %d\n", res, start);
-						
+							//printf("res: %d start: %d\n", res, start);
 
-					}
+
+						}
 					if (!available)
 						break;
 					for (int i = 0; i < start; i++)
 					{
 						crc ^= buffer[i];
 					}
-					
-					printf("Read: %d\n", res);
+
+					//printf("Read: %d\n", res);
 					memcpy(&tmp_chan, &buffer, sizeof(dvbchannel));
-					printf("done\n");
-					printf("SID: %x %d\n", tmp_chan.SID, tmp_chan.SID);
-					printf("SID: %x %d - Chan: %s\n", tmp_chan.SID, tmp_chan.SID, tmp_chan.serviceName);
+					//printf("done\n");
+					//printf("SID: %x %d\n", tmp_chan.SID, tmp_chan.SID);
+					//printf("SID: %x %d - Chan: %s\n", tmp_chan.SID, tmp_chan.SID, tmp_chan.serviceName);
 					channels.addDVBChannel(tmp_chan);
 
 				}
-				printf("CRC_calc: %d\n", crc);
+				//printf("CRC_calc: %d\n", crc);
 				(*s->cont.osd_obj).createPerspective();
-				
+
 				if (crc == buffer[0])
 				{
 					*s->cont.channels_obj = channels;
@@ -231,7 +234,7 @@ void *serial::startlistening(void *object)
 					sleep(3);
 					(*s->cont.osd_obj).hidePerspective();
 
-				
+
 				}
 				else
 				{
@@ -240,14 +243,14 @@ void *serial::startlistening(void *object)
 					sleep(3);
 					(*s->cont.osd_obj).hidePerspective();
 				}
-				
-				printf("Finished getting channels\n");
+
+				//printf("Finished getting channels\n");
 			}
 			break;
 
 		case 'D': // unsupported
 			break;
-		
+
 		case 'E': // Send version
 			write(s->fd, "LCARS                           \r", 32);
 			break;
@@ -315,7 +318,7 @@ void *serial::startlistening(void *object)
 		case '2': // Play picture
 			break;
 
-		case '3': // 
+		case '3': //
 			break;
 		}
 	} while(true);
@@ -344,6 +347,6 @@ bool serial::char_available()
 void serial::end()
 {
 	tcsetattr(fd,TCSANOW,&oldtio);
-          
+
 	close(fd);
 }

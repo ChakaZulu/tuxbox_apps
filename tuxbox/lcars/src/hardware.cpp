@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.6  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -39,7 +42,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 */
 #include "hardware.h"
 
-hardware::hardware(settings *s, variables *v) 
+hardware::hardware(settings *s, variables *v)
 {
 	setting = s;
 	vars = v;
@@ -70,11 +73,11 @@ int hardware::getVCRStatus()
 {
 	int val;
 	int fp = open("/dev/dbox/fp0",O_RDWR);
-	
+
 	ioctl(fp, FP_IOCTL_GET_VCR, &val);
 
 	close(fp);
-	std::cout << "VCR-Val: " << val << std::endl;
+	//std::cout << "VCR-Val: " << val << std::endl;
 	return val;
 }
 
@@ -87,7 +90,7 @@ int hardware::getARatio()
 	{
 		fgets(buffer, 100, fp);
 		sscanf(buffer, "A_RATIO: %d", &check);
-	}	
+	}
 	fclose(fp);
 	return check;
 }
@@ -95,11 +98,11 @@ int hardware::getARatio()
 bool hardware::switch_vcr()
 {
 	int i = 0, j = 0, nothing, nothinga, fblk = 2;
-	
-	printf("Getbox: %d\n", setting->getBox());
+
+	//printf("Getbox: %d\n", setting->getBox());
 	if (!vcr_on)
 	{
-		printf("on\n");
+		//printf("on\n");
 		old_fblk = getfblk();
 		avs = open("/dev/dbox/avs0",O_RDWR);
 		if (setting->getBox() == SAGEM) // Sagem
@@ -138,7 +141,7 @@ bool hardware::switch_vcr()
 		}
 	}
 	else
-	{		
+	{
 		setOutputMode(old_fblk);
 		avs = open("/dev/dbox/avs0",O_RDWR);
 		if (setting->getBox() == SAGEM)
@@ -146,12 +149,12 @@ bool hardware::switch_vcr()
 			i = 0;
 			j = 0;
 			nothing = 0;
-			
+
 			//ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW2,&nothing);
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
-		
+
 		}
 		else if (setting->getBox() == NOKIA)
 		{
@@ -170,26 +173,26 @@ bool hardware::switch_vcr()
 			i = 1;
 			j = 1;
 			nothing = 1;
-			
+
 			//ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW3,&nothing);
 			ioctl(avs,AVSIOSVSW2,&i);
 			ioctl(avs,AVSIOSASW2,&j);
 		}
 	}
-	printf ("i: %d - j: %d\n", i, j);
+	//printf ("i: %d - j: %d\n", i, j);
 
 
 	vcr_on = !vcr_on;
 	close(avs);
 	return vcr_on;
-	
+
 }
 
 void hardware::switch_mute()
 {
 	int i;
-	
+
 	if (muted)
 	{
 		i = AVS_UNMUTE;
@@ -205,7 +208,7 @@ void hardware::switch_mute()
 	close(avs);
 	muted = !muted;
 
-	
+
 }
 
 int hardware::vol_minus(int value)
@@ -226,7 +229,7 @@ int hardware::vol_minus(int value)
 int hardware::vol_plus(int value)
 {
 	int i;
-	avs = open("/dev/dbox/avs0",O_RDWR);	
+	avs = open("/dev/dbox/avs0",O_RDWR);
 	ioctl(avs, AVSIOGVOL, &i);
 	if (i > 0)
 		i -= value;

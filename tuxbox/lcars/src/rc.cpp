@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.cpp,v $
+Revision 1.6  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.5  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -53,64 +56,64 @@ rc::rc(hardware *h, settings *s)
 	hardware_obj = h;
 
 	fp = open("/dev/dbox/rc0", O_RDONLY);
-	
+
 	int rcs[NUMBER_RCS][25] =
-	{
-		{
-			RC1_0,
-			RC1_1,
-			RC1_2,
-			RC1_3,
-			RC1_4,
-			RC1_5,
-			RC1_6,
-			RC1_7,
-			RC1_8,
-			RC1_9,
-			RC1_STANDBY,
-			RC1_HOME,
-			RC1_DBOX,
-			RC1_RED,
-			RC1_GREEN,
-			RC1_YELLOW,
-			RC1_BLUE,
-			RC1_OK,
-			RC1_VOLPLUS,
-			RC1_MUTE,
-			RC1_HELP,
-			RC1_UP,
-			RC1_DOWN,
-			RC1_RIGHT,
-			RC1_LEFT
-		},
-		{
-			RC2_0,
-			RC2_1,
-			RC2_2,
-			RC2_3,
-			RC2_4,
-			RC2_5,
-			RC2_6,
-			RC2_7,
-			RC2_8,
-			RC2_9,
-			RC2_STANDBY,
-			RC2_HOME,
-			RC2_DBOX,
-			RC2_RED,
-			RC2_GREEN,
-			RC2_YELLOW,
-			RC2_BLUE,
-			RC2_OK,
-			RC2_VOLPLUS,
-			RC2_MUTE,
-			RC2_HELP,
-			RC2_UP,
-			RC2_DOWN,
-			RC2_RIGHT,
-			RC2_LEFT
-		}
-	};
+	    {
+	        {
+	            RC1_0,
+	            RC1_1,
+	            RC1_2,
+	            RC1_3,
+	            RC1_4,
+	            RC1_5,
+	            RC1_6,
+	            RC1_7,
+	            RC1_8,
+	            RC1_9,
+	            RC1_STANDBY,
+	            RC1_HOME,
+	            RC1_DBOX,
+	            RC1_RED,
+	            RC1_GREEN,
+	            RC1_YELLOW,
+	            RC1_BLUE,
+	            RC1_OK,
+	            RC1_VOLPLUS,
+	            RC1_MUTE,
+	            RC1_HELP,
+	            RC1_UP,
+	            RC1_DOWN,
+	            RC1_RIGHT,
+	            RC1_LEFT
+	        },
+	        {
+	            RC2_0,
+	            RC2_1,
+	            RC2_2,
+	            RC2_3,
+	            RC2_4,
+	            RC2_5,
+	            RC2_6,
+	            RC2_7,
+	            RC2_8,
+	            RC2_9,
+	            RC2_STANDBY,
+	            RC2_HOME,
+	            RC2_DBOX,
+	            RC2_RED,
+	            RC2_GREEN,
+	            RC2_YELLOW,
+	            RC2_BLUE,
+	            RC2_OK,
+	            RC2_VOLPLUS,
+	            RC2_MUTE,
+	            RC2_HELP,
+	            RC2_UP,
+	            RC2_DOWN,
+	            RC2_RIGHT,
+	            RC2_LEFT
+	        }
+	    };
 	//rc_codes = rcs;
 	for (int i = 0; i < NUMBER_RCS; i++)
 	{
@@ -128,21 +131,21 @@ rc::~rc()
 
 int rc::start_thread(bool withoutkeyboard)
 {
-	
+
 	int status;
-  	
+
 	pthread_mutex_init(&mutex, NULL);
 	status = pthread_create( &rcThread,
-                           NULL,
-                           start_rcqueue,
-                           (void *)this );
-	
+	                         NULL,
+	                         start_rcqueue,
+	                         (void *)this );
+
 	if (!withoutkeyboard)
 		status = pthread_create( &keyboardThread,
-                           NULL,
-                           start_keyboardqueue,
-                           (void *)this );
-						   
+		                         NULL,
+		                         start_keyboardqueue,
+		                         (void *)this );
+
 	return status;
 
 }
@@ -150,7 +153,7 @@ int rc::start_thread(bool withoutkeyboard)
 void* rc::start_rcqueue( void * this_ptr )
 {
 	rc *r = (rc *) this_ptr;
-	
+
 	while(1)
 	{
 		if (!r->rcstop)
@@ -158,9 +161,9 @@ void* rc::start_rcqueue( void * this_ptr )
 		else
 			sleep(1);
 		pthread_mutex_lock( &r->blockingmutex );
-		
+
 		r->key = r->read_from_rc2();
-		std::cout << "Key: " << r->key << std::endl;
+		//std::cout << "Key: " << r->key << std::endl;
 	}
 }
 
@@ -281,13 +284,13 @@ void* rc::start_keyboardqueue( void * this_ptr )
 	tcgetattr(0,&t);
 	t.c_lflag &= ~(ECHO | ICANON | ECHOK | ECHOE | ECHONL);
 	ot = t;
-	tcsetattr(0,TCSANOW,&t); 
+	tcsetattr(0,TCSANOW,&t);
 	while(1)
 	{
 		char character;
-		
+
 		std::cin.get(character);
-		
+
 		if (character > 47 && character < 58)
 			r->cheat_command(character - 48);
 		switch(character)
@@ -312,7 +315,7 @@ void* rc::start_keyboardqueue( void * this_ptr )
 			break;
 		case 119: // w
 			r->cheat_command(RC1_GREEN);
-			break; 
+			break;
 		case 101: // e
 			r->cheat_command(RC1_YELLOW);
 			break;
@@ -328,7 +331,7 @@ void* rc::start_keyboardqueue( void * this_ptr )
 
 
 		}
-		printf("%d\n", character);
+		//printf("%d\n", character);
 	}
 }
 
@@ -336,7 +339,7 @@ void rc::cheat_command(unsigned short cmd)
 {
 	key = cmd;
 	last_read = cmd;
-	std::cout << "Command: " << cmd << std::endl;
+	//std::cout << "Command: " << cmd << std::endl;
 	pthread_mutex_unlock( &blockingmutex );
 	usleep(100);
 	pthread_mutex_lock( &blockingmutex );
@@ -366,9 +369,9 @@ unsigned short rc::read_from_rc_raw()
 	unsigned short read_code = 0;
 
 	read(fp, &read_code, 2);
- 	
+
 	last_read = read_code;
-	
+
 	return read_code;
 }
 
@@ -390,7 +393,7 @@ unsigned short rc::read_from_rc()
 		pthread_mutex_lock( &blockingmutex );
 		pthread_mutex_unlock( &blockingmutex );
 	}
-	std::cout << "KEY: " << key << std::endl;
+	//std::cout << "KEY: " << key << std::endl;
 	int returnkey = key;
 	key = -1;
 	return returnkey;
@@ -407,7 +410,7 @@ unsigned short rc::read_from_rc2()
 		do
 		{
 			read(fp, &read_code, 2);
-			printf("RC: %x\n", read_code);
+			//printf("RC: %x\n", read_code);
 			if (setting->getSupportOldRc())
 				read_code = old_to_new(read_code);
 		} while (read_code == last_read || (read_code & 0xff00) == 0x5c00);
@@ -417,7 +420,7 @@ unsigned short rc::read_from_rc2()
 		do
 		{
 			read(fp, &read_code, 2);
-			printf("RC: %x\n", read_code);
+			//printf("RC: %x\n", read_code);
 			if (setting->getSupportOldRc())
 				read_code = old_to_new(read_code);
 		} while ((read_code & 0xff00) == 0x5c00);
@@ -425,7 +428,7 @@ unsigned short rc::read_from_rc2()
 	}
 
 	last_read = read_code;
-	
+
 	read_code %= 0x40;
 
 	pthread_mutex_unlock( &mutex );
@@ -489,7 +492,7 @@ int rc::old_to_new(int read_code)
 		return RC1_RIGHT;
 	case RC2_LEFT:
 		return RC1_LEFT;
-	
+
 
 	}
 	return read_code;
@@ -498,7 +501,7 @@ int rc::old_to_new(int read_code)
 int rc::get_number()
 {
 	int i, codes, number = -1;
-	
+
 	for (i = 0; i < NUMBER_RCS; i++)
 	{
 		for (codes = 0; codes < 10; codes++)

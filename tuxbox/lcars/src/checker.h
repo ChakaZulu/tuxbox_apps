@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.h,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -39,20 +42,20 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 class checker
 {
-    pthread_t eventThread;
+	pthread_t eventThread;
 	static void* startEventChecker(void*);
 
-public:	
+public:
 	int laststat;
 	int laststat_mode;
-	
+
 	hardware *hardware_obj;
 	settings *setting;
 	checker(settings *s, hardware *h);
 	int startEventThread();
 	void fnc(int i, int mode_16_9);
 	void aratioCheck();
-	
+
 	void set_16_9_mode(int mode);
 	int get_16_9_mode();
 };

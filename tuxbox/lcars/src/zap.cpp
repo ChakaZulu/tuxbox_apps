@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.5  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -64,21 +67,21 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 zap::zap(settings &set, osd &o, tuner &t, cam &c) : setting(set), osdd(o), tune(t), ca(c)
 {
-	printf("Initializing zapper...\n");
+	//printf("Initializing zapper...\n");
 
 	vid = open("/dev/ost/video0", O_RDWR);
 	if((video = open("/dev/ost/demux0", O_RDWR)) < 0) {
-		printf("Cannot open demux device \n");
+		//printf("Cannot open demux device \n");
 		exit(1);
 	}
 
 	if((audio = open("/dev/ost/demux0", O_RDWR)) < 0) {
-		printf("Cannot open demux device\n");
+		//printf("Cannot open demux device\n");
 		exit(1);
 	}
 	aud = open("/dev/ost/audio0", O_RDWR);
 	ioctl(vid, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX);
-    old_frequ = 0;
+	old_frequ = 0;
 	old_TS = -1;
 }
 
@@ -140,12 +143,12 @@ void zap::zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS
 		perror("/dev/ost/demux0");
 		exit(1);
 	}
-	struct dmxPesFilterParams pes_filter;	
+	struct dmxPesFilterParams pes_filter;
 
 	if (VPID == 0)
 		VPID = 0x1fff;
 
-	printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
+	//printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
 
 	bool usevideo = false, useaudio = false, usepcr = false;
 	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 0);
@@ -187,22 +190,22 @@ void zap::zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS
 
 	if (usevideo)
 		ioctl(vid, VIDEO_PLAY);
-	
+
 	if (useaudio)
 		ioctl(aud, AUDIO_PLAY);
-	
+
 	if (usepcr)
 		ioctl(pcr, DMX_START);
-	
+
 	if (useaudio)
 		ioctl(audio,DMX_START);
 	if (usevideo)
 		ioctl(video,DMX_START);
-	
-	
+
+
 	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 1);
 
-	printf("Zapping...\n");
+	//printf("Zapping...\n");
 	if (ECM != 0)
 	{
 		ca.initialize();
@@ -215,12 +218,12 @@ void zap::zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS
 		ca.setSID(SID);
 		ca.setONID(ONID);
 		if (PID1 != -1)
-			{
+		{
 			ca.addPID(PID1);
 		}
 		if (PID2 != -1)
 			ca.addPID(PID2);
-	
+
 		if (old_TS != TS)
 		{
 			ca.reset();
@@ -236,16 +239,16 @@ void zap::zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS
 
 void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 {
-	struct dmxPesFilterParams pes_filter;	
-	
+	struct dmxPesFilterParams pes_filter;
+
 	int i = AVS_MUTE;
 	int avs = open("/dev/dbox/avs0",O_RDWR);
 	ioctl(avs,AVSIOSMUTE,&i);
 	close(avs);
 	ioctl(aud, AUDIO_STOP, true);
 	ioctl(audio, DMX_STOP, true);
-	
-	printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
+
+	//printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
 
 	/* apid */
 	pes_filter.pid     = APID;

@@ -23,9 +23,9 @@ void update::eraseall()
 	{
 		perror("mtd_open");
 		exit( 1 );
-    }
-   
-   
+	}
+
+
 	if( ioctl( fd, MEMGETINFO, &meminfo ) != 0 )
 	{
 		perror("mtdmemgetinfo");
@@ -33,11 +33,11 @@ void update::eraseall()
 	}
 
 	erase.length = meminfo.erasesize;
-	
+
 	for (erase.start = 0; erase.start < meminfo.size; erase.start += meminfo.erasesize)
 	{
 		std::stringstream ostr;
-		
+
 		ostr << "Erasing: " << (erase.start*100/meminfo.size) << "% completed" << std::ends;
 		osd_obj->setPerspectiveName(ostr.str());
 		osd_obj->addCommand("SHOW perspective");
@@ -46,9 +46,9 @@ void update::eraseall()
 		{
 			perror("mtdmemerase");
 			//exit( 1 );
-       }
-   }
-	
+		}
+	}
+
 }
 
 void update::run(int type)
@@ -60,7 +60,7 @@ void update::run(int type)
 		ostr << "mount /dev/mtdblock/" << cramfsmtd << " /var/tmp/tmpcramfs" << std::ends;
 		mtd_block_device_mount= ostr.str();
 	}
-	
+
 	osd_obj->clearScreen();
 	osd_obj->createPerspective();
 	if (system("rm -rf /var/tmp/newcramfs") != 0)
@@ -84,7 +84,7 @@ void update::run(int type)
 	}
 	mkdir("/var/tmp/newcramfs", (mode_t)0755);
 	mkdir("/var/tmp/newcramfs/update", (mode_t)0755);
-	{	
+	{
 		std::stringstream ostr;
 		ostr << "Copying files, this may take a while" << std::ends;
 		osd_obj->setPerspectiveName(ostr.str());
@@ -98,7 +98,7 @@ void update::run(int type)
 		osd_obj->addCommand("HIDE perspective");
 		return;
 	}
-	
+
 	osd_obj->setPerspectiveName("Downloading updates... Please wait!");
 	osd_obj->addCommand("SHOW perspective");
 	if (type == UPDATE_INET)
@@ -126,8 +126,8 @@ void update::run(int type)
 			fgets(version, 5, fp);
 			fclose(fp);
 			std::string version_string(version);
-			std::cout << "Version eigen: " << settings_obj->getSmallVersion() << "-" << std::endl;
-			std::cout << "Version Server: " << version_string << "-" << std::endl;
+			//std::cout << "Version eigen: " << settings_obj->getSmallVersion() << "-" << std::endl;
+			//std::cout << "Version Server: " << version_string << "-" << std::endl;
 			if (version_string == settings_obj->getSmallVersion())
 			{
 				osd_obj->setPerspectiveName("No update available.");
@@ -195,7 +195,7 @@ void update::run(int type)
 	{
 		system("tar -xzvf /var/tmp/newcramfs/update/update.tar.gz -C /var/tmp/newcramfs");
 		system("rm -rf /var/tmp/newcramfs/update");
-		
+
 	}
 	osd_obj->setPerspectiveName("Making CramFS... stay tuned");
 	osd_obj->addCommand("SHOW perspective");
@@ -241,7 +241,7 @@ int update::getUpdate()
 
 	std::string url = "http://lcarsupdate.berlios.de/update/" + version + "/version.html";
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-	
+
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_data);
 	FILE *bodyfile = fopen("/var/tmp/newcramfs/update/version.html","w");
 	if (bodyfile == NULL)
@@ -264,7 +264,7 @@ int update::getUpdate()
 	url = "http://lcarsupdate.berlios.de/update/" + version + "/update.tar.gz";
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	res = curl_easy_perform(curl);
-		
+
 	fclose(bodyfile);
 	curl_easy_cleanup(curl);
 	return 0;

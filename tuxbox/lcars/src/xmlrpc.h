@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: xmlrpc.h,v $
+Revision 1.4  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.3  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -44,17 +47,17 @@ initial release
 
 enum
 {
-	NOTYPE, INT, BOOLEAN, STRING, DOUBLE, DATETIME, BASE64, STRUCT, ARRAY
+    NOTYPE, INT, BOOLEAN, STRING, DOUBLE, DATETIME, BASE64, STRUCT, ARRAY
 };
 
 enum
 {
-	RESPONSE, REQUEST, FAULT, FAILED
+    RESPONSE, REQUEST, FAULT, FAILED
 };
 
 enum
 {
-	SERVICE, EMPTY
+    SERVICE, EMPTY
 };
 struct command
 {
@@ -83,7 +86,7 @@ public:
 	typedef std::vector<xmlrpc_value*> xmlrpc_array;
 	typedef std::map<std::string, xmlrpc_value*> xmlrpc_struct;
 	typedef std::pair<std::string, xmlrpc_value*> xmlrpc_struct_pair;
-	
+
 	void setValue(int type, void* value);
 
 	int getType() { return type; }
@@ -168,7 +171,7 @@ public:
 class xmlrpc_parse
 {
 
-	
+
 	std::vector<struct command> command_list;
 
 	std::string xml;
@@ -179,7 +182,7 @@ class xmlrpc_parse
 public:
 	void readFile(std::string filename);
 	void setXML(std::string x) { xml = x; }
-	
+
 	int parseXML();
 
 	int getType() { return type; }
@@ -199,7 +202,7 @@ class handle
 	};
 public:
 	std::string makeHandle(int type, int count, ...);
-	
+
 	void parseHandle(std::string tmp_handle);
 	bool handleIsValid() { return valid; }
 	int getType() { return type; }

@@ -49,23 +49,23 @@ class fbClass
 	__u16 g[256];
 	__u16 b[256];
 	__u16 tr[256];
-	
+
 	struct fb_cmap cmap;
 
 	FT_Library  library;
-	FT_Face      face;      
+	FT_Face      face;
 	FT_GlyphSlot  slot;
-	
-	FT_Face      face_vt;      
+
+	FT_Face      face_vt;
 	FT_GlyphSlot  slot_vt;
-	
+
 	FT_UInt       glyph_index;
 	float factor;
 
 	struct font_cache
 	{
 		int size;
-		
+
 		int top;
 		int left;
 		int width;
@@ -112,7 +112,7 @@ public:
 	int getMaxY();
 	int getHandle() { return fbfd; }
 	int getWidth(char c);
-	
+
 	// Text Funktionen
 	void loadFonts(std::string standardfont, std::string vtfont);
 	void setTextSize(float setfactor);

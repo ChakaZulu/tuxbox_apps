@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: showview.cpp,v $
+Revision 1.5  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.4  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -243,7 +246,7 @@ showview::showview()
 	acSender[204] = "[204]";
 	acSender[205] = "[205]";
 	acSender[206] = "Phoenix [206]";
-	
+
 	anStart[0] = 1900;
 	anStart[1] = 1930;
 	anStart[2] = 2000;
@@ -1268,7 +1271,7 @@ showview::showview()
 	anStart[1021] = 1450;
 	anStart[1022] = 1455;
 	anStart[1023] = 1405;
-	
+
 	for (nCount = 0; nCount < 37; nCount++)
 		anLength[nCount] =  30;
 	for (nCount = 37; nCount < 74; nCount++)
@@ -1750,22 +1753,22 @@ int showview::getTimeIndex(time_t begin_time, int duration_start)
 
 	duration_start = ((int)(duration_start / 5)) * 5;
 	int duration = duration_start;
-	
+
 	int starttime = (*tm_time).tm_hour * 100 + (*tm_time).tm_min;
 	int index = -1;
-	printf("Startzeit: %d\n", starttime);
+	//printf("Startzeit: %d\n", starttime);
 	char acttime[100];
 	strftime(acttime, sizeof acttime, "%H:%M %d.%m", tm_time);
-	printf("Showviecode fr %s Dauer %d\n", acttime, duration);
+	//printf("Showviecode fr %s Dauer %d\n", acttime, duration);
 	for (int durstepper = 0; durstepper < 20 && index == -1; durstepper++)
 	{
 		for (int stepper = 0; stepper < 80 && index == -1; stepper++)
 		{
-	
-			printf("stepper: %d\n", stepper);
-			printf("Minuten: %d\n", (*tm_time).tm_min);
+
+			//printf("stepper: %d\n", stepper);
+			//printf("Minuten: %d\n", (*tm_time).tm_min);
 			strftime(acttime, sizeof acttime, "%H:%M %d.%m", tm_time);
-			printf("Showviecode fr %s Dauer %d\n", acttime, duration);
+			//printf("Showviecode fr %s Dauer %d\n", acttime, duration);
 			for (int i = 0; i < 1024; i++)
 			{
 				if (anStart[i] == starttime && anLength[i] == duration)
@@ -1774,7 +1777,7 @@ int showview::getTimeIndex(time_t begin_time, int duration_start)
 					break;
 				}
 			}
-	
+
 			begin -= 300;
 			duration += 5;
 			tm_time = localtime(&begin);
@@ -1788,7 +1791,7 @@ int showview::getTimeIndex(time_t begin_time, int duration_start)
 			break;
 	}
 
-	printf("Index: %d ist %d mit Dauer %d\n", index, anStart[index], anLength[index]);
+	//printf("Index: %d ist %d mit Dauer %d\n", index, anStart[index], anLength[index]);
 
 	return index;
 }
@@ -1818,7 +1821,7 @@ int showview::generateCode(time_t begin, int duration)
 	(*tm_time).tm_mday = 7;
 	channel = 6;
 	timeindex = 135;
-	
+
 	if (timeindex == -1)
 		return -1;
 
@@ -1830,23 +1833,23 @@ int showview::generateCode(time_t begin, int duration)
 	{
 		bin[i] = (channel >> i) & 0x1;
 	}
-	
+
 	for (int i = 0; i < 10; i++)
 	{
 		bin2[i] = (timeindex >> i) & 0x1;
 	}
-	
+
 	int top2 = 0;
 	int newtop = 0;
 
 	top2 = (bin2[2] << 4) | (bin[1] << 3) | (bin2[1] << 2) | (bin[0] << 1) | bin2[0];
 	newtop = (bin2[9] << 9) | (bin[4] << 8) | (bin[3] << 7) | (bin2[8] << 6) | (bin2[7] << 5) | (bin2[6] << 4) | (bin2[5] << 3) | (bin2[4] << 2) | (bin2[3] << 1) | bin[2];
 
-	printf("Top2: %d\n", top2);
-	printf("Newtop: %d\n", newtop);
+	//printf("Top2: %d\n", top2);
+	//printf("Newtop: %d\n", newtop);
 
 	int bottom = ((*tm_time).tm_mday - 1) * 32 + 1;
-	printf("Bottom: %d\n", bottom);
+	//printf("Bottom: %d\n", bottom);
 
 	int year = (*tm_time).tm_year % 100;
 	int count = year % 16 + 1;
@@ -1856,23 +1859,23 @@ int showview::generateCode(time_t begin, int duration)
 
 	for (int i = 0; i < count; i++)
 	{
-		printf("i: %d count: %d\n", i, count);
+		//printf("i: %d count: %d\n", i, count);
 		int j = 1;
 		newnumber = 0;
 		while (number > 9)
 		{
-			printf("number: %d\n", number);
-			printf("%d\n", mod(number % 10- ((int) (number / 10)) % 10, 10) * j);
+			//printf("number: %d\n", number);
+			//printf("%d\n", mod(number % 10- ((int) (number / 10)) % 10, 10) * j);
 			newnumber += (mod((number % 10) - (  ( (int) (number / 10))), 10 )) * j;
 			number = (int) (number / 10);
 			j *= 10;
-			printf("newnumber: %d\n", newnumber);
+			//printf("newnumber: %d\n", newnumber);
 		}
-		printf("%d\n", mod(-4 , 10));
+		//printf("%d\n", mod(-4 , 10));
 		newnumber += (mod(number - ((*tm_time).tm_mday % 10), 10)) * j;
 
 		number = newnumber;
-		printf("number: %d\n", number);
+		//printf("number: %d\n", number);
 	}
 
 	top = number;
@@ -1884,7 +1887,7 @@ int showview::generateCode(time_t begin, int duration)
 		offset += number % 10;
 		number /= 10;
 	}
-	printf("Offset: %d\n", offset);
+	//printf("Offset: %d\n", offset);
 
 	number = (*tm_time).tm_mday % 10;
 	for (int i = 0; i < count; i++)

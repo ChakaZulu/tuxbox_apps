@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pmt.cpp,v $
+Revision 1.5  2002/06/02 12:18:47  TheDOC
+source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -48,7 +51,7 @@ pmt_data pmt::readPMT(int pmt_pid)
 
 	// Lies den PMT
 	fd=open("/dev/ost/demux0", O_RDONLY);
-	
+
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;
 	flt.pid            = pmt_pid;
@@ -56,19 +59,19 @@ pmt_data pmt::readPMT(int pmt_pid)
 	flt.filter.mask[0] = 0xFF;
 	flt.timeout        = 10000;
 	flt.flags          = DMX_IMMEDIATE_START | DMX_ONESHOT;
-	
+
 	ioctl(fd, DMX_SET_FILTER, &flt);
 	r=read(fd, buffer, r);
 	ioctl(fd,DMX_STOP,0);
-		
+
 	close(fd);
-	
+
 	struct pmt_data tmp_pmt;
 	memset (&tmp_pmt, 0, sizeof (struct pmt_data));
 	tmp_pmt.ecm_counter = 0;
-	
+
 	tmp_pmt.PCR = (buffer[8] & 0x1f) << 8 | buffer[9];
-	
+
 	int descriptors_length = ((buffer[10] & 0xf) << 8 | buffer[11]);
 	int start = 12;
 	while (start < 12 + descriptors_length)
@@ -78,7 +81,7 @@ pmt_data pmt::readPMT(int pmt_pid)
 			tmp_pmt.CAID[tmp_pmt.ecm_counter] = (buffer[start + 2] << 8) | buffer[start + 3];
 			tmp_pmt.ECM[tmp_pmt.ecm_counter++] = ((buffer[start + 4] & 0x1f) << 8) | buffer[start + 5];
 		}
-		
+
 		start += buffer[start + 1] + 2;
 	}
 
@@ -100,7 +103,7 @@ pmt_data pmt::readPMT(int pmt_pid)
 			}
 			else if (buffer[start] == 0x56) // teletext_descripto
 			{
-				printf("---> teletext_descriptor: <---\n");
+				//printf("---> teletext_descriptor: <---\n");
 				for (int i = start + 3; i < start + 3 + buffer[start + 1]; i += 5)
 				{
 				}
