@@ -48,7 +48,7 @@ mainsettings.recording Nagrywanie
 mainsettings.colors Kolory / Tematy
 mainsettings.plugins Dodatki
 mainsettings.lcd LCD-ustawienia
-mainsettings.keybinding Wybor klawiszy
+mainsettings.keybinding Wybór klawiszy
 mainsettings.misc Inne Ustawienia
 mainsettings.scan Ustawienia Strojenia
 
@@ -62,10 +62,10 @@ miscsettings.general Glówne
 miscsettings.fb_destination Ekspert! -konsola
 miscsettings.infobar_sat_display Nazwa satelity na pasku
 
-languagesetup.head Wybor jezyka
+languagesetup.head Wybór jezyka
 languagesetup.select jezyk
 
-audiomenu.head Wybor Dzwieku
+audiomenu.head Wybór Dzwieku
 audiomenu.analogout wyjscie analogowe
 audiomenu.monoright prawy mono
 audiomenu.monoleft lewy mono
@@ -136,7 +136,7 @@ colormenu.textcolor_head Kolor tekstu
 colormenu.fade Redukcja kontrastu 
 colormenu.timing Czas wyswietlania OSD
 
-colorthememenu.head Wybor tematu
+colorthememenu.head Wybór tematu
 colorthememenu.neutrino_theme Temat Neutrino
 colorthememenu.classic_theme Klasyczny temat
 
@@ -144,7 +144,7 @@ colormenusetup.head Kolory Menu
 colormenusetup.menuhead Lista tytuowa
 colormenusetup.menucontent Zawartosc okien
 colormenusetup.menucontent_inactive Zawartosc okien wylaczona
-colormenusetup.menucontent_selected Wybor zawartosci okien
+colormenusetup.menucontent_selected Wybór zawartosci okien
 
 colorstatusbar.head Kolory listwy statusowej
 colorstatusbar.text Listwa Statusowa
@@ -163,7 +163,7 @@ tuxnews.size Rozmiar
 tuxnews_size.small Maly
 tuxnews_size.medium Sredni
 tuxnews_size.large Duzy
-tuxnews.speed Prêdkoæ
+tuxnews.speed Predkosc¦
 tuxnews_speed.slow Wolno
 tuxnews_speed.medium Srednio
 tuxnews_speed.fast Szybko
@@ -176,7 +176,7 @@ repeatblocker.hint_1 czas (w ms) pomiedzy nacisnieciami klawisza
 repeatblocker.hint_2 0 wylacza blokade (czerwony jest " ")
 
 keybindingmenu.RC Pilot
-keybindingmenu.repeatblock opóznienie samopotarzania
+keybindingmenu.repeatblock opóznienie samopowtarzania
 keybindingmenu.repeatblockgeneric podstawowe opóznienie
 keybindingmenu.head Ustawienia klawiszy
 keybindingmenu.modechange Zmiana Trybu
@@ -188,8 +188,8 @@ keybindingmenu.pageup Strona dalej
 keybindingmenu.pageup_head Strona dalej
 keybindingmenu.pagedown Strona wstecz 
 keybindingmenu.pagedown_head strona wstecz 
-keybindingmenu.cancel Zamknij liste kanalow
-keybindingmenu.cancel_head Zamknij liste kanalow
+keybindingmenu.cancel Zamknij liste kanalów
+keybindingmenu.cancel_head Zamknij liste kanalów
 keybindingmenu.sort Sortuj
 keybindingmenu.sort_head Sortuj
 keybindingmenu.addrecord dodaj timer
@@ -239,8 +239,8 @@ keychooser.head Wybierz nowy klawisz
 keychooser.text1 Prosze nacisnac klawisz
 keychooser.text2 Prosze czekaj, przerywam
 
-screensetup.upperleft czerw = lewy-gora
-screensetup.lowerright ziel = prawy-dol
+screensetup.upperleft czerw = lewy-góra
+screensetup.lowerright ziel = prawy-dól
 
 channellist.head Wszystkie Kanaly
 channellist.nonefound Brak listy kanalow!\nUruchom strojenie\n(ustawienia -> strojenie)
@@ -281,7 +281,7 @@ streaminfo.not_available nie dostepny
 streamfeatures.head Funkcje
 streamfeatures.info Informacje o strumienu
 
-apidselector.head Wybor Jezyka
+apidselector.head Wybór Jezyka
 
 nvodselector.head Czas rozpoczecia
 nvodselector.subservice Wybierz subservice
@@ -387,14 +387,14 @@ flashupdate.savesuccess Image zapisany poprawnie \njako %s.
 flashupdate.mtdselector Wybor partycji
 flashupdate.titlereadflash Czytam Flash
 flashupdate.actionreadflash Czytam
-flashupdate.fileselector Wybor plikow
+flashupdate.fileselector Wybór plikow
 flashupdate.titlewriteflash Zapis Flasha
 flashupdate.actionwriteflash zapis
 flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
 flashupdate.reallyflashmtd Napewno chcesz uaktualnic?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
 flashupdate.wrongbase Ta wersja Baseimage jest zbyt stara, \nprosze wgrac nowsza wersje!
 
-bouqueteditor.name Edytor Bukietow
+bouqueteditor.name Edytor Bukietów
 bouqueteditor.delete Kasuj
 bouqueteditor.add Dodaj
 bouqueteditor.move Przenies
@@ -451,7 +451,7 @@ GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
 
 GENRE.SPORTS.0 Sport
-GENRE.SPORTS.1 special imprezy (Olimpiada,Puchar siata itd.)
+GENRE.SPORTS.1 imprezy specjalne(Olimpiada,Puchar siata itd.)
 GENRE.SPORTS.2 magazyny sportowe
 GENRE.SPORTS.3 pilka nozna
 GENRE.SPORTS.4 tenis/squash
@@ -542,8 +542,8 @@ favorites.bouquetname Moje Ulubione
 favorites.nobouquets Ulubione dostepne sa wylacznie dla aktywnych Bukietów.
 favorites.addchannel Biezacy kanal zostanie dodany \ndo bukietu "Moje Ulubione". \n To moze potrwac kilka sekund...
 favorites.menueadd Dodaj kanal do ulubionych
-favorites.bqcreated Bukiuet "Moje Ulubione" zosta³ utworzony...\n
-favorites.chadded Bierzacy kanal zostal dodany do ulubionych...\n
+favorites.bqcreated Bukiuet "Moje Ulubione" zostal utworzony...\n
+favorites.chadded Biezacy kanal zostal dodany do ulubionych...\n
 favorites.chalreadyinbq Ten kanal jest juz w twoich ulubionych...\n
 favorites.finalhint \nUzyj edytora bukietow aby zmienic twoje ulubione.\n
 
@@ -559,7 +559,7 @@ shutdowntimer.announce Dbox wylaczy sie za minute\nZatrzymac wylaczanie ?
 timerbar.channelswitch Przeglad
 timerbar.recordevent Nagrywanie
 timer.eventtimed.title Przeglad eventów
-timer.eventtimed.msg Eventy ustaione.\nDbox wlaczy sie i\nustawi na tym kanale o czasie.
+timer.eventtimed.msg Eventy ustawione.\nDbox wlaczy sie i\nustawi na tym kanale o czasie.
 timer.eventrecord.title Przeglad nagran
 timer.eventrecord.msg ... Zrobione, lub nie zrobione... 
 timerlist.name Lista nagran
@@ -600,7 +600,7 @@ timerlist.stoptime Zatrzymaj
 timerlist.new Nowy timer
 timerlist.menumodify Zmien timer
 timerlist.type Typ timera
-timerlist.repeat Powtorzenie
+timerlist.repeat Powtórzenie
 timerlist.save Zapisz timer
 timerlist.standby Tryb standby
 timerlist.channel Kanal
@@ -668,7 +668,7 @@ mp3player.shuffle Losowo
 mp3player.deleteall Kasuj wszystkie
 mp3player.title Tytul
 mp3player.artist Wykonawca
-mp3player.playing Bierzacy
+mp3player.playing Biezacy
 mp3player.id3scan Skanuj ID3 info
 mp3player.keylevel poziom
 mp3player.fastforward przewin.
