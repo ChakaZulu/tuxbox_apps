@@ -1798,7 +1798,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 }
 
 
-class CMenuNumberInput : public CMenuForwarder, CMenuTarget
+class CMenuNumberInput : public CMenuForwarder, CMenuTarget, CChangeObserver
 {
 private:
 	CChangeObserver * observer;
@@ -1814,6 +1814,13 @@ protected:
 			return value;
 		}
 
+	virtual bool changeNotify(const std::string & OptionName, void * Data)
+		{
+			configfile->setInt32(text, atoi(value));
+			return observer->changeNotify(OptionName, Data);
+		}
+  
+
 public:
 	CMenuNumberInput(const char * const Text, const int32_t DefaultValue, CChangeObserver * const _observer, CConfigFile * const _configfile) : CMenuForwarder(Text, true, NULL, this)
 		{
@@ -1824,14 +1831,8 @@ public:
 
 	int exec(CMenuTarget * parent, const std::string & actionKey)
 		{
-			CStringInput * input;
-			int res;
-
-			input = new CStringInput(text.c_str(), (char *)getOption(), 3, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ", observer);
-			res = input->exec(parent, actionKey);
-			configfile->setInt32(text, atoi(value));
-			delete input;
-			return res;
+			CStringInput input(text.c_str(), (char *)getOption(), 3, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ", this);
+			return input.exec(parent, actionKey);
 		}
 };
 
