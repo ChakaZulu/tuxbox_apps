@@ -1,5 +1,5 @@
-AC_INIT([dvbsnoop],[1.2.01],[rasc@users.sourceforge.net])
-AM_INIT_AUTOMAKE([dvbsnoop],[1.2.01])
+AC_INIT([dvbsnoop],[1.2.02],[rasc@users.sourceforge.net])
+AM_INIT_AUTOMAKE([dvbsnoop],[1.2.02])
 #AM_MAINTAINER_MODE
 
 AC_PROG_CC
