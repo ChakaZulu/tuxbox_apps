@@ -206,19 +206,10 @@ void CFrameBuffer::setTransparency( int tr )
 {
 	if (tr> 8)
 		tr= 8;
-/*  --------------- driver broken
-	if (ioctl(fd, CCUBEFB_BLEV0, tr ))
-		perror("CCUBEFB_BLEV0");
 
-	if (ioctl(fd, CCUBEFB_BLEV1, tr ))
-		perror("CCUBEFB_BLEV1");
-
-	if (ioctl(fd, CCUBEFB_BLEV0, tr ))
-		perror("CCUBEFB_BLEV0");
-
-	if (ioctl(fd, CCUBEFB_BLEV1, tr ))
-		perror("CCUBEFB_BLEV1");
-*/
+	int val = (tr << 8) | tr;
+	if (ioctl(fd, AVIA_GT_GV_SET_BLEV, val ))
+		perror("AVIA_GT_GV_SET_BLEV");
 }
 
 void CFrameBuffer::setAlphaFade(int in, int num, int tr)
