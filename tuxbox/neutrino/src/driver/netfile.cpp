@@ -289,7 +289,7 @@ int request_file(URL *url)
 		  sprintf(str, "Host: %s\r\n", url->host);
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
-// findme
+
 		  if(enable_metadata)
 		  {
 		    sprintf(str, "icy-metadata: 1\r\n");
@@ -300,6 +300,7 @@ int request_file(URL *url)
 		  sprintf(str, "User-Agent: %s\r\n\r\n", "RealPlayer/4.0");
 		  dprintf(stderr, "> %s", str);
 		  send(url->fd, str, strlen(str), 0);
+
 		  if( (meta_int = parse_response(url->fd, &id3, &tmp)) < 0)
 		    return -1;
 		    
@@ -707,7 +708,16 @@ FILE *f_open(const char *filename, const char *type)
 			     else
 			     {
 			       /* look for a free cache slot */
-			       for(i=0; cache[i].cache; i++);
+			       for(i=0; ((i<CACHEENTMAX) && (cache[i].cache != NULL)); i++);
+			       
+			       /* no free cache slot ? return an error */
+			       if(i == CACHEENTMAX)
+			       {
+			         sprintf(err_txt, "no more free cache slots. Too many open files.\n");
+				 return NULL;
+			       }
+			       
+			       dprintf(stderr, "f_open: adding stream %x to cache[%d]\n", fd, i);
 
 			       cache[i].fd      = fd;
 			       cache[i].csize   = CACHESIZE;
@@ -720,14 +730,17 @@ FILE *f_open(const char *filename, const char *type)
 			       cache[i].filter  = NULL;
 			     
 			       /* create the readable/writeable mutex locks */
+			       dprintf(stderr, "f_open: creating mutexes\n");
 			       pthread_mutex_init(&cache[i].cache_lock, &cache[i].cache_lock_attr);
 			       pthread_mutex_init(&cache[i].readable,   &cache[i].readable_attr);
 			       pthread_mutex_init(&cache[i].writeable,  &cache[i].writeable_attr);
 
-			       /* and set the empty cache to 'unreadable */
+			       /* and set the empty cache to 'unreadable' */
+			       dprintf(stderr, "f_open: locking read direction\n");
 			       pthread_mutex_lock( &cache[i].readable );
 			     
 			       /* but writeable. */
+			       dprintf(stderr, "f_open: unlocking write direction\n");
 			       pthread_mutex_unlock( &cache[i].writeable );
 			     
 			       /* did the request fail ? Then close the stream */
@@ -825,27 +838,39 @@ int f_close(FILE *stream)
 
   if(cache[i].fd == stream)
   {
-    dprintf(stderr, "f_close: removing stream %x from the cache\n", (uint32_t)stream);
+    dprintf(stderr, "f_close: removing stream %x from cache[%d]\n", (uint32_t)stream, i);
     
-    cache[i].closed = 1;		/* indicate that tha cache is closed */
+    cache[i].closed = 1;		/* indicate that the cache is closed */
+
+    /* remove the cache looks */
+    pthread_mutex_unlock( &cache[i].writeable );
+    pthread_mutex_unlock( &cache[i].readable );
+    pthread_mutex_unlock( &cache[i].cache_lock );
+
+    /* wait for the fill thread to finish */
+    dprintf(stderr, "f_close: waiting for fill tread to finish\n");
     pthread_join(cache[i].fill_thread, NULL);
+
+    dprintf(stderr, "f_close: closing cache\n");
     rval = fclose(cache[i].fd);		/* close the stream */
     free(cache[i].cache);		/* free the cache */
-    cache[i].csize = 0;			/* set the cache size to zero */
-    cache[i].fd = NULL;  		/* remove the stream ID from the cache */
     
     /* if this stream has a streamfilter, call it's destructor */
     if(cache[i].filter_arg)
     if(cache[i].filter_arg->destructor)
     {
+      dprintf(stderr, "f_close: calling stream filter destructor\n");
       cache[i].filter_arg->destructor(cache[i].filter_arg);
       free(cache[i].filter_arg);
-      cache[i].filter_arg = NULL;
     }
 
+    dprintf(stderr, "f_close: destroying mutexes\n");
     pthread_mutex_destroy(&cache[i].cache_lock);
     pthread_mutex_destroy(&cache[i].readable);
     pthread_mutex_destroy(&cache[i].writeable);
+    
+    /* completely blank out all data */
+    bzero(&cache[i], sizeof(STREAM_CACHE));
   }
   else
     rval = fclose(stream);
@@ -951,8 +976,7 @@ int getCacheSlot(FILE *fd)
   int i;
 
   for(i=0; ((i<CACHEENTMAX) && (cache[i].fd != fd)); i++);
-   
-//findme
+  
   return (i == CACHEENTMAX) ? -1 : i;
 }
 
@@ -964,8 +988,7 @@ int push(FILE *fd, char *buf, long len)
 
   i = getCacheSlot(fd);
 
-//findme
-  if((i < 0) || (cache[i].closed))
+  if(i < 0)
     return -1;
 
 //  dprintf(stderr, "push: %d bytes to store [filled: %d of %d], stream: %x\n", len, cache[i].filled, CACHESIZE, fd);
@@ -975,11 +998,11 @@ int push(FILE *fd, char *buf, long len)
     do
     {
       if(cache[i].closed)
-        return 0;
+        return -1;
 
       /* try to obtain write permissions for the cache */
       /* this will block if the cache is full */
-      pthread_mutex_lock( & cache[i].writeable );
+      pthread_mutex_lock( &cache[i].writeable );
 
       if((cache[i].csize - cache[i].filled))
       {
@@ -988,6 +1011,11 @@ int push(FILE *fd, char *buf, long len)
 	/* prevent any modification to the cache by other threads, */
 	/* mainly by the pop() function, while we write data to it */
         pthread_mutex_lock( &cache[i].cache_lock );
+
+        /* has the cache been closed while we were waiting for the */
+	/* lock to open ? */
+	if(cache[i].closed)
+          return -1;
 
 	/* block transfer length: get either what's there or */
 	/* only as much as we need */
@@ -1059,7 +1087,6 @@ int pop(FILE *fd, char *buf, long len)
 
   i = getCacheSlot(fd);
 
-//findme
   if(i < 0)
     return -1;
     
@@ -1088,15 +1115,6 @@ int pop(FILE *fd, char *buf, long len)
 	/* block transfer length: get either what's there or */
 	/* only as much as we need */
 	blen = ((len - rval) > cache[i].filled) ? cache[i].filled : (len - rval);
-
-#if 0
-	/* if the cache is closed, just read the remaining data */
-//bug aleart !!! this causes a delayed core dump because we try to throw more data
-//onto the caller than he requested ! This is only left here as reminder, just in case 
-//we cause another bug with this.  --marked: pending deletion
-//	if(cache[i].closed)
-//	  blen = cache[i].filled, len = blen;
-#endif
 
 	if(cache[i].rptr < cache[i].wptr)
 	{
@@ -1196,6 +1214,7 @@ void CacheFillThread(void *c)
   /* and push it into the cache */
   do
   {
+    /* has a f_close() call in an other thread already closed the cache ? */
     datalen = CACHEBTRANS;
 
     rval = fread(buf, 1, datalen, cache->fd);
@@ -1210,12 +1229,13 @@ void CacheFillThread(void *c)
       datalen = rval;
     }
 
-    push(cache->fd, buf, rval);
-  } while( (rval == datalen) && (! cache->closed) );
+    if( push(cache->fd, buf, rval) < 0)
+      break;
+
+  } while( (rval == datalen) && (!cache->closed) );
 
   /* close the cache if the stream disrupted */
   cache->closed = 1;
-  
   pthread_mutex_unlock( &cache->writeable );
   pthread_mutex_unlock( &cache->readable );
 
@@ -1307,7 +1327,6 @@ void ShoutCAST_DestroyFilter(void *a)
   
   if(arg->state) free(arg->state), arg->state = NULL;
   if(arg->user)  free(arg->user),  arg->user  = NULL;
-//  if(arg->arg)                     arg->arg   = NULL;
 }
 
 STREAM_FILTER *ShoutCAST_InitFilter(int meta_int)
