@@ -2881,6 +2881,7 @@ void CNeutrinoApp::ExitRun()
 		frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
 	frameBuffer->loadPal("shutdown.pal");
 
+	networkConfig.automatic_start = (network_automatic_start == 1);
 	networkConfig.commitConfig();
 	saveSetup();
 	g_Controld->shutdown();
@@ -3278,6 +3279,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	else if(actionKey=="savesettings")
 	{
 		g_Controld->saveSettings();
+		networkConfig.automatic_start = (network_automatic_start == 1);
 		networkConfig.commitConfig();
 		saveSetup();
 	}
@@ -3363,7 +3365,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.434 2003/04/15 18:33:50 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.435 2003/04/16 13:49:07 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();
