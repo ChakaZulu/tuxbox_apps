@@ -546,11 +546,14 @@ int eTextPara::renderString(const eString &string, int rflags)
 
 	glyphs.reserve(uc_visual.size());
 	
+	int nextflags = 0;
+	
 	for (std::vector<unsigned long>::const_iterator i(uc_visual.begin());
 		i != uc_visual.end(); ++i)
 	{
 		int isprintable=1;
-		int flags=0;
+		int flags = nextflags;
+		nextflags = 0;
 		if (!(rflags&RS_DIRECT))
 		{
 			switch (*i)
@@ -584,7 +587,7 @@ tab:		isprintable=0;
 			case '\n':
 newline:isprintable=0;
 				newLine(rflags);
-				flags|=GS_ISFIRST;
+				nextflags|=GS_ISFIRST;
 				break;
 			case '\r':
 			case 0x86: case 0xE086:
@@ -788,6 +791,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 			linelength+=c->w;
 			num++;
 		}
+
 		if (!num)		// line mit nur einem space
 			continue;
 
