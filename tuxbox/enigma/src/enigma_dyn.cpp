@@ -1677,6 +1677,7 @@ void callbackFunction(const eServiceReference& s)
 static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
+	multiEPG = "";
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString>opt = getRequestOptions(opts);
 	eString refs = opt["ref"];
