@@ -178,6 +178,7 @@ extern "C" {
 	void filter_audio_from_pes(int fdin, int fdout, uint8_t id,
 				   uint8_t subid);
 	void find_avpids(int fd, uint16_t *vpid, uint16_t *apid);
+	int  is_audio_ac3(int fd);
 
 
 //instant repack

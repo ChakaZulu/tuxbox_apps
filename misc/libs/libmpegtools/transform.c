@@ -1100,6 +1100,39 @@ void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
                 }
         }
 }
+int  is_audio_ac3(int fd)
+{
+	uint8_t buf[IN_SIZE];
+	int count;
+	int i;
+	int off =0;
+	int is_ac3 = -1;
+
+	while ( is_ac3 == -1 ){
+			  count = read(fd, buf, IN_SIZE);
+			  for (i = 0; i < count-7; i++){
+						 if (buf[i] == 0x47){
+									if (buf[i+1] & 0x40){
+											  off = 0;
+											  if ( buf[3+i] & 0x20)//adapt field?
+														 off = buf[4+i] + 1;
+											  switch(buf[i+7+off]){
+												  case PRIVATE_STREAM1:
+													  is_ac3=1;
+													  break;
+												  case AUDIO_STREAM_S ... AUDIO_STREAM_E:
+													  is_ac3=0;
+													  break;
+											  }
+									}
+									i += 187;
+						 }
+						 if (is_ac3 >= 0) break;
+			  }
+			  if(count==0) break;
+	}
+	return is_ac3;
+}
 
 void find_bavpids(uint8_t *buf, int count, uint16_t *vpid, uint16_t *apid)
 {
