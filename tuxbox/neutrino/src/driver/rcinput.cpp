@@ -860,7 +860,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 				// Uns interessiert nur wenn eine Taste gedrueckt wurde - nicht wenn eine losgelassen wurde
 				if(ev.value)
 				{
-					//printf("got key native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
+					//printf("got keydown native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
 					long long now_pressed;
 					bool keyok = true;
 
@@ -913,6 +913,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 						}
 					}
 
+				}
+				else
+				{	// clear rc_last_key on keyup event
+					//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
+					rc_last_key = 0;
 				}
 			}
 		}
