@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.174 2002/05/08 16:10:26 obi Exp $
+ * $Id: zapit.cpp,v 1.175 2002/05/11 21:59:03 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -76,9 +76,9 @@ std::map <uint8_t, std::string> scanProviders;
 /* current zapit mode */
 enum
 {
-	TV_MODE = 0x01,
-	RADIO_MODE = 0x02,
-	RECORD_MODE = 0x04
+    TV_MODE = 0x01,
+    RADIO_MODE = 0x02,
+    RECORD_MODE = 0x04
 };
 
 int currentMode;
@@ -91,7 +91,8 @@ struct rmsg
 	unsigned short param2;
 	char param3[30];
 
-} rmsg;
+}
+rmsg;
 
 int connfd;
 
@@ -177,11 +178,11 @@ void signal_handler (int signum)
 {
 	switch (signum)
 	{
-	case SIGUSR1:
-		debug = (debug ? false : true);
-		break;
-	default:
-		CZapitDestructor();
+			case SIGUSR1:
+			debug = (debug ? false : true);
+			break;
+			default:
+			CZapitDestructor();
 	}
 }
 
@@ -447,6 +448,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 #ifdef USE_PID_CACHE
 	if (channel->getPidsFlag() == false)
 #endif
+
 	{
 		debug("[zapit] looking up pids for onid:sid %04x:%04x\n", channel->getOriginalNetworkId(), channel->getServiceId());
 
@@ -637,16 +639,16 @@ void parseScanInputXml ()
 
 	switch (frontend->getInfo()->type)
 	{
-	case FE_QPSK:
-		strcpy(filename, CONFIGDIR "/satellites.xml");
-		break;
+			case FE_QPSK:
+			strcpy(filename, CONFIGDIR "/satellites.xml");
+			break;
 
-	case FE_QAM:
-		strcpy(filename, CONFIGDIR "/cables.xml");
-		break;
+			case FE_QAM:
+			strcpy(filename, CONFIGDIR "/cables.xml");
+			break;
 
-	default:
-		return;
+			default:
+			return;
 	}
 
 	transponder_xml = fopen(filename, "r");
@@ -667,8 +669,8 @@ void parseScanInputXml ()
 		if (!scanInputParser->Parse(buffer, length, done))
 		{
 			printf("[zapit] parse error: %s at line %d\n",
-				scanInputParser->ErrorString(scanInputParser->GetErrorCode()),
-				scanInputParser->GetCurrentLineNumber());
+			       scanInputParser->ErrorString(scanInputParser->GetErrorCode()),
+			       scanInputParser->GetCurrentLineNumber());
 
 			fclose(transponder_xml);
 			delete scanInputParser;
@@ -723,408 +725,13 @@ int getPlaybackStatus ()
 
 void parse_command ()
 {
-	char *status;
-	short carsten; // who the fuck is short carsten? :)
+	#ifdef DEBUG
+		debug("Command received\n");
+		debug("  Version: %d\n", rmsg.version);
+		debug("  Command: %d\n", rmsg.cmd);
+	#endif
 
-	std::map<uint, uint>::iterator sit;
-	std::map<uint, CZapitChannel>::iterator cit;
-	int number = 0;
-
-#ifdef DEBUG
-	debug("Command received\n");
-	debug("  Version: %d\n", rmsg.version);
-	debug("  Command: %d\n", rmsg.cmd);
-	debug("  Param: %c\n", rmsg.param);
-	debug("  Param2: %d\n", rmsg.param2);
-	debug("  Param3: %s\n", rmsg.param3);
-#endif
-
-	if (rmsg.version == 1)
-	{
-		switch (rmsg.cmd)
-		{
-		case 5:
-			if (currentMode & RADIO_MODE)
-			{
-				if (!allchans_radio.empty())
-				{
-					status = "005";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-					for (sit = allnumchannels_radio.begin(); sit != allnumchannels_radio.end(); sit++)
-					{
-						cit = allchans_radio.find(sit->second);
-						channel_msg chanmsg;
-						strncpy(chanmsg.name, cit->second.getName().c_str(), 29);
-						chanmsg.chan_nr = sit->first;
-						chanmsg.mode = 'r';
-						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
-						{
-							perror("[zapit] send");
-							return;
-						}
-					}
-				}
-				else
-				{
-					printf("[zapit] radio_channellist is empty\n");
-					status = "-05";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-				}
-			}
-			else
-			{
-				if (!allchans_tv.empty())
-				{
-					status = "005";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-					for (sit = allnumchannels_tv.begin(); sit != allnumchannels_tv.end(); sit++)
-					{
-						cit = allchans_tv.find(sit->second);
-						channel_msg chanmsg;
-						strncpy(chanmsg.name, cit->second.getName().c_str(),29);
-						chanmsg.chan_nr = sit->first;
-						chanmsg.mode = 't';
-						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
-						{
-							perror("[zapit] send");
-							return;
-						}
-					}
-				}
-				else
-				{
-					printf("[zapit] tv_channellist is empty\n");
-					status = "-05";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-				}
-			}
-			usleep(200000);
-			break;
-		case 6:
-			status = "006";
-			setRadioMode();
-			if (allchans_radio.empty())
-			{
-				status = "-06";
-			}
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-		case 7:
-			status = "007";
-			setTVMode();
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-		case 9:
-			if (changeapid(atoi((const char*) &rmsg.param)) > 0)
-			{
-				status = "009";
-			}
-			else
-			{
-				status = "-09";
-			}
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-		case 'a':
-			status = "00a";
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			else
-			{
-				channel_msg settings = load_settings();
-				if (send(connfd, &settings, sizeof(settings), 0) == -1)
-				{
-					perror("[zapit] send");
-					return;
-				}
-			}
-			break;
-		case 'b':
-
-			if (channel == NULL)
-			{
-				status = "-0b";
-				break;
-			}
-			else
-			{
-				status = "00b";
-			}
-
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			carsten = (short) channel->getVideoPid();
-			if (send(connfd, &carsten, 2, 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			carsten = (short) channel->getAudioPid();
-			if (send(connfd, &carsten, 2, 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			break;
-		case 'c':
-			if (currentMode & RADIO_MODE)
-			{
-				if (!allchans_radio.empty())
-				{
-					status = "00c";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-					for (CBouquetManager::radioChannelIterator radiocit = g_BouquetMan->radioChannelsBegin(); radiocit != g_BouquetMan->radioChannelsEnd(); radiocit++)
-					{
-						channel_msg_2 chanmsg;
-
-						strncpy(chanmsg.name, (*radiocit)->getName().c_str(),30);
-						chanmsg.chan_nr = (*radiocit)->getChannelNumber();
-						chanmsg.onid_tsid = (*radiocit)->getOnidSid();
-
-						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
-						{
-							perror("[zapit] send");
-							return;
-						}
-					}
-				}
-				else
-				{
-					printf("[zapit] tv_channellist is empty\n");
-					status = "-0c";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-				}
-			}
-			else
-			{
-				if (!allchans_tv.empty())
-				{
-					status = "00c";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-					for (CBouquetManager::tvChannelIterator tvcit = g_BouquetMan->tvChannelsBegin(); tvcit != g_BouquetMan->tvChannelsEnd(); tvcit++)
-					{
-						channel_msg_2 chanmsg;
-						strncpy(chanmsg.name, (*tvcit)->getName().c_str(),30);
-						chanmsg.chan_nr = (*tvcit)->getChannelNumber();
-						chanmsg.onid_tsid = (*tvcit)->getOnidSid();
-						if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
-						{
-							perror("[zapit] send");
-							return;
-						}
-					}
-				}
-				else
-				{
-					printf("tv_channellist is empty\n");
-					status = "-0c";
-					if (send(connfd, status, strlen(status), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-				}
-			}
-			break;
-		case 'f':
-			if (current_is_nvod)
-			{
-				status = "00f";
-			}
-			else
-			{
-				status = "-0f";
-			}
-
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			if (current_is_nvod)
-			{
-				number = 1;
-				for (cit = nvodchannels.begin(); cit != nvodchannels.end(); cit++)
-				{
-					channel_msg_2 chanmsg;
-					strncpy(chanmsg.name, cit->second.getName().c_str(),30);
-					chanmsg.chan_nr = number++;
-					chanmsg.onid_tsid = cit->second.getOnidSid();
-
-					if (send(connfd, &chanmsg, sizeof(chanmsg), 0) == -1)
-					{
-						perror("[zapit] send");
-						return;
-					}
-				}
-			}
-			break;
-		case 'i':
-			uint nvod_onidsid;
-			ushort nvod_tsid;
-			ushort cnt_nvods;
-
-			//quick hack /* sehr sinnvoll - obi */
-			current_is_nvod = true;
-
-			if (current_is_nvod)
-			{
-				status = "00i";
-			}
-			else
-			{
-				status = "-0i";
-			}
-
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-
-			if (recv(connfd, &cnt_nvods, 2, 0) == -1)
-			{
-				perror("[zapit] recv");
-				return;
-			}
-			else
-			{
-				int cnt;
-				debug("[zapit] receiving nvods (%d)\n", cnt_nvods);
-				for (cnt = 0; cnt < cnt_nvods; cnt++)
-				{
-					if (recv(connfd, &nvod_onidsid, 4, 0) == -1)
-					{
-						perror("[zapit] recv");
-						return;
-					}
-					if (recv(connfd, &nvod_tsid, 2, 0) == -1)
-					{
-						perror("[zapit] recv");
-						return;
-					}
-					nvodchannels.insert(std::pair<int, CZapitChannel>(nvod_onidsid,CZapitChannel("NVOD",(nvod_onidsid&0xFFFF),nvod_tsid,(nvod_onidsid>>16),1,0,channel->getDiSEqC())));
-				}
-			}
-			break;
-
-		case 'p':
-			status = "00p";
-			prepare_channels();
-			if (send(connfd, status, strlen(status), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-
-		case 'q':
-			sendBouquetList();
-			break;
-
-		case 'r':
-			sendChannelListOfBouquet(rmsg.param);
-			break;
-		case 's':
-		{
-			uint32_t onidsid = channel->getOnidSid();
-			status = "00s";
-			if (send(connfd, status, strlen(status),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			if (send(connfd, &onidsid, sizeof(uint32_t), 0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-		}
-		case 'u':
-		{
-			dvb_pid_t teletextPid = channel->getTeletextPid();
-			status = "00u";
-			if (send(connfd, status, strlen(status),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			if (send(connfd, &teletextPid, sizeof(int),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			break;
-		}
-		default:
-			status = "000";
-			if (send(connfd, status, strlen(status),0) == -1)
-			{
-				perror("[zapit] send");
-				return;
-			}
-			printf("[zapit] unknown command\n");
-		}
-	}
-
-/********************************************/
-/*					  */
-/*  new command handling via CZapitClient   */
-/*					  */
-/********************************************/
-
-	else if (rmsg.version == CZapitClient::ACTVERSION)
+	if (rmsg.version == CZapitClient::ACTVERSION)
 	{
 		CZapitClient::responseCmd	      response;
 		CZapitClient::responseGeneralInteger   responseInteger;		// 2002-04-03 rasc
@@ -1136,7 +743,7 @@ void parse_command ()
 				CZapitClient::commandZapto msgZapto;
 				read( connfd, &msgZapto, sizeof(msgZapto));
 				zapTo(msgZapto.bouquet, msgZapto.channel);
-			break;
+				break;
 
 			case CZapitClient::CMD_ZAPTO_CHANNELNR :
 				CZapitClient::commandZaptoChannelNr msgZaptoChannelNr;
@@ -1144,22 +751,22 @@ void parse_command ()
 				zapTo(msgZaptoChannelNr.channel);
 			break;
 
-	    case CZapitClient::CMD_ZAPTO_SERVICEID :
-	    case CZapitClient::CMD_ZAPTO_SUBSERVICEID :
-		CZapitClient::commandZaptoServiceID msgZaptoServiceID;
-		CZapitClient::responseZapComplete msgResponseZapComplete;
+			case CZapitClient::CMD_ZAPTO_SERVICEID :
+			case CZapitClient::CMD_ZAPTO_SUBSERVICEID :
+				CZapitClient::commandZaptoServiceID msgZaptoServiceID;
+				CZapitClient::responseZapComplete msgResponseZapComplete;
 				read( connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
-		msgResponseZapComplete.zapStatus = zapTo_Onid_Sid( msgZaptoServiceID.serviceID , ( rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID ) );
+				msgResponseZapComplete.zapStatus = zapTo_Onid_Sid( msgZaptoServiceID.serviceID , ( rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID ) );
 				send(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete), 0);
-			break;
+				break;
 
 			case CZapitClient::CMD_ZAPTO_SERVICEID_NOWAIT :
-	    case CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT :
-		CZapitClient::commandZaptoServiceID msgZaptoServiceID2;
+			case CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT :
+				CZapitClient::commandZaptoServiceID msgZaptoServiceID2;
 				read( connfd, &msgZaptoServiceID2, sizeof(msgZaptoServiceID2));
-		zapTo_Onid_Sid( msgZaptoServiceID2.serviceID , ( rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT ) );
-			break;
-
+				zapTo_Onid_Sid( msgZaptoServiceID2.serviceID , ( rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID_NOWAIT ) );
+				break;
+			
 			case CZapitClient::CMD_GET_LAST_CHANNEL :
 				channel_msg mysettings;
 				mysettings = load_settings();
@@ -1168,13 +775,13 @@ void parse_command ()
 				responseGetLastChannel.channelNumber = mysettings.chan_nr;
 				responseGetLastChannel.mode = mysettings.mode;
 				send( connfd, &responseGetLastChannel, sizeof(responseGetLastChannel),0);
-			break;
+				break;
 
 			case CZapitClient::CMD_SET_AUDIOCHAN :
 				CZapitClient::commandSetAudioChannel msgSetAudioChannel;
 				read( connfd, &msgSetAudioChannel, sizeof(msgSetAudioChannel));
 				changeapid( msgSetAudioChannel.channel );
-			break;
+				break;
 
 			case CZapitClient::CMD_SET_MODE :
 				CZapitClient::commandSetMode msgSetMode;
@@ -1184,13 +791,13 @@ void parse_command ()
 					setTVMode();
 				else if ( msgSetMode.mode == CZapitClient::MODE_RADIO )
 					setRadioMode();
-			break;
+				break;
 
 			case CZapitClient::CMD_GET_CURRENT_SERVICEID :
 				CZapitClient::responseGetCurrentServiceID msgCurrentSID;
 				msgCurrentSID.serviceID = channel->getOnidSid();
 				send( connfd, &msgCurrentSID, sizeof(msgCurrentSID), 0);
-			break;
+				break;
 
 			case CZapitClient::CMD_GET_CURRENT_SERVICEINFO :
 				CZapitClient::responseCurrentServiceInfo msgCurrentServiceInfo;
@@ -1207,41 +814,41 @@ void parse_command ()
 				else
 					msgCurrentServiceInfo.polarisation = 2;
 				send( connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo), 0);
-			break;
+				break;
 
 			case CZapitClient::CMD_GET_BOUQUETS :
 				CZapitClient::commandGetBouquets msgGetBouquets;
 				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
 				sendBouquets(msgGetBouquets.emptyBouquetsToo);
-			break;
+				break;
 
 			case CZapitClient::CMD_GET_BOUQUET_CHANNELS :
 				CZapitClient::commandGetBouquetChannels msgGetBouquetChannels;
 				read( connfd, &msgGetBouquetChannels, sizeof(msgGetBouquetChannels));
 				sendBouquetChannels(msgGetBouquetChannels.bouquet, msgGetBouquetChannels.mode);
-			break;
+				break;
 
 			case CZapitClient::CMD_GET_CHANNELS :
 				CZapitClient::commandGetChannels msgGetChannels;
 				read( connfd, &msgGetChannels, sizeof(msgGetChannels));
 				sendChannels( msgGetChannels.mode, msgGetChannels.order);
-			break;
+				break;
 
 			case CZapitClient::CMD_RESTORE_BOUQUETS :
 				g_BouquetMan->restoreBouquets();
 				response.cmd = CZapitClient::CMD_READY;
 				send(connfd, &response, sizeof(response), 0);
-			break;
+				break;
 
 			case CZapitClient::CMD_REINIT_CHANNELS :
 				prepare_channels();
 				response.cmd = CZapitClient::CMD_READY;
 				send(connfd, &response, sizeof(response), 0);
-			break;
+				break;
 
 			case CZapitClient::CMD_SCANSTART :
 				start_scan();
-			break;
+				break;
 
 			case CZapitClient::CMD_SCANREADY :
 				CZapitClient::responseIsScanReady msgResponseIsScanReady;
@@ -1257,10 +864,10 @@ void parse_command ()
 					msgResponseIsScanReady.scanReady = true;
 				}
 				send( connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady),0);
-			break;
+				break;
 
 			case CZapitClient::CMD_SCANGETSATLIST:
-			{
+				{
 				if (scanInputParser == NULL)
 				{
 					parseScanInputXml();
@@ -1281,7 +888,8 @@ void parse_command ()
 					search = search->GetNext();
 				}
 				break;
-			}
+				}
+			
 			case CZapitClient::CMD_SCANSETSCANSATLIST:
 				CZapitClient::commandSetScanSatelliteList sat;
 				scanProviders.clear();
@@ -1291,7 +899,7 @@ void parse_command ()
 					scanProviders[sat.diseqc] = sat.satName;
 				}
 				break;
-
+				
 			case CZapitClient::CMD_SCANSETDISEQCTYPE :
 				diseqc_t diseqc;
 				read(connfd, &diseqc, sizeof(diseqc));
@@ -1308,7 +916,7 @@ void parse_command ()
 
 			case CZapitClient::CMD_SCANSETBOUQUETMODE :
 				read( connfd, &bouquetMode, sizeof(bouquetMode));
-			break;
+				break;
 
 			case CZapitClient::CMD_SET_RECORD_MODE :
 				CZapitClient::commandSetRecordMode msgSetRecordMode;
@@ -1317,38 +925,38 @@ void parse_command ()
 					setRecordMode();
 				else
 					unsetRecordMode();
-			break;
+				break;
 
 			case CZapitClient::CMD_GET_RECORD_MODE :
 				CZapitClient::responseGetRecordModeState msgGetRecordModeState;
 				msgGetRecordModeState.activated = (currentMode & RECORD_MODE);
 				send( connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState),0);
-			break;
+				break;
 
 			case CZapitClient::CMD_SB_GET_PLAYBACK_ACTIVE :
 				CZapitClient::responseGetPlaybackState msgGetPlaybackState;
 				msgGetPlaybackState.activated = getPlaybackStatus ();
 				send( connfd, &msgGetPlaybackState, sizeof(msgGetPlaybackState),0);
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
 				CZapitClient::commandAddBouquet msgAddBouquet;
 				read( connfd, &msgAddBouquet, sizeof(msgAddBouquet));
 				g_BouquetMan->addBouquet(msgAddBouquet.name);
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_DELETE_BOUQUET :
 				CZapitClient::commandDeleteBouquet msgDeleteBouquet;
 				read( connfd, &msgDeleteBouquet, sizeof(msgDeleteBouquet));
 				g_BouquetMan->deleteBouquet(msgDeleteBouquet.bouquet-1);
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_RENAME_BOUQUET :
 				CZapitClient::commandRenameBouquet msgRenameBouquet;
 				read( connfd, &msgRenameBouquet, sizeof(msgRenameBouquet));
 				g_BouquetMan->addBouquet(msgAddBouquet.name);
 				g_BouquetMan->Bouquets[msgRenameBouquet.bouquet-1]->Name = msgRenameBouquet.name;
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_EXISTS_BOUQUET :		// 2002-04-03 rasc
 				CZapitClient::commandExistsBouquet msgExistsBouquet;
@@ -1358,7 +966,7 @@ void parse_command ()
 				// -- This also means "not found (-1)" get's to zero (0)
 				responseInteger.number = g_BouquetMan->existsBouquet(msgExistsBouquet.name)+1;
 				send( connfd, &responseInteger, sizeof(responseInteger),0);
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET :	// 2002-04-05 rasc
 				CZapitClient::commandExistsChannelInBouquet msgExistsChInBq;
@@ -1366,67 +974,67 @@ void parse_command ()
 				// -- for some unknown reason BQ-IDs are externally  1..n
 				// -- internally BQ-IDs are 0..n-1, so subtract 1!!
 				responseBool.status = g_BouquetMan->existsChannelInBouquet(
-						msgExistsChInBq.bouquet-1, msgExistsChInBq.onid_sid);
+				                          msgExistsChInBq.bouquet-1, msgExistsChInBq.onid_sid);
 				send( connfd, &responseBool, sizeof(responseBool),0);
-			break;
+				break;
 
 
 			case CZapitClient::CMD_BQ_MOVE_BOUQUET :
 				CZapitClient::commandMoveBouquet msgMoveBouquet;
 				read( connfd, &msgMoveBouquet, sizeof(msgMoveBouquet));
 				g_BouquetMan->moveBouquet(msgMoveBouquet.bouquet-1, msgMoveBouquet.newPos-1);
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_ADD_CHANNEL_TO_BOUQUET :
 				CZapitClient::commandAddChannelToBouquet msgAddChannelToBouquet;
 				read( connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet));
 				addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.onid_sid);
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET :
 				CZapitClient::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
 				read( connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet));
 				removeChannelFromBouquet(msgRemoveChannelFromBouquet.bouquet, msgRemoveChannelFromBouquet.onid_sid);
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_MOVE_CHANNEL :
 				CZapitClient::commandMoveChannel msgMoveChannel;
 				read( connfd, &msgMoveChannel, sizeof(msgMoveChannel));
 				g_BouquetMan->Bouquets[ msgMoveChannel.bouquet-1]->moveService(
-					msgMoveChannel.oldPos-1,
-					msgMoveChannel.newPos-1,
-					(((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT ) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
-			break;
+				    msgMoveChannel.oldPos-1,
+				    msgMoveChannel.newPos-1,
+				    (((currentMode & RADIO_MODE) && msgMoveChannel.mode == CZapitClient::MODE_CURRENT ) || (msgMoveChannel.mode==CZapitClient::MODE_RADIO)) ? 2 : 1);
+				break;
 
 			case CZapitClient::CMD_BQ_SET_LOCKSTATE :
 				CZapitClient::commandBouquetState msgBouquetLockState;
 				read( connfd, &msgBouquetLockState, sizeof(msgBouquetLockState));
 				g_BouquetMan->Bouquets[msgBouquetLockState.bouquet-1]->bLocked = msgBouquetLockState.state;
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_SET_HIDDENSTATE :
 				CZapitClient::commandBouquetState msgBouquetHiddenState;
 				read( connfd, &msgBouquetHiddenState, sizeof(msgBouquetHiddenState));
 				g_BouquetMan->Bouquets[msgBouquetHiddenState.bouquet-1]->bHidden = msgBouquetHiddenState.state;
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_RENUM_CHANNELLIST :
 				g_BouquetMan->renumServices();
-			break;
+				break;
 
 			case CZapitClient::CMD_BQ_SAVE_BOUQUETS :
 				g_BouquetMan->saveBouquets();
 				response.cmd = CZapitClient::CMD_READY;
 				send(connfd, &response, sizeof(response), 0);
-			break;
+				break;
 
 			case CZapitClient::CMD_SB_START_PLAYBACK :
 				startPlayBack();
-			break;
+				break;
 
 			case CZapitClient::CMD_SB_STOP_PLAYBACK :
 				stopPlayBack();
-			break;
+				break;
 
 			case CZapitClient::CMD_GETPIDS :
 				CZapitClient::responseGetOtherPIDs responseGetOtherPIDs;
@@ -1437,7 +1045,7 @@ void parse_command ()
 				responseGetOtherPIDs.selected_apid = channel->getAudioPid();
 				send( connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs),0);
 				sendAPIDs();
-			break;
+				break;
 
 			case CZapitClient::CMD_SETSUBSERVICES :
 				CZapitClient::commandAddSubServices msgAddSubService;
@@ -1447,33 +1055,33 @@ void parse_command ()
 					//printf("got subchan %x %x\n", msgAddSubService.onidsid, msgAddSubService.tsid);
 					nvodchannels.insert
 					(
-						std::pair <int, CZapitChannel>
-						(
-							msgAddSubService.onidsid,
-							CZapitChannel
-							(
-								"NVOD",
-								(msgAddSubService.onidsid&0xFFFF),
-								msgAddSubService.tsid,
-								(msgAddSubService.onidsid>>16),
-								1,
-								0,
-								channel->getDiSEqC()
-							)
-						)
+					    std::pair <int, CZapitChannel>
+					    (
+					        msgAddSubService.onidsid,
+					        CZapitChannel
+					        (
+					            "NVOD",
+					            (msgAddSubService.onidsid&0xFFFF),
+					            msgAddSubService.tsid,
+					            (msgAddSubService.onidsid>>16),
+					            1,
+					            0,
+					            channel->getDiSEqC()
+					        )
+					    )
 					);
 				}
 
 				current_is_nvod = true;
-			break;
+				break;
 
 			case CZapitClient::CMD_REGISTEREVENTS :
 				eventServer->registerEvent( connfd );
-			break;
+				break;
 
 			case CZapitClient::CMD_UNREGISTEREVENTS :
 				eventServer->unRegisterEvent( connfd );
-			break;
+				break;
 
 			case CZapitClient::CMD_MUTE:
 				CZapitClient::commandBoolean msgBoolean;
@@ -1514,7 +1122,7 @@ void sendBouquetList()
 	for (i = 0; i < g_BouquetMan->Bouquets.size(); i++)
 	{
 		if ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size() > 0) ||
-			(currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size() > 0))
+		        (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size() > 0))
 		{
 			nBouquetCount++;
 		}
@@ -1531,7 +1139,7 @@ void sendBouquetList()
 		{
 			// send bouquet only if there are channels in it
 			if ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size() > 0) ||
-				(currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size() > 0))
+			        (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size() > 0))
 			{
 				bouquet_msg msgBouquet;
 				// we'll send name and i+1 as bouquet number
@@ -1588,7 +1196,7 @@ void sendChannelListOfBouquet(uint nBouquet)
 		for (i = 0; i < channels.size(); i++)
 		{
 			if ((currentMode & RECORD_MODE) && (channels[i]->getTsidOnid() != frontend->getTsidOnid()))
-					continue;
+				continue;
 
 			channel_msg_2 chanmsg;
 			strncpy(chanmsg.name, channels[i]->getName().c_str(), 30);
@@ -1624,10 +1232,11 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 #if DEBUG
+
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.174 2002/05/08 16:10:26 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.175 2002/05/11 21:59:03 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1707,6 +1316,7 @@ int main (int argc, char **argv)
 	printf("[zapit] channels have been loaded succesfully\n");
 
 #ifdef DEBUG
+
 	printf("[zapit] we have got ");
 	if (!allnumchannels_tv.empty())
 	{
@@ -1788,18 +1398,18 @@ int main (int argc, char **argv)
 	{
 		switch (fork())
 		{
-		case -1: /* can't fork */
-			perror("[zapit] fork");
-			exit(3);
-		case 0: /* child, process becomes a daemon */
-			// request a new session (job control)
-			if (setsid() == -1)
-			{
-				exit(4);
-			}
-			break;
-		default: /* parent returns to calling process */
-			return 0;
+				case -1: /* can't fork */
+				perror("[zapit] fork");
+				exit(3);
+				case 0: /* child, process becomes a daemon */
+				// request a new session (job control)
+				if (setsid() == -1)
+				{
+					exit(4);
+				}
+				break;
+				default: /* parent returns to calling process */
+				return 0;
 		}
 	}
 
@@ -1849,24 +1459,24 @@ void sendBouquets(bool emptyBouquetsToo)
 	for (uint i=0; i<g_BouquetMan->Bouquets.size(); i++)
 	{
 		if (emptyBouquetsToo ||
-			 ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden)) ||
-			  (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden))
+		        ((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden)) ||
+		        (currentMode & TV_MODE) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0) && (!g_BouquetMan->Bouquets[i]->bHidden))
 		{
 			if ((!(currentMode & RECORD_MODE)) || ((currentMode & RECORD_MODE) &&
-			    (((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->recModeRadioSize( frontend->getTsidOnid())) > 0 ) ||
-			      (currentMode & TV_MODE)    && (g_BouquetMan->Bouquets[i]->recModeTVSize( frontend->getTsidOnid())) > 0 )))
+			                                       (((currentMode & RADIO_MODE) && (g_BouquetMan->Bouquets[i]->recModeRadioSize( frontend->getTsidOnid())) > 0 ) ||
+			                                        (currentMode & TV_MODE)    && (g_BouquetMan->Bouquets[i]->recModeTVSize( frontend->getTsidOnid())) > 0 )))
 			{
-			CZapitClient::responseGetBouquets msgBouquet;
-			// we'll send name and i+1 as bouquet number
-			strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(),30);
-			msgBouquet.bouquet_nr = i+1;
-			msgBouquet.locked = g_BouquetMan->Bouquets[i]->bLocked;
-			msgBouquet.hidden = g_BouquetMan->Bouquets[i]->bHidden;
-			if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
-			{
-				perror("[zapit] could not send any return\n");
-				return;
-			}
+				CZapitClient::responseGetBouquets msgBouquet;
+				// we'll send name and i+1 as bouquet number
+				strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(),30);
+				msgBouquet.bouquet_nr = i+1;
+				msgBouquet.locked = g_BouquetMan->Bouquets[i]->bLocked;
+				msgBouquet.hidden = g_BouquetMan->Bouquets[i]->bHidden;
+				if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
+				{
+					perror("[zapit] could not send any return\n");
+					return;
+				}
 			}
 		}
 	}
@@ -2018,8 +1628,10 @@ int startPlayBack()
 #ifndef ALWAYS_DO_VIDEO_SELECT_SOURCE
 	if ((video_status.streamSource != VIDEO_SOURCE_DEMUX) && (video_status.playState == VIDEO_STOPPED))
 #else
+
 	if (video_status.playState == VIDEO_STOPPED)
 #endif
+
 	{
 		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
 		{
@@ -2043,6 +1655,7 @@ int startPlayBack()
 	setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, channel->getVideoPid());
 
 #if 0
+
 	if ((dmx_general_fd == -1) && (dmx_general_fd = open(DEMUX_DEV, O_RDWR)))
 	{
 		perror("[zapit] " DEMUX_DEV);
@@ -2078,15 +1691,15 @@ int startPlayBack()
 				{
 					switch (buf[j+3])
 					{
-					case 0xC0 ... 0xDF:
-						if (((buf[j+6] >> 6) & 0x03) == 2)
-						{
-							if (((buf[j+6] >> 4) & 0x03) == 0)
+							case 0xC0 ... 0xDF:
+							if (((buf[j+6] >> 6) & 0x03) == 2)
 							{
-								indicator = false;
+								if (((buf[j+6] >> 4) & 0x03) == 0)
+								{
+									indicator = false;
+								}
 							}
-						}
-						break;
+							break;
 					}
 				}
 
@@ -2109,6 +1722,7 @@ int startPlayBack()
 #endif
 
 #ifdef DBOX2
+
 	vbi_fd = startVbi(vbi_fd, channel->getTeletextPid());
 #endif /* DBOX2 */
 
@@ -2219,7 +1833,7 @@ unsigned zapTo (unsigned int channel)
 			radiocit++;
 			channel--;
 		}
-	//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
+		//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
 		if (radiocit != g_BouquetMan->radioChannelsEnd())
 			result = zapTo_Onid_Sid ( (*radiocit)->getOnidSid(), false );
 	}
@@ -2231,7 +1845,7 @@ unsigned zapTo (unsigned int channel)
 			tvcit++;
 			channel--;
 		}
-	//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
+		//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
 		if (tvcit != g_BouquetMan->tvChannelsEnd())
 			result = zapTo_Onid_Sid ( (*tvcit)->getOnidSid(), false );
 	}
