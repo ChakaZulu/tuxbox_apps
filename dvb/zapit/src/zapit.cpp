@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.326 2003/06/23 19:57:37 obi Exp $
+ * $Id: zapit.cpp,v 1.327 2003/08/14 18:27:42 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -25,6 +25,7 @@
 /* system headers */
 #include <csignal>
 #include <fcntl.h>
+#include <sys/poll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -171,6 +172,7 @@ CZapitClient::responseGetLastChannel load_settings(void)
  */
 
 static uint32_t tuned_transponder_id = 0;
+static int pmt_update_fd = -1;
 
 int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 {
@@ -337,6 +339,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	startPlayBack(thisChannel);
 	cam->setCaPmt(thisChannel->getCaPmt());
 	saveSettings(false);
+
+	pmt_update_fd = pmt_set_update_filter(thisChannel);
 
 	if (channel != thisChannel)
 		delete thisChannel;
@@ -1516,7 +1520,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.326 2003/06/23 19:57:37 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.327 2003/08/14 18:27:42 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1596,7 +1600,31 @@ int main(int argc, char **argv)
 
 	leaveStandby();
 
-	zapit_server.run(parse_command, CZapitMessages::ACTVERSION);
+	while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
+		unsigned int i, pollnum = 0;
+		struct pollfd pfd[1];
+
+		if (pmt_update_fd != -1) {
+			pfd[pollnum].fd = pmt_update_fd;
+			pfd[pollnum].events = (POLLIN | POLLPRI);
+			pollnum++;
+		}
+
+		if (pollnum) {
+			if (poll(pfd, pollnum, 0) > 0) {
+				for (i = 0; i < pollnum; i++) {
+					if (pfd[i].fd == pmt_update_fd) {
+						close(pmt_update_fd);
+						pmt_update_fd = -1;
+						zapit(channel->getChannelID(), current_is_nvod, 0);
+					}
+				}
+			}
+		}
+
+		/* yuck, don't waste that much cpu time :) */
+		usleep(0);
+	}
 
 	enterStandby();
 

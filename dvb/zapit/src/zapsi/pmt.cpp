@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.30 2003/01/30 17:21:17 obi Exp $
+ * $Id: pmt.cpp,v 1.31 2003/08/14 18:27:43 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -20,11 +20,16 @@
  *
  */
 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
 /* zapit */
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
 #include <zapit/debug.h>
 #include <zapit/pmt.h>
+#include <zapit/settings.h>
 
 #define PMT_SIZE 1024
 
@@ -251,18 +256,21 @@ int parse_pmt(CZapitChannel * const channel)
 	unsigned char filter[DMX_FILTER_SIZE];
 	unsigned char mask[DMX_FILTER_SIZE];
 
-	memset(filter, 0x00, DMX_FILTER_SIZE);
-	memset(mask, 0x00, DMX_FILTER_SIZE);
+	if (channel->getPmtPid() == 0)
+		return -1;
 
-	filter[0] = 0x02;
+	bzero(filter, DMX_FILTER_SIZE);
+	bzero(mask, DMX_FILTER_SIZE);
+	filter[0] = 0x02;	/* table_id */
 	filter[1] = channel->getServiceId() >> 8;
 	filter[2] = channel->getServiceId();
+	filter[3] = 0x01;	/* current_next_indicator */
+	filter[4] = 0x00;	/* section_number */
 	mask[0] = 0xFF;
 	mask[1] = 0xFF;
 	mask[2] = 0xFF;
-
-	if (channel->getPmtPid() == 0)
-		return -1;
+	mask[3] = 0x01;
+	mask[4] = 0xFF;
 
 	if ((dmx.sectionFilter(channel->getPmtPid(), filter, mask) < 0) || (dmx.read(buffer, PMT_SIZE) < 0))
 		return -1;
@@ -299,5 +307,42 @@ int parse_pmt(CZapitChannel * const channel)
 	channel->setCaPmt(caPmt);
 	channel->setPidsFlag();
 	return 0;
+}
+
+int pmt_set_update_filter(CZapitChannel * const channel)
+{
+	struct dmx_sct_filter_params dsfp;
+	int fd;
+
+	if (channel->getPmtPid() == 0)
+		return -1;
+
+	if ((fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
+		perror(DEMUX_DEVICE);
+		return -1;
+	}
+
+	bzero(&dsfp, sizeof(struct dmx_sct_filter_params));
+	dsfp.filter.filter[0] = 0x02;	/* table_id */
+	dsfp.filter.filter[1] = channel->getServiceId() >> 8;
+	dsfp.filter.filter[2] = channel->getServiceId();
+	dsfp.filter.filter[3] = (channel->getCaPmt()->version_number << 1) | 0x01;
+	dsfp.filter.filter[4] = 0x00;	/* section_number */
+	dsfp.filter.mask[0] = 0xFF;
+	dsfp.filter.mask[1] = 0xFF;
+	dsfp.filter.mask[2] = 0xFF;
+	dsfp.filter.mask[3] = (0x1F << 1) | 0x01;
+	dsfp.filter.mask[4] = 0xFF;
+	dsfp.filter.mode[3] = 0x1F << 1;
+	dsfp.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+	dsfp.pid = channel->getPmtPid();
+	dsfp.timeout = 0;
+
+	if (fop(ioctl, DMX_SET_FILTER, &dsfp) < 0) {
+		close(fd);
+		return -1;
+	}
+
+	return fd;
 }
 
