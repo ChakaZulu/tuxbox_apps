@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.82 2003/03/14 08:22:04 obi Exp $
+ * $Id: bouquets.cpp,v 1.83 2003/06/01 17:01:35 digi_casi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -37,6 +37,7 @@
 
 extern tallchans allchans;   //  defined in zapit.cpp
 extern CConfigFile config;   //  defined in zapit.cpp
+extern std::map<std::string, int16_t>satellitePositions;
 
 
 #define GET_ATTR(node, name, fmt, arg)                                  \
@@ -177,7 +178,7 @@ int CBouquet::recModeTVSize( unsigned int tsid)
 
 
 /**** class CBouquetManager *************************************************/
-void CBouquetManager::saveBouquets()
+void CBouquetManager::saveBouquets(void)
 {
 	INFO("creating new bouquets.xml");
 	FILE* bouq_fd = fopen(BOUQUETS_XML, "w");
@@ -200,17 +201,21 @@ void CBouquetManager::saveBouquets()
 				Bouquets[i]->bLocked ? 1 : 0);
 			for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
 			{
-				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%04x\"/>\n",
 						Bouquets[i]->tvChannels[j]->getServiceId(),
 						convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
-						Bouquets[i]->tvChannels[j]->getOriginalNetworkId());
+						Bouquets[i]->tvChannels[j]->getTransportStreamId(), 
+						Bouquets[i]->tvChannels[j]->getOriginalNetworkId(),
+						Bouquets[i]->tvChannels[j]->getSatellitePosition());
 			}
 			for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
 			{
-				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%04x\"/>\n",
 						Bouquets[i]->radioChannels[j]->getServiceId(),
 						convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
-						Bouquets[i]->radioChannels[j]->getOriginalNetworkId());
+						Bouquets[i]->radioChannels[j]->getTransportStreamId(), 
+						Bouquets[i]->radioChannels[j]->getOriginalNetworkId(), 
+						Bouquets[i]->radioChannels[j]->getSatellitePosition());
 			}
 			fprintf(bouq_fd, "\t</Bouquet>\n");
 		}
@@ -223,11 +228,14 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 {
 	xmlNodePtr search=root->xmlChildrenNode;
 	xmlNodePtr channel_node;
+	
 
 	if (search)
 	{
 		t_original_network_id original_network_id;
-		t_service_id          service_id;
+		t_service_id service_id;
+		t_transport_stream_id transport_stream_id;
+		int16_t satellitePosition;
 
 		INFO("reading bouquets");
 
@@ -244,6 +252,8 @@ void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 			{
 				GET_ATTR(channel_node, "serviceID", SCANF_SERVICE_ID_TYPE, service_id);
 				GET_ATTR(channel_node, "onid", SCANF_ORIGINAL_NETWORK_ID_TYPE, original_network_id);
+				GET_ATTR(channel_node, "sat_position", SCANF_SATELLITE_POSITION_TYPE, satellitePosition);
+				GET_ATTR(channel_node, "tsid", SCANF_TRANSPORT_STREAM_ID_TYPE, transport_stream_id);
 
 				CZapitChannel* chan = findChannelByChannelID(CREATE_CHANNEL_ID);
 
