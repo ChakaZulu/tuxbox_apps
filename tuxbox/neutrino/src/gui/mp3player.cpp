@@ -162,12 +162,10 @@ int CMP3PlayerGui::show()
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 	uint msg; uint data;
 
 	bool loop=true;
 	bool update=true;
-//	State last_state=STOP;
 	key_level=0;
 	while(loop)
 	{
@@ -178,11 +176,6 @@ int CMP3PlayerGui::show()
 			// stop if mode was changed in another thread
 			loop=false;
 		}
-/*		if(m_state != last_state)
-		{
-			last_state=m_state;
-			update=true;
-	   }	*/
 		if(m_state != STOP && CMP3Player::getInstance()->state==CMP3Player::STOP && playlist.size() >0)
 		{
 			int next = getNext();
@@ -195,11 +188,7 @@ int CMP3PlayerGui::show()
 			update=false;
 			paint();
 		}
-//		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 		g_RCInput->getMsg( &msg, &data, 10 ); // 1 sec timeout to update play/stop state display
-
-		if( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
 
 		if( msg == CRCInput::RC_home)
 		{ //Exit after cancel key
@@ -1187,10 +1176,15 @@ void CMP3PlayerGui::updateTimes(bool force)
 			g_Fonts->menu->RenderString(x+width-w1-10, y+4 + 1*fheight, w1, " / " + m_time_total,
 												 COL_MENUCONTENTSELECTED);
 		}
-		if(updatePlayed || force)
+		if(updatePlayed || force || m_state==PAUSE)
 		{
 			frameBuffer->paintBoxRel(x+width-w1-w2-15, y+4, w2+4, 1*fheight, COL_MENUCONTENTSELECTED);
-			g_Fonts->menu->RenderString(x+width-w1-w2-11, y+4 + 1*fheight, w2, m_time_played, COL_MENUCONTENTSELECTED);
+         struct timeval tv;
+         gettimeofday(&tv, NULL);
+			if(m_state != PAUSE || (tv.tv_sec % 2) == 0)
+         {
+            g_Fonts->menu->RenderString(x+width-w1-w2-11, y+4 + 1*fheight, w2, m_time_played, COL_MENUCONTENTSELECTED);
+         }
 		}
 	}
 }
