@@ -168,6 +168,8 @@
 		<img name="country_tr" src="tr.png" />
 		<img name="country_ru" src="ru.png" />
 		<img name="country_ro" src="ro.png" />
+		<img name="country_is" src="is.png" />
+		<img name="country_si" src="si.png" />
 		<img name="country_missing" src="missing.png" />
 	</images>
 
