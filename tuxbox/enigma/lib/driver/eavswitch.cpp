@@ -198,13 +198,13 @@ int eAVSwitchPhilips::setTVPin8(int vol)
 	switch (vol)
 	{
 	case 0:
-		fnc=2;
+		fnc=0;
 		break;
 	case 6:
 		fnc=1;
 		break;
 	case 12:
-		fnc=0;
+		fnc=2;
 		break;
 	 default:
 		fnc=2;
