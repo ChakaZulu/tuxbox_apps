@@ -397,6 +397,8 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, string actionKey)
 	text= text+ "\n"+ buf;
 
 	checkFile( UCODEDIR "/ucode.bin", (char*) &res);
+	if( !strcmp("not found", res) )
+		strcpy(res, "using buildin");
 	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.ucode").c_str(), res );
 	text= text+ "\n"+ buf;
 

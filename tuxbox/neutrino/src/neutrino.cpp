@@ -767,10 +767,11 @@ void CNeutrinoApp::doChecks()
 	if(fd)
 		fclose(fd);
 	ucodes_ok= ucodes_ok||(fd);
+/*	ucode.bin no longer needed, since buildin
 	fd = fopen(UCODEDIR "/ucode.bin", "r");
 	if(fd)
 		fclose(fd);
-	ucodes_ok= ucodes_ok&&(fd);
+	ucodes_ok= ucodes_ok&&(fd);*/
 	fd = fopen(UCODEDIR "/cam-alpha.bin", "r");
 	if(fd)
 		fclose(fd);
@@ -3362,7 +3363,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.433 2003/04/01 17:30:24 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.434 2003/04/15 18:33:50 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();
