@@ -13,7 +13,7 @@ is "white" but set to full transparency, so this will look different.
 Entering just "fbtest" will cycle through all modes
 
 There are 3 options:
--f : select one of the pixelformats (CLUT4,CLUT8,RGB332,ARGB1555,ARGB)
+-f : select one of the pixelformats (CLUT4,CLUT8,ARGB1555,ARGB)
 	(RGB565 is also included but seems not to work, at least not on
 	my machine, more testing is necessary for this one...)
 -s : select one of the 16 FB-sizes. All combinations of
@@ -23,6 +23,6 @@ There are 3 options:
 -n : inhibits clearing the framebuffer after each mode. This way you can
     retain the image
 
-Example: "fbtest -s720x576 -fRGB332 -n"
+Example: "fbtest -s720x576 -fCLUT8 -n"
 
 copyright Carsten Juttner (October 2003)

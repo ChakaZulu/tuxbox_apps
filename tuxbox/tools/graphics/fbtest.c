@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *  									      
  ******************************************************************************
- * $Id: fbtest.c,v 1.2 2003/11/14 00:16:29 carjay Exp $
+ * $Id: fbtest.c,v 1.3 2003/11/22 23:54:37 carjay Exp $
  ******************************************************************************/
 
 // TODO: - should restore the colour map and mode to what it was before
@@ -59,7 +59,6 @@ const struct vidsize vidsizetable[]={	// all supported sizes
 enum pixenum{	// keep in sync with pixname !
 	CLUT4=0,
 	CLUT8,
-	RGB332,
 	RGB565,
 	ARGB1555,
 	ARGB
@@ -67,7 +66,6 @@ enum pixenum{	// keep in sync with pixname !
 const char *pixname[] = {
 	"CLUT4",
 	"CLUT8",
-	"RGB332",
 	"RGB565",
 	"ARGB1555",
 	"ARGB"
@@ -112,13 +110,6 @@ const struct pixelformat pixelformattable[] = {
 		.green = { .offset = 0, .length=5, .msb_right =0 },
 		.blue =  { .offset = 0, .length=5, .msb_right =0 },
 		.transp=  { .offset = 0, .length=1, .msb_right =0 }
-	},
-	{ .name = "RGB332",	// RGB332, essentially CLUT8 as well but fixed palette
-		.bpp = 8, .pixenum = RGB332,
-		.red = 	 { .offset = 5, .length=3, .msb_right =0 },
-		.green = { .offset = 2, .length=3, .msb_right =0 },
-		.blue =  { .offset = 0, .length=2, .msb_right =0 },
-		.transp=  { .offset = 0, .length=0, .msb_right =0 }
 	},
 	{ .name = "ARGB1555", 	// ARGB1555
 		.bpp = 16, .pixenum = ARGB1555,
@@ -173,9 +164,6 @@ struct pixel{		// up to 32 bits of pixel information
 
 void col2pixel (struct pixel *pix, const struct pixelformat *pixf, const struct colour *col){
 	switch (pixf->pixenum){
-		case RGB332:
-			pix->byte[0]=(col->r&0xe0)|(col->g&0xe0)>>3|(col->b&0xc0)>>6;
-			break;
 		case RGB565:
 			pix->byte[0]=(col->r&0xf8)|(col->g&0xfc)>>5;
 			pix->byte[1]=(col->g&0xfc)<<3|(col->b&0xf8)>>3;
@@ -227,10 +215,6 @@ void drawrect(void *videoram, struct rect *r, const struct pixelformat *pixf, co
 
 	if (pixf->pixenum!=CLUT4&&pixf->pixenum!=CLUT8){
 		switch (pixf->pixenum){
-			case RGB332:
-				bpp = 8;
-				tocopy = 1;
-				break;
 			case ARGB1555:
 			case RGB565:
 				bpp = 16;
@@ -307,7 +291,7 @@ void usage(char *name){
  	printf ("Usage: %s [options]\n"
 		"Options: -f<pixelformat>\n"
 		"            where format is one of:\n"
-		"              CLUT4,CLUT8,RGB332,ARGB1555,RGB565,ARGB\n"
+		"              CLUT4,CLUT8,ARGB1555,RGB565,ARGB\n"
 		"         -s<width>x<heigth>\n"
 		"            where width is either 720,640,360,320\n"
 		"                  and height is either 288,240,480,576\n"
@@ -378,27 +362,27 @@ int main (int argc,char **argv){
 	
 	fbd = open (FBDEV, O_RDWR);
 	if (fbd<0){
-		perror ("Error opening framebuffer device: ");
+		perror ("Error opening framebuffer device");
 		return 1;
 	}
 	stat = ioctl (fbd, FBIOGET_FSCREENINFO,&fix);
 	if (stat<0){
-		perror ("Error getting fix screeninfo: ");
+		perror ("Error getting fix screeninfo");
 		return 1;
 	}
 	stat = ioctl (fbd, FBIOGET_VSCREENINFO,&var);
 	if (stat<0){
-		perror ("Error getting var screeninfo: ");
+		perror ("Error getting var screeninfo");
 		return 1;
 	}
 	stat = ioctl (fbd, FBIOPUT_VSCREENINFO,&var);
 	if (stat<0){
-		perror ("Error setting mode: ");
+		perror ("Error setting mode");
 		return 1;
 	}
 	pfb = mmap (0, fix.smem_len, PROT_READ|PROT_WRITE, MAP_SHARED, fbd, 0);
 	if (pfb == MAP_FAILED){
-		perror ("Error mmap'ing framebuffer device: ");
+		perror ("Error mmap'ing framebuffer device");
 		return 1;
 	}
 
@@ -414,7 +398,7 @@ int main (int argc,char **argv){
 			
 			// try to set mode
 			stat = setmode(fbd,&pixelformattable[i_pix],&vidsizetable[i_size]);
-			if (stat==-2) perror ("fbtest: could not get fb_var-screeninfo from fb-device: ");
+			if (stat==-2) perror ("fbtest: could not get fb_var-screeninfo from fb-device");
 			else if (stat==-1){
 				printf ("\nCould not set mode %s (%dx%d), possible reasons:\n"
 					"- you have a GTX (soz m8)\n"
@@ -453,7 +437,7 @@ int main (int argc,char **argv){
 
 	stat = munmap (pfb,fix.smem_len);
 	if (stat<0){
-		perror ("Error munmap'ing framebuffer device: ");
+		perror ("Error munmap'ing framebuffer device");
 		return 1;
 	}
 	close (fbd);

@@ -23,7 +23,7 @@ expected.
 
 Restrictions in short:
     - left start pixel must begin on an even position (0..718)
-    - top captured line must be on a even position (0..574)
+    - top captured line must be on an even position (0..574)
     - width must be a multiple of 2
     - scale_x and scale_y can only be positive integer values (1..30)
       for y,	if the scale is odd (1,3,5..) both fields are captured
