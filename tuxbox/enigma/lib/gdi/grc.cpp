@@ -8,7 +8,7 @@
 
 void *gRC::thread_wrapper(void *ptr)
 {
-	nice(3);
+	nice(1); //3
 	return ((gRC*)ptr)->thread();
 }
 
