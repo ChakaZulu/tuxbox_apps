@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.31 2004/11/04 09:51:36 ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.32 2004/12/12 22:17:12 tmbinc Exp $
  */
 
 #include <enigma_info.h>
@@ -63,6 +63,8 @@ void eZapInfo::sel_streaminfo()
 static eString getVersionInfo(const char *info)
 {
 	FILE *f=fopen("/.version", "rt");
+	if (!f)
+		f = fopen("/etc/image-version", "rt");
 	if (!f)
 		return "";
 	eString result;
