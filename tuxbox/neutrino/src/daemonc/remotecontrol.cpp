@@ -38,6 +38,7 @@ CRemoteControl::CRemoteControl()
 {
 	current_onid_sid = 0;
 	current_sub_onid_sid = 0;
+	current_channel_name = "";
 
 	zap_completion_timeout = 0;
 
@@ -482,6 +483,7 @@ string CRemoteControl::subChannelDown()
 void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame, bool start_video )
 {
 	current_onid_sid = onid_sid;
+	current_channel_name = channame;
 	is_video_started= start_video;
 
     current_sub_onid_sid = 0;

@@ -39,7 +39,6 @@
 #include "gui/widget/messagebox.h"
 #include "gui/color.h"
 
-#include "libucodes/libucodes.h"
 
 CScanTs::CScanTs()
 {

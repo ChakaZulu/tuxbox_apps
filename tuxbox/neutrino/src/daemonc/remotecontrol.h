@@ -90,6 +90,7 @@ class CRemoteControl
 		void copySubChannelsToZapit();
 
 	public:
+		string							current_channel_name;
 		unsigned int					current_onid_sid;
 		unsigned int					current_sub_onid_sid;
 		unsigned long long				current_EPGid;
