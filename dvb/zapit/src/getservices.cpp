@@ -87,7 +87,7 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 	  if ( (sm == 1) || ( (sm==4) || (sm==2) ) ) {
 	    std::string name = services->GetAttributeValue("Name");
 	    if (name[0] != ' ') {
-	      uint cnr, sid, pmt, ecmpid, tsid, onid;
+	      uint cnr, sid, pmt, ecmpid=0, tsid=curr_tsid, onid;
 	      std::string cname;
 
 	      //printf("Will build a channel of type: %d\n", sm);
@@ -97,8 +97,8 @@ void ParseTransponder(XMLTreeNode *xmltransponder) {
 	      sscanf(services->GetAttributeValue("onid"), "%x", &onid);
 
 	      sscanf(services->GetAttributeValue("pmt"), "%x", &pmt);
-	      sscanf(services->GetAttributeValue("ecmpid"), "%x", &ecmpid);
-	      sscanf(services->GetAttributeValue("tsid"), "%x", &tsid);
+//	      sscanf(services->GetAttributeValue("ecmpid"), "%x", &ecmpid);
+//	      sscanf(services->GetAttributeValue("tsid"), "%x", &tsid);
 
 	      //printf("%d Kanalname: %s, Pmt: %04x\n",tmp_chan->chan_nr, tmp_chan->name.c_str(), tmp_chan->pmt);
 
