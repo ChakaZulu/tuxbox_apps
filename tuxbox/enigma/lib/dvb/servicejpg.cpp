@@ -48,18 +48,16 @@ void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 int eServiceHandlerJPG::play(const eServiceReference &service, int workaround )
 {
 	printf("[SERVICEJPG] start...\n");
-
 	eServiceReference sref = eServiceInterface::getInstance()->service;
 	printf("[SERVICEJPG] show %s\n", sref.path.c_str());
 	ePictureViewer::getInstance()->displayImage(sref.path);
-
 	return 0;
 }
 
 int eServiceHandlerJPG::stop(int workaround)
 {
 	printf("[SERVICEJPG] stop.\n");
-
+	ePictureViewer::getInstance()->stopSlideshow();
 	return 0;
 }
 

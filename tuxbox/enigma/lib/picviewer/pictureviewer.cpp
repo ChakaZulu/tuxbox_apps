@@ -88,6 +88,7 @@ ePictureViewer::ePictureViewer(): slideshowTimer(eApp), messages(this, 1)
 ePictureViewer::~ePictureViewer()
 {
 	messages.send(Message::quit);
+	usleep(1000*1000);
 	if (thread_running())
 		kill();
 	if (instance == this)
@@ -108,29 +109,21 @@ void ePictureViewer::gotMessage(const Message &msg )
 		case Message::display:
 		{
 			printf("[PICTUREVIEWER] display: %s\n", msg.filename);
-			struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
-			fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 16);
-			fbClass::getInstance()->PutCMAP();
 			ShowImage(std::string(msg.filename), false);
 			break;
 		}
-		case Message::slideshow:
+		case Message::startSlideshow:
 		{
-			printf("[PICTUREVIEWER] slideShow: %s\n", msg.filename);
-			struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
-			fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 16);
-			fbClass::getInstance()->PutCMAP();
+			printf("[PICTUREVIEWER] startSlideShow: %s\n", msg.filename);
 			ShowSlideshow(std::string(msg.filename), false);
 			break;
 		}
-		case Message::zoom:
-			printf("[PICTUREVIEWER] zoom\n");
-//			zoom
+		case Message::stopSlideshow:
+		{
+			printf("[PICTUREVIEWER] stopSlideShow\n");
+			slideshowTimer.stop();
 			break;
-		case Message::move:
-			printf("[PICTUREVIEWER] move\n");
-//			move
-			break;
+		}
 		case Message::quit:
 			printf("[PICTUREVIEWER] quit\n");
 			slideshowTimer.stop();
@@ -151,7 +144,7 @@ void ePictureViewer::add_format(int (*picsize)(const char *, int *, int *, int, 
 	fhn->get_size = picsize;
 	fhn->get_pic = picread;
 	fhn->id_pic = id;
-	fhn->next = fh_root; 
+	fhn->next = fh_root;
 	fh_root = fhn;
 }
 
@@ -189,11 +182,6 @@ ePictureViewer::CFormathandler * ePictureViewer::fh_getsize(const char *name, in
 bool ePictureViewer::DecodeImage(const std::string& name, bool showBusySign, bool unscaled)
 {
 	printf("DecodeImage {\n");
-	if (name == m_NextPic_Name)
-	{
-		printf("DecodeImage }\n");
-		return true;
-	}
 
 	int x, y, xs, ys, imx, imy;
 	getCurrentRes(&xs, &ys);
@@ -320,12 +308,21 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 {
 	printf("Show Image {\n");
 	// Wird eh ueberschrieben ,also schonmal freigeben... (wenig speicher)
+#if 0
 	if (m_CurrentPic_Buffer != NULL)
 	{
 		free(m_CurrentPic_Buffer);
 		m_CurrentPic_Buffer = NULL;
 	}
+#endif
 	DecodeImage(filename, false, unscaled);
+	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+	if (screenInfo->bits_per_pixel != 16)
+	{
+		fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 16);
+		fbClass::getInstance()->PutCMAP();
+		fbClass::getInstance()->lock();
+	}
 	DisplayNextImage();
 	printf("Show Image }\n");
 	return true;
@@ -333,28 +330,18 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 
 void ePictureViewer::slideshowTimeout()
 {
-	printf("[PICTUREVIEWER] slideshowTimeout...\n");
-	
 	eString tmp = *myIt;
 	printf("[PICTUREVIEWER] slideshowTimeout: show %s\n", tmp.c_str());
-	ShowImage(*myIt, false);
-	if (myIt != slideshowList.end())
-	{
-		printf("[PICTUREVIEWER] slideshowTimeout: next slide...\n");
-		++myIt;
-	}
-	else
-	{
-		printf("[PICTUREVIEWER] slideshowTimeout: start with first slide again...\n");
+	ShowImage(tmp, false);
+	if (++myIt == slideshowList.end())
 		myIt = slideshowList.begin();
-	}
 	slideshowTimer.start(5000, true);
 }
 
 bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 {
 	printf("Show Slideshow {\n");
-	slideshowList.clear();	
+	slideshowList.clear();
 	// gen pic list for slideshow
 	int pos = filename.find_last_of("/");
 	if (pos == -1)
@@ -365,13 +352,29 @@ bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 	if (d)
 	{
 		while (struct dirent *e = readdir(d))
-			if (eString(e->d_name) != "." && eString(e->d_name) != "..")
-				slideshowList.push_back(directory + "/" + eString(e->d_name));
+		{
+			eString file(e->d_name);
+			if ((file != ".") && (file != "..") &&
+			    (file.right(4).upper() == ".JPG" ||
+			     file.right(4).upper() == ".PNG" ||
+			     file.right(4).upper() == ".BMP" ||
+			     file.right(4).upper() == ".GIF")
+			   )
+			{
+				printf("[PICTUREVIEWER] ShowSlideshow: adding %s\n", file.c_str());
+				eString tmp = directory + "/" + file;
+				slideshowList.push_back(tmp);
+			}
+		}
 		closedir(d);
 	}
-	slideshowList.sort();
-	myIt = slideshowList.begin();
-	slideshowTimeout();
+	if (!slideshowList.empty())
+	{
+		slideshowList.sort();
+		myIt = slideshowList.begin();
+		slideshowTimer.stop();
+		slideshowTimeout();
+	}
 	printf("Show Slideshow }\n");
 	return true;
 }
@@ -379,14 +382,17 @@ bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 bool ePictureViewer::DisplayNextImage()
 {
 	printf("DisplayNextImage {\n");
+#if 0
 	if (m_CurrentPic_Buffer != NULL)
 	{
 		free(m_CurrentPic_Buffer);
 		m_CurrentPic_Buffer = NULL;
 	}
+#endif
 	if (m_NextPic_Buffer != NULL)
 		fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 	printf("---DisplayNextImage fb_disp done\n");
+#if 0
 	m_CurrentPic_Buffer = m_NextPic_Buffer;
 	m_NextPic_Buffer = NULL;
 	m_CurrentPic_Name = m_NextPic_Name;
@@ -397,6 +403,7 @@ bool ePictureViewer::DisplayNextImage()
 	m_CurrentPic_YPos = m_NextPic_YPos;
 	m_CurrentPic_XPan = m_NextPic_XPan;
 	m_CurrentPic_YPan = m_NextPic_YPan;
+#endif
 	printf("DisplayNextImage }\n");
 	return true;
 }
@@ -578,12 +585,13 @@ void ePictureViewer::displayImage(eString filename)
 	messages.send(Message(Message::display, filename.c_str()));
 }
 
-void ePictureViewer::displaySlideshow(eString filename)
+void ePictureViewer::startSlideshow(eString filename)
 {
-	messages.send(Message(Message::slideshow, filename.c_str()));
+	messages.send(Message(Message::startSlideshow, filename.c_str()));
 }
 
-void ePictureViewer::quitPicViewer()
+void ePictureViewer::stopSlideshow()
 {
-	messages.send(Message(Message::quit, ""));
+	messages.send(Message(Message::stopSlideshow, ""));
 }
+

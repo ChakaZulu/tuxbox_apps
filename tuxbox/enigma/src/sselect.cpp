@@ -115,7 +115,7 @@ struct PicViewerStyleSelectorActions
 	eActionMap map;
 	eAction infoPressed;
 	PicViewerStyleSelectorActions():
-		map("PicViewerStyleSelector", _("Picture Style Selector")),
+		map("PicViewerStyleSelector", _("Picture Viewer Actions")),
 		infoPressed(map, "infoPressed", _("open the Picture Viewer with selected style"), eAction::prioDialog)
 	{
 	}
@@ -123,7 +123,7 @@ struct PicViewerStyleSelectorActions
 eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Picture Viewer Style Selector");
 
 ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer Actions"), 5, 350, true)
+		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.0 - Actions"), 5, 350, true)
 		,ssel(ssel)
 {
 	addActionMap(&i_PicViewerStyleSelectorActions->map);
@@ -1034,9 +1034,11 @@ void eServiceSelector::forEachServiceRef( Signal1<void,const eServiceReference&>
 int eServiceSelector::eventHandler(const eWidgetEvent &event)
 {
 	int num=0;
+	fbClass::getInstance()->unlock();
 	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
 	if (screenInfo->bits_per_pixel != 8)
 	{
+		ePictureViewer::getInstance()->stopSlideshow();
 		fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 8);
 		fbClass::getInstance()->PutCMAP();
 	}
@@ -1185,10 +1187,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				if (selected.path.right(4).upper() == ".JPG" ||
 				    selected.path.right(4).upper() == ".PNG" ||
 				    selected.path.right(4).upper() == ".BMP" ||
-				    selected.path.right(4).upper() == ".GIF") 
+				    selected.path.right(4).upper() == ".GIF")
 				{
-					if (ePictureViewer::getInstance())
-						ePictureViewer::getInstance()->quitPicViewer();
 					ePicViewerStyleSelector f(1);
 #ifndef DISABLE_LCD
 					f.setLCD( LCDTitle, LCDElement );
@@ -1200,15 +1200,22 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					switch (ret)
 					{
 						case 0:
+						{
+							ePictureViewer::getInstance()->stopSlideshow();
 							ePictureViewer::getInstance()->displayImage(selected.path);
 							break;
+						}
 						case 1:
-							ePictureViewer::getInstance()->displaySlideshow(selected.path);
+						{
+							ePictureViewer::getInstance()->stopSlideshow();
+							ePictureViewer::getInstance()->startSlideshow(selected.path);
 							break;
+						}
 						default:
 							show();
 							break;
 					}
+					close(0);
 				}
 				else
 				{

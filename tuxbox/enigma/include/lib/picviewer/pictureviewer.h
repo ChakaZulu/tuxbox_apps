@@ -22,9 +22,8 @@ class ePictureViewer: public eMainloop, private eThread, public Object
 		enum
 		{
 			display,
-			slideshow,
-			zoom,
-			move,
+			startSlideshow,
+			stopSlideshow,
 			quit
 		};
 		Message(int type = 0, const char *filename = 0)
@@ -34,7 +33,7 @@ class ePictureViewer: public eMainloop, private eThread, public Object
 	
 	eTimer slideshowTimer;
 	std::list<eString> slideshowList;
-	std::list <eString>::iterator myIt;
+	std::list<eString>::iterator myIt;
 	eFixedMessagePump<Message> messages;
 	static ePictureViewer *instance;
 	void gotMessage(const Message &message);
@@ -73,9 +72,9 @@ public:
 	void Cleanup();
 	void SetVisible(int startx, int endx, int starty, int endy);
 	void displayImage(eString filename);
-	void displaySlideshow(eString filename);
+	void startSlideshow(eString filename);
+	void stopSlideshow();
 	void slideshowTimeout();
-	void quitPicViewer();
 
 private:
 	CFormathandler *fh_root;

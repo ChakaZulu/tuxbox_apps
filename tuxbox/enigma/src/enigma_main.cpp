@@ -60,6 +60,7 @@
 #include <lib/system/info.h>
 #include <src/time_correction.h>
 #include <lib/driver/audiodynamic.h>
+#include <lib/picviewer/pictureviewer.h>
 
 		// bis waldi das in nen .h tut
 #define MOVIEDIR "/hdd/movie"
@@ -5095,6 +5096,7 @@ void eZapMain::blinkRecord()
 
 int eZapMain::eventHandler(const eWidgetEvent &event)
 {
+	fbClass::getInstance()->unlock();
 	// timer service change in progress...
 	if ( event.type == eWidgetEvent::evtAction && Decoder::locked == 2 )
 	{
@@ -5117,6 +5119,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
 		if (screenInfo->bits_per_pixel != 8)
 		{
+			ePictureViewer::getInstance()->stopSlideshow();
 			fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 8);
 			fbClass::getInstance()->PutCMAP();
 		}
@@ -5125,7 +5128,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 #ifndef DISABLE_FILE
 		if (	skipping &&
 			event.action != &i_enigmaMainActions->discrete_startSkipForward
-				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipForward && 
+				&& dvrfunctions && event.action != &i_enigmaMainActions->startSkipForward &&
 			event.action != &i_enigmaMainActions->discrete_repeatSkipForward
 				&& dvrfunctions && event.action != &i_enigmaMainActions->repeatSkipForward &&
 			event.action != &i_enigmaMainActions->discrete_stopSkipForward

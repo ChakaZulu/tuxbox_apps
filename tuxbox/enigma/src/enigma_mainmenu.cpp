@@ -18,6 +18,7 @@
 #include <lib/system/init_num.h>
 #include <lib/system/info.h>
 #include <lib/gdi/fb.h>
+#include <lib/picviewer/pictureviewer.h>
 
 struct enigmaMainmenuActions
 {
@@ -336,8 +337,10 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
 	if (screenInfo->bits_per_pixel != 8)
 	{
+		ePictureViewer::getInstance()->stopSlideshow();
 		fbClass::getInstance()->SetMode(screenInfo->xres, screenInfo->yres, 8);
 		fbClass::getInstance()->PutCMAP();
+		fbClass::getInstance()->unlock();
 	}
 	if ( !simpleMainmenu )
 	{
