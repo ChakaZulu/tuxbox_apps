@@ -1,5 +1,5 @@
 /*
- * $Id: streampes.c,v 1.6 2003/01/07 00:43:59 obi Exp $
+ * $Id: streampes.c,v 1.7 2003/01/15 18:46:02 gandalfx Exp $
  *
  * Copyright (C) 2001 by tmbinc
  * Copyright (C) 2001 by kwon
@@ -19,6 +19,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
+ * Calling:
+ * GET /<pid>  \r\n -> for tcp opration
+ * GET /<pid>,<udpport> \r\n -> for udp operation, tcp connection ist maintained as control connection
+ *                              to end udp streaming
  */
 
 #include <stdio.h>
@@ -26,6 +30,11 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/signal.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
@@ -33,10 +42,11 @@
 #include <linux/dvb/dmx.h>
 
 #define BSIZE					 1024*16
+void send_udp(int fd, int port);
 
 int main(int argc, char **argv)
 {
-	int fd;
+	int fd,port,ppid;
 	unsigned short pid;
 	struct dmx_pes_filter_params flt; 
 	char buffer[BSIZE], *bp;
@@ -71,8 +81,15 @@ int main(int argc, char **argv)
 		return -fd;
 	}
 
-	ioctl(fd, DMX_SET_BUFFER_SIZE, 256 * 1024);
+	ioctl(fd, DMX_SET_BUFFER_SIZE, 512*1024);
 	sscanf(bp, "%hx", &pid);
+	
+	port = 0;
+	if ((bp=strchr(bp,',')) != 0) {
+		bp++;
+		sscanf(bp, "%d", &port);
+	}
+	
 
 	flt.pid = pid;
 	flt.input = DMX_IN_FRONTEND;
@@ -84,25 +101,91 @@ int main(int argc, char **argv)
 		perror("DMX_SET_PES_FILTER");
 		return errno;
 	}
-
-	while (1) {
-
-		int pr = 0, r;
-		int tr = BSIZE;
-
-		while (tr) {
-
-			if ((r=read(fd, buffer+pr, tr)) <= 0)
-				continue;
-			pr+=r;
-			tr-=r;
+	
+	if (port > 1023) {
+		ppid = fork();
+		if (ppid == 0) {
+			send_udp (fd, port);
+		} 
+		else if (ppid > 0) {
+			while (read(STDIN_FILENO,buffer,1) >= 0);
+		 	kill (ppid,SIGINT);
+		 	waitpid(ppid,0,0);
 		}
+		else {
+			perror("streampes:Cannot fork\n");
+			return(-1);
+		}
+	}
+	else {
 
-		if (write(STDOUT_FILENO, buffer, r) != r)
-			break;
+		while (1) {
+
+			int pr = 0, r;
+			int tr = BSIZE;
+
+			while (tr) {
+
+				if ((r=read(fd, buffer+pr, tr)) <= 0)
+					continue;
+				pr+=r;
+				tr-=r;
+				if (tr) {
+					usleep(10000); //wait for 10 ms = max. 10 kb 
+				}
+			}
+
+			if (write(STDOUT_FILENO, buffer, r) != r)
+				break;
+		}
 	}
 
 	close(fd);
 	return 0;
+}
+
+void
+send_udp (int fd, int port) {
+	int			pnr = 0;
+	int                     sockfd;
+        struct sockaddr_in      cli_addr, serv_addr;
+	int			addr_len = sizeof (serv_addr);
+	static	char 		buffer[1444];
+	
+	if(getpeername(STDOUT_FILENO, (struct sockaddr *) &serv_addr, &addr_len)) {
+		perror("getpeername");
+	}
+
+	serv_addr.sin_family      = AF_INET;
+	serv_addr.sin_port        = htons(port);
+
+	if ( (sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+		perror("client: can't open datagram socket");
+
+	memset((char *) &cli_addr,0, sizeof(cli_addr));
+	cli_addr.sin_family      = AF_INET;
+	cli_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	cli_addr.sin_port        = htons(0);
+	if (bind(sockfd, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0) {
+		perror("client: can't bind local address");
+	}
+
+	while (1) {
+		int pr=0, r;
+		int tr=1440;
+		while (tr) {
+			if ((r=read(fd, buffer+pr, tr)) <= 0) {
+				perror ("streampes: read error muxer");
+				continue;
+			}
+			pr+=r;
+			tr-=r;
+			if (tr) {
+				usleep(10000); //wait for 10 ms = max. 10 kb 
+			}
+		}
+		*((int *)(&(buffer[1440])))=pnr++;	
+		sendto(sockfd, buffer, 1444, 0, (struct sockaddr *) &serv_addr, addr_len);
+	}
 }
 
