@@ -139,14 +139,13 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (buf[0] != 'l') &&
 			    (buf[0] != 'n') &&
 			    (buf[0] != 'o') &&
+			    (buf[0] != 'u') &&
 			    (buf[0] != 'v') &&
 			    (buf[0] != 'z') &&
+			    (buf[0] != 'N') &&
 			    (strncmp(buf, "apidse", 6) != 0) &&
 			    (strncmp(buf, "au", 2) != 0) &&
 			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
-			    (strncmp(buf, "fa", 2) != 0) &&
-			    (strncmp(buf, "fi", 2) != 0) &&
-			    (strncmp(buf, "fo", 2) != 0) &&
 			    (strncmp(buf, "me", 2) != 0) &&
 			    (strncmp(buf, "mi", 2) != 0) &&
 			    (strncmp(buf, "mp", 2) != 0) &&
@@ -159,7 +158,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(buf, "st", 2) != 0) &&
 			    (strncmp(buf, "timersettings", 13) != 0) &&
 			    (strncmp(buf, "timing", 6) != 0) &&
-			    ((strncmp(buf, "flashupdate", 11) != 0) || 
+			    ((buf[0] != 'f') || 
 			     ((strcmp(buf, "flashupdate.actionreadflash") == 0) ||
 			      (strcmp(buf, "flashupdate.reallyflashmtd") == 0) ||
 			      (strcmp(buf, "flashupdate.savesuccess") == 0))) &&
@@ -169,9 +168,7 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strcmp(buf, "bouquetlist.head") != 0) &&
 			    (strcmp(buf, "dhcp") != 0) &&
 			    (strcmp(buf, "epglist.head") != 0) &&
-			    (strcmp(buf, "NFS/CIFS") != 0) &&
-			    (strcmp(buf, "sleeptimerbox.title") != 0) &&
-			    (strcmp(buf, "ucodecheck.head") != 0)
+			    (strcmp(buf, "sleeptimerbox.title") != 0)
 			     )
 				text = CZapitClient::Utf8_to_Latin1(text);
 			localeData[buf] = text;

@@ -468,31 +468,35 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
 	return menu_return::RETURN_EXIT;
 }
 
-int CUCodeCheckExec::exec(CMenuTarget* parent, string actionKey)
+int CUCodeCheckExec::exec(CMenuTarget* parent, const std::string actionKey)
 {
-	string 	text;
+	std::string text;
 	char res[60];
-	char buf[200];
 
-	checkFile( UCODEDIR "/avia500.ux", (char*) &res);
-	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.avia500").c_str(), res );
-	text= buf;
+	text = g_Locale->getText("ucodecheck.avia500");
+	text += ": ";
+	checkFile(UCODEDIR "/avia500.ux", (char*) &res);
+	text += res;
+	text += '\n';
+	text += g_Locale->getText("ucodecheck.avia600");
+	text += ": ";
+	checkFile(UCODEDIR "/avia600.ux", (char*) &res);
+	text += res;
+	text += '\n';
+	text += g_Locale->getText("ucodecheck.ucode");
+	text += ": ";
+	checkFile(UCODEDIR "/ucode.bin", (char*) &res);
+	if (strcmp("not found", res) == 0)
+		text += "ucode_0014 (built-in)";
+	else
+		text += res;
+	text += '\n';
+	text += g_Locale->getText("ucodecheck.cam-alpha");
+	text += ": ";
+	checkFile(UCODEDIR "/cam-alpha.bin", (char*) &res);
+	text += res;
 
-	checkFile( UCODEDIR "/avia600.ux", (char*) &res);
-	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.avia600").c_str(), res );
-	text= text+ "\n"+ buf;
-
-	checkFile( UCODEDIR "/ucode.bin", (char*) &res);
-	if( !strcmp("not found", res) )
-		strcpy(res, "ucode_0014 (built-in)");
-	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.ucode").c_str(), res );
-	text= text+ "\n"+ buf;
-
-	checkFile( UCODEDIR "/cam-alpha.bin", (char*) &res);
-	sprintf((char*) buf, "%s: %s", g_Locale->getText("ucodecheck.cam-alpha").c_str(), res );
-	text= text+ "\n"+ buf;
-
-	ShowMsg( "ucodecheck.head", text, CMessageBox::mbrBack, CMessageBox::mbBack );
+	ShowMsg("ucodecheck.head", text, CMessageBox::mbrBack, CMessageBox::mbBack, "", 450, -1, true); // UTF-8
 	return 1;
 }
 

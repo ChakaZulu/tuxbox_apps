@@ -841,8 +841,8 @@ void CNeutrinoApp::doChecks()
 	if(fd)
 		fclose(fd);
 	ucodes_ok= ucodes_ok&&(fd);
-	if( !ucodes_ok )
-		ShowMsg ( "messagebox.error", g_Locale->getText("ucodes.failure"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
+	if (!ucodes_ok)
+		ShowMsg("messagebox.error", g_Locale->getText("ucodes.failure"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw", 450, -1, true); // UTF-8
 }
 
 
