@@ -352,7 +352,7 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 	return eString().assign((char*)res, t);
 }
 
-eString convertUTF8DVB(const eString &string)
+eString convertUTF8DVB(const eString &string, int table)
 {
 	eString ss=eString();
 	
@@ -371,31 +371,31 @@ eString convertUTF8DVB(const eString &string)
 		// now search it in table
 		if(c>=0x80){
 			for(unsigned int j=0;j<128;j++){
-				if ( table = 1 ) {
+				if ( table == 1 ) {
 					if(c88595[j]==c){            // now 8859-5 ....
 						c=0x80+j;
 						break;
 					}
 				}
-				if ( table = 2 ) {
+				if ( table == 2 ) {
 					if(c88596[j]==c){            // now 8859-6 ....
 						c=0x80+j;
 						break;
 					}
 				}
-				if ( table = 3 ) {
+				if ( table == 3 ) {
 					if(c88597[j]==c){            // now 8859-7 ....
 						c=0x80+j;
 						break;
 					}
 				}
-				if ( table = 4 ) {
+				if ( table == 4 ) {
 					if(c88598[j]==c){            // now 8859-8 ....
 						c=0x80+j;
 						break;
 					}
 				}
-				if ( table = 5 ) {
+				if ( table == 5 ) {
 					if(c88599[j]==c){            // now 8859-9 ....
 						c=0x80+j;
 						break;
