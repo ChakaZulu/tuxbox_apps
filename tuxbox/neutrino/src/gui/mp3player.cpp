@@ -80,8 +80,8 @@ CMP3PlayerGui::CMP3PlayerGui()
 	mp3filter.addFilter("mpa");
 	mp3filter.addFilter("m3u");
 	filebrowser->Filter = &mp3filter;
-   if(strlen(g_settings.network_nfs_local_dir[0])!=0)
-      Path = g_settings.network_nfs_local_dir[0];
+   if(strlen(g_settings.network_nfs_mp3dir)!=0)
+      Path = g_settings.network_nfs_mp3dir;
 	else
       Path = "/";
 }

@@ -64,7 +64,7 @@ mainsettings.keybinding Key Setup
 mainsettings.misc Misc settings
 mainsettings.scan Scan settings
 
-mp3picsettings.general MP3 player / picturviewer
+mp3picsettings.general MP3 player / picviewer
 
 miscsettings.head Misc settings
 miscsettings.shutdown_real Enable standby
@@ -696,6 +696,7 @@ mp3player.title_artist Title, Artist
 mp3player.display_order display order
 mp3player.follow auto select current
 mp3player.screensaver_timeout screensaver timeout (min, 0=off)
+mp3player.defdir start dir.
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
@@ -709,6 +710,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.nostreamingserver The streaming server could not be reached.
+movieplayer.defdir start dir.
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter on
@@ -730,7 +732,7 @@ nfs.mounttimeout mount error: timeout
 nfs.umount Umount NFS/CIFS volume
 nfs.umounterror error umounting volume
 nfs.alreadymounted directory already mounted
-nfs.mount_options NFS mount options
+nfs.mount_options mount options
 nfs.type type
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
@@ -750,3 +752,6 @@ pictureviewer.show show
 pictureviewer.slideshow slideshow
 pictureviewer.slide_time slideshow display time
 pictureviewer.scaling scaling
+pictureviewer.defdir start dir.
+
+

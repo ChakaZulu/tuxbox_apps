@@ -141,6 +141,9 @@ struct SNeutrinoSettings
 	int  network_nfs_type[4];
 	char network_nfs_username[4][100];
 	char network_nfs_password[4][100];
+   char network_nfs_mp3dir[100];
+   char network_nfs_picturedir[100];
+   char network_nfs_moviedir[100];
 
 	//recording
 	int  recording_type;

@@ -477,24 +477,16 @@ void CNFSUmountGui::umount(string dir)
 	}
 }
 
-CNFSSmallMenu::CNFSSmallMenu()
-{
-	m_menu = new CMenuWidget("nfsmenu.head", "network.raw");
-	m_mountGui = new CNFSMountGui();
-	m_umountGui = new CNFSUmountGui();
-	m_menu->addItem(new CMenuSeparator());
-	m_menu->addItem(new CMenuForwarder("menu.back"));
-	m_menu->addItem(new CMenuSeparator(CMenuSeparator::LINE));
-	m_menu->addItem( new CMenuForwarder("nfs.mount", true, "", m_mountGui));
-	m_menu->addItem( new CMenuForwarder("nfs.umount", true, "", m_umountGui));
-}
-CNFSSmallMenu::~CNFSSmallMenu()
-{
-	delete m_menu;
-	delete m_mountGui;
-	delete m_umountGui;
-}
 int CNFSSmallMenu::exec( CMenuTarget* parent, string actionKey )
 {
-	return m_menu->exec(parent, actionKey);
+	CMenuWidget menu("nfsmenu.head", "network.raw");
+	CNFSMountGui mountGui;
+	CNFSUmountGui umountGui;
+	menu.addItem(new CMenuSeparator());
+	menu.addItem(new CMenuForwarder("menu.back"));
+	menu.addItem(new CMenuSeparator(CMenuSeparator::LINE));
+	menu.addItem( new CMenuForwarder("nfs.mount", true, "", &mountGui));
+	menu.addItem( new CMenuForwarder("nfs.umount", true, "", &umountGui));
+	return menu.exec(parent, actionKey);
 }
+

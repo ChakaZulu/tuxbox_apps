@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.27 2003/08/27 07:11:05 zwen Exp $
+        $Id: movieplayer.cpp,v 1.28 2003/08/27 19:30:35 zwen Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -139,10 +139,10 @@ CMoviePlayerGui::CMoviePlayerGui ()
   videofilefilter.addFilter ("ps");
   videofilefilter.addFilter ("mpg");
   filebrowser->Filter = &videofilefilter;
-  if (strlen (g_settings.network_nfs_local_dir[0]) != 0)
-    Path = g_settings.network_nfs_local_dir[0];
+  if(strlen(g_settings.network_nfs_moviedir)!=0)
+	  Path = g_settings.network_nfs_moviedir;
   else
-    Path = "/";
+	  Path = "/";
 }
 
 //------------------------------------------------------------------------

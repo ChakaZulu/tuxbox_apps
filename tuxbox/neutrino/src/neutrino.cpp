@@ -427,6 +427,9 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_password[3], configfile.getString( "network_nfs_password_4", "" ).c_str() );
 	strcpy( g_settings.network_nfs_mount_options[0], configfile.getString( "network_nfs_mount_options_1", "ro,soft,udp" ).c_str() );
 	strcpy( g_settings.network_nfs_mount_options[1], configfile.getString( "network_nfs_mount_options_2", "nolock,rsize=8192,wsize=8192" ).c_str() );
+	strcpy( g_settings.network_nfs_mp3dir, configfile.getString( "network_nfs_mp3dir", "" ).c_str() );
+	strcpy( g_settings.network_nfs_picturedir, configfile.getString( "network_nfs_picturedir", "" ).c_str() );
+	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
 
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32( "recording_type", 0 );
@@ -678,6 +681,9 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nfs_password_4", g_settings.network_nfs_password[3] );
 	configfile.setString( "network_nfs_mount_options_1", g_settings.network_nfs_mount_options[0]);
 	configfile.setString( "network_nfs_mount_options_2", g_settings.network_nfs_mount_options[1]);
+	configfile.setString( "network_nfs_mp3dir", g_settings.network_nfs_mp3dir);
+	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
+	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);
 
 	//recording (server + vcr)
 	configfile.setInt32 ( "recording_type", g_settings.recording_type );
@@ -1078,7 +1084,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, "", &parentallockSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.recording", true, "", &recordingSettings) );
-	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );	
+	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.lcd", true,"", &lcdSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
@@ -1330,8 +1337,8 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 
 	mp3PicSettings.addItem( new CMenuSeparator() );
 	mp3PicSettings.addItem( new CMenuForwarder("menu.back") );
-
-   	CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
+	
+	CMenuOptionChooser *oj = new CMenuOptionChooser("pictureviewer.scaling", &g_settings.picviewer_scaling, true );
 	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
 	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
 	oj->addOption((int)CPictureViewer::NONE, "None");
@@ -1339,11 +1346,13 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
 	mp3PicSettings.addItem( oj );
 	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
+	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.defdir", true, g_settings.network_nfs_picturedir, 
+															 this, "picturedir"));
 
 	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
 	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title");
 	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist");
-   	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
+	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
 	mp3PicSettings.addItem( oj );
   	oj = new CMenuOptionChooser("mp3player.follow", &g_settings.mp3player_follow, true );
 	oj->addOption(0, "messagebox.no");
@@ -1351,6 +1360,8 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( oj );
 	CStringInput*  mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, "", "", "0123456789 ");
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
+	mp3PicSettings.addItem( new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, 
+															 this, "mp3dir"));
 }
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
@@ -1731,6 +1742,8 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	streamingSettings.addItem( mf3);
 	streamingSettings.addItem( mf4);
 	streamingSettings.addItem( mf5);
+	streamingSettings.addItem( new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir, 
+															 this, "moviedir"));
 
 }
 
@@ -3563,6 +3576,37 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 		sprintf(g_settings.timing_filebrowser_string,	"%d", DEFAULT_TIMING_FILEBROWSER);
 		changeNotify("timing.", NULL);
 	}
+	else if(actionKey == "mp3dir")
+	{
+		parent->hide();
+		CFileBrowser b;
+		b.Dir_Mode=true;
+		string startdir=g_settings.network_nfs_mp3dir;
+		if (b.exec(startdir))
+			strcpy(g_settings.network_nfs_mp3dir, b.getSelectedFile()->Name.c_str());
+		return menu_return::RETURN_REPAINT;
+	}
+	else if(actionKey == "picturedir")
+	{
+		parent->hide();
+		CFileBrowser b;
+		b.Dir_Mode=true;
+		string startdir=g_settings.network_nfs_picturedir;
+		if (b.exec(startdir))
+			strcpy(g_settings.network_nfs_picturedir, b.getSelectedFile()->Name.c_str());
+		return menu_return::RETURN_REPAINT;
+	}
+	else if(actionKey == "moviedir")
+	{
+		parent->hide();
+		CFileBrowser b;
+		b.Dir_Mode=true;
+		string startdir=g_settings.network_nfs_moviedir;
+		if (b.exec(startdir))
+			strcpy(g_settings.network_nfs_moviedir, b.getSelectedFile()->Name.c_str());
+		return menu_return::RETURN_REPAINT;
+	}
+
 	return returnval;
 }
 

@@ -80,11 +80,9 @@ CPictureViewerGui::CPictureViewerGui()
 	picture_filter.addFilter("jpg");
 	picture_filter.addFilter("gif");
 	m_filebrowser->Filter = &picture_filter;
-   if(strlen(g_settings.network_nfs_local_dir[1])!=0)
-      Path = g_settings.network_nfs_local_dir[1];
-   else if(strlen(g_settings.network_nfs_local_dir[0])!=0)
-      Path = g_settings.network_nfs_local_dir[0];
-   else
+   if(strlen(g_settings.network_nfs_picturedir)!=0)
+      Path = g_settings.network_nfs_picturedir;
+	else
       Path = "/";
 }
 

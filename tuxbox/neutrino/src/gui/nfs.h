@@ -82,13 +82,10 @@ class CNFSUmountGui : public CMenuTarget
 class CNFSSmallMenu : public CMenuTarget
 {
 	private:
-		CMenuWidget* m_menu;
-		CNFSMountGui* m_mountGui;
-		CNFSUmountGui* m_umountGui;
 
    public:
-		CNFSSmallMenu();
-		~CNFSSmallMenu();
+		CNFSSmallMenu(){};
+		~CNFSSmallMenu(){};
 		int exec( CMenuTarget* parent, string actionKey );
 };
 

@@ -64,7 +64,7 @@ mainsettings.keybinding Tasten Einstellungen
 mainsettings.misc Diverse Einstellungen
 mainsettings.scan Einstellungen Kanalsuche
 
-mp3picsettings.general MP3 Player / Bildbetrachter
+mp3picsettings.general MP3-Player / Bildbetrachter
 
 miscsettings.head Diverse Einstellungen
 miscsettings.shutdown_real Standbymodus
@@ -696,6 +696,7 @@ mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeige
 mp3player.follow Selektiere akt. Track
 mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
+mp3player.defdir Start-Verz.
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
@@ -709,6 +710,7 @@ movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.
 movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver hergestellt werden.
+movieplayer.defdir Start-Verz.
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter an
@@ -730,7 +732,7 @@ nfs.mounttimeout Mount-Fehler: Timeout
 nfs.umount NFS/CIFS Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
 nfs.alreadymounted Verzeichnis bereits gemountet
-nfs.mount_options NFS Mount-Optionen
+nfs.mount_options Mount-Optionen
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
@@ -738,6 +740,10 @@ nfs.username CIFS Benutzername
 nfs.password CIFS Passwort
 nfs.mounterror_notsup Dateisystem-Typ wird nicht unterstütz
 nfsmenu.head NFS/CIFS Einstellungen
+
+nfs.defdirs.mp3 MP3-Player Startverz.
+nfs.defdirs.picture Bildbetrachter Startverz.
+nfs.defdirs.movie Movie-Player Startverz.
 
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,
 apids.hint_2 getrennt durch ' ' in hexadezimaler Form
@@ -750,3 +756,5 @@ pictureviewer.show Anzeigen
 pictureviewer.slideshow Diaschau
 pictureviewer.slide_time Diaschau-Anzeigedauer
 pictureviewer.scaling Skalierung
+pictureviewer.defdir Start-Verz.
+
