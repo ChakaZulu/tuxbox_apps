@@ -25,5 +25,7 @@ typedef int	(*PluginExec)( PluginParam *par );
 #define P_ID_PROXY		"proxy"			// set proxy for save into highscore
 #define P_ID_PROXY_USER	"proxy_user"	// format "user:pass"
 #define P_ID_HSCORE		"hscore"		// highscore-server (as url)
+#define P_ID_OFF_X		"off_x"			// screen-top-offset x
+#define P_ID_OFF_Y		"off_y"			// screen-top-offset y
 
 #endif
