@@ -36,6 +36,7 @@
 #include <driver/vcrcontrol.h>
 
 #include <driver/encoding.h>
+#include <driver/stream2file.h>
 
 #include <gui/widget/messagebox.h>
 
@@ -99,29 +100,43 @@ CVCRControl::~CVCRControl()
 
 void CVCRControl::setDeviceOptions(CDeviceInfo *deviceInfo)
 {
-	if(Device)
+	if (Device)
 	{
-		if(Device->deviceType == DEVICE_SERVER)
+		if (Device->getDeviceType() == DEVICE_FILE)
 		{
-			CServerDevice * device = (CServerDevice *) Device;
-			CServerDeviceInfo *serverinfo = (CServerDeviceInfo *) deviceInfo;
-			if(serverinfo->Name.length() > 0)
-				device->Name = serverinfo->Name;
-			if(serverinfo->ServerAddress.length() > 0)
-				device->ServerAddress = serverinfo->ServerAddress;
-			if(serverinfo->ServerPort > 0)
-				device->ServerPort = serverinfo->ServerPort;
+			CFileDevice * device = (CFileDevice *) Device;
+			CFileDeviceInfo * serverinfo = (CFileDeviceInfo *) deviceInfo;
+
+			if (!(serverinfo->Directory.empty()))
+				device->Directory = serverinfo->Directory;
+			device->SplitSize = serverinfo->SplitSize;
+
 			device->StopPlayBack = serverinfo->StopPlayBack;
 			device->StopSectionsd = serverinfo->StopSectionsd;
 		}
-		else if(Device->deviceType == DEVICE_VCR)
+		else if(Device->getDeviceType() == DEVICE_SERVER)
+		{
+			CServerDevice * device = (CServerDevice *) Device;
+			CServerDeviceInfo *serverinfo = (CServerDeviceInfo *) deviceInfo;
+
+			if (!(serverinfo->ServerAddress.empty()))
+				device->ServerAddress = serverinfo->ServerAddress;
+			if (serverinfo->ServerPort > 0)
+				device->ServerPort = serverinfo->ServerPort;
+
+			device->StopPlayBack = serverinfo->StopPlayBack;
+			device->StopSectionsd = serverinfo->StopSectionsd;
+		}
+		else if(Device->getDeviceType() == DEVICE_VCR)
 		{
 			CVCRDevice * device = (CVCRDevice *) Device;
 			CVCRDeviceInfo *serverinfo = (CVCRDeviceInfo *) deviceInfo;
-			if(serverinfo->Name.length() > 0)
-				device->Name = serverinfo->Name;
+
 			device->SwitchToScart = serverinfo->SwitchToScart;
 		}
+
+		if (!(deviceInfo->Name.empty()))
+			Device->Name = deviceInfo->Name;
 	}
 }
 //-------------------------------------------------------------------------
@@ -146,19 +161,26 @@ bool CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo
 		CServerDevice * device =  new CServerDevice();
 		Device = (CDevice*) device;
 		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new serverdevice: %s\n",device->Name.c_str());
-		return true;
+		printf("CVCRControl registered new server device: %s\n",device->Name.c_str());
 	}
 	else if(deviceType == DEVICE_VCR)
 	{
 		CVCRDevice * device = new CVCRDevice();
 		Device = (CDevice*) device;
 		setDeviceOptions(deviceInfo);
-		printf("CVCRControl registered new vcrdevice: %s\n",device->Name.c_str());
-		return true;
+		printf("CVCRControl registered new vcr device: %s\n",device->Name.c_str());
+	}
+	else if(deviceType == DEVICE_FILE)
+	{
+		CFileDevice * device = new CFileDevice();
+		Device = (CDevice*) device;
+		setDeviceOptions(deviceInfo);
+		printf("CVCRControl registered new file device: %s\n",device->Name.c_str());
 	}
 	else
 		return false;
+
+	return true;
 }
 
 //-------------------------------------------------------------------------
@@ -260,18 +282,17 @@ bool CVCRControl::CVCRDevice::Resume()
 }
 
 //-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Stop()
+void CVCRControl::CFileAndServerDevice::RestoreNeutrino(void)
 {
-	printf("Stop\n"); 
-	if(!g_Zapit->isPlayBackActive() && 
-		CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby)
+	if (!g_Zapit->isPlayBackActive() && 
+	    CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby)
 		g_Zapit->startPlayBack();
 	g_Sectionsd->setPauseScanning(false);
 	g_Zapit->setRecordMode( false );
 	// alten mode wieder herstellen (ausser wen zwischenzeitlich auf oder aus sb geschalten wurde)
 	if(CNeutrinoApp::getInstance()->getMode() != last_mode && 
-		CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby &&
-		last_mode != NeutrinoMessages::mode_standby)
+	   CNeutrinoApp::getInstance()->getMode() != NeutrinoMessages::mode_standby &&
+	   last_mode != NeutrinoMessages::mode_standby)
 		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
 
 /*	if(last_mode == NeutrinoMessages::mode_standby &&
@@ -280,26 +301,14 @@ bool CVCRControl::CServerDevice::Stop()
 		//Wenn vorher und jetzt standby, dann die zapit wieder auf sb schalten
 		g_Zapit->setStandby(true);
 	}*/
-	if(sendCommand(CMD_VCR_STOP))
-		return true;
-	else
-		return false;
 }
 
-//-------------------------------------------------------------------------
-bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
+void CVCRControl::CFileAndServerDevice::CutBackNeutrino(const t_channel_id channel_id, const int mode)
 {
-	printf("Record channel_id: "
-	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-	       " epg: %llx, apids %s mode %d\n",
-	       channel_id,
-	       epgid,
-	       apids.c_str(),
-	       mode);
-	if(channel_id != 0)		// wenn ein channel angegeben ist
+	if (channel_id != 0) // wenn ein channel angegeben ist
 	{
 		last_mode = CNeutrinoApp::getInstance()->getMode();
-		if(mode != last_mode && (last_mode != NeutrinoMessages::mode_standby || mode != CNeutrinoApp::getInstance()->getLastMode()))
+		if (mode != last_mode && (last_mode != NeutrinoMessages::mode_standby || mode != CNeutrinoApp::getInstance()->getLastMode()))
 		{
 			CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , mode | NeutrinoMessages::norezap );
 			// Wenn wir im Standby waren, dann brauchen wir fürs streamen nicht aufwachen...
@@ -330,13 +339,174 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 		g_Sectionsd->setPauseScanning(true);		// sectionsd stoppen
 
 	g_Zapit->setRecordMode( true );					// recordmode einschalten
+}
+
+bool CVCRControl::CFileDevice::Stop()
+{
+	printf("Stop\n");
+
+	bool return_value = ::stop_recording();
+
+	RestoreNeutrino();
+
+	return return_value;
+}
+
+bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
+{
+	printf("Record channel_id: "
+	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+	       " epg: %llx, apids %s mode %d\n",
+	       channel_id,
+	       epgid,
+	       apids.c_str(),
+	       mode);
+
+	CutBackNeutrino(channel_id, mode);
+
+#define MAXPIDS		64
+	unsigned short pids[MAXPIDS];
+	unsigned int numpids;
+
+	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
+	pids[0] = si.vdid;
+
+	if (apids.empty())
+	{
+		pids[1] = si.apid;
+		numpids = 2;
+	}
+	else
+	{
+		unsigned int index = 0;
+		unsigned int pos = 0;
+		numpids = 1;
+		
+		while(pos != std::string::npos)
+		{
+			pos = apids.find(' ', index);
+			if(pos != std::string::npos)
+			{
+				pids[numpids++] = strtol(apids.substr(index,pos-index).c_str(),NULL,16);
+				index = pos+1;
+			}
+			else
+			{
+				pids[numpids++] = strtol(apids.substr(index).c_str(),NULL,16);
+			}
+		}
+	}
+
+	char filename[512]; // UTF-8
+
+	// Create filename for recording
+	unsigned int pos = Directory.size();
+	strcpy(filename, Directory.c_str());
+	
+	if ((pos == 0) ||
+	    (filename[pos - 1] != '/'))
+	{
+		filename[pos] = '/';
+		pos++;
+		filename[pos] = '\0';
+	}
+
+	std::string ext_channel_name = g_Zapit->getChannelName(channel_id);
+	if (!(ext_channel_name.empty()))
+	{
+		strcpy(&(filename[pos]), ext_channel_name.c_str());
+		char * p_act = &(filename[pos]);
+		do {
+			p_act += strcspn(p_act, "/ \"%&-\t`'´!,:;");
+			if (*p_act)
+			{
+				*p_act++ = '_';
+			}
+		} while (*p_act);
+								
+		strcat(filename, "_");
+	}
+
+	pos = strlen(filename);
+	if (epgid != 0)
+	{
+		CSectionsdClient sdc;
+		CShortEPGData epgdata;
+		if (sdc.getEPGidShort(epgid, &epgdata))
+		{
+			if (!(epgdata.title.empty()))
+			{
+#warning fixme sectionsd should deliver data in UTF-8 format
+//				strcpy(&(filename[pos]), Latin1_to_UTF8(epgdata.title).c_str());
+// all characters with code >= 128 will be discarded anyway
+				strcpy(&(filename[pos]), epgdata.title.c_str());
+				char * p_act = &(filename[pos]);
+				do {
+					p_act +=  strcspn(p_act, "/ \"%&-\t`'~<>!,:;?^°$\\=*#@¤|");
+					if (*p_act) {
+						*p_act++ = '_';
+					}
+				} while (*p_act);
+				
+				p_act = &(filename[pos]);
+				do
+				{
+					if ((unsigned char) (*p_act) >= 128) {
+						*p_act = '_';
+					}
+				} while (*p_act++);
+				
+				strcat(filename, "_");
+			}
+		}
+	}
+
+	pos = strlen(filename);
+	time_t t = time(NULL);
+	strftime(&(filename[pos]), sizeof(filename) - pos - 1, "%Y%m%d_%H%M%S", localtime(&t));
+
+	if (!(::start_recording(filename, ((unsigned long long)SplitSize) * 1073741824ULL, numpids, pids)))
+	{
+		RestoreNeutrino();
+
+#warning FIXME: Use better error message
+		DisplayErrorMessage(g_Locale->getText("streamingserver.noconnect")); // UTF-8
+
+		return false;
+	}
+	else
+		return true;
+}
+
+
+//-------------------------------------------------------------------------
+bool CVCRControl::CServerDevice::Stop()
+{
+	printf("Stop\n");
+
+	bool return_value = sendCommand(CMD_VCR_STOP);
+
+	RestoreNeutrino();
+
+	return return_value;
+}
+
+//-------------------------------------------------------------------------
+bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, const event_id_t epgid, const std::string & apids) 
+{
+	printf("Record channel_id: "
+	       PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+	       " epg: %llx, apids %s mode %d\n",
+	       channel_id,
+	       epgid,
+	       apids.c_str(),
+	       mode);
+
+	CutBackNeutrino(channel_id, mode);
 
 	if(!sendCommand(CMD_VCR_RECORD,channel_id,epgid,apids))
 	{
-		if(!g_Zapit->isPlayBackActive())			// wenn command nicht gesendet werden konnte
-			g_Zapit->startPlayBack();				// dann alles rueckgaengig machen
-		g_Sectionsd->setPauseScanning(false);
-		g_Zapit->setRecordMode( false );
+		RestoreNeutrino();
 
 		DisplayErrorMessage(g_Locale->getText("streamingserver.noconnect")); // UTF-8
 

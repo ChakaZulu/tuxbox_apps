@@ -84,6 +84,14 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 			norezap = 0x100
 		};
 
+		enum
+			{
+				RECORDING_OFF    = 0,
+				RECORDING_SERVER = 1,
+				RECORDING_VCR    = 2,
+				RECORDING_FILE   = 3
+			};
+
 		CConfigFile			configfile;
 		CScanSettings			scanSettings;
 		int                             network_dhcp;
