@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.341 2004/01/05 22:53:38 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.342 2004/01/12 15:35:16 zwen Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -323,6 +323,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 #endif
 	{
 		bool failed = false;
+      unsigned char audioChannel = thisChannel->getAudioChannelIndex();
 
 		thisChannel->resetPids();
 
@@ -340,6 +341,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 			WARN("pmt parsing failed");
 			failed = true;
 		}
+
+      thisChannel->setAudioChannel(audioChannel);
 
 		if ((!failed) && (thisChannel->getAudioPid() == NONE) && (thisChannel->getVideoPid() == NONE)) {
 			WARN("neither audio nor video pid found");
@@ -1602,7 +1605,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.341 2004/01/05 22:53:38 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.342 2004/01/12 15:35:16 zwen Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
