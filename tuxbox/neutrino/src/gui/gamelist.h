@@ -42,6 +42,7 @@ class CGameList : public CMenuTarget
 	void paintItem(int pos);
 	void paint();
 	void paintHead();
+	void runGame(int selected );
 
 	public:
     CGameList( string Name );

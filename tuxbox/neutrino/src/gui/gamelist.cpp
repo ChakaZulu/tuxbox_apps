@@ -168,119 +168,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			}
 			else
 			{//exec the plugin :))
-				printf("PLUGINDEMO------------------------------------------------\n\n");
-				void			*handle;
-				PluginInfoProc	getInfo;
-				PluginExecProc	execPlugin;
-				char			*error;
-				SPluginInfo		info;
-				char			*p;
-				char			*np;
-				char			*argv[20];
-				void			*libhandle[20];
-				int				argc;
-				int				i;
-				char			depstring[129];
-
-				string pluginname = gamelist[selected]->filename;
-
-				handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_LAZY);
-				if (!handle)
-				{
-					fputs (dlerror(), stderr);
-					break;
-				}
-				
-				getInfo = (PluginInfoProc) dlsym(handle,(pluginname+"_getInfo").c_str());
-				if ((error = dlerror()) != NULL)
-				{
-					fputs(error, stderr);
-					break;
-				}
-
-				getInfo(&info);
-				printf("Plugin Name: %s\n", info.name);
-				printf("Plugin Desc: %s\n", info.desc);
-				dlclose(handle);
-
-/* first we need depend-libs */
-				depstring[0] = 0;
-				if (( info.pluginversion > 0 ) && strlen( info.depend ))
-				{
-					memcpy(depstring,info.depend,sizeof(info.depend));
-					depstring[128] = 0;
-				}
-
-				argc=0;
-				if ( depstring[0] )
-				{
-					p=depstring;
-					while( 1 )
-					{
-						argv[ argc ] = p;
-						argc++;
-						np = strchr(p,',');
-						if ( !np )
-							break;
-					
-						*np=0;
-						p=np+1;
-						if ( argc == 20 )	// mehr nicht !
-							break;
-					}
-				}
-				for( i=0; i<argc; i++ )
-				{
-					string libname = argv[i];
-					printf("try load shared lib : %s\n",argv[i]);
-					libhandle[i] = dlopen ( ("/lib/"+libname).c_str(), RTLD_NOW);
-					if ( !libhandle )
-					{
-						fputs (dlerror(), stderr);
-						break;
-					}
-				}
-				if ( i == argc )		// alles geladen
-				{
-					while( 1 )		// trick jump
-					{
-						handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_NOW);
-						if (!handle)
-						{
-							fputs (dlerror(), stderr);
-							break;
-						}
-						execPlugin = (PluginExecProc) dlsym(handle, (pluginname+"_exec").c_str());
-						if ((error = dlerror()) != NULL)
-						{
-							fputs(error, stderr);
-							dlclose(handle);
-							break;
-						}
-						g_RCInput->stopInput();
-						printf("try exec...\n");
-						execPlugin(g_FrameBuffer->getFileHandle(),
-										g_RCInput->getFileHandle(), -1);
-						dlclose(handle);
-						printf("exec done...\n");
-						g_RCInput->restartInput();
-						//restore framebuffer...
-						g_FrameBuffer->paletteSet();
-						memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
-						//redraw menue...
-						paintHead();
-						paint();
-					}
-				}
-/* unload shared libs */
-				for( i=0; i<argc; i++ )
-				{
-					if ( libhandle[i] )
-						dlclose(libhandle[i]);
-					else
-						break;
-				}
-
+				runGame( selected );
 			}
 		} else {
 			g_RCInput->pushbackKey (key);
@@ -326,6 +214,122 @@ void CGameList::paint()
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
 		paintItem(count);
+	}
+}
+
+void CGameList::runGame(int selected )
+{
+	printf("PLUGINDEMO------------------------------------------------\n\n");
+	void			*handle;
+	PluginInfoProc	getInfo;
+	PluginExecProc	execPlugin;
+	char			*error;
+	SPluginInfo		info;
+	char			*p;
+	char			*np;
+	char			*argv[20];
+	void			*libhandle[20];
+	int				argc;
+	int				i;
+	char			depstring[129];
+
+	string pluginname = gamelist[selected]->filename;
+
+	handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_LAZY);
+	if (!handle)
+	{
+		fputs (dlerror(), stderr);
+		return;
+	}
+	
+	getInfo = (PluginInfoProc) dlsym(handle,(pluginname+"_getInfo").c_str());
+	if ((error = dlerror()) != NULL)
+	{
+		fputs(error, stderr);
+		return;
+	}
+
+	getInfo(&info);
+	printf("Plugin Name: %s\n", info.name);
+	printf("Plugin Desc: %s\n", info.desc);
+	dlclose(handle);
+
+	/* first we need depend-libs */
+	depstring[0] = 0;
+	if (( info.pluginversion > 0 ) && strlen( info.depend ))
+	{
+		memcpy(depstring,info.depend,sizeof(info.depend));
+		depstring[128] = 0;
+	}
+
+	argc=0;
+	if ( depstring[0] )
+	{
+		p=depstring;
+		while( 1 )
+		{
+			argv[ argc ] = p;
+			argc++;
+			np = strchr(p,',');
+			if ( !np )
+				break;
+		
+			*np=0;
+			p=np+1;
+			if ( argc == 20 )	// mehr nicht !
+				break;
+		}
+	}
+	for( i=0; i<argc; i++ )
+	{
+		string libname = argv[i];
+		printf("try load shared lib : %s\n",argv[i]);
+		libhandle[i] = dlopen ( ("/lib/"+libname).c_str(), RTLD_NOW);
+		if ( !libhandle )
+		{
+			fputs (dlerror(), stderr);
+			break;
+		}
+	}
+	if ( i == argc )		// alles geladen
+	{
+		handle = dlopen ( ("/usr/lib/neutrino/games/"+pluginname+".so").c_str(), RTLD_NOW);
+		if (!handle)
+		{
+			fputs (dlerror(), stderr);
+			//should unload libs!
+			return;
+		}
+		execPlugin = (PluginExecProc) dlsym(handle, (pluginname+"_exec").c_str());
+		if ((error = dlerror()) != NULL)
+		{
+			fputs(error, stderr);
+			dlclose(handle);
+			//should unload libs!
+			return;
+		}
+		g_RCInput->stopInput();
+		printf("try exec...\n");
+		execPlugin(g_FrameBuffer->getFileHandle(),
+						g_RCInput->getFileHandle(), -1);
+		dlclose(handle);
+		printf("exec done...\n");
+		g_RCInput->restartInput();
+		//restore framebuffer...
+		g_FrameBuffer->paletteSet();
+		memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
+		//redraw menue...
+		paintHead();
+		paint();
+	}
+
+	/* unload shared libs */
+	for( i=0; i<argc; i++ )
+	{
+		if ( libhandle[i] )
+			dlclose(libhandle[i]);
+		else
+			break;
 	}
 }
 
