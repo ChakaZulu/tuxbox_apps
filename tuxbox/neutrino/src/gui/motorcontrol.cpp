@@ -22,6 +22,7 @@
 
 
 #include <stdlib.h>
+#include <unistd.h>
 #include <global.h>
 #include <neutrino.h>
 
@@ -47,7 +48,7 @@ CMotorControl::CMotorControl()
 	y = (576 - height) >> 1;
 	
 	stepSize = 1; //default: 1 step
-	stepMode = true;
+	stepMode = STEP_MODE_TIMED;
 	installerMenue = false;
 	motorPosition = 1;
 	satellitePosition = 0;
@@ -94,65 +95,53 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 					case CRCInput::RC_1:
 					case CRCInput::RC_right:
 						printf("[motorcontrol] left/1 key received... drive/Step motor west, stepMode: %d\n", stepMode);
-						if (stepMode)
-						{
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x69, 1, (-1 * stepSize), 0);
-							satellitePosition -= stepSize;
-						}
-						else
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x69, 1, 40, 0);
+						motorStepWest();
 						paintStatus();
 						break;
 					
 					case CRCInput::RC_red:
 					case CRCInput::RC_2:
 						printf("[motorcontrol] 2 key received... halt motor\n");
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x60, 0, 0, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x60, 0, 0, 0);
 						break;
 
 					case CRCInput::RC_3:
 					case CRCInput::RC_left:
 						printf("[motorcontrol] right/3 key received... drive/Step motor east, stepMode: %d\n", stepMode);
-						if (stepMode)
-						{
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x68, 1, (-1 * stepSize), 0);
-							satellitePosition += stepSize;
-						}
-						else
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x68, 1, 40, 0);
+						motorStepEast();
 						paintStatus();
 						break;
 						
 					case CRCInput::RC_4:
 						printf("[motorcontrol] 4 key received... set west (soft) limit\n");
-						g_Zapit->sendMotorCommand(0xE1, 0x30, 0x67, 0, 0, 0);
+						g_Zapit->sendMotorCommand(0xE1, 0x31, 0x67, 0, 0, 0);
 						break;
 						
 					case CRCInput::RC_5:
 						printf("[motorcontrol] 5 key received... disable (soft) limits\n");
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x63, 0, 0, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x63, 0, 0, 0);
 						break;
 					
 					case CRCInput::RC_6:
 						printf("[motorcontrol] 6 key received... set east (soft) limit\n");
-						g_Zapit->sendMotorCommand(0xE1, 0x30, 0x66, 0, 0, 0);
+						g_Zapit->sendMotorCommand(0xE1, 0x31, 0x66, 0, 0, 0);
 						break;
 					
 					case CRCInput::RC_7:
 						printf("[motorcontrol] 7 key received... goto reference position\n");
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x6B, 1, 0, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x6B, 1, 0, 0);
 						satellitePosition = 0;
 						paintStatus();
 						break;
 					
 					case CRCInput::RC_8:
 						printf("[motorcontrol] 8 key received... enable (soft) limits\n");
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x6A, 1, 0, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x6A, 1, 0, 0);
 						break;
 					
 					case CRCInput::RC_9:
 						printf("[motorcontrol] 9 key received... (re)-calculate positions\n");
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x6F, 1, 0, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x6F, 1, 0, 0);
 						break;
 					
 					case CRCInput::RC_plus:
@@ -171,8 +160,9 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 						break;
 					
 					case CRCInput::RC_blue:
-						stepMode = !stepMode;
-						if (!stepMode)
+						if (++stepMode > 2) 
+							stepMode = 0;
+						if (stepMode == STEP_MODE_OFF)
 							satellitePosition = 0;
 						printf("[motorcontrol] red key received... toggle stepmode on/off: %d\n", stepMode);
 						paintStatus();
@@ -200,39 +190,27 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 					case CRCInput::RC_1:
 					case CRCInput::RC_right:
 						printf("[motorcontrol] left/1 key received... drive/Step motor west, stepMode: %d\n", stepMode);
-						if (stepMode)
-						{
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x69, 1, (-1 * stepSize), 0);
-							satellitePosition -= stepSize;
-						}
-						else
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x69, 1, 40, 0);
+						motorStepWest();
 						paintStatus();
 						break;
 					
 					case CRCInput::RC_red:
 					case CRCInput::RC_2:
 						printf("[motorcontrol] 2 key received... halt motor\n");
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x60, 0, 0, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x60, 0, 0, 0);
 						break;
 
 					case CRCInput::RC_3:
 					case CRCInput::RC_left:
 						printf("[motorcontrol] right/3 key received... drive/Step motor east, stepMode: %d\n", stepMode);
-						if (stepMode)
-						{
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x68, 1, (-1 * stepSize), 0);
-							satellitePosition += stepSize;
-						}
-						else
-							g_Zapit->sendMotorCommand(0xE1, 0x31, 0x68, 1, 40, 0);
+						motorStepEast();
 						paintStatus();
 						break;
 					
 					case CRCInput::RC_green:
 					case CRCInput::RC_5:
 						printf("[motorcontrol] 5 key received... store present satellite number: %d\n", motorPosition);
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x6A, 1, motorPosition, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x6A, 1, motorPosition, 0);
 						break;
 					
 					case CRCInput::RC_6:
@@ -244,7 +222,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 					case CRCInput::RC_yellow:
 					case CRCInput::RC_7:
 						printf("[motorcontrol] 7 key received... goto satellite number: %d\n", motorPosition);
-						g_Zapit->sendMotorCommand(0xE0, 0x30, 0x6B, 1, motorPosition, 0);
+						g_Zapit->sendMotorCommand(0xE0, 0x31, 0x6B, 1, motorPosition, 0);
 						satellitePosition = 0;
 						paintStatus();
 						break;
@@ -271,8 +249,9 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 						break;
 					
 					case CRCInput::RC_blue:
-						stepMode = !stepMode;
-						if (!stepMode)
+						if (++stepMode > 2) 
+							stepMode = 0;
+						if (stepMode == STEP_MODE_OFF)
 							satellitePosition = 0;
 						printf("[motorcontrol] red key received... toggle stepmode on/off: %d\n", stepMode);
 						paintStatus();
@@ -293,6 +272,46 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 	hide();
 
 	return menu_return::RETURN_REPAINT;
+}
+
+void CMotorControl::motorStepWest(void)
+{
+	printf("[motorcontrol] motorStepWest\n");
+	switch(stepMode)
+	{
+		case STEP_MODE_ON:
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x69, 1, (-1 * stepSize), 0);
+			satellitePosition += stepSize;
+			break;
+		case STEP_MODE_TIMED:
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x69, 1, 40, 0);
+			usleep(stepSize * 100 * 1000);
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x60, 0, 0, 0); //halt motor
+			satellitePosition += stepSize;
+			break;
+		default:
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x69, 1, 40, 0);
+	}
+}	
+
+void CMotorControl::motorStepEast(void)
+{
+	printf("[motorcontrol] motorStepEast\n");
+	switch(stepMode)
+	{
+		case STEP_MODE_ON:
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x68, 1, (-1 * stepSize), 0);
+			satellitePosition -= stepSize;
+			break;
+		case STEP_MODE_TIMED:
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x68, 1, 40, 0);
+			usleep(stepSize * 100 * 1000);
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x60, 0, 0, 0); //halt motor
+			satellitePosition -= stepSize;
+			break;
+		default:
+			g_Zapit->sendMotorCommand(0xE0, 0x31, 0x68, 1, 40, 0);
+	}
 }
 
 void CMotorControl::hide()
@@ -329,18 +348,35 @@ void CMotorControl::paintStatus()
 	
 	buf[0] = buf2[0] = 0;
 	strcat(buf, "Movement: ");
-	if (stepMode)
-		strcat(buf, "Step Mode");
-	else
-		strcat(buf, "Drive Mode");
+	switch(stepMode)
+	{
+		case STEP_MODE_ON:
+			strcat(buf, "Step Mode");
+			break;
+		case STEP_MODE_OFF:
+			strcat(buf, "Drive Mode");
+			break;
+		case STEP_MODE_TIMED:
+			strcat(buf, "Timed Step Mode");
+			break;
+	}
 	paintLine(buf, NULL);
 	
 	buf[0] = buf2[0] = 0;
 	strcat(buf, "Step Size: ");
-	if (stepMode)
-		sprintf(buf2, "%d", stepSize);
-	else
-		strcpy(buf2, "don't care");
+	switch(stepMode)
+	{
+		case STEP_MODE_ON:
+			sprintf(buf2, "%d", stepSize);
+			break;
+		case STEP_MODE_OFF:
+			strcpy(buf2, "don't care");
+			break;
+		case STEP_MODE_TIMED:
+			sprintf(buf2, "%d", stepSize * 100);
+			strcat(buf2, " milliseconds");
+			break;
+	}
 	strcat(buf, buf2);
 	paintLine(buf, NULL);
 }
@@ -374,7 +410,7 @@ void CMotorControl::paintMenu()
 		paintLine("(9) (Re)-Calculate Positions", NULL);
 		paintLine("(+/up) Increase Motor Position", NULL);
 		paintLine("(-/down) Decrease Motor Position", NULL);
-		paintLine("(blue) Toggle Step/Drive Mode", NULL);
+		paintLine("(blue) Switch Step/Drive Mode", NULL);
 	}
 	else
 	{
@@ -390,7 +426,7 @@ void CMotorControl::paintMenu()
 		paintLine("(9) Decrease Step Size", NULL);
 		paintLine("(+/up) Increase Motor Position", NULL);
 		paintLine("(-/down) Decrease Motor Position", NULL);
-		paintLine("(blue) Toggle Step/Drive Mode", NULL);	
+		paintLine("(blue) Switch Step/Drive Mode", NULL);	
 	}
 	
 	ypos_status = ypos;

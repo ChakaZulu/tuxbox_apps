@@ -39,6 +39,9 @@
 
 #include "widget/menue.h"
 
+#define STEP_MODE_OFF 0
+#define STEP_MODE_ON 1 
+#define STEP_MODE_TIMED 2       
 
 using namespace std;
 
@@ -56,7 +59,7 @@ class CMotorControl : public CMenuTarget
 		int ypos_menue;
 		
 		int8_t stepSize;
-		bool stepMode;
+		int stepMode;
 		bool installerMenue;
 		uint8_t motorPosition;
 		int32_t satellitePosition;
@@ -65,6 +68,8 @@ class CMotorControl : public CMenuTarget
 		void paintMenu(void);
 		void paintStatus(void);
 		void paintLine(char * txt, char * icon);
+		void motorStepEast(void);
+		void motorStepWest(void);
 
 	public:
 
