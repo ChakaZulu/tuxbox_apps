@@ -52,7 +52,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.4.9"
+#define WEBXFACEVERSION "1.5.0"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -151,7 +151,7 @@ static eString getControlPlugins(void)
 	std::stringstream result, tmp;
 	struct dirent **e;
 	eString line;
-	eString pluginsDir[2] = {"/lib/tuxbox/plugins", "/var/tuxbox/plugins"};
+	eString pluginsDir[2] = {"/lib/tuxbox/plugins/", "/var/tuxbox/plugins/"};
 	result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
 	for (int j = 0; j < 2; j++)
 	{
@@ -184,7 +184,7 @@ static eString getControlPlugins(void)
 		result << "<tr><td>No plugins found.</td></tr>";
 	else
 		result << tmp.str();
-	
+
 	result << "</table>";
 	result << "<br>";
 	result << button(100, "Stop", RED, "javascript:stopPlugin()");
@@ -1497,6 +1497,78 @@ public:
 	}
 };
 
+class myService
+{
+public:
+	eString serviceRef;
+	eString serviceName;
+	myService(eString sref, eString sname)
+	{
+//		eDebug("new Service: %s - %s", sref.c_str(), sname.c_str());
+		serviceRef = sref;
+		serviceName = sname;
+	};
+	~myService() {};
+	bool operator < (const myService &a) const {return serviceName < a.serviceName;}
+};
+
+void sortServices(eString &serviceRefList, eString &serviceList)
+{
+	std::list <myService> myList;
+	std::list <myService>::iterator myIt;
+	eString serviceRef, serviceName;
+
+	eDebug("[ENIGMA_DYN] start sorting...");
+
+	myList.clear();
+	while (serviceRefList)
+	{
+		serviceRef = "";
+		serviceName = "";
+		int pos1 = serviceRefList.find("\",") + 1;
+		if (pos1 != eString::npos)
+		{
+			serviceRef = serviceRefList.left(pos1);
+			serviceRefList = serviceRefList.right(serviceRefList.length() - pos1 - 2);
+		}
+		else
+			serviceRefList = "";
+
+		int pos2 = serviceList.find("\",") + 1;
+		if (pos2 != eString::npos)
+		{
+			serviceName = serviceList.left(pos2);
+			serviceList = serviceList.right(serviceList.length() - pos2 - 2);
+		}
+		else
+			serviceList = "";
+
+		if (serviceRef)
+			serviceRef = serviceRef.mid(1, serviceRef.length() - 2);
+
+		if (serviceName)
+			serviceName = serviceName.mid(1, serviceName.length() - 2);
+
+		if (serviceRef && serviceName)
+			myList.push_back(myService(serviceRef, serviceName));
+	}
+
+	myList.sort();
+	serviceRefList = "";
+	serviceList = "";
+
+	for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+	{
+		serviceRefList += "\"" + myIt->serviceRef + "\", ";
+		serviceList += "\"" + myIt->serviceName + "\", ";
+//		eDebug("[ENIGMA_DYN] adding: %s - %s", myIt->serviceRef.c_str(), myIt->serviceName.c_str());
+	}
+
+	myList.clear();
+
+	eDebug("[ENIGMA_DYN] sorting done.");
+}
+
 class eWebNavigatorListDirectory: public Object
 {
 	eString &result;
@@ -1579,7 +1651,7 @@ class eWebNavigatorListDirectory2: public Object
 public:
 	eWebNavigatorListDirectory2(eString &result1, eString &result2, eString origpath, eString path, eServiceInterface &iface, bool addEPG): result1(result1), result2(result2), origpath(origpath), path(path), iface(iface), addEPG(addEPG)
 	{
-		eDebug("path: %s", path.c_str());
+		eDebug("[eWebNavigatorListDirectory2:] path: %s", path.c_str());
 	}
 	void addEntry(const eServiceReference &e)
 	{
@@ -1683,7 +1755,7 @@ static eString getZapContent(eString mode, eString path)
 	return result;
 }
 
-static eString getZapContent2(eString mode, eString path, int depth, bool addEPG)
+static eString getZapContent2(eString mode, eString path, int depth, bool addEPG, bool sortList)
 {
 	eString result, result1, result2;
 	eString tpath;
@@ -1718,13 +1790,15 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 			Signal1<void, const eServiceReference&> signal;
 			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 			iface->enterDirectory(current_service, signal);
-			tmp.str(result1.left(result1.length() - 1));
-			bouquetrefs = result1.left(result1.length() - 2);
-			bouquets = result2.left(result2.length() - 2);
 			eDebug("entered");
 			iface->leaveDirectory(current_service);
 			eDebug("exited");
 
+			if (sortList)
+				sortServices(result1, result2);
+			tmp.str(result1.left(result1.length() - 1));
+			bouquetrefs = result1.left(result1.length() - 2);
+			bouquets = result2.left(result2.length() - 2);
 			if (depth > 1)
 			{
 				// go thru all bouquets to get the channels
@@ -1750,15 +1824,18 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 						channelrefs += "] = new Array(";
 
 						iface->enterDirectory(current_service, signal);
+						eDebug("entered");
+						iface->leaveDirectory(current_service);
+						eDebug("exited");
+
+						if (sortList)
+							sortServices(result1, result2);
 
 						channels += result2.left(result2.length() - 2);
 						channels += ");";
 						channelrefs += result1.left(result1.length() - 2);
 						channelrefs += ");";
 
-						eDebug("entered");
-						iface->leaveDirectory(current_service);
-						eDebug("exited");
 						i++;
 					}
 				}
@@ -1804,7 +1881,7 @@ static eString getZap(eString mode, eString path)
 			result += tmp;
 
 			tmp = readFile(TEMPLATE_DIR + "rec.tmp");
-			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false));
+			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false, false));
 			if (screenWidth > 1024)
 				tmp.strReplace("#SELSIZE#", "25");
 			else
@@ -1817,7 +1894,7 @@ static eString getZap(eString mode, eString path)
 		if (zapMode == ZAPMODEROOT) // root
 		{
 			result += readFile(TEMPLATE_DIR + "rec.tmp");
-			eString tmp = getZapContent2(mode, path, 1, false);
+			eString tmp = getZapContent2(mode, path, 1, false, false);
 			if (tmp != "")
 			{
 				result.strReplace("#ZAPDATA#", tmp);
@@ -1837,7 +1914,8 @@ static eString getZap(eString mode, eString path)
 				tmp.strReplace("#SELSIZE#", "30");
 			else
 				tmp.strReplace("#SELSIZE#", "15");
-			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 2, true));
+			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS);
+			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 2, true, sortList));
 			result += tmp;
 		}
 	}
@@ -2765,9 +2843,8 @@ public:
 										genreCategory = ce->content_nibble_level_1;
 									if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
 									{
-										if (genre != "")
-											genre += ", ";
-										genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
+										if (genre == "")
+											genre = gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
 									}
 								}
 							}
@@ -3020,9 +3097,8 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 							genreCategory = ce->content_nibble_level_1;
 						if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
 						{
-							if (genre != "")
-								genre += ", ";
-							genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
+							if (genre == "")
+								genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
 						}
 					}
 				}
@@ -4300,7 +4376,7 @@ static eString showAddTimerEventWindow(eString request, eString dirpath, eString
 	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
 	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
 
-	result.strReplace("#ZAPDATA#", getZapContent2("zap", zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, false));
+	result.strReplace("#ZAPDATA#", getZapContent2("zap", zap[ZAPMODETV][ZAPSUBMODEBOUQUETS], 2, false, false));
 	if (pdaScreen == 1)
 		result = "<html><head><title>Info</title></head><body>This function is not available for PDAs.</body></html>";
 
