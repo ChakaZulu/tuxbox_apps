@@ -240,6 +240,19 @@ void setNameServer(char* ip)
 	}
 }
 
+char* mypinghost(char* host)
+	{
+	int retvalue=0;
+	retvalue = pinghost(host);
+	switch (retvalue)
+		{
+		case 1: return ("ist erreichbar (ping)");
+		case 0: return ("ist nicht erreichbar (unreachable)");
+		case -1: return ("ist nicht erreichbar (Host or protocol error)");
+		case -2: return ("ist nicht erreichbar (Socket error)");
+		}
+	}
+
 void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway, char* nameserver)
 {
 	printf("testNw IP       : %s\n", ip);
@@ -251,28 +264,16 @@ void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
 	string 	text;
 	char _text[100];
 
-	if (pinghost(ip))
-		sprintf(_text, "%s ist erreichbar (ping)\n", ip );
-	else
-		sprintf(_text, "%s ist nicht erreichbar (ping)\n", ip );
+	sprintf(_text, "%s %s\n", ip, mypinghost(ip) );
 	text= _text;
 
-	if (pinghost(gateway))
-		sprintf(_text, "Gateway %s ist erreichbar (ping)\n", gateway );
-	else
-		sprintf(_text, "Gateway %s nicht erreichbar (ping)\n", gateway );
+	sprintf(_text, "Gateway %s %s\n", gateway, mypinghost(gateway) );
 	text= text+ _text;
 
-	if (pinghost(nameserver))
-		sprintf(_text, "Nameserver %s ist erreichbar (ping)\n", gateway );
-	else
-		sprintf(_text, "Nameserver %s nicht erreichbar (ping)\n", gateway );
+	sprintf(_text, "Nameserver %s %s\n", nameserver, mypinghost(nameserver) );
 	text= text+ _text;
 
-	if (pinghost("dboxupdate.berlios.de"))
-		sprintf(_text, "dboxupdate.berlios.de ist erreichbar (ping)\n" );
-	else
-		sprintf(_text, "dboxupdate.berlios.de nicht erreichbar (ping)\n" );
+	sprintf(_text, "dboxupdate.berlios.de %s\n",mypinghost("195.37.77.138") );
 	text= text+ _text;
 
 	ShowMsg( "networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack );
