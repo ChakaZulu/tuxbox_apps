@@ -12,6 +12,9 @@
 
 void plugin_exec(PluginParam *par)
 {
+		rc=0;
+		extrc=0;
+	
 	//show versioninfo
 
 		printf("\nTuxTxt [0.1.6]\n\n");
@@ -43,6 +46,10 @@ void plugin_exec(PluginParam *par)
 			else if (!strcmp(par->id, P_ID_END_Y))
 			{
 				ey = atoi(par->val);
+			}
+			else if (!strcmp(par->id, P_ID_RCINPUT))
+			{
+				extrc = atoi(par->val);
 			}
 		}
 
@@ -304,7 +311,8 @@ void plugin_exec(PluginParam *par)
 		ioctl(dmx, DMX_STOP);
 
 		close(dmx);
-		close(rc);
+		if(!extrc)
+			close(rc);
 
 		FT_Done_FreeType(library);
 
@@ -330,13 +338,18 @@ int Init()
 		}
 
 	//open rc
-
-		if((rc = open("/dev/dbox/rc0", O_RDONLY | O_NONBLOCK)) == -1)
+		if(!extrc)
 		{
-			perror("open remotecontrol failed");
-			return 0;
+			if((rc = open("/dev/dbox/rc0", O_RDONLY | O_NONBLOCK)) == -1)
+			{
+				perror("open remotecontrol failed");
+				return 0;
+			}
 		}
-
+		else
+		{
+			rc = extrc;
+		}
 		ioctl(rc, RC_IOCTL_BCODES, 1);
 
 	//allocate pagebuffer & init all buffers

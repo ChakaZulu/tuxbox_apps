@@ -149,7 +149,7 @@ struct fb_fix_screeninfo fix_screeninfo;
 FT_Library	library;
 FT_Face		face;
 
-int dmx, rc, fb;
+int dmx, rc, fb, extrc;
 
 int PosX, PosY, StartX,	StartY, sx, sy, ex, ey;
 
