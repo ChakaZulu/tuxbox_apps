@@ -422,7 +422,7 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.61 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.62 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -4004,9 +4004,9 @@ void *CacheThread(void *arg)
 		pthread_testcancel();
 
 		/* read packet */
-		unsigned int readcnt;
+		ssize_t readcnt;
 		readcnt = read(dmx, &pes_packet, sizeof(pes_packet));
-		if (!readcnt||(readcnt!=sizeof(pes_packet))){
+		if ((readcnt==-1)||(readcnt!=sizeof(pes_packet))){
 #if DEBUG
 			printf ("TuxTxt: readerror\n");
 #endif
