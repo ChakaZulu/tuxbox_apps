@@ -635,6 +635,10 @@ bool CVCRControl::CServerDevice::Stop()
 
 	bool return_value = sendCommand(CMD_VCR_STOP);
 
+	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
+	if ((actmode == 1) && (!g_settings.misc_spts)) // actual mode is SPTS and settings require PES
+		g_Zapit->PlaybackPES(); // restore PES mode
+
 	RestoreNeutrino();
 
 	return return_value;
@@ -652,6 +656,18 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 	       mode);
 
 	CutBackNeutrino(channel_id, mode);
+
+	int repeatcount=0;
+	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
+
+	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set
+	if ((actmode != -1) && (actmode != 1) && g_settings.recording_in_spts_mode)
+	{
+		g_Zapit->PlaybackSPTS();
+		while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 1)) {
+			sleep(1); 
+		}
+	}
 
 	if(!sendCommand(CMD_VCR_RECORD,channel_id,epgid,apids))
 	{

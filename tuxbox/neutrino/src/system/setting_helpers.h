@@ -74,11 +74,9 @@ class CStreamingNotifier : public CChangeObserver
 class CRecordingNotifier : public CChangeObserver
 {
 	private:
-//		CMenuItem* toDisable[15];
-		CMenuItem* toDisable[7];
+		CMenuItem* toDisable[9];
 	public:
-		CRecordingNotifier(CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
-//		CRecordingNotifier(CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
+		CRecordingNotifier(CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
 		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 

@@ -136,10 +136,7 @@ bool CStreamingNotifier::changeNotify(const neutrino_locale_t, void *)
 
 CRecordingNotifier::CRecordingNotifier(CMenuItem* i1 , CMenuItem* i2 , CMenuItem* i3 ,
                                        CMenuItem* i4 , CMenuItem* i5 , CMenuItem* i6 ,
-                                       CMenuItem* i7 , CMenuItem* i8)// , CMenuItem* i9 ,
-//				       CMenuItem* i10, CMenuItem* i11, CMenuItem* i12,
-//				       CMenuItem* i13, CMenuItem* i14, CMenuItem* i15,
-//				       CMenuItem* i16)
+                                       CMenuItem* i7 , CMenuItem* i8 , CMenuItem* i9)
 {
 	toDisable[ 0] = i1;
 	toDisable[ 1] = i2;
@@ -149,38 +146,20 @@ CRecordingNotifier::CRecordingNotifier(CMenuItem* i1 , CMenuItem* i2 , CMenuItem
 	toDisable[ 5] = i6;
 	toDisable[ 6] = i7;
 	toDisable[ 7] = i8;
-/*
 	toDisable[ 8] = i9;
-	toDisable[ 9] = i10;
-	toDisable[10] = i11;
-	toDisable[11] = i12;
-	toDisable[12] = i13;
-	toDisable[13] = i14;
-	toDisable[14] = i15;
-	toDisable[15] = i16;
-*/
 }
 bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 {
    if ((g_settings.recording_type == CNeutrinoApp::RECORDING_OFF) ||
        (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE))
    {
-//	   for(int i = 0; i < 13; i++)
-	   for(int i = 0; i < 8; i++)
+	   for(int i = 0; i < 9; i++)
 		   toDisable[i]->setActive(false);
 
 	   if (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE)
 	   {
 		   toDisable[7]->setActive(true);
-/*		   toDisable[8]->setActive(true);
-		   toDisable[9]->setActive(true);
-		   toDisable[10]->setActive(true);
-		   toDisable[11]->setActive(true);
-		   toDisable[12]->setActive(true);
-		   toDisable[13]->setActive(true);
-		   toDisable[14]->setActive(true);
-		   toDisable[15]->setActive(true);
-*/
+		   toDisable[8]->setActive(true);
 	   }
    }
    else if (g_settings.recording_type == CNeutrinoApp::RECORDING_SERVER)
@@ -193,16 +172,7 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 	   toDisable[5]->setActive(true);
 	   toDisable[6]->setActive(false);
 	   toDisable[7]->setActive(false);
-/*
-	   toDisable[8]->setActive(false);
-	   toDisable[9]->setActive(false);
-	   toDisable[10]->setActive(false);
-	   toDisable[11]->setActive(false);
-	   toDisable[12]->setActive(false);
-	   toDisable[13]->setActive(false);
-	   toDisable[14]->setActive(false);
-	   toDisable[15]->setActive(false);
-*/
+	   toDisable[8]->setActive(true);
    }
    else if (g_settings.recording_type == CNeutrinoApp::RECORDING_VCR)
    {
@@ -215,16 +185,7 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 	   toDisable[5]->setActive(false);
 	   toDisable[6]->setActive(true);
 	   toDisable[7]->setActive(false);
-/*
 	   toDisable[8]->setActive(false);
-	   toDisable[9]->setActive(false);
-	   toDisable[10]->setActive(false);
-	   toDisable[11]->setActive(false);
-	   toDisable[12]->setActive(false);
-	   toDisable[13]->setActive(false);
-	   toDisable[14]->setActive(false);
-	   toDisable[15]->setActive(false);
-*/
    }
    
    return true;
