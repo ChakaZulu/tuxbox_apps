@@ -241,7 +241,7 @@ int eFlashOperationsHandler::readFlash(eString mtd, eString filename)
 	if ((fd1 = open(mtddev.c_str(), O_RDONLY)) < 0)
 	{
 		progressMessage1 = "Error during Operation";
-		progressMessage2 = "Could not open /dev/mtd.";
+		progressMessage2 = "Could not open: " + mtddev + " (" + eString().sprintf("%d", fd1) + ")";
 		return -1;
 	}
 
