@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.53  2003/12/29 02:07:40  mws
+ * shifting 0 bits? :)
+ *
  * Revision 1.52  2003/12/29 00:09:44  mws
  * if a byte is bitwise and'ed with 0x0111 it is impossible to get values higher than 7 :)
  *
@@ -49,7 +52,7 @@
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.52 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.53 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -3595,7 +3598,7 @@ void *CacheThread(void *arg)
 								}
 								else
 								{
-									current_subpage[magazine] = b1<<12 | b2<<8 | b3<<4 | b4;
+									current_subpage[magazine] = b3<<4 | b4;
 								}
 
 							//get country control bits
