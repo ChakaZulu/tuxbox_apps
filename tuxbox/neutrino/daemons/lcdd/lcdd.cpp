@@ -76,7 +76,7 @@ void parse_command(lcdd_msg rmsg) {
 		return;
 	}
 
-	printf("[LCDD] received cmd=%i param=%i\n", rmsg.cmd, rmsg.param);
+	//printf("[LCDD] received cmd=%i param=%i\n", rmsg.cmd, rmsg.param);
 	switch (rmsg.cmd)
 	{
 	case LC_CHANNEL:
@@ -132,9 +132,18 @@ void show_time()
 
 
 void show_signal() {
-	int sig;
+	int fd, status, signal, res;
 
-	sig = 1;
+	if((fd = open("/dev/ost/qpskfe0", O_RDONLY)) < 0)
+		return;
+	if (ioctl(fd,FE_READ_STATUS,&status)<0)
+		return;
+
+	res=ioctl(fd,FE_READ_SIGNAL_STRENGTH, &signal);
+	if (res<0) signal=0;
+
+	printf("%i\n", signal);
+	close(fd);
 }
 
 
@@ -157,8 +166,8 @@ void show_menu(lcdd_msg msg) {
 	//display.load_screen(&icon_setup);
 	// reload specified line
 	i = msg.param;
-	display.draw_fill_rect(0,17+11*i,120,29+11*i, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(1,27+11*i, 120, msg.param3,
+	display.draw_fill_rect(-1,21+14*i,120,36+14*i, CLCDDisplay::PIXEL_OFF);
+	fonts.menu->RenderString(0,33+14*i, 140, msg.param3,
 	    CLCDDisplay::PIXEL_ON);
 	display.update();
 }
@@ -170,16 +179,16 @@ void set_mode(lcdd_mode m, char *title) {
 	switch (m) {
 	case LCDM_TV:
 		display.load_screen(&icon_lcd);
+		mode = m;
 		show_volume(volume);
 		show_channelname(channelname);
 		show_time();
 		display.update();
-		mode = m;
 		break;
 	case LCDM_MENU:
 		mode = m;
 		display.load_screen(&icon_setup);
-		fonts.channelname->RenderString(1,15, 120, title,
+		fonts.menutitle->RenderString(-1,17, 140, title,
 		    CLCDDisplay::PIXEL_ON);
 		display.update();
 		break;
@@ -212,7 +221,8 @@ int main(int argc, char **argv)
 	fontRenderer = new fontRenderClass( &display );
 	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 12);
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 8);
-	fonts.menu=fontRenderer->getFont("Arial", "Regular", 10);
+	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
+	fonts.menu=fontRenderer->getFont("Arial", "Regular", 13);
 	display.setIconBasePath("/usr/lib/icons/");
 
 	if(!display.isAvailable())
