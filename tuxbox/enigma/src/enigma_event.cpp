@@ -67,12 +67,13 @@ eEventDisplay::eEventDisplay(QString service, const QList<EITEvent> &e): eWindow
 	ASSIGN(title, eLabel, "title");
 	ASSIGN(eventTime, eLabel, "time");
 	ASSIGN(eventDate, eLabel, "date");
-
+	ASSIGN(channel, eLabel, "channel");
 	
 	title->setText("");
 	long_description->setText("");
 	eventDate->setText("");
 	eventTime->setText("");
+	channel->setText("");
 
 	setList(e);
 }
@@ -134,6 +135,7 @@ void eEventDisplay::setEvent(EITEvent *event)
 
 		title->setText(_title);
 		long_description->setText(_long_description);
+		channel->setText(service);
 	} 
 	else
 	{

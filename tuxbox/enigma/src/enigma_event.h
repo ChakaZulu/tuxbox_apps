@@ -15,10 +15,7 @@ class eEventDisplay: public eWindow
 	QListIterator<EITEvent> *events;
 	QList<EITEvent> *eventlist;
 
-	eLabel *title;
-	eLabel *long_description;
-	eLabel *eventDate;
-	eLabel *eventTime;
+	eLabel *title, *long_description, *eventDate, *eventTime, *channel;
 
 protected:
 	void keyDown(int rc);

@@ -515,10 +515,16 @@ void eZapMain::setEIT(EIT *eit)
 	{
 		flags|=ENIGMA_SUBSERVICES;
 	}
-/*	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
-		ButtonGreen->show();
+	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
+	{
+		ButtonGreenEn->show();
+		ButtonGreenDis->hide();
+	}
 	else
-		ButtonGreen->hide();*/
+	{
+		ButtonGreenDis->show();
+		ButtonGreenEn->hide();
+	}
 	QList<EITEvent> dummy;
 	if (actual_eventDisplay)
 		actual_eventDisplay->setList(eit?eit->events:dummy);
