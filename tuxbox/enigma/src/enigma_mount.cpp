@@ -169,11 +169,10 @@ int eMountPoint::mount()
 		g_mntstatus1 = -1;
 		if (!isMounted())
 		{
-			if (!(access(mp.localDir.c_str(), R_OK)))
+			if (access(mp.localDir.c_str(), R_OK) == -1)
 				system(eString("mkdir " + mp.localDir).c_str());
-			if (access(mp.localDir.c_str(), R_OK))
+			if (access(mp.localDir.c_str(), R_OK) == 0)
 			{
-
 				useoptions = mp.options + mp.ownOptions;
 				if (useoptions[useoptions.length() - 1] == ',') //remove?
 					useoptions = useoptions.left(useoptions.length() - 1); //remove?
