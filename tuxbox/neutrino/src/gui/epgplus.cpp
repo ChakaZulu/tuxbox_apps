@@ -513,7 +513,7 @@ void EpgPlus::CFooter::paintEventDetails ( const std::string& description , cons
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_ITEMLARGE]->RenderString
 		( this->x + 10
 		, this->y + this->height1
-		, this->width
+		, this->width - 20
 		, description
 		, this->textColor
 		, 0
