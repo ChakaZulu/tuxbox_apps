@@ -1140,7 +1140,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
 	if (!sapi)
 		return;
-
+		
 	eService *service=eServiceInterface::getInstance()->lookupService(_serviceref);
 
 	if (_serviceref.type == eServiceReference::idDVB)
@@ -1449,17 +1449,23 @@ void eZapMain::updateVolume(int vol)
 void eZapMain::postMessage(const eZapMessage &message, int clear)
 {
 	eLocker l(messagelock);
+	
 	int c=0;
 	if (clear)
 	{
 		for (std::list<eZapMessage>::iterator i(messages.begin()); i != messages.end(); )
+		{
 			if (message.isSameType(*i))
 			{
 				if (i == messages.begin())
+				{
 					c=1;
-				i = messages.erase(i);
+					++i;
+				} else
+					i = messages.erase(i);
 			} else
 				++i;
+		}
 	}
 	if (!message.isEmpty())
 		messages.push_back(message);
@@ -1468,14 +1474,16 @@ void eZapMain::postMessage(const eZapMessage &message, int clear)
 
 void eZapMain::gotMessage(const int &c)
 {
-	pauseMessages();
 	if ((!c) && pMsg) // noch eine gueltige message vorhanden
+	{
 		return;
+	}
+	pauseMessages();
 	while (!messages.empty())
 	{
 		nextMessage();
 		if (pMsg)
-			return;
+			break;
 	}
 	startMessages();
 }
@@ -1484,6 +1492,8 @@ void eZapMain::nextMessage()
 {
 	eZapMessage msg;
 	messagelock.lock();
+	
+	messagetimeout.stop();
 
 	if (pMsg)
 	{
@@ -1494,13 +1504,13 @@ void eZapMain::nextMessage()
 		pMsg->hide();
 		delete pMsg;
 		pMsg=0;
+		messages.pop_front();
 	}
 
 	std::list<eZapMessage>::iterator i(messages.begin());
  	if (i != messages.end())
  	{
  		msg=messages.front();
-		messages.pop_front();
 		messagelock.unlock();
 		int showonly=msg.getTimeout()>=0;
 		if (!showonly)
@@ -1513,8 +1523,9 @@ void eZapMain::nextMessage()
 			pMsg->hide();
 			delete pMsg;
 			pMsg=0;
+			messages.pop_front();
 		} else if (msg.getTimeout())
-			messagetimeout.start(msg.getTimeout()*1000);
+			messagetimeout.start(msg.getTimeout()*1000, 1);
 	} else
 		messagelock.unlock();
 }
@@ -1523,8 +1534,11 @@ void eZapMain::stopMessages()
 {
 	pauseMessages();
 	if (pMsg)
+	{
 		delete pMsg;
-	pMsg=0;
+		pMsg=0;
+		messages.pop_front();
+	}
 }
 
 void eZapMain::startMessages()
