@@ -1164,7 +1164,8 @@ eServiceMP3::eServiceMP3(const char *filename, const char *descr)
 		service_name=l;
 	}
 
-	id3 = &id3tags;
+	if (service_name.right(4).upper()==".MP3")
+		id3 = &id3tags;
 }
 
 eServiceMP3::eServiceMP3(const eServiceMP3 &c)
