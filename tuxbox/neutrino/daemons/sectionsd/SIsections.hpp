@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.11 2001/09/19 15:59:03 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.12 2001/09/20 09:14:07 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.12  2001/09/20 09:14:07  fnbrd
+// Small changes.
+//
 // Revision 1.11  2001/09/19 15:59:03  fnbrd
 // virtual Destructor
 //
@@ -276,12 +279,12 @@ class SIsection {
     void dumpSmallSectionHeader(void) const {
       dumpSmallSectionHeader((struct SI_section_header *)buffer);
     }
-    int saveBufferToFile(FILE *file) {
+    int saveBufferToFile(FILE *file) const {
       if(!file)
         return 1;
       return (fwrite(buffer, bufferLength, 1, file)!=1);
     }
-    int saveBufferToFile(const char *filename) {
+    int saveBufferToFile(const char *filename) const {
       FILE *file=fopen(filename, "wb");
       if(file) {
         int rc=saveBufferToFile(file);

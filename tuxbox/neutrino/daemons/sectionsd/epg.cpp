@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.15 2001/06/11 19:22:54 fnbrd Exp $
+// $Id: epg.cpp,v 1.16 2001/09/20 09:14:07 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.16  2001/09/20 09:14:07  fnbrd
+// Small changes.
+//
 // Revision 1.15  2001/06/11 19:22:54  fnbrd
 // Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
 //
@@ -113,5 +116,12 @@ int main(int argc, char **argv)
   for_each(events.begin(), events.end(), printSIeventWithService(services));
 //  for_each(events.begin(), events.end(), printSIevent());
 //  for_each(epgset.begin(), epgset.end(), printSIsectionEIT());
+
+//  int i=0;
+//  for(SIsectionsEIT::iterator s=epgset.begin(); s!=epgset.end(); s++, i++) {
+//    char fname[20];
+//    sprintf(fname, "seit%d", i+1);
+//    s->saveBufferToFile(fname);
+//  }
   return 0;
 }
