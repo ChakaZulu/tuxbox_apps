@@ -1218,13 +1218,13 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(GenericMenuBack);
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	CMoviePlayerGui* moviePlayerGui = new CMoviePlayerGui();
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.tsplayback", true, NULL, moviePlayerGui, "tsplayback", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.pesplayback", true, NULL, moviePlayerGui, "pesplayback", true));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.bookmark", true, NULL, moviePlayerGui, "bookmarkplayback"));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_TSPLAYBACK, true, NULL, moviePlayerGui, "tsplayback", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_PESPLAYBACK, true, NULL, moviePlayerGui, "pesplayback", true));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_BOOKMARK, true, NULL, moviePlayerGui, "bookmarkplayback"));
 	moviePlayer.addItem(GenericMenuSeparator);
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.fileplayback", true, NULL, moviePlayerGui, "fileplayback", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.dvdplayback", true, NULL, moviePlayerGui, "dvdplayback", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	moviePlayer.addItem(new CMenuForwarder("movieplayer.vcdplayback", true, NULL, moviePlayerGui, "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_FILEPLAYBACK, true, NULL, moviePlayerGui, "fileplayback", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_DVDPLAYBACK, true, NULL, moviePlayerGui, "dvdplayback", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_VCDPLAYBACK, true, NULL, moviePlayerGui, "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
 	moviePlayer.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &streamingSettings, NULL, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 	moviePlayer.addItem(new CMenuForwarder("nfsmenu.head", true, NULL, new CNFSSmallMenu(), NULL, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
@@ -1884,7 +1884,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf4 = new CMenuForwarder("streamingmenu.streaming_videorate", (g_settings.streaming_type==1), g_settings.streaming_videorate,streamingSettings_videorate);
 	CMenuForwarder* mf5 = new CMenuForwarder("streamingmenu.streaming_audiorate", (g_settings.streaming_type==1), g_settings.streaming_audiorate,streamingSettings_audiorate);
 	CMenuForwarder* mf6 = new CMenuForwarder("streamingmenu.streaming_server_startdir", (g_settings.streaming_type==1), g_settings.streaming_server_startdir,startdirInput);
-	CMenuForwarder* mf7 = new CMenuForwarder("movieplayer.defdir", true, g_settings.network_nfs_moviedir,this,"moviedir");
+	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
  
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_transcode_audio", &g_settings.streaming_transcode_audio, true);
 	oj1->addOption(0, "messagebox.no");
@@ -2662,7 +2662,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget mp3picSettings("mp3picsettings.general", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget scanSettings("servicemenu.scants", NEUTRINO_ICON_SETTINGS);
 	CMenuWidget service("servicemenu.head", NEUTRINO_ICON_SETTINGS);
-	CMenuWidget moviePlayer("movieplayer.head", "streaming.raw");
+	CMenuWidget moviePlayer(LOCALE_MOVIEPLAYER_HEAD, "streaming.raw");
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,

@@ -111,6 +111,17 @@ void CHintBox::paint(void)
 {
 	int ypos;
 
+	if (window != NULL)
+	{
+		/*
+		 * do not paint stuff twice:
+		 * => thread safety needed by movieplayer.cpp:
+		 *    one thread calls our paint method, the other one our hide method
+		 * => no memory leaks
+		 */
+		return;
+	}
+
 	window = new CFBWindow((((g_settings.screen_EndX- g_settings.screen_StartX) - width ) >> 1) + g_settings.screen_StartX,
 			       (((g_settings.screen_EndY- g_settings.screen_StartY) - height) >> 2) + g_settings.screen_StartY,
 			       width + borderwidth,

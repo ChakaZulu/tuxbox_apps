@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.90 2004/05/15 21:35:18 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.91 2004/05/20 07:38:34 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -354,7 +354,7 @@ bool VlcSendPlaylist(char* mrl)
 	printf ("[movieplayer.cpp] HTTP Result (emptyurl): %d\n", httpres);
 	if (httpres != 0)
 	{
-		DisplayErrorMessage(g_Locale->getText("movieplayer.nostreamingserver")); // UTF-8
+		DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER)); // UTF-8
 		playstate = CMoviePlayerGui::STOPPED;
 		pthread_exit (NULL);
 		// Assume safely that all succeeding HTTP requests are successful
@@ -515,7 +515,7 @@ ReceiveStreamThread (void *mrl)
 
 	if (!VlcSendPlaylist((char*)mrl))
 	{
-		DisplayErrorMessage(g_Locale->getText("movieplayer.nostreamingserver")); // UTF-8
+		DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER)); // UTF-8
 		playstate = CMoviePlayerGui::STOPPED;
 		pthread_exit (NULL);
 		// Assume safely that all succeeding HTTP requests are successful
@@ -756,7 +756,7 @@ PlayStreamThread (void *mrl)
 	ringbuf = ringbuffer_create (RINGBUFFERSIZE);
 	printf ("[movieplayer.cpp] ringbuffer created\n");
 
-	bufferingBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.buffering")); // UTF-8
+	bufferingBox = new CHintBox("messagebox.info", g_Locale->getText(LOCALE_MOVIEPLAYER_BUFFERING)); // UTF-8
 
 	std::string baseurl = "http://";
 	baseurl += g_settings.streaming_server_ip;
@@ -908,16 +908,28 @@ PlayStreamThread (void *mrl)
 				printf ("[movieplayer.cpp] Resyncing\n");
 				ioctl (dmxa, DMX_STOP);
 				printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
-				bufferfilled=false;
-				bufferingBox->paint ();
+				/*
+				 * always call bufferingBox->paint() before setting bufferfilled to false 
+				 * to ensure that it is painted completely before bufferingBox->hide()
+				 * might be called by ReceiveStreamThread (otherwise the hintbox's window
+				 * variable is deleted while being used)
+				 */
+				bufferingBox->paint();
+				bufferfilled = false;
 				ioctl (dmxa, DMX_START);
 				playstate = CMoviePlayerGui::PLAY;
 				break;
 			case CMoviePlayerGui::PLAY:
 				if (len < MINREADSIZE)
 				{
-					bufferingBox->paint ();
-					printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
+					printf("[movieplayer.cpp] Buffering approx. 3 seconds\n");
+					/*
+					 * always call bufferingBox->paint() before setting bufferfilled to false 
+					 * to ensure that it is painted completely before bufferingBox->hide()
+					 * might be called by ReceiveStreamThread (otherwise the hintbox's window
+					 * variable is deleted while being used)
+					 */
+					bufferingBox->paint();
 					bufferfilled = false;
 			
 				}
@@ -1645,7 +1657,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 				pthread_join (rct, NULL);
 			}
 			//TODO: Add Dialog (Remove Dialog later)
-			hintBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.pleasewait")); // UTF-8
+			hintBox = new CHintBox("messagebox.info", g_Locale->getText(LOCALE_MOVIEPLAYER_PLEASEWAIT)); // UTF-8
 			hintBox->paint();
 			buffer_time=0;
 			if (pthread_create (&rct, 0, PlayStreamThread, (void *) mrl) != 0)
@@ -1688,13 +1700,13 @@ CMoviePlayerGui::PlayStream (int streamtype)
 					bookmarkmanager->createBookmark(filename, stream_time_ss.str());
     			}
     			else {
-        			DisplayErrorMessage(g_Locale->getText("movieplayer.wrongvlcversion")); // UTF-8
+        			DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_WRONGVLCVERSION)); // UTF-8
     			}
 			}
 			else {
     			//popup error message
     			printf("too many bookmarks\n");
-    			DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
+    			DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 			}
 		}
 		
@@ -1739,7 +1751,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			char tmp[10+1];
 			bool cancel;
 
-			CTimeInput ti("movieplayer.goto", tmp, "movieplayer.goto.h1", "movieplayer.goto.h2", NULL, &cancel);
+			CTimeInput ti(LOCALE_MOVIEPLAYER_GOTO, tmp, LOCALE_MOVIEPLAYER_GOTO_H1, LOCALE_MOVIEPLAYER_GOTO_H2, NULL, &cancel);
 			ti.exec(NULL, "");
 			if(!cancel) // no cancel
 			{
@@ -1781,8 +1793,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
  		}
 		else if (msg == CRCInput::RC_help)
  		{
-			std::string fullhelptext = g_Locale->getText("movieplayer.vlchelp");
-			fullhelptext += "\nVersion: $Revision: 1.90 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP);
+			fullhelptext += "\nVersion: $Revision: 1.91 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1976,7 +1988,7 @@ CMoviePlayerGui::PlayFile (void)
 			else
 			{
 				printf("too many bookmarks\n");
-				DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
+				DisplayErrorMessage(g_Locale->getText(LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS)); // UTF-8
 			}
 		}
 		else if (msg == CRCInput::RC_green)
@@ -1985,8 +1997,8 @@ CMoviePlayerGui::PlayFile (void)
         }
  		else if (msg == CRCInput::RC_help)
  		{
-			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.90 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP);
+			fullhelptext += "\nVersion: $Revision: 1.91 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

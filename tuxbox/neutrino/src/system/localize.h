@@ -188,7 +188,7 @@ class CLocaleManager
 #define LOCALE_BOUQUETEDITOR_SWITCHMODE            "bouqueteditor.switchmode"
 #define LOCALE_BOUQUETLIST_HEAD                    "bouquetlist.head"
 #define LOCALE_CABLESETUP_PROVIDER                 "cablesetup.provider"
-#define LOCALE_CAM_WRONG                           "cam.wrong"                          /* FIXME: unused */
+//#define LOCALE_CAM_WRONG                           "cam.wrong"                                  /* FIXME: unused */
 #define LOCALE_CHANNELLIST_HEAD                    "channellist.head"
 #define LOCALE_CHANNELLIST_NONEFOUND               "channellist.nonefound"
 #define LOCALE_CHANNELLIST_SINCE                   "channellist.since"
@@ -253,6 +253,38 @@ class CLocaleManager
 #define LOCALE_FAVORITES_FINALHINT                 "favorites.finalhint"
 #define LOCALE_FAVORITES_MENUEADD                  "favorites.menueadd"
 #define LOCALE_FAVORITES_NOBOUQUETS                "favorites.nobouquets"
+
+
+#define LOCALE_MOVIEPLAYER_BOOKMARK                "movieplayer.bookmark"
+#define LOCALE_MOVIEPLAYER_BOOKMARKNAME            "movieplayer.bookmarkname"
+#define LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT1      "movieplayer.bookmarkname_hint1"
+#define LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT2      "movieplayer.bookmarkname_hint2"
+#define LOCALE_MOVIEPLAYER_BUFFERING               "movieplayer.buffering"
+//#define LOCALE_MOVIEPLAYER_CHOOSEPES               "movieplayer.choosepes"                      /* FIXME: unused */
+//#define LOCALE_MOVIEPLAYER_CHOOSEPS                "movieplayer.chooseps"                       /* FIXME: unused */
+//#define LOCALE_MOVIEPLAYER_CHOOSESTREAM            "movieplayer.choosestream"                   /* FIXME: unused */
+//#define LOCALE_MOVIEPLAYER_CHOOSESTREAMDVD         "movieplayer.choosestreamdvd"                /* FIXME: unused */
+//#define LOCALE_MOVIEPLAYER_CHOOSESTREAMFILE        "movieplayer.choosestreamfile"               /* FIXME: unused */
+//#define LOCALE_MOVIEPLAYER_CHOOSESTREAMSVCD        "movieplayer.choosestreamsvcd"               /* FIXME: unused */
+//#define LOCALE_MOVIEPLAYER_CHOOSETS                "movieplayer.choosets"                       /* FIXME: unused */
+#define LOCALE_MOVIEPLAYER_DEFDIR                  "movieplayer.defdir"
+#define LOCALE_MOVIEPLAYER_DVDPLAYBACK             "movieplayer.dvdplayback"
+#define LOCALE_MOVIEPLAYER_FILEPLAYBACK            "movieplayer.fileplayback"
+#define LOCALE_MOVIEPLAYER_GOTO                    "movieplayer.goto"
+#define LOCALE_MOVIEPLAYER_GOTO_H1                 "movieplayer.goto.h1"
+#define LOCALE_MOVIEPLAYER_GOTO_H2                 "movieplayer.goto.h2"
+#define LOCALE_MOVIEPLAYER_HEAD                    "movieplayer.head"
+//#define LOCALE_MOVIEPLAYER_NAME                    "movieplayer.name"                           /* FIXME: unused */
+#define LOCALE_MOVIEPLAYER_NOSTREAMINGSERVER       "movieplayer.nostreamingserver"
+#define LOCALE_MOVIEPLAYER_PESPLAYBACK             "movieplayer.pesplayback"
+//#define LOCALE_MOVIEPLAYER_PLAY                    "movieplayer.play"                           /* FIXME: unused */
+#define LOCALE_MOVIEPLAYER_PLEASEWAIT              "movieplayer.pleasewait"
+#define LOCALE_MOVIEPLAYER_TOOMANYBOOKMARKS        "movieplayer.toomanybookmarks"
+#define LOCALE_MOVIEPLAYER_TSHELP                  "movieplayer.tshelp"
+#define LOCALE_MOVIEPLAYER_TSPLAYBACK              "movieplayer.tsplayback"
+#define LOCALE_MOVIEPLAYER_VCDPLAYBACK             "movieplayer.vcdplayback"
+#define LOCALE_MOVIEPLAYER_VLCHELP                 "movieplayer.vlchelp"
+#define LOCALE_MOVIEPLAYER_WRONGVLCVERSION         "movieplayer.wrongvlcversion"
 
 
 #define LOCALE_TIMING_CHANLIST                     "timing.chanlist"

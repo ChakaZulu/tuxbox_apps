@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.11 2004/05/17 09:36:43 thegoodguy Exp $
+  $Id: bookmarkmanager.cpp,v 1.12 2004/05/20 07:38:34 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -82,7 +82,7 @@ inline int CBookmarkManager::createBookmark (const std::string & name, const std
 
 int CBookmarkManager::createBookmark (const std::string & url, const std::string & time) {
     char bookmarkname[26]="";
-    CStringInputSMS bookmarkname_input("movieplayer.bookmarkname", bookmarkname, 25, "movieplayer.bookmarkname_hint1", "movieplayer.bookmarkname_hint1", "abcdefghijklmnopqrstuvwxyz0123456789-_");
+    CStringInputSMS bookmarkname_input(LOCALE_MOVIEPLAYER_BOOKMARKNAME, bookmarkname, 25, LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT1, LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-_");
     bookmarkname_input.exec(NULL, "");
     // TODO: return -1 if no name was entered
     return createBookmark(std::string(bookmarkname), url, time);
@@ -105,7 +105,7 @@ void CBookmarkManager::renameBookmark (unsigned int index) {
 	CBookmark & theBookmark = bookmarks[index];
 	char bookmarkname[26];
 	strncpy (bookmarkname, theBookmark.getName(), 25);
-	CStringInputSMS bookmarkname_input("movieplayer.bookmarkname", bookmarkname, 25, "movieplayer.bookmarkname_hint1", "movieplayer.bookmarkname_hint1", "abcdefghijklmnopqrstuvwxyz0123456789-_");
+	CStringInputSMS bookmarkname_input(LOCALE_MOVIEPLAYER_BOOKMARKNAME, bookmarkname, 25, LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT1, LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT2, "abcdefghijklmnopqrstuvwxyz0123456789-_");
 	bookmarkname_input.exec(NULL, "");
 
 	if (strcmp(theBookmark.getName(), bookmarkname) != 0)
