@@ -288,6 +288,7 @@ void eDVRPlayerThread::readMore(int what)
 
 eDVRPlayerThread::~eDVRPlayerThread()
 {
+//	messages.send(eDVRPlayerThreadMessage(eDVRPlayerThreadMessage::setSpeed, 0));
 	messages.send(eDVRPlayerThreadMessage(eDVRPlayerThreadMessage::exit));
 	kill(); 			// join the thread
 
@@ -371,7 +372,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		speed=message.parm;
 		if (message.parm == 0)
 		{
-			if ((state==stateBuffering) || (state==stateBufferFull) || (statePlaying))
+			if ((state==stateBuffering) || (state==stateBufferFull) || (state==statePlaying))
 			{
 				inputsn->stop();
 				outputsn->stop();
