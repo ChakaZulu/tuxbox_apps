@@ -1,7 +1,6 @@
 INCLUDES = \
 	-I$(top_srcdir)/src \
-	-I$(top_srcdir)/lib \
-	-I/cdkroot/include
+	-I$(top_srcdir)/lib
  
 noinst_LIBRARIES = libneutrino_pictureviewer.a
 

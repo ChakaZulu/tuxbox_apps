@@ -1,19 +1,14 @@
-#include "config.h"
 #include "pictureviewer.h"
+#include "config.h"
 #include "fb_display.h"
 #include "driver/framebuffer.h"
 
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <termios.h>
-#include <sys/time.h>
 #include <sys/types.h>
-#include <getopt.h>
 
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#define max(a,b) ((a) > (b) ? (a) : (b))
-
+/* resize.cpp */
 extern unsigned char * simple_resize(unsigned char * orgin,int ox,int oy,int dx,int dy);
 extern unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,int dx,int dy);
 
