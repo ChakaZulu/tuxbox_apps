@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.21 2001/11/03 22:44:41 McClean Exp $
+// $Id: epgview.cpp,v 1.22 2001/11/05 17:13:26 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.22  2001/11/05 17:13:26  field
+// wiederholungen...?
+//
 // Revision 1.21  2001/11/03 22:44:41  McClean
 // radiomode paint bug fixed
 //
@@ -431,6 +434,11 @@ void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned 
             dp = ocopyStringto( dp, epgData.title, sizeof(epgData.title) );
             dp = ocopyStringto( dp, epgData.info1, sizeof(epgData.info1) );
 			dp = ocopyStringto( dp, epgData.info2, sizeof(epgData.info2) );
+
+            /* char whs[256];
+            dp = ocopyStringto( dp, whs, sizeof(whs) );
+            printf("WH: %s\n", whs); */
+
             sscanf(dp, "%08lx\xFF%08x\xFF", &epg_times.startzeit, &epg_times.dauer );
             current_zeit= epg_times.startzeit;
 

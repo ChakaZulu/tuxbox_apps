@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.45 2001/11/05 16:04:25 field Exp $
+// $Id: infoviewer.cpp,v 1.46 2001/11/05 17:13:26 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.46  2001/11/05 17:13:26  field
+// wiederholungen...?
+//
 // Revision 1.45  2001/11/05 16:04:25  field
 // nvods/subchannels ver"c++"ed
 //
@@ -589,7 +592,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 
                     gettimeofday(&now, NULL);
                     TIMEVAL_TO_TIMESPEC(&now, &abs_wait);
-                    abs_wait.tv_sec += 1;
+                    abs_wait.tv_sec += 2;
 
                     pthread_mutex_trylock( &InfoViewer->epg_mutex );
                     pthread_cond_timedwait( &InfoViewer->epg_cond, &InfoViewer->epg_mutex, &abs_wait );

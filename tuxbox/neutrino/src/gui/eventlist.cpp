@@ -1,11 +1,14 @@
 //
-// $Id: eventlist.cpp,v 1.23 2001/11/03 15:43:17 field Exp $
+// $Id: eventlist.cpp,v 1.24 2001/11/05 17:13:26 field Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.24  2001/11/05 17:13:26  field
+// wiederholungen...?
+//
 // Revision 1.23  2001/11/03 15:43:17  field
 // Perspektiven
 //
@@ -192,7 +195,7 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
             evt->epg.startzeit = mktime(&tmZeit);
 //            printf("Time: %02d.%02d %02d:%02d %lx\n", tmZeit.tm_mday, tmZeit.tm_mon+ 1, tmZeit.tm_hour, tmZeit.tm_min, evt->startzeit);
 
-            if ( (evtTime- aktTime) < 0 )
+            if ( (evtTime- aktTime) <= 0 )
                 current_event++;
 
             evt->epg.description=std::string(ename);
