@@ -1154,26 +1154,28 @@ void eTransponderList::readLNBData()
 		{
 			eString tmp = tmpStr;
 			free(tmpStr);
- 			if (!(tmp.length() % 7))
- 			{
-				for (unsigned int i=0; i < tmp.length(); i+=7)
-				{
-					eString cur = tmp.mid(i);
-	 				int x = atoi( cur.mid(0,4).c_str() );
-	 				int y = atoi( cur.mid(4,3).c_str() ); 
-	//				eDebug("satpos = %d, pos=%d", y,x);
-					lnb.getDiSEqC().RotorTable[x] = y;
-				}
-			} else
+			unsigned int len=tmp.length(), pos=0, cnt=0;
+			while ( (pos=tmp.find('-',pos)) != eString::npos )
 			{
-				for (unsigned int i=0; i < tmp.length(); i+=8)
-				{
-					eString cur = tmp.mid(i);
-	 				int x = atoi( cur.mid(0,5).c_str() );
-	 				int y = atoi( cur.mid(5,3).c_str() ); 
-	//				eDebug("satpos = %d, pos=%d", y,x);
-					lnb.getDiSEqC().RotorTable[x] = y;
-				}
+				++cnt;
+				++pos;
+			}
+			pos=0;
+			while ( (pos=tmp.find('+',pos)) != eString::npos )
+			{
+				++cnt;
+				++pos;
+			}
+			int entrylen = len/cnt;
+//			eDebug("%d pos entrys in registry... so entry len is %d", cnt, len/cnt );
+
+			for (unsigned int i=0; i < len; i += entrylen )
+			{
+				eString cur = tmp.mid(i);
+				int x = atoi( cur.mid(0,entrylen-3).c_str() );
+				int y = atoi( cur.mid(entrylen-3,3).c_str() );
+//				eDebug("satpos = %d, pos=%d", y,x);
+				lnb.getDiSEqC().RotorTable[x] = y;
 			}
 		}
                                                                    
