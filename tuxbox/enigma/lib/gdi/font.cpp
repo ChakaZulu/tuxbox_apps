@@ -62,6 +62,7 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
 		printf(" failed: %s\n", strerror(error));
 		return error;
 	}
+	FT_Select_Charmap(*aface, ft_encoding_unicode);
 	return 0;
 }																																																																
 
@@ -593,4 +594,3 @@ eSize eTextPara::getExtend()
 }
 
 eAutoInitP0<fontRenderClass> init_fontRenderClass(1, "Font Render Class");
-  
