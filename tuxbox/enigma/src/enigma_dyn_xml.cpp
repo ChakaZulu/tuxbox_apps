@@ -569,6 +569,165 @@ static eString vlc(eString request, eString dirpath, eString opt, eHTTPConnectio
 	return "http://" + getIP() + ":31339/0," + pmt + "," + vpid  + "," + apid;
 }
 
+class treeNode
+{
+public:
+	eString serviceNode;
+	eString serviceName;
+	bool isDirectory;
+	eServiceReference serviceReference;
+	treeNode(bool isdir, eString sname, eString snode, eServiceReference ref)
+	{
+		serviceName = sname;
+		serviceNode = snode;
+		isDirectory = isdir;
+		serviceReference = ref;
+	};
+	~treeNode() {};
+	bool operator < (const treeNode &a) const {return serviceName < a.serviceName;}
+};
+
+eString genNode(int submode, std::list <treeNode>::iterator myIt)
+{
+	eString result = myIt->serviceNode + "\n";
+	return result;
+}
+
+eString getTag(int id)
+{
+	eString tag;
+	switch(id)
+	{
+		case 2: tag = "satellite"; break;
+		case 3: tag = "provider"; break;
+		case 4: tag = "bouquet"; break;
+		default: tag = "unknown"; break;
+	}
+	return tag;
+}
+
+eString genNodeHeader(int submode, std::list <treeNode>::iterator myIt)
+{
+	eString result = "<" + getTag(submode) + "s name=\"" + myIt->serviceName + "\">\n";
+	return result;
+}
+
+eString genNodeFooter(int submode, std::list <treeNode>::iterator myIt)
+{
+	eString result = "</" + getTag(submode) + "s>\n";
+	return result;
+}
+
+struct listChannels: public Object
+{
+	std::list <treeNode> myList;
+	eServiceInterface *iface;
+	int submode;
+	eString& result;
+	bool sort;
+	bool addEPG;
+
+	listChannels(int submode, const eServiceReference &service, eString &result, bool sort, bool addEPG)
+		:myList(myList), submode(submode), iface(eServiceInterface::getInstance()), result(result), sort(sort), addEPG(addEPG)
+	{
+		std::list <treeNode>::iterator myIt;
+		Signal1<void, const eServiceReference&> cbSignal;
+		CONNECT(cbSignal, listChannels::addTreeNode);
+		iface->enterDirectory(service, cbSignal);
+		iface->leaveDirectory(service);
+//		result += genNodes(submode, sort, myList);
+		if (sort)
+			myList.sort();
+		for (myIt = myList.begin(); myIt != myList.end(); ++myIt)
+		{
+			if (myIt->isDirectory)
+			{
+				result += genNodeHeader(submode, myIt);
+				listChannels(submode, myIt->serviceReference, result, sort, addEPG);
+				result += genNodeFooter(submode, myIt);
+			}
+			else
+				result += genNode(submode, myIt);
+		}
+	}
+
+	void addTreeNode(const eServiceReference& ref)
+	{
+		eString serviceReference, serviceName, serviceDescription, serviceNode, orbitalPosition;
+
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
+
+		eService *service = iface ? iface->addRef(ref) : 0;
+
+		serviceReference = ref.toString();
+		if (ref.descr) serviceName = filter_string(ref.descr);
+		else
+		{
+			if (service)
+			{
+				serviceName = filter_string(service->service_name);
+				iface->removeRef(ref);
+			}
+			else
+				serviceName = "unnamed service";
+		}
+
+		if (ref.type == eServiceReference::idDVB && !(ref.flags & eServiceReference::isDirectory))
+		{
+			const eServiceReferenceDVB& dvb_ref = (const eServiceReferenceDVB&)ref;
+			eTransponder *tp = eTransponderList::getInstance()->searchTS(
+				dvb_ref.getDVBNamespace(),
+				dvb_ref.getTransportStreamID(),
+				dvb_ref.getOriginalNetworkID());
+			if (tp && tp->satellite.isValid())
+				orbitalPosition = eString().setNum(tp->satellite.orbital_position);
+			else
+				orbitalPosition = "0";
+		}
+
+		eString epg;
+		if (addEPG && epg)
+			serviceDescription = serviceName + " - " + epg;
+		else
+			serviceDescription = serviceName;
+
+//		serviceDescription.strReplace("'", "\\\'");
+		serviceNode = "<service reference=\"" + serviceReference + "\" orbitalposition=\"" + orbitalPosition + "\">" + serviceDescription + "</service>";
+		myList.push_back(treeNode(ref.flags & eServiceReference::isDirectory, serviceName, serviceNode, ref));
+	}
+};
+
+static eString getServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/xml; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
+
+	eString result = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
+
+	std::map<eString,eString> opts=getRequestOptions(opt, '&');
+
+	eString mode = "0";
+	if (opts["mode"])
+		mode = opts["mode"];
+
+	eString submode = "2";
+	if (opts["submode"])
+		submode = opts["submode"];
+
+	eString sref = zap[atoi(mode.c_str())][atoi(submode.c_str())];
+	eServiceReference ref(sref);
+
+	int subm = atoi(submode.c_str());
+
+	result += "<" + getTag(subm) + ">\n";
+	listChannels t(subm, ref, result, false, false);
+	result += "</" + getTag(subm) + ">\n";
+
+	return result;
+}
+
 void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/xml", doStatusXML, lockWeb);
@@ -579,5 +738,6 @@ void ezapXMLInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 	dyn_resolver->addDyn("GET", "/xml/audio", getAudioChannelsXML, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/mplayer.mply", mplayer, lockWeb);
 	dyn_resolver->addDyn("GET", "/xml/vlc.pls", vlc, lockWeb);
+	dyn_resolver->addDyn("GET", "/xml/getServices", getServices, lockWeb);
 }
 #endif
