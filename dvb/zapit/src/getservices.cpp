@@ -27,6 +27,7 @@ chanptr cur_c;
 chanptr cur_c_num;
 int serv_mode;
 uint curr_diseqc;
+uint count = 0;
 
 void addlistnum(chanptr item)
 {
@@ -106,6 +107,7 @@ void addlistnum(chanptr item)
 		  		if (top_num->next != NULL)
 		  			top_num->next->prev = item;
 		  		item->prev = top_num;
+		  		top_num->next = item;
 		  	}														
 			else if (cur_c_num->next != NULL && cur_c_num->prev != NULL)
 			{
@@ -133,6 +135,7 @@ void addlistnum(chanptr item)
 }
 void addlist(chanptr item)
 {
+	//printf("Inserting %s\n", item->name);
 	if (top != NULL) {
 		//cur_c = top;
 		if (strcasecmp(cur_c->name,item->name) < 0) 
@@ -156,6 +159,7 @@ void addlist(chanptr item)
 					
 					top->next = item;
 					item->prev = top;
+					cur_c = top;
 					//printf("Inserted %d %s at top\n", item->chan_nr, item->name);
 				}
 				else if (cur_c->next != NULL && cur_c->prev != NULL)
@@ -209,6 +213,8 @@ void addlist(chanptr item)
 		  		if (top->next != NULL)
 		  			top->next->prev = item;
 		  		item->prev = top;
+		  		top->next = item;
+		  		//printf("Inserted %d %s behind top\n", item->chan_nr, item->name);
 		  	}														
 			else if (cur_c->next != NULL && cur_c->prev != NULL)
 			{
@@ -216,12 +222,14 @@ void addlist(chanptr item)
 				item->next = cur_c->next;
 				cur_c->next->prev = item;
 				cur_c->next = item;
+				//printf("Inserted %d %s in the middle\n", item->chan_nr, item->name);
 			}
 			else
 			{
 				item->prev = cur_c;
 				item->next = NULL;
 				cur_c->next = item;
+				//printf("Inserted %d %s at tail\n", item->chan_nr, item->name);
 				//printf("inserting last item\n");
 				}
 		}	
@@ -301,6 +309,7 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	    //printf("%d Kanalname: %s, Pmt: %04x\n",tmp_chan->chan_nr, tmp_chan->name, tmp_chan->pmt);
 	    //cur_c->next = tmp_chan;
 	    //cur_c = tmp_chan;
+	    ++count;
 	    if (tmp_chan->chan_nr > 0)
 	    	addlistnum(tmp_chan);
 	    else
@@ -432,7 +441,7 @@ chanptr LoadServices(int mode)
   
   fclose(in);
   //cur_c = top->next;
-  printf("Concatenating lists\n");
+  //printf("Concatenating lists\n");
   if (top_num != NULL)
   {
   	cur_c_num = top_num;
@@ -451,7 +460,7 @@ chanptr LoadServices(int mode)
   
   if (top != NULL)
   {
-  	printf("Correcting numbers\n");
+  	//printf("Correcting numbers\n");
   	top->prev = NULL;
   	correct_numbers();
   }
@@ -468,7 +477,8 @@ chanptr LoadServices(int mode)
   	top->name = "No channels. Don´t zap";
   }
 
-  printf("Returning channels\n");
+  //printf("Returning channels\n");
+  printf("%d channels added\nPlease report to faralla@gmx.de if you see less in your neutrino-channellist\n",count);
   return top;
 }
 
