@@ -142,6 +142,8 @@ bool remove_modules(const CNFSMountGui::FSType fstype)
 	{
 		return ((system("rmmod nfs") == 0) && (system("rmmod lockd") == 0) && (system("rmmod sunrpc") == 0));
 	}
+	else if (fstype == CNFSMountGui::CIFS)
+		return (system("rmmod cifs") == 0);
 	return false;
 }
 
