@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<title>Write Flash Partition</title>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+		<script>
+			function selectFile()
+			{
+				var i = document.fileselector.files.selectedIndex;
+				var file = document.fileselector.files.options[i].value;
+				if (confirmAction('Do you really want to WRITE flash partition #MTD# (#MTDNAME#)? Note: All data in this partition will be lost.'))
+					document.location = "cgi-bin/writeFlashPartition?mtd=" + document.fileselector.mtd.value + "&file=" + file;
+			}
+		</script>
+	</head>
+	<body id="flashmgr">
+		<form id="fileselector">
+			<input type="hidden" name="mtd" value="#MTD#">
+			<table width="100%" border="0" cellpadding="0" cellspacing="10">
+				<tr>
+					<td>Please select the image file to be written to partition #MTD# (#MTDNAME#):</td>
+				</tr>
+				<tr>
+					<td>
+						<select name="files" size="1">
+							#FILES#
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input type="button" value="Flash" style="color:#000000; width: 100px" onClick="javascript:selectFile()">
+					</td>
+				</tr>
+			</table>
+		</form>
+	</body>
+</html>

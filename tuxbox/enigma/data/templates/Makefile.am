@@ -6,7 +6,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	mountPoint.tmp mountPoints.tmp mountPointWindow.tmp subChannelSelection.tmp mepg_small.tmp \
 	pdaResponse.tmp flashMgr.tmp configSettings.tmp timerListEntry.tmp remoteControl.tmp epg_old.tmp \
 	pdaRemoteControl.tmp sat.tmp satFinder.tmp remoteControlDbox2.tmp data.tmp leftnavi.tmp channavi.tmp rotor.tmp \
-	root.tmp
+	root.tmp flashMgrReadMenu.tmp flashMgrWriteMenu.tmp mtd.tmp
 
 install-data-local:
 	install -d $(DESTDIR)$(TUXBOXDATADIR)/enigma/templates

@@ -1,0 +1,8 @@
+<tr>
+	<td>#DEV#</td>
+	<td><input name="flash" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="Flash" onClick="javascript:writeMenu('#MTD#')"></td>
+	<td><input name="save" type="button" style="width: 100px; height: 22px; background-color: #1FCB12; color: #FFFFFF;" value="Save" onClick="javascript:saveMenu('#MTD#')"></td>
+	<td>#SIZE#</td>
+	<td>#ERASESIZE#</td>
+	<td>#NAME#</td>
+</tr>

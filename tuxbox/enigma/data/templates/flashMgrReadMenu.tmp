@@ -1,0 +1,20 @@
+<html>
+	<head>
+		<title>Save Flash Partition</title>
+		<link rel="stylesheet" type="text/css" href="webif.css">
+	</head>
+	<body id="flashmgr">
+		Save flash partition #MTD# (#MTDNAME#) to the following file:
+		<br><br>
+		<form name="fileselector" action="/cgi-bin/readFlashPartition">
+			<input type="hidden" name="mtd" value="#MTD#">
+			<input name="file" type="text" size="100" maxlength="100" value="#FILE#">
+			<br><br>
+			<input type="submit" style="width: 100px" value="Save">
+			<input type="reset" style="width: 100px" value="Clear">
+		</form>
+		<script>
+			document.fileselector.file.focus();
+		</script>
+	</body>
+</html>
