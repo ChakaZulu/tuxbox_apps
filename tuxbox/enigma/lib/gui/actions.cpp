@@ -101,7 +101,7 @@ void eActionMap::loadXML(eRCDevice *device, eKeymap &keymap, const XMLTreeNode *
 				continue;
 			}
 
-			eKeymap::iterator i=keymap.find(std::string(key));
+			eKeymap::iterator i=keymap.find(eString(key));
 
 			if (i == keymap.end())
 			{
@@ -301,7 +301,7 @@ int eActionMapList::loadDevice(eRCDevice *device)
 						if ( code != -1 )
 						{
 							const char *apng=k->GetAttributeValue("picture");
-							keymap.insert(std::pair<std::string, std::pair<int, std::string> >(name, std::pair<int, std::string> (code, apng ? apng : "")));
+							keymap.insert(std::pair<eString, std::pair<int, eString> >(name, std::pair<int, eString> (code, apng ? apng : "")));
 						}
 						else
 							eFatal("no code specified for key %s!", name);

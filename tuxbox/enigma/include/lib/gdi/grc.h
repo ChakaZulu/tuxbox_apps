@@ -175,7 +175,7 @@ public:
 	void setForegroundColor(const gColor &color);
 
 	void setFont(const gFont &font);
-	void renderText(const eRect &position, const std::string &string, int flags=0);
+	void renderText(const eRect &position, const eString &string, int flags=0);
 	void renderPara(eTextPara &para, ePoint offset=ePoint(0, 0));
 
 	void fill(const eRect &area);

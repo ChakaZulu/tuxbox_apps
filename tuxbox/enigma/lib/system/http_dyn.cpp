@@ -5,7 +5,7 @@ eHTTPDyn::eHTTPDyn(eHTTPConnection *c, eString result): eHTTPDataSource(c), resu
 	wptr=0;
 	char buffer[10];
 	snprintf(buffer, 10, "%d", size=result.length());
-	c->local_header["Content-Length"]=std::string(buffer);
+	c->local_header["Content-Length"]=eString(buffer);
 	if (c->code == -1)
 	{
 		c->code=200;
@@ -59,7 +59,7 @@ eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString pa
 		{
 			if (i->mustAuth)
 			{
-				std::map<std::string, std::string>::iterator i=conn->remote_header.find("Authorization");
+				std::map<eString, eString>::iterator i=conn->remote_header.find("Authorization");
 				if ((i == conn->remote_header.end()) || checkAuth(i->second))
 				{
 					conn->local_header["WWW-Authenticate"]="Basic realm=\"dreambox\"";

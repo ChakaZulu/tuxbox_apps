@@ -7,7 +7,7 @@
 class eDownloadWindow: public eWindow
 {
 	eHTTPConnection *c;
-	std::string url;
+	eString url;
 	int eventFilter(const eWidgetEvent &event);
 private:
 	void httpDone();

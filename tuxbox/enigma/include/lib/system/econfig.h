@@ -4,17 +4,17 @@
 // #include <lib/system/nconfig.h>
 
 #include <map>
-#include <string>
+#include <lib/base/estring.h>
 
 class eConfig // : public NConfig
 {
 	static eConfig *instance;
 	int ppin;
 	
-	std::map<std::string, int> keys_int;
-	std::map<std::string, std::string> keys_string;
-	std::map<std::string, unsigned int> keys_uint;
-	std::map<std::string, double> keys_double;
+	std::map<eString, int> keys_int;
+	std::map<eString, eString> keys_string;
+	std::map<eString, unsigned int> keys_uint;
+	std::map<eString, double> keys_double;
 	
 public:
 	int locked;

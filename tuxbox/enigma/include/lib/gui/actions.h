@@ -3,7 +3,6 @@
 
 #include <string.h>
 #include <list>
-#include <string>
 #include <functional>
 #include <set>
 
@@ -71,7 +70,7 @@ public:
 
 typedef std::multiset<eAction::directedAction,eAction::priorityComperator> eActionPrioritySet;
 
-typedef std::map<std::string, std::pair<int, std::string> > eKeymap;
+typedef std::map<eString, std::pair<int, eString> > eKeymap;
 
 class XMLTreeNode;
 class XMLTreeParser;

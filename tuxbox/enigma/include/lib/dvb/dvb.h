@@ -13,7 +13,6 @@ class eDVB;
 #include <map>
 #include <utility>
 #include <functional>
-#include <string>
 #include <set>
 #include <stack>
 #include <xmltree.h>

@@ -198,7 +198,7 @@ void gPixmap::mergePalette(const gPixmap &target)
 		dstptr+=stride;
 	}
 	
-	delete [] lookup;	
+	delete [] lookup;
 }
 
 void gPixmap::line(ePoint start, ePoint dst, gColor color)
@@ -266,6 +266,7 @@ gPixmap::gPixmap()
 gPixmap::~gPixmap()
 {
 	finalLock();
+	delete[] clut.data;
 }
 
 gImage::gImage(eSize size, int _bpp)
@@ -305,6 +306,5 @@ gImage::gImage(eSize size, int _bpp)
 gImage::~gImage()
 {
 	finalLock();
-	delete[] clut.data;
 	delete[] (char*)data;
 }

@@ -199,6 +199,7 @@ float fontRenderClass::getLineHeight(const gFont& font)
 	FT_Face current_face;
 	if (FTC_Manager_Lookup_Size(cacheManager, &fnt->font.font, &current_face, &fnt->size)<0)
 	{
+		delete fnt;
 		eDebug("FTC_Manager_Lookup_Size failed!");
 		return 0;
 	}
@@ -372,7 +373,8 @@ void eTextPara::calc_bbox()
 			boundBox.setBottom( i->bbox.bottom() );
 	}
 //	eDebug("boundBox left = %i, top = %i, right = %i, bottom = %i", boundBox.left(), boundBox.top(), boundBox.right(), boundBox.bottom() );
-	bboxValid=1;
+	if ( glyphs.size() )
+		bboxValid=1;
 }
 
 void eTextPara::newLine(int flags)
@@ -430,11 +432,17 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 		eFatal("mod. after lock");
 	if (!fnt)
 		return;
-	if (current_font && !current_font->ref)
-		delete current_font;
+	if (current_font)
+	{
+		if ( !current_font->ref )
+			delete current_font;
+	}
 	current_font=fnt;
-	if (replacement_font && !replacement_font->ref)
-		delete replacement_font;
+	if (replacement_font)
+	{
+		if (!replacement_font->ref)
+			delete replacement_font;
+	}
 	replacement_font=replacement;
 	singleLock s(ftlock);
 
@@ -494,7 +502,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 	std::vector<unsigned long> uc_string, uc_visual;
 	uc_string.reserve(string.length());
 	
-	std::string::const_iterator p(string.begin());
+	eString::const_iterator p(string.begin());
 
 	while(p != string.end())
 	{
@@ -860,9 +868,14 @@ void eTextPara::clear()
 {
 	singleLock s(ftlock);
 
+	if ( current_font && !current_font->ref )
+		delete current_font;
+
+	if ( replacement_font && !replacement_font->ref )
+		delete replacement_font;
+
 	for (glyphString::iterator i(glyphs.begin()); i!=glyphs.end(); ++i)
 		i->font->unlock();
-
 	glyphs.clear();
 }
 

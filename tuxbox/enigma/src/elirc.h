@@ -12,10 +12,10 @@ class ELirc: public Object
 	eTimer timeout;
 	eSocket *sd;
 	int fd;
-	std::string device;
+	eString device;
 
-	void sendcommand(std::string cmd);
-	void sendcommandlist(std::string filename);
+	void sendcommand(eString cmd);
+	void sendcommandlist(eString filename);
 
 	ELirc();
 	~ELirc();

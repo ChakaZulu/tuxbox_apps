@@ -235,7 +235,7 @@ struct saveService
 		}
 		eString prov;
 		prov=s.service_provider;
-		for (std::string::iterator i=prov.begin(); i != prov.end(); ++i)
+		for (eString::iterator i=prov.begin(); i != prov.end(); ++i)
 			if (*i == ',')
 				*i='_';
 		

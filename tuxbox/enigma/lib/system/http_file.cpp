@@ -1,8 +1,8 @@
 #include <lib/system/http_file.h>
+#include <lib/base/estring.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <string>
 #include <shadow.h>
 #include <pwd.h>
 
@@ -11,12 +11,12 @@ eHTTPFile::eHTTPFile(eHTTPConnection *c, int _fd, int method, const char *mime):
 	fd=_fd;
 	if (method == methodGET)
 	{
-		c->local_header["Content-Type"]=std::string(mime);
+		c->local_header["Content-Type"]=eString(mime);
 		size=lseek(fd, 0, SEEK_END);
 		char asize[10];
 		snprintf(asize, 10, "%d", size);
 		lseek(fd, 0, SEEK_SET);
-		c->local_header["Content-Length"]=std::string(asize);
+		c->local_header["Content-Length"]=eString(asize);
 	}
 	connection->code_descr="OK";
 	connection->code=200;
@@ -72,7 +72,7 @@ static int unbase64(eString &dst, const eString string)
 	char c[4];
 	int pos=0;
 	unsigned int i=0;
-	
+
 	while (1)
 	{
 		if (i == string.size())
@@ -93,7 +93,7 @@ static int unbase64(eString &dst, const eString string)
 			d[1]|=c[2]>>2;
 			d[2]=c[2]<<6;
 			d[2]|=c[3];
-			
+
 			dst+=d[0];
 			if (c[2] != 64)
 				dst+=d[1];
@@ -156,7 +156,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 		path.insert(0,"/");
 	if (path[path.length()-1]=='/')
 		path+="index.html";
-	
+
 	eHTTPDataSource *data=0;
 	for (ePtrList<eHTTPFilePath>::iterator i(translate); i != translate.end(); ++i)
 	{
@@ -169,7 +169,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 
 			if (i->authorized & ((method==eHTTPFile::methodGET)?1:2))
 			{
-				std::map<std::string, std::string>::iterator i=conn->remote_header.find("Authorization");
+				std::map<eString, eString>::iterator i=conn->remote_header.find("Authorization");
 				if ((i == conn->remote_header.end()) || checkAuth(i->second))
 				{
 					conn->local_header["WWW-Authenticate"]="Basic realm=\"dreambox\"";

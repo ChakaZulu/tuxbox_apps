@@ -89,7 +89,7 @@ eConfig::~eConfig()
 
 int eConfig::getKey(const char *key, int &i)
 {
-	std::map<std::string, int>::iterator it = keys_int.find(key);
+	std::map<eString, int>::iterator it = keys_int.find(key);
 	if (it == keys_int.end())
 		return -1;
 	i = it->second;
@@ -98,7 +98,7 @@ int eConfig::getKey(const char *key, int &i)
 
 int eConfig::getKey(const char *key, unsigned int &ui)
 {
-	std::map<std::string, unsigned int>::iterator it = keys_uint.find(key);
+	std::map<eString, unsigned int>::iterator it = keys_uint.find(key);
 	if (it == keys_uint.end())
 		return -1;
 	ui = it->second;
@@ -107,7 +107,7 @@ int eConfig::getKey(const char *key, unsigned int &ui)
 
 int eConfig::getKey(const char *key, double &d)
 {
-	std::map<std::string, double>::iterator it = keys_double.find(key);
+	std::map<eString, double>::iterator it = keys_double.find(key);
 	if (it == keys_double.end())
 		return -1;
 	d = it->second;
@@ -116,7 +116,7 @@ int eConfig::getKey(const char *key, double &d)
 
 int eConfig::getKey(const char *key, char * &string)
 {
-	std::map<std::string, std::string>::iterator it = keys_string.find(key);
+	std::map<eString, eString>::iterator it = keys_string.find(key);
 	if (it == keys_string.end())
 		return -1;
 	string = strdup(it->second.c_str());
@@ -166,13 +166,13 @@ void eConfig::flush()
 		return;
 	}
 
-	for (std::map<std::string, int>::iterator i(keys_int.begin()); i != keys_int.end(); ++i)
+	for (std::map<eString, int>::iterator i(keys_int.begin()); i != keys_int.end(); ++i)
 		fprintf(f, "i:%s=%08x\n", i->first.c_str(), i->second);
-	for (std::map<std::string, unsigned int>::iterator i(keys_uint.begin()); i != keys_uint.end(); ++i)
+	for (std::map<eString, unsigned int>::iterator i(keys_uint.begin()); i != keys_uint.end(); ++i)
 		fprintf(f, "u:%s=%08x\n", i->first.c_str(), i->second);
-	for (std::map<std::string, double>::iterator i(keys_double.begin()); i != keys_double.end(); ++i)
+	for (std::map<eString, double>::iterator i(keys_double.begin()); i != keys_double.end(); ++i)
 		fprintf(f, "d:%s=%lf\n", i->first.c_str(), i->second);
-	for (std::map<std::string, std::string>::iterator i(keys_string.begin()); i != keys_string.end(); ++i)
+	for (std::map<eString, eString>::iterator i(keys_string.begin()); i != keys_string.end(); ++i)
 		fprintf(f, "s:%s=%s\n", i->first.c_str(), i->second.c_str());
 
 	fclose(f);

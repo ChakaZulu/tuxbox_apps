@@ -41,7 +41,7 @@ eHTTPError::eHTTPError(eHTTPConnection *c, int errcode): eHTTPDataSource(c), err
 	connection->code_descr=error;
 	connection->code=errcode;
 	
-	connection->local_header["Content-Type"]=std::string("text/html");
+	connection->local_header["Content-Type"]=eString("text/html");
 }
 
 int eHTTPError::doWrite(int w)
@@ -81,12 +81,12 @@ eHTTPConnection::eHTTPConnection(eMainloop *ml): eSocket(ml), parent(0), persist
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
 	CONNECT(this->error_ , eHTTPConnection::gotError);
-	CONNECT(this->connected_ , eHTTPConnection::hostConnected);	
+	CONNECT(this->connected_ , eHTTPConnection::hostConnected);
 	CONNECT(this->connectionClosed_ , eHTTPConnection::destruct);
 
 	localstate=stateWait;
 	remotestate=stateWait;
-	
+
 	buffersize=64*1024;
 	data=0;
 }
@@ -118,7 +118,7 @@ void eHTTPConnection::gotHangup()
 
 	localstate=stateWait;
 	remotestate=stateRequest;
-	
+
 	remote_header.clear();
 	local_header.clear();
 }
@@ -129,11 +129,11 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int 
 		*error=0;
 
 	char *defaultproto="http";
-	std::string proto, host, path;
+	eString proto, host, path;
 	int port=80;
 
 	int state=0; // 0 proto, 1 host, 2 port 3 path
-	
+
 	while (*uri)
 	{
 		switch (state)
@@ -182,7 +182,7 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int 
 			path.push_back(*uri++);
 		}
 	}
-	
+
 	if (state==0)
 	{
 		path=proto;
@@ -200,7 +200,7 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int 
 			*error=ENOENT;
 		return 0;
 	}
-	
+
 	if (strcmp(proto.c_str(), "http"))
 	{
 		eDebug("invalid protocol (%s)", proto.c_str());
@@ -208,7 +208,7 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int 
 			*error=EINVAL;
 		return 0;
 	}
-	
+
 	if (port == -1)
 	{
 		eDebug("invalid port");
@@ -216,7 +216,7 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int 
 			*error=EINVAL;
 		return 0;
 	}
-	
+
 	if (!path.size())
 		path="/";
 
@@ -288,7 +288,7 @@ int eHTTPConnection::processLocalState()
 #ifdef DEBUG_HTTPD
 			eDebug("local header");
 #endif
-			for (std::map<std::string,std::string>::iterator cur=local_header.begin(); cur!=local_header.end(); ++cur)
+			for (std::map<eString,eString>::iterator cur=local_header.begin(); cur!=local_header.end(); ++cur)
 			{
 				writeString(cur->first.c_str());
 				writeString(": ");
@@ -396,7 +396,7 @@ int eHTTPConnection::processRemoteState()
 				abort=1;
 				break;
 			}
-	
+
 			int del[2];
 			del[0]=line.find(" ");
 			del[1]=line.find(" ", del[0]+1);
@@ -463,7 +463,7 @@ int eHTTPConnection::processRemoteState()
 				else
 					code_descr="";
 			}
-			
+
 			remotestate=stateHeader;
 			break;
 		}
@@ -524,7 +524,7 @@ int eHTTPConnection::processRemoteState()
 				eString name=line.left(del), value=line.mid(del+1);
 				if (value[0]==' ')
 					value=value.mid(1);
-				remote_header[std::string(name)]=std::string(value);
+				remote_header[eString(name)]=eString(value);
 			}
 			done=1;
 			break;

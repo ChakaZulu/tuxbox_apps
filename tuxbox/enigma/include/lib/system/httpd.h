@@ -108,7 +108,7 @@ public:
 	int code;
 	eString code_descr;
 	
-	std::map<std::string,std::string> remote_header, local_header;
+	std::map<eString,eString> remote_header, local_header;
 	
 		// stateData
 	int content_length, content_length_remaining;

@@ -23,8 +23,6 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/system/info.h>
 
-#include <string>
-
 tsSelectType::tsSelectType(eWidget *parent)
 	:eWidget(parent,1)
 {

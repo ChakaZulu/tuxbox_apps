@@ -3,7 +3,6 @@
 #include <elirc.h>
 
 #include <sys/socket.h>
-#include <string>
 #include <sstream>
 #include <unistd.h>
 #include <sys/un.h>
@@ -30,7 +29,7 @@ ELirc::~ELirc()
 {
 }
  
-void ELirc::sendcommand(std::string cmd)
+void ELirc::sendcommand(eString cmd)
 {
 	std::stringstream ostr;
 
@@ -39,7 +38,7 @@ void ELirc::sendcommand(std::string cmd)
 	std::cout << "[elirc.cpp]Sending: " << ostr.str() << std::endl;
 }
 
-void ELirc::sendcommandlist(std::string filename)
+void ELirc::sendcommandlist(eString filename)
 {
 	struct sockaddr_un addr;
 
@@ -65,7 +64,7 @@ void ELirc::sendcommandlist(std::string filename)
 		perror(filename.c_str());
 		// TODO: Handly errors here
 	}
-	std::string tmp_string;
+	eString tmp_string;
 	getline(inFile, device);
 	while(getline(inFile, tmp_string))
 	{

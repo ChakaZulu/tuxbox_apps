@@ -9,15 +9,14 @@
 #include <lib/system/elock.h>
 #endif
 
-#include <string>
-#include <map>       
 #include <new>
 #include <libsig_comp.h>
 #include <config.h>
-
-void eFatal(const char* fmt, ...);
+#include <lib/base/estring.h>
 
 class eString;
+
+void eFatal(const char* fmt, ...);
 
 enum { lvlDebug=1, lvlWarning=2, lvlFatal=4 };
 

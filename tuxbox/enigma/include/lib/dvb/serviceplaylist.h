@@ -86,7 +86,7 @@ struct ePlaylistEntry
 
 class ePlaylist: public eService
 {
-	std::string filename;
+	eString filename;
 	std::list<ePlaylistEntry> list;
 	__u8 changed;
 public:
