@@ -169,6 +169,7 @@ bool CVCRControl::CVCRDevice::IRDeviceConnect()
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Stop()
 {
+	deviceState = CMD_VCR_STOP;
 	// leave scart mode
 	g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
 	return ParseFile(LIRCDIR "stop.lirc");
@@ -210,7 +211,7 @@ int wait_time;
 		return true;
 	}
 	else
-		printf("konnte datei niciht oeffnen\n");
+		printf("konnte datei %s nicht oeffnen\n",filename.c_str());
 	return false;
 }
 //-------------------------------------------------------------------------
@@ -232,6 +233,7 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned lon
 			g_Zapit->setAudioChannel(apid);
 		}
 	}
+	deviceState = CMD_VCR_RECORD;
 	// switch to scart mode
 	g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
 /*
