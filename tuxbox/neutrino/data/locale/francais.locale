@@ -581,7 +581,7 @@ pictureviewer.scaling réajustement
 pictureviewer.show montrer
 pictureviewer.slide_time temps de défilement
 pictureviewer.slideshow défilement
-pictureviewer.sortorder changer l’ordre de tri
+pictureviewer.sortorder changer l'ordre de tri
 pictureviewer.sortorder.date (date)
 pictureviewer.sortorder.filename (Nom de fichier)
 ping.ok est joignable (ping)
@@ -594,19 +594,19 @@ rclock.lockmsg votre télécommande Récepteur sera bloquée.\n pour débloquer,
 rclock.menueadd Bloquer Télécommande (RC) 
 rclock.title Bloquer Télécommande (RC)
 rclock.unlockmsg Télécommande réactivée.
-recordingmenu.defdir Répertoire d’enregistrement 
+recordingmenu.defdir Répertoire d'enregistrement 
 recordingmenu.file Directe (fichier)
 recordingmenu.filesettingsseparator Enregistrement directe
-recordingmenu.head Réglages d’enregistrement
-recordingmenu.help Dispositifs d’enregistrement:\n--------------------------\nserveur:\nutilisation du programme de streaming sur PC\n\n(analogique) vcr:\nutilisation de la sortie vcr\n\ndirecte (fichier):\ndirectement dans le répertoire NFS mounté\nsur le dique dur interne(HDD)\nTS: utiliser mode spts (dbox2)\nPES: ne pas utiliser le mode spts(dbox2)\n\n\nTaille fichier Max.:\n---------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: Presque illimité (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
+recordingmenu.head Réglages d'enregistrement
+recordingmenu.help Dispositifs d'enregistrement:\n--------------------------\nserveur:\nutilisation du programme de streaming sur PC\n\n(analogique) vcr:\nutilisation de la sortie vcr\n\ndirecte (fichier):\ndirectement dans le répertoire NFS mounté\nsur le dique dur interne(HDD)\nTS: utiliser mode spts (dbox2)\nPES: ne pas utiliser le mode spts(dbox2)\n\n\nTaille fichier Max.:\n---------------------\nNFS V2: 2 GB (2048 MB)\nNFS V3: Presque illimité (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
 recordingmenu.no_scart Ne pas balancer vers le mode Péritel
 recordingmenu.off off
-recordingmenu.recording_type Dispositif d’enregistrement
+recordingmenu.recording_type Dispositif d'enregistrement
 recordingmenu.server serveur
-recordingmenu.server_ip IP serveur d’enregistrement
+recordingmenu.server_ip IP serveur d'enregistrement
 recordingmenu.server_mac Adresse MAC
-recordingmenu.server_port PORT serveur d’enregistrement 
-recordingmenu.server_wakeup WOL serveur d’enregistrement 
+recordingmenu.server_port PORT serveur d'enregistrement 
+recordingmenu.server_wakeup WOL serveur d'enregistrement 
 recordingmenu.setupnow activater les changements
 recordingmenu.splitsize Max. Taille fichier (MB)
 recordingmenu.stopplayback stop playback
@@ -615,7 +615,7 @@ recordingmenu.stream_all_audio_pids enregistrer tout les PIDS audio
 recordingmenu.stream_vtxt_pid enregistrer le videotext
 recordingmenu.use_o_sync écrire synchrone (O_SYNC)
 recordingmenu.vcr vcr
-recordtimer.announce L’enregistrement démarre dans quelques minutes
+recordtimer.announce L'enregistrement démarre dans quelques minutes
 repeatblocker.hint_1 Durée test court (in ms) pour reconnaitre 2 keystrokes
 repeatblocker.hint_2 Entrer 0 pour éteindre le blocker (rouge est espace)
 satsetup.diseqc DiSEqC
@@ -636,7 +636,7 @@ scants.actsatellite Satellite:
 scants.bouquet Bouquet
 scants.bouquet_create créer nouveau
 scants.bouquet_erase Tout éffacer
-scants.bouquet_leave Laisser l’actuel
+scants.bouquet_leave Laisser l'actuel
 scants.bouquet_satellite Satellite-Bouquet
 scants.bouquet_update mettre à jour
 scants.channel Chaine:
@@ -679,12 +679,12 @@ streaminfo.head Information Stream
 streaminfo.not_available Non disponible
 streaminfo.resolution Résolution
 streaminfo.signal Receipt signal
-streaming.buffer_overflow L’enregistrement est abondonné,\nTant que les données ne peuvent être écrites assez rapidement.
-streaming.busy Un ou plusieurs processus d’enregistrement sont actifs.\nSi vous rencontrez ce message et aucun enregistrement n’est actif, Redémarrer NEUTRINO SVP.
-streaming.dir_not_writable Le répertoire d’enregistrement n’est pas autorisé en écriture.\nL’enregistrement ne fonctionnera pas.
-streaming.success L’enregistrement est effectué avec succès.
-streaming.write_error L’enregistrement est abondonné,\nTant qu’une erreur est survenue lors du processus d’écriture.
-streaming.write_error_open L’enregistrement est abondonné,\nParceque le fichier cible ne peut être ouvert.
+streaming.buffer_overflow L'enregistrement est abondonné,\nTant que les données ne peuvent être écrites assez rapidement.
+streaming.busy Un ou plusieurs processus d'enregistrement sont actifs.\nSi vous rencontrez ce message et aucun enregistrement n'est actif, Redémarrer NEUTRINO SVP.
+streaming.dir_not_writable Le répertoire d'enregistrement n'est pas autorisé en écriture.\nL'enregistrement ne fonctionnera pas.
+streaming.success L'enregistrement est effectué avec succès.
+streaming.write_error L'enregistrement est abondonné,\nTant qu'une erreur est survenue lors du processus d'écriture.
+streaming.write_error_open L'enregistrement est abondonné,\nParceque le fichier cible ne peut être ouvert.
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
@@ -711,7 +711,7 @@ stringinput.caps caps / Pas de caps
 stringinput.clear Tout éffacer
 timer.eventrecord.msg   ... à exécuter, ou bien non
 timer.eventrecord.title Programmer enregistrement
-timer.eventtimed.msg L’évènement est programmé.\nLe récepteur démarrera et \basculera vers cette chaine à l’heure programmée.
+timer.eventtimed.msg L'évènement est programmé.\nLe récepteur démarrera et \basculera vers cette chaine à l'heure programmée.
 timer.eventtimed.title Programme Evènement
 timerbar.channelswitch programmer
 timerbar.recordevent Enregistrer
@@ -754,7 +754,7 @@ timerlist.standby Mode SB
 timerlist.standby.off Quitter Veille
 timerlist.standby.on Entrer en Veille
 timerlist.stoptime heure Arrêt
-timerlist.type Type d’horaire
+timerlist.type Type d'horaire
 timerlist.type.nextprogram Prochain programme
 timerlist.type.record Enregistrer
 timerlist.type.remind Rappeler
@@ -765,21 +765,21 @@ timerlist.type.unknown inconnu
 timerlist.type.zapto Zapper vers
 timerlist.weekdays Jours de la semaine
 timerlist.weekdays.hint_1 Lun Mar Mar Jeu Ven Sam Dim
-timerlist.weekdays.hint_2 'X'=Horaire '-' Pas d’horaire
-timersettings.record_safety_time_after Correction du temps d’arrêt d’enregistrement
+timerlist.weekdays.hint_2 'X'=Horaire '-' Pas d'horaire
+timersettings.record_safety_time_after Correction du temps d'arrêt d'enregistrement
 timersettings.record_safety_time_after.hint_1 Temps de Correction en min. (00=off). Ce temps
-timersettings.record_safety_time_after.hint_2 sera ajouté à chaque horaire d’enregistrement.
-timersettings.record_safety_time_before Correction du temps de démarrage d’enregistrement
+timersettings.record_safety_time_after.hint_2 sera ajouté à chaque horaire d'enregistrement.
+timersettings.record_safety_time_before Correction du temps de démarrage d'enregistrement
 timersettings.record_safety_time_before.hint_1 Temps de Correction en min. (00=off). Ce temps
-timersettings.record_safety_time_before.hint_2 sera déduit de chaque horaire d’enregistrement.
-timersettings.separator Réglages d’horaire
+timersettings.record_safety_time_before.hint_2 sera déduit de chaque horaire d'enregistrement.
+timersettings.separator Réglages d'horaire
 timing.chanlist Liste chaine
 timing.epg Epg
 timing.filebrowser Navigateur de fichier
-timing.head  Temps d’éclipse OSD
+timing.head  Temps d'éclipse OSD
 timing.hint_1 Temps en sec. Après ce temps
-timing.hint_2 la barre d’infos disparaîtra .
-timing.infobar Barre d’infos
+timing.hint_2 la barre d'infos disparaîtra .
+timing.infobar Barre d'infos
 timing.menu Menu
 timing.numericzap Zap Numerique
 ucodecheck.avia500 Avia 500
