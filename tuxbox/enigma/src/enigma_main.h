@@ -18,6 +18,7 @@
 #include <lib/gui/numberactions.h>
 #include <lib/dvb/service.h>
 #include <lib/gui/eprogress.h>
+#include <src/audio_dynamic.h>
 
 class eProgress;
 
@@ -183,6 +184,7 @@ public:
 class eAudioSelector: public eListBoxWindow<AudioStream>
 {
 	void selected(AudioStream *);
+	eAudioDynamicConfig *m_dyncfg;
 	int eventHandler(const eWidgetEvent &);
 public:
 	eAudioSelector();

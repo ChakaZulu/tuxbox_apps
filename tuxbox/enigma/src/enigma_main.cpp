@@ -56,6 +56,7 @@
 #include <lib/gdi/glcddc.h>
 #include <lib/system/info.h>
 #include <src/time_correction.h>
+#include <lib/driver/audiodynamic.h>
 
 		// bis waldi das in nen .h tut
 #define MOVIEDIR "/hdd/movie"
@@ -696,6 +697,12 @@ eAudioSelector::eAudioSelector()
 	CONNECT(list.selected, eAudioSelector::selected);
 	list.selchanged.connect( slot( AudioChannelSelectionChanged2 ) );
 	list.setFlags( eListBoxBase::flagNoPageMovement );
+
+	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-70));
+	
+	m_dyncfg = new eAudioDynamicConfig(this);
+	m_dyncfg->move(ePoint(10, getClientSize().height()-70));
+	m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
 }
 
 void eAudioSelector::clear()
@@ -2438,7 +2445,18 @@ void eZapMain::playlistNextService()
 
 void eZapMain::volumeUp()
 {
-	eAVSwitch::getInstance()->changeVolume(0, -2);
+	if (eAudioDynamicCompression::getInstance() &&
+			eAudioDynamicCompression::getInstance()->getEnable())
+		{
+			int oldval = eAudioDynamicCompression::getInstance()->getMax();
+			oldval += 1000;
+			if (oldval > 100000)
+				oldval = 100000;
+			eAudioDynamicCompression::getInstance()->setMax(oldval);
+		}
+	else
+		eAVSwitch::getInstance()->changeVolume(0, -2);
+
 	if ((!currentFocus) || (currentFocus == this))
 	{
 		volume.show();
@@ -2448,7 +2466,18 @@ void eZapMain::volumeUp()
 
 void eZapMain::volumeDown()
 {
-	eAVSwitch::getInstance()->changeVolume(0, +2);
+	if (eAudioDynamicCompression::getInstance() &&
+			eAudioDynamicCompression::getInstance()->getEnable())
+		{
+			int oldval = eAudioDynamicCompression::getInstance()->getMax();
+			oldval -= 1000;
+			if (oldval < 0)
+				oldval = 0;
+			eAudioDynamicCompression::getInstance()->setMax(oldval);
+		}
+	else
+		eAVSwitch::getInstance()->changeVolume(0, +2);
+
 	if ((!currentFocus) || (currentFocus == this))
 	{
 		volume.show();
