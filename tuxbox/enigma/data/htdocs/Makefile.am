@@ -1,4 +1,4 @@
-EXTRA_DIST = logo.gif trans.gif epgview.css
+EXTRA_DIST = logo.gif trans.gif epgview.css si.css
 
 install-data-local:
 	install -d $(DATADIR)/enigma/htdocs

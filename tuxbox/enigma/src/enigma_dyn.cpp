@@ -653,6 +653,17 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 		eitc+="no eit";
 	}
 
+	if(eDVB::getInstance()->service)
+	{
+		result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">epg</a></u>");
+		result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">si</a></u>");
+	}
+	else
+	{
+		result.strReplace("#EPG#", "");
+		result.strReplace("#SI#", "");
+	}
+
 	result.strReplace("#STATS#", stats);
 	result.strReplace("#NAVI#", navi);
 	result.strReplace("#MODE#", tmp);
@@ -783,6 +794,82 @@ static eString getcurepg(eString request, eString path, eString opt, eHTTPConnec
 	return result;
 }
 
+static eString getsi(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	eString result("");
+	eString name("");
+	eString provider("");
+	eString vpid("");
+	eString apid("");
+	eString pcrpid("");
+	eString tpid("");
+	eString vidform("n/a");
+	eString tsid("");
+	eString onid("");
+	eString sid("");
+
+	content->local_header["Content-Type"]="text/html";
+
+	name=eDVB::getInstance()->service->service_name.c_str();
+	provider=eDVB::getInstance()->service->service_provider.c_str();
+	vpid=eString().sprintf("%04xh (%dd)", Decoder::parms.vpid, Decoder::parms.vpid);
+	apid=eString().sprintf("%04xh (%dd)", Decoder::parms.apid, Decoder::parms.apid);
+	pcrpid=eString().sprintf("%04xh (%dd)", Decoder::parms.pcrpid, Decoder::parms.pcrpid);
+	tpid=eString().sprintf("%04xh (%dd)", Decoder::parms.tpid, Decoder::parms.tpid);
+	tsid=eString().sprintf("%04xh", eDVB::getInstance()->transport_stream_id);
+	onid=eString().sprintf("%04xh", eDVB::getInstance()->original_network_id);
+	sid=eString().sprintf("%04xh", eDVB::getInstance()->service_id);
+
+	FILE *bitstream=0;
+	
+	if (Decoder::parms.vpid!=-1)
+		bitstream=fopen("/proc/bus/bitstream", "rt");
+	if (bitstream)
+	{
+		char buffer[100];
+		int xres=0, yres=0, aspect=0;
+		while (fgets(buffer, 100, bitstream))
+		{
+			if (!strncmp(buffer, "H_SIZE:  ", 9))
+				xres=atoi(buffer+9);
+			if (!strncmp(buffer, "V_SIZE:  ", 9))
+				yres=atoi(buffer+9);
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+		}
+		fclose(bitstream);
+		vidform.sprintf("%dx%d ", xres, yres);
+		switch (aspect)
+		{
+		case 1:
+			vidform+="square"; break;
+		case 2:
+			vidform+="4:3"; break;
+		case 3:
+			vidform+="16:9"; break;
+		case 4:
+			vidform+="20:9"; break;
+		}
+	}
+
+
+	result+=eString("<html><head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>");
+	result+=eString("<table cellspacing=0 cellpadding=0 border=0>");
+	result+=eString("<tr><td>name:</td><td>"+name+"</td></tr>");
+	result+=eString("<tr><td>provider:</td><td>"+provider+"</td></tr>");
+	result+=eString("<tr><td>vpid:</td><td>"+vpid+"</td></tr>");
+	result+=eString("<tr><td>apid:</td><td>"+apid+"</td></tr>");
+	result+=eString("<tr><td>pcrpid:</td><td>"+pcrpid+"</td></tr>");
+	result+=eString("<tr><td>tpid:</td><td>"+tpid+"</td></tr>");
+	result+=eString("<tr><td>tsid:</td><td>"+tsid+"</td></tr>");
+	result+=eString("<tr><td>onid:</td><td>"+onid+"</td></tr>");
+	result+=eString("<tr><td>sid:</td><td>"+sid+"</td></tr>");
+	result+=eString("<tr><td>vidformat:<td>"+vidform+"</td></tr>");
+	result+=eString("</table>");
+	result+=eString("</body></html>");
+	return result;
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -800,6 +887,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getbouquets", getbouq);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
+	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 
 /*	dyn_resolver->addDyn("GET", "/channels/numberchannels", channels_numberchannels);

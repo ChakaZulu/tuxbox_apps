@@ -63,7 +63,7 @@
 
  function switchtoChannel(xy)
  {
-  win=window.open("/switchTo?service="+xy, "switchStatus","width=50,height=20,left=0,top=0");
+  win=window.open("/switchTo?service="+xy, "switchStatus","width=1,height=1,left=0,top=0");
   win.focus();
   parent.setTimeout("reload()", 3000);
  }
@@ -73,6 +73,12 @@
   win=window.open("/cgi-bin/getcurrentepg", "epg", "width=400, height=200, left=0, top=0");
   win.focus();
  } 
+ 
+ function openSI()
+ {
+  win=window.open("/cgi-bin/streaminfo", "si", "width=300, height=200, left=0, top=0");
+  win.focus();
+ }
 </script>
 </head>
 <body bgcolor="#000000" text="#c0c0c0" marginwidth="0" marginheight="0">
@@ -118,7 +124,7 @@
      <td width="100%" align="right">#MODE#</td>
      </tr>
      <tr>
-     <td width="100%" align="left">#COP#<br><span class="servicename">#SERVICENAME#</span> <u><a class="small" href="javascript:openEPG()">epg</a></u><br>#EIT#</td>
+     <td width="100%" align="left">#COP#<br><span class="servicename">#SERVICENAME#</span>#EPG# #SI#<br>#EIT#</td>
      </tr>
     </table>
    </td>
