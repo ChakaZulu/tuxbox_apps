@@ -190,9 +190,10 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 
 void CLCD::setlcdparameter(void)
 {
+	last_toggle_state_power = g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER];
 	setlcdparameter((mode == MODE_STANDBY) ? g_settings.lcd_setting[SNeutrinoSettings::LCD_STANDBY_BRIGHTNESS] : g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS],
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST],
-			g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER],
+			last_toggle_state_power,
 			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
 }
 
@@ -516,6 +517,15 @@ void CLCD::setPower(int power)
 int CLCD::getPower()
 {
 	return g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER];
+}
+
+void CLCD::togglePower(void)
+{
+	last_toggle_state_power = 1 - last_toggle_state_power;
+	setlcdparameter((mode == MODE_STANDBY) ? g_settings.lcd_setting[SNeutrinoSettings::LCD_STANDBY_BRIGHTNESS] : g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS],
+			g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST],
+			last_toggle_state_power,
+			g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]);
 }
 
 void CLCD::setInverse(int inverse)

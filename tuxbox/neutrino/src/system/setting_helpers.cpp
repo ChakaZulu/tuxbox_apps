@@ -206,19 +206,10 @@ bool CConsoleDestChangeNotifier::changeNotify(const std::string & OptionName, vo
 	return true;
 }
 
-CLcdNotifier::CLcdNotifier(int *lcdPowerSetting, int *lcdInverseSetting, int *lcdAutoDimmSetting)
-{
-	LcdPowerSetting    = lcdPowerSetting;
-	LcdInverseSetting  = lcdInverseSetting;
-	LcdAutoDimmSetting = lcdAutoDimmSetting;
-}
-
 bool CLcdNotifier::changeNotify(const std::string & OptionName, void *Data)
 {
-	CLCD::getInstance()->setPower(*LcdPowerSetting == 1);
-	CLCD::getInstance()->setInverse(*LcdInverseSetting == 1);
-	CLCD::getInstance()->setAutoDimm(*LcdAutoDimmSetting == 1);
-	//CLCD::getInstance()->update();
+	CLCD::getInstance()->setlcdparameter();
+	CLCD::getInstance()->setAutoDimm(g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM]);
 	return true;
 }
 

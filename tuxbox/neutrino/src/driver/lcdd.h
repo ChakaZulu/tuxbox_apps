@@ -84,15 +84,17 @@ class CLCD
 		bool				showclock;
 		CConfigFile			configfile;
 		pthread_t			thrTime;
+		int                             last_toggle_state_power;
 
 		CLCD();
 
 		static void* TimeThread(void*);
 		bool lcdInit(const char * fontfile, const char * fontname);
 		void setlcdparameter(int dimm, int contrast, int power, int inverse);
-		void setlcdparameter(void);
 
 	public:
+
+		void setlcdparameter(void);
 
 		static CLCD* getInstance();
 		void init(const char * fontfile, const char * fontname);
@@ -117,6 +119,8 @@ class CLCD
 
 		void setPower(int);
 		int getPower();
+
+		void togglePower(void);
 
 		void setInverse(int);
 		int getInverse();

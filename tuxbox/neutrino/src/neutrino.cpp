@@ -2143,10 +2143,6 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 {
-	lcdpower = CLCD::getInstance()->getPower()?1:0;
-	static int lcdinverse = CLCD::getInstance()->getInverse()?1:0;
-	static int lcdautodimm = CLCD::getInstance()->getAutoDimm()?1:0;
-
 	lcdSettings.addItem(GenericMenuSeparator);
 
 	lcdSettings.addItem(GenericMenuBack);
@@ -2154,14 +2150,14 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 
 	CLcdControler* lcdsliders = new CLcdControler("lcdmenu.head", NULL);
 
-	CLcdNotifier* lcdnotifier = new CLcdNotifier(&lcdpower, &lcdinverse, &lcdautodimm);
+	CLcdNotifier* lcdnotifier = new CLcdNotifier();
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("lcdmenu.inverse", &lcdinverse, true, lcdnotifier );
+	CMenuOptionChooser* oj = new CMenuOptionChooser("lcdmenu.inverse", &g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE], true, lcdnotifier );
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	lcdSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("lcdmenu.power", &lcdpower, true, lcdnotifier );
+	oj = new CMenuOptionChooser("lcdmenu.power", &g_settings.lcd_setting[SNeutrinoSettings::LCD_POWER], true, lcdnotifier );
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	lcdSettings.addItem( oj );
@@ -2169,7 +2165,7 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	if ((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM))
 	{
 		// Autodimm available on Sagem/Philips only
-		oj = new CMenuOptionChooser("lcdmenu.autodimm", &lcdautodimm, true, lcdnotifier );
+		oj = new CMenuOptionChooser("lcdmenu.autodimm", &g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM], true, lcdnotifier );
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		lcdSettings.addItem( oj );
@@ -2974,7 +2970,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if( mode == mode_standby )
 		{
 			//switch lcd off/on
-			CLCD::getInstance()->setPower( !CLCD::getInstance()->getPower() );
+			CLCD::getInstance()->togglePower();
 		}
 		else
 		{
@@ -3550,7 +3546,6 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	if( bOnOff )
 	{
 		// STANDBY AN
-		lcdpower = CLCD::getInstance()->getPower()?1:0;
 
 		if( mode == mode_scart )
 		{
@@ -3574,7 +3569,6 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	{
 		// STANDBY AUS
 
-		CLCD::getInstance()->setPower(lcdpower);
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 

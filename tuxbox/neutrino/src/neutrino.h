@@ -92,7 +92,6 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		neutrino_font_descr_struct      font;
 
 		int				mode;
-		int				lcdpower;
 		int				lastMode;
 		bool				softupdate;
 		bool				fromflash;
