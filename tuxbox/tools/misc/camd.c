@@ -377,6 +377,8 @@ int main(int argc, char **argv)
 	  ECMPID=find_ecmpid(pmt,caid);
 	  if (ECMPID == 0) {
 	    printf("no ECM-pid found for ca_system_ID %04X\n",caid);
+	    printf("press enter to exit\n");
+	    getchar();
 	    exit(0);
 	  }
 	  else
