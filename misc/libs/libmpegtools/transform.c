@@ -1101,6 +1101,78 @@ void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
                 }
         }
 }
+
+// 1200000 bytes should be enough to receive every audio pid at least once
+#define TSREADSIZE 1200000
+
+void find_all_avpids(int fd, uint16_t *vpid, uint16_t *apids, unsigned short *ac3flags, uint16_t *numpida)
+{
+
+        uint8_t buf[IN_SIZE];
+        int count;
+        int i;
+        int off =0;
+        int j=0;
+        *numpida = 0;
+        uint16_t temppida = 0;
+        unsigned long filecounter = 0;
+        int k=0;
+
+        while ( *apids == 0 || *vpid == 0 || filecounter < TSREADSIZE){
+                count = read(fd, buf, IN_SIZE);
+                filecounter += count;
+                if (count<=0) return;
+                for (i = 0; i < count-7; i++){
+                        if (buf[i] == 0x47){
+                                if (buf[i+1] & 0x40){
+                                        off = 0;
+                                        if ( buf[3+i] & 0x20)//adapt field?
+                                                off = buf[4+i] + 1;
+                                        switch(buf[i+7+off]){
+                                        case VIDEO_STREAM_S ... VIDEO_STREAM_E:
+                                                *vpid = get_pid(buf+i+1);
+                                                break;
+                                        case PRIVATE_STREAM1:
+                                                temppida = get_pid(buf+i+1);
+                                                for (k=0; k<j; k++) {
+                                                    if (*(apids+k) == temppida) {
+                                                        temppida=0;
+                                                    }
+                                                }
+                                                if (temppida != 0) {
+                                                    *(apids+j) = temppida;
+                                                    *(ac3flags+j) = 1;
+                                                    //printf("[transform.c] apid[%d]=0x%04X, ac3=%d\n",j,*(apids+j),*(ac3flags+j));
+                                                    j++;
+                                                    (*numpida)++;
+                                                    //printf("[transform.c] numpida=%d\n",*numpida);
+                                                }
+                                                break;
+                                        case AUDIO_STREAM_S ... AUDIO_STREAM_E:
+                                                temppida = get_pid(buf+i+1);
+                                                for (k=0; k<j; k++) {
+                                                    if (*(apids+k) == temppida) {
+                                                        temppida=0;
+                                                    }
+                                                }
+                                                if (temppida != 0) {
+                                                    *(apids+j) = temppida;
+                                                    *(ac3flags+j) = 0;
+                                                    //printf("[transform.c] apid[%d]=0x%04X, ac3=%d\n",j,*(apids+j),*(ac3flags+j));
+                                                    j++;
+                                                    (*numpida)++;
+                                                    //printf("[transform.c] numpida=%d\n",*numpida);
+                                                }
+                                                break;
+                                        }
+                                }
+                                i += 187;
+                        }
+                        if (*(apids+j) != 0 && *vpid != 0) break;
+                }
+        }
+}
+
 int  is_audio_ac3(int fd)
 {
 	uint8_t buf[IN_SIZE];
