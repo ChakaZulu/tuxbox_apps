@@ -22,6 +22,9 @@
  * MA 02111-1307 USA  
  *
  * $Log: md5check.c,v $
+ * Revision 1.3  2001/09/28 18:13:31  McClean
+ * not needed..
+ *
  * Revision 1.2  2001/09/28 11:43:48  derget
  *
  *
@@ -34,14 +37,15 @@
  * inital inport
  *
  * 
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "md5sum.c"
+#include "../libmd5sum/libmd5sum.h"
+
 
 int main(int argc, char **argv)
 {
