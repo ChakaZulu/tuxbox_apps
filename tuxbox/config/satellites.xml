@@ -26,6 +26,10 @@
 		<transponder frequency="12168000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12539000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 	</sat>
+	<sat name="HispaSat 30.0W">
+		<transponder frequency="11811000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11811000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
+	</sat>
 	<sat name="Kopernikus 23.5E">
 		<transponder frequency="11466000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 	</sat>
