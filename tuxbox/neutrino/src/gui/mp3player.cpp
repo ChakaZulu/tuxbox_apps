@@ -79,7 +79,10 @@ CMP3PlayerGui::CMP3PlayerGui()
 	mp3filter.addFilter("mpa");
 	mp3filter.addFilter("m3u");
 	filebrowser->Filter = &mp3filter;
-	Path = "/";
+   if(strlen(g_settings.network_nfs_local_dir[0])!=0)
+      Path = g_settings.network_nfs_local_dir[0];
+	else
+      Path = "/";
 }
 
 //------------------------------------------------------------------------
@@ -220,7 +223,7 @@ int CMP3PlayerGui::show()
             if ((int(selected)-int(listmaxshow))<0)
                selected=playlist.size()-1;
             else
-				selected -= listmaxshow;
+               selected -= listmaxshow;
             liststart = (selected/listmaxshow)*listmaxshow;
             update=true;
          }
@@ -333,10 +336,17 @@ int CMP3PlayerGui::show()
                      while (infile.good())
                      {
                         infile.getline(cLine, 255);
-                        printf("Line %s\n",cLine);
-                        if(strlen(cLine) > 0)
+                        // remove CR
+                        if(cLine[strlen(cLine)-1]=='\r')
+                           cLine[strlen(cLine)-1]=0;
+                        if(strlen(cLine) > 0 && cLine[0]!='#') 
                         {
                            std::string filename = sPath + "/" + cLine;
+                           
+                           unsigned int pos;
+                           while((pos=filename.find("\\"))!=std::string::npos)
+                              filename[pos]='/';
+
                            std::ifstream testfile;
                            testfile.open(filename.c_str(), ifstream::in);
                            if(testfile.good())
@@ -758,6 +768,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 
 	mad_stream_init(&Stream);
    ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+
 	if(m_state!=STOP)
 		usleep(15000);
 	
@@ -776,6 +787,8 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 				n=0;
 				fseek(in, -1, SEEK_CUR);
 				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+            if(ReadSize < 2)
+               return;
 				if(m_state!=STOP)
 					usleep(15000);
 			}
