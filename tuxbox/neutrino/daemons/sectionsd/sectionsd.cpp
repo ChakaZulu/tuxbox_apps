@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.170 2004/02/15 20:25:34 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.171 2004/02/25 00:28:12 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -817,7 +817,9 @@ static void commandDumpAllServices(int connfd, char* /*data*/, const unsigned /*
 
 	for (MySIservicesOrderServiceName::iterator s = mySIservicesOrderServiceName.begin(); s != mySIservicesOrderServiceName.end(); s++)
 	{
-		sprintf(daten, "%08x %hu %hhu %d %d %d %d %u ",
+		sprintf(daten,
+			PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+			" %hu %hhu %d %d %d %d %u ",
 		        (*s)->uniqueKey(),
 		        (*s)->service_id, (*s)->serviceTyp,
 		        (*s)->eitScheduleFlag(), (*s)->eitPresentFollowingFlag(),
@@ -1057,7 +1059,7 @@ static void commandDumpStatusInformation(int connfd, char* /*data*/, const unsig
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.170 2004/02/15 20:25:34 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.171 2004/02/25 00:28:12 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3001,7 +3003,9 @@ static void *eitThread(void *)
 					        ( ( dmxEIT.filter_index == 1 ) && ( !si->second->eitScheduleFlag() ) ) )
 					{
 						timeoutsDMX = 0;
-						dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0 (not broadcast)\n", messaging_current_servicekey );
+						dprintf("[eitThread] timeoutsDMX for 0x"
+							PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+							" reset to 0 (not broadcast)\n", messaging_current_servicekey );
 
 						dmxEIT.change( dmxEIT.filter_index + 1 );
 					}
@@ -3466,7 +3470,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.170 2004/02/15 20:25:34 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.171 2004/02/25 00:28:12 thegoodguy Exp $\n");
 
 	try {
 		if (argc != 1 && argc != 2) {

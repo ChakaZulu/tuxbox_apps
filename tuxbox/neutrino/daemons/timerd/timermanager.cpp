@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.69 2004/02/24 23:40:16 thegoodguy Exp $
+   $Id: timermanager.cpp,v 1.70 2004/02/25 00:28:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -746,12 +746,20 @@ void CTimerEvent::printEvent(void)
 	switch(eventType)
 	{
 		case CTimerd::TIMER_ZAPTO :
-			dprintf("Zapto: %x epg: %llx\n",static_cast<CTimerEvent_Zapto*>(this)->eventInfo.channel_id,static_cast<CTimerEvent_Zapto*>(this)->eventInfo.epgID);
+			dprintf("Zapto: "
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				" epg: %llx\n",
+				static_cast<CTimerEvent_Zapto*>(this)->eventInfo.channel_id,
+				static_cast<CTimerEvent_Zapto*>(this)->eventInfo.epgID);
 			break;
 
 		case CTimerd::TIMER_RECORD :
-			dprintf("Record: %x epg: %llx apids: %s\n",static_cast<CTimerEvent_Record*>(this)->eventInfo.channel_id,static_cast<CTimerEvent_Record*>(this)->eventInfo.epgID,
-					  static_cast<CTimerEvent_Record*>(this)->eventInfo.apids.c_str());
+			dprintf("Record: "
+				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
+				" epg: %llx apids: %s\n",
+				static_cast<CTimerEvent_Record*>(this)->eventInfo.channel_id,
+				static_cast<CTimerEvent_Record*>(this)->eventInfo.epgID,
+				static_cast<CTimerEvent_Record*>(this)->eventInfo.apids.c_str());
 			break;
 
 		case CTimerd::TIMER_STANDBY :
