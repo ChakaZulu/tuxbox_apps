@@ -1,8 +1,6 @@
 #ifndef __dvb_h
 #define __dvb_h
 
-#include <qstring.h>
-#include <qlist.h>
 #include <stdio.h>
 #include "si.h"
 
@@ -11,9 +9,13 @@
 
 class eDVB;
 
+#include <list>
 #include <map>
 #include <utility>
 #include <functional>
+#include <string>
+
+#define ServiceReferenceIterator std::list<eServiceReference*>::iterator
 
 struct tsref: public std::pair<int,int>
 {
@@ -109,7 +111,7 @@ public:
 	int transport_stream_id, original_network_id;
 	int service_id, service_type;
 	
-	QString service_name, service_provider;
+	std::string service_name, service_provider;
 	
 	int service_number;		// gleichzeitig sortierkriterium.
 	
@@ -138,15 +140,23 @@ struct eServiceReference
 class eBouquet
 {
 public:
-	eBouquet(int bouquet_id, QString bouquet_name);
+	inline eBouquet(int bouquet_id, std::string bouquet_name): bouquet_id(bouquet_id), bouquet_name(bouquet_name) { }
+	inline ~eBouquet();
 	void add(int transport_stream_id, int original_network_id, int service_id);
 	int remove(int transport_stream_id, int original_network_id, int service_id);
-
 	int bouquet_id;
-	QString bouquet_name;
-	
-	QList<eServiceReference> list;
+	std::string bouquet_name;
+	std::list<eServiceReference*> list;
 };
+
+eBouquet::~eBouquet()
+{
+	while (!list.empty())
+	{
+		delete *list.begin();
+		list.erase(list.begin());		
+	}
+}
 
 class eTransponderList
 {

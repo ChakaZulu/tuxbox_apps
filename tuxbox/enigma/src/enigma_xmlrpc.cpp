@@ -9,9 +9,9 @@ static eBouquet *getBouquetByID(const char *id)
 	if (sscanf(id, "B:%x", &bouquet_id)!=1)
 		return 0;
 	if (eDVB::getInstance()->getBouquets())
-		for (QListIterator<eBouquet> i(*eDVB::getInstance()->getBouquets()); i.current(); ++i)
-			if (i.current()->bouquet_id==bouquet_id)
-				return i.current();
+		for (BouquetIterator i = eDVB::getInstance()->getBouquets()->begin(); i != eDVB::getInstance()->getBouquets()->end(); ++i)
+			if ((*i)->bouquet_id==bouquet_id)
+				return *i;
 	return 0;
 }
 
@@ -58,16 +58,16 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		QList<eXMLRPCVariant> l;
 		if (eDVB::getInstance()->getBouquets())
 		{
-			for (QListIterator<eBouquet> i(*eDVB::getInstance()->getBouquets()); i.current(); ++i)
+			for (BouquetIterator i = eDVB::getInstance()->getBouquets()->begin(); i != eDVB::getInstance()->getBouquets()->end(); ++i)
 			{
-				eBouquet *b=i.current();
+				eBouquet *b=*i;
 				QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
 				static QString s0("caption");
 				static QString s1("type");
 				static QString s2("handle");
 				static QString s3("zappable");
 				
-				s->insert(s0, new eXMLRPCVariant(new QString(b->bouquet_name)));
+				s->insert(s0, new eXMLRPCVariant(new QString(b->bouquet_name.c_str())));
 				static QString g("Group");
 				s->insert(s1, new eXMLRPCVariant(new QString(g)));
 				static QString bs("B:");
@@ -92,9 +92,9 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		{
 			QList<eXMLRPCVariant> l;
 
-			for (QListIterator<eServiceReference> s(b->list); s.current(); ++s)
+			for (std::list<eServiceReference*>::iterator s = b->list.begin(); s != b->list.end(); s++)
 			{
-				eService *service=s.current()->service;
+				eService *service=(*s)->service;
 				if (!service)
 					continue;
 				QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
@@ -103,7 +103,7 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 				static QString s2("handle");
 				static QString s3("zappable");
 
-				s->insert(s0, new eXMLRPCVariant(new QString(service->service_name)));
+				s->insert(s0, new eXMLRPCVariant(new QString(service->service_name.c_str())));
 				static QString g("Service");
 				s->insert(s1, new eXMLRPCVariant(new QString(g)));
 				static QString bs("S:");
@@ -261,7 +261,7 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		s->insert(s1, new eXMLRPCVariant(new QString(g)));
 
 		static QString s0("caption");
-		s->insert(s0, new eXMLRPCVariant(new QString(service->service_name)));
+		s->insert(s0, new eXMLRPCVariant(new QString(service->service_name.c_str())));
 		
 		static QString s2("parentHandle");
 		static QString g2("NA");

@@ -34,23 +34,20 @@ struct hash<sref>
 
 class eventData
 {
+/*public:
+	enum TYP {SHORT, FULL};*/
+private:
 	char* EITdata;
 	int ByteSize;
 public:
+//	TYP type;
 	static int CacheSize;
-	eventData(const eit_event_struct* e, int size)
-	:ByteSize(size)
+	eventData(const eit_event_struct* e, int size/*, enum TYP t*/)
+	:ByteSize(size)//, type(t)
 	{
 		CacheSize+=size;
 		EITdata = new char[size];
 		memcpy(EITdata, (char*) e, size);
-	}
-	eventData(const eventData& Q)
-	:ByteSize(Q.ByteSize)
-	{
-		CacheSize+=ByteSize;
-		EITdata = new char[ByteSize];
-		memcpy(EITdata, Q.EITdata, ByteSize);
 	}
 	~eventData()
 	{

@@ -9,10 +9,10 @@ int eventData::CacheSize=0;
 eEPGCache *eEPGCache::instance;
 
 #define HILO(x) (x##_hi << 8 | x##_lo)
-
-eEPGCache::eEPGCache():eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xC0)
+eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
+//eEPGCache::eEPGCache():eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xC0)
 {
-	qDebug("[EPGC] Initialized EPGCache");
+	printf("[EPGC] Initialized EPGCache\n");
 	isRunning=0;
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*, int)), SLOT(enterService(eService*, int)));
 	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(stopEPG()));
@@ -29,8 +29,10 @@ void eEPGCache::timeUpdated()
 
 int eEPGCache::sectionRead(__u8 *data)
 {
-		if (*data >= 0x70 || *data < 0x50)
+/*		if (*data >= 0x70 || *data < 0x50)
 			return 0;
+
+		eventData::TYP type = (*data < 0x60)?eventData::FULL:eventData::SHORT;*/
 
 		eit_t *eit = (eit_t*) data;
 		int service_id=HILO(eit->service_id);
@@ -42,17 +44,21 @@ int eEPGCache::sectionRead(__u8 *data)
 		int duration;
 		sref SREF = sref(original_network_id,service_id);
 		time_t TM;
+		updateMap::iterator It;
 		
-  	updateMap::iterator It = temp.find(SREF);
-			
-		if (It == temp.end())
-		  temp[SREF] = time(0)+eDVB::getInstance()->time_difference;
+/*		if (type == eventData::FULL)  // only sections with full descr update in 60 min	
+		{*/
+			It = temp.find(SREF);
+	
+			if (It == temp.end())
+			  temp[SREF] = time(0)+eDVB::getInstance()->time_difference;
+//		}
 
 		if (firstEventId == HILO( eit_event->event_id ) )  // EPGCache around....
 		{
 			stopEPG();
 			zapTimer.start(UPDATE_INTERVAL, 1);
-			qDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
+			printf("[EPGC] next update in %i min\n", UPDATE_INTERVAL / 60000);
 			
 			It = temp.begin();
 
@@ -64,9 +70,8 @@ int eEPGCache::sectionRead(__u8 *data)
 
 			return -1;
 		}
-		else
-			if (!firstEventId)
-					firstEventId = HILO( eit_event->event_id );
+		else if (!firstEventId)
+			firstEventId = HILO( eit_event->event_id );
 
 		while (ptr<len)
 		{
@@ -77,12 +82,20 @@ int eEPGCache::sectionRead(__u8 *data)
 
 			if ( (time(0)+eDVB::getInstance()->time_difference) <= (TM+duration))  // old events should not be cached
 			{
-				// hier wird entweder eine vorhanden eventMap zurück gegeben.. oder
-				// auf jeden Fall eine erzeugt !
+				// hier wird entweder eine eventMap zurück gegeben.. entweder eine vorhandene..
+				// oder eine durch [] erzeugte
 				eventMap &service = eventDB[SREF];
+				
+				eventMap::iterator It = service.find(TM);
 
-				if (service.find(TM) == service.end())   // event still not cached
-					eventDB[SREF][TM]=new eventData(eit_event, eit_event_size);
+				if (It == service.end())   // event still not cached
+					eventDB[SREF][TM]=new eventData(eit_event, eit_event_size/*, type*/);
+/*				else
+					if (type == eventData::FULL && It->second->type == eventData::SHORT)
+					{   // old cached SHORT event should now updated to FULL Event
+						delete It->second;
+						It->second = new eventData(eit_event, eit_event_size, type);
+					}*/
 			}
 			ptr += eit_event_size;
 			((__u8*)eit_event)+=eit_event_size;
@@ -94,7 +107,7 @@ void eEPGCache::cleanLoop()
 {
 	if (!eventDB.empty())
 	{
-		qDebug("[EPGC] start cleanloop");
+		printf("[EPGC] start cleanloop\n");
 		const eit_event_struct* cur_event;
 		int duration;
 		time_t TM;
@@ -109,7 +122,7 @@ void eEPGCache::cleanLoop()
 
 				if ( (time(0)+eDVB::getInstance()->time_difference) > (TM+duration))  // outdated entry ?
 				{
-					qDebug("[EPGC] delete old event");
+					printf("[EPGC] delete old event\n");
 					delete It->second;				// release Heap Memory for this entry   (new ....)
 					DBIt->second.erase(It);   // remove entry from map
 					It=DBIt->second.begin();  // start at begin
@@ -118,21 +131,16 @@ void eEPGCache::cleanLoop()
 					It=DBIt->second.end();  // ends this clean loop
 			}
 
-		qDebug("[EPGC] stop cleanloop");
-		qDebug("[EPGC] %i bytes for cache used", eventData::CacheSize);
+		printf("[EPGC] stop cleanloop\n");
+		printf("[EPGC] %i bytes for cache used\n", eventData::CacheSize);
 	}
 }
 
 eEPGCache::~eEPGCache()
 {
-	eventCache::iterator DBIt = eventDB.begin();
-	eventMap::iterator It;
-	for (;DBIt != eventDB.end(); DBIt++)
-	{
-		It = DBIt->second.begin();
-		for (;It != DBIt->second.end(); It++)
+	for (eventCache::iterator evIt = eventDB.begin(); evIt != eventDB.end(); evIt++)
+		for (eventMap::iterator It = evIt->second.begin(); It != evIt->second.end(); It++)
 			delete It->second;
-	}
 }
 
 /*EITEvent *eEPGCache::lookupEvent(int original_network_id, int service_id, int event_id)

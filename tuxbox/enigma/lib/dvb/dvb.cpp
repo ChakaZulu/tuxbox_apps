@@ -51,12 +51,12 @@ static void Indent(FILE *out, int ind)
 		fprintf(out, "\t");
 }
 
-static QString escape(const QString s)
+static std::string escape(const std::string s)
 {
-	QString t;
+	std::string t;
 	for (unsigned int i=0; i<s.length(); i++)
 	{
-		QChar c=s[i];
+		char c = s[i];
 		switch (c)
 		{
 		case '&':
@@ -86,7 +86,7 @@ void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 
 int eTransponder::cable::tune(eTransponder *trans)
 {
-	qDebug("[TUNE] tuning to %d/%d\n", frequency, symbol_rate);
+	printf("[TUNE] tuning to %d/%d\n", frequency, symbol_rate);
 	int inv=0;
 	return eFrontend::fe()->tune_qam(trans, frequency, symbol_rate, fec_inner, inv, modulation);
 }
@@ -103,7 +103,7 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 
 int eTransponder::satellite::tune(eTransponder *trans)
 {
-	qDebug("[TUNE] tuning to %d/%d/%s/%d@%d", frequency, symbol_rate, polarisation?"V":"H", fec, sat);
+	printf("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, sat);
 	int inv=0;
 	return eFrontend::fe()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, sat);
 }
@@ -120,25 +120,22 @@ eService::eService(int transport_stream_id, int original_network_id, SDTEntry *s
 	update(sdtentry);
 }
 
-eBouquet::eBouquet(int bouquet_id, QString bouquet_name): bouquet_id(bouquet_id), bouquet_name(bouquet_name)
-{
-	list.setAutoDelete(true);
-}
 
 void eBouquet::add(int transport_stream_id, int original_network_id, int service_id)
 {
 	remove(transport_stream_id, original_network_id, service_id);
-	list.append(new eServiceReference(transport_stream_id, original_network_id, service_id));
+	list.push_back(new eServiceReference(transport_stream_id, original_network_id, service_id));
 }
 
 int eBouquet::remove(int transport_stream_id, int original_network_id, int service_id)
 {
-	for (QListIterator<eServiceReference> i(list); i.current(); ++i)
-		if ((i.current()->transport_stream_id==transport_stream_id) &&
-		    (i.current()->original_network_id==original_network_id) &&
-		    (i.current()->service_id==service_id))
+	for (ServiceReferenceIterator i = list.begin(); i != list.end(); i++)
+		if (((*i)->transport_stream_id==transport_stream_id) &&
+		    ((*i)->original_network_id==original_network_id) &&
+		    ((*i)->service_id==service_id))
 		{
-			list.remove(i.current());
+			delete *i;
+			list.erase(i);
 			return 0;
 		}
 	return -ENOENT;
@@ -205,7 +202,7 @@ void eService::update(SDTEntry *sdtentry)
 {
 	if (sdtentry->service_id != service_id)
 	{
-		qDebug("tried to update sid %x with sdt-sid %x", service_id, sdtentry->service_id);
+		printf("tried to update sid %x with sdt-sid %x", service_id, sdtentry->service_id);
 		return;
 	}
 	service_name="unknown";
@@ -220,7 +217,7 @@ void eService::update(SDTEntry *sdtentry)
 			service_provider=nd->service_provider;
 			service_type=nd->service_type;
 		}
-//	qDebug("%04x:%04x %02x %s", transport_stream_id, service_id, service_type, (const char*)service_name);
+//	printf("%04x:%04x %02x %s", transport_stream_id, service_id, service_type, (const char*)service_name);
 }
 
 eTransponderList::eTransponderList()

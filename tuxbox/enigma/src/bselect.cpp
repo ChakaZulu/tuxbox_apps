@@ -4,27 +4,28 @@
 #include "edvb.h"
 #include "dvb.h"
 #include "eskin.h"
+#include <list>
 
 void eBouquetSelector::fillBouquetList()
 {
 	list->clearList();
 	if (eDVB::getInstance()->getBouquets())
 	{
-		for (QListIterator<eBouquet> i(*eDVB::getInstance()->getBouquets()); i.current(); ++i)
+		for (BouquetIterator i = eDVB::getInstance()->getBouquets()->begin(); i != eDVB::getInstance()->getBouquets()->end(); ++i)
 		{
 			int usable=0;
-			for (QListIterator<eServiceReference> s(i.current()->list); (!usable) && s.current(); ++s)
+			for (std::list<eServiceReference*>::iterator s = (*i)->list.begin(); (!usable) && s != (*i)->list.end(); s++)
 			{
-				if (!s.current()->service)
+				if (!(*s)->service)
 					continue;
-				int st=s.current()->service->service_type;
+				int st=(*s)->service->service_type;
 				if ((st==1) || (st==2) || (st==4))
 					usable=1;
 			}
 			if (!usable)
 				continue;
-			eBouquet *c=i.current();
-			eListboxEntry *l=new eListboxEntryText(list, c->bouquet_name, 0, c);
+			eBouquet *c=*i;
+			eListboxEntry *l=new eListboxEntryText(list, c->bouquet_name.c_str(), 0, c);
 			if (c==result)
 				list->setCurrent(l);
 		}

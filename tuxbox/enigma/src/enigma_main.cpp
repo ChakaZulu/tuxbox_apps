@@ -575,7 +575,7 @@ void eZapMain::handleNVODService(SDTEntry *sdtentry)
 		if (i.current()->Tag()==DESCR_NVOD_REF)
 			for (QListIterator<NVODReferenceEntry> e(((NVODReferenceDescriptor*)i.current())->entries); e.current(); ++e)
 				nvodsel.add(e);
-	nvodsel.setText(eDVB::getInstance()->service->service_name);
+	nvodsel.setText(eDVB::getInstance()->service->service_name.c_str());
 }
 
 void eZapMain::keyDown(int code)
@@ -801,7 +801,7 @@ void eZapMain::keyUp(int code)
 			EIT *eit=eDVB::getInstance()->getEIT();
 			QList<EITEvent> dummy;
 			{
-				eEventDisplay ei(service->service_name, eit?&eit->events:&dummy);
+				eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
 				if (eit)
 					eit->unlock();		// HIER liegt der hund begraben.
 	
@@ -820,7 +820,7 @@ void eZapMain::keyUp(int code)
 			events.append( new EITEvent(*(It++)->second));
 			if (It != pMap->end())  // sicher ist sicher !
 				events.append( new EITEvent(*It->second));
-			eEventDisplay ei(service->service_name, &events);			
+			eEventDisplay ei(service->service_name.c_str(), &events);			
 			actual_eventDisplay=&ei;
 			ei.show();
 			ei.exec();
@@ -844,7 +844,7 @@ void eZapMain::serviceChanged(eService *service, int err)
 	if (service->service_type==4)
 		flags|=ENIGMA_NVOD;
 
-	ChannelName->setText(service->service_name);
+	ChannelName->setText(service->service_name.c_str());
 	
 	switch (err)
 	{

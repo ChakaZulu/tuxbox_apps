@@ -24,7 +24,7 @@ QString eListboxEntryEPG::getText(int col=0) const
 
 void eEPGWindow::fillEPGList()
 {
-	setText("EPG - "+current->service_name);
+	setText(QString("EPG - ")+current->service_name.c_str());
 	qDebug("get EventMap for onid: %02x, sid: %02x\n", current->original_network_id, current->service_id);
 	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
 	eventMap::const_iterator It;
@@ -35,7 +35,7 @@ void eEPGWindow::fillEPGList()
 void eEPGWindow::entrySelected(eListboxEntry *entry)
 {
 	hide();
-	eEventDisplay ei(eDVB::getInstance()->service->service_name, 0, ((eListboxEntryEPG*)entry)->event);
+	eEventDisplay ei(eDVB::getInstance()->service->service_name.c_str(), 0, ((eListboxEntryEPG*)entry)->event);
 	ei.show();
 	ei.exec();
 	ei.hide();

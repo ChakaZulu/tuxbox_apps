@@ -49,7 +49,7 @@ void eZapLCDMain::volumeUpdate(int vol)
 void eZapLCDMain::serviceChanged(eService *service, int)
 {
 	if (service)
-		ServiceName->setText(service->service_name);
+		ServiceName->setText(service->service_name.c_str());
 	else
 		ServiceName->setText("unknown");
 }

@@ -26,10 +26,15 @@ public:
 class tpPacket
 {
 public:
-	tpPacket(QString name, int scanflags): name(name), scanflags(scanflags) { possibleTransponders.setAutoDelete(true); }
+	tpPacket(QString name, int scanflags): name(name), scanflags(scanflags) {}
 	QString name;
 	int scanflags;
-	QList<eTransponder> possibleTransponders;
+	std::list<eTransponder*> possibleTransponders;
+	~tpPacket()
+	{
+		for (std::list<eTransponder*>::iterator It = possibleTransponders.begin(); It != possibleTransponders.end(); It++)
+			delete *It;
+	}
 };
 
 class tsFindInit: public eWidget

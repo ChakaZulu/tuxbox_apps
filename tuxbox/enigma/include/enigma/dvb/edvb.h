@@ -6,7 +6,13 @@
 #include "esection.h"
 #include <stdio.h>
 #include "nconfig.h"
+#include <list>
+#include <string>
 
+#define IntIterator std::list<int>::iterator
+#define BouquetIterator std::list<eBouquet*>::iterator
+#define CAIterator std::list<eDVB::CA*>::iterator
+					
 class eService;
 class eTransponder;
 class eTransponderList;
@@ -48,20 +54,20 @@ protected:
 		/** the main transponder/servicelist */
 	eTransponderList *transponderlist;
 	
-	QList<eBouquet> bouquets;
+	std::list<eBouquet*> bouquets;
 	void removeDVBBouquets();
 	void addDVBBouquet(BAT *bat);
 	eBouquet *getBouquet(int bouquet_id);
-	eBouquet *getBouquet(QString bouquet_name);
-	eBouquet *createBouquet(int bouquet_id, QString bouquet_name);
-	eBouquet *createBouquet(QString bouquet_name);
+	eBouquet *getBouquet(std::string bouquet_name);
+	eBouquet *createBouquet(int bouquet_id, std::string bouquet_name);
+	eBouquet *createBouquet(std::string bouquet_name);
 	int getUnusedBouquetID(int range);
 	
 	void revalidateBouquets();
 
 		/** the current transponder with errorcode */
 	eTransponder *currentTransponder;
-	const QList<eTransponder> *initialTransponders;
+	const std::list<eTransponder*> *initialTransponders;
 	int currentTransponderState;
 
 		/** tables for current service/transponder */
@@ -88,20 +94,20 @@ public:
 		int casysid, ecmpid, emmpid;
 	};
 	
-	QList<int> availableCASystems;
-	QList<CA> calist;		/** currently used ca-systems */
+	std::list<int> availableCASystems;
+	std::list<CA*> calist;		/** currently used ca-systems */
 	
 	int time_difference;
 
 protected:
 
-	int checkCA(QList<CA> &list, const QList<Descriptor> &descriptors);
+	int checkCA(std::list<CA*> &list, const QList<Descriptor> &descriptors);
 		/* SCAN internal */
 	int scanOK;	// 1 SDT, 2 NIT, 4 BAT, 8 oNIT
 	int currentONID, scanflags;
 	eTransponder *scannedTransponder;
 	void scanEvent(int event);
-	QList<int> knownNetworks;
+	std::list<int> knownNetworks;
 
 		/* SWITCH internal */
 
@@ -188,25 +194,25 @@ signals:
 
 		/* SCAN - public */
 public:
-	int startScan(const QList<eTransponder> &initital, int flags);	/** -> stateScanComplete */
+	int startScan(const std::list<eTransponder*> &initital, int flags);	/** -> stateScanComplete */
 
 		/* SERVICE SWITCH - public */
 	int switchService(eService *service); /** -> eventServiceSwitched */
 	int switchService(int nservice_id, int noriginal_network_id, int ntransport_stream_id, int nservice_type); /** -> stateServiceSwitched */
 
 public:
-	QString getVersion();
+	std::string getVersion();
 	eDVB();
 	~eDVB();
 	eTransponderList *getTransponders();
-	QList<eBouquet> *getBouquets();
+	std::list<eBouquet*> *getBouquets();
 	static eDVB *getInstance()
 	{
 		return instance;
 	}
 	void setTransponders(eTransponderList *tlist);
 
-	QString getInfo(const char *info);
+	std::string getInfo(const char *info);
 	
 	void setPID(PMTEntry *entry);
 	void setDecoder();

@@ -104,7 +104,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	service_name[0]->resize(QSize(140, fs+5));
 
 	service_name[1]=new eLabel(this);
-	service_name[1]->setText(cservice?(cservice->service_name):QString("--"));
+	service_name[1]->setText(cservice?(cservice->service_name.c_str()):"--");
 	service_name[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	service_name[1]->move(QPoint(185, yOffs+2));
 	service_name[1]->resize(QSize(260, fs+5));
@@ -116,7 +116,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	service_provider[0]->resize(QSize(140, fs+5));
 	
 	service_provider[1]=new eLabel(this);
-	service_provider[1]->setText(cservice?(cservice->service_provider):QString("--"));
+	service_provider[1]->setText(cservice?cservice->service_provider.c_str():"--");
 	service_provider[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	service_provider[1]->move(QPoint(185, yOffs+2));
 	service_provider[1]->resize(QSize(260, fs+5));
@@ -277,7 +277,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	
 	int numsys=0;
 	
-	for (QListIterator<int> i(eDVB::getInstance()->availableCASystems); i.current(); ++i)
+	for (IntIterator i = eDVB::getInstance()->availableCASystems.begin(); i != eDVB::getInstance()->availableCASystems.end(); ++i)
 	{
 		if (!numsys)
 			availcas="";
@@ -286,7 +286,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 			availcas+="...\n";
 			break;
 		}
-		availcas+=QString().sprintf("%04xh:  ", *i.current())+getCAName(*i.current())+"\n";
+		availcas+= QString().sprintf( "%04xh:  %s\n", *i, (const char*) getCAName(*i));
 	}
 	if (!numsys)
 		numsys++;
@@ -307,7 +307,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	
 	numsys=0;
 	
-	for (QListIterator<eDVB::CA> i(eDVB::getInstance()->calist); i.current(); ++i)
+	for (CAIterator i = eDVB::getInstance()->calist.begin(); i != eDVB::getInstance()->calist.end(); ++i)
 	{
 		if (!numsys)
 			usedcas="";
@@ -316,8 +316,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 			usedcas+="...\n";
 			break;
 		}
-		usedcas+=QString().sprintf("%04xh:  ", i.current()->casysid)+
-			getCAName(i.current()->casysid) + "\n";
+		usedcas+=QString().sprintf("%04xh:  ", (*i)->casysid)+getCAName((*i)->casysid) + "\n";
 	}
 	
 	if (!numsys)

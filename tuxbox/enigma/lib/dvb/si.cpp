@@ -837,10 +837,7 @@ EITEvent::EITEvent(const eit_event_struct *event)
 	descriptor.setAutoDelete(true);
 	event_id=HILO(event->event_id);
 	if (event->start_time_5!=0xFF)
-	{
-		start_time=parseDVBtime(event->start_time_1, event->start_time_2, event->start_time_3, 
-			event->start_time_4, event->start_time_5);
-	}
+		start_time=parseDVBtime(event->start_time_1, event->start_time_2, event->start_time_3,event->start_time_4, event->start_time_5);
 	else
 		start_time=-1;
 	if ((event->duration_1==0xFF) || (event->duration_2==0xFF) || (event->duration_3==0xFF))

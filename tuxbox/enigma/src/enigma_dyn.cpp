@@ -10,6 +10,7 @@
 #include "http_dyn.h"
 #include "dvb.h"
 #include "edvb.h"
+#include <list>
 
 #include <config.h>
 
@@ -99,7 +100,7 @@ struct listService: public std::unary_function<std::pair<sref,eService>&,void>
 			return;
 		QString sc;
 		sc.sprintf("%x:%x:%x:%x", service.service_id, service.transport_stream_id, service.original_network_id, service.service_type);
-		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service.service_name + "</a></td>"
+		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service.service_name.c_str() + "</a></td>"
 						"<td>" + QString().setNum(service.service_type, 0x10) + "</td></tr>\n";
 	}
 };
@@ -192,9 +193,8 @@ static QString getPMT(QString request, QString path, QString opt, eHTTPConnectio
 static QString version(QString request, QString path, QString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/plain";
-	QString result="";
-		"EliteDVB Version " + eDVB::getInstance()->getVersion() + "\r\n"
-		"eZap Version " + eZap::getInstance()->getVersion() + "\r\n";
+	QString result;
+	result.sprintf("EliteDVB Version : %s\r\n, eZap Version : %s\r\n",eDVB::getInstance()->getVersion().c_str(), (const char*) eZap::getInstance()->getVersion());
 	return result;
 }
 
@@ -308,14 +308,14 @@ static QString filter_string(QString string)
 
 eBouquet *getBouquet(int bouquet_id)
 {
-	QList<eBouquet> bouquets;
-	
-	bouquets=*eDVB::getInstance()->getBouquets();
+	std::list<eBouquet*>* b;
+	b=eDVB::getInstance()->getBouquets();
 
-        for (QListIterator<eBouquet> i(bouquets); i.current(); ++i)
-                if (i.current()->bouquet_id==bouquet_id)
-                        return i.current();
-        return 0;
+	for (BouquetIterator It = b->begin(); It != b->end(); It++)
+    if ((*It)->bouquet_id == bouquet_id)
+       return *It;
+	
+	return 0;
 }
 
 
@@ -360,65 +360,29 @@ static QString getContent(QString mode, int bouquetid)
 {
 	QString result="";
 	QString tmp="";
-	QList<eBouquet> bouquets;
-	QList<eServiceReference> esref;
+	std::list<eBouquet*>* bouquets;
+	std::list<eServiceReference*> esref;
 	eService *es;
 
-	bouquets=*eDVB::getInstance()->getBouquets();
+	bouquets=eDVB::getInstance()->getBouquets();
  
-	bouquets.sort();
+	bouquets->sort();
 
 	if(mode=="tv")
 	{
 		result+="<form action=\"/?mode=tv\" method=\"get\" name=\"bouquetsel\">";
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageTV(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
-		for(QListIterator<eBouquet> i(bouquets); i.current(); ++i)
+		for(BouquetIterator i = bouquets->begin(); i != bouquets->end(); ++i)
 		{
-			tmp=filter_string(i.current()->bouquet_name);
+			tmp=filter_string((*i)->bouquet_name.c_str());
 			if(tmp.find("[TV]")>-1)
 			{
-				result+="<option value=\"" + QString().setNum(i.current()->bouquet_id, 10) + "\"";
-				if(i.current()->bouquet_id==bouquetid) 
+				result+="<option value=\"" + QString().setNum((*i)->bouquet_id, 10) + "\"";
+				if((*i)->bouquet_id==bouquetid)
 				{
 					result+=" selected";
 				}
-				result+=">" + i.current()->bouquet_name + "</option>";
-		}
-	}
-	result+="</select>";
-	result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
-	eBouquet *act;
-	act=getBouquet(bouquetid);
-	esref=act->list;
-	for(QListIterator<eServiceReference> j(esref); j.current(); ++j)
-	{
-		es=j.current()->service;
-		result+="<option value=\"";
-		tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
-		result+=tmp;
-		result+="\">";
-		result+=filter_string(es->service_name);
-		result+="</option>";
-	}
-	result+="</select>";
-	result+="</form>";
-	}
-
-	if(mode=="radio")
-	{
-		result+="<form action=\"/?mode=radio\" method=\"get\" name=\"bouquetsel\">";
-		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
-		for(QListIterator<eBouquet> i(bouquets); i.current(); ++i)
-		{
-			tmp=filter_string(i.current()->bouquet_name);
-			if(tmp.find("[Radio]")>-1)
-			{
-				result+="<option value=\"" + QString().setNum(i.current()->bouquet_id, 10) + "\"";
-				if(i.current()->bouquet_id==bouquetid) 
-				{
-					result+=" selected";
-				}
-				result+=">" + i.current()->bouquet_name + "</option>";
+				result+=">" + QString((*i)->bouquet_name.c_str()) + "</option>";
 			}
 		}
 		result+="</select>";
@@ -426,23 +390,56 @@ static QString getContent(QString mode, int bouquetid)
 		eBouquet *act;
 		act=getBouquet(bouquetid);
 		esref=act->list;
-		for(QListIterator<eServiceReference> j(esref); j.current(); ++j)
+		for(std::list<eServiceReference*>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
-			es=j.current()->service;
+			es=(*j)->service;
 			result+="<option value=\"";
 			tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
 			result+=tmp;
 			result+="\">";
-			result+=filter_string(es->service_name);
+			result+=filter_string(es->service_name.c_str());
 			result+="</option>";
 		}
 		result+="</select>";
 		result+="</form>";
 	}
 
-
-
-	 if(result.length()<3)
+	if(mode=="radio")
+	{
+		result+="<form action=\"/?mode=radio\" method=\"get\" name=\"bouquetsel\">";
+		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
+		for(BouquetIterator i = bouquets->begin(); i != bouquets->end(); ++i)
+		{
+			tmp=filter_string((*i)->bouquet_name.c_str());
+			if(tmp.find("[RADIO]")>-1)
+			{
+				result+="<option value=\"" + QString().setNum((*i)->bouquet_id, 10) + "\"";
+				if((*i)->bouquet_id==bouquetid)
+				{
+					result+=" selected";
+				}
+				result+=">" + QString((*i)->bouquet_name.c_str()) + "</option>";
+			}
+			result+="</select>";
+			result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
+			eBouquet *act;
+			act=getBouquet(bouquetid);
+			esref=act->list;
+			for(std::list<eServiceReference*>::iterator j = esref.begin(); j != esref.end() ; j++)
+			{
+				es=(*j)->service;
+				result+="<option value=\"";
+				tmp.sprintf("%x:%x:%x:%x", es->service_id, es->transport_stream_id, es->original_network_id, es->service_type);
+				result+=tmp;
+				result+="\">";
+				result+=filter_string(es->service_name.c_str());
+				result+="</option>";
+			}
+			result+="</select>";
+			result+="</form>";
+		}
+	}
+	if(result.length()<3)
 		result="not ready yet";
 
 	return result;
@@ -453,7 +450,7 @@ static QString getCurService()
 	eService *current;
 	current=eDVB::getInstance()->service;
 	if(current)
-		return current->service_name;
+		return current->service_name.c_str();
 	else
 		return "no channel selected";
 }

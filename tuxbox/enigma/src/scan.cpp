@@ -80,7 +80,7 @@ void tsFindInit::scanPacket()
 		return;
 	}
 	body->setText("scanning " + packets.current()->name);
-	packets.current()->possibleTransponders.first()->tune();
+	packets.current()->possibleTransponders.front()->tune();
 }
 
 int tsFindInit::eventFilter(const eWidgetEvent &event)
@@ -101,50 +101,50 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 			for (f=330000; f<460000; f+=8000)
 			{
 				t=new eTransponder(-1, f/8000); t->setCable(f, 6900000);
-				p->possibleTransponders.append(t);
+				p->possibleTransponders.push_back(t);
 			}
-			t=new eTransponder(-1, -2); t->setCable(330000, 6875000); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -3); t->setCable(460000, 6900000); p->possibleTransponders.append(t);
+			t=new eTransponder(-1, -2); t->setCable(330000, 6875000); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -3); t->setCable(460000, 6900000); p->possibleTransponders.push_back(t);
 			packets.append(p);
 			break;
 		case eFrontend::feSatellite:
 			p=new tpPacket("Astra 19.2E", SCAN_SKIP);
-			t=new eTransponder(0x0009, 0x0085); t->setSatellite(12422000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(0x0454, 0x0001); t->setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(0x0441, 0x0001); t->setSatellite(12187500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			packets.append(p);
+			t=new eTransponder(0x0009, 0x0085); t->setSatellite(12422000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(0x0454, 0x0001); t->setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(0x0441, 0x0001); t->setSatellite(12187500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			packets.append	(p);
 
 			p=new tpPacket("Hotbird 13.0E", SCAN_ONIT);
-			t=new eTransponder(-1, -1); t->setSatellite(12692000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -2); t->setSatellite(12539000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -3); t->setSatellite(11746000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -4); t->setSatellite(12168500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -5); t->setSatellite(12034000, 27500000, eFrontend::polVert, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -6); t->setSatellite(11919000, 27500000, eFrontend::polVert, 2, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -7); t->setSatellite(11804000, 27500000, eFrontend::polVert, 2, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -8); t->setSatellite(12169000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -9); t->setSatellite(12539000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -10); t->setSatellite(12111000, 27500000, eFrontend::polVert, 3, 0); p->possibleTransponders.append(t);
+			t=new eTransponder(-1, -1); t->setSatellite(12692000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -2); t->setSatellite(12539000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -3); t->setSatellite(11746000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -4); t->setSatellite(12168500, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -5); t->setSatellite(12034000, 27500000, eFrontend::polVert, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -6); t->setSatellite(11919000, 27500000, eFrontend::polVert, 2, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -7); t->setSatellite(11804000, 27500000, eFrontend::polVert, 2, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -8); t->setSatellite(12169000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -9); t->setSatellite(12539000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -10); t->setSatellite(12111000, 27500000, eFrontend::polVert, 3, 0); p->possibleTransponders.push_back(t);
 			packets.append(p);
 	
 /*			p=new tpPacket("Astra 24.2E", SCAN_ONIT);
-			t=new eTransponder(-1, -1); t->setSatellite(11913000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.append(t);
-			packets.append(p); */
+			t=new eTransponder(-1, -1); t->setSatellite(11913000, 27500000, eFrontend::polHor, 3, 0); p->possibleTransponders.push_back(t);
+			packets.push_back(p); */
 	
 			p=new tpPacket("Astra 2 28E", 0);
-			t=new eTransponder(-1, -2); t->setSatellite(11954000, 27500000, eFrontend::polHor, 2, 0); p->possibleTransponders.append(t);
-			t=new eTransponder(-1, -3); t->setSatellite(12051000, 27500000, eFrontend::polVert, 2, 0); p->possibleTransponders.append(t);
+			t=new eTransponder(-1, -2); t->setSatellite(11954000, 27500000, eFrontend::polHor, 2, 0); p->possibleTransponders.push_back(t);
+			t=new eTransponder(-1, -3); t->setSatellite(12051000, 27500000, eFrontend::polVert, 2, 0); p->possibleTransponders.push_back(t);
 			packets.append(p);
 	
 			p=new tpPacket("andere...", SCAN_ONIT);
-			t=new eTransponder(-1, -1); t->setSatellite(11042000,  4340000, eFrontend::polHor, 4, 0); p->possibleTransponders.append(t); // eut w2 16E
-			t=new eTransponder(-1, -2); t->setSatellite(11010000,  2928000, eFrontend::polHor, 4, 0); p->possibleTransponders.append(t); // eut w1 10E
-			t=new eTransponder(-1, -3); t->setSatellite(11386000, 27500000, eFrontend::polHor, 4, 0); p->possibleTransponders.append(t); // eut w3 7E
+			t=new eTransponder(-1, -1); t->setSatellite(11042000,  4340000, eFrontend::polHor, 4, 0); p->possibleTransponders.push_back(t); // eut w2 16E
+			t=new eTransponder(-1, -2); t->setSatellite(11010000,  2928000, eFrontend::polHor, 4, 0); p->possibleTransponders.push_back(t); // eut w1 10E
+			t=new eTransponder(-1, -3); t->setSatellite(11386000, 27500000, eFrontend::polHor, 4, 0); p->possibleTransponders.push_back(t); // eut w3 7E
 	
-			t=new eTransponder(-1, -4); t->setSatellite(12245000, 27500000, eFrontend::polVert, 5, 0); p->possibleTransponders.append(t); // sirius 5E
-			t=new eTransponder(-1, -5); t->setSatellite(10974000,  9000000, eFrontend::polVert, 5, 0); p->possibleTransponders.append(t); // thor 1w
-			t=new eTransponder(-1, -6); t->setSatellite(12245000, 27500000, eFrontend::polVert, 5, 0); p->possibleTransponders.append(t); // sirius 5E
-			packets.append(p); 
+			t=new eTransponder(-1, -4); t->setSatellite(12245000, 27500000, eFrontend::polVert, 5, 0); p->possibleTransponders.push_back(t); // sirius 5E
+			t=new eTransponder(-1, -5); t->setSatellite(10974000,  9000000, eFrontend::polVert, 5, 0); p->possibleTransponders.push_back(t); // thor 1w
+			t=new eTransponder(-1, -6); t->setSatellite(12245000, 27500000, eFrontend::polVert, 5, 0); p->possibleTransponders.push_back(t); // sirius 5E
+			packets.append(p);
 			break;
 	
 		default:
@@ -178,19 +178,24 @@ int tsFindInit::eventFilter(const eWidgetEvent &event)
 
 void tsFindInit::tunedIn(eTransponder *trans, int error)
 {
+  static std::list<eTransponder*>::iterator current = packets.current()->possibleTransponders.begin();
+
 	if (!packets.current())
 		return;
-	if (trans != packets.current()->possibleTransponders.current())
+	
+	if (trans != *current)
 		return;
+
 	if (!error)
 	{
 		state=sFound;
+		body->setFlags(RS_WRAP);
 		body->setText("Es wurde ein Transponder gefunden, die Suche kann nun beginnen.");
 		result=packets.take();
 	} else
 	{
-		eTransponder *n;
-		if (!(n=packets.current()->possibleTransponders.next()))
+		eTransponder *n = ++current != packets.current()->possibleTransponders.end()?*current:0;
+		if (n)
 		{
 			packets.next();
 			scanPacket();
@@ -277,23 +282,23 @@ tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(
 {
 	transp_found=new eLabel(this);
 	transp_found->move(QPoint(10, 0));
-	transp_found->resize(QSize(380, 30));
+	transp_found->resize(QSize(440, 30));
 
 	transp_scanned=new eLabel(this);
 	transp_scanned->move(QPoint(10, 30));
-	transp_scanned->resize(QSize(380, 30));
+	transp_scanned->resize(QSize(440, 30));
 
 	known_services=new eLabel(this);
 	known_services->move(QPoint(10, 60));
-	known_services->resize(QSize(380, 30));
+	known_services->resize(QSize(440, 30));
 
 	bar=new eProgress(this);
 	bar->move(QPoint(10, 90));
-	bar->resize(QSize(380, 20));
+	bar->resize(QSize(440, 20));
 
 	eta=new eLabel(this);
 	eta->move(QPoint(10, 120));
-	eta->resize(QSize(380, 30));
+	eta->resize(QSize(440, 30));
 
 	connect(eDVB::getInstance(), SIGNAL(stateChanged(int)), SLOT(stateChanged(int)));
 	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
@@ -310,6 +315,7 @@ int tsDoScan::eventFilter(const eWidgetEvent &event)
 		delete init->result;
 		fexp=3*60;
 		etatimer.start(1000);
+
 		break;
 	case eWidgetEvent::execDone:
 		etatimer.stop();
@@ -339,7 +345,7 @@ TransponderScan::TransponderScan()
 	window=new eWindow(0);
 	window->setText("Transponder Scan");
 	window->move(QPoint(100, 100));
-	window->resize(QSize(400, 300));
+	window->resize(QSize(460, 300));
 	
 	progress=new eProgress(window);
 	progress->move(QPoint(60, window->getClientSize().height()-25));
@@ -368,8 +374,7 @@ TransponderScan::TransponderScan()
 	s->resize(QSize(window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
-
-	s=new tsText("ÜBERSTANDEN!", 
+	s=new tsText("ÜBERSTANDEN!",
 		"Herzlichen Glückwunsch!\n"
 		"Sie haben es heil überstanden!\n\n"
 		"Es erwartet sie nun eine schier unglaubliche\nProgrammnvielfalt! "

@@ -8,6 +8,7 @@
 #include "epgcache.h"
 #include <algorithm>
 #include "epgwindow.h"
+#include <list>
 
 eListboxEntryService::eListboxEntryService(eService &service, eListbox *listbox): eListboxEntry(listbox), service(service)
 {
@@ -190,10 +191,10 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 	list->clearList();
 	if (bouquet)
 	{
-		setText(bouquet->bouquet_name);
-		for (QListIterator<eServiceReference> i(bouquet->list); i.current(); ++i)
+		setText(bouquet->bouquet_name.c_str());
+		for (std::list<eServiceReference*>::iterator i = bouquet->list.begin(); i != bouquet->list.end(); i++)
 		{
-			eService &c=*i.current()->service;
+			eService &c = *(*i)->service;
 			if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
 				return;
 			eListboxEntry *l=new eListboxEntryService(c, list);
