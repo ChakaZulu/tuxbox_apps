@@ -154,6 +154,7 @@ public:
 	std::list<audioStream> audioStreams;
 	
 	ePtrList<PMTEntry> videoStreams;
+	ePtrList<PMTEntry> subtitleStreams;
 
 #ifndef DISABLE_CI
 	eDVBCI *DVBCI;

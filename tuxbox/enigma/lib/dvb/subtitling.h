@@ -12,6 +12,7 @@ class eSubtitleWidget: public eWidget
 	void gotData(int);
 	eSocketNotifier *sn;
 	int fd;
+	int isvisible;
 	
 	subtitle_ctx *subtitle; // the subtitle context
 	
@@ -31,11 +32,14 @@ class eSubtitleWidget: public eWidget
 	unsigned char pesbuffer[65536];
 	int pos;
 	int peslen;
+	static eSubtitleWidget *instance;
+	int eventHandler(const eWidgetEvent &event);
 public:
 	void start(int pid, const std::set<int> &pageids);
 	void stop();
 	eSubtitleWidget();
 	~eSubtitleWidget();
+	static eSubtitleWidget *getInstance() { return instance; }
 };
 
 #endif

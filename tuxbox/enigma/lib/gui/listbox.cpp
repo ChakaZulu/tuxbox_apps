@@ -137,14 +137,14 @@ int eListBoxBase::setProperty(const eString &prop, const eString &value)
 	if (prop == "noPageMovement")
 	{
 		if (value == "off")
-			flags |= ~flagNoPageMovement;
+			flags &= ~flagNoPageMovement;
 		else
 			flags |= flagNoPageMovement;
 	}
 	else if (prop == "noUpDownMovement")
 	{
 		if (value == "off")
-			flags |= ~flagNoUpDownMovement;
+			flags &= ~flagNoUpDownMovement;
 		else
 			flags |= flagNoUpDownMovement;
 	}

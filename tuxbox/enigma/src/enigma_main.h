@@ -19,6 +19,7 @@
 #include <lib/dvb/service.h>
 #include <lib/gui/eprogress.h>
 #include <src/audio_dynamic.h>
+#include <lib/dvb/subtitling.h>
 
 class eProgress;
 
@@ -186,11 +187,14 @@ class eAudioSelector: public eListBoxWindow<AudioStream>
 	void selected(AudioStream *);
 	eAudioDynamicConfig *m_dyncfg;
 	int eventHandler(const eWidgetEvent &);
+	eListBox<eListBoxEntryText> *m_subtitles;
+	void subtitleSelected(eListBoxEntryText *entry);
 public:
 	eAudioSelector();
 	void clear();
 	void update(std::list<eDVBServiceController::audioStream>&);
 	void add(eDVBServiceController::audioStream &pmt);
+	void addSubtitle(const PMTEntry *entry);
 };
 
 class ePSAudioSelector: public eListBoxWindow<eListBoxEntryText>
@@ -316,8 +320,8 @@ private:
 		*DVRSpaceLeft;
 
 	eWidget *dvrInfoBar, *dvbInfoBar, *fileInfoBar;
-
-	eWidget *bla;  // not used
+	
+	eSubtitleWidget *subtitle;
 
 	int dvrfunctions;
 	int stateOSD;

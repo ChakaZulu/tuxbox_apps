@@ -16,6 +16,7 @@
 #include <lib/system/info.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/record.h>
+#include <lib/dvb/subtitling.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
@@ -651,6 +652,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 
 	audioStreams.clear();
 	videoStreams.clear();
+	subtitleStreams.clear();
 
 	ePtrList<PMTEntry>::iterator TTXIt=pmt->streams.end();
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
@@ -691,6 +693,9 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 								TTXIt = i;
 								teletext=pe;
 							}
+							break;
+						case DESCR_SUBTITLING:
+							subtitleStreams.push_back(pe);
 							break;
 						case DESCR_ISO639_LANGUAGE:
 							stream.text=getISO639Description(((ISO639LanguageDescriptor*)*ii)->language_code);

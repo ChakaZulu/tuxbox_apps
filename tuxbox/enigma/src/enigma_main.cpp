@@ -676,9 +676,51 @@ void ePSAudioSelector::add(unsigned int id)
 	list.endAtomic();
 }
 
+void eAudioSelector::subtitleSelected(eListBoxEntryText *entry)
+{
+	if (!entry)
+		return;
+	eServiceHandler *service=eServiceInterface::getInstance()->getService();
+	if (service)
+	{
+		PMTEntry *pe = (PMTEntry*)entry->getKey();
+		eSubtitleWidget *i = eSubtitleWidget::getInstance();
+		if (!i)
+			return;
+		if (pe)
+		{
+			std::set<int> pages; pages.insert(-1);
+			i->start(pe->elementary_PID, pages);
+		} else
+			i->stop();
+	}
+}
+
 void eAudioSelector::update(std::list<eDVBServiceController::audioStream>& lst)
 {
 	list.forEachEntry(updateAudioStream(lst));
+}
+
+extern eString getISO639Description(char *iso);
+
+void eAudioSelector::addSubtitle(const PMTEntry *entry)
+{
+	m_subtitles->show();
+	
+	eString description;
+	description.sprintf("PID %04x", entry->elementary_PID);
+	
+	for (ePtrList<Descriptor>::const_iterator ii(entry->ES_info); ii != entry->ES_info.end(); ++ii)
+	{
+		switch (ii->Tag())
+		{
+		case DESCR_ISO639_LANGUAGE:
+			description=getISO639Description(((ISO639LanguageDescriptor*)*ii)->language_code);
+			break;
+		}
+	}
+	
+	new eListBoxEntryText(m_subtitles, description, (void*)entry );
 }
 
 int eAudioSelector::eventHandler(const eWidgetEvent &e)
@@ -717,14 +759,30 @@ eAudioSelector::eAudioSelector()
 	CONNECT(list.selected, eAudioSelector::selected);
 	list.selchanged.connect( slot( AudioChannelSelectionChanged2 ) );
 	list.setFlags( eListBoxBase::flagNoPageMovement );
+	
+	m_subtitles = new eListBox<eListBoxEntryText>(this);
+	m_subtitles->loadDeco();
+	
+	CONNECT(m_subtitles->selected, eAudioSelector::subtitleSelected);
 
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
-		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-70));		
+		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-115));
 		m_dyncfg = new eAudioDynamicConfig(this);
-		m_dyncfg->move(ePoint(10, getClientSize().height()-70));
+		m_dyncfg->move(ePoint(10, getClientSize().height()-75));
 		m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
+	
+		m_subtitles->move(ePoint(10, getClientSize().height()-110));
+	} else
+	{
+		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-40));
+		m_subtitles->move(ePoint(getClientSize().height()-35, 10));
 	}
+	
+	m_subtitles->resize(eSize(getClientSize().width()-20, 35));
+	
+	m_subtitles->setShortcut("green");
+	m_subtitles->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 }
 
 void eAudioSelector::clear()
@@ -738,6 +796,10 @@ void eAudioSelector::clear()
 	e->setCurrent(-3);
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	list.endAtomic();
+	
+	m_subtitles->clearList();
+	m_subtitles->hide();
+	new eListBoxEntryText(m_subtitles, _("no subtitles"), 0);
 }
 
 void eAudioSelector::add(eDVBServiceController::audioStream &pmt)
@@ -1440,6 +1502,9 @@ eZapMain::eZapMain()
 	VolumeBar->setRightColor( eSkin::getActive()->queryColor("volume_right") );
 	VolumeBar->setBorder(0);
 
+	subtitle = new eSubtitleWidget();
+	subtitle->show();
+
 	dvrInfoBar=new eLabel(this);
 	dvrInfoBar->setName("dvrInfoBar");
 	dvrInfoBar->hide();
@@ -1760,6 +1825,7 @@ eZapMain::~eZapMain()
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 		eDBoxLCD::getInstance()->switchLCD(0);
 #endif
+	delete subtitle;
 
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 	eConfig::getInstance()->setKey("/ezap/ui/playlistmode", playlistmode);
@@ -5431,6 +5497,9 @@ void eZapMain::gotPMT()
 	for (ePtrList<PMTEntry>::iterator it(sapi->videoStreams); it != sapi->videoStreams.end(); ++it)
 		videosel.add(*it);
 
+	for (ePtrList<PMTEntry>::iterator it(sapi->subtitleStreams); it != sapi->subtitleStreams.end(); ++it)
+		audiosel.addSubtitle(*it);
+
 	if (sapi->audioStreams.size()>1)
 	{
 		ButtonYellowDis->hide();
@@ -5467,6 +5536,7 @@ void eZapMain::timeOut()
 void eZapMain::leaveService()
 {
 	cur_start=cur_duration=cur_event_id=-1;
+	
 	ButtonGreenDis->show();
 	ButtonGreenEn->hide();
 	ButtonYellowDis->show();
@@ -5476,6 +5546,9 @@ void eZapMain::leaveService()
 		flags&=~(ENIGMA_NVOD|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);	
 	else
 		flags&=~(ENIGMA_NVOD|ENIGMA_SUBSERVICES|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);
+	
+	if (subtitle)
+		subtitle->stop();
 
 	ChannelName->setText("");
 //	ChannelNumber->setText("");
@@ -5488,7 +5561,7 @@ void eZapMain::leaveService()
 	EINext->setText("");
 	EINextDuration->setText("");
 	EINextTime->setText("");
-
+	
 	Progress->hide();
 #ifndef DISABLE_FILE
 	if (indices_enabled)

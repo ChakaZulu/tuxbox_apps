@@ -573,54 +573,8 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 	}
 	case 0x80: // end of display set segment
 	{
-		struct subtitle_page *page = sub->pages;
-		printf("----------- end of display set\n");
-		printf("active pages:\n");
-		while (page)
-		{
-			printf("  page_id %02x\n", page->page_id);
-			printf("  page_version_number: %d\n", page->page_version_number);
-			printf("  active regions:\n");
-			{
-				struct subtitle_page_region *region = page->page_regions;
-				while (region)
-				{
-					printf("    region_id: %04x\n", region->region_id);
-					printf("    region_horizontal_address: %d\n", region->region_horizontal_address);
-					printf("    region_vertical_address: %d\n", region->region_vertical_address);
-					
-					region = region->next;
-				}
-			}
-			
-			subtitle_redraw(sub, page->page_id);
-			printf("defined regions:\n");
-			struct subtitle_region *region = page->regions;
-			while (region)
-			{
-				printf("  region_id %04x, version %d, %dx%d\n", region->region_id, region->region_version_number, region->region_width, region->region_height);
-				
-				struct subtitle_region_object *object = region->region_objects;
-				while (object)
-				{
-					printf("  object %02x, type %d, %d:%d\n", object->object_id, object->object_type, object->object_horizontal_position, object->object_vertical_position);
-					object = object->next;
-				}				
-				
-#if 0
-				int x, y;
-				for (y = 0; y < region->region_height; ++y)
-				{
-					for (x = 0; x < region->region_width; ++x)
-						printf("%c", " !\"$%&/()';,:._-"[region->region_buffer[region->region_width * y + x]]);
-					printf("\n");
-				}
-#endif
-				
-				region = region->next;
-			}
-			page = page->next;
-		}
+		if (sub->screen_enabled)
+			subtitle_redraw_all(sub);
 		break;
 	}
 	case 0xFF: // stuffing
@@ -680,6 +634,67 @@ void subtitle_process_pes(struct subtitle_ctx *sub, void *buffer, int len)
 		printf("strange data at the end\n");
 }
 
+void subtitle_clear_screen(struct subtitle_ctx *sub)
+{
+		/* clear bbox */
+	int y;
+	
+	printf("BBOX clear %d:%d -> %d:%d\n", sub->bbox_left, sub->bbox_top, sub->bbox_right, sub->bbox_bottom);
+	
+	if (sub->bbox_right > sub->bbox_left)
+		for (y=sub->bbox_top; y < sub->bbox_bottom; ++y)
+			memset(sub->screen_buffer + y * sub->screen_width, 0, sub->bbox_right - sub->bbox_left);
+		
+	sub->bbox_right = 0;
+	sub->bbox_left = sub->screen_width;
+	sub->bbox_top = sub->screen_height;
+	sub->bbox_bottom = 0;
+}
+
+void subtitle_redraw_all(struct subtitle_ctx *sub)
+{
+	subtitle_clear_screen(sub);
+	
+	struct subtitle_page *page = sub->pages;
+	printf("----------- end of display set\n");
+	printf("active pages:\n");
+	while (page)
+	{
+		printf("  page_id %02x\n", page->page_id);
+		printf("  page_version_number: %d\n", page->page_version_number);
+		printf("  active regions:\n");
+		{
+			struct subtitle_page_region *region = page->page_regions;
+			while (region)
+			{
+				printf("    region_id: %04x\n", region->region_id);
+				printf("    region_horizontal_address: %d\n", region->region_horizontal_address);
+				printf("    region_vertical_address: %d\n", region->region_vertical_address);
+				
+				region = region->next;
+			}
+		}
+		
+		subtitle_redraw(sub, page->page_id);
+		printf("defined regions:\n");
+		struct subtitle_region *region = page->regions;
+		while (region)
+		{
+			printf("  region_id %04x, version %d, %dx%d\n", region->region_id, region->region_version_number, region->region_width, region->region_height);
+			
+			struct subtitle_region_object *object = region->region_objects;
+			while (object)
+			{
+				printf("  object %02x, type %d, %d:%d\n", object->object_id, object->object_type, object->object_horizontal_position, object->object_vertical_position);
+				object = object->next;
+			}				
+				
+			region = region->next;
+		}
+		page = page->next;
+	}
+}
+
 void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 {
 	struct subtitle_page *page = sub->pages;
@@ -699,19 +714,6 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 		return;
 	}
 	
-		/* clear bbox */
-	int y;
-	
-	printf("BBOX clear %d:%d -> %d:%d\n", sub->bbox_left, sub->bbox_top, sub->bbox_right, sub->bbox_bottom);
-	
-	if (sub->bbox_right > sub->bbox_left)
-		for (y=sub->bbox_top; y < sub->bbox_bottom; ++y)
-			memset(sub->screen_buffer + y * sub->screen_width, 0, sub->bbox_right - sub->bbox_left);
-		
-	sub->bbox_right = 0;
-	sub->bbox_left = sub->screen_width;
-	sub->bbox_top = sub->screen_height;
-	sub->bbox_bottom = 0;
 	
 	printf("iterating regions..\n");
 		/* iterate all regions in this pcs */
@@ -798,4 +800,15 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 		sub->set_palette(clut);
 	else
 		printf("[SUB] CLUT NOT FOUND.\n");
+}
+
+void subtitle_screen_enable(struct subtitle_ctx *sub, int enable)
+{
+	if (sub->screen_enabled == enable)
+		return;
+	sub->screen_enabled = enable;
+	if (enable)
+		subtitle_redraw_all(sub);
+	else
+		subtitle_clear_screen(sub);
 }

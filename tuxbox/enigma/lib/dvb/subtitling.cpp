@@ -38,6 +38,7 @@
 
 #include <lib/dvb/subtitling.h>
 
+eSubtitleWidget *eSubtitleWidget::instance;
 
 static int extractPTS(unsigned long long &pts, unsigned char *pkt)
 {
@@ -203,10 +204,30 @@ void eSubtitleWidget::gotData(int what)
 	}
 }
 
+int eSubtitleWidget::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::willShow:
+		isvisible = 1;
+		subtitle_screen_enable(subtitle, 1);
+		break;
+	case eWidgetEvent::willHide:
+		isvisible = 0;
+		subtitle_screen_enable(subtitle, 0);
+		break;
+	default:
+		return eWidget::eventHandler(event);;
+	}
+	return 0;
+}
+
 void eSubtitleWidget::start(int pid, const std::set<int> &ppageids)
 {
 	pageids = ppageids;
 	stop();
+	if (isvisible)
+		subtitle_screen_enable(subtitle, 1);
 	fd = open(DEMUX_DEV, O_RDWR|O_NONBLOCK);
 	if (fd == -1)
 	{
@@ -266,6 +287,7 @@ static void subtitle_set_palette(struct subtitle_clut *pal)
 
 eSubtitleWidget::eSubtitleWidget(): timer(eApp)
 {
+	instance = this;
 	fd = -1;
 	sn = 0;
 	subtitle = new subtitle_ctx;
@@ -274,6 +296,7 @@ eSubtitleWidget::eSubtitleWidget(): timer(eApp)
 	subtitle->bbox_right = 0;
 	subtitle->bbox_top = 0;
 	subtitle->bbox_bottom = 0;
+	subtitle->screen_enabled = 0;
 	
 	gFBDC *fbdc = gFBDC::getInstance();
 	gPixmap *pixmap = &fbdc->getPixmap();
@@ -298,8 +321,12 @@ eSubtitleWidget::~eSubtitleWidget()
 
 void eSubtitleWidget::stop()
 {
+	subtitle_screen_enable(subtitle, 0);
 	if (fd != -1)
-		close(fd);
+		::close(fd);
 	if (sn)
+	{
 		delete sn;
+		sn = 0;
+	}
 }
