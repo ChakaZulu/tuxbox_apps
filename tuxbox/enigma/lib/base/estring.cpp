@@ -266,10 +266,6 @@ eString convertLatin1UTF8(const eString &string)
 		unsigned long code=string[i];
 		if (!code)
 			continue;
-		if (code >= 0x10000)
-			bytesneeded++;
-		if (code >= 0x800)
-			bytesneeded++;
 		if (code >= 0x80)
 			bytesneeded++;
 		bytesneeded++;
@@ -284,23 +280,13 @@ eString convertLatin1UTF8(const eString &string)
 		unsigned long code=string[i];
 				// Unicode->UTF8 encoding
 		if (code < 0x80) // identity latin <-> utf8 mapping
-			res[t++]=char(code);
-		else if (code < 0x800) // two byte mapping
+			res[t++]=code;
+		else // two byte mapping
 		{
 			res[t++]=(code>>6)|0xC0;
 			res[t++]=(code&0x3F)|0x80;
-		} else if (code < 0x10000) // three bytes mapping
-		{
-			res[t++]=(code>>12)|0xE0;
-			res[t++]=((code>>6)&0x3F)|0x80;
-			res[t++]=(code&0x3F)|0x80;
-		} else
-		{
-			res[t++]=(code>>18)|0xF0;
-			res[t++]=((code>>12)&0x3F)|0x80;
-			res[t++]=((code>>6)&0x3F)|0x80;
-			res[t++]=(code&0x3F)|0x80;
 		}
+		i++;
 	}
 	if ( t != bytesneeded)
 		eFatal("t: %d, bytesneeded: %d", t, bytesneeded);
