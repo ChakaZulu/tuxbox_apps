@@ -213,6 +213,8 @@ void		RcGetActCode( void )
 	unsigned short	code = 0;
 	unsigned char	*p = buf;
 
+	actcode=0xee;
+
 	x = read(fd,buf,256);
 	if ( x>0 )
 	{
@@ -272,6 +274,7 @@ void		RcGetActCode( void )
 			}
 		}
 	}
+	realcode=actcode;
 }
 
 void	RcClose( void )
