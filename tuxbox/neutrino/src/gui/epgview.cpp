@@ -87,7 +87,7 @@ void CEpgData::processTextToArray(std::string text) // UTF-8
 	std::string	aktLine = "";
 	std::string	aktWord = "";
 	int	aktWidth = 0;
-	text+= " ";
+	text += ' ';
 	char* text_= (char*) text.c_str();
 
 	while(*text_!=0)
@@ -174,7 +174,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 9 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x020: {
@@ -182,7 +182,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 5 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x030: {
@@ -190,7 +190,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 4 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x040: {
@@ -198,7 +198,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 12 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x050: {
@@ -206,7 +206,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 6 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x060: {
@@ -214,7 +214,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 7 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x070: {
@@ -222,7 +222,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 12 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x080: {
@@ -230,7 +230,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 4 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x090: {
@@ -238,7 +238,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 8 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 		case 0x0A0: {
@@ -246,7 +246,7 @@ std::string GetGenre(const char contentClassification) // UTF-8
 						if ( (contentClassification&0x0F)< 8 )
 							res+= subClass;
 						else
-							res+= "0";
+							res+= '0';
 					 	break;
 					}
 	}
@@ -347,7 +347,9 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
 	std::string fromto;
 	int widthl,widthr;
-	fromto= epg_start+ " - "+ epg_end;
+	fromto = epg_start;
+	fromto += " - ";
+	fromto += epg_end;
 
 	widthl = g_Fonts->epg_date->getRenderWidth(fromto);
 	g_Fonts->epg_date->RenderString(sx+40,  sy+oy-3, widthl, fromto, COL_MENUHEAD);
@@ -649,7 +651,7 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, std::string title
 			strftime(tmpstr, sizeof(tmpstr), ".  %H:%M ", tmStartZeit );
 			screening_dates += tmpstr;
 
-			screening_dates += "\n";
+			screening_dates += '\n';
 		}
 	}
 
