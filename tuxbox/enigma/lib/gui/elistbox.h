@@ -65,6 +65,12 @@ public:
 	void remove(eListboxEntry *entry);
 	void clearList();
 	void setCurrent(eListboxEntry *c);
+	eListboxEntry *getCurrent()
+	{
+		if (!current)
+			return 0;
+		return *current;
+	}
 	void sort();
 	eListboxEntry *goNext();
 	eListboxEntry *goPrev();
