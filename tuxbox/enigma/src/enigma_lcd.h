@@ -10,6 +10,8 @@ class eService;
 class eZapLCDMain;
 class eZapLCDMenu;
 class eZapLCDScart;
+class eZapLCDStandby;
+class eZapLCDShutdown;
 class eServiceReference;
 
 class eZapLCD: public eWidget
@@ -20,6 +22,8 @@ public:
 	eZapLCDMain* lcdMain;
 	eZapLCDMenu* lcdMenu;
 	eZapLCDScart* lcdScart;
+	eZapLCDStandby *lcdStandby;
+	eZapLCDShutdown *lcdShutdown;
 	eZapLCD();
 	~eZapLCD();
 };
@@ -52,8 +56,19 @@ public:
 class eZapLCDScart: public eWidget
 {
 public:
-	eLabel *Title, *Scart;
 	eZapLCDScart(eWidget *parent);
+};
+
+class eZapLCDStandby: public eWidget
+{
+public:
+	eZapLCDStandby(eWidget *parent);
+};
+
+class eZapLCDShutdown: public eWidget
+{
+public:
+	eZapLCDShutdown(eWidget *parent);
 };
 
 #endif /* __enigma_lcd_h */

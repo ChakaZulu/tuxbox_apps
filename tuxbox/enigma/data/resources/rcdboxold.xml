@@ -62,7 +62,9 @@
 
 		<actionmap name="enigmaMain">
 			<action name="showMainMenu" key="d-box" flags="m" />
-			<action name="standby" key="power" flags="m" />
+			<action name="standby_press" key="power" flags="m" />
+			<action name="standby_repeat" key="power" flags="r" />
+			<action name="standby_release" key="power" flags="b" />
 			<action name="toggleInfobar" key="ok" flags="m" />
 			<action name="showServiceSelector" key="up" flags="m" />
 			<action name="showServiceSelector" key="down" flags="m" />
@@ -100,6 +102,8 @@
 			<action name="8" key="8" flags="mr" />
 			<action name="9" key="9" flags="mr" />
 		</actionmap>
-
+		<actionmap name="enigmaStandby">
+			<action name="wakeUp" key="power" flags="m" />
+		</actionmap>
 	</device>
 </rcdefaults>

@@ -22,8 +22,12 @@ eZapLCD::eZapLCD(): eWidget()
 	lcdMain = new eZapLCDMain(this);
 	lcdMenu = new eZapLCDMenu(this);
 	lcdScart = new eZapLCDScart(this);
+	lcdStandby = new eZapLCDStandby(this);
+	lcdShutdown = new eZapLCDShutdown(this);
 	lcdMenu->hide();
 	lcdScart->hide();
+	lcdStandby->hide();
+	lcdShutdown->hide();
 }
 
 eZapLCD::~eZapLCD()
@@ -31,6 +35,8 @@ eZapLCD::~eZapLCD()
 	delete lcdMain;
 	delete lcdMenu;
 	delete lcdScart;
+	delete lcdStandby;
+	delete lcdShutdown;
 }
 
 eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
@@ -134,7 +140,16 @@ eZapLCDScart::eZapLCDScart(eWidget *parent): eWidget(parent, 0)
 {	
 	if (eSkin::getActive()->build(this, "enigma_lcd_scart"))
 		eFatal("skin load of \"enigma_lcd_scart\" failed");
+}
 
-	ASSIGN(Title, eLabel, "enigma_logo");
-	ASSIGN(Scart, eLabel, "lcd_scart");
+eZapLCDStandby::eZapLCDStandby(eWidget *parent): eWidget(parent, 0)
+{	
+	if (eSkin::getActive()->build(this, "enigma_lcd_standby"))
+		eFatal("skin load of \"enigma_lcd_standby\" failed");
+}
+
+eZapLCDShutdown::eZapLCDShutdown(eWidget *parent): eWidget(parent, 0)
+{	
+	if (eSkin::getActive()->build(this, "enigma_lcd_shutdown"))
+		eFatal("skin load of \"enigma_lcd_shutdown\" failed");
 }

@@ -149,7 +149,12 @@ class eZapMain: public eWidget
 	void volumeDown();
 	void toggleMute();
 	void showMainMenu();
-	void standby();
+	
+	time_t standbyTime;
+
+	void standbyPress();
+	void standbyRepeat();
+	void standbyRelease();
 	void showSubserviceMenu();
 	void showAudioMenu();
 	void runVTXT();

@@ -30,6 +30,9 @@
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
 		<img name="eCheckboxLCD.checked" src="checked_lcd.png" nomerge="yes" />
 		<img name="eCheckboxLCD.unchecked" src="unchecked_lcd.png" nomerge="yes" />
+
+		<img name="lcd_standby" src="lcd_standby.png" nomerge="yes" />
+		<img name="lcd_shutdown" src="lcd_shutdown.png" nomerge="yes" />
 		<!--img name="sat_scan" src="sat.png" /-->
 	</images>
 	
@@ -69,6 +72,18 @@
 		<eZapLCDScart position="0:0" size="120:64">
 			<eLabel position="0:0" size="120:17" pixmap="enigma_logo" />
 		  <eLabel position="4:24" size="112:38" pixmap="lcd_scart" />	
+		</eZapLCDScart>
+	</object>
+
+	<object name="enigma_lcd_standby">
+		<eZapLCDScart position="0:0" size="120:64">
+		  <eLabel position="0:0" size="e:e" pixmap="lcd_standby" />	
+		</eZapLCDScart>
+	</object>
+
+	<object name="enigma_lcd_shutdown">
+		<eZapLCDScart position="0:0" size="120:64">
+		  <eLabel position="0:0" size="e:e" pixmap="lcd_shutdown" />	
 		</eZapLCDScart>
 	</object>
 

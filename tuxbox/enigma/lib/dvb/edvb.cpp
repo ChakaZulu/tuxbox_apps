@@ -151,7 +151,8 @@ eDVB::~eDVB()
 {
 	delete settings; 
 	recEnd();
-	
+
+	eAVSwitch::getInstance()->setActive(0);
 	delete eAVSwitch::getInstance();
 	eConfig::getInstance()->setKey("/elitedvb/audio/volume", volume);
 	eConfig::getInstance()->setKey("/elitedvb/audio/mute", mute);

@@ -43,13 +43,15 @@
 struct enigmaMainActions
 {
 	eActionMap map;
-	eAction showMainMenu, standby, toggleInfobar, showServiceSelector,
+	eAction showMainMenu, standby_press, standby_repeat, standby_release, toggleInfobar, showServiceSelector,
 		showSubservices, showAudio, pluginVTXT, showEPGList, showEPG, nextService,
 		prevService, serviceListDown, serviceListUp, volumeUp, volumeDown, toggleMute;
 	enigmaMainActions(): 
 		map("enigmaMain", _("enigma Zapp")),
 		showMainMenu(map, "showMainMenu", _("show main menu"), eAction::prioDialog),
-		standby(map, "standby", _("go to standby"), eAction::prioDialog),
+		standby_press(map, "standby_press", _("go to standby (press)"), eAction::prioDialog),
+		standby_repeat(map, "standby_repeat", _("go to standby (repeat)"), eAction::prioDialog),
+		standby_release(map, "standby_release", _("go to standby (release)"), eAction::prioDialog),
 		toggleInfobar(map, "toggleInfobar", _("toggle infobar"), eAction::prioDialog),
 		showServiceSelector(map, "showServiceSelector", _("show service selector"), eAction::prioDialog),
 		showSubservices(map, "showSubservices", _("show subservices/NVOD"), eAction::prioDialog),
@@ -69,6 +71,62 @@ struct enigmaMainActions
 };
 
 eAutoInitP0<enigmaMainActions> i_enigmaMainActions(5, "enigma main actions");
+
+struct enigmaStandbyActions
+{
+	eActionMap map;
+	eAction wakeUp;
+	enigmaStandbyActions(): 
+		map("enigmaStandby", _("enigma standby")),
+		wakeUp(map, "wakeUp", _("wake up enigma"), eAction::prioDialog)
+	{
+	}
+};
+
+eAutoInitP0<enigmaStandbyActions> i_enigmaStandbyActions(5, "enigma standby actions");
+
+class eZapStandby: public eWidget
+{
+protected:
+	int eventHandler(const eWidgetEvent &);
+public:
+	eZapStandby();
+};
+
+int eZapStandby::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_enigmaStandbyActions->wakeUp)
+			close(0);
+		else
+			break;
+		return 0;
+	case eWidgetEvent::execBegin:
+	{
+		eZapLCD *pLCD=eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdStandby->show();
+		break;
+	}
+	case eWidgetEvent::execDone:
+	{
+		eZapLCD *pLCD=eZapLCD::getInstance();
+		pLCD->lcdStandby->hide();
+		pLCD->lcdMain->show();
+		break;
+	}
+	default:
+		break;
+	}
+	return eWidget::eventHandler(event);
+}
+
+eZapStandby::eZapStandby(): eWidget(0, 1)
+{
+	addActionMap(&i_enigmaStandbyActions->map);
+}
 
 /*
 
@@ -478,13 +536,17 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 
 	actual_eventDisplay=0;
 
-	clockUpdate();	
+	clockUpdate();
+	standbyTime=-1;
 	
 	addActionMap(&i_enigmaMainActions->map);
 }
 
 eZapMain::~eZapMain()
 {
+	eZapLCD *pLCD=eZapLCD::getInstance();
+	pLCD->lcdMain->hide();
+	pLCD->lcdShutdown->show();
 }
 
 void eZapMain::set16_9Logo(int aspect)
@@ -785,9 +847,37 @@ void eZapMain::showMainMenu()
 	pLCD->lcdMain->show();
 }
 
-void eZapMain::standby()
+void eZapMain::standbyPress()
 {
-	eZap::getInstance()->quit();
+	standbyTime = time(0);
+}
+
+void eZapMain::standbyRepeat()
+{
+	if (standbyTime == -1)		// just waking up
+		return;
+	int diff = time(0) - standbyTime;
+	if (diff > 2)
+		standbyRelease();
+}
+
+void eZapMain::standbyRelease()
+{
+	if (standbyTime == -1)		// just waking up
+		return;
+	int diff = time(0) - standbyTime;
+	standbyTime=-1;
+	if (diff > 2)
+		eZap::getInstance()->quit();
+	else
+	{
+		eZapStandby standby;
+		if (isVisible())
+			hide();
+		standby.show();
+		standby.exec();
+		standby.hide();
+	}
 }
 
 void eZapMain::showInfobar()
@@ -978,8 +1068,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_enigmaMainActions->showMainMenu)
 			showMainMenu();
-		else if (event.action == &i_enigmaMainActions->standby)
-			standby();
+		else if (event.action == &i_enigmaMainActions->standby_press)
+			standbyPress();
+		else if (event.action == &i_enigmaMainActions->standby_repeat)
+			standbyRepeat();
+		else if (event.action == &i_enigmaMainActions->standby_release)
+			standbyRelease();
 		else if ((!isVisible()) && (event.action == &i_enigmaMainActions->toggleInfobar))
 			showInfobar();
 		else if (isVisible() && (event.action == &i_enigmaMainActions->toggleInfobar))
