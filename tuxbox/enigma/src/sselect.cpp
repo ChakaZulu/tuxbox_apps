@@ -1139,14 +1139,6 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					f.exec();
 					f.hide();
 
-					ePictureViewer e(selected.path);
-#ifndef DISABLE_LCD
-					e.setLCD( LCDTitle, LCDElement );
-#endif
-					e.show();
-					e.exec();
-					e.hide();
-
 					show();
 				}
 				else
