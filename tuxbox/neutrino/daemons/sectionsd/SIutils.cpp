@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.8 2001/07/06 11:09:56 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.9 2001/07/12 22:51:25 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.9  2001/07/12 22:51:25  fnbrd
+// Time-Thread im sectionsd (noch disabled, da prob mit mktime)
+//
 // Revision 1.8  2001/07/06 11:09:56  fnbrd
 // Noch ne Kleinigkeit gefixt.
 //
@@ -148,23 +151,13 @@ time_t changeUTCtoCtime(const unsigned char *buffer)
 {
     int year, month, day, y_, m_, k,
         hour, minutes, seconds;
-// Ich vermute long long macht Probleme mit verschiedenen gcc's bzw. glibc's
-//    unsigned long long utc;
     int mjd, time;
 
-//    utc = buffer[0];
-//    utc = (utc << 32) & 0xff00000000LL;
-//    utc = utc | (buffer[1] << 24) | (buffer[2] << 16)
-//              | (buffer[3] << 8) | buffer[4];
-
-    mjd  = (buffer[0]<< 8) | buffer[1];
-    time = (buffer[2] << 16) | (buffer[3] << 8) | buffer[4];
+    mjd  = (((unsigned)buffer[0])<< 8) + buffer[1];
+    time = (((unsigned)buffer[2]) << 16) + (((unsigned)buffer[3] << 8) + buffer[4];
     if(mjd == 0xffff && time == 0xffffff)
-//    if(utc==0xffffffffffffffffLL)
       // keine Uhrzeit
       return 0;
-//    mjd  = (utc >> 24) & 0xffff;
-//    time = utc & 0xffffff;
 
     y_   = (int) ((mjd - 15078.2) / 365.25);
     m_   = (int) ((mjd - 14956.1 - (int) (y_ * 365.25)) / 30.6001);
