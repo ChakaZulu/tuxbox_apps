@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.135 2002/04/17 10:07:35 field Exp $
+ * $Id: zapit.cpp,v 1.136 2002/04/17 11:14:20 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -416,12 +416,15 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		debug("[zapit] demux device already closed (audio)\n");
 	}
 
-	/* if channel's transponder does not match frontend's tuned transponder ... */
-	if (cit->second.getTsidOnid() != frontend->getTsidOnid())
+	/* store the new channel */
+	if ((channel == NULL) || (onid_sid != channel->getOnidSid()))
 	{
-		/* ... store the new channel, ... */
 		channel = &(cit->second);
+	}
 
+	/* if channel's transponder does not match frontend's tuned transponder ... */
+	if (channel->getTsidOnid() != frontend->getTsidOnid())
+	{
 		/* ... tune to it ... */
 		if (frontend->tuneChannel(channel) == true)
 		{
@@ -634,7 +637,6 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 			debug("[zapit] audio bypass mode set\n");
 		}
 	}
-
 
 	if (channel->getVideoPid() != NONE)
 	{
@@ -2166,7 +2168,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.135 2002/04/17 10:07:35 field Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.136 2002/04/17 11:14:20 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
