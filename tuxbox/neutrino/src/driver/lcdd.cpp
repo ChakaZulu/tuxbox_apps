@@ -106,20 +106,23 @@ const char * const background_path[NUMBER_OF_PATHS] = {
 };
 
 bool CLCD::lcdInit(const char * fontfile, const char * fontname,
-						 const char * fontfile2, const char * fontname2,
-						 const char * fontfile3, const char * fontname3)
+		   const char * fontfile2, const char * fontname2,
+		   const char * fontfile3, const char * fontname3)
 {
 	fontRenderer = new LcdFontRenderClass(&display);
 	const char * style_name = fontRenderer->AddFont(fontfile);
-	const char *style_name2,*style_name3;
-	if(fontfile2!=NULL)
+	const char * style_name2;
+	const char * style_name3;
+
+	if (fontfile2 != NULL)
 		style_name2 = fontRenderer->AddFont(fontfile2);
 	else
 	{
 		style_name2 = style_name;
 		fontname2   = fontname;
 	}
-	if(fontfile3!=NULL)
+
+	if (fontfile3 != NULL)
 		style_name3 = fontRenderer->AddFont(fontfile3);
 	else
 	{

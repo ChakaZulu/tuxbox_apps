@@ -1139,7 +1139,7 @@ const neutrino_font_descr_struct predefined_font[2] =
 const char* predefined_lcd_font[2][6] = 
 {
 	{FONTDIR "/12.pcf.gz", "Fix12", FONTDIR "/14B.pcf.gz", "Fix14", FONTDIR "/15B.pcf.gz", "Fix15"},
-	{"MD King KhammuRabi", FONTDIR "/md_khmurabi_10.ttf", NULL, NULL,  NULL, NULL}
+	{FONTDIR "/md_khmurabi_10.ttf", "MD King KhammuRabi", NULL, NULL,  NULL, NULL}
 };
 
 void CNeutrinoApp::SetupFonts()
