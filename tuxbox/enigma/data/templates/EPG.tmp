@@ -7,7 +7,6 @@
 		{
 			win=window.open("/addTimerEvent?"+xy, "switchStatus", "width=200, height=200, left=0, top=0");
 			win.focus();
-			parent.setTimeout("reload()", 300);
 		}
 
 		function EPGDetails(xy)
