@@ -46,7 +46,7 @@ CMotorControl::CMotorControl()
 	width = 430;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight + (19 * mheight);
+	height = hheight + (19 * mheight) + 5;
 	if (height > 576) height = 576;
 	x = ((720 - width) >> 1);
 	y = (576 - height) >> 1;
@@ -330,16 +330,14 @@ void CMotorControl::hide()
 void CMotorControl::paintLine(int x, int * y, int width, char * txt)
 {
 	*y += mheight;
-	//printf("[motorcontrol] paintline: %d, %d, %d, %s\n", x, *y, width, txt);
 	frameBuffer->paintBoxRel(x, *y - mheight, width, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x, *y, width, g_Locale->getText(txt).c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x, *y, width, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintLine(int x, int y, int width, char * txt)
 {
-	//printf("[motorcontrol] paintline: %d, %d, %d, %s\n", x, y, width, txt);
 	//frameBuffer->paintBoxRel(x, y - mheight, width, mheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x, y, width, g_Locale->getText(txt).c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x, y, width, txt, COL_MENUCONTENT);
 }
 
 void CMotorControl::paintSeparator(int xpos, int * ypos, int width, char * txt)
@@ -363,8 +361,8 @@ void CMotorControl::paintStatus()
 	char buf[256];
 	char buf2[256];
 	
-	xpos1 = x + 10;
-	xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(a) Motor Position:");
+	int xpos1 = x + 10;
+	int xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(a) Motor Position:");
 	int width2 = width - (xpos2 - xpos1) - 10;
 	int width1 = width - 10;
 	
@@ -406,7 +404,7 @@ void CMotorControl::paintStatus()
 	}
 	paintLine(xpos2, ypos, width2, buf);
 	
-	paintSeparator(xpos1, &ypos, width1, "Status");
+	paintSeparator(xpos1, &ypos, width, "Status");
 	strcpy(buf, "Satellite Position (Step Mode): ");
 	sprintf(buf2, "%d", satellitePosition);
 	strcat(buf, buf2);
@@ -430,8 +428,8 @@ void CMotorControl::paintMenu()
 	
 	ypos = ypos_menue;
 	
-	xpos1 = x + 10;
-	xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(7/yellow)");
+	int xpos1 = x + 10;
+	int xpos2 = xpos1 + 10 + g_Fonts->menu->getRenderWidth("(7/yellow)");
 	int width2 = width - (xpos2 - xpos1) - 10;
 	int width1 = width - 10;
 	
