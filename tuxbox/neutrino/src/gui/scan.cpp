@@ -194,7 +194,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-    sectionsdPauseScanning(1);
+	sectionsdPauseScanning(1);
 	startScan();
 	
 	char strServices[100] = "";
@@ -223,7 +223,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
 	int xpos3 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str());
 
-	g_FrameBuffer->loadPal("radar.pal", 20, 100);
+	g_FrameBuffer->loadPal("radar.pal", 17, 100);
 	int pos = 0;
 	bool finish = false;
 	while (!finish)
@@ -238,7 +238,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		char filename[30];
 		sprintf(filename, "radar%d.raw", pos);
 		pos = (pos+1)%10;
-		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 20);
+		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
 
 		sprintf(strTransponders, "%d", ts);
 		if(strcmp(strLastTransponders, strTransponders)!=0)
@@ -298,17 +298,16 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 void CScanTs::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
-	//g_FrameBuffer->paintBackgroundBoxRel(0,0, 719,575);
+	//g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	g_FrameBuffer->paintBackgroundBoxRel(0,0, 719,575);
 }
 
 
 void CScanTs::paint()
 {
-	//g_FrameBuffer->loadPal("scan.pal", 18, 199);
-	//g_FrameBuffer->paintIcon8("scan.raw",0,0, 18);
-
 	int ypos=y;
+	//g_FrameBuffer->loadPal("scan.pal", 30, 199);
+	//g_FrameBuffer->paintIcon8("scan.raw",0,0, 30);
 	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("scants.head").c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);

@@ -31,11 +31,14 @@
 
 /*
 
-$Id: framebuffer.cpp,v 1.11 2001/12/17 01:28:26 McClean Exp $
+$Id: framebuffer.cpp,v 1.12 2001/12/17 22:56:37 McClean Exp $
 
 
 
 $Log: framebuffer.cpp,v $
+Revision 1.12  2001/12/17 22:56:37  McClean
+add dump-function
+
 Revision 1.11  2001/12/17 01:28:26  McClean
 accelerate radiomode-logo-paint
 
@@ -515,6 +518,35 @@ bool CFrameBuffer::loadPicture2Mem(string filename, unsigned char* memp)
 	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
 
 	read(fd, memp, width*height);
+
+	close(fd);
+	return true;
+}
+
+bool CFrameBuffer::savePictureFromMem(string filename, unsigned char* memp)
+{
+	short width = 720;
+	short height = 576;
+	unsigned char tr = 0;
+	int fd;
+	filename = iconBasePath + filename;
+
+	fd = open(filename.c_str(), O_WRONLY );
+	
+	if (fd==-1)
+	{
+		printf("error while saving icon: %s", filename.c_str() );
+		return false;
+	}
+
+	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
+	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
+
+	write(fd, &width,  2 );
+	write(fd, &height, 2 );
+	write(fd, &tr, 1 );
+
+	write(fd, memp, width*height);
 
 	close(fd);
 	return true;

@@ -30,10 +30,13 @@
 */
 
 /*
-$Id: framebuffer.h,v 1.9 2001/12/17 01:28:26 McClean Exp $
+$Id: framebuffer.h,v 1.10 2001/12/17 22:56:37 McClean Exp $
 
 
 $Log: framebuffer.h,v $
+Revision 1.10  2001/12/17 22:56:37  McClean
+add dump-function
+
 Revision 1.9  2001/12/17 01:28:26  McClean
 accelerate radiomode-logo-paint
 
@@ -133,7 +136,8 @@ class CFrameBuffer
 		void loadPal(string filename, unsigned char offset=0, unsigned char endidx=255 );
 		void setIconBasePath(string);
 
-		bool CFrameBuffer::loadPicture2Mem(string filename, unsigned char* memp);
+		bool loadPicture2Mem(string filename, unsigned char* memp);
+		bool savePictureFromMem(string filename, unsigned char* memp);
 
 		void setBackgroundColor(int color);
 		bool loadBackground(string filename, unsigned char col = 0);
@@ -142,6 +146,8 @@ class CFrameBuffer
 		void paintBackgroundBox(int xa, int ya, int xb, int yb);
 		void paintBackgroundBoxRel(int x, int y, int dx, int dy);
 		void paintBackground();
+
+
 };
 
 
