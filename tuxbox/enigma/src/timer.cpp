@@ -1208,17 +1208,20 @@ void eTimerManager::clearEvents()
 
 void eTimerManager::deleteEventFromTimerList(const eServiceReference *ref, const EITEvent *evt)
 {
-	for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end();)
+	for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end(); i++)
+	{
 		if (*ref == i->service && evt->event_id == i->event_id)
 		{
 			i = timerlist->getList().erase(i);
 			break;
 		}
+	}
 }
 
 void eTimerManager::modifyEventInTimerList(const eServiceReference *ref, const EITEvent *evt, eString description)
 {
-	for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end();)
+	for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end(); i++)
+	{
 		if (*ref == i->service && evt->event_id == i->event_id)
 		{
 			i->time_begin = evt->start_time;
@@ -1226,6 +1229,7 @@ void eTimerManager::modifyEventInTimerList(const eServiceReference *ref, const E
 			i->service.descr = description;
 			break;
 		}
+	}
 }
 
 bool eTimerManager::updateRunningEventDuration( int duration )
