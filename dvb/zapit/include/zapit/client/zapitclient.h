@@ -112,10 +112,15 @@ class CZapitClient:public CBasicClient
 		int  diseqc;
 	};
 	typedef std::vector<commandSetScanSatelliteList> ScanSatelliteList;
+	
+	struct commandSetScanMotorPosList
+	{
+		char satName[30];
+		int  motorPos;
+	};
+	typedef std::vector<commandSetScanMotorPosList> ScanMotorPosList;
 
 	typedef std::vector<commandAddSubServices> subServiceList;
-
-
 
 	struct responseGetLastChannel
 	{
@@ -305,6 +310,9 @@ class CZapitClient:public CBasicClient
 
 	/* tell zapit which satellites to scan*/
 	void setScanSatelliteList( ScanSatelliteList& satelliteList );
+	
+	/* tell zapit stored satellite positions in diseqc 1.2 motor */
+	void setScanMotorPosList( ScanMotorPosList& motorPosList );
 
 	/* set diseqcType*/
 	void setDiseqcType( diseqc_t diseqc);

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.85 2003/05/01 19:33:08 digi_casi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.86 2003/05/11 09:50:55 digi_casi Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -529,6 +529,18 @@ void CZapitClient::setScanSatelliteList( ScanSatelliteList& satelliteList )
 	for (uint i=0; i<satelliteList.size(); i++)
 	{
 		send_data((char*)&satelliteList[i], sizeof(satelliteList[i]));
+	}
+	close_connection();
+}
+
+/* tell zapit stored satellite positions in diseqc 1.2 motor */
+void CZapitClient::setScanMotorPosList( ScanMotorPosList& motorPosList )
+{
+	send(CZapitMessages::CMD_SCANSETSCANMOTORPOSLIST);
+
+	for (uint i = 0; i < motorPosList.size(); i++)
+	{
+		send_data((char*)&motorPosList[i], sizeof(motorPosList[i]));
 	}
 	close_connection();
 }

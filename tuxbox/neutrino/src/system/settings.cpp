@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.13 2003/02/19 11:51:44 thegoodguy Exp $
+        $Id: settings.cpp,v 1.14 2003/05/11 09:50:56 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -33,10 +33,11 @@ CScanSettings::CScanSettings(void)
 	{
 		satName[i][0] = 0;
 		satDiseqc[i]  = -1;
+		satMotorPos[i] = -1;
 	}
 }
 
-int* CScanSettings::diseqscOfSat( char* satname)
+int * CScanSettings::diseqscOfSat( char* satname)
 {
 	for( int i=0; i<MAX_SATELLITES; i++)
 	{
@@ -53,11 +54,34 @@ int* CScanSettings::diseqscOfSat( char* satname)
 	return(NULL);
 }
 
-char* CScanSettings::satOfDiseqc(int diseqc) const{
-	if(diseqcMode == NO_DISEQC) return (char*)&satNameNoDiseqc;
-	if(diseqc >= 0 && diseqc < MAX_SATELLITES) {
-		for(int i=0; i<MAX_SATELLITES;i++) {
-			if(diseqc == satDiseqc[i]) return (char*)&satName[i];
+int * CScanSettings::motorPosOfSat( char* satname)
+{
+	for( int i=0; i<MAX_SATELLITES; i++)
+	{
+		if ( !strcmp(satName[i], ""))
+		{
+			strncpy( satName[i], satname, 30);
+			return &satMotorPos[i];
+		}
+		else if ( !strcmp(satName[i], satname))
+		{
+			return &satMotorPos[i];
+		}
+	}
+	return(NULL);
+}
+
+char * CScanSettings::satOfDiseqc(int diseqc) const
+{
+	if (diseqcMode == NO_DISEQC) 
+		return (char *)&satNameNoDiseqc;
+		
+	if (diseqc >= 0 && diseqc < MAX_SATELLITES) 
+	{
+		for (int i=0; i<MAX_SATELLITES;i++) 
+		{
+			if(diseqc == satDiseqc[i]) 
+				return (char *)&satName[i];
 		}
 	}
 	return "Unknown Satellite";
@@ -83,6 +107,22 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 				sat.diseqc = satDiseqc[i];
 				satList.insert( satList.end(), sat);
 			}
+		}
+	}
+}
+
+void CScanSettings::toMotorPosList(CZapitClient::ScanMotorPosList& motorPosList) const
+{
+	motorPosList.clear();
+	CZapitClient::commandSetScanMotorPosList sat;
+	
+	for (int i = 0; i < MAX_SATELLITES; i++)
+	{
+		if (satMotorPos[i] != -1)
+		{
+			strncpy(sat.satName, satName[i], 30);
+			sat.motorPos = satMotorPos[i];
+			motorPosList.insert(motorPosList.end(), sat);
 		}
 	}
 }
@@ -140,6 +180,18 @@ bool CScanSettings::loadSettings(const std::string fileName, const delivery_syst
 			sprintf((char*)&tmp, "satDiseqc%d", i);
 			satDiseqc[i] = configfile.getInt32( tmp, -1 );
 		}
+		if (diseqcMode == DISEQC_1_2)
+		{
+			int satMotorPosCount = configfile.getInt32( "satMotorPosCount", 0 );
+			for (int i=0; i<satMotorPosCount; i++)
+			{
+				char tmp[10];
+				sprintf((char*)&tmp, "SatMotorPos%d", i);
+				strcpy( satName[i], configfile.getString( tmp, "" ).c_str() );
+				sprintf((char*)&tmp, "satMotorPos%d", i);
+				satMotorPos[i] = configfile.getInt32( tmp, -1 );
+			}
+		}
 	}
 	return true;
 }
@@ -173,6 +225,32 @@ bool CScanSettings::saveSettings(const std::string fileName)
 				sprintf((char*)&tmp, "satDiseqc%d", satCount);
 				configfile.setInt32( tmp, satDiseqc[i] );
 				satCount++;
+			}
+		}
+		
+		if (diseqcMode == DISEQC_1_2)
+		{
+			satCount = 0;
+			for (int i=0; i<MAX_SATELLITES; i++)
+			{
+				if (satMotorPos[i] != -1)
+				{
+					satCount++;
+				}
+			}
+			configfile.setInt32( "satMotorPosCount", satCount );
+			satCount = 0;
+			for (int i=0; i<MAX_SATELLITES; i++)
+			{
+				if (satMotorPos[i] != -1)
+				{
+					char tmp[10];
+					sprintf((char*)&tmp, "SatName%d", satCount);
+					configfile.setString( tmp, satName[i] );
+					sprintf((char*)&tmp, "satDiseqc%d", satCount);
+					configfile.setInt32( tmp, satMotorPos[i] );
+					satCount++;
+				}
 			}
 		}
 	}

@@ -41,6 +41,7 @@
 #include "widget/menue.h"
 #include "widget/messagebox.h"
 
+#include "system/settings.h"
 
 CScanTs::CScanTs()
 {
@@ -55,6 +56,8 @@ CScanTs::CScanTs()
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
+	diseqc_t diseqcType = NO_DISEQC;
+	
 	if (!frameBuffer->getActive())
 		return menu_return::RETURN_EXIT_ALL;
 
@@ -63,13 +66,21 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 	g_Sectionsd->setPauseScanning( true );
 
-	g_Zapit->setDiseqcType( CNeutrinoApp::getInstance()->getScanSettings().diseqcMode);
+	diseqcType = CNeutrinoApp::getInstance()->getScanSettings().diseqcMode;
+	g_Zapit->setDiseqcType(diseqcType);
 	g_Zapit->setDiseqcRepeat( CNeutrinoApp::getInstance()->getScanSettings().diseqcRepeat);
 	g_Zapit->setScanBouquetMode( CNeutrinoApp::getInstance()->getScanSettings().bouquetMode);
 
 	CZapitClient::ScanSatelliteList satList;
 	CNeutrinoApp::getInstance()->getScanSettings().toSatList( satList);
 	g_Zapit->setScanSatelliteList( satList);
+	
+	if (diseqcType == DISEQC_1_2)
+	{
+		CZapitClient::ScanMotorPosList motorPosList;
+		CNeutrinoApp::getInstance()->getScanSettings().toMotorPosList(motorPosList);
+		g_Zapit->setScanMotorPosList(motorPosList);
+	}
 
 	bool success = g_Zapit->startScan();
 

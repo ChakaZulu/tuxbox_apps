@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.113 2003/05/10 09:42:34 digi_casi Exp $
+ * $Id: scan.cpp,v 1.114 2003/05/11 09:50:55 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,8 +35,6 @@
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
 
-#define SERVICES_TMP "/tmp/services.tmp"
-
 short scan_runs;
 short curr_sat;
 static int status = 0;
@@ -59,7 +57,7 @@ extern CFrontend *frontend;
 extern xmlDocPtr scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
 extern std::map <string, int32_t> satellitePositions;
-extern std::map <int32_t, uint8_t> motorPositions;
+extern std::map <string, uint8_t> motorPositions;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 
@@ -537,7 +535,7 @@ void *start_scanthread(void *)
 				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition))
 				{
 					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
-					frontend->positionMotor(motorPositions[satellitePosition]);
+					frontend->positionMotor(motorPositions[providerName]);
 				}
 						
 				scan_provider(search, providerName, satfeed, diseqc_pos);

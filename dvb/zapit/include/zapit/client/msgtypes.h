@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.13 2003/03/03 23:24:41 mws Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.14 2003/05/11 09:50:55 digi_casi Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -74,6 +74,7 @@ class CZapitMessages
 			CMD_SCANREADY,
 			CMD_SCANGETSATLIST,
 			CMD_SCANSETSCANSATLIST,
+			CMD_SCANSETSCANMOTORPOSLIST,
 			CMD_SCANSETDISEQCTYPE,
 			CMD_SCANSETDISEQCREPEAT,
 			CMD_SCANSETBOUQUETMODE,

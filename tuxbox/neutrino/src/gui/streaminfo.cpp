@@ -46,7 +46,7 @@ CStreamInfo::CStreamInfo()
 	mheight = g_Fonts->menu->getHeight();
 	height = hheight+14*mheight+ 10;
 
-    x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+    	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 }
 

@@ -1036,7 +1036,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	ojBouquets->addOption( CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
 	ojBouquets->addOption( CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
 
-	//kabel-lnb-settings
+	//sat-lnb-settings
 	if(g_info.delivery_system == DVB_S)
 	{
 		settings.addItem( new CMenuSeparator() );
@@ -1064,8 +1064,9 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		extSatSettings->addItem( new CMenuSeparator() );
 		extSatSettings->addItem( new CMenuForwarder("menu.back") );
 		extSatSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", scanSettings.diseqcMode != NO_DISEQC, "", extSatSettings);
-		for( uint i=0; i< satList.size(); i++)
+		
+		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", ((scanSettings.diseqcMode != NO_DISEQC) && (scanSettings.diseqcMode < DISEQC_1_2)), "", extSatSettings);
+		for( uint i=0; i < satList.size(); i++)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
 			oj->addOption( -1, "options.off");
@@ -1077,8 +1078,46 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			}
 			extSatSettings->addItem( oj);
 		}
+		
+		CMenuWidget* extLnbSettings = new CMenuWidget("satsetup.extended_lnb", "settings.raw");
+		extLnbSettings->addItem( new CMenuSeparator() );
+		extLnbSettings->addItem( new CMenuForwarder("menu.back") );
+		extLnbSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", &((int)(scanSettings.diseqcMode)), true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojDiseqcRepeats));
+		CMenuForwarder* ojExtLnbSettings = new CMenuForwarder("satsetup.extended_lnb", (scanSettings.diseqcMode == DISEQC_1_2), "", extLnbSettings);
+		for( uint i=0; i < satList.size(); i++)
+		{
+			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
+			oj->addOption( -1, "options.off");
+			for( int j=0; j<=63; j++)
+			{
+				char jj[2 + 1];
+				sprintf( jj, "%d", j + 1);
+				oj->addOption( j, jj);
+			}
+			extSatSettings->addItem( oj);
+		}
+		
+		CMenuWidget* extMotorSettings = new CMenuWidget("satsetup.extended_motor", "settings.raw");
+		extMotorSettings->addItem( new CMenuSeparator() );
+		extMotorSettings->addItem( new CMenuForwarder("menu.back") );
+		extMotorSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		
+		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), "", extMotorSettings);
+		for( uint i=0; i < satList.size(); i++)
+		{
+			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.motorPosOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
+			oj->addOption( -1, "options.off");
+			for( int j=0; j<=63; j++)
+			{
+				char jj[2 + 1];
+				sprintf( jj, "%d", j + 1);
+				oj->addOption( j, jj);
+			}
+			extMotorSettings->addItem( oj);
+		}
+
+		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", &((int)(scanSettings.diseqcMode)), true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojExtLnbSettings, ojExtMotorSettings, ojDiseqcRepeats));
 		ojDiseqc->addOption( NO_DISEQC,   "satsetup.nodiseqc");
 		ojDiseqc->addOption( MINI_DISEQC, "satsetup.minidiseqc");
 		ojDiseqc->addOption( DISEQC_1_0,  "satsetup.diseqc10");
@@ -1091,6 +1130,8 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojSat);
 		settings.addItem( ojDiseqcRepeats );
 		settings.addItem( ojExtSatSettings);
+		//settings.addItem( ojExtLnbSettings);
+		//settings.addItem( ojExtMotorSettings);
 
 	}
 	else
@@ -2186,7 +2227,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//mp3/picviewer Setup
 	InitMp3PicSettings(mp3picSettings);
 	
-   //misc Setup
+   	//misc Setup
 	InitMiscSettings(miscSettings);
 	miscSettings.setOnPaintNotifier(this);
 
@@ -2767,11 +2808,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 	{
 		if( mode != mode_scart )
-			skipShutdownTimer = (ShowMsg ( "messagebox.info",
-													 g_Locale->getText("shutdowntimer.announce") ,
-													 CMessageBox::mbrNo,
-													 CMessageBox::mbYes | CMessageBox::mbNo, "",450,5)
-										==CMessageBox::mbrYes);
+			skipShutdownTimer = (ShowMsg ( "messagebox.info", g_Locale->getText("shutdowntimer.announce"),
+							CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "",450,5)
+							==CMessageBox::mbrYes);
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
 	{
@@ -3382,7 +3421,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.441 2003/05/05 15:42:20 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.442 2003/05/11 09:50:56 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();

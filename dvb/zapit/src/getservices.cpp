@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.72 2003/05/10 09:42:34 digi_casi Exp $
+ * $Id: getservices.cpp,v 1.73 2003/05/11 09:50:55 digi_casi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -27,13 +27,11 @@
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
 
-#define MOTORCONFIGFILE ZAPITCONFIGDIR "/motor.conf"
-
 extern std::map <uint32_t, transponder> transponders;
 extern tallchans allchans;
 
 std::map <string, int32_t> satellitePositions; //satellite position as specified in satellites.xml
-std::map <int32_t, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
+std::map <string, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
 
 void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, std::string satellite, int32_t satellitePosition)
 {
@@ -188,9 +186,9 @@ void FindTransponder(xmlNodePtr search)
 int LoadMotorPositions(void)
 {
 	FILE *fd = NULL;
-	int32_t satellitePosition = 0;
 	int motorPosition = 0;
 	char buffer[256] = "";
+	char satellite[32] = "";
 	
 	if ((fd = fopen(MOTORCONFIGFILE, "r")))
 	{
@@ -198,10 +196,10 @@ int LoadMotorPositions(void)
 		{
 			fgets(buffer, 255, fd);
 			printf("[getservices] %s\n", buffer);
-			sscanf(buffer, "%d %d", &satellitePosition, &motorPosition);
-			printf("[getservices] motorPosition %d: %d\n", satellitePosition, motorPosition);
-			motorPositions[satellitePosition]++;
-			motorPositions[satellitePosition] = (uint8_t)motorPosition;	
+			sscanf(buffer, "%s %d", satellite, &motorPosition);
+			printf("[getservices] motorPosition %s: %d\n", satellite, motorPosition);
+			motorPositions[satellite]++;
+			motorPositions[satellite] = motorPosition;	
 			
 		}
 		fclose(fd);

@@ -57,7 +57,7 @@ struct SNeutrinoSettings
 	int audio_avs_Control;
 
 	//vcr
-	int	vcr_AutoSwitch;
+	int vcr_AutoSwitch;
 
 	//language
 	char language[25];
@@ -67,7 +67,7 @@ struct SNeutrinoSettings
 	int timing_chanlist;
 	int timing_epg;
 	int timing_infobar;
-	int	timing_filebrowser;
+	int timing_filebrowser;
 	char timing_menu_string[4];
 	char timing_chanlist_string[4];
 	char timing_epg_string[4];
@@ -75,7 +75,7 @@ struct SNeutrinoSettings
 	char timing_filebrowser_string[4];
 
 	//widget settings
-	int	widget_fade;
+	int widget_fade;
 
 	//colors
 	unsigned char gtx_alpha1;
@@ -168,10 +168,10 @@ struct SNeutrinoSettings
 	char repeat_genericblocker[4];
 
 	//screen configuration
-	int	screen_StartX;
-	int	screen_StartY;
-	int	screen_EndX;
-	int	screen_EndY;
+	int screen_StartX;
+	int screen_StartY;
+	int screen_EndX;
+	int screen_EndY;
 
 	//Software-update
 	int softupdate_mode;
@@ -220,20 +220,20 @@ struct SNeutrinoSettings
 	char	fontsize_filebrowser_item[4];
 
 	// lcdd
-	int	lcd_brightness;
-	int	lcd_standbybrightness;
-	int	lcd_contrast;
-	int	lcd_power;
-	int	lcd_inverse;
-   int   lcd_show_volume;
+	int lcd_brightness;
+	int lcd_standbybrightness;
+	int lcd_contrast;
+	int lcd_power;
+	int lcd_inverse;
+   	int lcd_show_volume;
 
 	// pictureviewer
 	char   picviewer_slide_time[3];
 	int    picviewer_scaling;
 
-   //mp3player
-   int   mp3player_display;
-   int   mp3player_follow;
+   	//mp3player
+   	int   mp3player_display;
+   	int   mp3player_follow;
 };
 
 struct SglobalInfo
@@ -248,7 +248,7 @@ const int PARENTALLOCK_PROMPT_ONSTART        = 1;
 const int PARENTALLOCK_PROMPT_CHANGETOLOCKED = 2;
 const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 
-#define MAX_SATELLITES 20
+#define MAX_SATELLITES 64
 
 class CScanSettings
 {
@@ -259,15 +259,17 @@ class CScanSettings
 	uint32_t                  diseqcRepeat;
 	char                      satNameNoDiseqc[30];
 	int                       satDiseqc[MAX_SATELLITES];
+	int	                  satMotorPos[MAX_SATELLITES];
 	char                      satName[30][MAX_SATELLITES];
 	delivery_system_t         delivery_system;
 
 	CScanSettings();
 	
 	int* diseqscOfSat( char* satname);
+	int* motorPosOfSat( char* satname);
 	char* CScanSettings::satOfDiseqc(int diseqc) const;
 	void toSatList( CZapitClient::ScanSatelliteList& ) const;
-	
+	void toMotorPosList( CZapitClient::ScanMotorPosList& ) const;
 	
 	void useDefaults(const delivery_system_t _delivery_system);
 	

@@ -57,7 +57,18 @@ bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 	{
 		satMenu->setActive(true);
 		extMenu->setActive(false);
+		lnbMenu->setActive(false);
+		motorMenu->setActive(false);
 		repeatMenu->setActive(false);
+	}
+	else
+	if (*((int*) Data) == DISEQC_1_2)
+	{
+		satMenu->setActive(true);
+		extMenu->setActive(true);
+		lnbMenu->setActive(true);
+		motorMenu->setActive(true);
+		repeatMenu->setActive(true);
 	}
 	else
 	{
