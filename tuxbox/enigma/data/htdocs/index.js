@@ -20,6 +20,13 @@ function setVol(xy)
 	parent.setTimeout("reload()", 100);
 }
 
+function setVid(xy)
+{
+	win=window.open("/setVideo?position="+xy, "switchStatus", "width=50,height=20,left=0,top=0");
+	win.focus();
+	parent.setTimeout("reload()", 100);
+}	
+
 function Mute()
 {
 	win=window.open("/setVolume?mute=1", "switchStatus","width=1,height=1,left=0,top=0");
@@ -58,7 +65,8 @@ function admin(xy)
 
 function vcontrol(xy)
 {
-	NewWindow('/cgi-bin/videocontrol?command='+xy, 'vcontrol', '200', '100', 'no', '300');
+	win=window.open("/cgi-bin/videocontrol?command="+xy, "vcontrol", "width=200, height=100, left=0, top=0");
+	win.focus();
 }
 
 function openSI()

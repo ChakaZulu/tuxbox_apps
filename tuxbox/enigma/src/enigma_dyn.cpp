@@ -63,6 +63,7 @@ using namespace std;
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 
+static int videopos = 0;
 
 static eString getVersionInfo(const char *info)
 {
@@ -432,13 +433,36 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString command=opt["command"];
-	eString requester=opt["requester"];
-	if (command)
+	eString command = opt["command"];
+	if (command == "rewind")
 	{
-		int i = 0;
+		videopos -= 1;
+		if (videopos < 0)
+			videopos = 0;
 	}
-	return "<html>" CHARSETMETA "<head><title>Video</title></head><body>User error ;-)</body></html>";
+	else
+	if (command == "forward")
+	{
+		videopos += 1;
+		if (videopos > 10)
+			videopos = 10;
+	}
+	else
+	if (command == "stop")
+	{
+		eZapMain::getInstance()->stop();
+	}
+	else
+	if (command == "pause")
+	{
+		eZapMain::getInstance()->pause();
+	}
+	else
+	if (command == "play")
+	{
+		eZapMain::getInstance()->play();
+	}
+	return "<script language=\"javascript\">window.close();</script>";
 }
 
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -546,40 +570,77 @@ static eString getVolume()
 static eString setVolume(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString mute="0";
+	eString mute = "0";
 	eString volume;
 	eString result;
-	int mut=0, vol=0;
+	int mut = 0, vol = 0;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	result+="<script language=\"javascript\">window.close();</script>";
-	mute=opt["mute"];
-	volume=opt["volume"];
+	result += "<script language=\"javascript\">window.close();</script>";
+	mute = opt["mute"];
+	volume = opt["volume"];
 
-	if (!mute) {
-		mut=0;
-	} else {
+	if (!mute)
+	{
+		mut = 0;
+	}
+	else
+	{
 		eAVSwitch::getInstance()->toggleMute();
-		result+="+ok";
+		result += "+ok";
 		return result;
 	}
 
-	if (volume) {
-		vol=atoi(volume.c_str());
-	} else {
-		result+="[no params]";
+	if (volume)
+	{
+		vol = atoi(volume.c_str());
+	}
+	else
+	{
+		result += "[no params]";
 		return result;
 	}
-	if (vol>10) vol=10;
-	if (vol<0) vol=0;
+	if (vol > 10) vol = 10;
+	if (vol < 0) vol = 0;
 
-	float temp=(float)vol;
-	temp=temp*6.3;
-	vol=(int)temp;
+	float temp = (float)vol;
+	temp = temp * 6.3;
+	vol = (int)temp;
 
 	eAVSwitch::getInstance()->changeVolume(1, 63-vol);
-	result+="+ok";
+	result += "+ok";
+
+	return result;
+}
+
+static eString setVideo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts);
+	eString video;
+	eString result;
+	int vid = 0;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	result += "<script language=\"javascript\">window.close();</script>";
+	video = opt["videopos"];
+
+	if (video)
+	{
+		vid=atoi(video.c_str());
+	}
+	else
+	{
+		result += "[no params]";
+		return result;
+	}
+	if (vid > 10) vid = 10;
+	if (vid < 0) vid = 0;
+
+	//set video position here...
+	videopos = vid;
+	result += "+ok";
 
 	return result;
 }
@@ -818,7 +879,7 @@ static eString getVolBar()
 static eString getVideoBar()
 {
 	eString result;
-	int videopos = 0;
+//	int videopos = 0;
 
 	result += "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
 	result += "<tr>";
@@ -1355,6 +1416,14 @@ static eString getContent(eString mode, eString path)
 	if (mode == "zap")
 	{
 		result = getTitle("Zap");
+#ifndef DISABLE_FILE
+		if (path == ";4097:7:0:1:0:0:0:0:0:0:")
+		{
+			eString tmpFile = read_file(TEMPLATE_DIR + "videocontrols.tmp");
+			tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
+			result += tmpFile;
+		}
+#endif
 		zap_result += getZapContent(mode, path);
 		result += getEITC();
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
@@ -1375,20 +1444,6 @@ static eString getContent(eString mode, eString path)
 		{
 			DELETE(#OPS#);
 		}
-#ifndef DISABLE_FILE
-		if (path == ";4097:7:0:1:0:0:0:0:0:0:")
-		{
-			eString tmpFile = read_file(TEMPLATE_DIR + "videocontrols.tmp");
-			tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
-			result.strReplace("#VIDEOCONTROLS#", tmpFile);
-		}
-		else
-		{
-#endif
-			DELETE(#VIDEOCONTROLS#);
-#ifndef DISABLE_FILE
-		}
-#endif
 		result += zap_result;
 	}
 	else
@@ -2709,6 +2764,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/videocontrol", videocontrol);
 #endif
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
+	dyn_resolver->addDyn("GET", "/setVideo", setVideo);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, true);
