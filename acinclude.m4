@@ -133,10 +133,13 @@ AC_ARG_WITH(driver,
 	[  --with-driver=PATH      path for driver sources[[NONE]]],
 	[DRIVER="$withval"],[DRIVER=""])
 
-if test -z "$DRIVER"; then
-	AC_MSG_ERROR([can't find driver sources])
+if test -z "$DRIVER/include"; then
+	AC_MSG_WARN([can't find driver sources])
+	AC_DEFINE_UNQUOTED(HAVE_DBOX2_DRIVER,0,[dbox2 driver headers found])
+else
+	AC_DEFINE_UNQUOTED(HAVE_DBOX2_DRIVER,1,[dbox2 driver headers found])
+	CPPFLAGS="$CPPFLAGS -I$DRIVER/include"
 fi
-CPPFLAGS="$CPPFLAGS -I$DRIVER/include"
 AC_SUBST(DRIVER)
 ])
 
@@ -151,16 +154,19 @@ if test "$DVBINCLUDES"; then
 else
 	CPPFLAGS=""
 fi
-AC_CHECK_HEADERS(dvb/version.h,[DVB_VERSION_H="yes"])
+AC_CHECK_HEADERS(linux/dvb/version.h,[LINUX_DVB_VERSION_H="yes"])
 AC_CHECK_HEADERS(ost/dmx.h,[OST_DMX_H="yes"])
-if test "$DVB_VERSION_H"; then
+if test "$LINUX_DVB_VERSION_H"; then
 	AC_MSG_NOTICE([found dvb version 2 or later])
+	AC_DEFINE_UNQUOTED(HAVE_DVB,1,[dvb headers found])
 elif test "$OST_DMX_H"; then
 	AC_MSG_NOTICE([found dvb version 1])
+	AC_DEFINE_UNQUOTED(HAVE_DVB,1,[dvb headers found])
 else
-	AC_MSG_ERROR([can't find dvb headers])
+	AC_MSG_WARN([can't find dvb headers])
+	AC_DEFINE_UNQUOTED(HAVE_DVB,0,[dvb headers found])
 fi
-DVB_VERSION_H=
+LINUX_DVB_VERSION_H=
 OST_DMX_H=
 CPPFLAGS="$orig_CPPFLAGS -I$DVBINCLUDES"
 ])
