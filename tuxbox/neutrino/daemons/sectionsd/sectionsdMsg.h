@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.15 2001/09/18 18:15:28 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.16 2001/09/20 10:38:41 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.16  2001/09/20 10:38:41  fnbrd
+//  neue Kommandoformat
+//
 //  Revision 1.15  2001/09/18 18:15:28  fnbrd
 //  2 new commands.
 //
@@ -80,6 +83,11 @@ struct sectionsd {
 
   struct msgResponseHeader {
     unsigned short dataLength;
+  } __attribute__ ((packed)) ;
+
+  struct sectionsdTime {
+    time_t startzeit;
+    unsigned dauer;
   } __attribute__ ((packed)) ;
 
   static const int numberOfCommands=18;
@@ -224,7 +232,10 @@ struct sectionsd {
 //     1 byte number of Events (noch nicht implementiert)
 //   data of response:
 //     is a string (c-string) describing the current/next EPGs
-//     every event: 1. line unique key (long long, hex), 2. line name, 3. line start time GMT (ctime, hex ), 4 line  duration (seconds, hex)
+//     every event: 
+//       1. 8 bytes unique key (unsigned long long), 
+//       2. struct sectionsdTime (8 bytes) 
+//       3. name (c-string with 0)     
 //
 // epgEPGid:
 //   data of request:
