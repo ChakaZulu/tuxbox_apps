@@ -1705,7 +1705,7 @@ void deactivateSwapFile(eString swapFile)
 	system(cmd.c_str());
 }
 
-void setSwapFile(int nextswapfile, eString nextswapfilename);
+void setSwapFile(int nextswapfile, eString nextswapfilename)
 {
 	int curswapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
@@ -1723,8 +1723,8 @@ void setSwapFile(int nextswapfile, eString nextswapfilename);
 		else 
 			deactivateSwapFile(nextswapfilename);
 			
-		eConfig::getInstance()->setKey("/extras/swapfile", swapfile);
-		eConfig::getInstance()->setKey("/extras/swapfilename", swapUSBFile.c_str());
+		eConfig::getInstance()->setKey("/extras/swapfile", nextswapfile);
+		eConfig::getInstance()->setKey("/extras/swapfilename", nextswapfilename.c_str());
 	}
 }
 
