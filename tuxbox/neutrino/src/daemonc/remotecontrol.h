@@ -42,6 +42,8 @@ class CRemoteControl
 		void zapTo(int key,  string chnlname );
 		void shutdown();
 		void setZapper (bool zapper);
+		void radioMode();
+		void tvMode();
 	
 };
 

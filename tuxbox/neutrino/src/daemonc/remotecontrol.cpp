@@ -144,6 +144,23 @@ void CRemoteControl::zapTo(int, string chnlname )
 	send();
 }
 
+void CRemoteControl::radioMode()
+{
+	remotemsg.version=1;
+	remotemsg.cmd=6;
+	
+	send();
+}
+
+void CRemoteControl::tvMode()
+{
+	remotemsg.version=1;
+	remotemsg.cmd=7;
+	
+	send();
+}
+
+
 void  CRemoteControl::shutdown()
 {
         remotemsg.version=1;

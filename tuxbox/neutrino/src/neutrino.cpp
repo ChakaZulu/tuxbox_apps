@@ -399,6 +399,9 @@ void CNeutrinoApp::channelsInit()
 	char rip[]="127.0.0.1";
 	char *return_buf;
 	
+	delete channelList;
+	channelList = new(CChannelList);
+	
 	sendmessage.version=1;
 	sendmessage.cmd = 5;
 
@@ -775,6 +778,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//init programm
 	remoteControl.setZapper(zapit);
+	if (zapit)
+		remoteControl.tvMode();
 	volume = 100;
 	channelsInit();
 	infoViewer.start(&frameBuffer, &fonts, &settings);
@@ -797,7 +802,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 			nRun=false;
 		}
 		
-		if (mode==mode_tv)
+		if (mode==mode_tv || mode==mode_radio)
 		{
 			if (key==CRCInput::RC_ok)
 			{	//channellist
@@ -942,6 +947,11 @@ void CNeutrinoApp::tvMode()
 	mode = mode_tv;
 	infoViewer.killTitle();
 	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
+	if (zapit) {
+	remoteControl.tvMode();
+	channelsInit();
+	channelList->zapTo(&remoteControl, &infoViewer,  0);
+	}
 }
 
 void CNeutrinoApp::radioMode()
@@ -950,9 +960,15 @@ void CNeutrinoApp::radioMode()
 	infoViewer.killTitle();
 	frameBuffer.loadPal("dboxradio.pal", 18, 199);
 	frameBuffer.paintIcon8("dboxradio.raw",0,0, 18);
+	if (zapit) {
+	remoteControl.radioMode();
+	channelsInit();
+	channelList->zapTo(&remoteControl, &infoViewer,  0);
+	} else {
 	while(rcInput.getKey(1)!=-1);
 	rcInput.getKey(600);
 	tvMode();
+	}
 }
 
 
