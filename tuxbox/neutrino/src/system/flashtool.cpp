@@ -70,7 +70,7 @@ bool CFlashTool::readFromMTD( string filename, int globalProgressEnd )
 {
 	int		fd1, fd2;
 	long	filesize;
-	int		globalProgressBegin;
+	int		globalProgressBegin = 0;
 
 	if(statusViewer)
 	{
@@ -146,7 +146,7 @@ bool CFlashTool::program( string filename, int globalProgressEndErase, int globa
 {
 	int		fd1, fd2;
 	long	filesize;
-	int		globalProgressBegin;
+	int		globalProgressBegin = 0;
 
 	if(statusViewer)
 	{
@@ -259,7 +259,7 @@ bool CFlashTool::erase(int globalProgressEnd)
 	int				fd;
 	mtd_info_t		meminfo;
 	erase_info_t	erase;
-	int				globalProgressBegin;
+	int				globalProgressBegin = 0;
 
 	if( (fd = open( mtdDevice.c_str(), O_RDWR )) < 0 )
 	{

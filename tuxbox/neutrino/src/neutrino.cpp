@@ -1193,15 +1193,13 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 			char buffer[200];
 			if(fgets(buffer,199,fd) != NULL)
 			{
-//				printf("buffer: '%s'\n",buffer);
-//				buffer[strlen(buffer)] = 0;
 				if(strncmp(buffer,"console=",8) == 0)
 				{
 					if(strncmp(&buffer[8],"null",4)==0)
 						fb_destination=0;
-					if(strncmp(&buffer[8],"ttyS0",5)==0)
+					else if(strncmp(&buffer[8],"ttyS0",5)==0)
 						fb_destination=1;
-					if(strncmp(&buffer[8],"tty",3)==0)
+					else if(strncmp(&buffer[8],"tty",3)==0)
 						fb_destination=2;
 				}
 				else
@@ -2766,7 +2764,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.303 2002/07/13 00:56:25 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.304 2002/07/13 01:10:37 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
