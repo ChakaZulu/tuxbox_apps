@@ -1623,7 +1623,7 @@ void eTimerListView::entrySelected(eListBoxEntryTimer *entry)
 	}
 }
 
-struct addToView: public std::unary_function<ePlaylistEntry*, void>
+struct addToView
 {
 	eListBox<eListBoxEntryTimer> *listbox;
 

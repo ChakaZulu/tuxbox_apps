@@ -69,6 +69,7 @@ struct gLookup
 	gColor *lookup;
 	gLookup(int size, const gPalette &pal, const gRGB &start, const gRGB &end);
 	gLookup();
+	~gLookup() { delete [] lookup; }
 	void build(int size, const gPalette &pal, const gRGB &start, const gRGB &end);
 };
 

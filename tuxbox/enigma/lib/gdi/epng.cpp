@@ -81,7 +81,7 @@ gImage *loadPNG(const char *filename)
 			rowptr[i]=((png_byte*)(res->data))+i*res->stride;
 		png_read_rows(png_ptr, rowptr, 0, height);
 	
-		delete rowptr;
+		delete [] rowptr;
 	
 		if (png_get_valid(png_ptr, info_ptr, PNG_INFO_PLTE))
 		{

@@ -143,11 +143,12 @@ eActionMapList::eActionMapList()
 		currentStyles.insert(tmp);
 		delete [] tmp;
 	}
-  xmlfiles.setAutoDelete(1);
+	xmlfiles.setAutoDelete(true);
 }
 
 eActionMapList::~eActionMapList()
 {
+	xmlfiles.clear();
 	if (instance==this)
 		instance=0;
 }
@@ -194,10 +195,14 @@ int eActionMapList::loadXML(const char *filename)
 
 	XMLTreeNode *root=parser->RootNode();
 	if (!root)
+	{
+		delete parser;
 		return -1;
+	}
 	if (strcmp(root->GetType(), "rcdefaults"))
 	{
 		eFatal("not a rcdefaults file.");
+		delete parser;
 		return -1;
 	}
 

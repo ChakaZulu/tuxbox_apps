@@ -74,7 +74,7 @@ void eDVBCI::thread()
 
 eDVBCI::~eDVBCI()
 {
-	kill(); // wait for thread exit.
+	quit(0);
 
 	delete ci;
 	if (fd >= 0)

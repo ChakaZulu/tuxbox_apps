@@ -51,6 +51,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb)
 
 eDVBServiceController::~eDVBServiceController()
 {
+	delete tdt;
 	Decoder::Flush();
 	eDVBCaPMTClientHandler::unregisterCaPMTClient(this);  // static method...
 }
@@ -290,6 +291,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		if (!pe)
 		{
 			pmtpid=-1;
+#ifndef DISABLE_FILE
 			if ( service.path ) // recorded ts
 			{
 				// we try to find manual the correct sid
@@ -341,6 +343,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 					close(fd);
 				}
 			}
+#endif
 		}
 		else
 			pmtpid=pe->program_map_PID;
@@ -410,6 +413,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		Decoder::Set();
 		break;
 	case eDVBServiceEvent::eventServiceSwitched:
+#ifndef DISABLE_FILE
 		if ( service.path )
 		{
 			eString filename = service.path;
@@ -438,6 +442,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				}
 			}
 		}
+#endif
 		/*emit*/ dvb.enterService(service);
 	case eDVBServiceEvent::eventServiceFailed:
 		/*emit*/ dvb.switchedService(service, -service_state);
@@ -710,8 +715,9 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 
 	Decoder::Flush();
 
-	if ( service && !service.path
+	if ( service
 #ifndef DISABLE_FILE
+		&& !service.path
 		&& Decoder::locked != 2 // leave service for (timer) zap in Background
 		&& !(eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef == service)
 #endif

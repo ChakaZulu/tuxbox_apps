@@ -202,11 +202,13 @@ eMainMenu::eMainMenu()
 	setHelpID(10);
 }
 
+#ifndef DISABLE_LCD
 void eMainMenu::setLCD( eWidget *LCDTitle, eWidget *LCDElement )
 {
 	eWidget::setLCD(LCDTitle, LCDElement);
 	wnd.setLCD(LCDTitle,LCDElement);
 }
+#endif
 
 void eMainMenu::sel_tv()
 {

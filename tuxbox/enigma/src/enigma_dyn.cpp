@@ -973,7 +973,7 @@ static eString getCurService()
 		return "n/a";
 }
 
-struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
+struct getEntryString
 {
 	std::stringstream &result;
 
@@ -2159,7 +2159,7 @@ static eString getTransponderServices(eString request, eString dirpath, eString 
 	return "E: no DVB service is running.. or this is a playback";
 }
 
-struct appendonidsidnamestr: public std::unary_function<const eServiceDVB&, void>
+struct appendonidsidnamestr
 {
 	eString &str;
 	appendonidsidnamestr(eString &s)

@@ -322,6 +322,7 @@ eZap::~eZap()
 	delete httpd;
 
 	delete init;
+
 	instance = 0;
 }
 
@@ -335,6 +336,9 @@ extern "C" void __mp_initsection();
 
 int main(int argc, char **argv)
 {
+#ifdef MEMLEAK_CHECK
+	atexit(DumpUnfreed);
+#endif
 	time_t t=0;
 	int res;
 //	signal(SIGSEGV, fault);

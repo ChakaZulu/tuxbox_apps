@@ -210,7 +210,7 @@ int eComboBox::setCurrent( const eListBoxEntryText* le, bool sendSelChanged )
 	return OK;
 }
 
-struct selectEntryByNum: public std::unary_function<const eListBoxEntryText&, void>
+struct selectEntryByNum
 {
 	int num;
 	eListBox<eListBoxEntryText>* lb;
@@ -246,7 +246,7 @@ int eComboBox::setCurrent( int num, bool sendSelChanged )
 	return OK;
 }
 
-struct selectEntryByKey: public std::unary_function<const eListBoxEntryText&, void>
+struct selectEntryByKey
 {
 	void* key;
 	eListBox<eListBoxEntryText>* lb;

@@ -1,15 +1,13 @@
 #include <lib/gdi/gpixmap.h>
 
 gLookup::gLookup()
+	:size(0), lookup(0)
 {
-	size=0;
-	lookup=0;
 }
 
 gLookup::gLookup(int size, const gPalette &pal, const gRGB &start, const gRGB &end)
+	:size(0), lookup(0)
 {
-	size=0;
-	lookup=0;
 	build(size, pal, start, end);
 }
 
@@ -17,7 +15,7 @@ void gLookup::build(int _size, const gPalette &pal, const gRGB &start, const gRG
 {
 	if (lookup)
 	{
-		delete lookup;
+		delete [] lookup;
 		lookup=0;
 		size=0;
 	}
@@ -186,7 +184,7 @@ void gPixmap::mergePalette(const gPixmap &target)
 	for (int i=0; i<clut.colors; i++)
 		lookup[i].color=target.clut.findColor(clut.data[i]);
 	
-	delete clut.data;
+	delete [] clut.data;
 	clut.colors=target.clut.colors;
 	clut.data=new gRGB[clut.colors];
 	memcpy(clut.data, target.clut.data, sizeof(gRGB)*clut.colors);
@@ -200,7 +198,7 @@ void gPixmap::mergePalette(const gPixmap &target)
 		dstptr+=stride;
 	}
 	
-	delete lookup;	
+	delete [] lookup;	
 }
 
 void gPixmap::line(ePoint start, ePoint dst, gColor color)

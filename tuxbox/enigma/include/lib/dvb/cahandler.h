@@ -6,7 +6,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <map>
+#include <lib/base/eptrlist.h>
 #include <lib/dvb/dvbservice.h>
 
 class CAService
@@ -15,6 +15,7 @@ class CAService
 	struct sockaddr_un servaddr;
 	eServiceReferenceDVB me;
 public:
+	const eServiceReferenceDVB &getRef() const { return me; }
 	CAService( const eServiceReferenceDVB &service )
 		:lastPMTVersion(-1), me(service)
 	{
@@ -39,29 +40,43 @@ public:
 
 class eDVBCAHandler: public eDVBCaPMTClient, public Object
 {
-	std::map<eServiceReferenceDVB, CAService*> services;
+	ePtrList<CAService> services;
 	void leaveTransponder( eTransponder* );
 public:
 	void enterService( const eServiceReferenceDVB &service)
 	{
-		std::map<eServiceReferenceDVB, CAService*>::iterator it(services.find(service));
+		ePtrList<CAService>::iterator it(services.begin());
+		for (;it != services.end(); ++it)
+		{
+			if ( it->getRef() == service )
+				break;
+		}
 		if ( it == services.end() )
-			services[service] = new CAService( service );
+			services.push_back(new CAService( service ));
 	}
 	void leaveService( const eServiceReferenceDVB &service )
 	{
-		std::map<eServiceReferenceDVB, CAService*>::iterator it(services.find(service));
-		if ( it != services.end() )
+		ePtrList<CAService>::iterator it(services.begin());
+		for (;it != services.end(); ++it)
 		{
-			delete it->second;
-			services.erase(it);
+			if ( it->getRef() == service )
+			{
+				services.erase(it);
+				break;
+			}
 		}
 	}
 	void handlePMT( const eServiceReferenceDVB &service, PMT *pmt )
 	{
-		std::map<eServiceReferenceDVB, CAService*>::iterator it(services.find(service));
-		if ( it != services.end() )
-			it->second->sendCAPMT(pmt);
+		ePtrList<CAService>::iterator it(services.begin());
+		for (;it != services.end(); ++it)
+		{
+			if ( it->getRef() == service )
+			{
+				it->sendCAPMT(pmt);
+				break;
+			}
+		}
 	}
 	eDVBCAHandler();
 	~eDVBCAHandler();

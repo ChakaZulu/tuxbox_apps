@@ -8,6 +8,7 @@
 
 eDVBCAHandler::eDVBCAHandler()
 {
+	services.setAutoDelete(true);
 	CONNECT( eDVB::getInstance()->leaveTransponder, eDVBCAHandler::leaveTransponder );
 	eDVBCaPMTClientHandler::registerCaPMTClient(this);  // static method...
 }

@@ -152,6 +152,14 @@ eDVB::~eDVB()
 	Decoder::Close();
 
 	eFrontend::close();
+
+	delete controller;
+
+#ifndef DISABLE_CI
+	delete DVBCI;
+	delete DVBCI2;	
+#endif
+
 	instance=0;
 }
 

@@ -6,6 +6,11 @@
 
 #include <lib/gui/emessage.h>
 
+#ifdef MEMLEAK_CHECK
+AllocList *allocList;
+pthread_mutex_t memLock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+#endif
+
 int infatal=0;
 
 Signal2<void, int, const eString&> logOutput;

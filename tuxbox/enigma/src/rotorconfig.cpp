@@ -148,7 +148,7 @@ RotorConfig::RotorConfig(eLNB *lnb )
 	}
 }
 
-struct savePosition: public std::unary_function< eListBoxEntryText&, void>
+struct savePosition
 {
 	std::map<int,int> &map;
 

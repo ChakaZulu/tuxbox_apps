@@ -291,6 +291,8 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			gPainter p(mydc);
 			p.mergePalette(*paldummy);
 		}
+		if ( images.find(name) != images.end() )
+			eDebug("we already have the image %s", name );
 		images[name] = image;
 	}
 	return 0;
@@ -475,7 +477,7 @@ eSkin::eSkin()
 	maxcolors=256;
 
 	palette=new gRGB[maxcolors];
-	
+
 	memset(palette, 0, sizeof(gRGB)*maxcolors);
 	paldummy=new gImage(eSize(1, 1), 8);
 	paldummy->clut.data=palette;
@@ -492,9 +494,9 @@ eSkin::~eSkin()
 
 	clear();
 
-	delete colorused;
+	delete [] colorused;
 
-	for (std::map<eString, gPixmap*>::iterator it(images.begin()); it != images.end(); it++)
+	for (std::map<eString, gPixmap*>::iterator it(images.begin()); it != images.end(); ++it)
 		delete it->second;	
 
 	if (paldummy)

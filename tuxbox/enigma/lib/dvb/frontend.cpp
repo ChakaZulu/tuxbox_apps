@@ -167,6 +167,7 @@ void eFrontend::timeout()
 
 eFrontend::~eFrontend()
 {
+	delete timer;
 	if (fd>=0)
 		::close(fd);
 #if HAVE_DVB_API_VERSION < 3

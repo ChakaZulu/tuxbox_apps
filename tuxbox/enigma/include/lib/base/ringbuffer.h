@@ -55,7 +55,7 @@ queueRingBuffer<T>::~queueRingBuffer()
 {
 	// delete all memory associated with ring buffer
 	link<T> * p = lastFree;
-	link<T> * next;
+	link<T> * next=NULL;
 
 	// walk around the circle deleting nodes
 	while( p->nextLink != lastFree )
@@ -64,6 +64,8 @@ queueRingBuffer<T>::~queueRingBuffer()
 		delete p;
 		p = next;
 	}
+	if ( next )
+		delete p;
 }
 
 template <class T>

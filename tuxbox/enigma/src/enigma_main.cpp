@@ -409,7 +409,7 @@ void eNVODSelector::clear()
 	/*emit*/ clearEntrys();
 }
 
-struct findNVOD: public std::unary_function<NVODStream&, void>
+struct findNVOD
 {
 	NVODStream **stream;
 	time_t nowTime;
@@ -711,7 +711,7 @@ SubService::SubService(eListBox<SubService> *listbox, eDVBNamespace dvb_namespac
 	service.descr = text;
 }
 
-struct selectCurSubService: public std::unary_function<SubService&, void>
+struct selectCurSubService
 {
 	eServiceReferenceDVB& cur;
 	eListBox<SubService> &lb;
@@ -2393,10 +2393,10 @@ void eZapMain::hideVolumeSlider()
 
 void eZapMain::toggleMute()
 {
+#ifndef DISABLE_FILE
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 // sorry.. disable Mute when playback TS or MPG File..
 // better do pause
-#ifndef DISABLE_FILE
 	if ( ( (ref.type == eServiceReference::idDVB && ref.path)
 				|| (ref.type == eServiceReference::idUser
 				&& ref.data[0] == eMP3Decoder::codecMPG ) )
@@ -2607,7 +2607,6 @@ void eZapMain::pause()
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
 	else
 	{
-#ifndef DISABLE_FILE
 		if ( ref.type == eServiceReference::idDVB && !ref.path )
 		{
 			Decoder::setAutoFlushScreen(0);
@@ -2619,7 +2618,6 @@ void eZapMain::pause()
 				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, -1));
 			}
 		}
-#endif
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 		Decoder::setAutoFlushScreen(1);
 	}
@@ -3377,9 +3375,11 @@ void eZapMain::createEmptyBouquet(int mode)
 			case modeRadio:
 				addUserBouquet( userRadioBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.radio",newList.data[1]), wnd.getEditText(), newList, true );
 				break;
+#ifndef DISABLE_FILE
 			case modeFile:
 				addUserBouquet( userFileBouquets, eplPath+'/'+eString().sprintf("userbouquet.%x.file",newList.data[1]), wnd.getEditText(), newList, true );
 				break;
+#endif
 		}
 	}
 }
@@ -3610,8 +3610,10 @@ int eZapMain::toggleEditMode( eServiceSelector *sel, int defmode )
 					userFileBouquets->getList() :
 			mode == modeRadio ?
 				userRadioBouquets->getList() :
+#ifndef DISABLE_FILE
 			mode == modeFile ?
 				userFileBouquets->getList() :
+#endif
 			userTVBouquets->getList();
 		UserBouquetSelector s( lst );
 		s.show();

@@ -1005,7 +1005,7 @@ int eLNBSetup::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
-struct eLNBPage::selectlnb: public std::unary_function<const eListBoxEntryText&, void>
+struct eLNBPage::selectlnb
 {
 	const eLNB *lnb;
 	eComboBox *lb;

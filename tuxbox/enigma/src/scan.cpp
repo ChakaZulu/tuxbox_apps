@@ -760,7 +760,7 @@ tsMultiSatScan::tsMultiSatScan(eWidget *parent)
 	CONNECT( start->selected, eWidget::accept );
 }
 
-struct copyNetwork: public std::unary_function<eListBoxEntrySat&, void>
+struct copyNetwork
 {
 	std::list<scanEntry> &dest;
 

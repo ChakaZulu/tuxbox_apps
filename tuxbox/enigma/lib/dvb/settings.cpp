@@ -194,7 +194,7 @@ void eDVBSettings::setTransponders(eTransponderList *tlist)
 	/*emit*/ dvb.serviceListChanged();
 }
 
-struct sortinChannel: public std::unary_function<const eServiceDVB&, void>
+struct sortinChannel
 {
 	eDVBSettings &edvb;
 	sortinChannel(eDVBSettings &edvb): edvb(edvb)
@@ -215,7 +215,7 @@ void eDVBSettings::sortInChannels()
 	revalidateBouquets();
 }
 
-struct saveService: public std::unary_function<const eServiceDVB&, void>
+struct saveService
 {
 	FILE *f;
 	saveService(FILE *out): f(out)
@@ -247,7 +247,7 @@ struct saveService: public std::unary_function<const eServiceDVB&, void>
 	}
 };
 
-struct saveTransponder: public std::unary_function<const eTransponder&, void>
+struct saveTransponder
 {
 	FILE *f;
 	saveTransponder(FILE *out): f(out)

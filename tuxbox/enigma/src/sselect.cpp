@@ -411,7 +411,7 @@ void eServiceSelector::addBouquet(const eServiceReference &ref)
 	new eListBoxEntryService(bouquets, ref, serviceentryflags);
 }
 
-struct renumber: public std::unary_function<const eListBoxEntryService&, void>
+struct renumber
 {
 	int &num;
 	bool invalidate;
@@ -578,7 +578,7 @@ void eServiceSelector::fillBouquetList( const eServiceReference& _ref)
 	bouquets->endAtomic();
 }
 
-struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, void>
+struct moveFirstChar
 {
 	char c;
 
@@ -597,7 +597,7 @@ struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, vo
 	}
 };
 
-struct moveServiceNum: public std::unary_function<const eListBoxEntryService&, void>
+struct moveServiceNum
 {
 	int num;
 
@@ -621,7 +621,7 @@ bool eServiceSelector::selectService(int num)
 	return services->forEachEntry( moveServiceNum( num ) ) == eListBoxBase::OK;
 }
 
-struct findServiceNum: public std::unary_function<const eListBoxEntryService&, void>
+struct findServiceNum
 {
 	int& num;
 	const eServiceReference& service;
@@ -718,7 +718,7 @@ void eServiceSelector::gotoChar(char c)
 	}
 }
 
-struct updateEPGChangedService: public std::unary_function<eListBoxEntryService&, void>
+struct updateEPGChangedService
 {
 	int cnt;
 	eEPGCache* epg;
@@ -1307,7 +1307,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 	return eWindow::eventHandler(event);
 }
 
-struct _selectService: public std::unary_function<const eListBoxEntryService&, void>
+struct _selectService
 {
 	eServiceReference service;
 
@@ -1326,7 +1326,7 @@ struct _selectService: public std::unary_function<const eListBoxEntryService&, v
 	}
 };
 
-struct copyEntry: public std::unary_function<const eListBoxEntryService&, void>
+struct copyEntry
 {
 	std::list<eServiceReference> &dest;
 

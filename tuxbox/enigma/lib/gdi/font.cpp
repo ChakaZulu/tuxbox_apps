@@ -212,6 +212,12 @@ float fontRenderClass::getLineHeight(const gFont& font)
 fontRenderClass::~fontRenderClass()
 {
 	singleLock s(ftlock);
+	while(font)
+	{
+		fontListEntry *f=font;
+		font=font->next;
+		delete f;
+	}
 //	auskommentiert weil freetype und enigma die kritische masse des suckens ueberschreiten. 
 //	FTC_Manager_Done(cacheManager);
 //	FT_Done_FreeType(library);
@@ -427,6 +433,8 @@ void eTextPara::setFont(Font *fnt, Font *replacement)
 	if (current_font && !current_font->ref)
 		delete current_font;
 	current_font=fnt;
+	if (replacement_font && !replacement_font->ref)
+		delete replacement_font;
 	replacement_font=replacement;
 	singleLock s(ftlock);
 

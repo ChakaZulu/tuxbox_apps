@@ -129,7 +129,7 @@ int eTransponderWidget::load()
 	return 0;
 }
 
-struct selectSat: public std::unary_function<eListBoxEntryText&, void>
+struct selectSat
 {
 	const eTransponder* t;
 	eComboBox *l;

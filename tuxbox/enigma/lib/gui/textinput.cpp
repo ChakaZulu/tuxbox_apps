@@ -69,7 +69,7 @@ void eTextInputField::loadKeyMappings()
 		return;
 	}
 
-	XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
+	XMLTreeParser parser("ISO-8859-1");
 	char buf[2048];
 
 	int done;
@@ -77,20 +77,18 @@ void eTextInputField::loadKeyMappings()
 	{
 		unsigned int len=fread(buf, 1, sizeof(buf), in);
 		done=len<sizeof(buf);
-		if (!parser->Parse(buf, len, done))
+		if (!parser.Parse(buf, len, done))
 		{
 			eFatal("parse error: %s at line %d",
-				parser->ErrorString(parser->GetErrorCode()),
-				parser->GetCurrentLineNumber());
-			delete parser;
-			parser=0;
+				parser.ErrorString(parser.GetErrorCode()),
+				parser.GetCurrentLineNumber());
 			fclose(in);
 			return;
 		}
 	} while (!done);
 	fclose(in);
 
-	XMLTreeNode *node=parser->RootNode();
+	XMLTreeNode *node=parser.RootNode();
 	if (!node)
 	{
 		eFatal("empty keymappings file?");

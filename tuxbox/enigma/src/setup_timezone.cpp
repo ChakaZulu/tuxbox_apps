@@ -62,8 +62,22 @@ eZapTimeZoneSetup::eZapTimeZoneSetup() : eWindow(0)
 	setHelpID(90);
 }
 
+struct delString
+{
+	delString()
+	{
+	}
+
+	bool operator()(eListBoxEntryText &e)
+	{
+		delete (eString*)(e.getKey());
+		return false;
+	}
+};
+
 eZapTimeZoneSetup::~eZapTimeZoneSetup()
 {
+	timeZone->forEachEntry(delString());
 }
 
 void eZapTimeZoneSetup::okPressed()

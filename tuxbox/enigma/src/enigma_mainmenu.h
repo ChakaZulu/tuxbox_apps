@@ -40,7 +40,9 @@ class eMainMenu: public eWidget
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
+#ifndef DISABLE_LCD
 	void setLCD(eWidget*,eWidget*);
+#endif
 	eMainMenu();
 };
 
