@@ -66,7 +66,7 @@ using namespace std;
 
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
 
-#define WEBXFACEVERSION "1.3.0"
+#define WEBXFACEVERSION "1.3.1"
 
 static int smallScreen = 0;
 
@@ -3814,7 +3814,7 @@ static eString wapAddTimerEvent(eString opts)
 
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
-	
+
 	int timeroffset = 0;
 	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
 		timeroffset = 0;
@@ -3843,10 +3843,10 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 	eDebug("[ENIGMA_DYN] deleteTimerEvent: serviceRef = %s, type = %s, start = %s", serviceRef.c_str(), eventType.c_str(), eventStartTime.c_str());
 
 	ePlaylistEntry e(
-		string2ref(serviceRef), 
-		atoi(eventStartTime.c_str()), 
+		string2ref(serviceRef),
+		atoi(eventStartTime.c_str()),
 		-1, -1, atoi(eventType.c_str()));
-	
+
 	eTimerManager::getInstance()->deleteEventFromTimerList(e);
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	content->code=204;
@@ -3923,12 +3923,12 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 
 	ePlaylistEntry oldEvent(
 		ref,
-		atoi(oldStartTime.c_str()), 
+		atoi(oldStartTime.c_str()),
 		-1, -1, oldType);
 
 	if ( oldStartTime < now && eventStartTime >= now )
 	{
-		oldType &= 
+		oldType &=
 			~(ePlaylistEntry::stateRunning|
 				ePlaylistEntry::statePaused|
 				ePlaylistEntry::stateFinished|
@@ -3946,14 +3946,14 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	ePlaylistEntry newEvent(
 		ref,
 		eventStartTime,
-		duration, 
+		duration,
 		eventid,
 		oldType);
 
 	// TODO : overlapp checking !!!
-	// change modifyEventInTimerList.. and return state values.. 
+	// change modifyEventInTimerList.. and return state values..
 	// i.e. overlap check failed.. event currently running .. all ok.. or whatever..
-	// than ask user what todo.. and call another once modifyEventInTimerList.. 
+	// than ask user what todo.. and call another once modifyEventInTimerList..
 	// with parameter force
 
 	eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent);
@@ -3968,7 +3968,6 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
 	eString serviceRef = opt["ref"];
-	eString eventID = opt["ID"];
 	eString sday = opt["sday"];
 	eString smonth = opt["smonth"];
 	eString shour = opt["shour"];
@@ -3994,25 +3993,27 @@ static eString addTimerEvent2(eString request, eString dirpath, eString opts, eH
 	end.tm_min = atoi(emin.c_str());
 	end.tm_sec = 0;
 
-#if 0
 	time_t eventStartTime = mktime(&start);
 	time_t eventEndTime = mktime(&end);
 	int duration = eventEndTime - eventStartTime;
-	int eventid;
-	sscanf(eventID.c_str(), "%x", &eventid);
-	// printf("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d\n", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
-	//								end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
+	int eventid = -1;
 
-	EITEvent evt;
-	evt.start_time = eventStartTime;
-	evt.duration = duration;
-	evt.event_id = eventid;
-	printf("[CHANGETIMER] startTime = %d, startDuration = %d, eventID = %x\n", evt.start_time, evt.duration, evt.event_id);
-	eServiceReference ref = string2ref(serviceRef);
-	eTimerManager::getInstance()->modifyEventInTimerList(&ref, &evt, channel + "/" + description);
+	int timeroffset = 0;
+	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
+
+	int start1 = eventStartTime - (timeroffset * 60);
+	duration = duration + (2 * timeroffset * 60);
+
+	ePlaylistEntry entry(string2ref(serviceRef), start1, duration, eventid, ePlaylistEntry::stateWaiting | ePlaylistEntry::RecTimerEntry | ePlaylistEntry::recDVR);
+	entry.service.descr = channel + "/" + description;
+
+	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
+		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
+	else
+		result += _("Timer event was created successfully.");
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-#endif
-	return "<html><body>This function is not working yet.</body></html>";
+
+	return result;
 }
 
 static eString buildAfterEventOpts(int type)
@@ -4020,7 +4021,7 @@ static eString buildAfterEventOpts(int type)
 	std::stringstream afterOpts;
 	if ( type & ePlaylistEntry::doGoSleep || type & ePlaylistEntry::doShutdown )
 		afterOpts << "<option value=\"0\">";
-	else 
+	else
 		afterOpts << "<option selected value=\"0\">";
 	afterOpts << _("Nothing")
 		<< "</option>";
