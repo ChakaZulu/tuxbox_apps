@@ -138,7 +138,7 @@ void	netSetDefaultRoute( char *gw )
 	in_addr->sin_family = AF_INET;
 
 	fd=socket(AF_INET,SOCK_DGRAM,0);
-	if ( !fd )
+	if ( fd < 0 )
 		return;
 
 	re.rt_flags = RTF_GATEWAY | RTF_UP;
@@ -148,6 +148,31 @@ void	netSetDefaultRoute( char *gw )
 
 	close(fd);
 	return;
+}
+
+void netGetDefaultRoute( char *ip )
+{
+	FILE *fp;
+	char interface[9];
+	unsigned char destination[4];
+	unsigned char gateway[4];
+	char zeile[256];
+
+	*ip = 0 ;
+	fp = fopen("/proc/net/route","r");
+	if (fp == NULL)
+		return;
+	fgets(zeile,sizeof(zeile),fp);
+	while(fgets(zeile,sizeof(zeile),fp))
+	{
+		sscanf(zeile,"%8s %x %x",interface,(unsigned *) destination,(unsigned *) gateway);
+		if (*(unsigned *)destination == 0)
+		{
+			sprintf(ip,"%d.%d.%d.%d",gateway[0],gateway[1],gateway[2],gateway[3]);
+			break;
+		}
+	}
+	fclose(fp);
 }
 
 static	char	dombuf[256];
@@ -198,5 +223,34 @@ void	netSetNameserver( char *ip )
 	if (dom && strlen(dom)>2)
 		fprintf(fp,"search %s\n",dom);
 	fprintf(fp,"nameserver %s\n",ip);
+	fclose(fp);
+}
+
+void	netGetNameserver( char *ip )
+{
+	FILE *fp;
+	char zeile[256];
+	char *index;
+	unsigned zaehler;
+
+	*ip = 0;
+	fp = fopen("/etc/resolv.conf","r");
+	if (!fp)
+		return;
+
+	while (fgets(zeile,sizeof(zeile),fp))
+	{
+		if (!strncasecmp(zeile,"nameserver",10))
+		{
+			index = zeile + 10;
+			while ( (*index == ' ') || (*index == '\t') )
+				index++;
+			zaehler = 0;
+			while ( (zaehler < 15) && ( ((*index >= '0') && (*index <= '9')) || (*index == '.')))
+				ip[zaehler++] = *(index++);
+			ip[zaehler] = 0;
+			break;
+		}
+	}
 	fclose(fp);
 }
