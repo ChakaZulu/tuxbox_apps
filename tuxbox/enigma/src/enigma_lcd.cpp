@@ -7,13 +7,18 @@
 #include "eprogress.h"
 #include "glcddc.h"
 #include "font.h"
+#include "emessage.h"
+#include "eskin.h"
+
+#define ASSIGN(v, t, n)	\
+	v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
 
 eZapLCD::eZapLCD(): eWidget()
 {
 	setTarget(gLCDDC::getInstance());
 	move(QPoint(0, 0));
 	resize(QSize(120, 64));
-	
+
 	mp.addPage(new eZapLCDMain(this));
 	mp.first();
 }
@@ -49,27 +54,15 @@ void eZapLCDMain::serviceChanged(eService *service, int)
 
 eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
 {
-//"News Gothic Br Medium"
-	eLabel *l=new eLabel(this);
-	l->setText("EliteDVB");
-	l->move(QPoint(50, 0));
-	l->resize(QSize(70, 16));
+	if (eSkin::getActive()->build(this, "enigma_lcd"))
+		qFatal("skin load of \"enigma_lcd\" failed");
 
-	ServiceName=new eLabel(this);
-	ServiceName->setText("");
-	ServiceName->setFlags(RS_WRAP);
-	ServiceName->move(QPoint(0, 20));
-	ServiceName->resize(QSize(120, 32));
-
-	Clock=new eLabel(this);
-	Clock->setText("EliteDVB");
-	Clock->move(QPoint(78, 50));//44
-	Clock->resize(QSize(42, 14));
+	ASSIGN(ServiceName, eLabel, "service_name");
+	ASSIGN(Clock, eLabel, "clock");
 
 	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
 	connect(eDVB::getInstance(), SIGNAL(volumeChanged(int)), SLOT(volumeUpdate(int)));
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
 
 	clockUpdate();
-	eDVB::getInstance()->changeVolume(0, +1);
 }
