@@ -2378,7 +2378,7 @@ void CNeutrinoApp::ExitRun()
 		frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
 	frameBuffer->paletteSet();
 
-	if (!frameBuffer->getActive())
+	if (frameBuffer->getActive())
 		frameBuffer->loadPicture2Mem("shutdown.raw", frameBuffer->getFrameBufferPointer() );
 	frameBuffer->loadPal("shutdown.pal");
 
@@ -2529,7 +2529,7 @@ void CNeutrinoApp::tvMode( bool rezap )
 
 	//printf( "tv-mode\n" );
 
-	if (!frameBuffer->getActive())
+	if (frameBuffer->getActive())
 		memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 	frameBuffer->useBackground(false);
 
@@ -2553,7 +2553,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 	if ( bOnOff )
 	{
 		// SCART AN
-		if (!frameBuffer->getActive())
+		if (frameBuffer->getActive())
 			memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 		g_Controld->setScartMode( 1 );
 
@@ -2600,7 +2600,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 			g_Controld->setScartMode( 0 );
 		}
 
-		if (!frameBuffer->getActive())
+		if (frameBuffer->getActive())
 			memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 
 		g_lcdd->setMode(CLcddClient::MODE_STANDBY);
@@ -2769,7 +2769,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.305 2002/07/19 21:36:07 waldi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.306 2002/07/19 21:47:58 waldi Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
