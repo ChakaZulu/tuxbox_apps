@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1,31: damned infobar                                                   *
  *    V1.30: change infobar, fix servicescan (segfault on RTL Shop)           *
  *    V1.29: infobar improvements by AlexW                                    *
  *    V1.28: use devfs device names by obi                                    *
@@ -46,7 +47,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.30 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.31 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -1904,7 +1905,7 @@ void RenderMessage(int Message)
 
 	//render infobar
 
-		PosX = StartX + fontwidth-3;
+		PosX = StartX + fontwidth+5;
 		PosY = StartY + fixfontheight*16;
 		for(byte = 0; byte < 37; byte++)
 		{
@@ -1912,7 +1913,7 @@ void RenderMessage(int Message)
 		}
 		RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth-3;
+		PosX = StartX + fontwidth+5;
 		PosY = StartY + fixfontheight*17;
 		RenderCharFB(message_2[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -1922,7 +1923,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_2[36], menucolor<<4 | menu2);
 		RenderCharFB(message_2[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth-3;
+		PosX = StartX + fontwidth+5;
 		PosY = StartY + fixfontheight*18;
 		RenderCharFB(message_3[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -1932,7 +1933,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_3[36], menucolor<<4 | menu2);
 		RenderCharFB(message_3[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth-3;
+		PosX = StartX + fontwidth+5;
 		PosY = StartY + fixfontheight*19;
 		RenderCharFB(message_4[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -1942,7 +1943,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_4[36], menucolor<<4 | menu2);
 		RenderCharFB(message_4[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth-3;
+		PosX = StartX + fontwidth+5;
 		PosY = StartY + fixfontheight*20;
 		for(byte = 0; byte < 37; byte++)
 		{
@@ -1950,7 +1951,7 @@ void RenderMessage(int Message)
 		}
 		RenderCharFB(message_5[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth-3;
+		PosX = StartX + fontwidth+5;
 		PosY = StartY + fixfontheight*21;
 		for(byte = 0; byte < 38; byte++)
 		{
