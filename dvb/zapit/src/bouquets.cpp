@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.5 2002/01/05 16:39:32 Simplex Exp $
+  $Id: bouquets.cpp,v 1.6 2002/01/15 23:08:50 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,10 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.6  2002/01/15 23:08:50  Simplex
+  added iterating  through channellists
+  added "special" bouquet
+
   Revision 1.5  2002/01/05 16:39:32  Simplex
   completed commands for bouquet-editor
 
@@ -94,7 +98,7 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 	}
 
 	uint i;
-	for (i=0; i<channels.size(), ((channels[i]->onid<<16) | channels[i]->sid) != onidSid; i++);
+	for (i=0; i<channels.size(), channels[i]->OnidSid() != onidSid; i++);
 
 	if (i<channels.size())
 		result = channels[i];
@@ -206,6 +210,7 @@ void CBouquet::moveService(  uint oldPosition, uint newPosition, uint serviceTyp
 }
 
 /**** class CBouquetManager *************************************************/
+
 void CBouquetManager::saveBouquets()
 {
 	printf("[zapit] creating new bouquets.xml\n");
@@ -221,20 +226,23 @@ void CBouquetManager::saveBouquets()
 
 	for (uint i=0; i<Bouquets.size(); i++)
 	{
-		fprintf(bouq_fd, "\t<Bouquet name=\"%s\">\n", Bouquets[i]->Name.c_str());
-		for ( uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
+		if (Bouquets[i] != remainChannels)
 		{
-			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
-					Bouquets[i]->tvChannels[j]->sid,
-					Bouquets[i]->tvChannels[j]->name.c_str(),
-					Bouquets[i]->tvChannels[j]->onid);
-		}
-		for ( uint j=0; j<Bouquets[i]->radioChannels.size(); j++)
-		{
-			fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
-					Bouquets[i]->radioChannels[j]->sid,
-					Bouquets[i]->radioChannels[j]->name.c_str(),
-					Bouquets[i]->radioChannels[j]->onid);
+			fprintf(bouq_fd, "\t<Bouquet name=\"%s\">\n", Bouquets[i]->Name.c_str());
+			for ( uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
+			{
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
+						Bouquets[i]->tvChannels[j]->sid,
+						Bouquets[i]->tvChannels[j]->name.c_str(),
+						Bouquets[i]->tvChannels[j]->onid);
+			}
+			for ( uint j=0; j<Bouquets[i]->radioChannels.size(); j++)
+			{
+				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
+						Bouquets[i]->radioChannels[j]->sid,
+						Bouquets[i]->radioChannels[j]->name.c_str(),
+						Bouquets[i]->radioChannels[j]->onid);
+			}
 		}
 		fprintf(bouq_fd, "\t</Bouquet>\n");
 	}
@@ -269,8 +277,6 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 			sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &sid);
 			sscanf(channel_node->GetAttributeValue("onid"), "%x", &onid);
 
-//			std::map<uint,channel>::iterator itChannel;
-
 			channel* chan = copyChannelByOnidSid( (onid << 16) + sid);
 
 			if ( chan != NULL)
@@ -300,6 +306,11 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 
 		search = search->GetNext();
 	}
+
+#ifdef USEBOUQUETMAN
+	makeRemainingChannelsBouquet( nChNrTV, nChNrRadio);
+#endif
+
 	printf("[zapit] Found %d bouquets.\n", Bouquets.size());
 
 }
@@ -339,6 +350,36 @@ void CBouquetManager::loadBouquets()
 	fclose(in);
 }
 
+void CBouquetManager::makeRemainingChannelsBouquet( unsigned int tvChanNr, unsigned int radioChanNr )
+{
+	remainChannels = addBouquet("Andere"); // TODO: use locales
+
+	for ( map<uint, channel>::iterator it=allchans_tv.begin(); it!=allchans_tv.end(); it++)
+	{
+		if (tvChannelsFind( it->second.OnidSid()) == tvChannelsEnd())
+		{
+			channel* chan = copyChannelByOnidSid( it->second.OnidSid());
+			chan->chan_nr = tvChanNr++;
+			remainChannels->addService( chan);
+		}
+	}
+
+	for ( map<uint, channel>::iterator it=allchans_radio.begin(); it!=allchans_radio.end(); it++)
+	{
+		if (radioChannelsFind( it->second.OnidSid()) == radioChannelsEnd())
+		{
+			channel* chan = copyChannelByOnidSid( it->second.OnidSid());
+			chan->chan_nr = radioChanNr++;
+			remainChannels->addService( chan);
+		}
+	}
+
+	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
+	{
+		deleteBouquet("Andere");
+	}
+}
+
 void CBouquetManager::renumServices()
 {
 	int nChNrRadio = 1;
@@ -352,12 +393,12 @@ void CBouquetManager::renumServices()
 		for (uint j=0; j<Bouquets[i]->tvChannels.size(); j++)
 		{
 			Bouquets[i]->tvChannels[j]->chan_nr = nChNrTV;
-			numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, (Bouquets[i]->tvChannels[j]->onid<<16)+Bouquets[i]->tvChannels[j]->sid));
+			numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, Bouquets[i]->tvChannels[j]->OnidSid()));
 		}
 		for (uint j=0; j<Bouquets[i]->radioChannels.size(); j++)
 		{
 			Bouquets[i]->radioChannels[j]->chan_nr = nChNrRadio;
-			numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, (Bouquets[i]->radioChannels[j]->onid<<16)+Bouquets[i]->radioChannels[j]->sid));
+			numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, Bouquets[i]->radioChannels[j]->OnidSid()));
 		}
 	}
 
@@ -433,12 +474,8 @@ void CBouquetManager::deleteBouquet( uint id)
 		BouquetList::iterator it;
 		uint i;
 		for (i=0, it = Bouquets.begin(); i<id; i++, it++);
-		printf ("for ready\n");
-		printf ("will erase bouquet %s\n", (*it)->Name.c_str());
 		Bouquets.erase( it);
-		printf ("erased\n");
 		delete bouquet;
-		printf ("deleted\n");
 	}
 }
 
@@ -540,3 +577,112 @@ channel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
 	}
 	return( chan);
 }
+
+CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsBegin()
+{
+	uint B=0;
+	while ((B<Bouquets.size()) && (Bouquets[B]->tvChannels.size()==0)) B++;
+	if (B<Bouquets.size())
+		return( tvChannelIterator(this, B));
+	else
+		return tvChannelsEnd();
+}
+
+CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)
+{
+	tvChannelIterator it = tvChannelsBegin();
+	while ((it != tvChannelsEnd()) && ((*it)->OnidSid() != onid_sid))
+		it++;
+	return( it);
+}
+
+CBouquetManager::tvChannelIterator CBouquetManager::tvChannelIterator::operator ++(int)
+{
+	if ((b==-1) && (c==-1))
+		return(*this);
+	c++;
+	if (c >= Owner->Bouquets[b]->tvChannels.size())
+	{
+		c = 0;
+		do
+		{
+			b++;
+		} while ((b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->tvChannels.size()==0));
+	}
+	if ( b >= Owner->Bouquets.size())
+	{
+		b=-1; c=-1;
+	}
+	return(*this);
+}
+
+channel* CBouquetManager::tvChannelIterator::operator *()
+{
+	return( Owner->Bouquets[b]->tvChannels[c]);
+}
+
+bool CBouquetManager::tvChannelIterator::operator != (const tvChannelIterator& it) const
+{
+	return( (b != it.b) || (c != it.c));
+}
+
+bool CBouquetManager::tvChannelIterator::operator == (const tvChannelIterator& it) const
+{
+	return( (b == it.b) && (c == it.c));
+}
+
+CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsBegin()
+{
+	uint B=0;
+	while ((B<Bouquets.size()) && (Bouquets[B]->radioChannels.size()==0)) B++;
+	if (B<Bouquets.size())
+		return( radioChannelIterator(this, B));
+	else
+		return radioChannelsEnd();
+}
+
+CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsFind( unsigned int onid_sid)
+{
+	radioChannelIterator it = radioChannelsBegin();
+	while ((it != radioChannelsEnd()) && ((*it)->OnidSid() != onid_sid))
+	{
+		it++;
+	}
+	return( it);
+}
+
+CBouquetManager::radioChannelIterator CBouquetManager::radioChannelIterator::operator ++(int)
+{
+	if ((b==-1) && (c==-1))
+		return(*this);
+	c++;
+	if (c >= Owner->Bouquets[b]->radioChannels.size())
+	{
+		c = 0;
+		do
+		{
+			b++;
+		} while ((b < Owner->Bouquets.size()) && (Owner->Bouquets[b]->radioChannels.size()==0));
+	}
+	if ( b >= Owner->Bouquets.size())
+	{
+		b=-1; c=-1;
+	}
+	return(*this);
+}
+
+channel* CBouquetManager::radioChannelIterator::operator *()
+{
+	return( Owner->Bouquets[b]->radioChannels[c]);
+}
+
+bool CBouquetManager::radioChannelIterator::operator != (const radioChannelIterator& it) const
+{
+	return( (b != it.b) || (c != it.c));
+}
+
+bool CBouquetManager::radioChannelIterator::operator == (const radioChannelIterator& it) const
+{
+	return( (b == it.b) && (c == it.c));
+}
+

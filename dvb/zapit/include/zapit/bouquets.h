@@ -44,8 +44,48 @@ typedef vector<CBouquet*> BouquetList;
 class CBouquetManager
 {
 	private:
+		CBouquet* remainChannels;
+		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr);
 		void parseBouquetsXml(XMLTreeNode *root);
 	public:
+		class tvChannelIterator
+		{
+			private:
+				CBouquetManager* Owner;
+				int b;
+				int c;
+			public:
+				tvChannelIterator(CBouquetManager* owner, int B=0, int C=0) { Owner = owner; b=B;c=C;};
+				tvChannelIterator operator ++(int);
+				bool operator != (const tvChannelIterator& it) const;
+				bool operator == (const tvChannelIterator& it) const;
+				channel* operator *();
+			friend class CBouquetManager;
+		};
+
+		tvChannelIterator tvChannelsBegin();
+		tvChannelIterator tvChannelsEnd(){ return tvChannelIterator(this, -1, -1);};
+		tvChannelIterator tvChannelsFind( unsigned int onid_sid);
+
+		class radioChannelIterator
+		{
+			private:
+				CBouquetManager* Owner;
+				int b;
+				int c;
+			public:
+				radioChannelIterator(CBouquetManager* owner, int B=0, int C=0) { Owner = owner; b=B;c=C;};
+				radioChannelIterator operator ++(int);
+				bool operator != (const radioChannelIterator& it) const;
+				bool operator == (const radioChannelIterator& it) const;
+				channel* operator *();
+			friend class CBouquetManager;
+		};
+
+		radioChannelIterator radioChannelsBegin();
+		radioChannelIterator radioChannelsEnd(){ return radioChannelIterator(this, -1, -1);};
+		radioChannelIterator radioChannelsFind( unsigned int onid_sid);
+
 		BouquetList Bouquets;
 
 		void saveBouquets();
@@ -64,6 +104,7 @@ class CBouquetManager
 		void onStart();
 
 		channel* copyChannelByOnidSid( unsigned int onid_sid);
+
 };
 
 BOUQUETS_CPP CBouquetManager* BouquetManager;
