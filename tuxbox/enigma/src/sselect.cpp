@@ -5,12 +5,32 @@
 #include "bselect.h"
 #include "epgwindow.h"
 
+#include <core/base/i18n.h>
+#include <core/gui/actions.h>
 #include <core/gui/elbwindow.h>
 #include <core/gui/eskin.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/epgcache.h>
 #include <core/driver/rc.h>
+#include <core/system/init.h>
+
+struct serviceSelectorActions
+{
+  eActionMap map;
+	eAction nextBouquet, prevBouquet, showBouquetSelector, showEPGSelector, showAllServices;
+	serviceSelectorActions():
+		map("serviceSelector", _("service selector")),
+		prevBouquet(map, "prevBouquet", _("switch to previous bouquet"), eAction::prioDialog),
+		nextBouquet(map, "nextBouquet", _("switch to next bouquet"), eAction::prioDialog),
+		showBouquetSelector(map, "showBouquetSelector", _("shows the bouquet selector"), eAction::prioDialog),
+		showEPGSelector(map, "showEPGSelector", _("shows the EPG selector for the highlighted channel"), eAction::prioDialog),
+		showAllServices(map, "showAllServices", _("switch to all services"), eAction::prioDialog)
+	{
+	}
+};
+
+eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
 
 eListboxEntryService::eListboxEntryService(eService *service, eListbox *listbox): eListboxEntry(listbox), service(service)
 {
@@ -142,75 +162,58 @@ void eServiceSelector::selchanged(eListboxEntry *entry)
 	selected = (((eListboxEntryService*)entry)->service);
 }
 
-int eServiceSelector::eventFilter(const eWidgetEvent &event)
+int eServiceSelector::eventHandler(const eWidgetEvent &event)
 {
-#if 0
 	switch (event.type)
 	{
-		case eWidgetEvent::keyDown:
-			switch (event.parameter)
-			{
-			case eRCInput::RC_PLUS:
-			{
-				eBouquet *b;
-				b=pbs->next();
-				if (b)
-					useBouquet(b);
-				return 1;
-			}
-			case eRCInput::RC_MINUS:
+		case eWidgetEvent::evtAction:
+			if (event.action == &i_serviceSelectorActions->prevBouquet)
 			{
 				eBouquet *b;
 				b=pbs->prev();
 				if (b)
 					useBouquet(b);
-				return 1;
 			}
-			case eRCInput::RC_DBOX:
+			else if (event.action == &i_serviceSelectorActions->nextBouquet)
 			{
-				eBouquet *b;
-				hide();
-				pbs->setLCD(LCDTitle, LCDElement);
-				b=pbs->choose();
-				if (b)
-					useBouquet(b);
-				show();
-				return 1;
+					eBouquet *b;
+					b=pbs->next();
+					if (b)
+						useBouquet(b);
 			}
-			case eRCInput::RC_HOME:
+			else if (event.action == &i_serviceSelectorActions->showBouquetSelector)
 			{
-				fillServiceList();
-				return 1;
-			}
-		}
-		break;
-		case eWidgetEvent::keyUp:
-			switch (event.parameter)
-			{
-			case eRCInput::RC_RED:
-			{
-				const eventMap* e = eEPGCache::getInstance()->getEventMap(selected->original_network_id, selected->service_id);
-				if (e && !e->empty())
-				{
-					eEPGWindow wnd(selected);
-					if (LCDElement && LCDTitle)
-						wnd.setLCD(LCDTitle, LCDElement);
+					eBouquet *b;
 					hide();
-					wnd.show();
-					wnd.exec();
-					wnd.hide();
+					pbs->setLCD(LCDTitle, LCDElement);
+					b=pbs->choose();
+					if (b)
+						useBouquet(b);
 					show();
-				}
-				return 1;
 			}
-			case eRCInput::RC_HELP:
-				close(0);
+			else if (event.action == &i_serviceSelectorActions->showEPGSelector)
+			{
+					const eventMap* e = eEPGCache::getInstance()->getEventMap(selected->original_network_id, selected->service_id);
+					if (e && !e->empty())
+					{
+						eEPGWindow wnd(selected);
+						if (LCDElement && LCDTitle)
+							wnd.setLCD(LCDTitle, LCDElement);
+						hide();
+						wnd.show();
+						wnd.exec();
+						wnd.hide();
+						show();
+					}
+			}
+			else if (event.action == &i_serviceSelectorActions->showAllServices)
+				fillServiceList();
+			else
 				break;
-			}
-		break;
+
+			return 1;
 	}
-#endif
-	return 0;
+	return eLBWindow::eventHandler(event);
 }
 
 eServiceSelector::eServiceSelector()
@@ -223,6 +226,7 @@ eServiceSelector::eServiceSelector()
 	CONNECT(list.selected, eServiceSelector::entrySelected);
 	CONNECT(list.selchanged, eServiceSelector::selchanged);
 	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::fillServiceList);
+	addActionMap(&i_serviceSelectorActions->map);
 }
 
 eServiceSelector::~eServiceSelector()

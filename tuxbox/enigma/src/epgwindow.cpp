@@ -37,70 +37,36 @@ void eEPGWindow::fillEPGList()
 
 void eEPGWindow::entrySelected(eListboxEntry *entry)
 {
-	if (!entry);
-	{
+	if (!entry)
 		close(0);
-		return;
-	}
-	hide();
-	eEventDisplay ei(eDVB::getInstance()->service->service_name.c_str(), 0, ((eListboxEntryEPG*)entry)->event);
-	ei.show();
-	ei.exec();
-	ei.hide();
-	show();
-}
-
-int eEPGWindow::eventFilter(const eWidgetEvent &event)
-{
-#if 0
-	switch (event.type)
-	{
-		case eWidgetEvent::keyUp:
+	else
+	{	
+		int ret;
+		hide();
+		eEventDisplay ei(eDVB::getInstance()->service->service_name.c_str(), 0, ((eListboxEntryEPG*)entry)->event);
+		ei.show();
+		while(ret = ei.exec())
 		{
-			switch (event.parameter)
-			{
-				case eRCInput::RC_HELP:
-				case eRCInput::RC_RED:
-				case eRCInput::RC_HOME:
-				case eRCInput::RC_DBOX:
-					closeTimer.start(100,1);   // without Timer ... no return 1 :-(
-				return 1;
+			eListboxEntryEPG* tmp;
 
-				case eRCInput::RC_OK:
-					return 0;
-			}
-			return 1;
-		}
+			if (ret==-1)
+				tmp=(eListboxEntryEPG*)list.goPrev();
+			else if (ret == 1)
+				tmp=(eListboxEntryEPG*)list.goNext();
 
-		case eWidgetEvent::keyDown:
-		{
-			switch (event.parameter)
-			{	
-					case eRCInput::RC_LEFT:
-					case eRCInput::RC_RIGHT:					
-					case eRCInput::RC_UP:
-					case eRCInput::RC_DOWN:
-						return 0;
-			}
-			return 1;	
+			if (tmp)
+				ei.setEvent(tmp->event);					
 		}
+		ei.hide();
+		show();
 	}
-#endif
-	return 0;
 }
 
-void eEPGWindow::closeWnd()
-{
-	close(0);
-}
-
-eEPGWindow::eEPGWindow(eService* service):current(service), closeTimer(eApp),
+eEPGWindow::eEPGWindow(eService* service):current(service),
 								eLBWindow("Select Service...", 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
 {
 	move(ePoint(50, 50));
 	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
-	CONNECT(closeTimer.timeout, eEPGWindow::closeWnd);
 	CONNECT(list.selected, eEPGWindow::entrySelected);
-
 	fillEPGList();
 }

@@ -25,7 +25,7 @@ class eServiceSelector: public eLBWindow
 	eService *result, *selected;
 	eBouquetSelector* pbs;
 protected:
-	int eventFilter(const eWidgetEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 private:
 	void fillServiceList();
 	void entrySelected(eListboxEntry *entry);

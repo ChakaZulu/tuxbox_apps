@@ -14,13 +14,13 @@ class eEventDisplay: public eWindow
 	eLabel *title, *long_description, *eventDate, *eventTime, *channel;
 	void nextEvent();
 	void prevEvent();
-	void setEvent(EITEvent *event);
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
 	eEventDisplay(eString service, const ePtrList<EITEvent>* e=0, EITEvent* evt=0);
 	~eEventDisplay();
 	void setList(const ePtrList<EITEvent> &events);
+	void setEvent(EITEvent *event);
 };
 
 #endif /* __enigma_event_h */

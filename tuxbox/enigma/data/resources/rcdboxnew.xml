@@ -27,8 +27,8 @@
 			<key name="yellow" code="12" />
 			<key name="red" code="13" />
 			<key name="blue" code="14" />
-			<key name="volup" code="16" />
-			<key name="voldown" code="15" />
+			<key name="+" code="16" />
+			<key name="-" code="15" />
 			<key name="?" code="17" />
 			<key name="d-box" code="18" />
 			<key name="home" code="1f" />
@@ -70,10 +70,19 @@
 			<action name="prevService" key="left" flags="mr" />
 			<action name="serviceListDown" key="down" flags="m" />
 			<action name="serviceListUp" key="up" flags="m" />
-			<action name="volumeUp" key="volup" flags="mr" />
-			<action name="volumeDown" key="voldown" flags="mr" />
+			<action name="volumeUp" key="+" flags="mr" />
+			<action name="volumeDown" key="-" flags="mr" />
 			<action name="toggleMute" key="mute" flags="mr" />
 		</actionmap>
+
+		<actionmap name="serviceSelector">
+			<action name="nextBouquet" key="+" flags="mr" />
+			<action name="prevBouquet" key="-" flags="mr" />
+			<action name="showBouquetSelector" key="d-box" flags="m" />
+			<action name="showEPGSelector" key="red" flags="m" />
+			<action name="showAllServices" key="home" flags="m" />
+		</actionmap>
+
 	</device>
 
 </rcdefaults>

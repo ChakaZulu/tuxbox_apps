@@ -14,10 +14,10 @@
 #include <core/gui/eskin.h>
 #include <core/gui/elistbox.h>
 #include <core/gui/ebutton.h>
+#include <core/gui/actions.h>
 #include <core/driver/rc.h>
 #include <core/driver/streamwd.h>
 
-#include <core/gui/actions.h>
 
 #include "enigma_main.h"
 #include "iso639.h"

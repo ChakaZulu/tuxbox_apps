@@ -130,7 +130,7 @@ int eListbox::eventHandler(const eWidgetEvent &event)
 			}
 		} else if (event.action == &i_cursorActions->cancel)
 		{
-			eDebug("cancel!");
+//			eDebug("cancel!");
 			/*emit*/ selected(0);
 		} else
 			return 0;
