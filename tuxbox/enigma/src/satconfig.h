@@ -41,7 +41,7 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 	void hiloChanged(eComboBox *who, eListBoxEntryText *le);
 	void voltageChanged(eComboBox *who, eListBoxEntryText *le);
 public:
-  eSatelliteConfigurationManager();
+	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
 };
 
@@ -51,83 +51,83 @@ class eRotorPage;
                  
 class eLNBSetup : public eWindow // Selitor = "Sel"ector + Ed"itor" :-)
 {
-  eMultipage mp;
-  eDiSEqCPage *DiSEqCPage;
-  eLNBPage *LNBPage;
-  eRotorPage *RotorPage;
-  eSatellite* sat;
-  void onSave();
-  void onNext() { mp.next(); }
-  void onPrev() { mp.prev(); }  
-  int eventHandler(const eWidgetEvent &event);
+	eMultipage mp;
+	eDiSEqCPage *DiSEqCPage;
+	eLNBPage *LNBPage;
+	eRotorPage *RotorPage;
+	eSatellite* sat;
+	void onSave();
+	void onNext() { mp.next(); }
+	void onPrev() { mp.prev(); }  
+	int eventHandler(const eWidgetEvent &event);
 public:
 	eLNBSetup( eSatellite *sat, eWidget* lcdTitle, eWidget* lcdElement );
 };
 
 class eLNBPage : public eWidget
 {
-  friend class eLNBSetup;
-  struct selectlnb;
-  eSatellite *sat;
+	friend class eLNBSetup;
+	struct selectlnb;
+	eSatellite *sat;
 	eListBox<eListBoxEntryText> *lnb_list;
-  eNumber *lofH, *lofL, *threshold;
+	eNumber *lofH, *lofL, *threshold;
 	eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
 	eButton *cancel; // close the window without apply changes
-  eButton *next; // shows the DiSEqC Configuration Dialog
-  eCheckbox *increased_voltage;
-  eStatusBar *statusbar;
+	eButton *next; // shows the DiSEqC Configuration Dialog
+	eCheckbox *increased_voltage;
+	eStatusBar *statusbar;
     
-  void numSelected(int*);
-  void lnbChanged( eListBoxEntryText* );
+	void numSelected(int*);
+	void lnbChanged( eListBoxEntryText* );
 	void lnbSelected(eListBoxEntryText*);
-  void updateText(const eWidget* w);  // for Statusbar....
+	void updateText(const eWidget* w);  // for Statusbar....
 public:
-  eLNBPage( eWidget *parent, eSatellite *sat );
+	eLNBPage( eWidget *parent, eSatellite *sat );
 };
 
 class eDiSEqCPage : public eWidget
 {
-  friend class eLNBSetup;
-  eSatellite *sat;
+	friend class eLNBSetup;
+	eSatellite *sat;
 	eComboBox *DiSEqCMode, *DiSEqCParam, *MiniDiSEqCParam, *DiSEqCRepeats;
-  eCheckbox *SeqRepeat, *uncommitted, *uncommitted_gap;
-  eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
+	eCheckbox *SeqRepeat, *uncommitted, *uncommitted_gap;
+	eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
 	eButton *cancel; // close the window without apply changes
-  eButton *prev; // shows the LNB Configuration Dialog
-  eButton *next; // shows the Rotor Setup (for non GotoXX Rotors)
-  eLabel *lDiSEqCRepeats, *lDiSEqCParam;
-  eStatusBar *statusbar;
-          
-  void lnbChanged( eListBoxEntryText* );
-  void DiSEqCModeChanged( eListBoxEntryText* );
-  void numSelected(int*);
-  void updateText(const eWidget* w);  // for Statusbar....
+	eButton *prev; // shows the LNB Configuration Dialog
+	eButton *next; // shows the Rotor Setup (for non GotoXX Rotors)
+	eLabel *lDiSEqCRepeats, *lDiSEqCParam;
+	eStatusBar *statusbar;
+         
+	void lnbChanged( eListBoxEntryText* );
+	void DiSEqCModeChanged( eListBoxEntryText* );
+	void numSelected(int*);
+	void updateText(const eWidget* w);  // for Statusbar....
 public:
-  eDiSEqCPage( eWidget *parent, eSatellite *sat );
+	eDiSEqCPage( eWidget *parent, eSatellite *sat );
 };
 
 
 class eRotorPage : public eWidget
 {
-  friend class eLNBSetup;
-  eSatellite *sat;
-  eLNB *curlnb;
-  eListBox<eListBoxEntryText> *positions;
-  eLabel *lRotorOffset;
-  eNumber *orbital_position, *number, *RotorOffset;
-  eButton *add, *remove, *prev, *save, *cancel;
-  eCheckbox *fine, *useGotoXX;  // if is checked.. then left..right is for finetuning
-  eComboBox *direction;
-  eFEStatusWidget *feState;
-  eStatusBar* statusbar;
-  void onAdd();
-  void onRemove();
-  void numSelected(int*);
-  void lnbChanged( eListBoxEntryText* );
-  void posChanged( eListBoxEntryText* );
-  void updateText(const eWidget* w);  // for Statusbar....
+	friend class eLNBSetup;
+	eSatellite *sat;
+	eLNB *curlnb;
+	eListBox<eListBoxEntryText> *positions;
+	eLabel *lRotorOffset;
+	eNumber *orbital_position, *number, *RotorOffset;
+	eButton *add, *remove, *prev, *save, *cancel;
+	eCheckbox *fine, *useGotoXX;  // if is checked.. then left..right is for finetuning
+	eComboBox *direction;
+	eFEStatusWidget *feState;
+	eStatusBar* statusbar;
+	void onAdd();
+	void onRemove();
+	void numSelected(int*);
+	void lnbChanged( eListBoxEntryText* );
+	void posChanged( eListBoxEntryText* );
+	void updateText(const eWidget* w);  // for Statusbar....
 public:  
-  eRotorPage( eWidget *parent, eSatellite *sat );
+	eRotorPage( eWidget *parent, eSatellite *sat );
 };
 
 #endif

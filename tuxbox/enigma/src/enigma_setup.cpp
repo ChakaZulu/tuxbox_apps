@@ -17,12 +17,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.27 2002/11/02 02:05:39 tmbinc Exp $
+ * $Id: enigma_setup.cpp,v 1.28 2002/11/14 19:07:09 Ghostrider Exp $
  */
 
 #include <enigma_setup.h>
 
-#include <timer.h>
 #include <enigma_scan.h>
 #include <setupnetwork.h>
 #include <setupvideo.h>
@@ -43,8 +42,7 @@
 eZapSetup::eZapSetup()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Setup"), 12, 220, true)
 {
-	eDebug("statusbar = %p", statusbar);
-	move(ePoint(150, 90)); //116
+	move(ePoint(150, 90)); 
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]"), _("back to Mainmenu") ))->selected, eZapSetup::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Channels..."), _("open channel setup") ))->selected, eZapSetup::sel_channels);
 	CONNECT((new eListBoxEntryMenu(&list, _("Network..."), _("open network setup") ))->selected, eZapSetup::sel_network);
@@ -54,21 +52,12 @@ eZapSetup::eZapSetup()
 	CONNECT((new eListBoxEntryMenu(&list, _("Video..."), _("open video setup") ))->selected, eZapSetup::sel_video);
 	CONNECT((new eListBoxEntryMenu(&list, _("Skin..."), _("open skin selector") ))->selected, eZapSetup::sel_skin);
 	CONNECT((new eListBoxEntryMenu(&list, _("Language..."), _("open language selector") ))->selected, eZapSetup::sel_language);
-	CONNECT((new eListBoxEntryMenu(&list, _("Timer..."), _("open timer view") ))->selected, eZapSetup::sel_timer);
 	if (eDVB::getInstance()->getInfo("mID") == "05")
 	{
 		CONNECT((new eListBoxEntryMenu(&list, _("Harddisk..."), _("initialize harddisc") ))->selected, eZapSetup::sel_harddisk);
 		CONNECT((new eListBoxEntryMenu(&list, _("Common Interface..."), _("initialize harddisc") ))->selected, eZapSetup::sel_ci);
 	}
-//	CONNECT(list.selchanged, eZapSetup::onSelChanged );
 }
-
-/*void eZapSetup::onSelChanged( eListBoxEntryMenu* p)
-{
-	eDebug("Update Statusbar to %s", p->getHelpText().c_str() );
-	eDebug("Statusbar pos is left = %i, top = %i, width = %i, height = %i", statusbar->getLabel().getPosition().x(), statusbar->getLabel().getPosition().y(), statusbar->getLabel().getSize().width(), statusbar->getLabel().getSize().height() );
-	list.setHelpText( p->getHelpText() );		
-}*/
 
 eZapSetup::~eZapSetup()
 {
@@ -172,17 +161,6 @@ void eZapSetup::sel_language()
 {
 	hide();
 	eZapLanguageSetup setup;
-	setup.setLCD(LCDTitle, LCDElement);
-	setup.show();
-	setup.exec();
-	setup.hide();
-	show();
-}
-
-void eZapSetup::sel_timer()
-{
-	hide();
-	eTimerView setup;
 	setup.setLCD(LCDTitle, LCDElement);
 	setup.show();
 	setup.exec();

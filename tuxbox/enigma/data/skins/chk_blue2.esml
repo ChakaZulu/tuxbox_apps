@@ -5,13 +5,13 @@
 		<title>chkdesign blue II</title>
 	</author>
 
-  <fonts>
+	<fonts>
 		<font file="bluehigh.ttf" name="Blue.Regular" /> <!-- Found at dafont.com freeware -->
 		<font file="bluebold.ttf" name="Blue.Bold" /> <!-- Found at dafont.com freeware -->
 		<font file="v5loxicar.ttf" name="v5Robusta" /> <!-- Found at dafont.com freeware -->
 		<font file="v5loxical.ttf" name="v5Lixera" /> <!-- Found at dafont.com freeware -->
 	</fonts>
-		
+
 	<fontalias>
 		<map name="eStatusBar" font="Blue.Regular" size="24" />
 		<map name="eWindow.TitleBar" font="Blue.Bold" size="32" />
@@ -58,7 +58,7 @@
 		<!--color name="button_border_dark" color=#1a636c72" />
 		<color name="button_border_light" color=#1FFFFFF" /-->	
 	</colors>
-	
+
 	<colorscheme>
 		<map name="eStatusBar.background" color="content" />
 		<map name="eStatusBar.foreground" color="content+15" />
@@ -80,13 +80,13 @@
 		<map name="eProgress.right" color="middle" />
 		<map name="eSlider.activated.left" color="shadow_red+3" />
 		<map name="eSlider.activated.right" color="middle" />
-		
+
 		<map name="eServiceSelector.highlight.background" color="dark" />   <!-- used for all Selectors ... EPG, Service, Bouquet-->
 		<map name="eServiceSelector.highlight.foreground" color="dark+15" />
 	</colorscheme>
-	
-	 <values>
-	 	<value name="eWindow.titleFontSize" value="24" />
+
+	<values>
+		<value name="eWindow.titleFontSize" value="24" />
 		<!--value name="eWindow.borderLeft" value="4" />
 		<value name="eWindow.borderRight" value="4" />
 		<value name="eWindow.borderBottom" value="16" />
@@ -198,7 +198,7 @@
 		<map name="eListBox.topRight" img="3DBorder.unselected.corner.darkLight" />
 		<map name="eListBox.bottomLeft" img="3DBorder.unselected.corner.darkLight" />		
 	</imagealias>
-	
+
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
 			<eProgress position="7:2" size="65:6" name="progress_bar" foregroundColor="0" leftColor="0" rightColor="255" border="1" />

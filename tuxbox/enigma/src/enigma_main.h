@@ -96,13 +96,13 @@ class AudioStream: public eListBoxEntryText
 {
 	friend class eListBox<AudioStream>;
 	friend class eAudioSelector;
-  int isAC3;
-  int component_tag;
-  void EITready(int error);
-  void parseEIT(EIT* eit);
+	int isAC3;
+	int component_tag;
+	void EITready(int error);
+	void parseEIT(EIT* eit);
 public:
 	enum
-  {
+	{
 		audioMPEG, audioAC3
 	};
 	AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream);
@@ -166,6 +166,7 @@ class eZapMain: public eWidget
 public:
 	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
 	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32 };
+	enum { messageGoSleep=2 };
 
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
@@ -175,15 +176,15 @@ private:
 		*ButtonGreenEn, *ButtonGreenDis, 
 		*ButtonYellowEn, *ButtonYellowDis,
 		*ButtonBlueEn, *ButtonBlueDis;
-	
+
 	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff, *recstatus;
 	eLabel mute, volume;
-	
+
 	eWidget *dvrFunctions;
 	int dvrfunctions;
-	
+
 	// eRecordingStatus *recstatus;
-	
+
 	eProgress *Progress, VolumeBar;
 	eMessageBox *pMsg;
 
@@ -191,7 +192,7 @@ private:
 	std::list<eZapMessage> messages;
 	eFixedMessagePump<int> message_notifier;
 
-	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer, standbyTimer, recStatusBlink;
+	eTimer timeout, clocktimer, messagetimeout, progresstimer, volumeTimer, recStatusBlink;
 
 	int cur_start, cur_duration, cur_event_id;
 	eString cur_event_text;
@@ -211,9 +212,10 @@ private:
 	ePlaylist *recordings;
 	eServiceReference recordingsref;
 
+  int wasSleeping;
 	int playlistmode; // curlist is a list controlled by the user (not just a history).
 	int entered_playlistmode;
-	
+
 	int flags;
 	int isVT;
 	int isEPG;
@@ -221,11 +223,11 @@ private:
 	int serviceFlags;
 	int isSeekable() const { return serviceFlags & eServiceHandler::flagIsSeekable; }
 	eZapLCD lcdmain;
-	
+
 	void eraseBackground(gPainter *, const eRect &where);
 	void setEIT(EIT *);
 	void handleNVODService(SDTEntry *sdtentry);
-	
+
 	// actions
 	void showServiceSelector(int dir, int selcurrent);
 	void nextService(int add=0);
@@ -237,7 +239,7 @@ private:
 	void hideVolumeSlider();
 	void toggleMute();
 	void showMainMenu();
-	
+
 	time_t standbyTime;
 
 	void standbyPress();
@@ -250,7 +252,7 @@ private:
 	void showEPG();
 	void showInfobar();
 	void hideInfobar();
-	
+
 	void play();
 	void stop();
 	void pause();
@@ -260,23 +262,23 @@ private:
 	void startSkip(int dir);
 	void repeatSkip(int dir);
 	void stopSkip(int dir);
-	
+
 	void showServiceMenu(eServiceSelector*);
 	void showFavourite(eServiceSelector*);
-	
+
 	void addService(const eServiceReference &service);
-	
+
 	void doPlaylistAdd(const eServiceReference &service);
 	void addServiceToFavourite(eServiceSelector *s, int dontask=0);
-  void removeServiceFromFavourite( const eServiceReference &service );
-	
+	void removeServiceFromFavourite( const eServiceReference &service );
+
 	void showFavourites();
 	void showBouquetList(int sellast);
 
 	void showDVRFunctions(int show);
 
 	static eZapMain *instance;
-	
+
 	eServicePath modeLast[modeEnd];
 	int mode, last_mode, state;
 protected:
@@ -300,7 +302,6 @@ private:
 	void getPlaylistPosition();
 	void setPlaylistPosition();
 	bool handleState(int justask=0);
-  void gotoStandby();
 	void blinkRecord();
 public:
 	void postMessage(const eZapMessage &message, int clear=0);
@@ -326,7 +327,7 @@ public:
 	void setModeD(int mode);
 	int getRealMode() { return last_mode==-1 ? mode : last_mode; }
 	void toggleTimerMode();
-	
+
 	void setServiceSelectorPath(eServicePath path);
 	void getServiceSelectorPath(eServicePath &path);
 

@@ -47,26 +47,26 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 
 		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
 
-    // reset all diseqc devices
+		// reset all diseqc devices
 
-    if ( sendDiSEqCCmd( 0, 0 ) )
-      exit(0);
+		if ( sendDiSEqCCmd( 0, 0 ) )
+			exit(0);
 
-  } else
+	} else
 		secfd=-1;
 		
 	lastcsw=0;
 
-  lastRotorCmd=-1;
+	lastRotorCmd=-1;
 
-  lastSmatvFreq=-1;
+	lastSmatvFreq=-1;
 }
 
 void eFrontend::Reset()
 {
-  lastcsw = lastSmatvFreq = lastRotorCmd = -1;
-  sendDiSEqCCmd( 0, 0 );
-  usleep(50000);
+	lastcsw = lastSmatvFreq = lastRotorCmd = -1;
+	sendDiSEqCCmd( 0, 0 );
+	usleep(50000);
 }
 
 void eFrontend::timeout()
@@ -76,12 +76,14 @@ void eFrontend::timeout()
 	  eDebug("+");
 		state=stateIdle;
 		/*emit*/ tunedIn(transponder, 0);
-	} else
+	}
+	else
 		if (--tries)
 		{
 			eDebug("-: %x", Status());
 			timer->start(100, true);
-		} else
+		}
+		else
 		{
 			eDebug("couldn't lock. (state: %x)", Status());
 			state=stateIdle;
@@ -207,61 +209,60 @@ int gotoXTable[10] = { 0x00, 0x02, 0x03, 0x05, 0x06, 0x08, 0x0A, 0x0B, 0x0D, 0x0
 
 void eFrontend::readInputPower()
 {
-      int tmp=0;
-      // open front prozessor
-      int fp=::open("/dev/dbox/fp0", O_RDWR);
-      if (fp < 0)
-      {
-        eDebug("couldn't open fp");
-        return;
-      }
-
-      // get power input of Rotor in idle
-      if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &tmp )<0)
-     	{
-   		  eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
- 	    	return;
-     	}
-      eDebug("InputPower = %d", tmp);
-      ::close(fp);  
+	int tmp=0;
+	// open front prozessor
+	int fp=::open("/dev/dbox/fp0", O_RDWR);
+	if (fp < 0)
+	{
+		eDebug("couldn't open fp");
+		return;
+	}
+	// get power input of Rotor in idle
+	if (ioctl(fp, FP_IOCTL_GET_LNB_CURRENT, &tmp )<0)
+	{
+		eDebug("FP_IOCTL_GET_LNB_CURRENT sucks.\n");
+		return;
+	}
+	eDebug("InputPower = %d", tmp);
+	::close(fp);  
 }
 
 int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 {
-  secCmdSequence seq;
-  secCommand cmd;
+	secCmdSequence seq;
+	secCommand cmd;
 
-  int cnt=0;
-  for ( unsigned int i=0; i < params.length() && i < 16; i+=4 )
-    cmd.u.diseqc.params[++cnt] = strtol( params.mid(i, 2).c_str(), 0, 16 );
+	int cnt=0;
+	for ( unsigned int i=0; i < params.length() && i < 16; i+=4 )
+		cmd.u.diseqc.params[++cnt] = strtol( params.mid(i, 2).c_str(), 0, 16 );
     
 	cmd.type = SEC_CMDTYPE_DISEQC_RAW;
-  cmd.u.diseqc.cmdtype = frame;
-  cmd.u.diseqc.addr = addr;
+	cmd.u.diseqc.cmdtype = frame;
+	cmd.u.diseqc.addr = addr;
 	cmd.u.diseqc.cmd = Cmd;
-  cmd.u.diseqc.numParams = cnt;
+	cmd.u.diseqc.numParams = cnt;
 
-  eString parms;
-  for (int i=0; i < cnt; i++)
-    parms+=eString().sprintf("0x%02x ",cmd.u.diseqc.params[i]);
+	eString parms;
+	for (int i=0; i < cnt; i++)
+		parms+=eString().sprintf("0x%02x ",cmd.u.diseqc.params[i]);
   
 //  eDebug("cmdtype = %02x, addr = %02x, cmd = %02x, numParams = %02x, params=%s", frame, addr, Cmd, cnt, parms.c_str() );
 
-  seq.miniCommand = SEC_MINI_NONE;
+	seq.miniCommand = SEC_MINI_NONE;
 	seq.continuousTone = SEC_TONE_OFF;
 	seq.voltage = SEC_VOLTAGE_13;
-  seq.commands=&cmd;
-  seq.numCommands=1;
+	seq.commands=&cmd;
+	seq.numCommands=1;
 
-  if ( ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
- 	{
- 		perror("SEC_SEND_SEQUENCE");
- 		return -1;
-  }
+	if ( ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
+	{
+		perror("SEC_SEND_SEQUENCE");
+		return -1;
+	}
 /*  else
     eDebug("cmd send");*/
 
-  return 0;
+	return 0;
 }
 
 int eFrontend::RotorUseTimeout(secCmdSequence& seq, int newPosition )
@@ -461,6 +462,7 @@ int eFrontend::tune(eTransponder *trans,
 
     if (csw <= eDiSEqC::BB)  // use AA/AB/BA/BB ?
     {
+      eDebug("csw=%d, csw<<2=%d", csw, csw << 2);
       csw = 0xF0 | ( csw << 2 );
       if ( polarisation==polHor )
         csw |= 2;  // Horizontal
@@ -576,12 +578,19 @@ int eFrontend::tune(eTransponder *trans,
         // when DiSEqC V1.0 is avail then loops is always 1 .. see above
         
         if ( loops > 1 && lnb->getDiSEqC().uncommitted_switch )
+        {
           commands[i].u.diseqc.cmd=0x39;          // uncomitted switch
+          eDebug("0x39");
+        }
         else // DiSEqC < V1.1 do not support repeats
+        {
           commands[i].u.diseqc.cmd=0x38;          // comitted switch
+          eDebug("0x38");          
+        }
           
    			commands[i].u.diseqc.cmdtype= i ? 0xE1 : 0xE0; // repeated or not repeated transm.
-     		commands[i].u.diseqc.numParams=1;
+        eDebug("0x%02x", commands[i].u.diseqc.cmdtype);
+       commands[i].u.diseqc.numParams=1;
      		commands[i].u.diseqc.params[0]=csw;
 
         i++;        
@@ -676,8 +685,8 @@ int eFrontend::tune(eTransponder *trans,
       // drive rotor always with 18V ( is faster )
       seq.voltage = SEC_VOLTAGE_18;
 
-//      RotorUseInputPower(seq, (void*) commands, cmdCount, lnb->getDiSEqC().SeqRepeat );
-      RotorUseTimeout(seq, sat->getOrbitalPosition() );
+      RotorUseInputPower(seq, (void*) commands, lnb->getDiSEqC().SeqRepeat );
+//      RotorUseTimeout(seq, sat->getOrbitalPosition() );
 
       // set the right voltage
       if ( voltage != SEC_VOLTAGE_18 )
@@ -685,6 +694,7 @@ int eFrontend::tune(eTransponder *trans,
     }
     else  // no Rotor avail... we send the complete cmd...
     {
+      eDebug("sendSeq");
       seq.voltage=voltage;
       if ( sendSeq && ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
    		{

@@ -27,9 +27,10 @@ gPixmap *eListBoxEntryService::folder=0;
 int eListBoxEntryService::maxNumSize=0;
 std::map< eServiceReference, int> eListBoxEntryService::favourites;
 eListBoxEntryService *eListBoxEntryService::selectedToMove=0;
+
 struct serviceSelectorActions
 {
-  eActionMap map;
+	eActionMap map;
 	eAction nextBouquet, prevBouquet, pathUp, showEPGSelector, showMenu, showFavourite, addService, addServiceToFavourite, modeTV, modeRadio, modeFile, toggleStyle, toggleFocus;
 	serviceSelectorActions():
 		map("serviceSelector", _("service selector")),
@@ -107,15 +108,15 @@ void eListBoxEntryService::invalidateDescr()
 
 eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
-  bool b;
+	bool b;
 
 	if ( (b = (hilited == 2)) )
 		hilited = 0;
 
-  if (this == selectedToMove)
-    drawEntryRect(rc, rect, eSkin::getActive()->queryColor("eServiceSelector.entrySelectedToMove"), coActiveF, coNormalB, coNormalF, hilited );
-  else  
-    drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited );
+	if (this == selectedToMove)
+		drawEntryRect(rc, rect, eSkin::getActive()->queryColor("eServiceSelector.entrySelectedToMove"), coActiveF, coNormalB, coNormalF, hilited );
+	else  
+		drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited );
 
 	eString sname;
 	eString sdescr;
@@ -126,14 +127,14 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 	else
 		sname="(removed service)";
 
-  std::map< eServiceReference, int>::iterator it = favourites.find( service );
-  if ( it != favourites.end() )
-    rc->setForegroundColor( eSkin::getActive()->queryColor("eServiceSelector.entryInFavourite") );
+	std::map< eServiceReference, int>::iterator it = favourites.find( service );
+	if ( it != favourites.end() )
+		rc->setForegroundColor( eSkin::getActive()->queryColor("eServiceSelector.entryInFavourite") );
 
 	if ( service.flags & eServiceReference::isDirectory && folder )  // we draw the folder pixmap
 	{
 		nameXOffs = folder->x + 20;
-  	int ypos = (rect.height() - folder->y) / 2;
+		int ypos = (rect.height() - folder->y) / 2;
 		rc->blit( *folder, ePoint(10, rect.top()+ypos ), eRect(), gPixmap::blitAlphaTest);		
 	}
 	else if (!service.flags & eServiceReference::isDirectory)
@@ -217,7 +218,7 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 
 void eServiceSelector::addService(const eServiceReference &ref)
 {
-  new eListBoxEntryService(services, ref);
+	new eListBoxEntryService(services, ref);
 }
 
 void eServiceSelector::addBouquet(const eServiceReference &ref)
@@ -328,7 +329,7 @@ struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, vo
 	{
 		if (s.sort[0] == c)
 		{
-	 		( (eListBox<eListBoxEntryService>*) s.listbox)->setCurrent(&s);
+			( (eListBox<eListBoxEntryService>*) s.listbox)->setCurrent(&s);
 			return 1;
 		}
 		return 0;
@@ -347,7 +348,7 @@ struct moveServiceNum: public std::unary_function<const eListBoxEntryService&, v
 	{
 		if (s.num == num)
 		{
-	 		( (eListBox<eListBoxEntryService>*) s.listbox)->setCurrent(&s);
+			( (eListBox<eListBoxEntryService>*) s.listbox)->setCurrent(&s);
 			return 1;
 		}
 		return 0;
@@ -372,7 +373,7 @@ struct findServiceNum: public std::unary_function<const eListBoxEntryService&, v
 	{
 		if (s.service == service)
 		{
-	 		num=s.getNum();
+			num=s.getNum();
 			return 1;
 		}
 		return 0;
@@ -382,7 +383,7 @@ struct findServiceNum: public std::unary_function<const eListBoxEntryService&, v
 int eServiceSelector::getServiceNum( const eServiceReference &ref )
 {
 	int ret=-1;
-  services->forEachEntry( findServiceNum(ref, ret ) );
+	services->forEachEntry( findServiceNum(ref, ret ) );
 	return ret;
 }
 
@@ -396,7 +397,7 @@ void eServiceSelector::gotoChar(char c)
 			else
 				BrowseChar = 'A';
 		break;
-	
+
 		case 3:	// D,E,F
 			if (BrowseChar == 'D' || BrowseChar == 'E')
 				BrowseChar++;
@@ -495,28 +496,28 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 
 		if (movemode)
       if (eListBoxEntryService::selectedToMove)
-  		{
-  			eListBoxEntryService *next=services->getNext();
-  			/*emit*/moveEntry(path.current(), ref, next ? next->service : eServiceReference());
-  			services->setMoveMode(0);
-        eListBoxEntryService::selectedToMove=0;
-  			services->beginAtomic();
-  			actualize();
-  			selectService(ref);
-  			services->endAtomic();
-  			return;
-  		}
-      else
-      {
-      	services->setMoveMode(1);
-        eListBoxEntryService::selectedToMove=entry;
-        services->invalidateCurrent();
-        return;
-      }
+			{
+				eListBoxEntryService *next=services->getNext();
+				/*emit*/moveEntry(path.current(), ref, next ? next->service : eServiceReference());
+				services->setMoveMode(0);
+				eListBoxEntryService::selectedToMove=0;
+				services->beginAtomic();
+				actualize();
+				selectService(ref);
+				services->endAtomic();
+				return;
+			}
+			else
+			{
+				services->setMoveMode(1);
+				eListBoxEntryService::selectedToMove=entry;
+				services->invalidateCurrent();
+				return;
+			}
 
 		if (ref.flags & eServiceReference::isDirectory)
 			enterDirectory(ref);
-		else
+		else if (!FavouriteMode)
 		{
 			result=&entry->service;
 			close(0);
@@ -665,28 +666,28 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				/*emit*/ showMenu(this);
 			else if (event.action == &i_serviceSelectorActions->showFavourite && !movemode && !FavouriteMode)
 				/*emit*/ showFavourite(this);
-  		else if (event.action == &i_serviceSelectorActions->addService && !movemode)
-      {
-        if (FavouriteMode)
-        {
-          eServiceReference &ref = services->getCurrent()->service;
-          std::map<eServiceReference, int>::iterator it = eListBoxEntryService::favourites.find( ref );
-          if ( it == eListBoxEntryService::favourites.end() )
-          {
-      			/*emit*/ addServiceToFavourite(this, 1);
-            eListBoxEntryService::favourites[ref] = 1;
-          }
-          else
-          {
-            /*emit*/ removeServiceFromFavourite( ref );
-            eListBoxEntryService::favourites.erase( ref );
-          }
-          services->invalidateCurrent();
+			else if (event.action == &i_serviceSelectorActions->addService && !movemode)
+			{
+				if (FavouriteMode)
+				{
+					eServiceReference &ref = services->getCurrent()->service;
+					std::map<eServiceReference, int>::iterator it = eListBoxEntryService::favourites.find( ref );
+					if ( it == eListBoxEntryService::favourites.end() )
+					{
+						/*emit*/ addServiceToFavourite(this, 1);
+						eListBoxEntryService::favourites[ref] = 1;
+					}
+					else
+					{
+						/*emit*/ removeServiceFromFavourite( ref );
+						eListBoxEntryService::favourites.erase( ref );
+					}
+					services->invalidateCurrent();
 
-          break;
-        }
-    		/*emit*/ addServiceToList(selected);
-      }
+					break;
+				}
+				/*emit*/ addServiceToList(selected);
+			}
 			else if (event.action == &i_serviceSelectorActions->addServiceToFavourite && !movemode)
 				/*emit*/ addServiceToFavourite(this, 0);
 			else if (event.action == &i_serviceSelectorActions->modeTV && !movemode)
@@ -697,23 +698,23 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				/*emit*/ setMode(eZapMain::modeFile);
 			else if (event.action == &i_cursorActions->cancel)
 			{	
-        if (movemode)
-        {
-          toggleMoveMode();
-  				services->beginAtomic();
-  				actualize();
-  				selectService(selected);
-  				services->endAtomic();
-        }
-        if (FavouriteMode)
-        {
-          FavouriteMode=0;
-          if (eListBoxEntryService::favourites.size())
-            eListBoxEntryService::favourites.clear();
-        }
-        break;
+				if (movemode)
+				{
+					toggleMoveMode();
+					services->beginAtomic();
+					actualize();
+					selectService(selected);
+					services->endAtomic();
+				}
+				if (FavouriteMode)
+				{
+					FavouriteMode=0;
+					if (eListBoxEntryService::favourites.size())
+						eListBoxEntryService::favourites.clear();
+				}
+				break;
 			}
-      else
+			else
 				break;
         
 			return 1;
@@ -747,61 +748,61 @@ struct copyEntry: public std::unary_function<const eListBoxEntryService&, void>
 	std::list<eServiceReference> &dest;
 
 	copyEntry(std::list<eServiceReference> &dest)
-    :dest(dest)
+		:dest(dest)
 	{
 	}
 
 	bool operator()(const eListBoxEntryService& s)
 	{
-    dest.push_back(s.service);
+		dest.push_back(s.service);
 		return 0;
 	}
 };
 
 bool eServiceSelector::selectServiceRecursive( eServiceReference &ref )
 {
-  services->beginAtomic();
-  bool b = selServiceRec( ref );
-  services->endAtomic();
-  return b;
+	services->beginAtomic();
+	bool b = selServiceRec( ref );
+	services->endAtomic();
+	return b;
 }
 
 bool eServiceSelector::selServiceRec( eServiceReference &ref )
 {
-  std::list<eServiceReference> tmp;
+	std::list<eServiceReference> tmp;
 
-  // copy all entrys to temp list
-  services->forEachEntry( copyEntry( tmp ) );
+	// copy all entrys to temp list
+	services->forEachEntry( copyEntry( tmp ) );
 
-  for ( std::list<eServiceReference>::iterator it( tmp.begin() ); it != tmp.end(); it++ )
-  {
-    if ( it->flags & eServiceReference::isDirectory )
-    {
-    	path.down(*it);
-    	actualize();
-      if ( selServiceRec( ref ) )
-        return true;
-      else
-      {
-        path.up();
-        actualize();
-      }
-    }
-    else if ( selectService(ref) )
-      return true;
-  }
-  return false;
+	for ( std::list<eServiceReference>::iterator it( tmp.begin() ); it != tmp.end(); it++ )
+	{
+		if ( it->flags & eServiceReference::isDirectory )
+		{
+			path.down(*it);
+			actualize();
+			if ( selServiceRec( ref ) )
+				return true;
+			else
+			{
+				path.up();
+				actualize();
+			}
+		}
+		else if ( selectService(ref) )
+			return true;
+	}
+	return false;
 }
 
 bool eServiceSelector::selectService(const eServiceReference &ref)
 {
 	if ( services->forEachEntry( _selectService(ref) ) )
-  {
+	{
 		services->moveSelection( eListBox<eListBoxEntryService>::dirFirst );
-    return false;
-  }
-  else
-    return true;
+		return false;
+	}
+	else
+		return true;
 }
 
 void eServiceSelector::setStyle(int newStyle)
@@ -809,14 +810,14 @@ void eServiceSelector::setStyle(int newStyle)
 	ci->hide();
 	eServicePath p = path;
 	eServiceReference currentService;
- 	if (style != newStyle)
+	if (style != newStyle)
 	{
 			if ( services )
 			{
 				// safe currentSelected Service
 				if ( services->getCount() )
 					currentService = services->getCurrent()->service;
-	
+
 				services->hide();
 				delete services;
 			}
@@ -847,12 +848,12 @@ void eServiceSelector::setStyle(int newStyle)
 			services->setName("services");
 			services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 			services->hide();
-		
+
 			bouquets = new eListBox<eListBoxEntryService>(this);
 			bouquets->setName("bouquets");
 			bouquets->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 			bouquets->hide();
-	
+
 			if ( newStyle == styleSingleColumn )
 			{
 				if (eSkin::getActive()->build(this, "eServiceSelector_singleColumn"))
@@ -917,7 +918,7 @@ void eServiceSelector::actualize()
 }
 
 eServiceSelector::eServiceSelector()
-								:eWindow(0), result(0), services(0), bouquets(0), style(styleInvalid), BrowseChar(0), BrowseTimer(eApp), ciDelay(eApp), movemode(0), FavouriteMode(0)
+	:eWindow(0), result(0), services(0), bouquets(0), style(styleInvalid), BrowseChar(0), BrowseTimer(eApp), ciDelay(eApp), movemode(0), FavouriteMode(0)
 {
 	ci = new eChannelInfo(this);
 	ci->setName("channelinfo");
@@ -1018,14 +1019,14 @@ void eServiceSelector::setPath(const eServicePath &newpath, const eServiceRefere
 void eServiceSelector::toggleMoveMode()
 {
 	movemode^=1;
-  if (!movemode)
-  {
-    eListBoxEntryService::selectedToMove=0;
-    services->setMoveMode(0);
-  }
+	if (!movemode)
+	{
+		eListBoxEntryService::selectedToMove=0;
+		services->setMoveMode(0);
+	}
 }
 
 void eServiceSelector::toggleFavouriteMode()
 {
-  FavouriteMode^=1;
+	FavouriteMode^=1;
 }

@@ -31,16 +31,16 @@ class eListBoxEntryService: public eListBoxEntry
 	int nameXOffs, descrXOffs, numYOffs, nameYOffs, descrYOffs;
 	int num;
 public:
-  static eListBoxEntryService *selectedToMove;
-  static std::map< eServiceReference, int> favourites;
-  int getNum() const { return num; }
+	static eListBoxEntryService *selectedToMove;
+	static std::map< eServiceReference, int> favourites;
+	int getNum() const { return num; }
 	void invalidate();
 	void invalidateDescr();
 	static int getEntryHeight();
 	eServiceReference service;
 	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service);
 	~eListBoxEntryService();
-	
+
 	bool operator<(const eListBoxEntryService &r) const
 	{
 		if (service.getSortKey() == r.service.getSortKey())
@@ -54,14 +54,14 @@ protected:
 
 class eServiceSelector: public eWindow
 {
-  eServiceReference selected;
+	eServiceReference selected;
 	eServiceReference *result;
 	eListBox<eListBoxEntryService> *services, *bouquets;
 
 	eChannelInfo* ci;
 
 	eServicePath path;
-	
+
 	void addService(const eServiceReference &service);
 	void addBouquet(const eServiceReference &service);
 	int style;
@@ -69,7 +69,7 @@ class eServiceSelector: public eWindow
 	char BrowseChar;
 	eTimer BrowseTimer;
 	eTimer ciDelay;
-	
+
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -85,23 +85,23 @@ private:
 	void updateCi();
 public:
 	int movemode;
-  int FavouriteMode;
-  enum { styleInvalid, styleCombiColumn, styleSingleColumn, styleMultiColumn };
+	int FavouriteMode;
+	enum { styleInvalid, styleCombiColumn, styleSingleColumn, styleMultiColumn };
 	enum { dirNo, dirUp, dirDown };
 
 	eServiceSelector();
 	~eServiceSelector();
 
 	Signal1<void,const eServiceReference &> addServiceToList, removeServiceFromFavourite;
-  Signal2<void,eServiceSelector*,int> addServiceToFavourite;
-  Signal1<void,eServiceSelector*> showFavourite, showMenu, toggleStyle;
+	Signal2<void,eServiceSelector*,int> addServiceToFavourite;
+	Signal1<void,eServiceSelector*> showFavourite, showMenu, toggleStyle;
 	Signal1<void,int> setMode;
 	Signal3<void,
 		const eServiceReference &, 		// path
 		const eServiceReference &, 		// service to move
 		const eServiceReference &			// service AFTER moved service
 		> moveEntry;
-	
+
 	const eServicePath &getPath()	{	return path; }
 	void setPath(const eServicePath &path, const eServiceReference &select=eServiceReference());
 
@@ -110,17 +110,17 @@ public:
 	void actualize();
 	bool selectService(const eServiceReference &ref);
 	bool selectService(int num);	
-  bool selectServiceRecursive( eServiceReference &ref );
-  bool selServiceRec( eServiceReference &ref );
-  int getServiceNum( const eServiceReference &ref);
+	bool selectServiceRecursive( eServiceReference &ref );
+	bool selServiceRec( eServiceReference &ref );
+	int getServiceNum( const eServiceReference &ref);
 	void enterDirectory(const eServiceReference &ref);
 	const eServiceReference &getSelected() { return selected; }
 	const eServiceReference *choose(int irc=-1);
 	const eServiceReference *next();
 	const eServiceReference *prev();
-	
+
 	void toggleMoveMode();
-  void toggleFavouriteMode();
+	void toggleFavouriteMode();
 };
 
 #endif

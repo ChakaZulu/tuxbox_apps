@@ -599,7 +599,6 @@ inline int eListBox<T>::moveSelection(int dir)
 
 	if (flags & flagShowEntryHelp)
 	{
-		eDebug("showEntryHelp");
 		setHelpText( current != childs.end() ? current->getHelpText():eString(_("no description available")));
 	}
 
@@ -844,9 +843,11 @@ inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width, b
 	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(sbar?35:5) ));
 	if (sbar)
 	{
-		statusbar->move( ePoint(getClientRect().left(), getClientRect().bottom()-30) );
-		statusbar->resize( eSize( getClientRect().width(), 30) );
+		statusbar->setFlags(eStatusBar::flagVCenter);
+		statusbar->move( ePoint(0, getClientSize().height()-30) );
+		statusbar->resize( eSize( getClientSize().width(), 30) );
 		statusbar->loadDeco();
+		statusbar->show();
 	}
 }
 

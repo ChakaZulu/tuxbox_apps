@@ -7,9 +7,11 @@
 class gPixmap;
 class eLabel;
 
+#define MENU_ENTRIES	9
+
 class eMainMenu: public eWidget
 {
-	gPixmap *pixmaps[8][2];
+	gPixmap *pixmaps[MENU_ENTRIES][2];
 	eLabel *label[7], *description;
 	int active;
 	void setActive(int i);
@@ -21,6 +23,7 @@ class eMainMenu: public eWidget
 	void sel_info();	
 	void sel_quit();
 	void sel_plugins();
+	void sel_timer();	
 	void eraseBackground(gPainter *, const eRect &where);
 protected:
 	int eventHandler(const eWidgetEvent &event);

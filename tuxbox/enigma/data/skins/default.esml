@@ -89,6 +89,8 @@
 		<img name="mainmenu.radio.sel" src="mainmenu/radio_sel-fs8.png" />
 		<img name="mainmenu.file" src="mainmenu/file-fs8.png" />
 		<img name="mainmenu.file.sel" src="mainmenu/file_sel-fs8.png" />
+		<img name="mainmenu.timer" src="mainmenu/rectime-fs8.png" />
+		<img name="mainmenu.timer.sel" src="mainmenu/rectime_sel-fs8.png" />
 	
 		<img name="sselect_dolby" src="dolby_on.png" />
 		<img name="sselect_stereo" src="stereo_on.png" />

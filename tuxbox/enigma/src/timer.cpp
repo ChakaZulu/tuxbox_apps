@@ -243,8 +243,8 @@ void eTimerManager::actionHandler()
     case stopRecording:
       if (nextStartingEvent->type & ePlaylistEntry::recDVR)
       {
-        eZapMain::getInstance()->recordDVR(0, 0);
-  			eZapMain::getInstance()->toggleTimerMode();        
+				eZapMain::getInstance()->toggleTimerMode();        
+				eZapMain::getInstance()->recordDVR(0, 0);
       }
       else  // insert lirc ( VCR stop ) here
       {
