@@ -32,8 +32,6 @@
 #include <stdint.h>
 #include <string>
 
-#include <gui/widget/component.h>
-
 typedef struct fb_var_screeninfo t_fb_var_screeninfo;
 
 /** Ausführung als Singleton */
@@ -143,7 +141,6 @@ class CFrameBuffer
 
 		void paintBackgroundBoxRel(int x, int y, int dx, int dy);
 		inline void paintBackgroundBox(int xa, int ya, int xb, int yb) { paintBackgroundBoxRel(xa, ya, xb - xa, yb - ya); }
-		void paintBackgroundBoxRel(CPoint origin, CDimension dimension);
 
 		void paintBackground();
 

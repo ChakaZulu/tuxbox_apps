@@ -23,7 +23,6 @@ neutrino_LDADD = \
 	gui/libtimerlist.a \
 	gui/libneutrino_gui.a \
 	gui/widget/libneutrino_gui_widget2.a \
-	gui/widget/libneutrino_gui_widget_basic.a \
 	driver/pictureviewer/libneutrino_pictureviewer.a \
 	system/libneutrino_system.a \
 	gui/libneutrino_gui2.a \

@@ -796,11 +796,6 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	}
 }
 
-void CFrameBuffer::paintBackgroundBoxRel(CPoint origin, CDimension dimension)
-{
-	paintBackgroundBoxRel( origin.getXPos(), origin.getYPos(), dimension.getWidth(), dimension.getHeight() );
-}
-
 void CFrameBuffer::paintBackground()
 {
 	if (!getActive())
