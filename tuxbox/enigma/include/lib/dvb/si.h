@@ -12,6 +12,10 @@
 #include "lowlevel/eit.h"
 #include "lowlevel/bat.h"
 
+time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5);
+int fromBCD(int bcd);
+
+
 class Descriptor: public QObject
 {
 	Q_OBJECT
@@ -31,7 +35,7 @@ public:
   __u8 *data;
   int len;
   UnknownDescriptor(descr_gen_t *descr);
-  ~UnknownDescriptor();
+  ~UnknownDescriptor();                                     	
   QString toString();
 };
 
