@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.79 2004/02/12 21:08:01 zwen Exp $
+  $Id: movieplayer.cpp,v 1.80 2004/02/18 20:54:54 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -157,6 +157,7 @@ CMoviePlayerGui::CMoviePlayerGui()
 		Path_local = "/";
 	Path_vlc  = "vlc://";
 	Path_vlc += g_settings.streaming_server_startdir;
+	Path_vlc_settings = g_settings.streaming_server_startdir;
 }
 
 //------------------------------------------------------------------------
@@ -176,6 +177,12 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 {
 	printf("[movieplayer.cpp] actionKey=%s\n",actionKey.c_str());
 	
+	if(Path_vlc_settings != g_settings.streaming_server_startdir)
+	{
+		Path_vlc  = "vlc://";
+		Path_vlc += g_settings.streaming_server_startdir;
+		Path_vlc_settings = g_settings.streaming_server_startdir;
+	}
 	bookmarkmanager = new CBookmarkManager ();
 
 	if (parent)
@@ -1621,7 +1628,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.79 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.80 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1793,7 +1800,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.79 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.80 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
