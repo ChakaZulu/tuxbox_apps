@@ -63,6 +63,8 @@
 
 #include <system/settings.h>
 
+#include <irsend/irsend.h>
+
 #include <algorithm>
 #include <sys/time.h>
 #include <fstream>
@@ -267,8 +269,8 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 
 	//Send ir
-	CIRSend irs("audioplayeroff");
-	irs.Send();
+	CIRSend irs2("audioplayeroff");
+	irs2.Send();
 	
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
