@@ -28,6 +28,18 @@ a:active  { text-decoration:none; }
 td.menu { font-family: Verdana; font-size: 10pt; font-weight: bold}
 </style>
 <script language="javascript">
+function NewWindow(mypage, myname, w, h, scroll)
+{
+	var win1 = (screen.width - w) / 2;
+	var wint = (screen.height - h) / 2;
+	winprops = 'height='+h+', width='+w+', top='+wint+', left='+win1+', scrollbars='+scroll+', resizable'
+	win = window.open(mypage, myname, winprops)
+	if (parseInt(navigator.appVersion) >= 4)
+	{
+		win.window.focus();
+	}
+}
+
 function getNewPageTV(xy)
 {
 	document.location.href="/?mode=tv&bouquetid="+xy;
@@ -73,8 +85,7 @@ function switchtoChannel(xy)
 
 function openEPG(xy)
 {
-	win=window.open("/cgi-bin/getcurrentepg2?ref="+xy, "epg", "width=500, height=600 left=0, top=0, scrollbars=yes, resizable=yes");
-	win.focus();
+	NewWindow('/cgi-bin/getcurrentepg2?ref='+xy, 'EPG', '600', '700', 'yes');
 }
 
 function openSI()

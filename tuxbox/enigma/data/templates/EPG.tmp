@@ -3,16 +3,26 @@
 	<title>EPG</title>
 	<link rel="stylesheet" type="text/css" href="/epgview.css">
 	<script language="javascript">
+		function NewWindow(mypage, myname, w, h, scroll)
+		{
+			var win1 = (screen.width - w) / 2;
+			var wint = (screen.height - h) / 2;
+			winprops = 'height='+h+', width='+w+', top='+wint+', left='+win1+', scrollbars='+scroll+', resizable'
+			win = window.open(mypage, myname, winprops)
+			if (parseInt(navigator.appVersion) >= 4)
+			{
+				win.window.focus();
+			}
+		}
+
 		function record(xy)
 		{
-			win=window.open("/addTimerEvent?"+xy, "switchStatus", "width=200, height=200, left=0, top=0");
-			win.focus();
+			NewWindow('/addTimerEvent?'+xy, 'record', '200', '200', 'no');
 		}
 
 		function EPGDetails(xy)
 		{
-			win=window.open("/EPGDetails?"+xy, "switchStatus", "width=200, height=200, left=0, top=0");
-			win.focus();
+			NewWindow('/EPGDetails?'+xy, 'EPGDetails', '200', '200', 'no');
 		}
 	</script>
 </head>
