@@ -915,16 +915,15 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 				}
 				else
 				{	
+					// clear rc_last_key on keyup event
+					//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
+					rc_last_key = 0;
 					if (translate(ev.code) == RC_standby)
 					{
 						*msg = RC_standby_release;
 						*data = 0;
 						return;
 					}
-
-					// clear rc_last_key on keyup event
-					//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
-					rc_last_key = 0;
 				}
 			}
 		}
