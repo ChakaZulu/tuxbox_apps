@@ -10,11 +10,13 @@ AM_PROG_LIBTOOL
 AC_HEADER_STDC
 
 TUXBOX_APPS_DRIVER
-TUXBOX_APPS_LIB_CONFIG_CHECK([FREETYPE],[freetype-config])
+TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
 
 AC_OUTPUT([
 Makefile
 libavs/Makefile
 liblcddisplay/Makefile
+tuxbox-avs.pc
+tuxbox-lcddisplay.pc
 ])
 

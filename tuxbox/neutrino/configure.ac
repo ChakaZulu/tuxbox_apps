@@ -2,19 +2,31 @@ AC_INIT(tuxbox-apps-tuxbox-neutrino,0.0.1,,neutrino)
 AM_INIT_AUTOMAKE(neutrino,0.0.1)
 
 TUXBOX_APPS
+TUXBOX_APPS_DIRECTORY
 
 AC_PROG_CC
 AC_PROG_CXX
+AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 
 TUXBOX_APPS_DVB
 TUXBOX_APPS_DRIVER
+TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
+TUXBOX_APPS_LIB_PKGCONFIG(CRAMFS,tuxbox-cramfs)
+TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 TUXBOX_APPS_LIB_PKGCONFIG(EVENTSERVER,tuxbox-eventserver)
-TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
+TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
+TUXBOX_APPS_LIB_PKGCONFIG(LCDDISPLAY,tuxbox-lcddisplay)
+TUXBOX_APPS_LIB_PKGCONFIG(MD5SUM,tuxbox-md5sum)
+TUXBOX_APPS_LIB_PKGCONFIG(NET,tuxbox-net)
+TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPITCLIENT,tuxbox-zapitclient)
 
 AC_OUTPUT([
 Makefile
+cgi/Makefile
+cgi/data/Makefile
+cgi/data/images/Makefile
 daemons/Makefile
 daemons/controld/Makefile
 daemons/controld/driver/Makefile
@@ -23,9 +35,20 @@ daemons/lcdd/clock/Makefile
 daemons/lcdd/icons/Makefile
 daemons/sectionsd/Makefile
 daemons/timerd/Makefile
+gui/Makefile
+gui/daemonc/Makefile
+gui/driver/Makefile
+gui/gui/Makefile
+gui/gui/bedit/Makefile
+gui/gui/widget/Makefile
+gui/icons/Makefile
+gui/locale/Makefile
+gui/system/Makefile
 libs/Makefile
+libs/libcgihelper/Makefile
 libs/libcontroldclient/Makefile
 libs/liblcddclient/Makefile
 libs/libsectionsdclient/Makefile
+libs/libtimerdclient/Makefile
 ])
 

@@ -3,7 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: tuxbox-zapit
-Description: zapit
+Name: tuxbox-avs
+Description: avs
 Version: @VERSION@
-Cflags: -I@INCLUDEDIR@/tuxbox
+Libs: -L${libdir} -lavs
+Cflags: -I${includedir}/tuxbox

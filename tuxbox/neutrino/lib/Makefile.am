@@ -1,5 +1,7 @@
 SUBDIRS = \
+	libcgihelper \
 	libcontroldclient \
 	liblcddclient \
-	libsectionsdclient
+	libsectionsdclient \
+	libtimerdclient
 

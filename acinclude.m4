@@ -174,7 +174,7 @@ else
 		AC_MSG_$1([could not find a suitable version of $3]);
 	else
 		$2_CFLAGS=`$$2_CONFIG --cflags`
-		$2_LIBS=`$$2_CONFIG --libtool`
+		$2_LIBS=`$$2_CONFIG --libs`
 	fi
 fi
 

@@ -1,29 +1,21 @@
 SUBDIRS = driver
 
-INCLUDES = 
+INCLUDES = \
 	-I$(top_srcdir)/libs/libcontroldclient \
 	-I$(top_srcdir)/libs/liblcddclient \
-	@EVENTSERVER_CFLAGS@
+	@EVENTSERVER_CFLAGS@ \
+	@ZAPITCLIENT_CFLAGS@
 
 bin_PROGRAMS = controld
 
-controld_LDADD =
+controld_LDADD = \
 	driver/libcontrold_driver.a \
 	$(top_builddir)/libs/liblcddclient/liblcddclient.la \
-	@EVENTSERVER_LIBS@
-	$(top_builddir)/zapit/clientlib/libzapitclient.la \
+	@EVENTSERVER_LIBS@ \
+	@ZAPITCLIENT_LIBS@ \
 	-lpthread
 
 controld_SOURCES = controld.cpp eventwatchdog.cpp
-
-$(top_builddir)/mczap/lcdd/clientlib/liblcddclient.la:
-	$(MAKE) -C $(top_builddir)/mczap/lcdd/clientlib
-
-$(top_builddir)/mczap/libevent/libeventserver.la:
-	$(MAKE) -C $(top_builddir)/mczap/libevent
-
-$(top_builddir)/zapit/clientlib/libzapitclient.la:
-	$(MAKE) -C $(top_builddir)/zapit/clientlib
 
 install-data-local:
 	install -d $(CONFIGDIR)

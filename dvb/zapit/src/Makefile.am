@@ -5,7 +5,7 @@ INCLUDES = -I$(top_srcdir)/lib @CONFIGFILE_CFLAGS@ @LCDDCLIENT_CFLAGS@
 bin_PROGRAMS = pzapit zapit
 
 zapitincludedir = ${includedir}/tuxbox/zapit
-zapitinclude_HEADERS = getservices.h scan.h zapit.h
+zapitinclude_HEADERS = getservices.h channel.h scan.h zapit.h
 
 pzapit_SOURCES = \
 	pzapit.cpp
