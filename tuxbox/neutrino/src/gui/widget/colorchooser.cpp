@@ -231,7 +231,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	}
 	hide();
 	if(observer)
-		observer->changeNotify(name);
+		observer->changeNotify(name, NULL);
 	return CMenuTarget::RETURN_REPAINT;
 }
 

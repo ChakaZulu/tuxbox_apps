@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.27 2002/02/17 15:55:56 McClean Exp $
+ $Id: rcinput.cpp,v 1.28 2002/02/19 23:41:48 McClean Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.28  2002/02/19 23:41:48  McClean
+ add neutrino-direct-start option (for alexW's-Images only at the moment)
+
  Revision 1.27  2002/02/17 15:55:56  McClean
  prepare for keyboard - useless at the moment
 
@@ -242,15 +245,16 @@ int CRCInput::getKey(int Timeout, bool bAllowRepeatLR)
 
 		FD_ZERO(&rfds);
 		FD_SET(fd_rc, &rfds);
-		FD_SET(fd_keyb, &rfds);
+		//FD_SET(fd_keyb, &rfds);
 		int status =  select(fd_max+1, &rfds, NULL, NULL, tvslectp);
-
+/*
 		if(FD_ISSET(fd_keyb, &rfds))
 		{
 			char key = 0;
 			read(fd_keyb, &key, sizeof(key));
 			printf("keyboard: %d\n", rc_key);
 		}
+*/
 		if(FD_ISSET(fd_rc, &rfds))
 		{
 			status = read(fd_rc, &rc_key, sizeof(rc_key));

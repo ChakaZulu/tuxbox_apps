@@ -32,8 +32,24 @@
 #include "setting_helpers.h"
 #include "../global.h"
 
+bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
+{
+	if( *((int*) Data)!=0)
+	{	//file anlegen (direktstart)
+		FILE* fd = fopen("/var/etc/.neutrino", "w");
+		if(fd)
+		{
+			fclose(fd);
+		}
+	}
+	else
+	{
+		remove("/var/etc/.neutrino");
+	}
+}
 
-bool CColorSetupNotifier::changeNotify(string OptionName)
+
+bool CColorSetupNotifier::changeNotify(string OptionName, void*)
 {
 	unsigned char r,g,b;
 	//setting colors-..
@@ -83,15 +99,15 @@ bool CColorSetupNotifier::changeNotify(string OptionName)
 
 	g_FrameBuffer->paletteSet();
 	return false;
-};
+}
 
-bool CAudioSetupNotifier::changeNotify(string OptionName)
+bool CAudioSetupNotifier::changeNotify(string OptionName, void*)
 {
 	printf("notify: %s\n", OptionName.c_str() );
 	return false;
-};
+}
 
-bool CVideoSetupNotifier::changeNotify(string OptionName)
+bool CVideoSetupNotifier::changeNotify(string OptionName, void*)
 {
 	if(OptionName=="videomenu.videosignal")
 	{
@@ -104,13 +120,45 @@ bool CVideoSetupNotifier::changeNotify(string OptionName)
 
 	printf("video notify: %s\n", OptionName.c_str() );
 	return false;
-};
+}
 
-bool CBoxTypeSetupNotifier::changeNotify(string OptionName)
+bool CBoxTypeSetupNotifier::changeNotify(string OptionName, void*)
 {
 	g_Controld->setBoxType( g_settings.box_Type );
-};
+}
 
+bool CLanguageSetupNotifier::changeNotify(string OptionName, void*)
+{
+	//	printf("language notify: %s - %s\n", OptionName.c_str(), g_settings.language );
+	g_Locale->loadLocale(g_settings.language);
+	return true;
+}
+
+bool CKeySetupNotifier::changeNotify(string OptionName, void*)
+{
+	//    printf("CKeySetupNotifier notify: %s\n", OptionName.c_str() );
+	g_RCInput->repeat_block = atoi(g_settings.repeat_blocker)* 1000;
+	g_RCInput->repeat_block_generic = atoi(g_settings.repeat_genericblocker)* 1000;
+	return false;
+}
+
+int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
+{
+	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
+	int sel= atoi(actionKey.c_str());
+	if (g_RemoteControl->audio_chans.selected!= sel )
+		g_RemoteControl->setAPID(atoi(actionKey.c_str()));
+	return RETURN_EXIT;
+}
+
+int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
+{
+	//    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
+	unsigned sel= atoi(actionKey.c_str());
+	g_RemoteControl->setSubChannel(sel);
+	g_RCInput->pushbackKey(CRCInput::RC_help);
+	return RETURN_EXIT;
+}
 
 void setNetworkAddress(char* ip, char* netmask, char* broadcast)
 {
@@ -139,38 +187,5 @@ void setNameServer(char* ip)
 	{
 		perror("cannot write /etc/resolv.conf");
 	}
-}
-
-bool CLanguageSetupNotifier::changeNotify(string OptionName)
-{
-	//	printf("language notify: %s - %s\n", OptionName.c_str(), g_settings.language );
-	g_Locale->loadLocale(g_settings.language);
-	return true;
-}
-
-bool CKeySetupNotifier::changeNotify(string OptionName)
-{
-	//    printf("CKeySetupNotifier notify: %s\n", OptionName.c_str() );
-	g_RCInput->repeat_block = atoi(g_settings.repeat_blocker)* 1000;
-	g_RCInput->repeat_block_generic = atoi(g_settings.repeat_genericblocker)* 1000;
-	return false;
-}
-
-int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
-{
-	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
-	int sel= atoi(actionKey.c_str());
-	if (g_RemoteControl->audio_chans.selected!= sel )
-		g_RemoteControl->setAPID(atoi(actionKey.c_str()));
-	return RETURN_EXIT;
-}
-
-int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
-{
-	//    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
-	unsigned sel= atoi(actionKey.c_str());
-	g_RemoteControl->setSubChannel(sel);
-	g_RCInput->pushbackKey(CRCInput::RC_help);
-	return RETURN_EXIT;
 }
 

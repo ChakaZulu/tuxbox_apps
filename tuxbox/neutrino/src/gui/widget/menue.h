@@ -49,25 +49,21 @@ using namespace std;
 class CChangeObserver
 {
 	public:
-		virtual ~CChangeObserver()
-		{}
-		;
-		virtual bool changeNotify(string OptionName)
+		virtual ~CChangeObserver(){}
+		virtual bool changeNotify(string OptionName, void *Data)
 		{
 			return false;
-		};
+		}
 };
 
 class COnPaintNotifier
 {
 	public:
-		virtual ~COnPaintNotifier()
-		{}
-		;
+		virtual ~COnPaintNotifier(){}
 		virtual bool onPaintNotify(string MenuName)
 		{
 			return false;
-		};
+		}
 };
 
 class CMenuTarget
@@ -78,21 +74,15 @@ class CMenuTarget
 		    RETURN_REPAINT = 1,
 		    RETURN_EXIT = 2,
 		    RETURN_EXIT_ALL = 4
-	};
-
-		CMenuTarget()
-		{}
-		;
-		virtual ~CMenuTarget()
-		{}
-		;
-		virtual void hide()
-		{}
-		;
+		};
+	
+		CMenuTarget(){}
+		virtual ~CMenuTarget(){}
+		virtual void hide(){}
 		virtual int exec(CMenuTarget* parent, string actionKey)
 		{
 			return 0;
-		};
+		}
 };
 
 
@@ -107,14 +97,10 @@ class CMenuItem
 		    RETURN_REPAINT = 1,
 		    RETURN_EXIT = 2,
 		    RETURN_EXIT_ALL = 4
-	};
+		};
 
-		CMenuItem()
-		{}
-		;
-		virtual ~CMenuItem()
-		{}
-		;
+		CMenuItem(){}
+		virtual ~CMenuItem(){}
 
 		virtual void init(int X, int Y, int DX)
 		{
@@ -125,20 +111,20 @@ class CMenuItem
 		virtual int paint(bool selected=false)
 		{
 			return -1;
-		};
+		}
 		virtual int getHeight()
 		{
 			return -1;
-		};
+		}
 		virtual bool isSelectable()
 		{
 			return false;
-		};
+		}
 
 		virtual int exec(CMenuTarget* parent)
 		{
 			return 0;
-		};
+		}
 };
 
 class CMenuSeparator : public CMenuItem
@@ -156,7 +142,7 @@ class CMenuSeparator : public CMenuItem
 		    ALIGN_CENTER = 4,
 		    ALIGN_LEFT = 8,
 		    ALIGN_RIGHT = 16
-	};
+		};
 
 
 		CMenuSeparator(int Type=0, string Text="");
@@ -165,7 +151,7 @@ class CMenuSeparator : public CMenuItem
 		int getHeight()
 		{
 			return height;
-		};
+		}
 };
 
 class CMenuForwarder : public CMenuItem
@@ -184,12 +170,12 @@ class CMenuForwarder : public CMenuItem
 		int getHeight()
 		{
 			return height;
-		};
+		}
 		int exec(CMenuTarget* parent);
 		bool isSelectable()
 		{
 			return active;
-		};
+		}
 };
 
 class CMenuOptionChooser : public CMenuItem
@@ -209,9 +195,8 @@ class CMenuOptionChooser : public CMenuItem
 		bool               localizing;
 
 	public:
-		CMenuOptionChooser()
-		{}
-		;
+		CMenuOptionChooser(){}
+		
 		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionChooser();
 
@@ -220,11 +205,11 @@ class CMenuOptionChooser : public CMenuItem
 		int getHeight()
 		{
 			return height;
-		};
+		}
 		bool isSelectable()
 		{
 			return active;
-		};
+		}
 
 		int exec(CMenuTarget* parent);
 };
@@ -240,9 +225,7 @@ class CMenuOptionStringChooser : public CMenuItem
 		bool               localizing;
 
 	public:
-		CMenuOptionStringChooser()
-		{}
-		;
+		CMenuOptionStringChooser(){}
 		CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionStringChooser();
 
@@ -251,11 +234,11 @@ class CMenuOptionStringChooser : public CMenuItem
 		int getHeight()
 		{
 			return height;
-		};
+		}
 		bool isSelectable()
 		{
 			return active;
-		};
+		}
 
 		int exec(CMenuTarget* parent);
 };
@@ -295,11 +278,11 @@ class CMenuWidget : public CMenuTarget
 		void setName(string Name)
 		{
 			name=Name;
-		};
+		}
 		void setIcon(string Icon)
 		{
 			iconfile=Icon;
-		};
+		}
 };
 
 

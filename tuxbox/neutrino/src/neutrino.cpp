@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.156 2002/02/17 16:18:31 Simplex Exp $
+        $Id: neutrino.cpp,v 1.157 2002/02/19 23:41:48 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.157  2002/02/19 23:41:48  McClean
+  add neutrino-direct-start option (for alexW's-Images only at the moment)
+
   Revision 1.156  2002/02/17 16:18:31  Simplex
   quick updown-zap for subchannels
 
@@ -1409,6 +1412,21 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	oj->addOption(1, "options.off");
 	oj->addOption(0, "options.on");
 	miscSettings.addItem( oj );
+
+	if (softupdate)
+	{
+		static int dummy = 0;
+		FILE* fd = fopen("/var/etc/.neutrino", "r");
+		if(fd)
+		{
+			dummy=1;
+			fclose(fd);
+		}
+		oj = new CMenuOptionChooser("miscsettings.startneutrinodirect", &dummy, true, new CStartNeutrinoDirectNotifier );
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+		miscSettings.addItem( oj );
+	}
 }
 
 
@@ -1490,7 +1508,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 
 	if (g_settings.video_Format==0) // autodetect has to be initialized
 	{
-		videoSetupNotifier->changeNotify("videomenu.videoformat");
+		videoSetupNotifier->changeNotify("videomenu.videoformat", NULL);
 	}
 
 	videoSettings.addItem( oj );
@@ -1623,7 +1641,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput*	keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
 	CStringInput*	keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
-	keySetupNotifier->changeNotify("initial");
+	keySetupNotifier->changeNotify("initial", NULL);
 
 	CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", "settings.raw");
 	CKeyChooser*	keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "keybindingmenu.pageup_head", "settings.raw");
@@ -1823,7 +1841,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	APIDChanger        = new CAPIDChangeExec;
 	NVODChanger        = new CNVODChangeExec;
 
-	colorSetupNotifier->changeNotify("initial");
+	colorSetupNotifier->changeNotify("initial", NULL);
 
 	setupNetwork();
 
@@ -2318,12 +2336,12 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	if(actionKey=="theme_neutrino")
 	{
 		setupColors_neutrino();
-		colorSetupNotifier->changeNotify("initial");
+		colorSetupNotifier->changeNotify("initial", NULL);
 	}
 	else if(actionKey=="theme_classic")
 	{
 		setupColors_classic();
-		colorSetupNotifier->changeNotify("initial");
+		colorSetupNotifier->changeNotify("initial", NULL);
 	}
 	else if(actionKey=="shutdown")
 	{
@@ -2405,7 +2423,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.156 2002/02/17 16:18:31 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.157 2002/02/19 23:41:48 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

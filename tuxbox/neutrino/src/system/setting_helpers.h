@@ -35,40 +35,47 @@
 #include "../widget/menue.h"
 #include "libnet.h"
 
+
+class CStartNeutrinoDirectNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(string OptionName, void*);
+};
+
 class CColorSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(string OptionName);
+		bool changeNotify(string OptionName, void*);
 };
 
 class CAudioSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(string OptionName);
+		bool changeNotify(string OptionName, void*);
 };
 
 class CVideoSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(string OptionName);
+		bool changeNotify(string OptionName, void*);
 };
 
 class CLanguageSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(string OptionName);
+		bool changeNotify(string OptionName, void*);
 };
 
 class CBoxTypeSetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(string OptionName);
+		bool changeNotify(string OptionName, void*);
 };
 
 class CKeySetupNotifier : public CChangeObserver
 {
 	public:
-		bool changeNotify(string OptionName);
+		bool changeNotify(string OptionName, void*);
 };
 
 class CAPIDChangeExec : public CMenuTarget

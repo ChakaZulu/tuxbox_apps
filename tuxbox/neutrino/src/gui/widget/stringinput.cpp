@@ -221,7 +221,7 @@ int CStringInput::exec( CMenuTarget* parent, string )
 
 	if ( (observ) && (key==CRCInput::RC_ok) )
 	{
-		observ->changeNotify( value );
+		observ->changeNotify( name, value );
 	}
 
 	return CMenuTarget::RETURN_REPAINT;

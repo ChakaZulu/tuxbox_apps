@@ -35,6 +35,7 @@ mainsettings.misc Misc Settings
 miscsettings.head Misc Settings
 miscsettings.shutdown_real Enable Standby
 miscsettings.boxtype DBox type
+miscsettings.startneutrinodirect start neutrino directly
 
 languagesetup.head Language Setup
 languagesetup.select Language
