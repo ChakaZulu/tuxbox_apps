@@ -1,5 +1,5 @@
 //
-// $Id: nit.cpp,v 1.1 2001/05/14 13:45:32 fnbrd Exp $
+// $Id: nit.cpp,v 1.2 2001/05/16 15:23:47 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: nit.cpp,v $
+// Revision 1.2  2001/05/16 15:23:47  fnbrd
+// Alles neu macht der Mai.
+//
 // Revision 1.1  2001/05/14 13:45:32  fnbrd
 // Erweitert.
 //
@@ -30,7 +33,14 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "Section.hpp"
+#include <set>
+#include <algorithm>
+#include <string>
+
+#include "SIutils.hpp"
+#include "SIservices.hpp"
+#include "SIevents.hpp"
+#include "SIsections.hpp"
 
 int main(int argc, char **argv)
 {

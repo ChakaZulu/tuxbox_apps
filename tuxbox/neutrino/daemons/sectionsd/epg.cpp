@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.11 2001/05/16 07:17:10 fnbrd Exp $
+// $Id: epg.cpp,v 1.12 2001/05/16 15:23:47 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.12  2001/05/16 15:23:47  fnbrd
+// Alles neu macht der Mai.
+//
 // Revision 1.11  2001/05/16 07:17:10  fnbrd
 // SDT geht, epg erweitert.
 //
@@ -55,7 +58,14 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "Section.hpp"
+#include <set>
+#include <algorithm>
+#include <string>
+
+#include "SIutils.hpp"
+#include "SIservices.hpp"
+#include "SIevents.hpp"
+#include "SIsections.hpp"
 
 int main(int argc, char **argv)
 {
