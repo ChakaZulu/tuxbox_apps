@@ -61,12 +61,12 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	{
 		for(int count=0;count<n;count++)
 		{
-			SPluginInfo	info;
-			void		*handle;
-			int			(*getInfo) (SPluginInfo*);
-			char		*error;
-			string		filen = namelist[count]->d_name;
-			int			pos = filen.find(".so");
+			SPluginInfo		info;
+			void			*handle;
+			PluginInfoProc	getInfo;
+			char			*error;
+			string			filen = namelist[count]->d_name;
+			int				pos = filen.find(".so");
 			if(pos!=-1)
 			{
 				string pluginname = filen.substr(0,pos);
@@ -78,13 +78,13 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 					break;
 				}
 				
-				getInfo = (int(*)(SPluginInfo*)) dlsym(handle,(pluginname+"_getInfo").c_str());
+				getInfo = (PluginInfoProc)dlsym(handle,(pluginname+"_getInfo").c_str());
 				if ((error = dlerror()) != NULL)
 				{
 					fputs(error, stderr);
 					break;
 				}
-				(*getInfo)(&info);
+				getInfo(&info);
 				game* tmp = new game();
 			    tmp->name = info.name;
 			    tmp->desc = info.desc;
@@ -169,12 +169,11 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			else
 			{//exec the plugin :))
 				printf("PLUGINDEMO------------------------------------------------\n\n");
-				void		*handle;
-				//typedef int   (*getInfo)( SPluginInfo * info);//
-				int			(*getInfo) (SPluginInfo*);
-				int			(*execPlugin) (int fb, int rc, int lcd);
-				char		*error;
-				SPluginInfo	info;
+				void			*handle;
+				PluginInfoProc	getInfo;
+				PluginExecProc	execPlugin;
+				char			*error;
+				SPluginInfo		info;
 
 				string pluginname = gamelist[selected]->filename;
 
@@ -185,13 +184,13 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 					break;
 				}
 				
-				getInfo = (int(*)(SPluginInfo*)) dlsym(handle,(pluginname+"_getInfo").c_str());
+				getInfo = (PluginInfoProc) dlsym(handle,(pluginname+"_getInfo").c_str());
 				if ((error = dlerror()) != NULL)
 				{
 					fputs(error, stderr);
 					break;
 				}
-				execPlugin = (int(*)(int fb, int rc, int lcd)) dlsym(handle, (pluginname+"_exec").c_str());
+				execPlugin = (PluginExecProc) dlsym(handle, (pluginname+"_exec").c_str());
 				if ((error = dlerror()) != NULL)
 				{
 					fputs(error, stderr);
@@ -199,13 +198,13 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 				}
 
 
-				(*getInfo)(&info);
+				getInfo(&info);
 				printf("Plugin Name: %s\n", info.name);
 				printf("Plugin Desc: %s\n", info.desc);
 				printf("try exec...\n");
 
 				g_RCInput->stopInput();
-				(*execPlugin)(g_FrameBuffer->getFileHandle(), g_RCInput->getFileHandle(), -1);
+				execPlugin(g_FrameBuffer->getFileHandle(), g_RCInput->getFileHandle(), -1);
 				printf("exec done...\n");
 				dlclose(handle);
 				g_RCInput->restartInput();
