@@ -266,6 +266,7 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 			{
 				i->x-=offset.x();
 				i->y-=offset.y();
+				i->bbox->moveBy(-offset.x(), -offset.y());
 				++i;
 			}
 			cursor+=ePoint(linelength, 0);	// put the cursor after that line
@@ -286,13 +287,12 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 		kern=delta.x>>6;
 	}
 
-	int tmp = cursor.y() - glyph->top;	// this calcs the Top of the boundbox
-	if ( tmp < boundBox.top() || boundBox.isNull() )
-		boundBox.setTop(tmp);
-
-	tmp = boundBox.top() + glyph->height;
-	if ( tmp > boundBox.bottom() )
-		boundBox.setBottom(tmp);
+  eRect* bbox = new eRect();
+	bbox->setLeft( (flags&GS_ISFIRST|glyphs.empty()?cursor.x():cursor.x()-1) + glyph->left );	
+	bbox->setTop( cursor.y() - glyph->top );
+	bbox->setWidth( glyph->width );
+	bbox->setHeight( glyph->height );
+//	eDebug("GS_ISFIRST=%i, bbox left = %i, top = %i, right = %i, bottom = %i", flags&GS_ISFIRST, bbox->left(), bbox->top(), bbox->right(), bbox->bottom() );
 
 	pGlyph ng;
 	ng.x=cursor.x()+kern;
@@ -303,11 +303,35 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 	ng.font->lock();
 	ng.glyph_index=glyphIndex;
 	ng.flags=flags;
-	glyphs.push_back(ng); 
+	ng.bbox=bbox;
+	glyphs.push_back(ng);
 
 	cursor+=ePoint(xadvance, 0);
 	previous=glyphIndex;
 	return 0;
+}
+
+void eTextPara::calc_bbox()
+{
+	boundBox.setLeft( 32000 );
+	boundBox.setTop( 32000 );
+	boundBox.setRight( -32000 );         // for each glyph image, compute its bounding box, translate it,
+	boundBox.setBottom( -32000 );
+	// and grow the string bbox
+
+	for (	glyphString::iterator i(glyphs.begin()); i != glyphs.end(); ++i)
+	{
+		if ( i->bbox->left() < boundBox.left() )
+			boundBox.setLeft( i->bbox->left() );
+		if ( i->bbox->top() < boundBox.top() )
+			boundBox.setTop( i->bbox->top() );
+		if ( i->bbox->right() > boundBox.right() )
+			boundBox.setRight( i->bbox->right() );
+		if ( i->bbox->bottom() > boundBox.bottom() )
+			boundBox.setBottom( i->bbox->bottom() );
+	}
+//	eDebug("boundBox left = %i, top = %i, right = %i, bottom = %i", boundBox.left(), boundBox.top(), boundBox.right(), boundBox.bottom() );
+	bboxValid=1;
 }
 
 void eTextPara::newLine()
@@ -448,6 +472,8 @@ int eTextPara::renderString(const eString &string, int rflags)
 		}
 		p++;
 	}
+	bboxValid=false;
+	calc_bbox();
 	return 0;
 }
 
@@ -574,6 +600,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 			while (begin != end)
 			{
 				begin->x+=offset;
+				begin->bbox->moveBy(offset,0);
 				++begin;
 			}
 			break;
@@ -597,6 +624,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 				if ((!spacemode) || (begin->flags&GS_ISSPACE))
 					doadd=1;
 				begin->x+=curoff>>8;
+				begin->bbox->moveBy(curoff>>8,0);
 				if (doadd)
 					curoff+=off;
 				++begin;
@@ -605,6 +633,7 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 		}
 		}
 	}
+	bboxValid=false;
 }
 
 void eTextPara::clear()
@@ -614,19 +643,9 @@ void eTextPara::clear()
 	for (glyphString::iterator i(glyphs.begin()); i!=glyphs.end(); ++i)
 	{
 		i->font->unlock();
+		delete i->bbox;
 	}
 	glyphs.clear();
-}
-
-eSize eTextPara::getExtend()
-{
-	eSize res=maximum;
-			/* account last unfinished line */
-	if (cursor.x() > res.width())
-		res.setWidth(cursor.x());
-	if (res.height()<cursor.y())
-		res.setHeight(cursor.y()+1);
-	return res;
 }
 
 eAutoInitP0<fontRenderClass> init_fontRenderClass(1, "Font Render Class");

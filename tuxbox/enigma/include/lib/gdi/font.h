@@ -69,6 +69,7 @@ struct pGlyph
 	Font *font;
 	FT_ULong glyph_index;
 	int flags;
+	eRect *bbox;
 };
 
 typedef std::vector<pGlyph> glyphString;
@@ -93,14 +94,13 @@ class eTextPara
 	int appendGlyph(FT_UInt glyphIndex, int flags);
 	void newLine();
 	void setFont(Font *font);
-public:
 	eRect boundBox;
+	void calc_bbox();
+	int bboxValid;
+public:
 	eTextPara(eRect area, ePoint start=ePoint(-1, -1))
-		: area(area), cursor(start), maximum(0, 0), left(start.x())
+		: current_font(0), current_face(0), area(area), cursor(start), maximum(0, 0), left(start.x()), refcnt(0), bboxValid(0)
 	{
-		current_font=0;
-		current_face=0;
-		refcnt=0;
 	}
 	~eTextPara();
 
@@ -118,8 +118,16 @@ public:
 	{
 		dirLeft, dirRight, dirCenter, dirBlock
 	};
+
 	void realign(int dir);
-	eSize getExtend();
+
+	const eRect & getBoundBox()
+	{
+		if (!bboxValid)
+			calc_bbox();
+
+		return boundBox;
+	}
 };
 
 class Font
