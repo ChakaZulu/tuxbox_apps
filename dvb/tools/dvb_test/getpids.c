@@ -1,5 +1,5 @@
 /*
- * $Id: getpids.c,v 1.1 2003/11/24 13:15:46 obi Exp $
+ * $Id: getpids.c,v 1.2 2003/11/24 14:46:27 obi Exp $
  *
  * (C) 2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -43,9 +43,10 @@ static void analyze_ts(const __u8 *buf, size_t len)
 	for (i = 0; i < len; i += 188) {
 		if (buf[i] == 0x47) {
 			pid = (*(__u16 *)&buf[i + 1]) & 0x1fff;
-			if (seen_pids[pid] == 0)
+			if (seen_pids[pid] == 0) {
 				printf("pid %04x\n", pid);
-			seen_pids[pid] = 1;
+				seen_pids[pid] = 1;
+			}
 		}
 		else {
 			i++;
@@ -63,7 +64,7 @@ static void usage(char *name)
 	printf("   add -v for verbose output\n");
 	printf("\n");
 	printf("   for quick results try -t 50 -f 28\n");
-	printf("   more exact result may be obtained with e.g. -t 100 -f 1\n");
+	printf("   more exact results may be obtained with e.g. -t 100 -f 1\n");
 }
 
 int main(int argc, char **argv)
@@ -149,7 +150,8 @@ int main(int argc, char **argv)
 		if (poll(&pfd, 1, timeout) > 0) {
 			if (pfd.revents & POLLIN) {
 				r = read(pfd.fd, buf, sizeof(buf));
-				analyze_ts(buf, r);
+				if (r >= 188)
+					analyze_ts(buf, r);
 			}
 		}
 
