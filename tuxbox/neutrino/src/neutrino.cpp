@@ -4293,7 +4293,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	int enabled_count = 0;
 		for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 		{
-			if (g_PluginList->getType(count)== PLUGIN_TYPE_TOOL && !g_PluginList->isHidden(count))
+			if (g_PluginList->getType(count)== CPlugins::P_TYPE_TOOL && !g_PluginList->isHidden(count))
 			{
 				// zB vtxt-plugins
 				sprintf(id, "%d", count);
