@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: tuxbox.c,v 1.6 2003/02/19 16:41:02 waldi Exp $
+ * $Id: tuxbox.c,v 1.7 2003/02/19 16:42:20 waldi Exp $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -30,7 +30,7 @@
 #include <string.h>
 #include "tuxbox.h"
 
-static unsigned int tuxbox_read_proc (char *type)
+static int tuxbox_read_proc (char *type)
 {
 	FILE *file;
 	char filename[64];
@@ -51,7 +51,7 @@ static unsigned int tuxbox_read_proc (char *type)
 	}
 
 	if (getline(&line, &len, file) != -1)
-		ret = strtoul (line, NULL, 0);
+		ret = strtol (line, NULL, 0);
 
 	fclose(file);
 
