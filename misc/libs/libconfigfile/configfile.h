@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.h,v 1.1 2002/04/14 23:19:49 obi Exp $
+ * $Id: configfile.h,v 1.2 2002/04/20 21:20:56 Simplex Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -29,34 +29,39 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 class CConfigFile
 {
 	private:
-		std::map <std::string, std::string> configData;
+
+		typedef map <string, string> ConfigDataMap;
+
+		ConfigDataMap configData;
 		char delimiter;
 		bool modifiedFlag;
 
 	public:
 		CConfigFile (const char p_delimiter);
 
-		const bool loadConfig (const std::string p_filename);
-		const bool saveConfig (const std::string p_filename);
+		const bool loadConfig (const string p_filename);
+		const bool saveConfig (const string p_filename);
 
-		std::string getString (const std::string p_keyName);
-		void setString (const std::string p_keyName, const std::string p_keyValue);
-		int getInt (const std::string p_keyName);
-		void setInt (const std::string p_keyName, const int p_keyValue);
-		bool getBool (const std::string p_keyName);
-		void setBool (const std::string p_keyName, const bool p_keyValue);
+		string getString (const string p_keyName, const string defaultValue = "");
+		void setString (const string p_keyName, const string p_keyValue);
+		int getInt (const string p_keyName, const int defaultValue = 0);
+		void setInt (const string p_keyName, const int p_keyValue);
+		bool getBool (const string p_keyName, const bool defaultValue = false);
+		void setBool (const string p_keyName, const bool p_keyValue);
 
 		const bool getModifiedFlag () { return modifiedFlag; }
 		void setModifiedFlag (const bool p_value) { modifiedFlag = p_value; }
 
-		std::vector <std::string> getStringVector (const std::string p_keyName);
-		void setStringVector (const std::string p_keyName, const std::vector <std::string> p_vec);
+		vector <string> getStringVector (const string p_keyName);
+		void setStringVector (const string p_keyName, const vector <string> p_vec);
 
-		std::vector <int> getIntVector (const std::string p_keyName);
-		void setIntVector (const std::string p_keyName, const std::vector <int> p_vec);
+		vector <int> getIntVector (const string p_keyName);
+		void setIntVector (const string p_keyName, const vector <int> p_vec);
 };
 
 #endif /* __configfile_h__ */

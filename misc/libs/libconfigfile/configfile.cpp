@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.1 2002/04/14 23:19:49 obi Exp $
+ * $Id: configfile.cpp,v 1.2 2002/04/20 21:20:56 Simplex Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -30,7 +30,7 @@ CConfigFile::CConfigFile(const char p_delimiter)
 	delimiter = p_delimiter;
 }
 
-const bool CConfigFile::loadConfig(std::string p_filename)
+const bool CConfigFile::loadConfig(string p_filename)
 {
 	FILE* fd = fopen(p_filename.c_str(), "r");
 
@@ -47,7 +47,7 @@ const bool CConfigFile::loadConfig(std::string p_filename)
 	char keystr[1000];
 	char valstr[1000];
 
-	while (!feof(fd)) 
+	while (!feof(fd))
 	{
 		if (fgets(buf, sizeof(buf), fd) != NULL)
 		{
@@ -87,64 +87,85 @@ const bool CConfigFile::loadConfig(std::string p_filename)
 	return true;
 }
 
-std::string CConfigFile::getString (std::string p_keyName)
+string CConfigFile::getString (string p_keyName, const string defaultValue = "")
 {
-	return configData[p_keyName];
+	if ( configData.find( p_keyName) == configData.end())
+	{
+		return defaultValue;
+	}
+	else
+	{
+		return configData[p_keyName];
+	}
 }
 
-void CConfigFile::setString (std::string p_keyName, std::string p_keyValue)
+void CConfigFile::setString (string p_keyName, string p_keyValue)
 {
 	configData[p_keyName] = p_keyValue;
 }
 
-int CConfigFile::getInt (std::string p_keyName)
+int CConfigFile::getInt (string p_keyName, const int defaultValue = 0)
 {
-	return atoi(configData[p_keyName].c_str());
+	if ( configData.find( p_keyName) == configData.end())
+	{
+		return defaultValue;
+	}
+	else
+	{
+		return atoi(configData[p_keyName].c_str());
+	}
 }
 
-void CConfigFile::setInt (std::string p_keyName, int p_keyValue)
+void CConfigFile::setInt (string p_keyName, int p_keyValue)
 {
 	char *configDataChar = (char *) malloc(sizeof(p_keyValue));
 	sprintf(configDataChar, "%d", p_keyValue);
-	configData[p_keyName] = std::string(configDataChar);
+	configData[p_keyName] = string(configDataChar);
 	free(configDataChar);
 }
 
-bool CConfigFile::getBool (std::string p_keyName)
+bool CConfigFile::getBool (string p_keyName, const bool defaultValue = false)
 {
-	if (configData[p_keyName] == "true")
+	if ( configData.find( p_keyName) == configData.end())
 	{
-		return true;
+		return defaultValue;
 	}
 	else
 	{
-		return false;
+		if (configData[p_keyName] == "true")
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
 
-void CConfigFile::setBool (std::string p_keyName, bool p_keyValue)
+void CConfigFile::setBool (string p_keyName, bool p_keyValue)
 {
 	if (p_keyValue)
 	{
-		configData[p_keyName] = std::string("true");
+		configData[p_keyName] = string("true");
 	}
 	else
 	{
-		configData[p_keyName] = std::string("false");
+		configData[p_keyName] = string("false");
 	}
 }
 
-const bool CConfigFile::saveConfig (std::string p_filename)
+const bool CConfigFile::saveConfig (string p_filename)
 {
-	std::ofstream configFile (p_filename.c_str());
+	ofstream configFile (p_filename.c_str());
 
 	if (configFile != NULL)
 	{
-		std::map <std::string, std::string>::iterator it;
-		
+		ConfigDataMap::iterator it;
+
 		for (it = configData.begin(); it != configData.end(); it++)
 		{
-			configFile << it->first << "=" << it->second << std::endl;
+			configFile << it->first << "=" << it->second << endl;
 		}
 
 		configFile.close();
@@ -152,15 +173,15 @@ const bool CConfigFile::saveConfig (std::string p_filename)
 	}
 	else
 	{
-		std::cerr << "unable to open file " << p_filename << "for writing." << std::endl;
+		cerr << "unable to open file " << p_filename << "for writing." << endl;
 		return false;
 	}
 }
 
-std::vector <std::string> CConfigFile::getStringVector (std::string p_keyName)
+vector <string> CConfigFile::getStringVector (string p_keyName)
 {
-	std::string keyValue = configData[p_keyName];
-	std::vector <std::string> vec;
+	string keyValue = configData[p_keyName];
+	vector <string> vec;
 	uint16_t length = 0;
 	uint16_t pos = 0;
 	uint16_t i;
@@ -183,7 +204,7 @@ std::vector <std::string> CConfigFile::getStringVector (std::string p_keyName)
 	return vec;
 }
 
-void CConfigFile::setStringVector (std::string p_keyName, std::vector <std::string> p_vec)
+void CConfigFile::setStringVector (string p_keyName, vector <string> p_vec)
 {
 	uint16_t i;
 
@@ -193,15 +214,15 @@ void CConfigFile::setStringVector (std::string p_keyName, std::vector <std::stri
 		{
 			configData[p_keyName] += delimiter;
 		}
-		
+
 		configData[p_keyName] += p_vec[i];
 	}
 }
 
-std::vector <int> CConfigFile::getIntVector (std::string p_keyName)
+vector <int> CConfigFile::getIntVector (string p_keyName)
 {
-	std::string keyValue = configData[p_keyName];
-	std::vector <int> vec;
+	string keyValue = configData[p_keyName];
+	vector <int> vec;
 	uint16_t length = 0;
 	uint16_t pos = 0;
 	uint16_t i;
@@ -224,7 +245,7 @@ std::vector <int> CConfigFile::getIntVector (std::string p_keyName)
 	return vec;
 }
 
-void CConfigFile::setIntVector (std::string p_keyName, std::vector <int> p_vec)
+void CConfigFile::setIntVector (string p_keyName, vector <int> p_vec)
 {
 	uint16_t i;
 
@@ -237,7 +258,7 @@ void CConfigFile::setIntVector (std::string p_keyName, std::vector <int> p_vec)
 
 		char *tmp = (char *) malloc (sizeof(p_vec[i]));
 		sprintf(tmp, "%d", p_vec[i]);
-		configData[p_keyName] += std::string(tmp);
+		configData[p_keyName] += string(tmp);
 		free(tmp);
 	}
 }
