@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.9  2004/08/20 14:57:37  lazyt
+ * add http-auth support for password protected webinterface
+ *
  * Revision 1.8  2004/07/10 11:38:15  lazyt
  * use -DOLDFT for older FreeType versions
  * replaced all remove() with unlink()
@@ -41,8 +44,10 @@ int ReadConf()
 {
 	FILE *fd_conf;
 	char *ptr;
+	char encodingtable[64] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 	char line_buffer[256];
 	int loop;
+	int src_index, dst_index;
 
 	//open config
 
@@ -68,8 +73,10 @@ int ReadConf()
 			fprintf(fd_conf, "LOGMODE=S\n\n");
 			fprintf(fd_conf, "SAVEDB=Y\n\n");
 			fprintf(fd_conf, "AUDIO=Y\n");
-			fprintf(fd_conf, "VIDEO=1\n");
-			fprintf(fd_conf, "PORT=80\n\n");
+			fprintf(fd_conf, "VIDEO=1\n\n");
+			fprintf(fd_conf, "WEBPORT=80\n");
+			fprintf(fd_conf, "WEBUSER=\n");
+			fprintf(fd_conf, "WEBPASS=\n\n");
 			fprintf(fd_conf, "NAME0=\n");
 			fprintf(fd_conf, "HOST0=\n");
 			fprintf(fd_conf, "USER0=\n");
@@ -83,7 +90,7 @@ int ReadConf()
 	//clear database
 
 		memset(account_db, 0, sizeof(account_db));
-		startdelay = intervall = pop3log = logmode = savedb = audio = video = port = 0;
+		startdelay = intervall = pop3log = logmode = savedb = audio = video = webport = webuser[0] = webpass[0] = 0;
 
 	//fill database
 
@@ -103,7 +110,9 @@ int ReadConf()
 
 			else if((ptr = strstr(line_buffer, "VIDEO="))) sscanf(ptr + 6, "%d", &video);
 
-			else if((ptr = strstr(line_buffer, "PORT="))) sscanf(ptr + 5, "%d", &port);
+			else if((ptr = strstr(line_buffer, "WEBPORT="))) sscanf(ptr + 8, "%d", &webport);
+			else if((ptr = strstr(line_buffer, "WEBUSER="))) sscanf(ptr + 8, "%s", &webuser[0]);
+			else if((ptr = strstr(line_buffer, "WEBPASS="))) sscanf(ptr + 8, "%s", &webpass[0]);
 
 			else if((ptr = strstr(line_buffer, "NAME0="))) sscanf(ptr + 6, "%s", account_db[0].name);
 			else if((ptr = strstr(line_buffer, "HOST0="))) sscanf(ptr + 6, "%s", account_db[0].host);
@@ -158,7 +167,7 @@ int ReadConf()
 
 	//check for update
 
-		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !port)
+		if(!startdelay || !intervall || !pop3log || !logmode || !savedb || !audio || !video || !webport)
 		{
 			printf("TuxMailD <missing Param(s), update Config>\n");
 
@@ -171,7 +180,7 @@ int ReadConf()
 			if(!savedb) savedb = 'Y';
 			if(!audio) audio = 'Y';
 			if(!video) video = 1;
-			if(!port) port = 80;
+			if(!webport) webport = 80;
 
 			fprintf(fd_conf, "STARTDELAY=%d\n", startdelay);
 			fprintf(fd_conf, "INTERVALL=%d\n\n", intervall);
@@ -179,8 +188,10 @@ int ReadConf()
 			fprintf(fd_conf, "LOGMODE=%c\n\n", logmode);
 			fprintf(fd_conf, "SAVEDB=%c\n\n", savedb);
 			fprintf(fd_conf, "AUDIO=%c\n", audio);
-			fprintf(fd_conf, "VIDEO=%d\n", video);
-			fprintf(fd_conf, "PORT=%d\n", port);
+			fprintf(fd_conf, "VIDEO=%d\n\n", video);
+			fprintf(fd_conf, "WEBPORT=%d\n", webport);
+			fprintf(fd_conf, "WEBUSER=%s\n", webuser);
+			fprintf(fd_conf, "WEBPASS=%s\n", webpass);
 
 			for(loop = 0; loop < 10; loop++)
 			{
@@ -240,10 +251,37 @@ int ReadConf()
 			video = 1;
 		}
 
-		if(port < 1 || port > 65535)
+		if(webport < 1 || webport > 65535)
 		{
-			printf("TuxMailD <PORT=%d invalid, set to \"80\">\n", port);
-			port = 80;
+			printf("TuxMailD <WEBPORT=%d invalid, set to \"80\">\n", webport);
+			webport = 80;
+		}
+		
+		if(webuser[0])
+		{
+		    //build encoded string
+
+    			strcpy(plainstring, &webuser[0]);
+    			strcat(plainstring, ":");
+			strcat(plainstring, &webpass[0]);
+
+			for(src_index = dst_index = 0; src_index < strlen(plainstring); src_index += 3, dst_index += 4)
+			{
+		    		encodedstring[0 + dst_index] = encodingtable[plainstring[0 + src_index] >> 2];
+				encodedstring[1 + dst_index] = encodingtable[(plainstring[0 + src_index] & 3) << 4 | plainstring[1 + src_index] >> 4];
+				encodedstring[2 + dst_index] = encodingtable[(plainstring[1 + src_index] & 15) << 2 | plainstring[2 + src_index] >> 6];
+				encodedstring[3 + dst_index] = encodingtable[plainstring[2 + src_index] & 63];
+			}
+
+			encodedstring[dst_index] = '\0';
+
+			if(strlen(plainstring) % 3)
+			{
+			    for(src_index = 0; src_index < (3 - strlen(plainstring) % 3); src_index++, dst_index--)
+			    {
+				    encodedstring[dst_index - 1] = '=';
+			    }
+			}
 		}
 
 		accounts = 0;
@@ -936,7 +974,18 @@ void NotifyUser()
 				}
 			}
 
-			strcat(http_cmd, " HTTP/1.1\n\n");
+			strcat(http_cmd, " HTTP/1.1\n");
+			
+			if(webuser[0])
+			{
+			    strcat(http_cmd, "Authorization: Basic ");
+			    strcat(http_cmd, &encodedstring[0]);
+			    strcat(http_cmd, "\n\n");			
+			}
+			else
+			{
+			    strcat(http_cmd, "\n");
+			}
 		}
 
 		if((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -946,7 +995,7 @@ void NotifyUser()
 		}
 
 		SockAddr.sin_family = AF_INET;
-		SockAddr.sin_port = htons(port);
+		SockAddr.sin_port = htons(webport);
 		inet_aton("127.0.0.1", &SockAddr.sin_addr);
 
 		if(connect(sock, (struct sockaddr*)&SockAddr, sizeof(SockAddr)))
@@ -989,7 +1038,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.8 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.9 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;

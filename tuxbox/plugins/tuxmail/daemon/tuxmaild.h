@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.6  2004/08/20 14:57:37  lazyt
+ * add http-auth support for password protected webinterface
+ *
  * Revision 1.5  2004/04/03 17:33:08  lazyt
  * remove curl stuff
  * fix audio
@@ -78,7 +81,9 @@ struct
 
 FILE *fd_pid;
 int pid;
-int port;
+int webport;
+char webuser[32], webpass[32];
+char plainstring[64], encodedstring[64];
 int startdelay, intervall;
 char pop3log, logmode, audio, savedb;
 int video;
