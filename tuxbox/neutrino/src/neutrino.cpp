@@ -1002,7 +1002,8 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.mp3player", true, "", new CMP3PlayerGui(), "", true) );
 
 #if HAVE_DVB_API_VERSION >= 3
-	mainMenu.addItem( new CMenuForwarder("mainmenu.movieplayer", true, "", new CMoviePlayerGui(), "", true) );
+	// Temporary disabled
+	// mainMenu.addItem( new CMenuForwarder("mainmenu.movieplayer", true, "", new CMoviePlayerGui(), "", true) );
 #endif
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.pictureviewer", true, "", new CPictureViewerGui(), "", true) );
@@ -3400,7 +3401,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.454 2003/05/24 00:36:46 gagga Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.455 2003/05/24 23:00:46 gagga Exp $\n\n");
 
 	tzset();
 	initGlobals();
