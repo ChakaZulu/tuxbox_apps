@@ -156,14 +156,14 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 				case NeutrinoMessages::EVT_SCAN_PROVIDER:
 					frameBuffer->paintBoxRel(x+ 10, ypos+ 4* mheight+2, width-20, mheight, COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
+					g_Fonts->menu->RenderString(x+ 10, ypos+ 5* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
 					delete (unsigned char*) data;
 					break;
 
 				case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
 					sprintf(cb, "%d", data);
 					frameBuffer->paintBoxRel(xpos2, ypos+ 7*mheight, x+width-105, mheight , COL_MENUCONTENT);
-					g_Fonts->menu->RenderString(xpos2, ypos+ 7* mheight, width, cb, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x + 10, ypos+ 8* mheight, width, cb, COL_MENUCONTENT);
 					break;
 
 				case NeutrinoMessages::EVT_SCAN_COMPLETE:
