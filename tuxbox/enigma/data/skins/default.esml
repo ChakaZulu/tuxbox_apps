@@ -64,11 +64,14 @@
 		<map name="eFEStatus.values" font="Nimbus" size="20" />
 		<map name="eSatfind" font="Nimbus" size="30" />
 		<map name="eUpgradeChanges" font="Nimbus" size="20" />
+		<map name="partitionCheck.status" font="Nimbus" size="20" />
 
 		<map name="head" font="Nimbus" size="40" />
 	</fontalias>
 
 	<images basepath="" target="fb">
+		<img name="arrow_up" src="arrow_up.png"/>
+		<img name="arrow_down" src="arrow_down.png"/>
 		<img name="eCheckbox.checked" src="checked.png" />
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
 		<img name="eCheckboxLCD.checked" src="checked_lcd.png" nomerge="yes" />
@@ -558,7 +561,7 @@
 			<eComboBox name="e_month" openEntries="6" position="110:e-165" size="150:35" helptext="select month (ok)" loadDeco="" />
 			<eComboBox name="e_day" openEntries="10" position="270:e-165" size="e-92:35" helptext="select day (ok)" loadDeco="" />
 			<eNumber name="e_time" position="e-82:e-165" size="72:35" helptext="edit the end time (0..9, left, right)" loadDeco="" />
-			<eComboBox name="type" openEntries="2" position="10:e-120" size="250:35" helptext="select the timer type (ok)" loadDeco="" />
+			<eComboBox name="type" openEntries="3" position="10:e-120" size="250:35" helptext="select the timer type (ok)" loadDeco="" />
 			<eButton name="select_service" position="270:e-120" size="e-10:35" helptext="to change service press ok" loadDeco="" />
 			<eButton name="close" text="close" position="10:e-75" size="150:35" helptext="close timer menu (ok)" loadDeco="" shortcut="escape" />
 			<eButton name="update" text="update" position="170:e-75" size="150:35" helptext="update the current selected timer (ok)" loadDeco="" shortcut="green" />
@@ -569,15 +572,16 @@
 	</object>
 
 	<object name="eAboutScreen">
-		<eAboutScreen text="About..." cposition="140:150" csize="450:350">
+		<eAboutScreen text="About..." cposition="125:150" csize="450:380">
 			<eLabel name="vendor" position="10:0" csize="e:25"/>
 			<eLabel name="machine" position="30:25" font="eAboutScreen.machine" csize="e:50"/>
 			<eLabel name="processor" text="processor: " position="10:80" csize="e:30" />
 			<eLabel name="frontend" text="frontend: " position="10:110" csize="e:30" />
-			<eLabel text="harddisk: " position="10:140" csize="e:30" />
-			<eLabel name="harddisks" position="10:170" csize="e:60" />
-			<eLabel text="Software Version:" position="10:230" csize="e:30" />
-			<eLabel name="version" position="10:260" csize="e:30" />
+			<eLabel name="translation" position="10:140" csize="e:30" />
+			<eLabel text="harddisk: " position="10:170" csize="e:30" />
+			<eLabel name="harddisks" position="10:200" csize="e:60" />
+			<eLabel text="Software Version:" position="10:260" csize="e:30" />
+			<eLabel name="version" position="10:290" csize="e:30" />
 			<eButton name="okButton" position="20:e-50" csize="100:30" text="ok" loadDeco="" shortcut="green" />
 			<eLabel name="dreamlogo" pixmap="dreamlogo" position="e-160:e-95" csize="143:75" alphatest="on" />
 		</eAboutScreen>
@@ -619,9 +623,10 @@
 			<eLabel name="bus" position="160:70" size="e:30" />
 			<eLabel text="status:" position="10:110" size="70:30" />
 			<eLabel name="status" position="80:110" size="e:30" />
-			<eButton name="close" text="close" position="10:170" size="170:40" loadDeco="" helptext="close harddisk menu" />
-			<eButton name="format" text="format" position="190:170" size="170:40" loadDeco="" helptext="initialize the disk for use with the dreambox" shortcut="red" />
-			<eButton name="check" text="check" position="370:170" size="170:40" loadDeco="" helptext="do a filesystem check" shortcut="yellow" />
+			<eButton name="format" text="format" position="10:170" size="225:40" loadDeco="" helptext="initialize the disk for use with the dreambox" shortcut="red" />
+			<eButton name="check" text="check" position="245:170" size="225:40" loadDeco="" helptext="do a filesystem check" shortcut="yellow" />
+			<eButton name="ext" position="480:170" size="60:40" loadDeco="" helptext="show extended configuration" alphatest="on" />
+			<eCombobox name="fs" position="e-210:220" size="e-10:35" loadDeco="" helptext="select filsystem to format" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eHarddiskMenu>
 	</object>
@@ -629,7 +634,7 @@
 	<object name="ePartitionCheck">
 		<ePartitionCheck text="Partition Check" cposition="80:100" csize="550:400" >
 			<eLabel text="status output:" position="10:10" size="e-10:30" />
-			<eLabel name="state" position="10:50" size="e-10:e-100" loadDeco="eNumber" wrap="on" />
+			<eLabel name="state" position="10:50" size="e-10:e-100" loadDeco="eNumber" wrap="on" font="partitionCheck.status" />
 			<eButton name="cancel" text="cancel" position="e-180:e-80" size="170:40" helptext="cancel partition check" loadDeco="" />
 			<eButton name="close" text="close" position="e-360:e-80" size="170:40" helptext="close window" loadDeco="" shortcut="green" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
@@ -668,11 +673,11 @@
 	</object>
 	
 	<object name="eWizardDiseqc">
-		<eWizardDiseqc cposition="120:100" csize="500:400" text="DiSEqC...">
+		<eWizardDiseqc cposition="120:100" csize="500:350" text="DiSEqC...">
 			<eLabel text="Please choose your DiSEqC-Configuration:" position="10:10" 
-				size="e:100" font="head" wrap="on" />
-			<eListbox name="choices" position="25:110" size="450:150" />
-			<eLabel name="description" position="10:280" size="e-10:60" />
+				size="e:150" font="head" wrap="on" />
+			<eListbox name="choices" position="25:160" size="450:150" />
+			<eLabel name="description" position="10:320" size="e-10:30" />
 		</eWizardDiseqc>
 	</object>
 </eskin>

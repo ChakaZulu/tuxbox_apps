@@ -4,7 +4,7 @@
 		<email>tmbinc@gmx.net</email>
 	</author>
 
-	<device identifier="Dreambox IR RC" >
+	<device identifier="Dreambox2" >
 		<keys>
 			<key name="0" code="00" />
 			<key name="1" code="01" />
@@ -63,6 +63,10 @@
 			<action name="yellow" key="yellow" flags="m" />
 			<action name="blue" key="blue" flags="m" />
 			<action name="escape" key="LAME" flags="m" />
+		</actionmap>
+
+		<actionmap name="mainmenu">
+			<action name="close" key="dream" flags="m" />
 		</actionmap>
 
 		<actionmap name="cursor">
@@ -124,8 +128,6 @@
 			<action name="stop" key="tv" flags="m" />
 
 			<action name="showBouquets" key="bouqup" flags="m" />
-			<action name="showFavourites" key="bouqdown" flags="m" />
-
 			<action name="modeTV" key="tv" flags="m" />
 			<action name="modeRadio" key="radio" flags="m" />
 			<action name="modeFile" key="text" flags="m" />
@@ -134,7 +136,7 @@
 
 		<actionmap name="enigmaMain" style="default">
 			<action name="showInfobar" key="ok" flags="m" />
-			<action name="hideInfobar" key="ok" flags="m" />			
+			<action name="hideInfobar" key="ok" flags="m" />
 			<action name="serviceListDown" key="down" flags="m" />
 			<action name="serviceListUp" key="up" flags="m" />
 			<action name="showEPG" key="info" flags="m" />
@@ -159,15 +161,16 @@
 		</actionmap>
 
 		<actionmap name="serviceSelector">
-			<action name="nextBouquet" key="next" flags="mr" />
-			<action name="prevBouquet" key="prev" flags="mr" />
-			<action name="pathUp" key="bouqup" flags="m" />
-			<action name="pathUp" key="bouqdown" flags="m" />
+			<action name="nextBouquet" key="bouqup" flags="mr" />
+			<action name="prevBouquet" key="bouqdown" flags="mr" />
+			<action name="pathUp" key="0" flags="m" />
+			<action name="gotoFirstService" key="prev" flags="m" />
+			<action name="gotoLastService" key="next" flags="m" />
 			<action name="showEPGSelector" key="info" flags="m" />
 			<action name="showMenu" key="red" flags="m" />
 			<action name="toggleStyle" key="green" flags="m" />
 			<action name="toggleFocus" key="yellow" flags="m" />
-			<action name="showFavourite" key="blue" flags="m" />
+			<action name="toggleRoot" key="blue" flags="m" />
 			<action name="modeTV" key="tv" flags="m" />
 			<action name="modeRadio" key="radio" flags="m" />
 			<action name="modeFile" key="text" flags="m" />
@@ -184,6 +187,8 @@
 			<action name="7" key="7" flags="mr" />
 			<action name="8" key="8" flags="mr" />
 			<action name="9" key="9" flags="mr" />
+			<action name="ext1" key="prev" flags="mr" />
+			<action name="ext2" key="next" flags="mr" />
 		</actionmap>
 
 		<actionmap name="enigmaStandby">

@@ -20,7 +20,7 @@ install_DATA = \
 	mainmenu/rectime_sel-fs8.png mainmenu/scart-fs8.png mainmenu/scart_sel-fs8.png \
 	mainmenu/setup-fs8.png mainmenu/setup_sel-fs8.png mainmenu/shutdown-fs8.png \
 	mainmenu/shutdown_sel-fs8.png mainmenu/tv-fs8.png mainmenu/tv_sel-fs8.png \
-	no-button.png r.png rec_symbol-fs8.png red-button.png speaker.png status-big-break.png \
+	no-button.png r.png rec_symbol-fs8.png red-button.png speaker.png status_big_break.png \
 	status_big_b_break.png status_big_b_left.png status_big_b_middle.png status_big_b_right.png \
 	status_big_left.png status_big_middle.png status_big_right.png status_small_b_break.png \
 	status_small_b_left.png status_small_b_middle.png status_small_b_right.png status_small_break.png \
