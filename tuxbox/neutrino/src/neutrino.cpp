@@ -1256,7 +1256,7 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
 	
    	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
-	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title"); 
+	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title");
 	oj->addOption((int)CMP3PlayerGui::TITLE_ARTIST, "mp3player.title_artist"); 
    	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
 	mp3PicSettings.addItem( oj );
@@ -2084,7 +2084,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName.c_str(), false);
 
 	g_info.box_Type = g_Controld->getBoxType();
-	
+
 	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d\n", g_info.box_Type);
 
 
@@ -2229,10 +2229,17 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FAILED, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
+ 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY, 222, NEUTRINO_UDS_NAME);
+ 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCYP, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SATELLITE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_CHANNELS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_PROVIDER, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_BOUQUETS_CHANGED, 222, NEUTRINO_UDS_NAME);
+ 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SERVICENAME, 222, NEUTRINO_UDS_NAME);
+ 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_A_CHAN, 222, NEUTRINO_UDS_NAME);
+ 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_TV_CHAN, 222, NEUTRINO_UDS_NAME);
+ 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN, 222, NEUTRINO_UDS_NAME);
+ 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_FOUND_DATA_CHAN, 222, NEUTRINO_UDS_NAME);
 
 	dprintf( DEBUG_NORMAL, "timerd event register\n");
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_SHUTDOWN, 222, NEUTRINO_UDS_NAME);
@@ -3374,7 +3381,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.439 2003/05/01 19:32:25 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.440 2003/05/05 08:52:50 mws Exp $\n\n");
 
 	tzset();
 	initGlobals();
