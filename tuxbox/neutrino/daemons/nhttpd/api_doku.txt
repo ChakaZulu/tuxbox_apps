@@ -342,20 +342,23 @@ Beispiel:
 Parameter: getallpids
 Rückgabe:
 
-Es werden die VPID und alle APIDs des laufenden Senders angezeigt. Die Werte sind durch ein Enter voneinander getrennt.
+Es werden die VTXT PID, VPID und alle APIDs des laufenden Senders angezeigt. Die Werte sind durch ein Enter voneinander getrennt.
+Hinter jeder APID wird eine kurze Beschreibung angegeben, bei AC3 Streams zusätzlich (AC3).
 
 Rückgabe-Format:
        VPID
-       APID
+       APID <description> [(AC3)]
        [APID...]
+       [VTXT PID]
 
 Beispiel:
 
 >>>http://dbox/control/zapto?getallpids
-305
-306
-307
-308
+110
+120 deu 
+125 dd  (AC3)
+121 2ch 
+130 vtxt
 
 
 Parameter: stopplayback
