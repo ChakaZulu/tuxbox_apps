@@ -291,7 +291,7 @@ void eMountOSD::unmountNow()
 {
 	if (mountList->getCurrent())
 	{
-		if (!eMountMgr::getInstance()->unmountMountPoint(mountList->getCurrent()->id))
+		if (eMountMgr::getInstance()->unmountMountPoint(mountList->getCurrent()->id))
 		{
 			eMessageBox box(_("Unmount failed!"), _("Unmount Error"), eMessageBox::btOK|eMessageBox::iconWarning, eMessageBox::btOK);
 			box.show();
@@ -299,7 +299,7 @@ void eMountOSD::unmountNow()
 			box.hide();
 			return;
 		}
-		
+
 		mountList->redraw();
 		setFocus(mountList);
 	}
