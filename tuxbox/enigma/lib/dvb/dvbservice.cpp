@@ -208,13 +208,10 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			if ( !service.getServiceID().get() && spSID != -1 )
 				service.data[1] = spSID;
 
-//			if ( service.getServiceID().get() )
-			{
-				dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
-				dvb.tPAT.start(new PAT());
-				eServiceInterface::getInstance()->removeRef(service);
-				break;
-			}
+			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceGetPAT));
+			dvb.tPAT.start(new PAT());
+			eServiceInterface::getInstance()->removeRef(service);
+			break;
 		}
 		if (!nopmt && service.getServiceID().get() ) // if not a dvb service, don't even try to search a PAT, PMT etc.
 		{
@@ -247,8 +244,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		}
 
 		startTDT();
-
-		dvb.tSDT.start(new SDT());
 
 		switch (service.getServiceType())
 		{
@@ -292,6 +287,9 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		int pmtpid=-1;
 		if (dvb.getState() != eDVBServiceState::stateServiceGetPAT)
 			break;
+
+		if ( !service.path )
+			dvb.tSDT.start(new SDT());
 
 		PAT *pat=dvb.tPAT.getCurrent();
 		PATEntry *pe=pat->searchService(service.getServiceID().get());
