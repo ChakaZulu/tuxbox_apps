@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.16 2004/04/30 12:58:54 thegoodguy Exp $
+ * $Id: streamfile.c,v 1.17 2004/04/30 13:29:30 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -44,7 +44,6 @@
 #include <transform.h>
 #include <pthread.h>
 #include <signal.h>
-#include <poll.h>
 
 #include "ringbuffer.h"
 
@@ -141,8 +140,6 @@ void *FileThread (void *v_arg)
 	unsigned long long filesize2 = 0;
 	unsigned int bitrate = 0;
 
-	struct pollfd pfd[1];
-	
 	while (1)
 	{
 		ringbuffer_get_read_vector(ringbuf, &(vec[0]));
@@ -160,15 +157,12 @@ void *FileThread (void *v_arg)
 				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
 				if (fd2 != -1)
 					close(fd2);
-				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_NONBLOCK | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
 				{
 					perror("[streamfile]: opening outfile");
 					exit_flag = 1;
 					pthread_exit(NULL);
 				}
-				pfd[0].fd = fd2;
-				pfd[0].events = POLLOUT;
-
 				remfile = splitsize;
 				timer1 = time(NULL);
 			}
@@ -184,67 +178,58 @@ void *FileThread (void *v_arg)
 				vec[1].len = readsize - vec[0].len;
 			}
 
-			if (poll(pfd, 1, 5000) > 0)
+			ssize_t written;
+
+			while (1)
 			{
-				if (pfd[0].revents & POLLOUT)
+				if ((written = write(fd2, vec[0].buf, vec[0].len)) < 0)
 				{
-					ssize_t written;
-
-					while (1)
+					if (errno != EAGAIN)
 					{
-						if ((written = write(fd2, vec[0].buf, vec[0].len)) < 0)
-						{
-							if (errno != EAGAIN)
-							{
-								exit_flag = 1;
-								perror("[streamfile]: write");
-								goto terminate_thread;
-							}
-						}
-						else
-						{
-							ringbuffer_read_advance(ringbuf, written);
-
-							if (vec[0].len == written)
-							{
-								if (vec[1].len == 0)
-								{
-									goto all_bytes_written;
-								}
-
-								vec[0] = vec[1];
-								vec[1].len = 0;
-							}
-							else
-							{
-								vec[0].len -= written;
-								vec[0].buf += written;
-							}
-						}
+						exit_flag = 1;
+						perror("[streamfile]: write");
+						goto terminate_thread;
 					}
-
-				all_bytes_written:
-					fdatasync(fd2);
-
-					remfile -= (unsigned long long)readsize;
-					if (!silent) filesize2 += (unsigned long long)readsize;
+				}
+				else
+				{
+					ringbuffer_read_advance(ringbuf, written);
+					
+					if (vec[0].len == written)
+					{
+						if (vec[1].len == 0)
+						{
+							goto all_bytes_written;
+						}
+						
+						vec[0] = vec[1];
+						vec[1].len = 0;
+					}
+					else
+					{
+						vec[0].len -= written;
+						vec[0].buf += written;
+					}
 				}
 			}
-			else
+
+		all_bytes_written:
+			fdatasync(fd2);
+			
+			remfile -= (unsigned long long)readsize;
+			if (!silent)
 			{
-				perror ("[streamfile]: poll");	
-				if (exit_flag)
-					goto terminate_thread;
+				filesize2 += (unsigned long long)readsize;
+			
+				if ((time(NULL) - timer1) > 10)
+				{
+					bitrate = (filesize2 / (time(NULL) - timer1) * 8);
+					printf("Datarate %d bits/sec, %d Kbits/sec, max. rb used %d bytes\n"
+					       , (int)bitrate, (int)bitrate/1024, maxreadsize);
+					filesize2 = 0;
+					timer1 = time(NULL);
+				}
 			}
-
-			if ((!silent)&&(time(NULL) - timer1) > 10) {
-				bitrate = (filesize2 / (time(NULL) - timer1) * 8);
-				printf("Datarate %d bits/sec, %d Kbits/sec, max. rb used %d bytes\n"
-					, (int)bitrate, (int)bitrate/1024, maxreadsize);
-				filesize2 = 0;
-				timer1 = time(NULL);
-			}
-
 		}
 		else
 		{
