@@ -139,7 +139,6 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 			p.setForegroundColor(gColor(0x13^i));
 			p.renderText(x, "Hello world dies ist ein ganz langer text der auf den screen gepinselt wird du lieber mensch bla keine ahnung hallo was soll das");
 		}
-		
 	}
 
 	focus = 0;
@@ -182,9 +181,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 		msg.hide();
 	}
 	else
-	{
 		bootcount++;
-	}
 
 	eDVB::getInstance()->config.setKey("/elitedvb/system/bootCount", bootcount);
 
@@ -196,7 +193,6 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 			eDVB::getInstance()->switchService(t);
 		}
 	}
-
 	init->setRunlevel(10);
 }
 

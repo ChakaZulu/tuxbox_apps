@@ -69,49 +69,54 @@ gImage *loadPNG(const char *filename)
 	
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, 0, 0, 0);
 	
-//	qDebug("loaded %dx%dx%d png, %d", (int)width, (int)height, (int)bit_depth, color_type);
-	res=new gImage(eSize(width, height), bit_depth);
+	qDebug("%s: %dx%dx%d png, %d", filename, (int)width, (int)height, (int)bit_depth, color_type);
 	
-	png_bytep *rowptr=new png_bytep[height];
-	
-	for (unsigned int i=0; i<height; i++)
-		rowptr[i]=((png_byte*)(res->data))+i*res->stride;
-	png_read_rows(png_ptr, rowptr, 0, height);
-	
-	delete rowptr;
-	
-	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_PLTE))
+	if (color_type != 6)
 	{
-		png_color *palette;
-		int num_palette;
-		png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
-		if (num_palette)
-			res->clut=new gRGB[num_palette];
-		else
-			res->clut=0;
-		res->colors=num_palette;
-		
-		for (int i=0; i<num_palette; i++)
+		res=new gImage(eSize(width, height), bit_depth);
+	
+		png_bytep *rowptr=new png_bytep[height];
+	
+		for (unsigned int i=0; i<height; i++)
+			rowptr[i]=((png_byte*)(res->data))+i*res->stride;
+		png_read_rows(png_ptr, rowptr, 0, height);
+	
+		delete rowptr;
+	
+		if (png_get_valid(png_ptr, info_ptr, PNG_INFO_PLTE))
 		{
-			res->clut[i].a=0;
-			res->clut[i].r=palette[i].red;
-			res->clut[i].g=palette[i].green;
-			res->clut[i].b=palette[i].blue;
-		}
-		if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
-		{
-			png_byte *trans;
-			png_get_tRNS(png_ptr, info_ptr, &trans, &num_palette, 0);
+			png_color *palette;
+			int num_palette;
+			png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
+			if (num_palette)
+				res->clut=new gRGB[num_palette];
+			else
+				res->clut=0;
+			res->colors=num_palette;
+			
 			for (int i=0; i<num_palette; i++)
-				res->clut[i].a=255-trans[i];
+			{
+				res->clut[i].a=0;
+				res->clut[i].r=palette[i].red;
+				res->clut[i].g=palette[i].green;
+				res->clut[i].b=palette[i].blue;
+			}
+			if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
+			{
+				png_byte *trans;
+				png_get_tRNS(png_ptr, info_ptr, &trans, &num_palette, 0);
+				for (int i=0; i<num_palette; i++)
+					res->clut[i].a=255-trans[i];
+			}
+		} else
+		{
+			res->clut=0;
+			res->colors=0;
 		}
+		png_read_end(png_ptr, end_info);
 	} else
-	{
-		res->clut=0;
-		res->colors=0;
-	}
-	
-	png_read_end(png_ptr, end_info);
+		res=0;
+
 	png_destroy_read_struct(&png_ptr, &info_ptr,&end_info);
 	fclose(fp);
 	return res;
