@@ -327,7 +327,9 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	eString directory = pos ? filename.substr(0, pos) : "/";
 	eDebug("---directory: %s", directory.c_str());
 	slideshowList.clear();
-	listDirectory(directory, 0);
+	int includesubdirs = 0;
+	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
+	listDirectory(directory, includesubdirs);
 	for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
 	{
 		eString tmp = *myIt;
@@ -385,22 +387,11 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			else
 			if (evt.action == &i_shortcutActions->yellow)
 			{
-				if (slideshowPaused)
-				{
-					nextPicture();
-					slideshowTimeout();
-					slideshowPaused = false;
-				}
-				else
-				{
-					slideshowTimer.stop();
-					previousPicture();
-					slideshowPaused = true;
-				}
+				slideshowTimer.stop();
+				previousPicture();
 			}
 			if (evt.action == &i_shortcutActions->green)
 			{
-				slideshowPaused = false;
 				nextPicture();
 				slideshowTimeout();
 			}
@@ -473,7 +464,7 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 					    filename.right(4).upper() == ".BMP" ||
 					    filename.right(4).upper() == ".GIF")
 					{
-						eDebug("[PICTUREVIEWER] ShowSlideshow: adding %s", filename.c_str());
+						eDebug("[PICTUREVIEWER] listDirectory: adding %s", filename.c_str());
 						eString tmp = directory + "/" + filename;
 						slideshowList.push_back(tmp);
 					}
@@ -487,51 +478,6 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 		}
 		closedir(d);
 	}
-}
-
-bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
-{
-	eDebug("Show Slideshow { %s", filename.c_str());
-	slideshowPaused = false;
-
-	int includesubdirs = 1;
-	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
-
-	// gen pic list for slideshow
-	int pos = filename.find_last_of("/");
-	if (pos == -1)
-		pos = filename.length() - 1;
-	eString directory = pos ? filename.substr(0, pos) : "/";
-	eDebug("---directory: %s", directory.c_str());
-	slideshowList.clear();
-	listDirectory(directory, includesubdirs);
-	if (!slideshowList.empty())
-	{
-		int sortpictures = 1;
-		eConfig::getInstance()->getKey("/picviewer/sortpictures", sortpictures);
-		if (sortpictures == 1)
-			slideshowList.sort();
-
-		int startwithselectedpic = 1;
-		eConfig::getInstance()->getKey("/picviewer/startwithselectedpic", startwithselectedpic);
-		if (startwithselectedpic == 1)
-		{
-			for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
-			{
-				eString tmp = *myIt;
-				eDebug("[PICTUREVIEWER] comparing: %s:%s", tmp.c_str(), filename.c_str());
-				if (tmp == filename)
-					break;
-			}
-		}
-		else
-			myIt = slideshowList.begin();
-
-		slideshowTimer.stop();
-		slideshowTimeout();
-	}
-	eDebug("Show Slideshow }");
-	return true;
 }
 
 bool ePictureViewer::DisplayNextImage()

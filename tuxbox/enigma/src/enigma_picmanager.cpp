@@ -15,12 +15,6 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 {
 	int slideshowtimeout = 5;
 	eConfig::getInstance()->getKey("/picviewer/slideshowtimeout", slideshowtimeout);
-	int sortpictures = 1;
-	eConfig::getInstance()->getKey("/picviewer/sortpictures", sortpictures);
-	int wraparound = 1;
-	eConfig::getInstance()->getKey("/picviewer/wraparound", wraparound);
-	int startwithselectedpic = 0;
-	eConfig::getInstance()->getKey("/picviewer/startwithselectedpic", startwithselectedpic);
 	int includesubdirs = 0;
 	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
 	int showbusysign = 0;
@@ -30,7 +24,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
 
-	setText(_("Slide Viewer Settings"));
+	setText(_("Slide Viewer (1.5)"));
 	cmove(ePoint(100, 80));
 
 	int y = 10, dy = 35, h = fd + 6;
@@ -54,30 +48,6 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	}
 	timeout->setCurrent(entries[slideshowtimeout - 1]);
 	timeout->setHelpText(_("Select slideshow timeout (left, right)"));
-
-	y += dy;
-
-	sort = new eCheckbox(this, sortpictures, 1);
-	sort->setText(_("Sort slides"));
-	sort->move(ePoint(10, y));
-	sort->resize(eSize(300, h));
-	sort->setHelpText(_("Sort slides alphabetically"));
-
-	y += dy;
-
-	wrap = new eCheckbox(this, wraparound, 1);
-	wrap->setText(_("Wrap around"));
-	wrap->move(ePoint(10, y));
-	wrap->resize(eSize(300, h));
-	wrap->setHelpText(_("Wrap around at end of slideshow"));
-
-	y += dy;
-
-	start = new eCheckbox(this, startwithselectedpic, 1);
-	start->setText(_("Start with selected slide"));
-	start->move(ePoint(10, y));
-	start->resize(eSize(300, h));
-	start->setHelpText(_("Start slideshow with selected slide"));
 
 	y += dy;
 
@@ -146,9 +116,6 @@ void ePicViewerSettings::fieldSelected(int *number)
 void ePicViewerSettings::okPressed()
 {
 	eConfig::getInstance()->setKey("/picviewer/slideshowtimeout", atoi(((eString *)timeout->getCurrent()->getKey())->c_str()));
-	eConfig::getInstance()->setKey("/picviewer/sortpictures", (int)sort->isChecked());
-	eConfig::getInstance()->setKey("/picviewer/wraparound", (int)wrap->isChecked());
-	eConfig::getInstance()->setKey("/picviewer/startwithselectedpic", (int)start->isChecked());
 	eConfig::getInstance()->setKey("/picviewer/includesubdirs", (int)subdirs->isChecked());
 	eConfig::getInstance()->setKey("/picviewer/showbusysign", (int)busy->isChecked());
 	eConfig::getInstance()->setKey("/picviewer/format169", (int)format_169->isChecked());

@@ -31,7 +31,6 @@ class ePictureViewer: public eWidget
 	void nextPicture();
 	void previousPicture();
 	bool showBusySign;
-	bool slideshowPaused;
 	bool switchto43;
 	int format169;
 public:
@@ -46,7 +45,6 @@ public:
 	};
 
 	bool ShowImage(const std::string& filename, bool unscaled = false);
-	bool ShowSlideshow(const std::string& filename, bool unscaled = false);
 	bool DecodeImage(const std::string& name, bool unscaled = false);
 	bool DisplayNextImage();
 	void SetScaling(ScalingMode s) {m_scaling = s;}

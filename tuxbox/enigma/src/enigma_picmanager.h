@@ -12,7 +12,7 @@ private:
 
 	eButton *ok, *abort;
 	eStatusBar *statusbar;
-	eCheckbox *sort, *wrap, *start, *subdirs, *busy, *format_169;
+	eCheckbox *subdirs, *busy, *format_169;
 	eListBox<eListBoxEntryText> *timeout;
 
 	void fieldSelected(int *number);
