@@ -512,8 +512,9 @@ int main ()
    pthread_t TcpReceiverThread;
    //pthread_attr_t ThreadAttr;
    //struct sched_param SchedParam;
- 
-   int RetVal, i;
+   CZapitClient zapit;
+
+   int RetVal, i, avia_mode;
    unsigned u, v;
 
    mainProcessID = getpid();
@@ -568,10 +569,14 @@ int main ()
       exit(-1);
    }
 
-	
+   avia_mode = zapit.PlaybackState();
+   if (avia_mode > -1 && avia_mode != TSMode) {
+      TSMode = (avia_mode == 1 ? 1 : 0);
+      printf("INFO: forced %s-Mode\n", (TSMode == 1 ? "TS" : "PES"));
+   }
+
    StreamNum = 0;
    if ( Bouquet != 0 ) {
-   	CZapitClient zapit;
       // Programm umschalten
       CZapitClient::responseGetPIDs pids;
  
