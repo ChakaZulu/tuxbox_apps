@@ -35,16 +35,16 @@ void eStreamWatchdog::checkstate()
 	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
 	{
-	    char buffer[100];
-	    int aspect=0;
-	    while (fgets(buffer, 100, bitstream))
-	    {
-	    	if (!strncmp(buffer, "A_RATIO: ", 9))
-	    		aspect=atoi(buffer+9);
-	    }
-	    fclose(bitstream);
-	    switch (aspect)
-	    {
+		char buffer[100];
+		int aspect=0;
+		while (fgets(buffer, 100, bitstream))
+		{
+			if (!strncmp(buffer, "A_RATIO: ", 9))
+				aspect=atoi(buffer+9);
+		}
+		fclose(bitstream);
+		switch (aspect)
+		{
 		case 1:
 		case 2:
 			isanamorph=0;
@@ -52,58 +52,52 @@ void eStreamWatchdog::checkstate()
 		case 3:
 		case 4:
 			isanamorph=1;
-	    }
+		}
 	}
-
+	
 	if (last != isanamorph)
 	{
-	    emit AspectRatioChanged(isanamorph);
-	    
-	    if (last == -1)
-	    {
-		last=isanamorph;	
-		return;
-	    }
-	    else
-	        last=isanamorph;
-
-	    int fd;
-	    if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
-	    {
-  		perror("open");
-		return;
-	    }
-    
-	    int videoDisplayFormat=VIDEO_LETTER_BOX;
-	    int doanamorph=0;
-    
-	    unsigned int pin8;
-	    eDVB::getInstance()->config.getKey("/elitedvb/video/pin8", pin8);
-    
-	    switch (pin8)
-	    {
-		case 0:
-   		    doanamorph=0;
-   		    videoDisplayFormat=VIDEO_LETTER_BOX;
-   		break;
-   		case 1:
-   		    doanamorph=0;
-   		    videoDisplayFormat=VIDEO_PAN_SCAN;
-   		break;
-		case 2:
-   		    doanamorph=isanamorph;
-   		    videoDisplayFormat=VIDEO_CENTER_CUT_OUT;
-   		break;
-	    }
+		emit AspectRatioChanged(isanamorph);
 		
-	    if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
-	    {
-    		perror("VIDEO SET DISPLAY FORMAT:");
-    		 return;
- 	    }
-	    close(fd);
-    
-	    eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
+		last=isanamorph;
+
+		int fd;
+		if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
+		{
+			perror("open");
+			return;
+		}
+
+		int videoDisplayFormat=VIDEO_LETTER_BOX;
+		int doanamorph=0;
+	
+		unsigned int pin8;
+		eDVB::getInstance()->config.getKey("/elitedvb/video/pin8", pin8);
+	
+		switch (pin8)
+		{
+		case 0:
+			doanamorph=0;
+			videoDisplayFormat=VIDEO_LETTER_BOX;
+			break;
+	 	case 1:
+			doanamorph=0;
+			videoDisplayFormat=VIDEO_PAN_SCAN;
+	 		break;
+		case 2:
+			doanamorph=isanamorph;
+			videoDisplayFormat=VIDEO_CENTER_CUT_OUT;
+	 		break;
+		}
+		
+		if (ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
+		{
+			perror("VIDEO SET DISPLAY FORMAT:");
+			return;
+ 		}
+		close(fd);
+	
+		eAVSwitch::getInstance()->setAspectRatio(doanamorph?r169:r43);
 	}
 }
 
