@@ -202,34 +202,41 @@ const char *eRCKeyDBoxOld::getDescription() const
 
 int eRCKeyDBoxOld::getCompatibleCode() const
 {
-	switch (code&0xFF)
+	if ((code&0xFF00)==0x5C00)
 	{
-		case 0: return eRCInput::RC_0;
-		case 1: return eRCInput::RC_1;
-    case 2: return eRCInput::RC_2;
-		case 3: return eRCInput::RC_3;
-		case 4: return eRCInput::RC_4;
-		case 5: return eRCInput::RC_5;
-		case 6: return eRCInput::RC_6;
-		case 7: return eRCInput::RC_7;
-		case 8: return eRCInput::RC_8;
-		case 9: return eRCInput::RC_9;
-		case 10: return eRCInput::RC_RIGHT;
-		case 11: return eRCInput::RC_LEFT;
-		case 12: return eRCInput::RC_UP;
-		case 13: return eRCInput::RC_DOWN;
-		case 14: return eRCInput::RC_OK;
-		case 15: return eRCInput::RC_MUTE;
-		case 16: return eRCInput::RC_STANDBY;
-		case 17: return eRCInput::RC_GREEN;
-		case 18: return eRCInput::RC_YELLOW;
-		case 19: return eRCInput::RC_RED;
-		case 20: return eRCInput::RC_BLUE;
-		case 22: return eRCInput::RC_MINUS;
-		case 21: return eRCInput::RC_PLUS;
-		case 23: return eRCInput::RC_HELP;
-		case 24: return eRCInput::RC_DBOX;
-		case 31: return eRCInput::RC_HOME;
+		switch (code&0xFF)
+		{
+		case 0x0C: return eRCInput::RC_STANDBY;
+		case 0x20: return eRCInput::RC_HOME;
+		case 0x27: return eRCInput::RC_DBOX;
+		case 0x00: return eRCInput::RC_0;
+		case 0x01: return eRCInput::RC_1;
+		case 0x02: return eRCInput::RC_2;
+		case 0x03: return eRCInput::RC_3;
+		case 0x04: return eRCInput::RC_4;
+		case 0x05: return eRCInput::RC_5;
+		case 0x06: return eRCInput::RC_6;
+		case 0x07: return eRCInput::RC_7;
+		case 0x08: return eRCInput::RC_8;
+		case 0x09: return eRCInput::RC_9;
+		case 0x3B: return eRCInput::RC_BLUE;
+		case 0x52: return eRCInput::RC_YELLOW;
+		case 0x55: return eRCInput::RC_GREEN;
+		case 0x2D: return eRCInput::RC_RED;
+		case 0x54: return eRCInput::RC_UP_LEFT;
+		case 0x53: return eRCInput::RC_DOWN_LEFT;
+		case 0x0E: return eRCInput::RC_UP;
+ 		case 0x0F: return eRCInput::RC_DOWN;
+		case 0x2F: return eRCInput::RC_LEFT;
+ 		case 0x2E: return eRCInput::RC_RIGHT;
+		case 0x30: return eRCInput::RC_OK;
+ 		case 0x16: return eRCInput::RC_PLUS;
+ 		case 0x17: return eRCInput::RC_MINUS;
+ 		case 0x28: return eRCInput::RC_MUTE;
+ 		case 0x82: return eRCInput::RC_HELP;
+		default:
+			return -1;
+		}
 	}
 	return -1;
 }
@@ -273,7 +280,36 @@ const char *eRCKeyDBoxNew::getDescription() const
 
 int eRCKeyDBoxNew::getCompatibleCode() const
 {
-	return code;
+	switch (code&0xFF)
+	{
+		case 0: return eRCInput::RC_0;
+		case 1: return eRCInput::RC_1;
+    case 2: return eRCInput::RC_2;
+		case 3: return eRCInput::RC_3;
+		case 4: return eRCInput::RC_4;
+		case 5: return eRCInput::RC_5;
+		case 6: return eRCInput::RC_6;
+		case 7: return eRCInput::RC_7;
+		case 8: return eRCInput::RC_8;
+		case 9: return eRCInput::RC_9;
+		case 10: return eRCInput::RC_RIGHT;
+		case 11: return eRCInput::RC_LEFT;
+		case 12: return eRCInput::RC_UP;
+		case 13: return eRCInput::RC_DOWN;
+		case 14: return eRCInput::RC_OK;
+		case 15: return eRCInput::RC_MUTE;
+		case 16: return eRCInput::RC_STANDBY;
+		case 17: return eRCInput::RC_GREEN;
+		case 18: return eRCInput::RC_YELLOW;
+		case 19: return eRCInput::RC_RED;
+		case 20: return eRCInput::RC_BLUE;
+		case 22: return eRCInput::RC_MINUS;
+		case 21: return eRCInput::RC_PLUS;
+		case 23: return eRCInput::RC_HELP;
+		case 24: return eRCInput::RC_DBOX;
+		case 31: return eRCInput::RC_HOME;
+	}
+	return -1;
 }
 
 const char *eRCKeyDBoxButton::getDescription() const

@@ -29,7 +29,6 @@ public:
 	void handleCode(int code);
 	eRCDeviceDBoxNew(eRCDriver *driver);
 	const char *getDescription() const;
-	int getCompatibleCode() const;
 };
 
 class eRCDeviceDBoxButton: public eRCDevice
