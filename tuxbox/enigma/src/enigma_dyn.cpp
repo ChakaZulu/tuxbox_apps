@@ -2613,7 +2613,7 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
 }
 
-#if 0
+
 static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result;
@@ -2671,7 +2671,6 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	eEPGCache::getInstance()->Unlock();
 	return result;
 }
-#endif
 
 #define CHANNELWIDTH 200
 
@@ -2913,6 +2912,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	result << std::setfill('0');
 
 	eService* current;
+	eServiceReference ref;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
@@ -2922,7 +2922,10 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	if (!sapi)
 		return "No EPG available";
 
-	eServiceReference ref = (serviceRef == "undefined") ? sapi->service : string2ref(serviceRef);
+	if (opts.find("ref") == eString::npos)
+		ref = sapi->service;
+	else
+		ref = string2ref(serviceRef);
 
 	eDebug("[ENIGMA_DYN] getcurepg2: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
 
@@ -4544,7 +4547,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
 	dyn_resolver->addDyn("GET", "/blank", blank, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg2, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2, lockWeb);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo, lockWeb);
