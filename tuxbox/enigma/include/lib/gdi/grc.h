@@ -1,8 +1,6 @@
 #ifndef __grc_h
 #define __grc_h
 
-#define GRC_USE_LOCKS
-
 /*
 	gPainter ist die high-level version. die highlevel daten werden zu low level opcodes ueber
 	die gRC-queue geschickt und landen beim gDC der hardwarespezifisch ist, meist aber auf einen
@@ -101,44 +99,24 @@ struct gOpcode
 	int flags;
 	
 	gDC *dc;
-
-#ifdef GRC_USE_LOCKS	
-	pthread_mutex_t mutex, free;
-	/*
-					free  	mutex
-	free    unlock 	lock				// item is free to use
-	ac.     lock    lock				// filling with data
-	ready   lock    unlock			// ready for processing
-	busy    lock    lock				// is processing
-	
-	special handling for "begin"/"flush" opcode:
-		opcode will be locked (lock/lock) until next flush (or end).
-	*/
-#endif
 };
 
 
 class gRC
 {
-	gOpcode *opcode;
-	int opcodes;
-	int ptr;
 	static gRC *instance;
 	
 	static void *thread_wrapper(void *ptr);
 	pthread_t the_thread;
 	void *thread();
 	
+	int fd[2];
+	
 public:
 	gRC();
 	virtual ~gRC();
 
-#ifdef GRC_USE_LOCKS
-	gOpcode *alloc(gDC *dc);
-	void flushall(gDC *dc);
-#else
-	void submit(gOpcode *opcode);
-#endif
+	void submit(const gOpcode &opcode);
 	static gRC &getInstance();
 };
 

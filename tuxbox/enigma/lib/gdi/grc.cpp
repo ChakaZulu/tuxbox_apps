@@ -18,81 +18,36 @@ gRC::gRC()
 {
 	ASSERT(!instance);
 	instance=this;
-	opcodes=1024;
-	opcode=new gOpcode[opcodes];
-	for (int i=0; i<opcodes; i++)
+	if (pipe(fd)<0)
 	{
-		pthread_mutex_init(&opcode[i].mutex, 0);
-		pthread_mutex_lock(&opcode[i].mutex);
-		pthread_mutex_init(&opcode[i].free, 0);
-	}
-	ptr=0;
+		perror("pipe");
+	}	
 	pthread_create(&the_thread, 0, thread_wrapper, this);
 }
 
 gRC::~gRC()
 {
-	gOpcode *o=alloc(0);
-	o->opcode=gOpcode::shutdown;
-	pthread_mutex_unlock(&o->mutex);
-	pthread_mutex_lock(&o->free);
-	for (int i=0; i<opcodes; i++)
-	{
-		pthread_mutex_destroy(&opcode[i].mutex);
-		pthread_mutex_destroy(&opcode[i].free);
-	}
-	delete[] opcode;
+	gOpcode o;
+	o.dc=0;
+	o.opcode=gOpcode::shutdown;
+	submit(o);
+	close(fd[1]);
 	instance=0;
 }
-
-gOpcode *gRC::alloc(gDC *dc)
-{
-	gOpcode *oc=opcode+ptr;
-	pthread_mutex_lock(&oc->free);
-	ptr++;
-	if (ptr>=opcodes)
-		ptr=0;
-	oc->dc=dc;
-	return oc;
-}
-
-void gRC::flushall(gDC *dc)
-{
-	int mptr=ptr;
-	while (1)
-	{
-		if (opcode[mptr].dc==dc)
-		{
-			pthread_mutex_lock(&opcode[mptr].free);
-			pthread_mutex_unlock(&opcode[mptr].free);
-		}
-		mptr++;
-		if (mptr>=opcodes)
-			mptr=0;
-		if (mptr==ptr)
-			break;
-	}
-}
-
 
 void *gRC::thread()
 {
 	int rptr=0;
+	gOpcode o;
 	while (1)
 	{
-		gOpcode *o=opcode+rptr;
-		pthread_mutex_lock(&o->mutex);
-		
-		if (o->opcode==gOpcode::shutdown)
+		read(fd[0], &o, sizeof(o));
+		if (o.opcode==gOpcode::shutdown)
 		{
-			pthread_mutex_unlock(&o->free);
+			close(fd[0]);
 			break;
 		}
-		o->dc->exec(o);
-
-		rptr++;
-		if (rptr>=opcodes)
-			rptr=0;
+		o.dc->exec(&o);
 	}
 	pthread_exit(0);
 }
@@ -100,6 +55,11 @@ void *gRC::thread()
 gRC &gRC::getInstance()
 {
 	return *instance;
+}
+
+void gRC::submit(const gOpcode &o)
+{
+	write(fd[1], &o, sizeof(o));
 }
 
 static int gPainter_instances;
@@ -121,15 +81,15 @@ gPainter::~gPainter()
 
 void gPainter::begin(const QRect &rect)
 {
+	gOpcode o;
 	dc.lock();
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::begin;
-	o->parm.begin.area=new QRect(rect);
+	o.dc=&dc;
+	o.opcode=gOpcode::begin;
+	o.parm.begin.area=new QRect(rect);
 	
 	cliparea=rect;
 	setLogicalZero(cliparea.topLeft());
-	pthread_mutex_unlock(&o->mutex);
-// beginptr=o;
+	rc.submit(o);
 }
 
 void gPainter::setBackgroundColor(const gColor &color)
@@ -152,84 +112,92 @@ void gPainter::renderText(const QRect &pos, const QString &string, int flags)
 	QRect area=pos;
 	area.moveBy(logicalZero.x(), logicalZero.y());
 
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::renderText;
-	o->parm.renderText.text=new QString(string);
-	o->parm.renderText.area=new QRect(area);
-	o->parm.renderText.font=new gFont(font);
-	o->flags=flags;
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::renderText;
+	o.parm.renderText.text=new QString(string);
+	o.parm.renderText.area=new QRect(area);
+	o.parm.renderText.font=new gFont(font);
+	o.flags=flags;
+	rc.submit(o);
 }
 
 void gPainter::renderPara(eTextPara &para)
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::renderPara;
-	o->parm.renderPara.textpara=para.grab();
-	o->parm.renderPara.offset=new QPoint(logicalZero);
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::renderPara;
+	o.parm.renderPara.textpara=para.grab();
+	o.parm.renderPara.offset=new QPoint(logicalZero);
+	rc.submit(o);
 }
 
 void gPainter::fill(const QRect &area)
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::fill;
-	o->parm.fill.area=new QRect(area);
-	o->parm.fill.area->moveBy(logicalZero.x(), logicalZero.y());
-	(*o->parm.fill.area)&=cliparea;
-	o->parm.fill.color=new gColor(foregroundColor);
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::fill;
+	o.parm.fill.area=new QRect(area);
+	o.parm.fill.area->moveBy(logicalZero.x(), logicalZero.y());
+	(*o.parm.fill.area)&=cliparea;
+	o.parm.fill.color=new gColor(foregroundColor);
+	rc.submit(o);
 }
 
 void gPainter::blit(gPixmap &pixmap, QPoint pos, QRect clip)
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::blit;
-	o->parm.blit.position=new QPoint(pos);
-	(*o->parm.blit.position)+=logicalZero;
-	o->parm.blit.clip=new QRect(clip);
-	(*o->parm.blit.clip).moveBy(logicalZero.x(), logicalZero.y());
-	o->parm.blit.pixmap=pixmap.lock();
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::blit;
+	o.parm.blit.position=new QPoint(pos);
+	(*o.parm.blit.position)+=logicalZero;
+	o.parm.blit.clip=new QRect(clip);
+	(*o.parm.blit.clip).moveBy(logicalZero.x(), logicalZero.y());
+	o.parm.blit.pixmap=pixmap.lock();
+	rc.submit(o);
 }
 
 void gPainter::clear()
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::fill;
-	o->parm.fill.area=new QRect(cliparea);
-	o->parm.fill.color=new gColor(backgroundColor);
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::fill;
+	o.parm.fill.area=new QRect(cliparea);
+	o.parm.fill.color=new gColor(backgroundColor);
+	rc.submit(o);
 }
 
 void gPainter::setPalette(gRGB *colors, int start=0, int len=256)
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::setPalette;
-	o->parm.setPalette.palette=new gPalette;
-	o->parm.setPalette.palette->data=new gRGB[len];
-	memcpy(o->parm.setPalette.palette->data, colors, len*sizeof(gRGB));
-	o->parm.setPalette.palette->start=start;
-	o->parm.setPalette.palette->len=len;
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::setPalette;
+	o.parm.setPalette.palette=new gPalette;
+	o.parm.setPalette.palette->data=new gRGB[len];
+	memcpy(o.parm.setPalette.palette->data, colors, len*sizeof(gRGB));
+	o.parm.setPalette.palette->start=start;
+	o.parm.setPalette.palette->len=len;
+	rc.submit(o);
 }
 
 void gPainter::mergePalette(gPixmap &target)
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::mergePalette;
-	o->parm.mergePalette.target=target.lock();
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::mergePalette;
+	o.parm.mergePalette.target=target.lock();
+	rc.submit(o);
 }
 
 void gPainter::line(QPoint start, QPoint end)
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::line;
-	o->parm.line.start=new QPoint(start+logicalZero);
-	o->parm.line.end=new QPoint(end+logicalZero);
-	o->parm.line.color=new gColor(foregroundColor);
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::line;
+	o.parm.line.start=new QPoint(start+logicalZero);
+	o.parm.line.end=new QPoint(end+logicalZero);
+	o.parm.line.color=new gColor(foregroundColor);
+	rc.submit(o);
 }
 
 void gPainter::setLogicalZero(QPoint rel)
@@ -250,37 +218,29 @@ void gPainter::resetLogicalZero()
 
 void gPainter::clip(QRect clip)
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::clip;
-	o->parm.clip.clip=new QRect(clip);
-	o->parm.clip.clip->moveBy(logicalZero.x(), logicalZero.y());
-	cliparea&=*o->parm.clip.clip;
-	pthread_mutex_unlock(&o->mutex);
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::clip;
+	o.parm.clip.clip=new QRect(clip);
+	o.parm.clip.clip->moveBy(logicalZero.x(), logicalZero.y());
+	cliparea&=*o.parm.clip.clip;
+	rc.submit(o);
 }
 
 void gPainter::flush()
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::flush;
-	pthread_mutex_unlock(&o->mutex);
-#ifdef SYNC_PAINT
-	pthread_mutex_lock(&o->free);
-	pthread_mutex_unlock(&o->free);
-#endif
-//	pthread_mutex_unlock(&beginptr->mutex);
-//	beginptr=o;
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::flush;
+	rc.submit(o);
 }
 
 void gPainter::end()
 {
-	gOpcode *o=rc.alloc(&dc);
-	o->opcode=gOpcode::end;
-	pthread_mutex_unlock(&o->mutex);
-//	pthread_mutex_unlock(&beginptr->mutex);
-#ifdef SYNC_PAINT
-	pthread_mutex_lock(&o->free);
-	pthread_mutex_unlock(&o->free);
-#endif
+	gOpcode o;
+	o.dc=&dc;
+	o.opcode=gOpcode::end;
+	rc.submit(o);
 }
 
 gDC::~gDC()
@@ -375,7 +335,6 @@ void gPixmapDC::exec(gOpcode *o)
 	default:
 		qFatal("illegal opcode %d. expect memory leak!", o->opcode);
 	}
-	pthread_mutex_unlock(&o->free);
 }
 
 eAutoInitP0<gRC, 1> init_grc("gRC");
