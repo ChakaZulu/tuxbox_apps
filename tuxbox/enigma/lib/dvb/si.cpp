@@ -474,7 +474,7 @@ eString StreamIdentifierDescriptor::toString()
 CADescriptor::CADescriptor(ca_descr_t *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
-	if ( (len-2) > 0 )
+	if ( len > 0 )
 	{
 		data=new __u8[len];
 		memcpy(data, descr, len);
