@@ -1,3 +1,13 @@
+function fertig()
+{
+	for (i=channels.achannels.length-1; i >= 0 ; i--) {
+		if (channels.achannels.options[i].selected==true) {
+			channels.achannels.options[i] = null;
+		}
+	}
+	channels.submit();
+}
+
 function movechannels(source, destination)
 {
 	for (i=0; i < source.length; i++) {
