@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmail.c,v $
+ * Revision 1.6  2004/04/14 17:05:10  metallica
+ *  fix: seg fault
+ *
  * Revision 1.5  2003/06/24 07:19:35  alexw
  * bugfix & cleanup
  *
@@ -388,7 +391,7 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 			return 0;
 		}
 
-		if((error = FTC_SBitCache_Lookup(cache, &desc, glyphindex, &sbit, &anode)))
+		if( FTC_SBitCache_Lookup(cache, &desc, glyphindex, &sbit, &anode))
 		{
 			printf("TuxMail <FTC_SBitCache_Lookup for Char \"%c\" failed with Errorcode 0x%.2X>\n", (int)currentchar, error);
 			return 0;
@@ -837,7 +840,7 @@ int Add2SpamList(int account, int mailindex)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.5 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.6 $", versioninfo[12];
 	int loop, account, mailindex;
 	FILE *fd_run;
 
@@ -895,14 +898,14 @@ void plugin_exec(PluginParam *par)
 
 	//init fontlibrary
 
-		if((error = FT_Init_FreeType(&library)))
+		if(FT_Init_FreeType(&library))
 		{
 			printf("TuxMail <FT_Init_FreeType failed with Errorcode 0x%.2X>", error);
 			munmap(lfb, fix_screeninfo.smem_len);
 			return;
 		}
 
-		if((error = FTC_Manager_New(library, 1, 2, 0, &MyFaceRequester, NULL, &manager)))
+		if(FTC_Manager_New(library, 1, 2, 0, &MyFaceRequester, NULL, &manager))
 		{
 			printf("TuxMail <FTC_Manager_New failed with Errorcode 0x%.2X>\n", error);
 			FT_Done_FreeType(library);
@@ -910,7 +913,7 @@ void plugin_exec(PluginParam *par)
 			return;
 		}
 
-		if((error = FTC_SBitCache_New(manager, &cache)))
+		if(FTC_SBitCache_New(manager, &cache))
 		{
 			printf("TuxMail <FTC_SBitCache_New failed with Errorcode 0x%.2X>\n", error);
 			FTC_Manager_Done(manager);
@@ -919,7 +922,7 @@ void plugin_exec(PluginParam *par)
 			return;
 		}
 
-		if((error = FTC_Manager_Lookup_Face(manager, FONT, &face)))
+		if(FTC_Manager_Lookup_Face(manager, FONT, &face))
 		{
 			printf("TuxMail <FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X>\n", error);
 			FTC_Manager_Done(manager);
