@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.312 2003/05/12 05:14:41 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.313 2003/05/22 12:27:08 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -90,6 +90,11 @@ enum {
 int currentMode;
 bool playbackStopForced = false;
 int debug = 0;
+
+int waitForMotor = 0;
+int motorRotationSpeed = 0; //in 0.1 degrees per second
+bool firstZapAfterBoot = true;
+diseqc_t diseqcType;
 
 /* near video on demand */
 tallchans nvodchannels;         //  tallchans defined in "bouquets.h"
@@ -212,12 +217,25 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 
 	stopPlayBack();
 	
-	/* position diseqc 1.2 motor if required */
-	if ((frontend->getDiseqcType() == DISEQC_1_2) && (channel->getSatellitePosition() != frontend->getCurrentSatellitePosition()))
+	/* have motor move satellite dish to satellite's position if necessary */
+	if ((diseqcType == DISEQC_1_2) && (motorPositions[channel->getSatelliteName()] != 0))
 	{
-		printf("[zapit] need to position satellite dish from satellite %d to %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
-		frontend->positionMotor(motorPositions[channel->getSatelliteName()]);
-		frontend->setCurrentSatellitePosition(channel->getSatellitePosition());
+		if (firstZapAfterBoot || (frontend->getCurrentSatellitePosition() != channel->getSatellitePosition()))
+		{
+			firstZapAfterBoot = false; //just send motor positioning command the first time after a boot to make sure motor is in right position
+			printf("[zapit] currentSatellitePosition = %d, satellitePosition = %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
+			printf("[zapit] motorPosition = %d\n", motorPositions[channel->getSatelliteName()]);
+			frontend->positionMotor(motorPositions[channel->getSatelliteName()]);
+		
+			if (!firstZapAfterBoot)
+			{
+				waitForMotor = abs(channel->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
+				printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
+				sleep(waitForMotor);
+			}
+		
+			frontend->setCurrentSatellitePosition(channel->getSatellitePosition());
+		}
 	}
 
 	/* if channel's transponder does not match the transponder tuned before ... */
@@ -752,6 +770,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		diseqc_t diseqc;
 		CBasicServer::receive_data(connfd, &diseqc, sizeof(diseqc));
 		frontend->setDiseqcType(diseqc);
+		diseqcType = diseqc;
 		DBG("set diseqc type %d", diseqc);
 		break;
 	}
@@ -1029,6 +1048,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::commandInt msg;
 		CBasicServer::receive_data(connfd, &msg, sizeof(msg));
 		select_nvod_subservice_num(msg.val);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SEND_MOTOR_COMMAND:
+	{
+		CZapitMessages::commandMotor msgMotor;
+		CBasicServer::receive_data(connfd, &msgMotor, sizeof(msgMotor));
+		printf("[zapit] received motor command: %x %x %x %x %x %x\n", msgMotor.cmdtype, msgMotor.address, msgMotor.cmd, msgMotor.num_parameters, msgMotor.param1, msgMotor.param2);
+		frontend->sendMotorCommand(msgMotor.cmdtype, msgMotor.address, msgMotor.cmd, msgMotor.num_parameters, msgMotor.param1, msgMotor.param2);
 		break;
 	}
 	
@@ -1365,8 +1393,10 @@ void leaveStandby(void)
 	}
 
 	frontend->setCurrentSatellitePosition(config.getInt32("lastSatellitePosition", 192));
-	frontend->setDiseqcType((diseqc_t) config.getInt32("diseqcType", NO_DISEQC));
 	frontend->setDiseqcRepeats(config.getInt32("diseqcRepeats", 0));
+	motorRotationSpeed = config.getInt32("motorRotationSpeed", 18); // default: 1.8 degrees per second
+	diseqcType = (diseqc_t)config.getInt32("diseqcType", NO_DISEQC);
+	frontend->setDiseqcType(diseqcType);
 
 	for (unsigned int i = 0; i < MAX_LNBS; i++) {
 		char tmp[16];
@@ -1455,7 +1485,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.312 2003/05/12 05:14:41 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.313 2003/05/22 12:27:08 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
