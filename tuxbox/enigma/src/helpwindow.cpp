@@ -50,8 +50,6 @@ eHelpWindow::eHelpWindow(ePtrList<eAction> &parseActionHelpList, int helpID):
 
 	const std::set<eString> styles=eActionMapList::getInstance()->getCurrentStyles();
 
-	int t = eSystemInfo::getInstance()->getHwType();
-
 	entryBeg.push_back(0);
 	int pageend=visible->height();
 
