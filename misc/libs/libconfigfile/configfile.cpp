@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.15 2003/01/17 16:07:10 obi Exp $
+ * $Id: configfile.cpp,v 1.16 2003/01/17 17:33:33 obi Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -163,7 +163,6 @@ int32_t CConfigFile::getInt32(const std::string key, const int32_t defaultVal)
 			storeInt32(key, defaultVal);
 		}
 		else {
-			std::cout << "returning defaultVal " << defaultVal << std::endl;
 			return defaultVal;
 		}
 	}
