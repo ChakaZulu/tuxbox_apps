@@ -62,10 +62,10 @@ int checkFile(char* filename, char* result)
 
 	for(count=0;count<anz;count++)
 	{
-		printf("%d: %s--%s\n", count, ucodes[count].md5, md5string);		
 		if( strcmp(ucodes[count].md5, md5string)==0)
 		{
-			 strcpy(result, ucodes[count].name);
+			strcpy(result, ucodes[count].name);
+			return 1;
 		}
 	}
 
