@@ -27,7 +27,6 @@ typedef unsigned char __u8;
 #include <ost/dmx.h>
 #include <ost/video.h>
 #include <ost/audio.h>
-//#define NEW_CAMD
 #else
 #include <xp/xp_osd_user.h>
 #include <vid/vid_inf.h>
@@ -86,11 +85,7 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 		close(2);
 #endif
 #ifdef USE_CAMD
-		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[4],
-#ifdef NEW_CAMD
-			descriptor, 
-#endif
-			0)<0)
+		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[4], descriptor, 0)<0)
 			perror("camd");
 #endif
 
