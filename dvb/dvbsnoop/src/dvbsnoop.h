@@ -1,16 +1,23 @@
 /*
-$Id: dvbsnoop.h,v 1.13 2003/11/01 17:05:46 rasc Exp $
+$Id: dvbsnoop.h,v 1.14 2003/11/07 16:33:31 rasc Exp $
 
 
- -- dvbsnoop
- -- a dvb sniffer and mpeg2 stream analyzer tool
- -- http://dvbsnoop.sourceforge.net/
+ DVBSNOOP
 
-   (c) rasc
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+
 
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.14  2003/11/07 16:33:31  rasc
+no message
+
 Revision 1.13  2003/11/01 17:05:46  rasc
 no message
 

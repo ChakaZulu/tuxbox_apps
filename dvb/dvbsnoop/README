@@ -3,17 +3,17 @@ dvbsnoop
 ========
 
 http://dvbsnoop.sourceforge.net/
+http://cvs.tuxbox.org/
 
 
-dvbsnoop is a DVB sniffer and monitor program to debug, dump
-or view dvb/mpeg/dsm-cc/MHP stream information (digital
-television) send via satellite, cable or terrestrial.
-Basically dvbsnoop is a simple DVB stream analyzer.
 
+dvbsnoop is a simple dvb / mpeg stream analyzer program.
+The program can be used to sniff, monitor, debug, dump
+or view dvb/mpeg/dsm-cc/MHP stream information (digital television)
+send via satellite, cable or terrestrial.
 
 The programm was mainly written to learn and understand the DVB 
-protocol structures and streams. This program is not performance
-optimized, but was itself part of the learning process... ;-)
+protocol structures and streams. This program is not performance optimized.
 
 
 
@@ -23,13 +23,11 @@ Important:
 
 
 Disclaimer:
-
   You are using this program at your own risk!
 
 
 
 License: 
-
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
@@ -54,15 +52,13 @@ includes also offers in online auctions...
 
 
 Keywords:
-   dvb stream analyze snoop sniffer dump mpeg mpeg2 descriptor
+   dvb mpeg stream analyzer snoop sniffer dump mpeg2 descriptor
    digital television satellite cable dvb-c dvb-s dvb-t TV
    MHP DSM-CC PES TOT PAT PMT SDT EIT NIT TDST RST SIT DIT
-   BAT EMM ECM sections
-   transport stream   packet elementary stream
-   DEMUX decode filter
-   GPL open source
+   BAT EMM ECM sections transport stream   packet elementary stream
+   DEMUX decode filter GPL open source
    
 
 
-Rainer Scherg
+(c) 2001-2003   Rainer.Scherg@gmx.de
 

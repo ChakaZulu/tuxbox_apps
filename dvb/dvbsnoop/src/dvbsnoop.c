@@ -1,19 +1,12 @@
 /*
-$Id: dvbsnoop.c,v 1.12 2003/11/01 21:40:26 rasc Exp $
-
-
+$Id: dvbsnoop.c,v 1.13 2003/11/07 16:33:31 rasc Exp $
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
  mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
 
- --> http://dvbsnoop.sourceforge.net/
-
- it's forbidden to use this program for hacking encryption
- information (like ECM/EMM streams to get extract keys, etc.).
-
- I also don't garantee, that data output is correct in any way.
+ http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
 
@@ -23,6 +16,9 @@ $Id: dvbsnoop.c,v 1.12 2003/11/01 21:40:26 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.13  2003/11/07 16:33:31  rasc
+no message
+
 Revision 1.12  2003/11/01 21:40:26  rasc
 some broadcast/linkage descriptor stuff
 

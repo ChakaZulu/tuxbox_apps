@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.22 2003/11/01 21:40:28 rasc Exp $
+$Id: dvb_str.c,v 1.23 2003/11/07 16:33:32 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.22 2003/11/01 21:40:28 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.23  2003/11/07 16:33:32  rasc
+no message
+
 Revision 1.22  2003/11/01 21:40:28  rasc
 some broadcast/linkage descriptor stuff
 
@@ -146,18 +149,21 @@ char *dvbstrTableID (u_int id)
 {
   STR_TABLE  TableIDs[] = {
 
+ 	// $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
+ 	// updated -- 2003-11-04
+	// ATSC Table IDs could be included...
      {  0x00, 0x00,  "program_association_section" },
      {  0x01, 0x01,  "conditional_access_section" },
      {  0x02, 0x02,  "program_map_section" },
      {  0x03, 0x03,  "transport_stream_description_section" },
- // $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
-      {  0x04, 0x39,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
-      {  0x3a, 0x3a,  "DSM-CC - LLCSNAP " },		/* $$$ ??? TODO */
-      {  0x3b, 0x3b,  "DSM-CC - DSI or DII (DownloadServerInitiate or -InfoIndication)" },
-      {  0x3c, 0x3c,  "DSM-CC - DDB (DownloadDataBlock)" },    /* TR 101 202 */
-      {  0x3d, 0x3d,  "DSM-CC - descriptorlist" },	/* $$$ ??? TODO */
+      {  0x04, 0x38,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+      {  0x39, 0x39,  "DSM-CC - addressable sections" },		/* $$$ ??? TODO */
+      {  0x3a, 0x3a,  "DSM-CC - multiprotocol encapsulated data" },		/* $$$ ??? TODO */
+      {  0x3b, 0x3b,  "DSM-CC - U-N messages (DSI or DII)" },
+      {  0x3c, 0x3c,  "DSM-CC - Download Data Messages (DDB)" },    /* TR 101 202 */
+      {  0x3d, 0x3d,  "DSM-CC - stream descriptorlist" },	/* $$$ ??? TODO */
       {  0x3e, 0x3e,  "DSM-CC - private data section (datagram)" },
-      {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
+      {  0x3f, 0x3f,  "DSM-CC - addressable sections" },
 
      {  0x40, 0x40,  "network_information_section - actual network" },
      {  0x41, 0x41,  "network_information_section - other network" },
@@ -182,7 +188,7 @@ char *dvbstrTableID (u_int id)
      {  0x75, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "discontinuity_information_section" },
      {  0x7F, 0x7F,  "selection_information_section" },
-     {  0x80, 0x8F,  "User private (EMM/ECM)" },   /* $$$ own definition! */
+     {  0x80, 0x8F,  "DVB CA message section (EMM/ECM)" },   /* ITU-R BT.1300 ref. */
      {  0x90, 0xFE,  "User private" },
      {  0xFF, 0xFF,  "forbidden" },
      {  0,0, NULL }
@@ -209,7 +215,7 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x05, 0x05,  "registration_descriptor" },
      {  0x06, 0x06,  "data_stream_alignment_descriptor" },
      {  0x07, 0x07,  "target_background_grid_descriptor" },
-     {  0x08, 0x08,  "videa_window_descriptor" },
+     {  0x08, 0x08,  "video_window_descriptor" },
      {  0x09, 0x09,  "CA_descriptor" },
      {  0x0A, 0x0A,  "ISO_639_language_descriptor" },
      {  0x0B, 0x0B,  "system_clock_descriptor" },
@@ -221,11 +227,16 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x11, 0x11,  "STD_descriptor" },
      {  0x12, 0x12,  "IBP_descriptor" },
           /* MPEG DSM-CC */
-     {  0x13, 0x13,  "Carousel_identifier_descriptor" },
-     {  0x14, 0x14,  "Association_tag_descriptor" },
-     {  0x15, 0x15,  "Deferred_association_tag_descriptor" },
-     	{  0x16, 0x1A,  "ISO/IEC13818-6 Reserved" },
-
+     {  0x13, 0x13,  "carousel_identifier_descriptor" },
+     {  0x14, 0x14,  "association_tag_descriptor" },
+     {  0x15, 0x15,  "deferred_association_tag_descriptor" },
+     {  0x16, 0x16,  "ISO/IEC13818-6 Reserved" },
+     /* $$$ TODO... vvvvvvv */
+     {  0x17, 0x17,  "NPT_reference_descriptor" },
+     {  0x18, 0x18,  "NPT_endpoint_descriptor" },
+     {  0x19, 0x19,  "stream_mode_descriptor" },
+     {  0x1A, 0x1A,  "stream_event_descriptor" },
+     /* $$$ TODO... ^^^^^^^^ */
      {  0x1B, 0x1B,  "MPEG4_video_descriptor" },
      {  0x1C, 0x1C,  "MPEG4_audio_descriptor" },
      {  0x1D, 0x1D,  "IOD_descriptor" },
@@ -545,6 +556,7 @@ char *dvbstrStream_TYPE (u_int flag)
 
   STR_TABLE  Table[] = {
 	  // -- updated 2003-10-17  from H.220
+	  // -- updated 2003-11-04  from ATSC Code_Point
      {  0x00, 0x00,  "ITU-T | ISO-IE Reserved" },
      {  0x01, 0x01,  "ISO/IEC 11172 Video" },
      {  0x02, 0x02,  "ITU-T Rec. H.262 | ISO/IEC 13818-2 Video | ISO/IEC 11172-2 constr. parameter video stream" },
@@ -554,20 +566,21 @@ char *dvbstrStream_TYPE (u_int flag)
      {  0x06, 0x06,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 PES packets containing private data" },
      {  0x07, 0x07,  "ISO/IEC 13512 MHEG" },
      {  0x08, 0x08,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Annex A  DSM CC" },
-     {  0x09, 0x09,  "ITU-T Rec. H.222.1" },
-     {  0x0A, 0x0A,  "ISO/IEC 13818-6 Type A" },
-     {  0x0B, 0x0B,  "ISO/IEC 13818-6 Type B" },
-     {  0x0C, 0x0C,  "ISO/IEC 13818-6 Type C" },
-     {  0x0D, 0x0D,  "ISO/IEC 13818-6 Type D" },
+     {  0x09, 0x09,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1/11172-1 auxiliary" },
+     {  0x0A, 0x0A,  "ISO/IEC 13818-6 Multiprotocol encapsulation" },
+     {  0x0B, 0x0B,  "ISO/IEC 13818-6 DSM-CC U-N Messages" },
+     {  0x0C, 0x0C,  "ISO/IEC 13818-6 Stream Descriptors" },
+     {  0x0D, 0x0D,  "ISO/IEC 13818-6 Sections (any type, including private data)" },
      {  0x0E, 0x0E,  "ISO/IEC 13818-1 auxiliary" },
      {  0x0F, 0x0F,  "ISO/IEC 13818-7 Audio with ADTS transport sytax" },
      {  0x10, 0x10,  "ISO/IEC 14496-2 Visual" },
      {  0x11, 0x11,  "ISO/IEC 14496-3 Audio with LATM transport syntax as def. in ISO/IEC 14496-3/AMD1" },
      {  0x12, 0x12,  "ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in PES packets" },
      {  0x13, 0x13,  "ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in ISO/IEC 14496 sections" },
-     {  0x14, 0x14,  "ISO/IEC 13818-6 synchronized download protocol" },
+     {  0x14, 0x14,  "ISO/IEC 13818-6 DSM-CC synchronized download protocol" },
 
      {  0x15, 0x7F,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
+     // $$$ ATSC ID Names could be includes...
      {  0x80, 0xFF,  "User private" },
      {  0,0, NULL }
   };
