@@ -139,6 +139,7 @@ recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
 recordingmenu.setupnow Einstellungen jetzt übernehmen
 recordingmenu.no_scart Unterdrücke Scart-Umschaltung
+recordingmenu.error_dir_not_writable Das Aufnahmeverzeichnis ist nicht beschreibbar.\nAufnahmen sind daher nicht möglich.
 
 streamingmenu.head Movieplayer Einstellungen
 streamingmenu.streaming_type Streamingserver
