@@ -1,9 +1,9 @@
 function fertig()
 {
-	for (i=channels.bchannels.length-1; i >= 0 ; i--) {
-		channels.bchannels.options[i].selected=true;
+	for (i=document.channels.bchannels.length-1; i >= 0 ; i--) {
+		document.channels.bchannels.options[i].selected=true;
 	}
-	channels.submit();
+	document.channels.submit();
 }
 
 function movechannels(source, destination)
