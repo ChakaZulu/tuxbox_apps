@@ -43,10 +43,6 @@ CMotorControl::CMotorControl()
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	
-	frameBuffer->loadPal("satellites.pal", 0, 255);
-	frameBuffer->loadPicture2FrameBuffer("satellites.raw");
-	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	
 	width = 500;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
@@ -60,6 +56,12 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 	uint msg;
 	uint data;
 	bool istheend = false;
+	
+	
+	frameBuffer->loadPal("satellites.pal", 0, 255);
+	frameBuffer->loadPicture2FrameBuffer("satellites.raw");
+	frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
+	
 	
 	if (!frameBuffer->getActive())
 		return menu_return::RETURN_EXIT_ALL;
@@ -154,7 +156,7 @@ int CMotorControl::exec(CMenuTarget* parent, string)
 						break;
 					
 					default:
-						printf("[motorcontrol] message received...\n");
+						//printf("[motorcontrol] message received...\n");
 						if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000)) 
 							delete (unsigned char*) data;
 						break;
