@@ -44,7 +44,19 @@ static	HScore	hsc[8];
 static	HScore	ihsc[8];
 static	int		use_ihsc=0;
 
-extern	unsigned long BuildCheck( char *user, long score );
+unsigned long BuildCheck( char *user, long score )
+{
+	unsigned long ret = 22;
+	unsigned long temp = 55;
+
+	while ( * user )
+	{
+		ret = ret << 1 ^ 90 ^ ( * user++ + temp );
+		temp += 2;
+	}
+
+	return ret ^ score;
+}
 
 static	void	LoadHScore( void )
 {

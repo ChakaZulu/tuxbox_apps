@@ -6,8 +6,6 @@ tetris_la_SOURCES = board.c somain.c
 
 tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
-tetris_la_LIBADD = h.lo
-
 install-exec-local:
 	install -d $(PLUGINDIR)
 	install -d $(CONFIGDIR)
@@ -20,6 +18,3 @@ uninstall-local:
 	-rm $(PLUGINDIR)/tetris.so
 	-rm $(PLUGINDIR)/tetris.cfg
 	-rmdir $(PLUGINDIR)
-
-h.lo:
-	-cp h.code h.lo
