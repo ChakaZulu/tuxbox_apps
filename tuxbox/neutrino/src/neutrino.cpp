@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.21 2001/09/03 03:34:04 tw-74 Exp $
+        $Id: neutrino.cpp,v 1.22 2001/09/07 00:21:39 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.22  2001/09/07 00:21:39  McClean
+  spezial shutdown (lcd) fix for GeOrG :))
+
   Revision 1.21  2001/09/03 03:34:04  tw-74
   cosmetic fixes, own "Mg" fontmetrics
 
@@ -993,15 +996,13 @@ void CNeutrinoApp::ExitRun()
 	printf("neutrino exit\n");
 	//shutdown screen
 	infoViewer.killTitle();
-	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
+	//memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 	for(int x=0;x<256;x++)
 		frameBuffer.paletteSetColor(x, 0x000000, 0xffff); 
-	frameBuffer.paletteSet();	
+	frameBuffer.paletteSet();
 	frameBuffer.paintIcon8("shutdown.raw",0,0);
 	frameBuffer.loadPal("shutdown.pal");
 	Controld.shutdown();
-	sleep(5);
-	remoteControl.shutdown();
 	sleep(55555);
 }
 
