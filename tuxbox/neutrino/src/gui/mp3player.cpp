@@ -341,6 +341,15 @@ int CMP3PlayerGui::show()
                            testfile.open(filename.c_str(), ifstream::in);
                            if(testfile.good())
                            {
+                              // Check for duplicates and remove (playlist has higher prio)
+                              CPlayList::iterator p=playlist.begin();
+                              while(p!=playlist.end())
+                              {
+                                 if(p->Filename == filename)
+                                    playlist.erase(p);
+                                 else
+                                    p++;
+                              }
                               CMP3 mp3;
                               mp3.Filename = filename;
                               playlist.push_back(mp3);
