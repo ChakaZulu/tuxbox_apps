@@ -16,8 +16,8 @@ pzapit_LDADD = \
 	$(top_builddir)/lib/libzapitclient.la
 
 zapit_SOURCES = \
-	zapit.cpp basicserver.cpp bouquets.cpp channel.cpp getservices.cpp \
-	scan.cpp xmlinterface.cpp $(DBOX2)
+	zapit.cpp basicserver.cpp bouquets.cpp channel.cpp dvbstring.cpp \
+	getservices.cpp scan.cpp xmlinterface.cpp $(DBOX2)
 
 zapit_LDADD = \
 	@CONFIGFILE_LIBS@ \
