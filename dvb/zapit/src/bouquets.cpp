@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.66 2002/10/04 10:24:25 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.67 2002/10/07 14:46:41 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -178,34 +178,34 @@ void CBouquetManager::saveBouquets()
 		return;
 	}
 
-	fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<ZAPIT>\n");
+	fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
 
 	for (unsigned int i=0; i<Bouquets.size(); i++)
 	{
 		if (Bouquets[i] != remainChannels)
 		{
 			fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
-				convertForXML(Bouquets[i]->Name).c_str(),
+				convert_to_UTF8_XML(Bouquets[i]->Name).c_str(),
 				Bouquets[i]->bHidden ? 1 : 0,
 				Bouquets[i]->bLocked ? 1 : 0);
 			for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
 						Bouquets[i]->tvChannels[j]->getServiceId(),
-						convertForXML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
+						convert_to_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
 						Bouquets[i]->tvChannels[j]->getOriginalNetworkId());
 			}
 			for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
 			{
 				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n",
 						Bouquets[i]->radioChannels[j]->getServiceId(),
-						convertForXML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
+						convert_to_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
 						Bouquets[i]->radioChannels[j]->getOriginalNetworkId());
 			}
 			fprintf(bouq_fd, "\t</Bouquet>\n");
 		}
 	}
-	fprintf(bouq_fd, "</ZAPIT>\n");
+	fprintf(bouq_fd, "</zapit>\n");
 	fclose(bouq_fd);
 }
 

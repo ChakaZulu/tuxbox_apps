@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.5 2002/09/19 12:10:26 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/Attic/xmlinterface.h,v 1.6 2002/10/07 14:46:41 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -29,6 +29,7 @@
 #include <xmltree.h>
 
 std::string convertForXML(const std::string s);
+std::string convert_to_UTF8_XML(const std::string s);
 std::string Utf8_to_Latin1(const std::string s);
 
 XMLTreeParser* parseXmlFile(const std::string filename);
