@@ -84,6 +84,7 @@ typedef struct pids{
         ushort count_apids;
         apid_struct apids[max_num_apids];
         uint ecmpid;
+        uint vtxtpid;
 }pids;
 
 

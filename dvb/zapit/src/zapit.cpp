@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.18 2001/10/17 11:09:55 faralla Exp $
+  $Id: zapit.cpp,v 1.19 2001/10/17 14:22:11 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,8 +70,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
-  Revision 1.18  2001/10/17 11:09:55  faralla
-  nvod-channel is set as last channel, too
+  Revision 1.19  2001/10/17 14:22:11  field
+  vtxt (treiber von [jolt] muss installiert sein, ist noch nicht im cdk)
 
   Revision 1.17  2001/10/16 20:36:00  field
   Audio decoding beim Umschalten beschleunigt
@@ -232,6 +232,32 @@ void write_lcd(char *name) {
   close(lcdd_fd);
 }
 
+
+int set_vtxt(uint vpid)
+{
+    int fd;
+
+    fd = open("/dev/dbox/vbi0", O_RDWR);
+    if (fd < 0)
+    {
+        perror ("/dev/dbox/vbi0");
+        return -fd;
+    }
+
+// nachdem #include "gen_vbi.h" noch nicht geht (noch nicht offiziell im cdk...)
+#define VBI_SETPID 1
+
+    if (ioctl(fd, VBI_SETPID, vpid) < 0)
+    {
+        perror("VBI_SETPID");
+        return 1;
+    }
+
+    close(fd);
+    return 0;
+}
+
+
 // war descriptor
 int parsePMTInfo(char *buffer, int len, int ca_system_id)
 {
@@ -325,120 +351,123 @@ pids parse_pmt(int pid, int ca_system_id)
     }
   else
     {
-      //printf("parsepmt is reading DMX\n");
-      if ( (r=read(fd, buffer, 3))<=0 )
+        //printf("parsepmt is reading DMX\n");
+        if ( (r=read(fd, buffer, 3))<=0 )
         {
-	  perror("read");
-	  close(fd);
-	  return ret_pids;
+            perror("read");
+            close(fd);
+            return ret_pids;
         }
       
-      //printf("parsepmt is parsing pmts\n");
-      int PMTInfoLen, dp, sec_len;
+        //printf("parsepmt is parsing pmts\n");
+        int PMTInfoLen, dp, sec_len;
       
-      sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
+        sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
       
-      if ((r=read(fd, buffer+3, sec_len))<=0)
+        if ((r=read(fd, buffer+3, sec_len))<=0)
         {
-	  perror("read");
-	  close(fd);
-	  return ret_pids;
+            perror("read");
+            close(fd);
+            return ret_pids;
         }
       
-      /*
-	FILE *file=fopen("zapit.pmt", "wb");
-	if(file) {
-        fwrite(buffer, sec_len+ 3, 1, file);
-        fclose(file);
-	}
-      */
-      PMTInfoLen = ( (buffer[10]&0xF)<<8 )| buffer[11];
-      dp= 12;
-      
-      //        while (dp<(pilen+12))
-      // wozu so kompliziert?
-      if ( PMTInfoLen> 0 )
-        {
-	  ecm_pid= parsePMTInfo(&buffer[12], PMTInfoLen, ca_system_id);
-	  dp+= PMTInfoLen;
+/*
+        FILE *file=fopen("zapit.pmt", "wb");
+        if(file) {
+            fwrite(buffer, sec_len+ 3, 1, file);
+            fclose(file);
         }
-      else
-	{
-	  ecm_pid = no_ecmpid_found; // not scrambled...
-	}
+*/
+        PMTInfoLen = ( (buffer[10]&0xF)<<8 )| buffer[11];
+        dp= 12;
       
-      while ( dp < ( r- 4 ) )
+        if ( PMTInfoLen> 0 )
         {
-	  int epid, esinfo, stype;
-	  stype = buffer[dp++];
-	  //            printf("stream type: %x\n", stype);
+            ecm_pid= parsePMTInfo(&buffer[12], PMTInfoLen, ca_system_id);
+            dp+= PMTInfoLen;
+        }
+        else
+        {
+            ecm_pid = no_ecmpid_found; // not scrambled...
+        }
+      
+        while ( dp < ( r- 4 ) )
+        {
+            int epid, esinfo, stype;
+            stype = buffer[dp++];
+            // printf("stream type: %x\n", stype);
 	  
-	  epid = (buffer[dp++]&0x1F)<<8;
-	  epid|= buffer[dp++];
-	  esinfo = (buffer[dp++]&0xF)<<8;
-	  esinfo|= buffer[dp++];
+            epid = (buffer[dp++]&0x1F)<<8;
+            epid|= buffer[dp++];
+            esinfo = (buffer[dp++]&0xF)<<8;
+            esinfo|= buffer[dp++];
 	  
-	  
-	  if (((stype == 1) || (stype == 2)) && (epid != 0))
+            if (((stype == 1) || (stype == 2)) && (epid != 0))
             {
-	      ret_pids.vpid = epid;
-	      vp_count++;
-	      dp+= esinfo;
+                ret_pids.vpid = epid;
+                vp_count++;
+                dp+= esinfo;
             }
-	  else if ( ( (stype == 3) || (stype == 4) || (stype == 6) ) && (ap_count <max_num_apids ) && (epid != 0) )
+            else if ( ( (stype == 3) || (stype == 4) || (stype == 6) ) && (epid != 0) )
             {
-	      int i_pt= dp;
-	      int tag_type, tag_len;
-	      ret_pids.apids[ap_count].component_tag= -1;
-	      dp+= esinfo;
+                int i_pt= dp;
+                int tag_type, tag_len;
+                ret_pids.apids[ap_count].component_tag= -1;
+                dp+= esinfo;
 	      
-	      ret_pids.apids[ap_count].is_ac3 = false;
-	      ret_pids.apids[ap_count].desc[0] = 0;
+                ret_pids.apids[ap_count].is_ac3 = false;
+                ret_pids.apids[ap_count].desc[0] = 0;
 	      
-	      while ( i_pt< dp )
+                while ( i_pt< dp )
                 {
-		  tag_type = buffer[i_pt++];
-		  tag_len = buffer[i_pt++];
-		  if ( tag_type == 0x6A ) // AC3
+                    tag_type = buffer[i_pt++];
+                    tag_len = buffer[i_pt++];
+                    if ( tag_type == 0x6A ) // AC3
                     {
-		      ret_pids.apids[ap_count].is_ac3 = true;
+                        ret_pids.apids[ap_count].is_ac3 = true;
                     }
-		  else if ( tag_type == 0x0A ) // LangDescriptor
+                    else if ( tag_type == 0x0A ) // LangDescriptor
                     {
-		      if ( ret_pids.apids[ap_count].desc[0] == 0 )
+                        if ( ret_pids.apids[ap_count].desc[0] == 0 )
                         {
-			  buffer[i_pt+ 3]= 0; // quick'n'dirty
+                            buffer[i_pt+ 3]= 0; // quick'n'dirty
 			  
-			  strcpy( ret_pids.apids[ap_count].desc, &(buffer[i_pt]) );
+                            strcpy( ret_pids.apids[ap_count].desc, &(buffer[i_pt]) );
                         }
                     }
-		  else if ( tag_type == 0x52 ) // STREAM_IDENTIFIER_DESCR
+                    else if ( tag_type == 0x52 ) // STREAM_IDENTIFIER_DESCR
                     {
-		      ret_pids.apids[ap_count].component_tag = buffer[i_pt];
+                        ret_pids.apids[ap_count].component_tag = buffer[i_pt];
                     }
-		  
-		  i_pt+= tag_len;
+                    else if ( tag_type == 0x56 ) // DESCR_TELETEXT
+                    {
+                        ret_pids.vtxtpid = epid;
+                        // printf("[zapit] vtxtpid %x\n", ret_pids.vtxtpid);
+                    }
+                    i_pt+= tag_len;
                 }
-	      if ( (stype == 3) || (stype == 4) || ( ret_pids.apids[ap_count].is_ac3 ) )
+                if ( (stype == 3) || (stype == 4) || ( ret_pids.apids[ap_count].is_ac3 ) )
                 {
-		  if ( ret_pids.apids[ap_count].desc[0] == 0 )
-		    sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count+ 1);
+                    if ( ret_pids.apids[ap_count].desc[0] == 0 )
+                        sprintf(ret_pids.apids[ap_count].desc, "%02d", ap_count+ 1);
 		  
-		  ret_pids.apids[ap_count].pid = epid;
-		  ap_count++;
+                    ret_pids.apids[ap_count].pid = epid;
+
+                    if (ap_count <max_num_apids )
+                        ap_count++;
                 }
 	      
             }
-	  else
-	    dp+= esinfo;
+            else
+                dp+= esinfo;
         }
-      ret_pids.count_apids = ap_count;
-      ret_pids.count_vpids = vp_count;
-      ret_pids.ecmpid = ecm_pid;
+        ret_pids.count_apids = ap_count;
+        ret_pids.count_vpids = vp_count;
+        ret_pids.ecmpid = ecm_pid;
     }
-  //printf("parsepmt is nearly over\n");
-  close(fd);
-  return ret_pids;
+    //printf("parsepmt is nearly over\n");
+    close(fd);
+    return ret_pids;
 }
 
 int find_emmpid(int ca_system_id) 
@@ -782,8 +811,9 @@ else
     {
       nvodname = cit->second.name;
       current_is_nvod = true;
-      curr_onid_sid = onid_sid;
-      save_settings();
+        curr_onid_sid = onid_sid;
+        save_settings();
+
       //printf("Getting sdt for NVOD\n");
       //sdt(cit->second.sid,false);
       //printf("Got sdt\n");
@@ -815,6 +845,9 @@ else
  
   memset(&parse_pmt_pids,0,sizeof(parse_pmt_pids));
   parse_pmt_pids = parse_pmt(cit->second.pmt, caid);
+
+//  if (parse_pmt_pids.vtxtpid != 0)
+    set_vtxt(parse_pmt_pids.vtxtpid);
   
   //printf("VPID parsed from pmt: %x\n", parse_pmt_pids.vpid);
   //for (i = 0;i<parse_pmt_pids.count_apids;i++) {
@@ -1802,7 +1835,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.18 2001/10/17 11:09:55 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.19 2001/10/17 14:22:11 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
