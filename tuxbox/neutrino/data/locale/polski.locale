@@ -6,6 +6,7 @@ options.on wla
 mainmenu.head Menu Glowne
 mainmenu.tvmode Telewizja
 mainmenu.radiomode Radio
+mainmenu.vcrmode VCR-Mode
 mainmenu.games w Gry grac
 mainmenu.shutdown Wylaczyc
 mainmenu.settings Settings

@@ -6,6 +6,7 @@ options.on dessus
 mainmenu.head Menu principal
 mainmenu.tvmode TV-Mode
 mainmenu.radiomode Radio-Mode
+mainmenu.vcrmode VCR-Mode
 mainmenu.games Play Games
 mainmenu.shutdown mettre hors circuit
 mainmenu.settings Settings
