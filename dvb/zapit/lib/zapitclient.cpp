@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.23 2002/04/08 20:51:19 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.24 2002/04/14 08:45:08 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.24  2002/04/14 08:45:08  Simplex
+  renamed sattelite to satellite ;)
+
   Revision 1.23  2002/04/08 20:51:19  Simplex
   cmd for getting satellite list
 
@@ -493,8 +496,8 @@ bool CZapitClient::isScanReady(unsigned int &satellite, unsigned int &transponde
 /*  Scanning stuff                             */
 /*                                             */
 /***********************************************/
-/* query possible sattelits*/
-void CZapitClient::getScanSatteliteList( SatteliteList& satteliteList )
+/* query possible satellits*/
+void CZapitClient::getScanSatelliteList( SatelliteList& satelliteList )
 {
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
@@ -503,9 +506,9 @@ void CZapitClient::getScanSatteliteList( SatteliteList& satteliteList )
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
 
-	responseGetSatteliteList response;
-	while ( receive((char*)&response, sizeof(responseGetSatteliteList)))
-		satteliteList.insert( satteliteList.end(), response);
+	responseGetSatelliteList response;
+	while ( receive((char*)&response, sizeof(responseGetSatelliteList)))
+		satelliteList.insert( satelliteList.end(), response);
 
 	zapit_close();
 
