@@ -153,8 +153,8 @@ int eFrontend::setFrontend()
 		eServiceInterface::getInstance()->getService();
 	if ( handler )
 	{
-		if ( handler->getID() != eServiceReference::idDVB && !eDVB::getInstance()->recorder )
-			doSavePower=true;
+		if (!eDVB::getInstance()->recorder && ( handler->getID() != eServiceReference::idDVB || eServiceInterface::getInstance()->service.path ) )
+				doSavePower=true;
 	}
 	else
 		doSavePower=true;
