@@ -188,7 +188,7 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 void eFEStatusWidget::update()
 {
 	p_agc->setPerc(fe->SignalStrength()*100/65536);
-	p_snr->setPerc((65536-fe->SNR())*100/65536);
+	p_snr->setPerc((fe->SNR())*100/65536);
 	int status=fe->Status();
 	c_lock->setCheck(!!(status & FE_HAS_LOCK));
 	c_sync->setCheck(!!(status & FE_HAS_SYNC));

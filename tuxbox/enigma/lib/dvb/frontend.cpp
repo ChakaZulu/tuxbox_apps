@@ -111,25 +111,29 @@ uint32_t eFrontend::BER()
 
 int eFrontend::SignalStrength()
 {
-	int32_t strength=-1;
+	uint16_t strength=-1;
 	ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength);
+#if 0
 	if ((strength<0) || (strength>65535))
 	{
+		eWarning("buggy SignalStrength driver (or old version) (%08x)", strength);
 		strength=0;
-		eWarning("buggy SNR driver (or old version)");
 	}
+#endif
 	return strength;
 }
 
 int eFrontend::SNR()
 {
-	int32_t snr=-1;
+	uint16_t snr=-1;
 	ioctl(fd, FE_READ_SNR, &snr);
+#if 0
 	if ((snr<0) || (snr>65535))
 	{
+		eWarning("buggy SNR driver (or old version) (%08x)", snr);
 		snr=0;
-		eWarning("buggy SNR driver (or old version)");
 	}
+#endif
 	return snr;
 }
 
