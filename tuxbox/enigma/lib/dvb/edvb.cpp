@@ -553,11 +553,11 @@ bool ismounted( eString mountpoint )
 
 void eDVB::doMounts()
 {
-	eDebug("[eDVB] do nfs/cifs mounts");
+	eDebug("[eDVB] do nfs/cifs/smbfs mounts");
 	for(int e=0;e<8;)
 	{
 		int automount=0;
-		eString cmd,sdir,ldir,opt;
+		eString cmd,sdir,ldir,opt,user,pass,ip;
 
 		cmd.sprintf("/elitedvb/network/nfs%d/",e++);
 		eConfig::getInstance()->getKey((cmd+"automount").c_str(), automount);
@@ -587,36 +587,57 @@ void eDVB::doMounts()
 			eConfig::getInstance()->getKey((cmd+"ip").c_str(), sip);
 			unpack(sip, de);
 
-			if(fstype) // CIFS
+			switch(fstype)
 			{
-				if (!eConfig::getInstance()->getKey((cmd+"username").c_str(), cvalue))
-				{
-					opt.sprintf("user=%s",cvalue);
-					free(cvalue);
-				}
-				if (!eConfig::getInstance()->getKey((cmd+"password").c_str(), cvalue))
-				{
-					opt.sprintf("%s,pass=%s",opt.c_str(),cvalue);
-					free(cvalue);
-				}
-				if (!eConfig::getInstance()->getKey((cmd+"sdir").c_str(), cvalue))
-				{
-					opt.sprintf("%s,unc=//%d.%d.%d.%d/%s",
-						opt.c_str(),
-						de[0],de[1],de[2],de[3],
-						cvalue);
-					free(cvalue);
-				}
-				if(ivalue>0)
-					opt=opt+",";
-			}
-			else
-			{
-				if (!eConfig::getInstance()->getKey((cmd+"sdir").c_str(), cvalue))
-				{
-					sdir.sprintf("%d.%d.%d.%d:/%s",de[0],de[1],de[2],de[3],cvalue);
-					free(cvalue);
-				}
+				case 0 : // NFS
+					if (!eConfig::getInstance()->getKey((cmd+"sdir").c_str(), cvalue))
+					{
+						sdir.sprintf("%d.%d.%d.%d:/%s",de[0],de[1],de[2],de[3],cvalue);
+						free(cvalue);
+					}
+					break;
+				case 1: // CIFS
+					if (!eConfig::getInstance()->getKey((cmd+"username").c_str(), cvalue))
+					{
+						opt.sprintf("user=%s",cvalue);
+						free(cvalue);
+					}
+					if (!eConfig::getInstance()->getKey((cmd+"password").c_str(), cvalue))
+					{
+						opt.sprintf("%s,pass=%s",opt.c_str(),cvalue);
+						free(cvalue);
+					}
+					if (!eConfig::getInstance()->getKey((cmd+"sdir").c_str(), cvalue))
+					{
+						opt.sprintf("%s,unc=//%d.%d.%d.%d/%s",
+							opt.c_str(),
+							de[0],de[1],de[2],de[3],
+							cvalue);
+						free(cvalue);
+					}
+					if(ivalue>0)
+						opt=opt+",";
+					break;
+				case 2: // SMBFS
+					if (!eConfig::getInstance()->getKey((cmd+"sdir").c_str(), cvalue))
+					{
+						sdir=cvalue;
+						free(cvalue);
+					}
+					if (!eConfig::getInstance()->getKey((cmd+"username").c_str(), cvalue))
+					{
+						user=cvalue;
+						free(cvalue);
+					}
+					if (!eConfig::getInstance()->getKey((cmd+"password").c_str(), cvalue))
+					{
+						pass=cvalue;
+						free(cvalue);
+					}
+					ip.sprintf("%d.%d.%d.%d",
+							de[0],de[1],de[2],de[3]);
+					ldir="mount "+ldir;
+					break;
 			}
 
 			switch(ivalue)
@@ -645,15 +666,75 @@ void eDVB::doMounts()
 				free(cvalue);
 			}
 
-			if (fork() == 0)
+			pid_t pid;
+			switch(pid=fork())
 			{
-				for (unsigned int i=3; i < 90; ++i )
-					close(i);
-				if(fstype)
-					execlp("busybox", "mount", "-t", "cifs", "//bla", "-o", opt.c_str(), ldir.c_str(), NULL);
-				else
-					execlp("busybox", "mount", "-t", "nfs", sdir.c_str(), ldir.c_str(), "-o", opt.c_str(), NULL);
-				_exit(0);
+				case -1:
+					eDebug("error fork mount (%m)");
+					break;
+				case 0:
+					for (unsigned int i=3; i < 90; ++i )
+						::close(i);
+					switch(fstype)
+					{
+						case 0:
+						{
+							// local copy after fork..
+							eString SDIR = sdir, LDIR = ldir, OPT = opt;
+							execlp("busybox", "mount", "-t", "nfs", SDIR.c_str(), LDIR.c_str(), "-o", OPT.c_str(), NULL);
+							break;
+						}
+						case 1:
+						{
+						 	// local copy after fork..
+							eString LDIR = ldir, OPT = opt;  // local copy after fork..
+							execlp("busybox", "mount", "-t", "cifs", "//bla", "-o", OPT.c_str(), LDIR.c_str(), NULL);
+							break;
+						}
+						case 2:
+						{
+							// execlp isn't working here.. don't ask why... i don't know
+							int args=user&&pass ? 10 : user ? 9 : pass ? 8 : 7, cnt=0;
+							char *argv[args];
+							argv[cnt++]="smbmount";
+							argv[cnt]=new char[sdir.length()+1];
+							strcpy(argv[cnt++], sdir.c_str());
+							if ( pass )
+							{
+								argv[cnt]=new char[pass.length()+1];
+								strcpy(argv[cnt++], pass.c_str());
+							}
+							if ( user )
+							{
+								argv[cnt]=new char[3];
+								strcpy(argv[cnt++], "-U");
+								argv[cnt]=new char[user.length()+1];
+								strcpy(argv[cnt++], user.c_str());
+							}
+							argv[cnt]=new char[3];
+							strcpy(argv[cnt++], "-I");
+							argv[cnt]=new char[ip.length()+1];
+							strcpy(argv[cnt++], ip.c_str());
+							argv[cnt]=new char[3];
+							strcpy(argv[cnt++], "-c");
+							argv[cnt]=new char[ldir.length()+1];
+							strcpy(argv[cnt++], ldir.c_str());
+							argv[cnt]=NULL;
+							execvp(argv[0], argv);
+							// SMBMOUNT do clone... so all after execvp is never reached..
+							while(--cnt)
+							{
+								fflush(stdout);
+								delete [] argv[cnt];
+							}
+						}
+					}
+					_exit(0);
+					break;
+				default:
+					usleep(15000); // delay 15ms to create lokal copy of strings
+					eDebug("create pid %d", pid);
+					break;
 			}
 		}
 	}

@@ -21,7 +21,7 @@ class eNFSSetup: public eWindow
 	eButton *ok, *mount, *umount, *prev, *next;
 	eCheckbox *doamount;
 	eComboBox *combo_fstype, *combo_options;
-	eLabel *lpass , *luser;
+	eLabel *lpass , *luser, *loptions, *lextras, *lip, *lldir, *lsdir;
 	eNumber *ip;
 	eStatusBar *sbar;
 	eString cmd,headline;
@@ -31,6 +31,7 @@ class eNFSSetup: public eWindow
      
 	void fieldSelected(int *number) { focusNext(eWidget::focusDirNext); }
 	void fstypeChanged(eListBoxEntryText *le);
+	void changeWidgets(int fstype);
     
 	void load_config();
 

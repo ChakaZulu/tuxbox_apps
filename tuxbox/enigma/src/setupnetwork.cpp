@@ -653,7 +653,9 @@ eZapNetworkSetup::eZapNetworkSetup():
 	nfs->setShortcutPixmap("blue");
 	nfs->loadDeco();
 	nfs->show();
-	nfs->setHelpText(_("here you can setup nfs/cifs mounts"));
+	eString hlptext = _("here you can setup nfs/cifs mounts");
+	hlptext.strReplace("nfs/cifs", "nfs/cifs/smbfs");
+	nfs->setHelpText(hlptext);
 	CONNECT( nfs->selected, eZapNetworkSetup::nfsPressed );
 #endif
 
@@ -938,6 +940,7 @@ eNFSSetup::eNFSSetup()
 	:eWindow(0), timeout(eApp), mountContainer(0)
 {
 	bool have_cifs=false;
+	bool have_smbfs=false;
 	FILE *f=fopen("/proc/filesystems", "rt");
 	if (f)
 	{
@@ -948,13 +951,15 @@ eNFSSetup::eNFSSetup()
 				break;
 			if ( strstr(buffer, "cifs") )
 				have_cifs=true;
+			if ( strstr(buffer, "smbfs") )
+				have_smbfs=true;
 		}
 		fclose(f);
 	}
 
 	CONNECT(timeout.timeout, eNFSSetup::mountTimeout);
 	cur_entry=0;
-	headline.sprintf("NFS/CIFS Setup (%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
+	headline.sprintf("Mount Manager(%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
 
 	setText(headline);
 	cmove(ePoint(140,90));
@@ -963,71 +968,56 @@ eNFSSetup::eNFSSetup()
 	__u32 sip=ntohl(0x0a000061);
     
 	int de[4];
-	int y = 10;
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
-	
-	eLabel *l = new eLabel(this);
-	l->move(ePoint(10,y));
-	l->resize(eSize(120,fd+4));
-	l->setText("IP:");
+
+	lip = new eLabel(this);
+	lip->resize(eSize(120,fd+4));
+	lip->setText("IP:");
 
 	eNumber::unpack(sip, de);
-	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
-	ip->move(ePoint(120, y));
+	ip=new eNumber(this, 4, 0, 255, 3, de, 0, lip);
 	ip->resize(eSize(200, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);
 	ip->setHelpText(_("enter IP Address (0..9, left, right)"));
 	ip->loadDeco();
 	CONNECT(ip->selected, eNFSSetup::fieldSelected);
-	
-	combo_fstype=new eComboBox(this, 2, l);
-	combo_fstype->move(ePoint(360,y));
-	combo_fstype->resize(eSize(80, fd+10));
+
+	combo_fstype=new eComboBox(this, 2);
+	combo_fstype->resize(eSize(100, fd+10));
 	combo_fstype->loadDeco();
 	combo_fstype->setHelpText(_("press ok to change mount type"));
 	new eListBoxEntryText( *combo_fstype, "NFS", (void*)0, 0, "Network File System");
 	if (have_cifs)
 		new eListBoxEntryText( *combo_fstype, "CIFS", (void*)1, 0, "Common Internet File System");
+	if (have_smbfs)
+		new eListBoxEntryText( *combo_fstype, "SMBFS", (void*)2, 0, _("Samba File System(to mount share from another Dreambox)"));
 	combo_fstype->setCurrent(0,true);
 	CONNECT(combo_fstype->selchanged, eNFSSetup::fstypeChanged);
-	
-	y = y + 34;
-	
-	l = new eLabel(this);
-	l->move(ePoint(10, y));
-	l->resize(eSize(120, fd+4));
-	l->setText("Dir:");
 
-	sdir = new eTextInputField(this,l);
-	sdir->move(ePoint(120, y));
+	lsdir = new eLabel(this);
+	lsdir->resize(eSize(120, fd+4));
+	lsdir->setText("Dir:");
+
+	sdir = new eTextInputField(this,lsdir);
 	sdir->resize(eSize(320, fd+10));
 	sdir->setUseableChars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
 	sdir->loadDeco();
-	sdir->setHelpText(_("enter the name of the share without trailing slash"));
 
-	y = y + 34;
-	
-	l = new eLabel(this);
-	l->move(ePoint(10, y));
-	l->resize(eSize(120, fd+4));
-	l->setText("LocalDir:");
+	lldir = new eLabel(this);
+	lldir->resize(eSize(120, fd+4));
+	lldir->setText("LocalDir:");
 
-	ldir = new eTextInputField(this,l);
-	ldir->move(ePoint(120, y));
+	ldir = new eTextInputField(this,lldir);
 	ldir->resize(eSize(320, fd+10));
 	ldir->setUseableChars("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/");
 	ldir->loadDeco();
 	ldir->setHelpText(_("enter name of the local mount point with trailing slash"));
 
-	y = y + 34;
+	loptions = new eLabel(this);
+	loptions->resize(eSize(120, fd+4));
+	loptions->setText("Options:");
 
-	l = new eLabel(this);
-	l->move(ePoint(10, y));
-	l->resize(eSize(120, fd+4));
-	l->setText("Options:");
-
-	combo_options=new eComboBox(this, 3, l);
-	combo_options->move(ePoint(120,y));
+	combo_options=new eComboBox(this, 3, loptions);
 	combo_options->resize(eSize(320, fd+10));
 	combo_options->loadDeco();
 	combo_options->setHelpText(_("press ok to change mount options"));
@@ -1047,55 +1037,40 @@ eNFSSetup::eNFSSetup()
 	new eListBoxEntryText( *combo_options, "ro,soft,udp,nolock", (void*)13, 0);
 	new eListBoxEntryText( *combo_options, "rw,soft,udp,nolock", (void*)14, 0);
 	combo_options->setCurrent(0,true);
-	
-	y = y + 34;
 
-	l = new eLabel(this);
-	l->move(ePoint(10, y));
-	l->resize(eSize(120, fd+4));
-	l->setText("Extra:");
+	lextras = new eLabel(this);
+	lextras->resize(eSize(120, fd+4));
+	lextras->setText("Extra:");
 
-	extraoptions=new eTextInputField(this, l);
-	extraoptions->move(ePoint(120, y));
+	extraoptions=new eTextInputField(this, lextras);
 	extraoptions->resize(eSize(320, fd+10));
 	extraoptions->setMaxChars(100);
 	extraoptions->loadDeco();
 	extraoptions->setHelpText(_("press ok to edit extra options"));
-	
-	y = y + 34;
 
 	luser = new eLabel(this);
-	luser->move(ePoint(10, y));
 	luser->resize(eSize(120, fd+4));
 	luser->setText("User:");
 
 	user=new eTextInputField(this, luser);
-	user->move(ePoint(120, y));
 	user->resize(eSize(320, fd+10));
 	user->setMaxChars(100);
 	user->loadDeco();
 	user->setHelpText(_("press ok to edit username"));
 
-	y = y + 34;
-
 	lpass = new eLabel(this);
-	lpass->move(ePoint(10, y));
 	lpass->resize(eSize(120, fd+4));
 	lpass->setText("Pass:");
 
 	pass=new eTextInputField(this, lpass);
-	pass->move(ePoint(120, y));
 	pass->resize(eSize(320, fd+10));
 	pass->setMaxChars(100);
 	pass->loadDeco();
 	pass->setHelpText(_("press ok to edit password"));
 
-	y = y + 34;
-
 	doamount=new eCheckbox(this, 0, 1);
-	doamount->setText("Automount");
-	doamount->move(ePoint(120, y));
 	doamount->resize(eSize(140, fd+4));
+	doamount->setText("Automount");
 	doamount->setHelpText(_("enable/disable automount (ok)"));
 
 	load_config();
@@ -1153,26 +1128,77 @@ eNFSSetup::eNFSSetup()
 	sbar->resize( eSize( clientrect.width(), 50) );
 	sbar->loadDeco();
 }
-  
+
+void eNFSSetup::changeWidgets(int fstype)
+{
+	int y=5;
+
+	lip->move(ePoint(10,y));
+	ip->move(ePoint(120, y));
+	combo_fstype->move(ePoint(340,y));
+	y += 36;
+
+	lsdir->move(ePoint(10, y));
+	sdir->move(ePoint(120, y));
+	y += 36;
+
+	lldir->move(ePoint(10, y));
+	ldir->move(ePoint(120, y));
+	y += 36;
+
+	luser->hide();
+	user->hide();
+	lpass->hide();
+	pass->hide();
+	loptions->hide();
+	combo_options->hide();
+	lextras->hide();
+	extraoptions->hide();
+	doamount->hide();
+
+	switch( fstype )
+	{
+		case 0:
+		case 1:  // CIFS
+			loptions->move(ePoint(10, y));
+			combo_options->move(ePoint(120,y));
+			y += 36;
+			lextras->move(ePoint(10, y));
+			extraoptions->move(ePoint(120, y));
+			y += 36;
+			loptions->show();
+			lextras->show();
+			combo_options->show();
+			extraoptions->show();
+			sdir->setHelpText(_("enter the name of the share without trailing slash"));
+			break;
+		case 2:  // SMBFS
+			sdir->setHelpText(_("enter the name of the share (//DreamBOX/harddisk)"));
+			break;
+	}
+	if ( fstype )
+	{
+		luser->move(ePoint(10, y));
+		user->move(ePoint(120, y));
+		y += 36;
+
+		lpass->move(ePoint(10, y));
+		pass->move(ePoint(120, y));
+		y += 36;
+
+		luser->show();
+		lpass->show();
+		user->show();
+		pass->show();
+	}
+	doamount->move(ePoint(120, y));
+	doamount->show();
+}
+    
 void eNFSSetup::fstypeChanged(eListBoxEntryText *le)
 {
 	if ( le )
-	{
-		if ( le->getKey() )  // CIFS
-		{
-			luser->show();
-			lpass->show();
-			user->show();
-			pass->show();
-		}
-		else
-		{
-			luser->hide();
-			lpass->hide();
-			user->hide();
-			pass->hide();
-		}
-	}
+		changeWidgets( (int)le->getKey() );
 }
     
 void eNFSSetup::load_config()
@@ -1191,22 +1217,8 @@ void eNFSSetup::load_config()
 
 	eConfig::getInstance()->getKey((cmd+"fstype").c_str(), itmp);
 
-	if(combo_fstype->getCurrent()->getKey())
-	{
-		luser->show();
-		lpass->show();
-		user->show();
-		pass->show();
-	}
-	else
-	{
-		luser->hide();
-		lpass->hide();
-		user->hide();
-		pass->hide();
-	}
-
-	combo_fstype->setCurrent(itmp, true);
+	if (combo_fstype->setCurrent(itmp, true) != eComboBox::OK || !itmp )
+		changeWidgets(0);
 
 	if (!eConfig::getInstance()->getKey((cmd+"sdir").c_str(), ctmp))
 	{
@@ -1256,7 +1268,7 @@ void eNFSSetup::prevPressed()
 {
 	cur_entry = ((cur_entry + MAX_NFS_ENTRIES - 1) % MAX_NFS_ENTRIES);
 	load_config();
-	headline.sprintf("NFS/CIFS Setup (%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
+	headline.sprintf("Mount Manager(%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
 	setText(headline);
 	setFocus(prev);
 }
@@ -1265,7 +1277,7 @@ void eNFSSetup::nextPressed()
 {
 	cur_entry = ((cur_entry + 1) % MAX_NFS_ENTRIES);
 	load_config();
-	headline.sprintf("NFS/CIFS Setup (%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
+	headline.sprintf("Mount Manager(%d/%d)",cur_entry + 1, MAX_NFS_ENTRIES);
 	setText(headline);
 	setFocus(next);
 }
@@ -1297,11 +1309,13 @@ void eNFSSetup::okPressed()
 		eConfig::getInstance()->setKey((cmd+"automount").c_str(), (int)doamount->isChecked());
 	}
 
-	eMessageBox msg(
-		_("NFS/CIFS-Entry stored. Further entry?\n"),
-		_("NFS/CIFS-Setup..."),
+	int tmp = (int)combo_fstype->getCurrent()->getKey();
+	eString tmp1 = _("NFS/CIFS-Entry stored. Further entry?\n");
+	eString tmp2 = _("NFS/CIFS-Setup...");
+	tmp1.strReplace("NFS/CIFS", tmp == 2 ? "SMBFS" : tmp == 1 ? "CIFS" : "NFS" );
+	tmp2.strReplace("NFS/CIFS", "NFS/CIFS/SMBFS" );
+	eMessageBox msg( tmp1, tmp2,
 		eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo);
-
 	msg.show();
 	int res=msg.exec();
 	msg.hide();
@@ -1326,13 +1340,17 @@ void eNFSSetup::mountPressed()
 	{
 		if(ismounted(ldir->getText()))
 		{
-			errorMessage(_("NFS/CIFS mount error already mounted"));
+			eString error=_("NFS/CIFS mount error already mounted");
+			int tmp = (int)combo_fstype->getCurrent()->getKey();
+			error.strReplace("NFS/CIFS", tmp == 2 ? "SMBFS" : tmp == 1 ? "CIFS" : "NFS" );
+			errorMessage(error);
 			return;
 		}
     
 		eString opt;
 
-		switch((int)combo_fstype->getCurrent()->getKey())
+		int fstype = (int)combo_fstype->getCurrent()->getKey();
+		switch(fstype)
 		{
 			case 0: // NFS
 			{
@@ -1349,15 +1367,12 @@ void eNFSSetup::mountPressed()
 					opt+=eString().sprintf(" -o %s", combo_options->getCurrent()->getText().c_str());
 				else if( extraoptions->getText() )
 					opt+=eString().sprintf(" -o %s", extraoptions->getText().c_str());
+				opt+=' ';
+				opt+=ldir->getText().c_str();
 				break;
 			}
 			case 1: // CIFS
 			{
-				if(!user->getText())
-				{
-					errorMessage("missing username");
-					return;
-				}
 				opt.sprintf("/bin/mount -t cifs //bla -o user=%s,pass=%s,unc=//%d.%d.%d.%d/%s",
 					user->getText().c_str(), pass->getText().c_str(),
 					ip->getNumber(0),ip->getNumber(1),
@@ -1372,14 +1387,23 @@ void eNFSSetup::mountPressed()
 					opt+=eString().sprintf(",%s", combo_options->getCurrent()->getText().c_str());
 				else if( extraoptions->getText() )
 					opt+=eString().sprintf(",%s", extraoptions->getText().c_str());
+				opt+=' ';
+				opt+=ldir->getText().c_str();
+				break;
+			}
+			case 2: // SMBFS
+			{
+				opt.sprintf("/bin/smbmount %s %s -U %s -I %d.%d.%d.%d -c \"mount %s\"",
+					sdir->getText().c_str(), pass->getText().c_str(), user->getText().c_str(),
+					ip->getNumber(0),ip->getNumber(1),
+					ip->getNumber(2),ip->getNumber(3),
+					ldir->getText().c_str());
 				break;
 			}
 			default:
 				errorMessage("not supported network file system");
 				return;
 		}
-		opt+=' ';
-		opt+=ldir->getText().c_str();
 
 		if (!mountContainer)
 		{
@@ -1387,7 +1411,10 @@ void eNFSSetup::mountPressed()
 			mountContainer = new eConsoleAppContainer(opt.c_str());
 			CONNECT(mountContainer->appClosed, eNFSSetup::appClosed);
 		}
-		timeout.start(3000,true);
+		if ( fstype == 2 )
+		    timeout.start(1500,true);
+		else
+		    timeout.start(3000,true);
 	}
 }
     
@@ -1395,8 +1422,9 @@ void eNFSSetup::umountPressed()
 {
 	eString error;
 
+	int tmp = (int)combo_fstype->getCurrent()->getKey();
 	error.sprintf("%s umount '%s' %s",
-		(int)combo_fstype->getCurrent()->getKey()?"CIFS":"NFS",
+		tmp==2?"SMBFS":tmp==1?"CIFS":"NFS",
 		ldir->getText().c_str(),
 		umount2(ldir->getText().c_str(), MNT_FORCE)?"FAILED!":"OK!");
 
@@ -1405,8 +1433,7 @@ void eNFSSetup::umountPressed()
 
 void eNFSSetup::mountTimeout()
 {
-	delete mountContainer;
-	mountContainer=0;
+	appClosed(0);
 }
 
 void eNFSSetup::appClosed(int)
@@ -1417,9 +1444,10 @@ void eNFSSetup::appClosed(int)
 	if ( timeout.isActive() )
 		timeout.stop();
 
+	int tmp = (int)combo_fstype->getCurrent()->getKey();
 	eString error;
 	error.sprintf("%s mount '%d.%d.%d.%d/%s %s' %s",
-		(int)combo_fstype->getCurrent()->getKey()?"CIFS":"NFS",
+		tmp==2?"SMBFS":tmp==1?"CIFS":"NFS",
 		ip->getNumber(0),ip->getNumber(1),
 		ip->getNumber(2),ip->getNumber(3),
 		sdir->getText().c_str(),
