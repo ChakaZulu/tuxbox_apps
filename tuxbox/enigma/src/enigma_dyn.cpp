@@ -434,13 +434,6 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	return "<script language=\"javascript\">window.close();</script>";
 }
 
-static eString setSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-
-	return "<script language=\"javascript\">window.close();</script>";
-}
-
 static eString setScreen(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -493,14 +486,50 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 
 static eString selectSubChannel(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString requester = opt["requester"];
-
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString subChannels = "<option>no subchannels available</option>";
 
-	eString subChannels;
+	eString curServiceRef = ref2string(eServiceInterface::getInstance()->service);
+	if (curServiceRef)
+	{
+		char nspace[128];
+		sscanf(curServiceRef.c_str(), "%*s:%*s:%*s:%*s:%*s:%*s:%s:%*s:%*s:%*s", nspace);
+		EIT *eit = eDVB::getInstance()->getEIT();
+		if (eit)
+		{
+			subChannels = "";
+			int service_id = eit->service_id;
+			int original_network_id = eit->original_network_id;
+			int transport_stream_id = eit->transport_stream_id;
+			ePtrList<EITEvent>::iterator s(eit->events);
+			for (ePtrList<Descriptor>::iterator d(s->descriptor); d != s->descriptor.end(); ++d)
+			{
+				if (d->Tag() == DESCR_PRIV_DATA_SPEC)
+				{
+					char tmp[256];
+					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
+					if ((unsigned int)ld->priv_len < sizeof(tmp))
+						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
+					else
+						strcpy(tmp, "buffer too small");
+					eString subService(tmp);
 
-	subChannels = "<option>no subchannels available</option>";
+					eString subServiceRef = "1:0:7:" + eString().sprintf("%04x", service_id) + eString().sprintf("%04x", transport_stream_id) + eString().sprintf("%04x", original_network_id)
+							  + eString(nspace) + ":0:0:0";
+
+					printf("[SELECTSUBCHANNEL] %s|%s|%s\n", curServiceRef.c_str(), subServiceRef.c_str(), subService.c_str());
+
+					if (subServiceRef == curServiceRef)
+						subChannels += "<option selected value=\"" + subServiceRef + "\">";
+					else
+						subChannels += "<option value=\"" + subServiceRef + "\">";
+					subChannels += subService;
+					subChannels += "</option>";
+				}
+			}
+			eit->unlock();
+		}
+	}
 
 	eString result = readFile(TEMPLATE_DIR + "subChannelSelection.tmp");
 	result.strReplace("#SUBCHANS#", subChannels);
@@ -4026,7 +4055,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectSubChannel", selectSubChannel, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setSubChannel", setSubChannel, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setScreen", setScreen, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB, lockWeb);
