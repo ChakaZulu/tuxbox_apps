@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <zapit/basicclient.h>
 #include <sectionsdclient/sectionsdMsg.h>
 
 
@@ -56,17 +57,12 @@ class CChannelEvent
 
 typedef vector<CChannelEvent> CChannelEventList;
 
-class CSectionsdClient
+class CSectionsdClient : private CBasicClient
 {
  private:
-        int sock_fd;
 
-	bool sectionsd_connect();
-	bool send_data(char* data, const size_t size);
-	bool receive(char* data, int size);
 	int readResponse(char* data = NULL, int size= 0);
-	bool sectionsd_close();
-	void send(const unsigned char command, char* data, const unsigned int size, const unsigned char version);
+	bool send(const unsigned char command, char* data, const unsigned int size, const unsigned char version);
 
  public:
 		enum events
@@ -113,10 +109,6 @@ class CSectionsdClient
 			ein beliebiges Event abmelden
 		*/
 		void unRegisterEvent(unsigned int eventID, unsigned int clientID);
-
-		/* construktor */
-		CSectionsdClient();
-
 
 };
 

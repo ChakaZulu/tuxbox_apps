@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.24 2002/10/13 21:21:49 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.25 2002/10/14 20:03:56 thegoodguy Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.25  2002/10/14 20:03:56  thegoodguy
+  Use CBasicClient in sectionsdclient, too ; always close_connection (even when the sectionsd did not respond)
+
   Revision 1.24  2002/10/13 21:21:49  thegoodguy
   Cleanup includes
 
@@ -93,108 +96,35 @@
 
 */
 #include <stdio.h>
-#include <unistd.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
+//#include <netinet/in.h>
+//#include <netinet/in_systm.h>
+//#include <netinet/ip.h>
+//#include <netdb.h>
+//#include <arpa/inet.h>
 
 
 #include <eventserver.h>
 #include <sectionsdclient/sectionsdclient.h>
 
-
-CSectionsdClient::CSectionsdClient()
-{
-	sock_fd = 0;
-}
-
-bool CSectionsdClient::sectionsd_connect()
-{
-	struct sockaddr_un servaddr;
-	int clilen;
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, SECTIONSD_UDS_NAME);
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-
-	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("[sectionsdclient] socket");
-		return false;
-	}
-
-	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
-	{
-  		perror("[sectionsdclient] connect");
-		sectionsd_close();
-		return false;
-	}
-	return true;
-}
-
 int CSectionsdClient::readResponse(char* data, int size)
 {
 	struct sectionsd::msgResponseHeader responseHeader;
-    receive((char*)&responseHeader, sizeof(responseHeader));
+    receive_data((char*)&responseHeader, sizeof(responseHeader));
 
 	if ( data != NULL )
 	{
 		if ( responseHeader.dataLength != size )
 			return -1;
 		else
-			return receive(data, size);
+			return receive_data(data, size);
 	}
 	else
 		return responseHeader.dataLength;
 }
 
 
-bool CSectionsdClient::sectionsd_close()
-{
-	if(sock_fd!=0)
-	{
-		close(sock_fd);
-		sock_fd=0;
-	}
-
-	return true;
-}
-
-bool CSectionsdClient::send_data(char* data, const size_t size)
-{
-	if(sock_fd)
-	{
-		if (write(sock_fd, data, size) == (ssize_t)size)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool CSectionsdClient::receive(char* data, int size)
-{
-	if(sock_fd)
-	{
-		if (read(sock_fd, data, size) > 0)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void CSectionsdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0, const unsigned char version = 2)
+bool CSectionsdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0, const unsigned char version = 2)
 {
 	sectionsd::msgRequestHeader msgHead;
 
@@ -202,11 +132,15 @@ void CSectionsdClient::send(const unsigned char command, char* data = NULL, cons
 	msgHead.command    = command;
 	msgHead.dataLength = size;
 
-	sectionsd_connect();
+	open_connection(SECTIONSD_UDS_NAME); // if the return value is false, the next send_data call will return false, too
 
-	send_data((char*)&msgHead, sizeof(msgHead));
-	if (size != 0)
-		send_data(data, size);
+        if (!send_data((char*)&msgHead, sizeof(msgHead)))
+            return false;
+
+        if (size != 0)
+            return send_data(data, size);
+
+        return true;
 }
 
 void CSectionsdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
@@ -220,7 +154,7 @@ void CSectionsdClient::registerEvent(unsigned int eventID, unsigned int clientID
 	
 	send(sectionsd::CMD_registerEvents, (char*)&msg2, sizeof(msg2), 3);
 
-	sectionsd_close();
+	close_connection();
 }
 
 void CSectionsdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
@@ -232,28 +166,25 @@ void CSectionsdClient::unRegisterEvent(unsigned int eventID, unsigned int client
 
 	send(sectionsd::CMD_unregisterEvents, (char*)&msg2, sizeof(msg2), 3);
 
-	sectionsd_close();
+	close_connection();
 }
 
 bool CSectionsdClient::getIsTimeSet()
 {
-	sectionsd::msgRequestHeader msg;
 	sectionsd::responseIsTimeSet rmsg;
 
-	msg.version = 2;
-	msg.command = sectionsd::getIsTimeSet;
-	msg.dataLength = 0;
-
-	if ( sectionsd_connect() )
+	if (send(sectionsd::getIsTimeSet))
 	{
-		send_data((char*)&msg, sizeof(msg));
 		readResponse((char*)&rmsg, sizeof(rmsg));
-		sectionsd_close();
+		close_connection();
 
 		return rmsg.IsTimeSet;
 	}
 	else
+	{
+		close_connection();
 		return false;
+	}
 }
 
 
@@ -262,7 +193,7 @@ void CSectionsdClient::setEventsAreOldInMinutes(const unsigned short minutes)
 	send(sectionsd::setEventsAreOldInMinutes, (char*)&minutes, sizeof(minutes));
 
 	readResponse();
-	sectionsd_close();
+	close_connection();
 }
 
 void CSectionsdClient::setPauseSorting(const bool doPause)
@@ -272,7 +203,7 @@ void CSectionsdClient::setPauseSorting(const bool doPause)
 	send(sectionsd::pauseSorting, (char*)&PauseIt, sizeof(PauseIt));
 
 	readResponse();
-	sectionsd_close();
+	close_connection();
 }
 
 void CSectionsdClient::setPauseScanning(const bool doPause)
@@ -282,7 +213,7 @@ void CSectionsdClient::setPauseScanning(const bool doPause)
 	send(sectionsd::pauseScanning, (char*)&PauseIt, sizeof(PauseIt));
 
 	readResponse();
-	sectionsd_close();
+	close_connection();
 }
 
 void CSectionsdClient::setServiceChanged(const unsigned ServiceKey, const bool requestEvent)
@@ -295,33 +226,24 @@ void CSectionsdClient::setServiceChanged(const unsigned ServiceKey, const bool r
 	send(sectionsd::serviceChanged, pData, 8);
 
 	readResponse();
-	sectionsd_close();
+	close_connection();
 }
 
 
 bool CSectionsdClient::getComponentTagsUniqueKey( unsigned long long uniqueKey, sectionsd::ComponentTagList& tags )
 {
-	sectionsd::msgRequestHeader msg;
-
-	msg.version = 2;
-	msg.command = sectionsd::ComponentTagsUniqueKey;
-	msg.dataLength = sizeof(uniqueKey);
-
-	if ( sectionsd_connect() )
+	if (send(sectionsd::ComponentTagsUniqueKey, (char*)&uniqueKey, sizeof(uniqueKey)))
 	{
-        tags.clear();
-
-		send_data((char*)&msg, sizeof(msg));
-		send_data((char*)&uniqueKey, sizeof(uniqueKey));
+		tags.clear();
 
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive(pData, nBufSize);
-        char* dp = pData;
+		receive_data(pData, nBufSize);
+		char* dp = pData;
 
-        int	count= *(int *) pData;
-        dp+= sizeof(int);
+		int	count= *(int *) pData;
+		dp+= sizeof(int);
 
 		sectionsd::responseGetComponentTags response;
 		for (int i= 0; i<count; i++)
@@ -337,37 +259,31 @@ bool CSectionsdClient::getComponentTagsUniqueKey( unsigned long long uniqueKey, 
 
 			tags.insert( tags.end(), response);
 		}
-		sectionsd_close();
+		close_connection();
 
 		return true;
 	}
 	else
+	{
+		close_connection();
 		return false;
+	}
 }
 
 bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long uniqueKey, sectionsd::LinkageDescriptorList& descriptors )
 {
-	sectionsd::msgRequestHeader msg;
-
-	msg.version = 2;
-	msg.command = sectionsd::LinkageDescriptorsUniqueKey;
-	msg.dataLength = sizeof(uniqueKey);
-
-	if ( sectionsd_connect() )
+	if (send(sectionsd::LinkageDescriptorsUniqueKey, (char*)&uniqueKey, sizeof(uniqueKey)))
 	{
-        descriptors.clear();
-
-		send_data((char*)&msg, sizeof(msg));
-		send_data((char*)&uniqueKey, sizeof(uniqueKey));
+		descriptors.clear();
 
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive(pData, nBufSize);
-        char* dp = pData;
+		receive_data(pData, nBufSize);
+		char* dp = pData;
 
-        int	count= *(int *) pData;
-        dp+= sizeof(int);
+		int	count= *(int *) pData;
+		dp+= sizeof(int);
 
 		sectionsd::responseGetLinkageDescriptors response;
 		for (int i= 0; i<count; i++)
@@ -383,35 +299,29 @@ bool CSectionsdClient::getLinkageDescriptorsUniqueKey( unsigned long long unique
 
 			descriptors.insert( descriptors.end(), response);
 		}
-		sectionsd_close();
+		close_connection();
 		return true;
 	}
 	else
+	{
+		close_connection();
 		return false;
+	}
 }
 
 bool CSectionsdClient::getNVODTimesServiceKey( unsigned serviceKey, sectionsd::NVODTimesList& nvod_list )
 {
-	sectionsd::msgRequestHeader msg;
-
-	msg.version = 2;
-	msg.command = sectionsd::timesNVODservice;
-	msg.dataLength =  sizeof(serviceKey);
-
-	if ( sectionsd_connect() )
+	if (send(sectionsd::timesNVODservice, (char*)&serviceKey, sizeof(serviceKey)))
 	{
-        nvod_list.clear();
-
-		send_data((char*)&msg, sizeof(msg));
-		send_data((char*)&serviceKey, sizeof(serviceKey));
+		nvod_list.clear();
 
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive(pData, nBufSize);
-        char* dp = pData;
+		receive_data(pData, nBufSize);
+		char* dp = pData;
 
-        sectionsd::responseGetNVODTimes response;
+		sectionsd::responseGetNVODTimes response;
 
 		while( dp< pData+ nBufSize )
 		{
@@ -422,32 +332,26 @@ bool CSectionsdClient::getNVODTimesServiceKey( unsigned serviceKey, sectionsd::N
 
 			nvod_list.insert( nvod_list.end(), response);
 		}
-		sectionsd_close();
+		close_connection();
 		return true;
 	}
 	else
+	{
+		close_connection();
 		return false;
+	}
 }
 
 
 bool CSectionsdClient::getCurrentNextServiceKey( unsigned serviceKey, sectionsd::responseGetCurrentNextInfoChannelID& current_next )
 {
-	sectionsd::msgRequestHeader msg;
-
-	msg.version = 2;
-	msg.command = sectionsd::currentNextInformationID;
-	msg.dataLength = sizeof(serviceKey);
-
-	if ( sectionsd_connect() )
+	if (send(sectionsd::currentNextInformationID, (char*)&serviceKey, sizeof(serviceKey)))
 	{
-		send_data((char*)&msg, sizeof(msg));
-		send_data((char*)&serviceKey, sizeof(serviceKey));
-
 		int nBufSize = readResponse();
 
 		char* pData = new char[nBufSize];
-		receive(pData, nBufSize);
-        char* dp = pData;
+		receive_data(pData, nBufSize);
+		char* dp = pData;
 
 		// current
 		current_next.current_uniqueKey = *((unsigned long long *)dp);
@@ -470,11 +374,14 @@ bool CSectionsdClient::getCurrentNextServiceKey( unsigned serviceKey, sectionsd:
 
 		current_next.current_fsk = *(char*) dp;
 
-		sectionsd_close();
+		close_connection();
 		return true;
 	}
 	else
+	{
+		close_connection();
 		return false;
+	}
 }
 
 
@@ -483,22 +390,14 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 {
 	CChannelEventList eList;
 
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-
-	req.command = sectionsd::actualEventListTVshortIDs;
-	req.dataLength = 0;
-	if ( sectionsd_connect() )
+	if (send(sectionsd::actualEventListTVshortIDs))
 	{
-		send_data((char*)&req, sizeof(req));
-
 		int nBufSize = readResponse();
 
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive(pData, nBufSize);
-			sectionsd_close();
+			receive_data(pData, nBufSize);
 
 			char* dp = pData;
 
@@ -521,13 +420,12 @@ CChannelEventList CSectionsdClient::getChannelEvents()
 				aEvent.text= dp;
 				dp+=strlen(dp)+1;
 
-				eList.insert(eList.end(), aEvent);
+				eList.push_back(aEvent);
 			}
 			delete[] pData;
 		}
 	}
-	else
-		printf("no connection to sectionsd\n");
+	close_connection();
 	return eList;
 }
 
@@ -535,23 +433,14 @@ CChannelEventList CSectionsdClient::getEventsServiceKey( unsigned serviceKey )
 {
 	CChannelEventList eList;
 
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-
-	req.command = sectionsd::allEventsChannelID_;
-	req.dataLength = sizeof(serviceKey);
-	if ( sectionsd_connect() )
+	if (send(sectionsd::allEventsChannelID_, (char*)&serviceKey, sizeof(serviceKey)))
 	{
-		send_data((char*)&req, sizeof(req));
-		send_data((char*)&serviceKey, sizeof(serviceKey));
-
 		int nBufSize = readResponse();
 
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive(pData, nBufSize);
-			sectionsd_close();
+			receive_data(pData, nBufSize);
 
 			char* dp = pData;
 
@@ -574,36 +463,29 @@ CChannelEventList CSectionsdClient::getEventsServiceKey( unsigned serviceKey )
 				aEvent.text= dp;
 				dp+=strlen(dp)+1;
 
-				eList.insert(eList.end(), aEvent);
+				eList.push_back(aEvent);
 			}
 			delete[] pData;
 		}
 	}
-	else
-		printf("no connection to sectionsd\n");
+
+	close_connection();
 	return eList;
 }
 
 bool CSectionsdClient::getActualEPGServiceKey( unsigned serviceKey, CEPGData * epgdata)
 {
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-
-	req.command = sectionsd::actualEPGchannelID;
-	req.dataLength = sizeof(serviceKey);
 	epgdata->title = "";
 
-	if ( sectionsd_connect() )
+	if (send(sectionsd::actualEPGchannelID, (char*)&serviceKey, sizeof(serviceKey)))
 	{
-		send_data((char*)&req, sizeof(req));
-		send_data((char*)&serviceKey, sizeof(serviceKey));
-
 		int nBufSize = readResponse();
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive(pData, nBufSize);
-			sectionsd_close();
+			receive_data(pData, nBufSize);
+
+			close_connection();
 
 			char* dp = pData;
 
@@ -633,8 +515,9 @@ bool CSectionsdClient::getActualEPGServiceKey( unsigned serviceKey, CEPGData * e
 		else
 			printf("no response from sectionsd\n");
 	}
-	else
-		printf("no connection to sectionsd\n");
+
+	close_connection();
+
 	return false;
 }
 
@@ -646,7 +529,7 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 
 	req.command = sectionsd::epgEPGid;
 	req.dataLength = sizeof(eventid)+ sizeof(starttime);
-	if ( sectionsd_connect() )
+	if (open_connection(SECTIONSD_UDS_NAME))
 	{
 		send_data((char*)&req, sizeof(req));
 		send_data((char*)&eventid, sizeof(eventid));
@@ -656,8 +539,8 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive(pData, nBufSize);
-			sectionsd_close();
+			receive_data(pData, nBufSize);
+			close_connection();
 
 			char* dp = pData;
 
@@ -687,30 +570,24 @@ bool CSectionsdClient::getEPGid( unsigned long long eventid,time_t starttime,CEP
 		else
 			printf("no response from sectionsd\n");
 	}
-	else
-		printf("no connection to sectionsd\n");
+
+	close_connection();
+
 	return false;
 }
 
 
 bool CSectionsdClient::getEPGidShort( unsigned long long eventid,CShortEPGData * epgdata)
 {
-	sectionsd::msgRequestHeader req;
-	req.version = 2;
-
-	req.command = sectionsd::epgEPGidShort;
-	req.dataLength = 8;
-	if ( sectionsd_connect() )
+	if (send(sectionsd::epgEPGidShort, (char*)&eventid, sizeof(eventid)))
 	{
-		send_data((char*)&req, sizeof(req));
-		send_data((char*)&eventid, sizeof(eventid));
-
 		int nBufSize = readResponse();
 		if( nBufSize > 0)
 		{
 			char* pData = new char[nBufSize];
-			receive(pData, nBufSize);
-			sectionsd_close();
+			receive_data(pData, nBufSize);
+
+			close_connection();
 
 			char* dp = pData;
 
@@ -733,9 +610,8 @@ bool CSectionsdClient::getEPGidShort( unsigned long long eventid,CShortEPGData *
 		else
 			printf("no response from sectionsd\n");
 	}
-	else
-		printf("no connection to sectionsd\n");
+
+	close_connection();
+	
 	return false;
 }
-
-

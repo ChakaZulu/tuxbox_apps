@@ -1,6 +1,7 @@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
-	@EVENTSERVER_CFLAGS@
+	@EVENTSERVER_CFLAGS@ \
+	@ZAPIT_CFLAGS@
 
 lib_LTLIBRARIES  = libsectionsdclient.la
 
