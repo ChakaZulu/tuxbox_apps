@@ -20,7 +20,7 @@
 #include <lib/gdi/glcddc.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/actions.h>
-#include <lib/system/econfig.h>
+#include <lib/system/nconfig.h>
 #include <lib/system/httpd.h>
 #include <lib/system/http_file.h>
 #include <lib/system/http_dyn.h>
