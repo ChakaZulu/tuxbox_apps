@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.57 2002/01/05 16:39:32 Simplex Exp $
+  $Id: zapit.cpp,v 1.58 2002/01/06 19:12:20 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.58  2002/01/06 19:12:20  Simplex
+  use clientlib for zapit
+
   Revision 1.57  2002/01/05 16:39:32  Simplex
   completed commands for bouquet-editor
 
@@ -303,7 +306,7 @@
 #include "zapit.h"
 #include "lcddclient.h"
 
-#include "clientlib/zapitclient.h"
+#include <zapitclient.h>
 
 
 CLcddClient lcdd;
@@ -2393,7 +2396,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.57 2002/01/05 16:39:32 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.58 2002/01/06 19:12:20 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
