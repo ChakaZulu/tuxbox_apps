@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.5  2001/03/14 17:04:53  gillem
+ *   - fix mute/unmute
+ *
  *   Revision 1.4  2001/03/03 17:50:19  gillem
  *   - fix dev filename
  *
@@ -34,7 +37,7 @@
  *
  *
  *
- *   $Revision: 1.4 $
+ *   $Revision: 1.5 $
  *
  */
 
@@ -224,7 +227,7 @@ void volume_set(int i) {
 void volume_mute() {
   int i;
   
-  i=AVS_MUTE_IM;
+  i=1; //AVS_MUTE_IM;
   if (ioctl(fd,AVSIOSMUTE,&i)< 0) {
     perror("AVSIOSMUTE:");
   }
@@ -233,7 +236,7 @@ void volume_mute() {
 void volume_unmute() {
   int i;
   
-  i=AVS_UNMUTE_IM;
+  i=0; //AVS_UNMUTE_IM;
   if (ioctl(fd,AVSIOSMUTE,&i)< 0) {
     perror("AVSIOSMUTE:");
   }
