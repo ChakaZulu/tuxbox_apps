@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.16 2001/09/20 10:38:41 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.17 2001/09/20 19:22:10 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,8 +25,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
-//  Revision 1.16  2001/09/20 10:38:41  fnbrd
-//  neue Kommandoformat
+//  Revision 1.17  2001/09/20 19:22:10  fnbrd
+//  Changed format of eventlists with IDs
 //
 //  Revision 1.15  2001/09/18 18:15:28  fnbrd
 //  2 new commands.
@@ -216,15 +216,18 @@ struct sectionsd {
 //   data of request:
 //     -
 //   data of response:
-//     is a string (c-string) with all cached actual events,
-//     3 lines per service, first line unique-event-key, second line unique-service-key, third line event name
+//     for every service:
+//       1. unique-service-key (4 bytes)
+//       2. unique-event-key (8 bytes) 
+//       3. event name (c-string with 0)
 //
 // actualEventListRadioShortIDs:
 //   data of request:
 //     -
 //   data of response:
-//     is a string (c-string) with all cached actual events,
-//     3 lines per service, first line unique-event-key, second line unique-service-key, third line event name
+//       1. unique-service-key (4 bytes)
+//       2. unique-event-key (8 bytes) 
+//       3. event name (c-string with 0)
 //
 // currentNextInformationID:
 //   data of request:

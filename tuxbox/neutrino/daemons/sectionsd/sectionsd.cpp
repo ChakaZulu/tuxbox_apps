@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.57 2001/09/20 12:53:22 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.58 2001/09/20 19:22:10 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.58  2001/09/20 19:22:10  fnbrd
+//  Changed format of eventlists with IDs
+//
 //  Revision 1.57  2001/09/20 12:53:22  fnbrd
 //  More speed with event list.More speed with event list.More speed with event list.More speed with event list.More speed with event list.More speed with event list.More speed with event list.
 //
@@ -1106,7 +1109,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.57 2001/09/20 12:53:22 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.58 2001/09/20 19:22:10 fnbrd Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1500,32 +1503,42 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
       SItime zeit(0, 0);
 //      dprintf("Servicename: '%s', Servicetyp: 0x%hhx, uniqueKey: %08x\n", s->second->serviceName.c_str(), s->second->serviceTyp, s->first);
       const SIevent &evt=findActualSIeventForServiceUniqueKey(s->first, zeit);
-      if(evt.serviceID!=0) {	
-        sprintf(liste, "%012llx\n", evt.uniqueKey());
-	liste+=13;
+      if(evt.serviceID!=0) {
 	if(sendServiceName) {
-	  strcpy(liste, s->second->serviceName.c_str());
+          sprintf(liste, "%012llx\n", evt.uniqueKey());
+	  liste+=13;
+          strcpy(liste, s->second->serviceName.c_str());
 	  liste+=strlen(s->second->serviceName.c_str());
 	  *liste='\n';
 	  liste++;
- 	}
+	  strcpy(liste, evt.name.c_str());
+	  liste+=strlen(evt.name.c_str());
+	  *liste='\n';
+	  liste++;
+	} // if sendServiceName
 	else {
-          sprintf(liste, "%08x\n", s->second->uniqueKey());
-	  liste+=9;
-	}
-        strcpy(liste, evt.name.c_str());
-        liste+=strlen(evt.name.c_str());
-	*liste='\n';
-	liste++;
+	  *((unsigned *)liste)=s->first;
+	  liste+=4;
+          *((unsigned long long *)liste)=evt.uniqueKey();
+	  liste+=8;
+	  strcpy(liste, evt.name.c_str());
+	  liste+=strlen(evt.name.c_str());
+	  *liste=0;
+	  liste++;
+	} // else !sendServiceName
       }
     } // if ==serviceTyp
-  *liste=0;
+  if(sendServiceName) {
+    *liste=0;
+    liste++;
+  }
   unlockEvents();
   unlockServices();
   dmxSDT.unpause();
   dmxEIT.unpause();
   struct sectionsd::msgResponseHeader msgResponse;
-  msgResponse.dataLength=strlen(evtList)+1;
+  msgResponse.dataLength=liste-evtList;
+//  msgResponse.dataLength=strlen(evtList)+1;
   if(msgResponse.dataLength==1)
     msgResponse.dataLength=0;
   if(writeNbytes(client->connectionSocket, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS)>0) {
@@ -1612,7 +1625,7 @@ static void commandEventListTVids(struct connectionData *client, char *data, con
 {
   if(dataLength)
     return;
-  dputs("Request of TV event list.\n");
+  dputs("Request of TV event list (IDs).\n");
   sendEventList(client, 0x01, 0x04, 0);
   return;
 }
@@ -1630,7 +1643,7 @@ static void commandEventListRadioIDs(struct connectionData *client, char *data, 
 {
   if(dataLength)
     return;
-  dputs("Request of radio event list.\n");
+  dputs("Request of radio event list (IDs).\n");
   sendEventList(client, 0x02, 0, 0);
   return;
 }
@@ -2338,7 +2351,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.57 2001/09/20 12:53:22 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.58 2001/09/20 19:22:10 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
