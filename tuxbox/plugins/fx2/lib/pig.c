@@ -2,9 +2,10 @@
 ** initial coding by fx2
 */
 
-#include <stdio.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <stropts.h>
+#include <unistd.h>
 
 #ifndef i386
 #include <dbox/avia_gt_pig.h>
@@ -83,9 +84,9 @@ void	Fx2PigResume( void )
 
 #else
 
-#include <draw.h>
+#include "draw.h"
 
-		int			fx2_use_pig = 1;
+	int			fx2_use_pig = 1;
 static	int			l_x = 0;
 static	int			l_y = 0;
 static	int			l_width = 0;

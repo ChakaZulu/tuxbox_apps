@@ -2,27 +2,30 @@
 ** initial coding by fx2
 */
 
-#include <stdio.h>
-#include <termios.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 #include <unistd.h>
-#include <rcinput.h>
-#include <draw.h>
-
-static	int				fd = -1;
-static	int				kbfd = -1;
-		unsigned short	realcode=0xee;
-		unsigned short	actcode=0xee;
-		int				doexit=0;
-		int				debug=0;
-
-#define Debug	if(debug)printf
 
 #ifdef i386
 #define RC_IOCTL_BCODES 0
 #else
 #include <dbox/fp.h>
 #endif
+
+#include "draw.h"
+#include "rcinput.h"
+
+#define Debug	if (debug) printf
+
+static	int	fd = -1;
+static	int	kbfd = -1;
+unsigned short	realcode=0xee;
+unsigned short	actcode=0xee;
+int		doexit=0;
+int		debug=0;
 
 static	struct termios	tios;
 
