@@ -1089,6 +1089,9 @@ void eDVBCI::dataAvailable(int what)
 
 	if(present!=1)						//CI removed
 	{
+		char *buf="REMOVE";
+		ci_mmi_progress(buf,6);
+
 		eDebug("[DVBCI] module removed");	
 		memset(appName,0,sizeof(appName));
 		ci_progress(_("no module"));
