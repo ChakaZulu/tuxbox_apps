@@ -711,9 +711,10 @@ movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.choosestreamfile Datei via VLC
-movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.\nDies kann bis zu 30 Sekunden dauern!
+movieplayer.pleasewait Bitte warten Sie.\nDie Verbindung zum Streamingserver wird hergestellt.
 movieplayer.nostreamingserver Es konnte keine Verbindung\nzum Streamingserver hergestellt werden.
 movieplayer.defdir Start-Verz.
+movieplayer.buffering Puffern...
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter an

@@ -711,9 +711,10 @@ movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
 movieplayer.choosestreamfile File via VLC
-movieplayer.pleasewait Please wait.\nConnecting to the streaming server...\nThis could take up to 30 seconds!
+movieplayer.pleasewait Please wait.\nConnecting to the streaming server...
 movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.defdir start dir.
+movieplayer.buffering Buffering...
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter on
