@@ -11,6 +11,7 @@
 
 #include <core/base/eerror.h>
 #include <core/dvb/edvb.h>
+#include <core/dvb/decoder.h>
 #include <core/system/init.h>
 #include <core/system/econfig.h>
 
