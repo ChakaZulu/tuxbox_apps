@@ -112,10 +112,9 @@ class CMenuItem
 		{
 			return -1;
 		}
-		virtual int getHeight(void) const
-		{
-			return -1;
-		}
+
+		virtual int getHeight(void) const = 0;
+
 		virtual bool isSelectable(void) const
 		{
 			return false;
