@@ -5,7 +5,7 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Sun Nov 23 16:58:27 CET 2003\nLast-Translator: unknown\nLanguage-Team: Dutch / Michel Weeren <sales@dream-multimedia.nl>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Mon Nov 24 13:33:57 CET 2003\nLast-Translator: unknown\nLanguage-Team: Dutch / Michel Weeren <sales@dream-multimedia.nl>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
 #: lib/dvb/serviceplaylist.cpp:123
 #, c-format
@@ -127,10 +127,9 @@ msgid "(removed service)"
 msgstr "(verwijderd item)"
 
 #: default.esml:439
-#, fuzzy
 
 msgid "/sec"
-msgstr "zoeken"
+msgstr "/sec"
 
 #: default.esml:384
 
@@ -150,7 +149,7 @@ msgstr "16:9"
 #: src/satconfig.cpp:61
 
 msgid "2 LNBs via 22Khz Signal.. special for old analog switches"
-msgstr ""
+msgstr "2 LNBs via 22Khz signaal.. speciaal voor oude analoge schakelaars"
 
 #: src/satconfig.cpp:62
 
@@ -248,13 +247,11 @@ msgid "<    Stop    >"
 msgstr "< Stop >"
 
 #: src/enigma_main.cpp:4002
-#, fuzzy
 
 msgid "A recording is currently in progress!\nThis stops the recording!"
 msgstr "Op dit moment is opname geaktiveerd!\nHiermee stopt de opname!"
 
 #: src/enigma_main.cpp:3992
-#, fuzzy
 
 msgid "A timer based recording is currently in progress!\nThis stops the timer, and recording!"
 msgstr "Op dit moment wordt automatisch opgenomen! (timer)\nAls u nu bevestigd, stopt de timer en daarmee de opname!"
@@ -290,15 +287,14 @@ msgid "AC3 default output"
 msgstr "AC3 standaard uitgang"
 
 #: src/enigma_main.cpp:5643
-#, fuzzy
 
 msgid "activate mode to simply add many services to a selectable bouquet"
-msgstr "service aan een specifiek boeket toevoegen"
+msgstr "eenvoudig meerdere services aan een te selecteren boeket toevoegen activeren"
 
 #: src/enigma_main.cpp:5606
 
 msgid "activate mode to simply change the entry order"
-msgstr ""
+msgstr "activeer de eenvoudige sorteer modus"
 
 #: default.esml:463 default.esml:699 default.esml:886
 
@@ -361,10 +357,9 @@ msgid "add only unscrambled services"
 msgstr "alleen ongecodeerde services toevoegen"
 
 #: src/enigma_main.cpp:5558
-#, fuzzy
 
 msgid "add selected service to the playlist"
-msgstr "item toevoegen aan uw playlist"
+msgstr "de geselecteerde service toevoegen aan de playlist"
 
 #: src/sselect.cpp:113
 
@@ -382,16 +377,14 @@ msgid "Add services to bouquet"
 msgstr "services aan een boeket toevoegen"
 
 #: src/enigma_main.cpp:5616
-#, fuzzy
 
 msgid "add the selected service to a selectable bouquet"
-msgstr "meerdere services aan een specifiek boeket toevoegen"
+msgstr "de geselecteerde service aan een te selecteren boeket toevoegen"
 
 #: src/enigma_main.cpp:5581
-#, fuzzy
 
 msgid "add the selected service to another bouquet"
-msgstr "meerdere services aan een specifiek boeket toevoegen"
+msgstr "de geselecteerde services aan een ander boeket toevoegen"
 
 #: src/enigma_event.cpp:20
 
@@ -549,16 +542,14 @@ msgid "audio track"
 msgstr "audio track"
 
 #: src/enigma_main.cpp:772
-#, fuzzy
 
 msgid "Audiotrack"
-msgstr "audio track"
+msgstr "Audiotrack"
 
 #: src/enigma_main.cpp:772
-#, fuzzy
 
 msgid "Audiotrack(AC3)"
-msgstr "audio track"
+msgstr "Audiotrack(AC3)"
 
 #: src/timer.cpp:1540
 
@@ -623,7 +614,7 @@ msgstr "beta"
 #: default.esml:488
 
 msgid "bla"
-msgstr ""
+msgstr "bla"
 
 #: src/enigma_bouquet.cpp:18
 
@@ -719,12 +710,12 @@ msgstr "PIN wijzigen"
 #: src/setup_rc.cpp:70
 
 msgid "change remote control repeat delay\nleft => shorter, right => longer (...delay)"
-msgstr ""
+msgstr "Afstandsbediening herhaal vertraging\nlinks => korter, rechts => langer"
 
 #: src/setup_rc.cpp:63
 
 msgid "change remote control repeat rate\nleft => less, right => more (... repeats)"
-msgstr ""
+msgstr "Afstandsbediening herhaal ratio\nlinks => lager, rechts => hoger"
 
 #: src/parentallock.cpp:79
 
@@ -993,10 +984,9 @@ msgid "Cooking"
 msgstr "Koken"
 
 #: src/enigma_main.cpp:5622
-#, fuzzy
 
 msgid "copy the selected provider to the bouquet list"
-msgstr "open de service selectie en geef boeketten weer"
+msgstr "kopieer de geselecteerde privider naar de boeket lijst "
 
 #: src/enigma_main.cpp:5622
 
@@ -1020,10 +1010,9 @@ msgid "Counter(Movement)"
 msgstr "Teller (beweging)"
 
 #: src/enigma_main.cpp:5583
-#, fuzzy
 
 msgid "create a new marker in the current bouquet"
-msgstr "nieuwe markering invoegen"
+msgstr "een nieuwe markering in het boeket aanmaken"
 
 #: src/enigma_main.cpp:3293
 
@@ -1067,10 +1056,9 @@ msgid "current %s PIN"
 msgstr "huidige %s PIN"
 
 #: src/setup_rc.cpp:111
-#, fuzzy
 
 msgid "cursor to next char timeout(msek) in textinputfields"
-msgstr "Cursor to next char timeout(msek) in textinputfields)"
+msgstr "Cursor naar het volgende karakter timeout(msek) in de textinputfields)"
 
 #: src/setupvideo.cpp:58
 
@@ -1119,10 +1107,9 @@ msgid "delete file"
 msgstr "wis bestand"
 
 #: src/enigma_main.cpp:3111
-#, fuzzy
 
 msgid "Delete File"
-msgstr "wis %s"
+msgstr "Bestand wissen"
 
 #: src/rotorconfig.cpp:290 src/rotorconfig.cpp:346
 
@@ -1162,7 +1149,7 @@ msgstr "Item uit de timerlijst verwijderen"
 #: src/enigma_main.cpp:5631
 
 msgid "delete the selected file (and all corresponding ts files"
-msgstr ""
+msgstr "wis het geselecteerde bestand (en alle bijbehorende ts bestanden)"
 
 #: src/setupengrab.cpp:91
 
@@ -1272,12 +1259,12 @@ msgstr "ok"
 #: src/enigma_main.cpp:5653
 
 msgid "do parental-unlock the selected service or file"
-msgstr ""
+msgstr "deblokkeer de geselecteerde service of bestand"
 
 #: src/enigma_main.cpp:5655
 
 msgid "do parentallock the selected service or file"
-msgstr ""
+msgstr "blokkeer de geselecteerde service of bestand"
 
 #: src/scan.cpp:1077
 #, c-format
@@ -1403,7 +1390,7 @@ msgstr "boeket dupliceren"
 #: src/enigma_main.cpp:5578
 
 msgid "duplicate the complete bouquet with all content"
-msgstr ""
+msgstr "dupliceer het gehele boeket en zijn inhoud"
 
 #: default.esml:764
 
@@ -1506,10 +1493,9 @@ msgid "enable/disable ac3 default output (ok)"
 msgstr "AC3 weergave als standaard instellen (ok)"
 
 #: lib/gui/textinput.cpp:20
-#, fuzzy
 
 msgid "enable/disable capslock"
-msgstr "Beveiliging aan-/uitschakelen"
+msgstr "Capslock aan-/uitschakelen"
 
 #: default.esml:507
 
@@ -1652,10 +1638,9 @@ msgid "enter netmask of your network (0..9, left, right)"
 msgstr "Netmask van uw netwerk (0..9, links, rechts)"
 
 #: src/enigma_main.cpp:3162
-#, fuzzy
 
 msgid "Enter new Filename:"
-msgstr "Nieuwe naam:"
+msgstr "Nieuwe bestandsnaam:"
 
 #: src/enigma_main.cpp:3222
 
@@ -2153,7 +2138,7 @@ msgstr "Indien u dit kunt lezen, wekt uw RF-Mod niet."
 #: src/enigma_main.cpp:5819
 
 msgid "immediate stop the recording"
-msgstr ""
+msgstr "stop direct met opnemen"
 
 #: src/setup_harddisk.cpp:431
 #, c-format
@@ -2293,16 +2278,14 @@ msgid "input all digits or press ok to send data"
 msgstr "alle nummers invoeren en op OK drukken om te verzenden"
 
 #: lib/gui/textinput.cpp:22
-#, fuzzy
 
 msgid "insert blank at cursor position"
-msgstr "huidige posities opslaan"
+msgstr "pauze invoegen op cursor positie"
 
 #: default.esml:455
-#, fuzzy
 
 msgid "insert rotor memory cell for this orbital position"
-msgstr "geef aan waar deze orbit positie opgeslagen moet worden in de rotor"
+msgstr "rotor memory cell invoegen voor deze orbit positie"
 
 #: src/enigma_info.cpp:274
 
@@ -2844,10 +2827,9 @@ msgid "ok"
 msgstr "OK"
 
 #: lib/gui/textinput.cpp:34
-#, fuzzy
 
 msgid "ok=leave edit mode, yellow=enable/disable capslock, blue=put numbers before/after chars"
-msgstr "druk op OK om de edit mode te verlaten. Geel = capslock"
+msgstr "ok=edit modues verlaten, geel=capslock aan/uit, blauw=zet nummers voor/achter karakters"
 
 #: src/satconfig.cpp:1158
 
@@ -3217,10 +3199,10 @@ msgid "please wait while initializing harddisk.\nThis might take some minutes.\n
 msgstr "Een ogenblik geduld a.u.b.\nDit kan enkele minuten duren.\n"
 
 #: src/enigma_main.cpp:1065
-#, fuzzy, c-format
+#, c-format
 
 msgid "Please wait while the motor is turning to %d.%d°%c ...."
-msgstr "Een ogenblik geduld. De rotor draait nu naar %d.%d%c ...."
+msgstr "Een ogenblik geduld. De rotor draait nu naar %d.%d°%c ...."
 
 #: src/upgrade.cpp:544
 
@@ -3436,7 +3418,7 @@ msgstr "Providers (TV)"
 #: lib/gui/textinput.cpp:21
 
 msgid "put numbers before/after characters"
-msgstr ""
+msgstr "plaats nummers voor/achter karakters"
 
 #: src/enigma_main.cpp:97
 
@@ -3647,7 +3629,7 @@ msgstr "de geseleceteerde satelliet verwijderen "
 #: lib/gui/textinput.cpp:23
 
 msgid "remove the character at the cursor position"
-msgstr ""
+msgstr "wis het karakter op de huidige cursor positie"
 
 #: default.esml:363
 
@@ -3685,10 +3667,9 @@ msgid "rename file"
 msgstr "bestand hernoemen"
 
 #: src/enigma_main.cpp:3163
-#, fuzzy
 
 msgid "Rename File"
-msgstr "Item hernoemen"
+msgstr "Bestandsnaam wijzigen"
 
 #: src/sselect.cpp:129
 
@@ -3696,31 +3677,29 @@ msgid "rename selected entry"
 msgstr "geselecteerd item hernoemen"
 
 #: src/enigma_main.cpp:5590
-#, fuzzy
 
 msgid "rename the current selected bouquet"
-msgstr "de huidige timer verwijderen (ok)"
+msgstr "het geselecteerde boeket hernoemen"
 
 #: src/enigma_main.cpp:5594
-#, fuzzy
 
 msgid "rename the current selected service/movie"
-msgstr "de huidige timer verwijderen (ok)"
+msgstr "de huidige (geselecteerde) service/movie hernoemen"
 
 #: src/enigma_main.cpp:5632
 
 msgid "rename the selected file (and all corresponding ts files"
-msgstr ""
+msgstr "hernoem het geselecteerde bestand (en alle bijbehorende ts bestanden)"
 
 #: src/setup_rc.cpp:55
 
 msgid "Repeat Delay:"
-msgstr "vertraging:"
+msgstr "Herhaal vertraging:"
 
 #: src/setup_rc.cpp:50
 
 msgid "Repeat Rate:"
-msgstr "herhaalfreq.:"
+msgstr "herhaal ratio:"
 
 #: src/enigma_main.cpp:116
 
@@ -3760,7 +3739,7 @@ msgstr "herstart"
 #: src/enigma_main.cpp:5686 src/enigma_main.cpp:5690
 
 msgid "restart your dreambox"
-msgstr ""
+msgstr "Dreambox herstarten"
 
 #: src/enigma_main.cpp:112
 
@@ -4080,10 +4059,9 @@ msgid "select the timer type (ok)"
 msgstr "selecteer timer type (ok)"
 
 #: src/enigma_main.cpp:5567
-#, fuzzy
 
 msgid "select to create a new bouquet"
-msgstr "nieuw boeket aanmaken"
+msgstr "selecteer om een nieuw boeket aan te maken"
 
 #: default.esml:400
 
@@ -4176,10 +4154,9 @@ msgid "select year (ok)"
 msgstr "jaar selecteren (ok)"
 
 #: default.esml:354
-#, fuzzy
 
 msgid "select your configuration here"
-msgstr "selecteer uw tijd zone (ok)"
+msgstr "selecteer hier uw configuratie"
 
 #: src/setup_rc.cpp:80
 
@@ -5022,10 +4999,9 @@ msgid "Swap Commands"
 msgstr "Commando's wisselen"
 
 #: default.esml:404
-#, fuzzy
 
 msgid "swaps committed and uncommitted DiSEqC Commands"
-msgstr "zend geen commited DiSEqC commando"
+msgstr "commited en uncommitted DiSEqC commando's omdraaien"
 
 #: src/enigma_main.cpp:4742 src/enigma_main.cpp:4747 src/enigma_main.cpp:4757
 #: src/enigma_main.cpp:4765 src/enigma_main.cpp:4772 src/enigma_main.cpp:4777
@@ -5035,10 +5011,9 @@ msgid "switch"
 msgstr "schakelen"
 
 #: src/enigma_main.cpp:5604
-#, fuzzy
 
 msgid "switch move mode off"
-msgstr "schakel naar bestand modus"
+msgstr "verplaats-modus uitschakelen"
 
 #: src/enigma_main.cpp:130 src/sselect.cpp:116
 
@@ -5766,7 +5741,7 @@ msgstr "Ja"
 #, c-format
 
 msgid "You are trying to delete '%s'.\nReally do this?"
-msgstr ""
+msgstr "U wilt '%s' wissen.\nWeet u het zeker?"
 
 #: src/setup_osd.cpp:324
 
