@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.260 2002/05/03 20:22:32 McClean Exp $
+        $Id: neutrino.cpp,v 1.261 2002/05/07 23:39:11 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -478,15 +478,10 @@ int CNeutrinoApp::loadSetup()
 		erg = 2;
 	}
 
-	ifstream is( scanSettingsFile.c_str());
-	if ( !is.is_open())
+	if(!scanSettings.loadSettings(scanSettingsFile))
 	{
-		cout << "error while loading scan-settings!" << endl;
+		printf("error while loading scan-settings!\n");
 		scanSettings.useDefaults();
-	}
-	else
-	{
-		is >> scanSettings;
 	}
 
 	return erg;
@@ -499,16 +494,11 @@ int CNeutrinoApp::loadSetup()
 **************************************************************************************/
 void CNeutrinoApp::saveSetup()
 {
+	if(!scanSettings.saveSettings(scanSettingsFile))
+	{
+		printf("error while saveing scan-settings!\n");
+	}
 
-	ofstream os( scanSettingsFile.c_str(), ios::out | ios::trunc);
-	try
-	{
-		os << scanSettings;
-	}
-	catch (...)
-	{
-		cout << "error while saving scan-settings!" << endl;
-	}
 	//video
 	configfile.setInt( "video_Signal", g_settings.video_Signal );
 	configfile.setInt( "video_Format", g_settings.video_Format );
@@ -951,6 +941,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		for ( uint i=0; i< satList.size(); i++)
 		{
 			ojSat->addOption(satList[i].satName);
+			printf("got scanprovider (sat): %s\n", satList[i].satName );
 		}
 
 		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", &((int)(scanSettings.diseqcRepeat)), scanSettings.diseqcMode != NO_DISEQC/*, new CSatelliteNotifier*/, NULL, false);
@@ -1026,6 +1017,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		for ( uint i=0; i< providerList.size(); i++)
 		{
 			oj->addOption( providerList[i].satName);
+			printf("got scanprovider (cable): %s\n", providerList[i].satName );
 		}
 		settings.addItem( ojBouquets);
 		settings.addItem( ojInv );
@@ -2521,7 +2513,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.260 2002/05/03 20:22:32 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.261 2002/05/07 23:39:11 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.4 2002/04/26 09:56:08 field Exp $
+        $Id: settings.cpp,v 1.5 2002/05/07 23:39:11 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -21,14 +21,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
-#include <iostream>
-#include <string>
 #include "settings.h"
+
 #include "global.h"
+
+#include <string>
 
 using namespace std;
 
 CScanSettings::CScanSettings()
+	: configfile('\t')
 {
 	satNameNoDiseqc[0] = 0;
 	for( int i=0; i<MAX_SATELLITES; i++)
@@ -36,18 +38,6 @@ CScanSettings::CScanSettings()
 		satName[i][0] = 0;
 		satDiseqc[i]  = -1;
 	}
-}
-
-void CScanSettings::useDefaults()
-{
-	bouquetMode = CZapitClient::BM_DONTTOUCHBOUQUETS;
-	diseqcMode = NO_DISEQC;
-	diseqcRepeat = 0;
-
-	if (g_info.fe==1)
-		strcpy( satNameNoDiseqc, "Astra 19.2E");
-	else
-		strcpy( satNameNoDiseqc, "Telekom");
 }
 
 int* CScanSettings::diseqscOfSat( char* satname)
@@ -91,6 +81,102 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 	}
 }
 
+void CScanSettings::useDefaults()
+{
+	bouquetMode = CZapitClient::BM_DONTTOUCHBOUQUETS;
+	diseqcMode = NO_DISEQC;
+	diseqcRepeat = 0;
+
+	if (g_info.fe==1)
+		strcpy( satNameNoDiseqc, "Astra 19.2E");
+	else
+		strcpy( satNameNoDiseqc, "Telekom");
+}
+
+bool CScanSettings::loadSettings( string fileName )
+{
+	if(!configfile.loadConfig(fileName))
+	{
+		//file existiert nicht
+		return false;
+	}
+
+	if(configfile.getInt("fe",-1) != g_info.fe)
+	{
+		//config stammt von sat/kabelbox - passt nicht
+		configfile.clear();
+		return false;
+	}
+
+	diseqcMode = (diseqc_t) configfile.getInt( "diseqcMode", NO_DISEQC );
+	diseqcRepeat = configfile.getInt( "diseqcRepeat", 0 );
+	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt( "bouquetMode", CZapitClient::BM_DONTTOUCHBOUQUETS );
+
+	if (diseqcMode == NO_DISEQC)
+	{
+		strcpy( satNameNoDiseqc, configfile.getString( "satNameNoDiseqc", g_info.fe==1?"Astra 19.2E":"Telekom").c_str() );
+	}
+	else
+	{
+		int satCount = configfile.getInt( "satCount", 0 );
+		for (int i=0; i<satCount; i++)
+		{
+			char tmp[10];
+			sprintf((char*)&tmp, "SatName%d", i);
+			strcpy( satName[i], configfile.getString( tmp, "" ).c_str() );
+			sprintf((char*)&tmp, "satDiseqc%d", i);
+			satDiseqc[i] = configfile.getInt( tmp, -1 );
+		}
+	}
+	return true;
+}
+
+bool CScanSettings::saveSettings( string fileName )
+{
+	configfile.setInt( "fe", g_info.fe );
+	configfile.setInt( "diseqcMode", diseqcMode );
+	configfile.setInt( "diseqcRepeat", diseqcRepeat );
+	configfile.setInt( "bouquetMode", bouquetMode );
+	if (diseqcMode == NO_DISEQC)
+	{
+		configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
+	}
+	else
+	{
+		int satCount = 0;
+		for (int i=0; i<MAX_SATELLITES; i++)
+		{
+			if (satDiseqc[i] != -1)
+			{
+				satCount++;
+			}
+		}
+		configfile.setInt( "satCount", satCount );
+		satCount = 0;
+		for (int i=0; i<MAX_SATELLITES; i++)
+		{
+			if (satDiseqc[i] != -1)
+			{
+				char tmp[10];
+				sprintf((char*)&tmp, "SatName%d", satCount);
+				configfile.setString( tmp, satName[i] );
+				sprintf((char*)&tmp, "satDiseqc%d", satCount);
+				configfile.setInt( tmp, satDiseqc[i] );
+				satCount++;
+			}
+		}
+	}
+	
+	if(configfile.getModifiedFlag())
+	{
+		printf("saveing neutrino scan-config\n");
+		configfile.saveConfig(fileName);
+	}
+
+	return true;
+}
+
+/*
 ostream &operator<<(ostream& os, const CScanSettings& settings)
 {
 	os << settings.bouquetMode << endl;
@@ -183,3 +269,4 @@ istream &operator>>(istream& is, CScanSettings& settings)
 	}
 	return is;
 }
+*/

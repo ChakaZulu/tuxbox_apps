@@ -33,7 +33,9 @@
 #define __settings__
 
 #include <vector>
+#include <string>
 #include "zapitclient.h"
+#include "libconfigfile/configfile.h"
 
 using namespace std;
 
@@ -191,23 +193,30 @@ const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 class CScanSettings
 {
 	public:
+		CConfigFile		configfile;
 		CZapitClient::bouquetMode bouquetMode;
-
-		diseqc_t diseqcMode;
-
-		uint32_t diseqcRepeat;
-
-		char satNameNoDiseqc[30];
-		int  satDiseqc[MAX_SATELLITES];
-		char satName[30][MAX_SATELLITES];
+		diseqc_t		diseqcMode;
+		uint32_t		diseqcRepeat;
+		char			satNameNoDiseqc[30];
+		int				satDiseqc[MAX_SATELLITES];
+		char			satName[30][MAX_SATELLITES];
 
 		CScanSettings();
-		void useDefaults();
+
 		int* diseqscOfSat( char* satname);
 
 		void toSatList( CZapitClient::ScanSatelliteList& ) const;
+
+
+		void useDefaults();
+
+		bool loadSettings( string fileName );
+		bool saveSettings( string fileName );
+
+/*		
 		friend ostream& operator<<(ostream&, const CScanSettings&);
 		friend istream& operator>>(istream&, CScanSettings&);
+	*/
 };
 
 
