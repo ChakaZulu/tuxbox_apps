@@ -10,7 +10,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -23,16 +23,20 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 //
-// $Id: channellist.cpp,v 1.37 2001/11/15 11:42:41 McClean Exp $
+// $Id: channellist.cpp,v 1.38 2001/11/19 22:50:28 Simplex Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.38  2001/11/19 22:50:28  Simplex
+// Neutrino can handle bouquets now.
+// There are surely some bugs and todo's but it works
+//
 // Revision 1.37  2001/11/15 11:42:41  McClean
 // gpl-headers added
 //
@@ -242,7 +246,7 @@ void CChannelList::updateEvents(void)
             }
             actPos+=strlen(actPos)+1;
         }
-    } // if sectionsd::actualEventListTVshortIDs 
+    } // if sectionsd::actualEventListTVshortIDs
     else
     {
         // old way
@@ -347,17 +351,27 @@ int CChannelList::getActiveChannelNumber()
 	return selected+1;
 }
 
+
 void CChannelList::exec()
+{   int nNewChannel;
+
+	nNewChannel = show();
+	if (nNewChannel > -1){
+		zapTo(nNewChannel);
+	}
+}
+
+int CChannelList::show()
 {
 	if(chanlist.size()==0)
 	{
 		//evtl. anzeige dass keine kanalliste....
-		return;
+		return -1;
 	}
 	paintHead();
 	updateEvents();
 	paint();
-	
+
 	int oldselected = selected;
 	int zapOnExit = false;
 	bool loop=true;
@@ -435,7 +449,11 @@ void CChannelList::exec()
 	hide();
 	if(zapOnExit)
 	{
-		zapTo(selected);
+		return(selected);
+	}
+	else
+	{
+		return(-1);
 	}
 }
 
@@ -463,7 +481,7 @@ void CChannelList::zapTo(int pos)
 		return;
 	}
 	selected= pos;
-  	channel* chan = chanlist[selected];
+	channel* chan = chanlist[selected];
 	lastChList.store (selected);
 
 	if ( pos!=(int)tuned )
@@ -480,7 +498,6 @@ void CChannelList::zapTo(int pos)
 				g_RemoteControl->zapTo_onid_sid( chan->onid_sid );
 			else
 				g_RemoteControl->zapTo( chan->name );
-
 		}
 	}
 	g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
@@ -493,7 +510,7 @@ void CChannelList::numericZap(int key)
         //evtl. anzeige dass keine kanalliste....
         return;
     }
- 
+
 	//schneller zap mit "0" taste zwischen den letzten beiden sendern...
 	if(key==0) {
 	  	int  ch;
@@ -597,7 +614,7 @@ void CChannelList::quickZap(int key)
         //evtl. anzeige dass keine kanalliste....
         return;
     }
- 
+
 //	printf("quickzap start\n");
     if (key==g_settings.key_quickzap_down)
     {
@@ -614,6 +631,16 @@ void CChannelList::quickZap(int key)
     };
 
     zapTo( selected );
+}
+
+bool CChannelList::hasChannel(int nChannelNr)
+{
+	for (uint i=0;i<chanlist.size();i++)
+	{
+		if (getKey(i) == nChannelNr)
+			return(true);
+	}
+	return(false);
 }
 
 void CChannelList::paintItem(int pos)
@@ -650,8 +677,14 @@ void CChannelList::paintItem(int pos)
 
 void CChannelList::paintHead()
 {
+	string strCaption = g_Locale->getText(name).c_str();
+
+	if (strCaption == "")
+	{
+		strCaption = name;
+	}
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, strCaption.c_str(), COL_MENUHEAD);
 }
 
 void CChannelList::paint()
@@ -669,7 +702,7 @@ void CChannelList::paint()
 	    numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
 	else // if(lastnum<100000)
 	    numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
-	
+
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
 		paintItem(count);

@@ -10,7 +10,7 @@
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
+
 
 	License: GPL
 
@@ -23,7 +23,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -32,9 +32,13 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.19 2001/11/15 11:42:41 McClean Exp $
+// $Id: channellist.h,v 1.20 2001/11/19 22:50:28 Simplex Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.20  2001/11/19 22:50:28  Simplex
+// Neutrino can handle bouquets now.
+// There are surely some bugs and todo's but it works
+//
 // Revision 1.19  2001/11/15 11:42:41  McClean
 // gpl-headers added
 //
@@ -154,8 +158,10 @@ class CChannelList
 	bool showInfo(int pos);
 	void updateEvents(void);
 	void numericZap(int key);
+	int  show();
 	void exec();
 	void quickZap(int key);
+	bool hasChannel(int nChannelNr);
 };
 
 
