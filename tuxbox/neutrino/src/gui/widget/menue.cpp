@@ -30,13 +30,13 @@
 */
 
 /*
-$Id: menue.cpp,v 1.35 2002/02/23 11:48:13 field Exp $
+$Id: menue.cpp,v 1.36 2002/02/23 13:57:17 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
- Revision 1.35  2002/02/23 11:48:13  field
- Soft-Update auch fuer alternative "Provider" :)
+ Revision 1.36  2002/02/23 13:57:17  field
+ Menue-Updates
 
  Revision 1.34  2002/02/19 23:41:48  McClean
  add neutrino-direct-start option (for alexW's-Images only at the moment)
@@ -147,7 +147,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 {
 	int pos;
 	int key;
-
+	int i;
 
 	if (parent)
 		parent->hide();
@@ -161,6 +161,16 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 	do
 	{
 		key = g_RCInput->getKey(g_settings.timing_menu);
+		for (i= 0; i< items.size(); i++)
+		{
+			CMenuItem* titem = items[i];
+			if ( (titem->directKey!= -1) && (titem->directKey== key) && (titem->isSelectable()) )
+			{
+				selected= i;
+				key= CRCInput::RC_ok;
+				break;
+			}
+		}
 
 		switch (key)
 		{
@@ -279,10 +289,22 @@ void CMenuWidget::paint()
 	string  l_name = g_Locale->getText(name);
 	g_lcdd->setMode(CLcddClient::MODE_MENU, l_name);
 
+
+
 	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name.c_str());
 	if (neededWidth> width-48)
 	{
 		width= neededWidth+ 49;
+	}
+
+	iconOffset= 0;
+	for (int i= 0; i< items.size(); i++)
+	{
+		if (items[i]->iconName!= "")
+		{
+			iconOffset= g_Fonts->menu->getHeight();
+			break;
+		}
 	}
 
 	//	x=((720-width)>>1) -20;
@@ -301,7 +323,7 @@ void CMenuWidget::paint()
 	for(unsigned int count=0;count<items.size();count++)
 	{
 		CMenuItem* item = items[count];
-		item->init(x,ypos, width);
+		item->init(x,ypos, width, iconOffset);
 		if( (item->isSelectable()) && (selected==-1) )
 		{
 			ypos = item->paint(true);
@@ -329,6 +351,8 @@ CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool
 	optionValue = OptionValue;
 	observ=Observ;
 	localizing= Localizing;
+	directKey = -1;
+	iconName = "";
 }
 
 
@@ -398,11 +422,11 @@ int CMenuOptionChooser::paint( bool selected )
 		l_option = option;
 
 	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
-	int stringstartposName = x + 10;
-	int stringstartposOption = x + dx - stringwidth - 10;
+	int stringstartposName = x + offx + 10;
+	int stringstartposOption = x + offx + dx - stringwidth - 10;
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx,  l_optionName.c_str(), color);
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx,  l_option.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option.c_str(), color);
 
 	if(selected)
 	{
@@ -424,6 +448,9 @@ CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* Opti
 	optionValue = OptionValue;
 	observ=Observ;
 	localizing= Localizing;
+
+	directKey = -1;
+	iconName = "";
 }
 
 
@@ -480,11 +507,11 @@ int CMenuOptionStringChooser::paint( bool selected )
 		l_option = optionValue;
 
 	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
-	int stringstartposName = x + 10;
-	int stringstartposOption = x + dx - stringwidth - 10;
+	int stringstartposName = x + offx + 10;
+	int stringstartposOption = x + offx + dx - stringwidth - 10;
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx, l_optionName.c_str(), color);
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx, l_option.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option.c_str(), color);
 
 	if(selected)
 	{
@@ -498,7 +525,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey, bool Localizing)
+CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey, bool Localizing, int DirectKey, string IconName)
 {
 	height=g_Fonts->menu->getHeight();
 	text=Text;
@@ -507,6 +534,8 @@ CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarg
 	jumpTarget = Target;
 	actionKey = ActionKey;
 	localizing = Localizing;
+	directKey = DirectKey;
+	iconName = IconName;
 }
 
 int CMenuForwarder::exec(CMenuTarget* parent)
@@ -531,7 +560,7 @@ int CMenuForwarder::paint(bool selected)
 	else
 		l_text = text;
 
-	int stringstartposX = x+10;
+	int stringstartposX = x + offx + 10;
 
 	if(selected)
 	{
@@ -550,13 +579,18 @@ int CMenuForwarder::paint(bool selected)
 		color = COL_MENUCONTENTINACTIVE;
 
 	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
-	g_Fonts->menu->RenderString(stringstartposX, y+height,dx,  l_text.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposX, y+height,dx- (stringstartposX - x),  l_text.c_str(), color);
+
+	if (iconName!="")
+	{
+		g_FrameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
+	}
 
 	if(option)
 	{
 		int stringwidth = g_Fonts->menu->getRenderWidth(option);
-		int stringstartposOption = x + dx - stringwidth - 10;
-		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx,  option, color);
+		int stringstartposOption = x + offx + dx - stringwidth - 10;
+		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option, color);
 	}
 
 	return y+ height;
@@ -565,6 +599,9 @@ int CMenuForwarder::paint(bool selected)
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(int Type, string Text)
 {
+	directKey = -1;
+	iconName = "";
+
 	height = g_Fonts->menu->getHeight();
 	if(Text=="")
 	{
@@ -614,7 +651,7 @@ int CMenuSeparator::paint(bool selected)
 
 		g_FrameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
 
-		g_Fonts->menu->RenderString(stringstartposX, y+height,dx, l_text.c_str(), COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(stringstartposX, y+height,dx- (stringstartposX- x) , l_text.c_str(), COL_MENUCONTENT);
 
 		if(selected)
 		{

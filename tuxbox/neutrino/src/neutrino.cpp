@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.162 2002/02/23 11:48:13 field Exp $
+        $Id: neutrino.cpp,v 1.163 2002/02/23 13:57:17 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.162  2002/02/23 11:48:13  field
-  Soft-Update auch fuer alternative "Provider" :)
+  Revision 1.163  2002/02/23 13:57:17  field
+  Menue-Updates
 
   Revision 1.161  2002/02/22 22:47:20  field
   Features-Menue verbessert
@@ -1271,11 +1271,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
                                 CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
 	mainMenu.addItem( new CMenuSeparator() );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio") );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart") );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
-	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv", true, CRCInput::RC_red, "rot.raw"), true );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio", true, CRCInput::RC_green, "gruen.raw") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, "gelb.raw") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, "blau.raw") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	streamstatus = 0;
 	if(g_settings.network_streaming_use)
@@ -1793,7 +1793,7 @@ void CNeutrinoApp::SelectAPID()
 
 void CNeutrinoApp::ShowStreamFeatures()
 {
-	CMenuWidget StreamFeatureSelector("streamfeatures.head", "features.raw", 300);
+	CMenuWidget StreamFeatureSelector("streamfeatures.head", "features.raw", 350);
 	//StreamFeatureSelector.addItem( new CMenuSeparator() );
 
 	char id[5];
@@ -1808,7 +1808,7 @@ void CNeutrinoApp::ShowStreamFeatures()
     	{
 			sprintf(id, "%d", count);
 			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), (g_RemoteControl->vtxtpid!=0), "",
-										   StreamFeaturesChanger, id, false), (cnt== 0) && (g_RemoteControl->vtxtpid!=0) );
+										   StreamFeaturesChanger, id, false, (cnt== 0)?CRCInput::RC_blue:-1, (cnt== 0)?"blau.raw":""), (cnt== 0) && (g_RemoteControl->vtxtpid!=0) );
 			cnt++;
 
 		}
@@ -2479,7 +2479,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.162 2002/02/23 11:48:13 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.163 2002/02/23 13:57:17 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

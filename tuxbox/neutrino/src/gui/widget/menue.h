@@ -1,29 +1,29 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -75,7 +75,7 @@ class CMenuTarget
 		    RETURN_EXIT = 2,
 		    RETURN_EXIT_ALL = 4
 		};
-	
+
 		CMenuTarget(){}
 		virtual ~CMenuTarget(){}
 		virtual void hide(){}
@@ -89,8 +89,10 @@ class CMenuTarget
 class CMenuItem
 {
 	protected:
-		int x, y, dx;
+		int x, y, dx, offx;
 	public:
+    	int		directKey;
+		string	iconName;
 
 		enum
 		{
@@ -99,14 +101,19 @@ class CMenuItem
 		    RETURN_EXIT_ALL = 4
 		};
 
-		CMenuItem(){}
+		CMenuItem()
+		{
+			directKey = -1;
+			iconName = "";
+		}
 		virtual ~CMenuItem(){}
 
-		virtual void init(int X, int Y, int DX)
+		virtual void init(int X, int Y, int DX, int OFFX)
 		{
 			x=X;
 			y=Y;
 			dx=DX;
+			offx=OFFX;
 		}
 		virtual int paint(bool selected=false)
 		{
@@ -165,7 +172,7 @@ class CMenuForwarder : public CMenuItem
 		bool        localizing;
 	public:
 
-		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true);
+		CMenuForwarder(string Text, bool Active=true, char *Option=NULL, CMenuTarget* Target=NULL, string ActionKey="", bool Localizing= true, int DirectKey= -1, string IconName= "");
 		int paint(bool selected=false);
 		int getHeight()
 		{
@@ -196,7 +203,7 @@ class CMenuOptionChooser : public CMenuItem
 
 	public:
 		CMenuOptionChooser(){}
-		
+
 		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionChooser();
 
@@ -257,6 +264,7 @@ class CMenuWidget : public CMenuTarget
 		int			x;
 		int			y;
 		int			selected;
+		int 		iconOffset;
 
 	public:
 		CMenuWidget()
@@ -265,6 +273,7 @@ class CMenuWidget : public CMenuTarget
 			iconfile="";
 			selected=-1;
 			onPaintNotifier=NULL;
+			iconOffset= 0;
 		};
 		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=390);
 		~CMenuWidget();
