@@ -599,7 +599,7 @@ void CMoviePlayerGui::paintInfo()
 void CMoviePlayerGui::paint()
 {
         frameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
-	frameBuffer->loadBackground("radiomode.pal");
+	frameBuffer->loadBackground("radiomode.raw");
 	frameBuffer->useBackground(true);
 	frameBuffer->paintBackground();
 
