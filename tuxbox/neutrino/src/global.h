@@ -1,38 +1,41 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
- 
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 //
-// $Id: global.h,v 1.20 2002/01/15 23:17:59 McClean Exp $
+// $Id: global.h,v 1.21 2002/01/29 23:41:21 Simplex Exp $
 //
 // $Log: global.h,v $
+// Revision 1.21  2002/01/29 23:41:21  Simplex
+// need zapitclient for bouquet editor
+//
 // Revision 1.20  2002/01/15 23:17:59  McClean
 // cleanup
 //
@@ -88,6 +91,7 @@
 #include "neutrino.h"
 #include "controldclient.h"
 #include "lcddclient.h"
+#include <zapitclient.h>
 #include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"
@@ -118,6 +122,7 @@ NEUTRINO_CPP  SNeutrinoSettings   g_settings;
 
 NEUTRINO_CPP  CLcddClient		*g_lcdd;
 NEUTRINO_CPP  CControldClient	*g_Controld;
+NEUTRINO_CPP  CZapitClient		*g_Zapit;
 NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
 NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;
