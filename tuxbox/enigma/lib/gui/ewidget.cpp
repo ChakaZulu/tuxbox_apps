@@ -541,8 +541,8 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 			setFocus(this);
 		break;
 	case eWidgetEvent::wantClose:
-		if (in_loop==0)
-			eFatal("attempt to close non-execing widget");
+/*		if (in_loop==0)
+			eFatal("attempt to close non-execing widget");*/
 		if (in_loop==1)	// nur wenn das ne echte loop ist
 		{
 			in_loop=-1;
