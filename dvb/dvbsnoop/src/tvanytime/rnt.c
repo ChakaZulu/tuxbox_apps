@@ -1,5 +1,5 @@
 /*
-$Id: rnt.c,v 1.1 2004/07/25 21:13:37 rasc Exp $
+$Id: rnt.c,v 1.2 2004/07/26 20:58:03 rasc Exp $
 
 
  DVBSNOOP
@@ -17,10 +17,12 @@ $Id: rnt.c,v 1.1 2004/07/25 21:13:37 rasc Exp $
 
 
 $Log: rnt.c,v $
+Revision 1.2  2004/07/26 20:58:03  rasc
+RNT completed..  (TS 102 323)
+
 Revision 1.1  2004/07/25 21:13:37  rasc
 do not forget to commit new files
 - RNT resolution_authority/provider_notification_section (TS 102 323)
-
 
 
 
@@ -60,8 +62,8 @@ void decode_RNT (u_char *b, int len)
 
 
   outBit_Sx_NL (3,"Section_syntax_indicator: ",	b, 8,  1);
-  outBit_Sx_NL (6,"reserved_1: ",		b, 9,  1);
-  outBit_Sx_NL (6,"reserved_2: ",		b,10,  2);
+  outBit_Sx_NL (6,"reserved: ",			b, 9,  1);
+  outBit_Sx_NL (6,"reserved: ",			b,10,  2);
   section_length = outBit_Sx_NL (5,"section_length: ",	b,12,12);
 
   outBit_Sx_NL (3,"context_id: ",		b,24, 16);
@@ -74,12 +76,13 @@ void decode_RNT (u_char *b, int len)
   outBit_Sx_NL (3,"Last_section_number: ",	b,56,  8);
 
 
-  outBit_Sx_NL (3,"context_id_type: ",		b,64,  8);  //$$$ TODO   Table 2
+  outBit_S2x_NL(3,"context_id_type: ",		b,64,  8,
+			(char *(*)(u_long))dvbstrTVA_content_id_type );
 
 
 
   len2 = outBit_Sx_NL (3,"common_descriptor_length: ",	b,72, 12);
-  outBit_Sx_NL (6,"reserved_3: ",			b,84,  4);
+  outBit_Sx_NL (6,"reserved: ",				b,84,  4);
 
   b += 11;
   len1 = section_length - 8;
@@ -99,14 +102,82 @@ void decode_RNT (u_char *b, int len)
   indent (-1);
 
 
+  // resolution provider info loop
+
+  out_nl (3,"resolution_provider_info_loop:");
+  indent (+1);
+  while (len1 > 0) {
+	int len2, len3;
+
+  	len2 = outBit_Sx_NL (3,"resolution_provider_info_length: ",	b,  0, 12);
+  	outBit_Sx_NL (6,"reserved: ",					b, 12,  4);
+
+  	len3 = outBit_Sx_NL (3,"resolution_provider_name_length: ",	b, 16,  8);
+	print_std_ascii     (3,"resolution_provider_name: ", 		b+3, len3);
+	b    += len3 + 3;
+	len1 -= len3 + 3;
+	len2 -= len3 + 3;
 
 
+  	// resolution_provider_descriptors loop 
+
+  	len3 = outBit_Sx_NL (3,"resolution_provider_descriptor_length: ", 	b, 0, 12);
+  	outBit_Sx_NL (6,"reserved: ",						b, 12, 4);
+	b    += 2;
+	len1 -= 2;
+	len2 -= 2;
+
+	out_nl (3,"resolution_provider_descriptor_loop:");
+	indent (+1);
+	while (len3 > 0) {
+		int i;
+		i   = descriptor (b, TVA_RNT);
+		b    += i;
+		len1 -= i;
+		len2 -= i;
+		len3 -= i;
+	}
+	indent (-1);
 
 
+	// CRID_authority loop
 
-// $$$ TODO ...
-out_nl (1," .... lots here missing...");
+	out_nl (3,"CRID_authority_loop:");
+	indent (+1);
+	while (len2 > 0) {
 
+		len3 = outBit_Sx_NL (3,"CRID_authority_name_length: ",	b,  0,  8);
+		print_std_ascii     (3,"CRID_authority_name: ", 	b+1, len3);
+		b    += len3 + 1;
+		len1 -= len3 + 1;
+		len2 -= len3 + 1;
+
+
+	 	// CRID_authority_descriptors loop 
+
+  		len3 = outBit_Sx_NL (3,"CRID_authority_descriptors_length: ", 	b, 0, 12);
+	  	outBit_Sx_NL (6,"reserved: ",					b, 12,  4);
+		b    += 2;
+		len1 -= 2;
+		len2 -= 2;
+
+		out_nl (3,"CRID_authority_descriptor_loop:");
+		indent (+1);
+		while (len3 > 0) {
+			int i;
+			i   = descriptor (b, TVA_RNT);
+			b    += i;
+			len1 -= i;
+			len2 -= i;
+			len3 -= i;
+		}
+		indent (-1);
+
+	}
+	indent (-1);
+
+  }
+  indent (-1);
 
 
 
@@ -116,58 +187,7 @@ out_nl (1," .... lots here missing...");
 
 
 
-
-
-
-
-/*
-
-resolution_authority_notification_section() {		
-	table_id	8	uimsbf
-	section_syntax_indicator	1	bslbf
-	reserved	1	bslbf
-	reserved	2	bslbf
-	section_length	12	uimsbf
-
-	context_id	16	uimsbf
-	reserved	2	bslbf
-	version_number	5	uimsbf
-	current_next_indicator	1	bslbf
-	section_number	8	uimsbf
-	last_section_number	8	uimsbf
-	context_id_type	8	uimsbf
-	common_descriptors_length	12	uimsbf
-	reserved	4	bslbf
-	for (i=0; i<N1; i++) {		
-		descriptor()		
-	}		
-....
-	for (i<0; i<N2; i++) {		
-		resolution_provider_info_length	12	uimsbf
-		reserved	4	bslbf
-		resolution_provider_name_length	8	uimsbf
-		for (j<0; j<resolution_provider_name_length; j++) {		
-			resolution_provider_name_byte	8	uimsbf
-		}		
-		resolution_provider_descriptors_length	12	uimsbf
-		reserved	4	bslbf
-		for (j=0; j<N3; j++) {		
-			descriptor() 		
-		}		
-		for (j=0; j<N4; j++) {		
-			CRID_authority_name_length	8	uimsbf
-			for (k<0; k<CRID_authority_name_length; k++) {		
-				CRID_authority_name_byte	8	uimsbf
-			}		
-			CRID_authority_descriptors_length	12	uimsbf
-			reserved	4	bslbf
-			for (k=0; k<N5; k++) {		
-				CRID_authority_descriptor() 		
-			}		
-		}		
-	}		
-	CRC_32	32	rpchof
-}		
-
-
-*/
+// Annotation:
+//
+// $$$ TODO:  RNT is untested so far !!!
+//  need stream with  RNT data

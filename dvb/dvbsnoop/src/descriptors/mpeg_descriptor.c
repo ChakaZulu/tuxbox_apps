@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.21 2004/07/25 20:12:58 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.22 2004/07/26 20:58:03 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.21 2004/07/25 20:12:58 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.22  2004/07/26 20:58:03  rasc
+RNT completed..  (TS 102 323)
+
 Revision 1.21  2004/07/25 20:12:58  rasc
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)
@@ -1616,7 +1619,7 @@ void descriptorMPEG_TVA_metadata_pointer (u_char *b)
 
 
   indent (+1);
-  printhex_buf (4, b+2, len);  // $$$ TODO
+  printhex_buf (4, b+2, len);  // $$$ TODO TS 102 323, where defined?
   indent (-1);
 }
 
@@ -1637,7 +1640,7 @@ void descriptorMPEG_TVA_metadata (u_char *b)
 
 
   indent (+1);
-  printhex_buf (4, b+2, len);  // $$$ TODO
+  printhex_buf (4, b+2, len);  // $$$ TODO TS 102 323, where defined?
   indent (-1);
 }
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.53 2004/07/25 20:12:59 rasc Exp $
+$Id: dvb_str.c,v 1.54 2004/07/26 20:58:03 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.53 2004/07/25 20:12:59 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.54  2004/07/26 20:58:03  rasc
+RNT completed..  (TS 102 323)
+
 Revision 1.53  2004/07/25 20:12:59  rasc
  - New: content_identifier_descriptor (TS 102 323)
  - New: TVA_id_descriptor (TS 102 323)
@@ -3082,6 +3085,28 @@ char *dvbstrTVA_crid_location (u_int i)
      {  0x00, 0x00,  "Carried explicitly within descriptor" },
      {  0x01, 0x01,  "Carried in Content Identifier Table (CIT)" },
      {  0x02, 0x03,  "DVB reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+/*
+ -- content id type (TV ANYTIME)
+ -- ETSI TS 102 323 v1.1.1  TV ANYTIME
+*/
+
+char *dvbstrTVA_content_id_type (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "context_id is a value of bouquet_id" },
+     {  0x01, 0x01,  "context_id is a value of original_network_id" },
+     {  0x02, 0x02,  "context_id is a value of a value of network_id" },
+     {  0x03, 0x7F,  "DVB reserved" },
+     {  0x80, 0xFF,  "user defined" },
      {  0,0, NULL }
   };
 
