@@ -75,7 +75,8 @@ void CTimeOSD::update()
 			tDisplayTime = m_time_show + (m_time_dis - time(NULL));
 			color = COL_MENUCONTENTSELECTED;
 		}
-
+		if(tDisplayTime < 0)
+			tDisplayTime=0;
 		strftime(cDisplayTime, 9, "%T", gmtime(&tDisplayTime));
 		frameBuffer->paintBackgroundBoxRel(m_xend - m_width -20, m_y - 10 , m_width + 40, m_height + 20);
 		frameBuffer->paintBoxRel(m_xend - m_width - 10, m_y , m_width + 10 , m_height, color);
