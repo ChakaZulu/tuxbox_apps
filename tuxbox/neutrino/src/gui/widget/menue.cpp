@@ -30,13 +30,13 @@
 */
 
 /*
-$Id: menue.cpp,v 1.36 2002/02/23 13:57:17 field Exp $
+$Id: menue.cpp,v 1.37 2002/02/23 14:31:07 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
- Revision 1.36  2002/02/23 13:57:17  field
- Menue-Updates
+ Revision 1.37  2002/02/23 14:31:07  field
+ neue Icons
 
  Revision 1.34  2002/02/19 23:41:48  McClean
  add neutrino-direct-start option (for alexW's-Images only at the moment)
@@ -161,19 +161,32 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 	do
 	{
 		key = g_RCInput->getKey(g_settings.timing_menu);
+
+		int handled= false;
+
 		for (i= 0; i< items.size(); i++)
 		{
 			CMenuItem* titem = items[i];
-			if ( (titem->directKey!= -1) && (titem->directKey== key) && (titem->isSelectable()) )
+			if ( (titem->directKey!= -1) && (titem->directKey== key) )
 			{
-				selected= i;
-				key= CRCInput::RC_ok;
+				if (titem->isSelectable())
+				{
+					selected= i;
+					key= CRCInput::RC_ok;
+				}
+				else
+				{
+					// swallow-key...
+					handled= true;
+				}
 				break;
 			}
 		}
 
-		switch (key)
+		if (!handled)
 		{
+			switch (key)
+			{
 
 				case (CRCInput::RC_up) :
 				case (CRCInput::RC_down) :
@@ -265,6 +278,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 						key = CRCInput::RC_timeout;
 					}
 					break;
+			}
 		}
 
 	}
