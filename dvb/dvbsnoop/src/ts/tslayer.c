@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.13 2004/01/02 16:40:44 rasc Exp $
+$Id: tslayer.c,v 1.14 2004/01/06 03:13:26 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tslayer.c,v 1.13 2004/01/02 16:40:44 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.14  2004/01/06 03:13:26  rasc
+TS prints PES/Section ID on payload_start
+
 Revision 1.13  2004/01/02 16:40:44  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -155,26 +158,43 @@ void decodeTS_buf (u_char *b, int len, int pid)
 
  if (t.adaption_field_control & 0x2) {
     indent (+1);
-
-    n = ts_adaption_field (b);
-
-    b   += n;
-    len -= n;
-
+    out_nl (3,"Adaption_field: ");
+    	indent (+1);
+    	n = ts_adaption_field (b);
+    	b   += n;
+    	len -= n;
+    	indent (-1);
     indent (-1);
  }
 
  
  if (t.adaption_field_control & 0x1) {
+
     indent (+1);
+    out_nl (3,"Payload: (len: %d)",len);
 
-    out_nl (3,"Data-Bytes: (len: %d)",len);
-    printhexdump_buf (4, b,len); 
+	// -- if payload_start, check PES/SECTION
+	// -- $$$ check PES-StreamID if changed by ISO!!!
+	if (t.payload_unit_start_indicator & ! t.transport_scrambling_control) {
+	    indent (+1);
+	    if (b[0]==0x00 && b[1]==0x00 && b[2]==0x01 && b[3]>=0xBC) {
+		// -- PES
+		outBit_S2x_NL (4,"==> PES-stream: ",	b+3, 0,8,
+			(char *(*)(u_long))dvbstrPESstream_ID );
+	    } else {
+		// -- section (eval pointer field)
+		int pointer = b[0]+1;
+		outBit_Sx_NL  (4,"==> pointer_field: ",	b, 0,8);
+		outBit_S2x_NL (4,"==> Section table: ",	b+pointer, 0,8,
+			(char *(*)(u_long))dvbstrTableID );
+	    }
+	    indent (-1);
+	}
 
-    b   += n;
-    len -= n;
+    	print_databytes (4, "Data-Bytes:", b,len); 
 
     indent (-1);
+
  }
 
 }

@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.23 2004/01/03 16:40:11 rasc Exp $
+$Id: dvbsnoop.c,v 1.24 2004/01/06 03:13:24 rasc Exp $
 
  DVBSNOOP
 
@@ -14,6 +14,9 @@ $Id: dvbsnoop.c,v 1.23 2004/01/03 16:40:11 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.24  2004/01/06 03:13:24  rasc
+TS prints PES/Section ID on payload_start
+
 Revision 1.23  2004/01/03 16:40:11  rasc
 no message
 
@@ -185,7 +188,7 @@ int main(int argc, char **argv)
 			break;
 
 		default:
-			fprintf (stderr,"unknown Stream Type selected...\n");
+			fprintf (stderr,"unknown snoop type (this should never happen..\n");
 			break;
 
 	  }

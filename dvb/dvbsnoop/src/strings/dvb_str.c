@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.34 2004/01/05 02:03:42 rasc Exp $
+$Id: dvb_str.c,v 1.35 2004/01/06 03:13:25 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.34 2004/01/05 02:03:42 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.35  2004/01/06 03:13:25  rasc
+TS prints PES/Section ID on payload_start
+
 Revision 1.34  2004/01/05 02:03:42  rasc
 no message
 
@@ -1916,8 +1919,10 @@ char *dvbstrPESstream_ID (u_int i)
 
 {
   STR_TABLE  Table[] = {
-     // on changes:  adapt dmx_pes.c!!!
+     // on changes:  adapt dmx_pes.c!!! & tslayer.c!!!
      {  0x00, 0xBB,  "!!!unknown or PES stream not in sync... (!!!)" },
+     // --  0xB9 = PS_END
+     // --  0xBA = PS_START
      {  0xBC, 0xBC,  "program_stream_map" },
      {  0xBD, 0xBD,  "private_stream_1" },
      {  0xBE, 0xBE,  "padding_stream" },
