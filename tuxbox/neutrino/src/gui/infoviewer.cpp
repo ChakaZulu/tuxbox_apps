@@ -30,9 +30,7 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.70 2002/01/30 21:41:01 McClean Exp $
-//
-// $Log: infoviewer.cpp,v $
+
 // Revision 1.70  2002/01/30 21:41:01  McClean
 // channame-position
 //
@@ -402,7 +400,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 				//g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR_BUTTONS_GRAY);
 
                 g_FrameBuffer->paintIcon("dd_gray.raw", BoxEndX- ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-                g_FrameBuffer->paintIcon("16_9_gray.raw", BoxEndX- 2* ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+                g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
                 showButtonNVOD(true);
 
@@ -422,20 +420,63 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
         if ( !CalledFromNumZap )
         {
-				key = g_RCInput->getKey( intShowDuration* 5 );
+        		for (int i= 0; i< 10; i++)
+        		{
+        			g_FrameBuffer->paintIcon((GetVideoFormat() == 3)?"16_9.raw":"16_9_gray.raw", BoxEndX- 2* ICON_LARGE, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
-                if ( ( key != CRCInput::RC_timeout ) && ( key != CRCInput::RC_ok ) )
-                {
-                        g_RCInput->pushbackKey(key);
-                }
+					key = g_RCInput->getKey( intShowDuration>> 2 );
+					if ( key != CRCInput::RC_timeout )
+						break;
+				}
 
-                if ( ( key != g_settings.key_quickzap_up ) &&
-                        ( key != g_settings.key_quickzap_down ) &&
-                        ( key != CRCInput::RC_help ) )
+
+				if ( ( key != CRCInput::RC_timeout ) && ( key != CRCInput::RC_ok ) )
+				{
+            		g_RCInput->pushbackKey(key);
+				}
+
+				if ( ( key != g_settings.key_quickzap_up ) &&
+                	 ( key != g_settings.key_quickzap_down ) &&
+                     ( key != CRCInput::RC_help ) )
                 {
-                        killTitle();
+                   	killTitle();
                 }
         }
+}
+
+
+
+int CInfoViewer::GetVideoFormat()
+{
+	FILE* fd = fopen("/proc/bus/bitstream", "rt");
+	if (fd==NULL)
+	{
+		printf("error while opening proc-bitstream\n" );
+		return 1;
+	}
+
+	char *tmpptr, buf[100];
+	int value= 1;
+	int pos= 0;
+	while(!feof(fd))
+	{
+		if(fgets(buf,29,fd)!=NULL)
+		{
+			if ( pos == 3 )
+			{
+				buf[strlen(buf)-1]=0;
+				tmpptr=buf;
+				strsep(&tmpptr,":");
+				for(;tmpptr[0]==' ';tmpptr++)
+					;
+				value= atoi(tmpptr);
+				break;
+			}
+			pos++;
+		}
+	}
+	fclose(fd);
+	return value;
 }
 
 

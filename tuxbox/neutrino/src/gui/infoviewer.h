@@ -120,6 +120,7 @@ class CInfoViewer
 		static void * InfoViewerThread (void *arg);
 		static void * LangViewerThread (void *arg);
 		bool getEPGData( string channelName, unsigned int onid_tsid );
+		int GetVideoFormat();
 		void showData();
 		void showWarte();
 		void showButtonAudio();
