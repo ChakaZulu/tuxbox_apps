@@ -420,6 +420,7 @@ int CChannelList::handleMsg(uint msg, uint data)
 	{
 		// 0x100 als FSK-Status zeigt an, dass (noch) kein EPG zu einem Kanal der NICHT angezeigt
 		// werden sollte (vorgesperrt) da ist
+		// oder das bouquet des Kanals ist vorgesperrt
 
 		//printf("program-lock-status: %d\n", data);
 
@@ -429,8 +430,13 @@ int CChannelList::handleMsg(uint msg, uint data)
 				zapProtection->fsk = data;
 			else
 			{
+				// require password if either
+				// CHANGETOLOCK mode and channel/bouquet is pre locked (0x100)
+				// ONSIGNAL mode and fsk(data) is beyond configured value
+				// if programm has already been unlocked, dont require pin
 				if ((data >= (uint)g_settings.parentallock_lockage) &&
-				    ((chanlist[selected]->last_unlocked_EPGid != g_RemoteControl->current_EPGid) || (g_RemoteControl->current_EPGid == 0)))
+					 ((chanlist[selected]->last_unlocked_EPGid != g_RemoteControl->current_EPGid) || (g_RemoteControl->current_EPGid == 0)) &&
+					 ((g_settings.parentallock_prompt != PARENTALLOCK_PROMPT_CHANGETOLOCKED) || (data >= 0x100)))
 				{
 					g_RemoteControl->stopvideo();
 					zapProtection = new CZapProtection( g_settings.parentallock_pincode, data );
@@ -449,6 +455,8 @@ int CChannelList::handleMsg(uint msg, uint data)
 					g_RemoteControl->startvideo();
 			}
 		}
+		else
+			g_RemoteControl->startvideo();
 
 		return messages_return::handled;
 	}
