@@ -34,6 +34,9 @@
  * so this module will be removed...
 */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <gui/sleeptimer.h>
 
