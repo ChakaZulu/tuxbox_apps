@@ -198,7 +198,7 @@ void CScreenSetup::paintCoords()
 
 void CScreenSetup::paint()
 {
-	memset(g_FrameBuffer->lfb, 7, g_FrameBuffer->Stride()*576);
+	memset(g_FrameBuffer->getFrameBufferPointer(), 7, g_FrameBuffer->getStride()*576);
 
 	for(int count=0;count<576;count+=15)
 		g_FrameBuffer->paintHLine(0,719, count, 8 );

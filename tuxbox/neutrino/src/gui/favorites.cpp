@@ -1,6 +1,4 @@
 /*
-$Id: favorites.cpp,v 1.3 2002/04/05 15:12:54 rasc Exp $
-
 	Neutrino-GUI  -   DBoxII-Project
 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
@@ -24,18 +22,6 @@ $Id: favorites.cpp,v 1.3 2002/04/05 15:12:54 rasc Exp $
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-$Log: favorites.cpp,v $
-Revision 1.3  2002/04/05 15:12:54  rasc
--- Favorites checks, if channel in Bouquet
-
-Revision 1.2  2002/04/05 01:14:43  rasc
--- Favorites Bouquet handling (Easy Add Channels)
-
-Revision 1.1  2002/04/04 22:29:32  rasc
--- Favorites Bouquet handling (Easy Add Channels)
-
-
 */
 
 #include "../global.h"

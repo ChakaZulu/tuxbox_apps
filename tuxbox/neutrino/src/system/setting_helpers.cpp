@@ -196,9 +196,30 @@ void showSubchan(string subChannelName)
 		int y = g_settings.screen_StartY + 10;
 		g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
 		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
+		
+		long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
+		int res = messages_return::none;
 		uint msg; uint data;
-		g_RCInput->getMsg( &msg, &data, 35 );
-		g_RCInput->postMsg( msg, data );
+
+		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
+		{
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, timeoutEnd );
+			res = neutrino->handleMsg( msg, data );
+
+			if ( res == messages_return::unhandled )
+			{
+				// raus hier und im Hauptfenster behandeln...
+				g_RCInput->postMsg(  msg, data );
+				res = messages_return::cancel_info;
+			}
+			struct timeval tv;
+			gettimeofday( &tv, NULL );
+			long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+			if(timeNow>timeoutEnd)
+			{
+				res = messages_return::cancel_info;
+			}
+		}
 		g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
 	}
 	else

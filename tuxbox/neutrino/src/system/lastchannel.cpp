@@ -1,7 +1,5 @@
 /*
-$Id: lastchannel.cpp,v 1.3 2002/01/03 20:03:20 McClean Exp $
- 
-Quarks -- Projekt
+ DBOX2 -- Projekt
  
 (c) 2001 rasc
  
@@ -18,23 +16,6 @@ welcher nach dem LIFO-prinzip wieder ausgelesen wird.
 Es wird aber gecheckt, ob ein Neuer Wert ein Mindestzeitabstand zum alten
 vorherigen Wert hat, damit bei schnellem Hochzappen, die "Skipped Channels"
 nicht gespeichert werden.
- 
- 
- 
-$Log: lastchannel.cpp,v $
-Revision 1.3  2002/01/03 20:03:20  McClean
-cleanup
-
-Revision 1.2  2001/10/16 19:11:16  rasc
--- CR LF --> LF in einigen Modulen
- 
-Revision 1.1  2001/10/16 18:34:13  rasc
--- QuickZap to last channel verbessert.
--- Standard Kanal muss ca. 2-3 Sekunden aktiv sein fuer LastZap Speicherung.
--- eigene Klasse fuer die Channel History...
- 
- 
- 
  
 */
 
