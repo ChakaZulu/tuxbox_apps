@@ -16,6 +16,7 @@ private:// slots:
 	void sel_sound(eListboxEntry *);
 	void sel_video(eListboxEntry *);
 	void sel_satconfig(eListboxEntry *);
+	void sel_language(eListboxEntry *);
 public:
 	eZapSetup();
 	~eZapSetup();

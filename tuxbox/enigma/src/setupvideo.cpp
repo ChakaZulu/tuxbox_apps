@@ -88,14 +88,14 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	CONNECT(pin8->selected, eZapVideoSetup::togglePin8);
 
 	ok=new eButton(this);
-	ok->setText("[OK]");
+	ok->setText(_("[OK]"));
 	ok->move(ePoint(10, 150));
 	ok->resize(eSize(50, fd+4));
 //  connect(ok, SIGNAL(selected()), SLOT(okPressed()));
 	CONNECT(ok->selected, eZapVideoSetup::okPressed);	
 
 	abort=new eButton(this);
-	abort->setText("[ABORT]");
+	abort->setText(_("[ABORT]"));
 	abort->move(ePoint(80, 150));
 	abort->resize(eSize(100, fd+4));
 //	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));

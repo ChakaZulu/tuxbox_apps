@@ -1,6 +1,29 @@
+/*
+ * enigma_setup.cpp
+ *
+ * Copyright (C) 2002 Felix Domke <tmbinc@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * $Id: enigma_setup.cpp,v 1.11 2002/05/03 23:59:31 waldi Exp $
+ */
+
 #include "enigma_setup.h"
 #include "setupnetwork.h"
 #include "setupvideo.h"
+#include "setup_language.h"
 #include "elistbox.h"
 #include "ewindow.h"
 #include "edvb.h"
@@ -20,13 +43,7 @@ eZapSetup::eZapSetup()
 //	CONNECT((list, _("Audio...")))->selected, sel_sound);
 	CONNECT((new eListboxEntryText(list, _("Video...")))->selected, eZapSetup::sel_video);
 	CONNECT((new eListboxEntryText(list, _("Satellites...")))->selected, eZapSetup::sel_satconfig);
-/*	connect(new eListboxEntryText(list, "[Zurück]"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
-	connect(new eListboxEntryText(list, "Bouquets..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_bouquet(eListboxEntry*)));
-	connect(new eListboxEntryText(list, "Network..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_network(eListboxEntry*)));
-//	connect(new eListboxEntryText(list, "Audio..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_sound(eListboxEntry*)));
-	connect(new eListboxEntryText(list, "Video..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_video(eListboxEntry*)));
-	connect(new eListboxEntryText(list, "Satelliten..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_satconfig()));*/
-
+	CONNECT((new eListboxEntryText(list, _("Language...")))->selected, eZapSetup::sel_language);
 }
 
 eZapSetup::~eZapSetup()
@@ -79,3 +96,14 @@ void eZapSetup::sel_satconfig(eListboxEntry *lbe)
 	satconfig.hide();
 	show();
 }
+
+void eZapSetup::sel_language(eListboxEntry *lbe)
+{
+	eZapLanguageSetup setup;
+	hide();
+	setup.show();
+	setup.exec();
+	setup.hide();
+	show();
+}
+
