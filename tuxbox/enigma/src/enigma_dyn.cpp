@@ -826,11 +826,15 @@ static eString getChannelStats()
 		result << "<img src=\"dolby_on.png\" border=0>";
 	else
 		result << "<img src=\"dolby_off.png\" border=0>";
-	
+
+	result << "&nbsp;";
+
 	if (eZapMain::getInstance()->getSmartcardLogo())
 		result << "<img src=\"crypt_on.png\" border=0>";
 	else
 		result << "<img src=\"crypt_off.png\" border=0>";
+
+	result << "&nbsp;";
 		
 	if (eZapMain::getInstance()->get16_9Logo())
 		result << "<img src=\"format_on.png\" border=0>";
