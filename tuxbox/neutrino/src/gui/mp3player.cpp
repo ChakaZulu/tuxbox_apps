@@ -30,6 +30,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include "mp3player.h"
+
 #include <global.h>
 #include <neutrino.h>
 
@@ -43,7 +49,6 @@
 #include <fstream>
 
 #include "eventlist.h"
-#include "mp3player.h"
 #include "color.h"
 #include "infoviewer.h"
 #include "nfs.h"
@@ -890,7 +895,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 }
 
 
-/*
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
 std::string Latin1_to_UTF8(const std::string s)
 {
 	std::string r;
@@ -910,7 +915,7 @@ std::string Latin1_to_UTF8(const std::string s)
 	}		
 	return r;
 }
-*/
+#endif
 //------------------------------------------------------------------------
 void CMP3PlayerGui::get_id3(CMP3 *mp3)
 {
@@ -1109,8 +1114,10 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 			else
 				mp3->Title	= tmp;
 		}
-		//		mp3->Artist = Latin1_to_UTF8(mp3->Artist);
-		//		mp3->Title = Latin1_to_UTF8(mp3->Title);
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+		mp3->Artist = Latin1_to_UTF8(mp3->Artist);
+		mp3->Title = Latin1_to_UTF8(mp3->Title);
+#endif
 	}
 	if(0)
 	{

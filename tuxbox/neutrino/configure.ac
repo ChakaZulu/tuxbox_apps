@@ -29,12 +29,17 @@ TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 
+AC_ARG_ENABLE(filesystems-utf8-encoded,
+         [  --enable-filesystems-utf8-encoded   enable utf8 encoded filesystems],
+         [],
+         [AC_DEFINE(FILESYSTEM_IS_ISO8859_1_ENCODED,1,[iso8859-1 encoded filesystems])])
+
 AC_ARG_ENABLE(keyboard-no-rc,
-         [  --enable-keyboard-no-rc    enable keyboard control, disable rc control],
+         [  --enable-keyboard-no-rc             enable keyboard control, disable rc control],
          [AC_DEFINE(KEYBOARD_INSTEAD_OF_REMOTE_CONTROL,1,[enable keyboard control, disable rc control])])
 
 AC_ARG_ENABLE(restore-prev-mode,
-         [  --enable-restore-prev-mode enable return from graphics mode],
+         [  --enable-restore-prev-mode          enable return from graphics mode],
          [AC_DEFINE(RETURN_FROM_GRAPHICS_MODE,1,[enable return from graphics mode])])
 
 AC_OUTPUT([

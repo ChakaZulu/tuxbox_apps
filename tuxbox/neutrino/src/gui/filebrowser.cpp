@@ -29,7 +29,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifdef HAVE_CONFIG_H
 #include <config.h>
+#endif
+
+#include "filebrowser.h"
+
 #include <algorithm>
 #include <global.h>
 #include <neutrino.h>
@@ -37,8 +42,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
-
-#include "filebrowser.h"
 
 #include <sys/stat.h>
 
@@ -62,7 +65,7 @@ int CFile::getType()
 	int ext_pos = Name.rfind(".");
 	if( ext_pos > 0)
 	{
-		string extension;
+		std::string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
 		if((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) ||
 			(strcasecmp(extension.c_str(),"mpa") == 0) )
@@ -80,7 +83,7 @@ int CFile::getType()
 
 //------------------------------------------------------------------------
 
-string CFile::getFileName()		// return name.extension or folder name without trailing /
+std::string CFile::getFileName()		// return name.extension or folder name without trailing /
 {
 	int namepos = Name.rfind("/");
 	if( namepos >= 0)
@@ -94,10 +97,10 @@ string CFile::getFileName()		// return name.extension or folder name without tra
 
 //------------------------------------------------------------------------
 
-string CFile::getPath()			// return complete path including trailing /
+std::string CFile::getPath()			// return complete path including trailing /
 {
 	int pos = 0;
-	string tpath;
+	std::string tpath;
 
 	if((pos = Name.rfind("/")) > 1)
 	{
@@ -198,12 +201,12 @@ CFileList *CFileBrowser::getSelectedFiles()
 
 //------------------------------------------------------------------------
 
-void CFileBrowser::ChangeDir(string filename)
+void CFileBrowser::ChangeDir(std::string filename)
 {
 	if(filename == "..")
 	{
 		int pos = (Path.substr(0,Path.length()-1)).rfind("/");
-		string newpath = Path.substr(0,pos);
+		std::string newpath = Path.substr(0,pos);
 //		printf("path: %s filename: %s newpath: %s\n",Path.c_str(),filename.c_str(),newpath.c_str());
 		readDir(newpath);
 		name = newpath;
@@ -219,7 +222,7 @@ void CFileBrowser::ChangeDir(string filename)
 
 //------------------------------------------------------------------------
 
-bool CFileBrowser::readDir(string dirname)
+bool CFileBrowser::readDir(std::string dirname)
 {
 struct stat statbuf;
 dirent_struct **namelist;
@@ -285,7 +288,7 @@ int n;
 
 //------------------------------------------------------------------------
 
-bool CFileBrowser::exec(string Dirname)
+bool CFileBrowser::exec(std::string Dirname)
 {
 	bool res = false;
 
@@ -421,7 +424,7 @@ bool CFileBrowser::exec(string Dirname)
 			}
 			else
 			{
-				string filename = filelist[selected].Name;
+				std::string filename = filelist[selected].Name;
 				if ( filename.length() > 1 )
 				{
 					if((!Multi_Select) && S_ISDIR(filelist[selected].Mode) && !Dir_Mode)
@@ -487,7 +490,7 @@ bool CFileBrowser::exec(string Dirname)
 
 //------------------------------------------------------------------------
 
-void CFileBrowser::addRecursiveDir(CFileList * re_filelist, string rpath, bool bRootCall, CProgressWindow * progress)
+void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, bool bRootCall, CProgressWindow * progress)
 {
 struct stat statbuf;
 dirent_struct **namelist;
@@ -575,7 +578,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 	int color;
 	int ypos = y+ theight+0 + pos*fheight;
 	CFile * actual_file = NULL;
-	string fileicon;
+	std::string fileicon;
 
 
 	if (liststart+pos==selected)
@@ -599,7 +602,11 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 		if ( actual_file->Name.length() > 0 )
 		{
 			if (liststart+pos==selected)
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+				CLCD::getInstance()->showMenuText(0, actual_file->getFileName()); // ISO-8859-1
+#else
 				CLCD::getInstance()->showMenuText(0, actual_file->getFileName(), -1, true); // UTF-8
+#endif
 			switch(actual_file->getType())
 			{
 				case CFile::FILE_MP3 : 
@@ -616,16 +623,20 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 			}
 			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
 			
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+			g_Fonts->filebrowser_item->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color); // ISO-8859-1
+#else
 			g_Fonts->filebrowser_item->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color, 0, true); // UTF-8
+#endif
 
 			if( S_ISREG(actual_file->Mode) )
 			{
-				string modestring;
+				std::string modestring;
 				for(int m = 2; m >=0;m--)
 				{
-					modestring += string((actual_file->Mode & (4 << (m*3)))?"r":"-");
-					modestring += string((actual_file->Mode & (2 << (m*3)))?"w":"-");
-					modestring += string((actual_file->Mode & (1 << (m*3)))?"x":"-");
+					modestring += std::string((actual_file->Mode & (4 << (m*3)))?"r":"-");
+					modestring += std::string((actual_file->Mode & (2 << (m*3)))?"w":"-");
+					modestring += std::string((actual_file->Mode & (1 << (m*3)))?"x":"-");
 				}
 				g_Fonts->filebrowser_item->RenderString(x + width - 180 , ypos+ fheight, 80, modestring.c_str(), color);
 
@@ -672,11 +683,16 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 void CFileBrowser::paintHead()
 {
 	char l_name[100];
-	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str());  // <- FIXME (UTF-8 and Latin combination)
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD);
 
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // ISO-8859-1
+	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD); // ISO-8859-1
+#else
+	snprintf(l_name, sizeof(l_name), "%s %s", (g_Locale->getText("filebrowser.head")).c_str(), name.c_str()); // UTF-8
+	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -693,7 +709,7 @@ void CFileBrowser::paintFoot()
 
 	if(filelist.size()>0)
 	{
-		string nextsort;
+		std::string nextsort;
 		type = filelist[selected].getType();
 
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
