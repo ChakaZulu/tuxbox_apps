@@ -135,7 +135,8 @@ bool CFlashUpdate::selectHttpImage(void)
 		}
 		else
 		{
-			endpos = url.find('/', startpos + 1);
+			startpos += 2;
+			endpos    = url.find('/', startpos);
 		}
 		cramfs_lists.push_back(url.substr(startpos, endpos));
 
@@ -335,6 +336,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror")); // UTF-8
 			return menu_return::RETURN_REPAINT;
 		}
+		filename = std::string(gTmpPath local_cramfs_filename);
 	}
 
 	showGlobalStatus(40);
@@ -357,7 +359,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, const std::string &)
 	showGlobalStatus(60);
 
 	//flash it...
-	if(!ft.program(std::string(gTmpPath local_cramfs_filename), 80, 100))
+	if(!ft.program(filename, 80, 100))
 	{
 		hide();
 		ShowHintUTF("messagebox.error", ft.getErrorMessage().c_str()); // UTF-8
