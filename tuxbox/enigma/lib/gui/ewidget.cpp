@@ -506,7 +506,7 @@ void eWidget::focusNext(int dir)
 			while (_focusList.current() != _focusList.end())
 			{
 				_focusList.next();
-				if (_focusList.current()->state&stateShow)
+				if (_focusList.current()->isVisible())
 					break;
 			}
 		break;
@@ -519,7 +519,7 @@ void eWidget::focusNext(int dir)
 			while (_focusList.current() != _focusList.begin())
 			{
 				_focusList.prev();
-				if (_focusList.current()->state&stateShow)
+				if (_focusList.current()->isVisible())
 					break;
 			}
 		break;
@@ -535,7 +535,7 @@ void eWidget::focusNext(int dir)
 		{
 			if (_focusList.current() == i)
 				continue;
-			if (!(focusList()->current()->state&stateShow))
+			if (!i->isVisible())
 				continue;
 			ePoint m1=i->getPosition();
 			m1+=ePoint(i->getSize().width()/2, i->getSize().height()/2);
