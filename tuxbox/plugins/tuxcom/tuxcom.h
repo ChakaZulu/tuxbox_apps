@@ -29,9 +29,8 @@
 #define TUXCOM_DBOX_VERSION 3
 
 #if TUXCOM_DBOX_VERSION == 3
-#include "config.h"
+#include <config.h>
 #endif
-
 #include <errno.h>
 #include <locale.h>
 #include <fcntl.h>
@@ -89,7 +88,7 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.5a\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.6\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -222,7 +221,7 @@ FT_Bool			use_kerning;
 
 
 enum {OK, OKCANCEL, OKHIDDENCANCEL,YESNOCANCEL,NOBUTTON,OVERWRITECANCEL,OVERWRITESKIPCANCEL,CANCELRUN};
-enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL,EDIT, RENAME};
+enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL,EDIT, RENAME, SEARCHRESULT};
 enum {GZIP,BZIP2,COMPRESS,TAR,FTP};
 
 #define FONTHEIGHT_VERY_SMALL 20
@@ -281,6 +280,7 @@ char* szCommand;
 char* szZipCommand;
 char tmpzipdir[256];
 char szClipboard[256];
+char szSearchstring[FILENAME_MAX];
 char szPass[20];
 long commandsize;
 
@@ -315,7 +315,6 @@ int language;
 #define ACTION_TOLINUX   11
 #define ACTION_MARKTEXT  12
 #define ACTION_INSTEXT   13
-#define ACTION_SETPASS   14
 
 
 
@@ -337,14 +336,17 @@ int language;
 #define SELECT_NOCHANGE 0
 #define SELECT_UPDIR    1
 
-#define SHOW_NO_OUTPUT  0
-#define SHOW_OUTPUT     1
+#define SHOW_NO_OUTPUT    0
+#define SHOW_OUTPUT       1
+#define SHOW_SEARCHRESULT 2
 
 #define REPEAT_TIMER 3
 
 #define INI_VERSION 1
 
 #define NUM_LANG 2
+
+#define MAINMENU 4
 
 enum {MSG_EXEC              ,
       MSG_EXEC_NOT_POSSIBLE ,
@@ -377,7 +379,8 @@ enum {MSG_EXEC              ,
       MSG_PROCESSUSER       ,
       MSG_PROCESSNAME       ,
       MSG_CANCELDOWNLOAD    ,
-      MSG_APPENDDOWNLOAD    };
+      MSG_APPENDDOWNLOAD    ,
+      MSG_SEARCHFILES       };
 
 enum {INFO_COPY   ,
       INFO_MOVE   ,
@@ -387,7 +390,9 @@ enum {INFO_COPY   ,
       INFO_PASS1  ,
       INFO_PASS2  ,
       INFO_PASS3  ,
-      INFO_PASS4  };
+      INFO_PASS4  ,
+      INFO_SEARCH1,
+      INFO_SEARCH2};
 
 
 char *numberchars[] = {  "0#!$%&?*()@\\",
@@ -409,7 +414,9 @@ char *info[]   = { "(select 'hidden' to copy in background)"               ,"('v
 				   "Please enter your password"                            ,"Bitte Passwort eingeben"                                       ,
 				   "Please enter new password"                             ,"Bitte neues Passwort eingeben"                                 ,
 				   "Please enter new password again"                       ,"Bitte neues Passwort wiederholen"                              ,
-				   "password has been changed"                             ,"Passwort wurde geändert"                                       };
+				   "password has been changed"                             ,"Passwort wurde geändert"                                       ,
+				   "searching..."							               ,"Suche läuft..."                                                ,
+				   "search result"									       ,"Suchergebnis"                                                  };
 
 char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen ?"                                ,
                   "Cannot execute file '%s'"                   ,"Kann '%s' nicht ausführen"                       ,
@@ -442,7 +449,9 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
 				  "owner"                                      ,"Besitzer"                                        ,
 				  "process"                                    ,"Prozess"                                         ,
 				  "cancel download ?"                          ,"Download abbrechen ?"                            ,
-				  "append to file '%s' ?"                      ,"An Datei '%s' anhängen ?"                        };
+				  "append to file '%s' ?"                      ,"An Datei '%s' anhängen ?"                        ,
+				  "search in directory %s for file:"           ,"In Verzeichnis %s suchen nach Datei:"            };
+
 
 char *menuline[]  = { ""      , ""           ,
                       "rights", "Rechte"     ,
@@ -468,8 +477,7 @@ char *colorline[] = { ""               , "" ,
                       "kill process"   , "Prozess beenden"          ,
                       "to linux format", "in Linux-Format"          ,
                       "mark text"      , "Text markieren"           ,
-                      "insert text"    , "Text einfügen"            ,
-                      "set password"   , "Passwort setzen"          };
+                      "insert text"    , "Text einfügen"            };
 char *mbox[]     = { "OK"           , "OK"                ,
                      "Cancel"       , "Abbrechen"         ,
                      "Hidden"       , "Versteckt"         ,
@@ -483,6 +491,17 @@ char *mbox[]     = { "OK"           , "OK"                ,
 char *props[]    = { "read"   , "lesen"    ,
                      "write"  , "schreiben",
                      "execute", "ausführen"};
+
+char *ftpstr[]   = { "host"     , "Adresse"    ,
+                     "port"     , "Port"       ,
+                     "user"     , "Nutzer"     ,
+                     "password" , "Passwort"   ,
+                     "directory", "Verzeichnis"};
+
+char *mainmenu[] = { "search files"    , "Dateien suchen"    ,
+                     "taskmanager"     , "Prozessübersicht"  ,
+                     "toggle 16:9 mode", "16:9-Modus setzen" ,
+                     "set password"    , "Passwort setzen"   };
 
 struct fileentry
 {
@@ -542,7 +561,7 @@ void 	          	FillDir(int frame, int selmode);
 struct fileentry* 	GetSelected(int frame);
 void 				SetSelected(int frame, const char* szFile);
 void 	          	GetSizeString(char* sizeString, unsigned long long size);
-int 	          	MessageBox(char* msg1,char* msg2, int mode);
+int 	          	MessageBox(const char* msg1,const char* msg2, int mode);
 int 	          	GetInputString(int width, int maxchars, char* str, char * msg, int pass);
 void	          	ClearEntries(int frame);
 void 				ClearZipEntries(int frame);
@@ -574,3 +593,6 @@ FILE*				OpenPipe(char* szAction);
 void 				OpenFTP();
 void 				ReadFTPDir(int frame, char* seldir);
 int					FTPcmd(int frame, const char *s1, const char *s2, char *buf);
+void 				DoEditFTP(char* szFile,char* szTitle);
+void 				DoMainMenu();
+void 				DoSearchFiles();

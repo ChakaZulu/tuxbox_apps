@@ -3,6 +3,16 @@ TuxCom:
 History:
 ---------
 
+10.10.2004 Version 1.6
+ - bugfix: wrong text in clipboard
+ - new main menu (dream-button)
+ - new feature: search for files (in main menu)
+ - Editing of .ftp-files with own mask
+ - bugfix: correct selected file after renaming
+ - bugfix: under certain circumstances the last character was cut off in textinput
+ - textcolor black on yellow background
+ - bugfix: change rights of file with red button now possible
+ 
 22.09.2004 Version 1.5a
  - bugfix: crash in editor / after closing editor
  - bugfix: crash when moving (button 6) a single file
@@ -121,8 +131,8 @@ green			toggle file marker
 yellow			toggle sorting of entries in current window
 blue			refresh display
 mute			toggle transparency
-dream			toggle between 4:3 and 16:9-mode
-info			Taskmanager / version info
+dream			main menu
+info			version info
 
 in messageboxes:
 
@@ -183,7 +193,14 @@ up/down 		Line up/down
 volume +		jump to first line
 volume -		jump to last line
 red			kill process
-blue			change password
+
+in Searchresult:
+
+left/right		Page back/forward
+up/down 		Line up/down
+volume +		jump to first line
+volume -		jump to last line
+ok			navigate to file
 
 in all dialogs: 
 

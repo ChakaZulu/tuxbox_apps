@@ -3,6 +3,16 @@ TuxCom:
 Historie:
 ---------
 
+10.10.2004 Version 1.6
+ - Bugfix: Fehlerhafter Text in Zwischenablage
+ - neues Hauptmenü (über Dream-Taste)
+ - neue Funktion: Dateien suchen (im Hauptmenü)
+ - Editieren von .ftp-Dateien in eigener Maske
+ - Bugfix: korrekt selektierte Datei nach Umbenennung
+ - Bugfix: unter Umständen Abschneiden des letzten Zeichens bei Texteingabe möglich
+ - Textfarbe schwarz bei gelbem Hintergrund
+ - Bugfix: Ändern der Dateirechte auch mit Taste rot möglich
+ 
 22.09.2004 Version 1.5a
  - Bugfix: Absturz im Editor / nach Schließen des Editors
  - Bugfix: Absturz bei Verschieben (Button 6) von einzelnen Dateien
@@ -120,8 +130,8 @@ grün			Datei markieren/Markierung aufheben
 gelb			Sortierung der Einträge im aktuellen Fenster umkehren
 blau			Ansicht aktualisieren
 mute			Transparenzmodus wechseln
-dream			Umschalten zwischen 4:3 und 16:9-Modus
-info			Taskmanager / Versionsinformation
+dream			Hauptmenü aufrufen
+info			Versionsinformation
 
 in Mitteilungsfenstern:
 
@@ -183,7 +193,14 @@ hoch/runter		Zeile zurück/vor
 volume +		Sprung zur 1. Zeile
 volume -		Sprung zur letzten Zeile
 rot			Prozess beenden 
-blau			Passwort ändern
+
+in Suchergebnis:
+
+links/rechts		Seite zurück/vor
+hoch/runter		Zeile zurück/vor
+volume +		Sprung zur 1. Zeile
+volume -		Sprung zur letzten Zeile
+ok			zur Datei springen
 
 in allen Dialogen: 
 
