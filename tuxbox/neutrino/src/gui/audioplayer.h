@@ -139,33 +139,33 @@ class CAudioPlayerGui : public CMenuTarget
 	void updateMetaData();
 	void updateTimes(const bool force = false);
 	void showMetaData();
-   void screensaver(bool on);
-   void savePlaylist();
+	void screensaver(bool on);
+	void savePlaylist();
 
-   /**
-    * Converts an absolute filename to a relative one
-    * as seen from a file in fromDir.
-    * Example:
-    * absFilename: /mnt/audio/A/abc.mp3
-    * fromDir: /mnt/audio/B
-    * => ../A/abc.mp3 will be returned 
-    * @param fromDir the directory from where we want to
-    * access the file
-    * @param absFilename the file we want to access in a
-    * relative way from fromDir (given as an absolute path)
-    * @return the location of absFilename as seen from fromDir
-    * (relative path)
-    */
-   std::string absPath2Rel(const std::string& fromDir,
-			   const std::string& absFilename);
-   
-   /** 
-    * Asks the user if the file filename should be overwritten or not
-    * @param filename the name of the file
-    * @return true if file should be overwritten, false otherwise
-    */
-   bool CAudioPlayerGui::askToOverwriteFile(const std::string& filename);
-
+	/**
+	 * Converts an absolute filename to a relative one
+	 * as seen from a file in fromDir.
+	 * Example:
+	 * absFilename: /mnt/audio/A/abc.mp3
+	 * fromDir: /mnt/audio/B
+	 * => ../A/abc.mp3 will be returned 
+	 * @param fromDir the directory from where we want to
+	 * access the file
+	 * @param absFilename the file we want to access in a
+	 * relative way from fromDir (given as an absolute path)
+	 * @return the location of absFilename as seen from fromDir
+	 * (relative path)
+	 */
+	std::string absPath2Rel(const std::string& fromDir,
+				const std::string& absFilename);
+	
+	/** 
+	 * Asks the user if the file filename should be overwritten or not
+	 * @param filename the name of the file
+	 * @return true if file should be overwritten, false otherwise
+	 */
+	bool CAudioPlayerGui::askToOverwriteFile(const std::string& filename);
+	
  public:
 	CAudioPlayerGui();
 	~CAudioPlayerGui();
