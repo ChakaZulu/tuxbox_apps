@@ -28,7 +28,7 @@ public:
 	 * \param string The string displayed inside the messagebox.
 	 * \param caption The title of the messagebox.
 	 */
-	eMessageBox(eString string, eString caption);
+	eMessageBox(eString string, eString caption, bool display_only=false);
 	~eMessageBox();
 };
 

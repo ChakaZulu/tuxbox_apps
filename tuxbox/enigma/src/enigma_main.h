@@ -8,6 +8,7 @@
 #include <core/gui/ewindow.h>
 #include <core/gui/listbox.h>
 #include <core/gui/multipage.h>
+#include <core/gui/emessage.h>
 
 class eLabel;
 class eProgress;
@@ -121,6 +122,7 @@ class eZapMain: public eWidget
 	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
 	
 	eProgress *Progress, *VolumeBar;
+	eMessageBox *pMsg;
 
 	eTimer timeout, clocktimer;
 

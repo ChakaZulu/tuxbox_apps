@@ -63,7 +63,7 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
 	CONNECT(clocktimer.timeout, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->volumeChanged, eZapLCDMain::volumeUpdate);
-	CONNECT(eDVB::getInstance()->enterService, eZapLCDMain::serviceEntered);
+	CONNECT(eDVB::getInstance()->switchedService, eZapLCDMain::serviceSwitched);
 	CONNECT(eDVB::getInstance()->leaveService, eZapLCDMain::leaveService);
 	clockUpdate();
 }
@@ -110,7 +110,7 @@ void eZapLCDMain::updateProgress(int start,int duration)
 	clockUpdate();
 }
 
-void eZapLCDMain::serviceEntered(const eServiceReference &sref)
+void eZapLCDMain::serviceSwitched(const eServiceReference &sref, int err)
 {
   eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sref);
 

@@ -434,7 +434,7 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 {
 }
 
-eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
+eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp), pMsg(0)
 {
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -1014,6 +1014,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
+		if (pMsg)
+		{
+			pMsg->hide();
+			delete pMsg;
+			pMsg=0;
+		}
 		if (event.action == &i_enigmaMainActions->showMainMenu)
 			showMainMenu();
 		else if (event.action == &i_enigmaMainActions->standby_press)
@@ -1132,6 +1138,15 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 
 	ChannelName->setText(name);		
 
+	if (pMsg)
+	{
+		if (pMsg->isVisible())
+			pMsg->hide();
+
+		delete pMsg;
+		pMsg = 0;
+	}
+
 	switch (err)
 	{
 	case 0:
@@ -1139,33 +1154,42 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		break;
 	case -EAGAIN:
 		Description->setText(_("Einen Moment bitte..."));
-		eDebug("Einen Moment bitte...");
+		pMsg = new eMessageBox( _("One moment please..."), _("Service Switch"), true);
 		break;
 	case -ENOENT:
 		Description->setText(_("Sender konnte nicht gefunden werden."));
+		pMsg = new eMessageBox( _("Service could not be found !"), _("Service Switch"), true );
 		eDebug("Sender konnte nicht gefunden werden.");
 		break;
 	case -ENOCASYS:
 		Description->setText(_("Dieser Sender kann nicht entschlüsselt werden."));
+		pMsg = new eMessageBox( _("This service could not be descrambled"), _("Service Switch"), true );
 		eDebug("Dieser Sender kann nicht entschlüsselt werden.");
 		break;
 	case -ENOSTREAM:
 		Description->setText(_("Dieser Sender sendet (momentan) kein Signal."));
+		pMsg = new eMessageBox( _("This service sends (currently) no signal"), _("Service Switch"), true );
 		eDebug("Dieser Sender sendet (momentan) kein Signal.");
 		break;
 	case -ENOSYS:
 		Description->setText(_("Dieser Inhalt kann nicht dargestellt werden."));
+		pMsg = new eMessageBox( _("This content could not be displayed"), _("Service Switch"), true );
 		eDebug("Dieser Inhalt kann nicht dargestellt werden.");
 		break;
 	case -ENVOD:
 		Description->setText(_("NVOD - Bitte Anfangszeit bestimmen!"));
+		pMsg = new eMessageBox( _("NVOD Service - select a starttime, please"), _("Service Switch"), true );
 		eDebug("NVOD - Bitte Anfangszeit bestimmen!");
 		break;
 	default:
 		Description->setText(_("<unbekannter Fehler>"));
+		pMsg = new eMessageBox( _("Unknown error !!"), _("Service Switch"), true );
 		eDebug("<unbekannter Fehler>");
 		break;
 	}
+
+	if (pMsg)
+		pMsg->show();
 
 	int num=-1;
 	

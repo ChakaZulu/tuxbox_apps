@@ -6,7 +6,7 @@
 #include <core/gui/eskin.h>
 #include <core/gdi/font.h>
 
-eMessageBox::eMessageBox(eString message, eString caption): eWindow(0)
+eMessageBox::eMessageBox(eString message, eString caption, bool display_only): eWindow(0)
 {
 	int fontsize=eSkin::getActive()->queryValue("fontsize", 20);
 	setText(caption);
@@ -26,14 +26,17 @@ eMessageBox::eMessageBox(eString message, eString caption): eWindow(0)
 	text->resize(ext); 
 
 	resize(eSize(ext.width()+20+size.width()-clientrect.width(), ext.height()+size.height()-clientrect.height() + fontsize +14));
-
-	eButton *b=new eButton(this);
-	b->resize(eSize(size.width()-20, fontsize+4));
-	b->setText("...OK!");
-	ext=b->getExtend();
-	b->resize(ext);
-	b->move(ePoint(clientrect.width()-ext.width(), clientrect.height()-fontsize-14));	// right align
-	CONNECT(b->selected, eMessageBox::okPressed);
+	
+	if (!display_only)
+	{
+		eButton *b=new eButton(this);
+		b->resize(eSize(size.width()-20, fontsize+4));
+		b->setText("...OK!");
+		ext=b->getExtend();
+		b->resize(ext);
+		b->move(ePoint(clientrect.width()-ext.width(), clientrect.height()-fontsize-14));	// right align
+		CONNECT(b->selected, eMessageBox::okPressed);
+	}
 }
 
 eMessageBox::~eMessageBox()
@@ -42,5 +45,8 @@ eMessageBox::~eMessageBox()
 
 void eMessageBox::okPressed()
 {
-  close(0);
+	if ( in_loop )
+	  close(0);
+	else
+		hide();
 }
