@@ -17,6 +17,8 @@ class eDVB;
 #include <set>
 #include <stack>
 
+#include <lib/system/elock.h>
+
 #ifndef MIN
 	#define MIN(a,b) (a < b ? a : b)
 #endif
@@ -223,13 +225,28 @@ public:
 class eService
 {
 public:
+	eService(const eString &service_name);
+	~eService();
+	
+	eLock access;
+
+	eString service_name;
+	class eServiceDVB *dvb;
+	class eServiceID3 *id3;
+};
+
+class eServiceDVB: public eService
+{
+public:
 	enum cacheID
 	{
 		cVPID, cAPID, cTPID, cPCRPID, cacheMax
 	};
-	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number=-1);
-	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number=-1);
-	eService(eServiceID service_id, const char *name);
+	eServiceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number=-1);
+	eServiceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number=-1);
+	eServiceDVB(eServiceID service_id, const char *name);
+	eServiceDVB(const eServiceDVB &c);
+
 	void update(const SDTEntry *sdtentry);
 	
 	eTransportStreamID transport_stream_id;
@@ -237,9 +254,16 @@ public:
 	eServiceID service_id;
 	int service_type;
 	
-	std::string service_name, service_provider;
+	eString service_provider;
 	
 	int service_number;		// nur fuer dvb, gleichzeitig sortierkriterium...
+	
+	enum {
+		dxNameFixed=1,
+		dxDontshow=2,
+		dxNoDVB=4		// no PAT/PMT/...
+	};
+	int dxflags;
 	
 	int cache[cacheMax];
 	
@@ -259,7 +283,7 @@ public:
 			cache[i]=-1;
 	}
 	
-	bool operator<(const eService &c) const
+	bool operator<(const eServiceDVB &c) const
 	{
 		if (original_network_id < c.original_network_id)
 			return 1;
@@ -517,7 +541,7 @@ public:
 	{
 		return orbital_position == sat.orbital_position;
 	}
-};
+};                     
 
 struct eDiSEqC
 {
@@ -536,7 +560,9 @@ struct eDiSEqC
 	int uncommitted_switch; // send to uncommited switch
 	int uncommitted_gap;    // send uncommitted switch in DiSEqC Repeat gap
 	int useGotoXX;          // Rotor Support gotoXX Position ?
-	double gotoXXOffset;    // Offset for gotoXX° Function
+	enum { NORTH, SOUTH, EAST, WEST };
+	int gotoXXLoDirection;  // EAST, WEST
+	int gotoXXLaDirection;  // NORT, SOUTH
 	double gotoXXLongitude; // Longitude for gotoXX° Function
 	double gotoXXLatitude;  // Latitude for gotoXX° Function
 };
@@ -576,7 +602,7 @@ class eTransponderList
 {
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
-	std::map<eServiceReferenceDVB,eService> services;
+	std::map<eServiceReferenceDVB,eServiceDVB> services;
 	
 	std::multimap<int,eSatellite*> satellites;
 	std::list<eLNB> lnbs;
@@ -604,26 +630,26 @@ public:
 	void writeLNBData();
 
 	eTransponder &createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
-	eService &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
+	eServiceDVB &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
 	int handleSDT(const SDT *sdt, eOriginalNetworkID onid=-1, eTransportStreamID tsid=-1);
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
 
 	eTransponder *searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
-	eService *searchService(const eServiceReference &service);
+	eServiceDVB *searchService(const eServiceReference &service);
 	const eServiceReferenceDVB *searchService(eOriginalNetworkID original_network_id, eServiceID service_id);
 	eServiceReferenceDVB searchServiceByNumber(int channel_number);
 	
 	template <class T> 
 	void forEachService(T ob)
 	{
-		for (std::map<eServiceReferenceDVB,eService>::iterator i(services.begin()); i!=services.end(); ++i)
+		for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(services.begin()); i!=services.end(); ++i)
 			ob(i->second);
 	}
 	template <class T> 
 	void forEachServiceReference(T ob)
 	{
-		for (std::map<eServiceReferenceDVB,eService>::iterator i(services.begin()); i!=services.end(); ++i)
+		for (std::map<eServiceReferenceDVB,eServiceDVB>::iterator i(services.begin()); i!=services.end(); ++i)
 			ob(i->first);
 	}
 	template <class T> void forEachTransponder(T ob)
@@ -633,7 +659,7 @@ public:
 	}
 	template <class T> void forEachChannel(T ob)
 	{
-		for (std::map<int,eService*>::iterator i(channel_number.begin()); i!=channel_number.end(); ++i)
+		for (std::map<int,eServiceDVB*>::iterator i(channel_number.begin()); i!=channel_number.end(); ++i)
 			ob(*i->second);
 	}
 

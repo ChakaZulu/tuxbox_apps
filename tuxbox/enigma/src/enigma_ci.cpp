@@ -77,13 +77,10 @@ enigmaCImmi::enigmaCImmi(): eWindow(0), mmi(0)
 	
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-//<<<<<<< enigma_ci.cpp
-	abort->move(ePoint(450, 280));
-	abort->resize(eSize(90, fd+4));
-//=======
-//	abort->move(ePoint(310, 280));
-//	abort->resize(eSize(150, 30));
-//>>>>>>> 1.12.2.2
+
+	abort->move(ePoint(310, 280));
+	abort->resize(eSize(150, 30));
+
 	abort->setHelpText(_("leave ci mmi"));
 	abort->loadDeco();
 

@@ -5,6 +5,7 @@
 #include <lib/gdi/epng.h>
 #include <lib/gui/elabel.h>
 #include <lib/gui/guiactions.h>
+#include <lib/gdi/font.h>
 
 eWindow::eWindow(int takefocus)
 	:eWidget(0, takefocus)
@@ -19,10 +20,10 @@ eWindow::eWindow(int takefocus)
 	borderBottom=eSkin::getActive()->queryValue("eWindow.borderBottom", deco.borderBottom);
 	borderTop=eSkin::getActive()->queryValue("eWindow.borderTop", deco.borderTop );
 
-	titleOffsetX=eSkin::getActive()->queryValue("eWindow.titleOffsetX", 0);
-	titleOffsetY=eSkin::getActive()->queryValue("eWindow.titleOffsetY", 0);
+	titleOffsetLeft=eSkin::getActive()->queryValue("eWindow.titleOffsetLeft", 0);
+	titleOffsetRight=eSkin::getActive()->queryValue("eWindow.titleOffsetRight", 0);
+	titleOffsetTop=eSkin::getActive()->queryValue("eWindow.titleOffsetTop", 0);
 	titleHeight=eSkin::getActive()->queryValue("eWindow.titleHeight", titleFontSize+10);
-	titleBorderY=eSkin::getActive()->queryValue("eWindow.titleBorderY", 0);
 	titleFontSize=eSkin::getActive()->queryValue("eWindow.titleFontSize", 20);
 
 	font = eSkin::getActive()->queryFont("eWindow.Childs");
@@ -36,7 +37,13 @@ eWindow::~eWindow()
 
 eRect eWindow::getTitleBarRect()
 {
-	return eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX/*-titleBorderY*/, titleHeight);
+	eRect rc;
+	rc.setLeft( deco.borderLeft > titleOffsetLeft ? deco.borderLeft : titleOffsetLeft );
+	rc.setTop( titleOffsetTop );
+	rc.setRight( width() - ( deco.borderRight > titleOffsetRight ? deco.borderRight : titleOffsetRight ) );
+	rc.setBottom( rc.top() + (titleHeight?titleHeight:deco.borderTop) );  // deco.borderTop sucks...
+
+	return rc;
 }
 
 void eWindow::redrawWidget(gPainter *target, const eRect &where)
@@ -57,33 +64,38 @@ void eWindow::eraseBackground(gPainter *target, const eRect &clip)
 
 void eWindow::drawTitlebar(gPainter *target)
 {
-	target->setForegroundColor(titleBarColor);
-	target->fill( getTitleBarRect() );
-	target->flush();
+	eRect rc = getTitleBarRect();
+  target->clip( rc );
+	if ( titleHeight )
+	{
+		target->setForegroundColor(titleBarColor);
+		target->fill( rc );
+		target->flush();
+	}
 
+	eTextPara *p = new eTextPara( rc );
+	p->setFont( eSkin::getActive()->queryFont("eWindow.TitleBar") );
+	p->renderString( text );
 	target->setBackgroundColor(titleBarColor);
 	target->setForegroundColor(fontColor);
-	target->setFont( eSkin::getActive()->queryFont("eWindow.TitleBar") );
-	target->renderText(getTitleBarRect(), text);
+	target->renderPara( *p );
 	target->flush();
+	p->destroy();
+  target->clippop();
 }
 
 void eWindow::recalcClientRect()
 {
-  clientrect=eRect(borderLeft, (titleOffsetY?titleOffsetY:borderTop)+titleHeight, size.width()-borderLeft-borderRight, size.height()-borderBottom-titleHeight-(titleOffsetY?titleOffsetY:borderTop));
+	clientrect=eRect( borderLeft, borderTop, width() - (borderLeft+borderRight), height() - ( borderTop+borderBottom) );
 }
 
 int eWindow::eventHandler(const eWidgetEvent &event)
 {
-	eRect rc;
 	switch (event.type)
 	{
 		case eWidgetEvent::changedText:
 		{
-			eRect rc = getTitleBarRect();
-			if ( !titleHeight && deco && deco.borderTop )
-				rc.setHeight( deco.borderTop );
-			redraw(rc);
+			redraw(getTitleBarRect());
 			return 1;
 		}
     

@@ -159,7 +159,7 @@ eZap::eZap(int argc, char **argv)
 	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/", 2);
 
 	eDebug("[ENIGMA] starting httpd");
-	httpd = new eHTTPD(80);
+	httpd = new eHTTPD(80, eApp);
 
 	serialhttpd=0;
 #if 0
@@ -263,6 +263,7 @@ int main(int argc, char **argv)
 
 	setlocale (LC_ALL, "");
 	bindtextdomain ("tuxbox-enigma", "/share/locale");
+	bind_textdomain_codeset("tuxbox-enigma", "UTF8");
 	textdomain ("tuxbox-enigma");
 	
 //	mtrace();

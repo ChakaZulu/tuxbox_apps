@@ -17,6 +17,7 @@ class eTransponderWidget;
 struct SatelliteEntry
 {
 	eComboBox *sat, *voltage, *hilo;
+	eLabel *fixed, *description;
 	eButton *lnb;
 };
 
@@ -25,10 +26,14 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 	eTimer* refresh;
 	eWidget *buttonWidget;
 	eWidget *w_buttons;
-	eButton *button_close, *button_new;
+	eButton *button_close, *button_new, *button_erase;
+	eLabel *lSatPos, *lLNB, *l22Khz, *lVoltage;
+	eComboBox *combo_type;
 	eMultipage satPages;
 	SatelliteEntry* deleteThisEntry;
-	int eventHandler(const eWidgetEvent &event);
+
+	int complexity;
+ 	int eventHandler(const eWidgetEvent &event);
 	std::map< eSatellite*, SatelliteEntry > entryMap;
 	eSatellite *getSat4SatCombo( const eComboBox* );
 	eSatellite *getSat4HiLoCombo( const eComboBox* );
@@ -38,12 +43,25 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 	void addSatellite(eSatellite* sat);
 	void repositionWidgets();
 	void closePressed();
+	void erasePressed();
 	void newPressed();
 	void lnbSelected(eButton *who);
+	void delSatellite( eSatellite* sat );
 	void satChanged(eComboBox *who, eListBoxEntryText *le);
 	void hiloChanged(eComboBox *who, eListBoxEntryText *le);
 	void voltageChanged(eComboBox *who, eListBoxEntryText *le);
 	void focusChanged( const eWidget* focus );
+	
+	void deleteSatellite(eSatellite *s);
+	
+	void typeChanged(eListBoxEntryText* newtype);
+	void setComplexity(int complexity);
+	int checkComplexity(); // check overall complexity
+	int checkDiseqcComplexity(eSatellite *s);
+	void deleteSatellitesAbove(int nr);
+	
+		// according to "complexity" (works only for complexity <= 2, of course)
+	void setSimpleDiseqc(eSatellite *s, int diseqcnr);
 public:
 	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
@@ -117,11 +135,11 @@ class eRotorPage : public eWidget
 	eSatellite *sat;
 	eLNB *curlnb;
 	eListBox<eListBoxEntryText> *positions;
-	eLabel *lRotorOffset, *lLatitude, *lLongitude, *lOrbitalPosition, *lStoredRotorNo, *lDirection;
-	eNumber *orbital_position, *number, *RotorOffset, *Latitude, *Longitude;
+	eLabel *lLatitude, *lLongitude, *lOrbitalPosition, *lStoredRotorNo, *lDirection;
+	eNumber *orbital_position, *number, *Latitude, *Longitude;
 	eButton *add, *remove, *prev, *save, *cancel;
 	eCheckbox *fine, *useGotoXX;  // if is checked.. then left..right is for finetuning
-	eComboBox *direction;
+	eComboBox *direction, *LaDirection, *LoDirection;
 	eFEStatusWidget *feState;
 	eStatusBar* statusbar;
 	void onAdd();

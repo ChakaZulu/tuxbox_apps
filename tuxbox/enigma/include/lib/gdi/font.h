@@ -61,8 +61,6 @@ public:
 #define GS_ISSPACE  1
 #define GS_ISFIRST  2
 #define GS_USED			4
-#define GS_MYWRAP   8
-#define GS_HEAP    16
 
 struct pGlyph
 {
@@ -92,7 +90,7 @@ class eTextPara
 	glyphString glyphs;
 	int refcnt;
 
-	int appendGlyph(FT_UInt glyphIndex, int flags);
+	int appendGlyph(FT_UInt glyphIndex, int flags, int rflags);
 	void newLine(int flags);
 	void setFont(Font *font);
 	eRect boundBox;

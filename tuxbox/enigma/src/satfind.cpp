@@ -58,6 +58,7 @@ int eSatfind::eventHandler( const eWidgetEvent& e)
 		default:
 			return eWindow::eventHandler(e);
 	}
+	return 0;
 }
 
 void eSatfind::update()

@@ -27,7 +27,7 @@ protected:
 	bool atomic_selchanged;
 	int movemode;
 public:
-	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4	};
+	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4, flagGrabCancel = 8 };
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8,	 E_NOT_VISIBLE = 16		};
 	void setFlags(int);
 	void removeFlags(int);

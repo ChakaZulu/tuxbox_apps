@@ -266,13 +266,14 @@
 	</colorscheme>
 
 	<values>
+    <value name="eComboBox.smallButton.decoWidth" value="25" />
 		<value name="eWindow.titleFontSize" value="24" />
 		<!-- <value name="eWindow.borderLeft" value="" />
 		<value name="eWindow.borderRight" value="4" />
 		<value name="eWindow.borderBottom" value="16" />
 		<value name="eWindow.borderTop" value="50" /> -->
-		<value name="eWindow.titleOffsetX" value="18" />
-		<value name="eWindow.titleOffsetY" value="0" />
+		<value name="eWindow.titleOffsetLeft" value="18" />
+		<value name="eWindow.titleOffsetTop" value="0" />
 		<value name="eWindow.titleHeight" value="0" />
 		<value name="fontsize" value="23" />
 	</values>

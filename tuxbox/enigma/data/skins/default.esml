@@ -114,16 +114,16 @@
 	</images>
 
 	<images basepath="shortcut">
-		<img name="shortcut.0" src="0.png" />
-		<img name="shortcut.1" src="1.png" />
-		<img name="shortcut.2" src="2.png" />
-		<img name="shortcut.3" src="3.png" />
-		<img name="shortcut.4" src="4.png" />
-		<img name="shortcut.5" src="5.png" />
-		<img name="shortcut.6" src="6.png" />
-		<img name="shortcut.7" src="7.png" />
-		<img name="shortcut.8" src="8.png" />
-		<img name="shortcut.9" src="9.png" />
+		<img name="shortcut.0" src="button_0.png" />
+		<img name="shortcut.1" src="button_1.png" />
+		<img name="shortcut.2" src="button_2.png" />
+		<img name="shortcut.3" src="button_3.png" />
+		<img name="shortcut.4" src="button_4.png" />
+		<img name="shortcut.5" src="button_5.png" />
+		<img name="shortcut.6" src="button_6.png" />
+		<img name="shortcut.7" src="button_7.png" />
+		<img name="shortcut.8" src="button_8.png" />
+		<img name="shortcut.9" src="button_9.png" />
 		<img name="shortcut.red" src="red.png" />
 		<img name="shortcut.green" src="green.png" />
 		<img name="shortcut.yellow" src="yellow.png" />
@@ -233,13 +233,15 @@
 
 	<object name="eSatelliteConfigurationManager">
 		<eSatelliteConfigurationManager cposition="80:80" csize="570:450" text="Satelliteconfiguration">
-			<eLabel text="Sat/Position" name="lSatPos" position="100:10" size="190:30" align="center"/>
-			<eLabel text="LNB" name="lLnb" position="300:10" size="60:30" align="center"/>
-			<eLabel text="22Khz" name="l22khz" position="370:10" size="90:30" align="center"/>
-			<eLabel text="Voltage" name="lVoltage" position="470:10" size="90:30" align="center"/>
-			<eWidget name="buttons" position="100:50" size="e-10:e-34" />
-			<eButton name="new" position="10:e-114" size="80:30" text="new" helptext="add a new Satellite" loadDeco="" shortcut="green" />
-			<eButton name="close" position="10:e-74" size="80:30" text="close" helptext="close Satelliteconfiguration" loadDeco="" />
+			<eComboBox name="type" position="10:10" size="500:35" loadDeco="" />
+			<eLabel text="Sat/Position" name="lSatPos" position="10:55" size="250:30" align="center"/>
+			<eLabel text="LNB" name="lLnb" position="270:55" size="60:30" align="center"/>
+			<eLabel text="22Khz" name="l22khz" position="340:55" size="90:30" align="center"/>
+			<eLabel text="Voltage" name="lVoltage" position="440:55" size="90:30" align="center"/>
+			<eWidget name="buttons" position="10:90" size="e-40:e-80" />
+			<eButton name="new" position="10:e-80" size="170:40" text="new" helptext="add a new Satellite" loadDeco="" shortcut="green" />
+			<eButton name="erase" position="190:e-80" size="170:40" text="erase" helptext="remove the selected Satellite" loadDeco="" shortcut="red" />
+			<eButton name="close" position="370:e-80" size="170:40" text="close" helptext="close Satelliteconfiguration" loadDeco="" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eSatelliteConfigurationManager>
 	</object>
@@ -279,7 +281,7 @@
 			<eCheckbox text="Sequence repeat" name="SeqRepeat" position="10:190" size="290:30" helptext="send the complete DiSEqC sequence dupe" shortcut="5" />
 			<eCheckbox text="Uncommitted switch" name="uncommitted" position="10:230" size="290:30" helptext="send to an uncommitted DiSEqC switch" shortcut="6" />
 			<eCheckbox text="Uncommitted gap" name="uncommitted_gap" position="310:230" size="e-10:30" helptext="fill DiSEqC repeat gap with uncommitted command" shortcut="7" />
-			<eButton name="next" text="Rotor Setup" position="10:270" size="e-10:40" helptext="opens the Rotor Setup" loadDeco="" shortcut="8" />
+			<eButton name="next" text="Rotor Setup" position="10:270" size="e-10:40" helptext="opens the Rotor Setup" loadDeco="" shortcut="blue" />
 			<eButton name="prev" text="prev. page" position="10:e-80" size="170:40" helptext="goto prev page (LNB)" loadDeco="" shortcut="yellow" />
 			<eButton name="save" text="save" position="190:e-80" size="170:40" helptext="save changes and use the selected lnb (in first page) for the choosen satellite" loadDeco="" shortcut="green" />
 			<eButton name="cancel" text="cancel" position="370:e-80" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" shortcut="escape" />
@@ -311,12 +313,12 @@
 			<eLabel name="lOrbitalPosition" text="Orbital Position:" position="190:100" size="e-110:35" vcenter="on" />
 			<eNumber name="OrbitalPosition" position="e-100:100" size="e-10:35" helptext="enter orbital position without dot (19.2° = 192)" loadDeco="" />
 			<eCheckbox text="Use gotoXX Function" name="useGotoXX" position="10:10" size="270:35" helptext="when the rotor support this, then use" vcenter="on" />
-			<eLabel text="Offset" name="lRotorOffset" position="10:55" size="150:35" vcenter="on" />
-			<eNumber name="RotorOffset" position="200:55" size="100:35" helptext="enter Rotor Offset (180 is exakt south) (0..9, +, -, ok)" loadDeco="" />
-			<eLabel name="lLongitude" text="Longitude:" position="10:100" size="150:35" vcenter="on" />
-			<eNumber name="Longitude" position="200:100" size="100:35" helptext="enter your longitude (0..9, +, -, ok)" loadDeco="" />
-			<eLabel name="lLatitude" text="Latitude:" position="10:145" size="150:35" vcenter="on" />
-			<eNumber name="Latitude" position="200:145" size="100:35" helptext="enter your latitude (0..9, +, -, ok)" loadDeco="" />
+			<eLabel name="lLongitude" text="Longitude:" position="10:55" size="150:35" vcenter="on" />
+			<eNumber name="Longitude" position="200:55" size="100:35" helptext="enter your longitude (0..9, +, -, ok)" loadDeco="" />
+			<eComboBox name="LoDirection" position="310:55" size="100:35" helptext="choose direction" loadDeco="" />
+			<eLabel name="lLatitude" text="Latitude:" position="10:100" size="150:35" vcenter="on" />
+			<eNumber name="Latitude" position="200:100" size="100:35" helptext="enter your latitude (0..9, +, -, ok)" loadDeco="" />
+			<eComboBox name="LaDirection" position="310:100" size="100:35" helptext="choose direction" loadDeco="" />
 
 			<eListbox name="positions" position="10:55" size="170:175" helptext="choose entry to edit or remove" loadDeco="" />
 
@@ -332,8 +334,8 @@
 			<eButton name="add" text="add" position="190:190" size="170:40" helptext="add to table/existing is overwritten" loadDeco="" />
 			<eButton name="remove" text="remove" position="370:190" size="170:40" helptext="remove selected entry" loadDeco="" />
 
-			<eButton name="prev" text="prev. page" position="10:e-80" size="170:40" helptext="goto prev page (LNB)" loadDeco="" />
-			<eButton name="save" text="save" position="190:e-80" size="170:40" helptext="save changes and use the selected lnb (in first page) for the choosen satellite" loadDeco="" />
+			<eButton name="prev" text="prev. page" position="10:e-80" size="170:40" helptext="goto prev page (LNB)" loadDeco="" shortcut="yellow" />
+			<eButton name="save" text="save" position="190:e-80" size="170:40" helptext="save changes and use the selected lnb (in first page) for the choosen satellite" loadDeco="" shortcut="green" />
 			<eButton name="cancel" text="cancel" position="370:e-80" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
 
 		</eRotorPage>

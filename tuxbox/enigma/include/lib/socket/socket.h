@@ -28,20 +28,23 @@ protected:
 	eSocketNotifier	*rsn;
 	virtual void notifier(int);
 public:
-	eSocket();
-	eSocket(int socket, int issocket);
+	eSocket(eMainloop *ml);
+	eSocket(int socket, int issocket, eMainloop *ml);
 	~eSocket();
 	int connectToHost(eString hostname, int port);
 	int getDescriptor();
 	int writeBlock(const char *data, unsigned int len);
-	int setSocket(int socketfd, int issocket);
+	int setSocket(int socketfd, int issocket, eMainloop *ml);
 	int bytesToWrite();
 	int readBlock(char *data, unsigned int maxlen);
 	int bytesAvailable();
 	bool canReadLine();
 	eString readLine();
 	void close();
-			
+			// flow control: start/stop data delivery into read buffer.
+	void enableRead();
+	void disableRead();
+	
 	enum State {	Idle, HostLookup, Connecting,
 			Listening, Connection, Closing };
 	int state();

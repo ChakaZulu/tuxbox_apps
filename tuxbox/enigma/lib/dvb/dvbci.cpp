@@ -831,7 +831,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 	int tpdu_len;
 	int tpdu_tc_id;
 	int x=0;
-#if 1	
+#if 0
 	printf("incoming:");	
 	for(int i=0;i<len;i++)
 		printf("%02x ",buffer[i]);
@@ -901,7 +901,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 			//if(tpdu_len>(len-6))
 			//	tpdu_len=len-6;
 			tpdu_tc_id=buffer[x++];
-#if 1
+#if 0
 			printf("tpdu (%02x):",tpdu_tag);
 			for(int i=0;i<tpdu_len;i++)
 				printf("%02x ",buffer[(x-tpdu_len+1)+i]);
@@ -991,8 +991,9 @@ void eDVBCI::dataAvailable(int what)
 void eDVBCI::poll()
 {
 	int present;
-
+#if 0
 	printf("TIMER\n");
+#endif
 	::ioctl(fd,CI_GET_STATUS,&present);	
 
 	if(present)						//CI removed
@@ -1028,7 +1029,7 @@ void SendLPDU(unsigned char *lpdu,unsigned char length)
 	printf("<-");
 	for(int i=0;i<length;i++)
 		printf("%02x ",lpdu[i]);
-	printf("\n");	
+	printf("\n");
 }
 
 void LinkSendData(unsigned char t_c_id, unsigned char *toSend, long numBytes)

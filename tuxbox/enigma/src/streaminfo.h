@@ -9,6 +9,7 @@
 class eLabel;
 class eMultipage;
 struct decoderParameters;
+class eServiceReference;
 
 class eStreaminfo: public eWindow
 {
@@ -19,7 +20,7 @@ class eStreaminfo: public eWindow
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:
-	eStreaminfo(int mode=0, decoderParameters *parms=0);
+	eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms=0);
 	~eStreaminfo();
 };
 

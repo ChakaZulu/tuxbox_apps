@@ -10,7 +10,7 @@ class eServerSocket: public eSocket
 protected:
 	virtual void newConnection(int socket)=0;
 public:
-	eServerSocket(int port);
+	eServerSocket(int port, eMainloop *ml);
 	virtual ~eServerSocket();
 	bool ok();
 };

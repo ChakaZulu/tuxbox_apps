@@ -22,7 +22,7 @@ void eServerSocket::notifier(int)
 	newConnection(clientfd);
 }
 
-eServerSocket::eServerSocket(int port)
+eServerSocket::eServerSocket(int port, eMainloop *ml): eSocket(ml)
 {
 	struct sockaddr_in serv_addr;
 

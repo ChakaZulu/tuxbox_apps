@@ -18,7 +18,7 @@ class eWindow: public eWidget
 	gColor fontColor, titleBarColor;
 protected:
 	int borderTop, borderLeft, borderBottom, borderRight;
-	int titleOffsetX, titleOffsetY, titleFontSize, titleHeight, titleBorderY;
+	int titleOffsetLeft, titleOffsetRight, titleOffsetTop, titleFontSize, titleHeight;
 	void redrawWidget(gPainter *target, const eRect &where);
 	void eraseBackground(gPainter *target, const eRect &where);
 	void drawTitlebar(gPainter *target);

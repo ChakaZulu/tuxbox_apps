@@ -31,6 +31,7 @@ public:
 	void setFlags(int flags);
 	void removeFlags(int flags);
 	void setAlign(int align);
+	void setShortcutPixmap(const eString &shortcut);
 
 	eSize getExtend();
 	ePoint getLeftTop();

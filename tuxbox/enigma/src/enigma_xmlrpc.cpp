@@ -106,27 +106,27 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 				eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(*s);
 				if (!service)
 					continue;
-				std::map<eString, eXMLRPCVariant*> *s=new std::map<eString, eXMLRPCVariant*>;
+				std::map<eString, eXMLRPCVariant*> *sm=new std::map<eString, eXMLRPCVariant*>;
 				static eString s0("caption");
 				static eString s1("type");
 				static eString s2("handle");
 				static eString s3("zappable");
 
-				s->INSERT(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
+				sm->INSERT(s0, new eXMLRPCVariant(new eString(service->service_name.c_str())));
 				static eString g("Service");
-				s->INSERT(s1, new eXMLRPCVariant(new eString(g)));
+				sm->INSERT(s1, new eXMLRPCVariant(new eString(g)));
 				static eString bs("S:");
 				eString handle=bs;
-				handle+=eString().setNum(service->original_network_id.get(), 16);
+				handle+=eString().setNum(s->getOriginalNetworkID().get(), 16);
 				handle+=':';
-				handle+=eString().setNum(service->transport_stream_id.get(), 16);
+				handle+=eString().setNum(s->getTransportStreamID().get(), 16);
 				handle+=':';
-				handle+=eString().setNum(service->service_id.get(), 16);
+				handle+=eString().setNum(s->getServiceID().get(), 16);
 				handle+=':';
-				handle+=eString().setNum(service->service_type, 16);
-				s->INSERT(s2, new eXMLRPCVariant(new eString(handle)));
-				s->INSERT(s3, new eXMLRPCVariant(new bool(1)));
-				l.push_back(new eXMLRPCVariant(s));
+				handle+=eString().setNum(s->getServiceType(), 16);
+				sm->INSERT(s2, new eXMLRPCVariant(new eString(handle)));
+				sm->INSERT(s3, new eXMLRPCVariant(new bool(1)));
+				l.push_back(new eXMLRPCVariant(sm));
 			}
 			result.push_back(new eXMLRPCVariant( l.getVector() ));
 		}

@@ -11,7 +11,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 	CONNECT(dvb.tSDT.tableReady, eDVBServiceController::SDTready);
 	CONNECT(dvb.tEIT.tableReady, eDVBServiceController::EITready);
 
-	if ( dvb.getInfo("mID") != "05" )  // no dreambox
+	if ( dvb.getInfo("mID") != "05" && dvb.getInfo("mID") != "06" )  // no dreambox
 	{
 		eDebug("add CAs");
 		availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
@@ -117,6 +117,28 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 	}
 	case eDVBServiceEvent::eventServiceTuneOK:
 		/*emit*/ dvb.enterTransponder(event.transponder);
+		
+				// do we haved fixed PID values?
+		{
+		  eService *sp=eServiceInterface::getInstance()->addRef(service);
+		  if (sp)
+		  {
+		  	if (sp->dvb && (sp->dvb->dxflags & eServiceDVB::dxNoDVB))
+		  	{
+		  		eDebug("ok no DVB");
+		  		// yes, not a real dvb service.
+		  		Decoder::parms.vpid=sp->dvb->get(eServiceDVB::cVPID);
+		  		Decoder::parms.apid=sp->dvb->get(eServiceDVB::cAPID);
+		  		Decoder::parms.tpid=sp->dvb->get(eServiceDVB::cTPID);
+		  		Decoder::parms.pcrpid=sp->dvb->get(eServiceDVB::cPCRPID);
+		  		Decoder::Set();
+					dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitched));
+					break;
+		  	}
+		  	eServiceInterface::getInstance()->removeRef(service);
+		  }
+		}
+
 		dvb.tPAT.start(new PAT());
 		if (tdt)
 			delete tdt;
@@ -401,7 +423,7 @@ void eDVBServiceController::scanPMT()
 	}
 
   DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
-
+  
 	setPID(video);
 	setPID(audio);
 	setPID(teletext);

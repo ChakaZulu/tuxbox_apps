@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.3 2002/11/25 22:43:06 Ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.4 2002/12/19 21:17:27 Ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
@@ -252,8 +252,14 @@ void eHarddiskMenu::s_format()
 
 		
 		if ((system(
+#ifdef EXT3
 				eString().sprintf(
-				"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 ) ||
+				"/sbin/mkfs.ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 )
+#else // REISERFS
+				eString().sprintf(
+				"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 )
+#endif
+				||
 				(system(
 				eString().sprintf(
 				"/bin/mount /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8 ) ||

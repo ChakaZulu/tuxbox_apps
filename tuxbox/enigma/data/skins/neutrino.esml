@@ -88,9 +88,9 @@
 		<value name="eWindow.borderLeft" value="0" />
 		<value name="eWindow.borderRight" value="0" />
 		<value name="eWindow.borderBottom" value="0" />
-		<value name="eWindow.borderTop" value="0" />
-		<value name="eWindow.titleOffsetX" value="0" />
-		<value name="eWindow.titleOffsetY" value="0" />
+		<value name="eWindow.borderTop" value="32" />
+		<value name="eWindow.titleOffsetLeft" value="0" />
+		<value name="eWindow.titleOffsetTop" value="0" />
 		<value name="eWindow.titleHeight" value="32" />
 		<value name="fontsize" value="24" />
 	</values>

@@ -24,6 +24,16 @@ void eSocket::close()
 	}
 }
 
+void eSocket::enableRead()
+{
+	rsn->setRequested(rsn->getRequested()|eSocketNotifier::Read);
+}
+
+void eSocket::disableRead()
+{
+	rsn->setRequested(rsn->getRequested()&~eSocketNotifier::Read);
+}
+
 eString eSocket::readLine()
 {
 	int size=readbuffer.searchchr('\n');
@@ -61,7 +71,7 @@ int eSocket::state()
 	return mystate;
 }
 
-int eSocket::setSocket(int s, int iss)
+int eSocket::setSocket(int s, int iss, eMainloop *ml)
 {
 	socketdesc=s;
 	issocket=iss;
@@ -69,7 +79,7 @@ int eSocket::setSocket(int s, int iss)
 
 	if (rsn)
 		delete rsn;
-	rsn=new eSocketNotifier(eApp, getDescriptor(), 
+	rsn=new eSocketNotifier(ml, getDescriptor(), 
 		eSocketNotifier::Read|eSocketNotifier::Hungup);
 	CONNECT(rsn->activated, eSocket::notifier);
 	return 0;
@@ -216,19 +226,19 @@ int eSocket::connectToHost(eString hostname, int port)
 	return(0);
 }
 
-eSocket::eSocket(): readbuffer(32768), writebuffer(32768), rsn(0)
+eSocket::eSocket(eMainloop *ml): readbuffer(32768), writebuffer(32768), rsn(0)
 {
 	int s=socket(AF_INET, SOCK_STREAM, 0);
 #if 0
 	eDebug("[SOCKET]: initalized socket %d", socketdesc);
 #endif
 	mystate=Idle;
-	setSocket(s, 1);
+	setSocket(s, 1, ml);
 }
 
-eSocket::eSocket(int socket, int issocket): readbuffer(32768), writebuffer(32768), rsn(0)
+eSocket::eSocket(int socket, int issocket, eMainloop *ml): readbuffer(32768), writebuffer(32768), rsn(0)
 {
-	setSocket(socket, issocket);
+	setSocket(socket, issocket, ml);
 	mystate=Connection;
 }
 

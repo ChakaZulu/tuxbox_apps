@@ -2,21 +2,30 @@
 #include <lib/gdi/font.h>
 
 eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, const char *deco )
-	:eButton(parent, desc, 1, deco), listbox(0), button( this, 0, 0), pm(0), entries(OpenEntries)
+:eButton(parent, desc, 1, deco), listbox(0), button( this, 0, 0, eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0)?"eButton":""), pm(0), entries(OpenEntries)
 {
 	align=eTextPara::dirLeft;
-	button.loadDeco();
+	if ( eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0) )
+		button.loadDeco();
 	button.setBlitFlags(BF_ALPHATEST);
+	pm=eSkin::getActive()->queryImage("eComboBox.arrow");
+	button.setPixmap(pm);
 	listbox.hide();
 	listbox.setDeco("eComboBox.listbox");
 	listbox.loadDeco();
-	pm=eSkin::getActive()->queryImage("eComboBox.arrow");
-	button.setPixmap(pm);
-	button.zOrderRaise();
 	CONNECT( selected, eComboBox::onOkPressed );
 	CONNECT( listbox.selected, eComboBox::onEntrySelected );
 	CONNECT( listbox.selchanged, eComboBox::onSelChanged );
-//	addActionMap(&i_cursorActions->map);
+	this->zOrderRaise();
+	listbox.zOrderRaise();
+	addActionMap(&i_cursorActions->map);
+}
+
+void eComboBox::redrawWidget(gPainter *target, const eRect &rc)
+{
+//	target->clip( eRect( rc.left(), rc.top(), rc.width()-button.width(), rc.bottom() ) );
+	eLabel::redrawWidget(target, rc);
+//	target->clippop();
 }
 
 void eComboBox::onOkPressed()
@@ -34,7 +43,7 @@ void eComboBox::onOkPressed()
 		listbox.move( ePoint( pt.x(), pt.y()-listbox.getSize().height() ) );
 	else
 		listbox.move( ePoint( pt.x(), pt.y()+getSize().height() ) );
-	listbox.show();
+ listbox.show();
 }
 
 int eComboBox::setProperty( const eString& prop, const eString& val )
@@ -45,6 +54,12 @@ int eComboBox::setProperty( const eString& prop, const eString& val )
 		entries = atoi( val.c_str() );
 	else if (prop == "showEntryHelp" )
 		flags |= flagShowEntryHelp;
+	else if (prop == "openWidth" )
+	{
+		int width=listbox.getSize().width();
+		width = atoi(val.c_str());
+  setOpenWidth( width );
+	}
 	else
 		return eButton::setProperty( prop, val);
 	return 0;
@@ -56,35 +71,44 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 	{
 		case eWidgetEvent::evtAction:
 			if (event.action == &i_cursorActions->cancel)
-				;
+				eDebug("CANCEL");
 			else
 				return eButton::eventHandler( event );
 		break;
 
+		case eWidgetEvent::evtShortcut:
+			onOkPressed();
+			break;
 		case eWidgetEvent::changedPosition:
 		case eWidgetEvent::changedSize:
 		{
 			eListBoxEntryText* cur = listbox.getCurrent();
 			listbox.resize( eSize( getSize().width(), eListBoxEntryText::getEntryHeight()*entries+listbox.getDeco().borderBottom+listbox.getDeco().borderTop ) );
+			int smButtonDeco = eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth", pm?pm->x:0 );
 			if (deco)
 			{
-				button.resize( eSize(25, crect.height()) );
-				button.move( ePoint( crect.right()-25, crect.top() ) );
-				if (pm)
-					button.pixmap_position = ePoint( (button.getSize().width() - pm->x) / 2, (button.getSize().height() - pm->y) / 2 );
+				button.resize( eSize(smButtonDeco, crect.height()) );
+				button.move( ePoint( crect.right()-smButtonDeco, crect.top() ) );
 			}
+			else
+			{
+				button.resize( eSize(smButtonDeco, height()) );
+				button.move( ePoint( position.x()+size.width()-smButtonDeco, 0 ) );
+			}
+			if (pm)
+				button.pixmap_position = ePoint( (button.getSize().width() - pm->x) / 2, (button.getSize().height() - pm->y) / 2 );
 			if (cur)
 				listbox.setCurrent(cur);
 		}
 		default:
 			return eButton::eventHandler( event );	
 	}
-	return 1;	
+	return 1;
 }
 
 void eComboBox::onEntrySelected( eListBoxEntryText* e)
 {
-	listbox.hide();	
+ listbox.hide();
 	if (flags & flagShowEntryHelp)
 		setHelpText( oldHelpText );
 

@@ -15,7 +15,7 @@
 		structure (ePlaylist)
 */
 
-ePlaylist::ePlaylist(): eService(0, "playlist")
+ePlaylist::ePlaylist(): eService("playlist")
 {
 	current=list.end();
 }
@@ -94,7 +94,7 @@ int ePlaylist::load(const char *filename)
 		}
 
 		eString filename="";
-		if (line[0] != '/')
+		if (line[0] != '/' && (!strstr(line, "://")))
 			filename=path;
 		filename+=line;
 

@@ -6,6 +6,7 @@
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
+#include <lib/dvb/servicemp3.h>
 #include <lib/gdi/font.h>
 #include <lib/gui/multipage.h>
 #include <lib/gui/eskin.h>
@@ -16,6 +17,7 @@
 #include <lib/dvb/dvbwidgets.h>
 #include <lib/dvb/frontend.h>
 #include <lib/dvb/dvbservice.h>
+#include <lib/dvb/service.h>
 
 
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
@@ -108,21 +110,53 @@ static eString getCAName(int casysid)
 	return system+subsystem;
 }
 
+class siTags: public eLabel
+{
+public:
+	siTags(const eService *service, eWidget *parent);
+};
+
+static eString getDescription(eString tag)
+{
+	if (tag == "TALB")
+		return _("album");
+	else if (tag == "TIT2")
+		return _("title");
+	else if (tag == "TPE1")
+		return _("artist");
+	else if (tag == "TCON")
+		return _("genre");
+	else if (tag == "TDRC")
+		return _("year");
+	else
+		return tag;
+}
+
+siTags::siTags(const eService *service, eWidget *parent): eLabel(parent)
+{
+	if (!service->id3)
+		return;
+	eString description;
+	
+	for (std::map<eString,eString>::const_iterator i(service->id3->tags.begin());
+			i != service->id3->tags.end(); ++i)
+		description+=getDescription(i->first) + ":\t" + i->second+"\n";
+	setText(description);
+}
+
 class siPID: public eWidget
 {
 	eLabel *service_name[2], *service_provider[2], *apid[2], *vpid[2], *pcrpid[2], *pmtpid[2], *tpid[2], *vform[2], *tsid[2], *onid[2], *sid[2];
 public:
-	siPID(decoderParameters parms, eWidget *parent);
+	siPID(decoderParameters parms, const eService *service, eWidget *parent);
 	void redrawWidget();
 };
 
-siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
+siPID::siPID(decoderParameters parms, const eService *cservice, eWidget *parent): eWidget(parent)
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
 		return;
-	
-	eService *cservice=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	
 	int yOffs=10;
 	int fs=eSkin::getActive()->queryValue("fontsize", 20);
@@ -145,7 +179,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	service_provider[0]->resize(eSize(140, fs+5));
 	
 	service_provider[1]=new eLabel(this);
-	service_provider[1]->setText(cservice?cservice->service_provider.c_str():"--");
+	service_provider[1]->setText((cservice && cservice->dvb)?cservice->dvb->service_provider.c_str():"--");
 	service_provider[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
 	service_provider[1]->move(ePoint(185, yOffs+2));
 	service_provider[1]->resize(eSize(260, fs+5));
@@ -375,18 +409,40 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	usedca[1]->resize(eSize(420, numsys*fs+fs));
 }
 
-eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), statusbar(this)
+eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParameters *parms): eWindow(1), statusbar(this)
 {
 	setText(mode?"Record mode - read manual":"Streaminfo");
 	cmove(ePoint(100, 80));
 	cresize(eSize(450, 450));
 	eSize s(clientrect.size());
 	s.setHeight( s.height() - 40 );
+
+	eService *service=eServiceInterface::getInstance()->addRef(ref);
 	
-	eWidget *w=new siPID(parms?*parms:Decoder::parms, this);
-	w->move(ePoint(0, 0));
-	w->resize( s );
-	w->hide();
+	eWidget *w;
+	
+	if (ref.type == eServiceReference::idDVB)
+	{
+		w=new siPID(parms?*parms:Decoder::parms, service, this);
+		w->move(ePoint(0, 0));
+		w->resize( s );
+		w->hide();
+	} else if (service && service->id3)
+	{
+		w=new siTags(service, this);
+		w->move(ePoint(0, 0));
+		w->resize( s );
+		w->hide();
+	} else
+	{
+		w=new eLabel(this);
+		w->setText(_("no information available"));
+		((eLabel*)w)->setFlags(eLabel::flagVCenter);
+		((eLabel*)w)->setAlign(eTextPara::dirCenter);
+		w->move(ePoint(0, 0));
+		w->resize( s );
+		w->hide();
+	}
 
 	mp.addPage(w);
 
@@ -397,27 +453,36 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), status
 
 	mp.addPage(w);
 	
-	eWidget *n=new eWidget(this);
-	n->move(ePoint(0, 0));
-	n->resize( s );
-	n->hide();
-
-	eTransponderWidget *t=new eTransponderWidget(n, 0, eTransponderWidget::deliverySatellite);
-	t->move(ePoint(0, 0));
-	t->resize(eSize(clientrect.width(), 200));
-	t->load();
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
+	if ((ref.type == eServiceReference::idDVB) && (!ref.path))
 	{
-		t->setTransponder(sapi->transponder);
-	}
+		w=new eWidget(this);
+		w->move(ePoint(0, 0));
+		w->resize( s );
+		w->hide();
 
-	eWidget *fe=new eFEStatusWidget(n, eFrontend::getInstance());
-	fe->move(ePoint(0, 200));
-	fe->resize(eSize(clientrect.width(), 100));
+		eTransponderWidget *t=new eTransponderWidget(w, 0, eTransponderWidget::deliverySatellite);
+		t->move(ePoint(0, 0));
+		t->resize(eSize(clientrect.width(), 200));
+		t->load();
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+		if (sapi)
+			t->setTransponder(sapi->transponder);
+
+		eWidget *fe=new eFEStatusWidget(w, eFrontend::getInstance());
+		fe->move(ePoint(0, 200));
+		fe->resize(eSize(clientrect.width(), 100));
+	} else
+	{
+		w=new eLabel(this);
+		w->setText(_("no information available"));
+		((eLabel*)w)->setFlags(eLabel::flagVCenter);
+		((eLabel*)w)->setAlign(eTextPara::dirCenter);
+		w->move(ePoint(0, 0));
+		w->resize( s );
+		w->hide();
+	}
 	
-	mp.addPage(n);
-	
+	mp.addPage(w);
 	mp.first();
 
 	statusbar.loadDeco();
@@ -437,6 +502,9 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), status
 	descr->resize( eSize(rect.width() - 50, rect.height()) );
 	descr->setText( lb->getCurrent()->getHelpText() );
 	descr->setFlags( eLabel::flagVCenter );
+	
+	if (service)
+		eServiceInterface::getInstance()->removeRef(ref);
 }
 
 eStreaminfo::~eStreaminfo()

@@ -151,7 +151,7 @@ void eUpgrade::loadCatalog(const char *url)
 	if (catalog)
 		delete catalog;
 	catalog=new XMLTreeParser("ISO-8859-1");
-	http=eHTTPConnection::doRequest(url, &error);
+	http=eHTTPConnection::doRequest(url, eApp, &error);
 	if (!http)
 	{
 		catalogTransferDone(error);
@@ -176,7 +176,7 @@ void eUpgrade::loadImage(const char *url)
 	progress->show();
 	progresstext->show();
 	abort->show();
-	http=eHTTPConnection::doRequest(url, &error);
+	http=eHTTPConnection::doRequest(url, eApp, &error);
 	if (!http)
 	{
 		imageTransferDone(error);

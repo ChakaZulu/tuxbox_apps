@@ -166,13 +166,13 @@ void eDVBSettings::setTransponders(eTransponderList *tlist)
 	/*emit*/ dvb.serviceListChanged();
 }
 
-struct sortinChannel: public std::unary_function<const eService&, void>
+struct sortinChannel: public std::unary_function<const eServiceDVB&, void>
 {
 	eDVBSettings &edvb;
 	sortinChannel(eDVBSettings &edvb): edvb(edvb)
 	{
 	}
-	void operator()(eService &service)
+	void operator()(eServiceDVB &service)
 	{
 		eBouquet *b = edvb.createBouquet(beautifyBouquetName(service.service_provider) );
 		b->add(eServiceReferenceDVB(service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
@@ -188,18 +188,26 @@ void eDVBSettings::sortInChannels()
 	saveBouquets();
 }
 
-struct saveService: public std::unary_function<const eService&, void>
+struct saveService: public std::unary_function<const eServiceDVB&, void>
 {
 	FILE *f;
 	saveService(FILE *out): f(out)
 	{
 	 	fprintf(f, "services\n");
 	}
-	void operator()(eService& s)
+	void operator()(eServiceDVB& s)
 	{
 		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type, s.service_number);
 		fprintf(f, "%s\n", s.service_name.c_str());
-		fprintf(f, "%s\n", s.service_provider.c_str());
+		if (s.dxflags)
+			fprintf(f, "f:%x,", s.dxflags);
+		if (s.dxflags & eServiceDVB::dxNoDVB)
+			for (int i=0; i<eServiceDVB::cacheMax; ++i)
+			{
+				if (s.cache[i] != -1)
+					fprintf(f, "c:%02d%04x,", i, s.cache[i]);
+			}
+		fprintf(f, "p:%s\n", s.service_provider.c_str());
 	}
 	~saveService()
 	{
@@ -236,7 +244,7 @@ void eDVBSettings::saveServices()
 	FILE *f=fopen(CONFIGDIR "/enigma/services", "wt");
 	if (!f)
 		eFatal("couldn't open servicefile - create " CONFIGDIR "/enigma!");
-	fprintf(f, "eDVB services - modify as long as you pay for the damage!\n");
+	fprintf(f, "eDVB services /1/\n");
 
 	getTransponders()->forEachTransponder(saveTransponder(f));
 	getTransponders()->forEachService(saveService(f));
@@ -317,7 +325,7 @@ void eDVBSettings::loadServices()
 
 		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
 		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
-		eService &s=transponderlist->createService(
+		eServiceDVB &s=transponderlist->createService(
 				eServiceReferenceDVB(
 						eTransportStreamID(transport_stream_id), 
 						eOriginalNetworkID(original_network_id), 
@@ -332,7 +340,42 @@ void eDVBSettings::loadServices()
 		fgets(line, 256, f);
 		if (strlen(line))
 			line[strlen(line)-1]=0;
-		s.service_provider=line;
+
+		eString str=line;
+		
+		if (str[1]!=':')	// old ... (only service_provider)
+		{
+			s.service_provider=line;
+		} else
+			while ((!str.empty()) && str[1]==':') // new: p:, f:, c:%02d...
+			{
+				int c=str.find(',');
+				char p=str[0];
+				eString v;
+				if (c == eString::npos)
+				{
+					v=str.mid(2);
+					str="";
+				} else
+				{
+					v=str.mid(2, c-2);
+					str=str.mid(c+1);
+				}
+				eDebug("%c ... %s", p, v.c_str());
+				if (p == 'p')
+					s.service_provider=v;
+				else if (p == 'f')
+				{
+					sscanf(v.c_str(), "%x", &s.dxflags);
+					eDebug("dxflags: %d", s.dxflags);
+				} else if (p == 'c')
+				{
+					int cid, val;
+					sscanf(v.c_str(), "%02d%04x", &cid, &val);
+					if (cid < eServiceDVB::cacheMax)
+						s.cache[cid]=val;
+				}
+			}
 	}
 	
 	eDebug("loaded %d services", count);
@@ -347,7 +390,7 @@ void eDVBSettings::saveBouquets()
 	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "wt");
 	if (!f)
 		eFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
-	fprintf(f, "eDVB bouquets - modify as long as you don't blame me!\n");
+	fprintf(f, "eDVB bouquets /1/");
 	fprintf(f, "bouquets\n");
 	for (ePtrList<eBouquet>::iterator i(*getBouquets()); i != getBouquets()->end(); ++i)
 	{

@@ -43,6 +43,7 @@ doc/Makefile
 include/Makefile
 include/lib/Makefile
 include/lib/base/Makefile
+include/lib/codecs/Makefile
 include/lib/driver/Makefile
 include/lib/dvb/Makefile
 include/lib/gdi/Makefile
@@ -52,6 +53,7 @@ include/lib/system/Makefile
 lib/Makefile
 lib/base/Makefile
 lib/driver/Makefile
+lib/codecs/Makefile
 lib/dvb/Makefile
 lib/dvb/lowlevel/Makefile
 lib/gdi/Makefile

@@ -400,27 +400,27 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, 0xFFFFFFFF),
-			new eService(eServiceReference::idDVB, "DVB - bouquets")
+			new eService("DVB - bouquets")
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, (1<<4)|(1<<1) ),
-			new eService(eServiceReference::idDVB, "DVB - bouquets (TV)")
+			new eService("DVB - bouquets (TV)")
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -1, 1<<2 ),
-			new eService(eServiceReference::idDVB, "DVB - bouquets (Radio)")
+			new eService("DVB - bouquets (Radio)")
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -2, 0xFFFFFFFF), 
-			new eService(eServiceReference::idDVB, "DVB - all services")
+			new eService("DVB - all services")
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -2, (1<<4)|(1<<1) ), // TV and NVOD
-			new eService(eServiceReference::idDVB, "DVB - TV services")
+			new eService("DVB - TV services")
 		);
 	cache.addPersistentService(
 			eServiceReference(eServiceReference::idDVB, eServiceReference::flagDirectory|eServiceReference::shouldSort, -2, 1<<2 ), 	// radio
-			new eService(eServiceReference::idDVB, "DVB - Radio services")
+			new eService("DVB - Radio services")
 		);
 		
 	recording=0;
@@ -677,7 +677,7 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 		if (!path)
 			path="movie";
 
-		return new eService(eServiceID(0), path.c_str());
+		return new eService(path.c_str());
 	}
 	switch (node.data[0])
 	{
@@ -686,7 +686,7 @@ eService *eServiceHandlerDVB::createService(const eServiceReference &node)
 		eBouquet *b=eDVB::getInstance()->settings->getBouquet(node.data[2]);
 		if (!b)
 			return 0;
-		return new eService(eServiceID(0), b->bouquet_name.c_str());
+		return new eService(b->bouquet_name.c_str());
 	}
 	}
 	return 0;

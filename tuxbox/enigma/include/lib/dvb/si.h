@@ -45,7 +45,7 @@ class ServiceDescriptor: public Descriptor
 {
 public:
   int service_type;
-  char *service_provider, *service_name;
+  eString service_provider, service_name;
   static const int CTag() { return DESCR_SERVICE; }
   ServiceDescriptor(sdt_service_desc *descr);
   ~ServiceDescriptor();
@@ -141,7 +141,7 @@ public:
 class NetworkNameDescriptor: public Descriptor
 {
 public:
-	char *network_name;
+	eString network_name;
   NetworkNameDescriptor(descr_gen_t *descr);
   ~NetworkNameDescriptor();
   eString toString();

@@ -90,7 +90,10 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 	}
 	
 	if (shortcutPixmap)
+	{
 		area.setWidth(area.width()-area.height());
+		area.setX(area.height());
+	}
 
 	if (text.length())
 	{
@@ -117,7 +120,9 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 			target->setBackgroundColor(w->getBackgroundColor());
 		}
 		target->setFont(font);
+		target->clip( area );
 		target->renderPara(*para, ePoint( area.left(), area.top()+yOffs) );
+		target->clippop();
 	}
 	if (pixmap)
 	{
@@ -127,7 +132,7 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 	}
 	if (shortcutPixmap)
 		target->blit(*shortcutPixmap, 
-				ePoint(area.right()+(area.height()-shortcutPixmap->x)/2, area.top()+(area.height()-shortcutPixmap->y)/2),
+				ePoint((area.height()-shortcutPixmap->x)/2, area.top()+(area.height()-shortcutPixmap->y)/2),
 				eRect(),
 				gPixmap::blitAlphaTest);
 }
@@ -200,11 +205,16 @@ int eLabel::setProperty(const eString &prop, const eString &value)
 		setFlags( flagVCenter );
 	else if (prop == "shortcut")
 	{
-		shortcutPixmap=eSkin::getActive()->queryImage("shortcut." + value);
+		setShortcutPixmap(value);
 		return eWidget::setProperty(prop, value);
 	} else
 		return eDecoWidget::setProperty(prop, value);
 	return 0;
+}
+
+void eLabel::setShortcutPixmap(const eString &shortcut)
+{
+	shortcutPixmap=eSkin::getActive()->queryImage("shortcut." + shortcut);
 }
 
 static eWidget *create_eLabel(eWidget *parent)

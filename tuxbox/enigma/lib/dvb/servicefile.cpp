@@ -28,8 +28,8 @@ eServiceFileHandler::eServiceFileHandler(): eServiceHandler(eServiceReference::i
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
 	instance=this;
-	cache.addPersistentService(eServiceReference(eServiceReference::idFile, dirflags, "/"), new eService(0, "root"));
-	cache.addPersistentService(eServiceReference(eServiceReference::idFile, dirflags, "/hdd/"), new eService(0, "harddisk"));
+	cache.addPersistentService(eServiceReference(eServiceReference::idFile, dirflags, "/"), new eService("root"));
+	cache.addPersistentService(eServiceReference(eServiceReference::idFile, dirflags, "/hdd/"), new eService("harddisk"));
 }
 
 eServiceFileHandler::~eServiceFileHandler()
@@ -104,7 +104,7 @@ eService *eServiceFileHandler::createService(const eServiceReference &node)
 		if (n<0)
 			n=0;
 		eString path=node.path.mid(node.path.rfind("/", n)+1);
-		return new eService(0, path.c_str() );
+		return new eService(path.c_str() );
 	}
 	eServiceHandler *handler=eServiceInterface::getInstance()->getServiceHandler(node.type);
 	if (!handler)

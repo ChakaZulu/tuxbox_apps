@@ -60,6 +60,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	p->setForegroundColor((have_focus && n==active)?cursorF:normalF);
 	p->setBackgroundColor((have_focus && n==active)?cursorB:normalB);
 
+	p->clip( pos );
 	if (!n && len==2 && ((flags & flagFixedNum) || (flags & flagTime)) ) // first element...
 	{
 		eTextPara *para = new eTextPara( pos );
@@ -73,6 +74,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 		p->renderText(pos, t);
 		
 	p->flush();
+	p->clippop();
 }
 
 double eNumber::getFixedNum()
@@ -104,12 +106,12 @@ void eNumber::setFixedNum(double d)
 	else
 		neg=0;
 
-	d=abs(d);
+	d=fabs(d);
 
 	if (flags & flagFixedNum)
 	{
 		number[0]=(int)d;
-		number[1]=(int)round(((d - number[0]) * 1000));
+		number[1]=(int)round(( ( d - number[0] ) * 1000) );
 	}
 	else
 		eDebug("eNumber bug... the Number %s is not a fixed Point number", name.c_str());
@@ -192,18 +194,17 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	cursorF(eSkin::getActive()->queryScheme("global.selected.foreground")),	
 	normalB(eSkin::getActive()->queryScheme("global.normal.background")),	
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
-	have_focus(0), digit(isactive), isactive(isactive), descr(descr), tmpDescr(0),
+	have_focus(0), digit(isactive), isactive(isactive), flags(0), descr(descr), tmpDescr(0),
   neg(false)
 {
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
 	setMaximumDigits(_maxdigits);
-	setFlags(0);
 	setBase(10);
 	for (int i=0; init && i<len; i++)
 		number[i]=init[i];
 	addActionMap(&i_cursorActions->map);
-}
+}                 
 
 eNumber::~eNumber()
 {
@@ -383,6 +384,9 @@ void eNumber::setMaximumDigits(int n)
 
 void eNumber::setFlags(int _flags)
 {
+  if (flags&flagFixedNum)
+		len=2;
+		
 	flags=_flags;
 }
 

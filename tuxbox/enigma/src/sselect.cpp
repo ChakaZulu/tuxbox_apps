@@ -145,8 +145,9 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 		int n=-1;
 		if (flags & flagOwnNumber)
 			n=num;
-		else if ( pservice )
-			n=pservice->service_number;
+		else if ( pservice && pservice->dvb )
+			n=pservice->dvb->service_number;
+
 		if (n != -1)
 		{
 			if (!numPara)

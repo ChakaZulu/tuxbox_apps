@@ -14,6 +14,7 @@ enigma_SOURCES = \
 enigma_LDADD = \
 	$(top_builddir)/lib/driver/libenigma_driver.la \
 	$(top_builddir)/lib/base/libenigma_base.la \
+	$(top_builddir)/lib/codecs/libenigma_codecs.la \
 	$(top_builddir)/lib/dvb/libenigma_dvb.la \
 	$(top_builddir)/lib/dvb/lowlevel/libenigma_dvb_lowlevel.la \
 	$(top_builddir)/lib/gui/libenigma_gui.la \

@@ -52,7 +52,7 @@ int eHTTPError::doWrite(int w)
 	return -1;
 }
 
-eHTTPConnection::eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent): eSocket(socket, issocket), parent(parent), persistent(persistent)
+eHTTPConnection::eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent): eSocket(socket, issocket, parent->ml), parent(parent), persistent(persistent)
 {
 #if 0
 	eDebug("eHTTPConnection");
@@ -81,7 +81,7 @@ void eHTTPConnection::destruct()
 	delete this;
 }
 
-eHTTPConnection::eHTTPConnection(): eSocket(), parent(0), persistent(0)
+eHTTPConnection::eHTTPConnection(eMainloop *ml): eSocket(ml), parent(0), persistent(0)
 {
 	CONNECT(this->readyRead_ , eHTTPConnection::readData);
 	CONNECT(this->bytesWritten_ , eHTTPConnection::bytesWritten);
@@ -110,7 +110,7 @@ void eHTTPConnection::start()
 	}
 }
 
-eHTTPConnection *eHTTPConnection::doRequest(const char *uri, int *error)
+eHTTPConnection *eHTTPConnection::doRequest(const char *uri, eMainloop *ml, int *error)
 {
 	if (error)
 		*error=0;
@@ -205,7 +205,7 @@ eHTTPConnection *eHTTPConnection::doRequest(const char *uri, int *error)
 	if (!path.size())
 		path="/";
 
-	eHTTPConnection *c=new eHTTPConnection();
+	eHTTPConnection *c=new eHTTPConnection(ml);
 	c->request="GET";
 	c->requestpath=path.c_str();
 	c->httpversion="HTTP/1.0";
@@ -442,6 +442,7 @@ int eHTTPConnection::processRemoteState()
 				abort=1;
 				break;
 			}
+			eDebug("%s", line.c_str());
 			if (!line.length())
 			{
 				if (parent)
@@ -469,7 +470,7 @@ int eHTTPConnection::processRemoteState()
 					content_length=atoi(remote_header["Content-Length"].c_str());
 					content_length_remaining=content_length;
 				}
-				if (content_length || remote_header.count("Content-Type"))
+				if (content_length || remote_header.count("Content-Type") || 1)
 					remotestate=stateData;
 				else
 				{
@@ -480,8 +481,10 @@ int eHTTPConnection::processRemoteState()
 					return -1;
 			} else
 			{
-				int del=line.find(": ");
-				eString name=line.left(del), value=line.mid(del+2);
+				int del=line.find(":");
+				eString name=line.left(del), value=line.mid(del+1);
+				if (value[0]==' ')
+					value=value.mid(1);
 				remote_header[std::string(name)]=std::string(value);
 			}
 			done=1;
@@ -566,7 +569,7 @@ void eHTTPConnection::gotError(int err)
 	delete this;
 }
 
-eHTTPD::eHTTPD(int port): eServerSocket(port)
+eHTTPD::eHTTPD(int port, eMainloop *ml): eServerSocket(port, ml), ml(ml)
 {
 	if (!ok())
 		eDebug("[NET] httpd server FAILED on port %d", port);

@@ -1,2 +1,2 @@
-SUBDIRS = base driver dvb gdi gui socket system
+SUBDIRS = base codecs driver dvb gdi gui socket system 
 

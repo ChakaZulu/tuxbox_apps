@@ -392,7 +392,8 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	break;
 	case eWidgetEvent::evtAction:
 		if (evt.action == shortcut && isVisible())
-			event(eWidgetEvent(eWidgetEvent::evtShortcut));
+			(shortcutFocusWidget?shortcutFocusWidget:this)->
+				event(eWidgetEvent(eWidgetEvent::evtShortcut));
 		else if (evt.action == &i_focusActions->up)
 			focusNext(focusDirPrev);
 		else if (evt.action == &i_focusActions->down)
@@ -460,8 +461,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 		invalidate();
 		break;
 	case eWidgetEvent::evtShortcut:
-		eDebug("got evtShortcut");
-		setFocus(shortcutFocusWidget ? shortcutFocusWidget : this);
+		setFocus(this);
 		break;
 	default:
 		break;
@@ -603,7 +603,7 @@ void eWidget::focusNext(int dir)
 		{
 			if (_focusList.current() == i)
 				continue;
-			if (!i->state&stateVisible)
+			if (!(i->state&stateVisible))
 				continue;
 			ePoint m1=i->getPosition();
 			m1+=ePoint(i->getSize().width()/2, i->getSize().height()/2);

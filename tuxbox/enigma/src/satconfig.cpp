@@ -17,18 +17,47 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 {
 	// send no more DiSEqC Commands on transponder::tune to Rotor
 	eFrontend::getInstance()->disableRotor();
-	
-	button_close=new eButton(this);
-	button_close->setName("close");
-	CONNECT(button_close->selected, eSatelliteConfigurationManager::closePressed);
+
+	lSatPos = new eLabel(this);
+	lSatPos->setName("lSatPos");
+
+	lLNB = new eLabel(this);
+	lLNB->setName("lLnb");
+	lLNB->hide();
+
+	l22Khz = new eLabel(this);
+	l22Khz->setName("l22khz");
+	l22Khz->hide();
+
+	lVoltage = new eLabel(this);
+	lVoltage->setName("lVoltage");
+	lVoltage->hide();
 
 	button_new=new eButton(this);
 	button_new->setName("new");
+	button_new->hide();
 	CONNECT(button_new->selected, eSatelliteConfigurationManager::newPressed);
 
-	buttonWidget=new eWidget(this);
-	buttonWidget->setName("buttons");
+	button_erase=new eButton(this);
+	button_erase->setName("erase");
+	button_erase->hide();
+	CONNECT(button_erase->selected, eSatelliteConfigurationManager::erasePressed);
 
+	button_close=new eButton(this);
+	button_close->setName("close");
+	CONNECT(button_close->selected, eSatelliteConfigurationManager::closePressed);
+  	
+	buttonWidget=new eWidget(this);
+	buttonWidget->setName("buttons");	
+	
+	combo_type=new eComboBox(this, 4);
+	combo_type->setName("type");
+	CONNECT(combo_type->selchanged, eSatelliteConfigurationManager::typeChanged);
+	new eListBoxEntryText( *combo_type, _("one single satellite"), (void*)0, 0, _("one directly connected LNB"));
+	new eListBoxEntryText( *combo_type, _("2 satellites via DiSEqC A/B"), (void*)1, 0, _("2 LNBs via Diseqc"));
+	new eListBoxEntryText( *combo_type, _("4 satellites via DiSEqC OPT A/B"), (void*)2, 0, _("3 LNBs via Diseqc"));
+	new eListBoxEntryText( *combo_type, _("non-standard user defined cofiguration..."), (void*)3, 0, _("special"));
+	
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eSatelliteConfigurationManager"))
 		eFatal("skin load of \"eSatelliteConfigurationManager\" failed");
@@ -42,6 +71,11 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 
 	parseNetworks();  // load all networks from satellite.xml or cable.xml
 	createControlElements();
+
+	complexity=checkComplexity();
+	eConfig::getInstance()->getKey("/elitedvb/DVB/config/lnbs/type", complexity);
+	combo_type->setCurrent( (void*)complexity );
+
 	repositionWidgets();
 
 	CONNECT( eWidget::focusChanged, eSatelliteConfigurationManager::focusChanged );
@@ -67,6 +101,218 @@ void eSatelliteConfigurationManager::focusChanged( const eWidget* focus )
 	}
 }
 
+void eSatelliteConfigurationManager::typeChanged(eListBoxEntryText* newtype)
+{
+	int newcomplexity=(int)newtype->getKey();
+	// check if the new type is less complex than our current setup...
+	if ( checkComplexity() > newcomplexity)
+	{
+		eMessageBox mb(_("Configuration contains some elements\nwhich don't fit into new DiSEqC-Type. Drop these items?"), _("Change DiSEqC-Type..."), eMessageBox::iconWarning|eMessageBox::btYes|eMessageBox::btCancel);
+		hide();
+		mb.show();
+		int res=mb.exec();
+		mb.hide();
+		show();
+		if (res == eMessageBox::btCancel)
+		{
+			combo_type->setCurrent((void*)complexity);
+			return;
+		}
+	}
+	setComplexity(complexity=newcomplexity);
+}
+
+void eSatelliteConfigurationManager::setComplexity(int complexity)
+{
+	int i=0;
+	if (complexity < 3)
+	{
+		lLNB->hide();
+		l22Khz->hide();
+		lVoltage->hide();
+		lSatPos->hide();
+		lSatPos->move( ePoint( 75, lSatPos->getPosition().y() ) );
+		lSatPos->show();
+		button_erase->hide();
+		button_new->hide();
+	}
+	else
+	{
+		lSatPos->hide();
+		lSatPos->move( ePoint( 0, lSatPos->getPosition().y() ) );
+		lSatPos->show();
+		lLNB->show();
+		l22Khz->show();
+		lVoltage->show();
+		button_new->show();
+		button_erase->show();
+	}
+
+	switch (complexity)
+	{
+	case 0:
+		deleteSatellitesAbove(1);
+		while (eTransponderList::getInstance()->getLNBs().size() < 1)
+			newPressed();
+		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); ++it, ++i)
+			setSimpleDiseqc(it->getSatelliteList().first(), i);
+		break;
+	case 1:
+		deleteSatellitesAbove(2);
+		while (eTransponderList::getInstance()->getLNBs().size() < 2)
+			newPressed();
+		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); ++it, ++i)
+			setSimpleDiseqc(it->getSatelliteList().first(), i);
+		break;
+	case 2:
+		deleteSatellitesAbove(4);
+		while (eTransponderList::getInstance()->getLNBs().size() < 4)
+			newPressed();
+		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); ++it, ++i)
+			setSimpleDiseqc(it->getSatelliteList().first(), i);
+		break;
+	case 3:
+		break;
+	}
+	checkComplexity();
+	repositionWidgets();
+}
+
+int eSatelliteConfigurationManager::checkComplexity()
+{
+	int c=0, comp=0;
+	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+	{
+		if (it->getSatelliteList().size() != 1)
+		{
+			eDebug("complexity is 3 since lnb %d has more than one satellite.", c);
+			return 3;
+		} else
+			++c;
+		int dc=checkDiseqcComplexity(it->getSatelliteList().first());
+		eDebug("LNB %d has %d", c, dc);
+		if (dc > comp)
+			comp=dc;
+	}
+	if (c > 4)
+		comp=3;
+		
+	if ((comp < 2) && c>2)
+		comp=2;
+	if ((comp < 1) && c>1)
+		comp=1;
+
+	eDebug("complexity is %d", comp);
+	return comp;
+}
+
+int eSatelliteConfigurationManager::checkDiseqcComplexity(eSatellite *s)
+{
+	SatelliteEntry *se=0;
+	
+	if (entryMap.count(s))
+		se=&entryMap[s];
+	
+	if (s->getSwitchParams().VoltageMode != eSwitchParameter::HV)
+	{
+		eDebug("voltage mode unusual");
+		return 3;
+	}
+	if (s->getSwitchParams().HiLoSignal != eSwitchParameter::HILO)
+	{
+		eDebug("sig22 mode unusual");
+		return 3;
+	}
+	if (s->getLNB()->getDiSEqC().DiSEqCMode == eDiSEqC::NONE)
+	{
+		if (se)
+			se->description->setText(_("direct connection"));
+		return 0;
+	}
+
+	if (s->getLNB()->getDiSEqC().DiSEqCMode > eDiSEqC::V1_0)
+	{
+		eDebug("diseqc mode > 1.0");
+		return 3;
+	}
+	if (s->getLNB()->getDiSEqC().DiSEqCParam > 3)
+	{
+		eDebug("unusual diseqc parameter");
+		return 3;
+	}
+	
+	if (se)
+	{
+		switch (s->getLNB()->getDiSEqC().DiSEqCParam)
+		{
+		case 0:
+			se->description->setText("DiSEqC A");
+			break;
+		case 1:
+			se->description->setText("DiSEqC B");
+			break;
+		case 2:
+			se->description->setText("DiSEqC BA");
+			break;
+		case 3:
+			se->description->setText("DiSEqC BB");
+			break;
+		}
+	}
+	
+			// we have simple 1.0 .. 
+	if (s->getLNB()->getDiSEqC().DiSEqCParam > 1)
+		return 2;
+	
+	if (s->getLNB()->getDiSEqC().DiSEqCParam)
+		return 1;
+	
+	return 0;
+}
+
+void eSatelliteConfigurationManager::deleteSatellitesAbove(int n)
+{
+			// it's all about invalidating ptrlist's iterators on delete :/
+start:
+		int index=0;
+		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); (it != eTransponderList::getInstance()->getLNBs().end()); ++it)
+			for ( ePtrList<eSatellite>::iterator si = it->getSatelliteList().begin() ; si != it->getSatelliteList().end(); si++)
+				if (index++ >= n)
+				{
+					delSatellite(si);
+					goto start;
+				}
+}
+
+void eSatelliteConfigurationManager::setSimpleDiseqc(eSatellite *s, int diseqcnr)
+{
+	eLNB *lnb=s->getLNB();
+
+	lnb->setLOFHi(10600000);
+	lnb->setLOFLo(9750000);
+	lnb->setLOFThreshold(11700000);
+	lnb->setIncreasedVoltage(0);
+	lnb->getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
+	if (complexity)		// if we have diseqc at all
+	{
+		lnb->getDiSEqC().DiSEqCParam=eDiSEqC::AA+diseqcnr;
+		lnb->getDiSEqC().DiSEqCMode=eDiSEqC::V1_0;
+	} else
+	{
+		lnb->getDiSEqC().DiSEqCParam=0;
+		lnb->getDiSEqC().DiSEqCMode=eDiSEqC::NONE;
+	}
+	lnb->getDiSEqC().DiSEqCRepeats=0;
+	lnb->getDiSEqC().SeqRepeat=0;
+	lnb->getDiSEqC().uncommitted_switch=0;
+	lnb->getDiSEqC().uncommitted_gap=0;
+	lnb->getDiSEqC().useGotoXX=1;
+	lnb->getDiSEqC().gotoXXLatitude=0.0;
+	lnb->getDiSEqC().gotoXXLaDirection=eDiSEqC::NORTH;
+	lnb->getDiSEqC().gotoXXLongitude=0.0;
+	lnb->getDiSEqC().gotoXXLoDirection=eDiSEqC::EAST;
+}
+
 eSatelliteConfigurationManager::~eSatelliteConfigurationManager()
 {
 	if (refresh)
@@ -82,7 +328,7 @@ eSatellite *eSatelliteConfigurationManager::getSat4SatCombo( const eComboBox *c 
 	for ( ; it != entryMap.end(); it++)
 		if ( it->second.sat == c)
 			break;
-	return it->first;
+	return it != entryMap.end()?it->first:0;
 }
 
 eSatellite *eSatelliteConfigurationManager::getSat4HiLoCombo( const eComboBox *c )
@@ -91,7 +337,7 @@ eSatellite *eSatelliteConfigurationManager::getSat4HiLoCombo( const eComboBox *c
 	for ( ; it != entryMap.end(); it++)
 		if ( it->second.hilo == c)
 			break;
-	return it->first;
+	return it != entryMap.end()?it->first:0;
 }
 
 eSatellite *eSatelliteConfigurationManager::getSat4VoltageCombo( const eComboBox *c )
@@ -100,7 +346,7 @@ eSatellite *eSatelliteConfigurationManager::getSat4VoltageCombo( const eComboBox
 	for ( ; it != entryMap.end(); it++)
 		if ( it->second.voltage == c)
 			break;
-	return it->first;
+	return it != entryMap.end()?it->first:0;
 }
 
 eSatellite *eSatelliteConfigurationManager::getSat4LnbButton( const eButton *b )
@@ -109,16 +355,16 @@ eSatellite *eSatelliteConfigurationManager::getSat4LnbButton( const eButton *b )
 	for ( ; it != entryMap.end(); it++)
 		if ( it->second.lnb == b)
 			break;
-	return it->first;
+	return it != entryMap.end()?it->first:0;
 }
 
-
+#define DESC_POS_X 350
 #define SAT_POS_X  0
-#define LNB_POS_X  200
-#define HILO_POS_X  270
-#define VOLTAGE_POS_X  370
-#define POS_Y 0
+#define LNB_POS_X  260
+#define HILO_POS_X  330
+#define VOLTAGE_POS_X  430
 
+#define POS_Y 0
 void eSatelliteConfigurationManager::repositionWidgets()
 {
 	if (deleteThisEntry)
@@ -127,6 +373,8 @@ void eSatelliteConfigurationManager::repositionWidgets()
 		delete deleteThisEntry->lnb;
 		delete deleteThisEntry->voltage;
 		delete deleteThisEntry->hilo;
+		delete deleteThisEntry->fixed;
+		delete deleteThisEntry->description;
 		// search Entry in Map;		
 		std::map< eSatellite*, SatelliteEntry >::iterator it( entryMap.begin() );
 		for ( ; it != entryMap.end() && &it->second != deleteThisEntry ; it++);
@@ -134,7 +382,7 @@ void eSatelliteConfigurationManager::repositionWidgets()
 			entryMap.erase( it );		
 		deleteThisEntry=0;
 	}
-	int sx=SAT_POS_X, y=POS_Y, hx=HILO_POS_X, vx=VOLTAGE_POS_X, lx=LNB_POS_X, count=0;
+	int count=0, y=POS_Y;
 
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 	{
@@ -142,25 +390,33 @@ void eSatelliteConfigurationManager::repositionWidgets()
 		{
 			SatelliteEntry& entry = entryMap[ *s ];
 			// search eComboBox for this eSatellite and move
-			if (isVisible())
-			{
-				entry.sat->hide();
-				entry.lnb->hide();
-				entry.voltage->hide();
-				entry.hilo->hide();
-			}
-			entry.sat->move( ePoint(sx, y) );
-			entry.lnb->move( ePoint(lx, y) );
-			entry.lnb->setText( eString().sprintf("%i", count) );
-			entry.hilo->move( ePoint(hx, y) );
-			entry.voltage->move( ePoint(vx, y) );
 
-			if (isVisible())
+			entry.sat->hide();
+			entry.lnb->hide();
+			entry.voltage->hide();
+			entry.hilo->hide();
+			entry.fixed->hide();
+			entry.description->hide();
+
+			entry.sat->move( ePoint((complexity==3?SAT_POS_X:75), y) );
+			entry.fixed->move( ePoint(0, y) );
+			entry.description->move( ePoint(DESC_POS_X, y) );
+			entry.lnb->move( ePoint(LNB_POS_X, y) );
+			entry.lnb->setText( eString().sprintf("%i", count) );
+			entry.hilo->move( ePoint(HILO_POS_X, y) );
+			entry.voltage->move( ePoint(VOLTAGE_POS_X, y) );
+
+			entry.sat->show();
+			if (complexity == 3) // user defined..
 			{
-				entry.sat->show();
 				entry.lnb->show();
 				entry.voltage->show();
 				entry.hilo->show();
+			}
+			else
+			{
+				entry.fixed->show();
+				entry.description->show();
 			}
 			y+=40;
 		}
@@ -192,10 +448,55 @@ void eSatelliteConfigurationManager::lnbSelected(eButton* who)
 	return;
 }
 
+void eSatelliteConfigurationManager::erasePressed()
+{
+	eSatellite *s=0;
+	if ( focus && focus->getName() == "satWidget" )
+	{
+		s = getSat4SatCombo( (eComboBox*)focus );
+		if (!s)
+			s = getSat4HiLoCombo( (eComboBox*)focus );
+		if (!s)
+			s = getSat4VoltageCombo( (eComboBox*)focus );
+		if (!s)
+			s = getSat4LnbButton( (eButton*)focus );
+	}
+	if (!s)
+		eDebug("Widget not found");
+	else
+	{
+		eDebug("call delSatellite(s)");
+		delSatellite(s);
+	}
+}
+
+void eSatelliteConfigurationManager::delSatellite( eSatellite* s )
+{
+	eDVB::getInstance()->settings->removeOrbitalPosition(s->getOrbitalPosition());
+	eLNB* lnb = s->getLNB();
+	lnb->deleteSatellite( s );
+	eDebug("Satellite is now removed");
+	if ( !lnb->getSatelliteList().size() )   // the lnb that have no more satellites must be deleted
+	{
+		eDebug("delete no more used lnb");
+		eTransponderList::getInstance()->getLNBs().remove( *s->getLNB() );
+	}
+	else
+		eDebug("do not delete lnb");
+
+	deleteThisEntry = &entryMap[ s ];
+	if (!refresh)
+	{
+		refresh = new eTimer( eApp );
+		CONNECT( refresh->timeout, eSatelliteConfigurationManager::repositionWidgets );
+	}
+	refresh->start(50, true );
+}
 
 void eSatelliteConfigurationManager::satChanged(eComboBox* who, eListBoxEntryText *le)
 {
-	eSatellite *s = getSat4SatCombo(who);
+	eSatellite *s=getSat4SatCombo( who );
+
 	if ( le->getKey() && le->getText() )
 	{
 			// delete old orbital position services
@@ -204,28 +505,8 @@ void eSatelliteConfigurationManager::satChanged(eComboBox* who, eListBoxEntryTex
 		s->setOrbitalPosition( (int) le->getKey() );
 		s->setDescription( le->getText() );
 	}
-	else  // *delete* selected -->> satellite and empty lnbs were now deleted
-	{
-		eDVB::getInstance()->settings->removeOrbitalPosition(s->getOrbitalPosition());
-		eLNB* lnb = s->getLNB();
-		lnb->deleteSatellite( s );
-		eDebug("Satellite is now removed");
-		if ( !lnb->getSatelliteList().size() )   // the lnb that have no more satellites must be deleted
-		{
-			eDebug("delete no more used lnb");
-			eTransponderList::getInstance()->getLNBs().remove( *s->getLNB() );
-		}
-		else
-			eDebug("do not delete lnb");		
-
-		deleteThisEntry = &entryMap[ s ];
-		if (!refresh)
-		{
-			refresh = new eTimer( eApp );
-			CONNECT( refresh->timeout, eSatelliteConfigurationManager::repositionWidgets );
-		}
-		refresh->start(50, true );
-	}
+	else if (s) // *delete* selected -->> satellite and empty lnbs were now deleted
+		delSatellite(s);
 }
 
 void eSatelliteConfigurationManager::hiloChanged(eComboBox* who, eListBoxEntryText *le)
@@ -247,45 +528,52 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 {
 	SatelliteEntry sat;
 
-	eLabel *l = new eLabel(this);
-	l->setName("lSatPos");
-	eComboBox* c = new eComboBox(w_buttons, 6, l);
+	eComboBox* c = new eComboBox(w_buttons, 6, lSatPos );
 	c->setName("satWidget");
 	sat.sat=c;
+
 	c->loadDeco();
-//			c->move(ePoint(sx,y));
-	c->resize(eSize(190, 30));
+	c->resize(eSize(250, 30));
 	c->setHelpText( _("press ok to select another satellite, or delete this satellite"));
 
-	new eListBoxEntryText( *c, _("*delete*"), (void*) 0 );   // this is to delete an satellite
+	if (complexity == 3)
+		new eListBoxEntryText( *c, _("*delete*"), (void*) 0 );   // this is to delete an satellite
 	for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
 		if ( i->possibleTransponders.size() )
 			new eListBoxEntryText( *c, i->name, (void*) i->possibleTransponders.begin()->satellite.orbital_position );
 
 	int err;
 	if ( (err = c->setCurrent( (void*) s->getOrbitalPosition() ) ) )
-		if (err == eComboBox::E_COULDNT_FIND)  // hmm current entry not in Combobox... we add manually
+		if (err == eComboBox::E_COULDNT_FIND)  // hmm current entry not in Combobox... we add it manually
 			c->setCurrent( new eListBoxEntryText( *c, s->getDescription(), (void*) s->getOrbitalPosition() ) );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::satChanged );
 
-	l = new eLabel(this);
-	l->setName("lLnb");
-	eButton* b = new eButton(w_buttons, l);
+	eButton* b = new eButton(w_buttons, lLNB);
 	sat.lnb=b;
 	b->setName("satWidget");
 	b->loadDeco();
-//			b->move(ePoint(lx, y));
+
 	b->resize(eSize(60, 30));
 	b->setHelpText( _("press ok to goto LNB config"));
 	CONNECT(b->selected_id, eSatelliteConfigurationManager::lnbSelected);
 
-	l = new eLabel(this);
-	l->setName("l22khz");
-	c = new eComboBox(w_buttons, 3, l);
+	int index=entryMap.size()+1;
+	sat.fixed=new eLabel(w_buttons);
+//	sat.fixed->setText(eString().sprintf(_("Sat %d"), index));
+		// don't ask...
+	sat.fixed->setShortcut(eString().sprintf("%d", index));
+	sat.fixed->setShortcutFocus(sat.sat);
+	sat.fixed->setShortcutPixmap(eString().sprintf("%d", index));
+	sat.fixed->resize(eSize(130, 30));
+
+	sat.description=new eLabel(w_buttons);
+	sat.description->resize(eSize(230, 30));
+
+	c = new eComboBox(w_buttons, 3, l22Khz);
 	c->setName("satWidget");
 	sat.hilo=c;
 	c->loadDeco();
-//			c->move( ePoint( hx, y ) );
+
 	c->resize( eSize( 90, 30 ) );
 	c->setHelpText( _("press ok to select another 22kHz mode") );
 	new eListBoxEntryText( *c, "Hi/Lo", (void*)eSwitchParameter::HILO, 0, _("22kHz signal is automaticaly switched") );
@@ -294,13 +582,11 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 	c->setCurrent( (void*) (int) s->getSwitchParams().HiLoSignal );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::hiloChanged);
 
-	l = new eLabel(this);
-	l->setName("lVoltage");
-	c = new eComboBox(w_buttons, 3, l	);
+	c = new eComboBox(w_buttons, 3, lVoltage );
 	c->setName("satWidget");
 	sat.voltage=c;
 	c->loadDeco();
-//			c->move( ePoint( vx, y ) );
+
 	c->resize( eSize( 90, 30 ) );
 	c->setHelpText( _("press ok to select another LNB Voltage mode") );
 	new eListBoxEntryText( *c, "H/V", (void*)eSwitchParameter::HV, 0, _("Voltage is automaticaly changed") );
@@ -337,8 +623,10 @@ void eSatelliteConfigurationManager::newPressed()
 		return;
 	}
 
+
 	eLNB *lnb;
-	if ( !eTransponderList::getInstance()->getLNBs().size() )  // lnb list is empty ?
+			// if not in user-defined mode, 
+	if ( (complexity < 3) || !eTransponderList::getInstance()->getLNBs().size() )  // lnb list is empty ?
 	{
 		eTransponderList::getInstance()->getLNBs().push_back( eLNB(*eTransponderList::getInstance()) );
 		lnb = &eTransponderList::getInstance()->getLNBs().back();
@@ -354,9 +642,10 @@ void eSatelliteConfigurationManager::newPressed()
 		lnb->getDiSEqC().uncommitted_switch=0;
 		lnb->getDiSEqC().uncommitted_gap=0;
 		lnb->getDiSEqC().useGotoXX=1;
-		lnb->getDiSEqC().gotoXXOffset=180.0;
 		lnb->getDiSEqC().gotoXXLatitude=0.0;
+		lnb->getDiSEqC().gotoXXLaDirection=eDiSEqC::NORTH;
 		lnb->getDiSEqC().gotoXXLongitude=0.0;
+		lnb->getDiSEqC().gotoXXLoDirection=eDiSEqC::EAST;
 	}
 	else // we use the last lnb in the list for the new Satellite
 		lnb = &eTransponderList::getInstance()->getLNBs().back();
@@ -487,7 +776,8 @@ void eLNBSetup::onSave()
 	p->getDiSEqC().uncommitted_switch = DiSEqCPage->uncommitted->isChecked();
 	p->getDiSEqC().uncommitted_gap = DiSEqCPage->uncommitted_gap->isChecked();
 	p->getDiSEqC().useGotoXX = RotorPage->useGotoXX->isChecked();
-	p->getDiSEqC().gotoXXOffset = RotorPage->RotorOffset->getFixedNum();
+	p->getDiSEqC().gotoXXLaDirection = (int)RotorPage->LaDirection->getCurrent()->getKey();
+	p->getDiSEqC().gotoXXLoDirection = (int)RotorPage->LoDirection->getCurrent()->getKey();
 	p->getDiSEqC().gotoXXLatitude = RotorPage->Latitude->getFixedNum();
 	p->getDiSEqC().gotoXXLongitude = RotorPage->Longitude->getFixedNum();
 	p->getDiSEqC().RotorTable.clear();
@@ -808,15 +1098,6 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
 	useGotoXX = new eCheckbox(this);
 	useGotoXX->setName("useGotoXX");
 
-	lRotorOffset = new eLabel(this);
-	lRotorOffset->setName("lRotorOffset");
-	lRotorOffset->hide();
-
-	RotorOffset = new eNumber(this, 2, 0, 360, 3, 0, 0, lRotorOffset );
-	RotorOffset->setFlags( eNumber::flagPosNeg|eNumber::flagFixedNum );
-	RotorOffset->setName("RotorOffset");
-	RotorOffset->hide();
-
 	lLongitude = new eLabel(this);
 	lLongitude->setName("lLongitude");
 	lLongitude->hide();
@@ -826,6 +1107,12 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
 	Longitude->setName("Longitude");
 	Longitude->hide();
 
+	LoDirection = new eComboBox( this, 2 );
+	LoDirection->setName("LoDirection");
+	LoDirection->hide();
+	new eListBoxEntryText( *LoDirection, _("East"), (void*)eDiSEqC::EAST, 0, _("East") );
+	new eListBoxEntryText( *LoDirection, _("West"), (void*)eDiSEqC::WEST, 0, _("West") );
+
 	lLatitude = new eLabel(this);
 	lLatitude->setName("lLatitude");
 	lLatitude->hide();
@@ -834,6 +1121,12 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
 	Latitude->setFlags( eNumber::flagFixedNum );
 	Latitude->setName("Latitude");
 	Latitude->hide();
+
+	LaDirection = new eComboBox( this, 2 );
+	LaDirection->setName("LaDirection");
+	LaDirection->hide();
+	new eListBoxEntryText( *LaDirection, _("North"), (void*)eDiSEqC::NORTH, 0, _("North") );
+	new eListBoxEntryText( *LaDirection, _("South"), (void*)eDiSEqC::SOUTH, 0, _("South") );
 
 	positions = new eListBox< eListBoxEntryText >( this );  
 	positions->setFlags( eListBoxBase::flagNoPageMovement );
@@ -885,7 +1178,6 @@ eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
 	if (skin->build(this, "eRotorPage"))
 		eFatal("skin load of \"eRotorPage\" failed");
 
-	CONNECT( RotorOffset->selected, eRotorPage::numSelected );    
 	CONNECT( orbital_position->selected, eRotorPage::numSelected );
 	CONNECT( Longitude->selected, eRotorPage::numSelected );
 	CONNECT( Latitude->selected, eRotorPage::numSelected );
@@ -915,19 +1207,19 @@ void eRotorPage::gotoXXChanged( int state )
 		
 		lLongitude->show();
 		Longitude->show();
+		LoDirection->show();
 		lLatitude->show();
 		Latitude->show();
-		lRotorOffset->show();
-		RotorOffset->show();
+		LaDirection->show();
 	}
 	else
 	{
 		lLongitude->hide();
 		Longitude->hide();
+		LoDirection->hide();
 		lLatitude->hide();
 		Latitude->hide();
-		lRotorOffset->hide();
-		RotorOffset->hide();
+		LaDirection->hide();
 
 		positions->show();
 		add->show();
@@ -958,15 +1250,17 @@ void eRotorPage::lnbChanged( eListBoxEntryText *lnb )
 
 		useGotoXX->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().useGotoXX );
 		gotoXXChanged( (int) ((eLNB*)lnb->getKey())->getDiSEqC().useGotoXX );
-		RotorOffset->setFixedNum( ((eLNB*)lnb->getKey())->getDiSEqC().gotoXXOffset );
 		Latitude->setFixedNum( ((eLNB*)lnb->getKey())->getDiSEqC().gotoXXLatitude );
+		LaDirection->setCurrent( (void*) ((eLNB*)lnb->getKey())->getDiSEqC().gotoXXLaDirection );
 		Longitude->setFixedNum( ((eLNB*)lnb->getKey())->getDiSEqC().gotoXXLongitude );
+		LoDirection->setCurrent( (void*) ((eLNB*)lnb->getKey())->getDiSEqC().gotoXXLoDirection );		
 	}
 	else
 	{
-		RotorOffset->setFixedNum( 0 );
 		Latitude->setFixedNum(0);
+		LaDirection->setCurrent(0);
 		Longitude->setFixedNum(0);
+		LoDirection->setCurrent(0);		
 		useGotoXX->setCheck( 1 );
 	}
 
@@ -1100,7 +1394,7 @@ int eManuallyRotorPage::eventHandler( const eWidgetEvent &event )
 					transponder.setCable(402000, 6900000, 0, 3);	// some cable transponder
 					break;
 				case eFrontend::feSatellite:
-					transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0);	// some astra transponder
+					transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 192 ); // some astra transponder
 					break;
 				default:
 					break;

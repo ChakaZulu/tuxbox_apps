@@ -86,8 +86,8 @@ public:
 	int persistent;
 	
 	eHTTPConnection(int socket, int issocket, eHTTPD *parent, int persistent=0);
-	eHTTPConnection(); // ready to do "connectToHost"
-	static eHTTPConnection *doRequest(const char *uri, int *error=0);
+	eHTTPConnection(eMainloop *ml); // ready to do "connectToHost"
+	static eHTTPConnection *doRequest(const char *uri, eMainloop *ml, int *error=0);
 	void start();
 	~eHTTPConnection();
 	
@@ -110,8 +110,9 @@ class eHTTPD: public eServerSocket
 {
 	friend class eHTTPConnection;
 	ePtrList<eHTTPPathResolver> resolver;
+	eMainloop *ml;
 public:
-	eHTTPD(int port);
+	eHTTPD(int port, eMainloop *ml);
 	void newConnection(int socket);
 
 	void addResolver(eHTTPPathResolver *r) { resolver.push_back(r); }

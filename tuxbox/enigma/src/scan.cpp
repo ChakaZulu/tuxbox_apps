@@ -642,7 +642,7 @@ void tsScan::serviceFound(const eServiceReferenceDVB &service, bool newService)
 	
 	services_scanned->setText(eString().sprintf("%i", servicesScanned));
 
-	eService *s=eDVB::getInstance()->settings->getTransponders()->searchService(service);
+	eServiceDVB *s=eDVB::getInstance()->settings->getTransponders()->searchService(service);
 	service_name->setText(s->service_name);
 	service_provider->setText(s->service_provider);
 	

@@ -188,46 +188,6 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 	return result;
 }
 
-struct listService: public std::unary_function<std::pair<eServiceReferenceDVB,eService>&,void>
-{
-	eString &result;
-	const eString &search;
-	listService(eString &result, const eString &search): result(result), search(search)
-	{
-	}
-	void operator()(eService &service)
-	{
-		if (search && (service.service_name.find(search)==eString::npos))
-			return;
-		eString sc;
-		sc.sprintf("%x:%x:%x:%x", service.service_id.get(), service.transport_stream_id.get(), service.original_network_id.get(), service.service_type);
-		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service.service_name.c_str() + "</a></td>"
-						"<td>" + eString().setNum(service.service_type, 0x10) + "</td></tr>\n";
-	}
-};
-
-static eString listServices(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	content->local_header["Content-Type"]="text/html";
-	eString result;
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	eString search=opt["search"];
-	result="<html>\n"
-		"<head>\n"
-		"  <title>enigma service list</title>\n"
-		"  <link rel=stylesheet type=\"text/css\" href=\"/index.css\">\n"
-		"</head>\n"
-		"<body>\n"
-		"<h1>Enigma channel list</h1>\n"
-		"<table>\n";
-		
-	eDVB::getInstance()->settings->getTransponders()->forEachService(listService(result, search));
-	result+="</table>\n"
-		"</body>\n"
-		"</html>\n";
-	return result;
-}
-
 static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html";
@@ -306,7 +266,7 @@ static eString channels_getcurrent(eString request, eString dirpath, eString opt
 	if (!sapi)
 		return "-1";
 		
-	eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	eServiceDVB *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if(current)
 		return current->service_name.c_str();
 	else
@@ -834,7 +794,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	if (!sapi)
 		return "not available";
 
-	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+	eServiceDVB *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	if (service)
 	{
 		name=service->service_name.c_str();
@@ -1160,7 +1120,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
-	dyn_resolver->addDyn("GET", "/cgi-bin/listServices", listServices);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);

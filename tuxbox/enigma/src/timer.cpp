@@ -498,7 +498,7 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const eServiceRefere
 
 bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& entry )
 {
-	time_t nowTime = time(0)+eDVB::getInstance()->time_difference;
+/*	time_t nowTime = time(0)+eDVB::getInstance()->time_difference;
 	if ( entry.time_begin < nowTime && !(entry.type & ePlaylistEntry::typeShutOffTimer) )
 	{
 		eMessageBox box(_("This event already began.\nYou can not add this to timerlist"), _("Add event to timerlist"), eMessageBox::iconWarning|eMessageBox::btOK);
@@ -508,7 +508,7 @@ bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& ent
 		box.hide();
 		sel->show();
 		return false;
-	}
+	}*/
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->list.begin() ); i != timerlist->list.end(); i++)
 		if ( ( entry.event_id != -1 && entry.event_id == i->event_id ) ||
 			   ( entry.service == i->service && entry.time_begin == i->time_begin ) )
@@ -921,7 +921,8 @@ eTimerView::eTimerView( ePlaylistEntry* e)
 		new eListBoxEntryText( *emonth, monthStr[i], (void*) i );
 
 	new eListBoxEntryText( *type, _("switch"), (void*) ePlaylistEntry::SwitchTimerEntry );
-	new eListBoxEntryText( *type, _("record DVR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
+	if(eDVB::getInstance()->getInfo("mID") != "06")
+		new eListBoxEntryText( *type, _("record DVR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
 //	new eListBoxEntryText( *type, _("record VCR"), (void*) ePlaylistEntry::RecTimerEntry|ePlaylisteEntry::recVCR ); );  
 
 	if ( events->getCount() )
@@ -1077,7 +1078,10 @@ void eTimerView::selChanged( eListBoxEntryTimer *entry )
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
 		tm tmp = *localtime( &now );
 		updateDateTime( tmp, tmp );
-		type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
+    if (eDVB::getInstance()->getInfo("mID") != "06" )
+			type->setCurrent( (void*)(ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
+		else
+			type->setCurrent( (void*)ePlaylistEntry::SwitchTimerEntry );
 
 		eServiceReference ref = eServiceInterface::getInstance()->service;
 

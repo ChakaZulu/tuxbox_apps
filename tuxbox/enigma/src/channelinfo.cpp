@@ -211,6 +211,8 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 		delete eit;
 	}
 	
+	// eService *service=eServiceInterface::getInstance()->addRef(service);
+	
 	if (! service.path.size())
 	{
 		EITEvent *e = 0;
