@@ -176,11 +176,7 @@ void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float fact
 
 	frameBuffer->paintBoxRel(x + startx, y, 120, mheight, COL_MENUCONTENT_PLUS_0);
 	frameBuffer->paintIcon("volumebody.raw", x + startx, y+2+mheight/4);
-	std::string iconfile = "volumeslider2";
-	if (selected)
-		iconfile += "blue";
-	iconfile +=".raw";
-	frameBuffer->paintIcon(iconfile, (int)(x + (startx+3)+(spos / factor)), y+mheight/4);
+	frameBuffer->paintIcon(selected ? "volumeslider2blue.raw" : "volumeslider2.raw", (int)(x + (startx+3)+(spos / factor)), y+mheight/4);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y+mheight, width, g_Locale->getText(text), COL_MENUCONTENT, 0, true); // UTF-8
 	sprintf(wert, "%3d", spos); // UTF-8 encoded

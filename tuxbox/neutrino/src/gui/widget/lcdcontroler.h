@@ -60,7 +60,7 @@ class CLcdControler : public CMenuTarget
 
 		void paint();
 		void setLcd();
-		void paintSlider(int x, int y, unsigned int spos, float factor, const neutrino_locale_t text, const char * const iconname, bool selected);
+		void paintSlider(int x, int y, unsigned int spos, float factor, const neutrino_locale_t text, bool selected);
 
 	public:
 
