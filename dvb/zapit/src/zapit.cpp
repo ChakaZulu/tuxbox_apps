@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.50 2001/12/20 00:47:46 faralla Exp $
+  $Id: zapit.cpp,v 1.51 2001/12/20 14:31:22 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,10 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.51  2001/12/20 14:31:22  obi
+  code for new tuning api can now be used if OLD_TUNER_API is undefined
+  in zapit.h and tune.cpp
+
   Revision 1.50  2001/12/20 00:47:46  faralla
   command to get vtxt-pid added
 
@@ -1436,7 +1440,11 @@ int sleepBox() {
     return -4;
   };
 
+#ifdef OLD_TUNER_API
   if (ioctl(device, OST_SET_POWER_STATE, OST_POWER_SUSPEND)!=0){
+#else
+  if (ioctl(device, FE_SET_POWER_STATE, FE_POWER_SUSPEND)!=0){
+#endif
     printf("[zapit] cannot set suspend-mode");
     return -4;
   }
@@ -2299,7 +2307,7 @@ int main(int argc, char **argv) {
 
   system("/usr/bin/killall camd");
   system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.50 2001/12/20 00:47:46 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.51 2001/12/20 14:31:22 obi Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;

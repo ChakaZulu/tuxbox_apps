@@ -20,6 +20,8 @@
 #include <ost/ca.h>
 #include <ost/audio.h>
 
+#define OLD_TUNER_API
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
@@ -33,7 +35,11 @@
 /*Thread stuff */
 #include <pthread.h>
 
+#ifdef OLD_TUNER_API
 #define FRONT_DEV "/dev/ost/qpskfe0"
+#else
+#define FRONT_DEV "/dev/ost/frontend0"
+#endif
 #define DEMUX_DEV "/dev/ost/demux0"
 #define SEC_DEV   "/dev/ost/sec0"
 #define VIDEO_DEV   "/dev/ost/video0"
