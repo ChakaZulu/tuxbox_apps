@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.19 2001/10/17 14:22:11 field Exp $
+  $Id: zapit.cpp,v 1.20 2001/10/18 13:27:11 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,6 +70,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.20  2001/10/18 13:27:11  field
+  vtxt
+
   Revision 1.19  2001/10/17 14:22:11  field
   vtxt (treiber von [jolt] muss installiert sein, ist noch nicht im cdk)
 
@@ -846,9 +849,6 @@ else
   memset(&parse_pmt_pids,0,sizeof(parse_pmt_pids));
   parse_pmt_pids = parse_pmt(cit->second.pmt, caid);
 
-//  if (parse_pmt_pids.vtxtpid != 0)
-    set_vtxt(parse_pmt_pids.vtxtpid);
-  
   //printf("VPID parsed from pmt: %x\n", parse_pmt_pids.vpid);
   //for (i = 0;i<parse_pmt_pids.count_apids;i++) {
   //   printf("Audio-PID %d from parse_pmt() ist: %x\n",i,parse_pmt_pids.apid[i]);
@@ -969,6 +969,10 @@ else
       
       close(vid);
       vid= -1;
+
+//  if (parse_pmt_pids.vtxtpid != 0)
+    set_vtxt(parse_pmt_pids.vtxtpid);
+
       //printf("Saving settings\n");
       curr_onid_sid = onid_sid;
       if (!in_nvod)
@@ -1835,7 +1839,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.19 2001/10/17 14:22:11 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.20 2001/10/18 13:27:11 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
