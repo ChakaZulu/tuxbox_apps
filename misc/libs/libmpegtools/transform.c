@@ -1078,6 +1078,7 @@ void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
 
         while ( *apid == 0 || *vpid == 0){
                 count = read(fd, buf, IN_SIZE);
+                if (count<=0) return;
                 for (i = 0; i < count-7; i++){
                         if (buf[i] == 0x47){
                                 if (buf[i+1] & 0x40){
