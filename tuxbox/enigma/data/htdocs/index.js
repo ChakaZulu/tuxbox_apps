@@ -27,9 +27,9 @@ function setVid(xy)
 	parent.setTimeout("reload()", 100);
 }	
 
-function Mute()
+function Mute(xy)
 {
-	win=window.open("/setVolume?mute=1", "switchStatus","width=1,height=1,left=0,top=0");
+	win=window.open("/setVolume?mute="+xy, "switchStatus","width=1,height=1,left=0,top=0");
 	win.focus();
 	parent.setTimeout("reload()", 100);
 }
