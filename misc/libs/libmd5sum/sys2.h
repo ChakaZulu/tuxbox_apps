@@ -165,8 +165,6 @@ char *getenv ();
 off_t lseek ();
 #endif
 
-#include "xalloc.h"
-
 #if ! defined HAVE_MEMPCPY && ! defined mempcpy
 /* Be CAREFUL that there are no side effects in N.  */
 # define mempcpy(D, S, N) ((void *) ((char *) memcpy (D, S, N) + (N)))
@@ -264,9 +262,6 @@ char *base_name PARAMS ((char const *));
   case GETOPT_HELP_CHAR:			\
     usage (EXIT_SUCCESS);			\
     break;
-
-#include "closeout.h"
-#include "version-etc.h"
 
 #define case_GETOPT_VERSION_CHAR(Program_name, Authors)			\
   case GETOPT_VERSION_CHAR:						\
