@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.11 2003/10/26 19:06:27 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.12 2003/10/26 21:36:19 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,10 @@ $Id: dvb_descriptor.c,v 1.11 2003/10/26 19:06:27 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.12  2003/10/26 21:36:19  rasc
+private DSM-CC descriptor Tags started,
+INT-Section completed..
+
 Revision 1.11  2003/10/26 19:06:27  rasc
 no message
 
@@ -906,7 +910,8 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
 	b += 4;
 	len -= 4;
 
-        out_SL_NL  (4,"Platform_id: ",d.platform_id);	/* $$$$ TODO: platform_id_str nach EN 162 */
+        out_S2L_NL  (4,"Platform_id: ",d.platform_id,
+			dsmccStrPlatform_ID (d.platform_id));
         out_SB_NL  (4,"Platform_name_loop_length: ",d.platform_name_loop_length);
 
 	len_loop1 -= 4;
@@ -2863,8 +2868,10 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 		   len -= 5;
 		   len2 -= 5;
 
- 		   out_SL_NL  (5,"Platform_id: ",d.platform_id);	/* $$$$ TODO: platform_id_str nach EN 162 */
- 		   out_S2B_NL  (5,"Action_type: ",d.action_type,dsmccStrAction_Type(d.action_type));
+ 		   out_S2L_NL  (5,"Platform_id: ",d.platform_id,
+				   dsmccStrPlatform_ID (d.platform_id));
+ 		   out_S2B_NL  (5,"Action_type: ",d.action_type,
+				   dsmccStrAction_Type(d.action_type));
  		   out_SB_NL  (5,"reserved: ",d.reserved);
  		   out_SB_NL  (5,"INT_versioning_flag: ",d.INT_versioning_flag);
  		   out_SB_NL  (5,"INT_version: ",d.INT_version);

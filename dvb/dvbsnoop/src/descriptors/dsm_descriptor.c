@@ -1,5 +1,5 @@
 /*
-$Id: dsm_descriptor.c,v 1.5 2003/10/26 19:06:27 rasc Exp $ 
+$Id: dsm_descriptor.c,v 1.6 2003/10/26 21:36:18 rasc Exp $ 
 
 
   dvbsnoop
@@ -11,6 +11,10 @@ $Id: dsm_descriptor.c,v 1.5 2003/10/26 19:06:27 rasc Exp $
 
 
 $Log: dsm_descriptor.c,v $
+Revision 1.6  2003/10/26 21:36:18  rasc
+private DSM-CC descriptor Tags started,
+INT-Section completed..
+
 Revision 1.5  2003/10/26 19:06:27  rasc
 no message
 
@@ -43,10 +47,12 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 /*
   determine descriptor type and print it...
+  !!! DSMCC descriptors are in a provate tag space !!!
+
   return byte length
 */
 
-int  descriptorDSMCC  (u_char *b)
+int  descriptorDSMCCPrivate  (u_char *b)
 
 {
  int len;
@@ -57,8 +63,10 @@ int  descriptorDSMCC  (u_char *b)
   len = ((int) b[1]) + 2;
 
   out_NL (4);
-//  out_S2B_NL (4,"DSM-CC-DescriptorTag: ",id, dvbstrDSMCCDescriptorTAG(id));
-//  out_SB_NL  (5,"Descriptor_length: ",b[1]);
+  out_S2B_NL (4,"DSM_CC-DescriptorTag: ",id,
+		  dsmccStrDSMCCPrivateDescriptorTAG(id));
+  out_SB_NL  (5,"Descriptor_length: ",b[1]);
+  /* $$$$ TODO */
 out_nl (1," ... TODO... $$$ not yet done");
 return len;
 
@@ -96,7 +104,7 @@ return len;
 
 /*
   Any  descriptor  (Basic Descriptor output)
-  ETSI 300 468 
+  ETSI  TR 102 206  (ISO 13818-6)
 */
 
 void descriptorDSMCC_any (u_char *b)

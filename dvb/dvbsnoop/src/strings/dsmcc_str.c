@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.2 2003/10/25 19:11:50 rasc Exp $
+$Id: dsmcc_str.c,v 1.3 2003/10/26 21:36:20 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,10 @@ $Id: dsmcc_str.c,v 1.2 2003/10/25 19:11:50 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.3  2003/10/26 21:36:20  rasc
+private DSM-CC descriptor Tags started,
+INT-Section completed..
+
 Revision 1.2  2003/10/25 19:11:50  rasc
 no message
 
@@ -58,6 +62,54 @@ static char *findTableID (STR_TABLE *t, u_int id)
 
 
 /* -----------------------------------------  */
+
+
+
+
+/*
+ * -- LinkageDescriptor0x0C Table_type  EN301192
+ *
+ */
+
+char *dsmccStrDSMCCPrivateDescriptorTAG (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "reserved" },
+     {  0x01, 0x01,  "scheduling_descriptor" },
+     {  0x02, 0x02,  "update_descriptor" },
+     {  0x03, 0x03,  "ssu_location_descriptor" },
+     {  0x04, 0x04,  "message_descriptor" },
+     {  0x05, 0x05,  "ssu_event_name_descriptor" },
+     {  0x06, 0x06,  "target_smartcard_descriptor" },
+     {  0x07, 0x07,  "target_MAC_address_descriptor" },
+     {  0x08, 0x08,  "target_serial_number_descriptor" },
+     {  0x09, 0x09,  "target_IP_address_descriptor" },
+     {  0x0A, 0x0A,  "target_IPv6_address_descriptor" },
+     {  0x0B, 0x0B,  "ssu_subgroup_association_descriptor" },
+     {  0x0C, 0x0C,  "IP/MAC_platform_name_descriptor" },
+     {  0x0D, 0x0D,  "IP/MAC_platform_provider_name_descriptor" },
+     {  0x0E, 0x0E,  "target_MAC_address_range_descriptor" },
+     {  0x0F, 0x0F,  "target_IP_slash_descriptor" },
+     {  0x10, 0x10,  "target_IP_source_slash_descriptor" },
+     {  0x11, 0x11,  "target_IPv6_slash_descriptor" },
+     {  0x12, 0x12,  "target_IPv6_source_slash_descriptor" },
+     {  0x13, 0x13,  "ISP_access_mode_descriptor" },
+     {  0x14, 0x3F,  "reserved" },
+     //     {  0x40, 0x7F,  "DVB-SI scope" },  Telphone, private_data_spec
+     {  0x80, 0xFE,  "user_private_descriptor" },
+     {  0xFF, 0xFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+
+
 
 
 
@@ -235,6 +287,24 @@ char *dsmccStrMultiProtEncapsMACAddrRangeField (u_int i)
 
 
 
+
+
+/*
+  --  Platform ID    ETR 162
+*/
+
+char *dsmccStrPlatform_ID (u_int id)
+
+{
+  STR_TABLE  TableIDs[] = {
+	  /* $$$ TODO   ... */
+	{ 0x000000, 0x000000,   "" },
+      {  0,0, NULL }
+  };
+
+
+  return findTableID (TableIDs, id);
+}
 
 
 
