@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.347 2004/04/02 13:26:58 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.348 2004/04/04 00:46:57 carjay Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -548,7 +548,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
 	DBG("cmd %d (version %d) received", rmsg.cmd, rmsg.version);
 
-	if ((standby) && (rmsg.cmd != CZapitMessages::CMD_SET_STANDBY)) {
+	if ((standby) && 
+			((rmsg.cmd != CZapitMessages::CMD_SET_STANDBY) &&
+			(rmsg.cmd != CZapitMessages::CMD_SHUTDOWN))) {
 		WARN("cmd %d refused in standby mode", rmsg.cmd);
 		return true;
 	}
@@ -1618,7 +1620,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.347 2004/04/02 13:26:58 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.348 2004/04/04 00:46:57 carjay Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
