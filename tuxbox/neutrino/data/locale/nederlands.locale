@@ -2,7 +2,7 @@ menu.back Terug
 
 options.off Uit
 options.on Aan
-options.serial Seriëel
+options.serial Serieel
 options.fb Framebuffer
 options.null Null
 options.default Reset naar standaard
