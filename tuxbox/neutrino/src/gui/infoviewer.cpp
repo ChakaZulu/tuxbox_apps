@@ -332,7 +332,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
     				}
     				else
     				{
-    					if ( msg != CRCInput::RC_timeout )
+    					if (( msg != CRCInput::RC_timeout ) && (msg != CRCInput::RC_ok))
     						g_RCInput->postMsg( msg, data );
 		            	res = messages_return::cancel_info;
 		            }
