@@ -614,6 +614,7 @@ int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
 
 	//fprintf (stderr,"FollowScreen: count %d \n",count );
 	if (count) processTextToArray( screening_dates );
+	else       processTextToArray( "---\n" );
 
 	return count;
 }
