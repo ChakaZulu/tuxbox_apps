@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.20 2002/12/17 23:10:44 obi Exp $
+ * $Id: frontend.h,v 1.21 2002/12/26 07:08:52 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -78,8 +78,8 @@ class CFrontend
 		/*
 		 * linux dvb frontend api
 		 */
-		static fe_code_rate_t CFrontend::getCodeRate (uint8_t fec_inner);
-		static fe_modulation_t CFrontend::getModulation (uint8_t modulation);
+		static fe_code_rate_t getCodeRate (uint8_t fec_inner);
+		static fe_modulation_t getModulation (uint8_t modulation);
 
 		const dvb_frontend_info * getInfo ()	{ return info; };
 
