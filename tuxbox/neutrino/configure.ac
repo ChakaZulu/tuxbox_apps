@@ -28,6 +28,10 @@ TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 TUXBOX_APPS_LIB_PKGCONFIG(UCODES,tuxbox-ucodes)
 TUXBOX_APPS_LIB_PKGCONFIG(ZAPIT,tuxbox-zapit)
 
+AC_ARG_ENABLE(keyboard-no-rc,
+         [  --enable-keyboard-no-rc    enable keyboard control, disable rc control],
+         [AC_DEFINE(KEYBOARD_INSTEAD_OF_REMOTE_CONTROL,1,[enable keyboard control, disable rc control])])
+
 AC_OUTPUT([
 Makefile
 lib/Makefile
