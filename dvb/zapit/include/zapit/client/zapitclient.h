@@ -188,11 +188,12 @@ class CZapitClient:public CBasicClient
 	/*					*/
 	/****************************************/
 
-	/* zaps to channel of specifeid bouquet */
-	void zapTo( unsigned int bouquet, unsigned int channel );
+	/* zaps to channel of specified bouquet */
+	/* exception: bouquets are numbered starting at 0 in this routine! */
+	void zapTo(const unsigned int bouquet, const unsigned int channel);
 
 	/* zaps to channel  */
-	void zapTo( unsigned int channel );
+	void zapTo(const unsigned int channel);
 
 	/* zaps to channel, returns the "zap-status" */
 	unsigned int zapTo_serviceID(const t_channel_id channel_id);
