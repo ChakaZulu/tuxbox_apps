@@ -105,7 +105,7 @@ class CLCD
 		void showTime();
 		void showVolume(const char vol, const bool perform_update = true);
 		void showPercentOver(const unsigned char perc, const bool perform_update = true);
-		void showMenuText(const int position, const std::string & text, const int highlight = -1, const bool utf_encoded = false);
+		void showMenuText(const int position, const char * text, const int highlight = -1, const bool utf_encoded = false);
 		void showMP3(const std::string & artist, const std::string & title, const std::string & album);
 		void showMP3Play(MP3MODES m=MP3_PLAY);
 		void setBrightness(int);

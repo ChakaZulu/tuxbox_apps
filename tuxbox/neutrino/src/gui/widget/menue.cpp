@@ -494,17 +494,17 @@ int CMenuOptionChooser::paint( bool selected )
 	}
 
 
-	std::string l_optionName = g_Locale->getText(optionName);
-	std::string l_option;
-	if ( localizing && !isNumber(option))
+	const char * l_option;
+	if (localizing && (!isNumber(option)))
 		l_option = g_Locale->getText(option);
 	else
-		l_option = option;
+		l_option = option.c_str();
 
 	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_option, true); // UTF-8
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
+	const char * l_optionName = g_Locale->getText(optionName);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color, 0, true); // UTF-8
 
@@ -579,21 +579,17 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 	CFrameBuffer::getInstance()->paintBoxRel(x,y, dx, height, color );
 
-	std::string  l_optionName = g_Locale->getText(optionName);
-	std::string  l_option;
-	if ( localizing )
-		l_option = g_Locale->getText(optionValue);
-	else
-		l_option = optionValue;
+	const char * l_option = localizing ? g_Locale->getText(optionValue) : optionValue;
 
 	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_option);
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
+	const char * l_optionName = g_Locale->getText(optionName);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color);
 
-	if(selected)
+	if (selected)
 	{
 		CLCD::getInstance()->showMenuText(0, l_optionName, -1, true); // UTF-8
 		CLCD::getInstance()->showMenuText(1, l_option);
@@ -663,7 +659,7 @@ int CMenuForwarder::paint(bool selected)
 {
 	CFrameBuffer * frameBuffer = CFrameBuffer::getInstance();
 	int height = getHeight();
-	std::string l_text = localizing ? g_Locale->getText(text) : text;
+	const char * l_text = localizing ? g_Locale->getText(text) : text.c_str();
 
 	int stringstartposX = x + offx + 10;
 
@@ -740,7 +736,7 @@ int CMenuSeparator::paint(bool selected)
 	if(type&STRING)
 	{
 		int stringstartposX;
-		std::string l_text = g_Locale->getText(text);
+		const char * l_text = g_Locale->getText(text);
 		int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_text, true); // UTF-8
 
 		/* if no alignment is specified, align centered */

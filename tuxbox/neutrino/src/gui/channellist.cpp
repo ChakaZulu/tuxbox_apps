@@ -870,8 +870,8 @@ void CChannelList::paintItem(int pos)
 
 		if (liststart+pos==selected)
 		{
-			CLCD::getInstance()->showMenuText(0, chan->name, -1, true); // UTF-8
-			CLCD::getInstance()->showMenuText(1, chan->currentEvent.description );
+			CLCD::getInstance()->showMenuText(0, chan->name.c_str(), -1, true); // UTF-8
+			CLCD::getInstance()->showMenuText(1, chan->currentEvent.description.c_str());
 		}
 
 		int numpos = x+5+numwidth- g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST_NUMBER]->getRenderWidth(tmp);

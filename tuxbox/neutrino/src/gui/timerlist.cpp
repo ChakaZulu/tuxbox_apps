@@ -553,8 +553,8 @@ void CTimerList::paintItem(int pos)
 					break;
 			default:;
 			}
-			CLCD::getInstance()->showMenuText(0, line1, -1, true); // UTF-8
-			CLCD::getInstance()->showMenuText(1, line2, -1, true); // UTF-8
+			CLCD::getInstance()->showMenuText(0, line1.c_str(), -1, true); // UTF-8
+			CLCD::getInstance()->showMenuText(1, line2.c_str(), -1, true); // UTF-8
 		}
 	}
 }

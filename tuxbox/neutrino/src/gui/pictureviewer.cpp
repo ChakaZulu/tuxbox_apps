@@ -628,10 +628,10 @@ void CPictureViewerGui::view(unsigned int index, bool unscaled)
 {
 	selected=index;
 	
-	CLCD::getInstance()->showMenuText(0, playlist[index].Name );
+	CLCD::getInstance()->showMenuText(0, playlist[index].Name.c_str());
 	char timestring[19];
 	strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&playlist[index].Date));
-	CLCD::getInstance()->showMenuText(1, timestring );
+	CLCD::getInstance()->showMenuText(1, timestring);
 	
 	if(m_state == MENU)
 		frameBuffer->setMode(720,576,16);

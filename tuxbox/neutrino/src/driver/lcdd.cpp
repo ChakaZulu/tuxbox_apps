@@ -330,14 +330,14 @@ void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 	}
 }
 
-void CLCD::showMenuText(const int position, const std::string & text, const int highlight, const bool utf_encoded)
+void CLCD::showMenuText(const int position, const char * text, const int highlight, const bool utf_encoded)
 {
 	if (mode != MODE_MENU_UTF8)
 		return;
 
 	// reload specified line
 	display.draw_fill_rect(-1,35+14*position,120,35+14+14*position, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,35+11+14*position, 140, text.c_str() , CLCDDisplay::PIXEL_INV, highlight, utf_encoded);
+	fonts.menu->RenderString(0,35+11+14*position, 140, text, CLCDDisplay::PIXEL_INV, highlight, utf_encoded);
 	display.update();
 }
 

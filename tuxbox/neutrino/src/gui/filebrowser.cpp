@@ -800,9 +800,9 @@ void CFileBrowser::paintItem(unsigned int pos)
 		{
 			if (liststart+pos==selected)
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-				CLCD::getInstance()->showMenuText(0, actual_file->getFileName()); // ISO-8859-1
+				CLCD::getInstance()->showMenuText(0, actual_file->getFileName().c_str()); // ISO-8859-1
 #else
-				CLCD::getInstance()->showMenuText(0, actual_file->getFileName(), -1, true); // UTF-8
+				CLCD::getInstance()->showMenuText(0, actual_file->getFileName().c_str(), -1, true); // UTF-8
 #endif                                   
 			switch(actual_file->getType())
 			{
@@ -828,14 +828,16 @@ void CFileBrowser::paintItem(unsigned int pos)
 
 			if( S_ISREG(actual_file->Mode) )
 			{
-				if (g_settings.filebrowser_showrights != 0){
-					std::string modestring;
-					for(int m = 2; m >=0;m--)
+				if (g_settings.filebrowser_showrights != 0)
+				{
+					const char * attribute = "xwr";
+					char modestring[9 + 1];
+					for (int m = 8; m >= 0; m--)
 					{
-						modestring += (actual_file->Mode & (4 << (m*3)))?'r':'-';
-						modestring += (actual_file->Mode & (2 << (m*3)))?'w':'-';
-						modestring += (actual_file->Mode & (1 << (m*3)))?'x':'-';
+						modestring[8 - m] = (actual_file->Mode & (1 << m)) ? attribute[m % 3] : '-';
 					}
+					modestring[9] = 0;
+
 					g_Font[SNeutrinoSettings::FONT_TYPE_FILEBROWSER_ITEM]->RenderString(x + 35 + colwidth1 , ypos+ fheight, colwidth2 - 10, modestring, color, 0, true); // UTF-8
 				}
         
