@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.4 2004/05/03 08:30:28 diemade Exp $
+ * $Id: stream2file.cpp,v 1.5 2004/05/03 15:24:38 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -335,6 +335,7 @@ void * DMXThread(void * v_arg)
 
 
 bool start_recording(const char * const filename,
+		     const char * const info,
 		     const unsigned long long splitsize,
 		     const unsigned int numpids,
 		     const unsigned short * const pids)
@@ -350,19 +351,16 @@ bool start_recording(const char * const filename,
 	strcpy(myfilename, filename);
 
 	// create and delete temp-file to wakeup the disk from standby
-	sprintf(buf, "%s.tmp", filename);
+	sprintf(buf, "%s.info", filename);
 	fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
-	write(fd, &(buf[0]), FILENAMEBUFFERSIZE);
+	write(fd, info, strlen(info));
 	fdatasync(fd);
 	close(fd);
 	unlink(buf);
 
 	if (splitsize < TS_SIZE)
 	{
-		if (splitsize == 0)
-			limit = 1099511627776ULL; // 1024GB, virtually no splitting
-		else
-			limit = 2147483648ULL; // 2GB
+		limit = 1099511627776ULL; // 1024GB, virtually no splitting
 	}
 	else
 		limit = splitsize;

@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.h,v 1.1 2004/05/02 16:08:18 thegoodguy Exp $
+ * $Id: stream2file.h,v 1.2 2004/05/03 15:24:38 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -23,6 +23,7 @@
 #define __stream2file_h__
 
 bool start_recording(const char * const filename,
+		     const char * const info,
 		     const unsigned long long splitsize,
 		     const unsigned int numpids,
 		     const unsigned short * const pids);

@@ -140,6 +140,7 @@ class CVCRControl
 			protected:
 				void RestoreNeutrino(void);
 				void CutBackNeutrino(const t_channel_id channel_id, const int mode);
+				std::string getCommandString(const CVCRCommand command, const t_channel_id channel_id, const event_id_t epgid, const std::string & apids) const;
 
 			public:
 				bool	StopPlayBack;
@@ -158,29 +159,29 @@ class CVCRControl
 					{
 						return true;
 					};
-		};
+			};
 
 		class CFileDevice : public CFileAndServerDevice
 			{
 			public:
 				std::string  Directory;
 				unsigned int SplitSize;
-
+				
 				virtual CVCRDevices getDeviceType(void) const
 					{
 						return DEVICE_FILE;
 					};
-
+				
 				virtual bool Stop(); 
 				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, const event_id_t epgid = 0, const std::string & apids = "");	
-
+				
 				CFileDevice()
 					{
 					};
 				virtual ~CFileDevice()
 					{
 					};
-		};
+			};
 
 		class CServerDevice : public CFileAndServerDevice // externer Streamingserver per tcp
 		{
