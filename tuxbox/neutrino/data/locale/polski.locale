@@ -126,7 +126,7 @@ ipsetup.hint_2 OK zapisuje, Home wychodzi
 
 colormenu.head Ustawienia kolorów
 colormenu.statusbar Listwa statusowa
-colormenu.themeselect Wybor tematu
+colormenu.themeselect Wybór tematu
 colormenu.font Czcionka
 colormenu.menucolors Kolory menu
 colormenu.background Kolor tla
@@ -163,7 +163,7 @@ tuxnews.size Rozmiar
 tuxnews_size.small Maly
 tuxnews_size.medium Sredni
 tuxnews_size.large Duzy
-tuxnews.speed Predkosc¦
+tuxnews.speed Predkosc
 tuxnews_speed.slow Wolno
 tuxnews_speed.medium Srednio
 tuxnews_speed.fast Szybko
@@ -376,15 +376,15 @@ flashupdate.proxyusername_hint2 pusty - bez proxy
 flashupdate.proxypassword Haslo
 flashupdate.proxypassword_hint1 Wprowadz haslo proxyserwera
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Znaleziono nasepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
-flashupdate.msgbox_manual Znaleziono nasepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
+flashupdate.msgbox Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
+flashupdate.msgbox_manual Znaleziono nastepujacy nowy image:\nData: %s, %s\nBaseImage: %s\nTyp Image: %s\n\nCzy chcesz pobrac i zainstalowac image ?
 flashupdate.expertfunctions Zaawansowane (ekspert)
 flashupdate.readflash Czytaj caly image
 flashupdate.writeflash Zapisz caly image
 flashupdate.readflashmtd Czytaj jedna partycje
 flashupdate.writeflashmtd Zapisz jedna partycje
 flashupdate.savesuccess Image zapisany poprawnie \njako %s.
-flashupdate.mtdselector Wybor partycji
+flashupdate.mtdselector Wybór partycji
 flashupdate.titlereadflash Czytam Flash
 flashupdate.actionreadflash Czytam
 flashupdate.fileselector Wybór plikow
