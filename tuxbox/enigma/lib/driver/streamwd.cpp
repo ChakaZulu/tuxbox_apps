@@ -1,6 +1,5 @@
 #include <lib/driver/streamwd.h>
 #include <config.h>
-#include <lib/driver/eavswitch.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -16,8 +15,10 @@
 #include <dbox/event.h>
 
 #include <lib/base/eerror.h>
+#include <lib/driver/eavswitch.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
+#include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
@@ -165,7 +166,16 @@ void eStreamWatchdog::reloadSettings()
 	unsigned int auto_vcr_switching=1;
 	eConfig::getInstance()->getKey("/elitedvb/video/vcr_switching", auto_vcr_switching );
 	if ( auto_vcr_switching )
-		/*emit*/VCRActivityChanged( getVCRActivity() );
+	{
+		int VcrSlbVlt = getVCRActivity();
+		/*emit*/VCRActivityChanged( VcrSlbVlt );
+// Loop through VCR Slowblanking values to TV Slowblanking
+		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+		{
+			if ( VcrSlbVlt && eAVSwitch::getInstance()->getInput() )
+				eAVSwitch::getInstance()->setTVPin8(VcrSlbVlt==2?12:6);
+		}
+	}
 }
 
 int eStreamWatchdog::isAnamorph()
