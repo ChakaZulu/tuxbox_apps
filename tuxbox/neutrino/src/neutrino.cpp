@@ -2772,7 +2772,8 @@ void CNeutrinoApp::SelectAPID()
 		{
 			char apid[5];
 			sprintf(apid, "%d", count);
-			APIDSelector.addItem(new CMenuForwarderNonLocalized(g_RemoteControl->current_PIDs.APIDs[count].desc, true, NULL, APIDChanger, apid, CRCInput::convertDigitToKey(count + 1)), (count == g_RemoteControl->current_PIDs.PIDs.selected_apid));
+			std::string tmp_apid_desc = g_RemoteControl->current_PIDs.APIDs[count].desc;
+			APIDSelector.addItem(new CMenuForwarderNonLocalized((Latin1_to_UTF8(tmp_apid_desc)).c_str(), true, NULL, APIDChanger, apid, CRCInput::convertDigitToKey(count + 1)), (count == g_RemoteControl->current_PIDs.PIDs.selected_apid));
 		}
 		APIDSelector.exec(NULL, "");
 	}
