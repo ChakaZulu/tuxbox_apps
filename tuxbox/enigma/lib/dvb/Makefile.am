@@ -14,7 +14,7 @@ noinst_LTLIBRARIES = libdvb.la
 
 libdvb_la_SOURCES = \
 	decoder.cpp dvb.cpp edvb.cpp epgcache.cpp \
-	esection.cpp frontend.cpp si.cpp
+	esection.cpp frontend.cpp si.cpp record.cpp
 
 libdvb_la_LDFLAGS = -rpath $(_LIBDIR)/enigma
 
