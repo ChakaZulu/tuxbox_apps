@@ -140,10 +140,8 @@ streamingmenu.streaming_server_cddrive Naped DVD
 streamingmenu.streaming_server_startdir Volumin (VLC)
 streamingmenu.streaming_videorate Obraz-przeplywnosc
 streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
-streamingmenu.streaming_ac3_enabled Obsluga AC3
 streamingmenu.off Wyl
 streamingmenu.on Wl
-streamingmenu.streaming_force_transcode Wymuszone transkodowanie
 streamingmenu.streaming_resolution Rozdzielczosc
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
@@ -768,5 +766,4 @@ pictureviewer.slideshow przewijaj
 pictureviewer.slide_time czas przewijania
 pictureviewer.scaling skalowanie
 pictureviewer.defdir folder startowy
-
 
