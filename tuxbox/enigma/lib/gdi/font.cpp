@@ -337,11 +337,17 @@ void eTextPara::setFont(Font *fnt)
 int eTextPara::renderString(const eString &qstring, int rflags)
 {
 	eLocker lock(ftlock);
-	
+
 	if (refcnt)
 		eFatal("mod. after lock");
 	if (!current_font)
 		return -1;
+
+	if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
+	{
+		printf("FTC_Manager_Lookup_Size failed!\n");
+		return -1;
+	}
 
 	const char *string=qstring.c_str();
 	
@@ -386,6 +392,7 @@ int eTextPara::renderString(const eString &qstring, int rflags)
 		if (isprintable)
 		{
 			FT_UInt index;
+			
 			index=(rflags&RS_DIRECT)?*string:FT_Get_Char_Index(current_face, *string);
 			if (!index)
 				; // qDebug("unicode %d ('%c') not present", uc, uc);
