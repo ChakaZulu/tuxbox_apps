@@ -158,13 +158,26 @@ bool CFSMounter::isMounted(const char * const local_dir)
 	std::ifstream in;
 	if (local_dir == NULL) 
 		return false;
+
+	// according to the man page realpath() sucks, but there's nothing better :(
+	int path_max = 0;
+	
+#ifdef PATH_MAX
+	path_max = PATH_MAX;
+#else
+	path_max = 4096;
+#endif
+	char mount_point[PATH_MAX];
+	if (realpath(local_dir, mount_point) == NULL) {
+		printf("[CFSMounter] could not resolve dir: %s: %s\n",local_dir, strerror(errno));
+		return false;
+	}
 	in.open("/proc/mounts", std::ifstream::in);
 	while(in.good())
 	{
 		MountInfo mi;
 		in >> mi.device >> mi.mountPoint >> mi.type;
-		strcmp(mi.mountPoint.c_str(),local_dir);
-		if (strcmp(mi.mountPoint.c_str(),local_dir) == 0)
+		if (strcmp(mi.mountPoint.c_str(),mount_point) == 0)
 		{   
 			return true;
 		}
