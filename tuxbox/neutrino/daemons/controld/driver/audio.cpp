@@ -57,11 +57,15 @@ void audioControl::setVolume(char volume)
 {
 	int fd;
 
-	double i = 63;
+	int i;
 
-	if(volume!=0)
+	if (volume != 0)
 	{
-		i = 64-32*log(volume/13.5);
+		i = lrint(64 - 32 * log(volume/13.5)) & 0xFFFFFFFF;
+	}
+	else
+	{
+		i = 63;
 	}
 
 	//printf("sndctl: %d\n", i);
