@@ -548,6 +548,7 @@ recordingmenu.defdir recording directory
 recordingmenu.file direct (file)
 recordingmenu.filesettingsseparator direct recording
 recordingmenu.head Recording Settings
+recordingmenu.help Recording devices:\nserver: using streaming software on a PC\n(analog) vcr: using the vcr outlet\ndirect (file): directly into an NFS mounted directory\nor onto an internal hard drive\n\nMax. file size:\nNFS V2: 2 GB (2048 MB)\nNFS V3: almost unlimited (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
 recordingmenu.no_scart do not switch to scart mode
 recordingmenu.off off
 recordingmenu.recording_type recording device
@@ -608,6 +609,7 @@ servicemenu.reload_hint Reloading Channel-lists,\nplease wait...
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
 servicemenu.update Software Update
+settings.help Help
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 settings.noconffile No neutrino-settings found.\nUsing defaults.
 shutdowntimer.announce Box will shutdown in 1 min.\nCancel Sutdown ?

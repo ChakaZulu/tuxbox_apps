@@ -586,6 +586,7 @@ recordingmenu.defdir Aufnahmeverzeichnis
 recordingmenu.file Direkt (Datei)
 recordingmenu.filesettingsseparator Direktaufnahme
 recordingmenu.head Aufnahme Einstellungen
+recordingmenu.help Aufnahmegeräte:\nServer: auf PC mit Hilfe eines Streaming-Programmes\n(analoger) Videorekorder: über VCR-Ausgang\nDirekt (Datei): auf ein per NFS gemountetes Verzeichnis\noder interne Festplatte\n\nMax. Dateigröße:\nNFS V2: 2 GB (2048 MB)\nNFS V3: fast unendlich (0 MB)\nFAT: 2 GB (2048 MB)\nFAT32: 4 GB (4096 MB)
 recordingmenu.no_scart Unterdrücke Scart-Umschaltung
 recordingmenu.off aus
 recordingmenu.recording_type Aufnahme Gerät
@@ -646,6 +647,7 @@ servicemenu.reload_hint Kanallisten werden neu geladen,\nbitte warten...
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 servicemenu.update Software-Aktualisierung
+settings.help Hilfe
 settings.missingoptionsconffile Die Neutrino-Einstellungen wurden erweitert.\nDie neuen Werte werden auf Standard gesetzt.
 settings.noconffile Die Neutrino-Einstellungen wurden nicht\ngefunden. Es werden Standardwerte benutzt.
 shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen?

@@ -2031,6 +2031,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	recordingSettings.addItem(GenericMenuSeparator);
 	recordingSettings.addItem(GenericMenuBack);
+	recordingSettings.addItem(new CMenuForwarder(LOCALE_SETTINGS_HELP, true, NULL, this, "help_recording"));
 	recordingSettings.addItem(new CMenuForwarder(LOCALE_RECORDINGMENU_SETUPNOW, true, NULL, this, "recording"));
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj1);
@@ -3991,25 +3992,9 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	//	printf("ac: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
 
-	if(actionKey=="theme_neutrino")
+	if(actionKey == "help_recording")
 	{
-		setupColors_neutrino();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if(actionKey=="theme_classic")
-	{
-		setupColors_classic();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if(actionKey=="theme_dblue")
-	{
-		setupColors_dblue();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-	}
-	else if(actionKey=="theme_dvb2k")
-	{
-		setupColors_dvb2k();
-		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
+		ShowMsgUTF(LOCALE_SETTINGS_HELP, g_Locale->getText(LOCALE_RECORDINGMENU_HELP), CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 	}
 	else if(actionKey=="shutdown")
 	{
@@ -4046,6 +4031,26 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	{
 		dprintf(DEBUG_INFO, "showing current network settings...\n");
 		showCurrentNetworkSettings();
+	}
+	else if (actionKey=="theme_neutrino")
+	{
+		setupColors_neutrino();
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
+	}
+	else if (actionKey=="theme_classic")
+	{
+		setupColors_classic();
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
+	}
+	else if (actionKey=="theme_dblue")
+	{
+		setupColors_dblue();
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
+	}
+	else if (actionKey=="theme_dvb2k")
+	{
+		setupColors_dvb2k();
+		colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if(actionKey=="savesettings")
 	{

@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.13 2004/07/17 08:37:01 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.14 2004/07/24 09:59:09 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -612,6 +612,7 @@ const char * locale_real_names[] =
 	"recordingmenu.file",
 	"recordingmenu.filesettingsseparator",
 	"recordingmenu.head",
+	"recordingmenu.help",
 	"recordingmenu.no_scart",
 	"recordingmenu.off",
 	"recordingmenu.recording_type",
@@ -672,6 +673,7 @@ const char * locale_real_names[] =
 	"servicemenu.scants",
 	"servicemenu.ucodecheck",
 	"servicemenu.update",
+	"settings.help",
 	"settings.missingoptionsconffile",
 	"settings.noconffile",
 	"shutdowntimer.announce",
