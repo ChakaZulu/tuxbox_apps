@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.64 2002/01/28 16:40:30 field Exp $
+  $Id: zapit.cpp,v 1.65 2002/01/29 17:22:33 field Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,8 +92,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
-  Revision 1.64  2002/01/28 16:40:30  field
-  Kleinigkeiten in Bezug auf keine ecm_pid found
+  Revision 1.65  2002/01/29 17:22:33  field
+  Speedup (debug-out), Cant decode verbessert
 
   Revision 1.63  2002/01/16 22:40:17  Simplex
   more adaptions to CBouquetManager
@@ -468,7 +468,6 @@ int set_vtxt(uint vpid)
 }
 
 
-// war descriptor
 int parsePMTInfo(char *buffer, int len, int ca_system_id)
 {
     int count=0;
@@ -491,8 +490,8 @@ int parsePMTInfo(char *buffer, int len, int ca_system_id)
             {
                 ca_pid = invalid_ecmpid_found;
             }
-	  count+=2;
-	  count+=(len2-4);
+	  		count+=2;
+			count+=(len2-4);
         }
       else
 	count+=len2;
@@ -507,13 +506,12 @@ pids parse_pmt(int pid, int ca_system_id)
   char buffer[1000];
   int fd, r=1000;
   int pt;
-  int ap_count=0;
-  int vp_count=0;
-  int ecm_pid=0;
+  int ap_count = 0;
+  int vp_count = 0;
+  int ecm_pid = no_ecmpid_found;
   struct dmxSctFilterParams flt;
   pids ret_pids;
   struct pollfd dmx_fd;
-
 
 
   //printf("Starting parsepmt()\n");
@@ -597,7 +595,6 @@ pids parse_pmt(int pid, int ca_system_id)
 */
         PMTInfoLen = ( (buffer[10]&0xF)<<8 )| buffer[11];
         dp= 12;
-
         if ( PMTInfoLen> 0 )
         {
             ecm_pid= parsePMTInfo(&buffer[12], PMTInfoLen, ca_system_id);
@@ -623,6 +620,9 @@ pids parse_pmt(int pid, int ca_system_id)
 
             if (((stype == 1) || (stype == 2)) && (epid != 0))
             {
+            	if (ecm_pid == no_ecmpid_found)
+					ecm_pid= parsePMTInfo(&buffer[i_pt], esinfo, ca_system_id);
+
                 ret_pids.vpid = epid;
                 vp_count++;
                 dp+= esinfo;
@@ -733,7 +733,6 @@ int find_emmpid(int ca_system_id)
   count=8;
 
   while(count<r-1) {
-    //printf("CAID %04X EMM: %04X\n",((buffer[count+2]<<8)|buffer[count+3]),((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
     if ((((buffer[count+2]<<8)|buffer[count+3]) == ca_system_id) && (buffer[count+2] == ((0x18|0x27)&0xD7)))
       return (((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
     count+=buffer[count+1]+2;
@@ -2486,14 +2485,14 @@ int main(int argc, char **argv) {
         }
         else
         {
-            printf("Usage: zapit [-d] [-o offset in Hz]\n");
+            printf("Usage: zapit [-d] [-o offset in Hz] [-v]\n");
             exit(0);
         }
         }
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.64 2002/01/28 16:40:30 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.65 2002/01/29 17:22:33 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2519,7 +2518,7 @@ int main(int argc, char **argv) {
 
   printf("[zapit] channels have been loaded succesfully\n");
 
-  printf("[zapit] we have got ");
+/*  printf("[zapit] we have got ");
   if (!allnumchannels_tv.empty())
     channelcount = allnumchannels_tv.rbegin()->first;
   printf("%d tv- and ", channelcount);
@@ -2528,7 +2527,7 @@ int main(int argc, char **argv) {
   else
     channelcount = 0;
   printf("%d radio-channels\n", channelcount);
-
+*/
   if (network_setup()!=0){
     printf("[zapit] error during network_setup\n");
     exit(0);

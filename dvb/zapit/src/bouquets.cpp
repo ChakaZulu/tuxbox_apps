@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.7 2002/01/16 22:42:30 Simplex Exp $
+  $Id: bouquets.cpp,v 1.8 2002/01/29 17:22:33 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.8  2002/01/29 17:22:33  field
+  Speedup (debug-out), Cant decode verbessert
+
   Revision 1.7  2002/01/16 22:42:30  Simplex
   improved build up of "special" bouquet
 
@@ -270,6 +273,7 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 	numchans_tv.clear();
 	numchans_radio.clear();
 
+	printf("[zapit] reading Bouquets ");
 	while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
 	{
 		CBouquet* newBouquet = addBouquet( search->GetAttributeValue("name"));
@@ -301,12 +305,13 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 			}
 			channel_node = channel_node->GetNext();
 		}
-		printf(
+		printf(".");
+/*		printf(
 			"[zapit] Bouquet %s with %d tv- and %d radio-channels.\n",
 			newBouquet->Name.c_str(),
 			newBouquet->tvChannels.size(),
 			newBouquet->radioChannels.size());
-
+*/
 		search = search->GetNext();
 	}
 
@@ -314,7 +319,7 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 	makeRemainingChannelsBouquet( nChNrTV, nChNrRadio, "Andere");  // TODO: use locales
 #endif
 
-	printf("[zapit] Found %d bouquets.\n", Bouquets.size());
+	printf("\n[zapit] Found %d bouquets.\n", Bouquets.size());
 
 }
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile = false)
