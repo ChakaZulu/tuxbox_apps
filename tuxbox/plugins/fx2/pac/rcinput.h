@@ -32,7 +32,7 @@
 #define RC_PAGE_UP		0x54
 
 extern	void			RcGetActCode( void );
-extern	void			RcInitialize( void );
+extern	int				RcInitialize( int extfd );
 extern	void			RcClose( void );
 
 #endif

@@ -17,21 +17,31 @@ extern	int				debug;
 
 #ifndef i386
 
-#define USE_BOX	0
-#define USE_BOX	1
-
 #include <dbox/fp.h>
 
-void	RcInitialize( void )
+static	int		fd_is_ext = 0;
+
+int	RcInitialize( int extfd )
 {
-	fd = open( "/dev/dbox/rc0", O_RDONLY );
-	if ( fd == -1 )
+	if ( extfd == -1 )
 	{
-		perror("failed - open /dev/dbox/rc0");
-		exit(0);
+		fd_is_ext = 0;
+		fd = open( "/dev/dbox/rc0", O_RDONLY );
+		if ( fd == -1 )
+		{
+			perror("failed - open /dev/dbox/rc0");
+			return(-1);
+		}
+		fcntl(fd, F_SETFL, O_NONBLOCK );
+		ioctl(fd, RC_IOCTL_BCODES, 1);
 	}
-	fcntl(fd, F_SETFL, O_NONBLOCK );
-	ioctl(fd, RC_IOCTL_BCODES, 1);
+	else
+	{
+		fd_is_ext = 1;
+		fd = extfd;
+		fcntl(fd, F_SETFL, O_NONBLOCK );
+	}
+	return 0;
 }
 
 static	unsigned short translate( unsigned short code )
@@ -103,11 +113,13 @@ static	unsigned short cw=0;
 
 	switch(code)
 	{
+#ifdef SUPPORT_SCREEN_DUMP
 	case RC_HELP:
 		if ( !cw )
 			write_xpm();
 		cw=1;
 		break;
+#endif
 	case RC_UP:
 	case RC_DOWN:
 	case RC_RIGHT:
@@ -126,19 +138,17 @@ static	unsigned short cw=0;
 
 void	RcClose( void )
 {
-	close(fd);
+	if ( !fd_is_ext )
+		close(fd);
 }
 
 #else		/* i386 */
 
 #include <termios.h>
 
-#define USE_KEYBOARD	0
-#define USE_KEYBOARD	1
-
 static	struct termios	tios;
 
-void	RcInitialize( void )
+int	RcInitialize( int extfd )
 {
 	struct termios	ntios;
 	fd = 0;
@@ -146,6 +156,8 @@ void	RcInitialize( void )
 	tcgetattr(fd,&tios);
 	memset(&ntios,0,sizeof(ntios));
 	tcsetattr(fd,TCSANOW,&ntios);
+
+	return 0;
 }
 
 static	unsigned short translate( unsigned char c )
@@ -197,9 +209,11 @@ void		RcGetActCode( void )
 			case 0x0d :
 				actcode=RC_OK;
 				break;
+#ifdef SUPPORT_SCREEN_DUMP
 			case 0x1c :
 				write_xpm();
 				break;
+#endif
 			}
 		}
 	}

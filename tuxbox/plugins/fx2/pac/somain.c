@@ -2,7 +2,6 @@
 ** initial coding by fx2
 */
 
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <string.h>
@@ -19,43 +18,26 @@ extern	int	gametime;
 extern	int	pices;
 extern	unsigned short	actcode;
 
-#define Debug	if(debug)printf
-
-
-static	void	sigproc( int snr )
+typedef struct _SPluginInfo
 {
-	doexit = 3;
-}
+	char			name[20];
+	char			desc[100];
+	int				type;
+	unsigned char	needfb;
+	unsigned char	needrc;
+	unsigned char	needlcd;
+} SPluginInfo;
 
-int main( int argc, char ** argv )
+int pacman_exec( int fdfb, int fdrc, int fdlcd )
 {
 	struct timeval	tv;
 	int				x;
-	int				i;
 
-	for( i=1; i < argc; i++ )
-	{
-		if ( !strcmp(argv[i],"-debug") )
-			debug=1;
-		else
-			printf("%s [-debug]\n",*argv);
-	}
-
-	signal( SIGINT, sigproc );
-	signal( SIGHUP, sigproc );
-	signal( SIGTERM, sigproc );
-
-	Debug("initialize framebuffer...\n");
-	if ( FBInitialize( 720, 576, 8, -1 ) < 0 )
+	if ( FBInitialize( 720, 576, 8, fdfb ) < 0 )
 		return -1;
 
-	Debug("initialize input-device...\n");
-	if ( RcInitialize(-1) < 0 )
+	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
-
-#ifdef i386
-	FBDrawRect( 0, 0, 720, 576, 1 );
-#endif
 
 	while( doexit != 3 )
 	{
@@ -82,7 +64,6 @@ int main( int argc, char ** argv )
 
 		if ( doexit != 3 )
 		{
-//			printf("\nscore : %d\n",gametime);
 			actcode=0xee;
 			if ( gametime )
 				DrawScore();
@@ -95,14 +76,24 @@ int main( int argc, char ** argv )
 				tv.tv_usec = 100000;
 				x = select( 0, 0, 0, 0, &tv );		/* 100ms pause */
 				RcGetActCode( );
-if ( actcode != 0xee )
-Debug("warte aus OK - code is aber : %04x\n",actcode);
 			}
 		}
 	}
 
 	RcClose();
 	FBClose();
+
+	return 0;
+}
+
+int	pacman_getInfo( SPluginInfo *info )
+{
+	strcpy(info->name,"Pacman");
+	strcpy(info->desc,"The good old pacman in new dboxII generation");
+	info->type=1;
+	info->needfb=1;
+	info->needrc=1;
+	info->needlcd=1;
 
 	return 0;
 }

@@ -46,20 +46,27 @@ static	void	SetColor( int idx, uchar r, uchar g, uchar b )
 	trans[idx] = 0;
 }
 
-void	FBInitialize( int xRes, int yRes, int nbpp )
+int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
 {
 	struct fb_fix_screeninfo	fix;
 
-	fd = open( fbdevname, O_RDWR );
-	if ( fd == -1 )
+	if ( extfd != -1 )
 	{
-		perror("failed - open " fbdevname);
-		exit(-1);
+		fd = extfd;
+	}
+	else
+	{
+		fd = open( fbdevname, O_RDWR );
+		if ( fd == -1 )
+		{
+			perror("failed - open " fbdevname);
+			return(-1);
+		}
 	}
 	if (ioctl(fd, FBIOGET_VSCREENINFO, &screeninfo)<0)
 	{
 		perror("failed - FBIOGET_VSCREENINFO");
-		exit(-1);
+		return(-1);
 	}
 	memcpy(&oldscreen,&screeninfo,sizeof(screeninfo));
 
@@ -92,43 +99,43 @@ void	FBInitialize( int xRes, int yRes, int nbpp )
 
 	if (ioctl(fd, FBIOPUT_VSCREENINFO, &screeninfo)<0)
 		perror("FBSetMode");
-	if (ioctl(fd, FBIOPUTCMAP, &cmap )<0)
-		perror("FBSetCMap");
 	if (ioctl(fd, FBIOGET_VSCREENINFO, &screeninfo)<0)
 		perror("failed - FBIOGET_VSCREENINFO");
 
 	bpp = screeninfo.bits_per_pixel;
 
 	if ( bpp != 8 )
-		exit(-1);
+		return(-1);
+
+	if (ioctl(fd, FBIOPUTCMAP, &cmap )<0)
+		perror("FBSetCMap");
 
 	if (ioctl(fd, FBIOGET_FSCREENINFO, &fix)<0)
 	{
 		perror("failed - FBIOGET_FSCREENINFO");
-		exit(-1);
+		return(-1);
 	}
 
 	available=fix.smem_len;
 	stride = fix.line_length;
-	printf("%dk video mem\n",available/1024);
 	lfb=(unsigned char*)mmap(0,available,PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
 
 	if ( !lfb )
 	{
 		perror("failed - mmap");
-		exit(-1);
+		return(-1);
 	}
-
-	printf("memory mapped - :-)\n");
 
 	/* clear screen */
 	memset(lfb,BLACK,stride * screeninfo.yres);
+
+	return 0;
 }
 
 void	FBClose( void )
 {
 	/* clear screen */
-	memset(lfb,BLACK,stride * screeninfo.yres);
+	memset(lfb,BNR0,stride * screeninfo.yres);
 
 	if (available)
 	{
@@ -329,6 +336,7 @@ void	FBOverlayImage( int x, int y, int dx, int dy,
 	}
 }
 
+#ifdef SUPPORT_SCREEN_DUMP
 void	write_xpm( void )
 {
 	FILE			*fp;
@@ -361,3 +369,4 @@ void	write_xpm( void )
 
 	fclose(fp);
 }
+#endif

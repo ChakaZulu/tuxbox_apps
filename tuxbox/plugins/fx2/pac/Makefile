@@ -741,6 +741,9 @@ maze.o: pics.h text.h
 pacman.so: somain.o $(OBJS)
 	$(CC) -o pacman.so -shared -Wl,-soname,pacman.so somain.o $(OBJS)
 
+clean::
+	rm -f pacman.so
+
 # ----------------------------------------------------------------------
 # common rules for all Makefiles - do not edit
 

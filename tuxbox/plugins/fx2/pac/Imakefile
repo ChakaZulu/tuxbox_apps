@@ -1,10 +1,13 @@
-all:: pac
+all:: pacman.so pac
 
 CC=powerpc-linux-gcc
 CDEBUGFLAGS=-g -O2 -Wall -pedantic
 INCLUDES=-I.
-OBJS=main.o rcinput.o draw.o maze.o
+OBJS=rcinput.o draw.o maze.o
 
-SingleProgramTarget(pac,$(OBJS),,)
+SingleProgramTarget(pac,main.o $(OBJS),,)
 
 maze.o: pics.h text.h
+
+pacman.so: somain.o $(OBJS)
+	$(CC) -o pacman.so -shared -Wl,-soname,pacman.so somain.o $(OBJS)

@@ -1,7 +1,7 @@
 #ifndef DRAW_H
 #define DRAW_H
 
-extern	void	FBInitialize( int xRes, int yRes, int bpp );
+extern	int		FBInitialize( int xRes, int yRes, int bpp, int extfd );
 extern	void	FBClose( void );
 extern	void	FBPaintPixel( int x, int y, unsigned char col );
 extern	void	FBDrawLine( int xa, int ya, int xb, int yb, unsigned char col );
