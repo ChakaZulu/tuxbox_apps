@@ -206,7 +206,6 @@ int Decoder::Set()
 	if (changed&0xF7)
 		SetECM(parms.vpid, parms.apid, parms.ecmpid, parms.emmpid, parms.pmtpid, parms.casystemid, parms.descriptor_length, parms.descriptors);
 
-#ifndef DBOX
 	if (changed & 8)
 	{
 		if (fd.demux_pcr!=-1)
@@ -217,13 +216,21 @@ int Decoder::Set()
 		else
 		{
 			pes_filter.pid=parms.pcrpid;
+#ifdef DBOX
+			pes_filter.input=DMX_IN_FRONTEND;
+			pes_filter.output=DMX_OUT_DECODER;
+			pes_filter.pesType=DMX_PES_PCR;
+			pes_filter.flags=0;
+			if (ioctl(fd.demux_pcr, DMX_SET_PES_FILTER, &pes_filter)<0)
+				perror("DMX_SET_PES_FILTER - PCR");
+#else
 			pes_filter.output=OUT_DECODER;
 			pes_filter.pesType=DMX_PES_PCR;
 			if (ioctl(fd.demux_pcr, DEMUX_FILTER_PES_SET, &pes_filter)<0)
 				perror("DEMUX_FILTER_PES_SET - PCR");
+#endif
 		}
 	}
-#endif
 
 	if (changed&9)													// open decoder
 		if ((parms.vpid!=-1) || (parms.apid!=-1)) 
@@ -236,18 +243,22 @@ int Decoder::Set()
 	if (changed&9)													// start decoding
 		if ((!parms.recordmode) && (fd.video!=-1))
 		{
-			qDebug("VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 #ifdef DBOX
-			if (ioctl(fd.video, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX)<0)
-				perror("VIDEO_SELECT_SOURCE");
+			videoStatus status;
+			qDebug("VIDEO_GET_STATUS, VIDEO_SELECT_SOURCE, VIDEO_PLAY");
+			if (ioctl(fd.video, VIDEO_GET_STATUS, &status)<0)
+				perror("VIDEO_GET_STATUS");
+			if (status.streamSource != (videoStreamSource_t)VIDEO_SOURCE_DEMUX)
+				if (ioctl(fd.video, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX)<0)
+					perror("VIDEO_SELECT_SOURCE");
 			if (ioctl(fd.video, VIDEO_PLAY, 0)<0)
 				perror("VIDEO_PLAY");
 #else
+			qDebug("VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 			if (ioctl(fd.video, MPEG_VID_SELECT_SOURCE, 0)<0)
 				perror("MPEG_VID_SELECT_SOURCE");
 			if (ioctl(fd.video, MPEG_VID_PLAY, 0)<0)
 				perror("MPEG_VID_PLAY");
-
 #endif
 		}
 
@@ -342,15 +353,28 @@ int Decoder::Set()
 	}
 #endif
 
+  if (changed&8)
+  	if ((!parms.recordmode) && (parms.pcrpid!=-1))
+  	{
+			qDebug("start pcr");
+#ifdef DBOX
+			if (ioctl(fd.demux_pcr, DMX_START,0)<0)	
+				perror("DMX_START");
+#else
+			if (ioctl(fd.demux_pcr, DEMUX_START,0)<0)
+				perror("DEMUX_START");
+#endif
+		}
+
   if (changed&1)
   	if ((!parms.recordmode) && (parms.vpid!=-1))
   	{
 			qDebug("start video");
 #ifdef DBOX
-			if (ioctl(fd.demux_video, DMX_START,0)<0)	
+			if (ioctl(fd.demux_video, DMX_START,0)<0)
 				perror("DMX_START");
 #else
-			if (ioctl(fd.demux_video, DEMUX_START,0)<0)	
+			if (ioctl(fd.demux_video, DEMUX_START,0)<0)
 				perror("DEMUX_START");
 #endif
 		}
