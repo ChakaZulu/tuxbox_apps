@@ -96,11 +96,13 @@ void eAVSwitch::changeVolume(int abs, int vol)
 	{
 		case 0:
 			volume+=vol;
-			setMute(0);
+			if (mute)
+				setMute(0);
 		break;
 		case 1:
 			volume=vol;
-			setMute(0);
+			if (mute)
+				setMute(0);
 		break;
 	}
 
@@ -110,13 +112,15 @@ void eAVSwitch::changeVolume(int abs, int vol)
 	if (volume>63)
 		volume=63;
 
-	setVolume( (63-volume) * 65536/64 );
+	if (vol)
+		setVolume( (63-volume) * 65536/64 );
 
 	/*emit*/ volumeChanged(volume);
 }
 
 void eAVSwitch::toggleMute()
 {
+eDebug("toggle Mute--------------------------------");
 	mute = !mute;
 	setMute(mute);
 	if (mute)
@@ -127,6 +131,7 @@ void eAVSwitch::toggleMute()
 
 void eAVSwitch::setMute(bool m)
 {
+	eDebug("setMute--------------------------------");
 	int a;
 
 	if(m)
