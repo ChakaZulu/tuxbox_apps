@@ -220,7 +220,7 @@ int CMP3PlayerGui::show()
 
 	int res = -1;
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MP3);
+	CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
 
 	bool loop=true;
 	bool update=true;
@@ -493,7 +493,7 @@ int CMP3PlayerGui::show()
 						}
 					}
 				}
-				CLCD::getInstance()->setMode(CLCD::MODE_MP3);
+				CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
 				paintLCD();
 				update=true;
 			}
@@ -597,7 +597,7 @@ int CMP3PlayerGui::show()
 		{
 			CNFSSmallMenu nfsMenu;
 			nfsMenu.exec(this, "");
-			CLCD::getInstance()->setMode(CLCD::MODE_MP3);
+			CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
 			paintLCD();
 			update=true;
 			//pushback key if...
@@ -759,7 +759,7 @@ void CMP3PlayerGui::paintItem(int pos)
 		{
 			paintItemID3DetailsLine(pos);
 			if (m_state == CMP3PlayerGui::STOP)
-				CLCD::getInstance()->showMP3(playlist[pos + liststart].Artist, playlist[pos + liststart].Title, playlist[pos + liststart].Album);
+				CLCD::getInstance()->showAudioTrack(playlist[pos + liststart].Artist, playlist[pos + liststart].Title, playlist[pos + liststart].Album);
 		}
 		
 	}
@@ -1053,7 +1053,7 @@ void CMP3PlayerGui::rev()
 	}
 	else if(m_state==CMP3PlayerGui::PLAY || m_state==CMP3PlayerGui::PAUSE || m_state==CMP3PlayerGui::FF)
 	{
-		m_state=CMP3PlayerGui::FF;
+		m_state=CMP3PlayerGui::REV;
 		CAudioPlayer::getInstance()->rev();
 	}
 	paintLCD();
@@ -1268,21 +1268,23 @@ void CMP3PlayerGui::paintLCD()
 	switch(m_state)
 	{
 	case CMP3PlayerGui::STOP:
-		CLCD::getInstance()->showMP3Play(CLCD::MP3_STOP);
+		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_STOP);
 		break;
 	case CMP3PlayerGui::PLAY:
-		CLCD::getInstance()->showMP3Play(CLCD::MP3_PLAY);
-		CLCD::getInstance()->showMP3(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
+		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PLAY);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		break;
 	case CMP3PlayerGui::PAUSE:
-		CLCD::getInstance()->showMP3Play(CLCD::MP3_PAUSE);
-		CLCD::getInstance()->showMP3(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
+		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_PAUSE);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		break;
 	case CMP3PlayerGui::FF:
-		CLCD::getInstance()->showMP3Play(CLCD::MP3_FF);
-		CLCD::getInstance()->showMP3(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
+		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_FF);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		break;
 	case CMP3PlayerGui::REV:
+		CLCD::getInstance()->showAudioPlayMode(CLCD::AUDIO_MODE_REV);
+		CLCD::getInstance()->showAudioTrack(curr_audiofile.Artist, curr_audiofile.Title, curr_audiofile.Album);
 		break;
 	}
 }
