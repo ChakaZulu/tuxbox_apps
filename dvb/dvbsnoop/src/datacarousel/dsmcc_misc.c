@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.18 2004/08/06 22:21:38 rasc Exp $
+$Id: dsmcc_misc.c,v 1.19 2004/08/07 22:10:00 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.18 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.19  2004/08/07 22:10:00  rasc
+Bugfix: NIT cable frequency display (reported by Karsten Siebert )
+
 Revision 1.18  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 
@@ -121,7 +124,7 @@ int dsmcc_pto_descriptor_loop (u_char *name, u_char *b)
    int loop_length;
    int len,i;
 
-
+   out_NL (3);
    out_nl (3,"%s_descriptor_loop:",name);
    indent (+1);
 

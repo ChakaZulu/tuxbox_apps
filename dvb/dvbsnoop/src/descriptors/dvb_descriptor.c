@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.34 2004/08/01 21:33:08 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.35 2004/08/07 22:10:00 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.34 2004/08/01 21:33:08 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.35  2004/08/07 22:10:00  rasc
+Bugfix: NIT cable frequency display (reported by Karsten Siebert )
+
 Revision 1.34  2004/08/01 21:33:08  rasc
 minor TVA stuff (TS 102 323)
 
@@ -488,7 +491,7 @@ void descriptorDVB_CableDelivSys (u_char *b)
  d.FEC_inner			 = getBits (b, 0, 100, 4);
 
 
- out_nl (4,"Frequency: %lu (= %3lx.%05lx MHz)",d.frequency,
+ out_nl (4,"Frequency: %lu (= %3lx.%04lx MHz)",d.frequency,
 	 d.frequency >> 16, d.frequency & 0x0000FFFF );
 
  out_S2B_NL (4,"FEC_outer: ",d.FEC_outer,
@@ -2597,7 +2600,7 @@ void descriptorDVB_FrequencyList  (u_char *b)
 	  break;
 
 	case 0x02:
- 	  out_nl (4,"(= %3lx.%05lx MHz)",
+ 	  out_nl (4,"(= %3lx.%04lx MHz)",
 	    d2.centre_frequency >> 16, d2.centre_frequency & 0x0000FFFF );
 	  break;
 

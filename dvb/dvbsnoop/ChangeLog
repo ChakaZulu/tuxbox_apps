@@ -1,4 +1,5 @@
 
+ - Bugfix: cable descriptors frequency (tnx to Karsten Siebert)
  - New: TV-Anytime (TS 102 323) RNT descriptors
  - Bugfix: UNT/INT table mixup, misc. descriptor stuff  (tnx to Karsten Siebert)
  - Update: misc. tables
