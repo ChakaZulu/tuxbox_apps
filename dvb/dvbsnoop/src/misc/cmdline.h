@@ -3,7 +3,7 @@
  -- (c) 2001 rasc
 
 
-$Id: cmdline.h,v 1.3 2003/10/16 19:02:27 rasc Exp $
+$Id: cmdline.h,v 1.4 2003/11/01 17:05:46 rasc Exp $
 
 
 */
@@ -33,6 +33,7 @@ typedef struct _OPTIONS {
   int         crc;
   long        packet_count;
   int         time_mode;
+  int         hide_copyright;  // suppress message at prog start
 } OPTION;
 
 

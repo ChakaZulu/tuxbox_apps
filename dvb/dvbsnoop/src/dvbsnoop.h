@@ -1,13 +1,19 @@
 /*
-$Id: dvbsnoop.h,v 1.12 2003/10/24 22:17:13 rasc Exp $
+$Id: dvbsnoop.h,v 1.13 2003/11/01 17:05:46 rasc Exp $
+
 
  -- dvbsnoop
- -- a dvb sniffer tool
- -- mainly for me to learn the dvb streams
+ -- a dvb sniffer and mpeg2 stream analyzer tool
+ -- http://dvbsnoop.sourceforge.net/
 
    (c) rasc
 
+
+
 $Log: dvbsnoop.h,v $
+Revision 1.13  2003/11/01 17:05:46  rasc
+no message
+
 Revision 1.12  2003/10/24 22:17:13  rasc
 code reorg...
 
@@ -41,9 +47,6 @@ define NEWSTRUCT to work with current linuxtv cvs
 
 Revision 1.3  2002/08/27 19:00:45  obi
 use devfs device names
-
-Revision 1.2  2001/10/06 18:19:18  Toerli
-Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
 Revision 1.1  2001/09/30 13:05:20  rasc
 dvbsnoop v0.7  -- Commit to CVS

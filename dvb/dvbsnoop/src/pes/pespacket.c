@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.8 2003/10/29 22:39:18 rasc Exp $
+$Id: pespacket.c,v 1.9 2003/11/01 17:05:47 rasc Exp $
 
    -- PES Decode/Table section
 
@@ -7,6 +7,9 @@ $Id: pespacket.c,v 1.8 2003/10/29 22:39:18 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.9  2003/11/01 17:05:47  rasc
+no message
+
 Revision 1.8  2003/10/29 22:39:18  rasc
 pes packet complete now...
 
@@ -46,6 +49,8 @@ dvbsnoop v0.7  -- Commit to CVS
 
 int PES_decode2 (u_char *b, int len, int pid);
 void print_xTS_field (u_char *b, int bit_offset);
+void pack_header (u_char *b, int len);
+
 
 
 
@@ -359,7 +364,7 @@ int  PES_decode2 (u_char *b, int len, int pid)
    	out_SB_NL  (3,"pack_field_length: ", pack_field_length);
    	out_nl (3,"Pack_header: ");
 	indent (+1);
-	printhexdump_buf (4, b+1, pack_field_length);
+	pack_header (b+1, pack_field_length);
    	b += pack_field_length +1;
    	indent (-2);
 
@@ -464,6 +469,20 @@ void print_xTS_field (u_char *b, int bit_offset)
  out_SW_NL  (4,"Marker_bit_2: ",f.marker_bit_2);
  out_SB_NL  (4,"Bit 14-0: ",f.xTS_14_0);
  out_SW_NL  (4,"Marker_bit_3: ",f.marker_bit_3);
+
+}
+
+
+
+void pack_header (u_char *b, int len)
+
+{
+
+	/*  ... $$$ TODO   */
+	/* z.B. H.222 ISO 13818-1 Table 2-33 */
+	/* 	ISO 11172-1 pack header */
+
+   printhexdump_buf (4, b, len);
 
 }
 

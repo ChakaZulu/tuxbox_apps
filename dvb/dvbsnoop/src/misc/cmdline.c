@@ -1,10 +1,13 @@
 /*
-$Id: cmdline.c,v 1.5 2003/10/16 20:45:47 rasc Exp $
+$Id: cmdline.c,v 1.6 2003/11/01 17:05:46 rasc Exp $
 
  -- (c) 2001 rasc
 
 
 $Log: cmdline.c,v $
+Revision 1.6  2003/11/01 17:05:46  rasc
+no message
+
 Revision 1.5  2003/10/16 20:45:47  rasc
 no message
 
@@ -67,6 +70,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->mask = 0;
   opt->packet_mode = SECT;
   opt->time_mode = FULL_TIME;
+  opt->hide_copyright= 0;
 
 
 
@@ -90,6 +94,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-nph")) opt->printhex = 0;
      else if (!strcmp (argv[i],"-pd")) opt->printdecode = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-npd")) opt->printdecode = 0;
+     else if (!strcmp (argv[i],"-HCP")) opt->hide_copyright= 1;
      else if (!strcmp (argv[i],"-tf")) opt->time_mode = FULL_TIME;
      else if (!strcmp (argv[i],"-td")) opt->time_mode = DELTA_TIME;
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
@@ -123,16 +128,19 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   */
 
   if (argc==1 || opt->help || opt->pid == 0xFFFF) {
-    printf("dvbsnoop [opt] pid \n\n");
+    printf("dvbsnoop  - a dvb/mpeg2 stream analyzer tool\n");
     printf("Version: %s  (%s %s)\n",DVBSNOOP_VERSION,__DATE__,__TIME__);
-    printf("\nThis programm was done for learning and understanding\n");
-    printf("DVB, the streams and the coordination between the streams...\n");
-    printf("Tnx to all the guys of the linux-dbox2 project for their help\n");
-    printf("Please report errors!\n");
-    printf(" (c) 2001-2003  Rainer Scherg.\n");
-    printf("     Use on your own risk - no warrenty in any way given.\n");
-    printf("     Miss-use is prohibited...\n");
-    printf("     \n");
+    printf("         %s  \n",DVBSNOOP_URL);
+    printf("         %s  \n",DVBSNOOP_COPYRIGHT);
+    printf("\n");
+    printf("This programm was done for learning and understanding\n");
+    printf("DVB/Mpeg2 streams... Tnx to all the guys of the linux-dbox2\n");
+    printf("project for their help.  Please report errors!\n");
+    printf("\n");
+    printf("Use on your own risk - Miss-use is prohibited...\n");
+    printf("\n");
+    printf("Usage\n");
+    printf(" dvbsnoop [opts] pid \n\n");
     printf(" Options:  \n");
     printf("   -demux device:      demux device [%s]\n",DEMUX_DEVICE);
     printf("   -dvr device:        dvr device [%s]\n",DVR_DEVICE);
@@ -150,9 +158,10 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
-    printf("     \n");
+    printf("   -HCP:         hide copyright and program info header at program start\n");
+    printf("\n");
     
-    return(0);   /* fail */
+    return(0); 
   } 
 
 

@@ -1,12 +1,14 @@
 /*
-$Id: dvbsnoop.c,v 1.10 2003/10/24 23:01:40 rasc Exp $
+$Id: dvbsnoop.c,v 1.11 2003/11/01 17:05:46 rasc Exp $
 
 
 
  DVBSNOOP
 
- a dvb sniffer tool
- mainly for me to learn about dvb streams, mpeg, mhp, and dsm-cc
+ a dvb sniffer  and mpeg2 stream analyzer tool
+ mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
+
+ --> http://dvbsnoop.sourceforge.net/
 
  it's forbidden to use this program for hacking encryption
  information (like ECM/EMM streams to get extract keys, etc.).
@@ -16,18 +18,15 @@ $Id: dvbsnoop.c,v 1.10 2003/10/24 23:01:40 rasc Exp $
  (c) 2001-2003   Rainer.Scherg@gmx.de
 
 
- -- Sorry for the bad coding, it's really quick and dirty. ;-)
- -- But this programm was for learning and testing only.
- -- The code could be heavily optimized...
- -- For more information please see: ISO 13818-1 and ETSI 300 468
- -- READ THE LICENCE FILE!
+
+
 
 
 $Log: dvbsnoop.c,v $
-Revision 1.10  2003/10/24 23:01:40  rasc
-code reorg...
+Revision 1.11  2003/11/01 17:05:46  rasc
+no message
 
-Revision 1.9  2003/10/24 22:17:13  rasc
+Revision 1.10  2003/10/24 23:01:40  rasc
 code reorg...
 
 Revision 1.8  2003/10/16 19:02:28  rasc
@@ -39,8 +38,6 @@ Revision 1.7  2003/07/06 05:28:52  obi
 compatibility stuff.. now there is only one version for old and new drivers
 which selects the api at configure time
 
-Revision 1.6  2003/07/06 02:22:46  rasc
-no message
 
 Revision 1.5  2003/02/26 16:45:16  obi
 - make dvbsnoop work on little endian machines again
@@ -100,7 +97,10 @@ int main(int argc, char **argv)
 
   indent (0);
   if (! opt.binary_out) {
-     out_nl (1, "DvbSnoop   Vers. %s   -- (c) Rainer Scherg",DVBSNOOP_VERSION);
+     if (! opt.hide_copyright) {
+        out_nl (1, "dvbsnoop  Vers. %s   -- (c) Rainer Scherg",DVBSNOOP_VERSION);
+        out_nl (1,"           %s  \n",DVBSNOOP_URL);
+     }
      out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
      out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
      out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
