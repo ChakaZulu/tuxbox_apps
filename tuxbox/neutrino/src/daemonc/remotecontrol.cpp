@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.27 2001/10/25 12:26:09 field Exp $
+// $Id: remotecontrol.cpp,v 1.28 2001/11/03 15:43:17 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.28  2001/11/03 15:43:17  field
+// Perspektiven
+//
 // Revision 1.27  2001/10/25 12:26:09  field
 // NVOD-Zeiten im Infoviewer stimmen
 //
@@ -75,7 +78,7 @@ void CRemoteControl::send()
 }
 
 // quick'n dirty, damit der Rest was zum arbeiten hat ;)
-static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
+static void getNVODs(unsigned onidSid, CRemoteControl *RemoteControl )
 {
     char rip[]="127.0.0.1";
 
@@ -85,6 +88,7 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
     int         count= 0;
     do
     {
+        pthread_mutex_unlock( &RemoteControl->send_mutex );
         rep_cnt++;
         if (rep_cnt> 1 )
         {
@@ -157,14 +161,16 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
             }
             close(sock_fd);
         }
-    } while ( ( ( count== 0 ) || ( !got_times ) ) && ( rep_cnt< 20) );
+        pthread_mutex_trylock( &RemoteControl->send_mutex );
+
+    } while ( ( ( count== 0 ) || ( !got_times ) ) && ( rep_cnt< 10) && ( strlen( RemoteControl->audio_chans_int.name )!= 0 ) );
 
     if ( count> 0 )
     {
         //sortieren
         time_t  min_zeit;
         int     min_index;
-        nvods->count_nvods= 0;
+        RemoteControl->nvods_int.count_nvods= 0;
         for (int j=0;j<count;j++)
         {
             min_zeit= 0x7FFFFFFF;
@@ -180,10 +186,10 @@ static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
             }
             if ( min_index!= -1)
             {
-                memcpy(&nvods->nvods[nvods->count_nvods], &n_nvods[min_index], sizeof(nvod_info));
+                memcpy(&RemoteControl->nvods_int.nvods[RemoteControl->nvods_int.count_nvods], &n_nvods[min_index], sizeof(nvod_info));
                 n_nvods[min_index].dauer= 0;
                 //printf("%s - %x\n", ctime(&nvods->nvods[nvods->count_nvods].startzeit), (unsigned int)nvods->nvods[nvods->count_nvods].startzeit);
-                nvods->count_nvods++;
+                RemoteControl->nvods_int.count_nvods++;
             }
         }
     }
@@ -322,7 +328,9 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                                     unsigned int onid_sid;
 
                                                     sscanf( r_msg.param3, "%x", &onid_sid );
-                                                    getNVODs( onid_sid, &RemoteControl->nvods_int );
+                                                    getNVODs( onid_sid, RemoteControl );
+                                                    // send_mutex ist danach wieder locked
+
                                                     printf("NVOD-Basechannel - got %d nvods!\n", RemoteControl->nvods_int.count_nvods);
 
                                                     strcpy( RemoteControl->nvods_int.name, r_msg.param3 );
@@ -331,9 +339,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                                     {
                                                         // übertragen der ids an zapit initialisieren
 
-                                                        // !!! AUSKOMMENTIERT, weil das tut noch nicht... !!!
-
                                                         RemoteControl->remotemsg.cmd= 'i';
+                                                        RemoteControl->remotemsg.param= 1;
                                                         do_immediatly = true;
                                                     }
                                                 }
@@ -381,12 +388,15 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].tsid, 2);
                                         }
 
-                                        // immediately change to nvod #0...
-                                        RemoteControl->remotemsg.cmd= 'e';
-                                        RemoteControl->nvods_int.selected= RemoteControl->nvods_int.count_nvods- 1;
-                                        snprintf( (char*) &RemoteControl->remotemsg.param3, 10, "%x", RemoteControl->nvods_int.nvods[RemoteControl->nvods_int.selected].onid_sid);
+                                        if (RemoteControl->remotemsg.param== 1)
+                                        {
+                                            // called from NVOD - immediately change to nvod #max...
+                                            RemoteControl->remotemsg.cmd= 'e';
+                                            RemoteControl->nvods_int.selected= RemoteControl->nvods_int.count_nvods- 1;
+                                            snprintf( (char*) &RemoteControl->remotemsg.param3, 10, "%x", RemoteControl->nvods_int.nvods[RemoteControl->nvods_int.selected].onid_sid);
 
-                                        do_immediatly = true;
+                                            do_immediatly = true;
+                                        }
 
                                         // pthread_mutex_unlock( &RemoteControl->send_mutex );
                                         break;
@@ -443,6 +453,20 @@ void CRemoteControl::CopyNVODs()
     memcpy(&nvods, &nvods_int, sizeof(nvods));
     pthread_mutex_unlock( &send_mutex );
 }
+
+void CRemoteControl::CopySubChannelsToZapit()
+{
+    pthread_mutex_lock( &send_mutex );
+    memcpy(&nvods_int, &nvods, sizeof(nvods));
+
+    remotemsg.version=1;
+    remotemsg.cmd='i';
+    remotemsg.param= 0;
+    //printf("sending subservices\n");
+    pthread_mutex_unlock( &send_mutex );
+    send();
+}
+
 
 void CRemoteControl::queryAPIDs()
 {

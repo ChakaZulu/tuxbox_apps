@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.43 2001/11/03 03:13:10 field Exp $
+// $Id: infoviewer.cpp,v 1.44 2001/11/03 15:43:17 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.44  2001/11/03 15:43:17  field
+// Perspektiven
+//
 // Revision 1.43  2001/11/03 03:13:10  field
 // EPG Anzeige verbessert
 //
@@ -311,7 +314,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 }
 
 
-void CInfoViewer::showButtonNVOD()
+void CInfoViewer::showButtonNVOD(bool CalledFromShowData = false)
 {
     char to_compare[50];
     if ( g_settings.epg_byname == 0 )
@@ -321,13 +324,19 @@ void CInfoViewer::showButtonNVOD()
 
     if ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 )
     {
-        // gelbe Taste für NVODs
-        if ( g_RemoteControl->nvods.count_nvods> 1 )
+        // gelbe Taste für NVODs / Subservices
+        if  ( g_RemoteControl->nvods.count_nvods> 1 )
         {
             g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-            g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR);
+            if (SubServiceList.size()> 0)
+                // SubServices
+                g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.subservice").c_str(), COL_INFOBAR);
+            else
+                // NVOD
+                g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR);
 
-            showData();
+            if (!CalledFromShowData)
+                showData();
         };
     };
 }
@@ -376,32 +385,64 @@ void CInfoViewer::showButtonAudio()
 void CInfoViewer::showData()
 {
     int is_nvod= false;
+    int has_subservices= (SubServiceList.size()> 0);
 
-    g_RemoteControl->CopyNVODs();
-    char to_compare[50];
-    if ( g_settings.epg_byname == 0 )
-        snprintf( to_compare, 10, "%x", Current_onid_tsid );
-    else
-        strcpy( to_compare, CurrentChannel.c_str() );
-
-    if ( ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 ) && ( g_RemoteControl->nvods.count_nvods> 0 ) )
+    if (ShowInfo_Info)
     {
-        // NVOD- Zeiten aus dem aktuell selektierten holen!
-        is_nvod= true;
+        if (has_subservices)
+        {
+            g_RemoteControl->CopyNVODs();
+            char to_compare[50];
+            if ( g_settings.epg_byname == 0 )
+                snprintf( to_compare, 10, "%x", Current_onid_tsid );
+            else
+                strcpy( to_compare, CurrentChannel.c_str() );
 
-        int sel= g_RemoteControl->nvods.selected;
-        unsigned    dauer =g_RemoteControl->nvods.nvods[sel].dauer/ 60;
-        sprintf((char*) &runningDuration, "%d min", dauer);
+            if ( strcmp(g_RemoteControl->nvods.name, to_compare )!= 0 )
+            {
+                //printf("subservices %d\n", SubServiceList.size());
+                strcpy( g_RemoteControl->nvods.name, to_compare );
+                g_RemoteControl->nvods.count_nvods= SubServiceList.size();
+                for(unsigned int count=0;count<SubServiceList.size();count++)
+            	{
+                    g_RemoteControl->nvods.nvods[count].onid_sid= SubServiceList[count]->originalNetworkId<<16 | SubServiceList[count]->serviceId;
+                    g_RemoteControl->nvods.nvods[count].tsid= SubServiceList[count]->transportStreamId;
+                    //printf("%x %x\n", g_RemoteControl->nvods.nvods[count].onid_sid, g_RemoteControl->nvods.nvods[count].tsid);
+                }
+                g_RemoteControl->CopySubChannelsToZapit();
+                showButtonNVOD(true);
+            }
+        }
+        else
+        {
 
-        struct      tm *pStartZeit = localtime(&g_RemoteControl->nvods.nvods[sel].startzeit);
-        sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-        runningPercent=(unsigned)((float)(time(NULL)-g_RemoteControl->nvods.nvods[sel].startzeit)/(float)g_RemoteControl->nvods.nvods[sel].dauer*100.);
-        if (runningPercent>100)
-            runningPercent=0;
+            char to_compare[50];
+            if ( g_settings.epg_byname == 0 )
+                snprintf( to_compare, 10, "%x", Current_onid_tsid );
+            else
+                strcpy( to_compare, CurrentChannel.c_str() );
 
-         Flag|=4;
-        //printf("%s %s %d\n", runningDuration, runningStart, runningPercent);
+            if ( ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 ) && ( g_RemoteControl->nvods.count_nvods> 0 ) )
+            {
+                // NVOD- Zeiten aus dem aktuell selektierten holen!
+                is_nvod= true;
+
+                int sel= g_RemoteControl->nvods.selected;
+                unsigned    dauer =g_RemoteControl->nvods.nvods[sel].dauer/ 60;
+                sprintf((char*) &runningDuration, "%d min", dauer);
+
+                struct      tm *pStartZeit = localtime(&g_RemoteControl->nvods.nvods[sel].startzeit);
+                sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+                runningPercent=(unsigned)((float)(time(NULL)-g_RemoteControl->nvods.nvods[sel].startzeit)/(float)g_RemoteControl->nvods.nvods[sel].dauer*100.);
+                if (runningPercent>100)
+                    runningPercent=0;
+
+                 Flag|=4;
+                //printf("%s %s %d\n", runningDuration, runningStart, runningPercent);
+            }
+        }
     }
+
 	int height = g_Fonts->infobar_channame->getHeight()/3;
 	//int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
@@ -576,7 +617,15 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 //                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
                 gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
-                gotEPG = gotEPG && (InfoViewer->Flag&14);
+                gotEPG = gotEPG && (InfoViewer->Flag&12);
+                if (InfoViewer->Flag&2)
+                {
+                    if (repCount> 4)
+                        repCount= 4;
+                    else
+                    if (repCount== 1)
+                        gotEPG= true;
+                }
 
                 pthread_mutex_trylock( &InfoViewer->epg_mutex );
 
@@ -634,6 +683,7 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 		SAI servaddr;
 		char rip[]="127.0.0.1";
 		bool retval = false;
+        unsigned short SubServiceCount;
 
 		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		memset(&servaddr,0,sizeof(servaddr));
@@ -688,16 +738,12 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
      
         		char* pData = new char[nBufSize+1] ;
                 read(sock_fd, pData, nBufSize);
-
                 unsigned long long          tmp_id;
                 sectionsd::sectionsdTime*   epg_times;
                 char* dp = pData;
 
-                Flag = (unsigned char)* dp;
-                dp+= sizeof(unsigned char);
-
                 // current
-                tmp_id = (unsigned long long)* dp;
+                tmp_id = *((unsigned long long *)dp);
                 dp+= sizeof(tmp_id);
                 epg_times = (sectionsd::sectionsdTime*) dp;
                 dp+= sizeof(sectionsd::sectionsdTime);
@@ -712,7 +758,7 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 dp+=strlen(dp)+1;
 
                 // next
-                tmp_id = (unsigned long long)* dp;
+                tmp_id = *((unsigned long long *)dp);
                 dp+= sizeof(tmp_id);
                 epg_times = (sectionsd::sectionsdTime*) dp;
                 dp+= sizeof(sectionsd::sectionsdTime);
@@ -724,18 +770,20 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 strncpy(next, dp, sizeof(next));
                 dp+=strlen(dp)+1;
 
-                int SubServiceCount= (int)* dp;
-                dp+= sizeof(SubServiceCount);
+                Flag = (unsigned char)* dp;
+                dp+= sizeof(unsigned char);
+                SubServiceCount= *((unsigned short *)dp);
+                dp+= sizeof(unsigned short);
                 for (int count= 0; count< SubServiceCount; count++)
                 {
                     SubService* aSubService = new SubService();
                     aSubService->name = dp;
                     dp+= strlen(dp)+1;
-                    aSubService->transportStreamId= (unsigned short)* dp;
+                    aSubService->transportStreamId= *((unsigned short *)dp);
                     dp+= sizeof(unsigned short);
-                    aSubService->originalNetworkId= (unsigned short)* dp;
+                    aSubService->originalNetworkId= *((unsigned short *)dp);
                     dp+= sizeof(unsigned short);
-                    aSubService->serviceId= (unsigned short)* dp;
+                    aSubService->serviceId= *((unsigned short *)dp);
                     dp+= sizeof(unsigned short);
 
 	                SubServiceList.insert(SubServiceList.end(), aSubService);

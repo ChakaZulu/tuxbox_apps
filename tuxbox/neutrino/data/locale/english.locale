@@ -130,6 +130,7 @@ infoviewer.cantdecode Channel can't be decoded
 infoviewer.selecttime Timeselection
 infoviewer.nocurrent No info for current program available
 infoviewer.noepg EPG not available
+infoviewer.subservice Subservices
 
 epgviewer.notfound no epg found
 epgviewer.nodetailed No detailed informations available
@@ -147,7 +148,9 @@ streaminfo.audiotype Audiotype
 streaminfo.audiotype_unknown Audiotype: unknown
 
 apidselector.head Select language
+
 nvodselector.head Select starting-time
+nvodselector.subservice Select Subservice
 
 ucodecheck.head UCode check
 ucodecheck.avia500 Avia 500

@@ -71,8 +71,8 @@ struct st_nvod_info
 class CRemoteControl
 {
         st_rmsg		remotemsg;
-        st_audio_info	audio_chans_int;
-        st_nvod_info    nvods_int;
+
+
         unsigned int    ecm_pid;
 
 		void send();
@@ -80,11 +80,15 @@ class CRemoteControl
 
         pthread_t       thrSender;
         pthread_cond_t  send_cond;
-        pthread_mutex_t send_mutex;
+
 
         static void * RemoteControlThread (void *arg);
 
 	public:
+        pthread_mutex_t send_mutex;
+        st_nvod_info    nvods_int;
+        st_audio_info	audio_chans_int;
+
         st_audio_info   audio_chans;
         st_nvod_info    nvods;
 
@@ -94,6 +98,7 @@ class CRemoteControl
         void queryAPIDs();
         void setAPID(int APID);
         void setNVOD(int NVOD);
+        void CopySubChannelsToZapit();
 		void shutdown();
 		void setZapper (bool zapper);
 		bool getZapper(){return zapit_mode;}

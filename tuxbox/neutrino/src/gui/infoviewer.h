@@ -83,7 +83,6 @@ class CInfoViewer
 		char				nextDuration[10];
 		char				runningPercent;
         unsigned char       Flag;
-        vector<SubService*>	SubServiceList;
 
 		static void * InfoViewerThread (void *arg);
         static void * LangViewerThread (void *arg);
@@ -91,11 +90,12 @@ class CInfoViewer
 		void showData();
         void showWarte();
         void showButtonAudio();
-        void showButtonNVOD();
+        void showButtonNVOD(bool CalledFromShowData = false);
 	public:
 
         bool                is_visible;
         pthread_cond_t      lang_cond;
+        vector<SubService*>	SubServiceList;
 
         CInfoViewer();
 

@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.26 2001/10/31 12:36:21 field Exp $
+  $Id: zapit.cpp,v 1.27 2001/11/03 15:40:49 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -70,8 +70,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
-  Revision 1.26  2001/10/31 12:36:21  field
-  vtxt abgedreht vor dem scan
+  Revision 1.27  2001/11/03 15:40:49  field
+  Perspektiven
 
   Revision 1.25  2001/10/31 10:47:31  field
   silent mode (-d debug switch)
@@ -772,40 +772,40 @@ int zapit (uint onid_sid,boolean in_nvod) {
     {
       current_is_nvod = true;
       if (nvodchannels.count(onid_sid)>0)
-	cit = nvodchannels.find(onid_sid);
+	    cit = nvodchannels.find(onid_sid);
       else
-	{
-	  dprintf("[zapit] onid_sid %08x not found\n", onid_sid);
-	  return -3;
-	}
+  	  {
+  	    dprintf("[zapit] onid_sid %08x not found\n", onid_sid);
+        return -3;
+      }
     }
   else
     {
       current_is_nvod = false;
       if (Radiomode_on)
-	{
-	  if (allchans_radio.count(onid_sid)>0)
-	    {
-	      cit = allchans_radio.find(onid_sid);
-	    }
-	  else
-	    {
-	      dprintf("[zapit] onid_sid %08x not found\n", onid_sid);
-	      return -3;
-	    }
-	}
+	   {
+	       if (allchans_radio.count(onid_sid)>0)
+	       {
+    	      cit = allchans_radio.find(onid_sid);
+	        }
+    	  else
+	        {
+    	      dprintf("[zapit] onid_sid %08x not found\n", onid_sid);
+	          return -3;
+    	    }
+    	}
       else
-	{
-	  if (allchans_tv.count(onid_sid) >0)
-	    {
-	      cit = allchans_tv.find(onid_sid);
-	    }
-	  else
-	    {
-	      dprintf("[zapit] onid_sid %08x not found\n", onid_sid);
-	      return -3;
-	    }
-	}
+    	{
+    	  if (allchans_tv.count(onid_sid) >0)
+	        {
+    	      cit = allchans_tv.find(onid_sid);
+	        }
+    	  else
+	        {
+    	      dprintf("[zapit] onid_sid %08x not found\n", onid_sid);
+	          return -3;
+    	    }
+    	}
     }
   
   if ( ( vid = open(VIDEO_DEV, O_RDWR) ) < 0)
@@ -814,11 +814,11 @@ int zapit (uint onid_sid,boolean in_nvod) {
       exit(1);
     }
   
-  ioctl(video,DMX_STOP,0);
+  ioctl(vid, VIDEO_STOP, false);
 
   if ( video>= 0 )
     {
-      ioctl(vid, VIDEO_STOP, false);
+      ioctl(video,DMX_STOP,0);
       close(video);
       video = -1;
     }
@@ -1358,6 +1358,33 @@ void start_scan()
 
   set_vtxt(0); // vtxt stoppen
 
+
+  // Video stoppen...
+  int vid;
+  if ( ( vid = open(VIDEO_DEV, O_RDWR) ) < 0)
+    {
+      printf("[zapit] cannot open video device \"%s\"\n",FRONT_DEV);
+      exit(1);
+    }
+  
+  ioctl(vid, VIDEO_STOP, false);
+
+  if ( video>= 0 )
+    {
+      ioctl(video,DMX_STOP,0);
+      close(video);
+      video = -1;
+    }
+  
+  if ( audio>= 0 )
+    {
+      ioctl(audio,DMX_STOP,0);
+      close(audio);
+      audio = -1;
+    }
+
+  close(vid);
+
   if (pthread_create(&scan_thread, 0, start_scanthread,0))
   {
   	perror("[zapit] pthread_create: scan_thread");
@@ -1790,6 +1817,9 @@ void parse_command()
        case 'i':
        uint nvod_onidsid; 
        ushort  nvod_tsid, cnt_nvods;
+       //quick hack
+       current_is_nvod= true;
+
        	if (current_is_nvod)
        		status = "00i";
        	else
@@ -1889,7 +1919,7 @@ int main(int argc, char **argv) {
     }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.26 2001/10/31 12:36:21 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.27 2001/11/03 15:40:49 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;

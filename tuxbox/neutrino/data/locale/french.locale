@@ -129,6 +129,7 @@ infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
 infoviewer.selecttime Timeselection
 infoviewer.nocurrent No info for current program available
 infoviewer.noepg EPG not available
+infoviewer.subservice Subservices
 
 epgviewer.notfound pas d' EPG informations trouvé
 epgviewer.nodetailed No detailed informations available
@@ -148,6 +149,7 @@ streaminfo.audiotype_unknown Argile version: inconnu
 apidselector.head Choix linguistique
 
 nvodselector.head Select starting-time
+nvodselector.subservice Select subservice
 
 ucodecheck.head UCode check
 ucodecheck.avia500 Avia 500

@@ -1,11 +1,14 @@
 //
-// $Id: eventlist.cpp,v 1.22 2001/11/03 03:13:10 field Exp $
+// $Id: eventlist.cpp,v 1.23 2001/11/03 15:43:17 field Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.23  2001/11/03 15:43:17  field
+// Perspektiven
+//
 // Revision 1.22  2001/11/03 03:13:10  field
 // EPG Anzeige verbessert
 //
@@ -135,7 +138,7 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
   }
 
     removeAllEvents(); // Alle gespeicherten Events loeschen
-    current_event = -1;
+    current_event = (unsigned int)-1;
 
     if ( resp.dataLength>0 )
     {
@@ -240,7 +243,7 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
         evtlist.insert(evtlist.end(), evt);
 
     }
-    if (current_event == -1)
+    if (current_event == (unsigned int)-1)
         current_event = 0;
     selected= current_event;
 

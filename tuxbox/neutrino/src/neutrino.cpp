@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.73 2001/10/31 12:35:39 field Exp $
+        $Id: neutrino.cpp,v 1.74 2001/11/03 15:43:17 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.74  2001/11/03 15:43:17  field
+  Perspektiven
+
   Revision 1.73  2001/10/31 12:35:39  field
   sectionsd stoppen waehrend scan
 
@@ -570,7 +573,7 @@ void CNeutrinoApp::firstChannel()
 		exit(-1);
 	}
 	
-	printf("That was returned: %s\n", return_buf);
+//	printf("That was returned: %s\n", return_buf);
 	
 	if (strncmp(return_buf,"00a",3))
 	{
@@ -638,7 +641,7 @@ void CNeutrinoApp::channelsInit()
 			exit(-1);
 		}
 	
-		printf("That was returned: %s\n", return_buf);
+//		printf("That was returned: %s\n", return_buf);
 	
 		if ( strcmp(return_buf, "00c")!= 0 )
 		{
@@ -1078,50 +1081,63 @@ void CNeutrinoApp::SelectNVOD()
     if ( ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 ) &&
          ( g_RemoteControl->nvods.count_nvods> 0 ) )
     {
-        // NVOD- Kanal!
-
-    	CMenuWidget NVODSelector("nvodselector.head", "video.raw", 400);
+        // NVOD/SubService- Kanal!
+        int has_subservices= (g_InfoViewer->SubServiceList.size()> 0);
+        string  menuhead;
+        if (!has_subservices)
+            menuhead="nvodselector.head";
+        else
+            menuhead="nvodselector.subservice";
+      	CMenuWidget NVODSelector(menuhead.c_str(), "video.raw", 400);
 
         NVODSelector.addItem( new CMenuSeparator() );
     //    NVODSelector.addItem( new CMenuForwarder("menu.back") );
 	//   NVODSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
 
         for(int count=0;count<g_RemoteControl->nvods.count_nvods;count++)
         {
             char nvod_id[5];
             sprintf(nvod_id, "%d", count);
 
-            char nvod_time_a[50];
-            char nvod_time_e[50];
-            char nvod_time_x[50];
-            char nvod_s[100];
-            struct  tm *tmZeit;
-
-            tmZeit= localtime(&g_RemoteControl->nvods.nvods[count].startzeit);
-            sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
-
-            time_t endtime=g_RemoteControl->nvods.nvods[count].startzeit+ g_RemoteControl->nvods.nvods[count].dauer;
-            tmZeit= localtime(&endtime);
-            sprintf(nvod_time_e, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
-
-            time_t jetzt=time(NULL);
-            if (g_RemoteControl->nvods.nvods[count].startzeit > jetzt)
+            if (!has_subservices)
             {
-                int mins=(g_RemoteControl->nvods.nvods[count].startzeit- jetzt)/ 60;
-                sprintf(nvod_time_x, g_Locale->getText("nvod.starting").c_str(), mins);
+                char nvod_time_a[50];
+                char nvod_time_e[50];
+                char nvod_time_x[50];
+                char nvod_s[100];
+                struct  tm *tmZeit;
+
+                tmZeit= localtime(&g_RemoteControl->nvods.nvods[count].startzeit);
+                sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
+
+                time_t endtime=g_RemoteControl->nvods.nvods[count].startzeit+ g_RemoteControl->nvods.nvods[count].dauer;
+                tmZeit= localtime(&endtime);
+                sprintf(nvod_time_e, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
+
+                time_t jetzt=time(NULL);
+                if (g_RemoteControl->nvods.nvods[count].startzeit > jetzt)
+                {
+                    int mins=(g_RemoteControl->nvods.nvods[count].startzeit- jetzt)/ 60;
+                    sprintf(nvod_time_x, g_Locale->getText("nvod.starting").c_str(), mins);
+                }
+                else
+                if ( (g_RemoteControl->nvods.nvods[count].startzeit<= jetzt) && (jetzt < endtime) )
+                {
+                    int proz=(jetzt- g_RemoteControl->nvods.nvods[count].startzeit)*100/g_RemoteControl->nvods.nvods[count].dauer;
+                    sprintf(nvod_time_x, g_Locale->getText("nvod.proz").c_str(), proz);
+                }
+                else
+                    nvod_time_x[0]= 0;
+
+
+                sprintf(nvod_s, "%s - %s %s", nvod_time_a, nvod_time_e, nvod_time_x);
+                NVODSelector.addItem( new CMenuForwarder(nvod_s, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->nvods.selected) );
             }
             else
-            if ( (g_RemoteControl->nvods.nvods[count].startzeit<= jetzt) && (jetzt < endtime) )
             {
-                int proz=(jetzt- g_RemoteControl->nvods.nvods[count].startzeit)*100/g_RemoteControl->nvods.nvods[count].dauer;
-                sprintf(nvod_time_x, g_Locale->getText("nvod.proz").c_str(), proz);
+                NVODSelector.addItem( new CMenuForwarder(g_InfoViewer->SubServiceList[count]->name, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->nvods.selected) );
             }
-            else
-                nvod_time_x[0]= 0;
-
-
-            sprintf(nvod_s, "%s - %s %s", nvod_time_a, nvod_time_e, nvod_time_x);
-            NVODSelector.addItem( new CMenuForwarder(nvod_s, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->nvods.selected) );
         }
         NVODSelector.exec(NULL, "");
     }
@@ -1658,7 +1674,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.73 2001/10/31 12:35:39 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.74 2001/11/03 15:43:17 field Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
