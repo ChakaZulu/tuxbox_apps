@@ -26,20 +26,21 @@ void eCheckbox::gotFocus()
 {
 	if (parent && parent->LCDElement)
 	{
-			LCDTmp = new eLabel(parent->LCDElement);
-			LCDTmp->hide();
-			eSize s = parent->LCDElement->getSize();
-			LCDTmp->move(ePoint(0,0));
-			LCDTmp->resize(eSize(s.width(), s.height()));
-			((eLabel*)LCDTmp)->setFlags(RS_WRAP);
-			gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked");
-			LCDTmp->setPixmap(pm);
-			((eLabel*)LCDTmp)->pixmap_position=ePoint(0, (size.height()-15)/2);
-			((eLabel*)LCDTmp)->text_position=ePoint(21, 0);
-			LCDTmp->setText(text);
-			LCDTmp->show();
+		LCDTmp = new eLabel(parent->LCDElement);
+		LCDTmp->hide();
+		eSize s = parent->LCDElement->getSize();
+		LCDTmp->move(ePoint(0,0));
+		LCDTmp->resize(eSize(s.width(), s.height()));
+		((eLabel*)LCDTmp)->setFlags(RS_WRAP);
+		gPixmap *pm=eSkin::getActive()->queryImage(ischecked?"eCheckboxLCD.checked":"eCheckboxLCD.unchecked");
+		LCDTmp->setPixmap(pm);
+		((eLabel*)LCDTmp)->pixmap_position=ePoint(0, (size.height()-15)/2);
+		((eLabel*)LCDTmp)->text_position=ePoint(21, 0);
+		LCDTmp->setText(text);
+		LCDTmp->show();
 	}
-	setBackgroundColor(focus);
+	setBackgroundColor(focusB);
+	setForegroundColor(focusF);
 	invalidate();
 }
 

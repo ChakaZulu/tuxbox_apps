@@ -11,8 +11,9 @@ eWindow::eWindow(int takefocus)
 {
 	borderTop=10;
 	borderLeft=borderRight=borderBottom=5;
-	setBackgroundColor(eSkin::getActive()->queryScheme("backgroundColor"));
-	setForegroundColor(eSkin::getActive()->queryScheme("eWindow.titleBarColor"));
+	// setBackgroundColor(eSkin::getActive()->queryScheme("global.normal.background"));
+	titleBarColor=eSkin::getActive()->queryScheme("eWindow.titleBar");
+	fontColor=eSkin::getActive()->queryScheme("eWindow.titleBarFont");
 
 	iTopLeft=eSkin::getActive()->queryImage("eWindow.topLeft");
 	iTop=eSkin::getActive()->queryImage("eWindow.top");
@@ -146,10 +147,13 @@ void eWindow::drawTitlebar(gPainter *target)
 	}
 	
 	target->flush();
-	
+
+	target->setForegroundColor(titleBarColor);
 	target->fill(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX-titleBorderY, titleHeight));
 	target->flush();
 
+	target->setBackgroundColor(titleBarColor);
+	target->setForegroundColor(fontColor);
 	target->setFont(gFont("NimbusSansL-Regular Sans L Regular", titleFontSize));
 	target->renderText(eRect(titleOffsetX, titleOffsetY, width()-titleOffsetX-titleBorderY, titleHeight), text);
 	target->flush();

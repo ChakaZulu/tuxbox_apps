@@ -173,7 +173,7 @@ eString getISO639Description(char *iso)
 void NVODStream::EITready(int error)
 {
 	eDebug("NVOD eit ready: %d", error);
-
+	
 	if (eit.ready && !eit.error)
 	{
 		for (ePtrList<EITEvent>::const_iterator event(eit.events); event != eit.events.end(); ++event)		// always take the first one
@@ -229,7 +229,7 @@ eNVODSelector::eNVODSelector()
 	:eListBoxWindow<NVODStream>(_("NVOD"), 10, 440)
 {
 	move(ePoint(100, 100));
-	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
+	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 	CONNECT(list.selected, eNVODSelector::selected);
 }
 
@@ -249,59 +249,42 @@ void eNVODSelector::add(NVODReferenceEntry *ref)
 }
 
 AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
-	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), stream(stream)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox), stream(stream)
 {
-		int isAC3=0;
-		int component_tag=-1;
-		for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
+	int isAC3=0;
+	int component_tag=-1;
+	for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
+	{
+		if (c->Tag()==DESCR_AC3)
+			isAC3=1;
+		else if (c->Tag()==DESCR_ISO639_LANGUAGE)
+			text=getISO639Description(((ISO639LanguageDescriptor*)*c)->language_code);
+		else if (c->Tag()==DESCR_STREAM_ID)
+			component_tag=((StreamIdentifierDescriptor*)*c)->component_tag;
+		else if (c->Tag()==DESCR_LESRADIOS)
 		{
-			if (c->Tag()==DESCR_AC3)
-				isAC3=1;
-			else if (c->Tag()==DESCR_ISO639_LANGUAGE)
-				text=getISO639Description(((ISO639LanguageDescriptor*)*c)->language_code);
-			else if (c->Tag()==DESCR_STREAM_ID)
-				component_tag=((StreamIdentifierDescriptor*)*c)->component_tag;
-			else if (c->Tag()==DESCR_LESRADIOS)
-			{
-				text=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)*c)->id));
-				text+=((LesRadiosDescriptor*)*c)->name;
-			}
+			text=eString().sprintf("%d.) ", (((LesRadiosDescriptor*)*c)->id));
+			text+=((LesRadiosDescriptor*)*c)->name;
 		}
-		if (!text)
-			text.sprintf("PID %04x", stream->elementary_PID);
-		if (component_tag!=-1)
-		{
-			EIT *eit=eDVB::getInstance()->getEIT();
-			if (eit)
-			{
-				for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
-					if ((e->running_status>=2)||(!e->running_status))		// currently running service
-						for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
-							if (d->Tag()==DESCR_COMPONENT && ((ComponentDescriptor*)*d)->component_tag == component_tag)
-									text=((ComponentDescriptor*)*d)->text;
-    					eit->unlock();
-			}
-		}
-		if (isAC3)
-			text+=" (AC3)";
-
-}
-
-void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
-{
-
-		rc->setForegroundColor(highlited?coActive:coNormal);
-		rc->setFont(listbox->getFont());
-
-		if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
-				rc->fill(rect);
-
-		rc->renderText(rect, text);
-
-		eWidget* p = listbox->getParent();			
-		if (highlited && p && p->LCDElement)
- 			p->LCDElement->setText(text);
 	}
+	if (!text)
+		text.sprintf("PID %04x", stream->elementary_PID);
+	if (component_tag!=-1)
+	{
+		EIT *eit=eDVB::getInstance()->getEIT();
+		if (eit)
+		{
+			for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+				if ((e->running_status>=2)||(!e->running_status))		// currently running service
+					for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+						if (d->Tag()==DESCR_COMPONENT && ((ComponentDescriptor*)*d)->component_tag == component_tag)
+								text=((ComponentDescriptor*)*d)->text;
+ 			eit->unlock();
+		}
+	}
+	if (isAC3)
+		text+=" (AC3)";
+}
 
 void eAudioSelector::selected(AudioStream *l)
 {
@@ -717,8 +700,10 @@ void eZapMain::showServiceSelector(int dir)
 		return;
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi && service)
+	{
 		if (sapi->switchService(*service))
 			serviceChanged(*service, -EAGAIN);
+	}
 }
 
 void eZapMain::nextService()
@@ -731,8 +716,10 @@ void eZapMain::nextService()
 	if (!service)
 		return;
 	if (service)
+	{
 		if (sapi->switchService(*service))
 			serviceChanged(*service, -EAGAIN);	
+	}
 }
 
 void eZapMain::prevService()
@@ -745,8 +732,10 @@ void eZapMain::prevService()
 	if (!service)
 		return;
 	if (service)
+	{
 		if (sapi->switchService(*service))
 			serviceChanged(*service, -EAGAIN);
+	}
 }
 
 void eZapMain::volumeUp()
@@ -805,6 +794,9 @@ void eZapMain::hideInfobar()
 
 void eZapMain::showSubserviceMenu()
 {
+	if (!(flags & (ENIGMA_NVOD|ENIGMA_SUBSERVICES)))
+		return;
+
 	eZapLCD* pLCD = eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdMenu->show();
@@ -1022,46 +1014,85 @@ void eZapMain::serviceChanged(const eServiceReference &serviceref, int err)
 	isVT = Decoder::parms.tpid != -1;
 
 	setVTButton(isVT);
-	
+
 	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(serviceref);
 
-	if (!service)
-		return;
+		// es wird nur dann versucht einen service als referenz-service zu uebernehmen, wenns den ueberhaupt
+		// gibt.
+	if (service)
+		switch (serviceref.service_type)
+		{
+		case 1:	// TV
+		case 2: // radio
+		case 4: // nvod ref
+			refservice=serviceref;
+			break;
+		}
 
-	if (service->service_type==4)
+	eService *rservice=0;
+	if (refservice != serviceref)
+		rservice=eDVB::getInstance()->settings->getTransponders()->searchService(refservice);
+	
+	if (refservice.service_type==4)
 		flags|=ENIGMA_NVOD;
 
-	ChannelName->setText(service->service_name.c_str());
+	eString name="";
+	if (rservice)
+		name=rservice->service_name + " - ";
+	
+	if (service)
+		name+=service->service_name;
+	else
+		switch (serviceref.service_type)
+		{
+		case 5: // nvod stream
+			name+="NVOD Stream";
+		}
+
+	if (!name.length())
+		name="new service";
+	
+	ChannelName->setText(name);
 	
 	switch (err)
 	{
 	case 0:
-		Description->setText("");
+		Description->setText(_(""));
 		break;
 	case -EAGAIN:
-		Description->setText("Einen Moment bitte...");
+		Description->setText(_("Einen Moment bitte..."));
 		break;
 	case -ENOENT:
-		Description->setText("Sender konnte nicht gefunden werden.");
+		Description->setText(_("Sender konnte nicht gefunden werden."));
 		break;
 	case -ENOCASYS:
-		Description->setText("Dieser Sender kann nicht entschlüsselt werden.");
+		Description->setText(_("Dieser Sender kann nicht entschlüsselt werden."));
 		break;
 	case -ENOSTREAM:
-		Description->setText("Dieser Sender sendet (momentan) kein Signal.");
+		Description->setText(_("Dieser Sender sendet (momentan) kein Signal."));
 		break;
 	case -ENOSYS:
-		Description->setText("Dieser Inhalt kann nicht dargestellt werden.");
+		Description->setText(_("Dieser Inhalt kann nicht dargestellt werden."));
 		break;
 	case -ENVOD:
-		Description->setText("NVOD - Bitte Anfangszeit bestimmen!");
+		Description->setText(_("NVOD - Bitte Anfangszeit bestimmen!"));
 		break;
 	default:
-		Description->setText("<unbekannter Fehler>");
+		Description->setText(_("<unbekannter Fehler>"));
 		break;
 	}
 	
-	ChannelNumber->setText(eString().sprintf("%d", service->service_number));
+	int num=-1;
+	
+	if (rservice)
+		num=rservice->service_number;
+	else if (service)
+		num=service->service_number;
+
+	if (num != -1)
+		ChannelNumber->setText(eString().sprintf("%d", num));
+	else
+		ChannelNumber->setText("");
 	
 	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
 	{

@@ -1,5 +1,54 @@
 #include "gpixmap.h"
 
+gLookup::gLookup()
+{
+	size=0;
+	lookup=0;
+}
+
+gLookup::gLookup(int size, const gPalette &pal, const gRGB &start, const gRGB &end)
+{
+	size=0;
+	lookup=0;
+	build(size, pal, start, end);
+}
+
+void gLookup::build(int _size, const gPalette &pal, const gRGB &start, const gRGB &end)
+{
+	if (lookup)
+	{
+		delete lookup;
+		lookup=0;
+		size=0;
+	}
+	size=_size;
+	if (!size)
+		return;
+	lookup=new gColor[size];
+	
+	for (int i=0; i<size; i++)
+	{
+		gRGB col;
+		if (i)
+		{
+			int rdiff=-start.r+end.r;
+			int gdiff=-start.g+end.g;
+			int bdiff=-start.b+end.b;
+			int adiff=-start.a+end.a;
+			rdiff*=i; rdiff/=(size-1);
+			gdiff*=i; gdiff/=(size-1);
+			bdiff*=i; bdiff/=(size-1);
+			adiff*=i; adiff/=(size-1);
+			col.r=start.r+rdiff;
+			col.g=start.g+gdiff;
+			col.b=start.b+bdiff;
+			col.a=start.a+adiff;
+		} else
+			col=start;
+		lookup[i]=pal.findColor(col);
+	}
+}
+
 gPixmap *gPixmap::lock()
 {
 	contentlock.lock(1);
@@ -67,42 +116,17 @@ void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 
 void gPixmap::mergePalette(const gPixmap &target)
 {
-	if ((!colors) || (!target.colors))
+	if ((!clut.colors) || (!target.clut.colors))
 		return;
-	gColor *lookup=new gColor[colors];
+	gColor *lookup=new gColor[clut.colors];
 
-	for (int i=0; i<colors; i++)
-	{
-		int difference=1<<30, best_choice=0;
-		for (int t=0; t<target.colors; t++)
-		{
-			int ttd;
-			int td=(signed)(clut[i].r-target.clut[t].r); td*=td; td*=(255-clut[i].a);
-			ttd=td;
-			if (ttd>=difference)
-				continue;
-			td=(signed)(clut[i].g-target.clut[t].g); td*=td; td*=(255-clut[i].a);
-			ttd+=td;
-			if (ttd>=difference)
-				continue;
-			td=(signed)(clut[i].b-target.clut[t].b); td*=td; td*=(255-clut[i].a);
-			ttd+=td;
-			if (ttd>=difference)
-				continue;
-			td=(signed)(clut[i].a-target.clut[t].a); td*=td; td*=255;
-			ttd+=td;
-			if (ttd>=difference)
-				continue;
-			difference=ttd;
-			best_choice=t;
-		}
-		lookup[i].color=best_choice;
-	}
+	for (int i=0; i<clut.colors; i++)
+		lookup[i].color=target.clut.findColor(clut.data[i]);
 	
-	delete clut;
-	colors=target.colors;
-	clut=new gRGB[colors];
-	memcpy(clut, target.clut, sizeof(gRGB)*colors);
+	delete clut.data;
+	clut.colors=target.clut.colors;
+	clut.data=new gRGB[clut.colors];
+	memcpy(clut.data, target.clut.data, sizeof(gRGB)*clut.colors);
 
 	__u8 *dstptr=(__u8*)data;
 
@@ -136,6 +160,34 @@ goto RightAndUp;  AfbAddr+=fbXincr; BfbAddr-=fbXincr; if ((dY=dY-1) > 0) goto XL
 +=fbYincr;  BfbAddr-=fbYincr; if ((dX=dX-1) > 0) goto YLOOP; *AfbAddr=color; if ((dY & 1) == 0) return; *BfbAddr=
 color;return; RightAndUp2: AfbAddr+=fbXYincr; BfbAddr-=fbXYincr; P+=dPru; if ((dX=dX-1) > 0) goto YLOOP; *AfbAddr
 =color; if((dY & 1) == 0) return; *BfbAddr=color; return; // nun ist der tolle code leider zu ende. tut mir leid.
+}
+
+gColor gPalette::findColor(const gRGB &rgb) const
+{
+	int difference=1<<30, best_choice=0;
+	for (int t=0; t<colors; t++)
+	{
+		int ttd;
+		int td=(signed)(rgb.r-data[t].r); td*=td; td*=(255-data[t].a);
+		ttd=td;
+		if (ttd>=difference)
+			continue;
+		td=(signed)(rgb.g-data[t].g); td*=td; td*=(255-data[t].a);
+		ttd+=td;
+		if (ttd>=difference)
+			continue;
+		td=(signed)(rgb.b-data[t].b); td*=td; td*=(255-data[t].a);
+		ttd+=td;
+		if (ttd>=difference)
+			continue;
+		td=(signed)(rgb.a-data[t].a); td*=td; td*=255;
+		ttd+=td;
+		if (ttd>=difference)
+			continue;
+		difference=ttd;
+		best_choice=t;
+	}
+	return best_choice;
 }
 
 void gPixmap::finalLock()
@@ -179,12 +231,12 @@ gImage::gImage(eSize size, int _bpp)
 	stride=x*bypp;
 	if (bpp==8)
 	{
-		colors=256;
-		clut=new gRGB[colors];
+		clut.colors=256;
+		clut.data=new gRGB[clut.colors];
 	} else
 	{
-		colors=0;
-		clut=0;
+		clut.colors=0;
+		clut.data=0;
 	}
 	data=new char[x*y*bypp];
 }
@@ -192,7 +244,6 @@ gImage::gImage(eSize size, int _bpp)
 gImage::~gImage()
 {
 	finalLock();
-	delete[] clut;
+	delete[] clut.data;
 	delete[] (char*)data;
 }
-

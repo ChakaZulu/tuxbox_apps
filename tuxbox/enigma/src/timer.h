@@ -10,14 +10,15 @@ class eService;
 
 class eRecordingTimer: public Object
 {
-	void ready();
-	void start();
-	void pause();
-	void stop();
+	void rec_ready();
+	void rec_start();
+	void rec_pause();
+	void rec_stop();
 	
 	void serviceChanged(const eServiceReference &, int);
 	void gotPMT(PMT*);
-	
+	eTimer timer;
+	void timeout();
 public:
 	enum
 	{
@@ -51,29 +52,28 @@ public:
 	eDVBRecorder *recorder;
 	eString filename;
 	
-	void setState(int state);
+	int disable();
+	int enable();
 	
-	struct orderChron
-	{
-		bool operator()(const eRecordingTimer &a, const eRecordingTimer &b) const
-		{
-			return a.start_time < b.start_time;
-		}
-	};
-
-	eRecordingTimer(time_t starttime);
+	int ready();
+	int start();
+	
+	int pause();
+	int resume();
+	
+	int abort();
+	
+	eRecordingTimer();
 	~eRecordingTimer();
 };
 
 class eTimerManager: public Object
 {
-	typedef std::multiset<eRecordingTimer, eRecordingTimer::orderChron> timerList;
+	typedef ePtrList<eRecordingTimer> timerList;
 	
 	timerList recordtimer;
 	
 	void process();
-	eTimer timer;
-
 public:
 	eTimerManager();
 	~eTimerManager();

@@ -27,7 +27,7 @@ public:
 		return sort < r.sort;
 	}
 protected:
-	void redraw(gPainter *rc, const eRect &rect, const gColor &coActive, const gColor &coNormal, bool highlighted);
+	void redraw(gPainter *rc, const eRect &rect, gColor, gColor, gColor, gColor, bool highlighted);
 };
 
 class eServiceSelector: public eWindow

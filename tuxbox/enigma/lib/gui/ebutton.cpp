@@ -4,8 +4,12 @@
 #include "guiactions.h"
 
 eButton::eButton(eWidget *parent, eLabel* desc, int takefocus)
-	:eLabel(parent, 0, takefocus), tmpDescr(0), focus(eSkin::getActive()->queryScheme("focusedColor")),
-	normal(eSkin::getActive()->queryScheme("fgColor")), descr(desc?desc->getText():"")
+	:eLabel(parent, 0, takefocus), tmpDescr(0), 
+	focusB(eSkin::getActive()->queryScheme("global.selected.background")),
+	focusF(eSkin::getActive()->queryScheme("global.selected.foreground")),
+	normalB(eSkin::getActive()->queryScheme("global.normal.background")),
+	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),
+	descr(desc?desc->getText():"")
 {
 	addActionMap(&i_cursorActions->map);
 }
@@ -35,7 +39,8 @@ void eButton::gotFocus()
 			parent->LCDElement->setText(text);
 	}
 
-	setBackgroundColor(focus);
+	setBackgroundColor(focusB);
+	setForegroundColor(focusF);
 	invalidate();
 }
 
@@ -56,7 +61,8 @@ void eButton::lostFocus()
 		else
 			parent->LCDElement->setText("");	
 	}
-	setBackgroundColor(normal);
+	setBackgroundColor(normalB);
+	setBackgroundColor(normalF);
 	invalidate();
 }
 

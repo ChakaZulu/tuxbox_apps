@@ -26,6 +26,8 @@ enigma_LDADD = \
 	$(LIBSIGC_LIBS) $(INTLLIBS) \
 	-ldl -lpthread
 
+# -lmpatrolmt -lbfd -liberty 
+
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
 
 $(top_builddir)/enigma/src/core/base/libenigma_base.la:

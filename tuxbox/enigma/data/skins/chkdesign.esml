@@ -19,7 +19,7 @@
 		<color name="main_head" color="#DBDBDB" end="#00064E" size="16" />
 		<color name="main_content" color="#000761" end="#ffffff" size="16" />
 		<color name="uhr" color="#FFC000" end="#00064E" size="16" />
-		<color name="header" color="#525475" end="#000000" size="16" />
+		<color name="header" color="#525475" end="#f0f0f0" size="16" />
 		<color name="content" color="#44DBDBDB" end="#00064E" size="16" />
 		<color name="content_selected" color="#757899" end="#ffffff" size="16" />
 
@@ -111,14 +111,20 @@
 	</colors>
 
 	<colorscheme>
-		<map name="backgroundColor" color="content" />
-		<map name="eServiceSelector.highlight" color="content_selected" />
-		<map name="focusedColor" color="content_selected" />
+		<map name="global.normal.background" color="content" />
+		<map name="global.normal.foreground" color="content+15" />
 
-		<map name="fgColor" color="content" />
-		<map name="fgColorDisabled" color="content" />
+		<map name="eServiceSelector.highlight.background" color="content_selected" />
+		<map name="eServiceSelector.highlight.foreground" color="content_selected+15" />
 
-		<map name="eWindow.titleBarColor" color="header" />
+		<map name="global.selected.background" color="content_selected" />
+		<map name="global.selected.foreground" color="content_selected+15" />
+
+		<map name="global.disabled.background" color="content" />
+		<map name="global.disabled.foreground" color="content+7" />
+
+		<map name="eWindow.titleBar" color="header" />
+		<map name="eWindow.titleBarFont" color="header+15" />
 
 		<map name="eProgress.border" color="osd_normal+15" />
 		<map name="eProgress.left" color="main_content" />
@@ -161,11 +167,11 @@
 
 	<object name="eventview">
 		<eWindow cposition="50:80" csize="590:400" name="title">
-			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" backgroundColor="content" wrap="on"/>
+			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" backgroundColor="content" foregroundColor="content+15" wrap="on"/>
 			<eWidget position="0:e-30" size="600:e" backgroundColor="osd_shadowcol" />
-			<eLabel position="10:e-30" size="130:e" name="date" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
-			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow"/>
-			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" align="right"/>
+			<eLabel position="10:e-30" size="130:e" name="date" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" foregroundColor="osd_shadow+15"/>
+			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" foregroundColor="osd_shadow+15"/>
+			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" foregroundColor="osd_shadow+15" align="right"/>
 		</eWindow>
 	</object>
 
@@ -196,28 +202,28 @@
 
 			<!--texte-->
 			<eLabel position="41:40" size="42:34" font="NimbusSansL-Regular Sans L Regular;27" name="ch_number" align="center"
-				backgroundColor="main_content"  />
+				backgroundColor="main_content" foregroundColor="main_content+15" />
 
 			<eLabel position="78:4" size="381:29" font="NimbusSansL-Regular Sans L Regular;28" name="ch_name"
-			backgroundColor="main_head"	/>
+				backgroundColor="main_head"	foregroundColor="main_head+15" />
 
 			<eLabel position="130:41" size="58:28" font="NimbusSansL-Regular Sans L Regular;20" name="e_now_time"
-			backgroundColor="main_content"	/>
+				backgroundColor="main_content" foregroundColor="main_content+15" />
 			<eLabel position="130:73" size="58:28" font="NimbusSansL-Regular Sans L Regular;20" name="e_next_time"
-				backgroundColor="main_content" />
+				backgroundColor="main_content" foregroundColor="main_content+15" />
 
 			<eLabel position="190:41" size="320:28" font="NimbusSansL-Regular Sans L Regular;20" name="e_now_title"
-				backgroundColor="main_content" />
+				backgroundColor="main_content" foregroundColor="main_content+15"  />
 			<eLabel position="190:73" size="320:28" font="NimbusSansL-Regular Sans L Regular;20" name="e_next_title"
-				backgroundColor="main_content" />
+				backgroundColor="main_content" foregroundColor="main_content+15"  />
 
 			<eLabel position="510:47" size="65:22" font="NimbusSansL-Regular Sans L Regular;18" name="e_now_duration" align="right"
-				backgroundColor="main_content" />
+				backgroundColor="main_content" foregroundColor="main_content+15"  />
 			<eLabel position="510:79" size="65:22" font="NimbusSansL-Regular Sans L Regular;18" name="e_next_duration" align="right"
-				backgroundColor="main_content" />
+				backgroundColor="main_content" foregroundColor="main_content+15"  />
 
 			<eLabel position="550:15" size="40:24" font="NimbusSansL-Regular Sans L Regular;18" name="time" align="right"
-				backgroundColor="uhr"/>
+				backgroundColor="uhr"  foregroundColor="uhr+15" />
 
 			<eProgress position="79:106" size="95:17" name="progress_bar" foregroundColor="osd_normal" border="1" />
 	
@@ -240,7 +246,6 @@
 			<eLabel position="233:106" size="12:12" pixmap="button_gray" name="button_green_disabled" alphatest="on" />
 			<eLabel position="253:106" size="12:12" pixmap="button_gray" name="button_yellow_disabled" alphatest="on" />
 			<eLabel position="273:106" size="12:12" pixmap="button_gray" name="button_blue_disabled" alphatest="on" />
-			
 	<!---->
 		</eZapMain>
 	</object>

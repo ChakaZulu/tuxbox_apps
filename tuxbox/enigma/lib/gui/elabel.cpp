@@ -12,7 +12,7 @@ eLabel::eLabel(eWidget *parent, int flags, int takefocus):
 	para=0;
 	blitFlags=0;
 	align=eTextPara::dirLeft;
-//	setBackgroundColor(eSkin::getActive()->queryScheme("fgColor"));
+	setForegroundColor(eSkin::getActive()->queryScheme("global.normal.foreground"));
 	pixmap_position=ePoint(0, 0);
 	text_position=ePoint(0, 0);
 }
@@ -57,6 +57,8 @@ void eLabel::redrawWidget(gPainter *target, const eRect &area)
 	if (text.length())
 	{
 		validate();
+		eWidget *w=getNonTransparentBackground();
+		target->setBackgroundColor(w->getBackgroundColor());
 		target->setFont(font);
 		target->renderPara(*para);
 	}

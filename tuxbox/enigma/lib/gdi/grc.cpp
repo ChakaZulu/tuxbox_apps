@@ -37,7 +37,6 @@ gRC::~gRC()
 
 void *gRC::thread()
 {
-	int rptr=0;
 	while (1)
 	{
 		queuelock.lock(1);
@@ -90,7 +89,7 @@ void gPainter::begin(const eRect &rect)
 	dc.lock();
 	o.dc=&dc;
 	o.opcode=gOpcode::begin;
-	o.parm.begin.area=new eRect(rect);
+	o.parm.begin=new gOpcode::para::pbegin(rect);
 	
 	cliparea=rect;
 	setLogicalZero(cliparea.topLeft());
@@ -120,9 +119,7 @@ void gPainter::renderText(const eRect &pos, const std::string &string, int flags
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::renderText;
-	o.parm.renderText.text=new eString(string.c_str());
-	o.parm.renderText.area=new eRect(area);
-	o.parm.renderText.font=new gFont(font);
+	o.parm.renderText=new gOpcode::para::prenderText(font, area, string, dc.getRGB(foregroundColor), dc.getRGB(backgroundColor));
 	o.flags=flags;
 	rc.submit(o);
 }
@@ -132,8 +129,7 @@ void gPainter::renderPara(eTextPara &para)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::renderPara;
-	o.parm.renderPara.textpara=para.grab();
-	o.parm.renderPara.offset=new ePoint(logicalZero);
+	o.parm.renderPara=new gOpcode::para::prenderPara(logicalZero, para.grab(), dc.getRGB(foregroundColor), dc.getRGB(backgroundColor));
 	rc.submit(o);
 }
 
@@ -142,10 +138,11 @@ void gPainter::fill(const eRect &area)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::fill;
-	o.parm.fill.area=new eRect(area);
-	o.parm.fill.area->moveBy(logicalZero.x(), logicalZero.y());
-	(*o.parm.fill.area)&=cliparea;
-	o.parm.fill.color=new gColor(foregroundColor);
+	eRect a=area;
+	a.moveBy(logicalZero.x(), logicalZero.y());
+	a&=cliparea;
+	
+	o.parm.fill=new gOpcode::para::pfill(a, foregroundColor);
 	rc.submit(o);
 }
 
@@ -154,11 +151,10 @@ void gPainter::blit(gPixmap &pixmap, ePoint pos, eRect clip, int flags)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::blit;
-	o.parm.blit.position=new ePoint(pos);
-	(*o.parm.blit.position)+=logicalZero;
-	o.parm.blit.clip=new eRect(clip);
-	(*o.parm.blit.clip).moveBy(logicalZero.x(), logicalZero.y());
-	o.parm.blit.pixmap=pixmap.lock();
+	pos+=logicalZero;
+	clip.moveBy(logicalZero.x(), logicalZero.y());
+	o.parm.blit=new gOpcode::para::pblit(pixmap.lock(), pos, clip);
+
 	o.flags=flags;
 	rc.submit(o);
 }
@@ -168,8 +164,7 @@ void gPainter::clear()
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::fill;
-	o.parm.fill.area=new eRect(cliparea);
-	o.parm.fill.color=new gColor(backgroundColor);
+	o.parm.fill=new gOpcode::para::pfill(cliparea, backgroundColor);
 	rc.submit(o);
 }
 
@@ -178,11 +173,13 @@ void gPainter::setPalette(gRGB *colors, int start, int len)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::setPalette;
-	o.parm.setPalette.palette=new gPalette;
-	o.parm.setPalette.palette->data=new gRGB[len];
-	memcpy(o.parm.setPalette.palette->data, colors, len*sizeof(gRGB));
-	o.parm.setPalette.palette->start=start;
-	o.parm.setPalette.palette->len=len;
+	gPalette *p=new gPalette;
+	
+	p->data=new gRGB[len];
+	memcpy(p->data, colors, len*sizeof(gRGB));
+	p->start=start;
+	p->colors=len;
+	o.parm.setPalette=new gOpcode::para::psetPalette(p);
 	rc.submit(o);
 }
 
@@ -191,7 +188,7 @@ void gPainter::mergePalette(gPixmap &target)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::mergePalette;
-	o.parm.mergePalette.target=target.lock();
+	o.parm.mergePalette=new gOpcode::para::pmergePalette(target.lock());
 	rc.submit(o);
 }
 
@@ -200,9 +197,7 @@ void gPainter::line(ePoint start, ePoint end)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::line;
-	o.parm.line.start=new ePoint(start+logicalZero);
-	o.parm.line.end=new ePoint(end+logicalZero);
-	o.parm.line.color=new gColor(foregroundColor);
+	o.parm.line=new gOpcode::para::pline(start+logicalZero, end+logicalZero, foregroundColor);
 	rc.submit(o);
 }
 
@@ -227,9 +222,10 @@ void gPainter::clip(eRect clip)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::clip;
-	o.parm.clip.clip=new eRect(clip);
-	o.parm.clip.clip->moveBy(logicalZero.x(), logicalZero.y());
-	cliparea&=*o.parm.clip.clip;
+	clip.moveBy(logicalZero.x(), logicalZero.y());
+	o.parm.clip=new gOpcode::para::pclip(clip);
+
+	cliparea&=clip;
 	rc.submit(o);
 }
 
@@ -271,68 +267,64 @@ void gPixmapDC::exec(gOpcode *o)
 	switch(o->opcode)
 	{
 	case gOpcode::begin:
-		clip=*o->parm.begin.area;
-		delete o->parm.begin.area;
+		clip=o->parm.begin->area;
+		delete o->parm.begin;
 		break;
 	case gOpcode::renderText:
 	{
-		eTextPara *para=new eTextPara(*o->parm.renderText.area);
-		para->setFont(*o->parm.renderText.font);
-		para->renderString(*o->parm.renderText.text, o->flags);
-		para->blit(*this, ePoint(0, 0));
+		eTextPara *para=new eTextPara(o->parm.renderText->area);
+		para->setFont(o->parm.renderText->font);
+		para->renderString(o->parm.renderText->text, o->flags);
+		para->blit(*this, ePoint(0, 0), o->parm.renderText->backgroundColor, o->parm.renderText->foregroundColor);
 		para->destroy();
-		delete o->parm.renderText.text;
-		delete o->parm.renderText.area;
-		delete o->parm.renderText.font;
+		delete o->parm.renderText;
 		break;
 	}
 	case gOpcode::renderPara:
 	{
-		o->parm.renderPara.textpara->blit(*this, *o->parm.renderPara.offset);
-		o->parm.renderPara.textpara->destroy();
-		delete o->parm.renderPara.offset;
+		o->parm.renderPara->textpara->blit(*this, o->parm.renderPara->offset, o->parm.renderPara->backgroundColor, o->parm.renderPara->foregroundColor);
+		o->parm.renderPara->textpara->destroy();
+		delete o->parm.renderPara;
 		break;
 	}
 	case gOpcode::fill:
-		pixmap->fill(*o->parm.fill.area, *o->parm.fill.color);
-		delete o->parm.fill.area;
-		delete o->parm.fill.color;
+		pixmap->fill(o->parm.fill->area, o->parm.fill->color);
+		delete o->parm.fill;
 		break;
 	case gOpcode::blit:
 	{
-		if (o->parm.blit.clip->isNull())
-			*o->parm.blit.clip=clip;
+		if (o->parm.blit->clip.isNull())
+			o->parm.blit->clip=clip;
 		else
-			(*o->parm.blit.clip)&=clip;
-		pixmap->blit(*o->parm.blit.pixmap, *o->parm.blit.position, *o->parm.blit.clip, o->flags);
-		o->parm.blit.pixmap->unlock();
-		delete o->parm.blit.position;
-		delete o->parm.blit.clip;
+			o->parm.blit->clip&=clip;
+		pixmap->blit(*o->parm.blit->pixmap, o->parm.blit->position, o->parm.blit->clip, o->flags);
+		o->parm.blit->pixmap->unlock();
+		delete o->parm.blit;
 		break;
 	}
 	case gOpcode::setPalette:
-		if (o->parm.setPalette.palette->start>pixmap->colors)
-			o->parm.setPalette.palette->start=pixmap->colors;
-		if (o->parm.setPalette.palette->len>(pixmap->colors-o->parm.setPalette.palette->start))
-			o->parm.setPalette.palette->len=pixmap->colors-o->parm.setPalette.palette->start;
-		if (o->parm.setPalette.palette->len)
-			memcpy(pixmap->clut+o->parm.setPalette.palette->start, o->parm.setPalette.palette->data, o->parm.setPalette.palette->len*sizeof(gRGB));
-		delete[] o->parm.setPalette.palette->data;
-		delete o->parm.setPalette.palette;
+		if (o->parm.setPalette->palette->start>pixmap->clut.colors)
+			o->parm.setPalette->palette->start=pixmap->clut.colors;
+		if (o->parm.setPalette->palette->colors>(pixmap->clut.colors-o->parm.setPalette->palette->start))
+			o->parm.setPalette->palette->colors=pixmap->clut.colors-o->parm.setPalette->palette->start;
+		if (o->parm.setPalette->palette->colors)
+			memcpy(pixmap->clut.data+o->parm.setPalette->palette->start, o->parm.setPalette->palette->data, o->parm.setPalette->palette->colors*sizeof(gRGB));
+		delete[] o->parm.setPalette->palette->data;
+		delete o->parm.setPalette->palette;
+		delete o->parm.setPalette;
 		break;
 	case gOpcode::mergePalette:
-		pixmap->mergePalette(*o->parm.blit.pixmap);
-		o->parm.blit.pixmap->unlock();
+		pixmap->mergePalette(*o->parm.blit->pixmap);
+		o->parm.blit->pixmap->unlock();
+		delete o->parm.blit;
 		break;
 	case gOpcode::line:
-		pixmap->line(*o->parm.line.start, *o->parm.line.end, *o->parm.line.color);
-		delete o->parm.line.start;
-		delete o->parm.line.end;
-		delete o->parm.line.color;
+		pixmap->line(o->parm.line->start, o->parm.line->end, o->parm.line->color);
+		delete o->parm.line;
 		break;
 	case gOpcode::clip:
-		clip&=*o->parm.clip.clip;
-		delete o->parm.clip.clip;
+		clip&=o->parm.clip->clip;
+		delete o->parm.clip;
 		break;
 	case gOpcode::end:
 		unlock();
@@ -341,6 +333,18 @@ void gPixmapDC::exec(gOpcode *o)
 	default:
 		eFatal("illegal opcode %d. expect memory leak!", o->opcode);
 	}
+}
+
+gRGB gPixmapDC::getRGB(gColor col)
+{
+	if ((!pixmap) || (!pixmap->clut.data))
+		return gRGB(col, col, col);
+	if (col<0)
+	{
+		eFatal("bla transp");
+		return gRGB(0, 0, 0, 0xFF);
+	}
+	return pixmap->clut.data[col];
 }
 
 eAutoInitP0<gRC> init_grc(1, "gRC");

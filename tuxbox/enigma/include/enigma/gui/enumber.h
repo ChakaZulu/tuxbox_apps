@@ -18,7 +18,7 @@ private:
 	int eventHandler(const eWidgetEvent &event);
 	int number[16];
 	int len, space, active;
-	gColor cursor, normal;
+	gColor cursorB, cursorF, normalB, normalF;
 	int have_focus;
 	int min, max, digit, maxdigits, isactive;
 	int flags;

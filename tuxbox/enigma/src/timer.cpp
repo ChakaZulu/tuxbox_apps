@@ -1,7 +1,47 @@
 #include "timer.h"
 #include <core/dvb/dvbservice.h>
 
-void eRecordingTimer::ready()
+void eRecordingTimer::timeout()
+{
+	time_t now=time(0)+eDVB::getInstance()->time_difference;
+	eDebug("[TIMER] event start, now: %d", now);
+	
+	if (now < (start_time-5))
+	{
+		time_t stime=start_time - time(0)+eDVB::getInstance()->time_difference - 5;
+		eDebug("[TIMER] not yet, restarting timer to %d...", stime);
+		timer.start( stime );
+	} else if (now < start_time+duration)
+	{
+		if (state == stateWaiting)
+		{
+			eDebug("[TIMER] making ready");
+			if (ready())
+				eDebug("[TIMER] ready failed!");
+		}
+		
+		if (state == stateReady)
+		{
+			if (now >= start_time)
+			{
+				eDebug("start!");
+				start();
+			}
+			timer.start(start_time-now+duration);
+		} else if (state == stateRunning)
+		{
+			eDebug("[TIMER] spurious timer");
+			timer.start(start_time-now+duration);
+		} else
+			eDebug("[TIMER] not ready?!");
+	} else
+	{
+		if (state != stateDone)
+			abort();
+	}
+}
+
+void eRecordingTimer::rec_ready()
 {
 	eDebug("[TIMER] ready()");
 	switch (action)
@@ -29,7 +69,7 @@ void eRecordingTimer::ready()
 	}
 }
 
-void eRecordingTimer::start()
+void eRecordingTimer::rec_start()
 {
 	eDebug("[TIMER] start()");
 	switch (action)
@@ -43,7 +83,7 @@ void eRecordingTimer::start()
 	}
 }
 
-void eRecordingTimer::pause()
+void eRecordingTimer::rec_pause()
 {
 	eDebug("[TIMER] pause()");
 	switch (action)
@@ -57,7 +97,7 @@ void eRecordingTimer::pause()
 	}
 }
 
-void eRecordingTimer::stop()
+void eRecordingTimer::rec_stop()
 {
 	eDebug("[TIMER] stop()");
 	switch (action)
@@ -86,80 +126,12 @@ void eRecordingTimer::serviceChanged(const eServiceReference &service, int err)
 	}
 }
 
-void eRecordingTimer::setState(int newstate)
-{
-	switch (newstate)
-	{
-	case stateReady:
-		switch (state)
-		{
-		case stateRunning:
-			setState(statePause);
-		case statePause:
-		case stateDisabled:
-		case stateWaiting:
-		case stateDone:
-			ready();
-			break;
-		}
-		break;
-	case statePause:
-		switch (state)
-		{
-		case stateDisabled:
-		case stateDone:
-		case stateWaiting:
-			ready();
-		case stateReady:
-			start();
-		case stateRunning:
-			pause();
-			break;
-		}
-		state=statePause;
-		break;
-	case stateRunning:
-		switch (state)
-		{
-		case stateDone:
-		case stateDisabled:
-		case stateWaiting:
-			setState(stateReady);
-		case statePause:
-		case stateReady:
-			start();
-			break;
-		case stateRunning:
-			break;
-		}
-		state=stateRunning;
-		break;
-	case stateDisabled:
-	case stateWaiting:
-	case stateDone:
-		switch (state)
-		{
-		case stateRunning:
-		case statePause:
-		case stateReady:
-			stop();
-		case stateDisabled:
-		case stateWaiting:
-			state=stateDone;
-			break;
-		}
-		break;
-	}
-	
-	state=newstate;
-}
-
 void eRecordingTimer::gotPMT(PMT *pmt)
 {
 	switch (state)
 	{
 	case stateRunning:
-		stop();
+		rec_stop();
 	case stateReady:
 	case statePause:
 		if (action == actionRecord)
@@ -175,7 +147,7 @@ void eRecordingTimer::gotPMT(PMT *pmt)
 			if (sapi)
 				recorder->addPID(sapi->pmtpid);
 			if (state == stateRunning)
-				start();
+				rec_start();
 		}
 		break;
 	default:
@@ -183,40 +155,101 @@ void eRecordingTimer::gotPMT(PMT *pmt)
 	}
 }
 
-eRecordingTimer::eRecordingTimer(time_t starttime)
-		: start_time(starttime), recorder(0)
+eRecordingTimer::eRecordingTimer()
+		: timer(eApp), start_time(0), recorder(0)
 {
 	CONNECT(eDVB::getInstance()->switchedService, eRecordingTimer::serviceChanged);
 	CONNECT(eDVB::getInstance()->gotPMT, eRecordingTimer::gotPMT);
+	CONNECT(timer.timeout, eRecordingTimer::timeout);
+	state=stateDisabled;
 }
 
 eRecordingTimer::~eRecordingTimer()
 {
-	setState(stateDone);
+	abort();
 	ASSERT(!recorder);
 }
 
-#if 0
-
-void eTimerManager::process()
+int eRecordingTimer::disable()
 {
-	int ttgr=5; // time to go ready (5s)
-	int now=time(0)+eDVB::getInstance()->time_difference;
-	for (timerList::iterator i(recordtimer.begin()); i != recordtimer.end(); ++i)
-	{
-		if ((i->state == stateDone) || (i->state == stateWaiting))
-			continue;
-		if ((i->start_time - ttgr) > now)
-		{
-			int delay=i->start_time - ttgr;
-		}
-		
-	}
+	if (state != stateWaiting)
+		return -1;
+	timer.stop();
+	state = stateDisabled;
+	return 0;
 }
-#endif
 
-eTimerManager::eTimerManager(): timer(eApp)
+int eRecordingTimer::enable()
 {
+	if (state != stateDisabled)
+		return -1;
+	time_t stime=start_time - time(0)+eDVB::getInstance()->time_difference - 5;
+	timer.start( stime );
+	eDebug("[TIMER] enabled at %d", stime);
+	state = stateWaiting;
+	return 0;
+}
+
+int eRecordingTimer::ready()
+{
+	if ((state != stateDisabled) && (state != stateWaiting) && (state != stateDone))
+		return -1;
+	rec_ready();
+	state = stateReady;
+	return 0;
+}
+
+int eRecordingTimer::start()
+{
+	if (state != stateReady)
+		if (ready())
+			return -1;
+	rec_start();
+	return 0;
+}
+
+int eRecordingTimer::pause()
+{
+	if (state != stateRunning)
+		return -1;
+	rec_pause();
+	state = statePause;
+	return 0;
+}
+
+int eRecordingTimer::resume()
+{
+	if (state != statePause)
+		return -1;
+	rec_start();
+	state = stateRunning;
+	return 0;
+}
+
+int eRecordingTimer::abort()
+{
+	if (state == stateRunning)
+		if (pause())
+			return -1;
+	if ((state != stateWaiting) && (state != statePause))
+		return -1;
+	if (state == statePause)
+		rec_stop();
+	state = stateDone;
+	return 0;
+}
+
+eTimerManager::eTimerManager()
+{
+#if 0
+	recordtimer.setAutoDelete(true);
+	
+	eRecordingTimer *n=new eRecordingTimer();
+	recordtimer.push_back(n);
+	n->start_time=time(0)+eDVB::getInstance()->time_difference + 60;
+	n->service=eServiceReference(eTransportStreamID(0x437), eOriginalNetworkID(0x0001), eServiceID(0x6d66), 1);
+	n->enable();
+#endif
 }
 
 eTimerManager::~eTimerManager()

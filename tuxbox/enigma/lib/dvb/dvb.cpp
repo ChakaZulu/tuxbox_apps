@@ -267,7 +267,7 @@ eTransponderList::eTransponderList()
 		lnbs.push_back(eLNB(*this));
 		eLNB &lnb=lnbs.back();
 	
-		lnb.setLOFHi(10600000);
+		lnb.setLOFHi(10607000);
 		lnb.setLOFLo(9750000);
 		lnb.setLOFThreshold(11700000);
 		lnb.getDiSEqC().sat=0;

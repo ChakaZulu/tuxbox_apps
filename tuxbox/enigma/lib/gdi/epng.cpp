@@ -88,29 +88,29 @@ gImage *loadPNG(const char *filename)
 			int num_palette;
 			png_get_PLTE(png_ptr, info_ptr, &palette, &num_palette);
 			if (num_palette)
-				res->clut=new gRGB[num_palette];
+				res->clut.data=new gRGB[num_palette];
 			else
-				res->clut=0;
-			res->colors=num_palette;
+				res->clut.data=0;
+			res->clut.colors=num_palette;
 			
 			for (int i=0; i<num_palette; i++)
 			{
-				res->clut[i].a=0;
-				res->clut[i].r=palette[i].red;
-				res->clut[i].g=palette[i].green;
-				res->clut[i].b=palette[i].blue;
+				res->clut.data[i].a=0;
+				res->clut.data[i].r=palette[i].red;
+				res->clut.data[i].g=palette[i].green;
+				res->clut.data[i].b=palette[i].blue;
 			}
 			if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
 			{
 				png_byte *trans;
 				png_get_tRNS(png_ptr, info_ptr, &trans, &num_palette, 0);
 				for (int i=0; i<num_palette; i++)
-					res->clut[i].a=255-trans[i];
+					res->clut.data[i].a=255-trans[i];
 			}
 		} else
 		{
-			res->clut=0;
-			res->colors=0;
+			res->clut.data=0;
+			res->clut.colors=0;
 		}
 		png_read_end(png_ptr, end_info);
 	} else

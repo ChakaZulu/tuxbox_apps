@@ -19,9 +19,46 @@
 #include <core/system/elock.h>
 #include <core/system/init.h>
 
+#include <map>
+
 fontRenderClass *fontRenderClass::instance;
 static eLock ftlock;
 static FTC_Font cache_current_font=0;
+
+struct fntColorCacheKey
+{
+	gRGB start, end;
+	fntColorCacheKey(const gRGB &start, const gRGB &end)
+		: start(start), end(end)
+	{
+	}
+	bool operator <(const fntColorCacheKey &c) const
+	{
+		if (start < c.start)
+			return 1;
+		else if (start == c.start)
+			return end < c.end;
+		return 0;
+	}
+};
+
+std::map<fntColorCacheKey,gLookup> colorcache;
+
+static gLookup &getColor(const gPalette &pal, const gRGB &start, const gRGB &end)
+{
+	fntColorCacheKey key(start, end);
+	std::map<fntColorCacheKey,gLookup>::iterator i=colorcache.find(key);
+	if (i != colorcache.end())
+		return i->second;
+	gLookup &n=colorcache.insert(std::pair<fntColorCacheKey,gLookup>(key,gLookup())).first->second;
+	eDebug("[FONT] creating new font color cache entry %02x%02x%02x%02x .. %02x%02x%02x%02x", start.a, start.r, start.g, start.b,
+		end.a, end.r, end.g, end.b);
+	n.build(16, pal, start, end);
+/*	for (int i=0; i<16; i++)
+		eDebugNoNewLine("%02x|%02x%02x%02x%02x ", (int)n.lookup[i], pal.data[n.lookup[i]].a, pal.data[n.lookup[i]].r, pal.data[n.lookup[i]].g, pal.data[n.lookup[i]].b);
+	eDebug("");*/
+	return n;
+}
 
 fontRenderClass *fontRenderClass::getInstance()
 {
@@ -73,7 +110,7 @@ FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_in
 
 int fontRenderClass::AddFont(const char *filename)
 {
-	eDebug("[FONT] adding font %s...", filename);
+	eDebugNoNewLine("[FONT] adding font %s...", filename);
 	fflush(stdout);
 	int error;
 	fontListEntry *n=new fontListEntry;
@@ -116,7 +153,7 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 			return;
 		}
 	}
-	eDebug("\n[FONT] loading fonts...\n");
+	eDebug("[FONT] loading fonts...");
 	fflush(stdout);
 	font=0;
 	
@@ -408,7 +445,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 	return 0;
 }
 
-void eTextPara::blit(gPixmapDC &dc, const ePoint &offset)
+void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background, const gRGB &foreground)
 {
 	eLocker lock(ftlock);
 
@@ -426,12 +463,19 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset)
 
 	if (target.bpp != 8)
 		eFatal("eTextPara::blit - can't render into %d bpp buffer", target.bpp);
+
+	register int opcode;
+	gColor *lookup=0;
 		
-	register int shift=target.clut?4:0, opcode=0;	// in grayscale modes use 8bit, else 4bit
-	
-	if (!target.clut)
+	if (target.clut.data)
+	{
+		lookup=getColor(target.clut, background, foreground).lookup;
+		opcode=0;
+	} else
+	{
 		opcode=1;
-	
+	}
+		
 	eRect clip(0, 0, target.x, target.y);
 	clip&=dc.getClip();
 
@@ -461,9 +505,9 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset)
 				{
 					for (ax=0; ax<sx; ax++)
 					{	
-						register int b=(*s++)>>shift;
+						register int b=(*s++)>>4;
 						if(b)
-							*td++|=b;
+							*td++=lookup[b];
 						else
 							td++;
 					}
@@ -471,11 +515,8 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset)
 				{
 					for (ax=0; ax<sx; ax++)
 					{	
-						register int b=(*s++)>>shift;
-						if(b)
-							*td++^=b;
-						else
-							td++;
+						register int b=*s++;
+						*td++^=b;
 					}
 				}
 				s+=glyph_bitmap->pitch-ax;

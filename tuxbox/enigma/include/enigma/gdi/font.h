@@ -20,6 +20,7 @@ class FontRenderClass;
 class Font;
 class gPixmapDC;
 class gFont;
+class gRGB;
 
 class fontRenderClass
 { 
@@ -110,7 +111,7 @@ public:
 
 	void clear();
 
-	void blit(gPixmapDC &dc, const ePoint &offset);
+	void blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background, const gRGB &foreground);
 
 	enum
 	{

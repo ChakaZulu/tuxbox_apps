@@ -263,6 +263,7 @@ int eSkin::parseValues(XMLTreeNode *xvalues)
 		}
 		values[name]=atoi(value);
 	}
+	return 0;
 }
 
 int eSkin::parseFonts(XMLTreeNode *xfonts)
@@ -289,6 +290,7 @@ int eSkin::parseFonts(XMLTreeNode *xfonts)
 		}
 		fontRenderClass::getInstance()->AddFont((basepath+eString(file)).c_str());
 	}
+	return 0;
 }
 
 gDC *eSkin::getDCbyName(const char *name)
@@ -358,12 +360,11 @@ eSkin::eSkin()
 	
 	memset(palette, 0, sizeof(gRGB)*maxcolors);
 	paldummy=new gImage(eSize(1, 1), 8);
-	paldummy->clut=palette;
-	paldummy->colors=maxcolors;
+	paldummy->clut.data=palette;
+	paldummy->clut.colors=maxcolors;
 
 	colorused=new int[maxcolors];
 	memset(colorused, 0, maxcolors*sizeof(int));
-
 }
 
 eSkin::~eSkin()
@@ -519,12 +520,20 @@ void eSkin::makeActive()
 
 gColor eSkin::queryScheme(const eString& name) const
 {
-	std::map<eString, gColor>::const_iterator it = scheme.find(name);
+	eString base=name;
+	int offset=0, p;
+	if ((p=base.find('+'))!=-1)
+	{
+		offset=atoi(base.mid(p).c_str());
+		base=base.left(p);
+	}
+
+	std::map<eString, gColor>::const_iterator it = scheme.find(base);
 
 	if (it != scheme.end())
-		return it->second;
+		return it->second + offset;
 
-	eDebug("%s does not exist", name.c_str());
+	eFatal("%s does not exist", name.c_str());
 	
 	return gColor(0);
 }
@@ -558,14 +567,19 @@ gColor eSkin::queryColor(const eString& name)
 	if (!*end)
 		return gColor(numcol);
 
-	eNamedColor *col=searchColor(name);
+	eString base=name;
+	int offset=0, p;
+	if ((p=base.find('+'))!=-1)
+	{
+		offset=atoi(base.mid(p).c_str());
+		base=base.left(p);
+	}
+
+	eNamedColor *col=searchColor(base);
 
 	if (!col)
 	{
-		eDebug("requested color %s does not exist", name.c_str());
-		return gColor(0);
-	}
-	else
-		return col->index;
+		return queryScheme(name);
+	} else
+		return col->index + offset;
 }
-

@@ -15,8 +15,8 @@ gLCDDC::gLCDDC(eLCD *lcd): lcd(lcd)
 	pixmap->stride=lcd->stride();
 	pixmap->data=lcd->buffer();
 	
-	pixmap->colors=256;
-	pixmap->clut=0;
+	pixmap->clut.colors=256;
+	pixmap->clut.data=0;
 }
 
 gLCDDC::~gLCDDC()

@@ -16,6 +16,7 @@ class eWindow: public eWidget
 	gPixmap *iTopLeft, *iTop,
 			*iTopRight, *iLeft, *iRight, 
 			*iBottomLeft, *iBottom, *iBottomRight;
+	gColor fontColor, titleBarColor;
 protected:
 	int borderTop, borderLeft, borderBottom, borderRight, titleOffsetX, titleOffsetY, titleFontSize, titleHeight, titleBorderY;
 	void redrawWidget(gPainter *target, const eRect &where);

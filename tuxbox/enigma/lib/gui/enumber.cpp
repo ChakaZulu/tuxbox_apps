@@ -18,7 +18,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	if (!area.contains(pos))
 		return;
 		
-	p->setForegroundColor((have_focus && n==active)?cursor:normal);
+	p->setForegroundColor((have_focus && n==active)?cursorB:normalB);
 	p->fill(pos);
 	p->setFont(font);
 	
@@ -31,6 +31,8 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	if (n && (flags & flagDrawPoints))
 		t="."+t;
 	
+	p->setForegroundColor((have_focus && n==active)?cursorF:normalF);
+	p->setBackgroundColor((have_focus && n==active)?cursorB:normalB);
 	p->renderText(pos, t);
 	p->flush();
 }
@@ -85,7 +87,11 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 
 eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
 	:eWidget(parent, grabfocus), 
-	active(0), cursor(cursor=eSkin::getActive()->queryScheme("focusedColor")),	normal(eSkin::getActive()->queryScheme("fgColor")),
+	active(0), 
+	cursorB(eSkin::getActive()->queryScheme("global.selected.background")),	
+	cursorF(eSkin::getActive()->queryScheme("global.selected.foreground")),	
+	normalB(eSkin::getActive()->queryScheme("global.normal.background")),	
+	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
 	have_focus(0), digit(isactive), isactive(isactive), descr(descr?descr->getText():""), tmpDescr(0)
 {
 	setNumberOfFields(_len);
@@ -172,8 +178,10 @@ void eNumber::gotFocus()
 		}
 		((eNumber*)LCDTmp)->digit=digit;
 		((eNumber*)LCDTmp)->active=active;
-		((eNumber*)LCDTmp)->normal=0;
-		((eNumber*)LCDTmp)->cursor=255;
+		((eNumber*)LCDTmp)->normalF=0;
+		((eNumber*)LCDTmp)->cursorF=255;
+		((eNumber*)LCDTmp)->normalB=255;
+		((eNumber*)LCDTmp)->cursorB=0;
 		((eNumber*)LCDTmp)->have_focus=1;
 		LCDTmp->show();
 	}

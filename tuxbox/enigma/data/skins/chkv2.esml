@@ -30,7 +30,6 @@
 		<color name="osd_timebar" color="#1010AA"/>
 		<color name="osd_timebarborder" color="#ffffff"/>
 
-
 		<color name="shadow_red" color="#586D88" end="#ff0303" size="16" />
 		<color name="shadow_green" color="#586D88" end="#03ff03" size="16" />
 		<color name="shadow_yellow" color="#586D88" end="#ffff03" size="16" />
@@ -39,20 +38,24 @@
 	</colors>
 	
 	<colorscheme>
-		<map name="backgroundColor" color="content" />
+		<map name="global.normal.background" color="content" />
+		<map name="global.normal.foreground" color="content+15" />
 
-		<map name="eServiceSelector.highlight" color="dark" />
-		<map name="focusedColor" color="dark" />
+		<map name="global.selected.background" color="dark" />
+		<map name="global.selected.foreground" color="dark+15" />
 
-		<map name="fgColor" color="content" />
-		<map name="fgColorDisabled" color="content" />
+		<map name="global.disabled.background" color="content" />
+		<map name="global.disabled.foreground" color="content+7" />
 
-		<map name="eWindow.titleBarColor" color="header" />
+		<map name="eWindow.titleBar" color="header" />
+		<map name="eWindow.titleBarFont" color="header+15" />
 
 		<map name="eProgress.border" color="dark" />
 		<map name="eProgress.left" color="light" />
 		<map name="eProgress.right" color="middle" />
 		
+		<map name="eServiceSelector.highlight.background" color="dark" />
+		<map name="eServiceSelector.highlight.foreground" color="dark+15" />
 	</colorscheme>
 	
 	 <values>
@@ -95,11 +98,11 @@
 	
 	<object name="eventview">
 		<eWindow cposition="50:80" csize="590:400" name="title">
-			<eLabel position="10:5" size="e:e-30" name="epg_description" font="Blue Highway Regular;24" backgroundColor="content" wrap="on"/>
+			<eLabel position="10:5" size="e:e-30" name="epg_description" font="Blue Highway Regular;24" backgroundColor="content" foregroundColor="content+15" wrap="on"/>
 			<eWidget position="0:e-30" size="600:e" backgroundColor="dark" />
-			<eLabel position="10:e-30" size="130:e" name="date" font="Blue Highway Regular;24" backgroundColor="dark"/>
-			<eLabel position="130:e-30" size="230:e" name="time" font="Blue Highway Regular;24" backgroundColor="dark"/>
-			<eLabel position="360:e-30" size="230:e" name="channel" font="Blue Highway Regular;24" backgroundColor="dark" align="right"/>
+			<eLabel position="10:e-30" size="130:e" name="date" font="Blue Highway Regular;24" backgroundColor="dark" foregroundColor="dark+15" />
+			<eLabel position="130:e-30" size="230:e" name="time" font="Blue Highway Regular;24" backgroundColor="dark" foregroundColor="dark+15" />
+			<eLabel position="360:e-30" size="230:e" name="channel" font="Blue Highway Regular;24" backgroundColor="dark" foregroundColor="dark+15" align="right"/>
 		</eWindow>
 	</object>
 
@@ -161,28 +164,28 @@
 
 			<!--texte-->
 			<eLabel position="0:84" size="65:25" font="Blue Highway Bold;30" name="ch_number" align="right"
-				backgroundColor="dark"/>
+				backgroundColor="dark" foregroundColor="dark+15" />
 
 			<eLabel position="96:4" size="479:27" font="Blue Highway Bold;36" name="ch_name"
-				backgroundColor="white"/>
+				backgroundColor="white" foregroundColor="white+15" />
 
 			<eLabel position="90:40" size="52:25" font="Blue Highway Regular;24" name="e_now_time"
-				backgroundColor="light"/>
+				backgroundColor="light" foregroundColor="light+15" />
 			<eLabel position="90:70" size="52:25" font="Blue Highway Regular;24" name="e_next_time"
-				backgroundColor="middle"/>
+				backgroundColor="middle" foregroundColor="middle+15" />
 
 			<eLabel position="142:40" size="346:25" font="Blue Highway Regular;24" name="e_now_title"
-				backgroundColor="light"/>
+				backgroundColor="light" foregroundColor="light+15" />
 			<eLabel position="142:70" size="346:25" font="Blue Highway Regular;24" name="e_next_title"
-				backgroundColor="middle"/>
+				backgroundColor="middle" foregroundColor="middle+15" />
 
 			<eLabel position="488:40" size="90:25" font="Blue Highway Regular;24" name="e_now_duration" align="right"
-				backgroundColor="light"/>
+				backgroundColor="light" foregroundColor="light+15" />
 			<eLabel position="488:70" size="90:25" font="Blue Highway Regular;24" name="e_next_duration" align="right"
-				backgroundColor="middle"/>
+				backgroundColor="middle" foregroundColor="middle+15" />
 
 			<eLabel position="104:101" size="50:21" font="Blue Highway Regular;24" name="time" align="center"
-				backgroundColor="dark"/>
+				backgroundColor="dark"  foregroundColor="dark+15" />
 
 			<eProgress position="160:103" size="150:16" name="progress_bar" foregroundColor="middle" border="1" />
 
@@ -195,8 +198,6 @@
 			<eLabel position="538:103" size="25:15" pixmap="osd_dolby_on" name="osd_dolby_on"/>
 			<eLabel position="538:103" size="25:15" pixmap="osd_dolby_off" name="osd_dolby_off"/>
 
-			
-			
 			<eLabel name="description" />
 		<!--	 -->
 			<eLabel position="393:105" size="12:12" pixmap="button_red" name="button_red_enabled" alphatest="on" />

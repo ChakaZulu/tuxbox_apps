@@ -32,12 +32,44 @@ struct gRGB
 	gRGB()
 	{
 	}
+	bool operator < (const gRGB &c) const
+	{
+		if (b < c.b)
+			return 1;
+		if (b == c.b)
+		{
+			if (g < c.g)
+				return 1;
+			if (g == c.g)
+			{
+				if (r < c.r)
+					return 1;
+				if (r == c.r)
+					return a < c.a;
+			}
+		}
+		return 0;
+	}
+	bool operator==(const gRGB &c) const
+	{
+		return (b == c.b) && (g == c.g) && (r == c.r) && (a == c.a);
+	}
 };
 
 struct gPalette
 {
-	int start, len;
+	int start, colors;
 	gRGB *data;
+	gColor findColor(const gRGB &rgb) const;
+};
+
+struct gLookup
+{
+	int size;
+	gColor *lookup;
+	gLookup(int size, const gPalette &pal, const gRGB &start, const gRGB &end);
+	gLookup();
+	void build(int size, const gPalette &pal, const gRGB &start, const gRGB &end);
 };
 
 /**
@@ -71,8 +103,8 @@ struct gPixmap
 {
 	int x, y, bpp, bypp, stride;
 	void *data;
-	int colors;
-	gRGB *clut;
+	
+	gPalette clut;
 	
 	eLock contentlock;
 	int final;
@@ -92,7 +124,6 @@ struct gPixmap
 	
 	void mergePalette(const gPixmap &target);
 	void line(ePoint start, ePoint end, gColor color);
-
 	void finalLock();
 	gPixmap();
 	virtual ~gPixmap();

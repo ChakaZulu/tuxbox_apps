@@ -84,7 +84,8 @@ eEPGWindow::eEPGWindow(const eServiceReference &service)
 	:eListBoxWindow<eListBoxEntryEPG>("Select Service...", 16, 600), current(service)
 {
 	move(ePoint(50, 50));
-	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
+	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"),
+			eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 	CONNECT(list.selected, eEPGWindow::entrySelected);
 	fillEPGList();
 }

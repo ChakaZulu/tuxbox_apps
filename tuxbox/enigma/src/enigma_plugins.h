@@ -22,21 +22,32 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited) const
 	{
-			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listbox->getFont());
+		rc->setFont(listbox->getFont());
 
-			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
-					rc->fill(rect);
+		if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
+		{
+			rc->setForegroundColor(highlited?coActiveB:coNormalB);
+			rc->fill(rect);
+			rc->setBackgroundColor(highlited?coActiveB:coNormalB);
+		} else
+		{
+			eWidget *w=listbox->getNonTransparentBackground();
+			rc->setForegroundColor(w->getBackgroundColor());
+			rc->fill(rect);
+			rc->setBackgroundColor(w->getBackgroundColor());
+		}
 
-			eString txt(isback?_("[back]"):name + " - " + desc);
+		rc->setForegroundColor(highlited?coActiveF:coNormalF);
 
-			rc->renderText(rect, txt);
-			
-			eWidget* p = listbox->getParent();			
-			if (highlited && p && p->LCDElement)
-				p->LCDElement->setText(txt);
+		eString txt(isback?_("[back]"):name + " - " + desc);
+
+		rc->renderText(rect, txt);
+		
+		eWidget* p = listbox->getParent();			
+		if (highlited && p && p->LCDElement)
+			p->LCDElement->setText(txt);
 	}
 };
 

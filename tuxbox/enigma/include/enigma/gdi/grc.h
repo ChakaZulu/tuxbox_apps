@@ -44,59 +44,72 @@ struct gOpcode
 		shutdown
 	} opcode;
 
-	union
+	union para
 	{
-		struct
+		struct pbegin
 		{
-			eRect *area;
-		} begin;
+			eRect area;
+			pbegin(const eRect &area): area(area) { }
+		} *begin;
 		
-		struct
+		struct pfill
 		{
-			eRect *area;
-			gColor *color;
-		} fill;
+			eRect area;
+			gColor color;
+			pfill(const eRect &area, gColor color): area(area), color(color) { }
+		} *fill;
 
-		struct
+		struct prenderText
 		{
-			gFont *font;
-			eRect *area;
-			eString *text;
-		} renderText;
+			gFont font;
+			eRect area;
+			eString text;
+			gRGB foregroundColor, backgroundColor;
+			prenderText(const gFont &font, const eRect &area, const eString &text, const gRGB &foregroundColor, const gRGB &backgroundColor):
+				font(font), area(area), text(text), foregroundColor(foregroundColor), backgroundColor(backgroundColor) { }
+		} *renderText;
 
-		struct
+		struct prenderPara
 		{
-			ePoint *offset;
+			ePoint offset;
 			eTextPara *textpara;
-		} renderPara;
+			gRGB foregroundColor, backgroundColor;
+			prenderPara(const ePoint &offset, eTextPara *textpara, const gRGB &foregroundColor, const gRGB &backgroundColor)
+				: offset(offset), textpara(textpara), foregroundColor(foregroundColor), backgroundColor(backgroundColor) { }
+		} *renderPara;
 
-		struct
+		struct psetPalette
 		{
 			gPalette *palette;
-		} setPalette;
+			psetPalette(gPalette *palette): palette(palette) { }
+		} *setPalette;
 		
-		struct
+		struct pblit
 		{
 			gPixmap *pixmap;
-			ePoint *position;
-			eRect *clip;
-		} blit;
+			ePoint position;
+			eRect clip;
+			pblit(gPixmap *pixmap, const ePoint &position, const eRect &clip): pixmap(pixmap), position(position), clip(clip) { }
+		} *blit;
 
-		struct
+		struct pmergePalette
 		{
 			gPixmap *target;
-		} mergePalette;
+			pmergePalette(gPixmap *target): target(target) { }
+		} *mergePalette;
 		
-		struct
+		struct pline
 		{
-			ePoint *start, *end;
-			gColor *color;
-		} line;
+			ePoint start, end;
+			gColor color;
+			pline(const ePoint &start, const ePoint &end, gColor color): start(start), end(end), color(color) { }
+		} *line;
 
-		struct
+		struct pclip
 		{
-			eRect *clip;
-		} clip;
+			eRect clip;
+			pclip(const eRect &clip): clip(clip) { }
+		} *clip;
 	} parm;
 
 	int flags;
@@ -178,6 +191,7 @@ public:
 	virtual gPixmap &getPixmap()=0;
 	virtual eSize getSize()=0;
 	virtual const eRect &getClip()=0;
+	virtual gRGB getRGB(gColor col)=0;
 	virtual ~gDC();
 	void lock() { dclock.lock(1); }
 	void unlock() { dclock.unlock(1); }
@@ -195,6 +209,7 @@ public:
 	gPixmapDC(gPixmap *pixmap);
 	virtual ~gPixmapDC();
 	gPixmap &getPixmap() { return *pixmap; }
+	gRGB getRGB(gColor col);
 	const eRect &getClip() { return clip; }
 	virtual eSize getSize() { return eSize(pixmap->x, pixmap->y); }
 };

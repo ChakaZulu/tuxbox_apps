@@ -44,12 +44,11 @@ public:
 	void add(NVODReferenceEntry *ref);
 };
 
-class AudioStream: public eListBoxEntry
+class AudioStream: public eListBoxEntryText
 {
 	friend class eListBox<AudioStream>;
 	friend class eAudioSelector;
 public:
-	eString text;
 	enum
   {
 		audioMPEG, audioAC3
@@ -58,8 +57,6 @@ public:
 	PMTEntry *stream;
 
 	bool operator < ( const AudioStream& e) const	{	return 0;	}
-protected:
-	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const;
 };
 
 class eAudioSelector: public eListBoxWindow<AudioStream>
@@ -132,6 +129,7 @@ class eZapMain: public eWidget
 	eSubServiceSelector subservicesel;
 	eAudioSelector audiosel;
 	eEventDisplay *actual_eventDisplay;
+	eServiceReference refservice;
 	int flags;
 	int isVT;
 	int isEPG;

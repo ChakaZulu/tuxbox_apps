@@ -67,7 +67,7 @@ eListBoxEntryService::~eListBoxEntryService()
 {
 }
 
-void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, const gColor &coActive, const gColor &coNormal, bool highlighted)
+void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool hilited)
 {
 	eString sname;
 	const eService *pservice=eDVB::getInstance()->settings->getTransponders()->searchService(service);
@@ -86,8 +86,8 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, const gColor 
 		}
 		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service);
 
-		eWidget* p = listbox->getParent();			
-		if (highlighted && p && p->LCDElement)
+		eWidget* p = listbox->getParent();
+		if (hilited && p && p->LCDElement)
 				p->LCDElement->setText(sname);
 
 		if (e)
@@ -110,11 +110,24 @@ void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, const gColor 
 		sname=bouquet->bouquet_name;
 	else
 		return;
-	gColor col=highlighted?coActive:coNormal;
-	rc->setForegroundColor(col);
+
 	rc->setFont(listbox->getFont());
-	if (col != -1)
+
+	if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
+	{
+		rc->setForegroundColor(hilited?coActiveB:coNormalB);
 		rc->fill(rect);
+		rc->setBackgroundColor(hilited?coActiveB:coNormalB);
+	} else
+	{
+		eWidget *w=listbox->getNonTransparentBackground();
+		rc->setForegroundColor(w->getBackgroundColor());
+		rc->fill(rect);
+		rc->setBackgroundColor(w->getBackgroundColor());
+	}
+
+	rc->setForegroundColor(hilited?coActiveF:coNormalF);
+
 	rc->renderText(rect, sname);
 }
 
@@ -230,7 +243,7 @@ eServiceSelector::eServiceSelector()
 {
 	services = new eListBox<eListBoxEntryService>(this);
 	services->setName("services");
-	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
+	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 	
 	pbs = new eBouquetSelector();
 	fillServiceList();

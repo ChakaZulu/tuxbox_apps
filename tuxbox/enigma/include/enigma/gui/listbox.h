@@ -20,7 +20,7 @@ class eListBox: public eWidget
 	ePtrList_T_iterator top, bottom, current;
 
 	int entries, item_height, flags;
-	gColor col_active;
+	gColor colorActiveB, colorActiveF;
 
 	void gotFocus();
 	void lostFocus();
@@ -47,7 +47,7 @@ public:
 	int setProperty(const eString &prop, const eString &value);
 
 	int have_focus;
-	void setActiveColor(gColor active);
+	void setActiveColor(gColor back, gColor front);
 	enum
 	{
 		dirPageDown, dirPageUp, dirDown, dirUp, dirFirst
@@ -110,19 +110,29 @@ public:
 	void *getKey() { return key; }
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited) const
 	{
-			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listbox->getFont());
+		rc->setFont(listbox->getFont());
 
-			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
-					rc->fill(rect);
+		if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
+		{
+			rc->setForegroundColor(highlited?coActiveB:coNormalB);
+			rc->fill(rect);
+			rc->setBackgroundColor(highlited?coActiveB:coNormalB);
+		} else
+		{
+			eWidget *w=listbox->getNonTransparentBackground();
+			rc->setForegroundColor(w->getBackgroundColor());
+			rc->fill(rect);
+			rc->setBackgroundColor(w->getBackgroundColor());
+		}
 
-			rc->renderText(rect, text);
-			
-			eWidget* p = listbox->getParent();			
-			if (highlited && p && p->LCDElement)
-				p->LCDElement->setText(text);
+		rc->setForegroundColor(highlited?coActiveF:coNormalF);
+		rc->renderText(rect, text);
+		
+		eWidget* p = listbox->getParent();			
+		if (highlited && p && p->LCDElement)
+			p->LCDElement->setText(text);
 	}
 };
 
@@ -144,19 +154,29 @@ public:
 	}
 
 protected:
-	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
+	void redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool highlited) const
 	{
-			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listbox->getFont());
+		rc->setFont(listbox->getFont());
 
-			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
-					rc->fill(rect);
+		if ((coNormalB != -1 && !highlited) || (highlited && coActiveB != -1))
+		{
+			rc->setForegroundColor(highlited?coActiveB:coNormalB);
+			rc->fill(rect);
+			rc->setBackgroundColor(highlited?coActiveB:coNormalB);
+		} else
+		{
+			eWidget *w=listbox->getNonTransparentBackground();
+			rc->setForegroundColor(w->getBackgroundColor());
+			rc->fill(rect);
+			rc->setBackgroundColor(w->getBackgroundColor());
+		}
 
-			rc->renderText(rect, text.str());
+		rc->setForegroundColor(highlited?coActiveF:coNormalF);
+		rc->renderText(rect, text.str());
 
-			eWidget* p = listbox->getParent();			
-			if (highlited && p && p->LCDElement)
-				p->LCDElement->setText(text.str());
+		eWidget* p = listbox->getParent();			
+		if (highlited && p && p->LCDElement)
+			p->LCDElement->setText(text.str());
 	}
 };
 
@@ -225,17 +245,20 @@ inline void eListBox<T>::invalidateEntry(int n)
 template <class T>
 inline int eListBox<T>::setProperty(const eString &prop, const eString &value)
 {
-	if (prop=="col_active")
-		col_active=eSkin::getActive()->queryScheme(value);
+	if (prop=="activeForegroundColor")
+		colorActiveF=eSkin::getActive()->queryScheme(value);
+	else if (prop=="activeBackgroundColor")
+		colorActiveB=eSkin::getActive()->queryScheme(value);
 	else
 		return eWidget::setProperty(prop, value);
 	return 0;
 }
 
 template <class T>
-inline void eListBox<T>::setActiveColor(gColor active)
+inline void eListBox<T>::setActiveColor(gColor back, gColor front)
 {
-	col_active=active;
+	colorActiveB=back;
+	colorActiveF=front;
 
 	if (current != childs.end())
 	{
@@ -273,7 +296,8 @@ inline eListBox<T>::eListBox(eWidget *parent)
 		top(childs.end()), bottom(childs.end()), current(childs.end()),
 		item_height(font.pointSize+2),
 		flags(0),
-		col_active(eSkin::getActive()->queryScheme("focusedColor")),
+		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
+		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
 		have_focus(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
@@ -302,7 +326,7 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 
 		if ( where.contains(rect) )
 		{
-			entry->redraw(target, rect, col_active, getBackgroundColor(), have_focus && (entry == current));
+			entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), have_focus && (entry == current));
 
 			if (pixmap && (entry == current) )
 			{

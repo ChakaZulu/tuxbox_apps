@@ -119,12 +119,6 @@ protected:
 	{
 		return parent?parent->getTLW():this;
 	}
-	inline eWidget *getNonTransparentBackground()
-	{
-		if (backgroundColor != -1)
-			return this;
-		return parent?parent->getNonTransparentBackground():this;
-	}
 	int result, in_loop, have_focus, just_showing;
 	void takeFocus();
 	void releaseFocus();
@@ -182,6 +176,13 @@ protected:
 	gPixmap *pixmap;
 
 public:
+	inline eWidget *getNonTransparentBackground()
+	{
+		if (backgroundColor != -1)
+			return this;
+		return parent?parent->getNonTransparentBackground():this;
+	}
+
 	eWidget *LCDTitle;
 	eWidget *LCDElement;
 	eWidget *LCDTmp;

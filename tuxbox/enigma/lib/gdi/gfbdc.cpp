@@ -23,8 +23,8 @@ gFBDC::gFBDC()
 	pixmap->stride=fb->Stride();
 	pixmap->data=fb->lfb;
 	
-	pixmap->colors=256;
-	pixmap->clut=new gRGB[pixmap->colors];
+	pixmap->clut.colors=256;
+	pixmap->clut.data=new gRGB[pixmap->clut.colors];
 }
 
 gFBDC::~gFBDC()
@@ -40,12 +40,12 @@ void gFBDC::exec(gOpcode *o)
 	{
 	case gOpcode::setPalette:
 	{
-		for (int i=o->parm.setPalette.palette->start; i<o->parm.setPalette.palette->len; i++)
+		for (int i=o->parm.setPalette->palette->start; i<o->parm.setPalette->palette->colors; i++)
 		{
-			fb->CMAP()->red[i]=o->parm.setPalette.palette->data[i].r<<8;
-			fb->CMAP()->green[i]=o->parm.setPalette.palette->data[i].g<<8;
-			fb->CMAP()->blue[i]=o->parm.setPalette.palette->data[i].b<<8;
-			fb->CMAP()->transp[i]=o->parm.setPalette.palette->data[i].a<<8;
+			fb->CMAP()->red[i]=o->parm.setPalette->palette->data[i].r<<8;
+			fb->CMAP()->green[i]=o->parm.setPalette->palette->data[i].g<<8;
+			fb->CMAP()->blue[i]=o->parm.setPalette->palette->data[i].b<<8;
+			fb->CMAP()->transp[i]=o->parm.setPalette->palette->data[i].a<<8;
 			if (!fb->CMAP()->red[i])
 				fb->CMAP()->red[i]=0x100;
 		}
