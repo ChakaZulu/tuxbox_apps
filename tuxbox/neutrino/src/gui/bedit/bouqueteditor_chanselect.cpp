@@ -53,7 +53,7 @@ CBEChannelSelectWidget::CBEChannelSelectWidget(const std::string & Caption, unsi
 	// width =   500;
 	// height =  440;
         width  = w_max (500, 0);
-        height = h_max (440, 40);
+        height = h_max (440, 50);
 
 	x = (((g_settings.screen_EndX - g_settings.screen_StartX) - width) / 2) + g_settings.screen_StartX;
 }
