@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.291 2003/02/24 21:15:04 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.292 2003/02/24 22:59:10 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -35,6 +35,7 @@
 /* tuxbox headers */
 #include <configfile.h>
 #include <connection/basicserver.h>
+#include <connection/basicsocket.h>
 
 /* zapit headers */
 #include <zapit/audio.h>
@@ -476,6 +477,17 @@ int start_scan(void)
 	return 0;
 }
 
+
+bool send_data(int fd, const void * data,  const size_t size)
+{
+#define SEND_TIMEOUT_IN_SECONDS 5
+        timeval timeout;
+        timeout.tv_sec  = SEND_TIMEOUT_IN_SECONDS;
+        timeout.tv_usec = 0;
+        return send_data(fd, data, size, timeout);
+}
+
+
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
 	DBG("cmd %d (version %d) received", rmsg.cmd, rmsg.version);
@@ -512,7 +524,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseZapComplete msgResponseZapComplete;
 		read(connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
 		msgResponseZapComplete.zapStatus = zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID));
-		send(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete), 0);
+		send_data(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete));
 		break;
 	}
 
@@ -529,7 +541,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitClient::responseGetLastChannel responseGetLastChannel;
 		responseGetLastChannel = load_settings();
-		send(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel), 0); // bouquet & channel number are already starting at 0!
+		send_data(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel)); // bouquet & channel number are already starting at 0!
 		break;
 	}
 	
@@ -556,7 +568,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::responseGetMode msgGetMode;
 		msgGetMode.mode = (CZapitClient::channelsMode) getMode();
-		send(connfd, &msgGetMode, sizeof(msgGetMode), 0);
+		send_data(connfd, &msgGetMode, sizeof(msgGetMode));
 		break;
 	}
 	
@@ -564,7 +576,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::responseGetCurrentServiceID msgCurrentSID;
 		msgCurrentSID.channel_id = channel->getChannelID();
-		send(connfd, &msgCurrentSID, sizeof(msgCurrentSID), 0);
+		send_data(connfd, &msgCurrentSID, sizeof(msgCurrentSID));
 		break;
 	}
 	
@@ -584,7 +596,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		else
 			msgCurrentServiceInfo.polarisation = 2;
 		msgCurrentServiceInfo.diseqc = channel->getDiSEqC();
-		send(connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo), 0);
+		send_data(connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo));
 		break;
 	}
 	
@@ -602,7 +614,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			response.system = DVB_T;
 			break;
 		}
-		send(connfd, &response, sizeof(response), 0);
+		send_data(connfd, &response, sizeof(response));
 		break;
 	}
 
@@ -635,7 +647,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseCmd response;
 		bouquetManager->restoreBouquets();
 		response.cmd = CZapitMessages::CMD_READY;
-		send(connfd, &response, sizeof(response), 0);
+		send_data(connfd, &response, sizeof(response));
 		break;
 	}
 	
@@ -644,7 +656,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseCmd response;
 		prepare_channels();
 		response.cmd = CZapitMessages::CMD_READY;
-		send(connfd, &response, sizeof(response), 0);
+		send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
 		break;
 	}
@@ -654,7 +666,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseCmd response;
 		bouquetManager->renumServices();
 		response.cmd = CZapitMessages::CMD_READY;
-		send(connfd, &response, sizeof(response), 0);
+		send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
 		break;
 	}
@@ -674,7 +686,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			msgResponseIsScanReady.scanReady = false;
 		else
 			msgResponseIsScanReady.scanReady = true;
-		send(connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady), 0);
+		send_data(connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady));
 		break;
 	}
 
@@ -695,7 +707,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		    while ((search = xmlGetNextOccurence(search, frontendname)) != NULL)
                         {
                                 strncpy(msgResponseGetSatelliteList.satName, xmlGetAttribute(search, "name"), sizeof(msgResponseGetSatelliteList.satName));
-                                send(connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList), 0);
+                                send_data(connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList));
                                 search = search->xmlNextNode;
                         }
 		break;
@@ -749,7 +761,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::responseGetRecordModeState msgGetRecordModeState;
 		msgGetRecordModeState.activated = (currentMode & RECORD_MODE);
-		send(connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState), 0);
+		send_data(connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState));
 		break;
 	}
 	
@@ -760,7 +772,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			msgGetPlaybackState.activated = 1;
 		else
 			msgGetPlaybackState.activated = 0;
-		send(connfd, &msgGetPlaybackState, sizeof(msgGetPlaybackState), 0);
+		send_data(connfd, &msgGetPlaybackState, sizeof(msgGetPlaybackState));
 		break;
 	}
 
@@ -795,7 +807,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseGeneralInteger responseInteger;
 		read(connfd, &msgExistsBouquet, sizeof(msgExistsBouquet));
 		responseInteger.number = bouquetManager->existsBouquet(convert_to_UTF8(std::string(msgExistsBouquet.name)));
-		send(connfd, &responseInteger, sizeof(responseInteger), 0); // bouquet & channel number are already starting at 0!
+		send_data(connfd, &responseInteger, sizeof(responseInteger)); // bouquet & channel number are already starting at 0!
 		break;
 	}
 	
@@ -805,7 +817,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseGeneralTrueFalse responseBool;
 		read(connfd, &msgExistsChInBq, sizeof(msgExistsChInBq)); // bouquet & channel number are already starting at 0!
 		responseBool.status = bouquetManager->existsChannelInBouquet(msgExistsChInBq.bouquet, msgExistsChInBq.channel_id);
-		send(connfd, &responseBool, sizeof(responseBool), 0);
+		send_data(connfd, &responseBool, sizeof(responseBool));
 		break;
 	}
 	
@@ -873,7 +885,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CZapitMessages::responseCmd response;
 		bouquetManager->saveBouquets();
 		response.cmd = CZapitMessages::CMD_READY;
-		send(connfd, &response, sizeof(response), 0);
+		send_data(connfd, &response, sizeof(response));
 		break;
 	}
 	
@@ -915,7 +927,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
 			responseGetOtherPIDs.pcrpid = channel->getPcrPid();
 			responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
-			send(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs), 0);
+			send_data(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs));
 			sendAPIDs(connfd);
 		}
 		break;
@@ -1049,7 +1061,7 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo)
 				msgBouquet.bouquet_nr = i;
 				msgBouquet.locked     = bouquetManager->Bouquets[i]->bLocked;
 				msgBouquet.hidden     = bouquetManager->Bouquets[i]->bHidden;
-				if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
+				if (send_data(connfd, &msgBouquet, sizeof(msgBouquet)) == false)
 				{
 					ERROR("could not send any return");
 					return;
@@ -1071,7 +1083,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 		response.channel_id = (*channels)[i]->getChannelID();
 		response.nr = first_channel_nr + i;
 
-		if (send(connfd, &response, sizeof(response),0) == -1)
+		if (send_data(connfd, &response, sizeof(response)) == false)
 		{
 			ERROR("could not send any return");
 			return;
@@ -1089,7 +1101,7 @@ void sendAPIDs(int connfd)
 		response.is_ac3 = channel->getAudioChannel(i)->isAc3;
 		response.component_tag = channel->getAudioChannel(i)->componentTag;
 
-		if (send(connfd, &response, sizeof(response),0) == -1)
+		if (send_data(connfd, &response, sizeof(response)) == false)
 		{
 			ERROR("could not send any return");
 			return;
@@ -1390,7 +1402,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.291 2003/02/24 21:15:04 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.292 2003/02/24 22:59:10 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
