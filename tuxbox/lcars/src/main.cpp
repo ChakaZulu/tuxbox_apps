@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.18  2002/05/20 20:11:13  TheDOC
+version fix - greetings to all readers of the tux-cvs-mailinglist :) just post a quick Hello to #dbox2 if you read that message ;)
+
 Revision 1.17  2002/05/20 20:08:12  TheDOC
 some new timer and epg-stuff
 
@@ -133,7 +136,7 @@ int main(int argc, char **argv)
 
 	settings settings(&cam);
 
-	settings.setVersion("0.21 TP7");
+	settings.setVersion("0.21");
 
 	hardware hardware(&settings, &variables);
 	hardware.useDD(false);
