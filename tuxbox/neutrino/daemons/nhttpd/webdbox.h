@@ -107,6 +107,8 @@ public:
 	bool ExecuteBouquetEditor(CWebserverRequest* request);
 // BouquetEditor functions
 
+	void BEShowBouquets(CWebserverRequest* request, int selected);
+
 // support functions
 	void ZapTo(string target);
 	void UpdateBouquets(void);
