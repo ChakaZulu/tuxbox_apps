@@ -1,20 +1,20 @@
-localedef -i de_DE -c -f UTF-8 de_DE
-localedef -i it_IT -c -f UTF-8 it_IT
-localedef -i es_ES -c -f UTF-8 es_ES
-localedef -i sv_SE -c -f UTF-8 sv_SE
-localedef -i nl_NL -c -f UTF-8 nl_NL
-localedef -i no_NO -c -f UTF-8 no_NO
-localedef -i tr_TR -c -f UTF-8 tr_TR
-localedef -i fr_FR -c -f UTF-8 fr_FR
-localedef -i pl_PL -c -f UTF-8 pl_PL
-localedef -i el_GR -c -f UTF-8 el_GR
-localedef -i sl_SI -c -f UTF-8 sl_SI
-localedef -i hr_HR -c -f UTF-8 hr_HR
-localedef -i hu_HU -c -f UTF-8 hu_HU
-localedef -i sk_SK -c -f UTF-8 sk_SK
-localedef -i cs_CZ -c -f UTF-8 cs_CZ
-localedef -i sr_YU -c -f UTF-8 sr_YU
-localedef -i ar_AR -c -f UTF-8 ar_AR
-localedef -i pt_PT -c -f UTF-8 pt_PT
-localedef -i ru_RU -c -f UTF-8 ru_RU
-localedef -i fi_FI -c -f UTF-8 fi_FI
+localedef --no-archive -i de_DE -c -f ISO-8859-1 de_DE
+localedef --no-archive -i it_IT -c -f ISO-8859-1 it_IT
+localedef --no-archive -i es_ES -c -f ISO-8859-1 es_ES
+localedef --no-archive -i sv_SE -c -f ISO-8859-1 sv_SE
+localedef --no-archive -i nl_NL -c -f ISO-8859-1 nl_NL
+localedef --no-archive -i no_NO -c -f ISO-8859-1 no_NO
+localedef --no-archive -i tr_TR -c -f ISO-8859-1 tr_TR
+localedef --no-archive -i fr_FR -c -f ISO-8859-1 fr_FR
+localedef --no-archive -i pl_PL -c -f ISO-8859-1 pl_PL
+localedef --no-archive -i el_GR -c -f ISO-8859-1 el_GR
+localedef --no-archive -i sl_SI -c -f ISO-8859-1 sl_SI
+localedef --no-archive -i hr_HR -c -f ISO-8859-1 hr_HR
+localedef --no-archive -i hu_HU -c -f ISO-8859-1 hu_HU
+localedef --no-archive -i sk_SK -c -f ISO-8859-1 sk_SK
+localedef --no-archive -i cs_CZ -c -f ISO-8859-1 cs_CZ
+localedef --no-archive -i sr_YU -c -f ISO-8859-1 sr_YU
+localedef --no-archive -i ar_AR -c -f ISO-8859-1 ar_AR
+localedef --no-archive -i pt_PT -c -f ISO-8859-1 pt_PT
+localedef --no-archive -i ru_RU -c -f ISO-8859-1 ru_RU
+localedef --no-archive -i fi_FI -c -f ISO-8859-1 fi_FI
