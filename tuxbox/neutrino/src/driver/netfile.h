@@ -53,13 +53,18 @@ extern "C" {
 #define HTTP11		1
 #define SHOUTCAST	2
 
+#define CONNECTING	1	/* not used */
+#define BUFFERING	2	/* not used */
+#define RUNNING		3
+
 /* map all fopen() calls onto out f_open() function */
-#define fopen  f_open
-#define fclose f_close
-#define fread  f_read
-#define ftell  f_tell
-#define rewind f_rewind
-#define fseek  f_seek
+#define fopen   f_open
+#define fclose  f_close
+#define fread   f_read
+#define ftell   f_tell
+#define rewind  f_rewind
+#define fseek   f_seek
+#define fstatus f_status
 
 extern FILE *f_open(const char *, const char *);
 extern int f_close(FILE *);
@@ -67,12 +72,12 @@ extern size_t f_read (void *, size_t, size_t, FILE *);
 extern long f_tell(FILE *);
 extern void f_rewind(FILE *);
 extern int f_seek(FILE *, long, int);
+extern int f_status(FILE *, void (*)(void*));
 extern char err_txt[2048];
 
-#define CACHESIZE	983040	/* = 30sec buffer for 320kbps streams */
-#define CACHEENTMAX	20
-#define CACHEBTRANS	1024	/* blocksize for the stream-to-cache */
-					/* transfer */
+#define CACHESIZE	cache_size
+#define CACHEENTMAX	20	/* at most 20 caches are available */
+#define CACHEBTRANS	1024	/* blocksize for the stream-to-cache transfer */
 
 typedef struct
 {
@@ -88,13 +93,40 @@ typedef struct
 
 typedef struct
 {
+  void	(*cb)(void *);	/* user provided callback function */
+  void	*user;		/* user date hook point */
+  int	state;		/* CONNECTING, BUFFERING, RUNNING */
+  int	bitrate;
+  int	buffered;	/* "waterlevel" in the cache; 0 ... 65535 */
+  char station_url[1024];	/*station url */
+  char	station[1024];	/* station name */
+  char	genre[4096];	/* station genre */
+  char	artist[4096];	/* artist currently playing */
+  char	title[4096];	/* title currently playing */
+} CSTATE;
+
+typedef struct
+{
   void	*buf;		/* start of the buffer */
-  int	len;		/* length of the buffer */
-  void	*arg;		/* ponter to some arguments for the filter function */
+  int	*len;		/* pointer to a variable containing the length of the buffer */
+  void	*arg;		/* pointer to some arguments for the filter function */
   void	*user;		/* here the filter function can hook in */
   			/* some private data */
+  void (*destructor)(void*);	/* stream filter destructor */
+
+  CSTATE *state;
+
 } STREAM_FILTER;
 
+typedef struct
+{
+  int	cnt;			/* counter */
+  int	len;			/* meta block length */
+  int	stored;			/* number of bytes already stored */
+  int	meta_int;		/* meta data intervall */
+  char	meta_data[4096];	/* meta blocks cam be at most 4096 bytes */
+} FILTERDATA;
+  
 typedef struct
 {
   FILE	*fd;		/* stream ID */
@@ -121,6 +153,7 @@ typedef struct
   pthread_mutexattr_t writeable_attr;
 
   void (*filter)(STREAM_FILTER*);	/* stream filter function */
+
   STREAM_FILTER *filter_arg;	/* place to hook in a pointer to the arguments */
 
 } STREAM_CACHE;
