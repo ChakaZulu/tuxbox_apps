@@ -8,6 +8,11 @@
 #include "eprogress.h"
 #include "epixmap.h"
 
+eWidget *create_eWidget(eWidget *parent)
+{
+	return new eWidget(parent);
+}
+
 eWidget *create_eWindow(eWidget *parent)
 {
 	return new eWindow();
@@ -40,6 +45,7 @@ eWidget *create_ePixmap(eWidget *parent)
 
 void eSkin_init()
 {
+	eSkin::addWidgetCreator("eWidget", create_eWidget);
 	eSkin::addWidgetCreator("eWindow", create_eWindow);
 	eSkin::addWidgetCreator("eLabel", create_eLabel);
 	eSkin::addWidgetCreator("eCheckbox", create_eCheckbox);
