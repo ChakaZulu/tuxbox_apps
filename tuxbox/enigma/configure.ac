@@ -50,6 +50,7 @@ data/skins/Makefile
 data/templates/Makefile
 data/lirc/Makefile
 doc/Makefile
+hotplug/Makefile
 include/Makefile
 include/lib/Makefile
 include/lib/base/Makefile
