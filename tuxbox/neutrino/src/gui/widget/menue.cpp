@@ -568,14 +568,13 @@ int CMenuOptionChooser::paint( bool selected )
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-CMenuOptionStringChooser::CMenuOptionStringChooser(const char * const OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
+CMenuOptionStringChooser::CMenuOptionStringChooser(const neutrino_locale_t OptionName, char* OptionValue, bool Active, CChangeObserver* Observ)
 {
 	height      = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getHeight();
 	optionName  = OptionName;
 	active      = Active;
 	optionValue = OptionValue;
 	observ      = Observ;
-	localizing  = Localizing;
 
 	directKey   = CRCInput::RC_nokey;
 	iconName    = "";
@@ -634,20 +633,18 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 	CFrameBuffer::getInstance()->paintBoxRel(x, y, dx, height, bgcolor);
 
-	const char * l_option = localizing ? g_Locale->getText(optionValue) : optionValue;
-
-	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(l_option);
+	int stringwidth = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(optionValue);
 	int stringstartposName = x + offx + 10;
 	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
 	const char * l_optionName = g_Locale->getText(optionName);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName, color, 0, true); // UTF-8
-	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option, color);
+	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), optionValue, color);
 
 	if (selected)
 	{
 		CLCD::getInstance()->showMenuText(0, l_optionName, -1, true); // UTF-8
-		CLCD::getInstance()->showMenuText(1, l_option);
+		CLCD::getInstance()->showMenuText(1, optionValue);
 	}
 
 	return y+height;

@@ -1439,7 +1439,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			}
 		}
 
-		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == NO_DISEQC)/*, new CSatelliteNotifier*/, NULL, false);
+		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser(LOCALE_SATSETUP_SATELLITE, scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == NO_DISEQC));
 		for (uint i=0; i < satList.size(); i++)
 		{
 			ojSat->addOption(satList[i].satName);
@@ -1496,7 +1496,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
 
-		CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_CABLESETUP_PROVIDER, (char*)&scanSettings.satNameNoDiseqc, true/*, new CCableProviderNotifier*/);
+		CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_CABLESETUP_PROVIDER, (char*)&scanSettings.satNameNoDiseqc, true);
 
 		for( uint i=0; i< providerList.size(); i++)
 		{
@@ -1735,7 +1735,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	languageSettings.addItem(GenericMenuBack);
 	languageSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_LANGUAGESETUP_SELECT, (char*)&g_settings.language, true, this, false);
+	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_LANGUAGESETUP_SELECT, (char*)&g_settings.language, true, this);
 	//search available languages....
 
 	struct dirent **namelist;
