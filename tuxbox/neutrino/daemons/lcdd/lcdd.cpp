@@ -42,7 +42,7 @@
 #include <ost/frontend.h>
 
 #include "lcdd.h"
-
+#include "config.h"
 
 
 CLCDDisplay		display;
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 14);
 	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.menu=fontRenderer->getFont("Arial", "Regular", 12);
-	display.setIconBasePath("/usr/lib/icons/");
+	display.setIconBasePath( DATADIR "/neutrino/icons/");
 
 	if(!display.isAvailable())
 	{
