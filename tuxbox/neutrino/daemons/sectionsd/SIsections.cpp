@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.34 2004/09/10 11:36:00 thegoodguy Exp $
+// $Id: SIsections.cpp,v 1.35 2005/02/05 21:06:44 metallica Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -177,6 +177,9 @@ void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e, unsign
     else
       e.text=std::string(++buf, textlength);
   }
+	while( e.text.length() && e.text[0] == '\x0A' )
+			e.text.erase(0,1);
+
 //  printf("Name: %s\n", e.name.c_str());
 //  printf("Text: %s\n", e.text.c_str());
 
