@@ -209,6 +209,7 @@ int CMoviePlayerGui::show()
 	CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 
 	uint msg; uint data;
+	uint msg2;
 
 	bool loop=true;
 	bool update=true;
@@ -345,7 +346,7 @@ int CMoviePlayerGui::show()
 		if (ioctl(vdec, VIDEO_PLAY) < 0) {
 		 //handle error
 		}
-
+                int fbcount = 0;
 		while ((r = read(ts, buf, sizeof(buf))) > 0) {
 			done = 0;
 			while (r > 0) {
@@ -355,20 +356,93 @@ int CMoviePlayerGui::show()
 				done += wr;
 
 			}
-			
-			// TODO: re-add Pause/Resume; currently removed due to performance problems with newest drivers
-			/*g_RCInput->getMsg( &msg, &data, 1 ); // 1/10 sec timeout to update play/stop state display
-			if( msg == CRCInput::RC_red || msg == CRCInput::RC_home) {
-				loop=false;
+
+			fbcount++;
+                        if (fbcount > 10) {
+                           fbcount = 0;
+                           g_RCInput->getMsg_us( &msg, &data, 1 ); // 1/10 sec timeout to update play/stop state display
+			   if( msg == CRCInput::RC_red || msg == CRCInput::RC_home) {
+				//loop=false;
 				break;
-			}
-			else if (msg == CRCInput::RC_yellow) {
+			   }
+			   else if (msg == CRCInput::RC_yellow) {
 				while (true) {
 					g_RCInput->getMsg (&msg2, &data,10);
-					if (msg2 == CRCInput::RC_yellow || msg2 == CRCInput::RC_home)
-						break;
+					if (msg2 == CRCInput::RC_yellow || msg2 == CRCInput::RC_home) {
+                                		ioctl(vdec, VIDEO_STOP);
+                                		ioctl(adec, AUDIO_STOP);
+                                		ioctl(dmxv, DMX_STOP);
+                                		ioctl(dmxa, DMX_STOP);
+                                
+                                		close(vdec);
+                                		close(adec);
+                                		close(dvr);
+                                		close(dmxv);
+                                		close(dmxa);
+                                		if ((dmxa = open(DMX, O_RDWR)) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                
+                                		if ((dmxv = open(DMX, O_RDWR)) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                		if ((dvr = open(DVR, O_WRONLY)) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                		if ((adec = open(ADEC, O_RDWR)) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                		if ((vdec = open(VDEC, O_RDWR)) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                		p.pid = pida;
+                                		p.input = DMX_IN_DVR;
+                                		p.output = DMX_OUT_DECODER;
+                                		p.pes_type = DMX_PES_AUDIO;
+                                		p.flags = DMX_IMMEDIATE_START;
+
+                                		if (ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                		if (ioctl(adec, AUDIO_STOP) < 0) {
+                                			//perror("AUDIO_STOP");
+                                			//return 1;
+                                		}
+                                
+                                		if (ioctl(vdec, VIDEO_STOP) < 0) {
+                                			//perror("VIDEO_STOP");
+                                			//return 1;
+                                		}
+                                
+                                	    	p.pid = pidv;
+                                		p.input = DMX_IN_DVR;
+                                		p.output = DMX_OUT_DECODER;
+                                		p.pes_type = DMX_PES_VIDEO;
+                                		p.flags = DMX_IMMEDIATE_START;
+                                
+                                		if (ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                		if (ioctl(adec, AUDIO_PLAY) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                		if (ioctl(vdec, VIDEO_PLAY) < 0) {
+                                		 //handle error
+                                		}
+                                
+                                                break;
+					}
 				}
-			}*/
+			   }
+			}
 			
 
 		}
