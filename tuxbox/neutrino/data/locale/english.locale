@@ -225,7 +225,7 @@ flashupdate.eraseingflash erasing flash
 flashupdate.programmingflash programming flash
 flashupdate.cantopenmtd can't open mtd-device
 flashupdate.ready ready
-flashupdate.reboot Please reboot your DBox
+flashupdate.reboot rebooting box....
 flashupdate.updatemode Updatemode
 flashupdate.updatemode_manual manual (ftp)
 flashupdate.updatemode_internet internet

@@ -220,7 +220,7 @@ flashupdate.eraseingflash lösche Flash
 flashupdate.programmingflash programmiere Flash
 flashupdate.cantopenmtd kann das MTD-Device nicht öffen
 flashupdate.ready fertig
-flashupdate.reboot Bitte restarten sie ihre DBox
+flashupdate.reboot Die DBox wird neu gestartet
 flashupdate.updatemode Updatemodus
 flashupdate.updatemode_manual manuell (ftp)
 flashupdate.updatemode_internet internet

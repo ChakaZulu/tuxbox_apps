@@ -407,6 +407,13 @@ void CFlashUpdate::showStatusMessage(string text)
 
 void CFlashUpdate::paint()
 {
+	int fp_fd = 0;
+	if ((fp_fd = open("/dev/dbox/fp0",O_RDWR)) <= 0)
+	{
+		perror("[neutrino] open fp0");
+		return;
+	}
+
 	int ypos=y;
 	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("flashupdate.head").c_str(), COL_MENUHEAD);
@@ -431,6 +438,7 @@ void CFlashUpdate::paint()
 		if(!http.getInfo())
 		{
 			showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
+			close(fp_fd);
 			return;
 		}
 	}
@@ -449,6 +457,7 @@ void CFlashUpdate::paint()
 	if(!fd)
 	{
 		showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
+		close(fp_fd);
 		return;		
 	}
 	char buf[100];
@@ -467,6 +476,7 @@ void CFlashUpdate::paint()
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.majorversiondiffer1").c_str() , COL_MENUCONTENT);
 		ypos+= mheight;
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.majorversiondiffer2").c_str() , COL_MENUCONTENT);
+		close(fp_fd);
 		return;
 	}
 	if(installed_provider!=new_provider)
@@ -474,6 +484,7 @@ void CFlashUpdate::paint()
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.providerversiondiffer1").c_str() , COL_MENUCONTENT);
 		ypos+= mheight;
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.providerversiondiffer2").c_str() , COL_MENUCONTENT);
+		close(fp_fd);
 		return;
 	}
 	if(installed_minor==new_minor)
@@ -481,6 +492,7 @@ void CFlashUpdate::paint()
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.nonewversion1").c_str() , COL_MENUCONTENT);
 		ypos+= mheight;
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.nonewversion2").c_str() , COL_MENUCONTENT);
+		close(fp_fd);
 		return;
 	}
 
@@ -498,6 +510,7 @@ void CFlashUpdate::paint()
 		if(!http.getFile())
 		{
 			showStatusMessage(g_Locale->getText("flashupdate.getupdatefileerror") );
+			close(fp_fd);
 			return;
 		}
 	}
@@ -512,6 +525,7 @@ void CFlashUpdate::paint()
 	if( md5_file("/var/tmp/cramfs.img", 1, (unsigned char*) &md5buffer))
 	{
 		showStatusMessage(g_Locale->getText("flashupdate.cantopenfile") );
+		close(fp_fd);
 		return;
 	}
 	for(int count=0;count<16;count++)
@@ -524,6 +538,7 @@ void CFlashUpdate::paint()
 	if(strcmp(md5string, new_md5sum)!=0)
 	{
 		showStatusMessage(g_Locale->getText("flashupdate.md5sumerror") );
+		close(fp_fd);
 		return;
 	}
 	
@@ -535,6 +550,7 @@ void CFlashUpdate::paint()
 	if(!ft.program("/var/tmp/cramfs.img"))
 	{
 		showStatusMessage( ft.getErrorMessage() );
+		close(fp_fd);
 		return;
 	}
 
@@ -551,6 +567,13 @@ void CFlashUpdate::paint()
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
 
+	sleep(2);
+	if (ioctl(fp_fd,FP_IOCTL_POWEROFF)< 0)
+	{
+		perror("FP_IOCTL_POWEROFF:");
+	}
+	close(fp_fd);
+	sleep(20000);
 }
 
 

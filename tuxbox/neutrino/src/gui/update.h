@@ -39,6 +39,9 @@
 #include "widget/menue.h"
 #include "widget/color.h"
 #include "libmd5sum/libmd5sum.h"
+#include "dbox/fp.h"
+#include <sys/ioctl.h>
+
 
 #include <stdio.h>
 #include <unistd.h>
