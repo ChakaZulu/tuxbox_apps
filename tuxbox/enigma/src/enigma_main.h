@@ -424,6 +424,7 @@ public:
 	void setFakeRecordingState(int on) {if (on) state |= stateRecording; else state &= ~stateRecording;}
 	int dvrActive(void) {return dvrfunctions;}
 #endif
+	int isSleeping() {return state & stateSleeping;}
 private:
 	void nextService(int add=0);
 	void prevService();
