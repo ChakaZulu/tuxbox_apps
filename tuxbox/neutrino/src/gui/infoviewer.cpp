@@ -1,7 +1,13 @@
 //
-// $Id: infoviewer.cpp,v 1.26 2001/09/22 17:57:03 McClean Exp $
+// $Id: infoviewer.cpp,v 1.27 2001/09/23 21:34:07 rasc Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.27  2001/09/23 21:34:07  rasc
+// - LIFObuffer Module, pushbackKey fuer RCInput,
+// - In einige Helper und widget-Module eingebracht
+//   ==> harmonischeres Menuehandling
+// - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
+//
 // Revision 1.26  2001/09/22 17:57:03  McClean
 // infobar painting modified
 //
@@ -108,7 +114,7 @@ void CInfoViewer::start()
                   25;
     InfoHeightY_Info = g_Fonts->infobar_small->getHeight()+ 5;
 
-    ChanWidth = g_Fonts->infobar_number->getRenderWidth("000") + 10;
+    ChanWidth = g_Fonts->infobar_number->getRenderWidth("0000") + 10;
 	ChanHeight = g_Fonts->infobar_number->getHeight()*9/8;
 
 }
@@ -224,7 +230,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
              ( ( key != CRCInput::RC_ok ) || ( CalledFromNumZap ) ) &&
              ( ( key != CRCInput::RC_home ) || ( CalledFromNumZap ) ) )
         {
-            g_RCInput->addKey2Buffer(key);
+//$$$            g_RCInput->addKey2Buffer(key);
+            g_RCInput->pushbackKey(key);
         };
 
         if ( ( key != g_settings.key_quickzap_up ) &&

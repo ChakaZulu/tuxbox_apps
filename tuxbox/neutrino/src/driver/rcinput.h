@@ -1,5 +1,23 @@
-#ifndef __rcinput__
-#define __rcinput__
+/*
+$Id: rcinput.h,v 1.4 2001/09/23 21:34:07 rasc Exp $
+
+ Module  RemoteControle Handling
+
+History:
+ $Log: rcinput.h,v $
+ Revision 1.4  2001/09/23 21:34:07  rasc
+ - LIFObuffer Module, pushbackKey fuer RCInput,
+ - In einige Helper und widget-Module eingebracht
+   ==> harmonischeres Menuehandling
+ - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
+
+
+*/
+
+
+
+#ifndef __MOD_rcinput__
+#define __MOD_rcinput__
 
 #include <dbox/fp.h>
 #include <stdio.h>
@@ -16,6 +34,7 @@
 #include "semaphore.h"
 
 #include "ringbuffer.h"
+#include "lifobuffer.h"
 
 #include <string>
 
@@ -25,16 +44,17 @@ class CRCInput
 {
 	private:
 
-		int				fd;
-		CRingBuffer		ringbuffer;
+		int             fd;
+		CRingBuffer     ringbuffer;
+            CLIFOBuffer     LIFObuffer;
 		pthread_t       thrInput;
 		pthread_t       thrTimer;
-		sem_t			waitforkey;
-		int				timeout;
+		sem_t           waitforkey;
+		int             timeout;
 
-        struct timeval  tv_prev;
+		struct timeval  tv_prev;
 
-		__u16			prevrccode;
+		__u16           prevrccode;
 
 		int translate(int code);
 		int getKeyInt();	//don't use!
@@ -57,14 +77,13 @@ class CRCInput
 		};
 		
         int repeat_block;
-		//constructor - opens rc-device and starts needed threads
-		CRCInput();
-		//destructor - closes rc-device
-		~CRCInput();
+		CRCInput();      //constructor - opens rc-device and starts needed threads
+		~CRCInput();     //destructor - closes rc-device
+
 		
-		//get key from the input-device
-		int getKey(int Timeout=-1);
-		void addKey2Buffer(int);
+		int  getKey(int Timeout=-1);     //get key from the input-device
+		int  pushbackKey (int key);	   // push key back in buffer (like ungetc)
+//$$		void addKey2Buffer(int);
 		static string getKeyName(int);
 };
 

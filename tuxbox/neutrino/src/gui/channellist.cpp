@@ -1,7 +1,13 @@
 //
-// $Id: channellist.cpp,v 1.23 2001/09/21 14:33:39 field Exp $
+// $Id: channellist.cpp,v 1.24 2001/09/23 21:34:07 rasc Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.24  2001/09/23 21:34:07  rasc
+// - LIFObuffer Module, pushbackKey fuer RCInput,
+// - In einige Helper und widget-Module eingebracht
+//   ==> harmonischeres Menuehandling
+// - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
+//
 // Revision 1.23  2001/09/21 14:33:39  field
 // Eventlist - ok/? vertauscht, epg-Breite flexibel
 //
@@ -328,6 +334,9 @@ void CChannelList::exec()
 		else if (key==CRCInput::RC_ok)
 		{
 			zapOnExit = true;
+			loop=false;
+		} else {
+			g_RCInput->pushbackKey (key);
 			loop=false;
 		}
 	}

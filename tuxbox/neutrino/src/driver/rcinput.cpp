@@ -1,5 +1,24 @@
+/*
+ $Id: rcinput.cpp,v 1.8 2001/09/23 21:34:07 rasc Exp $
+
+ Module for Remote Control Handling
+
+History:
+ $Log: rcinput.cpp,v $
+ Revision 1.8  2001/09/23 21:34:07  rasc
+ - LIFObuffer Module, pushbackKey fuer RCInput,
+ - In einige Helper und widget-Module eingebracht
+   ==> harmonischeres Menuehandling
+ - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
+
+
+*/
+
+
+
 #include "rcinput.h"
 #include "../global.h"
+
 
 /**************************************************************************
 *	Constructor - opens rc-input device and starts threads
@@ -20,6 +39,7 @@ CRCInput::CRCInput()
 
     tv_prev.tv_sec = 0;
     repeat_block = 0;
+
 }
 
 /**************************************************************************
@@ -39,10 +59,17 @@ CRCInput::~CRCInput()
 **************************************************************************/
 int CRCInput::getKey(int Timeout)
 {
-	if (ringbuffer.available())
-	{
+
+      // -- something pushed back ?
+	if (LIFObuffer.available()) {
+		return LIFObuffer.pop();
+	}
+
+      // a key already pressed?
+	if (ringbuffer.available()) {
 		return ringbuffer.read();
 	}
+
 	sem_init (&waitforkey, 0, 0);
 	timeout=Timeout;
 	sem_wait (&waitforkey);
@@ -58,10 +85,23 @@ int CRCInput::getKey(int Timeout)
 *	addKey2Buffer  add a rc-key to the buffer
 *
 **************************************************************************/
-void CRCInput::addKey2Buffer(int key)
+//$$ canceled, replaced by FIFO pushbackKey
+//void CRCInput::addKey2Buffer(int key)
+//{
+//	ringbuffer.add(key);
+//}
+
+
+//
+// -- push back a key into the buffer
+// -- 2001-09-21  rasc
+//
+
+int CRCInput::pushbackKey (int key)
 {
-	ringbuffer.add(key);
-}
+	return LIFObuffer.push(key);
+} 
+
 
 
 /**************************************************************************

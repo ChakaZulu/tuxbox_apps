@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.44 2001/09/22 13:18:07 field Exp $
+        $Id: neutrino.cpp,v 1.45 2001/09/23 21:34:07 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.45  2001/09/23 21:34:07  rasc
+  - LIFObuffer Module, pushbackKey fuer RCInput,
+  - In einige Helper und widget-Module eingebracht
+    ==> harmonischeres Menuehandling
+  - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
+
   Revision 1.44  2001/09/22 13:18:07  field
   epg-anzeige bug gefixt
 
@@ -1229,7 +1235,7 @@ void CNeutrinoApp::setVolume(int key)
         else 
         {
             if (key!=CRCInput::RC_ok)
-              g_RCInput->addKey2Buffer(key);
+              g_RCInput->pushbackKey(key);
 
             key= CRCInput::RC_timeout;
         }
@@ -1344,7 +1350,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.44 2001/09/22 13:18:07 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.45 2001/09/23 21:34:07 rasc Exp $\n\n");
     tzset();
 
     initGlobals();

@@ -1,3 +1,21 @@
+/*
+$Id: menue.cpp,v 1.16 2001/09/23 21:34:07 rasc Exp $
+
+
+History:
+ $Log: menue.cpp,v $
+ Revision 1.16  2001/09/23 21:34:07  rasc
+ - LIFObuffer Module, pushbackKey fuer RCInput,
+ - In einige Helper und widget-Module eingebracht
+   ==> harmonischeres Menuehandling
+ - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
+
+
+*/
+
+
+
+
 #include "menue.h"
 #include "../include/debug.h"
 #include "../global.h"
@@ -94,7 +112,12 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 		{
 //            retval = CMenuItem::RETURN_EXIT;
             key = CRCInput::RC_timeout;
+        } else if (key != CRCInput::RC_timeout) {
+		// unknown Key, push it back... and leave
+		g_RCInput->pushbackKey (key);
+            key = CRCInput::RC_timeout;
         }
+
 	} while ( key!=CRCInput::RC_timeout );
 
 	hide();

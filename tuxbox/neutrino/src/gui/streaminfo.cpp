@@ -1,3 +1,20 @@
+/*
+$Id: streaminfo.cpp,v 1.8 2001/09/23 21:34:07 rasc Exp $
+
+Module StreamInfo
+
+History:
+ $Log: streaminfo.cpp,v $
+ Revision 1.8  2001/09/23 21:34:07  rasc
+ - LIFObuffer Module, pushbackKey fuer RCInput,
+ - In einige Helper und widget-Module eingebracht
+   ==> harmonischeres Menuehandling
+ - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
+
+
+*/
+
+
 #include "streaminfo.h"
 #include "../global.h"
 
@@ -20,14 +37,18 @@ int CStreamInfo::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-	int key = g_RCInput->getKey(130);
+//	int key = g_RCInput->getKey(130);
 
-    if ( (key==CRCInput::RC_spkr) ||
-	     (key==CRCInput::RC_plus) ||
-         (key==CRCInput::RC_minus) )
-    {
-        g_RCInput->addKey2Buffer(key);
-    }
+	// -- just eat key and return
+
+	g_RCInput->getKey(130);
+
+//    if ( (key==CRCInput::RC_spkr) ||
+//	     (key==CRCInput::RC_plus) ||
+//         (key==CRCInput::RC_minus) )
+//    {
+//        g_RCInput->pushbackKey(key);
+//    }
 
 	hide();
 	return CMenuTarget::RETURN_REPAINT;
