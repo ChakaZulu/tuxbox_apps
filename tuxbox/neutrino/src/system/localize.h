@@ -45,9 +45,16 @@ class CLocaleManager
 {
 	private:
 		mapLocaleData localeData;
-
+		
 	public:
-		bool loadLocale(const char * const locale); /* return value: real unicode font needed */
+		enum loadLocale_ret_t
+			{
+				ISO_8859_1_FONT =  0,
+				UNICODE_FONT    =  1,
+				NO_SUCH_LOCALE  = -1
+			};
+
+		loadLocale_ret_t loadLocale(const char * const locale);
 
 		const char * getText(const std::string & keyName) const;
 		const char * getText(const char * const keyName) const;

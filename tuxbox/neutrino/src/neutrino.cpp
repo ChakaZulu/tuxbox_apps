@@ -64,6 +64,7 @@
 #include <driver/framebuffer.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+#include <driver/stream2file.h>
 #include <driver/vcrcontrol.h>
 #include <irsend/irsend.h>
 
@@ -431,7 +432,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.vcr_AutoSwitch = configfile.getInt32( "vcr_AutoSwitch", 1 );
 
 	//language
-	strcpy( g_settings.language, configfile.getString( "language", "deutsch" ).c_str() );
+	strcpy(g_settings.language, configfile.getString("language", "").c_str());
 
 	//widget settings
 	g_settings.widget_fade = configfile.getInt32( "widget_fade", 1 );
@@ -750,7 +751,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "vcr_AutoSwitch", g_settings.vcr_AutoSwitch );
 
 	//language
-	configfile.setString( "language", g_settings.language );
+	configfile.setString("language", g_settings.language);
 
 	//widget settings
 	configfile.setInt32( "widget_fade", g_settings.widget_fade );
@@ -2572,10 +2573,21 @@ int CNeutrinoApp::run(int argc, char **argv)
 	int loadSettingsErg = loadSetup();
 
 	/* load locales before setting up any fonts to determine whether we need a true unicode font */
-	bool use_true_unicode_font = g_Locale->loadLocale(g_settings.language);
+	bool display_language_selection;
+	CLocaleManager::loadLocale_ret_t loadLocale_ret = g_Locale->loadLocale(g_settings.language);
+	if (loadLocale_ret == CLocaleManager::NO_SUCH_LOCALE)
+	{
+		strcpy(g_settings.language, "deutsch");
+		loadLocale_ret = g_Locale->loadLocale(g_settings.language);
+		display_language_selection = true;
+	}
+	else
+		display_language_selection = false;
 
 	if (font.name == NULL) /* no font specified in command line */
 	{
+		unsigned int use_true_unicode_font = (loadLocale_ret == CLocaleManager::ISO_8859_1_FONT) ? 0 : 1;
+		
 		font = predefined_font[use_true_unicode_font];
 		CLCD::getInstance()->init(predefined_lcd_font[use_true_unicode_font][0], 
 		                          predefined_lcd_font[use_true_unicode_font][1],
@@ -2753,6 +2765,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Timerd->registerEvent(CTimerdClient::EVT_SLEEPTIMER, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_ANNOUNCE_SLEEPTIMER, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_REMIND, 222, NEUTRINO_UDS_NAME);
+
+	if (display_language_selection)
+		languageSettings.exec(NULL, "");
 
 	//ucodes testen
 	doChecks();
@@ -3299,6 +3314,34 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		if (mode != mode_scart)
 			ShowMsgUTF("messagebox.info", (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+		delete (unsigned char*) data;
+		return messages_return::handled;
+	}
+	else if (msg == NeutrinoMessages::EVT_RECORDING_ENDED)
+	{
+		if (mode != mode_scart)
+		{
+			const char * msgbody;
+			
+			if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_IDLE)
+				msgbody = "streaming.success";
+			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
+				msgbody = "streaming.buffer_overflow";
+			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_WRITE_OPEN_FAILURE)
+				msgbody = "streaming.write_error_open";
+			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_WRITE_FAILURE)
+				msgbody = "streaming.write_error";
+			else
+				goto skip_message;
+
+			ShowMsgUTF("messagebox.info", g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+
+		skip_message:
+			;
+		}
+		if ((* (stream2file_status_t *) data) != STREAM2FILE_STATUS_IDLE)
+			changeNotify("mainmenu.recording_stop", NULL);
+
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
@@ -3996,7 +4039,7 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 				{
 					time_t now = time(NULL);
 					recording_id=g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, 
-																						 eventinfo.epgID, eventinfo.epg_starttime);
+											    eventinfo.epgID, eventinfo.epg_starttime);
 				}
 			}
 			else

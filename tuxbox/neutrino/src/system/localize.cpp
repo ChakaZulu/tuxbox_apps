@@ -76,7 +76,7 @@ const char * getISO639Description(const char * const iso)
 
 const char * path[2] = {"/var/tuxbox/config/locale/", DATADIR "/neutrino/locale/"};
 
-bool CLocaleManager::loadLocale(const char * const locale)
+CLocaleManager::loadLocale_ret_t CLocaleManager::loadLocale(const char * const locale)
 {
 	int i;
 	FILE * fd;
@@ -97,7 +97,7 @@ bool CLocaleManager::loadLocale(const char * const locale)
 	if (i == 2)
 	{		
 		perror("cannot read locale");
-		return false;
+		return NO_SUCH_LOCALE;
 	}
 
 	localeData.clear();
@@ -151,7 +151,7 @@ bool CLocaleManager::loadLocale(const char * const locale)
 		(strcmp(locale, "russkij") == 0) ||
 		(strcmp(locale, "utf8") == 0)
 		/* utf8.locale is a generic name that can be used for new locales which need characters outside the ISO-8859-1 character set */
-		);
+		) ? UNICODE_FONT : ISO_8859_1_FONT;
 }
 
 const char * CLocaleManager::getText(const char * const keyName) const
