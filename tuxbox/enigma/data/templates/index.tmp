@@ -168,13 +168,7 @@ function clearTimerList()
 			</td>
 			<td align=left valign=top style="padding-left: 10px; padding-top: 10px; padding-right: 10px">
 			<!--content cell-->
-			<span style="width: 100%; background-color: #93A198">
-			<font style="font-family: Verdana; font-size: 14pt; font-weight: bold">#SERVICENAME#</font> #EPG# #SI#
-			</SPAN><br>
-			<span style="width: 100%; background-color: #DEE6D6">
-			#EIT#
-			</SPAN>
-			#COP#
+				#COP#
 			</td>
 			</tr>
 			</table>
