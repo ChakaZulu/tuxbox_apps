@@ -139,6 +139,7 @@ streamingmenu.streaming_server_cddrive DVD Drive
 streamingmenu.streaming_server_startdir Directory (VLC)
 streamingmenu.streaming_videorate Datarate Video
 streamingmenu.streaming_audiorate Datarate Audio
+streamingmenu.streaming_ac3_enabled AC3 Support
 streamingmenu.off Off
 streamingmenu.on On
 
