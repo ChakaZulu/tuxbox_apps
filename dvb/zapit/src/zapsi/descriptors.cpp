@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.26 2002/04/24 21:25:12 Simplex Exp $
+ * $Id: descriptors.cpp,v 1.27 2002/05/05 01:52:36 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -37,6 +37,8 @@ std::string curr_chan_name;
 uint32_t found_transponders;
 uint32_t found_channels;
 std::string lastProviderName;
+
+extern CEventServer *eventServer;
 
 std::string charToXML (uint8_t character)
 {

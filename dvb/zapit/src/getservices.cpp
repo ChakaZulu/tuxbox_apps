@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.35 2002/04/20 10:28:56 obi Exp $
+ * $Id: getservices.cpp,v 1.36 2002/05/05 01:52:36 obi Exp $
  */
 
 #include "frontend.h"
@@ -293,5 +293,119 @@ int LoadServices(void)
 	fclose(in);
 	delete parser;
 	return 23;
+}
+
+CZapitChannel::CZapitChannel (std::string p_name, uint16_t p_sid, uint16_t p_tsid, uint16_t p_onid, uint8_t p_service_type, uint16_t p_chan_nr, uint8_t p_DiSEqC)
+{
+	unsigned char i;
+
+	name = p_name;
+	serviceId = p_sid;
+	transportStreamId = p_tsid;
+	originalNetworkId = p_onid;
+	serviceType = p_service_type;
+	channelNumber = p_chan_nr;
+	DiSEqC = p_DiSEqC;
+
+	caPmt = NULL;
+
+	for (i = 0; i < max_num_apids; i++)
+	{
+		audioChannels[i] = NULL;
+	}
+
+	currentAudioChannel = 0;
+	audioChannelCount = 0;
+
+	pcrPid = 0;
+	pmtPid = 0;
+	teletextPid = 0;
+	videoPid = 0;
+
+	pidsFlag = false;
+}
+
+CZapitChannel::~CZapitChannel ()
+{
+	int i;
+
+	for (i = 0; i < audioChannelCount; i++)
+	{
+		delete audioChannels[i];
+	}
+
+	delete caPmt;
+}
+
+CZapitAudioChannel * CZapitChannel::getAudioChannel (uint8_t index)
+{
+	if (index == 0xFF)
+	{
+		return audioChannels[currentAudioChannel];
+	}
+
+	if (index < audioChannelCount)
+	{
+		return audioChannels[index];
+	}
+
+	return NULL;
+}
+
+dvb_pid_t CZapitChannel::getAudioPid (uint8_t index = 0xFF)
+{
+	if (index == 0xFF)
+	{
+		return audioChannels[currentAudioChannel]->pid;
+	}
+	if (index < audioChannelCount)
+	{
+		return audioChannels[index]->pid;
+	}
+
+	return 0;
+}
+
+int CZapitChannel::addAudioChannel(dvb_pid_t pid, bool isAc3, string description, unsigned char componentTag)
+{
+	unsigned char i;
+
+	for (i = 0; i < audioChannelCount; i++)
+	{
+		if (audioChannels[i]->pid == pid)
+		{
+			return -1;
+		}
+	}
+
+	audioChannels[audioChannelCount] = new CZapitAudioChannel();
+	audioChannels[audioChannelCount]->pid = pid;
+	audioChannels[audioChannelCount]->isAc3 = isAc3;
+	audioChannels[audioChannelCount]->description = description;
+	audioChannels[audioChannelCount]->componentTag = componentTag;
+	audioChannelCount++;
+
+	return 0;
+}
+
+void CZapitChannel::resetPids()
+{
+	unsigned char i;
+
+	for (i = 0; i < audioChannelCount; i++)
+	{
+		delete audioChannels[i];
+		audioChannels[i] = NULL;
+	}
+
+	currentAudioChannel = 0;
+	audioChannelCount = 0;
+
+	pcrPid = 0;
+	pmtPid = 0;
+	teletextPid = 0;
+	videoPid = 0;
+
+	pidsFlag = false;
 }
 

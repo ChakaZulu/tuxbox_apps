@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.47 2002/04/24 21:25:12 Simplex Exp $
+ * $Id: scan.cpp,v 1.48 2002/05/05 01:52:36 obi Exp $
  */
 
 #include "frontend.h"
@@ -34,6 +34,8 @@ extern CFrontend *frontend;
 extern XMLTreeParser *scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
 extern CZapitClient::bouquetMode bouquetMode;
+
+extern CEventServer *eventServer;
 
 int get_nits (uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, uint8_t polarity, uint8_t DiSEqC, Modulation modulation)
 {

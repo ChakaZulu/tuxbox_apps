@@ -1,8 +1,8 @@
 /*
- * $Id: pmt.h,v 1.4 2002/05/05 01:52:36 obi Exp $
+ * $Id: bat.h,v 1.1 2002/05/05 01:52:36 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- *
+ * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -19,13 +19,9 @@
  *
  */
 
-#ifndef __pmt_h__
-#define __pmt_h__
+#ifndef __bat_h__
+#define __bat_h__
 
-#include "ci.h"
-#include "getservices.h"
+int parse_bat ();
 
-int parse_pmt (int demux_fd, CZapitChannel * channel);
-unsigned short parse_ES_info (unsigned char *buffer, CZapitChannel * channel, CCaPmt * caPmt);
-
-#endif /* __pmt_h__ */
+#endif /* __bat_h__ */

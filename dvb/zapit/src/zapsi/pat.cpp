@@ -1,96 +1,66 @@
 /*
- * $Id: pat.cpp,v 1.18 2002/04/19 14:53:29 obi Exp $
+ * $Id: pat.cpp,v 1.19 2002/05/05 01:52:36 obi Exp $
+ *
+ * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <string>
-
-#include <ost/dmx.h>
-#include <ost/frontend.h>
-
+#include "dmx.h"
 #include "pat.h"
-#include "sdt.h"
-#include "scan.h"
 
-#define DEMUX_DEV	"/dev/ost/demux0"
-#define PAT_LENGTH	1024
+#define PAT_LENGTH 1024
 
-std::map <uint, CZapitChannel> nvodchannels;
-std::map <uint, CZapitChannel>::iterator cI;
-
-extern int found_transponders;
-
-int parse_pat (uint16_t original_network_id, std::map<uint, CZapitChannel> *cmap)
+int parse_pat (int demux_fd, CZapitChannel * channel)
 {
-	struct dmxSctFilterParams flt;
-	int demux_fd;
-	uint8_t buffer[PAT_LENGTH];
-	uint8_t section = 0;
+	/* buffer for program association table */
+	unsigned char buffer[PAT_LENGTH];
+
+	/* number of read sections */
+	unsigned char section = 0;
 
 	/* current positon in buffer */
-	uint16_t pos;
-
-	/* program_association_section elements */
-	uint16_t section_length;
-	uint16_t transport_stream_id;
-	uint16_t program_number;
-	uint16_t program_map_PID;
-
-	memset (&flt.filter, 0, sizeof(struct dmxFilter));
-
-	flt.pid = 0x00;
-	flt.filter.mask[0]  = 0xFF;
-	flt.timeout = 1000;
-	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-
-	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-	{
-		perror("[pat.cpp] " DEMUX_DEV);
-		return -1;
-	}
-
-	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
-	{
-		perror("[pat.cpp] DMX_SET_FILTER");
-		close(demux_fd);
-		return -1;
-	}
+	unsigned short i;
 
 	do
 	{
+		/* set filter for program association section */
+		setDmxSctFilter(demux_fd, 0x0000, 0x00);
+
+		/* read section */
 		if (read(demux_fd, buffer, PAT_LENGTH) < 0)
 		{
-			perror("[pat.cpp] read PAT");
-			close(demux_fd);
+			perror("[pat.cpp] read");
     			return -1;
     		}
 
-		section_length = ((buffer[1] & 0xF) << 8) + buffer[2];
-		transport_stream_id = (buffer[3] << 8) + buffer[4];
-
-		for (pos = 8; pos < section_length -2; pos += 4)
+		/* loop over service id / program map table pid pairs */
+		for (i = 8; i < (((buffer[1] & 0x0F) << 8) | buffer[2]) + 3; i += 4)
 		{
-			program_number = (buffer[pos] << 8) + buffer[pos + 1];
-			program_map_PID = ((buffer[pos + 2] & 0x1f) << 8) | buffer[pos + 3];
-
-			if ((*cmap).count((original_network_id << 16) + program_number) > 0)
+			/* compare service id */
+			if (channel->getServiceId() == ((buffer[i] << 8) | buffer[i+1]))
 			{
-				cI = (*cmap).find((original_network_id << 16) + program_number);
-				cI->second.setPmtPid(program_map_PID);
+				/* store program map table pid */
+				channel->setPmtPid(((buffer[i+2] & 0x1F) << 8) | buffer[i+3]);
+				return 0;
 			}
 		}
 	}
 	while (section++ != buffer[7]);
 
-	close(demux_fd);
-	return 1;
+	return -1;
 }
 

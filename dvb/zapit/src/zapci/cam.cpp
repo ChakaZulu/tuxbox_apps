@@ -1,8 +1,8 @@
 /*
- * $Id: cam.cpp,v 1.11 2002/04/28 08:07:37 obi Exp $
+ * $Id: cam.cpp,v 1.12 2002/05/05 01:52:36 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,43 +20,22 @@
  */
 
 #include <fcntl.h>
-#include <ost/dmx.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include "cam.h"
 
-#define CA_DEV  "/dev/ost/ca0"
-
-#ifdef USE_EXTERNAL_CAMD
 #define CAMD_UDS_NAME "/tmp/camd.socket"
-#endif
 
 CCam::CCam ()
 {
-#ifndef USE_EXTERNAL_CAMD
-	if ((caSystemId = readCaSystemId()) == 0)
-	{
-		initialized = false;
-	}
-#else
-	if ((caSystemId = 0x1702) == 0)
-	{
-		initialized = false;
-	}
-#endif
-	else
-	{
-		initialized = true;
-	}
 }
 
 CCam::~CCam ()
 {
 }
 
-#ifdef USE_EXTERNAL_CAMD
 bool CCam::camdConnect ()
 {
 	struct sockaddr_un servaddr;
@@ -92,62 +71,34 @@ void CCam::camdDisconnect ()
 		camdSocket = -1;
 	}
 }
-#endif
 
-int CCam::reset ()
-{
-	uint8_t buffer[1] = { 0x09 };
-	return sendMessage(buffer, 1);
-}
-
-uint16_t CCam::readCaSystemId ()
+ca_msg_t CCam::getMessage (unsigned short length)
 {
 	ca_msg_t ca_msg;
 
-	uint8_t buffer[1] = { 0x03 };
-	sendMessage(buffer, 1);
+	ca_msg.index = 0;
+	ca_msg.type = 0;
 
-	do
+	if (camdSocket == -1)
 	{
-		ca_msg = getMessage(9);
-	}
-	while (ca_msg.length == 0);
-
-	return (ca_msg.msg[6] << 8) | ca_msg.msg[7];
-}
-
-ca_msg_t CCam::getMessage (uint16_t length)
-{
-	int ca_fd = -1;
-
-	ca_msg_t ca_msg;
-	ca_msg.length = length;
-
-	if ((ca_fd = open(CA_DEV, O_RDWR)) < 0)
-	{
-		perror(CA_DEV);
 		ca_msg.length = 0;
 	}
-	else if (ioctl(ca_fd, CA_GET_MSG, &ca_msg) < 0)
+	else if ((ca_msg.length = read(camdSocket, ca_msg.msg, length)) < 0)
 	{
-		perror("[cam.cpp] CA_GET_MSG");
+		perror("[CCam::getMessage] read");
 		ca_msg.length = 0;
-	}
-
-	if (ca_fd != -1)
-	{
-		close(ca_fd);
 	}
 
 	return ca_msg;
 }
 
-int CCam::sendMessage (uint8_t *data, uint16_t length)
+int CCam::sendMessage (unsigned char * data, unsigned short length)
 {
-#ifdef USE_EXTERNAL_CAMD
 	camdBuffer[0] = 0x50;
 	camdBuffer[1] = length;
 	memcpy(camdBuffer + 2, data, length);
+
+	camdDisconnect();
 
 	if (camdConnect() == false)
 	{
@@ -161,149 +112,91 @@ int CCam::sendMessage (uint8_t *data, uint16_t length)
 	}
 	else
 	{
-		camdDisconnect();
 		return 0;
 	}
-#else
-	uint8_t i;
-	int ca_fd;
-	ca_msg_t *ca_msg = new ca_msg_t();
-
-	ca_msg->index = 0;
-	ca_msg->type = 0;
-	ca_msg->length = length + 4;
-
-	ca_msg->msg[0] = 0x50;
-	ca_msg->msg[1] = ca_msg->length - 3;
-	ca_msg->msg[2] = 0x23;
-
-	memcpy(ca_msg->msg + 3, data, length);
-
-	ca_msg->msg[ca_msg->length - 1] = 0x6E;
-
-	for (i = 0; i < ca_msg->length - 1; i++)
-	{
-		ca_msg->msg[ca_msg->length - 1] ^= ca_msg->msg[i];
-	}
-
-	if ((ca_fd = open(CA_DEV, O_RDWR)) < 0)
-	{
-		perror(CA_DEV);
-		delete ca_msg;
-		return -1;
-	}
-	else if (ioctl(ca_fd, CA_SEND_MSG, ca_msg) < 0)
-	{
-		perror("[cam.cpp] CA_SEND_MSG");
-		close(ca_fd);
-		delete ca_msg;
-		return -1;
-	}
-
-	close(ca_fd);
-	delete ca_msg;
-	return 0;
-#endif
 }
 
-int CCam::setEcm (CZapitChannel *channel)
+int CCam::reset (unsigned short originalNetworkId)
 {
-#ifdef USE_EXTERNAL_CAMD
-	uint8_t i;
-	uint8_t buffer[8 + ((channel->getPids()->count_vpids + channel->getPids()->count_apids) << 1) + (channel->getTeletextPid() ? 2 : 0)];
-	uint8_t pos = 9;
+	unsigned char buffer[3];
 
-	buffer[0] = 0x0D;
-	buffer[1] = channel->getOriginalNetworkId() >> 8;
-	buffer[2] = channel->getOriginalNetworkId();
-	buffer[3] = channel->getServiceId() >> 8;
-	buffer[4] = channel->getServiceId();
-	buffer[5] = caSystemId >> 8;
-	buffer[6] = caSystemId;
-	buffer[7] = channel->getEcmPid() >> 8;
-	buffer[8] = channel->getEcmPid();
+	buffer[0] = 0x09;
+	buffer[1] = originalNetworkId >> 8;
+	buffer[2] = originalNetworkId;
 
-	if (channel->getVideoPid() != 0)
+	return sendMessage(buffer, 3);
+}
+
+int CCam::setCaPmt (CCaPmt * caPmt)
+{
+	unsigned char buffer[caPmt->length_field + 5];
+	unsigned short pos;
+	unsigned short pos2;
+	unsigned short i;
+	unsigned short j;
+	unsigned short k;
+
+	buffer[0] = 0xCA;
+	buffer[1] = caPmt->ca_pmt_tag >> 16;
+	buffer[2] = caPmt->ca_pmt_tag >> 8;
+	buffer[3] = caPmt->ca_pmt_tag;
+	buffer[4] = caPmt->length_field;
+	buffer[5] = caPmt->ca_pmt_list_management;
+	buffer[6] = caPmt->program_number >> 8;
+	buffer[7] = caPmt->program_number;
+	buffer[8] = (caPmt->reserved1 << 6) | (caPmt->version_number << 1) | caPmt->current_next_indicator;
+	buffer[9] = (caPmt->reserved2 << 4) | (caPmt->program_info_length >> 8);
+	buffer[10] = caPmt->program_info_length;
+
+	if (caPmt->program_info_length != 0)
 	{
-		buffer[pos++] = channel->getVideoPid() >> 8;
-		buffer[pos++] = channel->getVideoPid();
+		buffer[11] = caPmt->ca_pmt_cmd_id;
+
+		for (pos = 12, i = 0; pos < caPmt->program_info_length + 11; pos += caPmt->ca_descriptor[i]->descriptor_length + 2, i++)
+		{
+			buffer[pos] = caPmt->ca_descriptor[i]->descriptor_tag;
+			buffer[pos + 1] = caPmt->ca_descriptor[i]->descriptor_length;
+			buffer[pos + 2] = caPmt->ca_descriptor[i]->CA_system_ID >> 8;
+			buffer[pos + 3] = caPmt->ca_descriptor[i]->CA_system_ID;
+			buffer[pos + 4] = (caPmt->ca_descriptor[i]->reserved1 << 5) | (caPmt->ca_descriptor[i]->CA_PID >> 8);
+			buffer[pos + 5] = caPmt->ca_descriptor[i]->CA_PID;
+
+			for (j = 0; j < caPmt->ca_descriptor[i]->descriptor_length - 4; j++)
+			{
+				buffer[pos + 6 + j] = caPmt->ca_descriptor[i]->private_data_byte[j];
+			}
+		}
 	}
 
-	for (i = 0; i < channel->getPids()->count_apids; i++)
+	for (pos = caPmt->program_info_length + 11, i = 0; pos < caPmt->length_field + 5; pos += caPmt->es_info[i]->ES_info_length + 5, i++)
 	{
-		buffer[pos++] = channel->getPids()->apids[i].pid >> 8;
-		buffer[pos++] = channel->getPids()->apids[i].pid;
-	}
+		buffer[pos] = caPmt->es_info[i]->stream_type;
+		buffer[pos + 1] = (caPmt->es_info[i]->reserved1 << 5) | (caPmt->es_info[i]->elementary_PID >> 8);
+		buffer[pos + 2] = caPmt->es_info[i]->elementary_PID;
+		buffer[pos + 3] = (caPmt->es_info[i]->reserved2 << 4) | (caPmt->es_info[i]->ES_info_length >> 8);
+		buffer[pos + 4] = caPmt->es_info[i]->ES_info_length;
 
-	if (channel->getTeletextPid() != 0)
-	{
-		buffer[pos++] = channel->getTeletextPid() >> 8;
-		buffer[pos++] = channel->getTeletextPid();
+		if (caPmt->es_info[i]->ES_info_length != 0)
+		{
+			buffer[pos + 5] = caPmt->es_info[i]->ca_pmt_cmd_id;
+
+			for (pos2 = pos + 6, j = 0; pos2 < pos + caPmt->es_info[i]->ES_info_length + 5; pos2 += caPmt->es_info[i]->ca_descriptor[j]->descriptor_length + 2, j++)
+			{
+				buffer[pos2] = caPmt->es_info[i]->ca_descriptor[j]->descriptor_tag;
+				buffer[pos2 + 1] = caPmt->es_info[i]->ca_descriptor[j]->descriptor_length;
+				buffer[pos2 + 2] = caPmt->es_info[i]->ca_descriptor[j]->CA_system_ID >> 8;
+				buffer[pos2 + 3] = caPmt->es_info[i]->ca_descriptor[j]->CA_system_ID;
+				buffer[pos2 + 4] = (caPmt->es_info[i]->ca_descriptor[j]->reserved1 << 5) | (caPmt->es_info[i]->ca_descriptor[j]->CA_PID >> 8);
+				buffer[pos2 + 5] = caPmt->es_info[i]->ca_descriptor[j]->CA_PID;
+
+				for (k = 0; k < caPmt->es_info[i]->ca_descriptor[j]->descriptor_length - 4; k++)
+				{
+					buffer[pos2 + 6 + k] = caPmt->es_info[i]->ca_descriptor[j]->private_data_byte[k];
+				}
+			}
+		}
 	}
 
 	return sendMessage(buffer, pos);
-#else
-	uint8_t i;
-	uint8_t buffer[12 + (4 * (channel->getPids()->count_vpids + channel->getPids()->count_apids))];
-	uint8_t pos = 12;
-
-	buffer[0] = 0x0D;
-	buffer[1] = channel->getTsidOnid() >> 8;
-	buffer[2] = channel->getTsidOnid() & 0xFF;
-	buffer[3] = channel->getTsidOnid() >> 24;
-	buffer[4] = (channel->getTsidOnid() >> 16) & 0xFF;
-	buffer[5] = 0x01;
-	buffer[6] = 0x04;
-	buffer[7] = caSystemId >> 8;
-	buffer[8] = caSystemId & 0xFF;
-	buffer[9] = channel->getEcmPid() >> 8;
-	buffer[10] = channel->getEcmPid() & 0xFF;
-	buffer[11] = channel->getPids()->count_vpids + channel->getPids()->count_apids;
-
-	for (i = 0; i < channel->getPids()->count_vpids; i++)
-  	{
-		buffer[pos++] = channel->getVideoPid() >> 8;
-		buffer[pos++] = channel->getVideoPid() & 0xFF;
-		buffer[pos++] = 0x80;
-		buffer[pos++] = 0x00;
-	}
-
-	for (i = 0; i < channel->getPids()->count_apids; i++)
-	{
-		buffer[pos++] = channel->getPids()->apids[i].pid >> 8;
-		buffer[pos++] = channel->getPids()->apids[i].pid & 0xFF;
-		buffer[pos++] = 0x80;
-		buffer[pos++] = 0x00;
-	}
-
-	return sendMessage(buffer, pos);
-#endif
-}
-
-int CCam::setEmm (CZapitChannel *channel)
-{
-#ifdef USE_EXTERNAL_CAMD
-	uint8_t buffer[5];
-
-	buffer[0] = 0x84;
-	buffer[1] = caSystemId >> 8;
-	buffer[2] = caSystemId;
-	buffer[3] = channel->getEmmPid() >> 8;
-	buffer[4] = channel->getEmmPid();
-
-	return sendMessage(buffer, 5);
-#else
-	uint8_t buffer[7];
-
-	buffer[0] = 0x84;
-	buffer[1] = 0x01;
-	buffer[2] = 0x04;
-	buffer[3] = caSystemId >> 8;
-	buffer[4] = caSystemId & 0xFF;
-	buffer[5] = channel->getEmmPid() >> 8;
-	buffer[6] = channel->getEmmPid() & 0xFF;
-
-	return sendMessage(buffer, 7);
-#endif
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.38 2002/04/25 10:38:12 happydude Exp $
+ * $Id: getservices.h,v 1.39 2002/05/05 01:52:36 obi Exp $
  */
 
 #ifndef __getservices_h__
@@ -10,8 +10,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <iostream>
 #include <string>
 
+#include "ci.h"
 #include "descriptors.h"
 #include "eventserver.h"
 #include "sdt.h"
@@ -35,30 +37,14 @@ void FindTransponder (XMLTreeNode *root);
 void LoadSortList ();
 int LoadServices ();
 
-// EVENTS...
-extern CEventServer *eventServer;
-
-typedef struct apid_struct
+class CZapitAudioChannel
 {
-	dvb_pid_t pid;
-	char desc[25];
-	bool is_ac3;
-	uint8_t component_tag;
-
-} apid_struct;
-
-typedef struct pids
-{
-        uint8_t count_vpids;
-        dvb_pid_t vpid;
-        uint8_t count_apids;
-        apid_struct apids[max_num_apids];
-        dvb_pid_t ecmpid;
-	dvb_pid_t emmpid;
-	dvb_pid_t pcrpid;
-	dvb_pid_t pmtpid;
-        dvb_pid_t vtxtpid;
-} pids;
+	public:
+		dvb_pid_t pid;
+		bool isAc3;
+		std::string description;
+		unsigned char componentTag;
+};
 
 class CZapitChannel
 {
@@ -67,13 +53,20 @@ class CZapitChannel
 		std::string name;
 
 		/* pids of this channel */
-		pids chanpids;
+		CZapitAudioChannel * audioChannels[max_num_apids];
+		dvb_pid_t pcrPid;
+		dvb_pid_t pmtPid;
+		dvb_pid_t teletextPid;
+		dvb_pid_t videoPid;
 
 		/* set true when pids are set up */
-		bool knowsPidsFlag;
+		bool pidsFlag;
 
 		/* last selected audio channel */
-		uint8_t audioChannel;
+		uint8_t currentAudioChannel;
+
+		/* number of audio channels */
+		uint8_t audioChannelCount;
 
 		/* number in channel list */
 		uint16_t channelNumber;
@@ -85,36 +78,13 @@ class CZapitChannel
 		uint8_t serviceType;
 		uint8_t DiSEqC;
 
-	public:
-		/* constructor */
-		CZapitChannel (std::string p_name, uint16_t p_sid, uint16_t p_tsid, uint16_t p_onid, uint8_t p_service_type, uint16_t p_chan_nr, uint8_t p_DiSEqC)
-		{
-			name = p_name;
-			memset(&chanpids, 0, sizeof(chanpids));
-			knowsPidsFlag = false;
-			audioChannel = 0;
-			serviceId = p_sid;
-			transportStreamId = p_tsid;
-			originalNetworkId = p_onid;
-			serviceType = p_service_type;
-			channelNumber = p_chan_nr;
-			DiSEqC = p_DiSEqC;
-		}
+		/* the conditional access program map table of this channel */
+		CCaPmt * caPmt;
 
-		/* get methods - read and write variables */
-		std::string getName()		{ return name; }
-		uint8_t getAudioChannel()	{ return audioChannel; }
-		dvb_pid_t getAudioPid()		{ return chanpids.apids[audioChannel].pid; }
-		dvb_pid_t getEcmPid()		{ return chanpids.ecmpid; }
-		dvb_pid_t getEmmPid()		{ return chanpids.emmpid; }
-		dvb_pid_t getPcrPid()		{ return chanpids.pcrpid; }
-		dvb_pid_t getPmtPid()		{ return chanpids.pmtpid; }
-		dvb_pid_t getTeletextPid()	{ return chanpids.vtxtpid; }
-		dvb_pid_t getVideoPid()		{ return chanpids.vpid; }
-		const pids *getPids()		{ return &chanpids; }
-		bool knowsPids()		{ return knowsPidsFlag; }
-		bool knowsPmtId()		{ return (chanpids.pmtpid != 0); }
-		uint16_t getChannelNumber()	{ return channelNumber; }
+	public:
+		/* constructor, desctructor */
+		CZapitChannel (std::string p_name, uint16_t p_sid, uint16_t p_tsid, uint16_t p_onid, uint8_t p_service_type, uint16_t p_chan_nr, uint8_t p_DiSEqC);
+		~CZapitChannel ();
 
 		/* get methods - read only variables */
 		uint16_t getServiceId()		{ return serviceId; }
@@ -125,30 +95,35 @@ class CZapitChannel
 		uint32_t getOnidSid()		{ return (originalNetworkId << 16) | serviceId; }
 		uint32_t getTsidOnid()		{ return (transportStreamId << 16) | originalNetworkId; }
 
+		/* get methods - read and write variables */
+		std::string getName()		{ return name; }
+		uint8_t getAudioChannelCount()	{ return audioChannelCount; }
+		dvb_pid_t getPcrPid()		{ return pcrPid; }
+		dvb_pid_t getPmtPid()		{ return pmtPid; }
+		dvb_pid_t getTeletextPid()	{ return teletextPid; }
+		dvb_pid_t getVideoPid()		{ return videoPid; }
+		uint16_t getChannelNumber()	{ return channelNumber; }
+		bool getPidsFlag()		{ return pidsFlag; }
+		CCaPmt * getCaPmt()		{ return caPmt; }
+
+		CZapitAudioChannel * getAudioChannel (uint8_t index = 0xFF);
+		dvb_pid_t getAudioPid (uint8_t index = 0xFF);
+
+		int addAudioChannel(dvb_pid_t pid, bool isAc3, string description, unsigned char componentTag);
+
 		/* set methods */
 		void setName(std::string pName)			{ name = pName; }
-		void setAudioChannel(uint8_t pAudioChannel)	{ audioChannel = pAudioChannel; }
-		void setAudioPid(dvb_pid_t pAudioPid)		{ chanpids.apids[audioChannel].pid = pAudioPid; }
-		void setEcmPid(dvb_pid_t pEcmPid)		{ chanpids.ecmpid = pEcmPid; }
-		void setEmmPid(dvb_pid_t pEmmPid)		{ chanpids.emmpid = pEmmPid; }
-		void setPcrPid(dvb_pid_t pPcrPid)		{ chanpids.pcrpid = pPcrPid; }
-		void setPmtPid(dvb_pid_t pPmtPid)		{ chanpids.pmtpid = pPmtPid; }
-		void setTeletextPid(dvb_pid_t pTeletextPid)	{ chanpids.vtxtpid = pTeletextPid; }
-		void setVideoPid(dvb_pid_t pVideoPid)		{ chanpids.vpid = pVideoPid; }
-		void setPids(pids pPids)
-		{
-			int _emmpid=chanpids.emmpid; 
-			if (pPids.count_vpids > 0 || pPids.count_apids > 0)
-			{
-				chanpids = pPids; 
-				chanpids.emmpid=_emmpid; 
-				knowsPidsFlag = true;
-			}
-		}
+		void setAudioChannel(uint8_t pAudioChannel)	{ currentAudioChannel = pAudioChannel; }
+		void setPcrPid(dvb_pid_t pPcrPid)		{ pcrPid = pPcrPid; }
+		void setPmtPid(dvb_pid_t pPmtPid)		{ pmtPid = pPmtPid; }
+		void setTeletextPid(dvb_pid_t pTeletextPid)	{ teletextPid = pTeletextPid; }
+		void setVideoPid(dvb_pid_t pVideoPid)		{ videoPid = pVideoPid; }
 		void setChannelNumber(uint16_t pChannelNumber)	{ channelNumber = pChannelNumber; }
+		bool setPidsFlag()				{ pidsFlag = true; }
+		void setCaPmt(CCaPmt * pCaPmt)			{ caPmt = pCaPmt; }
 
 		/* cleanup methods */
-		void resetPids()	{ memset(&chanpids, 0, sizeof(chanpids)); knowsPidsFlag = false; }
+		void resetPids();
 };
 
 struct transponder
@@ -180,16 +155,16 @@ struct transponder
 
 typedef struct bouquet_msg_struct
 {
-        uint32_t bouquet_nr;
-        char name[30];
+	uint32_t bouquet_nr;
+	char name[30];
 
 } bouquet_msg;
 
 typedef struct channel_msg_struct
 {
-        uint32_t chan_nr;
-        char name[30];
-        char mode;
+	uint32_t chan_nr;
+	char name[30];
+	char mode;
 
 } channel_msg;
 

@@ -1,8 +1,8 @@
 /*
- * $Id: cam.h,v 1.10 2002/04/28 05:38:51 obi Exp $
+ * $Id: cam.h,v 1.11 2002/05/05 01:52:36 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -25,36 +25,27 @@
 #include <ost/ca.h>
 #include <stdint.h>
 
+#include "ci.h"
 #include "getservices.h"
 
 class CCam
 {
 	private:
-		bool initialized;
-		uint16_t caSystemId;
-
-#ifdef USE_EXTERNAL_CAMD
-		uint8_t camdBuffer[2 + 255];
+		unsigned char camdBuffer[1024];
 		int camdSocket;
 
 		bool camdConnect ();
 		void camdDisconnect ();
-#endif
 
-		uint16_t readCaSystemId ();
-		ca_msg_t CCam::getMessage (uint16_t length);
-		int sendMessage (uint8_t *data, uint16_t length);
+		ca_msg_t CCam::getMessage (unsigned short length);
+		int sendMessage (unsigned char * data, unsigned short length);
 
 	public:
 		CCam();
 		~CCam();
 
-		uint16_t getCaSystemId() { return caSystemId; }
-		bool isInitialized() { return initialized; }
-
-		int reset ();
-		int setEcm (CZapitChannel *channel);
-		int setEmm (CZapitChannel *channel);
+		int reset (unsigned short originalNetworkId);
+		int setCaPmt (CCaPmt * caPmt);
 };
 
 #endif /* __cam_h__ */

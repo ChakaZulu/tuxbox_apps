@@ -1,8 +1,8 @@
 /*
- * $Id: pmt.h,v 1.4 2002/05/05 01:52:36 obi Exp $
+ * $Id: dmx.h,v 1.1 2002/05/05 01:52:36 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- *
+ * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -19,13 +19,13 @@
  *
  */
 
-#ifndef __pmt_h__
-#define __pmt_h__
+#include <ost/dmx.h>
 
-#include "ci.h"
-#include "getservices.h"
+#ifndef __dmx_h__
+#define __dmx_h__
 
-int parse_pmt (int demux_fd, CZapitChannel * channel);
-unsigned short parse_ES_info (unsigned char *buffer, CZapitChannel * channel, CCaPmt * caPmt);
+int setDmxSctFilter (int fd, dvb_pid_t pid, uint8_t filter0, uint8_t filter1 = 0x00, uint8_t filter2 = 0x00);
+int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, dvb_pid_t pid);
+int unsetDmxFilter (int fd);
 
-#endif /* __pmt_h__ */
+#endif /* __dmx_h__ */
