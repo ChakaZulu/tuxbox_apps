@@ -1,8 +1,8 @@
 #include "echeckbox.h"
 #include "font.h"
 
-eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eWidget* descr):
-	eButton(parent), descr(descr?descr->getText():"")
+eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eLabel* descr):
+	eButton(parent, descr)
 {
 	setFlags(RS_DIRECT);
 	setFont(gFont("Marlett Regular", Size));
@@ -12,22 +12,6 @@ eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eWidget* descr):
 
 eCheckbox::~eCheckbox()
 {
-}
-
-void eCheckbox::gotFocus()
-{
-  eButton::gotFocus();
-
-	if (parent && parent->LCDElement)
-		parent->LCDElement->setText(descr+'\n'+(ischecked?"[X]":"[  ]"));
-}
-
-void eCheckbox::lostFocus()
-{
-  eButton::lostFocus();
-
-	if (parent && parent->LCDElement)
-		parent->LCDElement->setText("");
 }
 
 void eCheckbox::sel()
@@ -41,6 +25,8 @@ void eCheckbox::setCheck(int c)
 	ischecked=c;
 	setText(ischecked?"\x19":"\x18");
 
+	static QString Desc(descr);
+
 	if (parent && parent->LCDElement)
-		parent->LCDElement->setText(descr+'\n'+(ischecked?"[X]":"[  ]"));
+		descr = Desc+'\n'+(ischecked?"[X]":"[  ]");
 }

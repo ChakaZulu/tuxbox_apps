@@ -107,7 +107,7 @@ private slots:
 	void selected(int*);
 	void timeout();
 public:
-	eServiceNumberWidget(int initial);
+	eServiceNumberWidget(int initial, eWidget* lcdTitle, eWidget* lcdElement);
 	~eServiceNumberWidget();
 };
 

@@ -39,8 +39,8 @@ void NVODStream::EITready(int error)
 NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id)
 	: eListboxEntry(listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id), 
 		service_id(service_id), eit(EIT::typeNowNext, service_id, 
-		((eDVB::getInstance()->transport_stream_id==transport_stream_id)&&(eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther
-		)
+		(			(eDVB::getInstance()->transport_stream_id==transport_stream_id)
+			&&	(eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther		)
 {
 	connect(&eit, SIGNAL(tableReady(int)), SLOT(EITready(int)));
 	eit.start();
@@ -238,7 +238,8 @@ void eServiceNumberWidget::timeout()
 	close(chnum);
 }
 
-eServiceNumberWidget::eServiceNumberWidget(int initial): eWindow(0)
+eServiceNumberWidget::eServiceNumberWidget(int initial, eWidget* lcdTitle, eWidget* lcdElement)
+										:eWindow(0, lcdTitle, lcdElement)
 {
 	setText("Channel");
 	move(QPoint(200, 140));
@@ -249,7 +250,7 @@ eServiceNumberWidget::eServiceNumberWidget(int initial): eWindow(0)
 	label->move(QPoint(50, 00));
 	label->resize(QSize(110, eSkin::getActive()->queryValue("fontsize", 20)+4));
 	
-	number=new eNumber(this, 1, 1, 999, 3, &initial, 1);
+	number=new eNumber(this, 1, 1, 999, 3, &initial, 1, label);
 	number->move(QPoint(160, 0));
 	number->resize(QSize(50, eSkin::getActive()->queryValue("fontsize", 20)+4));
 
@@ -605,13 +606,24 @@ void eZapMain::keyDown(int code)
 	{
 		if (!eDVB::getInstance()->getTransponders())
 			break;
+
 		if (isVisible())
 			hide();
-		eServiceNumberWidget *w=new eServiceNumberWidget(code-eRCInput::RC_0);
+
+		eZapLCD* pLCD = eZapLCD::getInstance();				
+		eServiceNumberWidget *w=new eServiceNumberWidget(code-eRCInput::RC_0, pLCD->lcdMenu->Title, pLCD->lcdMenu->Element );
+
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
+
 		qDebug("w is %p", w);
 		w->show();
 		int chnum=w->exec();
 		w->hide();
+
+		pLCD->lcdMenu->hide();
+		pLCD->lcdMain->show();
+
 		if (chnum!=-1)
 		{
 			eService *service=eDVB::getInstance()->getTransponders()->searchServiceByNumber(chnum);
@@ -635,9 +647,15 @@ void eZapMain::keyUp(int code)
 	{
 		if (isVisible())
 			hide();
-		eMainMenu mm;
+
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
+		eMainMenu mm(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		if (mm.exec())
 			eZap::getInstance()->quit();
+		pLCD->lcdMenu->hide();
+		pLCD->lcdMain->show();
 		break;
 	}
 	case eRCInput::RC_STANDBY:

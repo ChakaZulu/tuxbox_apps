@@ -72,7 +72,7 @@ private slots:
 	void sel_plugins(eListboxEntry *);
 	void sel_about(eListboxEntry *);
 public:
-	eMainMenu();
+	eMainMenu(eWidget* lcdTitle=0, eWidget* lcdElement=0);
 	~eMainMenu();
 	int exec();
 };

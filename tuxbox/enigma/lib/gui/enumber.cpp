@@ -18,14 +18,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const QRect &area)
 	p->setForegroundColor((have_focus && n==active)?cursor:normal);
 	p->fill(pos);
 	p->setFont(font);
-
-/*	if (!parent->LCDElement && have_focus && n == active)
-	{
-		p->renderText(pos, QString().sprintf("%s|%d|", n?".":"", number[n]));
-	}
-	else*/
-		p->renderText(pos, QString().sprintf("%s%d", n?".":"", number[n]));
-
+	p->renderText(pos, QString().sprintf("%s%d", n?".":"", number[n]));
 	p->flush();
 }
 
@@ -163,7 +156,6 @@ void eNumber::lostFocus()
 {
 	if (LCDTmp)
 	{
-		parent->LCDElement->setText("");
 		delete LCDTmp;
 		LCDTmp=0;
 	}

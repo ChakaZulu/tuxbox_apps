@@ -7,13 +7,12 @@
 class eButton: public eLabel
 {
 	gColor focus, normal;
-	QString descr;
 	Q_OBJECT
 protected:
+	QString descr;
 	void keyUp(int key);
 	void gotFocus();
 	void lostFocus();
-	int eventFilter(const eWidgetEvent &event);
 signals:
 	void selected();
 public:

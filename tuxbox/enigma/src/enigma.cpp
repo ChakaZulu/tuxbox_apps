@@ -31,7 +31,6 @@
 #include "eskin_register.h"
 #include "epng.h"
 #include "eavswitch.h"
-#include "enigma_lcd.h"
 #include "actions.h"
 #include "rc.h"
 #include "gfbdc.h"
@@ -307,10 +306,9 @@ int main(int argc, char **argv)
 	// system("/sbin/halt &");
 }
 
-eMainMenu::eMainMenu()
+eMainMenu::eMainMenu(eWidget* lcdTitle, eWidget* lcdElement)
 {
-	eZapLCD* pLCD = eZapLCD::getInstance();
-	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 240, pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 240, lcdTitle, lcdElement);
 	window->move(QPoint(70, 150));
 	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "VCR Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_vcr(eListboxEntry*)));
@@ -326,9 +324,6 @@ eMainMenu::eMainMenu()
 
 int eMainMenu::exec()
 {
-	eZapLCD* pLCD = eZapLCD::getInstance();
-	pLCD->lcdMain->hide();
-	pLCD->lcdMenu->show();
 	window->show();
 	int res=window->exec();
 	window->hide();
@@ -342,9 +337,6 @@ eMainMenu::~eMainMenu()
 
 void eMainMenu::sel_close(eListboxEntry *lbe)
 {
-	eZapLCD* pLCD = eZapLCD::getInstance();
-	pLCD->lcdMenu->hide();
-	pLCD->lcdMain->show();
 	window->close(0);
 }
 
@@ -352,7 +344,8 @@ void eMainMenu::sel_vcr(eListboxEntry *lbe)
 {
 	window->hide();
 	eAVSwitch::getInstance()->setInput(1);
-	window->LCDElement->setText("VCR-Mode\npress OK to close");
+	if (window->LCDElement)
+		window->LCDElement->setText("VCR-Mode\npress OK to close");
 	eMessageBox mb("If you can read this, your scartswitch doesn't work", "VCR");
 	mb.show();
 	mb.exec();
@@ -365,7 +358,8 @@ void eMainMenu::sel_scan(eListboxEntry *)
 {
 	TransponderScan ts;
 	window->hide();
-	window->LCDElement->setText("Transponderscan\npress ? to close");
+	if (window->LCDElement)
+		window->LCDElement->setText("Transponderscan\npress ? to close");
 	ts.exec();
 	window->show();
 }
@@ -374,7 +368,8 @@ void eMainMenu::sel_streaminfo(eListboxEntry *)
 {
 	eStreaminfo si;
 	window->hide();
-	window->LCDElement->setText("Streaminfo\npress OK to close");
+	if (window->LCDElement)
+		window->LCDElement->setText("Streaminfo\npress OK to close");
 	si.show();
 	si.exec();
 	si.hide();
@@ -383,8 +378,7 @@ void eMainMenu::sel_streaminfo(eListboxEntry *)
 
 void eMainMenu::sel_setup(eListboxEntry *)
 {
-	eZapLCD* pLCD = eZapLCD::getInstance();
-	eZapSetup setup(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+	eZapSetup setup(window->LCDTitle, window->LCDElement);
 	window->hide();
 	setup.exec();
 	window->show();
@@ -392,16 +386,16 @@ void eMainMenu::sel_setup(eListboxEntry *)
 
 void eMainMenu::sel_plugins(eListboxEntry *)
 {
-	eZapLCD* pLCD = eZapLCD::getInstance();
 	window->hide();
-	eZapPlugins plugins(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+	eZapPlugins plugins(window->LCDTitle, window->LCDElement);
 	plugins.exec();
 	window->show();
 }
 
 void eMainMenu::sel_quit(eListboxEntry *)
 {
-	window->LCDElement->setText("Enigma is shutting down\n....please wait");
+	if (window->LCDElement)
+		window->LCDElement->setText("Enigma is shutting down\n....please wait");
 	window->close(1);
 }
 
@@ -409,7 +403,8 @@ void eMainMenu::sel_bnversion(eListboxEntry *)
 {
 	ShowBNVersion bn;
 	window->hide();
-	window->LCDElement->setText("Show BN Version\npress OK to close");
+	if (window->LCDElement)
+		window->LCDElement->setText("Show BN Version\npress OK to close");
 	bn.show();
 	bn.exec();
 	bn.hide();
@@ -422,7 +417,8 @@ void eMainMenu::sel_record(eListboxEntry *)
 	Decoder::Set();
 	eStreaminfo si(1);
 	window->hide();
-	window->LCDElement->setText("Record Mode\npress OK to close");
+	if (window->LCDElement)
+		window->LCDElement->setText("Record Mode\npress OK to close");
 	si.show();
 	si.exec();
 	si.hide();
@@ -434,7 +430,8 @@ void eMainMenu::sel_record(eListboxEntry *)
 void eMainMenu::sel_about(eListboxEntry *)
 {
 	window->hide();
-	window->LCDElement->setText("About Box\npress OK to close");
+	if (window->LCDElement)
+		window->LCDElement->setText("About Box\npress OK to close");
 	eMessageBox msgbox(
 "enigma was constructed by Felix Domke <tmbinc@gmx.net> in 2001, 2002 for the dbox2-linux-project.\n"
 "Special thanks and respects go out to:\n"

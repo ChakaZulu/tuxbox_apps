@@ -118,8 +118,8 @@
 		<eZapLCDMenu position="0:0" size="120:64">
 			<eLabel position="0:0" size="120:18" font="NimbusSansL-Regular Sans L Regular;14" name="title" />
 		  <ePixmap position="0:18" size="120:3" pixmap="lcd_menu" />
-			<eLabel position="0:21" size="120:40" font="NimbusSansL-Regular Sans L Regular;14" name="element" />
-		  <ePixmap position="0:61" size="120:3" pixmap="lcd_menu" />
+			<eLabel position="0:21" size="120:40" font="NimbusSansL-Regular Sans L Regular;14" name="element" wrap="on" />
+			<ePixmap position="0:61" size="120:3" pixmap="lcd_menu" />
 		</eZapLCDMenu>
 	</object>
 
