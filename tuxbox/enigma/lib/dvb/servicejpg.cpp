@@ -34,7 +34,11 @@ void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 		if (!(::stat(filename.c_str(), &s)))
 		{
 			eServiceReference ref(id, 0, filename);
-			eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, 0, filename));
+			eString name = filename;
+			while (int pos = name.find("/") != eString::npos)
+				name = name.mid(pos + 1, name.length() - pos - 1);
+			ref.descr = name;
+			eServiceFileHandler::getInstance()->addReference(node, ref);
 		}
 	}
 }
@@ -43,13 +47,13 @@ int eServiceHandlerJPG::play(const eServiceReference &service, int workaround )
 {
 	printf("[SERVICEJPG] start...\n");
 
-	state = statePlaying;
+//	state = statePlaying;
 
-	flags = flagIsSeekable|flagSupportPosition;
-	flags |= flagIsTrack;
+//	flags = flagIsSeekable|flagSupportPosition;
+//	flags |= flagIsTrack;
 
-	serviceEvent(eServiceEvent(eServiceEvent::evtStart));
-	serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
+//	serviceEvent(eServiceEvent(eServiceEvent::evtStart));
+//	serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 
 	return 0;
 }
@@ -59,10 +63,10 @@ int eServiceHandlerJPG::stop(int workaround)
 	if (!workaround)
 	{
 		printf("[SERVICEJPG] stop.\n");
-		removeRef(runningService);
-		runningService=eServiceReference();
+//		removeRef(runningService);
+//		runningService=eServiceReference();
 	}
-	serviceEvent(eServiceEvent(eServiceEvent::evtStop));
+//	serviceEvent(eServiceEvent(eServiceEvent::evtStop));
 	return 0;
 }
 
