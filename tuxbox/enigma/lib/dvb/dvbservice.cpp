@@ -429,6 +429,8 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 
 			/*emit*/ dvb.gotPMT(pmt);
 			pmt->unlock();
+			if ( dvb.tEIT.ready() )
+				EITready(0);	// fake call.. to update Audio Descriptions..
 		}
 		if (dvb.getState()==eDVBServiceState::stateServiceGetPMT)
 			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitched));
