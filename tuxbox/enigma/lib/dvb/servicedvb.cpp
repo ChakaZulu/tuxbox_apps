@@ -95,7 +95,10 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 
 	CONNECT(messages.recv_msg, eDVRPlayerThread::gotMessage);
 
-	maxBufferSize=65424*3;
+	if ( eSystemInfo::getInstance()->getHwType() < 3 ) // dbox2
+		maxBufferSize=128*1024;
+	else
+		maxBufferSize=256*1024; 
 
 	speed=1;
 
@@ -160,13 +163,17 @@ void eDVRPlayerThread::outputReady(int what)
 {
 	(void)what;
 
+#if 0
+	// i don't know if this is better.. or not.. please check..
 	// on dbox2 we write only blocks of 65424 bytes
 	if ( eSystemInfo::getInstance()->getHwType() < 3	// dbox2
 		&& buffer.size() < 65424		// no full block in buffer
 		&& state != stateFileEnd )	// not eof
 		return;
+#endif
 
 	seekbusy-=buffer.tofile(dvrfd, 65424);
+
 	if (seekbusy < 0)
 		seekbusy=0;
 	if ((state == stateBufferFull) && (buffer.size()<maxBufferSize))
@@ -250,7 +257,7 @@ void eDVRPlayerThread::readMore(int what)
 		}
 	}
 
-	int bla = eSystemInfo::getInstance()->getHwType() < 3 ? 65423 : 16384;
+	int bla = eSystemInfo::getInstance()->getHwType() < 3 ? 100000 : 16384;
 
 	if ( (state == stateBuffering && buffer.size() > bla) || flushbuffer )
 	{
