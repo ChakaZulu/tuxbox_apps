@@ -71,6 +71,7 @@ void CRCInput::addKey2Buffer(int key)
 int CRCInput::getKeyInt()
 {
     struct timeval tv;
+    int td;
 	__u16 rccode;
 	bool repeat = true;
 	int	erg = RC_nokey;
@@ -85,17 +86,19 @@ int CRCInput::getKeyInt()
 		{
             gettimeofday( &tv, NULL );
 
-            // 100 ms wird als Untergrenze für 2 getrennte Tastendrücke angenommen..?
-			// deactivatet - suxx.......
-            if ( ( repeat_block == 0 ) ||
-                 ( tv_prev.tv_sec == 0 ) ||
-                 ( prevrccode!=rccode ) ||
-                 ( ( tv.tv_usec - tv_prev.tv_usec) > repeat_block ) ||
-                 ( ( tv.tv_sec - tv_prev.tv_sec) > 0 ) )
+            if ( ( tv.tv_sec - tv_prev.tv_sec ) > 1 )
+                td = 1000000;
+            else
+            {
+                td = ( tv.tv_usec - tv_prev.tv_usec );
+                td+= ( tv.tv_sec - tv_prev.tv_sec )* 1000000;
+            };
+
+            if ( ( ( prevrccode&0x1F ) != ( rccode&0x1F ) ) ||
+                 ( td > repeat_block ) )
             {
                 tv_prev = tv;
-
-//              printf("got key native key: %04x %d\n", rccode, tv.tv_sec );
+//                printf("got key native key: %04x %d\n", rccode, tv.tv_sec );
 
     			if( prevrccode==rccode )
     			{
