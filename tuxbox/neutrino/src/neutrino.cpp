@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.192 2002/03/11 17:29:02 Simplex Exp $
+        $Id: neutrino.cpp,v 1.193 2002/03/12 16:44:08 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -250,7 +250,7 @@ void CNeutrinoApp::setupDefaults()
 {
 	//language
 
-	strcpy(g_settings.language, "english");
+	strcpy(g_settings.language, "deutsch");
 
 	//misc
 	//g_settings.box_Type = 1;
@@ -289,12 +289,26 @@ void CNeutrinoApp::setupDefaults()
 
 
 	//network
-	g_settings.networkSetOnStartup = 0;
-	strcpy(g_settings.network_ip, "10.10.10.100");
 	strcpy(g_settings.network_netmask, "255.255.255.0");
-	strcpy(g_settings.network_broadcast, "10.10.10.255");
 	strcpy(g_settings.network_defaultgateway, "");
 	strcpy(g_settings.network_nameserver, "");
+
+	FILE* fd = fopen("/var/ip", "r");
+	if(fd)
+	{
+		char _ip[4];
+		fread(_ip, 4, 4, fd);
+		sprintf( g_settings.network_ip, "%d.%d.%d.%d", _ip[0], _ip[1], _ip[2], _ip[3] );
+		sprintf( g_settings.network_broadcast, "%d.%d.%d.255", _ip[0], _ip[1], _ip[2] );
+		fclose(fd);
+		g_settings.networkSetOnStartup = 1;
+	}
+	else
+	{
+		strcpy(g_settings.network_ip, "10.10.10.100");
+		strcpy(g_settings.network_broadcast, "10.10.10.255");
+		g_settings.networkSetOnStartup = 0;
+	}
 
 	g_settings.network_streaming_use = 0;
 	strcpy(g_settings.network_streamingserver, "10.10.10.10");
@@ -2228,7 +2242,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.192 2002/03/11 17:29:02 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.193 2002/03/12 16:44:08 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
