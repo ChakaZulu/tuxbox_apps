@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.16 2003/10/10 20:56:08 obi Exp $
+ * $Id: camd.c,v 1.17 2003/10/12 17:13:08 obi Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -18,6 +18,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
+#include <config.h>
 
 #include <errno.h>
 #include <fcntl.h>
