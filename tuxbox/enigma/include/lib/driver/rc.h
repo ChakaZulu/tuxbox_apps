@@ -10,6 +10,7 @@
 #include <lib/base/estring.h>
 #include <libsig_comp.h>
 #include <linux/input.h>
+#include <lib/driver/input_fake.h>
 
 class eRCInput;
 class eRCDriver;
