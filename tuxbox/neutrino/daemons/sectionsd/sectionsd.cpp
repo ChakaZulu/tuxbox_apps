@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.123 2002/04/25 16:17:10 field Exp $
+//  $Id: sectionsd.cpp,v 1.124 2002/04/27 10:48:07 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.124  2002/04/27 10:48:07  field
+//  Geschindigkeit gefixt
+//
 //  Revision 1.123  2002/04/25 16:17:10  field
 //  Updates
 //
@@ -408,11 +411,11 @@
 
 // 12h Pause für SDT
 #define TIME_SDT_SCHEDULED_PAUSE 12* 60* 60
-#define TIME_SDT_SKIPPING 60
+#define TIME_SDT_SKIPPING 5
 
 
-// Timeout bei tcp/ip connections in s
-#define TIMEOUT_CONNECTIONS 2
+// Timeout bei tcp/ip connections in ms
+#define TIMEOUT_CONNECTIONS 2000
 
 // Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
 #define RESTART_DMX_AFTER_TIMEOUTS 5
@@ -768,18 +771,18 @@ static void addService(const SIservice &s)
 // und -1 bei Fehler
 // ansonsten die Anzahl gelesener Bytes
 /* inline */
-int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
+int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
 {
 	size_t j;
 
-	timeoutInSeconds*=1000; // in Millisekunden aendern
+//	timeoutInSeconds*; // in Millisekunden aendern
 	for(j=0; j<n;)
 	{
 		struct pollfd ufds;
 		ufds.fd=fd;
 		ufds.events=POLLIN;
 		ufds.revents=0;
-		int rc=poll(&ufds, 1, timeoutInSeconds);
+		int rc=poll(&ufds, 1, timeoutInMSeconds);
 		if(!rc)
 			return 0; // timeout
 		else if(rc<0 && errno==EINTR)
@@ -797,11 +800,11 @@ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInSeconds)
 			// kommt wenn ein Timeout im Filter gesetzt wurde
 			// dprintf("revents: 0x%hx\n", ufds.revents);
 
-			usleep(200*1000UL); // wir warten 200 Millisekunden bevor wir es nochmal probieren
+			usleep(100*1000UL); // wir warten 100 Millisekunden bevor wir es nochmal probieren
 
-			if(timeoutInSeconds<=200)
+			if(timeoutInMSeconds<=200000)
 				return 0; // timeout
-			timeoutInSeconds-=200;
+			timeoutInMSeconds-=200000;
 			continue;
 		}
 
@@ -891,9 +894,9 @@ class DMX {
 	}
 
 	int start(void); // calls unlock at end
-	int read(char *buf, const size_t buflength, unsigned timeoutInSeconds)
+	int read(char *buf, const size_t buflength, unsigned timeoutMInSeconds)
 	{
-		return readNbytes(fd, buf, buflength, timeoutInSeconds);
+		return readNbytes(fd, buf, buflength, timeoutMInSeconds);
 	}
 
     void closefd(void)
@@ -1017,9 +1020,8 @@ int DMX::start(void)
     	return 4;
   	}
 
-  	filter_index= 0;
-  	if(timeset) // Nur wenn ne richtige Uhrzeit da ist
-    	lastChanged=time(NULL);
+//  	if(timeset) // Nur wenn ne richtige Uhrzeit da ist
+//    	lastChanged=time(NULL);
   	pthread_mutex_unlock( &start_stop_mutex );
   	return 0;
 }
@@ -1127,8 +1129,10 @@ int DMX::change(int new_filter_index)
 		pthread_cond_signal( &change_cond );
 		return 0;
     }
+showProfiling("before pthread_mutex_lock( &start_stop_mutex );");
 
 	pthread_mutex_lock( &start_stop_mutex );
+showProfiling("after pthread_mutex_lock( &start_stop_mutex );");
 
 	if (real_pauseCounter> 0)
 	{
@@ -1137,7 +1141,7 @@ int DMX::change(int new_filter_index)
 	}
 
 //	if(pID==0x12) // Nur bei EIT
-		dprintf("changeDMX -> %s (%d)\n", (new_filter_index==0) ? "current/next" : "scheduled", new_filter_index );
+		dprintf("changeDMX [%x]-> %s (%d)\n", pID, (new_filter_index==0) ? "current/next" : "scheduled", new_filter_index );
 
 	if (ioctl (fd, DMX_STOP, 0) == -1)
 	{
@@ -1168,7 +1172,7 @@ int DMX::change(int new_filter_index)
     	pthread_mutex_unlock( &start_stop_mutex );
     	return 3;
 	}
-
+showProfiling("after DMX_SET_FILTER, &");
 	if(timeset) // Nur wenn ne richtige Uhrzeit da ist
     	lastChanged=time(NULL);
 
@@ -1647,7 +1651,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.123 2002/04/25 16:17:10 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.124 2002/04/27 10:48:07 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2954,11 +2958,11 @@ static void *sdtThread(void *)
 {
 	struct SI_section_header header;
 	char *buf;
-	const unsigned timeoutInSeconds=2;
+	const unsigned timeoutInMSeconds=500;
 	bool sendToSleepNow= false;
 
     dmxSDT.addfilter(0x42, 0xff );
-    dmxSDT.addfilter(0x46, 0xff );
+//    dmxSDT.addfilter(0x46, 0xff );
 
 	try
 	{
@@ -3031,7 +3035,7 @@ static void *sdtThread(void *)
     		}
 
     		dmxSDT.lock();
-    		int rc=dmxSDT.read((char *)&header, sizeof(header), timeoutInSeconds);
+    		int rc=dmxSDT.read((char *)&header, sizeof(header), timeoutInMSeconds);
     		if(!rc)
     		{
       			dmxSDT.unlock();
@@ -3058,7 +3062,7 @@ static void *sdtThread(void *)
 
     		// Den Header kopieren
     		memcpy(buf, &header, sizeof(header));
-    		rc=dmxSDT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    		rc=dmxSDT.read(buf+sizeof(header), header.section_length-5, timeoutInMSeconds);
     		dmxSDT.unlock();
 
     		if(!rc)
@@ -3266,7 +3270,7 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
 */
 static void *timeThread(void *)
 {
-	unsigned timeoutInSeconds= 31;
+	unsigned timeoutInMSeconds= 31* 1000;
 	char *buf;
 	time_t tim;
 
@@ -3289,7 +3293,7 @@ static void *timeThread(void *)
 	  		struct SI_section_TDT_header tdt_tot_header;
 
 	  		dmxTOT.lock();
-  			int rc=dmxTOT.read((char *)&tdt_tot_header, sizeof(tdt_tot_header), timeoutInSeconds);
+  			int rc=dmxTOT.read((char *)&tdt_tot_header, sizeof(tdt_tot_header), timeoutInMSeconds);
 
   			if(!rc)
     		{
@@ -3317,7 +3321,7 @@ static void *timeThread(void *)
       					dmxTOT.closefd();
       					continue;
     				}
-    				rc=dmxTOT.read(buf, tdt_tot_header.section_length-5, timeoutInSeconds);
+    				rc=dmxTOT.read(buf, tdt_tot_header.section_length-5, timeoutInMSeconds);
     				delete[] buf;
     				// und weiter unterhalb  ...
     				dprintf("TDT/TOT: got local time via TOT :)");
@@ -3361,7 +3365,7 @@ static void *timeThread(void *)
     		struct SI_section_TOT_header header;
 
             dmxTOT.lock();
-    		int rc=dmxTOT.read((char *)&header, sizeof(header), timeoutInSeconds);
+    		int rc=dmxTOT.read((char *)&header, sizeof(header), timeoutInMSeconds);
     		if(!rc)
     		{
       			dmxTOT.unlock();
@@ -3383,7 +3387,7 @@ static void *timeThread(void *)
       			dmxTOT.closefd();
       			break;
     		}
-    		rc=dmxTOT.read(buf, header.section_length-7, timeoutInSeconds);
+    		rc=dmxTOT.read(buf, header.section_length-7, timeoutInMSeconds);
 
     		dmxTOT.unlock();
     		delete[] buf;
@@ -3449,10 +3453,11 @@ static void *eitThread(void *)
 {
 	struct SI_section_header header;
 	char *buf;
-	unsigned timeoutInSeconds=1;
+	unsigned timeoutInMSeconds=500;
 	bool sendToSleepNow= false;
-	dmxEIT.addfilter( 0x4e, (0xff) );
-    dmxEIT.addfilter( 0x4f, (0xff) );
+	//dmxEIT.addfilter( 0x4e, (0xff) );
+    //dmxEIT.addfilter( 0x4f, (0xff) );
+    dmxEIT.addfilter( 0x4f, (0xff- 0x01) );
     dmxEIT.addfilter( 0x50, (0xff) );
     dmxEIT.addfilter( 0x51, (0xff) );
     dmxEIT.addfilter( 0x53, (0xff- 0x01) );
@@ -3509,7 +3514,7 @@ static void *eitThread(void *)
 								break;
 							}
 						}
-                        //dprintf("\n");
+                        dprintf("dontchange %d\n", dont_change);
 						if ( !dont_change )
 						{
 							if ( dmxEIT.filter_index < ( dmxEIT.filters.size()- 1 ) )
@@ -3538,9 +3543,10 @@ static void *eitThread(void *)
                 }
                 else
                 {
+
                     // sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
                     dmxEIT.stop(); // -> lock
-                    lockEvents();
+/*                    lockEvents();
                     if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
                     {
                         // kleiner als 1 Tag machen wir den Cache nicht,
@@ -3560,9 +3566,12 @@ static void *eitThread(void *)
                         dmxSDT.real_unpause();
                     }
                     unlockEvents();
+*/
                     dmxEIT.start(); // -> unlock
                     dputs("[eitThread] dmxEIT restarted");
+
                 }
+
                 lastRestarted= zeit;
                 timeoutsDMX=0;
             }
@@ -3610,7 +3619,7 @@ static void *eitThread(void *)
                     if ( dmxEIT.filter_index < ( dmxEIT.filters.size()- 1 ) )
 					{
 						dmxEIT.change(dmxEIT.filter_index+ 1);
-						dprintf("[eitThread] skipping to next filter (> TIME_EIT_SKIPPING)\n", messaging_current_servicekey );
+						dprintf("[eitThread] skipping to next filter (> TIME_EIT_SKIPPING)\n" );
 					}
 					else
 						sendToSleepNow = true;
@@ -3618,7 +3627,7 @@ static void *eitThread(void *)
 				};
             }
             dmxEIT.lock();
-            int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
+            int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInMSeconds);
             last_clock=clock();
 
             if(!rc)
@@ -3648,7 +3657,7 @@ static void *eitThread(void *)
             }
             // Den Header kopieren
             memcpy(buf, &header, sizeof(header));
-            rc=dmxEIT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+            rc=dmxEIT.read(buf+sizeof(header), header.section_length-5, timeoutInMSeconds);
             dmxEIT.unlock();
             if(!rc)
             {
@@ -3951,7 +3960,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.123 2002/04/25 16:17:10 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.124 2002/04/27 10:48:07 field Exp $\n");
 	try
 	{
 
