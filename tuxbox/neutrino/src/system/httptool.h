@@ -42,6 +42,8 @@ class CHTTPTool
 {
 	private:
 		string userAgent;
+		int	iGlobalProgressEnd;
+		int	iGlobalProgressBegin;
 
 		CProgress_StatusViewer*	statusViewer;
 		static int show_progress( void *clientp, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow);
@@ -50,7 +52,7 @@ class CHTTPTool
 		CHTTPTool();
 		void setStatusViewer( CProgress_StatusViewer* statusview );
 
-		bool downloadFile( string URL, string downloadTarget );
+		bool downloadFile( string URL, string downloadTarget, int globalProgressEnd=-1 );
 
 };
 

@@ -107,14 +107,6 @@ void CHTTPUpdater::setStatusViewer( CProgress_StatusViewer* statusview )
 	statusViewer = statusview;
 }
 
-
-int CHTTPUpdater::show_progress( void *clientp, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow)
-{
-
-	((CProgress_StatusViewer*)clientp)->showLocalStatus( int( dlnow*100.0/dltotal ) );
-	return 0;
-}
-
 bool CHTTPUpdater::getInfo()
 {
 	CHTTPTool httpTool;
@@ -136,7 +128,7 @@ bool CHTTPUpdater::getFile( string version )
 	string gURL = BasePath + ImageFile;
 	string sFileName = gTmpPath+ ImageFile;
 
-	return httpTool.downloadFile( gURL, sFileName );
+	return httpTool.downloadFile( gURL, sFileName, 25 );
 }
 
 
@@ -197,12 +189,15 @@ void CFlashUpdate::showGlobalStatus(int prog)
 	}
 	globalstatus = prog;
 
-	frameBuffer->paintBox(x+10, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
+	int pos = x+10;
 	if(prog!=0)
 	{
-		int pos = x+10+( (width- 20)/100* prog);
+		pos += int( float(width-20)/100.0*prog);
+		//vordergrund
 		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
 	}
+	//hintergrund
+	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
 }
 
 void CFlashUpdate::showLocalStatus(int prog)
@@ -224,12 +219,16 @@ void CFlashUpdate::showLocalStatus(int prog)
 	}
 	lastprog = prog;
 
-	frameBuffer->paintBox(x+10, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
+	int pos = x+10;
 	if(prog!=0)
 	{
-		int pos = x+10+((width- 20)/100* prog);
-		frameBuffer->paintBox(x+10, localstatusY, pos, localstatusY+10, COL_MENUCONTENT +7);
+		pos += int( float(width-20)/100.0*prog);
+		//vordergrund
+		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT +7);
 	}
+	//hintergrund
+	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
+
 }
 
 void CFlashUpdate::showStatusMessage(string text)
@@ -362,7 +361,7 @@ void CFlashUpdate::paint()
 
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
-		if(!httpUpdater.getFile( new_minor ))
+		if(!httpUpdater.getFile( new_minor))
 		{
 			showStatusMessage(g_Locale->getText("flashupdate.getupdatefileerror") );
 			return;
@@ -400,7 +399,7 @@ void CFlashUpdate::paint()
 	CFlashTool ft;
 	ft.setMTDDevice("/dev/mtd/3");
 	ft.setStatusViewer(this);
-	if(!ft.program(sFileName))
+	if(!ft.program(sFileName, 75, 100))
 	{
 		showStatusMessage( ft.getErrorMessage() );
 		return;
@@ -456,7 +455,7 @@ void CFlashExpert::readmtd(int readmtd)
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(readmtd));
-	if(!ft.readFromMTD(filename))
+	if(!ft.readFromMTD(filename, 100))
 	{
 		showStatusMessage( ft.getErrorMessage() );
 		sleep(10);
@@ -488,7 +487,7 @@ void CFlashExpert::writemtd(string filename, int mtdNumber)
 	CFlashTool ft;
 	ft.setStatusViewer( this );
 	ft.setMTDDevice( CMTDInfo::getInstance()->getMTDFileName(mtdNumber) );
-	if(!ft.program(filename))
+	if(!ft.program( "/tmp/" + filename, 50, 100))
 	{
 		showStatusMessage( ft.getErrorMessage() );
 		sleep(10);
@@ -597,7 +596,7 @@ int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 			if(selectedMTD==-1)
 			{
 				//ganzes Image schreiben -> mtd 5
-				writemtd(actionKey, 5);
+				writemtd("flashimage.img", 5);
 			}
 			else
 			{

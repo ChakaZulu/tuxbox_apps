@@ -70,10 +70,11 @@ void CFlashTool::setStatusViewer( CProgress_StatusViewer* statusview )
 	statusViewer = statusview;
 }
 
-bool CFlashTool::readFromMTD( string filename )
+bool CFlashTool::readFromMTD( string filename, int globalProgressEnd )
 {
 	int		fd1, fd2;
 	long	filesize;
+	int		globalProgressBegin;
 
 	if(statusViewer)
 	{
@@ -104,7 +105,11 @@ bool CFlashTool::readFromMTD( string filename )
 		close(fd1);
 		return false;
 	}
-	
+
+	if(statusViewer)
+	{
+		globalProgressBegin = statusViewer->getGlobalStatus();
+	}
 	filesize = CMTDInfo::getInstance()->getMTDSize(mtdDevice);
 
 	char buf[1024];
@@ -123,6 +128,11 @@ bool CFlashTool::readFromMTD( string filename )
 		if(statusViewer)
 		{
 			statusViewer->showLocalStatus(prog);
+			if(globalProgressEnd!=-1)
+			{
+				int globalProg = globalProgressBegin + int((globalProgressEnd-globalProgressBegin) * prog/100. );
+				statusViewer->showGlobalStatus(globalProg);
+			}
 		}
 	}
 
@@ -136,10 +146,11 @@ bool CFlashTool::readFromMTD( string filename )
 	return true;
 }
 
-bool CFlashTool::program( string filename )
+bool CFlashTool::program( string filename, int globalProgressEndErase, int globalProgressEndFlash )
 {
 	int		fd1, fd2;
 	long	filesize;
+	int		globalProgressBegin;
 
 	if(statusViewer)
 	{
@@ -173,9 +184,6 @@ bool CFlashTool::program( string filename )
 		return false;
 	}
 
-	printf("filesize: %ld\n", filesize);
-
-
 	if(statusViewer)
 	{
 		statusViewer->showLocalStatus(0);
@@ -189,14 +197,17 @@ bool CFlashTool::program( string filename )
 		fd_fp = -1;
 	}
 
-	if(!erase())
+	if(!erase(globalProgressEndErase))
 	{
 		return false;
 	}
 
 	if(statusViewer)
 	{
-		statusViewer->showGlobalStatus(75);
+		if(globalProgressEndErase!=-1)
+		{
+			statusViewer->showGlobalStatus(globalProgressEndErase);
+		}
 		statusViewer->showLocalStatus(0);
 		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.programmingflash"));
 	}
@@ -206,6 +217,11 @@ bool CFlashTool::program( string filename )
 		ErrorMessage = g_Locale->getText("flashupdate.cantopenmtd");
 		close(fd1);
 		return false;
+	}
+
+	if(statusViewer)
+	{
+		globalProgressBegin = statusViewer->getGlobalStatus();
 	}
 
 	char buf[1024];
@@ -224,6 +240,11 @@ bool CFlashTool::program( string filename )
 		if(statusViewer)
 		{
 			statusViewer->showLocalStatus(prog);
+			if(globalProgressEndFlash!=-1)
+			{
+				int globalProg = globalProgressBegin + int((globalProgressEndFlash-globalProgressBegin) * prog/100. );
+				statusViewer->showGlobalStatus(globalProg);
+			}
 		}
 	}
 
@@ -237,11 +258,12 @@ bool CFlashTool::program( string filename )
 	return true;
 }
 
-bool CFlashTool::erase()
+bool CFlashTool::erase(int globalProgressEnd)
 {
-	int		fd;
-	mtd_info_t	meminfo;
+	int				fd;
+	mtd_info_t		meminfo;
 	erase_info_t	erase;
+	int				globalProgressBegin;
 
 	if( (fd = open( mtdDevice.c_str(), O_RDWR )) < 0 )
 	{
@@ -255,6 +277,11 @@ bool CFlashTool::erase()
 		return false;
 	}
 
+	if(statusViewer)
+	{
+		globalProgressBegin = statusViewer->getGlobalStatus();
+	}
+
 	erase.length = meminfo.erasesize;
 	for (erase.start = 0; erase.start < meminfo.size;erase.start += meminfo.erasesize)
 	{
@@ -265,7 +292,13 @@ bool CFlashTool::erase()
 		*/
 		if(statusViewer)
 		{
-			statusViewer->showLocalStatus( char(erase.start*100./meminfo.size));
+			int prog = int(erase.start*100./meminfo.size);
+			statusViewer->showLocalStatus(prog);
+			if(globalProgressEnd!=-1)
+			{
+				int globalProg = globalProgressBegin + int((globalProgressEnd-globalProgressBegin) * prog/100. );
+				statusViewer->showGlobalStatus(globalProg);
+			}
 		}
 
 		if(ioctl( fd, MEMERASE, &erase) != 0)

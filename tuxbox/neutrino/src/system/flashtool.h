@@ -47,7 +47,7 @@ class CFlashTool
 		string mtdDevice;
 		string ErrorMessage;
 
-		bool erase();
+		bool erase(int globalProgressEnd=-1);
 
 	public:
 		CFlashTool();
@@ -58,8 +58,8 @@ class CFlashTool
 		void setMTDDevice( string mtddevice );
 		void setStatusViewer( CProgress_StatusViewer* statusview );
 
-		bool program( string filename );
-		bool readFromMTD( string filename );
+		bool program( string filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
+		bool readFromMTD( string filename, int globalProgressEnd=-1 );
 
 		void reboot();
 };

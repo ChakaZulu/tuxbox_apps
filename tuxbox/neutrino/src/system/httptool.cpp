@@ -41,12 +41,21 @@ void CHTTPTool::setStatusViewer( CProgress_StatusViewer* statusview )
 
 int CHTTPTool::show_progress( void *clientp, size_t dltotal, size_t dlnow, size_t ultotal, size_t ulnow)
 {
-
-	((CProgress_StatusViewer*)clientp)->showLocalStatus( int( dlnow*100.0/dltotal ) );
+	CHTTPTool* hTool = ((CHTTPTool*)clientp);
+	if(hTool->statusViewer)
+	{
+		int progress = int( dlnow*100.0/dltotal);
+		hTool->statusViewer->showLocalStatus(progress);
+		if(hTool->iGlobalProgressEnd!=-1)
+		{
+			int globalProg = hTool->iGlobalProgressBegin + int((hTool->iGlobalProgressEnd-hTool->iGlobalProgressBegin) * progress/100. );
+			hTool->statusViewer->showGlobalStatus(globalProg);
+		}
+	}
 	return 0;
 }
 
-bool CHTTPTool::downloadFile( string URL, string downloadTarget )
+bool CHTTPTool::downloadFile( string URL, string downloadTarget, int globalProgressEnd )
 {
 	CURL *curl;
 	CURLcode res;
@@ -58,10 +67,15 @@ bool CHTTPTool::downloadFile( string URL, string downloadTarget )
 	curl = curl_easy_init();
 	if(curl)
 	{
+		iGlobalProgressEnd = globalProgressEnd;
+		if(statusViewer)
+		{
+			iGlobalProgressBegin = statusViewer->getGlobalStatus();
+		}
 		curl_easy_setopt(curl, CURLOPT_URL, URL.c_str() );
 		curl_easy_setopt(curl, CURLOPT_FILE, headerfile);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
-		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, statusViewer);
+		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, this);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, FALSE);
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);

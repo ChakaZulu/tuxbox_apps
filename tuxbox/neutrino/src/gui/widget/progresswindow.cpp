@@ -70,12 +70,15 @@ void CProgressWindow::showGlobalStatus(int prog)
 	}
 	globalstatus = prog;
 
-	frameBuffer->paintBox(x+10, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
+	int pos = x+10;
 	if(prog!=0)
 	{
-		int pos = x+10+( (width- 20)/100* prog);
+		pos += int( float(width-20)/100.0*prog);
+		//vordergrund
 		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
 	}
+	//hintergrund
+	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
 }
 
 void CProgressWindow::showLocalStatus(int prog)
@@ -97,12 +100,15 @@ void CProgressWindow::showLocalStatus(int prog)
 	}
 	lastprog = prog;
 
-	frameBuffer->paintBox(x+10, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
+	int pos = x+10;
 	if(prog!=0)
 	{
-		int pos = x+10+((width- 20)/100* prog);
-		frameBuffer->paintBox(x+10, localstatusY, pos, localstatusY+10, COL_MENUCONTENT +7);
+		pos += int( float(width-20)/100.0*prog);
+		//vordergrund
+		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT +7);
 	}
+	//hintergrund
+	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
 }
 
 void CProgressWindow::showStatusMessage(string text)
