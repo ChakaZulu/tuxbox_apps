@@ -72,13 +72,13 @@ class CLCD
 
 		MODES				mode;
 
-		string				servicename;
+		std::string			servicename;
 		char				volume;
-		int					lcd_brightness;
-		int					lcd_standbybrightness;
-		int					lcd_contrast;
-		int					lcd_power;
-		int					lcd_inverse;
+		int				lcd_brightness;
+		int				lcd_standbybrightness;
+		int				lcd_contrast;
+		int				lcd_power;
+		int				lcd_inverse;
 		bool				muted;
 		bool				showclock;
 		CConfigFile			configfile;
@@ -100,12 +100,12 @@ class CLCD
 		void loadConfig();
 
 
-		void setMode(MODES m, string title="");
+		void setMode(MODES m, std::string title="");
 
-		void showServicename(string name);
+		void showServicename(const std::string name); // UTF-8
 		void showTime();
 		void showVolume(char vol);
-		void showMenuText(int position, string text, int highlight=-1);
+		void showMenuText(int position, std::string text, int highlight=-1);
 
 		void setBrightness(int);
 		int getBrightness();

@@ -213,7 +213,7 @@ void CLCD::setlcdparameter(int dimm, int contrast, int power, int inverse)
 	close(fd);
 }
 
-void CLCD::showServicename( string name )
+void CLCD::showServicename(const std::string name) // UTF-8
 {
 	servicename = name;
 	if (mode != MODE_TVRADIO)
@@ -224,20 +224,20 @@ void CLCD::showServicename( string name )
 	if (fonts.channelname->getRenderWidth(name.c_str(), true) > 120)
 	{
 		int pos;
-		string text1 = name;
+		std::string text1 = name;
 		do
 		{
 			pos = text1.find_last_of("[ .]+"); // <- characters are UTF-encoded!
 			if (pos != -1)
 				text1 = text1.substr( 0, pos );
-		} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) );
+		} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str(), true) > 120 ) ); // UTF-8
 		
-		if ( fonts.channelname->getRenderWidth(text1.c_str(), true) <= 120 )
+		if ( fonts.channelname->getRenderWidth(text1.c_str(), true) <= 120 ) // UTF-8
 			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()+ 1).c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 		else
 		{
-			string text1 = name;
-			while (fonts.channelname->getRenderWidth(text1.c_str(), true) > 120)
+			std::string text1 = name;
+			while (fonts.channelname->getRenderWidth(text1.c_str(), true) > 120) // UTF-8
 				text1= text1.substr(0, text1.length()- 1);
 			
 			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()).c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
@@ -301,7 +301,7 @@ void CLCD::showVolume(char vol)
 	}
 }
 
-void CLCD::showMenuText(int position, string text, int highlight )
+void CLCD::showMenuText(int position, std::string text, int highlight )
 {
 	if (mode != MODE_MENU)
 	{
@@ -313,7 +313,7 @@ void CLCD::showMenuText(int position, string text, int highlight )
 	display.update();
 }
 
-void CLCD::setMode(MODES m, string title)
+void CLCD::setMode(MODES m, std::string title)
 {
 	switch (m)
 	{
