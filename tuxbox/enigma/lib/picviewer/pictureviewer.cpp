@@ -293,6 +293,12 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 {
 	eDebug("Show Image {");
 	DecodeImage(filename, false, unscaled);
+	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
+	if (screenInfo->bits_per_pixel != 16)
+	{
+		fbClass::getInstance()->lock();
+		fbClass::getInstance()->SetMode(720, 576, 16);
+	}
 	DisplayNextImage();
 	eDebug("Show Image }");
 	return true;
@@ -338,8 +344,6 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 		case eWidgetEvent::execBegin:
 		{
 			int mode = 0;
-			fbClass::getInstance()->lock();
-			fbClass::getInstance()->SetMode(720, 576, 16);
 			eConfig::getInstance()->getKey("/ezap/lastPicViewerStyle", mode);
 			if (mode)
 				ShowSlideshow(filename, false);
