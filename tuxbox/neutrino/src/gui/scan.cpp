@@ -188,14 +188,15 @@ void CScanTs::startScan()
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
-	if (parent)
-	{
-		parent->hide();
-	}
-	paint();
+	g_FrameBuffer->loadPal("scan.pal", 37, 199);
+//	g_FrameBuffer->paintIcon8("scan.raw",0,0, 37);
+//	g_FrameBuffer->savePictureFromMem("demoscan.raw", g_FrameBuffer->lfb);
+	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->lfb);
 
 	sectionsdPauseScanning(1);
 	startScan();
+
+	paint();
 	
 	char strServices[100] = "";
 	char strTransponders[100] = "";
@@ -223,7 +224,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	int xpos2 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.services").c_str());
 	int xpos3 = x+20 + g_Fonts->menu->getRenderWidth(g_Locale->getText("scants.actsatellite").c_str());
 
-	g_FrameBuffer->loadPal("radar.pal", 17, 100);
+	g_FrameBuffer->loadPal("radar.pal", 17, 37);
 	int pos = 0;
 	bool finish = false;
 	while (!finish)
@@ -306,10 +307,7 @@ void CScanTs::hide()
 void CScanTs::paint()
 {
 	int ypos=y;
-	//g_FrameBuffer->loadPal("scan.pal", 30, 199);
-	//g_FrameBuffer->paintIcon8("scan.raw",0,0, 30);
 	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("scants.head").c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
-
 }

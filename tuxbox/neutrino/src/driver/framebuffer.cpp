@@ -31,11 +31,14 @@
 
 /*
 
-$Id: framebuffer.cpp,v 1.12 2001/12/17 22:56:37 McClean Exp $
+$Id: framebuffer.cpp,v 1.13 2001/12/18 00:20:07 McClean Exp $
 
 
 
 $Log: framebuffer.cpp,v $
+Revision 1.13  2001/12/18 00:20:07  McClean
+update scanmenue
+
 Revision 1.12  2001/12/17 22:56:37  McClean
 add dump-function
 
@@ -531,7 +534,7 @@ bool CFrameBuffer::savePictureFromMem(string filename, unsigned char* memp)
 	int fd;
 	filename = iconBasePath + filename;
 
-	fd = open(filename.c_str(), O_WRONLY );
+	fd = open(filename.c_str(), O_WRONLY | O_CREAT);
 	
 	if (fd==-1)
 	{
@@ -546,7 +549,7 @@ bool CFrameBuffer::savePictureFromMem(string filename, unsigned char* memp)
 	write(fd, &height, 2 );
 	write(fd, &tr, 1 );
 
-	write(fd, memp, width*height);
+	write(fd, memp, 720*576);
 
 	close(fd);
 	return true;
