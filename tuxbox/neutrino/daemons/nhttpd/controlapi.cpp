@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.31 2004/02/19 16:02:08 thegoodguy Exp $
+	$Id: controlapi.cpp,v 1.32 2004/02/21 08:52:27 thegoodguy Exp $
 
 	License: GPL
 
@@ -607,7 +607,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 		}
 		else if (request->ParameterList["onidsid"] != "")
 		{
-			t_channel_id channel_id = atol(request->ParameterList["onidsid"].c_str()); // FIXME: atol makes only sense for tsidonidsid
+			t_channel_id channel_id = atol(request->ParameterList["onidsid"].c_str()); // FIXME
 			Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 			CChannelEventList::iterator eventIterator;
 
@@ -711,7 +711,13 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 		}
 		else
 		{
-			Parent->ZapTo(request->ParameterList["1"].c_str()); /* FIXME: CHANGE TO HEX */
+			const char * argument = request->ParameterList["1"].c_str();
+
+			if ((argument[0] == '0') && (argument[1] == 'x'))
+				Parent->ZapTo(&(argument[2]));
+			else
+				Parent->ZapTo_decimal(argument);
+
 			request->SendOk();
 		}
 		

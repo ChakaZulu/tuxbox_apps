@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.39 2004/02/19 16:02:08 thegoodguy Exp $
+        $Id: webdbox.h,v 1.40 2004/02/21 08:52:27 thegoodguy Exp $
 
         License: GPL
 
@@ -94,6 +94,7 @@ class CWebDbox
 	CZapitClient::BouquetChannelList *GetChannelList(int Mode);
 
 	// support functions
+	void ZapTo_decimal  (const char * const target);
 	void ZapTo          (const char * const target);
 	void ZapToSubService(const char * const target);
 

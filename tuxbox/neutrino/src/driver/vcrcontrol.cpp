@@ -418,8 +418,11 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command, const t_channe
 		extMessage += ext_channel_name;
 		extMessage += "</channelname>\n\t\t<epgtitle>";
 		extMessage += extEPGTitle;
-		extMessage += "</epgtitle>\n\t\t<onidsid>";
-		sprintf(tmp, "%u", channel_id);
+		extMessage += "</epgtitle>\n\t\t<id>";
+		sprintf(tmp, PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS, channel_id);
+		extMessage += tmp;
+		extMessage += "</id>\n\t\t<onidsid>";
+		sprintf(tmp, "%u", ((((uint32_t)GET_ORIGINAL_NETWORK_ID_FROM_CHANNEL_ID(channel_id)) << 16) | GET_SERVICE_ID_FROM_CHANNEL_ID(channel_id)));
 		extMessage += tmp;
 		extMessage += "</onidsid>\n\t\t<epgid>";
 		sprintf(tmp, "%llu", epgid);
