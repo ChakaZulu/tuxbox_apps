@@ -318,6 +318,7 @@ void *start_scanthread(void *param)
 				if (finaltune(feparams, 0, 0) == 0)
 				{
 					fake_pat(&scantransponders, feparams);
+					feparams.u.qam.SymbolRate = 6900000;
 				}
 				else
 				{
@@ -325,6 +326,16 @@ void *start_scanthread(void *param)
 					feparams.u.qam.SymbolRate = 6900000;
 				}
 			}
+		}
+		
+		feparams.Frequency=522000;
+		if (finaltune(feparams, 0, 0) == 0)
+		{
+			fake_pat(&scantransponders, feparams);
+		}
+		else
+		{
+			printf("[scan.cpp] No signal found on transponder.\n");
 		}
 
 		get_sdts();
