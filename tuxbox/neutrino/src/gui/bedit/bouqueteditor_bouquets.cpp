@@ -1,5 +1,5 @@
 /*
-$ID: $
+$Id: bouqueteditor_bouquets.cpp,v 1.20 2002/04/02 18:38:08 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@ $ID: $
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $Log: bouqueteditor_bouquets.cpp,v $
+Revision 1.20  2002/04/02 18:38:08  rasc
+$id
+
 Revision 1.19  2002/04/02 18:34:58  rasc
 -- browsing/page function for bouquet editor list box
 -- This enables quicker moving/sorting of your bouquet favorites.
