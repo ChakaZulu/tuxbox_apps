@@ -41,6 +41,8 @@
 
 #define borderwidth 4
 
+#define HINTBOX_MAX_HEIGHT 420
+
 
 CHintBox::CHintBox(const neutrino_locale_t Caption, const char * const Text, const int Width, const char * const Icon)
 {
@@ -63,6 +65,8 @@ CHintBox::CHintBox(const neutrino_locale_t Caption, const char * const Text, con
 	while (true)
 	{
 		height += fheight;
+		if (height > HINTBOX_MAX_HEIGHT)
+			height -= fheight;
 
 		line.push_back(begin);
 		pos = strchr(begin, '\n');
@@ -74,24 +78,33 @@ CHintBox::CHintBox(const neutrino_locale_t Caption, const char * const Text, con
 		else
 			break;
 	}
+	entries_per_page = ((height - theight) / fheight) - 1;
+	current_page = 0;
 
-	nw = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
+	unsigned int additional_width;
+
+	if (entries_per_page < line.size())
+		additional_width = 20 + 15;
+	else
+		additional_width = 20 +  0;
 
 	if (Icon != NULL)
 	{
 		iconfile = Icon;
-		nw += 30;
+		additional_width += 30;
 	}
 	else
 		iconfile = "";
+
+	nw = additional_width + g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getRenderWidth(g_Locale->getText(caption), true); // UTF-8
 
 	if (nw > width)
 		width = nw;
 
 	for (std::vector<char *>::const_iterator it = line.begin(); it != line.end(); it++)
 	{
-		nw = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(*it, true) + 20; // UTF-8
-		if (nw > width )
+		nw = additional_width + g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(*it, true); // UTF-8
+		if (nw > width)
 			width = nw;
 	}
 	window = NULL;
@@ -109,8 +122,6 @@ CHintBox::~CHintBox(void)
 
 void CHintBox::paint(void)
 {
-	int ypos;
-
 	if (window != NULL)
 	{
 		/*
@@ -126,16 +137,21 @@ void CHintBox::paint(void)
 			       (((g_settings.screen_EndY- g_settings.screen_StartY) - height) >> 2) + g_settings.screen_StartY,
 			       width + borderwidth,
 			       height + borderwidth);
+	refresh();
+}
 
+void CHintBox::refresh(void)
+{
 	if (window == NULL)
 	{
-		return; /* out of memory */
+		return;
 	}
 
 	window->paintBoxRel(borderwidth, height, width, borderwidth, COL_BACKGROUND_PLUS_0);
 	window->paintBoxRel(width, borderwidth, borderwidth, height - borderwidth, COL_BACKGROUND_PLUS_0);
 
 	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD_PLUS_0);
+
 	if (!iconfile.empty())
 	{
 		window->paintIcon(iconfile.c_str(), 8, 5);
@@ -144,12 +160,39 @@ void CHintBox::paint(void)
 	else
 		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE], 10, theight, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 
-	window->paintBoxRel(0, theight, width, height - theight, (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0);
+	window->paintBoxRel(0, theight, width, (entries_per_page + 1) * fheight, (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0);
 
-	ypos = theight + (fheight >> 1);
+	int count = entries_per_page;
+	int ypos  = theight + (fheight >> 1);
 
-	for (std::vector<char *>::const_iterator it = line.begin(); it != line.end(); it++)
+	for (std::vector<char *>::const_iterator it = line.begin() + (entries_per_page * current_page); ((it != line.end()) && (count > 0)); it++, count--)
 		window->RenderString(g_Font[SNeutrinoSettings::FONT_TYPE_MENU], 10, (ypos += fheight), width, *it, (CFBWindow::color_t)COL_MENUCONTENT, 0, true); // UTF-8
+
+	if (entries_per_page < line.size())
+	{
+		ypos = theight + (fheight >> 1);
+		window->paintBoxRel(width - 15, ypos                             , 15, entries_per_page * fheight, COL_MENUCONTENT_PLUS_1);
+		unsigned int marker_size = (entries_per_page * fheight) / ((line.size() + entries_per_page - 1) / entries_per_page);
+		window->paintBoxRel(width - 13, ypos + current_page * marker_size, 11, marker_size               , COL_MENUCONTENT_PLUS_3);
+	}
+}
+
+void CHintBox::scroll_up(void)
+{
+	if (current_page > 0)
+	{
+		current_page--;
+		refresh();
+	}
+}
+
+void CHintBox::scroll_down(void)
+{
+	if ((entries_per_page * (current_page + 1)) <= line.size())
+	{
+		current_page++;
+		refresh();
+	}
 }
 
 void CHintBox::hide(void)
@@ -178,18 +221,26 @@ int ShowHintUTF(const neutrino_locale_t Caption, const char * const Text, const 
 
 	while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 	{
-    	g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ((msg == CRCInput::RC_timeout) ||
-		    (msg == CRCInput::RC_home) ||
-		    (msg == CRCInput::RC_ok))
+		    (msg == CRCInput::RC_home   ) ||
+		    (msg == CRCInput::RC_ok     ))
 		{
 				res = messages_return::cancel_info;
 		}
+		else if (msg == CRCInput::RC_up)
+		{
+			hintBox->scroll_up();
+		}
+		else if (msg == CRCInput::RC_down)
+		{
+			hintBox->scroll_down();
+		}
 		else
 		{
-	        res = CNeutrinoApp::getInstance()->handleMsg(msg, data);
-			if ( res & messages_return::unhandled )
+			res = CNeutrinoApp::getInstance()->handleMsg(msg, data);
+			if (res & messages_return::unhandled)
 			{
 
 				// raus hier und darüber behandeln...

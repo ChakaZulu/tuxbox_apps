@@ -45,6 +45,9 @@ class CHintBox
 
 	CFBWindow *              window;
 
+	unsigned int             entries_per_page;
+	unsigned int             current_page;
+
 	int                      width;
 	int                      height;
 
@@ -55,10 +58,15 @@ class CHintBox
 	std::vector<char *>      line;
 	std::string              iconfile;
 	
+	void refresh(void);
+
  public:
 	// Text is UTF-8 encoded
 	CHintBox(const neutrino_locale_t Caption, const char * const Text, const int Width = 450, const char * const Icon = "info.raw");
 	~CHintBox(void);
+
+	void scroll_up(void);
+	void scroll_down(void);
 
 	void paint(void);
 	void hide(void);

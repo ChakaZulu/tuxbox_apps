@@ -54,6 +54,9 @@ void CMessageBox::paintButtons()
 {
 	uint8_t    color;
 	fb_pixel_t bgcolor;
+
+	window->paintBoxRel(0, height - (fheight << 1), width, (fheight << 1), (CFBWindow::color_t)COL_MENUCONTENT_PLUS_0);
+
 	//irgendwann alle vergleichen - aber cancel ist sicher der längste
 	int MaxButtonTextWidth = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText(LOCALE_MESSAGEBOX_CANCEL), true); // UTF-8
 
@@ -178,6 +181,14 @@ int CMessageBox::exec(int timeout)
 			}
 
 			paintButtons();
+		}
+		else if (msg == CRCInput::RC_up)
+		{
+			scroll_up();
+		}
+		else if (msg == CRCInput::RC_down)
+		{
+			scroll_down();
 		}
 		else if(msg==CRCInput::RC_left)
 		{
