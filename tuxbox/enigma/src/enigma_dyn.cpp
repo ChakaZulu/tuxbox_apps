@@ -323,6 +323,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString command=opt["command"];
+	eString requester=opt["requester"];
 	if (command)
 	{
 		if (command=="shutdown")
@@ -345,9 +346,15 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 			if (eZapStandby::getInstance())
 			{
 				eZapStandby::getInstance()->wakeUp(0);
-				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma is waking up...</body></html>";
+				if (requester == "webif")
+					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma is waking up...</body></html>";
+				else
+					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma is waking up</body></html>";
 			}
-			return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma doesn't sleep.</body></html>";
+			if (requester == "webif")
+				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma doesn't sleep.</body></html>";
+			else
+				return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>enigma doesn't sleep</body></html>";
 		}
 		else if (command=="standby")
 		{
