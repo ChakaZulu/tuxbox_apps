@@ -444,7 +444,7 @@ void eDVBServiceController::EITready(int error)
 void eDVBServiceController::TDTready(int error)
 {
 	eDebug("TDTready %d", error);
-	if (!error)
+	if (!error && transponder)
 	{
 		std::map<tsref,int> &tOffsMap = eTransponderList::getInstance()->TimeOffsetMap;
 		std::map< tsref, int >::iterator it( tOffsMap.find( *transponder ) );
@@ -994,7 +994,6 @@ void eDVBServiceController::clearCAlist()
 /*
 					case 0xC1:
 					{
-						/*
 						for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 						if (i->Tag()==DESCR_MHW_DATA)
 						{
