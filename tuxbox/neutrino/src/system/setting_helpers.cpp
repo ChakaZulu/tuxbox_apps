@@ -301,7 +301,7 @@ bool CAudioSetupNotifier::changeNotify(string OptionName, void*)
 	}
 	if(OptionName=="audiomenu.analogout")
 	{
-		g_Controld->setAnalogOutput(g_settings.audio_AnalogMode);
+		g_Zapit->setAudioMode(g_settings.audio_AnalogMode);
 		return true;
 	}
 	return false;
