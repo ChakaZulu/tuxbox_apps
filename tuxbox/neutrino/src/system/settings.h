@@ -173,5 +173,10 @@ struct SNeutrinoSettings
 	char parentallock_pincode[4];
 };
 
+const int PARENTALLOCK_PROMPT_NEVER          = 0;
+const int PARENTALLOCK_PROMPT_ONSTART        = 1;
+const int PARENTALLOCK_PROMPT_CHANGETOLOCKED = 2;
+const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
+
 #endif
 
