@@ -186,10 +186,10 @@ keybindingmenu.cancel Zamknij liste kanalow
 keybindingmenu.cancel_head Zamknij liste kanalow
 keybindingmenu.sort Sortuj
 keybindingmenu.sort_head Sortuj
-keybindingmenu.addrecord add unset
-keybindingmenu.addrecord_head unset
-keybindingmenu.addremind add unset
-keybindingmenu.addremind_head unset
+keybindingmenu.addrecord dodaj timer
+keybindingmenu.addrecord_head dodaj timer
+keybindingmenu.addremind add zapto timer
+keybindingmenu.addremind_head add zapto timer
 keybindingmenu.channelup Kanal do góry
 keybindingmenu.channelup_head Kanal do góry
 keybindingmenu.channeldown Kanal na dol
@@ -324,7 +324,7 @@ scants.bouquet Bukiety
 scants.bouquet_leave pozostaw obecne
 scants.bouquet_create utworz nowe
 scants.bouquet_erase kasuj wszystkie
-scants.failed unset
+scants.failed Brak transpondera!
 scants.finished Strojenie zakonczone sukcesem!
 
 flashupdate.head Aktualizacja oprogramowania
@@ -683,12 +683,12 @@ nfsmenu.head unset
 apids.hint_1 Podaj APIDy do odbioru w
 apids.hint_2 formacie hex rozdzielone przez ' '
 
-mainmenu.pictureviewer unset
-pictureviewer.head unset
-pictureviewer.sortorder unset
-pictureviewer.sortorder.date unset
-pictureviewer.sortorder.filename unset
-pictureviewer.show unset
-pictureviewer.slideshow unset
-pictureviewer.slide_time unset
-pictureviewer.scaling unset
+mainmenu.pictureviewer Przegladarka obrazów
+pictureviewer.head Przegladarka obrazów
+pictureviewer.sortorder zmien kolejnosc sortowania
+pictureviewer.sortorder.date (data)
+pictureviewer.sortorder.filename (nazwa)
+pictureviewer.show pokaz
+pictureviewer.slideshow przewijaj
+pictureviewer.slide_time czas przewijania
+pictureviewer.scaling skalowanie

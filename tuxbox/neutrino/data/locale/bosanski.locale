@@ -186,10 +186,10 @@ keybindingmenu.cancel zatvoriti listu kanala
 keybindingmenu.cancel_head zatvoriti listu kanala
 keybindingmenu.sort promijeniti smjer sortiranja
 keybindingmenu.sort_head promijeniti smjer sortiranja
-keybindingmenu.addrecord unset
-keybindingmenu.addrecord_head unset
-keybindingmenu.addremind unset
-keybindingmenu.addremind_head unset
+keybindingmenu.addrecord dodati vremenski brojac za snimanje
+keybindingmenu.addrecord_head dodati vremenski brojac za snimanje
+keybindingmenu.addremind dodati vremenski brojac za prebaciti
+keybindingmenu.addremind_head dodati vremenski brojac za prebaciti
 keybindingmenu.channelup kanal gore
 keybindingmenu.channelup_head tipka za kanal gore
 keybindingmenu.channeldown kanal dole
