@@ -33,12 +33,12 @@
 #ifndef __messagebox__
 #define __messagebox__
 
-#include <gui/widget/hintbox.h>
+#include <gui/widget/hintboxext.h>
 
 #include <string>
 
 
-class CMessageBox : CHintBox
+class CMessageBox : public CHintBoxExt
 {
  private:
 
@@ -66,6 +66,8 @@ class CMessageBox : CHintBox
 	
 	// Text & Caption are always UTF-8 encoded
 	CMessageBox(const neutrino_locale_t Caption, const char * const Text, const int Width = 500, const char * const Icon = NULL, const CMessageBox::result_ Default = mbrYes, const uint ShowButtons = mbAll);
+
+	CMessageBox(const neutrino_locale_t Caption, ContentLines& Lines, const int Width = 500, const char * const Icon = NULL, const CMessageBox::result_ Default = mbrYes, const uint ShowButtons = mbAll);
 
 	int exec(int timeout = -1);
 	
