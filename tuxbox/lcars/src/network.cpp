@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.11  2002/06/02 21:25:33  TheDOC
+http-network-stuff again
+
 Revision 1.10  2002/06/02 21:06:27  TheDOC
 http-network-stuff
 
@@ -305,6 +308,7 @@ void *network::startlistening(void *object)
 					write(inbound_connection, writebuffer, strlen(writebuffer));*/
 					path[1] = "file";
 					path[2] = "start.htm";
+					counter2 = 4;
 				}
 				if (path[1] == "command")
 				{
