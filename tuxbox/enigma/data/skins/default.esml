@@ -29,11 +29,11 @@
 		<color name="osd_timebar" color="#1010AA"/>
 		<color name="osd_timebarborder" color="#ffffff"/>
 
-		<color name="shadow_red" color="#030320" end="#ff0303" size="16" />
-		<color name="shadow_green" color="#030320" end="#03ff03" size="16" />
-		<color name="shadow_yellow" color="#030320" end="#ffff03" size="16" />
-		<color name="shadow_blue" color="#030320" end="#0303ff" size="16" />
-		<color name="shadow_gray" color="#030320" end="#282828" size="16" />
+		<color name="shadow_red" color="#11030320" end="#ff0303" size="16" />
+		<color name="shadow_green" color="#11030320" end="#03ff03" size="16" />
+		<color name="shadow_yellow" color="#11030320" end="#ffff03" size="16" />
+		<color name="shadow_blue" color="#11030320" end="#0303ff" size="16" />
+		<color name="shadow_gray" color="#11030320" end="#282828" size="16" />
 	</colors>
 	
 	<colorscheme>
@@ -112,71 +112,71 @@
 	</object> 
 	
 	<object name="ezap_main">
-		<eZapMain position="50:375" size="670:160">
+		<eZapMain position="50:355" size="670:180">
 
 			<!--kanalnummer-->
-			<eWidget position="4:3" size="113:62" backgroundColor="osd_normal" />
+			<eWidget position="4:3" size="113:82" backgroundColor="osd_normal" />
 
 			<!--hauptbox-->
-			<eWidget position="127:40" size="468:35" backgroundColor="osd_normal" />
-			<eWidget position="34:75" size="561:75" backgroundColor="osd_normal" />
+			<eWidget position="127:60" size="468:35" backgroundColor="osd_normal" />
+			<eWidget position="34:95" size="561:75" backgroundColor="osd_normal" />
 
 			<!--schatten-->
-			<eWidget position="14:65" size="113:10" backgroundColor="osd_shadowcol" />
-			<eWidget position="117:15" size="10:60" backgroundColor="osd_shadowcol" />
-			<eWidget position="127:15" size="478:25" backgroundColor="osd_shadowcol" />
-			<eWidget position="44:150" size="561:10" backgroundColor="osd_shadowcol" />
-			<eWidget position="595:15" size="10:135" backgroundColor="osd_shadowcol" />
+			<eWidget position="14:85" size="113:10" backgroundColor="osd_shadowcol" />
+			<eWidget position="117:15" size="10:80" backgroundColor="osd_shadowcol" />
+			<eWidget position="127:35" size="478:25" backgroundColor="osd_shadowcol" />
+			<eWidget position="44:170" size="561:10" backgroundColor="osd_shadowcol" />
+			<eWidget position="595:35" size="10:135" backgroundColor="osd_shadowcol" />
 
 			<!--
-			<eWidget position="560:49" size="95:20" backgroundColor="osd_timebarborder" />
-			<eWidget position="562:51" size="91:16" backgroundColor="osd_timebar" />
+			<eWidget position="560:69" size="95:20" backgroundColor="osd_timebarborder" />
+			<eWidget position="562:71" size="91:16" backgroundColor="osd_timebar" />
 			-->
 
 			<!--texte-->
 			<eLabel position="10:5" size="100:50" font="NimbusSansL-Regular Sans L Regular;50" name="ch_number" align="center"
 				backgroundColor="osd_normal"/>
 
-			<eLabel position="140:41" size="335:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
+			<eLabel position="140:61" size="445:35" font="NimbusSansL-Regular Sans L Regular;35" name="ch_name"
 				backgroundColor="osd_normal"/>
 
-			<eLabel position="50:82" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_time"
+			<eLabel position="50:102" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_time"
 				backgroundColor="osd_epg"/>
-			<eLabel position="50:114" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_time"
-				backgroundColor="osd_epg"/>
-
-			<eLabel position="140:82" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
-				backgroundColor="osd_epg"/>
-			<eLabel position="140:114" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
+			<eLabel position="50:134" size="75:27" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_time"
 				backgroundColor="osd_epg"/>
 
-			<eLabel position="495:82" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_duration" align="right"
+			<eLabel position="140:102" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_title"
 				backgroundColor="osd_epg"/>
-			<eLabel position="495:114" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_duration" align="right"
+			<eLabel position="140:134" size="345:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_title"
 				backgroundColor="osd_epg"/>
 
-			<eLabel position="521:15" size="65:21" font="NimbusSansL-Regular Sans L Regular;21" name="time" align="right"
+			<eLabel position="495:102" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_now_duration" align="right"
+				backgroundColor="osd_epg"/>
+			<eLabel position="495:134" size="90:35" font="NimbusSansL-Regular Sans L Regular;25" name="e_next_duration" align="right"
+				backgroundColor="osd_epg"/>
+
+			<eLabel position="521:35" size="65:21" font="NimbusSansL-Regular Sans L Regular;21" name="time" align="right"
 				backgroundColor="osd_shadow"/>
 
-			<eProgress position="490:49" size="95:20" name="progress_bar" />
+			<eProgress position="14:62" size="95:17" name="progress_bar" foregroundColor="osd_normal" border="1" />
 
-			<ePixmap position="127:17" size="104:24" pixmap="osd_crypt_on" name="osd_crypt_on" />
-			<ePixmap position="150:19" size="104:24" pixmap="osd_format_on" name="osd_format_on"/>
-			<ePixmap position="195:21" size="104:24" pixmap="osd_dolby_on" name="osd_dolby_on"/>
-			<ePixmap position="150:19" size="104:24" pixmap="osd_format_off" name="osd_format_off"/>
-			<ePixmap position="195:21" size="104:24" pixmap="osd_dolby_off" name="osd_dolby_off"/>
-			<ePixmap position="127:17" size="104:24" pixmap="osd_crypt_off" name="osd_crypt_off"/>
+			<ePixmap position="140:37" size="104:24" pixmap="osd_crypt_on" name="osd_crypt_on" />
+			<ePixmap position="163:39" size="104:24" pixmap="osd_format_on" name="osd_format_on"/>
+			<ePixmap position="208:41" size="104:24" pixmap="osd_dolby_on" name="osd_dolby_on"/>
+			<ePixmap position="163:39" size="104:24" pixmap="osd_format_off" name="osd_format_off"/>
+			<ePixmap position="208:41" size="104:24" pixmap="osd_dolby_off" name="osd_dolby_off"/>
+			<ePixmap position="140:37" size="104:24" pixmap="osd_crypt_off" name="osd_crypt_off"/>
 			<eLabel name="description" />
 			
-			<eLabel name="button_red_enabled" position="230:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
-			<eLabel name="button_green_enabled" position="250:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
-			<eLabel name="button_yellow_enabled" position="270:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
-			<eLabel name="button_blue_enabled" position="290:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
+			<eLabel name="button_red_enabled" position="243:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
+			<eLabel name="button_green_enabled" position="263:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
+			<eLabel name="button_yellow_enabled" position="283:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
+			<eLabel name="button_blue_enabled" position="303:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
 
-			<eLabel name="button_red_disabled" position="230:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_green_disabled" position="250:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_yellow_disabled" position="270:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_blue_disabled" position="290:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_red_disabled" position="243:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_green_disabled" position="263:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_yellow_disabled" position="283:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_blue_disabled" position="303:39" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
 	
 		</eZapMain>
 	</object>
