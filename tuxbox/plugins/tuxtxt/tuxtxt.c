@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.47  2003/06/23 15:08:18  alexw
+ * rc fixed
+ *
  * Revision 1.46  2003/03/06 18:14:43  lazyt
  * fix error-detection and configmenu
  *
@@ -29,7 +32,7 @@
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.46 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.47 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -3308,97 +3311,105 @@ void DecodePage()
 int GetRCCode()
 {
 	struct input_event ev;
+	static __u16 rc_last_key = KEY_RESERVED;
 
 	//get code
 
-		if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
+	if(read(rc, &ev, sizeof(ev)) == sizeof(ev))
+	{
+		if(ev.value)
 		{
-			if(ev.value)
+			if(ev.code != rc_last_key)
 			{
+				rc_last_key = ev.code;
 				switch(ev.code)
 				{
 					case KEY_UP:		RCCode = RC_UP;
 										break;
-
+	
 					case KEY_DOWN:		RCCode = RC_DOWN;
 										break;
-
+	
 					case KEY_LEFT:		RCCode = RC_LEFT;
 										break;
-
+	
 					case KEY_RIGHT:		RCCode = RC_RIGHT;
 										break;
-
+	
 					case KEY_OK:		RCCode = RC_OK;
 										break;
-
+	
 					case KEY_0:			RCCode = RC_0;
 										break;
-
+	
 					case KEY_1:			RCCode = RC_1;
 										break;
-
+	
 					case KEY_2:			RCCode = RC_2;
 										break;
-
+	
 					case KEY_3:			RCCode = RC_3;
 										break;
-
+	
 					case KEY_4:			RCCode = RC_4;
 										break;
-
+	
 					case KEY_5:			RCCode = RC_5;
 										break;
-
+	
 					case KEY_6:			RCCode = RC_6;
 										break;
-
+	
 					case KEY_7:			RCCode = RC_7;
 										break;
-
+	
 					case KEY_8:			RCCode = RC_8;
 										break;
-
+	
 					case KEY_9:			RCCode = RC_9;
 										break;
-
+	
 					case KEY_RED:		RCCode = RC_RED;
 										break;
-
+	
 					case KEY_GREEN:		RCCode = RC_GREEN;
 										break;
-
+	
 					case KEY_YELLOW:	RCCode = RC_YELLOW;
 										break;
-
+	
 					case KEY_BLUE:		RCCode = RC_BLUE;
 										break;
-
+	
 					case KEY_VOLUMEUP:	RCCode = RC_PLUS;
 										break;
-
+	
 					case KEY_VOLUMEDOWN:RCCode = RC_MINUS;
 										break;
-
+	
 					case KEY_MUTE:		RCCode = RC_MUTE;
 										break;
-
+	
 					case KEY_HELP:		RCCode = RC_HELP;
 										break;
-
+	
 					case KEY_SETUP:		RCCode = RC_DBOX;
 										break;
-
+	
 					case KEY_HOME:		RCCode = RC_HOME;
 										break;
-
+	
 					case KEY_POWER:		RCCode = RC_STANDBY;
 				}
-
 				return 1;
 			}
-			else RCCode = 0;
 		}
+		else
+		{
+			RCCode = 0;
+			rc_last_key = KEY_RESERVED;
+		}
+	}
 
 		usleep(1000000/100);
 		return 0;
