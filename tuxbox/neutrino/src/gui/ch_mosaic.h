@@ -47,12 +47,19 @@ class CChMosaic
 		void doMosaic ();
 
 	private:
+		void clearTV ();
+		void paintBackground ();
+		void paintMiniTVBackground(int x, int y, int w, int h);
+
 		CPIG	*pig;
 		int	current_pig_pos;
 
 		struct PIG_COORD {
 			int x,y,w,h;
 		};
+
+		CChannelList  *channellist;
+		CFrameBuffer  *frameBuffer;
 
 };
 

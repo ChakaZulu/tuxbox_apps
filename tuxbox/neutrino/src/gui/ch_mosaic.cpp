@@ -26,9 +26,10 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <gui/color.h>
+#include <gui/eventlist.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
-#include <daemonc/remotecontrol.h>
 
 #include <gui/channellist.h>
 
@@ -85,6 +86,9 @@ CChMosaic::CChMosaic()
 {
 	pig = new CPIG (0);
 	current_pig_pos = 0;
+
+  	channellist = CNeutrinoApp::getInstance()->channelList;
+  	frameBuffer = CFrameBuffer::getInstance();
 }
 
 
@@ -97,19 +101,36 @@ CChMosaic::~CChMosaic()
 
 void CChMosaic::doMosaic()
 {
+#define W 	(150)
+#define H	(120)
   struct PIG_COORD  coord[] = {
-	  	{ 10, 10, 170,RATIO(170) },
-		{150,110, 170,RATIO(170) },
-		{250,210, 170,RATIO(170) },
-		{300,300, 170,RATIO(170) }
+	  	{ 40, 10, W,H },
+		{200, 10, W,H },
+		{360, 10, W,H },
+		{520, 10, W,H },
+	  	{ 40,150, W,H },
+		{200,150, W,H },
+		{360,150, W,H },
+		{520,150, W,H },
+	  	{ 40,290, W,H },
+		{200,290, W,H },
+		{360,290, W,H },
+		{520,290, W,H },
+	  	{ 40,430, W,H },
+		{200,430, W,H },
+		{360,430, W,H },
+		{520,430, W,H }
 	};
 
-  CChannelList  *channellist;
   int    	channel;
+  int 		i;
+
 
 
   channellist = CNeutrinoApp::getInstance()->channelList;
   channel     = channellist->getActiveChannelNumber();
+
+  frameBuffer = CFrameBuffer::getInstance();
 
 
 
@@ -117,27 +138,73 @@ void CChMosaic::doMosaic()
   //  $$$ mute
 
 
+  // -- paint background and - windows
+  paintBackground();
+  for  (i=0; i < (int)(sizeof(coord)/sizeof(coord[0])); i++) {
+	paintMiniTVBackground(coord[i].x,coord[i].y, coord[i].w, coord[i].h);
+  }
+
+
+
 
    // experimental
-  int i;
   for  (i=0; i < (int)(sizeof(coord)/sizeof(coord[0])); i++) {
 
+	int j;
+
+
+	// -- adjust pig and zap to channel
 	printf ("pig: %d \n",i);
 	pig->show (coord[i].x,coord[i].y, coord[i].w, coord[i].h);
+	channellist->zapTo(channel);
 
-	channellist->zapTo(channel++);
-	sleep (1);
+	sleep (2);
 
-	// zap, sleep 0.5 sec
-	// capture frame
+
+	// -- inner loop
+	// -- try 4 times (4 * 0,5 sec) to get a captured frame 
+	for (j=0; j < 4; j++) {
+
+		uint msg; uint data;
+		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(500);
+		g_RCInput->getMsgAbsoluteTimeout( &msg, (uint*) (&data), &timeoutEnd );
+		printf ("pig inner loop: %d - %d \n",i,j);
+
+
+		if (msg == CRCInput::RC_timeout) {
+			i = i;
+		}
+
+
+		// -- push other events
+		if ( msg >  CRCInput::RC_MaxRC ) {
+			CNeutrinoApp::getInstance()->handleMsg( msg, data ); 
+		}
+		
+
+
+		// zap, sleep 0.5 sec
+		// capture frame
 	
-	// loop 4 times frame "empty"?
-	// --> wait 0,5 sec, re-capture
+		// loop 4 times frame "empty"?
+		// --> wait 0,5 sec, re-capture
+
+	}
 	
 	// display frame
 
 	// display add info (sendername, epg info)
+	//
+
+
+	channel ++;
   }
+
+
+
+
+  //  -- clear
+  clearTV();
 
   //  $$$ unmute
 
@@ -145,5 +212,25 @@ void CChMosaic::doMosaic()
 
 
 
+
+
+//
+// -- some paint abstraction functions in this class
+// 
+
+void CChMosaic::clearTV()
+{
+  frameBuffer->paintBackgroundBoxRel(0,0,SCREEN_X-1,SCREEN_Y-1);
+}
+
+void CChMosaic::paintBackground()
+{
+  frameBuffer->paintBoxRel(0, 0, SCREEN_X-1, SCREEN_Y-1, 0xFe);
+}
+
+void CChMosaic::paintMiniTVBackground(int x, int y, int w, int h)
+{
+  frameBuffer->paintBoxRel(x,y,w,h, 0xF0);
+}
 
 
