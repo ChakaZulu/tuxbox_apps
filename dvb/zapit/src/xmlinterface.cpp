@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.9 2002/10/07 23:36:27 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.10 2002/10/08 12:01:12 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -29,7 +29,7 @@
 
 std::string Unicode_Character_to_UTF8(const int character)
 {
-	char buf[4];
+	char buf[XML_UTF8_ENCODE_MAX];
 	int length = XmlUtf8Encode(character, buf);
 	return std::string(buf, length);
 }
