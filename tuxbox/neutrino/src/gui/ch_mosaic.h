@@ -47,7 +47,7 @@ class CChMosaic
 		void doMosaic ();
 
 	private:
-		CPIG	pig;
+		CPIG	*pig;
 		int	current_pig_pos;
 
 		struct PIG_COORD {

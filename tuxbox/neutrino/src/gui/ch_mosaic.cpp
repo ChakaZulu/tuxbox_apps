@@ -48,14 +48,16 @@
 int CChMosaicHandler::exec(CMenuTarget* parent, string actionkey)
 {
 	int       res = menu_return::RETURN_EXIT_ALL;
-	CChMosaic mosaic;
+	CChMosaic * mosaic;
 
 
 	if (parent) {
 		parent->hide();
 	}
 
-	mosaic.doMosaic ();
+	mosaic = new CChMosaic;
+	mosaic->doMosaic ();
+	delete mosaic;
 
 	return res;
 }
@@ -74,15 +76,14 @@ int CChMosaicHandler::exec(CMenuTarget* parent, string actionkey)
 
 CChMosaic::CChMosaic()
 {
-//	pig = new CPIG;
-	pig.pigopen (0);
+	pig = new CPIG (0);
 	current_pig_pos = 0;
 }
 
 
 CChMosaic::~CChMosaic()
 {
-//	delete pig;
+	delete pig;
 
 }
 
@@ -101,7 +102,7 @@ void CChMosaic::doMosaic()
   int i;
 
   for  (i=0; i < (int)(sizeof(coord)/sizeof(coord[0])); i++) {
-	pig.show (coord[i].x,coord[i].y, coord[i].w, coord[i].h);
+	pig->show (coord[i].x,coord[i].y, coord[i].w, coord[i].h);
 
   }
 
