@@ -49,90 +49,98 @@ void nameinsert(std::string name, uint onid_sid, uint sm)
 	}
 }
 
-void ParseTransponder(XMLTreeNode *xmltransponder) {
-
-  for (XMLTreeNode *services=xmltransponder->GetChild(); services; services=services->GetNext())
-    {
-      char *type = services->GetType();
-
-      if (!strcmp("cable", type)){
-	//printf("Frequency: %s\n", services->GetAttributeValue("frequency"));
-	if (transponders.count(curr_tsid) == 0)
-	  {
-	    printf("[zapit] no transponder with that tsid found\n");
-	    exit(0);
-	  }
-	titerator trans = transponders.find(curr_tsid);
-	sscanf(services->GetAttributeValue("frequency"),"%u", &trans->second.frequency);
-	sscanf(services->GetAttributeValue("symbolRate"), "%u", &trans->second.symbolrate);
-	sscanf(services->GetAttributeValue("Fec"), "%hu", &trans->second.fec);
-      }
-      else if (!strcmp("sat", type)){
-	//printf("In sat-section\n");
-	if (transponders.count(curr_tsid) == 0)
-	  {
-	    printf("[zapit] no transponder with that tsid found\n");
-	    exit(0);
-	  }
-	titerator trans = transponders.find(curr_tsid);
-	sscanf(services->GetAttributeValue("frequency"),"%u", &trans->second.frequency);
-	sscanf(services->GetAttributeValue("symbolRate"), "%u", &trans->second.symbolrate);
-	sscanf(services->GetAttributeValue("Polarity"), "%hu", &trans->second.polarity);
-	sscanf(services->GetAttributeValue("Fec"), "%hu", &trans->second.fec);
-	trans->second.diseqc = curr_diseqc;
-      }
-      else if (!strcmp("channel", type))
+void ParseTransponder(XMLTreeNode *xmltransponder)
+{
+	for (XMLTreeNode *services=xmltransponder->GetChild(); services; services=services->GetNext())
 	{
-	  int sm = atoi(services->GetAttributeValue("serviceType"));
-	  if ( (sm == 1) || ( (sm==4) || (sm==2) ) ) {
-	    std::string name = services->GetAttributeValue("Name");
-	    if (name[0] != ' ') {
-	      uint cnr, sid, pmt, ecmpid=0, tsid=curr_tsid, onid;
-	      std::string cname;
+		char *type = services->GetType();
 
-	      //printf("Will build a channel of type: %d\n", sm);
-
-	      sscanf(services->GetAttributeValue("channelNR"), "%d", &cnr);
-	      sscanf(services->GetAttributeValue("serviceID"), "%x", &sid);
-	      sscanf(services->GetAttributeValue("onid"), "%x", &onid);
-
-	      sscanf(services->GetAttributeValue("pmt"), "%x", &pmt);
-//	      sscanf(services->GetAttributeValue("ecmpid"), "%x", &ecmpid);
-//	      sscanf(services->GetAttributeValue("tsid"), "%x", &tsid);
-
-	      //printf("%d Kanalname: %s, Pmt: %04x\n",tmp_chan->chan_nr, tmp_chan->name.c_str(), tmp_chan->pmt);
-
-	      if (sm == 2)
+		if (!strcmp("cable", type))
 		{
-		  allchans_radio.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0, 0, 0, pmt, ecmpid, sid, tsid, onid,sm, cnr)));
-
-		  if (cnr > 0)
-		    {
-		      numchans_radio.insert(std::pair<uint, uint>(cnr, (onid<<16)+sid));
-		    }
-		  else
-		    {
-		      nameinsert(name, (onid<<16)+sid, sm);
-		    }
+			//printf("Frequency: %s\n", services->GetAttributeValue("frequency"));
+			if (transponders.count(curr_tsid) == 0)
+			{
+				printf("[zapit] no transponder with that tsid found\n");
+				exit(0);
+			}
+			titerator trans = transponders.find(curr_tsid);
+			sscanf(services->GetAttributeValue("frequency"),"%u", &trans->second.frequency);
+			sscanf(services->GetAttributeValue("symbolRate"), "%u", &trans->second.symbolrate);
+			sscanf(services->GetAttributeValue("Fec"), "%hu", &trans->second.fec);
 		}
-	      else
+		else if (!strcmp("sat", type))
 		{
-            allchans_tv.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0,0,0, pmt, ecmpid, sid, tsid,onid,sm, cnr)));
-
-            if (cnr > 0)
-                numchans_tv.insert(std::pair<uint, uint>(cnr, (onid<<16)+sid));
-            else
-                nameinsert(name, (onid<<16)+sid, sm);
+			//printf("In sat-section\n");
+			if (transponders.count(curr_tsid) == 0)
+			{
+				printf("[zapit] no transponder with that tsid found\n");
+				exit(0);
+			}
+			titerator trans = transponders.find(curr_tsid);
+			sscanf(services->GetAttributeValue("frequency"),"%u", &trans->second.frequency);
+			sscanf(services->GetAttributeValue("symbolRate"), "%u", &trans->second.symbolrate);
+			sscanf(services->GetAttributeValue("Polarity"), "%hu", &trans->second.polarity);
+			sscanf(services->GetAttributeValue("Fec"), "%hu", &trans->second.fec);
+			trans->second.diseqc = curr_diseqc;
 		}
-	    } else {
-	      //printf("Channelname is empty\n");
-	    }
-	  } else {
-	    //printf("Skipping channel %s which is not mode: %d .\n", services->GetAttributeValue("name"),serv_mode);
-	  }
+		else if (!strcmp("channel", type))
+		{
+			int sm = atoi(services->GetAttributeValue("serviceType"));
+			if ( (sm == 1) || ( (sm==4) || (sm==2) ) )
+			{
+				std::string name = services->GetAttributeValue("Name");
+				uint cnr, sid, pmt, ecmpid=0, tsid=curr_tsid, onid;
+				std::string cname;
+
+				//printf("Will build a channel of type: %d\n", sm);
+
+				sscanf(services->GetAttributeValue("channelNR"), "%d", &cnr);
+				sscanf(services->GetAttributeValue("serviceID"), "%x", &sid);
+				sscanf(services->GetAttributeValue("onid"), "%x", &onid);
+
+				sscanf(services->GetAttributeValue("pmt"), "%x", &pmt);
+//				sscanf(services->GetAttributeValue("ecmpid"), "%x", &ecmpid);
+//				sscanf(services->GetAttributeValue("tsid"), "%x", &tsid);
+
+				//printf("%d Kanalname: %s, Pmt: %04x\n",tmp_chan->chan_nr, tmp_chan->name.c_str(), tmp_chan->pmt);
+
+				if (sm == 2)
+				{
+					allchans_radio.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0, 0, 0, pmt, ecmpid, sid, tsid, onid,sm, cnr)));
+
+					if (cnr > 0)
+					{
+						numchans_radio.insert(std::pair<uint, uint>(cnr, (onid<<16)+sid));
+					}
+					else
+					{
+						nameinsert(name, (onid<<16)+sid, sm);
+					}
+				}
+				else
+				{
+					allchans_tv.insert(std::pair<uint, channel>((onid<<16)+sid, channel(name, 0,0,0, pmt, ecmpid, sid, tsid,onid,sm, cnr)));
+
+					if (cnr > 0)
+					{
+						numchans_tv.insert(std::pair<uint, uint>(cnr, (onid<<16)+sid));
+					}
+					else
+					{
+						nameinsert(name, (onid<<16)+sid, sm);
+					}
+				}
+			}
+			else
+			{
+				//printf("Skipping channel %s which is not mode: %d .\n", services->GetAttributeValue("name"),serv_mode);
+			}
+		}
+		else
+		{
+			printf("[zapit] not known. skipping %s\n", services->GetType());
+		}
 	}
-      else printf("[zapit] not known. skipping %s\n", services->GetType());
-    }
 }
 
 
