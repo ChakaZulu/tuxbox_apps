@@ -124,7 +124,7 @@ void read_frame(unsigned char *out, int fd)
 
 unsigned char image[(LCD_ROWS+1)*LCD_COLS*8], intensity[LCD_ROWS*LCD_COLS*8];
 
-void *update_thread(void)
+void *update_thread(void*dummy)
 {
 	unsigned char pic[XRES*YRES];	
 	int capture=open("/dev/dbox/capture", O_RDONLY);
@@ -141,11 +141,14 @@ void *update_thread(void)
 	close(capture);
 }
 
-int main(int argc, char *args[])
+int main(int argc, char *argv[])
 {
 	screen_t screen;
 	int curscreen;
 	int x, y, i;
+//	int D=atoi(argv[1]);
+#define D	3
+	// try other values
 	pthread_t ut;
 	init();
 	
@@ -160,7 +163,7 @@ int main(int argc, char *args[])
 
 	while (1)
 	{
-		int x, y, yy, pix;
+		int x, y, yy, pix, dither;
 		for (y=0; y<LCD_ROWS; y++) {
 			for (x=0; x<LCD_COLS; x++) {
 				pix = 0;
@@ -175,8 +178,8 @@ int main(int argc, char *args[])
 
 					pix = (pix<<1) + val;
 					
-					intensity[off]=(intensity[off])*15/16;
-					intensity[off]+=val*16;
+					intensity[off]=(intensity[off])*(256-D)/256;
+					intensity[off]+=val*D;
 				}
 				screen[y*LCD_COLS+x] = pix;
 			}
