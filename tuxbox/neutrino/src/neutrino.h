@@ -76,6 +76,9 @@ using namespace std;
 *                                                                                     *
 **************************************************************************************/
 class CColorSetupNotifier;
+class CAudioSetupNotifier;
+class CVideoSetupNotifier;
+class CNetworkSetupNotifier;
 class CNeutrinoApp : public CMenuTarget
 {
 	enum
@@ -123,6 +126,25 @@ class CNeutrinoApp : public CMenuTarget
 		void setVolume(int key);
 		void AudioMute();
 		void AudioUnMute();
+
+		void ExitRun();
+		void RealRun(CMenuWidget &mainSettings);
+		void InitZapper();
+		void InitKeySettings(CMenuWidget &);
+		void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
+		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier);
+		void InitColorSettings(CMenuWidget &);
+		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
+		void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier);
+		void InitScreenSettings(CMenuWidget &);
+		void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier);
+		void InitAudioThemesSettings(CMenuWidget &);
+		void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings);
+		void ClearFrameBuffer();
+		void SetupFonts();
+		void SetupFrameBuffer();
+		void CmdParser(int argc, char **argv);
+
 
 	public:
 

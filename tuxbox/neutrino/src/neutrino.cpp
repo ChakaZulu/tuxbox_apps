@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.9 2001/08/16 23:19:18 McClean Exp $
+        $Id: neutrino.cpp,v 1.10 2001/08/17 10:06:26 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.10  2001/08/17 10:06:26  McClean
+  cleanup - settings menue is broken!
+
   Revision 1.9  2001/08/16 23:19:18  McClean
   epg-view and quickview changed
 
@@ -563,10 +566,9 @@ void CNeutrinoApp::channelsInit()
 *          CNeutrinoApp -  run, the main runloop                                      *
 *                                                                                     *
 **************************************************************************************/
-int CNeutrinoApp::run(int argc, char **argv)
-{
-	printf("neutrino2\n");
 
+void CNeutrinoApp::CmdParser(int argc, char **argv)
+{
 	if (argc > 1) {
 		if (! strcmp(argv[1], "-z")) {
 			printf("Using zapit\n");
@@ -581,9 +583,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 		printf("Using nstreamzapd\n");
 	 	zapit = false;
 	}
-	
-	fontRenderer = new fontRenderClass( &frameBuffer);
-	
+}
+
+void CNeutrinoApp::SetupFrameBuffer()
+{
 	if (frameBuffer.setMode(720, 576, 8))
 	{
 		printf("Error while setting framebuffer mode\n");
@@ -594,8 +597,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	for(int count =0;count<8;count++)
 		frameBuffer.paletteSetColor(count, 0x000000, 0xffff); 
 	frameBuffer.paletteSet();
+}
 
-	//paint...
+void CNeutrinoApp::SetupFonts()
+{
 	fonts.menu=fontRenderer->getFont("Arial", "Bold", 20);
 	fonts.menu->RenderString( 10,100, 500, "DEMO!", 0 );
         fonts.menu_number=fontRenderer->getFont("Arial", "Regular", 15);
@@ -618,9 +623,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	fonts.infobar_channame->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts.infobar_info=fontRenderer->getFont("Arial", "Regular", 20);
 	fonts.infobar_info->RenderString( 10,100, 500, "DEMO!", 0 );
+}
 
-
-	//clear frame...
+void CNeutrinoApp::ClearFrameBuffer()
+{
 	memset(frameBuffer.lfb, 255, frameBuffer.Stride()*576);
 
 	//backgroundmode
@@ -652,36 +658,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	frameBuffer.paletteSetColor(0xF, 0xFFFFFF, 0);
 
 	frameBuffer.paletteSet();
+}
 
-
-	channelList = new CChannelList(1,"All Services");
-
-	if(!loadSetup(&settings))
-	{
-		//setup default if configfile not exists
-		setupDefaults( &settings);
-		printf("useing defaults...\n\n");
-	}
-
-
-	colorSetupNotifier = new CColorSetupNotifier(&frameBuffer, &settings);
-	CAudioSetupNotifier		audioSetupNotifier;
-	CVideoSetupNotifier		videoSetupNotifier;
-	CNetworkSetupNotifier	networkSetupNotifier(&settings);;
-
-	colorSetupNotifier->changeNotify("initial");
-	networkSetupNotifier.changeNotify("initial");
-
-
-	//Main settings
-	CMenuWidget			mainSettings;
-	CMenuWidget			videoSettings;
-	CMenuWidget			audioSettings;
-	CMenuWidget			networkSettings;
-	CMenuWidget			colorSettings;
-	CMenuWidget			keySettings;
-	//CMenuWidget			screenSettings;
-
+void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings)
+{
 	mainSettings.setName("Neutrino setup");
 	mainSettings.setIcon("settings.raw");
 	mainSettings.addItem( new CMenuSeparator(4) );
@@ -699,29 +679,33 @@ int CNeutrinoApp::run(int argc, char **argv)
 	mainSettings.addItem( new CMenuForwarder("Network", true, "", &networkSettings) );
 	mainSettings.addItem( new CMenuForwarder("Colors", true,"", &colorSettings) );
 	mainSettings.addItem( new CMenuForwarder("Key binding", true,"", &keySettings) );
+}
 
-	//audio Setup
+void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier)
+{
 	audioSettings.setName("Audio setup");
 	audioSettings.setIcon("audio.raw");
 	audioSettings.addItem( new CMenuSeparator(4) );
 	audioSettings.addItem( new CMenuForwarder("back") );
 	audioSettings.addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
-		CMenuOptionChooser* oj = new CMenuOptionChooser("Stereo", &settings.audio_Stereo, true, &audioSetupNotifier);
-		oj->addOption(0, "off");
-		oj->addOption(1, "on");
+	CMenuOptionChooser* oj = new CMenuOptionChooser("Stereo", &settings.audio_Stereo, true, &audioSetupNotifier);
+	oj->addOption(0, "off");
+	oj->addOption(1, "on");
 	audioSettings.addItem( oj );
-		oj = new CMenuOptionChooser("Dolby Digital", &settings.audio_DolbyDigital, true, &audioSetupNotifier);
-		oj->addOption(0, "off");
-		oj->addOption(1, "on");
+	oj = new CMenuOptionChooser("Dolby Digital", &settings.audio_DolbyDigital, true, &audioSetupNotifier);
+	oj->addOption(0, "off");
+	oj->addOption(1, "on");
 	audioSettings.addItem( oj );	
+}
 
-	//video Setup
+void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier)
+{
 	videoSettings.setName("Video setup");
 	videoSettings.setIcon("video.raw");
 	videoSettings.addItem( new CMenuSeparator(4) );
 	videoSettings.addItem( new CMenuForwarder("back") );
 	videoSettings.addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
-		oj = new CMenuOptionChooser("Output signal", &settings.video_Signal, true, &videoSetupNotifier);
+		CMenuOptionChooser* oj = new CMenuOptionChooser("Output signal", &settings.video_Signal, true, &videoSetupNotifier);
 		oj->addOption(0, "RGB");
 		oj->addOption(1, "S-Video");
 		oj->addOption(2, "FBAS");
@@ -730,8 +714,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 		oj->addOption(0, "4:3");
 		oj->addOption(1, "16:9");
 	videoSettings.addItem( oj );	
+}
 
-	//Screen  Setup
+void CNeutrinoApp::InitScreenSettings(CMenuWidget &screenSettings)
+{
 	/*
 	screenSettings.setName("Screen setup");
 	screenSettings.setIcon("video.raw");
@@ -740,15 +726,17 @@ int CNeutrinoApp::run(int argc, char **argv)
 	screenSettings.addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
 		CScreenSetup	screenSettings_upleft("Screen setup upper left corner", &settings);
 	screenSettings.addItem( new CMenuForwarder("lower right corner", true, "",&screenSettings_lowright ));
-*/
+	*/
+}
 
-	//network Setup
+void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier)
+{
 	networkSettings.setName("Network setup");
 	networkSettings.setIcon("settings.raw");
 	networkSettings.addItem( new CMenuSeparator(4) );
 	networkSettings.addItem( new CMenuForwarder("back") );
 	networkSettings.addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
-		oj = new CMenuOptionChooser("setup network on startup", &settings.networkSetOnStartup, true, &networkSetupNotifier);
+	CMenuOptionChooser* oj = new CMenuOptionChooser("setup network on startup", &settings.networkSetOnStartup, true, &networkSetupNotifier);
 		oj->addOption(0, "off");
 		oj->addOption(1, "on");
 	networkSettings.addItem( oj );	
@@ -764,14 +752,19 @@ int CNeutrinoApp::run(int argc, char **argv)
 	networkSettings.addItem( new CMenuSeparator(6, CMenuSeparator::LINE) );
 	networkSettings.addItem( new CMenuForwarder("Default gateway", true, settings.network_defaultgateway, &networkSettings_Gateway ));
 	networkSettings.addItem( new CMenuForwarder("Nameserver", true, settings.network_nameserver, &networkSettings_NameServer ));
+}
 
-	//color Setup
+void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
+{
 	colorSettings.setName("Color setup");
 	colorSettings.setIcon("settings.raw");
 	colorSettings.addItem( new CMenuSeparator(4) );
 	colorSettings.addItem( new CMenuForwarder("back") );
 	colorSettings.addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
-		CMenuWidget		audioSettings_Themes;
+}
+
+void CNeutrinoApp::InitAudioThemesSettings(CMenuWidget &audioSettings_Themes)
+{
 		audioSettings_Themes.setName("Select a theme");
 		audioSettings_Themes.setIcon("settings.raw");
 		audioSettings_Themes.addItem( new CMenuSeparator(4) );
@@ -779,9 +772,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 		audioSettings_Themes.addItem( new CMenuSeparator(11, CMenuSeparator::LINE) );
 		audioSettings_Themes.addItem( new CMenuForwarder("Neutrino default theme", true, "", this, "theme_neutrino") );
 		audioSettings_Themes.addItem( new CMenuForwarder("Classic theme", true, "", this, "theme_classic") );
-	colorSettings.addItem( new CMenuForwarder("select color theme", true, "", &audioSettings_Themes) );
-	colorSettings.addItem( new CMenuSeparator(6, CMenuSeparator::LINE) );
-		CMenuWidget		colorSettings_menuColors;
+}
+
+void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &colorSettings)
+{
 		colorSettings_menuColors.setName("menu colors");
 		colorSettings_menuColors.setIcon("settings.raw");
 		colorSettings_menuColors.addItem( new CMenuSeparator(4) );
@@ -814,8 +808,12 @@ int CNeutrinoApp::run(int argc, char **argv)
 		colorSettings_menuColors.addItem( new CMenuSeparator(20, CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body - selected") );
 		colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", &chContentSelectedcolor ));
 		colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", &chContentSelectedTextcolor ));
+
 	colorSettings.addItem( new CMenuForwarder("menu colors", true, "", &colorSettings_menuColors) );
-		CMenuWidget		colorSettings_statusbarColors;
+}
+
+void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors, CMenuWidget &colorSettings)
+{
 		colorSettings_statusbarColors.setName("statusbar colors");
 		colorSettings_statusbarColors.setIcon("settings.raw");
 		colorSettings_statusbarColors.addItem( new CMenuSeparator(4) );
@@ -828,8 +826,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 		colorSettings_statusbarColors.addItem( new CMenuForwarder("Background", true, "", &chInfobarcolor ));
 		colorSettings_statusbarColors.addItem( new CMenuForwarder("Textcolor", true, "", &chInfobarTextcolor ));
 	colorSettings.addItem( new CMenuForwarder("statusbar colors", true, "", &colorSettings_statusbarColors) );
+}
 
-	//keySettings
+void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
+{
 	keySettings.setName("key setup");
 	keySettings.setIcon("settings.raw");
 	keySettings.addItem( new CMenuSeparator(4) );
@@ -850,9 +850,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	keySettings.addItem( new CMenuForwarder("channel up", true, "", &keySettings_quickzap_up ));
 	keySettings.addItem( new CMenuForwarder("channel down", true, "", &keySettings_quickzap_down ));
 
+}
 
-
-	//init programm
+void CNeutrinoApp::InitZapper()
+{
 	remoteControl.setZapper(zapit);
 	volume = 100;
 	if (!zapit)
@@ -861,7 +862,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	infoViewer.start(&frameBuffer, &fonts, &settings);
 	epgData.start(&frameBuffer, &fonts, &rcInput, &settings);	
 		
-	if (zapit) {
+	if (zapit) 
+	{
 		firstChannel();
 		if (firstchannel.mode == 't') {
 			//remoteControl.tvMode();
@@ -873,10 +875,12 @@ int CNeutrinoApp::run(int argc, char **argv)
 			radioMode();
 		}
 	}
-	
-	
 	if (!zapit)
 		channelList->zapTo(&remoteControl, &infoViewer,  0);
+}
+
+void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
+{
 	mute = false;
 	while(nRun)
 	{
@@ -942,7 +946,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 			}
 		}
 	}
+}
 
+void CNeutrinoApp::ExitRun()
+{
 	saveSetup(&settings);
 	printf("neutrino exit\n");
 	//shutdown screen
@@ -956,6 +963,95 @@ int CNeutrinoApp::run(int argc, char **argv)
 	sleep(5);
 	remoteControl.shutdown();
 	sleep(55555);
+}
+
+int CNeutrinoApp::run(int argc, char **argv)
+{
+	printf("neutrino2\n");
+
+	CmdParser(argc, argv);
+
+	fontRenderer = new fontRenderClass( &frameBuffer);
+
+	SetupFrameBuffer();
+	
+	//paint...
+	SetupFonts();
+
+	//clear frame...
+	ClearFrameBuffer();
+
+	channelList = new CChannelList(1,"All Services");
+
+	if(!loadSetup(&settings))
+	{
+		//setup default if configfile not exists
+		setupDefaults( &settings);
+		printf("useing defaults...\n\n");
+	}
+
+
+	colorSetupNotifier = new CColorSetupNotifier(&frameBuffer, &settings);
+	CAudioSetupNotifier		audioSetupNotifier;
+	CVideoSetupNotifier		videoSetupNotifier;
+	CNetworkSetupNotifier	networkSetupNotifier(&settings);;
+
+	colorSetupNotifier->changeNotify("initial");
+	networkSetupNotifier.changeNotify("initial");
+
+
+	//Main settings
+	CMenuWidget			mainSettings;
+	CMenuWidget			videoSettings;
+	CMenuWidget			audioSettings;
+	CMenuWidget			networkSettings;
+	CMenuWidget			colorSettings;
+	CMenuWidget			keySettings;
+	CMenuWidget			screenSettings;
+
+	InitMainSettings(mainSettings, audioSettings, networkSettings, 
+			 colorSettings, keySettings, videoSettings);
+
+	//audio Setup
+	InitAudioSettings(audioSettings, audioSetupNotifier);
+
+	//video Setup
+	InitVideoSettings(videoSettings, videoSetupNotifier);
+
+	//Screen  Setup
+	InitScreenSettings(screenSettings);
+
+	//network Setup
+	InitNetworkSettings(networkSettings, networkSetupNotifier);
+	
+	//color Setup
+	InitColorSettings(colorSettings);
+
+	CMenuWidget colorSettings_statusbarColors;
+	InitColorSettingsStatusBarColors(colorSettings_statusbarColors, colorSettings);
+
+   CMenuWidget		audioSettings_Themes;
+
+	InitAudioThemesSettings(audioSettings_Themes);
+
+	// Hacking Shit
+	colorSettings.addItem( new CMenuForwarder("select color theme", true, "", &audioSettings_Themes) );
+	colorSettings.addItem( new CMenuSeparator(6, CMenuSeparator::LINE) );
+	// Meno
+
+   	CMenuWidget		colorSettings_menuColors;
+	InitColorSettingsMenuColors(colorSettings_menuColors, colorSettings);
+
+	//keySettings
+	InitKeySettings(keySettings);
+
+	//init programm
+	InitZapper();
+
+	RealRun(mainSettings);
+	
+
+	ExitRun();
 	return 0;
 }
 
