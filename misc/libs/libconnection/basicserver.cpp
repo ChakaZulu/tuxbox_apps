@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.6 2003/02/25 14:05:24 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.7 2003/03/06 18:41:44 obi Exp $
  *
  * Basic Server Class Class - The Tuxbox Project
  *
@@ -117,4 +117,5 @@ void CBasicServer::run(bool (parse_command)(CBasicMessage::Header &rmsg, int con
 	while (parse_another_command);
 
 	close(sock_fd);
+        unlink(name.c_str());
 }
