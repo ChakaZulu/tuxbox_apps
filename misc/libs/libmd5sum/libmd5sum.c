@@ -10,7 +10,7 @@
 #include "getline.h"
 #include "system.h"
 #include "error.h"
-
+#include <string.h>
 
 static int have_read_stdin;
 
