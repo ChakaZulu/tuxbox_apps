@@ -825,7 +825,7 @@ int CMenuSeparator::paint(bool selected)
 bool CPINProtection::check()
 {
 	char cPIN[4];
-	const char * hint = NONEXISTANT_LOCALE;
+	neutrino_locale_t hint = NONEXISTANT_LOCALE;
 	do
 	{
 		cPIN[0] = 0;
@@ -843,12 +843,12 @@ bool CZapProtection::check()
 
 	int res;
 	char cPIN[5];
-	const char * hint2 = NONEXISTANT_LOCALE;
+	neutrino_locale_t hint2 = NONEXISTANT_LOCALE;
 	do
 	{
 		cPIN[0] = 0;
 
-		CPLPINInput* PINInput = new CPLPINInput(LOCALE_PARENTALLOCK_HEAD, cPIN, 4, hint2, fsk );
+		CPLPINInput* PINInput = new CPLPINInput(LOCALE_PARENTALLOCK_HEAD, cPIN, 4, hint2, fsk);
 
 		res = PINInput->exec(getParent(), "");
 		delete PINInput;

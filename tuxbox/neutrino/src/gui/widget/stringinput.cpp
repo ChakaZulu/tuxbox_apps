@@ -333,6 +333,11 @@ void CStringInput::hide()
 	frameBuffer->paintBackgroundBoxRel(x, y, width, height);
 }
 
+const char * CStringInput::getHint1(void)
+{
+	return g_Locale->getText(hint_1);
+}
+
 void CStringInput::paint()
 {
 	int iconoffset;
@@ -352,7 +357,7 @@ void CStringInput::paint()
 
 	if (hint_1 != NONEXISTANT_LOCALE)
 	{
-		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1), COL_MENUCONTENT, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, getHint1(), COL_MENUCONTENT, 0, true); // UTF-8
 		if (hint_2 != NONEXISTANT_LOCALE)
 			g_Font[SNeutrinoSettings::FONT_TYPE_MENU_INFO]->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2), COL_MENUCONTENT, 0, true); // UTF-8
 	}
@@ -655,12 +660,26 @@ int CPLPINInput::handleOthers(neutrino_msg_t msg, neutrino_msg_data_t data)
 	return res;
 }
 
+const char * CPLPINInput::getHint1(void)
+{
+	if (fsk == 0x100)
+	{
+		hint_1 = LOCALE_PARENTALLOCK_LOCKEDCHANNEL;
+		return CStringInput::getHint1();
+	}
+	else
+	{
+		sprintf(hint, g_Locale->getText(LOCALE_PARENTALLOCK_LOCKEDPROGRAM), fsk);
+		return hint;
+	}
+}
+
 #define borderwidth 4
 
 int CPLPINInput::exec( CMenuTarget* parent, const std::string & )
 {
+	fb_pixel_t * pixbuf = new fb_pixel_t[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
 
-	fb_pixel_t * pixbuf= new fb_pixel_t[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
 	if (pixbuf != NULL)
 		frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
 
@@ -669,16 +688,6 @@ int CPLPINInput::exec( CMenuTarget* parent, const std::string & )
 	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
 	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
 	frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
-
-	if (fsk == 0x100)
-		hint_1 = LOCALE_PARENTALLOCK_LOCKEDCHANNEL;
-	else
-	{
-		char hint[100];
-		sprintf(hint, g_Locale->getText(LOCALE_PARENTALLOCK_LOCKEDPROGRAM), fsk );
-#warning incorrect usage of hint_1 (must be neutrino_locale_t and not const char *)!
-		hint_1 = hint;
-	}
 
 	int res = CPINInput::exec ( parent, "" );
 

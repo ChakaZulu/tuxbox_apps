@@ -61,6 +61,8 @@ class CStringInput : public CMenuTarget
 		int          selected;
 		CChangeObserver * observ;
 
+		virtual const char * getHint1(void);
+
 		virtual void paint();
 		virtual void paintChar(int pos, char c);
 		virtual void paintChar(int pos);
@@ -115,7 +117,7 @@ class CPINInput : public CStringInput
 	protected:
 		virtual void paintChar(int pos);
 	public:
-		CPINInput(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINInput(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1 = NONEXISTANT_LOCALE, const neutrino_locale_t Hint_2 = NONEXISTANT_LOCALE, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, "lock.raw") {};
 
 		 int exec( CMenuTarget* parent, const std::string & actionKey );
@@ -124,12 +126,16 @@ class CPINInput : public CStringInput
 class CPLPINInput : public CPINInput
 {
 	protected:
-		int	fsk;
+		int  fsk;
+		char hint[100];
 
 		virtual int handleOthers(const neutrino_msg_t msg, const neutrino_msg_data_t data);
+
+		virtual const char * getHint1(void);
+
 	public:
-		CPLPINInput(const char * const Name, char* Value, int Size, const neutrino_locale_t Hint_1, int FSK )
-		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };
+		CPLPINInput(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_2, int FSK )
+		 : CPINInput(Name, Value, Size, NONEXISTANT_LOCALE, Hint_2) { fsk = FSK; };
 
 		int exec( CMenuTarget* parent, const std::string & actionKey );
 };
@@ -138,7 +144,7 @@ class CPINChangeWidget : public CStringInput
 {
 	public:
 		CPINChangeWidget(const neutrino_locale_t Name, char* Value, int Size, const neutrino_locale_t Hint_1, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
-		: CStringInput(Name, Value, Size, Hint_1, NULL, Valid_Chars, Observ){};
+		: CStringInput(Name, Value, Size, Hint_1, NONEXISTANT_LOCALE, Valid_Chars, Observ){};
 };
 
 
