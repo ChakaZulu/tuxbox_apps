@@ -577,7 +577,7 @@ parentallock.parentallock Jugendschutz
 parentallock.prompt PIN-Eingabe
 pictureviewer.defdir Start-Verz.
 pictureviewer.head Bildbetrachter
-pictureviewer.help Menü-Modus\n OK Bild anzeigen\n 5 Sortierung ändern\n 0 Bild unskaliert einlesen\n\nDiashow-Modus\n LINKS vorheriges Bild\n RECHTS nächstes Bild\n 5 Sortierung ändern\n HOME Modus verlassen\n\nAnzeige-Modus\n  OK Bild neu einlesen LINKS vorheriges Bild\n RECHTS nächstes Bild\n 1 Zoom out\n 3 Zoom in\n 2 Scroll hoch\n 4 Scroll links\n 6 Scroll rechts\n 8 Scroll herunter\n 5 Sortierung ändern\n 0 Bild unskaliert einlesen\n HOME Modus verlassen\n
+pictureviewer.help Menü-Modus\n OK Bild anzeigen\n 5 Sortierung ändern\n 0 Bild unskaliert einlesen\n\nDiashow-Modus\n LINKS vorheriges Bild\n RECHTS nächstes Bild\n 5 Sortierung ändern\n HOME Modus verlassen\n\nAnzeige-Modus\n  OK Bild neu einlesen\n LINKS vorheriges Bild\n RECHTS nächstes Bild\n 1 Zoom out\n 3 Zoom in\n 2 Scroll hoch\n 4 Scroll links\n 6 Scroll rechts\n 8 Scroll herunter\n 5 Sortierung ändern\n 0 Bild unskaliert einlesen\n HOME Modus verlassen\n
 pictureviewer.resize.color_average aufwendig
 pictureviewer.resize.none keine
 pictureviewer.resize.simple einfach

@@ -539,7 +539,7 @@ parentallock.parentallock Youth protection
 parentallock.prompt prompt for PIN
 pictureviewer.defdir start dir.
 pictureviewer.head Picture viewer
-pictureviewer.help menu mode\n OK display image\n 5 change sort order\n 0 do not scale pictur\n\ndiashow mode\n LEFT previous image\n RIGHT next image\n 5 change sort order\n HOME exit\n\nshow mode\n LEFT previous image\n RIGHT next image\n HOME exit\n 1 Zoom out\n 3 Zoom in\n 2 scroll up\n 4 scroll left\n 6 scroll right\n scroll down\n 5 change sort order\n 0 reread image (no scaling)\n OK reread image
+pictureviewer.help menu mode\n OK display image\n 5 change sort order\n 0 do not scale picture\n\ndiashow mode\n LEFT previous image\n RIGHT next image\n 5 change sort order\n HOME exit\n\nshow mode\n \n OK reread image\n LEFT previous image\n RIGHT next image\n 1 Zoom out\n 3 Zoom in\n 2 scroll up\n 4 scroll left\n 6 scroll right\n scroll down\n 5 change sort order\n 0 reread image (no scaling)\n  HOME exit
 pictureviewer.resize.color_average advanced
 pictureviewer.resize.none none
 pictureviewer.resize.simple simple
