@@ -1833,7 +1833,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * recordingSettings_splitsize = new CStringInput("recordingmenu.splitsize", g_settings.recording_splitsize, 6, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ");
 	CMenuForwarder* mf8 = new CMenuForwarder("recordingmenu.splitsize", (g_settings.recording_type == RECORDING_FILE), g_settings.recording_splitsize,recordingSettings_splitsize);
 
-	CMenuOptionChooser* oj6 = new CMenuOptionChooser("recordingmenu.stream_all_audio_pids", &g_settings.recording_stream_all_audio_pids, (g_settings.recording_type == RECORDING_VCR));
+	CMenuOptionChooser* oj6 = new CMenuOptionChooser("recordingmenu.stream_all_audio_pids", &g_settings.recording_stream_all_audio_pids, (g_settings.recording_type == RECORDING_FILE));
 	oj6->addOption(0, "options.off");
 	oj6->addOption(1, "options.on");
 	
