@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.4 2002/07/17 02:14:37 obi Exp $
+ * $Id: camd.c,v 1.5 2002/07/23 12:37:38 obi Exp $
  *
  * (C) 2001, 2002 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -616,7 +616,6 @@ int parse_ca_pmt (const unsigned char * buffer, const unsigned int length)
 
 		if (current_onid == 0)
 		{
-			free(pmt);
 			return -1;
 		}
 
