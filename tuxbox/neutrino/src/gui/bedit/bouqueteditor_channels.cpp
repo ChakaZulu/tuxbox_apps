@@ -65,13 +65,21 @@ CBEChannelWidget::CBEChannelWidget(const std::string & Caption, unsigned int Bou
 void CBEChannelWidget::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
-	int color = COL_MENUCONTENT;
-	if (liststart+pos==selected)
+
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+	if (liststart + pos == selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
 	if ((liststart+pos==selected) && (state == beMoving))
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x + 8, ypos+4);
@@ -117,7 +125,7 @@ void CBEChannelWidget::paint()
 
 void CBEChannelWidget::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, caption.c_str() , COL_MENUHEAD);
 }
 
@@ -131,8 +139,8 @@ const struct button_label CBEChannelWidgetButtons[4] =
 
 void CBEChannelWidget::paintFoot()
 {
-	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + height + 4, (width - 20) / 4, 4, CBEChannelWidgetButtons);
 }

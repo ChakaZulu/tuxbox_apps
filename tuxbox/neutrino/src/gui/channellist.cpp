@@ -579,7 +579,7 @@ int CChannelList::numericZap(int key)
 			while(strlen(valstr)<4)
 				strcat(valstr,"·");   //"_"
 
-			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
+			frameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR_PLUS_0);
 
 			for (int i=3; i>=0; i--)
 			{
@@ -737,8 +737,8 @@ void CChannelList::paintDetails(int index)
 	}
 	else
 	{
-		frameBuffer->paintHLineRel(x, width, y + height, COL_INFOBAR_SHADOW);
-		frameBuffer->paintBoxRel(x, y + height + 1, width, info_height - 1, COL_MENUCONTENTDARK);
+		frameBuffer->paintHLineRel(x, width, y + height, COL_INFOBAR_SHADOW_PLUS_0);
+		frameBuffer->paintBoxRel(x, y + height + 1, width, info_height - 1, COL_MENUCONTENTDARK_PLUS_0);
 
 		char cNoch[50]; // UTF-8
 		char cSeit[50]; // UTF-8
@@ -856,15 +856,23 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 void CChannelList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
-	int color = COL_MENUCONTENT;
-	if (liststart+pos==selected)
+
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+	if (liststart + pos == selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 		paintDetails(liststart+pos);
 		paintItem2DetailsLine (pos, liststart+pos);
 	}
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
 	if(liststart+pos<chanlist.size())
 	{
 		CChannel* chan = chanlist[liststart+pos];
@@ -915,13 +923,13 @@ const struct button_label CChannelListButtons[1] =
 
 void CChannelList::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width- 65, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 
 	int ButtonWidth = (width - 20) / 4;
 	int buttonHeight = 7 + std::min(16, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight());
-	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW);
-	frameBuffer->paintBoxRel(x, y + (height - buttonHeight) + 1, width, buttonHeight - 1, COL_MENUHEAD);
+	frameBuffer->paintHLineRel(x, width, y + (height - buttonHeight), COL_INFOBAR_SHADOW_PLUS_0);
+	frameBuffer->paintBoxRel(x, y + (height - buttonHeight) + 1, width, buttonHeight - 1, COL_MENUHEAD_PLUS_0);
 	::paintButtons(frameBuffer, g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL], g_Locale, x + 10, y + (height - buttonHeight) + 3, ButtonWidth, 1, CChannelListButtons);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );

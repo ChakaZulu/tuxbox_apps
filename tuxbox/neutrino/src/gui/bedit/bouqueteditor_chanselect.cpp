@@ -75,12 +75,21 @@ bool CBEChannelSelectWidget::hasChanged()
 void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 {
 	int ypos = y+ theight + paintNr*getItemHeight();
-	int color = COL_MENUCONTENT;
+
+	uint8_t    color;
+	fb_pixel_t bgcolor;
 	if (selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
-	frameBuffer->paintBoxRel(x,ypos, width- 15, getItemHeight(), color);
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
+
+	frameBuffer->paintBoxRel(x,ypos, width- 15, getItemHeight(), bgcolor);
 
 	if(itemNr < getItemCount())
 	{
@@ -92,7 +101,7 @@ void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 		}
 		else
 		{
-			frameBuffer->paintBoxRel(x+8, ypos+4, NEUTRINO_ICON_BUTTON_GREEN_WIDTH, fheight-4, color);
+			frameBuffer->paintBoxRel(x+8, ypos+4, NEUTRINO_ICON_BUTTON_GREEN_WIDTH, fheight-4, bgcolor);
 		}
 	}
 }
@@ -126,8 +135,8 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, const std::string & action
 void CBEChannelSelectWidget::paintFoot()
 {
 	int ButtonWidth = width / 3;
-	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 3* ButtonWidth+ 8, y+height+1);
 	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width- 3* ButtonWidth+ 38, y+height+24 - 2, width, g_Locale->getText("bouqueteditor.switch"), COL_INFOBAR, 0, true); // UTF-8

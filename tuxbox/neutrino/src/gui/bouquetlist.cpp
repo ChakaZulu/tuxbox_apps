@@ -341,13 +341,21 @@ void CBouquetList::hide()
 void CBouquetList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
-	int color = COL_MENUCONTENT;
-	if (liststart+pos==selected)
+
+	uint8_t    color;
+	fb_pixel_t bgcolor;
+	if (liststart + pos == selected)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
+	}
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
 	}
 
-	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, bgcolor);
 	if(liststart+pos<Bouquets.size())
 	{
 		CBouquet* bouq = Bouquets[liststart+pos];
@@ -364,7 +372,7 @@ void CBouquetList::paintItem(int pos)
 
 void CBouquetList::paintHead()
 {
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10,y+theight+0, width, g_Locale->getText("bouquetlist.head"), COL_MENUHEAD, 0, true); // UTF-8
 }
 
