@@ -451,6 +451,8 @@ void *start_scanthread(void *param)
       get_nits(12111,27500,1,3,1, logfd);
       fprintf(logfd,	"get_nits(12168,27500,0,3,1, logfd);\n");
       get_nits(12168,27500,0,3,1, logfd);
+      fprintf(logfd,	"get_nits(11283,27500,1,3,1, logfd);\n");
+      get_nits(11283,27500,1,3,1, logfd);
       fprintf(logfd,	"get_nits(12283,27500,1,3,1, logfd);\n");
       get_nits(12283,27500,1,3,1, logfd);
       fprintf(logfd,	"get_nits(11331,6111,1,3,1, logfd);\n");
@@ -481,7 +483,7 @@ void *start_scanthread(void *param)
       get_nits(11457,6111,0,3,1, logfd);
       fprintf(logfd,	"get_nits(11464,4398,0,7,1, logfd);\n");
       get_nits(11464,4398,0,7,1, logfd);
-      fprintf(logfd,	"get_nits(12211,5632,0,3,1, logfd);\n");
+/*      fprintf(logfd,	"get_nits(12211,5632,0,3,1, logfd);\n");
       get_nits(12211,5632,0,3,1, logfd);
       fprintf(logfd,	"get_nits(12220,6161,0,3,1, logfd);\n");
       get_nits(12220,6161,0,3,1, logfd);
@@ -497,7 +499,7 @@ void *start_scanthread(void *param)
       get_nits(12581,5632,0,3,1, logfd);
       fprintf(logfd,	"get_nits(12590,5632,0,3,1, logfd);\n");
       get_nits(12590,5632,0,3,1, logfd);
-
+*/
       fprintf(logfd, "Got alle Nits\n");
       get_sdts(logfd);
 
