@@ -13,8 +13,10 @@ and combinations of this -->
 		<transponder frequency="10861750" symbol_rate="22000000" polarization="0" fec_inner="4"/>
 		<transponder frequency="11739000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 		<transponder frequency="11836500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<!--
 		<transponder frequency="12187500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12551000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
+		-->
 	</sat>
 	<sat name="Eutelsat 13.0E" flags="5" position="130">
 		<transponder frequency="12692000" symbol_rate="27500000" polarization="0" fec_inner="3"/>

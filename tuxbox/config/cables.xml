@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <cables>
-	<cable name="Ish" flags="9">
-		<transponder frequency="346000" symbol_rate="6900000" fec_inner="0" modulation="3"/>
-	</cable>
 	<cable name="Primacom" flags="9">
 		<transponder frequency="386000" symbol_rate="6956000" fec_inner="0" modulation="3"/>
 	</cable>
-	<cable name="Telekom" flags="9">
+	<cable name="Telekom/Ish" flags="9">
 		<transponder frequency="346000" symbol_rate="6900000" fec_inner="6" modulation="3"/>
-		<transponder frequency="450000" symbol_rate="6900000" fec_inner="6" modulation="3"/>
-		<transponder frequency="458000" symbol_rate="6900000" fec_inner="6" modulation="3"/>
 	</cable>
 	<cable name="UEWU Mediend." flags="9">
 		<transponder frequency="314000" symbol_rate="27500000" fec_inner="0" modulation="3"/>
