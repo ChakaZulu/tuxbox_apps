@@ -2345,9 +2345,56 @@ eString getConfigSettings(void)
 #endif
 #endif
 
-static eString getControlSatFinder(void)
+eString getSatellites(void)
 {
-	eTransponder *tp;
+	eString result;
+	int num = 0;
+	
+	for (std::list<eLNB>::iterator it2(eTransponderList::getInstance()->getLNBs().begin()); it2 != eTransponderList::getInstance()->getLNBs().end(); it2++)
+	{
+		// go thru all satellites...
+		for (ePtrList<eSatellite>::iterator s (it2->getSatelliteList().begin()); s != it2->getSatelliteList().end(); s++)
+		{
+			result += "<tr bgcolor=\"";
+			result += (num & 1) ? LIGHTGREY : DARKGREY;
+			result += "\">";
+			result += "<td><a href=\'?mode=controlSatFinder&display=transponders&sat=" + eString().sprintf("%d", s->getOrbitalPosition()) + "\'>" + s->getDescription() + "</a></td>";
+			result += "</tr>\n";
+			num++;
+		}
+	}
+	return result;
+}
+
+eString getTransponders(int orbital_position)
+{
+	eString result;
+	int num = 0;
+	
+	result += "<h2>Satellite Orbital Position: " + eString().sprintf("%d", orbital_position) + "</h2>\n";
+	// go thru all transponders...
+	for (std::list<tpPacket>::iterator it3(eTransponderList::getInstance()->getNetworks().begin()); it3 != eTransponderList::getInstance()->getNetworks().end(); it3++)
+	{
+		if (it3->orbital_position == orbital_position)
+		{
+			for (std::list<eTransponder>::iterator it(it3->possibleTransponders.begin()); it != it3->possibleTransponders.end(); it++)
+			{
+				eString transponder = eString().sprintf("%d / %d / %c", it->satellite.frequency / 1000, it->satellite.symbol_rate / 1000, it->satellite.polarisation ? 'V' : 'H');
+				result += "<tr bgcolor=\"";
+				result += (num & 1) ? LIGHTGREY : DARKGREY;
+				result += "\">";
+				result += "<td><a href=\'javascript:tuneTransponder(\"" + it->satellite.toString() + "\")\'>" + transponder + "</a></td>";
+				result += "</tr>\n";
+				num++;
+			}
+		}
+	}
+	return result;
+}
+
+eString getSatellitesAndTransponders(void)
+{
+	eTransponder *tp = NULL;
 	eString bouquets, bouquetrefs; // satellites
 	eString channels, channelrefs; // transponders
 	eString chs, chrefs;
@@ -2435,6 +2482,27 @@ static eString getControlSatFinder(void)
 	return result;
 }
 
+static eString getControlSatFinder(eString opts)
+{	
+	eString result;
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	
+	if (pdaScreen == 0)
+		result = getSatellitesAndTransponders();
+	else
+	{
+		// pda satfinder
+		result += "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
+		eString display = opt["display"];
+		if (display == "transponders")
+			result += getTransponders(atoi(opt["sat"].c_str()));
+		else 
+			result += getSatellites();
+		result += "</table>";
+	}	
+	return result;
+}
+
 static eString getControlScreenShot(void)
 {
 	eString result;
@@ -2496,7 +2564,7 @@ static eString getControlScreenShot(void)
 	return result;
 }
 
-static eString getContent(eString mode, eString path)
+static eString getContent(eString mode, eString path, eString opts)
 {
 	eString result, tmp;
 
@@ -2647,7 +2715,7 @@ static eString getContent(eString mode, eString path)
 	if (mode == "controlSatFinder")
 	{
 		result = getTitle("CONTROL: Satfinder");
-		result += getControlSatFinder();
+		result += getControlSatFinder(opts);
 	}
 	else
 	if (mode == "controlTimerList")
@@ -3561,7 +3629,7 @@ static eString getCurrentServiceRef(eString request, eString dirpath, eString op
 		return "E:no service running";
 }
 
-eString getPDAContent(eString mode, eString spath)
+eString getPDAContent(eString mode, eString spath, eString opts)
 {
 	eString result;
 
@@ -3571,7 +3639,7 @@ eString getPDAContent(eString mode, eString spath)
 		mode = "zap";
 
 	result = readFile(TEMPLATE_DIR + "index_small.tmp");
-	result.strReplace("#CONTENT#", getContent(mode, spath));
+	result.strReplace("#CONTENT#", getContent(mode, spath, opts));
 	result.strReplace("#VOLBAR#", getVolBar());
 	result.strReplace("#MUTE#", getMute());
 	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
@@ -3605,7 +3673,7 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 
 	eString mode = opt["mode"];
 	eString spath = opt["path"];
-	result = getPDAContent(mode, spath);
+	result = getPDAContent(mode, spath, opts);
 
 	return result;
 }
@@ -3645,7 +3713,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	{
 		eString mode = opt["mode"];
 		eString spath = opt["path"];
-		result = getPDAContent(mode, spath);
+		result = getPDAContent(mode, spath, opts);
 		content->local_header["Cache-Control"] = "no-cache";
 	}
 
@@ -4799,7 +4867,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	result = readFile(TEMPLATE_DIR + "index2.tmp");
 	result.strReplace("#TOPNAVI#", getTopNavi(mode, spath));
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, spath));
-	eString tmp = getContent(mode, spath);
+	eString tmp = getContent(mode, spath, opts);
 	if (tmp != "")
 		result.strReplace("#CONTENT#", tmp);
 	else
