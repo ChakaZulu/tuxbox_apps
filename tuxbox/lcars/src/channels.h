@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.12  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.11  2002/06/12 23:30:03  TheDOC
 basic NVOD should work again
 
@@ -99,6 +102,7 @@ struct channel
 	char providerName[100];
 	int number_perspectives;
 	linkage perspective[20];
+	pmt_data pmt_entry;
 };
 
 struct dvbchannel
@@ -191,6 +195,7 @@ class channels
 	std::vector<linkage> linkage_perspectives;
 	linkage tmp_link;
 	pmt_data NVOD_pmt;
+	pmt_data linkage_pmt;
 public:
 	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v);
 	channels(settings *setting, pat *p1, pmt *p2);
@@ -229,6 +234,7 @@ public:
 	void addDVBChannel(dvbchannel tmp_channel);
 
 	void setCurrentTS(int TS);
+	void setCurrentPMTdata(pmt_data pmt);
 	void setCurrentONID(int ONID);
 	void setCurrentSID(int SID);
 	void setCurrentPMT(int PMT);
@@ -263,6 +269,7 @@ public:
 	std::string getShortServiceName(int channelnumber);
 
 	int getCurrentTS();
+	pmt_data getCurrentPMTdata();
 	int getCurrentONID();
 	int getCurrentSID();
 	int getCurrentPMT();

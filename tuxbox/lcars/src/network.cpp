@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.16  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.15  2002/06/08 20:21:09  TheDOC
 adding the cam-sources with slight interface-changes
 
@@ -344,6 +347,12 @@ void *network::startlistening(void *object)
 							write(inbound_connection, writebuffer, strlen(writebuffer));
 						}
 					}
+					if (path[2] == "info?streaminfo")
+					{
+						write(inbound_connection, headertextok.c_str(), headertextok.length());
+						sprintf(writebuffer, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n", 1, 2, 3, 4, 5, 6, 7);
+						write(inbound_connection, writebuffer, strlen(writebuffer));
+					}
 					else if (path[2] == "zapto" && path[2].length() == 5)
 					{
 						write(inbound_connection, headertextok.c_str(), headertextok.length());
@@ -481,7 +490,7 @@ void *network::startlistening(void *object)
 					}
 					else if (path[2] == "scan")
 					{
-						(*n->scan_obj).scanChannels();
+						(*n->scan_obj).scanChannels(NORMAL);
 					}
 					else if (path[2] == "zapto")
 					{

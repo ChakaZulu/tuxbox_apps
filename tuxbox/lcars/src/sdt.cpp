@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: sdt.cpp,v $
+Revision 1.6  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.5  2002/06/12 23:30:03  TheDOC
 basic NVOD should work again
 
@@ -66,6 +69,7 @@ int sdt::getChannels(channels *channels)
 	ioctl(fd,DMX_STOP,0);
 
 	int transport_stream_id = (buffer[3] << 8) | buffer[4];
+	ONID = (buffer[8] << 8) | buffer[9];
 
 	int start = 11;
 	while (start < r - 5)

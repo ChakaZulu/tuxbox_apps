@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: sdt.h,v $
+Revision 1.5  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.4  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -35,9 +38,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 class sdt
 {
+	int ONID;
 public:
 	int getChannels(channels *channels);
 	void getNVODs(channels *channels);
+	int getONID() { return ONID; }
 };
 
 #endif

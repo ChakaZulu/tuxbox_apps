@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.h,v $
+Revision 1.5  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.4  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -44,12 +47,10 @@ struct pat_entry
 class pat
 {
 	int oldpatTS;
-	int ONID;
 	std::multimap<int, struct pat_entry> pat_list;
 public:
 	bool readPAT();
 	int getTS() { return (*pat_list.begin()).second.TS; }
-	int getONID() { return ONID; }
 	int getPMT(int SID);
 };
 

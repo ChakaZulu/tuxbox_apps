@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.18  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.17  2002/06/13 01:35:48  TheDOC
 NVOD should work now
 
@@ -210,6 +213,7 @@ void channels::setPerspective(int number)
 		memset (&pmt_entry, 0, sizeof (struct pmt_data));
 		tmp_link.PMT = pat_obj->getPMT(tmp_link.SID);
 		pmt_entry = pmt_obj->readPMT(tmp_link.PMT);
+		linkage_pmt = pmt_entry;
 		//channels.deleteCurrentAPIDs();
 		tmp_link.APIDcount = 0;
 		tmp_link.PCR = pmt_entry.PCR;
@@ -344,6 +348,7 @@ void channels::zapCurrentChannel()
 	{
 		setCurrentPMT(pat_obj->getPMT(getCurrentSID()));
 		pmt_data pmt_entry = (pmt_obj->readPMT(getCurrentPMT()));
+		setCurrentPMTdata(pmt_entry);
 		deleteCurrentAPIDs();
 		number_components = 0;
 		video_component = 0;
@@ -691,6 +696,11 @@ void channels::setCurrentTS(int TS)
 	basic_channellist[cur_pos].TS = TS;
 }
 
+void channels::setCurrentPMTdata(pmt_data pmt)
+{
+	basic_channellist[cur_pos].pmt_entry = pmt;
+}
+
 void channels::setCurrentONID(int ONID)
 {
 	//printf("setCurrentONID to %d\n", ONID);
@@ -858,6 +868,16 @@ int channels::getCurrentTS()
 		return getCurrentNVOD_TS(curr_perspective);
 	else
 		return 0;
+}
+
+pmt_data channels::getCurrentPMTdata()
+{
+	if (current_mode == CHANNEL)
+		return basic_channellist[cur_pos].pmt_entry;
+	else if (current_mode == LINKAGE)
+		return linkage_pmt;
+	else if (current_mode == NVOD)
+		return NVOD_pmt;
 }
 
 int channels::getCurrentONID()
@@ -1176,7 +1196,7 @@ void channels::dumpTS()
 {
 	for (std::multimap<struct transponder, struct transportstream>::iterator it = basic_TSlist.begin(); it != basic_TSlist.end(); ++it)
 	{
-		//printf("ONID: %d - TS: %d - FREQU: %ld - SYMBOL: %d - POL: %d - FEC: %d\n", (*it).second.trans.ONID, (*it).second.trans.TS, (*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC);
+		printf("ONID: %d - TS: %d - FREQU: %ld - SYMBOL: %d - POL: %d - FEC: %d\n", (*it).second.trans.ONID, (*it).second.trans.TS, (*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC);
 	}
 }
 
@@ -1185,9 +1205,9 @@ void channels::dumpChannels()
 {
 	for (std::vector<struct channel>::iterator it = basic_channellist.begin(); it != basic_channellist.end(); ++it)
 	{
-		//printf("#%d TS: %04x - SID: %04x - Name: %s\n", (*it).channelnumber, (*it).TS, (*it).SID, (*it).serviceName);
+		printf("#%d TS: %04x - SID: %04x - Name: %s\n", (*it).channelnumber, (*it).TS, (*it).SID, (*it).serviceName);
 	}
-	//printf("Das sind %d Kan„le\n", basic_channellist.size());
+	printf("Das sind %d Kan„le\n", basic_channellist.size());
 }
 
 int channels::tune(int TS, int ONID)

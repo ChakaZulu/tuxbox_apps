@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.h,v $
+Revision 1.9  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.8  2002/06/12 17:48:40  TheDOC
 reinsertion readded
 
@@ -144,6 +147,7 @@ class osd
 	// Scan
 	int percentage;
 	int channel_count;
+	int TS_count;
 
 	// Schedule
 	struct scheduling
@@ -270,6 +274,7 @@ public:
 	void createScan();
 	void setScanProgress(int percent);
 	void setScanChannelNumber(int number);
+	void setScanTSNumber(int number);
 	void showScan();
 	void hideScan();
 

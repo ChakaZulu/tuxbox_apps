@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.23  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.22  2002/06/12 23:30:03  TheDOC
 basic NVOD should work again
 
@@ -253,7 +256,7 @@ int main(int argc, char **argv)
 		if (com == RC1_HELP)
 		{
 			//printf("Emergency channel-scan\n");
-			channels = scan.scanChannels();
+			channels = scan.scanChannels(NORMAL);
 			channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner, &variables);
 			channels.saveDVBChannels();
 			while(rc.command_available())

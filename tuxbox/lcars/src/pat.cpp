@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.cpp,v $
+Revision 1.6  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.5  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -36,6 +39,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <memory.h>
 #include <stdio.h>
+#include <iostream>
 
 #include <ost/dmx.h>
 
@@ -62,7 +66,7 @@ bool pat::readPAT()
 	flt.pid            = 0x0;
 	//flt.filter.filter[0] = 0x0;
 	flt.filter.mask[0] = 0xff;
-	flt.timeout        = 10000;
+	flt.timeout        = 1000;
 	flt.flags          = DMX_IMMEDIATE_START;
 
 	if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
@@ -82,18 +86,14 @@ bool pat::readPAT()
 
 		pat_list.clear();
 
-
 		for (int i = 8; i < r - 5; i += 4)
 		{
-			if ((buffer[i] << 8) | buffer[i + 1] == 0)
-				ONID = (buffer[i + 2] & 0x1f) << 8 | buffer[i + 3];
-			if ((buffer[i] << 8) | buffer[i + 1] != 0)
+			if (((buffer[i] << 8) | buffer[i + 1]) != 0)
 			{
 				pat_entry temp_pat;
 				temp_pat.TS = transport_stream_id;
 				temp_pat.SID = (buffer[i] << 8) | buffer[i + 1];
 				temp_pat.PMT = ((buffer[i + 2] & 0x1f) << 8 | buffer[i + 3]);
-
 				pat_list.insert(std::pair<int, struct pat_entry>(temp_pat.SID, temp_pat));
 			}
 		}

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.cpp,v $
+Revision 1.9  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.8  2002/06/12 17:46:53  TheDOC
 reinsertion readded
 
@@ -503,6 +506,10 @@ void osd::executeCommand()
 			else if (parms[0] == "number_channels")
 			{
 				setScanChannelNumber(atoi(parms[1].c_str()));
+			}
+			else if (parms[0] == "number_TS")
+			{
+				setScanTSNumber(atoi(parms[1].c_str()));
 			}
 		}
 		else if (command2 == "schedule")
@@ -1902,6 +1909,7 @@ void osd::createScan()
 {
 	percentage = 0;
 	channel_count = 0;
+	TS_count = 0;
 	fb->setTextSize(0.5);
 }
 
@@ -1934,10 +1942,16 @@ void osd::setScanChannelNumber(int number)
 {
 	channel_count = number;
 
+	fb->fillBox(410, 335, 500, 365, 5);
+	fb->putText(480, 340, 5, channel_count, -1, 1);
+}
 
-	fb->fillBox(410, 350, 500, 380, 5);
-	fb->putText(480, 355, 5, channel_count, -1, 1);
+void osd::setScanTSNumber(int number)
+{
+	TS_count = number;
 
+	fb->fillBox(410, 370, 500, 400, 5);
+	fb->putText(480, 375, 5, TS_count, -1, 1);
 }
 
 void osd::showScan()
@@ -1949,7 +1963,10 @@ void osd::showScan()
 	fb->fillBox(200, 325, 500, 327, 0);
 	fb->fillBox(200, 400, 500, 402, 0);
 
-	fb->putText(220, 355, 5, "Found Channels:");
+	fb->putText(220, 340, 5, "Found Channels:");
+	fb->putText(220, 375, 5, "Found TSs:");
+
+	fb->putText(480, 375, 5, TS_count, -1, 1);
 }
 
 void osd::hideScan()

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.7  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.6  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -125,6 +128,7 @@ void* checker::startEventChecker(void* object)
 	while(1)
 	{
 		read(fd, &event, sizeof(event_t));
+		//std::cout << "Event: " << event.event << std::endl;
 		if (event.event == EVENT_VCR_CHANGED)
 		{
 			//std::cout << "Event: EVENT_VCR_CHANGED" << std::endl;
@@ -152,11 +156,10 @@ void* checker::startEventChecker(void* object)
 			case VCR_STATUS_OFF:
 				//std::cout << "Event: EVENT_VCR_OFF" << std::endl;
 				//std::cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << std::endl;
-				if (c->hardware_obj->vcrIsOn())
+				if (!c->hardware_obj->vcrIsOn())
 				{
 					//std::cout << "ON" << std::endl;
 					c->hardware_obj->fnc(0);
-
 				}
 				else
 					//std::cout << "Off" << std::endl;

@@ -154,6 +154,10 @@ command_class control::parseCommand(std::string cmd)
 	{
 		tmp_command.cmd_class = SDT;
 	}
+	else if (tmp_string == "TUNER")
+	{
+		tmp_command.cmd_class = TUNER;
+	}
 	else
 	{
 		std::cout << "Error in Command: Unknown Commandclass (" << tmp_string << ") on String:" << std::endl << cmd << std::endl;
@@ -263,6 +267,10 @@ command_class control::parseCommand(std::string cmd)
 	else if (tmp_string == "Get")
 	{
 		tmp_command.command = C_Get;
+	}
+	else if (tmp_string == "Tune")
+	{
+		tmp_command.command = C_Tune;
 	}
 	else
 	{
@@ -762,6 +770,12 @@ int control::runCommand(command_class command, bool val)
 							sprintf(text, "VPID: %04x", channels_obj->getCurrentVPID());
 							osd_obj->addMenuEntry(++counter, text);
 						}
+						else if (command.args[i] == "TXT")
+						{
+							char text[11];
+							sprintf(text, "TXT: %04x", channels_obj->getCurrentTXT());
+							osd_obj->addMenuEntry(++counter, text);
+						}
 						else if (command.args[i] == "TS")
 						{
 							char text[11];
@@ -801,6 +815,32 @@ int control::runCommand(command_class command, bool val)
 								sprintf(text, "APID: %04x", channels_obj->getCurrentAPID(i));
 								osd_obj->addMenuEntry(counter, text);
 							}
+						}
+						else if (command.args[i] == "CAIDs+ECMs")
+						{
+							char text[11];
+							counter++;
+							pmt_data pmt_entry = channels_obj->getCurrentPMTdata();
+							
+							for (int i = 0; i < pmt_entry.ecm_counter; i++)
+							{
+								sprintf(text, "CAID: %04x", pmt_entry.CAID[i]);
+								osd_obj->addMenuEntry(counter, text);
+								sprintf(text, "ECM: %04x", pmt_entry.ECM[i]);
+								osd_obj->addMenuEntry(counter, text);
+							}
+						}
+						else if (command.args[i] == "EMM")
+						{
+							char text[11];
+							sprintf(text, "EMM: %04x", settings_obj->getEMMpid());
+							osd_obj->addMenuEntry(++counter, text);
+						}
+						else if (command.args[i] == "CAID")
+						{
+							char text[11];
+							sprintf(text, "CAID: %04x", settings_obj->getCAID());
+							osd_obj->addMenuEntry(++counter, text);
 						}
 					}
 				}
@@ -858,7 +898,7 @@ int control::runCommand(command_class command, bool val)
 		{
 			if (command.args[0] == "Normal")
 			{
-				*channels_obj = scan_obj->scanChannels();
+				*channels_obj = scan_obj->scanChannels(NORMAL);
 				channels_obj->setStuff(eit_obj, cam_obj, hardware_obj, osd_obj, zap_obj, tuner_obj, vars);
 			}
 			else if (command.args[0] == "Update")
@@ -867,7 +907,12 @@ int control::runCommand(command_class command, bool val)
 			}
 			else if (command.args[0] == "Full")
 			{
-				*channels_obj = scan_obj->scanChannels(true);
+				*channels_obj = scan_obj->scanChannels(FULL);
+				channels_obj->setStuff(eit_obj, cam_obj, hardware_obj, osd_obj, zap_obj, tuner_obj, vars);
+			}
+			else if (command.args[0] == "Bruteforce")
+			{
+				*channels_obj = scan_obj->scanChannels(BRUTEFORCE);
 				channels_obj->setStuff(eit_obj, cam_obj, hardware_obj, osd_obj, zap_obj, tuner_obj, vars);
 			}
 		}
@@ -1167,6 +1212,19 @@ int control::runCommand(command_class command, bool val)
 		else if (command.command == C_Send)
 		{
 			ir_obj->sendCommand(command.args[0]);
+		}
+		break;
+	case TUNER:
+		if (command.command == C_Tune)
+		{
+			if (command.args[0] == "Cable")
+			{
+				tuner_obj->tune(atoi(command.args[1].c_str()), atoi(command.args[2].c_str()));
+			}
+			else if (command.args[0] == "Sat")
+			{
+				tuner_obj->tune(atoi(command.args[1].c_str()), atoi(command.args[2].c_str()), atoi(command.args[3].c_str()), atoi(command.args[4].c_str()), atoi(command.args[5].c_str()));
+			}
 		}
 		break;
 	}

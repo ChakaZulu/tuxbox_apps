@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.15  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.14  2002/06/04 20:39:12  TheDOC
 old version worked better :)
 
@@ -112,10 +115,10 @@ void scan::readUpdates()
 }
 
 
-channels scan::scanChannels(bool full, int start_frequency, int start_symbol, int start_polarization, int start_fec)
+channels scan::scanChannels(int type, int start_frequency, int start_symbol, int start_polarization, int start_fec)
 {
 	int number;
-	channels channels(setting, pat_obj, pmt_obj);
+	channels tmp_channels(setting, pat_obj, pmt_obj);
 	bool badcable = false;
 
 	//settings settings;
@@ -132,70 +135,81 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 		start_symbol = 6900;
 		osd_obj->createPerspective();
 
-		for (int i = 0; (i < 3) && (channels.numberTransponders() < 1); i++)
+		if (type == NORMAL || type == FULL)
 		{
-			start_frequency = 3460;
-			if (i == 1)
+			for (int i = 0; (i < 3) && (tmp_channels.numberTransponders() < 1); i++)
 			{
-				//std::cout << "Inversion off " << std::endl;
-				setting->setInversion(INVERSION_OFF);
-			}
-			else if (i == 0)
-			{
-				//std::cout << "Inversion auto" << std::endl;
-				setting->setInversion(INVERSION_AUTO);
-			}
-			else if (i == 2)
-			{
-				//std::cout << "Inversion on" << std::endl;
-				setting->setInversion(INVERSION_ON);
-			}
+				start_frequency = 3460;
+				if (i == 1)
+				{
+					//std::cout << "Inversion off " << std::endl;
+					setting->setInversion(INVERSION_OFF);
+				}
+				else if (i == 0)
+				{
+					//std::cout << "Inversion auto" << std::endl;
+					setting->setInversion(INVERSION_AUTO);
+				}
+				else if (i == 2)
+				{
+					//std::cout << "Inversion on" << std::endl;
+					setting->setInversion(INVERSION_ON);
+				}
 
 
-			while(channels.numberTransponders() < 1)
+				while(tmp_channels.numberTransponders() < 1)
+				{
+					char message[100];
+					sprintf(message, "Searching NIT on %d - %d", start_frequency, start_symbol);
+					osd_obj->setPerspectiveName(message);
+					osd_obj->addCommand("SHOW perspective");
+	
+					tuner_obj->tune(start_frequency, start_symbol);
+					//std::cout << "Checking frequ: " << start_frequency << " with symbol: " << start_symbol << std::endl;
+	
+					number = nit_obj->getTransportStreams(&tmp_channels);
+					if (tmp_channels.numberTransponders() > 0)
+					{
+						osd_obj->setScanTSNumber(tmp_channels.numberTransponders());
+						tmp_channels.dumpTS();
+						break;
+					}
+					start_frequency += 80;
+					if (start_frequency > 4000)
+						break;
+				}
+			}
+		}
+
+		if (type == NORMAL || type == FULL)
+		{
+			if (tmp_channels.numberTransponders() < 1)
 			{
-				char message[100];
-				sprintf(message, "Searching NIT on %d - %d", start_frequency, start_symbol);
-				osd_obj->setPerspectiveName(message);
+				osd_obj->setPerspectiveName("Sorry, no NIT found! Check cables!!!");
 				osd_obj->addCommand("SHOW perspective");
 
-				tuner_obj->tune(start_frequency, start_symbol);
-				//std::cout << "Checking frequ: " << start_frequency << " with symbol: " << start_symbol << std::endl;
-
-				number = nit_obj->getTransportStreams(&channels);
-				if (channels.numberTransponders() > 0)
-				{
-					channels.dumpTS();
-					break;
-				}
-				start_frequency += 80;
-				if (start_frequency > 4000)
-					break;
+				exit(-1);
 			}
 		}
 
-		if (channels.numberTransponders() < 1)
+		int test_frequ = 20000;
+		if (tmp_channels.numberTransponders() > 0)
 		{
-			osd_obj->setPerspectiveName("Sorry, no NIT found! Check cables!!!");
-			osd_obj->addCommand("SHOW perspective");
-
-			exit(-1);
+			tmp_channels.setBeginTS();
+			test_frequ = tmp_channels.getCurrentFrequency();
 		}
-
-		channels.setBeginTS();
-		int test_frequ = channels.getCurrentFrequency();
-
-		if (test_frequ > 10000)
+		
+		if (test_frequ > 10000 || type == BRUTEFORCE)
 		{
-			osd_obj->setPerspectiveName("Your cable-company sucks! Manually searching...");
+			osd_obj->setPerspectiveName("Manually searching... (That takes time :)");
 			badcable = true;
 			osd_obj->addCommand("SHOW perspective");
 
-			channels.clearTS();
+			tmp_channels.clearTS();
 
 			sleep(5);
 
-			for (int i = 3300; i < 4600; i += 80)
+			for (int i = 500; i < 8900; i += 80)
 			{
 				char message[100];
 				sprintf(message, "Checking %d - %d", i, 6900);
@@ -206,15 +220,14 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 
 				if (pat_obj->readPAT())
 				{
-					channels.addTS(pat_obj->getTS(), pat_obj->getONID(), i, 6900);
+					channels tmp_channels2(setting, pat_obj, pmt_obj);
+					sdt_obj->getChannels(&tmp_channels2);
+					tmp_channels.addTS(pat_obj->getTS(), sdt_obj->getONID(), i, 6900);
+					std::cout << "Found TS: " << pat_obj->getTS() << " " << sdt_obj->getONID() << " " << i << " " << 6900 << std::endl;
+					osd_obj->setScanTSNumber(tmp_channels.numberTransponders());
 				}
-
-
 			}
-
 		}
-
-
 	}
 	else if (setting->boxIsSat())
 	{
@@ -288,14 +301,14 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 				//printf("FInished tuning\n");
 
 				//printf ("Start NIT\n");
-				number = nit_obj->getTransportStreams(&channels, dis);
+				number = nit_obj->getTransportStreams(&tmp_channels, dis);
 				//printf ("End NIT\n");
 			}
 
 			i++;
 		}
 
-		if (channels.numberTransponders() < 1)
+		if (tmp_channels.numberTransponders() < 1)
 		{
 			osd_obj->setPerspectiveName("Sorry, no NIT found! Check cables!!!");
 			osd_obj->addCommand("SHOW perspective");
@@ -303,80 +316,90 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 		}
 	}
 
-	//printf("Transponders found: %d\n", channels.numberTransponders());
+	osd_obj->setScanTSNumber(tmp_channels.numberTransponders());
+	printf("Transponders found: %d\n", tmp_channels.numberTransponders());
+	tmp_channels.dumpTS();
 	sleep(5);
 	int count = 0;
-	int numberTS = channels.numberTransponders();
+	int numberTS = tmp_channels.numberTransponders();
 	int numberChannels = 0;
 
-	channels.setBeginTS();
+	tmp_channels.setBeginTS();
 
 	char message[100];
 	sprintf(message, "Scanning Channels");
 	osd_obj->setPerspectiveName(message);
 	osd_obj->addCommand("SHOW perspective");
 
-	channels.setTuner(tuner_obj);
+	tmp_channels.setTuner(tuner_obj);
 	do
 	{
-		channels.tuneCurrentTS();
+		tmp_channels.tuneCurrentTS();
 
 		//printf("getChannels - Start\n");
-		sdt_obj->getChannels(&channels);
+		sdt_obj->getChannels(&tmp_channels);
 
-		if (full)
+		if (type == FULL)
 		{
 			//std::cout << "Full Channel Scan" << std::endl;
 			pat_obj->readPAT();
-			for (int i = numberChannels; i < channels.numberChannels(); i++)
+			for (int i = numberChannels; i < tmp_channels.numberChannels(); i++)
 			{
-				channels.setCurrentChannel(i);
-				channels.setCurrentPMT(pat_obj->getPMT(channels.getCurrentSID()));
+				tmp_channels.setCurrentChannel(i);
+				tmp_channels.setCurrentPMT(pat_obj->getPMT(tmp_channels.getCurrentSID()));
 
 				pmt_data pmt_entry;
-				if (channels.getCurrentPMT() != 0)
+				if (tmp_channels.getCurrentPMT() != 0)
 				{
-					pmt_entry = pmt_obj->readPMT(channels.getCurrentPMT());
+					pmt_entry = pmt_obj->readPMT(tmp_channels.getCurrentPMT());
 
-					channels.setCurrentPCR(pmt_entry.PCR);
+					tmp_channels.setCurrentPCR(pmt_entry.PCR);
 
-					channels.deleteCurrentAPIDs();
+					tmp_channels.deleteCurrentAPIDs();
 					for (int j = 0; j < pmt_entry.pid_counter; j++)
 					{
 						if (pmt_entry.type[j] == 0x02)
 						{
-							channels.setCurrentVPID(pmt_entry.PID[j]);
+							tmp_channels.setCurrentVPID(pmt_entry.PID[j]);
 						}
 						else if (pmt_entry.type[j] == 0x04 || pmt_entry.type[j] == 0x03)
 						{
-							channels.addCurrentAPID(pmt_entry.PID[j]);
+							tmp_channels.addCurrentAPID(pmt_entry.PID[j]);
 						}
 					}
 
 					for (int j = 0; j < pmt_entry.ecm_counter; j++)
 					{
 						if (setting->getCAID() == pmt_entry.CAID[j])
-							channels.addCurrentCA(pmt_entry.CAID[j], pmt_entry.ECM[j]);
+							tmp_channels.addCurrentCA(pmt_entry.CAID[j], pmt_entry.ECM[j]);
 					}
 				}
 				else
 				{
-					channels.deleteCurrentAPIDs();
-					channels.setCurrentVPID(0x1fff);
-					channels.addCurrentAPID(0x1fff);
+					tmp_channels.deleteCurrentAPIDs();
+					tmp_channels.setCurrentVPID(0x1fff);
+					tmp_channels.addCurrentAPID(0x1fff);
 				}
 
 
-				numberChannels = channels.numberChannels();
+				numberChannels = tmp_channels.numberChannels();
 
 			}
 		}
 
-		osd_obj->setScanChannelNumber(channels.numberChannels());
+		osd_obj->setScanChannelNumber(tmp_channels.numberChannels());
 		//printf("getChannels - Finish\n");
 		count++;
 		osd_obj->setScanProgress((int)(((float)count / numberTS) * 100));
-	} while(channels.setNextTS());
+	} while(tmp_channels.setNextTS());
+
+	{
+		char message[100];
+		sprintf(message, "Found %d channels on %d TSs.", tmp_channels.numberChannels(), tmp_channels.numberTransponders());
+		osd_obj->setPerspectiveName(message);
+		osd_obj->addCommand("SHOW perspective");
+		sleep(5);
+	}
 
 	osd_obj->addCommand("HIDE scan");
 	osd_obj->addCommand("HIDE perspective");
@@ -385,7 +408,7 @@ channels scan::scanChannels(bool full, int start_frequency, int start_symbol, in
 	//printf("Found channels: %d\n", channels.numberChannels());
 	//channels.saveDVBChannels();
 
-	return channels;
+	return tmp_channels;
 }
 
 void scan::updateChannels(channels *chan)

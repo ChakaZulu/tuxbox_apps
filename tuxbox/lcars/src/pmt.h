@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pmt.h,v $
+Revision 1.6  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.5  2002/06/13 01:35:48  TheDOC
 NVOD should work now
 
@@ -36,8 +39,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include <map>
 
-struct pmt_data
+class pmt_data
 {
+public:
 	int pmt;
 	int sid;
 	int pid_counter;

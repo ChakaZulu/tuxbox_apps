@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.h,v $
+Revision 1.5  2002/06/15 02:33:03  TheDOC
+some changes + bruteforce-channelscan for cable
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -45,6 +48,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "config.h"
 
+enum { FULL, NORMAL, BRUTEFORCE };
+
 class scan
 {
 	settings *setting;
@@ -57,7 +62,7 @@ class scan
 	channels *channels_obj;
 public:
 	scan::scan(settings *s, pat *p1, pmt *p2, nit *n, sdt *s1, osd *o, tuner *t, channels *c);
-	channels scanChannels(bool full = false, int start_frequency = -1, int start_symbol = -1, int start_polarization = -1, int start_fec = -1);
+	channels scanChannels(int type = NORMAL, int start_frequency = -1, int start_symbol = -1, int start_polarization = -1, int start_fec = -1);
 	void updateChannels(channels *chan);
 	void readUpdates();
 };

@@ -21,7 +21,8 @@ enum
     IF,
     ELSE,
     IR,
-	SDT
+	SDT,
+	TUNER
 };
 
 // Commands
@@ -54,7 +55,8 @@ enum
     C_Send, // 24
     C_Fillbox, // 25
     C_Puttext, // 26
-    C_Get // 27
+    C_Get, // 27
+	C_Tune // 28
 };
 
 #endif
