@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.27 2004/02/28 12:13:03 rasc Exp $
+$Id: helper.c,v 1.28 2004/03/09 20:59:23 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.27 2004/02/28 12:13:03 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.28  2004/03/09 20:59:23  rasc
+VPS decoding (someone check the NPP & PTY code output please...)
+
 Revision 1.27  2004/02/28 12:13:03  rasc
 minor stuff
 
@@ -617,6 +620,13 @@ void print_private_data (int v, u_char *b, u_int len)
   print_databytes (v,"Private Data:",b,len);
 }
 
+void print_databytes_line  (int v, const char *str, u_char *b, u_int len)
+{
+  if (len > 0) {
+     out (v,"%s ",str);
+     printhexline_buf (v+1,b,len);
+  }
+}
 
 
 
@@ -756,6 +766,36 @@ void displ_IPv6_addr (int v, struct IPv6ADDR *a)
        );
 }
 
+
+
+
+
+
+
+
+/*
+ * --  return a bit string for value, len bits
+ * --  NOT thread-safe !!!  $$$
+ */
+
+char *str_bit32 (u_long value, int bits)
+{
+   static char *bitstr[65];
+   char *s = bitstr;
+
+   if (bits > 64) bits = 64;
+   s += bits;
+
+   // reverse bit shift to get real order
+ 
+   *s = '\0';
+   while (bits-- > 0) {
+	   *(--s) = (value & 0x01) ? '1' :'0';
+	   value = value >> 1;
+   }
+
+   return bitstr;
+}
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: hexprint.h,v 1.7 2004/02/20 22:18:40 rasc Exp $
+$Id: hexprint.h,v 1.8 2004/03/09 20:59:23 rasc Exp $
 
 
  DVBSNOOP
@@ -15,10 +15,11 @@ $Id: hexprint.h,v 1.7 2004/02/20 22:18:40 rasc Exp $
 */
 
 #ifndef __HEXPRINT_H
-#define __HEXPRINT_H 1
+#define __HEXPRINT_H 
 
 void setHexPrintMode (int i);
 void printhex_buf (int verbose, u_char *buf, int len);
+void printhexline_buf (int verbose, u_char *buf, int len);
 void printasciiline_buf (int verbose, u_char *buf, int n);
 
 #endif

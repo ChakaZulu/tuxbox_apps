@@ -38,6 +38,7 @@ void print_std_ascii (int v, const char *s, u_char *b, u_int len);
 
 void print_time40 (int verbose, u_long mjd, u_long utc);
 void print_databytes (int verbose, const char *str, u_char *b, u_int len);
+void print_databytes_line  (int v, const char *str, u_char *b, u_int len);
 void print_private_data (int verbose, u_char *b, u_int len);
 
 long str2i (char *s);
@@ -55,6 +56,9 @@ void displ_mac_addr (int v, long mac_H24, long mac_L24);
 void displ_IPv4_addr (int v, u_long ip);
 void displ_IPv6_addr (int v, struct IPv6ADDR *ip);
 
+
+
+char *str_bit32 (u_long value, int bits);
 
 
 #endif

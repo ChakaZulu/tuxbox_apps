@@ -1,5 +1,5 @@
 /*
-$Id: hexprint.c,v 1.6 2004/02/20 22:18:40 rasc Exp $
+$Id: hexprint.c,v 1.7 2004/03/09 20:59:23 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: hexprint.c,v 1.6 2004/02/20 22:18:40 rasc Exp $
 
 
 $Log: hexprint.c,v $
+Revision 1.7  2004/03/09 20:59:23  rasc
+VPS decoding (someone check the NPP & PTY code output please...)
+
 Revision 1.6  2004/02/20 22:18:40  rasc
 DII complete (hopefully)
 BIOP::ModuleInfo  (damned, who is spreading infos over several standards???)
@@ -67,7 +70,6 @@ int HexPrintmode = 0;
 
 static void printhexdump_buf (int verbose, u_char *buf, int len);
 static void printhexdump2_buf (int verbose, u_char *buf, int len);
-static void printhexline_buf (int verbose, u_char *buf, int len);
 
 
 
@@ -175,7 +177,7 @@ while (j*WID < n) {
  -- single line dump HEX
    42 f1 59 04 41 f1 00 00 00 01 ff 2e e3 ff 80 1f 4
 */
-static void printhexline_buf (int verbose, u_char *buf, int n)
+void printhexline_buf (int verbose, u_char *buf, int n)
 {
  int i;
 

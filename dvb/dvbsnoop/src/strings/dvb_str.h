@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.17 2004/02/04 22:36:29 rasc Exp $ 
+$Id: dvb_str.h,v 1.18 2004/03/09 20:59:23 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.17 2004/02/04 22:36:29 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.18  2004/03/09 20:59:23  rasc
+VPS decoding (someone check the NPP & PTY code output please...)
+
 Revision 1.17  2004/02/04 22:36:29  rasc
 more EBU/teletext stuff
 
@@ -137,6 +140,10 @@ char *dvbstrTELETEXT_packetnr (u_int i);
 char *dvbstrTELETEXT_lang_code (u_int i);
 
 
+char *dvbstrVPS_pcs_audio (u_int i);
+char *dvbstrVPS_cni_countrycode (u_int i);
+char *dvbstrVPS_pty (u_int i);
+char *dvbstrVPS_npp (u_int i);
 
 
 /* -- Div Stuff */

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.45 2004/02/15 18:58:31 rasc Exp $
+$Id: dvb_str.c,v 1.46 2004/03/09 20:59:23 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.45 2004/02/15 18:58:31 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.46  2004/03/09 20:59:23  rasc
+VPS decoding (someone check the NPP & PTY code output please...)
+
 Revision 1.45  2004/02/15 18:58:31  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -2587,6 +2590,98 @@ char *dvbstrTELETEXT_lang_code (u_int i)
   return findTableID (Table, i);
 }
 
+
+
+
+
+/*
+  -- dvbstrVPS_pcs_audio
+  -- EN 300 231
+*/
+
+char *dvbstrVPS_pcs_audio (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "unknown" },
+	{ 0x01, 0x01,   "mono" },
+	{ 0x02, 0x02,   "stereo" },
+	{ 0x03, 0x03,   "dual channel" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- dvbstrVPS_pcs_audio
+  -- EN 300 231
+*/
+
+char *dvbstrVPS_cni_countrycode (u_int i)
+{
+  int b_1_4;
+  int b_5_8;
+  char *s = "";
+
+  // $$$ TODO  check if b_1_4 start really at "1"
+  char  *table[6][16] = {
+//	  0     1     2     3     4     5     6     7     8     9     A     B     C     D     E      F
+/*0*/	{ "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",    ""  },
+/*1*/	{ "",   "",   "DZ", "AD", "IL", "IT", "BE", "BY", "AZR","AL", "AT", "HU", "MT", "DE", "CNR","EG" },
+/*2*/	{ "",   "GR", "CY", "SM", "CH", "JO", "FI", "LU", "BG", "DK", "GI", "IQ", "GB", "LY", "RO", "FR" },
+/*3*/	{ "",   "MA", "CZ", "PL", "VA", "",   "SY", "TN", "MA", "LI", "IS", "MC", "",   "",   "ES", "NO" },
+/*4*/	{ "",   "",   "IE", "TR", "",   "",   "YU", "UA", "NL", "",   "LB", "",   "",   "",   "SE", ""   },
+/*5*/	{ "",   "",   "",   "",   "",   "",   "",   "RU", "PT", "",   "",   "",   "",   "",   "",   ""   }
+  };
+
+  b_1_4 = i & 0x0F;
+  b_5_8 = (i >> 4) & 0x0F; 
+
+  if (b_1_4 < 5) {
+	  s = table[b_1_4][b_5_8];
+  }
+
+  return s;
+}
+
+
+
+
+/*
+  -- VPS PTY Content Nibble Types 
+  -- ETSI EN 300 231   
+*/
+
+char *dvbstrVPS_pty (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "no information" },
+	{ 0x00, 0x0F,   "undefined content" },
+	{ 0x10, 0x7F,   "see: ETSI EN 300 231" },	// $$$ TODO
+	{ 0x80, 0xFE,   "provider specific" },
+	{ 0xFF, 0xFF,   "PTY not used" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+/*
+  -- VPS Network/Program Provider 
+  -- ETSI EN 300 231   
+*/
+
+char *dvbstrVPS_npp (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0xFF,   "see: ETSI TR 101 231" },	// $$$ TODO
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: pes_data_ebu.c,v 1.2 2004/02/04 22:36:29 rasc Exp $
+$Id: pes_data_ebu.c,v 1.3 2004/03/09 20:59:23 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: pes_data_ebu.c,v 1.2 2004/02/04 22:36:29 rasc Exp $
 
 
 $Log: pes_data_ebu.c,v $
+Revision 1.3  2004/03/09 20:59:23  rasc
+VPS decoding (someone check the NPP & PTY code output please...)
+
 Revision 1.2  2004/02/04 22:36:29  rasc
 more EBU/teletext stuff
 
@@ -39,6 +42,7 @@ Revision 1.1  2004/02/02 23:41:23  rasc
 #include "pes_data_ebu.h"
 #include "strings/dvb_str.h"
 #include "ebu/teletext.h"
+#include "ebu/vps.h"
 #include "ebu/ebu_misc.h"
 #include "misc/helper.h"
 #include "misc/hexprint.h"
@@ -181,9 +185,7 @@ static int vps_data_field (int v, u_char *b, int len)
    indent (+1);
 
    	ebu_rfl_out (v1,b);
-
-	// $$$ TODO 
-	print_databytes (v1,"data_block:", b+1, 13);
+	print_vps_decode (v1, b+1, 13);
 
    indent (-1);
    return 14;

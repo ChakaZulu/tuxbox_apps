@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.29 2004/02/28 12:13:03 rasc Exp $
+$Id: cmdline.c,v 1.30 2004/03/09 20:59:23 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.29 2004/02/28 12:13:03 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.30  2004/03/09 20:59:23  rasc
+VPS decoding (someone check the NPP & PTY code output please...)
+
 Revision 1.29  2004/02/28 12:13:03  rasc
 minor stuff
 
@@ -207,6 +210,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-nph")) opt->buffer_hexdump = 0; // old option  use -ph and -nhdb/-hdb
      else if (!strcmp (argv[i],"-if")) {
 	 opt->inpPidFile = argv[++i];		// input filename
+	 if (!opt->inpPidFile) opt->inpPidFile = ""; 
+	 if (!strcmp(opt->inpPidFile,"-"))  opt->inpPidFile = "/dev/stdin"; 
 	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
      } else if (!strcmp (argv[i],"-s")) {
          s = argv[++i];
