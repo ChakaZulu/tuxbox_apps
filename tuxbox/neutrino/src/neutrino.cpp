@@ -1661,8 +1661,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 	sprintf(id, "%d", -1);
 
 	// -- Add Channel to favorites
-	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
-		new CFavorites, id, true, CRCInput::RC_yellow, "gelb.raw"), false );
+//	StreamFeatureSelector.addItem( new CMenuForwarder("favorites.menueadd", true, "",
+//		new CFavorites, id, true, CRCInput::RC_yellow, "gelb.raw"), false );
 
 	// -- Stream Info
 	StreamFeatureSelector.addItem( new CMenuForwarder("streamfeatures.info", true, "",
@@ -2689,7 +2689,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.295 2002/07/05 18:20:43 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.296 2002/07/05 18:47:47 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
