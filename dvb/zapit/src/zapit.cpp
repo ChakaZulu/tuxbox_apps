@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.88 2002/03/14 20:56:50 Simplex Exp $
+  $Id: zapit.cpp,v 1.89 2002/03/14 21:40:39 McClean Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2243,10 +2243,14 @@ void parse_command()
 				msgResponseIsScanReady.transponder = found_transponders;
 				msgResponseIsScanReady.services    = found_channels;
 		      	if (scan_runs>0)
-						msgResponseIsScanReady.scanReady   = false;
-					else
-						msgResponseIsScanReady.scanReady   = true;
-				write( connfd, &msgStartScan, sizeof(msgStartScan));
+				{
+					msgResponseIsScanReady.scanReady   = false;
+				}
+				else
+				{
+					msgResponseIsScanReady.scanReady   = true;
+				}
+				send( connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady),0);
 			break;
 			
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
@@ -2495,7 +2499,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.88 2002/03/14 20:56:50 Simplex Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.89 2002/03/14 21:40:39 McClean Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
