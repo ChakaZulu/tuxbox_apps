@@ -291,7 +291,7 @@ CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint
 	{
 		arraySizes[i] = strlen(Chars[i]);
 	}
-	height+=210;
+	height+=260;
 	y = ((500-height)>>1);
 }
 
@@ -356,5 +356,11 @@ void CStringInputSMS::paint()
 
 	for (int count=0;count<size;count++)
 		paintChar(count);
+
+	g_FrameBuffer->paintBoxRel(x,y+height-25, width,25, COL_MENUHEAD);
+	g_FrameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
+
+	g_FrameBuffer->paintIcon("rot.raw", x+8, y+height-25+1);
+	g_Fonts->infobar_small->RenderString(x+38, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps").c_str(), COL_INFOBAR);
 
 }
