@@ -93,7 +93,6 @@ int fh_png_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_
 	png_infop info_ptr;
 	png_uint_32 width, height;
 	int bit_depth, color_type, interlace_type;
-	char *rp;
 	FILE *fh;
 
 	if(!(fh=fopen(name,"rb")))	return(FH_ERROR_FILE);
@@ -106,11 +105,10 @@ int fh_png_getsize(const char *name,int *x,int *y, int wanted_width, int wanted_
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
 		fclose(fh); return(FH_ERROR_FORMAT);
 	}
-	rp=0;
+
 	if(setjmp(png_ptr->jmpbuf))
 	{
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
-		if(rp) free(rp);
 		fclose(fh); return(FH_ERROR_FORMAT);
 	}
 
