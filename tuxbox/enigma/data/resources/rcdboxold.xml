@@ -86,6 +86,8 @@
 			<action name="prevBouquet" key="-" flags="mr" />
 			<action name="pathUp" key="d-box" flags="m" />
 			<action name="showEPGSelector" key="red" flags="m" />
+			<action name="toggleStyle" key="mute" flags="m" />
+			<action name="toggleFocus" key="yellow" flags="m" />
 		</actionmap>
 
 		<actionmap name="numbers">
