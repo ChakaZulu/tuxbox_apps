@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.43 2002/02/27 22:51:13 field Exp $
+// $Id: epgview.cpp,v 1.44 2002/03/03 11:25:34 chrissi Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.44  2002/03/03 11:25:34  chrissi
+// add FSK output to CEpgData::show
+//
 // Revision 1.43  2002/02/27 22:51:13  field
 // Tasten kaputt gefixt - sollte wieder gehen :)
 //
@@ -439,8 +442,15 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 
 	processTextToArray( epgData.info2.c_str() );
 
+	char _tfsk[5];
+	if (epgData.fsk)
+		sprintf (_tfsk, "FSK: ab %d", epgData.fsk );	
+	else
+		sprintf (_tfsk, "FSK: keine" );	
+	processTextToArray( _tfsk );
+		
 	if (epgData.contentClassification.length()> 0)
-		processTextToArray( "\n"+ GetGenre(epgData.contentClassification[0]) );
+		processTextToArray( GetGenre(epgData.contentClassification[0]) );
 //	processTextToArray( epgData.userClassification.c_str() );
 
 	//show the epg
@@ -584,6 +594,7 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 	epgData.start 	= "";
 	epgData.end 	= "";
 	epgData.done 	= -1;
+	epgData.fsk	= 0;
 	epgData.contentClassification	= "";
 	epgData.userClassification		= "";
 
@@ -654,7 +665,7 @@ void CEpgData::GetEPGData( const string channelName, const unsigned int onid_tsi
 			epgData.userClassification = dp;
 			dp+=strlen(dp)+1;
 			epgData.fsk = *dp++;
-			printf("fsk: %d\n", epgData.fsk);
+			// printf("fsk: %d\n", epgData.fsk);
 
 			epg_times = (sectionsd::sectionsdTime*) dp;
             dp+= sizeof(sectionsd::sectionsdTime);
