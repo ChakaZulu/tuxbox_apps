@@ -1,0 +1,70 @@
+<html>
+	<head>
+		<title>Remote Control</title>
+		<link rel="stylesheet" type="text/css" href="webif_small.css">
+		<script>
+			function key(code)
+			{
+				document.location="/cgi-bin/rc?" + code;
+			}
+		</script>
+	</head>
+	<body>
+	<map id="rc">
+		<area shape="circle" coords="57, 12, 6" href="javascript:key(116)">
+		
+		<area shape="circle" coords="29, 37, 6" href="javascript:key(2)">
+		<area shape="circle" coords="48, 37, 6" href="javascript:key(3)">
+		<area shape="circle" coords="67, 37, 6" href="javascript:key(4)">
+		
+		<area shape="circle" coords="27, 48, 6" href="javascript:key(5)">
+		<area shape="circle" coords="48, 48, 6" href="javascript:key(6)">
+		<area shape="circle" coords="67, 48, 6" href="javascript:key(7)">
+		
+		<area shape="circle" coords="28, 58, 6" href="javascript:key(8)">
+		<area shape="circle" coords="47, 58, 6" href="javascript:key(9)">
+		<area shape="circle" coords="66, 58, 6" href="javascript:key(10)">
+		
+		<area shape="circle" coords="27, 69, 6" href="javascript:key(412)">
+		<area shape="circle" coords="48, 69, 6" href="javascript:key(11)">
+		<area shape="circle" coords="68, 69, 6" href="javascript:key(407)">
+		
+		<area shape="circle" coords="23, 88, 8" href="javascript:key(115)">
+		<area shape="circle" coords="48, 85, 6" href="javascript:key(113)">
+		<area shape="circle" coords="70, 88, 6" href="javascript:key(402)">
+		
+		<area shape="circle" coords="30, 100, 8" href="javascript:key(114)">
+		<area shape="circle" coords="48, 98, 6" href="javascript:key(1)">
+		<area shape="circle" coords="65, 100, 8" href="javascript:key(403)">
+		
+		<area shape="circle" coords="22, 117, 6" href="javascript:key(358)">
+		<area shape="circle" coords="46, 117, 8" href="javascript:key(103)">
+		<area shape="circle" coords="74, 117, 6" href="javascript:key(141)">
+		
+		<area shape="circle" coords="30, 131, 8" href="javascript:key(105)">
+		<area shape="circle" coords="47, 133, 8" href="javascript:key(352)">
+		<area shape="circle" coords="67, 131, 8" href="javascript:key(106)">
+		
+		<area shape="circle" coords="23, 150, 6" href="javascript:key(392)">
+		<area shape="circle" coords="48, 145, 8" href="javascript:key(108)">
+		<area shape="circle" coords="71, 150, 6" href="javascript:key(393)">
+		
+		<area shape="circle" coords="24, 167, 6" href="javascript:key(398)">
+		<area shape="circle" coords="39, 167, 6" href="javascript:key(399)">
+		<area shape="circle" coords="54, 167, 6" href="javascript:key(400)">
+		<area shape="circle" coords="70, 167, 6" href="javascript:key(401)">
+		
+		<area shape="circle" coords="28, 184, 6" href="javascript:key(385)">
+		<area shape="circle" coords="40, 184, 6" href="javascript:key(392)">
+		<area shape="circle" coords="53, 184, 6" href="javascript:key(388)">
+		<area shape="circle" coords="67, 184, 6" href="javascript:key(138)">
+	</map>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td align="center">
+			<img src="rc_small.jpg" border="0" usemap="#rc">
+		</td>
+	</tr>
+	</table>
+	</body>
+</html>

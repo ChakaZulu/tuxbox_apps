@@ -14,7 +14,7 @@
 		<area shape="circle" coords="175, 35, 10" href="javascript:key(116)">
 		
 		<area shape="circle" coords="85, 120, 10" href="javascript:key(2)">
-		<area shape="circle" coords="150, 120, 10" href="javascript.key(3)">
+		<area shape="circle" coords="150, 120, 10" href="javascript:key(3)">
 		<area shape="circle" coords="210, 125 10" href="javascript:key(4)">
 		
 		<area shape="circle" coords="85, 150, 10" href="javascript:key(5)">

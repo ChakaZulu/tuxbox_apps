@@ -3741,10 +3741,16 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 
 static eString showRemoteControl(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
+	eString result;
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
-	return readFile(TEMPLATE_DIR + "remoteControl.tmp");
+	if (pdaScreen == 0)
+		result = readFile(TEMPLATE_DIR + "remoteControl.tmp");
+	else
+		result = readFile(TEMPLATE_DIR + "pdaRemoteControl.tmp");
+
+	return result;
 }
 
 static eString getCurrentVpidApid(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -4428,6 +4434,8 @@ static eString showEditTimerEventWindow(eString request, eString dirpath, eStrin
 	int evType = atoi(eventType.c_str());
 
 	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
+
+	result.strReplace("#CSS#", (pdaScreen == 0) ? "webif.css" : "webif_small.css");
 
 	if (evType & ePlaylistEntry::isRepeating)
 	{
