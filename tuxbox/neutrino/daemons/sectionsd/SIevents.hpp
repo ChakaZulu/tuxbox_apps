@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.17 2002/02/23 14:53:18 McClean Exp $
+// $Id: SIevents.hpp,v 1.18 2002/02/23 20:23:23 McClean Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.18  2002/02/23 20:23:23  McClean
+// fix up
+//
 // Revision 1.17  2002/02/23 14:53:18  McClean
 // add fsk
 //
@@ -365,7 +368,7 @@ class SIevent {
     // Liefert das aktuelle EPG des senders mit der uebergebenen serviceID,
     // bei Fehler ist die serviceID des zurueckgelieferten Events 0
     static SIevent readActualEvent(unsigned short serviceID, unsigned timeoutInSeconds=2);
- 
+
     char getFSK();
  protected:
     int saveXML0(FILE *f) const;
