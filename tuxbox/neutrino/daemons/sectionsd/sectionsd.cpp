@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.67 2001/10/18 21:09:51 field Exp $
+//  $Id: sectionsd.cpp,v 1.68 2001/10/18 23:57:18 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,8 +23,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
-//  Revision 1.67  2001/10/18 21:09:51  field
-//  neuer Befehl fuer EPGPrev/Next
+//  Revision 1.68  2001/10/18 23:57:18  field
+//  Gesamtliste massiv beschleunigt
 //
 //  Revision 1.66  2001/10/10 14:56:30  fnbrd
 //  tsid wird bei nvod mitgeschickt
@@ -1265,7 +1265,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.67 2001/10/18 21:09:51 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.68 2001/10/18 23:57:18 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1761,45 +1761,86 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
   char *liste=evtList;
   lockServices();
   lockEvents();
+/*
 //  for(MySIservicesOrderServiceName::iterator s=mySIservicesOrderServiceName.begin(); s!=mySIservicesOrderServiceName.end(); s++)
   for(MySIservicesOrderUniqueKey::iterator s=mySIservicesOrderUniqueKey.begin(); s!=mySIservicesOrderUniqueKey.end(); s++)
     if(s->second->serviceTyp==serviceTyp1 || (serviceTyp2 && s->second->serviceTyp==serviceTyp2)) {
       SItime zeit(0, 0);
 //      dprintf("Servicename: '%s', Servicetyp: 0x%hhx, uniqueKey: %08x\n", s->second->serviceName.c_str(), s->second->serviceTyp, s->first);
       const SIevent &evt=findActualSIeventForServiceUniqueKey(s->first, zeit);
-      if(evt.serviceID!=0) {
-	if(sendServiceName) {
-          sprintf(liste, "%012llx\n", evt.uniqueKey());
-	  liste+=13;
-          strcpy(liste, s->second->serviceName.c_str());
-	  liste+=strlen(s->second->serviceName.c_str());
-	  *liste='\n';
-	  liste++;
-	  strcpy(liste, evt.name.c_str());
-	  liste+=strlen(evt.name.c_str());
-	  *liste='\n';
-	  liste++;
-	} // if sendServiceName
-	else {
-	  *((unsigned *)liste)=s->first;
-	  liste+=4;
-          *((unsigned long long *)liste)=evt.uniqueKey();
-	  liste+=8;
-	  strcpy(liste, evt.name.c_str());
-	  liste+=strlen(evt.name.c_str());
-	  *liste=0;
-	  liste++;
-	} // else !sendServiceName
-      }
-    } // if ==serviceTyp
-  if(sendServiceName) {
-    *liste=0;
-    liste++;
-  }
-  unlockEvents();
-  unlockServices();
-  dmxSDT.unpause();
-  dmxEIT.unpause();
+*/
+
+// aufgeraumt und umgestellt - sollte VIEEL schneller sein!
+    unsigned    uniqueNow= 0;
+    unsigned    uniqueOld= 0;
+    bool        found_already= false;
+    time_t      azeit=time(NULL);
+    std::string      sname;
+
+    for(MySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey::iterator e=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.begin(); e!=mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.end(); e++)
+    {
+        uniqueNow= SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID);
+
+        if ( uniqueNow != uniqueOld )
+        {
+            found_already= true;
+
+            // new service, check service- type
+            MySIservicesOrderUniqueKey::iterator s=mySIservicesOrderUniqueKey.find(uniqueNow);
+            if(s!=mySIservicesOrderUniqueKey.end())
+                if(s->second->serviceTyp==serviceTyp1 || (serviceTyp2 && s->second->serviceTyp==serviceTyp2))
+                {
+                    sname= s->second->serviceName;
+                    found_already= false;
+                }
+            uniqueOld= uniqueNow;
+        }
+
+        if ( !found_already )
+        {
+            for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
+                if(t->startzeit<=azeit && azeit<=(long)(t->startzeit+t->dauer))
+                {
+                    if(sendServiceName)
+                    {
+                        sprintf(liste, "%012llx\n", e->first->uniqueKey());
+                        liste+=13;
+                        strcpy(liste, sname.c_str());
+                        liste+=strlen(sname.c_str());
+                        *liste='\n';
+                        liste++;
+                        strcpy(liste, e->first->name.c_str());
+                        liste+=strlen(e->first->name.c_str());
+                        *liste='\n';
+                        liste++;
+                    } // if sendServiceName
+                    else
+                    {
+                        *((unsigned *)liste)=uniqueNow;
+                        liste+=4;
+                        *((unsigned long long *)liste)=e->first->uniqueKey();
+                        liste+=8;
+                        strcpy(liste, e->first->name.c_str());
+                        liste+=strlen(e->first->name.c_str());
+                        *liste=0;
+                        liste++;
+                    } // else !sendServiceName
+
+                    found_already= true;
+
+                    break;
+                }
+        }
+    }
+    if(sendServiceName)
+    {
+        *liste=0;
+        liste++;
+    }
+    unlockEvents();
+    unlockServices();
+    dmxSDT.unpause();
+    dmxEIT.unpause();
   struct sectionsd::msgResponseHeader msgResponse;
   msgResponse.dataLength=liste-evtList;
 //  msgResponse.dataLength=strlen(evtList)+1;
@@ -2690,7 +2731,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.67 2001/10/18 21:09:51 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.68 2001/10/18 23:57:18 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
