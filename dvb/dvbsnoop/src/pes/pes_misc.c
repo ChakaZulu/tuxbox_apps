@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.c,v 1.4 2004/02/02 23:34:08 rasc Exp $
+$Id: pes_misc.c,v 1.5 2004/02/04 23:54:37 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pes_misc.c,v 1.4 2004/02/02 23:34:08 rasc Exp $
 
 
 $Log: pes_misc.c,v $
+Revision 1.5  2004/02/04 23:54:37  rasc
+Bugfix:  PTS wrongly displayed!!!
+
 Revision 1.4  2004/02/02 23:34:08  rasc
 - output indent changed to avoid \r  (which sucks on logged output)
 - EBU PES data started (teletext, vps, wss, ...)
@@ -56,39 +59,38 @@ PES stream directory, PES restructured
 
 void  print_xTS_field (int v, const char *str, u_char *b, int bit_offset) 
 {
-  u_long   xTS_32_30;
-  u_long   xTS_29_15;
-  u_long   xTS_14_0;
-  u_long   ul;
-  int      bo = bit_offset;
-  int      v1 = v+1;
+  long long   xTS_32_30;
+  long long   xTS_29_15;
+  long long   xTS_14_0;
+  long long   ull;
+  int         bo = bit_offset;
+  int         v1 = v+1;
 
 
   out_nl (v,"%s:",str);
   indent (+1);
 
-    xTS_32_30 = outBit_Sx_NL (v1,"bit[32..30]: ",	b+bo,  0, 3);
-                outBit_Sx_NL (v1,"marker_bit: ",	b+bo,  3, 1);
-    xTS_29_15 = outBit_Sx_NL (v1,"bit[29..15]: ",	b+bo,  4,15);
-                outBit_Sx_NL (v1,"marker_bit: ",	b+bo, 19, 1);
-    xTS_14_0  = outBit_Sx_NL (v1,"bit[14..0]: ",	b+bo, 20,15);
-                outBit_Sx_NL (v1,"marker_bit: ",	b+bo, 35, 1);
+    xTS_32_30 = outBit_Sx_NL (v1,"bit[32..30]: ",	b, bo+0,  3);
+                outBit_Sx_NL (v1,"marker_bit: ",	b, bo+3,  1);
+    xTS_29_15 = outBit_Sx_NL (v1,"bit[29..15]: ",	b, bo+4, 15);
+                outBit_Sx_NL (v1,"marker_bit: ",	b, bo+19, 1);
+    xTS_14_0  = outBit_Sx_NL (v1,"bit[14..0]: ",	b, bo+20,15);
+                outBit_Sx_NL (v1,"marker_bit: ",	b, bo+35, 1);
 
-    ul = (xTS_32_30<<30) + (xTS_29_15<<15) + xTS_14_0;
-    out_nl (v," ==> %s: %lu (0x%08lx) [cycles of the 90 kHz system clock]",
-		str, ul,ul);
+    ull = (xTS_32_30<<30) + (xTS_29_15<<15) + xTS_14_0;
+    out (v," ==> %s: %llu (0x%08llx)", str, ull,ull);
 
     // -- display time
     {
 	int     h,m,s,u;
-	u_long  p = ul/90;
+	u_long  p = ull/90;
 
 	h=(p/(1000*60*60));
 	m=(p/(1000*60))-(h*60);
 	s=(p/1000)-(h*3600)-(m*60);
 	u=p-(h*1000*60*60)-(m*1000*60)-(s*1000);
 
-	out_nl (v," ==> %s: %d:%02d:%02d.%03d", str, h,m,s,u);
+	out_nl (v,"  [= 90 kHz-Timestamp: %d:%02d:%02d.%03d]", h,m,s,u);
     }
 
   indent (-1);
