@@ -294,6 +294,8 @@ messagebox.yes Yes
 messagebox.no No
 messagebox.cancel Cancel
 
+stringinput.caps caps / no caps
+
 GENRE.MOVIE.0 Spielfilm / Drama
 GENRE.MOVIE.1 detective/thriller
 GENRE.MOVIE.2 adventure/western/war
