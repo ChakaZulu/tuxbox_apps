@@ -98,6 +98,13 @@ int get_caid();
 int get_caver();
 #endif
 
+struct {
+	char         mode;          // 't' TV, 'r' Radio
+	unsigned int tv;
+	unsigned int radio;
+} lastChannel;
+
+
 /**************************************************************/
 /*                                                            */
 /*  functions for new command handling via CZapitClient       */

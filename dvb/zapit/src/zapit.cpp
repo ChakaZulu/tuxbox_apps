@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.84 2002/03/11 17:15:17 Simplex Exp $
+  $Id: zapit.cpp,v 1.85 2002/03/11 20:50:50 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -749,9 +749,8 @@ void save_settings()
 		CBouquetManager::radioChannelIterator cit = g_BouquetMan->radioChannelsFind(curr_onid_sid);
 		if (cit != g_BouquetMan->radioChannelsEnd())
 		{
-			fprintf(channel_settings, "radio\n");
-			fprintf(channel_settings, "%06d\n", (*cit)->chan_nr);
-			fprintf(channel_settings, "%s\n", (*cit)->name.c_str());
+			lastChannel.mode = 'r';
+			lastChannel.radio = (*cit)->chan_nr;
 		}
 	}
 	else
@@ -759,14 +758,16 @@ void save_settings()
 		CBouquetManager::tvChannelIterator cit = g_BouquetMan->tvChannelsFind(curr_onid_sid);
 		if (cit != g_BouquetMan->tvChannelsEnd())
 		{
-			fprintf(channel_settings, "tv\n");
-			fprintf(channel_settings, "%06d\n", (*cit)->chan_nr);
-			fprintf(channel_settings, "%s\n", (*cit)->name.c_str());
+			lastChannel.mode = 't';
+			lastChannel.tv = (*cit)->chan_nr;
 		}
+	}
+	if (fwrite( &lastChannel, sizeof(lastChannel), 1, channel_settings) != 1)
+	{
+		printf("[zapit] couldn't write settings correctly\n");
 	}
 
 	fclose(channel_settings);
-	//printf("Saved settings\n");
 	return;
 }
 
@@ -775,8 +776,6 @@ channel_msg load_settings()
 	FILE *channel_settings;
 	channel_msg output_msg;
 	char *buffer;
-
-	buffer = (char*) malloc(31);
 
 	memset(&output_msg, 0, sizeof(output_msg));
 
@@ -790,17 +789,7 @@ channel_msg load_settings()
 		return output_msg;
 	}
 
-	fscanf(channel_settings, "%s", buffer);
-
-	if (!strcmp(buffer, "tv"))
-	{
-		output_msg.mode = 't';
-	}
-	else if (!strcmp(buffer, "radio"))
-	{
-		output_msg.mode = 'r';
-	}
-	else
+	if (fread(&lastChannel, sizeof(lastChannel), 1, channel_settings) != 1)
 	{
 		printf("[zapit] no valid settings found\n");
 		output_msg.mode = 't';
@@ -808,11 +797,8 @@ channel_msg load_settings()
 		return output_msg;
 	}
 
-	fscanf(channel_settings, "%s", buffer);
-	output_msg.chan_nr = atoi(buffer);
-
-	fscanf(channel_settings, "%s", buffer);
-	strncpy(output_msg.name, buffer, 30);
+	output_msg.mode = lastChannel.mode;
+	output_msg.chan_nr = (Radiomode_on) ? lastChannel.radio : lastChannel.tv;
 
 	fclose(channel_settings);
 
@@ -1789,7 +1775,7 @@ void parse_command()
     case 6:
       status = "006";
       setRadioMode();
-      if (!allchans_radio.empty())
+      if (allchans_radio.empty())
       	status = "-06";
       //printf("zapit is sending back a status-msg %s\n", status);
       if (send(connfd, status, strlen(status),0) == -1) {
@@ -2492,7 +2478,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.84 2002/03/11 17:15:17 Simplex Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.85 2002/03/11 20:50:50 Simplex Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
