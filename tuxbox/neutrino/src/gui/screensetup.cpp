@@ -29,17 +29,17 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <global.h>
-#include <neutrino.h>
+#include <gui/screensetup.h>
+
+#include <gui/color.h>
+#include <gui/widget/messagebox.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <system/settings.h>
 
-#include "color.h"
-#include "screensetup.h"
-
-#include "widget/messagebox.h"
+#include <global.h>
+#include <neutrino.h>
 
 
 CScreenSetup::CScreenSetup()
@@ -47,7 +47,7 @@ CScreenSetup::CScreenSetup()
 	frameBuffer = CFrameBuffer::getInstance();
 }
 
-int CScreenSetup::exec( CMenuTarget* parent, string )
+int CScreenSetup::exec( CMenuTarget* parent, std::string )
 {
 	int res = menu_return::RETURN_REPAINT;
 

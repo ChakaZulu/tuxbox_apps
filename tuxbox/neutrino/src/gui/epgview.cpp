@@ -29,16 +29,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "epgview.h"
+#include <gui/epgview.h>
+
+#include <gui/widget/hintbox.h>
+#include <gui/widget/icons.h>
+#include <gui/widget/messagebox.h>
 
 #include <global.h>
 #include <neutrino.h>
 
-#include <gui/widget/icons.h>
-#include "widget/hintbox.h"
-#include "widget/messagebox.h"
-
-#include "driver/encoding.h"
+#include <driver/encoding.h>
 
 CEpgData::CEpgData()
 {
@@ -106,7 +106,7 @@ void CEpgData::processTextToArray(std::string text) // UTF-8
 			{
 				aktWord += *text_;
 
-				int aktWordWidth = g_Fonts->epg_info2->getRenderWidth(aktWord.c_str());
+				int aktWordWidth = g_Fonts->epg_info2->getRenderWidth(aktWord);
 				if((aktWordWidth+aktWidth)<(ox- 20- 15))
 				{//space ok, add
 					aktWidth += aktWordWidth;
@@ -284,14 +284,14 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 	int pos;
 	std::string text1 = epgData.title;
 	std::string text2 = "";
-	if ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 )
+	if ( g_Fonts->epg_title->getRenderWidth(text1)> 520 )
 	{
 		do
 	    	{
 			pos = text1.find_last_of("[ .]+");
 			if ( pos!=-1 )
 				text1 = text1.substr( 0, pos );
-		} while ( ( pos != -1 ) && ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 ) );
+		} while ( ( pos != -1 ) && ( g_Fonts->epg_title->getRenderWidth(text1)> 520 ) );
 		text2 = epgData.title.substr(text1.length()+ 1, uint(-1) );
 	}
 
@@ -333,15 +333,15 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 	// -- display more screenings on the same channel
 	// -- 2002-05-03 rasc
 	processTextToArray("\n"); // UTF-8
-	processTextToArray(std::string(g_Locale->getText("epgviewer.More_Screenings")) + ":"); // UTF-8
+	processTextToArray(std::string(g_Locale->getText("epgviewer.More_Screenings")) + ':'); // UTF-8
 	FollowScreenings(channel_id, epgData.title);
 
 
 	//show the epg
 	frameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD);
-	g_Fonts->epg_title->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1.c_str(), COL_MENUHEAD);
+	g_Fonts->epg_title->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1, COL_MENUHEAD);
 	if (text2!="")
-		g_Fonts->epg_title->RenderString(sx+10, sy- toph+ 2* topheight+ 3, ox-15, text2.c_str(), COL_MENUHEAD);
+		g_Fonts->epg_title->RenderString(sx+10, sy- toph+ 2* topheight+ 3, ox-15, text2, COL_MENUHEAD);
 
 	//show date-time....
 	frameBuffer->paintBoxRel(sx, sy+oy-botboxheight, ox, botboxheight, COL_MENUHEAD);
@@ -349,10 +349,10 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 	int widthl,widthr;
 	fromto= epg_start+ " - "+ epg_end;
 
-	widthl = g_Fonts->epg_date->getRenderWidth(fromto.c_str());
-	g_Fonts->epg_date->RenderString(sx+40,  sy+oy-3, widthl, fromto.c_str(), COL_MENUHEAD);
-	widthr = g_Fonts->epg_date->getRenderWidth(epg_date.c_str());
-	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epg_date.c_str(), COL_MENUHEAD);
+	widthl = g_Fonts->epg_date->getRenderWidth(fromto);
+	g_Fonts->epg_date->RenderString(sx+40,  sy+oy-3, widthl, fromto, COL_MENUHEAD);
+	widthr = g_Fonts->epg_date->getRenderWidth(epg_date);
+	g_Fonts->epg_date->RenderString(sx+ox-40-widthr,  sy+oy-3, widthr, epg_date, COL_MENUHEAD);
 
 	int showPos = 0;
 	textCount = epgText.size();

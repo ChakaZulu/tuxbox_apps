@@ -21,21 +21,24 @@
 */
 
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <global.h>
-#include <neutrino.h>
+#include <gui/motorcontrol.h>
 
 #include <driver/rcinput.h>
 
-#include "color.h"
-#include "motorcontrol.h"
+#include <gui/color.h>
 
-#include "widget/menue.h"
-#include "widget/messagebox.h"
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
 
-#include "system/settings.h"
+#include <system/settings.h>
+
+#include <global.h>
+#include <neutrino.h>
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
 
 CMotorControl::CMotorControl()
 {
@@ -59,7 +62,7 @@ CMotorControl::CMotorControl()
 	stepDelay = 10;
 }
 
-int CMotorControl::exec(CMenuTarget* parent, string)
+int CMotorControl::exec(CMenuTarget* parent, std::string)
 {
 	uint msg;
 	uint data;

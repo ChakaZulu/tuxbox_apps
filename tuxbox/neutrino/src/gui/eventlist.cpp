@@ -30,13 +30,13 @@
 */
 
 
-#include "eventlist.h"
+#include <gui/eventlist.h>
+
+#include <gui/widget/icons.h>
+#include <gui/widget/messagebox.h>
 
 #include <global.h>
 #include <neutrino.h>
-
-#include <gui/widget/icons.h>
-#include "widget/messagebox.h"
 
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
 
@@ -411,8 +411,7 @@ void EventList::paintItem(unsigned int pos)
 		}
 		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2, duration_str, color, 0, true); // UTF-8
 		// 2nd line
-		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25- 20,
-		        evtlist[liststart+pos].description.c_str(), color);
+		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25- 20, evtlist[liststart+pos].description, color);
 	}
 }
 

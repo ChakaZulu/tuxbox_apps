@@ -33,16 +33,14 @@
 #ifndef __bouquetlist__
 #define __bouquetlist__
 
-#include <string>
-#include <vector>
+#include <gui/channellist.h>
 
 #include <driver/framebuffer.h>
 #include <system/lastchannel.h>
 
-#include "channellist.h"
+#include <string>
+#include <vector>
 
-
-using namespace std;
 
 typedef enum bouquetSwitchMode
 {
@@ -101,7 +99,7 @@ class CBouquetList
 		CBouquetList();
 		~CBouquetList();
 
-		vector<CBouquet*>	Bouquets;
+		std::vector<CBouquet*>	Bouquets;
 
 		CChannelList* orgChannelList;
 		CBouquet* addBouquet(const std::string& name, int BouquetKey=-1, bool locked=false );

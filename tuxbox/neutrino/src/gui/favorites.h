@@ -24,11 +24,9 @@
 #ifndef __favorites__
 #define __favorites__
 
+#include <gui/widget/menue.h>
+
 #include <string>
-
-#include "widget/menue.h"
-
-using namespace std;
 
 
 //
@@ -42,7 +40,7 @@ class CFavorites : public CMenuTarget
 	public:
 
 		int  addChannelToFavorites ();
-		int  exec( CMenuTarget* parent, string actionKey );
+		int  exec( CMenuTarget* parent, std::string actionKey);
 };
 
 

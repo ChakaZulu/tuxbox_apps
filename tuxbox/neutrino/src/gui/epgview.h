@@ -33,20 +33,20 @@
 #ifndef __epgview__
 #define __epgview__
 
-#include <vector>
-#include <string>
-
-#include <sectionsdclient/sectionsdclient.h>
-
 #include <driver/framebuffer.h>
 #include <driver/rcinput.h>
 #include <driver/fontrenderer.h>
 #include <system/settings.h>
 
-#include "color.h"
-#define BIG_FONT_FAKTOR 1.5
+#include <gui/color.h>
 
-using namespace std;
+#include <sectionsdclient/sectionsdclient.h>
+
+#include <vector>
+#include <string>
+
+
+#define BIG_FONT_FAKTOR 1.5
 
 class CEpgData
 {
@@ -55,9 +55,9 @@ class CEpgData
 		CChannelEventList	evtlist;
 		CEPGData		epgData;
 
-		string 			epg_date;
-		string 			epg_start;
-		string 			epg_end;
+		std::string 		epg_date;
+		std::string 		epg_start;
+		std::string 		epg_end;
 		int			epg_done;
 
 		unsigned long long	prev_id;
@@ -68,7 +68,7 @@ class CEpgData
 		int			ox, oy, sx, sy, toph;
 		int			emptyLineCount, info1_lines;
 		int         		textCount;
-		vector<string>		epgText;
+		std::vector<std::string> epgText;
 		int			topheight,topboxheight;
 		int			botheight,botboxheight;
 		int			medlineheight,medlinecount;
@@ -76,10 +76,10 @@ class CEpgData
 
 		void GetEPGData(const t_channel_id channel_id, unsigned long long id, time_t* startzeit );
 		void GetPrevNextEPGData( unsigned long long id, time_t* startzeit );
-		void addTextToArray( string text );
-		void processTextToArray( string text );
+		void addTextToArray( std::string text );
+		void processTextToArray( std::string text );
 		void showText( int startPos, int ypos );
-		int FollowScreenings(const t_channel_id channel_id, string title);
+		int FollowScreenings(const t_channel_id channel_id, std::string title);
 		void showTimerEventBar(bool show);
 
 	public:

@@ -30,20 +30,21 @@
 */
 
 
-#include <global.h>
-#include <neutrino.h>
+#include <gui/bouquetlist.h>
+
+#include <gui/color.h>
+#include <gui/eventlist.h>
+#include <gui/infoviewer.h>
+
+#include <gui/widget/menue.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
 #include <system/settings.h>
 
-#include "widget/menue.h"
-
-#include "bouquetlist.h"
-#include "color.h"
-#include "eventlist.h"
-#include "infoviewer.h"
+#include <global.h>
+#include <neutrino.h>
 
 
 CBouquetList::CBouquetList()

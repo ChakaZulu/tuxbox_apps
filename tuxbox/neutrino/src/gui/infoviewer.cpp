@@ -29,22 +29,22 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <sys/timeb.h>
-#include <time.h>
-
-#include <global.h>
-#include <neutrino.h>
-
-#include "infoviewer.h"
+#include <gui/infoviewer.h>
 
 #include <gui/widget/icons.h>
-
-#include "widget/hintbox.h"
+#include <gui/widget/hintbox.h>
 
 #include <daemonc/remotecontrol.h>
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
+#include <global.h>
+#include <neutrino.h>
+
 #include <string>
+
+#include <sys/timeb.h>
+#include <time.h>
+
 
 #define COL_INFOBAR_BUTTONS			COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
@@ -448,7 +448,7 @@ void CInfoViewer::showSubchan()
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
-	string subChannelName = "";
+	std::string subChannelName = "";
 
 	if ( g_RemoteControl->selected_subchannel >= 0)
 		subChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
@@ -698,7 +698,7 @@ void CInfoViewer::showButton_SubServices()
 {
 	if ( g_RemoteControl->subChannels.size()> 0 )
 	{
-		// gelbe Taste für NVODs / Subservices
+		// yellow button for NVODs / Subservices
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, BoxEndX- ICON_OFFSET- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
 		if ( g_RemoteControl->are_subchannels )
@@ -829,7 +829,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 		if ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::not_broadcast ) ||
 			 ( ( calledFromEvent ) && !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_next | CSectionsdClient::epgflags::has_current ) ) ) )
 		{
-			// kein EPG verfügbar
+			// no EPG available
 			ChanInfoY += height;
 			frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
 			g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime?"infoviewer.noepg":"infoviewer.waittime"), COL_INFOBAR, 0, true); // UTF-8
@@ -845,7 +845,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 			if ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) && ( !( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current )) )
 			{
-				// spätere Events da, aber kein aktuelles...
+				// there are later events available - yet no current
 				g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText("infoviewer.nocurrent"), COL_INFOBAR, 0, true); // UTF-8
 
 				ChanInfoY += height;
@@ -881,7 +881,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 void CInfoViewer::showButton_Audio()
 {
-/*        string  to_compare= getActiveChannelID();
+/*        std::string  to_compare= getActiveChannelID();
 
         if ( strcmp(g_RemoteControl->audio_chans.name, to_compare.c_str() )== 0 )
         {
@@ -896,7 +896,7 @@ void CInfoViewer::showButton_Audio()
                         int ChanNameY = BoxStartY + ChanHeight + 10;
 
 
-                        string  disp_text;
+                        std::string  disp_text;
                         if ( ( g_RemoteControl->ecmpid == invalid_ecmpid_found ) )
 						{
                                 disp_text= g_Locale->getText("infoviewer.cantdecode");
@@ -917,7 +917,7 @@ void CInfoViewer::showButton_Audio()
                         KillShowEPG = true;
                 };
 */
-	// grün, wenn mehrere APIDs
+	// green, in case of several APIDs
 	uint count = g_RemoteControl->current_PIDs.APIDs.size();
 	if ( count > 1 )
 	{

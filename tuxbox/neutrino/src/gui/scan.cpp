@@ -30,18 +30,20 @@
 */
 
 
-#include <global.h>
-#include <neutrino.h>
+#include <gui/scan.h>
 
 #include <driver/rcinput.h>
 
-#include "color.h"
-#include "scan.h"
+#include <gui/color.h>
 
-#include "widget/menue.h"
-#include "widget/messagebox.h"
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
 
-#include "system/settings.h"
+#include <system/settings.h>
+
+#include <global.h>
+#include <neutrino.h>
+
 
 CScanTs::CScanTs()
 {
@@ -59,7 +61,7 @@ CScanTs::CScanTs()
 	found_transponder = 0;
 }
 
-int CScanTs::exec(CMenuTarget* parent, string)
+int CScanTs::exec(CMenuTarget* parent, std::string)
 {
 	diseqc_t diseqcType = NO_DISEQC;
 	uint msg = 0;

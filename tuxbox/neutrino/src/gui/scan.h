@@ -32,13 +32,12 @@
 #ifndef __scants__
 #define __scants__
 
+#include <gui/widget/menue.h>
+
+#include <driver/framebuffer.h>
+
 #include <string>
 
-#include "driver/framebuffer.h"
-
-#include "widget/menue.h"
-
-using namespace std;
 
 class CScanTs : public CMenuTarget
 {
@@ -75,6 +74,6 @@ class CScanTs : public CMenuTarget
 	public:
 		CScanTs();
 		void hide();
-		int exec(CMenuTarget* parent, string actionKey);
+		int exec(CMenuTarget* parent, std::string actionKey);
 };
 #endif

@@ -33,17 +33,16 @@
 #ifndef __motorcontrol__
 #define __motorcontrol__
 
+#include <gui/widget/menue.h>
+
+#include <driver/framebuffer.h>
+
 #include <string>
 
-#include "driver/framebuffer.h"
-
-#include "widget/menue.h"
 
 #define STEP_MODE_OFF 0
 #define STEP_MODE_ON 1 
 #define STEP_MODE_TIMED 2       
-
-using namespace std;
 
 class CMotorControl : public CMenuTarget
 {
@@ -81,7 +80,7 @@ class CMotorControl : public CMenuTarget
 
 		CMotorControl();
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 };
 
 
