@@ -69,7 +69,6 @@ a:hover {
 
 
 #topnavi {
-	padding-left: 60px;
 	background-color: #D9E0E7;
 	border-bottom: 1px solid #98A4B6;
 	border-top: 1px solid #98A4B6;
@@ -78,9 +77,8 @@ a:hover {
 }
 
 #channavi {
-	padding-left: 60px;
 	background-color: #D9E0E7;
-	border-bottom: 1px solid #98A4B6;
+	border-bottom: 0px solid #98A4B6;
 	border-top: 1px solid #98A4B6;
 	border-left: 0px solid #98A4B6;
 	border-right: 0px solid #98A4B6;
@@ -123,10 +121,6 @@ a:hover {
 	text-align: left;
 	background-image: url(mepg_grad.png);
 	background-repeat: repeat-x;
-}
-
-#megatable {
-	border: 1px solid #98A4B6;
 }
 
 

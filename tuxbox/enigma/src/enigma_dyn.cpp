@@ -1162,7 +1162,7 @@ static eString getMute()
 {
 	std::stringstream result;
 
-	result << "<a href=\"javascript:Mute(" << eAVSwitch::getInstance()->getMute() << ")\">";
+	result << "<a href=\"javascript:toggleMute(" << eAVSwitch::getInstance()->getMute() << ")\">";
 	if (eAVSwitch::getInstance()->getMute())
 		result << "<img src=\"speak_off.gif\" border=0>";
 	else
