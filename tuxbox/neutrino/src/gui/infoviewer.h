@@ -78,7 +78,7 @@ class CInfoViewer
 
 		static void * InfoViewerThread (void *arg);
         static void * LangViewerThread (void *arg);
-		bool getEPGData( string channelName, unsigned int onid_tsid );
+        bool getEPGData( string channelName, unsigned int onid_tsid );
 		void showData();
         void showWarte();
         void showButtons();

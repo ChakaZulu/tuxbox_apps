@@ -172,6 +172,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                         {
 //                                            printf("%s \n", apid_return_buf.apids[count].desc);
                                             strcpy(RemoteControl->apids.apid_names[count], apid_return_buf.apids[count].desc);
+                                            RemoteControl->apids.apid_ctags[count]= apid_return_buf.apids[count].component_tag;
                                         }
 
                                         pthread_cond_signal( &g_InfoViewer->lang_cond );

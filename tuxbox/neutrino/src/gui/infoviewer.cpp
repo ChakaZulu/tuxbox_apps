@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.27 2001/09/23 21:34:07 rasc Exp $
+// $Id: infoviewer.cpp,v 1.28 2001/09/26 09:57:02 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.28  2001/09/26 09:57:02  field
+// Tontraeger-Auswahl ok (bei allen Chans. auf denen EPG geht)
+//
 // Revision 1.27  2001/09/23 21:34:07  rasc
 // - LIFObuffer Module, pushbackKey fuer RCInput,
 // - In einige Helper und widget-Module eingebracht
@@ -457,6 +460,7 @@ char* copyStringto( char* from, char* to, int len)
 	return from;
 }
 
+
 bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 {
 	#ifdef EPG_SECTIONSD
@@ -606,7 +610,7 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
         	}
         }
 
-//    	printf("exit epg-get\n\n");
+    	printf("exit epg-get\n\n");
     	close(sock_fd);
     	return retval;
 	#endif

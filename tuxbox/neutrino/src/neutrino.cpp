@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.45 2001/09/23 21:34:07 rasc Exp $
+        $Id: neutrino.cpp,v 1.46 2001/09/26 09:57:02 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.46  2001/09/26 09:57:02  field
+  Tontraeger-Auswahl ok (bei allen Chans. auf denen EPG geht)
+
   Revision 1.45  2001/09/23 21:34:07  rasc
   - LIFObuffer Module, pushbackKey fuer RCInput,
   - In einige Helper und widget-Module eingebracht
@@ -935,6 +938,17 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 }
 
+static char* copyStringto(const char* from, char* to, int len, char delim)
+{
+	const char *fromend=from+len;
+	while(*from!=delim && from<fromend && *from)
+	{
+		*(to++)=*(from++);
+	}
+	*to=0;
+	return (char *)++from;
+}
+
 void CNeutrinoApp::SelectAPID()
 {
     g_RemoteControl->CopyAPIDs();
@@ -952,6 +966,93 @@ void CNeutrinoApp::SelectAPID()
 
         APIDSelector.addItem( new CMenuForwarder("menu.back") );
 	    APIDSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+        bool    has_unresolved_ctags= false;
+        for(int count=0;count<g_RemoteControl->apid_info.count_apids;count++)
+        {
+            if ( g_RemoteControl->apid_info.apid_ctags[count] != -1 )
+            {
+                has_unresolved_ctags= true;
+                break;
+            }
+        }
+
+        unsigned int onid_tsid = channelList->getActiveChannelOnid_sid();
+
+        if ( has_unresolved_ctags && ( onid_tsid != 0 ) )
+        {
+
+            int sock_fd;
+        	SAI servaddr;
+        	char rip[]="127.0.0.1";
+        	bool retval = false;
+
+        	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        	memset(&servaddr,0,sizeof(servaddr));
+        	servaddr.sin_family=AF_INET;
+        	servaddr.sin_port=htons(sectionsd::portNumber);
+        	inet_pton(AF_INET, rip, &servaddr.sin_addr);
+
+        	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+        	{
+        		perror("Couldn't connect to server!");
+        	}
+            else
+            {
+                sectionsd::msgRequestHeader req;
+                req.version = 2;
+                req.command = sectionsd::CurrentComponentTagsChannelID;
+                req.dataLength = 4;
+                write(sock_fd,&req,sizeof(req));
+
+                write(sock_fd, &onid_tsid, sizeof(onid_tsid));
+                printf("query ComponentTags for onid_tsid >%x<\n", onid_tsid );
+
+                sectionsd::msgResponseHeader resp;
+                memset(&resp, 0, sizeof(resp));
+
+                read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
+
+                int nBufSize = resp.dataLength;
+                if(nBufSize>0)
+                {
+                    char TagIDs[10];
+                    char TagText[100];
+                    unsigned char componentTag, componentType, streamContent;
+
+                    char* pData = new char[nBufSize+1] ;
+                    read(sock_fd, pData, nBufSize);
+
+                    char *actPos=pData;
+
+                    while(*actPos && actPos<pData+resp.dataLength)
+                    {
+                        *TagIDs=0;
+                        actPos = copyStringto( actPos, TagIDs, sizeof(TagIDs), '\n');
+                        *TagText=0;
+                        actPos = copyStringto( actPos, TagText, sizeof(TagText), '\n');
+
+
+                        sscanf(TagIDs, "%02hhx %02hhx %02hhx", &componentTag, &componentType, &streamContent);
+                        // printf("%s - %d - %s\n", TagIDs, componentTag, TagText);
+
+                        for(int count=0;count<g_RemoteControl->apid_info.count_apids;count++)
+                        {
+                            if ( g_RemoteControl->apid_info.apid_ctags[count] == componentTag )
+                            {
+                                strcpy(g_RemoteControl->apid_info.apid_names[count], TagText);
+                                g_RemoteControl->apid_info.apid_ctags[count] = -1;
+                                break;
+                            }
+                        }
+                    }
+
+                    delete[] pData;
+                    retval = true;
+                }
+                close(sock_fd);
+            }
+        }
 
         for(int count=0;count<g_RemoteControl->apid_info.count_apids;count++)
         {
@@ -1350,7 +1451,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.45 2001/09/23 21:34:07 rasc Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.46 2001/09/26 09:57:02 field Exp $\n\n");
     tzset();
 
     initGlobals();

@@ -38,7 +38,8 @@ struct st_audio_info
 {
     char    name[100];
     ushort  count_apids;
-    char    apid_names[5][30];
+    char    apid_names[10][30];
+    int     apid_ctags[10];
     int     selected;
 };
 

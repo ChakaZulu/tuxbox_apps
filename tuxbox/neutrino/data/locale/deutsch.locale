@@ -116,7 +116,7 @@ infoviewer.epgnotload EPG noch nicht geladen...
 infoviewer.epgwait Warte auf EPG...
 infoviewer.streaminfo Stream-Info
 infoviewer.eventlist Ereignis-Liste
-infoviewer.languages Sprachauswahl
+infoviewer.languages Tonauswahl
 infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar
 
 epgviewer.notfound keine EPG-Informationen gefunden
