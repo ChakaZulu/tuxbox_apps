@@ -51,7 +51,7 @@ mainsettings.keybinding namjestiti tipku
 mainsettings.misc namjestiti razne stvari
 mainsettings.scan namjestiti trazenja kanala
 
-mp3picsettings.general unset
+mp3picsettings.general mp3 igrac / promatrac slika
 
 miscsettings.head namjestiti razne stvari
 miscsettings.shutdown_real pripravnost
@@ -382,6 +382,7 @@ flashupdate.titlewriteflash pisati fles
 flashupdate.actionwriteflash pise se fles
 flashupdate.flashreadyreboot Imidz je uspjesno flesovan.\nVas dbox2 startuje sada ponovno.
 flashupdate.reallyflashmtd Hocete li stvarno nastaviti flesovanje?\n\nAko se desi greska ili imidz nije\nu redu, onda vas dbox2 nece vise raditi.\n\nIme imidza: %s\nPozicija: %s
+flashupdate.wrongbase unset
 
 bouqueteditor.name namjestiti buket
 bouqueteditor.delete izbrisati
@@ -663,19 +664,19 @@ mp3player.keylevel promijeniti tipke
 mp3player.fastforward brzo naprijed
 mp3player.pause pausa
 mp3player.rewind brzo natrag
-mp3player.artist_title unset
-mp3player.title_artist unset
-mp3player.display_order unset
-mp3player.follow unset
+mp3player.artist_title pjevac, pjesma
+mp3player.title_artist pjesma, pjevac
+mp3player.display_order redoslijed
+mp3player.follow izabjere ovu pjesmu
 
 filebrowser.head pretrazivac datoteka
-filebrowser.filter.active unset
-filebrowser.filter.inactive unset
+filebrowser.filter.active upaljen filter
+filebrowser.filter.inactive ugasen filter
 filebrowser.select izabrati
 filebrowser.mark oznaciti
 filebrowser.scan pretrazi direktorije
-filebrowser.sort.name unset
-filebrowser.sort.date unset
+filebrowser.sort.name (ime datoteke)
+filebrowser.sort.date (datum)
 
 nfs.mount montira nfs direktorij
 nfs.ip ip nfs servera

@@ -382,6 +382,7 @@ flashupdate.titlewriteflash Flash schriibe
 flashupdate.actionwriteflash schrieb grad s'flash 
 flashupdate.flashreadyreboot S'Image isch erfolgriich g'flasht.\nd'DBox wird jetz neu g'starded. 
 flashupdate.reallyflashmtd Willsch dä Flashvorgang wirklich mache?\n\nFalls es e'Fehler gitt odder s'Image nidd\nfunktionfäähig isch, wird d'DBox nümmi boote.\n\nImagename: %s\nZiel: %s 
+flashupdate.wrongbase Die Basisimage Version weicht ab, bitte\nzuerst neues Basisimage installieren!
 
 bouqueteditor.name Bouquet-Verwaltig 
 bouqueteditor.delete Lösche 

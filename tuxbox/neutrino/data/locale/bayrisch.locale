@@ -382,6 +382,7 @@ flashupdate.titlewriteflash Flash schreim
 flashupdate.actionwriteflash schreib in flash
 flashupdate.flashreadyreboot Des Imag is gflasht worn.\nJetz start ma de Box nei.
 flashupdate.reallyflashmtd Woins echt flashen?\n\nWann was schiaflaft oder des Image hi is\wer de Box nimma startn.\n\nImagenama: %s\nZiel: %s
+flashupdate.wrongbase unset
 
 bouqueteditor.name Bouquets verwoitn
 bouqueteditor.delete Wegmacha

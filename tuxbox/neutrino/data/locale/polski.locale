@@ -382,6 +382,7 @@ flashupdate.titlewriteflash Zapis Flasha
 flashupdate.actionwriteflash zapis
 flashupdate.flashreadyreboot Image prawidlowo zapisany.\nDBox zresetuje sie.
 flashupdate.reallyflashmtd Napewno chcesz uaktualnic?\n\nJezeli wystapi blad lub plik image jest\nwadliwy, Dbox nie uruchomi sie.\n\nNazwa Image: %s\nCel: %s
+flashupdate.wrongbase unset
 
 bouqueteditor.name Edytor Bukietow
 bouqueteditor.delete Kasuj
