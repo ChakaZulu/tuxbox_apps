@@ -8,6 +8,7 @@ mainmenu.tvmode TELEVIZYON
 mainmenu.radiomode RADIO
 mainmenu.scartmode SCART
 mainmenu.games OYUNLAR
+mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown KAPAT
 mainmenu.settings AYARLAR
 mainmenu.service Service

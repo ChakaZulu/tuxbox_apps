@@ -8,6 +8,7 @@ mainmenu.tvmode TV-Mode
 mainmenu.radiomode Radio-Mode
 mainmenu.scartmode Scart-Mode
 mainmenu.games Games
+mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Shutdown
 mainmenu.settings Settings
 mainmenu.service Service

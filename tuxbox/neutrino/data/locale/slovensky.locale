@@ -8,6 +8,7 @@ mainmenu.tvmode TV-modus
 mainmenu.radiomode Radio-modus
 mainmenu.scartmode Scart-modus
 mainmenu.games Hry
+mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown vypnut dbox
 mainmenu.settings nastavenia
 mainmenu.service service menu
