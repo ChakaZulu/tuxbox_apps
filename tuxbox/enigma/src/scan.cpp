@@ -719,11 +719,14 @@ int tsScan::eventHandler(const eWidgetEvent &event)
 void tsScan::updateTime()
 {
 		scantime++;
-		int sek = (int) (( (double) scantime / tpScanned) * tpLeft);
-		if (sek > 59)
-			timeleft->setText(eString().sprintf(_("%02i minutes and %02i seconds left"), sek / 60, sek % 60));
-		else
-			timeleft->setText(eString().sprintf(_("%02i seconds left"), sek ));
+		if ( tpScanned )
+		{
+			int sek = (int) (( (double) scantime / tpScanned) * tpLeft);
+			if (sek > 59)
+				timeleft->setText(eString().sprintf(_("%02i minutes and %02i seconds left"), sek / 60, sek % 60));
+			else
+				timeleft->setText(eString().sprintf(_("%02i seconds left"), sek ));
+		}
 }
 
 void tsScan::serviceFound(const eServiceReferenceDVB &service, bool newService)
