@@ -63,12 +63,15 @@ void rnd_gol(field f) {
 		for (x=0; x<X_DOTS; x++) {
 			f[y][x] = random() & 1;
 		}
-	printf("init done\n");
 }
 
 void gol(field from, field to) {
 	int x, y, count, x1, x2, y1, y2;
 
+	y = random() % Y_DOTS;
+	x = random() % X_DOTS;
+	//printf("x=%i y=%i n=%i\n", x, y, from[y][x]);
+	from[y][x] = 1;
 	for (y=0; y<Y_DOTS; y++)
 		for (x=0; x<X_DOTS; x++) {
 			//     x1 x  x2
@@ -107,7 +110,7 @@ void draw_gol(field f, screen_t s) {
 	for (y=0; y<LCD_ROWS; y++) {
 		for (x=0; x<LCD_COLS; x++) {
 			pix = 0;
-			for (yy=0; yy<8; yy++) {
+			for (yy=7; yy>=0; yy--) {
 				pix = (pix<<1) + f[8*y+yy][x];
 			}
 			s[y*LCD_COLS+x] = pix;
@@ -118,6 +121,7 @@ void draw_gol(field f, screen_t s) {
 int main(int argc, char *args[]) {
 	screen_t screen;
 	field *f1, *f2, *tmp;
+	int x, y;
 
 	f1 = malloc(sizeof(field));
 	f2 = malloc(sizeof(field));
