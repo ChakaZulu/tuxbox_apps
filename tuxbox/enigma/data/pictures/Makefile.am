@@ -1,4 +1,4 @@
-SUBDIRS = mainmenu chk_stone chk_silver chk_v2 neutrino shortcut
+SUBDIRS = mainmenu chk_stone chk_silver chk_v2 neutrino shortcut countries
 
 installdir = $(DATADIR)/enigma/pictures
 
@@ -10,5 +10,6 @@ install_DATA = \
 	crypt_on_small.png mute-fs8.png icon-warning-fs8.png icon-error-fs8.png \
 	icon-info-fs8.png icon-question-fs8.png volumeslider-fs8.png \
 	folder-fs8.png clock-fs8.png clock_rec-fs8.png event_ok-fs8.png \
-	event_failed-fs8.png dreamlogo-fs8.png
+	event_failed-fs8.png dreamlogo-fs8.png zahlen_w.png \
+	scan.mvi diseqc_0-fs8.png diseqc_1-fs8.png diseqc_2-fs8.png 
 

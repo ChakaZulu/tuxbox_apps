@@ -8,8 +8,7 @@
 	<fonts>
 		<font file="bluehigh.ttf" name="Blue.Regular" /> <!-- Found at dafont.com freeware -->
 		<font file="bluebold.ttf" name="Blue.Bold" /> <!-- Found at dafont.com freeware -->
-		<font file="v5loxicar.ttf" name="v5Robusta" /> <!-- Found at dafont.com freeware -->
-		<font file="v5loxical.ttf" name="v5Lixera" /> <!-- Found at dafont.com freeware -->
+		<font file="pakenham.ttf" name="lcd" /> <!-- Found at dafont.com freeware -->
 	</fonts>
 
 	<fontalias>
@@ -29,11 +28,11 @@
 		<map name="eventview.time" font="Blue.Regular" size="30" />
 		<map name="eventview.channel" font="Blue.Regular" size="30" />
 
-		<map name="lcd.menu.title" font="v5Robusta" size="22" />
-		<map name="lcd.menu.element" font="Blue.Regular" size="22" />
+		<map name="lcd.menu.title" font="lcd" size="24" />
+		<map name="lcd.menu.element" font="lcd" size="26" />
 
-		<map name="lcd.main.service_name" font="v5Robusta" size="22" />
-		<map name="lcd.main.clock" font="v5Robusta" size="22" />
+		<map name="lcd.main.service_name" font="lcd" size="30" />
+		<map name="lcd.main.clock" font="lcd" size="28" />
 	</fontalias>
 
 	<colors>
@@ -407,12 +406,12 @@
 	
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
-			<eProgress position="7:2" size="65:6" name="progress_bar" foregroundColor="0" leftColor="0" rightColor="255" border="1" />
-			<eLabel position="0:0" size="120:11" pixmap="lcd_enigma_logo" />
-			<eLabel position="2:10" size="120:40" font="lcd.main.service_name" wrap="on" name="service_name" vcenter="on" />
-			<eLabel position="74:46" size="46:18" font="lcd.main.clock" name="clock" align="right" />
-			<eLabel position="0:53" size="11:13" pixmap="speaker" />
-			<eProgress position="12:56" size="60:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+			<eLabel position="0:0" size="120:45" font="lcd.main.service_name" wrap="on" name="service_name" />
+			<eLabel position="74:44" size="46:23" font="lcd.main.clock" name="clock" align="right" />
+			<eLabel position="0:53" size="9:13" pixmap="speaker" />
+			<eLabel position="0:46" size="7:7" pixmap="lcd-clock" />
+			<eProgress position="9:56" size="64:8" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+			<eProgress position="9:46" size="64:9" name="progress_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
 		</eZapLCDMain>
 	</object> 
 

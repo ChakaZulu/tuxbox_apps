@@ -36,6 +36,7 @@ data/pictures/chk_stone/mainmenu/Makefile
 data/pictures/chk_silver/Makefile
 data/pictures/chk_silver/mainmenu/Makefile
 data/pictures/chk_v2/Makefile
+data/pictures/countries/Makefile
 data/pictures/neutrino/Makefile
 data/pictures/mainmenu/Makefile
 data/pictures/shortcut/Makefile
