@@ -724,7 +724,7 @@ void CTimerList::modifyTimer()
 		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apid", true, m_apid, timerSettings_apid );
 		timerSettings.addItem( m5);
 	}
-	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, "", this, "modifytimer") );
+	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, NULL, this, "modifytimer") );
 
 	if(timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
 		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
@@ -783,27 +783,27 @@ void CTimerList::newTimer()
 		CZapitClient::BouquetChannelList::iterator channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
-			if (channel == subchannellist.begin())
-				mctv->addItem(new CMenuForwarder(bouquet->name, true, "",mwtv));
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwtv->addItem(new CMenuForwarder(channel->name, true, "", this, string("SCT:")+string(cChannelId)+string(channel->name)));
+			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, string("SCT:")+string(cChannelId)+string(channel->name)));
 		}
+		if (subchannellist.size()>0)
+			mctv->addItem(new CMenuForwarder(bouquet->name, true, NULL, mwtv));
 		subchannellist.clear();
 		zapit.getBouquetChannels(bouquet->bouquet_nr,subchannellist,CZapitClient::MODE_RADIO);
 		channel = subchannellist.begin();
 		for(; channel != subchannellist.end();channel++)
 		{
-			if (channel == subchannellist.begin())
-				mcradio->addItem(new CMenuForwarder(bouquet->name, true, "",mwradio));
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwradio->addItem(new CMenuForwarder(channel->name, true, "", this, string("SCR:")+string(cChannelId)+string(channel->name)));
+			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, string("SCR:")+string(cChannelId)+string(channel->name)));
 		}
+		if (subchannellist.size()>0)
+			mcradio->addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));
 	}
 	CMenuWidget* mm = new CMenuWidget("timerlist.modeselect", "settings.raw");
-	mm->addItem(new CMenuForwarder("timerlist.modetv", true, "", mctv));
-	mm->addItem(new CMenuForwarder("timerlist.moderadio", true, "", mcradio));
+	mm->addItem(new CMenuForwarder("timerlist.modetv", true, NULL, mctv));
+	mm->addItem(new CMenuForwarder("timerlist.moderadio", true, NULL, mcradio));
 	strcpy(timerNew_channel_name,"---");
 	CMenuForwarder* m5 = new CMenuForwarder("timerlist.channel", false, timerNew_channel_name, mm); 
 
@@ -813,7 +813,7 @@ void CTimerList::newTimer()
 
 	CStringInput*  timerSettings_msg= new CStringInputSMS("timerlist.message", timerNew.message, 30,"","",
 																			"abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/");
-	CMenuForwarder *m7 = new CMenuForwarder("timerlist.message", false, "", timerSettings_msg );
+	CMenuForwarder *m7 = new CMenuForwarder("timerlist.message", false, NULL, timerSettings_msg );
 
 	CTimerListNewNotifier* notifier2 = new CTimerListNewNotifier(&((int)timerNew.eventType ),
 																					&timerNew.stopTime,m2,m5,m6,m7,
@@ -835,7 +835,7 @@ void CTimerList::newTimer()
 	timerSettings.addItem( m5);
 	timerSettings.addItem( m6);
 	timerSettings.addItem( m7);
-	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, "", this, "newtimer") );
+	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, NULL, this, "newtimer") );
 	strcpy(timerSettings_stopTime->getValue (), "                ");
 	if(timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
 		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
