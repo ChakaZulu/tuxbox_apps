@@ -174,7 +174,7 @@ typedef struct
 typedef struct
 {
   FILE	*stream;
-  char	type[64];
+  char	type[64+1];
 } STREAM_TYPE;
 
 typedef struct
