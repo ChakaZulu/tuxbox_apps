@@ -51,6 +51,7 @@
 #include "widget/menue.h"
 #include "widget/progresswindow.h"
 
+#define VLC_URI "vlc://"
 
 using namespace std;
 
@@ -110,6 +111,8 @@ class CFileBrowser
 		CFileList		filelist;
 		CFileList		selected_filelist;
 		bool			readDir(string dirname);
+		bool			readDir_vlc();
+		bool			readDir_std();
 		void			addRecursiveDir(CFileList * re_filelist, string path, bool bRootCall, CProgressWindow * progress = NULL);
 
 		unsigned int		selected;
@@ -121,6 +124,7 @@ class CFileBrowser
 		int			smode;		// Sortierungsart
 
 		string			name;
+		std::string		m_baseurl;
 		int 			width;
 		int 			height;
 		bool			use_filter;
@@ -151,6 +155,7 @@ class CFileBrowser
 		CFile		*getSelectedFile();
 		CFileList	*getSelectedFiles();
 		string getCurrentDir() {return Path;}
+//		size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data);
 };
 
 

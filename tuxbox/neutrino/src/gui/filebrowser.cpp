@@ -34,8 +34,10 @@
 #endif
 
 #include "filebrowser.h"
+#include "widget/messagebox.h"
 
 #include <algorithm>
+#include <iostream>
 #include <global.h>
 #include <neutrino.h>
 
@@ -44,6 +46,9 @@
 #include <dirent.h>
 
 #include <sys/stat.h>
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
 
 #ifdef __USE_FILE_OFFSET64
 typedef struct dirent64 dirent_struct;
@@ -56,7 +61,13 @@ typedef struct dirent dirent_struct;
 #endif
 
 //------------------------------------------------------------------------
-
+size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
+{
+	std::string* pStr = (std::string*) data;
+	*pStr += (char*) ptr;
+	return size*nmemb;
+}
+//------------------------------------------------------------------------
 int CFile::getType()
 {
 	if(S_ISDIR(Mode))
@@ -88,11 +99,10 @@ std::string CFile::getFileName()		// return name.extension or folder name withou
 	int namepos = Name.rfind("/");
 	if( namepos >= 0)
 	{
-		return Name.substr(namepos + 1, Name.length() - namepos);
+		return Name.substr(namepos + 1);
 	}
 	else
 		return Name;
-	
 }
 
 //------------------------------------------------------------------------
@@ -105,7 +115,8 @@ std::string CFile::getPath()			// return complete path including trailing /
 	if((pos = Name.rfind("/")) > 1)
 	{
 		tpath = Name.substr(0,pos+1);
-	}else
+	}
+	else
 		tpath = "/";
 	return (tpath);
 }
@@ -205,7 +216,19 @@ void CFileBrowser::ChangeDir(std::string filename)
 {
 	if(filename == "..")
 	{
-		int pos = (Path.substr(0,Path.length()-1)).rfind("/");
+		unsigned int pos;
+		if(Path.find(VLC_URI)==0)
+		{
+			pos = Path.substr(strlen(VLC_URI), Path.length()-strlen(VLC_URI)-1).rfind("/");
+			if (pos != std::string::npos)
+				pos += strlen(VLC_URI);
+		}
+		else
+		{
+			pos = Path.substr(0,Path.length()-1).rfind("/");
+		}
+		if(pos == std::string::npos)
+			pos = Path.length();
 		std::string newpath = Path.substr(0,pos);
 //		printf("path: %s filename: %s newpath: %s\n",Path.c_str(),filename.c_str(),newpath.c_str());
 		readDir(newpath);
@@ -221,22 +244,115 @@ void CFileBrowser::ChangeDir(std::string filename)
 }
 
 //------------------------------------------------------------------------
-
 bool CFileBrowser::readDir(std::string dirname)
 {
-struct stat statbuf;
-dirent_struct **namelist;
-
-int n;
-
+	bool ret;
 	Path = dirname;
 	
-	if(dirname[dirname.length()-1] != '/')
+	filelist.clear();
+	if(Path.rfind("/") != Path.length()-1)
 	{
 		Path = Path + "/";
 	}
+	
+	if (Path.find(VLC_URI)==0)
+	{
+		ret = readDir_vlc();
+	}
+	else
+	{
+		ret = readDir_std();
+	}
+	// sort result
+	if( smode == 0 )
+		sort(filelist.begin(), filelist.end(), sortByName);
+	else
+		sort(filelist.begin(), filelist.end(), sortByDate);
 
-	filelist.clear();
+	selected = 0;
+	return ret;
+}
+
+bool CFileBrowser::readDir_vlc()
+{
+	std::string answer="";
+	std::string url = m_baseurl + Path.substr(strlen(VLC_URI));
+	cout << "[FileBrowser] vlc URL: " << url << endl;
+	CURL *curl_handle;
+	CURLcode httpres;
+	/* init the curl session */
+	curl_handle = curl_easy_init();
+	/* specify URL to get */
+	curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+	/* send all data to this function  */
+	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION,
+						  CurlWriteToString);
+	/* we pass our 'chunk' struct to the callback function */
+	curl_easy_setopt(curl_handle, CURLOPT_FILE, (void *)&answer);
+	/* error handling */
+	char error[CURL_ERROR_SIZE];
+	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error);
+	curl_easy_setopt(curl_handle, CURLOPT_USERPWD, "admin:admin"); /* !!! make me custmoizable */
+	/* get it! */
+	httpres = curl_easy_perform(curl_handle);
+	/* cleanup curl stuff */
+	curl_easy_cleanup(curl_handle);
+	/* Convert \ to / */
+	for( unsigned int pos=answer.find("\\"); pos!=std::string::npos ; pos=answer.find("\\"))
+		answer[pos]='/';
+	//cout << "Answer:" << endl << "----------------" << endl << answer << endl;
+	/*!!! TODO check httpres and display error */
+	if (!answer.empty() && !httpres)
+	{
+		unsigned int start=0;
+		for (unsigned int pos=answer.find("\n",0) ; pos != std::string::npos ; pos=answer.find("\n",start))
+		{
+			CFile file;
+			std::string entry = answer.substr(start, pos-start);
+			if (entry.find("DIR:")==0)
+				file.Mode = S_IFDIR + 0777 ;
+			else
+				file.Mode = S_IFREG + 0777 ;
+			file.Name = Path + entry.substr(entry.rfind("/")+1);
+			file.Size = 0;
+			file.Time = 0;
+			if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+			{
+				if(!Filter->matchFilter(file.Name))
+				{
+					start=pos+1;
+					continue;
+				}
+			}
+			if(Dir_Mode && (!S_ISDIR(file.Mode)))
+			{
+				continue;
+				start=pos+1;
+			}
+			filelist.push_back(file);
+			start=pos+1;
+		}
+		return true;
+	}
+	else
+	{
+      ShowMsg ( "messagebox.error", error, CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
+		CFile file;
+		file.Name = Path + "..";
+		file.Mode = S_IFDIR + 0777;
+		file.Size = 0;
+		file.Time = 0;
+		filelist.push_back(file);
+	}
+	return false;
+}
+
+bool CFileBrowser::readDir_std()
+{
+	struct stat statbuf;
+	dirent_struct **namelist;
+	int n;
+
 	n = my_scandir(Path.c_str(), &namelist, 0, my_alphasort);
 	if (n < 0)
 	{
@@ -276,13 +392,7 @@ int n;
 	}
 
 	free(namelist);
-
-	if( smode == 0 )
-		sort(filelist.begin(), filelist.end(), sortByName);
-	else
-		sort(filelist.begin(), filelist.end(), sortByDate);
-
-	selected = 0;
+	
 	return true;
 }
 
@@ -292,6 +402,10 @@ bool CFileBrowser::exec(std::string Dirname)
 {
 	bool res = false;
 
+	m_baseurl = "http://" + g_settings.streaming_server_ip +
+	            ":" + g_settings.streaming_server_port + "/admin/dboxfiles.html?dir=";
+	for( unsigned int pos=Dirname.find("\\"); pos!=std::string::npos ; pos=Dirname.find("\\"))
+		Dirname[pos]='/';
 	name = Dirname;
 	paintHead();
 	readDir(Dirname);
@@ -767,4 +881,3 @@ void CFileBrowser::paint()
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 }
-
