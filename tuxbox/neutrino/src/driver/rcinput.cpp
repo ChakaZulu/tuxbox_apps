@@ -2,7 +2,7 @@
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
+                      2003 thegoodguy
 
 	Kommentar:
 
@@ -29,7 +29,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 
 #include <dbox/fp.h>
@@ -174,15 +176,15 @@ void CRCInput::open()
 
 	struct termio tio, tin;
 
-	ioctl( 0, TCGETA, &tio );
+	ioctl(STDIN_FILENO, TCGETA, &tio);
 
-	tin = tio;
-	tin.c_lflag &= ~(ICANON|ECHO);
-	tin.c_cc[VMIN]=1;
-	tin.c_cc[VTIME]=0;
-	ioctl( 0, TCSETA, &tin );
+	tin             = tio;
+	tin.c_lflag    &= ~(ICANON|ECHO);
+	tin.c_cc[VMIN ] = 1;
+	tin.c_cc[VTIME] = 0;
+	ioctl(0, TCSETA, &tin);
 
-	//	ioctl( 0, TCSETA, &tio );
+	//	ioctl(STDIN_FILENO, TCSETA, &tio);
 #else
 	//fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
 
