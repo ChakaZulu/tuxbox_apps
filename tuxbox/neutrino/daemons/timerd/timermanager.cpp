@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.48 2002/10/26 12:37:14 Zwen Exp $
+   $Id: timermanager.cpp,v 1.49 2002/10/27 19:17:12 Zwen Exp $
 
 	License: GPL
 
@@ -340,8 +340,8 @@ void CTimerManager::shutdownOnWakeup()
 		//teste auf wakeup
 		int wakeup;
 		int fd = open("/dev/dbox/fp0", O_RDWR);
-		ioctl(fd, FP_IOCTL_IS_WAKEUP, &wakeup);
-		if(wakeup)
+		int ret=ioctl(fd, FP_IOCTL_IS_WAKEUP, &wakeup);
+		if(wakeup && !ret<0)
 		{
 			CTimerEvent_Shutdown* event = new CTimerEvent_Shutdown(now+120, now+180);
 			addEvent(event);

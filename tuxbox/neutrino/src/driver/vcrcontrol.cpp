@@ -227,9 +227,22 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned lon
 		CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo ();
 		if(si.apid != apid)
 		{
-			g_Zapit->setAudioChannel(apid);
+			CZapitClient::responseGetPIDs pids;
+			g_Zapit->getPIDS (pids);
+			unsigned int i;
+			for(i=0;i<pids.APIDs.size();i++)
+			{
+				if(pids.APIDs[i].pid==apid)
+					g_Zapit->setAudioChannel(i);
+			}
+			// nicht gefunden, dann 1.
+			if(i==pids.APIDs.size())
+				g_Zapit->setAudioChannel(0);
 		}
 	}
+	else
+		g_Zapit->setAudioChannel(0); //sonst apid 0, also auf jeden fall ac3 aus !!!
+
 	// Auf Scart schalten
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::VCR_ON, 0 );
 	// Das ganze nochmal in die queue, da obiges RC_timeout erst in der naechsten ev. loop ausgeführt wird
