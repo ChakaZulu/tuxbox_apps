@@ -1139,14 +1139,23 @@ void find_all_avpids(int fd, uint16_t *vpid, uint16_t *apids, unsigned short *ac
                                                         temppida=0;
                                                     }
                                                 }
-                                                if (temppida != 0) {
+                                                if (temppida != 0 && buf[i+12+off] != 0x24) {
                                                     *(apids+j) = temppida;
                                                     *(ac3flags+j) = 1;
                                                     //printf("[transform.c] apid[%d]=0x%04X, ac3=%d\n",j,*(apids+j),*(ac3flags+j));
                                                     j++;
                                                     (*numpida)++;
                                                     //printf("[transform.c] numpida=%d\n",*numpida);
-                                                }
+                                                };
+						
+                                                if (temppida != 0 && buf[i+12+off] == 0x24) {
+                                                    *(apids+j) = temppida;
+                                                    *(ac3flags+j) = 2; // TTX PID found
+                                                    //printf("[transform.c] apid[%d]=0x%04X, ac3=%d\n",j,*(apids+j),*(ac3flags+j));
+                                                    j++;
+                                                    (*numpida)++;
+                                                    //printf("[transform.c] numpida=%d\n",*numpida);
+                                                };
                                                 break;
                                         case AUDIO_STREAM_S ... AUDIO_STREAM_E:
                                                 temppida = get_pid(buf+i+1);

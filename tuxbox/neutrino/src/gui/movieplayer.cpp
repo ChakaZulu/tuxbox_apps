@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.98 2004/10/19 20:18:46 zwen Exp $
+  $Id: movieplayer.cpp,v 1.99 2004/11/03 07:02:18 diemade Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -2225,17 +2225,49 @@ void CMoviePlayerGui::PlayFile (int parental)
 				std::string apidtitle = "Stream ";
 				apidtitle.append(apidnumber);
 
-				if(ac3flags[count]) apidtitle.append(" (AC3)");
+				if(ac3flags[count] == 2) 
+				{
+					apidtitle.append(" (Teletext)");
 
-				APIDSelector.addItem
-				(
-				new CMenuForwarderNonLocalized
-				(
-				apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, 
-				CRCInput::convertDigitToKey(count+1)
-				), 
-				(count == 0)
-				);
+					APIDSelector.addItem
+					(
+					new CMenuForwarderNonLocalized
+					(
+					apidtitle.c_str(), false, NULL, APIDChanger, apidnumber, 
+					CRCInput::convertDigitToKey(count+1)
+					), 
+					(count == 0)
+					);
+				};
+				
+				if(ac3flags[count] == 1) 
+				{
+					apidtitle.append(" (AC3)");
+
+					APIDSelector.addItem
+					(
+					new CMenuForwarderNonLocalized
+					(
+					apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, 
+					CRCInput::convertDigitToKey(count+1)
+					), 
+					(count == 0)
+					);
+				};
+				
+				if(!ac3flags[count]) 
+				{
+					APIDSelector.addItem
+					(
+					new CMenuForwarderNonLocalized
+					(
+					apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, 
+					CRCInput::convertDigitToKey(count+1)
+					), 
+					(count == 0)
+					);
+					
+				};
 			}
 
 			APIDSelector.exec(NULL, "");
@@ -2305,7 +2337,7 @@ void CMoviePlayerGui::PlayFile (int parental)
 				//-- Help --
 			case CRCInput::RC_help:
 				hlpstr = g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP);
-				hlpstr += "\nVersion: $Revision: 1.98 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+				hlpstr += "\nVersion: $Revision: 1.99 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 				ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, hlpstr.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 				break;
 
@@ -2743,7 +2775,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if(msg == CRCInput::RC_help)
 		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP);
-			fullhelptext += "\nVersion: $Revision: 1.98 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.99 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		}
 		else
