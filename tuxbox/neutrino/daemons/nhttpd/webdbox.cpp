@@ -895,41 +895,41 @@ Tmconnect con;
 					}
 					else
 					{
+
 						char *eventid;
-						char * anfang, *ende;
-						char *name,*text,*text2,*starttime,*duration;
-						int i;
+//						char * anfang, *ende;
+						char *name,*text,*text2,*contentClassification,*userClassification,fsk;
+						char *dp;
+						sectionsd::sectionsdTime* epg_times;
+
 						eventid = pData;
-						for(i = 0; (i < resp.dataLength) && (pData[i] != 255);i++);
-						pData[i] = 0;
-						name = &pData[i+1];
-						for(i = 0; (i < resp.dataLength) && (pData[i] != 255);i++);
-						pData[i] = 0;
-						text = &pData[i+1];
-						for(i = i + 1; (i < resp.dataLength) && (pData[i] != 255);i++);
-						pData[i] = 0;
-						text2 = &pData[i+1];
-						for(i = i + 1; (i < resp.dataLength) && (pData[i] != 255);i++);
-						pData[i] = 0;
-						starttime = &pData[i+1];
-						for(i = i + 1; (i < resp.dataLength) && (pData[i] != 255);i++);
-						pData[i] = 0;
-						duration = &pData[i+1];
-						for(i = i + 1; (i < resp.dataLength) && (pData[i] != 255);i++);
-						pData[i] = 0;
-						
+						name = pData + sizeof(long long);
+						dp = name;
+
+						dp+=strlen(dp)+1;
+						text = dp;
+						dp+=strlen(dp)+1;
+						text2 = dp;
+						dp+=strlen(dp)+1;
+						contentClassification = dp;
+						dp+=strlen(dp)+1;
+						userClassification = dp;
+						dp+=strlen(dp)+1;
+						fsk = *dp++;
+
+						epg_times = (sectionsd::sectionsdTime*) dp;
+
+						struct tm *pStartZeit = localtime(&(*epg_times).startzeit);
+//						printf("Startzeit %s Dauer: %ld\n",asctime(pStartZeit),(*epg_times).dauer);
+						channel->Starttime = (*epg_times).startzeit;
+						channel->Duration = (*epg_times).dauer;
+
 //						printf("ID: '%s' NAME: '%s' TEXT: '%s'\n",eventid,name,text); 
 						if(channel->EPG) delete channel->EPG;
 						channel->EPG = new TString(name);
 
-//						printf("Startzeit: '%s'\n",starttime);
-
-						sscanf(starttime,"%X",(long*)&channel->Starttime);
-						sscanf(duration,"%X",(long*)&channel->Duration);
-						
 						if(channel->ExtendedEPG) delete channel->ExtendedEPG;
 						channel->ExtendedEPG = new TString(text);
-
 
 						delete[] pData;
 					}
@@ -1099,7 +1099,8 @@ Tmconnect con;
 					{
 						classname = (pos&1)?'a':'b';
 						
-						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small> <a href=\"timer.dbox2?set&time=%ld&channel=%ld\"><IMG SRC=\"../images/timer.gif\" WIDTH=21 HEIGHT=21 BORDER=0 ALT=\"Timer\"></a></tr></td>", classname, edate, etime, eduration,zeit,onidSid);
+//						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small> <a href=\"timer.dbox2?set&time=%ld&channel=%ld\"><IMG SRC=\"../images/timer.gif\" WIDTH=21 HEIGHT=21 BORDER=0 ALT=\"Timer\"></a></tr></td>", classname, edate, etime, eduration,zeit,onidSid);
+						sprintf(buf, "<tr><td class=\"%c\">%s, %s <small>(%smin)</small></tr></td>", classname, edate, etime, eduration,zeit,onidSid);
 						sprintf(&buf[strlen(buf)], "<tr><td class=\"%ctext\"><a href=epg.dbox2?epgid=%s>%s</a></td></tr>\n", classname,epgID, ename);
 					}
 					request->SocketWrite(buf);
