@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.191 2002/07/14 00:38:23 obi Exp $
+ * $Id: zapit.cpp,v 1.192 2002/07/17 03:04:32 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1137,7 +1137,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.191 2002/07/14 00:38:23 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.192 2002/07/17 03:04:32 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1436,7 +1436,7 @@ void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode)
 {
 	bouquet--;
 
-	if ((bouquet < 0) || (bouquet>bouquetManager->Bouquets.size()))
+	if ((bouquet < 0) || (bouquet >= bouquetManager->Bouquets.size()))
 	{
 		printf("[zapit] invalid bouquet number: %d",bouquet);
 		return;
