@@ -287,18 +287,6 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_RCInput->postMsg(CRCInput::RC_timeout, 0); // leave underlying menu also
 		g_RCInput->postMsg(CRCInput::RC_timeout, 0); // leave underlying menu also
 		return menu_return::RETURN_EXIT;
-	}  else if (strncmp(key, "MRD:",4) == 0)
-	{
-		int mount_id = -1;
-		sscanf(&key[4],"%d",&mount_id);
-		if (mount_id != -1) 
-		{
-			strncpy(timerlist[selected].recordingDir,g_settings.network_nfs_local_dir[mount_id],sizeof(timerlist[selected].recordingDir));
-		} else {
-			strcpy(timerlist[selected].recordingDir,"");
-		}
-		g_RCInput->postMsg(CRCInput::RC_timeout,0);// leave underlying menu also
-		return menu_return::RETURN_REPAINT;
 	}
 
 	if(parent)
@@ -857,47 +845,8 @@ int CTimerList::modifyTimer()
 	CTimerListRepeatNotifier notifier((int *)&timer->eventRepeat,m4,m5);
 	CMenuOptionChooser* m3 = new CMenuOptionChooser(LOCALE_TIMERLIST_REPEAT, (int *)&timer->eventRepeat, TIMERLIST_REPEAT_OPTIONS, TIMERLIST_REPEAT_OPTION_COUNT, true, &notifier);
 
-	CMenuWidget recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS);
-
-	char indexStr[2];
-	// insert current recording dir at first position 
-	for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
-	{
-		if (g_settings.network_nfs_local_dir[i] != NULL &&
-		    strcmp(g_settings.network_nfs_local_dir[i],"") != 0 &&
-		    strcmp(timer->recordingDir,g_settings.network_nfs_local_dir[i]) == 0) {
-			std::string s(g_settings.network_nfs_local_dir[i]);
-			s += " (";
-			s += g_settings.network_nfs_ip[i];
-			s += ":";
-			s += g_settings.network_nfs_dir[i];
-			s +=")";
-			snprintf(indexStr,2,"%d",i);
-			recDirs.addItem(new CMenuForwarderNonLocalized(s.c_str(),true,NULL,this,(std::string("MRD:") + std::string(indexStr)).c_str()));
-			break;
-		}
-	}
-	// add all other directories
-	for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
-	{
-		if (g_settings.network_nfs_local_dir[i] != NULL &&
-		    strcmp(g_settings.network_nfs_local_dir[i],"") != 0)
-		{
-			if (strcmp(timer->recordingDir,g_settings.network_nfs_local_dir[i]) == 0) {
-				continue;
-			}
-			std::string s(g_settings.network_nfs_local_dir[i]);
-			s += " (";
-			s += g_settings.network_nfs_ip[i];
-			s += ":";
-			s += g_settings.network_nfs_dir[i];
-			s +=")";
-			snprintf(indexStr,2,"%d",i);
-			recDirs.addItem(new CMenuForwarderNonLocalized(s.c_str(),true,NULL,this,(std::string("MRD:") + std::string(indexStr)).c_str()));
-		}
-	}
+	CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,NULL,timer->recordingDir,g_settings.network_nfs_recordingdir);
 	bool recDirEnabled = (timer->eventType == CTimerd::TIMER_RECORD) && (g_settings.recording_type == RECORDING_FILE);
-
 	CMenuForwarder* m6 = new CMenuForwarder(LOCALE_TIMERLIST_RECORDING_DIR,recDirEnabled,timer->recordingDir, &recDirs);
 
 
