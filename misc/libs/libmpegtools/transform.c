@@ -1,29 +1,29 @@
 /*
  *  dvb-mpegtools for the Siemens Fujitsu DVB PCI card
  *
- * Copyright (C) 2000, 2001 Marcus Metzler 
+ * Copyright (C) 2000, 2001 Marcus Metzler
  *            for convergence integrated media GmbH
- * Copyright (C) 2002  Marcus Metzler 
- * 
+ * Copyright (C) 2002  Marcus Metzler
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
- * 
+ *
 
- * The author can be reached at marcus@convergence.de, 
+ * The author can be reached at marcus@convergence.de,
 
  * the project's page is at http://linuxtv.org/dvb/
  */
@@ -34,43 +34,43 @@
 #include <string.h>
 #include "ctools.h"
 
-static uint8_t tspid0[TS_SIZE] = { 
-	0x47, 0x40, 0x00, 0x10, 0x00, 0x00, 0xb0, 0x11, 
-	0x00, 0x00, 0xcb, 0x00, 0x00, 0x00, 0x00, 0xe0, 
-	0x10, 0x00, 0x01, 0xe4, 0x00, 0x2a, 0xd6, 0x1a, 
-	0xfb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+static uint8_t tspid0[TS_SIZE] = {
+	0x47, 0x40, 0x00, 0x10, 0x00, 0x00, 0xb0, 0x11,
+	0x00, 0x00, 0xcb, 0x00, 0x00, 0x00, 0x00, 0xe0,
+	0x10, 0x00, 0x01, 0xe4, 0x00, 0x2a, 0xd6, 0x1a,
+	0xfb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff
 };
 
-static	uint8_t tspid1[TS_SIZE] = { 
+static	uint8_t tspid1[TS_SIZE] = {
 	0x47, 0x44, 0x00, 0x10, 0x00, 0x02, 0xb0, 0x1c,
-	0x00, 0x01, 0xcb, 0x00, 0x00, 0xe0, 0xa0, 0xf0, 
+	0x00, 0x01, 0xcb, 0x00, 0x00, 0xe0, 0xa0, 0xf0,
 	0x05, 0x48, 0x03, 0x01, 0x00, 0x00, 0x02, 0xe0,
-	0xa0, 0xf0, 0x00, 0x03, 0xe0, 0x50, 0xf0, 0x00, 
-	0xae, 0xea, 0x4e, 0x48, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+	0xa0, 0xf0, 0x00, 0x03, 0xe0, 0x50, 0xf0, 0x00,
+	0xae, 0xea, 0x4e, 0x48, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
-	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -151,11 +151,11 @@ calc_crc32 (const uint8_t *sec, uint8_t len)
 uint64_t trans_pts_dts(uint8_t *pts)
 {
 	uint64_t wts;
-	
-	wts = ((uint64_t)((pts[0] & 0x0E) << 5) | 
-	       ((pts[1] & 0xFC) >> 2)) << 24; 
+
+	wts = ((uint64_t)((pts[0] & 0x0E) << 5) |
+	       ((pts[1] & 0xFC) >> 2)) << 24;
 	wts |= (((pts[1] & 0x03) << 6) |
-		((pts[2] & 0xFC) >> 2)) << 16; 
+		((pts[2] & 0xFC) >> 2)) << 16;
 	wts |= (((pts[2] & 0x02) << 6) |
 		((pts[3] & 0xFE) >> 1)) << 8;
 	wts |= (((pts[3] & 0x01) << 7) |
@@ -166,8 +166,8 @@ uint64_t trans_pts_dts(uint8_t *pts)
 
 void get_pespts(uint8_t *av_pts,uint8_t *pts)
 {
-	
-	pts[0] = 0x21 | 
+
+	pts[0] = 0x21 |
 		((av_pts[0] & 0xC0) >>5);
 	pts[1] = ((av_pts[0] & 0x3F) << 2) |
 		((av_pts[1] & 0xC0) >> 6);
@@ -188,14 +188,14 @@ uint16_t get_pid(uint8_t *pid)
 	return pp;
 }
 
-int write_ts_header(uint16_t pid, uint8_t *counter, int pes_start, 
+int write_ts_header(uint16_t pid, uint8_t *counter, int pes_start,
 		    uint8_t *buf, uint8_t length)
 {
 	int i;
 	int c = 0;
 	int fill;
-	uint8_t tshead[4] = { 0x47, 0x00, 0x00, 0x10}; 
-        
+	uint8_t tshead[4] = { 0x47, 0x00, 0x00, 0x10};
+
 
 	fill = TS_SIZE-4-length;
         if (pes_start) tshead[1] = 0x40;
@@ -224,7 +224,7 @@ int write_ts_header(uint16_t pid, uint8_t *counter, int pes_start,
 }
 
 
-int write_pes_header(uint8_t id,int length , long PTS, uint8_t *obuf, 
+int write_pes_header(uint8_t id,int length , long PTS, uint8_t *obuf,
 		     int stuffing)
 {
 	uint8_t le[2];
@@ -234,10 +234,10 @@ int write_pes_header(uint8_t id,int length , long PTS, uint8_t *obuf,
 	long lpts;
 	int c;
 	uint8_t headr[3] = {0x00, 0x00, 0x01};
-	
+
 	lpts = htonl(PTS);
 	pts = (uint8_t *) &lpts;
-	
+
 	get_pespts(pts,ppts);
 
 	c = 0;
@@ -250,8 +250,8 @@ int write_pes_header(uint8_t id,int length , long PTS, uint8_t *obuf,
 	le[1] = 0;
 	length -= 6+stuffing;
 
-	le[0] |= ((uint8_t)(length >> 8) & 0xFF); 
-	le[1] |= ((uint8_t)(length) & 0xFF); 
+	le[0] |= ((uint8_t)(length >> 8) & 0xFF);
+	le[1] |= ((uint8_t)(length) & 0xFF);
 	memcpy(obuf+c,le,2);
 	c += 2;
 
@@ -276,12 +276,12 @@ int write_pes_header(uint8_t id,int length , long PTS, uint8_t *obuf,
 		memcpy(obuf+c,ppts,5);
 		c += 5;
 	}
-	
+
 	return c;
 }
 
 
-void init_p2p(p2p *p, void (*func)(uint8_t *buf, int count, void *p), 
+void init_p2p(p2p *p, void (*func)(uint8_t *buf, int count, void *p),
 	      int repack){
 	p->found = 0;
 	p->cid = 0;
@@ -291,7 +291,7 @@ void init_p2p(p2p *p, void (*func)(uint8_t *buf, int count, void *p),
 	p->fd1 = -1;
 	p->func = func;
 	p->bigend_repack = 0;
-	p->repack = 0; 
+	p->repack = 0;
 	if ( repack < MAX_PLENGTH && repack > 265 ){
 		p->repack = repack-6;
 		p->bigend_repack = (uint16_t)htons((short)
@@ -361,7 +361,7 @@ void pes_repack(p2p *p)
 			count += repack-3;
 			p->func(buf, repack+6, p);
 		}
-		
+
 		if (rest){
 			diff = repack - 3 - rest - bfill;
 			if (!bfill){
@@ -371,14 +371,14 @@ void pes_repack(p2p *p)
 			}
 
 			if ( diff < PES_MIN){
-				length = rest+ diff + bfill+3; 
+				length = rest+ diff + bfill+3;
 				buf[4] = (uint8_t)((length & 0xFF00) >> 8);
 				buf[5] = (uint8_t)(length & 0x00FF);
 				buf[8] = (uint8_t)(bfill+diff);
 				memset(buf+9+bfill,0xFF,diff);
 				memcpy(buf+9+bfill+diff,p->buf+count,rest);
 			} else {
-				length = rest+ bfill+3; 
+				length = rest+ bfill+3;
 				buf[4] = (uint8_t)((length & 0xFF00) >> 8);
 				buf[5] = (uint8_t)(length & 0x00FF);
 				memcpy(buf+9+bfill,p->buf+count,rest);
@@ -388,7 +388,7 @@ void pes_repack(p2p *p)
 			}
 			p->func(buf, repack+6, p);
 		}
-	}	
+	}
 
 	if (p->mpeg == 1){
 
@@ -412,13 +412,13 @@ void pes_repack(p2p *p)
 			count += repack-1;
 			p->func(buf, repack+6, p);
 		}
-		
+
 
 		if (rest){
 			diff = repack - 1 - rest - bfill;
 
 			if ( diff < PES_MIN){
-				length = rest+ diff + bfill+1; 
+				length = rest+ diff + bfill+1;
 				buf[4] = (uint8_t)((length & 0xFF00) >> 8);
 				buf[5] = (uint8_t)(length & 0x00FF);
 				memset(buf+6,0xFF,diff);
@@ -427,7 +427,7 @@ void pes_repack(p2p *p)
 				}
 				memcpy(buf+7+diff,p->buf+count,rest+bfill);
 			} else {
-				length = rest+ bfill+1; 
+				length = rest+ bfill+1;
 				buf[4] = (uint8_t)((length & 0xFF00) >> 8);
 				buf[5] = (uint8_t)(length & 0x00FF);
 				if (!bfill){
@@ -443,7 +443,7 @@ void pes_repack(p2p *p)
 			}
 			p->func(buf, repack+6, p);
 		}
-	}	
+	}
 }
 
 
@@ -482,7 +482,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 			if (buf[c] == 0x01) p->found++;
 			else if (buf[c] == 0){
 				p->found = 2;
-			} else {	
+			} else {
 				if (p->fd1 >= 0)
 					write(p->fd1,buf+c,1);
 				p->found = 0;
@@ -517,7 +517,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 				break;
 			}
 			break;
-			
+
 
 		case 4:
 			if (count-c > 1){
@@ -563,7 +563,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 				p->flag2 = buf[c];
 				c++;
 				p->found++;
-			}	
+			}
 			break;
 
 		case 8:
@@ -573,7 +573,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 				p->found++;
 			}
 			break;
-			
+
 		default:
 
 			break;
@@ -583,11 +583,11 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 	if (!p->plength) p->plength = MMAX_PLENGTH-6;
 
 
-	if ( p->done || ((p->mpeg == 2 && p->found >= 9)  || 
+	if ( p->done || ((p->mpeg == 2 && p->found >= 9)  ||
 	     (p->mpeg == 1 && p->found >= 7)) ){
 		switch (p->cid){
-			
-		case AUDIO_STREAM_S ... AUDIO_STREAM_E:			
+
+		case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 		case VIDEO_STREAM_S ... VIDEO_STREAM_E:
 		case PRIVATE_STREAM1:
 
@@ -606,7 +606,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 			}
 
 
-			if (p->mpeg == 2 && (p->flag2 & PTS_ONLY) &&  
+			if (p->mpeg == 2 && (p->flag2 & PTS_ONLY) &&
 			    p->found < 14){
 				while (c < count && p->found < 14){
 					p->pts[p->found-9] = buf[c];
@@ -624,7 +624,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 					p->hlength = 1;
 				}
 
-				while (!p->which && c < count && 
+				while (!p->which && c < count &&
 				       p->check == 0xFF){
 					p->check = buf[c];
 					p->buf[p->found] = buf[c];
@@ -634,7 +634,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 				}
 
 				if ( c == count) return 1;
-				
+
 				if ( (p->check & 0xC0) == 0x40 && !p->which){
 					p->check = buf[c];
 					p->buf[p->found] = buf[c];
@@ -662,22 +662,22 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 					p->which = 2;
 					if ( c == count) return 1;
 				}
-				
+
 				if ( (p->check & 0x30) && p->check != 0xFF){
 					p->flag2 = (p->check & 0xF0) << 2;
 					p->pts[0] = p->check;
 					p->which = 3;
-				} 
+				}
 
 				if ( c == count) return 1;
 				if (p->which > 2){
 					if ((p->flag2 & PTS_DTS_FLAGS)
 					    == PTS_ONLY){
-						while (c < count && 
+						while (c < count &&
 						       p->which < 7){
 							p->pts[p->which-2] =
 								buf[c];
-							p->buf[p->found] = 
+							p->buf[p->found] =
 								buf[c];
 							c++;
 							p->found++;
@@ -685,15 +685,15 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 							p->hlength++;
 						}
 						if ( c == count) return 1;
-					} else if ((p->flag2 & PTS_DTS_FLAGS) 
+					} else if ((p->flag2 & PTS_DTS_FLAGS)
 						   == PTS_DTS){
-						while (c < count && 
+						while (c < count &&
 						       p->which< 12){
 							if (p->which< 7)
 								p->pts[p->which
 								      -2] =
 									buf[c];
-							p->buf[p->found] = 
+							p->buf[p->found] =
 								buf[c];
 							c++;
 							p->found++;
@@ -704,7 +704,7 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 					}
 					p->which = 2000;
 				}
-							
+
 			}
 
 			while (c < count && p->found < p->plength+6){
@@ -714,13 +714,13 @@ int filter_pes (uint8_t *buf, int count, p2p *p, int (*func)(p2p *p))
 				memcpy(p->buf+p->found, buf+c, l);
 				p->found += l;
 				c += l;
-			}			
+			}
 			if(p->found == p->plength+6){
-				if (func(p)){ 
+				if (func(p)){
 					if (p->fd1 >= 0){
 						write(p->fd1,p->buf,
 						      p->plength+6);
-					} 
+					}
 				} else ret = 0;
 			}
 			break;
@@ -766,8 +766,8 @@ int audio_pes_filt(p2p *p)
 			}
 		}
 		break;
-	
-	case AUDIO_STREAM_S ... AUDIO_STREAM_E:			
+
+	case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 		if ( p->cid == p->filter)
 			return 1;
 		break;
@@ -805,7 +805,7 @@ void pes_filt(p2p *p)
 
 	if ( p->cid == p->filter) {
 		if (p->es)
-			write(p->fd1,p->buf+p->hlength+6+3*factor, 
+			write(p->fd1,p->buf+p->hlength+6+3*factor,
 			      p->plength-p->hlength-3*factor);
 		else
 			write(p->fd1,p->buf,p->plength+6);
@@ -838,18 +838,18 @@ void pes_dfilt(p2p *p)
 	int type = NOPES;
 	int streamid;
 	int c = 6+p->hlength+3*factor;
-	
+
 
 	switch ( p->cid ) {
 	case PRIVATE_STREAM1:
 		streamid = p->buf[c];
-		head = 4; 
+		head = 4;
 		if ((streamid & 0xF8) == 0x80+p->es-1){
 			fd = p->fd1;
 			type = AC3;
 		}
 		break;
-	case AUDIO_STREAM_S ... AUDIO_STREAM_E:			
+	case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 		fd = p->fd1;
 		type = AUDIO;
 		break;
@@ -858,19 +858,19 @@ void pes_dfilt(p2p *p)
 		type = VIDEO;
 		break;
 	}
-	
+
 	if (p->es && !p->startv && type == VIDEO){
 		int found = 0;
-		
-		if  ( p->flag2 & PTS_DTS ) 
-			p->vpts = trans_pts_dts(p->pts); 
+
+		if  ( p->flag2 & PTS_DTS )
+			p->vpts = trans_pts_dts(p->pts);
 		else return;
 
 		while ( !found && c+3 < p->plength+6 ){
-			if ( p->buf[c] == 0x00 && 
-			     p->buf[c+1] == 0x00 && 
+			if ( p->buf[c] == 0x00 &&
+			     p->buf[c+1] == 0x00 &&
 			     p->buf[c+2] == 0x01 &&
-			     p->buf[c+3] == 0xb3) 
+			     p->buf[c+3] == 0xb3)
 				found = 1;
 			else c++;
 		}
@@ -879,18 +879,18 @@ void pes_dfilt(p2p *p)
 			write(fd, p->buf+c, p->plength+6-c);
 		}
 		fd = 0;
-	} 
+	}
 
-		
+
 	if ( p->es && !p->starta && type == AUDIO){
 		int found = 0;
-		if  ( p->flag2 & PTS_DTS ) 
-			p->apts = trans_pts_dts(p->pts);  
+		if  ( p->flag2 & PTS_DTS )
+			p->apts = trans_pts_dts(p->pts);
 		else return;
 
 		if (p->startv)
 			while ( !found && c+1 < p->plength+6){
-				if ( p->buf[c] == 0xFF && 
+				if ( p->buf[c] == 0xFF &&
 				     (p->buf[c+1] & 0xF8) == 0xF8)
 					found = 1;
 				else c++;
@@ -900,11 +900,11 @@ void pes_dfilt(p2p *p)
 			write(fd, p->buf+c, p->plength+6-c);
 		}
 		fd = 0;
-	} 
+	}
 
 	if ( p->es && !p->starta && type == AC3){
-		if  ( p->flag2 & PTS_DTS ) 
-			p->apts = trans_pts_dts(p->pts);  
+		if  ( p->flag2 & PTS_DTS )
+			p->apts = trans_pts_dts(p->pts);
 		else return;
 
 		if (p->startv){
@@ -913,17 +913,17 @@ void pes_dfilt(p2p *p)
 			write(fd, p->buf+c, p->plength+6-c);
 		}
 		fd = 0;
-	} 
+	}
 
 
 	if (fd){
 		if (p->es)
-			write(fd,p->buf+p->hlength+6+3*factor+head, 
+			write(fd,p->buf+p->hlength+6+3*factor+head,
 			      p->plength-p->hlength-3*factor-head);
 		else
 			write(fd,p->buf,p->plength+6);
 	}
-} 
+}
 
 int64_t pes_dmx( int fdin, int fdouta, int fdoutv, int es)
 {
@@ -934,7 +934,7 @@ int64_t pes_dmx( int fdin, int fdouta, int fdoutv, int es)
 	uint64_t l = 0;
 	int verb = 0;
 	int percent, oldPercent = -1;
- 	
+
 	init_p2p(&p, NULL, 2048);
 	p.fd1 = fdouta;
 	p.fd2 = fdoutv;
@@ -943,20 +943,20 @@ int64_t pes_dmx( int fdin, int fdouta, int fdoutv, int es)
 	p.starta = 0;
 	p.apts=-1;
 	p.vpts=-1;
-	
-	if (fdin != STDIN_FILENO) verb = 1; 
-	
+
+	if (fdin != STDIN_FILENO) verb = 1;
+
 	if (verb) {
 		length = lseek(fdin, 0, SEEK_END);
 		lseek(fdin,0,SEEK_SET);
 	}
-	
+
 	while (count > 0){
 		count = read(fdin,buf,SIZE);
 		l += count;
 		if (verb){
 			percent = 100 * l / length;
- 		
+
 			if (percent != oldPercent) {
 				fprintf(stderr, "Demuxing %d %%\r", percent);
 				oldPercent = percent;
@@ -964,9 +964,9 @@ int64_t pes_dmx( int fdin, int fdouta, int fdoutv, int es)
 		}
 		get_pes(buf,count,&p,pes_dfilt);
 	}
-	
+
 	return (int64_t)p.vpts - (int64_t)p.apts;
-	
+
 }
 
 
@@ -981,7 +981,7 @@ static void pes_in_ts(p2p *p)
 	uint8_t *counter;
 	pes_start = 1;
 	switch ( p->cid ) {
-	case AUDIO_STREAM_S ... AUDIO_STREAM_E:			
+	case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 		pid = p->pida;
 		counter = &p->acounter;
 		break;
@@ -989,16 +989,16 @@ static void pes_in_ts(p2p *p)
 		pid = p->pidv;
 		counter = &p->acounter;
 
-		tspid0[3] |= (p->count0++) 
+		tspid0[3] |= (p->count0++)
 			& 0x0F ;
-		tspid1[3] |= (p->count1++) 
+		tspid1[3] |= (p->count1++)
 			& 0x0F ;
-	
+
 		tspid1[24]  = p->pidv;
 		tspid1[23] |= (p->pidv >> 8) & 0x3F;
 		tspid1[29]  = p->pida;
 		tspid1[28] |= (p->pida >> 8) & 0x3F;
-		
+
 		p->func(tspid0,188,p);
 		p->func(tspid1,188,p);
 		break;
@@ -1013,7 +1013,7 @@ static void pes_in_ts(p2p *p)
 					     , obuf, TS_SIZE-4);
 			memcpy(obuf+l, p->buf+c, TS_SIZE-l);
 			c += TS_SIZE-l;
-		} else { 
+		} else {
 			l = write_ts_header(pid, counter, pes_start
 					     , obuf, length-c);
 			memcpy(obuf+l, p->buf+c, TS_SIZE-l);
@@ -1025,13 +1025,13 @@ static void pes_in_ts(p2p *p)
 }
 
 
-void write_out(uint8_t *buf, int count,p2p  *p)
+void write_out(uint8_t *buf, int count,p2p *p)
 {
 	write(p->fd1, buf, count);
 }
 
 
-void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv)
+void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv, const int* playstate)
 {
 	p2p p;
 	int count = 1;
@@ -1039,7 +1039,7 @@ void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv)
 	uint64_t length = 0;
 	uint64_t l = 0;
 	int verb = 0;
-	
+
 	init_p2p(&p, NULL, 2048);
 	p.fd1 = fdout;
 	p.pida = pida;
@@ -1049,22 +1049,21 @@ void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv)
 	p.count1 = 0;
 	p.count0 = 0;
 	p.func = write_out;
-	if (fdin != STDIN_FILENO) verb = 1; 
+	if (fdin != STDIN_FILENO) verb = 1;
 	if (verb) {
 		length = lseek(fdin, 0, SEEK_END);
 		lseek(fdin,0,SEEK_SET);
 	}
 
-	while (count > 0){
+	while (count > 0)
+	{
 		count = read(fdin,buf,SIZE);
 		l += count;
-		if (verb)
-			//fprintf(stdout,"Writing TS  %2.2f %%\r",
-			//	100.*l/length);
-
-		get_pes(buf,count,&p,pes_in_ts);
+		if (*playstate == 0) break;
+		while (*playstate == 2) ;	// do nothing
+		if (verb) get_pes(buf,count,(void*)&p,pes_in_ts);
 	}
-		
+
 }
 
 
@@ -1074,7 +1073,7 @@ void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
 {
         uint8_t buf[IN_SIZE];
         int count;
-        int i;  
+        int i;
         int off =0;
 
         while ( *apid == 0 || *vpid == 0){
@@ -1104,11 +1103,11 @@ void find_avpids(int fd, uint16_t *vpid, uint16_t *apid)
 
 void find_bavpids(uint8_t *buf, int count, uint16_t *vpid, uint16_t *apid)
 {
-        int i;  
+        int i;
         int founda = 0;
         int foundb = 0;
         int off = 0;
-        
+
         *vpid = 0;
         *apid = 0;
         for (i = 0; i < count-7; i++){
@@ -1117,8 +1116,8 @@ void find_bavpids(uint8_t *buf, int count, uint16_t *vpid, uint16_t *apid)
                                 off = 0;
                                 if ( buf[3+i] & 0x20)  // adaptation field?
                                         off = buf[4+i] + 1;
-                                
-                                if (buf[off+i+4] == 0x00 && 
+
+                                if (buf[off+i+4] == 0x00 &&
                                     buf[off+i+5] == 0x00 &&
                                     buf[off+i+6] == 0x01){
                                         switch(buf[off+i+7]){
@@ -1143,7 +1142,7 @@ void find_bavpids(uint8_t *buf, int count, uint16_t *vpid, uint16_t *apid)
 
 void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int ps)
 {
-	
+
 	uint8_t buf[IN_SIZE];
 	uint8_t mbuf[TS_SIZE];
 	int i;
@@ -1179,19 +1178,19 @@ void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int ps)
 	while (count > 0){
 		if ((count = save_read(fdin,buf+i,IN_SIZE-i)+i)<0)
 			perror("reading");
-		
+
 
 		if (!pidv){
                         find_bavpids(buf+i, IN_SIZE-i, &pidv, &dummy);
                         if (pidv) fprintf(stderr, "vpid %d (0x%02x)\n",
 					  pidv,pidv);
-                } 
+                }
 
                 if (!pida){
                         find_bavpids(buf+i, IN_SIZE-i, &dummy, &pida);
                         if (pida) fprintf(stderr, "apid %d (0x%02x)\n",
 					  pida,pida);
-                } 
+                }
 
 
 		for( i = 0; i < count; i+= TS_SIZE){
@@ -1203,7 +1202,7 @@ void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int ps)
 			if (!(buf[3+i]&0x10)) // no payload?
 				continue;
 			/*if ( buf[1+i]&0x80){
-				fprintf(stderr,"Error in TS for PID: %d\n", 
+				fprintf(stderr,"Error in TS for PID: %d\n",
 					pid);
 			}*/
 			if (pid == pidv){
@@ -1226,7 +1225,7 @@ void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int ps)
 			if ( buf[3+i] & 0x20) {  // adaptation field?
 				off = buf[4+i] + 1;
 			}
-        
+
 			instant_repack(buf+4+off+i, TS_SIZE-4-off, p);
 		}
 		i = 0;
@@ -1239,7 +1238,7 @@ void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int ps)
 #define INN_SIZE 2*IN_SIZE
 void insert_pat_pmt( int fdin, int fdout)
 {
-	
+
 	uint8_t buf[INN_SIZE];
 	uint8_t mbuf[TS_SIZE];
 	int i;
@@ -1254,7 +1253,7 @@ void insert_pat_pmt( int fdin, int fdout)
 
 
 	find_avpids(fdin, &pidv, &pida);
-	
+
  	count = save_read(fdin,mbuf,TS_SIZE);
 	for ( i = 0; i < 188 ; i++){
 		if ( mbuf[i] == 0x47 ) break;
@@ -1268,7 +1267,7 @@ void insert_pat_pmt( int fdin, int fdout)
 		memcpy(buf+TS_SIZE-i,mbuf,i);
 		i = 188;
 	}
-	
+
 	count = 1;
         /* length is not correct, but we only create a very small
          * PMT, so it doesn't matter :-)
@@ -1284,12 +1283,12 @@ void insert_pat_pmt( int fdin, int fdout)
                 tspid1[5 + pmt_len - 3] = (crc32 & 0x00ff0000) >> 16;
                 tspid1[5 + pmt_len - 2] = (crc32 & 0x0000ff00) >>  8;
                 tspid1[5 + pmt_len - 1] = (crc32 & 0x000000ff) >>  0;
-		
+
 		write(fdout,tspid0,188);
 		write(fdout,tspid1,188);
 
 		count = save_read(fdin,buf+i,INN_SIZE-i);
-		
+
 		written = 0;
 		while (written < IN_SIZE){
 			c = write(fdout,buf,INN_SIZE);
@@ -1300,7 +1299,7 @@ void insert_pat_pmt( int fdin, int fdout)
 
 		tspid1[3] &= 0xF0 ;
 		tspid1[3] |= (c1++)& 0x0F ;
-	
+
 		i=0;
 	}
 
@@ -1357,7 +1356,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 				break;
 			}
 			break;
-			
+
 
 		case 4:
 			if (count-c > 1){
@@ -1403,7 +1402,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 				p->flag2 = buf[c];
 				c++;
 				p->found++;
-			}	
+			}
 			break;
 
 		case 8:
@@ -1413,7 +1412,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 				p->found++;
 			}
 			break;
-			
+
 		default:
 
 			break;
@@ -1423,11 +1422,11 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 	if (!p->plength) p->plength = MMAX_PLENGTH-6;
 
 
-	if ( p->done || ((p->mpeg == 2 && p->found >= 9)  || 
+	if ( p->done || ((p->mpeg == 2 && p->found >= 9)  ||
 	     (p->mpeg == 1 && p->found >= 7)) ){
 		switch (p->cid){
-			
-		case AUDIO_STREAM_S ... AUDIO_STREAM_E:			
+
+		case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 		case VIDEO_STREAM_S ... VIDEO_STREAM_E:
 		case PRIVATE_STREAM1:
 
@@ -1446,7 +1445,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 			}
 
 
-			if (p->mpeg == 2 && (p->flag2 & PTS_ONLY) &&  
+			if (p->mpeg == 2 && (p->flag2 & PTS_ONLY) &&
 			    p->found < 14){
 				while (c < count && p->found < 14){
 					p->pts[p->found-9] = buf[c];
@@ -1464,7 +1463,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 					p->hlength = 1;
 				}
 
-				while (!p->which && c < count && 
+				while (!p->which && c < count &&
 				       p->check == 0xFF){
 					p->check = buf[c];
 					p->buf[p->found] = buf[c];
@@ -1474,7 +1473,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 				}
 
 				if ( c == count) return;
-				
+
 				if ( (p->check & 0xC0) == 0x40 && !p->which){
 					p->check = buf[c];
 					p->buf[p->found] = buf[c];
@@ -1502,22 +1501,22 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 					p->which = 2;
 					if ( c == count) return;
 				}
-				
+
 				if ( (p->check & 0x30) && p->check != 0xFF){
 					p->flag2 = (p->check & 0xF0) << 2;
 					p->pts[0] = p->check;
 					p->which = 3;
-				} 
+				}
 
 				if ( c == count) return;
 				if (p->which > 2){
 					if ((p->flag2 & PTS_DTS_FLAGS)
 					    == PTS_ONLY){
-						while (c < count && 
+						while (c < count &&
 						       p->which < 7){
 							p->pts[p->which-2] =
 								buf[c];
-							p->buf[p->found] = 
+							p->buf[p->found] =
 								buf[c];
 							c++;
 							p->found++;
@@ -1525,15 +1524,15 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 							p->hlength++;
 						}
 						if ( c == count) return;
-					} else if ((p->flag2 & PTS_DTS_FLAGS) 
+					} else if ((p->flag2 & PTS_DTS_FLAGS)
 						   == PTS_DTS){
-						while (c < count && 
+						while (c < count &&
 						       p->which< 12){
 							if (p->which< 7)
 								p->pts[p->which
 								      -2] =
 									buf[c];
-							p->buf[p->found] = 
+							p->buf[p->found] =
 								buf[c];
 							c++;
 							p->found++;
@@ -1544,7 +1543,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 					}
 					p->which = 2000;
 				}
-							
+
 			}
 
 			while (c < count && p->found < p->plength+6){
@@ -1554,10 +1553,10 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 				memcpy(p->buf+p->found, buf+c, l);
 				p->found += l;
 				c += l;
-			}			
+			}
 			if(p->found == p->plength+6)
 				func(p);
-			
+
 			break;
 		}
 
@@ -1587,7 +1586,7 @@ void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p))
 
 
 
-void setup_pes2ts( p2p *p, uint32_t pida, uint32_t pidv, 
+void setup_pes2ts( p2p *p, uint32_t pida, uint32_t pidv,
 		   void (*ts_write)(uint8_t *buf, int count, void *p))
 {
 	init_p2p( p, ts_write, 2048);
@@ -1605,7 +1604,7 @@ void kpes_to_ts( p2p *p,uint8_t *buf ,int count )
 }
 
 
-void setup_ts2pes( p2p *pa, p2p *pv, uint32_t pida, uint32_t pidv, 
+void setup_ts2pes( p2p *pa, p2p *pv, uint32_t pida, uint32_t pidv,
 		   void (*pes_write)(uint8_t *buf, int count, void *p))
 {
 	init_p2p( pa, pes_write, 2048);
@@ -1623,10 +1622,10 @@ void kts_to_pes( p2p *p, uint8_t *buf) // don't need count (=188)
 		return;
 
 	pid = get_pid(buf+1);
-			
+
 	if (pid != p->pid) return;
 	/*if ( buf[1]&0x80){
-		fprintf(stderr,"Error in TS for PID: %d\n", 
+		fprintf(stderr,"Error in TS for PID: %d\n",
 			pid);
 	}*/
 
@@ -1642,7 +1641,7 @@ void kts_to_pes( p2p *p, uint8_t *buf) // don't need count (=188)
 		off = buf[4] + 1;
 		if (off+4 > 187) return;
 	}
-        
+
 	get_pes(buf+4+off, TS_SIZE-4-off, p , pes_repack);
 }
 
@@ -1717,39 +1716,39 @@ int get_vinfo(uint8_t *mbuf, int count, VideoInfo *vi, int pr)
 
 	vi->horizontal_size	= ((headr[1] &0xF0) >> 4) | (headr[0] << 4);
 	vi->vertical_size	= ((headr[1] &0x0F) << 8) | (headr[2]);
-    
+
         sw = (int)((headr[3]&0xF0) >> 4) ;
 
         switch( sw ){
 	case 1:
 		if (pr)
 			fprintf(stderr,"Videostream: ASPECT: 1:1");
-		vi->aspect_ratio = 100;        
+		vi->aspect_ratio = 100;
 		break;
 	case 2:
 		if (pr)
 			fprintf(stderr,"Videostream: ASPECT: 4:3");
-                vi->aspect_ratio = 133;        
+                vi->aspect_ratio = 133;
 		break;
 	case 3:
 		if (pr)
 			fprintf(stderr,"Videostream: ASPECT: 16:9");
-                vi->aspect_ratio = 177;        
+                vi->aspect_ratio = 177;
 		break;
 	case 4:
 		if (pr)
 			fprintf(stderr,"Videostream: ASPECT: 2.21:1");
-                vi->aspect_ratio = 221;        
+                vi->aspect_ratio = 221;
 		break;
 
         case 5 ... 15:
 		if (pr)
 			fprintf(stderr,"Videostream: ASPECT: reserved");
-                vi->aspect_ratio = 0;        
+                vi->aspect_ratio = 0;
 		break;
 
         default:
-                vi->aspect_ratio = 0;        
+                vi->aspect_ratio = 0;
                 return -1;
 	}
 
@@ -1804,10 +1803,10 @@ int get_vinfo(uint8_t *mbuf, int count, VideoInfo *vi, int pr)
 		break;
 	}
 
-	vi->bit_rate = 400*(((headr[4] << 10) & 0x0003FC00UL) 
-			    | ((headr[5] << 2) & 0x000003FCUL) | 
+	vi->bit_rate = 400*(((headr[4] << 10) & 0x0003FC00UL)
+			    | ((headr[5] << 2) & 0x000003FCUL) |
 			    (((headr[6] & 0xC0) >> 6) & 0x00000003UL));
-	
+
 	if (pr){
 		fprintf(stderr,"  BRate: %.2f Mbit/s",(vi->bit_rate)/1000000.);
 		fprintf(stderr,"\n");
@@ -1827,7 +1826,7 @@ int get_ainfo(uint8_t *mbuf, int count, AudioInfo *ai, int pr)
 	int found = 0;
 	int c = 0;
 	int fr =0;
-	
+
 	while (!found && c < count){
 		uint8_t *b = mbuf+c;
 
@@ -1836,7 +1835,7 @@ int get_ainfo(uint8_t *mbuf, int count, AudioInfo *ai, int pr)
 		else {
 			c++;
 		}
-	}	
+	}
 
 	if (!found) return -1;
 
@@ -1862,12 +1861,12 @@ int get_ainfo(uint8_t *mbuf, int count, AudioInfo *ai, int pr)
 
 	fr = (headr[2] & 0x0c ) >> 2;
 	ai->frequency = freq[fr]*100;
-	
+
 	if (pr){
 		if (ai->frequency == 3)
 			fprintf (stderr, "  Freq: reserved\n");
 		else
-			fprintf (stderr,"  Freq: %2.1f kHz\n", 
+			fprintf (stderr,"  Freq: %2.1f kHz\n",
 				 ai->frequency/1000.);
 	}
 	ai->off = c;
@@ -1885,7 +1884,7 @@ uint32_t ac3_frames[3][32] =
      {69,87,104,121,139,174,208,243,278,348,417,487,557,696,835,975,1114,
       1253,1393,0,0,0,0,0,0,0,0,0,0,0,0,0},
      {96,120,144,168,192,240,288,336,384,480,576,672,768,960,1152,1344,
-      1536,1728,1920,0,0,0,0,0,0,0,0,0,0,0,0,0}}; 
+      1536,1728,1920,0,0,0,0,0,0,0,0,0,0,0,0,0}};
 
 int get_ac3info(uint8_t *mbuf, int count, AudioInfo *ai, int pr)
 {
@@ -1902,7 +1901,7 @@ int get_ac3info(uint8_t *mbuf, int count, AudioInfo *ai, int pr)
 		else {
 			c++;
 		}
-	}	
+	}
 
 
 	if (!found){
@@ -1951,7 +1950,7 @@ void ps_pes(ipack *p)
 					p->has_vi = 1;
 					vi = p->vi.bit_rate;
 				}
-			} 			
+			}
 			break;
 
 		case AUDIO_STREAM_S ... AUDIO_STREAM_E:
@@ -1960,7 +1959,7 @@ void ps_pes(ipack *p)
 					p->has_ai = 1;
 					ai = p->ai.bit_rate;
 				}
-			} 
+			}
 			break;
 		}
 
@@ -1968,13 +1967,13 @@ void ps_pes(ipack *p)
 			muxr = (vi+ai)/400;
 		}
 
-		if ( start && muxr && (p->buf[7] & PTS_ONLY) && (p->has_ai || 
-				       p->buf[9+p->buf[8]+4] == 0xb3)){  
+		if ( start && muxr && (p->buf[7] & PTS_ONLY) && (p->has_ai ||
+				       p->buf[9+p->buf[8]+4] == 0xb3)){
 			SCR = trans_pts_dts(p->pts)-3600;
-			
+
 			check = write_ps_header(pbuf,
 						SCR,
-						muxr, 1, 0, 0, 1, 1, 1, 
+						muxr, 1, 0, 0, 1, 1, 1,
 						0, 0, 0, 0, 0, 0);
 
 			p->func(pbuf, check , p->data);
@@ -1983,8 +1982,8 @@ void ps_pes(ipack *p)
 		if (muxr && !start && vi){
 			SCR = trans_pts_dts(p->pts)-3600;
 			check = write_ps_header(pbuf,
-						SCR, 
-						muxr, 1, 0, 0, 1, 1, 1, 
+						SCR,
+						muxr, 1, 0, 0, 1, 1, 1,
 						0xC0, 0, 64, 0xE0, 1, 460);
 			start = 1;
 			p->func(pbuf, check , p->data);
@@ -2009,7 +2008,7 @@ void send_ipack(ipack *p)
 	p->buf[4] = (uint8_t)(((p->count-6) & 0xFF00) >> 8);
 	p->buf[5] = (uint8_t)((p->count-6) & 0x00FF);
 
-	
+
 	if (p->cid == PRIVATE_STREAM1){
 
 		off = 9+p->buf[8];
@@ -2018,26 +2017,26 @@ void send_ipack(ipack *p)
 			ai.off = 0;
 			ac3_off = ((p->buf[off+2] << 8)| p->buf[off+3]);
 			if (ac3_off < p->count)
-				f=get_ac3info(p->buf+off+3+ac3_off, 
+				f=get_ac3info(p->buf+off+3+ac3_off,
 					      p->count-ac3_off, &ai,0);
 			if ( !f ){
-				nframes = (p->count-off-3-ac3_off)/ 
+				nframes = (p->count-off-3-ac3_off)/
 					ai.framesize + 1;
 				p->buf[off+1] = nframes;
 				p->buf[off+2] = (ac3_off >> 8)& 0xFF;
 				p->buf[off+3] = (ac3_off)& 0xFF;
-				
+
 				ac3_off +=  nframes * ai.framesize - p->count;
 			}
 		}
-	} 
-	
+	}
+
 	if (p->ps) ps_pes(p);
 	else p->func(p->buf, p->count, p->data);
 
 	switch ( p->mpeg ){
-	case 2:		
-		
+	case 2:
+
 		p->buf[6] = 0x80;
 		p->buf[7] = 0x00;
 		p->buf[8] = 0x00;
@@ -2050,7 +2049,7 @@ void send_ipack(ipack *p)
 			p->buf[11] = (ac3_off >> 8)& 0xFF;
 			p->buf[12] = (ac3_off)& 0xFF;
 		}
-		
+
 		break;
 	case 1:
 		p->buf[6] = 0x0F;
@@ -2077,7 +2076,7 @@ static void write_ipack(ipack *p, uint8_t *data, int count)
 	if ( p->size == p->size_orig && p->plength &&
 	     (diff = 6+p->plength - p->found + p->count +count) > p->size &&
 	     diff < 3*p->size/2){
-		
+
 			p->size = diff/2;
 //			fprintf(stderr,"size: %d \n",p->size);
 	}
@@ -2090,18 +2089,18 @@ static void write_ipack(ipack *p, uint8_t *data, int count)
 			if (ac3_off>=0 && ai.framesize){
 				p->buf[p->count] = 0x80;
 				p->buf[p->count+1] = (p->size - p->count
-						      - 4 - ac3_off)/ 
+						      - 4 - ac3_off)/
 					ai.framesize + 1;
 				p->buf[p->count+2] = (ac3_off >> 8)& 0xFF;
 				p->buf[p->count+3] = (ac3_off)& 0xFF;
 				p->count+=4;
-				
+
 			}
 		}
 	}
 
 	if (p->count + count < p->size){
-		memcpy(p->buf+p->count, data, count); 
+		memcpy(p->buf+p->count, data, count);
 		p->count += count;
 	} else {
 		int rest = p->size - p->count;
@@ -2164,7 +2163,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 				break;
 			}
 			break;
-			
+
 
 		case 4:
 			if (count-c > 1){
@@ -2210,7 +2209,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 				p->flag2 = buf[c];
 				c++;
 				p->found++;
-			}	
+			}
 			break;
 
 		case 8:
@@ -2220,7 +2219,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 				p->found++;
 			}
 			break;
-			
+
 		default:
 
 			break;
@@ -2233,14 +2232,14 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 	if (!p->plength) p->plength = MMAX_PLENGTH-6;
 
 
-	if ( p->done || ((p->mpeg == 2 && p->found >= 9)  || 
+	if ( p->done || ((p->mpeg == 2 && p->found >= 9)  ||
 	     (p->mpeg == 1 && p->found >= 7)) ){
 		switch (p->cid){
-			
-		case AUDIO_STREAM_S ... AUDIO_STREAM_E:			
+
+		case AUDIO_STREAM_S ... AUDIO_STREAM_E:
 		case VIDEO_STREAM_S ... VIDEO_STREAM_E:
 		case PRIVATE_STREAM1:
-			
+
 			if (p->mpeg == 2 && p->found == 9){
 				write_ipack(p, &p->flag1, 1);
 				write_ipack(p, &p->flag2, 1);
@@ -2252,7 +2251,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 			}
 
 
-			if (p->mpeg == 2 && (p->flag2 & PTS_ONLY) &&  
+			if (p->mpeg == 2 && (p->flag2 & PTS_ONLY) &&
 			    p->found < 14){
 				while (c < count && p->found < 14){
 					p->pts[p->found-9] = buf[c];
@@ -2262,7 +2261,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 				}
 				if (c == count) return;
 			}
-			
+
 			if (p->mpeg == 1 && p->which < 2000){
 
 				if (p->found == 7) {
@@ -2270,7 +2269,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 					p->hlength = 1;
 				}
 
-				while (!p->which && c < count && 
+				while (!p->which && c < count &&
 				       p->check == 0xFF){
 					p->check = buf[c];
 					write_ipack(p, buf+c, 1);
@@ -2280,7 +2279,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 				}
 
 				if ( c == count) return;
-				
+
 				if ( (p->check & 0xC0) == 0x40 && !p->which){
 					p->check = buf[c];
 					write_ipack(p, buf+c, 1);
@@ -2308,18 +2307,18 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 					p->which = 2;
 					if ( c == count) return;
 				}
-				
+
 				if ( (p->check & 0x30) && p->check != 0xFF){
 					p->flag2 = (p->check & 0xF0) << 2;
 					p->pts[0] = p->check;
 					p->which = 3;
-				} 
+				}
 
 				if ( c == count) return;
 				if (p->which > 2){
 					if ((p->flag2 & PTS_DTS_FLAGS)
 					    == PTS_ONLY){
-						while (c < count && 
+						while (c < count &&
 						       p->which < 7){
 							p->pts[p->which-2] =
 								buf[c];
@@ -2330,9 +2329,9 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 							p->hlength++;
 						}
 						if ( c == count) return;
-					} else if ((p->flag2 & PTS_DTS_FLAGS) 
+					} else if ((p->flag2 & PTS_DTS_FLAGS)
 						   == PTS_DTS){
-						while (c < count && 
+						while (c < count &&
 						       p->which< 12){
 							if (p->which< 7)
 								p->pts[p->which
@@ -2348,7 +2347,7 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 					}
 					p->which = 2000;
 				}
-							
+
 			}
 
 			while (c < count && p->found < p->plength+6){
@@ -2358,8 +2357,8 @@ void instant_repack (uint8_t *buf, int count, ipack *p)
 				write_ipack(p, buf+c, l);
 				p->found += l;
 				c += l;
-			}	
-		
+			}
+
 			break;
 		}
 
@@ -2420,7 +2419,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 	int perc =0;
 	int last_perc =0;
 
-	if (fdin != STDIN_FILENO) verb = 1; 
+	if (fdin != STDIN_FILENO) verb = 1;
 
 	if (verb) {
 		length = lseek(fdin, 0, SEEK_END);
@@ -2436,7 +2435,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 	} else {
 		init_ipack(&pa, IPACKS,write_out_pes, 0);
 		init_ipack(&pv, IPACKS,write_out_pes, 0);
-	} 
+	}
 	pa.fd = fda_out;
 	pv.fd = fdv_out;
 	pa.data = (void *)&pa;
@@ -2457,7 +2456,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 		memcpy(buf+TS_SIZE-i,mbuf,i);
 		i = 188;
 	}
-	
+
 	count = 1;
 	while (count > 0){
 		count = save_read(fdin,buf+i,IN_SIZE-i)+i;
@@ -2467,7 +2466,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 			fprintf(stderr,"Reading TS  %d %%\r",perc);
 			last_perc = perc;
 		}
-		
+
 		for( i = 0; i < count; i+= TS_SIZE){
 			uint8_t off = 0;
 
@@ -2477,7 +2476,7 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 			if (!(buf[3+i]&0x10)) // no payload?
 				continue;
 			/*if ( buf[1+i]&0x80){
-				fprintf(stderr,"Error in TS for PID: %d\n", 
+				fprintf(stderr,"Error in TS for PID: %d\n",
 					pid);
 			}*/
 			if (pid == pidv){
@@ -2500,28 +2499,28 @@ int64_t ts_demux(int fdin, int fdv_out,int fda_out,uint16_t pida,
 					reset_ipack(p);
 				}
 				sb = buf+4+off+i;
-				if( es && 
+				if( es &&
 				    !p->start && (sb[7] & PTS_DTS_FLAGS)){
-					uint8_t *pay = sb+sb[8]+9; 
+					uint8_t *pay = sb+sb[8]+9;
 					int l = TS_SIZE - 13 - off - sb[8];
-					if ( pid == pidv &&   
-					     (p->start = 
+					if ( pid == pidv &&
+					     (p->start =
 					      get_vinfo( pay, l,&p->vi,1)+1) >0
 						){
 						vpts = trans_pts_dts(sb+9);
 						printf("vpts : %fs\n",
 						       vpts/90000.);
 					}
-					if ( pid == pida && es==1 && 
-					     (p->start = 
+					if ( pid == pida && es==1 &&
+					     (p->start =
 					      get_ainfo( pay, l,&p->ai,1)+1) >0
 						){
 						apts = trans_pts_dts(sb+9);
 						printf("apts : %fs\n",
 						       apts/90000.);
 					}
-					if ( pid == pida && es==2 && 
-					     (p->start = 
+					if ( pid == pida && es==2 &&
+					     (p->start =
 					      get_ac3info( pay, l,&p->ai,1)+1) >0
 						){
 						apts = trans_pts_dts(sb+9);
@@ -2573,7 +2572,7 @@ void ts2es_opt(int fdin,  uint16_t pidv, ipack *p, int verb)
 		memcpy(buf+TS_SIZE-i,mbuf,i);
 		i = 188;
 	}
-	
+
 	count = 1;
 	while (count > 0){
 		count = save_read(fdin,buf+i,IN_SIZE-i)+i;
@@ -2593,7 +2592,7 @@ void ts2es_opt(int fdin,  uint16_t pidv, ipack *p, int verb)
 			if (!(buf[3+i]&0x10)) // no payload?
 				continue;
 			/*if ( buf[1+i]&0x80){
-				fprintf(stderr,"Error in TS for PID: %d\n", 
+				fprintf(stderr,"Error in TS for PID: %d\n",
 					pid);
 			}*/
 			if (pid != pidv){
@@ -2629,7 +2628,7 @@ void ts2es(int fdin,  uint16_t pidv)
 	p.fd = STDOUT_FILENO;
 	p.data = (void *)&p;
 
-	if (fdin != STDIN_FILENO) verb = 1; 
+	if (fdin != STDIN_FILENO) verb = 1;
 
 	ts2es_opt(fdin, pidv, &p, verb);
 }
@@ -2664,9 +2663,9 @@ void change_aspect(int fdin, int fdout, int aspect)
 				break;
 			}
 			while ( c < l - 6){
-				if (buf[c] == 0x00 && 
+				if (buf[c] == 0x00 &&
 				    buf[c+1] == 0x00 &&
-				    buf[c+2] == 0x01 && 
+				    buf[c+2] == 0x01 &&
 				    buf[c+3] == 0xB3) {
 					c += 4;
 					buf[c+3] &= 0x0f;

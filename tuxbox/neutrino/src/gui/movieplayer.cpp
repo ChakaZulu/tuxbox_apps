@@ -40,7 +40,7 @@
 /* TODOs / Release Plan:
 
  - always: fix bugs
- 
+
 (currently planned order)
  - read TS from socket (UDP?)
  - PES2TS on server side
@@ -94,14 +94,16 @@
 #define DVR	ADAP "/dvr0"
 
 #define AVIA_AV_STREAM_TYPE_0           0x00
-#define AVIA_AV_STREAM_TYPE_SPTS        0x01 
+#define AVIA_AV_STREAM_TYPE_SPTS        0x01
 #define AVIA_AV_STREAM_TYPE_PES         0x02
-#define AVIA_AV_STREAM_TYPE_ES          0x03 
+#define AVIA_AV_STREAM_TYPE_ES          0x03
 
 #define ConnectLineBox_Width	15
 
 static int playstate;
 static bool isTS;
+int speed = 1;
+
 
 //------------------------------------------------------------------------
 
@@ -199,19 +201,21 @@ int CMoviePlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 
 void* Play_Thread( void* filename )
 {
-	unsigned char buf[348*188];
+	bool failed = false;
+	unsigned char buf[384*188*2];
 	unsigned short pida = 0, pidv = 0;
 	int done, fd = 0, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
 	struct dmx_pes_filter_params p;
-	ssize_t wr;
-	size_t r;
+	ssize_t wr = 0;
+	ssize_t cache = sizeof(buf);
+	size_t r = 0;
 
 	if( (char *) filename == NULL ) {
 	    	playstate = 0;
 		pthread_exit(NULL);
 	}
 
-	if( (fd = open((char *) filename, O_RDONLY|O_LARGEFILE)) < 0 ) {
+	if( (fd = open((char *) filename, O_RDONLY|O_LARGEFILE )) < 0 ) {
 	    	playstate = 0;
 		pthread_exit(NULL);
 	}
@@ -229,19 +233,10 @@ void* Play_Thread( void* filename )
 	}
 	lseek( fd, 0L, SEEK_SET );
 
-	if( (dmxa = open(DMX, O_RDWR)) < 0 ||
-	    (dmxv = open(DMX, O_RDWR)) < 0 ||
-	    (dvr  = open(DVR, O_WRONLY)) < 0 ||
-	    (adec = open(ADEC, O_RDWR)) < 0 ||
-	    (vdec = open(VDEC, O_RDWR)) < 0 ) {
-	    	playstate = 0;
-		close(fd);
-		close(dmxa);
-		close(dmxv);
-		close(dvr);
-		close(adec);
-		close(vdec);
-		pthread_exit(NULL);
+	if( (dmxa = open(DMX, O_RDWR)) < 0 || (dmxv = open(DMX, O_RDWR)) < 0 || (dvr  = open(DVR, O_WRONLY)) < 0 ||
+	    (adec = open(ADEC, O_RDWR)) < 0 || (vdec = open(VDEC, O_RDWR)) < 0 )
+	{
+		failed = true;
 	}
 
 	p.input = DMX_IN_DVR;
@@ -250,78 +245,72 @@ void* Play_Thread( void* filename )
 
 	p.pid = pida;
 	p.pes_type = DMX_PES_AUDIO;
-	if( ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0 ||
-	    ioctl(adec, AUDIO_STOP) < 0 ||
-	    ioctl(vdec, VIDEO_STOP) < 0 ) {
-	    	playstate = 0;
-		close(fd);
-		close(dmxa);
-		close(dmxv);
-		close(dvr);
-		close(adec);
-		close(vdec);
-		pthread_exit(NULL);
+
+	if( ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0)
+	{
+		failed = true;
 	}
 
 	p.pid = pidv;
 	p.pes_type = DMX_PES_VIDEO;
-	if( ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0 ||
-	    ioctl(adec, AUDIO_PLAY) < 0 ||
-	    ioctl(vdec, VIDEO_PLAY) < 0 ) {
-	    	playstate = 0;
-		close(fd);
-		close(dmxa);
-		close(dmxv);
-		close(dvr);
-		close(adec);
-		close(vdec);
-		pthread_exit(NULL);
+	if( ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0)
+	{
+		failed = true;
 	}
 
-	if( isTS )
+	if( isTS && !failed )
 	{
-		while( (r = read(fd, buf, sizeof(buf))) > 0 && playstate >= 1 )
+		while( (r = read(fd, buf, cache)) > 0 && playstate >= 1 )
 		{
 			done = 0;
+			wr = 0;
 
 			switch( playstate )
 			{
-			case 2:	// pause play
-				while( playstate == 2 )
-					usleep(200000);
+				case 2:	// pause
+					while (playstate == 2)
+					{
+						ioctl(dmxa, DMX_STOP);
+					}
+					break;
 
-				// Filters need to be re-set, or playback will not work correctly
-				p.pid = pida;
-				p.pes_type = DMX_PES_AUDIO;
-				ioctl(dmxa, DMX_SET_PES_FILTER, &p);
-				p.pid = pidv;
-				p.pes_type = DMX_PES_VIDEO;
-				ioctl(dmxv, DMX_SET_PES_FILTER, &p);
-				break;
+				case 3:	// ff
+				case 4:	// rew
+					ioctl(dmxa, DMX_STOP);
+					lseek( fd, cache*speed, SEEK_CUR );
+					break;
 
-			case 3:	// todo: ff
-				//lseek( fd, 1000000L, SEEK_CUR );
-				playstate = 1;
-				break;
-
-			case 4:	// todo: rew
-				//lseek( fd, -1000000L, SEEK_CUR );
-				playstate = 1;
-				break;
+				case 99: // Softreset
+					speed = 1;
+					ioctl(vdec, VIDEO_STOP);
+					ioctl(adec, AUDIO_STOP);
+					ioctl(dmxv, DMX_STOP);
+					ioctl(dmxa, DMX_STOP);
+					ioctl(dmxv, DMX_START);
+					ioctl(dmxa, DMX_START);
+					ioctl(vdec, VIDEO_PLAY);
+					ioctl(adec, AUDIO_PLAY);
+					playstate = 1;
 			}
 
-			while( r > 0 )
+			do
 			{
-				if( (wr = write(dvr, &buf[done], r)) <= 0 )
-					continue;
-				r -= wr;
+				wr = write(dvr, &buf[done], r);
+				if ( playstate > 1) break;
+				if (!done ) cache = wr;
 				done += wr;
+				r -= wr;
 			}
+			while( r );
 		}
 	}
-	else
+	else if( !failed )
 	{
-		pes_to_ts2( fd, dvr, pida, pidv );	// VERY bad performance!!!
+		ioctl(vdec, VIDEO_PLAY);
+		ioctl(adec, AUDIO_PLAY);
+		ioctl(dmxv, DMX_START);
+		ioctl(dmxa, DMX_START);
+		pes_to_ts2( fd, dvr, pida, pidv, &playstate );	// VERY bad performance!!!
 	}
 
 	ioctl(vdec, VIDEO_STOP);
@@ -336,11 +325,11 @@ void* Play_Thread( void* filename )
 	close(adec);
 	close(vdec);
 
-	if( playstate != 0 )
-	{
-		isTS = true;					// to let the fast exit also work in pes mode ;)
-		g_RCInput->postMsg( CRCInput::RC_red, 0 );	// for faster exit in PlayStream()
-	}
+	isTS = true;					// to let the fast exit also work in pes mode ;)
+	g_RCInput->postMsg( CRCInput::RC_red, 0 );	// for faster exit in PlayStream()
+
+	playstate = 0;
+
 	pthread_exit(NULL);
 }
 
@@ -356,6 +345,7 @@ void CMoviePlayerGui::PlayStream( void )
 	 * playstate == 2 : pause-mode
 	 * playstate == 3 : fast-forward
 	 * playstate == 4 : rewind
+	 * playstate == 99: softreset without clearing buffer (playstate toggle to 1)
 	 */
 
 	do
@@ -366,13 +356,8 @@ void CMoviePlayerGui::PlayStream( void )
 
 			if( playstate >= 1 )
 			{
-				if( isTS )
-				{
 					playstate = 0;
 					break;
-				}
-				else
-					printf("[movieplayer.cpp] Stop not supported in PES Mode\n");
 			}
 		}
 
@@ -384,7 +369,7 @@ void CMoviePlayerGui::PlayStream( void )
 			if( filebrowser->exec(Path) )
 			{
 				Path = filebrowser->getCurrentDir();
-				
+
 				if( (filename = filebrowser->getSelectedFile()->Name.c_str()) != NULL )
 				{
 					update_lcd = true;
@@ -409,7 +394,7 @@ void CMoviePlayerGui::PlayStream( void )
 				playstate = 0;
 				pthread_join( rct, NULL );
 			}
-			playstate = 1;
+			playstate = 99;
 
 			if( pthread_create(&rct, 0, Play_Thread, (void *) filename) != 0 )
 			{
@@ -438,7 +423,7 @@ void CMoviePlayerGui::PlayStream( void )
 		}
 		else if( msg == CRCInput::RC_yellow )
 		{
-		  	if( playstate == 1 && isTS )
+		  	if( playstate == 1 )
 		  	{
 		  		// pause play
 		  		update_lcd = true;
@@ -448,17 +433,22 @@ void CMoviePlayerGui::PlayStream( void )
 		  	{
 		  		// resume play
 		  		update_lcd = true;
-		  		playstate = 1;
+		  		playstate = 99;
 		  	}
 		}
 		else if( msg == CRCInput::RC_left )
 		{
-			// fast-forward
+			// rewind
+			if ( speed > 1) speed = 1;
+			speed *= -2;
+			speed *= (speed > 1 ? -1 : 1);
 			playstate = 3;
 		}
 		else if( msg == CRCInput::RC_right )
 		{
-			// rewind
+			// fast-forward
+			if ( speed < 1) speed = 1;
+			speed *= 2;
 			playstate = 4;
 		}
 		else if( msg == CRCInput::RC_up ||
@@ -472,7 +462,12 @@ void CMoviePlayerGui::PlayStream( void )
 		}
 		else if( msg == CRCInput::RC_ok )
 		{
-			open_filebrowser = true;
+			if (playstate > 1)
+			{
+				playstate = 99;
+			}
+			else
+				open_filebrowser = true;
 		}
 		else if( msg == NeutrinoMessages::RECORD_START ||
 			 msg == NeutrinoMessages::ZAPTO ||
@@ -547,7 +542,7 @@ int CMoviePlayerGui::show()
 			PlayStream();
 			paint();
 		}
-#endif	
+#endif
 		else if(msg == NeutrinoMessages::CHANGEMODE)
 		{
 			if((data & NeutrinoMessages::mode_mask) !=NeutrinoMessages::mode_ts)

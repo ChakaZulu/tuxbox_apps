@@ -1,29 +1,29 @@
 /*
  *  dvb-mpegtools for the Siemens Fujitsu DVB PCI card
  *
- * Copyright (C) 2000, 2001 Marcus Metzler 
+ * Copyright (C) 2000, 2001 Marcus Metzler
  *            for convergence integrated media GmbH
- * Copyright (C) 2002  Marcus Metzler 
- * 
+ * Copyright (C) 2002  Marcus Metzler
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
- * 
+ *
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  * Or, point your browser to http://www.gnu.org/copyleft/gpl.html
- * 
+ *
 
- * The author can be reached at mocm@metzlerbros.de, 
+ * The author can be reached at mocm@metzlerbros.de,
 
  */
 
@@ -73,7 +73,7 @@
 #define PES_CRC_FLAG     0x02
 #define PES_EXT_FLAG     0x01
 
-//pts_dts flags 
+//pts_dts flags
 #define PTS_ONLY         0x80
 #define PTS_DTS          0xC0
 
@@ -152,9 +152,9 @@ extern "C" {
 		void *data;
 	} p2p;
 
-	
+
 	uint64_t trans_pts_dts(uint8_t *pts);
-	int write_ts_header(uint16_t pid, uint8_t *counter, int pes_start, 
+	int write_ts_header(uint16_t pid, uint8_t *counter, int pes_start,
 			    uint8_t *buf, uint8_t length);
 	uint16_t get_pid(uint8_t *pid);
 	void init_p2p(p2p *p, void (*func)(uint8_t *buf, int count, void *p),
@@ -162,21 +162,21 @@ extern "C" {
 	void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p));
 	void get_pes (uint8_t *buf, int count, p2p *p, void (*func)(p2p *p));
 	void pes_repack(p2p *p);
-	void setup_pes2ts( p2p *p, uint32_t pida, uint32_t pidv, 
+	void setup_pes2ts( p2p *p, uint32_t pida, uint32_t pidv,
 			   void (*ts_write)(uint8_t *buf, int count, void *p));
 	void kpes_to_ts( p2p *p,uint8_t *buf ,int count );
-	void setup_ts2pes( p2p *pa, p2p *pv, uint32_t pida, uint32_t pidv, 
+	void setup_ts2pes( p2p *pa, p2p *pv, uint32_t pida, uint32_t pidv,
 			   void (*pes_write)(uint8_t *buf, int count, void *p));
 	void kts_to_pes( p2p *p, uint8_t *buf);
 	void pes_repack(p2p *p);
 	void extract_from_pes(int fdin, int fdout, uint8_t id, int es);
 	int64_t pes_dmx(int fdin, int fdouta, int fdoutv, int es);
-	void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv);
+	void pes_to_ts2( int fdin, int fdout, uint16_t pida, uint16_t pidv, const int* playstate);
 	void ts_to_pes( int fdin, uint16_t pida, uint16_t pidv, int pad);
 	int get_ainfo(uint8_t *mbuf, int count, AudioInfo *ai, int pr);
 	int get_vinfo(uint8_t *mbuf, int count, VideoInfo *vi, int pr);
 	int get_ac3info(uint8_t *mbuf, int count, AudioInfo *ai, int pr);
-	void filter_audio_from_pes(int fdin, int fdout, uint8_t id, 
+	void filter_audio_from_pes(int fdin, int fdout, uint8_t id,
 				   uint8_t subid);
 	void find_avpids(int fd, uint16_t *vpid, uint16_t *apid);
 
@@ -218,9 +218,9 @@ extern "C" {
 			int pad);
 	void free_ipack(ipack * p);
 	void send_ipack(ipack *p);
-	void reset_ipack(ipack *p);		     
+	void reset_ipack(ipack *p);
 	void ps_pes(ipack *p);
-	// use with ipack structure, repack size and callback func 
+	// use with ipack structure, repack size and callback func
 
 	int64_t ts_demux(int fd_in, int fdv_out,int fda_out,uint16_t pida,
 			  uint16_t pidv, int es);
