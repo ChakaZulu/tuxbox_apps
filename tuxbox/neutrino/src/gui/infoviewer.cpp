@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.20 2001/09/20 00:36:32 field Exp $
+// $Id: infoviewer.cpp,v 1.21 2001/09/20 11:21:06 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.21  2001/09/20 11:21:06  field
+// buggy...
+//
 // Revision 1.20  2001/09/20 00:36:32  field
 // epg mit zaopit zum grossteil auf onid & s_id umgestellt
 //
@@ -466,39 +469,49 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
      
         		char* pData = new char[nBufSize+1] ;
                 read(sock_fd, pData, nBufSize);
-    		char tmp[20];
 
-    		char * pos = copyStringto( pData, tmp, sizeof(tmp));
-    		pos = copyStringto( pos, running, sizeof(running));
-    		pos = copyStringto( pos, runningStart, sizeof(runningStart));
-    		pos = copyStringto( pos, runningDuration, sizeof(runningDuration));
+                unsigned long long          tmp_id;
+                sectionsd::sectionsdTime*   epg_times;
+                char* dp = pData;
 
-    		pos = copyStringto( pos, tmp, sizeof(tmp));
-    		pos = copyStringto( pos, next, sizeof(next));
-    		pos = copyStringto( pos, nextStart, sizeof(nextStart));
-    		pos = copyStringto( pos, nextDuration, sizeof(nextDuration));
+                // current
+                tmp_id = (unsigned long long)* dp;
+                dp+= sizeof(tmp_id);
+printf("id %llx\n", tmp_id);
+                epg_times = (sectionsd::sectionsdTime*) dp;
+                dp+= sizeof(sectionsd::sectionsdTime);
 
-            time_t startzeit;
-    		unsigned long long dauer;
-            sscanf(runningDuration, "%08lx", &dauer);
-    		sprintf((char*) &runningDuration, "%d min", dauer/ 60);
+                unsigned    dauer = epg_times->dauer/ 60;
+        		sprintf((char*) &runningDuration, "%d min", dauer);
+printf("%s", runningDuration);
 
-            sscanf(runningStart, "%08lx", &startzeit);
-            struct tm *pStartZeit = localtime(&startzeit);
-    		sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+                struct      tm *pStartZeit = localtime(&epg_times->startzeit);
+        		sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+printf("%s", runningStart);
+                runningPercent=(unsigned)((float)(time(NULL)-epg_times->startzeit)/(float)epg_times->dauer*100.);
+printf("proz.: %d\n", runningPercent);
+                dp = copyStringto( dp, running, sizeof(running));
+printf("%s", running);
+                // next
+                tmp_id = (unsigned long long)* dp;
+                dp+= sizeof(tmp_id);
+printf("id %llx\n", tmp_id);
 
-            runningPercent=(unsigned)((float)(time(NULL)- startzeit)/(float)dauer*100.);
+                epg_times = (sectionsd::sectionsdTime*) dp;
+                dp+= sizeof(sectionsd::sectionsdTime);
 
-            sscanf(nextDuration, "%08lx", &dauer);
-    		sprintf((char*) &nextDuration, "%d min", dauer/ 60);
+                dauer = epg_times->dauer/ 60;
+        		sprintf((char*) &nextDuration, "%d min", dauer);
+printf("%s", nextDuration);
+                pStartZeit = localtime(&epg_times->startzeit);
+        		sprintf((char*) &nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
+printf("%s", nextStart);
+                dp = copyStringto( dp, next, sizeof(next));
+printf("%s", next);
+        		delete[] pData;
+        		retval = true;
 
-            sscanf(nextStart, "%08lx", &startzeit);
-            pStartZeit = localtime(&startzeit);
-    		sprintf((char*) &nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-
-    		delete[] pData;
-    		retval = true;
-    	}
+            }
         }
         else
         {
