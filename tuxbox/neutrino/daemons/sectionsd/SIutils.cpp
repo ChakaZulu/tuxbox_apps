@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.11 2001/07/14 16:38:46 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.12 2001/07/17 14:15:52 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.12  2001/07/17 14:15:52  fnbrd
+// Kleine Aenderung damit auch static geht.
+//
 // Revision 1.11  2001/07/14 16:38:46  fnbrd
 // Mit workaround fuer defektes mktime der glibc
 //
@@ -152,6 +155,10 @@ const char *decode_descr (unsigned char _index) {
 	return descr_tbl[index];
 }
 
+#ifdef SEPARATE_MKTIME
+time_t separate_mktime (struct tm *tp) __THROW;
+#endif
+
 // Thanks to kwon
 time_t changeUTCtoCtime(const unsigned char *buffer, int local_time)
 {
@@ -191,7 +198,11 @@ time_t changeUTCtoCtime(const unsigned char *buffer, int local_time)
 //    printf ("Startzeit: GMT: %.2d.%.2d.%.4d  %.2d:%.2d:%.2d\n",
 //      zeit.tm_mday, zeit.tm_mon+1, zeit.tm_year+1900,
 //      zeit.tm_hour, zeit.tm_min, zeit.tm_sec);
+#ifdef SEPARATE_MKTIME
+    return separate_mktime(&zeit)+ (local_time ? -timezone : 0);
+#else
     return mktime(&zeit)+ (local_time ? -timezone : 0);
+#endif
 }
 
 // Thanks to tmbinc

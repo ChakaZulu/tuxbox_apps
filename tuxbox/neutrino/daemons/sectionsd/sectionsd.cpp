@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.21 2001/07/17 13:14:59 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.22 2001/07/17 14:15:52 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.22  2001/07/17 14:15:52  fnbrd
+//  Kleine Aenderung damit auch static geht.
+//
 //  Revision 1.21  2001/07/17 13:14:59  fnbrd
 //  Noch ne Verbesserung in Bezug auf alte Events.
 //
@@ -1009,7 +1012,7 @@ const unsigned timeoutInSeconds=2;
       for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
         if(e->times.size()>0) {
 	  if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L &&
-	    e->times.begin()->startzeit+e->times.begin()->dauer>zeit-(long)OLD_EVENTS_ARE*60L
+	    e->times.begin()->startzeit+(long)e->times.begin()->dauer>zeit-(long)OLD_EVENTS_ARE*60L
 	  ) {
             pthread_mutex_lock(&eventsLock);
             events.insert(*e);
@@ -1181,7 +1184,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.21 2001/07/17 13:14:59 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.22 2001/07/17 14:15:52 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
