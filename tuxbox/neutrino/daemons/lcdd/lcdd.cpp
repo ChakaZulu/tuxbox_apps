@@ -123,7 +123,7 @@ void show_volume(unsigned char vol)
 	display.draw_fill_rect (3,54,29,64, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (3,54,3+(vol>>2),64, CLCDDisplay::PIXEL_ON);
 	if (muted) {
-		display.draw_fill_rect (3,56,29,62, CLCDDisplay::PIXEL_OFF);
+		display.draw_fill_rect (4,55,2+(vol>>2),63, CLCDDisplay::PIXEL_OFF);
 	}
 	display.update();
 }
