@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.3 2003/10/19 21:05:53 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.4 2003/10/19 22:22:57 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.3 2003/10/19 21:05:53 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.4  2003/10/19 22:22:57  rasc
+- some datacarousell stuff started
+
 Revision 1.3  2003/10/19 21:05:53  rasc
 - some datacarousell stuff started
 
@@ -2743,6 +2746,7 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 
 
  descDataBroadcastID   d;
+ int 		       len;
 
 
 
@@ -2750,6 +2754,8 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
  d.descriptor_length       	 = b[1];
 
  d.data_broadcast_id		 = getBits (b, 0, 16, 16);
+ b+=4;
+ len = d.descriptor_length -2;
 
  
  out_S2W_NL (4,"Data_broadcast_ID: ",d.data_broadcast_id,
@@ -2757,9 +2763,66 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 
  // $$$ ID selector bytes may depend on databroadcast_id
  // $$$ do further more selection here
+ // $$$ EN 301 192 Stuff TODO
+ 
+ if (d.data_broadcast_id == 0x000B) {
+	 // -- EN 301 192 PSI Signalling IP/MAC Notification Table
 
- out_nl (4,"ID_selector_bytes: ");
-     printhexdump_buf (4, b+4, d.descriptor_length-2);
+	 {
+ 		typedef struct  _descIPMAC_NOTIF_TABLE {
+			u_int	platform_id_data_length;
+			// inner loop
+			u_int	platform_id;
+			u_int	action_type;
+			u_int	reserved;
+			u_int	INT_versioning_flag;
+			u_int	INT_version;
+ 		} descIPMAC_NOTIF_TABLE;
+
+
+		descIPMAC_NOTIF_TABLE   d;
+		int 		 	len2;
+
+
+ 		out_nl    (4,"IP/MAC Notification [EN 301 192]:");
+
+ 		d.platform_id_data_length = getBits (b, 0,  0,  8);
+ 		out_SW_NL (5,"Platform_id_data_length: ",d.platform_id_data_length);
+		b++;
+		len--;
+		len2 = d.platform_id_data_length;
+
+		indent (+1);
+		while (len2 > 0) {
+        	   d.platform_id  		= getBits (b, 0,  0, 24);
+        	   d.action_type		= getBits (b, 0, 24,  8);
+        	   d.reserved			= getBits (b, 0, 32,  2);
+        	   d.INT_versioning_flag	= getBits (b, 0, 34,  1);
+        	   d.INT_version		= getBits (b, 0, 35,  5);
+		   b += 5;
+		   len -= 5;
+		   len2 -= 5;
+
+ 		   out_SL_NL  (5,"Platform_id: ",d.platform_id);	/* $$$$ TODO: platform_id_str nach EN 162 */
+ 		   out_SB_NL  (5,"Action_type: ",d.action_type);
+ 		   out_SB_NL  (5,"reserved: ",d.reserved);
+ 		   out_SB_NL  (5,"INT_versioning_flag: ",d.INT_versioning_flag);
+ 		   out_SB_NL  (5,"INT_version: ",d.INT_version);
+
+		}
+		indent (-1);
+ 	
+		out_nl (5,"Private Data: ");
+	     		printhexdump_buf (5, b, len);
+
+
+	 }
+	
+ } else {
+
+ 	out_nl (4,"ID_selector_bytes: ");
+     	printhexdump_buf (4, b, len);
+ }
 
 }
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.15 2003/10/19 21:05:53 rasc Exp $
+$Id: dvb_str.c,v 1.16 2003/10/19 22:22:57 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.15 2003/10/19 21:05:53 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.16  2003/10/19 22:22:57  rasc
+- some datacarousell stuff started
+
 Revision 1.15  2003/10/19 21:05:53  rasc
 - some datacarousell stuff started
 
@@ -128,9 +131,9 @@ char *dvbstrTableID (u_int id)
  //    {  0x04, 0x3F,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
  //
  // $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
-     {  0x04, 0x3d,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
-     {  0x3e, 0x3e,  "DSM-CC section with private data|ISO/IEC1381-6" },
-     {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+      {  0x04, 0x3d,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+      {  0x3e, 0x3e,  "DSM-CC section with private data|ISO/IEC1381-6" },
+      {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
 
      {  0x40, 0x40,  "network_information_section - actual network" },
      {  0x41, 0x41,  "network_information_section - other network" },
@@ -139,7 +142,11 @@ char *dvbstrTableID (u_int id)
      {  0x46, 0x46,  "service_description_section - actual transport stream" },
      {  0x47, 0x49,  "reserved" },
      {  0x4A, 0x4A,  "bouquet_association_section" },
-     {  0x4B, 0x4D,  "reserved" },
+//     {  0x4B, 0x4D,  "reserved" },
+     {  0x4B, 0x4B,  "reserved" },
+     {  0x4C, 0x4C,  "IP/MAC Notification Table [EN 301 192]" },
+     {  0x4D, 0x4D,  "reserved" },
+
      {  0x4E, 0x4E,  "event_information_section - actual transport stream, present/following" },
      {  0x4F, 0x4F,  "event_information_section - other transport stream, present/following" },
      {  0x50, 0x5F,  "event_information_section - actual transport stream, schedule" },
@@ -415,7 +422,12 @@ char *dvbstrLinkage_TYPE (u_int flag)
      {  0x08, 0x08,  "mobile handover service" },
      {  0x09, 0x09,  "system software update service" },
      {  0x0A, 0x0A,  "TS containing SSU BAT or NIT" },
-     {  0x0B, 0x7F,  "reserved" },
+//     {  0x0B, 0x7F,  "reserved" },   // own def...
+
+     {  0x0B, 0x0B,  "IP/MAC Notification Table" },
+     {  0x0C, 0x0C,  "Deferred IP/MAC Notification Table" },
+     {  0x0D, 0x7F,  "reserved" },
+
      {  0x80, 0xFE,  "user defined" },
      {  0xFF, 0xFF,  "reserved" },
      {  0,0, NULL }

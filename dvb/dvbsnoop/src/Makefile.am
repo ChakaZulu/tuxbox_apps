@@ -6,7 +6,8 @@ noinst_HEADERS = \
 	dmx_sect.h eit.h nit.h pkt_time.h sectables.h tot.h descriptor.h \
 	mpeg_descriptor.h dvb_descriptor.h dsm_descriptor.h \
 	dmx_ts.h emm_ecm.h output.h pmt.h sit.h tsdt.h dsmcc_str.h \
-	table_userdef.h version.h 
+	table_userdef.h version.h \
+	datacarousel/datagram.h
 
 dvbsnoop_SOURCES = \
 	bat.c dit.c dvbsnoop.c helper.c pat.c rst.c st.c tslayer.c cat.c \
@@ -14,5 +15,6 @@ dvbsnoop_SOURCES = \
 	dmx_sect.c eit.c nit.c pkt_time.c sectables.c tot.c descriptor.c \
 	mpeg_descriptor.c dvb_descriptor.c dsm_descriptor.c \
 	dmx_ts.c emm_ecm.c output.c pmt.c sit.c tsdt.c dsmcc_str.c \
-	table_userdef.c
+	table_userdef.c \
+	datacarousel/datagram.c
 
