@@ -56,7 +56,6 @@ lib/base/buffer.cpp
 lib/base/ebase.cpp
 lib/base/erect.cpp
 lib/base/thread.cpp
-lib/driver/rcdreambox.cpp
 lib/driver/eavswitch.cpp
 lib/driver/rc.cpp
 lib/driver/streamwd.cpp
