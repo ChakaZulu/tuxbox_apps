@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.14 2004/06/03 17:33:04 alexw Exp $
+ * $Id: stream2file.cpp,v 1.15 2004/06/15 14:44:15 carjay Exp $
  * 
  * streaming to file/disc
  * 
@@ -43,12 +43,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/poll.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
 #include <linux/dvb/dmx.h>
+
+//#define INC_BUSY_COUNT printf ("inc (%d): %s,%d\n",++busy_count,__FUNCTION__,__LINE__);
+//#define DEC_BUSY_COUNT printf ("dec (%d): %s,%d\n",--busy_count,__FUNCTION__,__LINE__);
+
+#define INC_BUSY_COUNT busy_count++;
+#define DEC_BUSY_COUNT busy_count--;
+
 
 //#include <transform.h>
 #define TS_SIZE 188
@@ -114,9 +122,8 @@ static int setPesFilter(const unsigned short pid, const dmx_output_t dmx_output)
 	int fd;
 	struct dmx_pes_filter_params flt; 
 
-	if ((fd = open(DMXDEV, O_RDWR)) < 0)
+	if ((fd = open(DMXDEV, O_RDWR|O_NONBLOCK)) < 0)
 		return -1;
-
 	if (ioctl(fd, DMX_SET_BUFFER_SIZE, DMX_BUFFER_SIZE) < 0)
 		return -1;
 
@@ -250,6 +257,8 @@ void * DMXThread(void * v_arg)
 	unsigned char buf[TS_SIZE];
 	int     offset = 0;
 	ssize_t r = 0;
+	struct pollfd pfd = {*(int*)v_arg, POLLIN|POLLERR,0 };
+	int pres;
 
 	ringbuffer_t * ringbuf = ringbuffer_create(RINGBUFFERSIZE);
 
@@ -272,12 +281,24 @@ void * DMXThread(void * v_arg)
 	if (v_arg == &dvrfd)
 		while (exit_flag == STREAM2FILE_STATUS_RUNNING)
 		{
-			r = read(*(int *)v_arg, &(buf[0]), TS_SIZE);
-			if (r > 0)
+			if ((pres=poll (&pfd, 1, 15000))>0)
 			{
-				offset = sync_byte_offset(&(buf[0]), r);
-				if (offset != -1)
-					break;
+				if (!(pfd.revents&POLLIN))
+				{
+					printf ("PANIC: error reading from demux, bailing out\n");
+					exit_flag = STREAM2FILE_STATUS_READ_FAILURE;
+				}
+				r = read(*(int *)v_arg, &(buf[0]), TS_SIZE);
+				if (r > 0)
+				{
+					offset = sync_byte_offset(&(buf[0]), r);
+					if (offset != -1)
+						break;
+				}
+			}
+			else if (!pres)
+			{
+				printf ("[stream2file]: timeout from demux\n");
 			}
 		}
 	else
@@ -313,33 +334,42 @@ void * DMXThread(void * v_arg)
 
 		while (exit_flag == STREAM2FILE_STATUS_RUNNING)
 		{
-			r = read(*(int *)v_arg, vec[0].buf, todo);
-			
-			if (r > 0)
+			if ((pres=poll (&pfd, 1, 15000))>0)
 			{
-				ringbuffer_write_advance(ringbuf, r);
-
-				if (todo == r)
+				if (!(pfd.revents&POLLIN))
 				{
-					if (todo2 == 0)
-						goto next;
-
-					todo = todo2;
-					todo2 = 0;
-					vec[0].buf = vec[1].buf;
+					printf ("PANIC: error reading from demux, bailing out\n");
+					exit_flag = STREAM2FILE_STATUS_READ_FAILURE;
 				}
-				else
+				r = read(*(int *)v_arg, vec[0].buf, todo);
+				if (r > 0)
 				{
-					vec[0].buf += r;
-					todo -= r;
+					ringbuffer_write_advance(ringbuf, r);
+	
+					if (todo == r)
+					{
+						if (todo2 == 0)
+							goto next;
+	
+						todo = todo2;
+						todo2 = 0;
+						vec[0].buf = vec[1].buf;
+					}
+					else
+					{
+						vec[0].buf += r;
+						todo -= r;
+					}
 				}
 			}
+			else if (!pres){
+				printf ("[stream2file]: timeout reading from demux\n");
+				goto next;
+			}
 		}
-	next:
-		todo = IN_SIZE;
+		next:
+			todo = IN_SIZE;
 	}
-	//sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
-	//	pthread_kill(rcst, SIGKILL);
 
 	if (v_arg == &dvrfd)
 		close(*(int *)v_arg);
@@ -354,7 +384,7 @@ void * DMXThread(void * v_arg)
 		while (demuxfd_count > 0)
 			unsetPesFilter(demuxfd[--demuxfd_count]);
 
-	busy_count--;
+	DEC_BUSY_COUNT
 
 	if ((v_arg == &dvrfd) || (v_arg == (&(demuxfd[0]))))
 	{
@@ -392,7 +422,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			return STREAM2FILE_BUSY;
 	}
 
-	busy_count++;
+	INC_BUSY_COUNT
 
 	strcpy(myfilename, filename);
 
@@ -406,7 +436,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	}
 	else
 	{
-		busy_count--;
+		DEC_BUSY_COUNT
 		return STREAM2FILE_INVALID_DIRECTORY;
 	}
 
@@ -421,7 +451,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	{
 		if (pids[i] > 0x1fff)
 		{
-			busy_count--;
+			DEC_BUSY_COUNT
 			return STREAM2FILE_INVALID_PID;
 		}
 		
@@ -430,7 +460,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			for (unsigned int j = 0; j < i; j++)
 				unsetPesFilter(demuxfd[j]);
 
-			busy_count--;
+			DEC_BUSY_COUNT
 			return STREAM2FILE_PES_FILTER_FAILURE;
 		}
 	}
@@ -444,7 +474,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			while (demuxfd_count > 0)
 				unsetPesFilter(demuxfd[--demuxfd_count]);
 
-			busy_count--;
+			DEC_BUSY_COUNT
 			return STREAM2FILE_DVR_OPEN_FAILURE;
 		}
 		exit_flag = STREAM2FILE_STATUS_RUNNING;
@@ -455,10 +485,10 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		exit_flag = STREAM2FILE_STATUS_RUNNING;
 		for (unsigned int i = 0; i < numpids; i++)
 		{
-			busy_count++;
+			INC_BUSY_COUNT
 			pthread_create(&demux_thread[i], 0, DMXThread, &demuxfd[i]);
 		}
-		busy_count--;
+		DEC_BUSY_COUNT
 	}
 
 	return STREAM2FILE_OK;
