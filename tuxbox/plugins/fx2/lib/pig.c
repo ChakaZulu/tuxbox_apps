@@ -82,6 +82,14 @@ void	Fx2PigResume( void )
 }
 
 #else
+
+#include <draw.h>
+
+static	int			l_x = 0;
+static	int			l_y = 0;
+static	int			l_width = 0;
+static	int			l_height = 0;
+
 void	Fx2SetPig( int x, int y, int width, int height )
 {
 	return;
@@ -89,10 +97,16 @@ void	Fx2SetPig( int x, int y, int width, int height )
 
 void	Fx2ShowPig( int x, int y, int width, int height )
 {
+	FBFillRect( x, y, width, height, 3 );
+	l_x=x;
+	l_y=y;
+	l_width=width;
+	l_height=height;
 	return;
 }
 void	Fx2StopPig( void )
 {
+	FBFillRect( l_x, l_y, l_width, l_height, 1 );
 	return;
 }
 void	Fx2PigPause( void )
