@@ -7,16 +7,15 @@
 	/* ----------------------- dreambox fernbedienung ---------------------- */
 void eRCDeviceDreambox2::handleCode(int rccode)
 {
-	rccode&=0x7F;
 	timeout.start(300, 1);
 	int old=ccode;
 	ccode=rccode;
-	if ((old!=-1) && (old!=rccode))
-		/*emit*/ input->keyPressed(eRCKey(this, old, eRCKey::flagBreak));
+	if ((old!=-1) && ( ((old&0x7FFF)!=(rccode&0x7FFF)) || !(rccode&0x8000)) )
+		/*emit*/ input->keyPressed(eRCKey(this, (old&0x7FFF), eRCKey::flagBreak));
 	if (old != rccode)
 	{
 		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
-		input->keyPressed(eRCKey(this, rccode, 0));
+		input->keyPressed(eRCKey(this, rccode&0x7FFF, 0));
 	}
 }
 
@@ -26,13 +25,13 @@ void eRCDeviceDreambox2::timeOut()
 	ccode=-1;
 	repeattimer.stop();
 	if (oldcc!=-1)
-		input->keyPressed(eRCKey(this, oldcc, eRCKey::flagBreak));
+		input->keyPressed(eRCKey(this, oldcc&0x7FFF, eRCKey::flagBreak));
 }
 
 void eRCDeviceDreambox2::repeat()
 {
 	if (ccode!=-1)
-		input->keyPressed(eRCKey(this, ccode, eRCKey::flagRepeat));
+		input->keyPressed(eRCKey(this, ccode&0x7FFF, eRCKey::flagRepeat));
 	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
 }
 
