@@ -15,9 +15,9 @@ mainmenu.sleeptimer Schlofzit
 mainmenu.shutdown Usschalde 
 mainmenu.settings Ischalde 
 mainmenu.service Sörvis 
-mainmenu.streaming Sdreaming (ufnehh) 
-mainmenu.streaming_start un los 
-mainmenu.streaming_stop hald 
+mainmenu.recording Sdreaming (ufnehh) 
+mainmenu.recording_start un los 
+mainmenu.recording_stop hald 
 
 servicemenu.head Sörvis 
 servicemenu.update Software-Öbdaede 
@@ -42,7 +42,7 @@ mainsettings.language Sprooch
 mainsettings.audio Audio 
 mainsettings.video Video 
 mainsettings.network Netzwerk 
-mainsettings.streaming Sdreamingsörver 
+mainsettings.recording Sdreamingsörver 
 mainsettings.colors Farbe / Theme / Schrifd 
 mainsettings.lcd LC-Display 
 mainsettings.keybinding Taste-Iischdellige 
@@ -65,6 +65,9 @@ audiomenu.monoright mono rächts
 audiomenu.monoleft mono lings 
 audiomenu.stereo stereo 
 audiomenu.dolbydigital Dolby Digidaal 
+audiomenu.avs_control unset
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head Video-Iischdellige 
 videomenu.screensetup Bildbereich ischelle 
@@ -89,12 +92,18 @@ networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway 
 networkmenu.nameserver Nameserver 
 
-streamingmenu.head Streamingserver Iischdellige 
-streamingmenu.usestreamserver Streamingserver nee 
-streamingmenu.streamingserver Streamingserver 
-streamingmenu.streamingserverport Port 
-streamingmenu.stopplayback Playback a'halde 
-streamingmenu.stopsectionsd Sectionsd a'halde 
+recordingmenu.head Streamingserver Iischdellige 
+recordingmenu.recording_type unset
+recordingmenu.server_ip unset
+recordingmenu.server_port unset
+recordingmenu.stopplayback Playback a'halde 
+recordingmenu.stopsectionsd Sectionsd a'halde 
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
 
 ping.ok isch erreichbar (ping) 
 ping.unreachable isch nidd erreichbar (unreachable) 
@@ -132,7 +141,6 @@ repeatblocker.hint_1 Mindeschtzit (in ms) zwüsche 2 Tastedrück'
 repeatblocker.hint_2 0 schaldet de Blocker us (Rot isch " ") 
 
 keybindingmenu.RC Fernbedienig 
-keybindingmenu.repeatblock Taste-Wiederholblocker 
 keybindingmenu.repeatblock Wiederholigsverzögerig 
 keybindingmenu.repeatblockgeneric Afangsverzögerig 
 keybindingmenu.head Tasten-Iischdellige 
@@ -147,6 +155,8 @@ keybindingmenu.pagedown Sidde abe blätter
 keybindingmenu.pagedown_head Sidde abe blättere 
 keybindingmenu.cancel Kanallischde zuemache 
 keybindingmenu.cancel_head Kanallischde zuemache 
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup Kanal uffe 
 keybindingmenu.channelup_head Kanal uffe Taste 
 keybindingmenu.channeldown Kanal abe 
@@ -496,6 +506,7 @@ sleeptimerbox.announce Ussschaltzit in 1 min
 
 zaptotimer.announce In einere Minute wird umgeschalde 
 recordtimer.announce D'Ufnahm beginnt in einere Minute 
+shutdowntimer.announce unset
 
 timerbar.channelswitch Umschalte 
 timerbar.recordevent Ufneh 
@@ -506,9 +517,8 @@ timer.eventrecord.msg   D'Sendig isch zuer Aufnahm vorgmerkt
 timerlist.name timerliste 
 timerlist.delete Lösche 
 timerlist.empty S'git momentan kei Timer 
-timerlist.deleting Timer wird glöscht 
 timerlist.type.shutdown Abe fahre 
-timerlist.type.nextprogramm Näggschdes Programm 
+timerlist.type.nextprogram Näggschdes Programm 
 timerlist.type.zapto Umschalte 
 timerlist.type.standby Standby 
 timerlist.type.record Uffnahm 
@@ -523,9 +533,38 @@ timerlist.repeat.fourweekly alli 4 wuche
 timerlist.repeat.monthly jede moned 
 timerlist.repeat.byeventdescription lueg under timer 
 timerlist.repeat.unknown chenne m'r nid 
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
 timerlist.program.unknown Programm chenne m'r nid 
-timerlist.standby.on Uffwache us Standby 
 timerlist.standby.off Uff Standby goh 
+timerlist.standby.on Uffwache us Standby 
+timerlist.alarmtime unset
+timerlist.stoptime unset
+timerlist.new unset
+timerlist.menumodify unset
+timerlist.type unset
+timerlist.repeat unset
+timerlist.save unset
+timerlist.standby unset
+timerlist.channel unset
+timerlist.menunew unset
+timerlist.reload unset
+timerlist.modify unset
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
 
 fontsize.menu Menutext 
 fontsize.menu_title Menu Titel 

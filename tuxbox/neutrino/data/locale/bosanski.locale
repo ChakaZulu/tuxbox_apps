@@ -65,7 +65,7 @@ audiomenu.monoright mono desno
 audiomenu.monoleft mono lijevo 
 audiomenu.stereo stereo 
 audiomenu.dolbydigital dolby digital 
-audiomenu.avs_ost_control Volume Control avs/ost
+audiomenu.avs_control Volume Control avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 
@@ -141,7 +141,6 @@ repeatblocker.hint_1 vrijeme (u ms) izmedu 2 pritiska tipke
 repeatblocker.hint_2 0 ugasi blokera (crveno je " ") 
 
 keybindingmenu.RC daljinska 
-keybindingmenu.repeatblock ponavljanje blokera tipaljke 
 keybindingmenu.repeatblock cekanje pri ponavljanju 
 keybindingmenu.repeatblockgeneric pocetno cekanje 
 keybindingmenu.head namjestiti tipaljku 
@@ -534,6 +533,17 @@ timerlist.repeat.fourweekly cetvorosedmicno
 timerlist.repeat.monthly mjesecno 
 timerlist.repeat.byeventdescription vidi timer 
 timerlist.repeat.unknown nepoznato 
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
 timerlist.program.unknown nepoznati program 
 timerlist.standby.off budjenje iz pripravnosti 
 timerlist.standby.on idi u pripravnost 
@@ -553,6 +563,8 @@ timerlist.message obavijest
 timerlist.apid audio pid 
 timersettings.separator namjescenje vremenskog brojaca 
 timersettings.record_safety_time ispraviti snimanje 
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
 
 fontsize.menu tekst u izboru 
 fontsize.menu_title naslov izbora 

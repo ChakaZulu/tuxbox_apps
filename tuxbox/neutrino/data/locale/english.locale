@@ -65,7 +65,7 @@ audiomenu.monoright mono right
 audiomenu.monoleft mono left
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
-audiomenu.avs_ost_control Volume Control avs/ost
+audiomenu.avs_control Volume Control avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 
@@ -250,8 +250,6 @@ ucodecheck.avia500 Avia 500
 ucodecheck.avia600 Avia 600
 ucodecheck.ucode UCode
 ucodecheck.cam-alpha Cam-Alpha
-
-
 
 date.Mon  Mon
 date.Tue  Tue
@@ -518,7 +516,6 @@ timer.eventrecord.title Schedule Record
 timer.eventrecord.msg   ... TO be DONE, or not to be done
 timerlist.name Timerlist
 timerlist.delete Delete
-timerlist.deleting Deleting timer
 timerlist.empty There are no timers at the moment
 timerlist.type.shutdown Shutdown
 timerlist.type.nextprogram Next program
@@ -566,6 +563,8 @@ timerlist.message Message
 timerlist.apid Audio PID
 timersettings.separator Timersettings
 timersettings.record_safety_time Record time correction
+timersettings.record_safety_time.hint_1 Correction time in min. (00=off).
+timersettings.record_safety_time.hint_2 This time will be deducted of every timer.
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Title

@@ -15,9 +15,9 @@ mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Spegnere
 mainmenu.settings Impostazioni
 mainmenu.service Servizio
-mainmenu.streaming Streaming (Registrazione)
-mainmenu.streaming_start start
-mainmenu.streaming_stop stop
+mainmenu.recording Streaming (Registrazione)
+mainmenu.recording_start start
+mainmenu.recording_stop stop
 
 servicemenu.head Service
 servicemenu.update Aggiornamento-Software
@@ -42,7 +42,7 @@ mainsettings.language Lingua
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Network
-mainsettings.streaming Streamingserver
+mainsettings.recording Streamingserver
 mainsettings.colors Colori / Themes
 mainsettings.lcd LC-Display
 mainsettings.keybinding Impostazioni-Tasti
@@ -65,6 +65,9 @@ audiomenu.monoright mono destro
 audiomenu.monoleft mono sinistro
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digitale
+audiomenu.avs_control unset
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head Impostazioni -Video
 videomenu.screensetup Impostazioni Margine Video
@@ -89,14 +92,20 @@ networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
 
-streamingmenu.head Streamingserver Impostazioni
-streamingmenu.usestreamserver usare Streamingserver
-streamingmenu.streamingserver Streamingserver
-streamingmenu.streamingserverport Port
-streamingmenu.stopplayback Playback stop
-streamingmenu.stopsectionsd Sectionsd stop
+recordingmenu.head Streamingserver Impostazioni
+recordingmenu.recording_type unset
+recordingmenu.server_ip unset
+recordingmenu.server_port unset
+recordingmenu.stopplayback Playback stop
+recordingmenu.stopsectionsd Sectionsd stop
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
 
-ping.e ok e raggiungibile (ping)
+ping.ok e raggiungibile (ping)
 ping.unreachable non e raggiungibile (unreachable)
 ping.protocol non e raggiungibile (Host or protocol error)
 ping.socket non e raggiungibile (Socket error)
@@ -107,6 +116,7 @@ ipsetup.hint_2 OK Salva, Home Indietro
 colormenu.head Impostazioni -Colori
 colormenu.statusbar statusbar
 colormenu.themeselect Sciegli Tema
+colormenu.font unset
 colormenu.menucolors Colori Menü
 colormenu.background Colori di fondo
 colormenu.background_head Colori di fondo
@@ -131,7 +141,6 @@ repeatblocker.hint_1 Tempo (in ms) tra 2 premuteTasti
 repeatblocker.hint_2 0 spegne il Blocker tasti (Rosso e " ")
 
 keybindingmenu.RC Telecomando
-keybindingmenu.repeatblock Blocco ripetizione Tasti
 keybindingmenu.repeatblock Ritardo ripetizione
 keybindingmenu.repeatblockgeneric Ritardo iniziale ripetizione
 keybindingmenu.head Impostazione Tastiera
@@ -146,6 +155,8 @@ keybindingmenu.pagedown  Pagina in Basso
 keybindingmenu.pagedown_head Pagina in Basso
 keybindingmenu.cancel Chiudi Lista Canali
 keybindingmenu.cancel_head Chiudi Lista Canali
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup Canale in Alto
 keybindingmenu.channelup_head Tasto Canale in Alto
 keybindingmenu.channeldown Canale verso Basso
@@ -494,6 +505,7 @@ sleeptimerbox.announce Sleeptimer in 1 min
 
 zaptotimer.announce In un Minuto verra cambiato il Canale
 recordtimer.announce La registrazione avra inizio in un Minuto
+shutdowntimer.announce unset
 
 timerbar.channelswitch Cambio Canale
 timerbar.recordevent Registrazione
@@ -504,9 +516,8 @@ timer.eventrecord.msg   La trasmissione e stata attivata per la registrazione
 timerlist.name Lista Timer
 timerlist.delete Cancella
 timerlist.empty per il momento non ce nessun Timer
-timerlist.deleting Timer viene cancellato
 timerlist.type.shutdown Shutdown
-timerlist.type.nextprogramm Prossimo Programma
+timerlist.type.nextprogram Prossimo Programma
 timerlist.type.zapto Cambia
 timerlist.type.standby Standby
 timerlist.type.record Registrazione
@@ -521,6 +532,62 @@ timerlist.repeat.fourweekly 4-volte alla Settimana
 timerlist.repeat.monthly Ogni Mese
 timerlist.repeat.byeventdescription vedi timer
 timerlist.repeat.unknown Sconosciuto
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
 timerlist.program.unknown Programma Sconosciuto
+timerlist.standby.off Vai a  Standby
 timerlist.standby.on Riattivazione dal Standby
-timerlist.standby.off Vai a  Standby 
+timerlist.alarmtime unset
+timerlist.stoptime unset
+timerlist.new unset
+timerlist.menumodify unset
+timerlist.type unset
+timerlist.repeat unset
+timerlist.save unset
+timerlist.standby unset
+timerlist.channel unset
+timerlist.menunew unset
+timerlist.reload unset
+timerlist.modify unset
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
+
+fontsize.menu unset
+fontsize.menu_title unset
+fontsize.menu_info unset
+fontsize.epg_title unset
+fontsize.epg_info1 unset
+fontsize.epg_info2 unset
+fontsize.epg_date unset
+fontsize.alert unset
+fontsize.eventlist_title unset
+fontsize.eventlist_itemlarge unset
+fontsize.eventlist_itemsmall unset
+fontsize.eventlist_datetime unset
+fontsize.channellist unset
+fontsize.channellist_descr unset
+fontsize.channellist_number unset
+fontsize.channel_num_zap unset
+fontsize.infobar_number unset
+fontsize.infobar_channame unset
+fontsize.infobar_info unset
+fontsize.infobar_small unset
+
+fontmenu.head unset
+fontmenu.channellist unset
+fontmenu.eventlist unset
+fontmenu.epg unset
+fontmenu.infobar unset

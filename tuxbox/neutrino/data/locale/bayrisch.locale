@@ -15,9 +15,9 @@ mainmenu.sleeptimer EischlofTimer
 mainmenu.shutdown Ausmacha
 mainmenu.settings Eistellunga
 mainmenu.service Service
-mainmenu.streaming Streaming (aufnemma)
-mainmenu.streaming_start ofanga
-mainmenu.streaming_stop aufhearn
+mainmenu.recording Streaming (aufnemma)
+mainmenu.recording_start ofanga
+mainmenu.recording_stop aufhearn
 
 servicemenu.head Service
 servicemenu.update Software-aktualisiern
@@ -42,7 +42,7 @@ mainsettings.language Sproch
 mainsettings.audio Audio
 mainsettings.video Video
 mainsettings.network Netzwerk
-mainsettings.streaming Streamingserva
+mainsettings.recording Streamingserva
 mainsettings.colors Forbn / Themes
 mainsettings.lcd LC-Disbläi
 mainsettings.keybinding Tasdn-Eistellunga
@@ -65,6 +65,9 @@ audiomenu.monoright mono rechts
 audiomenu.monoleft mono links
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
+audiomenu.avs_control unset
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head Video-Eistellunga
 videomenu.screensetup Bildbereich eistein
@@ -89,12 +92,18 @@ networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserva
 
-streamingmenu.head Streamingserva Eistellunga
-streamingmenu.usestreamserver Streamingserva hernemma
-streamingmenu.streamingserver Streamingserva
-streamingmenu.streamingserverport Port
-streamingmenu.stopplayback Fuim ohoitn
-streamingmenu.stopsectionsd Sectionsd ohoitn
+recordingmenu.head Streamingserva Eistellunga
+recordingmenu.recording_type unset
+recordingmenu.server_ip unset
+recordingmenu.server_port unset
+recordingmenu.stopplayback Fuim ohoitn
+recordingmenu.stopsectionsd Sectionsd ohoitn
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
 
 ping.ok kumt wos (ping)
 ping.unreachable kumt nix (unreachable)
@@ -107,6 +116,7 @@ ipsetup.hint_2 Mit OK speichan, mit HOME obbrecha
 colormenu.head Farb-Eistellunga
 colormenu.statusbar Statusboikn
 colormenu.themeselect Theme auswähn
+colormenu.font unset
 colormenu.menucolors Menüfarbn
 colormenu.background Hintergrundfarb
 colormenu.background_head Hintergrundfarbe
@@ -131,7 +141,6 @@ repeatblocker.hint_1 Mindestzeit (ms) zwischn zwoa Dasdndrucka
 repeatblocker.hint_2 0 schoitt an Blocka aus (Rot is " ")
 
 keybindingmenu.RC Fernbedienung
-keybindingmenu.repeatblock Dasdn-Wiederhoiblocka
 keybindingmenu.repeatblock Wiederholungsverzögerung
 keybindingmenu.repeatblockgeneric Onfangsverzögerung
 keybindingmenu.head Dasdn-Eistellunga
@@ -146,6 +155,8 @@ keybindingmenu.pagedown Seitn obiblatln
 keybindingmenu.pagedown_head Seitn obiblatln
 keybindingmenu.cancel Sendalistn zuamacha
 keybindingmenu.cancel_head Sendalistn zuamacha
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup Senda aufi
 keybindingmenu.channelup_head Senda aufi Dasdn
 keybindingmenu.channeldown Senda obe
@@ -495,19 +506,19 @@ sleeptimerbox.announce Eischloftimer in min
 
 zaptotimer.announce In na Minutn is schluss
 recordtimer.announce In na Minutn werd aufgnomma
+shutdowntimer.announce unset
 
 timerbar.channelswitch Umschoitn
 timerbar.recordevent Aufnemma
 timer.eventtimed.title Sendung vormerka
 timer.eventtimed.msg De Sendung is vorgmerkt
 timer.eventrecord.title Aufnemma vormerka
-timer.eventrecord.msg   De Sendung is zum Aufnemma vorgmerkt
+timer.eventrecord.msg De Sendung is zum Aufnemma vorgmerkt
 timerlist.name Timerlistn
 timerlist.delete wegmacha
 timerlist.empty Grod hammer koane Timer
-timerlist.deleting Timer werd glöscht
 timerlist.type.shutdown Ausmacha
-timerlist.type.nextprogramm Nächsta Senda
+timerlist.type.nextprogram Nächsta Senda
 timerlist.type.zapto Umschoitn
 timerlist.type.standby Bissl Ausmacha
 timerlist.type.record Aufnemma
@@ -522,7 +533,62 @@ timerlist.repeat.fourweekly alle vier Wocha
 timerlist.repeat.monthly jeden Monat
 timerlist.repeat.byeventdescription wia da timer
 timerlist.repeat.unknown Kenn i ned
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
 timerlist.program.unknown Kenn den Senda ned
-timerlist.standby.on Ausm Standy aufwacha
 timerlist.standby.off In Standy geh
+timerlist.standby.on Ausm Standy aufwacha
+timerlist.alarmtime unset
+timerlist.stoptime unset
+timerlist.new unset
+timerlist.menumodify unset
+timerlist.type unset
+timerlist.repeat unset
+timerlist.save unset
+timerlist.standby unset
+timerlist.channel unset
+timerlist.menunew unset
+timerlist.reload unset
+timerlist.modify unset
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
 
+fontsize.menu unset
+fontsize.menu_title unset
+fontsize.menu_info unset
+fontsize.epg_title unset
+fontsize.epg_info1 unset
+fontsize.epg_info2 unset
+fontsize.epg_date unset
+fontsize.alert unset
+fontsize.eventlist_title unset
+fontsize.eventlist_itemlarge unset
+fontsize.eventlist_itemsmall unset
+fontsize.eventlist_datetime unset
+fontsize.channellist unset
+fontsize.channellist_descr unset
+fontsize.channellist_number unset
+fontsize.channel_num_zap unset
+fontsize.infobar_number unset
+fontsize.infobar_channame unset
+fontsize.infobar_info unset
+fontsize.infobar_small unset
+
+fontmenu.head unset
+fontmenu.channellist unset
+fontmenu.eventlist unset
+fontmenu.epg unset
+fontmenu.infobar unset

@@ -2,6 +2,9 @@ menu.back spowrotem
 
 options.off wylanczyc
 options.on wlanczyc
+options.serial unset
+options.fb unset
+options.null unset
 
 mainmenu.head menu glówne
 mainmenu.tvmode telewizja
@@ -12,9 +15,9 @@ mainmenu.sleeptimer czas spac
 mainmenu.shutdown wylanczyc
 mainmenu.settings ustawienia
 mainmenu.service serwis
-mainmenu.streaming nagrywac
-mainmenu.streaming_start rozpocznij
-mainmenu.streaming_stop zatrzymaj
+mainmenu.recording nagrywac
+mainmenu.recording_start rozpocznij
+mainmenu.recording_stop zatrzymaj
 
 servicemenu.head serwis
 servicemenu.update aktualizacja trybu
@@ -39,7 +42,9 @@ mainsettings.language jezyk
 mainsettings.audio dzwiek
 mainsettings.video obraz
 mainsettings.network siec
+mainsettings.recording unset
 mainsettings.colors kolory / wyglad
+mainsettings.lcd unset
 mainsettings.keybinding ustawienie klawiszy
 mainsettings.misc rózne ustawienia
 mainsettings.scan ustawienia dla szukania kanalów
@@ -49,6 +54,7 @@ miscsettings.shutdown_real umozliwic standby
 miscsettings.boxtype typ tunera
 miscsettings.startneutrinodirect zastartuj neutrino odrazu
 miscsettings.general glówne ustawienia
+miscsettings.fb_destination unset
 
 languagesetup.head ustawienie jezyka
 languagesetup.select jezyk
@@ -59,6 +65,9 @@ audiomenu.monoright mono prawy
 audiomenu.monoleft mono lewy
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
+audiomenu.avs_control unset
+audiomenu.avs unset
+audiomenu.ost unset
 
 videomenu.head ustawienie Obrazu
 videomenu.screensetup Ustawienie widocznej czesci obrazu
@@ -82,9 +91,19 @@ networkmenu.netmask maska sieci
 networkmenu.broadcast Broadcast
 networkmenu.gateway standardowy Gateway
 networkmenu.nameserver Nameserver
-networkmenu.usestreamserver uzywaj streamserver
-networkmenu.streamingserver Streamingserver
-networkmenu.streamingserverport Port
+
+recordingmenu.head unset
+recordingmenu.recording_type unset
+recordingmenu.server_ip unset
+recordingmenu.server_port unset
+recordingmenu.stopplayback unset
+recordingmenu.stopsectionsd unset
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
 
 ping.ok siec jest (ping)
 ping.unreachable sieci brak
@@ -97,6 +116,7 @@ ipsetup.hint_2 albo gora/dol, OK zapisuje, Home wychodzi
 colormenu.head ustawienia kolorów
 colormenu.statusbar listwa statusowa
 colormenu.themeselect wybor wygladu
+colormenu.font unset
 colormenu.menucolors kolory menu
 colormenu.background kolor tla
 colormenu.background_head kolor tla
@@ -121,7 +141,6 @@ repeatblocker.hint_1 czas (w ms) miedzy 2 naciskami klawisza
 repeatblocker.hint_2 0 wylacza blokade (czerwony jest " ")
 
 keybindingmenu.RC pilot
-keybindingmenu.repeatblock blokada powtarzania klawiszy
 keybindingmenu.repeatblock powtórna przerwa
 keybindingmenu.repeatblockgeneric pierwsza przerwa
 keybindingmenu.head ustawienia klawiszy
@@ -136,6 +155,8 @@ keybindingmenu.pagedown strona spowrotem
 keybindingmenu.pagedown_head strona spowrotem
 keybindingmenu.cancel liste kanalow zamknac
 keybindingmenu.cancel_head liste kanalow zamknac
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup kanal do góry
 keybindingmenu.channelup_head klawisz kanal do góry
 keybindingmenu.channeldown kanal na dol
@@ -152,10 +173,21 @@ keybindingmenu.subchannelup podprogram do góry
 keybindingmenu.subchannelup_head klawisz podprogram do góry
 keybindingmenu.subchanneldown podprogram na dól
 keybindingmenu.subchanneldown_head klawisz podprogram na dól
+
 colorchooser.red czerwony
 colorchooser.green zielony
 colorchooser.blue niebieski
 colorchooser.alpha nasycenie
+
+lcdmenu.head unset
+lcdmenu.inverse unset
+lcdmenu.power unset
+lcdmenu.lcdcontroler unset
+
+lcdcontroler.head unset
+lcdcontroler.contrast unset
+lcdcontroler.brightness unset 
+lcdcontroler.brightnessstandby unset
 
 keychoosermenu.setnew wybrac nowy klawisz
 keychoosermenu.setnone zaden klawisz
@@ -278,19 +310,6 @@ flashupdate.reboot start ponowny....
 flashupdate.updatemode modus update-u
 flashupdate.updatemode_manual manualnie (ftp)
 flashupdate.updatemode_internet internet
-flashupdate.currentversion terazniejsza wersja
-flashupdate.checkupdate szukam nowej wersji
-flashupdate.versioncheck sprawdzam wersje
-flashupdate.majorversiondiffer1 poprzednia wersja rózni sie
-flashupdate.majorversiondiffer2 zainstaluj flashimage ponownie
-flashupdate.providerversiondiffer1 the provider id differs
-flashupdate.providerversiondiffer2 zainstaluj nowy flashimage
-flashupdate.nonewversion1 niema nowej wersji
-flashupdate.nonewversion2
-flashupdate.md5sumerror image ma blendy
-flashupdate.updatemode modus update-u
-flashupdate.updatemode_manual manualnie (ftp)
-flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep terazniejsza wersja
 flashupdate.currentversiondate data
 flashupdate.currentversiontime czas
@@ -359,6 +378,8 @@ cam.wrong UWAGA, TWOJA KARTA\nNIE ZGODNA z CAMALPHA.BIN!!\n\nCzy chcecz byc info
 ucodes.failure UWAGA, µCodes nie zostaly znalezione!\n\nprosze wgrac przez FTP (lub DBox-BootManager),\nnastepnie restartuj!
 
 stringinput.caps caps / no caps
+
+streamingserver.noconnect unset
 
 GENRE.MOVIE.0 fabularny/dramat
 GENRE.MOVIE.1 kryminalny/thriller
@@ -448,6 +469,7 @@ GENRE.TRAVEL_HOBBIES.7 gardening
 GENRE.UNKNOWN nieznany
 
 parentallock.parentallock ochrona nieletnich
+
 parentallock.prompt podaj kod
 parentallock.never nigdy
 parentallock.onstart przy starcie
@@ -469,6 +491,7 @@ pinprotection.wrongcode kod nie prawidlowy! powtóz.
 pinprotection.head podaj kod
 
 favorites.bouquetname moie ulubione
+favorites.nobouquets unset
 favorites.addchannel terazniejszy kanal zostanie dodany \ndo bukietu "moje ulubione". \nto zajmie kilka sekund...
 favorites.menueadd dodaj kanal do faworytów
 favorites.bqcreated bokiet "moje ulubione" zostal stworzony...\n
@@ -479,5 +502,93 @@ favorites.finalhint \nuzywaj edytora bukietów do modyfikacji twoich ulubionych.\
 sleeptimerbox.title Wylancz na czas
 sleeptimerbox.hint1 Czas do wylanczenia w min.
 sleeptimerbox.hint2 D-Box2 wylanczy sie po tym czasie.
+sleeptimerbox.announce unset
 
-timerbar.channelswitch Timed switch
+zaptotimer.announce unset
+recordtimer.announce unset
+shutdowntimer.announce unset
+
+timerbar.channelswitch unset
+timerbar.recordevent unset
+timer.eventtimed.title unset
+timer.eventtimed.msg unset
+timer.eventrecord.title unset
+timer.eventrecord.msg unset
+timerlist.name unset
+timerlist.delete unset
+timerlist.empty unset
+timerlist.type.shutdown unset
+timerlist.type.nextprogram unset
+timerlist.type.zapto unset
+timerlist.type.standby unset
+timerlist.type.record unset
+timerlist.type.remind unset
+timerlist.type.sleeptimer unset
+timerlist.type.unknown unset
+timerlist.repeat.once unset
+timerlist.repeat.daily unset
+timerlist.repeat.weekly unset
+timerlist.repeat.biweekly unset
+timerlist.repeat.fourweekly unset
+timerlist.repeat.monthly unset
+timerlist.repeat.byeventdescription unset
+timerlist.repeat.unknown unset
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
+timerlist.program.unknown unset
+timerlist.standby.off unset
+timerlist.standby.on unset
+timerlist.alarmtime unset
+timerlist.stoptime unset
+timerlist.new unset
+timerlist.menumodify unset
+timerlist.type unset
+timerlist.repeat unset
+timerlist.save unset
+timerlist.standby unset
+timerlist.channel unset
+timerlist.menunew unset
+timerlist.reload unset
+timerlist.modify unset
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
+
+fontsize.menu unset
+fontsize.menu_title unset
+fontsize.menu_info unset
+fontsize.epg_title unset
+fontsize.epg_info1 unset
+fontsize.epg_info2 unset
+fontsize.epg_date unset
+fontsize.alert unset
+fontsize.eventlist_title unset
+fontsize.eventlist_itemlarge unset
+fontsize.eventlist_itemsmall unset
+fontsize.eventlist_datetime unset
+fontsize.channellist unset
+fontsize.channellist_descr unset
+fontsize.channellist_number unset
+fontsize.channel_num_zap unset
+fontsize.infobar_number unset
+fontsize.infobar_channame unset
+fontsize.infobar_info unset
+fontsize.infobar_small unset
+
+fontmenu.head unset
+fontmenu.channellist unset
+fontmenu.eventlist unset
+fontmenu.epg unset
+fontmenu.infobar unset

@@ -15,9 +15,9 @@ mainmenu.sleeptimer koha per mi fik
 mainmenu.shutdown mi fik 
 mainmenu.settings setingat 
 mainmenu.service servis 
-mainmenu.streaming me inxhizu 
-mainmenu.streaming_start start 
-mainmenu.streaming_stop stop 
+mainmenu.recording me inxhizu 
+mainmenu.recording_start start 
+mainmenu.recording_stop stop 
 
 servicemenu.head servis 
 servicemenu.update leximi i sofware-s te re 
@@ -25,6 +25,7 @@ servicemenu.scants kerkimi i kanaleve
 servicemenu.ucodecheck shiqimi ucodese 
 
 cablesetup.provider provider-i 
+
 satsetup.disqeqc diseqc 
 satsetup.satellite sateliti 
 satsetup.extended mi gadit diseqc-un 
@@ -41,7 +42,7 @@ mainsettings.language Gjuha
 mainsettings.audio Zëri 
 mainsettings.video Video 
 mainsettings.network rrjeta 
-mainsettings.streaming streamingserver 
+mainsettings.recording streamingserver 
 mainsettings.colors ngjyrat 
 mainsettings.lcd lcd-en mi gadit 
 mainsettings.keybinding gaditje e pullave 
@@ -64,6 +65,9 @@ audiomenu.monoright mono djatht
 audiomenu.monoleft mono majt 
 audiomenu.stereo stereo 
 audiomenu.dolbydigital dolby digital 
+audiomenu.avs_control unset
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head gaditje video-s 
 videomenu.screensetup gaditje ekran-it 
@@ -88,12 +92,18 @@ networkmenu.broadcast broadcast
 networkmenu.gateway standard gateway 
 networkmenu.nameserver nameserver 
 
-streamingmenu.head gadite streamingserver 
-streamingmenu.usestreamserver perdore streamingserver 
-streamingmenu.streamingserver streamingserver 
-streamingmenu.streamingserverport port 
-streamingmenu.stopplayback ndaloje playback-un 
-streamingmenu.stopsectionsd ndaloje sectionsd 
+recordingmenu.head gadite streamingserver 
+recordingmenu.recording_type unset
+recordingmenu.server_ip unset
+recordingmenu.server_port unset
+recordingmenu.stopplayback ndaloje playback-un 
+recordingmenu.stopsectionsd ndaloje sectionsd 
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
 
 ping.ok dakord (ping) 
 ping.unreachable nuk është dakord (unreachable) 
@@ -123,6 +133,7 @@ colormenusetup.menuhead zgjedhje kryesore
 colormenusetup.menucontent përberje e dritares 
 colormenusetup.menucontent_inactive deaktiviran përberje e dritares 
 colormenusetup.menucontent_selected e ke zgjedh përberjen e dritares 
+
 colorstatusbar.head ngjyra e trakes statute 
 colorstatusbar.text traka statute 
 
@@ -130,7 +141,6 @@ repeatblocker.hint_1 koha (u ms) midis 2 shumje e pullave
 repeatblocker.hint_2 0 fike bllokerin (e kuqe është " ") 
 
 keybindingmenu.RC remote kontrolli 
-keybindingmenu.repeatblock perseritje pullave te bllokerit 
 keybindingmenu.repeatblock pritje per perseritje 
 keybindingmenu.repeatblockgeneric pritje fillimtare 
 keybindingmenu.head gadite pullen 
@@ -145,6 +155,8 @@ keybindingmenu.pagedown faqe posht
 keybindingmenu.pagedown_head faqe posht 
 keybindingmenu.cancel mylle listen e kanaleve 
 keybindingmenu.cancel_head mylle listen e kanaleve 
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup kanalin nalt 
 keybindingmenu.channelup_head pulla për kanalin nalt 
 keybindingmenu.channeldown kanalin posht 
@@ -358,6 +370,7 @@ messagebox.back mrapa
 messagebox.error gabim 
 messagebox.discard a doni mi hjek nrrimet? 
 messagebox.info informacionet 
+
 settings.noconffile Datat e neutrino nuk jan gjet.\nVuhen datat standart. 
 settings.missingoptionsconffile Neutrino është i zgjedhuar.\nNrrimet jan nrru në datat standarte. 
 
@@ -465,6 +478,7 @@ parentallock.onsignal nese ka danji ndalim ne kanal ma par
 parentallock.lockedsender nese është kanali i ndalum 
 parentallock.lockedprogram kanali i ndalum (prej %d vjet) 
 parentallock.head pin-numri për rinin 
+
 parentallock.lockage emisionet 
 parentallock.lockage12 ndalohet deri 12 vjet 
 parentallock.lockage16 ndalohet deri 16 vjet 
@@ -519,6 +533,17 @@ timerlist.repeat.fourweekly kater her n5 jav
 timerlist.repeat.monthly në muj 
 timerlist.repeat.byeventdescription shikoje timer 
 timerlist.repeat.unknown panjohtun 
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
 timerlist.program.unknown programi panjohtun 
 timerlist.standby.off fike timerlist-in 
 timerlist.standby.on vune standby timerlist-in 
@@ -534,6 +559,12 @@ timerlist.channel kanali
 timerlist.menunew timerlist i ri 
 timerlist.reload përseritje 
 timerlist.modify parashkrimi 
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
 
 fontsize.menu teksi në zgjedhje 
 fontsize.menu_title titulli i zgjedhjes 

@@ -15,9 +15,9 @@ mainmenu.sleeptimer $133p7!/\/\3|2
 mainmenu.shutdown 5|-|µ7|)*\/\//\/
 mainmenu.settings $3'|''|'¡/\/6$
 mainmenu.service $3|2\/![3
-mainmenu.streaming $+|234/\/\¡|\|6 (|23[*|2|)3)
-mainmenu.streaming_start 5'|'4|2+
-mainmenu.streaming_stop $'|'*p
+mainmenu.recording $+|234/\/\¡|\|6 (|23[*|2|)3)
+mainmenu.recording_start 5'|'4|2+
+mainmenu.recording_stop $'|'*p
 
 servicemenu.head $3|2\/¡[3
 servicemenu.update Software µP|]4+3
@@ -42,7 +42,7 @@ mainsettings.language 14|\|&|_|4@3
 mainsettings.audio 4|_||]¡*
 mainsettings.video \/!|]3*
 mainsettings.network /\/37\/\/*|2|<
-mainsettings.streaming 5+|234/\/\¡|\|653|2\/3|2
+mainsettings.recording 5+|234/\/\¡|\|653|2\/3|2
 mainsettings.colors [*|*|25
 mainsettings.lcd |[-|)¡5p14Y
 mainsettings.keybinding |<3Y $37|_|P
@@ -65,6 +65,9 @@ audiomenu.monoright /\/\*/\/* |2!6|-|7
 audiomenu.monoleft /\/\*|\|* 13|=7
 audiomenu.stereo 573|230
 audiomenu.dolbydigital |]01|3y |]!&¡'|'4|_
+audiomenu.avs_control unset
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head \/¡|]30 $3'|''|'¡/\/@5
 videomenu.screensetup $[|233|\| $3'|'µP
@@ -89,13 +92,18 @@ networkmenu.broadcast 8|204|)[4$7
 networkmenu.gateway |]3|=4µ|_'|' 64+3\/\/4y
 networkmenu.nameserver /\/4/\/\353|2\/3|2
 
-streamingmenu.head 5'|'|234/\/\¡/\/&53|2\/3|2 53'|'7!|\|&5
-streamingmenu.usestreamserver |_|53 57|234/\/\!|\|@53|2\/3|2
-streamingmenu.streamingserver $'|'|234/\/\¡|\|6$3|2\/3|2
-streamingmenu.streamingserverport p*|2'|'
-streamingmenu.stopplayback stop P|_4Y|34[|<
-streamingmenu.stopsectionsd stop 53[+!0/\/5|) 
-
+recordingmenu.head 5'|'|234/\/\¡/\/&53|2\/3|2 53'|'7!|\|&5
+recordingmenu.recording_type unset
+recordingmenu.server_ip unset
+recordingmenu.server_port unset
+recordingmenu.stopplayback stop P|_4Y|34[|<
+recordingmenu.stopsectionsd stop 53[+!0/\/5|) 
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
 
 ping.ok !5 |234[|-|48|_3 (P!/\/&)
 ping.unreachable ¡$ |_|/\/|234[|-|48|3
@@ -108,6 +116,7 @@ ipsetup.hint_2 *|< 54\/3$, |-|*/\/\3 480|2'|'5
 colormenu.head [0|0|2 53+7!|\|@$
 colormenu.statusbar ¡|\||=084|2
 colormenu.themeselect 53|3[7 +|-|3/\/\3
+colormenu.font unset
 colormenu.menucolors /\/\3/\/µ[01*|2
 colormenu.background 84[|<@|2*µ|\||)
 colormenu.background_head 84[|<@|20µ/\/|)
@@ -146,6 +155,8 @@ keybindingmenu.pagedown p463 |)0\/\/|\|
 keybindingmenu.pagedown_head |<3y537µP P4@3 |)0\/\/|\|
 keybindingmenu.cancel close [|-|4|\||\|3|_|_¡$+
 keybindingmenu.cancel_head [|-|4|\||\|31|¡5'|' [|_0$3
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup [|-|4|\|/\/3|_ |_|P
 keybindingmenu.channelup_head |<3Y53+µp [|-|4|\||\|3| µP
 keybindingmenu.channeldown [|-|4/\//\/3|_ |)0\/\/|\|
@@ -239,8 +250,6 @@ ucodecheck.avia500 4\/¡4 500
 ucodecheck.avia600 4\/¡4 600
 ucodecheck.ucode |_|[0|)3
 ucodecheck.cam-alpha [4/\/\-4|_P|-|4
-
-
 
 date.Mon  /\/\*|\|
 date.Tue  '|'µ3
@@ -495,9 +504,91 @@ sleeptimerbox.hint1 $|-|µ'|'|]0\/\/|\| 7¡/\/\3 ¡/\/ /\/\!|\|. (000=0|=|=)
 sleeptimerbox.hint2 +|-|3 |)|3*><2 \/\/!||_ $|-|µ7|)*\/\/|\| 4|='|'3|2 +|-|!5 7!/\/\3.
 sleeptimerbox.announce 5|33P+!/\/\3|2 !/\/ 1 /\/\¡/\/
 
+zaptotimer.announce unset
+recordtimer.announce unset
+shutdowntimer.announce unset
+
 timerbar.channelswitch 5[|-|3|]µ13
 timerbar.recordevent |23[0|2|)
 timer.eventtimed.title $[|-|3|]|_||_3 3\/3|\|'|'
 timer.eventtimed.msg +|-|3 3\/3|\|'|' !5 5[|-|3|)µ|_3|).\|\|'|'|-|3 |]|30><2 \/\/!|| p0\/\/3|2 0|\| 4|\||] \|\|$\/\/¡7[|-| '|'* +|-|!$ [|-|4/\/|\|3|_ 4+ 7|-|3 @!\/3/\/ '|'¡/\/\3.
 timer.eventrecord.title 5[|-|3|)µ|3 |23[0|2|]
-timer.eventrecord.msg   ... +0 83 |)*|\|3, 0|2 |\|07 7* 83 |)*|\|3
+timer.eventrecord.msg ... +0 83 |)*|\|3, 0|2 |\|07 7* 83 |)*|\|3
+timerlist.name unset
+timerlist.delete unset
+timerlist.empty unset
+timerlist.type.shutdown unset
+timerlist.type.nextprogram unset
+timerlist.type.zapto unset
+timerlist.type.standby unset
+timerlist.type.record unset
+timerlist.type.remind unset
+timerlist.type.sleeptimer unset
+timerlist.type.unknown unset
+timerlist.repeat.once unset
+timerlist.repeat.daily unset
+timerlist.repeat.weekly unset
+timerlist.repeat.biweekly unset
+timerlist.repeat.fourweekly unset
+timerlist.repeat.monthly unset
+timerlist.repeat.byeventdescription unset
+timerlist.repeat.unknown unset
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
+timerlist.program.unknown unset
+timerlist.standby.off unset
+timerlist.standby.on unset
+timerlist.alarmtime unset
+timerlist.stoptime unset
+timerlist.new unset
+timerlist.menumodify unset
+timerlist.type unset
+timerlist.repeat unset
+timerlist.save unset
+timerlist.standby unset
+timerlist.channel unset
+timerlist.menunew unset
+timerlist.reload unset
+timerlist.modify unset
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
+
+fontsize.menu unset
+fontsize.menu_title unset
+fontsize.menu_info unset
+fontsize.epg_title unset
+fontsize.epg_info1 unset
+fontsize.epg_info2 unset
+fontsize.epg_date unset
+fontsize.alert unset
+fontsize.eventlist_title unset
+fontsize.eventlist_itemlarge unset
+fontsize.eventlist_itemsmall unset
+fontsize.eventlist_datetime unset
+fontsize.channellist unset
+fontsize.channellist_descr unset
+fontsize.channellist_number unset
+fontsize.channel_num_zap unset
+fontsize.infobar_number unset
+fontsize.infobar_channame unset
+fontsize.infobar_info unset
+fontsize.infobar_small unset
+
+fontmenu.head unset
+fontmenu.channellist unset
+fontmenu.eventlist unset
+fontmenu.epg unset
+fontmenu.infobar unset

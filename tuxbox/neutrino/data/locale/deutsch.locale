@@ -65,7 +65,7 @@ audiomenu.monoright mono rechts
 audiomenu.monoleft mono links
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
-audiomenu.avs_ost_control Volume Steuerung avs/ost
+audiomenu.avs_control Volume Steuerung avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 
@@ -141,7 +141,6 @@ repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken
 repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")
 
 keybindingmenu.RC Fernbedienung
-keybindingmenu.repeatblock Tasten-Wiederholblocker
 keybindingmenu.repeatblock Wiederholungsverzögerung
 keybindingmenu.repeatblockgeneric Anfangsverzögerung
 keybindingmenu.head Tasten-Einstellungen
@@ -507,14 +506,14 @@ sleeptimerbox.announce Sleeptimer in 1 min
 
 zaptotimer.announce In einer Minute wird umgeschaltet
 recordtimer.announce Die Aufnahme beginnt in einer Minute
-shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen ?
+shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen?
 
 timerbar.channelswitch Umschalten
 timerbar.recordevent Aufnehmen
 timer.eventtimed.title Sendung vormerken
 timer.eventtimed.msg Die Sendung wurde vorgemerkt
 timer.eventrecord.title Aufnahme vormerken
-timer.eventrecord.msg   Die Sendung wurde zur Aufnahme vergemerkt
+timer.eventrecord.msg Die Sendung wurde zur Aufnahme vergemerkt
 timerlist.name Timerliste
 timerlist.delete Löschen
 timerlist.empty Es gibt momentan keine Timer

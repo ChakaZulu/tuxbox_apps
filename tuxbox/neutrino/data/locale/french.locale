@@ -15,9 +15,9 @@ mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown mettre hors circuit
 mainmenu.settings Settings
 mainmenu.service Service
-mainmenu.streaming Streaming (recorde)
-mainmenu.streaming_start start
-mainmenu.streaming_stop stop
+mainmenu.recording Streaming (recorde)
+mainmenu.recording_start start
+mainmenu.recording_stop stop
 
 servicemenu.head Service
 servicemenu.update Software Update
@@ -42,7 +42,7 @@ mainsettings.language Langue
 mainsettings.audio Argile
 mainsettings.video Vidéo
 mainsettings.network Réseau
-mainsettings.streaming Streamingserver
+mainsettings.recording Streamingserver
 mainsettings.colors  Couleurs / Thèmes
 mainsettings.lcd LC-Display
 mainsettings.keybinding Ajuster des clés
@@ -65,6 +65,9 @@ audiomenu.monoright mono a droite
 audiomenu.monoleft mono a gauche
 audiomenu.stereo Stéréo
 audiomenu.dolbydigital Dolby Digital
+audiomenu.avs_control unset
+audiomenu.avs avs
+audiomenu.ost ost
 
 videomenu.head Ajuster la Vidéo
 videomenu.screensetup ajuster le secteur d'image visible
@@ -89,12 +92,18 @@ networkmenu.broadcast Émission
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
 
-streamingmenu.head Streamingserver réglages
-streamingmenu.usestreamserver utiliser Streamingserver
-streamingmenu.streamingserver Streamingserver
-streamingmenu.streamingserverport Port
-streamingmenu.stopplayback arrêter interprétation
-streamingmenu.stopsectionsd arrêter Sectionsd
+recordingmenu.head Streamingserver réglages
+recordingmenu.usestreamserver utiliser Streamingserver
+recordingmenu.streamingserver Streamingserver
+recordingmenu.streamingserverport Port
+recordingmenu.stopplayback arrêter interprétation
+recordingmenu.stopsectionsd arrêter Sectionsd
+recordingmenu.vcr_devicename unset
+recordingmenu.off unset
+recordingmenu.server unset
+recordingmenu.vcr unset
+recordingmenu.server_wakeup unset
+recordingmenu.server_mac unset
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable
@@ -107,6 +116,7 @@ ipsetup.hint_2 ou Up/Down, OK stocke , Home interrompre
 colormenu.head Ajuster la Couleur
 colormenu.statusbar Poutre de statut
 colormenu.themeselect choisir un Thème
+colormenu.font unset
 colormenu.menucolors Couleur de menu
 colormenu.background Couleur de Arrière-plan
 colormenu.background_head Couleur de Arrière-plan
@@ -131,7 +141,6 @@ repeatblocker.hint_1 Temps minimum entre 2 clés dans les millisecondes
 repeatblocker.hint_2 0 met hors circuit l' amortissement  (Rouge est " ")
 
 keybindingmenu.RC Télécommande
-keybindingmenu.repeatblock bloquer des clés doubles
 keybindingmenu.repeatblock repeat delay
 keybindingmenu.repeatblockgeneric generic delay
 keybindingmenu.head Réglage de clé
@@ -146,6 +155,8 @@ keybindingmenu.pagedown couvrir de feuilles vers le bas un côté
 keybindingmenu.pagedown_head couvrir de feuilles vers le bas un côté
 keybindingmenu.cancel fermer la liste d'émetteur
 keybindingmenu.cancel_head fermer la liste d'émetteur
+keybindingmenu.sort unset
+keybindingmenu.sort_head unset
 keybindingmenu.channelup Canal vers le haut
 keybindingmenu.channelup_head Canal vers le haut clé
 keybindingmenu.channeldown Canal vers le bas
@@ -493,10 +504,91 @@ sleeptimerbox.hint1 Temps d'arrêt en minutes.
 sleeptimerbox.hint2 La dbox2 est terminé après ce temps.
 sleeptimerbox.announce Temporisateur De Sommeil en minutes 1 
 
-timerbar.channelswitch noter
-timerbar.recordevent Aufnahme 
-timer.eventtimed.title noter programme
-timer.eventtimed.msg Die Sendung wurde vorgemerkt.\nDie dbox2 wird sich zum Startzeitpunkt automatisch ein- \nund auf die Sendung umschalten.
-timer.eventrecord.title Aufnahme vormerken
-timer.eventrecord.msg   Die Sendung wurde zur Aufnahme vergemerkt
+zaptotimer.announce unset
+recordtimer.announce unset
+shutdowntimer.announce unset
 
+timerbar.channelswitch noter
+timerbar.recordevent unset 
+timer.eventtimed.title noter programme
+timer.eventtimed.msg unset
+timer.eventrecord.title unset
+timer.eventrecord.msg unset
+timerlist.name unset
+timerlist.delete unset
+timerlist.empty unset
+timerlist.type.shutdown unset
+timerlist.type.nextprogram unset
+timerlist.type.zapto unset
+timerlist.type.standby unset
+timerlist.type.record unset
+timerlist.type.remind unset
+timerlist.type.sleeptimer unset
+timerlist.type.unknown unset
+timerlist.repeat.once unset
+timerlist.repeat.daily unset
+timerlist.repeat.weekly unset
+timerlist.repeat.biweekly unset
+timerlist.repeat.fourweekly unset
+timerlist.repeat.monthly unset
+timerlist.repeat.byeventdescription unset
+timerlist.repeat.unknown unset
+timerlist.repeat.weekdays unset
+timerlist.repeat.sunday unset
+timerlist.repeat.monday unset
+timerlist.repeat.tuesday unset
+timerlist.repeat.wednesday unset
+timerlist.repeat.thursday unset
+timerlist.repeat.friday unset
+timerlist.repeat.saturday unset
+timerlist.weekdays unset
+timerlist.weekdays.hint_1 unset
+timerlist.weekdays.hint_2 unset
+timerlist.program.unknown unset
+timerlist.standby.off unset
+timerlist.standby.on unset
+timerlist.alarmtime unset
+timerlist.stoptime unset
+timerlist.new unset
+timerlist.menumodify unset
+timerlist.type unset
+timerlist.repeat unset
+timerlist.save unset
+timerlist.standby unset
+timerlist.channel unset
+timerlist.menunew unset
+timerlist.reload unset
+timerlist.modify unset
+timerlist.message unset
+timerlist.apid unset
+timersettings.separator unset
+timersettings.record_safety_time unset
+timersettings.record_safety_time.hint_1 unset
+timersettings.record_safety_time.hint_2 unset
+
+fontsize.menu unset
+fontsize.menu_title unset
+fontsize.menu_info unset
+fontsize.epg_title unset
+fontsize.epg_info1 unset
+fontsize.epg_info2 unset
+fontsize.epg_date unset
+fontsize.alert unset
+fontsize.eventlist_title unset
+fontsize.eventlist_itemlarge unset
+fontsize.eventlist_itemsmall unset
+fontsize.eventlist_datetime unset
+fontsize.channellist unset
+fontsize.channellist_descr unset
+fontsize.channellist_number unset
+fontsize.channel_num_zap unset
+fontsize.infobar_number unset
+fontsize.infobar_channame unset
+fontsize.infobar_info unset
+fontsize.infobar_small unset
+
+fontmenu.head unset
+fontmenu.channellist unset
+fontmenu.eventlist unset
+fontmenu.epg unset
+fontmenu.infobar unset
