@@ -897,6 +897,7 @@ static eString getLeftNavi(eString mode, eString path)
 		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=controlTimerList");
 	}
 	else
+#ifndef DISABLE_FILE
 	if (mode.find("config") == 0)
 	{
 		result += button(110, "HDD", LEFTNAVICOLOR, "?mode=configHDD");
@@ -905,6 +906,7 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 	}
 	else
+#endif
 	if (mode.find("updates") == 0)
 	{
 		result += button(110, "Internet", LEFTNAVICOLOR, "?mode=updatesInternet");
@@ -1753,9 +1755,7 @@ static eString getDiskInfo(void)
 	}
 	return result.str();
 }
-#endif //DISABLE_FILE
 
-#ifndef DISABLE_FILE
 static eString getConfigHDD(void)
 {
 	std::stringstream result;
@@ -1766,7 +1766,6 @@ static eString getConfigHDD(void)
 		<< readFile(TEMPLATE_DIR + "configHDD.tmp");
 	return result.str();
 }
-#endif
 
 static eString getUSBInfo(void)
 {
@@ -1838,6 +1837,7 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 	content->code_descr="No Content";
 	return NOCONTENT;
 }
+#endif
 
 static eString msgWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
@@ -1862,8 +1862,8 @@ static eString aboutDreambox(void)
 
 #ifndef DISABLE_FILE
 	result << getDiskInfo();
-#endif
 	result << getUSBInfo();
+#endif
 	result  << "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>"
 		<< "<tr><td>Web Interface:</td><td>" << WEBXFACEVERSION << "</td></tr>"
 		<< "</table>";
@@ -2155,13 +2155,13 @@ static eString getContent(eString mode, eString path)
 		result += getConfigHDD();
 	}
 	else
-#endif
 	if (mode == "configUSB")
 	{
 		result = getTitle("CONFIG: USB");
 		result += getConfigUSB();
 	}
 	else
+#endif
 	if (mode == "help")
 	{
 		result = getTitle("HELP");
@@ -3682,8 +3682,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio);
+#ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD);
+#endif
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getEIT", getEIT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
