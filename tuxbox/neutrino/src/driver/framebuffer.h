@@ -36,14 +36,6 @@
 #include <linux/fb.h>
 #include "dbox/fb.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <memory.h>
-
 #include <string>
 
 using namespace std;

@@ -42,9 +42,6 @@
 
 #include "lcddclient.h"
 
-#include <stdio.h>
-
-
 
 bool isDigit(const char ch)
 {

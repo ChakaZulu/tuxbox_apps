@@ -38,22 +38,11 @@
 
 #include "gui/color.h"
 #include "system/settings.h"
-#include "streaminfo.h"
-
-#include "pthread.h"
-#include "semaphore.h"
-#include <sys/wait.h>
-#include <signal.h>
 
 #include "sections/sectionsdMsg.h"
 
 
 using namespace std;
-
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-
 
 class CInfoViewer
 {

@@ -39,9 +39,6 @@
 #include "gui/color.h"
 #include "gui/widget/messagebox.h"
 
-#include <stdio.h>
-
-
 CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();

@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.3 2002/04/20 12:03:16 Simplex Exp $
+        $Id: settings.cpp,v 1.4 2002/04/26 09:56:08 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include "settings.h"
+#include "global.h"
 
 using namespace std;
 
@@ -43,7 +44,7 @@ void CScanSettings::useDefaults()
 	diseqcMode = NO_DISEQC;
 	diseqcRepeat = 0;
 
-	if (atoi(getenv("fe"))==1)
+	if (g_info.fe==1)
 		strcpy( satNameNoDiseqc, "Astra 19.2E");
 	else
 		strcpy( satNameNoDiseqc, "Telekom");

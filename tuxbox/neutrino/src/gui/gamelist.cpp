@@ -39,6 +39,17 @@
 #include <fstream>
 #include <iostream.h>
 
+#include <dirent.h>
+#include <dlfcn.h>
+#include <config.h>
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
+#include <dbox/avia_gt_vbi.h>
+
+
 void CPlugins::loadPlugins()
 {
 	frameBuffer = CFrameBuffer::getInstance();

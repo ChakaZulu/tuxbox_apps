@@ -38,7 +38,6 @@
 #include "gui/color.h"
 
 #include <string>
-//#include <stdio.h>
 
 using namespace std;
 

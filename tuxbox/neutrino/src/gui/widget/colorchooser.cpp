@@ -40,9 +40,6 @@
 #include "gui/color.h"
 #include "gui/widget/messagebox.h"
 
-#include <stdio.h>
-
-
 
 CColorChooser::CColorChooser(string Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer)
 {

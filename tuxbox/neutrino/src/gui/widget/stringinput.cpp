@@ -40,10 +40,6 @@
 #include "gui/color.h"
 #include "gui/widget/messagebox.h"
 
-
-#include <stdio.h>
-
-
 CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
 {
 	frameBuffer = CFrameBuffer::getInstance();

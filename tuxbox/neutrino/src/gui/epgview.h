@@ -42,29 +42,10 @@
 #include "sections/sectionsdMsg.h"
 #include "sectionsdclient.h"
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-#include <string>
-#include <stdio.h>
-#include <unistd.h>
 #include <vector>
-
-#include "pthread.h"
-
+#include <string>
 
 using namespace std;
-
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-
-
-
 
 class CEpgData
 {

@@ -176,6 +176,7 @@ struct SglobalInfo
 	int box_Type;
 	int gtx_ID;
 	int enx_ID;
+	int fe;
 };
 
 

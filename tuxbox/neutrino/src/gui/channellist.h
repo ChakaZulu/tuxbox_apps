@@ -34,6 +34,7 @@
 
 #include "driver/framebuffer.h"
 #include "system/lastchannel.h"
+#include "gui/widget/menue.h"
 
 #include <string>
 #include <vector>

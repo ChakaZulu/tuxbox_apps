@@ -32,23 +32,7 @@
 #ifndef __remotecontrol__
 #define __remotecontrol__
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
 
-#include <string>
-#include <stdio.h>
-#include <unistd.h>
-
-#include <string>
-
-#include "pthread.h"
-#include "semaphore.h"
-#include <sys/wait.h>
-#include <signal.h>
 #include "zapit/getservices.h"
 #include "sections/sectionsdMsg.h"
 #include "zapitclient.h"
@@ -56,9 +40,7 @@
 using namespace std;
 #include <vector>
 #include <set>
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
+#include <string>
 
 struct st_rmsg
 {

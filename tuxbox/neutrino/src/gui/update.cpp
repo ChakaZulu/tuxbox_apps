@@ -34,6 +34,21 @@
 #include "update.h"
 #include "neutrino.h"
 
+#include <sys/ioctl.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
+
+#include <linux/mtd/mtd.h>
+
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+
+
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
 

@@ -41,19 +41,6 @@
 #include "libmd5sum/libmd5sum.h"
 #include "dbox/fp.h"
 
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/mount.h>
-
-#include <linux/mtd/mtd.h>
-
-#include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
 
 #include <string>
 
@@ -119,7 +106,7 @@ class CFlashUpdate : public CMenuTarget, CFlashTool_StatusViewer
 		int fd_fp;
 
 		CHTTPUpdater httpUpdater;
-	
+
 		int x;
 		int y;
 		int width;

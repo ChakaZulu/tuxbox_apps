@@ -44,18 +44,11 @@
 
 using namespace std;
 
+#include <include/plugin.h>
+
 #include <string>
 #include <vector>
-#include <dirent.h>
 #include <map>
-#include <dlfcn.h>
-#include <config.h>
-
-#include <unistd.h>
-#include <fcntl.h>
-
-#include <include/plugin.h>
-#include <dbox/avia_gt_vbi.h>
 
 class CPlugins
 {

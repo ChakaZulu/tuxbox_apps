@@ -46,6 +46,16 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
+#define SA struct sockaddr
+#define SAI struct sockaddr_in
+
 
 void printbin( int a)
 {

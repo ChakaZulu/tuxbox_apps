@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.249 2002/04/26 08:22:51 field Exp $
+        $Id: neutrino.cpp,v 1.250 2002/04/26 09:56:08 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -94,6 +94,9 @@
 #include <string>
 #include <vector>
 #include <map>
+
+#define SA struct sockaddr
+#define SAI struct sockaddr_in
 
 using namespace std;
 
@@ -389,7 +392,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.key_subchannel_up = CRCInput::RC_right;
 	g_settings.key_subchannel_down = CRCInput::RC_left;
 
-	if ( g_Controld->getBoxType() == 2 )
+	if ( g_info.box_Type == 3 )
 	{
 		// Sagem - andere Defaults...
 		strcpy(g_settings.repeat_blocker, "150");
@@ -421,6 +424,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.parentallock_lockage = 12;
 	strcpy(g_settings.parentallock_pincode, "0000");
 
+	g_settings.widget_fade = 1;
 }
 
 
@@ -431,6 +435,8 @@ void CNeutrinoApp::setupDefaults()
 **************************************************************************************/
 bool CNeutrinoApp::loadSetup(SNeutrinoSettings* load2)
 {
+	char tmp[0xFFFF];
+
 	bool loadSuccessfull = true;
 	if(!load2)
 	{
@@ -444,13 +450,15 @@ bool CNeutrinoApp::loadSetup(SNeutrinoSettings* load2)
 		printf("error while loading settings: %s\n", settingsFile.c_str() );
 		loadSuccessfull = false;
 	}
-	else if(read(fd, load2, sizeof(SNeutrinoSettings))!=sizeof(SNeutrinoSettings))
+	else if(read(fd, tmp, sizeof(tmp))!=sizeof(SNeutrinoSettings))
 	{
 		printf("error while loading settings: %s - config from old version?\n", settingsFile.c_str() );
 		loadSuccessfull = false;
 	}
 	else
 	{
+		memcpy(load2, &tmp, sizeof(SNeutrinoSettings));
+
 		close(fd);
 	}
 
@@ -811,7 +819,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 	ojBouquets->addOption( CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
 
 	//kabel-lnb-settings
-	if (atoi(getenv("fe"))==1)
+	if (g_info.fe==1)
 	{
 		settings.addItem( new CMenuSeparator() );
 		settings.addItem( new CMenuForwarder("menu.back") );
@@ -1468,12 +1476,10 @@ void CNeutrinoApp::InitZapper()
 	firstChannel();
 	if (firstchannel.mode == 't')
 	{
-		//remoteControl.tvMode();
 		tvMode();
 	}
 	else
 	{
-		//remoteControl.radioMode();
 		radioMode();
 	}
 }
@@ -1484,7 +1490,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_info.gtx_ID = -1;
 	sscanf(getenv("gtxID"), "%x", &g_info.gtx_ID);
 	g_info.enx_ID = -1;
-	sscanf(getenv("enxID"), "%x", &g_info.gtx_ID);
+	sscanf(getenv("enxID"), "%x", &g_info.enx_ID);
+	g_info.fe = 0;
+	sscanf(getenv("fe"), "%x", &g_info.fe);
+	//printf("box_Type: %d, gtxID: %d, enxID: %d, fe: %d\n", g_info.box_Type, g_info.gtx_ID, g_info.enx_ID, g_info.fe);
 
 	if(!loadSetup())
 	{
@@ -2344,7 +2353,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.249 2002/04/26 08:22:51 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.250 2002/04/26 09:56:08 field Exp $\n\n");
 	tzset();
 	initGlobals();
 
