@@ -1,8 +1,11 @@
 /*
-$Id: dvb_str.c,v 1.26 2003/11/24 23:52:18 rasc Exp $
+$Id: dvb_str.c,v 1.27 2003/11/25 00:17:11 rasc Exp $
 
-  dvbsnoop
-  (c) Rainer Scherg 2001-2003
+
+ http://dvbsnoop.sourceforge.net/
+
+ (c) 2001-2003   Rainer.Scherg@gmx.de
+  
 
   -- DVB-Strings
   -- dvb decoder helper functions
@@ -15,6 +18,10 @@ $Id: dvb_str.c,v 1.26 2003/11/24 23:52:18 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.27  2003/11/25 00:17:11  rasc
+-sync option, some TS and PES stuff;
+dsm_addr inactive, may be wrong - due to missing ISO 13818-6
+
 Revision 1.26  2003/11/24 23:52:18  rasc
 -sync option, some TS and PES stuff;
 dsm_addr inactive, may be wrong - due to missing ISO 13818-6
@@ -1802,6 +1809,7 @@ char *dvbstrTSpid_ID (u_int i)
 
 
 /*
+  -- Scrambling Control Table  ISO 13818-1
   -- Scrambling Control Table  ETSI ETR 289  5.1,
                                ETSI ETR 154  4.1.4.2.3
 */
