@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "lcd.h"
 #include "eskin.h"
+#include "init.h"
 
 eProgress::eProgress(eWidget *parent)
 	: eWidget(parent)
@@ -55,3 +56,23 @@ int eProgress::setProperty(const QString &prop, const QString &value)
 		return eWidget::setProperty(prop, value);
 	return 0;
 }
+
+static eWidget *create_eProgress(eWidget *parent)
+{
+	return new eProgress(parent);
+}
+
+class eProgressSkinInit
+{
+public:
+	eProgressSkinInit()
+	{
+		eSkin::addWidgetCreator("eProgress", create_eProgress);
+	}
+	~eProgressSkinInit()
+	{
+		eSkin::removeWidgetCreator("eProgress", create_eProgress);
+	}
+};
+
+eAutoInitP0<eProgressSkinInit,3> init_eProgressSkinInit("eProgress");

@@ -79,6 +79,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 		{
 			eBouquet *b;
 			hide();
+			pbs->setLCD(LCDTitle, LCDElement);
 			b=pbs->choose();
 			if (b)
 				useBouquet(b);
@@ -96,10 +97,10 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-eServiceSelector::eServiceSelector(eWidget* lcdTitle, eWidget* lcdElement)
-								:eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 400, lcdTitle, lcdElement)
+eServiceSelector::eServiceSelector()
+								:eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 400)
 {
-	pbs = new eBouquetSelector(lcdTitle, lcdElement);
+	pbs = new eBouquetSelector();
 
 	move(QPoint(70, 60));
 	

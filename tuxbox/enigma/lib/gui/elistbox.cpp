@@ -126,12 +126,18 @@ void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, cons
 	if (!where.contains(rect))
 		return;
 
-	if (parent && parent->LCDElement && entry &&(entry == current->current()))
+	gColor color=(have_focus && entry && entry==current->current())?col_active:getBackgroundColor();
+	
+	if (color != -1)
+	{
+		target->setForegroundColor(color);
+		target->fill(rect);
+		target->flush();
+	}
+
+	if (parent && parent->LCDElement && entry && (entry == current->current()))
 		parent->LCDElement->setText(entry->getText(0));
 
-	target->setForegroundColor((have_focus && entry && entry==current->current())?col_active:getBackgroundColor());
-	target->fill(rect);
-	target->flush();
 	if (entry)
 		entry->renderInto(target, rect);
 	target->flush();
@@ -211,13 +217,21 @@ void eListbox::keyDown(int rc)
 	if (isVisible())
 	{
 		if (oldtop!=top->current())
-			redraw();
+			invalidate();
 		else if (cs)
 		{
 			int i=0;
+			int old=-1, cur=-1;
 			for (QListIterator<eListboxEntry> entry(*top); i<entries; i++, ++entry)
-				if ((entry.current()==oldptr) || (entry.current()==current->current()))
-					invalidateEntry(i);
+				if (entry.current()==oldptr)
+					old=i;
+				else if (entry.current()==current->current())
+					cur=i;
+				
+				if (old != -1)
+					invalidateEntry(old);
+				if (cur != -1)
+					invalidateEntry(cur);
 		}
 	}
 }
@@ -304,7 +318,7 @@ eListboxEntry *eListbox::goPrev()
 }
 
 eListbox::eListbox(eWidget *parent, int type, int ih)
-	 :eWidget(parent, 1, 0), type(type)
+	 :eWidget(parent, 1), type(type)
 {
 	col_active=eSkin::getActive()->queryScheme("focusedColor");
 	top=0;
@@ -313,8 +327,6 @@ eListbox::eListbox(eWidget *parent, int type, int ih)
 	font_size=ih;
 	item_height=ih+2;
 	have_focus=0;
-	if (parent)
-		setBackgroundColor(parent->getBackgroundColor());	// ich will nicht durchscheinen
 	entryFnt=gFont("NimbusSansL-Regular Sans L Regular", font_size);
 	childs.setAutoDelete(true);
 }
@@ -334,7 +346,7 @@ QRect eListbox::getEntryRect(int pos)
 
 void eListbox::invalidateEntry(int n)
 {
-	redraw(getEntryRect(n));
+	invalidate(getEntryRect(n));
 }
 
 eListbox::~eListbox()

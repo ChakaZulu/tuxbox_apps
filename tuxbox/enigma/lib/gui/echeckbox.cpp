@@ -1,5 +1,7 @@
 #include "echeckbox.h"
 #include "font.h"
+#include "init.h"
+#include "eskin.h"
 
 eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eLabel* descr):
 	eButton(parent, descr)
@@ -30,3 +32,23 @@ void eCheckbox::setCheck(int c)
 	if (parent && parent->LCDElement)
 		descr = Desc+'\n'+(ischecked?"[X]":"[  ]");
 }
+
+static eWidget *create_eCheckbox(eWidget *parent)
+{
+	return new eCheckbox(parent);
+}
+
+class eCheckboxSkinInit
+{
+public:
+	eCheckboxSkinInit()
+	{
+		eSkin::addWidgetCreator("eCheckbox", create_eCheckbox);
+	}
+	~eCheckboxSkinInit()
+	{
+		eSkin::removeWidgetCreator("eCheckbox", create_eCheckbox);
+	}
+};
+
+eAutoInitP0<eCheckboxSkinInit,3> init_eCheckboxSkinInit("eCheckbox");

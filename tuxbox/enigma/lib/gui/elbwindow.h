@@ -13,7 +13,7 @@ protected:
 	int width;
 public:
 	eListbox *list;
-	eLBWindow(QString Title="", int LBtype=0, int Entrys=0, int FontSize=0, int width=400, eWidget* lcdTitle=0, eWidget* lcdElement=0);
+	eLBWindow(QString Title="", int LBtype=0, int Entrys=0, int FontSize=0, int width=400);
 	~eLBWindow();
 };
 

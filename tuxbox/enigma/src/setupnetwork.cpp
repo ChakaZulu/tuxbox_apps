@@ -21,8 +21,8 @@ static void pack(__u32 &l, int *t)
 		l|=(*t++)<<((3-i)*8);
 }
 
-eZapNetworkSetup::eZapNetworkSetup(eWidget *lcdTitle, eWidget *lcdElement ):
-eWindow(0, lcdTitle, lcdElement)
+eZapNetworkSetup::eZapNetworkSetup():
+	eWindow(0)
 {
 	setText("Network Setup");
 	move(QPoint(150, 136));

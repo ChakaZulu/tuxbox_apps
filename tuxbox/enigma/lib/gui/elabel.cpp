@@ -3,6 +3,7 @@
 #include "font.h"
 #include "lcd.h"
 #include "eskin.h"
+#include "init.h"
 #include <qrect.h>
 
 eLabel::eLabel(eWidget *parent, int flags, int takefocus):
@@ -95,3 +96,23 @@ int eLabel::setProperty(const QString &prop, const QString &value)
 		return eWidget::setProperty(prop, value);
 	return 0;
 }
+
+static eWidget *create_eLabel(eWidget *parent)
+{
+	return new eLabel(parent);
+}
+
+class eLabelSkinInit
+{
+public:
+	eLabelSkinInit()
+	{
+		eSkin::addWidgetCreator("eLabel", create_eLabel);
+	}
+	~eLabelSkinInit()
+	{
+		eSkin::removeWidgetCreator("eLabel", create_eLabel);
+	}
+};
+
+eAutoInitP0<eLabelSkinInit,3> init_eLabelSkinInit("eLabel");

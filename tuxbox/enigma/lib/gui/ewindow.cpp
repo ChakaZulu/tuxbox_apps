@@ -3,11 +3,12 @@
 #include "enigma.h"
 #include "grc.h"
 #include "eskin.h"
+#include "init.h"
 #include "epng.h"
 #include "elabel.h"
 
-eWindow::eWindow(int takefocus, eWidget* lcdTitle, eWidget* lcdElement)
-	:eWidget(0, takefocus, lcdTitle, lcdElement)
+eWindow::eWindow(int takefocus)
+	:eWidget(0, takefocus)
 {
 	titleSize=10;
 	border=5;
@@ -166,3 +167,33 @@ int eWindow::eventFilter(const eWidgetEvent &event)
 	}
 	return 0;
 }
+
+void eWindow::willShow()
+{
+	if (LCDTitle)
+		LCDTitle->setText(text);
+}
+
+void eWindow::willHide()
+{
+}
+
+static eWidget *create_eWindow(eWidget *parent)
+{
+	return new eWindow();
+}
+
+class eWindowSkinInit
+{
+public:
+	eWindowSkinInit()
+	{
+		eSkin::addWidgetCreator("eWindow", create_eWindow);
+	}
+	~eWindowSkinInit()
+	{
+		eSkin::removeWidgetCreator("eWindow", create_eWindow);
+	}
+};
+
+eAutoInitP0<eWindowSkinInit,3> init_eWindowSkinInit("eWindow");

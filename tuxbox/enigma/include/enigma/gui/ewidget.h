@@ -37,9 +37,6 @@ public slots:
 	void accept();
 	void reject();
 
-protected slots:
-	virtual void OnFontSizeChanged(int NewFontSize){};
-
 protected:
 	eWidget *parent;
 	QString name;
@@ -57,6 +54,12 @@ protected:
 	inline eWidget *getTLW()
 	{
 		return parent?parent->getTLW():this;
+	}
+	inline eWidget *getNonTransparentBackground()
+	{
+		if (getBackgroundColor()!=-1)
+			return this;
+		return parent?parent->getNonTransparentBackground():this;
 	}
 	int result, in_loop, have_focus, just_showing;
 	void takeFocus();
@@ -107,7 +110,7 @@ public:
 	}
 	virtual void redrawWidget(gPainter *target, const QRect &area);
 	virtual void eraseBackground(gPainter *target, const QRect &area);
-	eWidget(eWidget *parent=0, int takefocus=0, eWidget *lcdTitle=0, eWidget *lcdElement=0);
+	eWidget(eWidget *parent=0, int takefocus=0);
 	virtual ~eWidget();
 	QList<eWidget> *focusList() { return &_focusList; }
 
@@ -119,6 +122,7 @@ public:
 	QRect getClientRect() { return clientrect; }
 
 	void redraw(QRect area=QRect());
+	void invalidate(QRect area=QRect());
 	int exec();
 	
 	void clear();
@@ -137,6 +141,7 @@ public:
 	void setForegroundColor(gColor color);
 	void setPixmap(gPixmap *pmap);
 	void setTarget(gDC *target);
+	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
 	
 	gColor getBackgroundColor() { return backgroundColor; }
 	gColor getForegroundColor() { return foregroundColor; }

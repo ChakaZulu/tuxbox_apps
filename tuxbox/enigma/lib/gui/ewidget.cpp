@@ -6,18 +6,19 @@
 #include "gfbdc.h"
 #include "epng.h"
 #include "eskin.h"
+#include "init.h"
 
-eWidget::eWidget(eWidget *parent, int takefocus, eWidget *lcdTitle, eWidget *lcdElement):
+eWidget::eWidget(eWidget *parent, int takefocus):
 	QObject(parent), 
 	parent(parent), 
 	takefocus(takefocus), 
 	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
 	backgroundColor(parent?gColor(-1):gColor(0x20)),
-	foregroundColor(parent?parent->foregroundColor:gColor(0x2F)),
-	LCDTitle(lcdTitle),
-	LCDElement(lcdElement),
-	LCDTmp(0)
+	foregroundColor(parent?parent->foregroundColor:gColor(0x2F))
 {
+	LCDTitle=0;
+	LCDElement=0;
+	LCDTmp=0;
 	target=parent?0:gFBDC::getInstance();
 	in_loop=0;
 	state=parent?stateShow:0;
@@ -133,6 +134,24 @@ void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
 	}
 }
 
+void eWidget::invalidate(QRect area)
+{
+	if (area.isNull())
+		area=QRect(0, 0, size.width(), size.height());
+
+	eWidget *w=this;
+
+	while (((int)w->getBackgroundColor())==-1)
+	{
+		if (!w->parent)	// spaetestens fuers TLW sollte backgroundcolor aber non-transparent sein
+			break;
+		area.moveBy(w->position.x(), w->position.y());
+		w=w->parent;
+		area.moveBy(w->clientrect.x(), w->clientrect.y());
+	}
+	w->redraw(area);
+}
+
 void eWidget::event(const eWidgetEvent &event)
 {
 	if (!eventFilter(event))
@@ -166,15 +185,11 @@ void eWidget::event(const eWidgetEvent &event)
 			break;
 		case eWidgetEvent::changedText:
 		case eWidgetEvent::changedFont:
-			if (isVisible() && (((int)getBackgroundColor())==-1))
-				setBackgroundColor(getTLW()->getBackgroundColor());
 		case eWidgetEvent::changedForegroundColor:
 		case eWidgetEvent::changedBackgroundColor:
 		case eWidgetEvent::changedPosition:
-			redraw();
-			break;
 		case eWidgetEvent::changedPixmap:
-			redraw();
+			getNonTransparentBackground()->redraw();
 			break;
 		}
 	}
@@ -447,6 +462,12 @@ void eWidget::setTarget(gDC *newtarget)
 	target=newtarget;
 }
 
+void eWidget::setLCD(eWidget *_lcdtitle, eWidget *_lcdelement)
+{
+	LCDTitle=_lcdtitle;
+	LCDElement=_lcdelement;
+}
+
 gPainter *eWidget::getPainter(QRect area)
 {
 	QRect myclip=QRect(getAbsolutePosition(), size);
@@ -557,3 +578,24 @@ eWidget *eWidget::search(const QString &sname)
 	}
 	return 0;
 }
+
+
+static eWidget *create_eWidget(eWidget *parent)
+{
+	return new eWidget(parent);
+}
+
+class eWidgetSkinInit
+{
+public:
+	eWidgetSkinInit()
+	{
+		eSkin::addWidgetCreator("eWidget", create_eWidget);
+	}
+	~eWidgetSkinInit()
+	{
+		eSkin::removeWidgetCreator("eWidget", create_eWidget);
+	}
+};
+
+eAutoInitP0<eWidgetSkinInit,3> init_eWidgetSkinInit("eWidget");

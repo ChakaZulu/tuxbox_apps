@@ -1,6 +1,7 @@
 #include "ebutton.h"
 #include "eskin.h"
 #include "rc.h"
+#include "init.h"
 
 eButton::eButton(eWidget *parent, eLabel* descr):
 	eLabel(parent, 0, 1), descr(descr?descr->getText():"")
@@ -35,3 +36,23 @@ void eButton::lostFocus()
 	setBackgroundColor(normal);
 	redraw();
 }
+
+static eWidget *create_eButton(eWidget *parent)
+{
+	return new eButton(parent);
+}
+
+class eButtonSkinInit
+{
+public:
+	eButtonSkinInit()
+	{
+		eSkin::addWidgetCreator("eButton", create_eButton);
+	}
+	~eButtonSkinInit()
+	{
+		eSkin::removeWidgetCreator("eButton", create_eButton);
+	}
+};
+
+eAutoInitP0<eButtonSkinInit,3> init_eButtonSkinInit("eButton");

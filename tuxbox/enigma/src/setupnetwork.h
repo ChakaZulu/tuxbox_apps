@@ -20,7 +20,7 @@ private slots:
 protected:
 	int eventFilter(const eWidgetEvent &event);
 public:
-	eZapNetworkSetup(eWidget *lcdTitle=0, eWidget *lcdElement=0);
+	eZapNetworkSetup();
 	~eZapNetworkSetup();
 };
 

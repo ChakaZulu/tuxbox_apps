@@ -19,7 +19,7 @@ private slots:
 	void fillServiceList();
 	void entrySelected(eListboxEntry *entry);
 public:
-	eServiceSelector(eWidget* lcdTitle=0, eWidget* lcdElement=0);
+	eServiceSelector();
 	~eServiceSelector();
 	void useBouquet(eBouquet *bouquet);
 	eService *choose(eService *current=0, int irc=-1);

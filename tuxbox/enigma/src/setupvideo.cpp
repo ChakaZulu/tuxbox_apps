@@ -45,7 +45,7 @@ void eZapVideoSetup::setColorFormat(eAVColorFormat w)
 	}
 }
 
-eZapVideoSetup::eZapVideoSetup(eWidget *lcdTitle, eWidget *lcdElement): eWindow(0, lcdTitle, lcdElement)
+eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 {
 /*	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "setup.video"))
