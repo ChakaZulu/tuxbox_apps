@@ -1186,11 +1186,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				&& !movemode && !editMode && this == eZap::getInstance()->getServiceSelector() )
 			{
 				hide();
-				printf("[SSELECT] sref: %s\n", selected.path.c_str());
-				if (selected.path.right(4).upper() == ".JPG" ||
-				    selected.path.right(4).upper() == ".PNG" ||
-				    selected.path.right(4).upper() == ".BMP" ||
-				    selected.path.right(4).upper() == ".GIF")
+				if (selected.type == 0x2000)  // Picture
 				{
 					ePicViewerStyleSelector f(1);
 #ifndef DISABLE_LCD
@@ -1200,29 +1196,15 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					printf("[SSELECT] calling exec() now...\n");
 					int ret = f.exec();
 					f.hide();
-#if 0
-					switch (ret)
+
+					if ( ret != -1 )
 					{
-						case 0:
-						{
-							ePictureViewer::getInstance()->stopSlideshow();
-							ePictureViewer::getInstance()->displayImage(selected.path);
-							break;
-						}
-						case 1:
-						{
-							ePictureViewer::getInstance()->stopSlideshow();
-							ePictureViewer::getInstance()->startSlideshow(selected.path);
-							break;
-						}
-						default:
-							show();
-							break;
+						ePictureViewer e(selected.path);
+						e.show();
+						e.exec();
+						e.hide();
 					}
-					close(0);
-#else
 					show();
-#endif
 				}
 				else
 				{
