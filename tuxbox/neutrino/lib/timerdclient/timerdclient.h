@@ -4,7 +4,11 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.7 2002/05/15 16:00:31 field Exp $
+<<<<<<< timerdclient.h
+	$Id: timerdclient.h,v 1.8 2002/05/17 03:26:52 dirch Exp $
+=======
+	$Id: timerdclient.h,v 1.8 2002/05/17 03:26:52 dirch Exp $
+>>>>>>> 1.7
 
 	License: GPL
 
@@ -73,10 +77,9 @@ class CTimerdClient
 		{
 			EVT_SHUTDOWN = 1,
 			EVT_NEXTPROGRAM,
-			EVT_STANDBY,
-			EVT_RECORD,
 			EVT_STANDBY_ON,
-			EVT_STANDBY_OFF
+			EVT_STANDBY_OFF,
+			EVT_RECORD
 		};
 
 		CTimerdClient::CTimerdClient();
@@ -95,26 +98,26 @@ class CTimerdClient
 
 		int addShutdownTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
-			addTimerEvent(TIMER_SHUTDOWN,NULL,month, day, hour, min);
+			addTimerEvent(TIMER_SHUTDOWN,NULL, min, hour, day, month);
 		};
 
 		int addRecordTimerEvent(int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
-			addTimerEvent(TIMER_RECORD,NULL,month, day, hour, min);
+			addTimerEvent(TIMER_RECORD,NULL, min, hour, day, month);
 		};
 
 		int addNextProgramTimerEvent(unsigned onidSid,int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
 			CTimerd::EventInfo eventInfo;
 			eventInfo.onidSid = onidSid;
-			addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo,month, day, hour, min);
+			addTimerEvent(TIMER_NEXTPROGRAM,&eventInfo, min, hour, day, month);
 		};
 
 		int addStandbyTimerEvent(bool standby_on,int min = 0, int hour = 0, int day = 0, int month = 0)
 		{
 			CTimerd::commandSetStandby standby;
 			standby.standby_on =standby_on;
-			addTimerEvent(TIMER_STANDBY,&standby,month, day, hour, min);
+			addTimerEvent(TIMER_STANDBY,&standby, min, hour, day, month);
 		};
 };
 

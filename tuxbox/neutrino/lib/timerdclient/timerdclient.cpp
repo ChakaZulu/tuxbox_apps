@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.5 2002/05/14 23:07:25 dirch Exp $
+	$Id: timerdclient.cpp,v 1.6 2002/05/17 03:26:52 dirch Exp $
 
 	License: GPL
 
@@ -164,7 +164,7 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 		month = actTime->tm_mon;
 
 	CTimerd::commandAddTimer msgAddTimer;
-	msgAddTimer.month  = month - 1;
+	msgAddTimer.month  = month  ;
 	msgAddTimer.day    = day    ;
 	msgAddTimer.hour   = hour   ;
 	msgAddTimer.min    = min    ;
