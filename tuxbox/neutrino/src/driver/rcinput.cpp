@@ -68,6 +68,7 @@
 
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
 static struct termio orig_termio;
+static bool          saved_orig_termio = false;
 #endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
 
 
@@ -164,18 +165,20 @@ void CRCInput::open()
 	}
 	*/
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-	fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
+	::fcntl(fd_keyb, F_SETFL, O_NONBLOCK);
 
 	struct termio new_termio;
 
-	ioctl(STDIN_FILENO, TCGETA, &orig_termio);
+	::ioctl(STDIN_FILENO, TCGETA, &orig_termio);
+
+	saved_orig_termio      = true;
 
 	new_termio             = orig_termio;
 	new_termio.c_lflag    &= ~(ICANON|ECHO);
 	new_termio.c_cc[VMIN ] = 1;
 	new_termio.c_cc[VTIME] = 0;
 
-	ioctl(STDIN_FILENO, TCSETA, &new_termio);
+	::ioctl(STDIN_FILENO, TCSETA, &new_termio);
 
 #else
 	//fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
@@ -194,7 +197,11 @@ void CRCInput::close()
 		fd_rc = 0;
 	}
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-	ioctl(STDIN_FILENO, TCSETA, &orig_termio);
+	if (saved_orig_termio)
+	{
+		::ioctl(STDIN_FILENO, TCSETA, &orig_termio);
+		printf("Original terminal settings restored.\n");
+	}
 #else
 /*
 	if(fd_keyb)
