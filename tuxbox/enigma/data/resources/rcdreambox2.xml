@@ -31,6 +31,7 @@
 			<key name="audio" code="26" />
 			<key name="video" code="27" />
 			<key name="info" code="28" />
+			<key name="record" code="35" />
 			<key name="red" code="40" />
 			<key name="green" code="41" />
 			<key name="yellow" code="42" />
@@ -69,10 +70,12 @@
 			<action name="standby_repeat" key="power" flags="r" />
 			<action name="standby_release" key="power" flags="b" />
 			<action name="toggleInfobar" key="ok" flags="m" />
-			<action name="showServiceSelector" key="tv" flags="m" />
 			<action name="showSubservices" key="green" flags="m" />
+			<action name="showSubservices" key="video" flags="m" />
 			<action name="showAudio" key="yellow" flags="m" />
+			<action name="showAudio" key="audio" flags="m" />
 			<action name="pluginVTXT" key="blue" flags="m" />
+			<action name="pluginVTXT" key="text" flags="m" />
 			<action name="showEPGList" key="red" flags="m" />
 			<action name="showEPG" key="info" flags="m" />
 			<action name="playlistNextService" key="next" flags="mr" />
@@ -87,9 +90,8 @@
 
 			<action name="play" key="green" flags="m" />
 			<action name="pause" key="yellow" flags="m" />
-			<action name="stop" key="tv" flags="m" />
 
-			<action name="record" key="radio" flags="m" />
+			<action name="record" key="record" flags="m" />
 			
 			<action name="startSkipF" key="blue" flags="m" />
 			<action name="repeatSkipF" key="blue" flags="r" />
@@ -98,7 +100,13 @@
 			<action name="startSkipR" key="red" flags="m" />
 			<action name="repeatSkipR" key="red" flags="r" />
 			<action name="stopSkipR" key="red" flags="b" />
+			
+			<action name="showBouquets" key="bouqup" flags="m" />
+			<action name="showFavourites" key="bouqdown" flags="m" />
 
+			<action name="modeTV" key="tv" flags="m" />
+			<action name="modeRadio" key="radio" flags="m" />
+			<action name="modeFile" key="text" flags="m" />
 		</actionmap>
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="next" flags="mr" />
@@ -150,7 +158,7 @@
 		<keys>
 			<key name="down" code="1" />
 			<key name="up" code="2" />
-			<key name="power" code="3" />
+			<key name="power" code="0" />
 		</keys>
 
 		<actionmap name="enigmaMain">

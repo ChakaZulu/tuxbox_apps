@@ -10,7 +10,6 @@
 #include <lib/base/estring.h>
 #include <lib/base/eptrlist.h>
 #include <lib/dvb/settings.h>
-#include <lib/dvb/dvbci.h>
 
 class eService;
 class eTransponder;

@@ -25,6 +25,7 @@
 #include <lib/dvb/record.h>
 #include <lib/system/init.h>
 #include <lib/system/econfig.h>
+#include <lib/dvb/dvbci.h>
 
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/dvbscan.h>
@@ -233,6 +234,8 @@ void eDVB::configureNetwork()
 			if (system(buffer.c_str())>>8)
 				eDebug("'%s' failed", buffer.c_str());
 		}
+		system("killall nmbd");
+		system("/bin/nmbd -D");
 	}
 }
 

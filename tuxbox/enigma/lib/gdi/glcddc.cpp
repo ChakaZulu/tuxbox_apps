@@ -6,6 +6,8 @@ gLCDDC *gLCDDC::instance;
 gLCDDC::gLCDDC(eLCD *lcd): lcd(lcd)
 {
 	instance=this;
+	
+	update=1;
 
 	pixmap=new gPixmap();
 	pixmap->x=lcd->size().width();
@@ -31,7 +33,8 @@ void gLCDDC::exec(gOpcode *o)
 	{
 	case gOpcode::flush:
 	case gOpcode::end:
-		lcd->update();
+		if (update)
+			lcd->update();
 	default:
 		gPixmapDC::exec(o);
 		break;
@@ -43,3 +46,7 @@ gLCDDC *gLCDDC::getInstance()
 	return instance;
 }
 
+void gLCDDC::setUpdate(int u)
+{
+	update=u;
+}

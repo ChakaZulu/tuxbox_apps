@@ -535,6 +535,7 @@ void eDVBCI::dataAvailable(int what)
 		
 		::read(fd,&buffer,0);	
 		ci_state=0;
+		clearCAIDs();
 		return;
 	}		
 	
@@ -549,7 +550,13 @@ void eDVBCI::dataAvailable(int what)
 		::read(fd,&buffer,0);	
 	
 		::ioctl(fd,CI_ACTIVATE);	
-		::ioctl(fd,CI_RESET);
+		if(::ioctl(fd,CI_RESET)!=0)
+		{
+			ci_state=0;
+			clearCAIDs();
+			return;
+		}		
+	
 		ci_state=1;
 	}					
 		
@@ -569,6 +576,10 @@ void eDVBCI::dataAvailable(int what)
 
 void eDVBCI::poll()
 {
-	//eDebug("[DVBCI] TIMER");	
-	sendTPDU(0xA0,0,1,0);
+	int present;
+
+	::ioctl(fd,CI_GET_STATUS,&present);	
+
+	if(present)						//CI removed
+		sendTPDU(0xA0,0,1,0);
 }

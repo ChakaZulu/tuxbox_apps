@@ -51,12 +51,13 @@ struct ePlaylistEntry
 
 class ePlaylist: public eService
 {
+	std::string filename;
 public:
 	std::list<ePlaylistEntry> list;
 	std::list<ePlaylistEntry>::iterator current;
 
 	int load(const char *filename);
-	int save(const char *filename);
+	int save(const char *filename=0);
 	
 	int deleteService(std::list<ePlaylistEntry>::iterator it);
 	int moveService(std::list<ePlaylistEntry>::iterator it, std::list<ePlaylistEntry>::iterator before);

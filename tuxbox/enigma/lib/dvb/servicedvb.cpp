@@ -33,9 +33,12 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	
 	slice=0;
 	struct stat s;
-	while (!stat((filename + slice ? eString().sprintf(".%03d", slice) : eString("")).c_str(), &s))
+	while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+	{
 		filelength+=s.st_size/1880;
-
+		slice++;
+	}
+		
 	if (openFile(slice=0))
 	{
 		state=stateError;
@@ -180,8 +183,8 @@ int eDVRPlayerThread::getPosition(int real)
 {
 	eLocker l(poslock);
 	if (real)
-		return (::lseek(sourcefd, 0, SEEK_CUR)-buffer.size() / 1880) + slice*(slicesize/1880);
-	return ((::lseek(sourcefd, 0, SEEK_CUR)-buffer.size() / 1880) + slice*(slicesize/1880)) / 250;
+		return ((::lseek(sourcefd, 0, SEEK_CUR)-buffer.size()) / 1880) + slice*(slicesize/1880);
+	return (((::lseek(sourcefd, 0, SEEK_CUR)-buffer.size()) / 1880) + slice*(slicesize/1880)) / 250;
 }
 
 int eDVRPlayerThread::getLength(int real)
@@ -426,7 +429,7 @@ int eServiceHandlerDVB::play(const eServiceReference &service)
 		decoder=0;
 		flags &= ~(flagIsSeekable|flagSupportPosition);
 	}
-	if (oldflags != flags)
+//	if (oldflags != flags)
 		serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 	if (sapi)
 		return sapi->switchService((const eServiceReferenceDVB&)service);

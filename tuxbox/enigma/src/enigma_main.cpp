@@ -37,6 +37,7 @@
 #include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/gdi/lcd.h>
+#include <lib/gdi/glcddc.h>
 #include <lib/dvb/servicestructure.h>
 #include <lib/dvb/serviceplaylist.h>
 
@@ -138,6 +139,8 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::execBegin:
 	{
 		eDBoxLCD::getInstance()->switchLCD(0);
+		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
+		system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
 		eZapLCD *pLCD=eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdStandby->show();
@@ -691,10 +694,10 @@ eZapMain::~eZapMain()
 		eServiceInterface::getInstance()->removeRef(favouriteref[i]);
 	}
 
-	curlist->save(CONFIGDIR "/enigma/playlist.epl");
+	curlist->save();
 	eServiceInterface::getInstance()->removeRef(playlistref);
 
-	recordings->save(MOVIEDIR "/recordings.epl");
+	recordings->save();
 	eServiceInterface::getInstance()->removeRef(recordingsref);
 	
 	if (instance == this)
@@ -702,7 +705,8 @@ eZapMain::~eZapMain()
 	eZapLCD *pLCD=eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdShutdown->show();
-//	eDBoxLCD::getInstance()->switchLCD(0);
+	gLCDDC::getInstance()->setUpdate(0);
+	eDBoxLCD::getInstance()->switchLCD(0); // BITTE lasst das doch einfach drin :/
 
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 }
@@ -1406,9 +1410,9 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 	m.hide();
 	switch (res)
 	{
-	case 0:
+	case 0: // cancel
 		break;
-	case 1:
+	case 1: // delete service
 	{
 		if (eServiceInterface::getInstance()->service == ref)
 			eServiceInterface::getInstance()->stop();
@@ -1431,24 +1435,23 @@ void eZapMain::showServiceMenu(eServiceSelector *sel)
 		{
 			std::list<ePlaylistEntry>::iterator it=std::find(pl->list.begin(), pl->list.end(), ref);
 			pl->deleteService(it);
+			pl->save();
 			sel->actualize();
 		}
 		eServiceInterface::getInstance()->removeRef(path);
 		break;
 	}
-	case 2:
+	case 2: // move service
 	{
-/*		eMessageBox box(_("Sorry, not yet implemented."), _("move service"), eMessageBox::iconInfo|eMessageBox::btOK );
-		box.show();
-		box.exec();
-		box.hide(); */
+			// enable move mode in listbox - we get a callback
+			// when move has finished
 		sel->setMoveMode(1);
 		break;
 	}
-	case 3:
+	case 3: // add service to playlist
 		doPlaylistAdd(sel->getSelected());
 		break;
-	case 4:
+	case 4: // add service to favourite
 		addServiceToFavourite(sel);
 	}
 	sel->show();
@@ -1578,7 +1581,10 @@ void eZapMain::addServiceToFavourite(eServiceSelector *sel)
 	sel->show();
 	
 	if ( res == eMessageBox::btYes )
+	{
 		favourite[mode]->list.push_back(service);
+		favourite[mode]->save();
+	}
 }
 
 void eZapMain::showSubserviceMenu()
@@ -2580,6 +2586,7 @@ void eZapMain::moveService(const eServiceReference &path, const eServiceReferenc
 		after=pl->list.end();
 	
 	pl->moveService(it, after);
+	pl->save();
 
 	eServiceInterface::getInstance()->removeRef(path);
 }

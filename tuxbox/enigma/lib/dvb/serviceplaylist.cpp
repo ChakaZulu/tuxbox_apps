@@ -23,6 +23,7 @@ ePlaylist::ePlaylist(): eService(0, "playlist")
 int ePlaylist::load(const char *filename)
 {
 	eDebug("loading playlist... %s", filename);
+	this->filename=filename;
 	FILE *fp=fopen(filename, "rt");
 	eString path=filename;
 	int service_name_set=service_name!="playlist";
@@ -113,6 +114,8 @@ int ePlaylist::load(const char *filename)
 
 int ePlaylist::save(const char *filename)
 {
+	if (!filename)
+		filename=this->filename.c_str();
 	FILE *f=fopen(filename, "wt");
 	if (!f)
 		return -1;

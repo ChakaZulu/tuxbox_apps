@@ -1,5 +1,5 @@
-#ifndef __lib_dvb_ci_h
-#define __lib_dvb_ci_h
+#ifndef __core_dvb_ci_h
+#define __core_dvb_ci_h
 
 #include <lib/dvb/service.h>
 //#include <lib/base/buffer.h>

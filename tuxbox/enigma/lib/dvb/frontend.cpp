@@ -229,14 +229,15 @@ int eFrontend::tune(eTransponder *trans,
 
 	if (lnb)
 	{
+		int local;
 		if ( swParams->HiLoSignal == eSwitchParameter::ON || ( swParams->HiLoSignal == eSwitchParameter::HILO && Frequency > lnb->getLOFThreshold() ) )
 	 	{
-			front.Frequency=Frequency-lnb->getLOFHi();
+			local=Frequency-lnb->getLOFHi();
 			seq.continuousTone = SEC_TONE_ON;
 			hi=1;
 		} else // swParams->hiloSignal == wSwitchParameter::OFF
 		{
-			front.Frequency=Frequency-lnb->getLOFLo();
+			local=Frequency-lnb->getLOFLo();
 			seq.continuousTone = SEC_TONE_OFF;
 			hi=0;
 		}
@@ -244,6 +245,11 @@ int eFrontend::tune(eTransponder *trans,
 		DiSEqC.cmd=0x38;
 		DiSEqC.numParams=1;
 		DiSEqC.params[0]=0xF0;
+		
+		if(local>0)		//Ku-Band
+			front.Frequency=local;
+		else	
+			front.Frequency=-local;  //C-Band
 
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::MINI )
 			cmd.type = SEC_MINI_NONE;
