@@ -21,7 +21,6 @@ gRC::gRC(): queuelock(MAXSIZE)
 //	ASSERT(!instance);
 	instance=this;
 	queuelock.lock(MAXSIZE);
-	eDebug("------------------------------------------------- gRC -----------------");
 	eDebug(pthread_create(&the_thread, 0, thread_wrapper, this)?"RC thread couldn't be created":"RC thread createted successfully");
 }
 

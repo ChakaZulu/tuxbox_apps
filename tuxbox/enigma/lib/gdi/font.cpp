@@ -411,10 +411,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 			if (!index)
 				; // eDebug("unicode %d ('%c') not present", uc, uc);
 			else
-			{
-				eDebug("appendGlyph");
 				appendGlyph(index, flags);
-			}
 		}
 		p++;
 	}
