@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.6 2001/06/11 19:22:54 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.7 2001/06/13 19:08:27 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.7  2001/06/13 19:08:27  fnbrd
+// Timeout bei read() per poll() implementiert.
+//
 // Revision 1.6  2001/06/11 19:22:54  fnbrd
 // Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
 //
@@ -45,6 +48,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <sys/poll.h> // fuer poll()
 
 #include <ost/dmx.h>
 
@@ -213,12 +217,44 @@ void SIevent::dumpSmall(void) const
   for_each(times.begin(), times.end(), printSItime());
   for_each(ratings.begin(), ratings.end(), printSIparentalRating());
 }
-
+/*
 // Liest n Bytes aus einem Socket per read
 inline int readNbytes(int fd, char *buf, int n)
 {
 int j;
   for(j=0; j<n;) {
+    int r=read (fd, buf, n-j);
+    if(r<=0) {
+      perror ("read");
+      return -1;
+    }
+    j+=r;
+    buf+=r;
+  }
+  return j;
+}
+*/
+
+// Liest n Bytes aus einem Socket per read
+// Liefert 0 bei timeout
+// und -1 bei Fehler
+// ansonsten die Anzahl gelesener Bytes
+inline int readNbytes(int fd, char *buf, int n, unsigned timeoutInSeconds)
+{
+int j;
+  for(j=0; j<n;) {
+    struct pollfd ufds;
+//    memset(&ufds, 0, sizeof(ufds));
+    ufds.fd=fd;
+    ufds.events=POLLIN|POLLPRI;
+    ufds.revents=0;
+    int rc=poll(&ufds, 1, timeoutInSeconds*1000);
+    if(!rc)
+      return 0; // timeout
+    else if(rc<0) {
+      perror ("poll");
+      return -1;
+    }
     int r=read (fd, buf, n-j);
     if(r<=0) {
       perror ("read");
@@ -261,7 +297,10 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
 //  printf("reading first\n");
   // Segment mit Event fuer sid suchen
   do {
-    if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+    if(!rc)
+      break; // timeout
+    else if(rc<0) {
       close(fd);
       perror ("read header");
       return evt;
@@ -274,7 +313,12 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
-    if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    if(!rc) {
+      delete[] buf;
+      break; // timeout
+    }
+    if(rc<0) {
       close(fd);
       delete[] buf;
       perror ("read section");

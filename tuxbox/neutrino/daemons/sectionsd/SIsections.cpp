@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.11 2001/06/11 01:53:54 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.12 2001/06/13 19:08:27 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.12  2001/06/13 19:08:27  fnbrd
+// Timeout bei read() per poll() implementiert.
+//
 // Revision 1.11  2001/06/11 01:53:54  fnbrd
 // Kleiner Fehler behoben.
 //
@@ -62,6 +65,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <sys/poll.h> // fuer poll()
 
 #include <ost/dmx.h>
 
@@ -281,10 +285,25 @@ void SIsectionSDT::parse(void)
 }
 
 // Liest n Bytes aus einem Socket per read
-inline int readNbytes(int fd, char *buf, int n)
+// Liefert 0 bei timeout
+// und -1 bei Fehler
+// ansonsten die Anzahl gelesener Bytes
+inline int readNbytes(int fd, char *buf, int n, unsigned timeoutInSeconds)
 {
 int j;
   for(j=0; j<n;) {
+    struct pollfd ufds;
+//    memset(&ufds, 0, sizeof(ufds));
+    ufds.fd=fd;
+    ufds.events=POLLIN|POLLPRI;
+    ufds.revents=0;
+    int rc=poll(&ufds, 1, timeoutInSeconds*1000);
+    if(!rc)
+      return 0; // timeout
+    else if(rc<0) {
+      perror ("poll");
+      return -1;
+    }
     int r=read (fd, buf, n-j);
     if(r<=0) {
       perror ("read");
@@ -336,22 +355,33 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
       close(fd);
       return 0; // timeout -> kein EPG
     }
-    if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+    if(!rc) {
       close(fd);
-      perror ("read header");
+      return 0; // timeout -> kein EPG
+    }
+    else if(rc<0) {
+      close(fd);
+//      perror ("read header");
       return 3;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       close(fd);
-      printf("Not enough memory!\n");
+      fprintf(stderr, "Not enough memory!\n");
       return 4;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
-    if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    if(!rc) {
       close(fd);
-      perror ("read section");
+      delete[] buf;
+      return 0; // timeout -> kein EPG
+    }
+    else if(rc<0) {
+      close(fd);
+//      perror ("read section");
       delete[] buf;
       return 5;
     }
@@ -377,9 +407,12 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   for(;;) {
     if(time(NULL)>szeit+(long)(timeoutInSeconds))
       break; // timeout
-    if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+    if(!rc)
+      break; // timeout
+    else if(rc<0) {
       close(fd);
-      perror ("read header");
+//      perror ("read header");
       return 6;
     }
     if(firstKey==SIsection::key(&header))
@@ -388,16 +421,21 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       close(fd);
-      printf("Not enough memory!\n");
+      fprintf(stderr, "Not enough memory!\n");
       return 7;
     }
     // Den Header kopieren (evtl. malloc und realloc nehmen)
     memcpy(buf, &header, sizeof(header));
     // den Rest der Section einlesen
-    if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    if(!rc) {
+      delete[] buf;
+      break; // timeout
+    }
+    else if(rc<0) {
       close(fd);
       delete[] buf;
-      perror ("read section");
+//      perror ("read section");
       return 8;
     }
     if(readNext || header.current_next_indicator)
@@ -474,24 +512,32 @@ int SIsections :: readSections(unsigned short pid, unsigned char filter, unsigne
   for(;;) {
     if(time(NULL)>szeit+(long)(timeoutInSeconds))
       break; // Timeout
-    if(readNbytes(fd, (char *)&header, sizeof(header))<0) {
+    int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
+    if(!rc)
+      break; // timeout
+    else if(rc<0) {
       close(fd);
-      perror ("read header");
+//      perror ("read header");
       return 11;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       close(fd);
-      printf("Not enough memory!\n");
+      fprintf(stderr, "Not enough memory!\n");
       return 12;
     }
     // Den Header kopieren (evtl. malloc und realloc nehmen)
     memcpy(buf, &header, sizeof(header));
     // den Rest der Section einlesen
-    if(readNbytes(fd, buf+sizeof(header), header.section_length-5)<0) {
+    rc=readNbytes(fd, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    if(!rc) {
+      delete[] buf;
+      break; // timeout
+    }
+    else if(rc<0) {
       close(fd);
       delete[] buf;
-      perror ("read section");
+//      perror ("read section");
       return 13;
     }
     if(missingSections.find(SIsection(&header))!=missingSections.end()) {
