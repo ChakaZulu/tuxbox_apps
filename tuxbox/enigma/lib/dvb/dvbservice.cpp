@@ -50,10 +50,11 @@ PMTEntry *eDVBServiceController::priorityAudio(PMTEntry *audio)
 		while (audiochannels && audio2 == 0)
 		{
 			audiochannels >> audiochannel;
+			audiochannel.upper();
 			for (std::list<eDVBServiceController::audioStream>::iterator it(audioStreams.begin())
 				;it != audioStreams.end(); ++it)
 			{
-				if (audiochannel.upper() == it->text.upper())
+				if (audiochannel == eString(it->text).upper())
 				{
 					audio2 = it->pmtentry;
 					break;
