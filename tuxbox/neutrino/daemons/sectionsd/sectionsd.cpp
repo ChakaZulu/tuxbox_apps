@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.69 2001/10/21 13:04:40 field Exp $
+//  $Id: sectionsd.cpp,v 1.70 2001/10/22 11:41:09 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.70  2001/10/22 11:41:09  field
+//  nvod-zeiten
+//
 //  Revision 1.69  2001/10/21 13:04:40  field
 //  nvod-zeiten funktionieren
 //
@@ -923,7 +926,7 @@ static const SIevent& findSIeventForEventUniqueKey(const long long& eventUniqueK
   return nullEvt;
 }
 
-static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit)
+static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned serviceUniqueKey, SItime& zeit, long plusminus = 0)
 {
     time_t azeit=time(NULL);
     // Event (serviceid) suchen
@@ -955,7 +958,7 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
         if(SIservice::makeUniqueKey(e->first->originalNetworkID, e->first->serviceID)==serviceUniqueKey)
         {
             for(SItimes::iterator t=e->first->times.begin(); t!=e->first->times.end(); t++)
-                if(t->startzeit<=azeit && azeit<=(long)(t->startzeit+t->dauer))
+                if((t->startzeit<=(long)(azeit+ plusminus)) && ((long)(azeit+plusminus)<=(long)(t->startzeit+t->dauer)))
                 {
                     zeit=*t;
                     return *(e->first);
@@ -1274,7 +1277,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.69 2001/10/21 13:04:40 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.70 2001/10/22 11:41:09 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2067,7 +2070,7 @@ static void commandTimesNVODservice(struct connectionData *client, char *data, c
 
         SItime zeitEvt1(0, 0);
 //        const SIevent &evt=
-        findActualSIeventForServiceUniqueKey(ni->uniqueKey(), zeitEvt1);
+        findActualSIeventForServiceUniqueKey(ni->uniqueKey(), zeitEvt1, 15*60);
         *(time_t *)p=zeitEvt1.startzeit;
         p+=4;
         *(unsigned *)p=zeitEvt1.dauer;
@@ -2757,7 +2760,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.69 2001/10/21 13:04:40 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.70 2001/10/22 11:41:09 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
