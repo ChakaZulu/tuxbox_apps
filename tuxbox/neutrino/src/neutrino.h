@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.36 2001/12/19 18:41:25 McClean Exp $
+//  $Id: neutrino.h,v 1.37 2001/12/28 16:31:09 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.37  2001/12/28 16:31:09  Simplex
+//  libcontroldclient is now used
+//
 //  Revision 1.36  2001/12/19 18:41:25  McClean
 //  change menue-structure
 //
@@ -137,7 +140,7 @@
 #include "zapit/getservices.h"
 
 #include "daemonc/remotecontrol.h"
-#include "daemonc/controld.h"
+#include <controldclient.h>
 
 #include "helpers/infoviewer.h"
 #include "helpers/epgdata.h"
@@ -191,7 +194,7 @@ class CNeutrinoApp : public CMenuTarget
 	CChannelList		*channelList;
 
 	void PluginDemo(); //demo only --- remove!
-	
+
 	void isCamValid();
 	void firstChannel();
 	void setupDefaults();

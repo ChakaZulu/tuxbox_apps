@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.15 2001/12/26 16:23:08 Simplex Exp $
+// $Id: global.h,v 1.16 2001/12/28 16:31:09 Simplex Exp $
 //
 // $Log: global.h,v $
+// Revision 1.16  2001/12/28 16:31:09  Simplex
+// libcontroldclient is now used
+//
 // Revision 1.15  2001/12/26 16:23:08  Simplex
 // -Streamwatchdog renamed to EventWatchDog and moved to Controld
 // -EventWatchdog now works with notifier-classes instead of callback-functioms
@@ -71,7 +74,7 @@
 //
 #include "neutrino.h"
 #include "daemonc/lcdd.h"
-#include "daemonc/controld.h"
+#include <controldclient.h>
 #include "daemonc/remotecontrol.h"
 
 #include "driver/fontrenderer.h"
@@ -99,7 +102,7 @@ NEUTRINO_CPP  CNeutrinoApp        *neutrino;
 NEUTRINO_CPP  SNeutrinoSettings   g_settings;
 
 NEUTRINO_CPP  CLCDD           *g_lcdd;
-NEUTRINO_CPP  CControld       *g_Controld;
+NEUTRINO_CPP  CControldClient *g_Controld;
 NEUTRINO_CPP  CRemoteControl  *g_RemoteControl;
 
 NEUTRINO_CPP  fontRenderClass *g_fontRenderer;
