@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.145 2005/01/27 22:37:55 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.146 2005/01/30 17:29:27 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -263,56 +263,57 @@ int get_sdts(const t_satellite_position satellite_position, const char * const f
 	uint32_t TsidOnid;
 
 	for (stiterator tI = transponders.begin(); tI != transponders.end(); tI++)
-	{
-		if (scan_should_be_aborted)
-			return 0;
-
-		/* msg to neutrino */
-		processed_transponders++;
-
-		actual_freq = tI->second.feparams.frequency;
-
-		eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS, CEventServer::INITID_ZAPIT, &processed_transponders, sizeof(processed_transponders));
- 		eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &actual_freq,sizeof(actual_freq));
-
- 		if (!strcmp(frontendType, "sat"))
- 		{
-	 		actual_polarisation = (uint)tI->second.polarization;
- 			eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCYP,CEventServer::INITID_ZAPIT,&actual_polarisation,sizeof(actual_polarisation));
- 		}
-
-		if (frontend->setParameters(&tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) < 0)
-			continue;
-
-		if(scan_mode)
+		if (GET_SATELLITEPOSITION_FROM_TRANSPONDER_ID(tI->first) == satellite_position)
 		{
-			TsidOnid = get_sdt_TsidOnid();
-			tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
-			tI->second.original_network_id = TsidOnid &0xFFFF;
+			if (scan_should_be_aborted)
+				return 0;
 
-			INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
- 			parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
-		}
-		else {
-			INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-			status = parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
-		
-			if (status == -1)
+			/* msg to neutrino */
+			processed_transponders++;
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS, CEventServer::INITID_ZAPIT, &processed_transponders, sizeof(processed_transponders));
+
+			actual_freq = tI->second.feparams.frequency;
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCY,CEventServer::INITID_ZAPIT, &actual_freq,sizeof(actual_freq));
+
+			if (!strcmp(frontendType, "sat"))
+			{
+				actual_polarisation = (uint)tI->second.polarization;
+				eventServer->sendEvent(CZapitClient::EVT_SCAN_REPORT_FREQUENCYP,CEventServer::INITID_ZAPIT,&actual_polarisation,sizeof(actual_polarisation));
+			}
+
+			if (frontend->setParameters(&tI->second.feparams, tI->second.polarization, tI->second.DiSEqC) < 0)
+				continue;
+
+			if(scan_mode)
 			{
 				TsidOnid = get_sdt_TsidOnid();
-		
-				if ((TsidOnid != 0) &&
-				    ((tI->second.transport_stream_id != (TsidOnid >> 16)&0xFFFF) || (tI->second.original_network_id != TsidOnid &0xFFFF)))
-				{
-					tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
-					tI->second.original_network_id = TsidOnid &0xFFFF;
+				tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
+				tI->second.original_network_id = TsidOnid &0xFFFF;
 
-					INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
-					parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+				INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+				parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+			}
+			else
+			{
+				INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+				status = parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+		
+				if (status == -1)
+				{
+					TsidOnid = get_sdt_TsidOnid();
+
+					if ((TsidOnid != 0) &&
+					    ((tI->second.transport_stream_id != (TsidOnid >> 16)&0xFFFF) || (tI->second.original_network_id != TsidOnid &0xFFFF)))
+					{
+						tI->second.transport_stream_id = (TsidOnid >> 16)&0xFFFF;
+						tI->second.original_network_id = TsidOnid &0xFFFF;
+
+						INFO("parsing SDT (tsid:onid %04x:%04x)", tI->second.transport_stream_id, tI->second.original_network_id);
+						parse_sdt(satellite_position, tI->second.transport_stream_id, tI->second.original_network_id, tI->second.DiSEqC);
+					}
 				}
 			}
 		}
-	}
 
 	return 0;
 }
