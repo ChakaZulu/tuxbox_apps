@@ -39,17 +39,13 @@
 
 /* TODOs / Release Plan:
 
- - always: fix bugs and be nice to neutrino (state handling, background handling, interruptable etc.)
+ - always: fix bugs
  
 (currently planned order)
- - make sure that zapit works after movieplayer has been quit
  - read TS from socket (UDP?)
  - PES2TS on server side
  - DivX,XVid,AVI,MPG,etc.->TS on server side
- - Pause/Resume (removed due to performance penalty)
- - Add Error handling
  - Bookmarks
- - LCD support
 
 */
 #define MORE_THAN_TS 1
@@ -203,7 +199,7 @@ int CMoviePlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 
 void* Play_Thread( void* filename )
 {
-	unsigned char buf[384*188];
+	unsigned char buf[348*188];
 	unsigned short pida = 0, pidv = 0;
 	int done, fd = 0, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
 	struct dmx_pes_filter_params p;
