@@ -30,6 +30,7 @@ class eSkin
 	int parseScheme(XMLTreeNode *scheme);
 	int parseImages(XMLTreeNode *images);
 	int parseValues(XMLTreeNode *values);
+	int parseFonts(XMLTreeNode *fonts);
 	
 	gDC *getDCbyName(const char *name);
 	

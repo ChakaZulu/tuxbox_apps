@@ -120,9 +120,6 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 	printf("\n[FONT] loading fonts...\n");
 	fflush(stdout);
 	font=0;
-	AddFont(FONTDIR "/unmrs.pfa");
-	AddFont(FONTDIR "/Marlett.ttf");
-//	AddFont(FONTDIR "/Courier_New_Bold.ttf");
 	
 	int maxbytes=4*1024*1024;
 	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);

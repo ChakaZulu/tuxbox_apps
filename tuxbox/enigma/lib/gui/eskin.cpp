@@ -9,7 +9,7 @@
 #include "epng.h"
 #include <config.h>
 #include <eerror.h>
-
+#include <core/gdi/font.h>
 
 QMap<eString,tWidgetCreator> eSkin::widget_creator;
 
@@ -286,6 +286,32 @@ int eSkin::parseValues(XMLTreeNode *xvalues)
 	}
 }
 
+int eSkin::parseFonts(XMLTreeNode *xfonts)
+{
+	const char *abasepath=xfonts->GetAttributeValue("basepath");
+	eString basepath=abasepath?abasepath:FONTDIR;
+
+	if (basepath.length())
+		if (basepath[basepath.length()-1]!='/')
+			basepath+="/";
+
+	for (XMLTreeNode *node=xfonts->GetChild(); node; node=node->GetNext())
+	{
+		if (strcmp(node->GetType(), "font"))
+		{
+			eDebug("illegal fonts entry %s", node->GetType());
+			continue;
+		}
+		const char *file=node->GetAttributeValue("file");
+		if (!file)
+		{
+			eDebug("fonts entry has no file");
+			continue;
+		}
+		fontRenderClass::getInstance()->AddFont((basepath+eString(file)).c_str());
+	}
+}
+
 gDC *eSkin::getDCbyName(const char *name)
 {
 	gPixmapDC *dc=0;
@@ -407,6 +433,8 @@ int eSkin::load(const char *filename)
 			parseImages(node);
 		else if (!strcmp(node->GetType(), "values"))
 			parseValues(node);
+		else if (!strcmp(node->GetType(), "fonts"))
+			parseFonts(node);
 
 	return 0;
 }
