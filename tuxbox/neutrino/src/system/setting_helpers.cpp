@@ -120,14 +120,18 @@ bool CKeySetupNotifier::changeNotify(string OptionName)
 int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 //    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
-    g_RemoteControl->setAPID(atoi(actionKey.c_str()));
+    int sel= atoi(actionKey.c_str());
+    if (g_RemoteControl->audio_chans.selected!= sel )
+        g_RemoteControl->setAPID(atoi(actionKey.c_str()));
     return RETURN_EXIT;
 };
 
 int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 //    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
-    g_RemoteControl->setNVOD(atoi(actionKey.c_str()));
+    int sel= atoi(actionKey.c_str());
+    if (g_RemoteControl->nvods.selected!= sel )
+        g_RemoteControl->setNVOD(sel);
     g_RCInput->pushbackKey(CRCInput::RC_help);
     return RETURN_EXIT;
 };
