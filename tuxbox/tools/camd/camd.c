@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.15 2003/10/08 11:47:15 obi Exp $
+ * $Id: camd.c,v 1.16 2003/10/10 20:56:08 obi Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -31,13 +31,20 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#ifdef HAVE_OST_DMX_H
+#include <ost/ca.h>
+#include <ost/dmx.h>
+#define CADEV		"/dev/dvb/card0/ca0"
+#define DMXDEV		"/dev/dvb/card0/demux0"
+#define dmx_sct_filter_params dmxSctFilterParams
+#else
 #include <linux/dvb/ca.h>
 #include <linux/dvb/dmx.h>
-
-#include "camd.h"
-
 #define CADEV		"/dev/dvb/adapter0/ca0"
 #define DMXDEV		"/dev/dvb/adapter0/demux0"
+#endif
+
+#include "camd.h"
 
 #define CAMD_UDS_NAME	"/tmp/camd.socket"
 #define MAX_SERVICES	8
@@ -790,14 +797,20 @@ int main(int argc, char **argv)
 							dsfp.filter.filter[3] = 0x01;
 							dsfp.filter.filter[4]++;
 							dsfp.filter.mask[3] = 0x01;
+#ifndef HAVE_OST_DMX_H
 							dsfp.filter.mode[3] = 0x00;
+#endif
 						}
 						else {
 							/* next version_number */
+#ifdef HAVE_OST_DMX_H
+							dsfp.filter.filter[3] = ((((buffer[5] >> 1) + 1) & 0x1f) << 1) | 0x01;
+#else
 							dsfp.filter.filter[3] = buffer[5] | 0x01;
+							dsfp.filter.mode[3] = 0xfe;
+#endif
 							dsfp.filter.filter[4] = 0x00;
 							dsfp.filter.mask[3] = 0xff;
-							dsfp.filter.mode[3] = 0xfe;
 						}
 
 						if (ioctl(dmxfd, DMX_SET_FILTER, &dsfp) < 0)
