@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.116 2002/04/16 13:03:26 field Exp $
+//  $Id: sectionsd.cpp,v 1.117 2002/04/17 13:07:06 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.117  2002/04/17 13:07:06  field
+//  Bugfix (current-event)
+//
 //  Revision 1.116  2002/04/16 13:03:26  field
 //  stime in neutrino verschoben
 //
@@ -1203,12 +1206,13 @@ static const SIevent& findActualSIeventForServiceUniqueKey(const unsigned servic
             if (flag!=0)
                 *flag|= sectionsd::epgflags::has_anything; // überhaupt was da...
             for(SItimes::reverse_iterator t=e->first->times.rend(); t!=e->first->times.rbegin(); t--)
-                if ((long)(azeit+plusminus)<=(long)(t->startzeit+t->dauer))
+                if ((long)(azeit+plusminus)<(long)(t->startzeit+t->dauer))
                 {
                     if (flag!=0)
                         *flag|= sectionsd::epgflags::has_later; // spätere events da...
                     if (t->startzeit<=(long)(azeit+ plusminus))
                     {
+                    	//printf("azeit %d, startzeit+t->dauer %d \n", azeit, (long)(t->startzeit+t->dauer) );
                         if (flag!=0)
                             *flag|= sectionsd::epgflags::has_current; // aktuelles event da...
                         zeit=*t;
@@ -1574,7 +1578,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.116 2002/04/16 13:03:26 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.117 2002/04/17 13:07:06 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3743,7 +3747,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.116 2002/04/16 13:03:26 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.117 2002/04/17 13:07:06 field Exp $\n");
 	try
 	{
 
