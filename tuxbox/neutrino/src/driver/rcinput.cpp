@@ -1096,6 +1096,10 @@ int CRCInput::translate(int code)
 				return RC_8;
 				case 0x09:
 				return RC_9;
+				case 0x14: //alte fb page up/down tasten...
+				return RC_page_up;
+				case 0x13:
+				return RC_page_down;
 				case 0x3B:
 				return RC_blue;
 				case 0x52:
