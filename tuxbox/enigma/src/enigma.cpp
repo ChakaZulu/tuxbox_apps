@@ -215,6 +215,18 @@ eZap::eZap(int argc, char **argv)
 	setlocale(LC_ALL, language);
 	free(language);
 
+#ifndef DISABLE_FILE
+	extern void initHDDSettings(void);
+	initHDDSettings();
+
+	int swapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
+	char *swapfilename;
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
+		swapfilename = "";
+	extern void activateSwapFile(eString);
+	activateSwapFile(eString(swapfilename));
+#endif
 	eDVB::getInstance()->configureNetwork();
 
 	// build Service Selector
