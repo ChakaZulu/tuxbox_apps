@@ -124,6 +124,7 @@ class CFileBrowser
 		bool			readDir_vlc(const std::string & dirname, CFileList* flist);
 		bool			readDir_std(const std::string & dirname, CFileList* flist);
 		void			addRecursiveDir(CFileList * re_filelist, std::string path, bool bRootCall, CProgressWindow * progress = NULL);
+		void SMSInput(uint msg);
 
 		unsigned int		selected;
 		unsigned int		liststart;
@@ -143,6 +144,8 @@ class CFileBrowser
 		int 			x;
 		int 			y;
 
+		time_t m_oldKeyTime;
+		unsigned char m_oldKey;
 
 		void paintItem(unsigned pos, unsigned int spalte = 0);
 		void paint();

@@ -68,6 +68,7 @@ typedef struct dirent dirent_struct;
 #define my_scandir scandir
 #endif
 
+#define SMSKEY_TIMEOUT 2
 //------------------------------------------------------------------------
 size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -198,6 +199,9 @@ CFileBrowser::CFileBrowser()
 		x=576-width;
 	
 	liststart = 0;
+
+	m_oldKeyTime = 0;
+	m_oldKey = 0;
 }
 
 //------------------------------------------------------------------------
@@ -308,7 +312,7 @@ bool CFileBrowser::readDir(const std::string & dirname, CFileList* flist)
 
 bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 {
-	printf("readDir_vlc %s\n",dirname.c_str());
+//	printf("readDir_vlc %s\n",dirname.c_str());
 	std::string answer="";
 	char *dir_escaped = curl_escape(dirname.substr(strlen(VLC_URI)).c_str(), 0);
 	std::string url = m_baseurl;
@@ -382,7 +386,7 @@ bool CFileBrowser::readDir_vlc(const std::string & dirname, CFileList* flist)
 
 bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 {
-	printf("readDir_std %s\n",dirname.c_str());
+//	printf("readDir_std %s\n",dirname.c_str());
 	struct stat statbuf;
 	dirent_struct **namelist;
 	int n;
@@ -587,13 +591,19 @@ bool CFileBrowser::exec(std::string Dirname)
 				sort(filelist.begin(), filelist.end(), sortByDate);
 			paint();
 		}
-		else
+		else if(CRCInput::isNumeric(msg))
 		{
+			SMSInput(msg);
+		}
+		else
+	  	{
 			if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
 			{
 				loop = false;
 			}
 		}
+		if(!CRCInput::isNumeric(msg))
+			frameBuffer->paintBoxRel(x+width-20, y+height- (foheight ), 20, (foheight ), COL_MENUHEAD);
 	}
 
 	hide();
@@ -833,12 +843,12 @@ void CFileBrowser::paintHead()
 void CFileBrowser::paintFoot()
 {
 //	int ButtonWidth = 25;
-	int dx = width / 4;
+	int dx = (width-20) / 4;
 	int type;
 	int by = y + height - (foheight -4);
 	int ty = by + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
 
-	frameBuffer->paintBoxRel(x, y+height- (foheight ), width, (foheight ), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, y+height- (foheight ), width-20, (foheight ), COL_MENUHEAD);
 
 	if (!(filelist.empty()))
 	{
@@ -895,4 +905,138 @@ void CFileBrowser::paint()
 	int sbs= (selected/listmaxshow);
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+}
+
+//------------------------------------------------------------------------
+void CFileBrowser::SMSInput(uint msg)
+{
+	time_t keyTime = time(NULL);
+	unsigned char key = 0;
+	if(msg == CRCInput::RC_1)
+	{
+			key = '1';
+	}
+	if(msg == CRCInput::RC_2)
+	{
+		if(m_oldKey == 'a' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'b';
+		else if(m_oldKey == 'b' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'c';
+		else if(m_oldKey == 'c' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = '2';
+		else
+			key = 'a';
+	}
+	else if(msg == CRCInput::RC_3)
+	{
+		if(m_oldKey == 'd' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'e';
+		else if(m_oldKey == 'e' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'f';
+		else if(m_oldKey == 'f' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = '3';
+		else
+			key = 'd';
+	}
+	else if(msg == CRCInput::RC_4)
+	{
+		if(m_oldKey == 'g' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'h';
+		else if(m_oldKey == 'h' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'i';
+		else if(m_oldKey == 'i' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = '4';
+		else
+			key = 'g';
+	}
+	else if(msg == CRCInput::RC_5)
+	{
+		if(m_oldKey == 'j' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'k';
+		else if(m_oldKey == 'k' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'l';
+		else if(m_oldKey == 'l' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = '5';
+		else
+			key = 'j';
+	}
+	else if(msg == CRCInput::RC_6)
+	{
+		if(m_oldKey == 'm' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'n';
+		else if(m_oldKey == 'n' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'o';
+		else if(m_oldKey == 'o' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = '6';
+		else
+			key = 'm';
+	}
+	else if(msg == CRCInput::RC_7)
+	{
+		if(m_oldKey == 'p' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'q';
+		else if(m_oldKey == 'q' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'r';
+		else if(m_oldKey == 'r' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 's';
+		else if(m_oldKey == 's' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 's';
+		else
+			key = 'p';
+	}
+	else if(msg == CRCInput::RC_8)
+	{
+		if(m_oldKey == 't' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'u';
+		else if(m_oldKey == 'u' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'v';
+		else if(m_oldKey == 'v' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = '8';
+		else
+			key = 't';
+	}
+	else if(msg == CRCInput::RC_9)
+	{
+		if(m_oldKey == 'w' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'x';
+		else if(m_oldKey == 'x' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'y';
+		else if(m_oldKey == 'y' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = 'z';
+		else if(m_oldKey == 'z' && keyTime <= m_oldKeyTime + SMSKEY_TIMEOUT)
+			key = '9';
+		else
+			key = 'w';
+	}
+	else if(msg == CRCInput::RC_0)
+	{
+		key = '0';
+	}
+	unsigned int i;
+	for(i=(selected+1) % filelist.size(); i != selected ; i= (i+1) % filelist.size())
+	{
+		if(tolower(filelist[i].getFileName()[0]) == key)
+		{
+			break;
+		}
+	}
+	char cKey[2]={key, 0};
+	int ty = y + height - (foheight -4) + g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getHeight();
+	frameBuffer->paintBoxRel(x+width-20, y+height- (foheight ), 20, (foheight ), COL_MENUHEAD);
+	g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+width-19, ty , 19, cKey, COL_INFOBAR); // ISO-8859-1
+	int prevselected=selected;
+	selected=i;
+	paintItem(prevselected - liststart);
+	unsigned int oldliststart = liststart;
+	liststart = (selected/listmaxshow)*listmaxshow;
+	if(oldliststart!=liststart)
+	{
+		paint();
+	}
+	else
+	{
+		paintItem(selected - liststart);
+	}
+	m_oldKeyTime=keyTime;
+	m_oldKey=key;
 }
