@@ -610,6 +610,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.mp3player_display = configfile.getInt32("mp3player_display",(int)CMP3PlayerGui::ARTIST_TITLE);
 	g_settings.mp3player_follow  = configfile.getInt32("mp3player_follow",0);
 	strcpy( g_settings.mp3player_screensaver, configfile.getString( "mp3player_screensaver", "0" ).c_str() );
+	g_settings.mp3player_highprio  = configfile.getInt32("mp3player_highprio",0);
 
 	//Filebrowser
 	g_settings.filebrowser_showrights =  configfile.getInt32("filebrowser_showrights", 1);
@@ -918,6 +919,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "mp3player_display", g_settings.mp3player_display );
 	configfile.setInt32( "mp3player_follow", g_settings.mp3player_follow );
 	configfile.setString( "mp3player_screensaver", g_settings.mp3player_screensaver );
+	configfile.setInt32( "mp3player_highprio", g_settings.mp3player_highprio );
 
 	//Filebrowser
 	configfile.setInt32("filebrowser_showrights", g_settings.filebrowser_showrights);
@@ -1496,6 +1498,10 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( oj );
 	CStringInput * mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
+  	oj = new CMenuOptionChooser("mp3player.highprio", &g_settings.mp3player_highprio, true );
+	oj->addOption(0, "messagebox.no");
+	oj->addOption(1, "messagebox.yes");
+	mp3PicSettings.addItem( oj );
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
 
 	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "filebrowser.head") );

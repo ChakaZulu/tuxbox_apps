@@ -717,6 +717,7 @@ mp3player.display_order display order
 mp3player.follow auto select current
 mp3player.screensaver_timeout screensaver timeout (min, 0=off)
 mp3player.defdir start dir.
+mp3player.highprio High decode priority
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer

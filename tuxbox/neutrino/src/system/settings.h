@@ -261,6 +261,7 @@ struct SNeutrinoSettings
 	int   mp3player_display;
 	int   mp3player_follow;
 	char  mp3player_screensaver[3];
+	int   mp3player_highprio;
 
 	//Filebrowser
 	int filebrowser_showrights;

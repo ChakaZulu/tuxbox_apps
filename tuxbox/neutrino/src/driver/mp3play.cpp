@@ -720,7 +720,7 @@ void* CMP3Player::PlayThread(void * filename)
 	return NULL;
 }
 
-bool CMP3Player::play(const char *filename)
+bool CMP3Player::play(const char *filename, bool highPrio)
 {
 	stop();
 	strcpy(m_mp3info,"");
@@ -730,12 +730,15 @@ bool CMP3Player::play(const char *filename)
 	state = PLAY;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
-	struct sched_param param;
-	pthread_attr_setschedpolicy(&attr, SCHED_RR);
-	param.sched_priority=1;
-	pthread_attr_setschedparam(&attr, &param);
-	usleep(100000); // give the event thread some time to handle his stuff
-	                // without this sleep there were duplicated events...
+	if(highPrio)
+	{
+		struct sched_param param;
+		pthread_attr_setschedpolicy(&attr, SCHED_RR);
+		param.sched_priority=1;
+		pthread_attr_setschedparam(&attr, &param);
+		usleep(100000); // give the event thread some time to handle his stuff
+							 // without this sleep there were duplicated events...
+	}
 	if (pthread_create (&thrPlay, &attr, PlayThread,(void *) filename) != 0 )
 	{
 		perror("mp3play: pthread_create(PlayThread)");

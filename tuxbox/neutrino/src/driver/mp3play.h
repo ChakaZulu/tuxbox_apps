@@ -76,7 +76,7 @@ public:
 	enum State {STOP = 0, PLAY, PAUSE, FF, REV};
 	State state;
 	static CMP3Player* getInstance();
-	bool play(const char *filename);
+	bool play(const char *filename, bool highPrio=false);
 	void stop();
    void pause();
 	void init();

@@ -667,6 +667,8 @@ void CMP3PlayerGui::paintItem(int pos)
 			// id3tag noch nicht geholt
 			get_id3(&playlist[pos + liststart]);
 			get_mp3info(&playlist[pos + liststart]);
+			if(m_state!=CMP3PlayerGui::STOP && !g_settings.mp3player_highprio)
+				usleep(100*1000);
 		}
 		char sNr[20];
 		sprintf(sNr, "%2d : ", pos + liststart + 1);
@@ -885,6 +887,8 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 
 	ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
 
+	if(m_state!=CMP3PlayerGui::STOP && !g_settings.mp3player_highprio)
+		usleep(15000);
 	bool foundSyncmark=true;
 	// Check for sync mark (some encoder produce data befor 1st frame in mp3 stream)
 	if(InputBuffer[0]!=0xff || (InputBuffer[1]&0xe0)!=0xe0)
@@ -902,12 +906,16 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 				n=0;
 				fseek(in, -1, SEEK_CUR);
 				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+				if(m_state!=CMP3PlayerGui::STOP)
+					usleep(15000 && !g_settings.mp3player_highprio);
 			}
 		}
 		if(ReadSize > 1)
 		{
 			fseek(in, j, SEEK_SET);
 			ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
+			if(m_state!=CMP3PlayerGui::STOP)
+				usleep(15000 && !g_settings.mp3player_highprio);
 			foundSyncmark=true;
 		}
 	}
@@ -920,6 +928,8 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 
 		mp3->VBR=false;
 
+		if(m_state!=CMP3PlayerGui::STOP && !g_settings.mp3player_highprio)
+			usleep(15000);
 		mad_stream_finish(&Stream);
 		// filesize
 		fseek(in, 0, SEEK_END);
@@ -1379,7 +1389,7 @@ void CMP3PlayerGui::play(int pos)
 	m_state=CMP3PlayerGui::PLAY;
 	curr_mp3 = playlist[current];
 	// Play
-	CMP3Player::getInstance()->play(curr_mp3.Filename.c_str()); 
+	CMP3Player::getInstance()->play(curr_mp3.Filename.c_str(), g_settings.mp3player_highprio==1); 
 	//LCD
 	paintLCD();
 	// Display

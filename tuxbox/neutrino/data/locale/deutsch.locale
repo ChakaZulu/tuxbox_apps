@@ -717,6 +717,7 @@ mp3player.display_order Anzeige
 mp3player.follow Selektiere akt. Track
 mp3player.screensaver_timeout Bildschirmschoner (min, 0=aus)
 mp3player.defdir Start-Verz.
+mp3player.highprio Hohe Decodier-Priorität
 
 movieplayer.name Movieplayer
 movieplayer.head Movieplayer
