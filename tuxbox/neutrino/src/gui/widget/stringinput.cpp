@@ -541,8 +541,6 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 {
 	int res = messages_return::unhandled;
 
-	printf("CPLPINInput::handleOthers %x %x\n", msg, data);
-
 	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
 	{
 		// trotzdem handlen
@@ -552,7 +550,7 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 			res = messages_return::cancel_info;
 	}
 
-	return messages_return::unhandled;
+	return res;
 }
 
 #define borderwidth 4

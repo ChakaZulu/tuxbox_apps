@@ -304,7 +304,6 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
     				{
                     	fadeOut = true;
                     	fadeTimer = g_RCInput->addTimer(80000, false);
-                    	//g_RCInput->postMsg( NeutrinoMessages::EVT_TIMER, fadeTimer );
             			timeoutEnd = g_RCInput->calcTimeoutEnd( 1 );
     				}
     				else
@@ -315,7 +314,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 		            }
 				}
 				else if ( ( msg == g_settings.key_quickzap_up ) ||
-               	 	 	  ( msg == g_settings.key_quickzap_down ) )
+               	 	 	  ( msg == g_settings.key_quickzap_down ) ||
+               	 	 	  ( msg == CRCInput::RC_0 ) )
 				{
 					hideIt = false;
 					g_RCInput->postMsg( msg, data );
