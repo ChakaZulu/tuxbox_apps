@@ -698,16 +698,23 @@ void LoadScart()
 		char buf[1000];
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 			sscanf( buf, "nokia_scart: %d %d %d\n", nokia_scart[0], nokia_scart[1], nokia_scart[2] );
+		printf( buf );
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 			sscanf( buf, "nokia_dvb: %d %d %d\n", nokia_dvb[0], nokia_dvb[1], nokia_dvb[2] );
+		printf( buf );
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 			sscanf( buf, "sagem_scart: %d %d %d\n", sagem_scart[0], sagem_scart[1], sagem_scart[2] );
+		printf( buf );
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 			sscanf( buf, "sagem_dvb: %d %d %d\n", sagem_dvb[0], sagem_dvb[1], sagem_dvb[2] );
+		printf( buf );
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 			sscanf( buf, "philips_scart: %d %d %d\n", philips_scart[0], philips_scart[1], philips_scart[2] );
+		printf( buf );
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 			sscanf( buf, "philips_dvb: %d %d %d\n", philips_dvb[0], philips_dvb[1], philips_dvb[2] );
+		printf( buf );
+		fclose(fd);
 	}
 	else
 	{
@@ -720,7 +727,7 @@ void LoadScart()
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  0.2 $Id\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.37 2002/03/01 11:58:15 field Exp $\n\n");
 
 	if (fork() != 0)
 		return 0;
