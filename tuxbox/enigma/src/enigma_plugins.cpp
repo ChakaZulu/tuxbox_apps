@@ -10,7 +10,7 @@
 #include "config.h"
 #include "eskin.h"
 #include "lcd.h"
-#include <include/plugin.h>
+#include <plugin.h>
 #include <dbox/avia_vbi.h>
 #include <unistd.h>
 #include <sys/types.h>
