@@ -105,6 +105,8 @@ videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect audomaddisch
 videomenu.vcrswitch Scart-Eingang audomaddisch
+videomenu.rgb_centering RGB-Zentrierig
+videomenu.csync Sync.-Korrektur
 
 networkmenu.head Netzwäerk Iischdellige
 networkmenu.test Netzwärk deschde
@@ -140,15 +142,19 @@ streamingmenu.streaming_server_cddrive DVD Laufwerk
 streamingmenu.streaming_server_startdir Verzeichniss (VLC)
 streamingmenu.streaming_videorate Daterade Video
 streamingmenu.streaming_audiorate Daterade Audio
-streamingmenu.streaming_ac3_enabled AC3 Understützig
 streamingmenu.off Deaktiviert
 streamingmenu.on Aktiviert
-streamingmenu.streaming_force_transcode Transcode Forcieren
 streamingmenu.streaming_resolution Auflösung
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
+streamingmenu.streaming_force_avi_rawaudio Erzwinge AC3 bii avi
+streamingmenu.streaming_force_transcode_video Transcod. auch mpg/vcd Video
+streamingmenu.streaming_transcode_video_codec MPEG Video Codec
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
 
 ping.ok isch erreichbar (ping)
 ping.unreachable isch nidd erreichbar (unreachable)
@@ -727,6 +733,26 @@ movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'
 movieplayer.nostreamingserver Es het kei Verbindig\nzuem Streamingserver herg'stellt werde chönne.
 movieplayer.defdir Start-Verz.
 movieplayer.buffering Puffere...
+movieplayer.tsplayback TS Abspiele
+movieplayer.pesplayback PES Abspiele (Experimendell)
+movieplayer.fileplayback Datei via VLC
+movieplayer.dvdplayback DVD
+movieplayer.vcdplayback (S)VCD
+movieplayer.tshelp ROT/Home Stop\nGRÜN Resync\nGELB Paus/Widdr\nBLAU Bookmark setze\nd-box Ziit iiblände\n1 ca. 1 Minute zruck\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zruck\n6 ca. 5 Minute vor\n7 ca. 10 Minute zurück\n9 ca. 10 Minute vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Paus/Widdr\nBLAU Bookmark setze\nd-box Ziit iiblände\nv Sprung\n1 ca. 1 Minute zruck\n3 ca. 1 Minute vor\n4 ca. 5 Minute zruck\n6 ca. 5 Minute vor\n7 ca. 10 Minute zruck\n9 ca. 10 Minute vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.toomanybookmarks D'hesch bereits z'viel Bookmarks a'glegt.\nEs mueß erscht e anderes g'löscht werde.
+movieplayer.bookmarkname Bookmark Name
+movieplayer.bookmarkname_hint1 Gib de Name für's neue Bookmark ii
+movieplayer.bookmarkname_hint2
+movieplayer.goto Spring' zue ...
+movieplayer.goto.h1 = -> absolute Sprung
+movieplayer.goto.h2 +,- -> relative Sprung
+movieplayer.wrongvlcversion Funktion isch mit dr benutzte Version vom VLC nit möglich
+
+bookmarkmanager.name Bookmarks
+bookmarkmanager.delete Lösche
+bookmarkmanager.rename Umbenenne
+bookmarkmanager.select Uuswähle
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter aah
@@ -735,7 +761,16 @@ filebrowser.select Usswähle
 filebrowser.mark Markiere
 filebrowser.scan Verzeichnisse durchsürche
 filebrowser.sort.name (Dateiname)
+filebrowser.sort.namedirsfirst (Dateiname2)
 filebrowser.sort.date (Datum)
+filebrowser.sort.type (Typ)
+filebrowser.sort.size (Größe)
+filebrowser.nextpage Sidde vor
+filebrowser.prevpage Sidde zruck
+filebrowser.showrights Dateirechte a'zeige
+filebrowser.delete Lösche
+filebrowser.dodelete1 Soll
+filebrowser.dodelete2 glöscht werde?
 
 nfs.mount NFS/CIFS Verzeichniss i'hänge
 nfs.ip NFS/CIFS Server IP
@@ -755,6 +790,7 @@ nfs.type_cifs CIFS
 nfs.username CIFS Benutzername
 nfs.password CIFS Passwort
 nfs.mounterror_notsup Dateisystem-Typ wird nit understützt
+nfs.remount Verzeichnisse erneut mounte
 nfsmenu.head NFS/CIFS Iischdellige
 
 apids.hint_1 Gib z'erschd d'zschdriemendi APIDs ii,
@@ -770,4 +806,20 @@ pictureviewer.slide_time Diaschau-A'zeigeduur
 pictureviewer.scaling Skalierig
 pictureviewer.defdir Start-Verz.
 
+rclock.menueadd FB sperre
+rclock.title Fernbedienung sperre
+rclock.lockmsg D'Fernbedienig der dbox2 wird gsperrt.\n Um'd Sperre uufz'hebe, bitte\n <ROT> und <DBOX> uff dr Fernbedienig\n drucke.
+rclock.unlockmsg DBOX2 Fernbedienig reaktiviert...
 
+EPGMenu.head EPG - Programm Information
+EPGMenu.eventinfo Info zuer Sendig
+EPGMenu.eventlist Vorschau aktuelles Programm
+EPGMenu.epgplus Vorschau Übersicht
+EPGMenu.streaminfo technische Information
+
+EPGPlus.head Vorschau Übersicht (EPG Plus)
+EPGPlus.record Uufnahm
+EPGPlus.refresh_epg Aktualisiere
+EPGPlus.remind Vormerke
+EPGPlus.scroll_mode Scroll Mode
+EPGPlus.stretch_mode Stretch Mode

@@ -749,6 +749,11 @@ movieplayer.goto.h1 = -> absolute sprong
 movieplayer.goto.h2 +,- -> relatieve sprong
 movieplayer.wrongvlcversion Functie is niet mogelijk met de gebruikte VLC-versie
 
+bookmarkmanager.name Favorieten
+bookmarkmanager.delete Verwijderen
+bookmarkmanager.rename Hernoemen
+bookmarkmanager.select Kiezen
+
 filebrowser.head Browser
 filebrowser.filter.active Filter aan
 filebrowser.filter.inactive Filter uit
@@ -763,6 +768,9 @@ filebrowser.sort.size (Grootte)
 filebrowser.nextpage Volgende pagina
 filebrowser.prevpage Vorige pagina
 filebrowser.showrights Toon rechten
+filebrowser.delete Verwijderen
+filebrowser.dodelete1 Moet
+filebrowser.dodelete2 gewist worden?
 
 nfs.mount Mount NFS/CIFS volume
 nfs.ip NFS/CIFS Server IP
@@ -782,6 +790,7 @@ nfs.type_cifs Common Internet File System (CIFS)
 nfs.username Gebruikersnaam Common Internet File System (CIFS)
 nfs.password paswoord Common Internet File System (CIFS)
 nfs.mounterror_notsup Type filesysteem niet ondersteund
+nfs.remount Lijst opnieuw mounten
 nfsmenu.head NFS/CIFS instellingen
 
 apids.hint_1 Geef de te streamen APIDs in
@@ -802,3 +811,15 @@ rclock.title Vergrendel afstandsbediening
 rclock.lockmsg Uw afstandsbediening van de DBox2 zal vergrendeld worden.\nOm de DBox2 vrij te geven druk op <ROOD> \n en <DBOX> op uw afstandsbediening.
 rclock.unlockmsg Afstandsbediening van de DBOX2 in werking.
 
+EPGMenu.head EPG - Programma Informatie
+EPGMenu.eventinfo Info over uitzending
+EPGMenu.eventlist Preview programma
+EPGMenu.epgplus Preview overzicht
+EPGMenu.streaminfo technische Informatie
+
+EPGPlus.head Preview  (EPG Plus)
+EPGPlus.record Opname
+EPGPlus.refresh_epg Aktualiseren
+EPGPlus.remind Herinneren
+EPGPlus.scroll_mode Scroll Mode
+EPGPlus.stretch_mode Stretch Mode
