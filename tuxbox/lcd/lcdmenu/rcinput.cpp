@@ -1,5 +1,5 @@
 /*
- * $Id: rcinput.cpp,v 1.4 2002/12/26 09:14:03 Jolt Exp $
+ * $Id: rcinput.cpp,v 1.5 2003/05/21 17:22:49 thegoodguy Exp $
  * 
  * Remote Control Handling Class
  *
@@ -24,6 +24,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: rcinput.cpp,v $
+ * Revision 1.5  2003/05/21 17:22:49  thegoodguy
+ * Fix handling (conversion, duplicates) of events
+ *
  * Revision 1.4  2002/12/26 09:14:03  Jolt
  * Ported to Input dev api
  *
@@ -54,7 +57,7 @@ CRCInput::CRCInput()
 	prevrccode = KEY_RESERVED;
 
     tv_prev.tv_sec = 0;
-    repeat_block = 0;
+    repeat_block = 150000; // 150ms
 }
 
 /**************************************************************************
@@ -83,32 +86,15 @@ int CRCInput::getKey()
 		}
 		else
 		{
-			td = ( ev.time.tv_usec - tv_prev.tv_usec );
+			td = ev.time.tv_usec - tv_prev.tv_usec;
 			td+= ( ev.time.tv_sec - tv_prev.tv_sec )* 1000000;
 
-			if ( ( ( ( prevrccode ) != ( ev.code ) ) || ( td > repeat_block ) ) && ( ev.value ) )
+			if ( ( ( prevrccode != ev.code ) || ( td > repeat_block ) ) && ( ev.value ) )
 			{
-				tv_prev = ev.time;
-				//printf("got key native key: %04x %d\n", ev.code, ev.time.tv_sec );
-
-				if( prevrccode==ev.code )
-				{
-					// key-repeat - cursors are okay
-					if ((ev.code==KEY_UP)
-						|| (ev.code==KEY_DOWN)
-						|| (ev.code==KEY_LEFT)
-						|| (ev.code==KEY_RIGHT))
-					{
-						return ev.code;
-					}
-				}
-    			else
-    			{
-   					prevrccode=ev.code;
-					return ev.code;
-				}
+				tv_prev    = ev.time;
+				prevrccode = ev.code;
+				return ev.code;
 			}
 		}
 	}
-	return KEY_RESERVED;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.25 2003/05/21 16:32:11 thegoodguy Exp $
+ * $Id: lcdmenu.cpp,v 1.26 2003/05/21 17:22:49 thegoodguy Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -253,16 +253,40 @@ bool CLCDMenu::rcLoop ()
 		{
 			/* 1-9: number keys */
 		case KEY_1:
+			if (entryCount > 0)
+				selected = selectEntry(0);
+			break;
 		case KEY_2:
+			if (entryCount > 1)
+				selected = selectEntry(1);
+			break;
 		case KEY_3:
+			if (entryCount > 2)
+				selected = selectEntry(2);
+			break;
 		case KEY_4:
+			if (entryCount > 3)
+				selected = selectEntry(3);
+			break;
 		case KEY_5:
+			if (entryCount > 4)
+				selected = selectEntry(4);
+			break;
 		case KEY_6:
+			if (entryCount > 5)
+				selected = selectEntry(5);
+			break;
 		case KEY_7:
+			if (entryCount > 6)
+				selected = selectEntry(6);
+			break;
 		case KEY_8:
+			if (entryCount > 7)
+				selected = selectEntry(7);
+			break;
 		case KEY_9:
-			if (pressedKey <= entryCount)
-				selected = selectEntry(pressedKey - 1);
+			if (entryCount > 8)
+				selected = selectEntry(8);
 			break;
 
 		case KEY_LEFT: /* left arrow */
@@ -364,14 +388,50 @@ std::string CLCDMenu::pinScreen (std::string title, bool isNewPin)
 
     for (i = 0; i < pin_length; i++)
     {
-	char *digit = (char *) malloc(1);
-	sprintf(digit, "%d", rc->getKey());
-	pin += string(digit);
+	    char digit = 0;
+	    int code = rc->getKey();
+	    
+	    switch (code)
+	    {       
+	    case KEY_0:
+		    digit = '0';
+		    break;
+	    case KEY_1:
+		    digit = '1';
+		    break;
+	    case KEY_2:
+		    digit = '2';
+		    break;
+	    case KEY_3:
+		    digit = '3';
+		    break;
+	    case KEY_4:
+		    digit = '4';
+		    break;
+	    case KEY_5:
+		    digit = '5';
+		    break;
+	    case KEY_6:
+		    digit = '6';
+		    break;
+	    case KEY_7:
+		    digit = '7';
+		    break;
+	    case KEY_8:
+		    digit = '8';
+		    break;
+	    case KEY_9:
+		    digit = '9';
+		    break;
+	    }
 
-	menuFont->RenderString(left, 3*fontSize, fontSize, "*", CLCDDisplay::PIXEL_ON, 0);
+	    if (digit != 0)
+		    pin += digit;
 
-	update();
-	left+=fontSize;
+	    menuFont->RenderString(left, 3*fontSize, fontSize, "*", CLCDDisplay::PIXEL_ON, 0);
+	    
+	    update();
+	    left+=fontSize;
     }
 
     if (isNewPin)
