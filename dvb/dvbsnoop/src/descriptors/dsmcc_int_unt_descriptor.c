@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.c,v 1.12 2004/01/02 22:25:35 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.c,v 1.13 2004/01/02 22:59:59 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dsmcc_int_unt_descriptor.c,v 1.12 2004/01/02 22:25:35 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.c,v $
+Revision 1.13  2004/01/02 22:59:59  rasc
+DSM-CC  modules renaming...
+
 Revision 1.12  2004/01/02 22:25:35  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -66,7 +69,7 @@ more PES stuff, DSM descriptors, testdata
 
 #include "dvbsnoop.h"
 #include "descriptor.h"
-#include "dsm_int_unt_descriptor.h"
+#include "dsmcc_int_unt_descriptor.h"
 #include "dvb_descriptor.h"
 #include "strings/dvb_str.h"
 #include "strings/dsmcc_str.h"

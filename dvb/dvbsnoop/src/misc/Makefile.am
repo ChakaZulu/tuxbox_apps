@@ -8,8 +8,9 @@ noinst_HEADERS = \
 	hexprint.h \
 	output.h \
 	pkt_time.h \
-	print_header.h \
-	crc32.h
+	print_header.h
+
+#	crc32.h
 
 
 libmisc_a_SOURCES = \
@@ -18,7 +19,8 @@ libmisc_a_SOURCES = \
 	hexprint.c \
 	output.c \
 	pkt_time.c \
-	print_header.c \
-	crc32.c
+	print_header.c 
+
+#	crc32.c
 
 

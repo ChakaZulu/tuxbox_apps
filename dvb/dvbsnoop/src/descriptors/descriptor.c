@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.17 2004/01/02 22:25:35 rasc Exp $
+$Id: descriptor.c,v 1.18 2004/01/02 22:59:58 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: descriptor.c,v 1.17 2004/01/02 22:25:35 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.18  2004/01/02 22:59:58  rasc
+DSM-CC  modules renaming...
+
 Revision 1.17  2004/01/02 22:25:35  rasc
 DSM-CC  MODULEs descriptors complete
 
@@ -69,8 +72,8 @@ kleiner Fehler
 #include "descriptor.h"
 #include "mpeg_descriptor.h"
 #include "dvb_descriptor.h"
-#include "dsm_descriptor.h"
-#include "dsm_int_unt_descriptor.h"
+#include "dsmcc_module_descriptor.h"
+#include "dsmcc_int_unt_descriptor.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
