@@ -134,8 +134,8 @@ ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
 	else
 		eConfig::getInstance()->getKey("/ezap/lastPicViewerStyle", last);
 	eListBoxEntryText *sel[2];
-	sel[0] = new eListBoxEntryText(&list,_("Channel EPG"), (void *)0, 0, _("Show selected slide") );
-	sel[1] = new eListBoxEntryText(&list,_("Multi EPG"), (void *)1, 0, _("Show slideshow (of all pictures in directory)"));
+	sel[0] = new eListBoxEntryText(&list,_("Slide"), (void *)0, 0, _("Show selected slide") );
+	sel[1] = new eListBoxEntryText(&list,_("Slideshow"), (void *)1, 0, _("Show slideshow (of all pictures in directory)"));
 
 	list.setCurrent(sel[last]);
 	CONNECT(list.selected, ePicViewerStyleSelector::entrySelected);
@@ -1181,12 +1181,11 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				&& !movemode && !editMode && this == eZap::getInstance()->getServiceSelector() )
 			{
 				hide();
-				eServiceReference sref = eServiceInterface::getInstance()->service;
-				printf("[SSELECT] sref: %s\n", sref.path.c_str());
-				if (sref.path.right(4).upper() == ".JPG" ||
-				    sref.path.right(4).upper() == ".PNG" ||
-				    sref.path.right(4).upper() == ".BMP" ||
-				    sref.path.right(4).upper() == ".GIF") 
+				printf("[SSELECT] sref: %s\n", selected.path.c_str());
+				if (selected.path.right(4).upper() == ".JPG" ||
+				    selected.path.right(4).upper() == ".PNG" ||
+				    selected.path.right(4).upper() == ".BMP" ||
+				    selected.path.right(4).upper() == ".GIF") 
 				{
 					ePicViewerStyleSelector e(1);
 #ifndef DISABLE_LCD
@@ -1198,10 +1197,10 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					switch (ret)
 					{
 						case 0:
-							ePictureViewer::getInstance()->displayImage(sref.path);
+							ePictureViewer::getInstance()->displayImage(selected.path);
 							break;
 						case 1:
-							ePictureViewer::getInstance()->displaySlideshow(sref.path);
+							ePictureViewer::getInstance()->displaySlideshow(selected.path);
 							break;
 						default:
 							show();
