@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-net
 Description: net
 Version: @VERSION@
-Libs: -L${libdir} -lnet
+Libs: -L${libdir} -ltuxbox-net
 Cflags: -I${includedir}/tuxbox

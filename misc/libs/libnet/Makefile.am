@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libnet.la
+lib_LTLIBRARIES = libtuxbox-net.la
 
 tuxboxincludedir = ${includedir}/tuxbox
 tuxboxinclude_HEADERS = libnet.h
 
-libnet_la_SOURCES = libnet.c
+libtuxbox_net_la_SOURCES = libnet.c

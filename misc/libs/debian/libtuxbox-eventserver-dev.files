@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-eventserver.so
+usr/lib/libtuxbox-eventserver.la
+usr/lib/libtuxbox-eventserver.a
+usr/lib/pkgconfig/tuxbox-eventserver.pc
+usr/include/tuxbox/eventserver.h

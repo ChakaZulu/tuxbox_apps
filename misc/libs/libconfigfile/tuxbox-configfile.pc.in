@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-configfile
 Description: configfile
 Version: @VERSION@
-Libs: -L${libdir} -lconfigfile
+Libs: -L${libdir} -ltuxbox-configfile
 Cflags: -I${includedir}/tuxbox

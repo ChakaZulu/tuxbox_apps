@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-md5sum.so
+usr/lib/libtuxbox-md5sum.la
+usr/lib/libtuxbox-md5sum.a
+usr/lib/pkgconfig/tuxbox-md5sum.pc
+usr/include/tuxbox/libmd5sum.h

@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-configfile.so
+usr/lib/libtuxbox-configfile.la
+usr/lib/libtuxbox-configfile.a
+usr/lib/pkgconfig/tuxbox-configfile.pc
+usr/include/tuxbox/configfile.h

@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-md5sum
 Description: md5sum
 Version: @VERSION@
-Libs: -L${libdir} -lmd5sum
+Libs: -L${libdir} -ltuxbox-md5sum
 Cflags: -I${includedir}/tuxbox

@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-cramfs.so
+usr/lib/libtuxbox-cramfs.la
+usr/lib/libtuxbox-cramfs.a
+usr/lib/pkgconfig/tuxbox-cramfs.pc
+usr/include/tuxbox/libcramfs.h

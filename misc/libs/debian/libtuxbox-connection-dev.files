@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-connection.so
+usr/lib/libtuxbox-connection.la
+usr/lib/libtuxbox-connection.a
+usr/lib/pkgconfig/tuxbox-connection.pc
+usr/include/tuxbox/connection

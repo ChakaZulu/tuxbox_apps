@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-ucodes.so
+usr/lib/libtuxbox-ucodes.la
+usr/lib/libtuxbox-ucodes.a
+usr/lib/pkgconfig/tuxbox-ucodes.pc
+usr/include/tuxbox/libucodes.h

@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-ucodes
 Description: ucodes
 Version: @VERSION@
-Libs: -L${libdir} -lucodes
+Libs: -L${libdir} -ltuxbox-ucodes
 Cflags: -I${includedir}/tuxbox

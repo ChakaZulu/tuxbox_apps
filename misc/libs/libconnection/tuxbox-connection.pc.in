@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-connection
 Description: connection
 Version: @VERSION@
-Libs: -L${libdir} -lconnection
+Libs: -L${libdir} -ltuxbox-connection
 Cflags: -I${includedir}/tuxbox/connection

@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-eventserver
 Description: eventserver
 Version: @VERSION@
-Libs: -L${libdir} -leventserver
+Libs: -L${libdir} -ltuxbox-eventserver
 Cflags: -I${includedir}/tuxbox

@@ -1,6 +1,6 @@
-lib_LTLIBRARIES = libmpegtools.la
+lib_LTLIBRARIES = libtuxbox-mpegtools.la
 
-libmpegtools_la_SOURCES = ctools.c remux.c ringbuffy.c transform.c
+libtuxbox_mpegtools_la_SOURCES = ctools.c remux.c ringbuffy.c transform.c
 
 pkgincludedir = ${includedir}/tuxbox/mpegtools
 pkginclude_HEADERS = ctools.h remux.h ringbuffy.h transform.h

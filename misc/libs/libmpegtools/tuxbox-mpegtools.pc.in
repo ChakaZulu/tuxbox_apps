@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-mpegtools
 Description: mpegtools
 Version: @VERSION@
-Libs: -L${libdir} -lmpegtools
+Libs: -L${libdir} -ltuxbox-mpegtools
 Cflags: -I${includedir}/tuxbox/mpegtools

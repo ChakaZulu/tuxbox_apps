@@ -1,13 +1,130 @@
-Source: tuxbox-libs
+Source: tuxbox-misc-libs
 Priority: optional
-Maintainer: Bastian Blank <waldi@debian.org>
+Section: libs
+Maintainer: Bastian Blank <waldi@tuxbox.org>
 Build-Depends: debhelper (>> 3.0.0), gcc-3.2, zlib1g-dev
 Standards-Version: 3.5.7
 
-Package: tuxbox-libs
-Section: devel
+Package: libtuxbox-configfile
 Architecture: any
 Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-connection
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-cramfs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-eventserver
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-md5sum
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-mpegtools
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-net
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-ucodes
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-xmltree
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-configfile-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-configfile (= ${Source-Version}), ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-connection-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-connection (= ${Source-Version}), ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-cramfs-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-cramfs (= ${Source-Version}), ${shlibs:Depends}
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-eventserver-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-eventserver (= ${Source-Version}), ${shlibs:Depends}
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-md5sum-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-md5sum (= ${Source-Version}), ${shlibs:Depends}
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-mpegtools-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-mpegtools (= ${Source-Version}), ${shlibs:Depends}
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-net-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-net (= ${Source-Version}), ${shlibs:Depends}
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-ucodes-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-ucodes (= ${Source-Version}), ${shlibs:Depends}
+Depends: ${shlibs:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libtuxbox-xmltree-dev
+Section: devel
+Architecture: any
+Depends: libtuxbox-xmltree (= ${Source-Version}), ${shlibs:Depends}
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
 

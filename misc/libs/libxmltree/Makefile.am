@@ -1,9 +1,9 @@
 INCLUDES = \
-        -Ixmltok
+        -I$(srcdir)/xmltok
 
-lib_LTLIBRARIES = libxmltree.la
+lib_LTLIBRARIES = libtuxbox-xmltree.la
 
-libxmltree_la_SOURCES = \
+libtuxbox_xmltree_la_SOURCES = \
 	hashtab.c xmlparse.cpp xmlrole.c xmltok.c xmltree.cpp
 
 pkgincludedir = ${includedir}/tuxbox/xmltree

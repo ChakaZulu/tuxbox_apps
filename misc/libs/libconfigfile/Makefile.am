@@ -1,7 +1,7 @@
-lib_LTLIBRARIES = libconfigfile.la
+lib_LTLIBRARIES = libtuxbox-configfile.la
 
 tuxboxincludedir = ${includedir}/tuxbox
 tuxboxinclude_HEADERS = configfile.h
 
-libconfigfile_la_SOURCES = configfile.cpp
+libtuxbox_configfile_la_SOURCES = configfile.cpp
 

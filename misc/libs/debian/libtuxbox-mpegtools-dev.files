@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-mpegtools.so
+usr/lib/libtuxbox-mpegtools.la
+usr/lib/libtuxbox-mpegtools.a
+usr/lib/pkgconfig/tuxbox-mpegtools.pc
+usr/include/tuxbox/mpegtools

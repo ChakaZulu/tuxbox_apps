@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: tuxbox-cramfs
 Description: cramfs
 Version: @VERSION@
-Libs: -L${libdir} -lcramfs
+Libs: -L${libdir} -ltuxbox-cramfs
 Cflags: -I${includedir}/tuxbox

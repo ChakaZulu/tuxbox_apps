@@ -1,6 +1,6 @@
-lib_LTLIBRARIES  = libeventserver.la
+lib_LTLIBRARIES  = libtuxbox-eventserver.la
 
 tuxboxincludedir = ${includedir}/tuxbox
 tuxboxinclude_HEADERS = eventserver.h
 
-libeventserver_la_SOURCES = eventserver.cpp
+libtuxbox_eventserver_la_SOURCES = eventserver.cpp

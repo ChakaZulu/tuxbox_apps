@@ -64,7 +64,9 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) -C build install DESTDIR=$(CURDIR)/debian/tuxbox-libs
+	$(MAKE) -C build install DESTDIR=$(CURDIR)/debian/tmp
+
+	dh_movefiles
 
 
 # Build architecture-independent files here.

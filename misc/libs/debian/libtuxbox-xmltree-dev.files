@@ -1,0 +1,5 @@
+usr/lib/libtuxbox-xmltree.so
+usr/lib/libtuxbox-xmltree.la
+usr/lib/libtuxbox-xmltree.a
+usr/lib/pkgconfig/tuxbox-xmltree.pc
+usr/include/tuxbox/xmltree
