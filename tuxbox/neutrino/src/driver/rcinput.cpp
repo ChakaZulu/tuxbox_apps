@@ -740,6 +740,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*msg = NeutrinoMessages::EVT_BOUQUETSCHANGED;
 									*data = 0;
 								break;
+#ifndef SKIP_CA_STATUS
 							case CZapitClient::EVT_ZAP_CA_CLEAR :
 									*msg = NeutrinoMessages::EVT_ZAP_CA_CLEAR;
 									*data = *(unsigned*) p;
@@ -752,6 +753,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*msg = NeutrinoMessages::EVT_ZAP_CA_FTA;
 									*data = *(unsigned*) p;
 								break;
+#endif
 							default :
 								printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
 						}
