@@ -3505,8 +3505,7 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 	return "E: invalid command";
 }
 
-#if 0
-is this still used???
+//is this still used???  yes .. tuxvision... dreamtv
 static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if (opt != "getpids")
@@ -3526,7 +3525,6 @@ static eString neutrino_suck_getonidsid(eString request, eString dirpath, eStrin
 
 	return eString().sprintf("%d\n", onidsid);
 }
-#endif
 
 struct addToString
 {
@@ -3587,7 +3585,6 @@ struct appendonidsidnamestr
 	}
 };
 
-#if 0
 static eString neutrino_suck_getchannellist(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString channelstring;
@@ -3596,7 +3593,6 @@ static eString neutrino_suck_getchannellist(eString request, eString dirpath, eS
 
 	return channelstring;
 }
-#endif
 
 static eString cleanupTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -4350,7 +4346,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/tvMessageWindow", tvMessageWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, false); // this dont really zap.. only used to return apid and vpid
+	dyn_resolver->addDyn("GET", "/cgi-bin/zapTo", zapTo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, lockWeb);
