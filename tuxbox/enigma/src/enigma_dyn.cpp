@@ -923,15 +923,16 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 			int cnt = 1;
 			do
 			{
-				eString tmp;
-				tmp.sprintf("%s.%03d", ref.path.c_str(), cnt++);
-				ret = ::unlink(tmp.c_str());
+				ret = ::unlink(eString().sprintf("%s.%03d", ref.path.c_str(), cnt++).c_str());
 			}
 			while(!ret);
-			eString fname = ref.path;
-			fname.erase(fname.length() - 2, 2);
-			fname += "eit";
-			::unlink(fname.c_str());
+			
+//			eString fname = ref.path;
+//			fname.erase(fname.length() - 2, 2);
+//			fname += "eit";
+//			::unlink(fname.c_str());
+			ret = ::unlink(eString().sprintf("%s.eit", ref.path.c_str()).c_str());
+			
 		}
 	}
 	return "<script language=\"javascript\">window.close();</script>";
@@ -1933,15 +1934,12 @@ public:
 								<< std::setw(2) << t->tm_min << ' '
 								<< " (" << event.duration / 60 << " min)"
 
-//								<< "<a href=\"/" << "?path=" + ref2string(ref) << "\">"
 								<< "<br><b>"
-
-//								<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
-//								<< "&ID=" << std::hex << event.event_id << std:dec
-//								<< "\")\'>"
-
+								
+								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\'>"
 								<< short_description
-//								<< "</a>"
+								<< "</a>"
+								
 								<< "</b></span><br>\n";
 
 							if (eventDuration >= 15 * 60)
