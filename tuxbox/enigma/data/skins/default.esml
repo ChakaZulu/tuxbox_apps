@@ -71,7 +71,7 @@
 		<img name="osd_format_off" src="format_off.png" />
 		<img name="enigma_logo" src="enigma2.png" nomerge="yes" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
-
+		<img name="lcd_scart" src="video.png" nomerge="yes" />
 
 		<!--
 		<img name="eWindow.top" src="header.png" />
@@ -122,7 +122,15 @@
 			<!--ePixmap position="0:61" size="120:3" pixmap="lcd_menu" /-->
 		</eZapLCDMenu>
 	</object>
-	
+
+	<object name="enigma_lcd_scart">
+		<eZapLCDScart position="0:0" size="120:64">
+			<ePixmap position="0:0" size="120:17" pixmap="enigma_logo" />
+		  <ePixmap position="4:24" size="112:38" pixmap="lcd_scart" />	
+		</eZapLCDScart>
+	</object>
+
+
 	<object name="eDownloadWindow">
 		<eDownloadWindow position="50:70" size="600:300" text="HTTP Download">
 			<eProgress position="0:50" size="100:20" name="progress" />
