@@ -213,8 +213,8 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	g_Sectionsd->setPauseScanning(false);
 
 #ifdef DBOX
-	// disable iec aka digi out
-	CAViAExt::getInstance()->iecOff();
+	// enable iec aka digi out
+	CAViAExt::getInstance()->iecOn();
 #endif
 
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
