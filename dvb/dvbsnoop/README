@@ -8,15 +8,15 @@ http://cvs.tuxbox.org/
 
 
 
-dvbsnoop is a dvb/mpeg stream analyzer program.
+dvbsnoop is a DVB/MPEG stream analyzer program.
 The program can be used to sniff, monitor, debug, dump
-or view dvb/mpeg/dsm-cc/MHP stream information (digital
-television or data broadcasts) send via satellite, cable
+or view DVB/MPEG/DSM-CC/MHP stream information (digital
+television or data broadcasts) sent via satellite, cable
 or terrestrial.
 
-The programm was mainly written to learn and understand the DVB 
+The program was mainly written to learn and understand the DVB 
 protocol structures and streams. dvbsnoop is currently part of
-the tuxbox project, bringing linux based TV software to some
+the tuxbox project, bringing Linux based TV software to some
 set top boxes (digital satellite/cable receivers).
 
 
@@ -57,23 +57,23 @@ commercial purpose without prior written permission by the author.
 
 
 
-Basic Requirements:
+Basic requirements:
 ===================
 
-  - a DVB card  (not needed for offline decoding of streamed files)
-  - Linux DVB-API 1 or 3 installed  (see: www.linuxtv.org)
+  - a DVB card (not needed for offline decoding of recorded files)
+  - Linux DVB API version 1 or 3 installed (see www.linuxtv.org)
  or
-  - a linux based SetTopBox (using DVB-API 1 or 3)
+  - a Linux based set top box (using DVB API version 1 or 3)
     (e.g. 'dbox2' or 'dreambox')
 
 
 
 Installation:
 =============
-  - install the dvb-api driver from http://www.linuxtv.org
-    (linux kernel 2.6.x and above are already providing the dvb-api)
+  - install the DVB API driver from http://www.linuxtv.org
+    (linux kernel 2.6.x and above are already providing the DVB API)
 
-  - download latest source from http://dvbsnoop.sourceforge.net
+  - download the latest source from http://dvbsnoop.sourceforge.net
     (download a tarball or checkout from cvs)
 
   - unzip and untar the archive (if needed)
@@ -85,7 +85,7 @@ Installation:
       ./autogen.sh	# e.g. on "dbox2" cdk, use if needed
       ./configure
     
-    or you may specify path to dvb-api include files
+    or you may specify path to DVB API include files
       ./configure CPPFLAGS=-I/path/to/dvb-kernel/linux/include
 
   - compile 
@@ -97,9 +97,9 @@ Installation:
 
 
 
-Posting DVBSNOOP output:
+Posting dvbsnoop output:
 ========================
-  If you are posting dvbsnoop output to mail lists, newsgroups, public boards
+  If you are posting dvbsnoop output to mailing lists, newsgroups, public boards
   or whatever, please always include the dvbsnoop header:
 
    e.g.: " dvbsnoop V1.2.49 -- http://dvbsnoop.sourceforge.net/" 
@@ -109,15 +109,15 @@ Posting DVBSNOOP output:
 
 
 
-Using source code snipsets for your own purpose:
+Using source code snippets for your own purpose:
 ================================================
-  You may do so. But you should follow the rules of the GPL.
+  You may do so, but you should follow the rules of the GPL.
   Please include a link or reference to dvbsnoop in your program or
-  documentation... Tnx.
+  documentation... Thanks.
 
 
 
-Bugs, Requests:
+Bugs, requests:
 ===============
   Well, if you find some bugs, please let me know.
   (check first, if the data stream is not broken).
@@ -132,11 +132,11 @@ Bugs, Requests:
 
 Keywords:
 =========
-   DVB stream analyzer mpeg stream analyzer, ts stream analyzer, MPEG,
-   MPG, descriptor, digital television, satellite TV, cable TV, dvb-c,
-   dvb-s, dvb-t, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT,
-   TDST, RST, SIT, DIT, BAT, EMM, ECM, SI Tables, SSU, INT, UNT, datagram,
-   sections, transport stream analyzer, packet elementary stream, DEMUX,
+   DVB stream analyzer mpeg stream analyzer, TS stream analyzer, MPEG,
+   MPG, descriptor, digital television, satellite TV, cable TV, DVB-C,
+   DVB-S, DVB-T, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT,
+   TDST, RST, SIT, DIT, BAT, EMM, ECM, PSI, SI tables, SSU, INT, UNT, datagram,
+   sections, transport stream analyzer, packetized elementary stream, demux,
    ISO/IEC 13818-1, ISO/IEC 13818-6, ETSI EN 300468, ETSI EN 301162,
    ETSI TS 102006, ETSI EN 301192, ETSI TR 101202, ITU H.222.0,
    data carousel, object carousel, dvb snoop 
