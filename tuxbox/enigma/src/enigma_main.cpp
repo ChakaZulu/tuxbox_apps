@@ -1768,10 +1768,12 @@ void eZapMain::set16_9Logo(int aspect)
 	{
 		WideOff->hide();
 		WideOn->show();
+		is16_9 = 1;
 	} else
 	{
 		WideOn->hide();
 		WideOff->show();
+		is16_9 = 0;
 	}
 }
 
@@ -1779,15 +1781,16 @@ void eZapMain::setEPGButton(bool b)
 {
 	if (b)
 	{
-		isEPG=1;
 		ButtonRedDis->hide();
 		ButtonRedEn->show();
+		isEPG = 1;
 	}
 	else
 	{
 		isEPG=0;
 		ButtonRedEn->hide();
 		ButtonRedDis->show();
+		isEPG = 0;
 	}
 }
 
@@ -1797,11 +1800,13 @@ void eZapMain::setVTButton(bool b)
 	{
 		ButtonBlueDis->hide();
 		ButtonBlueEn->show();
+		isVT = 1;
 	}
 	else
 	{
 		ButtonBlueEn->hide();
 		ButtonBlueDis->show();
+		isVT = 0;
 	}
 }
 
@@ -1811,10 +1816,12 @@ void eZapMain::setAC3Logo(bool b)
 	{
 		DolbyOff->hide();
 		DolbyOn->show();
+		isAC3 = 1;
 	} else
 	{
 		DolbyOn->hide();
 		DolbyOff->show();
+		isAC3 = 0;
 	}
 }
 
@@ -1824,10 +1831,12 @@ void eZapMain::setSmartcardLogo(bool b)
 	{
 		CryptOff->hide();
 		CryptOn->show();
+		isCrypted = 1;
 	} else
 	{
 		CryptOn->hide();
 		CryptOff->show();
+		isCrypted = 0;
 	}
 }
 

@@ -384,6 +384,9 @@ private:
 	int flags;
 	int isVT;
 	int isEPG;
+	int is16_9;
+	int isAC3;
+	int isCrypted;
 	int showOSDOnEITUpdate;
 	int serviceFlags;
 	int isSeekable() const { return serviceFlags & eServiceHandler::flagIsSeekable; }
@@ -540,6 +543,11 @@ public:
 	void clearRecordings();
 	int isSkipping() { return skipping; }
 #endif
+	int get16_9Logo() {return is16_9;}
+	int getSmartcardLogo() {return isCrypted;}
+	int getAC3Logo() {return isAC3;}
+	int getVTButton() {return isVT;}
+	int getEPGButton() {return isEPG;}
 
 #ifndef DISABLE_NETWORK
 	void startNGrabRecord();
