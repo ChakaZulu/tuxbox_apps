@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.4 2002/01/29 23:17:54 Simplex Exp $
+  $Id: zapitclient.cpp,v 1.5 2002/02/04 23:17:31 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.5  2002/02/04 23:17:31  Simplex
+  reinit channels, saving bouquets
+
   Revision 1.4  2002/01/29 23:17:54  Simplex
   bugfix
 
@@ -146,7 +149,21 @@ void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList&
 	while ( receive((char*)&response, sizeof(responseGetBouquetChannels)))
 		channels.insert( channels.end(), response);
 	zapit_close();
+}
 
+/* reloads channels and services*/
+void CZapitClient::reinitChannels()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_REINIT_CHANNELS;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseCmd response;
+	receive((char* )&response, sizeof(response));
+	zapit_close();
 }
 
 /***********************************************/
@@ -286,6 +303,23 @@ void CZapitClient::renumChannellist()
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
+	zapit_close();
+}
+
+
+/* saves current bouquet configuration to bouquets.xml*/
+void CZapitClient::saveBouquets()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_BQ_SAVE_BOUQUETS;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseCmd response;
+	receive((char* )&response, sizeof(response));
+
 	zapit_close();
 }
 

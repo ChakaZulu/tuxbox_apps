@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.69 2002/01/30 11:49:21 faralla Exp $
+  $Id: zapit.cpp,v 1.70 2002/02/04 23:19:00 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.70  2002/02/04 23:19:00  Simplex
+  reinit channels, saving bouquets
+
   Revision 1.69  2002/01/30 11:49:21  faralla
   fixed old-style channellist
 
@@ -760,7 +763,7 @@ void _writecamnu(int cmd, unsigned char *data, int len)
   int csum=0, i, pt;
   struct pollfd cam_pfd;
   boolean output = false;
-  
+
   camfd=open("/dev/dbox/cam0",O_RDWR);
 
   if( camfd <= 0 )
@@ -800,11 +803,11 @@ void _writecamnu(int cmd, unsigned char *data, int len)
   {
   	close(camfd);
   	return; //Setting emmpid. No answer expected.
-  }	
+  }
 */
-  
+
   if (buffer[4] == 0x0d)
-  {      
+  {
   	output = true;
   }
 
@@ -818,19 +821,19 @@ void _writecamnu(int cmd, unsigned char *data, int len)
        cam_pfd.fd = camfd;
    cam_pfd.events = POLLIN;
    cam_pfd.revents = 0;
-     
-   pt = poll(&cam_pfd, 1, 1000);
- 
 
- 
- 
+   pt = poll(&cam_pfd, 1, 1000);
+
+
+
+
    if (!pt)
    {
 	dprintf("[zapit] Read cam. Poll timeout\n");
 	close(camfd);
 	return;
   }
-  
+
   if ( read(camfd,&buffer,sizeof(buffer)) <= 0 )
   {
   	perror("read cam");
@@ -844,7 +847,7 @@ void _writecamnu(int cmd, unsigned char *data, int len)
   dprintf("[zapit] ca returned: ");
   for (int i = 0; i<buffer[2]+4;i++)
 	dprintf("%02X ", buffer[i]);
-  dprintf("\n");	
+  dprintf("\n");
   }
 
   close(camfd);
@@ -1592,7 +1595,7 @@ int prepare_channels()
   int ls = LoadServices();
   g_BouquetMan->loadBouquets();
   g_BouquetMan->renumServices();
-  
+
   return 23;
 }
 
@@ -1673,7 +1676,7 @@ void parse_command()
     printf("  Param2: %d\n", rmsg.param2);
     printf("  Param3: %s\n", rmsg.param3);
   */
-  
+
   if(rmsg.version==1)
   {
   switch (rmsg.cmd)
@@ -2208,6 +2211,7 @@ void parse_command()
 	else if (rmsg.version == CZapitClient::ACTVERSION)
 	{
 		printf("command version 2\n");
+		CZapitClient::responseCmd response;
 		switch( rmsg.cmd)
 		{
 			case CZapitClient::CMD_ZAPTO :
@@ -2226,6 +2230,12 @@ void parse_command()
 				CZapitClient::commandGetBouquetChannels msgGetBouquetChannels;
 				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
 				sendBouquetChannels(msgGetBouquetChannels.bouquet);
+			break;
+
+			case CZapitClient::CMD_REINIT_CHANNELS :
+				prepare_channels();
+				response.cmd = CZapitClient::CMD_READY;
+				send(connfd, &response, sizeof(response), 0);
 			break;
 
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
@@ -2275,6 +2285,12 @@ void parse_command()
 
 			case CZapitClient::CMD_BQ_RENUM_CHANNELLIST :
 				g_BouquetMan->renumServices();
+			break;
+
+			case CZapitClient::CMD_BQ_SAVE_BOUQUETS :
+				g_BouquetMan->saveBouquets();
+				response.cmd = CZapitClient::CMD_READY;
+				send(connfd, &response, sizeof(response), 0);
 			break;
 
 			case CZapitClient::CMD_SB_START_PLAYBACK :
@@ -2456,7 +2472,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.69 2002/01/30 11:49:21 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.70 2002/02/04 23:19:00 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
