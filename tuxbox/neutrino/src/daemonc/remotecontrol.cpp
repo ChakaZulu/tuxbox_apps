@@ -368,7 +368,7 @@ void CRemoteControl::processAPIDnames()
 		if ( current_PIDs.APIDs[count].component_tag != 0xFF )
 		{
 			has_unresolved_ctags= true;
-        }
+		}
 		if ( strlen( current_PIDs.APIDs[count].desc ) == 3 )
 		{
 			// unaufgeloeste Sprache...
@@ -398,9 +398,13 @@ void CRemoteControl::processAPIDnames()
 					{
 						if ( current_PIDs.APIDs[j].component_tag == tags[i].componentTag )
 						{
-							strncpy( current_PIDs.APIDs[j].desc, tags[i].component.c_str(), 25 );
-							if ( current_PIDs.APIDs[j].is_ac3 )
-								strncat( current_PIDs.APIDs[j].desc, " (AC3)", 25 );
+							// workaround for buggy ZDF ctags / or buggy sectionsd/drivers , who knows...
+							if(!tags[i].component.empty())
+							{
+								strncpy( current_PIDs.APIDs[j].desc, tags[i].component.c_str(), 25 );
+								if ( current_PIDs.APIDs[j].is_ac3 )
+									strncat( current_PIDs.APIDs[j].desc, " (AC3)", 25 );
+							}
 							current_PIDs.APIDs[j].component_tag = -1;
 							break;
 						}
@@ -412,12 +416,6 @@ void CRemoteControl::processAPIDnames()
 				{
 					if ( e->is_ac3 )
 					{
-						if ( e->component_tag != -1 )
-						{
-							current_PIDs.APIDs.erase( e );
-							continue;
-						}
-						else
 							has_ac3 = true;
 					}
 					e++;
