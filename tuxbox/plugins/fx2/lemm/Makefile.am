@@ -4,7 +4,7 @@ noinst_LTLIBRARIES = lemmings.la
 
 lemmings_la_SOURCES = somain.c sprite.c lemm.c pic.c sound.c double.c
 
-lemmings_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @CURL_LIBS@
+lemmings_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @CURL_LIBS@ -lz
 
 install-exec-local:
 	install -d $(PLUGINDIR)
