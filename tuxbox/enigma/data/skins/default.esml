@@ -65,6 +65,9 @@
 		<img name="osd_crypt_on" src="crypt_on.png" />
 		<img name="osd_dolby_on" src="dolby_on.png" />
 		<img name="osd_format_on" src="format_on.png" />
+		<img name="osd_crypt_off" src="crypt_off.png" />
+		<img name="osd_dolby_off" src="dolby_off.png" />
+		<img name="osd_format_off" src="format_off.png" />
 
 		<!--
 		<img name="eWindow.top" src="header.png" />
@@ -103,7 +106,7 @@
 			<eLabel position="0:0" size="70:18" font="NimbusSansL-Regular Sans L Regular;16" text="Enigma" />
 			<eLabel position="0:20" size="120:30" font="NimbusSansL-Regular Sans L Regular;15" wrap="on" name="service_name" />
 			<eLabel position="74:48" size="46:16" font="NimbusSansL-Regular Sans L Regular;16" name="clock" />
-			<eProgress position="0:57" size="64:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
+			<eProgress position="0:55" size="70:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
 		</eZapLCDMain>
 	</object> 
 	
@@ -157,20 +160,23 @@
 			<eProgress position="505:49" size="95:20" name="progress_bar" />
 
 			<ePixmap position="127:17" size="104:24" pixmap="osd_crypt_on" />
-			<ePixmap position="157:19" size="104:24" pixmap="osd_format_on" />
-			<ePixmap position="207:21" size="104:24" pixmap="osd_dolby_on" />
+			<ePixmap position="150:19" size="104:24" pixmap="osd_format_on" />
+			<ePixmap position="195:21" size="104:24" pixmap="osd_dolby_on" />
+			<ePixmap position="127:17" size="104:24" pixmap="osd_crypt_off" />
+			<ePixmap position="150:19" size="104:24" pixmap="osd_format_off" />
+			<ePixmap position="195:21" size="104:24" pixmap="osd_dolby_off" />
 
 			<eLabel name="description" />
 			
-			<eLabel name="button_red_enabled" position="240:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
-			<eLabel name="button_green_enabled" position="260:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
-			<eLabel name="button_yellow_enabled" position="280:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
-			<eLabel name="button_blue_enabled" position="300:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
+			<eLabel name="button_red_enabled" position="230:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_red" />
+			<eLabel name="button_green_enabled" position="250:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_green"  />
+			<eLabel name="button_yellow_enabled" position="270:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_yellow"  />
+			<eLabel name="button_blue_enabled" position="290:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_blue" />
 
-			<eLabel name="button_red_disabled" position="240:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_green_disabled" position="260:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_yellow_disabled" position="280:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
-			<eLabel name="button_blue_disabled" position="300:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_red_disabled" position="230:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_green_disabled" position="250:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_yellow_disabled" position="270:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
+			<eLabel name="button_blue_disabled" position="290:19" size="20:20" font="Marlett Regular;20" backgroundColor="shadow_gray"  />
 	
 		</eZapMain>
 	</object>

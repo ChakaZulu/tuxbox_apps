@@ -305,6 +305,20 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(ButtonGreenDis, eLabel, "button_green_disabled");
 	ASSIGN(ButtonYellowDis, eLabel, "button_yellow_disabled");
 	ASSIGN(ButtonBlueDis, eLabel, "button_blue_disabled");
+
+	ASSIGN(DolbyOn, ePixmap, "osd_dolby_on");
+	ASSIGN(DolbyOff, ePixmap, "osd_dolby_off");
+	ASSIGN(CryptOn, ePixmap, "osd_crypt_on");
+	ASSIGN(CryptOff, ePixmap, "osd_crypt_off"); 
+	ASSIGN(WideOn, ePixmap, "osd_format_on");
+	ASSIGN(WideOff, ePixmap, "osd_format_off");
+
+	DolbyOn->hide();
+	DolbyOff->show();
+	CryptOn->hide();
+	CryptOff->show();
+	WideOn->hide();
+	WideOff->show();
 	
 	ButtonRedEn->setFlags(RS_DIRECT);
 	ButtonRedEn->setText("\x19");
@@ -362,16 +376,46 @@ eZapMain::~eZapMain()
 
 void eZapMain::aspectRatioChanged(int aspect)
 {
+    if (aspect)
+    {
+	WideOff->hide();
+	WideOn->show();
+    }
+    else
+    {
+	WideOn->hide();
+	WideOff->show();
+    }
     qDebug("Aspect Ratio: %d", aspect);
 }
 
 void eZapMain::isAC3(bool b)
 {
+    if (b)
+    {
+	DolbyOff->hide();
+	DolbyOn->show();
+    }
+    else
+    {
+	DolbyOn->hide();
+	DolbyOff->show();
+    }
     qDebug("AC3: %s", b?"true":"false");
 }
 
 void eZapMain::scrambled(bool b)
 {
+    if (b)
+    {
+	CryptOff->hide();
+	CryptOn->show();
+    }
+    else
+    {
+	CryptOn->hide();
+	CryptOff->show();
+    }
     qDebug("Channel is %s", b?"scrambled":"FTA");
 }
 
