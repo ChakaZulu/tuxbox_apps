@@ -1,6 +1,6 @@
 SUBDIRS = xml zapci zapost zapsi
 
-INCLUDES = -I$(top_srcdir)/lib @CONFIGFILE_CFLAGS@
+INCLUDES = -I$(top_srcdir)/lib @CONFIGFILE_CFLAGS@ @LCDDCLIENT_CFLAGS@
 
 bin_PROGRAMS = pzapit zapit
 
@@ -11,8 +11,7 @@ pzapit_LDADD = \
 	$(top_builddir)/lib/libzapitclient.la
 
 zapit_SOURCES = \
-	zapit.cpp transponder.cpp channel.cpp bouquets.cpp getservices.cpp scan.cpp
-
+	zapit.cpp transponder.cpp channel.cpp bouquets.cpp getservices.cpp scan.cpp $(DBOX2)
 
 zapit_LDADD = \
 	@CONFIGFILE_LIBS@ \
@@ -23,12 +22,11 @@ zapit_LDADD = \
 	zapsi/libzapsi.a \
 	-lpthread
 
-#
-# used CPPFLAGS are:
-#
-#  DBOX2 - enable dbox2 specific code (see Makefile.am in every subdir, too)
-#  USE_PID_CACHE - do not read pids after every channel change
-#  EXCESSIVE_TUNING_RETRIES - retry tuning on failure
+if DBOX2
+DBOX2 = lcddclient.cpp
+lcddclient.cpp:
+	ln -sf @LCDDCLIENT_SOURCE@
+endif
 
 install-data-local:
 	$(INSTALL) -d $(CONFIGDIR)/zapit
