@@ -64,9 +64,9 @@ class CStreamInfo2 : public CMenuTarget
 		int   sig_text_snr_x;
 
 		struct feSignal {
-			int	ber, old_ber;
-			int	sig, old_sig;
-			int	snr, old_snr;
+			unsigned long	ber, old_ber;
+			unsigned long	sig, old_sig;
+			unsigned long	snr, old_snr;
 			// int	has_lock;
 			// int	has_signal;
 		} signal;
@@ -79,8 +79,8 @@ class CStreamInfo2 : public CMenuTarget
 		void paint_techinfo(int x, int y);
 		void paint_signal_fe_box(int x, int y, int w, int h);
 		void paint_signal_fe(struct feSignal s);
-		int  y_signal_fe(int value, int max_range, int max_y);
-		void SignalRenderStr (int value, int x, int y);
+		int  y_signal_fe(unsigned long value, unsigned long max_range, int max_y);
+		void SignalRenderStr (unsigned long value, int x, int y);
 
 
 

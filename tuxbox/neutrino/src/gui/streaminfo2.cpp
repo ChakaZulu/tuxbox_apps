@@ -142,7 +142,7 @@ int CStreamInfo2::doSignalStrengthLoop ()
 
 		signal.sig = s.sig & 0xFFFF;
 		signal.snr = s.snr & 0xFFFF;
-		signal.ber = s.ber & 0xFFFF;
+		signal.ber = (s.ber < 0x3FFFF) ? s.ber : 0x3FFFF;  // max. Limit
 
 		paint_signal_fe(signal);
 
@@ -216,9 +216,9 @@ void CStreamInfo2::paint_signal_fe_box(int x, int y, int w, int h)
 	g_Font[font_small]->RenderString(x+25+xd*2,y1, 50, "SIG", COL_MENUCONTENT, 0, true);
 
 	sig_text_y = y1 - iheight;
-	sig_text_ber_x = x+15+xd*0;
-	sig_text_snr_x = x+15+xd*1;
-	sig_text_sig_x = x+15+xd*2;
+	sig_text_ber_x = x+05+xd*0;
+	sig_text_snr_x = x+05+xd*1;
+	sig_text_sig_x = x+05+xd*2;
 
 
 	//  first draw of dummy signal
@@ -270,7 +270,7 @@ void CStreamInfo2::paint_signal_fe(struct feSignal  s)
 
 
 // -- calc y from max_range and max_y
-int CStreamInfo2::y_signal_fe(int value, int max_value, int max_y)
+int CStreamInfo2::y_signal_fe(unsigned long value, unsigned long max_value, int max_y)
 {
 	long  l;
 
@@ -282,12 +282,12 @@ int CStreamInfo2::y_signal_fe(int value, int max_value, int max_y)
 	return (int) l;
 }
 
-void CStreamInfo2::SignalRenderStr (int value, int x, int y)
+void CStreamInfo2::SignalRenderStr (unsigned long value, int x, int y)
 {
 	char str[30];
 
 	frameBuffer->paintBoxRel(x, y-iheight+1, 50, iheight-1, COL_MENUHEAD_PLUS_0);
-	sprintf(str,"%5d",value);
+	sprintf(str,"%6d",value);
 	g_Font[font_small]->RenderString(x, y, 50, str, COL_MENUCONTENT, 0, true);
 }
 

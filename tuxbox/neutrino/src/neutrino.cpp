@@ -2663,7 +2663,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- rasc (2003-12)
 
 
-	// StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized("experimental", true, NULL, new CChMosaicHandler(), id, CRCInput::RC_nokey, ""), false);
 
 
 #endif
