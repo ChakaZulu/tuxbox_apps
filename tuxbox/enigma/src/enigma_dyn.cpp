@@ -54,10 +54,11 @@ using namespace std;
 #define BLUE "#12259E"
 #define RED "#CB0303"
 #define LIGHTGREY "#DEE6D6"
+#define DARKGREY "#ABABAB"
 #define LEFTNAVICOLOR "#316183"
 #define TOPNAVICOLOR "#316183"
 
-extern eString getRight(const eString&, char);  // implemented in timer.cpp
+extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 
 static eString getVersionInfo(const char *info)
@@ -72,10 +73,10 @@ static eString getVersionInfo(const char *info)
 		if (!fgets(buffer, 128, f))
 			break;
 		if (strlen(buffer))
-			buffer[strlen(buffer)-1]=0;
-		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)]=='=')))
+			buffer[strlen(buffer) -1 ] = 0;
+		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)] == '=')))
 		{
-			int i = strlen(info)+1;
+			int i = strlen(info) + 1;
 			result = eString(buffer).mid(i, strlen(buffer)-i);
 			break;
 		}
@@ -107,10 +108,9 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 eString getTitle(eString title)
 {
 	std::stringstream result;
-	result << "<span style=\"width: 100%; background-color: " << LIGHTGREY << "\">"
-		"<font style=\"font-family: Verdana; font-size: 14pt; font-weight: bold\">"
+	result << "<span class=\"title\" style=\"width: 100%; background-color: " << LIGHTGREY << "\">"
 		<< title
-		<< "</font></SPAN><br><br>";
+		<< "</SPAN><br><br>";
 	return result.str();
 }
 
@@ -210,6 +210,37 @@ std::map<eString,eString> getRequestOptions(eString opt)
 		opt=opt.mid(a+1);
 	}
 	return result;
+}
+
+static int getOSDShot(eString mode)
+{
+	gPixmap *p = 0;
+#ifndef DISABLE_LCD
+	if (mode == "lcd")
+		p = &gLCDDC::getInstance()->getPixmap();
+	else
+#endif
+		p = &gFBDC::getInstance()->getPixmap();
+
+	if (p)
+		if (!savePNG("/tmp/screenshot.png", p))
+			return 0;
+
+	return -1;
+}
+
+static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt=getRequestOptions(opts);
+
+	if (getOSDShot(opt["mode"]) == 0)
+	{
+		content->local_header["Location"]="/root/tmp/screenshot.png";
+		content->code = 307;
+		return "+ok";
+	}
+	else
+		return "-error";
 }
 
 static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -554,7 +585,9 @@ static eString getNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=wakeup\')");
 		result += "<br>";
-		result += button(110, "Frameshot", LEFTNAVICOLOR, "?mode=menuFBShot");
+		result += button(110, "OSDshot", LEFTNAVICOLOR, "?mode=menuFBShot");
+		result += "<br>";
+		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=menuLCDShot");
 		result += "<br>";
 		result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=menuScreenShot");
 		result += "<br>";
@@ -718,12 +751,12 @@ public:
 					 return;
 		}
 #endif
-		result+="<tr><td bgcolor=\"#";
+		result += "<tr><td bgcolor=\"";
 		if (num & 1)
-			result += "c0c0c0";
+			result += LIGHTGREY;
 		else
-			result += "d0d0d0";
-		result+="\">";
+			result += DARKGREY;
+		result += "\">";
 		if (!(e.flags & eServiceReference::isDirectory))
 		{
 			result += "<a href=\'javascript:openEPG(\"" + ref2string(e) + "\")\'>[EPG]</a>";
@@ -754,31 +787,30 @@ static eString getZapContent(eString mode, eString path)
 	eString result;
 	eString tpath;
 
-	int pos=0, lastpos=0, temp=0;
+	int pos = 0, lastpos = 0, temp = 0;
 
-	if ((path.find(";", 0))==(unsigned)-1)
-		path=";"+path;
+	if ((path.find(";", 0)) == -1)
+		path = ";" + path;
 
-	while ((pos=path.find(";", lastpos))!=-1)
+	while ((pos = path.find(";", lastpos)) != -1)
 	{
-		lastpos=pos+1;
-		if ((temp=path.find(";", lastpos))!=-1)
+		lastpos = pos + 1;
+		if ((temp = path.find(";", lastpos)) != -1)
 		{
-			tpath=path.mid(lastpos, temp-lastpos);
+			tpath = path.mid(lastpos, temp - lastpos);
 		}
 		else
 		{
-			tpath=path.mid(lastpos, strlen(path.c_str())-lastpos);
+			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
 		}
 
 		eServiceReference current_service=string2ref(tpath);
-		eServiceInterface *iface=eServiceInterface::getInstance();
+		eServiceInterface *iface = eServiceInterface::getInstance();
 
 		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 		{
 			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //			iface->play(current_service);
-//			result += "Done. Please select ZAP to refresh screen.";
 			result += "<script language=\"javascript\">window.close();</script>";
 		}
 		else
@@ -1279,21 +1311,14 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "menuFBShot")
 	{
-		gPixmap *p=0;
-		p=&gFBDC::getInstance()->getPixmap();
-
-		result = getTitle("Control > Frameshot");
-		if (!p)
-		{
-			result += "FBShot failed";
-		}
-		else
-		{
-			if (!savePNG("/tmp/fbshot.png", p))
-			{
-				result += "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
-			}
-		}
+		if (!getOSDShot("fb"))
+			result += "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
+	}
+	else
+	if (mode == "menuLCDShot")
+	{
+		if (!getOSDShot("lcd"))
+			result += "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
 	}
 	else
 	if (mode == "menuScreenShot")
@@ -1329,9 +1354,9 @@ static eString getContent(eString mode, eString path)
 static eString getEITC2()
 {
 	eString now_time = "&nbsp;", now_duration = "&nbsp;",
-					now_text = "&nbsp;";//, now_longtext = "&nbsp;";
+		now_text = "&nbsp;";//, now_longtext = "&nbsp;";
 	eString next_time = "&nbsp;", next_duration = "&nbsp;",
-					next_text = "&nbsp;";//, next_longtext = "&nbsp;";
+		next_text = "&nbsp;";//, next_longtext = "&nbsp;";
 	eString result;
 
 	EIT *eit=eDVB::getInstance()->getEIT();
@@ -1575,16 +1600,16 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 {
 	std::stringstream result;
 	eString name,
-					provider,
-					vpid,
-					apid,
-					pcrpid,
-					tpid,
-					vidform("n/a"),
-					tsid,
-					onid,
-					sid,
-					pmt;
+		provider,
+		vpid,
+		apid,
+		pcrpid,
+		tpid,
+		vidform("n/a"),
+		tsid,
+		onid,
+		sid,
+		pmt;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
@@ -1896,7 +1921,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		res+="</table>\n";
 		eDebug("entered");
 		iface->leaveDirectory(current_service);
-		eDebug("leaved");
+		eDebug("exited");
 	}
 
 	return res;
@@ -1935,37 +1960,6 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	result.strReplace("#NAVI#", getNavi(mode, spath));
 
 	return result;
-}
-
-static int getOSDShot(eString mode)
-{
-	gPixmap *p = 0;
-#ifndef DISABLE_LCD
-	if (mode == "lcd")
-		p = &gLCDDC::getInstance()->getPixmap();
-	else
-#endif
-		p = &gFBDC::getInstance()->getPixmap();
-
-	if (p)
-		if (!savePNG("/tmp/screenshot.png", p))
-			return 0;
-
-	return -1;
-}
-
-static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	
-	if (getOSDShot(opt["mode"]) == 0)
-	{
-		content->local_header["Location"]="/root/tmp/screenshot.png";
-		content->code = 307;
-		return "+ok";
-	}
-	else
-		return "-error";
 }
 
 static eString listDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -2191,7 +2185,7 @@ static eString cleanupTimerList(eString request, eString dirpath, eString opt, e
 {
 	eString result;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	result+="<script language=\"javascript\">window.close();</script>";
+	result += "<script language=\"javascript\">window.close();</script>";
 	eTimerManager::getInstance()->cleanupEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
@@ -2201,7 +2195,7 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 {
 	eString result;
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	result+="<script language=\"javascript\">window.close();</script>";
+	result += "<script language=\"javascript\">window.close();</script>";
 	eTimerManager::getInstance()->clearEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
