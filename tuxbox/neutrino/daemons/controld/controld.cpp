@@ -89,7 +89,9 @@ int	sagem_scart[7];
 int	sagem_dvb[6];
 int	philips_scart[7];
 int	philips_dvb[6];
-char aspectRatio;
+char aspectRatio_vcr;
+char aspectRatio_dvb;
+bool vcr;
 
 
 
@@ -227,8 +229,13 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	if (format == 0) // automatic switch
 	{
 		printf("[controld] setting VideoFormat to auto \n");
+		int activeAspectRatio;
+	      if (vcr)
+		  activeAspectRatio = aspectRatio_vcr;
+		else
+		  activeAspectRatio = aspectRatio_dvb;
 
-		switch (aspectRatio)
+		switch (activeAspectRatio)
 		{
 		case 0 :	// 4:3
 			format= 2;
@@ -444,11 +451,13 @@ void routeVideo(int v1, int a1, int v2, int a2, int v3, int a3, int fblk)
 
 void switch_vcr( bool vcr_on)
 {
+	int activeAspectRatio;
 	LoadScart_Settings();
-
+	vcr = vcr_on;
 	if (vcr_on)
 	{
 		//turn to scart-input
+	   activeAspectRatio = aspectRatio_vcr;
 		printf("[controld]: switch to scart-input... (%d)\n", settings.boxtype);
 		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
 		{
@@ -465,6 +474,7 @@ void switch_vcr( bool vcr_on)
 	}
 	else
 	{	//turn to dvb...
+	   activeAspectRatio = aspectRatio_dvb;
 		printf("[controld]: switch to dvb-input... (%d)\n", settings.boxtype);
 		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
 		{
@@ -477,6 +487,23 @@ void switch_vcr( bool vcr_on)
 		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
 		{
 			routeVideo( philips_dvb[0], philips_dvb[1], philips_dvb[2], philips_dvb[3], philips_dvb[4], philips_dvb[5], settings.videooutput);
+		}
+	}
+
+	// recall AspectRatio when switching between DVB and VCR
+	if ( settings.videoformat == 0 )
+	{
+		switch (activeAspectRatio)
+		{
+		case 0 :	// 4:3
+			setVideoFormat( 2, false );
+			break;
+		case 1 :	// 16:9
+		case 2 :	// 2,21:1
+			setVideoFormat( 1, false );
+			break;
+		default:
+			printf("[controld] Unknown aspectRatio: %d", activeAspectRatio);
 		}
 	}
 }
@@ -745,7 +772,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CControld::CMD_GETASPECTRATIO:
 		//printf("[controld] get videoformat (fnc)\n");
 		CControld::responseAspectRatio msga;
-		msga.aspectRatio = aspectRatio;
+		if (vcr)
+		  msga.aspectRatio = aspectRatio_vcr;
+		else
+		  msga.aspectRatio = aspectRatio_dvb;
 		CBasicServer::send_data(connfd,&msga,sizeof(msga));
 		break;
 	case CControld::CMD_GETVIDEOOUTPUT:
@@ -802,7 +832,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.109 2003/10/17 17:49:18 obi Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.110 2003/10/21 22:48:25 zwen Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -898,12 +928,18 @@ int main(int argc, char **argv)
 
 void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 {
-	//printf("[controld] CControldAspectRatioNotifier::aspectRatioChanged( %d ) \n", newAspectRatio);
-	aspectRatio= newAspectRatio;
+	//printf("[controld] CControldAspectRatioNotifier::aspectRatioChanged( %x ) \n", newAspectRatio);
+	int activeAspectRatio;
+	aspectRatio_dvb = newAspectRatio & 0xFF;
+	aspectRatio_vcr = (newAspectRatio & 0xFF00) >> 8;
+	if (vcr)
+	   activeAspectRatio = aspectRatio_vcr;
+	else
+	   activeAspectRatio = aspectRatio_dvb;
 
 	if ( settings.videoformat == 0 )
 	{
-		switch (newAspectRatio)
+		switch (activeAspectRatio)
 		{
 		case 0 :	// 4:3
 			setVideoFormat( 2, false );
@@ -913,7 +949,7 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 			setVideoFormat( 1, false );
 			break;
 		default:
-			printf("[controld] Unknown aspectRatio: %d", newAspectRatio);
+			printf("[controld] Unknown aspectRatio: %d", activeAspectRatio);
 		}
 	}
 }

@@ -147,31 +147,14 @@ void *CEventWatchDog::watchdogThread(void *arg)
 
 							WatchDog->VCRMode = newVCRMode;
 							WatchDog->vcrModeChanged( newVCRMode );
-
-							if (newVCRMode > 0) {
-								// Watching "VCR", adjust format accordingly
-								WatchDog->VideoMode = newVCRMode + 1;
-								WatchDog->videoModeChanged(newVCRMode + 1);
-							} else {
-								// going back to DVB, adjust format if output not disabled
-								sleep(2);
-								int newVideoMode = WatchDog->getVideoMode();
-								WatchDog->VideoMode = newVideoMode;
-								int fd;
-								char disabled=0;
-								if ((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
-									perror("[controld] " SAA7126_DEVICE);
-								else 
-								{
-									if ((ioctl(fd,SAAIOGPOWERSAVE,&disabled) < 0))
-										perror("[controld] SAAIOSPOWERSAVE");
-									close(fd);
-								}
-								printf("Watchdog back to DVB disabled : %d\n",disabled);
-								if(!disabled)
-									WatchDog->videoModeChanged(newVideoMode);
+							
+							if(newVCRMode > 0)
+							{
+								//Set Aspect ratio of scart input signal (1->4:3 / 2->16:9)
+								// vcr AR is saved in Bit 8-15, DVB AR is saved in bits 0-7
+								WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF) | ((newVCRMode-1) << 8);
+								WatchDog->videoModeChanged(WatchDog->VideoMode);
 							}
-
 							pthread_mutex_unlock( &WatchDog->wd_mutex );
 						}
 					}
@@ -191,11 +174,11 @@ void *CEventWatchDog::watchdogThread(void *arg)
 							verb_aratio[WatchDog->VideoMode],
 							verb_aratio[event.u.size.aspect_ratio]);
 
-					if ((WatchDog->VideoMode != event.u.size.aspect_ratio) &&
-						(WatchDog->getVCRMode() == 0)) {
+					// DVB AR is saved in Bites 0-7
+					if ((WatchDog->VideoMode & 0xFF) != event.u.size.aspect_ratio) {
 						pthread_mutex_lock(&WatchDog->wd_mutex);
-						WatchDog->VideoMode = event.u.size.aspect_ratio;
-						WatchDog->videoModeChanged(event.u.size.aspect_ratio);
+						WatchDog->VideoMode = (WatchDog->VideoMode & 0xFF00 ) | event.u.size.aspect_ratio;
+						WatchDog->videoModeChanged(WatchDog->VideoMode);
 						pthread_mutex_unlock(&WatchDog->wd_mutex);
 					}
 				}
