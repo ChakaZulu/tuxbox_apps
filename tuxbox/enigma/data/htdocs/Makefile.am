@@ -9,7 +9,8 @@ EXTRA_DIST = \
 	icon-warning-fs8.png icon-question-fs8.png bg.png but_grey.png \
 	mepg_grad.png edit.gif timer.js window.js topbalk2.png topbalk3.png \
 	topbalk4.png zap.js zapdata.js up.gif down.gif topbalk_small.png \
-	webif_small.css
+	webif_small.css topbalk2_small.png topbalk3_small.png \
+	topbalk4_small.png
 
 install-data-local:
 	install -d $(DATADIR)/enigma/htdocs
