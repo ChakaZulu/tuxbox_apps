@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.54 2004/03/12 22:01:02 zwen Exp $
+	$Id: timerd.cpp,v 1.55 2004/04/21 16:56:56 zwen Exp $
 
 	License: GPL
 
@@ -347,6 +347,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			CBasicServer::receive_data(connfd,&msgRemoveTimer, sizeof(msgRemoveTimer));
 			dprintf("TIMERD: command remove %d\n",msgRemoveTimer.eventID);
 			CTimerManager::getInstance()->removeEvent(msgRemoveTimer.eventID);
+			break;
+
+		case CTimerdMsg::CMD_STOPTIMER:						//	timer stoppen
+			dprintf("TIMERD: command stop\n");
+			CTimerdMsg::commandRemoveTimer msgStopTimer;
+			CBasicServer::receive_data(connfd,&msgStopTimer, sizeof(msgStopTimer));
+			dprintf("TIMERD: command stop %d\n",msgStopTimer.eventID);
+			CTimerManager::getInstance()->stopEvent(msgStopTimer.eventID);
 			break;
 
 		case CTimerdMsg::CMD_TIMERDAVAILABLE:					// testen ob server läuft ;)

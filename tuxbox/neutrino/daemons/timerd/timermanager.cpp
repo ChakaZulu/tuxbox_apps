@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.71 2004/03/07 02:46:11 thegoodguy Exp $
+   $Id: timermanager.cpp,v 1.72 2004/04/21 16:56:56 zwen Exp $
 
 	License: GPL
 
@@ -204,11 +204,20 @@ bool CTimerManager::removeEvent(int eventID)
 
 		events[eventID]->eventState = CTimerd::TIMERSTATE_TERMINATED;		// set the state to terminated
 		return true;															// so timerthread will do the rest for us
-//		delete events[eventID];
 	}
 	else
 		return false;
-//	events.erase(eventID);
+}
+//------------------------------------------------------------
+bool CTimerManager::stopEvent(int eventID)
+{
+	if(events.find(eventID)!=events.end())							 // if i have a event with this id
+	{
+		events[eventID]->eventState = CTimerd::TIMERSTATE_HASFINISHED;		// set the state to terminated
+		return true;															// so timerthread will do the rest for us
+	}
+	else
+		return false;
 }
 
 //------------------------------------------------------------

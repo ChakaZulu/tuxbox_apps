@@ -3964,7 +3964,7 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 			}
 			else
 			{
-				g_Timerd->removeTimerEvent(recording_id);
+				g_Timerd->stopTimerEvent(recording_id);
 				startNextRecording();
 			}
 			return true;
