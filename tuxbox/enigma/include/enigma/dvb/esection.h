@@ -1,0 +1,184 @@
+#ifndef __esection_h
+#define __esection_h
+
+#include <qobject.h>
+#include <qsocketnotifier.h>
+#include <qtimer.h>
+#include <qlist.h>
+#include <asm/types.h>
+
+#define SECREAD_INORDER	1			// read them in order (read full tables)
+#define SECREAD_CRC			2			// check CRCs
+#define SECREAD_NOTIMEOUT	4		// never timeout
+#define SECREAD_NOABORT	8			// do not abort on transponderchange
+
+class eSection: public QObject
+{
+	Q_OBJECT
+	static QList<eSection> active;
+	int handle;
+	QSocketNotifier *notifier;
+	virtual int sectionRead(__u8 *data);
+	virtual void sectionFinish(int error);
+	
+	int pid, tableid, tableidext, tableidmask;
+	int maxsec, section, flags;
+	void closeFilter();
+	QTimer *timer;
+	__u8 buf[65536];
+	int lockcount;
+public slots:
+	void data(int socket);
+	void timeout();
+public:
+	eSection(int pid, int tableid, int tableidext, int version, int flags, int tableidmask=0xFF);
+	virtual ~eSection();
+
+	int setFilter(int pid, __u8 *data, __u8 *mask, int len);
+	int setFilter(int pid, int tableid, int tableidext, int version);
+	int start();
+	int abort();
+	static int abortAll();
+	int getLockCount() { return lockcount; }
+	int lock();
+	int unlock();
+	
+	int version;
+};
+
+class eTable: public eSection
+{
+	Q_OBJECT
+	virtual int sectionRead(__u8 *d) { int err=data(d); if (err<0) error=err; return err; }
+	virtual void sectionFinish(int err);
+protected:
+	virtual int data(__u8 *data)=0;
+signals:
+	void tableReady(int);
+public:
+	eTable(int pid, int tableid, int tableidext=-1, int version=-1);
+	virtual eTable *createNext();
+	int incrementVersion(int version) { return (version&0xC1)|((version+2)&0x3E); }
+	int error;
+	int ready;
+};
+
+
+class eAUGTable: public QObject
+{
+	Q_OBJECT
+signals:
+	void tableReady(int);
+protected slots:
+	void slotTableReady(int);
+public:
+	virtual void getNext(int err)=0;
+};
+
+template <class Table>
+class eAUTable: public eAUGTable
+{
+	Table *current, *next;		// current is READY AND ERRORFREE, next is not yet ready
+	int first;
+public:
+	eAUTable()
+	{
+		current=next=0;
+	}
+
+	~eAUTable()
+	{
+		delete current;
+		delete next;
+	}
+	
+	int start(Table *cur)
+	{
+		first=1;
+		if (current)
+			delete current;
+		current=0;
+		if (next)
+			delete next;
+		next=cur;
+		connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
+		return next->start();
+	}
+	
+	int get()
+	{
+		if (current)
+		{
+			emit tableReady(0);
+			return 0;
+		} else if (!next)
+		{
+			emit tableReady(-1);
+			return 0;
+		} else
+			return 1;
+	}
+	
+	Table *getCurrent()
+	{
+		if (!current)
+			qFatal("getCurrent - and nothing ready!");
+		current->lock();
+		return current;
+	}
+	
+	void abort()
+	{
+		qDebug("eAUTable: aborted!");
+		if (next)
+			next->abort();
+		delete next;
+		next=0;
+	}
+	
+	int ready()
+	{
+		return !!current;
+	}
+
+	void getNext(int error)
+	{
+//		qDebug("eAUTable: got table (ready %d, error %d)", next->ready, next->error);
+		if (current && current->getLockCount())
+		{
+			delete next;
+		} else
+		{
+			if (error)
+			{
+				delete next;
+				next=0;
+				if (first)
+					emit tableReady(error);
+				first=0;
+				return;
+			} else
+			{
+				if (current)
+					delete current;
+				current=next;
+			}
+		}
+		next=0;
+		first=0;
+		
+		if (!current->ready)
+			qFatal("was soll das denn? not ready? ICH GLAUBE ES HACKT!");
+			
+		emit tableReady(0);
+
+		next=(Table*)current->createNext();
+		if (next)
+		{
+			connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
+			next->start();
+		}
+	}
+};
+
+#endif
