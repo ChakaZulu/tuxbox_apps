@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.3 2003/09/25 21:08:59 ghostrider Exp $
+ * $Id: system_settings.cpp,v 1.4 2004/01/18 23:49:27 ghostrider Exp $
  */
 
 #include <system_settings.h>
@@ -52,7 +52,8 @@ eSystemSettings::eSystemSettings()
 	CONNECT((new eListBoxEntryMenu(&list, _("OSD Settings"), eString().sprintf("(%d) %s", ++entry, _("open on screen display settings")) ))->selected, eSystemSettings::osd_settings);
 	CONNECT((new eListBoxEntryMenu(&list, _("OSD Language"), eString().sprintf("(%d) %s", ++entry, _("open language selector")) ))->selected, eSystemSettings::osd_language);
 #ifndef DISABLE_LCD
-	CONNECT((new eListBoxEntryMenu(&list, _("LCD Settings"), eString().sprintf("(%d) %s", ++entry, _("open LCD settings")) ))->selected, eSystemSettings::lcd_settings);
+	if ( eSystemInfo::getInstance()->hasLCD() )
+		CONNECT((new eListBoxEntryMenu(&list, _("LCD Settings"), eString().sprintf("(%d) %s", ++entry, _("open LCD settings")) ))->selected, eSystemSettings::lcd_settings);
 #endif
 }
 

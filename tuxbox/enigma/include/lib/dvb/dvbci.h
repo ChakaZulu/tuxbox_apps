@@ -85,7 +85,6 @@ protected:
 	int buffersize;	
 
 	eTimer pollTimer;
-	eLock lock;
 
 	int tempPMTentrys;
 
@@ -193,6 +192,5 @@ public:
 	void thread();
 	Signal1<void, const char*> ci_progress;
 	Signal2<void, const char*, int> ci_mmi_progress;
-
 };
 #endif

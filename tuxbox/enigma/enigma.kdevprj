@@ -34,7 +34,7 @@ configure_args=\s--build=i386-linux --host=i386-linux --target=i386-linux\s
 dir_where_make_will_be_called=./
 email=
 kdevprj_version=1.3
-lfv_open_groups=
+lfv_open_groups=XML Files
 make_options=\s-j1 install
 makefiles=Makefile.am,enigma/Makefile.am,enigma/docs/Makefile.am,enigma/docs/en/Makefile.am,src/Makefile.am,lib/base/Makefile.am,lib/Makefile.am,lib/driver/Makefile.am,lib/dvb/lowlevel/Makefile.am,lib/dvb/Makefile.am,lib/gdi/Makefile.am,lib/gui/Makefile.am,lib/socket/Makefile.am,lib/system/Makefile.am,include/Makefile.am,include/lib/base/Makefile.am,include/lib/Makefile.am,include/lib/driver/Makefile.am,include/lib/dvb/Makefile.am,include/lib/gdi/Makefile.am,include/lib/gui/Makefile.am,include/lib/socket/Makefile.am,include/lib/system/Makefile.am,include/lib/dvb/lowlevel/Makefile.am,po/Makefile.am,data/skins/Makefile.am,data/Makefile.am,data/resources/Makefile.am,lib/codecs/Makefile.am,include/lib/codecs/Makefile.am
 modifyMakefiles=false
@@ -141,7 +141,7 @@ install_location=
 type=DATA
 
 [data/skins/Makefile.am]
-files=data/skins/chk_blue2.esml,data/skins/chk_blue2.info,data/skins/chkdesign.info,data/skins/chkv2.info,data/skins/default.esml,data/skins/dream.info,data/skins/neutrino.esml,data/skins/neutrino.info,data/skins/stone.esml,data/skins/silver.esml,data/skins/small.esml,data/skins/small.info
+files=data/skins/chk_blue2.esml,data/skins/chk_blue2.info,data/skins/chkdesign.info,data/skins/chkv2.info,data/skins/default.esml,data/skins/dream.info,data/skins/neutrino.esml,data/skins/neutrino.info,data/skins/stone.esml,data/skins/silver.esml,data/skins/small.esml,data/skins/small.info,data/skins/small169.esml
 sub_dirs=
 type=normal
 
@@ -206,6 +206,12 @@ install_location=
 type=DATA
 
 [data/skins/small.info]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[data/skins/small169.esml]
 dist=true
 install=false
 install_location=
@@ -420,7 +426,7 @@ type=HEADER
 
 [include/lib/driver/Makefile.am]
 dist=true
-files=include/lib/driver/eavswitch.h,include/lib/driver/Makefile.am,include/lib/driver/rc.h,include/lib/driver/rcdreambox.h,include/lib/driver/rcdbox.h,include/lib/driver/rcdreambox2.h,include/lib/driver/streamwd.h,include/lib/driver/rfmod.h
+files=include/lib/driver/eavswitch.h,include/lib/driver/Makefile.am,include/lib/driver/rc.h,include/lib/driver/rcdreambox.h,include/lib/driver/rcdbox.h,include/lib/driver/rcdreambox2.h,include/lib/driver/streamwd.h,include/lib/driver/rfmod.h,include/lib/driver/rcinput.h
 install=false
 install_location=
 sub_dirs=
@@ -451,6 +457,12 @@ install_location=
 type=HEADER
 
 [include/lib/driver/rcdreambox2.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[include/lib/driver/rcinput.h]
 dist=true
 install=false
 install_location=
@@ -1125,7 +1137,7 @@ type=SOURCE
 
 [lib/driver/Makefile.am]
 dist=true
-files=lib/driver/eavswitch.cpp,lib/driver/Makefile.am,lib/driver/rc.cpp,lib/driver/rcdbox.cpp,lib/driver/rcdreambox.cpp,lib/driver/rcdreambox2.cpp,lib/driver/streamwd.cpp,lib/driver/rfmod.cpp
+files=lib/driver/eavswitch.cpp,lib/driver/Makefile.am,lib/driver/rc.cpp,lib/driver/rcdbox.cpp,lib/driver/rcdreambox.cpp,lib/driver/rcdreambox2.cpp,lib/driver/streamwd.cpp,lib/driver/rfmod.cpp,lib/driver/rcinput.cpp
 install=false
 install_location=
 sharedlib_LDFLAGS=-version-info 0:0:0
@@ -1158,6 +1170,12 @@ install_location=
 type=SOURCE
 
 [lib/driver/rcdreambox2.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[lib/driver/rcinput.cpp]
 dist=true
 install=false
 install_location=

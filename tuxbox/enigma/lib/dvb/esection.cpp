@@ -77,6 +77,10 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, i
 
 	secFilterParams.timeout=0;
 	secFilterParams.flags=DMX_IMMEDIATE_START;
+#if HAVE_DVB_API_VERSION < 3
+	if ( eSystemInfo::getInstance()->hasNegFilter() )
+		secFilterParams.flags=0;
+#endif
 	if (flags&SECREAD_CRC)
 		secFilterParams.flags|=DMX_CHECK_CRC;
 	for (int i = 0; i < len; i++)
@@ -109,11 +113,12 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, __u8 *mode, int len, i
 	if ( eSystemInfo::getInstance()->hasNegFilter() )
 	{
 		__u8 negfilter[DMX_FILTER_SIZE];
-		memset(&negfilter, 0, DMX_FILTER_SIZE);
-		memcpy(&negfilter, mode, len);
-
-		if (::ioctl(handle, DMX_SET_NEGFILTER_MASK, &negfilter) < 0)
+		memset(negfilter, 0, DMX_FILTER_SIZE);
+		memcpy(negfilter, mode, len);
+		if (::ioctl(handle, DMX_SET_NEGFILTER_MASK, negfilter) < 0)
 			eDebug("DMX_SET_NEGFILTER_MASK (%m)");
+		if (::ioctl(handle, DMX_START, 0) < 0)
+			eDebug("DMX_START failed(%m)");
 	}
 #endif
 
@@ -138,19 +143,19 @@ int eSectionReader::read(__u8 *buf)
 }
 
 eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _flags, int _tableidmask)
-	:context(eApp), pid(_pid), tableid(_tableid), tableidext(_tableidext), tableidmask(_tableidmask), flags(_flags), version(_version)
+	:context(eApp), notifier(0), pid(_pid), tableid(_tableid)
+	,tableidext(_tableidext), tableidmask(_tableidmask), maxsec(0)
+	,section(0), flags(_flags), prevSection(0), count(0)
+	,timer(new eTimer(context)), lockcount(0), version(_version)
 {
-	count=prevSection=section=lockcount=0;
-	notifier=0;
-	timer=new eTimer(context);
 	CONNECT(timer->timeout, eSection::timeout);
 }
 
 eSection::eSection()
-	:context(eApp)
+	:context(eApp), notifier(0), pid(0), tableid(0), tableidext(0)
+	,tableidmask(0), maxsec(0), section(0), flags(0), prevSection(0)
+	,count(0), timer(new eTimer(context)), lockcount(0), version(0)
 {
-	count=prevSection=section=lockcount=0;
-	notifier=0;
 }
 
 eSection::~eSection()
@@ -168,10 +173,10 @@ int eSection::start( const char* dmxdev )
 		timer->start(
 			pid == 0x14 /* TOT/TDT */ ? 90000 :
 			pid == 0x10     /* NIT */ ? 12000 :
-			pid == 0x00     /* PAT */ ?  2500 :
+			pid == 0x00     /* PAT */ ?  5000 :
 			pid == 0x11     /* SDT */ ?  5000 :
-			pid == 0x12     /* EIT */ ?  4000 :
-			tableid == 0x02 /* PMT */ ?  2500 : 10000, true);
+			pid == 0x12     /* EIT */ ?  5000 :
+			tableid == 0x02 /* PMT */ ?  5000 : 10000, true);
 	return setFilter(pid, tableid, tableidext, version, dmxdev);
 }
 
@@ -341,7 +346,7 @@ int eSection::unlock()
 	if (lockcount)
 		return lockcount--;
 	else
-		eDebug("unlocking while not locked");
+		eDebug("unlocking... but not locked");
 	return 0;
 }
 
@@ -354,16 +359,15 @@ void eTable::sectionFinish(int err)
 }
 
 eTable::eTable(int pid, int tableid, int tableidext, int version)
-	:eSection(pid, tableid, tableidext, version, (pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC))
+	:eSection(pid, tableid, tableidext, version
+	,(pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC))
+	,error(0), ready(0)
 {
-	error=0;
-	ready=0;
 }
 
-eTable::eTable(): eSection()
+eTable::eTable()
+	:error(0), ready(0)
 {
-	error=0;
-	ready=0;
 }
 
 eTable *eTable::createNext()

@@ -165,6 +165,7 @@ public:
 		void set(const SatelliteDeliverySystemDescriptor *descriptor);
 		int tune(eTransponder *);
 		int isValid() const { return valid; }
+		inline bool useable( eLNB * lnb );
 		bool operator == (const satellite &c) const
 		{
 			if (valid != c.valid)
@@ -714,7 +715,7 @@ public:
 	unsigned int getLOFLo() const { return lof_lo; }
 	unsigned int getLOFThreshold() const { return lof_threshold; }
 	int getIncreasedVoltage() const { return increased_voltage; }
-	eDiSEqC& getDiSEqC() { return DiSEqC; }	
+	eDiSEqC& getDiSEqC() { return DiSEqC; }
 	eSatellite *addSatellite(int orbital_position);
 	void deleteSatellite(eSatellite *satellite);
 	void addSatellite( eSatellite *satellite);
@@ -843,5 +844,25 @@ public:
   std::multimap< int, eSatellite*>::iterator end() { return satellites.end(); }
 	std::list<eLNB>& getLNBs()	{	return lnbs;	}
 };
+
+inline bool eTransponder::satellite::useable( eLNB * lnb )
+{
+	// normal tuner can tune frequencys from 950 Mhz to 2150 Mhz
+	// do +- 100Mhz
+	if ( frequency > lnb->getLOFThreshold() )
+	{
+		int diff = abs(frequency - lnb->getLOFHi());
+		if ( diff > 2250000 || diff < 850000 )
+			return false;
+	}
+	else
+	{
+		int diff = abs(frequency - lnb->getLOFLo());
+		if ( diff > 2250000 || diff < 850000 )  
+			return false;
+	}
+	return true;
+}
+
 
 #endif

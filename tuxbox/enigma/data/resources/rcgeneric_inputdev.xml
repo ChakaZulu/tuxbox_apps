@@ -243,6 +243,8 @@
 
 		<actionmap name="mainmenu">
 			<action name="close" key="KEY_SPACE" flags="m" />
+			<action name="prev" key="KEY_LEFT" flags="mr" />
+			<action name="next" key="KEY_RIGHT" flags="mr" />
 		</actionmap>
 
 		<actionmap name="textedit">

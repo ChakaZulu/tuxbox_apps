@@ -29,6 +29,7 @@ public:
 	gFBDC();
 	~gFBDC();
 	static gFBDC *getInstance();
+	int islocked() { return fb->islocked(); }
 };
 
 

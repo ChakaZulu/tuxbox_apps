@@ -221,6 +221,7 @@ public:
 	virtual const eRect &getClip()=0;
 	virtual gRGB getRGB(gColor col)=0;
 	virtual ~gDC();
+	virtual int islocked() { return 0; }
 	void lock() { dclock.lock(1); }
 	void unlock() { dclock.unlock(1); }
 };

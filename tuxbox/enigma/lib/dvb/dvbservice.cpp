@@ -17,6 +17,7 @@
 #include <lib/dvb/record.h>
 
 std::set<eDVBCaPMTClient*> eDVBCaPMTClientHandler::capmtclients;
+eLock eDVBServiceController::availCALock;
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
@@ -944,8 +945,11 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 			Decoder::addCADescriptor((__u8*)(ca->data));
 
 			int avail=0;
-			if (availableCASystems.find(ca->CA_system_ID) != availableCASystems.end())
-				avail++;
+			{
+				eLocker s(availCALock);
+				if (availableCASystems.find(ca->CA_system_ID) != availableCASystems.end())
+					avail++;
+			}
 
 			usedCASystems.insert(ca->CA_system_ID);
 
@@ -976,12 +980,16 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 
 void eDVBServiceController::initCAlist()
 {
+	eLocker s(availCALock);
 	availableCASystems=eSystemInfo::getInstance()->getCAIDs();
 }
 
 void eDVBServiceController::clearCAlist()
 {
-	availableCASystems.clear();
+	{
+		eLocker s(availCALock);
+		availableCASystems.clear();
+	}
 	initCAlist();
 #ifndef DISABLE_CI
 	if (DVBCI)

@@ -2,6 +2,7 @@
 #define __rc_h
 
 #include <config.h>
+#include <unistd.h>
 #include <list>
 #include <map>
 
@@ -65,6 +66,7 @@ public:
 	 * \result The dbox2-compatible code. (new RC as defined in enum).
 	 */
 	virtual int getKeyCompatibleCode(const eRCKey &key) const;
+	const eRCDriver *getDriver() { return driver; }
 };
 
 /**
@@ -101,6 +103,8 @@ public:
 	~eRCDriver();
 	
 	void enable(int en) { enabled=en; }
+
+	virtual void flushBuffer() const {};
 };
 
 #if HAVE_DVB_API_VERSION < 3
@@ -113,6 +117,12 @@ protected:
 public:
 	eRCShortDriver(const char *filename);
 	~eRCShortDriver();
+	void flushBuffer()
+	{
+		unsigned char buf;
+		if (handle != -1)
+			while ( ::read(handle, &buf, 1) );
+	}
 };
 #else
 class eRCInputEventDriver: public eRCDriver
@@ -125,6 +135,12 @@ public:
 	eString getDeviceName();
 	eRCInputEventDriver(const char *filename);
 	~eRCInputEventDriver();
+	void flushBuffer()
+	{
+		unsigned char buf;
+		if (handle != -1)
+			while ( ::read(handle, &buf, 1) );
+	}
 };
 #endif
 

@@ -64,7 +64,6 @@ public:
 	static eZap *getInstance();
 	eServiceSelector *getServiceSelector()
 	{
-		ASSERT(serviceSelector);
 		return serviceSelector;
 	}
 	

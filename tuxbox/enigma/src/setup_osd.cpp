@@ -8,6 +8,7 @@
 #include <lib/gdi/font.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/ebutton.h>
+#include <lib/gui/echeckbox.h>
 #include <lib/gui/guiactions.h>
 #include <lib/gui/slider.h>
 #include <lib/gui/statusbar.h>
@@ -179,8 +180,8 @@ eZapOsdSetup::eZapOsdSetup()
 	:eWindow(0)
 {
 	setText(_("OSD Settings"));
-	cmove(ePoint(140, 150));
-	cresize(eSize(460, 300));
+	cmove(ePoint(140, 125));
+	cresize(eSize(460, 350));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -229,11 +230,20 @@ eZapOsdSetup::eZapOsdSetup()
 	sGamma->setValue( gamma);
 	CONNECT( sGamma->changed, eZapOsdSetup::gammaChanged );
 
+	simpleMainMenu=new eCheckbox(this);
+	simpleMainMenu->setText(_("Show listbox like Mainmenu"));
+	simpleMainMenu->setHelpText(_("show the Mainmenu in normal listbox style"));
+	simpleMainMenu->move(ePoint(20,140));
+	simpleMainMenu->resize(eSize(350,35));
+	int bla=0;
+	eConfig::getInstance()->getKey("/ezap/osd/simpleMainMenu", bla);
+	simpleMainMenu->setCheck(bla);
+
 	skin=new eButton(this);
 	skin->setText(_("Change skin"));
 	skin->setShortcut("blue");
 	skin->setShortcutPixmap("blue");
-	skin->move(ePoint(20, 140));
+	skin->move(ePoint(20, 190));
 	skin->resize(eSize(205, 40));
 	skin->loadDeco();
 	skin->setHelpText(_("press ok to open skin selector"));
@@ -244,7 +254,7 @@ eZapOsdSetup::eZapOsdSetup()
 	pluginoffs->setHelpText(_("here you can center the Tuxtxt (builtin videotext)"));
 	pluginoffs->setShortcut("yellow");
 	pluginoffs->setShortcutPixmap("yellow");
-	pluginoffs->move(ePoint(235, 140));
+	pluginoffs->move(ePoint(235, 190));
 	pluginoffs->resize(eSize(205, 40));
 	pluginoffs->loadDeco();
 	CONNECT( pluginoffs->selected, eZapOsdSetup::pluginPositionPressed );
@@ -253,7 +263,7 @@ eZapOsdSetup::eZapOsdSetup()
 	ok->setText(_("save"));
 	ok->setShortcut("green");
 	ok->setShortcutPixmap("green");
-	ok->move(ePoint(20, 200));
+	ok->move(ePoint(20, 245));
 	ok->resize(eSize(205, 40));
 	ok->setHelpText(_("save changes and return"));
 	ok->loadDeco();
@@ -303,6 +313,7 @@ void eZapOsdSetup::pluginPositionPressed()
 
 void eZapOsdSetup::okPressed()
 {
+	eConfig::getInstance()->setKey("/ezap/osd/simpleMainMenu", simpleMainMenu->isChecked());
 	gFBDC::getInstance()->saveSettings();
 	eConfig::getInstance()->flush();
 	close(1);

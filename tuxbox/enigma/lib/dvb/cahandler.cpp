@@ -3,6 +3,7 @@
 #include <lib/base/eerror.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+#include <lib/system/info.h>
 #include <lib/gdi/font.h>
 
 eDVBCAHandler::eDVBCAHandler()
@@ -27,14 +28,21 @@ void eDVBCAHandler::leaveTransponder( eTransponder* t )
 		strcpy(servaddr.sun_path, "/tmp/camd.socket");
 		clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
 		sock = socket(PF_UNIX, SOCK_STREAM, 0);
+		int err=0;
 		if ( connect(sock, (struct sockaddr *) &servaddr, clilen) )
 		{
 			eDebug("[eDVBCAHandler] (leaveTP) connect (%m)");
-			return;
+			err = 1;
 		}
-		const char *msg="\x9f\x80\x3f\x04\x83\x02\x03\x01";
-		if ( ::write(sock, msg, 8) != 8 )
-			eDebug("[eDVBCAHandler] (leaveTP) write (%m)");
+		fcntl(sock, F_SETFL, O_NONBLOCK);
+		int val=1;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
+		if (!err)
+		{
+			const char *msg="\x9f\x80\x3f\x04\x83\x02\x03\x01";
+			if ( ::write(sock, msg, 8) != 8 )
+				eDebug("[eDVBCAHandler] (leaveTP) write (%m)");
+		}
 		::close(sock);
 	}
 }
@@ -70,10 +78,18 @@ void CAService::sendCAPMT( PMT *pmt )
 	capmt[21]=me.getOriginalNetworkID().get()>>8;
 	capmt[22]=me.getOriginalNetworkID().get()&0xFF;
 
-	capmt[23]=0x82;  // demuxer kram.. source dest bla.. keine Ahnung...
+	capmt[23]=0x82;  // demuxer kram..
 	capmt[24]=0x02;
-	capmt[25]=0x03;
-	capmt[26]=0x01;
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	{
+		capmt[25]=0x03;  // descramble on demux0 and demux1
+		capmt[26]=0x01;  // get section data from demux1
+	}
+	else
+	{
+		capmt[25]=0x01;  // only descramble on demux0
+		capmt[26]=0x00;  // get section data from demux0
+	}
 
 	capmt[27]=0x84;  // pmt pid
 	capmt[28]=0x02;

@@ -513,8 +513,7 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 		int num = this == eZap::getInstance()->getServiceSelector() ?
 			getFirstBouquetServiceNum(ref,-1) :
 			getFirstBouquetServiceNum(ref,path.bottom().data[1] == (1<<2) ?
-				eZapMain::modeRadio :
-				path.bottom().data[1] == ((1<<1) || (1<<4)) ?
+				eZapMain::modeRadio : path.bottom().data[1] == (1<<1)|(1<<4) ?
 				eZapMain::modeTV : eZapMain::modeFile );
 		ePlaylist *pl = (ePlaylist*) eServiceInterface::getInstance()->addRef( path.top() );
 		if ( pl )
@@ -544,8 +543,7 @@ void eServiceSelector::updateNumbers()
 	int num = this == eZap::getInstance()->getServiceSelector() ?
 		getFirstBouquetServiceNum(path.bottom(),-1) :
 		getFirstBouquetServiceNum(path.bottom(),path.bottom().data[1] == (1<<2) ?
-			eZapMain::modeRadio :
-			path.bottom().data[1] == ((1<<1) || (1<<4)) ?
+			eZapMain::modeRadio : path.bottom().data[1] == (1<<1)|(1<<4) ?
 			eZapMain::modeTV : eZapMain::modeFile );
 	services->beginAtomic();
 	ePlaylist *pl = (ePlaylist*) eServiceInterface::getInstance()->addRef( path.top() );
@@ -1195,7 +1193,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					enterPath = /*emit*/ getRoot(listAll, -1);
 				else
 					enterPath = /*emit*/ getRoot(listAll, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
-						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
+						path.bottom().data[1] == (1<<1)|(1<<4) ? eZapMain::modeTV : eZapMain::modeFile );
 				if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() == eZapMain::modeFile )
 					enterPath.down(eServiceReference());
 			}
@@ -1207,7 +1205,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 						enterPath = /*emit*/ getRoot(listSatellites,-1);
 					else
 						enterPath = /*emit*/ getRoot(listSatellites, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
-						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
+						path.bottom().data[1] == (1<<1)|(1<<4) ? eZapMain::modeTV : eZapMain::modeFile );
 					if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 						enterPath.down(eServiceReference());
 				}
@@ -1218,7 +1216,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					enterPath = /*emit*/ getRoot(listProvider,-1);
 				else
 					enterPath = /*emit*/ getRoot(listProvider, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
-						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
+						path.bottom().data[1] == (1<<1)|(1<<4) ? eZapMain::modeTV : eZapMain::modeFile );
 				if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 					enterPath.down(eServiceReference());
 			}
@@ -1228,7 +1226,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					enterPath = /*emit*/ getRoot(listBouquets,-1);
 				else
 					enterPath = /*emit*/ getRoot(listBouquets, path.bottom().data[1] == (1<<2) ? eZapMain::modeRadio :
-						path.bottom().data[1] == ((1<<1) || (1<<4)) ? eZapMain::modeTV : eZapMain::modeFile );
+						path.bottom().data[1] == (1<<1)|(1<<4) ? eZapMain::modeTV : eZapMain::modeFile );
 				if ( style == styleCombiColumn )
 					enterPath.down(eServiceReference());
 			}
@@ -1588,7 +1586,7 @@ eServiceSelector::eServiceSelector()
 	addActionToHelpList(&i_serviceSelectorActions->modeTV);
 	addActionToHelpList(&i_serviceSelectorActions->modeRadio);
 #ifndef DISABLE_FILE
-	if ( this == eZap::getInstance()->getServiceSelector() )
+	if ( !eZap::getInstance()->getServiceSelector() )
 		addActionToHelpList(&i_serviceSelectorActions->modeFile);
 #endif
 	

@@ -380,7 +380,7 @@ void eTimerManager::actionHandler()
 			else
 			{
 				writeToLogfile("call eZapMain::getInstance()->toggleTimerMode()");
-				eZapMain::getInstance()->toggleTimerMode();
+				eZapMain::getInstance()->toggleTimerMode(1);
 				// now in eZapMain the RemoteControl should be handled for TimerMode...
 				// any service change stops now the Running Event and set it to userAborted
 //				conn = CONNECT( eDVB::getInstance()->leaveService, eTimerManager::leaveService );
@@ -512,7 +512,7 @@ void eTimerManager::actionHandler()
 				else
 				{
 					writeToLogfile("call eZapMain::getInstance()->toggleTimerMode()");
-					eZapMain::getInstance()->toggleTimerMode();
+					eZapMain::getInstance()->toggleTimerMode(0);
 				}
 				if ( eConfig::getInstance()->pLockActive() && eServiceInterface::getInstance()->service.isLocked() )
 				{
@@ -1023,6 +1023,9 @@ bool msOverlap( const ePlaylistEntry &m, const ePlaylistEntry &s )
 	struct tm multiple = *localtime( &m.time_begin ),
 				 Entry = *localtime( &s.time_begin );
 
+	if ( s.type & (ePlaylistEntry::stateError|ePlaylistEntry::stateFinished) )
+		return false;
+
 	int todayDate = getDate();
 	if ( m.last_activation == todayDate && m.type & ePlaylistEntry::stateError )
 	{
@@ -1072,7 +1075,9 @@ bool Overlapping( const ePlaylistEntry &e1, const ePlaylistEntry &e2 )
 		overlap = msOverlap( e1, e2 );
 	else if ( e2.type & ePlaylistEntry::isRepeating )
 		overlap = msOverlap( e2, e1 );
-	else overlap = ( !( e1.type & (ePlaylistEntry::stateError|ePlaylistEntry::stateFinished) )
+	else overlap =
+		(  !( e1.type & (ePlaylistEntry::stateError|ePlaylistEntry::stateFinished) )
+		&& !( e2.type & (ePlaylistEntry::stateError|ePlaylistEntry::stateFinished) )
 		&& Overlap( e2.time_begin, e2.duration, e1.time_begin, e1.duration) );
 	return overlap;
 }
@@ -1600,7 +1605,6 @@ void eTimerEditView::createWidgets()
 										_("November"), _("December") };
 	event_name = new eTextInputField(this);
 	event_name->setName("event_name");
-	event_name->setMaxChars(100);
 
 	multiple = new eCheckbox(this);
 	multiple->setName("multiple");

@@ -137,7 +137,7 @@ void enigmaCI::resetPressed()
 
 void enigmaCI::reset2Pressed()
 {
-	app->setText(_("resetting....please wait"));
+	app2->setText(_("resetting....please wait"));
 	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::reset));
 }
 

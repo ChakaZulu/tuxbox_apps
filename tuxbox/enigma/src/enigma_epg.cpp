@@ -526,7 +526,7 @@ void eZapEPG::buildPage(int direction)
 #endif
 			eString stext;
 			if ( curE->descr )   // have changed service name?
-				stext=service.service.descr;  // use this...
+				stext=curE->descr;  // use this...
 			else
 			{
 				eService *sv=eServiceInterface::getInstance()->addRef(*curE);

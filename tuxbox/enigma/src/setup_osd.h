@@ -14,6 +14,7 @@ class eZapOsdSetup: public eWindow
 	eStatusBar *statusbar;
 
 	eButton *pluginoffs, *skin, *ok;
+	eCheckbox *simpleMainMenu;
 	int alpha, brightness, gamma;
 private:
 	int eventHandler(const eWidgetEvent&);

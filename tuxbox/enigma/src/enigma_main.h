@@ -201,22 +201,9 @@ public:
 	void clear();
 };
 
-class VideoStream: public eListBoxEntryText
+class eVideoSelector: public eListBoxWindow<eListBoxEntryText>
 {
-	friend class eListBox<VideoStream>;
-	friend class eVideoSelector;
-	int component_tag;
-	void EITready(int error);
-	void parseEIT(EIT* eit);
-public:
-	VideoStream(eListBox<VideoStream> *listbox, PMTEntry *stream);
-	PMTEntry *stream;
-	bool operator < ( const VideoStream& e) const	{	return 0;	}
-};
-
-class eVideoSelector: public eListBoxWindow<VideoStream>
-{
-	void selected(VideoStream *);
+	void selected(eListBoxEntryText *);
 public:
 	eVideoSelector();
 	void clear();
@@ -549,7 +536,7 @@ public:
 	void setMode(int mode, int user=0); // user made change?
 	int getMode() { return mode; }
 
-	void toggleTimerMode();
+	void toggleTimerMode(int state);
 	int toggleEditMode(eServiceSelector *, int mode=-1);
 	void toggleMoveMode(eServiceSelector *);
 	void handleStandby(int i=0);

@@ -429,8 +429,8 @@ void eNVODSelector::readyCallBack( )
 		{
 			NVODStream *select=0;
 			list.forEachEntry( findNVOD( &select ) );
-/*			if ( select )
-				eServiceInterface::getInstance()->play( select->service );*/
+			if ( select )
+				eServiceInterface::getInstance()->play( select->service );
 		}
 	}
 }
@@ -450,76 +450,18 @@ void eNVODSelector::add(eDVBNamespace dvb_namespace, NVODReferenceEntry *ref)
 	clearEntrys.connect( slot( *nvod, &NVODStream::selfDestroy) );
 }
 
-VideoStream::VideoStream(eListBox<VideoStream> *listbox, PMTEntry *stream)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox), component_tag(-1), stream(stream)
-{
-	for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
-	{
-		if (c->Tag()==DESCR_STREAM_ID)
-			component_tag=((StreamIdentifierDescriptor*)*c)->component_tag;
-	}
-	if (!text)
-		text.sprintf("PID %04x", stream->elementary_PID);
-	if (component_tag!=-1)
-	{
-		eServiceHandler *service=eServiceInterface::getInstance()->getService();
-		if (service)
-		{
-			EIT *eit=service->getEIT();
-			if (eit)
-			{
-				parseEIT(eit);
-			}
-			else
-			{
-				CONNECT( eDVB::getInstance()->tEIT.tableReady, VideoStream::EITready );
-			}
-		}
-	}
-}
-
-void VideoStream::parseEIT(EIT* eit)
-{
-	for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
-	{
-		if ((e->running_status>=2)||(!e->running_status))		// currently running service
-		{
-			for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
-			{
-				if (d->Tag()==DESCR_COMPONENT)
-				{
-					if (((ComponentDescriptor*)*d)->component_tag == component_tag )
-					{
-						text=((ComponentDescriptor*)*d)->text;
-					}
-				}
-			}
-		}
-	}
-	eit->unlock();
-}
-
-void VideoStream::EITready(int error)
-{
-	if (!error)
-	{
-		EIT *eit=eDVB::getInstance()->getEIT();
-		parseEIT(eit);
-	}
-}
-
-void eVideoSelector::selected(VideoStream *l)
+void eVideoSelector::selected(eListBoxEntryText *l)
 {
 	eServiceHandler *service=eServiceInterface::getInstance()->getService();
 
 	if (l && service)
-		service->setPID(l->stream);
+		service->setPID((PMTEntry*)l->getKey());
 
 	close(0);
 }
 
 eVideoSelector::eVideoSelector()
-	:eListBoxWindow<VideoStream>(_("Video"), 10, 330)
+	:eListBoxWindow<eListBoxEntryText>(_("Video"), 10, 330)
 {
 	move(ePoint(200, 120));
 	CONNECT(list.selected, eVideoSelector::selected);
@@ -530,13 +472,16 @@ void eVideoSelector::clear()
 	list.clearList();
 }
 
-void eVideoSelector::add(PMTEntry *pmt)
+void eVideoSelector::add(PMTEntry *stream)
 {
-	new VideoStream(&list, pmt);
+	new eListBoxEntryText(&list,
+		eString().sprintf("PID %04x", stream->elementary_PID),
+		(void*)stream );
 }
 
 AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
-	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox), isAC3(0), isDTS(0), component_tag(-1), stream(stream)
+	:eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox), isAC3(0)
+	,isDTS(0), component_tag(-1), stream(stream)
 {
 	for (ePtrList<Descriptor>::iterator c(stream->ES_info); c != stream->ES_info.end(); ++c)
 	{
@@ -547,7 +492,8 @@ AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
 			RegistrationDescriptor *reg=(RegistrationDescriptor*)*c;
 			if (!memcmp(reg->format_identifier, "DTS", 3))
 				isDTS=1;
-		} else if (c->Tag()==DESCR_ISO639_LANGUAGE)
+		}
+		else if (c->Tag()==DESCR_ISO639_LANGUAGE)
 			text=getISO639Description(((ISO639LanguageDescriptor*)*c)->language_code);
 		else if (c->Tag()==DESCR_STREAM_ID)
 			component_tag=((StreamIdentifierDescriptor*)*c)->component_tag;
@@ -559,10 +505,6 @@ AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
 	}
 	if (!text)
 		text.sprintf("PID %04x", stream->elementary_PID);
-	if (isAC3)
-		text+=" (AC3)";
-	if (isDTS)
-		text+=" (DTS)";
 	if (component_tag!=-1)
 	{
 		eServiceHandler *service=eServiceInterface::getInstance()->getService();
@@ -574,13 +516,19 @@ AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
 				parseEIT(eit);
 		}
 	}
+	else if (isAC3)
+		text+=" (AC3)";
+	else if (isDTS)
+		text+=" (DTS)";
 }
 
 void AudioStream::parseEIT(EIT* eit)
 {
+	int p=0;
 	for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
 	{
-		if ((e->running_status>=2)||(!e->running_status))		// currently running service
+//		eDebug("running_status = %d", e->running_status );
+		if ((e->running_status>=2)|| (!p && !e->running_status))		// currently running service
 		{
 			for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
 			{
@@ -588,15 +536,28 @@ void AudioStream::parseEIT(EIT* eit)
 				{
 					if (((ComponentDescriptor*)*d)->component_tag == component_tag )
 					{
-						text=((ComponentDescriptor*)*d)->text;
-						if (isAC3)
-							text+=" (AC3)";
-						if (isDTS)
-							text+=" (DTS)";
+						eString tmp = ((ComponentDescriptor*)*d)->text;
+						if (tmp)
+						{
+							text=tmp;
+							goto raus;
+						}
 					}
 				}
 			}
 		}
+		p++;
+	}
+raus:
+	if (isAC3)
+		text+=" (AC3)";
+	if (isDTS)
+		text+=" (DTS)";
+	if ( para )
+	{
+		para->destroy();
+		para=0;
+		listbox->invalidateContent();
 	}
 	eit->unlock();
 }
@@ -671,7 +632,6 @@ void eAudioSelector::add(PMTEntry *pmt)
 {
 	new AudioStream(&list, pmt);
 }
-
 
 SubService::SubService(eListBox<SubService> *listbox, eDVBNamespace dvb_namespace, const LinkageDescriptor *descr)
 	:eListBoxEntryText((eListBox<eListBoxEntryText>*) listbox),
@@ -1128,9 +1088,10 @@ void eZapMain::loadUserBouquets( bool destroy )
 {
 	if ( destroy )
 		destroyUserBouquets();
+
 	// create user bouquet tv list
-	eServicePlaylistHandler::getInstance()->addNum( 2 );
-	userTVBouquetsRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 2);
+	eServicePlaylistHandler::getInstance()->addNum( 6 );
+	userTVBouquetsRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 6);
 	userTVBouquets=(ePlaylist*)eServiceInterface::getInstance()->addRef(userTVBouquetsRef);
 	ASSERT(userTVBouquets);
 	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeRoot), userTVBouquetsRef);
@@ -1140,9 +1101,20 @@ void eZapMain::loadUserBouquets( bool destroy )
 	userTVBouquets->service_name=_("Bouquets (TV)");
 	userTVBouquets->load((eplPath+"/userbouquets.tv.epl").c_str());
 
-	// create user bouquet radio list
+	// create user bouquet file list
 	eServicePlaylistHandler::getInstance()->addNum( 3 );
-	userRadioBouquetsRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 3);
+	userFileBouquetsRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 3);
+	userFileBouquets=(ePlaylist*)eServiceInterface::getInstance()->addRef(userFileBouquetsRef);
+	ASSERT(userFileBouquets);
+	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeRoot), userFileBouquetsRef);
+//	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeFile), userFileBouquetsRef);
+	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeBouquets), userFileBouquetsRef);
+	userFileBouquets->service_name=_("Bouquets (File)");
+	userFileBouquets->load((eplPath+"/userbouquets.file.epl").c_str());
+
+	// create user bouquet radio list
+	eServicePlaylistHandler::getInstance()->addNum( 4 );
+	userRadioBouquetsRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 4);
 	userRadioBouquets=(ePlaylist*)eServiceInterface::getInstance()->addRef(userRadioBouquetsRef);
 	ASSERT(userRadioBouquets);
 	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeRoot), userRadioBouquetsRef);
@@ -1151,17 +1123,6 @@ void eZapMain::loadUserBouquets( bool destroy )
 	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeBouquets), userRadioBouquetsRef);
 	userRadioBouquets->service_name=_("Bouquets (Radio)");
 	userRadioBouquets->load((eplPath+"/userbouquets.radio.epl").c_str());
-
-	// create user bouquet file list
-	eServicePlaylistHandler::getInstance()->addNum( 4 );
-	userFileBouquetsRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 4);
-	userFileBouquets=(ePlaylist*)eServiceInterface::getInstance()->addRef(userFileBouquetsRef);
-	ASSERT(userFileBouquets);
-	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeRoot), userFileBouquetsRef);
-//	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeFile), userFileBouquetsRef);
-	eServicePlaylistHandler::getInstance()->newPlaylist(eServiceStructureHandler::getRoot(eServiceStructureHandler::modeBouquets), userFileBouquetsRef);
-	userFileBouquets->service_name=_("Bouquets (File)");
-	userFileBouquets->load((eplPath+"/userbouquets.file.epl").c_str());
 
 	int i=0;
 	for (int d = modeTV; d <= modeFile; d++)
@@ -1842,22 +1803,6 @@ void eZapMain::setEIT(EIT *eit)
 				}
 			}
 
-			for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
-			{
-				Descriptor *descriptor=*d;
-				if (descriptor->Tag()==DESCR_COMPONENT)
-				{
-					ComponentDescriptor *cd=(ComponentDescriptor*)descriptor;
-
-					switch (cd->component_type)
-					{
-						case 0x10 ... 0x13:
-							eDebug("S E R V I C E  H A V E  S U B T I T L E S");
-							break;
-					}
-				}
-			}
-
 			tm *t=event->start_time!=-1?localtime(&event->start_time):0;
 			eString start="";
 			if (t && event->duration)
@@ -2169,11 +2114,17 @@ void eZapMain::showServiceSelector(int dir, int newTarget )
 				setServiceSelectorPath(p);
 			}
 		}
+		if (!doHideInfobar())
+			show();
 		return;
 	}
 
 	if (*service == eServiceInterface::getInstance()->service)
+	{
+		if (!doHideInfobar())
+			show();
 		return;
+	}
 
 #ifndef DISABLE_FILE
 	if ( eDVB::getInstance()->recorder || handleState() )
@@ -2343,14 +2294,23 @@ void eZapMain::showMainMenu()
 	pLCD->lcdMenu->hide();
 	pLCD->lcdMain->show();
 #endif
+	if (!doHideInfobar())
+		show();
 }
 
-void eZapMain::toggleTimerMode()
+void eZapMain::toggleTimerMode(int newstate)
 {
-	if ( state & stateInTimerMode)
+	eDebug("toggleTimerMode (%d)", newstate);
+	if ( !newstate )
+	{
+		eDebug("remove stateInTimerMode");
 		state &= ~stateInTimerMode;
+	}
 	else
+	{
+		eDebug("add stateInTimerMode");
 		state |= stateInTimerMode;
+	}
 }
 
 void eZapMain::standbyPress(int n)
@@ -2942,7 +2902,6 @@ void eZapMain::renameService( eServiceSelector *sel )
 				eServiceInterface::getInstance()->removeRef( it->service );
 			}
 		}
-		wnd.setMaxChars(100);
 		int ret = wnd.exec();
 		wnd.hide();
 		if ( !ret )
@@ -3129,7 +3088,6 @@ void eZapMain::renameFile( eServiceSelector *sel )
 	wnd.setText(_("Rename File"));
 	wnd.show();
 	wnd.setEditText(fname);
-	wnd.setMaxChars(100);
 	int ret = wnd.exec();
 	wnd.hide();
 	if ( !ret )
@@ -3161,7 +3119,6 @@ void eZapMain::renameFile( eServiceSelector *sel )
 						ret = ::rename(tmpold.c_str(), tmpnew.c_str());
 					}
 					while( !ret );
-
 					for ( std::list<ePlaylistEntry>::iterator it(recordings->getList().begin());
 						it != recordings->getList().end(); ++it )
 					{
@@ -3190,7 +3147,6 @@ void eZapMain::renameBouquet( eServiceSelector *sel)
 	wnd.setText(_("Rename bouquet"));
 	wnd.show();
 	wnd.setEditText(p->service_name);
-	wnd.setMaxChars(100);
 	int ret = wnd.exec();
 	wnd.hide();
 	if ( !ret )
@@ -3217,7 +3173,6 @@ void eZapMain::createEmptyBouquet(int mode)
 	wnd.setText(_("Add new bouquet"));
 	wnd.show();
 	wnd.setEditText(eString(""));
-	wnd.setMaxChars(100);
 	int ret = wnd.exec();
 	wnd.hide();
 	if ( !ret )
@@ -3263,7 +3218,6 @@ void eZapMain::createMarker(eServiceSelector *sel)
 		wnd.setText(_("create marker"));
 		sel->hide();
 		wnd.show();
-		wnd.setMaxChars(50);
 		int ret = wnd.exec();
 		wnd.hide();
 		if ( !ret )
@@ -3778,6 +3732,8 @@ void eZapMain::showSubserviceMenu()
 	pLCD->lcdMenu->hide();
 	pLCD->lcdMain->show();
 #endif
+	if (!doHideInfobar())
+		show();
 }
 
 void eZapMain::showAudioMenu()
@@ -3795,27 +3751,29 @@ void eZapMain::showAudioMenu()
 			hide();
 		}
 #ifndef DISABLE_LCD
-		if (flags&ENIGMA_AUDIO)
-			audiosel.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-		else
+		if (flags&ENIGMA_AUDIO_PS)
 			audioselps.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
-#endif
-		if (flags&ENIGMA_AUDIO)
-		{
-			audiosel.show();
-			audiosel.exec();
-			audiosel.hide();
-		}
 		else
+			audiosel.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+#endif
+		if (flags&ENIGMA_AUDIO_PS)
 		{
 			audioselps.show();
 			audioselps.exec();
 			audioselps.hide();
 		}
+		else
+		{
+			audiosel.show();
+			audiosel.exec();
+			audiosel.hide();
+		}
 #ifndef DISABLE_LCD
 		pLCD->lcdMenu->hide();
 		pLCD->lcdMain->show();
 #endif
+		if (!doHideInfobar())
+			show();
 	}
 }
 
@@ -3837,6 +3795,8 @@ void eZapMain::runPluginExt()
 	hide();
 	eZapPlugins plugins(2);
 	plugins.exec();
+	if (!doHideInfobar())
+		show();
 }
 
 void eZapMain::showEPGList(eServiceReferenceDVB service)
@@ -3869,6 +3829,8 @@ void eZapMain::showEPGList(eServiceReferenceDVB service)
 		if ( bMain )
 			pLCD->lcdMain->show();
 #endif
+		if (currentFocus == this && !doHideInfobar())
+			show();
 	}
 }
 
@@ -3948,17 +3910,22 @@ void eZapMain::showEPG()
 	}
 
 	eServiceInterface::getInstance()->removeRef( ref );
+	if (currentFocus == this && !doHideInfobar())
+		show();
 }
 
 void eZapMain::showHelp( ePtrList<eAction>* actionHelpList, int helpID )
 {
 	if ( (actionHelpList && actionHelpList->size()) || (helpID) )
 	{
+		hide();
 		eHelpWindow helpwin(*actionHelpList, helpID);
 
 		helpwin.show();
 		helpwin.exec();
 		helpwin.hide();
+		if (!doHideInfobar())
+			show();
 	}
 }
 
@@ -4734,6 +4701,8 @@ void eZapMain::showEPG_Streaminfo()
 		si.show();
 		si.exec();
 		si.hide();
+		if (!doHideInfobar())
+			show();
 	}
 	else
 	{
@@ -5023,6 +4992,9 @@ void eZapMain::gotPMT()
 	if (!sapi)
 		return;
 
+	audiosel.clear();
+	videosel.clear();
+
 	PMT *pmt=sapi->getPMT();
 	if (!pmt)
 		return;
@@ -5030,8 +5002,6 @@ void eZapMain::gotPMT()
 	bool isAc3 = false;
 	int numaudio=0;
 	int numvideo=0;
-	audiosel.clear();
-	videosel.clear();
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
@@ -5099,7 +5069,7 @@ void eZapMain::timeOut()
 		delete pRotorMsg;
 		pRotorMsg=0;
 	}
-	else if ((currentFocus==this) && ((state == 1) || (stateOSD == 0)))
+	else if ( doHideInfobar() && (currentFocus==this) && ((state == 1) || (stateOSD == 0)))
 		hide();
 }
 
@@ -5377,10 +5347,13 @@ void eZapMain::setMode(int newmode, int user)
 		else
 			playlist->service_name=_("History");
 
-		if ( newmode == modeFile && mode != newmode )
-			eEPGCache::getInstance()->pauseEPG();
-		else if ( mode == modeFile && mode != newmode && newmode != -1 )
-			eEPGCache::getInstance()->restartEPG();
+		if ( eSystemInfo::getInstance()->getHwType() < 3 )  // dbox2
+		{
+			if ( newmode == modeFile && mode != newmode )
+				eEPGCache::getInstance()->pauseEPG();
+			else if ( mode == modeFile && mode != newmode && newmode != -1 )
+				eEPGCache::getInstance()->restartEPG();
+		}
 #endif
 //		eDebug("setting mode to %d", newmode);
 
@@ -5451,6 +5424,7 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 			if ( userRadioBouquets->getList().size() )
 				p=userRadioBouquets;
 			break;
+#ifndef DISABLE_FILE
 		case modeFile:
 			if ( userFileBouquets->getList().size() )
 			{
@@ -5458,6 +5432,7 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 				p->getList().push_back(recordingsref);
 			}
 			break;
+#endif
 	}
 	int num=1;
 	if ( p )
@@ -5467,8 +5442,10 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 		{
 			if ( *it == ref )
 			{
+#ifndef DISABLE_FILE
 				if ( Mode == modeFile )
 					p->getList().remove(recordingsref);
+#endif
 				return num;
 			}
 			ePlaylist *pl = (ePlaylist*)eServiceInterface::getInstance()->addRef( it->service );
@@ -5484,8 +5461,10 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 				eServiceInterface::getInstance()->removeRef( it->service );
 			}
 		}
+#ifndef DISABLE_FILE
 		if ( Mode == modeFile )
 			p->getList().remove(recordingsref);
+#endif
 	}
 	return 1;
 }
@@ -5970,17 +5949,19 @@ eTimerInput::eTimerInput()
 
 	int min=10;
 	EIT *eit=eDVB::getInstance()->getEIT();
+	int p=0;
 	if (eit)
 	{
 		for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
 		{
-			if ((e->running_status>=2)||(!e->running_status)) // currently running service
+			if ((e->running_status>=2)|| (!p && !e->running_status))		// currently running service
 			{
 				time_t stime = e->start_time;
 				time_t now = time(0)+eDVB::getInstance()->time_difference;
 				min = (e->duration - (now - stime)) / 60;
 				break;
 			}
+			p++;
 		}
 		eit->unlock();
 	}
@@ -6035,16 +6016,18 @@ eRecTimeInput::eRecTimeInput()
 
 	time_t tmp=0;
 
+	int p=0;
 	EIT *eit=eDVB::getInstance()->getEIT();
 	if (eit)
 	{
 		for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
 		{
-			if ((e->running_status>=2)||(!e->running_status)) // currently running service
+			if ((e->running_status>=2)|| (!p && !e->running_status))		// currently running service
 			{
 				tmp = e->start_time+e->duration;
 				break;
 			}
+			p++;
 		}
 		eit->unlock();
 	}
@@ -6105,7 +6088,6 @@ TextEditWindow::TextEditWindow( const char *InputFieldDescr, const char* useable
 
 	input = new eTextInputField(this,0,image);
 	input->setName("inputfield");
-	input->setMaxChars(100);
 	input->setHelpText(_("press ok to start edit mode"));
 	if (useableChars)
 		input->setUseableChars( useableChars );

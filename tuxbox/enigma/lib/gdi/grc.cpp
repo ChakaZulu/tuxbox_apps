@@ -86,6 +86,8 @@ gPainter::~gPainter()
 
 void gPainter::begin(const eRect &rect)
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	dc.lock();
 	o.dc=&dc;
@@ -115,6 +117,8 @@ void gPainter::setFont(const gFont &mfont)
 
 void gPainter::renderText(const eRect &pos, const std::string &string, int flags)
 {
+	if ( dc.islocked() )
+		return;
 	eRect area=pos;
 	area.moveBy(logicalZero.x(), logicalZero.y());
 
@@ -128,6 +132,8 @@ void gPainter::renderText(const eRect &pos, const std::string &string, int flags
 
 void gPainter::renderPara(eTextPara &para, ePoint offset)
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::renderPara;
@@ -137,6 +143,8 @@ void gPainter::renderPara(eTextPara &para, ePoint offset)
 
 void gPainter::fill(const eRect &area)
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::fill;
@@ -150,6 +158,8 @@ void gPainter::fill(const eRect &area)
 
 void gPainter::clear()
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::fill;
@@ -159,6 +169,8 @@ void gPainter::clear()
 
 void gPainter::setPalette(gRGB *colors, int start, int len)
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::setPalette;
@@ -174,6 +186,8 @@ void gPainter::setPalette(gRGB *colors, int start, int len)
 
 void gPainter::mergePalette(gPixmap &target)
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::mergePalette;
@@ -183,6 +197,8 @@ void gPainter::mergePalette(gPixmap &target)
 
 void gPainter::line(ePoint start, ePoint end)
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::line;
@@ -208,6 +224,8 @@ void gPainter::resetLogicalZero()
 
 void gPainter::clip(eRect clip)
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::clip;
@@ -220,6 +238,8 @@ void gPainter::clip(eRect clip)
 
 void gPainter::clippop()
 {
+	if ( dc.islocked() )
+		return;
 	ASSERT (cliparea.size()>1);
 	gOpcode o;
 	o.dc=&dc;
@@ -231,6 +251,8 @@ void gPainter::clippop()
 
 void gPainter::flush()
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::flush;
@@ -239,6 +261,8 @@ void gPainter::flush()
 
 void gPainter::end()
 {
+	if ( dc.islocked() )
+		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::end;

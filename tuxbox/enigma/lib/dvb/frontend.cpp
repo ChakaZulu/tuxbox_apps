@@ -87,9 +87,9 @@ void eFrontend::timeout()
 			case eSystemInfo::dbox2Nokia:
 			case eSystemInfo::dbox2Philips:
 			case eSystemInfo::dbox2Sagem:
-				eDebug("FE_GET_FRONTEND is stil sucking (dbox2)... "
+/*				eDebug("FE_GET_FRONTEND is stil sucking (dbox2)... "
 				 "until dbox2 head drivers are not fixed we better "
-				 "don't update transponder data !");
+				 "don't update transponder data !");*/
 			 break;
 			default:
 				eDebug("unknown HWType.. don't use FE_GET_FRONTEND");
@@ -137,7 +137,7 @@ void eFrontend::timeout()
 //				eDebug("NEW INVERSION = %d", front.Inversion );
 			}
 		}
-
+		needreset=0;
 		/*emit*/ tunedIn(transponder, 0);
 	}
 	else
@@ -145,8 +145,7 @@ void eFrontend::timeout()
 		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite
 			&& eDVB::getInstance()->getScanAPI() && lastLNB )
 		{
-			if ( abs(lastLNB->getLOFHi() - transponder->satellite.frequency) > 2000000 &&
-					 abs(lastLNB->getLOFLo() - transponder->satellite.frequency) > 2000000 )
+			if ( !transponder->satellite.useable(lastLNB) )
 				tries=1;
 		}
 
@@ -1129,7 +1128,7 @@ int eFrontend::tune(eTransponder *trans,
 		return -EBUSY;
 
 #if HAVE_DVB_API_VERSION < 3
-	if (needreset >= 2)
+	if (needreset > 1)
 	{
 		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
 		usleep(150000);

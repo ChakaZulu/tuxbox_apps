@@ -267,11 +267,10 @@ void tsAutomatic::start()
 		{
 			if(snocircular)
 				i->satellite.polarisation&=1;   // CEDR
-			if ( lnb )
+			if ( lnb && !i->satellite.useable( lnb ) )
 			{
-				if ( abs(lnb->getLOFHi() - i->satellite.frequency) > 2000000 &&
-						 abs(lnb->getLOFLo() - i->satellite.frequency) > 2000000 )
-						continue;
+				eDebug("skip %d", i->satellite.frequency );
+				continue;
 			}
 			sapi->addTransponder(*i);
 		}
@@ -1085,12 +1084,9 @@ int TransponderScan::Exec()
 						if(snocircular)
 							i->satellite.polarisation&=1;   // CEDR
 
-						if ( lnb )
-						{
-							if ( abs(lnb->getLOFHi() - i->satellite.frequency) > 2000000 &&
-									 abs(lnb->getLOFLo() - i->satellite.frequency) > 2000000 )
-									continue;
-						}
+						if ( lnb && !i->satellite.useable(lnb))
+							continue;
+
 						sapi->addTransponder(*i);
 						cnt++;
 					}

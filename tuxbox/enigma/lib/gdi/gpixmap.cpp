@@ -261,8 +261,8 @@ void gPixmap::finalLock()
 }
 
 gPixmap::gPixmap()
+	:final(0)
 {
-	final=0;
 }
 
 gPixmap::~gPixmap()

@@ -102,6 +102,8 @@ public:
 	MHWEIT *tMHWEIT;
 	TDT *tdt;
 
+	static eLock availCALock;
+
 	struct CA
 	{
 		int casysid, ecmpid, emmpid;

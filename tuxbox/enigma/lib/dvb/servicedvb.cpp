@@ -20,6 +20,14 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 
+#if HAVE_DVB_API_VERSION < 3
+#include <ost/audio.h>
+#define AUDIO_DEV "/dev/dvb/card0/audio0"
+#else
+#include <linux/dvb/audio.h>
+#define AUDIO_DEV "/dev/dvb/adapter0/audio0"
+#endif
+
 #ifndef DISABLE_FILE
 #include <lib/dvb/record.h>
 
@@ -249,6 +257,15 @@ void eDVRPlayerThread::readMore(int what)
 
 eDVRPlayerThread::~eDVRPlayerThread()
 {
+	int fd = Decoder::getAudioDevice();
+	bool wasOpen = fd != -1;
+	if (!wasOpen)
+		fd = open(AUDIO_DEV, O_RDWR);
+	if (ioctl(fd, AUDIO_SET_MUTE, 0) < 0)
+		eDebug("AUDIO_SET_MUTE error (%m)");
+	if (!wasOpen)
+		close(fd);
+
 	lock.lock();		// wait for message loop exit
 	kill(); // join the thread
 

@@ -1034,12 +1034,11 @@ const eString& eListBoxEntrySeparator::redraw(gPainter *rc, const eRect& rect, g
 eListBoxEntryCheck::eListBoxEntryCheck( eListBox<eListBoxEntry> *lb, const char* text, const char* regkey, const eString& hlptxt )
 	:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, text, (void*)-1, 0, hlptxt, 0 )
 	,pm(eSkin::getActive()->queryImage("eListBoxEntryCheck"))
-	,regKey(regkey), checked(false)
+	,regKey(regkey), checked(0)
 {
 	selectable=1;
 	if ( regKey )
 	{
-		checked=false;
 		if ( eConfig::getInstance()->getKey( regKey.c_str(), checked ) )
 			eConfig::getInstance()->setKey( regKey.c_str(), checked );
 	}
@@ -1051,10 +1050,10 @@ void eListBoxEntryCheck::LBSelected(eListBoxEntry* t)
 {
 	if (t == this)
 	{
-		checked=checked?false:true;
+		checked^=1;
 		eConfig::getInstance()->setKey( regKey.c_str(), checked );
 		listbox->invalidateCurrent();
-		/* emit */ selected(checked);
+		/* emit */ selected((bool)checked);
 	}
 }
 

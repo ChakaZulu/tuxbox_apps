@@ -61,6 +61,9 @@ eDVBCI::eDVBCI()
 	tempPMTentrys=0;
 
 	run();
+
+	while ( !thread_running() )  // wait for thread running
+		usleep(1000);
 }
 
 void eDVBCI::thread()
@@ -427,9 +430,7 @@ void eDVBCI::clearCAIDs()
 	if(!sapi)
 		return;
 
-	lock.lock();
 	sapi->clearCAlist();
-	lock.unlock();
 
 	caidcount=0;
 }
@@ -445,13 +446,10 @@ void eDVBCI::pushCAIDs()
 	if(!sapi)
 		return;
 
-	lock.lock();	
 	eDebug("count for caids: %d",caidcount);
-
+	eLocker s(eDVBServiceController::availCALock);
 	for(unsigned int i=0;i<caidcount;i++)
 		sapi->availableCASystems.insert(caids[i]);
-
-	lock.unlock();
 }
 
 void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data,bool dontQueue)

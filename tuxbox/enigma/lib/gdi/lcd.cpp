@@ -174,25 +174,22 @@ eDBoxLCD *eDBoxLCD::getInstance()
 
 void eDBoxLCD::update()
 {
-	if (!locked)
+	unsigned char raw[120*8];
+	int x, y, yy;
+	for (y=0; y<8; y++)
 	{
-		unsigned char raw[120*8];
-		int x, y, yy;
-		for (y=0; y<8; y++)
+		for (x=0; x<120; x++)
 		{
-			for (x=0; x<120; x++)
+			int pix=0;
+			for (yy=0; yy<8; yy++)
 			{
-				int pix=0;
-				for (yy=0; yy<8; yy++)
-				{
-					pix|=(_buffer[(y*8+yy)*128+x]>=108)<<yy;
-				}
-				raw[y*120+x]=(pix^inverted);
+				pix|=(_buffer[(y*8+yy)*128+x]>=108)<<yy;
 			}
+			raw[y*120+x]=(pix^inverted);
 		}
-		if (lcdfd>0)
-			write(lcdfd, raw, 120*8);
 	}
+	if (lcdfd>0)
+		write(lcdfd, raw, 120*8);
 }
 
 class eDBoxLCDHardware

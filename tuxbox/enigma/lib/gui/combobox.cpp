@@ -274,14 +274,10 @@ int eComboBox::setCurrent( void* key, bool sendSelChanged )
 
 	eListBoxEntryText* cur = listbox.getCurrent();
 
-	if ( cur && cur->getKey() == key )
-		goto ok;
-
 	int err;
 	if ( (err=listbox.forEachEntry( selectEntryByKey(key, &listbox, sendSelChanged ) ) ) )
 		return E_COULDNT_FIND;
 
-ok:
 	setText( listbox.getCurrent()->getText() );
 	current = listbox.getCurrent();
 

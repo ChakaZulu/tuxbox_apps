@@ -340,6 +340,8 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 				if ( eTimerManager::getInstance()->removeEventFromTimerList( this, &current, &events->getCurrent()->event ) )
 					events->invalidateCurrent();
 			}
+			else if (event.action == &i_epgSelectorActions->showExtendedInfo)
+				entrySelected(events->getCurrent());
 			else
 				break;
 			if (addtype != -1)

@@ -141,6 +141,10 @@ void eStreamWatchdog::reloadSettings()
 				doanamorph=isanamorph;
 				videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
 				break;
+			case 3:
+				doanamorph=1;
+				videoDisplayFormat=VIDEO_CENTER_CUT_OUT;
+				break;
 		}
 
 		eAVSwitch::getInstance()->setVideoFormat( videoDisplayFormat );

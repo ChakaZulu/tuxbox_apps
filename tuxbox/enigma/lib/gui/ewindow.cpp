@@ -48,18 +48,22 @@ eRect eWindow::getTitleBarRect()
 
 void eWindow::redrawWidget(gPainter *target, const eRect &where)
 {
+	bool drawBorder=true;
 	if ( deco )  // then draw Deco
+	{
 		deco.drawDecoration(target, ePoint(width(), height()));
-	else
+		drawBorder=false;
+	}
+	drawTitlebar(target);
+	if ( drawBorder )
 	{
 		gColor border = eSkin::getActive()->queryColor("eWindow.border");
 		target->setForegroundColor(border);
-		target->line( ePoint(0,0), ePoint(0, height()) );
-		target->line( ePoint(0,0), ePoint(width(), 0) );
+		target->line( ePoint(0,0), ePoint(0, height()-1) );
+		target->line( ePoint(0,0), ePoint(width()-1, 0) );
 		target->line( ePoint(width()-1,0), ePoint(width()-1, height()-1) );
 		target->line( ePoint(0,height()-1), ePoint(width()-1, height()-1) );
 	}
-	drawTitlebar(target);
 }
 
 void eWindow::eraseBackground(gPainter *target, const eRect &clip)

@@ -159,5 +159,11 @@
 200312041830 5 5 MPEG1/MPEG2 Playback fix... after find the first audio stream id we seek to begin of the file
 200312051530 5 * Scan improovements .. (faster scan and never more scan unusable transponders)
 200312082200 5 5 MPEG2/VOB Playback much better sync
-200312101700 5 5 creating ext3 filesystems was broken in 1.07.1 .. fixed this
-200312101745 5 * fix small bug in service organising
+200312101700 5 5 Creating ext3 filesystems was broken in 1.07.1 .. fixed this
+200312101745 5 * Fix small bug in service organising
+200312121330 4 56 small CI fix for many CI's
+200312131430 5 * Infobar showing time fixed ( after zap to new service )
+200312151215 4 5 Much better sync when playing PS (VCD/SVCD/MVCD/VOB)
+200312172100 4 56 Support for dreamcrypt smartcards added (all cardreaders can handle this now)
+200312221545 5 * Zap to services in any bouquet is now possible (via servicenumber)
+200312221545 5 * Add support for bouquets in file mode

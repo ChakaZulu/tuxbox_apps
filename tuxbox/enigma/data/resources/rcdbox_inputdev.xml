@@ -65,6 +65,8 @@
 
 		<actionmap name="mainmenu">
 			<action name="close" key="d-box" flags="mr" />
+			<action name="prev" key="left" flags="mr" />
+			<action name="next" key="right" flags="mr" />
 		</actionmap>
 
 		<actionmap name="enigmaMain">

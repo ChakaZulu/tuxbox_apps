@@ -4,7 +4,6 @@
 #include <lib/driver/rcinput.h>
 
 #include <sys/ioctl.h>
-#include <linux/input.h>
 #include <sys/stat.h>
 
 #include <lib/base/ebase.h>
@@ -17,24 +16,37 @@ void eRCDeviceInputDev::handleCode(int rccode)
 	struct input_event *ev = (struct input_event *)rccode;
 	if (ev->type!=EV_KEY)
 		return;
+
 //	eDebug("%x %x %x", ev->value, ev->code, ev->type);
 	switch (ev->value)
 	{
 	case 0:
 		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagBreak));
+		repeattimer.stop();
 		break;
 	case 1:
 		/*emit*/ input->keyPressed(eRCKey(this, ev->code, 0));
+		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
+		memcpy(&cur, ev, sizeof(struct input_event) );
 		break;
 	case 2:
-		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagRepeat));
+// we use own repeat.. sorry.. but inputdev stuff
+// let not set repeat rate and repeat delay :(
+//		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagRepeat));
 		break;
 	}
 }
 
-eRCDeviceInputDev::eRCDeviceInputDev(eRCInputEventDriver *driver)
-: eRCDevice(driver->getDeviceName(), driver)
+void eRCDeviceInputDev::repeat()
 {
+	/*emit*/ input->keyPressed(eRCKey(this, cur.code, eRCKey::flagRepeat));
+	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
+}
+
+eRCDeviceInputDev::eRCDeviceInputDev(eRCInputEventDriver *driver)
+: eRCDevice(driver->getDeviceName(), driver), repeattimer(eApp)
+{
+	CONNECT(repeattimer.timeout, eRCDeviceInputDev::repeat);
 }
 
 const char *eRCDeviceInputDev::getDescription() const

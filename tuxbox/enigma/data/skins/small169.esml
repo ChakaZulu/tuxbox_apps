@@ -310,19 +310,19 @@
 		<eZapMain position="0:40" size="720:471">
             
 			<eWidget position="0:50" size="720:2" backgroundColor="hell" />
-			<eWidget position="0:53" size="720:26" backgroundColor="dunkel" />
-			<eWidget position="0:80" size="720:2" backgroundColor="hell" />
+			<eWidget position="0:53" size="720:30" backgroundColor="dunkel" />
+			<eWidget position="0:84" size="720:2" backgroundColor="hell" />
 			<eWidget position="0:398" size="720:3" backgroundColor="hell" />
 			<eWidget position="0:402" size="720:48" backgroundColor="mittel" />
 			<eWidget position="0:451" size="720:16" backgroundColor="dunkel" />
 			<eWidget position="0:468" size="720:3" backgroundColor="hell" />
 		
 			<!--texte    -->     
-			<eLabel position="70:53" size="60:22" font="Nimbus;22" name="ch_number" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel position="70:53" size="80:26" font="Nimbus;22" name="ch_number" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 
-			<eLabel position="130:53" size="426:22" font="Nimbus;22" name="ch_name" backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel position="155:53" size="420:26" font="Nimbus;22" name="ch_name" backgroundColor="dunkel" foregroundColor="dunkel+15" />
 
-			<eLabel position="573:53" size="75:22" font="Nimbus;22" name="time" align="right"  backgroundColor="dunkel" foregroundColor="dunkel+15" />
+			<eLabel position="593:53" size="55:22" font="Nimbus;22" name="time" align="right"  backgroundColor="dunkel" foregroundColor="dunkel+15" />
 
 			<!-- <eProgress position="428:142" size="156:13" name="progress_bar" foregroundColor="content" border="0" /> -->
 

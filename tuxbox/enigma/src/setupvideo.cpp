@@ -54,7 +54,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	colorformat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	colorformat->move(ePoint(180, 20));
 	colorformat->resize(eSize(120, 35));
-	eListBoxEntryText* entrys[3];
+	eListBoxEntryText* entrys[4];
 	entrys[0]=new eListBoxEntryText(colorformat, _("CVBS"), (void*)1);
 	entrys[1]=new eListBoxEntryText(colorformat, _("RGB"), (void*)2);
 	entrys[2]=new eListBoxEntryText(colorformat, _("SVideo"), (void*)3);
@@ -81,6 +81,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
 	entrys[1]=new eListBoxEntryText(pin8, _("4:3 panscan"), (void*)1);
 	entrys[2]=new eListBoxEntryText(pin8, _("16:9"), (void*)2);
+	entrys[3]=new eListBoxEntryText(pin8, _("always 16:9"), (void*)3);
 	pin8->setCurrent(entrys[v_pin8]);
 	CONNECT( pin8->selchanged, eZapVideoSetup::VPin8Changed );
 

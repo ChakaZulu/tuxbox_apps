@@ -25,6 +25,8 @@ public:
 		sock = socket(PF_UNIX, SOCK_STREAM, 0);
 		connect(sock, (struct sockaddr *) &servaddr, clilen);
 		fcntl(sock, F_SETFL, O_NONBLOCK);
+		int val=1;
+		setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &val, 4);
 //		eDebug("[eDVBCAHandler] new service %s", service.toString().c_str() );
 	}
 	~CAService()

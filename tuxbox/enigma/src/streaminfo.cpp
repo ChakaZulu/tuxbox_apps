@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#include <lib/system/elock.h>
 #include <lib/driver/rc.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
@@ -470,19 +471,22 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	clearCA();
 
 	int numsys=0;
-	std::set<int>& availCA = sapi->availableCASystems;
-	for (std::set<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
 	{
-		if (!numsys)
-			availcas="";
-		eString caname=getCAName(*i, 0);
-		if (caname)
+		eLocker s(eDVBServiceController::availCALock);
+		std::set<int>& availCA = sapi->availableCASystems;
+		for (std::set<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
 		{
-			availcas+= caname + "\n";
-			if (numsys++>5)
+			if (!numsys)
+				availcas="";
+			eString caname=getCAName(*i, 0);
+			if (caname)
 			{
-				availcas+="...\n";
-				break;
+				availcas+= caname + "\n";
+				if (numsys++>5)
+				{
+					availcas+="...\n";
+					break;
+				}
 			}
 		}
 	}

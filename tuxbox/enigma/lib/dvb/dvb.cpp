@@ -591,7 +591,7 @@ eTransponderList::eTransponderList()
 		instance = this;
 
 /*
-	eServicePlaylistHandler::getInstance()->addNum( 6 );
+	eServicePlaylistHandler::getInstance()->addNum( 2 );
 	newServicesRef=eServiceReference( eServicePlaylistHandler::ID, eServiceReference::flagDirectory, 0, 6);
 	newServices=(ePlaylist*)eServiceInterface::getInstance()->addRef(newServicesRef);
 	ASSERT(newServices);

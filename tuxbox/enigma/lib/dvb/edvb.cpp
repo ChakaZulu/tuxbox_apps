@@ -65,7 +65,8 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 }
 
 eDVB::eDVB()
-	:parentEIT(0), state(eDVBState::stateIdle)
+	:parentEIT(0), recorder(0), DVBCI(0), DVBCI2(0)
+	,state(eDVBState::stateIdle)
 {
 	settings=0;
 	time_difference=0;
@@ -101,10 +102,9 @@ eDVB::eDVB()
 		// set to idle state
 	controller=0;
 	setState(eDVBState(eDVBState::stateIdle));
-	
+
 		// intialize to service mode
 	setMode(controllerService);
-
 		// init AV switch
 	switch (eSystemInfo::getInstance()->getHwType())
 	{
@@ -127,9 +127,6 @@ eDVB::eDVB()
 		eRFmod::getInstance()->init();
 	}
 #endif
-
-		// init dvb recorder
-	recorder=0;
 
 	eDebug("eDVB::eDVB done.");
 }

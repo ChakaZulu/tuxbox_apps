@@ -129,7 +129,14 @@ int eRCInput::lock()
 void eRCInput::unlock()
 {
 	if (locked)
+	{
+		for ( std::map<eString,eRCDevice*,lstr>::iterator it( devices.begin() );
+			it != devices.end(); ++it)
+		{
+			it->second->getDriver()->flushBuffer();
+		}
 		locked=0;
+	}
 }
 
 void eRCInput::setFile(int newh)
@@ -193,12 +200,14 @@ eRCShortDriver::~eRCShortDriver()
 
 void eRCShortDriver::keyPressed(int)
 {
+	if ( input->islocked() )
+		return;
 	__u16 rccode;
 	while (1)
 	{
 		if (read(handle, &rccode, 2)!=2)
 			break;
-		if (enabled && !input->islocked())
+		if (enabled)
 			for (std::list<eRCDevice*>::iterator i(listeners.begin()); i!=listeners.end(); ++i)
 				(*i)->handleCode(rccode);
 	}
@@ -229,14 +238,15 @@ eRCInputEventDriver::~eRCInputEventDriver()
 
 void eRCInputEventDriver::keyPressed(int)
 {
+	if ( input->islocked() )
+		return;
 	struct input_event ev;
-
 	while (1)
 	{
 		if (read(handle, &ev, sizeof(struct input_event))!=sizeof(struct input_event))
 			break;
 
-		if (enabled && !input->islocked())
+		if (enabled)
 			for (std::list<eRCDevice*>::iterator i(listeners.begin()); i!=listeners.end(); ++i)
 				(*i)->handleCode((int)&ev);
 	}

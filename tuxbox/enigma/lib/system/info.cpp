@@ -9,8 +9,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
-#if HAVE_DVB_API_VERSION == 3
 #include <lib/dvb/frontend.h>
+#if HAVE_DVB_API_VERSION == 3
 #include <tuxbox.h>
 #endif
 
@@ -51,16 +51,47 @@ eSystemInfo::eSystemInfo()
 		eDebug("open demod failed (%m)");
 
 #else
-	switch (atoi(getInfo("fe").c_str()))
+	if ( eSystemInfo::getInstance()->getHwType() < eSystemInfo::DM7000 )
 	{
-		case 0: // DBOX_FE_CABLE
-			fetype=feCable;
-			break;
-		case 1: // DBOX_FE_SATELLITE
-			fetype=feSatellite;
-			break;
-		default:
-			fetype=feSatellite;
+		switch (atoi(getInfo("fe").c_str()))
+		{
+			case 0: // DBOX_FE_CABLE
+				fetype=feCable;
+				break;
+			case 1: // DBOX_FE_SATELLITE
+				fetype=feSatellite;
+				break;
+			default:
+				fetype=feSatellite;
+		}
+	}
+	else
+	{
+		int fd=::open(DEMOD_DEV, O_RDWR);
+		if (fd>=0)
+		{
+			FrontendInfo info;
+			if ( ::ioctl(fd, FE_GET_INFO, &info) >= 0 )
+			{
+				switch (info.type)
+				{
+					case FE_QPSK:
+						fetype = feSatellite;
+						break;
+					case FE_QAM:
+						fetype = feCable;
+						break;
+					default:
+					case FE_OFDM:
+						eDebug("COOL: dvb-t is out. less cool: enigma doesn't support it yet...");
+						fetype = feCable;
+						break;
+				}
+			}
+			else
+				eDebug("FE_GET_INFO failed (%m)");
+			::close (fd);
+		}
 	}
 #endif
 #if HAVE_DVB_API_VERSION==3
