@@ -966,9 +966,9 @@ static eString getEITC()
 	return result;
 }
 
-extern int freeRecordSpace();
+extern int freeRecordSpace(void);
 
-static eString getDiskSpace()
+static eString getDiskSpace(void)
 {
 	eString result = "";
 	eString tmp;
