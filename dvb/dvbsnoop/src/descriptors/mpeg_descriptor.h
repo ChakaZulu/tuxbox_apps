@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.h,v 1.1 2003/07/08 19:59:50 rasc Exp $ 
+$Id: mpeg_descriptor.h,v 1.2 2003/10/17 18:16:54 rasc Exp $ 
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -8,6 +8,10 @@ $Id: mpeg_descriptor.h,v 1.1 2003/07/08 19:59:50 rasc Exp $
 
 
 $Log: mpeg_descriptor.h,v $
+Revision 1.2  2003/10/17 18:16:54  rasc
+- started more work on newer ISO 13818  descriptors
+- some reorg work started
+
 Revision 1.1  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -35,4 +39,16 @@ void  descriptorMPEG_PrivateDataIndicator (u_char *b);
 void  descriptorMPEG_SmoothingBuf (u_char *b);
 void  descriptorMPEG_STD (u_char *b);
 void  descriptorMPEG_IBP (u_char *b);
+
+void  descriptorMPEG_MPEG4_video (u_char *b);
+void  descriptorMPEG_MPEG4_audio (u_char *b);
+void  descriptorMPEG_IOD (u_char *b);
+void  descriptorMPEG_SL (u_char *b);
+void  descriptorMPEG_FMC (u_char *b);
+void  descriptorMPEG_External_ES_ID (u_char *b);
+void  descriptorMPEG_MuxCode (u_char *b);
+void  descriptorMPEG_FMXBufferSize (u_char *b);
+void  descriptorMPEG_MultiplexBuffer (u_char *b);
+void  descriptorMPEG_FlexMuxTiming (u_char *b);
+void  descriptorMPEG_UserPrivate (u_char *b);
 

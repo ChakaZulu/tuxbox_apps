@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.2 2003/09/09 05:12:45 obi Exp $
+$Id: mpeg_descriptor.c,v 1.3 2003/10/17 18:16:54 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -9,6 +9,10 @@ $Id: mpeg_descriptor.c,v 1.2 2003/09/09 05:12:45 obi Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.3  2003/10/17 18:16:54  rasc
+- started more work on newer ISO 13818  descriptors
+- some reorg work started
+
 Revision 1.2  2003/09/09 05:12:45  obi
 print format identifier of registration descriptor in ascii.
 looks quite strange but is nice to see :)
@@ -77,12 +81,25 @@ int  descriptorMPEG  (u_char *b)
      case 0x10:  descriptorMPEG_SmoothingBuf  (b);  break; 
      case 0x11:  descriptorMPEG_STD  (b);  break; 
      case 0x12:  descriptorMPEG_IBP  (b);  break; 
+     /* 0x13 - 0x1A  DSM-CC ISO13818-6 */
+
+     case 0x1B:  descriptorMPEG_MPEG4_video (b);  break; 
+     case 0x1C:  descriptorMPEG_MPEG4_audio (b);  break; 
+     case 0x1D:  descriptorMPEG_IOD (b);  break; 
+     case 0x1E:  descriptorMPEG_SL (b);  break; 
+     case 0x1F:  descriptorMPEG_FMC (b);  break; 
+     case 0x20:  descriptorMPEG_External_ES_ID (b);  break; 
+     case 0x21:  descriptorMPEG_MuxCode (b);  break; 
+     case 0x22:  descriptorMPEG_FMXBufferSize (b);  break; 
+     case 0x23:  descriptorMPEG_MultiplexBuffer (b);  break; 
+     case 0x24:  descriptorMPEG_FlexMuxTiming (b);  break; 
 
      default: 
 	if (b[0] < 0x80) {
-	    out_nl (0,"  ----> ERROR: unimplemented descriptor (mpeg context), Report!");
+	   out_nl (0,"  ----> ERROR: unimplemented descriptor (mpeg context), Report!");
 	}
 	descriptorMPEG_any (b);
+    	// descriptorMPEG_UserPrivate (b);  break; 
 	break;
   } 
 
@@ -917,6 +934,100 @@ void descriptorMPEG_IBP  (u_char *b)
  out_SW_NL (4,"Max_gop_length: ",d.max_gop_length);
 
 }
+
+
+
+
+/*
+  0x1B  MPEG4 video  descriptor 
+  ISO 13818-1  
+*/
+
+void descriptorMPEG_MPEG4_video (u_char *b)
+
+{
+
+ typedef struct  _descMPEG4video {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_int      mpeg4_visual_profile_and_level;
+
+ } descMPEG4video;
+
+
+ descMPEG4video d;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ d.mpeg4_visual_profile_and_level = getBits (b, 0, 16, 8);
+
+ out_SB_NL (4,"MPEG4 visual profile and level: ",d.mpeg4_visual_profile_and_level);
+
+}
+
+
+
+/*
+  0x1C  MPEG4 audio  descriptor 
+  ISO 13818-1  
+*/
+
+void descriptorMPEG_MPEG4_audio (u_char *b)
+
+{
+
+ typedef struct  _descMPEG4audio {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_int      mpeg4_audio_profile_and_level;
+
+ } descMPEG4audio;
+
+
+ descMPEG4audio d;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ d.mpeg4_audio_profile_and_level = getBits (b, 0, 16, 8);
+
+ out_SB_NL (4,"MPEG4 audio profile and level: ",d.mpeg4_audio_profile_and_level);
+ /* $$$  Table .... */
+
+}
+
+
+
+
+
+
+
+
+void descriptorMPEG_IOD (u_char *b)	 { out_nl (4," ... $$$ To do"); descriptorMPEG_any (b); }
+void descriptorMPEG_SL (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+void descriptorMPEG_FMC (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+void descriptorMPEG_External_ES_ID (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+void descriptorMPEG_MuxCode (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+void descriptorMPEG_FMXBufferSize (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+void descriptorMPEG_MultiplexBuffer (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+void descriptorMPEG_FlexMuxTiming (u_char *b)	 { out_nl (4," ... $$$ To do"); }
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.11 2003/10/16 19:02:28 rasc Exp $
+$Id: dvb_str.c,v 1.12 2003/10/17 18:16:54 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,10 @@ $Id: dvb_str.c,v 1.11 2003/10/16 19:02:28 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.12  2003/10/17 18:16:54  rasc
+- started more work on newer ISO 13818  descriptors
+- some reorg work started
+
 Revision 1.11  2003/10/16 19:02:28  rasc
 some updates to dvbsnoop...
 - small bugfixes
@@ -132,7 +136,8 @@ char *dvbstrTableID (u_int id)
      {  0x74, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "discontinuity_information_section" },
      {  0x7F, 0x7F,  "selection_information_section" },
-     {  0x80, 0xFE,  "User private" },
+     {  0x80, 0x8F,  "User private (EMM/ECM)" },
+     {  0x90, 0xFE,  "User private" },
      {  0xFF, 0xFF,  "forbidden" },
      {  0,0, NULL }
   };
@@ -169,7 +174,21 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x10, 0x10,  "smoothing_buffer_descriptor" },
      {  0x11, 0x11,  "STD_descriptor" },
      {  0x12, 0x12,  "IBP_descriptor" },
-     {  0x13, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
+          /* DSM-CC */
+     {  0x13, 0x1A,  "ISO/IEC13818-6 Reserved" },
+
+     {  0x1B, 0x1B,  "MPEG4_video_descriptor" },
+     {  0x1C, 0x1C,  "MPEG4_audio_descriptor" },
+     {  0x1D, 0x1D,  "IOD_descriptor" },
+     {  0x1E, 0x1E,  "SL_descriptor" },
+     {  0x1F, 0x1F,  "FMC_descriptor" },
+     {  0x20, 0x20,  "External_ES_ID_descriptor" },
+     {  0x21, 0x21,  "MuxCode_descriptor" },
+     {  0x22, 0x22,  "FMXBufferSize_descriptor" },
+     {  0x23, 0x23,  "MultiplexBuffer_descriptor" },
+     {  0x24, 0x24,  "FlexMuxTiming_descriptor" },
+
+     {  0x25, 0x3F,  "ITU-T.Rec.H.222.0|ISO/IEC13818-1 Reserved" },
 
      {  0x40, 0xFF,  "Forbidden descriptor in MPEG context" },	// DVB Context
      {  0,0, NULL }

@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.3 2003/07/06 05:49:25 obi Exp $
+$Id: sectables.c,v 1.4 2003/10/17 18:16:54 rasc Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,10 @@ $Id: sectables.c,v 1.3 2003/07/06 05:49:25 obi Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.4  2003/10/17 18:16:54  rasc
+- started more work on newer ISO 13818  descriptors
+- some reorg work started
+
 Revision 1.3  2003/07/06 05:49:25  obi
 CAMT fix and indentation
 
@@ -76,7 +80,7 @@ void decodeSections_buf (u_char *buf, int len, u_int pid)
 		break; 
 
 	case  0x002:		/* TSDT Transport Stream Description Sect */
-		decode_TSDT  (buf, len);
+		decode_TSDT  (buf, len);	/* Table ID == 0x03 */
 		break; 
 
 	case  0x010:		/* NIT, ST  */
@@ -167,7 +171,12 @@ void  guess_table (u_char *buf, int len, u_int pid)
 
    out_nl (2,"Guess packet type from table id...");
 
+   /* $$$$ more tables to guess
+    *   Use Table to map functions calls ....   TODO
+    * */
+
    switch (buf[0]) {	/* Table ID, guess what... */
+
 
 	case  0x02:		/* Program Map Section */
 		decode_PMT  (buf, len);
@@ -177,9 +186,8 @@ void  guess_table (u_char *buf, int len, u_int pid)
 		decode_EMM_ECM  (buf, len);
 		break; 
 
-
 	default:
-		out_nl (2,"Unknown, reserved or not implemented...");
+   		out_SB_NL (2,"Unknown, reserved or not implemented - TableID: ",buf[0]);
 		break;
 
    }
