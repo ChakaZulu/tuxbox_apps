@@ -59,7 +59,7 @@ void* CTimerManager::timerThread(void *arg)
 	while (1)
 	{
 		CTimerEvent eNow = CTimerEvent::now();
-		//dprintf("our time: %d\n", eNow.time());
+		dprintf("our time: %d\n", eNow.time());
 		// fire events who's time has come
 		CTimerEventMap::iterator pos = timerManager->events.begin();
 		for(;pos != timerManager->events.end();pos++)
@@ -156,6 +156,9 @@ bool CTimerEvent::operator >= ( CTimerEvent& e)
 void CTimerEvent_Shutdown::fireEvent()
 {
 	//event in neutrinos remoteq. schreiben
+	CTimerManager::getInstance()->getEventServer()->sendEvent(
+		CTimerdClient::EVT_SHUTDOWN,
+		CEventServer::INITID_TIMERD);
 }
 
 //-----------------------------------------
