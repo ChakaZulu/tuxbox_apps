@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.46 2002/10/22 22:33:55 Zwen Exp $
+   $Id: timermanager.cpp,v 1.47 2002/10/23 18:55:25 Zwen Exp $
 
 	License: GPL
 
@@ -402,34 +402,27 @@ CTimerEvent::CTimerEvent(CTimerd::CTimerEventTypes evtype,CConfigFile *config, i
 void CTimerEvent::Reschedule()
 {
 	time_t diff = 0;
-	time_t TAG = 60 * 60 * 24;	// sek * min * std
 	printf("Reschedule\n");
+	struct tm *t= localtime(&alarmTime);
 	switch(eventRepeat)
 	{
 		case CTimerd::TIMERREPEAT_ONCE :
 			break;
 		case CTimerd::TIMERREPEAT_DAILY: 
-			diff = TAG;
+			t->tm_mday++;
 			break;
 		case CTimerd::TIMERREPEAT_WEEKLY: 
-			diff = TAG * 7;
+			t->tm_mday+=7;
 			break;
 		case CTimerd::TIMERREPEAT_BIWEEKLY: 
-			diff = TAG * 14;
+			t->tm_mday+=14;
 			break;
 		case CTimerd::TIMERREPEAT_FOURWEEKLY: 
-			diff = TAG * 28;
+			t->tm_mday+=28;
 			break;
 		case CTimerd::TIMERREPEAT_MONTHLY: 
 		{
-			struct tm *t= localtime(&alarmTime);
 		   t->tm_mon++;
-			if(t->tm_mon==12)
-			{
-				t->tm_mon=0;
-				t->tm_year++;
-			}
-			diff = mktime(t)-alarmTime;
 			break;
 		}
 		case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION :
@@ -452,12 +445,13 @@ void CTimerEvent::Reschedule()
 					struct tm *t= localtime(&alarmTime);
 					int day;
 					for(day=t->tm_wday+1 ; !weekday_arr[day%7] ; day++){}
-					diff = (day - t->tm_wday) * TAG;
+					t->tm_mday+=day;
 				}
 			}
 			else
 				dprintf("unknown repeat type %d\n",eventRepeat);
 	}
+	diff = mktime(t)-alarmTime;
 	if(diff != 0)
 	{
 		if(announceTime > 0)
