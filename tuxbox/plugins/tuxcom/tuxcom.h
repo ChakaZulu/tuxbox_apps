@@ -1,71 +1,26 @@
-/******************************************************************************
- *                  <<< TuxCom - TuxBox-Commander Plugin >>>                  *
- *                                                                            *
- *             (c) dbluelle 2004 (dbluelle@blau-weissoedingen.de)             *
- ******************************************************************************
+/*
+	TuxCom - TuxBox-Commander Plugin
 
-	26.08.2004 Version 1.4b
-	 - Textinput: possibility to mark (green button) and insert text (blue button) (kind of a mini-clipboard :-) )
-	 - Editor: display \r as white box (DOS/Win-textfile) (blue button -> konvert to linux-format)
-	 - FTP-client: remove whitspace characters at end of filename when downloading
-	 - FTP-client: improved download-speed
+	Copyright (C) 2004 'dbluelle' (dbluelle@blau-weissoedingen.de)
 
-	11.08.2004 Version 1.4a
-	 - support of usb-keyboards (needs kernel-module hid.ko from BoxMan)
-	 - read .ftp-files even when created by windows
-	 - BugFix: inserting new line in empty file in editor
-	 - minor bugfixes in Editor
-	 - many bugfixes in ftp-client
-	 - changes in keyboard routine
-	 - BugFix: wrong display after pressing red button (clear) while editing
-	 - BugFix: crash when leaving plugin with open ftp-connection
+	Homepage: http://www.blau-weissoedingen.de/dreambox/
 
-	25.07.2004 Version 1.4
-	 - Taskmanager added (on Info-Button)
-	 - scrolling back/forward possible when executing commands or scripts
-	 - scrolling back/forward in viewer not limited to 100k anymore
-	 - remember current selected file on plugin exit
-	 - Support for DMM-Keyboard installed
-	 - delay for pressed button
-	 - Bugfix: workaround for button-press bug from enigma
-	 - create link (Button 0): display current filename as name.
+	License: GPL
 
-	21.06.2004 Version 1.3
-	 - FTP-Client added
-	 - minor bugfixes in editor
-	 - text input: jumping to next character when pressing another Number.
-	 - text input: removing last character when at end of line and pressing volume-
-	 - toggle between 4:3 and 16:9-mode with dream-button
-	 - Viewer:scrolling possible as in editor (for files up to 100k size)
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-	05.06.2004 Version 1.2a
-	 - BugFix: missing characters in text input added.
-	 - text input in "sms-style" included
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-	29.05.2004 Version 1.2
-	  - support for reading and extracting from "tar", "tar.Z", "tar.gz" and "tar.bz2" archives
-		does not work with many Archives in Original-Image 1.07.4 ( BusyBox-Version to old :( )
-	  - display current line in editor
-	  - using tuxtxt-position for display
-	  - big font when editing a line
-	  - change scrolling through characters in edit mode to match enigma standard (switch up/down)
-	  - Version of plugin available on Info-Button
-	  - confirm-messagebox when overwriting existing files.
-
-	08.05.2004 Version 1.1a
-	  - BugFix: No more spaces at the end of renamed files
-
-	02.05.2004 version 1.1
-	  - changed some colors
-	  - added german language
-	  - possibility to keep buttons pressed (up/down, left/right, volume+/-, green button)
-	  - 3 states of transparency
-	  - set markers on files -> possibility to copy/move/delete multiple files
-	  - Key for transparency now mute (green button needed for setting file marker)
-
-	03.04.2004 version 1.0 :
-	  first public version
- ******************************************************************************/
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
+*/
 
 // setting Program-Version
 // 3 = for DBox

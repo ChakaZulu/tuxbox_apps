@@ -5,7 +5,7 @@ History:
 
 26.08.2004 Version 1.4b
  - Textinput: possibility to mark (green button) and insert text (blue button) (kind of a mini-clipboard :-) )
- - Editor: display \r as white box (DOS/Win-textfile) (blue button -> konvert to linux-format)
+ - Editor: display \r as white box (DOS/Win-textfile) (blue button -> convert to linux-format)
  - FTP-client: remove whitspace characters at end of filename when downloading
  - FTP-client: improved download-speed
  
