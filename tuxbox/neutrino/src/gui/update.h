@@ -44,16 +44,12 @@
 class CFlashUpdate : public CProgressWindow
 {
  private:
-	std::string BasePath;
-	std::string ImageFile;
-	std::string Version_Ext;
-	
 	std::string filename;
 	
 	std::string installedVersion;
 	std::string newVersion;
 	
-	bool getInfo();
+	bool selectHttpImage(void);
 	bool getUpdateImage(const std::string & version);
 	bool checkVersion4Update();
 	

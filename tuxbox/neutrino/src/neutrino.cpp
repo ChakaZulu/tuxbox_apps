@@ -532,6 +532,8 @@ int CNeutrinoApp::loadSetup()
 	//Software-update
 	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
 	strcpy( g_settings.softupdate_currentversion, configfile.getString( "softupdate_currentversion", "" ).c_str() );
+	strcpy( g_settings.softupdate_cramfs_list_host, configfile.getString("softupdate_cramfs_list_host", "dboxupdate.berlios.de" ).c_str());
+	strcpy( g_settings.softupdate_cramfs_list_file, configfile.getString("softupdate_cramfs_list_file", "download/cramfs.list" ).c_str());
 	strcpy( g_settings.softupdate_proxyserver, configfile.getString( "softupdate_proxyserver", "" ).c_str() );
 	strcpy( g_settings.softupdate_proxyusername, configfile.getString( "softupdate_proxyusername", "" ).c_str() );
 	strcpy( g_settings.softupdate_proxypassword, configfile.getString( "softupdate_proxypassword", "" ).c_str() );
@@ -848,6 +850,8 @@ void CNeutrinoApp::saveSetup()
 	//Software-update
 	configfile.setInt32( "softupdate_mode", g_settings.softupdate_mode );
 	configfile.setString( "softupdate_currentversion", g_settings.softupdate_currentversion );
+	configfile.setString("softupdate_cramfs_list_host", g_settings.softupdate_cramfs_list_host);
+	configfile.setString("softupdate_cramfs_list_file", g_settings.softupdate_cramfs_list_file);
 	configfile.setString( "softupdate_proxyserver", g_settings.softupdate_proxyserver );
 	configfile.setString( "softupdate_proxyusername", g_settings.softupdate_proxyusername );
 	configfile.setString( "softupdate_proxypassword", g_settings.softupdate_proxypassword );
@@ -1332,7 +1336,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 	if(softupdate)
 	{
 		dprintf(DEBUG_DEBUG, "init soft-update-stuff\n");
-		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "softupdate.raw", 450);
+		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "softupdate.raw", 550);
 		updateSettings->addItem(GenericMenuSeparator);
 		updateSettings->addItem(GenericMenuBack);
 		updateSettings->addItem(GenericMenuSeparatorLine);
@@ -1390,6 +1394,12 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionsnapshot", false, (char*) &releasetype, NULL ));
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
+
+		CStringInputSMS * updateSettings_cramfs_list_host = new CStringInputSMS("flashupdate.cramfs_list_host", g_settings.softupdate_cramfs_list_host, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+		updateSettings->addItem(new CMenuForwarder("flashupdate.cramfs_list_host", true, g_settings.softupdate_cramfs_list_host, updateSettings_cramfs_list_host));
+
+		CStringInputSMS * updateSettings_cramfs_list_file = new CStringInputSMS("flashupdate.cramfs_list_file", g_settings.softupdate_cramfs_list_file, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.:/ ");
+		updateSettings->addItem(new CMenuForwarder("flashupdate.cramfs_list_file", true, g_settings.softupdate_cramfs_list_file, updateSettings_cramfs_list_file));
 
 		CStringInputSMS * updateSettings_proxy = new CStringInputSMS("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23, "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2", "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyserver", true, g_settings.softupdate_proxyserver, updateSettings_proxy ) );

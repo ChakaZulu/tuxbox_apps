@@ -196,6 +196,8 @@ struct SNeutrinoSettings
 	//Software-update
 	int softupdate_mode;
 	char softupdate_currentversion[20];
+	char softupdate_cramfs_list_host[31];
+	char softupdate_cramfs_list_file[31];
 	char softupdate_proxyserver[31];
 	char softupdate_proxyusername[31];
 	char softupdate_proxypassword[31];

@@ -56,12 +56,12 @@ int CHTTPTool::show_progress( void *clientp, size_t dltotal, size_t dlnow, size_
 	return 0;
 }
 
-bool CHTTPTool::downloadFile(const std::string & URL, const std::string & downloadTarget, int globalProgressEnd)
+bool CHTTPTool::downloadFile(const std::string & URL, const char * const downloadTarget, int globalProgressEnd)
 {
 	CURL *curl;
 	CURLcode res;
 	FILE *headerfile;
-	headerfile = fopen(downloadTarget.c_str(), "w");
+	headerfile = fopen(downloadTarget, "w");
 	if (!headerfile)
 		return false;
 	res = (CURLcode) 1;

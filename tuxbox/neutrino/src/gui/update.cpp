@@ -64,9 +64,13 @@
 #include <sys/ioctl.h>
 #include <dirent.h>
 
+#include <fstream>
+
 
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
+#define cramfs_list_filename "cramfs.list"
+#define local_cramfs_filename "update.cramfs"
 
 
 CFlashUpdate::CFlashUpdate()
@@ -74,78 +78,98 @@ CFlashUpdate::CFlashUpdate()
 {
 	setTitle(g_Locale->getText("flashupdate.head")); // UTF-8
 
-	BasePath = "http://dboxupdate.berlios.de/images/";
-	ImageFile = "cdk.cramfs";
-	Version_Ext = ".version";
-
 	installedVersion = g_settings.softupdate_currentversion;
-	newVersion = "";
-
-	//use other path?
-	FILE* fd = fopen("/var/etc/update.conf", "r");
-	if(fd)
-	{
-		char buf[1000];
-		char buf2[1000];
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf(buf, "basepath: %s\n", buf2);
-		}
-		BasePath = buf2;
-		if(fgets(buf,sizeof(buf),fd)!=NULL)
-		{
-			sscanf(buf, "imagefile: %s\n", buf2);
-			if (strlen(buf2)> 0)
-			{
-				ImageFile = buf2;
-			}
-
-			if(fgets(buf,sizeof(buf),fd)!=NULL)
-			{
-				sscanf(buf, "version_ext: %s\n", buf2);
-				if (strlen(buf2)> 0)
-				{
-					Version_Ext = buf2;
-				}
-			}
-		}
-		fclose(fd);
-
-		printf("[CHTTPUpdater] HTTP-Basepath: %s\n", BasePath.c_str());
-		printf("[CHTTPUpdater] Image-Filename: %s\n", ImageFile.c_str());
-		printf("[CHTTPUpdater] version_ext: %s\n", Version_Ext.c_str());
-	}
 }
 
-bool CFlashUpdate::getInfo()
+
+
+class CUpdateMenuTarget : public CMenuTarget
+{
+	int    myID;
+	int *  myselectedID;
+
+public:
+	CUpdateMenuTarget(const int id, int * const selectedID)
+		{
+			myID = id;
+			myselectedID = selectedID;
+		}
+
+	virtual int exec(CMenuTarget* parent, const std::string & actionKey)
+		{
+			*myselectedID = myID;
+			return menu_return::RETURN_EXIT_ALL;
+		}
+};
+
+
+bool CFlashUpdate::selectHttpImage(void)
 {
 	CHTTPTool httpTool;
-	httpTool.setStatusViewer( this );
-	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
-	std::string gURL = BasePath;
-	gURL += ImageFile;
-	gURL += Version_Ext;
-	std::string sFileName = gTmpPath;
-	sFileName += ImageFile;
-	sFileName += Version_Ext;
+	std::string url;
 
-	printf("get versioninfo (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
-	return httpTool.downloadFile( gURL, sFileName, 20 );
+	httpTool.setStatusViewer(this);
+	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
+
+	url = "http://";
+	url += g_settings.softupdate_cramfs_list_host;
+	url += '/';
+	url += g_settings.softupdate_cramfs_list_file;
+
+	if (!httpTool.downloadFile(url, gTmpPath cramfs_list_filename, 20))
+	{
+		hide();
+		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
+		return false;
+	}
+	hide();
+
+	std::vector<std::string> urls, names, versions;
+	std::string name, version;
+	std::ifstream in(gTmpPath cramfs_list_filename);
+	while (in >> url >> version)
+	{
+		urls.push_back(url);
+		versions.push_back(version);
+		std::getline(in, name);
+		names.push_back(name);
+	}
+	if (urls.empty())
+	{
+		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
+		return false;
+	}
+
+	CMenuWidget SelectionWidget("flashupdate.selectimage", "softupdate.raw");
+
+	SelectionWidget.addItem(GenericMenuSeparator);
+	SelectionWidget.addItem(GenericMenuBack);
+	SelectionWidget.addItem(GenericMenuSeparatorLine);
+
+	int selected = -1;
+	for (unsigned int i = 0; i < urls.size(); i++)
+		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, "", new CUpdateMenuTarget(i, &selected)));
+
+	SelectionWidget.exec(NULL, "");
+
+	if (selected == -1)
+		return false;
+
+	filename = urls[selected];
+	newVersion = versions[selected];
+
+	return true;
 }
 
 bool CFlashUpdate::getUpdateImage(const std::string & version)
 {
 	CHTTPTool httpTool;
-	httpTool.setStatusViewer( this );
+	httpTool.setStatusViewer(this);
 
 	showStatusMessageUTF(std::string(g_Locale->getText("flashupdate.getupdatefile")) + ' ' + version); // UTF-8
-	std::string gURL = BasePath;
-	gURL += ImageFile;
-	std::string sFileName = gTmpPath;
-	sFileName += ImageFile;
 
-	printf("get update (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
-	return httpTool.downloadFile( gURL, sFileName, 40 );
+	printf("get update (url): %s - %s\n", filename.c_str(), gTmpPath local_cramfs_filename);
+	return httpTool.downloadFile(filename, gTmpPath local_cramfs_filename, 40 );
 }
 
 bool CFlashUpdate::checkVersion4Update()
@@ -156,41 +180,16 @@ bool CFlashUpdate::checkVersion4Update()
 
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
-		if(!getInfo())
-		{
-			hide();
-			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
+		if(!selectHttpImage())
 			return false;
-		}
 
 		showLocalStatus(100);
 		showGlobalStatus(20);
 		showStatusMessageUTF(g_Locale->getText("flashupdate.versioncheck")); // UTF-8
 
-		filename = gTmpPath;
-		filename += ImageFile;
-
-		std::string sFileName = filename;
-		sFileName += Version_Ext;
-
-		CConfigFile configfile('\t');
-		if(!configfile.loadConfig(sFileName))
-		{
-			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
-			return false;
-		}
-		else
-		{
-			newVersion = configfile.getString("version", "");
-			if (newVersion.empty())
-			{
-				ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
-				return false;
-			}
-		}
 		printf("internet version: %s\n", newVersion.c_str());
 
-		if(newVersion==installedVersion)
+		if (newVersion == installedVersion)
 		{
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.nonewversion")); // UTF-8
 			return false;
@@ -200,7 +199,6 @@ bool CFlashUpdate::checkVersion4Update()
 		showGlobalStatus(20);
 		hide();
 		
-		//bestimmung der CramfsDaten
 		versionInfo = new CFlashVersionInfo(newVersion);
 
 		msg_body = "flashupdate.msgbox";
