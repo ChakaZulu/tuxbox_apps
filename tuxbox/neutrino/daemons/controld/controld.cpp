@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include "controldMsg.h"
 #include "dbox/avs_core.h"
 #include "dbox/fp.h"
 #include "saa7126/saa7126_core.h"
@@ -498,101 +499,101 @@ void UnMute()
 }
 
 
-void parse_command(int connfd, CControldClient::commandHead* rmessage)
+void parse_command(int connfd, CControld::commandHead* rmessage)
 {
 
-	if(rmessage->version!=CControldClient::ACTVERSION)
+	if(rmessage->version!=CControld::ACTVERSION)
 	{
 		perror("[controld] unknown version\n");
 		return;
 	}
 	switch (rmessage->cmd)
 	{
-		case CControldClient::CMD_SHUTDOWN:
+		case CControld::CMD_SHUTDOWN:
 			//printf("[controld] shutdown\n");
 			shutdownBox();
 			break;
-		case CControldClient::CMD_SETVOLUME:
+		case CControld::CMD_SETVOLUME:
 			//printf("[controld] set volume\n");
-			CControldClient::commandVolume msg;
+			CControld::commandVolume msg;
 			read(connfd, &msg, sizeof(msg));
 			setVolume(msg.volume);
 			break;
-		case CControldClient::CMD_MUTE:
+		case CControld::CMD_MUTE:
 			//printf("[controld] mute\n");
 			Mute();
 			break;
-		case CControldClient::CMD_UNMUTE:
+		case CControld::CMD_UNMUTE:
 			printf("[controld] unmute\n");
 			UnMute();
 			break;
-		case CControldClient::CMD_SETVIDEOFORMAT:
+		case CControld::CMD_SETVIDEOFORMAT:
 			//printf("[controld] set videoformat\n");
-			CControldClient::commandVideoFormat msg2;
+			CControld::commandVideoFormat msg2;
 			read(connfd, &msg2, sizeof(msg2));
 			setVideoFormat(msg2.format);
 			break;
-		case CControldClient::CMD_SETVIDEOOUTPUT:
+		case CControld::CMD_SETVIDEOOUTPUT:
 			//printf("[controld] set videooutput\n");
-			CControldClient::commandVideoOutput msg3;
+			CControld::commandVideoOutput msg3;
 			read(connfd, &msg3, sizeof(msg3));
 			setvideooutput(msg3.output);
 			break;
-		case CControldClient::CMD_SETBOXTYPE:
+		case CControld::CMD_SETBOXTYPE:
 			//printf("[controld] set boxtype\n");
-			CControldClient::commandBoxType msg4;
+			CControld::commandBoxType msg4;
 			read(connfd, &msg4, sizeof(msg4));
 			setBoxType(msg4.boxtype);
 			break;
-		case CControldClient::CMD_SETSCARTMODE:
+		case CControld::CMD_SETSCARTMODE:
 			//printf("[controld] set scartmode\n");
-			CControldClient::commandScartMode msg5;
+			CControld::commandScartMode msg5;
 			read(connfd, &msg5, sizeof(msg5));
 			setScartMode(msg5.mode);
 			break;
-		case CControldClient::CMD_SETVIDEOPOWERDOWN:
+		case CControld::CMD_SETVIDEOPOWERDOWN:
 			//printf("[controld] set scartmode\n");
-			CControldClient::responseVideoPowerSave msg10;
+			CControld::responseVideoPowerSave msg10;
 			read(connfd, &msg10, sizeof(msg10));
 			disableVideoOutput(msg10.powerdown);
 			break;
 
 
-		case CControldClient::CMD_GETVOLUME:
+		case CControld::CMD_GETVOLUME:
 			//printf("[controld] get volume\n");
-			CControldClient::responseVolume msg6;
+			CControld::responseVolume msg6;
 			msg6.volume = settings.volume;
 			write(connfd,&msg6,sizeof(msg6));
 			break;
-		case CControldClient::CMD_GETMUTESTATUS:
+		case CControld::CMD_GETMUTESTATUS:
 			//printf("[controld] get mute\n");
-			CControldClient::responseMute msg7;
+			CControld::responseMute msg7;
 			msg7.mute = settings.mute;
 			write(connfd,&msg7,sizeof(msg7));
 			break;
-		case CControldClient::CMD_GETVIDEOFORMAT:
+		case CControld::CMD_GETVIDEOFORMAT:
 			//printf("[controld] get videoformat (fnc)\n");
-			CControldClient::responseVideoFormat msg8;
+			CControld::responseVideoFormat msg8;
 			msg8.format = settings.videoformat;
 			write(connfd,&msg8,sizeof(msg8));
 			break;
-		case CControldClient::CMD_GETVIDEOOUTPUT:
+		case CControld::CMD_GETVIDEOOUTPUT:
 			//printf("[controld] get videooutput (fblk)\n");
-			CControldClient::responseVideoOutput msg9;
+			CControld::responseVideoOutput msg9;
 			msg9.output = settings.videooutput;
 			write(connfd,&msg9,sizeof(msg9));
 			break;
-		case CControldClient::CMD_GETBOXTYPE:
+		case CControld::CMD_GETBOXTYPE:
 			//printf("[controld] get boxtype\n");
-			CControldClient::responseBoxType msg0;
+			CControld::responseBoxType msg0;
 			msg0.boxtype = settings.boxtype;
 			write(connfd,&msg0,sizeof(msg0));
 			break;
 
-		case CControldClient::CMD_REGISTEREVENT:
+		case CControld::CMD_REGISTEREVENT:
 			eventServer.registerEvent(connfd);
 			break;
-		case CControldClient::CMD_UNREGISTEREVENT:
+		case CControld::CMD_UNREGISTEREVENT:
 			eventServer.unRegisterEvent(connfd);
 			break;
 
@@ -666,7 +667,7 @@ int main(int argc, char **argv)
 	setvideooutput(settings.videooutput);
 	setVideoFormat(settings.videoformat);
 
-	struct CControldClient::commandHead rmessage;
+	struct CControld::commandHead rmessage;
 	while(1)
 	{
 		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);

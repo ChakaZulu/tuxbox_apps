@@ -4,14 +4,6 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	Kommentar:
-
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
-
 	License: GPL
 
 	This program is free software; you can redistribute it and/or modify
@@ -41,6 +33,8 @@
 
 #include <string>
 
+#include "controldMsg.h"
+
 using namespace std;
 
 
@@ -58,98 +52,11 @@ class CControldClient
 
 	public:
 
-		static const char ACTVERSION = 2;
-
-		enum commands
+		enum events
 		{
-			CMD_SETVOLUME = 1,
-			CMD_GETVOLUME,
-			CMD_MUTE,
-			CMD_UNMUTE,
-			CMD_GETMUTESTATUS,
-			CMD_SETVIDEOFORMAT,
-			CMD_GETVIDEOFORMAT,
-			CMD_SETVIDEOOUTPUT,
-			CMD_GETVIDEOOUTPUT,
-			CMD_SETBOXTYPE,
-			CMD_GETBOXTYPE,
-			CMD_SETSCARTMODE,
-			CMD_GETSCARTMODE,
-			CMD_SHUTDOWN,
-			CMD_SETVIDEOPOWERDOWN,
-
-			CMD_REGISTEREVENT,
-			CMD_UNREGISTEREVENT,
-			CMD_EVENT
-		};
-
-		//command structures
-		struct commandHead
-		{
-			unsigned char messageType;
-			unsigned char version;
-			unsigned char cmd;
-		};
-
-		struct commandVolume
-		{
-			unsigned char volume;
-		};
-
-		struct commandVideoFormat
-		{
-			unsigned char format;
-		};
-
-		struct commandVideoOutput
-		{
-			unsigned char output;
-		};
-
-		struct commandBoxType
-		{
-			unsigned char boxtype;
-		};
-
-		struct commandScartMode
-		{
-			unsigned char mode;
-		};
-
-		//response structures
-		struct responseVolume
-		{
-			unsigned char volume;
-		};
-
-		struct responseMute
-		{
-			bool mute;
-		};
-
-		struct responseVideoFormat
-		{
-			unsigned char format;
-		};
-
-		struct responseVideoOutput
-		{
-			unsigned char output;
-		};
-
-		struct responseBoxType
-		{
-			unsigned char boxtype;
-		};
-
-		struct responseScartMode
-		{
-			unsigned char mode;
-		};
-
-		struct responseVideoPowerSave
-		{
-			bool powerdown;
+			EVT_VOLUMECHANGED,
+			EVT_MUTECHANGED,
+			EVT_MODECHANGED,
 		};
 
 		//VideoFormat

@@ -83,9 +83,9 @@ bool CControldClient::receive(char* data, int size)
 
 void  CControldClient::shutdown()
 {
-	commandHead msg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SHUTDOWN;
+	CControld::commandHead msg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_SHUTDOWN;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	controld_close();
@@ -93,10 +93,10 @@ void  CControldClient::shutdown()
 
 void CControldClient::setBoxType(char type)
 {
-	commandHead msg;
-	commandBoxType msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETBOXTYPE;
+	CControld::commandHead msg;
+	CControld::commandBoxType msg2;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_SETBOXTYPE;
 	msg2.boxtype = type;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
@@ -106,10 +106,10 @@ void CControldClient::setBoxType(char type)
 
 char CControldClient::getBoxType()
 {
-	commandHead msg;
-	responseBoxType rmsg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_GETBOXTYPE;
+	CControld::commandHead msg;
+	CControld::responseBoxType rmsg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_GETBOXTYPE;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	receive((char*)&rmsg, sizeof(rmsg));
@@ -119,10 +119,10 @@ char CControldClient::getBoxType()
 
 void CControldClient::setScartMode(bool mode)
 {
-	commandHead msg;
-	commandScartMode msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETSCARTMODE;
+	CControld::commandHead msg;
+	CControld::commandScartMode msg2;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_SETSCARTMODE;
 	msg2.mode = mode;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
@@ -147,10 +147,10 @@ char CControldClient::getScartMode()
 
 void CControldClient::setVolume(char volume )
 {
-	commandHead msg;
-	commandVolume msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETVOLUME;
+	CControld::commandHead msg;
+	CControld::commandVolume msg2;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_SETVOLUME;
 	msg2.volume = volume;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
@@ -160,10 +160,10 @@ void CControldClient::setVolume(char volume )
 
 char CControldClient::getVolume()
 {
-	commandHead msg;
-	responseVolume rmsg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_GETVOLUME;
+	CControld::commandHead msg;
+	CControld::responseVolume rmsg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_GETVOLUME;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	receive((char*)&rmsg, sizeof(rmsg));
@@ -173,10 +173,10 @@ char CControldClient::getVolume()
 
 void CControldClient::setVideoFormat(char format)
 {
-	commandHead msg;
-	commandVideoFormat msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETVIDEOFORMAT;
+	CControld::commandHead msg;
+	CControld::commandVideoFormat msg2;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_SETVIDEOFORMAT;
 	msg2.format = format;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
@@ -186,10 +186,10 @@ void CControldClient::setVideoFormat(char format)
 
 char CControldClient::getVideoFormat()
 {
-	commandHead msg;
-	responseVideoFormat rmsg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_GETVIDEOFORMAT;
+	CControld::commandHead msg;
+	CControld::responseVideoFormat rmsg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_GETVIDEOFORMAT;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	receive((char*)&rmsg, sizeof(rmsg));
@@ -199,10 +199,10 @@ char CControldClient::getVideoFormat()
 
 void CControldClient::setVideoOutput(char output)
 {
-	commandHead msg;
-	commandVideoOutput msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETVIDEOOUTPUT;
+	CControld::commandHead msg;
+	CControld::commandVideoOutput msg2;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_SETVIDEOOUTPUT;
 	msg2.output = output;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
@@ -212,10 +212,10 @@ void CControldClient::setVideoOutput(char output)
 
 char CControldClient::getVideoOutput()
 {
-	commandHead msg;
-	responseVideoOutput rmsg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_GETVIDEOOUTPUT;
+	CControld::commandHead msg;
+	CControld::responseVideoOutput rmsg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_GETVIDEOOUTPUT;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	receive((char*)&rmsg, sizeof(rmsg));
@@ -226,9 +226,9 @@ char CControldClient::getVideoOutput()
 
 void CControldClient::Mute()
 {
-	commandHead msg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_MUTE;
+	CControld::commandHead msg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_MUTE;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	controld_close();
@@ -236,9 +236,9 @@ void CControldClient::Mute()
 
 void CControldClient::UnMute()
 {
-	commandHead msg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_UNMUTE;
+	CControld::commandHead msg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_UNMUTE;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	controld_close();
@@ -254,10 +254,10 @@ void CControldClient::setMute( bool mute)
 
 bool CControldClient::getMute()
 {
-	commandHead msg;
-	responseMute rmsg;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_GETMUTESTATUS;
+	CControld::commandHead msg;
+	CControld::responseMute rmsg;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_GETMUTESTATUS;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));
 	receive((char*)&rmsg, sizeof(rmsg));
@@ -267,10 +267,10 @@ bool CControldClient::getMute()
 
 void CControldClient::videoPowerDown(bool powerdown)
 {
-	commandHead msg;
-	responseVideoPowerSave msg2;
-	msg.version=ACTVERSION;
-	msg.cmd=CMD_SETVIDEOPOWERDOWN;
+	CControld::commandHead msg;
+	CControld::responseVideoPowerSave msg2;
+	msg.version=CControld::ACTVERSION;
+	msg.cmd=CControld::CMD_SETVIDEOPOWERDOWN;
 	msg2.powerdown = powerdown;
 	controld_connect();
 	send((char*)&msg, sizeof(msg));

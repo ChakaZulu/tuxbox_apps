@@ -72,6 +72,7 @@ class CLcddClient
 		//command structures
 		struct commandHead
 		{
+			unsigned char messageType;
 			unsigned char version;
 			unsigned char cmd;
 		};
