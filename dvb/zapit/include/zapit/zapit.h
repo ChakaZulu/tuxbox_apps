@@ -92,3 +92,4 @@ void *start_camd(void *args);
 void end_cam();
 int descriptor(char *buffer, int len, int ca_system_id);
 */
+

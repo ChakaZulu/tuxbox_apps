@@ -28,6 +28,13 @@ typedef struct channel_msg_struct {
 	char mode;
 } channel_msg;
 
+typedef struct channel_msg_struct_2 {
+	uint chan_nr;
+	char name[30];
+	char mode;
+    unsigned int onid_tsid;
+} channel_msg_2;
+
 typedef struct pids{
 	ushort count_vpids;
 	uint vpid;
@@ -38,5 +45,6 @@ typedef struct pids{
 }pids;
 
 #endif
+
 
 
