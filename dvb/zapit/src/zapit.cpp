@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.339 2003/12/19 23:35:47 derget Exp $
+ * $Id: zapit.cpp,v 1.340 2004/01/05 22:43:37 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -129,23 +129,37 @@ extern std::map<string, int>::iterator satdiseqc_it;
 
 bool standby = true;
 
+uint32_t lastChannelRadio;
+uint32_t lastChannelTV;
+
 void saveSettings(bool write)
 {
 	if (channel) {
-		config.setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
-
 		// now save the lowest channel number with the current channel_id
 		int c = ((currentMode & RADIO_MODE) ? bouquetManager->radioChannelsBegin() : bouquetManager->tvChannelsBegin()).getLowestChannelNumberWithChannelID(channel->getChannelID());
 
 		if (c >= 0)
-			config.setInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", c);
+			if ((currentMode & RADIO_MODE))
+				lastChannelRadio = c;
+			else
+				lastChannelTV = c;
 	}
 
 	if (write) {
+		if (config.getBool("saveLastChannel", true))
+		{
+			config.setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
+
+			config.setInt32("lastChannelRadio", lastChannelRadio);
+			config.setInt32("lastChannelTV", lastChannelTV);
+		}
+
 		config.setInt32("lastSatellitePosition", frontend->getCurrentSatellitePosition());
 		config.setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
 		config.setInt32("diseqcType", frontend->getDiseqcType());
-		config.saveConfig(CONFIGFILE);
+
+		if (config.getModifiedFlag())
+			config.saveConfig(CONFIGFILE);
 	}
 }
 
@@ -153,12 +167,12 @@ CZapitClient::responseGetLastChannel load_settings(void)
 {
 	CZapitClient::responseGetLastChannel lastchannel;
 
-	if (config.getInt32("lastChannelMode", 0))
+	if (currentMode & RADIO_MODE)
 		lastchannel.mode = 'r';
 	else
 		lastchannel.mode = 't';
 
-	lastchannel.channelNumber = config.getInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", 0);
+	lastchannel.channelNumber = (currentMode & RADIO_MODE) ? lastChannelRadio : lastChannelTV;
 	return lastchannel;
 }
 
@@ -1588,7 +1602,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.339 2003/12/19 23:35:47 derget Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.340 2004/01/05 22:43:37 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1607,7 +1621,23 @@ int main(int argc, char **argv)
 				close(fd);
 		}
 		else {
-			fprintf(stderr, "Usage: %s [-d] [-q]\n", argv[0]);
+			fprintf(stderr,
+				"Usage: %s [-d] [-q]\n"
+				"-d : debug mode\n"
+				"-q : quit mode\n"
+				"\n"
+				"Keys in config file "	CONFIGFILE ":\n"
+				"saveLastChannel" ", "
+				"lastChannelMode" ", "
+				"lastChannelRadio" ", "
+				"lastChannelTV" ", "
+				"lastSatellitePosition" ", "
+			        "diseqcRepeats" ", "
+				"diseqcType" ", "
+				"motorRotationSpeed" ", "
+				"lnb0_OffsetLow" ", ..., " "lnb63_OffsetLow" ", "
+				"lnb0_OffsetHigh" ", ..., " "lnb63_OffsetHigh" "."
+				"\n", argv[0]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -1623,9 +1653,10 @@ int main(int argc, char **argv)
 	/* create bouquet manager */
 	bouquetManager = new CBouquetManager();
 
-	CZapitClient::responseGetLastChannel test_lastchannel = load_settings();
+	lastChannelRadio = config.getInt32("lastChannelRadio", 0);
+	lastChannelTV    = config.getInt32("lastChannelTV", 0);
 
-	if (test_lastchannel.mode == 'r')
+	if (config.getInt32("lastChannelMode", 0))
 		setRadioMode();
 	else
 		setTVMode();
