@@ -6,6 +6,7 @@ CBEBouquetWidget::CBEBouquetWidget()
 	selected = 0;
 	width = 500;
 	height = 440;
+	ButtonHeight = 25;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
@@ -70,9 +71,29 @@ void CBEBouquetWidget::paintHead()
 	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, "Bouquets" /*g_Locale->getText(name).c_str()*/, COL_MENUHEAD);
 }
 
+void CBEBouquetWidget::paintFoot()
+{
+	int ButtonWidth = width / 4;
+	g_FrameBuffer->paintBoxRel(x,y+height, width,ButtonHeight, COL_MENUHEAD);
+	g_FrameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+
+	g_FrameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.delete").c_str(), COL_INFOBAR);
+
+	g_FrameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
+
+	g_FrameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
+
+	g_FrameBuffer->paintIcon("blau.raw", x+width- ButtonWidth+ 8, y+height+4);
+	g_Fonts->infobar_small->RenderString(x+width- ButtonWidth+ 29, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.rename").c_str(), COL_INFOBAR);
+
+}
+
 void CBEBouquetWidget::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
 int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
@@ -83,11 +104,11 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 	}
 
 // getting all bouquets from zapit
-	printf("getting bouquets\n");
+	Bouquets.clear();
 	g_Zapit->getBouquets(Bouquets, true);
-	printf("got bouquets\n");
 	paintHead();
 	paint();
+	paintFoot();
 
 	int oldselected = selected;
 	bool loop=true;
@@ -99,7 +120,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			selected = oldselected;
 			loop=false;
 		}
-		else if (key==g_settings.key_channelList_pageup)
+/*		else if (key==g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
 			if (selected>Bouquets.size()-1)
@@ -116,7 +137,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if (key==CRCInput::RC_up)
+*/		else if (key==CRCInput::RC_up)
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -153,8 +174,19 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 				paintItem(selected - liststart);
 			}
 		}
+		else if(key==CRCInput::RC_red)
+		{
+			g_Zapit->deleteBouquet( selected + 1);
+			Bouquets.clear();
+			g_Zapit->getBouquets(Bouquets, true);
+			if (selected >= Bouquets.size())
+				selected--;
+			hide();
+			paintHead();
+			paint();
+			paintFoot();
+		}
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-		         || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
 		         || (key==CRCInput::RC_standby)
 		         || (CRCInput::isNumeric(key)) )
 		{

@@ -20,6 +20,7 @@ using namespace std;
 		int					fheight; // Fonthoehe Bouquetlist-Inhalt
 		int					theight; // Fonthoehe Bouquetlist-Titel
 
+		int 				ButtonHeight;
 		//string				name;
 
 		int		width;
@@ -30,6 +31,7 @@ using namespace std;
 		void paintItem(int pos);
 		void paint();
 		void paintHead();
+		void paintFoot();
 		void hide();
 
 	public:
