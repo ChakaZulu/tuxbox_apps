@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.10 2003/12/27 18:17:18 rasc Exp $
+$Id: dsmcc_str.c,v 1.11 2003/12/27 22:02:44 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.10 2003/12/27 18:17:18 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.11  2003/12/27 22:02:44  rasc
+dsmcc INT UNT descriptors started
+
 Revision 1.10  2003/12/27 18:17:18  rasc
 dsmcc PES dsmcc_program_stream_descriptorlist
 
@@ -269,6 +272,8 @@ char *dsmccStrProcessing_order (u_int id)
   --  Address scrambling control (INT)   EN 301 192
 */
 
+// $$$ TODO  according to mpeg/ scrambling control?
+
 char *dsmccStrPayload_scrambling_control (u_int id)
 
 {
@@ -311,6 +316,7 @@ char *dsmccStrLinkage0CTable_TYPE (u_int i)
      {  0x00, 0x00,  "not defined" },
      {  0x01, 0x01,  "NIT" },
      {  0x02, 0x02,  "BAT" },
+     {  0x03, 0xFF,  "reserved" },
      {  0,0, NULL }
   };
 

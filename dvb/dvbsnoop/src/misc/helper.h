@@ -31,6 +31,9 @@ long str2i (char *s);
 char *str_cell_latitude (long latitude);
 char *str_cell_longitude (long longitude);
 
+void displ_mac_addr (int v, long mac_H24, long mac_L24);
+void displ_IPv4_addr (int v, u_long ip);
+
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.21 2003/12/27 14:35:00 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.22 2003/12/27 22:02:43 rasc Exp $ 
 
 
  DVBSNOOP
@@ -20,6 +20,9 @@ $Id: dvb_descriptor.c,v 1.21 2003/12/27 14:35:00 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.22  2003/12/27 22:02:43  rasc
+dsmcc INT UNT descriptors started
+
 Revision 1.21  2003/12/27 14:35:00  rasc
 dvb-t descriptors
 DSM-CC: SSU Linkage/DataBroadcast descriptors
@@ -827,11 +830,8 @@ void descriptorDVB_Linkage (u_char *b)
         sub_descriptorDVB_Linkage0x09 (b, len);
     } else if (d.linkage_type == 0x0A) {	/* TR 102 006  DSM-CC */
 	/* SSU SCAN Linkage */
- 	u_int table_id;
-
-	table_id			= getBits (b, 0,  0, 8);
-	out_S2W_NL  (4,"Table_id: ",table_id,
-			dsmccStrLinkage0CTable_TYPE(table_id));
+	outBit_S2x_NL (4,"Table_type: ",  	b, 0, 8,
+		   (char *(*)(u_long))dsmccStrLinkage0CTable_TYPE );
     } else if (d.linkage_type == 0x0B) {	/* EN 301 192  DSM-CC */
         sub_descriptorDVB_Linkage0x0B (b, len);
     } else if (d.linkage_type == 0x0C) {	/* EN 301 192  DSM-CC */
@@ -839,7 +839,9 @@ void descriptorDVB_Linkage (u_char *b)
     } else {
     	// private data
 	out_nl (4,"Private data:"); 
+	indent (+1);
     	printhexdump_buf (4, b,len);
+	indent (-1);
     }
 
  indent (-1);

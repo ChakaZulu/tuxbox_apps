@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_int_unt_descriptor.h,v 1.3 2003/12/27 18:17:17 rasc Exp $ 
+$Id: dsmcc_int_unt_descriptor.h,v 1.4 2003/12/27 22:02:43 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: dsmcc_int_unt_descriptor.h,v 1.3 2003/12/27 18:17:17 rasc Exp $
 
 
 $Log: dsmcc_int_unt_descriptor.h,v $
+Revision 1.4  2003/12/27 22:02:43  rasc
+dsmcc INT UNT descriptors started
+
 Revision 1.3  2003/12/27 18:17:17  rasc
 dsmcc PES dsmcc_program_stream_descriptorlist
 
@@ -37,6 +40,17 @@ more PES stuff, DSM descriptors, testdata
 int   descriptorDSMCC_INT_UNT_Private (u_char *b);
 void  descriptorDSMCC_INT_UNT_any (u_char *b);
 
+
+
+void descriptorDSMCC_target_smartcard (u_char *b);
+void descriptorDSMCC_MAC_address (u_char *b);
+void descriptorDSMCC_target_serial_number (u_char *b);
+void descriptorDSMCC_IP_address (u_char *b);
+
+void descriptorDSMCC_IP_MAC_platform_name (u_char *b);
+void descriptorDSMCC_IP_MAC_platform_provider_name (u_char *b);
+
+void descriptorDSMCC_MAC_address_range (u_char *b);
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.14 2003/12/27 14:35:01 rasc Exp $
+$Id: helper.c,v 1.15 2003/12/27 22:02:44 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.14 2003/12/27 14:35:01 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.15  2003/12/27 22:02:44  rasc
+dsmcc INT UNT descriptors started
+
 Revision 1.14  2003/12/27 14:35:01  rasc
 dvb-t descriptors
 DSM-CC: SSU Linkage/DataBroadcast descriptors
@@ -333,8 +336,8 @@ long  str2i  (char *s)
 
 
 /*
- -- print latitude coordinates   (Cell Descriptors)
- -- print longitude coordinates   (Cell Descriptors)
+ -- latitude coordinates   (Cell Descriptors)
+ -- longitude coordinates   (Cell Descriptors)
  -- ETSI EN 300 468
 */ 
 
@@ -386,5 +389,36 @@ static char *_str_cell_latitude_longitude (long ll, int angle)
 }
 
 
+
+
+
+/*
+ * -- display MAC-Address format
+ *  -- input:  High- and Low Word (each 24bit)
+ */
+
+void displ_mac_addr (int v, long mac_H24, long mac_L24)
+{
+
+   out (v,"%02x:%02x:%02x",
+	   (mac_H24>>16) & 0xFF, (mac_H24>>8) & 0xFF, mac_H24 & 0xFF);
+   out (v,"%02x:%02x:%02x",
+	   (mac_L24>>16) & 0xFF, (mac_L24>>8) & 0xFF, mac_L24 & 0xFF);
+
+}
+
+
+
+
+/*
+ * -- display IP-Address format
+ *  -- input: IP-Addr. 
+ */
+
+void displ_IPv4_addr (int v, u_long ip)
+{
+   out (v,"%d.%d.%d.%d",
+	(ip>>24) & 0xFF, (ip>>16) & 0xFF, (ip>>8) & 0xFF, ip & 0xFF);
+}
 
 

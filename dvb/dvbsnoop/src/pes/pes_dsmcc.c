@@ -1,5 +1,5 @@
 /*
-$Id: pes_dsmcc.c,v 1.3 2003/12/27 18:17:18 rasc Exp $
+$Id: pes_dsmcc.c,v 1.4 2003/12/27 22:02:44 rasc Exp $
 
 
 
@@ -17,6 +17,9 @@ $Id: pes_dsmcc.c,v 1.3 2003/12/27 18:17:18 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.4  2003/12/27 22:02:44  rasc
+dsmcc INT UNT descriptors started
+
 Revision 1.3  2003/12/27 18:17:18  rasc
 dsmcc PES dsmcc_program_stream_descriptorlist
 
@@ -312,7 +315,7 @@ static void  dsmcc_program_stream_descriptorlist_loop (u_char *b, int len)
 
 
   while (len > 0) {
-	  int i;
+	  int len2;
 
 	  if (! first) {
 		outBit_S2x_NL (4,"dsmcc_discriminator: ",	b,0,8,
@@ -321,9 +324,11 @@ static void  dsmcc_program_stream_descriptorlist_loop (u_char *b, int len)
 		len--;
   	  }
 
-	  i = descriptorDSMCC  (b);
-	  b += i;
-	  len -= i;
+	  len2 = b[1] + 2;	// descr. length + tag field
+	  descriptorDSMCC (b);
+
+	  b += len2;
+	  len -= len2;
 
 	  first = 0;
   }
