@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.41 2005/03/03 19:59:40 diemade Exp $
+ * $Id: locals.h,v 1.42 2005/03/25 18:42:58 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -470,6 +470,8 @@ typedef enum
 	LOCALE_LCDCONTROLER_CONTRAST,
 	LOCALE_LCDCONTROLER_HEAD,
 	LOCALE_LCDMENU_AUTODIMM,
+	LOCALE_LCDMENU_DIM_BRIGHTNESS,
+	LOCALE_LCDMENU_DIM_TIME,
 	LOCALE_LCDMENU_HEAD,
 	LOCALE_LCDMENU_INVERSE,
 	LOCALE_LCDMENU_LCDCONTROLER,

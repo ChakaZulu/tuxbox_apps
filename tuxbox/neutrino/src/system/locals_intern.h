@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.43 2005/03/03 19:59:41 diemade Exp $
+ * $Id: locals_intern.h,v 1.44 2005/03/25 18:42:58 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -470,6 +470,8 @@ const char * locale_real_names[] =
 	"lcdcontroler.contrast",
 	"lcdcontroler.head",
 	"lcdmenu.autodimm",
+	"lcdmenu.dim_brightness",
+	"lcdmenu.dim_time",
 	"lcdmenu.head",
 	"lcdmenu.inverse",
 	"lcdmenu.lcdcontroler",

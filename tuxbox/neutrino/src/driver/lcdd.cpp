@@ -57,12 +57,39 @@ CLCD* CLCD::getInstance()
 	return lcdd;
 }
 
+void CLCD::count_down() {
+	if (timeout_cnt > 0) {
+		timeout_cnt--;
+		if (timeout_cnt == 0) {
+			if (atoi(g_settings.lcd_setting_dim_brightness) > 0) 
+			{
+				// save lcd brightness, setBrightness() changes global setting
+				int b = g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS];
+				setBrightness(atoi(g_settings.lcd_setting_dim_brightness));
+				g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS] = b;
+			} else
+			{
+				setPower(0);
+			}
+		}
+	} 
+}
+
+void CLCD::wake_up() {
+	if (atoi(g_settings.lcd_setting_dim_time) > 0) {
+		timeout_cnt = atoi(g_settings.lcd_setting_dim_time);
+		atoi(g_settings.lcd_setting_dim_brightness) > 0 ?
+			setBrightness(g_settings.lcd_setting[SNeutrinoSettings::LCD_BRIGHTNESS]) : setPower(1);
+	}
+}
+
 void* CLCD::TimeThread(void *)
 {
 	while(1)
 	{
 		sleep(1);
 		CLCD::getInstance()->showTime();
+		CLCD::getInstance()->count_down();
 	}
 	return NULL;
 }
@@ -263,6 +290,7 @@ void CLCD::showServicename(const std::string & name) // UTF-8
 		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	}
 	
+	wake_up();
 	displayUpdate();
 }
 
@@ -336,6 +364,7 @@ void CLCD::showVolume(const char vol, const bool perform_update)
 		if (perform_update)
 		  displayUpdate();
 	}
+	wake_up();
 }
 
 void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
@@ -386,6 +415,7 @@ void CLCD::showMenuText(const int position, const char * text, const int highlig
 	// reload specified line
 	display.draw_fill_rect(-1,35+14*position,120,35+14+14*position, CLCDDisplay::PIXEL_OFF);
 	fonts.menu->RenderString(0,35+11+14*position, 140, text, CLCDDisplay::PIXEL_INV, highlight, utf_encoded);
+	wake_up();
 	displayUpdate();
 }
 
@@ -402,6 +432,7 @@ void CLCD::showAudioTrack(const std::string & artist, const std::string & title,
 	fonts.menu->RenderString(0,22, 125, artist.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	fonts.menu->RenderString(0,35, 125, album.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+	wake_up();
 	displayUpdate();
 }
 
@@ -452,6 +483,7 @@ void CLCD::showAudioPlayMode(AUDIOMODES m)
 			}
 			break;
 	}
+	wake_up();
 	displayUpdate();
 }
 
@@ -538,6 +570,7 @@ void CLCD::setMode(const MODES m, const char * const title)
 		                 /* "showTime()" clears the whole lcd in MODE_STANDBY                         */
 		break;
 	}
+	wake_up();
 }
 
 

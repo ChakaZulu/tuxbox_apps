@@ -270,10 +270,12 @@ struct SNeutrinoSettings
 		LCD_POWER              = 3,
 		LCD_INVERSE            = 4,
 		LCD_SHOW_VOLUME        = 5,
-		LCD_AUTODIMM           = 6
+		LCD_AUTODIMM           = 6,
 	};
-
 	int lcd_setting[LCD_SETTING_COUNT];
+
+	char lcd_setting_dim_time[4];          
+	char lcd_setting_dim_brightness[4];
 
 #define FILESYSTEM_ENCODING_TO_UTF8(a) (g_settings.filesystem_is_utf8 ? (a) : ZapitTools::Latin1_to_UTF8(a).c_str())
 #define UTF8_TO_FILESYSTEM_ENCODING(a) (g_settings.filesystem_is_utf8 ? (a) : ZapitTools::UTF8_to_Latin1(a).c_str())
@@ -331,7 +333,7 @@ extern const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT];
 #define DEFAULT_LCD_POWER			0x01
 #define DEFAULT_LCD_INVERSE			0x00
 #define DEFAULT_LCD_AUTODIMM			0x00
-#define DEFAULT_LCD_SHOW_VOLUME			1
+#define DEFAULT_LCD_SHOW_VOLUME			0x01
 
 /* end default values */
 

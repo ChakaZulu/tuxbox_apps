@@ -443,6 +443,8 @@ lcdcontroler.brightnessstandby Standby Helligkeit
 lcdcontroler.contrast Kontrast
 lcdcontroler.head LCD Einstellungen
 lcdmenu.autodimm Automatisch dimmen
+lcdmenu.dim_brightness Helligkeit nach dimm-Timeout
+lcdmenu.dim_time dimm-Timeout
 lcdmenu.head LCD Einstellungen
 lcdmenu.inverse Invertieren
 lcdmenu.lcdcontroler Kontrast / Helligkeit

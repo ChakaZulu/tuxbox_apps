@@ -511,7 +511,7 @@ const lcd_setting_struct_t lcd_setting[LCD_SETTING_COUNT] =
 	{"lcd_power"            , DEFAULT_LCD_POWER            },
 	{"lcd_inverse"          , DEFAULT_LCD_INVERSE          },
 	{"lcd_show_volume"      , DEFAULT_LCD_SHOW_VOLUME      },
-	{"lcd_autodimm"         , DEFAULT_LCD_AUTODIMM         }
+	{"lcd_autodimm"         , DEFAULT_LCD_AUTODIMM         }		
 };
 
 
@@ -741,6 +741,8 @@ int CNeutrinoApp::loadSetup()
 
 	for (int i = 0; i < LCD_SETTING_COUNT; i++)
 		g_settings.lcd_setting[i] = configfile.getInt32(lcd_setting[i].name, lcd_setting[i].default_value);
+	strcpy(g_settings.lcd_setting_dim_time, configfile.getString("lcd_dim_time","0").c_str());
+	strcpy(g_settings.lcd_setting_dim_brightness, configfile.getString("lcd_dim_brightness","0").c_str());
 
 	//Picture-Viewer
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
@@ -1064,6 +1066,8 @@ void CNeutrinoApp::saveSetup()
 
 	for (int i = 0; i < LCD_SETTING_COUNT; i++)
 		configfile.setInt32(lcd_setting[i].name, g_settings.lcd_setting[i]);
+	configfile.setString("lcd_dim_time", g_settings.lcd_setting_dim_time);
+	configfile.setString("lcd_dim_brightness", g_settings.lcd_setting_dim_brightness);
 
 	//Picture-Viewer
 	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
@@ -2590,6 +2594,14 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 		oj = new CMenuOptionChooser(LOCALE_LCDMENU_AUTODIMM, &g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM], OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, lcdnotifier);
 		lcdSettings.addItem( oj );
 	}
+
+	CStringInput * dim_time = new CStringInput(LOCALE_LCDMENU_DIM_TIME, g_settings.lcd_setting_dim_time, 3,
+						    NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"0123456789 ");
+	lcdSettings.addItem(new CMenuForwarder(LOCALE_LCDMENU_DIM_TIME,true, g_settings.lcd_setting_dim_time,dim_time));
+
+	CStringInput * dim_brightness = new CStringInput(LOCALE_LCDMENU_DIM_BRIGHTNESS, g_settings.lcd_setting_dim_brightness, 3,
+							  NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"0123456789 ");
+	lcdSettings.addItem(new CMenuForwarder(LOCALE_LCDMENU_DIM_BRIGHTNESS,true, g_settings.lcd_setting_dim_brightness,dim_brightness));
 
 	lcdSettings.addItem(GenericMenuSeparatorLine);
 	lcdSettings.addItem(new CMenuForwarder(LOCALE_LCDMENU_LCDCONTROLER, true, NULL, lcdsliders));

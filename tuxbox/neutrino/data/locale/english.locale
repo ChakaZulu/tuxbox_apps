@@ -440,6 +440,8 @@ lcdcontroler.brightnessstandby Standby Brightness
 lcdcontroler.contrast Contrast
 lcdcontroler.head LCD Stettings
 lcdmenu.autodimm Auto dimm
+lcdmenu.dim_brightness Brightness after dim timeout
+lcdmenu.dim_time Dim timeout
 lcdmenu.head LCD Settings
 lcdmenu.inverse Invert
 lcdmenu.lcdcontroler Contrast / Brightness

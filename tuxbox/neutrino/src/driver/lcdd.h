@@ -86,6 +86,10 @@ class CLCD
 		pthread_t			thrTime;
 		int                             last_toggle_state_power;
 		int				clearClock;
+		unsigned int                    timeout_cnt;
+
+		void wake_up();
+		void count_down();
 
 		CLCD();
 
@@ -102,7 +106,7 @@ class CLCD
 		static CLCD* getInstance();
 		void init(const char * fontfile, const char * fontname,
 		          const char * fontfile2=NULL, const char * fontname2=NULL,
-		          const char * fontfile3=NULL, const char * fontname3=NULL);
+		          const char * fontfile3=NULL, const char * fontname3=NULL); 
 
 		void setMode(const MODES m, const char * const title = "");
 
