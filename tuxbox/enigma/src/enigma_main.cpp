@@ -126,7 +126,6 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		pLCD->lcdStandby->show();
 
 		eAVSwitch::getInstance()->setInput(1);
-
 		break;
 	}
 	case eWidgetEvent::execDone:
@@ -657,7 +656,7 @@ eZapMain::~eZapMain()
 	eZapLCD *pLCD=eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdShutdown->show();
-	eDBoxLCD::getInstance()->switchLCD(0);
+//	eDBoxLCD::getInstance()->switchLCD(0);
 
 	eConfig::getInstance()->setKey("/ezap/ui/serviceSelectorStyle", eZap::getInstance()->getServiceSelector()->getStyle() );
 }
