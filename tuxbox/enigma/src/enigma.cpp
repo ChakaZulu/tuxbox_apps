@@ -225,7 +225,7 @@ eZap::eZap(int argc, char **argv)
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
 	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = "";
+		swapfilename = strdup("");
 	extern void activateSwapFile(eString);
 	activateSwapFile(eString(swapfilename));
 	free(swapfilename);
