@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.38 2002/12/13 12:00:39 thegoodguy Exp $
+ * $Id: sdt.cpp,v 1.39 2002/12/13 12:02:15 thegoodguy Exp $
  */
 
 /* system c */
@@ -71,7 +71,7 @@ ca_status_t get_sdt_free_CA_mode(const t_service_id p_service_id)
 	int demux_fd;
 	unsigned char buffer[SDT_SIZE];
 
-	ca_status_t free_CA_mode = CA_STATUS_CLEAR;  // <- return false if something fails
+	ca_status_t free_CA_mode = CA_STATUS_CLEAR;  // <- return CA_STATUS_CLEAR if something fails
 	unsigned short section_length;
 	unsigned short service_id;
 	unsigned short descriptors_loop_length;
