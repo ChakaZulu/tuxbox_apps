@@ -1,9 +1,9 @@
 function fertig()
 {
-	for (i=document.channels.bchannels.length-1; i >= 0 ; i--) {
-		document.channels.bchannels.options[i].selected=true;
+	for (i=document.getElementById('channels').bchannels.length-1; i >= 0 ; i--) {
+		document.getElementById('channels').bchannels.options[i].selected=true;
 	}
-	document.channels.submit();
+	document.getElementById('channels').submit();
 }
 
 function movechannels(source, destination)

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.20 2004/03/07 13:07:00 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.21 2004/03/07 13:22:13 thegoodguy Exp $
 
 	License: GPL
 
@@ -315,9 +315,8 @@ bool CBouqueteditAPI::editBouquet(CWebserverRequest * request)
 			"<h2>Bouquet-Editor</h2>\n"
 			"<h3>Bouquet ");
 		request->SocketWrite(request->ParameterList["name"].c_str());
-#warning xhtml strict violation: form tag name is deprecated. however: removing it results in non-working javascript
 		request->SocketWrite(" bearbeiten</h3>\n"
-				     "<form action=\"editchannels\" method=\"post\" id=\"channels\" name=\"channels\" enctype=\"x-www-form-urlencoded\">\n"
+				     "<form action=\"editchannels\" method=\"post\" id=\"channels\" enctype=\"x-www-form-urlencoded\">\n"
 				     "<p>"
 				     "<input type=\"hidden\" name=\"selected\" value=\"");
 		request->SocketWrite(request->ParameterList["selected"].c_str());
@@ -338,10 +337,10 @@ bool CBouqueteditAPI::editBouquet(CWebserverRequest * request)
 		}
 		request->SocketWrite("</select>"
 		                     "</td><td align=\"center\">\n"
-				     "<input type=\"button\" value=\"up\" onclick=\"poschannel(document.channels.bchannels, 0);\" /><br /><br />\n"
-				     "<input type=\"button\" value=\"down\" onclick=\"poschannel(document.channels.bchannels, 1);\" /><br /><br />\n"
-				     "<input type=\"button\" value=\"&gt;&gt;&gt;\" onclick=\"movechannels(document.channels.bchannels, document.channels.achannels);\" /><br /><br />\n"
-				     "<input type=\"button\" value=\"&lt;&lt;&lt;\" onclick=\"movechannels(document.channels.achannels, document.channels.bchannels);\" /><br /><br />\n"
+				     "<input type=\"button\" value=\"up\" onclick=\"poschannel(document.getElementById('channels').bchannels, 0);\" /><br /><br />\n"
+				     "<input type=\"button\" value=\"down\" onclick=\"poschannel(document.getElementById('channels').bchannels, 1);\" /><br /><br />\n"
+				     "<input type=\"button\" value=\"&gt;&gt;&gt;\" onclick=\"movechannels(document.getElementById('channels').bchannels, document.getElementById('channels').achannels);\" /><br /><br />\n"
+				     "<input type=\"button\" value=\"&lt;&lt;&lt;\" onclick=\"movechannels(document.getElementById('channels').achannels, document.getElementById('channels').bchannels);\" /><br /><br />\n"
 		                     "</td><td>\n"
 				     "<select multiple=\"multiple\" size=\"20\" name=\"achannels\">\n");
 		// List all channels
