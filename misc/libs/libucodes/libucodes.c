@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.11 2001/10/22 01:42:54 fnbrd Exp $
+  $Id: libucodes.c,v 1.12 2001/10/22 01:57:08 derget Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.12  2001/10/22 01:57:08  derget
+  01_02_002F hinzugefügt
+
   Revision 1.11  2001/10/22 01:42:54  fnbrd
   Small comment for support ;)
 
@@ -42,6 +45,7 @@ static struct Sucode ucodes[] =
 "997b1f858f1efee525e6842558edbe3c","cam_01_01_005E",
 "7f56e693a916b39a6e2734dc9b5aab7a","cam_01_02_002E",
 "1905390636e70c966574a3298a1b89c3","cam_01_02_002D",
+"704cb8d9965babbdc7d4e7cae6e5584e","cam_01_02_002F",
 "c734207ddea7b8ceafa2505f1360f3bf","cam_01_01_004F",
 "a5984825ff554ea530efc4733ffd7473","cam_01_01_005F",
 "16c5e1eba0cfe63f2bbc648e1644c883","cam_NOKIA_PRODTEST2",
