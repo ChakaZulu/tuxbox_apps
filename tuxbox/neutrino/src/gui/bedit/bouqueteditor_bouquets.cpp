@@ -1,8 +1,9 @@
 #include "bouqueteditor_bouquets.h"
 #include "messagebox.h"
+#include "hintbox.h"
 #include "../global.h"
 
-CBEBouquetWidget::CBEBouquetWidget()
+CBEBouquetWidget::CBEBouquetWidget(CBouquetEditorEvents* EventHandler = NULL)
 {
 	selected = 0;
 	width = 500;
@@ -16,6 +17,7 @@ CBEBouquetWidget::CBEBouquetWidget()
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	state = beDefault;
+	eventHandler = EventHandler;
 }
 
 void CBEBouquetWidget::paintItem(int pos)
@@ -146,6 +148,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 							paintFoot();
 						break;
 					}
+					delete messageBox;
 				}
 				else
 				{
@@ -367,10 +370,22 @@ void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned 
 
 void CBEBouquetWidget::saveChanges()
 {
-
+	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", "bouqueteditor.savingchanges");
+	hintBox->paint();
+	g_Zapit->saveBouquets();
+	g_Zapit->reinitChannels();
+	hintBox->hide(false);
+	delete hintBox;
+	if (eventHandler)
+		eventHandler->onBouquetsChanged();
 }
 
 void CBEBouquetWidget::discardChanges()
 {
+	CHintBox* hintBox= new CHintBox(this, "bouqueteditor.name", "bouqueteditor.discardingchanges");
+	hintBox->paint();
+	g_Zapit->reinitChannels();
+	hintBox->hide(false);
+	delete hintBox;
 }
 

@@ -265,8 +265,9 @@ bouqueteditor.move Move
 bouqueteditor.rename Rename
 bouqueteditor.newbouquetname New name of bouquets
 bouqueteditor.bouquetname Name of bouquets
-
 bouqueteditor.savechanges? Do you want to save the changes?
+bouqueteditor.savingchanges Saving changes. Please wait ...
+bouqueteditor.discardingchanges Discarding changes. Please wait ..
 
 messagebox.yes Yes
 messagebox.no No

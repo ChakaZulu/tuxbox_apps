@@ -11,6 +11,16 @@
 
 using namespace std;
 
+	/* class for handling when bouquets changed.                  */
+	/* This class should be a temporarily work around             */
+	/* and should be replaced by standard neutrino event handlers */
+	/* (libevent) */
+	class CBouquetEditorEvents
+	{
+	public:
+		virtual void onBouquetsChanged() {};
+	};
+
 	class CBEBouquetWidget : public CMenuWidget
 	{
 		enum state_
@@ -18,6 +28,8 @@ using namespace std;
 			beDefault,
 			beMoving
 		} state;
+
+		CBouquetEditorEvents* eventHandler;
 
 		unsigned int		selected;
 		unsigned int		origPosition;
@@ -57,7 +69,7 @@ using namespace std;
 		string inputName( string defaultName, string caption);
 
 	public:
-		CBEBouquetWidget();
+		CBEBouquetWidget( CBouquetEditorEvents* EventHandler = NULL);
 
 		CZapitClient::BouquetList	Bouquets;
 		int exec(CMenuTarget* parent, string actionKey);

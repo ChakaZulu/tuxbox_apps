@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.149 2002/01/31 16:59:54 field Exp $
+        $Id: neutrino.cpp,v 1.150 2002/02/04 23:26:36 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.150  2002/02/04 23:26:36  Simplex
+  bouquet-editor now saves changes
+
   Revision 1.149  2002/01/31 16:59:54  field
   Kleinigkeiten
 
@@ -1272,7 +1275,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	CMenuWidget* TSScan = new CMenuWidget("servicemenu.scants", "mainmenue.raw");
 	TSScan->addItem( new CMenuForwarder("menu.back") );
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
+	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget( new CNeutrinoBouquetEditorEvents(this))));
 	CMenuOptionChooser* oj = new CMenuOptionChooser("scants.bouquet", &g_settings.scan_bouquet, true );
 	oj->addOption(256, "scants.bouquet_leave");
 	oj->addOption(512, "scants.bouquet_create");
@@ -2348,6 +2351,16 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 	return false;
 }
 
+	/* This class should be a temporarily work around             */
+	/* and should be replaced by standard neutrino event handlers */
+	/* (libevent) */
+void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
+{
+	neutrino->firstChannel();
+	neutrino->channelsInit();
+	neutrino->channelList->zapTo( 0 );
+}
+
 
 /**************************************************************************************
 *                                                                                     *
@@ -2356,7 +2369,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.149 2002/01/31 16:59:54 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.150 2002/02/04 23:26:36 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

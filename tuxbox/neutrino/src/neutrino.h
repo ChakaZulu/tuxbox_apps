@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.43 2002/01/29 23:45:29 Simplex Exp $
+//  $Id: neutrino.h,v 1.44 2002/02/04 23:26:36 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.44  2002/02/04 23:26:36  Simplex
+//  bouquet-editor now saves changes
+//
 //  Revision 1.43  2002/01/29 23:45:29  Simplex
 //  first lines for bouquet editor
 //
@@ -184,6 +187,20 @@ using namespace std;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
+/* class for handling when bouquets changed.                  */
+/* This class should be a temporarily work around             */
+/* and should be replaced by standard neutrino event handlers */
+/* (libevent) */
+class CNeutrinoApp;
+
+class CNeutrinoBouquetEditorEvents : public CBouquetEditorEvents
+{
+	private:
+		CNeutrinoApp* neutrino;
+	public:
+		CNeutrinoBouquetEditorEvents( CNeutrinoApp* owner) { neutrino = owner;};
+		void onBouquetsChanged();
+	};
 
 /**************************************************************************************
 *                                                                                     *
@@ -287,7 +304,9 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		//onchange
 		bool changeNotify(string OptionName);
 
+	friend class CNeutrinoBouquetEditorEvents;
 };
+
 
 #endif
 
