@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.21 2002/07/17 03:07:12 obi Exp $
+ * $Id: pmt.cpp,v 1.22 2002/08/14 19:03:39 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -354,7 +354,7 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 		while ((ca_pmt_length & mask) != ca_pmt_length)
 		{
 			length_field_size++;
-			mask = (mask << 8) & 0xFF;
+			mask = (mask << 8) | 0xFF;
 		}
 
 		caPmt->length_field.push_back((1 << 7) | length_field_size);
