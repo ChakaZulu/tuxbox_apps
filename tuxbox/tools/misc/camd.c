@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <ost/ca.h>
 
 int camfd;
 /*
@@ -34,6 +36,7 @@ int camfd;
 
 void _writecam(int cmd, unsigned char *data, int len)
 {
+  ca_msg_t ca_msg;
   char buffer[128];
   int csum=0, i;
   buffer[0]=0x6E;
@@ -45,9 +48,21 @@ void _writecam(int cmd, unsigned char *data, int len)
   for (i=0; i<len; i++)
     csum^=buffer[i];
   buffer[len++]=csum;
-  if (write(camfd, buffer+1, len-1)!=len-1)
-    perror("write");
-  printf(">");
+
+  /* init ca message */
+  ca_msg.slot_num = 0;
+  ca_msg.type = 0;
+
+  ca_msg.length = len-1;
+  memcpy(ca_msg.msg,buffer+1,len-1);
+
+//  if (write(camfd, buffer+1, len-1)!=len-1)
+  if ( ioctl(camfd,CA_SEND_MSG,&ca_msg) != 0 )
+  {
+  	perror("ioctl");
+  }
+
+  printf("%d >",len);
   for (i=0; i<len; i++)
     printf(" %02x", buffer[i]);
   printf("\n");
@@ -150,13 +165,15 @@ void set_key(void)
 
 int main(int argc, char **argv)
 {
+  ca_msg_t ca_msg;
   int initok=0, caid=0x1722;
   int SID=9, ONID=0x85, ECMPID=0x150A, EMMPID=0x1500, VPID=0x1FF, APID=0x200;
   
-  camfd=open("/dev/dbox/cam0", O_RDWR);
-  if (camfd<0)
+  camfd=open("/dev/ost/ca0", O_RDWR);
+
+  if( camfd <= 0 )
   {
-    perror("/dev/dbox/cam0");
+    perror("open ca0");
     return 1;
   }
   
@@ -173,29 +190,67 @@ int main(int argc, char **argv)
   }
   
   reset();
-  
+
+  /* init ca message */
+  ca_msg.slot_num = 0;
+  ca_msg.type = 0;
+
+//  msg.length = 0;
+//  msg.msg
+
   while (1)
   {
     char buffer[128];
     int i;
     int len, csum;
-    
-    if (read(camfd, buffer, 4)!=4)
+
+//    if (read(camfd, buffer, 4)!=4)
+
+	ca_msg.length = 4;
+
+	if ( ioctl(camfd,CA_GET_MSG,&ca_msg) != 0 )
     {
-      perror("read");
+      perror("ioctl");
       break;
     }
+
+	len = ca_msg.length;
+
+//	printf("read %d bytes\n",len);
+
+	if ( len <= 0 )
+	{
+	  usleep(500);
+	  continue;
+	}
+	else
+	{
+		memcpy(buffer,ca_msg.msg,ca_msg.length);
+	}
+
     if ((buffer[0]!=0x6F) || (buffer[1]!=0x50))
     {
       printf("out of sync! %02x %02x %02x %02x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
       break;
     }
     len=buffer[2]&0x7F;
-    if (read(camfd, buffer+4, len)!=len)
+
+	ca_msg.length = len;
+
+//    if (read(camfd, buffer+4, len)!=len)
+	if ( ioctl(camfd,CA_GET_MSG,&ca_msg) != 0 )
     {
-      perror("read");
+      perror("ioctl");
       break;
     }
+
+	if ( ca_msg.length != len )
+	{
+		perror("length");
+		break;
+	}
+
+	memcpy(buffer+4,ca_msg.msg,ca_msg.length);
 
     csum=0;
     for (i=0; i<len+4; i++)
