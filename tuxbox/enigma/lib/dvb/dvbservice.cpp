@@ -241,7 +241,8 @@ void eDVBServiceController::SDTready(int error)
 		if (sdt)
 		{
 			if (dvb.settings->transponderlist->handleSDT(sdt))
-				dvb.serviceListChanged();
+//				dvb.serviceListChanged();   // hmm das suckt... wenn man auf einem Bouquet war .. und sich was geändert hat, dann schaltet enigma automatisch auf
+//				FullServices... temporary disabled ;)
 			sdt->unlock();
 		}
 	}
