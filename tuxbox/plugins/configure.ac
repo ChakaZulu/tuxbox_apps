@@ -41,6 +41,7 @@ tuxmail/Makefile
 tuxmail/daemon/Makefile
 tuxtxt/Makefile
 tuxtxt/font/Makefile
+tuxcom/Makefile
 vncviewer/Makefile
 tuxbox-plugins.pc
 ])
