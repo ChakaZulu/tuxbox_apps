@@ -368,6 +368,27 @@ removeEntry:
 nextEvent:
 				;
 			}
+			if ( DBIt->second.second.size() < 2 )  
+			// less than two events for this service in cache.. 
+			{
+				updateMap::iterator u = serviceLastUpdated.find(DBIt->first);
+				if ( u != serviceLastUpdated.end() )
+				{
+					// remove from lastupdated map.. 
+					serviceLastUpdated.erase(DBIt->first);
+					// current service?
+					if ( DBIt->first == current_service )
+					{
+//						eDebug("%08x == %08x, %08x == %08x, %08x == %08x",
+//							DBIt->first.sid, current_service.sid, 
+//							DBIt->first.onid, current_service.onid,
+//							DBIt->first.opos, current_service.opos);
+					// immediate .. after leave cleanloop 
+					// update epgdata for this service
+						zapTimer.start(0,true);
+					}
+				}
+			}
 		}
 
 		if (temp.size())

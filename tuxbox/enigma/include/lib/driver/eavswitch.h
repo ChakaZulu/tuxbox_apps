@@ -72,6 +72,7 @@ public:
 	eVSystem getVSystem() { return system; }
 	int setActive(int active);
 	int setInput(int v);	// 0: dbox, 1: vcr
+	void selectAudioChannel( int chan ); // 0 Stereo, 1 MonoLeft, 2 MonoRight
 	void changeVCRVolume(int abs, int vol);
 	void toggleMute();
 	void setVideoFormat( int );

@@ -119,6 +119,37 @@ void eAVSwitch::reloadSettings()
 	setVSystem(system);
 }
 
+void eAVSwitch::selectAudioChannel( int c )
+{
+#if HAVE_DVB_API_VERSION < 3
+	audioChannelSelect_t chan=AUDIO_STEREO;
+#else
+	audio_channel_select_t chan=AUDIO_STEREO;
+#endif
+	switch(c)
+	{
+		case 0: // Stereo
+			break;
+		case 1: // Mono Left
+			chan = AUDIO_MONO_LEFT;
+			break;
+		case 2: // Mono Right
+			chan = AUDIO_MONO_RIGHT;
+			break;
+	}
+	int fd = Decoder::getAudioDevice();
+
+	if ( fd == -1 )
+		fd = open( AUDIO_DEV, O_RDWR );
+
+	int ret=ioctl(fd, AUDIO_CHANNEL_SELECT, chan);
+	if(ret)
+		eDebug("AUDIO_CHANNEL_SELECT failed (%m)");
+
+	if (Decoder::getAudioDevice() == -1)
+		close(fd);
+}
+
 int eAVSwitch::setVolume(int vol)
 {
 	vol=63-vol/(65536/64);
@@ -157,7 +188,7 @@ int eAVSwitch::setVolume(int vol)
 
 		int ret=ioctl(fd, AUDIO_SET_MIXER, &mix);
 		if(ret)
-			perror("AUDIO_SET_MIXER");
+			eDebug("AUDIO_SET_MIXER failed(%m)");
 
 		if (Decoder::getAudioDevice() == -1)
 			close(fd);

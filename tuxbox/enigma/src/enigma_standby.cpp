@@ -53,6 +53,16 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::execBegin:
 	{
 		/*emit*/ enterStandby();
+		FILE *f = fopen("/var/etc/enigma_enter_standby.sh", "r");
+		if (f && fork() == 0)
+		{
+			fclose(f);
+			for (unsigned int i=3; i < 90; ++i )
+				close(i);
+			
+			system("/var/etc/enigma_enter_standby.sh");
+			_exit(0);
+		}
 #ifndef DISABLE_LCD
 		eDBoxLCD::getInstance()->switchLCD(0);
 		eZapLCD *pLCD=eZapLCD::getInstance();
@@ -127,6 +137,16 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 			::close(fd);
 		}
 		/*emit*/ leaveStandby();
+		FILE *f = fopen("/var/etc/enigma_leave_standby.sh", "r");
+		if (f && fork() == 0)
+		{
+			fclose(f);
+			for (unsigned int i=3; i < 90; ++i )
+				close(i);
+			
+			system("/var/etc/enigma_leave_standby.sh");
+			_exit(0);
+		}
 		break;
 	}
 	default:

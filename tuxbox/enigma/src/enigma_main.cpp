@@ -620,25 +620,24 @@ void ePSAudioSelector::selected(eListBoxEntryText*l)
 
 void AudioChannelSelectionChanged1( eListBoxEntryText *e )
 {
+	int sel=-1;
 	if ( e )
 	{
-		int val = (int) e->getKey();
-		if ( val < 0 )
+		switch (abs((int)e->getKey()))
 		{
-			val = abs(val);
-			if ( val & 1 )
-				eConfig::getInstance()->setKey("/ezap/audio/outputLeft", 1 );
-			else
-				eConfig::getInstance()->setKey("/ezap/audio/outputLeft", 0 );
-
-			if ( val & 2 )
-				eConfig::getInstance()->setKey("/ezap/audio/outputRight", 1 );
-			else
-				eConfig::getInstance()->setKey("/ezap/audio/outputRight", 0 );
-
-			eAVSwitch::getInstance()->changeVolume(0,0);  // reset audio
+			case 1: // mono left
+				sel=1;
+				break;
+			case 2: // mono right
+				sel=2;
+				break;
+			case 3: // Stereo
+				sel=0; 
+				break;
 		}
 	}
+	if ( sel != -1 )
+		eAVSwitch::getInstance()->selectAudioChannel(sel);
 }
 
 void AudioChannelSelectionChanged2( AudioStream *e )
@@ -5023,6 +5022,8 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	case eServiceEvent::evtFlagsChanged:
 	{
 		serviceFlags = eServiceInterface::getInstance()->getService()->getFlags();
+		if ( timeshift && serviceFlags & eServiceHandler::flagIsSeekable )
+			timeshift=0;
 		setSmartcardLogo( serviceFlags & eServiceHandler::flagIsScrambled );
 		if (serviceFlags & eServiceHandler::flagSupportPosition)
 			progresstimer.start(1000);
@@ -5217,6 +5218,8 @@ void eZapMain::showEPG_Streaminfo()
 
 void eZapMain::startService(const eServiceReference &_serviceref, int err)
 {
+	eAVSwitch::getInstance()->selectAudioChannel(0);
+
 	audioselps.clear();
 #ifndef DISABLE_FILE
 	skipcounter=0;

@@ -57,7 +57,7 @@ public:
 	eTimerManager();
 	~eTimerManager();
 	static eTimerManager *getInstance() { return instance; }
-	bool updateRunningEventDuration( int duration );
+	bool updateRunningEvent( int duration, int after_event );
 	bool removeEventFromTimerList( eWidget *w, const ePlaylistEntry& entry, int type=erase );
 	bool removeEventFromTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt);
 	void cleanupEvents();
@@ -65,8 +65,8 @@ public:
 	bool addEventToTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting, const ePlaylistEntry *exclude=0 );
 	bool addEventToTimerList( eWidget *w, const ePlaylistEntry& entry, const ePlaylistEntry *exclude=0 );
 	int addEventToTimerList(const ePlaylistEntry& entry);
-	void deleteEventFromTimerList(const ePlaylistEntry& entry);
-	void modifyEventInTimerList(const ePlaylistEntry& old_entry, const ePlaylistEntry& new_entry);
+	int deleteEventFromTimerList(const ePlaylistEntry& entry, bool force=false);
+	int modifyEventInTimerList(const ePlaylistEntry& old_entry, const ePlaylistEntry& new_entry, bool force=false);
 	bool eventAlreadyInList( eWidget *w, EITEvent &e, eServiceReference &ref );
 	void abortEvent(int err);
 	void loadTimerList();

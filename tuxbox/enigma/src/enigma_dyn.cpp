@@ -3847,7 +3847,15 @@ static eString deleteTimerEvent(eString request, eString dirpath, eString opts, 
 		atoi(eventStartTime.c_str()),
 		-1, -1, atoi(eventType.c_str()));
 
-	eTimerManager::getInstance()->deleteEventFromTimerList(e);
+	int ret = eTimerManager::getInstance()->deleteEventFromTimerList(e);
+#if 0	
+	if ( ret == -1 )  // event currently running...
+	{
+		// TODO ask user if he realy want to do this..
+		// then call deleteEventFromtTimerList again.. with true as third parameter..
+		// then the running event will aborted
+	}
+#endif
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	content->code=204;
 	content->code_descr="No Content";
@@ -3950,13 +3958,14 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 		eventid,
 		oldType);
 
-	// TODO : overlapp checking !!!
-	// change modifyEventInTimerList.. and return state values..
-	// i.e. overlap check failed.. event currently running .. all ok.. or whatever..
-	// than ask user what todo.. and call another once modifyEventInTimerList..
-	// with parameter force
-
-	eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent);
+	int ret = eTimerManager::getInstance()->modifyEventInTimerList(oldEvent, newEvent);
+#if 0	
+	if ( ret == -1 )  // event currently running...
+	{
+		// TODO ask user if he wants to update only after_event action and duration
+		// then call modifyEvent again.. with true as third parameter..
+	}
+#endif
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return "<script language=\"javascript\">window.close();</script>";
 }

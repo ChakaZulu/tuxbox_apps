@@ -29,7 +29,7 @@ struct uniqueEPGKey
 	uniqueEPGKey( const eServiceReferenceDVB &ref )
 		:sid( ref.type != eServiceReference::idInvalid ? ref.getServiceID().get() : -1 )
 		,onid( ref.type != eServiceReference::idInvalid ? ref.getOriginalNetworkID().get() : -1 )
-		,opos( ref.type != eServiceReference::idInvalid ? ref.data[4] >> 16 : -1 )
+		,opos( ref.type != eServiceReference::idInvalid ? ref.getDVBNamespace().get() >> 16 : -1 )
 	{
 		eTransponder *tp = eTransponderList::getInstance()->searchTS( ref.getDVBNamespace(), ref.getTransportStreamID(), ref.getOriginalNetworkID() );
 		if ( tp && tp->satellite.isValid() )
@@ -50,6 +50,10 @@ struct uniqueEPGKey
 	operator bool() const
 	{ 
 		return !(sid == -1 && onid == -1 && opos == -1); 
+	}
+	bool operator==(const uniqueEPGKey &a) const
+	{
+		return !memcmp( &sid, &a.sid, sizeof(int)*3);
 	}
 	struct equal
 	{

@@ -394,20 +394,21 @@ void eServiceSelector::addService(const eServiceReference &ref)
 				return;
 		}
 #endif
-		if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
-			return;
 	}
+	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
+		return;
 
 	int flags=serviceentryflags;
 
 	if ( ref.flags & eServiceReference::isDirectory)
 		flags &= ~ eListBoxEntryService::flagShowNumber;
-
 	new eListBoxEntryService(services, ref, flags);
 }
 
 void eServiceSelector::addBouquet(const eServiceReference &ref)
 {
+	if ( ref.isLocked() && (eConfig::getInstance()->pLockActive() & 2) )
+		return;
 	new eListBoxEntryService(bouquets, ref, serviceentryflags);
 }
 

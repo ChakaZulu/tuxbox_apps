@@ -342,8 +342,7 @@ void eTimerManager::timeChanged()
 {
 	writeToLogfile("--> timeChanged()");
 	if ( nextStartingEvent == timerlist->getConstList().end() // no event as next event set
-		|| (nextStartingEvent != timerlist->getConstList().end()  // event is set.. but not running
-		&& !(nextStartingEvent->type & ePlaylistEntry::stateRunning)) )
+		|| !(nextStartingEvent->type & ePlaylistEntry::stateRunning))  // event is set.. but not running
 	{
 		nextAction=setNextEvent;
 		actionTimer.start(0, true);
@@ -417,17 +416,32 @@ void eTimerManager::actionHandler()
 					case 2:
 						if ( eSystemInfo::getInstance()->canShutdown() )
 						{
-							writeToLogfile("eZapMain::getInstance()->handleStandby() returned 2 .. set doShutdown flag to timer type");
-							nextStartingEvent->type |= ePlaylistEntry::doShutdown;
+							if ( nextStartingEvent->type&(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown) )
+								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 2"
+									" .. but already select what todo after event");
+							else
+							{
+								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 2"
+									" .. set doShutdown flag to timer type");
+								nextStartingEvent->type |= ePlaylistEntry::doShutdown;
+							}
 						}
 						break;
 					case 3:
-						writeToLogfile("eZapMain::getInstance()->handleStandby() returned 3 .. set doGotoSleep flag to timer type");
-						nextStartingEvent->type |= ePlaylistEntry::doGoSleep;
+							if ( nextStartingEvent->type&(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown) )
+								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 3"
+									" .. but already select what todo after event");
+							else
+							{
+								writeToLogfile("eZapMain::getInstance()->handleStandby() returned 3"
+									" .. set doGotoSleep flag to timer type");
+								nextStartingEvent->type |= ePlaylistEntry::doGoSleep;
+							}
 						break;
 					case 0:
 					default:
-						writeToLogfile("eZapMain::getInstance()->handleStandby() returned 0 .. box was already running..");
+						writeToLogfile("eZapMain::getInstance()->handleStandby() returned 0"
+							" .. box was already running..");
 						break;
 				}
 			}
@@ -860,24 +874,21 @@ void eTimerManager::actionHandler()
 					&& prevEvent->type & ePlaylistEntry::stateError
 					&& prevEvent->type & ePlaylistEntry::errorUserAborted )
 					writeToLogfile("user abort previous event .. don't handleStandby");
-				else if ( nextStartingEvent != timerlist->getConstList().end() )
+				else if ( nextStartingEvent == timerlist->getConstList().end() || getSecondsToBegin() > 10*60 )
 				{
-					if ( getSecondsToBegin() > 10*60 )
-					{
-						int i=-1;
-						if ( prevEvent->type & ePlaylistEntry::doShutdown )
-							i=2;
-						else if ( prevEvent->type & ePlaylistEntry::doGoSleep )
-							i=3;
+					int i=-1;
+					if ( prevEvent->type & ePlaylistEntry::doShutdown )
+						i=2;
+					else if ( prevEvent->type & ePlaylistEntry::doGoSleep )
+						i=3;
+					
+					// is sleeptimer?
+					if ( prevEvent->type & ePlaylistEntry::doFinishOnly && 
+						!prevEvent->service )
+						i*=2; // force.. look in eZapMain::handleStandby
 
-						// is sleeptimer?
-						if ( prevEvent->type & ePlaylistEntry::doFinishOnly && 
-							!prevEvent->service )
-							i*=2; // force.. look in eZapMain::handleStandby
-
-						writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
-						eZapMain::getInstance()->handleStandby(i);
-					}
+					writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
+					eZapMain::getInstance()->handleStandby(i);
 				}
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d setNextEvent", calldepth--));
@@ -1398,39 +1409,79 @@ void eTimerManager::cleanupEvents()
 void eTimerManager::clearEvents()
 {
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end();)
-			i = timerlist->getList().erase(i);
+		i = timerlist->getList().erase(i);
+	nextStartingEvent = timerlist->getList().end();
+	actionTimer.stop();
 }
 
-void eTimerManager::deleteEventFromTimerList(const ePlaylistEntry &entry)
+int eTimerManager::deleteEventFromTimerList(const ePlaylistEntry &entry, bool force)
 {
+	if ( nextStartingEvent != timerlist->getConstList().end() 
+		&& *nextStartingEvent == entry && nextStartingEvent->type & ePlaylistEntry::stateRunning )
+	{
+		if ( force ) 
+		{
+			abortEvent( ePlaylistEntry::errorUserAborted );
+			return 0;
+		}
+		return -1;
+	}
 	for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end(); i++)
 	{
 		if (*i == entry)
 		{
-			i = timerlist->getList().erase(i);
+			timerlist->getList().erase(i);
+			if ( nextStartingEvent == timerlist->getList().end() 
+				|| (!(nextStartingEvent->type & ePlaylistEntry::stateRunning)) )
+			{
+				nextAction=setNextEvent;
+				actionTimer.start(0,true);
+			}
 			break;
 		}
 	}
+	return 0;
 }
 
-void eTimerManager::modifyEventInTimerList(const ePlaylistEntry &old_entry, const ePlaylistEntry &new_entry)
+int eTimerManager::modifyEventInTimerList(const ePlaylistEntry &old_entry, const ePlaylistEntry &new_entry, bool force)
 {
+	if ( nextStartingEvent != timerlist->getConstList().end() 
+		&& *nextStartingEvent == old_entry && nextStartingEvent->type & ePlaylistEntry::stateRunning )
+	{
+		if (force) // change only duration and 'after_event' action
+		{
+			updateRunningEvent(new_entry.duration, new_entry.type & (ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown) );
+			return 0;
+		}
+		return -1;  
+		// no changes on running event..  
+		// you can ask the user if he wants to change duration and 'after_event' action only..
+	}
 	for (std::list<ePlaylistEntry>::iterator i(timerlist->getList().begin()); i != timerlist->getList().end(); i++)
 	{
 		if (old_entry == *i)
 		{
 			*i = new_entry;
+			if ( nextStartingEvent == timerlist->getList().end() 
+				|| (!(nextStartingEvent->type & ePlaylistEntry::stateRunning)) )
+			{
+				nextAction=setNextEvent;
+				actionTimer.start(0,true);
+			}
 			break;
 		}
 	}
+	return 0;
 }
 
-bool eTimerManager::updateRunningEventDuration( int duration )
+bool eTimerManager::updateRunningEvent( int duration, int after_event )
 {
 	if ( nextStartingEvent->type & ePlaylistEntry::stateRunning )
 	{
-		nextAction = updateDuration;
 		nextStartingEvent->duration = duration;
+		nextStartingEvent->type &= ~(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown);
+		nextStartingEvent->type |= after_event;
+		nextAction = updateDuration;
 		actionHandler();
 		return true;
 	}
@@ -2221,7 +2272,7 @@ void eTimerEditView::applyPressed()
 					}
 					if ( ret == eMessageBox::btYes )
 					{
-						if ( eTimerManager::getInstance()->updateRunningEventDuration(evt.duration) )
+						if ( eTimerManager::getInstance()->updateRunningEvent(evt.duration,ttype&(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown)) )
 						{
 							hide();
 							eMessageBox box(
