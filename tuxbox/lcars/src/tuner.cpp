@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.24  2003/02/07 13:55:16  alexw
+frontend needs to be opened only once
+
 Revision 1.23  2003/01/26 00:00:20  thedoc
 mv bugs /dev/null
 
@@ -92,12 +95,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 tuner::tuner(settings *s)
 {
 	setting = s;
-
-	if ((frontend = open(FRONTEND_DEV, O_RDWR|O_NONBLOCK)) < 0)
-	{
-		perror("OPEN FRONTEND DEVICE");
-		exit(1);
-	}
 }
 
 tuner::~tuner()
@@ -356,7 +353,7 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 	{
 		frontp.Inversion = INVERSION_AUTO;
 	}
-	if ((frontend = open("/dev/dvb/card0/frontend0", O_RDWR)) < 0)
+	if ((frontend = open(FRONTEND_DEV, O_RDWR|O_NONBLOCK)) < 0)
 	{
 		perror("OPEN FRONTEND DEVICE");
 		exit(1);
