@@ -2,7 +2,6 @@
 
 #include <sys/ioctl.h>
 #include <linux/input.h>
-#include <lib/driver/input_fake.h>
 #include <sys/stat.h>
 
 
