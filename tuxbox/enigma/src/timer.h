@@ -76,6 +76,8 @@ public:
 	bool addEventToTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt, int type = ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR|ePlaylistEntry::stateWaiting, const ePlaylistEntry *exclude=0 );
 	bool addEventToTimerList( eWidget *w, const ePlaylistEntry& entry, const ePlaylistEntry *exclude=0 );
 	int addEventToTimerList(const ePlaylistEntry& entry);
+	void deleteEventFromTimerList(const eServiceReference *ref, const EITEvent *evt);
+	void modifyEventInTimerList(const eServiceReference *ref, const EITEvent *evt, eString description);
 	bool eventAlreadyInList( eWidget *w, EITEvent &e, eServiceReference &ref );
 	void abortEvent(int err);
 	void loadTimerList();
