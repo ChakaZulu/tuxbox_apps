@@ -39,12 +39,21 @@ public:
 
 	void init();
 	void clearList();
-	void setCurrent(T *c);
+	void setCurrent(const T *c);
 	T* getCurrent()	{ return current != childs.end() ? *current : 0; }
 	void sort();
 	T* goNext();
 	T* goPrev();
 	int setProperty(const eString &prop, const eString &value);
+	void eraseBackground(gPainter *target, const eRect &clip);
+
+	template <class Z>
+	void forEachEntry(Z ob)
+	{
+		for (ePtrList_T_iterator i(childs.begin()); i!=childs.end(); ++i)
+			if (ob(**i))
+				break;
+	}
 
 	int have_focus;
 	void setActiveColor(gColor back, gColor front);
@@ -317,6 +326,16 @@ inline eListBox<T>::~eListBox()
 }
 
 template <class T>
+void eListBox<T>::eraseBackground(gPainter *target, const eRect &clip)
+{
+/*	if (((int)getBackgroundColor())!=-1)
+	{
+		target->clear();
+		target->flush();
+	}*/
+}
+
+template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
 	int i=0;
@@ -550,17 +569,23 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 }
 
 template <class T>
-inline void eListBox<T>::setCurrent(T *c)
+inline void eListBox<T>::setCurrent(const T *c)
 {
 	if (childs.empty())
 		return;
+	
+	T *oldptr = *current;
 
-	for (current = childs.begin(); current != childs.end() ; current++)
-		if ( *current == c )
+	ePtrList_T_iterator it = current;	
+
+	for (it = childs.begin(); it != childs.end() ; it++)
+		if ( *it == c )
 			break;
 
-	if ( current == childs.end() )
-		current = childs.begin();
+	if ( it == childs.end() )
+		return;
+
+	current = it;
 
 	if (current != childs.end() )
 	{
@@ -572,12 +597,38 @@ inline void eListBox<T>::setCurrent(T *c)
 				break;
 			else if (it == childs.end())
 				break;
+
 		if ((i == entries) || (it == childs.end()))
 		{
 			top=bottom=current;
 			for (int i=0; i<entries; i++, bottom++)
 				if (bottom == childs.end() )
 					break;
+
+			if (isVisible())
+				invalidate();
+
+			return;
+		}
+
+		if (isVisible())
+		{
+			i=0;
+			int old=-1, cur=-1;
+			
+			for (ePtrList_T_iterator entry(top); i<entries; i++, ++entry)
+				if ( entry == childs.end())
+					break;
+				else if ( *entry == oldptr)
+					old=i;
+				else if ( *entry == *current )
+					cur=i;
+			
+				if ( old != -1 )
+					invalidateEntry(old);
+
+				if ( cur != -1 )
+					invalidateEntry(cur);
 		}
 	}
 }

@@ -85,7 +85,7 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID	face_id, FT_Face* aface)
 	int error;
 	if ((error=FT_New_Face(library, font->filename, 0, aface)))
 	{
-		printf(" failed: %s\n", strerror(error));
+		eDebug(" failed: %s", strerror(error));
 		return error;
 	}
 	FT_Select_Charmap(*aface, ft_encoding_unicode);
@@ -120,7 +120,7 @@ int fontRenderClass::AddFont(const char *filename)
 
 	if ((error=FT_New_Face(library, filename, 0, &face)))
 	{
-		printf(" failed: %s\n", strerror(error));
+		eDebug(" failed: %s", strerror(error));
 		return error;
 	}
 	strcpy(n->filename=new char[strlen(filename)+1], filename);
@@ -131,7 +131,7 @@ int fontRenderClass::AddFont(const char *filename)
 	FT_Done_Face(face);
 
 	n->next=font;
-	eDebug("OK (%s)\n", n->face);
+	eDebug("OK (%s)", n->face);
 	font=n;
 	return 0;
 }
@@ -149,7 +149,7 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 	{
 		if (FT_Init_FreeType(&library))
 		{
-			printf("[FONT] initializing failed.\n");
+			eDebug("[FONT] initializing failed.");
 			return;
 		}
 	}
@@ -163,25 +163,24 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 	{
 		if (FTC_Manager_New(library, 8, 8, maxbytes, myFTC_Face_Requester, this, &cacheManager))
 		{
-			printf("[FONT] initializing font cache failed!\n");
+			eDebug("[FONT] initializing font cache failed!");
 			return;
 		}
 		if (!cacheManager)
 		{
-			printf("[FONT] initializing font cache manager error.\n");
+			eDebug("[FONT] initializing font cache manager error.");
 			return;
 		}
 		if (FTC_SBit_Cache_New(cacheManager, &sbitsCache))
 		{
-			printf("[FONT] initializing font cache sbit failed!\n");
+			eDebug("[FONT] initializing font cache sbit failed!");
 			return;
 		}
 		if (FTC_Image_Cache_New(cacheManager, &imageCache))
 		{
-			printf("[FONT] initializing font cache imagecache failed!\n");
+			eDebug("[FONT] initializing font cache imagecache failed!");
 		}
 	}
-	printf("\n");
 	return;
 }
 
@@ -197,7 +196,7 @@ Font *fontRenderClass::getFont(const char *face, int size, int tabwidth)
 {
 	FTC_FaceID id=getFaceID(face);
 	if (!id)
-		printf("face %s does not exist!\n", face);
+		eDebug("face %s does not exist!", face);
 	if (!id)
 		return 0;
 	return new Font(this, id, size, tabwidth);
@@ -361,7 +360,7 @@ void eTextPara::setFont(Font *fnt)
 
 	if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 	{
-		printf("FTC_Manager_Lookup_Size failed!\n");
+		eDebug("FTC_Manager_Lookup_Size failed!");
 		return;
 	}
 	cache_current_font=&current_font->font.font;
@@ -390,7 +389,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 	{
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
-			printf("FTC_Manager_Lookup_Size failed!\n");
+			eDebug("FTC_Manager_Lookup_Size failed!");
 			return -1;
 		}
 		cache_current_font=&current_font->font.font;
@@ -453,7 +452,7 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 	{
 		if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 		{
-			printf("FTC_Manager_Lookup_Size failed!\n");
+			eDebug("FTC_Manager_Lookup_Size failed!");
 			return;
 		}
 		cache_current_font=&current_font->font.font;

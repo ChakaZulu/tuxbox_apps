@@ -11,8 +11,14 @@
 ]>
 <eskin>
 	<fonts>
-		<font file="unmrs.pfa" />
+		<font file="unmrs.pfa" name="Nimbus"/>
 	</fonts>
+
+	<fontalias>
+		<font name="Nimbus" alias="big" size="25"/>
+		<font name="Nimbus" alias="medium" size="21"/>	
+		<font name="Nimbus" alias="small" size="18"/>	
+	</fontalias>
 
 	<images basepath="" target="fb">
 		<img name="button_red" src="button_red.png" />
@@ -74,11 +80,11 @@
 
 	<object name="eSatelliteConfigurationManager">
 		<eSatelliteConfigurationManager cposition="120:80" csize="500:370" text="Satellitenkonfiguration">
-			<eLabel text="Satelliten:" position="0:0" size="400:30" font="NimbusSansL-Regular Sans L Regular;25" />
-			<eListbox name="list" position="0:30" size="400:300" />
-			<eButton name="close" position="300:300" size="50:30" text="[OK]"/>
-			<eButton name="new" position="150:300" size="50:30" text="Neu..."/>
-			<eButton name="delete" position="0:300" size="100:30" text="Loeschen..."/>
+			<eLabel text="DISEqC" position="70:10" size="100:30" />
+			<eLabel text="Sat/Position" position="230:10" size="280:30" />
+			<eLabel text="LNB" position="420:10" size="100:30" />
+			<eWidget name="buttons" position="50:55" size="e-10:e-10" />
+			<eButton name="close" position="10:e-40" size="50:30" text="[OK]"/>
 		</eSatelliteConfigurationManager>
 	</object>
 
@@ -108,12 +114,9 @@
 			<eListbox name="lnblist" position="210:10" size="e-10:30" />
 			<eLabel position="10:40" size="200:30" text="Netzwerk:" />
 			<eListbox name="network" position="210:40" size="e-10:30" />
-			
 			<eFEStatus name="festatus" position="0:100" size="400:85" />
-			
 			<eLabel name="status" position="10:190" size="e-10:e-30" />
-
-			<eButton text="start scan" name="start" position="10:e-30" size="200:30" />
+  		<eButton text="start scan" name="start" position="10:e-30" size="200:30" />
 			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" />
 		</tsAutomatic>
 	</object>
@@ -121,12 +124,15 @@
 	<object name="tsScan">
 		<tsScan position="0:0" size="e:350">
 			<eLabel position="10:5" size="200:30" text="scanning..." />
-			<eLabel position="10:40" size="200:30" text="Progress:" />
-			<eProgress name="scan_progress" position="145:45" size="e-10:20" />
-			<eLabel name="time_left" position="10:80" size="e-10:30" />
-			<eLabel name="service_name" position="10:120" size="e-10:30" />
-			<eLabel name="service_provider" position="10:160" size="e-10:30" />
-			<!--eLabel position="100:200" size="100:97" pixmap="sat_scan" alphatest="on"/-->			
+			<eLabel text="services scanned     :" position="10:45" size="300:30" />
+			<eLabel text="transponder scanned:" position="10:85" size="300:30" />
+			<eLabel name="services_scanned" position="320:45" size="e-10:30" align="right" />
+			<eLabel name="transponder_scanned" position="320:85" size="e-10:30" align="right" />
+			<eLabel position="10:135" size="200:30" text="Progress:" />
+			<eProgress name="scan_progress" position="140:140" size="e-10:20" />
+			<eLabel name="time_left" position="10:175" size="e-10:30" align="right" />
+			<eLabel name="service_name" position="10:245" size="e-10:30" />
+			<eLabel name="service_provider" position="10:285" size="e-10:30" />
 		</tsScan>
 	</object>
 	

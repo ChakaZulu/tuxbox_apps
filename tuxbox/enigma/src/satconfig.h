@@ -13,13 +13,10 @@ public:
 
 class eSatelliteConfigurationManager: public eWindow
 {
-	eListBox<eListBoxEntryMenu> *list;
-	eButton *button_close, *sat_new, *sat_delete;
+	eButton *button_close;
 	int eventFilter(const eWidgetEvent &event);
 public:
 	void okPressed();
-	void newSatellite();
-	void deleteSatellite();
 public:
 	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();

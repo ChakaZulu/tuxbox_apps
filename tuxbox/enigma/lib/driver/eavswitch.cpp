@@ -202,14 +202,14 @@ bool eAVSwitch::loadScartConfig()
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
 			sscanf( buf, readline.c_str(), &scart[0], &scart[1], &scart[2], &scart[3], &scart[4], &scart[5] );
-			eDebug("[eAVSwitch] readed scart conf : %i %i %i %i %i %i\n", scart[0], scart[1], scart[2], scart[3], scart[4], scart[5] );
+			eDebug("[eAVSwitch] readed scart conf : %i %i %i %i %i %i", scart[0], scart[1], scart[2], scart[3], scart[4], scart[5] );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
 			int i = readline.find("_scart");
 			readline.replace(i, 6,"_dvb");
 			sscanf( buf, readline.c_str(), &dvb[0], &dvb[1], &dvb[2], &dvb[3], &dvb[4], &dvb[5] );
-			eDebug("[eAVSwitch] readed dvb conf : %i %i %i %i %i %i\n", dvb[0], dvb[1], dvb[2], dvb[3], scart[4], scart[5] );
+			eDebug("[eAVSwitch] readed dvb conf : %i %i %i %i %i %i", dvb[0], dvb[1], dvb[2], dvb[3], scart[4], scart[5] );
 		}
 		fclose(fd);
 	}

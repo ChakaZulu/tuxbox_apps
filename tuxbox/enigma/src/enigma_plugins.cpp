@@ -136,7 +136,7 @@ int eZapPlugins::exec()
 
 	if (n < 0)
 	{
-		eDebug("Error Read Plugin Directory\n");
+		eDebug("Error Read Plugin Directory");
 		eMessageBox msg("Error Read Plugin Directory", "Error");
 		msg.show();
 		msg.exec();
@@ -148,7 +148,7 @@ int eZapPlugins::exec()
 	{
 		eString	FileName = namelist[count]->d_name;
 
-		if ( FileName.find(".cfg") != -1 )
+		if ( FileName.find(".cfg") != eString::npos )
 			new ePlugin(&window->list, (PluginPath+FileName).c_str());		
 
 		free(namelist[count]);

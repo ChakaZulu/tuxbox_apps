@@ -35,7 +35,7 @@ void eEPGWindow::fillEPGList()
   eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current);
   if (service)
 		setText(eString("EPG - ")+service->service_name);
- 	eDebug("get EventMap for onid: %02x, sid: %02x\n", current.original_network_id.get(), current.service_id.get());
+ 	eDebug("get EventMap for onid: %02x, sid: %02x", current.original_network_id.get(), current.service_id.get());
 	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current);
 	eventMap::const_iterator It;
 	for (It = evt->begin(); It != evt->end(); It++)

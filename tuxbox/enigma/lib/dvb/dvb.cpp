@@ -1,9 +1,13 @@
 #include <errno.h>
 #include <stdio.h>
-#include "dvb.h"
-#include "frontend.h"
-#include "si.h"
+#include <ctype.h>
 #include <set>
+
+#include <core/dvb/dvb.h>
+#include <core/dvb/si.h>
+#include <core/dvb/frontend.h>
+
+eTransponderList* eTransponderList::instance=0;
 
 static struct
 {
@@ -112,7 +116,7 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 
 int eTransponder::satellite::tune(eTransponder *trans)
 {
-	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d\n", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
+	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
 	int inv=0;
 	eSatellite *sat=trans->tplist.findSatellite(orbital_position);
 	if (!sat)
@@ -231,8 +235,22 @@ void eService::update(const SDTEntry *sdtentry)
 	for (ePtrList<Descriptor>::const_iterator d(sdtentry->descriptors); d != sdtentry->descriptors.end(); ++d)
 		if (d->Tag()==DESCR_SERVICE)
 		{
+			service_name="";
 			const ServiceDescriptor *nd=(ServiceDescriptor*)*d;
-			service_name=nd->service_name;
+		
+	  	int i=0;
+			char ch;
+			while ((ch=nd->service_name[i++]))
+			{
+				if (ch<32)
+					continue;
+				if (ch==0x86)
+					continue;
+				if (ch==0x87)
+					continue;
+				service_name+=ch;
+			}
+
 			service_provider=nd->service_provider;
 			service_type=nd->service_type;
 		}
@@ -263,6 +281,9 @@ void eLNB::deleteSatellite(eSatellite *satellite)
 
 eTransponderList::eTransponderList()
 {
+	if (!instance)
+		instance = this;
+
 	{
 		lnbs.push_back(eLNB(*this));
 		eLNB &lnb=lnbs.back();
@@ -307,16 +328,18 @@ eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_s
 eService &eTransponderList::createService(const eServiceReference &service, int chnum, bool *newService)
 {
 	std::map<eServiceReference,eService>::iterator i=services.find(service);
+                                                  	
+	if (newService)
+			*newService = ( i == services.end() );
+
 	if ( i == services.end() )
 	{
-		if (newService)
-			*newService=true;
-
 		if (chnum==-1)
 			chnum=beautifyChannelNumber(service.transport_stream_id.get(), service.original_network_id.get(), service.service_id.get());
 		
 		if (chnum==-1)
 		{
+
 			if (channel_number.end()==channel_number.begin())
 				chnum=200;
 			else
@@ -325,15 +348,17 @@ eService &eTransponderList::createService(const eServiceReference &service, int 
 				--i;
 				chnum=i->first+1;	// letzte kanalnummer +1
 			}
-			while (channel_number.find(chnum)!=channel_number.end())
-				chnum++;
 		}
-		
+
+		while (channel_number.find(chnum)!=channel_number.end())
+			chnum++;
+	
 		eService *n=&services.insert(
 					std::pair<eServiceReference,eService>
 						(service,
 						eService(service.transport_stream_id, service.original_network_id, service.service_id, chnum))
 					).first->second;
+
 		channel_number.insert(std::pair<int,eService*>(chnum,n));
 		
 		return *n;
@@ -341,29 +366,12 @@ eService &eTransponderList::createService(const eServiceReference &service, int 
 	return (*i).second;
 }
 
-void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nservices)
-{
-	numtransponders=0;
-	scanned=0;
-	nservices=services.size();
-	for(std::map<tsref,eTransponder>::iterator i(transponders.begin()); i!=transponders.end(); ++i)
-	{
-		eTransponder &t=i->second;
-		if (!t.isValid())
-			continue;
-		if (t.transport_stream_id.get()==-1)
-			continue;
-		numtransponders++;
-		if (t.state==eTransponder::stateOK)
-			scanned++;
-	}
-}
-
 int eTransponderList::handleSDT(const SDT *sdt)
 {
 	std::set<eServiceID> s;
 	int changed=0;
 	bool newAdded;
+
 	for (ePtrList<SDTEntry>::const_iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 	{
 		int service_type=-1;
@@ -373,6 +381,7 @@ int eTransponderList::handleSDT(const SDT *sdt)
 				const ServiceDescriptor *nd=(ServiceDescriptor*)*d;
 				service_type=nd->service_type;
 			}
+
 		if (service_type == -1)
 			continue;
 		
@@ -383,12 +392,13 @@ int eTransponderList::handleSDT(const SDT *sdt)
 					eServiceID(i->service_id),
 					service_type);
 
-		eService &service=createService(sref, newAdded);
+		eService &service=createService(sref, -1, &newAdded);
 		service.update(*i);
 		s.insert(eServiceID(i->service_id));
 
 		/*emit*/ service_found(sref, newAdded);
 	}
+
 	for (std::map<eServiceReference,eService>::iterator i(services.begin()); i != services.end(); ++i)
 		if ((i->first.original_network_id == sdt->original_network_id)	&& // if service on this on
 				(i->second.transport_stream_id == sdt->transport_stream_id) && 	// and on this transponder
@@ -412,7 +422,7 @@ eTransponder *eTransponderList::searchTS(eTransportStreamID transport_stream_id,
 	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(transport_stream_id, original_network_id));
 	if (i==transponders.end())
 		return 0;
-	return &i->second;
+		return &i->second;
 }
 
 eService *eTransponderList::searchService(const eServiceReference &service)

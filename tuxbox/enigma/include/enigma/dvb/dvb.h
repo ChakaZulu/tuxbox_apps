@@ -426,6 +426,7 @@ public:
 
 class eTransponderList
 {
+	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReference,eService> services;
 	std::map<int,eService*> channel_number;
@@ -436,8 +437,15 @@ class eTransponderList
 	friend class eSatellite;
 
 public:
+	static eTransponderList* getInstance()	{ return instance; }
 	eTransponderList();
-	
+
+	~eTransponderList()
+	{
+		if (instance == this)
+			instance = 0;
+	}
+
 	void updateStats(int &transponders, int &scanned, int &services);
 	eTransponder &createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eService &createService(const eServiceReference &service, int service_number=-1, bool *newService=0);
@@ -445,7 +453,6 @@ public:
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReference &, bool> service_found;
 
-	void serialize(FILE *out, int ind);
 	eTransponder *searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eService *searchService(const eServiceReference &service);
 	const eServiceReference *searchService(eOriginalNetworkID original_network_id, eServiceID service_id);

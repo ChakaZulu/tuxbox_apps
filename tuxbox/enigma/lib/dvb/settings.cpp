@@ -136,7 +136,7 @@ void eDVBSettings::revalidateBouquets()
 	/*emit*/ dvb.bouquetListChanged();
 }
 
-eTransponderList *eDVBSettings::getTransponders	()
+eTransponderList *eDVBSettings::getTransponders()
 {
 	return transponderlist;
 }
@@ -375,7 +375,7 @@ void eDVBSettings::loadBouquets()
 	eDebug("reading bouquets");
 	if ((!fgets(line, 256, f)) || strcmp(line, "bouquets\n"))
 	{
-		eDebug("settings invalid, no transponders\n");
+		eDebug("settings invalid, no transponders");
 		return;
 	}
 

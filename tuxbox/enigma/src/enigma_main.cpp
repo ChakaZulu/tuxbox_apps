@@ -1011,6 +1011,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 
 void eZapMain::serviceChanged(const eServiceReference &serviceref, int err)
 {
+
 	isVT = Decoder::parms.tpid != -1;
 
 	setVTButton(isVT);

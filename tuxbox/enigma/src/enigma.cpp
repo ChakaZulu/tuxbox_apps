@@ -110,9 +110,11 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eDebug("<-- eZapMain");
 
 	pLCD = eZapLCD::getInstance();
+	eDebug("<-- pLCD");
 	serviceSelector = new eServiceSelector();
-	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	eDebug("<-- service selector");
+	serviceSelector->setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+	eDebug("..");
 
 	dyn_resolver = new eHTTPDynPathResolver();
 	ezapInitializeDyn(dyn_resolver);

@@ -62,6 +62,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	case eDVBServiceEvent::eventServiceSwitch:
 	{
+		Decoder::Flush();
 		if (!dvb.settings->transponderlist)
 		{
 			eDebug("no tranponderlist");

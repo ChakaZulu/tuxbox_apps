@@ -54,7 +54,7 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 	handle=open(filename, O_RDONLY|O_NONBLOCK);
 	if (handle<0)
 	{
-		eDebug("failed to open %s\n", filename);
+		eDebug("failed to open %s", filename);
 		sn=0;
 	} else
 	{

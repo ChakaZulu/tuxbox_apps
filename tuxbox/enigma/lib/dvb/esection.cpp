@@ -249,7 +249,7 @@ void eSection::data(int socket)
 	while (max--)
 	{
 		if (lockcount)
-			eDebug("eSection::data on locked section!\n");
+			eDebug("eSection::data on locked section!");
 		timer->start(10000, true);
 		if (reader.read(buf))
 			break;

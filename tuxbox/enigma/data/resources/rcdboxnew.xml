@@ -59,8 +59,6 @@
 			<action name="showMainMenu" key="d-box" flags="m" />
 			<action name="standby" key="power" flags="m" />
 			<action name="toggleInfobar" key="ok" flags="m" />
-			<action name="showServiceSelector" key="up" flags="m" />
-			<action name="showServiceSelector" key="down" flags="m" />
 			<action name="showSubservices" key="green" flags="m" />
 			<action name="showAudio" key="yellow" flags="m" />
 			<action name="pluginVTXT" key="blue" flags="m" />
@@ -81,6 +79,19 @@
 			<action name="showBouquetSelector" key="d-box" flags="m" />
 			<action name="showEPGSelector" key="red" flags="m" />
 			<action name="showAllServices" key="home" flags="m" />
+		</actionmap>
+
+		<actionmap name="numbers">
+			<action name="0" key="0" flags="mr" />
+			<action name="1" key="1" flags="mr" />
+			<action name="2" key="2" flags="mr" />
+			<action name="3" key="3" flags="mr" />
+			<action name="4" key="4" flags="mr" />
+			<action name="5" key="5" flags="mr" />
+			<action name="6" key="6" flags="mr" />
+			<action name="7" key="7" flags="mr" />
+			<action name="8" key="8" flags="mr" />
+			<action name="9" key="9" flags="mr" />
 		</actionmap>
 
 	</device>

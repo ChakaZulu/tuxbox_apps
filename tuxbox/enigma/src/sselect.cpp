@@ -30,7 +30,28 @@ struct serviceSelectorActions
 	}
 };
 
+struct numberActions
+{
+	eActionMap map;
+	eAction key0, key1, key2, key3, key4, key5, key6, key7, key8, key9;
+	numberActions():
+		map("numbers", _("number actions")),
+		key0(map, "0", _("key 0"), eAction::prioDialog),
+		key1(map, "1", _("key 1"), eAction::prioDialog),
+		key2(map, "2", _("key 2"), eAction::prioDialog),
+		key3(map, "3", _("key 3"), eAction::prioDialog),
+		key4(map, "4", _("key 4"), eAction::prioDialog),
+		key5(map, "5", _("key 5"), eAction::prioDialog),
+		key6(map, "6", _("key 6"), eAction::prioDialog),
+		key7(map, "7", _("key 7"), eAction::prioDialog),
+		key8(map, "8", _("key 8"), eAction::prioDialog),
+		key9(map, "9", _("key 9"), eAction::prioDialog)
+	{
+	}
+};
+
 eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
+eAutoInitP0<numberActions> i_numberActions(5, "number actions");
 
 eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, const eServiceReference &service): 
 		eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service)
@@ -39,21 +60,9 @@ eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, c
 #if 0
 	sort=eString().sprintf("%06d", service->service_number);
 #else
-	sort="";
-	
 	const eService *pservice=eDVB::getInstance()->settings->getTransponders()->searchService(service);
-	if (pservice)
-		for (unsigned p=0; p<pservice->service_name.length(); p++)
-		{
-			char ch=pservice->service_name[p];
-			if (ch<32)
-				continue;
-			if (ch==0x86)
-				continue;
-			if (ch==0x87)
-				continue;
-			sort+=toupper(ch);
-		}
+	sort=pservice?pservice->service_name:"";
+	sort.upper();
 #endif
 }
 
@@ -69,26 +78,16 @@ eListBoxEntryService::~eListBoxEntryService()
 
 void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, bool hilited)
 {
-	eString sname;
 	const eService *pservice=eDVB::getInstance()->settings->getTransponders()->searchService(service);
+	eString sname;
 	if (pservice)
 	{
-		for (unsigned p=0; p<pservice->service_name.length(); p++)
-		{
-			char ch=pservice->service_name[p];
-			if (ch<32)
-				continue;
-			if (ch==0x86)
-				continue;
-			if (ch==0x87)
-				continue;
-			sname+=ch;
-		}
+		sname=pservice->service_name;
 		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service);
 
-		eWidget* p = listbox->getParent();
+		eWidget* p = listbox->getParent();			
 		if (hilited && p && p->LCDElement)
-				p->LCDElement->setText(sname);
+				p->LCDElement->setText(sort);
 
 		if (e)
 		{
@@ -150,6 +149,8 @@ struct eServiceSelector_addService: public std::unary_function<eServiceReference
 
 void eServiceSelector::fillServiceList()
 {
+	inBouquet = 0;
+
 	setText("full services");
 
 	services->clearList();
@@ -159,6 +160,94 @@ void eServiceSelector::fillServiceList()
 
 	services->sort();
 	services->invalidate();
+}
+
+struct moveFirstChar: public std::unary_function<const eListBoxEntryService&, void>
+{
+	eListBox<eListBoxEntryService> &lb;
+	char c;
+
+	moveFirstChar(char c, eListBox<eListBoxEntryService> &lb ): lb(lb), c(c)
+	{
+	}
+
+	bool operator()(const eListBoxEntryService& s)
+	{
+		if (s.sort[0] == c)
+		{
+	 		lb.setCurrent(&s);
+			return 1;
+		}
+		return 0;
+	}
+};
+
+
+void eServiceSelector::gotoChar(char c)
+{
+	switch(c)
+	{
+		case 2:	// A,B,C
+			if (BrowseChar == 'A' || BrowseChar == 'B')
+				BrowseChar++;
+			else
+				BrowseChar = 'A';
+		break;
+	
+		case 3:	// D,E,F
+			if (BrowseChar == 'D' || BrowseChar == 'E')
+				BrowseChar++;
+			else
+				BrowseChar = 'D';
+		break;
+
+		case 4:	// G,H,I
+			if (BrowseChar == 'G' || BrowseChar == 'H')
+				BrowseChar++;
+			else
+				BrowseChar = 'G';
+		break;
+
+		case 5:	// J,K,L
+			if (BrowseChar == 'J' || BrowseChar == 'M')
+				BrowseChar++;
+			else
+				BrowseChar = 'J';
+		break;
+
+		case 6:	// M,N,O
+			if (BrowseChar == 'M' || BrowseChar == 'N')
+				BrowseChar++;
+			else
+				BrowseChar = 'M';
+		break;
+
+		case 7:	// P,Q,R,S
+			if (BrowseChar >= 'P' && BrowseChar <= 'R')
+				BrowseChar++;
+			else
+				BrowseChar = 'P';
+		break;
+
+		case 8:	// T,U,V
+			if (BrowseChar == 'T' || BrowseChar == 'U')
+				BrowseChar++;
+			else
+				BrowseChar = 'T';
+		break;
+
+		case 9:	// W,X,Y,Z
+			if (BrowseChar >= 'W' && BrowseChar <= 'Y')
+				BrowseChar++;
+			else
+				BrowseChar = 'W';
+		break;
+	}
+	if (BrowseChar != 0)
+	{
+		BrowseTimer.start(5000);
+		services->forEachEntry(moveFirstChar(BrowseChar, *services));
+	}
 }
 
 void eServiceSelector::entrySelected(eListBoxEntryService *entry)
@@ -185,7 +274,23 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 		case eWidgetEvent::evtAction:
-			if (event.action == &i_serviceSelectorActions->prevBouquet)
+			if (event.action == &i_numberActions->key2)
+				gotoChar(2);
+			else if (event.action == &i_numberActions->key3)
+				gotoChar(3);
+			else if (event.action == &i_numberActions->key4)
+				gotoChar(4);
+			else if (event.action == &i_numberActions->key5)
+				gotoChar(5);
+			else if (event.action == &i_numberActions->key6)
+				gotoChar(6);
+			else if (event.action == &i_numberActions->key7)
+				gotoChar(7);
+			else if (event.action == &i_numberActions->key8)
+				gotoChar(8);
+			else if (event.action == &i_numberActions->key9)
+				gotoChar(9);
+			else if (event.action == &i_serviceSelectorActions->prevBouquet)
 			{
 				eBouquet *b;
 				b=pbs->prev();
@@ -230,17 +335,19 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				fillServiceList();
 			else
 				break;
-			return 1;
+		return 1;
 
 		default:
-			break;
+
+		break;
 	}
 	return eWindow::eventHandler(event);
 }
 
 eServiceSelector::eServiceSelector()
-								:eWindow(0)
+								:eWindow(0), BrowseChar(0), BrowseTimer(eApp)
 {
+	inBouquet = 0;
 	services = new eListBox<eListBoxEntryService>(this);
 	services->setName("services");
 	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
@@ -250,12 +357,14 @@ eServiceSelector::eServiceSelector()
 	CONNECT(services->selected, eServiceSelector::entrySelected);
 	CONNECT(services->selchanged, eServiceSelector::selchanged);
 	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::fillServiceList);
+	CONNECT(BrowseTimer.timeout, eServiceSelector::ResetBrowseChar);
 
 	if (eSkin::getActive()->build(this, "eServiceSelector"))
 		eWarning("Service selector widget build failed!");
 
 	services->init();
 	addActionMap(&i_serviceSelectorActions->map);
+	addActionMap(&i_numberActions->map);
 }
 
 eServiceSelector::~eServiceSelector()
@@ -266,6 +375,7 @@ eServiceSelector::~eServiceSelector()
 
 void eServiceSelector::useBouquet(eBouquet *bouquet)
 {
+	inBouquet = 1;
 	services->clearList();
 	if (bouquet)
 	{
@@ -275,13 +385,18 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 			if ((i->service_type!=1) && (i->service_type!=2) && (i->service_type!=4))
 				continue;
 			eListBoxEntryService *l=new eListBoxEntryService(services, *i);
-			if (*i==*result)
+			if (result && (*i == *result) )
 				services->setCurrent(l);
 		}
 		if (bouquet->bouquet_id>=0)
 			services->sort();
 	}
 	services->invalidate();
+}
+
+void eServiceSelector::ResetBrowseChar()
+{
+	BrowseChar=0;
 }
 
 const eServiceReference *eServiceSelector::choose(const eServiceReference *current, int irc)

@@ -12,6 +12,7 @@ class eLabel;
 class eListBoxEntryService: public eListBoxEntry
 {
 	friend class eListBox<eListBoxEntryService>;
+	friend struct moveFirstChar;
 	eString sort;
 	eString short_name;
 public:
@@ -32,6 +33,8 @@ protected:
 
 class eServiceSelector: public eWindow
 {
+	bool inBouquet;
+
 	const eServiceReference *result;
 	eServiceReference selected;
 	
@@ -44,7 +47,11 @@ private:
 	void fillServiceList();
 	void entrySelected(eListBoxEntryService *entry);
 	void selchanged(eListBoxEntryService *entry);
-public:
+	char BrowseChar;
+	eTimer BrowseTimer;
+	void ResetBrowseChar();
+	void gotoChar(char c);
+	public:
 	enum
 	{
 		dirNo,

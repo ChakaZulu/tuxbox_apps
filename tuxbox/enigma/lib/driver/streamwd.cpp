@@ -89,7 +89,7 @@ void eStreamWatchdog::reloadSettings()
 		}
 	}
 	
-	eDebug("Aratio changed\n");			
+	eDebug("Aratio changed");			
 		/*emit*/ AspectRatioChanged(isanamorph);
 
 	int fd;

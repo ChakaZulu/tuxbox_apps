@@ -6,18 +6,11 @@
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 {
-	list=new eListBox<eListBoxEntryMenu>(this);
-	list->setName("list");
-
 	button_close=new eButton(this);
 	button_close->setName("close");
 	CONNECT(button_close->selected, eSatelliteConfigurationManager::okPressed);
 
-	sat_new=new eButton(this);
-	sat_new->setName("new");
 	
-	sat_delete=new eButton(this);
-	sat_delete->setName("delete");
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eSatelliteConfigurationManager"))
@@ -31,14 +24,6 @@ eSatelliteConfigurationManager::~eSatelliteConfigurationManager()
 void eSatelliteConfigurationManager::okPressed()
 {
 	close(0);
-}
-
-void eSatelliteConfigurationManager::newSatellite()
-{
-}
-
-void eSatelliteConfigurationManager::deleteSatellite()
-{
 }
 
 int eSatelliteConfigurationManager::eventFilter(const eWidgetEvent &event)

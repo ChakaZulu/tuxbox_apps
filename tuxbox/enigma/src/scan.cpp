@@ -31,9 +31,9 @@ tsSelectType::tsSelectType(eWidget *parent): eWidget(parent)
 	if (skin->build(this, "tsSelectType"))
 		eFatal("skin load of \"tsSelectType\" failed");
 
-	new eListBoxEntryText(list, "Automatische Suche...", (void*)1);
-	new eListBoxEntryText(list, "Manuelle Suche...", (void*)2);
-	list->setCurrent(new eListBoxEntryText(list, "Jetzt keine Suche durchführen", (void*)0));
+	new eListBoxEntryText(list, _("auto scan"), (void*)1);
+	new eListBoxEntryText(list, _("manual scan.."), (void*)2);
+	list->setCurrent(new eListBoxEntryText(list, _("abort"), (void*)0));
 
 	CONNECT(list->selected, tsSelectType::selected);
 }
@@ -176,7 +176,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	new eListBoxEntryText(l_lnb, "SAT A, OPT B", (void*)2);
 	new eListBoxEntryText(l_lnb, "SAT B, OPT B", (void*)3);
 	
-	l_network->setCurrent(new eListBoxEntryText(l_network, _("Automatic"), (void*)0));
+	l_network->setCurrent(new eListBoxEntryText(l_network, _("automatic"), (void*)0));
 
 #if 0
 	new eListBoxEntryText(l_network, "Astra 19.2°E fake", (void*)"astra192");
@@ -222,7 +222,6 @@ void tsAutomatic::start()
 		}
 
 		// scanflags auswerten
-		eDebug("ScanFlags = %i", pkt->scanflags);
 		sapi->setSkipKnownNIT(pkt->scanflags & 8);
 		sapi->setUseONIT(pkt->scanflags & 4);
 		sapi->setUseBAT(pkt->scanflags & 2);
@@ -521,6 +520,12 @@ tsScan::tsScan(eWidget *parent): eWidget(parent, 1), timer(eApp)
 {
 	addActionMap(&i_cursorActions->map);
 
+	services_scanned = new eLabel(this);
+	services_scanned->setName("services_scanned");
+
+	transponder_scanned = new eLabel (this);
+	transponder_scanned->setName("transponder_scanned");
+
 	timeleft = new eLabel(this);
 	timeleft->setName("time_left");
 
@@ -581,18 +586,21 @@ void tsScan::updateTime()
 		scantime++;
 		int sek = (int) (( (double) scantime / tpScanned) * tpLeft);
 		if (sek > 59)
-			timeleft->setText(eString().sprintf("%02i minutes and %02i seconds left", sek / 60, sek % 60));
+			timeleft->setText(eString().sprintf(_("%02i minutes and %02i seconds left"), sek / 60, sek % 60));
 		else
-			timeleft->setText(eString().sprintf("%02i seconds left", sek ));
+			timeleft->setText(eString().sprintf(_("%02i seconds left"), sek ));
 }
 
 void tsScan::serviceFound(const eServiceReference &service, bool newService)
 {
 	servicesScanned++;
+	
+	services_scanned->setText(eString().sprintf("%i", servicesScanned));
+
 	eService *s=eDVB::getInstance()->settings->getTransponders()->searchService(service);
 	service_name->setText(s->service_name);
 	service_provider->setText(s->service_provider);
-
+	
 	if (newService)
 	switch(s->service_type)
 	{
@@ -650,11 +658,11 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 	case eDVBScanEvent::eventScanNext:
 			tpLeft--;
 			tpScanned++;
+			transponder_scanned->setText(eString().sprintf("%i", tpScanned));
 			perc=(int) ( ( 100.00 / (tpLeft+tpScanned) ) * tpScanned );
 			progress->setPerc(perc);
 		break;
 	case eDVBScanEvent::eventScanCompleted:
-			eDebug("Scan Finished: %i Transponder scanned, TP Left = %i", tpScanned, tpLeft);
 			timer.stop();
 			close(0);
 		break;
@@ -670,7 +678,7 @@ void tsScan::dvbState(const eDVBState &state)
 TransponderScan::TransponderScan()
 {
 	window=new eWindow(0);
-	window->setText("Transponder Scan");
+	window->setText(_("Transponder Scan"));
 	window->cmove(ePoint(100, 100));
 	window->cresize(eSize(460, 400));
 	

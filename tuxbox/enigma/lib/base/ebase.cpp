@@ -140,7 +140,7 @@ void eMainloop::processOneEvent()
 		}
 	}
 	else if (ret<0)
-		eDebug("poll made error\n");
+		eDebug("poll made error");
 
 		// check Timers...
 	while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
