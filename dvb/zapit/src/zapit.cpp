@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.301 2003/03/05 23:25:25 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.302 2003/03/06 18:44:31 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1415,14 +1415,15 @@ void signal_handler(int signum)
 		debug = !debug;
 		break;
 	default:
-		enterStandby();
-		exit(0);
+                CZapitClient zapit;
+                zapit.shutdown();
+                break;
 	}
 }
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.301 2003/03/05 23:25:25 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.302 2003/03/06 18:44:31 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1508,6 +1509,9 @@ int main(int argc, char **argv)
 
 	delete bouquetManager;
 	delete eventServer;
+
+        INFO("shutdown complete");
+
 	return 0;
 }
 
