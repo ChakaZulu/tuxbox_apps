@@ -103,12 +103,12 @@ class CLCD
 		void init(const char * fontfile, const char * fontname, const bool _setlcdparameter);
 		void setlcdparameter(void);
 
-		void setMode(MODES m, const std::string & title="");
+		void setMode(const MODES m, const char * const title = "");
 
 		void showServicename(const std::string & name); // UTF-8
 		void showTime();
-		void showVolume(char vol);
-		void showPercentOver(const unsigned char perc);
+		void showVolume(const char vol, const bool perform_update = true);
+		void showPercentOver(const unsigned char perc, const bool perform_update = true);
 		void showMenuText(const int position, const std::string & text, const int highlight = -1, const bool utf_encoded = false);
 		void showMP3(const std::string & artist, const std::string & title, const std::string & album);
 		void showMP3Play(MP3MODES m=MP3_PLAY);

@@ -282,7 +282,7 @@ void CMenuWidget::paint()
 {
 	std::string l_name = localizing ? g_Locale->getText(name) : name;
 
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, l_name);
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, l_name.c_str());
 
 	height=wanted_height;
 	if(height > (g_settings.screen_EndY - g_settings.screen_StartY))

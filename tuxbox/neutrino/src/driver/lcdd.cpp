@@ -267,11 +267,14 @@ void CLCD::showTime()
 	}
 }
 
-void CLCD::showVolume(char vol)
+void CLCD::showVolume(const char vol, const bool perform_update)
 {
 	volume = vol;
-	if ((mode==MODE_TVRADIO && g_settings.lcd_show_volume) 
-       || (mode==MODE_SCART) || (mode==MODE_MP3))
+	if (
+	    ((mode == MODE_TVRADIO) && (g_settings.lcd_show_volume)) ||
+	    (mode == MODE_SCART) ||
+	    (mode == MODE_MP3)
+	    )
 	{
 		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
 		//strichlin
@@ -285,13 +288,14 @@ void CLCD::showVolume(char vol)
 			display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 		}
 
-		display.update();
+		if (perform_update)
+		  display.update();
 	}
 }
-void CLCD::showPercentOver(const unsigned char perc)
+void CLCD::showPercentOver(const unsigned char perc, const bool perform_update)
 {
 	percentOver = perc;
-	if ((mode==MODE_TVRADIO))
+	if (mode == MODE_TVRADIO)
 	{
 		if(g_settings.lcd_show_volume == 0)
 		{
@@ -306,7 +310,8 @@ void CLCD::showPercentOver(const unsigned char perc)
 				int dp = int( perc/100.0*61.0+12.0);
 				display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 			}
-			display.update();
+			if (perform_update)
+				display.update();
 		}
 		else if (g_settings.lcd_show_volume == 2)
 		{
@@ -321,7 +326,8 @@ void CLCD::showPercentOver(const unsigned char perc)
 				int dp = int( perc/100.0*105.0+12.0);
 				display.draw_fill_rect (11,2,dp,8, CLCDDisplay::PIXEL_ON);
 			}
-			display.update();
+			if (perform_update)
+				display.update();
 		}
 	}
 }
@@ -388,7 +394,7 @@ void CLCD::showMP3Play(MP3MODES m)
 	}
 	display.update();
 }
-void CLCD::setMode(MODES m, const std::string & title)
+void CLCD::setMode(const MODES m, const char * const title)
 {
 	switch (m)
 	{
@@ -400,16 +406,16 @@ void CLCD::setMode(MODES m, const std::string & title)
 			switch(g_settings.lcd_show_volume){
 			case 0:
 				display.load_screen(&icon_lcd2);
-				showPercentOver(percentOver);
+				showPercentOver(percentOver, false);
 				break;
 			case 1:
 				display.load_screen(&icon_lcd);
-				showVolume(volume);
+				showVolume(volume, false);
 				break;
 			case 2:
 				display.load_screen(&icon_lcd3);
-				showVolume(volume);
-				showPercentOver(percentOver);
+				showVolume(volume, false);
+				showPercentOver(percentOver, false);
 				break;
 			}
 			showServicename(servicename);
@@ -444,7 +450,7 @@ void CLCD::setMode(MODES m, const std::string & title)
 			display.draw_line(x-2,32,x+14,32, CLCDDisplay::PIXEL_ON);
 
 			showMP3Play(MP3_STOP);
-			showVolume(volume);
+			showVolume(volume, false);
 			showTime();
 			display.update();
 		   break;
@@ -455,7 +461,7 @@ void CLCD::setMode(MODES m, const std::string & title)
 			display.load_screen(&icon_lcd);
 			mode = m;
 			showclock = true;
-			showVolume(volume);
+			showVolume(volume, false);
 			showTime();
 			display.update();
 			break;
@@ -465,7 +471,7 @@ void CLCD::setMode(MODES m, const std::string & title)
 			mode = m;
 			showclock = false;
 			display.load_screen(&icon_setup);
-			fonts.menutitle->RenderString(-1,28, 140, title.c_str(), CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
+			fonts.menutitle->RenderString(-1,28, 140, title, CLCDDisplay::PIXEL_ON, 0, true); // UTF-8
 			display.update();
 			break;
 		case MODE_SHUTDOWN:
