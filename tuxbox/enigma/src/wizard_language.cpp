@@ -136,7 +136,7 @@ eWizardLanguage::eWizardLanguage()
 		{
 			*id++=0;
 			struct stat s;
-			if ( stat(eString().sprintf("/usr/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s)
+			if ( strlen(id) == 1 && stat(eString().sprintf("/usr/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s)
 				&& stat(eString().sprintf("/share/locale/%c%c/LC_MESSAGES/tuxbox-enigma.mo", id[0], id[1]).c_str(), &s) )
 				continue;
 			eLanguageEntry *c=new eLanguageEntry(list, id, d);
