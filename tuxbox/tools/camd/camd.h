@@ -1,5 +1,5 @@
 /*
- * $Id: camd.h,v 1.3 2004/04/04 19:56:40 obi Exp $
+ * $Id: camd.h,v 1.4 2004/04/04 20:27:57 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -19,7 +19,7 @@
  *
  */
 
-#define MAX_PIDS	8
+#define MAX_PIDS	4
 
 typedef struct descrambleservice_t
 {

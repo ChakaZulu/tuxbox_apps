@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.20 2003/11/20 03:15:07 obi Exp $
+ * $Id: camd.c,v 1.21 2004/04/04 20:27:57 obi Exp $
  *
  * (C) 2001, 2002, 2003 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -472,8 +472,10 @@ int parse_ca_pmt(const unsigned char *buffer, const unsigned int length)
 	pmt->es_info = (ca_pmt_es_info *) malloc(sizeof(ca_pmt_es_info));
 
 	for (i = pmt->program_info_length + 6; i < length; i += pmt->es_info->es_info_length + 5) {
-		if (service.numpids == MAX_PIDS)
+		if (service.numpids == MAX_PIDS) {
+			fprintf(stderr, "[camd] The stupid CAM refuses to descramble more than %u elementary streams per service. The application I am communicating with should select less PIDs at once.\n", MAX_PIDS);
 			break;
+		}
 
 		pmt->es_info->stream_type = buffer[i];
 		pmt->es_info->elementary_pid = *(unsigned short *)&buffer[i + 1] & 0x1fff;
