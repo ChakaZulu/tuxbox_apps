@@ -138,6 +138,7 @@ struct SNeutrinoSettings
 	//network
 #define NETWORK_NFS_NR_OF_ENTRIES 8
 	std::string network_nfs_ip[NETWORK_NFS_NR_OF_ENTRIES];
+	char network_nfs_mac[NETWORK_NFS_NR_OF_ENTRIES][31];
 	char network_nfs_local_dir[NETWORK_NFS_NR_OF_ENTRIES][100];
 	char network_nfs_dir[NETWORK_NFS_NR_OF_ENTRIES][100];
 	int  network_nfs_automount[NETWORK_NFS_NR_OF_ENTRIES];
@@ -166,6 +167,8 @@ struct SNeutrinoSettings
 	int  recording_stream_all_audio_pids;
 	int  recording_stream_vtxt_pid;
 	char recording_ringbuffers[10];
+	int recording_choose_direct_rec_dir;
+	int recording_epg_for_filename;
 
 	//streaming
 	int  streaming_type;
@@ -334,6 +337,10 @@ struct SglobalInfo
 	delivery_system_t delivery_system;
 };
 
+const int RECORDING_OFF    = 0;
+const int RECORDING_SERVER = 1;
+const int RECORDING_VCR    = 2;
+const int RECORDING_FILE   = 3;
 
 const int PARENTALLOCK_PROMPT_NEVER          = 0;
 const int PARENTALLOCK_PROMPT_ONSTART        = 1;
