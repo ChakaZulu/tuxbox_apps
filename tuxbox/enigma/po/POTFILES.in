@@ -106,6 +106,7 @@
 ./src/enigma_vcr.cpp
 ./src/enigma_web.cpp
 ./src/enigma_xmlrpc.cpp
+./src/epgactions.h
 ./src/epgwindow.cpp
 ./src/helpwindow.cpp
 ./src/hotplug.cpp
