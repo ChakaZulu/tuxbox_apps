@@ -1,5 +1,5 @@
 /*
-$Id: bat.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: bat.c,v 1.3 2001/12/01 12:34:44 rasc Exp $
 
    -- BAT section
    -- Bouquet Allocation Table
@@ -9,6 +9,9 @@ $Id: bat.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
 
 
 $Log: bat.c,v $
+Revision 1.3  2001/12/01 12:34:44  rasc
+pespacket weitergestrickt, leider z.Zt. zuwenig Zeit um es richtig fertig zu machen.
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -102,7 +105,7 @@ void decode_BAT (u_char *b, int len)
  out_SB_NL (6,"reserved_2: ",t.reserved_2);
  out_SW_NL (5,"Section_length: ",t.section_length);
  out_SW_NL (3,"Bouquet_ID: ",t.bouquet_id);
- // ETR 162  $$$ ToDo
+ // ETR 162  $$$ ToDo bouquet_id
  out_SB_NL (6,"reserved_3: ",t.reserved_3);
  out_SB_NL (3,"Version_number: ",t.version_number);
  out_SB_NL (3,"Current_next_indicator: ",t.current_next_indicator);

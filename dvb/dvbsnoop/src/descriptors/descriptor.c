@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: descriptor.c,v 1.3 2001/12/01 12:34:31 rasc Exp $
 
  -- Descriptor Section
  -- (c) rasc
@@ -8,6 +8,9 @@ $Id: descriptor.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
  -- all descriptors are returning their length used in buffer
 
 $Log: descriptor.c,v $
+Revision 1.3  2001/12/01 12:34:31  rasc
+pespacket weitergestrickt, leider z.Zt. zuwenig Zeit um es richtig fertig zu machen.
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -2100,6 +2103,7 @@ void descriptor_Mosaic  (u_char *b)
 	b    += 2;
 	len1 -= 2;
 	out_SW_NL (4,"Bouquet_ID: ",d2.bouquet_id);
+//$$ do bouquet_id
 	break;
 
       case 0x02:

@@ -1,10 +1,13 @@
 /*
-$Id: dvb_str.c,v 1.4 2001/10/06 18:19:18 Toerli Exp $
+$Id: dvb_str.c,v 1.5 2001/12/01 12:34:17 rasc Exp $
 
   -- dvb decoder helper functions
 
 
 $Log: dvb_str.c,v $
+Revision 1.5  2001/12/01 12:34:17  rasc
+pespacket weitergestrickt, leider z.Zt. zuwenig Zeit um es richtig fertig zu machen.
+
 Revision 1.4  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -471,13 +474,13 @@ char *dvbstrCASystem_ID (u_int id)
      {  0x0001, 0x00FF,  "Standardized Systems" },
      {  0x0100, 0x01FF,  "Canal Plus (Seca/MediaGuard)" },
      {  0x0200, 0x02FF,  "CCETT" },
-     {  0x0300, 0x03FF,  "Deutsche Telekom" },
+     {  0x0300, 0x03FF,  "MSG MediaServices GmbH" },
      {  0x0400, 0x04FF,  "Eurodec" },
      {  0x0500, 0x05FF,  "France Telecom (Viaccess)" },
      {  0x0600, 0x06FF,  "Irdeto" },
-     {  0x0700, 0x07FF,  "Jerrold/GI" },
+     {  0x0700, 0x07FF,  "Jerrold/GI/Motorola" },
      {  0x0800, 0x08FF,  "Matra Communication" },
-     {  0x0900, 0x09FF,  "News Datacomi (Videoguard)" },
+     {  0x0900, 0x09FF,  "News Datacom (Videoguard)" },
      {  0x0A00, 0x0AFF,  "Nokia" },
      {  0x0B00, 0x0BFF,  "Norwegian Telekom (Conax)" },
      {  0x0C00, 0x0CFF,  "NTL" },
@@ -492,6 +495,22 @@ char *dvbstrCASystem_ID (u_int id)
      {  0x1500, 0x15FF,  "IBM" },
      {  0x1600, 0x16FF,  "Nera" },
      {  0x1700, 0x17FF,  "Beta Technik (Betacrypt)" },
+     {  0x1800, 0x18FF,  "Kudelski SA"},
+     {  0x1900, 0x19FF,  "Titan Information Systems"},
+     {  0x2000, 0x20FF,  "Telefónica Servicios Audiovisuales"},
+     {  0x2100, 0x21FF,  "STENTOR (France Telecom, CNES and DGA)"},
+     {  0x2200, 0x22FF,  "Tadiran Scopus"},
+     {  0x2300, 0x23FF,  "BARCO AS"},
+     {  0x2400, 0x24FF,  "StarGuide Digital Networks  "},
+     {  0x2500, 0x25FF,  "Mentor Data System, Inc."},
+     {  0x2600, 0x26FF,  "European Broadcasting Union"},
+     {  0x4700, 0x47FF,  "General Instrument"},
+     {  0x4800, 0x48FF,  "Telemann"},
+     {  0x4900, 0x49FF,  "Digital TV Industry Alliance of China"},
+     {  0x4A00, 0x4A0F,  "Tsinghua TongFang"},
+     {  0x4A10, 0x4A1F,  "Easycas"},
+     {  0x4A20, 0x4A2F,  "AlphaCrypt"},
+     {  0x4A30, 0x4A3F,  "DVN Holdings"},
 //$$$ some are missing and have to be hijacked from e.g. tmbinc
      {  0,0, NULL }
   };
