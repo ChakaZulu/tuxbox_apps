@@ -482,9 +482,7 @@ string CBEBouquetWidget::inputName(const std::string defaultName, const std::str
 		strncpy( Name, defaultName.c_str(), 30);
 	}
 
-	CStringInputSMS* nameInput = new CStringInputSMS(caption.c_str(), Name, 29,
-												 "" /* hint 1*/, "" /*hint2*/,
-													 "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+	CStringInputSMS* nameInput = new CStringInputSMS(caption.c_str(), Name, 29, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 	nameInput->exec(this, "");
 	return( Name);
 }

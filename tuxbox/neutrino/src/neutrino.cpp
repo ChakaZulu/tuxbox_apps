@@ -1310,19 +1310,13 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
 
-		CStringInputSMS*  updateSettings_proxy= new CStringInputSMS("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23,
-																						"flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2",
-																						"abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+		CStringInputSMS * updateSettings_proxy = new CStringInputSMS("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23, "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2", "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyserver", true, g_settings.softupdate_proxyserver, updateSettings_proxy ) );
 
-		CStringInputSMS*  updateSettings_proxyuser= new CStringInputSMS("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23,
-																							 "flashupdate.proxyusername_hint1", "flashupdate.proxyusername_hint2",
-																							 "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
+		CStringInputSMS * updateSettings_proxyuser = new CStringInputSMS("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23, "flashupdate.proxyusername_hint1", "flashupdate.proxyusername_hint2", "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyusername", true, g_settings.softupdate_proxyusername, updateSettings_proxyuser ) );
 
-		CStringInputSMS*  updateSettings_proxypass= new CStringInputSMS("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20,
-																							 "flashupdate.proxypassword_hint1", "flashupdate.proxypassword_hint2",
-																							 "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
+		CStringInputSMS * updateSettings_proxypass = new CStringInputSMS("flashupdate.proxypassword", g_settings.softupdate_proxypassword, 20, "flashupdate.proxypassword_hint1", "flashupdate.proxypassword_hint2", "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-. ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxypassword", true, g_settings.softupdate_proxypassword, updateSettings_proxypass ) );
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1344,7 +1338,7 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	oj->addOption((int)CPictureViewer::SIMPLE, "Simple");
 	oj->addOption((int)CPictureViewer::COLOR, "Color Average");
 	oj->addOption((int)CPictureViewer::NONE, "None");
-	CStringInput*  pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, "", "", "0123456789 ");
+	CStringInput * pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
 	mp3PicSettings.addItem( oj );
 	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
@@ -1360,7 +1354,7 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	oj->addOption(0, "messagebox.no");
 	oj->addOption(1, "messagebox.yes");
 	mp3PicSettings.addItem( oj );
-	CStringInput*  mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, "", "", "0123456789 ");
+	CStringInput * mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
 	mp3PicSettings.addItem( new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, 
 															 this, "mp3dir"));
@@ -1448,8 +1442,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( oj2 );
 
 	keySetupNotifier = new CKeySetupNotifier;
-	CStringInput*  keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
-	CStringInput*  keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	CStringInput * keySettings_repeat_genericblocker = new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	CStringInput * keySettings_repeatBlocker = new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
 	keySetupNotifier->changeNotify("initial", NULL);
 
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
@@ -1587,7 +1581,7 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	oj->addOption(18, "parentallock.lockage18");
 	parentallockSettings.addItem( oj );
 
-	CPINChangeWidget* pinChangeWidget = new CPINChangeWidget("parentallock.changepin", g_settings.parentallock_pincode, 4, "parentallock.changepin_hint1", "");
+	CPINChangeWidget * pinChangeWidget = new CPINChangeWidget("parentallock.changepin", g_settings.parentallock_pincode, 4, "parentallock.changepin_hint1", NULL);
 	parentallockSettings.addItem( new CMenuForwarder("parentallock.changepin", true, g_settings.parentallock_pincode, pinChangeWidget));
 }
 
@@ -1611,11 +1605,11 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CIPInput*   networkSettings_NetworkIP= new CIPInput("networkmenu.ipaddress", networkConfig.address, "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
-	CIPInput*   networkSettings_NetMask= new CIPInput("networkmenu.netmask", networkConfig.netmask, "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput*   networkSettings_Broadcast= new CIPInput("networkmenu.broadcast", networkConfig.broadcast, "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput*   networkSettings_Gateway= new CIPInput("networkmenu.gateway", networkConfig.gateway, "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput*   networkSettings_NameServer= new CIPInput("networkmenu.nameserver", networkConfig.nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_NetworkIP  = new CIPInput("networkmenu.ipaddress" , networkConfig.address   , "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
+	CIPInput * networkSettings_NetMask    = new CIPInput("networkmenu.netmask"   , networkConfig.netmask   , "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_Broadcast  = new CIPInput("networkmenu.broadcast" , networkConfig.broadcast , "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_Gateway    = new CIPInput("networkmenu.gateway"   , networkConfig.gateway   , "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_NameServer = new CIPInput("networkmenu.nameserver", networkConfig.nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
 
 	CMenuForwarder *m1 = new CMenuForwarder("networkmenu.ipaddress", networkConfig.inet_static, networkConfig.address, networkSettings_NetworkIP );
 	CMenuForwarder *m2 = new CMenuForwarder("networkmenu.netmask", networkConfig.inet_static, networkConfig.netmask, networkSettings_NetMask );
@@ -1646,8 +1640,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 {
-	CIPInput*   recordingSettings_server_ip= new CIPInput("recordingmenu.server_ip",  g_settings.recording_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
-	CStringInput*  recordingSettings_server_port= new CStringInput("recordingmenu.server_port", g_settings.recording_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	CIPInput * recordingSettings_server_ip = new CIPInput("recordingmenu.server_ip", g_settings.recording_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput * recordingSettings_server_port = new CStringInput("recordingmenu.server_port", g_settings.recording_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ");
 
 	CMenuForwarder* mf1 = new CMenuForwarder("recordingmenu.server_ip", (g_settings.recording_type==1), g_settings.recording_server_ip,recordingSettings_server_ip);
 	CMenuForwarder* mf2 = new CMenuForwarder("recordingmenu.server_port", (g_settings.recording_type==1), g_settings.recording_server_port,recordingSettings_server_port);
@@ -1675,10 +1669,10 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	oj5->addOption(0, "options.off");
 	oj5->addOption(1, "options.on");
 
-	CStringInput *timerSettings_record_safety_time_before= new CStringInput("timersettings.record_safety_time_before", g_settings.record_safety_time_before, 2, "timersettings.record_safety_time_before.hint_1", "timersettings.record_safety_time_before.hint_2","0123456789 ");
+	CStringInput * timerSettings_record_safety_time_before = new CStringInput("timersettings.record_safety_time_before", g_settings.record_safety_time_before, 2, "timersettings.record_safety_time_before.hint_1", "timersettings.record_safety_time_before.hint_2","0123456789 ");
 	CMenuForwarder *mf5 = new CMenuForwarder("timersettings.record_safety_time_before", true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
 
-	CStringInput *timerSettings_record_safety_time_after= new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ");
+	CStringInput * timerSettings_record_safety_time_after = new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ");
 	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
 	CRecordingNotifier *RecordingNotifier =
@@ -1713,12 +1707,12 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 {
-	CIPInput*   streamingSettings_server_ip= new CIPInput("streamingmenu.server_ip",  g_settings.streaming_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
-	CStringInput*  streamingSettings_server_port= new CStringInput("streamingmenu.server_port", g_settings.streaming_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
- 	CStringInputSMS*  cddriveInput = new CStringInputSMS("streamingmenu.streaming_server_cddrive", g_settings.streaming_server_cddrive, 20,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
-	CStringInput*  streamingSettings_videorate= new CStringInput("streamingmenu.streaming_videorate", g_settings.streaming_videorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
-	CStringInput*  streamingSettings_audiorate= new CStringInput("streamingmenu.streaming_audiorate", g_settings.streaming_audiorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
-	CStringInputSMS*  startdirInput = new CStringInputSMS("streamingmenu.streaming_server_startdir", g_settings.streaming_server_startdir, 30,"", "","abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
+	CIPInput * streamingSettings_server_ip = new CIPInput("streamingmenu.server_ip",  g_settings.streaming_server_ip, "ipsetup.hint_1", "ipsetup.hint_2");
+	CStringInput * streamingSettings_server_port = new CStringInput("streamingmenu.server_port", g_settings.streaming_server_port, 6, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+ 	CStringInputSMS * cddriveInput = new CStringInputSMS("streamingmenu.streaming_server_cddrive", g_settings.streaming_server_cddrive, 20, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
+	CStringInput * streamingSettings_videorate = new CStringInput("streamingmenu.streaming_videorate", g_settings.streaming_videorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	CStringInput * streamingSettings_audiorate = new CStringInput("streamingmenu.streaming_audiorate", g_settings.streaming_audiorate, 5, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	CStringInputSMS * startdirInput = new CStringInputSMS("streamingmenu.streaming_server_startdir", g_settings.streaming_server_startdir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789!""§$%&/()=?-:\\ ");
 
 	CMenuForwarder* mf1 = new CMenuForwarder("streamingmenu.server_ip", (g_settings.streaming_type==1), g_settings.streaming_server_ip,streamingSettings_server_ip);
 	CMenuForwarder* mf2 = new CMenuForwarder("streamingmenu.server_port", (g_settings.streaming_type==1), g_settings.streaming_server_port,streamingSettings_server_port);
@@ -1756,8 +1750,7 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 
 void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const char * const menuname, char *value)
 {
-	CStringInput *fontSize;
-	fontSize = new CStringInput(menuname, value, 3, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ",this);
+	CStringInput * fontSize = new CStringInput(menuname, value, 3, "ipsetup.hint_1", "ipsetup.hint_2", "0123456789 ", this);
 	fontSettings.addItem( new CMenuForwarder(menuname, true, value ,fontSize));
 }
 
@@ -1947,19 +1940,19 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 	colorSettings_timing.addItem( new CMenuForwarder("menu.back") );
 	colorSettings_timing.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CStringInput*  colorSettings_timing_menu = new CStringInput("timing.menu",g_settings.timing_menu_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	CStringInput * colorSettings_timing_menu = new CStringInput("timing.menu", g_settings.timing_menu_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.menu", true, g_settings.timing_menu_string, colorSettings_timing_menu ) );
 
-	CStringInput*  colorSettings_timing_chanlist = new CStringInput("timing.chanlist", g_settings.timing_chanlist_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	CStringInput * colorSettings_timing_chanlist = new CStringInput("timing.chanlist", g_settings.timing_chanlist_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.chanlist", true, g_settings.timing_chanlist_string, colorSettings_timing_chanlist ) );
 
-	CStringInput*  colorSettings_timing_epg = new CStringInput("timing.epg", g_settings.timing_epg_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	CStringInput * colorSettings_timing_epg = new CStringInput("timing.epg", g_settings.timing_epg_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.epg", true, g_settings.timing_epg_string, colorSettings_timing_epg ) );
 
-	CStringInput*  colorSettings_timing_infobar = new CStringInput("timing.infobar", g_settings.timing_infobar_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	CStringInput * colorSettings_timing_infobar = new CStringInput("timing.infobar", g_settings.timing_infobar_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.infobar", true,  g_settings.timing_infobar_string, colorSettings_timing_infobar ) );
 
-	CStringInput*  colorSettings_timing_filebrowser = new CStringInput("timing.filebrowser", g_settings.timing_filebrowser_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	CStringInput * colorSettings_timing_filebrowser = new CStringInput("timing.filebrowser", g_settings.timing_filebrowser_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.filebrowser", true,  g_settings.timing_filebrowser_string, colorSettings_timing_filebrowser ) );
 
 	colorSettings_timing.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -2904,7 +2897,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 	{
 		if( mode != mode_scart )
-			ShowHint ( "messagebox.info", g_Locale->getText("sleeptimerbox.announce") );
+			ShowHintUTF("messagebox.info", g_Locale->getText("sleeptimerbox.announce")); // UTF-8
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::SLEEPTIMER)
@@ -2947,9 +2940,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 	{
 		if( mode != mode_scart )
-			skipShutdownTimer = (ShowMsg ( "messagebox.info", g_Locale->getText("shutdowntimer.announce"),
-							CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "",450,5)
-							==CMessageBox::mbrYes);
+			skipShutdownTimer = (ShowMsg("messagebox.info", g_Locale->getText("shutdowntimer.announce"), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "", 450, 5, true) == CMessageBox::mbrYes); // UTF-8
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
 	{
@@ -3493,7 +3484,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="savesettings")
 	{
-	 	CHintBox* hintBox= new CHintBox( "messagebox.info", g_Locale->getText("mainsettings.savesettingsnow_hint"), "info.raw", 450 );
+		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("mainsettings.savesettingsnow_hint"), "info.raw", 450, true); // UTF-8
 		hintBox->paint();
 
 		g_Controld->saveSettings();
@@ -3519,7 +3510,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, std::string actionKey)
 	}
 	else if(actionKey=="reloadchannels")
 	{
-	 	CHintBox* hintBox= new CHintBox( "messagebox.info", g_Locale->getText("servicemenu.reload_hint"), "info.raw", 450 );
+	 	CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("servicemenu.reload_hint"), "info.raw", 450, true); // UTF-8
 		hintBox->paint();
 
 		g_Zapit->reinitChannels();

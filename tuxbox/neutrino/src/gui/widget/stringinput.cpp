@@ -43,17 +43,17 @@
 #include "stringinput.h"
 
 
-CStringInput::CStringInput(const char * const Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon )
+CStringInput::CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1, const char * const Hint_2, char* Valid_Chars, CChangeObserver* Observ, const char * const Icon)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name =  Name;
 	value = Value;
 	size =  Size;
 
-	hint_1 = Hint_1;
-	hint_2 = Hint_2;
+	hint_1 = Hint_1 ? Hint_1 : "";
+	hint_2 = Hint_2 ? Hint_2 : "";
 	validchars = Valid_Chars;
-	iconfile = Icon;
+	iconfile = Icon ? Icon : "";
 
 	observ = Observ;
 	width = (Size*20)+40;
@@ -170,7 +170,7 @@ void CStringInput::keyRightPressed()
 }
 
 
-int CStringInput::exec( CMenuTarget* parent, string )
+int CStringInput::exec( CMenuTarget* parent, std::string )
 {
 	int res = menu_return::RETURN_REPAINT;
 	char oldval[size], dispval[size];
@@ -325,9 +325,9 @@ void CStringInput::paint()
 
 	if ( hint_1.length()> 0 )
 	{
-		g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1).c_str(), COL_MENUCONTENT);
+		g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight+ 40, width- 20, g_Locale->getText(hint_1), COL_MENUCONTENT, 0, true); // UTF-8
 		if ( hint_2.length()> 0 )
-			g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
+			g_Fonts->menu_info->RenderString(x+ 20, y+ hheight+ mheight+ iheight* 2+ 40, width- 20, g_Locale->getText(hint_2), COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
 	for (int count=0;count<size;count++)
@@ -362,7 +362,7 @@ void CStringInput::paintChar(int pos)
 		paintChar(pos, value[pos]);
 }
 
-CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size, string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon)
+CStringInputSMS::CStringInputSMS(const char * const Name, char* Value, int Size, const char * const Hint_1, const char * const Hint_2, char* Valid_Chars, CChangeObserver* Observ, const char * const Icon)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
 	last_digit = -1;				// no key pressed yet
@@ -474,7 +474,7 @@ void CPINInput::paintChar(int pos)
 	CStringInput::paintChar(pos, (value[pos] == ' ') ? ' ' : '*');
 }
 
-int CPINInput::exec( CMenuTarget* parent, string )
+int CPINInput::exec( CMenuTarget* parent, std::string )
 {
 	int res = menu_return::RETURN_REPAINT;
 
@@ -583,7 +583,7 @@ int CPLPINInput::handleOthers( uint msg, uint data )
 
 #define borderwidth 4
 
-int CPLPINInput::exec( CMenuTarget* parent, string )
+int CPLPINInput::exec( CMenuTarget* parent, std::string )
 {
 
 	unsigned char* pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
@@ -596,13 +596,14 @@ int CPLPINInput::exec( CMenuTarget* parent, string )
 	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
 	frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
 
-	char hint[100];
-	if ( fsk == 0x100 )
-		strcpy(hint, g_Locale->getText("parentallock.lockedsender").c_str());
+	if (fsk == 0x100)
+		hint_1 = g_Locale->getText("parentallock.lockedsender");
 	else
+	{
+		char hint[100];
 		sprintf(hint, g_Locale->getText("parentallock.lockedprogram").c_str(), fsk );
-
-	hint_1= hint;
+		hint_1 = hint;
+	}
 
 	int res = CPINInput::exec ( parent, "" );
 

@@ -33,15 +33,12 @@
 #ifndef __stringinput_ext__
 #define __stringinput_ext__
 
-#include <string>
-#include <vector>
+#include "menue.h"
 
 #include <driver/framebuffer.h>
 
-#include "menue.h"
-
-
-using namespace std;
+#include <string>
+#include <vector>
 
 class CExtendedInput_Item;
 class CExtendedInput : public CMenuTarget
@@ -57,14 +54,14 @@ class CExtendedInput : public CMenuTarget
 		int mheight; // menu font height
 		int iheight; 
 
-		vector<CExtendedInput_Item*> inputFields;
+		std::vector<CExtendedInput_Item*> inputFields;
 		int selectedChar;
 
 		bool localizing;
-		string	name;
+		std::string	name;
 
-		string  hint_1;
-		string  hint_2;
+		std::string  hint_1;
+		std::string  hint_2;
 		char*	value;
 		CChangeObserver*   observ;
 
@@ -75,10 +72,10 @@ class CExtendedInput : public CMenuTarget
 
 	public:
 
-		CExtendedInput(const char * const Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL, bool Localizing=true);
+		CExtendedInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL, bool Localizing=true);
 
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 		void calculateDialog();
 
 		void addInputField( CExtendedInput_Item* );
@@ -129,16 +126,16 @@ class CExtendedInput_Item_newLiner : public CExtendedInput_Item
 class CExtendedInput_Item_Char : public CExtendedInput_Item
 {
 	protected:
-		string allowedChars;
+		std::string allowedChars;
 		bool selectable;
 		
 		bool isAllowedChar( char );
 		int getCharID( char );
 
 	public:
-		CExtendedInput_Item_Char(string Chars="", bool Selectable=true );
+		CExtendedInput_Item_Char(std::string Chars="", bool Selectable=true );
 		virtual ~CExtendedInput_Item_Char(){};
-		void setAllowedChars( string );
+		void setAllowedChars( std::string );
 		virtual void init(int &x, int &y);
 		virtual void paint(int x, int y, bool focusGained);
 
@@ -158,7 +155,7 @@ class CIPInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CIPInput(const char * const Name, std::string &Value, std::string Hint_1 = "", std::string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CIPInput(const char * const Name, std::string &Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
 };
 
 //----------------------------------------------------------------------------------------------------
@@ -173,7 +170,7 @@ class CDateInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CDateInput(const char * const Name, time_t* Time, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CDateInput(const char * const Name, time_t* Time, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
 		~CDateInput();
 		char* getValue() {return value;}
 };
@@ -187,7 +184,7 @@ class CMACInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CMACInput(const char * const Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CMACInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
 };
 
 

@@ -33,14 +33,11 @@
 #ifndef __stringinput__
 #define __stringinput__
 
-#include <string>
+#include "menue.h"
 
 #include <driver/framebuffer.h>
 
-#include "menue.h"
-
-
-using namespace std;
+#include <string>
 
 class CStringInput : public CMenuTarget
 {
@@ -54,14 +51,14 @@ class CStringInput : public CMenuTarget
 		int mheight; // menu font height
 		int iheight;
 
-		string	name;
-		string  hint_1, hint_2;
-		string	iconfile;
-		char*   validchars;
-		char*	value;
-		int	   	size;
-		int		selected;
-		CChangeObserver*   observ;
+		std::string name;
+		std::string hint_1, hint_2;
+		std::string iconfile;
+		char *      validchars;
+		char *      value;
+		int         size;
+		int         selected;
+		CChangeObserver * observ;
 
 		virtual void paint();
 		virtual void paintChar(int pos, char c);
@@ -79,11 +76,11 @@ class CStringInput : public CMenuTarget
 
 	public:
 
-		// Name: UTF-8 encoded
-		CStringInput(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, string Icon="" );
+		// Name, Hint_1, Hint_2: UTF-8 encoded
+		CStringInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 
 };
 
@@ -107,7 +104,7 @@ class CStringInputSMS : public CStringInput
 		virtual void paint();
 
 	public:
-		CStringInputSMS(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL, string Icon="");
+		CStringInputSMS(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "", CChangeObserver* Observ = NULL, const char * const Icon = NULL);
 };
 
 class CPINInput : public CStringInput
@@ -115,10 +112,10 @@ class CPINInput : public CStringInput
 	protected:
 		virtual void paintChar(int pos);
 	public:
-		CPINInput(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINInput(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, "lock.raw") {};
 
-		 int exec( CMenuTarget* parent, string actionKey );
+		 int exec( CMenuTarget* parent, std::string actionKey );
 };
 
 class CPLPINInput : public CPINInput
@@ -128,16 +125,16 @@ class CPLPINInput : public CPINInput
 
 		virtual int handleOthers( uint msg, uint data );
 	public:
-		CPLPINInput(const char * const Name, char* Value, int Size, string Hint_1, int FSK )
+		CPLPINInput(const char * const Name, char* Value, int Size, const char * const Hint_1, int FSK )
 		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };
 
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec( CMenuTarget* parent, std::string actionKey );
 };
 
 class CPINChangeWidget : public CStringInput
 {
 	public:
-		CPINChangeWidget(const char * const Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
+		CPINChangeWidget(const char * const Name, char* Value, int Size, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ){};
 };
 

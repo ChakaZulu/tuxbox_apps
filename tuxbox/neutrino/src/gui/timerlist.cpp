@@ -738,9 +738,7 @@ int CTimerList::modifyTimer()
 
 	Timer->setWeekdaysToStr(timer->eventRepeat, m_weekdaysStr);
 	timer->eventRepeat = (CTimerd::CTimerEventRepeat)(((int)timer->eventRepeat) & 0x1FF);
-	CStringInput  timerSettings_weekdays("timerlist.weekdays", m_weekdaysStr , 7, 
-													 "timerlist.weekdays.hint_1", 
-													 "timerlist.weekdays.hint_2", "-X");
+	CStringInput timerSettings_weekdays("timerlist.weekdays", m_weekdaysStr, 7, "timerlist.weekdays.hint_1", "timerlist.weekdays.hint_2", "-X");
 	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", ((int)timer->eventRepeat) >= (int)CTimerd::TIMERREPEAT_WEEKDAYS,
 														  m_weekdaysStr, &timerSettings_weekdays );
 	CTimerListRepeatNotifier notifier((int *)&timer->eventRepeat,m4);
@@ -755,7 +753,7 @@ int CTimerList::modifyTimer()
 	timerSettings.addItem(m3);
 	timerSettings.addItem(m4);
 
-   CStringInput  timerSettings_apids("timerlist.apids", timer->apids , 25, "apids.hint_1", "apids.hint_2", "0123456789ABCDEF ");
+	CStringInput timerSettings_apids("timerlist.apids", timer->apids , 25, "apids.hint_1", "apids.hint_2", "0123456789ABCDEF ");
 	if(timer->eventType ==  CTimerd::TIMER_RECORD)
 	{
 		CMenuForwarder *m5 = new CMenuForwarder("timerlist.apids", true, timer->apids, &timerSettings_apids );
@@ -790,9 +788,7 @@ int CTimerList::newTimer()
 	CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", false, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
 
 	strcpy(m_weekdaysStr,"-------");
-	CStringInput timerSettings_weekdays("timerlist.weekdays", m_weekdaysStr , 7, 
-													"timerlist.weekdays.hint_1", 
-													"timerlist.weekdays.hint_2", "-X");
+	CStringInput timerSettings_weekdays("timerlist.weekdays", m_weekdaysStr, 7, "timerlist.weekdays.hint_1", "timerlist.weekdays.hint_2", "-X");
 	CMenuForwarder *m4 = new CMenuForwarder("timerlist.weekdays", false,  m_weekdaysStr, 
 														 &timerSettings_weekdays );
 	CTimerListRepeatNotifier notifier((int *)&timerNew.eventRepeat,m4);
@@ -850,8 +846,7 @@ int CTimerList::newTimer()
 	m6->addOption(0 , "timerlist.standby.off");
 	m6->addOption(1 , "timerlist.standby.on");
 
-	CStringInputSMS timerSettings_msg("timerlist.message", timerNew.message, 30,"","",
-											 "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
+	CStringInputSMS timerSettings_msg("timerlist.message", timerNew.message, 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
 	CMenuForwarder *m7 = new CMenuForwarder("timerlist.message", false, NULL, &timerSettings_msg );
 
 	CTimerListNewNotifier notifier2((int *)&timerNew.eventType,

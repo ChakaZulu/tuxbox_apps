@@ -30,6 +30,8 @@
 */
 
 
+#include "stringinput_ext.h"
+
 #include <global.h>
 #include <neutrino.h>
 
@@ -39,17 +41,16 @@
 #include <gui/color.h>
 
 #include "messagebox.h"
-#include "stringinput_ext.h"
 
 
-CExtendedInput::CExtendedInput(const char * const Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)
+CExtendedInput::CExtendedInput(const char * const Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ, bool Localizing)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	value = Value;
 
-	hint_1 = Hint_1;
-	hint_2 = Hint_2;
+	hint_1 = Hint_1 ? Hint_1 : "";
+	hint_2 = Hint_2 ? Hint_2 : "";
 
 	observ = Observ;
 
@@ -110,7 +111,7 @@ void CExtendedInput::calculateDialog()
 }
 
 
-int CExtendedInput::exec( CMenuTarget* parent, string )
+int CExtendedInput::exec( CMenuTarget* parent, std::string )
 {
 	onBeforeExec();
 	int res = menu_return::RETURN_REPAINT;
@@ -240,28 +241,11 @@ void CExtendedInput::paint()
 	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, localizing ? g_Locale->getText(name) : name, COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
-	if ( hint_1.length()> 0 )
+	if (hint_1.length() > 0)
 	{
-		if(localizing)
-		{
-			g_Fonts->menu_info->RenderString(x+ 20, hintPosY, width- 20, g_Locale->getText(hint_1).c_str(), COL_MENUCONTENT);
-		}
-		else
-		{
-			g_Fonts->menu_info->RenderString(x+ 20, hintPosY, width- 20, hint_1.c_str(), COL_MENUCONTENT);
-		}
-		if ( hint_2.length()> 0 )
-		{
-			if(localizing)
-			{
-				g_Fonts->menu_info->RenderString(x+ 20, hintPosY + iheight, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
-			}
-			else
-			{
-				g_Fonts->menu_info->RenderString(x+ 20, hintPosY + iheight, width- 20, hint_2.c_str(), COL_MENUCONTENT);
-			}
-
-		}
+		g_Fonts->menu_info->RenderString(x+ 20, hintPosY, width- 20, localizing ? g_Locale->getText(hint_1) : hint_1, COL_MENUCONTENT, 0, true); // UTF-8
+		if (hint_2.length() > 0)
+			g_Fonts->menu_info->RenderString(x+ 20, hintPosY + iheight, width- 20, localizing ? g_Locale->getText(hint_2) : hint_2, COL_MENUCONTENT, 0, true); // UTF-8
 	}
 
 	for(unsigned int i=0; i<inputFields.size();i++)
@@ -275,7 +259,7 @@ void CExtendedInput::paint()
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-CExtendedInput_Item_Char::CExtendedInput_Item_Char(string Chars, bool Selectable )
+CExtendedInput_Item_Char::CExtendedInput_Item_Char(std::string Chars, bool Selectable )
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	idx = 20;
@@ -291,7 +275,7 @@ void CExtendedInput_Item_Char::init(int &x, int &y)
 	x += idx;
 }
 
-void CExtendedInput_Item_Char::setAllowedChars( string ac )
+void CExtendedInput_Item_Char::setAllowedChars( std::string ac )
 {
 	allowedChars = ac;
 }
@@ -367,7 +351,7 @@ void CExtendedInput_Item_Char::keyPressed(const int key)
 
 //-----------------------------#################################-------------------------------------------------------
 
-CIPInput::CIPInput(const char * const Name, std::string &Value, std::string Hint_1, std::string Hint_2, CChangeObserver* Observ)
+CIPInput::CIPInput(const char * const Name, std::string &Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, IP, Hint_1, Hint_2, Observ)
 {
 	ip = &Value;
@@ -418,7 +402,7 @@ void CIPInput::onAfterExec()
 }
 
 //-----------------------------#################################-------------------------------------------------------
-CDateInput::CDateInput(const char * const Name, time_t* Time, string Hint_1, string Hint_2, CChangeObserver* Observ)
+CDateInput::CDateInput(const char * const Name, time_t* Time, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, "", Hint_1, Hint_2, Observ)
 {
 	time=Time;
@@ -502,7 +486,7 @@ void CDateInput::onAfterExec()
 }
 //-----------------------------#################################-------------------------------------------------------
 
-CMACInput::CMACInput(const char * const Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ)
+CMACInput::CMACInput(const char * const Name, char* Value, const char * const Hint_1, const char * const Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ)
 {
 	frameBuffer = CFrameBuffer::getInstance();

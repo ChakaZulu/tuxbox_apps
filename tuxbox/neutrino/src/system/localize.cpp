@@ -134,42 +134,33 @@ void CLocaleManager::loadLocale(std::string locale)
 #warning dhcp     is missing in locales (used in neutrino.cpp)
 #warning NFS/CIFS is missing in locales (used in neutrino.cpp)
 			if (
+			    (buf[0] != 'a') &&
 			    (buf[0] != 'c') &&
 			    (buf[0] != 'g') &&
 			    (buf[0] != 'k') &&
 			    (buf[0] != 'l') &&
 			    (buf[0] != 'n') &&
 			    (buf[0] != 'o') &&
+			    (buf[0] != 'p') &&
+			    (buf[0] != 'r') &&
+			    (buf[0] != 's') &&
 			    (buf[0] != 'u') &&
 			    (buf[0] != 'v') &&
 			    (buf[0] != 'z') &&
 			    (buf[0] != 'N') &&
-			    (strncmp(buf, "apidse", 6) != 0) &&
-			    (strncmp(buf, "au", 2) != 0) &&
 			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
-			    (strncmp(buf, "me", 2) != 0) &&
-			    (strncmp(buf, "mi", 2) != 0) &&
-			    (strncmp(buf, "mp", 2) != 0) &&
-			    (strncmp(buf, "pa", 2) != 0) &&
-			    (strncmp(buf, "pic", 3) != 0) &&
-			    (strncmp(buf, "ping", 4) != 0) &&
-			    (strncmp(buf, "rec", 3) != 0) &&
-			    (strncmp(buf, "sa", 2) != 0) &&
-			    (strncmp(buf, "sc", 2) != 0) &&
-			    (strncmp(buf, "st", 2) != 0) &&
-			    (strncmp(buf, "timersettings", 13) != 0) &&
+			    (strncmp(buf, "ip", 2) != 0) &&
+			    ((buf[0] != 'm') || (strncmp(buf, "mo", 2) == 0)) &&
+			    (strncmp(buf, "timerl", 6) != 0) &&
+			    (strncmp(buf, "timers", 6) != 0) &&
 			    (strncmp(buf, "timing", 6) != 0) &&
 			    ((buf[0] != 'f') || 
 			     ((strcmp(buf, "flashupdate.actionreadflash") == 0) ||
 			      (strcmp(buf, "flashupdate.reallyflashmtd") == 0) ||
 			      (strcmp(buf, "flashupdate.savesuccess") == 0))) &&
-			    ((strncmp(buf, "ma", 2) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&
-			    ((strncmp(buf, "se", 2) != 0) || (strcmp(buf, "servicemenu.reload_hint") == 0)) &&
-			    ((strncmp(buf, "timerlist", 9) != 0) || (strncmp(buf, "timerlist.weekdays.hint", 23) == 0)) &&
 			    (strcmp(buf, "bouquetlist.head") != 0) &&
 			    (strcmp(buf, "dhcp") != 0) &&
-			    (strcmp(buf, "epglist.head") != 0) &&
-			    (strcmp(buf, "sleeptimerbox.title") != 0)
+			    (strcmp(buf, "epglist.head") != 0)
 			     )
 				text = CZapitClient::Utf8_to_Latin1(text);
 			localeData[buf] = text;
