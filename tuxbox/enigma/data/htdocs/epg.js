@@ -10,7 +10,6 @@ function EPGDetails(xy)
 
 function switchChannel(xy)
 {
-	win=window.open("/?path="+xy, "switchStatus","width=1,height=1,left=0,top=0");
-	win.focus();
+	document.location = "/cgi-bin/zapTo?path="+xy;
 	parent.setTimeout("reload()", 3000);
 }
