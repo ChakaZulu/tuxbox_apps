@@ -34,6 +34,8 @@ public:
 	void saveBouquets();
 	void loadBouquets();
 	
+	void clearList();
+	
 	eDVBSettings(eDVB &dvb);
 	~eDVBSettings();
 };

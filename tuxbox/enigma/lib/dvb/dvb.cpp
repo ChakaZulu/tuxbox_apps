@@ -3,6 +3,7 @@
 #include "dvb.h"
 #include "frontend.h"
 #include "si.h"
+#include <set>
 
 static struct
 {
@@ -45,12 +46,7 @@ static int beautifyChannelNumber(int transport_stream_id, int original_network_i
 	return -1;
 }
 
-static void Indent(FILE *out, int ind)
-{
-	while (ind--)
-		fprintf(out, "\t");
-}
-
+#if 0
 static std::string escape(const std::string s)
 {
 	std::string t;
@@ -74,6 +70,7 @@ static std::string escape(const std::string s)
 	}
 	return t;
 }
+#endif
 
 void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 {
@@ -133,6 +130,7 @@ void eBouquet::add(int transport_stream_id, int original_network_id, int service
 int eBouquet::remove(int transport_stream_id, int original_network_id, int service_id)
 {
 	list.remove(eServiceReference(transport_stream_id, original_network_id, service_id));
+	return 0;
 }
 
 eTransponder::eTransponder(int transport_stream_id, int original_network_id):
@@ -291,14 +289,33 @@ void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nser
 	}
 }
 
-void eTransponderList::handleSDT(const SDT *sdt)
+int eTransponderList::handleSDT(const SDT *sdt)
 {
 		// todo: remove dead services (clean up current transport_stream)
+	std::set<int> s;
+	int changed=0;
 	for (ePtrList<SDTEntry>::const_iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 	{
 		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, i->service_id);
 		service.update(*i);
+		s.insert(i->service_id);
 	}
+	for (std::map<sref,eService>::iterator i(services.begin()); i != services.end(); ++i)
+		if ((i->first.first == sdt->original_network_id)	&& // if service on this on
+				(i->second.transport_stream_id == sdt->transport_stream_id) && 	// and on this transponder
+				(!s.count(i->first.second))) // but does not exist
+			{
+				services.erase(i->first);
+				for (std::map<int,eService*>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
+					if (m->second == &i->second)
+					{
+						channel_number.erase(m);
+						break;
+					}
+				i=services.begin();
+				changed=1;
+			}
+	return changed;
 }
 
 eTransponder *eTransponderList::searchTS(int original_network_id, int transport_stream_id)

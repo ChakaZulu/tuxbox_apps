@@ -403,6 +403,14 @@ void eDVBSettings::loadBouquets()
 	eDebug("ok");
 }
 
+void eDVBSettings::clearList()
+{
+	delete transponderlist;
+	transponderlist=new eTransponderList;
+
+	/*emit*/ dvb.bouquetListChanged();
+}
+
 eDVBSettings::~eDVBSettings()
 {
 }

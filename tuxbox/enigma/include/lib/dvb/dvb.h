@@ -226,7 +226,7 @@ public:
 	void updateStats(int &transponders, int &scanned, int &services);
 	eTransponder &createTransponder(int transport_stream_id, int original_network_id);
 	eService &createService(int transport_stream_id, int original_network_id, int service_id, int service_number=-1);
-	void handleSDT(const SDT *sdt);
+	int handleSDT(const SDT *sdt);
 
 	void serialize(FILE *out, int ind);
 	eTransponder *searchTS(int original_network_id, int transport_stream_id);

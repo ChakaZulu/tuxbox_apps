@@ -27,11 +27,9 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		break;
 	case eDVBScanEvent::eventScanBegin:
 		eDebug("[SCAN] eventScanBegin");
-				// -> in eine settings operator kapseln
-		if (dvb.settings->transponderlist)
-			delete dvb.settings->transponderlist;
-
-		dvb.settings->transponderlist=new eTransponderList();
+		
+		if (flags & flagClearList)
+			dvb.settings->clearList();
 
 		if (flags & flagUseBAT)
 			dvb.settings->removeDVBBouquets();
@@ -172,8 +170,6 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 					for (std::list<eTransponder>::iterator n(knownTransponder.begin()); (!found) && n != knownTransponder.end(); ++n)
 						if (*n == transponder)
 							found++;
-					if (found)
-						continue;
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
 						switch (d->Tag())
@@ -186,7 +182,8 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 							break;
 						}
 					}
-					knownTransponder.push_back(transponder);
+					if (!found)
+						knownTransponder.push_back(transponder);
 				}
 			}
 			nit->unlock();

@@ -133,7 +133,7 @@ void eServiceSelector::fillServiceList()
 	setText("full services");
 
 	services->clearList();
-
+	
 	if (eDVB::getInstance()->settings->getTransponders())
 		eDVB::getInstance()->settings->getTransponders()->forEachChannel(eServiceSelector_addService(*services, result));
 

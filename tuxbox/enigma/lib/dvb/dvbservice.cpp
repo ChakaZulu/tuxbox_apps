@@ -235,7 +235,8 @@ void eDVBServiceController::SDTready(int error)
 		SDT *sdt=dvb.tSDT.ready()?dvb.tSDT.getCurrent():0;
 		if (sdt)
 		{
-			dvb.settings->transponderlist->handleSDT(sdt);
+			if (dvb.settings->transponderlist->handleSDT(sdt))
+				dvb.serviceListChanged();
 			sdt->unlock();
 		}
 	}
