@@ -29,6 +29,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <config.h>
 #include <algorithm>
 #include <global.h>
 #include <neutrino.h>
@@ -40,6 +41,16 @@
 #include "filebrowser.h"
 
 #include <sys/stat.h>
+
+#ifdef __USE_FILE_OFFSET64
+typedef struct dirent64 dirent_struct;
+#define my_alphasort alphasort64
+#define my_scandir scandir64
+#else
+typedef struct dirent dirent_struct;
+#define my_alphasort alphasort
+#define my_scandir scandir64
+#endif
 
 //------------------------------------------------------------------------
 
@@ -211,7 +222,8 @@ void CFileBrowser::ChangeDir(string filename)
 bool CFileBrowser::readDir(string dirname)
 {
 struct stat statbuf;
-struct dirent **namelist;
+dirent_struct **namelist;
+
 int n;
 
 	Path = dirname;
@@ -222,14 +234,14 @@ int n;
 	}
 
 	filelist.clear();
-	n = scandir(Path.c_str(), &namelist, 0, alphasort);
+	n = my_scandir(Path.c_str(), &namelist, 0, my_alphasort);
 	if (n < 0)
 	{
 		perror(("Filebrowser scandir: "+Path).c_str());
 		Path = "/";
 		name = "/";
 		paintHead();
-		n = scandir(Path.c_str(), &namelist, 0, alphasort);
+		n = my_scandir(Path.c_str(), &namelist, 0, my_alphasort);
 	}
 	for(int i = 0; i < n;i++)
 	{
@@ -478,7 +490,8 @@ bool CFileBrowser::exec(string Dirname)
 void CFileBrowser::addRecursiveDir(CFileList * re_filelist, string rpath, bool bRootCall, CProgressWindow * progress)
 {
 struct stat statbuf;
-struct dirent **namelist;
+dirent_struct **namelist;
+
 int n;
 uint msg, data;
 CFile file;
@@ -504,7 +517,7 @@ CFile file;
 	}
 
 	
-	n = scandir(rpath.c_str(), &namelist, 0, alphasort);
+	n = my_scandir(rpath.c_str(), &namelist, 0, my_alphasort);
 	if (n < 0)
 		perror(("Recursive scandir: "+rpath).c_str());
 	else 
