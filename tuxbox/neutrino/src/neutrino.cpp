@@ -108,6 +108,7 @@ using namespace std;
 // I don't like globals, I would have hidden them in classes,
 // but if you wanna do it so... ;)
 
+
 static void initGlobals(void)
 {
 	g_fontRenderer = NULL;
@@ -373,12 +374,6 @@ int CNeutrinoApp::loadSetup()
 	//language
 	strcpy( g_settings.language, configfile.getString( "language", "deutsch" ).c_str() );
 
-	//timing
-	g_settings.timing_menu = configfile.getInt32( "timing_menu", 10 );
-	g_settings.timing_chanlist = configfile.getInt32( "timing_chanlist", 10 );
-	g_settings.timing_epg = configfile.getInt32( "timing_epg", 8 );
-	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", 8 );
-
 	//widget settings
 	g_settings.widget_fade = configfile.getInt32( "widget_fade", 1 );
 
@@ -519,6 +514,12 @@ int CNeutrinoApp::loadSetup()
 	g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
+	//timing  (Einheit= 1 sec )
+	g_settings.timing_menu = configfile.getInt32( "timing_menu", 60 );
+	g_settings.timing_chanlist = configfile.getInt32( "timing_chanlist", 60 );
+	g_settings.timing_epg = configfile.getInt32( "timing_epg", 2* 60 );
+	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", 6 );
+
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
 		erg = 2;
@@ -571,12 +572,6 @@ void CNeutrinoApp::saveSetup()
 
 	//language
 	configfile.setString( "language", g_settings.language );
-
-	//timing
-	configfile.setInt32( "timing_menu", g_settings.timing_menu );
-	configfile.setInt32( "timing_chanlist", g_settings.timing_chanlist );
-	configfile.setInt32( "timing_epg", g_settings.timing_epg );
-	configfile.setInt32( "timing_infobar", g_settings.timing_infobar );
 
 	//widget settings
 	configfile.setInt32( "widget_fade", g_settings.widget_fade );
@@ -716,6 +711,12 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "parentallock_prompt", g_settings.parentallock_prompt );
 	configfile.setInt32( "parentallock_lockage", g_settings.parentallock_lockage );
 	configfile.setString( "parentallock_pincode", g_settings.parentallock_pincode );
+	
+	// timing
+	configfile.setInt32( "timing_menu", g_settings.timing_menu );
+	configfile.setInt32( "timing_chanlist", g_settings.timing_chanlist );
+	configfile.setInt32( "timing_epg", g_settings.timing_epg );
+	configfile.setInt32( "timing_infobar", g_settings.timing_infobar );
 
 	if(configfile.getModifiedFlag())
 	{
@@ -875,6 +876,12 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 	}
 }
 
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  setup the framebuffer                                      *
+*                                                                                     *
+**************************************************************************************/
+
 void CNeutrinoApp::SetupFrameBuffer()
 {
 	frameBuffer->init();
@@ -890,12 +897,14 @@ void CNeutrinoApp::SetupFrameBuffer()
 	frameBuffer->paletteSet();
 }
 
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  setup fonts                                                *
+*                                                                                     *
+**************************************************************************************/
+
 void CNeutrinoApp::SetupFonts()
 {
-	dprintf(DEBUG_INFO, "FontFile: %s\n", (fontFile+ ".ttf").c_str() );
-	dprintf(DEBUG_INFO, "FontName: %s\n", fontName.c_str() );
-	dprintf(DEBUG_INFO, "FontSize: %d\n", fontsSizeOffset );
-
 	g_fontRenderer->AddFont((fontFile+ ".ttf").c_str() );
 	g_fontRenderer->AddFont((fontFile+ "_bold.ttf").c_str() );
 	g_fontRenderer->AddFont((fontFile+ "_italic.ttf").c_str() );
@@ -931,6 +940,25 @@ void CNeutrinoApp::SetupFonts()
 
 }
 
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  setup the menu timouts                                     *
+*                                                                                     *
+**************************************************************************************/
+
+void CNeutrinoApp::SetupTiming()
+{
+	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
+	sprintf(g_settings.timing_chanlist_string,"%d",g_settings.timing_chanlist);
+	sprintf(g_settings.timing_epg_string,"%d",g_settings.timing_epg);
+	sprintf(g_settings.timing_infobar_string,"%d",g_settings.timing_infobar);
+}
+
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  clear the frame buffer                                     *
+*                                                                                     *
+**************************************************************************************/
 
 void CNeutrinoApp::ClearFrameBuffer()
 {
@@ -967,6 +995,12 @@ void CNeutrinoApp::ClearFrameBuffer()
 
 	frameBuffer->paletteSet();
 }
+
+/**************************************************************************************
+*                                                                                     *
+*          CNeutrinoApp -  init main menu                                             *
+*                                                                                     *
+**************************************************************************************/
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
 										  CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
@@ -1620,7 +1654,6 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
 
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
 	if(getenv("gtxID")=="ffffffff")
 	{
 		//menuefaden nur bei enx-chips!
@@ -1633,7 +1666,13 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 		CAlphaSetup* chAlphaSetup = new CAlphaSetup("colormenu.gtx_alpha", &g_settings.gtx_alpha1, &g_settings.gtx_alpha2, NULL);
 		colorSettings.addItem( new CMenuForwarder("colormenu.gtx_alpha", true, "", chAlphaSetup ));
 	}
+	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CMenuWidget *colorSettings_timing = new CMenuWidget("colormenu.timing", "settings.raw");
+	InitColorSettingsTiming(*colorSettings_timing);
+	colorSettings.addItem( new CMenuForwarder("timing.head", true, "", colorSettings_timing) );
 }
+
 
 void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 {
@@ -1696,6 +1735,31 @@ void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_s
 	colorSettings_statusbarColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colorstatusbar.text") );
 	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.background", true, "", chInfobarcolor ));
 	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chInfobarTextcolor ));
+}
+
+void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
+{
+	dprintf(DEBUG_DEBUG, "init colorsettingstiming\n");
+	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
+	sprintf(g_settings.timing_chanlist_string,"%d",g_settings.timing_chanlist);
+	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
+	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
+
+	colorSettings_timing.addItem( new CMenuSeparator() );
+	colorSettings_timing.addItem( new CMenuForwarder("menu.back") );
+	colorSettings_timing.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CStringInput*  colorSettings_timing_menu = new CStringInput("timing.menu",g_settings.timing_menu_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	colorSettings_timing.addItem( new CMenuForwarder("timing.menu", true, g_settings.timing_menu_string, colorSettings_timing_menu ) );
+
+	CStringInput*  colorSettings_timing_chanlist = new CStringInput("timing.chanlist", g_settings.timing_chanlist_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	colorSettings_timing.addItem( new CMenuForwarder("timing.chanlist", true, g_settings.timing_chanlist_string, colorSettings_timing_chanlist ) );
+
+	CStringInput*  colorSettings_timing_epg = new CStringInput("timing.epg", g_settings.timing_epg_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	colorSettings_timing.addItem( new CMenuForwarder("timing.epg", true, g_settings.timing_epg_string, colorSettings_timing_epg ) );
+
+	CStringInput*  colorSettings_timing_infobar = new CStringInput("timing.infobar", g_settings.timing_infobar_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	colorSettings_timing.addItem( new CMenuForwarder("timing.infobar", true,  g_settings.timing_infobar_string, colorSettings_timing_infobar ) );
 }
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
@@ -1978,12 +2042,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	int loadSettingsErg = loadSetup();
 
-	//timing  (Einheit= 1 sec )
-	g_settings.timing_menu = 60;
-	g_settings.timing_chanlist = 60;
-	g_settings.timing_epg = 2* 60;
-	g_settings.timing_infobar = 6;
-
+	SetupTiming();
 
 	g_Fonts = new FontsDef;
 	SetupFonts();
@@ -2468,6 +2527,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			CVCRControl::CServerDeviceInfo serverinfo;
 			serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
 			serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
+
 			CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
 
 			if(CVCRControl::getInstance()->Record((CTimerd::EventInfo *) data))
@@ -3036,12 +3096,19 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 {
-	printf("OptionName: %s\n",OptionName.c_str());
+//	printf("OptionName: %s\n",OptionName.c_str());
 	if(OptionName.substr(0,9).compare("fontsize.") == 0)
 	{
 		SetupFonts();
 	}
-	else
+	else if(OptionName.substr(0,7).compare("timing.") == 0)
+	{
+		g_settings.timing_menu = atoi(g_settings.timing_menu_string);
+		g_settings.timing_chanlist = atoi(g_settings.timing_chanlist_string);
+		g_settings.timing_epg = atoi(g_settings.timing_epg_string);
+		g_settings.timing_infobar = atoi(g_settings.timing_infobar_string);
+	}
+	else if(OptionName.substr(0,18).compare("mainmenu.recording") == 0)
 	{
 		CTimerd::EventInfo eventinfo;
 
@@ -3086,7 +3153,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.356 2002/11/04 19:28:15 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.357 2002/11/08 00:58:23 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

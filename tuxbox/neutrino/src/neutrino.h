@@ -146,6 +146,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitLanguageSettings(CMenuWidget &);
 		void InitColorThemesSettings(CMenuWidget &);
 		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors);
+		void InitColorSettingsTiming(CMenuWidget &colorSettings_timing);
 		void InitLcdSettings(CMenuWidget &lcdSettings);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
 		void AddFontSettingItem(CMenuWidget &fontSettings, string menuname, char *value);
@@ -162,6 +163,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings);
 		void ClearFrameBuffer();
 		void SetupFonts();
+		void SetupTiming();
 		void SetupFrameBuffer();
 		void SelectAPID();
 		void SelectNVOD();
