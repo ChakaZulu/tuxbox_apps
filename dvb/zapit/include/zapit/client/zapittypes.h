@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.9 2003/03/14 07:31:50 obi Exp $
+ * $Id: zapittypes.h,v 1.10 2003/05/05 08:15:43 mws Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -88,5 +88,15 @@ typedef enum {
 	ST_RCS_FLS,
 	ST_DVB_MHP_SERVICE
 } service_type_t;
+
+< /* thegoodguy structure für weniger events
+< struct scaninfo
+< 	{
+< 	uint32_t found_tv_chans;
+< 	uint32_t found_radio_chans;
+< 	uint32_t found_data_chans;
+< 	char      ServiceName[30];
+< 	};
+< */
 
 #endif /* __zapittypes_h__ */
