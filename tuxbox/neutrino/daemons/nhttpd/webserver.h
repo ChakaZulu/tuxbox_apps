@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webserver.h,v 1.16 2002/10/15 20:39:47 woglinde Exp $
+        $Id: webserver.h,v 1.17 2002/10/16 10:30:47 dirch Exp $
 
         License: GPL
 
@@ -39,7 +39,6 @@
 #include <pthread.h>
 
 #include <configfile.h>
-#include <neutrinoMessages.h>
 
 
 using namespace std;

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.12 2002/10/15 20:39:47 woglinde Exp $
+	$Id: webapi.cpp,v 1.13 2002/10/16 10:30:47 dirch Exp $
 
 	License: GPL
 
@@ -22,6 +22,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
+#include <neutrinoMessages.h>
 
 
 #include "webapi.h"
@@ -671,102 +673,104 @@ void CWebAPI::correctTime(struct tm *zt)
 bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 {
 
-   CTimerd::TimerList timerlist;             // List of bouquets
+	CTimerd::TimerList timerlist;				// List of bouquets
 
-   timerlist.clear();
-   Parent->Timerd->getTimerList(timerlist);
-   sort(timerlist.begin(), timerlist.end());
+	timerlist.clear();
+	Parent->Timerd->getTimerList(timerlist);
+	sort(timerlist.begin(), timerlist.end());
 
-   CZapitClient::BouquetChannelList channellist;     
-   channellist.clear();
+	CZapitClient::BouquetChannelList channellist;     
+	channellist.clear();
 
-   request->SendHTMLHeader("TIMERLIST");
-   request->SocketWrite("<center>\n<TABLE border=0>\n<TR>\n");
-   request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Alarm Time</TD>\n");
-   request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Stop Time</TD>\n");
-   request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Repeat</TD>\n");
-   request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Type</TD>\n");
-   request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Add. Data</TD>\n");
-   request->SocketWrite("<TD CLASS=\"cepg\"><TD CLASS=\"cepg\"></TR>\n");
+	request->SendHTMLHeader("TIMERLIST");
+	request->SocketWrite("<center>\n<TABLE border=0>\n<TR>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Alarm Time</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Stop Time</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Repeat</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Type</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\" align=\"center\"><b>Add. Data</TD>\n");
+	request->SocketWrite("<TD CLASS=\"cepg\"><TD CLASS=\"cepg\"></TR>\n");
 
-   int i = 1;
-   char classname= 'a';
-   CTimerd::TimerList::iterator timer = timerlist.begin();
-   for(; timer != timerlist.end();timer++)
-   {
-      classname = (i++&1)?'a':'b';
+	int i = 1;
+	char classname= 'a';
+	CTimerd::TimerList::iterator timer = timerlist.begin();
+	for(; timer != timerlist.end();timer++)
+	{
+		classname = (i++&1)?'a':'b';
 
-      char zAlarmTime[25] = {0};
-      struct tm *alarmTime = localtime(&(timer->alarmTime));
-      strftime(zAlarmTime,20,"%d.%m. %H:%M",alarmTime);
+		char zAlarmTime[25] = {0};
+		struct tm *alarmTime = localtime(&(timer->alarmTime));
+		strftime(zAlarmTime,20,"%d.%m. %H:%M",alarmTime);
 
-      char zAnnounceTime[25] = {0};
-      struct tm *announceTime = localtime(&(timer->announceTime));
-      strftime(zAnnounceTime,20,"%d.%m. %H:%M",announceTime);
+		char zAnnounceTime[25] = {0};
+		struct tm *announceTime = localtime(&(timer->announceTime));
+		strftime(zAnnounceTime,20,"%d.%m. %H:%M",announceTime);
 
-      char zStopTime[25] = {0};
-      if(timer->stopTime > 0)
-      {
-         struct tm *stopTime = localtime(&(timer->stopTime));
-         strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);     
-      }
+		char zStopTime[25] = {0};
+		if(timer->stopTime > 0)
+		{
+			struct tm *stopTime = localtime(&(timer->stopTime));
+			strftime(zStopTime,20,"%d.%m. %H:%M",stopTime);     
+		}
 
-     // request->printf("<TR><TD CLASS=\"%cepg\" align=center>%d</TD>",classname, timer->eventID);
-      request->printf("<TR><TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zAlarmTime);
-      request->printf("<TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zStopTime);
-      char zRep[20+1];
-      Parent->timerEventRepeat2Str(timer->eventRepeat,zRep,sizeof(zRep)-1);
-      request->printf("<TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zRep);
-      char zType[20+1];
-      Parent->timerEventType2Str(timer->eventType,zType,sizeof(zType)-1);
-      request->printf("<TD CLASS=\"%cepg\" align=center>%s", classname, zType);
+		// request->printf("<TR><TD CLASS=\"%cepg\" align=center>%d</TD>",classname, timer->eventID);
+		request->printf("<TR><TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zAlarmTime);
+		request->printf("<TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zStopTime);
+		char zRep[20+1];
+		Parent->timerEventRepeat2Str(timer->eventRepeat,zRep,sizeof(zRep)-1);
+		request->printf("<TD CLASS=\"%cepg\" align=center>%s</TD>", classname, zRep);
+		char zType[20+1];
+		Parent->timerEventType2Str(timer->eventType,zType,sizeof(zType)-1);
+		request->printf("<TD CLASS=\"%cepg\" align=center>%s", classname, zType);
 
-      // Add Data
-      char zAddData[20+1]={0};
-      switch(timer->eventType)
-      {
-         case CTimerd::TIMER_NEXTPROGRAM :
-         case CTimerd::TIMER_ZAPTO :
-         case CTimerd::TIMER_RECORD :
-            {
-               if(channellist.size()==0)
-               {
-                  Parent->Zapit->getChannels(channellist);
-               }
-               CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
-               for(; channel != channellist.end();channel++)
-               {
-                  if (channel->channel_id == timer->channel_id)
-                  {
-                     strncpy(zAddData, channel->name, 20);
-                     zAddData[20]=0;
-                     break;
-                  }
-               }
-               if(channel == channellist.end())
-                  strcpy(zAddData,"Unknown");
-            }
-            break;
-         case CTimerd::TIMER_STANDBY :
-            {
-               sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
-            }
-         case CTimerd::TIMER_REMIND :
-            {
-				   strncpy(zAddData, timer->message, 20);
-					zAddData[20]=0;
-            }
-            break;
-         default:{}
-      }
-      request->printf("<TD CLASS=\"%cepg\" align=center>%s\n",
-             classname, zAddData);
-      request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
-             classname, timer->eventID);
-   	  request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\"></a></TD>\n");
-      request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
-				  classname, timer->eventID);
-      request->printf("<img src=\"../images/modify.gif\" alt=\"Timer ändern\"></a><NOBR></TD><TR>\n");
+		// Add Data
+		char zAddData[20+1]={0};
+		switch(timer->eventType)
+		{
+			case CTimerd::TIMER_NEXTPROGRAM :
+			case CTimerd::TIMER_ZAPTO :
+			case CTimerd::TIMER_RECORD :
+			{
+				if(channellist.size()==0)
+				{
+					Parent->Zapit->getChannels(channellist);
+				}
+				CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
+				for(; channel != channellist.end();channel++)
+				{
+					if (channel->channel_id == timer->channel_id)
+					{
+						strncpy(zAddData, channel->name, 20);
+						zAddData[20]=0;
+						break;
+					}
+				}
+				if(channel == channellist.end())
+					strcpy(zAddData,"Unknown");
+			}
+			break;
+			case CTimerd::TIMER_STANDBY :
+			{
+				sprintf(zAddData,"Standby: %s",(timer->standby_on ? "ON" : "OFF"));
+			}
+			break;
+			case CTimerd::TIMER_REMIND :
+			{
+				strncpy(zAddData, timer->message, 20);
+				zAddData[20]=0;
+			}
+			break;
+
+			default:{}
+		}
+		request->printf("<TD CLASS=\"%cepg\" align=center>%s\n",
+			classname, zAddData);
+		request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
+			classname, timer->eventID);
+		request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\"></a></TD>\n");
+		request->printf("<TD CLASS=\"%cepg\" align=center><a HREF=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
+			classname, timer->eventID);
+		request->printf("<img src=\"../images/modify.gif\" alt=\"Timer ändern\"></a><NOBR></TD><TR>\n");
 	}
 	classname = (i++&1)?'a':'b';
 	request->printf("<TR><TD CLASS=\"%cepg\" colspan=5></TD>\n<TD CLASS=\"%cepg\" align=\"center\">\n",classname,classname);
@@ -851,63 +855,63 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 //-------------------------------------------------------------------------
 void CWebAPI::doModifyTimer(CWebserverRequest *request)
 {
-   unsigned modyId = atoi(request->ParameterList["id"].c_str());
-   CTimerd::responseGetTimer timer;
-   Parent->Timerd->getTimer(timer, modyId);
+	unsigned modyId = atoi(request->ParameterList["id"].c_str());
+	CTimerd::responseGetTimer timer;
+	Parent->Timerd->getTimer(timer, modyId);
 
-   struct tm *alarmTime = localtime(&(timer.alarmTime));
-   if(request->ParameterList["ad"] != "")
-   {
-      alarmTime->tm_mday = atoi(request->ParameterList["ad"].c_str());
-   }
-   if(request->ParameterList["amo"] != "")
-   {
-      alarmTime->tm_mon = atoi(request->ParameterList["amo"].c_str())-1;
-   }
-   if(request->ParameterList["ay"] != "")
-   {
-      alarmTime->tm_year = atoi(request->ParameterList["ay"].c_str())-1900;
-   }
-   if(request->ParameterList["ah"] != "")
-   {
-      alarmTime->tm_hour = atoi(request->ParameterList["ah"].c_str());
-   }
-   if(request->ParameterList["ami"] != "")
-   {
-      alarmTime->tm_min = atoi(request->ParameterList["ami"].c_str());
-   }
-   correctTime(alarmTime);
-   time_t alarmTimeT = mktime(alarmTime);
+	struct tm *alarmTime = localtime(&(timer.alarmTime));
+	if(request->ParameterList["ad"] != "")
+	{
+		alarmTime->tm_mday = atoi(request->ParameterList["ad"].c_str());
+	}
+	if(request->ParameterList["amo"] != "")
+	{
+		alarmTime->tm_mon = atoi(request->ParameterList["amo"].c_str())-1;
+	}
+	if(request->ParameterList["ay"] != "")
+	{
+		alarmTime->tm_year = atoi(request->ParameterList["ay"].c_str())-1900;
+	}
+	if(request->ParameterList["ah"] != "")
+	{
+		alarmTime->tm_hour = atoi(request->ParameterList["ah"].c_str());
+	}
+	if(request->ParameterList["ami"] != "")
+	{
+		alarmTime->tm_min = atoi(request->ParameterList["ami"].c_str());
+	}
+	correctTime(alarmTime);
+	time_t alarmTimeT = mktime(alarmTime);
 
-   struct tm *stopTime = localtime(&(timer.stopTime));
-   if(request->ParameterList["sd"] != "")
-   {
-      stopTime->tm_mday = atoi(request->ParameterList["sd"].c_str());
-   }
-   if(request->ParameterList["smo"] != "")
-   {
-      stopTime->tm_mon = atoi(request->ParameterList["smo"].c_str())-1;
-   }
-   if(request->ParameterList["sy"] != "")
-   {
-      stopTime->tm_year = atoi(request->ParameterList["sy"].c_str())-1900;
-   }
-   if(request->ParameterList["sh"] != "")
-   {
-      stopTime->tm_hour = atoi(request->ParameterList["sh"].c_str());
-   }
-   if(request->ParameterList["smi"] != "")
-   {
-      stopTime->tm_min = atoi(request->ParameterList["smi"].c_str());
-   }
-   correctTime(stopTime);
-   time_t stopTimeT = mktime(stopTime);
-   time_t announceTimeT = alarmTimeT-60;
+	struct tm *stopTime = localtime(&(timer.stopTime));
+	if(request->ParameterList["sd"] != "")
+	{
+		stopTime->tm_mday = atoi(request->ParameterList["sd"].c_str());
+	}
+	if(request->ParameterList["smo"] != "")
+	{
+		stopTime->tm_mon = atoi(request->ParameterList["smo"].c_str())-1;
+	}
+	if(request->ParameterList["sy"] != "")
+	{
+		stopTime->tm_year = atoi(request->ParameterList["sy"].c_str())-1900;
+	}
+	if(request->ParameterList["sh"] != "")
+	{
+		stopTime->tm_hour = atoi(request->ParameterList["sh"].c_str());
+	}
+	if(request->ParameterList["smi"] != "")
+	{
+		stopTime->tm_min = atoi(request->ParameterList["smi"].c_str());
+	}
+	correctTime(stopTime);
+	time_t stopTimeT = mktime(stopTime);
+	time_t announceTimeT = alarmTimeT-60;
 
-   CTimerd::CTimerEventRepeat rep = 
-   (CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
+	CTimerd::CTimerEventRepeat rep = 
+	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
 
-   Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
+	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
 }
 
 //-------------------------------------------------------------------------
@@ -969,7 +973,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 		  now->tm_mday);
 	// alarm month
 	request->printf("<INPUT TYPE=\"text\" name=\"amo\" value=\"%02d\" size=2 maxlength=2>. \n",
-		  now->tm_mon+1);
+		now->tm_mon+1);
 	// alarm year
 	request->printf("<INPUT TYPE=\"text\" name=\"ay\" value=\"%04d\" size=4 maxlength=4>\n",
 		  now->tm_year+1900);
@@ -1049,23 +1053,23 @@ time_t	announceTimeT = 0,
 		struct tm *alarmTime=localtime(&now);
 		if(request->ParameterList["ad"] != "")
 		{
-		  alarmTime->tm_mday = atoi(request->ParameterList["ad"].c_str());
+			alarmTime->tm_mday = atoi(request->ParameterList["ad"].c_str());
 		}
 		if(request->ParameterList["amo"] != "")
 		{
-		  alarmTime->tm_mon = atoi(request->ParameterList["amo"].c_str())-1;
+			alarmTime->tm_mon = atoi(request->ParameterList["amo"].c_str())-1;
 		}
 		if(request->ParameterList["ay"] != "")
 		{
-		  alarmTime->tm_year = atoi(request->ParameterList["ay"].c_str())-1900;
+			alarmTime->tm_year = atoi(request->ParameterList["ay"].c_str())-1900;
 		}
 		if(request->ParameterList["ah"] != "")
 		{
-		  alarmTime->tm_hour = atoi(request->ParameterList["ah"].c_str());
+			alarmTime->tm_hour = atoi(request->ParameterList["ah"].c_str());
 		}
 		if(request->ParameterList["ami"] != "")
 		{
-		  alarmTime->tm_min = atoi(request->ParameterList["ami"].c_str());
+			alarmTime->tm_min = atoi(request->ParameterList["ami"].c_str());
 		}
 		correctTime(alarmTime);
 		alarmTimeT = mktime(alarmTime);
@@ -1095,21 +1099,21 @@ time_t	announceTimeT = 0,
 		stopTimeT = mktime(stopTime);
 	}
 		
-   announceTimeT = alarmTimeT-60;
-   CTimerd::CTimerEventTypes type  = 
-   (CTimerd::CTimerEventTypes) atoi(request->ParameterList["type"].c_str());
-   CTimerd::CTimerEventRepeat rep = 
-   (CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
-   bool standby_on = (request->ParameterList["sbon"]=="1");
-   CTimerd::EventInfo eventinfo;
-   eventinfo.epgID      = 0;
-   eventinfo.channel_id = atoi(request->ParameterList["channel_id"].c_str());
-   void *data=NULL;
-   if(type == CTimerd::TIMER_STANDBY)
-      data=&standby_on;
-   else if(type==CTimerd::TIMER_NEXTPROGRAM || type==CTimerd::TIMER_ZAPTO ||
-           type==CTimerd::TIMER_RECORD)
-      data= &eventinfo;
+	announceTimeT = alarmTimeT-60;
+	CTimerd::CTimerEventTypes type  = 
+	(CTimerd::CTimerEventTypes) atoi(request->ParameterList["type"].c_str());
+	CTimerd::CTimerEventRepeat rep = 
+	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
+	bool standby_on = (request->ParameterList["sbon"]=="1");
+	CTimerd::EventInfo eventinfo;
+	eventinfo.epgID      = 0;
+	eventinfo.channel_id = atoi(request->ParameterList["channel_id"].c_str());
+	void *data=NULL;
+	if(type == CTimerd::TIMER_STANDBY)
+		data=&standby_on;
+	else if(type==CTimerd::TIMER_NEXTPROGRAM || type==CTimerd::TIMER_ZAPTO ||
+			type==CTimerd::TIMER_RECORD)
+		data= &eventinfo;
 	else if(type==CTimerd::TIMER_REMIND)
 	{
 		char msg[REMINDER_MESSAGE_MAXLEN];
@@ -1123,6 +1127,6 @@ time_t	announceTimeT = 0,
       stopTimeT=0;
    }
 */
-   Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep);
+	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep);
 }
 

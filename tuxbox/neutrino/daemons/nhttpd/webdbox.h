@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.31 2002/10/15 20:39:47 woglinde Exp $
+        $Id: webdbox.h,v 1.32 2002/10/16 10:30:47 dirch Exp $
 
         License: GPL
 
@@ -44,7 +44,6 @@
 #include <timerdclient/timerdclient.h>
 
 #include "request.h"
-
 
 using namespace std;
 

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.41 2002/10/15 20:39:47 woglinde Exp $
+	$Id: webdbox.cpp,v 1.42 2002/10/16 10:30:47 dirch Exp $
 
 	License: GPL
 
@@ -35,6 +35,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
+
+#include <neutrinoMessages.h>
 
 #include "webdbox.h"
 #include "webserver.h"

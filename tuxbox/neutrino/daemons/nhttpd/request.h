@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.17 2002/10/15 20:39:47 woglinde Exp $
+        $Id: request.h,v 1.18 2002/10/16 10:30:47 dirch Exp $
 
         License: GPL
 
@@ -142,8 +142,6 @@ public:
 	bool EndRequest();
 	void SendOk();
 	void SendError();
-//	TUpload *Upload;
 	friend class TWebDbox;
-//	friend class TUpload;
 };
 #endif
