@@ -2310,6 +2310,29 @@ eString getConfigMultiBoot(void)
 eString getConfigSettings(void)
 {
 	eString result = readFile(TEMPLATE_DIR + "configSettings.tmp");
+	int fastshutdown = 0;
+	eConfig::getInstance()->getKey("/extras/fastshutdown", fastshutdown);
+	int showSatPos = 1;
+	eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos);
+	result.strReplace("#SHOWSATPOS#", (showSatPos == 1) ? "checked" : "");
+	int timeroffset = 0;
+	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
+	result.strReplace("#TIMEROFFSET#", eString().sprintf("%d", timeroffset));
+	int maxmtu = 1500;
+	eConfig::getInstance()->getKey("/elitedvb/network/maxmtu", maxmtu);
+	result.strReplace("#MAXMTU#", eString().sprintf("%d", maxmtu));
+	int samba = 1;
+	eConfig::getInstance()->getKey("/elitedvb/network/samba", samba);
+	result.strReplace("#SAMBA#", (samba == 1) ? "checked" : "");
+	int webLock = 1;
+	eConfig::getInstance()->getKey("/ezap/webif/webIfLock", webLock);
+	result.strReplace("#WEBIFLOCK#", (webLock == 1) ? "checked" : "");
+	int hddti = 24;
+	eConfig::getInstance()->getKey("/extras/hdparm-s", hddti);
+	result.strReplace("#HDDSTANDBY#", eString().sprintf("%d", hddti));
+	int hddac = 160;
+	eConfig::getInstance()->getKey("/extras/hdparm-m", hddac);
+	result.strReplace("#HDDACOUSTICS#", eString().sprintf("%d", hddac));
 	return result;
 }
 #endif
