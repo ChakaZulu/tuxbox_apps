@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.2 2004/05/02 18:22:29 diemade Exp $
+ * $Id: stream2file.cpp,v 1.3 2004/05/02 19:04:33 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -84,6 +85,7 @@ static pthread_t file_thread;
 static pthread_t demux_thread;
 static unsigned long long limit;
 
+static char myfilename[512];
 
 static int sync_byte_offset (const unsigned char * buf, const unsigned int len) {
 
@@ -150,7 +152,7 @@ void * FileThread(void * v_arg)
 			// Do Splitting if necessary
 			if (remfile == 0)
 			{
-				sprintf(filename, "%s.%3.3d.ts", (char *)v_arg, ++filecount);
+				sprintf(filename, "%s.%3.3d.ts", myfilename, ++filecount);
 				if (fd2 != -1)
 					close(fd2);
 				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
@@ -245,7 +247,7 @@ void * DMXThread(void * v_arg)
 		goto the_end;
 	}
 
-	pthread_create(&file_thread, 0, FileThread, v_arg);
+	pthread_create(&file_thread, 0, FileThread, NULL);
 
 	while (!exit_flag)
 	{
@@ -345,6 +347,8 @@ bool start_recording(const char * const filename,
 
 	exit_flag = 0;
 
+	strcpy(myfilename, filename);
+
 	// create and delete temp-file to wakeup the disk from standby
 	sprintf(buf, "%s.tmp", filename);
 	fd = open(buf, O_SYNC | O_WRONLY | O_CREAT | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
@@ -379,7 +383,7 @@ bool start_recording(const char * const filename,
 	ringbuf = ringbuffer_create(RINGBUFFERSIZE);
 
 	demuxfd_count = numpids;
-	pthread_create(&demux_thread, 0, DMXThread, (void *)filename);
+	pthread_create(&demux_thread, 0, DMXThread, NULL);
 
 	return true;
 }
