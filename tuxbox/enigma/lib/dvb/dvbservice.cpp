@@ -782,7 +782,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 			break;
 	}
 
-	if ( !needAC3Workaround && ac3_audio && ( sac3default || (ac3pid != -1) ) )
+	if ( !needAC3Workaround && ac3_audio && ( sac3default || (ac3pid != -1) || (!audio) ) )
 	{
 		audiopid = ac3pid;
 		audio = ac3_audio;
@@ -818,7 +818,7 @@ void eDVBServiceController::scanPMT( PMT *pmt )
 	setDecoder();
 
 	// AC3 DBOX2 Workaround... buggy drivers...
-	if ( needAC3Workaround && ac3_audio && ( sac3default || (ac3pid != -1) ) )
+	if ( needAC3Workaround && ac3_audio && ( sac3default || (ac3pid != -1) || (!audio) ) )
 	{
 		setPID(ac3_audio);
 		setDecoder();
