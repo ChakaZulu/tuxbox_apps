@@ -55,7 +55,7 @@ struct signal {
   FrontendStatus status;
 };
 
-int max_values[3]={0,0,0};
+int max_values[3]={0,0xFFFF,0xFFFF};
 
 int draw_screen(screen_t screen,int lcd_fd) {
   return write(lcd_fd,screen,LCD_BUFFER_SIZE);
