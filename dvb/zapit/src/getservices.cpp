@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.85 2004/10/27 16:08:41 lucgas Exp $
+ * $Id: getservices.cpp,v 1.86 2004/12/01 11:06:22 diemade Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -249,8 +249,8 @@ int LoadSatellitePositions(void)
 	}
 	
 	xmlFreeDoc(parser);
-	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
-		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
+//	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
+//		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
 
 	return 0;
 }
