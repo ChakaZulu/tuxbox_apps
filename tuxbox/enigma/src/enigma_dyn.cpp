@@ -223,7 +223,7 @@ static int getOSDShot(eString mode)
 		p = &gFBDC::getInstance()->getPixmap();
 
 	if (p)
-		if (!savePNG("/tmp/screenshot.png", p))
+		if (!savePNG("/tmp/osdshot.png", p))
 			return 0;
 
 	return -1;
@@ -235,7 +235,7 @@ static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConn
 
 	if (getOSDShot(opt["mode"]) == 0)
 	{
-		content->local_header["Location"]="/root/tmp/screenshot.png";
+		content->local_header["Location"]="/root/tmp/osdshot.png";
 		content->code = 307;
 		return "+ok";
 	}
@@ -1312,15 +1312,17 @@ static eString getContent(eString mode, eString path)
 	if (mode == "menuFBShot")
 	{
 		if (!getOSDShot("fb"))
-			result += "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
+			result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
 	else
+#ifndef DISABLE_LCD
 	if (mode == "menuLCDShot")
 	{
 		if (!getOSDShot("lcd"))
-			result += "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
+			result += "<img width=\"650\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
 	else
+#endif
 	if (mode == "menuScreenShot")
 	{
 		result = getTitle("Control > Screenshot");
