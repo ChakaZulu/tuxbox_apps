@@ -57,7 +57,7 @@ class CNFSMountGui : public CMenuTarget
 		};
 	
  private:
-	static FS_Support fsSupported(const FSType fs, const bool load_modules = false);
+	static FS_Support fsSupported(const FSType fs, const bool keep_modules = false);
 
 	int menu();
 	int menuEntry(int nr);

@@ -139,7 +139,7 @@ bool remove_modules(const CNFSMountGui::FSType fstype)
 	return false;
 }
 
-CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fstype, const bool load_modules)
+CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fstype, const bool keep_modules)
 {
 	const char * fsname;
 
@@ -155,7 +155,7 @@ CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fs
 	{
 		if (in_proc_filesystems(fsname))
 		{
-			if (!load_modules)
+			if (!keep_modules)
 				remove_modules(fstype);
 
 			return FS_NEEDS_MODULES;
@@ -319,7 +319,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	pthread_cond_init(&g_cond, NULL);
 	g_mntstatus=-1;
 
-	FS_Support sup = fsSupported(fstype);
+	FS_Support sup = fsSupported(fstype, true); /* keep modules if necessary */
 
 	if (sup == FS_UNSUPPORTED)
 	{
