@@ -261,22 +261,17 @@ static QString setVolume(QString request, QString path, QString opts, const eHTT
 static QString read_file(QString filename)
 {
 	QFile f(filename);
-	QString res("");
 
 	if(f.open(IO_ReadOnly))
 	{
-		QTextStream t(&f);
-		while(!t.eof()) 
-		{
-			res+=t.readLine()+"\n";
-		}  
+		char buffer[f.size()+1];
+		buffer[f.readBlock(buffer, f.size())]=0;
+		return QString(buffer);
 	} 
 	else
 	{
-		res+="file: "+filename+" not found\n";
+		return "file: "+filename+" not found\n";
 	}
- 
-	return res;
 }
 
 static QString getIP()
