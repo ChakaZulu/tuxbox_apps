@@ -29,4 +29,3 @@ tuxbox-net.pc
 tuxbox-ucodes.pc
 tuxbox-xmltree.pc
 ])
-
