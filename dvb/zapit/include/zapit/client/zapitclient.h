@@ -390,6 +390,9 @@ class CZapitClient:public CBasicClient
 	*/
 	void unRegisterEvent(const unsigned int eventID, const unsigned int clientID);
 
+
+	// Conversion routine:
+	static std::string Utf8_to_Latin1(const std::string s);
 };
 
 

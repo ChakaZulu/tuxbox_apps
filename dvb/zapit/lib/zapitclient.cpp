@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.71 2002/12/18 12:39:14 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.72 2002/12/18 14:02:08 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -32,22 +32,42 @@
 #include <zapit/client/zapitclient.h>
 #include <zapit/client/msgtypes.h>
 
-std::string Utf8_to_Latin1(const std::string s)
+std::string CZapitClient::Utf8_to_Latin1(const std::string s)
 {
 	std::string r;
-	unsigned int i;
-	for (i = 0; i < s.length(); i++)
+
+	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
 	{
-		if ((i < s.length() - 3) && ((s[i] & 0xf0) == 0xf0))      // skip (can't be encoded in Latin1)
-			i += 3;
-		else if ((i < s.length() - 2) && ((s[i] & 0xe0) == 0xe0)) // skip (can't be encoded in Latin1)
-			i += 2;
-		else if ((i < s.length() - 1) && ((s[i] & 0xc0) == 0xc0))
+		if (((*it) & 0xf0) == 0xf0)      // skip (can't be encoded in Latin1)
 		{
-			r += ((s[i] & 3) << 6) | (s[i + 1] & 0x3f);
-			i++;
+			it++;
+			if (it == s.end())
+				return r;
+			it++;
+			if (it == s.end())
+				return r;
+			it++;
+			if (it == s.end())
+				return r;
 		}
-		else r += s[i];
+		else if (((*it) & 0xe0) == 0xe0) // skip (can't be encoded in Latin1)
+		{
+			it++;
+			if (it == s.end())
+				return r;
+			it++;
+			if (it == s.end())
+				return r;
+		}
+		else if (((*it) & 0xc0) == 0xc0)
+		{
+			char c = (((*it) & 3) << 6);
+			it++;
+			if (it == s.end())
+				return r;
+			r += (c | ((*it) & 0x3f));
+		}
+		else r += *it;
 	}
 	return r;
 }
