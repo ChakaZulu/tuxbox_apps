@@ -1031,9 +1031,9 @@ extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 
 static eString getDiskSpace(void)
 {
-	eString result;
+	eString result = "unknown";
 
-	result += "Remaining Disk Space: ";
+	result = "Remaining Disk: ";
 	int fds = freeRecordSpace();
 	if (fds != -1)
 	{
@@ -1048,8 +1048,6 @@ static eString getDiskSpace(void)
 		else
 			result += eString().sprintf("~%d h %02d min", min/60, min%60);
 	}
-	else
-		result += "unknown";
 
 	return result;
 }
@@ -1076,7 +1074,7 @@ static eString getStats()
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
 	apid = (Decoder::current.apid == -1) ? "none" : apid.sprintf("0x%x", Decoder::current.apid);
-	result += "<u><a href=\"/audio.m3u\">apid: " + apid + "</a></u>";
+	result += "<a href=\"/audio.m3u\">apid: " + apid + "</a>";
 
 	return result;
 }
@@ -1233,7 +1231,7 @@ static eString getVolBar()
 	}
 
 	result << "<td>"
-		"<a class=\"mute\" href=\"javascript:Mute(" << eAVSwitch::getInstance()->getMute() << ")\">";
+		"<a href=\"javascript:Mute(" << eAVSwitch::getInstance()->getMute() << ")\">";
 	if (eAVSwitch::getInstance()->getMute())
 		result << "<img src=\"speak_off.gif\" border=0></a>";
 	else
@@ -2401,6 +2399,7 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
 }
 
+#if 0
 static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result;
@@ -2458,6 +2457,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	eEPGCache::getInstance()->Unlock();
 	return result;
 }
+#endif
 
 #define CHANNELWIDTH 200
 
@@ -2593,14 +2593,14 @@ public:
 								<< " (" << event.duration / 60 << " min)"
 								<< "</span>"
 								<< "<br><b>"
-								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\'>"
+								<< "<a href=\'javascript:switchChannel(\"" << ref2string(ref) << "\")\' "
 								<< "<span class=\"event\">"
 								<< short_description
 								<< "</span>"
 								<< "</a>"
 
 								<< "</b><br>";
-
+								
 							if (eventDuration >= 15 * 60)
 							{
 								result << "<span class=\"description\">"
@@ -2608,7 +2608,7 @@ public:
 									<< "</span>";
 							}
 
-							result << "</td\n>";
+							result << "</td>\n";
 							tablePos += colUnits * 15 * d_min;
 							tableTime += eventDuration;
 						}
@@ -2627,7 +2627,7 @@ public:
 
 	eMEPG(time_t start, const eServiceReference & bouquetRef)
 		:hours(6)   // horizontally visible hours
-		,d_min(10)  // distance on time scale for 1 minute
+		,d_min(5)  // distance on time scale for 1 minute
 		,start(start)
 		,end(start + hours * 3600)
 		,tableWidth((end - start) / 60 * d_min + CHANNELWIDTH)
@@ -2649,7 +2649,7 @@ public:
 
 		result << "<tr>"
 			<< "<th width=" << eString().sprintf("%d", CHANNELWIDTH) << ">"
-			<< "Channel"
+			<< "CHANNEL"
 			<< "<br>"
 			<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", CHANNELWIDTH) << "\">"
 			<< "</th>";
@@ -2661,7 +2661,7 @@ public:
 				<< std::setfill('0')
 				<< std::setw(2) << t->tm_mday << '.'
 				<< std::setw(2) << t->tm_mon+1 << "."
-				<< " - "
+				<< "<br>"
 				<< std::setw(2) << t->tm_hour << ':'
 				<< std::setw(2) << t->tm_min << ' '
 				<< "<br>"
@@ -3876,7 +3876,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/header", header);
 	dyn_resolver->addDyn("GET", "/body", body);
 	dyn_resolver->addDyn("GET", "/blank", blank);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo);
