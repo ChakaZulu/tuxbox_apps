@@ -98,7 +98,7 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 
 	lNextCharTimeout = new eLabel(this);
 	lNextCharTimeout->move(ePoint(20,220));
-	lNextCharTimeout->resize(eSize(280,35));
+	lNextCharTimeout->resize(eSize(300,35));
 	lNextCharTimeout->setText(_("Next Char Timeout:"));
 
 	unsigned int t;

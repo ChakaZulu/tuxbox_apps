@@ -15,7 +15,7 @@
 ParentalLockWindow::ParentalLockWindow( const char* windowText, int curNum )
 :eWindow(0)
 {
-	resize( eSize( 300, 150 ) );
+	resize( eSize( 380, 150 ) );
 	move( ePoint( 200, 200 ) );
 	setText(windowText);
 

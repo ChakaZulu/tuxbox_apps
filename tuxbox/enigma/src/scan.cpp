@@ -382,8 +382,11 @@ int tsAutomatic::tuneNext(int next)
 
 	static int i=0;
 	i++;
-	std::string progress=_("Search in progress ");
-	progress+="\\|/-"[i&3];
+	eString progress=_("Search in progress ");
+	char bla [(i%9)+1];
+	memset(bla, '.', i%9);
+	bla[i%9]=0;
+	progress += bla;
 	l_status->setText(progress);
 
 	return 0;

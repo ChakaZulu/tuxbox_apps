@@ -741,10 +741,7 @@ void eTimerManager::actionHandler()
 					eDebug("[eTimerManager] start VCR-Lirc-Recording");
 					ELirc::getNew()->sendstart();
 				}
-#else
-				{
-				}
-#endif			
+#endif
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d startRecording", calldepth--));
 			break;
@@ -772,9 +769,9 @@ void eTimerManager::actionHandler()
 #endif
 			if (nextStartingEvent->type & ePlaylistEntry::recVCR)
 			{
+#ifndef DISABLE_LIRC
 				writeToLogfile("call ELirc::getNew()->sendstop()");
 				eDebug("[eTimerManager] stop VCR-Lirc-Recording");
-#ifndef DISABLE_LIRC
 				ELirc::getNew()->sendstop();
 #endif
 			}
@@ -796,7 +793,9 @@ void eTimerManager::actionHandler()
 			else // insert lirc ( VCR START )
 #endif
 			{
+#ifndef DISABLE_LIRC
 				writeToLogfile("recVCR... not Implemented !!");
+#endif
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d restartRecording", calldepth--));
 			break;
@@ -815,7 +814,9 @@ void eTimerManager::actionHandler()
 			else // insert lirc ( VCR PAUSE )
 #endif
 			{
-				writeToLogfile("not implemented...");
+#ifndef DISABLE_LIRC
+				writeToLogfile("recvcr not implemented...");
+#endif
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d pauseRecording", calldepth--));
 			break;
