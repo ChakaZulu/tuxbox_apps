@@ -606,6 +606,13 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 void CEpgData::hide()
 {
+        // 2004-09-10 rasc  (bugfix, scale large font settings back to normal)
+	if (bigFonts) {
+		bigFonts = false;
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO1]->getSize() / BIG_FONT_FAKTOR));
+		g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->setSize((int)(g_Font[SNeutrinoSettings::FONT_TYPE_EPG_INFO2]->getSize() / BIG_FONT_FAKTOR));
+	}
+
 	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
         showTimerEventBar (false);
 }
