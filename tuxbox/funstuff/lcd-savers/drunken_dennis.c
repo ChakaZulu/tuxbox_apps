@@ -10,10 +10,37 @@
   012
   3D4 (D: Dennis)
   567
-
 */
 
-/*
+struct {
+  unsigned int   width;
+  unsigned int   height;
+  unsigned char  pixel_data[32*23];
+} bed_buf = {
+  31, 22,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,
+  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,
+  1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,
+  1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,1,1,
+  1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+  1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,
+  1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1};
+
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
 void draw_screen(int lcd_fd, screen_t s) {
@@ -36,16 +63,21 @@ void putpixel(int x, int y, char col, screen_t s) {
     break;
   }
 }
-*/
 
 int main(int argc, char **argv) {
   unsigned char buf;
-  int lcdfd,rndfd;
+  int lcdfd,rndfd,x,y;
   int i,delay=1000;
-  //  screen_t screen;
+  screen_t screen;
   lcd_pixel pixl;
 
-  //  memset(screen,0,sizeof(screen));
+  memset(screen,0,sizeof(screen));
+  
+  for(y=0;y<bed_buf.height;y++) {
+    for(x=0;x<bed_buf.width;x++) {
+      if(bed_buf.pixel_data[(bed_buf.width*y)+x]) putpixel(119-bed_buf.width+x,y,LCD_PIXEL_ON,screen);
+    }
+  }
 
   if(argc>1)
     delay=atoi(argv[1]);
@@ -61,12 +93,13 @@ int main(int argc, char **argv) {
   i=LCD_MODE_BIN;
   ioctl(lcdfd,LCD_IOCTL_ASC_MODE,&i);
   ioctl(lcdfd,LCD_IOCTL_CLEAR);
+  draw_screen(lcdfd,screen);
   read(rndfd,&buf,1);
   pixl.x=buf%119;
   read(rndfd,&buf,1);
   pixl.y=buf%63;
   pixl.v=2;
-  while(read(rndfd,&buf,1)) {
+  while((read(rndfd,&buf,1)) && ((pixl.x<119-bed_buf.width)||(pixl.y>bed_buf.height))){
     buf%=8;
     switch(buf) {
     case 0:
@@ -106,12 +139,9 @@ int main(int argc, char **argv) {
       pixl.y++;
     }
     ioctl(lcdfd,LCD_IOCTL_SET_PIXEL,&pixl);
-    /*
-      putpixel(pixl.x,pixl.y,pixl.v,screen);
-      draw_screen(lcdfd,screen);
-    */
     usleep(delay);
   }
+  sleep(3);
   i=LCD_MODE_ASC;
   ioctl(lcdfd,LCD_IOCTL_ASC_MODE,&i);
   ioctl(lcdfd,LCD_IOCTL_CLEAR);
