@@ -92,18 +92,22 @@ void eEventDisplay::setEvent(EITEvent *event)
 		QString _eventDate="";
 		QString _eventTime="";
 
+
 		tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
+		if (begin)
+		{
+			qDebug("Starttime:%02d:%02d", begin->tm_hour, begin->tm_min);
+			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
+			_eventDate=QString().sprintf("%d.%d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
+		}
 		time_t endtime=event->start_time+event->duration;
 		tm *end=event->start_time!=-1?localtime(&endtime):0;
-		qDebug("Endtime:%02d:%02d", end->tm_hour, end->tm_min);
-		if (begin)
-			_eventTime.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
 		if (end)
+		{
+			qDebug("EndTime:%02d:%02d", end->tm_hour, end->tm_min);
 			_eventTime+=QString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
+		}
 
-		if (begin)
-			_eventDate=QString().sprintf("%d.%d.%4d", begin->tm_mday, begin->tm_mon+1, begin->tm_year+1900);
-	
 		for (QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
 		{
 			if (d.current()->Tag()==DESCR_SHORT_EVENT)
