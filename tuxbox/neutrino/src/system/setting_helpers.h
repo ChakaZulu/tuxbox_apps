@@ -120,7 +120,7 @@ class CPauseSectionsdNotifier : public CChangeObserver
 		bool changeNotify(const std::string & OptionName, void*);
 };
 
-class CStartNeutrinoDirectNotifier : public CChangeObserver
+class CShowBootInfoNotifier : public CChangeObserver
 {
 	public:
 		bool changeNotify(const std::string & OptionName, void*);

@@ -251,11 +251,11 @@ bool CPauseSectionsdNotifier::changeNotify(const std::string & OptionName, void*
 	return true;
 }
 
-bool CStartNeutrinoDirectNotifier::changeNotify(const std::string & OptionName, void* Data)
+bool CShowBootInfoNotifier::changeNotify(const std::string & OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)
 	{	//file anlegen (direktstart)
-		FILE* fd = fopen("/var/etc/.neutrino", "w");
+		FILE* fd = fopen("/var/etc/.cdkVcInfo", "w");
 		if(fd)
 		{
 			fclose(fd);
@@ -265,7 +265,7 @@ bool CStartNeutrinoDirectNotifier::changeNotify(const std::string & OptionName, 
 	}
 	else
 	{
-		remove("/var/etc/.neutrino");
+		remove("/var/etc/.cdkVcInfo");
 	}
 	return true;
 }

@@ -70,7 +70,7 @@ miscsettings.head Diverse Einstellungen
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.boxtype DBox Hersteller
-miscsettings.startneutrinodirect Neutrino direkt starten
+miscsettings.bootinfo Infos beim Booten anzeigen
 miscsettings.startbhdriver BH-Mode Treiber laden
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole

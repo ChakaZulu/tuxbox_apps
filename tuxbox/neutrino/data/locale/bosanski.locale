@@ -70,7 +70,7 @@ miscsettings.head namjestiti razne stvari
 miscsettings.shutdown_real pripravnost
 miscsettings.shutdown_real_rcdelay ugasiti sa zastojanjem
 miscsettings.boxtype proizvođač dbox2
-miscsettings.startneutrinodirect direktni start neutrina
+miscsettings.bootinfo unset
 miscsettings.startbhdriver startovati bh-mode driver
 miscsettings.general generalno
 miscsettings.fb_destination majstori! boot konsola

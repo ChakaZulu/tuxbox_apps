@@ -70,7 +70,7 @@ miscsettings.head Diverse Iischdellige
 miscsettings.shutdown_real Sdändbymodus
 miscsettings.shutdown_real_rcdelay V'rzögerede Shudown
 miscsettings.boxtype DBox Hersdeller
-miscsettings.startneutrinodirect Neutrino diräkt starte
+miscsettings.bootinfo unset
 miscsettings.startbhdriver BH-Mode Triiber lade
 miscsettings.general Allg'mein
 miscsettings.fb_destination EXPERT! Boot-Chonsole

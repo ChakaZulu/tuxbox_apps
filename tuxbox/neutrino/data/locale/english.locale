@@ -70,7 +70,7 @@ miscsettings.head Misc settings
 miscsettings.shutdown_real Enable standby
 miscsettings.shutdown_real_rcdelay Delayed shutdown
 miscsettings.boxtype DBox type
-miscsettings.startneutrinodirect start neutrino directly
+miscsettings.bootinfo Show infos at start
 miscsettings.startbhdriver load BH-Mode drivers
 miscsettings.general General
 miscsettings.fb_destination Expert! Boot-Console

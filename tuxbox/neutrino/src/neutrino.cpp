@@ -1446,13 +1446,13 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	if(fromflash)
 	{
 		static int dummy = 0;
-		FILE* fd = fopen("/var/etc/.neutrino", "r");
+		FILE* fd = fopen("/var/etc/.cdkVcInfo", "r");
 		if(fd)
 		{
 			dummy=1;
 			fclose(fd);
 		}
-		oj = new CMenuOptionChooser("miscsettings.startneutrinodirect", &dummy, true, new CStartNeutrinoDirectNotifier );
+		oj = new CMenuOptionChooser("miscsettings.bootinfo", &dummy, true, new CStartNeutrinoDirectNotifier );
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );

@@ -70,7 +70,7 @@ miscsettings.head Diversi Ischtöuigä
 miscsettings.shutdown_real Standbymodus
 miscsettings.shutdown_real_rcdelay Verzögertä Shutdown
 miscsettings.boxtype DBox Härschtöuär
-miscsettings.startneutrinodirect Neutrino diräkt schtartä
+miscsettings.bootinfo unset
 miscsettings.startbhdriver BH-Mode Triiber ladä
 miscsettings.general Augemein
 miscsettings.fb_destination EXPERT! Boot-Konsole

@@ -70,7 +70,7 @@ miscsettings.head Inne Ustawienia
 miscsettings.shutdown_real Zalacz Standby
 miscsettings.shutdown_real_rcdelay Opóznione wylaczenie
 miscsettings.boxtype Tyb DBox'a
-miscsettings.startneutrinodirect Bezposrednio Neutrino
+miscsettings.bootinfo unset
 miscsettings.startbhdriver zaladuj drivery BH
 miscsettings.general Glówne
 miscsettings.fb_destination Ekspert! -konsola

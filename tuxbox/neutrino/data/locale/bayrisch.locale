@@ -70,7 +70,7 @@ miscsettings.head Diverse Eistellunga
 miscsettings.shutdown_real bissi ausmacha
 miscsettings.shutdown_real_rcdelay verzögats Ausschoitn
 miscsettings.boxtype DBox Hersteller
-miscsettings.startneutrinodirect Neutrino glei startn
+miscsettings.bootinfo unset
 miscsettings.startbhdriver BH-Mode Treiba lon
 miscsettings.general Allgemein
 miscsettings.fb_destination EXPERT! Boot-Konsole
