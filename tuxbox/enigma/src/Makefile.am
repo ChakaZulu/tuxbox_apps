@@ -34,7 +34,7 @@ enigma_LDADD = \
 	@PNG_LIBS@ \
 	@SIGC_LIBS@ \
 	@XMLTREE_LIBS@ \
-	-ldl -lpthread -lcrypt -lresolv
+	-ldl -lpthread -lcrypt -lresolv -ltuxbox
 
 enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)
 	@rm -f enigma$(EXEEXT)
