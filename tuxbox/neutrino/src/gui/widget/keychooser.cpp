@@ -29,7 +29,7 @@ void CKeyChooser::paint()
 	CMenuWidget::paint();
 	
 	string text = g_Locale->getText("keychoosermenu.currentkey") + ": " + CRCInput::getKeyName(*key);
-	g_Fonts->menu->RenderString(x+ 10, y+ 65, width, g_Locale->getText(text).c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, y+ 65, width, text.c_str(), COL_MENUCONTENT);
 }
 
 //*****************************
