@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.6 2001/10/04 14:49:07 faralla Exp $
+  $Id: zapit.cpp,v 1.7 2001/10/10 12:09:20 field Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -69,6 +69,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.7  2001/10/10 12:09:20  field
+  Bei CMDs d,e den Parameter auf param3 geaendert (wg. Groesse)
+
   Revision 1.6  2001/10/04 14:49:07  faralla
   fixed streaming-error
 
@@ -1634,7 +1637,7 @@ void parse_command()
     case 'd':
       printf("[zapit] zapping by number\n");
       number = 0;
-      sscanf((const char*) &rmsg.param, "%x", &number);
+      sscanf((const char*) &rmsg.param3, "%x", &number);
 
       if (zapit(number,false) > 0)
       	status = "00d";
@@ -1649,7 +1652,7 @@ void parse_command()
     case 'e':
       printf("[zapit] changing nvod");
       number = 0;
-      sscanf((const char*) &rmsg.param, "%x", &number);
+      sscanf((const char*) &rmsg.param3, "%x", &number);
       
       if (zapit(number,true) > 0)
       	status = "00e";
@@ -1742,7 +1745,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.6 2001/10/04 14:49:07 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.7 2001/10/10 12:09:20 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   
   testmsg = load_settings();
