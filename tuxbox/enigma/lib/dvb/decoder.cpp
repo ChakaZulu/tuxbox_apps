@@ -122,10 +122,10 @@ void Decoder::Flush()
 	parms.descriptor_length=0;
 	parms.emmpid=-2;
 	parms.recordmode=0;
-	Set(0);
+	Set();
 }
 
-int Decoder::Set(int useAC3)
+int Decoder::Set()
 {
 	int changed=0;
 	struct dmxPesFilterParams pes_filter;
@@ -199,7 +199,7 @@ int Decoder::Set(int useAC3)
 				perror("VIDEO_PLAY");
 		}
 
-	if (changed&0x100 && useAC3)
+	if (changed&0x100)
 	{
 		int fd=open(AUDIO_DEV, O_RDWR);
 		if (fd<0)

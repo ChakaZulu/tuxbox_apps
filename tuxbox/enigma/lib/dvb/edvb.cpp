@@ -518,7 +518,7 @@ void eDVB::serviceEvent(int event)
 		break;
 	}
 	case eventServiceNewPIDs:
-		Decoder::Set(useAC3);
+		Decoder::Set();
 		break;
 	case eventServiceSwitched:
 		emit enterService(service);
@@ -574,7 +574,7 @@ void eDVB::scanPMT()
 			for (QListIterator<Descriptor> i(pe->ES_info); i.current(); ++i)
 			{
 				Descriptor *d=i.current();
-				if ((d->Tag()==DESCR_AC3) && useAC3)
+				if ((d->Tag()==DESCR_AC3))
 					audio=pe;
 				if (d->Tag()==DESCR_TELETEXT)
 					teletext=pe;
@@ -787,8 +787,6 @@ eDVB::eDVB()
 	}
 
 	time_difference=0;
-	if (config.getKey("/elitedvb/audio/useAC3", useAC3))
-		useAC3=0;
 	if (config.getKey("/elitedvb/DVB/useBAT", useBAT))
 		useBAT=0;
 	if (instance)

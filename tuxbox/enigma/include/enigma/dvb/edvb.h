@@ -222,7 +222,7 @@ public:
 	void saveBouquets();
 	void loadBouquets();
 	
-	int useAC3, useBAT;
+	int useBAT;
 
 	int volume, mute;	
 	void changeVolume(int abs, int vol);		// vol: 0..63, 63 is MIN; abs=0/1 vol, 2/3 mute

@@ -29,7 +29,7 @@ public:
 	static void Close();
 	static void Flush();
 	static void addCADescriptor(__u8 *descriptor);
-	static int Set(int useAc3);
+	static int Set();
 };
 
 #endif
