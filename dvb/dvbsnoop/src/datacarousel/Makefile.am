@@ -3,10 +3,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 noinst_LIBRARIES = libdatacarousel.a
 
 noinst_HEADERS = \
-	datagram.h \
+	dsmcc.h \
 	ints.h
 
 libdatacarousel_a_SOURCES = \
-	datagram.c \
+	dsmcc.c \
 	ints.c
 
