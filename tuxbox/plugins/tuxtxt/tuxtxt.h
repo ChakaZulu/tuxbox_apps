@@ -138,7 +138,7 @@
 
 //functions
 
-void ConfigMenu();
+void ConfigMenu(int Init);
 void CleanUp();
 void PageInput(int Number);
 void Prev100();

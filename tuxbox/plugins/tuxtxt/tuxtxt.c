@@ -5,6 +5,8 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.38: some mods & fixes                                                *
+ *    V1.37: fixing includes by woglinde                                      *
  *    V1.36: fix lcd-support                                                  *
  *    V1.35: add lcd-support                                                  *
  *    V1.34: add infoline for pagecatching                                    *
@@ -52,7 +54,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.36 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.38 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -110,6 +112,9 @@ void plugin_exec(PluginParam *par)
 		{
 			if(GetRCCode() == 1)
 			{
+				if(transpmode == 2 && RCCode != RC_MUTE) continue;
+				if(subpagetable[page] == 0xFF && RCCode == RC_OK) continue;
+
 				switch(RCCode)
 				{
 					case RC_UP:		GetNextPageOne();
@@ -181,7 +186,7 @@ void plugin_exec(PluginParam *par)
 					case RC_HELP:	SwitchHintMode();
 									break;
 
-					case RC_DBOX:	ConfigMenu();
+					case RC_DBOX:	ConfigMenu(0);
 									break;
 
 					case RC_STANDBY:;
@@ -382,7 +387,14 @@ int Init()
 
 		if(vtxtpid == 0)
 		{
-			vtxtpid = pid_table[0].vtxt_pid;
+			if(pids_found > 1) ConfigMenu(1);
+			else
+			{
+				vtxtpid = pid_table[0].vtxt_pid;
+
+				current_service = 0;
+				RenderMessage(ShowServiceName);
+			}
 		}
 
 		dmx_flt.pid		= vtxtpid;
@@ -658,9 +670,9 @@ skip_pid:;
 			{
 				current_service++;
 			}
-		}
 
-		RenderMessage(ShowServiceName);
+			RenderMessage(ShowServiceName);
+		}
 
 	return 1;
 }
@@ -669,7 +681,7 @@ skip_pid:;
  * ConfigMenu                                                                 *
  ******************************************************************************/
 
-void ConfigMenu()
+void ConfigMenu(int Init)
 {
 	struct dmxPesFilterParams dmx_flt;
 	int val, byte, line, menuitem = 1;
@@ -913,85 +925,94 @@ void ConfigMenu()
 								{
 									case 1:	if(pids_found > 1)
 											{
-												//stop old decode-thread
+												if(Init)
+												{
+													vtxtpid = pid_table[current_pid].vtxt_pid;
+												}
+												else
+												{
+													//stop old decode-thread
 
-													if(pthread_cancel(thread_id) != 0)
-													{
-														perror("TuxTxt <pthread_cancel>");
-													}
-
-													if(pthread_join(thread_id, &thread_result) != 0)
-													{
-														perror("TuxTxt <pthread_join>");
-													}
-
-												//stop demuxer
-
-													ioctl(dmx, DMX_STOP);
-
-												//reset data
-
-													memset(&cachetable, 0, sizeof(cachetable));
-													memset(&subpagetable, 0xFF, sizeof(subpagetable));
-													memset(&backbuffer, black, sizeof(backbuffer));
-
-													page_atrb[32] = transp<<4 | transp;
-
-													inputcounter = 2;
-
-													cached_pages = 0;
-
-													current_page	= -1;
-													current_subpage	= -1;
-
-													page	 = 0x100;
-													lastpage = 0x100;
-													prev_100 = 0x100;
-													prev_10  = 0x100;
-													next_100 = 0x100;
-													next_10  = 0x100;
-													subpage	 = 0;
-
-													pageupdate = 0;
-
-													zap_subpage_manual = 0;
-
-													hintmode = 0;
-
-												//free pagebuffers
-
-													for(clear_page = 0; clear_page < 0x8FF; clear_page++)
-													{
-														for(clear_subpage = 0; clear_subpage < 0x79; clear_subpage++)
+														if(pthread_cancel(thread_id) != 0)
 														{
-															if(cachetable[clear_page][clear_subpage] != 0);
+															perror("TuxTxt <pthread_cancel>");
+														}
+
+														if(pthread_join(thread_id, &thread_result) != 0)
+														{
+															perror("TuxTxt <pthread_join>");
+														}
+
+													//stop demuxer
+
+														ioctl(dmx, DMX_STOP);
+
+													//reset data
+
+														memset(&cachetable, 0, sizeof(cachetable));
+														memset(&subpagetable, 0xFF, sizeof(subpagetable));
+														memset(&backbuffer, black, sizeof(backbuffer));
+
+														page_atrb[32] = transp<<4 | transp;
+
+														inputcounter = 2;
+
+														cached_pages = 0;
+
+														current_page	= -1;
+														current_subpage	= -1;
+
+														page	 = 0x100;
+														lastpage = 0x100;
+														prev_100 = 0x100;
+														prev_10  = 0x100;
+														next_100 = 0x100;
+														next_10  = 0x100;
+														subpage	 = 0;
+
+														pageupdate = 0;
+
+														zap_subpage_manual = 0;
+
+														hintmode = 0;
+
+													//free pagebuffers
+
+														for(clear_page = 0; clear_page < 0x8FF; clear_page++)
+														{
+															for(clear_subpage = 0; clear_subpage < 0x79; clear_subpage++)
 															{
-																free(cachetable[clear_page][clear_subpage]);
+																if(cachetable[clear_page][clear_subpage] != 0);
+																{
+																	free(cachetable[clear_page][clear_subpage]);
+																}
 															}
 														}
-													}
 
-												//start demuxer with new vtxtpid
+													//start demuxer with new vtxtpid
 
-													vtxtpid = pid_table[current_pid].vtxt_pid;
+														vtxtpid = pid_table[current_pid].vtxt_pid;
 
-													dmx_flt.pid		= vtxtpid;
-													dmx_flt.input	= DMX_IN_FRONTEND;
-													dmx_flt.output	= DMX_OUT_TAP;
-													dmx_flt.pesType	= DMX_PES_OTHER;
-													dmx_flt.flags	= DMX_IMMEDIATE_START;
+														dmx_flt.pid		= vtxtpid;
+														dmx_flt.input	= DMX_IN_FRONTEND;
+														dmx_flt.output	= DMX_OUT_TAP;
+														dmx_flt.pesType	= DMX_PES_OTHER;
+														dmx_flt.flags	= DMX_IMMEDIATE_START;
 
-													if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
-													{
-														perror("TuxTxt <DMX_SET_PES_FILTER>");
-													}
+														if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
+														{
+															perror("TuxTxt <DMX_SET_PES_FILTER>");
+														}
 
-												//start new decode-thread
+													//start new decode-thread
 
-													if(pthread_create(&thread_id, NULL, CacheThread, NULL) != 0)
-													{
-														perror("TuxTxt <pthread_create>");
-													}
+														if(pthread_create(&thread_id, NULL, CacheThread, NULL) != 0)
+														{
+															perror("TuxTxt <pthread_create>");
+														}
+
+														pageupdate = 1;
+												}
 
 												//show new videotext
 
@@ -999,7 +1020,6 @@ void ConfigMenu()
 													RenderMessage(ShowServiceName);
 
 													fcntl(rc, F_SETFL, O_NONBLOCK);
-													pageupdate = 1;
 													RCCode = 0;
 													return;
 											}
@@ -1370,6 +1390,7 @@ void Prev100()
 	lastpage = page;
 	page = prev_100;
 	subpage = subpagetable[page];
+	inputcounter = 2;
 	pageupdate = 1;
 
 	printf("TuxTxt <Prev100 => %.3X>\n", page);
@@ -1386,6 +1407,7 @@ void Prev10()
 	lastpage = page;
 	page = prev_10;
 	subpage = subpagetable[page];
+	inputcounter = 2;
 	pageupdate = 1;
 
 	printf("TuxTxt <Prev10 => %.3X>\n", page);
@@ -1402,6 +1424,7 @@ void Next10()
 	lastpage = page;
 	page = next_10;
 	subpage = subpagetable[page];
+	inputcounter = 2;
 	pageupdate = 1;
 
 	printf("TuxTxt <Next10 => %.3X>\n", page);
@@ -1418,6 +1441,7 @@ void Next100()
 	lastpage = page;
 	page = next_100;
 	subpage = subpagetable[page];
+	inputcounter = 2;
 	pageupdate = 1;
 
 	printf("TuxTxt <Next100 => %.3X>\n", page);
@@ -1430,6 +1454,10 @@ void Next100()
 void PageCatching()
 {
 	int val;
+
+	//abort pageinput
+
+		inputcounter = 2;
 
 	//show info line
 
@@ -2380,7 +2408,7 @@ void UpdateLCD()
 
 		if(update_lcd)
 		{
-			printf("TuxTxt <update lcd => %.3x-%.2x/%.2x %.2d %.1d %.4d>\n", page, subpage, subpage_max, pids_found, hintmode, cached_pages);
+			//printf("TuxTxt <update LCD => %.3x-%.2x/%.2x %.2d %.1d %.4d>\n", page, subpage, subpage_max, pids_found, hintmode, cached_pages);
 
 			write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
 		}
@@ -2798,7 +2826,7 @@ void *CacheThread(void *arg)
 						if(b1 == 0xFF || b2 == 0xFF)
 						{
 							printf("TuxTxt <Biterror in Packet>\n");
-							goto SkipPacket;
+							continue;
 						}
 
 						packet_number = b1>>3 | b2<<1;
@@ -2807,11 +2835,12 @@ void *CacheThread(void *arg)
 
 						if(packet_number == 0)
 						{
-							//remove parity bit from data bytes (dirty, i know...)
+							//check parity
 
 								for(byte = 14; byte <= 45; byte++)
 								{
-									vtxt_row[byte] &= 127;
+									if((vtxt_row[byte]&1) ^ ((vtxt_row[byte]>>1)&1) ^ ((vtxt_row[byte]>>2)&1) ^ ((vtxt_row[byte]>>3)&1) ^ ((vtxt_row[byte]>>4)&1) ^ ((vtxt_row[byte]>>5)&1) ^ ((vtxt_row[byte]>>6)&1) ^ (vtxt_row[byte]>>7)) vtxt_row[byte] &= 127;
+									else vtxt_row[byte] = ' ';
 								}
 
 							//get pagenumber
@@ -2824,13 +2853,13 @@ void *CacheThread(void *arg)
 								{
 									current_page = -1;
 									printf("TuxTxt <Biterror in Page>\n");
-									goto SkipPacket;
+									continue;
 								}
 
 								if(b2 > 9 || b3 > 9)
 								{
 									current_page = -1;
-									goto SkipPacket;
+									continue;
 								}
 								else
 								{
@@ -2853,13 +2882,13 @@ void *CacheThread(void *arg)
 								{
 									current_subpage = -1;
 									printf("TuxTxt <Biterror in SubPage>\n");
-									goto SkipPacket;
+									continue;
 								}
 
 								if(b1 != 0 || b2 != 0 || b3 > 7 || b4 > 9)
 								{
 									current_subpage = -1;
-									goto SkipPacket;
+									continue;
 								}
 								else
 								{
@@ -2901,11 +2930,12 @@ void *CacheThread(void *arg)
 						}
 						else if(packet_number < 24)
 						{
-							//remove parity bit from data bytes (dirty, i know...)
+							//check parity
 
 								for(byte = 6; byte <= 45; byte++)
 								{
-									vtxt_row[byte] &= 127;
+									if((vtxt_row[byte]&1) ^ ((vtxt_row[byte]>>1)&1) ^ ((vtxt_row[byte]>>2)&1) ^ ((vtxt_row[byte]>>3)&1) ^ ((vtxt_row[byte]>>4)&1) ^ ((vtxt_row[byte]>>5)&1) ^ ((vtxt_row[byte]>>6)&1) ^ (vtxt_row[byte]>>7)) vtxt_row[byte] &= 127;
+									else vtxt_row[byte] = ' ';
 								}
 						}
 
@@ -2915,7 +2945,6 @@ void *CacheThread(void *arg)
 						{
 							memcpy(cachetable[current_page][current_subpage] + packet_number*40, &vtxt_row[6], 40);
 						}
-SkipPacket:;
 				}
 			}
 	}
