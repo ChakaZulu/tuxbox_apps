@@ -53,7 +53,7 @@ int CFavorites::addChannelToFavorites()
 
 
 	// no bouquet-List?  do nothing
-	if (!bouquetlist) return status;
+	if (!bouquetList) return status;
 
 	// -- get Favorites Bouquetname  from Locales
 	fav_bouquetname = (char *) g_Locale->getText("favorites.bouquetname").c_str();
