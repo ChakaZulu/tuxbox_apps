@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.4 2002/09/13 23:57:04 obi Exp $
+$Id: dvbsnoop.h,v 1.5 2002/11/01 20:38:40 Jolt Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -8,6 +8,9 @@ $Id: dvbsnoop.h,v 1.4 2002/09/13 23:57:04 obi Exp $
    (c) rasc
 
 $Log: dvbsnoop.h,v $
+Revision 1.5  2002/11/01 20:38:40  Jolt
+Changes for the new API
+
 Revision 1.4  2002/09/13 23:57:04  obi
 define NEWSTRUCT to work with current linuxtv cvs
 
@@ -25,7 +28,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #define VERSION  "0.7b"
 
-//#define NEWSTRUCT
+#define NEWSTRUCT
 
 #include <stdio.h>
 #include <stdlib.h>
