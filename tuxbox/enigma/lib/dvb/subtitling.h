@@ -1,6 +1,7 @@
 #ifndef __subtitling_h
 #define __subtitling_h
 
+#include <linux/fb.h>
 #include <lib/gui/ewidget.h>
 #include <lib/base/ebase.h>
 #include <lib/dvb/subtitle.h>
@@ -34,6 +35,7 @@ class eSubtitleWidget: public eWidget
 	int peslen;
 	static eSubtitleWidget *instance;
 	int eventHandler(const eWidgetEvent &event);
+	void globalFocusHasChanged(const eWidget* newFocus);
 public:
 	void start(int pid, const std::set<int> &pageids);
 	void stop();

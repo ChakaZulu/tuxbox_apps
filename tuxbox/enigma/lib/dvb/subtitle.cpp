@@ -6,6 +6,7 @@
 
 #include <asm/types.h>
 #include "subtitle.h"
+#include <lib/base/eerror.h>
 
 void bitstream_init(struct bitstream *bit, void *buffer, int size)
 {
@@ -32,7 +33,7 @@ int bitstream_get(struct bitstream *bit)
 void subtitle_process_line(struct subtitle_ctx *sub, struct subtitle_page *page, int object_id, int line, __u8 *data, int len)
 {
 	struct subtitle_region *region = page->regions;
-//	printf("line for %d:%d\n", page->page_id, object_id);
+//	eDebug("line for %d:%d", page->page_id, object_id);
 	while (region)
 	{
 		struct subtitle_region_object *object = region->region_objects;
@@ -44,17 +45,17 @@ void subtitle_process_line(struct subtitle_ctx *sub, struct subtitle_page *page,
 				int y = object->object_vertical_position + line;
 				if (x + len > region->region_width)
 				{
-					printf("[SUB] !!!! XCLIP %d + %d > %d\n", x, len, region->region_width);
+					//eDebug("[SUB] !!!! XCLIP %d + %d > %d", x, len, region->region_width);
 					len = region->region_width - x;
 				}
 				if (len < 0)
 					break;
 				if (y >= region->region_height)
 				{
-					printf("[SUB] !!!! YCLIP %d >= %d\n", y, region->region_height);
+					//eDebug("[SUB] !!!! YCLIP %d >= %d", y, region->region_height);
 					break;
 				}
-//				printf("inserting %d bytes (into region %d)\n", len, region->region_id);
+//				//eDebug("inserting %d bytes (into region %d)", len, region->region_id);
 				memcpy(region->region_buffer + region->region_width * y + x, data, len);
 			}
 			object = object->next;
@@ -70,13 +71,13 @@ int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *
 	switch (data_type)
 	{
 	case 0x10: // 2bit pixel data
-		printf("[SUB]  2 bit pixel data\n");
+		eDebug("[SUB] 2 bit pixel data");
 		exit(0);
 		break;
 	case 0x11:
 	{
 		struct bitstream bit;
-//		printf("  4 bit pixel data\n");
+//		//eDebug("  4 bit pixel data");
 		bitstream_init(&bit, data, 4);
 		while (1)
 		{
@@ -131,28 +132,28 @@ int subtitle_process_pixel_data(struct subtitle_ctx *sub, struct subtitle_page *
 		break;
 	}
 	case 0x12:
-		printf("[SUB]  8 bit pixel data\n");
+		eDebug("[SUB]  8 bit pixel data");
 		exit(0);
 		break;
 	case 0x20:
 	case 0x21:
 	case 0x22:
-		printf("[SUB] maps.\n");
+		//eDebug("[SUB] maps.");
 		break;
 	case 0xF0:
 		subtitle_process_line(sub, page, object_id, *linenr, line, *linep);
 /*		{
 			int i;
 			for (i=0; i<720; ++i)
-				printf("%d ", line[i]);
-			printf("\n");
+				//eDebugNoNewLine("%d ", line[i]);
+			//eDebug("");
 		} */
 		(*linenr)+=2; // interlaced
 		*linep = 0;
-//		printf("[SUB] EOL\n");
+//		//eDebug("[SUB] EOL");
 		return 1;
 	default:
-		printf("subtitle_process_pixel_data: invalid data_type %02x\n", data_type);
+		eDebug("subtitle_process_pixel_data: invalid data_type %02x", data_type);
 		return -1;
 	}
 	return 0;
@@ -163,7 +164,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 	int segment_type, page_id, segment_length, processed_length;
 	if (*segment++ !=  0x0F)
 	{
-		printf("out of sync.\n");
+		eDebug("out of sync.");
 		return -1;
 	}
 	segment_type = *segment++;
@@ -173,9 +174,9 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 	segment_length |= *segment++;
 	if (segment_type == 0xFF)
 		return segment_length + 6;
-//	printf("have %d bytes of segment data\n", segment_length);
+//	//eDebug("have %d bytes of segment data", segment_length);
 	
-//	printf("page_id %d, segtype %02x\n", page_id, segment_type);
+//	//eDebug("page_id %d, segtype %02x", page_id, segment_type);
 	
 	struct subtitle_page *page, **ppage;
 		
@@ -198,17 +199,17 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		int page_time_out = *segment++; processed_length++;
 		int page_version_number = *segment >> 4;
 		int page_state = (*segment >> 2) & 0x3;
-		printf("pcs with %d bytes data (%d:%d:%d)\n", segment_length, page_id, page_version_number, page_state);
+		//eDebug("pcs with %d bytes data (%d:%d:%d)", segment_length, page_id, page_version_number, page_state);
 		segment++;
 		processed_length++;
 		
-	//	printf("page time out: %d\n", page_time_out);
-		printf("page_version_number: %d\n" ,page_version_number);
-		printf("page_state: %d\n", page_state);
+		//eDebug("page time out: %d", page_time_out);
+		//eDebug("page_version_number: %d" ,page_version_number);
+		//eDebug("page_state: %d", page_state);
 		
 		if (!page)
 		{
-			printf("page not found\n");
+			//eDebug("page not found");
 			page = (struct subtitle_page*)malloc(sizeof(struct subtitle_page));
 			page->page_regions = 0;
 			page->regions = 0;
@@ -225,7 +226,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 				break;
 		}
 
-		printf("page updated: old: %d, new: %d\n", page->page_version_number, page_version_number);
+		//eDebug("page updated: old: %d, new: %d", page->page_version_number, page_version_number);
 			// when acquisition point or mode change: remove all displayed pages.
 		if ((page_state == 1) || (page_state == 2))
 		{
@@ -237,14 +238,14 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			}
 		}
 		
-		printf("new page.. (%d)\n", page_state);
+		//eDebug("new page.. (%d)", page_state);
 		
 		page->page_time_out = time(0) + page_time_out;
 		page->page_version_number = page_version_number;
 		
 		struct subtitle_page_region **r = &page->page_regions;
 		
-		printf("%d  / %d data left\n", processed_length, segment_length);
+		//eDebug("%d  / %d data left", processed_length, segment_length);
 		
 			// go to last entry
 		while (*r)
@@ -271,11 +272,11 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			pr->region_vertical_address |= *segment++;
 			processed_length += 2;
 			
-			printf("appended active region\n");
+			//eDebug("appended active region");
 		}
 		
 		if (processed_length != segment_length)
-			printf("%d != %d\n", processed_length, segment_length);
+			eDebug("%d != %d", processed_length, segment_length);
 		break;
 	}
 	case 0x11: // region composition segment
@@ -288,7 +289,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			// if we didn't yet received the pcs for this page, drop the region
 		if (!page)
 		{
-			printf("ignoring region %x, since page %02x doesn't yet exist.\n", region_id, page_id);
+			eDebug("ignoring region %x, since page %02x doesn't yet exist.", region_id, page_id);
 			break;
 		}
 		
@@ -323,7 +324,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			break;
 		
 		
-		printf("region %d:%d update\n", page_id, region_id);
+		//eDebug("region %d:%d update", page_id, region_id);
 			
 		region->region_id = region_id;
 		region->region_version_number = region_version_number;
@@ -370,10 +371,10 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			else if (region_depth == 3)
 				memset(region->region_buffer, region_8bit_pixel_code, region->region_height * region->region_width);
 			else
-				printf("!!!! invalid depth\n");
+				eDebug("!!!! invalid depth");
 		}
 		
-		printf("region %02x, version %d, %dx%d\n", region->region_id, region->region_version_number, region->region_width, region->region_height);
+		//eDebug("region %02x, version %d, %dx%d", region->region_id, region->region_version_number, region->region_width, region->region_height);
 		
 		region->region_objects = 0;
 		struct subtitle_region_object **pobject = &region->region_objects;
@@ -409,9 +410,9 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 				processed_length += 2;
 			}
 		}
-		
+
 		if (processed_length != segment_length)
-			printf("too less data! (%d < %d)\n", segment_length, processed_length);
+			eDebug("too less data! (%d < %d)", segment_length, processed_length);
 		
 		break;
 	}
@@ -423,13 +424,13 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		if (!page)
 			break;
 
-		printf("CLUT: %02x\n", *segment);
+		//eDebug("CLUT: %02x", *segment);
 		CLUT_id = *segment++;
 		
 		CLUT_version_number = *segment++ >> 4;
 		processed_length += 2;
 
-		printf("page %d, CLUT %02x, version %d\n", page->page_id, CLUT_id, CLUT_version_number);
+		//eDebug("page %d, CLUT %02x, version %d", page->page_id, CLUT_id, CLUT_version_number);
 
 		clut = page->cluts; pclut = &page->cluts;
 		
@@ -456,7 +457,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			
 		clut->size = 16;
 			
-		printf("new clut\n");
+		//eDebug("new clut");
 		while (processed_length < segment_length)
 		{
 			int CLUT_entry_id, entry_CLUT_flag, full_range;
@@ -466,7 +467,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			entry_CLUT_flag = *segment >> 5;
 			if (!(entry_CLUT_flag & 6)) // if no 4 or 16 color entry, skip it
 			{
-				printf("skipped 8bit CLUT entry\n");
+				eDebug("skipped 8bit CLUT entry");
 				continue;
 			}
 			full_range = *segment++ & 1;
@@ -493,7 +494,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			clut->entries[CLUT_entry_id].Cr = v_Cr; 
 			clut->entries[CLUT_entry_id].Cb = v_Cb; 
 			clut->entries[CLUT_entry_id].T = v_T; 
-			printf("  %04x %02x %02x %02x %02x\n", CLUT_entry_id, v_Y, v_Cb, v_Cr, v_T);
+			//eDebug("  %04x %02x %02x %02x %02x", CLUT_entry_id, v_Y, v_Cb, v_Cr, v_T);
 		}
 		break;
 	}
@@ -510,7 +511,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 		non_modifying_color_flag = !!(*segment++ & 2);
 		processed_length++;
 		
-		printf("object id %04x, version %d, object_coding_method %d (page_id %d)\n", object_id, object_version_number, object_coding_method, page_id);
+		//eDebug("object id %04x, version %d, object_coding_method %d (page_id %d)", object_id, object_version_number, object_coding_method, page_id);
 		
 		if (object_coding_method == 0)
 		{
@@ -522,7 +523,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 			
 			bottom_field_data_blocklength  = *segment++ << 8;
 			bottom_field_data_blocklength |= *segment++;
-			printf("%d / %d bytes\n", top_field_data_blocklength, bottom_field_data_blocklength);
+			//eDebug("%d / %d bytes", top_field_data_blocklength, bottom_field_data_blocklength);
 			processed_length += 4;
 			
 			i = 0;
@@ -555,20 +556,18 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 					processed_length += len;
 					i += len;
 				}
-			} else if (top_field_data_blocklength)
-			{
-				printf("!!!! unimplemented: no bottom field! (%d : %d)\n", top_field_data_blocklength, bottom_field_data_blocklength);
-			}
-			
+			} 
+			else if (top_field_data_blocklength)
+				eDebug("!!!! unimplemented: no bottom field! (%d : %d)", top_field_data_blocklength, bottom_field_data_blocklength);
+
 			if ((top_field_data_blocklength + bottom_field_data_blocklength) & 1)
 			{
 				segment++; processed_length++;
 			}
-		} else if (object_coding_method == 1)
-		{
-			printf("---- object_coding_method 1 unsupported!\n");
-		}
-		
+		} 
+		else if (object_coding_method == 1)
+			eDebug("---- object_coding_method 1 unsupported!");
+
 		break;
 	}
 	case 0x80: // end of display set segment
@@ -580,7 +579,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 	case 0xFF: // stuffing
 		break;
 	default:
-		printf("unhandled segment type %02x\n", segment_type);
+		eDebug("unhandled segment type %02x", segment_type);
 	}
 	
 	return segment_length + 6;
@@ -591,12 +590,12 @@ void subtitle_process_pes(struct subtitle_ctx *sub, void *buffer, int len)
 	__u8 *pkt = (__u8*)buffer;
 	if (pkt[0] || pkt[1] || (pkt[2] != 1))
 	{
-		printf("%s: invalid startcode %02x %02x %02x\n", __FUNCTION__, pkt[0], pkt[1], pkt[2]);
+		//eDebug("%s: invalid startcode %02x %02x %02x", __FUNCTION__, pkt[0], pkt[1], pkt[2]);
 		return;
 	}
 	if (pkt[3] != 0xBD)
 	{
-		printf("%s: invalid stream_id %02x\n", __FUNCTION__, pkt[3]);
+		//eDebug("%s: invalid stream_id %02x", __FUNCTION__, pkt[3]);
 		return;
 	}
 	pkt += 6; len -= 6;
@@ -610,7 +609,7 @@ void subtitle_process_pes(struct subtitle_ctx *sub, void *buffer, int len)
 
 	if (*pkt != 0x20)
 	{
-		printf("data identifier is 0x%02x, but not 0x20\n", *pkt);
+		//eDebug("data identifier is 0x%02x, but not 0x20", *pkt);
 		return;
 	}
 	pkt++; len--; // data identifier
@@ -618,7 +617,7 @@ void subtitle_process_pes(struct subtitle_ctx *sub, void *buffer, int len)
 	
 	if (len <= 0)
 	{
-		printf("no data left (%d)\n", len);
+		//eDebug("no data left (%d)", len);
 		return;
 	}
 	
@@ -630,8 +629,8 @@ void subtitle_process_pes(struct subtitle_ctx *sub, void *buffer, int len)
 		pkt += l;
 		len -= l;
 	}
-	if (len && *pkt != 0xFF)
-		printf("strange data at the end\n");
+//	if (len && *pkt != 0xFF)
+//		eDebug("strange data at the end");
 }
 
 void subtitle_clear_screen(struct subtitle_ctx *sub)
@@ -639,7 +638,7 @@ void subtitle_clear_screen(struct subtitle_ctx *sub)
 		/* clear bbox */
 	int y;
 	
-	printf("BBOX clear %d:%d -> %d:%d\n", sub->bbox_left, sub->bbox_top, sub->bbox_right, sub->bbox_bottom);
+	//eDebug("BBOX clear %d:%d -> %d:%d", sub->bbox_left, sub->bbox_top, sub->bbox_right, sub->bbox_bottom);
 	
 	if (sub->bbox_right > sub->bbox_left)
 		for (y=sub->bbox_top; y < sub->bbox_bottom; ++y)
@@ -656,36 +655,36 @@ void subtitle_redraw_all(struct subtitle_ctx *sub)
 	subtitle_clear_screen(sub);
 	
 	struct subtitle_page *page = sub->pages;
-	printf("----------- end of display set\n");
-	printf("active pages:\n");
+	//eDebug("----------- end of display set");
+	//eDebug("active pages:");
 	while (page)
 	{
-		printf("  page_id %02x\n", page->page_id);
-		printf("  page_version_number: %d\n", page->page_version_number);
-		printf("  active regions:\n");
+		//eDebug("  page_id %02x", page->page_id);
+		//eDebug("  page_version_number: %d", page->page_version_number);
+		//eDebug("  active regions:");
 		{
 			struct subtitle_page_region *region = page->page_regions;
 			while (region)
 			{
-				printf("    region_id: %04x\n", region->region_id);
-				printf("    region_horizontal_address: %d\n", region->region_horizontal_address);
-				printf("    region_vertical_address: %d\n", region->region_vertical_address);
+				//eDebug("    region_id: %04x", region->region_id);
+				//eDebug("    region_horizontal_address: %d", region->region_horizontal_address);
+				//eDebug("    region_vertical_address: %d", region->region_vertical_address);
 				
 				region = region->next;
 			}
 		}
 		
 		subtitle_redraw(sub, page->page_id);
-		printf("defined regions:\n");
+		//eDebug("defined regions:");
 		struct subtitle_region *region = page->regions;
 		while (region)
 		{
-			printf("  region_id %04x, version %d, %dx%d\n", region->region_id, region->region_version_number, region->region_width, region->region_height);
+			//eDebug("  region_id %04x, version %d, %dx%d", region->region_id, region->region_version_number, region->region_width, region->region_height);
 			
 			struct subtitle_region_object *object = region->region_objects;
 			while (object)
 			{
-				printf("  object %02x, type %d, %d:%d\n", object->object_id, object->object_type, object->object_horizontal_position, object->object_vertical_position);
+				//eDebug("  object %02x, type %d, %d:%d", object->object_id, object->object_type, object->object_horizontal_position, object->object_vertical_position);
 				object = object->next;
 			}				
 				
@@ -700,7 +699,7 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 	struct subtitle_page *page = sub->pages;
 	int main_clut_id = -1;
 	
-	printf("displaying page id %d\n", page_id);
+	//eDebug("displaying page id %d", page_id);
 	
 	while (page)
 	{
@@ -710,17 +709,17 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 	}
 	if (!page)
 	{
-		printf("page not found\n");
+		//eDebug("page not found");
 		return;
 	}
 	
 	
-	printf("iterating regions..\n");
+	//eDebug("iterating regions..");
 		/* iterate all regions in this pcs */
 	struct subtitle_page_region *region = page->page_regions;
 	while (region)
 	{
-		printf("region %d\n", region->region_id);
+		//eDebug("region %d", region->region_id);
 			/* find corresponding region */
 		struct subtitle_region *reg = page->regions;
 		while (reg)
@@ -733,19 +732,19 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 		{
 			int y;
 			int clut_id = reg->clut_id;
-			printf("clut %d, %d\n", clut_id, main_clut_id);
+			//eDebug("clut %d, %d", clut_id, main_clut_id);
 			if (main_clut_id != -1)
 			{
 				if (main_clut_id != clut_id)
 				{
-					printf("MULTIPLE CLUTS IN USE! prepare for pixelmuell!\n");
+					eDebug("MULTIPLE CLUTS IN USE! prepare for pixelmuell!");
 //					exit(0);
 				}
 			}
 			main_clut_id = clut_id;
 				
 				
-			printf("copy region %d to %d, %d\n", region->region_id, region->region_horizontal_address, region->region_vertical_address);
+			//eDebug("copy region %d to %d, %d", region->region_id, region->region_horizontal_address, region->region_vertical_address);
 				
 			int x0 = region->region_horizontal_address;
 			int y0 = region->region_vertical_address;
@@ -773,11 +772,12 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 					region->region_horizontal_address, 
 					reg->region_buffer + reg->region_width * y, reg->region_width);
 			}
-		} else
-			printf("region not found\n");
+		} 
+		else
+			eDebug("region not found");
 		region = region->next;
 	}
-	printf("schon gut.\n");
+	//eDebug("schon gut.");
 	
 	if (main_clut_id == -1)
 		return; /* most probably no display active */
@@ -785,12 +785,12 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 	if ((sub->current_clut_id == main_clut_id) && (sub->current_clut_page_id == page_id))
 		return;
 	
-	printf("updating clut..\n");
+	//eDebug("updating clut..");
 			/* find corresponding clut */
 	struct subtitle_clut *clut = page->cluts;
 	while (clut)
 	{
-		printf("have %d, want %d\n", clut->clut_id, main_clut_id);
+		//eDebug("have %d, want %d", clut->clut_id, main_clut_id);
 		if (clut->clut_id == main_clut_id)
 			break;
 		break;
@@ -799,7 +799,7 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 	if (clut)
 		sub->set_palette(clut);
 	else
-		printf("[SUB] CLUT NOT FOUND.\n");
+		eDebug("[SUB] CLUT NOT FOUND.");
 }
 
 void subtitle_screen_enable(struct subtitle_ctx *sub, int enable)

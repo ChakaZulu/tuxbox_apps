@@ -102,6 +102,7 @@ public:
 	 */
 	Signal1<void, const eWidget*> focusChanged;
 	static Signal2< void, ePtrList<eAction>*, int > showHelp;
+	static Signal1<void, const eWidget*> globalFocusChanged;
 protected:
 	ePtrList<eAction> actionHelpList;
 	int helpID;

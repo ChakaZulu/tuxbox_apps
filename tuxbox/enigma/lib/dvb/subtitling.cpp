@@ -10,6 +10,7 @@
 
 #include <lib/gdi/gfbdc.h>
 #include <lib/dvb/decoder.h>
+#include <lib/gui/eskin.h>
 
 #include <config.h>
 #if HAVE_DVB_API_VERSION < 3
@@ -65,8 +66,8 @@ void eSubtitleWidget::processPESPacket(unsigned char *pkt, int len)
 {
 	unsigned long long current = 0;
 	if (Decoder::getSTC(current))
-		printf("bloed, going unsyced\n");
-	printf("DEMUX STC: %08llx\n", current);
+		eDebug("bloed, going unsyced");
+//	eDebug("DEMUX STC: %08llx\n", current);
 	
 	unsigned long long pts = 0;
 	
@@ -104,7 +105,6 @@ void eSubtitleWidget::processPESPacket(unsigned char *pkt, int len)
 		}
 		return;
 	}
-	
 	subtitle_process_pes(subtitle, pesbuffer, peslen);
 }
 
@@ -127,7 +127,9 @@ void eSubtitleWidget::processNext()
 			fpts = pes.pts;
 		first = 0;
 		queue.pop();
+
 		subtitle_process_pes(subtitle, pes.pkt, pes.len);
+
 		delete pes.pkt;
 	}
 
@@ -145,7 +147,7 @@ void eSubtitleWidget::processNext()
 		return;
 	}
 	
-	eDebug("by the way, actual delay was %lld\n", current - fpts);
+	eDebug("by the way, actual delay was %lld(%lld msek)\n", current - fpts, (current-fpts)/90 );
 
 	if (queue.empty())
 		return;
@@ -209,12 +211,16 @@ int eSubtitleWidget::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::willShow:
+//		eDebug("willShow!!!");
 		isvisible = 1;
 		subtitle_screen_enable(subtitle, 1);
 		break;
 	case eWidgetEvent::willHide:
+//		eDebug("willHide!!!");
 		isvisible = 0;
 		subtitle_screen_enable(subtitle, 0);
+		//restore old palette
+		eSkin::getActive()->setPalette(gFBDC::getInstance());
 		break;
 	default:
 		return eWidget::eventHandler(event);;
@@ -254,7 +260,7 @@ void eSubtitleWidget::start(int pid, const std::set<int> &ppageids)
 
 static void subtitle_set_palette(struct subtitle_clut *pal)
 {
-	eDebug("updating palette!");
+//	eDebug("updating palette!");
 	gRGB palette[pal->size];
 	
 	for (int i=0; i<pal->size; ++i)
@@ -278,7 +284,7 @@ static void subtitle_set_palette(struct subtitle_clut *pal)
 			palette[i].a = 0xFF;
 		}
 		
-		eDebug("%d: %d %d %d %d", i, palette[i].r, palette[i].g, palette[i].b, palette[i].a);
+//		eDebug("%d: %d %d %d %d", i, palette[i].r, palette[i].g, palette[i].b, palette[i].a);
 	}
 	
 	gPainter p(*gFBDC::getInstance());
@@ -307,6 +313,7 @@ eSubtitleWidget::eSubtitleWidget(): timer(eApp)
 	subtitle->set_palette = subtitle_set_palette;
 	
 	CONNECT(timer.timeout, eSubtitleWidget::processNext);
+	CONNECT(eWidget::globalFocusChanged, eSubtitleWidget::globalFocusHasChanged);
 }
 
 eSubtitleWidget::~eSubtitleWidget()
@@ -321,12 +328,19 @@ eSubtitleWidget::~eSubtitleWidget()
 
 void eSubtitleWidget::stop()
 {
+	delete sn;
+	sn = 0;
 	subtitle_screen_enable(subtitle, 0);
 	if (fd != -1)
 		::close(fd);
-	if (sn)
-	{
-		delete sn;
-		sn = 0;
-	}
+}
+
+void eSubtitleWidget::globalFocusHasChanged(const eWidget* newFocus)
+{
+	if ( !sn ) // not running
+		return; 
+	if ( newFocus )
+			hide();
+	else
+		show();
 }

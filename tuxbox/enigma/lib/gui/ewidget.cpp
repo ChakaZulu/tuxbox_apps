@@ -15,6 +15,7 @@ extern eWidget *currentFocus;
 
 eWidget *eWidget::root;
 Signal2< void, ePtrList<eAction>*, int >eWidget::showHelp;
+Signal1< void, const eWidget*>eWidget::globalFocusChanged;
 eWidget::actionMapList eWidget::globalActions;
 
 eWidget::eWidget(eWidget *_parent, int takefocus)
@@ -105,6 +106,7 @@ void eWidget::takeFocus()
 	{
 		oldTLfocus=currentFocus;
 		currentFocus=this;
+		/*emit*/ globalFocusChanged(currentFocus);
 /*		if (oldTLfocus)
 		{
 			eDebug("focus problem");
@@ -130,7 +132,10 @@ void eWidget::releaseFocus()
 		{
 			removeActionMap(&i_focusActions->map);
 			if (currentFocus==this)	// if we don't have lost the focus, ...
+			{
 				currentFocus=oldTLfocus;	// give it back
+				/*emit*/ globalFocusChanged(currentFocus);
+			}
 			else
 				eFatal("someone has stolen the focus");
 		}
