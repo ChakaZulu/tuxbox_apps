@@ -77,7 +77,7 @@ static eString getVersionInfo(const char *info)
 	return result;
 }
 
-static eString button(int width, eString buttonText, eString buttonColor, eString buttonRef)
+eString button(int width, eString buttonText, eString buttonColor, eString buttonRef)
 {
 	std::stringstream result;
 	result << "<button name=\"" << buttonText << "\""
@@ -86,6 +86,16 @@ static eString button(int width, eString buttonText, eString buttonColor, eStrin
 		"onclick=\"self.location.href='" << buttonRef << "'\">"
 		"<span class=\"button\">" << buttonText << "</class>"
 		"</button>";
+	return result.str();
+}
+
+eString getTitle(eString title)
+{
+	std::stringstream result;
+	result << "<span style=\"width: 100%; background-color: #93A198\">"
+		"<font style=\"font-family: Verdana; font-size: 14pt; font-weight: bold\">"
+		<< title
+		<< "</font></SPAN><br><br>";
 	return result.str();
 }
 
@@ -548,7 +558,7 @@ static eString getNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Wakeup", OCKER, "?mode=menuWakeup");
 		result += "<br>";
-		result += button(110, "Frameshot", OCKER, "?mode=menuFrameshot");
+		result += button(110, "Frameshot", OCKER, "?mode=menuFBShot");
 		result += "<br>";
 		result += button(110, "Screenshot", OCKER, "?mode=menuScreenShot");
 		result += "<br>";
@@ -1178,8 +1188,8 @@ static eString getScreenShot(void)
 		result += "\" height=\"" + eString().sprintf("%d", winyres);
 		result += "\" src=\"/root/tmp/screenshot.bmp\" border=1>";
 		result += "<br>";
-		result += "Original format: " + eString().sprintf("%d", xres) + " x " + eString().sprintf("%d", yres);
-		result += "(" + eString().sprintf("%d", rh) + ":" + eString().sprintf("%d", rv) + ")";
+		result += "Original format: " + eString().sprintf("%d", xres) + "x" + eString().sprintf("%d", yres);
+		result += " (" + eString().sprintf("%d", rh) + ":" + eString().sprintf("%d", rv) + ")";
 	}
 	else
 		result = "Module grabber.o is required but not installed";
@@ -1193,6 +1203,7 @@ static eString getContent(eString mode, eString path)
 	eString zap_result = "";
 	if (mode == "zap")
 	{
+		result = getTitle("Zap");
 		zap_result += getZapContent(mode, path);
 //		if (path)
 //		{
@@ -1219,91 +1230,100 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "links")
 	{
-		result = "Select one of the link categories on the left";
+		result = getTitle("Links");
+		result += "Select one of the link categories on the left";
 	}
 	else
 	if (mode == "linksOfficialSites")
 	{
-		result = read_file(TEMPLATE_DIR+"linksOfficialSites.tmp");
+		result = getTitle("Links > Official Sites");
+		result += read_file(TEMPLATE_DIR+"linksOfficialSites.tmp");
 		if (result == "")
 			result = "No links available";
 	}
 	else
 	if (mode == "linksOtherSites")
 	{
-		result = read_file(TEMPLATE_DIR+"linksOtherSites.tmp");
+		result = getTitle("Links > Other Sites");
+		result += read_file(TEMPLATE_DIR+"linksOtherSites.tmp");
 		if (result == "")
 			result = "No links available";
 	}
 	else
 	if (mode == "linksForums")
 	{
-		result = read_file(TEMPLATE_DIR+"linksForums.tmp");
+		result = getTitle("Links > Forums");
+		result += read_file(TEMPLATE_DIR+"linksForums.tmp");
 		if (result == "")
 			result = "No links available";
 	}
 	else
 	if (mode == "about")
 	{
-		result = "Enigma Web Control<br>Version 0.4";
+		result = getTitle("About");
+		result += "Enigma Web Control<br>Version 0.4";
 	}
 	else
 	if (mode == "aboutDreambox")
 	{
-		result = aboutDreambox();
+		result = getTitle("About > Box");
+		result += aboutDreambox();
 	}
 	else
 	if (mode == "aboutDMM")
 	{
-		result = read_file(TEMPLATE_DIR+"aboutDMM.tmp");
+		result = getTitle("About > DMM");
+		result += read_file(TEMPLATE_DIR+"aboutDMM.tmp");
 	}
 	else
 	if (mode == "menuShutdown")
 	{
+		result = getTitle("Control > Shutdown");
 		eZap::getInstance()->quit();
-		result = "Enigma is shutting down...";
+		result += "Enigma is shutting down...";
 	}
 	else
 	if (mode == "menu")
 	{
-		result = "Control your box using the commands on the left";
+		result = getTitle("Control");
+		result += "Control your box using the commands on the left";
 	}
 	else
 	if (mode == "menuReboot")
 	{
+		result = getTitle("Control > Reboot");
 		eZap::getInstance()->quit(4);
-		result = "Enigma is rebooting...";
+		result += "Enigma is rebooting...";
 	}
 	else
 	if (mode == "menuRestart")
 	{
+		result = getTitle("Control > Restart");
 		eZap::getInstance()->quit(2);
-		result = "Enigma is restarting...";
+		result += "Enigma is restarting...";
 	}
 	else
 	if (mode == "menuWakeup")
 	{
+		result = getTitle("Control > Wakeup");
 		if ( eZapStandby::getInstance() )
 		{
 			eZapStandby::getInstance()->wakeUp(0);
-			result = "Enigma is waking up...";
+			result += "Enigma is waking up...";
 		}
 		else
-		{
-			result = "Enigma is already awake";
-		}
+			result += "Enigma is already awake";
 	}
 	else
 	if (mode == "menuStandby" )
 	{
+		result = getTitle("Control > Standby");
 		if (eZapStandby::getInstance())
-		{
-			result = "Enigma is already sleeping";
-		}
+			result += "Enigma is already sleeping";
 		else
 		{
 			eZapMain::getInstance()->gotoStandby();
-			result = "Enigma is going to sleep...";
+			result += "Enigma is going to sleep...";
 		}
 	}
 	else
@@ -1312,34 +1332,46 @@ static eString getContent(eString mode, eString path)
 		gPixmap *p=0;
 		p=&gFBDC::getInstance()->getPixmap();
 
+		result = getTitle("Control > Frameshot");
 		if (!p)
 		{
-			result = "FBShot failed";
+			result += "FBShot failed";
 		}
 		else
 		{
 			if (!savePNG("/tmp/fbshot.png", p))
 			{
-				result = "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
+				result += "<img width=\"650\" src=\"/root/tmp/fbshot.png\" border=0>";
 			}
 		}
 	}
 	else
 	if (mode == "menuScreenShot")
 	{
+		result = getTitle("Control > Screenshot");
 		result += getScreenShot();
 	}
 	else
 	if (mode == "menuTimerList")
 	{
-		result = genTimerListBody();
+		result = getTitle("Control > Timer List");
+		result += genTimerListBody();
 		result += "<br>";
 		result += button(100, "Cleanup", "12259E", "?cleanupTimer");
 		result += "&nbsp;&nbsp;&nbsp;";
 		result += button(100, "Clear", "CB0303", "?ClearTimer");
 	}
 	else
-		result = mode + " is not available yet";
+	if (mode == "updates")
+	{
+		result = getTitle("Updates");
+		result += "is not available yet";
+	}
+	else
+	{
+		result = getTitle("General");
+		result += mode + " is not available yet";
+	}
 
 	return result;
 }
