@@ -338,6 +338,7 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 		if (tmp == filename)
 			break;
 	}
+	slideshowList.sort();
 	DecodeImage(filename, unscaled);
 	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
 	if (screenInfo->bits_per_pixel != 16)
