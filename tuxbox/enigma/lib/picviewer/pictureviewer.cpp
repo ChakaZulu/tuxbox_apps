@@ -314,7 +314,7 @@ void ePictureViewer::slideshowTimeout()
 	ShowImage(tmp, false);
 	if (++myIt == slideshowList.end())
 	{
-		eConfig::getInstance()->getKey("/picviewer/slideshowwraparound", wrap);
+		eConfig::getInstance()->getKey("/picviewer/wraparound", wrap);
 		if (wrap == 1)
 			myIt = slideshowList.begin();
 		else
@@ -397,7 +397,10 @@ bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 	}
 	if (!slideshowList.empty())
 	{
-		slideshowList.sort();
+		int sortpictures = 1;
+		eConfig::getInstance()->getKey("/picviewer/sortpictures", sortpictures);
+		if (sortpictures == 1)
+			slideshowList.sort();
 		myIt = slideshowList.begin();
 		slideshowTimer.stop();
 		slideshowTimeout();

@@ -21,15 +21,6 @@ public:
 	void entrySelected( eListBoxEntryText* e );
 };
 
-class ePicViewerStyleSelector: public eListBoxWindow<eListBoxEntryText>
-{
-	int ssel;
-public:
-	ePicViewerStyleSelector(int ssel=0);
-	int eventHandler( const eWidgetEvent &event );
-	void entrySelected( eListBoxEntryText* e );
-};
-
 class eListBoxEntryService: public eListBoxEntry
 {
 	friend class eServiceSelector;

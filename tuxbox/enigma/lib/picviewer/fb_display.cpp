@@ -96,11 +96,9 @@ void getCurrentRes(int *x, int *y)
 		var = fbClass::getInstance()->getScreenInfo();
 		*x = var->xres;
 		*y = var->yres;
-		printf("[FB_DISPLAY] getCurrentRes: %d x %d\n", *x, *y);
 	}
 	else
 	{
-		printf("[FB_DISPLAY] getCurrentRes: no fb available yet.\n");
 		*x = 720;
 		*y = 576;
 	}

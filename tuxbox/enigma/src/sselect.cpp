@@ -28,6 +28,7 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <enigma_streamer.h>
+#include <enigma_picmanager.h>
 
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
@@ -109,61 +110,6 @@ void eEPGStyleSelector::entrySelected( eListBoxEntryText* e )
 		close(-1);
 }
 
-struct PicViewerStyleSelectorActions
-{
-	eActionMap map;
-	eAction infoPressed;
-	PicViewerStyleSelectorActions():
-		map("PicViewerStyleSelector", _("Picture Viewer Actions")),
-		infoPressed(map, "infoPressed", _("open the Picture Viewer with selected style"), eAction::prioDialog)
-	{
-	}
-};
-eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Picture Viewer Style Selector");
-
-ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.0 - Actions"), 5, 350, true)
-		,ssel(ssel)
-{
-	addActionMap(&i_PicViewerStyleSelectorActions->map);
-	move(ePoint(100, 100));
-	int last = 0;
-	eConfig::getInstance()->getKey("/ezap/lastPicViewerStyle", last);
-	eListBoxEntryText *sel[2];
-	sel[0] = new eListBoxEntryText(&list,_("Slide"), (void *)0, 0, _("Show selected slide") );
-	sel[1] = new eListBoxEntryText(&list,_("Slideshow"), (void *)1, 0, _("Show slideshow (of all pictures in directory)"));
-
-	list.setCurrent(sel[last]);
-	CONNECT(list.selected, ePicViewerStyleSelector::entrySelected);
-}
-
-int ePicViewerStyleSelector::eventHandler( const eWidgetEvent &event )
-{
-	switch (event.type)
-	{
-		case eWidgetEvent::evtAction:
-			if (event.action == &i_PicViewerStyleSelectorActions->infoPressed)
-				entrySelected(list.getCurrent());
-			else
-				break;
-			return 1;
-		default:
-			break;
-	}
-	return eWindow::eventHandler(event);
-}
-
-void ePicViewerStyleSelector::entrySelected( eListBoxEntryText* e )
-{
-	if (e)
-	{
-		eConfig::getInstance()->setKey("/ezap/lastPicViewerStyle", (int)e->getKey());
-		close( (int)e->getKey() );
-	}
-	else
-		close(-1);
-}
-
 struct serviceSelectorActions
 {
 	eActionMap map;
@@ -188,7 +134,7 @@ struct serviceSelectorActions
 		toggleFocus(map, "toggleFocus", _("toggle focus between service and bouquet list (in combi column style)"), eAction::prioDialog),
 		gotoPrevMarker(map, "gotoPrevMarker", _("go to the prev Marker if exist.. else goto first service"), eAction::prioDialogHi),
 		gotoNextMarker(map, "gotoNextMarker", _("go to the next Marker if exist.. else goto last service"), eAction::prioDialogHi),
-		
+
 		showAll(map, "showAll", _("show all services"), eAction::prioDialog),
 		showSatellites(map, "showSatellites", _("show satellite list"), eAction::prioDialog),
 		showProvider(map, "showProvider", _("show provider list"), eAction::prioDialog),
