@@ -1584,26 +1584,22 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true));
 
-	if (fromflash)
+	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
+	for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
 	{
-		miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
-
-		for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
+		FILE * fd = fopen(misc_setting_files[i].filename, "r");
+		if (fd)
 		{
-			FILE * fd = fopen(misc_setting_files[i].filename, "r");
-			if (fd)
-			{
-				fclose(fd);
-				g_settings.misc_option[i] = 1;
-			}
-			else
-				g_settings.misc_option[i] = 0;
-
-			miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
+			fclose(fd);
+			g_settings.misc_option[i] = 1;
 		}
-
-		miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, MISCSETTINGS_FB_DESTINATION_OPTIONS, MISCSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
+		else
+			g_settings.misc_option[i] = 0;
+		
+		miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
 	}
+	
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, MISCSETTINGS_FB_DESTINATION_OPTIONS, MISCSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
 
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput * keySettings_repeat_genericblocker = new CStringInput(LOCALE_KEYBINDINGMENU_REPEATBLOCKGENERIC, g_settings.repeat_genericblocker, 3, LOCALE_REPEATBLOCKER_HINT_1, LOCALE_REPEATBLOCKER_HINT_2, "0123456789 ", keySetupNotifier);
