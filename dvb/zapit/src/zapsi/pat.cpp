@@ -11,9 +11,9 @@
 #include "sdt.h"
 #include "scan.h"
 #include <ost/dmx.h>
-#include <sys/poll.h>
 
-#define DEMUX_DEV "/dev/ost/demux0"
+#define DEMUX_DEV	"/dev/ost/demux0"
+#define PAT_LENGTH	1024
 
 using namespace std;
 
@@ -21,183 +21,127 @@ map<uint,channel> nvodchannels;
 map<uint,channel>::iterator cI;
 extern int found_transponders;
 
-
 int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd)
 {
 	struct dmxSctFilterParams flt;
-	int demux, pt;
-	struct pollfd dmx_fd;
-	
+	int demux;
+	uint8_t buffer[PAT_LENGTH];
+  	uint16_t tsid;
+
 	fprintf(logfd, "Starting fake_pat\n");
-	demux=open(DEMUX_DEV, O_RDWR);
-  	if (demux<0) {
-    		perror("/dev/ost/demux0");
+
+  	if ((demux = open(DEMUX_DEV, O_RDWR)) < 0)
+	{
+    		perror(DEMUX_DEV);
     		return -1;
   	}
 
   	memset (&flt.filter, 0, sizeof (struct dmxFilter));
   
-  	flt.pid=0;
-    	flt.filter.mask[0]  =0xFF;
-  	flt.timeout=1000;
-  	flt.flags=DMX_CHECK_CRC;
-  	
-  	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)
+  	flt.pid = 0x00;
+    	flt.filter.mask[0]  = 0xFF;
+  	flt.timeout = 1000;
+  	flt.flags = DMX_CHECK_CRC | DMX_ONESHOT | DMX_IMMEDIATE_START;
+ 
+  	if (ioctl(demux, DMX_SET_FILTER, &flt) < 0)
 	{
     		perror("DMX_SET_FILTER");
   	}
-  
-  	ioctl(demux, DMX_START, 0);
-/*
-  	dmx_fd.fd = demux;
-  	dmx_fd.events = POLLIN;
-  	dmx_fd.revents = 0;
-  
-  	pt = poll(&dmx_fd, 1, 500);
 
-  	if (!pt)
-  	{
-  		printf("[zapit] PAT Poll Timeout\n");
-  		close(demux);
-  		return -1;
-  	}
-  	else
-  	{
-*/  		char buffer[1024];
-  		int r;
-  		int sec_len;
-  		int tsid;
-  		
-		if ((r=read(demux, buffer, 3))<=0)  {
-   			perror("[zapit] read Pat");
-   			fprintf(logfd ,"Error reading first 3 bytes from Pat\n");
-    			close(demux);
-    			return -1;
-    		}
-    		
-  		sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
+	if (read(demux, buffer, PAT_LENGTH) < 0)
+	{
+   		perror("[pat.cpp] read Pat");
+   		fprintf(logfd ,"Error reading Pat\n");
+    		close(demux);
+    		return -1;
+    	}
+ 
+	close(demux);
 
-    		if ((r=read(demux, buffer+3, sec_len))<=0)  {
-    			perror("[zapit] read Pat");
-    			fprintf(logfd ,"Error reading %d bytes from Pat\n", sec_len);
-    			close(demux);
-    			return -1;
-		}
-		
-		close(demux);
-		
-		tsid = (buffer[3]<<8)|buffer[4];
-		//printf("TSID: %04x\n", tsid);
-		(*tmap).insert(std::pair<int,transpondermap>(tsid,transpondermap(tsid, freq, sr, 0)));
-		fprintf(logfd ,"Adding Transponder %x to list\n",tsid);
-		found_transponders++;
-		
-//	}
-	fprintf(logfd ,"Fake_Pat ended\n");
+	tsid = (buffer[3] << 8) | buffer[4];
+
+	(*tmap).insert(std::pair<int,transpondermap>(tsid,transpondermap(tsid, freq, sr, 0)));
+	fprintf(logfd ,"Adding Transponder %x to list\n", tsid);
+	found_transponders++;
+
+	fprintf(logfd, "Ending fake_pat\n");
 	return 23;
 }
 
-int pat(uint oonid,std::map<uint,channel> *cmap)
+int pat(uint oonid, std::map<uint, channel> *cmap)
 {
 	struct dmxSctFilterParams flt;
-	int demux, pt;
-	struct pollfd dmx_fd;
-	int section = 0;
-	unsigned char buffer[1024];
-	
-	demux=open(DEMUX_DEV, O_RDWR);
-  	if (demux<0) {
-    		perror("/dev/ost/demux0");
-    		return -1;
-  	}
+	int demux_fd;
+	uint8_t buffer[PAT_LENGTH];
 
-  	memset (&flt.filter, 0, sizeof (struct dmxFilter));
-  
-  	flt.pid=0;
-    	flt.filter.mask[0]  =0xFF;
-  	flt.timeout=1000;
-  	flt.flags=DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-  	
-  	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)
+	/* current positon in buffer */
+	uint16_t pos;
+
+	/* program_association_section elements */
+	uint16_t section_length;
+	uint16_t transport_stream_id;
+	uint16_t program_number;
+	uint16_t program_map_PID;
+
+	memset (&flt.filter, 0, sizeof(struct dmxFilter));
+
+	flt.pid = 0x00;
+	flt.filter.mask[0]  = 0xFF;
+	flt.timeout = 1000;
+	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+
+	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
-    		perror("DMX_SET_FILTER");
-		close(demux);
+		perror("[pat.cpp] " DEMUX_DEV);
 		return -1;
-  	}
-  
-/*  
-  	dmx_fd.fd = demux;
-  	dmx_fd.events = POLLIN;
-  	dmx_fd.revents = 0;
-  
-  	pt = poll(&dmx_fd, 1, 500);
+	}
 
-  	if (!pt)
-  	{
-  		printf("Poll Timeout\n");
-  		close(demux);
-  		return 0;
-  	}
-  	else
-  	{
-  	
-*/  	
+	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
+	{
+		perror("[pat.cpp] DMX_SET_FILTER");
+		close(demux_fd);
+		return -1;
+	}
+
 	do
 	{
-  		int r;
-  		int current, sec_len;
-  		int tsid;
-  		
-		if ((r=read(demux, buffer, 3))<=0)  {
-   			perror("[zapit] read Pat");
-    			close(demux);
+		if (read(demux_fd, buffer, PAT_LENGTH) < 0)
+		{
+			perror("[pat.cpp] read PAT");
+			close(demux_fd);
     			return -1;
     		}
-    		
-  		sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
 
-    		if ((r=read(demux, buffer+3, sec_len))<=0)  {
-    			perror("[zapit] read Pat");
-    			close(demux);
-    			return -1;
-		}
-		
-		tsid = (buffer[3]<<8)|buffer[4];
-		printf("TSID: %04x\n", tsid);
-		current = 8;
-		
-		while (current < sec_len-1)
+		section_length = ((buffer[1] & 0xF) << 8) + buffer[2];
+		transport_stream_id = (buffer[3] << 8) + buffer[4];
+#ifdef DEBUG
+		printf("[pat.cpp] section_length: %04x\n", section_length);
+		printf("[pat.cpp] transport_stream_id: %04x\n", transport_stream_id);
+		printf("[pat.cpp] section_number: %02x\n", buffer[6]);
+		printf("[pat.cpp] last_section_number: %02x\n", buffer[7]);
+#endif
+		for (pos = 8; pos < section_length -2; pos += 4)
 		{
-			unsigned int p_nr = (buffer[current]<<8) | buffer[current+1];
-			unsigned int pid = ((buffer[current+2]&0x1f)<<8) | buffer[current+3];
-			
-			if ((*cmap).count((oonid<<16)|p_nr) >0)
+			program_number = (buffer[pos] << 8) + buffer[pos + 1];
+			program_map_PID = ((buffer[pos + 2] & 0x1f) << 8) | buffer[pos + 3];
+#ifdef DEBUG
+			printf("[pat.cpp] program_number: %04x, program_map_PID: %04x\n", program_number, program_map_PID);
+#endif
+			if ((*cmap).count((oonid << 16) + program_number) > 0)
 			{
-			  cI = (*cmap).find((oonid<<16)|p_nr);
-			  cI->second.pmt = pid;
+				cI = (*cmap).find((oonid << 16) + program_number);
+				cI->second.pmt = program_map_PID;
 			}
-			else
-			{
-				
-				
-			  /*	if (channels.count((tsid<<16)+p_nr) == 0)
-				{
-					channels.insert(std::pair<int,channel>((tsid<<16)+p_nr,channel(p_nr,tsid,pid)));
-				}
-				else
-				{
-					citerator I = channels.find((tsid<<16)+p_nr);
-					
-					I->second.pmt = pid;
-				}
-			  */
-			}
-			
-			current = current+4;
 		}
-//	}
-	} while (buffer[7] != section++);
+	}
+	while (buffer[6] != buffer[7]);
 
-	close(demux);
+	if (ioctl(demux_fd, DMX_STOP, 0) < 0)
+	{
+		perror("[pat.cpp] DMX_STOP");
+	}
+
+	close(demux_fd);
 	return 1;
 }
+

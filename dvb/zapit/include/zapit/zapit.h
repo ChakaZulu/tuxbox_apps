@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -30,6 +29,7 @@
 #include <ost/video.h>
 #include <ost/ca.h>
 #include <ost/audio.h>
+
 #include <dbox/avia_vbi.h>
 
 #include "bouquets.h"
