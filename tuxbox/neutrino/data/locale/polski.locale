@@ -156,6 +156,8 @@ epgviewer.nodetailed Informacje nie sa dostepne
 epglist.head Vorschau - %s
 epglist.noevents EPG niedostepne...
 
+channellist.since since %02d:%02d
+
 streaminfo.head Informacje
 streaminfo.resolution Rozdzielczosc
 streaminfo.bitrate Przekaz

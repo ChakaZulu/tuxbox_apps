@@ -156,6 +156,8 @@ epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
 epglist.head Vorschau - %s
 epglist.noevents Kein EPG verfügbar...
 
+channellist.since seit %02d:%02d
+
 streaminfo.head Informationen
 streaminfo.resolution Auflösung
 streaminfo.bitrate Bitrate

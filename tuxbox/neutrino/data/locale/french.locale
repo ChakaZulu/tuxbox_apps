@@ -158,6 +158,8 @@ epgviewer.nodetailed No detailed informations available
 epglist.head l' événement énumérerait - %s
 epglist.noevents Pas d'cEpg disponible ...
 
+channellist.since since %02d:%02d
+
 streaminfo.head Informations
 streaminfo.resolution Qualité d'image
 streaminfo.bitrate Bitrate

@@ -30,11 +30,11 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.54 2002/01/29 17:26:51 field Exp $
+// $Id: channellist.cpp,v 1.55 2002/01/29 23:23:06 field Exp $
 //
 // $Log: channellist.cpp,v $
-// Revision 1.54  2002/01/29 17:26:51  field
-// Jede Menge Updates :)
+// Revision 1.55  2002/01/29 23:23:06  field
+// Mehr Details in Channellist (sectionsd updaten)
 //
 // Revision 1.53  2002/01/18 23:34:36  McClean
 // repair infobar
@@ -201,6 +201,8 @@
 #include "../include/debug.h"
 #include "../global.h"
 
+#define info_height 62
+
 static char* copyStringto(const char* from, char* to, int len)
 {
 	const char *fromend=from+len;
@@ -217,14 +219,14 @@ CChannelList::CChannelList(int Key=-1, const std::string &Name)
 	key = Key;
 	name = Name;
 	selected = 0;
-	width = 500;
+	width = 520;
 	height = 440;
 	theight= g_Fonts->menu_title->getHeight();
 	fheight= g_Fonts->channellist->getHeight();
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height+ 5 ) ) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	tuned=0xfffffff;
 }
@@ -314,18 +316,32 @@ void CChannelList::updateEvents(void)
 		unsigned long long* evt_id = (unsigned long long*) actPos;
 		actPos+=8;
 
+		time_t* startt = (time_t*) actPos;
+		actPos+=4;
+
+		unsigned* dauert = (unsigned*) actPos;
+		actPos+=4;
+
+		string descriptiont= actPos;
+		actPos+=strlen(actPos)+1;
+		string textt= actPos;
+		actPos+=strlen(actPos)+1;
+
 		// quick'n dirty, sollte man mal anders machen
 		for (unsigned int count=0;count<chanlist.size();count++)
 		{
 			if (chanlist[count]->onid_sid==*serviceID)
 			{
 				chanlist[count]->currentEvent.id= *evt_id;
-				chanlist[count]->currentEvent.description= actPos;
+				chanlist[count]->currentEvent.description= descriptiont;
+				chanlist[count]->currentEvent.text_1= textt;
+				chanlist[count]->currentEvent.startzeit= *startt;
+				chanlist[count]->currentEvent.dauer= *dauert;
 				//	printf("Channel found: %s\n", actPos);
 				break;
 			}
 		}
-		actPos+=strlen(actPos)+1;
+
 	}
 
 	delete[] pData;
@@ -508,7 +524,7 @@ int CChannelList::show()
 
 void CChannelList::hide()
 {
-	g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	g_FrameBuffer->paintBackgroundBoxRel(x, y, width, height+ info_height+ 5);
 }
 
 bool CChannelList::showInfo(int pos)
@@ -560,7 +576,7 @@ void CChannelList::numericZap(int key)
 		{
 			if ((unsigned int)ch != tuned)
 			{
-				printf("quicknumtune(0)\n");
+				//printf("quicknumtune(0)\n");
 				lastChList.clear_storedelay (); // ignore store delay
 				zapTo(ch);		        // zap to last
 			}
@@ -674,51 +690,6 @@ void CChannelList::quickZap(int key)
         }
 
         zapTo( selected );
-
-
-
-	/*
-	if(chanlist.size()==0)
-	{
-		//evtl. anzeige dass keine kanalliste....
-		return;
-	}
-
-	int timeout = 2;
-	int timeout1 = 2;
-
-	sscanf(g_settings.repeat_blocker, "%d", &timeout);
-	timeout = int(timeout/100.0)+6;
-	sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
-	timeout1 = int(timeout1/100.0)+6;
-	if(timeout1>timeout)
-	{
-		timeout=timeout1;
-	}
-	printf("quickzap timeout is %d\n", timeout);
-
-	do
-	{
-		if (key==g_settings.key_quickzap_down)
-		{
-			if(selected==0)
-				selected = chanlist.size()-1;
-			else
-				selected--;
-		}
-		else if (key==g_settings.key_quickzap_up)
-		{
-			selected = (selected+1)%chanlist.size();
-		}
-		channel* chan = chanlist[selected];
-		g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
-
-		key = g_RCInput->getKey(timeout);
-	}
-	while ((key==g_settings.key_quickzap_down) || (key==g_settings.key_quickzap_up ));
-
-	zapTo( selected );
-*/
 }
 
 int CChannelList::hasChannel(int nChannelNr)
@@ -737,6 +708,67 @@ void CChannelList::setSelected( int nChannelNr)
 	selected = nChannelNr;
 }
 
+void CChannelList::paintDetails(int index)
+{
+	if ( chanlist[index]->currentEvent.description== "" )
+	{
+		g_FrameBuffer->paintBackgroundBoxRel(x, y+ height+ 5, width, info_height);
+	}
+	else
+	{
+		// löschen
+		g_FrameBuffer->paintBoxRel(x, y+ height+ 5, width, info_height, COL_MENUCONTENT);
+
+		char cNoch[50];
+		char cSeit[50];
+
+        struct		tm *pStartZeit = localtime(&chanlist[index]->currentEvent.startzeit);
+        unsigned 	seit = ( time(NULL) - chanlist[index]->currentEvent.startzeit ) / 60;
+        sprintf( cSeit, g_Locale->getText("channellist.since").c_str(), pStartZeit->tm_hour, pStartZeit->tm_min); //, seit );
+        int seit_len= g_Fonts->channellist_descr->getRenderWidth(cSeit);
+
+        int noch = ( chanlist[index]->currentEvent.startzeit + chanlist[index]->currentEvent.dauer - time(NULL)   ) / 60;
+        if ( (noch< 0) || (noch>=10000) )
+        	noch= 0;
+        sprintf( cNoch, "(%d / %d min)", seit, noch );
+        int noch_len= g_Fonts->channellist_number->getRenderWidth(cNoch);
+
+		string text1= chanlist[index]->currentEvent.description;
+		string text2= chanlist[index]->currentEvent.text_1;
+		string text3= "";
+
+		if ( text2 == "" )
+		{
+			// 2. Zeile leer und
+			if ( g_Fonts->channellist->getRenderWidth(text1.c_str())> (width - 30 - seit_len) )
+			{
+				// zu breit, Umbruch versuchen...
+				int pos = text1.find(" ");
+				if (pos == -1)
+					pos = text1.find("-");
+				if (pos == -1)
+					pos = text1.find(".");
+				if(pos!=-1)
+				{
+					text3 = text1;
+					text1 = text3.substr(0,pos);
+					text2 = text3.substr(pos+1, text3.length()-(pos+1) );
+
+					g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ 2* fheight, width - 30- noch_len, text2.c_str(), COL_MENUCONTENT);
+				}
+			}
+		}
+		if ( text3=="" )
+			g_Fonts->channellist_descr->RenderString(x+ 10, y+ height+ 10+ 2* fheight, width - 30- noch_len, text2.c_str(), COL_MENUCONTENT);
+
+		g_Fonts->channellist->RenderString(x+ 10, y+ height+ 10+ fheight, width - 30 - seit_len, text1.c_str(), COL_MENUCONTENT);
+		g_Fonts->channellist_descr->RenderString(x+ width- 10- seit_len, y+ height+ 10+ fheight, seit_len, cSeit, COL_MENUCONTENT);
+
+		g_Fonts->channellist_number->RenderString(x+ width- 10- noch_len, y+ height+ 10+ 2* fheight- 2, noch_len, cNoch, COL_MENUCONTENT);
+	}
+
+}
+
 void CChannelList::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight;
@@ -744,6 +776,7 @@ void CChannelList::paintItem(int pos)
 	if (liststart+pos==selected)
 	{
 		color = COL_MENUCONTENTSELECTED;
+		paintDetails(liststart+pos);
 	}
 
 	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);

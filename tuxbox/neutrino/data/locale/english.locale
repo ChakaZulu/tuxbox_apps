@@ -158,6 +158,8 @@ epgviewer.nodetailed No detailed informations available
 epglist.head Event-list - %s
 epglist.noevents EPG is not available...
 
+channellist.since since %02d:%02d
+
 streaminfo.head Stream-Information
 streaminfo.resolution Resolution
 streaminfo.bitrate Bitrate
@@ -252,12 +254,12 @@ flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Hostname
-flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port 
+flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port
 flashupdate.proxyserver_hint2 a empty entry means no proxy
 flashupdate.proxyusername Username
-flashupdate.proxyusername_hint1 enter the proxyserver username 
+flashupdate.proxyusername_hint1 enter the proxyserver username
 flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
 flashupdate.proxypassword Password
-flashupdate.proxypassword_hint1 enter the proxyserver password 
-flashupdate.proxypassword_hint2 
+flashupdate.proxypassword_hint1 enter the proxyserver password
+flashupdate.proxypassword_hint2
 
