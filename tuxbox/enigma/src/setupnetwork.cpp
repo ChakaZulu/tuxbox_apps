@@ -3,7 +3,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <netinet/in.h>
 
 #include <lib/base/i18n.h>
 
@@ -15,20 +14,6 @@
 #include <lib/gui/eskin.h>
 #include <lib/driver/rc.h>
 #include <lib/system/econfig.h>
-
-static void unpack(const struct in_addr &l, int *t)
-{
-	uint8_t *tc = (uint8_t *) &l.s_addr;
-	for (int i = 0; i < 4; ++i)
-		t[i] = tc[i];
-}
-
-static void pack(struct in_addr &l, const int *const t)
-{
-	uint8_t *tc = (uint8_t *) &l.s_addr;
-	for (int i = 0; i < 4; ++i)
-		tc[i] = t[i];
-}
 
 // convert a netmask (255.255.255.0) into the length (24)
 static int inet_ntom (const void *src, int *dst)
@@ -101,7 +86,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	l->move(ePoint(10, 20));
 	l->resize(eSize(150, fd+4));
 
-	unpack(sinet_address, de);
+	eNumber::unpack(sinet_address, de);
 	inet_address=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	inet_address->move(ePoint(160, 20));
 	inet_address->resize(eSize(200, fd+10));
@@ -115,7 +100,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	l->move(ePoint(10, 60));
 	l->resize(eSize(150, fd+4));
 
-	unpack(sinet_netmask_addr, de);
+	eNumber::unpack(sinet_netmask_addr, de);
 	inet_netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	inet_netmask->move(ePoint(160, 60));
 	inet_netmask->resize(eSize(200, fd+10));
@@ -129,7 +114,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	l->move(ePoint(10, 100));
 	l->resize(eSize(150, fd+4));
 
-	unpack(snameserver, de);
+	eNumber::unpack(snameserver, de);
 	nameserver=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	nameserver->move(ePoint(160, 100));
 	nameserver->resize(eSize(200, fd+10));
@@ -143,7 +128,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	l->move(ePoint(10, 140));
 	l->resize(eSize(150, fd+4));
 
-	unpack(sinet_gateway, de);
+	eNumber::unpack(sinet_gateway, de);
 	inet_gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	inet_gateway->move(ePoint(160, 140));
 	inet_gateway->resize(eSize(200, fd+10));
@@ -207,10 +192,10 @@ void eZapNetworkSetup::okPressed()
 		enameserver[i]		= nameserver->getNumber(i);
 		einet_gateway[i]	= inet_gateway->getNumber(i);
 	}
-	pack(sinet_address, einet_address);
-	pack(sinet_netmask_addr, einet_netmask_addr);
-	pack(snameserver, enameserver);
-	pack(sinet_gateway, einet_gateway);
+	eNumber::pack(sinet_address, einet_address);
+	eNumber::pack(sinet_netmask_addr, einet_netmask_addr);
+	eNumber::pack(snameserver, enameserver);
+	eNumber::pack(sinet_gateway, einet_gateway);
 	inet_ntom(&sinet_netmask_addr, &sinet_netmask);
 
 	eDebug("IP: %d.%d.%d.%d, Netmask: %d.%d.%d.%d, gateway %d.%d.%d.%d, DNS: %d.%d.%d.%d",
