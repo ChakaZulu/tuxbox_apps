@@ -1088,7 +1088,7 @@ ptrlpduQueueElem eDVBCI::AllocLpduQueueElem(unsigned char t_c_id)
 {
 	ptrlpduQueueElem curElem;
 
-	curElem = (ptrlpduQueueElem) malloc(sizeof(lpduQueueElem));
+	curElem = new lpduQueueElem;
 
 	curElem->lpduLen = 0;
 
@@ -1158,7 +1158,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 		length = lpduReceiveQueues[t_c_id].numLPDUS * LPDUPAYLOADLEN;
 		from_t_c_id = t_c_id;
 
-		payloadData = (unsigned char *) malloc(length);
+		payloadData = new unsigned char[length];
 		length = 0;
 
 		curElem = lpduReceiveQueues[t_c_id].firstLPDU;
@@ -1174,7 +1174,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 			curElem = curElem->nextElem;
 
 			// And remove element
-			free(lastElem);
+			delete lastElem;
 		}
 
 		lpduReceiveQueues[t_c_id].numLPDUS = 0;
@@ -1221,7 +1221,7 @@ void eDVBCI::incoming(unsigned char *buffer,int len)
 		if(length>1)
 			receiveTPDU(payloadData[0],cl,t_c_id,payloadData+(2+lenfield));
 
-		free(payloadData);
+		delete [] payloadData;
 
 		//startTimer();
 	}
@@ -1267,7 +1267,7 @@ void eDVBCI::dataAvailable(int what)
 						lastElem = curElem;
 						curElem = curElem->nextElem;
 						// And remove element
-						free(lastElem);
+						delete lastElem;
 					}
 				}
 			}
@@ -1356,6 +1356,8 @@ void eDVBCI::dataAvailable(int what)
 				// add this entry with higher priority to sendqueue..
 				sendqueue.push( queueData( d.tc_id, d.data, d.len, 1 ) );
 			}
+			else
+				delete [] d.data;
 		}
 
 		if (::ioctl(fd,8,&i)<0)
