@@ -1,7 +1,10 @@
 /*
-  $Id: tuxbox.c,v 1.1 2003/01/01 21:30:10 Jolt Exp $
+  $Id: tuxbox.c,v 1.2 2003/01/01 21:55:41 Jolt Exp $
   
   $Log: tuxbox.c,v $
+  Revision 1.2  2003/01/01 21:55:41  Jolt
+  Tuxbox info lib
+
   Revision 1.1  2003/01/01 21:30:10  Jolt
   Tuxbox info lib
 
@@ -11,7 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dbox/tuxbox.h>
+//#include <dbox/tuxbox.h>
+#include "../../../../driver/include/dbox/tuxbox.h"
 
 unsigned int tuxbox_get_capabilities(void)
 {
