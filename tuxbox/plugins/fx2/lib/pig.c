@@ -30,7 +30,7 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 		return;
 
 	Fx2SetPig( x, y, width, height );
-	avia_pig_set_stack(fd,1);
+	avia_pig_set_stack(fd,0);
 
 	avia_pig_show(fd);
 }

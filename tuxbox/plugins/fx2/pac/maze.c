@@ -123,6 +123,9 @@ void	DrawMaze( void )
 			case '.' :
 				FBCopyImage( x*32, y*32, 32, 32, futter );
 				break;
+			case 'z' :
+				FBFillRect( x*32, y*32, 32, 32, 0 );
+				break;
 			default :
 				FBFillRect( x*32, y*32, 32, 32, BLACK );
 				break;
