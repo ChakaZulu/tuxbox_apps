@@ -1168,9 +1168,9 @@ struct saveTransponder: public std::unary_function<const eTransponder&, void>
 			return;
 		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id, t.original_network_id, t.state);
 		if (t.cable.valid)
-			fprintf(f, "\tc %d:%d\n", t.cable.frequency, t.cable.symbol_rate);
+			fprintf(f, "\tc %d:%d:%d\n", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion);
 		if (t.satellite.valid)
-			fprintf(f, "\ts %d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.lnb);
+			fprintf(f, "\ts %d:%d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.lnb, t.satellite.inversion);
 		fprintf(f, "/\n");
 	}
 	~saveTransponder()
@@ -1230,15 +1230,15 @@ void eDVB::loadServices()
 				break;
 			if (line[1]=='s')
 			{
-				int frequency, symbol_rate, polarisation, fec, sat;
-				sscanf(line+2, "%d:%d:%d:%d:%d", &frequency, &symbol_rate, &polarisation, &fec, &sat);
-				t.setSatellite(frequency, symbol_rate, polarisation, fec, sat);
+				int frequency, symbol_rate, polarisation, fec, sat, inversion=0;
+				sscanf(line+2, "%d:%d:%d:%d:%d:%d", &frequency, &symbol_rate, &polarisation, &fec, &sat, &inversion);
+				t.setSatellite(frequency, symbol_rate, polarisation, fec, sat, inversion);
 			}
 			if (line[1]=='c')
 			{
-				int frequency, symbol_rate;
-				sscanf(line+2, "%d:%d", &frequency, &symbol_rate);
-				t.setCable(frequency, symbol_rate);
+				int frequency, symbol_rate, inversion=0;
+				sscanf(line+2, "%d:%d", &frequency, &symbol_rate, &inversion);
+				t.setCable(frequency, symbol_rate, inversion);
 			}
 		}
 	}

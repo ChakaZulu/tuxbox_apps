@@ -73,8 +73,8 @@ public:
 	eTransponder(int transport_stream_id, int original_network_id);
 	void setSatellite(SatelliteDeliverySystemDescriptor *descr) { satellite.set(descr); }
 	void setCable(CableDeliverySystemDescriptor *descr) { cable.set(descr); }
-	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb);
-	void setCable(int frequency, int symbol_rate);
+	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb, int inversion);
+	void setCable(int frequency, int symbol_rate, int inversion);
 	
 	eTransponder &operator=(const eTransponder &ref)
 	{

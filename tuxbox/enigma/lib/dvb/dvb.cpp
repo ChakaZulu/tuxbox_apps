@@ -81,6 +81,7 @@ void eTransponder::cable::set(const CableDeliverySystemDescriptor *descriptor)
 	symbol_rate=descriptor->symbol_rate;
 	modulation=descriptor->modulation;
 	fec_inner=descriptor->FEC_inner;
+	inversion=0;
 	valid=1;
 }
 
@@ -98,6 +99,7 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 	polarisation=descriptor->polarisation;
 	fec=descriptor->FEC_inner;
 	lnb=0;	// TODO: lookupSatellite(descr->orbital_position, descr->west_east_flag);
+	inversion=0;
 	valid=1;
 }
 
@@ -139,7 +141,7 @@ eTransponder::eTransponder(int transport_stream_id, int original_network_id):
 	state=stateListed;
 }
 
-void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb)
+void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb, int inversion)
 {
 	satellite.frequency=frequency;
 	satellite.symbol_rate=symbol_rate;
@@ -147,12 +149,14 @@ void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation
 	satellite.fec=fec;
 	satellite.lnb=lnb;
 	satellite.valid=1;
+	satellite.inversion=inversion;
 }
 
-void eTransponder::setCable(int frequency, int symbol_rate)
+void eTransponder::setCable(int frequency, int symbol_rate, int inversion)
 {
 	cable.frequency=frequency;
 	cable.symbol_rate=symbol_rate;
+	cable.inversion=inversion;
 	cable.valid=1;
 }
 
