@@ -1,0 +1,10 @@
+all:: pac
+
+#CC=powerpc-linux-gcc
+CDEBUGFLAGS=-g -O2 -Wall -pedantic
+INCLUDES=-I.
+OBJS=main.o rcinput.o draw.o maze.o
+
+SingleProgramTarget(pac,$(OBJS),,)
+
+maze.o: pics.h text.h
