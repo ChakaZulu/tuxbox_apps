@@ -1,24 +1,24 @@
 /*
-	Control-Daemon  -   DBoxII-Project
+  Control-Daemon  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean',
-	              2002 dboxII-team
+  Copyright (C) 2001 Steffen Hehn 'McClean',
+  2002 dboxII-team
 	
-	License: GPL
+  License: GPL
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <config.h>
@@ -40,6 +40,7 @@
 #include <dbox/fp.h>
 #include <dbox/saa7126_core.h>
 
+#include <connection/basicserver.h>
 #include <zapit/client/zapitclient.h>
 #include <eventserver.h>
 
@@ -92,8 +93,8 @@ void sig_catch(int);
 
 class CControldAspectRatioNotifier : public CAspectRatioNotifier
 {
-	public:
-		virtual void aspectRatioChanged( int newAspectRatio); //override;
+public:
+	virtual void aspectRatioChanged( int newAspectRatio); //override;
 };
 
 CEventWatchDog* watchDog;
@@ -144,18 +145,18 @@ void setvideooutput(int format, bool bSaveSettings = true)
 
 	int	arg;
 
-    switch ( format )
+	switch ( format )
 	{
-	 	case 0:
-	 		arg = 0;
-	 		break;
-		case 1:
-	 		arg = 1;
-	 		break;
-		case 2:
-	 		arg = 0;
-	 		break;
-    }
+	case 0:
+		arg = 0;
+		break;
+	case 1:
+		arg = 1;
+		break;
+	case 2:
+		arg = 0;
+		break;
+	}
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) < 0)
 	{
 		perror("open");
@@ -172,16 +173,16 @@ void setvideooutput(int format, bool bSaveSettings = true)
 
 	switch ( format )
 	{
-	 	case 0:
-	 		arg = SAA_MODE_FBAS;
-	 		break;
-		case 1:
-	 		arg = SAA_MODE_RGB;
-	 		break;
-		case 2:
-	 		arg = SAA_MODE_SVIDEO;
-	 		break;
-    }
+	case 0:
+		arg = SAA_MODE_FBAS;
+		break;
+	case 1:
+		arg = SAA_MODE_RGB;
+		break;
+	case 2:
+		arg = SAA_MODE_SVIDEO;
+		break;
+	}
 	if((fd = open(SAA7126_DEVICE,O_RDWR|O_NONBLOCK)) < 0)
 	{
 		perror("[controld] SAA DEVICE: ");
@@ -204,8 +205,8 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	int wss;
 
 	/*
-		16:9 : fnc 1
-		4:3  : fnc 2
+	  16:9 : fnc 1
+	  4:3  : fnc 2
 	*/
 
 
@@ -226,16 +227,16 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 
 		switch ( aspectRatio )
 		{
-			case 2 :	// 4:3
-				format= 2;
-				break;
-			case 3 :	// 16:9
-			case 4 :	// 21,1:1
-				format= 1;
-				break;
-			default:
-				format= 2;
-				// damits nicht ausgeht beim starten :)
+		case 2 :	// 4:3
+			format= 2;
+			break;
+		case 3 :	// 16:9
+		case 4 :	// 21,1:1
+			format= 1;
+			break;
+		default:
+			format= 2;
+			// damits nicht ausgeht beim starten :)
 		}
 	}
 
@@ -253,12 +254,12 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	{
 		switch (format)
 		{
-			case 1 :
-				avsiosfncFormat=2;
-				break;
-			case 2 :
-				avsiosfncFormat=3;
-				break;
+		case 1 :
+			avsiosfncFormat=2;
+			break;
+		case 2 :
+			avsiosfncFormat=3;
+			break;
 		}
 	}
 	if (ioctl(fd,AVSIOSFNC,&avsiosfncFormat)< 0)
@@ -272,19 +273,19 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	switch( format )
 	{
 		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
-		case AVS_FNCOUT_EXT169	:
-			videoDisplayFormat = 2; // FIXME: define VIDEO_CENTER_CUT_OUT in zapit clientlib
-			wss = SAA_WSS_169F;
-			break;
-		case AVS_FNCOUT_EXT43	:
-			videoDisplayFormat = 1; // FIXME: define VIDEO_LETTER_BOX in zapit clientlib
-			wss = SAA_WSS_43F;
-			break;
-		default:
-			videoDisplayFormat = 1; // FIXME: define VIDEO_LETTER_BOX in zapit clientlib
-			wss = SAA_WSS_43F;
-			break;
-			//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
+	case AVS_FNCOUT_EXT169	:
+		videoDisplayFormat = 2; // FIXME: define VIDEO_CENTER_CUT_OUT in zapit clientlib
+		wss = SAA_WSS_169F;
+		break;
+	case AVS_FNCOUT_EXT43	:
+		videoDisplayFormat = 1; // FIXME: define VIDEO_LETTER_BOX in zapit clientlib
+		wss = SAA_WSS_43F;
+		break;
+	default:
+		videoDisplayFormat = 1; // FIXME: define VIDEO_LETTER_BOX in zapit clientlib
+		wss = SAA_WSS_43F;
+		break;
+		//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
 	}
 
 	zapit.setDisplayFormat(videoDisplayFormat);
@@ -524,20 +525,20 @@ void disableVideoOutput(bool disable)
 	}
 	close(fd);
 	/*
-		arg=disable?0:0xf;
-		if((fd = open("/dev/dbox/fp0",O_RDWR|O_NONBLOCK)) < 0)
-		{
-			perror("[controld] FP DEVICE: ");
-			return;
-		}
+	  arg=disable?0:0xf;
+	  if((fd = open("/dev/dbox/fp0",O_RDWR|O_NONBLOCK)) < 0)
+	  {
+	  perror("[controld] FP DEVICE: ");
+	  return;
+	  }
 
-		if ( (ioctl(fd,FP_IOCTL_LCD_DIMM,&arg) < 0))
-		{
-			perror("[controld] IOCTL: ");
-			close(fd);
-			return;
-		}
-		close(fd);
+	  if ( (ioctl(fd,FP_IOCTL_LCD_DIMM,&arg) < 0))
+	  {
+	  perror("[controld] IOCTL: ");
+	  close(fd);
+	  return;
+	  }
+	  close(fd);
 	*/
 	if(!disable)
 	{
@@ -561,12 +562,12 @@ void setBoxType()
 
 	switch ( mID )
 	{
-		case 3:	settings.boxtype= CControldClient::BOXTYPE_SAGEM;
-				break;
-		case 2:	settings.boxtype= CControldClient::BOXTYPE_PHILIPS;
-				break;
-		default:
-			settings.boxtype= CControldClient::BOXTYPE_NOKIA;
+	case 3:	settings.boxtype= CControldClient::BOXTYPE_SAGEM;
+		break;
+	case 2:	settings.boxtype= CControldClient::BOXTYPE_PHILIPS;
+		break;
+	default:
+		settings.boxtype= CControldClient::BOXTYPE_NOKIA;
 	}
 
 	printf("[controld] Boxtype detected: (%s, %d, %d, %s)\n", strmID, mID, settings.boxtype, BoxNames[settings.boxtype]);
@@ -599,31 +600,24 @@ const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 }
 
 
-void parse_command(int connfd, CControld::Header * rmessage)
+bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
-	
-	if(rmessage->version != CControld::ACTVERSION)
-	{
-		perror("[controld] wrong version\n");
-		return;
-	}
-
-	switch (rmessage->cmd)
+	switch (rmsg.cmd)
 	{
 	case CControld::CMD_SHUTDOWN:
-		shutdownBox();
+		return false;
 		break;
-
+		
 	case CControld::CMD_SAVECONFIG:
 		saveSettings();
 		break;
-
+		
 	case CControld::CMD_SETVOLUME:
 	case CControld::CMD_SETVOLUME_AVS:
 		CControld::commandVolume msg_commandVolume;
 		read(connfd, &msg_commandVolume, sizeof(msg_commandVolume));
 
-		if (rmessage->cmd == CControld::CMD_SETVOLUME)
+		if (rmsg.cmd == CControld::CMD_SETVOLUME)
 		{
 			settings.volume = msg_commandVolume.volume;
 			config->setInt32("volume", settings.volume);
@@ -667,92 +661,93 @@ void parse_command(int connfd, CControld::Header * rmessage)
 		lcdd.setMute(settings.mute);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 		break;
-
-		case CControld::CMD_SETANALOGMODE:
-			CControld::commandAnalogMode msgmd;
-			read(connfd, &msgmd, sizeof(msgmd));
-			zapit.setAudioMode(msgmd.mode);
-			break;
-		case CControld::CMD_SETVIDEOFORMAT:
-			//printf("[controld] set videoformat\n");
-			CControld::commandVideoFormat msg2;
-			read(connfd, &msg2, sizeof(msg2));
-			setVideoFormat(msg2.format);
-			break;
-		case CControld::CMD_SETVIDEOOUTPUT:
-			//printf("[controld] set videooutput\n");
-			CControld::commandVideoOutput msg3;
-			read(connfd, &msg3, sizeof(msg3));
-			setvideooutput(msg3.output);
-			break;
-		case CControld::CMD_SETBOXTYPE:
-			//printf("[controld] set boxtype\n");    //-------------------dummy!!!!!!!!!!
-			CControld::commandBoxType msg4;
-			read(connfd, &msg4, sizeof(msg4));
-			setBoxType();
-			break;
-		case CControld::CMD_SETSCARTMODE:
-			//printf("[controld] set scartmode\n");
-			CControld::commandScartMode msg5;
-			read(connfd, &msg5, sizeof(msg5));
-			setScartMode(msg5.mode);
-			break;
-		case CControld::CMD_SETVIDEOPOWERDOWN:
-			//printf("[controld] set scartmode\n");
-			CControld::commandVideoPowerSave msg10;
-			read(connfd, &msg10, sizeof(msg10));
-			disableVideoOutput(msg10.powerdown);
-			break;
-
+		
+	case CControld::CMD_SETANALOGMODE:
+		CControld::commandAnalogMode msgmd;
+		read(connfd, &msgmd, sizeof(msgmd));
+		zapit.setAudioMode(msgmd.mode);
+		break;
+	case CControld::CMD_SETVIDEOFORMAT:
+		//printf("[controld] set videoformat\n");
+		CControld::commandVideoFormat msg2;
+		read(connfd, &msg2, sizeof(msg2));
+		setVideoFormat(msg2.format);
+		break;
+	case CControld::CMD_SETVIDEOOUTPUT:
+		//printf("[controld] set videooutput\n");
+		CControld::commandVideoOutput msg3;
+		read(connfd, &msg3, sizeof(msg3));
+		setvideooutput(msg3.output);
+		break;
+	case CControld::CMD_SETBOXTYPE:
+		//printf("[controld] set boxtype\n");    //-------------------dummy!!!!!!!!!!
+		CControld::commandBoxType msg4;
+		read(connfd, &msg4, sizeof(msg4));
+		setBoxType();
+		break;
+	case CControld::CMD_SETSCARTMODE:
+		//printf("[controld] set scartmode\n");
+		CControld::commandScartMode msg5;
+		read(connfd, &msg5, sizeof(msg5));
+		setScartMode(msg5.mode);
+		break;
+	case CControld::CMD_SETVIDEOPOWERDOWN:
+		//printf("[controld] set scartmode\n");
+		CControld::commandVideoPowerSave msg10;
+		read(connfd, &msg10, sizeof(msg10));
+		disableVideoOutput(msg10.powerdown);
+		break;
+		
 	case CControld::CMD_GETVOLUME:
 	case CControld::CMD_GETVOLUME_AVS:
 		CControld::responseVolume msg_responseVolume;
-		msg_responseVolume.volume = (rmessage->cmd == CControld::CMD_GETVOLUME) ? settings.volume : settings.volume_avs;
+		msg_responseVolume.volume = (rmsg.cmd == CControld::CMD_GETVOLUME) ? settings.volume : settings.volume_avs;
 		write(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
 		break;
 
 	case CControld::CMD_GETMUTESTATUS:
 	case CControld::CMD_GETMUTESTATUS_AVS:
 		CControld::responseMute msg_responseMute;
-		msg_responseMute.mute = (rmessage->cmd == CControld::CMD_GETMUTESTATUS) ? settings.mute : settings.mute_avs;
+		msg_responseMute.mute = (rmsg.cmd == CControld::CMD_GETMUTESTATUS) ? settings.mute : settings.mute_avs;
 		write(connfd, &msg_responseMute, sizeof(msg_responseMute));
 		break;
 
-		case CControld::CMD_GETVIDEOFORMAT:
-			//printf("[controld] get videoformat (fnc)\n");
-			CControld::responseVideoFormat msg8;
-			msg8.format = settings.videoformat;
-			write(connfd,&msg8,sizeof(msg8));
-			break;
-		case CControld::CMD_GETASPECTRATIO:
-			//printf("[controld] get videoformat (fnc)\n");
-			CControld::responseAspectRatio msga;
-			msga.aspectRatio = aspectRatio;
-			write(connfd,&msga,sizeof(msga));
-			break;
-		case CControld::CMD_GETVIDEOOUTPUT:
-			//printf("[controld] get videooutput (fblk)\n");
-			CControld::responseVideoOutput msg9;
-			msg9.output = settings.videooutput;
-			write(connfd,&msg9,sizeof(msg9));
-			break;
-		case CControld::CMD_GETBOXTYPE:
-			//printf("[controld] get boxtype\n");
-			CControld::responseBoxType msg0;
-			msg0.boxtype = settings.boxtype;
-			write(connfd,&msg0,sizeof(msg0));
-			break;
+	case CControld::CMD_GETVIDEOFORMAT:
+		//printf("[controld] get videoformat (fnc)\n");
+		CControld::responseVideoFormat msg8;
+		msg8.format = settings.videoformat;
+		write(connfd,&msg8,sizeof(msg8));
+		break;
+	case CControld::CMD_GETASPECTRATIO:
+		//printf("[controld] get videoformat (fnc)\n");
+		CControld::responseAspectRatio msga;
+		msga.aspectRatio = aspectRatio;
+		write(connfd,&msga,sizeof(msga));
+		break;
+	case CControld::CMD_GETVIDEOOUTPUT:
+		//printf("[controld] get videooutput (fblk)\n");
+		CControld::responseVideoOutput msg9;
+		msg9.output = settings.videooutput;
+		write(connfd,&msg9,sizeof(msg9));
+		break;
+	case CControld::CMD_GETBOXTYPE:
+		//printf("[controld] get boxtype\n");
+		CControld::responseBoxType msg0;
+		msg0.boxtype = settings.boxtype;
+		write(connfd,&msg0,sizeof(msg0));
+		break;
 
-		case CControld::CMD_REGISTEREVENT:
-			eventServer->registerEvent(connfd);
-			break;
-		case CControld::CMD_UNREGISTEREVENT:
-			eventServer->unRegisterEvent(connfd);
-			break;
+	case CControld::CMD_REGISTEREVENT:
+		eventServer->registerEvent(connfd);
+		break;
+	case CControld::CMD_UNREGISTEREVENT:
+		eventServer->unRegisterEvent(connfd);
+		break;
 
-		default:
-			printf("[controld] unknown command\n");
+	default:
+		printf("[controld] unknown command\n");
 	}
+	return true;
 }
 
 
@@ -771,9 +766,13 @@ void sig_catch(int signal)
 
 int main(int argc, char **argv)
 {
-	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.78 2002/11/05 19:47:21 obi Exp $\n\n");
-	
+	CBasicServer controld_server;
+
+	printf("Controld  $Id: controld.cpp,v 1.79 2002/12/03 16:15:13 thegoodguy Exp $\n\n");
+
+	if (!controld_server.prepare(CONTROLD_UDS_NAME))
+		return -1;
+
 	switch (fork())
 	{
 	case -1:
@@ -792,33 +791,6 @@ int main(int argc, char **argv)
 	}
 
 	eventServer = new CEventServer;
-
-	struct sockaddr_un servaddr;
-	int clilen;
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, CONTROLD_UDS_NAME);
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	unlink(CONTROLD_UDS_NAME);
-
-	//network-setup
-	if ((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("socket");
-	}
-
-	if ( bind(listenfd, (struct sockaddr*) &servaddr, clilen) <0 )
-	{
-		perror("[controld] bind failed...\n");
-		exit(-1);
-	}
-
-
-	if (listen(listenfd, 5) !=0)
-	{
-		perror("[controld] listen failed...\n");
-		exit( -1 );
-	}
 
 	//busyBox
 	signal(SIGHUP,sig_catch);
@@ -861,28 +833,9 @@ int main(int argc, char **argv)
 	setvideooutput(settings.videooutput);
 	setVideoFormat(settings.videoformat, false);
 
+	controld_server.run(parse_command, CControld::ACTVERSION);
 
-	try
-	{
-		struct CControld::Header rmessage;
-		while(true)
-		{
-			connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
-			memset(&rmessage, 0, sizeof(rmessage));
-			read(connfd,&rmessage,sizeof(rmessage));
-
-			parse_command(connfd, &rmessage);
-			close(connfd);
-		}
-	}
-	catch (std::exception& e)
-	{
-		printf("[controld] caught std-exception in main-thread %s!\n", e.what());
-	}
-	catch (...)
-	{
-	    printf("[controld] caught exception in main-thread!\n");
-  	}
+	shutdownBox();
 }
 
 void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
@@ -894,15 +847,15 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 	{
 		switch (newAspectRatio)
 		{
-			case 2 :	// 4:3
-				setVideoFormat( 2, false );
-				break;
-			case 3 :	// 16:9
-			case 4 :	// 2,21:1
-				setVideoFormat( 1, false );
-				break;
-			default:
-				printf("[controld] Unknown aspectRatio: %d", newAspectRatio);
+		case 2 :	// 4:3
+			setVideoFormat( 2, false );
+			break;
+		case 3 :	// 16:9
+		case 4 :	// 2,21:1
+			setVideoFormat( 1, false );
+			break;
+		default:
+			printf("[controld] Unknown aspectRatio: %d", newAspectRatio);
 		}
 	}
 }
