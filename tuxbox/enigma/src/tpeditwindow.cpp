@@ -96,14 +96,8 @@ eSatEditDialog::eSatEditDialog( tpPacket *tp )
 	useONIT->setText(_("Extended networks search"));
 	useONIT->setHelpText(_("scan NITs of other transponders\nthis is slower, but sometimes needed)"));
 	useONIT->setCheck( tp->scanflags&eDVBScanController::flagUseONIT );
-	skipKnownNIT = new eCheckbox(this);
-	skipKnownNIT->move(ePoint(10, 175));
-	skipKnownNIT->resize( cwidth );
-	skipKnownNIT->setText(_("Skip known Networks"));
-	skipKnownNIT->setHelpText(_("dont scan NITs from known Networks\nfaster scan"));
-	skipKnownNIT->setCheck(tp->scanflags&eDVBScanController::flagSkipKnownNIT);
 	useBAT = new eCheckbox(this);
-	useBAT->move(ePoint(10,215) );
+	useBAT->move(ePoint(10,175) );
 	useBAT->resize( cwidth );
 	useBAT->setText(_("Use BAT"));
 	useBAT->setHelpText(_("use Provider DVB Bouquet Tables if exist"));
@@ -135,8 +129,6 @@ void eSatEditDialog::savePressed()
 		tp->scanflags |= eDVBScanController::flagUseONIT;
 	if ( useBAT->isChecked() )
 		tp->scanflags |= eDVBScanController::flagUseBAT;
-	if ( skipKnownNIT->isChecked() )
-		tp->scanflags |= eDVBScanController::flagSkipKnownNIT;
 	tp->name=name->getText();
 	close(0);
 }

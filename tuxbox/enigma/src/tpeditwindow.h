@@ -59,7 +59,7 @@ class eSatEditDialog: public eWindow
 {
 	eTextInputField *name;
 	eNumber *OrbitalPos;
-	eCheckbox *skipKnownNIT, *useBAT, *useONIT, *doNetworkSearch;
+	eCheckbox *useBAT, *useONIT, *doNetworkSearch;
 	eComboBox *direction;
 	eButton *save;
 	eStatusBar *sbar;
