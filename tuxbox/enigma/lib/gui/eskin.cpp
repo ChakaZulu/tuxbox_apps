@@ -7,6 +7,8 @@
 #include "gfbdc.h"
 #include "glcddc.h"
 #include "epng.h"
+#include <config.h>
+
 
 QMap<QString,tWidgetCreator> eSkin::widget_creator;
 
@@ -214,10 +216,10 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 
 int eSkin::parseImages(XMLTreeNode *inode)
 {
-	QString basepath=inode->GetAttributeValue("basepath");
+	QString basepath= QString(DATADIR) + QString("/enigma/pictures/") + inode->GetAttributeValue("basepath");
 	if (!basepath)
 		basepath="";
-	if (basepath[basepath.length()]!='/')
+	if (basepath[basepath.length()-1]!='/')
 		basepath+="/";
 
 	for (XMLTreeNode *node=inode->GetChild(); node; node=node->GetNext())

@@ -35,16 +35,18 @@
 #include "epng.h"
 #include "eavswitch.h"
 
+#include <config.h>
+
 eZap *eZap::instance;
 
 int eZap::FontSize=0;
 
-static char copyright[]="EliteDVB, Copyright (C) 2001 Felix Domke et al.\n"
-"EliteDVB comes with ABSOLUTELY NO WARRANTY\n"
+static char copyright[]="enigma, Copyright (C) dbox-Project\n"
+"enigma comes with ABSOLUTELY NO WARRANTY\n"
 "This is free software, and you are welcome\n"
 "to redistribute it under certain conditions.\n"
 "It is licensed under the GNU General Public License,\n"
-"Version 2\n";
+"Version 1\n";
 
 eZap *eZap::getInstance()
 {
@@ -78,7 +80,7 @@ void eZap::switchFontSize()
 
 QString eZap::getVersion()
 {
-	return "eZap 1.0RC2beta2, compiled " __DATE__;
+	return "enigma 0.1, compiled " __DATE__;
 }
 
 eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
@@ -113,8 +115,8 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 	eSkin_init();
 
 	eSkin *skin=new eSkin;
-	if (skin->load("skins/default.esml"))
-		qFatal("skin load failed");
+	if (skin->load( DATADIR "/enigma/skins/default.esml"))
+		qFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
 	skin->setPalette(gfbdc);
 	skin->makeActive();
 
