@@ -567,11 +567,11 @@ void CInfoViewer::showMotorMoving(int duration)
 
 int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 {
-	if ( ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG ) ||
-		  ( msg == NeutrinoMessages::EVT_NEXTPROGRAM ) )
+	if ((msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG) ||
+	    (msg == NeutrinoMessages::EVT_NEXTPROGRAM    ))
 	{
 		CSectionsdClient::CurrentNextInfo info = getEPG( data );
-		if(data == channel_id)
+		if ((*(t_channel_id *)data) == channel_id)
 		{
 			info_CurrentNext = info;
 			if ( is_visible )
@@ -605,9 +605,9 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		recordModeActive = data;
 	}
-    else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
+	else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
 	{
-		if ( data == channel_id)
+		if ((*(t_channel_id *)data) == channel_id)
 		{
 			if ( is_visible && showButtonBar )
 				showButton_Audio();
@@ -616,7 +616,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_ZAP_GOTPIDS )
 	{
-		if ( data == channel_id)
+		if ((*(t_channel_id *)data) == channel_id)
 		{
 			if ( is_visible && showButtonBar )
 				showIcon_VTXT();
@@ -625,16 +625,16 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES )
 	{
-		if ( data == channel_id)
+		if ((*(t_channel_id *)data) == channel_id)
 		{
 			if ( is_visible && showButtonBar )
 				showButton_SubServices();
 		}
 	    return messages_return::handled;
 	}
-	else if ( msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE )
+	else if (msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE)
 	{
-		//if ( data == channel_id)
+		//if ((*(t_channel_id *)data) == channel_id)
 		{
 			if ( is_visible && showButtonBar &&  ( !g_RemoteControl->are_subchannels ) )
 				show_Data( true );
@@ -642,9 +642,9 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		showLcdPercentOver();
 		return messages_return::handled;
 	}
-	else if ( msg == NeutrinoMessages::EVT_ZAP_FAILED )
+	else if (msg == NeutrinoMessages::EVT_ZAP_FAILED)
 	{
-		if ( data == channel_id)
+		if ((*(t_channel_id *)data) == channel_id)
        		{
 			// show failure..!
 			CLCD::getInstance()->showServicename("(" + g_RemoteControl->getCurrentChannelName() + ')');
@@ -722,7 +722,11 @@ CSectionsdClient::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_cha
 		g_RCInput->postMsg( ( info.flags & ( CSectionsdClient::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
 	}
 	else
-		g_RCInput->postMsg( NeutrinoMessages::EVT_NOEPG_YET, for_channel_id, false );
+	{
+		t_channel_id * p = new t_channel_id;
+		*p = for_channel_id;
+		g_RCInput->postMsg(NeutrinoMessages::EVT_NOEPG_YET, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
+	}
 
 	return info;
 }

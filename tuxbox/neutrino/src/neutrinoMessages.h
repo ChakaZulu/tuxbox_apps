@@ -70,55 +70,65 @@ struct NeutrinoMessages {
 		CHANGEMODE		=	CRCInput::RC_Messages + 17,
 		REMIND			=	CRCInput::RC_Messages + 18,
 
-		EVT_VOLCHANGED		=	CRCInput::RC_Events + 1,
-		EVT_MUTECHANGED		=	CRCInput::RC_Events + 2,
-		EVT_VCRCHANGED		=	CRCInput::RC_Events + 3,
-		EVT_MODECHANGED		=	CRCInput::RC_Events + 4,
-		EVT_BOUQUETSCHANGED	=	CRCInput::RC_Events + 6,
-//		EVT_SERVICESCHANGED	=	CRCInput::RC_Events + 7,
-		EVT_CURRENTNEXT_EPG	=	CRCInput::RC_Events + 8,
-		EVT_ZAP_GOT_SUBSERVICES =	CRCInput::RC_Events + 9,
-		EVT_ZAP_GOTPIDS		=	CRCInput::RC_Events + 10,
-		EVT_ZAP_COMPLETE	=	CRCInput::RC_Events + 11,
-		EVT_ZAP_GOTAPIDS	=	CRCInput::RC_Events + 12,
-		EVT_ZAP_FAILED		=	CRCInput::RC_Events + 13,
-		EVT_ZAP_ISNVOD		=	CRCInput::RC_Events + 14,
-		EVT_ZAP_SUB_COMPLETE      = CRCInput::RC_Events + 15,
-		EVT_SCAN_COMPLETE         = CRCInput::RC_Events + 16,
-		EVT_SCAN_NUM_TRANSPONDERS = CRCInput::RC_Events + 17,
-		EVT_SCAN_NUM_CHANNELS     = CRCInput::RC_Events + 18,
-		EVT_SHUTDOWN		=	CRCInput::RC_Events + 19,
-		EVT_TIMER		=	CRCInput::RC_Events + 20,
-		EVT_NEXTPROGRAM		=	CRCInput::RC_Events + 21,
-		EVT_PROGRAMLOCKSTATUS =	CRCInput::RC_Events + 22,
-		EVT_NOEPG_YET		=	CRCInput::RC_Events + 23,
-		EVT_RECORDMODE		=	CRCInput::RC_Events + 24,
-		EVT_ZAP_SUB_FAILED	=	CRCInput::RC_Events + 25,
+		EVT_VOLCHANGED                           = CRCInput::RC_Events + 1,
+		EVT_MUTECHANGED                          = CRCInput::RC_Events + 2,
+		EVT_VCRCHANGED                           = CRCInput::RC_Events + 3,
+		EVT_MODECHANGED                          = CRCInput::RC_Events + 4,
+		EVT_BOUQUETSCHANGED                      = CRCInput::RC_Events + 6,
+//		EVT_SERVICESCHANGED                      = CRCInput::RC_Events + 7,
+		EVT_SCAN_COMPLETE                        = CRCInput::RC_Events + 16,
+		EVT_SCAN_NUM_TRANSPONDERS                = CRCInput::RC_Events + 17,
+		EVT_SCAN_NUM_CHANNELS                    = CRCInput::RC_Events + 18,
+		EVT_SHUTDOWN                             = CRCInput::RC_Events + 19,
+		EVT_TIMER                                = CRCInput::RC_Events + 20,
+		EVT_PROGRAMLOCKSTATUS                    = CRCInput::RC_Events + 22,
+		EVT_RECORDMODE                           = CRCInput::RC_Events + 24,
 #ifndef SKIP_CA_STATUS
-		EVT_ZAP_CA_CLEAR	=	CRCInput::RC_Events + 26,
-		EVT_ZAP_CA_LOCK		=	CRCInput::RC_Events + 27,
-		EVT_ZAP_CA_FTA		=	CRCInput::RC_Events + 28,
+		EVT_ZAP_CA_CLEAR                         = CRCInput::RC_Events + 26,
+		EVT_ZAP_CA_LOCK                          = CRCInput::RC_Events + 27,
+		EVT_ZAP_CA_FTA                           = CRCInput::RC_Events + 28,
 #endif
-		EVT_SCAN_FAILED           = CRCInput::RC_Events + 29,
+		EVT_SCAN_FAILED                          = CRCInput::RC_Events + 29,
 		EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS = CRCInput::RC_Events + 30,
- 		EVT_SCAN_REPORT_FREQUENCY = CRCInput::RC_Events + 31,
- 		EVT_SCAN_FOUND_RADIO_CHAN = CRCInput::RC_Events + 32,
- 		EVT_SCAN_FOUND_DATA_CHAN = CRCInput::RC_Events + 33,
- 		EVT_SCAN_FOUND_TV_CHAN = CRCInput::RC_Events + 34,
- 		EVT_SCAN_FOUND_A_CHAN = CRCInput::RC_Events + 35,
- 		EVT_SCAN_REPORT_FREQUENCYP = CRCInput::RC_Events + 36,
- 		EVT_ZAP_MOTOR 		= 	CRCInput::RC_Events + 37,
+ 		EVT_SCAN_REPORT_FREQUENCY                = CRCInput::RC_Events + 31,
+ 		EVT_SCAN_FOUND_RADIO_CHAN                = CRCInput::RC_Events + 32,
+ 		EVT_SCAN_FOUND_DATA_CHAN                 = CRCInput::RC_Events + 33,
+ 		EVT_SCAN_FOUND_TV_CHAN                   = CRCInput::RC_Events + 34,
+ 		EVT_SCAN_REPORT_FREQUENCYP               = CRCInput::RC_Events + 36,
+ 		EVT_ZAP_MOTOR                            = CRCInput::RC_Events + 37,
 
 
-		EVT_CURRENTEPG 		=	CRCInput::RC_WithData + 1,
-		EVT_SCAN_SATELLITE	=	CRCInput::RC_WithData + 2,
-		EVT_SCAN_PROVIDER	=	CRCInput::RC_WithData + 3,
-		EVT_NEXTEPG 		=	CRCInput::RC_WithData + 4,
-		EVT_TIMESET 		=	CRCInput::RC_WithData + 5,
-		EVT_POPUP		=	CRCInput::RC_WithData + 6,
-		EVT_EXTMSG		=	CRCInput::RC_WithData + 7,
-		EVT_START_PLUGIN	=	CRCInput::RC_WithData + 8,
-		EVT_SCAN_SERVICENAME	=	CRCInput::RC_WithData + 9
+		EVT_CURRENTEPG                           = CRCInput::RC_WithData +  1,
+		EVT_NEXTEPG                              = CRCInput::RC_WithData +  2,
+		EVT_POPUP                                = CRCInput::RC_WithData +  3,
+		EVT_EXTMSG                               = CRCInput::RC_WithData +  4,
+		EVT_START_PLUGIN                         = CRCInput::RC_WithData +  5,
+
+		/* sectionsd */
+		EVT_CURRENTNEXT_EPG                      = CRCInput::RC_WithData +  6, /* data: (t_channel_id *) */
+		EVT_TIMESET                              = CRCInput::RC_WithData +  7, /* data: (long long *)    */
+
+		/* "sectionsd" events triggered by neutrino */
+		EVT_NOEPG_YET                            = CRCInput::RC_WithData +  8, /* data: (t_channel_id *) */
+
+		/* "timerd" events triggered by neutrino */
+		EVT_NEXTPROGRAM                          = CRCInput::RC_WithData +  9, /* data: (t_channel_id *) */
+
+		/* zapit */
+ 		EVT_SCAN_FOUND_A_CHAN                    = CRCInput::RC_WithData + 10,
+		EVT_SCAN_PROVIDER                        = CRCInput::RC_WithData + 11,
+		EVT_SCAN_SATELLITE                       = CRCInput::RC_WithData + 12,
+		EVT_SCAN_SERVICENAME                     = CRCInput::RC_WithData + 13,
+		EVT_ZAP_COMPLETE                         = CRCInput::RC_WithData + 14, /* data: (t_channel_id *) */
+		EVT_ZAP_FAILED                           = CRCInput::RC_WithData + 15, /* data: (t_channel_id *) */
+		EVT_ZAP_ISNVOD                           = CRCInput::RC_WithData + 16, /* data: (t_channel_id *) */
+		EVT_ZAP_SUB_COMPLETE                     = CRCInput::RC_WithData + 17, /* data: (t_channel_id *) */
+		EVT_ZAP_SUB_FAILED                       = CRCInput::RC_WithData + 18, /* data: (t_channel_id *) */
+
+		/* "zapit" events triggered by neutrino */
+		EVT_ZAP_GOT_SUBSERVICES                  = CRCInput::RC_WithData + 19, /* data: (t_channel_id *) */
+		EVT_ZAP_GOTAPIDS                         = CRCInput::RC_WithData + 20, /* data: (t_channel_id *) */
+		EVT_ZAP_GOTPIDS                          = CRCInput::RC_WithData + 21  /* data: (t_channel_id *) */
 	};
 	enum
 	{

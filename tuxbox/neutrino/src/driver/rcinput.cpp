@@ -821,10 +821,8 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			 			//printf("[neutrino] event - from SECTIONSD %x %x\n", emsg.eventID, *(unsigned*) p);
 						switch(emsg.eventID)
 						{
-							case CSectionsdClient::EVT_TIMESET :
+							case CSectionsdClient::EVT_TIMESET:
 								{
-									*msg = NeutrinoMessages::EVT_TIMESET;
-
 									struct timeval tv;
 									gettimeofday( &tv, NULL );
 									long long timeOld = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
@@ -846,13 +844,15 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 										if (e->correct_time)
 											e->times_out+= *(long long*) p;
 
-										*data = (unsigned) p;
+									*msg          = NeutrinoMessages::EVT_TIMESET;
+									*data         = (neutrino_msg_data_t) p;
 									dont_delete_p = true;
 								}
 								break;
-							case CSectionsdClient::EVT_GOT_CN_EPG :
-									*msg = NeutrinoMessages::EVT_CURRENTNEXT_EPG;
-									*data = *(unsigned*) p;
+							case CSectionsdClient::EVT_GOT_CN_EPG:
+									*msg          = NeutrinoMessages::EVT_CURRENTNEXT_EPG;
+									*data         = (neutrino_msg_data_t) p;
+									dont_delete_p = true;
 								break;
 							default:
 								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
@@ -863,118 +863,110 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 			 			//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
 						switch(emsg.eventID)
 						{
-							case CZapitClient::EVT_RECORDMODE_ACTIVATED :
-									*msg = NeutrinoMessages::EVT_RECORDMODE;
-									*data = true;
-								break;
-							case CZapitClient::EVT_RECORDMODE_DEACTIVATED :
-									*msg = NeutrinoMessages::EVT_RECORDMODE;
-									*data = false;
-								break;
-							case CZapitClient::EVT_ZAP_COMPLETE :
-									*msg = NeutrinoMessages::EVT_ZAP_COMPLETE;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_ZAP_FAILED :
-									*msg = NeutrinoMessages::EVT_ZAP_FAILED;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_ZAP_SUB_FAILED :
-									*msg = NeutrinoMessages::EVT_ZAP_SUB_FAILED;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD :
-									*msg = NeutrinoMessages::EVT_ZAP_ISNVOD;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_ZAP_SUB_COMPLETE :
-									*msg = NeutrinoMessages::EVT_ZAP_SUB_COMPLETE;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_SCAN_COMPLETE :
-									*msg = NeutrinoMessages::EVT_SCAN_COMPLETE;
-									*data = 0;
-								break;
-							case CZapitClient::EVT_SCAN_NUM_TRANSPONDERS :
-									*msg = NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS :
-									*msg = NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS;
-									*data = *(unsigned*) p;
-								break;
- 							case CZapitClient::EVT_SCAN_REPORT_FREQUENCY :
- 									*msg = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY;
- 									*data = *(unsigned*) p;
- 								break;
- 							case CZapitClient::EVT_SCAN_FOUND_A_CHAN :
- 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_A_CHAN;
- 									*data = (unsigned) p;
- 									dont_delete_p = true;
- 								break;
- 							case CZapitClient::EVT_SCAN_SERVICENAME :
- 									*msg = NeutrinoMessages::EVT_SCAN_SERVICENAME;
- 									*data = (unsigned) p;
- 									dont_delete_p = true;
- 								break;
- 							case CZapitClient::EVT_SCAN_FOUND_TV_CHAN :
- 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN;
- 									*data = *(unsigned*) p;
- 								break;
- 							case CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN :
- 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN;
- 									*data = *(unsigned*) p;
- 								break;
- 							case CZapitClient::EVT_SCAN_FOUND_DATA_CHAN :
- 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN;
- 									*data = *(unsigned*) p;
- 								break;
- 							case CZapitClient::EVT_SCAN_REPORT_FREQUENCYP :
- 									*msg = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP;
- 									*data = *(unsigned*) p;
- 								break;
-							case CZapitClient::EVT_SCAN_NUM_CHANNELS :
-									*msg = NeutrinoMessages::EVT_SCAN_NUM_CHANNELS;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_SCAN_PROVIDER :
-									*msg = NeutrinoMessages::EVT_SCAN_PROVIDER;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case CZapitClient::EVT_SCAN_SATELLITE :
-									*msg = NeutrinoMessages::EVT_SCAN_SATELLITE;
-									*data = (unsigned) p;
-									dont_delete_p = true;
-								break;
-							case CZapitClient::EVT_BOUQUETS_CHANGED :
-									*msg = NeutrinoMessages::EVT_BOUQUETSCHANGED;
-									*data = 0;
-								break;
+						case CZapitClient::EVT_RECORDMODE_ACTIVATED:
+							*msg  = NeutrinoMessages::EVT_RECORDMODE;
+							*data = true;
+							break;
+						case CZapitClient::EVT_RECORDMODE_DEACTIVATED:
+							*msg  = NeutrinoMessages::EVT_RECORDMODE;
+							*data = false;
+							break;
+						case CZapitClient::EVT_ZAP_COMPLETE:
+							*msg = NeutrinoMessages::EVT_ZAP_COMPLETE;
+							break;
+						case CZapitClient::EVT_ZAP_FAILED:
+							*msg = NeutrinoMessages::EVT_ZAP_FAILED;
+							break;
+						case CZapitClient::EVT_ZAP_SUB_FAILED:
+							*msg = NeutrinoMessages::EVT_ZAP_SUB_FAILED;
+							break;
+						case CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD:
+							*msg = NeutrinoMessages::EVT_ZAP_ISNVOD;
+							break;
+						case CZapitClient::EVT_ZAP_SUB_COMPLETE:
+							*msg = NeutrinoMessages::EVT_ZAP_SUB_COMPLETE;
+							break;
+						case CZapitClient::EVT_SCAN_COMPLETE:
+							*msg  = NeutrinoMessages::EVT_SCAN_COMPLETE;
+							*data = 0;
+							break;
+						case CZapitClient::EVT_SCAN_NUM_TRANSPONDERS:
+							*msg  = NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS:
+							*msg  = NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_REPORT_FREQUENCY:
+							*msg = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_FOUND_A_CHAN:
+							*msg = NeutrinoMessages::EVT_SCAN_FOUND_A_CHAN;
+							break;
+						case CZapitClient::EVT_SCAN_SERVICENAME:
+							*msg = NeutrinoMessages::EVT_SCAN_SERVICENAME;
+							break;
+						case CZapitClient::EVT_SCAN_FOUND_TV_CHAN:
+							*msg  = NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN:
+							*msg  = NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_FOUND_DATA_CHAN:
+							*msg  = NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_REPORT_FREQUENCYP:
+							*msg  = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_NUM_CHANNELS:
+							*msg = NeutrinoMessages::EVT_SCAN_NUM_CHANNELS;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_SCAN_PROVIDER:
+							*msg = NeutrinoMessages::EVT_SCAN_PROVIDER;
+							break;
+						case CZapitClient::EVT_SCAN_SATELLITE:
+							*msg = NeutrinoMessages::EVT_SCAN_SATELLITE;
+							break;
+						case CZapitClient::EVT_BOUQUETS_CHANGED:
+							*msg  = NeutrinoMessages::EVT_BOUQUETSCHANGED;
+							*data = 0;
+							break;
 #ifndef SKIP_CA_STATUS
-							case CZapitClient::EVT_ZAP_CA_CLEAR :
-									*msg = NeutrinoMessages::EVT_ZAP_CA_CLEAR;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_ZAP_CA_LOCK :
-									*msg = NeutrinoMessages::EVT_ZAP_CA_LOCK;
-									*data = *(unsigned*) p;
-								break;
-							case CZapitClient::EVT_ZAP_CA_FTA :
-									*msg = NeutrinoMessages::EVT_ZAP_CA_FTA;
-									*data = *(unsigned*) p;
-								break;
+						case CZapitClient::EVT_ZAP_CA_CLEAR:
+							*msg  = NeutrinoMessages::EVT_ZAP_CA_CLEAR;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_ZAP_CA_LOCK:
+							*msg  = NeutrinoMessages::EVT_ZAP_CA_LOCK;
+							*data = *(unsigned*) p;
+							break;
+						case CZapitClient::EVT_ZAP_CA_FTA:
+							*msg  = NeutrinoMessages::EVT_ZAP_CA_FTA;
+							*data = *(unsigned*) p;
+							break;
 #endif
-							case CZapitClient::EVT_SCAN_FAILED:
-									*msg  = NeutrinoMessages::EVT_SCAN_FAILED;
-									*data = 0;
-								break;
-							case CZapitClient::EVT_ZAP_MOTOR:
-									*msg = NeutrinoMessages::EVT_ZAP_MOTOR;
-									*data = *(unsigned*) p;
-								break;
+						case CZapitClient::EVT_SCAN_FAILED:
+							*msg  = NeutrinoMessages::EVT_SCAN_FAILED;
+							*data = 0;
+							break;
+						case CZapitClient::EVT_ZAP_MOTOR:
+							*msg  = NeutrinoMessages::EVT_ZAP_MOTOR;
+							*data = *(unsigned*) p;
+							break;
 						default:
 							printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
+						}
+						if (((*msg) >= CRCInput::RC_WithData) && ((*msg) < CRCInput::RC_WithData + 0x10000000))
+						{
+							*data         = (neutrino_msg_data_t) p;
+							dont_delete_p = true;
 						}
 			 		}
 			 		else if ( emsg.initiatorID == CEventServer::INITID_TIMERD )
@@ -987,7 +979,7 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 						if (emsg.eventID==CTimerdClient::EVT_NEXTPROGRAM)
 			 			{
 			 				*msg = NeutrinoMessages::EVT_NEXTPROGRAM;
-			 				*data = (unsigned) p;
+			 				*data = (neutrino_msg_data_t) p;
 			 				dont_delete_p = true;
 			 			}
 */

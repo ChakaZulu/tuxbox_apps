@@ -85,14 +85,14 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 	if ( zap_completion_timeout != 0 )
 	{
 		// warte auf Meldung vom ZAPIT
-    		if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) ||
-    		 ( msg == NeutrinoMessages:: EVT_ZAP_FAILED ) ||
-    		 ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD ) )
+    		if ((msg == NeutrinoMessages::EVT_ZAP_COMPLETE) ||
+		    (msg == NeutrinoMessages::EVT_ZAP_FAILED  ) ||
+		    (msg == NeutrinoMessages::EVT_ZAP_ISNVOD  ))
 		{
-			if ( data != current_channel_id )
+			if ((*(t_channel_id *)data) != current_channel_id)
 			{
-				g_Zapit->zapTo_serviceID_NOWAIT( current_channel_id );
-				g_Sectionsd->setServiceChanged( current_channel_id, false );
+				g_Zapit->zapTo_serviceID_NOWAIT(current_channel_id );
+				g_Sectionsd->setServiceChanged(current_channel_id, false);
 
 				zap_completion_timeout = getcurrenttime() + 2 * (long long) 1000000;
 
@@ -104,21 +104,21 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 	}
 	else
 	{
-        if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) ||
-    		 ( msg == NeutrinoMessages:: EVT_ZAP_FAILED ) ||
-    		 ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD ) )
-    	{
-    		// warte auf keine Meldung vom ZAPIT -> jemand anderer hat das zappen ausgelöst...
-    		if ( data != current_channel_id )
-    		{
+		if ((msg == NeutrinoMessages::EVT_ZAP_COMPLETE) ||
+		    (msg == NeutrinoMessages::EVT_ZAP_FAILED  ) ||
+		    (msg == NeutrinoMessages::EVT_ZAP_ISNVOD  ))
+		{
+			// warte auf keine Meldung vom ZAPIT -> jemand anderer hat das zappen ausgelöst...
+			if ((*(t_channel_id *)data) != current_channel_id)
+			{
 				CZapitClient::BouquetChannelList channellist;
 				g_Zapit->getChannels(channellist);
 				CZapitClient::BouquetChannelList::iterator i = channellist.begin();
-				for (;i != channellist.end() && i->channel_id != data; i++);
-				if(i->channel_id == data)
+				for (;i != channellist.end() && i->channel_id != (*(t_channel_id *)data); i++);
+				if (i->channel_id == (*(t_channel_id *)data))
 					current_channel_name = i->name;
 				CLCD::getInstance()->showServicename(current_channel_name); // UTF-8
-				current_channel_id = data;
+				current_channel_id = *(t_channel_id *)data;
 				is_video_started= true;
 
 				current_EPGid = 0;
@@ -132,31 +132,31 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 				subChannels.clear();
 				selected_subchannel = -1;
 				director_mode = 0;
-				needs_nvods = ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD );
+				needs_nvods = (msg == NeutrinoMessages:: EVT_ZAP_ISNVOD);
 
 				g_Sectionsd->setServiceChanged( current_channel_id, true );
 				CNeutrinoApp::getInstance()->channelList->adjustToChannelID(current_channel_id);
 				if ( g_InfoViewer->is_visible )
 					g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR , 0 );
 			}
-    	}
-    	else
-	    if ( ( msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE ) ||
-        	 ( msg == NeutrinoMessages:: EVT_ZAP_SUB_FAILED ) )
-        {
-    		if ( data != current_sub_channel_id )
-    		{
-				current_sub_channel_id = data;
+		}
+		else
+			if ((msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE) ||
+			    (msg == NeutrinoMessages:: EVT_ZAP_SUB_FAILED ))
+			{
+				if ((*(t_channel_id *)data) != current_sub_channel_id)
+				{
+					current_sub_channel_id = *(t_channel_id *)data;
 
-				for( unsigned int i= 0; i< subChannels.size(); i++)
-					if (subChannels[i].getChannelID() == data)
+					for(unsigned int i = 0; i < subChannels.size(); i++)
+					if (subChannels[i].getChannelID() == (*(t_channel_id *)data))
 					{
 						selected_subchannel = i;
 						break;
 					}
+				}
 			}
-        }
-    }
+	}
 
     if ( msg == NeutrinoMessages::EVT_CURRENTEPG )
 	{
@@ -230,37 +230,41 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 
 	    return messages_return::handled;
 	}
-	else if ( msg == NeutrinoMessages::EVT_NOEPG_YET )
+	else if (msg == NeutrinoMessages::EVT_NOEPG_YET)
 	{
-		if ( data == current_channel_id )
+		if ((*(t_channel_id *)data) == current_channel_id)
 		{
 			if ( !is_video_started )
 				g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false );
 		}
 		return messages_return::handled;
 	}
-	else if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) || ( msg == NeutrinoMessages:: EVT_ZAP_SUB_COMPLETE ) )
+	else if ((msg == NeutrinoMessages::EVT_ZAP_COMPLETE    ) ||
+		 (msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE))
 	{
-		if ( data == (( msg == NeutrinoMessages::EVT_ZAP_COMPLETE )?current_channel_id:current_sub_channel_id) )
+		if ((*(t_channel_id *)data) == ((msg == NeutrinoMessages::EVT_ZAP_COMPLETE) ? current_channel_id : current_sub_channel_id))
 		{
 			CLCD::getInstance()->showServicename(current_channel_name); // UTF-8
 			g_Zapit->getPIDS( current_PIDs );
-			g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOTPIDS, current_channel_id, false );
+
+			t_channel_id * p = new t_channel_id;
+			*p = current_channel_id;
+			g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOTPIDS, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 
 			processAPIDnames();
 		}
 	    return messages_return::handled;
 	}
-	else if ( msg == NeutrinoMessages::EVT_ZAP_ISNVOD )
+	else if (msg == NeutrinoMessages::EVT_ZAP_ISNVOD)
 	{
-		if ( data == current_channel_id )
+		if ((*(t_channel_id *)data) == current_channel_id)
 		{
 			needs_nvods = true;
 			CLCD::getInstance()->showServicename(std::string("[") + current_channel_name + ']'); // UTF-8
 			if ( current_EPGid != 0)
 			{
 				getNVODs();
-				if ( subChannels.size() == 0 )
+				if (subChannels.empty())
 					g_Sectionsd->setServiceChanged( current_channel_id, true );
 			}
 			else
@@ -273,7 +277,10 @@ int CRemoteControl::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data
 	else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == current_programm_timer ) )
 	{
 		//printf("new program !\n");
-		g_RCInput->postMsg( NeutrinoMessages::EVT_NEXTPROGRAM, current_channel_id, false );
+
+		t_channel_id * p = new t_channel_id;
+		*p = current_channel_id;
+		g_RCInput->postMsg(NeutrinoMessages::EVT_NEXTPROGRAM, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 
  		return messages_return::handled;
 	}
@@ -302,7 +309,10 @@ void CRemoteControl::getSubChannels()
 						selected_subchannel = i;
 				}
 				copySubChannelsToZapit();
-				g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, current_channel_id, false );
+
+				t_channel_id * p = new t_channel_id;
+				*p = current_channel_id;
+				g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 			}
 		}
 	}
@@ -339,12 +349,14 @@ void CRemoteControl::getNVODs()
 			}
 
 			copySubChannelsToZapit();
-            g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, current_channel_id, false );
 
+			t_channel_id * p = new t_channel_id;
+			*p = current_channel_id;
+			g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 
-            if ( selected_subchannel == -1 )
-            {
-            	// beim ersten Holen letzten NVOD-Kanal setzen!
+			if ( selected_subchannel == -1 )
+			{
+				// beim ersten Holen letzten NVOD-Kanal setzen!
 				setSubChannel( subChannels.size()- 1 );
 			}
 			else
@@ -437,8 +449,9 @@ void CRemoteControl::processAPIDnames()
 		}
 	}
 
-
-	g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOTAPIDS, current_channel_id, false );
+	t_channel_id * p = new t_channel_id;
+	*p = current_channel_id;
+	g_RCInput->postMsg(NeutrinoMessages::EVT_ZAP_GOTAPIDS, (const neutrino_msg_data_t)p, false); // data is pointer to allocated memory
 }
 
 
@@ -455,7 +468,8 @@ void CRemoteControl::copySubChannelsToZapit(void)
 
 void CRemoteControl::setAPID( uint APID )
 {
-	if ((current_PIDs.PIDs.selected_apid == APID ) || (APID < 0) || (APID >= current_PIDs.APIDs.size()) )
+	if ((current_PIDs.PIDs.selected_apid == APID ) ||
+	    (APID >= current_PIDs.APIDs.size()))
 		return;
 
 	current_PIDs.PIDs.selected_apid = APID;
