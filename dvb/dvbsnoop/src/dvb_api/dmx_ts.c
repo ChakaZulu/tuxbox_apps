@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.20 2004/01/25 22:36:52 rasc Exp $
+$Id: dmx_ts.c,v 1.21 2004/02/15 22:22:28 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.20 2004/01/25 22:36:52 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.21  2004/02/15 22:22:28  rasc
+cmd option: -hexdumpbuffer -nohexdumpbuffer
+
 Revision 1.20  2004/01/25 22:36:52  rasc
 minor changes & enhancments
 
@@ -232,7 +235,7 @@ int  doReadTS (OPTION *opt)
        print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
 
 
-       if (opt->printhex) {
+       if (opt->buffer_hexdump) {
            printhex_buf (0, b, n);
            out_NL(0);
        }

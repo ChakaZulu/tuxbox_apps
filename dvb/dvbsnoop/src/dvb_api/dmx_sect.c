@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.19 2004/02/12 23:00:24 rasc Exp $
+$Id: dmx_sect.c,v 1.20 2004/02/15 22:22:28 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.19 2004/02/12 23:00:24 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.20  2004/02/15 22:22:28  rasc
+cmd option: -hexdumpbuffer -nohexdumpbuffer
+
 Revision 1.19  2004/02/12 23:00:24  rasc
 no message
 
@@ -200,7 +203,7 @@ int  doReadSECT (OPTION *opt)
        print_packet_header (opt, "SECT", opt->pid, count, n, 0);
 
 
-       if (opt->printhex) {
+       if (opt->buffer_hexdump) {
            printhex_buf (0,buf, n);
            out_NL(0);
        }

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.24 2004/01/29 22:34:49 rasc Exp $
+$Id: cmdline.c,v 1.25 2004/02/15 22:22:28 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.24 2004/01/29 22:34:49 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.25  2004/02/15 22:22:28  rasc
+cmd option: -hexdumpbuffer -nohexdumpbuffer
+
 Revision 1.24  2004/01/29 22:34:49  rasc
 -sync: default now
 
@@ -135,6 +138,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
     -- init options
   */
 
+  opt->buffer_hexdump = 1;
   opt->printhex = -1;
   opt->printdecode = -1;
   opt->binary_out = 0;
@@ -175,7 +179,6 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-n")) opt->packet_count = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-b")) opt->binary_out = 1;
      else if (!strcmp (argv[i],"-ph")) opt->printhex = str2i(argv[++i]);
-     else if (!strcmp (argv[i],"-nph")) opt->printhex = 0;
      else if (!strcmp (argv[i],"-pd")) opt->printdecode = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-npd")) opt->printdecode = 0;
      else if (!strcmp (argv[i],"-HCP")) opt->hide_copyright= 1;
@@ -183,8 +186,13 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-tf")) opt->time_mode = FULL_TIME;
      else if (!strcmp (argv[i],"-td")) opt->time_mode = DELTA_TIME;
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
+     else if (!strcmp (argv[i],"-hexdumpbuffer")) opt->buffer_hexdump = 1;
+     else if (!strcmp (argv[i],"-nohexdumpbuffer")) opt->buffer_hexdump = 0;
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
-     else if (!strcmp (argv[i],"-if")) {
+     else if (!strcmp (argv[i],"-nph")) {	// old option  use -ph and -nhdb/-hdb
+	opt->buffer_hexdump = 0;
+	opt->printhex = 0;
+     } else if (!strcmp (argv[i],"-if")) {
 	 opt->inpPidFile = argv[++i];		// input filename
 	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
      } else if (!strcmp (argv[i],"-s")) {
@@ -271,7 +279,7 @@ static void usage (void)
     printf("                         bandwidth = data rate statistics for pid\n");
     printf("                         signal = signal rate statistics \n");
     printf("                 stream type or pidscan\n");
-// experimental $$$ TODO    printf("   -TIMEOUT ms:  section read timeout in ms [-TIMEOUT 0]\n");
+    printf("   -TIMEOUT ms:  section read timeout in ms [-TIMEOUT 0]\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
@@ -282,9 +290,11 @@ static void usage (void)
     printf("   -n count:     receive count packets (0=no limit) [-n 0]\n");
     printf("   -b:           binary output of packets (disables other output)\n");
     printf("   -if:          input file, reads from binary file instead of demux device\n");
-    printf("   -ph mode:     print hex buffer, modes: [-ph 1]\n");
+    printf("   -ph mode:     data hex dump mode, modes: [-ph 1]\n");
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
-    printf("   -nph:         don't print hex buffer (= -ph 0)\n");
+    printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer -ph 0]\n");
+    printf("   -hexdumpbuffer:    print hex dump of read buffer [-hexdumpbuffer]\n");
+    printf("   -nnohexdumpbuffer: don't print hex dump of read buffer [-hexdumpbuffer]\n");
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
@@ -298,3 +308,5 @@ static void usage (void)
 
 
 
+
+// $$$ TODO  commandline needs a redesign 

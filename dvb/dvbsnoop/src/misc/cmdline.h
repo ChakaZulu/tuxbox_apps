@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.15 2004/01/22 22:26:35 rasc Exp $
+$Id: cmdline.h,v 1.16 2004/02/15 22:22:29 rasc Exp $
 
 
  DVBSNOOP
@@ -29,20 +29,21 @@ enum TIME_MODE    {NO_TIME, FULL_TIME, DELTA_TIME};
 typedef struct _OPTIONS {
   int         packet_mode;
   int         packet_header_sync;	// Try to do a softsync of packet sync bytes
-  int         printhex;
-  int         printdecode;
-  int         binary_out;
+  int         buffer_hexdump;		// 0/1: print hexdump prior to decoding
+  int         printhex;			// hexdump mode
+  int         printdecode;		// decode verbose mode
+  int         binary_out;		// binary output?
   char        *inpPidFile;		// read from file instead of dmux if not NULL
-  char        *devDemux;
-  char        *devDvr;
-  char        *devFE;
-  u_int       pid;
-  u_int       filter;
-  u_int       mask;
-  int         crc;
+  char        *devDemux;		// input device DMX
+  char        *devDvr;			// input device DVR
+  char        *devFE;			// input device Frontend
+  u_int       pid;			// decode PID
+  u_int       filter;			// PID filter
+  u_int       mask;			// PID mask
+  int         crc;			// section CRC check?
   long        timeout_ms;		// read timeout in ms
-  long        packet_count;
-  int         time_mode;
+  long        packet_count;		// read n packets
+  int         time_mode;		// time print mode
   int         hide_copyright;  		// suppress message at prog start
   int         help;
 } OPTION;
