@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.22 2002/08/30 18:07:54 dirch Exp $
+	$Id: timermanager.cpp,v 1.23 2002/08/30 19:11:03 dirch Exp $
 
 	License: GPL
 
@@ -555,8 +555,7 @@ void CTimerEvent_Zapto::fireEvent()
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_ZAPTO,
 		CEventServer::INITID_TIMERD,
-		&eventInfo.onidSid,
-		sizeof(eventInfo.onidSid));
+		&eventInfo, sizeof(CTimerEvent::EventInfo));
 }
 
 
