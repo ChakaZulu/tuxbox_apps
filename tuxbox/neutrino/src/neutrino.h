@@ -33,8 +33,7 @@
 #ifndef __neutrino__
 #define __neutrino__
 
-// hat beides hier drin nix verloren
-#include "zapit/message.h"
+#include "zapitclient.h"
 
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
@@ -109,7 +108,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		long long 			standby_pressed_at;
 
-		channel_msg         firstchannel;
+		CZapitClient::responseGetLastChannel    firstchannel;
 		st_rmsg				sendmessage;
 
 		char				current_volume;

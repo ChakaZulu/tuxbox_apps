@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.232 2002/09/19 13:12:01 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.233 2002/09/20 13:17:33 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -43,7 +43,6 @@
 #include <lcddclient.h>
 
 /* zapit library headers */
-#include <message.h>
 #include <zapci/cam.h>
 #include <zapost/audio.h>
 #include <zapost/dmx.h>
@@ -244,18 +243,18 @@ void save_settings (bool write)
 	}
 }
 
-channel_msg load_settings()  // ATTENTION: output_msg.name is returned undefined!
+CZapitClient::responseGetLastChannel load_settings()
 {
-	channel_msg output_msg;
+	CZapitClient::responseGetLastChannel lastchannel;
 
 	if (config->getInt32("lastChannelMode", 0))
-		output_msg.mode = 'r';
+		lastchannel.mode = 'r';
 	else
-		output_msg.mode = 't';
+		lastchannel.mode = 't';
 
-	output_msg.chan_nr = config->getInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", 1);
+	lastchannel.channelNumber = config->getInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", 1);
 
-	return output_msg;
+	return lastchannel;
 }
 
 /*
@@ -619,13 +618,8 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			}
 			case CZapitClient::CMD_GET_LAST_CHANNEL:
 			{
-				channel_msg mysettings;
-				mysettings = load_settings();                                // ATTENTION: value of mysettings.name is undefined
 				CZapitClient::responseGetLastChannel responseGetLastChannel;
-//				strcpy(responseGetLastChannel.channelName, mysettings.name);
-				responseGetLastChannel.channelName[0] = 0;                   // return empty channel name as a temporary solution
-				responseGetLastChannel.channelNumber = mysettings.chan_nr;
-				responseGetLastChannel.mode = mysettings.mode;
+				responseGetLastChannel = load_settings();
 				send(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel), 0);
 				break;
 			}
@@ -1054,10 +1048,10 @@ int main (int argc, char **argv)
 	struct sockaddr_un servaddr;
 	int clilen;
 
-	channel_msg testmsg;
+	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.232 2002/09/19 13:12:01 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.233 2002/09/20 13:17:33 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1105,16 +1099,12 @@ int main (int argc, char **argv)
 	/* create bouquet manager */
 	bouquetManager = new CBouquetManager();
 
-	testmsg = load_settings();  // ATTENTION: value of testmsg.name is undefined
+	test_lastchannel = load_settings();
 
-	if (testmsg.mode == 'r')
-	{
+	if (test_lastchannel.mode == 'r')
 		setRadioMode();
-	}
 	else
-	{
 		setTVMode();
-	}
 
 	if (prepare_channels() < 0)
 		printf("[zapit] error parsing services!\n");

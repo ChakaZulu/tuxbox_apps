@@ -166,7 +166,7 @@ CZapitClient::CCurrentServiceInfo CZapitClient::getCurrentServiceInfo()
 	return erg;
 }
 
-void CZapitClient::getLastChannel( string &channame, unsigned int &channumber, char &mode)
+void CZapitClient::getLastChannel(unsigned int &channumber, char &mode)
 {
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
@@ -177,7 +177,6 @@ void CZapitClient::getLastChannel( string &channame, unsigned int &channumber, c
 
 	responseGetLastChannel response;
 	receive((char* )&response, sizeof(response));
-	channame = response.channelName;
 	channumber = response.channelNumber;
 	mode = response.mode;
 
