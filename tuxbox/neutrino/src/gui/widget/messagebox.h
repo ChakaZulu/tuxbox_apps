@@ -33,12 +33,9 @@
 #ifndef __messagebox__
 #define __messagebox__
 
-#include <driver/fb_window.h>
-
-#include "menue.h"
+#include <gui/widget/hintbox.h>
 
 #include <string>
-#include <vector>
 
 
 class CMessageBoxNotifier
@@ -50,26 +47,15 @@ class CMessageBoxNotifier
 
 
 
-class CMessageBox
+class CMessageBox : CHintBox
 {
  private:
 
-	CFBWindow *              window;
-
-	int                      width, height;
-
-	int                      fheight;
-	int                      theight;
-	
-	std::string              caption;
-	std::vector<std::string> text;
-	std::string              iconfile;
 	CMessageBoxNotifier*     notifier;
 
 	int                      selected;
 	int                      showbuttons;
 	
-	void paintHead();
 	void paintButtons();
 	
 	void yes();
@@ -95,17 +81,16 @@ class CMessageBox
 		} buttons;
 	
 	// Text & Caption are always UTF-8 encoded
-	CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const char * const Icon = NULL, const int Width = 500, const uint Default = mbrYes, const uint ShowButtons = mbAll);
-	~CMessageBox(void);
+	CMessageBox(const char * const Caption, const char * const Text, const int Width = 500, const char * const Icon = NULL, const uint Default = mbrYes, const uint ShowButtons = mbAll, CMessageBoxNotifier* Notifier = NULL);
 
 	int exec(int timeout = -1);
 	
 };
 
 // Text & Caption are always UTF-8 encoded
-int ShowMsgUTF(const char * const Caption, std::string Text, const uint Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
+int ShowMsgUTF(const char * const Caption, const char * const Text, const uint Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
+int ShowMsgUTF(const char * const Caption, const std::string & Text, const uint Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
 
-// Text is UTF-8 encoded
 void DisplayErrorMessage(const char * const ErrorMsg); // UTF-8
 
 #endif

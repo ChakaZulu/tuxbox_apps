@@ -38,93 +38,110 @@
 #define borderwidth 4
 
 
-CHintBox::CHintBox(const char * const Caption, const char * const _Text, const int Width, const std::string Icon)
+CHintBox::CHintBox(const char * const Caption, const char * const Text, const int Width, const char * const Icon)
 {
-	std::string Text = _Text;
-	frameBuffer = CFrameBuffer::getInstance();
-	theight= g_Fonts->menu_title->getHeight();
-	fheight= g_Fonts->menu->getHeight();
-	iconfile = Icon;
+	char * begin;
+	char * pos;
+	int    nw;
+
+	message = strdup(Text);
+
+	theight = g_Fonts->menu_title->getHeight();
+	fheight = g_Fonts->menu->getHeight();
+
 	caption = Caption;
-	Text = Text + '\n';
-	text.clear();
 
-	int pos;
-	do
+	begin   = message;
+
+	while (true)
 	{
-		pos = Text.find_first_of('\n');
-		if ( pos!=-1 )
+		line.push_back(begin);
+		pos = strchr(begin, '\n');
+		if (pos != NULL)
 		{
-			text.push_back(Text.substr( 0, pos));
-			Text= Text.substr( pos+ 1, uint(-1) );
+			*pos = 0;
+			begin = pos + 1;
 		}
-	} while ( ( pos != -1 ) );
+		else
+			break;
+	}
 
-	height = theight+ fheight* ( text.size()+ 1 );
+	width  = Width;
 
-	width = Width;
-	int nw= g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
-	if ( iconfile!="" )
-		nw+= 30;
+	nw     = g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
+
+	if (Icon != NULL)
+	{
+		iconfile = Icon;
+		nw += 30;
+	}
+	else
+		iconfile = "";
+
 	if ( nw> width )
 		width= nw;
 
-	for (unsigned int i= 0; i< text.size(); i++)
+	for (std::vector<char *>::const_iterator it = line.begin(); it != line.end(); it++)
 	{
-		int nw= g_Fonts->menu->getRenderWidth(text[i], true) + 20; // UTF-8
+		int nw= g_Fonts->menu->getRenderWidth(*it, true) + 20; // UTF-8
 		if ( nw> width )
 			width= nw;
 	}
 
-	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 3) + g_settings.screen_StartY;
-
-	pixbuf= NULL;
+	height = theight + fheight * (line.size() + 1);
 }
 
-void CHintBox::paint(const bool saveScreen)
+CHintBox::~CHintBox(void)
 {
-	if (saveScreen)
+	if (window != NULL)
 	{
-		pixbuf= new unsigned char[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
-		if (pixbuf!= NULL)
-			frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
-
-		/*
-		// clear border
-		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
-		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
-		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
-		frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
-		*/
-		frameBuffer->paintBoxRel(x + borderwidth, y+ height, width, borderwidth, COL_BACKGROUND);
-		frameBuffer->paintBoxRel(x + width, y + borderwidth, borderwidth, height - borderwidth, COL_BACKGROUND);
+		delete window;
+		window = NULL;
 	}
-
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	if ( iconfile!= "" )
-	{
-		frameBuffer->paintIcon(iconfile, x + 8, y + 5);
-		g_Fonts->menu_title->RenderString(x+40, y+theight+0, width- 40, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
-	}
-	else
-		g_Fonts->menu_title->RenderString(x+10, y+theight+0, width- 10, g_Locale->getText(caption), COL_MENUHEAD, 0, true); // UTF-8
-
-	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
-	for (unsigned int i= 0; i< text.size(); i++)
-		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i], COL_MENUCONTENT, 0, true); // UTF-8
+	free(message);
 }
 
-void CHintBox::hide()
+void CHintBox::paint(void)
 {
-	if (pixbuf!= NULL)
+	int ypos;
+
+	window = new CFBWindow((((g_settings.screen_EndX- g_settings.screen_StartX) - width ) >> 1) + g_settings.screen_StartX,
+			       (((g_settings.screen_EndY- g_settings.screen_StartY) - height) >> 2) + g_settings.screen_StartY,
+			       width + borderwidth,
+			       height + borderwidth);
+
+	if (window == NULL)
 	{
-		frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
-		delete pixbuf;
-		pixbuf= NULL;
+		return; /* out of memory */
+	}
+
+	window->paintBoxRel(borderwidth, height, width, borderwidth, COL_BACKGROUND);
+	window->paintBoxRel(width, borderwidth, borderwidth, height - borderwidth, COL_BACKGROUND);
+
+	window->paintBoxRel(0, 0, width, theight, (CFBWindow::color_t)COL_MENUHEAD);
+	if (!iconfile.empty())
+	{
+		window->paintIcon(iconfile.c_str(), 8, 5);
+		window->RenderString(g_Fonts->menu_title, 40, theight, width - 40, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
 	}
 	else
-		frameBuffer->paintBackgroundBoxRel(x, y, width, height);
+		window->RenderString(g_Fonts->menu_title, 10, theight, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
+
+	window->paintBoxRel(0, theight, width, height - theight, (CFBWindow::color_t)COL_MENUCONTENT);
+
+	ypos = theight + (fheight >> 1);
+
+	for (std::vector<char *>::const_iterator it = line.begin(); it != line.end(); it++)
+		window->RenderString(g_Fonts->menu, 10, (ypos += fheight), width, *it, (CFBWindow::color_t)COL_MENUCONTENT, 0, true); // UTF-8
+}
+
+void CHintBox::hide(void)
+{
+	if (window != NULL)
+	{
+		delete window;
+		window = NULL;
+	}
 }
 
 int ShowHintUTF(const char * const Caption, const char * const Text, const int Width, int timeout)

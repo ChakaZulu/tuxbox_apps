@@ -37,45 +37,11 @@
 #include <global.h>
 #include <neutrino.h>
 
-//#define borderwidth 4
 
-
-CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier * const Notifier, const char * const Icon, const int Width, const uint Default, const uint ShowButtons)
+CMessageBox::CMessageBox(const char * const Caption, const char * const Text, const int Width, const char * const Icon, const uint Default, const uint ShowButtons, CMessageBoxNotifier * const Notifier) : CHintBox(Caption, Text, Width, Icon)
 {
-	theight = g_Fonts->menu_title->getHeight();
-	fheight = g_Fonts->menu->getHeight();
+	height += (fheight << 1);
 
-	iconfile = Icon ? Icon : "";
-	caption  = Caption;
-	Text     = Text + '\n';
-	text.clear();
-
-	int pos;
-	do
-	{
-		pos = Text.find_first_of('\n');
-		if ( pos!=-1 )
-		{
-			text.push_back(Text.substr( 0, pos));
-			Text= Text.substr( pos+ 1, uint(-1) );
-		}
-	} while ( ( pos != -1 ) );
-
-	width  = (Width < 450) ? 450 : Width;
-	height = (theight + 0) + fheight * (text.size() + 3);
-
-	int nw= g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
-	if ( iconfile!="" )
-		nw+= 30;
-	if ( nw> width )
-		width= nw;
-
-	for (unsigned int i= 0; i< text.size(); i++)
-	{
-		int nw= g_Fonts->menu->getRenderWidth(text[i], true) + 20; // UTF-8
-		if ( nw> width )
-			width= nw;
-	}
 
 	notifier = Notifier;
 	switch (Default)
@@ -87,8 +53,6 @@ CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBo
 			selected = 1;
 			break;
 		case mbrCancel:
-			selected = 2;
-			break;
 		case mbrBack:
 			selected = 2;
 			break;
@@ -96,35 +60,9 @@ CMessageBox::CMessageBox(const std::string Caption, std::string Text, CMessageBo
 	showbuttons= ShowButtons;
 }
 
-CMessageBox::~CMessageBox(void)
-{
-	if (window != NULL)
-	{
-		delete window;
-		window = NULL;
-	}
-}
-
-void CMessageBox::paintHead()
-{
-
-	window->paintBoxRel(0, 0, width, theight + 0, (CFBWindow::color_t)COL_MENUHEAD);
-	if ( iconfile!= "" )
-	{
-		window->paintIcon(iconfile, 8, 5);
-		window->RenderString(g_Fonts->menu_title, 40, theight + 0, width - 40, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
-	}
-	else
-		window->RenderString(g_Fonts->menu_title, 10, theight + 0, width - 10, g_Locale->getText(caption), (CFBWindow::color_t)COL_MENUHEAD, 0, true); // UTF-8
-
-	window->paintBoxRel(0, theight + 0, width, height - (theight + 0), (CFBWindow::color_t)COL_MENUCONTENT);
-	for (unsigned int i = 0; i < text.size(); i++)
-		window->RenderString(g_Fonts->menu, 10, (theight + 0) + (fheight >> 1) + fheight * (i + 1), width, text[i], (CFBWindow::color_t)COL_MENUCONTENT, 0, true); // UTF-8
-
-}
-
 void CMessageBox::paintButtons()
 {
+	int color;
 	//irgendwann alle vergleichen - aber cancel ist sicher der längste
 	int MaxButtonTextWidth = g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("messagebox.cancel"), true); // UTF-8
 
@@ -133,40 +71,34 @@ void CMessageBox::paintButtons()
 //	int ButtonSpacing = 40;
 //	int startpos = (width - ((ButtonWidth*3)+(ButtonSpacing*2))) / 2;
 
-	int startpos = 10;
 	int ButtonSpacing = (width- 20- (ButtonWidth*3) ) / 2;
 
-	int xpos = startpos;
-	int color = COL_INFOBAR_SHADOW;
+	int xpos = 10;
 
-	if ( showbuttons & mbYes )
+	if (showbuttons & mbYes)
 	{
-		if(selected==0)
-			color = COL_MENUCONTENTSELECTED;
+		color = (selected == 0) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
 		window->paintBoxRel(xpos, height - fheight - 20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos + 14, height - fheight - 15);
 		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
 
-	xpos = startpos+ButtonWidth+ButtonSpacing;
+	xpos += ButtonWidth + ButtonSpacing;
 
-	if ( showbuttons & mbNo )
+	if (showbuttons & mbNo)
 	{
-		color = COL_INFOBAR_SHADOW;
-		if(selected==1)
-			color = COL_MENUCONTENTSELECTED;
+		color = (selected == 1) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, xpos+14, height-fheight-15);
 		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.no"), (CFBWindow::color_t)color, 0, true); // UTF-8
-    }
+	}
 
-    xpos = startpos+ButtonWidth*2+ButtonSpacing*2;
-    if ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) )
+	xpos += ButtonWidth + ButtonSpacing;
+
+	if (showbuttons & (mbCancel | mbBack))
 	{
-		color = COL_INFOBAR_SHADOW;
-		if(selected==2)
-			color = COL_MENUCONTENTSELECTED;
+		color = (selected == 2) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_HOME, xpos+10, height-fheight-19);
@@ -200,27 +132,13 @@ int CMessageBox::exec(int timeout)
 {
 	int res = menu_return::RETURN_REPAINT;
 
-	window = new CFBWindow((((g_settings.screen_EndX- g_settings.screen_StartX) - width ) >> 1) + g_settings.screen_StartX,
-			       (((g_settings.screen_EndY- g_settings.screen_StartY) - height) >> 1) + g_settings.screen_StartY,
-			       width,
-			       height);
+	CHintBox::paint();
 
 	if (window == NULL)
 	{
 		return res; /* out of memory */
 	}
 
-/*
-	unsigned char pixbuf[(width+ 2* borderwidth) * (height+ 2* borderwidth)];
-	frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
-
-	// clear border
-	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, width+ 2* borderwidth, borderwidth);
-	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ height, width+ 2* borderwidth, borderwidth);
-	frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, height);
-	frameBuffer->paintBackgroundBoxRel(x+ width, y, borderwidth, height);
-*/
-	paintHead();
 	paintButtons();
 
 	if ( timeout == -1 )
@@ -235,9 +153,8 @@ int CMessageBox::exec(int timeout)
 
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-		if ( ( (msg==CRCInput::RC_timeout) ||
-			   (msg == (uint) g_settings.key_channelList_cancel) ) &&
-			 ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) ) )
+		if (((msg == CRCInput::RC_timeout) || (msg  == (uint)g_settings.key_channelList_cancel)) &&
+		    (showbuttons & (mbCancel | mbBack)))
 		{
 			cancel();
 			loop=false;
@@ -270,7 +187,7 @@ int CMessageBox::exec(int timeout)
 						ok = ( showbuttons & mbNo );
 						break;
 					case 2:
-						ok = ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) );
+						ok = (showbuttons & (mbCancel | mbBack));
 						break;
 				}
 			}
@@ -295,7 +212,7 @@ int CMessageBox::exec(int timeout)
 						ok = ( showbuttons & mbNo );
 						break;
 					case 2:
-						ok = ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) );
+						ok = (showbuttons & (mbCancel | mbBack));
 						break;
 				}
 			}
@@ -324,26 +241,25 @@ int CMessageBox::exec(int timeout)
 		}
 
 	}
-/*
-	frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, width+ 2* borderwidth, height+ 2* borderwidth, pixbuf);
-*/
-	if (window != NULL)
-	{
-		delete window;
-		window = NULL;
-	}
+
+	hide();
 	
 	return res;
 }
 
-int ShowMsgUTF(const char * const Caption, std::string Text, const uint Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
+int ShowMsgUTF(const char * const Caption, const char * const Text, const uint Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
 {
-   	CMessageBox* messageBox = new CMessageBox(Caption, Text, NULL, Icon, Width, Default, ShowButtons);
+   	CMessageBox* messageBox = new CMessageBox(Caption, Text, Width, Icon, Default, ShowButtons);
 	messageBox->exec(timeout);
 	int res = messageBox->result;
 	delete messageBox;
 	
 	return res;
+}
+
+int ShowMsgUTF(const char * const Caption, const std::string & Text, const uint Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
+{
+	return ShowMsgUTF(Caption, Text.c_str(), Default, ShowButtons, Icon, Width, timeout);
 }
 
 void DisplayErrorMessage(const char * const ErrorMsg)

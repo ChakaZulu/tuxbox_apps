@@ -33,36 +33,34 @@
 #ifndef __hintbox__
 #define __hintbox__
 
-#include <driver/framebuffer.h>
-#include <driver/fontrenderer.h>
-
-#include "menue.h"
+#include <driver/fb_window.h>
 
 #include <string>
 #include <vector>
 
 class CHintBox
 {
- private:
-	CFrameBuffer *           frameBuffer;
+ protected:
+
+	CFBWindow *              window;
+
 	int                      width;
 	int                      height;
-	int                      x;
-	int                      y;
+
 	int                      fheight;
 	int                      theight;
 	std::string              caption;
-	std::vector<std::string> text;
+	char *                   message;
+	std::vector<char *>      line;
 	std::string              iconfile;
-	
-	unsigned char *          pixbuf;
 	
  public:
 	// Caption and Text are UTF-8 encoded
-	CHintBox(const char * const Caption, const char * const Text, const int Width = 450, const std::string Icon = "info.raw");
+	CHintBox(const char * const Caption, const char * const Text, const int Width = 450, const char * const Icon = "info.raw");
+	~CHintBox(void);
 
-	void paint(const bool saveScreen = true);
-	void hide();
+	void paint(void);
+	void hide(void);
 };
 
 // Caption and Text are UTF-8 encoded
