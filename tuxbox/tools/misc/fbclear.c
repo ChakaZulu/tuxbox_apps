@@ -74,7 +74,7 @@ int main(void)
 
 	mapped = mmap(0, fb_fix.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 
-	if (!mapped) {
+	if (mapped==MAP_FAILED) {
 		perror("mmap");
 		return 1;
 	}
@@ -83,4 +83,3 @@ int main(void)
 
 	return 0;
 }
-
