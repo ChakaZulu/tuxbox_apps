@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.30 2003/01/26 15:07:10 zwen Exp $
+	$Id: webapi.cpp,v 1.31 2003/02/05 13:06:43 thegoodguy Exp $
 
 	License: GPL
 
@@ -802,10 +802,10 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 			classname, sAddData.c_str());
 		request->printf("<TD CLASS=\"%ctimer\" align=center><a HREF=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
 			classname, timer->eventID);
-		request->SocketWrite("<img border=0 src=\"../images/remove.gif\" alt=\"Timer löschen\"></a></TD>\n");
+		request->SocketWrite("<img border=0 src=\"../images/remove.png\" alt=\"Timer löschen\"></a></TD>\n");
 		request->printf("<TD CLASS=\"%ctimer\" align=center><a HREF=\"/fb/timer.dbox2?action=modify-form&id=%d\">", 
 			classname, timer->eventID);
-		request->printf("<img border=0 src=\"../images/modify.gif\" alt=\"Timer ändern\"></a><NOBR></TD></TR>\n");
+		request->printf("<img border=0 src=\"../images/modify.png\" alt=\"Timer ändern\"></a><NOBR></TD></TR>\n");
 	}
 	classname = (i++&1)?'a':'b';
 	request->printf("<TR><TD CLASS=\"%ctimer\" colspan=5><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD>\n<TD CLASS=\"%ctimer\" align=\"center\">\n",classname,classname);

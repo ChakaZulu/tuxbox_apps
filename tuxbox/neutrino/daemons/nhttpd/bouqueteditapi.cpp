@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.9 2003/01/15 00:57:38 pumuckel Exp $
+	$Id: bouqueteditapi.cpp,v 1.10 2003/02/05 13:06:43 thegoodguy Exp $
 
 	License: GPL
 
@@ -133,8 +133,8 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=hide#akt\"><IMG border=0 src=\"../images/visible.gif\" ALT=\"Bouquet anzeigen\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 
 		request->printf("<TD><A HREF=\"edit?selected=%i&name=%s\">%s</A></TD>", bouquet->bouquet_nr + 1, bouquet->name, bouquet->name);
-		request->printf("<TD WIDTH=\"100\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG border=0 SRC=\"../images/modify.gif\" ALT=\"Bouquet umbenennen\"></a>&nbsp;\n",bouquet->bouquet_nr + 1, bouquet->name);
-		request->printf("<A HREF=\"delete?selected=%i&name=%s\"><IMG border=0 src=\"../images/remove.gif\" ALT=\"Bouquet löschen\"></A>&nbsp;\n",
+		request->printf("<TD WIDTH=\"100\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG border=0 SRC=\"../images/modify.png\" ALT=\"Bouquet umbenennen\"></a>&nbsp;\n",bouquet->bouquet_nr + 1, bouquet->name);
+		request->printf("<A HREF=\"delete?selected=%i&name=%s\"><IMG border=0 src=\"../images/remove.png\" ALT=\"Bouquet löschen\"></A>&nbsp;\n",
 			bouquet->bouquet_nr + 1, bouquet->name);
 		
 
