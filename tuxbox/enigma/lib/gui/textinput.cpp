@@ -515,7 +515,8 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				key=11;
 			else
 				return eButton::eventHandler( event );
-			if ( key != lastKey && lastKey != -1 && key != -1 )
+			if ( (lastKey != -1 && key != -1) &&
+				(key != lastKey || flags & flagGoAlwaysNext) )
 			{
 				if ( nextCharTimer.isActive() )
 					nextCharTimer.stop();

@@ -312,7 +312,7 @@ void eNumber::gotFocus()
 	have_focus++;
 	digit=isactive;
 
-  if (deco && deco_selected)
+	 if (deco && deco_selected)
 		invalidate();
 	else
 		invalidate(getNumberRect(active));
