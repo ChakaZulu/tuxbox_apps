@@ -11,8 +11,8 @@ void *mountThread(void *cmd);
 class eMountPoint
 {
 private:
-	bool in_proc_filesystems(eString);
-	int isMounted(eString);
+	bool fileSystemIsSupported(eString);
+	bool isMounted(eString);
 public:
 	int id;			//sequential number
 	eString	userName;	//username, only for CIFS
@@ -29,12 +29,13 @@ public:
 	int wsize;		//write size
 
 	eMountPoint(CConfigFile *, int);
-	eMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, int);
+	eMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, bool, int);
 	~eMountPoint();
 	
 	void save(FILE *, int);
 	int mount(void);
 	int unmount(void);
+	bool isIdentical(eString, eString);
 };
 
 class eMountMgr
@@ -43,10 +44,11 @@ private:
 	static eMountMgr *instance;
 	std::vector <eMountPoint> mountPoints;
 	std::vector <eMountPoint>::iterator mp_it;
+	void addMountedFileSystems(void);
 public:
 	eString listMountPoints(eString);
 	void removeMountPoint(int);
-	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int);
+	void addMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, bool);
 	void changeMountPoint(eString, int, eString, eString, eString, int, int, int, eString, eString, int, int, int, int, int);
 	void getMountPointData(eString *, int *, eString *, eString *, eString *, int *, int *, int *, eString *, eString *, int *, int *, int *, int *, int);
 	int mountMountPoint(int);

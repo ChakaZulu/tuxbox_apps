@@ -41,11 +41,11 @@ eMountPoint::eMountPoint(CConfigFile *config, int i)
 	ownOptions = config->getString(eString().sprintf("ownoptions_%d", i));
 	eString sip = config->getString(eString().sprintf("ip_%d", i));
 	sscanf(sip.c_str(), "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]);
-	mounted    = false;
+	mounted    = isMounted(localDir);
 	id         = i;
 }
 
-eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3, int pid)
+eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3, bool pmounted, int pid)
 {
 	localDir   = plocalDir;
 	fstype     = pfstype;
@@ -63,6 +63,7 @@ eMountPoint::eMountPoint(eString plocalDir, int pfstype, eString ppassword, eStr
 	ip[2]      = pip2;
 	ip[3]      = pip3;
 	id         = pid;
+	mounted    = pmounted;
 }
 
 void eMountPoint::save(FILE *out, int pid)
@@ -82,14 +83,15 @@ void eMountPoint::save(FILE *out, int pid)
 	fprintf(out,"--------------------------------------\n");
 }
 
-bool eMountPoint::in_proc_filesystems(eString fsname)
+bool eMountPoint::fileSystemIsSupported(eString fsname)
 {
 	eString s;
+	fsname = fsname.upper();
 	std::ifstream in("/proc/filesystems", std::ifstream::in);
 
 	while (in >> s)
 	{
-		if (s == fsname)
+		if (s.upper() == fsname)
 	  	{
 			in.close();
 			return true;
@@ -97,7 +99,7 @@ bool eMountPoint::in_proc_filesystems(eString fsname)
 	}
 	in.close();
 
-	if (fsname == "nfs")
+	if (fsname == "NFS")
 	{
 #ifdef HAVE_MODPROBE
 		system("modprobe nfs");
@@ -108,7 +110,7 @@ bool eMountPoint::in_proc_filesystems(eString fsname)
 #endif
 	}
 	else
-	if (fsname == "cifs")
+	if (fsname == "CIFS")
 	{
 		system("insmod cifs");
 		system("insmod /lib/modules/`uname -r`/kernel/fs/cifs/cifs.ko");
@@ -121,7 +123,7 @@ bool eMountPoint::in_proc_filesystems(eString fsname)
 	return false;
 }
 
-int eMountPoint::isMounted(eString localdir)
+bool eMountPoint::isMounted(eString localdir)
 {
 	std::ifstream in;
 	eString mountDev;
@@ -130,7 +132,7 @@ int eMountPoint::isMounted(eString localdir)
 	eString buffer;
 	std::stringstream tmp;
 
-	int rc =0;
+	bool found = false;
 	in.open("/proc/mounts", std::ifstream::in);
 	while(getline(in, buffer, '\n'))
 	{
@@ -138,14 +140,32 @@ int eMountPoint::isMounted(eString localdir)
 		tmp.str(buffer);
 		tmp >> mountDev >> mountOn >> mountType;
 		tmp.clear();
-		if (mountOn == localdir)
-		{
-			rc = -1;
+		if (found = isIdentical(mountOn, mountDev))
 			break;
-		}
 	}
 	in.close();
-	return rc;
+	return found;
+}
+
+bool eMountPoint::isIdentical(eString mountOn, eString mountDev)
+{
+	bool found = false;
+	
+	switch(fstype)
+	{
+		case 0: //NFS
+			found = (eString().sprintf("%d.%d.%d.%d:%s", ip[0], ip[1], ip[2], ip[3]) == mountDir);
+			break;
+		case 1: //CIFS
+			found = (eString().sprintf("//%d.%d.%d.%d/%s", ip[0], ip[1], ip[2], ip[3]) == mountDir);
+			break;
+		case 2: //DEVICE
+			found = ((mountOn == localDir) && (mountDev == mountDir) && (ip[0] == 0) && (ip[1] == 0) && (ip[2] == 0) && (ip[3] == 0));
+			break;
+		default:
+			break;
+	}
+	return found;
 }
 
 int eMountPoint::mount()
@@ -159,7 +179,7 @@ int eMountPoint::mount()
 		pthread_mutex_init(&g_mut1, NULL);
 		pthread_cond_init(&g_cond1, NULL);
 		g_mntstatus1 = -1;
-		if (isMounted(localDir) != -1)
+		if (!isMounted(localDir))
 		{
 			if (!(access(localDir.c_str(), R_OK)))
 				system(eString("mkdir" + localDir).c_str());
@@ -175,7 +195,7 @@ int eMountPoint::mount()
 					case 0:	/* NFS */
 						cmd = "mount -t ";
 						cmd += fstype ? "cifs //" : "nfs ";
-						if (in_proc_filesystems("nfs") || in_proc_filesystems("nfs"))
+						if (fileSystemIsSupported("nfs"))
 						{
 							cmd = ip + ":" + mountDir + " " + localDir + " -o ";
 							cmd += eString().sprintf("rsize=%d,wsize=%d", rsize, wsize);
@@ -188,7 +208,7 @@ int eMountPoint::mount()
 					case 1: /* CIFS */
 						cmd = "mount -t ";
 						cmd += fstype ? "cifs //" : "nfs ";
-						if(in_proc_filesystems("cifs") || in_proc_filesystems("cifs"))
+						if(fileSystemIsSupported("cifs"))
 						{
 							cmd = ip + "/" + mountDir + " " + localDir + " -o user=";
 							cmd += (userName != "") ? userName : "anonymous";
@@ -261,14 +281,13 @@ eMountMgr::eMountMgr()
 
 eMountMgr::~eMountMgr()
 {
-	save();
-	mountPoints.clear();
+	
 }
 
-void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3)
+void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3, bool pmounted)
 {
 	int pid = mountPoints.size();
-	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pip0, pip1, pip2, pip3, pid));
+	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pip0, pip1, pip2, pip3, pmounted, pid));
 	save();
 }
 
@@ -394,6 +413,64 @@ eString eMountMgr::listMountPoints(eString skelleton)
 	return result;
 }
 
+void eMountMgr::addMountedFileSystems()
+{
+	std::ifstream in;
+	eString mountDev;
+	eString mountOn;
+	eString mountType;
+	eString buffer;
+	std::stringstream tmp;
+	int ip[4];
+	eString dir;
+	bool found = false;
+	
+	in.open("/proc/mounts", std::ifstream::in);
+	while(getline(in, buffer, '\n'))
+	{
+		mountDev = mountOn = mountType = "";
+		tmp.str(buffer);
+		tmp >> mountDev >> mountOn >> mountType;
+		tmp.clear();
+		
+		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+		{
+			if (found = mp_it->isIdentical(mountOn, mountDev))
+				break;	
+		}
+		
+		if (!found)
+		{
+			//add the mount point
+			if (mountType.upper() == "NFS")
+			{
+				if (mountDev.find("/dev") != eString::npos)
+				{
+					sscanf(mountDev.c_str(), "%d.%d.%d.%d:%*s", &ip[0], &ip[1], &ip[2], &ip[3]);
+					dir = getRight(mountDev, ':');
+					addMountPoint(mountOn, 0, "", "", dir, 0, 0, 0, "", "", ip[0], ip[1], ip[2], ip[3], true);
+				}
+			}
+			else
+			if (mountType.upper() == "CIFS")
+			{
+				sscanf(mountDev.c_str(), "//%d.%d.%d.%d/%*s", &ip[0], &ip[1], &ip[2], &ip[3]);
+				mountDev = mountDev.right(2); //strip off leading slashes
+				dir = getRight(mountDev, '/');
+				addMountPoint(mountOn, 1, "", "", dir, 0, 0, 0, "", "", ip[0], ip[1], ip[2], ip[3], true);
+			}
+			else
+			if (!((mountOn == "/") ||(mountOn == "/dev") || (mountOn == "/tmp") || (mountOn == "/proc") || (mountOn == "/dev/pts") ||
+			     (mountDev == "/dev/mtdblock") || (mountOn == "")))
+			{
+				//other file system
+				addMountPoint(mountOn, 2, "", "", mountDev, 0, 0, 0, "", "", 0, 0, 0, 0, true);
+			}
+		}
+	}
+	in.close();
+}
+
 void eMountMgr::init()
 {
 	mountPoints.clear();
@@ -408,6 +485,7 @@ void eMountMgr::init()
 				break;
 		}
 	}
+	addMountedFileSystems();
 }
 
 void eMountMgr::save()

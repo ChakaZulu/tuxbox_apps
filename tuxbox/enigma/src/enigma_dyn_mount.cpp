@@ -51,7 +51,7 @@ static eString addMountPoint(eString request, eString dirpath, eString opts, eHT
 	eString ip3 = opt["ip3"];
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->addMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()));
+	eMountMgr::getInstance()->addMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), false);
 	return "<html><body>Mount point added successfully.</body></html>";
 }
 
