@@ -496,6 +496,7 @@ sleeptimerbox.announce Sleeptimer in 1 min
 
 zaptotimer.announce In einer Minute wird umgeschaltet
 recordtimer.announce Die Aufnahme beginnt in einer Minute
+shutdowntimer.announce Die Box wird in 1 min runtergefahren.\nShutdown abbrechen ?
 
 timerbar.channelswitch Umschalten
 timerbar.recordevent Aufnehmen

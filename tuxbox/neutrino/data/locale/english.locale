@@ -498,6 +498,7 @@ sleeptimerbox.announce Sleeptimer in 1 min
 
 zaptotimer.announce Zapto timer in one minute
 recordtimer.announce Recording starts in one minute
+shutdowntimer.announce Box will shutdown in 1 min.\nCancel Sutdown ?
 
 timerbar.channelswitch Schedule
 timerbar.recordevent Record

@@ -151,6 +151,7 @@ CNeutrinoApp::CNeutrinoApp()
 	mode = mode_unknown;
 	channelList = NULL;
 	bouquetList = NULL;
+	skipShutdownTimer=false;
 }
 
 /*-------------------------------------------------------------------------------------
@@ -2116,7 +2117,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	{
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, 100 ); // 10 secs..
-
+/*
 		if (msg == NeutrinoMessages::RECORD_START)
 		{
 			if(CVCRControl::getInstance()->registeredDevices() > 0)
@@ -2227,7 +2228,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					standbyMode( true );
 			}
 		}
-		else if ( msg == NeutrinoMessages::VCR_ON )
+		else */
+		if ( msg == NeutrinoMessages::VCR_ON )
 		{
 			if  ( mode != mode_scart )
 			{
@@ -2516,13 +2518,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 		return messages_return::handled;
 	}
-/*
+
 		if (msg == NeutrinoMessages::RECORD_START)
 		{
 			if(CVCRControl::getInstance()->registeredDevices() > 0)
 			{
-				if(g_Zapit->getCurrentServiceID() != ((CTimerEvent::EventInfo *) data)->channel_id)	// und momentan noch nicht getuned ist
-					g_Zapit->zapTo_serviceID(((CTimerEvent::EventInfo *) data)->channel_id);		// dann umschalten
 				CVCRControl::CServerDeviceInfo serverinfo;
 				serverinfo.StopPlayBack = (g_settings.network_streaming_stopplayback == 1);
 				serverinfo.StopSectionsd = (g_settings.network_streaming_stopsectionsd == 1);
@@ -2557,7 +2557,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		{
 			CTimerEvent::EventInfo * eventinfo; 
 			eventinfo = (CTimerEvent::EventInfo *) data;
-			channelList->zapToOnidSid(eventinfo->channel_id);
+			channelList->zapTo_ChannelID(eventinfo->channel_id);
 			return messages_return::handled;
 		}
 
@@ -2569,6 +2569,10 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		if ( msg == NeutrinoMessages::ANNOUNCE_RECORD)
 		{
 			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
+			CTimerEvent::EventInfo * eventinfo; 
+			eventinfo = (CTimerEvent::EventInfo *) data;
+			channelList->zapTo_ChannelID(eventinfo->channel_id); // dann umschalten
+//				g_Zapit->zapTo_serviceID(eventinfo->channel_id);		
 			return messages_return::handled;
 		}
 		if ( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
@@ -2606,12 +2610,23 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		}
 		else if ( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 		{
-			//TODO: MsgBox mit Ok / Cancel
+			skipShutdownTimer = (ShowMsg ( "messagebox.info", 
+													 g_Locale->getText("shutdowntimer.announce") , 
+													 CMessageBox::mbrNo, 
+													 CMessageBox::mbYes | CMessageBox::mbNo, "",450,5)
+										==CMessageBox::mbrYes);
 		}
 		else if ( msg == NeutrinoMessages::SHUTDOWN )
 		{
 			// AUSSCHALTEN...
-			ExitRun();
+			if(!skipShutdownTimer)
+			{
+				ExitRun();
+			}
+			else
+			{
+				skipShutdownTimer=false;
+			}
 			return messages_return::handled;
 		}
 		else if ( msg == NeutrinoMessages::EVT_POPUP )
@@ -2624,7 +2639,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
 			return messages_return::handled;
 		}
-*/
+
 	if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
 		delete (unsigned char*) data;
 
@@ -3050,7 +3065,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.332 2002/09/24 21:35:42 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.333 2002/09/28 23:24:48 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

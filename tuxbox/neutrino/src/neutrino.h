@@ -95,6 +95,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		char				current_volume;
 		bool				current_muted;
 
+		bool           skipShutdownTimer;
+
 		CColorSetupNotifier			*colorSetupNotifier;
 		CAudioSetupNotifier			*audioSetupNotifier;
 		CVideoSetupNotifier			*videoSetupNotifier;
