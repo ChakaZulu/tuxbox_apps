@@ -463,6 +463,7 @@ pinprotection.wrongcode PIN-Code was wrong! Try again.
 pinprotection.head Enter PIN code
 
 favorites.bouquetname My Favorites
+favorites.nobouquets Favorites are available with activeted Bouquets only.
 favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds...
 favorites.menueadd add channel to favorites
 favorites.bqcreated Bouquet "My Favorites" has been created...\n

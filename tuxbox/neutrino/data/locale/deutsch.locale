@@ -459,6 +459,7 @@ pinprotection.wrongcode Geben Sie den Code nocheinmal ein!
 pinprotection.head PIN-Abfrage
 
 favorites.bouquetname Meine Favoriten
+favorites.nobouquets Favoriten sind nur mit aktivierten Bouquets möglich
 favorites.addchannel Der aktuelle Kanal wird dem Bouquet \n"Meine Favoriten" hinzugefügt. \nDie Speicherung benötigt einen Moment...
 favorites.menueadd Kanal Favoriten hinzufügen
 favorites.bqcreated Bouquet "Meine Favoriten" wurde angelegt...\n

@@ -113,6 +113,13 @@ int CFavorites::exec(CMenuTarget* parent, string)
 		parent->hide();
 	}
 
+	if (!bouquetList) {
+		ShowMsg ( "favorites.bouquetname",
+			g_Locale->getText("favorites.nobouquets"),
+			CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		return res;
+	}
+
 
 	CHintBox* hintBox= new CHintBox( "favorites.bouquetname", g_Locale->getText("favorites.addchannel"), "info.raw", 380 );
 	hintBox->paint();
