@@ -3,11 +3,10 @@
 #include <core/system/init.h>
 #include "guiactions.h"
 
-eButton::eButton(eWidget *parent, eLabel* desc, int takefocus):
-	eLabel(parent, 0, takefocus), descr(desc?desc->getText():""), tmpDescr(0)
+eButton::eButton(eWidget *parent, eLabel* desc, int takefocus)
+	:eLabel(parent, 0, takefocus), tmpDescr(0), focus(eSkin::getActive()->queryScheme("focusedColor")),
+	normal(eSkin::getActive()->queryScheme("fgColor")), descr(desc?desc->getText():"")
 {
-	focus=eSkin::getActive()->queryScheme("focusedColor");
-	normal=eSkin::getActive()->queryScheme("fgColor");
 	addActionMap(&i_cursorActions->map);
 }
 
