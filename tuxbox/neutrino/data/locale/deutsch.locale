@@ -566,7 +566,7 @@ timerbar.recordevent Aufnehmen
 timer.eventtimed.title Sendung vormerken
 timer.eventtimed.msg Die Sendung wurde vorgemerkt
 timer.eventrecord.title Aufnahme vormerken
-timer.eventrecord.msg Die Sendung wurde zur Aufnahme vergemerkt
+timer.eventrecord.msg Die Sendung wurde zur Aufnahme vorgemerkt
 timerlist.name Timerliste
 timerlist.delete Löschen
 timerlist.empty Es gibt momentan keine Timer
