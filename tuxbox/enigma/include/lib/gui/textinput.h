@@ -38,7 +38,7 @@ class eTextInputField: public eButton
 	void updateHelpWidget();
 	int keyDown(int rc);
 public:
-	enum { flagCloseParent=128 };
+	enum { flagCloseParent=128, flagGoAlwaysNext=256 };
 	eTextInputField( eWidget* parent, eLabel *descr=0, eTextInputFieldHelpWidget* hlp=0, const char *deco="eNumber" );
 	static void loadKeyMappings();
 	void setMaxChars( int i ) { maxChars = i; }
