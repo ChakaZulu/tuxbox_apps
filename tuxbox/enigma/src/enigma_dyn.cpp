@@ -507,7 +507,7 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	tmp.sprintf("<span class=\"white\">booted enigma %d times</span><br>", bootcount);
 	stats+=tmp;
 
-	tmp.sprintf("<span class=\"white\">vpid: 0x%x | <a class=\"audio\" href=\"http://"+getIP()+"/audio.pls\">apid: 0x%x</a></span>", Decoder::parms.vpid, Decoder::parms.apid);
+	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"http://"+getIP()+"/audio.pls\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
 	stats+=tmp;
 	
 	tvc="normal";
@@ -641,7 +641,11 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	result.replace(QRegExp("#NAVI#"), navi);
 	result.replace(QRegExp("#MODE#"), tmp);
 	result.replace(QRegExp("#COP#"), cop);
-	result.replace(QRegExp("#SERVICENAME#"), filter_string(getCurService()));
+	if((mode=="tv")||
+           (mode=="radio")) 
+		result.replace(QRegExp("#SERVICENAME#"), filter_string(getCurService()));
+	else
+		result.replace(QRegExp("#SERVICENAME#"), "");
 	result.replace(QRegExp("#VOLBAR#"), getVolBar());
 	if(mode=="tv"||mode=="radio")
 		result.replace(QRegExp("#EIT#"), eitc);
