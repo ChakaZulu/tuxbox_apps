@@ -468,7 +468,7 @@ static void unpack(__u32 l, int *t)
 }
 
 #ifndef DISABLE_NFS
-static eString resolvSymlinks(const eString &path)
+eString resolvSymlinks(const eString &path)
 {
 	char buffer[128];
 	eString tmpPath;
