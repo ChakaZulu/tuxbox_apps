@@ -2337,15 +2337,15 @@ int EpgPlus::MenuTargetRefreshEpg::exec
 
 struct CMenuOptionChooser::keyval menuOptionChooserSwitchSwapModes[] =
 {
-  {EpgPlus::SwapMode_ByPage   , LOCALE_EPGPLUS_BY_PAGE},
-  {EpgPlus::SwapMode_ByBouquet, LOCALE_EPGPLUS_BY_BOUQUET}
+  {EpgPlus::SwapMode_ByPage   , LOCALE_EPGPLUS_BYPAGE_MODE},
+  {EpgPlus::SwapMode_ByBouquet, LOCALE_EPGPLUS_BYBOUQUET_MODE}
 };
 
 EpgPlus::MenuOptionChooserSwitchSwapMode::MenuOptionChooserSwitchSwapMode
   ( EpgPlus* epgPlus
   )
   : CMenuOptionChooser
-      ( LOCALE_EPGPLUS_SWAPMODE
+      ( LOCALE_EPGPLUS_SWAP_MODE
       , (int*)&epgPlus->currentSwapMode
       , menuOptionChooserSwitchSwapModes
       , sizeof(menuOptionChooserSwitchSwapModes)/sizeof(CMenuOptionChooser::keyval)
@@ -2405,7 +2405,7 @@ EpgPlus::MenuOptionChooserSwitchViewMode::MenuOptionChooserSwitchViewMode
   ( EpgPlus* epgPlus
   )
   : CMenuOptionChooser
-      ( LOCALE_EPGPLUS_VIEWMODE
+      ( LOCALE_EPGPLUS_VIEW_MODE
       , (int*)&epgPlus->currentViewMode
       , menuOptionChooserSwitchViewModes
       , sizeof(menuOptionChooserSwitchViewModes)/sizeof(CMenuOptionChooser::keyval)
