@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.180 2002/05/12 01:56:18 obi Exp $
+ * $Id: zapit.cpp,v 1.181 2002/05/13 14:52:03 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1208,7 +1208,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.180 2002/05/12 01:56:18 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.181 2002/05/13 14:52:03 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1690,7 +1690,7 @@ int startPlayBack()
 int stopPlayBack()
 {
 
-#ifndef DBOX2
+#ifdef DBOX2
 	stopVbi();
 #endif /* DBOX2 */
 
