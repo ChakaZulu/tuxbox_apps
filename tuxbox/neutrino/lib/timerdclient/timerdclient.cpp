@@ -127,7 +127,7 @@ int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0
 	time_t actTime_t;
 	::time(&actTime_t);
 	struct tm* actTime = localtime(&actTime_t);
-	actTime->tm_mon += 1;
+//	actTime->tm_mon += 1;
 
 	if (min==0)
 		min = actTime->tm_min;
