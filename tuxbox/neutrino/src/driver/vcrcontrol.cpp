@@ -262,11 +262,9 @@ bool CVCRControl::CServerDevice::Stop()
 		g_Zapit->startPlayBack();
 	g_Sectionsd->setPauseScanning(false);
 	g_Zapit->setRecordMode( false );
-	if(last_mode != NeutrinoMessages::mode_scart)
-	{
-		g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
-		g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
-	}
+	// alten mode wieder herstellen
+	g_RCInput->postMsg( NeutrinoMessages::CHANGEMODE , last_mode);
+
 	if(sendCommand(CMD_VCR_STOP))
 		return true;
 	else
@@ -280,8 +278,13 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 	if(channel_id != 0)		// wenn ein channel angegeben ist
 	{
 		last_mode = CNeutrinoApp::getInstance()->getMode();
-		if(mode != last_mode)
+		if(mode != last_mode && (last_mode != NeutrinoMessages::mode_standby || mode != CNeutrinoApp::getInstance()->getLastMode()))
+		{
 			CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , mode | NeutrinoMessages::norezap );
+			// Wenn wir im Standby waren, dann brauchen wir fürs streamen nicht aufwachen...
+			if(last_mode == NeutrinoMessages::mode_standby)
+				CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_standby);
+		}
 		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
 		{
 			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten

@@ -199,6 +199,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void showProfiling( string text );
 
 		int getMode() {return mode;}
+		int getLastMode() {return lastMode;}
 
 	friend class CNeutrinoBouquetEditorEvents;
 };
