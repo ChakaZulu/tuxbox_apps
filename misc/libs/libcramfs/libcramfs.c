@@ -1,15 +1,18 @@
 /*
  * cramfsck - check a cramfs file system
-/* compile-time options */
+ */
 
-#define _GNU_SOURCE
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/mman.h>
 #include <fcntl.h>
 #include <linux/fs.h>
-#include "cramfs_fs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #include <zlib.h>
+
+#include "cramfs_fs.h"
 
 #define PAD_SIZE 512
 #define PAGE_CACHE_SIZE (4096)
@@ -23,7 +26,7 @@ static int fd;
 
 int cramfs_init(char *filename)
 {
-	size_t length;
+	size_t length = 0;
 	struct stat st;
 
 	/* find the physical size of the file or block device */
