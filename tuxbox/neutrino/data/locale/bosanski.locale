@@ -1,74 +1,74 @@
 menu.back nazad
 
-options.off ugaseno
+options.off ugašeno
 options.on upaljeno
 options.serial serijski
 options.fb framebuffer
 options.null null
-options.default standardno namjescenje
+options.default standardno namješćenje
 
 mainmenu.head glavni izbor
 mainmenu.tvmode tv
 mainmenu.radiomode radio
 mainmenu.scartmode av-scart ulaz
 mainmenu.games igre
-mainmenu.mp3player mp3 igrac
-mainmenu.sleeptimer vremenski brojac za ugasiti
+mainmenu.mp3player mp3 igrač
+mainmenu.sleeptimer vremenski brojač za ugasiti
 mainmenu.shutdown ugasiti
-mainmenu.settings namjescenje
+mainmenu.settings namješćenje
 mainmenu.service servis
 mainmenu.recording snimanje
 mainmenu.recording_start start
 mainmenu.recording_stop stop
-mainmenu.pictureviewer promatrac slika
-mainmenu.movieplayer promatrac filmova
-mainmenu.pausesectionsd citati epg
+mainmenu.pictureviewer promatrač slika
+mainmenu.movieplayer promatrač filmova
+mainmenu.pausesectionsd čitati epg
 
 servicemenu.head servis
 servicemenu.update obnoviti softver
-servicemenu.scants traziti kanale
+servicemenu.scants tražiti kanale
 servicemenu.ucodecheck provjeriti ucodese
 servicemenu.reload liste kanale obnoviti
-servicemenu.reload_hint obnavljaju se liste kanala,\ncekajte trenutak...
+servicemenu.reload_hint obnavljaju se liste kanala,\nčekajte molim ...
 
-cablesetup.provider snabdjevac
+cablesetup.provider snabdjevač
 
 satsetup.disqeqc diseqc
 satsetup.satellite satelit
 satsetup.extended diseqc namjestiti
-satsetup.extended_lnb namjescenje lnb-ea
-satsetup.extended_motor namjescenje motora
+satsetup.extended_lnb namješćenje lnb-ea
+satsetup.extended_motor namješćenje motora
 satsetup.nodiseqc nema diseqca
 satsetup.minidiseqc mini-diseqc
 satsetup.diseqc10 diseqc 1.0
 satsetup.diseqc11 diseqc 1.1
-satsetup.diseqc12 DiSEqC 1.2
+satsetup.diseqc12 diseqc 1.2
 satsetup.smatvremote smatv remote tuning
 satsetup.diseqcrepeat ponavljanje diseqca
-satsetup.savesettingsnow namjescenje sada memorisati
-satsetup.motorcontrol namjescenje motora
+satsetup.savesettingsnow namješćenje sada memorisati
+satsetup.motorcontrol namješćenje motora
 
-mainsettings.head namjescenje
-mainsettings.savesettingsnow namjescenje sada memorisati
-mainsettings.savesettingsnow_hint memorise se namjescenje,\ncekajte trenutak...
+mainsettings.head namješćenje
+mainsettings.savesettingsnow namješćenje sada memorisati
+mainsettings.savesettingsnow_hint memoriše se namješćenje,\nčekajte molim ...
 mainsettings.language jezik
 mainsettings.audio ton
 mainsettings.video video
-mainsettings.network mreza
+mainsettings.network mreža
 mainsettings.recording snimanje
 mainsettings.colors boje / teme
-mainsettings.plugins namjescenje plugina
-mainsettings.lcd tecni kristal
+mainsettings.plugins namješćenje plugina
+mainsettings.lcd tečni kristal
 mainsettings.keybinding namjestiti tipku
 mainsettings.misc namjestiti razne stvari
-mainsettings.scan namjestiti trazenja kanala
+mainsettings.scan namjestiti traženja kanala
 
-mp3picsettings.general mp3 igrac / promatrac slika
+mp3picsettings.general mp3 igrač / promatrač slika
 
 miscsettings.head namjestiti razne stvari
 miscsettings.shutdown_real pripravnost
 miscsettings.shutdown_real_rcdelay ugasiti sa zastojanjem
-miscsettings.boxtype proizvodjac dbox2
+miscsettings.boxtype proizvođač dbox2
 miscsettings.startneutrinodirect direktni start neutrina
 miscsettings.startbhdriver startovati bh-mode driver
 miscsettings.general generalno
@@ -100,14 +100,14 @@ videomenu.videoformat format ekrana
 videomenu.videoformat_43 4:3 (LB)
 videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
-videomenu.videoformat_autodetect automaticno
-videomenu.vcrswitch automaticni av-scart ulaz
+videomenu.videoformat_autodetect automatično
+videomenu.vcrswitch automatični av-scart ulaz
 
-networkmenu.head namjestiti mrezu
-networkmenu.test provjeriti mrezu
-networkmenu.show pokazati aktivne podatke mreze
-networkmenu.setupnow sada namjestiti podatke mreze
-networkmenu.setuponstartup namjestiti mrezu pri startu
+networkmenu.head namjestiti mrežu
+networkmenu.test provjeriti mrežu
+networkmenu.show pokazati aktivne podatke mreže
+networkmenu.setupnow sada namjestiti podatke mreže
+networkmenu.setuponstartup namjestiti mrežu pri startu
 networkmenu.ipaddress ip adresa
 networkmenu.netmask netmask
 networkmenu.broadcast broadcast
@@ -121,12 +121,12 @@ recordingmenu.server_port port servera za snimanje
 recordingmenu.stopplayback zaustaviti playback
 recordingmenu.stopsectionsd zaustaviti sectionsd
 recordingmenu.vcr_devicename ime video rikordera (lirc)
-recordingmenu.off ugaseno
+recordingmenu.off ugašeno
 recordingmenu.server server
 recordingmenu.vcr video rikorder
 recordingmenu.server_wakeup server za snimanje wol
 recordingmenu.server_mac mac adresa
-recordingmenu.setupnow namjescenje sada preuzeti
+recordingmenu.setupnow namješćenje sada preuzeti
 recordingmenu.no_scart nema mijenjanja scarta
 
 ping.ok pristupan (ping)
@@ -135,12 +135,12 @@ ping.protocol nije pristupan (host or protocol error)
 ping.socket nije pristupan (socket error)
 
 ipsetup.hint_1 upotrijebite 0..9 ili gore/dole
-ipsetup.hint_2 ok memorise, home prekida
+ipsetup.hint_2 ok memoriše, home prekida
 
 colormenu.head namjestiti boje
 colormenu.statusbar statusna traka
 colormenu.themeselect izabrati teme
-colormenu.font velicina slova
+colormenu.font veličina slova
 colormenu.menucolors boja izbora
 colormenu.background boja pozadine
 colormenu.background_head boja pozadine
@@ -151,13 +151,13 @@ colormenu.timing osd tajm-aut
 
 colorthememenu.head izabrati teme
 colorthememenu.neutrino_theme neutrino tema
-colorthememenu.classic_theme klasicno
+colorthememenu.classic_theme klasično
 
 colormenusetup.head boja izbora
 colormenusetup.menuhead izborno zaglavlje
-colormenusetup.menucontent sadrzaj prozora
-colormenusetup.menucontent_inactive deaktiviran sadrzaj prozora
-colormenusetup.menucontent_selected izabran sadrzaj prozora
+colormenusetup.menucontent sadržaj prozora
+colormenusetup.menucontent_inactive deaktiviran sadržaj prozora
+colormenusetup.menucontent_selected izabran sadržaj prozora
 
 colorstatusbar.head boja statusne trake
 colorstatusbar.text statusna traka
@@ -167,16 +167,16 @@ timing.menu izbor
 timing.chanlist lista kanala
 timing.epg epg
 timing.infobar infromativna traka
-timing.filebrowser pretrazivac datoteka
+timing.filebrowser pretraživač datoteka
 timing.hint_1 vrijeme u sekundama u kojemu
-timing.hint_2 ce biti pokazana informativna traka
+timing.hint_2 će biti pokazana informativna traka
 
 repeatblocker.hint_1 vrijeme (u ms) izmedu 2 pritiska tipke
 repeatblocker.hint_2 0 ugasi blokera (crveno je " ")
 
 keybindingmenu.RC daljinska
-keybindingmenu.repeatblock cekanje pri ponavljanju
-keybindingmenu.repeatblockgeneric pocetno cekanje
+keybindingmenu.repeatblock čekanje pri ponavljanju
+keybindingmenu.repeatblockgeneric početno čekanje
 keybindingmenu.head namjestiti tipaljku
 keybindingmenu.modechange promijeniti stanje
 keybindingmenu.channellist lista kanala
@@ -191,10 +191,10 @@ keybindingmenu.cancel zatvoriti listu kanala
 keybindingmenu.cancel_head zatvoriti listu kanala
 keybindingmenu.sort promijeniti smjer sortiranja
 keybindingmenu.sort_head promijeniti smjer sortiranja
-keybindingmenu.addrecord dodati vremenski brojac za snimanje
-keybindingmenu.addrecord_head dodati vremenski brojac za snimanje
-keybindingmenu.addremind dodati vremenski brojac za prebaciti
-keybindingmenu.addremind_head dodati vremenski brojac za prebaciti
+keybindingmenu.addrecord dodati vremenski brojač za snimanje
+keybindingmenu.addrecord_head dodati vremenski brojač za snimanje
+keybindingmenu.addremind dodati vremenski brojač za prebaciti
+keybindingmenu.addremind_head dodati vremenski brojač za prebaciti
 keybindingmenu.channelup kanal gore
 keybindingmenu.channelup_head tipka za kanal gore
 keybindingmenu.channeldown kanal dole
@@ -217,51 +217,53 @@ colorchooser.green zeleno
 colorchooser.blue plavo
 colorchooser.alpha alfa
 
-lcdmenu.head namjestiti tecni kristal
+lcdmenu.head namjestiti tečni kristal
 lcdmenu.inverse invertirati
 lcdmenu.power struja
 lcdmenu.lcdcontroler kontrast / svjetlost
 lcdmenu.statusline statusna linija
 lcdmenu.statusline.volume glasnost
 lcdmenu.statusline.playtime igrano vrijeme
-lcdmenu.statusline.both change me
+lcdmenu.statusline.both glasnost i trajanje
 
-lcdcontroler.head namjestiti tecni kristal
+lcdcontroler.head namjestiti tečni kristal
 lcdcontroler.contrast kontrast
 lcdcontroler.brightness normalna svjetlost
 lcdcontroler.brightnessstandby svjetlost u pripravnosti
 
 keychoosermenu.setnew namjestiti novu tipku
 keychoosermenu.setnone nijedna tipka
-keychoosermenu.currentkey sadasnja tipka
+keychoosermenu.currentkey sadašnja tipka
 
 keychooser.head namjestiti novu tipku
 keychooser.text1 pritisnite tipku
-keychooser.text2 cekati na prekid...
+keychooser.text2 čekati na prekid...
 
 screensetup.upperleft crveno = ekran gore, lijevo
 screensetup.lowerright zeleno = ekran dole, desno
 
+bouquetlist.head buketi
+
 channellist.head svi kanali
-channellist.nonefound Nije nadjen nijedan kanal!\nNapravite trazenje kanala\n(dbox2-tipka -> servis)
+channellist.nonefound Nije nađen nijedan kanal!\nNapravite traženje kanala\n(dbox2-tipka -> servis)
 channellist.since od %02d:%02d
 
-infoviewer.epgnotload informacije jos nisu pristupacne...
-infoviewer.epgwait ceka se na epg informacije...
+infoviewer.epgnotload informacije još nisu pristupačne...
+infoviewer.epgwait čeka se na epg informacije...
 infoviewer.streaminfo osobine
 infoviewer.eventlist program
 infoviewer.languages izbor tona
-infoviewer.notavailable kanal (trenutacno) nije pristupan
-infoviewer.cantdecode kanal se ne moze desifrovati
-infoviewer.selecttime pocetak
+infoviewer.notavailable kanal (trenutačno) nije pristupan
+infoviewer.cantdecode kanal se ne može dešifrovati
+infoviewer.selecttime početak
 infoviewer.nocurrent nema informacije o ovom programu
 infoviewer.noepg nema epg informacije
-infoviewer.subservice rezija slike
-infoviewer.waittime ceka se na vrijeme ...
-infoviewer.motor_moving namjescenje antene
+infoviewer.subservice režija slike
+infoviewer.waittime čeka se na vrijeme ...
+infoviewer.motor_moving namješćenje antene
 
-epgviewer.notfound nisu nadjene informacije o programu (epg)
-epgviewer.nodetailed nema opsirnih informacija
+epgviewer.notfound nisu nađene informacije o programu (epg)
+epgviewer.nodetailed nema opširnih informacija
 epgviewer.More_Screenings drugi termini na ovom kanalu
 epglist.head pregled - %s
 epglist.noevents Nema epg informacije.
@@ -275,8 +277,8 @@ streaminfo.framerate framerate
 streaminfo.framerate_unknown nepoznat framerate
 streaminfo.audiotype vrsta tona
 streaminfo.audiotype_unknown nepoznata vrsta tona
-streaminfo.not_crypted nije sifrovano
-streaminfo.ecm_invalid nevazeci ca sistem
+streaminfo.not_crypted nije šifrovano
+streaminfo.ecm_invalid nevažeći ca sistem
 streaminfo.not_available nije pristupno
 
 streamfeatures.head osobine streama
@@ -284,9 +286,9 @@ streamfeatures.info informacija o streamu
 
 apidselector.head izbor jezika
 
-nvodselector.head izabrati pocetak
+nvodselector.head izabrati početak
 nvodselector.subservice perspektive
-nvodselector.directormode rezija slike
+nvodselector.directormode režija slike
 
 ucodecheck.head provjera ucodesa
 ucodecheck.avia500 avia 500
@@ -297,7 +299,7 @@ ucodecheck.cam-alpha cam-alpha
 date.Mon  pon
 date.Tue  uto
 date.Wed  sri
-date.Thu  cet
+date.Thu  čet
 date.Fri  pet
 date.Sat  sub
 date.Sun  ned
@@ -315,16 +317,16 @@ date.Oct  okt
 date.Nov  nov
 date.Dec  dec
 
-nvod.starting (pocetak za %d minuta)
-nvod.proz (%d%% proslo)
+nvod.starting (početak za %d minuta)
+nvod.proz (%d%% prošlo)
 
-scants.head trazenje kanala
-scants.startnow poceti trazenje kanala
+scants.head traženje kanala
+scants.startnow početi traženje kanala
 scants.actsatellite satelit:
 scants.actcable kablo:
 scants.transponders transponderi:
 scants.freqdata frekvencija:
-scants.provider snabdjevac:
+scants.provider snabdjevač:
 scants.channel kanal:
 scants.numberoftvservices tv
 scants.numberofradioservices radio
@@ -336,65 +338,65 @@ scants.bouquet_leave ne promijeniti
 scants.bouquet_create novo sastaviti
 scants.bouquet_erase izbrisati
 scants.bouquet_satellite satelitski buket
-scants.failed Neuspjesno trazenje kanala!
-scants.finished Uspjesno izvrseno trazenje kanala!
+scants.failed Neuspjesno traženje kanala!
+scants.finished Uspješno izvršeno traženje kanala!
 
-motorcontrol.head namjescenje motora
+motorcontrol.head namješćenje motora
 
 flashupdate.head obnavljanje
 flashupdate.action akcija:
 flashupdate.globalprogress glavni status:
-flashupdate.getinfofile cita se informacija o verziji
-flashupdate.getinfofileerror nemoze se dobiti informacija o verziji
-flashupdate.getupdatefile ucitaje se najnoviji softver
-flashupdate.getupdatefileerror nemoze se dobiti najnoviji softver
-flashupdate.cantopenfile nemoze se otvoriti datoteka
-flashupdate.fileis0bytes velicina datoteke je 0 bajtova
-flashupdate.eraseingflash brise se fles
-flashupdate.programmingflash programira se fles
-flashupdate.cantopenmtd nemoze se otvoriti mtd-uredaj
+flashupdate.getinfofile čita se informacija o verziji
+flashupdate.getinfofileerror nemože se dobiti informacija o verziji
+flashupdate.getupdatefile učitaje se najnoviji softver
+flashupdate.getupdatefileerror nemože se dobiti najnoviji softver
+flashupdate.cantopenfile nemože se otvoriti datoteka
+flashupdate.fileis0bytes veličina datoteke je 0 bajtova
+flashupdate.eraseingflash briše se fleš
+flashupdate.programmingflash programira se fleš
+flashupdate.cantopenmtd nemože se otvoriti mtd-uredaj
 flashupdate.ready gotovo
 flashupdate.reboot startuje se dbox2 ponovno
 flashupdate.updatemode softver se obnavlja
-flashupdate.updatemode_manual rucno (ftp)
+flashupdate.updatemode_manual ručno (ftp)
 flashupdate.updatemode_internet sa interneta
 flashupdate.currentversion_sep instalirana verzija
 flashupdate.currentversiondate datum
 flashupdate.currentversiontime vrijeme
-flashupdate.currentversionbaseversion osnovni imidz
-flashupdate.currentversionsnapshot vrsta imidza
-flashupdate.checkupdate traziti novu verziju
+flashupdate.currentversionbaseversion osnovni imidž
+flashupdate.currentversionsnapshot vrsta imidža
+flashupdate.checkupdate tražiti novu verziju
 flashupdate.versioncheck provjeriti verziju
 flashupdate.nonewversion nema nove verzije
-flashupdate.md5check provjera imidza
-flashupdate.md5sumerror imidz ima greski
+flashupdate.md5check provjera imidža
+flashupdate.md5sumerror imidž ima greške
 flashupdate.proxyserver_sep proxyserver
 flashupdate.proxyserver proxyname
 flashupdate.proxyserver_hint1 utipkajte ime proxya ili ip adresu (host:port)
-flashupdate.proxyserver_hint2 prazno znaci da nema proxya
+flashupdate.proxyserver_hint2 prazno znači da nema proxya
 flashupdate.proxyusername korisnik
 flashupdate.proxyusername_hint1 utipkajte ime korisnika za proxy
-flashupdate.proxyusername_hint2 prazno znaci da nema provjere
+flashupdate.proxyusername_hint2 prazno znači da nema provjere
 flashupdate.proxypassword lozinka
 flashupdate.proxypassword_hint1 utipkajte lozinku za proxy
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Nadjen je novi imidz:\nDatum: %s, %s\nOsnovni imidz: %s\nvrsta imidza: %s\n\nHocete li ovu verziju sada preuzeti\nsa interneta i instalirati?
-flashupdate.msgbox_manual Nadjen je novi imidz:\nDatum: %s, %s\nOsnovni imidz: %s\nVrsta imidza: %s\n\nHocete li ovu verziju sada instalirati?
+flashupdate.msgbox Nađen je novi imidž:\nDatum: %s, %s\nOsnovni imidž: %s\nvrsta imidža: %s\n\nHoćete li ovu verziju sada preuzeti\nsa interneta i instalirati?
+flashupdate.msgbox_manual Nađen je novi imidž:\nDatum: %s, %s\nOsnovni imidž: %s\nVrsta imidža: %s\n\nHoćete li ovu verziju sada instalirati?
 flashupdate.expertfunctions funkcije za majstore
-flashupdate.readflash ucitati citav flesimidz
-flashupdate.writeflash pisati citav flesimidz
-flashupdate.readflashmtd ucitati jednu particiju
+flashupdate.readflash učitati čitav flešimidž
+flashupdate.writeflash pisati čitav flešimidž
+flashupdate.readflashmtd učitati jednu particiju
 flashupdate.writeflashmtd pisati jednu particiju
-flashupdate.savesuccess Imidz je uspjesno memorisan \npod imenom %s.
+flashupdate.savesuccess Imidž je uspješno memorisan \npod imenom %s.
 flashupdate.mtdselector izbor particije
-flashupdate.titlereadflash ucitati fles
-flashupdate.actionreadflash ucitaje se fles
+flashupdate.titlereadflash učitati fleš
+flashupdate.actionreadflash učitaje se fleš
 flashupdate.fileselector izbor datoteke
-flashupdate.titlewriteflash pisati fles
-flashupdate.actionwriteflash pise se fles
-flashupdate.flashreadyreboot Imidz je uspjesno flesovan.\nVas dbox2 startuje sada ponovno.
-flashupdate.reallyflashmtd Hocete li stvarno nastaviti flesovanje?\n\nAko se desi greska ili imidz nije\nu redu, onda vas dbox2 nece vise raditi.\n\nIme imidza: %s\nPozicija: %s
-flashupdate.wrongbase Verzija osnovnog imidza ne pase vise,\ntreba se instalirati novi osnovni imidz!
+flashupdate.titlewriteflash pisati fleš
+flashupdate.actionwriteflash piše se fleš
+flashupdate.flashreadyreboot Imidž je uspješno flešovan.\nVaš dbox2 startuje sada ponovno.
+flashupdate.reallyflashmtd Hoćete li stvarno nastaviti flešovanje?\n\nAko se desi greška ili imidž nije\nu redu, onda vaš dbox2 neće više raditi.\n\nIme imidža: %s\nPozicija: %s
+flashupdate.wrongbase Verzija osnovnog imidža ne paše više,\ntreba se instalirati novi osnovni imidž!
 
 bouqueteditor.name namjestiti buket
 bouqueteditor.delete izbrisati
@@ -405,9 +407,9 @@ bouqueteditor.hide sakriti
 bouqueteditor.lock zabraniti
 bouqueteditor.newbouquetname novo ime buketa
 bouqueteditor.bouquetname ime buketa
-bouqueteditor.savechanges? Hocete li memorisati promjene?
-bouqueteditor.savingchanges Memorisu se promjene. Cekajte molim ...
-bouqueteditor.discardingchanges Pobacuju se promjene. Cekajte molim ...
+bouqueteditor.savechanges? Hoćete li memorisati promjene?
+bouqueteditor.savingchanges Memorišu se promjene. Čekajte molim ...
+bouqueteditor.discardingchanges Pobacuju se promjene. Čekajte molim ...
 bouqueteditor.switch preuzeti/izbaciti kanal
 bouqueteditor.switchmode tv/radio
 bouqueteditor.return gotovo
@@ -416,15 +418,15 @@ messagebox.yes ja
 messagebox.no ne
 messagebox.cancel prekid
 messagebox.back nazad
-messagebox.error greska
-messagebox.discard Hocete li pobaciti promijenito?
+messagebox.error greška
+messagebox.discard Hoćete li pobaciti promijenito?
 messagebox.info informacija
 
-settings.noconffile Podaci o neutrinu nisu nadjeni.\nMecu se standardni podaci.
-settings.missingoptionsconffile Neutrino je opsiren.\nNove stvari su namjescene na standardne podatke.
+settings.noconffile Podaci o neutrinu nisu nađeni.\nMeću se standardni podaci.
+settings.missingoptionsconffile Neutrino je opširen.\nNove stvari su namješćene na standardne podatke.
 
-cam.wrong Paznja, vas cam_alpha.bin ne pase\nuz vasu smart-karticu!!!\n\nHocete li da vidite ovo upozorenje opet?
-ucodes.failure Paznja, nisu nadjeni ucodesi!\n\nMolim sa ftpeom (ili dbox-bootmanagerom)\npostaviti, i dbox2 ponovno startovati!
+cam.wrong Pažnja, vaš cam_alpha.bin ne paše\nuz vašu smart-karticu!!!\n\nHoćete li da vidite ovo upozorenje opet?
+ucodes.failure Pažnja, nisu nađeni ucodesi!\n\nMolim sa ftpeom (ili dbox-bootmanagerom)\npostaviti, i dbox2 ponovno startovati!
 
 stringinput.caps velika/mala slova
 stringinput.clear sve izbrisati
@@ -434,11 +436,11 @@ streamingserver.noconnect Ne postoji veza sa streamingserverom.\nPrekid snimanja
 GENRE.MOVIE.0 igrani film / drama
 GENRE.MOVIE.1 kriminalni film / triler
 GENRE.MOVIE.2 avanturni/kaubojski/ratni film
-GENRE.MOVIE.3 naucna fantastika/fantazija/strava
+GENRE.MOVIE.3 naučna fantastika/fantazija/strava
 GENRE.MOVIE.4 komedija
 GENRE.MOVIE.5 soap/melodramatika/folklora
 GENRE.MOVIE.6 romantika
-GENRE.MOVIE.7 ozbiljno/klasicno/vjerno/povijesni film/drama
+GENRE.MOVIE.7 ozbiljno/klasično/vjerno/povijesni film/drama
 GENRE.MOVIE.8 film za odrasle/drama
 
 GENRE.NEWS.0 vijesti
@@ -453,7 +455,7 @@ GENRE.SHOW.2 variete
 GENRE.SHOW.3 talkshow
 
 GENRE.SPORTS.0 sport
-GENRE.SPORTS.1 veledogadaji (olimpijada, svjetsko prvenstvo itd.)
+GENRE.SPORTS.1 veledogađaji (olimpijada, svjetsko prvenstvo itd.)
 GENRE.SPORTS.2 sport magazin
 GENRE.SPORTS.3 nogomet
 GENRE.SPORTS.4 tenis
@@ -463,20 +465,20 @@ GENRE.SPORTS.7 motorni sport
 GENRE.SPORTS.8 vodeni sport
 GENRE.SPORTS.9 zimski sport
 GENRE.SPORTS.10 jahanje
-GENRE.SPORTS.11 borilacki sportovi
+GENRE.SPORTS.11 borilački sportovi
 
 GENRE.CHILDRENs_PROGRAMMES.0 program za djecu / mlade
-GENRE.CHILDRENs_PROGRAMMES.1 program za predskolsku djecu
-GENRE.CHILDRENs_PROGRAMMES.2 program za 6-o do 14-o godisnjake
-GENRE.CHILDRENs_PROGRAMMES.3 program za 10-o do 16-o godisnjake
-GENRE.CHILDRENs_PROGRAMMES.4 informativni i naucni program
+GENRE.CHILDRENs_PROGRAMMES.1 program za predškolsku djecu
+GENRE.CHILDRENs_PROGRAMMES.2 program za 6-o do 14-o godišnjake
+GENRE.CHILDRENs_PROGRAMMES.3 program za 10-o do 16-o godišnjake
+GENRE.CHILDRENs_PROGRAMMES.4 informativni i naučni program
 GENRE.CHILDRENs_PROGRAMMES.5 crtani film
 
 GENRE.MUSIC_DANCE.0 muzika/balet/ples
 GENRE.MUSIC_DANCE.1 rok/pop
-GENRE.MUSIC_DANCE.2 ozbiljna musika/klasika
-GENRE.MUSIC_DANCE.3 narodna musika
-GENRE.MUSIC_DANCE.4 dzez
+GENRE.MUSIC_DANCE.2 ozbiljna muzika/klasika
+GENRE.MUSIC_DANCE.3 narodna muzika
+GENRE.MUSIC_DANCE.4 džez
 GENRE.MUSIC_DANCE.5 musical/opera
 GENRE.MUSIC_DANCE.6 balet
 
@@ -488,18 +490,18 @@ GENRE.ARTS.4 umjetnost
 GENRE.ARTS.5 literatura
 GENRE.ARTS.6 film/kino
 GENRE.ARTS.7 eksperimentalni film/video
-GENRE.ARTS.8 rtv/stampa
+GENRE.ARTS.8 rtv/štampa
 GENRE.ARTS.9 nove medije
 GENRE.ARTS.10 magazin za umjetnost / kulturu
 GENRE.ARTS.11 moda
 
-GENRE.SOZIAL_POLITICAL.0 socialni & politicki dogadaji / privreda
+GENRE.SOZIAL_POLITICAL.0 socialni & politički dogadaji / privreda
 GENRE.SOZIAL_POLITICAL.1 magazin/report/dokumentacija
 GENRE.SOZIAL_POLITICAL.2 privreda i socialno
-GENRE.SOZIAL_POLITICAL.3 narociti ljudi
+GENRE.SOZIAL_POLITICAL.3 naročiti ljudi
 
 GENRE.DOCUS_MAGAZINES.0 dokumentacija/magazin
-GENRE.DOCUS_MAGAZINES.1 priroda/zivotinje/okolina
+GENRE.DOCUS_MAGAZINES.1 priroda/životinje/okolina
 GENRE.DOCUS_MAGAZINES.2 nauka i tehnika
 GENRE.DOCUS_MAGAZINES.3 medicina/fisiologija/psihologija
 GENRE.DOCUS_MAGAZINES.4 inozemstvo/ekspedicije
@@ -509,7 +511,7 @@ GENRE.DOCUS_MAGAZINES.7 jezici
 
 GENRE.TRAVEL_HOBBIES.0 odmor
 GENRE.TRAVEL_HOBBIES.1 odmor i turizam
-GENRE.TRAVEL_HOBBIES.2 rucni rad
+GENRE.TRAVEL_HOBBIES.2 ručni rad
 GENRE.TRAVEL_HOBBIES.3 motori
 GENRE.TRAVEL_HOBBIES.4 sposobnost i zdravlje
 GENRE.TRAVEL_HOBBIES.5 kuhanje
@@ -518,16 +520,16 @@ GENRE.TRAVEL_HOBBIES.7 vrt
 
 GENRE.UNKNOWN nepoznato
 
-parentallock.parentallock sticenje omladine
+parentallock.parentallock štićenje omladine
 
 parentallock.prompt pitati za pin-broj
 parentallock.never nikada
 parentallock.onstart pri startu
 parentallock.changetolocked kod zabranjenih buketa
-parentallock.onsignal ako ima privremena spera na kanalu
+parentallock.onsignal ako ima privremena špera na kanalu
 parentallock.lockedsender ako je kanal zabranjen
 parentallock.lockedprogram zabranjen program (od %d godina)
-parentallock.head pin-broj za sticenje omladine
+parentallock.head pin-broj za štićenje omladine
 
 parentallock.lockage emisije
 parentallock.lockage12 zabraniti od 12 godina
@@ -541,72 +543,72 @@ pinprotection.wrongcode Utipkajte pin-broj ponovno!
 pinprotection.head kontrola pin-broja
 
 favorites.bouquetname moji ljubimci
-favorites.nobouquets moji ljubimci su samo u aktiviranim buketima moguci
-favorites.addchannel Dodaje se trenutacni kanal\nbuketu"moji ljubimci".\nMemorisanje traje trenutak...
+favorites.nobouquets moji ljubimci su samo u aktiviranim buketima mogući
+favorites.addchannel Dodaje se trenutačni kanal\nbuketu"moji ljubimci".\nMemorisanje traje trenutak...
 favorites.menueadd dodati kanal ljubimcima
 favorites.bqcreated stvoren je buket "Moji ljubimci"...\n
-favorites.chadded trenutacni kanal je dodan vasim ljubimcima...\n
-favorites.chalreadyinbq trenutacni kanal je vec u vasim ljubimcima...\n
-favorites.finalhint \nSlucajno dodati kanali mogu se\nizbrisati u namjescenju buketa.\n
+favorites.chadded trenutačni kanal je dodan vašim ljubimcima...\n
+favorites.chalreadyinbq trenutačni kanal je već u vašim ljubimcima...\n
+favorites.finalhint \nSlučajno dodati kanali mogu se\nizbrisati u namješćenju buketa.\n
 
-sleeptimerbox.title vremenski brojac za ugasiti
-sleeptimerbox.hint1 ugasiti za XXX minuta. (000=ugaseno)
-sleeptimerbox.hint2 Dbox2 ce se ugasiti za to vrijeme.
-sleeptimerbox.announce vremenski brojac ce ugasiti za 1 minutu
+sleeptimerbox.title vremenski brojač za ugasiti
+sleeptimerbox.hint1 ugasiti za XXX minuta. (000=ugašeno)
+sleeptimerbox.hint2 Dbox2 će se ugasiti za to vrijeme.
+sleeptimerbox.announce vremenski brojač će ugasiti za 1 minutu
 
-zaptotimer.announce za jednu minutu ce se dbox2 prebaciti
-recordtimer.announce snimanje pocinje za jednu minutu
-shutdowntimer.announce Dbox2 ce se ugasiti za 1 minutu.\nPrekinuti gasenje?
+zaptotimer.announce za jednu minutu će se dbox2 prebaciti
+recordtimer.announce snimanje počinje za jednu minutu
+shutdowntimer.announce Dbox2 će se ugasiti za 1 minutu.\nPrekinuti gašenje?
 
 timerbar.channelswitch prebaciti
 timerbar.recordevent snimati
 timer.eventtimed.title zapamtiti emisiju
-timer.eventtimed.msg Emisija je zapamcena.\nDbox2 ce se automaticno upaliti i prebaciti na emisiju.
+timer.eventtimed.msg Emisija je zapamćena.\nDbox2 će se automatično upaliti i prebaciti na emisiju.
 timer.eventrecord.title zapamtiti snimanje
-timer.eventrecord.msg emisija je zapamcena za snimanje
-timerlist.name lista vremenskih brojaca
+timer.eventrecord.msg emisija je zapamćena za snimanje
+timerlist.name lista vremenskih brojača
 timerlist.delete izbrisati
-timerlist.empty trenutacno nema vremenskih brojaca
+timerlist.empty trenutačno nema vremenskih brojača
 timerlist.type.shutdown ugasiti
 timerlist.type.nextprogram drugi program
 timerlist.type.zapto prebaciti
 timerlist.type.standby pripravnost
 timerlist.type.record snimanje
-timerlist.type.remind podsjecanje
-timerlist.type.sleeptimer vremenski brojac za ugasiti
+timerlist.type.remind podsjećanje
+timerlist.type.sleeptimer vremenski brojač za ugasiti
 timerlist.type.unknown nepoznato
 timerlist.repeat.once jedanput
 timerlist.repeat.daily dnevno
-timerlist.repeat.weekly sedmicno
-timerlist.repeat.biweekly dvosedmnicno
-timerlist.repeat.fourweekly cetvorosedmicno
-timerlist.repeat.monthly mjesecno
-timerlist.repeat.byeventdescription vidi vremenski brojac
+timerlist.repeat.weekly sedmično
+timerlist.repeat.biweekly dvosedmnično
+timerlist.repeat.fourweekly četvorosedmično
+timerlist.repeat.monthly mjesečno
+timerlist.repeat.byeventdescription vidi vremenski brojač
 timerlist.repeat.unknown nepoznato
 timerlist.repeat.weekdays ovim danima
 timerlist.repeat.sunday ned
 timerlist.repeat.monday pon
 timerlist.repeat.tuesday uto
 timerlist.repeat.wednesday sri
-timerlist.repeat.thursday cet
+timerlist.repeat.thursday čet
 timerlist.repeat.friday pet
 timerlist.repeat.saturday sub
 timerlist.weekdays dani
-timerlist.weekdays.hint_1 pon uto sri cet pet sub ned
-timerlist.weekdays.hint_2 'X'=vremenski brojac '-' nema vremenskog brojaca
+timerlist.weekdays.hint_1 pon uto sri čet pet sub ned
+timerlist.weekdays.hint_2 'X'=vremenski brojač '-' nema vremenskog brojača
 timerlist.program.unknown nepoznati program
-timerlist.standby.off budjenje iz pripravnosti
+timerlist.standby.off buđenje iz pripravnosti
 timerlist.standby.on idi u pripravnost
 timerlist.alarmtime vrijeme za uzbunu
 timerlist.stoptime vrijeme za stop
-timerlist.new novi vremenski brojac
-timerlist.menumodify obradjivati vremenski brojac
-timerlist.type vrsta vremenskog brojaca
+timerlist.new novi vremenski brojač
+timerlist.menumodify obrađivati vremenski brojač
+timerlist.type vrsta vremenskog brojača
 timerlist.repeat ponavljanje
-timerlist.save memorisati vremenski brojac
+timerlist.save memorisati vremenski brojač
 timerlist.standby pripravnost
 timerlist.channel kanal
-timerlist.menunew novi vremenski brojac
+timerlist.menunew novi vremenski brojač
 timerlist.reload obnoviti
 timerlist.modify obrada
 timerlist.message obavijest
@@ -616,13 +618,13 @@ timerlist.channelselect izabrati kanal
 timerlist.modeselect izbor
 timerlist.modetv tv kanali
 timerlist.moderadio radio kanali
-timersettings.separator namjescenje vremenskog brojaca
-timersettings.record_safety_time_before ispraviti pocetak snimanja
+timersettings.separator namješćenje vremenskog brojača
+timersettings.record_safety_time_before ispraviti početak snimanja
 timersettings.record_safety_time_before.hint_1 vrijeme u minutama koje se odbija od
-timersettings.record_safety_time_before.hint_2  pocetka vremeskog brojaca (00=ugaseno)
+timersettings.record_safety_time_before.hint_2  početka vremeskog brojača (00=ugašeno)
 timersettings.record_safety_time_after ispravljanje kraja snimanja
 timersettings.record_safety_time_after.hint_1 vrijeme u minutama koje se odbija od
-timersettings.record_safety_time_after.hint_2 kraja vremeskog brojaca (00=ugaseno)
+timersettings.record_safety_time_after.hint_2 kraja vremeskog brojača (00=ugašeno)
 
 fontsize.menu tekst u izboru
 fontsize.menu_title naslov izbora
@@ -632,10 +634,10 @@ fontsize.epg_info1 epg informacija 1
 fontsize.epg_info2 epg informacija 2
 fontsize.epg_date epg datum
 fontsize.alert uzbuna
-fontsize.eventlist_title naslov liste dogadjaja
-fontsize.eventlist_itemlarge velika lista dogadjaja
-fontsize.eventlist_itemsmall mala lista dogadjaja
-fontsize.eventlist_datetime lista dogadjaja za datum / vrijeme
+fontsize.eventlist_title naslov liste događaja
+fontsize.eventlist_itemlarge velika lista događaja
+fontsize.eventlist_itemsmall mala lista događaja
+fontsize.eventlist_datetime lista događaja za datum / vrijeme
 fontsize.channellist lista kanala
 fontsize.channellist_descr opis
 fontsize.channellist_number broj
@@ -646,12 +648,12 @@ fontsize.infobar_info infromativna traka za informaciju
 fontsize.infobar_small mala infromativna traka
 fontsize.gamelist_itemLarge veliko
 fontsize.gamelist_itemSmall malo
-fontsize.filebrowser_item dio pretrazivaca datoteka
-fontsize.hint slova se namjescaju,\ncekajte trenutak...
+fontsize.filebrowser_item dio pretraživača datoteka
+fontsize.hint slova se namjesćaju,\nčekajte molim ...
 
-fontmenu.head namjescenje velicine slova
+fontmenu.head namješćenje veličine slova
 fontmenu.channellist lista kanala
-fontmenu.eventlist lista dogadjaja
+fontmenu.eventlist lista događaja
 fontmenu.epg epg
 fontmenu.infobar informativna traka
 fontmenu.gamelist lista igara
@@ -660,43 +662,43 @@ colormenu.gtx_alpha providnost (gtx)
 gtxalpha.alpha1 alpha 1
 gtxalpha.alpha2 alpha 2
 
-mp3player.name mp3 igrac
+mp3player.name mp3 igrač
 mp3player.head mp3 lista
 mp3player.play igrati
 mp3player.add dodati
 mp3player.delete izbrisati
 mp3player.stop zaustaviti
 mp3player.playall sve igrati
-mp3player.shuffle slucaj
+mp3player.shuffle slučaj
 mp3player.deleteall sve izbrisati
 mp3player.title naslov
-mp3player.artist pjevac
+mp3player.artist pjevač
 mp3player.playing pjesma
-mp3player.id3scan citaj id3-tag
+mp3player.id3scan čitaj id3-tag
 mp3player.keylevel promijeniti tipke
 mp3player.fastforward brzo naprijed
-mp3player.pause pausa
+mp3player.pause pauza
 mp3player.rewind brzo natrag
-mp3player.artist_title pjevac, pjesma
-mp3player.title_artist pjesma, pjevac
+mp3player.artist_title pjevač, pjesma
+mp3player.title_artist pjesma, pjevač
 mp3player.display_order redoslijed
 mp3player.follow izabjere ovu pjesmu
-mp3player.screensaver_timeout stititi ekran (min, 0=ugaseno)
+mp3player.screensaver_timeout štititi ekran (min, 0=ugašeno)
 
-movieplayer.name promatrac filmova
-movieplayer.head promatrac filmova
+movieplayer.name promatrač filmova
+movieplayer.head promatrač filmova
 movieplayer.play odigrati
 movieplayer.choosets odigrati ts
 movieplayer.chooseps odigrati ps
 movieplayer.choosepes odigrati pes
 movieplayer.bookmark oznaka
 
-filebrowser.head pretrazivac datoteka
+filebrowser.head pretraživač datoteka
 filebrowser.filter.active upaljen filter
-filebrowser.filter.inactive ugasen filter
+filebrowser.filter.inactive ugašen filter
 filebrowser.select izabrati
-filebrowser.mark oznaciti
-filebrowser.scan pretrazi direktorije
+filebrowser.mark označiti
+filebrowser.scan pretraži direktorije
 filebrowser.sort.name (ime datoteke)
 filebrowser.sort.date (datum)
 
@@ -706,16 +708,16 @@ nfs.dir nfs direktorij
 nfs.localdir lokalni direktorij
 nfs.automount pri startu montirati
 nfs.mountnow sada montirati
-nfs.mounterror greska pri montiranju
+nfs.mounterror greška pri montiranju
 nfs.umount nfs direktorij sada demontirati
-nfs.umounterror greska pri demontiranju
-nfs.alreadymounted direktorij je vec montiran
-nfsmenu.head namjescenje nfsa
+nfs.umounterror greška pri demontiranju
+nfs.alreadymounted direktorij je već montiran
+nfsmenu.head namješćenje nfsa
 
 apids.hint_1 Utipkajte heksadecimalne apids
 apids.hint_2 za streaming razdvojene sa ' '.
 
-pictureviewer.head promatrac slika
+pictureviewer.head promatrač slika
 pictureviewer.sortorder promijeniti smjer sortiranja
 pictureviewer.sortorder.date (datum)
 pictureviewer.sortorder.filename (ime datoteke)

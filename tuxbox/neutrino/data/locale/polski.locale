@@ -242,6 +242,8 @@ keychooser.text2 Prosze czekaj, przerywam
 screensetup.upperleft czerw = lewy-góra
 screensetup.lowerright ziel = prawy-dól
 
+bouquetlist.head Bukiety
+
 channellist.head Wszystkie Kanaly
 channellist.nonefound Brak listy kanalow!\nUruchom strojenie\n(ustawienia -> strojenie)
 channellist.since since %02d:%02d
