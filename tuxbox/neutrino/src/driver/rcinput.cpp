@@ -665,6 +665,12 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			case '9':
 				trkey = RC_9;
 				break;
+			case '+':
+				trkey = RC_plus;
+				break;
+			case '-':
+				trkey = RC_minus;
+				break;
 			case 'a':
 				trkey = KEY_A;
 				break;
