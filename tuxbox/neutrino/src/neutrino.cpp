@@ -1189,7 +1189,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		strcpy(baseimage, versionInfo.getBaseImageVersion().c_str());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionbaseversion", false, (char*) &baseimage, NULL ));
 		static char releasetype[50];
-		strcpy(releasetype, versionInfo.isSnapShot()?"Snapshot":"Release");
+		strcpy(releasetype, versionInfo.getType().c_str());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionsnapshot", false, (char*) &releasetype, NULL ));
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
@@ -2200,17 +2200,17 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				// noch nicht im Standby-Mode...
 				standbyMode( true );
-				g_RCInput->clearRCMsg();
 			}
+			g_RCInput->clearRCMsg();
 		}
 		else if ( msg == NeutrinoMessages::STANDBY_OFF )
 		{
-			if ( mode == mode_standby == data)
+			if ( mode == mode_standby )
 			{
 				// WAKEUP
 				standbyMode( false );
-				g_RCInput->clearRCMsg();
 			}
+			g_RCInput->clearRCMsg();
 		}
 		else if ( msg == NeutrinoMessages::CHANGEMODE )
 		{
@@ -2227,10 +2227,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			if(data == mode_standby)
 			{
 				if(mode != mode_standby)
-				{
 					standbyMode( true );
-					g_RCInput->clearRCMsg();
-				}
 			}
 		}
 		else if ( msg == NeutrinoMessages::VCR_ON )
@@ -3055,7 +3052,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.322 2002/09/12 22:19:25 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.323 2002/09/15 16:25:11 alexw Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
