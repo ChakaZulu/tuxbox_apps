@@ -2,7 +2,8 @@ SUBDIRS = lowlevel
 
 INCLUDES = \
 	-I$(DRIVER)/include \
-	-I$(top_srcdir)/enigma/src
+	-I$(top_srcdir)/enigma/src \
+	-I$(top_srcdir)/libxmltree
 
 lib_LTLIBRARIES = libenigma_dvb.la
 

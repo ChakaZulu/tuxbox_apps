@@ -1,8 +1,6 @@
-#include "xmlrpc.h"
 
 #include "xmlrpc.h"
 
-#include <core/xml/xmltree.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
 

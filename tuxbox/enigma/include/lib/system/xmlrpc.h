@@ -7,7 +7,7 @@
 
 #include <core/base/estring.h>
 #include <core/base/eptrlist.h>
-#include <core/xml/xmltree.h>
+#include <xmltree.h>
 #include <core/system/httpd.h>
 
 #define INSERT(KEY,VALUE) insert(std::pair<eString, eXMLRPCVariant*>(KEY,VALUE))

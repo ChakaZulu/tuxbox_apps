@@ -1,5 +1,6 @@
 INCLUDES = \
-	-I$(top_srcdir)/enigma/src
+	-I$(top_srcdir)/enigma/src \
+	-I$(top_srcdir)/libxmltree
 
 lib_LTLIBRARIES = libenigma_gui.la
 

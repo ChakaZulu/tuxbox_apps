@@ -7,7 +7,7 @@
 #include <core/base/estring.h>
 #include <core/base/eptrlist.h>
 #include <core/gdi/grc.h>
-#include <core/xml/xmltree.h>
+#include <xmltree.h>
 
 class eWidget;
 class gPixmap;
