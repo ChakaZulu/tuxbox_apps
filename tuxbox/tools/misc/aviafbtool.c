@@ -5,11 +5,12 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <stdint.h>
 #include <dbox/fb.h>
 
 void help (char *prog_name)
 {
-	printf("$Id: aviafbtool.c,v 1.2 2002/08/21 08:11:35 obi Exp $\n\n");
+	printf("$Id: aviafbtool.c,v 1.3 2002/10/10 23:21:19 dirch Exp $\n\n");
 	printf("Usage: %s <switches>\n\n",prog_name);
 	printf("Switches:\n"
 	"-h,     --help             help\n"

@@ -1,5 +1,5 @@
 /*
- * $Id: pluginx.c,v 1.1 2002/08/29 16:13:29 obi Exp $
+ * $Id: pluginx.c,v 1.2 2002/10/10 23:21:19 dirch Exp $
  *
  * commandline tool to execute gui plugins without gui
  *
@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <stdint.h>
 #include <dbox/fb.h>
 
 #include <config.h>
