@@ -2421,7 +2421,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	return result;
 }
 
-#define CHANNELWIDTH 250
+#define CHANNELWIDTH 200
 
 class eMEPG: public Object
 {
@@ -2465,7 +2465,7 @@ public:
 					int tablePos = 0;
 					time_t tableTime = start;
 					result << "<tr>"
-						"<td width=" << eString().sprintf("%d", CHANNELWIDTH) << ">" << filter_string(current->service_name) << "</td>";
+						"<td id=\"channel\" width=" << eString().sprintf("%d", CHANNELWIDTH) << ">" << filter_string(current->service_name) << "</td>";
 					tablePos += CHANNELWIDTH;
 
 					timeMap::const_iterator It;
@@ -2489,10 +2489,9 @@ public:
 						}
 
 						time_t eventStart = adjust2FifteenMinutes(event.start_time);
-						time_t eventEnd = adjust2FifteenMinutes(event.start_time + event.duration);
+						time_t eventEnd = eventStart + adjust2FifteenMinutes(event.duration);
 
 						int eventDuration = 0;
-						int colWidth = 0;
 						int colUnits = 0;
 						if ((eventStart > end) || (eventEnd < tableTime))
 						{
@@ -2512,11 +2511,9 @@ public:
 						if ((eventStart > tableTime) && (eventStart < end))
 						{
 							eventDuration = eventStart - tableTime;
-							colWidth = eventDuration / 60 * d_min;
-							colUnits = colWidth / d_min / 15;
+							colUnits = eventDuration / 60 / 15;
 							result << "<td colspan=" << colUnits << ">&nbsp;</td>";
 							tableTime = eventStart;
-//							tablePos += colWidth;
 							tablePos += colUnits * 15 * d_min;
 							eventDuration = adjust2FifteenMinutes(event.duration);
 						}
@@ -2527,8 +2524,7 @@ public:
 						if (tableTime + eventDuration > end)
 							eventDuration = end - tableTime;
 
-						colWidth = eventDuration / 60 * d_min;
-						colUnits = colWidth / d_min/ 15;
+						colUnits = eventDuration / 60 / 15;
 						if (colUnits > 0)
 						{
 							result << "<td colspan=" << colUnits << ">";
@@ -2557,13 +2553,12 @@ public:
 								<< short_description
 								<< "</a>"
 
-								<< "</b><br>\n";
+								<< "</b><br>";
 
 							if (eventDuration >= 15 * 60)
 								result << filter_string(ext_description);
 
-							result << "</td>";
-//							tablePos += colWidth;
+							result << "</td\n>";
 							tablePos += colUnits * 15 * d_min;
 							tableTime += eventDuration;
 						}
@@ -2571,7 +2566,7 @@ public:
 					if (tablePos < tableWidth)
 						result << "<td colspan=" << (tableWidth - tablePos) / d_min / 15 << ">&nbsp;</td>";
 
-					result << "</tr>";
+					result << "</tr>\n";
 				}
 				eEPGCache::getInstance()->Unlock();
 
@@ -2603,16 +2598,16 @@ public:
 		std::stringstream result;
 
 		result << "<tr>"
-			<< "<td width=" << eString().sprintf("%d", CHANNELWIDTH) << ">"
+			<< "<th width=" << eString().sprintf("%d", CHANNELWIDTH) << ">"
 			<< "Channel"
 			<< "<br>"
 			<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", CHANNELWIDTH) << "\">"
-			<< "</td>";
+			<< "</th>";
 
 		for (time_t i = start; i < end; i += 15 * 60)
 		{
 			tm* t = localtime(&i);
-			result << "<td width=" << d_min * 15 << ">"
+			result << "<th width=" << d_min * 15 << ">"
 				<< std::setfill('0')
 				<< std::setw(2) << t->tm_mday << '.'
 				<< std::setw(2) << t->tm_mon+1 << "."
@@ -2621,7 +2616,7 @@ public:
 				<< std::setw(2) << t->tm_min << ' '
 				<< "<br>"
 				<< "<img src=\"trans.gif\" border=\"0\" height=\"1\" width=\"" << eString().sprintf("%d", 15 * d_min) << "\">"
-				<< "</td>";
+				<< "</th>";
 		}
 		result << "</tr>";
 

@@ -101,8 +101,8 @@ a:hover {
 	font-size:16pt;
 }
 
-#epg .title {
-	font-size:16pt;
+#mepg channel {
+	font-weight: bold;
 }
 
 #mepg TR {
@@ -114,6 +114,7 @@ a:hover {
 	border: 0px solid #000000;
 }
 
+#mepg TH,
 #mepg TD {
 	border-bottom: 1px solid #98A4B6;
 	border-top: 1px solid #BBC8D4;
@@ -124,6 +125,7 @@ a:hover {
 	padding-left:3px;
 	padding-right:3px;
 	vertical-align: top;
+	text-align: left;
 	background-image: url(mepg_grad.png);
 	background-repeat: repeat-x;
 }
