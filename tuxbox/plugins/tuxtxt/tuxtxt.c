@@ -394,9 +394,9 @@ int Init()
 
 	//open pig
 
-		if((pig = open("/dev/dbox/pig0", O_RDWR)) == -1)
+		if((pig = open("/dev/v4l2/capture0", O_RDWR)) == -1)
 		{
-			perror("TuxTxt <open /dev/dbox/pig0>");
+			perror("TuxTxt <open /dev/v4l2/capture0>");
 			return 0;
 		}
 
@@ -451,9 +451,18 @@ int Init()
 
 void CleanUp()
 {
+	int preview;
+
 	//hide pig
 
-		if(screenmode) avia_pig_hide(pig);
+		if(screenmode) {
+
+			preview = 1;
+			
+			ioctl(pig, VIDIOC_PREVIEW ,&preview);
+			
+		}
+
 
 	//restore videoformat
 
@@ -710,6 +719,7 @@ void ConfigMenu(int Init)
 	struct dmx_pes_filter_params dmx_flt;
 	int val, byte, line, menuitem = 1;
 	int current_pid = 0;
+	int preview;
 
 	char menu[] =	"рсссссссссссссссссссссссссссстшллллллллллллллллллллллллллллллЫ"
 					"у    TuxTxt-Konfiguration    фщлддддддддддддддддддддддддддддлЫ"
@@ -775,7 +785,9 @@ void ConfigMenu(int Init)
 		{
 			screenmode = 0;
 
-			avia_pig_hide(pig);
+			preview = 1;
+			
+			ioctl(pig, VIDIOC_PREVIEW ,&preview);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
@@ -1791,6 +1803,9 @@ void SwitchZoomMode()
 
 void SwitchScreenMode()
 {
+	int preview;
+	struct v4l2_window window;
+
 	//reset transparency mode
 
 		if(transpmode) transpmode = 0;
@@ -1817,10 +1832,19 @@ void SwitchScreenMode()
 			desc.font.pix_width  = 8;
 			desc.font.pix_height = 21;
 
-			avia_pig_set_pos(pig, (StartX+322), StartY);
-			avia_pig_set_size(pig, 320, 526);
-			avia_pig_set_stack(pig, 2);
-			avia_pig_show(pig);
+			window.x = StartX+322;
+			window.y = StartY;
+			window.width = 320;
+			window.height = 526;
+			window.chromakey = 0;
+			window.clips = NULL;
+			window.clipcount = 0;
+			
+			ioctl(pig, VIDIOC_S_WIN, &window);
+			
+			preview = 1;
+			
+			ioctl(pig, VIDIOC_PREVIEW ,&preview);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode2]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode2]);
@@ -1830,7 +1854,9 @@ void SwitchScreenMode()
 			desc.font.pix_width  = 16;
 			desc.font.pix_height = 22;
 
-			avia_pig_hide(pig);
+			preview = 0;
+			
+			ioctl(pig, VIDIOC_PREVIEW ,&preview);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);

@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
-#include <dbox/avia_gt_pig.h>
+#include <linux/videodev.h>
 #include <dbox/avs_core.h>
 #include <dbox/saa7126_core.h>
 #include <dbox/fp.h>
