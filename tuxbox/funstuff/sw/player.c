@@ -15,20 +15,18 @@ int main(int argc, char **argv) {
 
  while(fgets(buffer,255,fd) != NULL) {
   if (pos == 0) {
-   for(;fp>0;fp--)
-    usleep(1000000/15);
+   usleep((1000000/15)*fp);
    sscanf(buffer,"%d",&fp);
-   pos++;
    printf("\033[;H\033[2J");
    printf("%s",y_offset);
   }
   else {
    printf("%s",x_offset);
    printf("%s",buffer);
-   pos++;
-   if (pos > 13)
-    pos=0;
   }
+  pos++;
+  if (pos > 13)
+    pos=0;
  }
 
  pclose(fd);
