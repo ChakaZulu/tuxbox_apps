@@ -18,21 +18,34 @@ function Mute(xy)
 
 function switchChannel(xy, bouquet, channel)
 {
-	document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
-	if (screen.width < 800)
+	if (window.screen.width < 800)
+	{
+		NewWindow('/cgi-bin/zapTo?path='+xy+'&curBouquet='+bouquet+'&curChannel='+channel, 'zap', '1', '1', 'no');
 		setTimeout("reload()", 3000);
+	}
 	else
-		setTimeout("zapHeaderReload()", 3000);
+	{
+		document.location = "/cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
+		setTimeout("zapHeaderReload()", 100);
+	}
 }
 
-function deleteMovie()
+function deleteMovie(xy)
 {
 	if (confirmAction('Do you really want to delete this movie?'))
 	{
-		var selChannel = document.channelselector.channel.selectedIndex;
-		var channel = document.channelselector.channel.options[selChannel].value;
-		document.location = "/cgi-bin/deleteMovie?ref="+channel;
-		setTimeout("reload()", 3000);
+		if (window.screen.width < 800)
+		{
+			document.location = "/cgi-bin/deleteMovie?ref="+xy;
+			setTimeout("reload()", 100);
+		}
+		else
+		{
+			var selChannel = document.channelselector.channel.selectedIndex;
+			var channel = document.channelselector.channel.options[selChannel].value;
+			document.location = "/cgi-bin/deleteMovie?ref="+channel;
+			setTimeout("reload()", 3000);
+		}
 	}
 }
 

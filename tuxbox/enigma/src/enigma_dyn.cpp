@@ -1395,7 +1395,7 @@ public:
 #endif
 		result += "<tr bgcolor=\"";
 		result += (num & 1) ? LIGHTGREY : DARKGREY;
-		result += "\"><td width=50 align=center>";
+		result += "\"><td width=30 align=center>";
 
 		eString serviceRef = ref2string(e);
 		if (!(e.flags & eServiceReference::isDirectory))
