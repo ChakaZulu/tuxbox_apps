@@ -33,6 +33,7 @@
 #define __flashtool__
 
 #include <string>
+#include <vector>
 #include "gui/progressstatus.h"
 
 using namespace std;
@@ -40,6 +41,7 @@ using namespace std;
 
 class CFlashTool
 {
+	private:
 		CProgress_StatusViewer* statusViewer;
 		string mtdDevice;
 		string ErrorMessage;
@@ -55,6 +57,47 @@ class CFlashTool
 
 		bool program( string filename );
 		bool readFromMTD( string filename );
+};
+
+
+class CMTDInfo
+{
+	private:
+
+		struct SMTDPartition
+		{
+			int size;
+			int erasesize;
+			string name;
+			string filename;
+		};
+
+		vector<SMTDPartition*> mtdData;
+		
+		void getPartitionInfo();
+
+		CMTDInfo();
+		~CMTDInfo();
+
+	public: 
+		static CMTDInfo* getInstance();
+	
+		int getMTDCount();
+
+		//mtdinfos abfragen (nach mtdnummer)
+		string getMTDName( int pos );
+		string getMTDFileName( int pos );
+		int getMTDSize( int pos );
+		int getMTDEraseSize( int pos );
+
+		//mtdinfos abfragen (nach mtd-filename)
+		string getMTDName( string filename );
+		string getMTDFileName( string filename );
+		int getMTDSize( string filename );
+		int getMTDEraseSize( string filename );
+
+		int findMTDNumber( string filename );
+
 };
 
 

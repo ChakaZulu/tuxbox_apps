@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.261 2002/05/07 23:39:11 McClean Exp $
+        $Id: neutrino.cpp,v 1.262 2002/05/08 23:45:35 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2504,7 +2504,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 
 	return false;
 }
-
+#include "system/flashtool.h"
 
 /**************************************************************************************
 *                                                                                     *
@@ -2513,9 +2513,11 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.261 2002/05/07 23:39:11 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.262 2002/05/08 23:45:35 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
+
+	CMTDInfo* mi = CMTDInfo::getInstance();
 
 	return CNeutrinoApp::getInstance()->run(argc, argv);
 }

@@ -263,3 +263,121 @@ bool CFlashTool::erase()
 	close(fd);
 	return true;
 }
+
+//-----------------------------------------------------------------------------------------------------------------
+
+CMTDInfo::CMTDInfo()
+{
+	getPartitionInfo();
+}
+
+CMTDInfo::~CMTDInfo()
+{
+	for(int x=0;x<getMTDCount();x++)
+	{
+		delete mtdData[x];
+	}
+	mtdData.clear();
+}
+
+
+CMTDInfo* CMTDInfo::getInstance()
+{
+	static CMTDInfo* MTDInfo = NULL;
+
+	if(!MTDInfo)
+	{
+		MTDInfo = new CMTDInfo();
+	}
+	return MTDInfo;
+}
+
+void CMTDInfo::getPartitionInfo()
+{
+	FILE* fd = fopen("/proc/mtd", "r");
+	if(!fd)
+	{
+		perror("cannot read /proc/mtd");
+		return;
+	}
+	char buf[1000];
+	fgets(buf,sizeof(buf),fd);
+	while(!feof(fd))
+	{
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			char mtdname[50]="";
+			int mtdnr=0;
+			int mtdsize=0;
+			int mtderasesize=0;
+			sscanf(buf, "mtd%d: %x %x \"%s\"\n", &mtdnr, &mtdsize, &mtderasesize, mtdname);
+			printf("-%d-%d-%d-%s-\n", mtdnr, mtdsize, mtderasesize, mtdname);
+			SMTDPartition* tmp = new SMTDPartition;
+				tmp->size = mtdsize;
+				tmp->erasesize = mtderasesize;
+				tmp->name = mtdname;
+				sprintf((char*) &buf, "/dev/mtd/%d", mtdnr);
+				tmp->filename = buf;
+			mtdData.insert( mtdData.end(), tmp);
+		}
+	}
+	fclose(fd);
+}
+
+int CMTDInfo::getMTDCount()
+{
+	return mtdData.size();
+}
+
+string CMTDInfo::getMTDName( int pos )
+{
+	return mtdData[pos]->name;
+}
+
+string CMTDInfo::getMTDFileName( int pos )
+{
+	return mtdData[pos]->filename;
+}
+
+int CMTDInfo::getMTDSize( int pos )
+{
+	return mtdData[pos]->size;
+}
+
+int CMTDInfo::getMTDEraseSize( int pos )
+{
+	return mtdData[pos]->erasesize;
+}
+
+int CMTDInfo::findMTDNumber( string filename )
+{
+	for(int x=0;x<getMTDCount();x++)
+	{
+		if(filename == getMTDFileName(x))
+		{
+			return x;
+		}
+	}
+	return -1;
+}
+
+string CMTDInfo::getMTDName( string filename )
+{
+	return getMTDName( findMTDNumber(filename) );
+}
+
+string CMTDInfo::getMTDFileName( string filename )
+{
+	return getMTDFileName( findMTDNumber(filename) );
+}
+
+int CMTDInfo::getMTDSize( string filename )
+{
+	return getMTDSize( findMTDNumber(filename) );
+}
+
+int CMTDInfo::getMTDEraseSize( string filename )
+{
+	return getMTDEraseSize( findMTDNumber(filename) );
+}
+
