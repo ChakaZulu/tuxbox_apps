@@ -1,7 +1,10 @@
 /*
-  $Id: tuxbox.c,v 1.2 2003/01/09 02:22:07 obi Exp $
+  $Id: tuxbox.c,v 1.3 2003/02/18 18:08:22 zwen Exp $
   
   $Log: tuxbox.c,v $
+  Revision 1.3  2003/02/18 18:08:22  zwen
+   - tuxbox_get_vendor should work with old drivers now (via env. var.)
+
   Revision 1.2  2003/01/09 02:22:07  obi
   read from proc, not from getenv()
 
@@ -49,7 +52,7 @@ static unsigned int tuxbox_read_proc(char *search)
 	file = fopen("/proc/bus/tuxbox", "r");
 
 	if (!file) {
-		perror("/proc/bus/tuxbox");
+		/*perror("/proc/bus/tuxbox"); -> old drivers */
 		return ret;
 	}
 
@@ -119,9 +122,30 @@ char *tuxbox_get_vendor_str(void)
 
 unsigned int tuxbox_get_model(void)
 {
-
-	return tuxbox_read_proc(TUXBOX_TAG_MODEL);
-
+	char strmID[40];
+	int ret;
+	
+	// new driver
+	ret=tuxbox_read_proc(TUXBOX_TAG_MODEL);
+	
+	// old driver
+	if(!ret)
+	{
+		strcpy( strmID, getenv("mID") );
+		int mID = atoi(strmID);
+		switch ( mID )
+		{
+			case 3:
+				ret=TUXBOX_VENDOR_SAGEM;
+				break;
+			case 2:
+				ret=TUXBOX_VENDOR_PHILIPS;
+				break;
+			default:
+				ret=TUXBOX_VENDOR_NOKIA;
+		}
+	}
+	return ret;
 }
 
 char *tuxbox_get_model_str(void)
