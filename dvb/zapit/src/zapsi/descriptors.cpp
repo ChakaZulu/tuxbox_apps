@@ -96,7 +96,6 @@ int sat_deliv_system_desc(char *buffer, int tsid,int diseqc)
   int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)>>4)*10) + (buffer[11]&0xf);
   int fec_inner = (buffer[12]&0xF);
   int polarization = ((buffer[8]&0x60)>>5);
-
 	
 	if (scantransponders.count(tsid) == 0)
 	{
@@ -282,7 +281,7 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 		scanchannels.insert(std::pair<int,scanchannel>((tsid<<16)+sid,scanchannel(servicename,sid,tsid,onid,service_type)));
 	}
 	
-	if (service_type == 1 || service_type == 2)
+	if (service_type == 1 || service_type == 2 || service_type == 4 || service_type == 5)
 		scanbouquets.insert(std::pair<std::string,bouquet_mulmap>(provname.c_str(),bouquet_mulmap(provname, servicename, sid,onid)));
 	
 	}

@@ -46,7 +46,7 @@ int sdt(uint osid, bool scan_mode)
       flt.filter.filter[0] = 0x42;
       flt.filter.mask[0]  =0xFF;
       flt.timeout=25000;
-      flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
+      flt.flags=DMX_CHECK_CRC;
       
       if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
 	perror("DMX_SET_FILTER");
@@ -87,6 +87,7 @@ int sdt(uint osid, bool scan_mode)
 	//exit(0);
 	continue;
       }
+      ioctl(demux, DMX_STOP, 0);
       close(demux);
       break;
     }
