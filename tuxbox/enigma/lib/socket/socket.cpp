@@ -109,7 +109,7 @@ void eSocket::writeit(int)
 int eSocket::writeBlock(const char *data, unsigned int len)
 {
 	rsn->stop();
-	int byteswritten=send(getDescriptor(), data, len, 0);
+	int byteswritten=send(getDescriptor(), data, len, MSG_NOSIGNAL);
 	rsn->start();
 	return byteswritten;
 }
