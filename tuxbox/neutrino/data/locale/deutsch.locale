@@ -343,6 +343,7 @@ scants.bouquet Bouquets
 scants.bouquet_leave nicht ändern
 scants.bouquet_create neu erstellen
 scants.bouquet_erase löschen
+scants.bouquet_satellite Satelliten-Bouquet erstellen (DiSEqC 1.2)
 scants.failed Kanalsuche fehlgeschlagen!
 scants.finished Kanalsuche erfolgreich beendet!
 
