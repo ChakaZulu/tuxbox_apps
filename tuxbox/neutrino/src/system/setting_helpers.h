@@ -70,12 +70,15 @@ class CStreamingNotifier : public CChangeObserver
 		CStreamingNotifier( CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
 		bool changeNotify(const neutrino_locale_t, void *);
 };
+
 class CRecordingNotifier : public CChangeObserver
 {
 	private:
-		CMenuItem* toDisable[13];
+//		CMenuItem* toDisable[15];
+		CMenuItem* toDisable[7];
 	public:
-		CRecordingNotifier(CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
+		CRecordingNotifier(CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
+//		CRecordingNotifier(CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*, CMenuItem*);
 		bool changeNotify(const neutrino_locale_t OptionName, void*);
 };
 
@@ -90,7 +93,7 @@ class CRecordingNotifier2 : public CChangeObserver
 	private:
 		CMenuItem* toDisable[1];
 	public:
-		CRecordingNotifier2( CMenuItem* );
+		CRecordingNotifier2( CMenuItem*);
 		bool changeNotify(const neutrino_locale_t, void *);
 };
 
