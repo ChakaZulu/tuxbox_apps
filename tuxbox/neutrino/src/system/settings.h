@@ -244,6 +244,7 @@ struct SNeutrinoSettings
 	int lcd_power;
 	int lcd_inverse;
    	int lcd_show_volume;
+   	int lcd_autodimm;
 
 	// pictureviewer
 	char   picviewer_slide_time[3];
@@ -299,6 +300,7 @@ struct SNeutrinoSettings
 #define DEFAULT_LCD_CONTRAST			0x0F
 #define DEFAULT_LCD_POWER			0x01
 #define DEFAULT_LCD_INVERSE			0x00
+#define DEFAULT_LCD_AUTODIMM			0x00
 #define DEFAULT_LCD_SHOW_VOLUME			1
 
 //timing

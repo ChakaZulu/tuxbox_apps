@@ -207,16 +207,18 @@ bool CConsoleDestChangeNotifier::changeNotify(string OptionName, void *Data)
 	return true;
 }
 
-CLcdNotifier::CLcdNotifier(int *lcdPowerSetting,int *lcdInverseSetting)
+CLcdNotifier::CLcdNotifier(int *lcdPowerSetting, int *lcdInverseSetting, int *lcdAutoDimmSetting)
 {
-	LcdPowerSetting = lcdPowerSetting;
-	LcdInverseSetting = lcdInverseSetting;
+	LcdPowerSetting    = lcdPowerSetting;
+	LcdInverseSetting  = lcdInverseSetting;
+	LcdAutoDimmSetting = lcdAutoDimmSetting;
 }
 
 bool CLcdNotifier::changeNotify(string OptionName, void *Data)
 {
 	CLCD::getInstance()->setPower(*LcdPowerSetting == 1);
 	CLCD::getInstance()->setInverse(*LcdInverseSetting == 1);
+	CLCD::getInstance()->setAutoDimm(*LcdAutoDimmSetting == 1);
 	//CLCD::getInstance()->update();
 	return true;
 }

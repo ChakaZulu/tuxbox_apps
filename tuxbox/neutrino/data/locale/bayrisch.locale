@@ -234,6 +234,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Eistellunga
 lcdmenu.inverse Invertieren
 lcdmenu.power Pauwa
+lcdmenu.autodimm unset
 lcdmenu.lcdcontroler Kontrast / Helligkeid
 lcdmenu.statusline Statuszeiln
 lcdmenu.statusline.volume Lautstärkn

@@ -234,6 +234,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Settings
 lcdmenu.inverse Invert
 lcdmenu.power Power
+lcdmenu.autodimm Auto dimm
 lcdmenu.lcdcontroler Contrast / Brightness
 lcdmenu.statusline status line
 lcdmenu.statusline.volume volume

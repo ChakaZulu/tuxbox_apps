@@ -234,6 +234,7 @@ colorchooser.alpha alfa
 lcdmenu.head namjestiti tečni kristal
 lcdmenu.inverse invertirati
 lcdmenu.power struja
+lcdmenu.autodimm unset
 lcdmenu.lcdcontroler kontrast / svjetlost
 lcdmenu.statusline statusna linija
 lcdmenu.statusline.volume glasnost

@@ -234,6 +234,7 @@ colorchooser.alpha nasycenie
 lcdmenu.head Ustawienia LCD
 lcdmenu.inverse Inversja
 lcdmenu.power Wl / Wyl
+lcdmenu.autodimm unset
 lcdmenu.lcdcontroler Kontrast / Jasnosc
 lcdmenu.statusline Linia Statusowa
 lcdmenu.statusline.volume Glosnosc

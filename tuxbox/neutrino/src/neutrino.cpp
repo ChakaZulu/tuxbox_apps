@@ -540,6 +540,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.lcd_power = configfile.getInt32("lcd_power", DEFAULT_LCD_POWER);
 	g_settings.lcd_inverse = configfile.getInt32("lcd_inverse", DEFAULT_LCD_INVERSE);
 	g_settings.lcd_show_volume = configfile.getInt32("lcd_show_volume", DEFAULT_LCD_SHOW_VOLUME);
+	g_settings.lcd_autodimm = configfile.getInt32("lcd_autodimm", DEFAULT_LCD_AUTODIMM);
 
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
 	g_settings.picviewer_scaling = configfile.getInt32("picviewer_scaling", 1 /*(int)CPictureViewer::SIMPLE*/);
@@ -581,11 +582,11 @@ int CNeutrinoApp::loadSetup()
 					else if(strncmp(&buffer[8], "tty", 3)==0)
 						g_settings.uboot_console = 2;
 				}
-				else if(strncmp(buffer,"lcd_inverse=", 11) == 0)
+				else if(strncmp(buffer,"lcd_inverse=", 12) == 0)
 				{
 					g_settings.uboot_lcd_inverse = atoi(&buffer[12]);
 				}
-				else if(strncmp(buffer,"lcd_contrast=", 12) == 0)
+				else if(strncmp(buffer,"lcd_contrast=", 13) == 0)
 				{
 					g_settings.uboot_lcd_contrast = atoi(&buffer[13]);
 				}
@@ -874,6 +875,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "lcd_power", g_settings.lcd_power );
 	configfile.setInt32( "lcd_inverse", g_settings.lcd_inverse );
 	configfile.setInt32( "lcd_show_volume", g_settings.lcd_show_volume );
+	configfile.setInt32( "lcd_autodimm", g_settings.lcd_autodimm );
 
 	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
 	configfile.setInt32( "picviewer_scaling", g_settings.picviewer_scaling );
@@ -2034,6 +2036,8 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 {
 	lcdpower = CLCD::getInstance()->getPower()?1:0;
 	static int lcdinverse = CLCD::getInstance()->getInverse()?1:0;
+	static int lcdautodimm = CLCD::getInstance()->getAutoDimm()?1:0;
+
 	dprintf(DEBUG_DEBUG, "init lcdsettings\n");
 	lcdSettings.addItem( new CMenuSeparator() );
 
@@ -2042,7 +2046,7 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 
 	CLcdControler* lcdsliders = new CLcdControler("lcdmenu.head", NULL);
 
-	CLcdNotifier* lcdnotifier = new CLcdNotifier(&lcdpower,&lcdinverse);
+	CLcdNotifier* lcdnotifier = new CLcdNotifier(&lcdpower, &lcdinverse, &lcdautodimm);
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("lcdmenu.inverse", &lcdinverse, true, lcdnotifier );
 	oj->addOption(0, "options.off");
@@ -2053,6 +2057,15 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	lcdSettings.addItem( oj );
+
+	if(g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA)
+	{
+		// Autodimm only on Sagem/Philips available
+		oj = new CMenuOptionChooser("lcdmenu.autodimm", &lcdautodimm, true, lcdnotifier );
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+		lcdSettings.addItem( oj );
+	}
 
 	lcdSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	lcdSettings.addItem( new CMenuForwarder("lcdmenu.lcdcontroler", true, "", lcdsliders ));

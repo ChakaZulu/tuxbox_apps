@@ -197,6 +197,7 @@ void CLCD::setlcdparameter(int dimm, const int contrast, const int power, const 
 void CLCD::setlcdparameter(void)
 {
 	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+	setAutoDimm(g_settings.lcd_autodimm);
 }
 
 void CLCD::showServicename(const std::string name) // UTF-8
@@ -537,12 +538,37 @@ int CLCD::getPower()
 void CLCD::setInverse(int inverse)
 {
 	g_settings.lcd_inverse = inverse;
-	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+	setlcdparameter((mode==MODE_STANDBY)?g_settings.lcd_standbybrightness:g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 int CLCD::getInverse()
 {
 	return g_settings.lcd_inverse;
+}
+
+void CLCD::setAutoDimm(int autodimm)
+{
+	int fd;
+	g_settings.lcd_autodimm = autodimm;
+
+	if ((fd = open("/dev/dbox/fp0", O_RDWR)) == -1)
+	{
+		perror("[lcdd] open '/dev/dbox/fp0' failed");
+	}
+	else
+	{
+		if( ioctl(fd, FP_IOCTL_LCD_AUTODIMM, &autodimm) < 0 )
+		{
+			perror("[lcdd] set autodimm failed!");
+		}
+
+		close(fd);
+	}
+}
+
+int CLCD::getAutoDimm()
+{
+	return g_settings.lcd_autodimm;
 }
 
 void CLCD::setMuted(bool mu)

@@ -127,6 +127,9 @@ class CLCD
 		void setInverse(int);
 		int getInverse();
 
+		void setAutoDimm(int);
+		int getAutoDimm();
+
 		void setMuted(bool);
 
 		void resume();

@@ -108,9 +108,9 @@ class CCableSpectalInversionNotifier : public CChangeObserver
 class CLcdNotifier : public CChangeObserver
 {
 	private:
-		int *LcdPowerSetting, *LcdInverseSetting;
+		int *LcdPowerSetting, *LcdInverseSetting, *LcdAutoDimmSetting;
 	public:
-		CLcdNotifier(int *lcdPowerSetting,int *lcdInverseSetting);
+		CLcdNotifier(int *lcdPowerSetting, int *lcdInverseSetting, int *lcdAutoDimmSetting);
 		bool changeNotify(string OptionName, void*);
 };
 

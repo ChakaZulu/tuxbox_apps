@@ -234,6 +234,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Ischtöuigä
 lcdmenu.inverse Invertierä
 lcdmenu.power Power
+lcdmenu.autodimm unset
 lcdmenu.lcdcontroler Kontrascht / Häuigkeit
 lcdmenu.statusline Schtatuszilä
 lcdmenu.statusline.volume Lutschtärchi

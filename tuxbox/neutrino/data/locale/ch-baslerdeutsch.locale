@@ -234,6 +234,7 @@ colorchooser.alpha alpha
 lcdmenu.head LCD Iistellige
 lcdmenu.inverse Inverdiere
 lcdmenu.power Pfuus
+lcdmenu.autodimm unset
 lcdmenu.lcdcontroler Kontrast / Hälligkeit
 lcdmenu.statusline Statusziile
 lcdmenu.statusline.volume Lutstärki
