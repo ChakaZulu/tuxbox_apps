@@ -9,12 +9,27 @@
 #ifndef i386
 #include <dbox/avia_pig.h>
 
-static	int							fd = -1;
+static	int			fd = -1;
+static	int			l_x = 0;
+static	int			l_y = 0;
+static	int			l_width = 0;
+static	int			l_height = 0;
 
 void	Fx2SetPig( int x, int y, int width, int height )
 {
-	avia_pig_set_pos(fd,x,y);
-	avia_pig_set_size(fd,width,height);
+	if (( x == l_x ) && ( y == l_y ) &&
+		( width == l_height ) && ( height == l_height ))
+			return;
+	avia_pig_hide(fd);
+	if (( x != l_x ) || ( y != l_y ))
+		avia_pig_set_pos(fd,x,y);
+	if (( width != l_height ) || ( height != l_height ))
+		avia_pig_set_size(fd,width,height);
+	l_x=x;
+	l_y=y;
+	l_width=width;
+	l_height=height;
+	avia_pig_show(fd);
 }
 
 void	Fx2ShowPig( int x, int y, int width, int height )
@@ -29,8 +44,13 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 	if ( fd == -1 )
 		return;
 
-	Fx2SetPig( x, y, width, height );
-	avia_pig_set_stack(fd,0);
+	l_x=x;
+	l_y=y;
+	l_width=width;
+	l_height=height;
+	avia_pig_set_pos(fd,x,y);
+	avia_pig_set_size(fd,width,height);
+	avia_pig_set_stack(fd,1);
 
 	avia_pig_show(fd);
 }
