@@ -1484,7 +1484,7 @@ public:
 		eString serviceRef = ref2string(e);
 
 		if (!(e.flags & eServiceReference::isDirectory))
-			result += "<a href=\"/wap?mode=zapto?path=\"" + serviceRef + "\">";
+			result += "<a href=\"/wap?mode=zapto&path=" + serviceRef + "\">";
 		else
 			result += "<a href=\"/wap?mode=zap&path=" + serviceRef + "\">";
 
