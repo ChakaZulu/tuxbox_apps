@@ -13,11 +13,11 @@ eHTTPFile::eHTTPFile(eHTTPConnection *c, int _fd, int method, const char *mime):
 	if (method == methodGET)
 	{
 		c->local_header["Content-Type"]=eString(mime);
-		size=lseek(fd, 0, SEEK_END);
-		char asize[10];
-		snprintf(asize, 10, "%d", size);
+		size=lseek64(fd, 0, SEEK_END);
+		char asize[32];
+		snprintf(asize, 32, "%lld", size);
 		lseek(fd, 0, SEEK_SET);
-		c->local_header["Content-Length"]=eString(asize);
+		c->local_header["Content-Length"]=asize;
 	}
 	connection->code_descr="OK";
 	connection->code=200;

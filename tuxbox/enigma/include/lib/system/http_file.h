@@ -5,7 +5,8 @@
 
 class eHTTPFile: public eHTTPDataSource
 {
-	int fd, size;
+	int fd;
+	off64_t size;
 	const char *mime;
 	int method;
 public:
