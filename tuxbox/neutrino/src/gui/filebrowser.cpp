@@ -639,7 +639,7 @@ void CFileBrowser::paintFoot()
 {
 //	int ButtonWidth = 25;
 	int dx = width / 4;
-	int type = filelist[selected].getType();
+	int type;
 	int by = y + height - (foheight -4);
 	int ty = by + g_Fonts->infobar_small->getHeight();
 
@@ -648,6 +648,7 @@ void CFileBrowser::paintFoot()
 	if(filelist.size()>0)
 	{
 		string nextsort;
+		type = filelist[selected].getType();
 
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
