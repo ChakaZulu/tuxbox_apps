@@ -5,7 +5,7 @@ function channelChange()
 	if (j >= 0)
 	{
 		channel = document.channelselector.channel.options[j].value;
-		alert("Switch to: " + channel);
+		switchChannel(channel);
 	}
 }
 function bouquetChange()
@@ -20,7 +20,7 @@ function epg()
 	if (j >= 0)
 	{
 		channel = document.channelselector.channel.options[j].value;
-		alert("EPG for: " + channel);
+		openEPG(channel);
 	}
 	else
 		alert("No Channel selected");
@@ -29,7 +29,7 @@ function mepg()
 {
 	var i = document.channelselector.bouquet.selectedIndex;
 	var bouquet = document.channelselector.bouquet.options[i].value;
-	alert("Multi-EPG for: " + bouquet);
+	openMultiEPG(bouquet);
 }
 function loadChannels(bouquet)
 {
