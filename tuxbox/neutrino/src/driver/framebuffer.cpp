@@ -724,11 +724,11 @@ bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t
 		return false;
 	}
 
-	if ((stride == 0) || (stride == width))
-		read(fd, memp, width * height * sizeof(fb_pixel_t));
+	if ((stride == 0) || (stride == width * sizeof(fb_pixel_t)))
+		read(fd, memp, height * width * sizeof(fb_pixel_t));
 	else
 		for (int i = 0; i < height; i++)
-			read(fd, memp + i * stride, width);
+			read(fd, ((uint8_t *)memp) + i * stride, width * sizeof(fb_pixel_t));
 
 	close(fd);
 	return true;
@@ -811,6 +811,18 @@ bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned c
 		}
 	}
 
+#ifndef FB_USE_PALETTE
+	fb_pixel_t * dest = background + BACKGROUNDIMAGEWIDTH * 576;
+	uint8_t    * src  = ((uint8_t * )background)+ BACKGROUNDIMAGEWIDTH * 576;
+	for (int i = 576 - 1; i >= 0; i--)
+		for (int j = BACKGROUNDIMAGEWIDTH - 1; j >= 0; j--)
+		{
+			dest--;
+			src--;
+			paintPixel(dest, *src);
+		}
+#endif
+
 	backgroundFilename = filename;
 
 	return true;
@@ -864,7 +876,7 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	else
 	{
 		uint8_t * fbpos = ((uint8_t *)getFrameBufferPointer()) + x * sizeof(fb_pixel_t) + stride * y;
-		uint8_t * bkpos = ((uint8_t *)background) + x * sizeof(fb_pixel_t) + BACKGROUNDIMAGEWIDTH * y;
+		fb_pixel_t * bkpos = background + x + BACKGROUNDIMAGEWIDTH * y;
 		for(int count = 0;count < dy; count++)
 		{
 			memcpy(fbpos, bkpos, dx * sizeof(fb_pixel_t));
@@ -882,7 +894,7 @@ void CFrameBuffer::paintBackground()
 	if (useBackgroundPaint && (background != NULL))
 	{
 		for (int i = 0; i < 576; i++)
-			memcpy(getFrameBufferPointer() + i * stride, background + i * BACKGROUNDIMAGEWIDTH, BACKGROUNDIMAGEWIDTH);
+			memcpy(((uint8_t *)getFrameBufferPointer()) + i * stride, (background + i * BACKGROUNDIMAGEWIDTH), BACKGROUNDIMAGEWIDTH * sizeof(fb_pixel_t));
 	}
 	else
 		memset(getFrameBufferPointer(), backgroundColor, stride * 576);
