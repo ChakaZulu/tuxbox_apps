@@ -1,4 +1,4 @@
-EXTRA_DIST = d_a.bmp
+EXTRA_DIST = *.bmp
 
 install-data-local:
 	install -d $(DATADIR)/lcdd/clock
