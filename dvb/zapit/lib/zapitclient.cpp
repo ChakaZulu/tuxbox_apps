@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.49 2002/09/24 00:13:26 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.50 2002/09/25 14:53:57 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -24,14 +24,6 @@
  */
 
 #include <stdio.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <sys/socket.h>
-
 
 /* libevent */
 #include <eventserver.h>
@@ -40,72 +32,25 @@
 #include "zapitclient.h"
 
 
-
-CZapitClient::CZapitClient()
+inline bool CZapitClient::zapit_connect()
 {
-	sock_fd = -1;
+	return open_connection(ZAPIT_UDS_NAME);
 }
 
-bool CZapitClient::zapit_connect()
+inline void CZapitClient::zapit_close()
 {
-	zapit_close();
-
-	struct sockaddr_un servaddr;
-	int clilen;
-	std::string filename = ZAPIT_UDS_NAME;
-
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, filename.c_str());
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-
-	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("zapitclient: socket");
-		sock_fd = -1;
-		return false;
-	}
-
-	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
-	{
-		perror("zapitclient: connect");
-		zapit_close();
-		return false;
-	}
-	return true;
+	close_connection();
 }
 
-void CZapitClient::zapit_close()
-{
-	if(sock_fd != -1)
-	{
-		close(sock_fd);
-		sock_fd = -1;
-	}
-}
-
-inline void CZapitClient::send(char* data, const unsigned int size)
-{
-	if (sock_fd != -1)
-		write(sock_fd, data, size);
-}
-
-bool CZapitClient::receive(char* data, const unsigned int size)
-{
-	if (sock_fd == -1)
-		return false;
-	else
-		return (read(sock_fd, data, size) > 0);
-}
-
-void CZapitClient::send(const commands command, char* data, const unsigned int size)
+void CZapitClient::send(const commands command, char* data = NULL, const unsigned int size = 0)
 {
 	commandHead msgHead;
 	msgHead.version = ACTVERSION;
 	msgHead.cmd     = command;
 	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
-	send(data, size);
+	send_data((char*)&msgHead, sizeof(msgHead));
+	if (size != 0)
+	    send_data(data, size);
 }
 
 /***********************************************/
@@ -141,15 +86,10 @@ void CZapitClient::zapTo( unsigned int channel )
 
 t_channel_id CZapitClient::getCurrentServiceID()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_GET_CURRENT_SERVICEID;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_GET_CURRENT_SERVICEID);
 
 	responseGetCurrentServiceID response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	zapit_close();
 
@@ -158,15 +98,10 @@ t_channel_id CZapitClient::getCurrentServiceID()
 
 CZapitClient::CCurrentServiceInfo CZapitClient::getCurrentServiceInfo()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_GET_CURRENT_SERVICEINFO;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_GET_CURRENT_SERVICEINFO);
 
 	responseCurrentServiceInfo response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	CZapitClient::CCurrentServiceInfo erg;
 
@@ -186,15 +121,10 @@ CZapitClient::CCurrentServiceInfo CZapitClient::getCurrentServiceInfo()
 
 void CZapitClient::getLastChannel(unsigned int &channumber, char &mode)
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_GET_LAST_CHANNEL;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_GET_LAST_CHANNEL);
 
 	responseGetLastChannel response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 	channumber = response.channelNumber;
 	mode = response.mode;
 
@@ -222,7 +152,7 @@ unsigned int CZapitClient::zapTo_serviceID(const t_channel_id channel_id)
 	send(CMD_ZAPTO_SERVICEID, (char*)&msg, sizeof(msg));
 
 	responseZapComplete response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	zapit_close();
 
@@ -238,7 +168,7 @@ unsigned int CZapitClient::zapTo_subServiceID(const t_channel_id channel_id)
 	send(CMD_ZAPTO_SUBSERVICEID, (char*)&msg, sizeof(msg));
 
 	responseZapComplete response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	zapit_close();
 
@@ -284,34 +214,26 @@ void CZapitClient::setMode( channelsMode mode )
 void CZapitClient::setSubServices( subServiceList& subServices )
 {
 	unsigned int i;
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_SETSUBSERVICES;
 
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_SETSUBSERVICES);
 
 	for (i = 0; i< subServices.size(); i++)
-		send((char*)&subServices[i], sizeof(subServices[i]));
+		send_data((char*)&subServices[i], sizeof(subServices[i]));
 
 	zapit_close();
 }
 
 void CZapitClient::getPIDS( responseGetPIDs& pids )
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_GETPIDS;
+	send(CMD_GETPIDS);
 
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
 	responseGetOtherPIDs response;
-    receive((char* )&response, sizeof(response));
-    memcpy(&pids.PIDs, &response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+	memcpy(&pids.PIDs, &response, sizeof(response));
 
 	responseGetAPIDs responseAPID;
 	pids.APIDs.clear();
-	while ( receive((char*)&responseAPID, sizeof(responseAPID)))
+	while ( CBasicClient::receive_data((char*)&responseAPID, sizeof(responseAPID)))
 		pids.APIDs.insert( pids.APIDs.end(), responseAPID );
 	zapit_close();
 }
@@ -319,18 +241,14 @@ void CZapitClient::getPIDS( responseGetPIDs& pids )
 /* gets all bouquets */
 void CZapitClient::getBouquets( BouquetList& bouquets, bool emptyBouquetsToo)
 {
-	commandHead msgHead;
 	commandGetBouquets msg;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_GET_BOUQUETS;
+
 	msg.emptyBouquetsToo = emptyBouquetsToo;
 
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
-	send((char*)&msg, sizeof(msg));
+	send(CMD_GET_BOUQUETS, (char*)&msg, sizeof(msg));
 
 	responseGetBouquets response;
-	while ( receive((char*)&response, sizeof(responseGetBouquets)))
+	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquets)))
 		bouquets.insert( bouquets.end(), response);
 	zapit_close();
 }
@@ -346,7 +264,7 @@ void CZapitClient::getBouquetChannels( unsigned int bouquet, BouquetChannelList&
 	send(CMD_GET_BOUQUET_CHANNELS, (char*)&msg, sizeof(msg));
 
 	responseGetBouquetChannels response;
-	while ( receive((char*)&response, sizeof(responseGetBouquetChannels)))
+	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
 		channels.insert( channels.end(), response);
 	zapit_close();
 }
@@ -362,7 +280,7 @@ void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 	send(CMD_GET_CHANNELS, (char*)&msg, sizeof(msg));
 
 	responseGetBouquetChannels response;
-	while ( receive((char*)&response, sizeof(responseGetBouquetChannels)))
+	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
 		channels.insert( channels.end(), response);
 	zapit_close();
 }
@@ -370,30 +288,20 @@ void CZapitClient::getChannels( BouquetChannelList& channels, channelsMode mode,
 /* restore bouquets so as if they where just loaded*/
 void CZapitClient::restoreBouquets()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_RESTORE_BOUQUETS;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_RESTORE_BOUQUETS);
 
 	responseCmd response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 	zapit_close();
 }
 
 /* reloads channels and services*/
 void CZapitClient::reinitChannels()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_REINIT_CHANNELS;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_REINIT_CHANNELS);
 
 	responseCmd response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 	zapit_close();
 }
 
@@ -401,15 +309,10 @@ void CZapitClient::reinitChannels()
 /* commit bouquet change */
 void CZapitClient::commitBouquetChange()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_COMMIT_BOUQUET_CHANGE;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_COMMIT_BOUQUET_CHANGE);
 
 	responseCmd response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 	zapit_close();
 }
 
@@ -453,7 +356,7 @@ bool CZapitClient::startScan()
 	if (!zapit_connect())
 		return false;
 
-	send((char*)&msgHead, sizeof(msgHead));
+	send_data((char*)&msgHead, sizeof(msgHead));
 
 	zapit_close();
 
@@ -463,15 +366,10 @@ bool CZapitClient::startScan()
 /* query if ts-scan is ready - response gives status */
 bool CZapitClient::isScanReady(unsigned int &satellite, unsigned int &transponder, unsigned int &services )
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_SCANREADY;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_SCANREADY);
 
 	responseIsScanReady response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	satellite = response.satellite;
 	transponder = response.transponder;
@@ -484,15 +382,10 @@ bool CZapitClient::isScanReady(unsigned int &satellite, unsigned int &transponde
 /* query possible satellits*/
 void CZapitClient::getScanSatelliteList( SatelliteList& satelliteList )
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_SCANGETSATLIST;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_SCANGETSATLIST);
 
 	responseGetSatelliteList response;
-	while ( receive((char*)&response, sizeof(responseGetSatelliteList)))
+	while ( CBasicClient::receive_data((char*)&response, sizeof(responseGetSatelliteList)))
 		satelliteList.insert( satelliteList.end(), response);
 
 	zapit_close();
@@ -502,15 +395,11 @@ void CZapitClient::getScanSatelliteList( SatelliteList& satelliteList )
 /* tell zapit which satellites to scan*/
 void CZapitClient::setScanSatelliteList( ScanSatelliteList& satelliteList )
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_SCANSETSCANSATLIST;
+	send(CMD_SCANSETSCANSATLIST);
 
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
 	for (uint i=0; i<satelliteList.size(); i++)
 	{
-		send((char*)&satelliteList[i], sizeof(satelliteList[i]));
+		send_data((char*)&satelliteList[i], sizeof(satelliteList[i]));
 	}
 	zapit_close();
 }
@@ -580,7 +469,7 @@ unsigned int CZapitClient::existsBouquet(std::string name)
 
 	send(CMD_BQ_EXISTS_BOUQUET, (char*)&msg, sizeof(msg));
 
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 	zapit_close();
 	return (unsigned int) response.number;
 }
@@ -600,7 +489,7 @@ bool CZapitClient::existsChannelInBouquet(const unsigned int bouquet, const t_ch
 
 	send(CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET, (char*)&msg, sizeof(msg));
 
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 	zapit_close();
 	return (unsigned int) response.status;
 }
@@ -705,12 +594,7 @@ void CZapitClient::setBouquetHidden( unsigned int bouquet, bool hidden)
 /* necessarily after bouquet editing operations*/
 void CZapitClient::renumChannellist()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_BQ_RENUM_CHANNELLIST;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_BQ_RENUM_CHANNELLIST);
 	zapit_close();
 }
 
@@ -718,15 +602,10 @@ void CZapitClient::renumChannellist()
 /* saves current bouquet configuration to bouquets.xml*/
 void CZapitClient::saveBouquets()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_BQ_SAVE_BOUQUETS;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_BQ_SAVE_BOUQUETS);
 
 	responseCmd response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	zapit_close();
 }
@@ -734,37 +613,22 @@ void CZapitClient::saveBouquets()
 
 void CZapitClient::startPlayBack()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_SB_START_PLAYBACK;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_SB_START_PLAYBACK);
 	zapit_close();
 }
 
 void CZapitClient::stopPlayBack()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_SB_STOP_PLAYBACK;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_SB_STOP_PLAYBACK);
 	zapit_close();
 }
 
 bool CZapitClient::isPlayBackActive()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_SB_GET_PLAYBACK_ACTIVE;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_SB_GET_PLAYBACK_ACTIVE);
 
 	responseGetPlaybackState response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	zapit_close();
 	return response.activated;
@@ -796,15 +660,10 @@ void CZapitClient::setRecordMode( bool activate )
 
 bool CZapitClient::isRecordModeActive()
 {
-	commandHead msgHead;
-	msgHead.version=ACTVERSION;
-	msgHead.cmd=CMD_GET_RECORD_MODE;
-
-	zapit_connect();
-	send((char*)&msgHead, sizeof(msgHead));
+	send(CMD_GET_RECORD_MODE);
 
 	responseGetRecordModeState response;
-	receive((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response));
 
 	zapit_close();
 	return response.activated;

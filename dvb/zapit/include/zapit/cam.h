@@ -1,7 +1,8 @@
 /*
- * $Id: cam.h,v 1.17 2002/09/21 17:58:42 thegoodguy Exp $
+ * $Id: cam.h,v 1.18 2002/09/25 14:53:58 thegoodguy Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>,
+ *             thegoodguy         <thegoodguy@berlios.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,21 +24,14 @@
 #define __cam_h__
 
 #include "ci.h"
+#include <clientlib/basicclient.h>
 
-class CCam
+class CCam : public CBasicClient
 {
 	private:
-		int camdSocket;
-
-		bool camdConnect ();
-		void camdDisconnect ();
-
-		int sendMessage (unsigned char * data, unsigned short length);
-
+		bool sendMessage (char* data, const unsigned short length);
 	public:
-		CCam();
-
-		int setCaPmt (CCaPmt * caPmt);
+		bool setCaPmt (CCaPmt* caPmt);
 };
 
 #endif /* __cam_h__ */
