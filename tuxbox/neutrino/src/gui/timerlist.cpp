@@ -495,7 +495,7 @@ void CTimerList::paintItem(int pos)
 					zAddData = convertChannelId2String(timer.channel_id, timer.mode); // UTF-8
 					if(strlen(timer.apids) != 0)
 					{
-						zAddData += std::string(" (") + timer.apids + ")"; // must be UTF-8 encoded !
+						zAddData += std::string(" (") + timer.apids + ')'; // must be UTF-8 encoded !
 					}
 					if(timer.epgID!=0)
 					{
@@ -503,7 +503,7 @@ void CTimerList::paintItem(int pos)
 						if (g_Sectionsd->getEPGid(timer.epgID, timer.epg_starttime, &epgdata))
 						{
 #warning fixme sectionsd should deliver data in UTF-8 format
-							zAddData+= " : " + Latin1_to_UTF8(epgdata.title);
+							zAddData += " : " + Latin1_to_UTF8(epgdata.title);
 						}
 					}
 				}
@@ -534,7 +534,7 @@ void CTimerList::paintItem(int pos)
 				case CTimerd::TIMER_NEXTPROGRAM :
 				case CTimerd::TIMER_ZAPTO :
 					{
-						line1 += " ";
+						line1 += ' ';
 						line1 += convertChannelId2String(timer.channel_id,timer.mode); // UTF-8
 					}
 					break;

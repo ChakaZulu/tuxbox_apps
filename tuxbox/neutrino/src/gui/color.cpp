@@ -30,10 +30,10 @@
 */
 
 
-#include "color.h"
+#include <gui/color.h>
 
 
-int convertSetupColor2RGB(unsigned char r, unsigned char g, unsigned char b)
+int convertSetupColor2RGB(const unsigned char r, const unsigned char g, const unsigned char b)
 {
 	unsigned char red =  	int( float(255./100.)*float(r) );
 	unsigned char green =  	int( float(255./100.)*float(g) );

@@ -101,7 +101,7 @@ CPictureViewerGui::~CPictureViewerGui()
 }
 
 //------------------------------------------------------------------------
-int CPictureViewerGui::exec(CMenuTarget* parent, string actionKey)
+int CPictureViewerGui::exec(CMenuTarget* parent, std::string actionKey)
 {
 	selected = 0;
 	width = 710;
@@ -324,7 +324,7 @@ int CPictureViewerGui::show()
 						{
 							CPicture pic;
 							pic.Filename = files->Name;
-							string tmp   = files->Name.substr(files->Name.rfind('/')+1);
+							std::string tmp   = files->Name.substr(files->Name.rfind('/')+1);
 							pic.Name     = tmp.substr(0,tmp.rfind('.'));
 							pic.Type     = tmp.substr(tmp.rfind('.')+1);
 							struct stat statbuf;
@@ -518,7 +518,7 @@ void CPictureViewerGui::paintItem(int pos)
 	frameBuffer->paintBoxRel(x,ypos, width-15, fheight, color);
 	if(liststart+pos<playlist.size())
 	{
-		string tmp=playlist[liststart+pos].Name + " (" + playlist[liststart+pos].Type + ")";
+		std::string tmp=playlist[liststart+pos].Name + " (" + playlist[liststart+pos].Type + ')';
 		char timestring[18];
 		strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&playlist[liststart+pos].Date));
 		int w = g_Fonts->menu->getRenderWidth(timestring);
@@ -534,7 +534,7 @@ void CPictureViewerGui::paintItem(int pos)
 void CPictureViewerGui::paintHead()
 {
 //	printf("paintHead{\n");
-	string strCaption = g_Locale->getText("pictureviewer.head");
+	std::string strCaption = g_Locale->getText("pictureviewer.head");
 	frameBuffer->paintBoxRel(x,y, width,theight, COL_MENUHEAD);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+10);
 	g_Fonts->menu_title->RenderString(x+35,y+theight+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
@@ -561,8 +561,8 @@ void CPictureViewerGui::paintFoot()
 		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("pictureviewer.show"), COL_INFOBAR, 0, true); // UTF-8
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth2 + 25, y+(height-buttonHeight)-3);
-		string tmp = g_Locale->getText("pictureviewer.sortorder");
-		tmp += " ";
+		std::string tmp = g_Locale->getText("pictureviewer.sortorder");
+		tmp += ' ';
 		if(m_sort==FILENAME)
 			tmp += g_Locale->getText("pictureviewer.sortorder.date");
 		else if(m_sort==DATE)

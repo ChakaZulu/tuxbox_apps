@@ -425,7 +425,7 @@ int CMP3PlayerGui::show()
                            cLine[strlen(cLine)-1]=0;
                         if(strlen(cLine) > 0 && cLine[0]!='#') 
                         {
-                           std::string filename = sPath + "/" + cLine;
+                           std::string filename = sPath + '/' + cLine;
                            
                            unsigned int pos;
                            while((pos=filename.find('\\'))!=std::string::npos)
@@ -662,7 +662,7 @@ void CMP3PlayerGui::paintItem(int pos)
       if (!playlist[liststart+pos].Title.empty())
 			title= playlist[liststart+pos].Title;
       if (!playlist[liststart+pos].Album.empty())
-         album=" (" + playlist[liststart+pos].Album + ")";
+         album=" (" + playlist[liststart+pos].Album + ')';
       if(g_settings.mp3player_display == TITLE_ARTIST)
          tmp += title + ", " + artist + album;
       else //if(g_settings.mp3player_display == ARTIST_TITLE)
@@ -1221,7 +1221,7 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 		g_Fonts->menu->RenderString(x+width-w-5, ypos2 + 2 + 1*fheight, w, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
 		tmp = playlist[selected].Artist;
 		if (!(playlist[selected].Album.empty()))
-			tmp += " (" + playlist[selected].Album + ")";
+			tmp += " (" + playlist[selected].Album + ')';
 		g_Fonts->menu->RenderString(x+10, ypos2 + 2*fheight-2, width- 20, tmp, COL_MENUCONTENTDARK, 0, true); // UTF-8
 	}
 	else

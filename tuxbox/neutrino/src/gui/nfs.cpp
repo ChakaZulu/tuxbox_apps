@@ -385,17 +385,17 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	
    if(fstype == NFS)
 	{
-      cmd = std::string("mount -t nfs ") + ip + ":" + dir + " " + local_dir + " -o " + 
+      cmd = std::string("mount -t nfs ") + ip + ':' + dir + ' ' + local_dir + " -o " + 
          g_settings.network_nfs_mount_options[0];
 	}
 	else
 	{
-		cmd = std::string("mount -t cifs //") + ip + "/" + dir + " " + local_dir + 
+		cmd = std::string("mount -t cifs //") + ip + '/' + dir + ' ' + local_dir + 
          " -o username=" +  username + ",password=" + password + 
-         ",unc=//" + ip + "/" + dir + "," + g_settings.network_nfs_mount_options[0];
+         ",unc=//" + ip + '/' + dir + ',' + g_settings.network_nfs_mount_options[0];
 	}
    if(g_settings.network_nfs_mount_options[1][0] !='\0')
-      cmd = cmd + "," + g_settings.network_nfs_mount_options[1];
+      cmd = cmd + ',' + g_settings.network_nfs_mount_options[1];
 
 	sprintf(buffer,"%s",cmd.c_str());
 	pthread_create(&g_mnt, 0, mount_thread, buffer);

@@ -1,43 +1,43 @@
 /*
-	Neutrino-GUI  -   DBoxII-Project
+  Neutrino-GUI  -   DBoxII-Project
 
-	Movieplayer (c) 2003 by gagga
-	Based on code by Dirch, obi and the Metzler Bros. Thanks.
+  Movieplayer (c) 2003 by gagga
+  Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.45 2003/09/12 17:25:04 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.46 2003/09/12 18:10:01 thegoodguy Exp $
 
-	Homepage: http://www.giggo.de/dbox2/movieplayer.html
+  Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
-	License: GPL
+  License: GPL
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /* KNOWN ISSUES:
-  - AC3 handling does not work
-  - TS which are played back from CIFS drives may not work in a good quality.
+   - AC3 handling does not work
+   - TS which are played back from CIFS drives may not work in a good quality.
 */
 
 
 /* TODOs / Release Plan:
- - always: fix bugs
-(currently planned order)
- - Nicer UI
- - Chapter support for DVD and (S)VCD
- - Playing from Bookmarks
- - MP3 HTTP streaming
+   - always: fix bugs
+   (currently planned order)
+   - Nicer UI
+   - Chapter support for DVD and (S)VCD
+   - Playing from Bookmarks
+   - MP3 HTTP streaming
 */
 
 #ifdef HAVE_CONFIG_H
@@ -129,40 +129,40 @@ bool avpids_found;
 size_t
 CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 {
-  return size * nmemb;
+	return size * nmemb;
 }
 
 //------------------------------------------------------------------------
 
 CMoviePlayerGui::CMoviePlayerGui ()
 {
-  frameBuffer = CFrameBuffer::getInstance ();
+	frameBuffer = CFrameBuffer::getInstance ();
 
-  visible = false;
-  selected = 0;
+	visible = false;
+	selected = 0;
 
-  filebrowser = new CFileBrowser ();
-  filebrowser->Multi_Select = false;
-  filebrowser->Dirs_Selectable = false;
-  videofilefilter.addFilter ("ts");
-  videofilefilter.addFilter ("ps");
-  videofilefilter.addFilter ("mpg");
-  videofilefilter.addFilter ("m2p");
-  videofilefilter.addFilter ("avi");
-  filebrowser->Filter = &videofilefilter;
-  if (strlen (g_settings.network_nfs_moviedir) != 0)
-    Path = g_settings.network_nfs_moviedir;
-  else
-    Path = "/";
+	filebrowser = new CFileBrowser ();
+	filebrowser->Multi_Select = false;
+	filebrowser->Dirs_Selectable = false;
+	videofilefilter.addFilter ("ts");
+	videofilefilter.addFilter ("ps");
+	videofilefilter.addFilter ("mpg");
+	videofilefilter.addFilter ("m2p");
+	videofilefilter.addFilter ("avi");
+	filebrowser->Filter = &videofilefilter;
+	if (strlen (g_settings.network_nfs_moviedir) != 0)
+		Path = g_settings.network_nfs_moviedir;
+	else
+		Path = "/";
 }
 
 //------------------------------------------------------------------------
 
 CMoviePlayerGui::~CMoviePlayerGui ()
 {
-  delete filebrowser;
-  g_Zapit->setStandby (false);
-  g_Sectionsd->setPauseScanning (false);
+	delete filebrowser;
+	g_Zapit->setStandby (false);
+	g_Sectionsd->setPauseScanning (false);
 
 }
 
@@ -170,94 +170,94 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 int
 CMoviePlayerGui::exec (CMenuTarget * parent, std::string actionKey)
 {
-  current = -1;
-  selected = 0;
+	current = -1;
+	selected = 0;
 
-  //define screen width
-  width = 710;
-  if ((g_settings.screen_EndX - g_settings.screen_StartX) <
-      width + MOVIEPLAYER_ConnectLineBox_Width)
-    width =
-      (g_settings.screen_EndX - g_settings.screen_StartX) -
-      MOVIEPLAYER_ConnectLineBox_Width;
+	//define screen width
+	width = 710;
+	if ((g_settings.screen_EndX - g_settings.screen_StartX) <
+	    width + MOVIEPLAYER_ConnectLineBox_Width)
+		width =
+			(g_settings.screen_EndX - g_settings.screen_StartX) -
+			MOVIEPLAYER_ConnectLineBox_Width;
 
-  //define screen height
-  height = 570;
-  if ((g_settings.screen_EndY - g_settings.screen_StartY) < height)
-    height = (g_settings.screen_EndY - g_settings.screen_StartY);
-  buttonHeight = min (25, g_Fonts->infobar_small->getHeight ());
-  theight = g_Fonts->menu_title->getHeight ();
-  fheight = g_Fonts->menu->getHeight ();
-  sheight = g_Fonts->infobar_small->getHeight ();
-  title_height = fheight * 2 + 20 + sheight + 4;
-  info_height = fheight * 2;
-  listmaxshow =
-    (height - info_height - title_height - theight -
-     2 * buttonHeight) / (fheight);
-  height = theight + info_height + title_height + 2 * buttonHeight + listmaxshow * fheight;	// recalc height
+	//define screen height
+	height = 570;
+	if ((g_settings.screen_EndY - g_settings.screen_StartY) < height)
+		height = (g_settings.screen_EndY - g_settings.screen_StartY);
+	buttonHeight = min (25, g_Fonts->infobar_small->getHeight ());
+	theight = g_Fonts->menu_title->getHeight ();
+	fheight = g_Fonts->menu->getHeight ();
+	sheight = g_Fonts->infobar_small->getHeight ();
+	title_height = fheight * 2 + 20 + sheight + 4;
+	info_height = fheight * 2;
+	listmaxshow =
+		(height - info_height - title_height - theight -
+		 2 * buttonHeight) / (fheight);
+	height = theight + info_height + title_height + 2 * buttonHeight + listmaxshow * fheight;	// recalc height
 
-  x =
-    (((g_settings.screen_EndX - g_settings.screen_StartX) -
-      (width + MOVIEPLAYER_ConnectLineBox_Width)) / 2) + g_settings.screen_StartX +
-    MOVIEPLAYER_ConnectLineBox_Width;
-  y =
-    (((g_settings.screen_EndY - g_settings.screen_StartY) - height) / 2) +
-    g_settings.screen_StartY;
+	x =
+		(((g_settings.screen_EndX - g_settings.screen_StartX) -
+		  (width + MOVIEPLAYER_ConnectLineBox_Width)) / 2) + g_settings.screen_StartX +
+		MOVIEPLAYER_ConnectLineBox_Width;
+	y =
+		(((g_settings.screen_EndY - g_settings.screen_StartY) - height) / 2) +
+		g_settings.screen_StartY;
 
-  if (parent)
-    {
-      parent->hide ();
-    }
+	if (parent)
+	{
+		parent->hide ();
+	}
 
-  // set zapit in standby mode
-  g_Zapit->setStandby (true);
+	// set zapit in standby mode
+	g_Zapit->setStandby (true);
 
-  // tell neutrino we're in ts_mode
-  CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE,
-					   NeutrinoMessages::mode_ts);
-  // remember last mode
-  m_LastMode =
-    (CNeutrinoApp::getInstance ()->
-     getLastMode () /*| NeutrinoMessages::norezap */ );
+	// tell neutrino we're in ts_mode
+	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE,
+						 NeutrinoMessages::mode_ts);
+	// remember last mode
+	m_LastMode =
+		(CNeutrinoApp::getInstance ()->
+		 getLastMode () /*| NeutrinoMessages::norezap */ );
 
-  // Stop sectionsd
-  g_Sectionsd->setPauseScanning (true);
+	// Stop sectionsd
+	g_Sectionsd->setPauseScanning (true);
 
 
-  show ();
+	show ();
 
-  //stop();
-  hide ();
+	//stop();
+	hide ();
 
-  g_Zapit->setStandby (false);
+	g_Zapit->setStandby (false);
 
-  // Start Sectionsd
-  g_Sectionsd->setPauseScanning (false);
+	// Start Sectionsd
+	g_Sectionsd->setPauseScanning (false);
 
-  // Restore last mode
-  CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE,
-					   m_LastMode);
+	// Restore last mode
+	CNeutrinoApp::getInstance ()->handleMsg (NeutrinoMessages::CHANGEMODE,
+						 m_LastMode);
 
-  // always exit all
-  return menu_return::RETURN_EXIT_ALL;
+	// always exit all
+	return menu_return::RETURN_EXIT_ALL;
 }
 
 //------------------------------------------------------------------------
 CURLcode sendGetRequest (std::string url) {
-  CURL *curl;
-  CURLcode httpres;
-  httpres = (CURLcode) 1;
-  std::string response = "";
+	CURL *curl;
+	CURLcode httpres;
+	httpres = (CURLcode) 1;
+	std::string response = "";
   
-  curl = curl_easy_init ();
-  curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
-  curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
-  curl_easy_setopt (curl, CURLOPT_FILE, (void *) &response);
-  curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
-  httpres = curl_easy_perform (curl);
-  //printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
-  curl_easy_cleanup (curl);
-  return httpres;
+	curl = curl_easy_init ();
+	curl_easy_setopt (curl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+	curl_easy_setopt (curl, CURLOPT_FILE, (void *) &response);
+	curl_easy_setopt (curl, CURLOPT_FAILONERROR, true);
+	httpres = curl_easy_perform (curl);
+	//printf ("[movieplayer.cpp] HTTP Result: %d\n", httpres);
+	curl_easy_cleanup (curl);
+	return httpres;
 }
 
 //------------------------------------------------------------------------
@@ -277,7 +277,7 @@ ReceiveStreamThread (void *mrl)
 	sscanf (g_settings.streaming_server_port, "%d", &port);
 	
 	
-	std::string baseurl = "http://" + g_settings.streaming_server_ip + ":" + g_settings.streaming_server_port + "/";
+	std::string baseurl = "http://" + g_settings.streaming_server_ip + ':' + g_settings.streaming_server_port + '/';
 	
 	// empty playlist
 	std::string emptyurl = baseurl + "?control=empty";
@@ -291,242 +291,242 @@ ReceiveStreamThread (void *mrl)
 		// Assume safely that all succeeding HTTP requests are successful
 	}
 
-  // add MRL
-  /* demo MRLs:
-      - DVD: dvdsimple:D:@1:1
-      - DemoMovie: c:\\TestMovies\\dolby.mpg
-      - SVCD: vcd:D:@1:1
-  */
-  std::string addurl = baseurl + "?control=add&mrl=" + (char*) mrl;
-  httpres = sendGetRequest(addurl);
+	// add MRL
+	/* demo MRLs:
+	   - DVD: dvdsimple:D:@1:1
+	   - DemoMovie: c:\\TestMovies\\dolby.mpg
+	   - SVCD: vcd:D:@1:1
+	*/
+	std::string addurl = baseurl + "?control=add&mrl=" + (char*) mrl;
+	httpres = sendGetRequest(addurl);
   
-  // add sout (URL encoded)
-  // Example(mit transcode zu mpeg1): ?sout=#transcode{vcodec=mpgv,vb=2000,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
-  // Example(ohne transcode zu mpeg1): ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
-  //TODO make this nicer :-)
-  std::string souturl;
-  if(!memcmp((char*)mrl, "vcd:", 4) || 
-	  !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "mpg") || 
-	  !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "ac3") || 
-	  !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "m2p"))
-  {
-	  // no transcode
-	  souturl = std::string("") + "#duplicate{dst=std{access=http,mux=ts,url=:" + g_settings.streaming_server_port + 
-		  "/dboxstream}}";
-  }
-  else if(!memcmp((char*)mrl, "dvd", 3) && g_settings.streaming_ac3_enabled) 
-  {
-	  // transcode video only
-	  souturl = std::string("") + "#transcode{vcodec=mpgv,vb=" + g_settings.streaming_videorate + 
-		  "}:duplicate{dst=std{access=http,mux=ts,url=:" + g_settings.streaming_server_port + "/dboxstream}}";
-  }
-  else
-  {
-	  // transcode audio and video
-	  souturl = std::string("") + "#transcode{vcodec=mpgv,vb=" + g_settings.streaming_videorate + ",acodec=mpga,ab=" + 
-		  g_settings.streaming_audiorate + ",channels=2}:duplicate{dst=std{access=http,mux=ts,url=:" + 
-		  g_settings.streaming_server_port + "/dboxstream}}";
-  }
-  char *tmp = curl_escape (souturl.c_str (), 0);
-  printf("[movieplayer.cpp] URL      : %s?sout=%s\n",baseurl.c_str(), souturl.c_str());
-  printf("[movieplayer.cpp] URL(enc) : %s?sout=%s\n",baseurl.c_str(), tmp);
-  std::string url = baseurl + "?sout=" + tmp;
-  curl_free(tmp);
-  httpres = sendGetRequest(url);
+	// add sout (URL encoded)
+	// Example(mit transcode zu mpeg1): ?sout=#transcode{vcodec=mpgv,vb=2000,acodec=mpga,ab=192,channels=2}:duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
+	// Example(ohne transcode zu mpeg1): ?sout=#duplicate{dst=std{access=http,mux=ts,url=:8080/dboxstream}}
+	//TODO make this nicer :-)
+	std::string souturl;
+	if(!memcmp((char*)mrl, "vcd:", 4) || 
+	   !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "mpg") || 
+	   !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "ac3") || 
+	   !strcasecmp(addurl.substr(addurl.length()-3).c_str(), "m2p"))
+	{
+		// no transcode
+		souturl = std::string("") + "#duplicate{dst=std{access=http,mux=ts,url=:" + g_settings.streaming_server_port + 
+			"/dboxstream}}";
+	}
+	else if(!memcmp((char*)mrl, "dvd", 3) && g_settings.streaming_ac3_enabled) 
+	{
+		// transcode video only
+		souturl = std::string("") + "#transcode{vcodec=mpgv,vb=" + g_settings.streaming_videorate + 
+			"}:duplicate{dst=std{access=http,mux=ts,url=:" + g_settings.streaming_server_port + "/dboxstream}}";
+	}
+	else
+	{
+		// transcode audio and video
+		souturl = std::string("") + "#transcode{vcodec=mpgv,vb=" + g_settings.streaming_videorate + ",acodec=mpga,ab=" + 
+			g_settings.streaming_audiorate + ",channels=2}:duplicate{dst=std{access=http,mux=ts,url=:" + 
+			g_settings.streaming_server_port + "/dboxstream}}";
+	}
+	char *tmp = curl_escape (souturl.c_str (), 0);
+	printf("[movieplayer.cpp] URL      : %s?sout=%s\n",baseurl.c_str(), souturl.c_str());
+	printf("[movieplayer.cpp] URL(enc) : %s?sout=%s\n",baseurl.c_str(), tmp);
+	std::string url = baseurl + "?sout=" + tmp;
+	curl_free(tmp);
+	httpres = sendGetRequest(url);
 
-  // play MRL
-  std::string playurl = baseurl + "?control=play&item=0";
-  httpres = sendGetRequest(playurl);
+	// play MRL
+	std::string playurl = baseurl + "?control=play&item=0";
+	httpres = sendGetRequest(playurl);
   
 // TODO: Better way to detect if http://<server>:8080/dboxstream is already alive. For example repetitive checking for HTTP 404.
 // Unfortunately HTTP HEAD requests are not supported by VLC :(
 // vlc 0.6.3 and up may support HTTP HEAD requests.
 
 // Open HTTP connection to VLC
-  bool vlc_is_sending = false;
+	bool vlc_is_sending = false;
 
-  struct sockaddr_in servAddr;
-  servAddr.sin_family = AF_INET;
-  servAddr.sin_port = htons (port);
-  servAddr.sin_addr.s_addr = inet_addr (server);
-  int res;
-  printf ("[movieplayer.cpp] Server: %s\n", server);
-  printf ("[movieplayer.cpp] Port: %d\n", port);
-  char buf[RINGBUFFERSIZE];
-  int len;
+	struct sockaddr_in servAddr;
+	servAddr.sin_family = AF_INET;
+	servAddr.sin_port = htons (port);
+	servAddr.sin_addr.s_addr = inet_addr (server);
+	int res;
+	printf ("[movieplayer.cpp] Server: %s\n", server);
+	printf ("[movieplayer.cpp] Port: %d\n", port);
+	char buf[RINGBUFFERSIZE];
+	int len;
 
-  while (!vlc_is_sending)
-    {
-
-      //printf ("[movieplayer.cpp] Trying to call socket\n");
-      skt = socket (AF_INET, SOCK_STREAM, 0);
-
-      printf ("[movieplayer.cpp] Trying to connect socket\n");
-      res = connect (skt, (struct sockaddr *) &servAddr, sizeof (servAddr));
-      if (res < 0)
+	while (!vlc_is_sending)
 	{
-	  perror ("SOCKET");
-	  playstate = CMoviePlayerGui::STOPPED;
-	  pthread_exit (NULL);
-	}
-      fcntl (skt, O_NONBLOCK);
-      printf ("[movieplayer.cpp] Socket OK\n");
 
-      // Skip HTTP header
-      char *msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
-      int msglen = strlen (msg);
-      if (send (skt, msg, msglen, 0) == -1)
+		//printf ("[movieplayer.cpp] Trying to call socket\n");
+		skt = socket (AF_INET, SOCK_STREAM, 0);
+
+		printf ("[movieplayer.cpp] Trying to connect socket\n");
+		res = connect (skt, (struct sockaddr *) &servAddr, sizeof (servAddr));
+		if (res < 0)
+		{
+			perror ("SOCKET");
+			playstate = CMoviePlayerGui::STOPPED;
+			pthread_exit (NULL);
+		}
+		fcntl (skt, O_NONBLOCK);
+		printf ("[movieplayer.cpp] Socket OK\n");
+
+		// Skip HTTP header
+		char *msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
+		int msglen = strlen (msg);
+		if (send (skt, msg, msglen, 0) == -1)
+		{
+			perror ("send()");
+			playstate = CMoviePlayerGui::STOPPED;
+			pthread_exit (NULL);
+		}
+
+		printf ("[movieplayer.cpp] GET Sent\n");
+
+		// Skip HTTP Header
+		int found = 0;
+		char line[200];
+		strcpy (line, "");
+		while (found < 4)
+		{
+			len = recv (skt, buf, 1, 0);
+			strncat (line, buf, 1);
+			if (strcmp (line, "HTTP/1.0 404") == 0)
+			{
+				printf ("[movieplayer.cpp] VLC still does not send. Retrying...\n");
+				close (skt);
+				break;
+			}
+			if ((found == 0) & (buf[0] == '\r'))
+			{
+				found++;
+			}
+			else if ((found == 1) & (buf[0] == '\n'))
+			{
+				found++;
+			}
+			else if ((found == 2) & (buf[0] == '\r'))
+			{
+				found++;
+			}
+			else if ((found == 3) & (buf[0] == '\n'))
+			{
+				found++;
+			}
+			else
+			{
+				(found = 0);
+			}
+		}
+		if (found == 4)
+		{
+			vlc_is_sending = true;
+
+		}
+	}
+	printf ("[movieplayer.cpp] Now VLC is sending. Read sockets created\n");
+	hintBox->hide ();
+	bufferingBox->paint ();
+	printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
+
+	int done;
+	int size;
+	streamingrunning = 1;
+	int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
+
+	struct pollfd poller[0];
+	poller[0].fd = skt;
+	poller[0].events = POLLIN | POLLPRI;
+	int pollret;
+
+	while (streamingrunning == 1)
 	{
-	  perror ("send()");
-	  playstate = CMoviePlayerGui::STOPPED;
-	  pthread_exit (NULL);
-	}
+		while ((size = ringbuffer_write_space (ringbuf)) == 0)
+		{
+			if (playstate == CMoviePlayerGui::STOPPED)
+			{
+				close(skt);
+				pthread_exit (NULL);
+			}
+			if (!avpids_found)
+			{
+				// find apid and vpid. Easiest way to do that is to write the TS to a file 
+				// and use the usual find_avpids function. This is not even overhead as the
+				// buffer needs to be prefilled anyway
+				close (fd);
+				fd = open ("/tmp/tmpts", O_RDONLY);
+				//Use global pida, pidv
+				//unsigned short pidv = 0, pida = 0;
+				find_avpids (fd, &pidv, &pida);
+				close (fd);
+				printf ("[movieplayer.cpp] ReceiveStreamThread: while streaming found pida: 0x%04X ; pidv: 0x%04X\n",
+					pida, pidv);
+				avpids_found = true;
+			}
+			if (!bufferfilled) {
+				bufferingBox->hide ();
+				//TODO reset drivers?
+				bufferfilled = true;
+			}
+		}
+		//printf("[movieplayer.cpp] ringbuf write space:%d\n",size);
 
-      printf ("[movieplayer.cpp] GET Sent\n");
+		if (playstate == CMoviePlayerGui::STOPPED)
+		{
+			close(skt);
+			pthread_exit (NULL);
+		}
 
-      // Skip HTTP Header
-      int found = 0;
-      char line[200];
-      strcpy (line, "");
-      while (found < 4)
-	{
-	  len = recv (skt, buf, 1, 0);
-	  strncat (line, buf, 1);
-	  if (strcmp (line, "HTTP/1.0 404") == 0)
-	    {
-	      printf ("[movieplayer.cpp] VLC still does not send. Retrying...\n");
-	      close (skt);
-	      break;
-	    }
-	  if ((found == 0) & (buf[0] == '\r'))
-	    {
-	      found++;
-	    }
-	  else if ((found == 1) & (buf[0] == '\n'))
-	    {
-	      found++;
-	    }
-	  else if ((found == 2) & (buf[0] == '\r'))
-	    {
-	      found++;
-	    }
-	  else if ((found == 3) & (buf[0] == '\n'))
-	    {
-	      found++;
-	    }
-	  else
-	    {
-	      (found = 0);
-	    }
-	}
-      if (found == 4)
-	{
-	  vlc_is_sending = true;
+		len = 0;
+		pollret = poll (poller, (unsigned long) 1, -1);
 
-	}
-    }
-  printf ("[movieplayer.cpp] Now VLC is sending. Read sockets created\n");
-  hintBox->hide ();
-  bufferingBox->paint ();
-  printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
-
-  int done;
-  int size;
-  streamingrunning = 1;
-  int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
-
-  struct pollfd poller[0];
-  poller[0].fd = skt;
-  poller[0].events = POLLIN | POLLPRI;
-  int pollret;
-
-  while (streamingrunning == 1)
-    {
-      while ((size = ringbuffer_write_space (ringbuf)) == 0)
-	{
-	  if (playstate == CMoviePlayerGui::STOPPED)
-	    {
-	      close(skt);
-	      pthread_exit (NULL);
-	    }
-	  if (!avpids_found)
-	    {
-	      // find apid and vpid. Easiest way to do that is to write the TS to a file 
-	      // and use the usual find_avpids function. This is not even overhead as the
-	      // buffer needs to be prefilled anyway
-	      close (fd);
-	      fd = open ("/tmp/tmpts", O_RDONLY);
-	      //Use global pida, pidv
-	      //unsigned short pidv = 0, pida = 0;
-	      find_avpids (fd, &pidv, &pida);
-	      close (fd);
-	      printf ("[movieplayer.cpp] ReceiveStreamThread: while streaming found pida: 0x%04X ; pidv: 0x%04X\n",
-		       pida, pidv);
-	      avpids_found = true;
-	    }
-	  if (!bufferfilled) {
-	    bufferingBox->hide ();
-	    //TODO reset drivers?
-	    bufferfilled = true;
-	  }
-	}
-      //printf("[movieplayer.cpp] ringbuf write space:%d\n",size);
-
-      if (playstate == CMoviePlayerGui::STOPPED)
-	{
-	  close(skt);
-	  pthread_exit (NULL);
-	}
-
-      len = 0;
-      pollret = poll (poller, (unsigned long) 1, -1);
-
-      if ((pollret < 0) ||
-          ((poller[0].revents & POLLHUP) == POLLHUP) ||
-	  ((poller[0].revents & POLLERR) == POLLERR) ||
-	  ((poller[0].revents & POLLNVAL) == POLLNVAL))
-	{
-	  perror ("Error while polling()");
-	  playstate = CMoviePlayerGui::STOPPED;
-	  close(skt);
-	  pthread_exit (NULL);
-	}
+		if ((pollret < 0) ||
+		    ((poller[0].revents & POLLHUP) == POLLHUP) ||
+		    ((poller[0].revents & POLLERR) == POLLERR) ||
+		    ((poller[0].revents & POLLNVAL) == POLLNVAL))
+		{
+			perror ("Error while polling()");
+			playstate = CMoviePlayerGui::STOPPED;
+			close(skt);
+			pthread_exit (NULL);
+		}
 
 
-      if (((poller[0].revents & POLLIN) == POLLIN) ||
-          ((poller[0].revents & POLLPRI) == POLLPRI))
-	{
-	  len = recv (poller[0].fd, buf, size, 0);
-	}
+		if (((poller[0].revents & POLLIN) == POLLIN) ||
+		    ((poller[0].revents & POLLPRI) == POLLPRI))
+		{
+			len = recv (poller[0].fd, buf, size, 0);
+		}
 
-      if (len > 0)
-	{
-	  nothingreceived = 0;
-	  //printf ("[movieplayer.cpp] bytes received:%d\n", len);
-	  if (!avpids_found)
-	    {
-	      write (fd, buf, len);
-	    }
-	}
-      else {
-        if (playstate == CMoviePlayerGui::PLAY) {
-          nothingreceived++;
-          if (nothingreceived > 200) {
-            printf ("[movieplayer.cpp] PlayStreamthread: Didn't receive for a while. Stopping.\n");
-            playstate = CMoviePlayerGui::STOPPED;	
-          }	
-        }
-      }
+		if (len > 0)
+		{
+			nothingreceived = 0;
+			//printf ("[movieplayer.cpp] bytes received:%d\n", len);
+			if (!avpids_found)
+			{
+				write (fd, buf, len);
+			}
+		}
+		else {
+			if (playstate == CMoviePlayerGui::PLAY) {
+				nothingreceived++;
+				if (nothingreceived > 200) {
+					printf ("[movieplayer.cpp] PlayStreamthread: Didn't receive for a while. Stopping.\n");
+					playstate = CMoviePlayerGui::STOPPED;	
+				}	
+			}
+		}
       
-      while (len > 0)
-	{
-	  done = ringbuffer_write (ringbuf, buf, len);
-	  len -= done;
-	}
+		while (len > 0)
+		{
+			done = ringbuffer_write (ringbuf, buf, len);
+			len -= done;
+		}
 
-    }
-  close(skt);
-  pthread_exit (NULL);
+	}
+	close(skt);
+	pthread_exit (NULL);
 }
 
 
@@ -534,827 +534,828 @@ ReceiveStreamThread (void *mrl)
 void *
 PlayStreamThread (void *mrl)
 {
-  char buf[348 * 188];
-  bool failed = false;
-  // use global pida and pidv
-  pida = 0, pidv = 0;
-  int done, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
-  struct dmx_pes_filter_params p;
-  ssize_t wr;
-  ringbuf = ringbuffer_create (RINGBUFFERSIZE);
-  printf ("[movieplayer.cpp] ringbuffer created\n");
+	char buf[348 * 188];
+	bool failed = false;
+	// use global pida and pidv
+	pida = 0, pidv = 0;
+	int done, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
+	struct dmx_pes_filter_params p;
+	ssize_t wr;
+	ringbuf = ringbuffer_create (RINGBUFFERSIZE);
+	printf ("[movieplayer.cpp] ringbuffer created\n");
 
-  bufferingBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.buffering")); // UTF-8
+	bufferingBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.buffering")); // UTF-8
 
-  CURLcode httpres;
-  httpres = (CURLcode) 1;
-  std::string baseurl = "http://" + g_settings.streaming_server_ip + ":" + g_settings.streaming_server_port + "/";
+	CURLcode httpres;
+	httpres = (CURLcode) 1;
+	std::string baseurl = "http://" + g_settings.streaming_server_ip + ':' + g_settings.streaming_server_port + '/';
 
-  printf ("[movieplayer.cpp] mrl:%s\n", (char *) mrl);
-  pthread_t rcst;
-  pthread_create (&rcst, 0, ReceiveStreamThread, mrl);
-  //printf ("[movieplayer.cpp] ReceiveStreamThread created\n");
-  if ((dmxa =
-       open (DMX, O_RDWR | O_NONBLOCK)) < 0
-      || (dmxv =
-	  open (DMX,
-		O_RDWR | O_NONBLOCK)) < 0
-      || (dvr =
-	  open (DVR,
-		O_WRONLY | O_NONBLOCK)) < 0
-      || (adec =
-	  open (ADEC,
-		O_RDWR | O_NONBLOCK)) < 0
-      || (vdec = open (VDEC, O_RDWR | O_NONBLOCK)) < 0)
-    {
-      failed = true;
-    }
-
-  playstate = CMoviePlayerGui::SOFTRESET;
-  printf ("[movieplayer.cpp] read starting\n");
-  size_t readsize, len;
-  len = 0;
-  bool driverready = false;
-  std::string pauseurl;
-  std::string unpauseurl;
-  while (playstate > CMoviePlayerGui::STOPPED)
-    {
-      readsize = ringbuffer_read_space (ringbuf);
-      if (readsize > MAXREADSIZE)
+	printf ("[movieplayer.cpp] mrl:%s\n", (char *) mrl);
+	pthread_t rcst;
+	pthread_create (&rcst, 0, ReceiveStreamThread, mrl);
+	//printf ("[movieplayer.cpp] ReceiveStreamThread created\n");
+	if ((dmxa =
+	     open (DMX, O_RDWR | O_NONBLOCK)) < 0
+	    || (dmxv =
+		open (DMX,
+		      O_RDWR | O_NONBLOCK)) < 0
+	    || (dvr =
+		open (DVR,
+		      O_WRONLY | O_NONBLOCK)) < 0
+	    || (adec =
+		open (ADEC,
+		      O_RDWR | O_NONBLOCK)) < 0
+	    || (vdec = open (VDEC, O_RDWR | O_NONBLOCK)) < 0)
 	{
-	  readsize = MAXREADSIZE;
+		failed = true;
 	}
-      //printf("[movieplayer.cpp] readsize=%d\n",readsize);
-      if (bufferfilled)
+
+	playstate = CMoviePlayerGui::SOFTRESET;
+	printf ("[movieplayer.cpp] read starting\n");
+	size_t readsize, len;
+	len = 0;
+	bool driverready = false;
+	std::string pauseurl;
+	std::string unpauseurl;
+	while (playstate > CMoviePlayerGui::STOPPED)
 	{
-	  if (!driverready)
-	    {
-	      driverready = true;
-	      // pida and pidv should have been set by ReceiveStreamThread now
-	      printf ("[movieplayer.cpp] PlayStreamthread: while streaming found pida: 0x%04X ; pidv: 0x%04X\n",
-		       pida, pidv);
-
-	      p.input = DMX_IN_DVR;
-	      p.output = DMX_OUT_DECODER;
-	      p.flags = DMX_IMMEDIATE_START;
-	      p.pid = pida;
-	      p.pes_type = DMX_PES_AUDIO;
-	      if (ioctl (dmxa, DMX_SET_PES_FILTER, &p) < 0)
-		failed = true;
-	      p.pid = pidv;
-	      p.pes_type = DMX_PES_VIDEO;
-	      if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
-		failed = true;
-	      if (g_settings.streaming_ac3_enabled == 1) {
-      		if (ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL)<0)
-      		  {
-      		  	perror("AUDIO_SET_BYPASS_MODE");
-      		  	failed=true;
-      		  }
-       	      }
-			else
+		readsize = ringbuffer_read_space (ringbuf);
+		if (readsize > MAXREADSIZE)
+		{
+			readsize = MAXREADSIZE;
+		}
+		//printf("[movieplayer.cpp] readsize=%d\n",readsize);
+		if (bufferfilled)
+		{
+			if (!driverready)
 			{
-				ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+				driverready = true;
+				// pida and pidv should have been set by ReceiveStreamThread now
+				printf ("[movieplayer.cpp] PlayStreamthread: while streaming found pida: 0x%04X ; pidv: 0x%04X\n",
+					pida, pidv);
+
+				p.input = DMX_IN_DVR;
+				p.output = DMX_OUT_DECODER;
+				p.flags = DMX_IMMEDIATE_START;
+				p.pid = pida;
+				p.pes_type = DMX_PES_AUDIO;
+				if (ioctl (dmxa, DMX_SET_PES_FILTER, &p) < 0)
+					failed = true;
+				p.pid = pidv;
+				p.pes_type = DMX_PES_VIDEO;
+				if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
+					failed = true;
+				if (g_settings.streaming_ac3_enabled == 1) {
+					if (ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL)<0)
+					{
+						perror("AUDIO_SET_BYPASS_MODE");
+						failed=true;
+					}
+				}
+				else
+				{
+					ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+				}
+				if (ioctl (adec, AUDIO_PLAY) < 0)
+				{
+					perror ("AUDIO_PLAY");
+					failed = true;
+				}
+
+				if (ioctl (vdec, VIDEO_PLAY) < 0)
+				{
+					perror ("VIDEO_PLAY");
+					failed = true;
+				}
+
+				ioctl (dmxv, DMX_START);
+				ioctl (dmxa, DMX_START);
+				printf ("[movieplayer.cpp] PlayStreamthread: Driver successfully set up\n");
+				bufferingBox->hide ();
 			}
-	      if (ioctl (adec, AUDIO_PLAY) < 0)
-		{
-		  perror ("AUDIO_PLAY");
-		  failed = true;
-		}
 
-	      if (ioctl (vdec, VIDEO_PLAY) < 0)
-		{
-		  perror ("VIDEO_PLAY");
-		  failed = true;
-		}
+			len = ringbuffer_read (ringbuf, buf, (readsize / 188) * 188);
 
-	      ioctl (dmxv, DMX_START);
-	      ioctl (dmxa, DMX_START);
-	      printf ("[movieplayer.cpp] PlayStreamthread: Driver successfully set up\n");
-	      bufferingBox->hide ();
-	    }
+			switch (playstate)
+			{
+			case CMoviePlayerGui::PAUSE:
+				//ioctl (dmxv, DMX_STOP);
+				ioctl (dmxa, DMX_STOP);
 
-	  len = ringbuffer_read (ringbuf, buf, (readsize / 188) * 188);
+				// pause VLC
+				pauseurl = baseurl + "?control=pause";
+				httpres = sendGetRequest(pauseurl);
 
-	  switch (playstate)
-	    {
-	    case CMoviePlayerGui::PAUSE:
-	      //ioctl (dmxv, DMX_STOP);
-	      ioctl (dmxa, DMX_STOP);
+				while (playstate == CMoviePlayerGui::PAUSE)
+				{
+					//ioctl (dmxv, DMX_STOP);	
+					ioctl (dmxa, DMX_STOP);
+				}
+				// unpause VLC
+				unpauseurl = baseurl + "?control=pause";
+				httpres = sendGetRequest(unpauseurl);
 
-	      // pause VLC
-	      pauseurl = baseurl + "?control=pause";
-	      httpres = sendGetRequest(pauseurl);
-
-	      while (playstate == CMoviePlayerGui::PAUSE)
-		{
-		  //ioctl (dmxv, DMX_STOP);	
-		  ioctl (dmxa, DMX_STOP);
-		}
-	      // unpause VLC
-	      unpauseurl = baseurl + "?control=pause";
-	      httpres = sendGetRequest(unpauseurl);
-
-	      speed = 1;
-	      break;
-	    case CMoviePlayerGui::PLAY:
-	      if (len < MINREADSIZE)
-		{
-			bufferingBox->paint ();
-			printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
-			bufferfilled = false;
+				speed = 1;
+				break;
+			case CMoviePlayerGui::PLAY:
+				if (len < MINREADSIZE)
+				{
+					bufferingBox->paint ();
+					printf ("[movieplayer.cpp] Buffering approx. 3 seconds\n");
+					bufferfilled = false;
 			
-		}
-	      //printf ("[movieplayer.cpp] [%d bytes read from ringbuf]\n", len);
-	      done = 0;
-	      while (len > 0)
-		{
-		  wr = write (dvr, &buf[done], len);
-		  //printf ("[movieplayer.cpp] [%d bytes written]\n", wr);
-		  len -= wr;
-		  done += wr;
-		}
-	      break;
-	    case CMoviePlayerGui::SOFTRESET:
-	      ioctl (vdec, VIDEO_STOP);
-	      ioctl (adec, AUDIO_STOP);
-	      ioctl (dmxv, DMX_STOP);
-	      ioctl (dmxa, DMX_STOP);
-	      ioctl (vdec, VIDEO_PLAY);
-	      if (g_settings.streaming_ac3_enabled == 1) {
-      		ioctl (adec, AUDIO_SET_BYPASS_MODE, 0UL );
-      	      }
-			else
-			{
-				ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+				}
+				//printf ("[movieplayer.cpp] [%d bytes read from ringbuf]\n", len);
+				done = 0;
+				while (len > 0)
+				{
+					wr = write (dvr, &buf[done], len);
+					//printf ("[movieplayer.cpp] [%d bytes written]\n", wr);
+					len -= wr;
+					done += wr;
+				}
+				break;
+			case CMoviePlayerGui::SOFTRESET:
+				ioctl (vdec, VIDEO_STOP);
+				ioctl (adec, AUDIO_STOP);
+				ioctl (dmxv, DMX_STOP);
+				ioctl (dmxa, DMX_STOP);
+				ioctl (vdec, VIDEO_PLAY);
+				if (g_settings.streaming_ac3_enabled == 1) {
+					ioctl (adec, AUDIO_SET_BYPASS_MODE, 0UL );
+				}
+				else
+				{
+					ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+				}
+				ioctl (adec, AUDIO_PLAY);
+				p.pid = pida;
+				p.pes_type = DMX_PES_AUDIO;
+				ioctl (dmxa, DMX_SET_PES_FILTER, &p);
+				p.pid = pidv;
+				p.pes_type = DMX_PES_VIDEO;
+				ioctl (dmxv, DMX_SET_PES_FILTER, &p);
+				ioctl (dmxv, DMX_START);
+				ioctl (dmxa, DMX_START);
+				speed = 1;
+				playstate = CMoviePlayerGui::PLAY;
+
 			}
-	      ioctl (adec, AUDIO_PLAY);
-	      p.pid = pida;
-	      p.pes_type = DMX_PES_AUDIO;
-	      ioctl (dmxa, DMX_SET_PES_FILTER, &p);
-	      p.pid = pidv;
-	      p.pes_type = DMX_PES_VIDEO;
-	      ioctl (dmxv, DMX_SET_PES_FILTER, &p);
-	      ioctl (dmxv, DMX_START);
-	      ioctl (dmxa, DMX_START);
-	      speed = 1;
-	      playstate = CMoviePlayerGui::PLAY;
-
-	    }
+		}
 	}
-    }
 
-  ioctl (vdec, VIDEO_STOP);
-  ioctl (adec, AUDIO_STOP);
-  ioctl (dmxv, DMX_STOP);
-  ioctl (dmxa, DMX_STOP);
-  close (dmxa);
-  close (dmxv);
-  close (dvr);
-  close (adec);
-  close (vdec);
+	ioctl (vdec, VIDEO_STOP);
+	ioctl (adec, AUDIO_STOP);
+	ioctl (dmxv, DMX_STOP);
+	ioctl (dmxa, DMX_STOP);
+	close (dmxa);
+	close (dmxv);
+	close (dvr);
+	close (adec);
+	close (vdec);
 
-  // stop VLC
-  std::string stopurl = baseurl + "?control=stop";
-  httpres = sendGetRequest(stopurl);
+	// stop VLC
+	std::string stopurl = baseurl + "?control=stop";
+	httpres = sendGetRequest(stopurl);
 
-  printf ("[movieplayer.cpp] Waiting for RCST to stop\n");
-  pthread_join (rcst, NULL);
-  printf ("[movieplayer.cpp] Seems that RCST was stopped succesfully\n");
+	printf ("[movieplayer.cpp] Waiting for RCST to stop\n");
+	pthread_join (rcst, NULL);
+	printf ("[movieplayer.cpp] Seems that RCST was stopped succesfully\n");
   
-  // Some memory clean up
-  ringbuffer_free(ringbuf);
-  delete bufferingBox;
-  delete hintBox;
+	// Some memory clean up
+	ringbuffer_free(ringbuf);
+	delete bufferingBox;
+	delete hintBox;
 
-  pthread_exit (NULL);
+	pthread_exit (NULL);
 }
 
 //------------------------------------------------------------------------
 void *
 PlayFileThread (void *filename)
 {
-  bool failed = false;
-  unsigned char buf[384 * 188 * 2];
-  unsigned short pida = 0, pidv = 0;
-  int done, fd = 0, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
-  struct dmx_pes_filter_params p;
-  ssize_t wr = 0;
-  ssize_t cache = sizeof (buf);
-  size_t r = 0;
-  if ((char *) filename == NULL)
-    {
-      playstate = CMoviePlayerGui::STOPPED;
-      pthread_exit (NULL);
-    }
-
-  if ((fd = open ((char *) filename, O_RDONLY | O_LARGEFILE)) < 0)
-    {
-      playstate = CMoviePlayerGui::STOPPED;
-      pthread_exit (NULL);
-    }
-
-  // todo: check if file is valid ts or pes
-  if (isTS)
-    {
-      find_avpids (fd, &pidv, &pida);
-      printf ("[movieplayer.cpp] found pida: 0x%04X ; pidv: 0x%04X\n",
-	       pida, pidv);
-    }
-  else
-    {				// Play PES
-      pida = 0x900;
-      pidv = 0x8ff;
-    }
-
-  lseek (fd, 0L, SEEK_SET);
-  if ((dmxa = open (DMX, O_RDWR)) < 0
-      || (dmxv = open (DMX, O_RDWR)) < 0
-      || (dvr = open (DVR, O_WRONLY)) < 0
-      || (adec = open (ADEC, O_RDWR)) < 0 || (vdec = open (VDEC, O_RDWR)) < 0)
-    {
-      failed = true;
-    }
-
-  p.input = DMX_IN_DVR;
-  p.output = DMX_OUT_DECODER;
-  p.flags = DMX_IMMEDIATE_START;
-  p.pid = pida;
-  p.pes_type = DMX_PES_AUDIO;
-  if (ioctl (dmxa, DMX_SET_PES_FILTER, &p) < 0)
-    failed = true;
-  p.pid = pidv;
-  p.pes_type = DMX_PES_VIDEO;
-  if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
-    failed = true;
-  fileposition = 0;
-  if (isTS && !failed)
-    {
-      while ((r = read (fd, buf, cache)) > 0 && playstate >= CMoviePlayerGui::PLAY)
+	bool failed = false;
+	unsigned char buf[384 * 188 * 2];
+	unsigned short pida = 0, pidv = 0;
+	int done, fd = 0, dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
+	struct dmx_pes_filter_params p;
+	ssize_t wr = 0;
+	ssize_t cache = sizeof (buf);
+	size_t r = 0;
+	if ((char *) filename == NULL)
 	{
-	  done = 0;
-	  wr = 0;
-	  fileposition += r;
-	  switch (playstate)
-	    {
-	    case CMoviePlayerGui::PAUSE:
-	      while (playstate == CMoviePlayerGui::PAUSE)
-		{
-		  ioctl (dmxa, DMX_STOP);
-		}
-	      break;
-	    case CMoviePlayerGui::FF:
-	    case CMoviePlayerGui::REW:
-	      ioctl (dmxa, DMX_STOP);
-	      lseek (fd, cache * speed, SEEK_CUR);
-	      fileposition += cache * speed;
-	      break;
-	    case CMoviePlayerGui::SOFTRESET:
-	      ioctl (vdec, VIDEO_STOP);
-	      ioctl (adec, AUDIO_STOP);
-	      ioctl (dmxv, DMX_STOP);
-	      ioctl (dmxa, DMX_STOP);
-	      ioctl (vdec, VIDEO_PLAY);
-	      if (g_settings.streaming_ac3_enabled == 1) {
-      		ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL);
-      	      }
-			else
-			{
-				ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
-			}
-	      ioctl (adec, AUDIO_PLAY);
-	      p.pid = pida;
-	      p.pes_type = DMX_PES_AUDIO;
-	      ioctl (dmxa, DMX_SET_PES_FILTER, &p);
-	      p.pid = pidv;
-	      p.pes_type = DMX_PES_VIDEO;
-	      ioctl (dmxv, DMX_SET_PES_FILTER, &p);
-	      ioctl (dmxv, DMX_START);
-	      ioctl (dmxa, DMX_START);
-	      speed = 1;
-	      playstate = CMoviePlayerGui::PLAY;
-	    }
-
-	  do
-	    {
-	      wr = write (dvr, &buf[done], r);
-	      if (!done)
-		cache = wr;
-	      done += wr;
-	      r -= wr;
-	    }
-	  while (r);
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
 	}
-    }
-  else if (!failed)
-    {
-      ioctl (vdec, VIDEO_PLAY);
-      if (g_settings.streaming_ac3_enabled == 1) {
-      	ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL);
-      }
+
+	if ((fd = open ((char *) filename, O_RDONLY | O_LARGEFILE)) < 0)
+	{
+		playstate = CMoviePlayerGui::STOPPED;
+		pthread_exit (NULL);
+	}
+
+	// todo: check if file is valid ts or pes
+	if (isTS)
+	{
+		find_avpids (fd, &pidv, &pida);
+		printf ("[movieplayer.cpp] found pida: 0x%04X ; pidv: 0x%04X\n",
+			pida, pidv);
+	}
+	else
+	{				// Play PES
+		pida = 0x900;
+		pidv = 0x8ff;
+	}
+
+	lseek (fd, 0L, SEEK_SET);
+	if ((dmxa = open (DMX, O_RDWR)) < 0
+	    || (dmxv = open (DMX, O_RDWR)) < 0
+	    || (dvr = open (DVR, O_WRONLY)) < 0
+	    || (adec = open (ADEC, O_RDWR)) < 0 || (vdec = open (VDEC, O_RDWR)) < 0)
+	{
+		failed = true;
+	}
+
+	p.input = DMX_IN_DVR;
+	p.output = DMX_OUT_DECODER;
+	p.flags = DMX_IMMEDIATE_START;
+	p.pid = pida;
+	p.pes_type = DMX_PES_AUDIO;
+	if (ioctl (dmxa, DMX_SET_PES_FILTER, &p) < 0)
+		failed = true;
+	p.pid = pidv;
+	p.pes_type = DMX_PES_VIDEO;
+	if (ioctl (dmxv, DMX_SET_PES_FILTER, &p) < 0)
+		failed = true;
+	fileposition = 0;
+	if (isTS && !failed)
+	{
+		while ((r = read (fd, buf, cache)) > 0 && playstate >= CMoviePlayerGui::PLAY)
+		{
+			done = 0;
+			wr = 0;
+			fileposition += r;
+			switch (playstate)
+			{
+			case CMoviePlayerGui::PAUSE:
+				while (playstate == CMoviePlayerGui::PAUSE)
+				{
+					ioctl (dmxa, DMX_STOP);
+				}
+				break;
+			case CMoviePlayerGui::FF:
+			case CMoviePlayerGui::REW:
+				ioctl (dmxa, DMX_STOP);
+				lseek (fd, cache * speed, SEEK_CUR);
+				fileposition += cache * speed;
+				break;
+			case CMoviePlayerGui::SOFTRESET:
+				ioctl (vdec, VIDEO_STOP);
+				ioctl (adec, AUDIO_STOP);
+				ioctl (dmxv, DMX_STOP);
+				ioctl (dmxa, DMX_STOP);
+				ioctl (vdec, VIDEO_PLAY);
+				if (g_settings.streaming_ac3_enabled == 1) {
+					ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL);
+				}
+				else
+				{
+					ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
+				}
+				ioctl (adec, AUDIO_PLAY);
+				p.pid = pida;
+				p.pes_type = DMX_PES_AUDIO;
+				ioctl (dmxa, DMX_SET_PES_FILTER, &p);
+				p.pid = pidv;
+				p.pes_type = DMX_PES_VIDEO;
+				ioctl (dmxv, DMX_SET_PES_FILTER, &p);
+				ioctl (dmxv, DMX_START);
+				ioctl (dmxa, DMX_START);
+				speed = 1;
+				playstate = CMoviePlayerGui::PLAY;
+			}
+
+			do
+			{
+				wr = write (dvr, &buf[done], r);
+				if (!done)
+					cache = wr;
+				done += wr;
+				r -= wr;
+			}
+			while (r);
+		}
+	}
+	else if (!failed)
+	{
+		ioctl (vdec, VIDEO_PLAY);
+		if (g_settings.streaming_ac3_enabled == 1) {
+			ioctl (adec, AUDIO_SET_BYPASS_MODE,0UL);
+		}
 		else
 		{
 			ioctl (adec, AUDIO_SET_BYPASS_MODE,1UL);
 		}
-      ioctl (adec, AUDIO_PLAY);
-      ioctl (dmxv, DMX_START);
-      ioctl (dmxa, DMX_START);
-      pes_to_ts2 (fd, dvr, pida, pidv, (const int *)&playstate);	// VERY bad performance!!!
-    }
+		ioctl (adec, AUDIO_PLAY);
+		ioctl (dmxv, DMX_START);
+		ioctl (dmxa, DMX_START);
+		pes_to_ts2 (fd, dvr, pida, pidv, (const int *)&playstate);	// VERY bad performance!!!
+	}
 
-  ioctl (vdec, VIDEO_STOP);
-  ioctl (adec, AUDIO_STOP);
-  ioctl (dmxv, DMX_STOP);
-  ioctl (dmxa, DMX_STOP);
-  close (fd);
-  close (dmxa);
-  close (dmxv);
-  close (dvr);
-  close (adec);
-  close (vdec);
-  if (playstate != CMoviePlayerGui::STOPPED)
-    {
-      playstate = CMoviePlayerGui::STOPPED;
-      g_RCInput->postMsg (CRCInput::RC_red, 0);	// for faster exit in PlayStream(); do NOT remove!
-    }
+	ioctl (vdec, VIDEO_STOP);
+	ioctl (adec, AUDIO_STOP);
+	ioctl (dmxv, DMX_STOP);
+	ioctl (dmxa, DMX_STOP);
+	close (fd);
+	close (dmxa);
+	close (dmxv);
+	close (dvr);
+	close (adec);
+	close (vdec);
+	if (playstate != CMoviePlayerGui::STOPPED)
+	{
+		playstate = CMoviePlayerGui::STOPPED;
+		g_RCInput->postMsg (CRCInput::RC_red, 0);	// for faster exit in PlayStream(); do NOT remove!
+	}
 
-  pthread_exit (NULL);
+	pthread_exit (NULL);
 }
 
 //------------------------------------------------------------------------
 void
 CMoviePlayerGui::PlayStream (int streamtype)
 {
-  uint msg, data;
-  string sel_filename;
-  bool update_info = true, start_play = false, exit =
-    false, open_filebrowser = true;
-  char mrl[200];
-  if (streamtype == STREAMTYPE_DVD)
-    {
-      strcpy (mrl, "dvdsimple:");
-      strcat (mrl, g_settings.streaming_server_cddrive);
-      strcat (mrl, "@1:1");
-      printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
-      sel_filename = "DVD";
-      open_filebrowser = false;
-      start_play = true;
-    }
-  else if (streamtype == STREAMTYPE_SVCD)
-    {
-      strcpy (mrl, "vcd:");
-      strcat (mrl, g_settings.streaming_server_cddrive);
-      strcat (mrl, "@1:1");
-      printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
-      sel_filename = "(S)VCD";
-      open_filebrowser = false;
-      start_play = true;
-
-    }
-
-  playstate = CMoviePlayerGui::STOPPED;
-  /* playstate == CMoviePlayerGui::STOPPED         : stopped
-   * playstate == CMoviePlayerGui::PREPARING       : preparing stream from server
-   * playstate == CMoviePlayerGui::ERROR           : error setting up server
-   * playstate == CMoviePlayerGui::PLAY            : playing
-   * playstate == CMoviePlayerGui::PAUSE           : pause-mode
-   * playstate == CMoviePlayerGui::FF              : fast-forward
-   * playstate == CMoviePlayerGui::REW             : rewind
-   * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
-   */
-  do
-    {
-      if (exit)
+	uint msg, data;
+	string sel_filename;
+	bool update_info = true, start_play = false, exit =
+		false, open_filebrowser = true;
+	char mrl[200];
+	if (streamtype == STREAMTYPE_DVD)
 	{
-	  exit = false;
-	  if (playstate >= CMoviePlayerGui::PLAY)
-	    {
-	      playstate = CMoviePlayerGui::STOPPED;
-	      break;
-	    }
+		strcpy (mrl, "dvdsimple:");
+		strcat (mrl, g_settings.streaming_server_cddrive);
+		strcat (mrl, "@1:1");
+		printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
+		sel_filename = "DVD";
+		open_filebrowser = false;
+		start_play = true;
+	}
+	else if (streamtype == STREAMTYPE_SVCD)
+	{
+		strcpy (mrl, "vcd:");
+		strcat (mrl, g_settings.streaming_server_cddrive);
+		strcat (mrl, "@1:1");
+		printf ("[movieplayer.cpp] Generated MRL: %s\n", mrl);
+		sel_filename = "(S)VCD";
+		open_filebrowser = false;
+		start_play = true;
+
 	}
 
-      if (open_filebrowser)
+	playstate = CMoviePlayerGui::STOPPED;
+	/* playstate == CMoviePlayerGui::STOPPED         : stopped
+	 * playstate == CMoviePlayerGui::PREPARING       : preparing stream from server
+	 * playstate == CMoviePlayerGui::ERROR           : error setting up server
+	 * playstate == CMoviePlayerGui::PLAY            : playing
+	 * playstate == CMoviePlayerGui::PAUSE           : pause-mode
+	 * playstate == CMoviePlayerGui::FF              : fast-forward
+	 * playstate == CMoviePlayerGui::REW             : rewind
+	 * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
+	 */
+	do
 	{
-	  open_filebrowser = false;
-	  filename = NULL;
-	  char startDir[40 + 6];
-	  strcpy (startDir, "vlc://");
-	  strcat (startDir, g_settings.streaming_server_startdir);
-	  printf ("[movieplayer.cpp] Startdir: %s\n", startDir);
-	  if (filebrowser->exec (startDir))
-	    {
-	      Path = filebrowser->getCurrentDir ();
-	      if ((filename =
-		   filebrowser->getSelectedFile ()->Name.c_str ()) != NULL)
+		if (exit)
 		{
-		  sel_filename =
-		    filebrowser->getSelectedFile ()->getFileName ();
-		  //printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-		  int namepos =
-		    filebrowser->getSelectedFile ()->Name.rfind ("vlc://");
-		  string mrl_str =
-		    filebrowser->getSelectedFile ()->Name.substr (namepos +
-								  6);
-		  char *tmp = curl_escape (mrl_str.c_str (), 0);
-		  strncpy (mrl, tmp, sizeof (mrl) - 1);
-		  curl_free (tmp);
-		  printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
-
-		  update_info = true;
-		  start_play = true;
+			exit = false;
+			if (playstate >= CMoviePlayerGui::PLAY)
+			{
+				playstate = CMoviePlayerGui::STOPPED;
+				break;
+			}
 		}
-	    }
-	  else
-	    {
-	      if (playstate == CMoviePlayerGui::STOPPED)
-		break;
-	    }
 
-	  CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
-	}
+		if (open_filebrowser)
+		{
+			open_filebrowser = false;
+			filename = NULL;
+			char startDir[40 + 6];
+			strcpy (startDir, "vlc://");
+			strcat (startDir, g_settings.streaming_server_startdir);
+			printf ("[movieplayer.cpp] Startdir: %s\n", startDir);
+			if (filebrowser->exec (startDir))
+			{
+				Path = filebrowser->getCurrentDir ();
+				if ((filename =
+				     filebrowser->getSelectedFile ()->Name.c_str ()) != NULL)
+				{
+					sel_filename =
+						filebrowser->getSelectedFile ()->getFileName ();
+					//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
+					int namepos =
+						filebrowser->getSelectedFile ()->Name.rfind ("vlc://");
+					string mrl_str =
+						filebrowser->getSelectedFile ()->Name.substr (namepos +
+											      6);
+					char *tmp = curl_escape (mrl_str.c_str (), 0);
+					strncpy (mrl, tmp, sizeof (mrl) - 1);
+					curl_free (tmp);
+					printf ("[movieplayer.cpp] Generated FILE MRL: %s\n", mrl);
 
-      if (update_info)
-	{
-	  update_info = false;
-	  char tmp[20];
-	  string lcd;
-	  switch (playstate)
-	    {
-	    case CMoviePlayerGui::PAUSE:
-	      lcd = "|| (" + sel_filename + ")";
-	      break;
-	    case CMoviePlayerGui::REW:
-	      sprintf (tmp, "%dx<< ", speed);
-	      lcd = tmp + sel_filename;
-	      break;
-	    case CMoviePlayerGui::FF:
-	      sprintf (tmp, "%dx>> ", speed);
-	      lcd = tmp + sel_filename;
-	      break;
-	    default:
-	      lcd = "> " + sel_filename;
-	      break;
-	    }
+					update_info = true;
+					start_play = true;
+				}
+			}
+			else
+			{
+				if (playstate == CMoviePlayerGui::STOPPED)
+					break;
+			}
 
-	  CLCD::getInstance ()->showServicename (lcd);
-	}
+			CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
+		}
 
-      if (start_play)
-	{
-	  start_play = false;
-	  bufferfilled = false;
-	  avpids_found=false;
+		if (update_info)
+		{
+			update_info = false;
+			char tmp[20];
+			string lcd;
+			switch (playstate)
+			{
+			case CMoviePlayerGui::PAUSE:
+				lcd = "|| (" + sel_filename + ')';
+				break;
+			case CMoviePlayerGui::REW:
+				sprintf (tmp, "%dx<< ", speed);
+				lcd = tmp + sel_filename;
+				break;
+			case CMoviePlayerGui::FF:
+				sprintf (tmp, "%dx>> ", speed);
+				lcd = tmp + sel_filename;
+				break;
+			default:
+				lcd = "> " + sel_filename;
+				break;
+			}
+
+			CLCD::getInstance ()->showServicename (lcd);
+		}
+
+		if (start_play)
+		{
+			start_play = false;
+			bufferfilled = false;
+			avpids_found=false;
 	  
-	  if (playstate >= CMoviePlayerGui::PLAY)
-	    {
-	      playstate = CMoviePlayerGui::STOPPED;
-	      pthread_join (rct, NULL);
-	    }
-	  //TODO: Add Dialog (Remove Dialog later)
-	  hintBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.pleasewait")); // UTF-8
-	  hintBox->paint();
-	  if (pthread_create (&rct, 0, PlayStreamThread, (void *) mrl) != 0)
-	    {
-	      break;
-	    }
-	  playstate = CMoviePlayerGui::SOFTRESET;
-	}
+			if (playstate >= CMoviePlayerGui::PLAY)
+			{
+				playstate = CMoviePlayerGui::STOPPED;
+				pthread_join (rct, NULL);
+			}
+			//TODO: Add Dialog (Remove Dialog later)
+			hintBox = new CHintBox("messagebox.info", g_Locale->getText("movieplayer.pleasewait")); // UTF-8
+			hintBox->paint();
+			if (pthread_create (&rct, 0, PlayStreamThread, (void *) mrl) != 0)
+			{
+				break;
+			}
+			playstate = CMoviePlayerGui::SOFTRESET;
+		}
 
-      g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
-      if (msg == CRCInput::RC_red || msg == CRCInput::RC_home)
-	{
-	  //exit play
-	  exit = true;
+		g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
+		if (msg == CRCInput::RC_red || msg == CRCInput::RC_home)
+		{
+			//exit play
+			exit = true;
+		}
+		else if (msg == CRCInput::RC_yellow)
+		{
+			if (playstate != CMoviePlayerGui::PAUSE)
+			{
+				update_info = true;
+				playstate = CMoviePlayerGui::PAUSE;
+			}
+			else
+			{
+				// resume play
+				update_info = true;
+				playstate = CMoviePlayerGui::SOFTRESET;
+			}
+		}
+		else
+			if (msg == NeutrinoMessages::RECORD_START
+			    || msg == NeutrinoMessages::ZAPTO
+			    || msg == NeutrinoMessages::STANDBY_ON
+			    || msg == NeutrinoMessages::SHUTDOWN
+			    || msg == NeutrinoMessages::SLEEPTIMER)
+			{
+				// Exit for Record/Zapto Timers
+				exit = true;
+				g_RCInput->postMsg (msg, data);
+			}
+			else
+				if (CNeutrinoApp::getInstance ()->
+				    handleMsg (msg, data) & messages_return::cancel_all)
+				{
+					exit = true;
+				}
 	}
-      else if (msg == CRCInput::RC_yellow)
-	{
-	  if (playstate != CMoviePlayerGui::PAUSE)
-	    {
-	      update_info = true;
-	      playstate = CMoviePlayerGui::PAUSE;
-	    }
-	  else
-	    {
-	      // resume play
-	      update_info = true;
-	      playstate = CMoviePlayerGui::SOFTRESET;
-	    }
-	}
-      else
-	if (msg == NeutrinoMessages::RECORD_START
-	    || msg == NeutrinoMessages::ZAPTO
-	    || msg == NeutrinoMessages::STANDBY_ON
-	    || msg == NeutrinoMessages::SHUTDOWN
-	    || msg == NeutrinoMessages::SLEEPTIMER)
-	{
-	  // Exit for Record/Zapto Timers
-	  exit = true;
-	  g_RCInput->postMsg (msg, data);
-	}
-      else
-	if (CNeutrinoApp::getInstance ()->
-	    handleMsg (msg, data) & messages_return::cancel_all)
-	{
-	  exit = true;
-	}
-    }
-  while (playstate >= CMoviePlayerGui::PLAY);
-  pthread_join (rct, NULL);
+	while (playstate >= CMoviePlayerGui::PLAY);
+	pthread_join (rct, NULL);
 }
 
 void
 CMoviePlayerGui::PlayFile (void)
 {
-  uint msg, data;
-  string sel_filename;
-  bool update_lcd = true, open_filebrowser =
-    true, start_play = false, exit = false;
-  playstate = CMoviePlayerGui::STOPPED;
-  /* playstate == CMoviePlayerGui::STOPPED         : stopped
-   * playstate == CMoviePlayerGui::PLAY            : playing
-   * playstate == CMoviePlayerGui::PAUSE           : pause-mode
-   * playstate == CMoviePlayerGui::FF              : fast-forward
-   * playstate == CMoviePlayerGui::REW             : rewind
-   * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
-   */
-  do
-    {
-      if (exit)
+	uint msg, data;
+	string sel_filename;
+	bool update_lcd = true, open_filebrowser =
+		true, start_play = false, exit = false;
+	playstate = CMoviePlayerGui::STOPPED;
+	/* playstate == CMoviePlayerGui::STOPPED         : stopped
+	 * playstate == CMoviePlayerGui::PLAY            : playing
+	 * playstate == CMoviePlayerGui::PAUSE           : pause-mode
+	 * playstate == CMoviePlayerGui::FF              : fast-forward
+	 * playstate == CMoviePlayerGui::REW             : rewind
+	 * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
+	 */
+	do
 	{
-	  exit = false;
-	  if (playstate >= CMoviePlayerGui::PLAY)
-	    {
-	      playstate = CMoviePlayerGui::STOPPED;
-	      break;
-	    }
-	}
-
-      if (open_filebrowser)
-	{
-	  open_filebrowser = false;
-	  filename = NULL;
-	  if (filebrowser->exec (g_settings.network_nfs_moviedir))
-	    {
-	      Path = filebrowser->getCurrentDir ();
-	      if ((filename =
-		   filebrowser->getSelectedFile ()->Name.c_str ()) != NULL)
+		if (exit)
 		{
-		  update_lcd = true;
-		  start_play = true;
-		  sel_filename =
-		    filebrowser->getSelectedFile ()->getFileName ();
+			exit = false;
+			if (playstate >= CMoviePlayerGui::PLAY)
+			{
+				playstate = CMoviePlayerGui::STOPPED;
+				break;
+			}
 		}
-	    }
-	  else
-	    {
-	      if (playstate == CMoviePlayerGui::STOPPED)
-		break;
-	    }
 
-	  CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
-	}
+		if (open_filebrowser)
+		{
+			open_filebrowser = false;
+			filename = NULL;
+			if (filebrowser->exec (g_settings.network_nfs_moviedir))
+			{
+				Path = filebrowser->getCurrentDir ();
+				if ((filename =
+				     filebrowser->getSelectedFile ()->Name.c_str ()) != NULL)
+#warning FIXME: what is the use of the above (c_str() will always be != NULL or am I mistaken)
+				{
+					update_lcd = true;
+					start_play = true;
+					sel_filename =
+						filebrowser->getSelectedFile ()->getFileName ();
+				}
+			}
+			else
+			{
+				if (playstate == CMoviePlayerGui::STOPPED)
+					break;
+			}
 
-      if (update_lcd)
-	{
-	  update_lcd = false;
-	  char tmp[20];
-	  string lcd;
-	  switch (playstate)
-	    {
-	    case CMoviePlayerGui::PAUSE:
-	      lcd = "|| (" + sel_filename + ")";
-	      break;
-	    case CMoviePlayerGui::REW:
-	      sprintf (tmp, "%dx<< ", speed);
-	      lcd = tmp + sel_filename;
-	      break;
-	    case CMoviePlayerGui::FF:
-	      sprintf (tmp, "%dx>> ", speed);
-	      lcd = tmp + sel_filename;
-	      break;
-	    default:
-	      lcd = "> " + sel_filename;
-	      break;
-	    }
+			CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
+		}
 
-	  CLCD::getInstance ()->showServicename (lcd);
-	}
+		if (update_lcd)
+		{
+			update_lcd = false;
+			char tmp[20];
+			string lcd;
+			switch (playstate)
+			{
+			case CMoviePlayerGui::PAUSE:
+				lcd = "|| (" + sel_filename + ')';
+				break;
+			case CMoviePlayerGui::REW:
+				sprintf (tmp, "%dx<< ", speed);
+				lcd = tmp + sel_filename;
+				break;
+			case CMoviePlayerGui::FF:
+				sprintf (tmp, "%dx>> ", speed);
+				lcd = tmp + sel_filename;
+				break;
+			default:
+				lcd = "> " + sel_filename;
+				break;
+			}
 
-      if (start_play)
-	{
-	  start_play = false;
-	  if (playstate >= CMoviePlayerGui::PLAY)
-	    {
-	      playstate = CMoviePlayerGui::STOPPED;
-	      pthread_join (rct, NULL);
-	    }
+			CLCD::getInstance ()->showServicename (lcd);
+		}
 
-	  if (pthread_create
-	      (&rct, 0, PlayFileThread, (void *) filename) != 0)
-	    {
-	      break;
-	    }
-	  playstate = CMoviePlayerGui::SOFTRESET;
-	}
+		if (start_play)
+		{
+			start_play = false;
+			if (playstate >= CMoviePlayerGui::PLAY)
+			{
+				playstate = CMoviePlayerGui::STOPPED;
+				pthread_join (rct, NULL);
+			}
 
-      g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
-      if (msg == CRCInput::RC_red || msg == CRCInput::RC_home)
-	{
-	  //exit play
-	  exit = true;
+			if (pthread_create
+			    (&rct, 0, PlayFileThread, (void *) filename) != 0)
+			{
+				break;
+			}
+			playstate = CMoviePlayerGui::SOFTRESET;
+		}
+
+		g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
+		if (msg == CRCInput::RC_red || msg == CRCInput::RC_home)
+		{
+			//exit play
+			exit = true;
+		}
+		else if (msg == CRCInput::RC_yellow)
+		{
+			if (playstate != CMoviePlayerGui::PAUSE)
+			{
+				update_lcd = true;
+				playstate = CMoviePlayerGui::PAUSE;
+			}
+			else
+			{
+				// resume play
+				update_lcd = true;
+				playstate = CMoviePlayerGui::SOFTRESET;
+			}
+		}
+		else if (msg == CRCInput::RC_blue)
+		{
+			FILE *bookmarkfile;
+			char bookmarkfilename[] =
+				"/var/tuxbox/config/movieplayer.bookmarks";
+			bookmarkfile = fopen (bookmarkfilename, "a");
+			fprintf (bookmarkfile, "%s\n", filename);
+			fprintf (bookmarkfile, "%ld\n", fileposition);
+			fclose (bookmarkfile);
+		}
+		else if (msg == CRCInput::RC_left)
+		{
+			// rewind
+			if (speed > 1)
+				speed = 1;
+			speed *= -2;
+			speed *= (speed > 1 ? -1 : 1);
+			playstate = CMoviePlayerGui::REW;
+			update_lcd = true;
+		}
+		else if (msg == CRCInput::RC_right)
+		{
+			// fast-forward
+			if (speed < 1)
+				speed = 1;
+			speed *= 2;
+			playstate = CMoviePlayerGui::FF;
+			update_lcd = true;
+		}
+		else if (msg == CRCInput::RC_up || msg == CRCInput::RC_down)
+		{
+			// todo: next/prev file
+		}
+		else if (msg == CRCInput::RC_help)
+		{
+			// todo: infobar
+		}
+		else if (msg == CRCInput::RC_ok)
+		{
+			if (playstate > CMoviePlayerGui::PLAY)
+			{
+				update_lcd = true;
+				playstate = CMoviePlayerGui::SOFTRESET;
+			}
+			else
+				open_filebrowser = true;
+		}
+		else
+			if (msg == NeutrinoMessages::RECORD_START
+			    || msg == NeutrinoMessages::ZAPTO
+			    || msg == NeutrinoMessages::STANDBY_ON
+			    || msg == NeutrinoMessages::SHUTDOWN
+			    || msg == NeutrinoMessages::SLEEPTIMER)
+			{
+				// Exit for Record/Zapto Timers
+				isTS = true;		// also exit in PES Mode
+				exit = true;
+				g_RCInput->postMsg (msg, data);
+			}
+			else
+				if (CNeutrinoApp::getInstance ()->
+				    handleMsg (msg, data) & messages_return::cancel_all)
+				{
+					isTS = true;		// also exit in PES Mode
+					exit = true;
+				}
 	}
-      else if (msg == CRCInput::RC_yellow)
-	{
-	  if (playstate != CMoviePlayerGui::PAUSE)
-	    {
-	      update_lcd = true;
-	      playstate = CMoviePlayerGui::PAUSE;
-	    }
-	  else
-	    {
-	      // resume play
-	      update_lcd = true;
-	      playstate = CMoviePlayerGui::SOFTRESET;
-	    }
-	}
-      else if (msg == CRCInput::RC_blue)
-	{
-	  FILE *bookmarkfile;
-	  char bookmarkfilename[] =
-	    "/var/tuxbox/config/movieplayer.bookmarks";
-	  bookmarkfile = fopen (bookmarkfilename, "a");
-	  fprintf (bookmarkfile, "%s\n", filename);
-	  fprintf (bookmarkfile, "%ld\n", fileposition);
-	  fclose (bookmarkfile);
-	}
-      else if (msg == CRCInput::RC_left)
-	{
-	  // rewind
-	  if (speed > 1)
-	    speed = 1;
-	  speed *= -2;
-	  speed *= (speed > 1 ? -1 : 1);
-	  playstate = CMoviePlayerGui::REW;
-	  update_lcd = true;
-	}
-      else if (msg == CRCInput::RC_right)
-	{
-	  // fast-forward
-	  if (speed < 1)
-	    speed = 1;
-	  speed *= 2;
-	  playstate = CMoviePlayerGui::FF;
-	  update_lcd = true;
-	}
-      else if (msg == CRCInput::RC_up || msg == CRCInput::RC_down)
-	{
-	  // todo: next/prev file
-	}
-      else if (msg == CRCInput::RC_help)
-	{
-	  // todo: infobar
-	}
-      else if (msg == CRCInput::RC_ok)
-	{
-	  if (playstate > CMoviePlayerGui::PLAY)
-	    {
-	      update_lcd = true;
-	      playstate = CMoviePlayerGui::SOFTRESET;
-	    }
-	  else
-	    open_filebrowser = true;
-	}
-      else
-	if (msg == NeutrinoMessages::RECORD_START
-	    || msg == NeutrinoMessages::ZAPTO
-	    || msg == NeutrinoMessages::STANDBY_ON
-	    || msg == NeutrinoMessages::SHUTDOWN
-	    || msg == NeutrinoMessages::SLEEPTIMER)
-	{
-	  // Exit for Record/Zapto Timers
-	  isTS = true;		// also exit in PES Mode
-	  exit = true;
-	  g_RCInput->postMsg (msg, data);
-	}
-      else
-	if (CNeutrinoApp::getInstance ()->
-	    handleMsg (msg, data) & messages_return::cancel_all)
-	{
-	  isTS = true;		// also exit in PES Mode
-	  exit = true;
-	}
-    }
-  while (playstate >= CMoviePlayerGui::PLAY);
-  pthread_join (rct, NULL);
+	while (playstate >= CMoviePlayerGui::PLAY);
+	pthread_join (rct, NULL);
 }
 
 int
 CMoviePlayerGui::show ()
 {
-  int res = -1;
-  uint msg, data;
-  bool loop = true, update = true;
-  while (loop)
-    {
-      if (CNeutrinoApp::getInstance ()->
-	  getMode () != NeutrinoMessages::mode_ts)
+	int res = -1;
+	uint msg, data;
+	bool loop = true, update = true;
+	while (loop)
 	{
-	  // stop if mode was changed in another thread
-	  loop = false;
-	}
+		if (CNeutrinoApp::getInstance ()->
+		    getMode () != NeutrinoMessages::mode_ts)
+		{
+			// stop if mode was changed in another thread
+			loop = false;
+		}
 
-      if (update)
-	{
-	  hide ();
-	  update = false;
-	  paint ();
-	}
+		if (update)
+		{
+			hide ();
+			update = false;
+			paint ();
+		}
 
-      // Check Remote Control
+		// Check Remote Control
 
-      g_RCInput->getMsg (&msg, &data, 10);	// 1 sec timeout to update play/stop state display
-      if (msg == CRCInput::RC_home)
-	{			//Exit after cancel key
-	  loop = false;
-	}
-      else if (msg == CRCInput::RC_timeout)
-	{
-	  // do nothing
-	}
+		g_RCInput->getMsg (&msg, &data, 10);	// 1 sec timeout to update play/stop state display
+		if (msg == CRCInput::RC_home)
+		{			//Exit after cancel key
+			loop = false;
+		}
+		else if (msg == CRCInput::RC_timeout)
+		{
+			// do nothing
+		}
 //------------ RED --------------------
-      else if (msg == CRCInput::RC_red)
-	{
-	  hide ();
-	  PlayStream (STREAMTYPE_FILE);
-	  paint ();
-	}
+		else if (msg == CRCInput::RC_red)
+		{
+			hide ();
+			PlayStream (STREAMTYPE_FILE);
+			paint ();
+		}
 //------------ GREEN --------------------
-      else if (msg == CRCInput::RC_green)
-	{
-	  hide ();
-	  isTS = true;
-	  PlayFile ();
-	  paint ();
-	}
+		else if (msg == CRCInput::RC_green)
+		{
+			hide ();
+			isTS = true;
+			PlayFile ();
+			paint ();
+		}
 /*//------------ YELLOW --------------------
-      else if (msg == CRCInput::RC_yellow)
-	{
-	  hide ();
-	  isTS = false;
-	  PlayFile ();
-	  paint ();
-	}
-	*/
-//------------ YELLOW --------------------
-      else if (msg == CRCInput::RC_yellow)
-	{
-	  hide ();
-	  PlayStream (STREAMTYPE_DVD);
-	  paint ();
-	}
-//------------ BLUE --------------------
-      else if (msg == CRCInput::RC_blue)
-	{
-	  hide ();
-	  PlayStream (STREAMTYPE_SVCD);
-	  paint ();
-	}
-      else if (msg == NeutrinoMessages::CHANGEMODE)
-	{
-	  if ((data & NeutrinoMessages::
-	       mode_mask) != NeutrinoMessages::mode_ts)
-	    {
-	      loop = false;
-	      m_LastMode = data;
-	    }
-	}
-      else
-	if (msg == NeutrinoMessages::RECORD_START
-	    || msg == NeutrinoMessages::ZAPTO
-	    || msg == NeutrinoMessages::STANDBY_ON
-	    || msg == NeutrinoMessages::SHUTDOWN
-	    || msg == NeutrinoMessages::SLEEPTIMER)
-	{
-	  // Exit for Record/Zapto Timers
-	  // Add bookmark
-	  loop = false;
-	  g_RCInput->postMsg (msg, data);
-	}
-      else
-	{
-	  if (CNeutrinoApp::getInstance ()->
-	      handleMsg (msg, data) & messages_return::cancel_all)
-	    {
-	      loop = false;
-	    }
-	  // update mute icon
-	  paintHead ();
-	}
-    }
+  else if (msg == CRCInput::RC_yellow)
+  {
   hide ();
+  isTS = false;
+  PlayFile ();
+  paint ();
+  }
+*/
+//------------ YELLOW --------------------
+		else if (msg == CRCInput::RC_yellow)
+		{
+			hide ();
+			PlayStream (STREAMTYPE_DVD);
+			paint ();
+		}
+//------------ BLUE --------------------
+		else if (msg == CRCInput::RC_blue)
+		{
+			hide ();
+			PlayStream (STREAMTYPE_SVCD);
+			paint ();
+		}
+		else if (msg == NeutrinoMessages::CHANGEMODE)
+		{
+			if ((data & NeutrinoMessages::
+			     mode_mask) != NeutrinoMessages::mode_ts)
+			{
+				loop = false;
+				m_LastMode = data;
+			}
+		}
+		else
+			if (msg == NeutrinoMessages::RECORD_START
+			    || msg == NeutrinoMessages::ZAPTO
+			    || msg == NeutrinoMessages::STANDBY_ON
+			    || msg == NeutrinoMessages::SHUTDOWN
+			    || msg == NeutrinoMessages::SLEEPTIMER)
+			{
+				// Exit for Record/Zapto Timers
+				// Add bookmark
+				loop = false;
+				g_RCInput->postMsg (msg, data);
+			}
+			else
+			{
+				if (CNeutrinoApp::getInstance ()->
+				    handleMsg (msg, data) & messages_return::cancel_all)
+				{
+					loop = false;
+				}
+				// update mute icon
+				paintHead ();
+			}
+	}
+	hide ();
 
-  return (res);
+	return (res);
 }
 
 //------------------------------------------------------------------------
@@ -1362,22 +1363,22 @@ CMoviePlayerGui::show ()
 void
 CMoviePlayerGui::hide ()
 {
-  if (visible)
-    {
-      frameBuffer->paintBackgroundBoxRel (x -
-					  MOVIEPLAYER_ConnectLineBox_Width
-					  - 1,
-					  y +
-					  title_height
-					  - 1,
-					  width
-					  +
-					  MOVIEPLAYER_ConnectLineBox_Width
-					  + 2, height + 2 - title_height);
-      frameBuffer->paintBackgroundBoxRel (x, y, width, title_height);
-      frameBuffer->ClearFrameBuffer ();
-      visible = false;
-    }
+	if (visible)
+	{
+		frameBuffer->paintBackgroundBoxRel (x -
+						    MOVIEPLAYER_ConnectLineBox_Width
+						    - 1,
+						    y +
+						    title_height
+						    - 1,
+						    width
+						    +
+						    MOVIEPLAYER_ConnectLineBox_Width
+						    + 2, height + 2 - title_height);
+		frameBuffer->paintBackgroundBoxRel (x, y, width, title_height);
+		frameBuffer->ClearFrameBuffer ();
+		visible = false;
+	}
 }
 
 //------------------------------------------------------------------------
@@ -1386,24 +1387,24 @@ void
 CMoviePlayerGui::paintHead ()
 {
 //      printf("[movieplayer.cpp] paintHead{\n");
-  std::string strCaption = g_Locale->getText ("movieplayer.head");
-  frameBuffer->paintBoxRel (x, y + title_height, width, theight,
-			    COL_MENUHEAD);
-  frameBuffer->paintIcon ("movie.raw", x + 7, y + title_height + 10);
-  g_Fonts->menu_title->RenderString (x + 35, y + theight + title_height + 0, width - 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
-  int ypos = y + title_height;
-  if (theight > 26)
-    ypos = (theight - 26) / 2 + y + title_height;
-  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_DBOX, x + width - 30, ypos);
-  if (CNeutrinoApp::getInstance ()->isMuted ())
-    {
-      int xpos = x + width - 75;
-      ypos = y + title_height;
-      if (theight > 32)
-	ypos = (theight - 32) / 2 + y + title_height;
-      frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_MUTE, xpos, ypos);
-    }
-  visible = true;
+	std::string strCaption = g_Locale->getText ("movieplayer.head");
+	frameBuffer->paintBoxRel (x, y + title_height, width, theight,
+				  COL_MENUHEAD);
+	frameBuffer->paintIcon ("movie.raw", x + 7, y + title_height + 10);
+	g_Fonts->menu_title->RenderString (x + 35, y + theight + title_height + 0, width - 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
+	int ypos = y + title_height;
+	if (theight > 26)
+		ypos = (theight - 26) / 2 + y + title_height;
+	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_DBOX, x + width - 30, ypos);
+	if (CNeutrinoApp::getInstance ()->isMuted ())
+	{
+		int xpos = x + width - 75;
+		ypos = y + title_height;
+		if (theight > 32)
+			ypos = (theight - 32) / 2 + y + title_height;
+		frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_MUTE, xpos, ypos);
+	}
+	visible = true;
 }
 
 //------------------------------------------------------------------------
@@ -1411,68 +1412,68 @@ CMoviePlayerGui::paintHead ()
 void
 CMoviePlayerGui::paintImg ()
 {
-  // TODO: find better image
-  frameBuffer->paintBoxRel (x,
-			    y +
-			    title_height +
-			    theight, width,
-			    height -
-			    info_height -
-			    2 *
-			    buttonHeight -
-			    title_height - theight, COL_BACKGROUND);
-  frameBuffer->paintIcon ("movieplayer.raw",
-			  x + 25, y + 15 + title_height + theight);
+	// TODO: find better image
+	frameBuffer->paintBoxRel (x,
+				  y +
+				  title_height +
+				  theight, width,
+				  height -
+				  info_height -
+				  2 *
+				  buttonHeight -
+				  title_height - theight, COL_BACKGROUND);
+	frameBuffer->paintIcon ("movieplayer.raw",
+				x + 25, y + 15 + title_height + theight);
 }
 
 //------------------------------------------------------------------------
 void
 CMoviePlayerGui::paintFoot ()
 {
-  int ButtonWidth = (width - 20) / 4;
-  frameBuffer->paintBoxRel (x,
-			    y + (height -
-				 info_height
-				 -
-				 2 *
-				 buttonHeight),
-			    width, 2 * buttonHeight, COL_MENUHEAD);
-  frameBuffer->paintHLine (x, x + width - x,
-			   y + (height -
-				info_height
-				- 2 * buttonHeight), COL_INFOBAR_SHADOW);
+	int ButtonWidth = (width - 20) / 4;
+	frameBuffer->paintBoxRel (x,
+				  y + (height -
+				       info_height
+				       -
+				       2 *
+				       buttonHeight),
+				  width, 2 * buttonHeight, COL_MENUHEAD);
+	frameBuffer->paintHLine (x, x + width - x,
+				 y + (height -
+				      info_height
+				      - 2 * buttonHeight), COL_INFOBAR_SHADOW);
 /*  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
-			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.bookmark"), COL_INFOBAR, 0, true);	// UTF-8
+    y + (height - info_height - 2 * buttonHeight) + 4);
+    g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.bookmark"), COL_INFOBAR, 0, true);	// UTF-8
 */
-  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
-			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamfile"), COL_INFOBAR, 0, true); // UTF-8
+	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
+				y + (height - info_height - 2 * buttonHeight) + 4);
+	g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamfile"), COL_INFOBAR, 0, true); // UTF-8
 
-  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_GREEN, x + 1 * ButtonWidth + 10,
-			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 1 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosets"), COL_INFOBAR, 0, true); // UTF-8
-  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_YELLOW, x + 2 * ButtonWidth + 10,
-			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 2 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamdvd"), COL_INFOBAR, 0, true); // UTF-8
-  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_BLUE, x + 3 * ButtonWidth + 10,
-			  y + (height - info_height - 2 * buttonHeight) + 4);
-  g_Fonts->infobar_small->RenderString (x + 3 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamsvcd"), COL_INFOBAR, 0, true); // UTF-8
+	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_GREEN, x + 1 * ButtonWidth + 10,
+				y + (height - info_height - 2 * buttonHeight) + 4);
+	g_Fonts->infobar_small->RenderString (x + 1 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosets"), COL_INFOBAR, 0, true); // UTF-8
+	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_YELLOW, x + 2 * ButtonWidth + 10,
+				y + (height - info_height - 2 * buttonHeight) + 4);
+	g_Fonts->infobar_small->RenderString (x + 2 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamdvd"), COL_INFOBAR, 0, true); // UTF-8
+	frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_BLUE, x + 3 * ButtonWidth + 10,
+				y + (height - info_height - 2 * buttonHeight) + 4);
+	g_Fonts->infobar_small->RenderString (x + 3 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.choosestreamsvcd"), COL_INFOBAR, 0, true); // UTF-8
 }
 
 void
 CMoviePlayerGui::paint ()
 {
-  CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
-  CLCD::getInstance ()->showServicename ("Movieplayer");
-  frameBuffer->loadPal ("radiomode.pal", 18, COL_MAXFREE);
-  frameBuffer->loadBackground ("radiomode.raw");
-  frameBuffer->useBackground (true);
-  frameBuffer->paintBackground ();
-  paintHead ();
-  paintImg ();
-  paintFoot ();
-  visible = true;
+	CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
+	CLCD::getInstance ()->showServicename ("Movieplayer");
+	frameBuffer->loadPal ("radiomode.pal", 18, COL_MAXFREE);
+	frameBuffer->loadBackground ("radiomode.raw");
+	frameBuffer->useBackground (true);
+	frameBuffer->paintBackground ();
+	paintHead ();
+	paintImg ();
+	paintFoot ();
+	visible = true;
 }
 
 #endif

@@ -59,10 +59,10 @@ class CFileFilter
 	std::vector<std::string> Filter;
 public:
 	void addFilter(std::string filter){Filter.push_back(filter);};
-	bool matchFilter(std::string name)
+	bool matchFilter(const std::string name)
 	{
 		int ext_pos = 0;
-		ext_pos = name.rfind(".");
+		ext_pos = name.rfind('.');
 		if( ext_pos > 0)
 		{
 			std::string extension;
