@@ -31,7 +31,8 @@ class eTimerManager: public Object
 		zap, prepareEvent, startCountdown, setNextEvent,
 		startEvent, pauseEvent, restartEvent, stopEvent,
 		startRecording, stopRecording, restartRecording,
-		pauseRecording, spinUpHarddiscs, oldService
+		pauseRecording, spinUpHarddiscs, oldService,
+		updateDuration
 	} nextAction;
 
 	eTimer actionTimer;  // to start timer related actions
@@ -67,7 +68,7 @@ public:
 	eTimerManager();
 	~eTimerManager();
 	static eTimerManager *getInstance() { return instance; }
-//	bool updateRunningEvent( eWidget *w, ePlaylistEntry& entry );
+	bool updateRunningEventDuration( int duration );
 	bool removeEventFromTimerList( eWidget *w, const ePlaylistEntry& entry, int type=erase );
 	bool removeEventFromTimerList( eWidget *w, const eServiceReference *ref, const EITEvent *evt);
 	void cleanupEvents();

@@ -3158,7 +3158,9 @@ void eZapMain::deleteService( eServiceSelector *sel )
 			if ( (it->type & (ePlaylistEntry::PlaylistEntry|ePlaylistEntry::boundFile))==(ePlaylistEntry::PlaylistEntry|ePlaylistEntry::boundFile) )
 			{
 			// recorded stream selected ( in recordings.epl )
-				eMessageBox box(_("This is a recorded stream!\nReally delete?"), _("Delete recorded stream"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
+				eString str;
+				str.sprintf(_("Really delete '%s'?"), it->service.descr.c_str() );
+				eMessageBox box(str, _("Delete recorded stream"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 				box.show();
 				int r=box.exec();
 				box.hide();
@@ -3219,9 +3221,11 @@ void eZapMain::deleteService( eServiceSelector *sel )
 		else
 			sel->removeCurrent(true);
 
-		sel->updateNumbers();
 		// remove the entry in playlist
 		pl->deleteService(it);
+
+		sel->updateNumbers();
+
 		// save playlist
 		pl->save();
 		// enter new into the current path
@@ -4365,7 +4369,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if ( subservicesel.quickzapmode() && event.action == &i_enigmaMainActions->nextSubService )
 		{
-			if ( flags&ENIGMA_SUBSERVICES && handleState() )
+			if ( flags&ENIGMA_SUBSERVICES )
 				subservicesel.next();
 		}
 		else if (event.action == &i_enigmaMainActions->nextService)
@@ -4379,7 +4383,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		}
 		else if ( subservicesel.quickzapmode() && event.action == &i_enigmaMainActions->prevSubService )
 		{
-			if ( flags&ENIGMA_SUBSERVICES && handleState() )
+			if ( flags&ENIGMA_SUBSERVICES )
 				subservicesel.prev();
 		}
 		else if (event.action == &i_enigmaMainActions->prevService)
@@ -4933,35 +4937,36 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	}
 	case eServiceEvent::evtAddNewAudioStreamId:
 		eDebug("case eServiceEvent::evtAddNewAudioStreamId:.. %02x", event.param );
+		ButtonYellowDis->hide();
+		ButtonYellowEn->show();
+		flags|=ENIGMA_AUDIO_PS;
 		audioselps.add(event.param);
-		unsigned int audioStreamID=0;
-		eConfig::getInstance()->getKey("/ezap/audio/prevAudioStreamID", audioStreamID);
-		bool seekToBegin=true;
-		bool setStreamID=false;
-		if ( playlist->current != playlist->getConstList().end()
-			&& playlist->current->current_position != -1 )
-			seekToBegin=false;
-		if ( audioselps.getCount() > 1 )
-		{
-			ButtonYellowDis->hide();
-			ButtonYellowEn->show();
-			flags|=ENIGMA_AUDIO_PS;
-/////////////////////
-			if ( audioStreamID && audioStreamID == (unsigned int)event.param )
-				setStreamID=true;
-		}
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (!handler)
 			return;
-		if ( setStreamID )
-			handler->setAudioStream(event.param);
-		if ( seekToBegin )
+
+		// get previous selected audio stream_id
+		unsigned int audioStreamID=0;
+		eConfig::getInstance()->getKey("/ezap/audio/prevAudioStreamID", audioStreamID);
+
+		// check if playback begin in the middle of the file
+		if ( playlist->current != playlist->getConstList().end()
+			&& playlist->current->current_position != -1 )
+			eDebug("dont seek to begin");
+		else if ( audioselps.getCount() == 3 )
+// first stream_id found.. seek to begin.. we will see the complete file :)
 		{
 			Decoder::Pause(0);
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, 0));
 			usleep(200);
 			Decoder::flushBuffer();
 			Decoder::Resume(false);
+		}
+// new audio stream_id found.. when this is our saved stream_id.. then change
+		if ( audioselps.getCount() > 3 && audioStreamID
+			&& audioStreamID == (unsigned int)event.param )
+		{
+			handler->setAudioStream(event.param);
 		}
 		break;
 #endif // DISABLE_FILE
@@ -5380,6 +5385,7 @@ void eZapMain::leaveService()
 //	ChannelNumber->setText("");
 	Description->setText("");
 
+	fileinfos->setText("");
 	EINow->setText("");
 	EINowDuration->setText("");
 	EINowTime->setText("");

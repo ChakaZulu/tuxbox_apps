@@ -25,7 +25,7 @@ eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportSt
 	int dvb_namespace=orbital_position<<16;
 		// on invalid ONIDs, build hash from frequency.
 	if (!isValidONIDTSID(onid, tsid))
-		dvb_namespace|=freq&0xFFFF;
+		dvb_namespace|=(freq/1000)&0xFFFF;
 	return eDVBNamespace(dvb_namespace);
 }
 
@@ -250,15 +250,9 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 				{
 					eOriginalNetworkID onid=i->original_network_id;
 					eTransportStreamID tsid=i->transport_stream_id;
-					eDVBNamespace dvb_namespace=-1;
-					// eTransponder &transponder=dvb.settings->transponderlist->createTransponder(tsid, onid);
-
-					// schon bekannte transponder nicht nochmal scannen
-					if (dvb.settings->getTransponders()->searchTS(dvb_namespace, tsid, onid))
-						continue;
 
 					eTransponder tp(*dvb.settings->getTransponders(), -1, tsid, onid);
-					
+
 					for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 					{
 						switch (d->Tag())
@@ -272,7 +266,18 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 						}
 					}
 
-					if (flags & flagNoCircularPolarization)
+					eDVBNamespace dvb_namespace =
+						tp.satellite.isValid()
+						?eTransponder::buildNamespace(onid,tsid,tp.satellite.orbital_position,tp.satellite.frequency)
+						:-1;
+
+					// schon bekannte transponder nicht nochmal scannen
+					if (dvb.settings->getTransponders()->searchTS(dvb_namespace, tsid, onid))
+						continue;
+					else
+						tp.dvb_namespace=dvb_namespace;
+
+					if (flags&flagNoCircularPolarization)
 						tp.satellite.polarisation&=1;
 
 					if ( addTransponder(tp) )
@@ -418,21 +423,23 @@ int eDVBScanController::handleSDT(const SDT *sdt)
 		known=1;
 
 	if ( flags & flagOnlyFree )
-		dvb.settings->getTransponders()->handleSDT(sdt, dvb_namespace, onid, tsid, &freeCheckFinishedCallback );
+		dvb.settings->getTransponders()->handleSDT(sdt,dvb_namespace,onid,tsid,&freeCheckFinishedCallback );
 	else
-		dvb.settings->getTransponders()->handleSDT(sdt, dvb_namespace, onid, tsid );
+		dvb.settings->getTransponders()->handleSDT(sdt,dvb_namespace,onid,tsid);
 
 	return known;
 }
 
-//static char *FEC[] = { "Auto", "1/2", "2/3", "3/4", "5/6", "7/8" };
+#if DEBUG_TO_FILE
+static char *FEC[] = { "Auto", "1/2", "2/3", "3/4", "5/6", "7/8" };
+#endif
 
 bool eDVBScanController::addTransponder(const eTransponder &transponder)
 {
 #if DEBUG_TO_FILE
 	FILE *out = fopen("bla.out", "a");
 	if ( !out )
-		eFatal("could not open bla.out");*/
+		eFatal("could not open bla.out");
 
 	fprintf(out, "TOADD -> %d, %d, %c, %s, %s, %s(%d), %d onid = %d, tsid = %d\n",
 		transponder.satellite.frequency, transponder.satellite.symbol_rate,
@@ -441,7 +448,7 @@ bool eDVBScanController::addTransponder(const eTransponder &transponder)
 		!transponder.satellite.inversion?"NO":transponder.satellite.inversion==2?"AUTO":"INV",
 		transponder.satellite.inversion,
 		transponder.satellite.orbital_position, transponder.original_network_id.get(),
-		transponder.transport_stream_id.get() );*/
+		transponder.transport_stream_id.get() );
 #endif
 	if ( transponder.satellite.valid &&
 			 transponder.satellite.orbital_position != knownTransponder.front().satellite.orbital_position &&
@@ -453,7 +460,6 @@ bool eDVBScanController::addTransponder(const eTransponder &transponder)
 #endif
 		return false;
 	}
-
 	for ( std::list<eTransponder>::iterator n(changedTransponder.begin()); n != changedTransponder.end(); ++n)
 	{
 		if (*n == transponder)
@@ -465,7 +471,6 @@ bool eDVBScanController::addTransponder(const eTransponder &transponder)
 			return false;
 		}
 	}
-
 	for (std::list<eTransponder>::iterator n(knownTransponder.begin()); n != knownTransponder.end(); ++n)
 	{
 #if DEBUG_TO_FILE
@@ -475,7 +480,7 @@ bool eDVBScanController::addTransponder(const eTransponder &transponder)
 		n->satellite.valid?"SAT":transponder.cable.valid?"CAB":"UNK",
 		!n->satellite.inversion?"NO":transponder.satellite.inversion==2?"AUTO":"INV",
 		n->satellite.orbital_position, transponder.original_network_id.get(),
-		n->transport_stream_id.get() );                                      */
+		n->transport_stream_id.get() );                                      
 #endif
 		if (*n == transponder)  // no duplicate Transponders
 		{

@@ -12,7 +12,7 @@
 #include <lib/dvb/dvb.h>
 
 eSatfind::eSatfind(eFrontend *fe)
-	:eWindow(0), updateTimer(eApp), fe(fe), current(0), lockcount(0)
+	:eWindow(0), updateTimer(eApp), fe(fe), current(0)
 {
 	p_snr=new eProgress(this);
 	p_snr->setName("snr");
@@ -124,7 +124,6 @@ void eSatfind::satChanged( eListBoxEntryText *sat)
 
 void eSatfind::tpChanged( eListBoxEntryText *tp )
 {
-	lockcount=0;
 	updateTimer.stop();
 	if (tp && tp->getKey())
 	{
@@ -163,10 +162,7 @@ int eSatfind::eventHandler( const eWidgetEvent& e)
 
 void eSatfind::tunedIn(eTransponder *, int error )
 {
-	lockcount=0;
 	update();
-	if ( error )
-		retune();
 }
 
 void eSatfind::update()
@@ -174,15 +170,6 @@ void eSatfind::update()
 	int snr=fe->SNR(),
 			agc=fe->SignalStrength(),
 			ber=fe->BER();
-	p_agc->setPerc(agc*100/65535);
-	p_snr->setPerc(snr*100/65535);
-	p_ber->setPerc((int)log2(ber));
-	lsnr_num->setText(eString().sprintf("%d%%",snr*100/65535));
-	lsync_num->setText(eString().sprintf("%d%%",agc*100/65535));
-	lber_num->setText(eString().sprintf("%d",ber));
-	status=fe->Status();
-	c_lock->setCheck(!!(status & FE_HAS_LOCK));
-	c_sync->setCheck(!!(status & FE_HAS_SYNC));
 	eDebug("[Satfind] SNR %d(%s) AGC %d(%s) BER %d(%s) %s %s",
 		snr,
 		lsnr_num->getText().c_str(),
@@ -192,21 +179,19 @@ void eSatfind::update()
 		lber_num->getText().c_str(),
 		c_lock->isChecked()?"LOCK":"NOLOCK",
 		c_sync->isChecked()?"SYNC":"NOSYNC");
+	snr=snr*100/65535;
+	agc=agc*100/65535;
+	p_agc->setPerc(agc);
+	p_snr->setPerc(snr);
+	p_ber->setPerc((int)log2(ber));
+	lsnr_num->setText(eString().sprintf("%d%%",snr));
+	lsync_num->setText(eString().sprintf("%d%%",agc));
+	lber_num->setText(eString().sprintf("%d",ber));
+	status=fe->Status();
+	c_lock->setCheck(!!(status & FE_HAS_LOCK));
+	c_sync->setCheck(!!(status & FE_HAS_SYNC));
 #ifndef DISABLE_LCD
 	eZapLCD::getInstance()->lcdSatfind->update(snr,agc);
 #endif
 	updateTimer.start(250,true);
-	if (status & FE_HAS_LOCK)
-		;
-	else if( lockcount++ == 5 )
-		retune();
-}
-
-void eSatfind::retune()
-{
-	if (!(status & FE_HAS_LOCK))
-	{
-		if (current)
-			current->tune();
-	}
 }

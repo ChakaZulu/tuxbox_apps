@@ -540,9 +540,9 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 
 void eServiceSelector::updateNumbers()
 {
-	int num = this == eZap::getInstance()->getServiceSelector() ?
-		getFirstBouquetServiceNum(path.bottom(),-1) :
-		getFirstBouquetServiceNum(path.bottom(),path.bottom().data[1] == (1<<2) ?
+	int num = (this == eZap::getInstance()->getServiceSelector()) ?
+		getFirstBouquetServiceNum(path.top(),-1) :
+		getFirstBouquetServiceNum(path.top(),path.bottom().data[1] == (1<<2) ?
 			eZapMain::modeRadio : path.bottom().data[1] == (1<<1)|(1<<4) ?
 			eZapMain::modeTV : eZapMain::modeFile );
 	services->beginAtomic();

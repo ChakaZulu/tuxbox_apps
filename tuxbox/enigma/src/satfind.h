@@ -24,7 +24,7 @@ class eSatfind: public eWindow
 	eButton *ok;
 	eFrontend *fe;
 	eTransponder *current;
-	int lockcount, status;
+	int status;
 	int eventHandler( const eWidgetEvent& e);
 	void satChanged(eListBoxEntryText *sat);
 	void tpChanged( eListBoxEntryText *tp );
@@ -34,7 +34,6 @@ public:
 	eSatfind(eFrontend*);
 	void closeWnd();
 	void update();
-	void retune();	
 };
 
 #endif

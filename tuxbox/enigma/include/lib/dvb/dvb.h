@@ -173,7 +173,7 @@ public:
 			if ( abs( frequency-c.frequency ) > 3000 )
 				return 0;
 //   		eDebug("symbol_rate -> %i != %i", symbol_rate, c.symbol_rate );
-			if ( abs(symbol_rate-c.symbol_rate) > 2000 )
+			if ( abs(symbol_rate-c.symbol_rate) > 4000 )
 				return 0;
 //   		eDebug("polarisation -> %i != %i", polarisation, c.polarisation );
 			if (polarisation != c.polarisation)
@@ -181,7 +181,7 @@ public:
 //   		eDebug("fec -> %i != %i", fec, c.fec );
 			if (fec != c.fec)
 				return 0;
-//   		eDebug("inversion -> %i != %i", inversion, c.inversion );
+//			eDebug("inversion -> %i != %i", inversion, c.inversion );
 			// dont compare inversion when one have AUTO
 			if (inversion != 2 && c.inversion != 2 && inversion != c.inversion)
 				return 0;
@@ -811,6 +811,7 @@ public:
 	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
 	Signal1<void, const eServiceReferenceDVB &> service_removed;
 
+	eTransponder *searchTransponder(const eTransponder &);
 	eTransponder *searchTS(eDVBNamespace dvbnamespace, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eServiceDVB *searchService(const eServiceReference &service);
 	const eServiceReferenceDVB *searchService(eDVBNamespace dvbnamespace, eOriginalNetworkID original_network_id, eServiceID service_id);

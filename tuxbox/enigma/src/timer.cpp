@@ -453,6 +453,14 @@ void eTimerManager::actionHandler()
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d startCountdown", calldepth--));
 			break;
 
+		case updateDuration:
+			writeToLogfile("--> actionHandler() updateEndTime");
+			nextAction = stopEvent;
+			actionTimer.start( getSecondsToEnd() * 1000, true );
+			writeToLogfile(eString().sprintf("new left duration is %d seconds", getSecondsToEnd()) );
+			writeToLogfile("<-- actionHandler() updateEndTime");
+			break;
+
 		case startEvent:
 			writeToLogfile(eString().sprintf("--> actionHandler() calldepth=%d startEvent", ++calldepth));
 			eDebug("[eTimerManager] startEvent");
@@ -1186,48 +1194,18 @@ void eTimerManager::clearEvents()
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end();)
 			i = timerlist->getList().erase(i);
 }
-	
-/*
-bool eTimerManager::updateRunningTimerEvent( eWidget *sel, const ePlaylistEntry& entry )
+
+bool eTimerManager::updateRunningEventDuration( int duration )
 {
-	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
-		if ( *i == entry )
-		{
-			sel->hide();
-			eString str2 = _("Update event in timerlist");
-			eString str3 = _("Really update this event?");
-
-			int ret = eMessageBox::btNo;
-			eMessageBox box(str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
-			box.show();
-			ret=box.exec();
-			box.hide();
-
-			if (ret == eMessageBox::btYes)
-			{
-				timerlist->getList().erase(i);
-				if ( &(*nextStartingEvent) == &entry )
-				{
-					if ( nextStartingEvent->type & ePlaylistEntry::stateRunning )
-					{
-						nextAction=stopEvent;
-						nextStartingEvent->type |= (ePlaylistEntry::stateError | ePlaylistEntry::errorUserAborted);
-						actionHandler();
-					}
-					else if ( !(nextStartingEvent->type & ePlaylistEntry::stateRunning) )
-					{
-						nextAction=setNextEvent;
-						actionHandler();
-					}
-				}
-				sel->show();
-				return true;
-			}
-			sel->show();
-			break;
-		}
+	if ( nextStartingEvent->type & ePlaylistEntry::stateRunning )
+	{
+		nextAction = updateDuration;
+		nextStartingEvent->duration = duration;
+		actionHandler();
+		return true;
+	}
 	return false;
-}*/
+}
 
 bool eTimerManager::removeEventFromTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt )
 {
@@ -1284,7 +1262,7 @@ bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& ent
 			continue;
 		if ( Overlapping(*i, entry) )
 		{
-			if ( entry.type & ePlaylistEntry::doFinishOnly )
+			if ( entry.type & (ePlaylistEntry::doFinishOnly|ePlaylistEntry::stateRunning) )
 			{
 				eMessageBox box(_("The Endtime overlaps with another event in the timerlist"), _("Set Stop Time"), eMessageBox::iconWarning|eMessageBox::btOK);
 				sel->hide();
@@ -1322,35 +1300,36 @@ bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& ent
 
 bool eTimerManager::addEventToTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt, int type, const ePlaylistEntry *exclude )
 {
-	eServiceReference *subref=0;
-// add the event description
-
-//	eString descr	= _("no description is available");
-
-	eSubServiceSelector subservicesel(false);
-
-	for (ePtrList<Descriptor>::const_iterator d(evt->descriptor); d != evt->descriptor.end(); ++d)
+	if ( !exclude )
 	{
-		if (d->Tag()==DESCR_LINKAGE)
+		eSubServiceSelector subservicesel(false);
+		eServiceReference *subref=0;
+		for (ePtrList<Descriptor>::const_iterator d(evt->descriptor); d != evt->descriptor.end(); ++d)
 		{
-			LinkageDescriptor *ld=(LinkageDescriptor*)*d;
-			if (ld->linkage_type==0xB0)
-				subservicesel.add(((eServiceReferenceDVB*)ref)->getDVBNamespace(), ld);
+			if (d->Tag()==DESCR_LINKAGE)
+			{
+				LinkageDescriptor *ld=(LinkageDescriptor*)*d;
+				if (ld->linkage_type==0xB0)
+					subservicesel.add(((eServiceReferenceDVB*)ref)->getDVBNamespace(), ld);
+			}
+		}
+		if ( subservicesel.getSelected() )  // channel have subservices?
+		{
+			sel->hide();
+			subservicesel.show();
+			if ( !subservicesel.exec() )
+				subref=subservicesel.getSelected();
+			subservicesel.hide();
+			sel->show();
+		}
+		if ( subref )
+		{
+			subref->descr+=ref->descr;
+			ePlaylistEntry e( *subref, evt->start_time, evt->duration, evt->event_id, type );
+			return addEventToTimerList( sel, e, exclude );
 		}
 	}
-	if ( subservicesel.getSelected() )  // channel have subservices?
-	{
-		sel->hide();
-		subservicesel.show();
-		if ( !subservicesel.exec() )
-			subref=subservicesel.getSelected();
-		subservicesel.hide();
-		sel->show();
-	}
-	if ( subref )
-		subref->descr+=ref->descr;
-
-	ePlaylistEntry e( subref?*subref:*ref, evt->start_time, evt->duration, evt->event_id, type );
+	ePlaylistEntry e( *ref, evt->start_time, evt->duration, evt->event_id, type );
 //	eDebug("e.service.descr = %s", e.service.descr.c_str() );
 //	eDebug("descr = %s", descr.c_str() );
 //	eString tmp = getLeft(e.service.descr, '/');
@@ -1671,55 +1650,58 @@ void eTimerEditView::createWidgets()
 	event_name = new eTextInputField(this);
 	event_name->setName("event_name");
 
-	multiple = new eCheckbox(this);
+	int takefocus = !(curEntry && curEntry->type&ePlaylistEntry::stateRunning);
+	event_name->setActive(takefocus);
+
+	multiple = new eCheckbox(this, 0, takefocus);
 	multiple->setName("multiple");
 	CONNECT(multiple->checked, eTimerEditView::multipleChanged);
 
-	cMo = new eCheckbox(this);
+	cMo = new eCheckbox(this, 0, takefocus);
 	cMo->setName("Mo");
 
-	cTue = new eCheckbox(this);
+	cTue = new eCheckbox(this, 0, takefocus);
 	cTue->setName("Tue");
 
-	cWed = new eCheckbox(this);
+	cWed = new eCheckbox(this, 0, takefocus);
 	cWed->setName("Wed");
 
-	cThu = new eCheckbox(this);
+	cThu = new eCheckbox(this, 0, takefocus);
 	cThu->setName("Thu");
 
-	byear = new eComboBox(this);
+	byear = new eComboBox(this, 5, 0, takefocus);
 	byear->setName("b_year");
 
-	bmonth = new eComboBox(this);
+	bmonth = new eComboBox(this, 5, 0, takefocus);
 	bmonth->setName("b_month");
 
-	bday = new eComboBox(this);
+	bday = new eComboBox(this, 5, 0, takefocus);
 	bday->setName("b_day");
 
 	lBegin = new eLabel(this);
 	lBegin->setName("lBegin");
 
-	btime = new eNumber( this, 2, 0, 59, 2, 0, 0, lBegin);
+	btime = new eNumber( this, 2, 0, 59, 2, 0, 0, lBegin, takefocus );
 	btime->setName("b_time");
 	btime->setFlags( eNumber::flagDrawPoints|eNumber::flagFillWithZeros|eNumber::flagTime );
 	CONNECT( btime->selected, eTimerEditView::focusNext );
 
-	cFr = new eCheckbox(this);
+	cFr = new eCheckbox(this, 0, takefocus);
 	cFr->setName("Fr");
 
-	cSa = new eCheckbox(this);
+	cSa = new eCheckbox(this, 0, takefocus);
 	cSa->setName("Sa");
 
-	cSu = new eCheckbox(this);
+	cSu = new eCheckbox(this, 0, takefocus);
 	cSu->setName("Su");
 
-	eyear = new eComboBox(this);
+	eyear = new eComboBox(this, 5, 0, takefocus);
 	eyear->setName("e_year");
 
-	emonth = new eComboBox(this);
+	emonth = new eComboBox(this, 5, 0, takefocus);
 	emonth->setName("e_month");
 
-	eday = new eComboBox(this);
+	eday = new eComboBox(this, 5, 0, takefocus);
 	eday->setName("e_day");
 
 	lEnd = new eLabel(this);
@@ -1730,10 +1712,10 @@ void eTimerEditView::createWidgets()
 	etime->setFlags( eNumber::flagDrawPoints|eNumber::flagFillWithZeros|eNumber::flagTime );
 	CONNECT( etime->selected, eTimerEditView::focusNext );
 
-	type = new eComboBox( this );
+	type = new eComboBox( this, 5, 0, takefocus );
 	type->setName("type");
 
-	bSelectService = new eButton( this );
+	bSelectService = new eButton( this, 0, takefocus );
 	bSelectService->setName("select_service");
 	CONNECT( bSelectService->selected, eTimerEditView::showServiceSelector );
 
@@ -1741,7 +1723,7 @@ void eTimerEditView::createWidgets()
 	bApply->setName("apply");
 	CONNECT( bApply->selected, eTimerEditView::applyPressed );
 
-	bScanEPG = new eButton(this);
+	bScanEPG = new eButton(this, 0, takefocus );
 	bScanEPG->setName("scanEPG");
 	CONNECT( bScanEPG->selected, eTimerEditView::scanEPGPressed);
 
@@ -1985,6 +1967,58 @@ void eTimerEditView::applyPressed()
 			// this only checks if the new event can added ! (overlapp check only)
 			if ( eTimerManager::getInstance()->addEventToTimerList( this, &tmpService, &evt, ttype, curEntry ) )
 			{
+				if ( curEntry->type & ePlaylistEntry::stateRunning )
+				{
+					time_t now = time(0)+eDVB::getInstance()->time_difference;
+					time_t newEnd = curEntry->time_begin + evt.duration;
+
+					int ret = eMessageBox::btYes;
+					if ( newEnd < now )
+					{
+						eString str=_("The new endtime is before now time!\n"
+													"This stops the running timer(recording)\n");
+						str+=_("Really update this event?");
+						hide();
+						eMessageBox box(
+							str,
+							_("Update event in timerlist"),
+							eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
+							eMessageBox::btNo);
+						box.show();
+						ret=box.exec();
+						box.hide();
+						show();
+					}
+					if ( ret == eMessageBox::btYes )
+					{
+						if ( eTimerManager::getInstance()->updateRunningEventDuration(evt.duration) )
+						{
+							hide();
+							eMessageBox box(
+								_("New endtime are now adjusted"),
+								_("Update event in timerlist"),
+								eMessageBox::iconInfo|eMessageBox::btOK);
+							box.show();
+							box.exec();
+							box.hide();
+							show();
+							close(0);
+						}
+						else
+						{
+							hide();
+							eMessageBox box(
+								_("The event has already finished... you can not change endtime!"),
+								_("Update event in timerlist"),
+								eMessageBox::iconInfo|eMessageBox::btOK);
+							box.show();
+							box.exec();
+							box.hide();
+							show();
+						}
+					}
+					return;
+				}
 				// now we can delete the old event without any problem :)
 				ret = eTimerManager::getInstance()->removeEventFromTimerList( this, *curEntry, eTimerManager::update );
 			}

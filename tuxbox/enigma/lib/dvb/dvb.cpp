@@ -916,6 +916,17 @@ eTransponder *eTransponderList::searchTS(eDVBNamespace dvbnamespace, eTransportS
 	return &i->second;
 }
 
+eTransponder *eTransponderList::searchTransponder(const eTransponder &t)
+{
+	for (std::map<tsref,eTransponder>::iterator i(transponders.begin());
+		i != transponders.end(); ++i)
+	{
+		if (t==i->second)
+			return &i->second;
+	}
+	return 0;
+}
+
 eServiceDVB *eTransponderList::searchService(const eServiceReference &service)
 {
 	if (service.type != eServiceReference::idDVB)

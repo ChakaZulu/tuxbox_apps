@@ -1,5 +1,5 @@
 #ifndef __FRONTEND_H
-#define __FRNOTEND_H
+#define __FRONTEND_H
 
 /*
 	 this handles all kind of frontend activity including
@@ -82,7 +82,7 @@ class eFrontend: public Object
 
 	eLNB *lastLNB;
          
-	enum { stateIdle, stateTuning } state;
+	enum { stateIdle, stateTuning, stateDiSEqC } state;
 	eTransponder *transponder;
 	eFrontend(int type, const char *demod=DEMOD_DEV, const char *sec=SEC_DEV);
 	static eFrontend *frontend;
@@ -111,6 +111,8 @@ class eFrontend: public Object
 	void RotorRunningLoop();
 	void RotorFinish(bool tune=true);
 	int SendSequence( const eSecCmdSequence &seq );
+	void checkLock();
+	void updateTransponder( eTransponder * );
 public:
 	void disableRotor() { noRotorCmd = 1, lastRotorCmd=-1; } // no more rotor cmd is sent when tune
 	void enableRotor() { noRotorCmd = 0, lastRotorCmd=-1; }  // rotor cmd is sent when tune

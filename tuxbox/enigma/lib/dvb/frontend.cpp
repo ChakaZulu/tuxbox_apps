@@ -30,9 +30,10 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 	noRotorCmd(0)
 {
 	timer=new eTimer(eApp);
-
+	CONNECT(eDVB::getInstance()->leaveTransponder, eFrontend::updateTransponder );
 	CONNECT(rotorTimer1.timeout, eFrontend::RotorStartLoop );
 	CONNECT(rotorTimer2.timeout, eFrontend::RotorRunningLoop );
+	CONNECT(timer2.timeout, eFrontend::checkLock );
 
 	CONNECT(timer->timeout, eFrontend::timeout);
 	fd=::open(demod, O_RDWR);
@@ -58,6 +59,18 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec)
 	needreset = 2;
 }
 
+void eFrontend::checkLock()
+{
+	if (state == stateIdle && !eDVB::getInstance()->getScanAPI() )
+	{
+		if (!Locked() && transponder)
+		{
+			timer2.stop();
+			transponder->tune();
+		}
+	}
+}
+
 void eFrontend::InitDiSEqC()
 {
 	lastcsw = lastSmatvFreq = lastRotorCmd = lastucsw = lastToneBurst = -1;
@@ -71,80 +84,21 @@ void eFrontend::InitDiSEqC()
 
 void eFrontend::timeout()
 {
+	bool inScan = eDVB::getInstance()->getScanAPI() ? true : false;
 	if (Locked())
 	{
 		eDebug("+");
 		state=stateIdle;
-
-		int updateTransponder=0;
-		switch ( eSystemInfo::getInstance()->getHwType() )
-		{
-			case eSystemInfo::DM500:
-			case eSystemInfo::DM5600:
-			case eSystemInfo::DM5620:
-			case eSystemInfo::DM7000:
-				updateTransponder=1;
-				break;
-			case eSystemInfo::dbox2Nokia:
-			case eSystemInfo::dbox2Philips:
-			case eSystemInfo::dbox2Sagem:
-/*				eDebug("FE_GET_FRONTEND is stil sucking (dbox2)... "
-				 "until dbox2 head drivers are not fixed we better "
-				 "don't update transponder data !");*/
-			 break;
-			default:
-				eDebug("unknown HWType.. don't use FE_GET_FRONTEND");
-				break;
-		}
-		if ( transponder->satellite.valid && !eDVB::getInstance()->getScanAPI() &&
-			updateTransponder )
-		{
-#if HAVE_DVB_API_VERSION < 3
-			FrontendParameters front;
-#else
-			dvb_frontend_event front;
-#endif
-			if (ioctl(fd, FE_GET_FRONTEND, &front)<0)
-				perror("FE_GET_FRONTEND");
-			else
-			{
-				eDebug("FE_GET_FRONTEND OK");
-				eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
-				if (sat)
-				{
-					eLNB *lnb = sat->getLNB();
-					if (lnb)
-					{
-						eDebug("oldFreq = %d", transponder->satellite.frequency );
-#if HAVE_DVB_API_VERSION < 3
-						transponder->satellite.frequency = transponder->satellite.frequency > lnb->getLOFThreshold() ?
-								front.Frequency + lnb->getLOFHi() :
-								front.Frequency + lnb->getLOFLo();
-#else
-						transponder->satellite.frequency = transponder->satellite.frequency > lnb->getLOFThreshold() ?
-								front.parameters.frequency + lnb->getLOFHi() :
-								front.parameters.frequency + lnb->getLOFLo();
-#endif
-						eDebug("newFreq = %d", transponder->satellite.frequency );
-					}
-				}
-/*				transponder->satellite.fec = front.u.qpsk.FEC_inner;
-				transponder->satellite.symbol_rate = front.u.qpsk.SymbolRate;*/
-#if HAVE_DVB_API_VERSION < 3
-				transponder->satellite.inversion=front.Inversion;
-#else
-				transponder->satellite.inversion=front.parameters.inversion;
-#endif
-//				eDebug("NEW INVERSION = %d", front.Inversion );
-			}
-		}
 		needreset=0;
+		if (!inScan)
+			timer2.start(1000);
 		/*emit*/ tunedIn(transponder, 0);
+//		updateTransponder(transponder);
 	}
 	else
 	{
 		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite
-			&& eDVB::getInstance()->getScanAPI() && lastLNB )
+			&& inScan && lastLNB )
 		{
 			if ( !transponder->satellite.useable(lastLNB) )
 				tries=1;
@@ -157,11 +111,15 @@ void eFrontend::timeout()
 		}
 		else
 		{
-			if ( !eDVB::getInstance()->getScanAPI() )
-				needreset++;
 			eDebug("couldn't lock. (state: %x)", Status());
 			state=stateIdle;
 			/*emit*/ tunedIn(transponder, -ETIMEDOUT);
+			timer2.stop();
+			if (!inScan)
+			{
+				transponder->tune();
+				++needreset;
+			}
 		}
 	}
 }
@@ -818,14 +776,12 @@ void eFrontend::RotorFinish(bool tune)
 {
 	if ( voltage != eSecCmdSequence::VOLTAGE_18 )
 #if HAVE_DVB_API_VERSION < 3
-{
 		if (ioctl(secfd, SEC_SET_VOLTAGE, increased ? SEC_VOLTAGE_13_5 : SEC_VOLTAGE_13) < 0 )
 			eDebug("SEC_SET_VOLTAGE failed (%m)");
-}
 #else
-		if ( ioctl(fd, FE_SET_VOLTAGE, voltage) < 0 )
-			eDebug("FE_SET_VOLTAGE failed (%m)");
-		curVoltage = voltage;
+	 if ( ioctl(fd, FE_SET_VOLTAGE, voltage) < 0 )
+		eDebug("FE_SET_VOLTAGE failed (%m)");
+	curVoltage = voltage;
 #endif
 	if ( tune )
 		transponder->tune();
@@ -1086,6 +1042,78 @@ double calcSatHourangle( double Azimuth, double Elevation, double Declination, d
 		returnvalue = ( 180 - returnvalue );
 
 	return returnvalue;
+}
+
+void eFrontend::updateTransponder( eTransponder *tp )
+{
+	if ( !tp || !transponder || !(*transponder == *tp) )
+		return;  // only update transponder data for current tp
+	int updateTransponder=0;
+	switch ( eSystemInfo::getInstance()->getHwType() )
+	{
+		case eSystemInfo::DM500:
+		case eSystemInfo::DM5600:
+		case eSystemInfo::DM5620:
+		case eSystemInfo::DM7000:
+			updateTransponder=1;
+			break;
+		case eSystemInfo::dbox2Nokia:
+		case eSystemInfo::dbox2Philips:
+		case eSystemInfo::dbox2Sagem:
+/*				eDebug("FE_GET_FRONTEND is stil sucking (dbox2)... "
+				 "until dbox2 head drivers are not fixed we better "
+				 "don't update transponder data !");*/
+			break;
+		default:
+			eDebug("unknown HWType.. don't use FE_GET_FRONTEND");
+			break;
+	}
+	if ( transponder->satellite.valid && updateTransponder )
+	{
+#if HAVE_DVB_API_VERSION < 3
+		FrontendParameters front;
+#else
+		dvb_frontend_event front;
+#endif
+		if (ioctl(fd, FE_GET_FRONTEND, &front)<0)
+			eDebug("FE_GET_FRONTEND (%m)");
+		else
+		{
+//			eDebug("FE_GET_FRONTEND OK");
+			eSatellite * sat = eTransponderList::getInstance()->findSatellite(transponder->satellite.orbital_position);
+			if (sat)
+			{
+				eLNB *lnb = sat->getLNB();
+				if (lnb)
+				{
+//					eDebug("oldFreq = %d", transponder->satellite.frequency );
+#if HAVE_DVB_API_VERSION < 3
+					transponder->satellite.frequency =
+						transponder->satellite.frequency > lnb->getLOFThreshold() ?
+							front.Frequency + lnb->getLOFHi() :
+							front.Frequency + lnb->getLOFLo();
+
+					transponder->satellite.symbol_rate = front.u.qpsk.SymbolRate;
+//					eDebug("newSR = %d", transponder->satellite.symbol_rate);
+#else
+						transponder->satellite.frequency =
+							transponder->satellite.frequency > lnb->getLOFThreshold() ?
+							front.parameters.frequency + lnb->getLOFHi() :
+							front.parameters.frequency + lnb->getLOFLo();
+#endif
+//					eDebug("newFreq = %d", transponder->satellite.frequency );
+				}
+			}
+/*				transponder->satellite.fec = front.u.qpsk.FEC_inner;
+			transponder->satellite.symbol_rate = front.u.qpsk.SymbolRate;*/
+#if HAVE_DVB_API_VERSION < 3
+			transponder->satellite.inversion=front.Inversion;
+#else
+			transponder->satellite.inversion=front.parameters.inversion;
+#endif
+//				eDebug("NEW INVERSION = %d", front.Inversion );
+		}
+	}
 }
 
 int eFrontend::tune(eTransponder *trans,
@@ -1462,6 +1490,9 @@ int eFrontend::tune(eTransponder *trans,
 			eDebug("send no DiSEqC");
 			seq.commands=0;
 		}
+		else
+			state=stateDiSEqC;
+
 		seq.numCommands=cmdCount;
 		eDebug("%d DiSEqC cmds to send", cmdCount);
 
@@ -1655,11 +1686,13 @@ int eFrontend::tune_qam(eTransponder *transponder,
 int eFrontend::savePower()
 {
 #if HAVE_DVB_API_VERSION < 3
+	timer2.stop();
 	if ( ioctl(fd, FE_SET_POWER_STATE, FE_POWER_OFF) < 0 )
 		eDebug("FE_SET_POWER_STATE failed (%m)");
 
 	if (secfd != -1)
 	{        
+		transponder=0;
 		eSecCmdSequence seq;
 
 		seq.commands=0;
