@@ -439,7 +439,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 
 	CONNECT(app->selected, enigmaCI::appPressed);		
 
-	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM5600)
+	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
 	{
 		reset2=new eButton(this);
 		reset2->setText(_("Reset"));
@@ -495,7 +495,7 @@ enigmaCI::enigmaCI(): eWindow(0)
 	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);		
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
 
-	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM5600)
+	if (tuxbox_get_submodel() == TUXBOX_SUBMODEL_DREAMBOX_DM5600)
 	{
 		CONNECT(DVBCI2->ci_progress, enigmaCI::updateCI2info);		
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));

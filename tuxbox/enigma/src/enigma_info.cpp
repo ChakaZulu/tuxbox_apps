@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.19 2003/02/19 17:07:22 waldi Exp $
+ * $Id: enigma_info.cpp,v 1.20 2003/02/19 21:00:10 obi Exp $
  */
 
 #include <enigma_info.h>
@@ -169,7 +169,7 @@ public:
 		if (eSkin::getActive()->build(this, "eAboutScreen"))
 			eFatal("skin load of \"eAboutScreen\" failed");
 
-		if(tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM7000)
+		if (tuxbox_get_capabilities() & TUXBOX_CAPABILITIES_HDD)
 		{
 			harddisks->hide();
 			eWidget *h=search("harddisk_label");
@@ -181,15 +181,15 @@ public:
 		
 		vendor->setText(tuxbox_get_vendor_str());
 		
-		switch (tuxbox_get_model())
+		switch (tuxbox_get_submodel())
 		{
-		case TUXBOX_MODEL_DBOX2:
+		case TUXBOX_SUBMODEL_DBOX2:
 			processor->setText(_("Processor: XPC823, 66MHz"));
 			break;
-		case TUXBOX_MODEL_DREAMBOX_DM7000:
+		case TUXBOX_SUBMODEL_DREAMBOX_DM7000:
 			processor->setText(_("Processor: STB04500, 252MHz"));
 			break;
-		case TUXBOX_MODEL_DREAMBOX_DM5600:
+		case TUXBOX_SUBMODEL_DREAMBOX_DM5600:
 			processor->setText(_("Processor: STB25xxx, 252MHz"));
 			break;
 		}
@@ -273,13 +273,11 @@ public:
 				eString date=verid.mid(4, 8);
 //				eString time=verid.mid(12, 4);
 				if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
-					version->setText(
-														eString().sprintf
-															("%s %c.%d. %s", typea[type%3], ver[0],
-															atoi( eString().sprintf("%c%c",ver[1],ver[2]).c_str()	),
-															(date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4)).c_str()
-															)
-													);
+					version->setText(eString().sprintf("%s %c.%d. %s",
+						typea[type%3],
+						ver[0],
+						atoi( eString().sprintf("%c%c",ver[1],ver[2]).c_str()),
+						(date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4)).c_str()));
 				else
 					version->setText(
 						eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]
