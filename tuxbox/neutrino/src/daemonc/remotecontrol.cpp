@@ -1,9 +1,9 @@
 //
-// $Id: remotecontrol.cpp,v 1.22 2001/10/16 17:32:15 field Exp $
+// $Id: remotecontrol.cpp,v 1.23 2001/10/16 19:21:30 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
-// Revision 1.22  2001/10/16 17:32:15  field
-// NVOD-Liste besser
+// Revision 1.23  2001/10/16 19:21:30  field
+// NVODs! Zeitanzeige geht noch nicht
 //
 // Revision 1.20  2001/10/16 17:00:13  faralla
 // nvod nearly ready
@@ -178,7 +178,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
               		perror("CRemoteControl::RemoteControlThread - Couldn't connect to serverd zapit!");
 //            		exit(-1);
             	}
-                printf("sending %d\n", r_msg.cmd);
+//                printf("sending %d\n", r_msg.cmd);
                 write(sock_fd, &r_msg, sizeof(r_msg));
 	
                 return_buf = (char*) malloc(4);
@@ -244,7 +244,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                         case '7':   printf("Changed to TV-mode\n");
                                     break;
                         case '8':
-                        case 'd':   {
+                        case 'd':
+                        case 'e':   {
                                         struct  pids    apid_return_buf;
                                         memset(&apid_return_buf, 0, sizeof(apid_return_buf));
 
@@ -254,7 +255,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                             pthread_mutex_trylock( &RemoteControl->send_mutex );
                                             if ( ( strlen( RemoteControl->audio_chans_int.name )!= 0 ) ||
-                                                 ( ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) && (return_buf[2] == 'd') ) )
+                                                 ( ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) && (return_buf[2] == 'd') ) ||
+                                                 (return_buf[2] == 'e') )
                                             {
                                                 // noch immer der gleiche Kanal
 
@@ -283,6 +285,8 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                                 {
                                                     if (return_buf[2] == 'd')
                                                         strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
+                                                    if (return_buf[2] == 'e')
+                                                        strcpy( RemoteControl->audio_chans_int.name, RemoteControl->nvods_int.name );
 
                                                     // Nur dann die Audio-Channels abholen, wenn nicht NVOD-Basechannel
 
@@ -301,28 +305,37 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                                 pthread_cond_signal( &g_InfoViewer->lang_cond );
                                             }
-                                            pthread_mutex_unlock( &RemoteControl->send_mutex );
+                                            if (!do_immediatly)
+                                                pthread_mutex_unlock( &RemoteControl->send_mutex );
                                         }
                                         else
                                             printf("pid-description fetch failed!\n");
                                         break;
                                     }
                         case 'i':   {
+                                        pthread_mutex_trylock( &RemoteControl->send_mutex );
                                         //printf("Telling zapit the number of nvod-chans: %d\n",RemoteControl->nvods_int.count_nvods);
                                         write(sock_fd, &RemoteControl->nvods_int.count_nvods, 2);
 
                                         //printf("Sending NVODs to zapit\n");
-                                        for(int count=1;count<=RemoteControl->nvods_int.count_nvods;count++)
+                                        for(int count=0;count<RemoteControl->nvods_int.count_nvods;count++)
                                         {
                                             //printf("Sending %d\n", count);
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].onid_sid, 4);
                                             write(sock_fd, &RemoteControl->nvods_int.nvods[count].tsid, 2);
                                         }
+
+                                        // immediately change to nvod #0...
+                                        RemoteControl->remotemsg.cmd= 'e';
+                                        RemoteControl->nvods_int.selected= RemoteControl->nvods_int.count_nvods- 1;
+                                        snprintf( (char*) &RemoteControl->remotemsg.param3, 10, "%x", RemoteControl->nvods_int.nvods[RemoteControl->nvods_int.selected].onid_sid);
+
+                                        do_immediatly = true;
+
+                                        // pthread_mutex_unlock( &RemoteControl->send_mutex );
                                         break;
                                     }
                         case '9':   printf("Changed apid\n");
-                                    break;
-                        case 'e':   printf("Changed NOVD-Nr\n");
                                     break;
 
                         default: printf("Unknown return-code >%s<, %d\n", return_buf, return_buf[2]);
@@ -402,6 +415,8 @@ void CRemoteControl::setAPID(int APID)
 void CRemoteControl::setNVOD(int NVOD)
 {
     pthread_mutex_lock( &send_mutex );
+
+    memset(&audio_chans_int, 0, sizeof(audio_chans_int));
 
     remotemsg.version=1;
     remotemsg.cmd='e';

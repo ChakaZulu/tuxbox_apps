@@ -128,6 +128,7 @@ int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 //    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
     g_RemoteControl->setNVOD(atoi(actionKey.c_str()));
+    g_RCInput->pushbackKey(CRCInput::RC_help);
     return RETURN_EXIT;
 };
 

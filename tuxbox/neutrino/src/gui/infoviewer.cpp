@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.38 2001/10/15 17:27:19 field Exp $
+// $Id: infoviewer.cpp,v 1.39 2001/10/16 19:21:30 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.39  2001/10/16 19:21:30  field
+// NVODs! Zeitanzeige geht noch nicht
+//
 // Revision 1.38  2001/10/15 17:27:19  field
 // nvods (fast) implementiert (umschalten funkt noch nicht)
 //
@@ -245,7 +248,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         g_FrameBuffer->paintIcon("rot.raw", BoxEndX- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
 
+        g_RemoteControl->CopyNVODs();
         showButtonNVOD();
+        g_RemoteControl->CopyAPIDs();
         showButtonAudio();
     }
 
