@@ -617,7 +617,6 @@ static eString getDiskSpace(void)
 {
 	eString result;
 	eString tmp;
-	result = "<span class=\"white\">";
 	result += "Remaining Disk Space: ";
 	int fds = freeRecordSpace();
 	if (fds != -1)
@@ -638,7 +637,6 @@ static eString getDiskSpace(void)
 	else
 		result += "unknown";
 
-	result += "</span>";
 	return result;
 }
 #endif
@@ -649,7 +647,6 @@ static eString getStats()
 	eString apid, vpid;
 	int bootcount = 0;
 
-	result +="<span class=\"white\">";
 #ifndef DISABLE_FILE
 	result += getDiskSpace();
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
@@ -661,18 +658,12 @@ static eString getStats()
 	result += getIP();
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
-	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
-	result += eString().sprintf("booted %d times", bootcount);
-	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
-
 	vpid = (Decoder::current.vpid == -1) ? "none" : vpid.sprintf("0x%x", Decoder::current.vpid);
 	result += "vpid: " + vpid;
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
 	apid = (Decoder::current.apid == -1) ? "none" : apid.sprintf("0x%x", Decoder::current.apid);
 	result += "<u><a href=\"/audio.m3u\">apid: " + apid + "</a></u>";
-
-	result += "</span>";
 
 	return result;
 }
@@ -1564,24 +1555,24 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 				if (descriptor->Tag() == DESCR_SHORT_EVENT)
 				{
 					tm* t = localtime(&event.start_time);
-					result << "<u><a href=\'"
-										"javascript:record(\"ref=" << serviceRef
-								<< "&ID=" << event.event_id
-								<< "&start=" << event.start_time
-								<< "&duration=" << event.duration
-								<< "\")\'>Record"
-										"</a></u>&nbsp;&nbsp;"
-										"<span class=\"epg\">"
-										"<a href=\'"
-										"javascript:EPGDetails(\"ref=" << serviceRef
-								<< "&ID=" << event.event_id
-								<< "\")\'>"
-								<< std::setw(2) << t->tm_mday << '.'
-								<< std::setw(2) << t->tm_mon+1 << ". - "
-								<< std::setw(2) << t->tm_hour << ':'
-								<< std::setw(2) << t->tm_min << ' '
-								<< ((ShortEventDescriptor*)descriptor)->event_name
-								<< "</a></span></u><br>\n";
+					result << "<span class=\"epg\">"
+						"<u><a href=\'"
+						"javascript:record(\"ref=" << serviceRef
+						<< "&ID=" << event.event_id
+						<< "&start=" << event.start_time
+						<< "&duration=" << event.duration
+						<< "\")\'>Record"
+						"</a></u>&nbsp;&nbsp;"
+						"<a href=\'"
+						"javascript:EPGDetails(\"ref=" << serviceRef
+						<< "&ID=" << event.event_id
+						<< "\")\'>"
+						<< std::setw(2) << t->tm_mday << '.'
+						<< std::setw(2) << t->tm_mon+1 << ". - "
+						<< std::setw(2) << t->tm_hour << ':'
+						<< std::setw(2) << t->tm_min << ' '
+						<< ((ShortEventDescriptor*)descriptor)->event_name
+						<< "</a></span></u><br>\n";
 				}
 			}
 		}
