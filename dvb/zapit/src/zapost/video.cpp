@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.2 2002/09/21 20:20:05 thegoodguy Exp $
+ * $Id: video.cpp,v 1.3 2002/10/07 22:52:13 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -32,6 +32,8 @@
 CVideo::CVideo ()
 {
 	initialized = false;
+	status.playState = VIDEO_STOPPED;
+	status.streamSource = VIDEO_SOURCE_DEMUX;
 
 	if ((fd = open(VIDEO_DEVICE, O_RDWR)) < 0)
 	{

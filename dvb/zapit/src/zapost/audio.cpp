@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.7 2002/10/03 02:04:22 obi Exp $
+ * $Id: audio.cpp,v 1.8 2002/10/07 22:52:13 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -36,6 +36,9 @@ CAudio::CAudio()
 
 	mixer.volume_left = 0;
 	mixer.volume_right = 0;
+	status.bypassMode = false;
+	status.playState = AUDIO_STOPPED;
+	status.streamSource = AUDIO_SOURCE_MEMORY;
 
 	if ((fd = open(AUDIO_DEVICE, O_RDWR)) < 0)
 	{
