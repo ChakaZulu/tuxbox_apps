@@ -39,6 +39,7 @@
 #include <system/settings.h>
 
 #include <gui/color.h>
+#include "widget/menue.h"
 
 #include <sectionsdclient/sectionsdclient.h>
 
@@ -89,6 +90,16 @@ class CEpgData
 		int show(const t_channel_id channel_id, unsigned long long id = 0, time_t* startzeit = NULL, bool doLoop = true );
 		void hide();
 };
+
+
+
+class CEPGDataHandler : public CMenuTarget
+{
+	public:
+		int  exec( CMenuTarget* parent,  const std::string &actionkey);
+
+};
+
 
 
 #endif

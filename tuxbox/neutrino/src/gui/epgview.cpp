@@ -713,3 +713,36 @@ void CEpgData::showTimerEventBar (bool show)
     frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+8+cellwidth*pos, y+h_offset );
     g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch"), COL_INFOBAR, 0, true); // UTF-8
 }
+
+
+
+
+
+//
+//  -- EPG Data Viewer Menu Handler Class
+//  -- to be used for calls from Menue
+//  -- (2004-03-06 rasc)
+// 
+
+int CEPGDataHandler::exec(CMenuTarget* parent, const std::string &actionkey)
+{
+	int           res = menu_return::RETURN_EXIT_ALL;
+	CChannelList  *channelList;
+	CEpgData      *e;
+
+
+	if (parent) {
+		parent->hide();
+	}
+
+	e = new CEpgData;
+
+	channelList = CNeutrinoApp::getInstance()->channelList;
+	e->start();
+	e->show( channelList->getActiveChannel_ChannelID() );
+	delete e;
+
+	return res;
+}
+
+

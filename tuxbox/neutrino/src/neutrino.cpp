@@ -2455,7 +2455,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 	StreamFeatureSelector.addItem( oj );
 
 	// -- Stream Info
-	StreamFeatureSelector.addItem(new CMenuForwarder("streamfeatures.info", true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
+	// -- !! obsolete (rasc 2004-03-06) 
+	// StreamFeatureSelector.addItem(new CMenuForwarder("streamfeatures.info", true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
 
 
 	// ------
@@ -2827,7 +2828,15 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			}
 			else if( msg == CRCInput::RC_red )
 			{	// eventlist
-				g_EventList->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
+				// -- !! obsolete (2004-03-06 rasc)
+				// g_EventList->exec(channelList->getActiveChannel_ChannelID(), channelList->getActiveChannelName()); // UTF-8
+
+				// -- new EPG Menu (rasc 2004-03-06)
+				{  CEPGMenuHandler  *epg_menu;
+
+				   epg_menu = new CEPGMenuHandler;
+				   epg_menu-> doMenu();
+				}
 			}
 			else if( msg == CRCInput::RC_blue )
 			{	// streaminfo
