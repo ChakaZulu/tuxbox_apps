@@ -1,7 +1,10 @@
 //
-// $Id: remotecontrol.cpp,v 1.14 2001/10/10 02:56:34 fnbrd Exp $
+// $Id: remotecontrol.cpp,v 1.15 2001/10/10 14:58:09 fnbrd Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.15  2001/10/10 14:58:09  fnbrd
+// Angepasst an neuen sectionsd
+//
 // Revision 1.14  2001/10/10 02:56:34  fnbrd
 // nvod vorbereitet
 //
@@ -80,6 +83,9 @@ static void getNVODs(unsigned onidSid)
 	unsigned onidsid2=*(unsigned *)p;
 	printf("onid_sid: 0x%x\n", onidsid2);
 	p+=4;
+	unsigned short tsid=*(unsigned short *)p;
+	printf("tsid: 0x%x\n", tsid);
+	p+=2;
 	unsigned char numberOfTimes=*p;
 	p++;
 	for(int i=0; i<numberOfTimes; i++) {
