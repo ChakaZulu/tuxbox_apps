@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.35 2002/01/03 20:03:20 McClean Exp $
+// $Id: remotecontrol.cpp,v 1.36 2002/01/15 20:55:59 McClean Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.36  2002/01/15 20:55:59  McClean
+// new zapto-interface
+//
 // Revision 1.35  2002/01/03 20:03:20  McClean
 // cleanup
 //
@@ -534,7 +537,7 @@ void CRemoteControl::setSubChannel(unsigned numSub)
 }
 
 
-void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
+void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 {
 	pthread_mutex_lock( &send_mutex );
 	remotemsg.version=1;
@@ -543,7 +546,11 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
 
 	memset(&audio_chans_int, 0, sizeof(audio_chans_int));
 	subChannels_internal.clear();
-
+	#ifdef USEACTIONLOG
+		char buf[1000];
+		sprintf((char*) buf, "zapto: %u \"%s\"", onid_sid, channame.c_str() );
+		g_ActionLog->println(buf);
+	#endif
 	pthread_mutex_unlock( &send_mutex );
 
 	send();

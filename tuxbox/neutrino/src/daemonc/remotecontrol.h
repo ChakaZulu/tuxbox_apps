@@ -190,7 +190,7 @@ class CRemoteControl
 		st_audio_info       audio_chans;
 
 		CRemoteControl();
-		void zapTo_onid_sid( unsigned int onid_sid );
+		void zapTo_onid_sid( unsigned int onid_sid, string channame );
 		void queryAPIDs();
 		void setAPID(int APID);
 		void setSubChannel(unsigned numSub);
