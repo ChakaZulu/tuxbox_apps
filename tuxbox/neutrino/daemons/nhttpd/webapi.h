@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webapi.h,v 1.7 2003/03/14 07:20:01 obi Exp $
+        $Id: webapi.h,v 1.8 2005/03/28 14:12:33 chakazulu Exp $
 
         License: GPL
 
@@ -46,7 +46,7 @@ class CWebAPI
 		bool ShowEventList(CWebserverRequest *request, t_channel_id channel_id);
 		bool ShowBouquet(CWebserverRequest *request, int BouquetNr = -1);
 		bool ShowBouquets(CWebserverRequest *request);
-		bool ShowControlpanel(CWebserverRequest *request);
+		bool ShowControlpanel(CWebserverRequest *request,CStringList &params);
 		bool ShowCurrentStreamInfo(CWebserverRequest *request);
 		bool ShowEpg(CWebserverRequest *request, std::string EpgID, std::string Startzeit = "");
 		bool ShowEPG(CWebserverRequest *request, std::string Title, std::string Info1, std::string Info2);

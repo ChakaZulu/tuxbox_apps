@@ -2862,7 +2862,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
 
 	// --  Lock remote control
-	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_RCLOCK_MENUEADD, true, NULL, new CRCLock, id, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_RCLOCK_MENUEADD, true, NULL, this->rcLock, id, CRCInput::RC_nokey, ""), false);
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();
@@ -3135,6 +3135,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	MoviePluginChanger        = new CMoviePluginChangeExec;
 	MyIPChanger               = new CIPChangeNotifier;
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
+	rcLock                    = new CRCLock();
 
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
@@ -3896,6 +3897,11 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		if( mode != mode_scart )
 			ShowMsgUTF(LOCALE_TIMERLIST_TYPE_REMIND, text, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
 		delete (unsigned char*) data;
+		return messages_return::handled;
+	}
+	else if (msg == NeutrinoMessages::LOCK_RC)
+	{
+		this->rcLock->exec(NULL,CRCLock::NO_USER_INPUT);
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::CHANGEMODE )

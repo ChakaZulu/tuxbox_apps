@@ -41,6 +41,7 @@
 #include <system/configure_network.h>
 #include <timerdclient/timerdtypes.h>
 #include <gui/channellist.h>          /* CChannelList */
+#include <gui/rc_lock.h>
 #include <daemonc/remotecontrol.h>    /* st_rmsg      */
 
 #include <zapit/client/zapitclient.h>
@@ -127,7 +128,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CIPChangeNotifier		*MyIPChanger;
 //		CVCRControl			*vcrControl;
 		CConsoleDestChangeNotifier	*ConsoleDestinationChanger;
-
+		CRCLock                         *rcLock;
 
 		bool ucodes_available(void);
 		void firstChannel();

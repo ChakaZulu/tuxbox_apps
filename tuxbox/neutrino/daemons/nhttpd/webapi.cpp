@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.62 2005/01/30 14:18:10 chakazulu Exp $
+	$Id: webapi.cpp,v 1.63 2005/03/28 14:12:33 chakazulu Exp $
 
 	License: GPL
 
@@ -259,7 +259,12 @@ bool CWebAPI::Channellist(CWebserverRequest* request)
 bool CWebAPI::Controlpanel(CWebserverRequest* request)
 // show controlpanel
 {	
-int mode;
+	int mode;
+	CStringList params;
+	// TODO: move this back to ShowControlpanel
+	// this is needed here until we can query the current locking state
+	params["LOCKRC0"] = "00";
+	params["LOCKRC1"] = "01";
 
 	if (request->ParameterList.size() > 0)							// parse the parameters first
 	{
@@ -310,9 +315,24 @@ int mode;
 			request->Send302("channellist.dbox2#akt");
 			return true;
 		}
+		else if( request->ParameterList["lockrc"] == "01")
+		{
+			Parent->EventServer->sendEvent(NeutrinoMessages::LOCK_RC, CEventServer::INITID_HTTPD);
+			params["LOCKRC0"] = "01";
+			params["LOCKRC1"] = "00";
+		}
+		else if( request->ParameterList["lockrc"] == "00")
+		{
+			Parent->EventServer->sendEvent(NeutrinoMessages::UNLOCK_RC, CEventServer::INITID_HTTPD);
+		} else
+		{
+			printf("[CWebApi] param not found\n");
+		}
+
 	}
 
-	ShowControlpanel(request);									// show the controlpanel
+			
+	ShowControlpanel(request,params); // show the controlpanel
 	return true;
 }
 
@@ -704,9 +724,9 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 }
 //-------------------------------------------------------------------------
 
-bool CWebAPI::ShowControlpanel(CWebserverRequest* request)
+bool CWebAPI::ShowControlpanel(CWebserverRequest* request, CStringList &params)
 {
-CStringList params;
+//CStringList params;
 char volbuf[5];
 
 	int vol = Parent->Controld->getVolume();
@@ -733,7 +753,6 @@ char volbuf[5];
 			params["MUTE_ICON0"] = " ";
 			params["MUTE_ICON1"] = " ";
 		}
-		
 		request->ParseFile("controlpanel.html",params);
 	}
 	else

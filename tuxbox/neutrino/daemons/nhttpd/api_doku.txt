@@ -26,6 +26,7 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 18. Timerd Interface			http://dbox/control/timer
 19. Shellscript ausführen               http://dbox/cgi-bin/exec
 20. System-/Treiberfunktionen           http://dbox/control/system
+21. Fernbedienung                       http://dbox/control/rc
 **********************************************************************************************
 1. Die Kanalliste
 **********************************************************************************************
@@ -1041,5 +1042,31 @@ Rückgabe: ok
 Aktiviert den SPTS-Modus
 
 http://dbox/control/system?setAViAExtPlayBack=spts
+ok
+
+**********************************************************************************************
+21. Fernbedienung
+**********************************************************************************************
+
+Handler: http://dbox/control/rc
+
+Parameter: lock
+Rückgabe: ok
+
+Sperrt die Fernbedienung
+
+Beispiel:
+
+http://dbox/control/rc?lock
+ok
+
+Parameter: unlock
+Rückgabe: ok
+
+Entsperrt die Fernbedienung
+
+Beispiel:
+
+http://dbox/control/rc?unlock
 ok
 

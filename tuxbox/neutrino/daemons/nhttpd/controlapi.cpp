@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.52 2005/01/19 19:44:21 sat_man Exp $
+	$Id: controlapi.cpp,v 1.53 2005/03/28 14:12:33 chakazulu Exp $
 
 	License: GPL
 
@@ -84,7 +84,7 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
 		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
 		"channellist","getbouquet","getbouquets","epg","version","zapto", "startplugin",
-		"getmode","exec","system",NULL
+		"getmode","exec","system","rc",NULL
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
@@ -169,6 +169,8 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 	        return ExecCGI(request);
 	case 22: 
 	        return SystemCGI(request);
+	case 23: 
+	        return RCCGI(request);
 	default:
 		request->SendError();
 		return false;
@@ -432,6 +434,24 @@ bool CControlAPI::StandbyCGI(CWebserverRequest *request)
 			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_HTTPD);
 		if (request->ParameterList["1"] == "off")	// standby mode ausschalten
 			Parent->EventServer->sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_HTTPD);
+	}
+
+	request->SendOk();
+	return true;
+}
+
+//-------------------------------------------------------------------------
+bool CControlAPI::RCCGI(CWebserverRequest *request)
+{
+	request->SendPlainHeader("text/plain");          // Standard httpd header senden
+
+	if (request->ParameterList.size() == 1)
+	{
+		if (request->ParameterList["1"] == "lock")	// lock remote control
+			Parent->EventServer->sendEvent(NeutrinoMessages::LOCK_RC, CEventServer::INITID_HTTPD);
+		else if (request->ParameterList["1"] == "unlock")	// unlock remote control
+			Parent->EventServer->sendEvent(NeutrinoMessages::UNLOCK_RC, CEventServer::INITID_HTTPD);
+
 	}
 
 	request->SendOk();
