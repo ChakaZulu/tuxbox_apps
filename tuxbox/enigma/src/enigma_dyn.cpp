@@ -239,7 +239,12 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 		"<h1>Enigma status</h1>\n"
 		"<table>\n"
 		"<tr><td>Current time:</td><td>" + eString(ctime(&atime)) + "</td></tr>\n"
-		"<tr><td>Recording status:</td><td>";
+		"<tr><td>Standby:</td><td>";
+		if (eZapMain::getInstance()->isSleeping())
+			result += "ON";
+		else
+			result += "OFF";
+	result += "<tr><td>Recording:</td><td>";
 #ifndef DISABLE_FILE
 		if (eZapMain::getInstance()->isRecording())
 			result += "ON";
