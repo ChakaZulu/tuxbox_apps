@@ -3,7 +3,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.h,v 1.29 2004/02/13 14:39:09 thegoodguy Exp $
+  $Id: sectionsdclient.h,v 1.30 2005/02/21 15:11:24 thegoodguy Exp $
 
   License: GPL
 
@@ -159,7 +159,7 @@ class CSectionsdClient : private CBasicClient
 
 	void setServiceChanged(const t_channel_id channel_id, const bool requestEvent);
 
-	CChannelEventList getChannelEvents();
+	CChannelEventList getChannelEvents(const bool tv_mode = true);
 
 	CChannelEventList getEventsServiceKey(const t_channel_id channel_id);
 

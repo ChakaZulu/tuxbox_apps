@@ -121,7 +121,8 @@ int CChannelList::exec()
 
 void CChannelList::updateEvents(void)
 {
-	CChannelEventList events = g_Sectionsd->getChannelEvents();
+	/* request tv channel list if current mode is not radio mode */
+	CChannelEventList events = g_Sectionsd->getChannelEvents((CNeutrinoApp::getInstance()->getMode()) != NeutrinoMessages::mode_radio);
 
 	for (uint count=0; count<chanlist.size(); count++)
 		chanlist[count]->currentEvent= CChannelEvent();

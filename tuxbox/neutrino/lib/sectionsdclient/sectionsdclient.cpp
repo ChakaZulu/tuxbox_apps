@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.37 2004/04/07 19:08:41 zwen Exp $
+  $Id: sectionsdclient.cpp,v 1.38 2005/02/21 15:11:24 thegoodguy Exp $
 
   License: GPL
 
@@ -338,11 +338,11 @@ bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, C
 
 
 
-CChannelEventList CSectionsdClient::getChannelEvents()
+CChannelEventList CSectionsdClient::getChannelEvents(const bool tv_mode)
 {
 	CChannelEventList eList;
 
-	if (send(sectionsd::actualEventListTVshortIDs))
+	if (send(tv_mode ? sectionsd::actualEventListTVshortIDs : sectionsd::actualEventListRadioShortIDs))
 	{
 		int nBufSize = readResponse();
 
