@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.6 2003/07/06 02:22:46 rasc Exp $
+$Id: dvbsnoop.c,v 1.7 2003/07/06 05:28:52 obi Exp $
 
 
 
@@ -24,6 +24,10 @@ $Id: dvbsnoop.c,v 1.6 2003/07/06 02:22:46 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.7  2003/07/06 05:28:52  obi
+compatibility stuff.. now there is only one version for old and new drivers
+which selects the api at configure time
+
 Revision 1.6  2003/07/06 02:22:46  rasc
 no message
 
@@ -84,7 +88,7 @@ int main(int argc, char **argv)
 
   indent (0);
   if (! opt.binary_out) {
-     out_nl (1, "DvbSnoop   Vers. %s   -- (c) Rainer Scherg",VERSION);
+     out_nl (1, "DvbSnoop   Vers. %s   -- (c) Rainer Scherg",DVBSNOOP_VERSION);
      out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
      out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
      out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);

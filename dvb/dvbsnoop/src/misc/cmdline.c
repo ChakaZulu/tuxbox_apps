@@ -1,10 +1,14 @@
 /*
-$Id: cmdline.c,v 1.2 2001/10/06 18:19:18 Toerli Exp $
+$Id: cmdline.c,v 1.3 2003/07/06 05:28:52 obi Exp $
 
  -- (c) 2001 rasc
 
 
 $Log: cmdline.c,v $
+Revision 1.3  2003/07/06 05:28:52  obi
+compatibility stuff.. now there is only one version for old and new drivers
+which selects the api at configure time
+
 Revision 1.2  2001/10/06 18:19:18  Toerli
 Steuerzeichen entfernt. rasc wuerdest du mal bitte nen gescheiten unix-konformen Editor verwenden... windows editoren sind ungeeignet
 
@@ -110,7 +114,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
   if (argc==1 || opt->help || opt->pid == 0xFFFF) {
     printf("dvbsnoop [opt] pid \n\n");
-    printf("Version: %s  (%s %s)\n",VERSION,__DATE__,__TIME__);
+    printf("Version: %s  (%s %s)\n",DVBSNOOP_VERSION,__DATE__,__TIME__);
     printf("\nThis programm was done for learning and understanding\n");
     printf("DVB, the streams and the coordination between the streams...\n");
     printf("Tnx to all the guys of the linux-dbox2 project for their help\n");
