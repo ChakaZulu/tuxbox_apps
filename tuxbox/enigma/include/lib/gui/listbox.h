@@ -310,7 +310,7 @@ inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width, b
 	cresize( eSize(width, (sbar?60:10)+Entrys*T::getEntryHeight() ) );
 	list.setFlags( eListBoxBase::flagShowEntryHelp );
 	list.move(ePoint(10, 5));
-	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(sbar?35:5) ));
+	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(sbar?60:10) ));
 	if (sbar)
 	{
 		statusbar->setFlags(eStatusBar::flagVCenter);
