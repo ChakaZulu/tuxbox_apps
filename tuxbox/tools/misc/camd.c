@@ -163,6 +163,59 @@ void set_key(void)
   fclose(fp);
 }
 
+int find_emmpid(int ca_system_id) {
+  char buffer[1000];
+  int fd, r=1000,emm_pid=0,count;
+  struct dmxSctFilterParams flt;
+
+  fd=open("/dev/ost/demux0", O_RDONLY);
+  if (fd<0)
+  {
+    perror("/dev/ost/demux0");
+    return -fd;
+  }
+
+  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
+  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+
+  flt.pid=1;
+  flt.filter.filter[0]=1;
+
+  flt.filter.mask[0]  =0xFF;
+  flt.timeout=10000;
+  flt.flags=DMX_ONESHOT;
+
+  flt.flags=0;
+  if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
+  {
+    perror("DMX_SET_FILTER");
+    return 1;
+  }
+
+  ioctl(fd, DMX_START, 0);
+  if ((r=read(fd, buffer, r))<=0)
+  {
+    perror("read");
+    return 1;
+  }
+
+  close(fd);
+
+  r=buffer[2];
+
+  //for(count=0;count<r-1;count++)
+  //  printf("%02d: %02X\n",count,buffer[count]);
+
+  count=8;
+  while(count<r-1) {
+    //printf("CAID %04X EMM: %04X\n",((buffer[count+2]<<8)|buffer[count+3]),((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
+    if ((((buffer[count+2]<<8)|buffer[count+3]) == ca_system_id) && (buffer[count+2] == ((0x18|0x27)&0xD7)))
+      return (((buffer[count+4]<<8)|buffer[count+5])&0x1FFF);
+      count+=buffer[count+1]+2;
+  }
+  return 0;
+}
+
 int descriptor(char *buffer, int len, int ca_system_id) {
   int count=0;
   int desc,len2,ca_id,ca_pid=0;
@@ -255,7 +308,7 @@ int main(int argc, char **argv)
   ca_msg_t ca_msg;
   char cmd=0x03;
   int initok=0, caid=0;
-  int SID=9, ONID=0x85, ECMPID=0, EMMPID=0x1500, VPID=0x1FF, APID=0x200,pmt=0;
+  int SID=9, ONID=0x85, ECMPID=0, EMMPID=0, VPID=0x1FF, APID=0x200,pmt=0;
   
   camfd=open("/dev/ost/ca0", O_RDWR);
 
@@ -368,28 +421,40 @@ int main(int argc, char **argv)
         printf("keep-alive(%d) %x casys %04x\n", buffer[4], buffer[5], (buffer[6]<<8)|buffer[7]);
         break;
       case 0x89:
-      {
-	if (caid == 0) break;
-        printf("status89: %02x\n", buffer[5]);
-        setemm(0x104, caid, EMMPID);
-	if (ECMPID == 0) {
-	  printf("searching ECM-pid for ca_system_ID %04X\n",caid);
-	  ECMPID=find_ecmpid(pmt,caid);
-	  if (ECMPID == 0) {
-	    printf("no ECM-pid found for ca_system_ID %04X\n",caid);
-	    printf("press enter to exit\n");
-	    getchar();
+	{
+	  if (caid == 0) break;
+	  printf("status89: %02x\n", buffer[5]);	
+	  if (EMMPID == 0) {
+	    printf("searching EMM-pid for ca_system_ID %04X\n",caid);
+	    EMMPID=find_emmpid(caid);
+	    if (EMMPID == 0) {
+	      printf("no EMM-pid found for ca_system_ID %04X\n",caid);
+	      printf("press enter to exit\n");
+	      getchar();
 	    exit(0);
+	    }
+	    else
+	      printf("EMM-pid found: %04X\n",EMMPID);
 	  }
-	  else
-	    printf("ECM-pid found: %04X\n",ECMPID);
+	  setemm(0x104, caid, EMMPID);
+	  if (ECMPID == 0) {
+	    printf("searching ECM-pid for ca_system_ID %04X\n",caid);
+	    ECMPID=find_ecmpid(pmt,caid);
+	    if (ECMPID == 0) {
+	      printf("no ECM-pid found for ca_system_ID %04X\n",caid);
+	      printf("press enter to exit\n");
+	      getchar();
+	      exit(0);
+	    }
+	    else
+	      printf("ECM-pid found: %04X\n",ECMPID);
+	  }
+	  descramble(ONID, SID, 0x104, caid, ECMPID, APID, VPID);
+	  break;
 	}
-        descramble(ONID, SID, 0x104, caid, ECMPID, APID, VPID);
-        break;
-      }
       case 0x83:
-      {
-        int newcaid=(buffer[6]<<8)|buffer[7];
+	{
+	  int newcaid=(buffer[6]<<8)|buffer[7];
 	if ((caid != 0) && (newcaid != caid)) {
 	  reset();
 	  exit(0);
