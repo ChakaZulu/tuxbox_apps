@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.32 2002/08/29 09:27:52 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.33 2002/08/29 10:42:18 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -822,6 +822,19 @@ bool CBouquetManager::ChannelIterator::operator != (const ChannelIterator& it) c
 bool CBouquetManager::ChannelIterator::operator == (const ChannelIterator& it) const
 {
 	return( (b == it.b) && (c == it.c));    // not quite correct (might have different Owner and/or be radio/tv iterator!)
+}
+
+CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::FindChannelNr(const unsigned int channel)
+{
+	c = channel;
+	for (b = 0; b < Owner->Bouquets.size(); b++)
+		if (getBouquet()->size() > (unsigned int)c)
+			goto end;
+		else
+			c -= getBouquet()->size();
+	b = 0; c = -2;
+ end:
+	return (*this);
 }
 
 CBouquetManager::ChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)

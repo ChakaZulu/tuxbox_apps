@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.21 2002/08/29 09:27:52 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.22 2002/08/29 10:42:18 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -100,6 +100,8 @@ class CBouquetManager
 				bool operator == (const ChannelIterator& it) const;
 				ChannelIterator operator ++(int);
 				CZapitChannel* operator *();
+				ChannelIterator FindChannelNr(const unsigned int channel);
+				bool EndOfChannels () { return (c == -2) && (b == 0); };
 		};
 
 		ChannelIterator tvChannelsBegin() { return ChannelIterator(this, 0, -1, true)++; };
