@@ -11,7 +11,7 @@ class ePlugin: eListboxEntry
 public:
 	QString name, desc;
 	QString depend, sopath, pluginname;
-	int needfb, needrc, needlcd;
+	int needfb, needrc, needlcd, needvtxtpid, needoffset;
 	int isback;
 	ePlugin(eListbox *parent, const char *cfgfile);
 	QString getText(int t) const;

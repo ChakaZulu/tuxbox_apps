@@ -10,8 +10,8 @@
 #include "config.h"
 #include "eskin.h"
 
-typedef int     (*PluginInfoProc)( struct SPluginInfo *info );
-typedef int     (*PluginExecProc)( int fd_fb, int fd_rc, int fd_lcd, char *cfgfile );
+typedef int	(*PluginInfoProc)( struct SPluginInfo *info );
+typedef int	(*PluginExecProc)( int fd_fb, int fd_rc, int fd_lcd, char *cfgfile );
 
 static QString getInfo(const char *file, const char *info)
 {
@@ -50,13 +50,18 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	desc=getInfo(cfgfile, "desc");
 	if (!desc)
 		desc="";
-	const char *aneedfb=getInfo(cfgfile, "needfb"), 
-			*aneedlcd=getInfo(cfgfile, "needlcd"),
-			*aneedrc=getInfo(cfgfile, "needrc");
+	const char *aneedfb=getInfo(cfgfile, "needfb"),
+							*aneedlcd=getInfo(cfgfile, "needlcd"),
+							*aneedrc=getInfo(cfgfile, "needrc");
+/*							*aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
+							*aneedoffset=getInfo(cfgfile, "needoffsets");*/
 
 	needfb=atoi(aneedfb?aneedfb:0);
 	needlcd=atoi(aneedlcd?aneedlcd:0);
 	needrc=atoi(aneedrc?aneedrc:0);
+/*	needvtxtpid=atoi(aneedvtxtpid?aneedvtxtpid:0);
+	needoffset=atoi(aneedoffset?aneedoffset:0);*/
+
 	isback=0;
 	sopath=QString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg
 	pluginname=QString(cfgfile).mid(QString(cfgfile).findRev('/')+1);
@@ -193,6 +198,7 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 	if (i==argc)
 	{
 		qDebug("would exec plugin %s", (const char*)plugin->sopath);
+
 		PluginExecProc execPlugin=(PluginExecProc)dlsym(libhandle[i-1], plugin->pluginname + "_exec");
 		
 		if (!execPlugin)

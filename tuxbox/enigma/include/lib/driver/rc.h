@@ -86,7 +86,8 @@ public:
 class eRCInput: public QObject
 {
 	Q_OBJECT
-	
+	int locked;	
+	int handle;
 	static eRCInput *instance;
 signals:
 	void keyEvent(const eRCKey &);
@@ -106,7 +107,9 @@ public:
 	
 	int lock();
 	void unlock();
-	
+
+	void setHandle(int hRC);
+
 	void keyPressed(const eRCKey &key)
 	{
 		emit keyEvent(key);

@@ -43,7 +43,10 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 	if (!rc.open(IO_ReadOnly))
 		qDebug("failed to open %s", filename);
 	else
+	{
 		qDebug("driver open success");
+		eRCInput::getInstance()->setHandle(rc.handle());
+	}
 	sn=new QSocketNotifier(rc.handle(), QSocketNotifier::Read, this);
 	connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
 }
@@ -53,6 +56,7 @@ eRCInput *eRCInput::instance;
 eRCInput::eRCInput()
 {
 	instance=this;
+	locked = 0;
 }
 
 eRCInput::~eRCInput()
@@ -61,10 +65,21 @@ eRCInput::~eRCInput()
 
 int eRCInput::lock()
 {
-	return -1;
+	if (locked || !handle)	
+		return -1;
+
+	locked=1;
+
+	return handle;
 }
 
 void eRCInput::unlock()
 {
+	if (locked)
+		locked=0;
 }
 
+void eRCInput::setHandle(int hRC)
+{
+	handle=hRC;
+}
