@@ -21,7 +21,7 @@ eSystemInfo::eSystemInfo()
 	:hashdd(0), hasci(0), hasrfmod(0), haslcd(0), hasnetwork(1)
 	,haskeyboard(0) ,canmeasurelnbcurrent(0), hasnegfilter(0)
 	,canupdateTransponder(0), canshutdown(1), canrecordts(0)
-	,alphaincrement(10), hasstandbywakeuptimer(0)
+	,alphaincrement(10), hasstandbywakeuptimer(0), cantimeshift(0)
 {
 	instance=this;
 #if HAVE_DVB_API_VERSION == 3
@@ -111,6 +111,7 @@ eSystemInfo::eSystemInfo()
 			manufactstr="Dream-Multimedia-TV";
 			helpstr="dreambox";
 			canupdateTransponder=1;
+			caids.insert(0x4a70);
 			switch(mid)
 			{
 				case 5:
@@ -118,9 +119,8 @@ eSystemInfo::eSystemInfo()
 					modelstr="DM7000";
 					cpustr="STB04500, 252MHz";
 					haskeyboard = hashdd = haslcd = canmeasurelnbcurrent = hasci
-					= canrecordts = 1;
+					= canrecordts = cantimeshift = 1;
 					hwtype = DM7000;
-					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					{
 						// check if new FP Firmware is avail...
@@ -144,7 +144,6 @@ eSystemInfo::eSystemInfo()
 					cpustr="STBx25xx, 252MHz";
 					alphaincrement=25;
 					canshutdown=0;
-					canupdateTransponder=1;
 					hasci = 2;
 					hwtype = getInfo("type", true) == "DM5600" ? DM5600 : DM5620;
 					if ( hwtype == DM5600 )
@@ -158,7 +157,6 @@ eSystemInfo::eSystemInfo()
 						modelstr="DM5620";
 						defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					}
-					caids.insert(0x4a70);
 					break;
 				case 7:
 					midstr="7";
@@ -167,9 +165,7 @@ eSystemInfo::eSystemInfo()
 					alphaincrement=25;
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
 					canshutdown=0;
-					canupdateTransponder=1;
 					hwtype = DM500;
-					caids.insert(0x4a70);
 					break;
 				case 9:
 				{
@@ -177,8 +173,7 @@ eSystemInfo::eSystemInfo()
 					modelstr="DM7020";
 					cpustr="STB04500, 252MHz";
 					haskeyboard = hasrfmod = hashdd = haslcd = hasci
-					= canrecordts = hasstandbywakeuptimer = 1;
-
+					= canrecordts = hasstandbywakeuptimer = cantimeshift = 1;
 					// check if the box revision is new enough to measure
 					// lnb power with > 13V ( revisions with lnbp21 can this )
 					int fd = open("/dev/dbox/fp0", O_RDWR);
@@ -190,9 +185,7 @@ eSystemInfo::eSystemInfo()
 							canmeasurelnbcurrent=2;
 						close(fd);
 					}
-
 					hwtype = DM7020;
-					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					break;
 				}
