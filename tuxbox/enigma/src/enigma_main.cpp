@@ -3389,23 +3389,23 @@ void eZapMain::skipLoop()
 	switch(speed)
 	{ 
 		case  1: 
-			time = (skipspeed<0) ? 2 : 1; 
+			time = (skipspeed<0) ? 2 : 1;
 			break; //Seconds
 		case  2: 
-			time = (skipspeed<0) ? 4 : 2; 
+			time = (skipspeed<0) ? 4 : 2;
 			break; //back must more!
 		case  3: 
-			time = (skipspeed<0) ? 8 : 4; 
+			time = (skipspeed<0) ? 8 : 4;
 			break;
 		case  4: 
-			time = (skipspeed<0) ? 16 : 8; 
+			time = (skipspeed<0) ? 16 : 8;
 			break;
 		default: 
-			time =  0;
+			time = 0;
 	}
 
 	if(time)
-	{	
+	{
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 		if (handler)
 		{
@@ -3430,22 +3430,22 @@ void eZapMain::skipLoop()
 			// correct non-ts (test)
 			eServiceReference &ref = eServiceInterface::getInstance()->service;
 			if( ref.type == eServiceReference::idUser &&
-			    ( 	(ref.data[0] ==  eMP3Decoder::codecMPG) ||
-				(ref.data[0] ==  eMP3Decoder::codecMP3) ) )
+				((ref.data[0] ==  eMP3Decoder::codecMPG) ||
+				 (ref.data[0] ==  eMP3Decoder::codecMP3) ) )
 			{ 
 				time <<= (faktor<0) ? 4 : 2; // ermittelt per trial & error (bitrate?)
 				time *= 3;
 				time /= 2;
 				ts=0;
 			}
-			else 
+			else
 				ts=1;
 
 			// Skip
 			if(ts && skipspeed==1) 
 				return; // normal trickmode forward (ts only)
 			else
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,(time*1000)*faktor));
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSkip,(time*(faktor<0?1250:1000))*faktor));
 
 			seekpos=pos;
 		}
