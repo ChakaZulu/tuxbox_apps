@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.27 2003/05/09 13:10:49 digi_casi Exp $
+ * $Id: frontend.h,v 1.28 2003/05/22 11:52:49 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -98,7 +98,8 @@ class CFrontend
 		int				setParameters(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
 		void 				setCurrentSatellitePosition(int32_t satellitePosition) {currentSatellitePosition = satellitePosition; }
 		
-		void 				positionMotor(uint8_t diseqc); 
+		void 				positionMotor(uint8_t motorPosition); 
+		void				sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t command, uint8_t num_parameters, uint8_t parameter1, uint8_t parameter2);
 };
 
 #endif /* __zapit_frontend_h__ */

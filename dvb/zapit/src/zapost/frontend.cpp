@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.49 2003/05/10 09:42:42 digi_casi Exp $
+ * $Id: frontend.cpp,v 1.50 2003/05/22 11:52:29 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -426,18 +426,38 @@ void CFrontend::setLnbOffset(const bool high, const uint8_t index, int offset)
 	}
 }
 
+void CFrontend::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t command, uint8_t num_parameters, uint8_t parameter1, uint8_t parameter2)
+{
+	struct dvb_diseqc_master_cmd cmd;
+	
+	printf("[frontend] sendMotorCommand: cmdtype   = %x, address = %x, cmd   = %x\n", cmdtype, address, command);
+	printf("[frontend] sendMotorCommand: num_parms = %d, parm1   = %x, parm2 = %x\n", num_parameters, parameter1, parameter2);
+	
+	cmd.msg[0] = cmdtype; //command type
+	cmd.msg[1] = address; //address
+	cmd.msg[2] = command; //command
+	cmd.msg[3] = parameter1;
+	cmd.msg[4] = parameter2;
+	cmd.msg_len = 5;
+	
+	sendDiseqcCommand(&cmd, 15);
+	printf("[frontend] motor positioning command sent.\n");
+}
+
 void CFrontend::positionMotor(uint8_t motorPosition)
 {
 	struct dvb_diseqc_master_cmd cmd;
 	
-	printf("[frontend] ATTENTION! not tested yet.\n");
-	cmd.msg[0] = 0xE0; //command type
-	cmd.msg[1] = 0x31; //address
-	cmd.msg[2] = 0x6B; //command: goto stored motor position
-	cmd.msg[3] = motorPosition;
-	cmd.msg_len = 4;
-	
-	sendDiseqcCommand(&cmd, 15);
+	if (motorPosition != 0)
+	{
+		cmd.msg[0] = 0xE0; //command type
+		cmd.msg[1] = 0x31; //address
+		cmd.msg[2] = 0x6B; //command: goto stored motor position
+		cmd.msg[3] = motorPosition;
+		cmd.msg_len = 4;
+		sendDiseqcCommand(&cmd, 15);
+		printf("[frontend] motor positioning command sent.\n");
+	}
 }
 
 int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization, const uint8_t diseqc)
