@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.77 2002/02/09 22:04:05 Simplex Exp $
+  $Id: zapit.cpp,v 1.78 2002/02/13 14:36:56 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.78  2002/02/13 14:36:56  obi
+  added some defines to run on on x86
+
   Revision 1.77  2002/02/09 22:04:05  Simplex
   speed up discarding BQ-Ed. changes
 
@@ -361,8 +364,9 @@
 #include "lcddclient.h"
 
 
-
+#ifndef DVBS
 CLcddClient lcdd;
+#endif /* DVBS */
 
 static int debug=0;
 
@@ -424,6 +428,7 @@ void termination_handler (int signum)
   system("cp /tmp/zapit_last_chan " CONFIGDIR "/zapit/last_chan");
 }
 
+#ifndef DVBS
 // nachdem #include "gen_vbi.h" noch nicht geht (noch nicht offiziell im cdk...)
 #define VBI_START_VTXT 1
 #define VBI_STOP_VTXT 2
@@ -503,7 +508,7 @@ int set_vtxt(uint vpid)
     }
     return 0;
 }
-
+#endif /* DVBS */
 
 int parsePMTInfo(char *buffer, int len, int ca_system_id)
 {
@@ -779,6 +784,7 @@ int find_emmpid(int ca_system_id)
   return 0;
 }
 
+#ifndef DVBS
 void _writecamnu(int cmd, unsigned char *data, int len)
 {
   int camfd;
@@ -948,7 +954,7 @@ void setemm(int unknown, int caID, int emmpid)
 	buffer[6]=emmpid&0xFF;
 	writecam(buffer, 7);
 }
-
+#endif /* DVBS */
 
 void save_settings()
 {
@@ -1031,6 +1037,7 @@ channel_msg load_settings()
   return output_msg;
 }
 
+#ifndef DVBS
 void *decode_thread(void *ptr)
 {
 	decode_vals *vals;
@@ -1056,6 +1063,7 @@ void *decode_thread(void *ptr)
 	dprintf("[zapit] ending decode_thread\n");
 	pthread_exit(0);
 }
+#endif /* DVBS */
 
 int zapit (uint onid_sid,boolean in_nvod) {
 
@@ -1068,8 +1076,10 @@ int zapit (uint onid_sid,boolean in_nvod) {
   //uint16_t emmpid;
   boolean do_search_emmpid;
   //std::map<uint,channel>::iterator cI;
+#ifndef DVBS
   pthread_t dec_thread;
   bool do_cam_reset = false;
+#endif /* DVBS */
 
   if (in_nvod)
     {
@@ -1136,7 +1146,9 @@ int zapit (uint onid_sid,boolean in_nvod) {
 
   if (cit->second.tsid != old_tsid)
     {
+#ifndef DVBS
     	do_cam_reset = true;
+#endif /* DVBS */
       dprintf("[zapit] tunig to tsid %04x\n", cit->second.tsid);
       if (tune(cit->second.tsid) < 0)
 	{
@@ -1170,8 +1182,10 @@ else
 	else
 	  pat(cit->second.onid,&allchans_tv);
     }
+#ifndef DVBS
   if (caid==0)
      caid = get_caid();
+#endif /* DVBS */
 
   memset(&parse_pmt_pids,0,sizeof(parse_pmt_pids));
   parse_pmt_pids = parse_pmt(cit->second.pmt, caid);
@@ -1205,6 +1219,7 @@ else
     //	cit->second.last_update = current_time;
   }
 
+#ifndef DVBS
 	if (in_nvod)
 	{
 		lcdd.setServiceName(nvodname);
@@ -1213,6 +1228,7 @@ else
 	{
 		lcdd.setServiceName(cit->second.name);
 	}
+#endif /* DVBS */
 
   if (cit->second.vpid != 0x1fff || cit->second.apid != 0x8191)
     {
@@ -1224,7 +1240,7 @@ else
 
       dprintf("[zapit] zapping to sid: %04x %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", cit->second.sid, cit->second.name.c_str(), cit->second.vpid, cit->second.apid, cit->second.pmt);
 
-
+#ifndef DVBS
       if ( ( cit->second.ecmpid > 0 ) && ( cit->second.ecmpid < no_ecmpid_found ) )
 	{
 		decode_vals *vals =(decode_vals*) malloc(sizeof(decode_vals));
@@ -1238,7 +1254,7 @@ else
 
 		pthread_create(&dec_thread, 0,decode_thread, (void*) vals);
 	}
-
+#endif /* DVBS */
 
       if ( (video = open(DEMUX_DEV, O_RDWR)) < 0)
         {
@@ -1303,19 +1319,21 @@ else
       close(vid);
       vid= -1;
 
+#ifndef DVBS
 //  if (parse_pmt_pids.vtxtpid != 0)
     dprintf("[zapit] setting vtxt\n");
     set_vtxt(parse_pmt_pids.vtxtpid);
-
+#endif /* DVBS */
 
       //printf("Saving settings\n");
       curr_onid_sid = onid_sid;
       if (!in_nvod)
 	save_settings();
-
+#ifndef DVBS
 	//wait for decode_thread to exit
 	dprintf("[zapit] waiting for decode_thread\n");
 	pthread_join(dec_thread,0);
+#endif /* DVBS */
     }
   else
     {
@@ -1414,7 +1432,7 @@ int changeapid(ushort pid_nr)
 	  close(audio);
 	  audio = -1;
         }
-
+#ifndef DVBS
       //        descramble(0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff);
 
 
@@ -1423,7 +1441,7 @@ int changeapid(ushort pid_nr)
 /*	  cam_reset();
 	  descramble(cit->second.onid, cit->second.tsid, 0x104, caid, cit->second.ecmpid,  pids_desc.apids[pid_nr].pid , vpid);
  */       }
-
+#endif /* DVBS */
 
       //        printf("Changing APID of %s. VPID: 0x%04x. APID: 0x%04x, PMT: 0x%04x\n", current->name, current->vpid, pids_desc.apid[pid_nr], current->pmt);
 
@@ -1638,8 +1656,9 @@ void start_scan(unsigned short do_diseqc)
   found_transponders = 0;
   found_channels = 0;
 
+#ifndef DVBS
   set_vtxt(0); // vtxt stoppen
-
+#endif /* DVBS */
 
   // Video stoppen...
   int vid;
@@ -2513,7 +2532,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.77 2002/02/09 22:04:05 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.78 2002/02/13 14:36:56 obi Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2527,8 +2546,10 @@ int main(int argc, char **argv) {
   if (testmsg.mode== 'r')
     Radiomode_on = true;
 
+#ifndef DVBS
   caver = get_caver();
   caid = get_caid();
+#endif /* DVBS */
 
   memset(&pids_desc, 0, sizeof(pids));
 
@@ -2576,7 +2597,7 @@ int main(int argc, char **argv) {
       return 0;
     }
 
-
+#ifndef DVBS
 //  descramble(0xffff,0xffff,0xffff,0xffff,0xffff, 0xffff,0xffff);
     pids _pids;
     _pids.count_vpids= 1;
@@ -2584,6 +2605,7 @@ int main(int argc, char **argv) {
     _pids.count_apids= 1;
     _pids.apids[0].pid= 0xffff;
     descramble(0xffff,0xffff,0xffff,0xffff,0xffff, &_pids);
+#endif /* DVBS */
 
   while (keep_going)
     {
