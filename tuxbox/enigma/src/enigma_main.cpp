@@ -5455,7 +5455,7 @@ int eZapMain::getFirstBouquetServiceNum( eServiceReference ref, int _mode )
 			}
 		}
 	}
-	return 0;
+	return 1;
 }
 
 eServicePath eZapMain::getRoot(int list, int _mode)
