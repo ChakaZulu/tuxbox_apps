@@ -65,11 +65,14 @@ int main(int argc, char **argv)
 	FILE *fp;
 	fp = fopen("/var/lcars/dirs.conf", "r");
 	
-	if (fp < 0)
+	if (fp == NULL)
 	{
 		printf("File /var/lcars/dirs.conf not found!");
-		exit(0);
+		//exit(0);
 	}
+	else
+	{
+	
 	char pluginpath[100];
 	fgets(pluginpath, 100, fp);
 	printf("Plugins-Pfad: %s\n", pluginpath);
@@ -79,7 +82,7 @@ int main(int argc, char **argv)
 		
 	plugins.setPluginDir(ppath.substr(0, ppath.length() - 1));
 	plugins.loadPlugins();
-	
+	}
 	cam cam;
 	sdt sdt;
 	nit nit;
