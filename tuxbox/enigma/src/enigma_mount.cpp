@@ -367,15 +367,15 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			if (mp_it->mp.mounted)
 			{
 				mountStatus = "<img src=\"on.gif\" alt=\"online\" border=0>";
-				action = button(75, "Unmount", OCKER, "javascript:unmountMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')");
+				action = button(75, "Unmount", OCKER, "javascript:unmountMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')", "#FFFFFF");
 			}
 			else
 			{
 				mountStatus = "<img src=\"off.gif\" alt=\"offline\" border=0>";
-				action = button(75, "Mount", GREEN, "javascript:mountMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')");
+				action = button(75, "Mount", GREEN, "javascript:mountMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')", "#FFFFFF");
 			}
 			tmp.strReplace("#ACTIONBUTTON#", action);
-			action = button(75, "Change", BLUE, "javascript:changeMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')");
+			action = button(75, "Change", BLUE, "javascript:changeMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')", "#FFFFFF");
 			tmp.strReplace("#CHANGEBUTTON#", action);
 			action = button(75, "Delete", RED, "javascript:deleteMountPoint('" + eString().sprintf("%d", mp_it->mp.id) + "')");
 			tmp.strReplace("#DELETEBUTTON#", action);

@@ -20,7 +20,7 @@
 #define BLUE "#12259E"
 #define RED "#CB0303"
 #define GREEN "#1FCB12"
-#define YELLOW "#F5FF3C"
+#define YELLOW "#F1EF1D"
 #define LIGHTGREY "#F4F4EC"
 #define DARKGREY "#D9E0E7"
 #define LEFTNAVICOLOR ""
@@ -31,7 +31,7 @@
 
 eString getAttribute(eString filename, eString attribute);
 eString readFile(eString filename);
-eString button(int width, eString buttonText, eString buttonColor, eString buttonRef, eString target="");
+eString button(int width, eString buttonText, eString buttonColor, eString buttonRef, eString color="");
 eString getTitle(eString title);
 int getHex(int c);
 eString httpUnescape(const eString &string);

@@ -95,7 +95,7 @@ eString getInstalledImages(void)
 		result += "</td>";
 		result += "<td>";
 		if (i != atoi(activeImage.c_str()))
-			result += button(100, "Select", GREEN, "javascript:selectImage('" + eString().sprintf("%d", i) + "')");
+			result += button(100, "Select", GREEN, "javascript:selectImage('" + eString().sprintf("%d", i) + "')", "#FFFFFF");
 		else
 			result += "&nbsp;";
 		result += "</td>";

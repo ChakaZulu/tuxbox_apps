@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.0.0"
+#define WEBIFVERSION "2.1.0"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -162,7 +162,7 @@ public:
 	bool operator() (ePlugin& plugin)
 	{
 		result  << "<tr><td width=\"100\">"
-			<< button(100, "Start", GREEN, "javascript:startPlugin('" + plugin.cfgname+ "')")
+			<< button(100, "Start", GREEN, "javascript:startPlugin('" + plugin.cfgname+ "')", "#FFFFFF")
 			 << "</td><td>"
 			 << plugin.name
 			 << "</td><td>"
@@ -186,7 +186,7 @@ static eString getControlPlugins(void)
 
 	result << "</table>";
 	result << "<br>";
-	result << button(100, "Stop", RED, "javascript:stopPlugin()");
+	result << button(100, "Stop", RED, "javascript:stopPlugin()", "#FFFFFF");
 
 	return result.str();
 }
@@ -790,7 +790,7 @@ static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnec
 
 eString getCurService(void)
 {
-	eString result = "&nbsp;";
+	eString result;
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
@@ -849,17 +849,17 @@ static eString getLeftNavi(eString mode, bool javascript)
 		if (pdaScreen == 0)
 		{
 			result += "<span class=\"zapnavi\">";
-			result += button(110, "TV", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
+			result += button(110, "TV", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
 			result += "<br>";
-			result += button(110, "Radio", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
+			result += button(110, "Radio", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post, "#FFFFFF");
 			result += "<br>";
-			result += button(110, "Data", BLUE, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post);
+			result += button(110, "Data", BLUE, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post, "#FFFFFF");
 			result += "<br>";
 #ifndef DISABLE_FILE
-			result += button(110, "Movies", OCKER, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post);
+			result += button(110, "Movies", OCKER, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 			result += "<br>";
 #endif
-			result += button(110, "Root", PINK, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post);
+			result += button(110, "Root", PINK, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post, "#FFFFFF");
 			result += "</span>";
 			result += "<br><br>";
 			if (zap[zapMode][ZAPSUBMODESATELLITES])
@@ -875,7 +875,6 @@ static eString getLeftNavi(eString mode, bool javascript)
 			if (zap[zapMode][ZAPSUBMODEBOUQUETS])
 			{
 				result += button(110, "Bouquets", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
-				result += "<br>";
 			}
 		}
 		else
@@ -970,7 +969,6 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += button(110, "Multi-Boot", LEFTNAVICOLOR, pre + "?mode=configMultiBoot" + post);
 		result += "<br>";
 		result += button(110, "Settings", LEFTNAVICOLOR, pre + "?mode=configSettings" + post);
-		result += "<br>";
 #endif
 #endif
 	}
@@ -990,7 +988,6 @@ static eString getLeftNavi(eString mode, bool javascript)
 			result += "<br>";
 		}
 		result += button(110, "Boards", LEFTNAVICOLOR, pre + "?mode=helpForums" + post);
-		result += "<br>";
 	}
 
 	result += "&nbsp;";
@@ -1099,6 +1096,7 @@ static eString getIP()
 #ifndef DISABLE_FILE
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 
+#if 0
 static eString getDiskSpace(void)
 {
 	eString result = "unknown";
@@ -1122,7 +1120,9 @@ static eString getDiskSpace(void)
 	return result;
 }
 #endif
+#endif
 
+#if 0
 static eString getStats()
 {
 	eString result;
@@ -1192,6 +1192,7 @@ static eString getRecordingStat()
 
 	return result.str();
 }
+#endif
 
 static eString getVolBar()
 {
@@ -1769,7 +1770,7 @@ static eString getZap(eString mode, eString path)
 				tmp.strReplace("#SELSIZE#", "25");
 			else
 				tmp.strReplace("#SELSIZE#", "10");
-			tmp.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()"));
+			tmp.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()", "#FFFFFF"));
 			result += tmp;
 		}
 		else
@@ -1917,7 +1918,7 @@ static eString aboutDreambox(void)
 
 	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
 		if (pdaScreen == 0)
-			result << "<img src=\"dm7000.jpg\" width=\"620\" border=\"0\"><br><br>";
+			result << "<img src=\"dm7000.jpg\" width=\"630\" border=\"0\"><br><br>";
 		else
 			result << "<img src=\"dm7000.jpg\" width=\"160\" border=\"0\"><br><br>";
 
@@ -2128,9 +2129,9 @@ static eString getControlTimerList()
 		result.strReplace("#TIMER_REPEATED#", "<tr><td colspan=\"7\">None</td></tr>");
 
 	// buttons
-	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()"));
-	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()"));
-	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()"));
+	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()", "#FFFFFF"));
+	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()", "#FFFFFF"));
+	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()", "#FFFFFF"));
 
 	return result;
 }
@@ -2394,7 +2395,7 @@ static eString getControlScreenShot(void)
 	else
 	{
 		FILE *bitstream = 0;
-		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 620, winyres = 0, rh = 0, rv = 0;
+		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 630, winyres = 0, rh = 0, rv = 0;
 		if (pdaScreen == 1)
 			winxres = 160;
 		if (Decoder::current.vpid != -1)
@@ -2549,10 +2550,10 @@ static eString getContent(eString mode, eString path, eString opts)
 		result = getTitle("CONTROL: OSDShot");
 		if (!getOSDShot("fb"))
 		{
-			result += "<table bgcolor=\"" + eString(DARKGREY) + "\" cellpadding=\"0\" cellspacing=\"0\">";
+			result += "<table bgcolor=\"#000000\" cellpadding=\"0\" cellspacing=\"0\">";
 			result += "<tr><td>";
 			if (pdaScreen == 0)
-				result += "<img width=\"620\" src=\"/root/tmp/osdshot.png\" border=0>";
+				result += "<img width=\"630\" src=\"/root/tmp/osdshot.png\" border=0>";
 			else
 				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
 			result += "</td></tr>";
@@ -2566,7 +2567,7 @@ static eString getContent(eString mode, eString path, eString opts)
 		result = getTitle("CONTROL: LCDShot");
 		if (!getOSDShot("lcd"))
 			if (pdaScreen == 0)
-				result += "<img width=\"620\" src=\"/root/tmp/osdshot.png\" border=0>";
+				result += "<img width=\"630\" src=\"/root/tmp/osdshot.png\" border=0>";
 			else
 				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
 	}
@@ -2618,8 +2619,8 @@ static eString getContent(eString mode, eString path, eString opts)
 
 eString getEITC(eString result)
 {
-	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext ="&nbsp;",
-		next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
+	eString now_time, now_duration, now_text, now_longtext,
+		next_time, next_duration, next_text, next_longtext;
 
 	EIT *eit = eDVB::getInstance()->getEIT();
 	if (eit)
@@ -2632,28 +2633,28 @@ eString getEITC(eString result)
 			{
 				if (p == 0)
 				{
-					if (event->start_time != 0)
+					if (event->start_time)
 					{
 						now_time.sprintf("%s", ctime(&event->start_time));
-						now_time = now_time.mid(10, 6);
+						now_time = now_time.mid(11, 5);
 					}
 
-					now_duration.sprintf("%d", (int)(event->duration/60));
+					now_duration.sprintf("%d", (int)(event->duration / 60));
 				}
 				if (p == 1)
 				{
-					if (event->start_time != 0)
+					if (event->start_time)
 					{
  						next_time.sprintf("%s", ctime(&event->start_time));
-						next_time = next_time.mid(10,6);
-						next_duration.sprintf("%d", (int)(event->duration/60));
+						next_time = next_time.mid(11, 5);
+						next_duration.sprintf("%d", (int)(event->duration / 60));
 					}
 				}
 				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
 				{
 					if (descriptor->Tag() == DESCR_SHORT_EVENT)
 					{
-						ShortEventDescriptor *ss =(ShortEventDescriptor*)*descriptor;
+						ShortEventDescriptor *ss = (ShortEventDescriptor*)*descriptor;
 						switch(p)
 						{
 							case 0:
@@ -2666,7 +2667,7 @@ eString getEITC(eString result)
 					}
 					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
 					{
-						ExtendedEventDescriptor *ss =(ExtendedEventDescriptor*)*descriptor;
+						ExtendedEventDescriptor *ss = (ExtendedEventDescriptor*)*descriptor;
 						switch(p)
 						{
 							case 0:
@@ -2687,20 +2688,18 @@ eString getEITC(eString result)
 	now_text = now_text.left(30);
 	next_text = next_text.left(30);
 	result.strReplace("#NOWT#", now_time);
-	if (now_duration != "&nbsp;")
+	if (now_duration)
 		now_duration = "(" + now_duration + ")";
 	result.strReplace("#NOWD#", now_duration);
 	result.strReplace("#NOWST#", now_text);
 	result.strReplace("#NOWLT#", now_longtext);
 	result.strReplace("#NEXTT#", next_time);
-	if (next_duration != "&nbsp;")
+	if (next_duration)
 		next_duration = "(" + next_duration + ")";
 	result.strReplace("#NEXTD#", next_duration);
 	result.strReplace("#NEXTST#", next_text);
 	result.strReplace("#NEXTLT#", next_longtext);
-	result.strReplace("#VOLBAR#", getVolBar());
-	result.strReplace("#MUTE#", getMute());
-	
+
 	eString curService = getCurService();
 	eString curServiceRef;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
@@ -2709,16 +2708,13 @@ eString getEITC(eString result)
 	eString curSubService = getCurrentSubChannel(curServiceRef);
 	if (curSubService)
 	{
-		if (curService != "&nbsp;")
+		if (!curService)
 			curService += ": " + curSubService;
 		else
 			curService = curSubService;
 	}
 	result.strReplace("#SERVICENAME#", curService);
-	result.strReplace("#STATS#", getStats());
 	result.strReplace("#EMPTYCELL#", "&nbsp;");
-	result.strReplace("#CHANSTATS#", getChannelStats());
-	result.strReplace("#RECORDING#", getRecordingStat());
 
 	return result;
 }
@@ -2733,9 +2729,9 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 
 class eMEPG: public Object
 {
-	int hours;
 	int d_min;
 	eString multiEPG;
+	int hours;
 	time_t start;
 	time_t end;
 	int tableWidth;
@@ -4632,7 +4628,7 @@ static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPCon
 		mode = "zap";
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "leftnavi.tmp");
-	
+
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, true));
 	return result;
 }
@@ -4669,18 +4665,18 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "data.tmp");
-	
+
 	// epg data
 	result = getEITC(result);
-	
+
 	// webif update cycle
 	int updateCycle = 10000;
 	eConfig::getInstance()->getKey("/ezap/webif/updateCycle", updateCycle);
 	result.strReplace("#UPDATECYCLE#", eString().sprintf("%d", updateCycle));
-	
+
 	// standby
 	result.strReplace("#STANDBY#", (eZapMain::getInstance()->isSleeping()) ? "1" : "0");
-		
+
 	// uptime
 	int sec = atoi(readFile("/proc/uptime").c_str());
 	result.strReplace("#UPTIME#", eString().sprintf("%d:%02d h up", sec / 3600, (sec % 3600) / 60));
@@ -4694,13 +4690,11 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 	result.strReplace("#LOCK#", (lockWebIf == 1) ? "locked" : "unlocked");
 
 	// vpid
-	eString vpid = (Decoder::current.vpid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.vpid);
-	result.strReplace("#VPID#", (Decoder::current.vpid == -1) ? "none" : vpid.sprintf("0x%x", Decoder::current.vpid));
+	result.strReplace("#VPID#", (Decoder::current.vpid == -1) ? "\"none\"" : eString().sprintf("0x%x", Decoder::current.vpid));
 
 	// apid
-	eString apid = (Decoder::current.apid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.apid);
-	result.strReplace("#APID#", (Decoder::current.apid == -1) ? "none" : apid.sprintf("0x%x", Decoder::current.apid));
-	
+	result.strReplace("#APID#", (Decoder::current.apid == -1) ? "\"none\"" : eString().sprintf("0x%x", Decoder::current.apid));
+
 	// free recording space on disk
 #ifndef DISABLE_FILE
 	int fds = freeRecordSpace();
@@ -4713,30 +4707,30 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 			result.strReplace("#DISKGB#", eString().sprintf("%d MB", fds));
 		else
 			result.strReplace("#DISKGB#", eString().sprintf("%d.%02d GB", fds/1024, (int)((fds % 1024) / 10.34)));
-		
+
 		int min = fds / 33;
 		if (min < 60)
 			result.strReplace("#DISKH#", eString().sprintf("~%d min", min));
 		else
 			result.strReplace("#DISKH#", eString().sprintf("~%d h, %02d min", min/60, min%60));
 	}
-	
+
 	// volume
 	result.strReplace("#VOLUME#", (eAVSwitch::getInstance()->getMute()) ? "0" : eString().sprintf("%d", 63 - eAVSwitch::getInstance()->getVolume()));
 
 	// mute
-	result.strReplace("#STANDBY#", (eAVSwitch::getInstance()->getMute()) ? "1" : "0");
-	
+	result.strReplace("#MUTE2#", (eAVSwitch::getInstance()->getMute()) ? "1" : "0");
+
 	// channel stats
 	result.strReplace("#DOLBY#", (eZapMain::getInstance()->getAC3Logo()) ? "0" : "1");
 	result.strReplace("#CRYPT#", (eZapMain::getInstance()->getSmartcardLogo()) ? "0" : "1");
 	result.strReplace("#FORMAT#", (eZapMain::getInstance()->get16_9Logo()) ? "0" : "1");
-	
+
 	// recording status
 #ifndef DISABLE_FILE
-	result.strReplace("#RECORDING#", (eZapMain::getInstance()->isRecording()) ? "1" : "0");
+	result.strReplace("#RECORDING2#", (eZapMain::getInstance()->isRecording()) ? "1" : "0");
 #else
-	result.strReplace("#RECORDING#", "0");
+	result.strReplace("#RECORDING2#", "0");
 #endif
 	return result;
 }
