@@ -102,7 +102,7 @@ bool CDHCPNotifier::changeNotify(const neutrino_locale_t, void * data)
 	return true;
 }
 
-CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, CMenuItem* i7, CMenuItem* i8, CMenuItem* i9, CMenuItem* i10, CMenuItem* i11, CMenuItem* i12)
+CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3, CMenuItem* i4, CMenuItem* i5, CMenuItem* i6, CMenuItem* i7, CMenuItem* i8, CMenuItem* i9, CMenuItem* i10, CMenuItem* i11)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
@@ -115,20 +115,18 @@ CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[8]=i9;
    toDisable[9]=i10;
    toDisable[10]=i11;
-   toDisable[11]=i12;
-
 }
 
 bool CStreamingNotifier::changeNotify(const neutrino_locale_t, void *)
 {
    if(g_settings.streaming_type==0)
    {
-      for (int i=0; i<=11; i++)
+      for (int i=0; i<=10; i++)
         toDisable[i]->setActive(false);
    }
    else if(g_settings.streaming_type==1)
    {
-      for (int i=0; i<=11; i++)
+      for (int i=0; i<=10; i++)
         toDisable[i]->setActive(true);
    }
    return true;
@@ -187,7 +185,7 @@ bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 	   toDisable[7]->setActive(false);
 	   toDisable[8]->setActive(false);
    }
-   
+
    return true;
 }
 
@@ -335,11 +333,11 @@ bool CAudioSetupNotifier2::changeNotify(const neutrino_locale_t, void *)
 {
 	toDisable[0]->setActive(g_settings.audio_avs_Control == 2);
 
-	if (g_settings.audio_avs_Control == 2)   
+	if (g_settings.audio_avs_Control == 2)
 		g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), CControld::TYPE_OST);
 	// tell controld the new volume_type
 	g_Controld->setVolume(g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control),
-									 (CControld::volume_type)g_settings.audio_avs_Control); 
+									 (CControld::volume_type)g_settings.audio_avs_Control);
 	return true;
 }
 
@@ -516,7 +514,7 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 		netGetDefaultRoute(our_gateway);
 		netGetNameserver(our_nameserver);
 	}
-		
+
 	printf("testNw IP       : %s\n", our_ip);
 	printf("testNw Netmask  : %s\n", our_mask);
 	printf("testNw Broadcast: %s\n", our_broadcast);
