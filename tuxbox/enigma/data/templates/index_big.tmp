@@ -59,9 +59,13 @@
 				getElem("id", "servicename", null).firstChild.nodeValue = serviceName;
 				getElem("id", "nowt", null).firstChild.nodeValue = nowT;
 				getElem("id", "nowd", null).firstChild.nodeValue = nowD;
+				if (!MS)
+					nowSt = nowSt.substr(0, 40);
 				getElem("id", "nowst", null).firstChild.nodeValue = nowSt;
 				getElem("id", "nextt", null).firstChild.nodeValue = nextT;
  				getElem("id", "nextd", null).firstChild.nodeValue = nextD;
+				if (!MS)
+					nextSt = nextSt.substr(0, 40);
 				getElem("id", "nextst", null).firstChild.nodeValue = nextSt;
 			}
 			function topnavi(command)
