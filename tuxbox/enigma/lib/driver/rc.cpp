@@ -96,6 +96,7 @@ eRCInput *eRCInput::instance;
 
 eRCInput::eRCInput()
 {
+	ASSERT( !instance);
 	instance=this;
 	handle = -1;
 	locked = 0;
@@ -144,7 +145,12 @@ eRCDevice *eRCInput::getDevice(const char *id)
 {
 	std::map<const char*,eRCDevice*>::iterator i=devices.find(id);
 	if (i == devices.end())
+	{
+		eDebug("failed, possible choices are:");
+		for (std::map<const char*,eRCDevice*>::iterator i=devices.begin(); i != devices.end(); ++i)	
+			eDebug("%s", i->first);
 		return 0;
+	}
 	return i->second;
 }
 

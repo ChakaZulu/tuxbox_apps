@@ -1,0 +1,109 @@
+<rcdefaults>
+	<author>
+		<name>Felix Domke</name>
+		<email>tmbinc@gmx.net</email>
+	</author>
+	
+	<device identifier="Dreambox2" >
+		<keys>
+			<key name="0" code="00" />
+			<key name="1" code="01" />
+			<key name="2" code="02" />
+			<key name="3" code="03" />
+			<key name="4" code="04" />
+			<key name="5" code="05" />
+			<key name="6" code="06" />
+			<key name="7" code="07" />
+			<key name="8" code="08" />
+			<key name="9" code="09" />
+			<key name="volup" code="0a" />
+			<key name="voldown" code="0b" />
+			<key name="tv" code="0c" />
+			<key name="bouqup" code="0d" />
+			<key name="bouqdown" code="0e" />
+			<key name="power" code="0f" />
+			<key name="dream" code="20" />
+			<key name="up" code="21" />
+			<key name="down" code="22" />
+			<key name="left" code="23" />
+			<key name="right" code="24" />
+			<key name="ok" code="25" />
+			<key name="audio" code="26" />
+			<key name="video" code="27" />
+			<key name="info" code="28" />
+			<key name="red" code="40" />
+			<key name="green" code="41" />
+			<key name="yellow" code="42" />
+			<key name="blue" code="43" />
+			<key name="mute" code="44" />
+			<key name="next" code="50" />
+			<key name="prev" code="51" />
+			<key name="LAME" code="52" />
+			<key name="radio" code="53" />
+			<key name="help" code="54" />
+		</keys>
+		<actionmap name="cursor">
+			<action name="up" key="up" flags="mr" />
+			<action name="down" key="down" flags="mr" />
+			<action name="left" key="left" flags="mr" />
+			<action name="right" key="right" flags="mr" />
+			<action name="ok" key="ok" flags="m" />
+			<action name="cancel" key="LAME" flags="m" />
+		</actionmap>
+		<actionmap name="focus">
+			<action name="up" key="up" flags="mr" />
+			<action name="down" key="down" flags="mr" />
+			<action name="left" key="left" flags="mr" />
+			<action name="right" key="right" flags="mr" />
+		</actionmap>
+		<actionmap name="list">
+			<action name="pagedown" key="next" flags="mr" />
+			<action name="pageup" key="prev" flags="mr" />
+			<action name="pagedown" key="right" flags="mr" />
+			<action name="pageup" key="left" flags="mr" />
+		</actionmap>
+		<actionmap name="enigmaMain">
+			<action name="showMainMenu" key="dream"  flags="m" />
+			<action name="standby_press" key="power" flags="m" />
+			<action name="standby_repeat" key="power" flags="r" />
+			<action name="standby_release" key="power" flags="b" />
+			<action name="toggleInfobar" key="ok" flags="m" />
+			<action name="showServiceSelector" key="tv" flags="m" />
+			<action name="showSubservices" key="green" flags="m" />
+			<action name="showAudio" key="yellow" flags="m" />
+			<action name="pluginVTXT" key="blue" flags="m" />
+			<action name="showEPGList" key="red" flags="m" />
+			<action name="showEPG" key="info" flags="m" />
+			<action name="nextService" key="right" flags="mr" />
+			<action name="prevService" key="left" flags="mr" />
+			<action name="serviceListDown" key="down" flags="m" />
+			<action name="serviceListUp" key="up" flags="m" />
+			<action name="volumeUp" key="volup" flags="mr" />
+			<action name="volumeDown" key="voldown" flags="mr" />
+			<action name="toggleMute" key="mute" flags="mr" />
+		</actionmap>
+		<actionmap name="serviceSelector">
+			<action name="nextBouquet" key="next" flags="mr" />
+			<action name="prevBouquet" key="prev" flags="mr" />
+			<action name="showBouquetSelector" key="bouqup" flags="m" />
+			<action name="showBouquetSelector" key="bouqdown" flags="m" />
+			<action name="showEPGSelector" key="info" flags="m" />
+			<action name="showAllServices" key="tv" flags="m" />
+		</actionmap>
+		<actionmap name="numbers">
+			<action name="0" key="0" flags="mr" />
+			<action name="1" key="1" flags="mr" />
+			<action name="2" key="2" flags="mr" />
+			<action name="3" key="3" flags="mr" />
+			<action name="4" key="4" flags="mr" />
+			<action name="5" key="5" flags="mr" />
+			<action name="6" key="6" flags="mr" />
+			<action name="7" key="7" flags="mr" />
+			<action name="8" key="8" flags="mr" />
+			<action name="9" key="9" flags="mr" />
+		</actionmap>
+		<actionmap name="enigmaStandby">
+			<action name="wakeUp" key="power" flags="m" />
+		</actionmap>
+	</device>
+</rcdefaults>

@@ -151,7 +151,6 @@ eRCDreamboxDriver::eRCDreamboxDriver(): eRCShortDriver("/dev/rawir")
 
 class eDreamboxRCHardware
 {
-	eRCInput input;
 	eRCDreamboxDriver driver;
 	eRCDeviceDreambox device;
 public:
