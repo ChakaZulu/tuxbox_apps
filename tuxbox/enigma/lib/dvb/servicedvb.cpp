@@ -509,14 +509,14 @@ void eServiceHandlerDVB::startPlayback(const eString &filename, int livemode)
 	decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::start, livemode));
 	flags=flagIsSeekable|flagSupportPosition;
 	state=statePlaying;
-	if ( livemode == 2)
+	if ( livemode )
 		flags|=flagStartTimeshift;
 	pcrpid = Decoder::current.pcrpid;
 		// stop pcrpid
 	Decoder::parms.pcrpid = -1;
 	Decoder::Set();
 	serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
-	if ( livemode == 2)
+	if ( livemode )
 		flags&=~flagStartTimeshift;
 }
 
