@@ -9,6 +9,7 @@
 
 std::map<int,transpondermap> scantransponders;
 std::map<int,scanchannel> scanchannels;
+multimap<std::string, bouquet_mulmap> scanbouquets;
 std::string curr_chan_name;
 int found_transponders;
 int found_channels;
@@ -33,14 +34,14 @@ int priv_data_desc(char *buffer)
 int network_name_desc(char *buffer)
 {
 	int len = buffer[1];
-	//int i;
+	int i;
 	std::string name;
-	/*	
+		
 	for (i=0;i<len;i++)
 		name += buffer[i+2];
 	
 	printf("Network-name: %s\n",name.c_str());
-	*/
+	
 	return len+2;
 }
 
@@ -261,7 +262,7 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 		}
 	}
 	
-	//printf("provider: %s\n",provname.c_str());
+	printf("provider: %s\n",provname.c_str());
 	printf("service: %s\n",servicename.c_str());
 	
 	if (scan_mode)
@@ -281,6 +282,10 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 		found_channels++;
 		scanchannels.insert(std::pair<int,scanchannel>((tsid<<16)+sid,scanchannel(servicename,sid,tsid,onid,service_type)));
 	}
+	
+	if (service_type == 1 || service_type == 2)
+		scanbouquets.insert(std::pair<std::string,bouquet_mulmap>(provname.c_str(),bouquet_mulmap(provname, servicename, sid,onid)));
+	
 	}
 	
 	
@@ -290,14 +295,14 @@ int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode)
 int bouquet_name_desc(char *buffer)
 {
 	int len = buffer[1];
-	int i = 0;
+	/*int i = 0;
 	std::string name;
 			
 	for (i = 0; i<len; i++)
 	{
 	  name += buffer[i+2];
 	}
-	//printf("Bouquet name: %s\n",name.c_str());
+	printf("Bouquet name: %s\n",name.c_str());*/
 	return len+2;
 }
 

@@ -28,6 +28,7 @@
 
 typedef std::map<int, scanchannel>::iterator sciterator;
 typedef std::map<int, transpondermap>::iterator stiterator;
+typedef std::multimap<std::string, bouquet_mulmap>::iterator sbiterator;
 #ifdef NVOD_HACK
 std::string curr_chan;
 #endif
@@ -67,11 +68,56 @@ void get_sdts()
 
 
 
-void write_bouquets(FILE *fd)
+void write_fake_bouquets(FILE *fd)
 {
   fprintf(fd, "<Bouquet name=\"dummy\">\n\t<channel id=\"0000\"/>\n</Bouquet>\n");
 }
- 
+
+
+void write_bouquets()
+{
+	FILE *bouq_fd;
+	std::string oldname = "";
+	
+	bouq_fd = fopen("/var/zapit/bouquets.xml", "r");
+	
+	if (bouq_fd != NULL || scanbouquets.empty())
+		return;
+	else
+	{
+		bouq_fd = fopen("/var/zapit/bouquets.xml", "w");
+		
+		fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<ZAPIT>\n");
+		
+		for (sbiterator bI = scanbouquets.begin(); bI != scanbouquets.end(); bI++)
+      		{
+      			if (bI->second.provname != oldname)
+      			{
+      				if (oldname != "")
+      				{
+      					fprintf(bouq_fd, "</Bouquet>\n");
+      					//printf("</Bouquet>\n");
+      				}
+      				
+      				fprintf(bouq_fd, "<Bouquet name=\"%s\">\n", bI->second.provname.c_str());
+      				//printf("<Bouquet name=\"%s\">\n", bI->second.provname.c_str());
+      				
+      			}
+      			fprintf(bouq_fd, "\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n", bI->second.sid, bI->second.servname.c_str(), bI->second.onid);
+      			//printf("\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n", bI->second.sid, bI->second.servname.c_str(), bI->second.onid);
+      			
+      			oldname = bI->second.provname;
+      		}
+      		
+      		fprintf(bouq_fd, "</Bouquet>\n</ZAPIT>\n");
+      		//printf("</Bouquet>\n</ZAPIT>\n");
+      	}
+      	scanbouquets.clear();
+      	fclose(bouq_fd);
+}
+
+      		
+		
 void write_transponder(int tsid, FILE *fd)
 {
   std::string transponder;
@@ -182,8 +228,9 @@ void *start_scanthread(void *)
       fprintf(fd,"</cable>\n");
 	}
 
-      scanchannels.clear();
       scantransponders.clear();
+      scanchannels.clear();
+
     }
   else
     {
@@ -223,6 +270,8 @@ void *start_scanthread(void *)
 	  fprintf(fd, "</satellite>\n");
 	}
       
+
+
       scanchannels.clear();
       scantransponders.clear();
       
@@ -285,10 +334,11 @@ void *start_scanthread(void *)
        scanchannels.clear();
        scantransponders.clear();
       }
-      write_bouquets(fd);
+      write_fake_bouquets(fd);
   fprintf(fd,"</ZAPIT>\n"); 
   fclose(fd);
-  
+
+  write_bouquets();  
         	
   if (prepare_channels() <0) 
   {

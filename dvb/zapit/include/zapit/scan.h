@@ -1,3 +1,4 @@
+
 struct scanchannel{
 	std::string name;
 	int sid;
@@ -65,7 +66,25 @@ struct transpondermap
 	}
 };
 
+struct bouquet_mulmap
+{
+	std::string provname;
+	std::string servname;
+	int sid;
+	int onid;
+	
+	bouquet_mulmap(std::string Provname, std::string Servname, int Sid, int Onid)
+	{
+		provname = Provname;
+		servname = Servname;
+		sid = Sid;
+		onid = Onid;
+	}
+};
+
+
 // #define NVOD_HACK
 
 extern std::map<int, transpondermap> scantransponders;
 extern std::map<int, scanchannel> scanchannels;
+extern std::multimap<std::string, bouquet_mulmap> scanbouquets;
