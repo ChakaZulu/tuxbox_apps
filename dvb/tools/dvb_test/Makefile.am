@@ -1,5 +1,6 @@
 bin_PROGRAMS = \
 	diseqc \
+	getpids \
 	sendburst \
 	set22k \
 	setpid \
@@ -25,6 +26,7 @@ bin_PROGRAMS = \
 test_clip_vlc_LDADD = 	-lpthread
 
 diseqc_SOURCES = diseqc.c
+getpids_SOURCES = getpids.c
 sendburst_SOURCES = sendburst.c
 set22k_SOURCES = set22k.c
 setpid_SOURCES = setpid.c
