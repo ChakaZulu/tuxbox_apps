@@ -47,9 +47,6 @@ class CLcddClient
 		bool lcdd_close();
 
 	public:
-		static const bool MUTE_ON  = true;
-		static const bool MUTE_OFF = false;
-
 		enum mode
 		{
 			MODE_TVRADIO,
@@ -57,7 +54,8 @@ class CLcddClient
 			MODE_MENU,
 			MODE_SAVER,
 			MODE_SHUTDOWN,
-			MODE_STANDBY
+			MODE_STANDBY,
+			MODE_MENU_UTF8
 		};
 
 		CLcddClient();
