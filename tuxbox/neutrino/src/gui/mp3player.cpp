@@ -39,6 +39,7 @@
 #include <system/settings.h>
 #include <algorithm>
 #include <sys/time.h>
+#include <fstream>
 
 #include "eventlist.h"
 #include "mp3player.h"
@@ -75,6 +76,8 @@ CMP3PlayerGui::CMP3PlayerGui()
 	filebrowser->Dirs_Selectable = true;
 	mp3filter.addFilter("mp3");
 	mp3filter.addFilter("m2a");
+	mp3filter.addFilter("mpa");
+	mp3filter.addFilter("m3u");
 	filebrowser->Filter = &mp3filter;
 	Path = "/";
 }
@@ -321,7 +324,33 @@ int CMP3PlayerGui::show()
 							mp3.Filename = files->Name;
 							playlist.push_back(mp3);
 						}
-					}
+                  else if(files->getType() == CFile::FILE_MP3_PLAYLIST)
+                  {
+                     std::string sPath = files->Name.substr(0, files->Name.rfind("/"));
+                     std::ifstream infile;
+                     char cLine[256];
+                     infile.open (files->Name.c_str(), ifstream::in);
+                     while (infile.good())
+                     {
+                        infile.getline(cLine, 255);
+                        printf("Line %s\n",cLine);
+                        if(strlen(cLine) > 0)
+                        {
+                           std::string filename = sPath + "/" + cLine;
+                           std::ifstream testfile;
+                           testfile.open(filename.c_str(), ifstream::in);
+                           if(testfile.good())
+                           {
+                              CMP3 mp3;
+                              mp3.Filename = filename;
+                              playlist.push_back(mp3);
+                           }
+                           testfile.close();
+                        }
+                     }
+                     infile.close();
+                  }
+               }
 				}
 				CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 				paintLCD();

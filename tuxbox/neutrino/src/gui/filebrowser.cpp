@@ -54,8 +54,10 @@ int CFile::getType()
 		string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
 		if((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) ||
-			(strcasecmp(extension.c_str(),"mpa") == 0))
+			(strcasecmp(extension.c_str(),"mpa") == 0) )
 			return FILE_MP3;
+      if((strcasecmp(extension.c_str(),"m3u") == 0))
+         return FILE_MP3_PLAYLIST;
 		if((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
 			return FILE_TEXT;
 		if((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || 
@@ -218,39 +220,42 @@ int n;
 	filelist.clear();
 	n = scandir(Path.c_str(), &namelist, 0, alphasort);
 	if (n < 0)
+   {
 		perror(("Filebrowser scandir: "+Path).c_str());
-	else 
-	{
-		for(int i = 0; i < n;i++)
-		{
-		CFile file;
-			if(strcmp(namelist[i]->d_name,".") != 0)
-			{
-				file.Name = Path + namelist[i]->d_name;
-//				printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
-				if(stat((file.Name).c_str(),&statbuf) != 0)
-					perror("stat error");
-				file.Mode = statbuf.st_mode;
-				file.Size = statbuf.st_size;
-				file.Time = statbuf.st_mtime;
+      Path = "/";
+      name = "/";
+      paintHead();
+      n = scandir(Path.c_str(), &namelist, 0, alphasort);
+   }
+   for(int i = 0; i < n;i++)
+   {
+      CFile file;
+      if(strcmp(namelist[i]->d_name,".") != 0)
+      {
+         file.Name = Path + namelist[i]->d_name;
+//			printf("file.Name: '%s', getFileName: '%s' getPath: '%s'\n",file.Name.c_str(),file.getFileName().c_str(),file.getPath().c_str());
+         if(stat((file.Name).c_str(),&statbuf) != 0)
+            perror("stat error");
+         file.Mode = statbuf.st_mode;
+         file.Size = statbuf.st_size;
+         file.Time = statbuf.st_mtime;
 
-				if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
-					if(!Filter->matchFilter(file.Name))
-					{
-						free(namelist[i]);
-						continue;
-					}
-				if(Dir_Mode && (!S_ISDIR(file.Mode)))
-				{
-					free(namelist[i]);
-					continue;
-				}
-				filelist.push_back(file);
-			}
-			free(namelist[i]);
-		}
-		free(namelist);
-	}
+         if(Filter != NULL && (!S_ISDIR(file.Mode)) && use_filter)
+            if(!Filter->matchFilter(file.Name))
+            {
+               free(namelist[i]);
+               continue;
+            }
+         if(Dir_Mode && (!S_ISDIR(file.Mode)))
+         {
+            free(namelist[i]);
+            continue;
+         }
+         filelist.push_back(file);
+      }
+      free(namelist[i]);
+   }
+   free(namelist);
 //	sort(filelist.begin(),filelist.end(),sortByType);
 
 	selected = 0;

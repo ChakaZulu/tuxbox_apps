@@ -84,6 +84,7 @@ public:
 		FILE_DIR,
 		FILE_TEXT,
 		FILE_MP3,
+		FILE_MP3_PLAYLIST,
 		FILE_PICTURE
 	};
 
