@@ -264,7 +264,7 @@ uint8_t service_name_desc(uint8_t *buffer, uint16_t service_id, uint16_t transpo
 		else
 		{
 			found_channels++;
-			eventServer->sendEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, CEventServer::INITID_ZAPIT, &found_channels, sizeof(found_channels));
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_NUM_CHANNELS, CEventServer::INITID_ZAPIT, &found_channels, sizeof(found_channels));
 			scanchannels.insert(std::pair<int, scanchannel>((transport_stream_id << 16) | service_id, scanchannel(servicename, service_id, transport_stream_id, original_network_id, service_type)));
 		}
 
