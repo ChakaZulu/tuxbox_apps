@@ -444,6 +444,13 @@ class CZapitClient:public CBasicClient
 	void setDisplayFormat(const video_display_format_t mode);
 	void setAudioMode(int mode);
 	void setVideoSystem_a(int video_system);
+	void IecOn();
+	void IecOff();
+	int IecState();
+	void PlaybackSPTS();
+	void PlaybackPES();
+	int PlaybackState();
+
 
 	/****************************************/
 	/*					*/

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.360 2005/01/18 02:48:52 carjay Exp $
+ * $Id: zapit.cpp,v 1.361 2005/01/18 07:53:07 diemade Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -39,6 +39,7 @@
 
 /* zapit headers */
 #include <zapit/audio.h>
+#include <zapit/aviaext.h>
 #include <zapit/cam.h>
 #include <zapit/client/msgtypes.h>
 #include <zapit/dmx.h>
@@ -62,6 +63,8 @@ CConfigFile config(',', false);
 CEventServer *eventServer = NULL;
 /* the dvb audio device */
 CAudio *audioDecoder = NULL;
+/* the aviaEXT device */
+CAViAext *aviaExtDriver = NULL;
 /* the dvb frontend device */
 CFrontend *frontend = NULL;
 /* the dvb video device */
@@ -1250,6 +1253,46 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+	case CZapitMessages::CMD_SET_AE_IEC_ON:
+	{
+		setIec(1);
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_AE_IEC_OFF:
+	{
+		setIec(0);
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_AE_IEC_STATE:
+	{
+                CZapitMessages::responseGeneralInteger responseInteger;
+                responseInteger.number = aviaExtDriver->iecState();
+                CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger));
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_AE_PLAYBACK_PES:
+	{
+		setDemuxMode(0);
+		break;
+	}
+
+	case CZapitMessages::CMD_SET_AE_PLAYBACK_SPTS:
+	{
+		setDemuxMode(1);
+		break;
+	}
+
+	case CZapitMessages::CMD_GET_AE_PLAYBACK_STATE:
+	{
+		CZapitMessages::responseGeneralInteger responseInteger;
+		responseInteger.number = aviaExtDriver->playbackState();
+		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger));
+		break;
+	}
+
 	default:
 		WARN("unknown command %d (version %d)", rmsg.cmd, CZapitMessages::ACTVERSION);
 		break;
@@ -1536,6 +1579,30 @@ void setVideoSystem_t(int video_system)
 		videoDecoder->setVideoSystem(NTSC);
 }
 
+void setIec(int iec_active)
+{
+	if (iec_active == 0)
+                aviaExtDriver->iecOff();
+	else
+                aviaExtDriver->iecOn();
+}
+
+void setDemuxMode(int demux_mode)
+{
+	if (demux_mode == 0)
+                aviaExtDriver->playbackPES();
+	else
+                aviaExtDriver->playbackSPTS();
+
+	if (videoDecoder->getPlayState() == VIDEO_PLAYING) {
+		stopPlayBack();
+		playbackStopForced = true;
+		sleep(1);
+		playbackStopForced = false;
+		startPlayBack(channel);
+	}
+}
+
 void enterStandby(void)
 {
 	if (standby) {
@@ -1580,6 +1647,10 @@ void enterStandby(void)
 		delete videoDecoder;
 		videoDecoder = NULL;
 	}
+	if (aviaExtDriver) {
+		delete aviaExtDriver;
+		aviaExtDriver = NULL;
+	}
 
 	tuned_transponder_id = TRANSPONDER_ID_NOT_TUNED;
 }
@@ -1598,6 +1669,9 @@ void leaveStandby(void)
 	}
 	if (!videoDecoder) {
 		videoDecoder = new CVideo();
+	}
+	if (!aviaExtDriver) {
+		aviaExtDriver = new CAViAext();
 	}
 
 	frontend->setCurrentSatellitePosition(config.getInt32("lastSatellitePosition", 192));
@@ -1693,7 +1767,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.360 2005/01/18 02:48:52 carjay Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.361 2005/01/18 07:53:07 diemade Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

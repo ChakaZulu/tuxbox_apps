@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.51 2004/10/27 16:08:42 lucgas Exp $
+ * $Id: pzapit.cpp,v 1.52 2005/01/18 07:53:07 diemade Exp $
  *
  * simple commandline client for zapit
  *
@@ -59,6 +59,12 @@ int usage (const char * basename)
         std::cout << "switch to ntsc mode: " << basename << " --ntsc" << std::endl;
         std::cout << "switch to pal mode: " << basename << " --pal" << std::endl;
 	std::cout << "send diseqc 1.2 motor command: " << basename << "-m <cmdtype> <addr> <cmd> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
+	std::cout << "activate Iec (requires aviaEXT driver): " << basename << " --iecon>" << std::endl;
+	std::cout << "deactivate Iec (requires aviaEXT driver): " << basename << " --iecoff>" << std::endl;
+	std::cout << "get Iec state (0=off, 1=on): " << basename << " --iecstate>" << std::endl;
+	std::cout << "set decoder to PES mode (requires aviaEXT driver): " << basename << " --pes>" << std::endl;
+	std::cout << "set decoder to SPTS mode (requires aviaEXT driver): " << basename << " --spts>" << std::endl;
+	std::cout << "get decoder mode (0=PES, 1=SPTS): " << basename << " --decmode>" << std::endl;
 	return -1;
 }
 
@@ -95,6 +101,12 @@ int main (int argc, char** argv)
 	bool enterStandby = false;
 	bool leaveStandby = false;
 	bool sendMotorCommand = false;
+	bool Iecon = false;
+	bool Iecoff = false;
+	bool Iecstate = false;
+	bool pes = false;
+	bool spts = false;
+	bool decmode = false;
 	uint8_t motorCmdType = 0;
 	uint8_t motorCmd = 0;
 	uint8_t motorNumParameters = 0;
@@ -258,6 +270,36 @@ int main (int argc, char** argv)
 			mute = 0;
 			continue;
 		}
+                else if (!strncmp(argv[i], "--iecon", 7))
+                {
+                        Iecon = true;
+                        continue;
+                }
+                else if (!strncmp(argv[i], "--iecoff", 8))
+                {
+                        Iecoff = true;
+                        continue;
+                }
+                else if (!strncmp(argv[i], "--iecstate", 10))
+                {
+                        Iecstate = true;
+                        continue;
+                }
+                else if (!strncmp(argv[i], "--pes", 5))
+                {
+                        pes = true;
+                        continue;
+                }
+                else if (!strncmp(argv[i], "--spts", 6))
+                {
+                        spts = true;
+                        continue;
+                }
+                else if (!strncmp(argv[i], "--decmode", 9))
+                {
+                        decmode = true;
+                        continue;
+                }
 		else if (!strncmp(argv[i], "-vol", 4))
 		{
 			if (i < argc - 1)
@@ -318,6 +360,42 @@ int main (int argc, char** argv)
 	{
 		std::cout << "set volume" << std::endl;
 		zapit.setVolume(volume, volume);
+		return 0;
+	}
+
+	if (Iecon)
+	{
+		std::cout << "Iec on" << std::endl;
+		zapit.IecOn();
+		return 0;
+	}
+	if (Iecoff)
+	{
+		std::cout << "Iec off" << std::endl;
+		zapit.IecOff();
+		return 0;
+	}
+	if (Iecstate)
+	{
+		std::cout << "Iec state = " << zapit.IecState() << std::endl;
+		return 0;
+	}
+
+	if (pes)
+	{
+		std::cout << "set decoder to PES mode" << std::endl;
+		zapit.PlaybackPES();
+		return 0;
+	}
+	if (spts)
+	{
+		std::cout << "set decoder to SPTS mode" << std::endl;
+		zapit.PlaybackSPTS();
+		return 0;
+	}
+	if (decmode)
+	{
+		std::cout << "decoder mode = " << zapit.PlaybackState() << std::endl;
 		return 0;
 	}
 

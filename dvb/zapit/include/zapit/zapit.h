@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.68 2004/10/27 16:08:40 lucgas Exp $
+ * $Id: zapit.h,v 1.69 2005/01/18 07:53:05 diemade Exp $
  */
 
 #ifndef __zapit_h__
@@ -32,6 +32,8 @@ void sendAPIDs(int connfd);
 void enterStandby(void);
 void leaveStandby(void);
 void setVideoSystem_t(int video_system);
+void setIec(int);
+void setDemuxMode(int);
 
 #define PAL	0
 #define NTSC	1
