@@ -8,8 +8,22 @@
 			#NOWST#	
 		</p>
 		<p>
-			<a href="/wap?mode=zap">ZAP</a><br/>
-			<a href="/wap?mode=control">CONTROL</a>
+			<a href="#zap">ZAP</a><br/>
+			<a href="#ctl">CONTROL</a>
 		</p>
+	</card>
+	<card id="zap" title="Zap">
+		<p>
+			This function is not available yet.
+		</p>
+	</card>
+	<card id="ctl" title="Control">
+	<p>
+		Shutdown<br/>
+		Restart<br/>
+		Reboot<br/>
+		Standby<br/>
+		Wakeup<br/>
+	</p>
 	</card>
 </wml>
