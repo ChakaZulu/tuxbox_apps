@@ -24,7 +24,9 @@
 #include <enigma_standby.h>
 #include <sselect.h>
 #include <upgrade.h>
+#include <math.h>
 
+#include <lib/dvb/frontend.h>
 #include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/edvb.h>
@@ -53,7 +55,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.5.2"
+#define WEBXFACEVERSION "1.5.3"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -179,7 +181,7 @@ static eString getControlPlugins(void)
 		result << "<tr><td>No plugins found.</td></tr>";
 	else
 		plugins.list.forEachEntry(PluginCollector(result));
-	
+
 	result << "</table>";
 	result << "<br>";
 	result << button(100, "Stop", RED, "javascript:stopPlugin()");
@@ -894,6 +896,8 @@ static eString getLeftNavi(eString mode, eString path)
 #ifndef DISABLE_FILE
 		result += "<br>";
 		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
+		result += "<br>";
+		result += button(110, "Satfinder", LEFTNAVICOLOR, "?mode=controlSatFinder");
 #endif
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
 			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
@@ -2340,13 +2344,20 @@ eString getConfigSettings(void)
 #endif
 #endif
 
+static eString getControlSatFinder(void)
+{
+	eString result = readFile(TEMPLATE_DIR + "sat.tmp");
+
+	return result;
+}
+
 static eString getControlScreenShot(void)
 {
 	eString result;
 
 	int ret = system("grabpic bmp > /tmp/screenshot.bmp");
 	eDebug("ret is %d", ret);
-	if ( ret >> 8 )
+	if (ret >> 8)
 		result = "grabpic tool is required but not existing or working";
 	else
 	{
@@ -2547,6 +2558,12 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("CONTROL: Screenshot");
 		result += getControlScreenShot();
+	}
+	else
+	if (mode == "controlSatFinder")
+	{
+		result = getTitle("CONTROL: Satfinder");
+		result += getControlSatFinder();
 	}
 	else
 	if (mode == "controlTimerList")
@@ -3236,6 +3253,46 @@ static eString getchannelinfo(eString request, eString dirpath, eString opts, eH
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = getEITC(readFile(TEMPLATE_DIR + "eit.tmp"));
 	result.strReplace("#SERVICENAME#", getCurService());
+
+	return result;
+}
+
+eString genBar(int val)
+{
+	std::stringstream result;
+	for (int i = 10; i <= 100; i += 10)
+	{
+		result << "<td width=\"15\" height=\"8\">";
+		if (i <= val)
+			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
+		else
+			result << "<img src=\"led_off.gif\" border=\"0\" width=\"15\" height=\"8\">";
+		result << "</td>";
+	}
+	return result.str();
+}
+
+static eString satFinder(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "satFinder.tmp");
+
+	eFrontend *fe = eFrontend::getInstance();
+	int snr = fe->SNR();
+	int agc = fe->SignalStrength();
+	unsigned int ber = fe->BER();
+	int status = fe->Status();
+	bool lock = status & FE_HAS_LOCK;
+	bool sync = status & FE_HAS_SYNC;
+
+	result.strReplace("#SNR#", eString().sprintf("%d", snr * 100 / 65535));
+	result.strReplace("#SNRBAR#", genBar(snr * 100 / 65535));
+	result.strReplace("#AGC#", eString().sprintf("%d", agc * 100 / 65535));
+	result.strReplace("#AGCBAR#", genBar(agc * 100 / 65535));
+	result.strReplace("#BER#", eString().sprintf("%d", ber));
+	result.strReplace("#BERBAR#", genBar(ber));
+	result.strReplace("#LOCK#", (lock) ? "checked" : "");
+	result.strReplace("#SYNC#", (sync) ? "checked" : "");
 
 	return result;
 }
@@ -4724,6 +4781,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/rc", remoteControl, lockWeb);
 	dyn_resolver->addDyn("GET", "/showRemoteControl", showRemoteControl, lockWeb);
+	dyn_resolver->addDyn("GET", "/satFinder", satFinder, lockWeb);
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 	dyn_resolver->addDyn("GET", "/header", header, lockWeb);

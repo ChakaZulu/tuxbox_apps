@@ -8,7 +8,7 @@ function setVid(xy)
 {
 	document.location = "/setVideo?position="+xy;
 	setTimeout("reload()", 1000);
-}
+}	
 
 function Mute(xy)
 {
@@ -35,6 +35,11 @@ function switchChannel(xy, bouquet, channel)
 function remoteControl()
 {
 	NewWindow("/showRemoteControl", "RC", "293", "750", "no");
+}
+
+function satFinder()
+{
+	NewWindow("/satFinder", "satfind", "170", "150", "no");
 }
 
 function deleteMovie(xy)
