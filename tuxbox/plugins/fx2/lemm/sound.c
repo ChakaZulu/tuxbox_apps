@@ -70,7 +70,7 @@ void	SoundStart( void )
 	int					rc;
 	int format = AFMT_S8;	// signed, 8 Bit
 	int channels = 1;	// 1=mono, 2=stereo
-	int speed = 11025;
+	int speed = 12000;		// 11025 is not availible when video playback is enabled
 
 	if ( sound_fd == -1 )
 #ifdef __i386__
