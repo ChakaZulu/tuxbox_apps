@@ -55,10 +55,8 @@ void CAViAExt::iecOn()
 		if (errno==ENOENT)
 			fprintf (stderr,"%s does not exist, did you forget to load the aviaEXT module?\n",AVIAEXT_DEV);
 		else
-		{
 			perror ("aviaext: error opening /dev/dbox/aviaEXT");
-			return;
-	        }
+		return;
 	}
 	res = ioctl(fd, AVIA_EXT_IEC_SET, 1);
 	if (res<0)
@@ -75,10 +73,8 @@ void CAViAExt::iecOff()
 		if (errno==ENOENT)
 			fprintf (stderr,"%s does not exist, did you forget to load the aviaEXT module?\n",AVIAEXT_DEV);
 		else
-		{
 			perror ("aviaext: error opening /dev/dbox/aviaEXT");
-			return;
-	        }
+		return;
 	}
 	res = ioctl(fd, AVIA_EXT_IEC_SET, 0);
 	if (res<0)
@@ -96,10 +92,8 @@ int CAViAExt::iecState()
 		if (errno==ENOENT)
 			fprintf (stderr,"%s does not exist, did you forget to load the aviaEXT module?\n",AVIAEXT_DEV);
 		else
-		{
 			perror ("aviaext: error opening /dev/dbox/aviaEXT");
-			return -1;
-	        }
+		return -1;
 	}
 	res = ioctl(fd, AVIA_EXT_IEC_GET, &param);
 	if (res<0)
