@@ -36,15 +36,14 @@ static QMap<QString,QString> getRequestOptions(QString opt)
 	return result;
 }
 
-static QString doStatus(QString request, QString path, QString opt, const eHTTPConnection *content)
+static QString doStatus(QString request, QString path, QString opt, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html";
 	QString result;
 	time_t atime;
 	time(&atime);
 	atime+=eDVB::getInstance()->time_difference;
-	result ="Content-Type: text/html\r\n";
-	result+="\r\n";
-	result+="<html>\n"
+	result="<html>\n"
 		"<head>\n"
 		"  <title>elitedvb status</title>\n"
 		"  <link rel=stylesheet type=\"text/css\" href=\"/index.css\">\n"
@@ -59,16 +58,15 @@ static QString doStatus(QString request, QString path, QString opt, const eHTTPC
 	return result;
 }
 
-static QString switchService(QString request, QString path, QString opt, const eHTTPConnection *content)
+static QString switchService(QString request, QString path, QString opt, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html";
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	if (opt.find("="))
 		opt=opt.mid(opt.find("=")+1);
 	sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
-	QString result;
+	QString result="";
 	
-	result="Content-Type: text/html\r\n";
-	result+="\r\n";
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 		eService *meta=0;
@@ -92,14 +90,13 @@ static QString switchService(QString request, QString path, QString opt, const e
 	return result;
 }
 
-static QString listServices(QString request, QString path, QString opts, const eHTTPConnection *content)
+static QString listServices(QString request, QString path, QString opts, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html";
 	QString result;
 	QMap<QString,QString> opt=getRequestOptions(opts);
 	QString search=opt["search"];
-	result ="Content-Type: text/html\r\n";
-	result+="\r\n";
-	result+="<html>\n"
+	result="<html>\n"
 		"<head>\n"
 		"  <title>elitedvb service list</title>\n"
 		"  <link rel=stylesheet type=\"text/css\" href=\"/index.css\">\n"
@@ -123,22 +120,24 @@ static QString listServices(QString request, QString path, QString opts, const e
 	return result;
 }
 
-static QString admin(QString request, QString path, QString opts, const eHTTPConnection *content)
+static QString admin(QString request, QString path, QString opts, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html";
 	QMap<QString,QString> opt=getRequestOptions(opts);
 	QString command=opt["command"];
 	if (command && command=="shutdown")
 	{
 		eZap::getInstance()->quit();
-		return "Content-Type: text/html\r\n\r\n<html><head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>\n";
+		return "<html><head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>\n";
 	} else
-		return "Content-Type: text/html\r\n\r\n<html><head><title>Error</title></head><body>Unknown admin command.</body></html>\n";
+		return "<html><head><title>Error</title></head><body>Unknown admin command.</body></html>\n";
 }
 
-static QString audio(QString request, QString path, QString opts, const eHTTPConnection *content)
+static QString audio(QString request, QString path, QString opts, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html";
 	QMap<QString,QString> opt=getRequestOptions(opts);
-	QString result="Content-Type: text/html\r\n\r\n";
+	QString result="";
 	QString volume=opt["volume"];
 	if (volume)
 	{
@@ -157,12 +156,13 @@ static QString audio(QString request, QString path, QString opts, const eHTTPCon
 	return result;
 }
 
-static QString getPMT(QString request, QString path, QString opt, const eHTTPConnection *content)
+static QString getPMT(QString request, QString path, QString opt, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="x-application/PMT";
 	PMT *pmt=eDVB::getInstance()->getPMT();
 	if (!pmt)
-		return "Content-Type: x-application/PMT\r\nresult=ERROR\n";
-	QString res="Content-Type: x-application/PMT\r\nresult=OK\n";
+		return "result=ERROR\n";
+	QString res="result=OK\n";
 	res+="PMT"+QString().sprintf("(%04x)\n", pmt->pid);
 	res+="program_number="+QString().sprintf("%04x\n", pmt->program_number);
 	res+="PCR_PID="+QString().sprintf("%04x\n", pmt->PCR_PID);
@@ -183,17 +183,19 @@ static QString getPMT(QString request, QString path, QString opt, const eHTTPCon
 	return res;
 }
 
-static QString version(QString request, QString path, QString opt, const eHTTPConnection *content)
+static QString version(QString request, QString path, QString opt, eHTTPConnection *content)
 {
-	QString result="Content-Type: text/plain\r\n\r\n"
+	content->local_header["Content-Type"]="text/plain";
+	QString result="";
 		"EliteDVB Version " + eDVB::getInstance()->getVersion() + "\r\n"
 		"eZap Version " + eZap::getInstance()->getVersion() + "\r\n";
 	return result;
 }
 
-static QString channels_getcurrent(QString request, QString path, QString opt, const eHTTPConnection *content)
+static QString channels_getcurrent(QString request, QString path, QString opt, eHTTPConnection *content)
 {
-	QString result="Content-Type: text/plain\r\n\r\n";
+	QString result="";
+	content->local_header["Content-Type"]="text/plain";
 	if (eDVB::getInstance()->service)
 		result+=QString().sprintf("%d", eDVB::getInstance()->service->service_number);
 	else
@@ -204,8 +206,8 @@ static QString channels_getcurrent(QString request, QString path, QString opt, c
 
 static void unpack(__u32 l, int *t)
 {
-        for (int i=0; i<4; i++)
-                *t++=(l>>((3-i)*8))&0xFF;
+	for (int i=0; i<4; i++)
+		*t++=(l>>((3-i)*8))&0xFF;
 }
 
 static QString getVolume()
@@ -213,18 +215,15 @@ static QString getVolume()
 	return QString().setNum((63-eDVB::getInstance()->volume)*100/63, 10);
 }
 
-
-
-static QString setVolume(QString request, QString path, QString opts, const eHTTPConnection *content)
+static QString setVolume(QString request, QString path, QString opts, eHTTPConnection *content)
 {
 	QMap<QString,QString> opt=getRequestOptions(opts);
 	QString mute="0";
 	QString volume;
-	QString result;
+	QString result="";
 	int mut=0, vol=0;
 
-	result="Content-Type: text/html\r\n";
-	result+="\r\n";
+	content->local_header["Content-Type"]="text/html";
 
 	result+="<script language=\"javascript\">window.close();</script>"; 
 	mute=opt["mute"];
@@ -267,15 +266,13 @@ static QString read_file(QString filename)
 		char buffer[f.size()+1];
 		buffer[f.readBlock(buffer, f.size())]=0;
 		return QString(buffer);
-	} 
-	else
-	{
+	} else
 		return "file: "+filename+" not found\n";
-	}
 }
 
 static QString getIP()
 {
+#if 0
 	QString tmp;
 	int ip[4];
 	ip[0]=0;
@@ -291,6 +288,8 @@ static QString getIP()
 	sscanf(tmp, "%02x%02x%02x%02x", &ip[0], &ip[1], &ip[2], &ip[3]);
 	tmp.sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
 	return tmp;
+#endif
+	return "?.?.?.?";
 }
 
 
@@ -455,10 +454,11 @@ static QString getCurService()
 		return "no channel selected";
 }
 
-static QString web_root(QString request, QString path, QString opts, const eHTTPConnection *content)
+static QString web_root(QString request, QString path, QString opts, eHTTPConnection *content)
 {
-	QString result;
+	QString result="";
 	QMap<QString,QString> opt=getRequestOptions(opts);
+	content->local_header["Content-Type"]="text/html";
 
 	QString mode=opt["mode"];
 	QString bid="0";
@@ -467,9 +467,6 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 		bid=opt["bouquetid"];
 
 	int bouquetid=atoi(bid);
-
-	result ="Content-Type: text/html\r\n";
-	result+="\r\n";
 
 	result+=read_file(TEMPLATE_DIR+"index.tmp");
  
@@ -483,11 +480,10 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	int bootcount=0;
 	
 	stats+="<span class=\"white\">";
-	system("/bin/uptime > /tmp/uptime");
-	tmp=read_file("/tmp/uptime");
-	stats+=tmp.mid( tmp.find("m")+1 );
+	int sec=atoi(read_file("/proc/uptime"));
+	stats+=QString().sprintf("%d:%02dm up", sec/3600, (sec%3600)/60);
 	stats+="</span> | ";
- 
+
 	tmp=read_file("/proc/mounts");
 	if(!tmp.find("cramfs"))
 	{
@@ -509,7 +505,6 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 
 	tmp.sprintf("<span class=\"white\">vpid: 0x%x</span> | <a class=\"audio\" href=\"http://"+getIP()+"/audio.pls\">apid: 0x%x</a>", Decoder::parms.vpid, Decoder::parms.apid);
 	stats+=tmp;
-	
 	tvc="normal";
 	radioc="normal";
 	aboutc="normal";
@@ -636,7 +631,6 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 		eitc+="no eit";
 	}
 
-
 	result.replace(QRegExp("#STATS#"), stats);
 	result.replace(QRegExp("#NAVI#"), navi);
 	result.replace(QRegExp("#MODE#"), tmp);
@@ -654,17 +648,16 @@ static QString web_root(QString request, QString path, QString opts, const eHTTP
 	return result;
 }
 
-static QString switchServiceWeb(QString request, QString path, QString opt, const eHTTPConnection *content)
+static QString switchServiceWeb(QString request, QString path, QString opt, eHTTPConnection *content)
 {
+	content->local_header["Content-Type"]="text/html";
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	if (opt.find("="))
 		opt=opt.mid(opt.find("=")+1);
         if(opt)
  	 sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
-	QString result;
+	QString result="";
 	
-	result="Content-Type: text/html\r\n";
-	result+="\r\n";
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 		eService *meta=0;
@@ -688,15 +681,13 @@ static QString switchServiceWeb(QString request, QString path, QString opt, cons
 	return result;
 }
 
-static QString audiopls(QString request, QString path, QString opt, const eHTTPConnection *content)
+static QString audiopls(QString request, QString path, QString opt, eHTTPConnection *content)
 {
 	QString result;
 	QString tmp;
 
-	result="Content-Type: audio/x-scpls\r\n";
-	result+="\r\n";
-
-	result+="[playlist]\n";
+	content->local_header["Content-Type"]="audio/x-scpls";
+	result="[playlist]\n";
 	result+="NumberOfEntries=1\n";
 	result+="File1=http://"+getIP()+":31338/";
         tmp.sprintf("%02x\n", Decoder::parms.apid);
