@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.104 2002/03/18 16:55:16 field Exp $
+//  $Id: sectionsd.cpp,v 1.105 2002/03/20 18:58:36 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.105  2002/03/20 18:58:36  field
+//  Updates
+//
 //  Revision 1.104  2002/03/18 16:55:16  field
 //  Bugfix
 //
@@ -1081,9 +1084,9 @@ int DMX::change(bool set_Scheduled)
 
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
 // falsch ist es zumindest nicht
-static DMX dmxEIT(0x12, 0x4f, 0xfe, 0x50, 0xf0, 384);
+static DMX dmxEIT(0x12, 0x4f, (0xff- 0x01), 0x50, (0xff- 0x0f), 384);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
-static DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
+static DMX dmxTOT(0x14, 0x73, 0xff, 0x70, (0xff- 0x03), 256, 1);
 
 //------------------------------------------------------------
 // misc. functions
@@ -1508,7 +1511,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.104 2002/03/18 16:55:16 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.105 2002/03/20 18:58:36 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1701,7 +1704,7 @@ static void commandserviceChanged(struct connectionData *client, char *data, con
 	messaging_wants_current_next_Event = *requestCN_Event;
 	unlockMessaging();
 
-	if ( *requestCN_Event )
+	if ( messaging_wants_current_next_Event )
 	{
 		dprintf("[sectionsd] requesting current_next event...\n");
 		// aufwecken - mit current-next
@@ -2772,7 +2775,7 @@ struct SI_section_TDT_header {
       unsigned short section_length : 12;
       // 3 bytes
       unsigned long long UTC_time : 40;
-} __attribute__ ((packed)) ; // 10 bytes
+} __attribute__ ((packed)) ; // 8 bytes
 
 /*
 // BR schickt falschen Time-Offset, daher per TZ und Rest hier auskommentiert
@@ -2852,10 +2855,10 @@ char *buf;
 			if(dmxTOT.change( true )) // von TOT nach TDT wechseln
     			;
 
-	  		struct SI_section_TDT_header tdt_header;
+	  		struct SI_section_TDT_header tdt_tot_header;
 
 	  		dmxTOT.lock();
-  			int rc=dmxTOT.read((char *)&tdt_header, sizeof(tdt_header), timeoutInSeconds);
+  			int rc=dmxTOT.read((char *)&tdt_tot_header, sizeof(tdt_tot_header), timeoutInSeconds);
 
   			if(!rc)
     		{
@@ -2867,36 +2870,55 @@ char *buf;
     		{
       			dmxTOT.unlock();
       			dmxTOT.closefd();
-      			break;
+      			continue;
     		}
 
-			dmxTOT.unlock();
-  			if(rc>0)
-  			{
-    			time_t tim=changeUTCtoCtime(((const unsigned char *)&tdt_header)+3);
-    			if(tim)
-    			{
-      				if(stime(&tim)< 0)
-      				{
-        				perror("[sectionsd] cannot set date");
-						dmxTOT.closefd();
-        				return 0;
-      				}
+			switch ( tdt_tot_header.table_id )
+			{
+				case 0x73:
+				{
+					// TOT - Rest einlesen!
+					buf = new char[tdt_tot_header.section_length-5];
+    				if(!buf)
+    				{
+      					dmxTOT.unlock();
+      					fprintf(stderr, "Not enough memory!\n");
+      					dmxTOT.closefd();
+      					continue;
+    				}
+    				rc=dmxTOT.read(buf, tdt_tot_header.section_length-5, timeoutInSeconds);
+    				delete[] buf;
+    				// und weiter unterhalb  ...
+    				dprintf("TDT/TOT: got local time via TOT :)");
+				}
+				case 0x70:
+				{
+				    dmxTOT.unlock();
+                	time_t tim=changeUTCtoCtime(((const unsigned char *)&tdt_tot_header)+3);
+    				if(tim)
+    				{
+      					if(stime(&tim)< 0)
+      					{
+        					perror("[sectionsd] cannot set date");
+							dmxTOT.closefd();
+      					}
 
-	      			timeset=1;
-    	  			time_t t=time(NULL);
-      				dprintf("TDT: local time: %s", ctime(&t));
+	      				timeset=1;
+    	  				time_t t=time(NULL);
+      					dprintf("TDT/TOT: local time: %s", ctime(&t));
+    				}
+
+    				break;
     			}
-  			}
+    			default:
+					dmxTOT.unlock();
+			}
   		} while (timeset!=1);
 
   		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD );
 
-/*  		if(dmxTOT.change( false ) ) // von TDT nach TOT wechseln
-    		return 0;
-*/
 		dmxTOT.closefd();
-		dprintf("dmxTOT: changing from TDT to TOT.\n");
+		dprintf("dmxTOT: changing from TDT/TOT to TOT.\n");
 
   		// Jetzt wird die Uhrzeit nur noch per TOT gesetzt (CRC)
   		for(;;)
@@ -2923,7 +2945,7 @@ char *buf;
       			break;
     		}
 
-    		buf=new char[sizeof(header)+header.section_length-5];
+    		buf=new char[header.section_length- 7];
     		if(!buf)
     		{
       			dmxTOT.unlock();
@@ -2931,10 +2953,7 @@ char *buf;
       			dmxTOT.closefd();
       			break;
     		}
-
-    		// Den Header kopieren
-    		memcpy(buf, &header, sizeof(header));
-    		rc=dmxTOT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    		rc=dmxTOT.read(buf, header.section_length-7, timeoutInSeconds);
 
     		dmxTOT.unlock();
     		delete[] buf;
@@ -3263,6 +3282,7 @@ static void *eitThread(void *)
                 	if (!header.section_number && !header.last_section_number)
                     {
                     	// nur eine section...
+                    	dprintf("[eitThread] got all current_next packages... (only one!)\n");
 						dmxEIT.change( true );
 					}
                     else
@@ -3270,6 +3290,7 @@ static void *eitThread(void *)
 						if ( messaging_current_Section_MaxID == -1 )
                     	{
 							messaging_current_Section_MaxID= header.section_number;
+
                         }
                         else
                         {
@@ -3279,7 +3300,6 @@ static void *eitThread(void *)
                         		dprintf("[eitThread] got all current_next packages...\n");
                         		if ( messaging_wants_current_next_Event )
                         		{
-
                         			messaging_wants_current_next_Event = false;
                 					eventServer->sendEvent(CSectionsdClient::EVT_GOT_CN_EPG, CEventServer::INITID_SECTIONSD, &messaging_current_ServiceKey, sizeof(messaging_current_ServiceKey) );
                                 }
@@ -3405,7 +3425,7 @@ int main(int argc, char **argv)
 	int rc;
 	struct sockaddr_in serverAddr;
 
-	printf("$Id: sectionsd.cpp,v 1.104 2002/03/18 16:55:16 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.105 2002/03/20 18:58:36 field Exp $\n");
 	try
 	{
 
