@@ -776,7 +776,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 						else if (emsg.eventID==CTimerdClient::EVT_RECORD_START)
 			 			{
 							*msg = NeutrinoMessages::RECORD_START;
-							*data = 0;
+							*data = *(unsigned *)  p;
 						}
 						else if (emsg.eventID==CTimerdClient::EVT_RECORD_STOP)
 			 			{
@@ -786,7 +786,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 						else if (emsg.eventID==CTimerdClient::EVT_ZAPTO)
 			 			{
 							*msg = NeutrinoMessages::ZAPTO;
-							*data = *(unsigned*) p;			// channelID
+							*data = *(unsigned *)  p;
 						}
 						else if (emsg.eventID==CTimerdClient::EVT_SHUTDOWN)
 			 			{
