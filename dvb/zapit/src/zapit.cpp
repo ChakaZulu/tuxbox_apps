@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
   
-  $Id: zapit.cpp,v 1.1 2001/09/28 14:34:30 faralla Exp $
+  $Id: zapit.cpp,v 1.2 2001/09/28 17:05:42 faralla Exp $
   
   Done 2001 by Philipp Leusmann using many parts of code from older 
   applications by the DBoxII-Project.
@@ -60,6 +60,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   $Log: zapit.cpp,v $
+  Revision 1.2  2001/09/28 17:05:42  faralla
+  bugfix
+
   Revision 1.1  2001/09/28 14:34:30  faralla
   fake-cpp redesign
 
@@ -1168,6 +1171,7 @@ int prepare_channels()
 	  allnamechannels_tv.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
 	  //printf("Inserted %d %s\n", cit->second.chan_nr, cit->second.name.c_str());
 	}
+      numchans_tv.clear();
       for (nameit = namechans_tv.begin(); nameit != namechans_tv.end(); nameit++)
 	{
 	  cit = allchans_tv.find(nameit->second);
@@ -1176,6 +1180,7 @@ int prepare_channels()
 	  allnamechannels_tv.insert(std::pair<std::string, uint>(nameit->first, (cit->second.onid<<16)+cit->second.sid));
 	  //printf("Inserted %d %s\n", cit->second.chan_nr, cit->second.name.c_str());
 	}
+      namechans_tv.clear();
       number = 1;
       for (numit = numchans_radio.begin(); numit != numchans_radio.end(); numit++)
 	{
@@ -1185,6 +1190,7 @@ int prepare_channels()
 	  allnamechannels_radio.insert(std::pair<std::string, uint>(cit->second.name, (cit->second.onid<<16)+cit->second.sid));
 	  //printf("Inserted %s\n", cit->second.name.c_str());
 	}
+      numchans_radio.clear();
       for (nameit = namechans_radio.begin(); nameit != namechans_radio.end(); nameit++)
 	{
 	  cit = allchans_radio.find(nameit->second);
@@ -1193,6 +1199,7 @@ int prepare_channels()
 	  allnamechannels_radio.insert(std::pair<std::string, uint>(nameit->first, (cit->second.onid<<16)+cit->second.sid));
 	  //printf("Inserted %s\n", cit->second.name.c_str());
 	}
+      namechans_radio.clear();
     }
 else
   {
@@ -1559,6 +1566,7 @@ int network_setup() {
 int main(int argc, char **argv) {
   
   channel_msg testmsg;
+  int channelcount = 0;
   
   if (argc > 1) {
     if (!strcmp(argv[1], "-o")) {
@@ -1572,7 +1580,7 @@ int main(int argc, char **argv) {
   }
   
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.1 2001/09/28 14:34:30 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.2 2001/09/28 17:05:42 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   
   testmsg = load_settings();
@@ -1590,7 +1598,16 @@ int main(int argc, char **argv) {
   }
   
   printf("Channels have been loaded succesfully\n");
-  printf("We´ve got %d tv- and %d radio-channels\n", allnumchannels_tv.rbegin()->first, allnumchannels_radio.rbegin()->first);
+  
+  printf("We´ve got ");
+  if (!allnumchannels_tv.empty())
+    channelcount = allnumchannels_tv.rbegin()->first;
+  printf("%d tv- and ", channelcount);
+  if (!allnumchannels_radio.empty())
+    channelcount = allnumchannels_radio.rbegin()->first;
+  else
+    channelcount = 0;
+  printf("%d radio-channels\n", channelcount);
   
   if (network_setup()!=0){
     printf("Error during network_setup\n");
