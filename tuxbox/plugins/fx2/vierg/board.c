@@ -305,8 +305,6 @@ static	void	MyPlay( void )
 				continue;
 			for( x=0;x<7;x++)
 			{
-				if ( x==vidx[k] )
-					continue;
 				i2=vFall(x,5);
 				if ( i2 == -1 )
 					continue;
