@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.4 2001/06/10 14:55:51 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.5 2001/06/10 15:48:31 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.5  2001/06/10 15:48:31  fnbrd
+// Noch einen kleinen Fehler behoben.
+//
 // Revision 1.4  2001/06/10 14:55:51  fnbrd
 // Kleiner Aenderungen und Ergaenzungen (epgMini).
 //
@@ -270,7 +273,7 @@ SIevent SIevent::readActualEvent(unsigned short serviceID, unsigned timeoutInSec
       SIsectionEIT e(SIsection(sizeof(header)+header.section_length-5, buf));
       time_t zeit=time(NULL);
       for(SIevents::iterator k=e.events().begin(); k!=e.events().end(); k++)
-        if(k->serviceID==serviceID && k->startzeit<=zeit<=(long)(k->startzeit+k->dauer)) {
+        if(k->serviceID==serviceID && k->startzeit<=zeit && zeit<=(long)(k->startzeit+k->dauer)) {
 	  close(fd);
 	  return SIevent(*k);
         }
