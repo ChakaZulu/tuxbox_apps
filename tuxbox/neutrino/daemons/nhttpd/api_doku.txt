@@ -679,38 +679,51 @@ Beispiel:
 
 
 **********************************************************************************************
-16. Popup-Fenster öffnen
+16. Open popup window
 **********************************************************************************************
 Handler: http://dbox/control/message
 
-Parameter: popup=Text
-Rückgabe:
+Parameter: popup=text or nmsg=text
 
-Neutrino öffnet ein Popup-Fenster, in dem der Parameter als Text dargestellt wird. 
-Leerzeichen sind dabei als %20 zu übergeben. 
-Das Fenster schliesst sich nach wenigen Sekunden selbst.
+Return value: ok
 
-Rückgabe-Format: ok / error
+Character encoding: UTF-8, spaces must be transmitted using %20
 
-Beispiel:
+Neutrino opens a pop up (popup) or message (nmsg) window in which the text part of the parameter is displayed.
+A pop up window closes itself after a few seconds whereas a message window must be closed using the remote control.
 
->>>http://dbox/control/message?popup=Hallo%20Welt
-öffnet ein Popup-Fenster auf dem Fernseher, in dem "Hallo Welt" steht
+Examples:
+
+>>>http://dbox/control/message?popup=Hello%20World
+opens a popup window on the TV screen with content "Hello World"
+
+>>>http://dbox/control/message?nmsg=Hello%20Welt
+opens a message window on the TV screen with content "Hello World"
 
 
+**********************************************************************************************
+16. Popup-Fenster oeffnen
+**********************************************************************************************
+Handler: http://dbox/control/message
 
-Parameter: nmsg=Text
-Rückgabe:
+Parameter: popup=Text oder nmsg=Text
 
-Neutrino öffnet ein Message-Fenster, in dem der Parameter als Text dargestellt wird. 
-Leerzeichen sind dabei als %20 zu übergeben.
-Das Fenster wird im nicht wieder geschlossen, es muß per Fernbedienung an der dbox geschlossen werden.
-Rückgabe-Format: ok / error
+Rückgabewert: ok
 
-Beispiel:
+Zeichensatz: UTF-8, Leerzeichen muessen als %20 gesendet werden
+
+Neutrino oeffnet ein Popup(popup)- oder Message(nmsg)-Fenster, in dem der Text des Parameters dargestellt wird. 
+Ein Popupfenster schliesst sich nach wenigen Sekunden selbst, wohingegen ein Message-Fenster mit der Fernbedienung geschlossen werden muss.
+
+Beispiele:
+
+>>>http://dbox/control/message?popup=Hallo%20World
+öffnet ein Popup-Fenster auf dem Fernseher, in dem "Hallo World" steht
 
 >>>http://dbox/control/message?nmsg=Hallo%20Welt
 öffnet ein Message-Fenster auf dem Fernseher, in dem "Hallo Welt" steht
+
+
 
 
 **********************************************************************************************

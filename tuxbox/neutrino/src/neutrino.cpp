@@ -2955,17 +2955,17 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		}
 		return messages_return::handled;
 	}
-	else if( msg == NeutrinoMessages::EVT_POPUP )
+	else if (msg == NeutrinoMessages::EVT_POPUP)
 	{
-		if( mode != mode_scart )
-			ShowHint ( "messagebox.info", std::string((char *) data) );
+		if (mode != mode_scart)
+			ShowHintUTF("messagebox.info", std::string((char *) data)); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
-	else if( msg == NeutrinoMessages::EVT_EXTMSG )
+	else if (msg == NeutrinoMessages::EVT_EXTMSG)
 	{
-		if( mode != mode_scart )
-			ShowMsg ( "messagebox.info", std::string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		if (mode != mode_scart)
+			ShowMsg("messagebox.info", std::string((char *) data), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
