@@ -289,6 +289,7 @@ static void updatePPPConfig( const eString &secrets, int flags )
 static void getNameserver( __u32 &ip )
 {
 	char buf[256];
+	__u32 tmp=UINT_MAX;
 
 	FILE *file=fopen("/etc/resolv.conf","r");
 	if (!file)
@@ -300,18 +301,20 @@ static void getNameserver( __u32 &ip )
 	{
 		if (sscanf(buf,"nameserver %d.%d.%d.%d", &tmp1, &tmp2, &tmp3, &tmp4) == 4)
 		{
-			ip=tmp1<<24|tmp2<<16|tmp3<<8|tmp4;
+			ip=tmp=tmp1<<24|tmp2<<16|tmp3<<8|tmp4;
 //			sprintf(ip, "0x%02x%02x%02x%02x", tmp1, tmp2, tmp3, tmp4);
 			break;
 		}
 	}
 	fclose(file);
+	if ( tmp == UINT_MAX )
+		eDebug("parse resolv.conf failed");
 }
 
 static void getDefaultGateway(__u32 &ip)
 {
 	char iface[9];
-	unsigned int dest=0, gw=0;
+	unsigned int dest=0, gw=UINT_MAX;
 	char buf[256];
 
 	FILE *file=fopen("/proc/net/route","r");
@@ -320,13 +323,17 @@ static void getDefaultGateway(__u32 &ip)
 	fgets(buf,sizeof(buf),file);
 	while(fgets(buf,sizeof(buf),file))
 	{
-		sscanf(buf,"%8s %x %x", iface, &dest, &gw);
-		if (!dest)
+		if (sscanf(buf,"%8s %x %x", iface, &dest, &gw) == 3)
 		{
-			ip = gw;
-			break;
+			if (!dest)
+			{
+				ip = gw;
+				break;
+			}
 		}
 	}
+	if (gw == UINT_MAX)
+		eDebug("get route failed");
 	fclose(file);
 }
 
@@ -346,10 +353,14 @@ static void getIP( char *dev, __u32 &ip, __u32 &mask)
 	saddr = (struct sockaddr_in *) &req.ifr_addr;
 	addr = (unsigned char*) &saddr->sin_addr.s_addr;
 
-	if( !ioctl(fd,SIOCGIFADDR,&req) )
-		ip = addr[0]<<24|addr[1]<<16|addr[2]<<8|addr[3];
+	if( ::ioctl(fd,SIOCGIFADDR,&req) < 0 )
+		eDebug("SIOCGIFADDR failed(%m)");
+	else
+		ip = addr[0]<<24|addr[1]<<16|addr[2]<<8|addr[3];	
 
-	if( !ioctl(fd,SIOCGIFNETMASK,&req) )
+	if( ::ioctl(fd,SIOCGIFNETMASK,&req) < 0 )
+		eDebug("SIOCGIFNETMASK failed(%m)");
+	else
 		mask = addr[0]<<24|addr[1]<<16|addr[2]<<8|addr[3];
 
 	close(fd);

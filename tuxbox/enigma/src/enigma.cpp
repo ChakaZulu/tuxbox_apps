@@ -226,6 +226,8 @@ void eZap::reconfigureHTTPServer()
 {
 	delete serialhttpd;
 	delete httpd;
+	serialhttpd=0;
+	httpd=0;
 
 	dyn_resolver = new eHTTPDynPathResolver();
 	ezapInitializeDyn(dyn_resolver);
@@ -273,6 +275,7 @@ void eZap::reconfigureHTTPServer()
 		::close(tts_fd);
 
 #if 1
+	logOutputConsole=1;
 	int disableSerialDebugOutput=0;
 	eConfig::getInstance()->getKey("/ezap/extra/disableSerialOutput", disableSerialDebugOutput);
 	if ( !SerialConsoleActivated && !disableSerialDebugOutput )

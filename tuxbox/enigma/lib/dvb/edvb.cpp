@@ -731,6 +731,7 @@ void eDVB::configureNetwork()
 		else
 		{
 			delete udhcpc;
+			udhcpc=0;
 
 			FILE *f=fopen("/etc/resolv.conf", "wt");
 			if (!f)

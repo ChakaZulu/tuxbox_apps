@@ -43,9 +43,10 @@ void eDebug(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
-	logOutput(lvlDebug, eString(buf) + "\n");
 	if (logOutputConsole)
 		fprintf(stderr, "%s\n", buf);
+	else
+		logOutput(lvlDebug, eString(buf) + "\n");	
 }
 
 void eDebugNoNewLine(const char* fmt, ...)
@@ -55,9 +56,10 @@ void eDebugNoNewLine(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
-	logOutput(lvlDebug, buf);
 	if (logOutputConsole)
-		fprintf(stderr, "%s", buf);
+		fprintf(stderr, buf);
+	else
+		logOutput(lvlDebug, buf);
 }
 
 void eWarning(const char* fmt, ...)
@@ -67,8 +69,9 @@ void eWarning(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
-	logOutput(lvlWarning, eString(buf) + "\n");
 	if (logOutputConsole)
 		fprintf(stderr, "%s\n", buf);
+	else
+		logOutput(lvlWarning, eString(buf) + "\n");
 }
 #endif // DEBUG
