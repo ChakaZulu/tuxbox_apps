@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.17 2003/03/01 16:39:07 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.18 2003/03/01 19:37:55 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -47,14 +47,13 @@ extern void showProfiling(std::string text);
 extern bool timeset;
 
 
-DMX::DMX(const unsigned char p, const unsigned short bufferSizeInKB, const bool nCRC)
+DMX::DMX(const unsigned char p, const unsigned short bufferSizeInKB)
 {
 	fd = 0;
 	lastChanged = 0;
 	filter_index = 0;
 	pID = p;
 	dmxBufferSizeInKB = bufferSizeInKB;
-	noCRC = nCRC;
 	pthread_mutex_init(&pauselock, NULL);        // default = fast mutex
 #ifdef DEBUG_MUTEX
 	pthread_mutexattr_t start_stop_mutex_attr;
@@ -444,31 +443,14 @@ int DMX::change(const int new_filter_index)
 
 //	if (new_filter_index != filter_index)
 	{
-
-		if ((fd = open(DEMUX_DEVICE, O_RDWR)) == -1)
-		{
-			perror("[sectionsd] open dmx: ");
-			unlock();
-			return 2;
-		}
-
-		if (ioctl(fd, DMX_SET_BUFFER_SIZE, (unsigned long)(dmxBufferSizeInKB*1024UL)) == -1)
-		{
-			closefd();
-			perror("[sectionsd] DMX: DMX_SET_BUFFER_SIZE");
-			unlock();
-			return 3;
-		}
-
 		filter_index = new_filter_index;
-		if (!setfilter(fd, pID, filters[filter_index].filter, filters[filter_index].mask, 
-			       ((new_filter_index != 0) &&  // 0x70, 0x71, 0x72 have no CRC
-				noCRC)                      // dmxTOT
-			       ? DMX_IMMEDIATE_START : DMX_IMMEDIATE_START | DMX_CHECK_CRC))
+
+		int rc = immediate_start();
+
+		if (rc != 0)
 		{
-			closefd();
 			unlock();
-			return 3;
+			return rc;
 		}
 
 		showProfiling("after DMX_SET_FILTER");
