@@ -378,6 +378,9 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	int textypos = sy;
 	showText(showPos, textypos);
 
+	// show Timer Event Buttons
+	showTimerEventBar (true);
+
 	//show progressbar
 	if ( epg_done!= -1 )
 	{
@@ -487,6 +490,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 void CEpgData::hide()
 {
 	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
+        // showTimerEventBar (false);
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("epg: closed");
 	#endif
