@@ -208,10 +208,10 @@ int eAVSwitchPhilips::setTVPin8(int vol)
 		fnc=1;
 		break;
 	case 12:
-		fnc=2;
+		fnc=3;
 		break;
 	 default:
-		fnc=2;
+		fnc=3;
 		break;
 	}
 	return ioctl(fd, AVSIOSFNC, &fnc);
