@@ -2395,14 +2395,14 @@ void eZapMain::toggleMute()
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 // sorry.. disable Mute when playback TS or MPG File..
 // better do pause
-	if ( (ref.type == eServiceReference::idDVB && ref.path)
 #ifndef DISABLE_FILE
-		|| (ref.type == eServiceReference::idUser &&
-			ref.data[0] == eMP3Decoder::codecMPG )
-#endif
-		 )
-		 pause();
+	if ( ( (ref.type == eServiceReference::idDVB && ref.path)
+				|| (ref.type == eServiceReference::idUser
+				&& ref.data[0] == eMP3Decoder::codecMPG ) )
+			&& (!eAVSwitch::getInstance()->getMute()) )
+		pause();
 	else
+#endif
 		eAVSwitch::getInstance()->toggleMute();
 }
 
