@@ -564,7 +564,7 @@ void EpgPlus::CFooter::paintButtons ( bool isStretchMode)
 		std::cout << "EpgPlus::CFooter::paintButtons3" << std::endl;
 	#endif
 
-	this->frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, this->x + this->width - 30, this->y + this->height1 + this->height2 + 2);
+	this->frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, this->x + this->width - 30, this->y + this->height1 + this->height2 );
 
 }
 
