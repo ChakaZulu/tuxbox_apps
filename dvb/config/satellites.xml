@@ -16,15 +16,13 @@ and combinations of this -->
 		<transponder frequency="12015000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 		<transponder frequency="12567000" symbol_rate="19850000" polarization="0" fec_inner="3"/>
 	</sat>
-	<sat name="Telstar12 15W" flags="5" position="-150">
+	<sat name="Telstar12 15.0W" flags="5" position="-150">
 		<transponder frequency="11501000" symbol_rate="06602000" polarization="0" fec_inner="2"/>
+		<transponder frequency="12041000" symbol_rate="3256000" polarization="0" fec_inner="2"/>
+		<transponder frequency="12520000" symbol_rate="8700000" polarization="1" fec_inner="1"/>
 		<transponder frequency="12551000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
 		<transponder frequency="12588000" symbol_rate="04502000" polarization="1" fec_inner="1"/>
 		<transponder frequency="12595000" symbol_rate="31830000" polarization="0" fec_inner="3"/>
-	</sat>	
-	<sat name="Telstar 15.0W" flags="5" position="-150">
-		<transponder frequency="12041000" symbol_rate="3256000" polarization="0" fec_inner="2"/>
-		<transponder frequency="12520000" symbol_rate="8700000" polarization="1" fec_inner="1"/>
 	</sat>
 	<sat name="Eutelsat 8.0W" flags="5" position="-80">
 		<transponder frequency="11635000" symbol_rate="6800000" polarization="0" fec_inner="5"/>
