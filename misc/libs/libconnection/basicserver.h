@@ -2,11 +2,11 @@
 #define __basicserver__
 
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.4 2002/12/02 13:31:52 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.h,v 1.5 2003/02/25 14:05:24 thegoodguy Exp $
  *
- * Basic Server Class (Neutrino) - DBoxII-Project
+ * Basic Server Class Class - The Tuxbox Project
  *
- * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
+ * (C) 2002 - 2003 by thegoodguy <thegoodguy@berlios.de>
  *
  * License: GPL
  *
@@ -37,6 +37,8 @@ class CBasicServer
 	std::string name;
 
  public:
+	static bool receive_data(int fd, void * data, const size_t size);
+	static bool send_data(int fd, const void * data, const size_t size);
 	bool prepare(const char* socketname);
 	void run(bool (parse_command)(CBasicMessage::Header &rmsg, int connfd), const CBasicMessage::t_version version);
 };

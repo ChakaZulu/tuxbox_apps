@@ -1,9 +1,9 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.5 2002/12/02 13:31:52 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicserver.cpp,v 1.6 2003/02/25 14:05:24 thegoodguy Exp $
  *
- * Basic Server Class (Neutrino) - DBoxII-Project
+ * Basic Server Class Class - The Tuxbox Project
  *
- * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
+ * (C) 2002 - 2003 by thegoodguy <thegoodguy@berlios.de>
  *
  * License: GPL
  *
@@ -23,6 +23,9 @@
  *
  */
 
+#include "basicserver.h"
+#include "basicsocket.h"
+
 #include <stdio.h>
 #include <unistd.h>
 
@@ -30,7 +33,24 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "basicserver.h"
+#define RECEIVE_TIMEOUT_IN_SECONDS 5
+#define SEND_TIMEOUT_IN_SECONDS 5
+
+bool CBasicServer::receive_data(int fd, void * data, const size_t size)
+{
+        timeval timeout;
+        timeout.tv_sec  = RECEIVE_TIMEOUT_IN_SECONDS;
+        timeout.tv_usec = 0;
+        return ::receive_data(fd, data, size, timeout);
+}
+
+bool CBasicServer::send_data(int fd, const void * data, const size_t size)
+{
+        timeval timeout;
+        timeout.tv_sec  = SEND_TIMEOUT_IN_SECONDS;
+        timeout.tv_usec = 0;
+        return ::send_data(fd, data, size, timeout);
+}
 
 bool CBasicServer::prepare(const char* socketname)
 {
