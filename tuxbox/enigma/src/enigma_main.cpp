@@ -569,14 +569,9 @@ AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
 		if (service)
 		{
 			EIT *eit=service->getEIT();
+			CONNECT( eDVB::getInstance()->tEIT.tableReady, AudioStream::EITready );
 			if (eit)
-			{
 				parseEIT(eit);
-			}
-			else
-			{
-				CONNECT( eDVB::getInstance()->tEIT.tableReady, AudioStream::EITready );
-			}
 		}
 	}
 }
