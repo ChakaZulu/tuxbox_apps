@@ -88,27 +88,27 @@ class CRemoteControl
 
 	void getNVODs();
 	void getSubChannels();
-	void copySubChannelsToZapit();
+	void copySubChannelsToZapit(void);
 
 public:
-	t_channel_id            current_channel_id;
-	unsigned long long      current_EPGid;
-	unsigned long long      next_EPGid;
-	CZapitClient::responseGetPIDs    current_PIDs;
+	t_channel_id                  current_channel_id;
+	unsigned long long            current_EPGid;
+	unsigned long long            next_EPGid;
+	CZapitClient::responseGetPIDs current_PIDs;
 
 	// APID - Details
-	bool              has_ac3;
-	bool              has_unresolved_ctags;
+	bool                          has_ac3;
+	bool                          has_unresolved_ctags;
 
 	// SubChannel/NVOD - Details
 	CSubServiceListSorted         subChannels;
-	int               selected_subchannel;
-	bool                             are_subchannels;
-	bool              needs_nvods;
-	int               director_mode;
+	int                           selected_subchannel;
+	bool                          are_subchannels;
+	bool                          needs_nvods;
+	int                           director_mode;
 
 	// Video / Parental-Lock
-	bool              is_video_started;
+	bool                          is_video_started;
 
 	CRemoteControl();
 	void zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video = true); // UTF-8
@@ -117,9 +117,9 @@ public:
 	void queryAPIDs();
 	void setAPID(uint APID);
 	void processAPIDnames();
-	std::string setSubChannel(unsigned numSub, bool force_zap = false );
-	std::string subChannelUp();
-	std::string subChannelDown();
+	std::string setSubChannel(const int numSub, const bool force_zap = false);
+	std::string subChannelUp(void);
+	std::string subChannelDown(void);
 
 	void radioMode();
 	void tvMode();

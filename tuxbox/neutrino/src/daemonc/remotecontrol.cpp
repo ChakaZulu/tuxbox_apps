@@ -412,12 +412,12 @@ void CRemoteControl::processAPIDnames()
 }
 
 
-void CRemoteControl::copySubChannelsToZapit()
+void CRemoteControl::copySubChannelsToZapit(void)
 {
 	CZapitClient::subServiceList 		zapitList;
 	CZapitClient::commandAddSubServices	zapitSubChannel;
 
-	for(CSubServiceListSorted::iterator e=subChannels.begin(); e!=subChannels.end(); ++e)
+	for (CSubServiceListSorted::const_iterator e = subChannels.begin(); e != subChannels.end(); e++)
 	{
 		zapitSubChannel.original_network_id = e->original_network_id;
 		zapitSubChannel.service_id          = e->service_id;
@@ -442,7 +442,7 @@ void CRemoteControl::setAPID( uint APID )
 	#endif
 }
 
-std::string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
+std::string CRemoteControl::setSubChannel(const int numSub, const bool force_zap)
 {
 	if ((numSub < 0) || (numSub >= subChannels.size()))
 		return "";
@@ -479,21 +479,14 @@ std::string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
 	return perspectiveName;
 }
 
-std::string CRemoteControl::subChannelUp()
+std::string CRemoteControl::subChannelUp(void)
 {
-	return setSubChannel( (selected_subchannel + 1) % subChannels.size());
+	return setSubChannel((subChannels.size() == 0) ? -1 : (int)((selected_subchannel + 1) % subChannels.size()));
 }
 
-std::string CRemoteControl::subChannelDown()
+std::string CRemoteControl::subChannelDown(void)
 {
-	if (selected_subchannel == 0 )
-	{
-		return setSubChannel(subChannels.size() - 1);
-	}
-	else
-	{
-		return setSubChannel(selected_subchannel - 1);
-	}
+	return setSubChannel((selected_subchannel == 0) ? (subChannels.size() - 1) : (selected_subchannel - 1));
 }
 
 void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::string channame, const bool start_video) // UTF-8
