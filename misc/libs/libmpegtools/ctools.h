@@ -27,6 +27,10 @@
  * the project's page is at http://linuxtv.org/dvb/
  */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
