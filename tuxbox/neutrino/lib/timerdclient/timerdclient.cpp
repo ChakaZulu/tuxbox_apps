@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.46 2004/03/07 02:46:12 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.47 2004/03/12 22:01:02 zwen Exp $
 
 	License: GPL
 
@@ -234,7 +234,8 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 	{
 		length = 0;
 	}
-	else if(evType == CTimerd::TIMER_NEXTPROGRAM || evType == CTimerd::TIMER_ZAPTO || evType == CTimerd::TIMER_RECORD )
+	else if(evType == CTimerd::TIMER_NEXTPROGRAM || evType == CTimerd::TIMER_ZAPTO || 
+			  evType == CTimerd::TIMER_RECORD || evType == CTimerd::TIMER_IMMEDIATE_RECORD )
 	{
 		CTimerd::EventInfo *ei=static_cast<CTimerd::EventInfo*>(data); 
 		strcpy(tei.apids, ei->apids.substr(0, TIMERD_APIDS_MAXLEN-1).c_str());

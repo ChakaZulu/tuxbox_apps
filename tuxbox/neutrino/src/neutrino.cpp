@@ -3903,7 +3903,6 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 		{
 			if(recordingstatus == 1)
 			{
-				recording_id=0;
 				CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 				eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
@@ -3915,10 +3914,16 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 					recordingstatus=0;
 					return false;
 				}
+				else
+				{
+					time_t now = time(NULL);
+					recording_id=g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, 
+																						 eventinfo.epgID, eventinfo.epg_starttime);
+				}
 			}
 			else
 			{
-				CVCRControl::getInstance()->Stop();
+				g_Timerd->removeTimerEvent(recording_id);
 				startNextRecording();
 			}
 			return true;

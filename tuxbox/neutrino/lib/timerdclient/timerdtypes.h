@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.13 2004/03/07 02:46:12 thegoodguy Exp $
+	$Id: timerdtypes.h,v 1.14 2004/03/12 22:01:02 zwen Exp $
 
 	License: GPL
 
@@ -58,7 +58,8 @@ class CTimerd
 			TIMER_STANDBY,
 			TIMER_RECORD,
 			TIMER_REMIND,
-			TIMER_SLEEPTIMER
+			TIMER_SLEEPTIMER,
+			TIMER_IMMEDIATE_RECORD
 		};
 		
 		enum CTimerEventStates 

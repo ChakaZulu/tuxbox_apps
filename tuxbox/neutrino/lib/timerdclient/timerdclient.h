@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.40 2004/03/07 02:46:12 thegoodguy Exp $
+	$Id: timerdclient.h,v 1.41 2004/03/12 22:01:02 zwen Exp $
 
 	License: GPL
 
@@ -102,15 +102,27 @@ class CTimerdClient:private CBasicClient
 		int addRecordTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t stoptime, 
 										unsigned long long epgID=0, time_t epg_starttime=0, time_t announcetime = 0, 
 										std::string apids="", bool safety=false) 
-			{
-				CTimerd::EventInfo eventInfo;
-				eventInfo.channel_id = channel_id;
-				eventInfo.epgID = epgID;
-				eventInfo.epg_starttime = epg_starttime;
-				eventInfo.apids = apids;
-				eventInfo.recordingSafety = safety;
-				return addTimerEvent(CTimerd::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
-			};
+		{
+			CTimerd::EventInfo eventInfo;
+			eventInfo.channel_id = channel_id;
+			eventInfo.epgID = epgID;
+			eventInfo.epg_starttime = epg_starttime;
+			eventInfo.apids = apids;
+			eventInfo.recordingSafety = safety;
+			return addTimerEvent(CTimerd::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
+		};
+		
+		int addImmediateRecordTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t stoptime, 
+													unsigned long long epgID=0, time_t epg_starttime=0)
+		{
+			CTimerd::EventInfo eventInfo;
+			eventInfo.channel_id = channel_id;
+			eventInfo.epgID = epgID;
+			eventInfo.epg_starttime = epg_starttime;
+			eventInfo.apids = "";
+			eventInfo.recordingSafety = false;
+			return addTimerEvent(CTimerd::TIMER_IMMEDIATE_RECORD, &eventInfo, 0, alarmtime, stoptime);
+		};
 
 		// adds new standby timer event
 		int addStandbyTimerEvent(bool standby_on,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.53 2004/03/07 02:46:11 thegoodguy Exp $
+	$Id: timerd.cpp,v 1.54 2004/03/12 22:01:02 zwen Exp $
 
 	License: GPL
 
@@ -263,6 +263,21 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 															evInfo.epg_starttime,
 															evInfo.apids,
 															msgAddTimer.eventRepeat);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
+					break;
+
+				case CTimerd::TIMER_IMMEDIATE_RECORD :
+					CBasicServer::receive_data(connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
+					event = new CTimerEvent_Record(
+															msgAddTimer.announceTime,
+															msgAddTimer.alarmTime,
+															msgAddTimer.stopTime,
+															evInfo.channel_id,
+															evInfo.epgID,
+															evInfo.epg_starttime,
+															evInfo.apids,
+															msgAddTimer.eventRepeat);
+					event->eventState = CTimerd::TIMERSTATE_ISRUNNING;
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
