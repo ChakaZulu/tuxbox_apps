@@ -2,6 +2,9 @@ AC_DEFUN(TUXBOX_APPS,[
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
+AC_GNU_SOURCE
+AC_SYS_LARGEFILE
+
 AC_ARG_WITH(target,
 	[  --with-target=TARGET    target for compilation [[native,cdk]]],
 	[TARGET="$withval"],[TARGET="native"])
