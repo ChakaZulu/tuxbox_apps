@@ -3021,8 +3021,9 @@ int freeRecordSpace()
 
 int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_descr )
 {
+#ifndef DISABLE_LCD
 	eZapLCD *pLCD=eZapLCD::getInstance();
-
+#endif
 	// disable skipping
 	if(skipping)
 		endSkip();
@@ -3251,6 +3252,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 		recStatusBlink.stop();
 		recstatus->hide();
 
+#ifndef DISABLE_LCD
 		// if standby disable lcdMain
 		if(state & stateSleeping)
 		{ 
@@ -3260,6 +3262,7 @@ int eZapMain::recordDVR(int onoff, int user, time_t evtime, const char *timer_de
 
 		// disable lcd-blink
 		pLCD->lcdMain->Clock->show();
+#endif
 
 		eZap::getInstance()->getServiceSelector()->actualize();
 
@@ -5038,6 +5041,7 @@ bool eZapMain::handleState(int justask)
 #ifndef DISABLE_FILE
 void eZapMain::blinkRecord()
 {
+#ifndef DISABLE_LCD
 	eZapLCD *pLCD=eZapLCD::getInstance();
 
 	// if standby enable lcdMain
@@ -5046,14 +5050,17 @@ void eZapMain::blinkRecord()
 		pLCD->lcdStandby->hide();
 		pLCD->lcdMain->show();
 	}
+#endif
 
 	if (state & stateRecording)
 	{
+#ifndef DISABLE_LCD
 		// handle clock-blinking when record is active..
 		if(pLCD->lcdMain->Clock->isVisible())
 			pLCD->lcdMain->Clock->hide();
 		else
 			pLCD->lcdMain->Clock->show();
+#endif
 
 		if (isVisible())
 		{
