@@ -422,7 +422,7 @@ void eZapMain::setEIT(EIT *eit)
 	{
 		flags|=ENIGMA_SUBSERVICES;
 	}
-	if (flags&(ENIGMA_NVOD|EZAP_SUBSERVICES))
+	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
 		ButtonGreen->setText("\x19");
 	else
 		ButtonGreen->setText("");
@@ -655,7 +655,7 @@ void eZapMain::serviceChanged(eService *service, int err)
 	
 	ChannelNumber->setText(QString().sprintf("%d", service->service_number));
 	
-	if (flags&(ENIGMA_NVOD|EZAP_SUBSERVICES))
+	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
 		ButtonGreen->setText("\x19");	// ein runder knopf
 	else
 		ButtonGreen->setText("");
