@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.32 2004/03/31 21:14:23 rasc Exp $
+$Id: cmdline.c,v 1.33 2004/04/01 19:19:06 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.32 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.33  2004/04/01 19:19:06  rasc
+cmdline options renamed...
+
 Revision 1.32  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -207,8 +210,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-ph")) opt->printhex = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-pd")) opt->printdecode = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-npd")) opt->printdecode = 0;
-     else if (!strcmp (argv[i],"-HCP")) opt->hide_copyright= 1;
-     else if (!strcmp (argv[i],"-TIMEOUT")) opt->timeout_ms = str2i(argv[++i]);
+     else if (!strcmp (argv[i],"-hideproginfo")) opt->hide_copyright= 1;
+     else if (!strcmp (argv[i],"-timeout")) opt->timeout_ms = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-tf")) opt->time_mode = FULL_TIME;
      else if (!strcmp (argv[i],"-td")) opt->time_mode = DELTA_TIME;
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
@@ -313,7 +316,7 @@ static void usage (void)
     printf("                         signal = signal rate statistics \n");
     printf("                         feinfo = frontend information\n");
     printf("                 stream type or pidscan\n");
-    printf("   -TIMEOUT ms:  section read timeout in ms [-TIMEOUT 0]\n");
+    printf("   -timeout ms:  section read timeout in ms [-TIMEOUT 0]\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
@@ -333,7 +336,7 @@ static void usage (void)
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
-    printf("   -HCP:         hide copyright and program info header at program start\n");
+    printf("   -hideproginfo: hide copyright and program info header at program start\n");
     printf("   -help:        this usage info...\n");
     printf("\n");
     
