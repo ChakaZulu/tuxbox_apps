@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.24 2003/03/24 17:23:12 alexw Exp $
+ * $Id: lcdmenu.cpp,v 1.25 2003/05/21 16:32:11 thegoodguy Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -72,6 +72,9 @@ CLCDMenu::CLCDMenu (std::string configFilename)
 	pinEntries = config->getInt32Vector("pin_protect");
 	visibleEntries = config->getInt32("visible_entries");
 	entryCount = entries.size();
+
+	if (entryCount < visibleEntries)
+		visibleEntries = entryCount;
 
 	if (defaultEntry >= visibleEntries)
 	{
