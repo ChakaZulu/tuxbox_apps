@@ -1,5 +1,5 @@
 /*
-$Id: ints.c,v 1.10 2003/12/26 23:27:39 rasc Exp $
+$Id: ints.c,v 1.11 2003/12/27 14:35:00 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: ints.c,v 1.10 2003/12/26 23:27:39 rasc Exp $
 
 
 $Log: ints.c,v $
+Revision 1.11  2003/12/27 14:35:00  rasc
+dvb-t descriptors
+DSM-CC: SSU Linkage/DataBroadcast descriptors
+
 Revision 1.10  2003/12/26 23:27:39  rasc
 DSM-CC  UNT section
 
@@ -58,7 +62,7 @@ void decode_DSMCC_INT (u_char *b, int len)
 
  out_nl (3,"INT-decoding....");
  table_id = outBit_S2x_NL (3,"Table_ID: ",	b, 0, 8,
-				(char *(*)(u_int))dvbstrTableID );
+				(char *(*)(u_long))dvbstrTableID );
  if (table_id != 0x4c) {
    out_nl (3,"wrong Table ID");
    return;
@@ -70,7 +74,7 @@ void decode_DSMCC_INT (u_char *b, int len)
  outBit_Sx_NL (6,"reserved_2: ",		b,10, 2);
  section_length = outBit_Sx_NL (5,"section_length: ",	b,12,12);
  outBit_S2x_NL(3,"Action_type: ",		b,24, 8,
-			(char *(*)(u_int))dsmccStrAction_Type );
+			(char *(*)(u_long))dsmccStrAction_Type );
  outBit_Sx_NL (3,"Platform_id_hash: ",		b,32, 8);
  outBit_Sx_NL (6,"reserved_3: ",		b,40, 2);
 
@@ -80,9 +84,9 @@ void decode_DSMCC_INT (u_char *b, int len)
  outBit_Sx_NL (3,"Last_section_number: ",	b,56, 8);
 
  outBit_S2x_NL(3,"Platform_id: ",		b,64,24,
-			(char *(*)(u_int))dsmccStrPlatform_ID );
+			(char *(*)(u_long))dsmccStrPlatform_ID );
  outBit_S2x_NL(3,"Processing_order: ",		b,88, 8,
-			(char *(*)(u_int))dsmccStrProcessing_order);
+			(char *(*)(u_long))dsmccStrProcessing_order);
 
  b += 12;
  len1 = section_length - 9;

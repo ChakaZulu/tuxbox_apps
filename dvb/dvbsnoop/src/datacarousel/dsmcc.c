@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.1 2003/12/27 00:21:16 rasc Exp $
+$Id: dsmcc.c,v 1.2 2003/12/27 14:35:00 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dsmcc.c,v 1.1 2003/12/27 00:21:16 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.2  2003/12/27 14:35:00  rasc
+dvb-t descriptors
+DSM-CC: SSU Linkage/DataBroadcast descriptors
+
 Revision 1.1  2003/12/27 00:21:16  rasc
 dsmcc section tables
 
@@ -58,7 +62,7 @@ void decode_DSMCC_section (u_char *b, int len)
 
  out_nl (3,"DSM-CC-decoding....");
  table_id = outBit_S2x_NL (3,"Table_ID: ",	b, 0, 8,
-				(char *(*)(u_int))dvbstrTableID );
+				(char *(*)(u_long))dvbstrTableID );
  if (table_id < 0x3a || table_id > 0x3e) {
    out_nl (3,"wrong Table ID");
    return;
@@ -120,12 +124,12 @@ void decode_DSMCC_section (u_char *b, int len)
 
  } else if (table_id == 0x3E) {
 
-	 // $$$ TODO collision with dsmcc-datagram??
+	 // $$$ Remark: DVB defines 0x3E as datagram!!
 
-	out_nl (3,"Private data:");
-	indent (+1);
-	printhexdump_buf (4, b, len1-4);	// -4 == CRC/Checksum
-	indent (-1);
+	 out_nl (3,"Private data:");
+	 indent (+1);
+	 printhexdump_buf (4, b, len1-4);	// -4 == CRC/Checksum
+	 indent (-1);
 
  }
 

@@ -1,12 +1,11 @@
 /*
-$Id: pes_dsmcc.c,v 1.1 2003/12/17 23:15:04 rasc Exp $
+$Id: pes_dsmcc.c,v 1.2 2003/12/27 14:35:01 rasc Exp $
 
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
-
  http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
@@ -18,6 +17,10 @@ $Id: pes_dsmcc.c,v 1.1 2003/12/17 23:15:04 rasc Exp $
 
 
 $Log: pes_dsmcc.c,v $
+Revision 1.2  2003/12/27 14:35:01  rasc
+dvb-t descriptors
+DSM-CC: SSU Linkage/DataBroadcast descriptors
+
 Revision 1.1  2003/12/17 23:15:04  rasc
 PES DSM-CC  ack and control commands  according ITU H.222.0 Annex B
 
@@ -67,7 +70,7 @@ void  PES_decodeDSMCC (u_char *b, int len)
    // --- packet_length			24 uimsbf
 
    commandID = outBit_S2x_NL (4,"Command_ID: ",	b,0,8,
-			(char *(*)(u_int)) dsmccStr_Command_ID);
+			(char *(*)(u_long)) dsmccStr_Command_ID);
    b++;
    len--;
 
@@ -126,7 +129,7 @@ static void dsmcc_control (u_char *b, int len)
 			(bitstreamID_31_17<<17) + (bitstreamID_16_2<<2) + bitstreamID_1_0);
 
 		outBit_S2x_NL (4,"select_mode: ",	b,34,5,
-				(char *(*)(u_int))dsmccStr_SelectMode_ID );
+				(char *(*)(u_long))dsmccStr_SelectMode_ID );
 		outBit_Sx_NL (4,"marker_bit: ",		b,39,1);
 
 	indent (-1);
@@ -159,7 +162,7 @@ static void dsmcc_control (u_char *b, int len)
 		   indent (+1);
    			outBit_Sx_NL  (6,"reserved: ",		b,0,7);
 			outBit_S2x_NL (4,"direction_indicator: ",	b,7,1,
-				(char *(*)(u_int)) dsmccStr_DirectionIndicator );
+				(char *(*)(u_long)) dsmccStr_DirectionIndicator );
 			indent (+1);
 				xlen = dsmcc_timecode (b+1);
 			b += xlen+1;
@@ -173,7 +176,7 @@ static void dsmcc_control (u_char *b, int len)
 		   indent (+1);
    		   	outBit_Sx_NL  (4,"speed_mode: ",			b,0,1);
    		   	outBit_S2x_NL (4,"direction_indicator: ",	b,1,1,
-				(char *(*)(u_int)) dsmccStr_DirectionIndicator );
+				(char *(*)(u_long)) dsmccStr_DirectionIndicator );
    		   	outBit_Sx_NL (6,"reserved: ",			b,2,6);
 		   	indent (+1);
 		   		xlen = dsmcc_timecode (b+1);

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.20 2003/12/26 23:27:39 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.21 2003/12/27 14:35:00 rasc Exp $ 
 
 
  DVBSNOOP
@@ -20,6 +20,10 @@ $Id: dvb_descriptor.c,v 1.20 2003/12/26 23:27:39 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.21  2003/12/27 14:35:00  rasc
+dvb-t descriptors
+DSM-CC: SSU Linkage/DataBroadcast descriptors
+
 Revision 1.20  2003/12/26 23:27:39  rasc
 DSM-CC  UNT section
 
@@ -923,7 +927,8 @@ void sub_descriptorDVB_Linkage0x09 (u_char *b, int len)
     len --;
 
     while (OUI_data_length > 0) {
-    	OUI             = outBit_Sx_NL (4,"OUI: ", 		b, 0,24);
+    	OUI             = outBit_S2x_NL (4,"OUI: ", 		b, 0,24,
+				   (char *(*)(u_long))dsmccStrOUI );
 	b += 3;
 	OUI_data_length -= 3;
 	len -= 3;
@@ -1908,32 +1913,47 @@ void descriptorDVB_Teletext (u_char *b)
 void descriptorDVB_Telephone  (u_char *b)
 
 {
-
- typedef struct  _descTelephone {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      reserved_1;
-    // $$$ ToDO
-
- } descTelephone;
-
-
- descTelephone  d;
+  u_int      country_prefix_len;
+  u_int      internat_area_code_len;
+  u_int      operator_code_len;
+  u_int      national_area_code_len;
+  u_int      core_number_len;
 
 
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
+  // descriptor_tag		 = b[0];
+  // len		       	 = b[1];
 
+  outBit_Sx_NL (6,"reserved_1: ",		b, 16, 2);
+  outBit_Sx_NL (4,"foreign_availability: ",	b, 18, 1);
+  outBit_Sx_NL (4,"connection_type: ",		b, 19, 5);
+  outBit_Sx_NL (6,"reserved_2: ",		b, 24, 1);
 
+  country_prefix_len 	= outBit_Sx_NL (4,"country_prefix_length: ",	b, 25, 2);
+  internat_area_code_len= outBit_Sx_NL (4,"international_area_code_length: ",	b, 27, 3);
+  operator_code_len	= outBit_Sx_NL (4,"operator_code_length: ",	b, 30, 2);
+  			  outBit_Sx_NL (6,"reserved_3: ",		b, 32, 1);
+  national_area_code_len= outBit_Sx_NL (4,"national_area_code_length: ",b, 33, 3);
+  core_number_len	= outBit_Sx_NL (4,"core_number_length: ",	b, 36, 4);
+  b += 5;
 
- descriptorDVB_any (b);
- /* $$$ TODO ... */
- out_nl (4," ==> ERROR: Telephone descriptor not implemented, Report!");
+  out (4,"country_prefix: "); printasciiline_buf (4, b, country_prefix_len);
+  b += country_prefix_len;
 
+  out (4,"international_area_code_prefix: "); printasciiline_buf (4, b, internat_area_code_len);
+  b += internat_area_code_len;
+
+  out (4,"operator_code: "); printasciiline_buf (4, b, operator_code_len);
+  b += operator_code_len;
+
+  out (4,"national_area_code: "); printasciiline_buf (4, b, national_area_code_len);
+  b += national_area_code_len;
+
+  out (4,"core_number: "); printasciiline_buf (4, b, core_number_len);
+  b += core_number_len;
 
 }
+
 
 
 
@@ -2143,9 +2163,11 @@ void descriptorDVB_TerrestDelivSys (u_char *b)
  d.other_frequency_flag		 = getBits (b, 0, 71, 1);
  d.reserved_2			 = getBits (b, 0, 72, 32);
 
+ 
+ // frequency is in 10 Hz steps == * 10
+ out_nl (4,"Center frequency: 0x%08x (= %lu.%03lu kHz)",d.centre_frequency,
+	 d.centre_frequency / 100, d.centre_frequency % 100 );
 
- out_nl (4,"Center frequency: 0x%08x (= %lu Hz)",d.centre_frequency,
-	 d.centre_frequency * 10 );
  out_S2B_NL (4,"Bandwidth: ",d.bandwidth,
 	 dvbstrTerrBandwidth_SCHEME (d.bandwidth));
  out_SB_NL (6,"reserved_1: ",d.reserved_1);
@@ -2659,7 +2681,9 @@ void descriptorDVB_FrequencyList  (u_char *b)
 	  break;
 
 	case 0x03:
- 	  out_nl (4,"(= %lu Hz)", d2.centre_frequency * 10 );
+ 	  // frequency is in 10 Hz steps == * 10
+	  out_nl (4,"(= %lu.%03lu kHz)",
+			  d2.centre_frequency / 100, d2.centre_frequency % 100 );
 	  break;
     }
 
@@ -2956,10 +2980,11 @@ void descriptorDVB_DataBroadcast (u_char *b)
     		b++;
 
    		while (s.OUI_data_length > 0) {
-    		   outBit_Sx_NL (4,"OUI: ", 			b,0,24);	// $$$ TODO Table OUI
+    		   outBit_S2x_NL (4,"OUI: ", 			b,0,24,
+				   (char *(*)(u_long))dsmccStrOUI);
     		   outBit_Sx_NL (6,"reserved: ", 		b,24, 4);
     		   s.updt_type = outBit_S2x_NL (4,"update_type: ",b,28, 4,
-				   (char *(*)(u_int))dsmccStrUpdateType_ID);
+				   (char *(*)(u_long))dsmccStrUpdateType_ID);
     		   outBit_Sx_NL (6,"reserved: ", 		b,32, 2);
     		   outBit_Sx_NL (4,"update_versioning_flag: ", 	b,34, 1);
     		   outBit_Sx    (4,"update_version: ", 		b,35, 5);
@@ -3073,11 +3098,47 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 
  if (d.data_broadcast_id == 0x000A) {
 
+	// TR 102 006  Software update  S.12
+	int  OUI_data_len;
+	int  i;
 
-	// $$$ TODO  TR 102 006  Software update  S.12
-	out_nl    (4,"TODO system_software_update_info:");
-		 	printhexdump_buf (4,  b, len);
 
+	out_nl    (4,"system_software_update_info [TR 102 006]:");
+ 	OUI_data_len = outBit_Sx_NL (4,"OUI_data_length: ",	b, 0, 8);
+	b++;
+	len--;
+
+	i = OUI_data_len;
+	while (i > 0) {
+		int len2;
+
+		out_NL (5);
+		indent (+1);
+
+	    	outBit_S2x_NL(5,"OUI: ", 		b, 0,24,
+				   (char *(*)(u_long))dsmccStrOUI );
+ 		outBit_Sx_NL (6,"reserved_1: ",		b,24, 4);
+ 		outBit_S2x_NL(5,"update_type: ",	b,28, 4,
+				   (char *(*)(u_long)) dsmccStrUpdateType_ID );
+ 		outBit_Sx_NL (6,"reserved_2: ",		b,32, 2);
+ 		outBit_Sx_NL (5,"update_versioning_flag: ",	b,34, 1);
+ 		outBit_Sx_NL (5,"update_version: ",	b,35, 5);
+
+ 		len2 = outBit_Sx_NL (5,"selector_length: ",	b,40, 8);
+		b += 6;
+		len -= 6;
+		out_nl (5,"Selector Bytes:");
+		indent(+1);
+	     		printhexdump_buf (5, b, len2);
+			b += len2;
+			len -= len2;
+		indent (-2);
+	}
+
+	out_nl (5,"Private Data: ");
+		indent (+1);
+	     	printhexdump_buf (5, b, len);
+		indent (-1);
 
 
  } else if (d.data_broadcast_id == 0x000B) {
@@ -3109,6 +3170,7 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 
 		indent (+1);
 		while (len2 > 0) {
+		   out_NL (5);
         	   d.platform_id  		= getBits (b, 0,  0, 24);
         	   d.action_type		= getBits (b, 0, 24,  8);
         	   d.reserved			= getBits (b, 0, 32,  2);
@@ -3130,7 +3192,9 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
 		indent (-1);
  	
 		out_nl (5,"Private Data: ");
+			indent (+1);
 	     		printhexdump_buf (5, b, len);
+			indent (-1);
 
 
 	 }
@@ -3393,7 +3457,7 @@ void descriptorDVB_AncillaryData  (u_char *b)
 	d.ancillary_data_identifier);
 
 
- // $$$ the following should normally in dvbStrAncillaryData...()
+ // $$$ TODO the following should normally in dvbStrAncillaryData...()
 
  i = d.ancillary_data_identifier;
  indent (+1);
@@ -3419,12 +3483,53 @@ void descriptorDVB_AncillaryData  (u_char *b)
 void descriptorDVB_CellList  (u_char *b)
 
 {
+ int len;
 
-  // $$$ Todo  6.2.7
+ // descriptor_tag		 = b[0];
+ len       	 = b[1];
+ b += 2;
+ len -= 0;
 
- descriptorDVB_any (b);
- out_nl (4," ==> ERROR: CellList descriptor not implemented, Report!");
+ while (len > 0) {
+	int len2;
 
+	out_nl (4,"Cell:");
+
+	indent (+1);
+		outBit_Sx_NL  (4,"cell_id: ",  		b, 0,16);
+		outBit_S2x_NL (4,"cell_latitude: ",  	b,16,16,
+				   (char *(*)(u_long)) str_cell_latitude);
+		outBit_S2x_NL (4,"cell_longitude: ",  	b,32,16,
+				   (char *(*)(u_long)) str_cell_longitude);
+		outBit_S2x_NL (4,"cell_extend_of_latitude: ",  	b,48,12,
+				   (char *(*)(u_long)) str_cell_latitude);
+		outBit_S2x_NL (4,"cell_extend_of_longitude: ",  	b,60,12,
+				   (char *(*)(u_long)) str_cell_longitude);
+
+		len2 = outBit_Sx_NL (4,"subcell_info_loop_length: ",  	b,72, 8);
+		b += 10;
+		len -= 10;
+
+		while ( len2 > 0) {
+			out_nl (4,"Sub-Cell:");
+			indent (+1);
+				outBit_Sx_NL (4,"cell_id_extension: ", 		b, 0, 8);
+				outBit_S2x_NL (4,"sub_cell_latitude: ",  	b, 8,16,
+				   (char *(*)(u_long)) str_cell_latitude);
+				outBit_S2x_NL (4,"sub_cell_longitude: ",  	b,24,16,
+				   (char *(*)(u_long)) str_cell_longitude);
+				outBit_S2x_NL (4,"sub_cell_extend_of_latitude: ",b,40,12,
+				   (char *(*)(u_long)) str_cell_latitude);
+				outBit_S2x_NL (4,"cell_extend_of_longitude: ", 	b,52,12,
+				   (char *(*)(u_long)) str_cell_longitude);
+			indent (-1);
+			b += 8;
+			len -= 8;
+			len2 -= 8;
+		}
+
+	indent (-1);
+ }
 
 }
 
@@ -3439,28 +3544,53 @@ void descriptorDVB_CellList  (u_char *b)
 void descriptorDVB_CellFrequencyLink  (u_char *b)
 
 {
- // $$$$ TODO 300468  6.2.6
- //
- descriptorDVB_any (b);
- out_nl (4," ==> ERROR: CellFrequencyLink descriptor not implemented, Report!");
+ int len;
 
+ // descriptor_tag		 = b[0];
+ len       	 = b[1];
+ b += 2;
+ len -= 0;
 
-/*
-cell_frequency_link_descriptor(){
-	descriptor_tag 8 uimsbf
-	descriptor_length 8 uimsbf
-	for (i=0;i<N;i++){
-		cell_id 16 uimsbf
-		frequency 32 uimsbf
-		subcell_info_loop_length 8 uimsbf
-		for (i=0;i<N;i++){
-			cell_id_extension 8 uimsbf
-			transposer_frequency 32 uimsbf
+ while (len > 0) {
+	int    len2;
+	u_long frequency;
+
+	out_nl (4,"Cell:");
+
+	indent (+1);
+		outBit_Sx_NL  (4,"cell_id: ",  		b, 0,16);
+
+		frequency = getBits (b, 0, 16, 32);
+ 		// frequency is in 10 Hz steps == * 10
+		out_nl (4,"Center frequency: 0x%08x (= %lu.%03lu kHz)",
+			frequency, frequency / 100, frequency % 100 );
+
+		len2 = outBit_Sx_NL (4,"subcell_info_loop_length: ",  	b,48, 8);
+		b += 7;
+		len -= 7;
+
+		while (len2 > 0) {
+			u_long frequency2;
+
+			out_nl (4,"Sub-Cell:");
+			indent (+1);
+				outBit_Sx_NL (4,"cell_id_extension: ", 		b, 0, 8);
+				frequency2 = getBits (b, 0,  8, 32);
+		 		// frequency is in 10 Hz steps == * 10
+				out_nl (4,"Transposer frequency: 0x%08x (= %lu.%03lu kHz)",
+					frequency2,
+					frequency2 / 100, frequency2 % 100 );
+
+				b += 5;
+				len -= 5;
+				len2 -= 5;
+
+			indent (-1);
 		}
-	}
-}
 
-*/
+
+	indent (-1);
+ }
 
 }
 
@@ -3622,7 +3752,7 @@ void descriptorDVB_ApplicationSignalling (u_char *b)
     d2.reserved                  = getBits (b, 0,16,  3);
     d2.AIT_version_nr            = getBits (b, 0,19,  5);
 
-    out_SW_NL (4,"Application type: ",d2.application_type);	// $$$ Application type text
+    out_SW_NL (4,"Application type: ",d2.application_type);	// $$$ TODO Application type text
     out_SB_NL (6,"reserved: ",d2.reserved);
     out_SB_NL (4,"AIT version nr.: ",d2.AIT_version_nr);
 
@@ -3717,7 +3847,7 @@ void descriptorDVB_ServiceIdentifier (u_char *b)
  len = d.descriptor_length - 0;
 
 //$$$ TODO 
- out_nl (4,"Service Identifier:  [no encoding known ToDo, Report!] ");
+ out_nl (4,"Service Identifier:  [no encoding known, Report!] ");
 
  descriptorDVB_any (b);
 

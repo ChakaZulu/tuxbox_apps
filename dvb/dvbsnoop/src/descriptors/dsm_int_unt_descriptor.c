@@ -1,5 +1,5 @@
 /*
-$Id: dsm_int_unt_descriptor.c,v 1.2 2003/11/01 21:40:27 rasc Exp $ 
+$Id: dsm_int_unt_descriptor.c,v 1.3 2003/12/27 14:35:00 rasc Exp $ 
 
 
   dvbsnoop
@@ -12,6 +12,10 @@ $Id: dsm_int_unt_descriptor.c,v 1.2 2003/11/01 21:40:27 rasc Exp $
 
 
 $Log: dsm_int_unt_descriptor.c,v $
+Revision 1.3  2003/12/27 14:35:00  rasc
+dvb-t descriptors
+DSM-CC: SSU Linkage/DataBroadcast descriptors
+
 Revision 1.2  2003/11/01 21:40:27  rasc
 some broadcast/linkage descriptor stuff
 
@@ -27,6 +31,7 @@ more PES stuff, DSM descriptors, testdata
 #include "dvbsnoop.h"
 #include "descriptor.h"
 #include "dsm_descriptor.h"
+#include "dvb_descriptor.h"
 #include "strings/dsmcc_str.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -71,6 +76,29 @@ return len;
 
 
   switch (b[0]) {
+
+// {  0x01, 0x01,  "scheduling_descriptor" },
+//     {  0x02, 0x02,  "update_descriptor" },
+//     {  0x03, 0x03,  "ssu_location_descriptor" },
+//     {  0x04, 0x04,  "message_descriptor" },
+//     {  0x05, 0x05,  "ssu_event_name_descriptor" },
+//     {  0x06, 0x06,  "target_smartcard_descriptor" },
+//     {  0x07, 0x07,  "target_MAC_address_descriptor" },
+//     {  0x08, 0x08,  "target_serial_number_descriptor" },
+//     {  0x09, 0x09,  "target_IP_address_descriptor" },
+//     {  0x0A, 0x0A,  "target_IPv6_address_descriptor" },
+//     {  0x0B, 0x0B,  "ssu_subgroup_association_descriptor" },
+//     {  0x0C, 0x0C,  "IP/MAC_platform_name_descriptor" },
+//     {  0x0D, 0x0D,  "IP/MAC_platform_provider_name_descriptor" },
+//     {  0x0E, 0x0E,  "target_MAC_address_range_descriptor" },
+//     {  0x0F, 0x0F,  "target_IP_slash_descriptor" },
+//     {  0x10, 0x10,  "target_IP_source_slash_descriptor" },
+//     {  0x11, 0x11,  "target_IPv6_slash_descriptor" },
+//     {  0x12, 0x12,  "target_IPv6_source_slash_descriptor" },
+//     {  0x13, 0x13,  "ISP_access_mode_descriptor" },
+//     {  0x14, 0x3F,  "reserved" },
+     //     {  0x40, 0x7F,  "DVB-SI scope" },  Telphone, private_data_spec
+//     {  0x80, 0xFE,  "user_private_descriptor" },
 
 
      default: 

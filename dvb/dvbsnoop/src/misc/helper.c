@@ -1,12 +1,10 @@
 /*
-$Id: helper.c,v 1.13 2003/11/26 23:54:48 rasc Exp $
+$Id: helper.c,v 1.14 2003/12/27 14:35:01 rasc Exp $
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
@@ -15,6 +13,10 @@ $Id: helper.c,v 1.13 2003/11/26 23:54:48 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.14  2003/12/27 14:35:01  rasc
+dvb-t descriptors
+DSM-CC: SSU Linkage/DataBroadcast descriptors
+
 Revision 1.13  2003/11/26 23:54:48  rasc
 -- bugfixes on Linkage descriptor
 
@@ -118,7 +120,7 @@ u_long outBit_Sx_NL (int verbosity, char *text, u_char *buf, int startbit, int b
 
 
 
-u_long outBit_S2x_NL (int verbosity, char *text, u_char *buf, int startbit, int bitlen, char *(*f)(u_int) )
+u_long outBit_S2x_NL (int verbosity, char *text, u_char *buf, int startbit, int bitlen, char *(*f)(u_long) )
 
 {
    u_long value;
@@ -324,6 +326,63 @@ long  str2i  (char *s)
  v = strtol (s, NULL, 0);
  return v;
 
+}
+
+
+
+
+
+/*
+ -- print latitude coordinates   (Cell Descriptors)
+ -- print longitude coordinates   (Cell Descriptors)
+ -- ETSI EN 300 468
+*/ 
+
+static char *_str_cell_latitude_longitude (long ll, int angle);
+
+char *str_cell_latitude (long latitude)
+
+{
+ // cell_latitude: This 16-bit field, coded as a two's complement number,
+ // shall specify the latitude of the corner of a spherical rectangle that
+ // approximately describes the coverage area of the cell indicated. It shall
+ // be calculated by multiplying the value of the latitude field by
+ // (90 ° /2^15 ). Southern latitudes shall be considered negative and
+ // northern latitudes positive.
+
+ return _str_cell_latitude_longitude (latitude, 90);
+}
+
+
+char *str_cell_longitude (long longitude)
+
+{
+ // cell_longitude: This 16-bit field, coded as a two's complement number, shall
+ // specify the longitude of the corner of a spherical rectangle that approximately
+ // describes the coverage area of the cell indicated. It shall be calculated by
+ // multiplying the value of the longitude field by (180 ° /2^15 ). Western
+ // longitudes shall be considered negative and eastern longitudes positive.
+
+ return _str_cell_latitude_longitude (longitude, 180);
+}
+
+
+static char *_str_cell_latitude_longitude (long ll, int angle)
+
+{
+ long long  x;
+ long       g1,g2;
+ static     char s[40];	// $$$ not thread safe!
+
+ x = (long long) ll * angle * 1000;
+ x = x / (2<<15);
+
+ g1 = x / 1000;
+ g2 = x % 1000;
+ if (g2 <0) g2 = 0 - g2;
+
+ sprintf (s,"%ld.%04ld grad",g1,g2);
+ return s;
 }
 
 

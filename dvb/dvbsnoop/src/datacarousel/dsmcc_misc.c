@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.1 2003/12/26 23:27:39 rasc Exp $
+$Id: dsmcc_misc.c,v 1.2 2003/12/27 14:35:00 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: dsmcc_misc.c,v 1.1 2003/12/26 23:27:39 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.2  2003/12/27 14:35:00  rasc
+dvb-t descriptors
+DSM-CC: SSU Linkage/DataBroadcast descriptors
+
 Revision 1.1  2003/12/26 23:27:39  rasc
 DSM-CC  UNT section
 
@@ -108,13 +112,13 @@ int dsmcc_CompatibilityDescriptor(u_char *b)
 	indent (+1);
 
    	outBit_S2x_NL (4,"descriptorType: ",		b, 0, 8,
-			(char *(*)(u_int))dsmccStr_DescriptorType );
+			(char *(*)(u_long))dsmccStr_DescriptorType );
    	outBit_Sx_NL (4,"descriptorLength: ",		b, 8, 8);
 
    	outBit_S2x_NL (4,"specifierType: ",		b,16, 8,
-			(char *(*)(u_int))dsmccStr_SpecifierType );
+			(char *(*)(u_long))dsmccStr_SpecifierType );
    	outBit_S2x_NL (4,"specifierData: ",		b,24,24,
-			(char *(*)(u_int))dsmccStrOUI );
+			(char *(*)(u_long))dsmccStrOUI );
    	outBit_Sx_NL (4,"Model: ",			b,48,16);
    	outBit_Sx_NL (4,"Version: ",			b,64,16);
 
