@@ -19,7 +19,7 @@
 #define QAM_AUTO		6
 #define TRANSMISSION_MODE_AUTO	2
 #define BANDWIDTH_AUTO		3
-#define QUARD_INTERVAL_AUTO	4
+#define GUARD_INTERVAL_AUTO	4
 #define HIERARCHY_AUTO		4
 #else
 #include <linux/dvb/dmx.h>
