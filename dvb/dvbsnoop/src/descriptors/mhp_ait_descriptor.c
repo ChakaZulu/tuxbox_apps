@@ -1,5 +1,5 @@
 /*
-$Id: mhp_ait_descriptor.c,v 1.3 2004/02/10 22:57:54 rasc Exp $ 
+$Id: mhp_ait_descriptor.c,v 1.4 2004/02/11 20:27:32 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: mhp_ait_descriptor.c,v 1.3 2004/02/10 22:57:54 rasc Exp $
 
 
 $Log: mhp_ait_descriptor.c,v $
+Revision 1.4  2004/02/11 20:27:32  rasc
+MHP AIT descriptors...
+
 Revision 1.3  2004/02/10 22:57:54  rasc
 MHP descriptor, missing DVB descriptor done
 
@@ -91,11 +94,9 @@ int  descriptorMHP_AIT (u_char *b)
      case 0x05:  descriptorMHP_AIT_external_application_authorisation (b); break;
      // case 0x06: reserved
      // case 0x07: reserved
-//     {  0x06, 0x06,  "Routing Descriptor IPv4" },
-//     {  0x07, 0x07,  "Routing Descriptor IPv6" },
-//     {  0x08, 0x08,  "DVB-HTML application descriptor" },
-//     {  0x09, 0x09,  "DVB-HTML application location descriptor" },
-//     {  0x0A, 0x0A,  "DVB-HTML application boundary descriptor" },
+     case 0x08:  descriptorMHP_AIT_dvb_html_application (b); break;
+     case 0x09:  descriptorMHP_AIT_dvb_html_application_location (b); break;
+     case 0x0A:  descriptorMHP_AIT_dvb_html_application_boundary (b); break;
 //     {  0x0B, 0x0B,  "Application icons descriptor" },
 //     {  0x0C, 0x0C,  "Pre-fetch descriptor" },
 //     {  0x0D, 0x0D,  "DII location descriptor" },
@@ -440,15 +441,91 @@ void descriptorMHP_AIT_external_application_authorisation (u_char *b)
 
 
 
+/*
+  0x08 -- DVB html application
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_dvb_html_application (u_char *b)
+{
+  int  len;
+  int  len2;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+  b += 2;
+
+  len2 = outBit_Sx_NL (4,"appid_set_length: ",	b, 0, 8);
+  b += 3;
+  len --;
+
+  indent(+1);
+  while (len2 > 0) {
+  	outBit_Sx_NL (4,"application_id: ",	b, 0, 16);
+	b += 2;
+	len -= 2;
+	len2 -= 2;
+  }
+  indent(-1);
+
+  print_std_ascii (4, "parameter: ", b, len);
+}
+
+
+
+
+/*
+  0x09 -- DVB html application location
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_dvb_html_application_location (u_char *b)
+{
+  int  len;
+  int  len2;
+
+
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+  b += 2;
+
+  len2 = outBit_Sx_NL (4,"physical_root_length: ",	b+2, 0, 8);
+  print_std_ascii (4, "physical_root: ", b+3, len2);
+
+  b += 3 + len2;
+  len -= 1 + len2;
+
+  print_std_ascii (4, "initial_path: ", b, len);
+}
 
 
 
 
 
+/*
+  0x0A -- DVB html application boundary
+  ETSI  TS 102 812
+*/
+
+void descriptorMHP_AIT_dvb_html_application_boundary (u_char *b)
+{
+  int  len;
+  int  len2;
 
 
+  // descriptor_tag	= b[0];
+  len		        = b[1];
+  b += 2;
 
+  len2 = outBit_Sx_NL (4,"label_length: ",	b+2, 0, 8);
+  print_std_ascii (4, "label: ", b+3, len2);
 
+  b += 3 + len2;
+  len -= 1 + len2;
+
+  print_std_ascii (4, "regular_expression: ", b, len);
+}
 
 
 
