@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.18 2002/10/06 02:02:49 Zwen Exp $
+	$Id: timerdMsg.h,v 1.19 2002/10/10 22:32:52 Zwen Exp $
 
 	License: GPL
 
@@ -41,7 +41,6 @@ using namespace std;
 #include "../timermanager.h"
 
 #define TIMERD_UDS_NAME "/tmp/timerd.sock"
-
 
 class CTimerd
 {
@@ -127,6 +126,11 @@ class CTimerd
 			CTimerEvent::CTimerEventRepeat	eventRepeat;
 		};
 
+		struct commandRemind
+		{
+			char message[REMINDER_MESSAGE_MAXLEN];
+		};
+
 		struct responseGetTimer
 		{		
 			int								eventID;
@@ -139,6 +143,7 @@ class CTimerd
 			t_channel_id channel_id; //only filled if applicable
 			unsigned long long epgID; //only filled if applicable
 			bool standby_on; //only filled if applicable
+			char message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
 			bool operator< (const responseGetTimer& a) const
 			{
 				return this->alarmTime < a.alarmTime ;

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.21 2002/09/25 18:36:43 Zwen Exp $
+	$Id: timerdclient.cpp,v 1.22 2002/10/10 22:32:52 Zwen Exp $
 
 	License: GPL
 
@@ -321,6 +321,10 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 	else if(evType == CTimerEvent::TIMER_STANDBY)
 	{
 		length = sizeof(CTimerd::commandSetStandby);
+	}
+	else if(evType == CTimerEvent::TIMER_REMIND)
+	{
+		length = sizeof(CTimerd::commandRemind);
 	}
 	else
 	{

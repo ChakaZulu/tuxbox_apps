@@ -45,6 +45,7 @@
 #include "gui/widget/menue.h"
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"
+#include "gui/widget/stringinput.h"
 #include "gui/color.h"
 #include "gui/infoviewer.h"
 
@@ -57,16 +58,18 @@ class CTimerListNewNotifier : public CChangeObserver
 		CMenuForwarder* m1;
 		CMenuOptionChooser* m2;
 		CMenuOptionChooser* m3;
+		CMenuForwarder* m4;
 		char* display;
 		int* iType;
 		time_t* stopTime;
 	public:
 		CTimerListNewNotifier( int* Type, time_t* time,CMenuForwarder* a1, CMenuOptionChooser* a2, 
-									  CMenuOptionChooser* a3, char* d)
+									  CMenuOptionChooser* a3, CMenuForwarder* a4, char* d)
 		{
 			m1 = a1;
 			m2 = a2;
 			m3 = a3;
+			m4 = a4;
 			display=d;
 			iType=Type;
 			stopTime=time;
@@ -99,6 +102,10 @@ class CTimerListNewNotifier : public CChangeObserver
 				m3->setActive(true);
 			else
 				m3->setActive(false);
+			if(type == CTimerEvent::TIMER_REMIND)
+				m4->setActive(true);
+			else
+				m4->setActive(false);
 			return true;
 		}
 };
@@ -150,6 +157,8 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 				  timerNew.eventType==CTimerEvent::TIMER_ZAPTO ||
 				  timerNew.eventType==CTimerEvent::TIMER_RECORD)
 			data= &eventinfo;
+		else if(timerNew.eventType==CTimerEvent::TIMER_REMIND)
+			data= timerNew.message;
 		Timer->addTimerEvent(timerNew.eventType,data,timerNew.announceTime,timerNew.alarmTime,
 									timerNew.stopTime,timerNew.eventRepeat);
 		return menu_return::RETURN_EXIT;
@@ -397,6 +406,11 @@ void CTimerList::paintItem(int pos)
 					zAddData = g_Locale->getText("timerlist.standby.off");
 			}
 			break;
+			case CTimerEvent::TIMER_REMIND :
+			{
+				zAddData = timer.message ;
+			}
+			break;
 			default:{}
 		}
 		g_Fonts->menu->RenderString(x+170,ypos+2*fheight, 320, zAddData, color, fheight);
@@ -606,8 +620,9 @@ void CTimerList::newTimer()
 	timerNew.alarmTime = (time(NULL)/60)*60;
 	timerNew.stopTime = 0;
 	timerNew.channel_id = 0;
+	strcpy(timerNew.message, "");
 	timerNew_standby_on =false;
-	strcpy(timerNew_channel_name,"0");
+//	strcpy(timerNew_channel_name,"0");
 
 	CMenuWidget timerSettings("timerlist.menunew", "settings.raw");
 	timerSettings.addItem( new CMenuSeparator() );
@@ -649,9 +664,12 @@ void CTimerList::newTimer()
 	m5->addOption(0 , "timerlist.standby.off");
 	m5->addOption(1 , "timerlist.standby.on");
 
+	CStringInput*	timerSettings_msg= new CStringInputSMS("timerlist.message", timerNew.message, 30,"","",
+																			"abcdefghijklmnopqrstuvwxyz0123456789-.,:!?");
+	CMenuForwarder *m6 = new CMenuForwarder("timerlist.message", false, "", timerSettings_msg );
 	
 	CTimerListNewNotifier* notifier = new CTimerListNewNotifier(&((int)timerNew.eventType ),
-																					&timerNew.stopTime,m2,m4,m5,
+																					&timerNew.stopTime,m2,m4,m5,m6,
 																					timerSettings_stopTime->getValue ());
 	CMenuOptionChooser* m0 = new CMenuOptionChooser("timerlist.type", &((int)timerNew.eventType ), true, notifier); 
 	m0->addOption((int)CTimerEvent::TIMER_SHUTDOWN, "timerlist.type.shutdown");
@@ -660,6 +678,7 @@ void CTimerList::newTimer()
 	m0->addOption((int)CTimerEvent::TIMER_STANDBY, "timerlist.type.standby");
 	m0->addOption((int)CTimerEvent::TIMER_RECORD, "timerlist.type.record");
 	m0->addOption((int)CTimerEvent::TIMER_SLEEPTIMER, "timerlist.type.sleeptimer");
+	m0->addOption((int)CTimerEvent::TIMER_REMIND, "timerlist.type.remind");
 
 	
 	timerSettings.addItem( m0);
@@ -668,6 +687,7 @@ void CTimerList::newTimer()
 	timerSettings.addItem( m3);
 	timerSettings.addItem( m4);
 	timerSettings.addItem( m5);
+	timerSettings.addItem( m6);
 	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, "", this, "newtimer") );
 	strcpy(timerSettings_stopTime->getValue (), "                ");
 	if (timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)

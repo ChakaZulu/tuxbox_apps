@@ -538,6 +538,7 @@ timerlist.channel Kanal
 timerlist.menunew Neuer Timer
 timerlist.reload Aktualisieren
 timerlist.modify Bearbeiten
+timerlist.message Nachricht
 timersettings.separator Timereinstellungen
 timersettings.record_safety_time Aufnahmekorrektur
 

@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.23 2002/10/05 17:08:38 Zwen Exp $
+   $Id: timerd.cpp,v 1.24 2002/10/10 22:32:52 Zwen Exp $
 
    License: GPL
 
@@ -199,16 +199,33 @@ void loadTimersFromConfig()
                   }
                   break;
                }
+            case CTimerEvent::TIMER_REMIND :
+               {
+                  CTimerEvent_Remind *event=
+                  new CTimerEvent_Remind(config, savedIDs[i]);
+                  if((event->alarmTime >= now) || (event->stopTime > now))
+                  {
+                     CTimerManager::getInstance()->addEvent(event,false);
+                  }
+                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  {
+                     // old periodic timers need to be rescheduled
+                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     CTimerManager::getInstance()->addEvent(event,false);
+                  }
+                  else
+                  {
+                     dprintf("Timer too old %d/%d\n",(int)now,(int) event->alarmTime);
+                     delete event;
+                  }
+                  break;
+               }
             default:
                dprintf("Unknown timer on load %d\n",type);
          }
       }
    }
    delete config;
-/*	char cmd[80];
-	sprintf(cmd,"cp /var/tuxbox/config/timerd.conf /var/tuxbox/config/timerd.conf.%d",
-			  (int) time(NULL));
-	system(cmd);*/
    CTimerManager::getInstance()->saveEventsToConfig();
 }
 
@@ -291,6 +308,11 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                   resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
                }
+               else if(event->eventID == CTimerEvent::TIMER_REMIND)
+               {
+						memset(resp.message, 0, sizeof(resp.message));
+                  strncpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message, sizeof(resp.message)-1);
+               }
             }
          }
          write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
@@ -329,6 +351,10 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                   resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
                }
+               else if(event->eventType == CTimerEvent::TIMER_REMIND)
+               {
+						strcpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message);
+					}
                write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
             }
          }
@@ -371,10 +397,8 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                event = new CTimerEvent_Standby(
                                               msgAddTimer.announceTime,
                                               msgAddTimer.alarmTime,
-                                              msgAddTimer.stopTime,
+															 standby.standby_on,
                                               msgAddTimer.eventRepeat);
-
-               static_cast<CTimerEvent_Standby*>(event)->standby_on = standby.standby_on;
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
 
@@ -382,7 +406,6 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                event = new CTimerEvent_Shutdown(
                                                msgAddTimer.announceTime,
                                                msgAddTimer.alarmTime,
-                                               msgAddTimer.stopTime,
                                                msgAddTimer.eventRepeat);
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
@@ -391,7 +414,6 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                event = new CTimerEvent_Sleeptimer(
                                                  msgAddTimer.announceTime,
                                                  msgAddTimer.alarmTime,
-                                                 msgAddTimer.stopTime,
                                                  msgAddTimer.eventRepeat);
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
@@ -402,9 +424,9 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                                              msgAddTimer.announceTime,
                                              msgAddTimer.alarmTime,
                                              msgAddTimer.stopTime,
+															evInfo.channel_id,
+															evInfo.epgID,
                                              msgAddTimer.eventRepeat);
-               static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id = evInfo.channel_id;
-               static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID = evInfo.epgID;
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
 
@@ -415,10 +437,9 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                   event = new CTimerEvent_Zapto(
                                                msgAddTimer.announceTime,
                                                msgAddTimer.alarmTime,
-                                               msgAddTimer.stopTime,
+															  evInfo.channel_id,
+															  evInfo.epgID,
                                                msgAddTimer.eventRepeat);
-                  static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id = evInfo.channel_id;
-                  static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID = evInfo.epgID;
                   rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                }
                break;
@@ -451,6 +472,16 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                }
 */
                break;
+            case CTimerEvent::TIMER_REMIND :
+               CTimerd::commandRemind remind;
+               read( connfd, &remind, sizeof(CTimerd::commandRemind));
+					event = new CTimerEvent_Remind(msgAddTimer.announceTime,
+																msgAddTimer.alarmTime,
+																remind.message,
+																msgAddTimer.eventRepeat);
+					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+					break;
+
             default:
                printf("[timerd] Unknown TimerType\n");
          }

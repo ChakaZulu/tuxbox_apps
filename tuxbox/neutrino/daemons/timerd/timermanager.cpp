@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.38 2002/10/09 19:20:16 Zwen Exp $
+	$Id: timermanager.cpp,v 1.39 2002/10/10 22:32:52 Zwen Exp $
 
 	License: GPL
 
@@ -510,10 +510,16 @@ void CTimerEvent_Sleeptimer::saveToConfig(CConfigFile *config)
 {
    CTimerEvent::saveToConfig(config);
 }
-
 //=============================================================
 // Standby Event
 //=============================================================
+CTimerEvent_Standby::CTimerEvent_Standby( time_t announceTime, time_t alarmTime, 
+														bool sb_on, 
+														CTimerEventRepeat evrepeat): 
+				  CTimerEvent(TIMER_STANDBY, announceTime, alarmTime, (time_t) 0, evrepeat)
+{
+	standby_on = sb_on;
+}
 CTimerEvent_Standby::CTimerEvent_Standby(CConfigFile *config, int iId):
 CTimerEvent(TIMER_STANDBY, config, iId)
 {
@@ -549,6 +555,15 @@ void CTimerEvent_Standby::saveToConfig(CConfigFile *config)
 //=============================================================
 // Record Event
 //=============================================================
+CTimerEvent_Record::CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, 
+													 t_channel_id channel_id, unsigned long long epgID, 
+													 CTimerEventRepeat evrepeat) :
+		  CTimerEvent(TIMER_RECORD, announceTime, alarmTime, stopTime, evrepeat)
+{
+	eventInfo.epgID = epgID;
+	eventInfo.channel_id = channel_id;
+}
+//------------------------------------------------------------
 CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
 CTimerEvent(TIMER_RECORD, config, iId)
 {
@@ -617,6 +632,15 @@ void CTimerEvent_Record::Reschedule()
 //=============================================================
 // Zapto Event
 //=============================================================
+CTimerEvent_Zapto::CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, 
+												  t_channel_id channel_id, unsigned long long epgID, 
+												  CTimerEventRepeat evrepeat) :
+				  CTimerEvent(TIMER_ZAPTO, announceTime, alarmTime, (time_t) 0, evrepeat)
+{
+	eventInfo.epgID = epgID;
+	eventInfo.channel_id = channel_id;
+}
+//------------------------------------------------------------
 CTimerEvent_Zapto::CTimerEvent_Zapto(CConfigFile *config, int iId):
 CTimerEvent(TIMER_ZAPTO, config, iId)
 {
@@ -656,9 +680,25 @@ void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
    config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
    config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 }
+//------------------------------------------------------------
+void CTimerEvent_Zapto::Reschedule()
+{
+	// clear eogId on reschedule
+	eventInfo.epgID = 0;
+	CTimerEvent::Reschedule();
+}
 //=============================================================
 // NextProgram Event
 //=============================================================
+CTimerEvent_NextProgram::CTimerEvent_NextProgram( time_t announceTime, time_t alarmTime, time_t stopTime, 
+																  t_channel_id channel_id, unsigned long long epgID, 
+																  CTimerEventRepeat evrepeat) :
+			 CTimerEvent(TIMER_NEXTPROGRAM, announceTime, alarmTime, stopTime, evrepeat)
+{
+	eventInfo.epgID = epgID;
+	eventInfo.channel_id = channel_id;
+}
+//------------------------------------------------------------
 CTimerEvent_NextProgram::CTimerEvent_NextProgram(CConfigFile *config, int iId):
 CTimerEvent(TIMER_NEXTPROGRAM, config, iId)
 {
@@ -701,5 +741,53 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
    config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
    config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.channel_id);
 }
+//------------------------------------------------------------
+void CTimerEvent_NextProgram::Reschedule()
+{
+	// clear eogId on reschedule
+	eventInfo.epgID = 0;
+	CTimerEvent::Reschedule();
+}
 //=============================================================
+// Remind Event
+//=============================================================
+CTimerEvent_Remind::CTimerEvent_Remind( time_t announceTime, time_t alarmTime, 
+													 char* msg, CTimerEventRepeat evrepeat) :
+				  CTimerEvent(TIMER_REMIND, announceTime, alarmTime, (time_t) 0, evrepeat)
+{
+	memset(message, 0, sizeof(message));
+	strncpy(message, msg, sizeof(message)-1);
+}
+//------------------------------------------------------------
+CTimerEvent_Remind::CTimerEvent_Remind(CConfigFile *config, int iId):
+CTimerEvent(TIMER_REMIND, config, iId)
+{
+   stringstream ostr;
+   ostr << iId;
+   string id=ostr.str();
+	strcpy(message, config->getString("MESSAGE_"+id).c_str());
+}
+//------------------------------------------------------------
+void CTimerEvent_Remind::announceEvent(){}
+//------------------------------------------------------------
+void CTimerEvent_Remind::stopEvent(){}
+//------------------------------------------------------------
+
+void CTimerEvent_Remind::fireEvent()
+{
+	CTimerManager::getInstance()->getEventServer()->sendEvent(
+		CTimerdClient::EVT_REMIND,
+		CEventServer::INITID_TIMERD,
+		message,REMINDER_MESSAGE_MAXLEN);
+}
+
+//------------------------------------------------------------
+void CTimerEvent_Remind::saveToConfig(CConfigFile *config)
+{
+   CTimerEvent::saveToConfig(config);
+   stringstream ostr;
+   ostr << eventID;
+   string id=ostr.str();
+   config->setString("MESSAGE_"+id,message);
+}
 //=============================================================
