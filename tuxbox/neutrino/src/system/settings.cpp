@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.11 2002/10/16 01:14:09 woglinde Exp $
+        $Id: settings.cpp,v 1.12 2003/02/14 15:05:16 thegoodguy Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -22,18 +22,12 @@
 */
 
 
-#include <string>
-
-#include <global.h>
-
 #include "settings.h"
 
-
-using namespace std;
-
-CScanSettings::CScanSettings()
+CScanSettings::CScanSettings(void)
 	: configfile('\t')
 {
+	delivery_system = DVB_S;
 	satNameNoDiseqc[0] = 0;
 	for( int i=0; i<MAX_SATELLITES; i++)
 	{
@@ -93,38 +87,47 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 	}
 }
 
-void CScanSettings::useDefaults()
+void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 {
-	bouquetMode = CZapitClient::BM_DONTTOUCHBOUQUETS;
-	diseqcMode = NO_DISEQC;
-	diseqcRepeat = 0;
+	delivery_system = _delivery_system;
+	bouquetMode     = CZapitClient::BM_DONTTOUCHBOUQUETS;
+	diseqcMode      = NO_DISEQC;
+	diseqcRepeat    = 0;
 
-	if (g_info.fe==1)
-		strcpy( satNameNoDiseqc, "Astra 19.2E");
-	else
-		strcpy( satNameNoDiseqc, "Telekom/Ish");
+	switch (delivery_system)
+	{
+	case DVB_C:
+		strcpy(satNameNoDiseqc, "Telekom/Ish");
+		break;
+	case DVB_S:
+		strcpy(satNameNoDiseqc, "Astra 19.2E");
+		break;
+	case DVB_T:
+		strcpy(satNameNoDiseqc, "");
+		break;
+	}
 }
 
-bool CScanSettings::loadSettings( string fileName )
+bool CScanSettings::loadSettings(const std::string fileName, const delivery_system_t _delivery_system)
 {
+	useDefaults(delivery_system);
+
 	if(!configfile.loadConfig(fileName))
 	{
-		//file existiert nicht
 		return false;
 	}
 
-	if(configfile.getInt32("fe",-1) != g_info.fe)
+	if (configfile.getInt32("delivery_system",-1) != delivery_system)
 	{
-		//config stammt von sat/kabelbox - passt nicht
+		// configfile is not for this delivery system
 		configfile.clear();
 		return false;
 	}
 
-	diseqcMode = (diseqc_t) configfile.getInt32( "diseqcMode", NO_DISEQC );
-	diseqcRepeat = configfile.getInt32( "diseqcRepeat", 0 );
-	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32( "bouquetMode", CZapitClient::BM_DONTTOUCHBOUQUETS );
-
-	strcpy( satNameNoDiseqc, configfile.getString( "satNameNoDiseqc", g_info.fe==1?"Astra 19.2E":"Telekom/Ish").c_str() );
+	diseqcMode   = (diseqc_t)                  configfile.getInt32("diseqcMode"  , diseqcMode);
+	diseqcRepeat =                             configfile.getInt32("diseqcRepeat", diseqcRepeat);
+	bouquetMode  = (CZapitClient::bouquetMode) configfile.getInt32("bouquetMode" , bouquetMode);
+	strcpy(satNameNoDiseqc, configfile.getString("satNameNoDiseqc", satNameNoDiseqc).c_str());
 
 	if (diseqcMode != NO_DISEQC)
 	{
@@ -141,9 +144,9 @@ bool CScanSettings::loadSettings( string fileName )
 	return true;
 }
 
-bool CScanSettings::saveSettings( string fileName )
+bool CScanSettings::saveSettings(const std::string fileName)
 {
-	configfile.setInt32( "fe", g_info.fe );
+	configfile.setInt32("delivery_system", delivery_system);
 	configfile.setInt32( "diseqcMode", diseqcMode );
 	configfile.setInt32( "diseqcRepeat", diseqcRepeat );
 	configfile.setInt32( "bouquetMode", bouquetMode );
@@ -222,7 +225,7 @@ istream &operator>>(istream& is, CScanSettings& settings)
 		is >> settings.diseqcRepeat;
 		if (settings.diseqcMode == NO_DISEQC)
 		{
-			string token, satname = "";
+			std::string token, satname = "";
 			do
 			{
 				is >> token;
@@ -238,7 +241,7 @@ istream &operator>>(istream& is, CScanSettings& settings)
 			cout << "have to read " << satCount << " sats" <<endl;
 			for (int i=0; i<satCount; i++)
 			{
-				string token, satname = "";
+				std::string token, satname = "";
 				do
 				{
 					is >> token;

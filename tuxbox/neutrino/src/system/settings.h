@@ -1,44 +1,41 @@
 /*
-	Neutrino-GUI  -   DBoxII-Project
+  Neutrino-GUI  -   DBoxII-Project
 
-	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://dbox.cyberphoria.org/
+  Copyright (C) 2001 Steffen Hehn 'McClean'
+  Homepage: http://dbox.cyberphoria.org/
 
-	Kommentar:
+  Kommentar:
 
-	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
-	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
-	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
-	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
+  Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
+  Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
+  auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
+  Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 
 
-	License: GPL
+  License: GPL
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifndef __settings__
 #define __settings__
 
-#include <string>
-#include <vector>
-
 #include <configfile.h>
 #include <zapit/client/zapitclient.h>
 
-using namespace std;
+#include <string>
 
 struct SNeutrinoSettings
 {
@@ -239,8 +236,8 @@ struct SNeutrinoSettings
 
 struct SglobalInfo
 {
-	int box_Type;
-	int fe;
+	int               box_Type;
+	delivery_system_t delivery_system;
 };
 
 
@@ -253,31 +250,27 @@ const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 
 class CScanSettings
 {
-	public:
-		CConfigFile		configfile;
-		CZapitClient::bouquetMode bouquetMode;
-		diseqc_t		diseqcMode;
-		uint32_t		diseqcRepeat;
-		char			satNameNoDiseqc[30];
-		int				satDiseqc[MAX_SATELLITES];
-		char			satName[30][MAX_SATELLITES];
+ public:
+	CConfigFile               configfile;
+	CZapitClient::bouquetMode bouquetMode;
+	diseqc_t                  diseqcMode;
+	uint32_t                  diseqcRepeat;
+	char                      satNameNoDiseqc[30];
+	int                       satDiseqc[MAX_SATELLITES];
+	char                      satName[30][MAX_SATELLITES];
+	delivery_system_t         delivery_system;
 
-		CScanSettings();
-
-		int* diseqscOfSat( char* satname);
-		char* CScanSettings::satOfDiseqc(int diseqc) const;
-		void toSatList( CZapitClient::ScanSatelliteList& ) const;
-
-
-		void useDefaults();
-
-		bool loadSettings( string fileName );
-		bool saveSettings( string fileName );
-
-/*		
-		friend ostream& operator<<(ostream&, const CScanSettings&);
-		friend istream& operator>>(istream&, CScanSettings&);
-	*/
+	CScanSettings();
+	
+	int* diseqscOfSat( char* satname);
+	char* CScanSettings::satOfDiseqc(int diseqc) const;
+	void toSatList( CZapitClient::ScanSatelliteList& ) const;
+	
+	
+	void useDefaults(const delivery_system_t _delivery_system);
+	
+	bool loadSettings(const std::string fileName, const delivery_system_t _delivery_system);
+	bool saveSettings(const std::string fileName);
 };
 
 

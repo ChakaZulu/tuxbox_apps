@@ -82,7 +82,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	ypos+= mheight;
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
 	ypos+= mheight;
-	if (g_info.fe==1)
+	if (g_info.delivery_system == DVB_S)
 	{	//sat only
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.actsatellite").c_str(), COL_MENUCONTENT);
 	}
