@@ -282,6 +282,7 @@ struct SNeutrinoSettings
 	//Filebrowser
 	int filebrowser_showrights;
 	int filebrowser_sortmethod;
+	int filebrowser_denydirectoryleave;
 	
 	//uboot
 	int	uboot_lcd_inverse;

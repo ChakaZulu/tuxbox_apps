@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.8 2004/07/11 09:44:11 thegoodguy Exp $
+ * $Id: locals.h,v 1.9 2004/07/13 11:12:08 gagga Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -817,6 +817,7 @@ typedef enum
 	LOCALE_VIDEOMENU_VIDEOSIGNAL_SVIDEO                   ,
 	LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_C                    ,
 	LOCALE_VIDEOMENU_VIDEOSIGNAL_YUV_V                    ,
-	LOCALE_ZAPTOTIMER_ANNOUNCE
+	LOCALE_ZAPTOTIMER_ANNOUNCE                            ,
+	LOCALE_FILEBROWSER_DENYDIRECTORYLEAVE
 } neutrino_locale_t;
 #endif

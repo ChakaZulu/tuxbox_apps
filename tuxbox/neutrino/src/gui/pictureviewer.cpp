@@ -84,7 +84,16 @@ CPictureViewerGui::CPictureViewerGui()
 	selected = 0;
 	m_sort = FILENAME;
 	m_viewer = new CPictureViewer();
-	m_filebrowser = new CFileBrowser();
+    if(strlen(g_settings.network_nfs_picturedir)!=0)
+      Path = g_settings.network_nfs_picturedir;
+	else
+      Path = "/";
+	if (g_settings.filebrowser_denydirectoryleave == 1) {
+	    m_filebrowser = new CFileBrowser (Path);
+    }
+    else {
+        m_filebrowser = new CFileBrowser ();
+    }
 	m_filebrowser->Multi_Select = true;
 	m_filebrowser->Dirs_Selectable = true;
 	picture_filter.addFilter("png");
@@ -94,10 +103,6 @@ CPictureViewerGui::CPictureViewerGui()
 	picture_filter.addFilter("gif");
 	picture_filter.addFilter("crw");
 	m_filebrowser->Filter = &picture_filter;
-   if(strlen(g_settings.network_nfs_picturedir)!=0)
-      Path = g_settings.network_nfs_picturedir;
-	else
-      Path = "/";
 }
 
 //------------------------------------------------------------------------

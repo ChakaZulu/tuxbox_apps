@@ -94,7 +94,16 @@ CAudioPlayerGui::CAudioPlayerGui()
 	selected = 0;
 	m_metainfo = "";
 
-	filebrowser = new CFileBrowser();
+	if(strlen(g_settings.network_nfs_mp3dir)!=0)
+		Path = g_settings.network_nfs_mp3dir;
+	else
+		Path = "/";
+	if (g_settings.filebrowser_denydirectoryleave == 1) {
+	    filebrowser = new CFileBrowser (Path);
+    }
+    else {
+        filebrowser = new CFileBrowser ();
+    }
 	filebrowser->Multi_Select = true;
 	filebrowser->Dirs_Selectable = true;
 	audiofilefilter.addFilter("cdr");
@@ -107,10 +116,6 @@ CAudioPlayerGui::CAudioPlayerGui()
 	audiofilefilter.addFilter("url");
 	audiofilefilter.addFilter("wav");
 	filebrowser->Filter = &audiofilefilter;
-	if(strlen(g_settings.network_nfs_mp3dir)!=0)
-		Path = g_settings.network_nfs_mp3dir;
-	else
-		Path = "/";
 }
 
 //------------------------------------------------------------------------

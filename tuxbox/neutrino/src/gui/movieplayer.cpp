@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.95 2004/07/10 21:03:07 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.96 2004/07/13 11:12:07 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -168,7 +168,21 @@ int CAPIDSelectExec::exec(CMenuTarget* parent, const std::string & actionKey)
 CMoviePlayerGui::CMoviePlayerGui()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	filebrowser = new CFileBrowser ();
+
+	if (strlen (g_settings.network_nfs_moviedir) != 0)
+		Path_local = g_settings.network_nfs_moviedir;
+	else
+		Path_local = "/";
+	Path_vlc  = "vlc://";
+	Path_vlc += g_settings.streaming_server_startdir;
+	Path_vlc_settings = g_settings.streaming_server_startdir;
+
+	if (g_settings.filebrowser_denydirectoryleave == 1) {
+	    filebrowser = new CFileBrowser (Path_local);
+    }
+    else {
+        filebrowser = new CFileBrowser ();
+    }
 	filebrowser->Multi_Select = false;
 	filebrowser->Dirs_Selectable = false;
 	tsfilefilter.addFilter ("ts");
@@ -179,13 +193,6 @@ CMoviePlayerGui::CMoviePlayerGui()
 	vlcfilefilter.addFilter ("vob");
 	pesfilefilter.addFilter ("mpv");
 	filebrowser->Filter = &tsfilefilter;
-	if (strlen (g_settings.network_nfs_moviedir) != 0)
-		Path_local = g_settings.network_nfs_moviedir;
-	else
-		Path_local = "/";
-	Path_vlc  = "vlc://";
-	Path_vlc += g_settings.streaming_server_startdir;
-	Path_vlc_settings = g_settings.streaming_server_startdir;
 }
 
 //------------------------------------------------------------------------
@@ -1794,7 +1801,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP);
-			fullhelptext += "\nVersion: $Revision: 1.95 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.96 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1997,7 +2004,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP);
-			fullhelptext += "\nVersion: $Revision: 1.95 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.96 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)

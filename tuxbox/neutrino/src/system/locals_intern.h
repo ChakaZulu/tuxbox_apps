@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.10 2004/07/11 09:44:11 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.11 2004/07/13 11:12:08 gagga Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -814,5 +814,6 @@ const char * locale_real_names[] =
 	"videomenu.videosignal_yuv_c",
 	"videomenu.videosignal_yuv_v",
 	"zaptotimer.announce",
+	"filebrowser.denydirectoryleave"
 };
 #endif
