@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.5 2003/10/19 22:31:38 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.6 2003/10/21 19:54:43 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,9 @@ $Id: dvb_descriptor.c,v 1.5 2003/10/19 22:31:38 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.6  2003/10/21 19:54:43  rasc
+no message
+
 Revision 1.5  2003/10/19 22:31:38  rasc
 - some datacarousell stuff started
 
@@ -836,7 +839,7 @@ void sub_descriptorDVB_Linkage0x0B (u_char *b, int len)			 /* $$$ TODO */
     u_int      platform_id_data_length;		
 
         // inner Loop 1
-    	u_int      platform_id;		
+    	u_long     platform_id;		
 	u_int      platform_name_loop_length;		
 
         // inner Loop 2
@@ -2686,9 +2689,13 @@ void descriptorDVB_DataBroadcast (u_char *b)
 
 	 }
 
+ } else if (d.data_broadcast_id == 0x0006) {
+	 /* $$$ TODO EN 301 192 8.3.1 */
+ 			out_nl    (4,"TODO Data Carousel info_structure, etc:");
+		 	printhexdump_buf (4,  b, d.selector_length);
  } else if (d.data_broadcast_id == 0x0007) {
 	 /* $$$ TODO EN 301 192 9.3.2 */
- 			out_nl    (4,"TODO Data Carousel ID, etc:");
+ 			out_nl    (4,"TODO Data Carousel Info, etc:");
 		 	printhexdump_buf (4,  b, d.selector_length);
  } else {
  	out_nl    (4,"Selector-Bytes:");
@@ -2779,7 +2786,7 @@ void descriptorDVB_DataBroadcastID  (u_char *b)
  		typedef struct  _descIPMAC_NOTIF_TABLE {
 			u_int	platform_id_data_length;
 			// inner loop
-			u_int	platform_id;
+			u_long	platform_id;
 			u_int	action_type;
 			u_int	reserved;
 			u_int	INT_versioning_flag;

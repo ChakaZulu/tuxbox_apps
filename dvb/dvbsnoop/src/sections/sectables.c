@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.6 2003/10/19 22:22:57 rasc Exp $
+$Id: sectables.c,v 1.7 2003/10/21 19:54:43 rasc Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,9 @@ $Id: sectables.c,v 1.6 2003/10/19 22:22:57 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.7  2003/10/21 19:54:43  rasc
+no message
+
 Revision 1.6  2003/10/19 22:22:57  rasc
 - some datacarousell stuff started
 
@@ -49,6 +52,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "emm_ecm.h"
 #include "table_userdef.h"
 #include "datacarousel/datagram.h"
+#include "datacarousel/ints.h"
 
 
 
@@ -205,7 +209,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x46, 0x46,  decode_SDT	},
      /* res. */
      {  0x4A, 0x4A,  decode_BAT	},
-//$$$     {  0x4C, 0x4C,  decode_IPMAC_NOTIFICATION_DSMCC	},
+     {  0x4C, 0x4C,  decode_INT_DSMCC	},
      {  0x4E, 0x6E,  decode_EIT	},  /*  4 different types */
      {  0x70, 0x70,  decode_TDT },
      {  0x71, 0x71,  decode_RST },
