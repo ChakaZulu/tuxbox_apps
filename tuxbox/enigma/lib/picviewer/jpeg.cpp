@@ -1,16 +1,12 @@
 #include "format_config.h"
 #ifdef FBV_SUPPORT_JPEG
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <lib/picviewer/pictureviewer.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 extern "C" {
 #include <jpeglib.h>
 }
 #include <setjmp.h>
-#include <lib/picviewer/pictureviewer.h>
 
 struct r_jpeg_error_mgr
 {
