@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <stdio.h>
 
 #ifndef DISABLE_FILE
 
@@ -634,7 +635,18 @@ int eServiceHandlerDVB::play(const eServiceReference &service)
 	decoder=0;
 
 	if (service.path.length())
-		startPlayback(service.path, 0);
+	{
+			FILE *f = fopen( service.path.c_str(), "r" );
+			if (!f)
+			{
+				eDebug("file %s not exist.. don't play", service.path.c_str() );
+				return -1;
+			}
+			else
+				fclose(f);
+
+			startPlayback(service.path, 0);
+	}
 	else
 #endif
 		flags &= ~(flagIsSeekable|flagSupportPosition);

@@ -17,6 +17,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <stdio.h>
 
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/audio.h>
@@ -780,6 +781,20 @@ eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 
 int eServiceHandlerMP3::play(const eServiceReference &service)
 {
+	if ( service.path )
+	{
+		FILE *f = fopen( service.path.c_str(), "r" );
+		if (!f)
+		{
+			eDebug("file %s not exist.. don't play", service.path.c_str() );
+			return -1;
+		}
+		else
+			fclose(f);
+	}
+	else
+		return -1;
+
 	decoder=new eMP3Decoder(service.data[0], service.path.c_str(), this);
 	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::start));
 	
@@ -906,9 +921,12 @@ int eServiceHandlerMP3::getState()
 
 int eServiceHandlerMP3::stop()
 {
-	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::exit));
-	delete decoder;
-	decoder=0;
+	if ( decoder )
+	{
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::exit));
+		delete decoder;
+		decoder=0;
+	}
 	serviceEvent(eServiceEvent(eServiceEvent::evtStop));
 	return 0;
 }
