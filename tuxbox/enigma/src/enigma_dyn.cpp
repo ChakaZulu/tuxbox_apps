@@ -1905,7 +1905,7 @@ struct getEntryString
 		time_t time_end = se->time_begin + se->duration;
 		tm endTime = *localtime(&time_end);
 
-		eString description = se->service.descr;
+		eString description = htmlChars(se->service.descr);
 		eString channel = getLeft(description, '/');
 		if (!channel)
 		{
@@ -4088,8 +4088,8 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	eString emonth = opt["emonth"];
 	eString ehour = opt["ehour"];
 	eString emin = opt["emin"];
-	eString description = httpUnescape(opt["descr"]);
-	eString channel = httpUnescape(opt["channel"]);
+	eString description = unHtmlChars(httpUnescape(opt["descr"]));
+	eString channel = unHtmlChars(httpUnescape(opt["channel"]));
 	eString after_event = opt["after_event"];
 	eString force = opt["force"];
 	eString mo = opt["mo"];

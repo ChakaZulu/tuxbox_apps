@@ -29,6 +29,20 @@ using namespace std;
 
 extern int pdaScreen;
 
+eString htmlChars(eString s)
+{
+	s.strReplace("\'", "&#39;");
+	s.strReplace("\"", "&quot;");
+	return s;
+}
+
+eString unHtmlChars(eString s)
+{
+	s.strReplace("&#39;", "\'");
+	s.strReplace("&quot;", "\"");
+	return s;
+}
+
 eString getAttribute(eString filename, eString attribute)
 {
 	eString result = "&nbsp;";
