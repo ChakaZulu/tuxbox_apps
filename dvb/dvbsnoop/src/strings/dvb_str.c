@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.18 2003/10/25 19:11:50 rasc Exp $
+$Id: dvb_str.c,v 1.19 2003/10/26 23:00:43 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,9 @@ $Id: dvb_str.c,v 1.18 2003/10/25 19:11:50 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.19  2003/10/26 23:00:43  rasc
+fix
+
 Revision 1.18  2003/10/25 19:11:50  rasc
 no message
 
@@ -134,12 +137,12 @@ char *dvbstrTableID (u_int id)
      {  0x01, 0x01,  "conditional_access_section" },
      {  0x02, 0x02,  "program_map_section" },
      {  0x03, 0x03,  "transport_stream_description_section" },
- //    {  0x04, 0x3F,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+ //    {  0x04, 0x3F,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
  //
  // $$$ TODO DSM-CC  anyone a ISO 13818-6 tp spare???
-      {  0x04, 0x3d,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+      {  0x04, 0x3d,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
       {  0x3e, 0x3e,  "DSM-CC section with private data|ISO/IEC1381-6" },
-      {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13813 reserved" },
+      {  0x3f, 0x3f,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
 
      {  0x40, 0x40,  "network_information_section - actual network" },
      {  0x41, 0x41,  "network_information_section - other network" },
@@ -161,7 +164,8 @@ char *dvbstrTableID (u_int id)
      {  0x71, 0x71,  "running_status_section" },
      {  0x72, 0x72,  "stuffing_section" },
      {  0x73, 0x73,  "time_offset_section" },
-     {  0x74, 0x7D,  "reserved" },
+     {  0x74, 0x74,  "AIT Application_information_section" }, /* MHP */
+     {  0x75, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "discontinuity_information_section" },
      {  0x7F, 0x7F,  "selection_information_section" },
      {  0x80, 0x8F,  "User private (EMM/ECM)" },   /* $$$ own definition! */
@@ -202,8 +206,11 @@ char *dvbstrMPEGDescriptorTAG (u_int tag)
      {  0x10, 0x10,  "smoothing_buffer_descriptor" },
      {  0x11, 0x11,  "STD_descriptor" },
      {  0x12, 0x12,  "IBP_descriptor" },
-          /* DSM-CC */
-     {  0x13, 0x1A,  "ISO/IEC13818-6 Reserved" },
+          /* MPEG DSM-CC */
+     {  0x13, 0x13,  "Carousel_identifier_descriptor" },
+     {  0x14, 0x14,  "Association_tag_descriptor" },
+     {  0x15, 0x15,  "Deferred_association_tag_descriptor" },
+     	{  0x16, 0x1A,  "ISO/IEC13818-6 Reserved" },
 
      {  0x1B, 0x1B,  "MPEG4_video_descriptor" },
      {  0x1C, 0x1C,  "MPEG4_audio_descriptor" },
@@ -288,7 +295,10 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x71, 0x71,  "service_identifier_descriptor" },
      {  0x72, 0x72,  "service_availability_descriptor" },
      {  0x73, 0x7F,  "reserved_descriptor" },
-     {  0x80, 0xFE,  "User defined" },
+     {  0x80, 0xEF,  "User defined" },
+     	{  0xf0, 0xf0,  "$$$ MHP Object Carousel" },
+     	{  0xf1, 0xf1,  "$$$ MHP Multiprotocol Encapsulation" },
+	{  0xf2, 0xFE,  "reserved MHP" },
 
      {  0xFF, 0xFF,  "Forbidden" },
      {  0,0, NULL }
