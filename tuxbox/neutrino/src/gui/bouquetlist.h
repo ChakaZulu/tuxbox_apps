@@ -54,14 +54,12 @@ class CBouquet
 
 	public:
 		int				unique_key;
-		string			name;
 		bool			bLocked;
 		CChannelList*	channelList;
 
 		CBouquet( int Unique_key=-1, const std::string& Name="", bool locked=false)
 		{
 			unique_key = Unique_key;
-			name = Name;
 			bLocked = locked;
 			channelList = new CChannelList( Name );
 		}
@@ -110,7 +108,6 @@ class CBouquetList
 		void setName(const std::string& Name);
 		int getActiveBouquetNumber();
 		int activateBouquet( int id, bool bShowChannelList = false);
-		const std::string& getActiveBouquetName();
 		int show();
 		int showChannelList( int nBouquet = -1);
 		void adjustToChannel( int nChannelNr);

@@ -103,6 +103,7 @@ class CChannelList
 		CChannel* getChannel( int number);
 		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
 		void setName(const std::string& Name);
+		const std::string getName() { return name; };
 		int getKey(int);
 		string getActiveChannelName();
 		int getActiveChannelNumber();
