@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.h,v 1.5 2003/02/24 14:05:02 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.h,v 1.6 2003/06/29 12:57:48 alexw Exp $
  *
  * Basic Client Class - The Tuxbox Project
  *
@@ -40,7 +40,7 @@ class CBasicClient
 
 	bool open_connection();
 	bool send_data(const char* data, const size_t size);
-	bool receive_data(char* data, const size_t size);
+	bool receive_data(char* data, const size_t size, bool use_max_timeout = false);
 	bool send(const unsigned char command, const char* data = NULL, const unsigned int size = 0);
 	void close_connection();
 	

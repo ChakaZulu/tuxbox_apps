@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.91 2003/06/02 22:22:07 digi_casi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.92 2003/06/29 12:57:47 alexw Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -414,7 +414,7 @@ void CZapitClient::reinitChannels()
 	send(CZapitMessages::CMD_REINIT_CHANNELS);
 
 	CZapitMessages::responseCmd response;
-	CBasicClient::receive_data((char* )&response, sizeof(response));
+	CBasicClient::receive_data((char* )&response, sizeof(response), true);
 	close_connection();
 }
 
