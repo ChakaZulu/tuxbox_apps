@@ -31,8 +31,8 @@ public:
 	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8,	 E_NOT_VISIBLE = 16		};
 	void setFlags(int);
 	void removeFlags(int);
-  void invalidateEntry(int n){	invalidate(getEntryRect(n));}
-  void invalidateContent();
+	void invalidateEntry(int n){	invalidate(getEntryRect(n));}
+	void invalidateContent();
 	void setColumns(int col);
 	int getColumns() { return columns; }
 	void setMoveMode(int move) { movemode=move; }
@@ -105,13 +105,13 @@ public:
 		return ERROR;
 	}
 
-  void invalidateCurrent()
-  {
-    int n=0;
-    for (ePtrList_T_iterator i(top); i != bottom; ++i, n++)
-      if ( i == current )
-        invalidate(getEntryRect(n));    
-  }
+	void invalidateCurrent()
+	{
+		int n=0;
+		for (ePtrList_T_iterator i(top); i != bottom; ++i, n++)
+			if ( i == current )
+				invalidate(getEntryRect(n));    
+	}
   
 	enum
 	{
@@ -311,7 +311,7 @@ inline T* eListBox<T>::goPrev()
 
 template <class T>
 inline eListBox<T>::eListBox(eWidget *parent, const eWidget* descr)
-	 :eListBoxBase(parent, descr),
+	:eListBoxBase(parent, descr),
 		top(childs.end()), bottom(childs.end()), current(childs.end()), recalced(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
@@ -438,7 +438,7 @@ template <class T>
 inline int eListBox<T>::moveSelection(int dir)
 {
 	int direction=0, forceredraw=0;
-	
+
 	if (childs.empty())
 		return 0;
 
@@ -553,7 +553,7 @@ inline int eListBox<T>::moveSelection(int dir)
 		default:
 			return 0;
 	}
-	
+
 	if (current != oldptr)  // current has changed
 	{
 		if (movemode)
@@ -564,7 +564,7 @@ inline int eListBox<T>::moveSelection(int dir)
 			typename std::list<T*>::iterator curi=current;
 			typename std::list<T*>::iterator oldi=oldptr;
 			int count=0;
-			
+
 			T* old=*o;
 
 			if (direction > 0)

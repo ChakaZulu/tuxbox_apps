@@ -288,7 +288,7 @@ ePtrList<T>::ePtrList()
 
 /////////////////// Copy Constructor /////////////////////////////
 template <class T>
-ePtrList<T>::ePtrList(const ePtrList& e)		
+ePtrList<T>::ePtrList(const ePtrList& e)
 	:std::list<T*>(e), cur(e.cur), autoDelete( false )
 {		
 	if ( e.autoDelete )	
@@ -402,8 +402,8 @@ inline T* ePtrList<T>::take()
 // The item after the taken item becomes the new current list item if the taken item is not the last item in the list. If the last item is taken, the new last item becomes the current item.
 // The current item is set to null if the list becomes empty.
 	T* tmp = *cur;
- 	cur = std::list<T*>::erase(cur);
- 	return tmp;
+	cur = std::list<T*>::erase(cur);
+	return tmp;
 }
 
 /////////////////// ePtrList take(T*) ////////////////////
@@ -411,7 +411,7 @@ template <class T>
 inline void ePtrList<T>::take(T* t)
 {
 // Takes all item with T* out of the list without deleting it (even if auto-deletion is enabled).
- 	std::list<T*>::remove(t);
+	std::list<T*>::remove(t);
 }
 
 /////////////////// ePtrList setCurrent(T*) ////////////////////
@@ -433,7 +433,7 @@ inline T* ePtrList<T>::setCurrent(const T* t)
 /////////////////// ePtrList current() ////////////////////
 template <class T>
 inline T* ePtrList<T>::current()
-{		
+{
 //	Returns a pointer to the current list item. The current item may be null (implies that the current index is -1).
 	return cur==end() ? 0 : *cur;	
 }
@@ -441,7 +441,7 @@ inline T* ePtrList<T>::current()
 /////////////////// ePtrList next() ////////////////////
 template <class T>
 inline T* ePtrList<T>::next()
-{		
+{
 //	Returns a pointer to the item succeeding the current item. Returns null if the current items is null or equal to the last item.
 //	Makes the succeeding item current. If the current item before this function call was the last item, the current item will be set to null. If the current item was null, this function does nothing.
 	if (cur == end())
@@ -456,7 +456,7 @@ inline T* ePtrList<T>::next()
 /////////////////// ePtrList prev() ////////////////////
 template <class T>
 inline T* ePtrList<T>::prev()
-{		
+{
 //	Returns a pointer to the item preceding the current item. Returns null if the current items is null or equal to the first item.
 //	Makes the preceding item current. If the current item before this function call was the first item, the current item will be set to null. If the current item was null, this function does nothing.
 	if (cur == begin())
@@ -468,7 +468,7 @@ inline T* ePtrList<T>::prev()
 /////////////////// ePtrList first() ////////////////////
 template <class T>
 inline T* ePtrList<T>::first()
-{		
+{
 // Returns a pointer to the first item in the list and makes this the current list item, or null if the list is empty.
 	return *(cur = begin());	
 }
@@ -476,7 +476,7 @@ inline T* ePtrList<T>::first()
 /////////////////// ePtrList last() ////////////////////
 template <class T>
 inline T* ePtrList<T>::last()
-{		
+{
 //	Returns a pointer to the last item in the list and makes this the current list item, or null if the list is empty.
 	return *(cur = --end());	
 }
@@ -484,7 +484,7 @@ inline T* ePtrList<T>::last()
 /////////////////// const ePtrList current() ////////////////////
 template <class T>
 inline const T* ePtrList<T>::current() const
-{		
+{
 //	Returns a pointer to the current list item. The current item may be null (implies that the current index is not valid)
 	return cur==end() ? 0 : *cur;	
 }
@@ -492,7 +492,7 @@ inline const T* ePtrList<T>::current() const
 /////////////////// const ePtrList next() ////////////////////
 template <class T>
 inline const T* ePtrList<T>::next() const
-{		
+{
 //	Returns a pointer to the item succeeding the current item. Returns null if the current items is null or equal to the last item.
 //	Makes the succeeding item current. If the current item before this function call was the last item, the current item will be set to null. If the current item was null, this function does nothing.
 	if (cur == end())
@@ -507,7 +507,7 @@ inline const T* ePtrList<T>::next() const
 /////////////////// const ePtrList prev() ////////////////////
 template <class T>
 inline const T* ePtrList<T>::prev() const
-{		
+{
 //	Returns a pointer to the item preceding the current item. Returns null if the current items is null or equal to the first item.
 //	Makes the preceding item current. If the current item before this function call was the first item, the current item will be set to null. If the current item was null, this function does nothing.
 	if (cur == begin())
@@ -519,7 +519,7 @@ inline const T* ePtrList<T>::prev() const
 /////////////////// const ePtrList first() ////////////////////
 template <class T>
 inline const T* ePtrList<T>::first() const
-{		
+{
 // Returns a pointer to the first item in the list and makes this the current list item, or null if the list is empty.
 	return *(cur = begin());	
 }
@@ -527,7 +527,7 @@ inline const T* ePtrList<T>::first() const
 /////////////////// const ePtrList last() ////////////////////
 template <class T>
 inline const T* ePtrList<T>::last() const
-{		
+{
 //	Returns a pointer to the last item in the list and makes this the current list item, or null if the list is empty.
 	return *(cur = --end());	
 }

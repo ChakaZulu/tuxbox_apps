@@ -10,49 +10,48 @@
 class ePoint
 {
 public:
-    ePoint();
-    ePoint( int xpos, int ypos );
+	ePoint();
+	ePoint( int xpos, int ypos );
 
-    bool   isNull()	const;
+	bool   isNull()	const;
 
-    int	   x()		const;
-    int	   y()		const;
-    void   setX( int x );
-    void   setY( int y );
+	int	   x()		const;
+	int	   y()		const;
+	void   setX( int x );
+	void   setY( int y );
 
-    int manhattanLength() const;
+	int manhattanLength() const;
 
-    int &rx();
-    int &ry();
+	int &rx();
+	int &ry();
 
-    ePoint &operator+=( const ePoint &p );
-    ePoint &operator-=( const ePoint &p );
-    ePoint &operator*=( int c );
-    ePoint &operator*=( double c );
-    ePoint &operator/=( int c );
-    ePoint &operator/=( double c );
+	ePoint &operator+=( const ePoint &p );
+	ePoint &operator-=( const ePoint &p );
+	ePoint &operator*=( int c );
+	ePoint &operator*=( double c );
+	ePoint &operator/=( int c );
+	ePoint &operator/=( double c );
 
-    friend inline bool	 operator==( const ePoint &, const ePoint & );
-    friend inline bool	 operator!=( const ePoint &, const ePoint & );
-    friend inline ePoint operator+( const ePoint &, const ePoint & );
-    friend inline ePoint operator-( const ePoint &, const ePoint & );
-    friend inline ePoint operator*( const ePoint &, int );
-    friend inline ePoint operator*( int, const ePoint & );
-    friend inline ePoint operator*( const ePoint &, double );
-    friend inline ePoint operator*( double, const ePoint & );
-    friend inline ePoint operator-( const ePoint & );
-    friend inline ePoint operator/( const ePoint &, int );
-    friend inline ePoint operator/( const ePoint &, double );
-
+	friend inline bool	 operator==( const ePoint &, const ePoint & );
+	friend inline bool	 operator!=( const ePoint &, const ePoint & );
+	friend inline ePoint operator+( const ePoint &, const ePoint & );
+	friend inline ePoint operator-( const ePoint &, const ePoint & );
+	friend inline ePoint operator*( const ePoint &, int );
+	friend inline ePoint operator*( int, const ePoint & );
+	friend inline ePoint operator*( const ePoint &, double );
+	friend inline ePoint operator*( double, const ePoint & );
+	friend inline ePoint operator-( const ePoint & );
+	friend inline ePoint operator/( const ePoint &, int );
+	friend inline ePoint operator/( const ePoint &, double );
 private:
-    int xp;
-    int yp;
+	int xp;
+	int yp;
 };
 
 
 inline int ePoint::manhattanLength() const
 {
-    return ABS(x())+ABS(y());
+	return ABS(x())+ABS(y());
 }
 
 
@@ -147,26 +146,26 @@ inline ePoint operator-( const ePoint &p )
 
 inline ePoint &ePoint::operator/=( int c )
 {
-    xp/=(int)c;
-    yp/=(int)c;
-    return *this;
+	xp/=(int)c;
+	yp/=(int)c;
+	return *this;
 }
 
 inline ePoint &ePoint::operator/=( double c )
 {
-    xp=(int)(xp/c);
-    yp=(int)(yp/c);
-    return *this;
+	xp=(int)(xp/c);
+	yp=(int)(yp/c);
+	return *this;
 }
 
 inline ePoint operator/( const ePoint &p, int c )
 {
-    return ePoint(p.xp/c, p.yp/c);
+	return ePoint(p.xp/c, p.yp/c);
 }
 
 inline ePoint operator/( const ePoint &p, double c )
 {
-    return ePoint((int)(p.xp/c), (int)(p.yp/c));
+	return ePoint((int)(p.xp/c), (int)(p.yp/c));
 }
 
 

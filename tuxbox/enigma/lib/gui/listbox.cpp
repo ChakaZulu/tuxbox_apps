@@ -23,12 +23,12 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, const char *de
 }
 
 void eListBoxBase::setFlags(int _flags)	
-{		
+{
 	flags |= _flags;	
 }
 
 void eListBoxBase::removeFlags(int _flags)	
-{		
+{
 	flags &= ~_flags;	
 }
 
@@ -65,14 +65,14 @@ int eListBoxBase::setProperty(const eString &prop, const eString &value)
 {
 	if (prop == "noPageMovement")
 	{
-    if (value == "off")
+		if (value == "off")
 			flags |= ~flagNoPageMovement;
 		else
 			flags |= flagNoPageMovement;
 	}
 	else if (prop == "noUpDownMovement")
 	{
-    if (value == "off")
+		if (value == "off")
 			flags |= ~flagNoUpDownMovement;
 		else
 			flags |= flagNoUpDownMovement;
@@ -162,7 +162,7 @@ void eListBoxBase::gotFocus()
 void eListBoxBase::invalidateContent()
 {
   eRect rc;
-  for ( int i=0; i<MaxEntries; i++ )
+  for ( int i=0; i<MaxEntries*columns; i++ )
     rc |= getEntryRect(i);
 
   invalidate(rc);
@@ -183,7 +183,7 @@ int eListBoxBase::newFocus()
 {
 	if (deco && deco_selected)
 	{
-    recalcMaxEntries();
+		recalcMaxEntries();
 
 		if (isVisible())
 			invalidate();
@@ -249,7 +249,7 @@ int calcFontHeight( const gFont& font)
 
 const eString& eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state)
 {
-  bool b;
+	bool b;
 
 	if ( (b = (state == 2)) )
 		state = 0;

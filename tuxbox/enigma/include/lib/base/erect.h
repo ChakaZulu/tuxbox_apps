@@ -7,84 +7,83 @@
 
 // x2 = x1 + width  (AND NOT, NEVER, NEVER EVER +1 or -1 !!!!)
 
-class eRect					// rectangle class
+class eRect // rectangle class
 {
 public:
-    eRect()	{ x1 = y1 = x2 = y2 = 0; }
-    eRect( const ePoint &topleft, const ePoint &bottomright );
-    eRect( const ePoint &topleft, const eSize &size );
-    eRect( int left, int top, int width, int height );
+	eRect()	{ x1 = y1 = x2 = y2 = 0; }
+	eRect( const ePoint &topleft, const ePoint &bottomright );
+	eRect( const ePoint &topleft, const eSize &size );
+	eRect( int left, int top, int width, int height );
 
-    bool   isNull()	const;
-    bool   isEmpty()	const;
-    bool   isValid()	const;
-    eRect  normalize()	const;
+	bool isNull()	const;
+	bool isEmpty()	const;
+	bool isValid()	const;
+	eRect normalize()	const;
 
-    int	   left()	const;
-    int	   top()	const;
-    int	   right()	const;
-    int	   bottom()	const;
+	int left()	const;
+	int top()	const;
+	int right()	const;
+	int  bottom()	const;
+	int &rLeft();
+	int &rTop();
+	int &rRight();
+	int &rBottom();
 
-    int &rLeft();
-    int &rTop();
-    int &rRight();
-    int &rBottom();
-	
-    int	   x()		const;
-    int	   y()		const;
-    void   setLeft( int pos );
-    void   setTop( int pos );
-    void   setRight( int pos );
-    void   setBottom( int pos );
-    void   setX( int x );
-    void   setY( int y );
+	int x() const;
+	int y() const;
+	void setLeft( int pos );
+	void setTop( int pos );
+	void setRight( int pos );
+	void setBottom( int pos );
+	void setX( int x );
+	void setY( int y );
 
-    ePoint topLeft()	 const;
-    ePoint bottomRight() const;
-    ePoint topRight()	 const;
-    ePoint bottomLeft()	 const;
-    ePoint center()	 const;
+	ePoint topLeft()	 const;
+	ePoint bottomRight() const;
+	ePoint topRight()	 const;
+	ePoint bottomLeft()	 const;
+	ePoint center()	 const;
 
-    void   rect( int *x, int *y, int *w, int *h ) const;
-    void   coords( int *x1, int *y1, int *x2, int *y2 ) const;
+	void rect( int *x, int *y, int *w, int *h ) const;
+	void coords( int *x1, int *y1, int *x2, int *y2 ) const;
 
-    void   moveTopLeft( const ePoint &p );
-    void   moveBottomRight( const ePoint &p );
-    void   moveTopRight( const ePoint &p );
-    void   moveBottomLeft( const ePoint &p );
-    void   moveCenter( const ePoint &p );
-    void   moveBy( int dx, int dy );
+	void moveTopLeft( const ePoint &p );
+	void moveBottomRight( const ePoint &p );
+	void moveTopRight( const ePoint &p );
+	void moveBottomLeft( const ePoint &p );
+	void moveCenter( const ePoint &p );
+	void moveBy( int dx, int dy );
 
-    void   setRect( int x, int y, int w, int h );
-    void   setCoords( int x1, int y1, int x2, int y2 );
+	void setRect( int x, int y, int w, int h );
+	void setCoords( int x1, int y1, int x2, int y2 );
 
-    eSize  size()	const;
-    int	   width()	const;
-    int	   height()	const;
-    void   setWidth( int w );
-    void   setHeight( int h );
-    void   setSize( const eSize &s );
+	eSize size()	const;
+	int width()	const;
+	int height()	const;
+	void setWidth( int w );
+	void setHeight( int h );
+	void setSize( const eSize &s );
 
-    eRect  operator|(const eRect &r) const;
-    eRect  operator&(const eRect &r) const;
-    eRect&  operator|=(const eRect &r);
-    eRect&  operator&=(const eRect &r);
+	eRect operator|(const eRect &r) const;
+	eRect operator&(const eRect &r) const;
+	eRect& operator|=(const eRect &r);
+	eRect& operator&=(const eRect &r);
 
-    bool   contains( const ePoint &p) const;
-    bool   contains( int x, int y) const;
-    bool   contains( const eRect &r) const;
-    eRect  unite( const eRect &r ) const;
-    eRect  intersect( const eRect &r ) const;
-    bool   intersects( const eRect &r ) const;
+	bool contains( const ePoint &p) const;
+	bool contains( int x, int y) const;
+	bool contains( const eRect &r) const;
+	eRect unite( const eRect &r ) const;
+	eRect intersect( const eRect &r ) const;
+	bool intersects( const eRect &r ) const;
 
-    friend bool operator==( const eRect &, const eRect & );
-    friend bool operator!=( const eRect &, const eRect & );
+	friend bool operator==( const eRect &, const eRect & );
+	friend bool operator!=( const eRect &, const eRect & );
 
 private:
-    int x1;
-    int y1;
-    int x2;
-    int y2;
+	int x1;
+	int y1;
+	int x2;
+	int y2;
 };
 
 bool operator==( const eRect &, const eRect & );
@@ -119,10 +118,10 @@ namespace std
 
 inline eRect::eRect( int left, int top, int width, int height )
 {
-    x1 = left;
-    y1 = top;
-    x2 = left+width;
-    y2 = top+height;
+	x1 = left;
+	y1 = top;
+	x2 = left+width;
+	y2 = top+height;
 }
 
 inline bool eRect::isNull() const
@@ -208,8 +207,7 @@ inline eSize eRect::size() const
 
 inline bool eRect::contains( int x, int y) const
 {
-	return x >= x1 && x < x2 &&
-			y >= y1 && y < y2;
+	return x >= x1 && x < x2 && y >= y1 && y < y2;
 }
 
 #endif // eRect_H
