@@ -2975,6 +2975,8 @@ bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
 	return false;
 }
 
+#define LCD_UPDATE_TIME_RADIO_MODE (6 * 1000 * 1000)
+#define LCD_UPDATE_TIME_TV_MODE (60 * 1000 * 1000)
 
 void CNeutrinoApp::InitZapper()
 {
@@ -2999,6 +3001,8 @@ void CNeutrinoApp::InitZapper()
 	}
 	else
 	{
+		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
+		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
 		radioMode();
 	}
 }
@@ -4125,9 +4129,13 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 void CNeutrinoApp::tvMode( bool rezap )
 {
-	if(mode==mode_radio && g_settings.misc_spts==1)
+	if(mode==mode_radio )
 	{
-		g_Zapit->PlaybackSPTS();
+		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
+		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false );
+
+		if(g_settings.misc_spts==1)
+			g_Zapit->PlaybackSPTS();
 	}
 
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
@@ -4255,9 +4263,13 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 void CNeutrinoApp::radioMode( bool rezap)
 {
-	if(mode==mode_tv && g_settings.misc_spts==1)
+	if(mode==mode_tv )
 	{
-		g_Zapit->PlaybackPES();
+		g_RCInput->killTimer(g_InfoViewer->lcdUpdateTimer);
+		g_InfoViewer->lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
+
+		if(g_settings.misc_spts==1)
+			g_Zapit->PlaybackPES();
 	}
 
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);

@@ -66,8 +66,8 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 // in us
 #define FADE_TIME 40000
+
 #define LCD_UPDATE_TIME_TV_MODE (60 * 1000 * 1000)
-#define LCD_UPDATE_TIME_RADIO_MODE (4 * 1000 * 1000)
 
 int time_left_width;
 int time_dot_width;
@@ -170,16 +170,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 {
 	channel_id = new_channel_id;
 	showButtonBar = !calledFromNumZap;
-	int mode = g_Zapit->isChannelTVChannel(channel_id) ? NeutrinoMessages::mode_tv : NeutrinoMessages::mode_radio;
-	static short last_mode=1;
-	if(last_mode != mode)
-	{
-		if(mode==2)
-			lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_RADIO_MODE, false );
-		else
-			lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME_TV_MODE, false );
-	last_mode=mode;
-	}
+
 	bool fadeIn = ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
 		g_settings.widget_fade &&
 		(!is_visible) &&

@@ -78,7 +78,6 @@ class CInfoViewer
 
 	uint           sec_timer_id;
 	uint           fadeTimer;
-	uint           lcdUpdateTimer;
 	
 
 	void show_Data( bool calledFromEvent = false );
@@ -100,6 +99,7 @@ class CInfoViewer
 
  public:
 	bool	is_visible;
+	uint           lcdUpdateTimer;
 
 	CInfoViewer();
 
