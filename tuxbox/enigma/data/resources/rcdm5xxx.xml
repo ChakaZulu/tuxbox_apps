@@ -165,8 +165,8 @@
 			<action name="indexSeekNext" key="shift_blue" />
 			<action name="indexSeekPrev" key="shift_red" />
 
-			<action name="prevSubService" key="next" flags="mr" />
-			<action name="nextSubService" key="prev" flags="mr" />
+			<action name="prevSubService" key="prev" flags="mr" />
+			<action name="nextSubService" key="next" flags="mr" />
 		</actionmap>
 
 		<actionmap name="enigmaMain" style="default" descr="Default (Enigma)" >
