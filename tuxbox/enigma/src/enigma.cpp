@@ -151,7 +151,7 @@ eZap::eZap(int argc, char **argv)
 				if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox_keyboard.xml") )
 					eDebug("couldn't load Dreambox keyboard mapping (rcdreambox_keyboard.xml)");
 			break;
-		case eSystemInfo::TR_DVB272S:
+//		case eSystemInfo::TR_DVB272S:
 		case eSystemInfo::DM5600:
 		case eSystemInfo::DM5620:
 		case eSystemInfo::DM500:
@@ -159,9 +159,9 @@ eZap::eZap(int argc, char **argv)
 				if ( eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdm5xxx.xml") )
 					eFatal("couldn't load RC Mapping file for DM5XXX");
 			break;
-/*		case eSystemInfo::TR_DVB272S:
+		case eSystemInfo::TR_DVB272S:
 			if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rctrdvb272.xml") )
-				eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rctrdvb272.xml");*/
+				eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rctrdvb272.xml");
 		default:
 			break;
 	}
@@ -213,6 +213,8 @@ eZap::eZap(int argc, char **argv)
 	if (eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount))
 	{
 		bootcount = 1;
+		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::TR_DVB272S )
+			eConfig::getInstance()->setKey("/ezap/osd/simpleMainMenu", 1);
 #if 0
 		eMessageBox msg(_("Welcome to enigma.\n\n"
 											"Please do a transponder scan first.\n(mainmenu > setup > channels > transponder scan)"),
