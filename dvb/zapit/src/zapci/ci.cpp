@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.7 2002/08/27 21:12:36 thegoodguy Exp $
+ * $Id: ci.cpp,v 1.8 2002/10/08 00:55:44 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -59,7 +59,7 @@ CCaDescriptor::CCaDescriptor (unsigned char * buffer)
 {
 	descriptor_tag = buffer[0];
 	descriptor_length = buffer[1];
-	CA_system_ID = *(unsigned short*)(&(buffer[2]));
+	CA_system_ID = (buffer[2] << 8) | buffer[3];
 	reserved1 = buffer[4] >> 5;
 	CA_PID = ((buffer[4] & 0x1F) << 8) | buffer[5];
 
@@ -70,7 +70,8 @@ unsigned int CCaDescriptor::writeToBuffer (unsigned char * buffer) // returns nu
 {
 	buffer[0] = descriptor_tag;
 	buffer[1] = descriptor_length;
-	*(unsigned short*)(&(buffer[2])) = CA_system_ID;
+	buffer[2] = CA_system_ID >> 8;
+	buffer[3] = CA_system_ID;
 	buffer[4] = (reserved1 << 5) | (CA_PID >> 8);
 	buffer[5] = CA_PID;
 
