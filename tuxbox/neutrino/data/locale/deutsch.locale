@@ -11,6 +11,9 @@ mainmenu.games Spiele
 mainmenu.shutdown Ausschalten
 mainmenu.settings Einstellungen
 mainmenu.service Service
+mainmenu.streaming Streaming (aufnehmen)
+mainmenu.streaming_start start
+mainmenu.streaming_stop stop
 
 servicemenu.head Service
 servicemenu.update Software-Aktualisierung
@@ -57,6 +60,9 @@ networkmenu.netmask Netzmaske
 networkmenu.broadcast Broadcast
 networkmenu.gateway Standard Gateway
 networkmenu.nameserver Nameserver
+networkmenu.usestreamserver Streamingserver benutzen
+networkmenu.streamingserver Streamingserver
+networkmenu.streamingserverport Port
 
 ipsetup.hint_1 Benutzen Sie "0"-"9", Rot ist " ", Grün "."
 ipsetup.hint_2 oder Up/Down, OK speichert, Home bricht ab

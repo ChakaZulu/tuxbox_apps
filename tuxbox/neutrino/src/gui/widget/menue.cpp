@@ -30,11 +30,14 @@
 */
 
 /*
-$Id: menue.cpp,v 1.32 2002/01/03 20:03:20 McClean Exp $
+$Id: menue.cpp,v 1.33 2002/01/04 02:38:05 McClean Exp $
  
  
 History:
  $Log: menue.cpp,v $
+ Revision 1.33  2002/01/04 02:38:05  McClean
+ cleanup
+
  Revision 1.32  2002/01/03 20:03:20  McClean
  cleanup
 
@@ -158,63 +161,67 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 				case (CRCInput::RC_up) :
 				case (CRCInput::RC_down) :
-					//search next / prev selectable item
-					for (unsigned int count=1; count< items.size(); count++)
 					{
-
-						if (key==CRCInput::RC_up)
+						//search next / prev selectable item
+						for (unsigned int count=1; count< items.size(); count++)
 						{
-							pos = selected- count;
-							if ( pos<0 )
-								pos = items.size()-1;
-						}
-						else
-						{
-							pos = (selected+ count)%items.size();
-						}
 
-						CMenuItem* item = items[pos];
+							if (key==CRCInput::RC_up)
+							{
+								pos = selected- count;
+								if ( pos<0 )
+									pos = items.size()-1;
+							}
+							else
+							{
+								pos = (selected+ count)%items.size();
+							}
 
-						if ( item->isSelectable() )
-						{
-							//clear prev. selected
-							items[selected]->paint( false );
-							//select new
-							item->paint( true );
-							selected = pos;
-							break;
+							CMenuItem* item = items[pos];
+
+							if ( item->isSelectable() )
+							{
+								//clear prev. selected
+								items[selected]->paint( false );
+								//select new
+								item->paint( true );
+								selected = pos;
+								break;
+							}
 						}
 					}
 					break;
-				case (CRCInput::RC_ok) :
-					//exec this item...
-					CMenuItem* item = items[selected];
-					int ret = item->exec( this );
+				case (CRCInput::RC_ok):
+					{
+						//exec this item...
+						CMenuItem* item = items[selected];
+						int ret = item->exec( this );
 
-					if(ret==CMenuItem::RETURN_EXIT)
-					{
-						key = CRCInput::RC_timeout;
-					}
-					else if(ret==CMenuItem::RETURN_EXIT_ALL)
-					{
-						retval = CMenuItem::RETURN_EXIT_ALL;
-						key = CRCInput::RC_timeout;
-					}
-					else if(ret==CMenuItem::RETURN_REPAINT)
-					{
-						paint();
+						if(ret==CMenuItem::RETURN_EXIT)
+						{
+							key = CRCInput::RC_timeout;
+						}
+						else if(ret==CMenuItem::RETURN_EXIT_ALL)
+						{
+							retval = CMenuItem::RETURN_EXIT_ALL;
+							key = CRCInput::RC_timeout;
+						}
+						else if(ret==CMenuItem::RETURN_REPAINT)
+						{
+							paint();
+						}
 					}
 					break;
 
 				case (CRCInput::RC_home):
-							key = CRCInput::RC_timeout;
+					key = CRCInput::RC_timeout;
 					break;
 	
 				case (CRCInput::RC_right):
 					break;
 
 				case (CRCInput::RC_left):
-							key = CRCInput::RC_timeout;
+					key = CRCInput::RC_timeout;
 					break;
 
 				case (CRCInput::RC_timeout):
@@ -222,8 +229,10 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 				//close menue on dbox-key
 				case (CRCInput::RC_setup):
-					key = CRCInput::RC_timeout;
-					retval = CMenuItem::RETURN_EXIT_ALL;
+					{
+						key = CRCInput::RC_timeout;
+						retval = CMenuItem::RETURN_EXIT_ALL;
+					}
 					break;
 
 				//pushback only these Keys
@@ -235,8 +244,10 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 				case (CRCInput::RC_yellow):
 				case (CRCInput::RC_blue):
 				case (CRCInput::RC_standby):
-					g_RCInput->pushbackKey (key);
-					key = CRCInput::RC_timeout;
+					{
+						g_RCInput->pushbackKey (key);
+						key = CRCInput::RC_timeout;
+					}
 					break;
 		}
 

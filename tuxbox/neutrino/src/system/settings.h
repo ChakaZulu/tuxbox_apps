@@ -115,11 +115,18 @@ struct SNeutrinoSettings
 
 	//network
 	int networkSetOnStartup;
+	int network_dhcp;
 	char network_ip[20];
 	char network_netmask[20];
 	char network_broadcast[20];
 	char network_defaultgateway[20];
 	char network_nameserver[20];
+
+	//streaming
+	int network_streaming_use;
+	char network_streamingserver[31];
+	char network_streamingserverport[10];
+
 
 	//key configuration
 	int key_tvradio_mode;

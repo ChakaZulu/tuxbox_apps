@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.39 2002/01/03 20:03:20 McClean Exp $
+//  $Id: neutrino.h,v 1.40 2002/01/04 02:38:05 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
 //  $Log: neutrino.h,v $
+//  Revision 1.40  2002/01/04 02:38:05  McClean
+//  cleanup
+//
 //  Revision 1.39  2002/01/03 20:03:20  McClean
 //  cleanup
 //
@@ -127,6 +130,12 @@
 #include <dirent.h>
 #include <dlfcn.h>
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
@@ -162,13 +171,17 @@
 using namespace std;
 
 
+#define SA struct sockaddr
+#define SAI struct sockaddr_in
+
+
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  main run-class                                             *
 *                                                                                     *
 **************************************************************************************/
 
-class CNeutrinoApp : public CMenuTarget, COnPaintNotifier
+class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 {
 	private:
 		enum
@@ -176,7 +189,14 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier
 		    mode_tv = 1,
 		    mode_radio = 2,
 		    mode_scart = 3
-	};
+		};
+
+
+		struct streaming_commandhead
+		{
+			char version;
+			char command;
+		};
 
 		//    EventList *eventlist;
 		string				settingsFile;
@@ -185,6 +205,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier
 		int				    mode;
 		bool				mute;
 		bool				softupdate;
+		int					streamstatus;
 
 		channel_msg         firstchannel;
 		st_rmsg				sendmessage;
@@ -253,6 +274,9 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier
 		int exec(CMenuTarget* parent, string actionKey);
 		//callback for menue
 		bool onPaintNotify(string MenuName);
+		//onchange
+		bool changeNotify(string OptionName);
+
 };
 
 #endif

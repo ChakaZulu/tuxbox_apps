@@ -568,9 +568,9 @@ void CFlashUpdate::paint()
 	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
 
 	sleep(2);
-	if (ioctl(fp_fd,FP_IOCTL_POWEROFF)< 0)
+	if (ioctl(fp_fd,FP_IOCTL_REBOOT)< 0)
 	{
-		perror("FP_IOCTL_POWEROFF:");
+		perror("FP_IOCTL_REBOOT:");
 	}
 	close(fp_fd);
 	sleep(20000);

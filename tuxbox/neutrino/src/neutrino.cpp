@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.117 2002/01/03 20:03:20 McClean Exp $
+        $Id: neutrino.cpp,v 1.118 2002/01/04 02:38:05 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.118  2002/01/04 02:38:05  McClean
+  cleanup
+
   Revision 1.117  2002/01/03 20:03:20  McClean
   cleanup
 
@@ -609,6 +612,11 @@ void CNeutrinoApp::setupDefaults()
 	strcpy(g_settings.network_defaultgateway, "10.10.10.10");
 	strcpy(g_settings.network_nameserver, "10.10.10.10");
 
+	g_settings.network_streaming_use = 0;
+	strcpy(g_settings.network_streamingserver, "10.10.10.10");
+	strcpy(g_settings.network_streamingserverport, "4000");
+	
+
 	//key bindings
 	g_settings.key_tvradio_mode = CRCInput::RC_nokey;
 	g_settings.key_channelList_pageup = CRCInput::RC_red;
@@ -981,6 +989,7 @@ void CNeutrinoApp::channelsInit()
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
 	softupdate = false;
+	g_settings.network_streaming_use = 0;
 
 	for(int x=1; x<argc; x++)
 	{
@@ -992,6 +1001,11 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		else if ( !strcmp(argv[x], "-z"))
 		{
 			printf("zapitmode is default..\n");
+		}
+		else if ( !strcmp(argv[x], "-stream"))
+		{
+			printf("enable streaming-control\n");
+			g_settings.network_streaming_use = 1;
 		}
 		else
 		{
@@ -1094,6 +1108,15 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	streamstatus = 0;
+	if(g_settings.network_streaming_use)
+	{
+		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.streaming", &streamstatus, true, this );
+		oj->addOption(0, "mainmenu.streaming_start");
+		oj->addOption(1, "mainmenu.streaming_stop");
+		mainMenu.addItem( oj );
+		mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	}
 	mainMenu.addItem( new CMenuForwarder("mainmenu.settings", true, "", &mainSettings) );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.service", true, "", &service) );
 
@@ -1345,6 +1368,23 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.gateway", true, g_settings.network_defaultgateway, networkSettings_Gateway ));
 	networkSettings.addItem( new CMenuForwarder("networkmenu.nameserver", true, g_settings.network_nameserver, networkSettings_NameServer ));
+
+
+	if(g_settings.network_streaming_use)
+	{
+		networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		/*
+		oj = new CMenuOptionChooser("networkmenu.usestreamserver", &g_settings.network_streaming_use, true);
+		oj->addOption(0, "options.off");
+		oj->addOption(1, "options.on");
+		networkSettings.addItem( oj );
+		*/
+		CStringInput*	networkSettings_streamingserver= new CStringInput("networkmenu.streamingserver", g_settings.network_streamingserver, 24, "ipsetup.hint_1", "ipsetup.hint_2");
+		CStringInput*	networkSettings_streamingserverport= new CStringInput("networkmenu.streamingserverport", g_settings.network_streamingserverport, 6, "ipsetup.hint_1", "ipsetup.hint_2","1234567890 ");
+
+		networkSettings.addItem( new CMenuForwarder("networkmenu.streamingserver", true, g_settings.network_streamingserver,networkSettings_streamingserver));
+		networkSettings.addItem( new CMenuForwarder("networkmenu.streamingserverport", true, g_settings.network_streamingserverport,networkSettings_streamingserverport));
+	}
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
@@ -1677,14 +1717,14 @@ void CNeutrinoApp::InitZapper()
 
 int CNeutrinoApp::run(int argc, char **argv)
 {
-	CmdParser(argc, argv);
-
 	if(!loadSetup())
 	{
 		//setup default if configfile not exists
 		setupDefaults();
 		printf("using defaults...\n\n");
 	}
+
+	CmdParser(argc, argv);
 
 	g_Fonts = new FontsDef;
 	SetupFonts();
@@ -2112,6 +2152,34 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	return returnval;
 }
 
+bool CNeutrinoApp::changeNotify(string OptionName)
+{
+	int port = 0;
+	sscanf(g_settings.network_streamingserverport, "%d", &port);
+
+	printf("streaming : %d\n", streamstatus);
+	printf("port : %d\n", port);
+
+	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SAI servaddr;
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(port);
+	inet_pton(AF_INET, g_settings.network_streamingserver, &servaddr.sin_addr);
+
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("CRemoteControl - getNVODs - couldn't connect to sectionsd!\n");
+		return false;
+	}
+	streaming_commandhead rmsg;
+	rmsg.version=1;
+	rmsg.command = streamstatus +1;
+	write(sock_fd, &rmsg, sizeof(rmsg));
+	close(sock_fd);
+
+	return false;
+}
 
 
 /**************************************************************************************
@@ -2121,7 +2189,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.117 2002/01/03 20:03:20 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.118 2002/01/04 02:38:05 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
