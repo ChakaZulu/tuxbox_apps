@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.99 2002/02/23 21:08:43 field Exp $
+//  $Id: sectionsd.cpp,v 1.100 2002/02/28 01:52:21 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.100  2002/02/28 01:52:21  field
+//  Verbessertes Umschalt-Handling
+//
 //  Revision 1.99  2002/02/23 21:08:43  field
 //  Bugfix des Bugfixes :)
 //
@@ -339,10 +342,10 @@
 // Zeit die fuer die scheduled eit's benutzt wird (in Sekunden)
 #define TIME_EIT_SCHEDULED 60
 
-#define TIME_EIT_SCHEDULED_PAUSE 220
+#define TIME_EIT_SCHEDULED_PAUSE 230
 
 // Zeit die fuer die present/following (und nvods) eit's benutzt wird (in Sekunden)
-#define TIME_EIT_PRESENT 20
+#define TIME_EIT_PRESENT 10
 
 // Timeout bei tcp/ip connections in s
 #define TIMEOUT_CONNECTIONS 2
@@ -463,7 +466,7 @@ typedef std::multimap<unsigned, class NvodSubEvent *, std::less<unsigned> > nvod
 */
 
 // Loescht ein Event aus allen Mengen
-static void deleteEvent(const unsigned long long uniqueKey)
+static bool deleteEvent(const unsigned long long uniqueKey)
 {
   MySIeventsOrderUniqueKey::iterator e=mySIeventsOrderUniqueKey.find(uniqueKey);
   if(e!=mySIeventsOrderUniqueKey.end()) {
@@ -473,7 +476,10 @@ static void deleteEvent(const unsigned long long uniqueKey)
     }
     mySIeventsOrderUniqueKey.erase(uniqueKey);
     mySIeventsNVODorderUniqueKey.erase(uniqueKey);
+    return true;
   }
+  else
+  	return false;
 /*
   for(MySIeventIDsMetaOrderServiceID::iterator i=mySIeventIDsMetaOrderServiceID.begin(); i!=mySIeventIDsMetaOrderServiceID.end(); i++)
     if(i->second==eventID)
@@ -1520,7 +1526,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.99 2002/02/23 21:08:43 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.100 2002/02/28 01:52:21 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1550,6 +1556,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 }
 
 static unsigned currentServiceKey=0;
+static int currentSectionCNMax=-1;
 
 // Mostly copied from epgd (something bugfixed ;) )
 static void commandCurrentNextInfoChannelName(struct connectionData *client, char *data, const unsigned dataLength)
@@ -1723,6 +1730,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 
     // hierher - ist im Lock :)
     currentServiceKey= *uniqueServiceKey;
+	currentSectionCNMax= -1;
 
     unlockServices();
 
@@ -1911,8 +1919,7 @@ struct sectionsd::msgResponseHeader responseHeader;
 	p+=strlen(e.contentClassification.c_str())+1;
 	strcpy(p, e.userClassification.c_str());
 	p+=strlen(e.userClassification.c_str())+1;
-	SIevent tmp = e;
-	*p = tmp.getFSK();
+	*p = e.getFSK();
 	p++;
 
     sectionsd::sectionsdTime zeit;
@@ -3184,8 +3191,35 @@ static void *eitThread(void *)
                                 unlockServices();
                             }
                         }
+
+
+
                     } // for
-                } // if serviceID
+                } // if
+
+                if ( ( header.table_id== 0x4E ) && (timeset) && ( header.table_id_extension == ( currentServiceKey & 0xFFFF ) ) )
+				{
+                	if (!header.section_number && !header.last_section_number)
+                    {
+                    	// nur eine section...
+						dmxEIT.change( true );
+					}
+                    else
+                    {
+						if ( currentSectionCNMax == -1 )
+                    	{
+							currentSectionCNMax= header.section_number;
+                        }
+                        else
+                        {
+                        	if ( ( currentSectionCNMax == header.section_number ) )
+                        	{
+                        		dmxEIT.change( true );
+                        	}
+                       	}
+					}
+				}
+
             } // if
             else
             {
@@ -3301,7 +3335,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.99 2002/02/23 21:08:43 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.100 2002/02/28 01:52:21 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {

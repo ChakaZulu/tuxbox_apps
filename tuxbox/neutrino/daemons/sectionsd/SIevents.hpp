@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.18 2002/02/23 20:23:23 McClean Exp $
+// $Id: SIevents.hpp,v 1.19 2002/02/28 01:52:21 field Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.19  2002/02/28 01:52:21  field
+// Verbessertes Umschalt-Handling
+//
 // Revision 1.18  2002/02/23 20:23:23  McClean
 // fix up
 //
@@ -369,7 +372,7 @@ class SIevent {
     // bei Fehler ist die serviceID des zurueckgelieferten Events 0
     static SIevent readActualEvent(unsigned short serviceID, unsigned timeoutInSeconds=2);
 
-    char getFSK();
+    char getFSK() const;
  protected:
     int saveXML0(FILE *f) const;
     int saveXML2(FILE *f) const;
