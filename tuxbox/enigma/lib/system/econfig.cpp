@@ -70,6 +70,10 @@ eConfig::eConfig()
 			eFatal("error while opening configdir or creating - " CONFIGDIR "/enigma");
 			}
 		  }
+		  else
+		  {
+		  closedir(configdir);
+		  }
 	
 	locked=1;
 	ppin=0;
