@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.55 2001/12/31 16:27:36 McClean Exp $
+  $Id: zapit.cpp,v 1.56 2002/01/04 22:52:31 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,11 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.56  2002/01/04 22:52:31  Simplex
+  prepared zapitclient,
+  added new command structure (version 2),
+  added some commands for bouquet editor,
+
   Revision 1.55  2001/12/31 16:27:36  McClean
   use lcddclient
 
@@ -295,6 +300,8 @@
 #include "zapit.h"
 #include "lcddclient.h"
 
+#include "clientlib/zapitclient.h"
+
 
 CLcddClient lcdd;
 
@@ -347,6 +354,8 @@ volatile sig_atomic_t keep_going = 1; /* controls program termination */
 
 void sendBouquetList();
 void sendChannelListOfBouquet( uint nBouquet);
+
+CBouquetManager* g_BouquetMan;
 
 void termination_handler (int signum)
 {
@@ -1624,12 +1633,8 @@ void parse_command()
     printf("  Param3: %s\n", rmsg.param3);
   */
 
-  if(rmsg.version!=1)
-    {
-      perror("[zapit] unknown cmd version\n");
-      return;
-    }
-
+  if(rmsg.version==1)
+  {
   switch (rmsg.cmd)
     {
     case 1:
@@ -2143,8 +2148,58 @@ void parse_command()
       }
       printf("[zapit] unknown command\n");
     }
+	} // if (rmsg.version==1)
 
 
+
+
+/********************************************/
+/*                                          */
+/*  new command handling via CZapitClient   */
+/*                                          */
+/********************************************/
+
+	else if (rmsg.version == CZapitClient::ACTVERSION)
+	{
+		printf("command version 2\n");
+		switch( rmsg.cmd)
+		{
+			case CZapitClient::CMD_GET_BOUQUETS :
+				CZapitClient::commandGetBouquets msgGetBouquets;
+				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
+				sendBouquets(msgGetBouquets.emptyBouquetsToo);
+			break;
+
+			case CZapitClient::CMD_BQ_ADD_BOUQUET :
+				CZapitClient::commandAddBouquet msgAddBouquet;
+				read( connfd, &msgAddBouquet, sizeof(msgAddBouquet));
+				g_BouquetMan->addBouquet(msgAddBouquet.name);
+			break;
+
+			case CZapitClient::CMD_BQ_ADD_CHANNEL_TO_BOUQUET :
+				CZapitClient::commandAddChannelToBouquet msgAddChannelToBouquet;
+				read( connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet));
+				addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.onid_sid);
+			break;
+
+			case CZapitClient::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET :
+				printf("should remove channel\n");
+				CZapitClient::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
+				printf("reading ...\n");
+				read( connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet));
+				printf("done\n");
+				removeChannelFromBouquet(msgRemoveChannelFromBouquet.bouquet, msgRemoveChannelFromBouquet.onid_sid);
+			break;
+
+			default:
+				printf("[zapit] unknown command (version %d)\n", CZapitClient::ACTVERSION);
+		}
+	}
+	else
+	{
+		perror("[zapit] unknown cmd version\n");
+		return;
+	}
 }
 
 void sendBouquetList()
@@ -2307,7 +2362,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.55 2001/12/31 16:27:36 McClean Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.56 2002/01/04 22:52:31 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2392,5 +2447,45 @@ int main(int argc, char **argv) {
   return 0;
 }
 
+/**************************************************************/
+/*                                                            */
+/*  functions for new command handling via CZapitClient       */
+/*                                                            */
+/*  these functions should be encapsulated in a class CZapit  */
+/*                                                            */
+/**************************************************************/
 
+void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid)
+{
+	printf("addChannelToBouquet(%d, %d)\n", bouquet, onid_sid);
+	channel* chan = g_BouquetMan->copyChannelByOnidSid( onid_sid);
+	g_BouquetMan->Bouquets[bouquet]->addService( chan);
+}
 
+void removeChannelFromBouquet(unsigned int bouquet, unsigned int onid_sid)
+{
+	printf("removing %d in bouquet %d \n", onid_sid, bouquet);
+	g_BouquetMan->Bouquets[bouquet]->removeService( onid_sid);
+}
+
+void sendBouquets(bool emptyBouquetsToo)
+{
+	for (uint i=0; i<g_BouquetMan->Bouquets.size(); i++)
+	{
+		if ( emptyBouquetsToo ||
+			 (Radiomode_on) && (g_BouquetMan->Bouquets[i]->radioChannels.size()> 0) ||
+			!(Radiomode_on) && (g_BouquetMan->Bouquets[i]->tvChannels.size()> 0))
+		{
+			CZapitClient::responseGetBouquet msgBouquet;
+			// we'll send name and i+1 as bouquet number
+			strncpy(msgBouquet.name, g_BouquetMan->Bouquets[i]->Name.c_str(),30);
+			msgBouquet.bouquet_nr = i+1;
+
+			if (send(connfd, &msgBouquet, sizeof(msgBouquet),0) == -1)
+			{
+				perror("[zapit] could not send any return\n");
+				return;
+			}
+		}
+	}
+}

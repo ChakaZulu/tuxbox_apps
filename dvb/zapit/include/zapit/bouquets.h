@@ -16,8 +16,8 @@ typedef vector<channel*> ChannelList;
 class CBouquet
 {
 	private:
-		channel* getChannelByName(char* serviceName, uint serviceType);
-		channel* getChannelByOnidSid(uint onidSid, uint serviceType);
+		channel* getChannelByName(char* serviceName, uint serviceType = 0);
+		channel* getChannelByOnidSid(uint onidSid, uint serviceType = 0);
 
 	public:
 		string Name;
@@ -30,8 +30,8 @@ class CBouquet
 		void addService( channel* newChannel);
 
 		void removeService( channel* oldChannel);
-		void removeService( char* serviceName, uint serviceType)	{removeService( getChannelByName( serviceName, serviceType));}
-		void removeService( uint onidSid, uint serviceType)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
+		void removeService( char* serviceName, uint serviceType = 0)	{removeService( getChannelByName( serviceName, serviceType));}
+		void removeService( uint onidSid, uint serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
 
 		void moveService(  char* serviceName, uint newPosition, uint serviceType);
 //		void moveService(  uint onidSid, uint newPosition);
@@ -60,6 +60,8 @@ class CBouquetManager
 		void clearAll();
 		void onTermination();
 		void onStart();
+
+		channel* copyChannelByOnidSid( unsigned int onid_sid);
 };
 
 BOUQUETS_CPP CBouquetManager* BouquetManager;

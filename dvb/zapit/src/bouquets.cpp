@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.3 2002/01/02 18:07:54 Simplex Exp $
+  $Id: bouquets.cpp,v 1.4 2002/01/04 22:52:31 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,11 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.4  2002/01/04 22:52:31  Simplex
+  prepared zapitclient,
+  added new command structure (version 2),
+  added some commands for bouquet editor,
+
   Revision 1.3  2002/01/02 18:07:54  Simplex
   fixed bug with channels of servicetype 4
 
@@ -45,6 +50,7 @@ channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
 	ChannelList& channels = tvChannels;
 	switch (serviceType)
 	{
+		case 0:
 		case 1:
 		case 4: channels = tvChannels; break;
 		case 2: channels = radioChannels; break;
@@ -58,16 +64,22 @@ channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
 	{
 		result = *it;
 	}
+
+	if ((serviceType==0) && (result==NULL))
+		result = getChannelByName(serviceName, 2);
+
 	return( result);
 }
 
-channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType)
+channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 {
 	channel* result = NULL;
 
+	printf("searching channel\n");
 	ChannelList& channels = tvChannels;
 	switch (serviceType)
 	{
+		case 0:
 		case 1:
 		case 4: channels = tvChannels; break;
 		case 2: channels = radioChannels; break;
@@ -78,8 +90,13 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType)
 		it++;
 	if (it<channels.end())
 	{
+		printf("channel found!\n");
 		result = *it;
 	}
+
+	if ((serviceType==0) && (result==NULL))
+		result = getChannelByOnidSid(onidSid, 2);
+
 	return( result);
 }
 
@@ -113,7 +130,11 @@ void CBouquet::removeService( channel* oldChannel)
 		it--;
 	if (it>channels.begin())
 	{
+		printf("channel found \n");
 		channels.erase(it);
+		printf("channel erased \n");
+		delete oldChannel;
+		printf("channel deleted \n");
 	}
 }
 
@@ -218,9 +239,6 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 	int nChNrRadio = 1;
 	int nChNrTV = 1;
 
-	typedef enum {isTVChannel, isRadioChannel, isNothing} ChannelType;
-
-	enum ChannelType channelType;
 	uint onid, sid;
 
 	numchans_tv.clear();
@@ -236,40 +254,26 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 			sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &sid);
 			sscanf(channel_node->GetAttributeValue("onid"), "%x", &onid);
 
-			std::map<uint,channel>::iterator itChannel;
+//			std::map<uint,channel>::iterator itChannel;
 
-			channel* chan;
-			itChannel = allchans_tv.find((onid << 16) + sid);
-			if (itChannel != allchans_tv.end())
-			{
-				chan = new channel(itChannel->second);
-				channelType = isTVChannel;
-			}
-			else
-			{
-				itChannel = allchans_radio.find((onid << 16) + sid);
-				if (itChannel != allchans_radio.end())
-				{
-					chan = new channel(itChannel->second);
-					channelType = isRadioChannel;
-				}
-				else
-				{
-					channelType = isNothing;
-				}
-			}
+			channel* chan = copyChannelByOnidSid( (onid << 16) + sid);
 
-			if (channelType == isTVChannel)
+			if ( chan != NULL)
 			{
-				chan->chan_nr = nChNrTV;
-				newBouquet->addService( chan);
-				numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, (onid<<16)+sid));
-			}
-			if (channelType == isRadioChannel)
-			{
-				chan->chan_nr = nChNrRadio;
-				newBouquet->addService( chan);
-				numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, (onid<<16)+sid));
+				switch (chan->service_type)
+				{
+					case 1:
+					case 4:
+						chan->chan_nr = nChNrTV;
+						newBouquet->addService( chan);
+						numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, (onid<<16)+sid));
+					break;
+					case 2:
+						chan->chan_nr = nChNrRadio;
+						newBouquet->addService( chan);
+						numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, (onid<<16)+sid));
+					break;
+				}
 			}
 			channel_node = channel_node->GetNext();
 		}
@@ -421,3 +425,21 @@ void CBouquetManager::onStart()
 	system("cp " CONFIGDIR "/zapit/last_bouq /tmp/zapit_last_bouq");
 }
 
+channel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
+{
+	channel* chan = NULL;
+	map<uint,channel>::iterator itChannel = allchans_tv.find(onid_sid);
+	if (itChannel != allchans_tv.end())
+	{
+		chan = new channel(itChannel->second);
+	}
+	else
+	{
+		itChannel = allchans_radio.find( onid_sid);
+		if (itChannel != allchans_radio.end())
+		{
+			chan = new channel(itChannel->second);
+		}
+	}
+	return( chan);
+}

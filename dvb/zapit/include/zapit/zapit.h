@@ -86,4 +86,15 @@ int tune(uint tsid);
 void *start_scanthread(void *);
 int get_caver();
 
-CBouquetManager* g_BouquetMan;
+/**************************************************************/
+/*                                                            */
+/*  functions for new command handling via CZapitClient       */
+/*                                                            */
+/*  these functions should be encapsulated in a class CZapit  */
+/*                                                            */
+/**************************************************************/
+
+void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid);
+void removeChannelFromBouquet(unsigned int bouquet, unsigned int onid_sid);
+void sendBouquets(bool emptyBouquetsToo);
+
