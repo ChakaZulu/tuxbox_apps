@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.41 2004/11/10 14:52:18 zwen Exp $
+	$Id: controlapi.cpp,v 1.42 2004/11/29 19:16:46 chakazulu Exp $
 
 	License: GPL
 
@@ -23,10 +23,16 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 // system
 #include <unistd.h>
+#include <stdio.h>
 #include <string>
 #include <cctype>
+#include <dirent.h>
 
 // tuxbox
 #include <neutrinoMessages.h>
@@ -43,7 +49,7 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		"timer","setmode","standby","getdate","gettime","settings","getservicesxml",
 		"getbouquetsxml","getonidsid","message","info","shutdown","volume",
 		"channellist","getbouquet","getbouquets","epg","version","zapto", "startplugin",
-		"getmode",NULL
+		"getmode","exec",NULL
 	};
 
 	dprintf("Execute CGI : %s\n",request->Filename.c_str());
@@ -124,6 +130,8 @@ bool CControlAPI::Execute(CWebserverRequest* request)
 		return StartPluginCGI(request);
 	case 20:
 		return GetModeCGI(request);
+		case 21: 
+        return ExecCGI(request);
 	default:
 		request->SendError();
 		return false;
@@ -246,6 +254,79 @@ bool CControlAPI::GetModeCGI(CWebserverRequest *request)
 		request->SocketWriteLn("unknown");
 	return true;
 }
+
+static const std::string pluginDirs[2] = {
+	PLUGINDIR,
+	"/var/tuxbox/plugins",
+};
+
+bool CControlAPI::ExecCGI(CWebserverRequest *request)
+{
+	bool res = false;
+	if (request->ParameterList.size() > 0) 
+	{
+		std::string script = request->ParameterList["1"];
+		std::string::size_type i = script.find_last_of("/");
+		if (i != std::string::npos)
+			script = script.substr(i+1);
+
+		for (unsigned int i=0;i<2;i++) {
+			DIR *scriptdir = opendir(pluginDirs[i].c_str());
+			if (scriptdir != NULL)
+			{
+				struct dirent *scriptfile = NULL;
+				while ((scriptfile = readdir(scriptdir)) != NULL)
+				{
+					if (strcmp(script.c_str(),scriptfile->d_name) == 0)
+						break;
+				}
+				if (scriptfile != NULL)
+				{
+					// script was found
+					std::string abscmd(pluginDirs[i].c_str());
+					abscmd += "/";
+					abscmd += script;
+					dprintf("executing %s\n",abscmd.c_str());
+					FILE *f = popen(abscmd.c_str(),"r");
+					if (f != NULL)
+					{
+						char output[1024];
+						while (fgets(output,1024,f))
+						{
+							request->SocketWrite(output);
+						}
+						pclose(f);
+						res = true;
+						break;
+					} 
+					else 
+					{	
+						printf("can't open %s\n",abscmd.c_str());
+					}
+				} 
+				else
+				{
+					printf("script %s not found in %s\n",
+							script.c_str(),pluginDirs[i].c_str());
+				}	
+				closedir(scriptdir);
+				
+			}
+			else 
+			{
+				printf("could not open: %s\n",pluginDirs[i].c_str());
+			}
+		}
+	}
+	else
+	{
+		printf("No script given\n");
+		request->Send404Error();
+	}
+	
+	return res;
+}
+
 
 //-------------------------------------------------------------------------
 
