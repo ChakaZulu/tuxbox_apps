@@ -28,11 +28,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.h,v 1.10 2002/02/22 16:01:16 field Exp $
+$Id: gamelist.h,v 1.11 2002/02/22 17:23:24 field Exp $
 
 $Log: gamelist.h,v $
-Revision 1.10  2002/02/22 16:01:16  field
-Plugin-Interface weiter verbessert
+Revision 1.11  2002/02/22 17:23:24  field
+Neues Offset-Cmd
 
 Revision 1.8  2002/01/15 23:17:59  McClean
 cleanup
@@ -90,6 +90,7 @@ class CPlugins
 		bool vtxtpid;
 		int posx, posy, sizex, sizey;
 		bool showpig;
+		bool needoffset;
 	};
 
 	int fb, rc, lcd, pid;
@@ -127,6 +128,7 @@ public:
 	int getPosY(int number) { return plugin_list[number].posy; }
 	int getSizeX(int number) { return plugin_list[number].sizex; }
 	int getSizeY(int number) { return plugin_list[number].sizey; }
+	int getType(int number) { return plugin_list[number].type; }
 
 	void startPlugin(int number);
 };
@@ -135,39 +137,43 @@ public:
 class CGameList : public CMenuTarget
 {
 
-	int fb, rc, lcd, pid;
-	int number_of_plugins;
-	std::string plugin_dir;
+	struct game
+    {
+    	int		number;
+        string	name;
+		string	desc;
+	};
 
-		unsigned int	liststart;
-		unsigned int	listmaxshow;
-		unsigned int	selected;
-		int				key;
-		string			name;
+	unsigned int	liststart;
+	unsigned int	listmaxshow;
+	unsigned int	selected;
+	int				key;
+	string			name;
+	vector<game*>   gamelist;
 
-		int				fheight; // Fonthoehe Channellist-Inhalt
-		int				theight; // Fonthoehe Channellist-Titel
 
-		int				fheight1,fheight2;
+	int				fheight; // Fonthoehe Channellist-Inhalt
+	int				theight; // Fonthoehe Channellist-Titel
 
-		int 			width;
-		int 			height;
-		int 			x;
-		int 			y;
+	int				fheight1,fheight2;
 
-		void paintItem(int pos);
-		void paint();
-		void paintHead();
+	int 			width;
+	int 			height;
+	int 			x;
+	int 			y;
 
-	public:
+	void paintItem(int pos);
+	void paint();
+	void paintHead();
 
-		CGameList( string Name );
-		~CGameList();
+public:
 
-		void hide();
-		int exec(CMenuTarget* parent, string actionKey);
-		void runGame(int selected );
+	CGameList( string Name );
+	~CGameList();
 
+	void hide();
+	int exec(CMenuTarget* parent, string actionKey);
+	void runGame(int selected );
 };
 
 

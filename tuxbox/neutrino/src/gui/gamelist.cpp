@@ -28,11 +28,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.28 2002/02/22 16:01:16 field Exp $
+$Id: gamelist.cpp,v 1.29 2002/02/22 17:23:24 field Exp $
 
 $Log: gamelist.cpp,v $
-Revision 1.28  2002/02/22 16:01:16  field
-Plugin-Interface weiter verbessert
+Revision 1.29  2002/02/22 17:23:24  field
+Neues Offset-Cmd
 
 Revision 1.26  2002/01/29 17:26:51  field
 Jede Menge Updates :)
@@ -167,6 +167,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 	plugin_data->lcd = false;
 	plugin_data->vtxtpid = false;
 	plugin_data->showpig = false;
+	plugin_data->needoffset = false;
 
 	for (int i = 0; i < linecount; i++)
 	{
@@ -216,6 +217,10 @@ void CPlugins::parseCfg(plugin *plugin_data)
 		else if (cmd == "pigon")
 		{
 			plugin_data->showpig = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needoffsets")
+		{
+			plugin_data->needoffset = ((parm == "1")?true:false);
 		}
 	}
 
@@ -290,6 +295,15 @@ void CPlugins::startPlugin(int number)
 		cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
 
 		startparam = makeParam(P_ID_VTXTPID, startparam);
+	}
+	if (plugin_list[number].needoffset)
+	{
+		addParm(P_ID_OFF_X, g_settings.screen_StartX);
+		addParm(P_ID_OFF_Y, g_settings.screen_StartY);
+		cout << "With OFFSETS " << params.find(P_ID_OFF_X)->second.c_str() << ":" << params.find(P_ID_OFF_Y)->second.c_str() << endl;
+
+		startparam = makeParam(P_ID_OFF_X, startparam);
+		startparam = makeParam(P_ID_OFF_Y, startparam);
 	}
 
 	PluginParam *par = startparam;
@@ -412,6 +426,12 @@ CGameList::CGameList(string Name)
 
 CGameList::~CGameList()
 {
+	for(unsigned int count=0;count<gamelist.size();count++)
+    {
+    	delete gamelist[count];
+	}
+    gamelist.clear();
+
 }
 
 
@@ -425,8 +445,29 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	paintHead();
 
 	//scan4games here!
+    for(unsigned int count=0;count<gamelist.size();count++)
+	{
+    	delete gamelist[count];
+	}
+    gamelist.clear();
+
+    game* tmp = new game();
+    tmp->name = g_Locale->getText("menu.back");
+    gamelist.insert(gamelist.end(), tmp);
 
 	g_PluginList->loadPlugins();
+
+	for(unsigned int count=0;count<g_PluginList->getNumberOfPlugins();count++)
+	{
+    	if ( g_PluginList->getType(count)== 1 )
+    	{
+    		tmp = new game();
+    		tmp->number = count;
+    		tmp->name = g_PluginList->getName(count);
+    		tmp->desc = g_PluginList->getDescription(count);
+    		gamelist.insert(gamelist.end(), tmp);
+    	}
+	}
 
 	paint();
 
@@ -441,7 +482,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
-			if (selected>g_PluginList->getNumberOfPlugins())
+			if (selected>gamelist.size()-1)
 				selected=0;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
@@ -449,7 +490,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
-				selected=g_PluginList->getNumberOfPlugins();
+				selected=gamelist.size()-1;
 			else
 				selected -= listmaxshow;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -460,7 +501,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			int prevselected=selected;
 			if(selected==0)
 			{
-				selected = g_PluginList->getNumberOfPlugins();
+				selected = gamelist.size()-1;
 			}
 			else
 				selected--;
@@ -479,7 +520,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==CRCInput::RC_down)
 		{
 			int prevselected=selected;
-			selected = (selected+1)%(g_PluginList->getNumberOfPlugins()+1);
+			selected = (selected+1)%(gamelist.size());
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -500,7 +541,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			}
 			else
 			{//exec the plugin :))
-				runGame( selected- 1 );
+				runGame( selected );
 			}
 		}
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
@@ -538,26 +579,19 @@ void CGameList::paintItem(int pos)
 		g_FrameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
 		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
 		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
-
-		g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
-    	g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, g_Locale->getText("menu.back"), color);
-
-
 	}
 	else
 	{
 		ypos -= (fheight / 2) - 15;
+	}
+    g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
 
-		g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
 
-
-
-		if(liststart+pos-1<g_PluginList->getNumberOfPlugins())
-		{
-			g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, g_PluginList->getName(liststart+pos-1).c_str(), color);
-			g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, g_PluginList->getDescription(liststart+pos-1).c_str(), color);
-
-		}
+	if(liststart+pos<gamelist.size())
+	{
+    	game* aktgame = gamelist[liststart+pos];
+		g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name.c_str(), color);
+		g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc.c_str(), color);
 	}
 }
 
@@ -586,7 +620,7 @@ void CGameList::runGame(int selected )
 
 	g_RemoteControl->CopyPIDs();
 	g_PluginList->setvtxtpid( g_RemoteControl->vtxtpid );
-	g_PluginList->startPlugin( selected );
+	g_PluginList->startPlugin( gamelist[selected]->number );
 
     //redraw menue...
     paintHead();
