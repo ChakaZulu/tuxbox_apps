@@ -120,13 +120,8 @@ class CPauseSectionsdNotifier : public CChangeObserver
 
 class CSPTSNotifier : public CChangeObserver
 {
-	const char * filename;
- public:
-	inline CSPTSNotifier(const char * file_to_modify)
-		{
-			filename = file_to_modify;
-		};
-	bool changeNotify(const neutrino_locale_t, void * data);
+	public:
+		bool changeNotify(const neutrino_locale_t, void *);
 };
 
 class CTouchFileNotifier : public CChangeObserver

@@ -52,7 +52,6 @@
 
 #include <gui/plugins.h>
 #include <daemonc/remotecontrol.h>
-#include <driver/aviaext.h>
 extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
@@ -271,25 +270,13 @@ bool CPauseSectionsdNotifier::changeNotify(const neutrino_locale_t, void * Data)
 	return true;
 }
 
-bool CSPTSNotifier::changeNotify(const neutrino_locale_t, void * data)
+bool CSPTSNotifier::changeNotify(const neutrino_locale_t, void *)
 {
-	if ((*(int *)data) != 0)
-	{
-		CAViAExt::getInstance()->playbackSPTS();
-		FILE * fd = fopen(filename, "w");
-		if (fd)
-			fclose(fd);
-		else
-			return false;
-	}
+	if (g_settings.misc_spts)
+		g_Zapit->PlaybackSPTS();
 	else
-	{
-		CAViAExt::getInstance()->playbackPES();
-		remove(filename);
-	}
-	g_Zapit->stopPlayBack();
-	sleep(1);
-	g_Zapit->startPlayBack();
+		g_Zapit->PlaybackPES();
+
 	return true;
 }
 

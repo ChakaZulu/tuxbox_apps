@@ -37,9 +37,6 @@
 #include <unistd.h>
 #include <dbox/avs_core.h>
 #include <driver/audioplay.h> // for ShoutcastCallback()
-#ifdef DBOX
-#include <driver/aviaext.h>
-#endif
 #define AVS_DEVICE "/dev/dbox/avs0"
 #include <driver/netfile.h>
 
@@ -215,7 +212,7 @@ bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int
 	 		mSamplerate = dsp_speed;
 #ifdef DBOX
 			// disable iec aka digi out (avia reset enables it again)
-			CAViAExt::getInstance()->iecOff();
+			// removed, iec is handled by zapit now, audioplayback should disable the iec themself
 #endif
 		}	 		
 		usleep(400000);

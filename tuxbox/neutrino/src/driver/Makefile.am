@@ -27,7 +27,6 @@ libneutrino_driver_a_SOURCES = \
 	stream2file.cpp \
 	screen_max.cpp \
 	slotbuffer.c \
-	aviaext.cpp \
 	file.cpp \
 	audiometadata.cpp \
 	audiofile.cpp

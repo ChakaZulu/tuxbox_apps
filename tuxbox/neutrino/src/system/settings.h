@@ -51,6 +51,7 @@ struct SNeutrinoSettings
 	char record_safety_time_after[3];
 	int infobar_sat_display;
 	int infobar_subchan_disp_pos;
+	int misc_spts;
 
 	//audio
 	int audio_AnalogMode;
@@ -279,12 +280,12 @@ struct SNeutrinoSettings
 
 
 #if HAVE_DVB_API_VERSION == 1
-#define MISC_SETTING_FILES_COUNT 8
-#else
 #define MISC_SETTING_FILES_COUNT 7
+#else
+#define MISC_SETTING_FILES_COUNT 6
 #endif
 
-#define MISC_SETTING_SPTS_MODE 0
+// #define MISC_SETTING_SPTS_MODE 0
 
 	int misc_option[MISC_SETTING_FILES_COUNT];
 

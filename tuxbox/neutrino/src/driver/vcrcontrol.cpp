@@ -575,7 +575,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 							      ((unsigned long long)SplitSize) * 1048576ULL,
 							      numpids,
 							      pids,
-							      g_settings.misc_option[MISC_SETTING_SPTS_MODE],
+							      g_settings.misc_spts,
 							      RingBuffers);
 
 

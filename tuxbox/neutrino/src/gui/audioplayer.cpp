@@ -45,9 +45,6 @@
 #include <driver/audioplay.h>
 #include <driver/audiometadata.h>
 #define DBOX 1
-#ifdef DBOX
-#include <driver/aviaext.h>
-#endif
 
 #include <daemonc/remotecontrol.h>
 
@@ -242,7 +239,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 #ifdef DBOX
 	// disable iec aka digi out
-	CAViAExt::getInstance()->iecOff();
+	g_Zapit->IecOff();
 #endif
 	
 	/*int ret =*/
@@ -270,7 +267,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 #ifdef DBOX
 	// enable iec aka digi out
-	CAViAExt::getInstance()->iecOn();
+	g_Zapit->IecOn();
 #endif
 
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );

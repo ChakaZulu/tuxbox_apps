@@ -544,10 +544,11 @@ int CNeutrinoApp::loadSetup()
 	g_settings.gtx_alpha2 = configfile.getInt32( "gtx_alpha2", 1);
 
 	//misc
-	g_settings.shutdown_real         = configfile.getBool("shutdown_real"        , true );
-	g_settings.shutdown_real_rcdelay = configfile.getBool("shutdown_real_rcdelay", true );
-	g_settings.infobar_sat_display   = configfile.getBool("infobar_sat_display"  , true );
-	g_settings.infobar_subchan_disp_pos = configfile.getInt32("infobar_subchan_disp_pos"  , 0 );
+	g_settings.shutdown_real            = configfile.getBool("shutdown_real"             , true );
+	g_settings.shutdown_real_rcdelay    = configfile.getBool("shutdown_real_rcdelay"     , true );
+	g_settings.infobar_sat_display      = configfile.getBool("infobar_sat_display"       , true );
+	g_settings.infobar_subchan_disp_pos = configfile.getInt32("infobar_subchan_disp_pos" , 0 );
+	g_settings.misc_spts                = configfile.getBool("misc_spts"                 , false );
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -871,10 +872,11 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "gtx_alpha2", g_settings.gtx_alpha2 );
 
 	//misc
-	configfile.setBool("shutdown_real"        , g_settings.shutdown_real        );
-	configfile.setBool("shutdown_real_rcdelay", g_settings.shutdown_real_rcdelay);
-	configfile.setBool("infobar_sat_display"  , g_settings.infobar_sat_display  );
-	configfile.setInt32("infobar_subchan_disp_pos"  , g_settings.infobar_subchan_disp_pos  );
+	configfile.setBool("shutdown_real"             , g_settings.shutdown_real);
+	configfile.setBool("shutdown_real_rcdelay"     , g_settings.shutdown_real_rcdelay);
+	configfile.setBool("infobar_sat_display"       , g_settings.infobar_sat_display);
+	configfile.setInt32("infobar_subchan_disp_pos" , g_settings.infobar_subchan_disp_pos);
+	configfile.setBool("misc_spts"                 , g_settings.misc_spts);
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -1765,7 +1767,6 @@ typedef struct misc_setting_files_t
 
 const misc_setting_files_struct_t misc_setting_files[MISC_SETTING_FILES_COUNT] =
 {
-	{LOCALE_MISCSETTINGS_SPTSMODE      , "/var/etc/.spts_mode"     , OPTIONS_OFF0_ON1_OPTIONS }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
 	{LOCALE_MISCSETTINGS_BOOTMENU      , "/var/etc/.neutrino"      , OPTIONS_OFF1_ON0_OPTIONS },
 	{LOCALE_MISCSETTINGS_BOOTINFO      , "/var/etc/.boot_info"     , OPTIONS_OFF0_ON1_OPTIONS },
 #if HAVE_DVB_API_VERSION == 1
@@ -1804,6 +1805,10 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_INFOVIEWER_SUBCHAN_DISP_POS, &g_settings.infobar_subchan_disp_pos, INFOBAR_SUBCHAN_DISP_POS_OPTIONS, INFOBAR_SUBCHAN_DISP_POS_OPTIONS_COUNT, true));
 	
 	miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
+
+	CSPTSNotifier *sptsNotifier = new CSPTSNotifier;
+	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_SPTSMODE, &g_settings.misc_spts, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true, sptsNotifier));
+
 	for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
 	{
 		FILE * fd = fopen(misc_setting_files[i].filename, "r");
@@ -1815,10 +1820,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		else
 			g_settings.misc_option[i] = 0;
 		
-		if (misc_setting_files[i].name == LOCALE_MISCSETTINGS_SPTSMODE) // SPTS-Mode
-			miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CSPTSNotifier(misc_setting_files[i].filename)));
-		else
-			miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
+		miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
 	}
 	
 	miscSettings.addItem(new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, MISCSETTINGS_FB_DESTINATION_OPTIONS, MISCSETTINGS_FB_DESTINATION_OPTION_COUNT, true, ConsoleDestinationChanger));
@@ -2953,7 +2955,17 @@ void CNeutrinoApp::InitZapper()
 	g_InfoViewer->start();
 	g_EpgData->start();
 
+	// set initial PES/SPTS mode
+	if (g_settings.misc_spts != g_Zapit->PlaybackState())
+	{
+		if (g_settings.misc_spts)
+			g_Zapit->PlaybackSPTS();
+		else
+			g_Zapit->PlaybackPES();
+	}
+
 	firstChannel();
+
 	if(firstchannel.mode == 't')
 	{
 		tvMode();
