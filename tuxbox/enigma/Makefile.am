@@ -1,7 +1,7 @@
 if HAVE_LIBFREETYPE
 if HAVE_LIBPNG
 
-SUBDIRS = src
+SUBDIRS = doc src
 
 endif
 endif
