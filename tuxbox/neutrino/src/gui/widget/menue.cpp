@@ -58,6 +58,20 @@ CMenuForwarder * const GenericMenuBack = &CGenericMenuBack;
 
 
 
+void CMenuItem::init(const int X, const int Y, const int DX, const int OFFX)
+{
+	x    = X;
+	y    = Y;
+	dx   = DX;
+	offx = OFFX;
+}
+
+void CMenuItem::setActive(const bool Active)
+{
+	active = Active;
+	if (x != -1)
+		paint();
+}
 
 CMenuWidget::CMenuWidget(const neutrino_locale_t Name, const std::string & Icon, const int mwidth, const int mheight)
 {

@@ -88,13 +88,8 @@ class CMenuItem
 		}
 		virtual ~CMenuItem(){}
 
-		virtual void init(int X, int Y, int DX, int OFFX)
-		{
-			x=X;
-			y=Y;
-			dx=DX;
-			offx=OFFX;
-		}
+		virtual void init(const int X, const int Y, const int DX, const int OFFX);
+
 		virtual int paint (bool selected = false) = 0;
 
 		virtual int getHeight(void) const = 0;
@@ -108,12 +103,7 @@ class CMenuItem
 		{
 			return 0;
 		}
-		virtual void setActive(const bool Active)
-		{
-			active = Active;
-			if (x != -1)
-				paint();
-		};
+		virtual void setActive(const bool Active);
 };
 
 class CMenuSeparator : public CMenuItem

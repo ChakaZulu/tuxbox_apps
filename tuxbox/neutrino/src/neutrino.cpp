@@ -2042,6 +2042,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( mf7);
 	recordingSettings.addItem( mf8);
 	recordingSettings.addItem( oj6);
+	recordingSettings.addItem( oj7);
 
 	recordingstatus = 0;
 }
