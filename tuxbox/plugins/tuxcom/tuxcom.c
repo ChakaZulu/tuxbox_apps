@@ -192,13 +192,13 @@ int GetRCCode(int scrollmode)
 #else
 		else
 		{
-			rccode = 0;
+			rccode = -1;
 			rc_last_key = KEY_RESERVED;
 		}
 #endif
 	}
 
-		rccode = 0;
+		rccode = -1;
 		usleep(1000000/100);
 		return 0;
 }
