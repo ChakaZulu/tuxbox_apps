@@ -24,18 +24,14 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
-
-
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 
 #include <linux/mtd/mtd.h>
+#include <libcramfs/libcramfs.h>
+
 #include "dbox/fp.h"
 
 
@@ -311,6 +307,11 @@ bool CFlashTool::erase(int globalProgressEnd)
 
 	close(fd);
 	return true;
+}
+
+bool CFlashTool::check_cramfs( string filename )
+{
+	return cramfs_crc( (char*) filename.c_str())==1; 
 }
 
 void CFlashTool::reboot()

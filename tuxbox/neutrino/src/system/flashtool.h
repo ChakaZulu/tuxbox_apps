@@ -42,6 +42,7 @@ using namespace std;
 class CFlashTool
 {
 	private:
+	
 		int		fd_fp;
 		CProgress_StatusViewer* statusViewer;
 		string mtdDevice;
@@ -60,6 +61,8 @@ class CFlashTool
 
 		bool program( string filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
 		bool readFromMTD( string filename, int globalProgressEnd=-1 );
+
+		bool check_cramfs( string filename );
 
 		void reboot();
 };
