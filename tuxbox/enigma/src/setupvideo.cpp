@@ -13,6 +13,10 @@
 #include <lib/gui/echeckbox.h>
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
+#include <lib/system/init.h>
+#include <lib/system/init_num.h>
+
+#include <src/enigma_lcd.h>
                                                
 eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 {
@@ -271,3 +275,158 @@ void eZapVideoSetup::ac3defaultChanged( int i )
 {
 	eAudio::getInstance()->setAC3default( i );
 }
+
+class eWizardTVSystem: public eWindow
+{
+	eButton *ok;
+	eListBox<eListBoxEntryText> *tvsystem;
+	unsigned int v_tvsystem;
+	void TVSystemChanged( eListBoxEntryText * );
+	void okPressed();
+	int eventHandler( const eWidgetEvent &e );
+public:
+	eWizardTVSystem();
+	static int run();
+};
+
+void eWizardTVSystem::TVSystemChanged( eListBoxEntryText *e )
+{
+	unsigned int old = 0;
+	eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", old );
+	if (e)
+	{
+		v_tvsystem = (unsigned int) e->getKey();
+		eConfig::getInstance()->setKey("/elitedvb/video/tvsystem", v_tvsystem);
+		eAVSwitch::getInstance()->reloadSettings();
+		eConfig::getInstance()->setKey("/elitedvb/video/tvsystem", old );
+	}
+}
+
+int eWizardTVSystem::eventHandler( const eWidgetEvent &e)
+{
+	switch(e.type)
+	{
+		case eWidgetEvent::execDone:
+			eAVSwitch::getInstance()->reloadSettings();
+			eStreamWatchdog::getInstance()->reloadSettings();
+			break;
+		case eWidgetEvent::wantClose:
+			unsigned int bla;
+			if ( eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", bla ) )
+			    break;
+		default:
+			return eWindow::eventHandler( e );
+	}
+	return 1;
+}
+
+eWizardTVSystem::eWizardTVSystem(): eWindow(0)
+{
+	v_tvsystem=1;
+	eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", v_tvsystem );
+
+	int fd=eSkin::getActive()->queryValue("fontsize", 20);
+
+	setText(_("TV System Wizard"));
+	move(ePoint(160, 120));
+	cresize(eSize(390, 170));
+
+	eLabel *l=new eLabel(this);
+	l->setText(_("TV System:"));
+	l->move(ePoint(20, 10));
+	l->resize(eSize(150, fd+4));
+
+	tvsystem=new eListBox<eListBoxEntryText>(this, l);
+	tvsystem->loadDeco();
+	tvsystem->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+
+	// our bitmask is:
+
+	// have pal     1
+	// have ntsc    2
+	// have pal60   4  (aka. PAL-M bis wir PAL60 supporten)
+
+	// allowed bitmasks:
+
+	//  1    pal only, no ntsc
+	//  2    ntsc only, no pal
+	//  3    multinorm
+	//  5    pal, pal60
+
+	eListBoxEntryText *entrys[4];
+	tvsystem->move(ePoint(180, 10));
+	tvsystem->resize(eSize(170, 35));
+	tvsystem->setHelpText(_("choose TV system ( left, right )"));
+	entrys[0]=new eListBoxEntryText(tvsystem, "PAL", (void*)1);
+	entrys[1]=new eListBoxEntryText(tvsystem, "PAL + PAL60", (void*)5);
+	entrys[2]=new eListBoxEntryText(tvsystem, "Multinorm", (void*)3);
+	entrys[3]=new eListBoxEntryText(tvsystem, "NTSC", (void*)2);
+
+	int i = 0;
+	switch (v_tvsystem)
+	{
+	case 1: i = 0; break;
+	case 5: i = 1; break;
+	case 3: i = 2; break;
+	case 2: i = 3; break;
+	}
+	tvsystem->setCurrent(entrys[i]);
+	CONNECT( tvsystem->selchanged, eWizardTVSystem::TVSystemChanged );
+
+	ok=new eButton(this);
+	ok->setText(_("save"));
+	ok->setShortcut("green");
+	ok->setShortcutPixmap("green");
+	ok->move(ePoint(20, 65));
+	ok->resize(eSize(220, 40));
+	ok->setHelpText(_("save changes and return"));
+	ok->loadDeco();
+	CONNECT(ok->selected, eWizardTVSystem::okPressed);
+
+	eStatusBar *status = new eStatusBar(this);
+	status->move( ePoint(0, clientrect.height()-50) );
+	status->resize( eSize( clientrect.width(), 50) );
+	status->loadDeco();
+}
+
+void eWizardTVSystem::okPressed()
+{
+	eConfig::getInstance()->setKey("/elitedvb/video/tvsystem", v_tvsystem);
+	eAudio::getInstance()->saveSettings();
+	eConfig::getInstance()->flush();
+	close(1);
+}
+
+class eWizardTVSystemInit
+{
+public:
+	eWizardTVSystemInit()
+	{
+		if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
+		{
+			// only run wizzard when language not yet setup'ed
+			unsigned int tvsystem=0;
+			if ( eConfig::getInstance()->getKey("/elitedvb/video/tvsystem", tvsystem) )
+			{
+				eWizardTVSystem w;
+#ifndef DISABLE_LCD
+				eZapLCD* pLCD = eZapLCD::getInstance();
+				pLCD->lcdMain->hide();
+				pLCD->lcdMenu->show();
+    			w.setLCD( pLCD->lcdMenu->Title, pLCD->lcdMenu->Element );
+#endif
+				w.show();
+				w.exec();
+				w.hide();
+#ifndef DISABLE_LCD
+				pLCD->lcdMenu->hide();
+				pLCD->lcdMain->show();
+#endif
+			}
+			else
+				eDebug("tvsystem already selected.. do not start tvsystem wizard");
+		}
+	}
+};
+
+eAutoInitP0<eWizardTVSystemInit> init_eWizardTVSystemInit(eAutoInitNumbers::wizard-1, "wizard: tv system");
