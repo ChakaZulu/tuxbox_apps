@@ -164,13 +164,13 @@ void CInfoViewer::showRecordIcon(const bool show)
 
 void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap)
 {
-	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
-
 	channel_id = new_channel_id;
 	showButtonBar = !calledFromNumZap;
 
-	bool fadeIn = ( ( !is_visible ) && showButtonBar &&
-			( g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA ) && ( g_settings.widget_fade ) ); // only enx
+	bool fadeIn = ((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM)) && // eNX only
+		g_settings.widget_fade &&
+		(!is_visible) &&
+		showButtonBar;
 	bool fadeOut = false;
 	int fadeValue;
 
@@ -311,6 +311,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		uint msg;
 		uint data;
 
+		CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
 		if ( !calledFromNumZap )
 		{
@@ -376,8 +377,10 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 						g_RCInput->killTimer(fadeTimer);
 						fadeIn = false;
 					}
-					if ( (!fadeOut) &&
-					     ( g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA ) && ( g_settings.widget_fade ) )
+					if (((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM)) && // eNX only
+						(!fadeOut) &&
+						g_settings.widget_fade
+						)
 					{
 						fadeOut = true;
 						fadeTimer = g_RCInput->addTimer( FADE_TIME, false );
@@ -642,7 +645,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		if ( data == channel_id)
        		{
 			// show failure..!
-			CLCD::getInstance()->showServicename("("+g_RemoteControl->getCurrentChannelName()+")");
+			CLCD::getInstance()->showServicename("(" + g_RemoteControl->getCurrentChannelName() + ')');
 			printf("zap failed!\n");
 			showFailure();
 			CLCD::getInstance()->showPercentOver(255);
@@ -695,17 +698,12 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 
 void CInfoViewer::showButton_SubServices()
 {
-	if ( g_RemoteControl->subChannels.size()> 0 )
+	if (!(g_RemoteControl->subChannels.empty()))
 	{
-		// yellow button for NVODs / Subservices
+		// yellow button for subservices / NVODs
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, BoxEndX- ICON_OFFSET- 2* ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 
-		if ( g_RemoteControl->are_subchannels )
-			// SubServices
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2 + 2), g_Locale->getText("infoviewer.subservice"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
-		else
-			// NVOD
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2 + 2), g_Locale->getText("infoviewer.selecttime"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 2* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_YELLOW_WIDTH + 2 + 2), g_Locale->getText((g_RemoteControl->are_subchannels) ? "infoviewer.subservice" : "infoviewer.selecttime"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	}
 }
 
@@ -766,9 +764,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 
 	if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 	{
-		int seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;
-		if ((jetzt - info_CurrentNext.current_zeit.startzeit ) % 60 > 30)
-			seit++;
+		int seit = (jetzt - info_CurrentNext.current_zeit.startzeit + 30) / 60;
 		int rest = ( info_CurrentNext.current_zeit.dauer / 60) - seit ;
 		if ( seit< 0 )
 		{
@@ -924,13 +920,16 @@ void CInfoViewer::showButton_Audio()
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2 + 2), g_Locale->getText("infoviewer.languages"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	};
 
+	const char * dd_icon;
 	if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&
 	     ( g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3 ) )
-		frameBuffer->paintIcon("dd.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		dd_icon = "dd.raw";
 	else if ( g_RemoteControl->has_ac3 )
-		frameBuffer->paintIcon("dd_avail.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		dd_icon = "dd_avail.raw";
 	else
-		frameBuffer->paintIcon("dd_gray.raw", BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		dd_icon = "dd_gray.raw";
+
+	frameBuffer->paintIcon(dd_icon, BoxEndX - (ICON_LARGE_WIDTH + 2 + ICON_SMALL_WIDTH + 2), BoxEndY - ((InfoHeightY_Info + 16) >> 1));
 }
 
 void CInfoViewer::killTitle()
@@ -969,11 +968,8 @@ void CInfoViewer::showLcdPercentOver()
 		}
 		if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
-			int seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;
-			if ((jetzt - info_CurrentNext.current_zeit.startzeit ) % 60 > 30)
-				seit++;
-			if ( seit< 0 )
-				runningPercent= 0;
+			if (jetzt < info_CurrentNext.current_zeit.startzeit)
+				runningPercent = 0;
 			else
 				runningPercent=MIN((unsigned)((float)(jetzt-info_CurrentNext.current_zeit.startzeit)/
 														(float)info_CurrentNext.current_zeit.dauer*100.),100);

@@ -2018,15 +2018,15 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder("timing.head", true, NULL, colorSettings_timing));
 
 	colorSettings.addItem(GenericMenuSeparatorLine);
-	if(g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA)
+	if ((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM)) // eNX
 	{
-		//menuefaden nur bei enx-chips!
 		CMenuOptionChooser* oj = new CMenuOptionChooser("colormenu.fade", &g_settings.widget_fade, true );
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		colorSettings.addItem( oj );
-	} else {
-		//alpha-werte nur einstellen wenn gtx-chip
+	}
+	else // GTX, ...
+	{
 		CAlphaSetup* chAlphaSetup = new CAlphaSetup("colormenu.gtx_alpha", &g_settings.gtx_alpha1, &g_settings.gtx_alpha2);
 		colorSettings.addItem( new CMenuForwarder("colormenu.gtx_alpha", true, NULL, chAlphaSetup));
 	}
@@ -2149,9 +2149,9 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	oj->addOption(1, "options.on");
 	lcdSettings.addItem( oj );
 
-	if(g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA)
+	if ((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM))
 	{
-		// Autodimm only on Sagem/Philips available
+		// Autodimm available on Sagem/Philips only
 		oj = new CMenuOptionChooser("lcdmenu.autodimm", &lcdautodimm, true, lcdnotifier );
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
