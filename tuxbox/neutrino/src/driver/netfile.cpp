@@ -981,10 +981,13 @@ FILE *f_open(const char *filename, const char *acctype)
 			   if( strstr( (char*)&magic, "ID3") )	{ f_type(fd, "audio/mpeg"); magic = 0; }
 			   if( strstr( (char*)&magic, "Ogg") )	{ f_type(fd, "audio/ogg");  magic = 0; }
 
-#if 0
-#error this magic is nonsense			   
-			   if(magic & 0xFFFB0000)		{ f_type(fd, "audio/mpeg"); magic = 0; }
-#endif
+			   /* 1111 1111 1111 1010 0000 0000 0000 0000
+			      AAAA AAAA AAAB BCC
+				  where A: frame sync
+				        B: MPEG audio ID (11 = MPEG Version 1)
+						C: Layer description (01 = Layer III)
+			      see http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm */
+			   if(magic & 0xFFFA0000)		{ f_type(fd, "audio/mpeg"); magic = 0; }
 
 			   /* stage two: try to determine the filetype from the file name */
 			   /* a smarter solution would be to get this info from /etc/mime.types */
