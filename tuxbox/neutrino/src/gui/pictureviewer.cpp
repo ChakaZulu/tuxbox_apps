@@ -341,12 +341,11 @@ int CPictureViewerGui::show()
 						}
 						else
 							printf("Wrong Filetype %s:%d\n",files->Name.c_str(), files->getType());
-						
-						if(m_sort==FILENAME)
-							std::sort(playlist.begin(),playlist.end(),comparePictureByFilename);
-						else if(m_sort==DATE)
-							std::sort(playlist.begin(),playlist.end(),comparePictureByDate);
 					}
+					if (m_sort == FILENAME)
+						std::sort(playlist.begin(), playlist.end(), comparePictureByFilename);
+					else if (m_sort == DATE)
+						std::sort(playlist.begin(), playlist.end(), comparePictureByDate);
 				}
 	//				CLCD::getInstance()->setMode(CLCD::MODE_MP3);
 				update=true;
