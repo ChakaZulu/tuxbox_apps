@@ -703,18 +703,24 @@ filebrowser.scan Durchsuche Verzeichnisse
 filebrowser.sort.name (Dateiname)
 filebrowser.sort.date (Datum)
 
-nfs.mount NFS Verzeichnis mounten
-nfs.ip NFS Server IP
-nfs.dir NFS Verzeichnis
+nfs.mount NFS/CIFS Verzeichnis mounten
+nfs.ip NFS/CIFS Server IP
+nfs.dir Verzeichnis/Freigabe
 nfs.localdir lokales Verzeichnis
 nfs.automount Beim Start mounten
 nfs.mountnow Jetzt mounten
 nfs.mounterror Mount-Fehler: lade default-Einstellungen
-nfs.umount NFS Verzeichnis unmounten
+nfs.mounttimeout Mount-Fehler: Timeout
+nfs.umount NFS/CIFS Verzeichnis unmounten
 nfs.umounterror Umount-Fehler
 nfs.alreadymounted Verzeichnis bereits gemountet
-nfs.mount_options Mount-Optionen
-nfsmenu.head NFS Einstellungen
+nfs.mount_options NFS Mount-Optionen
+nfs.type Typ
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username CIFS Benutzername
+nfs.password CIFS Passwort
+nfsmenu.head NFS/CIFS Einstellungen
 
 apids.hint_1 Geben Sie die zu streamenden APIDs ein,
 apids.hint_2 getrennt durch ' ' in hexadezimaler Form

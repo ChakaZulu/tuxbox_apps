@@ -413,6 +413,18 @@ int CNeutrinoApp::loadSetup()
 	g_settings.network_nfs_automount[1] = configfile.getInt32( "network_nfs_automount_2", 0);
 	g_settings.network_nfs_automount[2] = configfile.getInt32( "network_nfs_automount_3", 0);
 	g_settings.network_nfs_automount[3] = configfile.getInt32( "network_nfs_automount_4", 0);
+	g_settings.network_nfs_type[0] = configfile.getInt32( "network_nfs_type_1", 0);
+	g_settings.network_nfs_type[1] = configfile.getInt32( "network_nfs_type_2", 0);
+	g_settings.network_nfs_type[2] = configfile.getInt32( "network_nfs_type_3", 0);
+	g_settings.network_nfs_type[3] = configfile.getInt32( "network_nfs_type_4", 0);
+	strcpy( g_settings.network_nfs_username[0], configfile.getString( "network_nfs_username_1", "" ).c_str() );
+	strcpy( g_settings.network_nfs_username[1], configfile.getString( "network_nfs_username_2", "" ).c_str() );
+	strcpy( g_settings.network_nfs_username[2], configfile.getString( "network_nfs_username_3", "" ).c_str() );
+	strcpy( g_settings.network_nfs_username[3], configfile.getString( "network_nfs_username_4", "" ).c_str() );
+	strcpy( g_settings.network_nfs_password[0], configfile.getString( "network_nfs_password_1", "" ).c_str() );
+	strcpy( g_settings.network_nfs_password[1], configfile.getString( "network_nfs_password_2", "" ).c_str() );
+	strcpy( g_settings.network_nfs_password[2], configfile.getString( "network_nfs_password_3", "" ).c_str() );
+	strcpy( g_settings.network_nfs_password[3], configfile.getString( "network_nfs_password_4", "" ).c_str() );
 	strcpy( g_settings.network_nfs_mount_options[0], configfile.getString( "network_nfs_mount_options_1", "ro,soft,udp" ).c_str() );
 	strcpy( g_settings.network_nfs_mount_options[1], configfile.getString( "network_nfs_mount_options_2", "nolock,rsize=8192,wsize=8192" ).c_str() );
 
@@ -644,6 +656,18 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "network_nfs_automount_2", g_settings.network_nfs_automount[1]);
 	configfile.setInt32( "network_nfs_automount_3", g_settings.network_nfs_automount[2]);
 	configfile.setInt32( "network_nfs_automount_4", g_settings.network_nfs_automount[3]);
+	configfile.setInt32( "network_nfs_type_1", g_settings.network_nfs_type[0]);
+	configfile.setInt32( "network_nfs_type_2", g_settings.network_nfs_type[1]);
+	configfile.setInt32( "network_nfs_type_3", g_settings.network_nfs_type[2]);
+	configfile.setInt32( "network_nfs_type_4", g_settings.network_nfs_type[3]);
+	configfile.setString( "network_nfs_username_1", g_settings.network_nfs_username[0] );
+	configfile.setString( "network_nfs_username_2", g_settings.network_nfs_username[1] );
+	configfile.setString( "network_nfs_username_3", g_settings.network_nfs_username[2] );
+	configfile.setString( "network_nfs_username_4", g_settings.network_nfs_username[3] );
+	configfile.setString( "network_nfs_password_1", g_settings.network_nfs_password[0] );
+	configfile.setString( "network_nfs_password_2", g_settings.network_nfs_password[1] );
+	configfile.setString( "network_nfs_password_3", g_settings.network_nfs_password[2] );
+	configfile.setString( "network_nfs_password_4", g_settings.network_nfs_password[3] );
 	configfile.setString( "network_nfs_mount_options_1", g_settings.network_nfs_mount_options[0]);
 	configfile.setString( "network_nfs_mount_options_2", g_settings.network_nfs_mount_options[1]);
 
@@ -1585,7 +1609,7 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
-	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "NFS") );
+	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "NFS/CIFS") );
 	networkSettings.addItem( new CMenuForwarder("nfs.mount", true, "", new CNFSMountGui()));
 	networkSettings.addItem( new CMenuForwarder("nfs.umount", true, "", new CNFSUmountGui()));
 }

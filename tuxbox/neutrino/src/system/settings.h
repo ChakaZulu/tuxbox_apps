@@ -138,6 +138,9 @@ struct SNeutrinoSettings
 	char network_nfs_dir[4][100];
 	int  network_nfs_automount[4];
 	char network_nfs_mount_options[2][31];
+	int  network_nfs_type[4];
+	char network_nfs_username[4][100];
+	char network_nfs_password[4][100];
 
 	//streaming
 	int  recording_type;

@@ -704,18 +704,24 @@ filebrowser.scan Scaning folder
 filebrowser.sort.name (filename)
 filebrowser.sort.date (date)
 
-nfs.mount Mount NFS volume
-nfs.ip NFS Server IP
-nfs.dir NFS directory
+nfs.mount Mount NFS/CIFS volume
+nfs.ip NFS/CIFS Server IP
+nfs.dir directory/share
 nfs.localdir local dir
 nfs.automount mount on startup
 nfs.mountnow mount now
 nfs.mounterror mount error: loading default values
-nfs.umount Umount NFS volume
+nfs.mounttimeout mount error: timeout
+nfs.umount Umount NFS/CIFS volume
 nfs.umounterror error umounting volume
 nfs.alreadymounted directory already mounted
-nfs.mount_options mount options
-nfsmenu.head NFS settings
+nfs.mount_options NFS mount options
+nfs.type type
+nfs.type_nfs NFS
+nfs.type_cifs CIFS
+nfs.username CIFS username
+nfs.password CIFS password
+nfsmenu.head NFS/CIFS settings
 
 apids.hint_1 Enter APIDs to be streamed
 apids.hint_2 in hex notation seperated by ' '

@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <global.h>
+#include <pthread.h>
 
 #include "nfs.h"
 #include "filebrowser.h"
@@ -42,13 +43,53 @@
 #include "widget/stringinput.h"
 #include "widget/stringinput_ext.h"
 
-pthread_t mnt = (pthread_t)NULL;
-bool mnt_status = false;
+pthread_mutex_t g_mut;
+pthread_cond_t g_cond;
+pthread_t g_mnt;
+int g_mntstatus;
+
+class CNFSMountGuiNotifier : public CChangeObserver
+{
+private:
+	CMenuForwarder *m_opt1,*m_opt2, *m_user, *m_pass;
+	int *m_type;
+public:
+	CNFSMountGuiNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwarder* a3, CMenuForwarder* a4 , int* type)
+	{
+		m_opt1 = a1;
+		m_opt2 = a2;
+		m_user = a3;
+		m_pass = a4;
+		m_type = type;
+	}
+	bool changeNotify(string OptionName, void* dummy)
+	{
+		if(*m_type == (int)CNFSMountGui::NFS)
+		{
+			m_opt1->setActive (true);
+			m_opt2->setActive (true);
+			m_user->setActive (false);
+			m_pass->setActive (false);
+		}
+		else
+		{
+			m_opt1->setActive (false);
+			m_opt2->setActive (false);
+			m_user->setActive (true);
+			m_pass->setActive (true);
+		}
+		return true;
+	}
+};
 
 void *mount_thread(void* cmd)
 {
-	system((char*)cmd);
-	mnt_status = true;
+	int ret;
+	ret=system((char*)cmd);
+	pthread_mutex_lock(&g_mut);
+	g_mntstatus=ret;
+	pthread_cond_broadcast(&g_cond);
+	pthread_mutex_unlock(&g_mut);
 	pthread_exit(NULL);
 }
 
@@ -67,8 +108,16 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 				a=g_Locale->getText("messagebox.yes");
 			else
 				a=g_Locale->getText("messagebox.no");
-			sprintf(m_entry[i],"%s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
-					  g_settings.network_nfs_local_dir[i], a.c_str());
+			if(g_settings.network_nfs_type[i] == (int) NFS)
+			{
+				sprintf(m_entry[i],"NFS %s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
+						  g_settings.network_nfs_local_dir[i], a.c_str());
+			}
+			else
+			{
+				sprintf(m_entry[i],"CIFS //%s/%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
+						  g_settings.network_nfs_local_dir[i], a.c_str());
+			}
 		}
 		returnval = menu();
 	}
@@ -83,14 +132,24 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 				a=g_Locale->getText("messagebox.yes");
 			else
 				a=g_Locale->getText("messagebox.no");
-			sprintf(m_entry[i],"%s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
-					  g_settings.network_nfs_local_dir[i], a.c_str());
+			if(g_settings.network_nfs_type[i] == (int) NFS)
+			{
+				sprintf(m_entry[i],"NFS %s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
+						  g_settings.network_nfs_local_dir[i], a.c_str());
+			}
+			else
+			{
+				sprintf(m_entry[i],"CIFS //%s/%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
+						  g_settings.network_nfs_local_dir[i], a.c_str());
+			}
 		}
 	}
 	else if(actionKey.substr(0,7)=="domount")
 	{
 		int nr=atoi(actionKey.substr(7,1).c_str());
-		mount(g_settings.network_nfs_ip[nr].c_str(), g_settings.network_nfs_dir[nr], g_settings.network_nfs_local_dir[nr],true);
+		mount(g_settings.network_nfs_ip[nr].c_str(), g_settings.network_nfs_dir[nr], 
+				g_settings.network_nfs_local_dir[nr], (FSType) g_settings.network_nfs_type[nr],
+				g_settings.network_nfs_username[nr], g_settings.network_nfs_password[nr], true);
 		returnval = menu_return::RETURN_EXIT;
 	}
 	else if(actionKey.substr(0,3)=="dir")
@@ -127,14 +186,19 @@ int CNFSMountGui::menu()
 
 int CNFSMountGui::menuEntry(int nr)
 {
-	char *dir,*local_dir;
+	char *dir,*local_dir, *username, *password;
 	int* automount;
+	int* type;
 	char cmd[9];
 	char cmd2[9];
 
 	dir = g_settings.network_nfs_dir[nr];
 	local_dir = g_settings.network_nfs_local_dir[nr];
-	automount=&g_settings.network_nfs_automount[nr];
+	username = g_settings.network_nfs_username[nr];
+	password = g_settings.network_nfs_password[nr];
+	automount = &g_settings.network_nfs_automount[nr];
+	type = &g_settings.network_nfs_type[nr];
+	
 	sprintf(cmd,"domount%d",nr);
 	sprintf(cmd2,"dir%d",nr);
 
@@ -143,34 +207,50 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(new CMenuForwarder("menu.back"));
 	mountMenuEntryW.addItem(new CMenuSeparator(CMenuSeparator::LINE));
 	CIPInput  ipInput("nfs.ip", g_settings.network_nfs_ip[nr]);
-	mountMenuEntryW.addItem(new CMenuForwarder("nfs.ip", true, g_settings.network_nfs_ip[nr], &ipInput));
 	CStringInputSMS  dirInput("nfs.dir", dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
-	mountMenuEntryW.addItem(new CMenuForwarder("nfs.dir", true, dir, &dirInput));
-
-	CStringInputSMS options1("nfs.mount_options", g_settings.network_nfs_mount_options[0], 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
-	mountMenuEntryW.addItem(new CMenuForwarder("nfs.mount_options", true, g_settings.network_nfs_mount_options[0], &options1));
-
-	CStringInputSMS options2("nfs.mount_options", g_settings.network_nfs_mount_options[1], 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
-	mountMenuEntryW.addItem(new CMenuForwarder("nfs.mount_options", true, g_settings.network_nfs_mount_options[1], &options2));
-
-	mountMenuEntryW.addItem(new CMenuForwarder("nfs.localdir", true, local_dir, this, cmd2));
 	CMenuOptionChooser *automountInput= new CMenuOptionChooser("nfs.automount", automount, true);
 	automountInput->addOption(0, "messagebox.no");
 	automountInput->addOption(1, "messagebox.yes");
+	CStringInputSMS options1("nfs.mount_options", g_settings.network_nfs_mount_options[0], 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
+	CMenuForwarder *options1_fwd = new CMenuForwarder("nfs.mount_options", *type==NFS, g_settings.network_nfs_mount_options[0], &options1);
+	CStringInputSMS options2("nfs.mount_options", g_settings.network_nfs_mount_options[1], 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
+	CMenuForwarder *options2_fwd = new CMenuForwarder("nfs.mount_options", *type==NFS, g_settings.network_nfs_mount_options[1], &options2);
+	CStringInputSMS  userInput("nfs.username", username, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
+	CMenuForwarder *username_fwd = new CMenuForwarder("nfs.username", *type==CIFS, username, &userInput);
+	CStringInputSMS  passInput("nfs.password", password, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
+	CMenuForwarder *password_fwd = new CMenuForwarder("nfs.password", *type==CIFS, "", &passInput);
+	CNFSMountGuiNotifier notifier(options1_fwd, options2_fwd, username_fwd, password_fwd, type);
+	CMenuOptionChooser *typeInput= new CMenuOptionChooser("nfs.type", type, true, &notifier);
+	typeInput->addOption((int) NFS, "nfs.type_nfs");
+	typeInput->addOption((int) CIFS, "nfs.type_cifs");
+	mountMenuEntryW.addItem(typeInput);
+	mountMenuEntryW.addItem(new CMenuForwarder("nfs.ip", true, g_settings.network_nfs_ip[nr], &ipInput));
+	mountMenuEntryW.addItem(new CMenuForwarder("nfs.dir", true, dir, &dirInput));
+	mountMenuEntryW.addItem(new CMenuForwarder("nfs.localdir", true, local_dir, this, cmd2));
 	mountMenuEntryW.addItem(automountInput);
+	mountMenuEntryW.addItem(options1_fwd);
+	mountMenuEntryW.addItem(options2_fwd);
+	mountMenuEntryW.addItem(username_fwd);
+	mountMenuEntryW.addItem(password_fwd);
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.mountnow", true, NULL, this, cmd));
 
 	int ret = mountMenuEntryW.exec(this,"");
 	return ret;
 }
 
-void CNFSMountGui::mount(const char* ip, const char* dir, const char* local_dir, bool showerror)
+void CNFSMountGui::mount(const char* ip, const char* dir, const char* local_dir, 
+								 FSType fstype, const char* username, const char* password, bool showerror)
 {
 	char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
 	string cmd;
-	mnt_status = false;
+	pthread_mutex_init(&g_mut, NULL);
+   pthread_cond_init(&g_cond, NULL);
+	g_mntstatus=-1;
 
-	printf("Mount %s:%s -> %s\n",ip,dir,local_dir);
+	if(fstype==NFS)
+		printf("NFS-Mount %s:%s -> %s\n",ip,dir,local_dir);
+	else
+		printf("CIFS-Mount //%s/%s -> %s\n",ip,dir,local_dir);
 
 	ifstream in;
 	in.open("/proc/mounts",ifstream::in);
@@ -192,30 +272,53 @@ void CNFSMountGui::mount(const char* ip, const char* dir, const char* local_dir,
 	}
 	in.close();
 
-	if(g_settings.network_nfs_mount_options[0][0] == '\0')
+	if(fstype == NFS)
 	{
-		strcpy(g_settings.network_nfs_mount_options[0],g_settings.network_nfs_mount_options[1]);
-		g_settings.network_nfs_mount_options[1][0] = '\0';
-	}
+		if(g_settings.network_nfs_mount_options[0][0] == '\0')
+		{
+			strcpy(g_settings.network_nfs_mount_options[0],g_settings.network_nfs_mount_options[1]);
+			g_settings.network_nfs_mount_options[1][0] = '\0';
+		}
 
-	if((g_settings.network_nfs_mount_options[0][0] == '\0') && (g_settings.network_nfs_mount_options[1][0] == '\0'))
+		if((g_settings.network_nfs_mount_options[0][0] == '\0') && (g_settings.network_nfs_mount_options[1][0] == '\0'))
+		{
+			strcpy(g_settings.network_nfs_mount_options[0],"ro,soft,udp");
+			strcpy(g_settings.network_nfs_mount_options[1],"nolock,rsize=8192,wsize=8192");
+		}
+
+		cmd = string("mount -t nfs ") + ip + ":" + dir + " " + local_dir + " -o " + g_settings.network_nfs_mount_options[0];
+		if(g_settings.network_nfs_mount_options[1][0] !='\0')
+			cmd = cmd + "," + g_settings.network_nfs_mount_options[1];
+	}
+	else
 	{
-		strcpy(g_settings.network_nfs_mount_options[0],"ro,soft,udp");
-		strcpy(g_settings.network_nfs_mount_options[1],"nolock,rsize=8192,wsize=8192");
+		cmd = string("mount -t cifs //") + ip + "/" + dir + " " + local_dir + " -o username=" +  username +
+			",password=" + password + ",unc=//" + ip + "/" + dir; 
 	}
-
-	cmd = string("mount -t nfs ") + ip + ":" + dir + " " + local_dir + " -o " + g_settings.network_nfs_mount_options[0];
-	if(g_settings.network_nfs_mount_options[1][0] !='\0')
-		cmd = cmd + "," + g_settings.network_nfs_mount_options[1];
 
 	sprintf(buffer,"%s",cmd.c_str());
-	pthread_create(&mnt, 0, mount_thread, buffer);
-	sleep(1);
+	pthread_create(&g_mnt, 0, mount_thread, buffer);
 
-	if ( mnt_status == false )
+	struct timespec timeout;
+	int retcode;
+
+	pthread_mutex_lock(&g_mut);
+	timeout.tv_sec = time(NULL) + 5;
+	timeout.tv_nsec = 0;
+	retcode = pthread_cond_timedwait(&g_cond, &g_mut, &timeout);
+	if (retcode == ETIMEDOUT) 
+   {  // timeout occurred
+		pthread_cancel(g_mnt);
+	}
+	pthread_mutex_unlock(&g_mut);
+
+	if ( g_mntstatus != 0 )
 	{
 		if(showerror)
-			ShowHint ( "messagebox.info",  g_Locale->getText("nfs.mounterror"));
+			if(retcode == ETIMEDOUT)
+				ShowHint ( "messagebox.info",  g_Locale->getText("nfs.mounttimeout"));
+			else
+				ShowHint ( "messagebox.info",  g_Locale->getText("nfs.mounterror"));
 		strcpy(g_settings.network_nfs_mount_options[0],"ro,soft,udp");
 		strcpy(g_settings.network_nfs_mount_options[1],"nolock,rsize=8192,wsize=8192");
 		printf("[neutrino]: NFS mount error: \"%s\"\n", cmd.c_str());
@@ -228,7 +331,9 @@ void CNFSMountGui::automount()
 	for(int i = 0; i < 4; i++)
 	{
 		if(g_settings.network_nfs_automount[i])
-			mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], g_settings.network_nfs_local_dir[i], false);
+			mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], g_settings.network_nfs_local_dir[i], 
+					(FSType) g_settings.network_nfs_type[i], g_settings.network_nfs_username[i], 
+					g_settings.network_nfs_password[i], false);
 	}
 }
 
@@ -266,7 +371,7 @@ int CNFSUmountGui::menu()
 		strcpy(mountType,"");
 		in.getline(buffer, 200);
 		sscanf(buffer,"%s %s %s ", mountDev, mountOn, mountType);
-		if(strcmp(mountType,"nfs")==0)
+		if(strcmp(mountType,"nfs")==0 || strcmp(mountType,"cifs")==0)
 		{
 			count++;
 			string s1=string(mountDev) + " -> " + mountOn;
