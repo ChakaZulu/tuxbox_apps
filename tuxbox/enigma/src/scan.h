@@ -22,9 +22,10 @@ struct scanEntry
 	bool onlyFree;
 	bool operator < ( const scanEntry& e ) const
 	{
-		if ( !packet || e.packet )
+		if ( packet && e.packet )
+			return packet->orbital_position < e.packet->orbital_position;
+		else
 			return 0;
-		return packet->orbital_position < e.packet->orbital_position;
 	}
 };
 
