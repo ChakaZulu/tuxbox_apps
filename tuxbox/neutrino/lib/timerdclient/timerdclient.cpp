@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.10 2002/05/21 15:50:30 dirch Exp $
+	$Id: timerdclient.cpp,v 1.11 2002/05/30 19:57:30 dirch Exp $
 
 	License: GPL
 
@@ -123,9 +123,15 @@ int timerID;
 		timerID = timerid;
 
 	if(timerID != 0)
+	{
+		dprintf("Modify Sleeptimer announce: %d alarm: %d\n",announcetime,alarmtime);
 		modifyTimerEvent(timerID, announcetime, alarmtime, 0);
+	}
 	else
+	{
+		dprintf("Set New Sleeptimerannounce: %d alarm: %d\n",announcetime,alarmtime);
 		timerID = addTimerEvent(CTimerEvent::TIMER_SLEEPTIMER,true,NULL,announcetime,alarmtime,0);
+	}
 
 	return timerID;	
 }
@@ -154,7 +160,7 @@ int CTimerdClient::getSleepTimerRemaining()
 		return (timer.alarmTime - time(NULL)) / 60;
 	}
 	else
-		return -1;
+		return 0;
 }
 
 void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
