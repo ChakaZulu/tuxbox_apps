@@ -73,6 +73,7 @@ class CControldClient:private CBasicClient
 				TUXBOX_MAKER_SAGEM			= 2,
 				TUXBOX_MAKER_PHILIPS			= 3,
 				TUXBOX_MAKER_DREAM_MM			= 4,
+				TUXBOX_MAKER_TECHNOTREND		= 5,
 			}
 		tuxbox_maker_t;
 

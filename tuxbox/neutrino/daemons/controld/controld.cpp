@@ -587,6 +587,9 @@ void setBoxType()
 	case TUXBOX_VENDOR_DREAM_MM:
 		settings.boxtype = CControldClient::TUXBOX_MAKER_DREAM_MM;
 		break;
+	case TUXBOX_VENDOR_TECHNOTREND:
+		settings.boxtype = CControldClient::TUXBOX_MAKER_TECHNOTREND;
+		break;
 	default:
 		settings.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
 	}
@@ -816,7 +819,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.97 2003/02/25 14:21:26 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.98 2003/03/03 19:36:00 thegoodguy Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
