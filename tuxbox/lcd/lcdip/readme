@@ -1,0 +1,29 @@
+lcdip:
+------
+
+function: allows to enter an IP address in dotted decimal notation through the LCD 
+	  by either entering it via remote control or the 3 frontpanel buttons
+
+input:	via remote control: 
+		press key number (0-9) to directly enter a number
+		press UP/DOWN to get the next higher/lower digit
+		press LEFT/RIGHT to skip to previous/next position
+		press OK to save and exit the app (number is checked for correctness).
+			In case of an error, press OK to correct the number.
+	
+	via frontpanel buttons:
+		press UP/DOWN to set number
+		press STANDBY to skip to next position or save and exit the app if
+			last number has been reached. In case of an error, press
+			STANDBY again to correct the number.
+	
+output: writes the IP to /var/lcdip.conf as a human readable ASCII-string
+	
+return values: 0 on success, other value on error
+
+remark: Originally this app set the ip through "ipconfig" which is no longer present. 
+	Anyway, I think it's better to use this as part of a (startup) script if needed. 
+	That's why I also replaced the original binary lcdip.conf with ASCII, so it can be
+	read in easier by a shell script.
+	
+	Feel free to enhance!
