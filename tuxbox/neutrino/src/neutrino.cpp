@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.166 2002/02/23 20:19:51 field Exp $
+        $Id: neutrino.cpp,v 1.167 2002/02/24 20:17:23 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.167  2002/02/24 20:17:23  field
+  Kleinigkeiten
+
   Revision 1.166  2002/02/23 20:19:51  field
   version-filename angepasst
 
@@ -1377,14 +1380,14 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 				if(fgets(g_settings.softupdate_currentversion,90,fd)==NULL)
 					fclose(fd);
 			//printf("versiondata: ->%s<-\n", g_settings.softupdate_currentversion);
-/*			for (unsigned int x=0;x<strlen(g_settings.softupdate_currentversion);x++)
+			for (unsigned int x=0;x<strlen(g_settings.softupdate_currentversion);x++)
 			{
 				if( (g_settings.softupdate_currentversion[x]!='.') && ((g_settings.softupdate_currentversion[x]>'9') || (g_settings.softupdate_currentversion[x]<'0') ) )
 				{
 					g_settings.softupdate_currentversion[x]=0;
 				}
 			}
-*/
+
 			}
 		}
 		else
@@ -1809,10 +1812,11 @@ void CNeutrinoApp::SelectAPID()
 void CNeutrinoApp::ShowStreamFeatures()
 {
 	CMenuWidget StreamFeatureSelector("streamfeatures.head", "features.raw", 350);
-	//StreamFeatureSelector.addItem( new CMenuSeparator() );
+	StreamFeatureSelector.addItem( new CMenuSeparator() );
 
 	char id[5];
 	int cnt = 0;
+	int enabled_count = 0;
 
 	g_RemoteControl->CopyPIDs();
     g_PluginList->loadPlugins();
@@ -1821,11 +1825,17 @@ void CNeutrinoApp::ShowStreamFeatures()
 	{
     	if ( g_PluginList->getType(count)== 2 )
     	{
-			sprintf(id, "%d", count);
-			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), (g_RemoteControl->vtxtpid!=0), "",
-										   StreamFeaturesChanger, id, false, (cnt== 0)?CRCInput::RC_blue:-1, (cnt== 0)?"blau.raw":""), (cnt== 0) && (g_RemoteControl->vtxtpid!=0) );
-			cnt++;
+    		// zB vtxt-plugins
 
+			sprintf(id, "%d", count);
+
+			bool enable_it = ( ( !g_PluginList->getVTXT(count) )  || (g_RemoteControl->vtxtpid!=0) );
+			if ( enable_it )
+				enabled_count++;
+
+			StreamFeatureSelector.addItem( new CMenuForwarder(g_PluginList->getName(count), enable_it, "",
+										   StreamFeaturesChanger, id, false, (cnt== 0)?CRCInput::RC_blue:-1, (cnt== 0)?"blau.raw":""), (cnt == 0) && enable_it );
+			cnt++;
 		}
 	}
 
@@ -1836,7 +1846,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	sprintf(id, "%d", -1);
 	StreamFeatureSelector.addItem( new CMenuForwarder("streamfeatures.info", true, "",
-									   StreamFeaturesChanger, id, true), (g_RemoteControl->vtxtpid==0) );
+									   StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), (enabled_count!=0) );
 	StreamFeatureSelector.exec(NULL, "");
 }
 
@@ -2494,7 +2504,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.166 2002/02/23 20:19:51 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.167 2002/02/24 20:17:23 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

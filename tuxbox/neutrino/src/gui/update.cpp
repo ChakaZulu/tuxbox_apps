@@ -343,7 +343,7 @@ bool CHTTPUpdater::getFile()
 
 CFlashUpdate::CFlashUpdate()
 {
-	width = 400;
+	width = 430;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
 	height = hheight+5*mheight+20;
