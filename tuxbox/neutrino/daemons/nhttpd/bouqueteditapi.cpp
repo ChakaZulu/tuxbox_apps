@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.10 2003/02/05 13:06:43 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.11 2003/02/07 18:03:51 dirch Exp $
 
 	License: GPL
 
@@ -80,7 +80,6 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 }
 
 //-------------------------------------------------------------------------
-
 bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 {
 	int selected = -1;
@@ -158,6 +157,8 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 
 bool CBouqueteditAPI::addBouquet(CWebserverRequest* request)
 {
+	if(!request->Authenticate())
+        	return false;	
 	if (request->ParameterList["name"] == "") {
 		request->SendPlainHeader("text/html");
 		request->SendHTMLHeader("Bouquet-Editor");
@@ -191,6 +192,8 @@ bool CBouqueteditAPI::addBouquet(CWebserverRequest* request)
 
 bool CBouqueteditAPI::moveBouquet(CWebserverRequest* request)
 {
+        if(!request->Authenticate())    
+                return false;   
 	if (request->ParameterList["selected"] != "" && (request->ParameterList["action"] == "up" || request->ParameterList["action"] == "down")) {
 		int selected = atoi(request->ParameterList["selected"].c_str());
 		if (request->ParameterList["action"] == "up") {
@@ -217,6 +220,9 @@ bool CBouqueteditAPI::moveBouquet(CWebserverRequest* request)
 bool CBouqueteditAPI::deleteBouquet(CWebserverRequest* request)
 {
 	int selected = -1;
+        if(!request->Authenticate())    
+                return false;   
+
 	if (request->ParameterList["selected"] != "") {
 		selected = atoi(request->ParameterList["selected"].c_str());
 	}
@@ -242,6 +248,8 @@ bool CBouqueteditAPI::deleteBouquet(CWebserverRequest* request)
 
 bool CBouqueteditAPI::saveBouquet(CWebserverRequest* request)
 {
+        if(!request->Authenticate())    
+                return false;   
 	Parent->Zapit->saveBouquets();
 	Parent->Zapit->commitBouquetChange();
 	Parent->UpdateBouquets();
@@ -253,6 +261,8 @@ bool CBouqueteditAPI::saveBouquet(CWebserverRequest* request)
 
 bool CBouqueteditAPI::renameBouquet(CWebserverRequest* request)
 {
+        if(!request->Authenticate())    
+                return false;   
 	if (request->ParameterList["selected"] != "") 
 	{
 		if (request->ParameterList["nameto"] == "") {
@@ -284,6 +294,8 @@ bool CBouqueteditAPI::editBouquet(CWebserverRequest* request)
 CZapitClient::BouquetChannelList BChannelList;
 CZapitClient::BouquetChannelList::iterator channels;
 
+        if(!request->Authenticate())    
+                return false;   
 	if (request->ParameterList["selected"] != "") {
 		int selected = atoi(request->ParameterList["selected"].c_str());
 		request->SendPlainHeader("text/html");
@@ -342,6 +354,8 @@ CZapitClient::BouquetChannelList::iterator channels;
 
 bool CBouqueteditAPI::changeBouquet(CWebserverRequest* request)
 {
+        if(!request->Authenticate())    
+                return false;   
 	if (request->ParameterList["selected"] != "") {
 		int selected = atoi(request->ParameterList["selected"].c_str());
 		CZapitClient::BouquetChannelList BChannelList;
@@ -373,6 +387,8 @@ bool CBouqueteditAPI::changeBouquet(CWebserverRequest* request)
 
 bool CBouqueteditAPI::setBouquet(CWebserverRequest* request)
 {
+        if(!request->Authenticate())    
+                return false;   
 	if (request->ParameterList["selected"] != "") {
 		int selected = atoi(request->ParameterList["selected"].c_str());
 		if(request->ParameterList["action"].compare("hide") == 0)
