@@ -34,7 +34,7 @@ using namespace std;
 class CChMosaicHandler : public CMenuTarget
 {
 	public:
-		int  exec( CMenuTarget* parent, string actionKey );
+		int  exec( CMenuTarget* parent,  const std::string &actionkey);
 
 };
 
