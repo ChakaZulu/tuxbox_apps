@@ -60,10 +60,13 @@ void eZap::keyUp(int code)
 struct enigmaActions
 {
 	eActionMap map;
-	eAction up;
+	eAction up, down, left, right;
 	enigmaActions(): 
 		map("global", "Global"),
-		up(map, "hoch", "selection_up")
+		up(map, "selection_up", _("up")),
+		down(map, "selection_down", _("down")),
+		left(map, "selection_left", _("left")),
+		right(map, "selection_right", _("right"))
 	{
 	}
 };
@@ -164,6 +167,10 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	ezapInitializeXMLRPC(httpd);
 	httpd->addResolver(dyn_resolver);
 	httpd->addResolver(fileresolver);
+
+	qDebug("[ENIGMA] loading default keymaps...");
+	
+	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
 
 	eDebug("[ENIGMA] ok, beginning mainloop");
 
