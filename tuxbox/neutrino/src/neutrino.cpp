@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.197 2002/03/18 15:04:40 field Exp $
+        $Id: neutrino.cpp,v 1.198 2002/03/19 19:07:01 flfs Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -254,7 +254,7 @@ void CNeutrinoApp::setupDefaults()
 
 	//misc
 	//g_settings.box_Type = 1;
-	//g_settings.box_Type = g_Controld->getBoxType(); //passiert ohnehin immer...
+	g_settings.box_Type = g_Controld->getBoxType();
 	g_settings.shutdown_real = 1;
 	g_settings.shutdown_showclock = 1;
 	g_settings.show_camwarning = 1;
@@ -277,6 +277,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.scan_astra = 1;
 	g_settings.scan_eutel = 0;
 	g_settings.scan_kopernikus = 0;
+	g_settings.scan_sirius5 = 0;
 	g_settings.scan_digituerk = 0;
 	g_settings.scan_bouquet = 1024; //erase bouquets
 
@@ -830,7 +831,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	service.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 	//servicescan
-	CMenuWidget* TSScan = new CMenuWidget("servicemenu.scants", "settings.raw");
+	CMenuWidget* TSScan = new CMenuWidget("servicemenu.scants", "mainmenue.raw");
 	TSScan->addItem( new CMenuForwarder("menu.back") );
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget( new CNeutrinoBouquetEditorEvents(this))));
@@ -854,6 +855,10 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 		oj->addOption(0, "options.off");
 		oj->addOption(4, "options.on");
 		TSScan->addItem( oj );
+		oj = new CMenuOptionChooser("scants.sirius5", &g_settings.scan_sirius5, true );
+		oj->addOption(0, "options.off");
+		oj->addOption(9, "options.on");
+		TSScan->addItem( oj );		
 		oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
 		oj->addOption(0, "options.off");
 		oj->addOption(8, "options.on");
@@ -862,33 +867,6 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	TSScan->addItem( new CMenuForwarder("scants.startnow", true, "", g_ScanTS) );
 	service.addItem( new CMenuForwarder("servicemenu.scants", true, "", TSScan) );
-
-
-	//kabel-lnb-settings
-	if (atoi(getenv("fe"))==1)
-	{// only sat-params....
-		//todo
-	}
-	else
-	{//kabel
-		CMenuWidget* cableSettings = new CMenuWidget("servicemenu.cablesetup", "settings.raw");
-		cableSettings->addItem( new CMenuSeparator() );
-		cableSettings->addItem( new CMenuForwarder("menu.back") );
-		cableSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-
-		static int dummy = 0;
-		FILE* fd = fopen("/var/etc/.specinv", "r");
-		if(fd)
-		{
-			dummy=1;
-			fclose(fd);
-		}
-		oj = new CMenuOptionChooser("cablesetup.spectralInversion", &dummy, true, new CCableSpectalInversionNotifier );
-		oj->addOption(0, "options.off");
-		oj->addOption(1, "options.on");
-		cableSettings->addItem( oj );
-		service.addItem( new CMenuForwarder("servicemenu.cablesetup", true, "", cableSettings) );
-	}
 
 	//ucodecheck
 	service.addItem( new CMenuForwarder("servicemenu.ucodecheck", true, "", UCodeChecker ) );
@@ -1453,9 +1431,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 		setupDefaults();
 		printf("using defaults...\n\n");
 	}
-	//get dbox-type everytime!
-	g_settings.box_Type = g_Controld->getBoxType();
-	//printf("got boxtype from controld: %d\n", g_settings.box_Type);
 
 	CmdParser(argc, argv);
 
@@ -2005,7 +1980,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		g_FrameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
 }
 
-void CNeutrinoApp::tvMode( bool rezap )
+void CNeutrinoApp::tvMode( bool rezap = true )
 {
 	if( mode == mode_tv )
 	{
@@ -2062,21 +2037,23 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 	else
 	{
 	    // SCART AUS
-		g_Controld->setScartMode( 0 );
 
-        mode = mode_unknown;
+		g_Controld->setScartMode( 0 );
 
 		//re-set mode
 		if ( lastMode == mode_radio )
 		{
+			mode = mode_unknown;
 			radioMode( false );
 		}
 		else if ( lastMode == mode_tv )
 		{
+			mode = mode_unknown;
 			tvMode( false );
 		}
 		else if ( lastMode == mode_standby )
 		{
+			usleep(100000);
 			standbyMode( true );
 		}
 	}
@@ -2270,7 +2247,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.197 2002/03/18 15:04:40 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.198 2002/03/19 19:07:01 flfs Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
