@@ -69,6 +69,7 @@ class CStringInput : public CMenuTarget
 
 		virtual void key0_9Pressed(int key);
 		virtual void keyRedPressed();
+		virtual void keyYellowPressed();
 		virtual void keyUpPressed();
 		virtual void keyDownPressed();
 		virtual void keyLeftPressed();
@@ -96,6 +97,7 @@ class CStringInputSMS : public CStringInput
 
 		virtual void key0_9Pressed(int key);
 		virtual void keyRedPressed();
+		virtual void keyYellowPressed();
 		virtual void keyUpPressed();
 		virtual void keyDownPressed();
 		virtual void keyLeftPressed();

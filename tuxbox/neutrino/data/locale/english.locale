@@ -406,6 +406,7 @@ cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish t
 ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via FTP (or DBox-BootManager),\nthen restart your DBox!
 
 stringinput.caps caps / no caps
+stringinput.clear clear all
 
 streamingserver.noconnect No connection to streamingserver.\nRecording canceled.
 

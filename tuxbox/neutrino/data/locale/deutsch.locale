@@ -406,6 +406,7 @@ cam.wrong Achtung, Ihre CAM_ALPHA.BIN passt\nnicht zu Ihrer Smart-Card!!!\n\nWol
 ucodes.failure Achtung, die µCodes wurden NICHT gefunden!\n\nBitte per FTP (oder DBox-BootManager)\nuploaden, und die DBox neu starten!
 
 stringinput.caps Groß-/Kleinbuchstaben
+stringinput.clear Alles löschen
 
 streamingserver.noconnect Keine Verbindung zum Streamingserver.\nAufnahme wird abgebrochen.
 

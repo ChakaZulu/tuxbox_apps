@@ -406,6 +406,7 @@ cam.wrong Achtig, Ihr CAM_ALPHA.BIN basst\nnidd zu Ihrer Smart-Card!!!\n\nWänn S
 ucodes.failure Achtig, die µCodes wurde nidd gefunde!\n\nBitte per FTP (oder DBox-BootManager)\nöploaden, un d'DBox neu starte! 
 
 stringinput.caps Groß-/Chleiueuchstabe 
+stringinput.caps unset
 
 streamingserver.noconnect Kei Verbindig zuem Streamingsörver.\nd'Uffnahm' wird abbroche. 
 

@@ -111,6 +111,15 @@ void CStringInput::keyRedPressed()
 	}
 }
 
+void CStringInput::keyYellowPressed()
+{
+	selected=0;
+	for(int i=0 ; i < size ; i++)
+	{
+		value[i]=' ';
+		paintChar(i);
+	}
+}
 void CStringInput::keyUpPressed()
 {
 	int npos = 0;
@@ -204,6 +213,10 @@ int CStringInput::exec( CMenuTarget* parent, string )
 		else if (msg==CRCInput::RC_red)
 		{
 			keyRedPressed();
+		}
+		else if (msg==CRCInput::RC_yellow)
+		{
+			keyYellowPressed();
 		}
 		else if ( (msg==CRCInput::RC_green) && ( strstr(validchars, ".")!=NULL ) )
 		{
@@ -405,6 +418,11 @@ void CStringInputSMS::keyRedPressed()		// switch between lower & uppercase
 	paintChar(selected);
 }
 
+void CStringInputSMS::keyYellowPressed()		// switch between lower & uppercase
+{
+	lastKey=-1;
+	CStringInput::keyYellowPressed();
+}
 void CStringInputSMS::keyUpPressed()
 {}
 
@@ -433,8 +451,9 @@ void CStringInputSMS::paint()
 	frameBuffer->paintHLine(x, x+width,  y+height-25, COL_INFOBAR_SHADOW);
 
 	frameBuffer->paintIcon("rot.raw", x+8, y+height-25+1);
-	g_Fonts->infobar_small->RenderString(x+38, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps").c_str(), COL_INFOBAR);
-
+	g_Fonts->infobar_small->RenderString(x+28, y+height-25+24 - 2, width, g_Locale->getText("stringinput.caps").c_str(), COL_INFOBAR);
+	frameBuffer->paintIcon("gelb.raw", x+238, y+height-25+1);
+	g_Fonts->infobar_small->RenderString(x+258, y+height-25+24 - 2, width, g_Locale->getText("stringinput.clear").c_str(), COL_INFOBAR);
 }
 
 void CPINInput::paintChar(int pos)

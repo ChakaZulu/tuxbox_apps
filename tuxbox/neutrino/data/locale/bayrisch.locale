@@ -406,6 +406,7 @@ cam.wrong Obacht, Eana CAM_ALPHA.BIN passt\nned zu Eanara Smart-Card!!!\n\nWoins
 ucodes.failure Obacht, de µCodes san ned gfundn worn!\n\nLoans de doch bittschen mit FTP \nauffi, und startns de Box numoi!
 
 stringinput.caps Groﬂ-/Koabuchstobm
+stringinput.caps unset
 
 streamingserver.noconnect Kao Verbindung zum Streamingserva.\nDe Aufnahme werd obbrocha.
 
