@@ -37,6 +37,7 @@
 #include "getservices.h"
 #include "sdt.h"
 #include "zapitclient.h"
+#include "eventserver.h"
 
 #include "config.h"
 

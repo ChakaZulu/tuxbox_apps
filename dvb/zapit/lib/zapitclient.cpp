@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.15 2002/03/23 19:03:39 field Exp $
+  $Id: zapitclient.cpp,v 1.16 2002/03/24 14:55:37 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.16  2002/03/24 14:55:37  field
+  Updates, Clientlib
+
   Revision 1.15  2002/03/23 19:03:39  field
   Clientlib massiv ausgebaut
 
@@ -217,6 +220,39 @@ unsigned int CZapitClient::zapTo_subServiceID( unsigned serviceID )
 
 	return response.zapStatus;
 }
+
+/* zaps to channel, does NOT wait for completion (uses event) */
+void CZapitClient::zapTo_serviceID_NOWAIT( unsigned serviceID )
+{
+	commandHead msgHead;
+	commandZaptoServiceID msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_ZAPTO_SERVICEID_NOWAIT;
+
+	msg.serviceID = serviceID;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
+/* zaps to subservice, does NOT wait for completion (uses event) */
+void CZapitClient::zapTo_subServiceID_NOWAIT( unsigned serviceID )
+{
+	commandHead msgHead;
+	commandZaptoServiceID msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_ZAPTO_SUBSERVICEID_NOWAIT;
+
+	msg.serviceID = serviceID;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
 
 void CZapitClient::setMode( channelsMode mode )
 {
@@ -609,6 +645,41 @@ void CZapitClient::stopPlayBack()
 
 	zapit_connect();
 	send((char*)&msgHead, sizeof(msgHead));
+	zapit_close();
+}
+
+void CZapitClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
+{
+	commandHead msgHead;
+	CEventServer::commandRegisterEvent msg;
+
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_REGISTEREVENTS;
+
+	msg.eventID = eventID;
+	msg.clientID = clientID;
+
+	strcpy(msg.udsName, udsName.c_str());
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+}
+
+void CZapitClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
+{
+	commandHead msgHead;
+	CEventServer::commandUnRegisterEvent msg;
+
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_UNREGISTEREVENTS;
+
+	msg.eventID = eventID;
+	msg.clientID = clientID;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
 	zapit_close();
 }
 

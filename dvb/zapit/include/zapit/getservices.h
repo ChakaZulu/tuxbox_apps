@@ -6,6 +6,10 @@
 #include <string>
 
 #include <config.h>
+#include "eventserver.h"
+
+// EVENTS...
+extern CEventServer *eventServer;
 
 struct channel {
   std::string name;

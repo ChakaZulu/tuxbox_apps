@@ -1,4 +1,11 @@
+#ifndef __scan__
+#define __scan__
+
+
 #include <config.h>
+#include "zapitclient.h"
+#include "eventserver.h"
+#include "getservices.h"
 
 struct scanchannel{
 	std::string name;
@@ -7,7 +14,7 @@ struct scanchannel{
 	int service_type;
 	int pmt;
 	int onid;
-	
+
 	scanchannel(std::string Name, int Sid, int Tsid,int Onid, int Service_type)
 	{
 		name = Name;
@@ -26,7 +33,7 @@ struct scanchannel{
 		service_type = 1;
 		pmt = 0;
 	}
-	
+
 	scanchannel(int Sid, int Tsid, int Pmt)
 	{
 		sid = Sid;
@@ -45,8 +52,8 @@ struct transpondermap
 	int fec_inner;
 	int polarization;
 	int diseqc;
-	
-	
+
+
 	transpondermap(int Tsid, int Freq, int Symbolrate, int Fec_inner)
 	{
 		tsid = Tsid;
@@ -56,7 +63,7 @@ struct transpondermap
 		polarization = 0;
 		diseqc=0;
 	}
-	
+
 	transpondermap(int Tsid, int Freq, int Symbolrate, int Fec_inner,int Polarization,int Diseqc)
 	{
 		tsid = Tsid;
@@ -74,7 +81,7 @@ struct bouquet_mulmap
 	std::string servname;
 	int sid;
 	int onid;
-	
+
 	bouquet_mulmap(std::string Provname, std::string Servname, int Sid, int Onid)
 	{
 		provname = Provname;
@@ -90,3 +97,5 @@ struct bouquet_mulmap
 extern std::map<int, transpondermap> scantransponders;
 extern std::map<int, scanchannel> scanchannels;
 extern std::multimap<std::string, bouquet_mulmap> scanbouquets;
+
+#endif

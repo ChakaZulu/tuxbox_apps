@@ -23,9 +23,6 @@
 #define DEMUX_DEV "/dev/ost/demux0"
 #define SEC_DEV   "/dev/ost/sec0"
 
-
-
-
 typedef std::map<int, scanchannel>::iterator sciterator;
 typedef std::map<int, transpondermap>::iterator stiterator;
 typedef std::multimap<std::string, bouquet_mulmap>::iterator sbiterator;
@@ -265,6 +262,8 @@ void *start_scanthread(void *param)
   int is_satbox = issatbox();
   FILE *logfd = fopen(logfile.c_str(), "w");
 
+  char	satName[50];
+
   if (is_satbox == -1)
   {
   	printf("Is your dbox properly set up?\n");
@@ -293,6 +292,8 @@ void *start_scanthread(void *param)
   if (!is_satbox)
     {
     	fprintf(logfd, "Scanning cable\n");
+    	strcpy(satName, "cable");
+    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
     	curr_sat = 0;
       int symbolrate = 6900;
@@ -366,6 +367,9 @@ void *start_scanthread(void *param)
       if (do_diseqc & 1)
       {
       	curr_sat = 1;
+      	strcpy(satName, "ASTRA");
+    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+
       printf("---------------------------\nSCANNING ASTRA\n---------------------------\n");
       fprintf(logfd, "---------------------------\nSCANNING ASTRA\n---------------------------\n");
 
@@ -424,6 +428,8 @@ void *start_scanthread(void *param)
       if (do_diseqc & 2)
       {
       	curr_sat = 2;
+      	strcpy(satName, "HOTBIRD");
+    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
       printf("---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
       	fprintf(logfd,	"---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
 
@@ -489,6 +495,9 @@ void *start_scanthread(void *param)
       if (do_diseqc & 4)
       {
       	curr_sat = 4;
+      	strcpy(satName, "KOPERNIKUS");
+    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+
       printf("---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
       fprintf(logfd,"---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
 
@@ -529,9 +538,12 @@ void *start_scanthread(void *param)
        fprintf(logfd,"Scanning Kopernikus ready\n");
        }
 
-      if (do_diseqc & 9)
+      if (do_diseqc & 16)
       {
-      	curr_sat = 9;
+      	curr_sat = 16;
+		strcpy(satName, "SIRIUS5");
+    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+
       printf("---------------------------\nSCANNING SIRIUS5\n---------------------------\n");
       fprintf(logfd,"---------------------------\nSCANNING SIRIUS5\n---------------------------\n");
 
@@ -647,6 +659,9 @@ void *start_scanthread(void *param)
       if (do_diseqc & 8)
       {
       	curr_sat = 8;
+      	strcpy(satName, "TÜRKSAT");
+    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+
       printf("---------------------------\nSCANNING TÜRKSAT\n---------------------------\n");
       fprintf(logfd,"Scanning Kopernikus ready\n");
 
@@ -749,5 +764,6 @@ void *start_scanthread(void *param)
   fclose(logfd);
 
   scan_runs = 0;
+  eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT );
   pthread_exit(0);
 }
