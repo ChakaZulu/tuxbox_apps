@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.34 2001/10/09 20:10:08 fnbrd Exp $
+// $Id: infoviewer.cpp,v 1.35 2001/10/09 21:09:23 fnbrd Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.35  2001/10/09 21:09:23  fnbrd
+// Fixed small bug.
+//
 // Revision 1.34  2001/10/09 20:10:08  fnbrd
 // Ein paar fehlende Initialisierungen implementiert.
 //
@@ -162,10 +165,6 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         EPG_NotFound_Text = (char*) g_Locale->getText("infoviewer.epgnotload").c_str();
     else
         EPG_NotFound_Text =  (char*) g_Locale->getText("infoviewer.epgwait").c_str();
-    is_visible = true;
-    KillShowEPG = false;
-
-    pthread_mutex_unlock( &epg_mutex );
 
 	BoxStartX = g_settings.screen_StartX+ 20;
 	BoxEndX   = g_settings.screen_EndX- 20;
@@ -176,6 +175,12 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         BoxStartY = BoxEndY- InfoHeightY- InfoHeightY_Info+ 6;
     else
     	BoxStartY = BoxEndY- InfoHeightY;
+
+    is_visible = true;
+    KillShowEPG = false;
+
+    pthread_mutex_unlock( &epg_mutex );
+
 
 	//frameBuffer->paintVLine(settings->screen_StartX,0,576, 3);
 	//frameBuffer->paintVLine(settings->screen_EndX,0,576, 3);
