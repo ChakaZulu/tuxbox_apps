@@ -1,6 +1,6 @@
 /*
 
-        $Header: /cvs/tuxbox/apps/misc/libs/libeventserver/eventserver.h,v 1.13 2003/02/22 15:36:42 thegoodguy Exp $
+        $Header: /cvs/tuxbox/apps/misc/libs/libeventserver/eventserver.h,v 1.14 2004/05/06 15:06:30 thegoodguy Exp $
 
 	Event-Server  -   DBoxII-Project
 
@@ -43,6 +43,7 @@ class CEventServer
 			INITID_ZAPIT,
 			INITID_TIMERD,
 			INITID_HTTPD,
+			INITID_NEUTRINO,
 			INITID_GENERIC_INPUT_EVENT_PROVIDER
 		};
 
