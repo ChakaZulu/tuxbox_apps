@@ -341,41 +341,63 @@ void CFlashTool::reboot()
 //-----------------------------------------------------------------------------------------------------------------
 
 
-CFlashVersionInfo::CFlashVersionInfo(std::string versionString)
+CFlashVersionInfo::CFlashVersionInfo(const std::string versionString)
 {
 	//SBBBYYYYMMTTHHMM -- formatsting
 
-	char tmp[100];
-
-	//snapshot erfragen
+	// recover type
 	snapshot = versionString[0];
 
-	//Baseimage Version ermitteln
-	int baseMayor = atoi( versionString.substr(1,1).c_str() );
-	int baseMinor = atoi( versionString.substr(2,2).c_str() );	
-	sprintf(tmp, "%d.%d", baseMayor, baseMinor);
-	baseImageVersion = tmp;
+	// recover baseimage version
+	baseImageVersion[0] = versionString[1];
+	baseImageVersion[1] = '.';
+	if (versionString[2] == '0')
+	{
+	    baseImageVersion[2] = versionString[3];
+	    baseImageVersion[3] = 0;
+	}
+	else
+	{
+	    baseImageVersion[2] = versionString[2];
+	    baseImageVersion[3] = versionString[3];
+	    baseImageVersion[4] = 0;
+	}
 
-	//Datum ermitteln
-	date = versionString.substr(10,2) + "." + versionString.substr(8,2) + "." + versionString.substr(4,4);
+	// recover date
+	date[0] = versionString[10];
+	date[1] = versionString[11];
+	date[2] = '.';
+	date[3] = versionString[8];
+	date[4] = versionString[9];
+	date[5] = '.';
+	date[6] = versionString[4];
+	date[7] = versionString[5];
+	date[8] = versionString[6];
+	date[9] = versionString[7];
+	date[10] = 0;
 
-	//Zeit ermitteln
-	time = versionString.substr(12,2) + ":" + versionString.substr(14,2);
+	// recover time stamp
+	time[0] = versionString[12];
+	time[1] = versionString[13];
+	time[2] = ':';
+	time[3] = versionString[14];
+	time[4] = versionString[15];
+	time[5] = 0;
 }
 
 const char * const CFlashVersionInfo::getDate() const
 {
-	return date.c_str();
+	return date;
 }
 
 const char * const CFlashVersionInfo::getTime() const
 {
-	return time.c_str();
+	return time;
 }
 
 const char * const CFlashVersionInfo::getBaseImageVersion() const
 {
-	return baseImageVersion.c_str();
+	return baseImageVersion;
 }
 
 const char * const CFlashVersionInfo::getType() const
@@ -387,7 +409,7 @@ const char * const CFlashVersionInfo::getType() const
 	case '1':
 		return "Snapshot";
 	case '2':
-		return "Intern";
+		return "Internal";
 	default:
 		return "Unknown";
 	}

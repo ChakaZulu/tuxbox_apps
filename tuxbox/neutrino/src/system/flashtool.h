@@ -71,20 +71,21 @@ class CFlashTool
 
 class CFlashVersionInfo
 {
-	private:
-
-		std::string	date;
-		std::string	time;
-		std::string	baseImageVersion;
-		char	snapshot;
-
-	public:
-		CFlashVersionInfo(std::string versionString);
-
-		const char * const getDate() const;
-		const char * const getTime() const;
-		const char * const getBaseImageVersion() const;
-		const char * const getType() const;
+ private:
+	
+	char date[11];
+	char time[6];
+	char baseImageVersion[5];
+	char snapshot;
+	
+ public:
+	
+	CFlashVersionInfo(const std::string versionString);
+	
+	const char * const getDate() const;
+	const char * const getTime() const;
+	const char * const getBaseImageVersion() const;
+	const char * const getType() const;
 };
 
 
