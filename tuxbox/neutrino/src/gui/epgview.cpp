@@ -1,9 +1,9 @@
 //
-// $Id: epgview.cpp,v 1.16 2001/10/18 14:31:23 field Exp $
+// $Id: epgview.cpp,v 1.17 2001/10/18 14:37:55 field Exp $
 //
 // $Log: epgview.cpp,v $
-// Revision 1.16  2001/10/18 14:31:23  field
-// Scrollleisten :)
+// Revision 1.17  2001/10/18 14:37:55  field
+// scrollbars (die zweite)
 //
 // Revision 1.15  2001/10/11 21:04:58  rasc
 // - EPG:
@@ -166,7 +166,7 @@ void CEpgData::showText( int startPos, int ypos )
 
     int sbc= ((textCount- 1)/ linecount)+ 1;
     float sbh= (sb- 4)/ sbc;
-    int sbs= (startPos)/linecount;
+    int sbs= (startPos+ 1)/ linecount;
 
     g_FrameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
@@ -494,7 +494,7 @@ void CEpgData::GetEPGData( string channelName, unsigned int onid_tsid, unsigned 
 		delete[] pData;
 	#endif
 
-	printf("exit epg-get\n\n");
+	//printf("exit epg-get\n\n");
 	close(sock_fd);
 }
 
