@@ -140,11 +140,11 @@ public:
 	eString getDeviceName();
 	eRCInputEventDriver(const char *filename);
 	~eRCInputEventDriver();
-	void flushBuffer() const
+	void flushBuffer()
 	{
 		struct input_event ev;
 		if (handle != -1)
-			while ( ::read(handle, &ev, sizeof(struct input_event)));
+			while (1) ( ::read(handle, &ev, sizeof(struct input_event)));
 	}
 };
 
