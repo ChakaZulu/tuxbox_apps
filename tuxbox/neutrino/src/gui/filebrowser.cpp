@@ -85,6 +85,34 @@ size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
 	*pStr += (char*) ptr;
 	return size*nmemb;
 }
+
+const struct file_type_list_t
+{
+	const char * const extension;
+	CFile::FileType    type;
+} file_type_list[] =
+{
+	{ "ogg" , CFile::FILE_OGG       },
+	{ "mp3" , CFile::FILE_MP3       },
+	{ "m2a" , CFile::FILE_MP3       },
+	{ "mpa" , CFile::FILE_MP3       },
+	{ "mp2" , CFile::FILE_MP3       },
+	{ "m3u" , CFile::FILE_PLAYLIST  },
+	{ "url" , CFile::STREAM_MP3     },
+	{ "txt" , CFile::FILE_TEXT      },
+	{ "sh"  , CFile::FILE_TEXT      },
+	{ "png" , CFile::FILE_PICTURE   },
+	{ "jpg" , CFile::FILE_PICTURE   },
+	{ "jpeg", CFile::FILE_PICTURE   },
+	{ "bmp" , CFile::FILE_PICTURE   },
+	{ "gif" , CFile::FILE_PICTURE   },
+	{ "crw" , CFile::FILE_PICTURE   },
+	{ "imu" , CFile::STREAM_PICTURE },
+	{ "cdr" , CFile::FILE_CDR       },
+	{ "wav" , CFile::FILE_WAV       },
+};
+
+
 //------------------------------------------------------------------------
 CFile::FileType CFile::getType(void) const
 {
@@ -92,30 +120,14 @@ CFile::FileType CFile::getType(void) const
 		return FILE_DIR;
 
 	int ext_pos = Name.rfind('.');
-	if( ext_pos > 0)
+	if (ext_pos > 0)
 	{
 		std::string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
-		if ((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) ||
-		  (strcasecmp(extension.c_str(),"mpa") == 0) || (strcasecmp(extension.c_str(),"mp2") == 0))
-			return FILE_MP3;
-		if (strcasecmp(extension.c_str(),"m3u") == 0)
-			return FILE_PLAYLIST;
-		if (strcasecmp(extension.c_str(),"url") == 0)
-			return STREAM_MP3;
-		if ((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
-			return FILE_TEXT;
-		if ((strcasecmp(extension.c_str(),"jpg") == 0) || (strcasecmp(extension.c_str(),"jpeg") == 0) || (strcasecmp(extension.c_str(),"png") == 0) || 
-		    (strcasecmp(extension.c_str(),"bmp") == 0) || (strcasecmp(extension.c_str(),"gif") == 0) || (strcasecmp(extension.c_str(),"crw") == 0))
-			return FILE_PICTURE;
-		if (strcasecmp(extension.c_str(),"imu") == 0)
-			return STREAM_PICTURE;
-		if (strcasecmp(extension.c_str(),"ogg") == 0)
-			return FILE_OGG;
-		if (strcasecmp(extension.c_str(),"cdr") == 0)
-			return FILE_CDR;
-		if (strcasecmp(extension.c_str(),"wav") == 0)
-			return FILE_WAV;
+		
+		for (unsigned int i = 0; i < sizeof(file_type_list) / sizeof(struct file_type_list_t); i++)
+			if (strcasecmp(extension.c_str(), file_type_list[i].extension) == 0)
+				return file_type_list[i].type;
 	}
 	return FILE_UNKNOWN;
 }
@@ -326,9 +338,9 @@ void CFileBrowser::ChangeDir(const std::string & filename)
 		}
 		else
 		{
-			newpath = Path.substr(0,pos);
+			newpath = Path.substr(0, pos + 1);
 		}
-
+		
 		if (strncmp(newpath.c_str(), base.c_str(), base.length()) != 0)
 			return;
 	}
