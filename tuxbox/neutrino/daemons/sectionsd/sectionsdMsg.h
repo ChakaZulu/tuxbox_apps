@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.25 2001/11/22 12:53:39 field Exp $
+//  $Id: sectionsdMsg.h,v 1.26 2001/11/22 13:19:00 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,8 +25,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
-//  Revision 1.25  2001/11/22 12:53:39  field
-//  Kleinere Updates
+//  Revision 1.26  2001/11/22 13:19:00  field
+//  Liefert nun auch nur NEXT Epg ab
 //
 //  Revision 1.24  2001/10/21 13:04:40  field
 //  nvod-zeiten funktionieren
@@ -100,6 +100,7 @@ struct sectionsd {
   static const unsigned char epg_has_later= 0x02;
   static const unsigned char epg_has_current= 0x04;
   static const unsigned char epg_not_broadcast= 0x08;
+  static const unsigned char epg_has_next= 0x10;
 
   struct msgRequestHeader {
     char version;
