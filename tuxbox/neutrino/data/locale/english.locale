@@ -41,6 +41,9 @@ EPGPlus.select_font_name Font selection
 EPGPlus.settings Settings
 EPGPlus.slider_width slider width
 EPGPlus.stretch_mode Stretch mode
+EPGPlus.swap_mode skip mode
+EPGPlus.timeline_fontdate Timescale Date
+EPGPlus.timeline_fonttime Timescale Time
 EPGPlus.vergap1_width width ver. gap 1
 EPGPlus.vergap2_width width ver. gap 2
 EPGPlus.view_mode Mode
