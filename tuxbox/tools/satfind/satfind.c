@@ -302,7 +302,7 @@ int main(int argc, char **argv) {
     return 1;
   }
   
-  if((fe_fd=open(FE,O_RDONLY))<0) {
+  if((fe_fd=open(FE,O_RDWR))<0) {
     perror("[satfind.c] Can't open Tuner");
     return 1;
   }
