@@ -1,6 +1,7 @@
 <html>
 <head>
-	<title>epgview</title>
+	<title>EPG</title>
+	<link rel="stylesheet" type="text/css" href="/epgview.css">
 	<script language="javascript">
 		function record()
 		{
@@ -15,7 +16,7 @@
 		}
 	</script>
 </head>
-<body bgcolor="#000000"><span class="title">#CHANNEL#</span><br>
+<body bgcolor="#ffffff"><span class="title"><b>#CHANNEL#</b></span><br>
 #BODY#
 </body>
 </html>
