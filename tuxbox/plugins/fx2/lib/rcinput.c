@@ -9,7 +9,6 @@
 #include <draw.h>
 
 static	int				fd = -1;
-static	int				keydown=0;
 		unsigned short	realcode=0xee;
 		unsigned short	actcode=0xee;
 		int				doexit=0;
@@ -106,8 +105,6 @@ static  unsigned short cw=0;
 	if ( x < 2 )
 	{
 		realcode=0xee;
-		if ( cw == 2 )
-			cw=3;
 		if ( cw == 1 )
 			cw=0;
 		return;
@@ -128,20 +125,9 @@ static  unsigned short cw=0;
 
 	Debug("code=%04x\n",code);
 
-	if ( cw == 3 )
-	{
-		if ( code == RC_SPKR )
-		{
-			actcode = RC_SPKR;
-			cw=1;
-		}
-		return;
-	}
-
 	if ( cw == 2 )
 	{
-		if ( code != RC_SPKR )
-			cw=3;
+		actcode=code;
 		return;
 	}
 
@@ -155,8 +141,9 @@ static  unsigned short cw=0;
 	case RC_SPKR:
 		if ( !cw )
 		{
-			FBPause();
 			cw=2;
+			FBPause();
+			cw=0;
 		}
 		break;
 	case RC_HOME:

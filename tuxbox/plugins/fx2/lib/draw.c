@@ -548,9 +548,11 @@ static int			pos[64] =
 		}
 	}
 
+	while( realcode != 0xee )
+		RcGetActCode();
 	actcode = 0xee;
 
-	while( actcode == 0xee )
+	while( actcode != RC_SPKR )
 	{
 		tv.tv_usec = 100000;
 		tv.tv_sec = 0;
@@ -575,6 +577,12 @@ static int			pos[64] =
 
 		free(back);
 	}
+
+/* nochmal leer lesen */
+	while( realcode != 0xee )
+		RcGetActCode();
+	actcode = 0xee;
+
 /*	FBDrawClock(); */
 
 	Fx2PigResume();
