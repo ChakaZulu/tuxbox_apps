@@ -646,10 +646,10 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string
 			count++;
 			tmStartZeit = localtime(&(e->startTime));
 
-			screening_dates += "    ";
+			screening_dates = "    ";
 
 			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
-			screening_dates = g_Locale->getText(tmpstr);
+			screening_dates += g_Locale->getText(tmpstr);
 			screening_dates += '.';
 
 			strftime(tmpstr, sizeof(tmpstr), "  %d.", tmStartZeit );
