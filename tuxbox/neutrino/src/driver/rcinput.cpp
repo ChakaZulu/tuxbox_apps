@@ -1249,11 +1249,11 @@ unsigned int CRCInput::convertDigitToKey(const unsigned int digit)
 *       getUnicodeValue - return unicode value of the key or -1
 *
 **************************************************************************/
-#define UNICODE_VALUE_SIZE 54
+#define UNICODE_VALUE_SIZE 58
 static const int unicode_value[UNICODE_VALUE_SIZE] = {-1 , -1 , '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', -1 , -1 ,
 						      'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', -1 , -1 , 'A', 'S',
 						      'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', -1 /* FIXME */, -1 /* FIXME */, -1 , '\\', 'Z', 'X', 'C', 'V',
-						      'B', 'N', 'M', ',', '.', '/'};
+						      'B', 'N', 'M', ',', '.', '/', -1, -1, -1, ' '};
 
 int CRCInput::getUnicodeValue(const unsigned int key)
 {
