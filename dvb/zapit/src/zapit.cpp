@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.136 2002/04/17 11:14:20 obi Exp $
+ * $Id: zapit.cpp,v 1.137 2002/04/18 22:34:05 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -43,6 +43,8 @@ CConfigFile *config = NULL;
 CFrontend *frontend = NULL;
 /* the current channel */
 CZapitChannel *channel = NULL;
+/* the transponder scan xml input */
+XMLTreeParser *scanInputParser = NULL;
 
 struct rmsg {
 	uint8_t version;
@@ -69,7 +71,7 @@ CEventServer *eventServer;
 bool debug = false;
 
 /* previous ac3 state */
-bool OldAC3 = false;
+bool wasAc3 = false;
 
 /* near video on demand */
 extern map <uint, CZapitChannel> nvodchannels;
@@ -120,6 +122,31 @@ static int camdpid = -1;
 pthread_t dec_thread;
 #endif /* USE_EXTERNAL_CAMD */
 
+void CZapitDestructor()
+{
+	save_settings(true);
+
+	if (connfd != -1)
+	{
+		close(connfd);
+	}
+
+#ifdef USE_EXTERNAL_CAMD
+	if (camdpid != -1)
+	{
+		kill(camdpid, SIGTERM);
+		waitpid(camdpid, 0, 0);
+	}
+#endif
+
+	delete config;
+	delete frontend;
+	delete cam;
+
+	// remove this in class
+	exit(0);
+}
+
 void signal_handler (int signum)
 {
 	switch (signum)
@@ -128,21 +155,7 @@ void signal_handler (int signum)
 		debug = (debug ? false : true);
 		break;
 	default:
-		save_settings(true);
-		delete frontend;
-		delete config;
-		delete cam;
-#ifdef USE_EXTERNAL_CAMD
-		if (camdpid != -1)
-		{
-			kill(camdpid, SIGTERM);
-			waitpid(camdpid, 0, 0);
-		}
-#endif
-		if (connfd != -1)
-			close(connfd);
-
-		exit(0);
+		CZapitDestructor();
 	}
 }
 
@@ -305,15 +318,86 @@ void *decode_thread(void *ptr)
 }
 #endif /* USE_EXTERNAL_CAMD */
 
+int setPesFilter (int fd, dmxPesType_t type, dvb_pid_t pid)
+{
+	dmxPesFilterParams params;
+
+	if ((pid == NONE) || (pid == INVALID))
+	{
+		return fd;
+	}
+
+	/* open demux device if needed */
+	if ((fd == -1) && ((fd = open(DEMUX_DEV, O_RDWR)) < 0))
+	{
+		perror("[zapit] " DEMUX_DEV);
+		return -1;
+	}
+
+	/* setup vpid */
+	params.pid = pid;
+	params.input = DMX_IN_FRONTEND;
+	params.output = DMX_OUT_DECODER;
+	params.pesType = type;
+	params.flags = DMX_IMMEDIATE_START;
+
+	if (ioctl(fd, DMX_SET_PES_FILTER, &params) < 0)
+	{
+		perror("[zapit] DMX_SET_PES_FILTER");
+		close(fd);
+		return -1;
+	}
+
+	return fd;
+}
+
+int unsetPesFilter (int fd)
+{
+	if (fd != -1)
+	{
+		close(fd);
+	}
+
+	return -1;
+}
+
+bool setAudioBypassMode (bool isAc3)
+{
+	if (isAc3 == wasAc3)
+	{
+		return false;
+	}
+
+	if (audio_fd != -1)
+	{
+		close(audio_fd);
+	}
+
+	if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
+	{
+		perror("[zapit] " AUDIO_DEV);
+		return false;
+	}
+
+	if (ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, isAc3 ? 0 : 1) < 0)
+	{
+		perror("[zapit] AUDIO_SET_BYPASS_MODE");
+		close(audio_fd);
+		return false;
+	}
+
+	wasAc3 = isAc3;
+
+	return true;
+}
+
 int zapit (uint32_t onid_sid, bool in_nvod)
 {
-	dmxPesFilterParams pes_filter;
 #ifndef SELECT_VIDEO_SOURCE
 	videoStatus video_status;
 #endif
 	std::map <uint, CZapitChannel>::iterator cit;
 	bool new_transponder;
-	//pids chanpids;
 #ifdef USE_EXTERNAL_CAMD
 	char *vpidbuf;
 	char *apidbuf;
@@ -384,37 +468,10 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		debug("[zapit] video device already closed\n");
 	}
 
-	/* close demux devices */
-	if (dmx_video_fd != -1)
-	{
-		debug("[zapit] close demux device (video)\n");
-		close(dmx_video_fd);
-		dmx_video_fd = -1;
-	}
-	else
-	{
-		debug("[zapit] demux device already closed (video)\n");
-	}
-	if (dmx_pcr_fd != -1)
-	{
-		debug("[zapit] close demux device (pcr)\n");
-		close(dmx_pcr_fd);
-		dmx_pcr_fd = -1;
-	}
-	else
-	{
-		debug("[zapit] demux device already closed (pcr)\n");
-	}
-	if (dmx_audio_fd != -1)
-	{
-		debug("[zapit] close demux device (audio)\n");
-		close(dmx_audio_fd);
-		dmx_audio_fd = -1;
-	}
-	else
-	{
-		debug("[zapit] demux device already closed (audio)\n");
-	}
+	/* stop demux filters */
+	dmx_video_fd = unsetPesFilter(dmx_video_fd);
+	dmx_audio_fd = unsetPesFilter(dmx_audio_fd);
+	dmx_pcr_fd = unsetPesFilter(dmx_pcr_fd);
 
 	/* store the new channel */
 	if ((channel == NULL) || (onid_sid != channel->getOnidSid()))
@@ -549,238 +606,56 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	pthread_create(&dec_thread, 0, decode_thread, (void*) vals);
 #endif /* USE_EXTERNAL_CAMD */
 
-	/* Open video device */
-	if (video_fd == -1)
+	/* open video device */
+	if ((video_fd == -1) && ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0))
 	{
-		if ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0)
-		{
-			perror("[zapit] unable to open video device");
-			return -3;
-		}
-		else
-		{
-			debug("[zapit] opened video device\n");
-		}
+		perror("[zapit] " VIDEO_DEV);
+		return -3;
 	}
-	else
-	{
-		debug("[zapit] video device already open\n");
-	}
+
 #ifndef SELECT_VIDEO_SOURCE
 	/* get video status */
 	if (ioctl(video_fd, VIDEO_GET_STATUS, &video_status) < 0)
 	{
 		perror("[zapit] VIDEO_GET_STATUS");
+		return -3;
 	}
 
 	/* select video source */
 	if (video_status.streamSource != VIDEO_SOURCE_DEMUX)
-	{
 #endif
+	{
 		if (ioctl(video_fd, VIDEO_SELECT_SOURCE, VIDEO_SOURCE_DEMUX) < 0)
 		{
 			perror("[zapit] VIDEO_SELECT_SOURCE");
 		}
-		else
-		{
-			debug("[zapit] selected video source\n");
-		}
-#ifndef SELECT_VIDEO_SOURCE
 	}
-	else
-	{
-		debug("[zepit] video source already demux\n");
-	}
-#endif
 
-	/* start video play */
+	/* start video */
 	if (ioctl(video_fd, VIDEO_PLAY) < 0)
 	{
 		perror("[zapit] VIDEO_PLAY");
-	}
-	else
-	{
-		debug("[zapit] video playing\n");
+		return -3;
 	}
 
-	/* Set audio ac3 mode */
-	if (channel->getPids()->apids[channel->getAudioChannel()].is_ac3 != OldAC3)
-	{
-		OldAC3 = !OldAC3;
+	/* set bypass mode */
+	setAudioBypassMode(channel->getPids()->apids[channel->getAudioChannel()].is_ac3);
 
-		if (audio_fd != -1)
-		{
-			debug("[zapit] closing open audio device.\n");
-			close(audio_fd);
-		}
-		else
-		{
-			debug("[zapit] audio device already closed.\n");
-		}
-
-		if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
-		{
-			perror("[zapit] unable to open audio device");
-			return -3;
-		}
-		else
-		{
-			debug("[zapit] opened audio device\n");
-		}
-
-		if (ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, OldAC3 ? 0 : 1) < 0)
-		{
-			perror("[zapit] AUDIO_SET_BYPASS_MODE");
-		}
-		else
-		{
-			debug("[zapit] audio bypass mode set\n");
-		}
-	}
-
-	if (channel->getVideoPid() != NONE)
-	{
-		/* Open demux device (video) */
-		if (dmx_video_fd == -1)
-		{
-			if ((dmx_video_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-			{
-				perror("[zapit] unable to open demux device (video)");
-				return -3;
-			}
-			else
-			{
-				debug("[zapit] opened demux device (video)\n");
-			}
-		}
-		else
-		{
-			debug("[zapit] demux device (video) already open\n");
-		}
-
-		/* setup vpid */
-		pes_filter.pid = channel->getVideoPid();
-		pes_filter.input = DMX_IN_FRONTEND;
-		pes_filter.output = DMX_OUT_DECODER;
-		pes_filter.pesType = DMX_PES_VIDEO;
-		pes_filter.flags = 0;
-
-		if (ioctl(dmx_video_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
-		{
-			perror("[zapit] DMX_SET_PES_FILTER (video)");
-			return -3;
-		}
-		else
-		{
-			debug("[zapit] video pid set to %04x\n", channel->getVideoPid());
-		}
-	}
-
-	if (channel->getPcrPid() != NONE)
-	{
-		/* Open demux device (pcr) */
-		if (dmx_pcr_fd == -1)
-		{
-			if ((dmx_pcr_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-			{
-				perror("[zapit] unable to open demux device (pcr)");
-				return -3;
-			}
-			else
-			{
-				debug("[zapit] opened demux device (pcr)\n");
-			}
-		}
-		else
-		{
-			debug("[zapit] demux device (pcr) already open\n");
-		}
-
-		/* setup pcrpid and start demuxing */
-		pes_filter.pid = channel->getPcrPid();
-		pes_filter.input = DMX_IN_FRONTEND;
-		pes_filter.output = DMX_OUT_DECODER;
-		pes_filter.pesType = DMX_PES_PCR;
-		pes_filter.flags = DMX_IMMEDIATE_START;
-
-		if (ioctl(dmx_pcr_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
-		{
-			perror("[zapit] DMX_SET_PES_FILTER (pcr)");
-			return -3;
-		}
-		else
-		{
-			debug("[zapit] pcr pid set to %04x and demux started\n", channel->getPcrPid());
-		}
-	}
-
-	if (channel->getAudioPid() != NONE)
-	{
-		/* Open demux device (audio) */
-		if (dmx_audio_fd == -1)
-		{
-			if ((dmx_audio_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-			{
-				perror("[zapit] unable to open demux device (audio)");
-				return -3;
-			}
-			else
-			{
-				debug("[zapit] opened demux device (audio)\n");
-			}
-		}
-		else
-		{
-			debug("[zapit] demux device (audio) already open\n");
-		}
-
-		/* setup apid and start demuxing */
-		pes_filter.pid     = channel->getAudioPid();
-		pes_filter.input   = DMX_IN_FRONTEND;
-		pes_filter.output  = DMX_OUT_DECODER;
-		pes_filter.pesType = DMX_PES_AUDIO;
-		pes_filter.flags   = DMX_IMMEDIATE_START;
-
-		if (ioctl(dmx_audio_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
-		{
-			perror("[zapit] DMX_SET_PES_FILTER (audio)");
-			return -3;
-		}
-		else
-		{
-			debug("[zapit] audio pid set to %04x and demux started\n", channel->getAudioPid());
-		}
-	}
-
-	if (channel->getVideoPid() != NONE)
-	{
-		/* start demux (video) */
-		if (ioctl(dmx_video_fd, DMX_START, 0) < 0)
-		{
-			perror("[zapit] DMX_START (video)");
-		}
-		else
-		{
-			debug("[zapit] started demux (video)\n");
-		}
-	}
+	/* start demux filters */
+	dmx_pcr_fd = setPesFilter(dmx_pcr_fd, DMX_PES_PCR, channel->getPcrPid());
+	dmx_audio_fd = setPesFilter(dmx_audio_fd, DMX_PES_AUDIO, channel->getAudioPid());
+	dmx_video_fd = setPesFilter(dmx_video_fd, DMX_PES_VIDEO, channel->getVideoPid());
 
 #ifndef DVBS
 	debug("[zapit] setting vtxt\n");
 	set_vtxt(channel->getTeletextPid());
 #endif /* DVBS */
 
-	if (!in_nvod)
-	{
-		debug("[zapit] saving settings\n");
-		save_settings(false);
-	}
-
+	save_settings(false);
 	return 3;
 }
 
-
-int numzap(int channel_number)
+int numzap (int channel_number)
 {
 	std::map<uint, uint>::iterator cit;
 
@@ -792,6 +667,7 @@ int numzap(int channel_number)
 			debug("[zapit] given channel not found\n");
 			return -2;
 		}
+
 		cit  = allnumchannels_radio.find(channel_number);
 	}
 	else
@@ -801,19 +677,23 @@ int numzap(int channel_number)
 			debug("[zapit] given channel not found\n");
 			return -2;
 		}
+
 		cit = allnumchannels_tv.find(channel_number);
 	}
 
 	debug("[zapit] zapping to onid_sid %04x\n", cit->second);
 
 	if (zapit(cit->second, false) > 0)
+	{
 		return 2;
+	}
 	else
+	{
 		return -2;
+	}
 }
 
-
-int namezap(std::string channel_name)
+int namezap (std::string channel_name)
 {
 	std::map<std::string,uint>::iterator cit;
 
@@ -842,225 +722,76 @@ int namezap(std::string channel_name)
 	debug("[zapit] zapping to onid_sid %04x\n", cit->second);
 
 	if (zapit(cit->second, false) > 0)
-		return 3;
-	else
-		return -3;
-}
-
-int changeapid(uint8_t pid_nr)
-{
-	struct dmxPesFilterParams pes_filter;
-
-	if (pid_nr <= channel->getPids()->count_apids)
 	{
-		if (dmx_audio_fd == -1)
-		{
-			if ((dmx_audio_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-			{
-				perror("[zapit] unable to open demux device (audio / changeapid)");
-				return -8;
-			}
-			else
-			{
-				debug("[zapit] opened demux device (audio)\n");
-			}
-		}
-
-		if (ioctl(dmx_audio_fd, DMX_STOP, 0) < 0)
-		{
-			perror("[zapit] unable to stop audio");
-			return -8;
-		}
-
-		/* Set audio ac3 mode */
-		if (channel->getPids()->apids[pid_nr].is_ac3 != OldAC3)
-		{
-			OldAC3 = !OldAC3;
-
-			if (audio_fd == -1)
-			{
-				if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
-				{
-					perror("[zapit] unable to open audio device");
-					return -8;
-				}
-				else
-				{
-					debug("[zapit] opened audio device\n");
-				}
-			}
-			else
-			{
-				debug("[zapit] audio device already open\n");
-			}
-
-			if (ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, OldAC3 ? 0 : 1) < 0)
-			{
-				perror("[zapit] AUDIO_SET_BYPASS_MODE");
-				return -8;
-			}
-			else
-			{
-				debug("[zapit] audio bypass mode set\n");
-			}
-		}
-
-		/* apid */
-		pes_filter.pid = channel->getPids()->apids[pid_nr].pid;
-		pes_filter.input = DMX_IN_FRONTEND;
-		pes_filter.output = DMX_OUT_DECODER;
-		pes_filter.pesType = DMX_PES_AUDIO;
-		pes_filter.flags = DMX_IMMEDIATE_START;
-
-		if (ioctl(dmx_audio_fd, DMX_SET_PES_FILTER, &pes_filter) < 0)
-		{
-			perror("[zapit] unable to set demux pes filter");
-			return -8;
-		}
-		else
-		{
-			debug("[zapit] apid changed to %04x\n", channel->getPids()->apids[pid_nr].pid);
-			channel->setAudioChannel(pid_nr);
-			return 8;
-		}
+		return 3;
 	}
 	else
+	{
+		return -3;
+	}
+}
+
+int changeapid (uint8_t pid_nr)
+{
+	/* invalid pid number? */
+	if (pid_nr >= channel->getPids()->count_apids)
 	{
 		return -8;
 	}
+
+	/* stop demux filter */
+	dmx_audio_fd = unsetPesFilter(dmx_audio_fd);
+
+	/* set bypass mode */
+	setAudioBypassMode(channel->getPids()->apids[pid_nr].is_ac3);
+
+	/* start demux filter */
+	dmx_audio_fd = setPesFilter(dmx_audio_fd, DMX_PES_AUDIO, channel->getPids()->apids[pid_nr].pid);
+
+	/* update current channel */
+	channel->setAudioChannel(pid_nr);
+
+	return 8;
 }
 
-#if 0
-void display_pic()
-{
-	struct videoDisplayStillPicture sp;
-	char *picture;
-	int pic_fd;
-	struct stat pic_desc;
-
-	if ((pic_fd = open("/root/ilogo.mpeg", O_RDONLY)) < 0)
-	{
-		perror("open still picture");
-		exit(0);
-	}
-
-	if((video_fd == -1) && ((video_fd = open(VIDEO_DEV, O_RDWR|O_NONBLOCK)) < 0))
-	{
-		perror("[zapit] unable to open video device");
-		exit(1);
-	}
-
-	fstat(pic_fd, &pic_desc);
-
-	sp.iFrame = (char *) malloc(pic_desc.st_size);
-	sp.size = pic_desc.st_size;
-	printf("I-frame size: %d\n", sp.size);
-
-	if(!sp.iFrame)
-	{
-		printf("No memory for I-Frame\n");
-		exit(0);
-	}
-
-	printf("read: %d bytes\n",read(pic_fd,sp.iFrame,sp.size));
-
-	if (ioctl(video_fd, VIDEO_STOP, (boolean)0) < 0)
-	{
-		perror("VIDEO_STOP");
-		//exit(0);
-	}
-
-	if (ioctl(video_fd, VIDEO_STILLPICTURE, sp) < 0))
-	{
-		perror("VIDEO STILLPICTURE");
-		//exit(0);
-	}
-
-	sleep(3);
-
-	if (ioctl(video_fd, VIDEO_PLAY) < 0)
-	{
-		perror("VIDEO PLAY");
-		//exit(0);
-	}
-
-	return;
-}
-#endif
-
-void endzap()
+void endzap ()
 {
 	if (audio_fd != -1)
 	{
 		close(audio_fd);
 		audio_fd = -1;
 	}
+
 	if (video_fd != -1)
 	{
 		close(video_fd);
 		video_fd = -1;
 	}
-	if (dmx_video_fd != -1)
-	{
-		close(dmx_video_fd);
-		dmx_video_fd = -1;
-	}
-	if (dmx_audio_fd != -1)
-	{
-		close(dmx_audio_fd);
-		dmx_audio_fd = -1;
-	}
-	if (dmx_pcr_fd != -1)
-	{
-		close(dmx_pcr_fd);
-		dmx_pcr_fd = -1;
-	}
-	return;
+
+	dmx_video_fd = unsetPesFilter(dmx_video_fd);
+	dmx_audio_fd = unsetPesFilter(dmx_audio_fd);
+	dmx_pcr_fd = unsetPesFilter(dmx_pcr_fd);
 }
 
-
-int shutdownBox()
+void shutdownBox ()
 {
 	if (execlp("/sbin/halt", "halt", NULL) < 0)
 	{
 		perror("[zapit] execlp");
-		return -1;
 	}
-	return 0;
 }
 
-int sleepBox()
+void setRadioMode ()
 {
-	int device;
-	if((device = open(FRONT_DEV, O_RDWR)) < 0)
-	{
-		perror("[zapit] " FRONT_DEV);
-		return -4;
-	}
-
-	if (ioctl(device, FE_SET_POWER_STATE, FE_POWER_OFF) != 0)
-	{
-		perror("[zapit] FE_SET_POWER_STATE");
-		return -4;
-	}
-
-	return(4);
-}
-
-void setRadioMode()
-{
-	debug("[zapit] switching to radio-mode\n");
 	Radiomode_on = true;
-	return;
 }
 
-void setTVMode()
+void setTVMode ()
 {
 	Radiomode_on = false;
-	return;
 }
 
-int prepare_channels()
+int prepare_channels ()
 {
 	int ls;
 
@@ -1130,7 +861,7 @@ int start_scan(unsigned short do_diseqc)
 	if (video_fd != -1)
 	{
 		/* blank screen */
-		if(ioctl(video_fd, VIDEO_STOP, 1) < 0)
+		if (ioctl(video_fd, VIDEO_STOP, 1) < 0)
 		{
 			perror("[zapit] VIDEO_STOP");
 		}
@@ -1139,23 +870,9 @@ int start_scan(unsigned short do_diseqc)
 		video_fd = -1;
 	}
 
-	if (dmx_audio_fd != -1)
-	{
-		close(dmx_audio_fd);
-		dmx_audio_fd = -1;
-	}
-
-	if (dmx_video_fd != -1)
-	{
-		close(dmx_video_fd);
-		dmx_video_fd = -1;
-	}
-
-	if (dmx_pcr_fd != -1)
-	{
-		close(dmx_pcr_fd);
-		dmx_pcr_fd = -1;
-	}
+	dmx_audio_fd = unsetPesFilter(dmx_audio_fd);
+	dmx_video_fd = unsetPesFilter(dmx_video_fd);
+	dmx_pcr_fd = unsetPesFilter(dmx_pcr_fd);
 
 	if (pthread_create(&scan_thread, 0, start_scanthread, &do_diseqc))
 	{
@@ -1171,7 +888,68 @@ int start_scan(unsigned short do_diseqc)
 	return 0;
 }
 
-void parse_command()
+void parseScanInputXml ()
+{
+	char buffer[2048];
+	char filename[32];
+	size_t done;
+	size_t length;
+	FILE *transponder_xml;
+
+	switch (frontend->getInfo()->type)
+	{
+	case FE_QPSK:
+		strcpy(filename, CONFIGDIR "/satellites.xml");
+		break;
+
+	case FE_QAM:
+		strcpy(filename, CONFIGDIR "/cables.xml");
+		break;
+
+	default:
+		return;
+	}
+
+	transponder_xml = fopen(filename, "r");
+
+	if (transponder_xml == NULL)
+	{
+		perror(filename);
+		return;
+	}
+
+	scanInputParser = new XMLTreeParser("ISO-8859-1");
+
+	do
+	{
+		length = fread(buffer, 1, sizeof(buffer), transponder_xml);
+		done = length < sizeof(buffer);
+
+		if (!scanInputParser->Parse(buffer, length, done))
+		{
+			printf("[zapit] parse error: %s at line %d\n",
+				scanInputParser->ErrorString(scanInputParser->GetErrorCode()),
+				scanInputParser->GetCurrentLineNumber());
+
+			fclose(transponder_xml);
+			delete scanInputParser;
+			scanInputParser = NULL;
+			return;
+		}
+	}
+	while (!done);
+
+	fclose(transponder_xml);
+
+	if (!scanInputParser->RootNode())
+	{
+		delete scanInputParser;
+		scanInputParser = NULL;
+		return;
+	}
+}
+
+void parse_command ()
 {
 	char *status;
 	short carsten; // who the fuck is short carsten? :)
@@ -1864,18 +1642,29 @@ void parse_command()
 				send( connfd, &msgResponseIsScanReady, sizeof(msgResponseIsScanReady),0);
 			break;
 
-			case CZapitClient::CMD_SCANGETSATLIST :
-/*
-frontend->getInfo()->type == FE_QPSK //bei sat
-frontend->getInfo()->type == FE_QAM //bei kabel
-*/
-				CZapitClient::responseGetSatelliteList msgResponseGetSatelliteList;
-				strncpy( msgResponseGetSatelliteList.satName, "Astra 19.2E", 30);
-				send( connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList),0);
-				strncpy( msgResponseGetSatelliteList.satName, "Dummy-Sat2", 30);
-				send( connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList),0);
-			break;
+			case CZapitClient::CMD_SCANGETSATLIST:
+			{
+				if (scanInputParser == NULL)
+				{
+					parseScanInputXml();
 
+					if (scanInputParser == NULL)
+					{
+						break;
+					}
+				}
+
+				CZapitClient::responseGetSatelliteList msgResponseGetSatelliteList;
+				XMLTreeNode *search = scanInputParser->RootNode()->GetChild();
+
+				while (search != NULL)
+				{
+					strncpy(msgResponseGetSatelliteList.satName, search->GetAttributeValue("name"), sizeof(msgResponseGetSatelliteList.satName));
+					send(connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList), 0);
+					search = search->GetNext();
+				}
+				break;
+			}
 			case CZapitClient::CMD_SCANSETSCANSATLIST :
 				CZapitClient::commandSetScanSatelliteList sat;
 				while( read( connfd, &sat, sizeof(sat)))
@@ -2168,7 +1957,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.136 2002/04/17 11:14:20 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.137 2002/04/18 22:34:05 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2236,9 +2025,7 @@ int main (int argc, char **argv)
 	if (!frontend->isInitialized())
 	{
 		printf("[zapit] unable to open frontend devices. bye.\n");
-		delete frontend;
-		delete config;
-		return -1;
+		CZapitDestructor();
 	}
 	else
 	{
@@ -2262,10 +2049,7 @@ int main (int argc, char **argv)
 	if (!cam->isInitialized())
 	{
 		printf("[zapit] unable to initialize cam. bye.\n");
-		delete cam;
-		delete frontend;
-		delete config;
-		return -1;
+		CZapitDestructor();
 	}
 	else
 	{
