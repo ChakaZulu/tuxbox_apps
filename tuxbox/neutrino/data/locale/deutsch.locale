@@ -470,10 +470,11 @@ favorites.finalhint \nVersehentlich hinzugefügte Kanäle können mit\nder Bouquetv
 sleeptimerbox.title Sleeptimer
 sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
 sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
+sleeptimerbox.announce Sleeptimer in 1 min
 
 timerbar.channelswitch Vormerken
 timerbar.recordevent Aufnehmen
 timer.eventtimed.title Sendung vormerken
 timer.eventtimed.msg Die Sendung wurde vorgemerkt.\nDie dbox2 wird sich zum Startzeitpunkt automatisch ein- \nund auf die Sendung umschalten.
 timer.eventrecord.title Aufnahme vormerken
-timer.eventrecord.msg   Noch nicht implementiert!
+timer.eventrecord.msg   Die Sendung wurde zur Aufnahme vergemerkt
