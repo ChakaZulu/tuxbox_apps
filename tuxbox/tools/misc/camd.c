@@ -201,6 +201,8 @@ int find_emmpid(int ca_system_id) {
 
   close(fd);
 
+  if (r<=0) return 0;
+
   r=buffer[2];
 
   //for(count=0;count<r-1;count++)
@@ -423,7 +425,7 @@ int main(int argc, char **argv)
       case 0x89:
 	{
 	  if (caid == 0) break;
-	  printf("status89: %02x\n", buffer[5]);	
+	  printf("status89: %02x\n", buffer[5]);
 	  if (EMMPID == 0) {
 	    printf("searching EMM-pid for ca_system_ID %04X\n",caid);
 	    EMMPID=find_emmpid(caid);
