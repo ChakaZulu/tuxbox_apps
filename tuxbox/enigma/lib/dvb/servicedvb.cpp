@@ -705,14 +705,12 @@ int eServiceHandlerDVB::play(const eServiceReference &service, int workaround )
 	{
 		if ( !workaround )
 		{
-			FILE *f = fopen( service.path.c_str(), "r" );
-			if (!f)
+			struct stat64 s;
+			if (::stat64(service.path.c_str(), &s))
 			{
 				eDebug("file %s not exist.. don't play", service.path.c_str() );
 				return -1;
 			}
-			else
-				fclose(f);
 			if ( eDVB::getInstance()->recorder &&
 				service.path == eDVB::getInstance()->recorder->getFilename() )
 				startPlayback(service.path, 2);
