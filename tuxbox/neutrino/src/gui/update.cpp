@@ -255,7 +255,7 @@ int CFlashUpdate::exec(CMenuTarget* parent, string)
 	showGlobalStatus(40);
 
 	CFlashTool ft;
-	ft.setMTDDevice("/dev/mtd/3");
+	ft.setMTDDevice("/dev/mtd/2");
 	ft.setStatusViewer(this);
 
 	string sFileName = gTmpPath+ ImageFile;
