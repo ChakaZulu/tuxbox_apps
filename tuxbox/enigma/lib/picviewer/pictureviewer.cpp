@@ -6,6 +6,7 @@
 #include <lib/base/estring.h>
 #include <lib/gui/actions.h>
 #include <lib/gui/guiactions.h>
+#include <lib/dvb/servicedvb.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
@@ -67,7 +68,7 @@ ePictureViewer::ePictureViewer(const eString &filename)
 
 	fh_root = NULL;
 	m_scaling = COLOR;
-	m_aspect = 4.0 / 3;
+//	m_aspect = 4.0 / 3;
 	m_CurrentPic_Name = "";
 	m_CurrentPic_Buffer = NULL;
 	m_CurrentPic_X = 0;
@@ -97,11 +98,12 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	eConfig::getInstance()->getKey("/picviewer/showbusysign", showbusysign);
 	showBusySign = (showbusysign == 1);
 
-#if 0
 	unsigned int v_pin8 = 0;
 	eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8);
-	m_aspect = (v_pin8 < 2) ? 4.0/3 : 16.0/9;
-#endif
+	if ((v_pin8 > 1) && (eServiceInterface::getInstance()->getService()->getAspectRatio() == 1))
+		m_aspect = 16.0 / 9;
+	else
+		m_aspect = 4.0 / 3;
 
 	m_busy_buffer = NULL;
 
