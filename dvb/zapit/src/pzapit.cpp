@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.44 2003/05/15 20:09:55 digi_casi Exp $
+ * $Id: pzapit.cpp,v 1.45 2003/05/18 11:41:57 digi_casi Exp $
  *
  * simple commandline client for zapit
  *
@@ -166,16 +166,16 @@ int main (int argc, char** argv)
 				sscanf(argv[++i], "%x", &tmp);
 				motorCmdType = tmp;
 				sscanf(argv[++i], "%x", &tmp);
-				motorCmd = tmp;
-				sscanf(argv[++i], "%x", &tmp);
 				motorAddr = tmp;
+				sscanf(argv[++i], "%x", &tmp);
+				motorCmd = tmp;
 				sscanf(argv[++i], "%x", &tmp);
 				motorNumParameters = tmp;
 				sscanf(argv[++i], "%x", &tmp);
 				motorParam1 = tmp;
 				sscanf(argv[++i], "%x", &tmp);
 				motorParam2 = tmp;
-				printf("[pzapit] motor command = %d %d %d %d %d %d\n", motorCmdType, motorCmd, motorAddr, motorNumParameters, motorParam1, motorParam2);
+				printf("[pzapit] motor command = %x %x %x %x %x %x\n", motorCmdType, motorAddr, motorCmd, motorNumParameters, motorParam1, motorParam2);
 				continue;
 			}
 			else
@@ -311,7 +311,7 @@ int main (int argc, char** argv)
 	/* send diseqc 1.2 motor command */
 	if (sendMotorCommand)
 	{
-		zapit.sendMotorCommand(motorCmdType, motorCmd, motorAddr, motorNumParameters, motorParam1, motorParam2);
+		zapit.sendMotorCommand(motorCmdType, motorAddr, motorCmd, motorNumParameters, motorParam1, motorParam2);
 	}
 	
 	/* kill zapit*/
