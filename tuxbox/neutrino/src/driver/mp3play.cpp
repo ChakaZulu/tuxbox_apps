@@ -535,13 +535,11 @@ void* CMP3Player::PlayThread(void * filename)
 	FILE *soundfd=::fopen("/dev/sound/dsp","w");
 	CMP3Player::getInstance()->ResetDSP(soundfd);
 
-	g_Sectionsd->setPauseScanning(true);
 	/* Decode stdin to stdout. */
 	int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
 	if(Status > 0)
 		fprintf(stderr,"Error %d occured during decoding.\n",Status);
 	
-	g_Sectionsd->setPauseScanning(false);
 	fclose(fp);
 	fclose(soundfd);
 	pthread_exit(0);

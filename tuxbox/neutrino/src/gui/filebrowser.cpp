@@ -52,7 +52,7 @@ int CFile::getType()
 	{
 		string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
-		if(extension == "mp3")
+		if(extension == "mp3" || extension == "m2a")
 			return FILE_MP3;
 		if((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
 			return FILE_TEXT;
@@ -523,7 +523,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 	}
 	else
 	{
-		color = COL_MENUCONTENTDARK;
+		color = COL_MENUCONTENT;//DARK;
 	}
 	
 	if( (liststart + pos) <filelist.size() )
@@ -575,7 +575,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 		}
 	}
 	else
-		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, COL_MENUCONTENTDARK);
+		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, COL_MENUCONTENT/*DARK*/);
 }
 
 //------------------------------------------------------------------------
