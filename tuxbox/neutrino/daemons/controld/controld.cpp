@@ -332,7 +332,7 @@ void switch_vcr( bool vcr_on)
 		}
 		else if (settings.boxtype == 1) // Nokia
 		{
-			routeVideo(3, 2, 7, 2);
+			routeVideo(3, 2, 1, 2);
 		}
 		else if (settings.boxtype == 3) // Philips
 		{
@@ -348,7 +348,7 @@ void switch_vcr( bool vcr_on)
 		}
 		else if (settings.boxtype == 1) // Nokia
 		{
-			routeVideo(5, 1, 7, settings.videooutput);
+			routeVideo(5, 1, 1, settings.videooutput);
 		}
 		else if (settings.boxtype == 3) // Philips
 		{
