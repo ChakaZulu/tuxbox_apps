@@ -327,16 +327,11 @@ scants.head Kanalsuche
 scants.startnow Kanalsuche starten
 scants.actsatellite Satellit:
 scants.actcable Kabel:
-scants.astra Astra
-scants.hotbird Hotbird
-scants.kopernikus Kopernikus
-scants.sirius Sirius
-scants.thor Thor
-scants.digituerk Digituerk
-scants.tuerksat Tuerksat
 scants.transponders Transponder:
 scants.freqdata Frequenz:
-scants.servicenames TV     Radio  Data
+scants.provider Anbieter:
+scants.channel Kanal:
+scants.numberofservices TV     Radio  Data
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave nicht ändern
