@@ -191,8 +191,9 @@ void show_time()
 
 		if(mode!=CLcddClient::MODE_STANDBY)
 		{
-			display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
-			fonts.time->RenderString(82,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+			display.draw_fill_rect (77,50,120,64, CLCDDisplay::PIXEL_OFF);
+			int pos = 122 - fonts.time->getRenderWidth(timestr);
+			fonts.time->RenderString(pos,62, 50, timestr, CLCDDisplay::PIXEL_ON);
 		}
 		else
 		{
@@ -335,7 +336,7 @@ int main(int argc, char **argv)
 {
 	debugoutput = true;
 
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.42 2002/03/01 15:27:01 field Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.43 2002/03/18 00:02:57 McClean Exp $\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
 	fontRenderer->AddFont(FONTDIR "/Arial.ttf");
