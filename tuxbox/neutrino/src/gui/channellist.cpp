@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.43 2001/12/12 19:11:32 McClean Exp $
+// $Id: channellist.cpp,v 1.44 2001/12/14 16:56:42 faralla Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.44  2001/12/14 16:56:42  faralla
+// better bouquet-key handling
+//
 // Revision 1.43  2001/12/12 19:11:32  McClean
 // prepare timing setup...
 //
@@ -381,8 +384,10 @@ int CChannelList::show()
 	int oldselected = selected;
 	int zapOnExit = false;
 	bool loop=true;
+	printf("New channellist.show()\n");
 	while (loop)
 	{
+		printf("in channellist-show-loop\n");
 		int key = g_RCInput->getKey(g_settings.timing_chanlist);
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
@@ -442,6 +447,29 @@ int CChannelList::show()
 				paintItem(selected - liststart);
 			}
 		}
+		else if ((key==g_settings.key_bouquet_up) && (bouquetList!=NULL))
+			{
+				if (bouquetList->Bouquets.size() > 0)
+				{
+					int nNext = (bouquetList->getActiveBouquetNumber()+1) % bouquetList->Bouquets.size();
+					bouquetList->activateBouquet(nNext);
+					if ( bouquetList->showChannelList())
+						bouquetList->adjustToChannel( getActiveChannelNumber());
+					loop = false;
+
+				}
+			}
+		else if ((key==g_settings.key_bouquet_down) && (bouquetList!=NULL))
+			{
+				if (bouquetList->Bouquets.size() > 0)
+				{
+					int nNext = (bouquetList->getActiveBouquetNumber()+bouquetList->Bouquets.size()-1) % bouquetList->Bouquets.size();
+					bouquetList->activateBouquet(nNext);
+					if ( bouquetList->showChannelList())
+						bouquetList->adjustToChannel( getActiveChannelNumber());
+					loop = false;
+				}
+			}
 		else if (key==CRCInput::RC_ok)
 		{
 			zapOnExit = true;

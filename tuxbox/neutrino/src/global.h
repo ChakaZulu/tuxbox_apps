@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.13 2001/12/12 01:47:17 McClean Exp $
+// $Id: global.h,v 1.14 2001/12/14 16:56:42 faralla Exp $
 //
 // $Log: global.h,v $
+// Revision 1.14  2001/12/14 16:56:42  faralla
+// better bouquet-key handling
+//
 // Revision 1.13  2001/12/12 01:47:17  McClean
 // cleanup
 //
@@ -76,6 +79,7 @@
 #include "helpers/streaminfo.h"
 
 #include "widget/screensetup.h"
+#include "widget/bouquetlist.h"
 #include "helpers/settings.h"
 #include "helpers/scan.h"
 #include "widget/eventlist.hpp"
@@ -113,5 +117,7 @@ NEUTRINO_CPP  CScreenSetup    *g_ScreenSetup;
 NEUTRINO_CPP CLocaleManager   *g_Locale;
 
 NEUTRINO_CPP CStreamWatchDog  *g_WatchDog;
+
+NEUTRINO_CPP CBouquetList	*bouquetList;
 
 

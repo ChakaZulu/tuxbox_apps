@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.34 2001/12/05 01:40:55 McClean Exp $
+//  $Id: neutrino.h,v 1.35 2001/12/14 16:56:42 faralla Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.35  2001/12/14 16:56:42  faralla
+//  better bouquet-key handling
+//
 //  Revision 1.34  2001/12/05 01:40:55  McClean
 //  fixed bouquet-options bugs, soft-update-bug and add scartmode-support
 //
@@ -121,7 +124,6 @@
 #include "widget/color.h"
 #include "widget/menue.h"
 #include "widget/channellist.h"
-#include "widget/bouquetlist.h"
 #include "widget/colorchooser.h"
 #include "widget/keychooser.h"
 #include "widget/stringinput.h"
@@ -184,7 +186,6 @@ class CNeutrinoApp : public CMenuTarget
     CNVODChangeExec         *NVODChanger;
 
 	CChannelList		*channelList;
-	CBouquetList		*bouquetList;
 
 	void PluginDemo(); //demo only --- remove!
 	

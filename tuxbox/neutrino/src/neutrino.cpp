@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.98 2001/12/13 00:51:52 McClean Exp $
+        $Id: neutrino.cpp,v 1.99 2001/12/14 16:56:42 faralla Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.99  2001/12/14 16:56:42  faralla
+  better bouquet-key handling
+
   Revision 1.98  2001/12/13 00:51:52  McClean
   fix infobar - showepg-bug
 
@@ -1729,43 +1732,22 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					channelList->exec();
 				}
 			}
-			else if ((key==g_settings.key_bouquet_up) && (bouquetList!=NULL))
-			{
-				if (bouquetList->Bouquets.size() > 0)
-				{
-					int nNext = (bouquetList->getActiveBouquetNumber()+1) % bouquetList->Bouquets.size();
-					bouquetList->activateBouquet(nNext);
-					if ( bouquetList->showChannelList())
-						bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
-
-				}
-			}
-			else if ((key==g_settings.key_bouquet_down) && (bouquetList!=NULL))
-			{
-				if (bouquetList->Bouquets.size() > 0)
-				{
-					int nNext = (bouquetList->getActiveBouquetNumber()+bouquetList->Bouquets.size()-1) % bouquetList->Bouquets.size();
-					bouquetList->activateBouquet(nNext);
-					if ( bouquetList->showChannelList())
-						bouquetList->adjustToChannel( channelList->getActiveChannelNumber());
-				}
-			}
 			else if (key==CRCInput::RC_red)
 			{	// eventlist
-                g_InfoViewer->killTitle();
-                g_EventList->exec(channelList->getActiveChannelOnid_sid(), channelList->getActiveChannelName());
+                		g_InfoViewer->killTitle();
+                		g_EventList->exec(channelList->getActiveChannelOnid_sid(), channelList->getActiveChannelName());
 			}
 			else if (key==CRCInput::RC_blue)
 			{	// streaminfo
-                g_StreamInfo->exec(NULL, "");
+                		g_StreamInfo->exec(NULL, "");
 			}
-            else if (key==CRCInput::RC_green)
+            		else if (key==CRCInput::RC_green)
 			{	// APID
-                SelectAPID();
+                		SelectAPID();
 			}
-            else if (key==CRCInput::RC_yellow)
+            		else if (key==CRCInput::RC_yellow)
 			{	// NVODs
-                SelectNVOD();
+                		SelectNVOD();
 			}
 			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
 			{
@@ -1778,9 +1760,9 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{	//epg
 				if ( g_InfoViewer->is_visible )
 				{
-                    g_InfoViewer->killTitle();
+                    			g_InfoViewer->killTitle();
 					g_EpgData->show( channelList->getActiveChannelName(),
-                                     channelList->getActiveChannelOnid_sid() );
+                                     	channelList->getActiveChannelOnid_sid() );
 				}
 				else
 				{
@@ -2017,7 +1999,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.98 2001/12/13 00:51:52 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.99 2001/12/14 16:56:42 faralla Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
