@@ -744,7 +744,7 @@ void eZapMain::prevService()
 
 void eZapMain::volumeUp()
 {
-	eDVB::getInstance()->changeVolume(0, +4);
+	eDVB::getInstance()->changeVolume(0, -4);
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
@@ -752,7 +752,7 @@ void eZapMain::volumeUp()
 
 void eZapMain::volumeDown()
 {
-	eDVB::getInstance()->changeVolume(0, -4);
+	eDVB::getInstance()->changeVolume(0, +4);
 //		if (!isVisible())
 //			show();
 //		timeout.start(1000, 1);
