@@ -71,11 +71,11 @@ eString zapSubModes[5] = {"", "", "Satellites", "Providers", "Bouquets"};
 
 eString zap[5][5] =
 {
-	{"TV", ";0:7:1:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:6:0:0:0:0:0:0:"},
-	{"Radio", ";0:7:2:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ ";4097:7:0:4:0:0:0:0:0:0:"},
-	{"Data", ";0:7:6:0:0:0:0:0:0:0:", /* Satellites */ ";1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ ";1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ ""},
-	{"Recordings", ";4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""},
-	{"Root", ";2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
+	{"TV", "0:7:1:0:0:0:0:0:0:0:", /* Satellites */ "1:15:fffffffc:12:0:0:0:0:0:0:", /* Providers */ "1:15:ffffffff:12:ffffffff:0:0:0:0:0:", /* Bouquets */ "4097:7:0:6:0:0:0:0:0:0:"},
+	{"Radio", "0:7:2:0:0:0:0:0:0:0:", /* Satellites */ "1:15:fffffffc:4:0:0:0:0:0:0:", /* Providers */ "1:15:ffffffff:4:ffffffff:0:0:0:0:0:", /* Bouquets */ "4097:7:0:4:0:0:0:0:0:0:"},
+	{"Data", "0:7:6:0:0:0:0:0:0:0:", /* Satellites */ "1:15:fffffffc:ffffffe9:0:0:0:0:0:0:", /* Providers */ "1:15:ffffffff:ffffffe9:ffffffff:0:0:0:0:0:", /* Bouquets */ ""},
+	{"Recordings", "4097:7:0:1:0:0:0:0:0:0:", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""},
+	{"Root", "2:47:0:0:0:0:/", /* Satellites */ "", /* Providers */ "", /* Bouquets */ ""}
 };
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
@@ -837,13 +837,13 @@ static eString getChannelNavi(void)
 static eString getZapNavi(eString mode, eString path)
 {
 	eString result;
-	result += button(100, "TV", RED, "?path=" + zap[ZAPMODETV][ZAPMODECATEGORY]);
-	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPMODECATEGORY]);
-	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPMODECATEGORY]);
+	result += button(100, "TV", RED, "?path=" + zap[ZAPMODETV][ZAPSUBMODECATEGORY]);
+	result += button(100, "Radio", GREEN, "?path=" + zap[ZAPMODERADIO][ZAPSUBMODECATEGORY]);
+	result += button(100, "Data", BLUE, "?path=" + zap[ZAPMODEDATA][ZAPSUBMODECATEGORY]);
 #ifndef DISABLE_FILE
-	result += button(100, "Movies", OCKER, "?path=" + zap[ZAPMODERECORDINGS][ZAPMODECATEGORY]);
+	result += button(100, "Movies", OCKER, "?path=" + zap[ZAPMODERECORDINGS][ZAPSUBMODECATEGORY]);
 #endif
-	result += button(100, "Root", PINK, "?path=" + zap[ZAPMODEROOT][ZAPMODECATEGORY]);
+	result += button(100, "Root", PINK, "?path=" + zap[ZAPMODEROOT][ZAPSUBMODECATEGORY]);
 	result += "<br><br>";
 	return result;
 }
@@ -873,16 +873,16 @@ static eString getLeftNavi(eString mode, eString path)
 		}
 		else
 		{
-			result += button(110, "TV", LEFTNAVICOLOR, "?path=;0:7:1:0:0:0:0:0:0:0:");
+			result += button(110, "TV", LEFTNAVICOLOR, "?path=0:7:1:0:0:0:0:0:0:0:");
 			result += "<br>";
-			result += button(110, "Radio", LEFTNAVICOLOR, "?path=;0:7:2:0:0:0:0:0:0:0:");
+			result += button(110, "Radio", LEFTNAVICOLOR, "?path=0:7:2:0:0:0:0:0:0:0:");
 			result += "<br>";
-			result += button(110, "Data", LEFTNAVICOLOR, "?path=;0:7:6:0:0:0:0:0:0:0:");
+			result += button(110, "Data", LEFTNAVICOLOR, "?path=0:7:6:0:0:0:0:0:0:0:");
 #ifndef DISABLE_FILE
 			result += "<br>";
-			result += button(110, "Root", LEFTNAVICOLOR, "?path=;2:47:0:0:0:0:%2f");
+			result += button(110, "Root", LEFTNAVICOLOR, "?path=2:47:0:0:0:0:%2f");
 			result += "<br>";
-			result += button(110, "Movies", LEFTNAVICOLOR, "?path=;4097:7:0:1:0:0:0:0:0:0:");
+			result += button(110, "Movies", LEFTNAVICOLOR, "?path=4097:7:0:1:0:0:0:0:0:0:");
 #endif
 		}
 	}
@@ -986,8 +986,7 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 	}
 
-	if (result == "")
-		result = "&nbsp;";
+	result += "&nbsp;";
 	return result;
 }
 
@@ -1579,12 +1578,11 @@ void sortServices(bool sortList, std::list <myService> &myList, eString &service
 class eWebNavigatorListDirectory: public Object
 {
 	eString &result;
-	eString origpath;
 	eString path;
 	eServiceInterface &iface;
 	int num;
 public:
-	eWebNavigatorListDirectory(eString &result, eString origpath, eString path, eServiceInterface &iface): result(result), origpath(origpath), path(path), iface(iface)
+	eWebNavigatorListDirectory(eString &result, eString path, eServiceInterface &iface): result(result), path(path), iface(iface)
 	{
 		eDebug("path: %s", path.c_str());
 		num = 0;
@@ -1718,41 +1716,26 @@ public:
 static eString getZapContent(eString mode, eString path)
 {
 	eString result;
-	eString tpath;
 
-	unsigned int pos = 0, lastpos = 0, temp = 0;
+	eServiceReference current_service = string2ref(path);
+	eServiceInterface *iface = eServiceInterface::getInstance();
 
-	if ((path.find(";", 0)) == eString::npos)
-		path = ";" + path;
-
-	while ((pos = path.find(";", lastpos)) != eString::npos)
+	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 	{
-		lastpos = pos + 1;
-		if ((temp = path.find(";", lastpos)) != eString::npos)
-			tpath = path.mid(lastpos, temp - lastpos);
-		else
-			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
-
-		eServiceReference current_service=string2ref(tpath);
-		eServiceInterface *iface = eServiceInterface::getInstance();
-
-		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
-		{
-			playService(current_service);
-			result += "<script language=\"javascript\">window.close();</script>";
-		}
-		else
-		{
-			eWebNavigatorListDirectory navlist(result, path, tpath, *iface);
-			Signal1<void, const eServiceReference&> signal;
-			signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
-			result += "<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
-			iface->enterDirectory(current_service, signal);
-			result += "</table>\n";
-			eDebug("entered");
-			iface->leaveDirectory(current_service);
-			eDebug("exited");
-		}
+		playService(current_service);
+		result += "<script language=\"javascript\">window.close();</script>";
+	}
+	else
+	{
+		eWebNavigatorListDirectory navlist(result, path, *iface);
+		Signal1<void, const eServiceReference&> signal;
+		signal.connect(slot(navlist, &eWebNavigatorListDirectory::addEntry));
+		result += "<table width=\"100%\" cellspacing=\"2\" cellpadding=\"1\" border=\"0\">\n";
+		iface->enterDirectory(current_service, signal);
+		result += "</table>\n";
+		eDebug("entered");
+		iface->leaveDirectory(current_service);
+		eDebug("exited");
 	}
 
 	return result;
@@ -1762,111 +1745,96 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 {
 	std::list <myService> myList;
 	eString result, result1, result2;
-	eString tpath;
 	eString bouquets, bouquetrefs, channels, channelrefs;
 	std::stringstream tmp;
 
-	unsigned int pos = 0, lastpos = 0, temp = 0;
+	eServiceReference current_service = string2ref(path);
+	eServiceInterface *iface = eServiceInterface::getInstance();
 
-	if ((path.find(";", 0)) == eString::npos)
-		path = ";" + path;
-
-	while ((pos = path.find(";", lastpos)) != eString::npos)
+	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 	{
-		lastpos = pos + 1;
-		if ((temp = path.find(";", lastpos)) != eString::npos)
-			tpath = path.mid(lastpos, temp - lastpos);
-		else
-			tpath = path.mid(lastpos, strlen(path.c_str()) - lastpos);
+		playService(current_service);
+		result = "";
+	}
+	else
+	{
+		// first pass thru is to get all user bouquets
+		myList.sort();
+		eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG);
+		Signal1<void, const eServiceReference&> signal;
+		signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+		iface->enterDirectory(current_service, signal);
+		eDebug("entered");
+		iface->leaveDirectory(current_service);
+		eDebug("exited");
 
-		eServiceReference current_service = string2ref(tpath);
-		eServiceInterface *iface = eServiceInterface::getInstance();
+		sortServices(sortList, myList, result1, result2);
 
-		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
+		tmp.str(result1.left(result1.length() - 1));
+		bouquetrefs = result1.left(result1.length() - 2);
+		bouquets = result2.left(result2.length() - 2);
+		if (depth > 1)
 		{
-			playService(current_service);
-			result = "";
-		}
-		else
-		{
-			// first pass thru is to get all user bouquets
-			myList.sort();
-			eWebNavigatorListDirectory2 navlist(myList, tpath, *iface, addEPG);
-			Signal1<void, const eServiceReference&> signal;
-			signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
-			iface->enterDirectory(current_service, signal);
-			eDebug("entered");
-			iface->leaveDirectory(current_service);
-			eDebug("exited");
-
-			sortServices(sortList, myList, result1, result2);
-
-			tmp.str(result1.left(result1.length() - 1));
-			bouquetrefs = result1.left(result1.length() - 2);
-			bouquets = result2.left(result2.length() - 2);
-			if (depth > 1)
+			// go thru all bouquets to get the channels
+			int i = 0;
+			while (tmp)
 			{
-				// go thru all bouquets to get the channels
-				int i = 0;
-				while (tmp)
+				result1 = ""; result2 =""; path = "";
+				tmp >> path;
+				if (path)
 				{
-					result1 = ""; result2 =""; tpath = "";
-					tmp >> tpath;
-					if (tpath)
-					{
-						tpath = tpath.mid(1, tpath.length() - 3);
-						eServiceReference current_service = string2ref(tpath);
+					path = path.mid(1, path.length() - 3);
+					eServiceReference current_service = string2ref(path);
 
-						myList.clear();
-						eWebNavigatorListDirectory2 navlist(myList, tpath, *iface, addEPG);
-						Signal1<void, const eServiceReference&> signal;
-						signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
+					myList.clear();
+					eWebNavigatorListDirectory2 navlist(myList, path, *iface, addEPG);
+					Signal1<void, const eServiceReference&> signal;
+					signal.connect(slot(navlist, &eWebNavigatorListDirectory2::addEntry));
 
-						channels += "channels[";
-						channels += eString().sprintf("%d", i);
-						channels += "] = new Array(";
-						channelrefs += "channelRefs[";
-						channelrefs += eString().sprintf("%d", i);
-						channelrefs += "] = new Array(";
+					channels += "channels[";
+					channels += eString().sprintf("%d", i);
+					channels += "] = new Array(";
+					channelrefs += "channelRefs[";
+					channelrefs += eString().sprintf("%d", i);
+					channelrefs += "] = new Array(";
 
-						iface->enterDirectory(current_service, signal);
-						eDebug("entered");
-						iface->leaveDirectory(current_service);
-						eDebug("exited");
+					iface->enterDirectory(current_service, signal);
+					eDebug("entered");
+					iface->leaveDirectory(current_service);
+					eDebug("exited");
 
-						sortServices(sortList, myList, result1, result2);
+					sortServices(sortList, myList, result1, result2);
 
-						channels += result2.left(result2.length() - 2);
-						channels += ");";
-						channelrefs += result1.left(result1.length() - 2);
-						channelrefs += ");";
+					channels += result2.left(result2.length() - 2);
+					channels += ");";
+					channelrefs += result1.left(result1.length() - 2);
+					channelrefs += ");";
 
-						i++;
-					}
+					i++;
 				}
 			}
-			else
-			{
-				channels = "channels[0] = new Array(" + bouquets + ");";
-				channelrefs = "channelRefs[0] = new Array(" + bouquetrefs + ");";
-				bouquets = "\"Dummy bouquet\"";
-				bouquetrefs = "\"Dummy bouquet ref\"";
-			}
-
-			result = readFile(HTDOCS_DIR + "zapdata.js");
-			result.strReplace("#BOUQUETS#", bouquets);
-			result.strReplace("#BOUQUETREFS#", bouquetrefs);
-			result.strReplace("#CHANNELS#", channels);
-			result.strReplace("#CHANNELREFS#", channelrefs);
-			result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
-			result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
-			int autobouquetchange = 0;
-			eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
-			result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
-			result.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
-			result.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
+		}
+		else
+		{
+			channels = "channels[0] = new Array(" + bouquets + ");";
+			channelrefs = "channelRefs[0] = new Array(" + bouquetrefs + ");";
+			bouquets = "\"Dummy bouquet\"";
+			bouquetrefs = "\"Dummy bouquet ref\"";
 		}
 	}
+
+	result = readFile(HTDOCS_DIR + "zapdata.js");
+	result.strReplace("#BOUQUETS#", bouquets);
+	result.strReplace("#BOUQUETREFS#", bouquetrefs);
+	result.strReplace("#CHANNELS#", channels);
+	result.strReplace("#CHANNELREFS#", channelrefs);
+	result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
+	result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
+	int autobouquetchange = 0;
+	eConfig::getInstance()->getKey("/elitedvb/extra/autobouquetchange", autobouquetchange);
+	result.strReplace("#AUTOBOUQUETCHANGE#", eString().sprintf("%d", autobouquetchange));
+	result.strReplace("#ZAPMODE#", eString().sprintf("%d", zapMode));
+	result.strReplace("#ZAPSUBMODE#", eString().sprintf("%d", zapSubMode));
 
 	return result;
 }
@@ -2574,7 +2542,7 @@ static eString getContent(eString mode, eString path, eString opts)
 		if (pdaScreen == 0)
 		{
 			if (zapMode >= 0 && zapMode <= 4)
-				tmp += ": " + zap[zapMode][ZAPMODENAME];
+				tmp += ": " + zap[zapMode][ZAPSUBMODENAME];
 			if (zapSubMode >= 2 && zapSubMode <= 4)
 				tmp += " - " + zapSubModes[zapSubMode];
 		}
@@ -4817,7 +4785,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	{
 		for (int i = 0; i < 5; i++)
 		{
-			if (spath == zap[i][ZAPMODECATEGORY])
+			if (spath == zap[i][ZAPSUBMODECATEGORY])
 			{
 				zapMode = i;
 				switch(zapMode)
