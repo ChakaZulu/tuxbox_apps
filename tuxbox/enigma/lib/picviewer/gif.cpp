@@ -1,4 +1,4 @@
-#include "config.h"
+#include "format_config.h"
 #ifdef FBV_SUPPORT_GIF
 #include <lib/picviewer/pictureviewer.h>
 #include <stdio.h>

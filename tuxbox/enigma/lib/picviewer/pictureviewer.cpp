@@ -1,3 +1,4 @@
+#include <config.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
@@ -7,6 +8,7 @@
 #include <lib/gui/guiactions.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -16,6 +18,7 @@
 #include <lib/gdi/font.h>
 #include <lib/picviewer/pictureviewer.h>
 #include "fb_display.h"
+#include "format_config.h"
 
 /* resize.cpp */
 extern unsigned char *simple_resize(unsigned char *orgin, int ox, int oy, int dx, int dy);
@@ -48,7 +51,7 @@ extern int fh_crw_id(const char *);
 #endif
 
 ePictureViewer::ePictureViewer(const eString &filename)
-	:eWidget(0,1), slideshowTimer(eApp), filename(filename)
+	:eWidget(0, 1), slideshowTimer(eApp), filename(filename)
 {
 	eDebug("[PICTUREVIEWER] Constructor...");
 
@@ -298,6 +301,9 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	{
 		fbClass::getInstance()->lock();
 		fbClass::getInstance()->SetMode(720, 576, 16);
+#if HAVE_DVB_API_VERSION == 3
+		fbClass::getInstance()->setTransparency(0);
+#endif
 	}
 	DisplayNextImage();
 	eDebug("Show Image }");
@@ -344,7 +350,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 		case eWidgetEvent::execBegin:
 		{
 			int mode = 0;
-			eConfig::getInstance()->getKey("/ezap/lastPicViewerStyle", mode);
+			eConfig::getInstance()->getKey("/picviewer/lastPicViewerStyle", mode);
 			if (mode)
 				ShowSlideshow(filename, false);
 			else
@@ -362,45 +368,87 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 	return 1;
 }
 
+void ePictureViewer::listDirectory(eString directory, int includesubdirs)
+{
+	eDebug("[PICTUREVIEWER] listDirectory: dir %s", directory.c_str());
+	DIR *d = opendir(directory.c_str());
+	if (d)
+	{
+		while (struct dirent *e = readdir(d))
+		{
+			eString filename = eString(e->d_name);
+			eDebug("[PICTUREVIEWER] listDirectory: processing %s", filename.c_str());
+			if ((filename != ".") && (filename != ".."))
+			{
+				struct stat s;
+				eString fullFilename = directory + "/" + filename;
+				if (lstat(fullFilename.c_str(), &s) < 0)
+				{
+					eDebug("--- file no good :(");
+					continue;
+				}
+
+				if (S_ISREG(s.st_mode))
+				{
+					if (filename.right(4).upper() == ".JPG" ||
+					    filename.right(4).upper() == ".JPEG" ||
+					    filename.right(4).upper() == ".CRW" ||
+					    filename.right(4).upper() == ".PNG" ||
+					    filename.right(4).upper() == ".BMP" ||
+					    filename.right(4).upper() == ".GIF")
+					{
+						eDebug("[PICTUREVIEWER] ShowSlideshow: adding %s", filename.c_str());
+						eString tmp = directory + "/" + filename;
+						slideshowList.push_back(tmp);
+					}
+				}
+				else
+				if ((includesubdirs == 1) && (S_ISDIR(s.st_mode) || S_ISLNK(s.st_mode)))
+				{
+					listDirectory(directory + "/" + filename, includesubdirs);
+				}
+			}
+		}
+		closedir(d);
+	}
+}
+
 bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 {
-	eDebug("Show Slideshow { ", filename.c_str());
-	slideshowList.clear();
+	eDebug("Show Slideshow { %s", filename.c_str());
+	int includesubdirs = 1;
+	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
+
 	// gen pic list for slideshow
 	int pos = filename.find_last_of("/");
 	if (pos == -1)
 		pos = filename.length() - 1;
 	eString directory = pos?filename.substr(0, pos):"/";
 	eDebug("---directory: %s", directory.c_str());
-	DIR *d = opendir(directory.c_str());
-	if (d)
-	{
-		while (struct dirent *e = readdir(d))
-		{
-			eString file(e->d_name);
-			if ((file != ".") && (file != "..") &&
-			    (file.right(4).upper() == ".JPG" ||
-			     file.right(4).upper() == ".JPEG" ||
-			     file.right(4).upper() == ".CRW" ||
-			     file.right(4).upper() == ".PNG" ||
-			     file.right(4).upper() == ".BMP" ||
-			     file.right(4).upper() == ".GIF")
-			   )
-			{
-				eDebug("[PICTUREVIEWER] ShowSlideshow: adding %s", file.c_str());
-				eString tmp = directory + "/" + file;
-				slideshowList.push_back(tmp);
-			}
-		}
-		closedir(d);
-	}
+	slideshowList.clear();
+	listDirectory(directory, includesubdirs);
 	if (!slideshowList.empty())
 	{
 		int sortpictures = 1;
 		eConfig::getInstance()->getKey("/picviewer/sortpictures", sortpictures);
 		if (sortpictures == 1)
 			slideshowList.sort();
-		myIt = slideshowList.begin();
+
+		int startwithselectedpic = 1;
+		eConfig::getInstance()->getKey("/picviewer/startwithselectedpic", startwithselectedpic);
+		if (startwithselectedpic == 1)
+		{
+			for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
+			{
+				eString tmp = *myIt;
+				eDebug("[PICTUREVIEWER] comparing: %s:%s", tmp.c_str(), filename.c_str());
+				if (tmp == filename)
+					break;
+			}
+		}
+		else
+			myIt = slideshowList.begin();
+
 		slideshowTimer.stop();
 		slideshowTimeout();
 	}

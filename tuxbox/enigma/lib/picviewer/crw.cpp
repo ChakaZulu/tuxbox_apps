@@ -1,4 +1,4 @@
-#include "config.h"
+#include "format_config.h"
 #ifdef FBV_SUPPORT_CRW
 #include <stdio.h>
 #include <sys/types.h>

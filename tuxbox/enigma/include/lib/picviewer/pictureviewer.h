@@ -27,6 +27,7 @@ class ePictureViewer: public eWidget
 	typedef  struct cformathandler CFormathandler;
 	eString filename;
 	int eventHandler(const eWidgetEvent &evt);
+	void listDirectory(eString, int);
 public:
 	ePictureViewer( const eString &filename);
 	~ePictureViewer();

@@ -1,4 +1,4 @@
-#include "config.h"
+#include "format_config.h"
 #ifdef FBV_SUPPORT_JPEG
 #include <stdio.h>
 #include <sys/types.h>

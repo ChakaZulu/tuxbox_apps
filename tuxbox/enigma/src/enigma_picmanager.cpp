@@ -24,18 +24,18 @@ struct PicViewerStyleSelectorActions
 eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Picture Viewer Style Selector");
 
 ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.1 - Actions"), 5, 350, true)
+		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.1a - Actions"), 5, 350, true)
 		,ssel(ssel)
 {
 	eListBoxEntrySeparator *sep;
 	addActionMap(&i_PicViewerStyleSelectorActions->map);
 	cmove(ePoint(100, 100));
 	int last = 0;
-	eConfig::getInstance()->getKey("/ezap/lastPicViewerStyle", last);
+	eConfig::getInstance()->getKey("/picviewer/lastPicViewerStyle", last);
 	eListBoxEntryText *sel[3];
 	sel[0] = new eListBoxEntryText(&list,_("Slide"), (void *)0, 0, _("Show selected slide") );
 	sel[1] = new eListBoxEntryText(&list,_("Slideshow"), (void *)1, 0, _("Show slideshow (of all pictures in directory)"));
-	sep = new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
+	sep = new eListBoxEntrySeparator((eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true);
 	sel[2] = new eListBoxEntryText(&list,_("Settings"), (void *)2, 0, _("Customize your slideshow"));
 
 	list.setCurrent(sel[last]);
@@ -64,7 +64,7 @@ void ePicViewerStyleSelector::entrySelected( eListBoxEntryText* e )
 	{
 		if ((int)e->getKey() < 2)
 		{
-			eConfig::getInstance()->setKey("/ezap/lastPicViewerStyle", (int)e->getKey());
+			eConfig::getInstance()->setKey("/picviewer/lastPicViewerStyle", (int)e->getKey());
 			close( (int)e->getKey() );
 		}
 		else
