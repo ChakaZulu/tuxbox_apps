@@ -95,8 +95,9 @@ colorstatusbar.text Infobar
 repeatblocker.hint_1 Shortest time (in ms) to recognize 2 keystrokes
 repeatblocker.hint_2 Enter 0 to switch of the blocker (red is space)
 
-keybindingmenu.RC Remote-Control
-keybindingmenu.repeatblock Key repeat-blocker
+keybindingmenu.RC Key repeat-blocker
+keybindingmenu.repeatblock repeat delay
+keybindingmenu.repeatblockgeneric generic delay
 keybindingmenu.head Keybinding Setup
 keybindingmenu.modechange Modechange
 keybindingmenu.channellist Channellist

@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.19 2002/01/08 03:08:20 McClean Exp $
+ $Id: rcinput.cpp,v 1.20 2002/01/08 12:34:28 McClean Exp $
  
  Module for Remote Control Handling
  
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.20  2002/01/08 12:34:28  McClean
+ better rc-handling - add flat-standby
+
  Revision 1.19  2002/01/08 03:08:20  McClean
  improve input-handling
 
@@ -162,6 +165,7 @@ int CRCInput::getKey(int Timeout)
 {
 	static unsigned long long last_keypress=0;
 	static __u16 rc_last_key = 0;
+	static __u16 rc_last_repeat_key = 0;
 	__u16 rc_key;
 	bool exit=false;
 
@@ -189,20 +193,36 @@ int CRCInput::getKey(int Timeout)
 			//test auf wiederholenden key (gedrückt gehalten)
 			if (rc_key == rc_last_key)
 			{
+				keyok = false;
 				//nur diese tasten sind wiederholbar 
 				int trkey = translate(rc_key);
-				if ((trkey!= RC_up) && (trkey!= RC_down) && (trkey!= RC_plus) && (trkey!= RC_minus))
+				if ((trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby))
 				{
-					keyok = false;
+					if( rc_last_repeat_key!=rc_key)
+					{
+						if(now_pressed-last_keypress>repeat_block)
+						{
+							keyok = true;
+							rc_last_repeat_key = rc_key;
+						}
+					}
+					else
+					{
+							keyok = true;
+					}
 				}
+			}
+			else
+			{
+				rc_last_repeat_key = 0;
 			}
 			rc_last_key = rc_key;
 
-			if(now_pressed-last_keypress>repeat_block)
+			if(now_pressed-last_keypress>repeat_block_generic)
 			{
-				last_keypress = now_pressed;
 				if(keyok)
 				{
+					last_keypress = now_pressed;
 					return translate(rc_key);
 				}
 			}

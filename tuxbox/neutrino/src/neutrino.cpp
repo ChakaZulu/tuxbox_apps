@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.123 2002/01/08 03:08:20 McClean Exp $
+        $Id: neutrino.cpp,v 1.124 2002/01/08 12:34:28 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.124  2002/01/08 12:34:28  McClean
+  better rc-handling - add flat-standby
+
   Revision 1.123  2002/01/08 03:08:20  McClean
   improve input-handling
 
@@ -1513,6 +1516,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	keySetupNotifier = new CKeySetupNotifier;
 	CStringInput*	keySettings_repeatBlocker= new CStringInput("keybindingmenu.repeatblock", g_settings.repeat_blocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
+	CStringInput*	keySettings_repeat_genericblocker= new CStringInput("keybindingmenu.repeatblockgeneric", g_settings.repeat_genericblocker, 3, "repeatblocker.hint_1", "repeatblocker.hint_2", "0123456789 ", keySetupNotifier);
 	keySetupNotifier->changeNotify("initial");
 
 	CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "keybindingmenu.tvradiomode_head", "settings.raw");
@@ -1527,6 +1531,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
+	keySettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.modechange") );
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, "", keySettings_tvradio_mode ));
@@ -2168,22 +2173,32 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	{
 		if(!g_settings.shutdown_real)
 		{
-			/*
-			int timeout = 0;
+			int timeout = 5;
+			int timeout1 = 5;
+	
 			sscanf(g_settings.repeat_blocker, "%d", &timeout);
-			printf("timeout: %d\n",  timeout);
-			timeout = int(timeout/100.0)+10;
-			printf("timeout: %d\n",  timeout);
+			timeout = int(timeout/100.0)+1;
+			sscanf(g_settings.repeat_genericblocker, "%d", &timeout1);
+			timeout1 = int(timeout1/100.0)+1;
+			if(timeout1>timeout)
+			{
+				timeout=timeout1;
+			}
+			printf("timeout is %d\n", timeout);
+
 			struct timeval tv;
 			gettimeofday( &tv, NULL );
 			long long starttime = (tv.tv_sec*1000000) + tv.tv_usec;
 			while(g_RCInput->getKey(timeout)==CRCInput::RC_standby)
-			{}
-			gettimeofday( &tv, NULL );
-			long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
-			printf("diff: %d\n",  int((endtime-starttime)/1000000. ));
-			*/
-
+			{
+				gettimeofday( &tv, NULL );
+				long long endtime = (tv.tv_sec*1000000) + tv.tv_usec;
+				//printf("diff: %d\n",  int((endtime-starttime)/100000. ));
+				if(int((endtime-starttime)/100000.)>25)
+				{
+					ExitRun();
+				}
+			}
 			g_lcdd->setMode(CLcddClient::MODE_STANDBY);
 			g_Controld->videoPowerDown(true);
 			printf("standby-loop\n");
@@ -2265,7 +2280,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.123 2002/01/08 03:08:20 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.124 2002/01/08 12:34:28 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -139,6 +139,7 @@ bool CKeySetupNotifier::changeNotify(string OptionName)
 {
 	//    printf("CKeySetupNotifier notify: %s\n", OptionName.c_str() );
 	g_RCInput->repeat_block = atoi(g_settings.repeat_blocker)* 1000;
+	g_RCInput->repeat_block_generic = atoi(g_settings.repeat_genericblocker)* 1000;
 	return false;
 }
 
