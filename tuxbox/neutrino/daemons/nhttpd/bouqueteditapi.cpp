@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.17 2004/02/19 08:49:05 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.18 2004/03/07 12:25:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -98,8 +98,8 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 
 
 	CZapitClient::BouquetList AllBouquetList;					// List of all bouquets
-	AllBouquetList.clear();
-	Parent->Zapit->getBouquets(AllBouquetList, true); 
+
+	Parent->Zapit->getBouquets(AllBouquetList, true, true); // UTF-8
 	CZapitClient::BouquetList::iterator bouquet = AllBouquetList.begin();
 	
 	unsigned int bouquetSize = AllBouquetList.size();
@@ -108,12 +108,7 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 	request->SocketWrite("<TABLE WIDTH=\"90%\">");
 	for(; bouquet != AllBouquetList.end();bouquet++)
 	{
-		char classname;
-
-		if ((bouquet->bouquet_nr + 1) % 2 == 1)
-			classname='a';
-		else
-			classname='b';
+		char classname = ((bouquet->bouquet_nr & 1) == 0) ? 'a' : 'b';
 		
 		request->printf("<TR CLASS=\"%c\">\n<TD>",(selected == (int) bouquet->bouquet_nr + 1)?'c':classname);
 		if (selected == (int) (bouquet->bouquet_nr + 1))
@@ -130,10 +125,10 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 		else
 			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=hide#akt\"><IMG border=0 src=\"../images/visible.gif\" TITLE=\"Bouquet anzeigen\"></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 
-		request->printf("<TD><A HREF=\"edit?selected=%i&name=%s\">%s</A></TD>", bouquet->bouquet_nr + 1, bouquet->name, bouquet->name);
-		request->printf("<TD WIDTH=\"100\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG border=0 SRC=\"../images/modify.png\" TITLE=\"Bouquet umbenennen\"></a>&nbsp;\n",bouquet->bouquet_nr + 1, bouquet->name);
+		request->printf("<TD><A HREF=\"edit?selected=%i&name=%s\">%s</A></TD>", bouquet->bouquet_nr + 1, bouquet->name, CZapitClient::Utf8_to_Latin1(bouquet->name).c_str());
+		request->printf("<TD WIDTH=\"100\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG border=0 SRC=\"../images/modify.png\" TITLE=\"Bouquet umbenennen\"></a>&nbsp;\n",bouquet->bouquet_nr + 1, CZapitClient::Utf8_to_Latin1(bouquet->name).c_str());
 		request->printf("<A HREF=\"delete?selected=%i&name=%s\"><IMG border=0 src=\"../images/remove.png\" TITLE=\"Bouquet löschen\"></A>&nbsp;\n",
-			bouquet->bouquet_nr + 1, bouquet->name);
+			bouquet->bouquet_nr + 1, CZapitClient::Utf8_to_Latin1(bouquet->name).c_str());
 		
 
 		// move down
@@ -288,30 +283,53 @@ bool CBouqueteditAPI::renameBouquet(CWebserverRequest* request)
 //-------------------------------------------------------------------------
 
 
-bool CBouqueteditAPI::editBouquet(CWebserverRequest* request)
+bool CBouqueteditAPI::editBouquet(CWebserverRequest * request)
 {
-CZapitClient::BouquetChannelList BChannelList;
-CZapitClient::BouquetChannelList::iterator channels;
-
-        if(!request->Authenticate())    
+        if (!(request->Authenticate()))
                 return false;   
-	if (request->ParameterList["selected"] != "") {
+
+	if (!(request->ParameterList["selected"].empty()))
+	{
+		CZapitClient::BouquetChannelList BChannelList;
+		CZapitClient::BouquetChannelList::iterator channels;
+
 		int selected = atoi(request->ParameterList["selected"].c_str());
+
 		request->SendPlainHeader("text/html");
-		request->SendHTMLHeader("Bouquet-Editor");
-		request->SocketWrite("<Script language=\"Javascript\" src=\"/channels.js\">\n</script>\n");
-		request->printf("<H2>Bouquet-Editor</H2><BR><H3>Bouquet %s bearbeiten</H3>\n",request->ParameterList["name"].c_str());
-		request->SocketWrite("<FORM ACTION=\"editchannels\" METHOD=\"POST\" NAME=\"channels\" ENCTYPE=\"x-www-form-urlencoded\">\n");
-		request->SocketWrite("<INPUT TYPE=\"HIDDEN\" NAME=\"selected\" VALUE=\"");
+
+		request->SocketWrite(
+			"<!DOCTYPE html\n"
+			"     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
+			"     \"DTD/xhtml1-strict.dtd\">\n"
+			"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"de\" lang=\"de\">\n"
+			"<head>\n"
+			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
+			"<meta http-equiv=\"cache-control\" content=\"no-cache\" />\n"
+			"<meta http-equiv=\"expires\" content=\"0\" />\n"
+			"<link rel=\"stylesheet\" href=\"../global.css\" type=\"text/css\" />\n"
+			"<title>Bouquet-Editor</title>\n"
+			"</head>\n"
+			"\n"
+			"<body>\n"
+			);
+
+
+//		request->SendHTMLHeader("Bouquet-Editor");
+		request->SocketWrite("<script src=\"/channels.js\" type=\"text/javascript\"></script>\n"
+				     "<h2>Bouquet-Editor</h2>\n");
+		request->printf("<h3>Bouquet %s bearbeiten</h3>\n", request->ParameterList["name"].c_str()); // FIXME: should be UTF-8 encoded
+		request->SocketWrite("<form action=\"editchannels\" method=\"post\" id=\"channels\" name=\"channels\" enctype=\"x-www-form-urlencoded\">\n"
+				     "<p>"
+				     "<input type=\"hidden\" name=\"selected\" value=\"");
 		request->SocketWrite(request->ParameterList["selected"].c_str());
-		request->SocketWrite("\">\n");
-		request->SocketWrite("<TABLE CELLSPACING=5><TR><TD>\n");
+		request->SocketWrite("\" />\n"
+				     "</p>"
+				     "<table cellspacing=\"5\"><tr><td>"
+				     "<select multiple size=\"20\" name=\"bchannels\">\n");
 
 		// List channels in bouquet
-		request->SocketWrite("<SELECT MULTIPLE SIZE=\"20\" NAME=\"bchannels\">\n");
-		Parent->Zapit->getBouquetChannels(selected - 1, BChannelList, CZapitClient::MODE_CURRENT);
-		channels = BChannelList.begin();
-		for(; channels != BChannelList.end();channels++)
+		Parent->Zapit->getBouquetChannels(selected - 1, BChannelList, CZapitClient::MODE_CURRENT, true); // UTF-8
+		for(channels = BChannelList.begin(); channels != BChannelList.end(); channels++)
 		{
 			request->printf("<option value=\""
 					PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
@@ -319,18 +337,16 @@ CZapitClient::BouquetChannelList::iterator channels;
 					channels->channel_id,
 					channels->name);
 		}
-		request->SocketWrite("</SELECT>\n");
-
-		request->SocketWrite("</TD><TD><CENTER>\n");
-		request->SocketWrite("<INPUT TYPE=\"Button\" VALUE=\"up\" onClick=\"poschannel(document.channels.bchannels, 0);\"><BR><BR>\n");
-		request->SocketWrite("<INPUT TYPE=\"Button\" VALUE=\"down\" onClick=\"poschannel(document.channels.bchannels, 1);\"><BR><BR>\n");
-		request->SocketWrite("<INPUT TYPE=\"Button\" VALUE=\">>>\" onClick=\"movechannels(document.channels.bchannels, document.channels.achannels);\"><BR><BR>\n");		
-		request->SocketWrite("<INPUT TYPE=\"Button\" VALUE=\"<<<\" onClick=\"movechannels(document.channels.achannels, document.channels.bchannels);\"><BR><BR>\n");
-		request->SocketWrite("</CENTER></td><td>\n");
-
+		request->SocketWrite("</select>"
+		                     "</td><td><center>\n"
+				     "<input type=\"button\" value=\"up\" onclick=\"poschannel(document.channels.bchannels, 0);\" /><br /><br />\n"
+				     "<input type=\"button\" value=\"down\" onclick=\"poschannel(document.channels.bchannels, 1);\" /><br /><br />\n"
+				     "<input type=\"button\" value=\"&gt;&gt;&gt;\" onclick=\"movechannels(document.channels.bchannels, document.channels.achannels);\" /><br /><br />\n"
+				     "<input type=\"button\" value=\"&lt;&lt;&lt;\" onclick=\"movechannels(document.channels.achannels, document.channels.bchannels);\" /><br /><br />\n"
+		                     "</center></td><td>\n"
+				     "<select multiple size=\"20\" name=\"achannels\">\n");
 		// List all channels
-		request->SocketWrite("<SELECT multiple SIZE=\"20\" NAME=\"achannels\">\n");
-		Parent->Zapit->getChannels(BChannelList, CZapitClient::MODE_CURRENT, CZapitClient::SORT_ALPHA);
+		Parent->Zapit->getChannels(BChannelList, CZapitClient::MODE_CURRENT, CZapitClient::SORT_ALPHA, true); // UTF-8
 		channels = BChannelList.begin();
 		for(; channels != BChannelList.end();channels++)
 		{
@@ -342,11 +358,12 @@ CZapitClient::BouquetChannelList::iterator channels;
 						channels->name);
 			}
 		}
-		request->SocketWrite("</SELECT>\n");
-
-		request->SocketWrite("</TD></TR></TABLE>\n");
-		request->SocketWrite("<INPUT TYPE=\"button\" VALUE=\"Fertig\" onClick=\"fertig();\">\n");
-		request->SocketWrite("</FORM>\n");
+		request->SocketWrite("</select>\n"
+				     "</td></tr></table>\n"
+				     "<p>"
+				     "<input type=\"button\" value=\"Fertig\" onclick=\"fertig();\" />\n"
+				     "</p>"
+				     "</form>\n");
 		request->SendHTMLFooter();
 	}
 	else
