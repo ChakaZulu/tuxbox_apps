@@ -36,6 +36,7 @@
 
 #include <gui/widget/messagebox.h>
 #include <gui/widget/helpbox.h>
+#include <gui/widget/icons.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -60,7 +61,7 @@ Helpbox::~Helpbox()
 void Helpbox::show(const neutrino_locale_t Caption, const int Width, int timeout)
 {
 
- 	CMessageBox msgBox(Caption, m_lines, Width, NULL,CMessageBox::mbrBack,CMessageBox::mbBack);
+ 	CMessageBox msgBox(Caption, m_lines, Width, NEUTRINO_ICON_INFO, CMessageBox::mbrBack,CMessageBox::mbBack);
 	msgBox.exec(timeout);
 }
 
