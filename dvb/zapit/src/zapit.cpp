@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.151 2002/04/20 21:42:02 Simplex Exp $
+ * $Id: zapit.cpp,v 1.152 2002/04/20 22:09:13 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1880,7 +1880,7 @@ void sendChannelListOfBouquet(uint nBouquet)
 		for (i = 0; i < channels.size(); i++)
 		{
 			if ((currentMode & RECORD_MODE) && (channels[i]->getTsidOnid() != frontend->getTsidOnid()))
-					break;
+					continue;
 
 			channel_msg_2 chanmsg;
 			strncpy(chanmsg.name, channels[i]->getName().c_str(), 30);
@@ -1919,7 +1919,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.151 2002/04/20 21:42:02 Simplex Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.152 2002/04/20 22:09:13 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2171,6 +2171,9 @@ void internalSendChannels(ChannelList* channels)
 {
 	for (uint i = 0; i < channels->size();i++)
 	{
+		if ((currentMode & RECORD_MODE) && ((*channels)[i]->getTsidOnid() != frontend->getTsidOnid()))
+			continue;
+
 		CZapitClient::responseGetBouquetChannels response;
 		strncpy(response.name, (*channels)[i]->getName().c_str(),30);
 		response.onid_sid = (*channels)[i]->getOnidSid();
