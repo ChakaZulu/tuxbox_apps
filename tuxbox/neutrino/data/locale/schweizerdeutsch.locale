@@ -1,4 +1,4 @@
-menu.back z'ruck 
+menu.back z'ruck
 
 options.off us 
 options.on ii 
@@ -120,7 +120,7 @@ ping.socket isch nidd erreichbar (Socket error)
 ipsetup.hint_1 Nimm  0..9 odder abe/uffe 
 ipsetup.hint_2 OK speichert, Home bricht ab 
 
-colormenu.head Farb-Iischdellige 
+colormenu.head Farb-Iischdellige
 colormenu.statusbar Statusbalke 
 colormenu.themeselect Theme usswähle 
 colormenu.font Schriftgrössi 
@@ -181,7 +181,7 @@ keybindingmenu.quickzap Schnällumschaldig
 keybindingmenu.tvradiomode Fernseh-/Radio-Modus 
 keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus 
 keybindingmenu.pageup Sidde uffe blättere 
-keybindingmenu.pageup_head Sidde uffe blättere 
+keybindingmenu.pageup_head Sidde uffe blättere
 keybindingmenu.pagedown Sidde abe blätter 
 keybindingmenu.pagedown_head Sidde abe blättere 
 keybindingmenu.cancel Kanallischde zuemache 
@@ -242,7 +242,7 @@ channellist.head Alle Kanäle
 channellist.nonefound M'r hänn keine Kanäl g'funde!\nMach e Kanalsüchi\n(dbox-Taste -> Service) 
 channellist.since sidd %02d:%02d 
 
-infoviewer.epgnotload Informatione no'nidd g'lade... 
+infoviewer.epgnotload Informatione no'nidd g'lade...
 infoviewer.epgwait Wart' uf EPG-Informatione... 
 infoviewer.streaminfo Fiitschrs 
 infoviewer.eventlist Programm 
@@ -303,7 +303,7 @@ date.Mar  Mär
 date.Apr  Apr 
 date.May  Mai 
 date.Jun  Jun 
-date.Jul  Jul 
+date.Jul  Jul
 date.Aug  Aug 
 date.Sep  Sep 
 date.Oct  Okt 
@@ -324,47 +324,49 @@ scants.thor Thor
 scants.digituerk Digituerk 
 scants.tuerksat Tuerksat 
 scants.transponders Transponder: 
-scants.services Services: 
-scants.bouquet Bouquets 
-scants.bouquet_leave nidd ändere 
-scants.bouquet_create neu mache 
-scants.bouquet_erase lösche 
+scants.freqdata	unset
+scants.servicenames	unset
+scants.services Services:
+scants.bouquet Bouquets
+scants.bouquet_leave nidd ändere
+scants.bouquet_create neu mache
+scants.bouquet_erase lösche
 scants.failed Kanalsuechii fehlg'schlage!
-scants.finished Kanalsueche erfolgrich beändet! 
+scants.finished Kanalsueche erfolgrich beändet!
 
-flashupdate.head Aktualisierig 
-flashupdate.action Aktion: 
-flashupdate.globalprogress G'samtstatus: 
-flashupdate.getinfofile lade Versioninfo 
-flashupdate.getinfofileerror ka Info nidd lade 
-flashupdate.getupdatefile lade Öpdate 
-flashupdate.getupdatefileerror ka Öpdate nidd lade 
-flashupdate.cantopenfile ka Datei nidd uffmache 
-flashupdate.fileis0bytes d'Dateigrößi isch 0 Byte 
-flashupdate.eraseingflash lösch' grad s'Fläsh 
-flashupdate.programmingflash programmier grad s'Fläsh 
-flashupdate.cantopenmtd ka's MTD-Device nidd uffmache 
-flashupdate.ready ferdig 
-flashupdate.reboot Die DBox wird neu g'starded 
-flashupdate.updatemode Öpdatemodus 
-flashupdate.updatemode_manual manuell (ftp) 
-flashupdate.updatemode_internet internet 
-flashupdate.currentversion_sep Installierdi Version 
-flashupdate.currentversiondate Datum 
-flashupdate.currentversiontime Uhrzit 
-flashupdate.currentversionbaseversion Basisimage 
-flashupdate.currentversionsnapshot ImageTyp 
-flashupdate.checkupdate nach neuer Version sueche 
-flashupdate.versioncheck Versionsueberpruefig 
-flashupdate.nonewversion kei neue Version verfuigbar 
-flashupdate.md5check Imagepruefig 
-flashupdate.md5sumerror Des Image isch fehlerhaft 
-flashupdate.proxyserver_sep Proxyserver 
-flashupdate.proxyserver Proxyname 
-flashupdate.proxyserver_hint1 Gib de Proxyname oder d'IP ii (Host:Port) 
-flashupdate.proxyserver_hint2 E leere Iintrag bedüded kei Proxy 
-flashupdate.proxyusername Benutzername 
-flashupdate.proxyusername_hint1 Gib de Proxy-Benutzername ii 
+flashupdate.head Aktualisierig
+flashupdate.action Aktion:
+flashupdate.globalprogress G'samtstatus:
+flashupdate.getinfofile lade Versioninfo
+flashupdate.getinfofileerror ka Info nidd lade
+flashupdate.getupdatefile lade Öpdate
+flashupdate.getupdatefileerror ka Öpdate nidd lade
+flashupdate.cantopenfile ka Datei nidd uffmache
+flashupdate.fileis0bytes d'Dateigrößi isch 0 Byte
+flashupdate.eraseingflash lösch' grad s'Fläsh
+flashupdate.programmingflash programmier grad s'Fläsh
+flashupdate.cantopenmtd ka's MTD-Device nidd uffmache
+flashupdate.ready ferdig
+flashupdate.reboot Die DBox wird neu g'starded
+flashupdate.updatemode Öpdatemodus
+flashupdate.updatemode_manual manuell (ftp)
+flashupdate.updatemode_internet internet
+flashupdate.currentversion_sep Installierdi Version
+flashupdate.currentversiondate Datum
+flashupdate.currentversiontime Uhrzit
+flashupdate.currentversionbaseversion Basisimage
+flashupdate.currentversionsnapshot ImageTyp
+flashupdate.checkupdate nach neuer Version sueche
+flashupdate.versioncheck Versionsueberpruefig
+flashupdate.nonewversion kei neue Version verfuigbar
+flashupdate.md5check Imagepruefig
+flashupdate.md5sumerror Des Image isch fehlerhaft
+flashupdate.proxyserver_sep Proxyserver
+flashupdate.proxyserver Proxyname
+flashupdate.proxyserver_hint1 Gib de Proxyname oder d'IP ii (Host:Port)
+flashupdate.proxyserver_hint2 E leere Iintrag bedüded kei Proxy
+flashupdate.proxyusername Benutzername
+flashupdate.proxyusername_hint1 Gib de Proxy-Benutzername ii
 flashupdate.proxyusername_hint2 E leere Iintrag bedüded kei Authentifizierig 
 flashupdate.proxypassword Passwort 
 flashupdate.proxypassword_hint1 Gib's Proxy-Passwort Ii 

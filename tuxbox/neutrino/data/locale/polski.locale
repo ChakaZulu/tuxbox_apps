@@ -324,6 +324,8 @@ scants.thor Thor
 scants.digituerk digiturk
 scants.tuerksat Turksat
 scants.transponders Transpondery:
+scants.freqdata	unset
+scants.servicenames	unset
 scants.services Kanaly:
 scants.bouquet Bukiety
 scants.bouquet_leave pozostaw obecne

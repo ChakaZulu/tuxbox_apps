@@ -324,6 +324,8 @@ scants.thor Thor
 scants.digituerk Digituerk
 scants.tuerksat Tuerksat
 scants.transponders Transponder:
+scants.freqdata	Frequenz:
+scants.Servicenames	TV     Radio  Data
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave nicht ändern

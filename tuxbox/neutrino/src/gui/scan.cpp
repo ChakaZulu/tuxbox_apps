@@ -48,7 +48,7 @@ CScanTs::CScanTs()
 	width = 400;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
-	height = hheight+5*mheight;
+	height = hheight+8*mheight;		//space for infolines
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 }
@@ -104,6 +104,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	while (!istheend)
 	{
 		char filename[30];
+		char cb[10];
+		char cb1[21];
 		sprintf(filename, "radar%d.raw", pos);
 		pos = (pos+1)%10;
 		frameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
@@ -115,55 +117,44 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-			if ( msg == NeutrinoMessages::EVT_SCAN_SATELLITE )
-			{
-				frameBuffer->paintBox(xpos3, ypos+ 2* mheight, x+width-105, ypos+ 2* mheight+mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
-				delete (unsigned char*) data;
-			}
-            else
-			if ( msg == NeutrinoMessages::EVT_SCAN_NUM_CHANNELS )
-			{
-				char cb[10];
-				sprintf(cb, "%d", data);
-				frameBuffer->paintBox(xpos2, ypos+ mheight, x+width-105, ypos+ mheight+mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(xpos2, ypos+ 2* mheight, width, cb, COL_MENUCONTENT);
-			}
-			else
-			if ( msg == NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS )
-			{
-				char cb[10];
-				sprintf(cb, "%d", data);
-				frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
-				found_transponder = data;
-			}
-			else
-			if ( msg == NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS )
-			{
-				char cb[21];
-				if (found_transponder == 0) data = 0;
-				sprintf(cb, "%d/%d", data,found_transponder);
-				frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
-			}
-			else
-			if ( msg == NeutrinoMessages::EVT_SCAN_PROVIDER )
-			{
-				frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight+2, width-20, mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
-				delete (unsigned char*) data;
-			}
-			else
-				if ((msg == NeutrinoMessages::EVT_SCAN_COMPLETE) || (msg == NeutrinoMessages::EVT_SCAN_FAILED))
-				{
-					success  = (msg == NeutrinoMessages::EVT_SCAN_COMPLETE);
+			switch (msg)
+				case NeutrinoMessages::EVT_SCAN_SATELLITE:
+					frameBuffer->paintBox(xpos3, ypos+ 2* mheight, x+width-105, ypos+ 2* mheight+mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
+					delete (unsigned char*) data;
+					break;
+				case NeutrinoMessages::EVT_SCAN_NUM_CHANNELS:
+					sprintf(cb, "%d", data);
+					frameBuffer->paintBox(xpos2, ypos+ mheight, x+width-105, ypos+ mheight+mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(xpos2, ypos+ 2* mheight, width, cb, COL_MENUCONTENT);
+					break;
+				case NeutrinoMessages::EVT_SCAN_NUM_TRANSPONDERS:	//willbe obsolete soon
+					sprintf(cb, "%d", data);
+					frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb, COL_MENUCONTENT);
+					found_transponder = data;
+					break;
+				case NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS:
+					if (found_transponder == 0) data = 0;
+					sprintf(cb1, "%d/%d", data,found_transponder);
+					frameBuffer->paintBox(xpos1, ypos, x+width-105, ypos+mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, cb1, COL_MENUCONTENT);
+					break;
+				case NeutrinoMessages::EVT_SCAN_PROVIDER:
+					frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight+2, width-20, mheight, COL_MENUCONTENT);
+					g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, 0, true); // UTF-8
+					delete (unsigned char*) data;
+					break;
+				case NeutrinoMessages::EVT_SCAN_COMPLETE:
+				case NeutrinoMessages::EVT_SCAN_FAILED:
+    					success  = (msg == NeutrinoMessages::EVT_SCAN_COMPLETE);
 					istheend = true;
 					msg      = CRCInput::RC_timeout;
-				}
-			else
-			if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
-				delete (unsigned char*) data;
+					break;
+				default:
+					if (msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
+					delete (unsigned char*) data;
+					break;:
 		}
 	}
 
