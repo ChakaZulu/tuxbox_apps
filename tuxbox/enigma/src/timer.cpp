@@ -764,8 +764,15 @@ void eTimerManager::actionHandler()
 					if ( playbackRef )
 					{
 						writeToLogfile("we have playbackRef...zap back to old service");
-						conn2 = CONNECT( eDVB::getInstance()->switchedService, eTimerManager::switchedService );
+						if ( playbackRef.type == eServiceReference::idDVB )
+							conn2 = CONNECT( eDVB::getInstance()->switchedService, eTimerManager::switchedService );
 						eServiceInterface::getInstance()->play( playbackRef, -1 );
+						if ( playbackRef.type != eServiceReference::idDVB )
+						{
+							writeToLogfile("old service is running again (no DVB) :)");
+							Decoder::locked=0;
+							playbackRef = eServiceReference();
+						}
 					}
 				}
 				else
