@@ -736,7 +736,25 @@ void eDVB::configureNetwork()
 			eDebug("[eDVB] use DHCP");
 			delete udhcpc;
 			system("killall -9 udhcpc");
-			udhcpc = new eConsoleAppContainer("/bin/udhcpc -f");
+			FILE *file=fopen("/etc/hostname","r");
+			eString cmd("/bin/udhcpc -f");
+			if (!file)
+				eDebug("couldn't get hostname.. /etc/hostname not exist");
+			else
+			{
+				char buf[256];
+				fgets(buf,sizeof(buf),file);
+				fclose(file);
+				file = fopen("/var/share/udhcpc/default.script","r");
+				if ( file )
+				{
+					fclose(file);
+					cmd.sprintf("/bin/udhcpc --hostname=%s --foreground --script=/var/share/udhcpc/default.script", buf);
+				}
+				else
+					cmd.sprintf("/bin/udhcpc --hostname=%s --foreground", buf);
+			}
+			udhcpc = new eConsoleAppContainer(cmd.c_str());
 			CONNECT(udhcpc->dataAvail, eDVB::UDHCPC_DataAvail);
 			CONNECT(udhcpc->appClosed, eDVB::UDHCPC_Closed);
 		}
