@@ -111,6 +111,8 @@ void blt_field(int ofsx, int ofsy, screen_t s) {
 
 #define GL 12
 static unsigned char gl[GL] = {62, 65, 73, 73, 121, 0, 127, 64, 64, 64, 64, 0};
+//#define GL 8
+//static unsigned char gl[GL] = { 30, 33, 37, 125, 64, 64, 96, 0};
 
 void blt_two(int ofsx1, int ofsy1, int ofsx2, int ofsy2, screen_t s) {
 	int x, y, w1, w2, bit_y1, byte_y1, bit_y2, byte_y2;
