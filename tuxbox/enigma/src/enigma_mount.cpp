@@ -382,6 +382,15 @@ void eMountMgr::automountMountPoints(void)
 	}
 }
 
+void eMountMgr::unmountAllMountPoints(void)
+{
+	for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
+	{
+		if (mp_it->mp.mounted == 1)
+			mp_it->unmount();
+	}
+}
+
 eString eMountMgr::listMountPoints(eString skelleton)
 {
 	eString result, mountStatus, action;
@@ -421,8 +430,8 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			if (mp_it->mp.ownOptions)
 				options += ", " + mp_it->mp.ownOptions;
 			tmp.strReplace("#OPTIONS#", mp_it->mp.options);
-			tmp.strReplace("#RSIZE#", eString().sprintf("%d", mp_it->mp.rsize));
-			tmp.strReplace("#WSIZE#", eString().sprintf("%d", mp_it->mp.wsize));
+			tmp.strReplace("#RSIZE#", (mp_it->mp.rsize != -1) ? eString().sprintf("%d", mp_it->mp.rsize) : "");
+			tmp.strReplace("#WSIZE#", (mp_it->mp.wsize != -1) ? eString().sprintf("%d", mp_it->mp.wsize) : "");
 			result += tmp + "\n";
 		}
 	else

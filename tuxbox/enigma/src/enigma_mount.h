@@ -62,6 +62,7 @@ public:
 	int mountMountPoint(int);
 	int unmountMountPoint(int);
 	void automountMountPoints(void);
+	void unmountAllMountPoints(void);
 	void save();
 	void init();
 

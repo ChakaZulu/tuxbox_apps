@@ -47,8 +47,8 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	mp.userName = opt["username"];
 	mp.mountDir = opt["mountdir"];
 	mp.automount = (opt["automount"] == "on") ? 1 : 0;
-	mp.rsize = atoi(opt["rsize"].c_str());
-	mp.wsize = atoi(opt["wsize"].c_str());
+	mp.rsize = (opt["rsize"]) ? atoi(opt["rsize"].c_str()) : -1;
+	mp.wsize = (opt["wsize"]) ? atoi(opt["wsize"].c_str()) : -1;
 	mp.ownOptions = opt["ownoptions"];
 	mp.ip[0] = atoi(opt["ip0"].c_str());
 	mp.ip[1] = atoi(opt["ip1"].c_str());
