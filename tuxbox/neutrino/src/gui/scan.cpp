@@ -131,7 +131,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	}
 
 	startScan();
-
+	
+	char buf[100];
 	int ts = 0;
 	int services = 0;
 	while (!scanReady(&ts, &services))
@@ -140,10 +141,12 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 		ypos+= hheight + (mheight >>1);
 		
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.transponders").c_str(), COL_MENUCONTENT);
+		sprintf(buf, "%s %d", g_Locale->getText("scants.transponders").c_str(), ts);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 		ypos+= mheight;
 
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
+		sprintf(buf, "%s %d", g_Locale->getText("scants.services").c_str(), services);
+		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 		//g_RCInput->getKey(190);
 		sleep(3);
 	}
