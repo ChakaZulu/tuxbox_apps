@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.83 2001/11/07 23:49:45 field Exp $
+//  $Id: sectionsd.cpp,v 1.84 2001/11/08 13:50:32 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.84  2001/11/08 13:50:32  field
+//  Debug-Out verbessert
+//
 //  Revision 1.83  2001/11/07 23:49:45  field
 //  Current/Next Umschaltung funktioniert wieder
 //
@@ -1369,7 +1372,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.83 2001/11/07 23:49:45 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.84 2001/11/08 13:50:32 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1547,7 +1550,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     if(dataLength!=4)
         return;
     unsigned* uniqueServiceKey=(unsigned *)data;
-    dprintf("Request of current/next information for 0x%x\n", *uniqueServiceKey);
+    dprintf("[sectionsd] Request of current/next information for 0x%x\n", *uniqueServiceKey);
     if(dmxEIT.pause()) // -> lock
         return;
     lockServices();
@@ -1563,10 +1566,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 
         if(si!=mySIservicesOrderUniqueKey.end())
         {
-            if ( !si->second->eitScheduleFlag() )
-                dprintf("current service has no scheduled events\n");
-            if ( !si->second->eitPresentFollowingFlag() )
-                dprintf("current service has no present/following events\n");
+            dprintf("[sectionsd] current service has%s scheduled events, and has%s present/following events\n", si->second->eitScheduleFlag()?"":"no ", si->second->eitPresentFollowingFlag()?"":"no " );
             if ( ( !si->second->eitScheduleFlag() ) &&
                  ( !si->second->eitPresentFollowingFlag() ) )
             {
@@ -1574,7 +1574,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
             }
         }
     }
-    dprintf("current flag %d\n", flag);
+    //dprintf("[sectionsd] current flag %d\n", flag);
     unlockServices();
 
     SIevent nextEvt;
@@ -1582,12 +1582,12 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     SItime zeitEvt2(zeitEvt1);
     if(evt.serviceID!=0)
     {//Found
-        dprintf("current EPG found.\n");
+        dprintf("[sectionsd] current EPG found.\n");
 
         nextEvt=findNextSIevent(evt.uniqueKey(), zeitEvt2);
 
         if(nextEvt.serviceID!=0)
-            dprintf("next EPG found.\n");
+            dprintf("[sectionsd] next EPG found.\n");
     }
 
         nResultDataSize=
@@ -1677,7 +1677,7 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     }
     else
     {
-        dprintf("current/next EPG not found!\n");
+        dprintf("[sectionsd] current/next EPG not found!\n");
     }
     currentNextWasOk=(flag&4);
     currentServiceKey= *uniqueServiceKey;
@@ -3037,7 +3037,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.83 2001/11/07 23:49:45 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.84 2001/11/08 13:50:32 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
