@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.27 2003/05/25 10:42:37 digi_casi Exp $
+        $Id: settings.cpp,v 1.28 2003/06/01 18:05:35 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -144,9 +144,9 @@ void CScanSettings::toMotorPosList(CZapitClient::ScanMotorPosList& motorPosList)
 	
 	for (int i = 0; i < MAX_SATELLITES; i++)
 	{
-		if (satName[i][0] != 0)
+		if (strlen(satName[i]) != 0)
 		{
-			strncpy(sat.satName, satName[i], 30);
+			sat.satPosition = satPosition[i];
 			sat.motorPos = satMotorPos[i];
 			motorPosList.insert(motorPosList.end(), sat);
 		}
