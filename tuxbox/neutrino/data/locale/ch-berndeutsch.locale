@@ -105,6 +105,8 @@ videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect outomatisch
 videomenu.vcrswitch Scart-Iigang outomatisch
+videomenu.rgb_centering RGB-Zentrierig
+videomenu.csync Sync.-Korrektur
 
 networkmenu.head Netzwärk Ischtöuige
 networkmenu.test Netzwärk teschte
@@ -140,15 +142,19 @@ streamingmenu.streaming_server_cddrive DVD Loufwärk
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Daterate Video
 streamingmenu.streaming_audiorate Daterate Audio
-streamingmenu.streaming_ac3_enabled AC3 Ungerschtützig
 streamingmenu.off Deaktiviert
 streamingmenu.on Aktiviert
-streamingmenu.streaming_force_transcode Transcode Forcieren
 streamingmenu.streaming_resolution Uflösig
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
+streamingmenu.streaming_force_avi_rawaudio Erzwinge AC3 bei avi
+streamingmenu.streaming_force_transcode_video Transcod. ou bi mpg/vcd Video
+streamingmenu.streaming_transcode_video_codec MPEG Video Codec
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
 
 ping.ok isch erreichbar (ping)
 ping.unreachable isch nid erreichbar (unreachable)
@@ -727,6 +733,22 @@ movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härg
 movieplayer.nostreamingserver Verbindig zum\n Streamingsörver fäugschlage.
 movieplayer.defdir Schtart-Verz.
 movieplayer.buffering Puffern...
+movieplayer.tsplayback TS Absschpile
+movieplayer.pesplayback PES Abschpile (Experimentell)
+movieplayer.fileplayback Datei via VLC
+movieplayer.dvdplayback DVD
+movieplayer.vcdplayback (S)VCD
+movieplayer.tshelp ROT/Home Stop\nGRÜN Resync\nGELB Pouse/Wyter\nBLAU Bookmark setze\n1 ca. 1 Minute zrugg\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zrugg\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zrugg\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp ROT/Home Stop\nGRÜN Resync\nGELB Pouse/Wyter\nBLAU Bookmark setze\n1 ca. 1 Minute zrugg\n3 ca. 1 Minute vor\n4 ca. 5 Minuten zrugg\n6 ca. 5 Minuten vor\n7 ca. 10 Minuten zrugg\n9 ca. 10 Minuten vor\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.toomanybookmarks Du hesch scho zviu Bookmarks aagleit.\nEs muess zersch äs Angers glöscht wärde.
+movieplayer.bookmarkname Bookmark Name
+movieplayer.bookmarkname_hint1 Gib ä Name für's nöie Bookmark i.
+movieplayer.bookmarkname_hint2 
+movieplayer.skipping Neupositionierig - bitte warte
+movieplayer.goto Schpringe zu ...
+movieplayer.goto.h1 = -> absolute Schprung
+movieplayer.goto.h2 +,- -> relative Schprung
+movieplayer.wrongvlcversion Funktion isch mit dere Version vom VLC nid müglech
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Föuter a
@@ -735,7 +757,13 @@ filebrowser.select Auswähle
 filebrowser.mark Markiere
 filebrowser.scan Dürsueche Verzeichnis
 filebrowser.sort.name (Dateiname)
+filebrowser.sort.namedirsfirst (Dateiname2)
 filebrowser.sort.date (Datum)
+filebrowser.sort.type (Typ)
+filebrowser.sort.size (Grössi)
+filebrowser.nextpage Site vor
+filebrowser.prevpage Site zrugg
+filebrowser.showrights Dateirächt aazeige
 
 nfs.mount NFS/CIFS Verzeichnis mounte
 nfs.ip NFS/CIFS Sörver IP
@@ -770,4 +798,7 @@ pictureviewer.slide_time Diaschou-Azeigduur
 pictureviewer.scaling Skalierig
 pictureviewer.defdir Schtart-Verz.
 
-
+rclock.menueadd FB schperre 
+rclock.title Färnbedienig schperre
+rclock.lockmsg d'Färnbedienig vo de DBOX2 wird gschperrt.\n um d'Schperri ufzhebe, bitte\n <ROT> u <DBOX> uf dr Färnbedienig\n druecke.
+rclock.unlockmsg DBOX2 Färnbedienig reaktiviert...

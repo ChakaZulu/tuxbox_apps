@@ -105,6 +105,8 @@ videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatisch
 videomenu.vcrswitch Scart-Eigang automatisch
+videomenu.rgb_centering RGB-Zentriern
+videomenu.csync Sync.-Korrigiern
 
 networkmenu.head Netzwerk Eistellunga
 networkmenu.test Netzwerk ausprobiern
@@ -140,15 +142,19 @@ streamingmenu.streaming_server_cddrive DVD Laufwerk
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Datenrate Video
 streamingmenu.streaming_audiorate Datenrate Audio
-streamingmenu.streaming_ac3_enabled AC3 Untastützung
 streamingmenu.off Ausgschoitn
 streamingmenu.on Eigschoitn
-streamingmenu.streaming_force_transcode Transcode Forcieren
 streamingmenu.streaming_resolution Auflösung
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
+streamingmenu.streaming_force_avi_rawaudio AC3 bei avi erzwinga
+streamingmenu.streaming_force_transcode_video Transcod. a mpg/vcd Video
+streamingmenu.streaming_transcode_video_codec MPEG Video Codec
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
 
 ping.ok kumt wos (ping)
 ping.unreachable kumt nix (unreachable)
@@ -727,6 +733,21 @@ movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergst
 movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva m�ch.
 movieplayer.defdir Start-Verz.
 movieplayer.buffering Buffern..
+movieplayer.tsplayback TS Abspuin
+movieplayer.pesplayback PES Abspuin (Experiment)
+movieplayer.fileplayback Fuim mim VLC
+movieplayer.dvdplayback DVD
+movieplayer.vcdplayback (S)VCD
+movieplayer.tshelp ROT/Hoam Stop\nGREA Resync\nGOIB Pause/Weida\nBLAU Merkal setzn\n1 ca. 1 Minutn zruck\n3 ca. 1 Minutn viri\n4 ca. 5 Minutn zruck\n6 ca. 5 Minutn viri\n7 ca. 10 Minutn zruck\n9 ca. 10 Minutn viri\nHuif: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp ROT/Hoam Stop\nGREA Resync\nGELB Pause/Weida\nBLAU Merkal setzn\n1 ca. 1 Minutn zruck\n3 ca. 1 Minutn viri\n4 ca. 5 Minutn zruck\n6 ca. 5 Minutn viri\n7 ca. 10 Minutn zruck\n9 ca. 10 Minutn viri\nHuif: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.toomanybookmarks Sie ham scho zvui Merkal oglegt.\nEs muas erst a andas glöscht wern.
+movieplayer.bookmarkname Merkal Nama 
+movieplayer.bookmarkname_hint1 Bitte gems den Nama fürs neie Merkal o.
+movieplayer.bookmarkname_hint2 movieplayer.skipping Umsortiern bitte wartn 
+movieplayer.goto Spring zu ...
+movieplayer.goto.h1 = -> absoluter Sprung
+movieplayer.goto.h2 +,- -> relativer Sprung
+movieplayer.wrongvlcversion Des is mit ehnara VLC-Version ne drin
 
 filebrowser.head Datiesucha
 filebrowser.filter.active Fuita o
@@ -735,7 +756,13 @@ filebrowser.select auswaehn
 filebrowser.mark markiern
 filebrowser.scan Verzeichnisse durchsuacha
 filebrowser.sort.name (Nama)
+filebrowser.sort.namedirsfirst (Dateinama2)
 filebrowser.sort.date (Datum)
+filebrowser.sort.type (Typ)
+filebrowser.sort.size (Greaß)
+filebrowser.nextpage Seitn viri
+filebrowser.prevpage Seitn zruck
+filebrowser.showrights Dateirechte ozoang
 
 nfs.mount NFS/CIFS Verzeichnis mountn
 nfs.ip NFS/CIFS Serva IP
@@ -770,4 +797,7 @@ pictureviewer.slide_time Diaschaugn-Ozoagdaua
 pictureviewer.scaling Skalierung
 pictureviewer.defdir Start-Verz.
 
-
+rclock.menueadd FB sperrn 
+rclock.title Fernbedienung sperrn
+rclock.lockmsg D Fernbedienung von da dbox2 werd gsperrt.\n Um die Sperrn aufzhem, bitte\n <ROT> und <DBOX> auf da Fernbedienung\ndrucka. 
+rclock.unlockmsg DBOX2 Fernbedienung reaktiviert...

@@ -105,6 +105,8 @@ videomenu.videoformat_431 4:3 (PS)
 videomenu.videoformat_169 16:9
 videomenu.videoformat_autodetect automatico
 videomenu.vcrswitch Entrata-Scart automatico
+videomenu.rgb_centering RGB-Posizionamento
+videomenu.csync Correttura Sync.
 
 networkmenu.head Impostazioni Rete
 networkmenu.test Test Rete
@@ -140,15 +142,19 @@ streamingmenu.streaming_server_cddrive dvd
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate brzina videa
 streamingmenu.streaming_audiorate brzina audia
-streamingmenu.streaming_ac3_enabled Sopporto AC3
 streamingmenu.off ugaseno
 streamingmenu.on upaljeno
-streamingmenu.streaming_force_transcode Force Transcoding
 streamingmenu.streaming_resolution Resolution
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
 streamingmenu.704x576 704x576
+streamingmenu.streaming_transcode_audio Transcod. Audio (dvd/vcd/mpg)
+streamingmenu.streaming_force_avi_rawaudio Usa AC3 forzato con file avi
+streamingmenu.streaming_force_transcode_video Transcod. anche mpg/vcd Video
+streamingmenu.streaming_transcode_video_codec MPEG Video Codec
+streamingmenu.mpeg1 MPEG1
+streamingmenu.mpeg2 MPEG2
 
 ping.ok e raggiungibile (ping)
 ping.unreachable non e raggiungibile (unreachable)
@@ -727,6 +733,21 @@ movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim 
 movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
 movieplayer.defdir Start-Directory.
 movieplayer.buffering Buffering...
+movieplayer.tsplayback TS playback
+movieplayer.pesplayback PES playback (Sperimentale)
+movieplayer.fileplayback File via VLC
+movieplayer.dvdplayback DVD
+movieplayer.vcdplayback (S)VCD
+movieplayer.tshelp ROSSO/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp ROSSo/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\nmovieplayer.toomanybookmarks Ha Inserito troppi Bookmarks.\nprima cancellare uno vecchio.
+movieplayer.bookmarkname Nome Bookmark
+movieplayer.bookmarkname_hint1 Inoltrare il Nome del nuovo Bookmark 
+movieplayer.bookmarkname_hint2 
+movieplayer.skipping Nuovo posizionamento - Prego Attendere
+movieplayer.goto Salta ad ...
+movieplayer.goto.h1 = -> Salto assoluto
+movieplayer.goto.h2 +,- -> Salto relativo
+movieplayer.wrongvlcversion Funzione con questa Versione di VLC non possibbile
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on
@@ -735,7 +756,13 @@ filebrowser.select scegli
 filebrowser.mark seleziona
 filebrowser.scan cerca nella directory
 filebrowser.sort.name (Nome File)
+filebrowser.sort.namedirsfirst (Nomefile2)
 filebrowser.sort.date (Data)
+filebrowser.sort.type (Tipo)
+filebrowser.sort.size (Grandezza)
+filebrowser.nextpage Pagina Avanti
+filebrowser.prevpage Pagina Indietro
+filebrowser.showrights Attribbuti File
 
 nfs.mount carica directory
 nfs.ip NFS/CIFS Server IP
@@ -761,11 +788,16 @@ apids.hint_1 Inoltrare i dati APIDs per Streamen,
 apids.hint_2 Diviso con ' ' in Formato hexadecimale
 
 pictureviewer.head Lettore immaggini
+pictureviewer.sortorder Cambiamento posizione
 pictureviewer.sortorder.date (Data)
 pictureviewer.sortorder.filename (Nome File)
 pictureviewer.show Vedi
+pictureviewer.slideshow Diashow
 pictureviewer.slide_time Diashow-Durata
 pictureviewer.scaling Graduazione
 pictureviewer.defdir Start-Directory
 
-
+rclock.menueadd Blocco Telecomando 
+rclock.title Blocco Telecomando 
+rclock.lockmsg Il Telecomando viene Bloccato.\n per sbloccarlo, premete\n<Rosso> ed <DBOX> sul vostro Telecomando.
+rclock.unlockmsg Telecomando DBOX2 Riattivato...
