@@ -23,7 +23,7 @@ int eHTTPDyn::doWrite(int hm)
 		return -1;
 	connection->writeBlock(result.c_str()+wptr, tw);
 	wptr+=tw;
-	return tw;
+	return (size > wptr) ? 1 : -1;
 }
 
 eHTTPDynPathResolver::eHTTPDynPathResolver()
