@@ -43,7 +43,8 @@ class CMessageBox : public CHintBoxExt
  private:
 
 	int  showbuttons;
-	
+	bool returnDefaultOnTimeout;
+
 	void paintButtons();
 
  public:
@@ -70,13 +71,13 @@ class CMessageBox : public CHintBoxExt
 	CMessageBox(const neutrino_locale_t Caption, ContentLines& Lines, const int Width = 500, const char * const Icon = NULL, const CMessageBox::result_ Default = mbrYes, const uint ShowButtons = mbAll);
 
 	int exec(int timeout = -1);
-	
+	void returnDefaultValueOnTimeout(bool returnDefault);
 };
 
 // Text is always UTF-8 encoded
-int ShowLocalizedMessage(const neutrino_locale_t Caption, const neutrino_locale_t Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1);
-int ShowMsgUTF(const neutrino_locale_t Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
-int ShowMsgUTF(const neutrino_locale_t Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
+int ShowLocalizedMessage(const neutrino_locale_t Caption, const neutrino_locale_t Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1, bool returnDefaultOnTimeout = false);
+int ShowMsgUTF(const neutrino_locale_t Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1, bool returnDefaultOnTimeout = false); // UTF-8
+int ShowMsgUTF(const neutrino_locale_t Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1, bool returnDefaultOnTimeout = false); // UTF-8
 
 void DisplayErrorMessage(const char * const ErrorMsg); // UTF-8
 
