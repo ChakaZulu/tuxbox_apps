@@ -163,7 +163,7 @@ msgstr "Entfernen"
 
 #: default.esml:443 default.esml:478
 msgid "Motor Config"
-msgstr "Motor Konfiguration"
+msgstr "Motor"
 
 #: default.esml:469
 msgid "remove selected entry"
@@ -721,7 +721,7 @@ msgstr "Änderungen speichern"
 
 #: stone.esml:465 silver.esml:472
 msgid "plugins"
-msgstr "Erweiterungen"
+msgstr "Plugins"
 
 #: default.esml:933
 msgid "edit selected transponder (ok)"
@@ -813,7 +813,7 @@ msgstr "Gewünschten Satelliten auswählen ('OK')"
 
 #: default.esml:839
 msgid "show extended configuration"
-msgstr "Erweiterte Konfiguration anzeigen"
+msgstr "Erweiterte Konfiguration öffnen"
 
 #: default.esml:480
 msgid "choose what you want to do"
@@ -879,7 +879,7 @@ msgstr "Festplatte:"
 
 #: default.esml:784
 msgid "FP Version:"
-msgstr "Frontprozessor Software Version:"
+msgstr "Frontprozessor Software:"
 
 #: default.esml:835
 msgid "status:"
@@ -899,7 +899,7 @@ msgstr "Zum Ändern 'OK' drücken"
 
 #: default.esml:928
 msgid "Transponders"
-msgstr "Transponder"
+msgstr "Transponder Bearbeitung"
 
 #: chk_blue2.esml:313
 msgid "FR "
@@ -1608,7 +1608,7 @@ msgstr "Live"
 
 #: src/channelinfo.cpp:236
 msgid "no data for this service avail"
-msgstr "Keine Daten für diesen 'Service' verfügbar"
+msgstr "Keine Daten für diesen Service verfügbar"
 
 #: src/channelinfo.cpp:268
 #, c-format
@@ -1662,7 +1662,7 @@ msgstr "Datei"
 
 #: src/enigma_bouquet.cpp:38 src/enigma_setup.cpp:40
 msgid "Service Organising"
-msgstr "'Service' Verwaltung"
+msgstr "Serviceverwaltung"
 
 #: src/enigma_bouquet.cpp:42
 msgid "Create new bouquet"
@@ -1674,11 +1674,11 @@ msgstr "Neues, leeres Bouquet erstellen"
 
 #: src/enigma_bouquet.cpp:43
 msgid "Add services to bouquet"
-msgstr "'Services' zum Bouquet hinzufügen"
+msgstr "Services zum Bouquet hinzufügen"
 
 #: src/enigma_bouquet.cpp:43
 msgid "add multiple services to a specific bouquet"
-msgstr "Mehrere 'Services' zu einem bestimmten Bouquet hinzufügen"
+msgstr "Mehrere Services zu einem bestimmten Bouquet hinzufügen"
 
 #: src/enigma_bouquet.cpp:44
 msgid "Edit bouquets"
@@ -1686,23 +1686,23 @@ msgstr "Bouquets bearbeiten"
 
 #: src/enigma_bouquet.cpp:44
 msgid "sort,rename,delete services/bouquets "
-msgstr "'Services'/Bouquets sortieren, umbennen, löschen"
+msgstr "Services/Bouquets sortieren, umbennen, löschen"
 
 #: src/enigma_bouquet.cpp:48
 msgid "Lock/Unlock Services"
-msgstr "'Services' sperren/entsperren"
+msgstr "Services sperren/entsperren"
 
 #: src/enigma_bouquet.cpp:48
 msgid "lock,unlock services (parental locking)"
-msgstr "'Services' sperren,entsperren (Jugendschutz)"
+msgstr "Services sperren,entsperren (Jugendschutz)"
 
 #: src/enigma_ci.cpp:29
 msgid "Common Interface Modules"
-msgstr "Common Interface Module"
+msgstr "Common Interface"
 
 #: src/enigma_ci.cpp:37
 msgid "Common Interface Module"
-msgstr "Common Interface Modul"
+msgstr "Common Interface"
 
 #: src/enigma_ci.cpp:43 src/enigma_ci.cpp:72
 msgid "Reset"
@@ -1771,7 +1771,7 @@ msgstr "Es ist keine Informationen verfügbar"
 
 #: src/enigma_info.cpp:39
 msgid "Infos"
-msgstr "Infos"
+msgstr "Informationen"
 
 #: src/enigma_info.cpp:42 src/streaminfo.cpp:551
 msgid "Streaminfo"
@@ -1857,7 +1857,7 @@ msgstr "Zeige Infoleiste oder EPG"
 
 #: src/enigma_main.cpp:95
 msgid "show service selector"
-msgstr "'Serviceliste' anzeigen"
+msgstr "Serviceliste anzeigen"
 
 #: src/enigma_main.cpp:96
 msgid "show subservices/NVOD"
@@ -1909,11 +1909,11 @@ msgstr "Playlist/Verlauf vorherige"
 
 #: src/enigma_main.cpp:110
 msgid "service list and down"
-msgstr "'Serviceliste' und runter"
+msgstr "Serviceliste und runter"
 
 #: src/enigma_main.cpp:111
 msgid "service list and up"
-msgstr "'Serviceliste' und hoch"
+msgstr "Serviceliste und hoch"
 
 #: src/enigma_main.cpp:113 src/enigma_main.cpp:170
 msgid "volume up"
@@ -1969,19 +1969,19 @@ msgstr "Schnellen Rücklauf stoppen"
 
 #: src/enigma_main.cpp:143
 msgid "open the serviceselector and show bouquets"
-msgstr "Die 'Serviceliste' öffnen und Bouquets anzeigen"
+msgstr "Die Serviceliste öffnen und Bouquets anzeigen"
 
 #: src/enigma_main.cpp:144
 msgid "open the serviceselector and show provider"
-msgstr "Die 'Serviceliste' öffnen und Provider anzeigen"
+msgstr "Die Serviceliste öffnen und Provider anzeigen"
 
 #: src/enigma_main.cpp:145
 msgid "open the serviceselector and show recorded movies"
-msgstr "Die 'Serviceliste' öffnen und aufgenommene Filme anzeigen"
+msgstr "Die Serviceliste öffnen und aufgenommene Filme anzeigen"
 
 #: src/enigma_main.cpp:146
 msgid "open the serviceselector and shows the playlist"
-msgstr "Die 'Serviceliste' öffnen und die Playlist anzeigen"
+msgstr "Die Serviceliste öffnen und die Playlist anzeigen"
 
 #: src/enigma_main.cpp:148 src/sselect.cpp:130
 msgid "switch to TV mode"
@@ -2138,7 +2138,7 @@ msgstr "SleepTimer"
 
 #: src/enigma_main.cpp:3054
 msgid "Sorry, you cannot record this service."
-msgstr "Sorry, Sie können diesen 'Service' nicht aufnehmen."
+msgstr "Sorry, Sie können diesen Service nicht aufnehmen."
 
 #: src/enigma_main.cpp:3259
 msgid "Show recorded movies?"
@@ -2170,11 +2170,11 @@ msgstr "Eintrag umbenennen"
 
 #: src/enigma_main.cpp:3797
 msgid "Sorry, you cannot delete this service."
-msgstr "Sorry, Sie können diesen 'Service' nicht löschen."
+msgstr "Sorry, Sie können diesen Service nicht löschen."
 
 #: src/enigma_main.cpp:3797
 msgid "delete service"
-msgstr "'Service' löschen"
+msgstr "Service löschen"
 
 #: src/enigma_main.cpp:3824 src/enigma_main.cpp:3910
 #, c-format
@@ -2359,7 +2359,7 @@ msgstr "Verlauf"
 
 #: src/enigma_main.cpp:6936
 msgid "Service Menu"
-msgstr "'Service' Menü"
+msgstr "Service Menü"
 
 #: src/enigma_main.cpp:6948 src/sselect.cpp:128
 msgid "add service to playlist"
@@ -2392,7 +2392,7 @@ msgstr "Zu bestimmten Bouquet hinzufügen"
 
 #: src/enigma_main.cpp:6975
 msgid "add the selected service to another bouquet"
-msgstr "'Service' zu einem anderen Bouquet hinzufügen"
+msgstr "Service zu einem anderen Bouquet hinzufügen"
 
 #: src/enigma_main.cpp:6977
 msgid "add marker"
@@ -2413,7 +2413,7 @@ msgstr "Gewähltes Bouquet umbenennen"
 
 #: src/enigma_main.cpp:7000 src/enigma_main.cpp:7035
 msgid "rename the current selected service/movie"
-msgstr "Gewählten 'Service' umbenennen"
+msgstr "Gewählten Service umbenennen"
 
 #: src/enigma_main.cpp:7004 src/enigma_main.cpp:7036 src/sselect.cpp:367
 msgid "delete"
@@ -2421,7 +2421,7 @@ msgstr "Löschen"
 
 #: src/enigma_main.cpp:7004 src/enigma_main.cpp:7036
 msgid "delete the current selected service/movie"
-msgstr "Gewählten 'Service' löschen"
+msgstr "Gewählten Service löschen"
 
 #: src/enigma_main.cpp:7011
 msgid "disable move mode"
@@ -2449,7 +2449,7 @@ msgstr "Gewählten Anbieter in die Bouquetliste kopieren"
 
 #: src/enigma_main.cpp:7028 src/enigma_main.cpp:7033
 msgid "add the selected service to a selectable bouquet"
-msgstr "Ausgewählten 'Service' in ein wählbares Bouquet einfügen"
+msgstr "Ausgewählten Service in ein wählbares Bouquet einfügen"
 
 #: src/enigma_main.cpp:7048
 msgid "add the selected file to a selectable bouquet"
@@ -2486,7 +2486,7 @@ msgstr "Bearbeitungsmodus aktivieren"
 #: src/enigma_main.cpp:7067
 msgid "activate mode to simply add many services to a selectable bouquet"
 msgstr ""
-"Modus zum einfachen Einfügen mehrerer 'Services' in ein bestimmtes Bouquet "
+"Modus zum einfachen Einfügen mehrerer Services in ein bestimmtes Bouquet "
 "aktivieren"
 
 #: src/enigma_main.cpp:7077
@@ -2539,7 +2539,7 @@ msgstr "Gerät jetzt neu starten"
 
 #: src/enigma_main.cpp:7121 src/enigma_main.cpp:7125
 msgid "shutdown now"
-msgstr "Jetzt herunterfahren"
+msgstr "Ausschalten"
 
 #: src/enigma_main.cpp:7121
 msgid "shutdown your dreambox"
@@ -2726,7 +2726,7 @@ msgstr "Transponder Bearbeitung"
 
 #: src/enigma_scan.cpp:51
 msgid "for automatic scan"
-msgstr "Für automatischen Suche"
+msgstr "Transponder Bearbeitung für automatische Sendersuche öffnen"
 
 #: src/enigma_scan.cpp:54 src/scan.cpp:36
 msgid "Automatic Transponder Scan"
@@ -2787,7 +2787,7 @@ msgstr "LNB %d für Motor benutzen"
 
 #: src/enigma_setup.cpp:40
 msgid "open service organising"
-msgstr "'Serviceverwaltung' öffnen"
+msgstr "Serviceverwaltung öffnen"
 
 #: src/enigma_setup.cpp:41
 msgid "open service searching"
@@ -2799,7 +2799,7 @@ msgstr "System"
 
 #: src/enigma_setup.cpp:43
 msgid "open system settings"
-msgstr "Systemeinstellungen anzeigen"
+msgstr "Systemeinstellungen öffnen"
 
 #: src/enigma_setup.cpp:46
 msgid "Common Interface"
@@ -2823,7 +2823,7 @@ msgstr "Experten"
 
 #: src/enigma_setup.cpp:50
 msgid "open expert setup"
-msgstr "Experten Einstellungen anzeigen"
+msgstr "Experten Einstellungen öffnen"
 
 #: src/epgactions.h:14
 msgid "EPG selector"
@@ -2891,7 +2891,7 @@ msgstr "Bitte PIN eingeben:"
 
 #: src/parentallock.cpp:45
 msgid "Parental setup"
-msgstr "Jugendschutz Setup"
+msgstr "Jugendschutz"
 
 #: src/parentallock.cpp:52
 msgid "Parental lock"
@@ -2923,11 +2923,11 @@ msgstr "Setup PIN ändern (ok)"
 
 #: src/parentallock.cpp:86
 msgid "Hide locked services"
-msgstr "Gesperrte 'Services' ausblenden"
+msgstr "Gesperrte Services ausblenden"
 
 #: src/parentallock.cpp:89
 msgid "don't show locked services in any list"
-msgstr "Gesperrte 'Services' in keiner Liste zeigen"
+msgstr "Gesperrte Services in keiner Liste zeigen"
 
 #: src/parentallock.cpp:171
 #, c-format
@@ -3740,11 +3740,11 @@ msgstr "Suche beendet"
 
 #: src/setup_extra.cpp:49
 msgid "Communication Setup"
-msgstr "Kommunikation"
+msgstr "Kommunikation/Netzwerk"
 
 #: src/setup_extra.cpp:49
 msgid "open communication setup"
-msgstr "Kommunikationseinstellungen anzeigen"
+msgstr "Kommunikations/Netzwerkeinstellungen öffnen"
 
 #: src/setup_extra.cpp:50
 msgid "Ngrab Streaming Setup"
@@ -3752,7 +3752,7 @@ msgstr "NGrab-Streaming"
 
 #: src/setup_extra.cpp:50
 msgid "open ngrab server setup"
-msgstr "NGrab-Server Einstellungen anzeigen"
+msgstr "NGrab-Server Einstellungen öffnen"
 
 #: src/setup_extra.cpp:52 src/software_update.cpp:29
 msgid "Software Update"
@@ -3768,7 +3768,7 @@ msgstr "Fernbedienung"
 
 #: src/setup_extra.cpp:55
 msgid "open remote control setup"
-msgstr "Fernbedienungseinstellungen anzeigen"
+msgstr "Fernbedienungseinstellungen öffnen"
 
 #: src/setup_extra.cpp:57 src/setup_extra.cpp:181
 msgid "Factory reset"
@@ -3784,15 +3784,15 @@ msgstr "Splitgrösse für Aufnahmen (links,rechts)"
 
 #: src/setup_extra.cpp:77
 msgid "Serviceselector help buttons"
-msgstr "Hilfebuttons in der 'Serviceliste'"
+msgstr "Hilfebuttons in der Serviceliste"
 
 #: src/setup_extra.cpp:77
 msgid "show colored help buttons in service selector"
-msgstr "Farbige Hilfebuttons in der 'Serviceliste' zeigen"
+msgstr "Farbige Hilfebuttons in der Serviceliste zeigen"
 
 #: src/setup_extra.cpp:78
 msgid "Show Sat position"
-msgstr "Sat Positionen anzeigen"
+msgstr "Sat Position anzeigen"
 
 #: src/setup_extra.cpp:78
 msgid "show sat position in the infobar"
@@ -3977,7 +3977,7 @@ msgstr "Für die Überprüfung nicht unterstütztes Dateisystem"
 
 #: src/setup_lcd.cpp:49
 msgid "LC-Display Setup"
-msgstr "Display"
+msgstr "LC-Display"
 
 #: src/setup_lcd.cpp:63 src/setup_osd.cpp:204
 msgid "Brightness:"
@@ -4046,14 +4046,14 @@ msgid ""
 "press green to select the right bottom edge\n"
 "use the cursor keys to move the selected edges"
 msgstr ""
-"Hier können Sie Tuxtxt zentrieren...\n"
+"Hier können Sie Tuxtxt und andere 'Plugins' zentrieren...\n"
 "Drücken Sie 'rot' um das linke obere Eck zu wählen\n"
 "Drücken Sie 'grün' um das rechte untere Eck zu wählen\n"
-"Benutzen Sie das die Pfeiltasten um die Zentrierung durchzuführen."
+"Benutzen Sie die Pfeiltasten um die Zentrierung durchzuführen."
 
 #: src/setup_osd.cpp:182 src/system_settings.cpp:59
 msgid "OSD Settings"
-msgstr "Benutzer Oberfläche"
+msgstr "Benutzeroberfläche"
 
 #: src/setup_osd.cpp:190
 msgid "Alpha:"
@@ -4093,7 +4093,7 @@ msgstr "TuxTxt Position"
 
 #: src/setup_osd.cpp:249
 msgid "here you can center the Tuxtxt (builtin videotext)"
-msgstr "Hier können sie TuxTxt (eingebauter Videotext) zentrieren"
+msgstr "Hier können sie TuxTxt (eingebauter Videotext) und andere 'Plugins' zentrieren"
 
 #: src/setup_osd.cpp:331
 msgid ""
@@ -4229,7 +4229,7 @@ msgstr "Zeitzone geändert"
 
 #: src/setupengrab.cpp:25
 msgid "Ngrab Server"
-msgstr "NGrab Server"
+msgstr "NGrab-Streaming"
 
 #: src/setupengrab.cpp:49
 msgid "enter IP Adress of the Ngrab Server (0..9, left, right)"
@@ -4261,7 +4261,7 @@ msgstr "HW Adresse (MAC) konnte nicht gefunden werden"
 
 #: src/setupnetwork.cpp:380
 msgid "Communication setup"
-msgstr "Kommunikation"
+msgstr "Kommunikation/Netzwerk"
 
 #: src/setupnetwork.cpp:451
 msgid "enter IP Address of the box (0..9, left, right)"
@@ -4433,7 +4433,7 @@ msgstr "NFS/CIFS Freigabe ist schon eingehängt (gemountet)"
 
 #: src/setupvideo.cpp:51 src/system_settings.cpp:43
 msgid "A/V Settings"
-msgstr "Bild & Ton"
+msgstr "Bild und Ton"
 
 #: src/setupvideo.cpp:56
 msgid "Color Format:"
@@ -4623,11 +4623,11 @@ msgstr "Zeigt die EPG Auswahl für den gewählten Sender"
 
 #: src/sselect.cpp:127
 msgid "show service selector menu"
-msgstr "'Service' Menü anzeigen"
+msgstr "Service Menü anzeigen"
 
 #: src/sselect.cpp:129
 msgid "add service to a specific bouquet"
-msgstr "'Service' zu einem bestimmten Bouquet hinzufügen"
+msgstr "Service zu einem bestimmten Bouquet hinzufügen"
 
 #: src/sselect.cpp:133
 msgid "toggle between classic and multi column style"
@@ -4636,20 +4636,20 @@ msgstr "Umschalten zwischen klassischer oder mehrspaltiger Darstellung"
 #: src/sselect.cpp:134
 msgid "toggle focus between service and bouquet list (in combi column style)"
 msgstr ""
-"Auswahl zwischen 'Service' - und Bouquetliste wechseln (in mehrspaltiger "
+"Auswahl zwischen Service-/Bouquetliste wechseln (in mehrspaltiger "
 "Ansicht)"
 
 #: src/sselect.cpp:135
 msgid "go to the prev Marker if exist.. else goto first service"
 msgstr ""
 "Zum vorherhigen Marker springen falls vorhanden.. ansonsten zum ersten "
-"'Service' springen"
+"Service springen"
 
 #: src/sselect.cpp:136
 msgid "go to the next Marker if exist.. else goto last service"
 msgstr ""
 "Zum nächsten Marker springen falls vorhanden.. ansonsten zum letzten "
-"'Service' springen"
+"Service springen"
 
 #: src/sselect.cpp:138
 msgid "show all services"
@@ -4689,7 +4689,7 @@ msgstr "[Eine Ebene nach oben]"
 
 #: src/sselect.cpp:289
 msgid "(removed service)"
-msgstr "(gelöschter 'Service')"
+msgstr "(gelöschter Service)"
 
 #: src/sselect.cpp:368
 msgid "mark"
@@ -4779,7 +4779,7 @@ msgstr "Aufnahmemodus - Anleitung lesen"
 
 #: src/streaminfo.cpp:657
 msgid "Service information (right)"
-msgstr "'Service' Informationen (rechts)"
+msgstr "Service Informationen (rechts)"
 
 #: src/streaminfo.cpp:658
 msgid "Scrambled system information (left, right)"
@@ -5275,11 +5275,11 @@ msgstr "Zeit"
 
 #: src/system_settings.cpp:41
 msgid "open time settings"
-msgstr "Zeit Einstellungen anzeigen"
+msgstr "Zeit Einstellungen öffnen"
 
 #: src/system_settings.cpp:43
 msgid "open A/V settings"
-msgstr "A/V Einstellungen anzeigen"
+msgstr "Bild und Ton Einstellungen öffnen"
 
 #: src/system_settings.cpp:46
 msgid "UHF Modulator"
@@ -5287,7 +5287,7 @@ msgstr "UHF Modulator"
 
 #: src/system_settings.cpp:46
 msgid "open UHF-Modulator setup"
-msgstr "UHF-Modulator Einstellungen anzeigen"
+msgstr "UHF-Modulator Einstellungen öffnen"
 
 #: src/system_settings.cpp:51
 msgid "Harddisc Setup"
@@ -5295,19 +5295,19 @@ msgstr "Festplatte"
 
 #: src/system_settings.cpp:51
 msgid "open harddisc setup"
-msgstr "Festplatteneinstellungen anzeigen"
+msgstr "Festplatteneinstellungen öffnen"
 
 #: src/system_settings.cpp:56
 msgid "open keyboard setup"
-msgstr "Tastatureinstellungen anzeigen"
+msgstr "Tastatureinstellungen öffnen"
 
 #: src/system_settings.cpp:59
 msgid "open on screen display settings"
-msgstr "Einstellungen für OnScreenDisplay anzeigen"
+msgstr "Einstellungen für die Benutzeroberfläche öffnen"
 
 #: src/system_settings.cpp:60
 msgid "open language selector"
-msgstr "Sprachauswahl öffnen"
+msgstr "Sprachauswahl anzeigen"
 
 #: src/system_settings.cpp:63
 msgid "LCD Settings"
@@ -5315,7 +5315,7 @@ msgstr "LC-Display"
 
 #: src/system_settings.cpp:63
 msgid "open LCD settings"
-msgstr "LCD Einstellungen anzeigen"
+msgstr "LCD Einstellungen öffnen"
 
 #: src/system_settings.cpp:126
 msgid "sorry, no harddisks found!"
@@ -5339,7 +5339,7 @@ msgstr "Zeitkorrektur"
 
 #: src/time_settings.cpp:37
 msgid "open time correction window"
-msgstr "Fenster zur Zeitkorrektur anzeigen"
+msgstr "Fenster zur Zeitkorrektur öffnen"
 
 #: src/time_settings.cpp:72
 msgid "To change time correction you must tune first to any transponder"
