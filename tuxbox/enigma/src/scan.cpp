@@ -46,7 +46,7 @@ void tsSelectType::selected(eListBoxEntryText *entry)
 		close((int)entry->getKey());
 }
 
-tsManual::tsManual(eWidget *parent, const eTransponder &transponder, tpScanParameter &param): eWidget(parent), param(param), transponder(transponder)
+tsManual::tsManual(eWidget *parent, const eTransponder &transponder): eWidget(parent), transponder(transponder)
 {
 	int ft=0;
 	switch (eFrontend::fe()->Type())
@@ -141,6 +141,322 @@ int tsManual::eventHandler(const eWidgetEvent &event)
 	default:
 		break;
 	}
+	return 0;
+}
+
+tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
+{
+	l_lnb=new eListBox<eListBoxEntryText>(this);
+	l_lnb->setName("lnblist");
+	l_lnb->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+	
+	l_network=new eListBox<eListBoxEntryText>(this);
+	l_network->setName("network");
+	l_network->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+
+	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::fe());
+	festatus_widget->setName("festatus");
+	
+	l_status=new eLabel(this, RS_WRAP);
+	l_status->setName("status");
+
+	b_start=new eButton(this);
+	b_start->setName("start");
+	b_start->hide();
+	
+	b_abort=new eButton(this);
+	b_abort->setName("abort");
+
+	eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "tsAutomatic"))
+		eFatal("skin load of \"tsAutomatic\" failed");
+
+	l_lnb->setCurrent(new eListBoxEntryText(l_lnb, "SAT A", (void*)0));
+	new eListBoxEntryText(l_lnb, "SAT B", (void*)1);
+	new eListBoxEntryText(l_lnb, "SAT A, OPT B", (void*)2);
+	new eListBoxEntryText(l_lnb, "SAT B, OPT B", (void*)3);
+	
+	l_network->setCurrent(new eListBoxEntryText(l_network, _("Automatic"), (void*)0));
+
+#if 0
+	new eListBoxEntryText(l_network, "Astra 19.2°E fake", (void*)"astra192");
+	new eListBoxEntryText(l_network, "Astra 19.3°E (bei schiefer Antenne)", (void*)"astra193");
+	new eListBoxEntryText(l_network, "Hotbird 11.0°E fuck", (void*)"hb11");
+	new eListBoxEntryText(l_network, "Hotbird 13.5°E", (void*)"hbemu135");
+	new eListBoxEntryText(l_network, "Hotbird XP", (void*)"hbxp");
+	new eListBoxEntryText(l_network, "Sirius -139.2°N", (void*)"sirius-1395");
+#endif
+
+	CONNECT(b_start->selected, tsAutomatic::start);
+	CONNECT(b_abort->selected, tsAutomatic::abort);
+	CONNECT(l_network->selected, tsAutomatic::networkSelected);
+
+	CONNECT(eDVB::getInstance()->eventOccured, tsAutomatic::dvbEvent);
+	
+	if (loadNetworks())
+		eFatal("loading networks failed");
+
+		// todo: text aendern
+	l_status->setText(_("To begin searching for a valid satellite, enter correct LNB and either select satellite or automatic and press OK"));
+	
+	setFocus(l_lnb);
+}
+
+void tsAutomatic::start()
+{
+	eDVBScanController *sapi=eDVB::getInstance()->getScanAPI();
+	if (!sapi)
+	{	
+		eWarning("no scan active");
+		close(1);
+	} else
+	{
+		tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
+		for (std::list<eTransponder>::iterator i(pkt->possibleTransponders.begin()); i != pkt->possibleTransponders.end(); ++i)
+			sapi->addTransponder(*i);
+
+		// scanflags auswerten
+//		sapi->setUseONIT(network->useONIT);
+//		sapi->setUseBAT(network->useBAT);
+		sapi->setNetworkSearch(1);
+		sapi->setClearList(1);
+		close(0);
+	}
+}
+
+void tsAutomatic::abort()
+{
+	close(1);
+}
+
+void tsAutomatic::networkSelected(eListBoxEntryText *l)
+{
+	if (nextNetwork(-1))		// if "automatic" selected,
+	{
+		automatic=1;
+		nextNetwork();				// begin with first
+	} else
+		automatic=0;
+	tuneNext(0);
+}
+
+void tsAutomatic::dvbEvent(const eDVBEvent &event)
+{
+	switch (event.type)
+	{
+	case eDVBEvent::eventTunedIn:
+		eDebug("eventTunedIn");
+		if (event.err)
+		{
+			b_start->hide();
+			tuneNext(1);
+		} else
+		{
+			b_start->show();
+			setFocus(b_start);
+			l_status->setText(_("A valid transponder has been found. Verify that it's the correct LNB and satellite, and press OK to start scanning"));
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+int tsAutomatic::loadNetworks()
+{
+	int fetype=eFrontend::fe()->Type();
+
+	XMLTreeParser parser("ISO-8859-1");
+	
+	int done=0;
+	const char *filename=0;
+	
+	switch (fetype)
+	{
+	case eFrontend::feSatellite:
+		filename=CONFIGDIR "/satellites.xml";
+		break;
+	case eFrontend::feCable:
+		filename=CONFIGDIR "/cables.xml";
+		break;
+	default:
+		break;
+	}
+	
+	if (!filename)
+		return -1;
+		
+	FILE *in=fopen(filename, "rt");
+	if (!in)
+	{
+		eWarning("unable to open %s", filename);
+		return -1;
+	}
+	
+	do
+	{
+		char buf[2048];
+		unsigned int len=fread(buf, 1, sizeof(buf), in);
+		done=len<sizeof(buf);
+		if (!parser.Parse(buf, len, done))
+		{
+			eDebug("parse error: %s at line %d",
+				parser.ErrorString(parser.GetErrorCode()),
+				parser.GetCurrentLineNumber());
+			fclose(in);
+			return -1;
+		}
+	} while (!done);
+	
+	fclose(in);
+	
+	XMLTreeNode *root=parser.RootNode();
+	
+	if (!root)
+		return -1;
+	
+	for (XMLTreeNode *node = root->GetChild(); node; node = node->GetNext())
+		if (!strcmp(node->GetType(), "cable"))
+		{
+			tpPacket pkt;
+			if (!addNetwork(pkt, node, eFrontend::feCable))
+				networks.push_back(pkt);
+		} else if (!strcmp(node->GetType(), "sat"))
+		{
+			tpPacket pkt;
+			if (!addNetwork(pkt, node, eFrontend::feSatellite))
+				networks.push_back(pkt);
+		} else
+			eFatal("unknown packet %s", node->GetType());
+		
+	for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
+		new eListBoxEntryText(l_network, i->name, (void*)&*i);
+
+	return 0;
+}
+
+int tsAutomatic::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
+{
+	const char *name=node->GetAttributeValue("name");
+	if (!name)
+	{
+		eFatal("no name");
+		return -1;
+	}
+	
+	packet.name=name;
+	packet.scanflags=0;
+
+	for (node=node->GetChild(); node; node=node->GetNext())
+	{
+		eTransponder t;
+		switch (type)
+		{
+		case eFrontend::feCable:
+		{
+			const char *afrequency=node->GetAttributeValue("frequency"),
+					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
+					*ainversion=node->GetAttributeValue("inversion");
+			if (!afrequency)
+				continue;
+			if (!asymbol_rate)
+				asymbol_rate="6900000";
+			if (!ainversion)
+				ainversion="0";
+			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate), inversion=atoi(ainversion);;
+			t.setCable(frequency, symbol_rate, inversion);
+			break;
+		}
+		case eFrontend::feSatellite:
+		{
+			const char *afrequency=node->GetAttributeValue("frequency"),
+					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
+					*apolarisation=node->GetAttributeValue("polarization"),
+					*afec_inner=node->GetAttributeValue("fec_inner"),
+					*ainversion=node->GetAttributeValue("inversion");
+			if (!afrequency)
+				continue;
+			if (!asymbol_rate)
+				continue;
+			if (!apolarisation)
+				continue;
+			if (!afec_inner)
+				continue;
+			if (!ainversion)
+				ainversion="0";
+			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate), 
+					polarisation=atoi(apolarisation), fec_inner=atoi(afec_inner), inversion=atoi(ainversion);
+			t.setSatellite(frequency, symbol_rate, polarisation, fec_inner, 0, inversion);
+			break;
+		}
+		default:
+			continue;
+		}
+		packet.possibleTransponders.push_back(t);
+	}
+	return 0;
+}
+
+int tsAutomatic::nextNetwork(int first)
+{
+	eDebug("next network");
+
+	if (first != -1)
+		l_network->moveSelection(first ? eListBox<eListBoxEntryText>::dirFirst : eListBox<eListBoxEntryText>::dirDown);
+		
+	tpPacket *pkt=(tpPacket*)(l_network->getCurrent() -> getKey());
+	
+	eDebug("pkt: %p", pkt);
+
+	if (!pkt)
+		return -1;
+
+	current_tp = pkt->possibleTransponders.begin();
+	last_tp = pkt->possibleTransponders.end();
+	return 0;
+}
+
+int tsAutomatic::nextTransponder(int next, int lnb)
+{
+	if (next)
+		++current_tp;
+
+	if (current_tp == last_tp)
+		return 1;
+
+	if (current_tp->satellite.valid)
+		current_tp->satellite.lnb=lnb;
+	return current_tp->tune();
+}
+
+int tsAutomatic::tuneNext(int next)
+{
+	while (nextTransponder(next, (int)l_lnb->getCurrent()->getKey()))
+	{
+		if (automatic)
+		{
+			if (nextNetwork())	// wrapped around?
+			{
+				l_status->setText(_("All known transponders have been tried,"
+					" but no lock was possible. Verify antenna-/cable-setup or try manual search "
+					"if its some obscure satellite/network."));
+				return -1;
+			}
+		} else
+		{
+			l_status->setText(_("All known transponders have been tried,"
+				" but no lock was possible. Verify antenna-/cable-setup or try another satellite/network."));
+			return -1;
+		}
+		next=0;
+	}
+
+	static int i=0;
+	i++;
+	std::string progress=_("Search in progress ");
+	progress+="\\-/|"[i&3];
+	l_status->setText(progress);
+
 	return 0;
 }
 
@@ -241,24 +557,6 @@ void tsScan::dvbState(const eDVBState &state)
 
 TransponderScan::TransponderScan()
 {
-	eTransponder transponder;
-	
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-
-	if (sapi && sapi->transponder)
-		transponder=*sapi->transponder;
-	else
-		switch (eFrontend::fe()->Type())
-		{
-		case eFrontend::feCable:
-			transponder.setCable(402000, 6900000, 0);	// some cable transponder
-			break;
-		case eFrontend::feSatellite:
-			transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0);	// some astra transponder
-			break;
-		default:
-			break;
-		}
 
 	window=new eWindow(0);
 	window->setText("Transponder Scan");
@@ -274,27 +572,6 @@ TransponderScan::TransponderScan()
 	progress_text=new eLabel(window);
 	progress_text->move(ePoint(0, size.height()));
 	progress_text->resize(eSize(50, 30));
-
-	select_type=new tsSelectType(window);
-	select_type->hide();
-	mp.addPage(select_type);
-
-	manual_scan=new tsManual(window, transponder, scanparam);
-	manual_scan->hide();
-	mp.addPage(manual_scan);
-	
-	eWidget *scan;
-	scan=new tsScan(window);
-	scan->hide();
-	scan->move(ePoint(0, 0));
-	scan->resize(size);
-	mp.addPage(scan);
-
-	tsText *finish=new tsText(_("Done."), _("The transponderscan has finished and found n new Transponders with n new services."), window);
-	finish->hide();
-	finish->move(ePoint(0, 0));
-	finish->resize(size);
-	mp.addPage(finish);
 }
 
 TransponderScan::~TransponderScan()
@@ -304,59 +581,136 @@ TransponderScan::~TransponderScan()
 
 int TransponderScan::exec()
 {
-	int ret;
-	window->show();
-	mp.first();
-	
 	eDVB::getInstance()->setMode(eDVB::controllerScan);
+	eSize size=eSize(window->getClientSize().width(), window->getClientSize().height()-30);
 
-	ret=0;
-	while (!ret)
+	enum
 	{
-		int n=mp.at();
-		int total=mp.count();
-		progress_text->setText(eString().sprintf("%d/%d", n+1, total));
+		stateMenu,
+		stateManual,
+		stateAutomatic,
+		stateScan,
+		stateDone,
+		stateEnd
+	} state=stateMenu;
+
+	window->show();
+
+	while (state != stateEnd)
+	{
+		int total=stateEnd;
+		
+		progress_text->setText(eString().sprintf("%d/%d", state+1, total));
 		if (total<2)
 			total=2;
 		total--;
-		progress->setPerc(n*100/total);
-		int res=mp.getCurrent()->exec();
+		progress->setPerc(state*100/total);
+
+		switch (state)
+		{
+		case stateMenu:
+		{
+			tsSelectType select(window);
+			select.show();
+			switch (select.exec())
+			{
+			case 0:
+				state=stateEnd;
+				break;
+			case 1:
+				state=stateAutomatic;
+				break;
+			case 2:
+				state=stateManual;
+				break;
+			}
+			select.hide();
+			break;
+		}
+		case stateManual:
+		{
+			eTransponder transponder;
+
+			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+
+			if (sapi && sapi->transponder)
+				transponder=*sapi->transponder;
+			else
+				switch (eFrontend::fe()->Type())
+				{
+				case eFrontend::feCable:
+					transponder.setCable(402000, 6900000, 0);	// some cable transponder
+					break;
+				case eFrontend::feSatellite:
+					transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0);	// some astra transponder
+					break;
+				default:
+					break;
+				}
+
+			tsManual manual_scan(window, transponder);
 			
-		if (mp.getCurrent()==select_type)
-		{
-			switch (res)
+			manual_scan.show();
+			switch (manual_scan.exec())
 			{
 			case 0:
-				ret=-1;
+				state=stateScan;
 				break;
 			case 1:
-				mp.set(automatic_scan);
-				break;
-			case 2:
-				mp.set(manual_scan);
+				state=stateMenu;
 				break;
 			}
-		} else
+			manual_scan.hide();
+			break;
+		}
+		case stateAutomatic:
 		{
-			switch (res)
+			tsAutomatic automatic_scan(window);
+			
+			automatic_scan.show();
+			switch (automatic_scan.exec())
 			{
 			case 0:
-				if (mp.next())
-					ret=1;
+				state=stateScan;
 				break;
 			case 1:
-				mp.prev();
-				break;
-			case 2:
-				ret=-1;
+				state=stateMenu;
 				break;
 			}
+			automatic_scan.hide();
+			break;
+		}
+		case stateScan:
+		{
+			tsScan scan(window);
+			scan.move(ePoint(0, 0));
+			scan.resize(size);
+			
+			scan.show();
+			scan.exec();
+			scan.hide();
+			
+			state=stateDone;
+			break;
+		}
+		case stateDone:
+		{
+			tsText finish(_("Done."), _("The transponderscan has finished and found n new Transponders with n new services."), window);
+			finish.move(ePoint(0, 0));
+			finish.resize(size);
+			finish.show();
+			finish.exec();
+			finish.hide();
+			break;
+		}
+		default:
+			state=stateEnd;
+			break;
 		}
 	}
-
+	
 	eDVB::getInstance()->setMode(eDVB::controllerService);
 
-	mp.getCurrent()->hide();
 	window->hide();
-	return ret;
+	return 0;
 }

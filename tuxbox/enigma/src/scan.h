@@ -2,7 +2,6 @@
 #define __scan_h
 
 #include <core/dvb/dvb.h>
-#include <core/gui/multipage.h>
 #include <core/gui/ewidget.h>
 #include <core/gui/listbox.h>
 
@@ -25,7 +24,7 @@ public:
 	tsSelectType(eWidget *parent);
 };
 
-class tpScanParameter
+class tpPacket
 {
 public:
 	std::string name;
@@ -35,7 +34,6 @@ public:
 
 class tsManual: public eWidget
 {
-	tpScanParameter &param;
 	eTransponder transponder;
 	eButton *b_start, *b_abort;
 	eTransponderWidget *transponder_widget;
@@ -46,7 +44,29 @@ class tsManual: public eWidget
 	void retune();
 	int eventHandler(const eWidgetEvent &event);
 public:
-	tsManual(eWidget *parent, const eTransponder &transponder, tpScanParameter &param);
+	tsManual(eWidget *parent, const eTransponder &transponder);
+};
+
+class tsAutomatic: public eWidget
+{
+	eButton *b_start, *b_abort;
+	eListBox<eListBoxEntryText> *l_lnb, *l_network;
+	eLabel *l_status;
+	std::list<tpPacket> networks;
+	std::list<eTransponder>::iterator current_tp, last_tp;
+	int automatic;
+	void start();
+	void abort();
+	void networkSelected(eListBoxEntryText *l);
+	void dvbEvent(const eDVBEvent &event);
+	int loadNetworks();
+	int addNetwork(tpPacket &p, XMLTreeNode *node, int type);
+	
+	int nextNetwork(int first=0);
+	int nextTransponder(int next, int lnb);
+	int tuneNext(int next);
+public:
+	tsAutomatic(eWidget *parent);
 };
 
 class tsText: public eWidget
@@ -74,11 +94,8 @@ class TransponderScan
 	eWindow *window;
 	eProgress *progress;
 	eLabel *progress_text;
-	eMultipage mp;
 	
 	eWidget *select_type, *manual_scan, *automatic_scan;
-
-	tpScanParameter scanparam;
 public:
 	TransponderScan();
 	~TransponderScan();

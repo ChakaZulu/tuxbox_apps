@@ -101,6 +101,22 @@
 		</tsManual>
 	</object>
 	
+	<object name="tsAutomatic">
+		<tsAutomatic position="0:0" size="e:350">
+			<eLabel position="10:10" size="200:30" text="Antenne:" />
+			<eListbox name="lnblist" position="210:10" size="e-10:30" />
+			<eLabel position="10:40" size="200:30" text="Netzwerk:" />
+			<eListbox name="network" position="210:40" size="e-10:30" />
+			
+			<eFEStatus name="festatus" position="0:100" size="400:85" />
+			
+			<eLabel name="status" position="10:190" size="e-10:e-30" />
+
+			<eButton text="start scan" name="start" position="10:e-30" size="200:30" />
+			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" />
+		</tsAutomatic>
+	</object>
+	
 	<object name="setup.skins">
 		<eSkinSetup cposition="100:100" csize="400:300" text="Skin Setup">
 			<eLabel text="Skins:" position="0:0" size="100:30" />
@@ -131,6 +147,21 @@
 			
 			<eLabel text="LNB:" position="190:130" size="100:30" />
 			<eNumber name="lnb" position="290:130" size="50:30" />
+		</eTranspondersettings>
+	</object>
+
+	<object name="transpondersettings.cable">
+		<eTranspondersettings position="0:0" size="400:160">
+			<eLabel text="Frequency:" position="10:10" size="140:30" />
+			<eNumber name="frequency" position="150:10:" size="e-150:30" />
+			<eLabel text="MHz" position="e-150:10" size="e:30" />
+
+			<eLabel text="Symbolrate:" position="10:100" size="140:30" />
+			<eNumber name="symbolrate" position="150:100:" size="e-150:30" />
+			<eLabel text="KSymb/s" position="e-150:100" size="e:30" />
+			
+			<eLabel text="Inversion:" position="10:130" size="140:30" />
+			<eCheckbox name="inversion" position="150:130" size="30:30" />
 		</eTranspondersettings>
 	</object>
 
