@@ -168,6 +168,7 @@ if test "$DVBINCLUDES"; then
 fi
 
 AC_CHECK_HEADERS(linux/dvb/version.h,[
+	AC_PROG_EGREP
 	AC_LANG_PREPROC_REQUIRE()
 	AC_LANG_CONFTEST([AC_LANG_SOURCE([[
 #include <linux/dvb/version.h>
