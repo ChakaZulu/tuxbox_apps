@@ -4742,9 +4742,9 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 	result.strReplace("#MUTE2#", (eAVSwitch::getInstance()->getMute()) ? "1" : "0");
 
 	// channel stats
-	result.strReplace("#DOLBY#", (eZapMain::getInstance()->getAC3Logo()) ? "0" : "1");
-	result.strReplace("#CRYPT#", (eZapMain::getInstance()->getSmartcardLogo()) ? "0" : "1");
-	result.strReplace("#FORMAT#", (eZapMain::getInstance()->get16_9Logo()) ? "0" : "1");
+	result.strReplace("#DOLBY#", (eZapMain::getInstance()->getAC3Logo()) ? "1" : "0");
+	result.strReplace("#CRYPT#", (eZapMain::getInstance()->getSmartcardLogo()) ? "1" : "0");
+	result.strReplace("#FORMAT#", (eZapMain::getInstance()->get16_9Logo()) ? "1" : "0");
 
 	// recording status
 #ifndef DISABLE_FILE
