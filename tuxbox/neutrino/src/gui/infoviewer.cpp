@@ -597,7 +597,7 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	if ((msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG) ||
 	    (msg == NeutrinoMessages::EVT_NEXTPROGRAM    ))
 	{
-		CSectionsdClient::CurrentNextInfo info = getEPG( data );
+		CSectionsdClient::CurrentNextInfo info = getEPG( *(t_channel_id *)data );
 		if ((*(t_channel_id *)data) == channel_id)
 		{
 			info_CurrentNext = info;
