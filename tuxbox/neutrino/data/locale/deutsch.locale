@@ -275,7 +275,7 @@ channellist.since seit %02d:%02d
 infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.streaminfo Features
-infoviewer.eventlist Programm
+infoviewer.eventlist EPG/Vorschau
 infoviewer.languages Tonwahl
 infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar.
 infoviewer.cantdecode Kanal kann nicht entschlüsselt werden.
