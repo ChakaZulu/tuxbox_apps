@@ -608,36 +608,28 @@ int CNeutrinoApp::loadSetup()
 	g_settings.infobar_Text_blue = configfile.getInt32( "infobar_Text_blue", 0x64 );
 
 	//network
-	g_settings.network_nfs_ip[0] = configfile.getString("network_nfs_ip_1", "");
-	g_settings.network_nfs_ip[1] = configfile.getString("network_nfs_ip_2", "");
-	g_settings.network_nfs_ip[2] = configfile.getString("network_nfs_ip_3", "");
-	g_settings.network_nfs_ip[3] = configfile.getString("network_nfs_ip_4", "");
-	strcpy( g_settings.network_nfs_dir[0], configfile.getString( "network_nfs_dir_1", "" ).c_str() );
-	strcpy( g_settings.network_nfs_dir[1], configfile.getString( "network_nfs_dir_2", "" ).c_str() );
-	strcpy( g_settings.network_nfs_dir[2], configfile.getString( "network_nfs_dir_3", "" ).c_str() );
-	strcpy( g_settings.network_nfs_dir[3], configfile.getString( "network_nfs_dir_4", "" ).c_str() );
-	strcpy( g_settings.network_nfs_local_dir[0], configfile.getString( "network_nfs_local_dir_1", "" ).c_str() );
-	strcpy( g_settings.network_nfs_local_dir[1], configfile.getString( "network_nfs_local_dir_2", "" ).c_str() );
-	strcpy( g_settings.network_nfs_local_dir[2], configfile.getString( "network_nfs_local_dir_3", "" ).c_str() );
-	strcpy( g_settings.network_nfs_local_dir[3], configfile.getString( "network_nfs_local_dir_4", "" ).c_str() );
-	g_settings.network_nfs_automount[0] = configfile.getInt32( "network_nfs_automount_1", 0);
-	g_settings.network_nfs_automount[1] = configfile.getInt32( "network_nfs_automount_2", 0);
-	g_settings.network_nfs_automount[2] = configfile.getInt32( "network_nfs_automount_3", 0);
-	g_settings.network_nfs_automount[3] = configfile.getInt32( "network_nfs_automount_4", 0);
-	g_settings.network_nfs_type[0] = configfile.getInt32( "network_nfs_type_1", 0);
-	g_settings.network_nfs_type[1] = configfile.getInt32( "network_nfs_type_2", 0);
-	g_settings.network_nfs_type[2] = configfile.getInt32( "network_nfs_type_3", 0);
-	g_settings.network_nfs_type[3] = configfile.getInt32( "network_nfs_type_4", 0);
-	strcpy( g_settings.network_nfs_username[0], configfile.getString( "network_nfs_username_1", "" ).c_str() );
-	strcpy( g_settings.network_nfs_username[1], configfile.getString( "network_nfs_username_2", "" ).c_str() );
-	strcpy( g_settings.network_nfs_username[2], configfile.getString( "network_nfs_username_3", "" ).c_str() );
-	strcpy( g_settings.network_nfs_username[3], configfile.getString( "network_nfs_username_4", "" ).c_str() );
-	strcpy( g_settings.network_nfs_password[0], configfile.getString( "network_nfs_password_1", "" ).c_str() );
-	strcpy( g_settings.network_nfs_password[1], configfile.getString( "network_nfs_password_2", "" ).c_str() );
-	strcpy( g_settings.network_nfs_password[2], configfile.getString( "network_nfs_password_3", "" ).c_str() );
-	strcpy( g_settings.network_nfs_password[3], configfile.getString( "network_nfs_password_4", "" ).c_str() );
-	strcpy( g_settings.network_nfs_mount_options[0], configfile.getString( "network_nfs_mount_options_1", "ro,soft,udp" ).c_str() );
-	strcpy( g_settings.network_nfs_mount_options[1], configfile.getString( "network_nfs_mount_options_2", "nolock,rsize=8192,wsize=8192" ).c_str() );
+	char cfg_key[81];
+	for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
+	{
+		sprintf(cfg_key, "network_nfs_ip_%d", i);
+		g_settings.network_nfs_ip[i] = configfile.getString(cfg_key, "");
+		sprintf(cfg_key, "network_nfs_dir_%d", i);
+		strcpy( g_settings.network_nfs_dir[i], configfile.getString( cfg_key, "" ).c_str() );
+		sprintf(cfg_key, "network_nfs_local_dir_%d", i);
+		strcpy( g_settings.network_nfs_local_dir[i], configfile.getString( cfg_key, "" ).c_str() );
+		sprintf(cfg_key, "network_nfs_automount_%d", i);
+		g_settings.network_nfs_automount[i] = configfile.getInt32( cfg_key, 0);
+		sprintf(cfg_key, "network_nfs_type_%d", i);
+		g_settings.network_nfs_type[i] = configfile.getInt32( cfg_key, 0);
+		sprintf(cfg_key,"network_nfs_username_%d", i);
+		strcpy( g_settings.network_nfs_username[i], configfile.getString( cfg_key, "" ).c_str() );
+		sprintf(cfg_key, "network_nfs_password_%d", i);
+		strcpy( g_settings.network_nfs_password[i], configfile.getString( cfg_key, "" ).c_str() );
+		sprintf(cfg_key, "network_nfs_mount_options1_%d", i);
+		strcpy( g_settings.network_nfs_mount_options1[i], configfile.getString( cfg_key, "ro,soft,udp" ).c_str() );
+		sprintf(cfg_key, "network_nfs_mount_options2_%d", i);
+		strcpy( g_settings.network_nfs_mount_options2[i], configfile.getString( cfg_key, "nolock,rsize=8192,wsize=8192" ).c_str() );
+	}
 	strcpy( g_settings.network_nfs_audioplayerdir, configfile.getString( "network_nfs_audioplayerdir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_picturedir, configfile.getString( "network_nfs_picturedir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
@@ -930,36 +922,28 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "infobar_Text_blue", g_settings.infobar_Text_blue );
 
 	//network
-	configfile.setString( "network_nfs_ip_1", g_settings.network_nfs_ip[0] );
-	configfile.setString( "network_nfs_ip_2", g_settings.network_nfs_ip[1] );
-	configfile.setString( "network_nfs_ip_3", g_settings.network_nfs_ip[2] );
-	configfile.setString( "network_nfs_ip_4", g_settings.network_nfs_ip[3] );
-	configfile.setString( "network_nfs_dir_1", g_settings.network_nfs_dir[0] );
-	configfile.setString( "network_nfs_dir_2", g_settings.network_nfs_dir[1] );
-	configfile.setString( "network_nfs_dir_3", g_settings.network_nfs_dir[2] );
-	configfile.setString( "network_nfs_dir_4", g_settings.network_nfs_dir[3] );
-	configfile.setString( "network_nfs_local_dir_1", g_settings.network_nfs_local_dir[0] );
-	configfile.setString( "network_nfs_local_dir_2", g_settings.network_nfs_local_dir[1] );
-	configfile.setString( "network_nfs_local_dir_3", g_settings.network_nfs_local_dir[2] );
-	configfile.setString( "network_nfs_local_dir_4", g_settings.network_nfs_local_dir[3] );
-	configfile.setInt32( "network_nfs_automount_1", g_settings.network_nfs_automount[0]);
-	configfile.setInt32( "network_nfs_automount_2", g_settings.network_nfs_automount[1]);
-	configfile.setInt32( "network_nfs_automount_3", g_settings.network_nfs_automount[2]);
-	configfile.setInt32( "network_nfs_automount_4", g_settings.network_nfs_automount[3]);
-	configfile.setInt32( "network_nfs_type_1", g_settings.network_nfs_type[0]);
-	configfile.setInt32( "network_nfs_type_2", g_settings.network_nfs_type[1]);
-	configfile.setInt32( "network_nfs_type_3", g_settings.network_nfs_type[2]);
-	configfile.setInt32( "network_nfs_type_4", g_settings.network_nfs_type[3]);
-	configfile.setString( "network_nfs_username_1", g_settings.network_nfs_username[0] );
-	configfile.setString( "network_nfs_username_2", g_settings.network_nfs_username[1] );
-	configfile.setString( "network_nfs_username_3", g_settings.network_nfs_username[2] );
-	configfile.setString( "network_nfs_username_4", g_settings.network_nfs_username[3] );
-	configfile.setString( "network_nfs_password_1", g_settings.network_nfs_password[0] );
-	configfile.setString( "network_nfs_password_2", g_settings.network_nfs_password[1] );
-	configfile.setString( "network_nfs_password_3", g_settings.network_nfs_password[2] );
-	configfile.setString( "network_nfs_password_4", g_settings.network_nfs_password[3] );
-	configfile.setString( "network_nfs_mount_options_1", g_settings.network_nfs_mount_options[0]);
-	configfile.setString( "network_nfs_mount_options_2", g_settings.network_nfs_mount_options[1]);
+	char cfg_key[81];
+	for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
+	{
+		sprintf(cfg_key, "network_nfs_ip_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_ip[i] );		
+		sprintf(cfg_key, "network_nfs_dir_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_dir[i] );		
+		sprintf(cfg_key, "network_nfs_local_dir_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_local_dir[i] );		
+		sprintf(cfg_key, "network_nfs_automount_%d", i);
+		configfile.setInt32( cfg_key, g_settings.network_nfs_automount[i]);		
+		sprintf(cfg_key, "network_nfs_type_%d", i);
+		configfile.setInt32( cfg_key, g_settings.network_nfs_type[i]);		
+		sprintf(cfg_key,"network_nfs_username_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_username[i] );		
+		sprintf(cfg_key, "network_nfs_password_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_password[i] );		
+		sprintf(cfg_key, "network_nfs_mount_options1_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_mount_options1[i]);		
+		sprintf(cfg_key, "network_nfs_mount_options2_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_mount_options2[i]);	
+	}
 	configfile.setString( "network_nfs_audioplayerdir", g_settings.network_nfs_audioplayerdir);
 	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
 	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);

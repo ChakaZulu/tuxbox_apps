@@ -33,6 +33,7 @@
 #ifndef __neutrino_nfs_gui__
 #define __neutrino_nfs_gui__
 
+#include <system/settings.h>
 #include <gui/widget/menue.h>
 
 
@@ -62,8 +63,8 @@ class CNFSMountGui : public CMenuTarget
 	int menu();
 	int menuEntry(int nr);
 
-	char       m_entry[4][200];
- 	char       ISO_8859_1_entry[4][200];
+	char       m_entry[NETWORK_NFS_NR_OF_ENTRIES][200];
+ 	char       ISO_8859_1_entry[NETWORK_NFS_NR_OF_ENTRIES][200];
 
 	FS_Support m_nfs_sup;
 	FS_Support m_cifs_sup;
@@ -71,7 +72,9 @@ class CNFSMountGui : public CMenuTarget
  public:
 	CNFSMountGui();
 	int exec(CMenuTarget* parent, const std::string & actionKey);
-	static void mount(const char * const ip, const char * const dir, const char * const local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror = false);
+	static void mount(const char * const ip, const char * const dir, const char * const local_dir, 
+							const FSType fstype, const char * const username, const char * const password, 
+							char * options1, char * options2, const bool showerror = false);
 	static void automount();
 };
 

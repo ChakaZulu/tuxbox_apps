@@ -206,7 +206,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 	if (actionKey.empty())
 	{
 		parent->hide();
-		for(int i=0 ; i< 4; i++)
+		for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES; i++)
 		{
 			sprintf(m_entry[i],
 				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) NFS) ? 0 : 1],
@@ -226,7 +226,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 	{
 		parent->hide();
 		returnval = menuEntry(actionKey[10]-'0');
-		for(int i=0 ; i< 4; i++)
+		for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES; i++)
 		{
 			sprintf(m_entry[i],
 				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) NFS) ? 0 : 1],
@@ -247,7 +247,8 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 		int nr=atoi(actionKey.substr(7,1).c_str());
 		mount(g_settings.network_nfs_ip[nr].c_str(), g_settings.network_nfs_dir[nr], 
 				g_settings.network_nfs_local_dir[nr], (FSType) g_settings.network_nfs_type[nr],
-				g_settings.network_nfs_username[nr], g_settings.network_nfs_password[nr], true);
+				g_settings.network_nfs_username[nr], g_settings.network_nfs_password[nr],
+				g_settings.network_nfs_mount_options1[nr], g_settings.network_nfs_mount_options2[nr], true);
 		returnval = menu_return::RETURN_EXIT;
 	}
 	else if(actionKey.substr(0,3)=="dir")
@@ -273,7 +274,7 @@ int CNFSMountGui::menu()
 	mountMenuW.addItem(GenericMenuSeparatorLine);
 	char s2[12];
 
-	for(int i=0 ; i < 4 ; i++)
+	for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
 	{
 		sprintf(s2,"mountentry%d",i);
 		sprintf(ISO_8859_1_entry[i],ZapitTools::UTF8_to_Latin1(m_entry[i]).c_str()); 
@@ -300,7 +301,7 @@ const CMenuOptionChooser::keyval NFS_TYPE_OPTIONS[NFS_TYPE_OPTION_COUNT] =
 
 int CNFSMountGui::menuEntry(int nr)
 {
-	char *dir,*local_dir, *username, *password;
+	char *dir,*local_dir, *username, *password, *options1, *options2;
 	int* automount;
 	int* type;
 	char cmd[9];
@@ -312,6 +313,8 @@ int CNFSMountGui::menuEntry(int nr)
 	password = g_settings.network_nfs_password[nr];
 	automount = &g_settings.network_nfs_automount[nr];
 	type = &g_settings.network_nfs_type[nr];
+	options1 = g_settings.network_nfs_mount_options1[nr];
+	options2 = g_settings.network_nfs_mount_options2[nr];
 	
 	sprintf(cmd,"domount%d",nr);
 	sprintf(cmd2,"dir%d",nr);
@@ -333,10 +336,10 @@ int CNFSMountGui::menuEntry(int nr)
 	CIPInput ipInput(LOCALE_NFS_IP, g_settings.network_nfs_ip[nr], LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CStringInputSMS dirInput(LOCALE_NFS_DIR, dir, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuOptionChooser *automountInput= new CMenuOptionChooser(LOCALE_NFS_AUTOMOUNT, automount, MESSAGEBOX_NO_YES_OPTIONS, MESSAGEBOX_NO_YES_OPTION_COUNT, true);
-	CStringInputSMS options1(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[0], 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
-	CMenuForwarder *options1_fwd = new CMenuForwarder(LOCALE_NFS_MOUNT_OPTIONS, true, g_settings.network_nfs_mount_options[0], &options1);
-	CStringInputSMS options2(LOCALE_NFS_MOUNT_OPTIONS, g_settings.network_nfs_mount_options[1], 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
-	CMenuForwarder *options2_fwd = new CMenuForwarder(LOCALE_NFS_MOUNT_OPTIONS, true, g_settings.network_nfs_mount_options[1], &options2);
+	CStringInputSMS options1Input(LOCALE_NFS_MOUNT_OPTIONS, options1, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
+	CMenuForwarder *options1_fwd = new CMenuForwarder(LOCALE_NFS_MOUNT_OPTIONS, true, options1, &options1Input);
+	CStringInputSMS options2Input(LOCALE_NFS_MOUNT_OPTIONS, options2, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
+	CMenuForwarder *options2_fwd = new CMenuForwarder(LOCALE_NFS_MOUNT_OPTIONS, true, options2, &options2Input);
 	CStringInputSMS userInput(LOCALE_NFS_USERNAME, username, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuForwarder *username_fwd = new CMenuForwarder(LOCALE_NFS_USERNAME, *type==CIFS, username, &userInput);
 	CStringInputSMS passInput(LOCALE_NFS_PASSWORD, password, 30, NONEXISTANT_LOCALE, NONEXISTANT_LOCALE, "abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
@@ -358,7 +361,9 @@ int CNFSMountGui::menuEntry(int nr)
 	return ret;
 }
 
-void CNFSMountGui::mount(const char * const ip, const char * const dir, const char * const local_dir, const FSType fstype, const char * const username, const char * const password, const bool showerror)
+void CNFSMountGui::mount(const char * const ip, const char * const dir, const char * const local_dir, 
+								 const FSType fstype, const char * const username, const char * const password, 
+								 char * options1, char * options2, const bool showerror)
 {
 	char buffer[200+1],mountDev[100],mountOn[100],mountType[20];
 	std::string cmd;
@@ -397,23 +402,23 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	}
 	in.close();
 
-	if(g_settings.network_nfs_mount_options[0][0] == '\0')
+	if(options1[0] == '\0')
 	{
-		strcpy(g_settings.network_nfs_mount_options[0],g_settings.network_nfs_mount_options[1]);
-		g_settings.network_nfs_mount_options[1][0] = '\0';
+		strcpy(options1,options2);
+		options2[0] = '\0';
 	}
 	
-	if((g_settings.network_nfs_mount_options[0][0] == '\0') && (g_settings.network_nfs_mount_options[1][0] == '\0'))
+	if((options1[0] == '\0') && (options2[0] == '\0'))
 	{
 		if(fstype == NFS)
 		{
-			strcpy(g_settings.network_nfs_mount_options[0],"ro,soft,udp");
-			strcpy(g_settings.network_nfs_mount_options[1],"nolock,rsize=8192,wsize=8192");
+			strcpy(options1,"ro,soft,udp");
+			strcpy(options2,"nolock,rsize=8192,wsize=8192");
 		}
 		else if(fstype == CIFS)
 		{
-			strcpy(g_settings.network_nfs_mount_options[0],"ro");
-			strcpy(g_settings.network_nfs_mount_options[1],"");
+			strcpy(options1,"ro");
+			strcpy(options2,"");
 		}
 	}
 	
@@ -426,7 +431,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 		cmd += ' ';
 		cmd += local_dir;
 		cmd += " -o ";
-		cmd += g_settings.network_nfs_mount_options[0];
+		cmd += options1;
 	}
 	else
 	{
@@ -445,12 +450,12 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 		cmd += '/';
 		cmd += dir;
 		cmd += ',';
-		cmd += g_settings.network_nfs_mount_options[0];
+		cmd += options1;
 	}
-	if (g_settings.network_nfs_mount_options[1][0] !='\0')
+	if (options2[0] !='\0')
 	{
 		cmd += ',';
-		cmd += g_settings.network_nfs_mount_options[1];
+		cmd += options2;
 	}
 	
 	pthread_create(&g_mnt, 0, mount_thread, (void *) cmd.c_str());
@@ -479,12 +484,13 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 
 void CNFSMountGui::automount()
 {
-	for(int i = 0; i < 4; i++)
+	for(int i = 0; i < NETWORK_NFS_NR_OF_ENTRIES; i++)
 	{
 		if(g_settings.network_nfs_automount[i])
 			mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], g_settings.network_nfs_local_dir[i], 
 					(FSType) g_settings.network_nfs_type[i], g_settings.network_nfs_username[i], 
-					g_settings.network_nfs_password[i], false);
+					g_settings.network_nfs_password[i], g_settings.network_nfs_mount_options1[i], 
+					g_settings.network_nfs_mount_options2[i], false);
 	}
 }
 
@@ -593,7 +599,7 @@ int CNFSSmallMenu::exec( CMenuTarget* parent, const std::string & actionKey )
 	else if(actionKey.substr(0,7) == "remount")
 	{
 		//umount automount dirs
-		for(int i = 0; i < 4; i++)
+		for(int i = 0; i < NETWORK_NFS_NR_OF_ENTRIES; i++)
 		{
 			if(g_settings.network_nfs_automount[i])
 				umount2(g_settings.network_nfs_local_dir[i],MNT_FORCE);

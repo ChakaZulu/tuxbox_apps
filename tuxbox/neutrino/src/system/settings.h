@@ -135,14 +135,16 @@ struct SNeutrinoSettings
 	unsigned char infobar_Text_blue;
 
 	//network
-	std::string network_nfs_ip[4];
-	char network_nfs_local_dir[4][100];
-	char network_nfs_dir[4][100];
-	int  network_nfs_automount[4];
-	char network_nfs_mount_options[2][31];
-	int  network_nfs_type[4];
-	char network_nfs_username[4][31];
-	char network_nfs_password[4][31];
+#define NETWORK_NFS_NR_OF_ENTRIES 8
+	std::string network_nfs_ip[NETWORK_NFS_NR_OF_ENTRIES];
+	char network_nfs_local_dir[NETWORK_NFS_NR_OF_ENTRIES][100];
+	char network_nfs_dir[NETWORK_NFS_NR_OF_ENTRIES][100];
+	int  network_nfs_automount[NETWORK_NFS_NR_OF_ENTRIES];
+	char network_nfs_mount_options1[NETWORK_NFS_NR_OF_ENTRIES][31];
+	char network_nfs_mount_options2[NETWORK_NFS_NR_OF_ENTRIES][31];
+	int  network_nfs_type[NETWORK_NFS_NR_OF_ENTRIES];
+	char network_nfs_username[NETWORK_NFS_NR_OF_ENTRIES][31];
+	char network_nfs_password[NETWORK_NFS_NR_OF_ENTRIES][31];
 	char network_nfs_audioplayerdir[100];
 	char network_nfs_picturedir[100];
 	char network_nfs_moviedir[100];
