@@ -44,75 +44,6 @@
 
 using namespace std;
 
-#if 0
-eString getImageMediaPath(void)
-{
-	eString mediaPath;
-	if (access("/tmp/org", R_OK) == 0)
-		mediaPath = getAttribute("/tmp/org", "mpoint");
-	else
-		mediaPath = getAttribute("/Image.info", "mpoint");
-	return mediaPath;
-}
-
-bool dreamFlashIsInstalled(void)
-{
-	eString mediaPath = getImageMediaPath();
-	return ((access(eString(mediaPath + "/tools/lcdmenu.conf").c_str(), R_OK) == 0)
-		&& (access(eString(mediaPath + "/tools/lcdmenu").c_str(), X_OK) == 0)
-		&& (access(eString(mediaPath + "/tools/menu").c_str(), X_OK) == 0)
-		);	
-}
-
-eString getInstalledImages(void)
-{
-	eString result;
-	eString image;
-	unsigned int pos = 0;
-	int i = 0;
-	eString mediaPath = getImageMediaPath();
-	eString dreamFlashImages = getAttribute(mediaPath + "/tools/lcdmenu.conf", "menu_items");
-	eString activeImage = getAttribute(mediaPath + "/tools/lcdmenu.conf", "default_entry");
-	if (dreamFlashImages.length() > 0)
-		dreamFlashImages = dreamFlashImages.substr(0, dreamFlashImages.length() - 1); //remove last comma
-	while (dreamFlashImages.length() > 0)
-	{
-		if ((pos = dreamFlashImages.find(",")) != eString::npos)
-		{
-			image = dreamFlashImages.substr(0, pos);
-			dreamFlashImages = dreamFlashImages.substr(pos + 1);
-		}
-		else
-		{
-			image = dreamFlashImages;
-			dreamFlashImages = "";
-		}
-		result += "<tr>";
-		result += "<td>";
-		if (i == atoi(activeImage.c_str()))
-			result += "<img src=\"on.gif\" alt=\"online\" border=0>";
-		else
-			result += "<img src=\"off.gif\" alt=\"offline\" border=0>";
-		result += "</td>";
-		result += "<td>";
-		if (i != atoi(activeImage.c_str()))
-			result += button(100, "Select", GREEN, "javascript:selectImage('" + eString().sprintf("%d", i) + "')", "#FFFFFF");
-		else
-			result += "&nbsp;";
-		result += "</td>";
-		result += "<td>";
-		result += image;
-		result += "</td>";
-		result += "</tr>";
-		i++;
-	}
-	if (result == "")
-		result = "<tr><td>none</td></tr>";
-	
-	return result;
-}
-#endif
-
 void deactivateSwapFile(eString swapFile)
 {
 	eString cmd;
@@ -162,24 +93,6 @@ eString setConfigSwapFile(eString request, eString dirpath, eString opts, eHTTPC
 	return closeWindow(content, "", 500);
 }
 
-eString setConfigMultiBoot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	eString imageNumber = opt["image"];
-
-	CConfigFile *config = new CConfigFile(',');
-	if (config->loadConfig("/var/mnt/usb/tools/lcdmenu.conf"))
-	{
-		config->setString("default_entry", imageNumber);
-		config->setModifiedFlag(true);
-		config->saveConfig("/var/mnt/usb/tools/lcdmenu.conf");
-
-		delete(config);
-	}
-
-	return closeWindow(content, "", 500);
-}
-
 void initHDDparms(void)
 {
 #ifndef DISABLE_FILE
@@ -201,6 +114,39 @@ void initHDDparms(void)
 #endif
 }
 
+eString getConfigSettings(void)
+{
+	eString result = readFile(TEMPLATE_DIR + "configSettings.tmp");
+	int fastshutdown = 0;
+	eConfig::getInstance()->getKey("/extras/fastshutdown", fastshutdown);
+	int showSatPos = 1;
+	eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos);
+	result.strReplace("#SHOWSATPOS#", (showSatPos == 1) ? "checked" : "");
+	int timeroffset = 0;
+	eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset);
+	result.strReplace("#TIMEROFFSET#", eString().sprintf("%d", timeroffset));
+	int maxmtu = 1500;
+	eConfig::getInstance()->getKey("/elitedvb/network/maxmtu", maxmtu);
+	result.strReplace("#MAXMTU#", eString().sprintf("%d", maxmtu));
+	int samba = 1;
+	eConfig::getInstance()->getKey("/elitedvb/network/samba", samba);
+	result.strReplace("#SAMBA#", (samba == 1) ? "checked" : "");
+	int webLock = 1;
+	eConfig::getInstance()->getKey("/ezap/webif/webIfLock", webLock);
+	result.strReplace("#WEBIFLOCK#", (webLock == 1) ? "checked" : "");
+	int hddti = 24;
+	eConfig::getInstance()->getKey("/extras/hdparm-s", hddti);
+	result.strReplace("#HDDSTANDBY#", eString().sprintf("%d", hddti / 12));
+	int hddac = 160;
+	eConfig::getInstance()->getKey("/extras/hdparm-m", hddac);
+	result.strReplace("#HDDACOUSTICS#", eString().sprintf("%d", hddac));
+	char *audiochannelspriority;
+	if (eConfig::getInstance()->getKey("/extras/audiochannelspriority", audiochannelspriority))
+		audiochannelspriority = "";
+	result.strReplace("#AUDIOCHANNELSPRIORITY#", eString(audiochannelspriority));
+	return result;
+}
+
 eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -211,6 +157,7 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 	eString timeroffset = opt["timeroffset"];
 	eString showsatpos = opt["showsatpos"];
 	eString webiflock = opt["webiflock"];
+	eString audiochannelspriority = opt["audiochannelspriority"];
 	
 	int oldti = 0;
 	eConfig::getInstance()->getKey("/extras/hdparm-s", oldti);
@@ -229,6 +176,7 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 	if (atoi(hddac.c_str()) != oldac)
 		eConfig::getInstance()->setKey("/extras/hdparm-m", atoi(hddac.c_str()));
 	initHDDparms();
+	eConfig::getInstance()->setKey("/extras/audiochannelspriority", audiochannelspriority.c_str());
 
 	return closeWindow(content, "", 500);
 }
@@ -236,7 +184,6 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 void ezapConfInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigSwapFile", setConfigSwapFile, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigMultiBoot", setConfigMultiBoot, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigSettings", setConfigSettings, lockWeb);
 }
 #endif
