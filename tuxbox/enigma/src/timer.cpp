@@ -705,11 +705,15 @@ void eTimerManager::actionHandler()
 				writeToLogfile("SwitchTimerEvent... do nothing");
 			}
 
-			nextAction = stopEvent;
-			actionTimer.start( getSecondsToEnd() * 1000, true );
-			writeToLogfile(eString().sprintf("stopEvent in %d seconds", getSecondsToEnd()) );
-
-			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d startEvent", calldepth--));
+			if ( playbackRef && playbackRef.type == eServiceReference::idDVB )
+				writeToLogfile("set stopEventTime after zap back to playbackRef");
+			else
+			{
+				nextAction = stopEvent;
+				actionTimer.start( getSecondsToEnd() * 1000, true );
+				writeToLogfile(eString().sprintf("stopEvent in %d seconds", getSecondsToEnd()) );
+				writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d startEvent", calldepth--));
+			}
 			break;
 
 		case pauseEvent:
@@ -1208,17 +1212,19 @@ void eTimerManager::actionHandler()
 
 void eTimerManager::switchedService( const eServiceReferenceDVB &ref, int err)
 {
-	if ( err == -ENOSTREAM )
-	{
-		writeToLogfile("call abortEvent");
-		abortEvent( ePlaylistEntry::errorZapFailed );
-	}
-	else if ( ref == (eServiceReference&)playbackRef )
+	if ( ref == (eServiceReference&)playbackRef )
 	{
 		writeToLogfile("switchedService back on playbackref :)");
 		// back on old service.. reconnect enigma to dvb kram..
 		nextAction=oldService;
 		actionTimer.start(0,true);
+	}
+	else if ( err == -ENOSTREAM )
+	{
+		if ( Decoder::locked )
+			Decoder::locked = 0;
+		writeToLogfile("call abortEvent");
+		abortEvent( ePlaylistEntry::errorZapFailed );
 	}
 	else
 	{
