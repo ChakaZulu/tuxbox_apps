@@ -194,8 +194,8 @@ struct SNeutrinoSettings
 	int key_bouquet_down;
 	int key_subchannel_up;
 	int key_subchannel_down;
-  int key_zaphistory;
-  int key_lastchannel;
+	int key_zaphistory;
+	int key_lastchannel;
 
 	char repeat_blocker[4];
 	char repeat_genericblocker[4];
@@ -279,7 +279,7 @@ struct SNeutrinoSettings
 	char   picviewer_slide_time[3];
 	int    picviewer_scaling;
 
-   	//audioplayer
+	//audioplayer
 	int   audioplayer_display;
 	int   audioplayer_follow;
 	char  audioplayer_screensaver[3];

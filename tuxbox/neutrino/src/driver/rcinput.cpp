@@ -304,9 +304,9 @@ int CRCInput::messageLoop( bool anyKeyCancels, int timeout )
 	{
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
-    if ( ( msg == CRCInput::RC_timeout ) ||
-       	 ( msg == CRCInput::RC_home ) ||
-       	 ( msg == CRCInput::RC_ok ) )
+	if ( ( msg == CRCInput::RC_timeout ) ||
+		( msg == CRCInput::RC_home ) ||
+		( msg == CRCInput::RC_ok ) )
 			doLoop = false;
 		else
 		{
