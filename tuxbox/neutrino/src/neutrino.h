@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dirent.h>
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"

@@ -226,6 +226,80 @@ int CMenuOptionChooser::paint( bool selected )
 	return y+height;
 }
 
+
+//-------------------------------------------------------------------------------------------------------------------------------
+
+CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active, CChangeObserver* Observ)
+{
+	height= g_Fonts->menu->getHeight();
+	optionName = OptionName;
+	active = Active;
+	optionValue = OptionValue;
+	observ=Observ;
+}
+
+
+CMenuOptionStringChooser::~CMenuOptionStringChooser()
+{
+	options.clear();
+}
+
+void CMenuOptionStringChooser::addOption( string value)
+{
+		options.insert(options.end(), value);
+}
+
+int CMenuOptionStringChooser::exec(CMenuTarget*)
+{
+	//select next value
+	for(unsigned int count=0;count<options.size();count++)
+	{
+		string actOption = options[count];
+		if(!strcmp( actOption.c_str(), optionValue))
+		{
+			strcpy(optionValue, options[ (count+1)%options.size() ].c_str());
+			break;
+		}
+	}
+	
+	paint(true);
+	if(observ)
+	{
+		observ->changeNotify( optionName );
+	}
+	return 0;
+}
+
+int CMenuOptionStringChooser::paint( bool selected )
+{
+	unsigned char color = COL_MENUCONTENT;
+	if (selected)
+		color = COL_MENUCONTENTSELECTED;
+	if (!active)
+		color = COL_MENUCONTENTINACTIVE;
+
+	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
+
+	string option = optionValue;
+
+	int stringwidth = g_Fonts->menu->getRenderWidth(option.c_str());
+	int stringstartposName = x + 10;
+	int stringstartposOption = x + dx - stringwidth - 10;
+
+	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx,  optionName.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx,  option.c_str(), color);
+
+        if(selected)
+        {
+                g_lcdd->setText(0, optionName);
+                g_lcdd->setText(1, option);
+        }
+
+	return y+height;
+}
+
+
+
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey="")
 {

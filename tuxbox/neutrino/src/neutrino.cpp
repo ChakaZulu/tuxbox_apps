@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.28 2001/09/16 03:38:44 McClean Exp $
+        $Id: neutrino.cpp,v 1.29 2001/09/17 01:07:44 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.29  2001/09/17 01:07:44  McClean
+  i18n selectable from menue - call make install - the .locale-files are needed..
+
   Revision 1.28  2001/09/16 03:38:44  McClean
   i18n + small other fixes
 
@@ -414,7 +417,7 @@ void CNeutrinoApp::setupColors_classic()
 void CNeutrinoApp::setupDefaults()
 {
 	//language
-	g_settings.language = 0;
+	strcpy(g_settings.language, "english");
 
 	//video
 	g_settings.video_Signal = 0;
@@ -796,9 +799,36 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	languageSettings.addItem( new CMenuSeparator() );
 	languageSettings.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 	languageSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	CMenuOptionChooser* oj = new CMenuOptionChooser(g_Locale->getText("languagesetup.select"), &g_settings.language, true);
-		oj->addOption(0, g_Locale->getText("options.off"));
-		oj->addOption(1, g_Locale->getText("options.on"));
+	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(g_Locale->getText("languagesetup.select"), (char*)&g_settings.language, true);
+		//search available languages....
+		
+		struct dirent **namelist;
+		int n;
+		printf("scanning locale dir now....(perhaps)\n");
+
+		n = scandir("/usr/lib/locale", &namelist, 0, alphasort);
+		if (n < 0)
+		{
+			perror("scandir");
+			//should be available...
+			oj->addOption( "english" );
+		}
+		else
+		{
+			for(int count=0;count<n;count++)
+			{
+				string filen = namelist[count]->d_name;
+				int pos = filen.find(".locale");
+				if(pos!=-1)
+				{
+					string locale = filen.substr(0,pos);
+					printf("locale found: %s\n", locale.c_str() );
+					oj->addOption( locale );
+				}
+				free(namelist[count]);
+			}
+			free(namelist);
+		}
 	languageSettings.addItem( oj );
 }
 
@@ -1079,7 +1109,7 @@ int CNeutrinoApp::run(int argc, char **argv)
     g_ScreenSetup = new CScreenSetup;
 
     printf("\nCNeutrinoApp::run - objects initialized...\n\n");
-	g_Locale->loadLocale("deutsch");
+	g_Locale->loadLocale(g_settings.language);
 
 	colorSetupNotifier = new CColorSetupNotifier();
 

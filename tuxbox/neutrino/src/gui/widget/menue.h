@@ -133,6 +133,29 @@ class CMenuOptionChooser : public CMenuItem
 		int exec(CMenuTarget* parent);
 };
 
+class CMenuOptionStringChooser : public CMenuItem
+{
+	vector<string>	options;
+	int				height;
+	string			optionName;
+	bool			active;
+	char*			optionValue;
+	CChangeObserver*	observ;
+
+	public:
+		CMenuOptionStringChooser(){};
+		CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL);
+		~CMenuOptionStringChooser();
+
+		void addOption( string value);
+		int paint(bool selected);
+		int getHeight(){return height;};
+		bool isSelectable(){return active;};
+
+		int exec(CMenuTarget* parent);
+};
+
+
 class CMenuWidget : public CMenuTarget
 {
 	protected:
