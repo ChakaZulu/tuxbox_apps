@@ -199,36 +199,36 @@ int eSkin::parseFontAlias(XMLTreeNode *xscheme)
 	XMLTreeNode *node;
 	for (node=xscheme->GetChild(); node; node=node->GetNext())
 	{
-		if (strcmp(node->GetType(), "font"))
+		if (strcmp(node->GetType(), "map"))
 		{
 			eDebug("illegal fontalias entry found: %s", node->GetType());
 			continue;
 		}
-		char *name=node->GetAttributeValue("name"),
-				 *alias=node->GetAttributeValue("alias"),
+		char *font=node->GetAttributeValue("font"),
+				 *name=node->GetAttributeValue("name"),
 				 *size=node->GetAttributeValue("size");
 
-		if (!name || !alias || !size)
+		if (!name || !font || !size)
 		{
 			eDebug("no name, alias or size spezified in fontaliase");
 			continue;
 		}
 
-		std::map<eString, gFont>::iterator it = fontAlias.find(alias);
+		std::map<eString, gFont>::iterator it = fontAlias.find(name);
 		if (it != fontAlias.end())
 		{
-			eDebug("fontalias %s does exist, skip make alias for font %s", alias, name);
+			eDebug("fontalias %s does exist, skip make alias for font %s", name, font);
 			continue;
 		}
 
-		std::map<eString, eString>::iterator i = fonts.find(name);
+		std::map<eString, eString>::iterator i = fonts.find(font);
 		if (i == fonts.end())
 		{
-			eDebug("font %s not found, skip make alias %s", name, alias);
+			eDebug("font %s not found, skip make alias %s", font, name);
 			continue;
 		}
-		fontAlias[alias]=gFont(i->second, atoi(size));
-		eDebug("Make Font Alias %s for Font %s with size %i", alias, name, fontAlias[alias].pointSize );
+		fontAlias[name]=gFont(i->second, atoi(size));
+		eDebug("Make Font Alias %s for Font %s with size %i", name, font, fontAlias[name].pointSize );
 	}
 	return 0;
 }
@@ -650,22 +650,34 @@ gColor eSkin::queryColor(const eString& name)
 		return col->index + offset;
 }
 
-const gFont& eSkin::queryFont(const eString& name)
+gFont eSkin::queryFont(const eString& name)
 {
-	std::map<eString, eString>::iterator it = fonts.find(name);
+	std::map<eString, gFont>::iterator it = fontAlias.find(name);  // check if name is a font alias
 	
-	if ( it == fonts.end() )
+	if ( it != fontAlias.end() )		// font alias found
+		return it->second;
+
+	eString family;
+	int size=0;
+
+	unsigned int sem = name.rfind(';');		// check if exist ';' in name
+	if (sem != eString::npos) 						// then exist
 	{
-//		eDebug("font with alias name %s does not exist", name.c_str() );
-		static gFont g;
-		return g;
+		family=name.left(sem);	   	
+		size = atoi( name.mid(sem+1).c_str() );
+		if (size<=0)
+			size=16;
 	}
-	std::map<eString, gFont>::iterator i = fontAlias.find(it->second);
-	if ( i == fontAlias.end() )
-	{
-		eDebug("font with name %s does not exist", it->second.c_str() );
-		static gFont g;
-		return g;
-	}
-	return i->second;
+	
+	std::map<eString, eString>::iterator i = fonts.find(family);   // check if family is a font name
+	if ( i != fonts.end() ) // font exist
+		return gFont(i->second, size);
+
+	for (i = fonts.begin() ; i != fonts.end(); i++)				// as last check if family name is a complete font Face
+		if ( i->second == family)
+			return gFont(i->second, size);
+
+	eFatal("Font %s does not exist", family.c_str() );			//  halt Programm now... Font does not exist
+
+	return gFont();
 }

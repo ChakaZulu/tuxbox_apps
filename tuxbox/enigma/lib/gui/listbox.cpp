@@ -29,7 +29,7 @@ void eListBoxEntryText::redraw(gPainter *rc, const eRect& rect, gColor coActiveB
 	}
 	rc->setForegroundColor(highlited?coActiveF:coNormalF);
 
-	if (text != oldtext)
+	if (text != oldtext || !para)
 	{
 		oldtext = text;
 

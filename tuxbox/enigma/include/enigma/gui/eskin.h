@@ -72,7 +72,7 @@ public:
 	gColor queryScheme(const eString &name) const;
 	gPixmap *queryImage(const eString &name) const;
 	int queryValue(const eString &name, int d) const;
-	const gFont& queryFont(const eString &name);
+	gFont queryFont(const eString &name);
 	
 	void makeActive();
 	

@@ -6,11 +6,22 @@
 	</author>
 
   <fonts>
-		<font file="bluehigh.ttf" /> <!-- Found at dafont.com freeware -->
-		<font file="bluebold.ttf" /> <!-- Found at dafont.com freeware -->
-		<font file="v5loxicar.ttf" /> <!-- Found at dafont.com freeware -->
-		<font file="v5loxical.ttf" /> <!-- Found at dafont.com freeware -->
+		<font file="bluehigh.ttf" name="Blue.Regular" /> <!-- Found at dafont.com freeware -->
+		<font file="bluebold.ttf" name="Blue.Bold" /> <!-- Found at dafont.com freeware -->
+		<font file="v5loxicar.ttf" name="v5Robusta" /> <!-- Found at dafont.com freeware -->
+		<font file="v5loxical.ttf" name="v5Lixera" /> <!-- Found at dafont.com freeware -->
 	</fonts>
+		
+	<fontalias>
+		<map name="eWindow.Title" font="Blue.Regular" size="20" />
+		<map name="eListBox.EntryText" font="Blue.Regular" size="20" />
+		<map name="eButton.Text" font="Blue.Regular" size="20" />
+
+		<map name="eventview.description" font="Blue.Regular" size="32" />
+		<map name="eventview.date" font="Blue.Regular" size="30" />
+		<map name="eventview.time" font="Blue.Regular" size="30" />
+		<map name="eventview.channel" font="Blue.Regular" size="30" />
+	</fontalias>
 
 	<colors>
 		<color name="background" color="#ff000000" />
@@ -58,6 +69,12 @@
 		
 		<map name="eServiceSelector.highlight.background" color="dark" />
 		<map name="eServiceSelector.highlight.foreground" color="dark+15" />
+
+		<map name="eventview.description.background" color="content" />
+		<map name="eventview.description.foreground" color="content+15" />
+		<map name="eventview.statusbar.background" color="dark" />
+		<map name="eventview.statusbar.foreground" color="dark+15" />
+		<map name="eventview.normal.background" color="dark" />	
 	</colorscheme>
 	
 	 <values>
@@ -102,17 +119,6 @@
 		<img name="eWindow.bottomRight" src="chk_v2/br.png" />
 	</images>
 	
-	<object name="eventview">
-		<eWindow cposition="70:120" csize="580:380" name="title">
-			<eLabel position="10:5" size="e:e-35" name="epg_description" font="Blue Highway Regular;32" backgroundColor="content" foregroundColor="content+15" wrap="on"/>
-			<eWidget position="0:e-35" size="580:e-10" backgroundColor="dark" />
-			<eLabel position="10:e-35" size="120:e-10" name="date" font="Blue Highway Regular;30" backgroundColor="dark" foregroundColor="dark+15" />
-			<eLabel position="130:e-35" size="230:e-10" name="time" font="Blue Highway Regular;30" backgroundColor="dark" foregroundColor="dark+15" />
-			<eLabel position="360:e-35" size="e-10:e-10" name="channel" font="Blue Highway Regular;30" backgroundColor="dark" foregroundColor="dark+15" align="right"/>
-		</eWindow>
-	</object>
-
-
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
 			<eLabel position="0:0" size="120:17" pixmap="enigma_logo" />

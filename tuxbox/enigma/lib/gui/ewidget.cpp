@@ -233,10 +233,11 @@ int eWidget::exec()
 {
 	if (in_loop)
 		eFatal("double exec");
+
 	in_loop=-1;	// hey, exec hat angefangen aber noch nicht in der mainloop
 
 	event(eWidgetEvent(eWidgetEvent::execBegin));	// hat jemand was dagegen einzuwenden?
-	
+
 	if (in_loop)	// hatte wohl jemand.
 	{
 		in_loop=1;		// wir betreten die mainloop
@@ -282,7 +283,7 @@ void eWidget::show()
 {
 	if (state & stateShow)
 		return;
-	
+
 	ASSERT(!(state&stateVisible));
 
 	state|=stateShow;
@@ -887,27 +888,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		setText(text);
 	}
 	else if (prop=="font")
-	{
-		const gFont& g = eSkin::getActive()->queryFont(value);
-			
-		if (g)
-			setFont(g);
-		else
-		{
-			eString family=value;
-			int size=16;
-			int sem=value.rfind(';');
-			if (sem!=-1)
-			{
-				family=family.left(sem);
-				eString r=value.mid(sem+1);
-				size=atoi(r.c_str());
-				if (size<=0)
-					size=16;
-			}
-			setFont(gFont(family, size));
-		}
-	}
+		setFont(eSkin::getActive()->queryFont(value));	
 	else if (prop=="name")
 		name=value;
 	else if (prop=="pixmap")

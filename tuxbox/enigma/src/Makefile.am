@@ -1,7 +1,7 @@
 INCLUDES = \
 	-I$(DRIVER)/include \
 	-I$(top_srcdir)/enigma/src \
-	-I$(top_srcdir)/include
+	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/intl
 
 bin_PROGRAMS = enigma

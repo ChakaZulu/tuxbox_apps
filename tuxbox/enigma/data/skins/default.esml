@@ -14,12 +14,6 @@
 		<font file="unmrs.pfa" name="Nimbus"/>
 	</fonts>
 
-	<fontalias>
-		<font name="Nimbus" alias="big" size="25"/>
-		<font name="Nimbus" alias="medium" size="21"/>	
-		<font name="Nimbus" alias="small" size="18"/>	
-	</fontalias>
-
 	<images basepath="" target="fb">
 		<img name="button_red" src="button_red.png" />
 		<img name="button_green" src="button_green.png" />
@@ -42,11 +36,11 @@
  
 	<object name="eventview">
 		<eWindow cposition="50:80" csize="590:400" name="title">
-			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" wrap="on"/>
-			<eWidget position="0:e-30" size="600:e" />
-			<eLabel position="10:e-30" size="130:e" name="date" font="small" />
-			<eLabel position="130:e-30" size="230:e" name="time" font="small" />
-			<eLabel position="360:e-30" size="230:e" name="channel" font="small" align="right"/>
+			<eLabel position="10:5" size="e:e-35" name="epg_description" font="eventview.description" backgroundColor="eventview.description.background" foregroundColor="eventview.description.foreground" wrap="on"/>
+			<eWidget position="0:e-35" size="600:e-10" backgroundColor="eventview.normal.background" />
+			<eLabel position="10:e-35" size="130:e-10" name="date" font="eventview.date" backgroundColor="eventview.statusbar.background" foregroundColor="eventview.statusbar.foreground" />
+			<eLabel position="130:e-35" size="230:e-10" name="time" font="eventview.time" backgroundColor="eventview.statusbar.background" foregroundColor="eventview.statusbar.foreground" />
+			<eLabel position="360:e-35" size="230:e-10" name="channel" font="eventview.channel" backgroundColor="eventview.statusbar.background" foregroundColor="eventview.statusbar.foreground" align="right"/>
 		</eWindow>
 	</object>
 
