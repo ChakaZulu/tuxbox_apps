@@ -144,7 +144,8 @@ int eFrontend::setFrontend()
 		eServiceInterface::getInstance()->getService();
 	if ( handler && handler->getID() != eServiceReference::idDVB )
 	{
-		if ( !eDVB::getInstance()->recorder )
+		
+		if ( !eDVB::getInstance()->recorder && !eDVB::getInstance()->getScanAPI() )
 			doSavePower=true;
 	}
 	if ( doSavePower )
