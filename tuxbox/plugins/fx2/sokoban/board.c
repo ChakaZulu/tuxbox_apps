@@ -98,8 +98,7 @@ void freeMem(void)
 void	DrawScore( void )
 {
 	char tmoves[ 64 ];
-	char tpushes[ 64 ];		/* fx2 - nix C++ !!! */
-
+	char tpushes[ 64 ];		
 	sprintf(tmoves,"%d",moves);
 
 	FBDrawString( 100, 480, 30, "Moves", WHITE, 0 );
