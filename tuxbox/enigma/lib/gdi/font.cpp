@@ -276,33 +276,36 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 		)
 	{
 		int cnt = 0;
-		glyphString::iterator i(glyphs.end());
-		--i;
-		while (i != glyphs.begin())
+		glyphString::reverse_iterator i(glyphs.rbegin());
+		while (i != glyphs.rend())
 		{
 			if (i->flags&(GS_ISSPACE|GS_ISFIRST))
 				break;
 			cnt++;
-			--i;
+			++i;
 		} 
-		if (i != glyphs.begin() && ((i->flags&(GS_ISSPACE|GS_ISFIRST))==GS_ISSPACE) && (++i != glyphs.end()))		// skip space
+		if (i != glyphs.rend()
+			&& ((i->flags&(GS_ISSPACE|GS_ISFIRST))==GS_ISSPACE)
+			&& cnt )
 		{
+			--i;
 			int linelength=cursor.x()-i->x;
 			i->flags|=GS_ISFIRST;
 			ePoint offset=ePoint(i->x, i->y);
 			newLine(rflags);
 			offset-=cursor;
-			while (i != glyphs.end())		// rearrange them into the next line
+			do
 			{
 				i->x-=offset.x();
 				i->y-=offset.y();
 				i->bbox.moveBy(-offset.x(), -offset.y());
-				++i;
 			}
-			cursor+=ePoint(linelength, 0);	// put the cursor after that line
-		} else
+			while (i-- != glyphs.rbegin()); // rearrange them into the next line
+			cursor+=ePoint(linelength, 0);  // put the cursor after that line
+		}
+		else
 		{
-	    if (cnt)
+			if (cnt)
 			{
 				newLine(rflags);
 				flags|=GS_ISFIRST;
@@ -320,8 +323,7 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 	}
 
 	pGlyph ng;
-
-	ng.bbox.setLeft( (flags&GS_ISFIRST | /*glyphs.empty() ? cursor.x() : */cursor.x() - 1 ) + glyph->left );
+	ng.bbox.setLeft( (flags&GS_ISFIRST|cursor.x()-1)+glyph->left );
 	ng.bbox.setTop( cursor.y() - glyph->top );
 	ng.bbox.setWidth( glyph->width );
 	ng.bbox.setHeight( glyph->height );
@@ -329,7 +331,6 @@ int eTextPara::appendGlyph(Font *current_font, FT_Face current_face, FT_UInt gly
 	xadvance+=kern;
 
 	ng.x=cursor.x()+kern;
-
 	ng.y=cursor.y();
 	ng.w=xadvance;
 	ng.font=current_font;
@@ -351,8 +352,10 @@ void eTextPara::calc_bbox()
 	boundBox.setBottom( -32000 );
 	// and grow the string bbox
 
-	for (	glyphString::iterator i(glyphs.begin()); i != glyphs.end(); ++i)
+	for ( glyphString::iterator i(glyphs.begin()); i != glyphs.end(); ++i)
 	{
+		if ( i->flags & GS_ISSPACE )
+			continue;
 		if ( i->bbox.left() < boundBox.left() )
 			boundBox.setLeft( i->bbox.left() );
 		if ( i->bbox.top() < boundBox.top() )

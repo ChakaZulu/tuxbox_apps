@@ -267,8 +267,6 @@ void gPainter::flush()
 
 void gPainter::end()
 {
-	if ( dc.islocked() )
-		return;
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::end;
