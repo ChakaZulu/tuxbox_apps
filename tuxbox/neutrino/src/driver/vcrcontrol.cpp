@@ -38,6 +38,7 @@
 #include "vcrcontrol.h"
 #include "neutrinoMessages.h"
 
+
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 

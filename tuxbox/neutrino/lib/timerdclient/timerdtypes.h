@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.2 2002/10/17 10:01:27 thegoodguy Exp $
+	$Id: timerdtypes.h,v 1.3 2002/10/18 00:18:31 woglinde Exp $
 
 	License: GPL
 
@@ -27,8 +27,10 @@
 #ifndef __timerdtypes__
 #define __timerdtypes__
 
-#include <zapit/zapittypes.h>
 #include <vector>
+
+#include <zapit/zapittypes.h>
+
 
 #define REMINDER_MESSAGE_MAXLEN 31
 #define TIMERD_UDS_NAME "/tmp/timerd.sock"
