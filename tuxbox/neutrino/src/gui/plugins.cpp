@@ -64,6 +64,8 @@
 extern CPlugins       * g_PluginList;    /* neutrino.cpp */
 extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
+#define PLUGINDIR_VAR "/var/tuxbox/plugins"
+
 bool CPlugins::plugin_exists(const std::string & filename)
 {
 	return (find_plugin(filename) >= 0);
@@ -118,21 +120,17 @@ void CPlugins::scanDir(const char *dir)
 			if (new_plugin.type == PLUGIN_TYPE_SCRIPT)
 			{
 				new_plugin.pluginfile.append(".sh");
-				if (!pluginfile_exists(new_plugin.pluginfile))
-				{
-					printf("[CPlugins] could not find %s,\nperhaps wrong plugin type in %s\n",
-						   new_plugin.pluginfile.c_str(), new_plugin.cfgfile.c_str());
-					continue;
-				}
 			} else {
 				new_plugin.pluginfile.append(".so");
-				if (!pluginfile_exists(new_plugin.pluginfile))
-				{
-					printf("[CPlugins] could not find %s,\nperhaps wrong plugin type in %s\n",
-						   new_plugin.pluginfile.c_str(), new_plugin.cfgfile.c_str());
-					continue;
-				}
 			}
+			// We do not check if new_plugin.pluginfile exists since .cfg in
+			// PLUGINDIR_VAR can overwrite settings in read only dir
+			// PLUGINDIR. This needs PLUGINDIR_VAR to be scanned at 
+			// first -> .cfg in PLUGINDIR will be skipped since plugin
+			// already exists in the list.
+			// This behavior is used to make sure plugins can be disabled
+			// by creating a .cfg in PLUGINDIR_VAR (PLUGINDIR often is read only).
+
 			if(!plugin_exists(new_plugin.filename))
 			{
 				plugin_list.push_back(new_plugin);
@@ -148,7 +146,7 @@ void CPlugins::loadPlugins()
 	number_of_plugins = 0;
 	plugin_list.clear();
 
-	scanDir("/var/tuxbox/plugins");
+	scanDir(PLUGINDIR_VAR);
 	scanDir(PLUGINDIR);
 	sort(plugin_list.begin(), plugin_list.end());
 }
@@ -273,6 +271,13 @@ void CPlugins::startScriptPlugin(int number)
 {
 	const char *script = plugin_list[number].pluginfile.c_str();
 	printf("[CPlugins] executing %s\n",script);
+	if (!pluginfile_exists(plugin_list[number].pluginfile))
+	{
+		printf("[CPlugins] could not find %s,\nperhaps wrong plugin type in %s\n",
+			   script, plugin_list[number].cfgfile.c_str());
+		return;
+	}
+
 	FILE *f = popen(script,"r");
 	if (f != NULL)
 	{
@@ -300,6 +305,13 @@ void CPlugins::startPlugin(int number)
 		startScriptPlugin(number);
 		return;
 	}
+	if (!pluginfile_exists(plugin_list[number].pluginfile))
+	{
+		printf("[CPlugins] could not find %s,\nperhaps wrong plugin type in %s\n",
+			   plugin_list[number].pluginfile.c_str(), plugin_list[number].cfgfile.c_str());
+		return;
+	}
+
 
 	PluginExec execPlugin;
 	char depstring[129];
