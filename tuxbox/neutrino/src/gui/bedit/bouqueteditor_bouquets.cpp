@@ -29,20 +29,20 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <zapit/client/zapitclient.h>
+#include <gui/bedit/bouqueteditor_bouquets.h>
 
 #include <global.h>
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
-#include <gui/widget/messagebox.h>
+#include <gui/bedit/bouqueteditor_channels.h>
 #include <gui/widget/hintbox.h>
+#include <gui/widget/icons.h>
+#include <gui/widget/messagebox.h>
 #include <gui/widget/stringinput.h>
 
-#include "bouqueteditor_bouquets.h"
-#include "bouqueteditor_channels.h"
+#include <zapit/client/zapitclient.h>
 
-#include <gui/widget/icons.h>
 
 CBEBouquetWidget::CBEBouquetWidget()
 {
@@ -165,7 +165,7 @@ void CBEBouquetWidget::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
-int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
+int CBEBouquetWidget::exec(CMenuTarget* parent, std::string actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 
@@ -404,7 +404,7 @@ void CBEBouquetWidget::deleteBouquet()
 
 void CBEBouquetWidget::addBouquet()
 {
-	string newName = inputName("", "bouqueteditor.bouquetname");
+	std::string newName = inputName("", "bouqueteditor.bouquetname");
 	if (newName != "")
 	{
 		g_Zapit->addBouquet( newName);
@@ -446,7 +446,7 @@ void CBEBouquetWidget::cancelMoveBouquet()
 
 void CBEBouquetWidget::renameBouquet()
 {
-	string newName = inputName( Bouquets[selected].name, "bouqueteditor.newbouquetname");
+	std::string newName = inputName( Bouquets[selected].name, "bouqueteditor.newbouquetname");
 	if (newName != Bouquets[selected].name)
 	{
 		g_Zapit->renameBouquet(selected, newName);
@@ -475,7 +475,7 @@ void CBEBouquetWidget::switchLockBouquet()
 	paint();
 }
 
-string CBEBouquetWidget::inputName(const std::string defaultName, const std::string caption)
+std::string CBEBouquetWidget::inputName(const std::string defaultName, const std::string caption)
 {
 	char Name[30] = "";
 	if (defaultName != "")

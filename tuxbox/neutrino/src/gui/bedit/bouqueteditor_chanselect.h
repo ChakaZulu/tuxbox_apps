@@ -32,14 +32,13 @@
 #ifndef __bouqueteditor_chanselect__
 #define __bouqueteditor_chanselect__
 
-#include <string>
-#include <vector>
-
 #include <driver/framebuffer.h>
 #include <gui/widget/listbox.h>
 
+#include <zapit/client/zapitclient.h>
 
-using namespace std;
+#include <string>
+
 
 class CBEChannelSelectWidget : public CListBox
 {
@@ -58,8 +57,8 @@ class CBEChannelSelectWidget : public CListBox
 		CZapitClient::BouquetChannelList	Channels;        // list of all channels
 		CZapitClient::BouquetChannelList	bouquetChannels; // list of chans that are currently selected
 
-		CBEChannelSelectWidget( string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode);
-		int exec(CMenuTarget* parent, string actionKey);
+		CBEChannelSelectWidget(std::string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode);
+		int exec(CMenuTarget* parent, std::string actionKey);
 		bool hasChanged();
 
 };

@@ -29,6 +29,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <gui/widget/colorchooser.h>
 
 #include <global.h>
 #include <neutrino.h>
@@ -37,16 +38,14 @@
 #include <driver/rcinput.h>
 
 #include <gui/color.h>
-
-#include "colorchooser.h"
-#include "messagebox.h"
+#include <gui/widget/messagebox.h>
 
 #define VALUE_R     0
 #define VALUE_G     1
 #define VALUE_B     2
 #define VALUE_ALPHA 3
 
-static const string iconnames[4] = {
+static const std::string iconnames[4] = {
 	"red",
 	"green",
 	"blue",
@@ -85,7 +84,7 @@ void CColorChooser::setColor()
 	*/
 }
 
-int CColorChooser::exec(CMenuTarget* parent, string)
+int CColorChooser::exec(CMenuTarget* parent, std::string)
 {
 	int res = menu_return::RETURN_REPAINT;
 	if (parent)
@@ -97,7 +96,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	unsigned char b_alt= *value[VALUE_B];
 	unsigned char a_alt = (value[VALUE_ALPHA]) ? (*(value[VALUE_ALPHA])) : 0;
 
-	string names[4] = {
+	std::string names[4] = {
 		g_Locale->getText("colorchooser.red"),
 		g_Locale->getText("colorchooser.green"),
 		g_Locale->getText("colorchooser.blue"),
@@ -217,7 +216,7 @@ void CColorChooser::paint()
 	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, g_Locale->getText(name), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
-	string names[4] = {
+	std::string names[4] = {
 		g_Locale->getText("colorchooser.red"),
 		g_Locale->getText("colorchooser.green"),
 		g_Locale->getText("colorchooser.blue"),
@@ -231,13 +230,13 @@ void CColorChooser::paint()
 	frameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
 }
 
-void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const string text, const string iconname, const bool selected)
+void CColorChooser::paintSlider(int x, int y, unsigned char *spos, const std::string text, const std::string iconname, const bool selected)
 {
 	if (!spos)
 		return;
 	frameBuffer->paintBoxRel(x+70,y,120,mheight, COL_MENUCONTENT);
 	frameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
-	string iconfile = "volumeslider2";
+	std::string iconfile = "volumeslider2";
 	if (selected)
 		iconfile += iconname;
 	iconfile +=".raw";

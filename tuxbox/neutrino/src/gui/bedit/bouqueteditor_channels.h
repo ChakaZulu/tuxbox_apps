@@ -33,14 +33,13 @@
 #ifndef __bouqueteditor_channels__
 #define __bouqueteditor_channels__
 
-#include <string>
-#include <vector>
-
 #include <driver/framebuffer.h>
 #include <gui/widget/menue.h>
 
+#include <zapit/client/zapitclient.h>
 
-using namespace std;
+#include <string>
+
 
 class CBEChannelWidget : public CMenuWidget
 {
@@ -66,7 +65,7 @@ class CBEChannelWidget : public CMenuWidget
 		int					theight;
 
 		int 				ButtonHeight;
-		string				caption;
+		std::string				caption;
 		bool				channelsChanged;
 
 		CZapitClient::channelsMode mode;
@@ -92,10 +91,10 @@ class CBEChannelWidget : public CMenuWidget
 		void internalMoveChannel( unsigned int fromPosition, unsigned int toPosition);
 
 	public:
-		CBEChannelWidget( string Caption, unsigned int Bouquet);
+		CBEChannelWidget( std::string Caption, unsigned int Bouquet);
 
 		CZapitClient::BouquetChannelList	Channels;
-		int exec(CMenuTarget* parent, string actionKey);
+		int exec(CMenuTarget* parent, std::string actionKey);
 		bool hasChanged();
 };
 

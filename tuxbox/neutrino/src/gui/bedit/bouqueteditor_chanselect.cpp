@@ -29,19 +29,18 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
-#include <zapit/client/zapitclient.h>
+#include <gui/bedit/bouqueteditor_chanselect.h>
 
 #include <global.h>
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
-
-#include "bouqueteditor_chanselect.h"
-
 #include <gui/widget/icons.h>
 
-CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
+#include <zapit/client/zapitclient.h>
+
+
+CBEChannelSelectWidget::CBEChannelSelectWidget(std::string Caption, unsigned int Bouquet, CZapitClient::channelsMode Mode)
 	:CListBox(Caption.c_str())
 {
 	bouquet = Bouquet;
@@ -112,7 +111,7 @@ void CBEChannelSelectWidget::onOkKeyPressed()
 	g_RCInput->postMsg( CRCInput::RC_down, 0 );
 }
 
-int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
+int CBEChannelSelectWidget::exec(CMenuTarget* parent, std::string actionKey)
 {
 	Channels.clear();
 	bouquetChannels.clear();

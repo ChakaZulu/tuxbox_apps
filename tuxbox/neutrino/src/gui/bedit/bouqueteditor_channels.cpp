@@ -29,20 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
-#include <zapit/client/zapitclient.h>
+#include <gui/bedit/bouqueteditor_channels.h>
 
 #include <global.h>
 #include <neutrino.h>
 
 #include <driver/fontrenderer.h>
-
-#include "bouqueteditor_channels.h"
-#include "bouqueteditor_chanselect.h"
-
+#include <gui/bedit/bouqueteditor_chanselect.h>
 #include <gui/widget/icons.h>
 
-CBEChannelWidget::CBEChannelWidget(string Caption, unsigned int Bouquet)
+#include <zapit/client/zapitclient.h>
+
+
+CBEChannelWidget::CBEChannelWidget(std::string Caption, unsigned int Bouquet)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	selected = 0;
@@ -145,7 +144,7 @@ void CBEChannelWidget::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
-int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
+int CBEChannelWidget::exec(CMenuTarget* parent, std::string actionKey)
 {
 	int res = menu_return::RETURN_REPAINT;
 

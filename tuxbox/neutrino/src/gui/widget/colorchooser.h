@@ -33,14 +33,10 @@
 #ifndef __colorchooser__
 #define __colorchooser__
 
-#include <string>
-
 #include <driver/framebuffer.h>
+#include <gui/widget/menue.h>
 
-#include "menue.h"
-
-
-using namespace std;
+#include <string>
 
 class CColorChooser : public CMenuTarget
 {
@@ -54,20 +50,20 @@ class CColorChooser : public CMenuTarget
 
 		unsigned char * value[4]; // r, g, b, alpha
 
-		string	name;
+		std::string	name;
 
 		CChangeObserver* observer;
 
 		void paint();
 		void setColor();
-		void paintSlider(int x, int y, unsigned char *spos, const string text, const string iconname, const bool selected);
+		void paintSlider(int x, int y, unsigned char *spos, const std::string text, const std::string iconname, const bool selected);
 
 	public:
 
 		CColorChooser(const char * const Name, unsigned char *R, unsigned char *G, unsigned char *B, unsigned char* Alpha, CChangeObserver* Observer = NULL); // UTF-8
 
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec(CMenuTarget* parent, std::string actionKey);
 
 };
 

@@ -32,14 +32,12 @@
 #ifndef __bouqueteditor_bouquets__
 #define __bouqueteditor_bouquets__
 
-#include <string>
-#include <vector>
-
 #include <driver/framebuffer.h>
 #include <gui/widget/menue.h>
 
+#include <zapit/client/zapitclient.h>
 
-using namespace std;
+#include <string>
 
 /* class for handling when bouquets changed.                  */
 /* This class should be a temporarily work around             */
@@ -82,7 +80,7 @@ class CBEBouquetWidget : public CMenuWidget
 		int					theight; // Fonthoehe Bouquetlist-Titel
 
 		int 				ButtonHeight;
-		//string				name;
+		//std::string				name;
 		bool	bouquetsChanged;
 		int		width;
 		int		height;
@@ -108,13 +106,13 @@ class CBEBouquetWidget : public CMenuWidget
 		void saveChanges();
 		void discardChanges();
 
-		string inputName( string defaultName, string caption);
+		std::string inputName( std::string defaultName, std::string caption);
 
 	public:
 		CBEBouquetWidget();
 
-		CZapitClient::BouquetList	Bouquets;
-		int exec(CMenuTarget* parent, string actionKey);
+		CZapitClient::BouquetList Bouquets;
+		int exec(CMenuTarget* parent, std::string actionKey);
 };
 
 
