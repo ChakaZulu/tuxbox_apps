@@ -109,13 +109,29 @@ public:
 			myselectedID = selectedID;
 		}
 
-	virtual int exec(CMenuTarget* parent, const std::string & actionKey)
+	virtual int exec(CMenuTarget *, const std::string &)
 		{
 			*myselectedID = myID;
 			return menu_return::RETURN_EXIT_ALL;
 		}
 };
 
+
+class CNonLocalizedMenuSeparator : public CMenuSeparator
+{
+	const char * the_text;
+
+public:
+	CNonLocalizedMenuSeparator(const char * text, const neutrino_locale_t Text) : CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, Text)
+		{
+			the_text = text;
+		}
+
+	virtual const char * getString(void)
+		{
+			return the_text;
+		}
+};
 
 bool CFlashUpdate::selectHttpImage(void)
 {
@@ -154,8 +170,7 @@ bool CFlashUpdate::selectHttpImage(void)
 		}
 		updates_lists.push_back(url.substr(startpos, endpos - startpos));
 
-#warning CMenuSeparator expects neutrino_locale_t as second argument!
-		SelectionWidget.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, updates_lists.rbegin()->c_str()));
+		SelectionWidget.addItem(new CNonLocalizedMenuSeparator(updates_lists.rbegin()->c_str(), LOCALE_FLASHUPDATE_SELECTIMAGE));
 		
 		if (httpTool.downloadFile(url, gTmpPath LIST_OF_UPDATES_LOCAL_FILENAME, 20))
 		{

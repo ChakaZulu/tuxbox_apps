@@ -96,7 +96,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CScanSettings			scanSettings;
 		int                             network_dhcp;
 		int                             network_automatic_start;
-		int                             fserverpid;
 
 		neutrino_font_descr_struct      font;
 
@@ -182,7 +181,6 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		                  CMenuWidget &colorSettings, CMenuWidget &lcdSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
 		                  CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service, CMenuWidget &fontSettings,
                         	  CMenuWidget &audioplPicSettings, CMenuWidget &streamingSettings, CMenuWidget &moviePlayer);
-		void SetupFonts();
 		void SetupTiming();
 		void SetupFrameBuffer();
 		void SelectAPID();
@@ -193,6 +191,7 @@ class CNeutrinoApp : public CMenuTarget, CChangeObserver
 		CNeutrinoApp();
 
 	public:
+		void SetupFonts();
 		~CNeutrinoApp();
 		const CScanSettings& getScanSettings(){ return scanSettings;};
 

@@ -32,6 +32,7 @@
 #ifndef __settings__
 #define __settings__
 
+#include <system/localize.h>
 #include <configfile.h>
 #include <zapit/client/zapitclient.h>
 
@@ -292,13 +293,8 @@ struct SNeutrinoSettings
 
 /* some default Values */
 
-static const int default_timing[TIMING_SETTING_COUNT] = {
-	60,
-	60,
-	240,
-	6,
-	60
-};
+extern const int               default_timing     [TIMING_SETTING_COUNT];
+extern const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT];
 
 // lcdd
 #define DEFAULT_LCD_BRIGHTNESS			0xff

@@ -141,6 +141,9 @@ CRemoteControl * g_RemoteControl;
 // but if you wanna do it so... ;)
 static bool parentallocked = false;
 
+static CTimingSettingsNotifier timingsettingsnotifier;
+static CFontSizeNotifier fontsizenotifier;
+
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
 
@@ -482,15 +485,6 @@ const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] =
 	{LOCALE_FONTSIZE_INFOBAR_INFO       ,  20, FONT_STYLE_REGULAR, 1},
 	{LOCALE_FONTSIZE_INFOBAR_SMALL      ,  14, FONT_STYLE_REGULAR, 1},
 	{LOCALE_FONTSIZE_FILEBROWSER_ITEM   ,  16, FONT_STYLE_BOLD   , 1}
-};
-
-const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT] =
-{
-	LOCALE_TIMING_MENU,
-	LOCALE_TIMING_CHANLIST,
-	LOCALE_TIMING_EPG,
-	LOCALE_TIMING_INFOBAR,
-	LOCALE_TIMING_FILEBROWSER
 };
 
 typedef struct lcd_setting_t
@@ -2153,7 +2147,7 @@ public:
 
 void CNeutrinoApp::AddFontSettingItem(CMenuWidget &fontSettings, const SNeutrinoSettings::FONT_TYPES number_of_fontsize_entry)
 {
-	fontSettings.addItem(new CMenuNumberInput(neutrino_font[number_of_fontsize_entry].name, neutrino_font[number_of_fontsize_entry].defaultsize, this, &configfile));
+	fontSettings.addItem(new CMenuNumberInput(neutrino_font[number_of_fontsize_entry].name, neutrino_font[number_of_fontsize_entry].defaultsize, &fontsizenotifier, &configfile));
 }
 
 
@@ -2363,7 +2357,7 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 
 	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
 	{
-		CStringInput * colorSettings_timing_item = new CStringInput(timing_setting_name[i], g_settings.timing_string[i], 3, LOCALE_TIMING_HINT_1, LOCALE_TIMING_HINT_2, "0123456789 ", this);
+		CStringInput * colorSettings_timing_item = new CStringInput(timing_setting_name[i], g_settings.timing_string[i], 3, LOCALE_TIMING_HINT_1, LOCALE_TIMING_HINT_2, "0123456789 ", &timingsettingsnotifier);
 		colorSettings_timing.addItem(new CMenuForwarder(timing_setting_name[i], true, g_settings.timing_string[i], colorSettings_timing_item));
 	}
 
@@ -2746,7 +2740,6 @@ void CNeutrinoApp::setupRecordingDevice(void)
 int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
-	fserverpid = -1;
 
 	int loadSettingsErg = loadSetup();
 
@@ -3514,13 +3507,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
 			 * instead it checks the state of the variable recordingstatus
 			 */
-			int tmp = recording_id;
-
 			/* restart recording */
 			changeNotify(LOCALE_MAINMENU_RECORDING_START, NULL);
-
-			/* workaround to ensure that we listen to the events for the original recording (especially the STOP event) */
-			recording_id = tmp;
 		}
 
 		delete (unsigned char*) data;
@@ -3639,15 +3627,6 @@ void CNeutrinoApp::ExitRun()
 	if (frameBuffer != NULL)
 		delete frameBuffer;
 
-	if (fserverpid > 0) {
-	    if(kill(fserverpid,SIGTERM)) {
-		    fprintf(stderr,"\n[neutrino.cpp] fserver process not killed\n");
-		}
-		waitpid(fserverpid,0,0);
-		fprintf(stderr,"[neutrino.cpp] fserver stopped\n");
-		fserverpid = -1;
-	}
-		
 	exit(0);
 }
 
@@ -4111,7 +4090,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 					configfile.setInt32(neutrino_font[k].name, neutrino_font[k].defaultsize);
 				}
 		}
-		changeNotify("fontsize.", NULL); // FIXME
+		fontsizenotifier.changeNotify(NONEXISTANT_LOCALE, NULL);
 	}
 	else if(actionKey=="osd.def")
 	{
@@ -4171,26 +4150,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 **************************************************************************************/
 bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 {
-	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
-	{
-		if (ARE_LOCALES_EQUAL(OptionName, timing_setting_name[i]))
-		{
-			g_settings.timing[i] = 	atoi(g_settings.timing_string[i]);
-			return true;
-		}
-	}
-
-	if (strncmp(OptionName, "fontsize.", 9) == 0)
-	{
-		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FONTSIZE_HINT)); // UTF-8
-		hintBox->paint();
-
-		SetupFonts();
-
-		hintBox->hide();
-		delete hintBox;
-	}
-	else if ((ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING_START)) || (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING)))
+	if ((ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING_START)) || (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING)))
 	{
 		CTimerd::RecordingInfo eventinfo;
 
@@ -4218,11 +4178,10 @@ bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 					recordingstatus=0;
 					return false;
 				}
-				else
+				else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING))
 				{
 					time_t now = time(NULL);
-					recording_id=g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, 
-											    eventinfo.epgID, eventinfo.epg_starttime);
+					recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, eventinfo.epgID, eventinfo.epg_starttime);
 				}
 			}
 			else
@@ -4233,7 +4192,7 @@ bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 			return true;
 		}
 		else
-			printf("Keine Streamingdevices registriert\n");
+			puts("[neutrino.cpp] no recording devices");
 	}
 	else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_LANGUAGESETUP_SELECT))
 	{

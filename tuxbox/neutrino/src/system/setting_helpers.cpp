@@ -56,7 +56,7 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 
 extern "C" int pinghost( const char *hostname );
 
-bool CSatDiseqcNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
+bool CSatDiseqcNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
 	if (*((int*) Data) == NO_DISEQC)
 	{
@@ -93,7 +93,7 @@ CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwa
 }
 
 
-bool CDHCPNotifier::changeNotify(const neutrino_locale_t OptionName, void * data)
+bool CDHCPNotifier::changeNotify(const neutrino_locale_t, void * data)
 {
 	CNeutrinoApp::getInstance()->networkConfig.inet_static = ((*(int*)(data)) == 0);
 	for(int x=0;x<5;x++)
@@ -118,7 +118,7 @@ CStreamingNotifier::CStreamingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
 
 }
 
-bool CStreamingNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CStreamingNotifier::changeNotify(const neutrino_locale_t, void *)
 {
    if(g_settings.streaming_type==0)
    {
@@ -149,7 +149,7 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[8]=i9;
    toDisable[9]=i10;
 }
-bool CRecordingNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CRecordingNotifier::changeNotify(const neutrino_locale_t, void *)
 {
    if ((g_settings.recording_type == CNeutrinoApp::RECORDING_OFF) ||
        (g_settings.recording_type == CNeutrinoApp::RECORDING_FILE))
@@ -198,13 +198,13 @@ CRecordingNotifier2::CRecordingNotifier2( CMenuItem* i1)
 {
    toDisable[0]=i1;
 }
-bool CRecordingNotifier2::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CRecordingNotifier2::changeNotify(const neutrino_locale_t, void *)
 {
    toDisable[0]->setActive(g_settings.recording_server_wakeup==1);
    return true;
 }
 
-bool CRecordingSafetyNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CRecordingSafetyNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	g_Timerd->setRecordingSafety(atoi(g_settings.record_safety_time_before)*60, atoi(g_settings.record_safety_time_after)*60);
    return true;
@@ -214,34 +214,27 @@ CMiscNotifier::CMiscNotifier( CMenuItem* i1)
 {
    toDisable[0]=i1;
 }
-bool CMiscNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CMiscNotifier::changeNotify(const neutrino_locale_t, void *)
 {
    toDisable[0]->setActive(!g_settings.shutdown_real);
    return true;
 }
 
-bool CConsoleDestChangeNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
-{
-	g_settings.uboot_console = *(int *)Data;
-
-	return true;
-}
-
-bool CLcdNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CLcdNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	CLCD::getInstance()->setlcdparameter();
 	CLCD::getInstance()->setAutoDimm(g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM]);
 	return true;
 }
 
-bool CPauseSectionsdNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
+bool CPauseSectionsdNotifier::changeNotify(const neutrino_locale_t, void * Data)
 {
 	g_Sectionsd->setPauseScanning((*((int *)Data)) == 0);
 
 	return true;
 }
 
-bool CTouchFileNotifier::changeNotify(const neutrino_locale_t OptionName, void * data)
+bool CTouchFileNotifier::changeNotify(const neutrino_locale_t, void * data)
 {
 	if ((*(int *)data) != 0)
 	{
@@ -256,21 +249,7 @@ bool CTouchFileNotifier::changeNotify(const neutrino_locale_t OptionName, void *
 	return true;
 }
 
-bool CIPChangeNotifier::changeNotify(const neutrino_locale_t OptionName, void * Data)
-{
-	char ip[16];
-	unsigned char _ip[4];
-	sscanf((char*) Data, "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
-
-	sprintf(ip, "%hhu.%hhu.%hhu.255", _ip[0], _ip[1], _ip[2]);
-	CNeutrinoApp::getInstance()->networkConfig.broadcast = ip;
-
-	CNeutrinoApp::getInstance()->networkConfig.netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
-
-	return true;
-}
-
-bool CColorSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CColorSetupNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
 //	unsigned char r,g,b;
@@ -345,7 +324,7 @@ CAudioSetupNotifier2::CAudioSetupNotifier2( CMenuItem* i1)
    toDisable[0]=i1;
 }
 
-bool CAudioSetupNotifier2::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CAudioSetupNotifier2::changeNotify(const neutrino_locale_t, void *)
 {
 	toDisable[0]->setActive(g_settings.audio_avs_Control == 2);
 
@@ -379,12 +358,57 @@ bool CVideoSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void 
 	return false;
 }
 
-bool CKeySetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CKeySetupNotifier::changeNotify(const neutrino_locale_t, void *)
 {
-	//    printf("CKeySetupNotifier notify: %s\n", OptionName);
 	g_RCInput->repeat_block = atoi(g_settings.repeat_blocker)* 1000;
 	g_RCInput->repeat_block_generic = atoi(g_settings.repeat_genericblocker)* 1000;
 	return false;
+}
+
+bool CIPChangeNotifier::changeNotify(const neutrino_locale_t, void * Data)
+{
+	char ip[16];
+	unsigned char _ip[4];
+	sscanf((char*) Data, "%hhu.%hhu.%hhu.%hhu", &_ip[0], &_ip[1], &_ip[2], &_ip[3]);
+
+	sprintf(ip, "%hhu.%hhu.%hhu.255", _ip[0], _ip[1], _ip[2]);
+	CNeutrinoApp::getInstance()->networkConfig.broadcast = ip;
+
+	CNeutrinoApp::getInstance()->networkConfig.netmask = (_ip[0] == 10) ? "255.0.0.0" : "255.255.255.0";
+
+	return true;
+}
+
+bool CConsoleDestChangeNotifier::changeNotify(const neutrino_locale_t, void * Data)
+{
+	g_settings.uboot_console = *(int *)Data;
+
+	return true;
+}
+
+bool CTimingSettingsNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
+{
+	for (int i = 0; i < TIMING_SETTING_COUNT; i++)
+	{
+		if (ARE_LOCALES_EQUAL(OptionName, timing_setting_name[i]))
+		{
+			g_settings.timing[i] = 	atoi(g_settings.timing_string[i]);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool CFontSizeNotifier::changeNotify(const neutrino_locale_t, void *)
+{
+	CHintBox hintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_FONTSIZE_HINT)); // UTF-8
+	hintBox.paint();
+
+	CNeutrinoApp::getInstance()->SetupFonts();
+
+	hintBox.hide();
+
+	return true;
 }
 
 int CAPIDChangeExec::exec(CMenuTarget* parent, const std::string & actionKey)
