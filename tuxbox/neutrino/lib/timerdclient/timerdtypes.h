@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.1 2002/10/15 17:30:27 Zwen Exp $
+	$Id: timerdtypes.h,v 1.2 2002/10/17 10:01:27 thegoodguy Exp $
 
 	License: GPL
 
@@ -85,15 +85,6 @@ class CTimerd
 			CMD_SHUTDOWN,
 			CMD_SETAPID
 		};
-
-
-		//command structures
-		struct commandHead
-		{
-			unsigned char version;
-			unsigned char cmd;
-		};
-
 
 		struct commandAddTimer
 		{
