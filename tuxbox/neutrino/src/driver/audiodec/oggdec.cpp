@@ -121,7 +121,7 @@ CBaseDec::RetCode COggDec::Decoder(FILE *in, const int OutputFd, State* const st
 	  // clear buffer on state change
 	  if(oldstate!=*state)
 	  {
-		  if(*state!=PAUSE)
+		  if(*state!=PAUSE && (*state!=PLAY || oldstate!=PAUSE))
 		  {
 			  mWriteSlot=mReadSlot=0;
 			  oldstate=*state;
@@ -178,6 +178,11 @@ CBaseDec::RetCode COggDec::Decoder(FILE *in, const int OutputFd, State* const st
 	  if(bytes == mSlotSize)
 		  mWriteSlot=(mWriteSlot+1) % DECODE_SLOTS;
   } while (rval != 0 && *state!=STOP_REQ && Status==OK);
+
+  // let buffer run dry
+  while(rval==0 && *state!=STOP_REQ && Status==OK && mReadSlot != mWriteSlot)
+	  usleep(100000);
+
   pthread_cancel(OutputThread);
 
   for(int i = 0 ; i < DECODE_SLOTS ; i++)
@@ -238,17 +243,23 @@ void COggDec::ParseUserComments(vorbis_comment* vc, CAudioMetaData* m)
 	for(int i=0; i < vc->comments ; i++)
 	{
 		char* search;
-		if((search=strstr(vc->user_comments[i],"Artist"))!=NULL)
+		if((search=strstr(vc->user_comments[i],"Artist"))!=NULL ||
+		   (search=strstr(vc->user_comments[i],"ARTIST"))!=NULL)
 			m->artist = search+7;
-		else if((search=strstr(vc->user_comments[i],"Album"))!=NULL)
+		else if((search=strstr(vc->user_comments[i],"Album"))!=NULL ||
+		        (search=strstr(vc->user_comments[i],"ALBUM"))!=NULL)
 			m->album = search+6;
-		else if((search=strstr(vc->user_comments[i],"Title"))!=NULL)
+		else if((search=strstr(vc->user_comments[i],"Title"))!=NULL ||
+		        (search=strstr(vc->user_comments[i],"TITLE"))!=NULL)
 			m->title = search+6;
-		else if((search=strstr(vc->user_comments[i],"Genre"))!=NULL)
+		else if((search=strstr(vc->user_comments[i],"Genre"))!=NULL ||
+		        (search=strstr(vc->user_comments[i],"GENRE"))!=NULL)
 			m->genre = search+6;
-		else if((search=strstr(vc->user_comments[i],"Date"))!=NULL)
+		else if((search=strstr(vc->user_comments[i],"Date"))!=NULL ||
+		        (search=strstr(vc->user_comments[i],"DATE"))!=NULL)
 			m->date = search+5;
-		else if((search=strstr(vc->user_comments[i],"TrackNumber"))!=NULL)
+		else if((search=strstr(vc->user_comments[i],"TrackNumber"))!=NULL ||
+		        (search=strstr(vc->user_comments[i],"TRACKNUMBER"))!=NULL)
 			m->track = search+12;
 	}
 }
