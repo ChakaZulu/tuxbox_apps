@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.42 2003/11/30 13:21:01 zwen Exp $
+	$Id: webapi.cpp,v 1.43 2003/11/30 21:21:13 thegoodguy Exp $
 
 	License: GPL
 
@@ -534,10 +534,9 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 //	request->SendHTMLHeader("DBOX2-Neutrino Kanalliste");
 //	request->SocketWriteLn(
 	request->printf(
-// QITH THIS DOCTYPE PAGE IS NOT WORKING WITH MOZILLA 1.5 FIXME!!!
-//		"<!DOCTYPE html\n"
-//		"     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
-//		"     \"DTD/xhtml1-strict.dtd\">\n"
+		"<!DOCTYPE html\n"
+		"     PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n"
+		"     \"DTD/xhtml1-strict.dtd\">\n"
 		"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"de\" lang=\"de\">\n"
 		"<head>\n"
 		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\" />\n"
@@ -567,7 +566,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 		std::string bouquetstr = (BouquetNr >= 0) ? ("&amp;bouquet=" + itoa(BouquetNr)) : "";
 		
-		request->printf("<tr><td colspan=\"2\" class=\"%c\">",classname);
+		request->printf("<tr style=\"border-top: 2px solid #707070\"><td colspan=\"2\" class=\"%c\">",classname);
 		request->printf("%s<a class=\"clist\" href=\"switch.dbox2?zapto=%d%s\">%d. %s%s</a>&nbsp;<a href=\"epg.dbox2?eventlist=%u\">%s</a>",
 				((channel->channel_id == current_channel) ? "<a name=\"akt\"></a>" : " "),
 				channel->channel_id,
@@ -576,10 +575,10 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 				channel->name,
 				(channel->service_type == ST_NVOD_REFERENCE_SERVICE) ? " (NVOD)" : "",
 				channel->channel_id,
-				((Parent->ChannelListEvents[channel->channel_id]) ? "<img border=\"0\" src=\"../images/elist.gif\" alt=\"Programmvorschau\" />" : ""));
+				((Parent->ChannelListEvents[channel->channel_id]) ? "<img src=\"../images/elist.gif\" alt=\"Programmvorschau\" style=\"border: 0px\" />" : ""));
 
 		if (channel->channel_id == current_channel)
-			request->printf("&nbsp;&nbsp;<a href=\"/fb/info.dbox2\"><img src=\"/images/streaminfo.png\" border=0 alt=\"Streaminfo\" /></a>");
+			request->printf("&nbsp;&nbsp;<a href=\"/fb/info.dbox2\"><img src=\"/images/streaminfo.png\" alt=\"Streaminfo\" style=\"border: 0px\" /></a>");
 
 		request->printf("</td></tr>");
 
@@ -608,7 +607,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 					Parent->Sectionsd->getActualEPGServiceKey(channel_id, &epg); // FIXME: der scheissendreck geht nit!!!
 
-					request->printf("<tr><td align=\"left\" width=\"31\" class=\"%cepg\">&nbsp;</td>", classname);
+					request->printf("<tr><td align=\"left\" style=\"width: 31px\" class=\"%cepg\">&nbsp;</td>", classname);
 					request->printf("<td class=\"%cepg\">%s&nbsp;", classname, timestr);
 					request->printf("%s<a href=\"switch.dbox2?zaptosubservice=%d%s\">%04x:%04x:%04x %s</a>", // FIXME: get name
 							(channel_id == current_channel) ? "<a name=\"akt\"></a>" : " ",
@@ -634,26 +633,23 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 			bool has_current_next = Parent->Sectionsd->getCurrentNextServiceKey(channel->channel_id, currentNextInfo);
 			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
 			timeString(event->startTime, timestr);
-			request->printf("<tr><td align=\"left\" width=\"31\" class=\"%cepg\">",classname);
-			request->printf("<table border=\"0\" rules=none height=\"10\" width=\"30\" cellspacing=\"0\" cellpadding=\"0\">"
+			request->printf("<tr><td align=\"left\" style=\"width: 31px\" class=\"%cepg\">"
+			                "<table border=\"0\" rules=\"none\" style=\"height: 10px; width: 30px\" cellspacing=\"0\" cellpadding=\"0\">"
 					"<tr>"
-					"<td rowspan=\"3\" bgcolor=#000000><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
-					"<td bgcolor=#000000 colspan=\"2\"><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
-					"<td rowspan=\"3\" bgcolor=#000000><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
-					"</tr>");
-			request->printf("<tr><td bgcolor=\"#2211FF\" height=\"10\" width=\"%d\">"
-					"<img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
-					"<td bgcolor=\"#EAEBFF\" height=\"10\" width=\"%d\">"
-					"<img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td></tr>"
-					"<tr><td bgcolor=#000000 colspan=\"2\"><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td>"
-					"</tr></table></td>",
-					(prozent / 10) * 3,(10 - (prozent / 10))*3);
+					"<td style=\"background-color: #2211FF; border: 1px solid black; height: 10px; width: %dpx\">"
+					"</td>"
+					"<td style=\"background-color: #EAEBFF; border: 1px solid black; height: 10px; width: %dpx\">"
+					"</td>"
+					"</tr>"
+					"</table></td>"
+					, classname
+					, (prozent / 10) * 3,(10 - (prozent / 10))*3);
 			request->printf("<td class=\"%cepg\">",classname);
 			request->printf("<a class=\"clistsmall\" href=\"epg.dbox2?epgid=%llx\">",event->eventID);
 //			request->printf("<a class=\"clistsmall\" href=\"epg.dbox2?epgid=%llx&amp;startzeit=%lx\">",event->eventID,event->startTime);
 			request->printf("%s&nbsp;%s&nbsp;", timestr, event->description.c_str()); 
 
-			request->printf("<font size=\"-3\"><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>", (time(NULL) - event->startTime)/60,event->duration / 60,prozent);
+			request->printf("<span style=\"font-size: 8pt\">(%ld von %d min, %d%%)</span></a>", (time(NULL) - event->startTime)/60,event->duration / 60,prozent);
 
 			if ((has_current_next) && (currentNextInfo.flags & CSectionsdClient::epgflags::has_next)) {
 				timeString(currentNextInfo.next_zeit.startzeit, timestr);
@@ -662,10 +658,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 
 			request->printf("</td></tr>\n");
 		}
-
-//		request->printf("<tr height=\"2\"><td colspan=\"2\"><img src=\"/images/blank.gif\" width=\"1\" height=\"1\" /></td></tr>\n");
-		request->printf("<tr height=\"2\"><td colspan=\"2\"></td></tr>\n");
-
+		request->printf("<tr style=\"height: 2px\"><td></td></tr>\n");
 	}
 
 	request->printf("</table>\n");
