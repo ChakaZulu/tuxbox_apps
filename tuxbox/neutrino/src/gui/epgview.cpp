@@ -582,7 +582,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
 																  epgData.eventID, epgData.epg_times.startzeit,
 																  "");
-						ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+						ShowMsgUTF(LOCALE_TIMER_EVENTTIMED_TITLE, g_Locale->getText(LOCALE_TIMER_EVENTTIMED_MSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 					}
 					else
 						printf("timerd not available\n");
