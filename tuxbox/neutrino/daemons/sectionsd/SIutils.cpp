@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.7 2001/07/06 09:46:01 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.8 2001/07/06 11:09:56 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.8  2001/07/06 11:09:56  fnbrd
+// Noch ne Kleinigkeit gefixt.
+//
 // Revision 1.7  2001/07/06 09:46:01  fnbrd
 // Kleiner Fehler behoben
 //
@@ -154,8 +157,8 @@ time_t changeUTCtoCtime(const unsigned char *buffer)
 //    utc = utc | (buffer[1] << 24) | (buffer[2] << 16)
 //              | (buffer[3] << 8) | buffer[4];
 
-    mjd  = (buffer[0]<< 8) + buffer[1];
-    time = (buffer[2] << 16) + (buffer[3] << 8) + buffer[4];
+    mjd  = (buffer[0]<< 8) | buffer[1];
+    time = (buffer[2] << 16) | (buffer[3] << 8) | buffer[4];
     if(mjd == 0xffff && time == 0xffffff)
 //    if(utc==0xffffffffffffffffLL)
       // keine Uhrzeit
