@@ -9,7 +9,10 @@
 #ifdef MEMLEAK_CHECK
 AllocList *allocList;
 pthread_mutex_t memLock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
+#else
+	#include <lib/system/elock.h>
 #endif
+pthread_mutex_t signalLock=PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP;
 
 int infatal=0;
 
@@ -23,7 +26,10 @@ void eFatal(const char* fmt, ...)
 	va_start(ap, fmt);
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
-	logOutput(lvlFatal, buf);
+	{
+		singleLock s(signalLock);
+		logOutput(lvlFatal, buf);
+	}
 	fprintf(stderr, "%s\n",buf );
 	if (!infatal)
 	{
@@ -46,7 +52,10 @@ void eDebug(const char* fmt, ...)
 	if (logOutputConsole)
 		fprintf(stderr, "%s\n", buf);
 	else
-		logOutput(lvlDebug, eString(buf) + "\n");	
+	{
+		singleLock s(signalLock);
+		logOutput(lvlDebug, eString(buf) + "\n");
+	}
 }
 
 void eDebugNoNewLine(const char* fmt, ...)
@@ -59,7 +68,10 @@ void eDebugNoNewLine(const char* fmt, ...)
 	if (logOutputConsole)
 		fprintf(stderr, buf);
 	else
+	{
+		singleLock s(signalLock);
 		logOutput(lvlDebug, buf);
+	}
 }
 
 void eWarning(const char* fmt, ...)
@@ -72,6 +84,9 @@ void eWarning(const char* fmt, ...)
 	if (logOutputConsole)
 		fprintf(stderr, "%s\n", buf);
 	else
+	{
+		singleLock s(signalLock);
 		logOutput(lvlWarning, eString(buf) + "\n");
+	}
 }
 #endif // DEBUG
