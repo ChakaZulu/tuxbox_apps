@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.h,v 1.9 2003/08/14 18:27:41 obi Exp $
+ * $Id: pmt.h,v 1.10 2003/08/15 23:34:09 obi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -26,6 +26,6 @@
 #include "ci.h"
 
 int parse_pmt(CZapitChannel * const channel);
-int pmt_set_update_filter(CZapitChannel * const channel);
+int pmt_set_update_filter(CZapitChannel * const channel, int *fd);
 
 #endif /* __zapit_pmt_h__ */

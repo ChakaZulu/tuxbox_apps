@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.31 2003/08/14 18:27:43 obi Exp $
+ * $Id: pmt.cpp,v 1.32 2003/08/15 23:34:11 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -309,15 +309,14 @@ int parse_pmt(CZapitChannel * const channel)
 	return 0;
 }
 
-int pmt_set_update_filter(CZapitChannel * const channel)
+int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 {
 	struct dmx_sct_filter_params dsfp;
-	int fd;
 
 	if (channel->getPmtPid() == 0)
 		return -1;
 
-	if ((fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
+	if ((*fd == -1) && ((*fd = open(DEMUX_DEVICE, O_RDWR)) < 0)) {
 		perror(DEMUX_DEVICE);
 		return -1;
 	}
@@ -338,11 +337,12 @@ int pmt_set_update_filter(CZapitChannel * const channel)
 	dsfp.pid = channel->getPmtPid();
 	dsfp.timeout = 0;
 
-	if (fop(ioctl, DMX_SET_FILTER, &dsfp) < 0) {
-		close(fd);
+	if (ioctl(*fd, DMX_SET_FILTER, &dsfp) < 0) {
+		perror("DMX_SET_FILTER");
+		close(*fd);
 		return -1;
 	}
 
-	return fd;
+	return 0;
 }
 

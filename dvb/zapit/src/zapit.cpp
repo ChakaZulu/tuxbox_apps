@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.327 2003/08/14 18:27:42 obi Exp $
+ * $Id: zapit.cpp,v 1.328 2003/08/15 23:34:10 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -340,7 +340,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	cam->setCaPmt(thisChannel->getCaPmt());
 	saveSettings(false);
 
-	pmt_update_fd = pmt_set_update_filter(thisChannel);
+	pmt_set_update_filter(thisChannel, &pmt_update_fd);
 
 	if (channel != thisChannel)
 		delete thisChannel;
@@ -1520,7 +1520,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.327 2003/08/14 18:27:42 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.328 2003/08/15 23:34:10 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1614,8 +1614,6 @@ int main(int argc, char **argv)
 			if (poll(pfd, pollnum, 0) > 0) {
 				for (i = 0; i < pollnum; i++) {
 					if (pfd[i].fd == pmt_update_fd) {
-						close(pmt_update_fd);
-						pmt_update_fd = -1;
 						zapit(channel->getChannelID(), current_is_nvod, 0);
 					}
 				}
