@@ -59,8 +59,6 @@ lib/base/thread.cpp
 lib/driver/eavswitch.cpp
 lib/driver/rc.cpp
 lib/driver/streamwd.cpp
-lib/driver/rcdreambox2.cpp
-lib/driver/rcdbox.cpp
 lib/socket/socket.cpp
 lib/socket/serversocket.cpp
 lib/system/econfig.cpp
