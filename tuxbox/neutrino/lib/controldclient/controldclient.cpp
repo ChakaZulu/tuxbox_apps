@@ -135,10 +135,6 @@ void CControldClient::videoFormatCallback( void* arg, int format)
 
 void CControldClient::setVideoFormat(char format, bool bDoUnregister = true)
 {
-	WDECallbackFunction callBack;
-	callBack.call = &videoFormatCallback;
-	callBack.arg = this;
-
 	remotemsg.version=1;
 	remotemsg.cmd=5;
 	remotemsg.param=format;
