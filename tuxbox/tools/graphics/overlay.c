@@ -19,7 +19,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  ******************************************************************************
- * $Id: overlay.c,v 1.1 2003/11/14 00:16:29 carjay Exp $
+ * $Id: overlay.c,v 1.2 2003/11/14 00:24:48 carjay Exp $
  ******************************************************************************/
 
 #include <stdlib.h>
@@ -128,8 +128,7 @@ int main (int argc, char **argv){
 		return 2;
 	}
 
-//	usleep (250000);
-	sleep (5);
+	sleep (atoi(argv[5]));
 		overlay=0;
 	stat = ioctl(vfd, VIDIOC_OVERLAY, &overlay);		// turn off overlay
 	if (stat<0){
