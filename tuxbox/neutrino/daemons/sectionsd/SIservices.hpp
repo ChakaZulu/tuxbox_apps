@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.3 2001/06/11 19:22:54 fnbrd Exp $
+// $Id: SIservices.hpp,v 1.4 2001/06/27 11:59:44 fnbrd Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIservices.hpp,v $
+// Revision 1.4  2001/06/27 11:59:44  fnbrd
+// Angepasst an gcc 3.0
+//
 // Revision 1.3  2001/06/11 19:22:54  fnbrd
 // Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
 //
@@ -38,6 +41,9 @@
 // forward references
 class SIservice;
 class SIevent;
+
+// needed for gcc 3.0
+using namespace std;
 
 struct sdt_service {
   unsigned short service_id : 16;
@@ -79,7 +85,8 @@ class SInvodReference
 };
 
 // Fuer for_each
-struct printSInvodReference : public unary_function<SInvodReference, void>
+struct printSInvodReference : public unary_function<class SInvodReference, void>
+//struct printSInvodReference : public ::std::unary_function<class SInvodReference, void>
 {
   void operator() (const SInvodReference &ref) { ref.dump();}
 };

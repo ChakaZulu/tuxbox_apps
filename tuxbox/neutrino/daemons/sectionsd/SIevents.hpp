@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.9 2001/06/11 19:22:54 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.10 2001/06/27 11:59:44 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.10  2001/06/27 11:59:44  fnbrd
+// Angepasst an gcc 3.0
+//
 // Revision 1.9  2001/06/11 19:22:54  fnbrd
 // Events haben jetzt mehrere Zeiten, fuer den Fall von NVODs (cinedoms)
 //
@@ -57,6 +60,9 @@
 // forward references
 class SIservice;
 class SIservices;
+
+// needed for gcc 3.0
+using namespace std;
 
 struct eit_event {
   unsigned short event_id : 16;
@@ -118,13 +124,13 @@ class SIcomponent {
 };
 
 // Fuer for_each
-struct printSIcomponent : public unary_function<SIcomponent, void>
+struct printSIcomponent : public unary_function<class SIcomponent, void>
 {
   void operator() (const SIcomponent &c) { c.dump();}
 };
 
 // Fuer for_each
-struct saveSIcomponentXML : public unary_function<SIcomponent, void>
+struct saveSIcomponentXML : public unary_function<class SIcomponent, void>
 {
   FILE *f;
   saveSIcomponentXML(FILE *fi) { f=fi;}

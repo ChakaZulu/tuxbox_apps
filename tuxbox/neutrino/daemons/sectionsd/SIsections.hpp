@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.6 2001/06/11 01:15:16 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.7 2001/06/27 11:59:44 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.7  2001/06/27 11:59:44  fnbrd
+// Angepasst an gcc 3.0
+//
 // Revision 1.6  2001/06/11 01:15:16  fnbrd
 // NVOD reference descriptors und Service-Typ
 //
@@ -46,6 +49,9 @@
 //
 
 // #pragma pack(1) // fnbrd: geht anscheinend nicht beim gcc
+
+// needed for gcc 3.0
+using namespace std;
 
 struct SI_section_SDT_header {
       unsigned char table_id : 8;
