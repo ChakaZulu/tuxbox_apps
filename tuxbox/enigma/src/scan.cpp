@@ -1,10 +1,10 @@
 #include <time.h>
 #include "scan.h"
+#include "enigma.h"
+
 #include <core/dvb/frontend.h>
 #include <core/dvb/si.h>
 #include <core/dvb/dvb.h>
-#include "enigma.h"
-
 #include <core/gui/elabel.h>
 #include <core/gui/ewindow.h>
 #include <core/gdi/font.h>
@@ -33,7 +33,7 @@ tsSelectType::tsSelectType(eWidget *parent): eWidget(parent)
 
 	new eListBoxEntryText(list, _("auto scan"), (void*)1);
 	new eListBoxEntryText(list, _("manual scan.."), (void*)2);
-/*	list->setCurrent(*/new eListBoxEntryText(list, _("abort"), (void*)0);// );
+	list->setCurrent( new eListBoxEntryText(list, _("abort"), (void*)0) );
 
 	CONNECT(list->selected, tsSelectType::selected);
 }
@@ -63,11 +63,11 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LC
 		ft=eTransponderWidget::deliverySatellite;
 		break;
 	}
-	
+
 	transponder_widget=new eTransponderWidget(this, 1, ft);
 	transponder_widget->load();
 	transponder_widget->setName("transponder");
-	
+
 	festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
 	festatus_widget->setName("festatus");
 
@@ -92,14 +92,13 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LC
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "tsManual"))
 		eFatal("skin load of \"tsManual\" failed");
-		
+
 	transponder_widget->setTransponder(&transponder);
 
 	CONNECT(b_start->selected, tsManual::start);
 	CONNECT(b_abort->selected, tsManual::abort);
-	
 	CONNECT(transponder_widget->updated, tsManual::retune);
-	
+
 	retune();
 }
 
@@ -199,7 +198,6 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 
 void tsAutomatic::start()
 {
-	eDebug("tsAutomatic start");
 	eDVBScanController *sapi=eDVB::getInstance()->getScanAPI();
 	if (!sapi)
 	{	
@@ -264,10 +262,14 @@ void tsAutomatic::dvbEvent(const eDVBEvent &event)
 	}
 }
 
-int tsAutomatic::loadNetworks()
+existNetworks::existNetworks()
+:fetype( eFrontend::getInstance()->Type() )
 {
-	int fetype=eFrontend::getInstance()->Type();
 
+}
+
+int existNetworks::parseNetworks()
+{
 	XMLTreeParser parser("ISO-8859-1");
 	
 	int done=0;
@@ -331,16 +333,10 @@ int tsAutomatic::loadNetworks()
 		} else
 			eFatal("unknown packet %s", node->GetType());
 
-		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
-			for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-				for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
-					if ( ( i->possibleTransponders.front().satellite.orbital_position == s->getOrbitalPosition() ) || (fetype == eFrontend::feCable) )
-						new eListBoxEntryText(l_network, i->name, (void*)&*i, eTextPara::dirCenter);
-
 	return 0;
 }
 
-int tsAutomatic::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
+int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 {
 	const char *name=node->GetAttributeValue("name");
 	if (!name)
@@ -399,7 +395,7 @@ int tsAutomatic::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 				continue;
 			if (!ainversion)
 				ainversion="0";
-			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate), 
+			int frequency=atoi(afrequency), symbol_rate=atoi(asymbol_rate),
 					polarisation=atoi(apolarisation), fec_inner=atoi(afec_inner), inversion=atoi(ainversion);
 			t.setSatellite(frequency, symbol_rate, polarisation, fec_inner, orbital_position, inversion);
 			break;
@@ -409,6 +405,22 @@ int tsAutomatic::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 		}
 		packet.possibleTransponders.push_back(t);
 	}
+	return 0;
+}
+
+int tsAutomatic::loadNetworks()
+{
+	int err;
+
+	if(	(err = existNetworks::parseNetworks()) )
+		return err;
+
+	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
+		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
+			for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
+				if ( ( i->possibleTransponders.front().satellite.orbital_position == s->getOrbitalPosition() ) || (fetype == eFrontend::feCable) )
+					new eListBoxEntryText(l_network, i->name, (void*)&*i, eTextPara::dirCenter);
+
 	return 0;
 }
 
@@ -676,7 +688,7 @@ TransponderScan::TransponderScan( eWidget *LCDTitle, eWidget *LCDElement)
 	window->cresize(eSize(460, 400));
 	
 	statusbar=new eStatusBar(window);
-	statusbar->setFlags( eStatusBar::flagLoadDeco );
+	statusbar->loadDeco();
 	statusbar->move(ePoint(0, window->getClientSize().height()-30) );
 	statusbar->resize( eSize( window->getClientSize().width(), 30 ) );
 }

@@ -2,6 +2,7 @@
 #define __core_gui_decoration_h
 
 #include <core/base/epoint.h>
+#include <core/base/estring.h>
 class gPixmap;
 class gPainter;
 
@@ -10,12 +11,13 @@ class eDecoration
 	gPixmap *iTopLeft, *iTop,
 			*iTopRight, *iLeft, *iRight, 
 			*iBottomLeft, *iBottom, *iBottomRight;
-			
+
+	eString	basename;
 public:
 	operator bool() { return iTopLeft || iTop || iTopRight || iLeft || iRight || iBottomLeft || iBottom || iBottomRight; }
 	
 	eDecoration();
-	void load(const char *basename);
+	bool load(const eString& basename);
 
 	void drawDecoration(gPainter *target, ePoint size);
 	int borderTop, borderLeft, borderBottom, borderRight;

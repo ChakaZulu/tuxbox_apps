@@ -14,7 +14,6 @@ eRect eNumber::getNumberRect(int n)
 		return eRect( deco.borderLeft-1 + n * dspace, deco.borderTop, dspace, crect.height() );
 	else
 		return eRect( n * dspace, 0, dspace, height() );
-
 }
 
 void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
@@ -63,23 +62,11 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 	{
 	case eWidgetEvent::changedSize:
 		if (deco)
-		{
-			crect.setLeft( deco.borderLeft );
-			crect.setTop( deco.borderTop );
-			crect.setBottom( height() - deco.borderBottom );
-			crect.setRight( width() - deco.borderRight );
 			dspace = (crect.width()-2) / len;
-		}
-		if (deco_selected)
-		{
-			crect_selected.setLeft( deco_selected.borderLeft );
-			crect_selected.setTop( deco_selected.borderTop );
-			crect_selected.setBottom( height() - deco_selected.borderBottom );
-			crect_selected.setRight( width() - deco_selected.borderRight );
-			space_selected = (crect_selected.width()-2) / len;
-		}
 		else
 			dspace = (size.width()-2) / len;	
+		if (deco_selected)
+			space_selected = (crect_selected.width()-2) / len;
 		break;
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->left)
@@ -113,11 +100,11 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 	default:
 		break;
 	}
-	return eWidget::eventHandler(event);
+	return eDecoWidget::eventHandler(event);
 }
 
-eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eWidget* descr, int grabfocus, int loadDeco)
-	:eWidget(parent, grabfocus), 
+eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eWidget* descr, int grabfocus, const char *deco)
+	:eDecoWidget(parent, grabfocus, deco ),
 	active(0), 
 	cursorB(eSkin::getActive()->queryScheme("global.selected.background")),	
 	cursorF(eSkin::getActive()->queryScheme("global.selected.foreground")),	
@@ -125,18 +112,12 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
 	have_focus(0), digit(isactive), isactive(isactive), descr(descr), tmpDescr(0)
 {
-	if (loadDeco)
-	{
-		deco.load("eNumber");
-		deco_selected.load("eNumber.selected");
-	}
-
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
 	setMaximumDigits(_maxdigits);
 	setFlags(0);
 	setBase(10);
-	for (int i=0; i<len; i++)
+	for (int i=0; init && i<len; i++)
 		number[i]=init[i];
 	addActionMap(&i_cursorActions->map);
 }
@@ -196,7 +177,7 @@ void eNumber::gotFocus()
 
 	if (parent && parent->LCDElement)  // detect if LCD Avail
 	{
-		LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0, 0);
+		LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
 		LCDTmp->hide();
 		((eNumber*)LCDTmp)->setFlags(flags);
 		eSize s = parent->LCDElement->getSize();

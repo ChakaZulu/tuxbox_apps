@@ -125,10 +125,8 @@ int eTransponder::satellite::tune(eTransponder *trans)
 		eDebug("couldn't find sat %d..", orbital_position);
 		return -ENOENT;
 	}
-	
-	eLNB &lnb=sat->getLNB();
-	
-	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, lnb);
+
+	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, sat->getLNB(), sat->getSwitchParams() );
 }
 
 eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number):
@@ -281,6 +279,17 @@ eSatellite *eLNB::addSatellite(int orbital_position)
 {
 	satellites.push_back(new eSatellite(tplist, orbital_position, *this));
 	return satellites.back();
+}
+
+void eLNB::addSatellite( eSatellite *satellite)
+{
+	satellites.push_back(satellite);
+}
+
+eSatellite* eLNB::takeSatellite( eSatellite *satellite)
+{
+	satellites.take( satellite );	
+	return satellite;
 }
 
 void eLNB::deleteSatellite(eSatellite *satellite)
@@ -465,9 +474,11 @@ void eTransponderList::readLNBData()
  	while (1)
 	{
 		unsigned int tmp=0;
+		int tmpint=0;
 
 		if ( eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofH").c_str(), tmp) )
 			break;
+
 		lnbs.push_back(eLNB(*this));
 		eLNB &lnb=lnbs.back();
 
@@ -479,9 +490,11 @@ void eTransponderList::readLNBData()
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofThreshold").c_str(), tmp);
 		lnb.setLOFThreshold(tmp);
 
-		int tmpint;
-		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DISEqCpara").c_str(), tmpint);
-		lnb.getDiSEqC().sat=tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DISEqCMode").c_str(), tmpint );
+		lnb.getDISEqC().DISEqCMode = (eDISEqC::tDISEqCMode) tmpint;
+
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DISEqCParam").c_str(), tmpint );
+		lnb.getDISEqC().DISEqCParam = (eDISEqC::tDISEqCParam) tmpint;
 
 		int satread=0;
 		while(1)
@@ -491,8 +504,17 @@ void eTransponderList::readLNBData()
 				break;  // no satellite for this lnb found
 
 			eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/description").c_str(), descr) ;
+			eSatellite *sat = lnb.addSatellite(tmpint);
+			sat->setDescription(descr);
 
-			lnb.addSatellite(tmpint)->setDescription(descr);
+			eSwitchParameter &sParams = sat->getSwitchParams();
+
+			eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/VoltageMode").c_str(), tmpint);
+			sParams.VoltageMode = (eSwitchParameter::VMODE)tmpint;
+
+			eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/satellites/"+eString().setNum(satread)+"/HiLoSignal").c_str(), tmpint);
+			sParams.HiLoSignal = (eSwitchParameter::SIG22)tmpint;
+
 			satread++;
 		}
 		lnbread++;
@@ -507,8 +529,13 @@ void eTransponderList::readLNBData()
 			lnb.setLOFHi(10600000);
 			lnb.setLOFLo(9750000);
 			lnb.setLOFThreshold(11700000);
-			lnb.getDiSEqC().sat=0;
-			lnb.addSatellite(192)->setDescription("Astra 19.2E");
+			lnb.getDISEqC().DISEqCParam=eDISEqC::AA;
+			lnb.getDISEqC().DISEqCMode=eDISEqC::V1_0;		
+			eSatellite *sat = lnb.addSatellite(192);
+			sat->setDescription("Astra 19.2E");
+			eSwitchParameter &sParams = sat->getSwitchParams();
+			sParams.VoltageMode = eSwitchParameter::HV;
+			sParams.HiLoSignal = eSwitchParameter::HILO;
 		}
 		{
 			lnbs.push_back(eLNB(*this));
@@ -516,12 +543,16 @@ void eTransponderList::readLNBData()
 			lnb.setLOFHi(10600000);
 			lnb.setLOFLo(9750000);
 			lnb.setLOFThreshold(11700000);
-			lnb.getDiSEqC().sat=1;
-			lnb.addSatellite(130)->setDescription("Eutelsat 13.0E");
+			lnb.getDISEqC().DISEqCParam=eDISEqC::AB;
+			lnb.getDISEqC().DISEqCMode=eDISEqC::V1_0;		
+			eSatellite *sat = lnb.addSatellite(130);
+			sat->setDescription("Eutelsat 13.0E");
+			eSwitchParameter &sParams = sat->getSwitchParams();
+			sParams.VoltageMode = eSwitchParameter::HV;
+			sParams.HiLoSignal = eSwitchParameter::HILO;
 		}
 	}
-	else
-		eDebug("%i lnbs readed", lnbread);
+	eDebug("%i lnbs readed", lnbread);
 }
 
 void eTransponderList::writeLNBData()
@@ -534,16 +565,22 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), it->getLOFHi() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofL").c_str(), it->getLOFLo() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofThreshold").c_str(), it->getLOFThreshold() );
-		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DISEqCpara").c_str(), it->getDiSEqC().sat );
-
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DISEqCMode").c_str(), (int) it->getDISEqC().DISEqCMode );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DISEqCParam").c_str(), (int) it->getDISEqC().DISEqCParam );
 		int satwrite=0;
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 		{
 			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/OrbitalPosition").c_str(), s->getOrbitalPosition() );
 			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/description").c_str(), s->getDescription().c_str() );
+			eSwitchParameter &sParams = s->getSwitchParams();
+			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/VoltageMode").c_str(), (int) sParams.VoltageMode );
+			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/HiLoSignal").c_str(), (int) sParams.HiLoSignal );
 			satwrite++;
 		}
 		lnbwrite++;
 	}
 	eDebug("%i LNBs written", lnbwrite);
+	unsigned int tmp;
+	while (	!eConfig::getInstance()->getKey( (basepath+eString().setNum(++lnbwrite)+"/lofH").c_str(), tmp) )	// erase no more exist lnbs...
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(++lnbwrite)).c_str() );
 }

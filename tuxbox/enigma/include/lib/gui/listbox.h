@@ -10,14 +10,12 @@
 #include <core/gui/eskin.h>
 #include <core/gui/ewindow.h>
 #include <core/gui/guiactions.h>
-#include <core/gui/decoration.h>
 #include <core/gui/statusbar.h>
 
 int calcFontHeight( const gFont& font );
 
-class eListBoxBase: public eWidget
+class eListBoxBase: public eDecoWidget
 {
-	eDecoration deco, deco_selected;	
 	gPixmap *iArrowUpDown, *iArrowUp, *iArrowDown, *iArrowLeft, *iArrowRight;
 protected:
 	const eWidget* descr;
@@ -26,15 +24,12 @@ protected:
 	eRect crect, crect_selected;
 	int MaxEntries, item_height, flags;
 public:
-	enum
-	{
-		flagNoUpDownMovement=1,
-		flagNoPageMovement=2,
-		flagLoadDeco=4
-	};
+	enum	{		flagNoUpDownMovement=1,		flagNoPageMovement=2,		flagShowEntryHelp=4	};
+	enum	{		OK = 0,		ERROR=1,		E_ALLREADY_SELECTED = 2,		E_COULDNT_FIND = 4,		E_INVALID_ENTRY = 8	};
 	void setFlags(int);
+	void removeFlags(int);
 protected:
-	eListBoxBase(eWidget* parent, const eWidget* descr=0);
+	eListBoxBase(eWidget* parent, const eWidget* descr=0, const char *deco="eListBox" );
 	eRect getEntryRect(int n);
 	int setProperty(const eString &prop, const eString &value);
 	int eventHandler(const eWidgetEvent &event);
@@ -45,7 +40,6 @@ protected:
 	int newFocus();
 	void gotFocus();
 	void lostFocus();
-	void loadDeco();
 };
 
 template <class T>
@@ -56,6 +50,10 @@ class eListBox: public eListBoxBase
 	ePtrList<T> childs;
 	ePtrList_T_iterator top, bottom, current;
 	int recalced;
+	void redrawWidget(gPainter *target, const eRect &area);
+	int eventHandler(const eWidgetEvent &event);
+	void lostFocus();
+	void gotFocus();
 public:
 	eListBox(eWidget *parent, const eWidget* descr=0 );
 	~eListBox();
@@ -65,11 +63,12 @@ public:
 	void append(T* e, bool holdCurrent=false);
 	void remove(T* e, bool holdCurrent=false);
 	void clearList();
+	int getCount() { return childs.size(); }
 
 	Signal1<void, T*> selected;	
 	Signal1<void, T*> selchanged;
 
-	void setCurrent(const T *c);
+	int setCurrent(const T *c);
 	T* getCurrent()	{ return current != childs.end() ? *current : 0; }
 	T* goNext();
 	T* goPrev();
@@ -77,11 +76,13 @@ public:
 	void sort();
 
 	template <class Z>
-	void forEachEntry(Z ob)
+	int forEachEntry(Z ob)
 	{
 		for (ePtrList_T_iterator i(childs.begin()); i!=childs.end(); ++i)
-			if (ob(**i))
-				break;
+			if ( ob(**i) )
+				return OK;
+
+		return ERROR;
 	}
 
 	enum
@@ -91,10 +92,6 @@ public:
 
 	int moveSelection(int dir);
 	void setActiveColor(gColor back, gColor front);
-	void redrawWidget(gPainter *target, const eRect &area);
-	int eventHandler(const eWidgetEvent &event);
-	void lostFocus();
-	void gotFocus();
 };
 
 class eListBoxEntry: public Object
@@ -102,9 +99,10 @@ class eListBoxEntry: public Object
 	friend class eListBox<eListBoxEntry>;
 protected:
 	eListBox<eListBoxEntry>* listbox;
+	eString helptext;
 public:
-	eListBoxEntry(eListBox<eListBoxEntry>* parent)
-		:listbox(parent)
+	eListBoxEntry(eListBox<eListBoxEntry>* parent, const char *hlptxt=0)
+		:listbox(parent), helptext(hlptxt?hlptxt:_("no description avail"))
 	{	
 		if (listbox)
 			listbox->append(this);
@@ -116,6 +114,7 @@ public:
 	}
 
 	void drawEntryRect( gPainter* rc, const eRect& where, const gColor& coActiveB, const gColor& coActiveF, const gColor& coNormalB, const gColor& coNormalF, int state );
+	const eString &getHelpText() const { return helptext; }
 };
 
 class eListBoxEntryText: public eListBoxEntry
@@ -131,13 +130,15 @@ protected:
 public:
 	static int getEntryHeight();
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0 )
-		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb ), text(txt), key(key), align(align), para(0)
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0, const char* hlptxt=0 )
+		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb, hlptxt ), text(txt),
+		 key(key), align(align), para(0)
 	{
 	}
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0 )
-		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb ), text(txt), key(key), align(align), para(0)
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0, const char* hlptxt=0 )
+		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb, hlptxt ), text(txt),
+		 key(key), align(align), para(0)
 	{
 	}
 
@@ -152,8 +153,8 @@ public:
 	}
 	
 	void *& getKey() { return key; }
+	const void* getKey() const { return key; }
 	const eString& getText() { return text; }
-
 protected:
 	const eString& redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int state );
 };
@@ -184,13 +185,11 @@ protected:
 class eListBoxEntryMenu: public eListBoxEntryText
 {
 	friend class eListBox<eListBoxEntryMenu>;
-	eString helptext;
 public:
-	const eString &getHelpText() const { return helptext; }
 	Signal0<void> selected;
 
 	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt, const char* hlptxt=0, int align=0 )
-		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt, 0, align), helptext(hlptxt?hlptxt:_("no description avail") )
+		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt, 0, align, hlptxt)
 	{
 		if (listbox)
 			CONNECT(listbox->selected, eListBoxEntryMenu::LBSelected);
@@ -307,10 +306,10 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 		if ( rc.contains(rect) )
 			if ( entry == current )
 			{
-				if ( LCDTmp )
-					LCDTmp->setText( entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 1 : ( MaxEntries > 1 ? 2 : 0 ) ) ) );
-				else if ( parent->LCDElement )
-					parent->LCDElement->setText( entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 1 : ( MaxEntries > 1 ? 2 : 0 ) ) ) );
+				if ( LCDTmp ) // LCDTmp is only valid, when we have the focus
+					LCDTmp->setText( entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), 1 ) );				
+				else if ( parent->LCDElement && have_focus )
+					parent->LCDElement->setText( entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), 1 ) );
 				else
 					entry->redraw(target, rect, colorActiveB, colorActiveF, getBackgroundColor(), getForegroundColor(), ( have_focus ? 1 : ( MaxEntries > 1 ? 2 : 0 ) )	);		
 			}
@@ -472,6 +471,9 @@ inline int eListBox<T>::moveSelection(int dir)
 	if (*current != oldptr)  // current has changed
 		/*emit*/ selchanged(*current);
 
+	if (flags & flagShowEntryHelp)
+		setHelpText( current != childs.end() ? current->getHelpText():eString(_("no description avail")));
+
 	if (isVisible())
 	{
 		if (oldtop != *top)
@@ -536,10 +538,10 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 }
 
 template <class T>
-inline void eListBox<T>::setCurrent(const T *c)
+inline int eListBox<T>::setCurrent(const T *c)
 {
 	if (childs.empty() || *current == c)  // no entries or current is equal the entry to search
-		return;	// do nothing
+		return E_ALLREADY_SELECTED;	// do nothing
 
 	ePtrList_T_iterator it(childs.begin());
 
@@ -548,7 +550,7 @@ inline void eListBox<T>::setCurrent(const T *c)
 			break;
 
 	if ( it == childs.end() ) // entry not in listbox... do nothing
-		return;
+		return E_COULDNT_FIND;
 
 	int newCurPos=-1;
 	int oldCurPos=-1;
@@ -596,7 +598,10 @@ inline void eListBox<T>::setCurrent(const T *c)
 		if (isVisible())
 			invalidate();   // Draw all
   }
-	return;
+
+	/*emit*/ selchanged(*current);
+
+	return OK;
 }
 
 template <class T>
@@ -641,9 +646,9 @@ inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width, b
 	list.resize(eSize(getClientSize().width()-20, getClientSize().height()-(sbar?35:5) ));
 	if (sbar)
 	{
-		statusbar->move( ePoint(0, getClientRect().bottom()-30) );
-		statusbar->resize( eSize( size.width(), 30) );
-		statusbar->setFlags( eStatusBar::flagLoadDeco );
+		statusbar->move( ePoint(getClientRect().left(), getClientRect().bottom()-30) );
+		statusbar->resize( eSize( getClientRect().width(), 30) );
+		statusbar->loadDeco();
 	}
 }
 

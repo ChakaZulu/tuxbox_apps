@@ -55,6 +55,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ip->resize(eSize(200, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);
 	ip->setHelpText(_("enter IP Adress of the box (0..9, left, right)"));
+	ip->loadDeco();
+	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
 	l=new eLabel(this);
 	l->setText("Netmask:");
@@ -67,6 +69,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	netmask->resize(eSize(200, fd+10));
 	netmask->setFlags(eNumber::flagDrawPoints);
 	netmask->setHelpText(_("enter netmask of your network (0..9, left, right)"));
+	netmask->loadDeco();
+	CONNECT(netmask->selected, eZapNetworkSetup::fieldSelected);
 	
 	l=new eLabel(this);
 	l->setText("Nameserver:");
@@ -79,6 +83,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	dns->resize(eSize(200, fd+10));
 	dns->setFlags(eNumber::flagDrawPoints);
 	dns->setHelpText(_("enter your domain name server (0..9, left, right)"));
+	dns->loadDeco();
+	CONNECT(dns->selected, eZapNetworkSetup::fieldSelected);
 
 	l=new eLabel(this);
 	l->setText("Gateway:");
@@ -91,8 +97,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 	gateway->resize(eSize(200, fd+10));
 	gateway->setFlags(eNumber::flagDrawPoints);
 	gateway->setHelpText(_("enter ip of your gateway (0..9, left, right)"));
-
-	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
+	gateway->loadDeco();
+	CONNECT(gateway->selected, eZapNetworkSetup::fieldSelected);
 
 	dosetup=new eCheckbox(this, sdosetup, 1);
 	dosetup->setText("Configure Network");
@@ -105,10 +111,12 @@ eZapNetworkSetup::eZapNetworkSetup():
 	ok->move(ePoint(20, 230));
 	ok->resize(eSize(90, fd+4));
 	ok->setHelpText(_("close window and save changes"));
+	ok->loadDeco();
 	
 	CONNECT(ok->selected, eZapNetworkSetup::okPressed);
 
 	abort=new eButton(this);
+	abort->loadDeco();
 	abort->setText(_("abort"));
 	abort->move(ePoint(140, 230));
 	abort->resize(eSize(100, fd+4));
@@ -119,7 +127,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	statusbar=new eStatusBar(this);
 	statusbar->move( ePoint(0, clientrect.height()-30 ) );
 	statusbar->resize( eSize( clientrect.width(), 30) );
-	statusbar->setFlags( eStatusBar::flagLoadDeco );
+	statusbar->loadDeco();
 }
 
 eZapNetworkSetup::~eZapNetworkSetup()

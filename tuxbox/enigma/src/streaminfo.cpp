@@ -415,7 +415,7 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), status
 	
 	mp.first();
 
-	statusbar.setFlags( eStatusBar::flagLoadDeco );
+	statusbar.loadDeco();
 	statusbar.move( ePoint(0, clientrect.height()-40) );
 	statusbar.resize( eSize(clientrect.width(), 40) );
 	eRect rect = statusbar.getClientRect();
@@ -423,11 +423,10 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), status
 	lb = new eListBox<eListBoxEntryMenu>( &statusbar.getLabel() );
 	lb->move( ePoint(rect.width()-50, 2) );
 	lb->resize( eSize(45, rect.height()-5) );
-	lb->setFlags( eListBoxBase::flagNoPageMovement | eListBoxBase::flagNoUpDownMovement/* | eListBoxBase::flagLoadDeco*/ );
-//	const gFont &ft = eSkin::getActive()->queryFont("eStatusBar");
-	new eListBoxEntryMenu( lb, "1/3", _("Service information (right)"), eTextPara::dirCenter/*, ft*/ );
-	new eListBoxEntryMenu( lb, "2/3", _("Scramble system information (left, right)"), eTextPara::dirCenter/*, ft*/ );
-	new eListBoxEntryMenu( lb, "3/3", _("Transponder information (left)"), eTextPara::dirCenter/*, ft*/ );
+	lb->setFlags( eListBoxBase::flagNoPageMovement | eListBoxBase::flagNoUpDownMovement );
+	new eListBoxEntryMenu( lb, "1/3", _("Service information (right)"), eTextPara::dirCenter );
+	new eListBoxEntryMenu( lb, "2/3", _("Scramble system information (left, right)"), eTextPara::dirCenter );
+	new eListBoxEntryMenu( lb, "3/3", _("Transponder information (left)"), eTextPara::dirCenter );
 	descr = new eLabel( &statusbar.getLabel() );
 	descr->move( ePoint(0,0) );
 	descr->resize( eSize(rect.width() - 50, rect.height()) );

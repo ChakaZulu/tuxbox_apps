@@ -11,7 +11,7 @@
 #include <core/gdi/grc.h>
 #include <core/driver/rc.h>
 #include <core/gui/actions.h>
-
+#include <core/gui/decoration.h>
 #include <list>
 
 class eWidgetEvent
@@ -25,7 +25,7 @@ public:
 		gotFocus, lostFocus,
 		
 		changedText, changedFont, changedForegroundColor, changedBackgroundColor,
-		changedSize, changedPosition, changedPixmap,
+		changedSize, changedPosition, changedPixmap, childChangedHelpText,
 
 		evtAction
 	} type;
@@ -94,6 +94,12 @@ public:
 	 * \sa eWidget::close
 	 */
 	void reject();
+	/**
+	 * \brief Signal is send, when the focus Changed
+	 *
+	 * used from a existing statusbar.
+	 * \sa eWidget::focusChanged
+	 */
 	Signal1<void, const eWidget*> focusChanged;
 protected:
 	ePtrList<eWidget> childlist;
@@ -424,8 +430,7 @@ public:
 
 	const eString& getHelpText() const	{	return helptext;	}
 
-	void setHelpText( const eString txt )	{	helptext = txt; }
-	
+	void setHelpText( const eString&);
 	/**
 	 * \brief Sets a property.
 	 *
@@ -455,6 +460,27 @@ public:
 	
 	void zOrderLower();
 	void zOrderRaise();
+};
+
+class eDecoWidget:public eWidget
+{
+protected:
+	eString strDeco;
+	eRect crect, crect_selected;
+	eDecoration deco, deco_selected;
+	int setProperty( const eString &prop, const eString &value);
+	int eventFilter( const eWidgetEvent &evt);
+public:
+	void setDeco( const char* deco )
+	{
+		strDeco = deco;
+	}
+	void loadDeco();
+	eDecoWidget( eWidget* parent=0, int takefocus=0, const char* deco="" )
+	:eWidget(parent, takefocus), strDeco( deco )
+	{	}	
+	const eDecoration& getDeco()	{ return deco; }
+	const eDecoration& getDecoSelected()	{ return deco_selected; }
 };
 
 #endif

@@ -21,7 +21,7 @@ eMessageBox::eMessageBox(eString message, eString caption, bool display_only): e
 	eSize ext=text->getExtend();
 
 // HACK ... the size given by getExtend is okay... but the the renderer sucks....
-	ext+=eSize(2,0);
+	ext+=eSize(10,0);
 ////////////////////////////
 
 	if (ext.width()<150)

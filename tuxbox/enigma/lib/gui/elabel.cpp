@@ -6,8 +6,8 @@
 #include <core/gui/eskin.h>
 #include <core/system/init.h>
 
-eLabel::eLabel(eWidget *parent, int flags, int takefocus ):
-	eWidget(parent, takefocus), blitFlags(0), flags(flags), para(0), align(eTextPara::dirLeft)
+eLabel::eLabel(eWidget *parent, int flags, int takefocus, const char *deco ):
+	eDecoWidget(parent, takefocus, deco), blitFlags(0), flags(flags), para(0), align( eTextPara::dirLeft )
 {
 	setForegroundColor(eSkin::getActive()->queryScheme("global.normal.foreground"));
 }
@@ -22,9 +22,9 @@ void eLabel::validate( const eSize* s )
 	if (!para)
   {
 		if (s)
-			para=new eTextPara(eRect(text_position.x(), text_position.y(), s->width() - text_position.x(), s->height() - text_position.y()));		
+			para=new eTextPara( eRect(text_position.x(), text_position.y(), s->width() - text_position.x(), s->height() - text_position.y()));		
 		else
-			para=new eTextPara(eRect(text_position.x(), text_position.y(), size.width() - text_position.x(), size.height() - text_position.y()));
+			para=new eTextPara( eRect(text_position.x(), text_position.y(), size.width() - text_position.x(), size.height() - text_position.y()));
 		para->setFont(font);
 		para->renderString(text, flags);
 		para->realign(align);
@@ -34,13 +34,13 @@ void eLabel::validate( const eSize* s )
 void eLabel::invalidate()
 {
 	if (para)
+	{
 		para->destroy();
-	para=0;
-}
+		para=0;
+	}
 
-void eLabel::willHide()
-{
-	invalidate(); // ob das sinn macht müsste mal überlegt werden
+	if (isVisible())
+		eDecoWidget::invalidate();  // we must redraw...
 }
 
 void eLabel::setFlags(int flag)
@@ -48,6 +48,11 @@ void eLabel::setFlags(int flag)
 	flags|=flag;
 	if (flag)
 		invalidate();
+}
+
+void eLabel::setBlitFlags( int flags )
+{
+	blitFlags |= flags;
 }
 
 void eLabel::removeFlags(int flag)
@@ -63,15 +68,27 @@ void eLabel::setAlign(int align)
 	invalidate();
 }
 
-void eLabel::redrawWidget(gPainter *target, const eRect &area)
+void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 {
+	eRect area;
+
+	if (deco_selected && have_focus)
+	{
+		deco_selected.drawDecoration(target, ePoint(width(), height()) );
+		area=crect_selected;
+	}
+	else if (deco)
+	{
+		deco.drawDecoration(target, ePoint(width(), height()) );
+		area=crect;
+	}
+	else
+		area = rc;
+
 	if (text.length())
 	{
-		if ( area.size().height() < size.height() || area.size().width() < size.width() )
-		{
-			invalidate();
+		if ( area.size().height() < size.height() || area.size().width() < size.width() )  // then deco is drawed
 			validate( &area.size() );
-		}
 		else
 			validate();
 
@@ -89,20 +106,21 @@ void eLabel::redrawWidget(gPainter *target, const eRect &area)
 		target->blit(*pixmap, pixmap_position, eRect(), (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
 }
 
-int eLabel::eventFilter(const eWidgetEvent &event)
+int eLabel::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
 	case eWidgetEvent::changedFont:
-		invalidate();
-		break;
 	case eWidgetEvent::changedText:
+	case eWidgetEvent::changedSize:
 		invalidate();
-		break;
+	break;
+	
 	default:
+		return eDecoWidget::eventHandler(event);
 		break;
 	}
-	return 0;
+	return 1;
 }
 
 eSize eLabel::getExtend()
@@ -126,20 +144,20 @@ int eLabel::setProperty(const eString &prop, const eString &value)
 	else if (prop=="align")
 	{
 		if (value=="left")
-			align=eTextPara::dirLeft;
+			setAlign(eTextPara::dirLeft);
 		else if (value=="center")
-			align=eTextPara::dirCenter;
+			setAlign(eTextPara::dirCenter);
 		else if (value=="right")
-			align=eTextPara::dirRight;
+			setAlign(eTextPara::dirRight);
 		else if (value=="block")
-			align=eTextPara::dirBlock;
+			setAlign(eTextPara::dirBlock);
 		else
-			align=eTextPara::dirLeft;
+			setAlign(eTextPara::dirLeft);
 	}
 	else if (prop=="vcenter")
 		setFlags( flagVCenter );
 	else
-		return eWidget::setProperty(prop, value);
+		return eDecoWidget::setProperty(prop, value);
 	return 0;
 }
 

@@ -374,6 +374,9 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 {
 	switch (evt.type)
 	{
+	case eWidgetEvent::childChangedHelpText:
+		/* emit */ focusChanged(focus);  // faked focusChanged Signal to the Statusbar
+	break;
 	case eWidgetEvent::evtAction:
 		if (evt.action == &i_focusActions->up)
 			focusNext(focusDirPrev);
@@ -683,6 +686,13 @@ void eWidget::setFocus(eWidget *newfocus)
 	/* emit */ focusChanged(focus);
 }
 
+void eWidget::setHelpText( const eString& e)
+{
+	helptext=e;
+	if ( parent )
+		parent->event( eWidgetEvent::childChangedHelpText );
+}
+
 void eWidget::setFont(const gFont &fnt)
 {
 	font=fnt;
@@ -989,5 +999,53 @@ public:
 		eSkin::removeWidgetCreator("eWidget", create_eWidget);
 	}
 };
+
+int eDecoWidget::setProperty( const eString &prop, const eString &value)
+{
+	if (prop == "loadDeco")
+	{
+		if ( value != "" )
+			strDeco=value;
+	
+		loadDeco();
+	}
+	else
+		return eWidget::setProperty( prop, value );
+	
+	return 0;
+}
+
+int eDecoWidget::eventFilter( const eWidgetEvent &evt )
+{
+	if ( evt.type == eWidgetEvent::changedSize )
+	{
+		if (deco)
+		{
+			crect.setLeft( deco.borderLeft );
+			crect.setTop( deco.borderTop );
+			crect.setRight( width() - 1 - deco.borderRight );
+			crect.setBottom( height() - 1 - deco.borderBottom );
+		}
+		if (deco_selected)
+		{
+			crect_selected.setLeft( deco_selected.borderLeft );
+			crect_selected.setTop( deco_selected.borderTop );
+			crect_selected.setRight( width() - 1 - deco_selected.borderRight );
+			crect_selected.setBottom( height() - 1 - deco_selected.borderBottom );
+		}
+	}
+	return 0; //always return 0... the eventHandler must been called...
+}
+
+void eDecoWidget::loadDeco()
+{
+	int i = 0;
+	if ( deco.load( strDeco ) )
+		i |= 1;
+	if ( deco_selected.load( strDeco+".selected" ) )
+		i |= 1;
+	if (i)
+		event( eWidgetEvent::changedSize );
+}
 
 eAutoInitP0<eWidgetSkinInit> init_eWidgetSkinInit(3, "eWidget");

@@ -3,29 +3,33 @@
 
 #include <list>
 
+#include <apps/enigma/scan.h>
 #include <core/gui/ebutton.h>
+#include <core/gui/combobox.h>
 #include <core/gui/enumber.h>
 #include <core/gui/listbox.h>
 #include <core/dvb/dvb.h>
 
+
 class eButton;
 
-class eSatelliteConfiguration: public eWindow
+class eSatelliteConfigurationManager: public eWindow, public existNetworks
 {
-public:
-	eSatelliteConfiguration(int sat);
-};
-
-class eSatelliteConfigurationManager: public eWindow
-{
+	eTimer* refresh;
 	eWidget *w_buttons;
 	eButton *button_close;
 	int eventHandler(const eWidgetEvent &event);
+	std::map< eComboBox*, std::pair< int, eSatellite*> > sat;
+	std::map< eButton*, std::pair< int, eLNB*> > lnb;
+	std::map< eComboBox*, eSwitchParameter::VMODE* > voltage;
+	std::map< eComboBox*, eSwitchParameter::SIG22* > hilo;
+	void redrawButtons();
 public:
-	void okPressed();
-	bool lnbSelected(eString& str);
-	bool satSelected(eString& str);
-	bool DISEqCSelected(eString& str);	
+	void closePressed();
+	void lnbSelected(eButton *who);
+	void satChanged(eComboBox *who, eListBoxEntryText *le);
+	void hiloChanged(eComboBox *who, eListBoxEntryText *le);
+	void voltageChanged(eComboBox *who, eListBoxEntryText *le);
 public:
 	eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
@@ -33,25 +37,23 @@ public:
 
 class eLNBSelitor: public eWindow  // Selitor = "Sel"ector + Ed"itor" :-)
 {
+	struct selectlnb;
 	eListBox<eListBoxEntryText> *lnb_list;
 	eNumber *lofH, *lofL, *threshold;
-	eButton *use; 	// use this LNB for Satelite and close LNBSelitor
-	eButton *apply; // apply changed to selected LNB
-	eButton *remove; // remove the selected LNB
+	eButton *save; 	// use this LNB for Satelite and close LNBSelitor
 	eButton *cancel; // close the window without apply changes
+	eComboBox *diseqcMode, *diseqcParam;
 	int eventHandler(const eWidgetEvent &event);
-	void selected(int*);
+	void numSelected(int*);
+	void lnbSelected(eListBoxEntryText*);
+	void lnbChanged( eListBoxEntryText* );
+	void diseqcModeChanged ( eListBoxEntryText* );
+	void onSave();
+	eSatellite *sat;
+	eLNB *lnb;
 public:
+	void setData( eLNB* lnb, eSatellite* sat);
 	eLNBSelitor();
-
-	void setCurrentLNB(int num)
-	{
-	}
-
-	int getCurrentLNB()
-	{
-		return 0;
-	}
 };
 
 #endif

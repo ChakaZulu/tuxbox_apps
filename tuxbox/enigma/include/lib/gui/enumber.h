@@ -2,7 +2,6 @@
 #define __enumber_h
 
 #include <core/gui/ewidget.h>
-#include <core/gui/decoration.h>
 
 class eLabel;
 class gPainter;
@@ -10,11 +9,9 @@ class gPainter;
 /**
  * \brief A widget to enter a number.
  */
-class eNumber: public eWidget
+class eNumber: public eDecoWidget
 {
 private:
-	eDecoration deco, deco_selected;
-	eRect crect, crect_selected;    // this eRects holds the real client sizes when decoration is used
 	void redrawNumber(gPainter *, int n, const eRect &rect);
 	void redrawWidget(gPainter *, const eRect &rect);
 	eRect getNumberRect(int n);
@@ -35,11 +32,10 @@ protected:
 public:
 	Signal1<void, int*> selected;
 	Signal0<void> numberChanged;
-	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, int DrawDeco=1);
+	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eWidget* descr=0, int grabfocus=1, const char* deco="eNumber" );
 	~eNumber();
 	int getNumber(int f) { if ((f>=0) && (f<len)) return number[f]; return -1; }
 	void setNumber(int f, int n);
-
 	void setLimits(int min, int max);
 	void setNumberOfFields(int n);
 	void setMaximumDigits(int n);

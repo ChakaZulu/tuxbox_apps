@@ -181,6 +181,7 @@ int eFrontend::tune(eTransponder *trans,
 		CodeRate FEC_inner,			// FEC_inner api
 		SpectralInversion Inversion,	// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
 		eLNB *lnb,
+		eSwitchParameter *swParams,
 		Modulation QAM)					// Modulation, QAM_xx
 {
 	FrontendParameters front;
@@ -205,29 +206,32 @@ int eFrontend::tune(eTransponder *trans,
 
 	if (lnb)
 	{
-		diseqc.addr=0x10;
-		diseqc.cmd=0x38;
-		diseqc.numParams=1;
-		cmd.type=SEC_CMDTYPE_DISEQC;
-	
-		if (Frequency > lnb->getLOFThreshold())
+		if ( swParams->HiLoSignal == eSwitchParameter::ON || ( swParams->HiLoSignal == eSwitchParameter::HILO && Frequency > lnb->getLOFThreshold() ) )
 		{
 			front.Frequency=Frequency-lnb->getLOFHi();
 			seq.continuousTone = SEC_TONE_ON;
 			hi=1;
-		} else
+		} else // swParams->hiloSignal == wSwitchParameter::OFF
 		{
 			front.Frequency=Frequency-lnb->getLOFLo();
 			seq.continuousTone = SEC_TONE_OFF;
 			hi=0;
 		}
 
+		diseqc.addr=0x10;
+		diseqc.cmd=0x38;
+		diseqc.numParams=1;
 		diseqc.params[0]=0xF0;
 
-		if (polarisation==polVert)
+		if ( lnb->getDISEqC().DISEqCMode == eDISEqC::MINI )
+			cmd.type = SEC_MINI_NONE;
+		else
+			cmd.type = SEC_CMDTYPE_DISEQC;
+
+		if ( swParams->VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams->VoltageMode == eSwitchParameter::HV )  )
 		{
 			seq.voltage=SEC_VOLTAGE_13;
-		} else if (polarisation==polHor)
+		} else if ( swParams->VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams->VoltageMode == eSwitchParameter::HV)  )
 		{
 			diseqc.params[0]|=2;
 			seq.voltage=SEC_VOLTAGE_18;
@@ -236,10 +240,10 @@ int eFrontend::tune(eTransponder *trans,
 
 		if (hi)
 			diseqc.params[0]|=1;
-		diseqc.params[0]|=lnb->getDiSEqC().sat<<2;
+
+		diseqc.params[0]|=lnb->getDISEqC().DISEqCParam<<2;
 
 		cmd.u.diseqc=diseqc;
-		seq.miniCommand=SEC_MINI_NONE;
 
 		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
 
@@ -250,22 +254,25 @@ int eFrontend::tune(eTransponder *trans,
 #else
 			int changelnb=1;
 #endif
-		
 			lastcsw=diseqc.params[0];
 		
-#if 0
-			if (changelnb)
+			if (changelnb && lnb->getDISEqC().DISEqCMode == eDISEqC::MINI )  // Mini DISEqC
 			{
-				if (sat==0)
+				if ( lnb->getDISEqC().DISEqCParam == eDISEqC::AA )
 					seq.miniCommand=SEC_MINI_A;
-				else if (sat==1)
+				else
 					seq.miniCommand=SEC_MINI_B;
-			} else
-#endif
-			seq.miniCommand=SEC_MINI_NONE;
+				seq.commands=0;
+				seq.numCommands=0;
+				eDebug("we send no Diseqc Commands (MiniDiseqc mode ");
+			}
+			else
+			{
+				seq.miniCommand=SEC_MINI_NONE;
+				seq.numCommands=changelnb?1:0;
+				seq.commands=&cmd;
+			}
 
-			seq.numCommands=changelnb?1:0;
-			seq.commands=&cmd;
 			if (ioctl(secfd, SEC_SEND_SEQUENCE, &seq)<0)
 			{
 				perror("SEC_SEND_SEQUENCE");
@@ -308,10 +315,11 @@ int eFrontend::tune_qpsk(eTransponder *transponder,
 		int polarisation, 			// polarisation (polHor, polVert, ...)
 		uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 		uint8_t FEC_inner,			// FEC_inner (-1 for none, 0 for auto, but please don't use that)
-		int Inversion,	// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
-		eLNB &lnb)								// diseqc satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
+		int Inversion,					// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
+		eLNB &lnb,							// diseqc satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
+		eSwitchParameter &swParams) // 22Khz(hi/lo, on, off), minidiseq(true,false), diseqcParameter(A/A, A/B, B/A, B/B), Voltage ( h/v, 14, 18 )
 {
-	return tune(transponder, Frequency, polarisation, SymbolRate, getFEC(FEC_inner), Inversion?INVERSION_ON:INVERSION_OFF, &lnb, QPSK);
+	return tune(transponder, Frequency, polarisation, SymbolRate, getFEC(FEC_inner), Inversion?INVERSION_ON:INVERSION_OFF, &lnb, &swParams, QPSK);
 }
 
 int eFrontend::tune_qam(eTransponder *transponder, 
@@ -321,5 +329,5 @@ int eFrontend::tune_qam(eTransponder *transponder,
 		int Inversion,	// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
 		int QAM)					// Modulation, QAM_xx
 {
-	return tune(transponder, Frequency, 0, SymbolRate, getFEC(FEC_inner), Inversion?INVERSION_ON:INVERSION_OFF, 0, getModulation(QAM));
+	return tune(transponder, Frequency, 0, SymbolRate, getFEC(FEC_inner), Inversion?INVERSION_ON:INVERSION_OFF, 0, 0, getModulation(QAM));
 }

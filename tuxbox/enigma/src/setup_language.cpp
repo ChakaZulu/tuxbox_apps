@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.6 2002/08/11 00:52:24 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.7 2002/08/20 15:13:13 Ghostrider Exp $
  */
 
 #include "setup_language.h"
@@ -40,7 +40,8 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	l->resize(eSize(150, fd+4));
 
 	language=new eListBox<eListBoxEntryText>(this, l);
-	language->setFlags( eListBoxBase::flagLoadDeco | eListBoxBase::flagNoUpDownMovement );
+	language->loadDeco();
+	language->setFlags( eListBoxBase::flagNoUpDownMovement );
 	language->move(ePoint(140, 20));
 	language->resize(eSize(150, 35));
 	language->setHelpText(_("select your language (left, right)"));
@@ -57,6 +58,7 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	ok->move(ePoint(20, 80));
 	ok->resize(eSize(90, fd+4));
 	ok->setHelpText(_("save changes and close window"));
+	ok->loadDeco();
 	CONNECT(ok->selected, eZapLanguageSetup::okPressed);
 
 	abort=new eButton(this);
@@ -64,12 +66,13 @@ eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 	abort->move(ePoint(140, 80));
 	abort->resize(eSize(100, fd+4));
 	abort->setHelpText(_("leave language setup (no changes are saved)"));
+	abort->loadDeco();
 	CONNECT(abort->selected, eZapLanguageSetup::abortPressed);
 
 	statusbar = new eStatusBar(this);
 	statusbar->move( ePoint(0, clientrect.height()-30) );
 	statusbar->resize( eSize( clientrect.width(), 30) );
-	statusbar->setFlags( eStatusBar::flagLoadDeco );
+	statusbar->loadDeco();
 }
 
 void eZapLanguageSetup::okPressed()

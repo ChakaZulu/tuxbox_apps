@@ -7,7 +7,7 @@
 // Definition Blit Flags
 #define BF_ALPHATEST 1
 
-class eLabel: public eWidget
+class eLabel: public eDecoWidget
 {
 protected:
 	int blitFlags;
@@ -15,17 +15,17 @@ protected:
 	eTextPara *para;
 	int align;
 	void validate( const eSize* s=0 );
-	void invalidate();
-	void willHide();
-	int eventFilter(const eWidgetEvent &event);
-	virtual void redrawWidget(gPainter *target, const eRect &area);
+	int eventHandler(const eWidgetEvent &event);
+	void redrawWidget(gPainter *target, const eRect &area);
 	int setProperty(const eString &prop, const eString &value);
 	int yOffs;
 public:
+	void invalidate();
 	enum { flagVCenter = 64 };
-	eLabel(eWidget *parent, int flags=0 /* RS_WRAP */ , int takefocus=0 );
+	eLabel(eWidget *parent, int flags=0 /* RS_WRAP */ , int takefocus=0, const char* deco="eLabel" );
 	~eLabel();
 
+	void setBlitFlags( int flags );
 	void setFlags(int flags);
 	void removeFlags(int flags);
 	void setAlign(int align);

@@ -228,7 +228,7 @@ void NVODStream::EITready(int error)
 				int perc=(now-event->start_time)*100/event->duration;
 				text << " (" << perc << "%, " << perc*3/100 << '.' << std::setw(2) << (perc*3)%100 << " Euro lost)";
 			}
-			break;
+//y			break;
 		}
 	}
 	else
@@ -255,7 +255,7 @@ void eNVODSelector::selected(NVODStream* nv)
 	
 	if (nv)
 	{
-//		nv->service.descr = "NVOD";
+		nv->service.descr = "NVOD";
 		eServiceInterface::getInstance()->play(nv->service);
 	}
 	
@@ -379,7 +379,7 @@ void eSubServiceSelector::selected(SubService *ss)
 	if (ss)
 	{
 		ss->service.setServiceType(5);  // faked service type
-//		ss->service.descr = ss->getText();
+		ss->service.descr = ss->getText();
 		eServiceInterface::getInstance()->play(ss->service);
 	}
 	close(0);
@@ -1184,7 +1184,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			switch (serviceref.getServiceType())
 			{
 			case 5: // nvod stream or linkage subservice ( type faked in SubServiceSelector::selected )
-				name+="NVOD";//serviceref.descr;
+				name+=serviceref.descr;
 			}
 
 		if (!name.length())
@@ -1276,9 +1276,9 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 		else
 			name="bla :(";
 
-		ChannelName->setText(name);
+		ChannelName->setText(name);		
 	}
-
+	
 	if (!eZap::getInstance()->focus)
 		show();
 

@@ -21,28 +21,32 @@ eDecoration::eDecoration()
 	borderLeft=borderTop=borderRight=borderBottom=0;
 }
 
-void eDecoration::load(const char *base)
+bool eDecoration::load(const eString& base)
 {
-	eString basename=base;	// all your
-	iTopLeft=eSkin::getActive()->queryImage(basename + ".topLeft");
-	iTop=eSkin::getActive()->queryImage(basename + ".top");
-	iTopRight=eSkin::getActive()->queryImage(basename + ".topRight");
-	iLeft=eSkin::getActive()->queryImage(basename + ".left");
-	iRight=eSkin::getActive()->queryImage(basename + ".right");
-	iBottomLeft=eSkin::getActive()->queryImage(basename + ".bottomLeft");
-	iBottom=eSkin::getActive()->queryImage(basename + ".bottom");
-	iBottomRight=eSkin::getActive()->queryImage(basename + ".bottomRight");
+	if (basename != base)
+	{
+		basename=base;	// all your
+		iTopLeft=eSkin::getActive()->queryImage(basename + ".topLeft");
+		iTop=eSkin::getActive()->queryImage(basename + ".top");
+		iTopRight=eSkin::getActive()->queryImage(basename + ".topRight");
+		iLeft=eSkin::getActive()->queryImage(basename + ".left");
+		iRight=eSkin::getActive()->queryImage(basename + ".right");
+		iBottomLeft=eSkin::getActive()->queryImage(basename + ".bottomLeft");
+		iBottom=eSkin::getActive()->queryImage(basename + ".bottom");
+		iBottomRight=eSkin::getActive()->queryImage(basename + ".bottomRight");
 
-	borderLeft=borderTop=borderRight=borderBottom=0;
+		borderLeft=borderTop=borderRight=borderBottom=0;
 	
-	if (iTop)
-		borderTop = iTop->y;
-	if (iLeft)
-		borderLeft = iLeft->x;
-	if (iRight)
-		borderRight = iRight->x;
-	if (iBottom)
-		borderBottom = iBottom->y;
+		if (iTop)
+			borderTop = iTop->y;
+		if (iLeft)
+			borderLeft = iLeft->x;
+		if (iRight)
+			borderRight = iRight->x;
+		if (iBottom)
+			borderBottom = iBottom->y;
+	}
+	return operator bool();
 }
 
 void eDecoration::drawDecoration(gPainter *target, ePoint size)

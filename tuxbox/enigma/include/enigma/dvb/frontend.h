@@ -16,6 +16,7 @@
 
 class eTransponder;
 class eLNB;
+class eSwitchParameter;
 
 /**
  * \brief A frontend, delivering TS.
@@ -38,7 +39,7 @@ class eFrontend: public Object
 			uint32_t Frequency, int polarisation,
 			uint32_t SymbolRate, CodeRate FEC_inner,
 			SpectralInversion Inversion, eLNB *lnb,
-			Modulation QAM);
+			eSwitchParameter* switchParams, Modulation QAM);
 private:
 	void timeout();
 public:
@@ -85,8 +86,9 @@ public:
 			uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 			uint8_t FEC_inner,			// FEC_inner according to ETSI (-1 for none, 0 for auto, but please don't use that)
 			int Inversion,					// spectral invesion on(1)/off(0)
-			eLNB &lnb);
-	int tune_qam(eTransponder *transponder, 
+			eLNB &lnb,              // description in dvb.h
+			eSwitchParameter &swParams);  // description in dvb.h
+	int tune_qam(eTransponder *transponder,
 			uint32_t Frequency, 		// absolute frequency in kHz
 			uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 6900000)
 			uint8_t FEC_inner, 			// FEC_inner according to ETSI (-1 for none, 0 for auto, but please don't use that). normally -1.

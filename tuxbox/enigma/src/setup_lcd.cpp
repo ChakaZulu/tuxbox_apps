@@ -90,19 +90,19 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
 	eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby);
 
-	bbrightness=new eButton(this, 0, 1, false);
+	bbrightness=new eButton(this, 0, 1);
 	bbrightness->setText(_("Brightness:"));
 	bbrightness->move(ePoint(20, 20));
 	bbrightness->resize(eSize(110, fd+4));
 	bbrightness->setHelpText(_("set LCD brightness ( left / right )"));
 
-	bcontrast=new eButton(this, 0, 1, false);
+	bcontrast=new eButton(this, 0, 1);
 	bcontrast->setText(_("Contrast:"));
 	bcontrast->move(ePoint(20, 60));
 	bcontrast->resize(eSize(110, fd+4));
 	bcontrast->setHelpText(_("set LCD contrast ( left / right )"));
 
-	bstandby=new eButton(this, 0, 1, false);
+	bstandby=new eButton(this, 0, 1);
 	bstandby->setText(_("Standby:"));
 	bstandby->move(ePoint(20, 100));
 	bstandby->resize(eSize(110, fd+4));
@@ -130,7 +130,7 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	ok->move(ePoint(20, 155));
 	ok->resize(eSize(90, fd+4));
 	ok->setHelpText(_("close window and save changes"));
-	
+	ok->loadDeco();
 	CONNECT(ok->selected, eZapLCDSetup::okPressed);
 
 	abort=new eButton(this);
@@ -138,13 +138,13 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	abort->move(ePoint(140, 155));
 	abort->resize(eSize(100, fd+4));
 	abort->setHelpText(_("close window (no changes are saved)"));
-
+	abort->loadDeco();
 	CONNECT(abort->selected, eZapLCDSetup::abortPressed);
 
 	statusbar=new eStatusBar(this);
 	statusbar->move( ePoint(0, clientrect.height()-30 ) );
 	statusbar->resize( eSize( clientrect.width(), 30) );
-	statusbar->setFlags( eStatusBar::flagLoadDeco );
+	statusbar->loadDeco();
 }
 
 eZapLCDSetup::~eZapLCDSetup()

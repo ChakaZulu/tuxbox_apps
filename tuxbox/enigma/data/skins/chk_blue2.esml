@@ -105,6 +105,7 @@
 	</values>
 
 	<images basepath="chk_v2" target="fb">
+		<img name="eComboBox.arrow" src="combo_arrow.png" />
 		<img name="eCheckbox.checked" src="checked.png" />
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
 		<img name="button_red" src="../button_red.png" />
@@ -147,12 +148,6 @@
 		<img name="3DBorder.unselected.hor.light" src="3D_border_unselected_hor_light.png" />
 		<img name="3DBorder.unselected.ver.dark" src="3D_border_unselected_ver_dark.png" />		
 		<img name="3DBorder.unselected.ver.light" src="3D_border_unselected_ver_light.png" />
-		<!--img name="Statusbar.border.bottom/top" src="statusbar_border_bottom_top.png" />
-		<img name="Statusbar.border.left/right" src="statusbar_border_left_right.png" />
-		<img name="Statusbar.border.leftTop" src="statusbar_border_leftTop.png" />
-		<img name="Statusbar.border.rightTop" src="statusbar_border_rightTop.png" />
-		<img name="Statusbar.border.leftBottom" src="statusbar_border_leftBottom.png" />
-		<img name="Statusbar.border.rightBottom" src="statusbar_border_rightBottom.png" /-->
 	</images>
 
 	<imagealias>
@@ -164,6 +159,24 @@
 		<map name="eStatusBar.bottomRight" img="3DBorder.unselected.corner.dark" />		
 		<map name="eStatusBar.topRight" img="3DBorder.unselected.corner.lightDark" />
 		<map name="eStatusBar.bottomLeft" img="3DBorder.unselected.corner.lightDark" />		
+
+		<map name="eComboBox.top" img="3DBorder.unselected.hor.dark" />
+		<map name="eComboBox.left" img="3DBorder.unselected.ver.dark" />
+		<map name="eComboBox.topLeft" img="3DBorder.unselected.corner.dark" />
+		<map name="eComboBox.bottom" img="3DBorder.unselected.hor.light" />
+		<map name="eComboBox.right" img="3DBorder.unselected.ver.light" />
+		<map name="eComboBox.bottomRight" img="3DBorder.unselected.corner.light" />		
+		<map name="eComboBox.topRight" img="3DBorder.unselected.corner.darkLight" />
+		<map name="eComboBox.bottomLeft" img="3DBorder.unselected.corner.darkLight" />		
+
+		<map name="eComboBox.listbox.bottom" img="3DBorder.unselected.hor.dark" />
+		<map name="eComboBox.listbox.right" img="3DBorder.unselected.ver.dark" />
+		<map name="eComboBox.listbox.bottomLeft" img="3DBorder.unselected.corner.dark" />
+		<map name="eComboBox.listbox.top" img="3DBorder.unselected.hor.dark" />
+		<map name="eComboBox.listbox.left" img="3DBorder.unselected.ver.dark" />
+		<map name="eComboBox.listbox.topRight" img="3DBorder.unselected.corner.dark" />		
+		<map name="eComboBox.listbox.bottomRight" img="3DBorder.unselected.corner.dark" />
+		<map name="eComboBox.listbox.topLeft" img="3DBorder.unselected.corner.dark" />		
 
 		<map name="eButton.top" img="3DBorder.unselected.hor.light" />
 		<map name="eButton.left" img="3DBorder.unselected.ver.light" />

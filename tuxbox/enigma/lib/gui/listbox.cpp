@@ -5,8 +5,8 @@
 gFont eListBoxEntryText::font;
 gFont eListBoxEntryTextStream::font;
 
-eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr)
-:   eWidget(parent, 1),
+eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, const char *deco)
+:   eDecoWidget(parent, 1, deco),
 		iArrowUpDown(eSkin::getActive()->queryImage("eListBox.arrow.updown")),
 		iArrowUp(eSkin::getActive()->queryImage("eListBox.arrow.up")),
 		iArrowDown(eSkin::getActive()->queryImage("eListBox.arrow.down")),
@@ -22,10 +22,12 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr)
 
 void eListBoxBase::setFlags(int _flags)	
 {		
-	flags=_flags;	
+	flags |= _flags;	
+}
 
-	if (flags & flagLoadDeco)
-		loadDeco();
+void eListBoxBase::removeFlags(int _flags)	
+{		
+	flags &= ~_flags;	
 }
 
 void eListBoxBase::recalcMaxEntries()
@@ -48,22 +50,9 @@ eRect eListBoxBase::getEntryRect(int pos)
 		return eRect( ePoint(0, pos*item_height), eSize(size.width(), item_height));
 }
 
-void eListBoxBase::loadDeco()
-{
-	if (!deco)
-		deco.load("eListBox");
-	if (!deco_selected)
-		deco_selected.load("eListBox.selected");
-}
-
 int eListBoxBase::setProperty(const eString &prop, const eString &value)
 {
-	if (prop=="loadDeco")
-	{
-		loadDeco();
-		event(eWidgetEvent(eWidgetEvent::changedSize));
-	}
-	else if (prop == "noPageMovement")
+	if (prop == "noPageMovement")
 	{
     if (value == "off")
 			flags |= ~flagNoPageMovement;
@@ -81,8 +70,10 @@ int eListBoxBase::setProperty(const eString &prop, const eString &value)
 		colorActiveF=eSkin::getActive()->queryScheme(value);
 	else if (prop=="activeBackgroundColor")
 		colorActiveB=eSkin::getActive()->queryScheme(value);
+	else if (prop=="showEntryHelp")
+		setFlags( flagShowEntryHelp );
 	else
-		return eWidget::setProperty(prop, value);
+		return eDecoWidget::setProperty(prop, value);
 
 	return 0;
 }
@@ -142,7 +133,6 @@ void eListBoxBase::gotFocus()
 	if (parent && parent->LCDElement)  // detect if LCD Avail
 		if (descr)
 		{
-			eDebug("eListBoxBase::gotFocus()");
 			parent->LCDElement->setText("");
 			LCDTmp = new eLabel(parent->LCDElement);
 			LCDTmp->hide();

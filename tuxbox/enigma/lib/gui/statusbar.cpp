@@ -4,8 +4,8 @@
 #include <core/gui/eskin.h>
 #include <core/gdi/font.h>
 
-eStatusBar::eStatusBar( eWidget* parent)
-	:eWidget(parent), flags(0), client(this), current(0)
+eStatusBar::eStatusBar( eWidget* parent, const char *deco)
+	:eDecoWidget(parent, 0, deco), flags(0), client(this), current(0)
 {
 	client.setFont( eSkin::getActive()->queryFont("eStatusBar") );
 	client.setForegroundColor ( eSkin::getActive()->queryColor("eStatusBar.foreground") );
@@ -14,6 +14,7 @@ eStatusBar::eStatusBar( eWidget* parent)
 	initialize();
 }
 
+
 void eStatusBar::initialize()
 {
 	if ( !(flags & flagOwnerDraw) )
@@ -21,16 +22,17 @@ void eStatusBar::initialize()
 		if (parent)
 			CONNECT( parent->focusChanged, eStatusBar::update );
 	}
-	if (flags & flagLoadDeco)
-		loadDeco();
 	if (flags & flagVCenter)
 		client.setFlags(eLabel::flagVCenter);
 }
 
 void eStatusBar::update( const eWidget* p )
 {
-	current = p;
-	invalidate( clientrect );
+	if (p)
+	{
+		current = p;
+		invalidate( clientrect );
+	}
 }
 
 int eStatusBar::getFlags() const	
@@ -44,25 +46,14 @@ void eStatusBar::setFlags( int fl )
 	initialize();
 }
 
-void eStatusBar::loadDeco()
-{
-	if (!deco)
-	{
-		deco.load("eStatusBar");
-		event(eWidgetEvent(eWidgetEvent::changedSize));
-	}
-}
-
 int eStatusBar::setProperty(const eString &prop, const eString &value)
 {
-	if (prop=="loadDeco")
-		flags |= flagLoadDeco;
-	else if (prop=="ownerDraw")
+	if (prop=="ownerDraw")
 		flags |= flagOwnerDraw;
 	else if (prop=="vCenter")
 		flags |= flagVCenter;
 	else
-		return eWidget::setProperty(prop, value);
+		return eDecoWidget::setProperty(prop, value);
 
 	initialize();
 	
@@ -71,11 +62,18 @@ int eStatusBar::setProperty(const eString &prop, const eString &value)
 
 void eStatusBar::redrawWidget(gPainter *target, const eRect& where)
 {
+/*	eDebug("redrawWidget eStatusbar");
+	eDebug("where left = %i, top = %i, width = %i, height = %i", where.left(), where.top(), where.width(), where.height() );
+	eDebug("left = 0, top = 0, width = %i, bottom = %i", width(), height() );*/
 	if ( deco && where.contains( eRect(0, 0, width(), height() ) ) )
 		deco.drawDecoration(target, ePoint(width(), height()));
+/*	else
+		eDebug("do not redraw Deco");*/
 	
 	if ( (!(flags & flagOwnerDraw)) && current && where.contains( clientrect ) )
 		client.setText( current->getHelpText() );
+/*	else
+		eDebug("do not redraw Deco");*/
 }
 
 int eStatusBar::eventHandler(const eWidgetEvent &event)
@@ -95,7 +93,7 @@ int eStatusBar::eventHandler(const eWidgetEvent &event)
 		default:
 		break;
 	}
-	return eWidget::eventHandler(event);
+	return eDecoWidget::eventHandler(event);
 }
 
 static eWidget *create_eStatusBar(eWidget *parent)

@@ -38,7 +38,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	l->resize(eSize(200, fd+4));
 
 	colorformat=new eListBox<eListBoxEntryText>(this, l);
-	colorformat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement  | eListBox<eListBoxEntryText>::flagLoadDeco);
+	colorformat->loadDeco();
+	colorformat->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 	colorformat->move(ePoint(160, 20));
 	colorformat->resize(eSize(120, 35));
 	eListBoxEntryText* entrys[3];
@@ -54,7 +55,9 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	l->resize(eSize(150, fd+4));
 	
 	pin8=new eListBox<eListBoxEntryText>(this, l);
-	pin8->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement | eListBox<eListBoxEntryText>::flagLoadDeco);
+	pin8->loadDeco();	
+	pin8->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
+	
 	pin8->move(ePoint(160, 65));
 	pin8->resize(eSize(170, 35));
 	pin8->setHelpText(_("choose aspect ratio ( left, right )"));
@@ -68,6 +71,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	ok->move(ePoint(20, 130));
 	ok->resize(eSize(90, fd+4));
 	ok->setHelpText(_("save settings and leave video setup"));
+	ok->loadDeco();
 
 	CONNECT(ok->selected, eZapVideoSetup::okPressed);		
 
@@ -76,13 +80,14 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	abort->move(ePoint(140, 130));
 	abort->resize(eSize(100, fd+4));
 	abort->setHelpText(_("leave video setup (no changes are saved)"));
+	abort->loadDeco();
 
 	CONNECT(abort->selected, eZapVideoSetup::abortPressed);
 
 	status = new eStatusBar(this);	
 	status->move( ePoint(0, clientrect.height()-30) );
 	status->resize( eSize( clientrect.width(), 30) );
-	status->setFlags( eStatusBar::flagLoadDeco );
+	status->loadDeco();
 }
 
 eZapVideoSetup::~eZapVideoSetup()

@@ -145,29 +145,32 @@
 
 	<object name="eSatelliteConfigurationManager">
 		<eSatelliteConfigurationManager position="80:40" size="570:470" text="Satelliteconfiguration">
-			<eLabel text="DISEqC" position="100:10" size="80:30" align="center"/>
-  		<eLabel text="Sat/Position" position="190:10" size="280:30" align="center"/>
-			<eLabel text="LNB" position="480:10" size="80:30" align="center"/>
+  		<eLabel text="Sat/Position" position="100:10" size="190:30" align="center"/>
+			<eLabel text="LNB" position="300:10" size="60:30" align="center"/>
+			<eLabel text="22Khz" position="370:10" size="90:30" align="center"/>
+			<eLabel text="Voltage" position="470:10" size="90:30" align="center"/>
 			<eWidget name="buttons" position="100:50" size="e-10:e-10" />
-			<eButton name="close" position="10:e-70" size="80:30" text="close" helptext="close Satelliteconfiguration" />
-			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="on" />
+			<eButton name="close" position="10:e-70" size="80:30" text="close" helptext="close Satelliteconfiguration" loadDeco="" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eSatelliteConfigurationManager>
 	</object>
 
 	<object name="eLNBSelitor">
-		<eLNBSelitor position="100:100" size="400:350" text="LNB Configuration">
-			<eListbox name="lnblist" helptext="choose the LNB you wish to apply or edit" position="10:10" size="100:e-95" loadDeco="on" />
-			<eLabel text="LOF/L:" name="lLofL" position="130:10" size="100:35" />
-			<eNumber name="lofL" position="250:10" size="e-10:35" helptext="enter lnb lowband offset frequency (0..9, ok)" />
-  		<eLabel text="LOF/H:" name="lLofH" position="130:60" size="100:35" />
-			<eNumber name="lofH" position="250:60" size="e-10:35" helptext="enter lnb highband offset frequency (0..9, ok)" />
-  		<eLabel text="Threshold:" name="lThreshold" position="130:110" size="120:35" />
-			<eNumber name="threshold" position="250:110" size="e-10:35" helptext="enter lnb threshold frequency (0..9, ok)"/>
-			<eButton name="apply" text="apply" position="130:e-125" size="100:30" helptext="apply changes to current selected lnb" />
-			<eButton name="delete" text="delete" position="250:e-125" size="e-10:30" helptext="remove selected lnb from the list" />
-			<eButton name="use" text="use" position="10:e-75" size="100:30" helptext="use current selected lnb for the choosen satellite" />
-			<eButton name="cancel" text="cancel" position="130:e-75" size="100:30" helptext="leave lnb-setup (no changes are saved)" />
-			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="on" />
+		<eLNBSelitor position="100:100" size="450:400" text="LNB Configuration">
+			<eListbox name="lnblist" helptext="choose the LNB you wish to apply or edit" position="10:10" size="100:e-45" loadDeco="" />
+			<eLabel text="LOF/L:" name="lLofL" position="130:10" size="150:35" vcenter="on" />
+			<eNumber name="lofL" position="280:10" size="e-10:35" helptext="enter lnb lowband offset frequency (0..9, ok)" loadDeco="" />
+  		<eLabel text="LOF/H:" name="lLofH" position="130:60" size="150:35" vcenter="on" />
+			<eNumber name="lofH" position="280:60" size="e-10:35" helptext="enter lnb highband offset frequency (0..9, ok)" loadDeco="" />
+  		<eLabel text="Threshold:" name="lThreshold" position="130:110" size="150:35" vcenter="on"/>
+			<eNumber name="threshold" position="280:110" size="e-10:35" helptext="enter lnb threshold frequency (0..9, ok)" loadDeco="" />
+			<eLabel text="DISEqC Mode:" name="lDISEqCMode" position="130:160" size="150:35" vcenter="on"/>
+			<eComboBox name="DISEqCMode" position="280:160" size="e-10:35" helptext="select DISEqC mode (ok)" loadDeco="" />
+			<eLabel text="DISEqC Para:" name="lDISEqCPara" position="130:210" size="150:35" vcenter="on"/>
+			<eComboBox name="DISEqCParam" position="280:210" size="e-10:35" helptext="select DISEqC parameter (ok)" loadDeco="" />
+			<eButton name="save" text="save" position="130:e-75" size="100:30" helptext="use current selected lnb for the choosen satellite" loadDeco="" />
+			<eButton name="cancel" text="cancel" position="250:e-75" size="100:30" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eLNBSelitor>
 	</object>
 
@@ -182,8 +185,8 @@
 		<tsManual position="0:0" size="e:350">
 			<eTranspondersettings name="transponder" position="0:0" size="400:160" />
 			<eFEStatus name="festatus" position="0:160" size="400:85" />
-			<eButton text="start scan" name="start" position="10:e-30" size="200:30" helptext="start the transponderscan" />
-			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" helptext="close window and do not scan" />
+			<eButton text="start scan" name="start" position="10:e-30" size="200:30" helptext="start the transponderscan" loadDeco="" />
+			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" helptext="close window and do not scan" loadDeco="" />
 			<eCheckbox text="use ONIT" name="useonit" position="10:e-100" size="200:30" helptext="enable/disable check ONIT on any transponder" />
 			<eCheckbox text="use BAT" name="usebat" position="210:e-100" size="e:30" helptext="enable/disable use BAT for scan (if exist)" />
 			<eCheckbox text="clear list before" name="clearlist" position="10:e-70" size="200:30" helptext="remove all services before scan" />
@@ -194,11 +197,11 @@
 	<object name="tsAutomatic">
 		<tsAutomatic position="0:0" size="e:350">
 			<eLabel name="lNet" position="10:40" size="150:30" text="Network:" />
-			<eListbox name="network" position="160:40" size="e-70:35" loadDeco="on" helptext="choose satelite/cable provider (left, right)" />
+			<eListbox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satelite/cable provider (left, right)" />
 			<eFEStatus name="festatus" position="0:100" size="400:85" />
 			<eLabel name="status" position="10:190" size="e-10:e-30" />
-  		<eButton text="start scan" name="start" position="10:e-30" size="200:30" align="center" helptext="starts the transponderscan" />
-			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" helptext="close window and do not scan" />
+  		<eButton text="start scan" name="start" position="10:e-30" size="200:30" align="center" helptext="starts the transponderscan" loadDeco="" />
+			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" helptext="close window and do not scan" loadDeco="" />
 		</tsAutomatic>
 	</object>
 
@@ -220,32 +223,32 @@
 	<object name="setup.skins">
 		<eSkinSetup cposition="100:100" csize="400:300" text="Skin Setup">
 			<eLabel text="Skins:" position="20:10" size="100:30" />
-			<eListbox name="skins" position="120:10" size="e-10:e-50" loadDeco="on" helptext="select skin and press ok or choose save" />
-			<eButton text="save" name="accept" position="10:e-120" size="80:30" helptext="close skin setup and save changes" />
-			<eButton text="abort" name="reject" position="10:e-80" size="80:30" helptext="abort skin setup ( no changes are saved )" />
-			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="on" />
+			<eListbox name="skins" position="120:10" size="e-10:e-50" helptext="select skin and press ok or choose save" loadDeco="" />
+			<eButton text="save" name="accept" position="10:e-120" size="80:30" helptext="close skin setup and save changes" loadDeco="" />
+			<eButton text="abort" name="reject" position="10:e-80" size="80:30" helptext="abort skin setup ( no changes are saved )" loadDeco="" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eSkinSetup>
 	</object>
 	
 	<object name="transpondersettings.satellite">
 		<eTranspondersettings position="0:0" size="400:160">
 			<eLabel text="Satellite:" name="lSat" position="10:10" size="140:34" vcenter="on" />
-			<eListbox name="sat" position="150:10" size="e-10:34" loadDeco="on" helptext="choose wished satellite (left, right)" noUpDownMovement="on" />
+			<eListbox name="sat" position="150:10" size="e-10:34" loadDeco="" helptext="choose wished satellite (left, right)" noUpDownMovement="on" />
 
 			<eLabel  name="lFreq" text="Frequency:" position="10:50" size="140:32" vcenter="on" />
-			<eNumber name="frequency" position="150:50" size="e-150:32" helptext="enter transponder frequeny (0..9, left, right)" />
+			<eNumber name="frequency" position="150:50" size="e-150:32" helptext="enter transponder frequeny (0..9, left, right)" loadDeco="" />
 			<eLabel text="MHz" position="e-145:50" size="40:32" vcenter="on" />
 
 			<eCheckbox text="Inv:" name="inversion" position="330:50" size="e-10:32" helptext="enable/disable inversion here (ok)" swaptxtpixmap="on" />
 
 			<eLabel name="lPol" text="Polarity:" position="10:85" size="140:34" vcenter="on" />
-			<eListbox name="polarity" position="150:85" size="e-140:34" loadDeco="on" helptext="choose polarity (left, right)" noUpDownMovement="on" />
+			<eListbox name="polarity" position="150:85" size="e-140:34" loadDeco="" helptext="choose polarity (left, right)" noUpDownMovement="on" />
 
 			<eLabel name="lFec" text="FEC:" position="e-120:85" size="50:34" vcenter="on" />
-			<eListbox name="fec" position="e-70:85" size="e-10:34" loadDeco="on" helptext="choose the FEC (left, right)" noUpDownMovement="on" />
+			<eListbox name="fec" position="e-70:85" size="e-10:34" loadDeco="" helptext="choose the FEC (left, right)" noUpDownMovement="on" />
 
 			<eLabel name="lSymb" text="Symbolrate:" position="10:124" size="140:32" vcenter="on" />
-			<eNumber name="symbolrate" position="150:124:" size="e-150:32" helptext="enter symbolrate (0..9, left, right)" />
+			<eNumber name="symbolrate" position="150:124:" size="e-150:32" helptext="enter symbolrate (0..9, left, right)" loadDeco="" />
 			<eLabel text="KSymb/s" position="e-145:125" size="e:32" vcenter="on" />
 		</eTranspondersettings>
 	</object>
@@ -253,11 +256,11 @@
 	<object name="transpondersettings.cable">
 		<eTranspondersettings position="0:0" size="400:160">
 			<eLabel name="lFreq" text="Frequency:" position="10:10" size="140:32" vcenter="on" />
-			<eNumber name="frequency" position="150:10:" size="e-150:32" helptext="enter frequency (0..9, left, right)" />
+			<eNumber name="frequency" position="150:10:" size="e-150:32" helptext="enter frequency (0..9, left, right)" loadDeco="" />
 			<eLabel text="MHz" position="e-150:10" size="e:32" vcenter="on" />
 
 			<eLabel name="lSymb" text="Symbolrate:" position="10:100" size="140:32" vcenter="on" />
-			<eNumber name="symbolrate" position="150:100:" size="e-150:32" helptext="enter symbolrate (0..9, left, right)" />
+			<eNumber name="symbolrate" position="150:100:" size="e-150:32" helptext="enter symbolrate (0..9, left, right)" loadDeco="" />
 			<eLabel text="KSymb/s" position="e-150:100" size="e:32" vcenter="on" />
 			
 			<eLabel text="Inversion:" position="10:130" size="140:32" vcenter="on" />

@@ -9,14 +9,14 @@ protected:
 	int ischecked;
 private:
 	void sel();
-	int eventFilter(const eWidgetEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 	int setProperty(const eString &prop, const eString &value);
 	void gotFocus();
 	void lostFocus();
 	bool swapTxtPixmap;
 public:
 	Signal1<void, int> checked;
-	eCheckbox(eWidget *parent, int checked=0, int takefocus=1, bool swapTxtPixmap=false);
+	eCheckbox(eWidget *parent, int checked=0, int takefocus=1, bool swapTxtPixmap=false, const char *deco="eCheckBox" );
 	~eCheckbox();
 	void setCheck(int c);
 	int isChecked() { return ischecked; }

@@ -48,12 +48,21 @@ public:
 	tsManual(eWidget *parent, const eTransponder &transponder, eWidget* LCDTitle, eWidget* LCDElement);
 };
 
-class tsAutomatic: public eWidget
+class existNetworks
+{
+protected:
+	int fetype;
+	existNetworks();
+	std::list<tpPacket> networks;
+	int parseNetworks();
+	int addNetwork(tpPacket &p, XMLTreeNode *node, int type);
+};
+
+class tsAutomatic: public existNetworks, public eWidget
 {
 	eButton *b_start, *b_abort;
 	eListBox<eListBoxEntryText> *l_network;
 	eLabel *l_status;
-	std::list<tpPacket> networks;
 	std::list<eTransponder>::iterator current_tp, last_tp;
 	int automatic;
 	void start();
@@ -61,8 +70,6 @@ class tsAutomatic: public eWidget
 	void networkSelected(eListBoxEntryText *l);
 	void dvbEvent(const eDVBEvent &event);
 	int loadNetworks();
-	int addNetwork(tpPacket &p, XMLTreeNode *node, int type);
-	
 	int nextNetwork(int first=0);
 	int nextTransponder(int next);
 	int tuneNext(int next);

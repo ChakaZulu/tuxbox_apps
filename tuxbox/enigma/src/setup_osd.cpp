@@ -35,6 +35,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	ok->move(ePoint(20, 135));
 	ok->resize(eSize(90, fd+4));
 	ok->setHelpText(_("close window and save changes"));
+	ok->loadDeco();
 	
 	CONNECT(ok->selected, eZapOsdSetup::okPressed);
 
@@ -43,13 +44,14 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	abort->move(ePoint(140, 135));
 	abort->resize(eSize(100, fd+4));
 	abort->setHelpText(_("close window (no changes are saved)"));
+	abort->loadDeco();
 
 	CONNECT(abort->selected, eZapOsdSetup::abortPressed);
 
 	statusbar=new eStatusBar(this);
 	statusbar->move( ePoint(0, clientrect.height()-30 ) );
 	statusbar->resize( eSize( clientrect.width(), 30) );
-	statusbar->setFlags( eStatusBar::flagLoadDeco );
+	statusbar->loadDeco();
 }
 
 eZapOsdSetup::~eZapOsdSetup()

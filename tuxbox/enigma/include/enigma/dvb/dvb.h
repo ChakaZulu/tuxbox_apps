@@ -280,7 +280,9 @@ struct eServiceReference
 		idUser=0x1000
 	};
 	int type;
-	
+
+	eString descr;
+
 	int flags;
 	enum
 	{
@@ -431,11 +433,20 @@ public:
 	}
 };
 
+struct eSwitchParameter
+{
+	enum SIG22	{	HILO=0, ON=1, OFF=2	}; // 22 Khz
+	enum VMODE	{	HV=0, _14V=1, _18V=2 }; // 14/18 V
+	VMODE VoltageMode;
+	SIG22 HiLoSignal;
+};
+
 class eSatellite
 {
 	eTransponderList &tplist;
 	int orbital_position;
 	eString description;
+	eSwitchParameter switchParams;
 	eLNB &lnb;
 	friend class eLNB;
 	std::map<int,eSatellite*>::iterator tpiterator;
@@ -457,7 +468,12 @@ public:
 	{
 		return orbital_position;
 	}
-	
+
+	eSwitchParameter &getSwitchParams()
+	{
+		return switchParams;
+	}	
+
 	eLNB &getLNB() const
 	{
 		return lnb;
@@ -479,18 +495,22 @@ public:
 	}
 };
 
-struct eDiSEqCParameter
+struct eDISEqC
 {
-	int sat;
+	enum tDISEqCParam	{	AA=0, AB=1, BA=2, BB=3, USER=4 }; // DISEqC Parameter
+	enum tDISEqCMode	{	MINI=0, V1_0=1, V1_1=2, V1_2=3 }; // DISEqC Mode
+	tDISEqCParam DISEqCParam;
+	tDISEqCMode DISEqCMode;
 };
 
 class eLNB
 {
 	unsigned int lof_hi, lof_lo, lof_threshold;
 	ePtrList<eSatellite> satellites;
-	eDiSEqCParameter diseqc;
 	eTransponderList &tplist;
+	eDISEqC DISEqC;
 public:
+
 	eLNB(eTransponderList &tplist): tplist(tplist)
 	{
 		satellites.setAutoDelete(true);
@@ -502,11 +522,12 @@ public:
 	unsigned int getLOFHi() const { return lof_hi; }
 	unsigned int getLOFLo() const { return lof_lo; }
 	unsigned int getLOFThreshold() const { return lof_threshold; }
-	eDiSEqCParameter &getDiSEqC() { return diseqc; }
-	
+	eDISEqC& getDISEqC() { return DISEqC; }	
 	eSatellite *addSatellite(int orbital_position);
 	void deleteSatellite(eSatellite *satellite);
-
+	void addSatellite( eSatellite *satellite);
+	eSatellite* takeSatellite( eSatellite *satellite);
+	bool operator==(const eLNB& lnb) { return this == &lnb; }
 	ePtrList<eSatellite> &getSatelliteList() { return satellites; }
 };
 
@@ -521,7 +542,6 @@ class eTransponderList
 	std::map<int,eSatellite*> satellites;
 	friend class eLNB;
 	friend class eSatellite;
-
 public:
 	static eTransponderList* getInstance()	{ return instance; }
 	eTransponderList();

@@ -4,10 +4,10 @@
 #include <core/system/init.h>
 #include <core/gui/eskin.h>
 
-eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, bool swapTxtPixmap)
-	:eButton(parent, 0, takefocus, false), swapTxtPixmap(swapTxtPixmap)
+eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, bool swapTxtPixmap, const char *deco)
+	:eButton(parent, 0, takefocus, deco), swapTxtPixmap(swapTxtPixmap)
 {
-	flags|=flagVCenter;
+	align=eTextPara::dirLeft;
 	ischecked = -1;
 	setCheck(checked);
 	CONNECT(selected, eCheckbox::sel);
@@ -82,7 +82,7 @@ int eCheckbox::setProperty(const eString &prop, const eString &value)
 	return 0;
 }
 
-int eCheckbox::eventFilter(const eWidgetEvent &event)
+int eCheckbox::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
@@ -100,11 +100,12 @@ int eCheckbox::eventFilter(const eWidgetEvent &event)
 			pixmap_position=ePoint(0, (size.height()-pixmap->y)/2);
 			text_position=ePoint((int)(pixmap->x*1.25), 0);
 		}
-		break;
+		return eButton::eventHandler(event); // changed Size must seen by eLabel...
+
 	default:
-		break;
+		return eButton::eventHandler(event); // changed Size must seen by eLabel...
 	}
-	return 0;
+	return 1;
 }
 
 static eWidget *create_eCheckbox(eWidget *parent)

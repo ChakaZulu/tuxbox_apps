@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.7 2002/08/11 00:52:23 Ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.8 2002/08/20 15:13:13 Ghostrider Exp $
  */
 
 #include "enigma_scan.h"
@@ -25,6 +25,7 @@
 #include <apps/enigma/satconfig.h>
 #include <apps/enigma/scan.h>
 #include <core/dvb/edvb.h>
+#include <core/dvb/frontend.h>
 #include <core/gui/ewindow.h>
 #include <core/gui/eskin.h>
 #include <core/gui/elabel.h>
@@ -36,7 +37,8 @@ eZapScan::eZapScan()
 	move(ePoint(150, 136));
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]")))->selected, eZapScan::sel_close);
 	CONNECT((new eListBoxEntryMenu(&list, _("Transponder scan")))->selected, eZapScan::sel_scan);	
-	CONNECT((new eListBoxEntryMenu(&list, _("Satellites...")))->selected, eZapScan::sel_satconfig);	
+	if ( eFrontend::getInstance()->Type() == eFrontend::feSatellite )  // only when a sat box is avail we shows a satellite config
+		CONNECT((new eListBoxEntryMenu(&list, _("Satellites...")))->selected, eZapScan::sel_satconfig);	
 	CONNECT((new eListBoxEntryMenu(&list, _("Bouquets...")))->selected, eZapScan::sel_bouquet);	
 }
 
