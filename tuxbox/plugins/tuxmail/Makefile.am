@@ -1,6 +1,6 @@
 SUBDIRS = daemon
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	@FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/include
 
@@ -17,6 +17,6 @@ install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
 	install -d $(DESTDIR)$(CONFIGDIR)
 	install -d $(DESTDIR)$(CONFIGDIR)/tuxmail
-	$(LIBTOOL) install tuxmail.la $(DESTDIR)$(PLUGINDIR)
+	$(LIBTOOL) --mode=install install tuxmail.la $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/tuxmail.cfg $(DESTDIR)$(PLUGINDIR)
 	install -m 0644 $(srcdir)/tuxmail.conf $(DESTDIR)$(CONFIGDIR)/tuxmail
