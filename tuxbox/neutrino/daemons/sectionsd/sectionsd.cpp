@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.125 2002/05/04 00:14:51 rasc Exp $
+//  $Id: sectionsd.cpp,v 1.126 2002/05/15 10:00:55 dirch Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.126  2002/05/15 10:00:55  dirch
+//  timerd removed
+//
 //  Revision 1.125  2002/05/04 00:14:51  rasc
 //  -- default cache 21 days, processor load should be no problem
 //
@@ -404,8 +407,8 @@
 #include "eventserver.h"
 #include "sectionsdclient.h"
 
-#include "timerdclient.h"
-#include "../timermanager.h"
+//#include "timerdclient.h"
+//#include "../timermanager.h"
 
 // 60 Minuten Zyklus...
 #define TIME_EIT_SCHEDULED_PAUSE 60* 60
@@ -438,8 +441,8 @@ static int scanning=1;
 // EVENTS...
 
 CEventServer    *eventServer;
-CTimerdClient   *timerdClient;
-bool            timerd = false;
+//CTimerdClient   *timerdClient;
+//bool            timerd = false;
 
 #define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
 #define dputs(str) {if(debug) puts(str);}
@@ -1655,7 +1658,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.125 2002/05/04 00:14:51 rasc Exp $\n"
+    "$Id: sectionsd.cpp,v 1.126 2002/05/15 10:00:55 dirch Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3964,7 +3967,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.125 2002/05/04 00:14:51 rasc Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.126 2002/05/15 10:00:55 dirch Exp $\n");
 	try
 	{
 
@@ -4045,6 +4048,7 @@ int main(int argc, char **argv)
 
 
 		eventServer = new CEventServer;
+/*
 		timerdClient = new CTimerdClient;
 
 		printf("[sectionsd ] checking timerd\n");
@@ -4053,7 +4057,7 @@ int main(int argc, char **argv)
 			printf("[sectionsd ] timerd available\n");
 		else
 			printf("[sectionsd ] timerd NOT available\n");
-
+*/
 		// SDT-Thread starten
 		rc=pthread_create(&threadSDT, 0, sdtThread, 0);
 		if(rc)
