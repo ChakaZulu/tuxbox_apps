@@ -6,8 +6,6 @@
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
 
-#define DEFAULTSKIN "stone.esml"
-
 class eSkinInit
 {
 	eSkin default_skin;
@@ -18,10 +16,15 @@ public:
 			if (default_skin.load( DATADIR "/enigma/skins/default.esml"))
 				eFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
 
-		eString skinfile=DEFAULTSKIN;
+		eString defaultSkin =
+			eSystemInfo::getInstance()->getHwType()
+				== eSystemInfo::TR_DVB272S
+			?
+				DATADIR "/enigma/skins/small_red.esml"
+			:
+				DATADIR "/enigma/skins/stone.esml";
 
-		if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::TR_DVB272S )
-			skinfile = "small_red.esml";
+		eString skinfile=defaultSkin;
 
 		char *temp=0;
 		if (!eConfig::getInstance()->getKey("/ezap/ui/skin", temp))
@@ -32,10 +35,9 @@ public:
 
 		if (default_skin.load(skinfile.c_str()))
 		{
-			eWarning("failed to load user defined skin %s, falling back to " DEFAULTSKIN, skinfile.c_str());
-			if (default_skin.load(CONFIGDIR "/enigma/skins/" DEFAULTSKIN))
-				if (default_skin.load(DATADIR "/enigma/skins/" DEFAULTSKIN))
-					eFatal("couldn't load fallback skin " DATADIR "/enigma/skins/" DEFAULTSKIN);
+			eWarning("failed to load user defined skin %s, falling back to %s", skinfile.c_str(), defaultSkin.c_str() );
+			if (default_skin.load(defaultSkin.c_str()))
+				eFatal("couldn't load fallback skin %s", defaultSkin.c_str() );
 		}
 
 		default_skin.parseSkins();
