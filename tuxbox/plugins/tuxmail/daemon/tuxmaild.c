@@ -3,6 +3,9 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.5  2004/03/31 13:55:36  thegoodguy
+ * use UTF-8 encoding for ü (\xC3\xBC)
+ *
  * Revision 1.4  2003/05/16 15:07:23  lazyt
  * skip unused accounts via "plus/minus", add mailaddress to spamlist via "blue"
  *
@@ -890,8 +893,8 @@ void NotifyUser()
 			{
 				if(account_db[loop].mail_new)
 				{
-					if(video == 2) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20für%%20%s\\n", loop, account_db[loop].mail_new, account_db[loop].name);
-					if(video == 3 || video == 4) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20für%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+					if(video == 2) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s\\n", loop, account_db[loop].mail_new, account_db[loop].name);
+					if(video == 3 || video == 4) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20f\xC3\xBCr%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
 					strcat(http_cmd, tmp_buffer);
 				}
 			}
@@ -938,7 +941,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.4 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.5 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
