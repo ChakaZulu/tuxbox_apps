@@ -297,11 +297,9 @@ void *start_scanthread(void *param)
 
     	curr_sat = 0;
       int symbolrate = 6900;
+      int symbolrate2 = 6875;
       for (int freq = 3300; freq<=4600; freq +=80)
 	{
-	  //get_nits(freq,symbolrate,0,0,0);
-	  //printf("get_nits() done\n");
-	  //printf("scanning cable\n");
 	  if (finaltune(freq,symbolrate,0,0,0)>0)
 	  {
 	  	fprintf(logfd, "Tuning to Freq: %d, SR: %d was succesfull\n", freq*100, symbolrate*1000);
@@ -310,24 +308,22 @@ void *start_scanthread(void *param)
     	}
   	  else
   	  {
-    		printf("No signal found on transponder\n");
+    		printf("No signal found on transponder\nTrying SR 6875\n");
     		fprintf(logfd, "Tuning to Freq: %d, SR: %d was UNsuccesfull\n", freq*100, symbolrate*1000);
+    		if (finaltune(freq,symbolrate2,0,0,0)>0)
+	  	{
+	  		fprintf(logfd, "Tuning to Freq: %d, SR: %d was succesfull\n", freq*100, symbolrate2*1000);
 
-    	  }
+    	  		fake_pat(&scantransponders, freq, symbolrate2, logfd);
+    		}
+  	  	else
+  	  	{
+    			printf("No signal found on transponder\n");
+    			fprintf(logfd, "Tuning to Freq: %d, SR: %d was UNsuccesfull\n", freq*100, symbolrate2*1000);
+		}
+	}
 
 	}
-	if (finaltune(3300,6875,0,0,0)>0)
-	{
-		fprintf(logfd, "Tuning to Freq: 330000, SR: 6875000 was succesfull\n");
-
-    	  	fake_pat(&scantransponders, 3300,6875, logfd);
-    	}
-    	else
-    	{
-    		fprintf(logfd, "Tuning to Freq: 330000, SR: 6875000 was UNsuccesfull\n");
-
-    	}
-
 
 	get_sdts(logfd);
 	fprintf(logfd, "Writing cable-tranponders and channels now\n");
