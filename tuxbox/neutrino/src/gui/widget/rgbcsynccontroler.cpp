@@ -162,7 +162,7 @@ void CRGBCSyncControler::paint()
 
 	paintSlider(x+10, y+hheight, *csync, CSYNCFACTOR, g_Locale->getText("videomenu.csync"),"", true);
 
-//	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT+3 );
+//	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT_PLUS_3);
 }
 
 void CRGBCSyncControler::paintSlider(int x, int y, unsigned int spos, float factor, const char * const text, const char * const iconname, bool selected)

@@ -301,7 +301,7 @@ void CExtendedInput_Item_Char::paint(int x, int y, bool focusGained )
 	if (focusGained)
 		color = COL_MENUCONTENTSELECTED;
 
-	frameBuffer->paintBoxRel( startx, starty, idx, idy, COL_MENUCONTENT+4);
+	frameBuffer->paintBoxRel( startx, starty, idx, idy, COL_MENUCONTENT_PLUS_4);
 	frameBuffer->paintBoxRel( startx+1, starty+1, idx-2, idy-2, color);
 
 	char text[2];

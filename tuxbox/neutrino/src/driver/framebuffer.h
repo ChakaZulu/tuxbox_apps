@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <string>
 
+#define fb_pixel_t uint8_t
+
 typedef struct fb_var_screeninfo t_fb_var_screeninfo;
 
 /** Ausführung als Singleton */
@@ -60,11 +62,11 @@ class CFrameBuffer
 		std::string     iconBasePath;
 
 		int             fd, tty;
-		unsigned char * lfb;
+		fb_pixel_t *    lfb;
 		int		available;
-		uint8_t *       background;
-		uint8_t *       backupBackground;
-		int             backgroundColor;
+		fb_pixel_t *    background;
+		fb_pixel_t *    backupBackground;
+		fb_pixel_t      backgroundColor;
 		std::string     backgroundFilename;
 		bool            useBackgroundPaint;
 		unsigned int	xRes, yRes, stride, bpp;
@@ -89,12 +91,12 @@ class CFrameBuffer
 		int setMode(unsigned int xRes, unsigned int yRes, unsigned int bpp);
 
 
-		int getFileHandle(); //only used for plugins (games) !!
+		int getFileHandle() const; //only used for plugins (games) !!
 		t_fb_var_screeninfo *getScreenInfo();
 
-		unsigned char* getFrameBufferPointer(); //pointer to framebuffer
-		unsigned int getStride(); //stride (anzahl bytes die eine Zeile im Framebuffer belegt)
-		bool getActive(); //is framebuffer active
+		fb_pixel_t * getFrameBufferPointer() const; // pointer to framebuffer
+		unsigned int getStride() const;             // size of a single line in the framebuffer (in bytes)
+		bool getActive() const;                     // is framebuffer active?
 
 		void setTransparency( int tr = 0 );
 
@@ -105,18 +107,18 @@ class CFrameBuffer
 		void paletteSet(struct fb_cmap *map = NULL);
 
 		//paint functions
-		void paintPixel(int x, int y, unsigned char col);
+		void paintPixel(int x, int y, const fb_pixel_t col);
 
-		void paintBoxRel(const int x, const int y, const int dx, const int dy, const unsigned char col);
-		inline void paintBox(int xa, int ya, int xb, int yb, unsigned char col) { paintBoxRel(xa, ya, xb - xa, yb - ya, col); }
+		void paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col);
+		inline void paintBox(int xa, int ya, int xb, int yb, const fb_pixel_t col) { paintBoxRel(xa, ya, xb - xa, yb - ya, col); }
 
-		void paintLine(int xa, int ya, int xb, int yb, unsigned char col);
+		void paintLine(int xa, int ya, int xb, int yb, const fb_pixel_t col);
 
-		void paintVLine(int x, int ya, int yb, unsigned char col);
-		void paintVLineRel(int x, int y, int dy, unsigned char col);
+		void paintVLine(int x, int ya, int yb, const fb_pixel_t col);
+		void paintVLineRel(int x, int y, int dy, const fb_pixel_t col);
 
-		void paintHLine(int xa, int xb, int y, unsigned char col);
-		void paintHLineRel(int x, int dx, int y, unsigned char col);
+		void paintHLine(int xa, int xb, int y, const fb_pixel_t col);
+		void paintHLineRel(int x, int dx, int y, const fb_pixel_t col);
 
 
 		void setIconBasePath(const std::string & iconPath);
@@ -126,13 +128,13 @@ class CFrameBuffer
 		bool paintIcon8(const std::string & filename, const int x, const int y, const unsigned char offset = 0);
 		void loadPal   (const std::string & filename, const unsigned char offset = 0, const unsigned char endidx = 255);
 
-		bool loadPicture2Mem        (const std::string & filename, uint8_t * const memp);
+		bool loadPicture2Mem        (const std::string & filename, fb_pixel_t * const memp);
 		bool loadPicture2FrameBuffer(const std::string & filename);
-		bool loadPictureToMem       (const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * const memp);
-		bool savePictureFromMem     (const std::string & filename, const uint8_t * const memp);
+		bool loadPictureToMem       (const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t stride, fb_pixel_t * const memp);
+		bool savePictureFromMem     (const std::string & filename, const fb_pixel_t * const memp);
 
 		int getBackgroundColor() { return backgroundColor;}
-		void setBackgroundColor(int color);
+		void setBackgroundColor(const fb_pixel_t color);
 		bool loadBackground(const std::string & filename, const unsigned char col = 0);
 		void useBackground(bool);
 		bool getuseBackground(void);
@@ -145,8 +147,8 @@ class CFrameBuffer
 
 		void paintBackground();
 
-		void SaveScreen(int x, int y, int dx, int dy, unsigned char* memp);
-		void RestoreScreen(int x, int y, int dx, int dy, unsigned char* memp);
+		void SaveScreen(int x, int y, int dx, int dy, fb_pixel_t * const memp);
+		void RestoreScreen(int x, int y, int dx, int dy, fb_pixel_t * const memp);
 
 		void ClearFrameBuffer();
 

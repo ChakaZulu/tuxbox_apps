@@ -812,8 +812,8 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 	int ypos2 = y + height;
 	int ypos1a = ypos1 + (fheight/2)-2;
 	int ypos2a = ypos2 + (info_height/2)-2;
-	unsigned char col1 = COL_MENUCONTENT+6;
-	unsigned char col2 = COL_MENUCONTENT+1;
+	unsigned char col1 = COL_MENUCONTENT_PLUS_6;
+	unsigned char col2 = COL_MENUCONTENT_PLUS_1;
 
 
 	// Clear
@@ -954,13 +954,13 @@ void CChannelList::paint()
 
 	int ypos = y+ theight;
 	int sb = fheight* listmaxshow;
-	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	frameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT_PLUS_1);
 
 	int sbc= ((chanlist.size()- 1)/ listmaxshow)+ 1;
 	float sbh= (sb- 4)/ sbc;
 	int sbs= (selected/listmaxshow);
 
-	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
 
 	g_Sectionsd->setPauseSorting( false );
 }

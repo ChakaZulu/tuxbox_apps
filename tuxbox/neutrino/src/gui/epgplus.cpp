@@ -103,13 +103,13 @@ EpgPlus::CTimeLine::CTimeLine
 	this->durationX = durationX;
 	this->gridHeight = gridHeight;
 
-	this->backColor1     = COL_MENUCONTENT + 1;
-	this->backColor2     = COL_MENUCONTENT + 2;
+	this->backColor1     = COL_MENUCONTENT_PLUS_1;
+	this->backColor2     = COL_MENUCONTENT_PLUS_2;
 	this->dateColor      = COL_MENUHEAD;
 	this->markColor      = COL_MENUCONTENTSELECTED;
 	this->backMarkColor  = COL_MENUCONTENT;
-	this->textColor      = COL_MENUCONTENT + 1;
-	this->gridColor      = COL_MENUCONTENT + 5;
+	this->textColor      = COL_MENUCONTENT_PLUS_1;
+	this->gridColor      = COL_MENUCONTENT_PLUS_5;
 }
 
 EpgPlus::CTimeLine::~CTimeLine()
@@ -324,8 +324,8 @@ EpgPlus::CChannelEventEntry::CChannelEventEntry ( const CChannelEvent* channelEv
 	this->width  = width;
 	this->height = height;
 
-	this->normalColor1    = COL_MENUCONTENT + 1;
-	this->normalColor2    = COL_MENUCONTENT + 2;
+	this->normalColor1    = COL_MENUCONTENT_PLUS_1;
+	this->normalColor2    = COL_MENUCONTENT_PLUS_2;
 	this->selectionColor  = COL_MENUCONTENTSELECTED;
 	this->dummyEventColor = COL_MENUCONTENT;
 }
@@ -1447,7 +1447,7 @@ void EpgPlus::paint()
 		, this->sliderY + int(sliderKnobPosition*sliderKnobHeight)
 		, 11
 		, int(sliderKnobHeight)
-		, COL_MENUCONTENT + 3
+		, COL_MENUCONTENT_PLUS_3
 		);
 }
 

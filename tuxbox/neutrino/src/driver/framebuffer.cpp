@@ -109,7 +109,7 @@ void CFrameBuffer::init(const char * const fbDevice)
 
 	available=fix.smem_len;
 	printf("%dk video mem\n", available/1024);
-	lfb=(unsigned char*)mmap(0, available, PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
+	lfb=(fb_pixel_t*)mmap(0, available, PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
 
 	if (!lfb)
 	{
@@ -202,25 +202,25 @@ CFrameBuffer::~CFrameBuffer()
 		delete[] virtual_fb;
 }
 
-int CFrameBuffer::getFileHandle()
+int CFrameBuffer::getFileHandle() const
 {
 	return fd;
 }
 
-unsigned int CFrameBuffer::getStride()
+unsigned int CFrameBuffer::getStride() const
 {
 	return stride;
 }
 
-unsigned char* CFrameBuffer::getFrameBufferPointer()
+fb_pixel_t * CFrameBuffer::getFrameBufferPointer() const
 {
 	if (active || (virtual_fb == NULL))
 		return lfb;
 	else
-		return virtual_fb;
+		return (fb_pixel_t *) virtual_fb;
 }
 
-bool CFrameBuffer::getActive()
+bool CFrameBuffer::getActive() const
 {
 	return (active || (virtual_fb != NULL));
 }
@@ -267,7 +267,7 @@ int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int n
 	}
 
 	stride=fix.line_length;
-	memset(getFrameBufferPointer(), 0, stride*yRes);
+	memset(getFrameBufferPointer(), 0, stride * yRes);
 	return 0;
 }
 
@@ -337,26 +337,39 @@ void CFrameBuffer::paletteSet(struct fb_cmap *map)
 }
 
 
-void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const unsigned char col)
+void CFrameBuffer::paintBoxRel(const int x, const int y, const int dx, const int dy, const fb_pixel_t col)
 {
 	if (!getActive())
 		return;
 
-	unsigned char * pos = getFrameBufferPointer() + x + stride * y;
+	fb_pixel_t * pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
 	for(int count = 0; count < dy; count++)
 	{
-		memset(pos, col, dx);
+		memset(pos, col, dx * sizeof(fb_pixel_t));
 		pos += stride;
 	}
 }
 
-void CFrameBuffer::paintVLine(int x, int ya, int yb, unsigned char col)
+void CFrameBuffer::paintVLine(int x, int ya, int yb, const fb_pixel_t col)
 {
 	if (!getActive())
 		return;
 
-	unsigned char* pos = getFrameBufferPointer() + x + stride*ya;
+	fb_pixel_t * pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * ya;
 	int dy = yb-ya;
+	for (int count = 0; count < dy; count++)
+	{
+		*pos = col;
+		pos += stride;
+	}
+}
+
+void CFrameBuffer::paintVLineRel(int x, int y, int dy, const fb_pixel_t col)
+{
+	if (!getActive())
+		return;
+
+	fb_pixel_t* pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
 	for(int count=0;count<dy;count++)
 	{
 		*pos = col;
@@ -364,36 +377,23 @@ void CFrameBuffer::paintVLine(int x, int ya, int yb, unsigned char col)
 	}
 }
 
-void CFrameBuffer::paintVLineRel(int x, int y, int dy, unsigned char col)
+void CFrameBuffer::paintHLine(int xa, int xb, int y, const fb_pixel_t col)
 {
 	if (!getActive())
 		return;
 
-	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
-	for(int count=0;count<dy;count++)
-	{
-		*pos = col;
-		pos += stride;
-	}
-}
-
-void CFrameBuffer::paintHLine(int xa, int xb, int y, unsigned char col)
-{
-	if (!getActive())
-		return;
-
-	unsigned char* pos = getFrameBufferPointer() + xa + stride*y;
+	fb_pixel_t* pos = getFrameBufferPointer() + xa * sizeof(fb_pixel_t) + stride * y;
 	int dx = xb -xa;
-	memset(pos, col, dx);
+	memset(pos, col, dx * sizeof(fb_pixel_t));
 }
 
-void CFrameBuffer::paintHLineRel(int x, int dx, int y, unsigned char col)
+void CFrameBuffer::paintHLineRel(int x, int dx, int y, const fb_pixel_t col)
 {
 	if (!getActive())
 		return;
 
-	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
-	memset(pos, col, dx);
+	fb_pixel_t* pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	memset(pos, col, dx * sizeof(fb_pixel_t));
 }
 
 void CFrameBuffer::setIconBasePath(const std::string & iconPath)
@@ -424,8 +424,8 @@ bool CFrameBuffer::paintIcon8(const std::string & filename, const int x, const i
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	unsigned char *d = getFrameBufferPointer() + x +stride*y;
-	unsigned char *d2;
+	fb_pixel_t *d = getFrameBufferPointer() + x +stride*y;
+	fb_pixel_t *d2;
 	for (int count=0; count<height; count ++ )
 	{
 		read(fd, &pixbuf, width );
@@ -470,8 +470,8 @@ bool CFrameBuffer::paintIcon(const std::string & filename, const int x, const in
 	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[768];
-	unsigned char *d = getFrameBufferPointer() + x +stride*y;
-	unsigned char *d2;
+	fb_pixel_t *d = getFrameBufferPointer() + x +stride*y;
+	fb_pixel_t *d2;
 	for (int count=0; count<height; count ++ )
 	{
 		read(fd, &pixbuf, width >> 1 );
@@ -539,16 +539,16 @@ void CFrameBuffer::loadPal(const std::string & filename, const unsigned char off
 	close(fd);
 }
 
-void CFrameBuffer::paintPixel(const int x, const int y, const unsigned char col)
+void CFrameBuffer::paintPixel(const int x, const int y, const fb_pixel_t col)
 {
 	if (!getActive())
 		return;
 
-	unsigned char* pos = getFrameBufferPointer() + x + stride*y;
+	fb_pixel_t * pos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
 	*pos = col;
 }
 
-void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, unsigned char col)
+void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, const fb_pixel_t col)
 {
 	if (!getActive())
 		return;
@@ -634,12 +634,12 @@ void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, unsigned char col)
 	}
 }
 
-void CFrameBuffer::setBackgroundColor(int color)
+void CFrameBuffer::setBackgroundColor(const fb_pixel_t color)
 {
 	backgroundColor = color;
 }
 
-bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t stride, uint8_t * memp)
+bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t width, const uint16_t height, const uint16_t stride, fb_pixel_t * memp)
 {
 	struct rawHeader header;
 	int              fd;
@@ -671,7 +671,7 @@ bool CFrameBuffer::loadPictureToMem(const std::string & filename, const uint16_t
 	return true;
 }
 
-bool CFrameBuffer::loadPicture2Mem(const std::string & filename, uint8_t * memp)
+bool CFrameBuffer::loadPicture2Mem(const std::string & filename, fb_pixel_t * memp)
 {
 	return loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, memp);
 }
@@ -684,7 +684,7 @@ bool CFrameBuffer::loadPicture2FrameBuffer(const std::string & filename)
 	return loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, getStride(), getFrameBufferPointer());
 }
 
-bool CFrameBuffer::savePictureFromMem(const std::string & filename, const uint8_t * const memp)
+bool CFrameBuffer::savePictureFromMem(const std::string & filename, const fb_pixel_t * const memp)
 {
 	struct rawHeader header;
 	uint16_t         width, height;
@@ -715,7 +715,7 @@ bool CFrameBuffer::savePictureFromMem(const std::string & filename, const uint8_
 	return true;
 }
 
-bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned char col)
+bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned char offset)
 {
 	if ((backgroundFilename == filename) && (background))
 	{
@@ -728,7 +728,7 @@ bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned c
 		delete[] background;
 	}
 
-	background = new uint8_t[BACKGROUNDIMAGEWIDTH * 576];
+	background = new fb_pixel_t[BACKGROUNDIMAGEWIDTH * 576];
 
 	if (!loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, background))
 	{
@@ -736,14 +736,14 @@ bool CFrameBuffer::loadBackground(const std::string & filename, const unsigned c
 		return false;
 	}
 
-	if(col!=0)//pic-offset
+	if (offset != 0)//pic-offset
 	{
-		unsigned char *bpos = background;
+		fb_pixel_t * bpos = background;
 		int pos = BACKGROUNDIMAGEWIDTH * 576;
-		while(pos>0)
+		while (pos > 0)
 		{
-			*bpos += col;
-			bpos += 1;
+			*bpos += offset;
+			bpos++;
 			pos--;
 		}
 	}
@@ -775,7 +775,7 @@ void CFrameBuffer::saveBackgroundImage(void)
 
 void CFrameBuffer::restoreBackgroundImage(void)
 {
-	uint8_t * tmp = background;
+	fb_pixel_t * tmp = background;
 
 	if (backupBackground != NULL)
 	{
@@ -800,11 +800,11 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	}
 	else
 	{
-		unsigned char *fbpos = getFrameBufferPointer() + x + stride*y;
-		unsigned char *bkpos = background + x + BACKGROUNDIMAGEWIDTH * y;
-		for(int count=0;count<dy;count++)
+		fb_pixel_t * fbpos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+		fb_pixel_t * bkpos = background + x * sizeof(fb_pixel_t) + BACKGROUNDIMAGEWIDTH * y;
+		for(int count = 0;count < dy; count++)
 		{
-			memcpy(fbpos, bkpos, dx);
+			memcpy(fbpos, bkpos, dx * sizeof(fb_pixel_t));
 			fbpos += stride;
 			bkpos += BACKGROUNDIMAGEWIDTH;
 		}
@@ -822,35 +822,35 @@ void CFrameBuffer::paintBackground()
 			memcpy(getFrameBufferPointer() + i * stride, background + i * BACKGROUNDIMAGEWIDTH, BACKGROUNDIMAGEWIDTH);
 	}
 	else
-		memset(getFrameBufferPointer(), backgroundColor, stride*576);
+		memset(getFrameBufferPointer(), backgroundColor, stride * 576);
 }
 
-void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, unsigned char* memp)
+void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, fb_pixel_t * const memp)
 {
 	if (!getActive())
 		return;
 
-    unsigned char *fbpos = getFrameBufferPointer() + x + stride*y;
-	unsigned char *bkpos = memp;
-	for(int count=0;count<dy;count++)
+	fb_pixel_t * fbpos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	fb_pixel_t * bkpos = memp;
+	for (int count = 0; count < dy; count++)
 	{
-		memcpy(bkpos, fbpos, dx);
+		memcpy(bkpos, fbpos, dx * sizeof(fb_pixel_t));
 		fbpos += stride;
 		bkpos += dx;
 	}
 
 }
 
-void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, unsigned char* memp)
+void CFrameBuffer::RestoreScreen(int x, int y, int dx, int dy, fb_pixel_t * const memp)
 {
 	if (!getActive())
 		return;
 
-	unsigned char *fbpos = getFrameBufferPointer() + x + stride*y;
-	unsigned char *bkpos = memp;
-	for(int count=0;count<dy;count++)
+	fb_pixel_t * fbpos = getFrameBufferPointer() + x * sizeof(fb_pixel_t) + stride * y;
+	fb_pixel_t * bkpos = memp;
+	for (int count = 0; count < dy; count++)
 	{
-		memcpy(fbpos, bkpos, dx);
+		memcpy(fbpos, bkpos, dx * sizeof(fb_pixel_t));
 		fbpos += stride;
 		bkpos += dx;
 	}
@@ -877,7 +877,7 @@ void CFrameBuffer::switch_signal (int signal)
 		if (virtual_fb != NULL)
 			memcpy(thiz->lfb, virtual_fb, thiz->stride * thiz->yRes);
 		else
-			memset(thiz->lfb, 0, thiz->stride*thiz->yRes);
+			memset(thiz->lfb, 0, thiz->stride * thiz->yRes);
 	}
 }
 

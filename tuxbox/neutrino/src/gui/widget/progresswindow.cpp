@@ -70,10 +70,10 @@ void CProgressWindow::showGlobalStatus(const unsigned int prog)
 
 		pos += int( float(width-20)/100.0 * global_progress);
 		//vordergrund
-		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
+		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT_PLUS_7);
 	}
 	//hintergrund
-	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
+	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT_PLUS_2);
 }
 
 void CProgressWindow::showLocalStatus(const unsigned int prog)
@@ -92,10 +92,10 @@ void CProgressWindow::showLocalStatus(const unsigned int prog)
 
 		pos += int( float(width-20)/100.0 * local_progress);
 		//vordergrund
-		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT +7);
+		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT_PLUS_7);
 	}
 	//hintergrund
-	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
+	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT_PLUS_2);
 }
 
 void CProgressWindow::showStatusMessageUTF(const std::string & text)

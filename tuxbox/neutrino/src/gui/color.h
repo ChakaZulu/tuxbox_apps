@@ -44,6 +44,16 @@
 
 #define COL_BACKGROUND 			255
 
+#define COL_INFOBAR_SHADOW_PLUS_1	(COL_INFOBAR_SHADOW + 1)
+#define COL_MENUCONTENT_PLUS_1          (COL_MENUCONTENT + 1)
+#define COL_MENUCONTENT_PLUS_2          (COL_MENUCONTENT + 2)
+#define COL_MENUCONTENT_PLUS_3          (COL_MENUCONTENT + 3)
+#define COL_MENUCONTENT_PLUS_4          (COL_MENUCONTENT + 4)
+#define COL_MENUCONTENT_PLUS_5          (COL_MENUCONTENT + 5)
+#define COL_MENUCONTENT_PLUS_6          (COL_MENUCONTENT + 6)
+#define COL_MENUCONTENT_PLUS_7          (COL_MENUCONTENT + 7)
+
+
 int convertSetupColor2RGB(unsigned char r, unsigned char g, unsigned char b);
 int convertSetupAlpha2Alpha(unsigned char alpha);
 

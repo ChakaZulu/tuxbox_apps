@@ -370,7 +370,7 @@ void CStringInput::paintChar(int pos, const char c)
 	if (pos==selected)
 		color = COL_MENUCONTENTSELECTED;
 
-	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT+ 4);
+	frameBuffer->paintBoxRel(xpos, ypos, xs, ys, COL_MENUCONTENT_PLUS_4);
 	frameBuffer->paintBoxRel(xpos+ 1, ypos+ 1, xs- 2, ys- 2, color);
 
 	int xfpos = xpos + ((xs- g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(ch))>>1);

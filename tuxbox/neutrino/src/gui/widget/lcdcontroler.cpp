@@ -308,7 +308,7 @@ void CLcdControler::paint()
 	paintSlider(x+10, y+hheight+mheight, brightness, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightness"),"brightness", false);
 	paintSlider(x+10, y+hheight+mheight*2, brightnessstandby, BRIGHTNESSFACTOR, g_Locale->getText("lcdcontroler.brightnessstandby"),"brightnessstandby",false);
 
-	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT+3 );
+	frameBuffer->paintHLineRel(x+10, width-20, y+hheight+mheight*3+mheight/4, COL_MENUCONTENT_PLUS_3);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+10, y+hheight+mheight*4+mheight/2, width, g_Locale->getText("options.default"), COL_MENUCONTENT, 0, true); // UTF-8
 }
 

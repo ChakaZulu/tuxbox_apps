@@ -367,10 +367,10 @@ void CMenuWidget::paintItems()
 	// Scrollbar
 	if(total_pages>1)
 	{
-		frameBuffer->paintBoxRel(x+ width,item_start_y, 15, item_height,  COL_MENUCONTENT+ 1);
+		frameBuffer->paintBoxRel(x+ width,item_start_y, 15, item_height,  COL_MENUCONTENT_PLUS_1);
 		float sbh= ((item_height-4) / total_pages);
 		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ int(current_page* sbh) , 11, 
-										 int(sbh),  COL_MENUCONTENT+ 3);
+										 int(sbh),  COL_MENUCONTENT_PLUS_3);
 	}
 	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT);
 	unsigned int count;
@@ -733,8 +733,8 @@ int CMenuSeparator::paint(bool selected)
 	frameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
 	if(type&LINE)
 	{
-		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1), COL_MENUCONTENT+3 );
-		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1)+1, COL_MENUCONTENT+1 );
+		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1), COL_MENUCONTENT_PLUS_3);
+		frameBuffer->paintHLineRel(x+10,dx-20,y+(height>>1)+1, COL_MENUCONTENT_PLUS_1);
 	}
 	if(type&STRING)
 	{
