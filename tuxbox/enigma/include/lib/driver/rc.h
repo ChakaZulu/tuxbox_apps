@@ -11,6 +11,11 @@ class eRCInput;
 class eRCDriver;
 class eRCKey;
 
+/**
+ * \brief A remote control.
+ *
+ * Handles one remote control. Gets codes from a \ref eRCDriver. Produces events in \ref eRCInput.
+ */
 class eRCDevice: public Object
 {
 protected:
@@ -18,14 +23,46 @@ protected:
 	eRCDriver *driver;
 	const char *id;
 public:
+	/**
+	 * \brief Constructs a new remote control.
+	 *
+	 * \param id The identifier of the RC, for use in settings.
+	 * \param input The \ref eRCDriver where this remote gets its codes from.
+	 */
 	eRCDevice(const char *id, eRCDriver *input);
 	~eRCDevice();
+	/**
+	 * \brief Handles a device specific code.
+	 *
+	 * Generates events in \ref eRCInput. code is highly device- and driver dependant.
+	 * For Example, it might be 16bit codes with one bit make/break or special codes
+	 * for repeat.
+	 */
 	virtual void handleCode(int code)=0;
+	/**
+	 * \brief Get user readable description.
+	 * \result The description.
+	 */
 	virtual const char *getDescription() const=0;
+	/**
+	 * \brief Get a description for a specific key.
+	 * \param key The key to get the description for.
+	 * \result User readable description of given key.
+	 */
 	virtual const char *getKeyDescription(const eRCKey &key) const=0;
+	/**
+	 * \brief Get a dbox2-compatible keycode.
+	 *
+	 * THIS IS DEPRECATED! DON'T USE IT UNLESS YOU NEED IT!
+	 * \param key The key to get the compatible code for.
+	 * \result The dbox2-compatible code. (new RC as defined in enum).
+	 */
 	virtual int getKeyCompatibleCode(const eRCKey &key) const;
 };
 
+/**
+ * Receives codes from one or more remote controls.
+ */
 class eRCDriver: public Object
 {
 //	Q_OBJECT
@@ -33,8 +70,19 @@ protected:
 	std::list<eRCDevice*> listeners;
 	eRCInput *input;
 public:
+	/**
+	 * \brief Constructs a driver.
+	 *
+	 * \param input The RCInput to bind this driver to.
+	 */
 	eRCDriver(eRCInput *input);
+	/**
+	 * \brief Get pointer to key-consumer.
+	 */
 	eRCInput *getInput() const { return input; }
+	/**
+	 * \brief Adds a code lister
+	 */
 	void addCodeListener(eRCDevice *dev)
 	{
 		listeners.push_back(dev);
