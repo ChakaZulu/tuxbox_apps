@@ -564,7 +564,7 @@ options.on ein
 options.serial seriell
 parentallock.changepin PIN-Code festlegen
 parentallock.changepin_hint1 Geben Sie hier Ihren neuen PIN-Code ein!
-parentallock.changetolocked Bei vorgeperrten Bouquets
+parentallock.changetolocked Bei vorgesperrten Bouquets
 parentallock.head Jugendschutz PIN
 parentallock.lockage Sendungen
 parentallock.lockage12 ab 12 Jahren sperren
