@@ -1,5 +1,5 @@
 /*
-$Id: favorites.cpp,v 1.2 2002/04/05 01:14:43 rasc Exp $
+$Id: favorites.cpp,v 1.3 2002/04/05 15:12:54 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -26,6 +26,9 @@ $Id: favorites.cpp,v 1.2 2002/04/05 01:14:43 rasc Exp $
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 $Log: favorites.cpp,v $
+Revision 1.3  2002/04/05 15:12:54  rasc
+-- Favorites checks, if channel in Bouquet
+
 Revision 1.2  2002/04/05 01:14:43  rasc
 -- Favorites Bouquet handling (Easy Add Channels)
 
@@ -57,12 +60,12 @@ int CFavorites::addChannelToFavorites()
 	int          status = 0;
 
 
+	// -- get Favorites Bouquetname  from Locales
 	fav_bouquetname = (char *) g_Locale->getText("favorites.bouquetname").c_str();
 
 	//
 	// -- check if Favorite Bouquet exists: if not, create it.
 	//
-
 	bouquet_id = g_Zapit->existsBouquet (fav_bouquetname);
 	if (!bouquet_id) {
 		g_Zapit->addBouquet (fav_bouquetname);
@@ -74,20 +77,21 @@ int CFavorites::addChannelToFavorites()
 	onid_sid = g_Zapit->getCurrentServiceID();
 	//fprintf (stderr, "ADDFav: %08lx  (onid_sid)  bq_id: %u \n", onid_sid, bouquet_id);
 
+	if ( ! g_Zapit->existsChannelInBouquet (bouquet_id,onid_sid) ) {
+		g_Zapit->addChannelToBouquet(bouquet_id, onid_sid);
+		status |= 2;
+	}
 
-	// ToDO:  Check if channel is already in this bouquet $$$$ (rasc)
-	g_Zapit->addChannelToBouquet( (unsigned int) bouquet_id, onid_sid);
-	status |= 2;
 
+	// -- tell zapit to save Boquets and reinit (if changed)
+	if (status) {
+		g_Zapit->saveBouquets();
+		g_Zapit->reinitChannels();
 
-	// -- tell zapit to save Boquets and reinit
-	g_Zapit->saveBouquets();
-	g_Zapit->reinitChannels();
-
-	// -- same to Neutrino (keep channel!)
-	neutrino->channelsInit();
-	//g_RCInput->postMsg( messages::EVT_BOUQUETSCHANGED, 1 );
-
+		// -- same to Neutrino (keep current channel!)
+		neutrino->channelsInit();
+		//g_RCInput->postMsg( messages::EVT_BOUQUETSCHANGED, 1 );
+	}
 
 	return status;
 }
@@ -130,7 +134,7 @@ int CFavorites::exec(CMenuTarget* parent, string)
 	if (status & 2)  str += g_Locale->getText("favorites.chadded"); 
 	else             str += g_Locale->getText("favorites.chalreadyinbq");
 
-	str +=  g_Locale->getText("favorites.finalhint");
+	if (status) str +=  g_Locale->getText("favorites.finalhint");
 
 	ShowMsg ( "favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack );
 
