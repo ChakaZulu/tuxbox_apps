@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.35 2001/09/18 11:34:42 fnbrd Exp $
+        $Id: neutrino.cpp,v 1.36 2001/09/18 14:57:51 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.36  2001/09/18 14:57:51  field
+  tzset eingebaut, id wird beim starten ausgegeben
+
   Revision 1.35  2001/09/18 11:34:42  fnbrd
   Some changes.
 
@@ -1274,7 +1277,10 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-  initGlobals();
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.36 2001/09/18 14:57:51 field Exp $\n\n");
+    tzset();
+
+    initGlobals();
 	neutrino = new CNeutrinoApp;
 	return neutrino->run(argc, argv);
 }
