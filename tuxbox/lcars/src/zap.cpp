@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.16  2003/10/07 20:39:28  thedoc
+
+someone added premiere-ca support, which was not supposed to be supported in lcars, sorry...
+
 Revision 1.15  2003/01/28 00:25:24  thedoc
 why does it always show such strange error messages?
 
@@ -185,7 +189,7 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	if (PCR == 0)
 		PCR = 0x1fff;
 
-	if (ECM != 0)
+	if (ECM != 0 && ONID != 0x85)
 	{
 		std::cout << "Doing CA" << std::endl;
 		ca.initialize();
