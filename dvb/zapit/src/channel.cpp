@@ -1,7 +1,8 @@
 /*
- * $Id: channel.cpp,v 1.3 2002/05/13 20:25:10 McClean Exp $
+ * $Id: channel.cpp,v 1.4 2002/05/15 20:45:04 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ *	& Steffen Hehn <mcclean@berlios.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,17 +39,18 @@ CZapitChannel::CZapitChannel (std::string p_name, unsigned short p_sid, unsigned
 CZapitChannel::~CZapitChannel ()
 {
 	resetPids();
-	if(caPmt)
+
+	if (caPmt)
 	{
 		delete caPmt;
 	}
 }
 
-CZapitAudioChannel* CZapitChannel::getAudioChannel (unsigned char index)
+CZapitAudioChannel * CZapitChannel::getAudioChannel (unsigned char index)
 {
 	CZapitAudioChannel* retval = NULL;
 
-	if ((index == 0xFF) && (currentAudioChannel<getAudioChannelCount()))
+	if ((index == 0xFF) && (currentAudioChannel < getAudioChannelCount()))
 	{
 		retval = audioChannels[currentAudioChannel];
 	}
@@ -64,7 +66,7 @@ unsigned short CZapitChannel::getAudioPid (unsigned char index = 0xFF)
 {
 	unsigned short retval = 0;
 
-	if ((index == 0xFF) && (currentAudioChannel<getAudioChannelCount()))
+	if ((index == 0xFF) && (currentAudioChannel < getAudioChannelCount()))
 	{
 		retval = audioChannels[currentAudioChannel]->pid;
 	}
@@ -76,21 +78,23 @@ unsigned short CZapitChannel::getAudioPid (unsigned char index = 0xFF)
 	return retval;
 }
 
-int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag)
+int CZapitChannel::addAudioChannel (unsigned short pid, bool isAc3, std::string description, unsigned char componentTag)
 {
-	for (std::vector<CZapitAudioChannel*>::iterator aI=audioChannels.begin(); aI!=audioChannels.end(); ++aI)
+	std::vector <CZapitAudioChannel *>::iterator aI;
+
+	for (aI = audioChannels.begin(); aI != audioChannels.end(); aI++)
 	{
-		if ( (*aI)->pid==pid)
+		if ((* aI)->pid == pid)
 		{
 			return -1;
 		}
 	}
 
-	CZapitAudioChannel* tmp = new CZapitAudioChannel();
-		tmp->pid = pid;
-		tmp->isAc3 = isAc3;
-		tmp->description = description;
-		tmp->componentTag = componentTag;
+	CZapitAudioChannel * tmp = new CZapitAudioChannel();
+	tmp->pid = pid;
+	tmp->isAc3 = isAc3;
+	tmp->description = description;
+	tmp->componentTag = componentTag;
 	audioChannels.insert(audioChannels.end(), tmp);
 
 	return 0;
@@ -98,10 +102,13 @@ int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, std::string d
 
 void CZapitChannel::resetPids()
 {
-	for (std::vector<CZapitAudioChannel*>::iterator aI=audioChannels.begin(); aI!=audioChannels.end(); ++aI)
+	std::vector<CZapitAudioChannel *>::iterator aI;
+
+	for (aI = audioChannels.begin(); aI != audioChannels.end(); aI++)
 	{
-		delete *aI;
+		delete * aI;
 	}
+
 	audioChannels.clear();
 	currentAudioChannel = 0;
 
