@@ -459,7 +459,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 
 				// 31.05.2002 dirch		record timer
 				case CRCInput::RC_red:
-					if(g_settings.network_streaming_use)
+					if(g_settings.network_streaming_use || g_settings.vcr_recording)
 					{
 						timerdclient = new CTimerdClient;
 						if(timerdclient->isTimerdAvailable())
@@ -685,7 +685,7 @@ void CEpgData::showTimerEventBar (bool show)
 
 
     // Button: Timer Record & Channelswitch 
-	if(g_settings.network_streaming_use)		// display record button only if streamingserver_use
+	if(g_settings.network_streaming_use || g_settings.vcr_recording)		// display record button only if streamingserver_use
 	{
 		pos = 0;
 		frameBuffer->paintIcon("rot.raw", x+8+cellwidth*pos, y+h_offset );
