@@ -2890,6 +2890,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			}
 			return messages_return::cancel_all | messages_return::handled;
 		}
+#if 0
 		else /* data == 1: Standby button released */
 		{
 			struct timeval tv;
@@ -2902,6 +2903,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				return messages_return::cancel_all | messages_return::handled;
 			}
 		}
+#endif
 	}
 	else if( msg == CRCInput::RC_plus ||
 		 msg == CRCInput::RC_minus )
