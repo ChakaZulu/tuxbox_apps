@@ -68,7 +68,7 @@ class CInfoViewer
 
 		string		CurrentChannel;
 		sectionsd::CurrentNextInfo	info_CurrentNext;
-        	unsigned int			current_onid_sid;
+        	t_channel_id    channel_id;
 
 		char aspectRatio;
 
@@ -95,9 +95,9 @@ class CInfoViewer
 
 		void start();
 
-		void showTitle( int ChanNum, string Channel, unsigned int onid_sid = 0, bool calledFromNumZap = false );
+		void showTitle( int ChanNum, string Channel, const t_channel_id new_channel_id = 0, bool calledFromNumZap = false );
 		void killTitle();
-		sectionsd::CurrentNextInfo getEPG( unsigned int onid_sid );
+		sectionsd::CurrentNextInfo getEPG(const t_channel_id for_channel_id);
 
 		void showSubchan();
 

@@ -146,12 +146,12 @@ void CInfoViewer::showRecordIcon( bool show )
 	}
 }
 
-void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid, bool calledFromNumZap )
+void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new_channel_id, bool calledFromNumZap )
 {
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
         CurrentChannel = Channel;
-        current_onid_sid = onid_sid;
+        channel_id = new_channel_id;
         showButtonBar = !calledFromNumZap;
 
         bool fadeIn = ( ( !is_visible ) && showButtonBar &&
@@ -171,7 +171,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
  		if ( !gotTime )
  			gotTime = g_Sectionsd->getIsTimeSet();
 
-		info_CurrentNext = getEPG( current_onid_sid );
+		info_CurrentNext = getEPG(channel_id);
 
         if ( fadeIn )
         {
@@ -248,14 +248,14 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 			showIcon_VTXT();
         }
 
-        if ( ( g_RemoteControl->current_onid_sid == current_onid_sid ) &&
+        if ( ( g_RemoteControl->current_onid_sid == channel_id) &&
              !( ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) &&
 				    ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_no_current ) ) ) ||
 				    ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) ) )
 
         {
 			// EVENT anfordern!
-			g_Sectionsd->setServiceChanged( onid_sid, true );
+			g_Sectionsd->setServiceChanged(channel_id, true );
 		}
 
 		// Schatten
@@ -519,7 +519,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	{
 		sectionsd::CurrentNextInfo info = getEPG( data );
 
-		if ( ( is_visible ) && ( data == current_onid_sid ) )
+		if ( ( is_visible ) && ( data == channel_id) )
 		{
 			info_CurrentNext = info;
 			show_Data( true );
@@ -549,7 +549,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	}
     else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
 	{
-		if ( data == current_onid_sid )
+		if ( data == channel_id)
 		{
 			if ( is_visible && showButtonBar )
 				showButton_Audio();
@@ -558,7 +558,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_ZAP_GOTPIDS )
 	{
-		if ( data == current_onid_sid )
+		if ( data == channel_id)
 		{
 			if ( is_visible && showButtonBar )
 				showIcon_VTXT();
@@ -567,7 +567,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES )
 	{
-		if ( data == current_onid_sid )
+		if ( data == channel_id)
 		{
 			if ( is_visible && showButtonBar )
 				showButton_SubServices();
@@ -576,7 +576,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_ZAP_SUB_COMPLETE )
 	{
-		//if ( data == current_onid_sid )
+		//if ( data == channel_id)
 		{
 			if ( is_visible && showButtonBar &&  ( !g_RemoteControl->are_subchannels ) )
 				show_Data( true );
@@ -585,7 +585,7 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	}
 	else if ( msg == NeutrinoMessages::EVT_ZAP_FAILED )
 	{
-		if ( data == current_onid_sid )
+		if ( data == channel_id)
 		{
 			// show failure..!
 			printf("zap failed!\n");
@@ -631,11 +631,11 @@ void CInfoViewer::showButton_SubServices()
 	}
 }
 
-sectionsd::CurrentNextInfo CInfoViewer::getEPG( unsigned int onid_sid )
+sectionsd::CurrentNextInfo CInfoViewer::getEPG(const t_channel_id for_channel_id)
 {
 	sectionsd::CurrentNextInfo info;
 
-	g_Sectionsd->getCurrentNextServiceKey( onid_sid, info );
+	g_Sectionsd->getCurrentNextServiceKey(for_channel_id, info );
 
 	if ( info.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_next ) )
 	{
@@ -644,7 +644,7 @@ sectionsd::CurrentNextInfo CInfoViewer::getEPG( unsigned int onid_sid )
 		g_RCInput->postMsg( ( info.flags & ( sectionsd::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
 	}
 	else
-		g_RCInput->postMsg( NeutrinoMessages::EVT_NOEPG_YET, onid_sid, false );
+		g_RCInput->postMsg( NeutrinoMessages::EVT_NOEPG_YET, for_channel_id, false );
 
 	return info;
 }
@@ -664,7 +664,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 	if ( is_visible )
 	{
 
-       	if ( ( g_RemoteControl->current_onid_sid == current_onid_sid ) &&
+       	if ( ( g_RemoteControl->current_onid_sid == channel_id) &&
        		 ( g_RemoteControl->subChannels.size()> 0 ) && ( !g_RemoteControl->are_subchannels ) )
        	{
 			is_nvod = true;
