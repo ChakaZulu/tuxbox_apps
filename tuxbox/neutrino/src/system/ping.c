@@ -134,7 +134,7 @@ int
 recv_ping( struct sockaddr_in *taddr )
 {
   int len;
-  int from;
+  socklen_t from;
   int nf, cc;
   unsigned char buf[ HDRLEN + DATALEN ];
   struct icmp        *icp;
