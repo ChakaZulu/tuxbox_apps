@@ -120,7 +120,11 @@ int main(int argc, char **argv)
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 8);
 	display.setIconBasePath("/usr/lib/icons/");
 
-	display.paintIcon("neutrino_lcd.raw",0,0,0);
+	if (!display.paintIcon("neutrino_lcd.raw",0,0,0))
+	{
+		printf("exit...\n");
+		exit(-1);
+	}
 
 	show_time();
 
