@@ -154,7 +154,6 @@ void eEventDisplay::setList(const ePtrList<EITEvent> &e)
 		delete events;
 	eventlist=new ePtrList<EITEvent>(e);
 	events=new ePtrList<EITEvent>::iterator(*eventlist);
-	printf(eventlist->isAutoDelete()?"eventList benutzt autoDelete\n": "eventList benutzt kein autoDelete\n");
 	setEvent(**events);
 }
 

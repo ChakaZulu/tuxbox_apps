@@ -121,13 +121,8 @@ template <class T>
 inline ePtrList<T>::~ePtrList()
 {
 	if (autoDelete)
-	{
 		for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
-		{
 			delete *it;
-			*it=0;	//sicher ist sicher
-		}
-	}
 }
 
 /////////////////// ePtrList remove(T*) /////////////////////////
@@ -146,10 +141,7 @@ template <class T>
 inline ePtrList<T>::iterator ePtrList<T>::erase(iterator it)
 {
 	if (autoDelete && *it)
-	{
 		delete *it;
-		*it = 0;  // sicher ist sicher...
-	}
 
 	if (cur == it)
 		return cur = std::list<T*>::erase(it);
