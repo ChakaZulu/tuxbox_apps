@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.93 2002/03/17 17:10:13 obi Exp $
+  $Id: zapit.cpp,v 1.94 2002/03/17 21:14:43 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -153,10 +153,8 @@ extern short curr_sat;
 extern short scan_runs;
 
 /* videotext */
-#ifndef DVBS
 boolean use_vtxtd = false;
 int vtxt_pid;
-#endif /* DVBS */
 
 void start_scan();
 volatile sig_atomic_t keep_going = 1; /* controls program termination */
@@ -955,7 +953,7 @@ int zapit (uint onid_sid, bool in_nvod)
 			}
 		}
 	}
-
+#if 0
 	debug("[zapit] stop decoding\n");
 
 	if (video_fd >= 0)
@@ -982,7 +980,7 @@ int zapit (uint onid_sid, bool in_nvod)
 		close(dmx_audio_fd);
 		dmx_audio_fd = -1;
 	}
-
+#endif
 	if (cit->second.tsid != old_tsid)
 	{
 #ifndef USE_EXTERNAL_CAMD
@@ -1152,7 +1150,7 @@ int zapit (uint onid_sid, bool in_nvod)
 
 		debug("[zapit] open video device\n");
 
-		if ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0)
+		if ((video_fd == -1) && ((video_fd = open(VIDEO_DEV, O_RDWR)) < 0))
 		{
 			perror("[zapit] unable to open video device");
 			exit(1);
@@ -1191,7 +1189,7 @@ int zapit (uint onid_sid, bool in_nvod)
 			}
 		}
 
-		if ((dmx_video_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+		if ((dmx_video_fd == -1) && ((dmx_video_fd = open(DEMUX_DEV, O_RDWR)) < 0))
 		{
 			perror("[zapit] unable to open demux device");
 			return -3;
@@ -1216,7 +1214,7 @@ int zapit (uint onid_sid, bool in_nvod)
 			vpid = Vpid;
 		}
 
-		if((dmx_audio_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+		if ((dmx_audio_fd == -1) && ((dmx_audio_fd = open(DEMUX_DEV, O_RDWR)) < 0))
 		{
 			perror("[zapit] unable open demux device");
 			return -3;
@@ -2568,10 +2566,10 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 #if DEBUG
-	int channelcount;
+	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.93 2002/03/17 17:10:13 obi Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.94 2002/03/17 21:14:43 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
