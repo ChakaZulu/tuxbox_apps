@@ -39,6 +39,8 @@
 #include "vcrcontrol.h"
 #include "neutrino.h"
 
+#include <fstream>
+
 #define LIRCDIR "/var/tuxbox/config/lirc/"
 
 #define SA struct sockaddr
