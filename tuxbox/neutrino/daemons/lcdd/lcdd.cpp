@@ -208,7 +208,7 @@ void * TimeThread (void *)
 {
 	while(1)
 	{
-		sleep(1);
+		sleep(10);
 		show_time();
 	}
 	return NULL;
