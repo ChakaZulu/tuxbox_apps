@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: channellist.cpp,v 1.44 2001/12/14 16:56:42 faralla Exp $
+// $Id: channellist.cpp,v 1.45 2001/12/14 17:03:40 faralla Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.45  2001/12/14 17:03:40  faralla
+// forgot debug-output
+//
 // Revision 1.44  2001/12/14 16:56:42  faralla
 // better bouquet-key handling
 //
@@ -384,10 +387,8 @@ int CChannelList::show()
 	int oldselected = selected;
 	int zapOnExit = false;
 	bool loop=true;
-	printf("New channellist.show()\n");
 	while (loop)
 	{
-		printf("in channellist-show-loop\n");
 		int key = g_RCInput->getKey(g_settings.timing_chanlist);
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
