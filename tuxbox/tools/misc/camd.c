@@ -429,26 +429,28 @@ int main(int argc, char **argv)
 	    EMMPID=find_emmpid(caid);
 	    if (EMMPID == 0) {
 	      printf("no EMM-pid found for ca_system_ID %04X\n",caid);
-	      printf("press enter to exit\n");
-	      getchar();
-	      exit(0);
+	      //printf("press enter to exit\n");
+	      //getchar();
+	      //exit(0);
 	    }
 	    else
 	      printf("EMM-pid found: %04X\n",EMMPID);
 	  }
+	  if (EMMPID == 0) break;
 	  setemm(0x104, caid, EMMPID);
 	  if (ECMPID == 0) {
 	    printf("searching ECM-pid for ca_system_ID %04X\n",caid);
 	    ECMPID=find_ecmpid(pmt,caid);
 	    if (ECMPID == 0) {
 	      printf("no ECM-pid found for ca_system_ID %04X\n",caid);
-	      printf("press enter to exit\n");
-	      getchar();
-	      exit(0);
+	      //printf("press enter to exit\n");
+	      //getchar();
+	      //exit(0);
 	    }
 	    else
 	      printf("ECM-pid found: %04X\n",ECMPID);
 	  }
+	  if (ECMPID == 0) break;
 	  descramble(ONID, SID, 0x104, caid, ECMPID, APID, VPID);
 	  break;
 	}
