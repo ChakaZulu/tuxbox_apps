@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.7 2004/03/24 00:34:12 ghostrider Exp $
+ * $Id: console.cpp,v 1.8 2004/05/01 09:03:48 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -153,7 +153,6 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 	CONNECT(in->activated, eConsoleAppContainer::readyRead);
 	CONNECT(out->activated, eConsoleAppContainer::readyWrite);
 	CONNECT(err->activated, eConsoleAppContainer::readyErrRead);
-	signal(SIGCHLD, SIG_IGN);   // no zombie when child killed
 }
 
 eConsoleAppContainer::~eConsoleAppContainer()

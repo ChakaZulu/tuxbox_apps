@@ -142,7 +142,9 @@ public:
 private:
 	void recMessage(int);
 public:
+#endif
 	eDVBRecorder *recorder;
+#ifndef DISABLE_FILE
 		/// starts a new recording
 	void recBegin(const char *filename, eServiceReferenceDVB service);
 		/// pauses a recording

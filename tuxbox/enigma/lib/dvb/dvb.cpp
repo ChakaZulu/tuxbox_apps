@@ -1243,7 +1243,7 @@ void eTransponderList::writeLNBData()
 	eString basepath="/elitedvb/DVB/config/lnbs/";
 
 	// remove all LNB and Satellite Data from registry
-	for (int delLNB=0; delLNB < 16; ++delLNB)
+	for (int delLNB=0; delLNB < 32; ++delLNB)
 	{
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/lofH").c_str());
 		eConfig::getInstance()->delKey( (basepath+eString().setNum(delLNB)+"/lofL").c_str());

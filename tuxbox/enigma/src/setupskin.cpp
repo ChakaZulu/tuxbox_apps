@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.17 2004/04/28 09:52:07 ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.18 2004/05/01 09:03:49 ghostrider Exp $
  */
 
 #include <setupskin.h>
@@ -90,6 +90,8 @@ void eSkinSetup::loadSkins()
 		lskins->sort();
 	if (selection)
 		lskins->setCurrent(selection);
+	if ( current_skin )
+		free(current_skin);
 }
 
 void eSkinSetup::accept()

@@ -568,7 +568,8 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts);
-	eString audioChannel = httpUnescape(opt["audio"]);
+	int apid=-1;
+	sscanf(opt["audio"].c_str(), "0x%04x", &apid);
 
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if ( sapi )
@@ -576,16 +577,13 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 		std::list<eDVBServiceController::audioStream> &astreams( sapi->audioStreams );
 		std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin());
 		for (;it != astreams.end(); ++it )
-			if ( it->text == audioChannel )
+			if ( it->pmtentry->elementary_PID == apid )
 			{
-				eDebug("blasel found... setpid");
 				eServiceHandler *service=eServiceInterface::getInstance()->getService();
 				if (service)
 					service->setPID(it->pmtentry);
 				break;
 			}
-			else
-				eDebug("not found %s", it->text.c_str() );
 	}
 
 	return "<script language=\"javascript\">window.close();</script>";
@@ -603,7 +601,7 @@ static eString selectAudio(eString request, eString dirpath, eString opts, eHTTP
 		for (std::list<eDVBServiceController::audioStream>::iterator it(astreams.begin())
 			;it != astreams.end(); ++it )
 		{
-			audioChannels += "<option>";
+			audioChannels += eString().sprintf("<option value=\"0x%04x\">", it->pmtentry->elementary_PID);
 			audioChannels += it->text;
 			audioChannels += "</option>";
 		}

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.4 2004/01/18 23:49:27 ghostrider Exp $
+ * $Id: system_settings.cpp,v 1.5 2004/05/01 09:03:49 ghostrider Exp $
  */
 
 #include <system_settings.h>
@@ -27,6 +27,7 @@
 #include <setup_rfmod.h>
 #include <setup_lcd.h>
 #include <setup_harddisk.h>
+#include <setup_keyboard.h>
 #include <setupvideo.h>
 #include <lib/dvb/edvb.h>
 #include <lib/gui/emessage.h>
@@ -47,6 +48,10 @@ eSystemSettings::eSystemSettings()
 #ifndef DISABLE_FILE
 	if ( eSystemInfo::getInstance()->hasHDD() )
 		CONNECT((new eListBoxEntryMenu(&list, _("Harddisc Setup"), eString().sprintf("(%d) %s", ++entry, _("open harddisc setup")) ))->selected, eSystemSettings::harddisc_setup);
+#endif
+#ifdef ENABLE_KEYBOARD
+	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+		CONNECT((new eListBoxEntryMenu(&list, _("Keyboard Setup"), eString().sprintf("(%d) %s", ++entry, _("open keyboard setup")) ))->selected, eSystemSettings::keyboard_setup);
 #endif
 	new eListBoxEntrySeparator( (eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true );
 	CONNECT((new eListBoxEntryMenu(&list, _("OSD Settings"), eString().sprintf("(%d) %s", ++entry, _("open on screen display settings")) ))->selected, eSystemSettings::osd_settings);
@@ -125,6 +130,21 @@ void eSystemSettings::harddisc_setup()
 		setup.exec();
 		setup.hide();
 	}
+	show();
+}
+#endif
+
+#ifdef ENABLE_KEYBOARD
+void eSystemSettings::keyboard_setup()
+{
+	hide();
+	eZapKeyboardSetup setup;
+#ifndef DISABLE_LCD
+	setup.setLCD(LCDTitle, LCDElement);
+#endif
+	setup.show();
+	setup.exec();
+	setup.hide();
 	show();
 }
 #endif

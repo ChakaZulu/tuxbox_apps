@@ -274,6 +274,7 @@ public:
 	enum { kmNone, kmAscii, kmAll };
 	void setKeyboardMode(int mode);
 	int  getKeyboardMode() { return keyboardMode; }
+	void loadKeyboardMapping();
 
 	void keyPressed(const eRCKey &key)
 	{

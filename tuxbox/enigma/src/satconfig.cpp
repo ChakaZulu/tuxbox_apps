@@ -1069,7 +1069,7 @@ eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
 		new eListBoxEntryText(*lnb_list, eString().sprintf("LNB %i", i++), (void*)&(*it) );
 
 	// fill with new lnbs
-	while (i < 16)
+	while (i < 32)
 		new eListBoxEntryText(*lnb_list, eString().sprintf("LNB %i", i++), (void*) 0 );
 
 	lnb_list->forEachEntry( selectlnb( sat->getLNB(), lnb_list ) );

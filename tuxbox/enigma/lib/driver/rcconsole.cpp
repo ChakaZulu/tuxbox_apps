@@ -80,6 +80,7 @@ void eRCConsoleDriver::keyPressed(int)
 
 void eRCConsole::handleCode(int code)
 {
+//	eDebug("console code is %d", code);
 	input->keyPressed(eRCKey(this, code, 0));
 }
 

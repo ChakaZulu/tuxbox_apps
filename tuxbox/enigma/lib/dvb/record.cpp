@@ -94,11 +94,12 @@ void SAHandler(int ptr)
 
 void eDVBRecorder::thread()
 {
-	struct sigaction act;
+/*	struct sigaction act;
 	act.sa_handler = SAHandler;
 	sigemptyset (&act.sa_mask);
 	act.sa_flags = 0;
-	sigaction (SIGALRM, &act, NULL);
+	sigaction (SIGALRM, &act, NULL);*/
+	signal(SIGALRM, SAHandler);
 	PatPmtWrite();
 	while (state == stateRunning)
 	{
@@ -127,6 +128,7 @@ void eDVBRecorder::thread()
 			}
 	}
 	alarm(0);
+	signal(SIGALRM, SIG_DFL );
 }
 
 void eDVBRecorder::PMTready(int error)

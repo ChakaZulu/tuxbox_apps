@@ -23,20 +23,26 @@ void eRCDeviceInputDev::handleCode(int rccode)
 	
 	if (km == eRCInput::kmAscii)
 	{
-		eDebug("filtering..");
+//		eDebug("filtering.. %d", ev->code);
+		bool filtered = ( ev->code > 0 && ev->code < 61 );
 		switch (ev->code)
 		{
-		case KEY_0: case KEY_1: case KEY_2: case KEY_3: case KEY_4: case KEY_5: case KEY_6: case KEY_7: case KEY_8: case KEY_9:
-		case KEY_A: case KEY_B: case KEY_C: case KEY_D: case KEY_E: case KEY_F: case KEY_G: case KEY_H: case KEY_I: case KEY_J:
-		case KEY_K: case KEY_L: case KEY_M: case KEY_N: case KEY_O: case KEY_P: case KEY_Q: case KEY_R: case KEY_S: case KEY_T:
-		case KEY_U: case KEY_V: case KEY_W: case KEY_X: case KEY_Y: case KEY_Z:
-		case KEY_SPACE:
-			/* FIXME: some are still missing */
-			return;
-		default:
-			break;
+			case KEY_RESERVED:
+			case KEY_ESC:
+			case KEY_TAB:
+			case KEY_BACKSPACE:
+			case KEY_ENTER:
+			case KEY_LEFTCTRL:
+			case KEY_RIGHTSHIFT:
+			case KEY_LEFTALT:
+			case KEY_CAPSLOCK:
+				filtered=false;
+			default:
+				break;
 		}
-		eDebug("passed!");
+		if (filtered)
+			return;
+//		eDebug("passed!");
 	}
 
 	switch (ev->value)

@@ -9,6 +9,8 @@
 #include <termios.h>
 #include <signal.h>
 #include <sys/klog.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <dlfcn.h>
 
 #include <lib/base/i18n.h>
@@ -72,6 +74,25 @@ void eZap::status()
 void handle_sig_pipe (int i)
 {
 	eDebug("SIGPIPE");
+	return;
+}
+
+void handle_sig_chld(int signum)
+{
+	pid_t cpid = 0;
+
+	//make sure it is for sigchild
+	if(signum != SIGCHLD)
+		eDebug("error: signum = %d", signum);
+
+	//wait for all children that have exited, returns 0 when no child is exited
+	while( (cpid = waitpid(-1, NULL, WNOHANG)) > 0)
+		eDebug("waited for child %d", cpid);
+
+	//check for error
+	if(cpid < 0)
+		perror("waitpid");
+
 	return;
 }
 
@@ -238,12 +259,11 @@ eZap::eZap(int argc, char **argv)
 		serviceSelector->setStyle( serviceSelector->getStyle(), true );
 	}
 
-	struct sigaction act;
-	act.sa_handler = handle_sig_pipe;
-	sigemptyset (&act.sa_mask);
-	act.sa_flags = 0;
-	sigaction (SIGPIPE, &act, NULL);
-	eDebug("set SIGPIPE handler");
+	if(signal(SIGPIPE, handle_sig_pipe) == SIG_ERR)
+		eFatal("couldn't install SIGPIPE handler");
+
+	if(signal(SIGCHLD, handle_sig_chld) == SIG_ERR)
+		eFatal("couldn't install SIGCHLD handler");
 
 	init->setRunlevel(eAutoInitNumbers::main);
 }

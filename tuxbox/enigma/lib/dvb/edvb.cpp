@@ -623,7 +623,6 @@ void eDVB::doMounts()
 				free(cvalue);
 			}
 
-			signal(SIGCHLD, SIG_IGN);
 			if (fork() == 0)
 			{
 				for (unsigned int i=3; i < 90; ++i )
@@ -661,7 +660,6 @@ void eDVB::restartSamba()
 	eDebug("[eDVB] restart Samba");
 	if (samba != 0)
 	{
-		signal(SIGCHLD, SIG_IGN);
 		if (fork() == 0)
 		{
 			for (unsigned int i=3; i < 90; ++i )

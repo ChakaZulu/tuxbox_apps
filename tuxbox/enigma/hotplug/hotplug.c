@@ -1,5 +1,5 @@
 /*
- * $Id: hotplug.c,v 1.2 2003/09/07 00:03:27 ghostrider Exp $
+ * $Id: hotplug.c,v 1.3 2004/05/01 09:03:48 ghostrider Exp $
  *
  * (C) 2002, 2003 by Andreas Monzner <ghostrider@tuxbox.org>
  *
@@ -50,9 +50,8 @@ int main(int argc, char **argv)
 {
 	unsigned char lenstr[11]="LENGTH = 0";
 
-	char *action=0, *product=0, *type=0, *interface=0, *device=0, *devfs=0;
+	char *action=0, *devpath=0, *product=0, *type=0, *interface=0, *devfs=0, *device=0;
 
-	printf("hotplug called");
 	fflush(stdout);
 	if (argc < 2 || strcmp(argv[1],"usb") )
 	{
@@ -64,17 +63,18 @@ int main(int argc, char **argv)
 	// read environment variables
 	if ( (action = getenv("ACTION")) )
 		lenstr[9]++;
+	if ( (devpath = getenv("DEVPATH")) )
+		lenstr[9]++;
 	if ( (product = getenv("PRODUCT")) )
 		lenstr[9]++;
 	if ( (type = getenv("TYPE")) )
 		lenstr[9]++;
 	if ( (interface = getenv("INTERFACE")) )
 		lenstr[9]++;
-	if ( (device = getenv("DEVICE")) )
-		lenstr[9]++;
 	if ( (devfs = getenv("DEVFS")) )
 		lenstr[9]++;
-
+	if ( (device = getenv("DEVICE")) )
+		lenstr[9]++;
 	if (!lenstr[9])
 		return EXIT_FAILURE;
 
@@ -87,6 +87,15 @@ int main(int argc, char **argv)
 		char tmp[6+1+strlen(action)+1];
 		strcpy(tmp,"ACTION=");
 		strcpy(tmp+7, action);
+		if ( send_to_sock(tmp, strlen(tmp)) != EXIT_SUCCESS )
+			return EXIT_FAILURE;
+	}
+
+	if ( devpath )
+	{
+		char tmp[7+1+strlen(devpath)+1];
+		strcpy(tmp,"DEVPATH=");
+		strcpy(tmp+8, devpath);
 		if ( send_to_sock(tmp, strlen(tmp)) != EXIT_SUCCESS )
 			return EXIT_FAILURE;
 	}
@@ -117,21 +126,21 @@ int main(int argc, char **argv)
 		if ( send_to_sock(tmp, strlen(tmp)) != EXIT_SUCCESS )
 			return EXIT_FAILURE;
 	}
+	
+	if ( devfs )
+	{
+		char tmp[5+1+strlen(devfs)+1];
+		strcpy(tmp,"DEVFS=");
+		strcpy(tmp+6, devfs);
+		if ( send_to_sock(tmp, strlen(tmp)) != EXIT_SUCCESS )
+			return EXIT_FAILURE;
+	}
 
 	if ( device )
 	{
 		char tmp[6+1+strlen(device)+1];
 		strcpy(tmp,"DEVICE=");
 		strcpy(tmp+7, device);
-		if ( send_to_sock(tmp, strlen(tmp)) != EXIT_SUCCESS )
-			return EXIT_FAILURE;
-	}
-
-	if ( devfs )
-	{
-		char tmp[5+1+strlen(devfs)+1];
-		strcpy(tmp,"DEVFS=");
-		strcpy(tmp+6, devfs);
 		if ( send_to_sock(tmp, strlen(tmp)) != EXIT_SUCCESS )
 			return EXIT_FAILURE;
 	}

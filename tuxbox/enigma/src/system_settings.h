@@ -13,6 +13,9 @@ private:
 #ifndef DISABLE_FILE
 	void harddisc_setup();
 #endif
+#ifdef ENABLE_KEYBOARD
+	void keyboard_setup();
+#endif
 #ifdef ENABLE_RFMOD
 	void uhf_modulator();
 #endif
