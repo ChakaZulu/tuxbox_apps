@@ -1,31 +1,29 @@
 #include <time.h>
 #include <errno.h>
-#include "iso639.h"
-
-#include "enigma.h"
 #include "enigma_main.h"
+#include "elistbox.h"
+#include "iso639.h"
+#include "edvb.h"
 #include "enigma_mainmenu.h"
+#include "elabel.h"
+#include "eprogress.h"
 #include "enigma_event.h"
-#include "enigma_plugins.h"
-#include "enigma_lcd.h"
-#include "download.h"
 #include "sselect.h"
+#include "enumber.h"
+#include "eskin.h"
+#include "streamwd.h"
+#include "font.h"
+#include "rc.h"
+#include "enigma.h"
+#include "enigma_lcd.h"
+#include "decoder.h"
+#include "enigma_plugins.h"
+#include "download.h"
+#include "epgcache.h"
 #include "epgwindow.h"
 
-#include <core/dvb/edvb.h>
-#include <core/dvb/epgcache.h>
-#include <core/dvb/esection.h>
-#include <core/dvb/decoder.h>
-#include <core/gdi/font.h>
-#include <core/gui/elabel.h>
-#include <core/gui/eprogress.h>
-#include <core/gui/enumber.h>
-#include <core/gui/eskin.h>
-#include <core/gui/elistbox.h>
-#include <core/gui/ebutton.h>
-#include <core/driver/rc.h>
-#include <core/driver/streamwd.h>
-
+#include "ebutton.h"
+#include "esection.h"
 
 /*
 
@@ -103,49 +101,62 @@ static eString getISO639Description(char *iso)
 	return eString()+iso[0]+iso[1]+iso[2];
 }
 
-NVODStream::NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id)
-	: eListBoxEntryText((eListBox<eListBoxEntryText>*)listbox),
-		transport_stream_id(transport_stream_id),
-		original_network_id(original_network_id),
-		service_id(service_id),
-		eit(EIT::typeNowNext, service_id,	(	(eDVB::getInstance()->transport_stream_id==transport_stream_id)	&& (eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther )
+
+void NVODStream::EITready(int error)
+{
+	eDebug("NVOD eit ready: %d", error);
+	listbox->sort();
+	if (listbox && listbox->isVisible())
+		listbox->invalidate();
+}
+
+NVODStream::NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id)
+	: eListboxEntry(listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id),
+		service_id(service_id), eit(EIT::typeNowNext, service_id,
+		(			(eDVB::getInstance()->transport_stream_id==transport_stream_id)
+			&&	(eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther		)
 {
 	CONNECT(eit.tableReady, NVODStream::EITready);
 	eit.start();
 }
 
-void NVODStream::EITready(int error)
+eString NVODStream::getText(int col=0) const
 {
-	eDebug("NVOD eit ready: %d", error);
-
-	if (!eit.error)
+	if (eit.ready && !eit.error)
 	{
 		for (ePtrList<EITEvent>::const_iterator i(eit.events); i != eit.events.end(); ++i)		// always take the first one
 		{
-			text="--:--";
+			eString s="--:--";
 			EITEvent *event=*i;
+			if (col==-1)
+				return eString().sprintf("%08x", (unsigned int)event->start_time);
 			tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
 			if (begin)
-				text.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
+				s.sprintf("%02d:%02d", begin->tm_hour, begin->tm_min);
 			time_t endtime=event->start_time+event->duration;
 			tm *end=event->start_time!=-1?localtime(&endtime):0;
 			if (end)
-				text+=eString().sprintf(" bis %02d:%02d", end->tm_hour, end->tm_min);
+				s+=eString().sprintf(" bis %02d:%02d", end->tm_hour, end->tm_min);
 			time_t now=time(0)+eDVB::getInstance()->time_difference;
 			if ((event->start_time <= now) && (now < endtime))
 			{
 				int perc=(now-event->start_time)*100/event->duration;
-				text+=eString().sprintf(" (%d%%, %d.%02d Euro lost)", perc, perc*3/100, (perc*3)%100);
+				s+=+" ("+eString().sprintf("%d%%, %d.%02d Euro lost)", perc, perc*3/100, (perc*3)%100);
 			}
+			return s;
 		}
 	}
-	else
-		text.sprintf("Service %04x", service_id);
+	eString s;
+	s.sprintf("Service %04x", service_id);
+	return s;
+}
 
-//		listBox->sort();
-
-	if (listBox && listBox->isVisible())
-		listBox->invalidate();
+void eNVODSelector::selected(eListboxEntry *l)
+{
+	NVODStream *nv=(NVODStream*)l;
+	if (nv)
+		eDVB::getInstance()->switchService(nv->service_id, nv->original_network_id, nv->transport_stream_id, 5);	// faked service_type
+	close(0);
 }
 
 eNVODSelector::eNVODSelector(): eWindow(0)
@@ -153,7 +164,7 @@ eNVODSelector::eNVODSelector(): eWindow(0)
 	setText("NVOD");
 	move(ePoint(100, 100));
 	resize(eSize(440, 380));
-	list=new eListBox<NVODStream>(this, eSkin::getActive()->queryValue("fontsize", 20));
+	list=new eListbox(this, eSkin::getActive()->queryValue("fontsize", 20));
 	list->move(ePoint(0, 0));
 	list->resize(getClientSize());
 	CONNECT(list->selected, eNVODSelector::selected);
@@ -168,18 +179,6 @@ void eNVODSelector::add(NVODReferenceEntry *ref)
 {
 	new NVODStream(list, ref->transport_stream_id, ref->original_network_id, ref->service_id);
 }
-
-void eNVODSelector::selected(NVODStream *l)
-{
-	if (l)
-	{
-		eDebug("sid : %04x, onid : %04x, tsid : %04x", l->service_id, l->original_network_id, l->transport_stream_id);
-		eDVB::getInstance()->switchService(l->service_id, l->original_network_id, l->transport_stream_id, 5);	// faked service_type
-	}
-
-	close(0);
-}
-
 
 AudioStream::AudioStream(eListbox *listbox, PMTEntry *stream): eListboxEntry(listbox), stream(stream)
 {
@@ -285,10 +284,7 @@ void eSubServiceSelector::selected(eListboxEntry *l)
 	SubService *ss=(SubService*)l;
 
 	if (ss)
-	{
-		eDebug("sid : %04x, onid : %04x, tsid : %04x", ss->service_id, ss->original_network_id, ss->transport_stream_id);
 		eDVB::getInstance()->switchService(ss->service_id, ss->original_network_id, ss->transport_stream_id, 5);	// faked service_type
-	}
 	close(0);
 }
 
@@ -754,7 +750,6 @@ void eZapMain::keyUp(int code)
 	{
 		if (isVisible())
 			hide();
-
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();

@@ -187,7 +187,7 @@ public:
 	 * The timer is not yet active, it has to be started with \c start.
 	 * \param context The thread from which the signal should be emitted.
 	 */
-	eTimer(eMainloop *context): bActive(false), context(*context) { }
+	eTimer(eMainloop *context): context(*context), bActive(false) { }
 	~eTimer()	{		if (bActive) stop();	}
 
 	Signal0<void> timeout;
@@ -212,7 +212,7 @@ class eMainloop : public Object
 	int loop_level;
 	void processOneEvent();
 public:
-	eMainloop():loop_level(0),app_quit_now(0)	{	}
+	eMainloop():app_quit_now(0),loop_level(0)	{	}
 	void addSocketNotifier(eSocketNotifier *sn);
 	void removeSocketNotifier(eSocketNotifier *sn);
 	void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort();	}

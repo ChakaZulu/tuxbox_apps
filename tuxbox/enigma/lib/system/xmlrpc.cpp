@@ -187,7 +187,7 @@ void eXMLRPCVariant::toXML(eString &result)
 		result+=s2;
 	} else if (getDouble())
 	{
-		result.append(eString().sprintf("<value><double>%lf</double></value>", *getDouble()));
+		result+=eString().sprintf("<value><double>%lf</double></value>", *getDouble());
 	}	else
 		qFatal("couldn't append");
 }
@@ -351,9 +351,9 @@ int eXMLRPCResponse::doCall()
 		result+="<params>\n";
 		for (QListIterator<eXMLRPCVariant> i(ret); i.current(); ++i)
 		{
-			result.append("<param>");
+			result+="<param>";
 			i.current()->toXML(result);
-			result.append("</param>");
+			result+="</param>";
 		}
 		result+="</params>";
 	}

@@ -149,6 +149,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	eDebug("<-- network");
 
 	main = new eZapMain();
+	eDebug("<-- eZapMain");
 
 	pLCD = eZapLCD::getInstance();
 	serviceSelector = new eServiceSelector();

@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include "edvb.h"
 #include "httpd.h"
+#include <string>
 
 void eHTTPGarbage::doGarbage()
 {
@@ -70,7 +71,7 @@ eHTTPError::eHTTPError(eHTTPConnection *c, int errcode): eHTTPDataSource(c), err
 	connection->code_descr=error;
 	connection->code=errcode;
 	
-	connection->local_header["Content-Type"]="text/html";
+	connection->local_header["Content-Type"]=std::string("text/html");
 }
 
 int eHTTPError::doWrite(int w)
@@ -437,7 +438,7 @@ int eHTTPConnection::processRemoteState()
 			{
 				int del=line.find(": ");
 				eString name=line.left(del), value=line.mid(del+2);
-				remote_header[name]=value;
+				remote_header[std::string(name)]=std::string(value);
 				const char *ct="Content-Type";
 			}
 			done=1;
@@ -501,7 +502,7 @@ int eHTTPConnection::getLine(eString &line)
 
 	line.erase(line.length()-1);
 
-	if (line.at(line.length()-1) == '\r')
+	if (line[(line.length()-1)] == '\r')
 		line.erase(line.length()-1);
 
 	return 1;

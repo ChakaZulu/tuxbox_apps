@@ -1,13 +1,17 @@
 #include "estring.h"
 #include <ctype.h>
 #include <limits.h>
+#include <core/system/elock.h>
+
+static eLock lock;
 
 ///////////////////////////////////////// eString sprintf /////////////////////////////////////////////////
 eString& eString::sprintf(char *fmt, ...)
 {
+	eLocker locker(lock);
 // Implements the normal sprintf method, to use format strings with eString
 // The max length of the result string is 1024 char.
-	char buf[1024];
+	static char buf[1024];
 	va_list ap;
 	va_start(ap, fmt);
 	std::vsnprintf(buf, 1024, fmt, ap);
@@ -21,12 +25,12 @@ eString& eString::setNum(int val, int sys)
 {
 //	Returns a string that contain the value val as string
 //	if sys == 16 than hexadezimal if sys == 10 than decimal
-	char buf[16];
-	
+	char buf[12];
+
 	if (sys == 10)
-		std::snprintf(buf, 16, "%i", val);
+		std::snprintf(buf, 12, "%i", val);
 	else if (sys == 16)
-		std::snprintf(buf, 16, "%X", val);		
+		std::snprintf(buf, 12, "%X", val);		
 	
 	assign(buf);
 	return *this;

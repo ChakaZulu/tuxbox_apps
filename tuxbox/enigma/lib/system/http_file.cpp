@@ -2,16 +2,17 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "http_file.h"
+#include <string>
 
 eHTTPFile::eHTTPFile(eHTTPConnection *c, int _fd, const char *mime): eHTTPDataSource(c)
 {
 	fd=_fd;
-	c->local_header["Content-Type"]=mime;
+	c->local_header["Content-Type"]=std::string(mime);
 	size=lseek(fd, 0, SEEK_END);
 	char asize[10];
 	snprintf(asize, 10, "%d", size);
 	lseek(fd, 0, SEEK_SET);
-	c->local_header["Content-Length"]=asize;
+	c->local_header["Content-Length"]=std::string(asize);
 	connection->code_descr="OK";
 	connection->code=200;
 }
@@ -46,9 +47,9 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 {
 	if (path.find("../")!=-1)		// evil hax0r
 		return new eHTTPError(conn, 403);
-	if (path.at(0) != '/')		// prepend '/'
+	if (path[0] != '/')		// prepend '/'
 		path.insert(0,"/");
-	if (path.at(path.length()-1)=='/')
+	if (path[path.length()-1]=='/')
 		path+="index.html";
 	eHTTPDataSource *data=0;
 	for (ePtrList<eHTTPFilePath>::iterator i(translate); i != translate.end(); ++i)

@@ -722,12 +722,14 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 	else if (prop=="text")
 	{
 		eString text;
+		
+		std::string::const_iterator p(value.begin());
 
-		for (std::string::const_iterator it = value.begin(); it != value.end(); it++)
+		while(*p)
 		{
-			if (*it=='\\')
+			if (*p=='\\')
 			{
-				switch (*(++it))
+				switch (*(++p))
 				{
 				case 'n':
 					text+='\n';
@@ -750,7 +752,9 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 				}
 			}
 			else
-				text+=*it;
+				text+=*p;
+	
+			p++;
 		}
 		setText(text);
 	}

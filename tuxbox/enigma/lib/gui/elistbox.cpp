@@ -3,8 +3,8 @@
 #include "elabel.h"
 #include "init.h"
 
-eListbox::eListbox(eWidget *parent, int type, int ih)
-	 :eWidget(parent, 1), type(type)
+eListbox::eListbox(eWidget *parent, int ih)
+	 :eWidget(parent, 1)
 {
 	col_active=eSkin::getActive()->queryScheme("focusedColor");
 	top=0;

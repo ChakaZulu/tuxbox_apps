@@ -3,10 +3,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested, bool startnow): fd(fd), context(*context), requested(requested)
+eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested, bool startnow): context(*context), fd(fd), state(0), requested(requested)
 {
-	state=0;
-	
 	if (startnow)	
 		start();
 }
@@ -102,7 +100,12 @@ void eMainloop::removeSocketNotifier(eSocketNotifier *sn)
 
 void eMainloop::processOneEvent()
 {
-	int cnt=0;
+// process pending timers...
+	long usec;
+
+	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
+		TimerList.begin()->activate();
+
 	int fdAnz = notifiers.size();
 	pollfd* pfd = new pollfd[fdAnz];  // make new pollfd array
 
@@ -113,13 +116,6 @@ void eMainloop::processOneEvent()
 		pfd[i].fd = it->first;
 		pfd[i].events = it->second->getRequested();
 	}
-
-		// MAY BE BUG: wenn im timer nen FD geschlossen wird...
-// process pending timers...
-	long usec;
-
-	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
-		TimerList.begin()->activate();
 
 	int ret=poll(pfd, fdAnz, TimerList ? usec / 1000 : -1);  // milli .. not micro seks
 
@@ -160,6 +156,7 @@ int eMainloop::exec()
 		app_quit_now = false;
 		enter_loop();
 	}
+	return 0;
 }
 
 void eMainloop::enter_loop()

@@ -1,14 +1,12 @@
 #ifndef __enigma_main_h
 #define __enigma_main_h
 
+#include "elistbox.h"
+#include "ewindow.h"
+#include "si.h"
+#include "dvb.h"
 #include "enigma_lcd.h"
 #include "multipage.h"
-
-#include <core/gui/elistbox.h>
-#include <core/gui/eListBox.h>
-#include <core/gui/ewindow.h>
-#include <core/dvb/si.h>
-#include <core/dvb/dvb.h>
 
 class eListbox;
 class eLabel;
@@ -22,13 +20,13 @@ class PMTEntry;
 class eNumber;
 class gPainter;
 
-class NVODStream: public eListBoxEntryText
+class NVODStream: public eListboxEntry
 {
-	friend class eListBox<NVODStream>;
 private:
 	void EITready(int error);
 public:
-	NVODStream(eListBox<NVODStream> *lb, int transport_stream_id, int original_network_id, int service_id);
+	NVODStream(eListbox *listbox, int transport_stream_id, int original_network_id, int service_id);
+	eString getText(int col=0) const;
 	int transport_stream_id, original_network_id, service_id;
 	EIT eit;
 };
@@ -37,9 +35,9 @@ class NVODReferenceEntry;
 
 class eNVODSelector: public eWindow
 {
-	eListBox<NVODStream> *list;
+	eListbox *list;
 private:
-	void selected(NVODStream *);
+	void selected(eListboxEntry *);
 public:
 	eNVODSelector();
 	void clear();

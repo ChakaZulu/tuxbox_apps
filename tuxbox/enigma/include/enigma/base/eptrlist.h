@@ -97,18 +97,6 @@ public:
 	{
 		return &operator T&();
 	}
-	
-	void operator+=(int i)
-	{
-		while (i--)
-			operator++();
-	}
-
-	void operator-=(int i)
-	{
-		while (i--)
-			operator--();
-	}
 };
 
 /////////////////// const_iterator class /////////////////////////////
@@ -134,19 +122,6 @@ public:
 	{
 		return &operator T&();
 	}
-
-	void operator+=(int i)
-	{
-		while (i--)
-			operator++();
-	}
-
-	void operator-=(int i)
-	{
-		while (i--)
-			operator--();
-	}
-
 };
 
 /////////////////// reverse_iterator class /////////////////////////////
@@ -172,19 +147,6 @@ public:
 	{
 		return &operator T&();
 	}
-
-	void operator+=(int i)
-	{
-		while (i--)
-			operator++();
-	}
-
-	void operator-=(int i)
-	{
-		while (i--)
-			operator--();
-	}
-
 };
 
 /////////////////// const_reverse_iterator class /////////////////////////////
@@ -209,18 +171,6 @@ public:
 	operator T*() const
 	{
 		return &operator T&();
-	}
-
-	void operator+=(int i)
-	{
-		while (i--)
-			operator++();
-	}
-
-	void operator-=(int i)
-	{
-		while (i--)
-			operator--();
 	}
 };
 

@@ -44,7 +44,6 @@ class eListbox: public eWidget
 	gFont entryFnt;
 	QListIterator<eListboxEntry> *top, *bottom, *current;
 	int entries, font_size, item_height;
-	int type;
 	
 	gColor col_active;
 	void actualize();
@@ -75,11 +74,7 @@ public:
 	eListboxEntry *goNext();
 	eListboxEntry *goPrev();
 	int setProperty(const eString &prop, const eString &value);
-	enum
-	{
-		tBorder, tLitebar
-	};
-	eListbox(eWidget *parent, int type=tLitebar, int FontSize=20);
+	eListbox(eWidget *parent, int FontSize=20);
 	~eListbox();
 	int have_focus;
 	void setActiveColor(gColor active);

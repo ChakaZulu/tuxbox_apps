@@ -130,6 +130,7 @@ struct eServiceReference
 	int transport_stream_id, original_network_id, service_id;
 	
 	eService *service;
+
 	eServiceReference(int transport_stream_id, int original_network_id, int service_id):
 		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id)
 	{
@@ -144,20 +145,25 @@ struct eServiceReference
 class eBouquet
 {
 public:
-	inline eBouquet(const eBouquet *parent, int bouquet_id, eString& bouquet_name): parent(parent), bouquet_id(bouquet_id), bouquet_name(bouquet_name) { }
-	void add(int transport_stream_id, int original_network_id, int service_id);
-	int remove(int transport_stream_id, int original_network_id, int service_id);
+	const eBouquet *parent;
 	int bouquet_id;
 	eString bouquet_name;
 	std::list<eServiceReference> list;
-	const eBouquet *parent;
+
+	inline eBouquet(const eBouquet *parent, int bouquet_id, eString& bouquet_name)
+		:parent(parent), bouquet_id(bouquet_id), bouquet_name(bouquet_name)
+	{
+	}
+
+	void add(int transport_stream_id, int original_network_id, int service_id);
+	int remove(int transport_stream_id, int original_network_id, int service_id);
 	bool operator == (const eBouquet &c) const
 	{
 		return bouquet_id==c.bouquet_id;
 	}
 	bool operator < (const eBouquet &c) const
 	{
-		return (bouquet_name < c.bouquet_name);
+		return (bouquet_name.compare(c.bouquet_name));
 	}
 };
 

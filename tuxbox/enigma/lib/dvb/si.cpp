@@ -12,6 +12,8 @@ extern "C"
 #include "lowlevel/pat.h"
 #include "lowlevel/sdt.h"
 #include "lowlevel/tdt.h"
+#include <sstream>
+#include <iomanip>
 
 static eString qHex(int v)
 {
@@ -134,13 +136,12 @@ UnknownDescriptor::~UnknownDescriptor()
 
 eString UnknownDescriptor::toString()
 {
-	eString res;
-	res="UnknownDescriptor: "+ eString(decode_descr(data[0])) + " (" + qHex(data[0])+")\n";
-	res+="	rawData:";
+	std::stringstream res;
+	res << "UnknownDescriptor: " << decode_descr(data[0]) << " (" << std::hex << std::setfill('0') << std::setw(4) << data[0] << ")\n" << "	rawData:";
 	for (int i=0; i<len; i++)
-		res+=eString().sprintf(" %02x", data[i]);
-	res+="\n";
-	return res;
+		res << std::setw(2) << data[i];
+	res << std::endl;
+	return res.str();
 }
 
 ServiceDescriptor::ServiceDescriptor(sdt_service_desc *descr): Descriptor(CTag())
@@ -506,16 +507,23 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr): Descriptor(DESCR
 		ptr++;
 		len--;
 	}
-	for (int i=0; i<len; i++)
-		event_name+=data[ptr++];
+
+/*	for (int i=0; i<len; i++)
+		event_name+=data[ptr++];*/
+
+	event_name.append( (char*) data+ptr, len);
+	ptr+=len;
+
 	len=data[ptr++];
+
 	if (data[ptr]<0x20)			// ignore charset
 	{
 		ptr++;
 		len--;
 	}
-	for (int i=0; i<len; i++)
-		text+=data[ptr++];
+/*	for (int i=0; i<len; i++)
+		text+=data[ptr++];*/
+	text.append( (char*) data+ptr, len);
 }
 
 eString ShortEventDescriptor::toString()
@@ -1022,15 +1030,26 @@ int MHWEIT::sectionRead(__u8 *data)
 	event.event_name="";
 	event.flags=HILO(table->flags);
 	int len=30;
-	while (len-- && (table->event_name[len+1]==' '));
-	for (int i=0; i<len; i++)
-		event.event_name+=table->event_name[i];
+	while (len-- && (table->event_name[len+1]==' '))
+		;
+
+/*	for (int i=0; i<len; i++)
+		event.event_name+=table->event_name[i];*/
+
+	event.event_name.append( (char*) &table->event_name[0], len);
+
 	len=15;
 	event.short_description="";
-	while (len-- && (table->short_description[len+1]==' '));
-	for (int i=0; i<len; i++)
-		event.short_description+=table->short_description[i];
+
+	while (len-- && (table->short_description[len+1]==' '))
+		;
+
+	event.short_description.append( (char*) &table->short_description[0], len);
+/*	for (int i=0; i<len; i++)
+		event.short_description+=table->short_description[i];*/
+
 	if (available==3)
 		return 1;
+
 	return 0;
 }

@@ -11,7 +11,7 @@ int eRCDevice::getKeyCompatibleCode(const eRCKey &) const
 	return -1;
 }
 
-eRCDevice::eRCDevice(const char *id, eRCDriver *driver): id(id), driver(driver)
+eRCDevice::eRCDevice(const char *id, eRCDriver *driver): driver(driver), id(id)
 {
 	input=driver->getInput();
 	driver->addCodeListener(this);
@@ -108,6 +108,7 @@ void eRCInput::close()
 
 bool eRCInput::open()
 {
+	return false;
 }
 
 int eRCInput::lock()

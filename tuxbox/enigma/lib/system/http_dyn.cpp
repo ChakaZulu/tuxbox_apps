@@ -5,7 +5,7 @@ eHTTPDyn::eHTTPDyn(eHTTPConnection *c, eString result): eHTTPDataSource(c), resu
 	wptr=0;
 	char buffer[10];
 	snprintf(buffer, 10, "%d", size=result.length());
-	c->local_header["Content-Length"]=buffer;
+	c->local_header["Content-Length"]=std::string(buffer);
 	c->code=200;
 	c->code_descr="OK";
 }

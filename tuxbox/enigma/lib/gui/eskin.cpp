@@ -303,9 +303,9 @@ gDC *eSkin::getDCbyName(const char *name)
 
 int eSkin::build(eWidget *widget, XMLTreeNode *node)
 {
-	// eDebug("building a %s", node->GetType());
-	// if (widget->getType() != node->GetType())
-	//		return -1;
+//	 eDebug("building a %s", node->GetType());
+/*	 if (widget->getType() != node->GetType())
+			return -1;*/
 	
 	for (XMLAttribute *attrib=node->GetAttributes(); attrib; attrib=attrib->GetNext())
 	{

@@ -554,7 +554,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	navi+="\" href=\"/?mode=updates\">updates</a>";
 
 	tmp="<span class=\"titel\">"+mode+"</span>";
-	tmp=tmp.upper();
+	tmp.upper();
 
 	cop=getContent(mode, bouquetid);
 

@@ -1,4 +1,5 @@
 #include "actions.h"
+#include <core/base/eerror.h>
 #include "init.h"
 #include "nconfig.h"
 #include "edvb.h"

@@ -1,5 +1,5 @@
-#ifndef __elistBox_h
-#define __elistBox_h
+#ifndef __eListBox_h
+#define __eListBox_h
 
 #include <core/driver/rc.h>
 #include <core/gdi/grc.h>
@@ -7,6 +7,8 @@
 #include <core/gui/ewidget.h>
 #include <core/gui/eskin.h>
 #include <core/gui/ewindow.h>
+
+#include <sstream>
 
 template <class T>
 class eListBox: public eWidget
@@ -36,7 +38,7 @@ public:
 	Signal1<void, T*> selected;	
 	Signal1<void, T*> selchanged;
 
-	void actualize();
+	void init();
 	void clearList();
 	void setCurrent(T *c);
 	void sort();
@@ -52,18 +54,18 @@ class eListBoxEntry: public Object
 {
 	friend class eListBox<eListBoxEntry>;
 protected:
-	eListBox<eListBoxEntry>* listBox;
+	eListBox<eListBoxEntry>* listbox;
 public:
 	eListBoxEntry(eListBox<eListBoxEntry>* parent)
-		:listBox(parent)
+		:listbox(parent)
 	{	
-		if (listBox)
-			listBox->append(this);
+		if (listbox)
+			listbox->append(this);
 	}
 	~eListBoxEntry()
 	{
-		if (listBox)
-			listBox->remove(this);
+		if (listbox)
+			listbox->remove(this);
 	}
 };
 
@@ -87,16 +89,43 @@ public:
 protected:
 	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
 	{
-/*	if (parent && parent->LCDElement && entry && (entry == *current) )
-		parent->LCDElement->setText( entry->getText(0) );*/
 			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listBox->getEntryFnt());
+			rc->setFont(listbox->getEntryFnt());
 
 			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
 					rc->fill(rect);
 
 			rc->renderText(rect, text);
-			rc->flush();
+	}
+};
+
+class eListBoxEntryTextStream: public eListBoxEntry
+{
+	friend class eListBox<eListBoxEntryText>;
+protected:
+	std::stringstream text;
+public:
+	eListBoxEntryTextStream(eListBox<eListBoxEntryTextStream>* lb)
+		:eListBoxEntry((eListBox<eListBoxEntry>*)lb)
+	{		
+	
+	}
+
+	bool operator < ( const eListBoxEntryTextStream& e) const
+	{
+		return text.str() < e.text.str();	
+	}
+
+protected:
+	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
+	{
+			rc->setForegroundColor(highlited?coActive:coNormal);
+			rc->setFont(listbox->getEntryFnt());
+
+			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
+					rc->fill(rect);
+
+			rc->renderText(rect, text.str());
 	}
 };
 
@@ -109,8 +138,8 @@ public:
 	eListBoxEntryMenu(eListBox<eListBoxEntryMenu>* lb, const char* txt)
 		:eListBoxEntryText((eListBox<eListBoxEntryText>*)lb, txt)
 	{
-		if (listBox)
-			CONNECT(listBox->selected, eListBoxEntryMenu::LBSelected);
+		if (listbox)
+			CONNECT(listbox->selected, eListBoxEntryMenu::LBSelected);
 	}
 	void LBSelected(eListBoxEntry* t)
 	{
@@ -124,30 +153,41 @@ template <class T>
 inline void eListBox<T>::append(T* entry)
 {
 	childs.push_back(entry);
-
-//	if (auto_actualize)
-	actualize();
+	
+	init();
 }
 
 template <class T>
 inline void eListBox<T>::remove(T* entry)
 {
 	childs.take(entry);
-//	if (auto_actualize)
-		actualize();
+
+	init();
 }
 
 template <class T>
 inline void eListBox<T>::geometryChanged()
 {
+	eDebug("geometryChanged");  // this Method is not tested !
 	entries=size.height()/item_height;
 
 	if (!childs.empty())
 	{
+		bool ok=false;
+
 		bottom=top;
-		bottom+=entries;
-		if (bottom == childs.end())
-			bottom--;
+
+		for (int i=0; i < entries; i++, bottom++)
+		{
+			if (bottom == current)
+				ok = true;
+
+			if (bottom == --childs.end() )
+				break;
+		}
+
+		if (!ok)
+			current = top;		
 	}
 }
 
@@ -162,7 +202,7 @@ inline void eListBox<T>::sort()
 {
 	childs.sort();
 }
-
+         	
 template <class T>
 inline eRect eListBox<T>::getEntryRect(int pos)
 {
@@ -190,8 +230,20 @@ inline void eListBox<T>::setActiveColor(gColor active)
 {
 	col_active=active;
 
-	if (current != childs.end() && *current)
-		invalidateEntry(active);		/* das ist ja wohl buggy hier */
+	if (current != childs.end())
+	{
+		ePtrList<T>::iterator it(top);
+
+		for (int i = 0; i < entries; i++, it++)
+		{
+			if (it == current)
+			{
+				invalidateEntry(i);
+				break;
+			}
+		}
+	}
+
 }
 
 template <class T>
@@ -234,20 +286,24 @@ inline eListBox<T>::~eListBox()
 template <class T>
 inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 {
-	ePtrList<T>::iterator entry(top);
+	if (!have_focus)
+		return;
 
-	for (int i=0 ; have_focus && i < entries && entry != childs.end() ; i++, entry++)
+	ePtrList<T>::iterator entry(top);   // refresh bottom here...
+
+	int i=0;
+  do
 	{
-		eRect rect=eRect(ePoint(0, i*item_height), eSize(size.width(), item_height));
+		eRect rect = getEntryRect(i);
 
-		if (!where.contains(rect))
-			continue;
-
-		entry->redraw(target, rect, col_active, getBackgroundColor(), *entry == *current);
-
-		if (*entry == *current)  // than the item is the new highlited item
-			/*emit*/ selchanged(*entry);
+		if ( where.contains(rect) )
+			entry->redraw(target, rect, col_active, getBackgroundColor(), entry == current);
+		
+		i++;
 	}
+	while (entry++ != bottom);
+
+	target->flush();
 }
 
 template <class T>
@@ -258,11 +314,7 @@ inline void eListBox<T>::gotFocus()
 	if (childs.empty())
 		return;
 
-	ePtrList<T>::iterator entry(top);
-
-	for (int i=0; i<entries; i++, ++entry)
-		if (*entry == *current)
-			invalidateEntry(i);
+	invalidate();
 }
 
 template <class T>
@@ -272,7 +324,7 @@ inline void eListBox<T>::lostFocus()
 
 	if (childs.empty())
 		return;
-
+/*
 	ePtrList<T>::iterator entry(top);
 
 	if (isVisible())
@@ -280,23 +332,24 @@ inline void eListBox<T>::lostFocus()
 		for (int i=0; i<entries; i++, ++entry)
 			if (*entry == *current)
 				invalidateEntry(i);
-	}
+	}*/
 
 /*	if (parent && parent->LCDElement)
 		parent->LCDElement->setText("");*/
 }
 
 template <class T>
-inline void eListBox<T>::actualize()
+inline void eListBox<T>::init()
 {
 	entries = size.height() / item_height;
 
 	current = top = bottom = childs.begin();
 
-	bottom += entries;
-
-	if (bottom == childs.end())
-		bottom--;
+	for (int i=1; i < entries; i++, bottom++)
+	{
+		if (bottom == --childs.end() )
+			break;	
+	}
 }
 
 template <class T>
@@ -305,81 +358,88 @@ inline void eListBox<T>::keyDown(int rc)
 	if (childs.empty())
 		return;
 
-	int cs=1;
-	
 	T *oldptr = *current,
 		*oldtop = *top;
 
 	switch (rc)
 	{
 		case eRCInput::RC_RIGHT:
-			top += entries;
-			bottom += entries;
-			current += entries;
-			if ( bottom == childs.end() )
-			{
-				bottom--; // bottom to last valid entry
-				current = bottom; // current to last valid entry
-				top = childs.end();
-				top -= entries;		// top - entries
-			}
+			if (bottom == --childs.end() )
+				current = bottom;
+			else
+				for (int i = 0; i < entries; i++)
+				{
+					if (bottom == --childs.end())
+						break;
+					bottom++;
+					top++;
+					current++;
+				}
 		break;
 
 		case eRCInput::RC_LEFT:
-			top -= entries;
-			bottom -= entries;
-			current -= entries;
-			if ( bottom == childs.begin() )
-				bottom+=entries;
+			if (top == childs.begin())
+				current = top;
+			else
+				for (int i = 0; i < entries; i++)
+				{	
+					if (top == childs.begin())
+						break;
+					bottom--;
+					top--;
+					current--;
+				}
 		break;
 		
 		case eRCInput::RC_UP:
 			if ( current == childs.begin() )				// wrap around?
 			{
-				bottom = current = --childs.end();					// select last
-				top = childs.end();
-				top -= entries;
+				top = bottom = current = --childs.end();					// select last
+				for (int i = 1; i < entries; i++, top--)
+					if (top == childs.begin())
+						break;
 			}
 			else
-			{
-				if (current == top)				// upper entry?
+				if (current-- == top) // new top must set
 				{
-					top -= entries;					// renew top   //???????????????????
-					bottom -= entries;
+					for (int i = 0;i < entries; i++, top--, bottom--)
+						if (top == childs.begin())
+							break;
 				}
-				current--;								// go up
-			}
-			cs=1;
 		break;
 
 		case eRCInput::RC_DOWN:
-			if (current == --childs.end() )				// wrap around?
+			if ( current == --childs.end() )				// wrap around?
 			{
 				top = current = bottom = childs.begin(); 	// goto first;
-				bottom += entries;
-				if ( bottom == childs.end() )
-					bottom--;
+				for (int i = 1; i < entries; i++, bottom++)
+					if ( bottom == --childs.end() )
+						break;
 			}
 			else
-			{
-				if (++current == bottom)
+				if (current++ == bottom)
 				{
-					top = bottom;
-					top -= entries;
+					for (int i=0; i<entries; i++, top++, bottom++)
+						if ( bottom == --childs.end() )
+							break;
 				}
-			}
-			cs=1;
 		break;
 	}
 
 	if (isVisible())
 	{
+		if (*current != oldptr)  // current has changed
+			/*emit*/ selchanged(*current);
+
 		if (oldtop != *top)
+		{
 			invalidate();
-		else if (cs)
+		}
+		else if ( *current != oldptr)
 		{
 			int i=0;
 			int old=-1, cur=-1;
+
 			for (ePtrList<T>::iterator entry(top); i<entries; i++, ++entry)
 				if ( *entry == oldptr)
 					old=i;
@@ -389,7 +449,7 @@ inline void eListBox<T>::keyDown(int rc)
 			if (old != -1)
 				invalidateEntry(old);
 
-			if ( (cur != -1) && (cur != old) )
+			if ( (cur != -1) )
 				invalidateEntry(cur);
 		}
 	}
@@ -417,27 +477,28 @@ inline void eListBox<T>::setCurrent(T *c)
 	if (childs.empty())
 		return;
 
-	for (current == childs.begin(); current != childs.end() ; current++)
+	for (current = childs.begin(); current != childs.end() ; current++)
 		if ( *current == c )
 			break;
 
 	if ( current == childs.end() )
 		current = childs.begin();
 
-	if (entries)
+	if (current != childs.end() )
 	{
 		ePtrList<T>::iterator it(top);
 
-		int i;
-
-		for (i=0; i<entries; ++i, ++it)
+		int i = 0;
+		for (; i<entries; ++i, ++it)
 			if (it == current)
 				break;
 
 		if (i == entries)
 		{
 			top=bottom=current;
-			bottom+=entries;
+			for (int i=0; i<entries; i++, bottom++)
+				if (bottom == --childs.end() )
+					break;
 		}
 	}
 }

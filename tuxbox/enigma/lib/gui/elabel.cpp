@@ -52,7 +52,7 @@ void eLabel::setFlags(int flag)
 
 void eLabel::redrawWidget(gPainter *target, const eRect &area)
 {
-	if (text && text.length())
+	if (text.length())
 	{
 		validate();
 		target->setFont(font);

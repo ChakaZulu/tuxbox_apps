@@ -110,7 +110,7 @@ void gPainter::setFont(const gFont &mfont)
 	font=mfont;
 }
 
-void gPainter::renderText(const eRect &pos, const eString &string, int flags)
+void gPainter::renderText(const eRect &pos, const std::string &string, int flags)
 {
 	eRect area=pos;
 	area.moveBy(logicalZero.x(), logicalZero.y());
@@ -118,7 +118,7 @@ void gPainter::renderText(const eRect &pos, const eString &string, int flags)
 	gOpcode o;
 	o.dc=&dc;
 	o.opcode=gOpcode::renderText;
-	o.parm.renderText.text=new eString(string);
+	o.parm.renderText.text=new eString(string.c_str());
 	o.parm.renderText.area=new eRect(area);
 	o.parm.renderText.font=new gFont(font);
 	o.flags=flags;

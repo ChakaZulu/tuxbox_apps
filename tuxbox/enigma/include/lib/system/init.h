@@ -32,7 +32,7 @@ public:
 	{
 		eInit::add(rl, this);
 	}
-	~eAutoInit()
+	virtual ~eAutoInit()
 	{
 		eInit::remove(rl, this);
 	}

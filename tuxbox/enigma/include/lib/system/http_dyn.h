@@ -1,6 +1,6 @@
 #ifndef __http_dyn_h_
 #define __http_dyn_h_
-
+#include <string>
 #include "httpd.h"
 
 class eHTTPDyn: public eHTTPDataSource

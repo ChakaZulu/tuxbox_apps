@@ -342,6 +342,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 
 	if (refcnt)
 		eFatal("mod. after lock");
+
 	if (!current_font)
 		return -1;
 
@@ -356,8 +357,10 @@ int eTextPara::renderString(const eString &string, int rflags)
 		}
 		cache_current_font=&current_font->font.font;
 	}
+	
+	std::string::const_iterator p(string.begin());
 
-	for (	eString::const_iterator it = string.begin(); it != string.end(); it++)
+	while(p != string.end())
 	{
 		int isprintable=1;
 		int flags=0;
@@ -367,7 +370,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 		
 		if (!(rflags&RS_DIRECT))
 		{
-			switch (*it)
+			switch (*p)
 			{
 			case '\t':
 				isprintable=0;
@@ -392,13 +395,14 @@ int eTextPara::renderString(const eString &string, int rflags)
 		{
 			FT_UInt index;
 
-			index=(rflags&RS_DIRECT)? *it : FT_Get_Char_Index(current_face, *it);
+			index=(rflags&RS_DIRECT)? *p : FT_Get_Char_Index(current_face, *p);
 
 			if (!index)
-				; // qDebug("unicode %d ('%c') not present", uc, uc);
+				; // eDebug("unicode %d ('%c') not present", uc, uc);
 			else
 				appendGlyph(index, flags);
 		}
+		p++;
 	}
 	return 0;
 }

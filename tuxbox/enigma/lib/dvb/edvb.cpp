@@ -425,22 +425,18 @@ void eDVB::serviceEvent(int event)
 	{
 	case eventServiceSwitch:
 	{
-		eDebug("Begin");
 		if (!transponderlist)
 		{
 			service_state=ENOENT;
 			serviceEvent(eventServiceFailed);
 			return;
 		}
-		eDebug("nach !Transponderlist");
 		eTransponder *n=transponderlist->searchTS(original_network_id, transport_stream_id);
-		eDebug("n = %p", n);
 		if (!n)
 		{
 			setState(eventServiceTuneFailed);
 			break;
 		}
-		eDebug("n = %p", n);
 		if (n->state!=eTransponder::stateOK)
 		{
 			eDebug("couldn't tune");
@@ -1038,7 +1034,7 @@ eString eDVB::getInfo(const char *info)
 		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)]=='=')))
 		{
 			int i = strlen(info)+1;
-			result = eString(buffer).substr(i, strlen(buffer)-i);
+			result = eString(buffer).mid(i, strlen(buffer)-i);
 			break;
 		}
 	}	

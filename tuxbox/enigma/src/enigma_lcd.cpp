@@ -66,7 +66,7 @@ void eZapLCDMain::serviceChanged(eService *service, int)
 eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
 {
 	if (eSkin::getActive()->build(this, "enigma_lcd_main"))
-		qFatal("skin load of \"enigma_lcd\" failed");
+		eFatal("skin load of \"enigma_lcd\" failed");
 
 	ASSIGN(Volume, eProgress, "volume_bar");
 	ASSIGN(ServiceName, eLabel, "service_name");
@@ -83,7 +83,7 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0), clocktimer(eApp)
 eZapLCDMenu::eZapLCDMenu(eWidget *parent): eWidget(parent, 0)
 {	
 	if (eSkin::getActive()->build(this, "enigma_lcd_menu"))
-		qFatal("skin load of \"enigma_lcd_menu\" failed");
+		eFatal("skin load of \"enigma_lcd_menu\" failed");
 
 	ASSIGN(Title, eLabel, "title");
 	ASSIGN(Element, eLabel, "element");
@@ -92,7 +92,7 @@ eZapLCDMenu::eZapLCDMenu(eWidget *parent): eWidget(parent, 0)
 eZapLCDScart::eZapLCDScart(eWidget *parent): eWidget(parent, 0)
 {	
 	if (eSkin::getActive()->build(this, "enigma_lcd_scart"))
-		qFatal("skin load of \"enigma_lcd_scart\" failed");
+		eFatal("skin load of \"enigma_lcd_scart\" failed");
 
 	ASSIGN(Title, eLabel, "enigma_logo");
 	ASSIGN(Scart, eLabel, "lcd_scart");
