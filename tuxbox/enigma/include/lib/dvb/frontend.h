@@ -16,6 +16,11 @@
 #include <ost/video.h>
 #define DEMOD_DEV "/dev/dvb/card0/frontend0"
 #define SEC_DEV "/dev/dvb/card0/sec0"
+#define QAM_AUTO		6
+#define TRANSMISSION_MODE_AUTO	2
+#define BANDWIDTH_AUTO		3
+#define QUARD_INTERVAL_AUTO	4
+#define HIERARCHY_AUTO		4
 #else
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
