@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.c,v 1.1 2002/07/15 13:14:12 obi Exp $
+ * $Id: sdt.c,v 1.2 2002/07/29 19:22:33 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -18,6 +18,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
+
+#ifdef LOOKUP_ONID
 
 #include <fcntl.h>
 #include <ost/dmx.h>
@@ -80,3 +82,4 @@ unsigned short parse_sdt ()
 	return ((buf[8] << 8) | buf[9]);
 }
 
+#endif /* LOOKUP_ONID */

@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.5 2002/07/23 12:37:38 obi Exp $
+ * $Id: camd.c,v 1.6 2002/07/29 19:22:33 obi Exp $
  *
  * (C) 2001, 2002 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -33,7 +33,12 @@
 
 #include "camd.h"
 #include "cat.h"
+
+#ifdef LOOKUP_ONID
 #include "sdt.h"
+
+unsigned short current_onid = 0;
+#endif /* LOOKUP_ONID */
 
 #define CAMD_UDS_NAME	"/tmp/camd.socket"
 #define MAX_SERVICES	8
@@ -54,8 +59,6 @@ unsigned char card_country[3];
 unsigned char card_number[10];
 unsigned char card_version[2];
 //end cam-status
-
-unsigned short current_onid = 0;
 
 int _writecam (unsigned char command, unsigned char * data, unsigned short length)
 {
@@ -140,9 +143,10 @@ int status (void)
 
 int reset (void)
 {
-	unsigned char i;
 	unsigned char buffer[1];
 
+#ifdef LOOKUP_ONID
+	unsigned char i;
 	unsigned short onid = parse_sdt();
 
 	for (i = 0; i < MAX_SERVICES; i++)
@@ -160,6 +164,7 @@ int reset (void)
 	{
 		current_onid = onid;
 	}
+#endif /* LOOKUP_ONID */
 
 	buffer[0] = 0x09;
 
@@ -609,6 +614,7 @@ int parse_ca_pmt (const unsigned char * buffer, const unsigned int length)
 
 	if ((service.numpids != 0) && (service.caID != 0))
 	{
+#ifdef LOOKUP_ONID
 		if (current_onid == 0)
 		{
 			current_onid = parse_sdt();
@@ -618,8 +624,12 @@ int parse_ca_pmt (const unsigned char * buffer, const unsigned int length)
 		{
 			return -1;
 		}
-
+		
 		service.onID = current_onid;
+#else
+		service.onID = 0x0085;
+#endif /* LOOKUP_ONID */
+
 		service.Unkwn = 0x0104;
 
 		return adddescrambleservicestruct(&service);
