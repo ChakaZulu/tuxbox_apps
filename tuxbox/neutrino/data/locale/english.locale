@@ -320,6 +320,7 @@ scants.bouquet Bouquet
 scants.bouquet_leave leave current
 scants.bouquet_create create new
 scants.bouquet_erase erase all
+scants.failed Transponderscan failed!
 scants.finished Transponderscan finished successfully!
 
 flashupdate.head Software Update

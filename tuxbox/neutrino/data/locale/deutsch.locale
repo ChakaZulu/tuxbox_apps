@@ -320,6 +320,7 @@ scants.bouquet Bouquets
 scants.bouquet_leave nicht ändern
 scants.bouquet_create neu erstellen
 scants.bouquet_erase löschen
+scants.failed Kanalsuche fehlgeschlagen!
 scants.finished Kanalsuche erfolgreich beendet!
 
 flashupdate.head Aktualisierung
