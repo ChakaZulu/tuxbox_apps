@@ -5,6 +5,7 @@
 #include <lib/gdi/font.h>
 #include <lib/dvb/epgcache.h>
 #include <lib/dvb/dvbservice.h>
+#include <sys/stat.h>
 #include <time.h>
 
 eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)
@@ -202,29 +203,46 @@ void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 {
 	closeEIT();
 
-	EITEvent *e = 0;
-	e = eEPGCache::getInstance()->lookupEvent(service);
-//	eDebug(" e = %p", e);	
-	if (e)  // data is in cache...
+	if (! service.path.size())
 	{
-  	ParseEITInfo(e);
-		delete e;
-	}
-	else  // we parse the eit...
+		EITEvent *e = 0;
+		e = eEPGCache::getInstance()->lookupEvent(service);
+	//	eDebug(" e = %p", e);	
+		if (e)  // data is in cache...
+		{
+	  	ParseEITInfo(e);
+			delete e;
+		}
+		else  // we parse the eit...
+		{
+			cname.setText(_("no data for this service avail"));
+	
+			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+			if (!sapi)
+				return;
+			eServiceReferenceDVB &ref = sapi->service;
+	
+			int type = ((service.getTransportStreamID()==ref.getTransportStreamID())
+				&&	(service.getOriginalNetworkID()==ref.getOriginalNetworkID())) ? EIT::tsActual:EIT::tsOther;
+	
+			eit = new EIT( EIT::typeNowNext, service.getServiceID().get(), type );
+			CONNECT( eit->tableReady, eChannelInfo::EITready );
+			eit->start();
+		}
+	} else
 	{
-		cname.setText(_("no data for this service avail"));
-
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-		if (!sapi)
-			return;
-		eServiceReferenceDVB &ref = sapi->service;
-
-		int type = ((service.getTransportStreamID()==ref.getTransportStreamID())
-			&&	(service.getOriginalNetworkID()==ref.getOriginalNetworkID())) ? EIT::tsActual:EIT::tsOther;
-
-		eit = new EIT( EIT::typeNowNext, service.getServiceID().get(), type );
-		CONNECT( eit->tableReady, eChannelInfo::EITready );
-		eit->start();
+		// should be moved to eService
+		eString filename=service.path;
+		int slice=0;
+		struct stat s;
+		int filelength=0;
+		while (!stat((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
+		{
+			filelength+=s.st_size/1024;
+			slice++;
+		}
+		
+		cname.setText(eString(_("Filesize: ")) + eString().sprintf("%d MB", filelength/1024));
 	}
 }
 	

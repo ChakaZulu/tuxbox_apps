@@ -229,11 +229,12 @@ void eTimerManager::actionHandler()
 		break;
 
 		case startRecording:
-			eZapMain::getInstance()->recordDVR(1, 0);
-		break;
+			if (nextStartingEvent != timerlist->list.end())
+				eZapMain::getInstance()->recordDVR(1, 0, nextStartingEvent->service.descr);
+			break;
 		case stopRecording:
 			eZapMain::getInstance()->recordDVR(0, 0);
-		break;
+			break;
 
 		case restartRecording:
 		{
@@ -256,7 +257,7 @@ void eTimerManager::actionHandler()
 		default:
 			eDebug("unhandled timer action");
 	}
-}
+}                                                                                                   
 
 void eTimerManager::serviceChanged( const eServiceReferenceDVB& ref )
 {

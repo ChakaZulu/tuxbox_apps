@@ -109,6 +109,7 @@ void eDVRPlayerThread::outputReady(int what)
 	}
 	if (buffer.empty())
 	{
+		eDebug("buffer empty, state %d", state);
 		outputsn->stop();
 		if (state!=stateFileEnd)
 			state=stateBuffering;
@@ -266,7 +267,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			br/=8;
 			
 			br*=message.parm;
-			offset=-buffer.size();
+			offset=-(buffer.size()+1000*1000); // account for pvr buffer
 			buffer.clear();
 			offset+=br;
 			if (message.type == eDVRPlayerThreadMessage::skip)
@@ -403,6 +404,8 @@ eServiceHandlerDVB::eServiceHandlerDVB()
 		);
 		
 	recording=0;
+	CONNECT(messages.recv_msg, eServiceHandlerDVB::gotMessage);
+	messages.start();
 }
 
 eServiceHandlerDVB::~eServiceHandlerDVB()

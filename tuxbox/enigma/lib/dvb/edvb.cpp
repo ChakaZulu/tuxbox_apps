@@ -256,15 +256,27 @@ void eDVB::recBegin(const char *filename)
 	recorder=new eDVBRecorder();
 	recorder->open(filename);
 	CONNECT(recorder->recMessage, eDVB::recMessage);
-	if (Decoder::parms.apid != -1)		// todo! get pids from PMT
-		recorder->addPID(Decoder::parms.apid);
-	if (Decoder::parms.vpid != -1)
-		recorder->addPID(Decoder::parms.vpid);
-	if (Decoder::parms.tpid != -1)
-		recorder->addPID(Decoder::parms.tpid);
-	if (Decoder::parms.pcrpid != -1)
-		recorder->addPID(Decoder::parms.pcrpid);
-	recorder->addPID(0);
+	
+	PMT *pmt=getPMT();
+	if (!pmt)
+	{
+		if (Decoder::parms.apid != -1)
+			recorder->addPID(Decoder::parms.apid);
+		if (Decoder::parms.vpid != -1)
+			recorder->addPID(Decoder::parms.vpid);
+		if (Decoder::parms.tpid != -1)
+			recorder->addPID(Decoder::parms.tpid);
+		if (Decoder::parms.pcrpid != -1)
+			recorder->addPID(Decoder::parms.pcrpid);
+	} else
+	{
+		recorder->addPID(pmt->PCR_PID);
+		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
+			recorder->addPID(i->elementary_PID);
+		pmt->unlock();
+	}
+	
+	recorder->addPID(0);	// PAT
 	if (Decoder::parms.pmtpid != -1)
 		recorder->addPID(Decoder::parms.pmtpid);
 }

@@ -1844,8 +1844,12 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		int num=0;
 		stopMessages();
 		if (event.action == &i_enigmaMainActions->showMainMenu)
+		{
+			int oldmode=mode;
 			showMainMenu();
-		else if (event.action == &i_enigmaMainActions->standby_press)
+			if (mode != oldmode)
+				showServiceSelector(-1, 0);
+		} else if (event.action == &i_enigmaMainActions->standby_press)
 			standbyPress();
 		else if (event.action == &i_enigmaMainActions->standby_repeat)
 			standbyRepeat();

@@ -532,8 +532,13 @@ void eTransponderList::readLNBData()
     eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/SeqRepeat").c_str(), tmpint );
     lnb.getDiSEqC().SeqRepeat = tmpint;
 
-    eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncomitted_switch").c_str(), tmpint );
+    if (eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncomitted_switch").c_str(), tmpint ))
+    {
+    	eWarning("%d", eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncomitted_switch").c_str(), tmpint ));
+    	tmpint = 0;
+    }
     lnb.getDiSEqC().uncommitted_switch = tmpint;
+    eWarning("got uncommitted switch %d", tmpint);
 
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/uncommitted_gap").c_str(), tmpint );
     lnb.getDiSEqC().uncommitted_gap = tmpint;
@@ -636,6 +641,7 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCRepeats").c_str(), (int) it->getDiSEqC().DiSEqCRepeats );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/SeqRepeat").c_str(), (int) it->getDiSEqC().SeqRepeat );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/uncommitted_switch").c_str(), (int) it->getDiSEqC().uncommitted_switch );
+		eDebug("setting uncommitted switch to %d",  (int) it->getDiSEqC().uncommitted_switch);
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/uncommitted_gap").c_str(), (int) it->getDiSEqC().uncommitted_gap );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/useGotoXX").c_str(), (int) it->getDiSEqC().useGotoXX );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/rotorOffset").c_str(), (int) it->getDiSEqC().rotorOffset );    

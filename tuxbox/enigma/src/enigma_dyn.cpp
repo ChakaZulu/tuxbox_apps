@@ -24,10 +24,13 @@
 #include <lib/dvb/epgcache.h>
 #include <lib/system/econfig.h>
 #include <lib/gdi/fb.h>
+#include <lib/gdi/glcddc.h>
+#include <lib/gdi/gfbdc.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbservice.h>
 #include <lib/dvb/service.h>
 #include <lib/gui/emessage.h>
+#include <lib/gdi/epng.h>
 #include <lib/driver/eavswitch.h>
 #include <lib/dvb/service.h>
 
@@ -1128,6 +1131,28 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	return result;
 }
 
+static eString screenshot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	gPixmap *p=0;
+	if (opt["mode"]=="lcd")
+		p=&gLCDDC::getInstance()->getPixmap();
+	else
+		p=&gFBDC::getInstance()->getPixmap();
+	
+	if (!p)
+		return "no\n";
+	
+	if (!savePNG("/var/tmp/screenshot.png", p))
+	{
+		content->local_header["Location"]="/root/var/tmp/screenshot.png";
+		content->code=302;
+		return "ok\n";
+	}
+	
+	return "nixging\n";
+}
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root);
@@ -1152,6 +1177,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
 
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
+	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", screenshot);
 
 /*
 	dyn_resolver->addDyn("GET", "/record/on", record_on);
