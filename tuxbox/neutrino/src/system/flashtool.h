@@ -42,6 +42,7 @@ using namespace std;
 class CFlashTool
 {
 	private:
+		int		fd_fp;
 		CProgress_StatusViewer* statusViewer;
 		string mtdDevice;
 		string ErrorMessage;
@@ -50,6 +51,8 @@ class CFlashTool
 
 	public:
 		CFlashTool();
+		~CFlashTool();
+
 		string getErrorMessage();
 
 		void setMTDDevice( string mtddevice );
@@ -57,6 +60,8 @@ class CFlashTool
 
 		bool program( string filename );
 		bool readFromMTD( string filename );
+
+		void reboot();
 };
 
 

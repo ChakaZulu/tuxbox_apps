@@ -33,10 +33,16 @@
 
 #include "update.h"
 #include "neutrino.h"
+
+#include "gui/color.h"
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"
 #include "system/flashtool.h"
 #include "system/httptool.h"
+#include "driver/fontrenderer.h"
+#include "driver/rcinput.h"
+
+#include "libmd5sum/libmd5sum.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -303,13 +309,6 @@ bool CFlashUpdate::checkVersion4Update(int ypos, string &sFileName)
 
 void CFlashUpdate::paint()
 {
-	int fp_fd = 0;
-	if ((fp_fd = open("/dev/dbox/fp0",O_RDWR)) <= 0)
-	{
-		perror("[neutrino] open fp0");
-		return;
-	}
-
 	int ypos=y;
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText("flashupdate.head").c_str(), COL_MENUHEAD);
@@ -333,7 +332,6 @@ void CFlashUpdate::paint()
 		if(!httpUpdater.getInfo())
 		{
 			showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
-			close(fp_fd);
 			return;
 		}
 	}
@@ -367,7 +365,6 @@ void CFlashUpdate::paint()
 		if(!httpUpdater.getFile( new_minor ))
 		{
 			showStatusMessage(g_Locale->getText("flashupdate.getupdatefileerror") );
-			close(fp_fd);
 			return;
 		}
 	}
@@ -383,7 +380,6 @@ void CFlashUpdate::paint()
 	if( md5_file(sFileName.c_str(), 1, (unsigned char*) &md5buffer))
 	{
 		showStatusMessage(g_Locale->getText("flashupdate.cantopenfile") );
-		close(fp_fd);
 		return;
 	}
 	for(int count=0;count<16;count++)
@@ -396,7 +392,6 @@ void CFlashUpdate::paint()
 	if(strcmp(md5string, new_md5sum)!=0)
 	{
 		showStatusMessage(g_Locale->getText("flashupdate.md5sumerror") );
-		close(fp_fd);
 		return;
 	}
 
@@ -408,7 +403,6 @@ void CFlashUpdate::paint()
 	if(!ft.program(sFileName))
 	{
 		showStatusMessage( ft.getErrorMessage() );
-		close(fp_fd);
 		return;
 	}
 
@@ -430,11 +424,7 @@ void CFlashUpdate::paint()
 	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width- 10, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
 
 	sleep(2);
-	if (ioctl(fp_fd,FP_IOCTL_REBOOT)< 0)
-	{
-		perror("FP_IOCTL_REBOOT:");
-	}
-	close(fp_fd);
+	ft.reboot();
 	sleep(20000);
 }
 
@@ -445,66 +435,27 @@ void CFlashUpdate::paint()
 CFlashExpert::CFlashExpert()
 	:CProgressWindow()
 {
-
+	selectedMTD = -1;
 }
-
-void CFlashExpert::readflash()
-{
-	setTitle( g_Locale->getText("flashupdate.titlereadflash"));
-	paint();
-	showGlobalStatus(0);
-	showStatusMessage(g_Locale->getText("flashupdate.actionreadflash"));
-	CFlashTool ft;
-	ft.setStatusViewer( this );
-	ft.setMTDDevice("/dev/mtd/5");
-	if(!ft.readFromMTD("/tmp/flashimage.img"))
-	{
-		showStatusMessage( ft.getErrorMessage() );
-		sleep(10);
-	}
-	else
-	{
-		showGlobalStatus(100);
-		showStatusMessage( g_Locale->getText("flashupdate.ready"));
-		char message[500];
-		sprintf(message, g_Locale->getText("flashupdate.savesuccess").c_str(), "/tmp/flashimage.img");
-		sleep(1);
-		hide();
-		ShowHint ( "messagebox.info", message );
-	}
-}
-
-void CFlashExpert::writeflash()
-{
-		CMenuWidget* fileselector = new CMenuWidget("flashupdate.fileselector", "softupdate.raw");
-		fileselector->addItem( new CMenuSeparator() );
-		fileselector->addItem( new CMenuForwarder("messagebox.cancel") );
-		fileselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-/*
-		CMTDInfo* mtdInfo =CMTDInfo::getInstance();
-		for(int x=0;x<mtdInfo->getMTDCount();x++)
-		{
-			char actionKey[20];
-			sprintf(actionKey, "readmtd%d", x);
-			mtdselector->addItem(  new CMenuForwarder( mtdInfo->getMTDName(x), true, "", this, actionKey ) );
-		}
-		*/
-		fileselector->exec(NULL,"");
-}
-
 
 void CFlashExpert::readmtd(int readmtd)
 {
 	char tmp[10];
 	sprintf(tmp, "%d", readmtd);
 	string filename = "/tmp/mtd" + string(tmp) + string(".img");
+	if(readmtd==-1)
+	{
+		//ganzes flashimage lesen
+		filename = "/tmp/flashimage.img";
+		readmtd = 5;
+	}
 	setTitle(g_Locale->getText("flashupdate.titlereadflash"));
 	paint();
 	showGlobalStatus(0);
 	showStatusMessage(g_Locale->getText("flashupdate.actionreadflash") + " (" + string(CMTDInfo::getInstance()->getMTDName(readmtd)) + ")");
 	CFlashTool ft;
 	ft.setStatusViewer( this );
-	ft.setMTDDevice("/dev/mtd/" + string(tmp));
+	ft.setMTDDevice(CMTDInfo::getInstance()->getMTDFileName(readmtd));
 	if(!ft.readFromMTD(filename))
 	{
 		showStatusMessage( ft.getErrorMessage() );
@@ -522,6 +473,86 @@ void CFlashExpert::readmtd(int readmtd)
 	}
 }
 
+void CFlashExpert::writemtd(string filename, int mtdNumber)
+{
+	char message[500];
+	sprintf(message, g_Locale->getText("flashupdate.reallyflashmtd").c_str(), filename.c_str(), CMTDInfo::getInstance()->getMTDName(mtdNumber).c_str());
+
+    if ( ShowMsg ( "messagebox.info", message , CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
+    {
+    	return;
+    }
+	setTitle( g_Locale->getText("flashupdate.titlewriteflash"));
+	paint();
+	showGlobalStatus(0);
+	CFlashTool ft;
+	ft.setStatusViewer( this );
+	ft.setMTDDevice( CMTDInfo::getInstance()->getMTDFileName(mtdNumber) );
+	if(!ft.program(filename))
+	{
+		showStatusMessage( ft.getErrorMessage() );
+		sleep(10);
+	}
+	else
+	{
+		showGlobalStatus(100);
+		showStatusMessage( g_Locale->getText("flashupdate.ready"));
+		sleep(1);
+		hide();
+		ShowHint ( "messagebox.info",  g_Locale->getText("flashupdate.flashreadyreboot") );
+		ft.reboot();
+	}
+}
+
+
+void CFlashExpert::showMTDSelector(string actionkey)
+{
+	//mtd-selector erzeugen
+	CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
+	mtdselector->addItem( new CMenuSeparator() );
+	mtdselector->addItem( new CMenuForwarder("messagebox.cancel") );
+	mtdselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	CMTDInfo* mtdInfo =CMTDInfo::getInstance();
+	for(int x=0;x<mtdInfo->getMTDCount();x++)
+	{
+		char sActionKey[20];
+		sprintf(sActionKey, "%s%d", actionkey.c_str(), x);
+		mtdselector->addItem(  new CMenuForwarder( mtdInfo->getMTDName(x), true, "", this, sActionKey ) );
+	}
+	mtdselector->exec(NULL,"");
+}
+
+void CFlashExpert::showFileSelector(string actionkey)
+{
+	CMenuWidget* fileselector = new CMenuWidget("flashupdate.fileselector", "softupdate.raw");
+	fileselector->addItem( new CMenuSeparator() );
+	fileselector->addItem( new CMenuForwarder("messagebox.cancel") );
+	fileselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	struct dirent **namelist;
+	int n = scandir("/tmp", &namelist, 0, alphasort);
+	if (n < 0)
+	{
+		perror("no flashimages available");
+		//should be available...
+	}
+	else
+	{
+		for(int count=0;count<n;count++)
+		{
+			string filen = namelist[count]->d_name;
+			int pos = filen.find(".img");
+			if(pos!=-1)
+			{
+				fileselector->addItem(  new CMenuForwarder( filen, true, "", this, actionkey + filen ) );
+			}
+			free(namelist[count]);
+		}
+		free(namelist);
+	}
+	fileselector->exec(NULL,"");
+}
+
+
 int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 {
 	if(parent)
@@ -531,79 +562,48 @@ int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 
 	if(actionKey=="readflash")
 	{
-		readflash();
+		readmtd(-1);
 	}
 	else if(actionKey=="writeflash")
 	{
-		CMenuWidget* fileselector = new CMenuWidget("flashupdate.fileselector", "softupdate.raw");
-		fileselector->addItem( new CMenuSeparator() );
-		fileselector->addItem( new CMenuForwarder("messagebox.cancel") );
-		fileselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		struct dirent **namelist;
-		int n;
-		//		printf("scanning locale dir now....(perhaps)\n");
-
-		n = scandir("/tmp", &namelist, 0, alphasort);
-		if (n < 0)
-		{
-			perror("no flashimages available");
-			//should be available...
-		}
-		else
-		{
-			for(int count=0;count<n;count++)
-			{
-				string filen = namelist[count]->d_name;
-				int pos = filen.find(".img");
-				if(pos!=-1)
-				{
-					fileselector->addItem(  new CMenuForwarder( filen, true, "", this, filen ) );
-				}
-				free(namelist[count]);
-			}
-			free(namelist);
-		}
-		fileselector->exec(NULL,"");
+		showFileSelector("");
 	}
 	else if(actionKey=="readflashmtd")
 	{
-		//mtd-selector erzeugen
-		CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
-		mtdselector->addItem( new CMenuSeparator() );
-		mtdselector->addItem( new CMenuForwarder("messagebox.cancel") );
-		mtdselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMTDInfo* mtdInfo =CMTDInfo::getInstance();
-		for(int x=0;x<mtdInfo->getMTDCount();x++)
-		{
-			char actionKey[20];
-			sprintf(actionKey, "readmtd%d", x);
-			mtdselector->addItem(  new CMenuForwarder( mtdInfo->getMTDName(x), true, "", this, actionKey ) );
-		}
-		mtdselector->exec(NULL,"");
+		showMTDSelector("readmtd");
 	}
 	else if(actionKey=="writeflashmtd")
-	{/*
-		CMenuWidget* mtdselector = new CMenuWidget("flashupdate.mtdselector", "softupdate.raw");
-		mtdselector->addItem( new CMenuSeparator() );
-		mtdselector->addItem( new CMenuForwarder("messagebox.cancel") );
-		mtdselector->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMTDInfo* mtdInfo =CMTDInfo::getInstance();
-		for(int x=0;x<mtdInfo->getMTDCount();x++)
-		{
-			char actionKey[20];
-			sprintf(actionKey, "readmtd%d", x);
-			mtdselector->addItem(  new CMenuForwarder( mtdInfo->getMTDName(x), true, "", this, actionKey ) );
-		}
-		mtdselector->exec(NULL,"");
-		*/
+	{
+		showMTDSelector("writemtd");
 	}
 	else
 	{
 		int iReadmtd = -1;
+		int iWritemtd = -1;
 		sscanf(actionKey.c_str(), "readmtd%d", &iReadmtd);
+		sscanf(actionKey.c_str(), "writemtd%d", &iWritemtd);
 		if(iReadmtd!=-1)
 		{
 			readmtd(iReadmtd);
+		}
+		else if(iWritemtd!=-1)
+		{
+			printf("mtd-write\n\n");
+			selectedMTD = iWritemtd;
+			showFileSelector("");
+		}
+		else
+		{
+			if(selectedMTD==-1)
+			{
+				//ganzes Image schreiben -> mtd 5
+				writemtd(actionKey, 5);
+			}
+			else
+			{
+				writemtd(actionKey, selectedMTD);
+				selectedMTD=-1;
+			}
 		}
 		hide();
 		return menu_return::RETURN_EXIT_ALL;

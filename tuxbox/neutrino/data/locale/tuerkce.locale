@@ -307,9 +307,15 @@ flashupdate.writeflash Write hole image
 flashupdate.readflashmtd Read one partition
 flashupdate.writeflashmtd Write one partition
 flashupdate.savesuccess The image was successfully saved \nunder %s.
-flashupdate.mtdselector Partition-Selektor
+flashupdate.mtdselector Partition-Selector
 flashupdate.titlereadflash Reading Flash
 flashupdate.actionreadflash reading
+flashupdate.fileselector File-Selector
+flashupdate.titlewriteflash Writing Flash
+flashupdate.actionwriteflash writing
+flashupdate.flashreadyreboot The image was successfully flashed.\nThe DBox will be rebooted now.
+flashupdate.reallyflashmtd Do you really want to flash?\n\nIf a error occurs or the image is not\nvalid, the box will not boot after flashing.\n\nImagename: %s\nTarget: %s
+
 
 bouqueteditor.name Bouquet-Editor
 bouqueteditor.delete Delete

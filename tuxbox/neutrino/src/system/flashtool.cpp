@@ -36,13 +36,23 @@
 #include <sys/mount.h>
 
 #include <linux/mtd/mtd.h>
+#include "dbox/fp.h"
 
 
 CFlashTool::CFlashTool()
 {
+	fd_fp = -1;
 	statusViewer = NULL;
 	mtdDevice = "";
 	ErrorMessage = "";
+}
+
+CFlashTool::~CFlashTool()
+{
+	if(fd_fp!=-1)
+	{
+		close(fd_fp);
+	}
 }
 
 string CFlashTool::getErrorMessage()
@@ -172,6 +182,13 @@ bool CFlashTool::program( string filename )
 		statusViewer->showStatusMessage(g_Locale->getText("flashupdate.eraseingflash"));
 	}
 
+	//jetzt wirds kritisch - daher filehandle auf fp öffen um reset machen zu können
+	if ((fd_fp = open("/dev/dbox/fp0",O_RDWR)) <= 0)
+	{
+		perror("[neutrino] open fp0");
+		fd_fp = -1;
+	}
+
 	if(!erase())
 	{
 		return false;
@@ -261,6 +278,19 @@ bool CFlashTool::erase()
 
 	close(fd);
 	return true;
+}
+
+void CFlashTool::reboot()
+{
+	if(fd_fp!=-1)
+	{
+		if (ioctl(fd_fp,FP_IOCTL_REBOOT)< 0)
+		{
+			perror("FP_IOCTL_REBOOT:");
+		}
+		close(fd_fp);
+		fd_fp = -1;
+	}
 }
 
 //-----------------------------------------------------------------------------------------------------------------

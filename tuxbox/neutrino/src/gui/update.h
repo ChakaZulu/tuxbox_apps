@@ -33,16 +33,10 @@
 #define __update__
 
 #include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
 
 #include "gui/widget/progressstatus.h"
 #include "gui/widget/progresswindow.h"
 #include "gui/widget/menue.h"
-#include "gui/color.h"
-
-#include "libmd5sum/libmd5sum.h"
-#include "dbox/fp.h"
 
 
 #include <string>
@@ -115,9 +109,13 @@ class CFlashUpdate : public CMenuTarget, CProgress_StatusViewer
 class CFlashExpert : public CProgressWindow
 {
 	private:
-		void readflash();
-		void writeflash();
+		int selectedMTD;
+
+		void showMTDSelector(string actionkey);
+		void showFileSelector(string actionkey);
+
 		void readmtd(int readmtd);
+		void writemtd(string filename, int mtdNumber);
 
 	public:
 		CFlashExpert();
