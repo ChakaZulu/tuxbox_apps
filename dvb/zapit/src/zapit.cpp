@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.252 2002/10/04 17:56:01 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.253 2002/10/04 18:25:17 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -128,8 +128,18 @@ extern short curr_sat;
 extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
+bool shutdown_requested = false;
+
 void CZapitDestructor()
 {
+	if (shutdown_requested)
+	{
+		sleep(1);
+		return;
+	}
+
+	shutdown_requested = true;
+
 	save_settings(true);
 
 	if (connfd != -1)
@@ -1066,7 +1076,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.252 2002/10/04 17:56:01 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.253 2002/10/04 18:25:17 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
