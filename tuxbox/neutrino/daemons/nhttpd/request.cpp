@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.9 2002/04/22 20:38:13 dirch Exp $
+	$Id: request.cpp,v 1.10 2002/04/27 16:47:54 dirch Exp $
 
 	License: GPL
 
@@ -384,12 +384,11 @@ void CWebserverRequest::PrintRequest()
 }
 
 //-------------------------------------------------------------------------
-void CWebserverRequest::SendHTMLHeader(char * Titel)
+void CWebserverRequest::SendHTMLHeader(string Titel)
 {
-	SocketWrite("<html>\n<head><title>");
-	SocketWrite(Titel);
-	SocketWrite("DBOX2-Neutrino Kanalliste</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\">");
-	SocketWriteLn("<meta http-equiv=\"cache-control\" content=\"no-cache\">\n</head>\n<body>\n");
+	SocketWriteLn("<html>\n<head><title>" + Titel + "</title><link rel=\"stylesheet\" type=\"text/css\" href=\"../channellist.css\">");
+	SocketWriteLn("<meta http-equiv=\"cache-control\" content=\"no-cache\">");
+	SocketWriteLn("<meta http-equiv=\"expires\" content=\"0\"></head>\n<body>");
 }
 
 //-------------------------------------------------------------------------

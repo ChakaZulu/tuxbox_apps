@@ -62,7 +62,7 @@ public:
 	bool SendFile(string path,string filename);
 
 	void SendHTMLFooter();
-	void SendHTMLHeader(char * Titel);
+	void SendHTMLHeader(string Titel);
 	void SendPlainHeader(string contenttype = "text/plain");
 	void Send404Error();
 	void Send500Error();
