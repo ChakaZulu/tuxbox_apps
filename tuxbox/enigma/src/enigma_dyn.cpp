@@ -3913,9 +3913,14 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	}
 	else
 	{
-		content->code = 400;
-		content->code_descr = "Function failed.";
-		result = "TVBrowser and Enigma service name don't match.";
+		if (command == "add")
+		{
+			content->code = 400;
+			content->code_descr = "Function failed.";
+			result = "TVBrowser and Enigma service name don't match.";
+		}
+		else
+			result = "Service of timer event does not exist, or no longer exists.";
 	}
 
 	return result;
