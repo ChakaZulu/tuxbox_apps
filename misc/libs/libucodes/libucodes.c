@@ -1,3 +1,13 @@
+/*
+  $Id: libucodes.c,v 1.10 2001/10/09 20:39:26 fnbrd Exp $
+  
+  $Log: libucodes.c,v $
+  Revision 1.10  2001/10/09 20:39:26  fnbrd
+  Added Id and Log
+
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
