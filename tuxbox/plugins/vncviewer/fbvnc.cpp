@@ -471,7 +471,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 		static char rc_pan=0;
 
 		count = read(rc_fd, &iev, sizeof(struct input_event));
-		if((count == sizeof(struct input_event)) && ((iev.value == 1)||(iev.value == 2)))
+		if(count == sizeof(struct input_event))
 		{
 			dprintf("Input event: \ntime: %d.%d\ntype: %d\ncode: %d\nvalue: %d\n",
 				(int)iev.time.tv_sec,(int)iev.time.tv_usec,iev.type,iev.code,iev.value);
@@ -525,9 +525,15 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			// codes
 			if(iev.code == KEY_HOME)
+			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				retval = FBVNC_EVENT_QUIT;
+			}
 			if(iev.code == KEY_TOPLEFT || iev.code == KEY_TOPRIGHT || iev.code == KEY_UP)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				if(global_framebuffer.mouse_y == 0 && global_framebuffer.v_y0==0)
 				{
 					RetEvent(FBVNC_EVENT_NULL);
@@ -557,6 +563,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			if(iev.code == KEY_BOTTOMLEFT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_DOWN)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				if(global_framebuffer.mouse_y >= global_framebuffer.pv_ysize &&
 					global_framebuffer.v_y0 + global_framebuffer.pv_ysize >= global_framebuffer.v_ysize)
 				{
@@ -587,6 +595,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			if(iev.code == KEY_TOPLEFT || iev.code == KEY_BOTTOMLEFT || iev.code == KEY_LEFT)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				if(global_framebuffer.mouse_x == 0 && global_framebuffer.v_x0==0)
 				{
 					RetEvent(FBVNC_EVENT_NULL);
@@ -616,6 +626,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			if(iev.code == KEY_TOPRIGHT || iev.code == KEY_BOTTOMRIGHT || iev.code == KEY_RIGHT)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				if(global_framebuffer.mouse_x >= global_framebuffer.pv_xsize &&
 					global_framebuffer.v_x0 + global_framebuffer.pv_xsize >= global_framebuffer.v_xsize)
 				{
@@ -646,6 +658,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_HELP)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				if(mouse_button > 0)
 				{
 					mouse_button=0;
@@ -659,6 +673,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_MUTE)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				ev->key = hbtn.pan;
 				if(rc_pan)
 					retval=FBVNC_EVENT_BTN_UP;
@@ -668,16 +684,22 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_VOLUMEDOWN)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
 				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_OUT | FBVNC_EVENT_TS_MOVE);
 			}
 			else if(iev.code == KEY_VOLUMEUP)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				global_framebuffer.mouse_x = global_framebuffer.mouse_y = 0;
 				retval = (fbvnc_event) (FBVNC_EVENT_ZOOM_IN | FBVNC_EVENT_TS_MOVE);
 			}
 			else if(iev.code == KEY_OK)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				nextev.x =global_framebuffer.mouse_x;
 				nextev.y =global_framebuffer.mouse_y;  
 				nextev.evtype = FBVNC_EVENT_TS_UP;
@@ -687,10 +709,14 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_RED)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				retval=FBVNC_EVENT_DCLICK;				
 			}
 			else if(iev.code == KEY_GREEN)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				nextev.x =global_framebuffer.mouse_x;
 				nextev.y =global_framebuffer.mouse_y;  
 				nextev.evtype = FBVNC_EVENT_TS_UP;
@@ -700,6 +726,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_YELLOW)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				nextev.x =global_framebuffer.mouse_x;
 				nextev.y =global_framebuffer.mouse_y;  
 				nextev.evtype = FBVNC_EVENT_TS_UP;
@@ -709,6 +737,8 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 			}
 			else if(iev.code == KEY_BLUE)
 			{
+				if(!iev.value)
+					RetEvent(FBVNC_EVENT_NULL); // ignore key pressed event
 				toggle_keyboard();
 			}
 			else if (iev.code != KEY_TOPLEFT && iev.code != KEY_TOPRIGHT && iev.code != KEY_UP &&
@@ -717,7 +747,7 @@ fbvnc_get_event (fbvnc_event_t *ev, List *sched)
 
 			{
 				ev->key = iev.code;
-				if(iev.value == 1) //KEY RELEASE
+				if(iev.value == 0) //KEY RELEASE
 				{
 					retval = FBVNC_EVENT_BTN_UP;
 					if(!btn_state[iev.code])
@@ -963,6 +993,7 @@ extern "C" {
 		requestedDepth = 16;
 		forceTruecolour = True;
 		hwType = "dbox";
+		kbdRate=4;
 #if 0
 		processArgs(argc, argv);
 #endif
@@ -1127,6 +1158,7 @@ extern "C" {
 						}
 						rep_key = 0;
 					}
+					dprintf("Removing Keyrep1\n");
 					schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
 					btn_state[ev.key] = 1;
 
@@ -1162,6 +1194,7 @@ extern "C" {
 				if(ev.evtype & FBVNC_EVENT_BTN_UP)
 				{
 					btn_state[ev.key] = 0;
+					dprintf("Removing Keyrep1\n");
 					schedule_delete(sched, FBVNC_EVENT_KEYREPEAT);
 					rep_key = 0;
 					if(active_overlay)
@@ -1264,6 +1297,7 @@ extern "C" {
 				}
 				if(ev.evtype & FBVNC_EVENT_KEYREPEAT)
 				{
+					dprintf("Keyrepeat\n");
 					if(kbdRate && rep_key)
 					{
 						schedule_add(sched, 1000 / kbdRate, FBVNC_EVENT_KEYREPEAT);

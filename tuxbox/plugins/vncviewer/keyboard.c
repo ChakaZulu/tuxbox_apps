@@ -527,6 +527,7 @@ key_press(int hwkey) {
 
 	if (repeating_key(key)) {
 		rep_key = key;
+		dprintf("Adding Keyrepeat\n");
 		schedule_add(sched, kbdDelay, FBVNC_EVENT_KEYREPEAT);
 	}
 
