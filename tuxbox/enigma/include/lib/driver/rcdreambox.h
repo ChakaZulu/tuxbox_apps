@@ -15,23 +15,14 @@ public:
 	void handleCode(int code);
 	eRCDeviceDreambox(eRCDriver *driver);
 	const char *getDescription() const;
+	const char *getKeyDescription(const eRCKey &key) const;
+	int getKeyCompatibleCode(const eRCKey &key) const;
 };
 
 class eRCDreamboxDriver: public eRCShortDriver
 {
 public:
 	eRCDreamboxDriver();
-};
-
-class eRCKeyDreambox: public eRCKey
-{
-public:
-	const char *getDescription() const;
-	eRCKeyDreambox(eRCDevice *producer, int code, int flags)
-			: eRCKey(producer, code, flags)
-	{
-	}
- int getCompatibleCode() const;
 };
 
 #endif

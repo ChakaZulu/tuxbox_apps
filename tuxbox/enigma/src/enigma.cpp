@@ -7,28 +7,22 @@
 #include <stdlib.h>
 #include "qrect.h"
 #include "enigma.h"
-#include "elbwindow.h"
-#include "elistbox.h"
-#include "elabel.h"
-#include "scan.h"
 #include "sselect.h"
 #include "dvb.h"
 #include "edvb.h"
-#include "eprogress.h"
 #include "streaminfo.h"
 #include "httpd.h"
 #include "http_file.h"
 #include "http_dyn.h"
+#include "xmlrpc.h"
 #include "enigma_dyn.h"
-#include "showbnversion.h"
-#include "decoder.h"
 #include "enigma_xmlrpc.h"
+#include "decoder.h"
 #include "enigma_main.h"
 #include "emessage.h"
-#include "epng.h"
-#include "eavswitch.h"
 #include "actions.h"
 #include "rc.h"
+#include "elabel.h"
 
 #include "init.h"
 
@@ -64,17 +58,30 @@ void eZap::keyUp(int code)
 		main->event(eWidgetEvent(eWidgetEvent::keyUp, code));
 }
 
-static eActionMap map("global", "Global");
+struct enigmaActions
+{
+	eActionMap map;
+	eAction up;
+	enigmaActions(): 
+		map("global", "Global"),
+		up(map, "hoch", "selection_up")
+	{
+	}
+};
 
-static eAction up(map, "hoch", "selection_up");
+eAutoInitP0<enigmaActions> enigmaActions(5, "enigma Actions");
 
 void eZap::keyEvent(const eRCKey &key)
 {
-	int c = key.getCompatibleCode();
+	int c = key.producer->getKeyCompatibleCode(key);
+	
+	const eAction *action=enigmaActions->map.findAction(key);
+	if (action == &enigmaActions->up)
+		qDebug("action: UP !!!");
 
 	if (c != -1)
 	{
-		if (key.getFlags() & eRCKey::flagBreak)
+		if (key.flags & eRCKey::flagBreak)
 		{
 			keyUp(c);
 		}
@@ -94,6 +101,8 @@ QString eZap::getVersion()
 	return "enigma 0.1, compiled " __DATE__;
 }
 
+#include "gfbdc.h"
+
 eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 {
 	int bootcount;
@@ -109,6 +118,29 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 
 	init = new eInit();
 	init->setRunlevel(5);
+	
+	if(0)
+	{
+		gDC &dc=*gFBDC::getInstance();
+
+		gPainter p(dc);
+		
+		p.clear();
+		p.flush();
+		p.setForegroundColor(gColor(0x13));
+		p.fill(QRect(0, 0, 720, 576));
+		
+		QRect x(10, 10, 100, 50);
+		p.setFont(gFont("NimbusSansL-Regular Sans L Regular", 30));
+		for (int i=0; i<100; i++)
+		{
+			x.moveBy(5, 5);
+//			gPainter p(dc);
+			p.setForegroundColor(gColor(0x13^i));
+			p.renderText(x, "Hello world dies ist ein ganz langer text der auf den screen gepinselt wird du lieber mensch bla keine ahnung hallo was soll das");
+		}
+		
+	}
 
 	focus = 0;
 

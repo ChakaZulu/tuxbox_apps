@@ -11,11 +11,11 @@ void eRCDeviceDreambox::handleCode(int rccode)
 	int old=ccode;
 	ccode=rccode;
 	if ((old!=-1) && (old!=rccode))
-		/*emit*/ input->keyPressed(eRCKeyDreambox(this, old&0xF7FF, eRCKey::flagBreak));
+		/*emit*/ input->keyPressed(eRCKey(this, old&0xF7FF, eRCKey::flagBreak));
 	if (old != rccode)
 	{
 		repeattimer.start(rdelay, 1);
-		input->keyPressed(eRCKeyDreambox(this, rccode&0xF7FF, 0));
+		input->keyPressed(eRCKey(this, rccode&0xF7FF, 0));
 	}
 }
 
@@ -25,23 +25,21 @@ void eRCDeviceDreambox::timeOut()
 	ccode=-1;
 	repeattimer.stop();
 	if (oldcc!=-1)
-		input->keyPressed(eRCKeyDreambox(this, oldcc&0xF7FF, eRCKey::flagBreak));
+		input->keyPressed(eRCKey(this, oldcc&0xF7FF, eRCKey::flagBreak));
 }
 
 void eRCDeviceDreambox::repeat()
 {
 	if (ccode!=-1)
-		input->keyPressed(eRCKeyDreambox(this, ccode&0xF7FF, eRCKey::flagRepeat));
+		input->keyPressed(eRCKey(this, ccode&0xF7FF, eRCKey::flagRepeat));
 	repeattimer.start(rrate, 1);
 }
 
-eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver): eRCDevice(driver)
+eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver): eRCDevice("Dreambox", driver)
 {
 	ccode=-1;
 	rrate=30;
 	rdelay=500;
-/*	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
-	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));*/
 	CONNECT(timeout.time_out, eRCDeviceDreambox::timeOut);
 	CONNECT(repeattimer.time_out, eRCDeviceDreambox::repeat);
 }
@@ -51,15 +49,11 @@ const char *eRCDeviceDreambox::getDescription() const
 	return "dreambox Fernbedienung";
 }
 
-eRCDreamboxDriver::eRCDreamboxDriver(): eRCShortDriver("/dev/rawir")
+const char *eRCDeviceDreambox::getKeyDescription(const eRCKey &key) const
 {
-}
-
-const char *eRCKeyDreambox::getDescription() const
-{
-	if ((code&0xFF00)!=0x1400)
+	if ((key.code&0xFF00)!=0x1400)
 		return 0;
-	switch (code&0xFF)
+	switch (key.code&0xFF)
 	{
 	case 0: return "dream-box";
 	case 1: return "power";
@@ -108,11 +102,11 @@ const char *eRCKeyDreambox::getDescription() const
 	return 0;
 }
 
-int eRCKeyDreambox::getCompatibleCode() const
+int eRCDeviceDreambox::getKeyCompatibleCode(const eRCKey &key) const
 {
-	if ((code&0xFF00)!=0x1400)
+	if ((key.code&0xFF00)!=0x1400)
 		return 0;
-	switch (code&0xFF)
+	switch (key.code&0xFF)
 	{
 	case 0: return eRCInput::RC_DBOX;
 	case 1: return eRCInput::RC_STANDBY;
@@ -149,6 +143,10 @@ int eRCKeyDreambox::getCompatibleCode() const
 	case 0x22: return eRCInput::RC_0;
 	}
 	return -1;
+}
+
+eRCDreamboxDriver::eRCDreamboxDriver(): eRCShortDriver("/dev/rawir")
+{
 }
 
 class eDreamboxRCHardware

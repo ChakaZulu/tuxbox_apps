@@ -5,20 +5,22 @@
 #include <unistd.h>
 #include "init.h"
 
-int eRCKey::getCompatibleCode() const
+int eRCDevice::getKeyCompatibleCode(const eRCKey &) const
 {
 	return -1;
 }
 
-eRCDevice::eRCDevice(eRCDriver *driver): driver(driver)
+eRCDevice::eRCDevice(const char *id, eRCDriver *driver): id(id), driver(driver)
 {
 	input=driver->getInput();
 	driver->addCodeListener(this);
+	eRCInput::getInstance()->addDevice(id, this);
 }
 
 eRCDevice::~eRCDevice()
 {
 	driver->removeCodeListener(this);
+	eRCInput::getInstance()->removeDevice(id);
 }
 
 eRCDriver::eRCDriver(eRCInput *input): input(input)
@@ -102,6 +104,30 @@ void eRCInput::unlock()
 void eRCInput::setFile(int newh)
 {
 	handle=newh;
+}
+
+void eRCInput::addDevice(const char *id, eRCDevice *dev)
+{
+	qDebug("adding driver %s -> %x", id, dev);
+	devices.insert(std::pair<const char*,eRCDevice*>(id, dev));
+}
+
+void eRCInput::removeDevice(const char *id)
+{
+	devices.erase(id);
+}
+
+eRCDevice *eRCInput::getDevice(const char *id)
+{
+	qDebug("searching for %s", id);
+	std::map<const char*,eRCDevice*>::iterator i=devices.find(id);
+	if (i == devices.end())
+	{
+		qDebug("nix");
+		return 0;
+	}
+	qDebug("ok, %x", i->second);
+	return i->second;
 }
 
 eAutoInitP0<eRCInput> init_rcinput(1, "RC Input layer");

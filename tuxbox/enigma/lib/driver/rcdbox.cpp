@@ -16,7 +16,7 @@ void eRCDeviceDBoxOld::handleCode(int rccode)
 		{
 			int old=ccode;
 			ccode=-1;
-			input->keyPressed(eRCKeyDBoxOld(this, old, eRCKey::flagBreak));
+			input->keyPressed(eRCKey(this, old, eRCKey::flagBreak));
 		}
 	} else // if (rccode!=ccode)
 	{
@@ -24,11 +24,11 @@ void eRCDeviceDBoxOld::handleCode(int rccode)
 		int old=ccode;
 		ccode=rccode;
 		if ((old!=-1) && (old!=rccode))
-			/*emit*/ input->keyPressed(eRCKeyDBoxOld(this, old, eRCKey::flagBreak));
+			/* emit */input->keyPressed(eRCKey(this, old, eRCKey::flagBreak));
 		if (old != rccode)
 		{
 			repeattimer.start(rdelay, 1);
-			input->keyPressed(eRCKeyDBoxOld(this, rccode, 0));
+			input->keyPressed(eRCKey(this, rccode, 0));
 		}
 	}
 }
@@ -39,23 +39,21 @@ void eRCDeviceDBoxOld::timeOut()
 	ccode=-1;
 	repeattimer.stop();
 	if (oldcc!=-1)
-		input->keyPressed(eRCKeyDBoxOld(this, oldcc, eRCKey::flagBreak));
+		input->keyPressed(eRCKey(this, oldcc, eRCKey::flagBreak));
 }
 
 void eRCDeviceDBoxOld::repeat()
 {
 	if (ccode!=-1)
-		input->keyPressed(eRCKeyDBoxOld(this, ccode, eRCKey::flagRepeat));
+		input->keyPressed(eRCKey(this, ccode, eRCKey::flagRepeat));
 	repeattimer.start(rrate, 1);
 }
 
-eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice(driver)
+eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice("DBoxOld", driver)
 {
 	ccode=-1;
 	rrate=100;
 	rdelay=300;
-/*	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
-	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));*/
 	CONNECT(timeout.time_out, eRCDeviceDBoxOld::timeOut);
 	CONNECT(repeattimer.time_out, eRCDeviceDBoxOld::repeat);
 }
@@ -65,108 +63,11 @@ const char *eRCDeviceDBoxOld::getDescription() const
 	return "alte d-box Fernbedienung";
 }
 
-	/* ----------------------- neue fernbedienung ---------------------- */
-void eRCDeviceDBoxNew::handleCode(int rccode)
+const char *eRCDeviceDBoxOld::getKeyDescription(const eRCKey &key) const
 {
-	if ((rccode&0xFF00)!=0x0000)
-		return;
-	timeout.start(300, 1);
-	int old=ccode;
-	ccode=rccode;
-	if ((old!=-1) && (old!=rccode))
-		/*emit*/ input->keyPressed(eRCKeyDBoxNew(this, old&0x3F, eRCKey::flagBreak));
-	if (old != rccode)
-	{
-		repeattimer.start(rdelay, 1);
-		input->keyPressed(eRCKeyDBoxNew(this, rccode&0x3F, 0));
-	}
-}
-
-void eRCDeviceDBoxNew::timeOut()
-{
-	int oldcc=ccode;
-	ccode=-1;
-	repeattimer.stop();
-	if (oldcc!=-1)
-		input->keyPressed(eRCKeyDBoxNew(this, oldcc&0x3F, eRCKey::flagBreak));
-}
-
-void eRCDeviceDBoxNew::repeat()
-{
-	if (ccode!=-1)
-		input->keyPressed(eRCKeyDBoxNew(this, ccode&0x3F, eRCKey::flagRepeat));
-	repeattimer.start(rrate, 1);
-}
-
-eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice(driver)
-{
-	ccode=-1;
-	rrate=100;
-	rdelay=400;
-/*	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
-	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));*/
-	CONNECT(timeout.time_out, eRCDeviceDBoxNew::timeOut);
-	CONNECT(repeattimer.time_out, eRCDeviceDBoxNew::repeat);
-}
-
-const char *eRCDeviceDBoxNew::getDescription() const
-{
-	return "neue d-box Fernbedienung";
-}
-
-	/* ----------------------- dbox buttons ---------------------- */
-void eRCDeviceDBoxButton::handleCode(int code)
-{
-	if ((code&0xFF00)!=0xFF00)
-		return;
-	
-	code=(~code)&0xF;
-	
-	for (int i=0; i<4; i++)
-		if ((last&~code) & (1<<i))
-			/*emit*/ input->keyPressed(eRCKeyDBoxButton(this, i, eRCKey::flagBreak));
-		else if ((~last&code)&(1<<i))
-			/*emit*/ input->keyPressed(eRCKeyDBoxButton(this, i, 0));
-	if (code)
-		repeattimer.start(rdelay, 1);
-	else
-		repeattimer.stop();
-	last=code;
-}
-
-void eRCDeviceDBoxButton::repeat()
-{
-	for (int i=0; i<4; i++)
-		if (last&(1<<i))
-			/*emit*/ input->keyPressed(eRCKeyDBoxButton(this, i, eRCKey::flagRepeat));
-	repeattimer.start(rrate, 1);
-}
-
-eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice(driver)
-{
-	rrate=100;
-	rdelay=300;
-	last=0;
-//	connect(&repeattimer, SIGNAL(timeout()), SLOT(repeat()));
-	CONNECT(repeattimer.time_out, eRCDeviceDBoxButton::repeat);
-}
-
-const char *eRCDeviceDBoxButton::getDescription() const
-{
-	return "d-box Buttons";
-}
-
-eRCDBoxDriver::eRCDBoxDriver(): eRCShortDriver("/dev/dbox/rc0")
-{
-	if (handle>0)
-		ioctl(handle, RC_IOCTL_BCODES, 1);
-}
-
-const char *eRCKeyDBoxOld::getDescription() const
-{
-	if ((code&0xFF00)!=0x5C00)
+	if ((key.code&0xFF00)!=0x5C00)
 		return 0;
-	switch (code&0xFF)
+	switch (key.code&0xFF)
 	{
 	case 0x0C: return "power";
 	case 0x20: return "home";
@@ -200,11 +101,11 @@ const char *eRCKeyDBoxOld::getDescription() const
 	return 0;
 }
 
-int eRCKeyDBoxOld::getCompatibleCode() const
+int eRCDeviceDBoxOld::getKeyCompatibleCode(const eRCKey &key) const
 {
-	if ((code&0xFF00)==0x5C00)
+	if ((key.code&0xFF00)==0x5C00)
 	{
-		switch (code&0xFF)
+		switch (key.code&0xFF)
 		{
 		case 0x0C: return eRCInput::RC_STANDBY;
 		case 0x20: return eRCInput::RC_HOME;
@@ -241,9 +142,56 @@ int eRCKeyDBoxOld::getCompatibleCode() const
 	return -1;
 }
 
-const char *eRCKeyDBoxNew::getDescription() const
+	/* ----------------------- neue fernbedienung ---------------------- */
+void eRCDeviceDBoxNew::handleCode(int rccode)
 {
-	switch (code)
+	if ((rccode&0xFF00)!=0x0000)
+		return;
+	timeout.start(300, 1);
+	int old=ccode;
+	ccode=rccode;
+	if ((old!=-1) && (old!=rccode))
+		/*emit*/ input->keyPressed(eRCKey(this, old&0x3F, eRCKey::flagBreak));
+	if (old != rccode)
+	{
+		repeattimer.start(rdelay, 1);
+		input->keyPressed(eRCKey(this, rccode&0x3F, 0));
+	}
+}
+
+void eRCDeviceDBoxNew::timeOut()
+{
+	int oldcc=ccode;
+	ccode=-1;
+	repeattimer.stop();
+	if (oldcc!=-1)
+		input->keyPressed(eRCKey(this, oldcc&0x3F, eRCKey::flagBreak));
+}
+
+void eRCDeviceDBoxNew::repeat()
+{
+	if (ccode!=-1)
+		input->keyPressed(eRCKey(this, ccode&0x3F, eRCKey::flagRepeat));
+	repeattimer.start(rrate, 1);
+}
+
+eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice("DBoxNew", driver)
+{
+	ccode=-1;
+	rrate=100;
+	rdelay=400;
+	CONNECT(timeout.time_out, eRCDeviceDBoxNew::timeOut);
+	CONNECT(repeattimer.time_out, eRCDeviceDBoxNew::repeat);
+}
+
+const char *eRCDeviceDBoxNew::getDescription() const
+{
+	return "neue d-box Fernbedienung";
+}
+
+const char *eRCDeviceDBoxNew::getKeyDescription(const eRCKey &key) const
+{
+	switch (key.code)
 	{
 	case 0: return "0";
 	case 1: return "1";
@@ -278,9 +226,9 @@ const char *eRCKeyDBoxNew::getDescription() const
 	}
 }
 
-int eRCKeyDBoxNew::getCompatibleCode() const
+int eRCDeviceDBoxNew::getKeyCompatibleCode(const eRCKey &key) const
 {
-	switch (code&0xFF)
+	switch (key.code&0xFF)
 	{
 		case 0: return eRCInput::RC_0;
 		case 1: return eRCInput::RC_1;
@@ -312,9 +260,50 @@ int eRCKeyDBoxNew::getCompatibleCode() const
 	return -1;
 }
 
-const char *eRCKeyDBoxButton::getDescription() const
+	/* ----------------------- dbox buttons ---------------------- */
+void eRCDeviceDBoxButton::handleCode(int code)
 {
-	switch (code)
+	if ((code&0xFF00)!=0xFF00)
+		return;
+	
+	code=(~code)&0xF;
+	
+	for (int i=0; i<4; i++)
+		if ((last&~code) & (1<<i))
+			/*emit*/ input->keyPressed(eRCKey(this, i, eRCKey::flagBreak));
+		else if ((~last&code)&(1<<i))
+			/*emit*/ input->keyPressed(eRCKey(this, i, 0));
+	if (code)
+		repeattimer.start(rdelay, 1);
+	else
+		repeattimer.stop();
+	last=code;
+}
+
+void eRCDeviceDBoxButton::repeat()
+{
+	for (int i=0; i<4; i++)
+		if (last&(1<<i))
+			/*emit*/ input->keyPressed(eRCKey(this, i, eRCKey::flagRepeat));
+	repeattimer.start(rrate, 1);
+}
+
+eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice("DBoxButton", driver)
+{
+	rrate=100;
+	rdelay=300;
+	last=0;
+	CONNECT(repeattimer.time_out, eRCDeviceDBoxButton::repeat);
+}
+
+const char *eRCDeviceDBoxButton::getDescription() const
+{
+	return "d-box Buttons";
+}
+
+const char *eRCDeviceDBoxButton::getKeyDescription(const eRCKey &key) const
+{
+	switch (key.code)
 	{
 	case 1: return "power";
 	case 2: return "down";
@@ -322,15 +311,22 @@ const char *eRCKeyDBoxButton::getDescription() const
 	}
 }
 
-int eRCKeyDBoxButton::getCompatibleCode() const
+int eRCDeviceDBoxButton::getKeyCompatibleCode(const eRCKey &key) const
 {
-	switch (code)
+	switch (key.code)
 	{
 	case 1: return eRCInput::RC_STANDBY;
 	case 2: return eRCInput::RC_RIGHT;
 	case 3: return eRCInput::RC_LEFT;
 	}
 }
+
+eRCDBoxDriver::eRCDBoxDriver(): eRCShortDriver("/dev/dbox/rc0")
+{
+	if (handle>0)
+		ioctl(handle, RC_IOCTL_BCODES, 1);
+}
+
 
 class eDBoxRCHardware
 {

@@ -5,7 +5,7 @@
 #include <qsocketnotifier.h>
 #include <qtimer.h>
 #include <list>
-
+#include <map>
 #include <sigc++/signal_system.h>
 #ifdef SIGC_CXX_NAMESPACES
 using namespace SigC;
@@ -13,6 +13,7 @@ using namespace SigC;
 
 class eRCInput;
 class eRCDriver;
+class eRCKey;
 
 class eRCDevice: public Object
 {
@@ -20,11 +21,14 @@ protected:
 	int rrate, rdelay;
 	eRCInput *input;
 	eRCDriver *driver;
+	const char *id;
 public:
-	eRCDevice(eRCDriver *input);
+	eRCDevice(const char *id, eRCDriver *input);
 	~eRCDevice();
 	virtual void handleCode(int code)=0;
 	virtual const char *getDescription() const=0;
+	virtual const char *getKeyDescription(const eRCKey &key) const=0;
+	virtual int getKeyCompatibleCode(const eRCKey &key) const;
 };
 
 class eRCDriver: public Object
@@ -62,10 +66,10 @@ public:
 
 class eRCKey
 {
-protected:
+public:
 	eRCDevice *producer;
 	int code, flags;
-public:
+
 	eRCKey(eRCDevice *producer, int code, int flags): 
 		producer(producer), code(code), flags(flags)
 	{
@@ -75,16 +79,26 @@ public:
 		flagBreak=1,
 		flagRepeat=2
 	};
-	virtual const char *getDescription() const =0;
-	bool operator>(const eRCKey &o) const
+	
+	bool operator<(const eRCKey &r) const
 	{
-		return (o.code==code) && 
-			((o.flags&flagBreak)==(flags&flagBreak)) && 
-			((o.flags&flagRepeat) || !(flags&flagRepeat));
+		if (r.producer == producer)
+		{
+			if (r.code == code)
+			{
+				if (r.flags < flags)
+					return 1;
+				else
+					return 0;
+			} else if (r.code < code)
+				return 1;
+			else
+				return 0;
+		} else if (r.producer < producer)
+			return 1;
+		else
+			return 0;
 	}
-	int getFlags() const { return flags; }
-	eRCDevice *getProducer() const { return producer; }
-	virtual int getCompatibleCode() const;
 };
 
 class eRCInput: public Object
@@ -93,8 +107,16 @@ class eRCInput: public Object
 	int locked;	
 	int handle;
 	static eRCInput *instance;
-//signals:
-//	void keyEvent(const eRCKey &);
+
+	struct lstr
+	{
+		bool operator()(const char *a, const char* b) const
+		{
+			return strcmp(a, b)<0; 
+		}
+	};
+	
+	std::map<const char*,eRCDevice*,lstr> devices;
 public:
 	Signal1<void, const eRCKey&> keyEvent;
 	enum
@@ -120,6 +142,10 @@ public:
 	{
 		/*emit*/ keyEvent(key);
 	}
+	
+	void addDevice(const char *id, eRCDevice *dev);
+	void removeDevice(const char *id);
+	eRCDevice *getDevice(const char *id);
 	
 	static eRCInput *getInstance() { return instance; }
 };
