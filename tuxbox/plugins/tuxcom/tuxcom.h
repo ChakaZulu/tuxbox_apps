@@ -26,7 +26,7 @@
 // 3 = for DBox
 // 2 = for Dreambox with new Freetype
 // 1 = for Dreambox with old Freetype
-#define TUXCOM_DBOX_VERSION 1
+#define TUXCOM_DBOX_VERSION 3
 
 #include <config.h>
 #include <errno.h>
