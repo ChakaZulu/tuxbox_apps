@@ -5,6 +5,7 @@ options.on Accendi
 options.serial seriale
 options.fb framebuffer
 options.null null
+options.default unset
 
 mainmenu.head MenÃ¼ Principale
 mainmenu.tvmode Modo-TV
@@ -28,6 +29,7 @@ servicemenu.update Aggiornamento-Software
 servicemenu.scants Ricerca Canali
 servicemenu.ucodecheck Controllo UCodes
 servicemenu.reload unset
+servicemenu.reload_hint unset
 
 cablesetup.provider Gestore
 
@@ -48,6 +50,7 @@ satsetup.motorcontrol Setup-Motore
 
 mainsettings.head Impostazioni
 mainsettings.savesettingsnow Salvare le Impostazioni
+mainsettings.savesettingsnow_hint unset
 mainsettings.language Lingua
 mainsettings.audio Audio
 mainsettings.video Video
@@ -64,6 +67,7 @@ mp3picsettings.general MP3 Player / Visore Immaggine
 
 miscsettings.head Altre Impostazioni
 miscsettings.shutdown_real Modo Standby
+miscsettings.shutdown_real_rcdelay unset
 miscsettings.boxtype DBox Costruttore
 miscsettings.startneutrinodirect Esecuzione diretta Neutrino
 miscsettings.startbhdriver Carica Driver BH-Mode
@@ -226,7 +230,6 @@ lcdcontroler.head Impostazioni LCD
 lcdcontroler.contrast Contrasto
 lcdcontroler.brightness Luminosita normale
 lcdcontroler.brightnessstandby Luminosita Standby
-lcdcontroler.default unset
 
 keychoosermenu.setnew Impostazioni nuovo Tasto
 keychoosermenu.setnone Nessun Tasto
@@ -644,6 +647,7 @@ fontsize.infobar_small Infobar stretto
 fontsize.gamelist_itemLarge infobar lango
 fontsize.gamelist_itemSmall infobar piccolo
 fontsize.filebrowser_item Vedi-Filebrowser
+fontsize.hint unset
 
 fontmenu.head Impostazioni dei caratteri
 fontmenu.channellist Lista canali
@@ -677,6 +681,7 @@ mp3player.artist_title Artista, Titolo
 mp3player.title_artist Titolo, Artista
 mp3player.display_order Visore
 mp3player.follow Selezionare Track attuale
+mp3player.screensaver_timeout unset
 
 movieplayer.name unset
 movieplayer.head unset

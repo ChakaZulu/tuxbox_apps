@@ -5,6 +5,7 @@ options.on on
 options.serial serial
 options.fb framebuffer
 options.null null
+options.default Reset to defaults
 
 mainmenu.head Main menue
 mainmenu.tvmode TV-Mode
@@ -28,6 +29,7 @@ servicemenu.update Software Update
 servicemenu.scants Servicescan
 servicemenu.ucodecheck Check ucodes
 servicemenu.reload Reload Channel-lists
+servicemenu.reload_hint Reloading Channel-lists,\nplease wait...
 
 cablesetup.provider cable provider
 
@@ -48,6 +50,7 @@ satsetup.motorcontrol Manual Motor-Setup
 
 mainsettings.head Settings
 mainsettings.savesettingsnow save settings now
+mainsettings.savesettingsnow_hint Saveing settings,\nplease wait...
 mainsettings.language Language
 mainsettings.audio Audio
 mainsettings.video Video
@@ -64,6 +67,7 @@ mp3picsettings.general MP3 player / picturviewer
 
 miscsettings.head Misc settings
 miscsettings.shutdown_real Enable standby
+miscsettings.shutdown_real_rcdelay Delayed shutdown
 miscsettings.boxtype DBox type
 miscsettings.startneutrinodirect start neutrino directly
 miscsettings.startbhdriver load BH-Mode drivers
@@ -644,6 +648,7 @@ fontsize.infobar_small small
 fontsize.gamelist_itemLarge large
 fontsize.gamelist_itemSmall small
 fontsize.filebrowser_item filebrowser item
+fontsize.hint Initialising font,\nplease wait...
 
 fontmenu.head Fontsize settings
 fontmenu.channellist Channellist

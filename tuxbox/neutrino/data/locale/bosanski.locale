@@ -5,6 +5,7 @@ options.on upaljeno
 options.serial serijski
 options.fb framebuffer
 options.null null
+options.default unset
 
 mainmenu.head glavni izbor
 mainmenu.tvmode tv
@@ -28,6 +29,7 @@ servicemenu.update obnoviti softver
 servicemenu.scants traziti kanale
 servicemenu.ucodecheck provjeriti ucodese
 servicemenu.reload unset
+servicemenu.reload_hint unset
 
 cablesetup.provider snabdjevac
 
@@ -48,6 +50,7 @@ satsetup.motorcontrol namjescenje motora
 
 mainsettings.head namjescenje
 mainsettings.savesettingsnow namjescenje sada memorisati
+mainsettings.savesettingsnow_hint unset
 mainsettings.language jezik
 mainsettings.audio ton
 mainsettings.video video
@@ -64,6 +67,7 @@ mp3picsettings.general mp3 igrac / promatrac slika
 
 miscsettings.head namjestiti razne stvari
 miscsettings.shutdown_real pripravnost
+miscsettings.shutdown_real_rcdelay unset
 miscsettings.boxtype proizvodjac dbox2
 miscsettings.startneutrinodirect direktni start neutrina
 miscsettings.startbhdriver startovati bh-mode driver
@@ -226,7 +230,6 @@ lcdcontroler.head namjestiti tecni kristal
 lcdcontroler.contrast kontrast
 lcdcontroler.brightness normalna svjetlost
 lcdcontroler.brightnessstandby svjetlost u pripravnosti
-lcdcontroler.default unset
 
 keychoosermenu.setnew namjestiti novu tipku
 keychoosermenu.setnone nijedna tipka
@@ -644,6 +647,7 @@ fontsize.infobar_small mala infromativna traka
 fontsize.gamelist_itemLarge veliko
 fontsize.gamelist_itemSmall malo
 fontsize.filebrowser_item dio pretrazivaca datoteka
+fontsize.hint unset
 
 fontmenu.head namjescenje velicine slova
 fontmenu.channellist lista kanala
@@ -677,6 +681,7 @@ mp3player.artist_title pjevac, pjesma
 mp3player.title_artist pjesma, pjevac
 mp3player.display_order redoslijed
 mp3player.follow izabjere ovu pjesmu
+mp3player.screensaver_timeout unset
 
 movieplayer.name unset
 movieplayer.head unset

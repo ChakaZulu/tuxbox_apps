@@ -5,6 +5,7 @@ options.on wla
 options.serial szeregowy
 options.fb ekran
 options.null brak
+options.default unset
 
 mainmenu.head Menu glówne
 mainmenu.tvmode Telewizja
@@ -28,6 +29,7 @@ servicemenu.update Aktualizacja oprogramowania
 servicemenu.scants Strojenie
 servicemenu.ucodecheck Wersja ucodes
 servicemenu.reload unset
+servicemenu.reload_hint unset
 
 cablesetup.provider provider kablowy
 
@@ -48,6 +50,7 @@ satsetup.motorcontrol Silownik-konfiguracja
 
 mainsettings.head Glówne ustawienia
 mainsettings.savesettingsnow Zapisz natychmiast ustawienia
+mainsettings.savesettingsnow_hint unset
 mainsettings.language Jezyk
 mainsettings.audio Dzwiek
 mainsettings.video Obraz
@@ -64,6 +67,7 @@ mp3picsettings.general Odtwarzacz MP3 / Przegladarka
 
 miscsettings.head Inne Ustawienia
 miscsettings.shutdown_real Zalacz Standby
+miscsettings.shutdown_real_rcdelay unset
 miscsettings.boxtype Tyb DBox'a
 miscsettings.startneutrinodirect Bezposrednio Neutrino
 miscsettings.startbhdriver unset
@@ -226,7 +230,6 @@ lcdcontroler.head Ustawienia LCD
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness Jasnosc
 lcdcontroler.brightnessstandby Jasnosc w standby
-lcdcontroler.default unset
 
 keychoosermenu.setnew Wybierz nowy klawisz
 keychoosermenu.setnone Zaden
@@ -644,6 +647,7 @@ fontsize.infobar_small maly
 fontsize.gamelist_itemLarge duzy
 fontsize.gamelist_itemSmall maly
 fontsize.filebrowser_item element przeglad.
+fontsize.hint unset
 
 fontmenu.head Rozmiar czcionki
 fontmenu.channellist Lista kan.
@@ -677,6 +681,7 @@ mp3player.artist_title Interpretacja, Tytul
 mp3player.title_artist Tytul, Interpretacja
 mp3player.display_order Kolejnosc
 mp3player.follow Auto-wybór biezacy
+mp3player.screensaver_timeout unset
 
 movieplayer.name unset
 movieplayer.head unset

@@ -5,6 +5,7 @@ options.on ii
 options.serial säriell
 options.fb frembaffer
 options.null null
+options.default unset
 
 mainmenu.head Haupdmenü
 mainmenu.tvmode TV-Modus
@@ -28,6 +29,7 @@ servicemenu.update Software-Öbdaede
 servicemenu.scants Kanalsürchi
 servicemenu.ucodecheck UCodes tschegge
 servicemenu.reload unset
+servicemenu.reload_hint unset
 
 cablesetup.provider Kabelabieder
 
@@ -48,6 +50,7 @@ satsetup.motorcontrol Motor-Setup
 
 mainsettings.head Iischdellige
 mainsettings.savesettingsnow Iischdellige jetz speichere
+mainsettings.savesettingsnow_hint unset
 mainsettings.language Sprooch
 mainsettings.audio Audio
 mainsettings.video Video
@@ -64,6 +67,7 @@ mp3picsettings.general MP3 Player / Bildbetrachter
 
 miscsettings.head Diverse Iischdellige
 miscsettings.shutdown_real Sdändbymodus
+miscsettings.shutdown_real_rcdelay unset
 miscsettings.boxtype DBox Hersdeller
 miscsettings.startneutrinodirect Neutrino diräkt starte
 miscsettings.startbhdriver BH-Mode Triiber lade
@@ -226,7 +230,6 @@ lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness normale Helligkeit
 lcdcontroler.brightnessstandby Standby Helligkeit
-lcdcontroler.default unset
 
 keychoosermenu.setnew Neue Taste Iistelle
 keychoosermenu.setnone Kei Taste
@@ -644,6 +647,7 @@ fontsize.infobar_small Infobar chlei
 fontsize.gamelist_itemLarge gross
 fontsize.gamelist_itemSmall chlei
 fontsize.filebrowser_item Dateibrowser-Iidrag
+fontsize.hint unset
 
 fontmenu.head Schriftgrössen Iischdellige
 fontmenu.channellist Kanallischde
@@ -677,6 +681,7 @@ mp3player.artist_title Interpret, Titel
 mp3player.title_artist Titel, Interpret
 mp3player.display_order Anzeig'
 mp3player.follow Selektiere akt. Track
+mp3player.screensaver_timeout unset
 
 movieplayer.name unset
 movieplayer.head unset

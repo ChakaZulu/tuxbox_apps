@@ -5,6 +5,7 @@ options.on omacha
 options.serial seriell
 options.fb framebuffa
 options.null null
+options.default unset
 
 mainmenu.head Hauptmenü
 mainmenu.tvmode Fernseh schaugn
@@ -28,6 +29,7 @@ servicemenu.update Software-aktualisiern
 servicemenu.scants Senda suacha
 servicemenu.ucodecheck UCodes obcheckn
 servicemenu.reload unset
+servicemenu.reload_hint unset
 
 cablesetup.provider Kabiobieta
 
@@ -48,6 +50,7 @@ satsetup.motorcontrol Manuelle Motor-Eistellunga
 
 mainsettings.head Eistellunga
 mainsettings.savesettingsnow Eistellunga jetz speichan
+mainsettings.savesettingsnow_hint unset
 mainsettings.language Sproch
 mainsettings.audio Audio
 mainsettings.video Video
@@ -64,6 +67,7 @@ mp3picsettings.general Musi spuin / Buidl schaugn
 
 miscsettings.head Diverse Eistellunga
 miscsettings.shutdown_real bissi ausmacha
+miscsettings.shutdown_real_rcdelay unset
 miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino glei startn
 miscsettings.startbhdriver BH-Mode Treiba lon
@@ -226,7 +230,6 @@ lcdcontroler.head LCD Eistellunga
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness normale Helligkeid 
 lcdcontroler.brightnessstandby Standby Helligkeid
-lcdcontroler.default unset
 
 keychoosermenu.setnew Neie Dasdn eistein
 keychoosermenu.setnone Koa Dasdn
@@ -644,6 +647,7 @@ fontsize.infobar_small Infobar kloa
 fontsize.gamelist_itemLarge groß
 fontsize.gamelist_itemSmall kloa
 fontsize.filebrowser_item Dateibrausa
+fontsize.hint unset
 
 fontmenu.head Schriftgrössn Eistellunga
 fontmenu.channellist Kanallistn
@@ -677,6 +681,7 @@ mp3player.artist_title Interpret, Titl
 mp3player.title_artist Interpret
 mp3player.display_order Ozoagn
 mp3player.follow aktuelle Liad
+mp3player.screensaver_timeout unset
 
 movieplayer.name Fuimspuia
 movieplayer.head Fuimspuia

@@ -5,6 +5,7 @@ options.on ein
 options.serial seriell
 options.fb framebuffer
 options.null null
+options.default Voreinstellungen benutzen
 
 mainmenu.head Hauptmenü
 mainmenu.tvmode TV-Modus
@@ -28,6 +29,7 @@ servicemenu.update Software-Aktualisierung
 servicemenu.scants Kanalsuche
 servicemenu.ucodecheck UCodes überprüfen
 servicemenu.reload Kanallisten neu laden
+servicemenu.reload_hint Kanallisten werden neu laden,\nbitte warten...
 
 cablesetup.provider Kabelanbieter
 
@@ -48,6 +50,7 @@ satsetup.motorcontrol Manueller Motor-Setup
 
 mainsettings.head Einstellungen
 mainsettings.savesettingsnow Einstellungen jetzt speichern
+mainsettings.savesettingsnow_hint Einstellungen werden jetzt gespeichert,\nbitte warten...
 mainsettings.language Sprache
 mainsettings.audio Audio
 mainsettings.video Video
@@ -64,6 +67,7 @@ mp3picsettings.general MP3 Player / Bildbetrachter
 
 miscsettings.head Diverse Einstellungen
 miscsettings.shutdown_real Standbymodus
+miscsettings.shutdown_real_rcdelay Verzögerter Shutdown
 miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino direkt starten
 miscsettings.startbhdriver BH-Mode Treiber laden
@@ -226,7 +230,6 @@ lcdcontroler.head LCD Einstellungen
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness normale Helligkeit 
 lcdcontroler.brightnessstandby Standby Helligkeit
-lcdcontroler.default Standard-Werte benutzen
 
 keychoosermenu.setnew Neue Taste einstellen
 keychoosermenu.setnone Keine Taste
@@ -644,6 +647,7 @@ fontsize.infobar_small Infobar klein
 fontsize.gamelist_itemLarge groß
 fontsize.gamelist_itemSmall klein
 fontsize.filebrowser_item Dateibrowser-Eintrag
+fontsize.hint Font wird initialisiert,\nbitte warten...
 
 fontmenu.head Schriftgrössen Einstellungen
 fontmenu.channellist Kanalliste
