@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.194 2002/03/12 17:26:36 field Exp $
+        $Id: neutrino.cpp,v 1.195 2002/03/15 18:05:41 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1426,6 +1426,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 		setupDefaults();
 		printf("using defaults...\n\n");
 	}
+	//get dbox-type everytime!
+	g_settings.box_Type = g_Controld->getBoxType();
+	printf("got boxtype from controld: %d\n", g_settings.box_Type);
 
 	CmdParser(argc, argv);
 
@@ -2242,7 +2245,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.194 2002/03/12 17:26:36 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.195 2002/03/15 18:05:41 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
