@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.12 2002/05/17 03:42:52 dirch Exp $
+	$Id: request.cpp,v 1.13 2002/05/17 13:06:51 woglinde Exp $
 
 	License: GPL
 
@@ -452,7 +452,7 @@ void CWebserverRequest::Send500Error()
 }
 //-------------------------------------------------------------------------
 
-void CWebserverRequest::SendPlainHeader(string contenttype = "text/plain")
+void CWebserverRequest::SendPlainHeader(string contenttype)
 {
 	SocketWrite("HTTP/1.0 200 OK\nContent-Type: " + contenttype + "\n\n");
 	HttpStatus = 200;

@@ -339,7 +339,7 @@ void CStringInput::paintChar(int pos)
 	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
 }
 
-CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "", CChangeObserver* Observ = NULL, string Icon)
+CStringInputSMS::CStringInputSMS(string Name, char* Value, int Size, string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ, string Icon)
 		: CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ, Icon)
 {
 	Chars[1] = "1.,:!?";

@@ -2423,7 +2423,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 	}
 }
 
-void CNeutrinoApp::radioMode( bool rezap = true )
+void CNeutrinoApp::radioMode( bool rezap)
 {
 	if ( mode==mode_radio )
 	{
@@ -2556,7 +2556,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.274 2002/05/15 11:11:40 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.275 2002/05/17 13:06:50 woglinde Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

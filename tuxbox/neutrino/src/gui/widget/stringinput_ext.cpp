@@ -366,7 +366,7 @@ void CExtendedInput_Item_Char::keyPressed( int key )
 
 //-----------------------------#################################-------------------------------------------------------
 
-CIPInput::CIPInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL)
+CIPInput::CIPInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ)
 	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ)
 {
 	frameBuffer = CFrameBuffer::getInstance();

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.6 2002/05/17 03:26:52 dirch Exp $
+	$Id: timerdclient.cpp,v 1.7 2002/05/17 13:06:51 woglinde Exp $
 
 	License: GPL
 
@@ -144,7 +144,7 @@ void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID
 }
 
 
-int CTimerdClient::addTimerEvent( timerTypes evType, void* data = 0, int min = 0, int hour = 0, int day = 0, int month = 0)
+int CTimerdClient::addTimerEvent( timerTypes evType, void* data, int min, int hour, int day, int month)
 {
 	CTimerd::commandHead msg;
 	msg.version=CTimerd::ACTVERSION;

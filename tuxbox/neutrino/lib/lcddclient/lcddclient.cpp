@@ -95,7 +95,7 @@ bool CLcddClient::receive(char* data, int size)
 	read(sock_fd, data, size);
 }
 
-void CLcddClient::setMode(char mode, string head="")
+void CLcddClient::setMode(char mode, string head)
 {
 	CLcddMsg::commandHead msg;
 	CLcddMsg::commandMode msg2;

@@ -126,7 +126,7 @@ void CComponent::hide()
 }
 
 //CDimension-----------------------------------------------------------------------------------------------
-CDimension::CDimension(int width=0, int height=0)
+CDimension::CDimension(int width, int height)
 {
 	iWidth = width;
 	iHeight = height;
@@ -163,7 +163,7 @@ void CDimension::addHeight(int height)
 }
 
 //CPoint---------------------------------------------------------------------------------------------------
-CPoint::CPoint(int xPos=0, int yPos=0)
+CPoint::CPoint(int xPos, int yPos)
 {
 	iXPos = xPos;
 	iYPos = yPos;

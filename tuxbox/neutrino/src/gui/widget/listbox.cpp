@@ -59,7 +59,7 @@ void CListBox::setSaveDialogText(string title, string text)
 
 }
 
-void CListBox::setModified( bool modified = true )
+void CListBox::setModified( bool modified)
 {
 	toSave = modified;
 }

@@ -69,7 +69,7 @@ CBouquetList::~CBouquetList()
 	Bouquets.clear();
 }
 
-CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey, bool locked=false )
+CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey, bool locked)
 {
 	if ( BouquetKey==-1 )
 		BouquetKey= Bouquets.size();
@@ -94,7 +94,7 @@ int CBouquetList::getActiveBouquetNumber()
 	return selected;
 }
 
-int CBouquetList::showChannelList( int nBouquet = -1 )
+int CBouquetList::showChannelList( int nBouquet)
 {
 	if (nBouquet == -1)
 		nBouquet = selected;
@@ -126,7 +126,7 @@ void CBouquetList::adjustToChannel( int nChannelNr)
 }
 
 
-int CBouquetList::activateBouquet( int id, bool bShowChannelList = false )
+int CBouquetList::activateBouquet( int id, bool bShowChannelList)
 {
 	int res = menu_return::RETURN_REPAINT;
 

@@ -358,7 +358,7 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 	pthread_mutex_unlock( &renderer->render_mutex );
 }
 
-void Font::RenderString(int x, int y, int width, string text, unsigned char color, int boxheight=0)
+void Font::RenderString(int x, int y, int width, string text, unsigned char color, int boxheight)
 {
 	RenderString( x, y, width, text.c_str(), color, boxheight);
 }

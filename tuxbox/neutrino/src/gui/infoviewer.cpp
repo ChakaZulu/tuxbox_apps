@@ -641,7 +641,7 @@ sectionsd::CurrentNextInfo CInfoViewer::getEPG( unsigned int onid_sid )
 }
 
 
-void CInfoViewer::show_Data( bool calledFromEvent = false )
+void CInfoViewer::show_Data( bool calledFromEvent)
 {
 	char runningStart[10];
 	char runningDuration[10];
