@@ -59,7 +59,18 @@
 #include "widget/hintbox.h"
 #include "widget/stringinput.h"
 
- #include <id3tag.h>
+#include <id3tag.h>
+
+#if HAVE_DVB_API_VERSION >= 3
+#include <linux/dvb/audio.h>
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/video.h>
+#define ADAP	"/dev/dvb/adapter0"
+#define ADEC	ADAP "/audio0"
+#define VDEC	ADAP "/video0"
+#define DMX	ADAP "/demux0"
+#define DVR	ADAP "/dvr0"
+#endif
 
 #define ConnectLineBox_Width	15
 
@@ -97,7 +108,9 @@ CMP3PlayerGui::CMP3PlayerGui()
 CMP3PlayerGui::~CMP3PlayerGui()
 {
 	playlist.clear();
-	delete filebrowser;
+	g_Zapit->setStandby (false);
+        g_Sectionsd->setPauseScanning (false);
+        delete filebrowser;
 }
 
 //------------------------------------------------------------------------
@@ -160,13 +173,48 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 	frameBuffer->useBackground(usedBackground);
 	frameBuffer->paintBackground();
 
-	// Start Sectionsd
-	g_Sectionsd->setPauseScanning(false);
+#if HAVE_DVB_API_VERSION >= 3
+        // gagga: don't ask me why. But opening the drivers, setting bogus parameters for clipmode
+        // and closing the drivers solves the problem of black screens after closing MP3Player
+        int dmxa = 0, dmxv = 0, dvr = 0, adec = 0, vdec = 0;
+  	struct dmx_pes_filter_params p;
+
+  	dmxa = open (DMX, O_RDWR);
+      	dmxv = open (DMX, O_RDWR);
+      	dvr = open (DVR, O_WRONLY);
+      	adec = open (ADEC, O_RDWR);
+      	vdec = open (VDEC, O_RDWR);
+	p.input = DMX_IN_DVR;
+	p.output = DMX_OUT_DECODER;
+	p.flags = DMX_IMMEDIATE_START;
+	p.pid = 0x45;
+	p.pes_type = DMX_PES_AUDIO;
+	ioctl (dmxa, DMX_SET_PES_FILTER, &p);
+	p.pid = 0x44;
+	p.pes_type = DMX_PES_VIDEO;
+	ioctl (dmxv, DMX_SET_PES_FILTER, &p);
+	ioctl (adec, AUDIO_PLAY);
+	ioctl (vdec, VIDEO_PLAY);
+	ioctl (dmxv, DMX_START);
+	ioctl (dmxa, DMX_START);
+	ioctl (vdec, VIDEO_STOP);
+  	ioctl (adec, AUDIO_STOP);
+  	ioctl (dmxv, DMX_STOP);
+  	ioctl (dmxa, DMX_STOP);
+  	close (dmxa);
+  	close (dmxv);
+  	close (dvr);
+  	close (adec);
+  	close (vdec);
+#endif
 
 	// Restore last mode
 	//t_channel_id channel_id=CNeutrinoApp::getInstance()->channelList->getActiveChannel_ChannelID();
 	//g_Zapit->zapTo_serviceID(channel_id);
 	g_Zapit->setStandby(false);
+	// Start Sectionsd
+	g_Sectionsd->setPauseScanning(false);
+
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 	//sleep(3); // zapit doesnt like fast zapping in the moment
 
