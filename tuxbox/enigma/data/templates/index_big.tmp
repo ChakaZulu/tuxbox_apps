@@ -88,7 +88,6 @@
 		<tbody valign="top">
 		<tr>
 			<td colspan="2">
-			<!--iframe name="header" width="100%" height="112px" src="header" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe-->
 				<!-- begin header -->
 				<table id="headTable" width="100%" height="112px" border="0" cellpadding="0" cellspacing="0" background="#TOPBALK#">
 				<tr>
@@ -138,13 +137,17 @@
 									<td id="nextst" class="epgname" width=320 align=left>&nbsp;</td>
 									<td width=5>&nbsp;</td>
 									<td width="190px" align="right">
-										<img id="recording" width="12" border="0" src="trans.gif">
-										<img height="0" width="5" border="0" src="trans.gif">
-										<img id="imgCrypt" src="crypt_off.png" border="0">
-										<img height="0" width="5" border="0" src="trans.gif">
-										<img id="imgFormat" src="format_off.png" border="0">
-										<img height="0" width="5" border="0" src="trans.gif">
-										<img id="imgDolby" src="dolby_off.png" border="0">
+										<table border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td><img id="recording" width="12" border="0" src="trans.gif"></td>
+											<td><img height="0" width="5" border="0" src="trans.gif"></td>
+											<td><img id="imgCrypt" src="crypt_off.png" border="0"></td>
+											<td><img height="0" width="5" border="0" src="trans.gif"></td>
+											<td><img id="imgFormat" src="format_off.png" border="0"></td>
+											<td><img height="0" width="5" border="0" src="trans.gif"></td>
+											<td><img id="imgDolby" src="dolby_off.png" border="0"></td>
+										</tr>
+										</table>
 									</td>
 								</tr>
 								</table>
@@ -183,7 +186,6 @@
 		</tr>
 		<tr>
 			<td colspan="2">
-			<!--iframe name="topnavi" width="100%" height="24px" src="topnavi" scrolling="no" frameborder="0" marginwidth="0" marginheight="0"></iframe-->
 				<!-- topnavi start -->
 				<table id="topnavi" border="0" width="100%" height="22px" cellspacing="0" cellpadding="0">
 				<tbody align="left">

@@ -4,7 +4,7 @@ EXTRA_DIST = eit.tmp index.tmp helpDMMSites.tmp helpOtherSites.tmp helpForums.tm
 	index_small.tmp index_big.tmp eit_small.tmp addTimerEvent.tmp wap.tmp wapepg.tmp wapzap.tmp \
 	wapEPGDetails.tmp wapTimerList.tmp queryEditTimer.tmp queryDeleteTimer.tmp deleteTimerComplete.tmp \
 	mountPoint.tmp mountPoints.tmp mountPointWindow.tmp subChannelSelection.tmp mepg_small.tmp \
-	pdaResponse.tmp flashMgr.tmp configSettings.tmp timerListEntry.tmp remoteControl.tmp \
+	pdaResponse.tmp flashMgr.tmp configSettings.tmp timerListEntry.tmp remoteControl.tmp epg_old.tmp \
 	pdaRemoteControl.tmp sat.tmp satFinder.tmp remoteControlDbox2.tmp data.tmp leftnavi.tmp channavi.tmp rotor.tmp
 
 install-data-local:
