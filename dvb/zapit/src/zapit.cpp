@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.226 2002/09/16 21:48:28 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.227 2002/09/16 22:38:55 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -695,7 +695,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			case CZapitClient::CMD_GET_CURRENT_SERVICEID:
 			{
 				CZapitClient::responseGetCurrentServiceID msgCurrentSID;
-				msgCurrentSID.serviceID = channel->getChannelID();
+				msgCurrentSID.channel_id = channel->getChannelID();
 				send(connfd, &msgCurrentSID, sizeof(msgCurrentSID), 0);
 				break;
 			}
@@ -1085,7 +1085,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.226 2002/09/16 21:48:28 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.227 2002/09/16 22:38:55 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{

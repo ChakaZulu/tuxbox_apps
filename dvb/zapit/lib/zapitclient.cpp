@@ -121,7 +121,7 @@ void CZapitClient::zapTo( unsigned int channel )
 	zapit_close();
 }
 
-unsigned int CZapitClient::getCurrentServiceID()
+t_channel_id CZapitClient::getCurrentServiceID()
 {
 	commandHead msgHead;
 	msgHead.version=ACTVERSION;
@@ -135,7 +135,7 @@ unsigned int CZapitClient::getCurrentServiceID()
 
 	zapit_close();
 
-	return response.serviceID;
+	return response.channel_id;
 }
 
 CZapitClient::CCurrentServiceInfo CZapitClient::getCurrentServiceInfo()
