@@ -906,7 +906,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 							if (trkey!=RC_nokey)
 							{
 								*msg = trkey;
-								*data = 0;
+								*data = 0; /* <- button pressed */
 								return;
 							}
 						}
@@ -920,8 +920,8 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 					rc_last_key = 0;
 					if (translate(ev.code) == RC_standby)
 					{
-						*msg = RC_standby_release;
-						*data = 0;
+						*msg = RC_standby;
+						*data = 1; /* <- button released */
 						return;
 					}
 				}
@@ -1003,10 +1003,10 @@ bool CRCInput::isNumeric(unsigned int key)
 }
 
 /**************************************************************************
-*       transforms the rc-key to string
+*       transforms the rc-key to std::string
 *
 **************************************************************************/
-string CRCInput:: getKeyName(int code)
+std::string CRCInput:: getKeyName(int code)
 {
 	switch(code)
 	{
@@ -1066,14 +1066,6 @@ string CRCInput:: getKeyName(int code)
 			return "mute";
 			case RC_help:
 			return "help";
-			case RC_top_left:
-			return "cursor top+left";
-			case RC_top_right:
-			return "cursor top+right";
-			case RC_bottom_left:
-			return "cursor bottom+left";
-			case RC_bottom_right:
-			return "cursor bottom+right";
 			case RC_timeout:
 			return "timeout";
 			case RC_nokey:

@@ -34,11 +34,10 @@
 
 #include <string>
 #include <vector>
+#include <linux/input.h>
 
 #define NEUTRINO_UDS_NAME "/tmp/neutrino.sock"
 
-
-using namespace std;
 
 class CRCInput
 {
@@ -57,8 +56,8 @@ class CRCInput
 			bool			correct_time;
 		};
 
-		uint		timerid;
-		vector<timer>	timers;
+		uint               timerid;
+		std::vector<timer> timers;
 
 		int 		fd_pipe_high_priority[2];
 		int 		fd_pipe_low_priority[2];
@@ -78,21 +77,35 @@ class CRCInput
 
 	public:
 		//rc-code definitions
-		static const uint RC_MaxRC	= 0x3F;
-		static const uint RC_KeyBoard	= 0x4000;
-		static const uint RC_Events	= 0x80000000;
-		static const uint RC_Messages	= 0x90000000;
-		static const uint RC_WithData	= 0xA0000000;
+		static const uint RC_MaxRC    = KEY_MAX;    /* /include/linux/input.h: #define KEY_MAX                 0x1ff */
+		static const uint RC_KeyBoard = 0x4000;
+		static const uint RC_Events   = 0x80000000;
+		static const uint RC_Messages = 0x90000000;
+		static const uint RC_WithData = 0xA0000000;
 		enum
 		{
 			RC_0=0x0, RC_1=0x1, RC_2=0x2, RC_3=0x3, RC_4=0x4, RC_5=0x5, RC_6=0x6, RC_7=0x7, RC_8=0x8, RC_9=0x9,
-		    RC_right=0xA, RC_left=0xB, RC_up=0xC, RC_down=0xD, RC_ok=0xE, RC_spkr=0xF,
-			RC_standby=0x10, RC_green=0x11, RC_yellow=0x12, RC_red=0x13, RC_blue=0x14, 
-			RC_plus=0x15, RC_minus=0x16, RC_help=0x17, RC_setup=0x18, RC_home=0x1F, RC_page_up=0x20, RC_page_down=0x21,
-			RC_top_left=27, RC_top_right=28, RC_bottom_left=29, RC_bottom_right=30,
-		    RC_standby_release= RC_MaxRC+ 1,
-		    RC_timeout	= 0xFFFFFFFF,
-		    RC_nokey	= 0xFFFFFFFE
+			RC_left      = KEY_LEFT,            /* /include/linux/input.h: #define KEY_LEFT                105   */
+			RC_right     = KEY_RIGHT,           /* /include/linux/input.h: #define KEY_RIGHT               106   */
+			RC_up        = KEY_UP,              /* /include/linux/input.h: #define KEY_UP                  103   */
+                        RC_down      = KEY_DOWN,            /* /include/linux/input.h: #define KEY_DOWN                108   */
+			RC_ok        = KEY_OK,              /* /include/linux/input.h: #define KEY_OK           0x160        */ /* in patched input.h */
+			RC_spkr      = KEY_MUTE,            /* /include/linux/input.h: #define KEY_MUTE                113   */
+			RC_standby   = KEY_POWER,           /* /include/linux/input.h: #define KEY_POWER               116   */
+			RC_red       = KEY_RED,             /* /include/linux/input.h: #define KEY_RED          0x18e        */ /* in patched input.h */
+			RC_green     = KEY_GREEN,           /* /include/linux/input.h: #define KEY_GREEN        0x18f        */ /* in patched input.h */
+			RC_yellow    = KEY_YELLOW,          /* /include/linux/input.h: #define KEY_YELLOW       0x190        */ /* in patched input.h */
+			RC_blue      = KEY_BLUE,            /* /include/linux/input.h: #define KEY_BLUE         0x191        */ /* in patched input.h */
+			RC_plus      = KEY_VOLUMEUP,        /* /include/linux/input.h: #define KEY_VOLUMEUP            115   */
+			RC_minus     = KEY_VOLUMEDOWN,      /* /include/linux/input.h: #define KEY_VOLUMEDOWN          114   */
+			RC_help      = KEY_HELP,            /* /include/linux/input.h: #define KEY_HELP                138   */
+			RC_setup     = KEY_SETUP,           /* /include/linux/input.h: #define KEY_SETUP               141   */
+			RC_home      = KEY_HOME,            /* /include/linux/input.h: #define KEY_HOME                102   */
+			RC_page_up   = KEY_PAGEUP,          /* /include/linux/input.h: #define KEY_PAGEUP              104   */
+			RC_page_down = KEY_PAGEDOWN,        /* /include/linux/input.h: #define KEY_PAGEDOWN            109   */
+
+			RC_timeout	= 0xFFFFFFFF,
+			RC_nokey	= 0xFFFFFFFE
 		};
 
 		//only used for plugins (games) !!
@@ -111,7 +124,7 @@ class CRCInput
 
 		static bool isNumeric(unsigned int key);
 
-		static string getKeyName(int);
+		static std::string getKeyName(int);
 
 		int addTimer(unsigned long long Interval, bool oneshot= true, bool correct_time= true );
 		int addTimer(struct timeval Timeout);
