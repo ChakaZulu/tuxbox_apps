@@ -1,5 +1,5 @@
 #ifndef DEVICES_H
-#define XMLRPC_H
+#define DEVICES_H
 
 #include "config.h"
 
@@ -14,6 +14,7 @@
 #define AUDIO_DEV "/dev/dvb/adapter0/audio0"
 #define DEMUX_DEV "/dev/dvb/adapter0/demux0"
 #define FRONTEND_DEV "/dev/dvb/adapter0/frontend0"
+#define PIG_DEV "/dev/v4l/video0"
 
 #elif HAVE_OST_DMX_H
 
@@ -30,6 +31,7 @@
 #define AUDIO_DEV "/dev/dvb/card0/audio0"
 #define DEMUX_DEV "/dev/dvb/card0/demux0"
 #define FRONTEND_DEV "/dev/dvb/card0/frontend0"
+#define PIG_DEV "/dev/dbox/pig0"
 
 #define fe_code_rate_t CodeRate
 #define audio_status audioStatus

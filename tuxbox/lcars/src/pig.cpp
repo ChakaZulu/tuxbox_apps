@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pig.cpp,v $
+Revision 1.7  2003/01/05 20:00:11  TheDOC
+hmpf
+
 Revision 1.6  2003/01/05 19:52:47  TheDOC
 forgot include
 
@@ -40,7 +43,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #ifdef HAVE_LINUX_DVB_VERSION_H
 pig::pig()
 {
-	fd = open("/dev/v4l/video0", O_RDWR);
+	fd = open(PIG_DEV, O_RDWR);
 }
 
 pig::~pig()
@@ -81,7 +84,7 @@ void pig::setSource(int x1, int y1, int x2, int y2)
 
 pig::pig()
 {
-	fd = open("/dev/dbox/pig0", O_RDWR);
+	fd = open(PIG_DEV, O_RDWR);
 }
 
 pig::~pig()
