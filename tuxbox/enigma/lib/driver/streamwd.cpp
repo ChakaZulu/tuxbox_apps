@@ -20,7 +20,7 @@ eStreamWatchdog *eStreamWatchdog::instance;
 eStreamWatchdog::eStreamWatchdog()
 {
 	sn=0;
-	handle=open( EVENT_DEVICE, O_RDWR );
+	handle=open( EVENT_DEVICE, O_RDONLY | O_NONBLOCK );
 
 	if (handle<0)
 	{
@@ -54,16 +54,11 @@ eStreamWatchdog *eStreamWatchdog::getInstance()
 void eStreamWatchdog::check(int)
 {
 	struct event_t event;
-
-	int status = read(handle, &event, sizeof(event));
-
-	if ( status == sizeof(event) )
-	{
+	int eventSize = sizeof (event);
+	int status;
+	while (status = read(handle, &event, eventSize) == eventSize)
 		if (event.event == EVENT_ARATIO_CHANGE)
-		{
 			reloadSettings();
-		}
-	}
 }
 
 void eStreamWatchdog::reloadSettings()
@@ -112,7 +107,7 @@ void eStreamWatchdog::reloadSettings()
 			{
 				case 0:
 					doanamorph=0;
-					videoDisplayFormat=VIDEO_LETTER_BOX;
+					videoDisplayFormat=isanamorph?VIDEO_LETTER_BOX:VIDEO_PAN_SCAN;
 				break;
 			 	case 1:
 					doanamorph=0;
@@ -120,7 +115,7 @@ void eStreamWatchdog::reloadSettings()
 		 		break;
 				case 2:
 					doanamorph=isanamorph;
-					videoDisplayFormat=VIDEO_CENTER_CUT_OUT;
+					videoDisplayFormat=isanamorph?VIDEO_CENTER_CUT_OUT:VIDEO_PAN_SCAN;
 		 		break;
 			}
 
@@ -146,4 +141,4 @@ eStreamWatchdog::~eStreamWatchdog()
 		delete sn;
 }
 
-eAutoInitP0<eStreamWatchdog> eStreamWatchdog_init(4, "stream watchdog");
+eAutoInitP0<eStreamWatchdog> eStreamWatchdog_init(3, "stream watchdog");

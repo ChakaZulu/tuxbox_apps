@@ -363,7 +363,6 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(Clock, eLabel, "time");
 
 	cur_start=cur_duration=-1;
-
 	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(set16_9Logo(int)));
 	connect(eEPGCache::getInstance(), SIGNAL(EPGAvail(bool)), SLOT(setEPGButton(bool)));
 	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(setSmartcardLogo(bool)));
