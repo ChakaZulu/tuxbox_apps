@@ -40,7 +40,6 @@
 #include <linux/dvb/frontend.h> 
 
 #define LCD "/dev/dbox/lcd0"
-#define FP "/dev/dbox/fp0"
 #define DMX "/dev/dvb/adapter0/demux0"
 #define FE "/dev/dvb/adapter0/frontend0"
 
@@ -253,31 +252,37 @@ int main(int argc, char **argv) {
   struct dmx_sct_filter_params flt;
   unsigned char buf[1024];
   char network_name[31],old_name[31];
+  int lcd;
 
-  /* open dbox2-specific devices (LCD and FP) */
+  /* open dbox2-specific devices (LCD) */
   if((lcd_fd=open(LCD,O_RDWR))<0) {
     fprintf(stderr,"lcd open - Can't open LCD: %d\n",errno);
-    return -1;
+    lcd = 0;
+  }
+  else {
+    lcd = 1;
   }
 
   /* open nokia-api specific devices (demux,tuner and sat-control) */
   if((dmx_fd=open(DMX,O_RDWR))<0) {
     perror("Can't open Demux");
-    return -1;
+    return 1;
   }
   
   if((fe_fd=open(FE,O_RDONLY))<0) {
     fprintf(stderr,"frontend open - Can't open Tuner: %d\n",errno);
-    return -1;
+    return 1;
   }
 
   /* switch LCD to binary mode and clear it */
-  lcd_mode=LCD_MODE_BIN;
-  if ((ioctl(lcd_fd,LCD_IOCTL_ASC_MODE,&lcd_mode)<0) || (ioctl(lcd_fd,LCD_IOCTL_CLEAR)<0)) {
-    fprintf(stderr,"lcd ioctl - error setting LCD-mode/clearing LCD: %d\n",errno);
-    return -1;
+  if (lcd) { 
+    lcd_mode=LCD_MODE_BIN;
+    if ((ioctl(lcd_fd,LCD_IOCTL_ASC_MODE,&lcd_mode)<0) || (ioctl(lcd_fd,LCD_IOCTL_CLEAR)<0)) {
+      fprintf(stderr,"lcd ioctl - error setting LCD-mode/clearing LCD: %d\n",errno);
+      return 1;
+    }
+    memset(screen,0,sizeof(screen));
   }
-  memset(screen,0,sizeof(screen));
   memset(&old_signal,0,sizeof(old_signal));
   
   /* initialize demux to get the NIT */
@@ -296,7 +301,8 @@ int main(int argc, char **argv) {
   }
   
   /* main stuff here */
-  prepare_main(screen);
+  if (lcd)
+    prepare_main(screen);
   network_name[0]=0;
   old_name[0]=0;
   FD_ZERO(&rfds);
@@ -322,7 +328,8 @@ int main(int argc, char **argv) {
 	  for(count=strlen(network_name);count<=10;count++)
 	    network_name[count]=0x20;
 	  network_name[count]=0;
-	  render_string(screen,0,56,network_name);
+	  if (lcd)
+	    render_string(screen,0,56,network_name);
 	  memcpy(old_name,network_name,sizeof(old_name));
 	}
       }
@@ -336,13 +343,16 @@ int main(int argc, char **argv) {
     tv.tv_usec=10000;
 
     get_signal(&signal_quality,fe_fd);
-    draw_signal(&signal_quality,&old_signal,screen);
-    draw_screen(screen,lcd_fd);
+    if (lcd) {
+      draw_signal(&signal_quality,&old_signal,screen);
+      draw_screen(screen,lcd_fd);
+    }
     printf("%s %d %d %d [%c%c]\n",network_name,signal_quality.ber,signal_quality.snr,signal_quality.strength,signal_quality.status&FE_HAS_SIGNAL? 'S':' ',signal_quality.status&FE_HAS_LOCK? 'L':' ');
   }
 
   /* close devices */
-  close(lcd_fd);
+  if (lcd)
+    close(lcd_fd);
   close(dmx_fd);
   close(fe_fd);
   
