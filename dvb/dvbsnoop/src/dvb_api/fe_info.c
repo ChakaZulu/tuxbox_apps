@@ -1,5 +1,5 @@
 /*
-$Id: fe_info.c,v 1.3 2004/03/21 13:20:07 rasc Exp $
+$Id: fe_info.c,v 1.4 2004/03/21 18:02:45 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_info.c,v 1.3 2004/03/21 13:20:07 rasc Exp $
 
 
 $Log: fe_info.c,v $
+Revision 1.4  2004/03/21 18:02:45  rasc
+corrections
+
 Revision 1.3  2004/03/21 13:20:07  rasc
 more -feinfo, some restructs on FE code
 
@@ -100,78 +103,80 @@ int  do_FE_Info (OPTION *opt)
    out_NL (2);
 
 
+   out_nl (3,"Basic apabilities:");
+   indent(+1);
+
    err = read_FEInfo(fd_fe, &fi);
    if (err) return 1;
  
 
    fi.name[127] = '\0';		// be save...
-   out_nl (1,"Name: \"%s\"",fi.name);
+   out_nl (3,"Name: \"%s\"",fi.name);
 
 
    {
      char   *s;
+     char   *sf;
 
      s  = "";
+     sf = "";
      switch (fi.type) {
-	case FE_QPSK:   s = "QPSK (DVB-S)"; d = 1000L;  break;
-	case FE_QAM:	s = "QAM (DVB-C)";  d = 1L;     break;
-	case FE_OFDM:	s = "OFDM (DVB-T)"; d = 1L;     break;
+	case FE_QPSK:   s = "QPSK (DVB-S)"; sf = "MHz";  break;
+	case FE_QAM:	s = "QAM (DVB-C)";  sf = "kHz";  break;
+	case FE_OFDM:	s = "OFDM (DVB-T)"; sf = "kHz";  break;
 	default:	s = "unkonwn"; break;
      }
-     out_nl (1,"Frontend-type:       %s", s);
+     out_nl (3,"Frontend-type:       %s", s);
 
-
-     if (d == 1000L) {
-       out_nl (1,"Frequency (min):     %d.%03d MHz", fi.frequency_min / d, fi.frequency_min % d);
-       out_nl (1,"Frequency (max):     %d.%03d MHz", fi.frequency_max / d, fi.frequency_max % d);
-     } else {
-       out_nl (1,"Frequency (min):     %d kHz", fi.frequency_min);
-       out_nl (1,"Frequency (max):     %d kHz", fi.frequency_max);
-     }
-
-     out_nl (1,"Frequency stepsize:  %d kHz", fi.frequency_stepsize);
-     out_nl (1,"Frequency tolerance: %d Hz", fi.frequency_tolerance);
+     out_nl (3,"Frequency (min):     %d.%03d %s", fi.frequency_min / 1000, fi.frequency_min % 1000, sf);
+     out_nl (3,"Frequency (max):     %d.%03d %s", fi.frequency_max / 1000, fi.frequency_max % 1000, sf);
+     out_nl (3,"Frequency stepsiz:   %d.%03d %s", fi.frequency_stepsize / 1000, fi.frequency_stepsize % 1000, sf);
+     out_nl (3,"Frequency tolerance: %d.%03d %s", fi.frequency_tolerance/ 1000, fi.frequency_tolerance% 1000, sf);
 
    }
 
 
    d = 1000000L;
-   out_nl (1,"Symbol rate (min):     %d.%06d MSym/s", fi.symbol_rate_min / d, fi.symbol_rate_min % d);
-   out_nl (1,"Symbol rate (max):     %d.%06d MSym/s", fi.symbol_rate_max / d, fi.symbol_rate_max % d);
-   out_nl (1,"Symbol rate tolerance: %d ppm", fi.symbol_rate_tolerance);
+   out_nl (3,"Symbol rate (min):     %d.%06d MSym/s", fi.symbol_rate_min / d, fi.symbol_rate_min % d);
+   out_nl (3,"Symbol rate (max):     %d.%06d MSym/s", fi.symbol_rate_max / d, fi.symbol_rate_max % d);
+   out_nl (3,"Symbol rate tolerance: %d ppm", fi.symbol_rate_tolerance);
    
 
-   out_nl (1,"Notifier delay: %d ms", fi.notifier_delay);
+   out_nl (3,"Notifier delay: %d ms", fi.notifier_delay);
 
 
 
-   out_nl (1,"Frontend capabilities:");
-   indent (+1);
-
-   if (fi.caps == FE_IS_STUPID)  		out_nl (1,"stupid FE");
-   if (fi.caps &  FE_CAN_INVERSION_AUTO)  	out_nl (1,"auto inversion");
-   if (fi.caps &  FE_CAN_FEC_1_2)  		out_nl (1,"FEC 1/2");
-   if (fi.caps &  FE_CAN_FEC_2_3)  		out_nl (1,"FEC 2/3");
-   if (fi.caps &  FE_CAN_FEC_3_4)  		out_nl (1,"FEC 3/4");
-   if (fi.caps &  FE_CAN_FEC_4_5)  		out_nl (1,"FEC 4/5");
-   if (fi.caps &  FE_CAN_FEC_5_6)  		out_nl (1,"FEC 5/6");
-   if (fi.caps &  FE_CAN_FEC_6_7)  		out_nl (1,"FEC 6/7");
-   if (fi.caps &  FE_CAN_FEC_7_8)  		out_nl (1,"FEC 7/8");
-   if (fi.caps &  FE_CAN_FEC_AUTO)	  	out_nl (1,"FEC AUTO");
-   if (fi.caps &  FE_CAN_QPSK)	  		out_nl (1,"QPSK");
-   if (fi.caps &  FE_CAN_QAM_16)	  	out_nl (1,"QAM 16");
-   if (fi.caps &  FE_CAN_QAM_32)	  	out_nl (1,"QAM 32");
-   if (fi.caps &  FE_CAN_QAM_64)	  	out_nl (1,"QAM 64");
-   if (fi.caps &  FE_CAN_QAM_128)	  	out_nl (1,"QAM 128");
-   if (fi.caps &  FE_CAN_QAM_256)	  	out_nl (1,"QAM 256");
-   if (fi.caps &  FE_CAN_QAM_AUTO)	  	out_nl (1,"QAM AUTO");
-   if (fi.caps &  FE_CAN_TRANSMISSION_MODE_AUTO)	out_nl (1,"auto transmission mode");
-   if (fi.caps &  FE_CAN_BANDWIDTH_AUTO)	out_nl (1,"auto bandwidth");
-   if (fi.caps &  FE_CAN_GUARD_INTERVAL_AUTO)	out_nl (1,"auto guard interval");
-   if (fi.caps &  FE_CAN_HIERARCHY_AUTO)	out_nl (1,"auto hierarchy");
-   if (fi.caps &  FE_CAN_CLEAN_SETUP)		out_nl (1,"clean setup");
+   out_nl (3,"Frontend capabilities:");
+      indent (+1);
+      if (fi.caps == FE_IS_STUPID)  		out_nl (3,"stupid FE");
+      if (fi.caps &  FE_CAN_INVERSION_AUTO)  	out_nl (3,"auto inversion");
+      if (fi.caps &  FE_CAN_FEC_1_2)  		out_nl (3,"FEC 1/2");
+      if (fi.caps &  FE_CAN_FEC_2_3)  		out_nl (3,"FEC 2/3");
+      if (fi.caps &  FE_CAN_FEC_3_4)  		out_nl (3,"FEC 3/4");
+      if (fi.caps &  FE_CAN_FEC_4_5)  		out_nl (3,"FEC 4/5");
+      if (fi.caps &  FE_CAN_FEC_5_6)  		out_nl (3,"FEC 5/6");
+      if (fi.caps &  FE_CAN_FEC_6_7)  		out_nl (3,"FEC 6/7");
+      if (fi.caps &  FE_CAN_FEC_7_8)  		out_nl (3,"FEC 7/8");
+      if (fi.caps &  FE_CAN_FEC_AUTO)	  	out_nl (3,"FEC AUTO");
+      if (fi.caps &  FE_CAN_QPSK)	  	out_nl (3,"QPSK");
+      if (fi.caps &  FE_CAN_QAM_16)	  	out_nl (3,"QAM 16");
+      if (fi.caps &  FE_CAN_QAM_32)	  	out_nl (3,"QAM 32");
+      if (fi.caps &  FE_CAN_QAM_64)	  	out_nl (3,"QAM 64");
+      if (fi.caps &  FE_CAN_QAM_128)	  	out_nl (3,"QAM 128");
+      if (fi.caps &  FE_CAN_QAM_256)	  	out_nl (3,"QAM 256");
+      if (fi.caps &  FE_CAN_QAM_AUTO)	  	out_nl (3,"QAM AUTO");
+      if (fi.caps &  FE_CAN_TRANSMISSION_MODE_AUTO)	out_nl (3,"auto transmission mode");
+      if (fi.caps &  FE_CAN_BANDWIDTH_AUTO)		out_nl (3,"auto bandwidth");
+      if (fi.caps &  FE_CAN_GUARD_INTERVAL_AUTO)	out_nl (3,"auto guard interval");
+      if (fi.caps &  FE_CAN_HIERARCHY_AUTO)	out_nl (3,"auto hierarchy");
+      if (fi.caps &  FE_CAN_CLEAN_SETUP)	out_nl (3,"clean setup");
+      indent (-1);
 
    indent (-1);
+
+
+
+
 
 
   close(fd_fe);
@@ -183,6 +188,7 @@ int  do_FE_Info (OPTION *opt)
 
 
 #endif  // DVB-API Check
+
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.c,v 1.1 2004/03/21 13:20:07 rasc Exp $
+$Id: fe_misc.c,v 1.2 2004/03/21 18:02:45 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: fe_misc.c,v 1.1 2004/03/21 13:20:07 rasc Exp $
 
 
 $Log: fe_misc.c,v $
+Revision 1.2  2004/03/21 18:02:45  rasc
+corrections
+
 Revision 1.1  2004/03/21 13:20:07  rasc
 more -feinfo, some restructs on FE code
 
@@ -158,6 +161,8 @@ void out_status_detail (int v,fe_status_t s)
 
 
 
+#if DVB_API_VERSION != 1
+
 /*
  * -- read frontend info
  */
@@ -177,13 +182,28 @@ int read_FEInfo(int f, struct dvb_frontend_info *fi)
 
 
 
+/*
+ * -- read effective frontend params
+ */
+
+int read_FEParam(int f, struct dvb_frontend_parameters *p)
+{
+  int err = 0;
+
+
+  err = ioctl(f, FE_GET_FRONTEND, p);
+  if (err < 0) {
+	IO_error ("frontend ioctl");
+  	return -1;
+  }
+  return 0;
+}
 
 
 
 
-//
-// read_FE_get_frontend...
-//
-// int ioctl(int fd, int request = FE GET FRONTEND, struct dvb frontend parameters *p);
-// int ioctl(int fd, int request = QPSK GET EVENT, struct dvb frontend event *ev);
+#endif
+
+
+
 

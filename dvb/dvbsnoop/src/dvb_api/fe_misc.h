@@ -1,5 +1,5 @@
 /*
-$Id: fe_misc.h,v 1.1 2004/03/21 13:20:07 rasc Exp $
+$Id: fe_misc.h,v 1.2 2004/03/21 18:02:45 rasc Exp $
 
 
  DVBSNOOP
@@ -40,7 +40,17 @@ int capability_Check (int f, int cap);
 int read_Signal(int f, FE_SIGNAL *s, FE_SIG_CAP *cap);
 void out_status_detail (int v, fe_status_t s);
 
+
+
+#if DVB_API_VERSION != 1
+
+// -- only API3
+
 int read_FEInfo(int f, struct dvb_frontend_info *fi);
+int read_FEParam(int f, struct dvb_frontend_parameters *p);
+
+#endif
+
 
 
 
