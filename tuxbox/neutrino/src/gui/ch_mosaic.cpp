@@ -22,19 +22,18 @@
 
 #include <unistd.h>
 
-
 #include <global.h>
 #include <neutrino.h>
 
-#include <gui/color.h>
-#include <gui/eventlist.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
-
+#include <gui/color.h>
+#include <gui/eventlist.h>
 #include <gui/channellist.h>
 
 #include "ch_mosaic.h"
 
+#warning "experimental..."
 
 
 /*
@@ -85,6 +84,7 @@ int CChMosaicHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 CChMosaic::CChMosaic()
 {
 	pig = new CPIG (0);
+	capture = new CCAPTURE (0);
 	current_pig_pos = 0;
 
   	channellist = CNeutrinoApp::getInstance()->channelList;
@@ -150,13 +150,16 @@ void CChMosaic::doMosaic()
    // experimental
   for  (i=0; i < (int)(sizeof(coord)/sizeof(coord[0])); i++) {
 
+	u_char frame_buf[SCREEN_X*SCREEN_Y*2];
 	int j;
 
 
-	// -- adjust pig and zap to channel
+	// -- adjust pig and zap to channel, set capture size
 	printf ("pig: %d \n",i);
 	pig->show (coord[i].x,coord[i].y, coord[i].w, coord[i].h);
 	channellist->zapTo(channel);
+	capture->set_coord (coord[i].x, coord[i].y, coord[i].w, coord[i].h);
+	capture->set_output_size (coord[i].w, coord[i].h);
 
 	sleep (2);
 
@@ -172,7 +175,17 @@ void CChMosaic::doMosaic()
 
 
 		if (msg == CRCInput::RC_timeout) {
-			i = i;
+			printf ("pig inner loop timeout: \n");
+			// $$$ TEST
+			capture->readframe (frame_buf);
+			if (frame_buf[10] == 0x00)  continue;
+
+			int a;
+			for (a=0; a<0x10; a++) {
+				printf("%02x ",frame_buf[a]);
+			}
+			printf ("\n");
+
 		}
 
 

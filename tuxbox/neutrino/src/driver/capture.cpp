@@ -28,10 +28,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <error.h>
+#include <stdlib.h>
 
 #include "capture.h"
 
 
+#include <stdio.h>
+#warning  "experimental..."
 
 
 //
@@ -247,14 +251,17 @@ u_char *CCAPTURE::readframe (u_char *buf)
 		b = (buf != NULL)
 			? buf
 			: (u_char *) malloc (vid.fmt.pix.bytesperline * 
-					     vid.fmt,pix.height);
+					     vid.fmt.pix.height);
 
 
 		n = read (fd, b, vid.fmt.pix.bytesperline*vid.fmt.pix.height);
 		if (n < 0)  perror ("Error reading buffer");
+
+		return b;
 	}
 
-	return b;
+	return (u_char *) NULL;
+
 
 #else
 
@@ -272,9 +279,11 @@ u_char *CCAPTURE::readframe (u_char *buf)
 		n = read(fd, b, stride * out_h);
 		if (n < 0)  perror ("Error reading buffer");
   		capture_stop(fd);
+
+		return b;
 	}
 
-	return b;
+	return (u_char *) NULL;
 
 #endif
 }

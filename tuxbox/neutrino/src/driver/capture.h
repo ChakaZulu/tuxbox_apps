@@ -60,7 +60,7 @@ class CCAPTURE
 		void set_coord (int x, int y, int w, int h);
 		void set_xy    (int x, int y);
 		void set_size  (int w, int h);
-		void set_output_size (int x, int y, int w, int h);
+		void set_output_size (int w, int h);
 		u_char *readframe (u_char *buf);
 
 	private:

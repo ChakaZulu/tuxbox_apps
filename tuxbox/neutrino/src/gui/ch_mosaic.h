@@ -27,6 +27,7 @@
 #include "widget/menue.h"
 
 #include <driver/pig.h>
+#include <driver/capture.h>
 
 
 using namespace std;
@@ -51,8 +52,9 @@ class CChMosaic
 		void paintBackground ();
 		void paintMiniTVBackground(int x, int y, int w, int h);
 
-		CPIG	*pig;
-		int	current_pig_pos;
+		CPIG	 *pig;
+		CCAPTURE *capture;
+		int	 current_pig_pos;
 
 		struct PIG_COORD {
 			int x,y,w,h;
