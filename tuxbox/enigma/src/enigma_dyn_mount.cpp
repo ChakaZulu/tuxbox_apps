@@ -77,13 +77,55 @@ static eString changeMountPoint(eString request, eString dirpath, eString opts, 
 	eString automount = opt["auto"];
 	eString rsize = opt["rsize"];
 	eString wsize = opt["wsize"];
-	eString options = opt["options"];
 	eString ownOptions = opt["ownoptions"];
 	eString ip0 = opt["ip0"];
 	eString ip1 = opt["ip1"];
 	eString ip2 = opt["ip2"];
 	eString ip3 = opt["ip3"];
 	eString id = opt["id"];
+	eString async = opt["async"];
+	eString sync = opt["sync"];
+	eString atime = opt["atime"];
+	eString autom = opt["autom"];
+	eString execm = opt["execm"];
+	eString noexec = opt["noexec"];
+	eString ro = opt["ro"];
+	eString rw = opt["rw"];
+	eString users = opt["users"];
+	eString nolock = opt["nolock"];
+	eString intr = opt["intr"];
+	eString soft = opt["soft"];
+	eString udp = opt["udp"];
+	
+	eString options;
+	if (async == "on")
+		options += "async,";
+	if (sync == "on")
+		options += "sync,";
+	if (atime == "on")
+		options += "atime,";
+	if (autom == "on")
+		options += "autom,";
+	if (execm == "on")
+		options += "execm,";
+	if (noexec == "on")
+		options += "noexec,";
+	if (ro == "on")
+		options += "ro,";
+	if (rw == "on")
+		options += "rw,";
+	if (users == "on")
+		options += "users,";
+	if (nolock == "on")
+		options += "nolock,";
+	if (intr == "on")
+		options += "intr,";
+	if (soft == "on")
+		options += "soft,";
+	if (udp == "on")
+		options += "udp,";
+	if (options.length() > 0)
+		options = options.left(options.length() - 1); //remove last comma
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eMountMgr::getInstance()->changeMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), atoi(id.c_str()));
@@ -92,24 +134,134 @@ static eString changeMountPoint(eString request, eString dirpath, eString opts, 
 
 static eString addMountPointWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result = readFile(TEMPLATE_DIR + "addMountPointWindow.tmp");
+	eString localDir, password, userName, mountDir, options, ownOptions;
+	int fstype = 0, automount = 0, rsize = 4096, wsize = 4096, ip0 = 0, ip1 = 0, ip2 = 0, ip3 = 0;
+	eString async = "off", sync = "off", atime = "off", autom = "off", execm = "off", noexec = "off", ro = "off", rw = "off", 
+		users = "off", nolock = "on", intr = "on", soft = "on", udp = "on";
+	int id = 99;
+	
+	eString result = readFile(TEMPLATE_DIR + "mountPointWindow.tmp");
+	result.strReplace("#TITLE#", "Add Mount Point");
 
-	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+//	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
-	//TODO: fill in mount point default data...
+	
+	result.strReplace("#LDIR#", localDir);
+	result.strReplace("#FSTYPE#", eString().sprintf("%d", fstype));
+	result.strReplace("#PW#", password);
+	result.strReplace("#USER#", userName);
+	result.strReplace("#MDIR#", mountDir);
+	result.strReplace("#AUTO#", eString().sprintf("%d", automount));
+	result.strReplace("#RSIZE#", eString().sprintf("%d", rsize));
+	result.strReplace("#WSIZE#", eString().sprintf("%d", wsize));
+	result.strReplace("#OWNOPTIONS#", ownOptions);
+	result.strReplace("#IP0#", eString().sprintf("%d", ip0));
+	result.strReplace("#IP1#", eString().sprintf("%d", ip1));
+	result.strReplace("#IP2#", eString().sprintf("%d", ip2));
+	result.strReplace("#IP3#", eString().sprintf("%d", ip3));
+	result.strReplace("#ID#", eString().sprintf("%d", id));
+	result.strReplace("#ASYNC#", async);
+	result.strReplace("#SYNC", sync);
+	result.strReplace("#ATIME#", atime);
+	result.strReplace("#AUTOM#", autom);
+	result.strReplace("#EXECM#", execm);
+	result.strReplace("#NOEXEC#", noexec);
+	result.strReplace("#RO#", ro);
+	result.strReplace("#RW#", rw);
+	result.strReplace("#USERS#", users);
+	result.strReplace("#NOLOCK#", nolock);
+	result.strReplace("#INTR#", intr);
+	result.strReplace("#SOFT#", soft);
+	result.strReplace("#UDP#", udp);
 
 	return result;
 }
 
 static eString editMountPointWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	eString result = readFile(TEMPLATE_DIR + "editMountPointWindow.tmp");
+	eString localDir, password, userName, mountDir, options, ownOptions;
+	int fstype, automount, rsize, wsize, ip0, ip1, ip2, ip3;
+	eString async = "off", sync = "off", atime = "off", autom = "off", execm = "off", noexec = "off", ro = "off", rw = "off", 
+		users = "off", nolock = "off", intr = "off", soft = "off", udp = "off";
+	
+	eString result = readFile(TEMPLATE_DIR + "mountPointWindow.tmp");
+	result.strReplace("#TITLE#", "Change Mount Point");
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString id = opt["id"];
 
-	//TODO: get mount point and fill in mount point data...
+	eMountMgr::getInstance()->getMountPointData(&localDir, &fstype, &password, &userName, &mountDir, &automount, &rsize, &wsize, &options, &ownOptions, &ip0, &ip1, &ip2, &ip3, atoi(id.c_str()));
+	
+	while (options.length() > 0)
+	{
+		eString option = getLeft(options, ',');
+		if (option == "async")
+			async = "on";
+		else
+		if (option == "sync")
+			sync = "on";
+		else
+		if (option == "atime")
+			atime = "on";
+		else
+		if (option == "autom")
+			autom = "on";
+		else
+		if (option == "execm")
+			execm = "on";
+		else
+		if (option == "noexec")
+			noexec = "on";
+		else
+		if (option == "ro")
+			ro = "on";
+		else
+		if (option == "rw")
+			rw = "on";
+		else
+		if (option == "users")
+			users = "on";
+		else
+		if (option == "nolock")
+			nolock = "on";
+		else
+		if (option == "intr")
+			intr = "on";
+		else
+		if (option == "soft")
+			soft = "on";
+		else
+		if (option == "udp")
+			udp == "on";
+	}
+	
+	result.strReplace("#LDIR#", localDir);
+	result.strReplace("#FSTYPE#", eString().sprintf("%d", fstype));
+	result.strReplace("#PW#", password);
+	result.strReplace("#USER#", userName);
+	result.strReplace("#MDIR#", mountDir);
+	result.strReplace("#AUTO#", eString().sprintf("%d", automount));
+	result.strReplace("#RSIZE#", eString().sprintf("%d", rsize));
+	result.strReplace("#WSIZE#", eString().sprintf("%d", wsize));
+	result.strReplace("#OWNOPTIONS#", ownOptions);
+	result.strReplace("#IP0#", eString().sprintf("%d", ip0));
+	result.strReplace("#IP1#", eString().sprintf("%d", ip1));
+	result.strReplace("#IP2#", eString().sprintf("%d", ip2));
+	result.strReplace("#IP3#", eString().sprintf("%d", ip3));
+	result.strReplace("#ID#", id);
+	result.strReplace("#ASYNC#", async);
+	result.strReplace("#SYNC", sync);
+	result.strReplace("#ATIME#", atime);
+	result.strReplace("#AUTOM#", autom);
+	result.strReplace("#EXECM#", execm);
+	result.strReplace("#NOEXEC#", noexec);
+	result.strReplace("#RO#", ro);
+	result.strReplace("#RW#", rw);
+	result.strReplace("#USERS#", users);
+	result.strReplace("#NOLOCK#", nolock);
+	result.strReplace("#INTR#", intr);
+	result.strReplace("#SOFT#", soft);
+	result.strReplace("#UDP#", udp);
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
