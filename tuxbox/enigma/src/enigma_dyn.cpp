@@ -12,6 +12,7 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
+#include <linux/input.h>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
@@ -3657,6 +3658,60 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 	return "E: invalid command";
 }
 
+int sendKey(int evd, unsigned int code, unsigned int value)
+{
+	struct input_event iev;
+
+	iev.type = EV_KEY;
+	iev.code = code;
+	iev.value = value;
+	write (evd, &iev, sizeof(iev));
+}
+
+static eString remoteControl(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	enum
+	{
+		KEY_RELEASED = 0,
+		KEY_PRESSED,
+		KEY_AUTOREPEAT
+	};
+
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eString keyS = opt["key"];
+	eString durationS = opt["duration"];
+	eString reptimeS = opt["reptime"];
+
+	unsigned long duration = 0;
+	if (durationS)
+		duration = atol(durationS.c_str());
+
+	int key = atoi(keyS.c_str());
+
+	unsigned long reptime = 500;
+	if (reptimeS)
+		atol(reptimeS.c_str());
+
+	unsigned long time = duration * 1000 / reptime;
+
+	int evd = open("/dev/input/event0", O_RDWR);
+	if (evd)
+	{
+		sendKey(evd, key, KEY_PRESSED);
+		while (time--)
+		{
+			usleep(reptime * 1000);
+			sendKey(evd, key, KEY_AUTOREPEAT);
+		}
+		sendKey(evd, key, KEY_RELEASED);
+		close(evd);
+	}
+
+	return "key sent.";
+}
+
 static eString getCurrentVpidApid(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if (opt != "getpids")
@@ -4607,7 +4662,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message, lockWeb);
 	dyn_resolver->addDyn("GET", "/control/message", message, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage, lockWeb);
-
+	dyn_resolver->addDyn("GET", "/cgi-bin/rc", remoteControl, lockWeb);
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u, lockWeb);
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
