@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.31 2004/08/06 22:21:38 rasc Exp $
+$Id: helper.c,v 1.32 2004/08/08 17:00:25 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.31 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.32  2004/08/08 17:00:25  rasc
+Bugfix: Cell List descriptor (tnx to Karsten Siebert)
+
 Revision 1.31  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 
@@ -717,13 +720,13 @@ static char *_str_cell_latitude_longitude (long ll, int angle)
  static     char s[40];	// $$$ not thread safe!
 
  x = (long long) ll * angle * 1000;
- x = x / (2<<15);
+ x = x / (1<<15);
 
  g1 = x / 1000;
  g2 = x % 1000;
  if (g2 <0) g2 = 0 - g2;
 
- sprintf (s,"%ld.%04ld grad",g1,g2);
+ sprintf (s,"%ld.%03ld grad",g1,g2);
  return s;
 }
 
