@@ -401,12 +401,12 @@
 		<eLabel position="0:5" size="23:20" pixmap="button_red" />
 		<eLabel position="143:5" size="23:20" pixmap="button_green" />
 		<eLabel position="286:5" size="23:20" pixmap="button_yellow" />
-		<eLabel position="428:5" size="23:20" pixmap="button_blue" />
+		<eLabel position="438:5" size="23:20" pixmap="button_blue" />
 		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
-		<eButton name="key_blue" position="428:0" size="142:28" backgroundColor="content" loadDeco=""
+		<eButton name="key_blue" position="438:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
-		<eButton name="key_yellow" position="286:0" size="142:28" backgroundColor="content" loadDeco=""
+		<eButton name="key_yellow" position="302:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
 		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
@@ -421,12 +421,12 @@
 		<eLabel position="0:5" size="23:20" pixmap="button_red" />
 		<eLabel position="143:5" size="23:20" pixmap="button_green" />
 		<eLabel position="286:5" size="23:20" pixmap="button_yellow" />
-		<eLabel position="428:5" size="23:20" pixmap="button_blue" />
+		<eLabel position="438:5" size="23:20" pixmap="button_blue" />
 		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
-		<eButton name="key_blue" position="428:0" size="142:28" backgroundColor="content" loadDeco=""
+		<eButton name="key_blue" position="438:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
-		<eButton name="key_yellow" position="286:0" size="142:28" backgroundColor="content" loadDeco=""
+		<eButton name="key_yellow" position="302:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
 		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
@@ -441,12 +441,12 @@
 		<eLabel position="0:5" size="23:20" pixmap="button_red" />
 		<eLabel position="143:5" size="23:20" pixmap="button_green" />
 		<eLabel position="286:5" size="23:20" pixmap="button_yellow" />
-		<eLabel position="428:5" size="23:20" pixmap="button_blue" />
+		<eLabel position="438:5" size="23:20" pixmap="button_blue" />
 		<eButton name="key_red" position="0:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
-		<eButton name="key_blue" position="428:0" size="142:28" backgroundColor="content" loadDeco=""
+		<eButton name="key_blue" position="438:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
-		<eButton name="key_yellow" position="286:0" size="142:28" backgroundColor="content" loadDeco=""
+		<eButton name="key_yellow" position="302:0" size="142:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
 		<eButton name="key_green" position="143:0" size="143:28" backgroundColor="content" loadDeco=""
 			font="Blue.Bold;22" align="center" foregroundColor="white" vcenter="on" alphatest="on" />
