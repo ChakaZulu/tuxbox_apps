@@ -46,8 +46,11 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 
 	message = strdup(Text);
 
+	width  = Width;
+
 	theight = g_Fonts->menu_title->getHeight();
 	fheight = g_Fonts->menu->getHeight();
+	height  = theight + fheight;
 
 	caption = Caption;
 
@@ -55,6 +58,8 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 
 	while (true)
 	{
+		height += fheight;
+
 		line.push_back(begin);
 		pos = strchr(begin, '\n');
 		if (pos != NULL)
@@ -66,9 +71,7 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 			break;
 	}
 
-	width  = Width;
-
-	nw     = g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
+	nw = g_Fonts->menu_title->getRenderWidth(g_Locale->getText(caption), true) + 20; // UTF-8
 
 	if (Icon != NULL)
 	{
@@ -78,17 +81,15 @@ CHintBox::CHintBox(const char * const Caption, const char * const Text, const in
 	else
 		iconfile = "";
 
-	if ( nw> width )
-		width= nw;
+	if (nw > width)
+		width = nw;
 
 	for (std::vector<char *>::const_iterator it = line.begin(); it != line.end(); it++)
 	{
-		int nw= g_Fonts->menu->getRenderWidth(*it, true) + 20; // UTF-8
-		if ( nw> width )
-			width= nw;
+		nw = g_Fonts->menu->getRenderWidth(*it, true) + 20; // UTF-8
+		if (nw > width )
+			width = nw;
 	}
-
-	height = theight + fheight * (line.size() + 1);
 }
 
 CHintBox::~CHintBox(void)

@@ -38,26 +38,13 @@
 #include <neutrino.h>
 
 
-CMessageBox::CMessageBox(const char * const Caption, const char * const Text, const int Width, const char * const Icon, const uint Default, const uint ShowButtons, CMessageBoxNotifier * const Notifier) : CHintBox(Caption, Text, Width, Icon)
+CMessageBox::CMessageBox(const char * const Caption, const char * const Text, const int Width, const char * const Icon, const CMessageBox::result_ Default, const uint ShowButtons) : CHintBox(Caption, Text, Width, Icon)
 {
 	height += (fheight << 1);
 
+	result = Default;
 
-	notifier = Notifier;
-	switch (Default)
-	{
-		case mbrYes:
-			selected = 0;
-			break;
-		case mbrNo:
-			selected = 1;
-			break;
-		case mbrCancel:
-		case mbrBack:
-			selected = 2;
-			break;
-	}
-	showbuttons= ShowButtons;
+	showbuttons = ShowButtons;
 }
 
 void CMessageBox::paintButtons()
@@ -77,7 +64,7 @@ void CMessageBox::paintButtons()
 
 	if (showbuttons & mbYes)
 	{
-		color = (selected == 0) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
+		color = (result == mbrYes) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
 		window->paintBoxRel(xpos, height - fheight - 20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_RED, xpos + 14, height - fheight - 15);
 		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText("messagebox.yes"), (CFBWindow::color_t)color, 0, true); // UTF-8
@@ -87,7 +74,7 @@ void CMessageBox::paintButtons()
 
 	if (showbuttons & mbNo)
 	{
-		color = (selected == 1) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
+		color = (result == mbrNo) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, xpos+14, height-fheight-15);
@@ -98,34 +85,12 @@ void CMessageBox::paintButtons()
 
 	if (showbuttons & (mbCancel | mbBack))
 	{
-		color = (selected == 2) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
+		color = (result >= mbrCancel) ? COL_MENUCONTENTSELECTED : COL_INFOBAR_SHADOW;
 
 		window->paintBoxRel(xpos, height-fheight-20, ButtonWidth, fheight, (CFBWindow::color_t)color);
 		window->paintIcon(NEUTRINO_ICON_BUTTON_HOME, xpos+10, height-fheight-19);
 		window->RenderString(g_Fonts->infobar_small, xpos + 43, height-fheight+4, ButtonWidth- 53, g_Locale->getText( ( showbuttons & mbCancel ) ? "messagebox.cancel" : "messagebox.back" ), (CFBWindow::color_t)color, 0, true); // UTF-8
 	}
-}
-
-void CMessageBox::yes()
-{
-	result = mbrYes;
-	if (notifier)
-		notifier->onYes();
-}
-
-void CMessageBox::no()
-{
-	result = mbrNo;
-	if (notifier)
-		notifier->onNo();
-}
-
-void CMessageBox::cancel()
-{
-	if ( showbuttons & mbCancel )
-		result = mbrCancel;
-	else
-		result = mbrBack;
 }
 
 int CMessageBox::exec(int timeout)
@@ -156,40 +121,26 @@ int CMessageBox::exec(int timeout)
 		if (((msg == CRCInput::RC_timeout) || (msg  == (uint)g_settings.key_channelList_cancel)) &&
 		    (showbuttons & (mbCancel | mbBack)))
 		{
-			cancel();
-			loop=false;
+			result = (showbuttons & mbCancel) ? mbrCancel : mbrBack;
+			loop   = false;
 		}
-		else if ( (msg==CRCInput::RC_green) && ( showbuttons & mbNo ) )
+		else if ((msg == CRCInput::RC_green) && (showbuttons & mbNo))
 		{
-			no();
-			loop=false;
+			result = mbrNo;
+			loop   = false;
 		}
-		else if ( (msg==CRCInput::RC_red) && ( showbuttons & mbYes ) )
+		else if ((msg == CRCInput::RC_red) && (showbuttons & mbYes))
 		{
-			yes();
-			loop=false;
+			result = mbrYes;
+			loop   = false;
 		}
 		else if(msg==CRCInput::RC_right)
 		{
 			bool ok = false;
 			while (!ok)
 			{
-				selected++;
-				switch (selected)
-				{
-					case 3:
-						selected= -1;
-					    break;
-					case 0:
-						ok = ( showbuttons & mbYes );
-						break;
-					case 1:
-						ok = ( showbuttons & mbNo );
-						break;
-					case 2:
-						ok = (showbuttons & (mbCancel | mbBack));
-						break;
-				}
+				result = (CMessageBox::result_)((result + 1) & 3);
+				ok = showbuttons & (1 << result);
 			}
 
 			paintButtons();
@@ -199,45 +150,21 @@ int CMessageBox::exec(int timeout)
 			bool ok = false;
 			while (!ok)
 			{
-				selected--;
-				switch (selected)
-				{
-					case -1:
-						selected= 3;
-					    break;
-					case 0:
-						ok = ( showbuttons & mbYes );
-						break;
-					case 1:
-						ok = ( showbuttons & mbNo );
-						break;
-					case 2:
-						ok = (showbuttons & (mbCancel | mbBack));
-						break;
-				}
+				result = (CMessageBox::result_)((result - 1) & 3);
+				ok = showbuttons & (1 << result);
 			}
 
 			paintButtons();
 
 		}
-		else if(msg==CRCInput::RC_ok)
-		{
-			//exec selected;
-			switch (selected)
-			{
-				case 0: yes();
-					break;
-				case 1: no();
-					break;
-				case 2: cancel();
-					break;
-			}
-			loop=false;
-		}
-		else if ( CNeutrinoApp::getInstance()->handleMsg( msg, data ) & messages_return::cancel_all )
+		else if(msg == CRCInput::RC_ok)
 		{
 			loop = false;
-			res = menu_return::RETURN_EXIT_ALL;
+		}
+		else if (CNeutrinoApp::getInstance()->handleMsg(msg, data) & messages_return::cancel_all)
+		{
+			res  = menu_return::RETURN_EXIT_ALL;
+			loop = false;
 		}
 
 	}
@@ -247,7 +174,7 @@ int CMessageBox::exec(int timeout)
 	return res;
 }
 
-int ShowMsgUTF(const char * const Caption, const char * const Text, const uint Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
+int ShowMsgUTF(const char * const Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
 {
    	CMessageBox* messageBox = new CMessageBox(Caption, Text, Width, Icon, Default, ShowButtons);
 	messageBox->exec(timeout);
@@ -257,7 +184,7 @@ int ShowMsgUTF(const char * const Caption, const char * const Text, const uint D
 	return res;
 }
 
-int ShowMsgUTF(const char * const Caption, const std::string & Text, const uint Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
+int ShowMsgUTF(const char * const Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
 {
 	return ShowMsgUTF(Caption, Text.c_str(), Default, ShowButtons, Icon, Width, timeout);
 }
