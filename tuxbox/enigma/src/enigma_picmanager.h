@@ -21,7 +21,7 @@ private:
 
 	eButton *ok, *abort;
 	eStatusBar *statusbar;
-	eCheckbox *sort, *wrap, *start, *subdirs;
+	eCheckbox *sort, *wrap, *start, *subdirs, *busy;
 	eListBox<eListBoxEntryText> *timeout;
 
 	void fieldSelected(int *number);

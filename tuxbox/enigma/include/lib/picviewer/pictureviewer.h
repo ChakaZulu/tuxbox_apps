@@ -28,6 +28,7 @@ class ePictureViewer: public eWidget
 	eString filename;
 	int eventHandler(const eWidgetEvent &evt);
 	void listDirectory(eString, int);
+	bool showBusySign;
 public:
 	ePictureViewer( const eString &filename);
 	~ePictureViewer();
@@ -41,7 +42,7 @@ public:
 
 	bool ShowImage(const std::string& filename, bool unscaled = false);
 	bool ShowSlideshow(const std::string& filename, bool unscaled = false);
-	bool DecodeImage(const std::string& name, bool showBusySign = false, bool unscaled = false);
+	bool DecodeImage(const std::string& name, bool unscaled = false);
 	bool DisplayNextImage();
 	void SetScaling(ScalingMode s) {m_scaling = s;}
 	void SetAspectRatio(float aspect_ratio) {m_aspect = aspect_ratio;}
@@ -49,7 +50,6 @@ public:
 	void hideBusy();
 	void Zoom(float factor);
 	void Move(int dx, int dy);
-	void SetVisible(int startx, int endx, int starty, int endy);
 	void slideshowTimeout();
 private:
 	CFormathandler *fh_root;

@@ -24,7 +24,7 @@ struct PicViewerStyleSelectorActions
 eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Picture Viewer Style Selector");
 
 ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.1a - Actions"), 5, 350, true)
+		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.2 - Actions"), 5, 350, true)
 		,ssel(ssel)
 {
 	eListBoxEntrySeparator *sep;
@@ -36,7 +36,7 @@ ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
 	sel[0] = new eListBoxEntryText(&list,_("Slide"), (void *)0, 0, _("Show selected slide") );
 	sel[1] = new eListBoxEntryText(&list,_("Slideshow"), (void *)1, 0, _("Show slideshow (of all pictures in directory)"));
 	sep = new eListBoxEntrySeparator((eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true);
-	sel[2] = new eListBoxEntryText(&list,_("Settings"), (void *)2, 0, _("Customize your slideshow"));
+	sel[2] = new eListBoxEntryText(&list,_("Slideshow Settings"), (void *)2, 0, _("Customize your slideshow"));
 
 	list.setCurrent(sel[last]);
 	CONNECT(list.selected, ePicViewerStyleSelector::entrySelected);
@@ -91,6 +91,8 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	eConfig::getInstance()->getKey("/picviewer/startwithselectedpic", startwithselectedpic);
 	int includesubdirs = 0;
 	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
+	int showbusysign = 0;
+	eConfig::getInstance()->getKey("/picviewer/showbusysign", showbusysign);
 
 	int fd = eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -117,7 +119,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 		entries[i] = new eListBoxEntryText(timeout, num.c_str(), (void *)new eString(num.c_str()));
 	}
 	timeout->setCurrent(entries[slideshowtimeout - 1]);
-	timeout->setHelpText(_("select slideshow timeout (left, right)"));
+	timeout->setHelpText(_("Select slideshow timeout (left, right)"));
 
 	y += dy;
 
@@ -126,7 +128,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	sort->setText(_("Sort pictures"));
 	sort->move(ePoint(10, y));
 	sort->resize(eSize(300, h));
-	sort->setHelpText(_("sort pictures alphabetically"));
+	sort->setHelpText(_("Sort pictures alphabetically"));
 
 	y += dy;
 
@@ -152,6 +154,14 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	subdirs->resize(eSize(300, h));
 	subdirs->setHelpText(_("Include subdirectories in slideshow"));
 
+	y += dy;
+
+	busy = new eCheckbox(this, showbusysign, 1);
+	busy->setText(_("Show busy sign"));
+	busy->move(ePoint(10, y));
+	busy->resize(eSize(300, h));
+	busy->setHelpText(_("Show busy sign while decompressing image"));
+
 	y += dy + 20;
 
 	ok = new eButton(this);
@@ -160,7 +170,7 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	ok->setShortcutPixmap("green");
 	ok->move(ePoint(10, y));
 	ok->resize(eSize(130, h));
-	ok->setHelpText(_("close window and save entries"));
+	ok->setHelpText(_("Close window and save entries"));
 	ok->loadDeco();
 	CONNECT(ok->selected, ePicViewerSettings::okPressed);
 
@@ -171,15 +181,15 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	abort->setShortcutPixmap("red");
 	abort->move(ePoint(130 + 10 + 10, y));
 	abort->resize(eSize(130, h));
-	abort->setHelpText(_("close window (no changes are saved)"));
+	abort->setHelpText(_("Close window (no changes are saved)"));
 	CONNECT(abort->selected, ePicViewerSettings::abortPressed);
 
-	y = y + 40 + 35;
+	y = y + 40 + 2 * h;
 	cresize(eSize(350, y));
 
 	statusbar = new eStatusBar(this);
-	statusbar->move(ePoint(0, clientrect.height() - 30 ) );
-	statusbar->resize(eSize( clientrect.width(), 30) );
+	statusbar->move(ePoint(0, clientrect.height() - 2 * h));
+	statusbar->resize(eSize( clientrect.width(), 2 * h));
 	statusbar->loadDeco();
 }
 
@@ -199,6 +209,7 @@ void ePicViewerSettings::okPressed()
 	eConfig::getInstance()->setKey("/picviewer/wraparound", (int)wrap->isChecked());
 	eConfig::getInstance()->setKey("/picviewer/startwithselectedpic", (int)start->isChecked());
 	eConfig::getInstance()->setKey("/picviewer/includesubdirs", (int)subdirs->isChecked());
+	eConfig::getInstance()->setKey("/picviewer/showbusysign", (int)busy->isChecked());
 
 	close(1);
 }

@@ -67,7 +67,7 @@ ePictureViewer::ePictureViewer(const eString &filename)
 
 	fh_root = NULL;
 	m_scaling = COLOR;
-	m_aspect = 4.0 / 3;
+//	m_aspect = 4.0 / 3;
 	m_CurrentPic_Name = "";
 	m_CurrentPic_Buffer = NULL;
 	m_CurrentPic_X = 0;
@@ -86,10 +86,20 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	m_NextPic_YPan = 0;
 	int xs = 0, ys = 0;
 	getCurrentRes(&xs, &ys);
-	m_startx = 0;
-	m_endx = xs - 1;
-	m_starty = 0;
-	m_endy = ys - 1;
+
+	m_startx = 20, m_starty = 20, m_endx = 699, m_endy = 555;
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/left", m_startx); // left
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/top", m_starty); // top
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/right", m_endx); // right
+	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/bottom", m_endy); // bottom
+
+	int showbusysign = 1;
+	eConfig::getInstance()->getKey("/picviewer/showbusysign", showbusysign);
+	showBusySign = (showbusysign == 1);
+
+	unsigned int v_pin8 = 0;
+	eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8);
+	m_aspect = (v_pin8 < 2) ? 4.0/3 : 16.0/9;
 
 	m_busy_buffer = NULL;
 
@@ -167,7 +177,7 @@ ePictureViewer::CFormathandler * ePictureViewer::fh_getsize(const char *name, in
 	return(NULL);
 }
 
-bool ePictureViewer::DecodeImage(const std::string& name, bool showBusySign, bool unscaled)
+bool ePictureViewer::DecodeImage(const std::string& name, bool unscaled)
 {
 	eDebug("DecodeImage {");
 
@@ -284,18 +294,24 @@ bool ePictureViewer::DecodeImage(const std::string& name, bool showBusySign, boo
 	return(m_NextPic_Buffer != NULL);
 }
 
-void ePictureViewer::SetVisible(int startx, int endx, int starty, int endy)
-{
-	m_startx = startx;
-	m_endx = endx;
-	m_starty = starty;
-	m_endy = endy;
-}
-
 bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 {
 	eDebug("Show Image {");
-	DecodeImage(filename, false, unscaled);
+	int pos = filename.find_last_of("/");
+	if (pos == -1)
+		pos = filename.length() - 1;
+	eString directory = pos ? filename.substr(0, pos) : "/";
+	eDebug("---directory: %s", directory.c_str());
+	slideshowList.clear();
+	listDirectory(directory, 0);
+	for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
+	{
+		eString tmp = *myIt;
+		eDebug("[PICTUREVIEWER] comparing: %s:%s", tmp.c_str(), filename.c_str());
+		if (tmp == filename)
+			break;
+	}
+	DecodeImage(filename, unscaled);
 	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
 	if (screenInfo->bits_per_pixel != 16)
 	{
@@ -341,11 +357,27 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 		case eWidgetEvent::evtAction:
 			if (/* evt.action == &i_cursorActions->ok || */
 				evt.action == &i_cursorActions->cancel ||
-				evt.action == &i_cursorActions->up ||
-				evt.action == &i_cursorActions->down ||
 				evt.action == &i_cursorActions->left ||
 				evt.action == &i_cursorActions->right )
 				close(0);
+			else
+			if (evt.action == &i_cursorActions->up)
+			{
+				if (myIt++ == slideshowList.end())
+					myIt = slideshowList.begin();
+				DecodeImage(*myIt, false);
+				DisplayNextImage();
+			}
+			else
+			if (evt.action == &i_cursorActions->down)
+			{
+				if (myIt == slideshowList.begin())
+					myIt = slideshowList.end()--;
+				else
+					myIt--;
+				DecodeImage(*myIt, false);
+				DisplayNextImage();
+			}
 			break;
 		case eWidgetEvent::execBegin:
 		{
@@ -423,7 +455,7 @@ bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 	int pos = filename.find_last_of("/");
 	if (pos == -1)
 		pos = filename.length() - 1;
-	eString directory = pos?filename.substr(0, pos):"/";
+	eString directory = pos ? filename.substr(0, pos) : "/";
 	eDebug("---directory: %s", directory.c_str());
 	slideshowList.clear();
 	listDirectory(directory, includesubdirs);
