@@ -155,7 +155,7 @@ public:
 		:result(res)
 	{
 	}
-	bool operator() (ePlugin& plugin) 
+	bool operator() (ePlugin& plugin)
 	{
 		result << "<tr><td width=100>"
 					 << button(100, "Start", GREEN, "javascript:startPlugin('" + plugin.cfgname+ "')")
@@ -2132,6 +2132,7 @@ struct getEntryString
 
 	void operator()(ePlaylistEntry* se)
 	{
+		eString tmp = readFile(TEMPLATE_DIR + "timerListEntry.tmp");
 		if (!repeating && se->type & ePlaylistEntry::isRepeating)
 			return;
 		if (repeating && !(se->type & ePlaylistEntry::isRepeating))
@@ -2155,110 +2156,93 @@ struct getEntryString
 		if (!description)
 			description = "No description available";
 
-		result << "<tr>"
-			<< "<td align=center><a href=\"javascript:deleteTimerEvent(\'"
-			<< "ref=" << ref2string(se->service)
-			<< "&start=" << se->time_begin
-			<< "&type=" << se->type
-			<< "&force=no"
-			<< "\')\"><img src=\"trash.gif\" border=0 height=20></a></td>";
-
-		result << "<td align=center><a href=\"javascript:editTimerEvent(\'"
-			<< "ref=" << ref2string(se->service)
-			<< "&start=" << se->time_begin
-			<< "&duration=" << se->duration
-			<< "&channel=" << channel
-			<< "&descr=" << description
-			<< "&type=" << se->type
-			<< "\')\"><img src=\"edit.gif\" border=0 height=20></a></td>";
+		tmp.strReplace("#DELETEPARMS#", "ref=" + ref2string(se->service) + "&start=" + eString().sprintf("%d", se->time_begin) + "&type=" + eString().sprintf("%d", se->type) + "&force=no");
+		tmp.strReplace("#EDITPARMS#", "ref=" + ref2string(se->service) + "&start=" + eString().sprintf("%d", se->time_begin) + "&duration=" + eString().sprintf("%d", se->duration) + "&channel=" + channel + "&descr=" + description + "&type=" + eString().sprintf("%d", se->type));
 
 		if (se->type & ePlaylistEntry::stateFinished)
-			result << "<td align=center><img src=\"on.gif\"></td>";
-		else if (se->type & ePlaylistEntry::stateError)
-			result << "<td align=center><img src=\"off.gif\"></td>";
+			tmp.strReplace("#STATEPIC#", "on.gif");
 		else
-			result << "<td>&nbsp;</td>";
+		if (se->type & ePlaylistEntry::stateError)
+			tmp.strReplace("#STATEPIC#", "off.gif");
+		else
+			tmp.strReplace("#STATEPIC#", "trans.gif");
 
-		result << "<td>";
 		if (se->type & ePlaylistEntry::isRepeating)
 		{
+			eString days;
 			if (se->type & ePlaylistEntry::Su)
-				result << "Su ";
+				days += "Su ";
 			if (se->type & ePlaylistEntry::Mo)
-				result << "Mo ";
+				days += "Mo ";
 			if (se->type & ePlaylistEntry::Tue)
-				result << "Tue ";
+				days += "Tue ";
 			if (se->type & ePlaylistEntry::Wed)
-				result << "Wed ";
+				days += "Wed ";
 			if (se->type & ePlaylistEntry::Thu)
-				result << "Thu ";
+				days += "Thu ";
 			if (se->type & ePlaylistEntry::Fr)
-				result << "Fr ";
+				days += "Fr ";
 			if (se->type & ePlaylistEntry::Sa)
-				result << "Sa";
-			result  << "</td><td>"
-				<< std::setw(2) << startTime.tm_hour << ':'
-				<< std::setw(2) << startTime.tm_min << " - ";
+				days += "Sa";
+
+			tmp.strReplace("#DAYS#", days);
+			tmp.strReplace("#START#", eString().sprintf("%02d:%02d", startTime.tm_hour, startTime.tm_min));
+			tmp.strReplace("#END#", eString().sprintf("%02d:%02d", endTime.tm_hour, endTime.tm_min));
 		}
 		else
 		{
-			result 	<< std::setw(2) << startTime.tm_mday << '.'
-				<< std::setw(2) << startTime.tm_mon+1 << ". - "
-				<< std::setw(2) << startTime.tm_hour << ':'
-				<< std::setw(2) << startTime.tm_min
-				<< "</td><td>"
-				<< std::setw(2) << endTime.tm_mday << '.'
-				<< std::setw(2) << endTime.tm_mon+1 << ". - ";
+			tmp.strReplace("#DAYS#", "&nbsp;");
+			tmp.strReplace("#START#", eString().sprintf("%02d.%02d - %02d:%02d", startTime.tm_mday, startTime.tm_mon + 1, startTime.tm_hour, startTime.tm_min));
+			tmp.strReplace("#END#", eString().sprintf("%02d.%02d - %02d:%02d", endTime.tm_mday, endTime.tm_mon + 1, endTime.tm_hour, endTime.tm_min));
 		}
+		tmp.strReplace("#CHANNEL#", channel);
+		tmp.strReplace("#DESCRIPTION#", description);
 
-		result 	<< std::setw(2) << endTime.tm_hour << ':'
-			<< std::setw(2) << endTime.tm_min
-			<< "</td><td>" << channel
-			<< "</td><td>" << description
-			<< "</td></tr>";
+	result << tmp;
 	}
 };
 
-static eString genTimerListTableBody(int type)
-{
-	std::stringstream result;
-	result << std::setfill('0');
-	if (!eTimerManager::getInstance()->getTimerCount())
-		result << "<tr><td>" << eString("No timer events available") << "</td></tr>";
-	else
-		eTimerManager::getInstance()->forEachEntry(getEntryString(result, type));
-
-	return result.str();
-}
-
 static eString getControlTimerList()
 {
-	eString tableBody;
 	eString result = readFile(TEMPLATE_DIR + "timerListBody.tmp");
 
 	// regular timers
-	int count = 0;
-	eTimerManager::getInstance()->forEachEntry(countTimer(count, false));
-	if (count)
-		tableBody = genTimerListTableBody(0);
-	else
-		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString("No regular timer events available") + "</td></tr>";
-	result.strReplace("#TIMER_REGULAR#", tableBody);
-
+	int count1 = 0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count1, false));
 	// repeating timers
-	count = 0;
-	eTimerManager::getInstance()->forEachEntry(countTimer(count, true));
-	if (count)
-		tableBody = genTimerListTableBody(1);
+	int count2 = 0;
+	eTimerManager::getInstance()->forEachEntry(countTimer(count2, true));
+
+	if (count1 + count2)
+	{
+		std::stringstream tmp;
+		if (count1)
+		{
+			eTimerManager::getInstance()->forEachEntry(getEntryString(tmp, 0));
+			result.strReplace("#TIMER_REGULAR#", tmp.str());
+		}
+		else
+			result.strReplace("#TIMER_REGULAR#", "");
+		tmp.clear();
+		tmp.str("");
+		if (count2)
+		{
+			eTimerManager::getInstance()->forEachEntry(getEntryString(tmp, 1));
+			result.strReplace("#TIMER_REPEATED#", tmp.str());
+		}
+		else
+			result.strReplace("#TIMER_REPEATED#", "");
+	}
 	else
-		tableBody = "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>" + eString("No repeating timer events available") + "</td></tr>";
-	result.strReplace("#TIMER_REPEATED#", tableBody);
+	{
+		result.strReplace("#TIMER_REGULAR#", "");
+		result.strReplace("#TIMER_REPEATED#", "<tr><td>No timer events available.</td></tr>");
+	}
 
 	// buttons
 	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()"));
 	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()"));
-	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow('regular')"));
-	result.strReplace("#BUTTONADD2#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow('repeating')"));
+	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()"));
 
 	return result;
 }
@@ -3688,28 +3672,31 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 	if (durationS)
 		duration = atol(durationS.c_str());
 
-	int key = atoi(keyS.c_str());
-
 	unsigned long reptime = 500;
 	if (reptimeS)
 		atol(reptimeS.c_str());
 
 	unsigned long time = duration * 1000 / reptime;
 
-	int evd = open("/dev/input/event0", O_RDWR);
-	if (evd)
+	if (keyS)
 	{
-		sendKey(evd, key, KEY_PRESSED);
-		while (time--)
+		int key = atoi(keyS.c_str());
+		int evd = open("/dev/input/event0", O_RDWR);
+		if (evd)
 		{
-			usleep(reptime * 1000);
-			sendKey(evd, key, KEY_AUTOREPEAT);
+			sendKey(evd, key, KEY_PRESSED);
+			while (time--)
+			{
+				usleep(reptime * 1000);
+				sendKey(evd, key, KEY_AUTOREPEAT);
+			}
+			sendKey(evd, key, KEY_RELEASED);
+			close(evd);
 		}
-		sendKey(evd, key, KEY_RELEASED);
-		close(evd);
+		return "key sent.";
 	}
-
-	return "key sent.";
+	else
+		return "a key code has to be specified /cgi-bin/rc?key=ddd (decimal)";
 }
 
 static eString getCurrentVpidApid(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -4370,7 +4357,7 @@ static eString buildAfterEventOpts(int type)
 	return afterOpts.str();
 }
 
-static eString editTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString showEditTimerEventWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -4393,7 +4380,7 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 	int evType = atoi(eventType.c_str());
 
 	eString result = readFile(TEMPLATE_DIR + "editTimerEvent.tmp");
-	
+
 	if (evType & ePlaylistEntry::isRepeating)
 	{
 		result.strReplace("#REPEATING#", "selected");
@@ -4658,7 +4645,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/TVBrowserTimerEvent", TVBrowserTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, lockWeb);
-	dyn_resolver->addDyn("GET", "/editTimerEvent", editTimerEvent, lockWeb);
+	dyn_resolver->addDyn("GET", "/showEditTimerEventWindow", showEditTimerEventWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/showAddTimerEventWindow", showAddTimerEventWindow, lockWeb);
 	dyn_resolver->addDyn("GET", "/changeTimerEvent", changeTimerEvent, lockWeb);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, lockWeb);
