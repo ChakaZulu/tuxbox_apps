@@ -734,12 +734,20 @@ movieplayer.nostreamingserver The streaming server could not be reached.
 movieplayer.defdir start dir.
 movieplayer.buffering Buffering...
 movieplayer.tsplayback Play TS
+movieplayer.pesplayback Play PES (Experimental)
 movieplayer.fileplayback File via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
+movieplayer.tshelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.vlchelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.toomanybookmarks There are too many bookmarks.\nYou need to delete one of them first.
+movieplayer.bookmarkname Bookmarkname
+movieplayer.bookmarkname_hint1 Enter a name for your new bookmark
+movieplayer.bookmarkname_hint2 
 movieplayer.goto Jump to ...
 movieplayer.goto.h1 = -> absolute jump
 movieplayer.goto.h2 +,- -> relative jump
+movieplayer.wrongvlcversion This feature is not support by your current version of VLC
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Filter on
