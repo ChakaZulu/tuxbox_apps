@@ -14,6 +14,14 @@ TUXBOX_APPS_LIB_PKGCONFIG(EVENTSERVER,tuxbox-eventserver)
 CPPFLAGS="$CPPFLAGS $EVENTSERVER_CFLAGS"
 LDFLAGS="$LDFLAGS $EVENTSERVER_LIBS"
 
+AC_ARG_ENABLE(pid-cache,
+	[  --enable-pid-cache      do not read pids after every channel change],
+	[AC_DEFINE(USE_PID_CACHE,1,[do not read pids after every channel change])])
+
+AC_ARG_ENABLE(tunning-retries,
+	[  --enable-tuning-retries  retry tuning on failure],
+	[AC_DEFINE(EXCESSIVE_TUNING_RETRIES,1,[retry tuning on failure])])
+
 AC_OUTPUT([
 Makefile
 lib/Makefile

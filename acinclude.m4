@@ -7,7 +7,7 @@ AC_ARG_WITH(target,
 	[TARGET="$withval"],[TARGET="native"])
 
 AC_ARG_WITH(targetprefix,
-	[  --with-targetprefix=PATH prefix relative to target root [[PREFIX[for native], /[for cdk]]]],
+	[  --with-targetprefix=PATH  prefix relative to target root [[PREFIX[for native], /[for cdk]]]],
 	[targetprefix="$withval"],[targetprefix="NONE"])
 
 AC_ARG_WITH(debug,
@@ -136,7 +136,7 @@ AC_SUBST(DRIVER)
 
 AC_DEFUN_ONCE([TUXBOX_APPS_DVB],[
 AC_ARG_WITH(dvbincludes,
-	[  --with-dvbincludes=PATH path for dvb includes[[NONE]]],
+	[  --with-dvbincludes=PATH  path for dvb includes[[NONE]]],
 	[DVBINCLUDES="$withval"],[DVBINCLUDES=""])
 
 orig_CFLAGS=$CFLAGS
@@ -164,7 +164,7 @@ CPPFLAGS="$orig_CPPFLAGS -I$DVBINCLUDES"
 CXXFLAGS="$CXXFLAGS -I$DVBINCLUDES"
 ])
 
-AC_DEFUN([_TUXBOX_APPS_LIB_CONFIG_CHECK],[
+AC_DEFUN([_TUXBOX_APPS_LIB_CONFIG],[
 AC_PATH_PROG($2_CONFIG,$3,no)
 
 if test "$$2_CONFIG" = "no"; then
@@ -182,15 +182,15 @@ AC_SUBST($2_CFLAGS)
 AC_SUBST($2_LIBS)
 ])
 
-AC_DEFUN([TUXBOX_APPS_LIB_CONFIG_CHECK],[
-_TUXBOX_APPS_LIB_CONFIG_CHECK(ERROR,$1,$2)
+AC_DEFUN([TUXBOX_APPS_LIB_CONFIG],[
+_TUXBOX_APPS_LIB_CONFIG(ERROR,$1,$2)
 ])
 
-AC_DEFUN([TUXBOX_APPS_LIB_CONFIG_CHECK_WARN],[
-_TUXBOX_APPS_LIB_CONFIG_CHECK(WARN,$1,$2)
+AC_DEFUN([TUXBOX_APPS_LIB_CONFIG_WARN],[
+_TUXBOX_APPS_LIB_CONFIG(WARN,$1,$2)
 ])
 
-AC_DEFUN([_TUXBOX_APPS_LIB_PKGCONFIG_CHECK],[
+AC_DEFUN([_TUXBOX_APPS_LIB_PKGCONFIG],[
 if test -z "$PKG_CONFIG"; then
 	AC_PATH_PROG(PKG_CONFIG, pkg-config,no)
 fi
@@ -199,10 +199,10 @@ if test "$PKG_CONFIG" = "no" ; then
 	AC_MSG_$1([could not find pkg-config]);
 else
 	AC_MSG_CHECKING(for $3)
-	if $PKG_CONFIG --exists "$3" ; then
+	if PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --exists "$3" ; then
 		AC_MSG_RESULT(yes)
-		$2_CFLAGS=`$PKG_CONFIG --cflags "$3"`
-		$2_LIBS=`$PKG_CONFIG --libs "$3"`
+		$2_CFLAGS=`PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --cflags "$3"`
+		$2_LIBS=`PKG_CONFIG_PATH="${prefix}/lib/pkgconfig" $PKG_CONFIG --libs "$3"`
 	else
 		AC_MSG_RESULT(no)
 		AC_MSG_$1([could not find $3]);
@@ -211,5 +211,13 @@ fi
 
 AC_SUBST($2_CFLAGS)
 AC_SUBST($2_LIBS)
+])
+
+AC_DEFUN([TUXBOX_APPS_LIB_PKGCONFIG],[
+_TUXBOX_APPS_LIB_PKGCONFIG(ERROR,$1,$2)
+])
+
+AC_DEFUN([TUXBOX_APPS_LIB_PKGCONFIG_WARN],[
+_TUXBOX_APPS_LIB_PKGCONFIG(WARN,$1,$2)
 ])
 
