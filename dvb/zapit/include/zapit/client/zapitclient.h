@@ -179,6 +179,7 @@ class CZapitClient:public CBasicClient
 	};
 	typedef std::vector<responseGetSatelliteList> SatelliteList;
 
+
  public:
 	/*****************************/
 	/*                           */
@@ -250,6 +251,9 @@ class CZapitClient:public CBasicClient
 
 	/* set Mode */
 	void setMode( channelsMode mode );
+
+	/* set Mode */
+	int getMode();
 
 	/* set RecordMode*/
 	void setRecordMode( bool activate );

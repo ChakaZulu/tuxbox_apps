@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.65 2002/10/17 09:41:10 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.66 2002/10/18 00:01:04 dirch Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -221,6 +221,17 @@ void CZapitClient::setMode( channelsMode mode )
 	send(CZapitMessages::CMD_SET_MODE, (char*)&msg, sizeof(msg));
 
 	close_connection();
+}
+
+int CZapitClient::getMode()
+{
+	send(CZapitMessages::CMD_GET_MODE);
+
+	CZapitMessages::responseGetMode response;
+	CBasicClient::receive_data((char* )&response, sizeof(response));
+
+	close_connection();
+	return response.mode;
 }
 
 void CZapitClient::setSubServices( subServiceList& subServices )

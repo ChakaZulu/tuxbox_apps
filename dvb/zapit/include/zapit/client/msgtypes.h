@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.4 2002/10/17 09:41:10 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.5 2002/10/18 00:01:04 dirch Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -45,6 +45,7 @@ class CZapitMessages
 			CMD_ZAPTO_CHANNELNR,
 			CMD_STOP_VIDEO,					// not supported yet
 			CMD_SET_MODE,
+			CMD_GET_MODE,
 			CMD_GET_LAST_CHANNEL,
 			CMD_GET_APID_VPID,				// not supported yet
 			CMD_GET_VTXT_PID,				// not supported yet
@@ -247,6 +248,11 @@ class CZapitMessages
 	struct responseGetRecordModeState
 	{
 		bool activated;
+	};
+
+	struct responseGetMode
+	{
+		CZapitClient::channelsMode  mode;
 	};
 
 	struct responseGetPlaybackState

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.263 2002/10/17 22:33:19 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.264 2002/10/18 00:01:04 dirch Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -453,6 +453,15 @@ void setTVMode ()
 	currentMode &= ~RADIO_MODE;
 }
 
+int getMode ()
+{
+	if(currentMode & TV_MODE)
+		return CZapitClient::MODE_TV;
+	if(currentMode & RADIO_MODE)
+		return CZapitClient::MODE_RADIO;
+	return 0;
+}
+
 void setRecordMode ()
 {
 	currentMode |= RECORD_MODE;
@@ -614,6 +623,13 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 				{
 					setRadioMode();
 				}
+				break;
+			}
+			case CZapitMessages::CMD_GET_MODE:
+			{
+				CZapitMessages::responseGetMode msgGetMode;
+				msgGetMode.mode = (CZapitClient::channelsMode) getMode();
+				send(connfd, &msgGetMode, sizeof(msgGetMode), 0);
 				break;
 			}
 			case CZapitMessages::CMD_GET_CURRENT_SERVICEID:
@@ -1012,7 +1028,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.263 2002/10/17 22:33:19 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.264 2002/10/18 00:01:04 dirch Exp $\n\n");
 
 	if (argc > 1)
 	{
