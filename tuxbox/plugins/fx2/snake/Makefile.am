@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = snake.la
 
 snake_la_SOURCES = snake.c somain.c
 
+snake_la_LIBADD = ../lib/libfx2.la
+
 snake_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
