@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.153 2003/02/17 19:15:14 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.154 2003/02/24 14:39:28 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -25,6 +25,7 @@
 //
 //
 
+#include <malloc.h>
 #include <dmx.h>
 #include <debug.h>
 
@@ -35,18 +36,16 @@
 #include <netinet/ip.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/poll.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <malloc.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <stdio.h>
 #include <signal.h>
 //#include <sys/resource.h> // getrusage
 #include <set>
@@ -57,6 +56,7 @@
 #include <sys/wait.h>
 #include <sys/time.h>
 
+#include <connection/basicsocket.h>
 #include <connection/basicserver.h>
 
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
@@ -87,6 +87,7 @@
 
 // Timeout bei tcp/ip connections in ms
 #define TIMEOUT_CONNECTIONS 2000
+#define WRITE_TIMEOUT_IN_SECONDS 2
 
 // Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
 #define RESTART_DMX_AFTER_TIMEOUTS 5
@@ -518,56 +519,13 @@ int readNbytes(int fd, char *buf, const size_t n, unsigned timeoutInMSeconds)
 	return j;
 }
 
-// Schreibt n Bytes in einen Socket per write
-// Liefert 0 bei timeout
-// und -1 bei Fehler
-// ansonsten die Anzahl geschriebener Bytes
-/* inline */ int writeNbytes(int fd,  const char *buf,  const size_t numberOfBytes,  unsigned timeoutInSeconds)
+inline bool writeNbytes(int fd,  const char *buf,  const size_t numberOfBytes, const time_t timeoutInSeconds)
 {
-	// Timeouthandling usw fehlt noch
-	int n = numberOfBytes;
-
-	while (n)
-	{
-		fd_set readfds, writefds, exceptfds;
-		FD_ZERO(&readfds);
-		FD_ZERO(&writefds);
-		FD_ZERO(&exceptfds);
-		FD_SET(fd, &writefds);
-		timeval tv;
-		tv.tv_sec = timeoutInSeconds;
-		tv.tv_usec = 0;
-		int f = select(fd + 1, &readfds, &writefds, &exceptfds, &tv);
-
-		if (!f)
-		{
-			//      dputs("select: timeout");
-			return 0; // timeout
-		}
-		else if (f == -1 || (f > 0 && fd == -1))
-		{
-			//      dputs("select: fehler");
-			return -1; // Fehler
-		}
-
-		int rc = write(fd, buf, n);
-
-		if (!rc)
-			continue;
-		else if (rc < 0)
-		{
-			if (errno == EINTR)
-				continue;
-			else
-				return -1;
-		}
-		else
-			n -= rc;
-	}
-
-	return numberOfBytes;
+	timeval timeout;
+	timeout.tv_sec  = timeoutInSeconds;
+	timeout.tv_usec = 0;
+	return send_data(fd, buf, numberOfBytes, timeout);
 }
-
 
 
 // k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
@@ -852,7 +810,7 @@ static void commandPauseScanning(int connfd, char *data, const unsigned dataLeng
 
 	msgResponse.dataLength = 0;
 
-	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS);
 
 	return ;
 }
@@ -878,7 +836,7 @@ static void commandPauseSorting(int connfd, char *data, const unsigned dataLengt
 
 	msgResponse.dataLength = 0;
 
-	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS);
 
 	return ;
 }
@@ -926,10 +884,10 @@ static void commandDumpAllServices(int connfd, char *data, const unsigned dataLe
 	if (msgResponse.dataLength == 1)
 		msgResponse.dataLength = 0;
 
-	if (writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS) == true)
 	{
 		if (msgResponse.dataLength)
-			writeNbytes(connfd, serviceList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, serviceList, msgResponse.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -952,7 +910,7 @@ static void commandSetEventsAreOldInMinutes(int connfd, char *data, const unsign
 
 	responseHeader.dataLength = 0;
 
-	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
 	return ;
 }
@@ -970,7 +928,7 @@ static void commandSetHoursToCache(int connfd, char *data, const unsigned dataLe
 
 	responseHeader.dataLength = 0;
 
-	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
 	return ;
 }
@@ -1073,10 +1031,10 @@ static void sendAllEvents(int connfd, t_channel_id serviceUniqueKey, bool oldFor
 	if ( responseHeader.dataLength == 1 )
 		responseHeader.dataLength = 0;
 
-	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(connfd, evtList, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, evtList, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1147,7 +1105,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.153 2003/02/17 19:15:14 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.154 2003/02/24 14:39:28 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -1170,10 +1128,10 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 
 	responseHeader.dataLength = strlen(stati) + 1;
 
-	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(connfd, stati, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, stati, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1265,12 +1223,12 @@ static void commandCurrentNextInfoChannelName(int connfd, char *data, const unsi
 
 	struct sectionsd::msgResponseHeader pmResponse;
 	pmResponse.dataLength = nResultDataSize;
-	int rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+	bool rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
 
 	if ( nResultDataSize > 0 )
 	{
-		if (rc > 0)
-			writeNbytes(connfd, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+		if (rc == true)
+			writeNbytes(connfd, pResultData, nResultDataSize, WRITE_TIMEOUT_IN_SECONDS);
 		else
 			dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -1363,10 +1321,10 @@ static void commandComponentTagsUniqueKey(int connfd, char *data, const unsigned
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = nResultDataSize;
 
-	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(connfd, pResultData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, pResultData, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1459,10 +1417,10 @@ static void commandLinkageDescriptorsUniqueKey(int connfd, char *data, const uns
 	struct sectionsd::msgResponseHeader responseHeader;
 	responseHeader.dataLength = nResultDataSize;
 
-	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader),  WRITE_TIMEOUT_IN_SECONDS) == true)
 	{
 		if (responseHeader.dataLength)
-			writeNbytes(connfd, pResultData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, pResultData, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -1584,7 +1542,7 @@ static void commandserviceChanged(int connfd, char *data, const unsigned dataLen
 
 	msgResponse.dataLength = 0;
 
-	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS);
+	writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS);
 
 	return ;
 }
@@ -1737,12 +1695,12 @@ static void commandCurrentNextInfoChannelID(int connfd, char *data, const unsign
 
 	struct sectionsd::msgResponseHeader pmResponse;
 	pmResponse.dataLength = nResultDataSize;
-	int rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+	bool rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
 
 	if ( nResultDataSize > 0 )
 	{
-		if (rc > 0)
-			writeNbytes(connfd, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+		if (rc == true)
+			writeNbytes(connfd, pResultData, nResultDataSize, WRITE_TIMEOUT_IN_SECONDS);
 		else
 			dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -1830,10 +1788,10 @@ static void sendEPG(int connfd, const SIevent& e, const SItime& t, int shortepg 
 
 	dmxEIT.unpause(); // -> unlock
 
-	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	bool rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
-	if (rc > 0)
-		writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+	if (rc == true)
+		writeNbytes(connfd, msgData, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -1873,7 +1831,7 @@ static void commandGetNextEPG(int connfd, char *data, const unsigned dataLength)
 
 		struct sectionsd::msgResponseHeader responseHeader;
 		responseHeader.dataLength = 0;
-		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 	}
 
 	return ;
@@ -1910,7 +1868,7 @@ static void commandActualEPGchannelID(int connfd, char *data, const unsigned dat
 
 		struct sectionsd::msgResponseHeader responseHeader;
 		responseHeader.dataLength = 0;
-		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 	}
 
 	return ;
@@ -1971,10 +1929,10 @@ static void commandGetEPGPrevNext(int connfd, char *data, const unsigned dataLen
 	unlockEvents();
 	dmxEIT.unpause(); // -> unlock
 
-	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	bool rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
-	if (rc > 0)
-		writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+	if (rc == true)
+		writeNbytes(connfd, msgData, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -2060,12 +2018,12 @@ static void commandActualEPGchannelName(int connfd, char *data, const unsigned d
 
 	pmResponse.dataLength = nResultDataSize;
 
-	int rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS);
+	bool rc = writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
 
 	if ( nResultDataSize > 0 )
 	{
-		if (rc > 0)
-			writeNbytes(connfd, pResultData, nResultDataSize, TIMEOUT_CONNECTIONS);
+		if (rc == true)
+			writeNbytes(connfd, pResultData, nResultDataSize, WRITE_TIMEOUT_IN_SECONDS);
 		else
 			dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -2207,10 +2165,10 @@ static void sendEventList(int connfd, const unsigned char serviceTyp1, const uns
 	if ( msgResponse.dataLength == 1 )
 		msgResponse.dataLength = 0;
 
-	if (writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&msgResponse, sizeof(msgResponse), WRITE_TIMEOUT_IN_SECONDS) == true)
 	{
 		if (msgResponse.dataLength)
-			writeNbytes(connfd, evtList, msgResponse.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, evtList, msgResponse.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -2250,10 +2208,10 @@ static void sendShort(int connfd, const SIevent& e, const SItime& t)
 	unlockEvents();
 	dmxEIT.unpause(); // -> unlock
 
-	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	bool rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
-	if (rc > 0)
-		writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+	if (rc == true)
+		writeNbytes(connfd, msgData, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
 
@@ -2293,7 +2251,7 @@ static void commandGetNextShort(int connfd, char *data, const unsigned dataLengt
 
 		struct sectionsd::msgResponseHeader responseHeader;
 		responseHeader.dataLength = 0;
-		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 	}
 
 	return ;
@@ -2396,8 +2354,7 @@ static void commandEPGepgID(int connfd, char *data, const unsigned dataLength)
 		struct sectionsd::msgResponseHeader pmResponse;
 		pmResponse.dataLength = 0;
 
-		if (writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS) <= 0)
-			dputs("[sectionsd] Fehler/Timeout bei write");
+		writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
 	}
 }
 
@@ -2432,8 +2389,7 @@ static void commandEPGepgIDshort(int connfd, char *data, const unsigned dataLeng
 		struct sectionsd::msgResponseHeader pmResponse;
 		pmResponse.dataLength = 0;
 
-		if (writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), TIMEOUT_CONNECTIONS) <= 0)
-			dputs("[sectionsd] Fehler/Timeout bei write");
+		writeNbytes(connfd, (const char *)&pmResponse, sizeof(pmResponse), WRITE_TIMEOUT_IN_SECONDS);
 	}
 }
 
@@ -2518,13 +2474,13 @@ static void commandTimesNVODservice(int connfd, char *data, const unsigned dataL
 	}
 
 	dprintf("data bytes: %u\n", responseHeader.dataLength);
-	int rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+	bool rc = writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS);
 
-	if (rc > 0)
+	if (rc == true)
 	{
 		if (responseHeader.dataLength)
 		{
-			writeNbytes(connfd, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+			writeNbytes(connfd, msgData, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 			delete[] msgData;
 		}
 	}
@@ -2554,9 +2510,9 @@ static void commandGetIsTimeSet(int connfd, char *data, const unsigned dataLengt
 
 	responseHeader.dataLength = sizeof(rmsg);
 
-	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS) > 0)
+	if (writeNbytes(connfd, (const char *)&responseHeader, sizeof(responseHeader), WRITE_TIMEOUT_IN_SECONDS) == true)
 	{
-		writeNbytes(connfd, (const char *)&rmsg, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+		writeNbytes(connfd, (const char *)&rmsg, responseHeader.dataLength, WRITE_TIMEOUT_IN_SECONDS);
 	}
 	else
 		dputs("[sectionsd] Fehler/Timeout bei write");
@@ -3761,7 +3717,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.153 2003/02/17 19:15:14 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.154 2003/02/24 14:39:28 thegoodguy Exp $\n");
 
 	try
 	{
