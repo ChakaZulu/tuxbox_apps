@@ -60,7 +60,7 @@ miscsettings.boxtype proizvodjac dbox2
 miscsettings.startneutrinodirect direktni start neutrina
 miscsettings.general generalno
 miscsettings.fb_destination majstori! boot konsola
-miscsettings.infobar_sat_display unset
+miscsettings.infobar_sat_display informativna traka sateliti
 
 languagesetup.head izabrati jezik
 languagesetup.select jezik
@@ -222,9 +222,9 @@ lcdmenu.head namjestiti tecni kristal
 lcdmenu.inverse invertirati
 lcdmenu.power struja
 lcdmenu.lcdcontroler kontrast / svjetlost
-lcdmenu.statusline unset
-lcdmenu.statusline.volume unset
-lcdmenu.statusline.playtime unset
+lcdmenu.statusline statusna linija
+lcdmenu.statusline.volume glasnost
+lcdmenu.statusline.playtime igrano vrijeme
 
 lcdcontroler.head namjestiti tecni kristal
 lcdcontroler.contrast kontrast
@@ -320,7 +320,7 @@ nvod.proz (%d%% proslo)
 scants.head trazenje kanala
 scants.startnow poceti trazenje kanala
 scants.actsatellite satelit:
-scants.actcable unset:
+scants.actcable kablo:
 scants.astra astra
 scants.hotbird hotbird
 scants.kopernikus kopernikus
@@ -329,8 +329,8 @@ scants.thor thor
 scants.digituerk digituerk
 scants.tuerksat tuerksat
 scants.transponders transponderi:
-scants.freqdata	unset
-scants.servicenames	unset
+scants.freqdata frekvencija:
+scants.servicenames tv     radio  data
 scants.services servisi:
 scants.bouquet bukete
 scants.bouquet_leave ne promijeniti
@@ -392,7 +392,7 @@ flashupdate.titlewriteflash pisati fles
 flashupdate.actionwriteflash pise se fles
 flashupdate.flashreadyreboot Imidz je uspjesno flesovan.\nVas dbox2 startuje sada ponovno.
 flashupdate.reallyflashmtd Hocete li stvarno nastaviti flesovanje?\n\nAko se desi greska ili imidz nije\nu redu, onda vas dbox2 nece vise raditi.\n\nIme imidza: %s\nPozicija: %s
-flashupdate.wrongbase unset
+flashupdate.wrongbase Verzija osnovnog imidza ne pase vise,\ntreba se instalirati novi osnovni imidz!
 
 bouqueteditor.name namjestiti buket
 bouqueteditor.delete izbrisati

@@ -52,7 +52,7 @@ mainsettings.keybinding Impostazioni-Tasti
 mainsettings.misc Altre Impostazioni
 mainsettings.scan Impostazioni Ricerca Canali
 
-mp3picsettings.general unset
+mp3picsettings.general MP3 Player / Visore Immaggine
 
 miscsettings.head Altre Impostazioni
 miscsettings.shutdown_real Modo Standby
@@ -60,7 +60,7 @@ miscsettings.boxtype DBox Costruttore
 miscsettings.startneutrinodirect Esecuzione diretta Neutrino
 miscsettings.general Generale
 miscsettings.fb_destination EXPERT! Boot-Konsole
-miscsettings.infobar_sat_display unset
+miscsettings.infobar_sat_display Infobar Display Satellite
 
 languagesetup.head Impostazioni Lingua
 languagesetup.select Lingua
@@ -222,9 +222,9 @@ lcdmenu.head LCD Settings
 lcdmenu.inverse Inversione
 lcdmenu.power Power
 lcdmenu.lcdcontroler Contrasto / Luminosita
-lcdmenu.statusline unset
-lcdmenu.statusline.volume unset
-lcdmenu.statusline.playtime unset
+lcdmenu.statusline Linia Progresso
+lcdmenu.statusline.volume Volume
+lcdmenu.statusline.playtime Tempo trascorso
 
 lcdcontroler.head Impostazioni LCD
 lcdcontroler.contrast Contrasto
@@ -320,7 +320,7 @@ nvod.proz (%d%% passati)
 scants.head Ricerca Canali
 scants.startnow Start Ricerca Canali
 scants.actsatellite Satellite:
-scants.actcable unset:
+scants.actcable Cavo:
 scants.astra Astra
 scants.hotbird Hotbird
 scants.kopernikus Kopernikus
@@ -329,8 +329,8 @@ scants.thor Thor
 scants.digituerk Digituerk
 scants.tuerksat Tuerksat
 scants.transponders Transponder:
-scants.freqdata	unset
-scants.servicenames	unset
+scants.freqdata Frequenza:
+scants.servicenames TV     Radio  Data
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave Non Cambiare
@@ -392,7 +392,7 @@ flashupdate.titlewriteflash Scrivo-Flash
 flashupdate.actionwriteflash Scrivo-Flash
 flashupdate.flashreadyreboot La Image e stata scritta con Successo.\nIl vostro DBox verra Riavviato.
 flashupdate.reallyflashmtd Vuole veramente scrivere il Flash?\n\nIn caso di un errore\nil vostro, DBox non potra piu riavviarsi.\n\nImagename: %s\nZiel: %s
-flashupdate.wrongbase unset
+flashupdate.wrongbase Versione Baseimage errata\nPrima istallare una nuova Versione!
 
 bouqueteditor.name Gestione-Bouquet
 bouqueteditor.delete Cancella
@@ -674,19 +674,19 @@ mp3player.keylevel Cambio-Tasti
 mp3player.fastforward Avanti svelto
 mp3player.pause Pausa
 mp3player.rewind Indietro svelto
-mp3player.artist_title unset
-mp3player.title_artist unset
-mp3player.display_order unset
-mp3player.follow unset
+mp3player.artist_title Artista, Titolo
+mp3player.title_artist Titolo, Artista
+mp3player.display_order Visore
+mp3player.follow Selezionare Track attuale
 
 filebrowser.head filebrowser
-filebrowser.filter.active unset
-filebrowser.filter.inactive unset
+filebrowser.filter.active Filtro on
+filebrowser.filter.inactive Filtro off
 filebrowser.select scegli
 filebrowser.mark seleziona
 filebrowser.scan cerca nella directory
-filebrowser.sort.name unset
-filebrowser.sort.date unset
+filebrowser.sort.name (Nome File)
+filebrowser.sort.date (Data)
 
 nfs.mount carica directory
 nfs.ip NFS Server IP

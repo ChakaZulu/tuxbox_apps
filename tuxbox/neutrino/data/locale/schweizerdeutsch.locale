@@ -320,7 +320,7 @@ nvod.proz (%d%% umme)
 scants.head Kanalsuechi
 scants.startnow Kanalsuechi starde
 scants.actsatellite Sadellid:
-scants.actcable unset:
+scants.actcable unset
 scants.astra Astra
 scants.hotbird Hotbörd
 scants.kopernikus Kopernikus
@@ -330,7 +330,7 @@ scants.digituerk Digituerk
 scants.tuerksat Tuerksat
 scants.transponders Transponder:
 scants.freqdata	unset
-scants.servicenames	unset
+scants.servicenames unset
 scants.services Services:
 scants.bouquet Bouquets
 scants.bouquet_leave nidd ändere
