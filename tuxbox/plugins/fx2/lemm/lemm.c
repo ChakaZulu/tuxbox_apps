@@ -760,16 +760,18 @@ int	InitLemm( void )
 	return 0;
 }
 
-void	RunKey( void )
+void	HandleDirection( int actcode )
 {
-	Sprite	*s;
+Sprite 			*s;
+	int		umove=0;
+	int		dmove=0;
+	int		lmove=0;
+	int		rmove=0;
 static	int		step=2;
 static	int		cnt=0;
 static	int		zcnt=0;
 static	int		lastc=0;
-	int			nac;
-	int			sel_type=0;
-unsigned long	otype;
+
 
 	if ( realcode == 0xee )
 	{
@@ -797,102 +799,98 @@ unsigned long	otype;
 	else
 		step=2;
 
-	if (( step != 2 ) && ( actcode != lastc ))
+	if (( step != 2 ) && ( actcode != lastc )){
+		cnt=0;
 		step=2;
-
-	lastc=actcode;
-
-	switch( actcode )
-	{
-	case RC_LEFT :
-	case RC_RIGHT :
-	case RC_UP :
-	case RC_DOWN :
-			if ( pause && ( sel_sprite != -1 ))
-			{
-				sel_sprite=-1;
-				UndrawSprite( deko[0] );
-				SpriteSelPic( deko[0], 0 );
-			}
-			break;
 	}
 
-	switch( actcode )
+	lastc=actcode;
+	if ( action > 2 )
+		return;
+	s=deko[0];
+	if (!s)
+		return;
+	switch (actcode){
+	case KEY_TOPLEFT:
+		umove=1;lmove=1;break;
+	case KEY_TOPRIGHT:
+		umove=1;rmove=1;break;
+	case KEY_BOTTOMLEFT:
+		dmove=1;lmove=1;break;
+	case KEY_BOTTOMRIGHT:
+		dmove=1;rmove=1;break;
+	case RC_UP:
+		umove=1;break;
+	case RC_DOWN:
+		dmove=1;break;
+	case RC_LEFT:
+		lmove=1;break;
+	case RC_RIGHT:
+		rmove=1;break;
+	}
+
+	if ((lmove||rmove)&&(( s->x == main_x - 6 )||(s->x == main_x + 320)))	// move screen
 	{
-	case RC_LEFT :
-		if ( action > 2 )
-			break;
-		s=deko[0];
-		if ( !s || ( s->x < 32 ))
-				break;
-		if ( s->x == main_x - 6 )	// move screen
-		{
-			if ( s->y > 152 )
-				break;
+		int new_x;
+		if (s->x == main_x - 6){
 			main_x -= step;
+			new_x = main_x;
 			dblXMove( 0, step );
-			CopyBg2Screen( main_x, 0, step, 160 );
-			SpriteGetBackground( s );
-			pic_moved=1;		// mark for redraw unanimated deko-sprites
-			break;
+		} else { // (s->x == main_x + 320)
+			main_x += step;
+			new_x = main_x+328-step;
+			dblXMove( step, 0 );
 		}
-		UndrawSprite( s );
+		CopyBg2Screen( new_x, 0, step, 160 );
+		SpriteGetBackground( s );
+		pic_moved=1;		// mark for redraw unanimated deko-sprites
+		return;
+	}
+	// all other movements
+	UndrawSprite( s );
+	if ((lmove)&&(s->x >= 32)){
 		s->x -= step;
 		if ( s->x < main_x - 6 )
 			s->x = main_x - 6;
-		SpriteGetBackground( s );
-		DrawSprite( s );
-		break;
-	case RC_RIGHT :
-		if ( action > 2 )
-			break;
-		s=deko[0];
-		if ( !s ||
-			( s->x > 1580 ))
-				break;
-		if ( s->x == main_x+320 )
-		{
-			if ( s->y > 152 )
-				break;
-			main_x += step;
-			dblXMove( step, 0 );
-			CopyBg2Screen( main_x+328-step, 0, step, 160 );
-			SpriteGetBackground( s );
-			pic_moved=1;		// mark for redraw unanimated deko-sprites
-			break;
-		}
-		UndrawSprite( s );
+	} 
+	if ((rmove)&&(s->x <= 1580)){
 		s->x += step;
-		if ( s->x > main_x+320 )
-			s->x=main_x+320;
-		SpriteGetBackground( s );
-		DrawSprite( s );
-		break;
-	case RC_UP :
-		if ( action > 2 )
-			break;
-		s=deko[0];
-		if ( s->y == -6 )
-				break;
-		UndrawSprite( s );
+		if ( s->x > main_x + 320 )
+			s->x = main_x + 320;
+	}
+	if ((umove)&&(s->y > -6)){
 		s->y -= step;
-		if ( s->y < - 6 )
-			s->y = - 6;
-		SpriteGetBackground( s );
-		DrawSprite( s );
-		break;
-	case RC_DOWN :
-		if ( action > 2 )
-			break;
-		s=deko[0];
-		if ( s->y == 152 )
-				break;
-		UndrawSprite( s );
+		if ( s->y < -6 )
+			s->y = -6;
+	}
+	if ((dmove)&&(s->y < 152)){
 		s->y += step;
 		if ( s->y > 152 )
-			s->y=152;
-		SpriteGetBackground( s );
-		DrawSprite( s );
+			s->y = 152;
+	}
+	SpriteGetBackground( s );
+	DrawSprite( s );
+}
+
+
+void	RunKey( void )
+{
+	Sprite	*s;
+	int			nac;
+	int			sel_type=0;
+	unsigned long	otype;
+
+	switch( actcode )
+	{
+	case KEY_TOPLEFT:
+	case KEY_TOPRIGHT:
+	case KEY_BOTTOMLEFT:
+	case KEY_BOTTOMRIGHT:
+	case RC_LEFT :
+	case RC_RIGHT :
+	case RC_UP :
+	case RC_DOWN :
+		HandleDirection ( actcode );
 		break;
 	case RC_RED :		// kill all lemmings
 		if ( pause || (action!=2) || !in_level )
@@ -923,7 +921,7 @@ unsigned long	otype;
 	case RC_5 :
 	case RC_6 :
 	case RC_7 :
-	case RC_8 :
+	case RC_8 :	// select lemm-action
 		if ( pause || !action || (action>2))
 			break;
 		nac=actcode-1;
@@ -972,7 +970,7 @@ unsigned long	otype;
 			SoundPlay( SND_DOOR );
 			break;
 		}
-		if (( action != 2 ) || pause || ( sel_sprite == -1 ))
+		if (( action != 2 ) || pause || ( sel_sprite == -1 ) || !portfolio[afunc])
 			break;
 		s=lemm[ sel_sprite ];
 		if ( !s )

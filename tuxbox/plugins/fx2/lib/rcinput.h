@@ -29,8 +29,8 @@
 #define RC_HELP			KEY_HELP
 #define RC_SETUP		KEY_SETUP
 #define RC_HOME			KEY_HOME
-#define RC_PAGE_DOWN	KEY_PAGEUP
-#define RC_PAGE_UP		KEY_PAGEDOWN
+#define RC_PAGE_DOWN		KEY_PAGEDOWN
+#define RC_PAGE_UP		KEY_PAGEUP
 
 extern	void			RcGetActCode( void );
 extern	int				RcInitialize( int extfd );
