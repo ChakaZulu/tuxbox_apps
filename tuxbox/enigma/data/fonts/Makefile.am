@@ -1,5 +1,5 @@
 EXTRA_DIST = \
-	bluebold.ttf bluehigh.ttf Marlett.ttf unmrs.pfa v5loxical.ttf v5loxicar.ttf
+	bluebold.ttf bluehigh.ttf unmrs.pfa v5loxical.ttf v5loxicar.ttf
 
 install-data-local:
 	install -d $(FONTDIR)
