@@ -30,17 +30,8 @@ AC_ARG_WITH(neutrino-source,
 	[NEUTRINO_SOURCE="$withval"])
 
 if test $NEUTRINO_SOURCE; then
-	orig_CFLAGS=$CFLAGS
-	orig_CPPFLAGS=$CPPFLAGS
-        CFLAGS="-I$NEUTRINO_SOURCE/lib"
-        CPPFLAGS="-I$NEUTRINO_SOURCE/lib"
-	LCDDCLIENT_CFLAGS=$CFLAGS
+	LCDDCLIENT_CFLAGS="-I$NEUTRINO_SOURCE/lib"
 	LCDDCLIENT_SOURCE=$NEUTRINO_SOURCE/lib/lcddclient/lcddclient.cpp
-	CFLAGS="$orig_CFLAGS"
-	CPPFLAGS="$orig_CPPFLAGS"
-fi
-
-if test $LCDDCLIENT_CFLAGS; then
 	AC_DEFINE(DBOX2,1,[enable dbox2 specific code])
 fi
 
