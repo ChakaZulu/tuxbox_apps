@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.22 2004/11/03 21:00:59 rasc Exp $
+$Id: cmdline.h,v 1.23 2004/11/16 23:02:50 rasc Exp $
 
 
  DVBSNOOP
@@ -49,6 +49,7 @@ typedef struct _OPTIONS {
   long        dec_packet_count;		// decode max. n packets
   int         spider_pid;		// Section PID spider mode
   int         ts_subdecode;		// sub decode PES or SEC in TS stream
+  int         ts_raw_mode;		// Read full TS in TS stream mode (if hardware supported)
   int         time_mode;		// time print mode
   char        *privateProviderStr;	// Private Provider ID str (usedef tables, descr)
   int         hide_copyright;  		// suppress message at prog start

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.38 2004/11/03 21:00:59 rasc Exp $
+$Id: cmdline.c,v 1.39 2004/11/16 23:02:50 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.38 2004/11/03 21:00:59 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.39  2004/11/16 23:02:50  rasc
+cmd option "-tsraw" for full/raw TS read (if supported by hard-/firmware)
+
 Revision 1.38  2004/11/03 21:00:59  rasc
  - New: "premiere.de" private tables and descriptors (tnx to Peter.Pavlov, Premiere)
  - New: cmd option "-privateprovider <provider name>"
@@ -205,6 +208,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->crc = 0;
   opt->spider_pid = 0;
   opt->ts_subdecode = 0;
+  opt->ts_raw_mode = 0;
   opt->rd_packet_count = 0;
   opt->dec_packet_count = 0;
   opt->packet_header_sync = 1;
@@ -251,7 +255,10 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
      else if (!strcmp (argv[i],"-privateprovider")) opt->privateProviderStr = argv[++i];
      else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
-     else if (!strcmp (argv[i],"-spiderpid")) {
+     else if (!strcmp (argv[i],"-tsraw")) {
+	 opt->ts_raw_mode = 1;
+	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
+     } else if (!strcmp (argv[i],"-spiderpid")) {
 	 opt->spider_pid = 1;
 	 opt->rd_packet_count = 1;
      } else if (!strcmp (argv[i],"-if")) {
@@ -293,6 +300,8 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
   if (opt->printhex    < 0) opt->printhex = 4;
   if (opt->printdecode < 0) opt->printdecode = 7;
+
+
 
 
   /*
@@ -367,13 +376,14 @@ static void usage (void)
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
     printf("   -crc:         CRC check when reading 'sec' [-nocrc]\n");
-    printf("   -nocrc:       No CRC check when reading 'sec' [-nocrc]\n");
-    printf("   -sync:        Simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
-    printf("   -nosync:      No header sync when reading 'ts' or 'pes' [-snyc]\n");
+    printf("   -nocrc:       no CRC check when reading 'sec' [-nocrc]\n");
+    printf("   -sync:        simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
+    printf("   -nosync:      no header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -n count:     receive/read max. <count> packets (0=no limit) [-n 0]\n");
 //    printf("   -N count:     decode max. <count> packets (0=no limit) [-N 0]\n");
     printf("   -spiderpid:   snoop referenced section pids (sets -n 1) \n");
     printf("   -tssubdecode: sub-decode sections or pes from ts stream decoding\n");
+    printf("   -tsraw:       read raw/full TS in TS snoop mode\n");
     printf("   -b:           binary output of packets (disables other output)\n");
     printf("   -if file:     input file, reads from binary <file> instead of demux device\n");
     printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");

@@ -1,5 +1,5 @@
 /*
-$Id: print_header.c,v 1.3 2004/10/12 20:37:48 rasc Exp $
+$Id: print_header.c,v 1.4 2004/11/16 23:02:50 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: print_header.c,v 1.3 2004/10/12 20:37:48 rasc Exp $
 
 
 $Log: print_header.c,v $
+Revision 1.4  2004/11/16 23:02:50  rasc
+cmd option "-tsraw" for full/raw TS read (if supported by hard-/firmware)
+
 Revision 1.3  2004/10/12 20:37:48  rasc
  - Changed: TS pid filtering from file, behavior changed
  - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
@@ -57,6 +60,12 @@ void  print_packet_header (OPTION *opt, char *packetTyp, int pid, int count, int
    } else {
 	s = "(Unkown PID)";
    }
+
+   // Full Transport Stream Read?
+   if (opt->ts_raw_mode && (opt->packet_mode == TS)) {
+	s = "(Full TS read)";
+   }
+
 
    out_nl (1,"\n------------------------------------------------------------");
    out_nl (1,"%s-Packet: %08ld   PID: %s, Length: %d (0x%04x)",

@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.21 2004/11/16 09:12:41 obi Exp $
+$Id: dvbsnoop.h,v 1.22 2004/11/16 23:02:50 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: dvbsnoop.h,v 1.21 2004/11/16 09:12:41 obi Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.22  2004/11/16 23:02:50  rasc
+cmd option "-tsraw" for full/raw TS read (if supported by hard-/firmware)
+
 Revision 1.21  2004/11/16 09:12:41  obi
 increased MAX_PID from 0x1fff to 0x2000 (which means "full transport stream" in linux dvb api terms)
 
@@ -109,9 +112,13 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/output.h"
 
 
+
 /* some defs */
-#define MAX_PID    0x2000
-#define DUMMY_PID  0xFFFF	/* special if no pid is needed */
+#define MAX_PID      0x1FFF
+#define PID_FULL_TS  0x2000	/* special PID for reading full/raw TS */
+				/* THIS is defined by Linux DVB-API !! */
+
+#define DUMMY_PID    0xFFFF	/* special if no pid is needed */
 #define INVALID_PID  0xFEFE	/* a invalid PID*/
 
 

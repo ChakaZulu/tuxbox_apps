@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.28 2004/11/16 09:15:03 obi Exp $
+$Id: dmx_ts.c,v 1.29 2004/11/16 23:02:50 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.28 2004/11/16 09:15:03 obi Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.29  2004/11/16 23:02:50  rasc
+cmd option "-tsraw" for full/raw TS read (if supported by hard-/firmware)
+
 Revision 1.28  2004/11/16 09:15:03  obi
 show received pid instead of command line pid if pid 0x2000 was specified (full TS)
 
@@ -200,6 +203,12 @@ int  doReadTS (OPTION *opt)
 	    dmx_buffer_size = opt->rd_buffer_size;
     }
 
+    // -- full Transport Stream Read?? (special DVB-API-PID...)
+    if (opt->ts_raw_mode) {
+	    opt->pid = PID_FULL_TS;
+    }
+
+
     if (ioctl(fd_dmx,DMX_SET_BUFFER_SIZE, dmx_buffer_size) < 0) {
 	IO_error ("DMX_SET_BUFFER_SIZE failed: ");
 	close (fd_dmx);
@@ -290,8 +299,7 @@ int  doReadTS (OPTION *opt)
 
        // -- new packet, output header
        indent (0);
-       if (opt->pid != 0x2000)
-     	  print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
+       print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
 
 
 	// -- SyncByte for TS packet and correct len?
@@ -308,9 +316,7 @@ int  doReadTS (OPTION *opt)
 	// -- filter pid?  (e.g. if multi-pid-ts-file)
 	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && is_ts_packet) {
 	   int packet_pid = getBits (b, 0,11, 13);
-	   if (opt->pid == 0x2000) {
-     	        print_packet_header (opt, "TS", packet_pid, count, n, skipped_bytes);
-	   } else if (opt->pid != packet_pid) {
+	   if (opt->pid != packet_pid) {
  		out_SW_NL(6,"skipped packet, assigned PID: ",packet_pid);
 		filter_match = 0;
 	   }
