@@ -149,9 +149,9 @@ struct fb_fix_screeninfo fix_screeninfo;
 FT_Library	library;
 FT_Face		face;
 
-int dmx, rc, fb;
+int dmx, rc = -1, fb = -1;
 
-int PosX, PosY, StartX,	StartY, sx, sy, ex, ey;
+int PosX, PosY, StartX,	StartY, sx = -1, sy = -1, ex = -1, ey = -1;
 
 pthread_t thread_id1;
 void *thread_result1;
@@ -160,7 +160,7 @@ unsigned short RCCode;
 
 int Page = 0x100, PageInput = 0, PageInputCount = 2, update = 1, visible = 1, show_string = 1;
 
-int packet, current_page = -1, vtxtpid;
+int packet, current_page = -1, vtxtpid = -1;
 
 unsigned char *pagebuffer;
 unsigned char  pagetable[0x899];

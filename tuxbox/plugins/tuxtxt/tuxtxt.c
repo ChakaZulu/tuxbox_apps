@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.6 (LazyT): added transparency mode                                   *
  *    V1.5 (LazyT): added newsflash/subtitle support                          *
  *    V1.4 (LazyT): skip not received pages on +/-10, some mods               *
  *    V1.3 (LazyT): segfault fixed                                            *
@@ -22,7 +23,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt [1.5]\n\n");
+		printf("\nTuxTxt 1.6 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox Team\n\n");
 
 	//get params
 
@@ -58,18 +59,17 @@ void plugin_exec(PluginParam *par)
 			}
 		}
 
-	//calculate screen position
-
-//		StartX = (((ex - sx) - 40*fontwidth ) / 2) + sx;
-//		StartY = (((ey - sy) - 24*fontheight) / 2) + sy;
-		StartX = ex - 40*fontwidth;
-		StartY = sy + fontheight/2;
+		if(fb == -1 || rc == -1 || vtxtpid == -1 || sx == -1 || sy == -1 || ex == -1 || ey == -1)
+		{
+			printf("invalid params: fb = %d, rc = %d, vtxtpid = %X, sx = %d, ex = %d, sy = %d, ey = %d\nTuxtxt aborted!\n\n", fb, rc, vtxtpid, sx, ex, sy, ey);
+			return;
+		}
 
 	//init
 
 		if(Init() == 0)
 		{
-			printf("TuxTxt aborted!\n");
+			printf("TuxTxt aborted!\n\n");
 			return;
 		}
 
@@ -196,8 +196,13 @@ void plugin_exec(PluginParam *par)
 
 									if(pagetable[Page] == 0)
 									{
-										for( ; Page < 0x899; Page++)
+										for( ; Page < 0x900; Page++)
 										{
+											if(Page > 0x899)
+											{
+												Page = 0x100;
+											}
+
 											if(pagetable[Page] == 1)
 											{
 												break;
@@ -288,8 +293,13 @@ void plugin_exec(PluginParam *par)
 
 									if(pagetable[Page] == 0)
 									{
-										for( ; Page < 0x890; Page+=0x10)
+										for( ; Page < 0x900; Page+=0x10)
 										{
+											if(Page > 0x899)
+											{
+												Page = 0x100;
+											}
+
 											if(pagetable[Page] == 1)
 											{
 												break;
@@ -337,7 +347,7 @@ void plugin_exec(PluginParam *par)
 
 									if(pagetable[Page] == 0)
 									{
-										for( ; Page > 0x110; Page-=0x10)
+										for( ; Page > 0x100; Page-=0x10)
 										{
 											if(pagetable[Page] == 1)
 											{
@@ -357,21 +367,40 @@ void plugin_exec(PluginParam *par)
 									update = 1;
 									break;
 
-					case RC_OK:	//show or hide videotext
+					case RC_OK:	//set display mode
 
-									if(visible)
-									{
-									  ClearFramebuffer(transp);
-									  visible = 0;
-									}
-									else
-									{
-									  visible = 1;
-									  update = 1;
-									}
+								visible++;
 
-									show_string = 1;
-									break;
+								switch(visible)
+								{
+									case 3:	//same as hidden but reset modecounter
+
+											 visible = 0;
+
+									case 0:	//hidden
+
+											ClearFramebuffer(transp);
+
+											PosX = StartX + fontwidth*3;
+											PosY = StartY + fontheight*2;
+											RenderCharFB(249, transp<<4 | yellow);
+											RenderCharFB(250, transp<<4 | yellow);
+											RenderCharFB(251, transp<<4 | yellow);
+											PosX = StartX + fontwidth*3;
+											PosY = StartY + fontheight*3;
+											RenderCharFB(252, transp<<4 | yellow);
+											RenderCharFB(253, transp<<4 | yellow);
+											RenderCharFB(254, transp<<4 | yellow);
+											break;
+
+									case 1:	//normal
+									case 2:	//transp
+											update = 1;
+											break;
+								}
+
+								show_string = 1;
+								break;
 				}
 
 				if(PageInputCount < 0)
@@ -421,6 +450,26 @@ void plugin_exec(PluginParam *par)
 int Init()
 {
 	struct dmxPesFilterParams dmx_flt;
+
+	//calculate screen position
+
+		if((ex-sx) - 40*fontwidth >= 0)
+		{
+			StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
+		}
+		else
+		{
+			StartX = ex - 40*fontwidth;
+		}
+
+		if((ey-sy) - 24*fontheight >= 0)
+		{
+			StartY = sy + (((ey-sy) - 24*fontheight) / 2);
+		}
+		else
+		{
+			StartY = sy + fontheight/2;
+		}
 
 	//open demuxer
 
@@ -587,6 +636,12 @@ void RenderChar(int Char, int Attribute)
 					}
 					else
 					{
+						if(visible == 2)
+						{
+							Attribute &= 0xFF0F;
+							Attribute |= transp<<4;
+						}
+
 						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = (Attribute>>4) & 15;
 
 						if((Attribute>>10) & 1)
@@ -654,6 +709,12 @@ void RenderCharFB(int Char, int Attribute)
 					}
 					else
 					{
+						if(visible == 2)
+						{
+							Attribute &= 0xFF0F;
+							Attribute |= transp<<4;
+						}
+
 						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = (Attribute>>4) & 15;
 
 						if((Attribute>>15) & 1)
@@ -768,9 +829,9 @@ void RenderPage()
 {
 	int row, col;
 
-	if(visible == 1)
+	if(visible)
 	{	
-		if(update == 1 && Page != current_page)
+		if(update && Page != current_page)
 		{
 			if(pagetable[Page] == 1)
 			{
@@ -802,7 +863,7 @@ void RenderPage()
 			}
 			else
 			{
-				if(show_string == 1)
+				if(show_string)
 				{
 					RenderString();
 				}
@@ -823,6 +884,22 @@ void RenderPage()
 				{
 					RenderCharFB(page_char[col], page_atrb[col]);
 				}
+		}
+	}
+	else
+	{
+		if(update == 1)
+		{
+			PosX = StartX + fontwidth*3;
+			PosY = StartY + fontheight*2;
+			RenderCharFB(243, transp<<4 | yellow);
+			RenderCharFB(244, transp<<4 | yellow);
+			RenderCharFB(245, transp<<4 | yellow);
+			PosX = StartX + fontwidth*3;
+			PosY = StartY + fontheight*3;
+			RenderCharFB(246, transp<<4 | yellow);
+			RenderCharFB(247, transp<<4 | yellow);
+			RenderCharFB(248, transp<<4 | yellow);
 		}
 	}
 
