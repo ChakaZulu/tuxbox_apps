@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.10 2003/02/27 23:05:07 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.11 2003/02/28 15:36:15 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -188,9 +188,9 @@ char * DMX::getSection(const unsigned timeoutInMSeconds, int &timeouts)
 	// check if the filter worked correctly
 	if (((initial_header.table_id ^ filters[filter_index].filter) & filters[filter_index].mask) != 0)
 	{
+		printf("[sectionsd] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", filters[filter_index].filter, filters[filter_index].mask, initial_header.table_id);
 		unlock();
 		delete[] buf;
-		printf("[sectionsd] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", filters[filter_index].filter, filters[filter_index].mask, initial_header.table_id);
 		real_pause();
 		real_unpause();
 		return NULL;
