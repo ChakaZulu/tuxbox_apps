@@ -2537,7 +2537,7 @@ msgstr "Molim odaberite verziju na koju želite nadograditi ili pritisnite LAME!
 
 
 msgid "please wait while initializing Common Interface ..."
-msgstr "molim pričekajte tijekom inicijalizacije Tvrdog diska.\nTo može potrajati nekoliko minuta."
+msgstr "molim pričekajte tijekom inicijalizacije modul Zajedničkog sučelja..."
 
 
 msgid "please wait while initializing harddisk.\nThis might take some minutes.\n"
