@@ -330,7 +330,6 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	int includesubdirs = 0;
 	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
 	listDirectory(directory, includesubdirs);
-	slideshowList.sort();
 	for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
 	{
 		eString tmp = *myIt;
@@ -355,10 +354,10 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 
 void ePictureViewer::slideshowTimeout()
 {
-	bool setTimer = true;
 	eString tmp = *myIt;
 	eDebug("[PICTUREVIEWER] slideshowTimeout: show %s", tmp.c_str());
-	ShowImage(tmp, false);
+	DecodeImage(*myIt, false);
+	DisplayNextImage();
 	nextPicture();
 	int timeout = 5;
 	eConfig::getInstance()->getKey("/picviewer/slideshowtimeout", timeout);
@@ -428,6 +427,12 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 {
 	eDebug("[PICTUREVIEWER] listDirectory: dir %s", directory.c_str());
+	std::list<eString> piclist;
+	std::list<eString>::iterator picIt;
+	std::list<eString> dirlist;
+	std::list<eString>::iterator dirIt;
+	piclist.clear();
+	dirlist.clear();
 	DIR *d = opendir(directory.c_str());
 	if (d)
 	{
@@ -454,19 +459,31 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 					    filename.right(4).upper() == ".BMP" ||
 					    filename.right(4).upper() == ".GIF")
 					{
-						eDebug("[PICTUREVIEWER] listDirectory: adding %s", filename.c_str());
 						eString tmp = directory + "/" + filename;
-						slideshowList.push_back(tmp);
+						piclist.push_back(tmp);
 					}
 				}
 				else
 				if ((includesubdirs == 1) && (S_ISDIR(s.st_mode) || S_ISLNK(s.st_mode)))
 				{
-					listDirectory(directory + "/" + filename, includesubdirs);
+					eString tmp = directory + "/" + filename;
+					dirlist.push_back(tmp);
 				}
 			}
 		}
 		closedir(d);
+	}
+	piclist.sort();
+	for (picIt = piclist.begin(); picIt != piclist.end(); picIt++)
+	{
+		eString tmp = *picIt;
+		slideshowList.push_back(tmp);
+	}
+	dirlist.sort();
+	for (dirIt = dirlist.begin(); dirIt != dirlist.end(); dirIt++)
+	{
+		eString tmp = *dirIt;
+		listDirectory(tmp, includesubdirs);
 	}
 }
 
