@@ -1,6 +1,6 @@
 DOMAIN = $(PACKAGE)
 XGETTEXT_OPTIONS = --keyword=_ --keyword=N_
-COPYRIGHT_HOLDER = Tuxbox Project
+COPYRIGHT_HOLDER = tuxbox project
 EXTRA_LOCALE_CATEGORIES =
 
 localedir = $(datadir)/locale
@@ -57,11 +57,12 @@ all-no:
 # otherwise packages like GCC can not be built if only parts of the source
 # have been downloaded.
 
-$(DOMAIN).pot-update: @POTFILES@ $(srcdir)/POTFILES.in
+$(DOMAIN).pot-update: $(POTFILES) $(srcdir)/POTFILES.in
 	@XGETTEXT@ --default-domain=$(DOMAIN) --directory=$(top_srcdir) \
 	  --add-comments=TRANSLATORS: $(XGETTEXT_OPTIONS) \
 	  --files-from=$(srcdir)/POTFILES.in \
 	  --copyright-holder='$(COPYRIGHT_HOLDER)'
+	$(srcdir)/xml2po $(srcdir)/POTFILES.xml.in $(top_srcdir) ) >> $(DOMAIN).pot
 	test ! -f $(DOMAIN).po || { \
 	  if test -f $(srcdir)/$(DOMAIN).pot; then \
 	    sed -e 's/^"POT-Creation-Date: .*\"$$//' < $(srcdir)/$(DOMAIN).pot > $(DOMAIN).1po && \
