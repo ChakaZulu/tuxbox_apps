@@ -3019,7 +3019,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		}
 	}
 
-	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic) && (mode != mode_ts))
+	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic))
 	{
 		// anzeigen NUR, wenn es vom Event kommt
 		if( current_muted )
@@ -3542,7 +3542,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.475 2003/07/10 17:15:31 alexw Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.476 2003/07/11 19:41:05 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();
