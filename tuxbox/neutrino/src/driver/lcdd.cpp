@@ -31,7 +31,6 @@
 #include <sys/timeb.h>
 #include <time.h>
 
-
 CLCD::CLCD()
 	: configfile('\t')
 {
@@ -126,7 +125,7 @@ void CLCD::init()
 
 bool CLCD::lcdInit()
 {
-	fontRenderer = new fontRenderClass( &display );
+	fontRenderer = new LcdFontRenderClass( &display );
 	fontRenderer->AddFont(FONTDIR "/micron.ttf");
 	fontRenderer->InitFontCache();
 
@@ -217,7 +216,6 @@ void CLCD::showServicename(const std::string name) // UTF-8
 	servicename = name;
 	if (mode != MODE_TVRADIO)
 		return;
-
 	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
 
 	if (fonts.channelname->getRenderWidth(name.c_str(), true) > 120)

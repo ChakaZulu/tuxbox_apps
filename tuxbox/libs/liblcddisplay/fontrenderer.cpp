@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.6 2002/10/29 13:57:02 thegoodguy Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.7 2003/02/01 03:32:43 zwen Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -38,19 +38,19 @@
 #include <freetype/internal/ftobjs.h>
 #include <freetype/internal/ftdriver.h>
 
-FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
+FT_Error LcdFontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
                             FT_Library  library,
                             FT_Pointer  request_data,
                             FT_Face*    aface)
 {
-	return ((fontRenderClass*)request_data)->FTC_Face_Requester(face_id, aface);
+	return ((LcdFontRenderClass*)request_data)->FTC_Face_Requester(face_id, aface);
 }
 
 
-fontRenderClass::fontRenderClass(CLCDDisplay *fb)
+LcdFontRenderClass::LcdFontRenderClass(CLCDDisplay *fb)
 {
 	framebuffer = fb;
-	printf("[FONT] initializing core...");
+	printf("[LCDFONT] initializing core...");
 	fflush(stdout);
 	if (FT_Init_FreeType(&library))
 	{
@@ -61,15 +61,15 @@ fontRenderClass::fontRenderClass(CLCDDisplay *fb)
 	font=0;
 }
 
-fontRenderClass::~fontRenderClass()
+LcdFontRenderClass::~LcdFontRenderClass()
 {
 	FTC_Manager_Done(cacheManager);
 	FT_Done_FreeType(library);
 }
 
-void fontRenderClass::InitFontCache()
+void LcdFontRenderClass::InitFontCache()
 {
-	printf("[FONT] Intializing font cache...");
+	printf("[LCDFONT] Intializing font cache...");
 	fflush(stdout);
 	if (FTC_Manager_New(library, 0, 0, 0, myFTC_Face_Requester, this, &cacheManager))
 	{
@@ -93,13 +93,13 @@ void fontRenderClass::InitFontCache()
 	printf("\n");
 }
 
-FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID  face_id,
+FT_Error LcdFontRenderClass::FTC_Face_Requester(FTC_FaceID  face_id,
                             FT_Face*    aface)
 {
 	fontListEntry *font=(fontListEntry *)face_id;
 	if (!font)
 		return -1;
-	printf("[FONT] FTC_Face_Requester (%s/%s)\n", font->family, font->style);
+	printf("[LCDFONT] FTC_Face_Requester (%s/%s)\n", font->family, font->style);
 
 	int error;
 	if ((error=FT_New_Face(library, font->filename, 0, aface)))
@@ -110,7 +110,7 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID  face_id,
 	return 0;
 }                                                                                                                                
 
-FTC_FaceID fontRenderClass::getFaceID(const char *family, const char *style)
+FTC_FaceID LcdFontRenderClass::getFaceID(const char *family, const char *style)
 {
 	for (fontListEntry *f=font; f; f=f->next)
 	{
@@ -120,14 +120,14 @@ FTC_FaceID fontRenderClass::getFaceID(const char *family, const char *style)
 	return 0;
 }
 
-FT_Error fontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit)
+FT_Error LcdFontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit)
 {
 	return FTC_SBit_Cache_Lookup(sbitsCache, font, glyph_index, sbit);
 }
 
-int fontRenderClass::AddFont(const char *filename)
+int LcdFontRenderClass::AddFont(const char *filename)
 {
-	printf("[FONT] adding font %s...", filename);
+	printf("[LCDFONT] adding font %s...", filename);
 	fflush(stdout);
 	int error;
 	fontListEntry *n=new fontListEntry;
@@ -149,22 +149,22 @@ int fontRenderClass::AddFont(const char *filename)
 	return 0;
 }
 
-fontRenderClass::fontListEntry::~fontListEntry()
+LcdFontRenderClass::fontListEntry::~fontListEntry()
 {
 	delete[] filename;
 	delete[] family;
 	delete[] style;
 }
 
-Font *fontRenderClass::getFont(const char *family, const char *style, int size)
+LcdFont *LcdFontRenderClass::getFont(const char *family, const char *style, int size)
 {
 	FTC_FaceID id=getFaceID(family, style);
 	if (!id)
 		return 0;
-	return new Font(framebuffer, this, id, size);
+	return new LcdFont(framebuffer, this, id, size);
 }
 
-Font::Font(CLCDDisplay *fb, fontRenderClass *render, FTC_FaceID faceid, int isize)
+LcdFont::LcdFont(CLCDDisplay *fb, LcdFontRenderClass *render, FTC_FaceID faceid, int isize)
 {
 	framebuffer=fb;
 	renderer=render;
@@ -175,7 +175,7 @@ Font::Font(CLCDDisplay *fb, fontRenderClass *render, FTC_FaceID faceid, int isiz
 	font.image_type |= ftc_image_flag_autohinted;
 }
 
-FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
+FT_Error LcdFont::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
 {
 	return renderer->getGlyphBitmap(&font, glyph_index, sbit);
 }
@@ -225,7 +225,7 @@ int UTF8ToUnicode(const char * &text, const bool utf8_encoded) // returns -1 on 
 	return unicode_value;
 }
 
-void Font::RenderString(int x, int y, int width, const char * text, int color, int selected, const bool utf8_encoded)
+void LcdFont::RenderString(int x, int y, int width, const char * text, int color, int selected, const bool utf8_encoded)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
@@ -291,7 +291,7 @@ void Font::RenderString(int x, int y, int width, const char * text, int color, i
     }
 }
 
-int Font::getRenderWidth(const char * text, const bool utf8_encoded)
+int LcdFont::getRenderWidth(const char * text, const bool utf8_encoded)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
