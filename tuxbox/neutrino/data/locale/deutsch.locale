@@ -742,7 +742,7 @@ movieplayer.tshelp ROT/Home Stop\nGRÃœN Resync\nGELB Pause/Weiter\nBLAU Bookmark
 movieplayer.vlchelp ROT/Home Stop\nGRÃœN Resync\nGELB Pause/Weiter\n\nHilfe: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.toomanybookmarks Sie haben bereits zu viele Bookmarks angelegt.\nEs muß erst ein anderes gelöscht werden.
 movieplayer.bookmarkname Bookmark Name
-movieplayer.bookmarkname_hint1 Geben Sie den Namen für das neue Bookmark ein
+movieplayer.bookmarkname_hint1 Geben Sie den Namen fÃ¼r das neue Bookmark ein
 movieplayer.bookmarkname_hint2 
 movieplayer.skipping Neupositionierung - bitte warten
 movieplayer.goto Springe zu ...
