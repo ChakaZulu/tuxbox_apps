@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include "driver/audio.h"
 #include "controldMsg.h"
 #include "dbox/avs_core.h"
 #include "dbox/fp.h"
@@ -602,88 +603,6 @@ void setBoxType()
 	printf("[controld] Boxtype detected: (%s, %d, %d, %s)\n", strmID, mID, settings.boxtype, BoxNames[settings.boxtype]);
 }
 
-void setVolume(char volume)
-{
-	int fd;
-	settings.volume = volume;
-
-	int i = 64-int(volume*64.0/100.0);
-	//printf("[controld] set volume: %d\n", i );
-	if (i < 0)
-	{
-		i=0;
-	}
-	else if (i > 63)
-	{
-		i=63;
-	}
-
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSVOL,&i)< 0)
-	{
-		perror("AVSIOGVOL:");
-		return;
-	}
-	close(fd);
-
-
-	lcdd.setVolume(volume);
-	eventServer->sendEvent( CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &volume, sizeof(volume) );
-}
-
-void Mute()
-{
-	settings.mute = 1;
-	int i;
-	int fd;
-	i=AVS_MUTE;
-
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSMUTE,&i)< 0)
-	{
-		perror("AVSIOSMUTE:");
-		return;
-	}
-	close(fd);
-
-	lcdd.setMute(true);
-	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
-}
-
-void UnMute()
-{
-	settings.mute = 0;
-	int i;
-	int fd;
-	i=AVS_UNMUTE;
-
-	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
-	{
-		perror("open");
-		return;
-	}
-
-	if (ioctl(fd,AVSIOSMUTE,&i)< 0)
-	{
-		perror("AVSIOSMUTE:");
-		return;
-	}
-	close(fd);
-
-	lcdd.setMute(false);
-	eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
-}
-
 
 void parse_command(int connfd, CControld::commandHead* rmessage)
 {
@@ -703,15 +622,24 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			//printf("[controld] set volume\n");
 			CControld::commandVolume msg;
 			read(connfd, &msg, sizeof(msg));
-			setVolume(msg.volume);
+			settings.volume = msg.volume;
+			audioControl::setVolume(msg.volume);
+			lcdd.setVolume(msg.volume);
+			eventServer->sendEvent( CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &msg.volume, sizeof(msg.volume) );
 			break;
 		case CControld::CMD_MUTE:
 			//printf("[controld] mute\n");
-			Mute();
+			settings.mute = 1;
+			audioControl::setMute(true);
+			lcdd.setMute(true);
+			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 			break;
 		case CControld::CMD_UNMUTE:
 			//printf("[controld] unmute\n");
-			UnMute();
+			settings.mute = 0;
+			audioControl::setMute(false);
+			lcdd.setMute(false);
+			eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 			break;
 		case CControld::CMD_SETVIDEOFORMAT:
 			//printf("[controld] set videoformat\n");
@@ -807,7 +735,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.53 2002/03/18 15:05:29 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.54 2002/03/19 17:34:37 McClean Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)
@@ -866,11 +794,22 @@ int main(int argc, char **argv)
 	watchDog->registerNotifier(WDE_VIDEOMODE, aspectRatioNotifier);
 
 	//init
-	setVolume(settings.volume);
+	audioControl::setVolume(settings.volume);
+	lcdd.setVolume(settings.volume);
+
+	if (settings.mute== 1)
+	{
+		audioControl::setMute(true);
+		lcdd.setMute(true);
+	}
+	else
+	{
+		audioControl::setMute(false);
+		lcdd.setMute(false);
+	}
+
 	setvideooutput(settings.videooutput);
 	setVideoFormat(settings.videoformat, false);
-	if (settings.mute== 1)
-		Mute();
 
 
     try

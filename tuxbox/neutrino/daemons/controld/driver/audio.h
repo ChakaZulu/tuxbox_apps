@@ -26,25 +26,24 @@
 #ifndef __audiocontrol__
 #define __audiocontrol__
 
+#include "ost/audio.h"
 
 class audioControl
 {
 
-	enum 
-	{	
-		AUDIO_STEREO = 1,
-		AUDIO_MONO_LEFT,
-		AUDIO_MONO_RIGHT
-	};
+	public:
 
-	
+		enum 
+		{	
+			STEREO = AUDIO_STEREO,
+			MONO_LEFT = AUDIO_MONO_LEFT,
+			MONO_RIGHT = AUDIO_MONO_RIGHT
+		};
+
+		static void setAudioMode(int mode);
+		static void setVolume(char volume);
+		static void setMute(bool mute);
 
 };
-
-
-
-
-
-
 
 #endif

@@ -24,11 +24,82 @@
 */
 
 #include "audio.h"
+#include "dbox/avs_core.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
-/*
-ioctl(audiofd, AUDIO_CHANNEL_SELECT, AUDIO_MONO_RIGHT)
-P driver/include/ost/audio.h
-"/dev/ost/audio0"
-*/
 
+void audioControl::setAudioMode(int mode)
+{
+	int fd;
+
+	if ((fd = open("/dev/ost/audio0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AUDIO_CHANNEL_SELECT,&mode)< 0)
+	{
+		perror("AVSIOGVOL:");
+		return;
+	}
+	close(fd);
+}
+
+
+void audioControl::setVolume(char volume)
+{
+	int fd;
+
+	int i = 64-int(volume*64.0/100.0);
+
+	if (i < 0)
+	{
+		i=0;
+	}
+	else if (i > 63)
+	{
+		i=63;
+	}
+
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSVOL,&i)< 0)
+	{
+		perror("AVSIOGVOL:");
+		return;
+	}
+	close(fd);
+}
+
+void audioControl::setMute(bool mute)
+{
+	int i;
+	int fd;
+
+	i=mute?AVS_MUTE:AVS_UNMUTE;
+
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSMUTE,&i)< 0)
+	{
+		perror("AVSIOSMUTE:");
+		return;
+	}
+	close(fd);
+}
