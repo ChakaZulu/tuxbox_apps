@@ -60,10 +60,13 @@ void eWidget::releaseFocus()
 {
 	if ((!parent) && have_focus)
 	{
-		removeActionMap(&i_focusActions->map);
-		if (eZap::getInstance()->focus==this)	// if we don't have lost the focus, ...
-			eZap::getInstance()->focus=oldTLfocus;	// give it back
 	 	have_focus--;
+		if (!have_focus)
+		{
+			removeActionMap(&i_focusActions->map);
+			if (eZap::getInstance()->focus==this)	// if we don't have lost the focus, ...
+				eZap::getInstance()->focus=oldTLfocus;	// give it back
+		}
  	}
 }
 
