@@ -4129,7 +4129,6 @@ void CNeutrinoApp::tvMode( bool rezap )
 	{
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
-		g_Zapit->setStandby(false);
 	}
 
 	mode = mode_tv;
@@ -4192,8 +4191,6 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 void CNeutrinoApp::standbyMode( bool bOnOff )
 {
 	//printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
-	if(recordingstatus)
-		return; 
 
 	if( bOnOff )
 	{
@@ -4209,7 +4206,6 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		CLCD::getInstance()->setMode(CLCD::MODE_STANDBY);
 		g_Controld->videoPowerDown(true);
-		g_Zapit->setStandby(true);
 
 		lastMode = mode;
 		mode = mode_standby;
@@ -4224,7 +4220,6 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
-		g_Zapit->setStandby(false);
 
 		//Send ir
 		CIRSend irs("sboff");
@@ -4264,7 +4259,6 @@ void CNeutrinoApp::radioMode( bool rezap)
 	{
 		CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
-		g_Zapit->setStandby(false);
 	}
 
 	mode = mode_radio;
