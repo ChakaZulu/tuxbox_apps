@@ -113,6 +113,9 @@ void CChannelList::updateEvents(void)
 	CChannelEventList events = g_Sectionsd->getChannelEvents();
 
 	for (uint count=0; count<chanlist.size(); count++)
+		chanlist[count]->currentEvent= CChannelEvent();
+
+	for (uint count=0; count<chanlist.size(); count++)
 		for ( CChannelEventList::iterator e= events.begin(); e != events.end(); ++e )
 			if (chanlist[count]->onid_sid == e->serviceID() )
 			{
