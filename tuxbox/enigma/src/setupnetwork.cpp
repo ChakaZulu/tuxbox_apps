@@ -729,7 +729,7 @@ static void errorMessage(const eString message, int type=0)
 }
 
 eNFSSetup::eNFSSetup()
-	:eWindow(0), timeout(eApp)
+	:eWindow(0), timeout(eApp), mountContainer(0)
 {
 	CONNECT(timeout.timeout, eNFSSetup::mountTimeout);
 	cur_entry=0;
@@ -1242,6 +1242,11 @@ int eNFSSetup::eventHandler(const eWidgetEvent &e)
 		return 1;
 	}
 	return eWindow::eventHandler(e);
+}
+
+eNFSSetup::~eNFSSetup()
+{
+	delete mountContainer;
 }
 
 #endif

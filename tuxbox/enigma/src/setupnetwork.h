@@ -45,7 +45,7 @@ class eNFSSetup: public eWindow
 	void mountTimeout();
 public:
 	eNFSSetup();
-	~eNFSSetup(){};
+	~eNFSSetup();
     
 	void automount();
 };
