@@ -1,5 +1,5 @@
-#ifndef __thread_h
-#define __thread_h
+#ifndef __ebase_h
+#define __ebase_h
 
 #include <vector>
 #include <eptrlist.h>
@@ -127,22 +127,16 @@ static inline long timeout_usec ( const timeval & orig )
 	return (orig-now).tv_sec*1000000 + (orig-now).tv_usec;
 }
 
-class eThread
-{
-	pthread_t the_thread;
-	int thread_id;
-	static void *wrapper(void *ptr);
-public:
-	eThread();
-	~eThread();
-
-	virtual void thread()=0;
-};
-
 class eMainloop;
 
 					// die beiden signalquellen: SocketNotifier...
 
+/**
+ * \brief Gives a callback when data on a file descriptor is ready.
+ *
+ * This class emits the signal \c eSocketNotifier::activate whenever the
+ * event specified by \c req is available.
+ */
 class eSocketNotifier
 {
 public:
@@ -153,6 +147,13 @@ private:
 	int state;
 	int requested;		// requested events (POLLIN, ...)
 public:
+	/** 
+	 * \brief Constructs a eSocketNotifier.
+	 * \param context The thread where to bind the socketnotifier to. The signal is emitted from that thread.
+	 * \param fd The filedescriptor to monitor. Can be a device or a socket.
+	 * \param req The events to watch to, normally either \c Read or \c Write. You can specify any events that \c poll supports.
+	 * \param startnow Specifies if the socketnotifier should start immediately.
+	 */ 
 	eSocketNotifier(eMainloop *context, int fd, int req, bool startnow=true);
 	~eSocketNotifier();
 
@@ -167,6 +168,11 @@ public:
 };
 
 				// ... und Timer
+/**
+ * \brief Gives a callback after a specified timeout.
+ *
+ * This class emits the signal \c eTimer::timeout after the specified timeout.
+ */
 class eTimer
 {
 	eMainloop &context;
@@ -175,6 +181,12 @@ class eTimer
 	bool bSingleShot;
 	bool bActive;
 public:
+	/**
+	 * \brief Constructs a timer.
+	 *
+	 * The timer is not yet active, it has to be started with \c start.
+	 * \param context The thread from which the signal should be emitted.
+	 */
 	eTimer(eMainloop *context): bActive(false), context(*context) { }
 	~eTimer()	{		if (bActive) stop();	}
 
@@ -214,7 +226,12 @@ public:
 	void exit_loop();
 };
 
-
+/**
+ * \brief The application class.
+ *
+ * An application provides a mainloop, and runs in the primary thread.
+ * You can have other threads, too, but this is the primary one.
+ */
 class eApplication: public eMainloop
 {
 public:
@@ -228,14 +245,4 @@ public:
 		eApp = 0;
 	}
 };
-
-
-class eMessagePump
-{
-	int fd[2];
-public:
-	int send(void *data, int len);
-	int recv(void *data, int len); // blockierend
-};
-
 #endif

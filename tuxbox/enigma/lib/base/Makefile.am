@@ -5,7 +5,7 @@ INCLUDES = \
 noinst_LTLIBRARIES = libbase.la
 
 libbase_la_SOURCES = \
-	ebase.cpp erect.cpp esize.cpp epoint.cpp eptrlist.cpp
+	ebase.cpp erect.cpp esize.cpp epoint.cpp eptrlist.cpp message.cpp thread.cpp
 
 AM_CXXFLAGS = $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
 
