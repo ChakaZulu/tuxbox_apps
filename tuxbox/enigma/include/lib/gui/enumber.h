@@ -32,6 +32,7 @@ protected:
 	int keyDown(int key);
 	void gotFocus();
 	void lostFocus();
+	int setProperty(const eString &prop, const eString &value);
 public:
 	static void unpack(__u32 l, int *t);
 	static void pack(__u32 &l, int *t);

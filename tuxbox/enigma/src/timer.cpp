@@ -39,6 +39,8 @@ eTimerManager* eTimerManager::instance=0;
 
 void normalize( struct tm & );
 
+bool Overlapping( const ePlaylistEntry &e1, const ePlaylistEntry &e2 );
+
 static time_t getNextEventStartTime( time_t t, int duration, int type, bool notToday )
 {
 	if ( type < ePlaylistEntry::isRepeating )
@@ -992,11 +994,10 @@ eTimerManager::~eTimerManager()
 
 ePlaylistEntry* eTimerManager::findEvent( eServiceReference *service, EITEvent *evt )
 {
- for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
-		if ( ( evt->event_id != -1 && i->event_id == evt->event_id ) ||
-				 ( *service == i->service && evt->start_time == i->time_begin ) )
-				return &*i;
-
+	ePlaylistEntry tmp(*service, evt->start_time, evt->duration, evt->event_id);
+	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
+		if ( *service == i->service && Overlapping(*i, tmp ) )
+			return &*i;
 	return 0;
 }
 
@@ -1013,8 +1014,14 @@ bool msOverlap( const ePlaylistEntry &m, const ePlaylistEntry &s )
 	struct tm multiple = *localtime( &m.time_begin ),
 				 Entry = *localtime( &s.time_begin );
 
-	if ( m.last_activation == getDate() && m.type & ePlaylistEntry::stateError )
-		return false;
+	int todayDate = getDate();
+	if ( m.last_activation == todayDate && m.type & ePlaylistEntry::stateError )
+	{
+		tm evtTime = *localtime(&s.time_begin);
+		int evtDate = ((100+evtTime.tm_mday)*1000000)+((100+evtTime.tm_mon+1)*1000)+evtTime.tm_year;
+		if ( evtDate == todayDate )
+			return false;
+	}
 
 /*				eDebug("multiple %02d:%02d, duration = %d, entry %02d:%02d, duration = %d",
 					multiple.tm_hour, multiple.tm_min, i->duration,
@@ -1047,6 +1054,20 @@ bool mmOverlap( const ePlaylistEntry &m1, const ePlaylistEntry &m2 )
 	return false;
 }
 
+bool Overlapping( const ePlaylistEntry &e1, const ePlaylistEntry &e2 )
+{
+	bool overlap=false;
+	if ( e1.type & ePlaylistEntry::isRepeating && e2.type & ePlaylistEntry::isRepeating )
+		overlap = mmOverlap( e1, e2 );
+	else if ( e1.type & ePlaylistEntry::isRepeating )
+		overlap = msOverlap( e1, e2 );
+	else if ( e2.type & ePlaylistEntry::isRepeating )
+		overlap = msOverlap( e2, e1 );
+	else overlap = ( !( e1.type & (ePlaylistEntry::stateError|ePlaylistEntry::stateFinished) )
+		&& Overlap( e2.time_begin, e2.duration, e1.time_begin, e1.duration) );
+	return overlap;
+}
+
 bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry& entry, int type )
 {
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
@@ -1066,15 +1087,15 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 				str2 = _("Update event in timerlist");
 				str3 = _("Really update this event?");
 			}
-			// show messageBox blasel.. running event...
+/*			// show messageBox blasel.. running event...
 			if ( &(*nextStartingEvent) == &entry && entry.type & ePlaylistEntry::stateRunning  )
 			{
 				eMessageBox box(str1, str2, eMessageBox::btOK|eMessageBox::iconWarning );
 				box.show();
 				box.exec();
 				box.hide();
-			}
-			eMessageBox box(str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
+			}*/
+			eMessageBox box(str1+'\n'+str3, str2, eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btNo);
 			box.show();
 			int r=box.exec();
 			box.hide();
@@ -1106,17 +1127,18 @@ bool eTimerManager::removeEventFromTimerList( eWidget *sel, const ePlaylistEntry
 
 bool eTimerManager::removeEventFromTimerList( eWidget *sel, const eServiceReference *ref, const EITEvent *evt )
 {
+	ePlaylistEntry tmp(*ref, evt->start_time, evt->duration, evt->event_id);
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
-		if ( ( i->event_id != -1 && i->event_id == evt->event_id ) || ( *ref == i->service && evt->start_time == i->time_begin ) )
+		if ( *ref == i->service && Overlapping(*i, tmp ) )
 			return removeEventFromTimerList( sel, *i );
 	return false;
 }
 
 bool eTimerManager::eventAlreadyInList( eWidget *w, EITEvent &e, eServiceReference &ref )
 {
+	ePlaylistEntry tmp(ref, e.start_time, e.duration, e.event_id);
 	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end(); i++)
-		if ( ( e.event_id != -1 && e.event_id == i->event_id ) ||
-			   ( ref == i->service && e.start_time == i->time_begin ) )
+		if ( ref == i->service && Overlapping(*i, tmp ) )
 		{
 			eMessageBox box(
 				_("This event is already in the timerlist."),
@@ -1138,54 +1160,29 @@ bool eTimerManager::addEventToTimerList( eWidget *sel, const ePlaylistEntry& ent
 	{
 		if ( exclude && *exclude == *i )
 			continue;
-		if ( !(entry.type & ePlaylistEntry::isRepeating) &&
-			 ( ( entry.event_id != -1 && entry.event_id == i->event_id ) ||
-				 ( entry.service == i->service && entry.time_begin == i->time_begin ) ) )
+		if ( Overlapping(*i, entry) )
 		{
-			eMessageBox box(_("This event is already in the timerlist."), _("Add event to timerlist"), eMessageBox::iconWarning|eMessageBox::btOK);
-			sel->hide();
-			box.show();
-			box.exec();
-			box.hide();
-			sel->show();
-			return false;
-		}
-		else
-		{
-			bool overlap=false;
-			if ( i->type & ePlaylistEntry::isRepeating &&
-					entry.type & ePlaylistEntry::isRepeating )
-				overlap = mmOverlap( *i, entry );
-			else if ( i->type & ePlaylistEntry::isRepeating )
-				overlap = msOverlap( *i, entry );
-			else if ( entry.type & ePlaylistEntry::isRepeating )
-				overlap = msOverlap( entry, *i );
-			else overlap = ( !( i->type & (ePlaylistEntry::stateError|ePlaylistEntry::stateFinished) )
-									&& Overlap( entry.time_begin, entry.duration, i->time_begin, i->duration) );
-			if ( overlap )
+			if ( entry.type & ePlaylistEntry::doFinishOnly )
 			{
-				if ( entry.type & ePlaylistEntry::doFinishOnly )
-				{
-					eMessageBox box(_("The Endtime overlaps with another event in the timerlist"), _("Set Stop Time"), eMessageBox::iconWarning|eMessageBox::btOK);
-					sel->hide();
-					box.show();
-					box.exec();
-					box.hide();
-					sel->show();
-				}
-				else
-				{
-					eMessageBox box(_("This event cannot added to the timerlist.\n"
-						"The event overlaps with another event in the timerlist\n"
-						"Please check the timerlist manually."), _("Add event to timerlist"), eMessageBox::iconWarning|eMessageBox::btOK);
-					sel->hide();
-					box.show();
-					box.exec();
-					box.hide();
-					sel->show();
-				}
-				return false;
+				eMessageBox box(_("The Endtime overlaps with another event in the timerlist"), _("Set Stop Time"), eMessageBox::iconWarning|eMessageBox::btOK);
+				sel->hide();
+				box.show();
+				box.exec();
+				box.hide();
+				sel->show();
 			}
+			else
+			{
+				eMessageBox box(_("This event cannot added to the timerlist.\n"
+					"The event overlaps with another event in the timerlist\n"
+					"Please check the timerlist manually."), _("Add event to timerlist"), eMessageBox::iconWarning|eMessageBox::btOK);
+				sel->hide();
+				box.show();
+				box.exec();
+				box.hide();
+				sel->show();
+			}
+			return false;
 		}
 	}
 	if (!exclude)
@@ -2082,13 +2079,13 @@ int eTimerEditView::eventHandler( const eWidgetEvent &event )
 	switch ( event.type )
 	{
 		case eWidgetEvent::evtAction:
-			if (event.action == &i_TimerEditActions->incBegTime )
+			if (event.action == &i_TimerEditActions->incBegTime && !event_name->inEditMode() )
 				changeTime(-1);
-			else if (event.action == &i_TimerEditActions->decBegTime )
+			else if (event.action == &i_TimerEditActions->decBegTime && !event_name->inEditMode() )
 				changeTime(-2);
-			else if (event.action == &i_TimerEditActions->incEndTime )
+			else if (event.action == &i_TimerEditActions->incEndTime && !event_name->inEditMode() )
 				changeTime(+2);
-			else if ( event.action == &i_TimerEditActions->decEndTime )
+			else if ( event.action == &i_TimerEditActions->decEndTime && !event_name->inEditMode() )
 				changeTime(+1);
 			else
 				return eWindow::eventHandler( event );

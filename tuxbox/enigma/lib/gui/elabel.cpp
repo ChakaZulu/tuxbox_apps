@@ -140,7 +140,7 @@ void eLabel::redrawWidget(gPainter *target, const eRect &rc)
 	{
 //		eDebug("blit pixmap area left=%d, top=%d, right=%d, bottom=%d", rc.left(), rc.top(), rc.right(), rc.bottom() );
 //		eDebug("pixmap_pos x = %d, y = %d, xsize=%d, ysize=%d", pixmap_position.x(), pixmap_position.y(), pixmap->x, pixmap->y );
-		target->blit(*pixmap, shortcutPixmap?pixmap_position+ePoint( area.left(), 0):pixmap_position, area, (blitFlags & BF_ALPHATEST) ? gPixmap::blitAlphaTest : 0);
+		target->blit(*pixmap, shortcutPixmap?pixmap_position+ePoint( area.left(), 0):pixmap_position, area, /*(blitFlags & BF_ALPHATEST) ?*/ gPixmap::blitAlphaTest/* : 0*/);
 	}
 	if (shortcutPixmap)
 		target->blit(*shortcutPixmap, 

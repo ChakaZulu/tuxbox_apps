@@ -98,7 +98,7 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 			else
 			{
 				button.resize( eSize(smButtonDeco, height()) );
-				button.move( ePoint( position.x()+size.width()-smButtonDeco, 0 ) );
+				button.move( ePoint( clientrect.right()-smButtonDeco, clientrect.top() ) );
 			}
 			if (pm)
 				button.pixmap_position = ePoint( (button.getSize().width() - pm->x) / 2, (button.getSize().height() - pm->y) / 2 );
@@ -130,7 +130,7 @@ void eComboBox::onEntrySelected( eListBoxEntryText* e)
 
 	listbox.hide();
 
-	if (e && text != e->getText() )
+	if (e)
 	{
 		setText(e->getText());
 		setFocus( this );

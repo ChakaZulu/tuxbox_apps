@@ -11,14 +11,28 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus,
 #ifndef DISABLE_LCD
 		tmpDescr(0),
 #endif
-		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
-		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
+		colorActiveB(eSkin::getActive()->queryScheme("listbox.selected.background")),
+		colorActiveF(eSkin::getActive()->queryScheme("listbox.selected.foreground")),
 		movemode(0), MaxEntries(0), flags(0), item_height(item_height),
 		columns(1), in_atomic(0), top(childs.end()), bottom(childs.end()), current(childs.end())
 {
 	childs.setAutoDelete(false);	// machen wir selber
 	addActionMap(&i_cursorActions->map);
 	addActionMap(&i_listActions->map);
+	if ( !colorActiveB )
+		colorActiveB=eSkin::getActive()->queryScheme("global.selected.background");
+	if ( !colorActiveF )
+		colorActiveF=eSkin::getActive()->queryScheme("global.selected.foreground");
+	{
+		gColor col = eSkin::getActive()->queryScheme("listbox.normal.background");
+		if (col)
+			backgroundColor=col;
+	}
+	{
+		gColor col = eSkin::getActive()->queryScheme("listbox.normal.foreground");
+		if (col)
+			foregroundColor=col;
+	}
 }
 
 eListBoxBase::~eListBoxBase()

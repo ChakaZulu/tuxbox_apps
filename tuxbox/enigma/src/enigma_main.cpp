@@ -2491,9 +2491,10 @@ void eZapMain::play()
 		case eServiceHandler::statePause:
 			pause();
 			break;
-		default:
+		case eServiceHandler::stateStopped:
 			if ( mode == modeFile )
 				playService( eServiceInterface::getInstance()->service, psDontAdd );
+		default:
 			break;
 	}
 	updateProgress();
@@ -2711,6 +2712,7 @@ int eZapMain::recordDVR(int onoff, int user, const char *timer_descr )
 			{
 				DVRSpaceLeft->show();
 				recStatusBlink.start(500, 1);
+				eZap::getInstance()->getServiceSelector()->actualize();
 			}
 /*			else
 				return -3;*/
@@ -2729,6 +2731,7 @@ int eZapMain::recordDVR(int onoff, int user, const char *timer_descr )
 		DVRSpaceLeft->hide();
 		recStatusBlink.stop();
 		recstatus->hide();
+		eZap::getInstance()->getServiceSelector()->actualize();
 
 		int profimode=0;
 		eConfig::getInstance()->getKey("/elitedvb/extra/profimode", profimode);
@@ -5066,12 +5069,17 @@ void eZapMain::setMode(int newmode, int user)
 
 void eZapMain::setServiceSelectorPath(eServicePath path)
 {
+	eServiceSelector *sel = eZap::getInstance()->getServiceSelector();
 	eServiceReference ref=path.current();
 	path.up();
 	eServicePath p = path;
 //	eDebug("Setting currentService to %s", ref.toString().c_str() );
 //	eDebug("setting path to %s", p.toString().c_str());
-	eZap::getInstance()->getServiceSelector()->setPath(path, ref);
+	eServicePath current = sel->getPath();
+	if ( path != current )
+		sel->setPath(path, ref);
+	else if ( sel->getSelected() != ref )
+		sel->selectService(ref);
 }
 
 void eZapMain::getServiceSelectorPath(eServicePath &path)

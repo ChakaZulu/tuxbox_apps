@@ -10,15 +10,46 @@ eButton::eButton(eWidget *parent, eLabel* desc, int takefocus, const char *deco)
 #ifndef DISABLE_LCD
 	tmpDescr(0),
 #endif
-	focusB(eSkin::getActive()->queryScheme("global.selected.background")),
-	focusF(eSkin::getActive()->queryScheme("global.selected.foreground")),
+	focusB(eSkin::getActive()->queryScheme("button.selected.background")),
+	focusF(eSkin::getActive()->queryScheme("button.selected.foreground")),
 	normalB(eSkin::getActive()->queryScheme("button.normal.background")),
-	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),
+	normalF(eSkin::getActive()->queryScheme("button.normal.foreground")),
 	descr(desc)
 {
 	align=eTextPara::dirCenter;
 	flags |= eLabel::flagVCenter;
 	addActionMap(&i_cursorActions->map);
+	if ( !focusF )
+		focusF=eSkin::getActive()->queryScheme("global.selected.foreground");
+	if ( !focusB )
+		focusB=eSkin::getActive()->queryScheme("global.selected.background");
+	if ( !normalF )
+		normalF=eSkin::getActive()->queryScheme("global.normal.foreground");
+	if ( !normalB )
+		normalB=eSkin::getActive()->queryScheme("global.normal.background");
+	setBackgroundColor(normalB);
+	setForegroundColor(normalF);
+}
+
+int eButton::setProperty(const eString &prop, const eString &value)
+{
+	if (prop=="foregroundColor")
+	{
+		normalF=eSkin::getActive()->queryColor(value);
+		setForegroundColor(normalF);
+	}
+	else if (prop=="backgroundColor")
+	{
+		normalB=eSkin::getActive()->queryColor(value);
+		setForegroundColor(normalB);
+	}
+	if (prop=="activeForegroundColor")
+		focusF=eSkin::getActive()->queryColor(value);
+	else if (prop=="activeBackgroundColor")
+		focusB=eSkin::getActive()->queryColor(value);
+	else
+		return eLabel::setProperty(prop, value);
+	return 0;
 }
 
 void eButton::gotFocus()
@@ -49,8 +80,6 @@ void eButton::gotFocus()
 #endif
 	setForegroundColor(focusF,false);
 	setBackgroundColor(focusB);
-
-//invalidate();
 }
 
 void eButton::lostFocus()
@@ -74,8 +103,6 @@ void eButton::lostFocus()
 #endif
 	setForegroundColor(normalF,false);
 	setBackgroundColor(normalB);
-
-//	invalidate();	
 }
 
 int eButton::eventHandler(const eWidgetEvent &event)

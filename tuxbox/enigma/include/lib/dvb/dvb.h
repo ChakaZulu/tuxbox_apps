@@ -520,6 +520,14 @@ class eServicePath
 {
 	std::list<eServiceReference> path;
 public:
+	bool operator != ( const eServicePath& p ) const
+	{
+		return p.path != path;
+	}
+	bool operator == ( const eServicePath &p ) const
+	{
+		return p.path == path;
+	}
 	eServicePath()	{	}
 	eServicePath( const eString& data );
 	eServicePath(const eServiceReference &ref);

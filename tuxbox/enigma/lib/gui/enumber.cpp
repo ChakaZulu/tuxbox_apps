@@ -206,10 +206,10 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eWidget* descr, int grabfocus, const char *deco)
  :eDecoWidget(parent, grabfocus, deco ),
 	active(0), 
-	cursorB(eSkin::getActive()->queryScheme("global.selected.background")),	
-	cursorF(eSkin::getActive()->queryScheme("global.selected.foreground")),	
-	normalB(eSkin::getActive()->queryScheme("global.normal.background")),	
-	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
+	cursorB(eSkin::getActive()->queryScheme("number.selected.background")),
+	cursorF(eSkin::getActive()->queryScheme("number.selected.foreground")),
+	normalB(eSkin::getActive()->queryScheme("number.normal.background")),
+	normalF(eSkin::getActive()->queryScheme("number.normal.foreground")),
 	have_focus(0), digit(isactive), isactive(isactive), flags(0), descr(descr), tmpDescr(0),
 	neg(false)
 {
@@ -220,6 +220,16 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	for (int i=0; init && i<len; i++)
 		number[i]=init[i];
 	addActionMap(&i_cursorActions->map);
+	if ( !cursorF )
+		cursorF=eSkin::getActive()->queryScheme("global.selected.foreground");
+	if ( !cursorB )
+		cursorB=eSkin::getActive()->queryScheme("global.selected.background");
+	if ( !normalF )
+		normalF=eSkin::getActive()->queryScheme("global.normal.foreground");
+	if ( !normalB )
+		normalB=eSkin::getActive()->queryScheme("global.normal.background");
+	setBackgroundColor(normalB);
+	setForegroundColor(normalF);
 }                 
              
 eNumber::~eNumber()
@@ -363,6 +373,27 @@ void eNumber::lostFocus()
 	else
 		invalidate(getNumberRect(active));
 	isactive=0;
+}
+
+int eNumber::setProperty(const eString &prop, const eString &value)
+{
+	if (prop=="foregroundColor")
+	{
+		normalF=eSkin::getActive()->queryColor(value);
+		setForegroundColor(normalF);
+	}
+	else if (prop=="backgroundColor")
+	{
+		normalB=eSkin::getActive()->queryColor(value);
+		setForegroundColor(normalB);
+	}
+	if (prop=="activeForegroundColor")
+		cursorF=eSkin::getActive()->queryColor(value);
+	else if (prop=="activeBackgroundColor")
+		cursorB=eSkin::getActive()->queryColor(value);
+	else
+		return eDecoWidget::setProperty(prop, value);
+	return 0;
 }
 
 void eNumber::setNumber(int f, int n)

@@ -795,7 +795,7 @@
 			<eLabel name="status" position="80:110" size="e:30" />
 			<eButton name="format" text="format" position="10:170" size="225:40" loadDeco="" helptext="initialize the disk for use with the dreambox" shortcut="red" />
 			<eButton name="check" text="check" position="245:170" size="225:40" loadDeco="" helptext="do a filesystem check" shortcut="yellow" />
-			<eButton name="ext" position="480:170" size="60:40" loadDeco="" helptext="show extended configuration" alphatest="on" />
+			<eButton name="ext" position="480:170" size="60:40" loadDeco="" helptext="show extended configuration" />
 			<eCombobox name="fs" position="e-210:220" size="e-10:35" loadDeco="" helptext="select filsystem to format" />
 			<eStatusBar name="statusbar" position="0:e-50" size="e:e" loadDeco="" />
 		</eHarddiskMenu>

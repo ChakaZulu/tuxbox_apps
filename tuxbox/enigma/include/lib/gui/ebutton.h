@@ -19,6 +19,7 @@ protected:
 	void gotFocus();
 	void lostFocus();
 public:
+	int setProperty(const eString &prop, const eString &val);
 	/**
 	 * \brief Constructs a button.
 	 *

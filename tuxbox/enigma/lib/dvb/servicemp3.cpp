@@ -832,7 +832,7 @@ int eServiceHandlerMP3::serviceCommand(const eServiceCommand &cmd)
 	switch (cmd.type)
 	{
 	case eServiceCommand::cmdSetSpeed:
-		if ((state == statePlaying) || (state == statePause) || (state == stateSkipping))
+		if ((state == statePlaying) || (state == statePause) || (state == stateStopped) || (state == stateSkipping))
 		{
 			if (cmd.parm < 0)
 				return -1;
@@ -856,6 +856,8 @@ int eServiceHandlerMP3::serviceCommand(const eServiceCommand &cmd)
 		break;
 	case eServiceCommand::cmdSeekAbsolute:
 		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::seek, cmd.parm));
+		if ( cmd.parm == 0 && state == statePause )
+			state = stateStopped;
 		break;
 	case eServiceCommand::cmdSeekReal:
 		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::seekreal, cmd.parm));
