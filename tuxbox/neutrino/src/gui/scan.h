@@ -29,7 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
 #ifndef __scants__
 #define __scants__
 
@@ -39,27 +38,43 @@
 
 #include "widget/menue.h"
 
-
 using namespace std;
 
 class CScanTs : public CMenuTarget
 {
 	private:
-		CFrameBuffer	*frameBuffer;
+		CFrameBuffer *frameBuffer;
 		int x;
 		int y;
 		int width;
 		int height;
-		int hheight,mheight; // head/menu font height
+		int hheight, mheight; // head/menu font height
+		int ypos; //current y position
+		int xpos1; //x position for first column
+		int xpos2; //x position for second column
+		int radar; 
+		int xpos_radar;
+		int ypos_radar;
+		int ypos_cur_satellite;
+		int ypos_transponder;
+		int ypos_frequency;
+		int ypos_provider;
+		int ypos_channel;
+		int ypos_service_numbers;
+		bool success;
+		bool istheend;
+		uint found_transponder;
 
 		void paint();
+		void paintLine(int x, int * y, int width, char * txt);
+		void paintLine(int x, int y, int width, char * txt);
+		void paintRadar(void);
+		int handleMsg(uint msg, uint data);
+		int greater_xpos(int xpos, char * txt);
 
 	public:
-
 		CScanTs();
 		void hide();
-		int exec( CMenuTarget* parent, string actionKey );
+		int exec(CMenuTarget* parent, string actionKey);
 };
-
-
 #endif
