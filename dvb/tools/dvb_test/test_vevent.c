@@ -78,6 +78,8 @@ int main(void)
 		return 1;
 	}
 
+	videoGetSize(vfd, NULL);
+
 	pfd[0].fd = vfd;
 	pfd[0].events = POLLPRI;
 
