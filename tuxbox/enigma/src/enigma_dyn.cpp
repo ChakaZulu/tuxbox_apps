@@ -53,7 +53,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.5.1"
+#define WEBXFACEVERSION "1.5.2"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -4371,7 +4371,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
 	else
 	{
-		result += "<html><body onUnload=\"parent.window.opener.location.close(true)\">Timer event was created successfully.</body></html>";
+		result += "Timer event was created successfully.";
 		eTimerManager::getInstance()->saveTimerList();
 	}
 

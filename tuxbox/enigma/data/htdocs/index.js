@@ -7,8 +7,8 @@ function setVol(xy)
 function setVid(xy)
 {
 	document.location = "/setVideo?position="+xy;
-	setTimeout("reload()", 100);
-}	
+	setTimeout("reload()", 1000);
+}
 
 function Mute(xy)
 {

@@ -5,59 +5,59 @@
 		<script>
 			function key(code)
 			{
-				alert(code);
+				document.location="/cgi-bin/rc?" + code;
 			}
 		</script>
 	</head>
 	<body>
 	<map id="rc">
-		<area shape="circle" coords="175, 35, 10" href="javascript:key('power')">
+		<area shape="circle" coords="175, 35, 10" href="javascript:key(116)">
 		
-		<area shape="circle" coords="85, 120, 10" href="javascript:key('1')">
-		<area shape="circle" coords="150, 120, 10" href="javascript.key('2')">
-		<area shape="circle" coords="210, 125 10" href="javascript:key('3')">
+		<area shape="circle" coords="85, 120, 10" href="javascript:key(2)">
+		<area shape="circle" coords="150, 120, 10" href="javascript.key(3)">
+		<area shape="circle" coords="210, 125 10" href="javascript:key(4)">
 		
-		<area shape="circle" coords="85, 150, 10" href="javascript:key('4')">
-		<area shape="circle" coords="150, 155, 10" href="javascript:key('5')">
-		<area shape="circle" coords="210 150, 10" href="javascript:key('6')">
+		<area shape="circle" coords="85, 150, 10" href="javascript:key(5)">
+		<area shape="circle" coords="150, 155, 10" href="javascript:key(6)">
+		<area shape="circle" coords="210 150, 10" href="javascript:key(7)">
 		
-		<area shape="circle" coords="90, 180, 10" href="javascript:key('7')">
-		<area shape="circle" coords="150, 185, 10" href="javascript:key('8')">
-		<area shape="circle" coords="210, 185, 10" href="javascript:key('9')">
+		<area shape="circle" coords="90, 180, 10" href="javascript:key(8)">
+		<area shape="circle" coords="150, 185, 10" href="javascript:key(9)">
+		<area shape="circle" coords="210, 185, 10" href="javascript:key(10)">
 		
-		<area shape="circle" coords="85, 220, 10" href="javascript:key('arrow left')">
-		<area shape="circle" coords="150, 215, 10" href="javascript:key('0')">
-		<area shape="circle" coords="210, 215, 10" href="javascript:key('arrow right')">
+		<area shape="circle" coords="85, 220, 10" href="javascript:key(412)">
+		<area shape="circle" coords="150, 215, 10" href="javascript:key(11)">
+		<area shape="circle" coords="210, 215, 10" href="javascript:key(407)">
 		
-		<area shape="circle" coords="75, 280, 15" href="javascript:key('vol up')">
-		<area shape="circle" coords="150, 265 10" href="javascript:key('mute')">
-		<area shape="circle" coords="225, 275, 15" href="javascript:key('bouquet up')">
+		<area shape="circle" coords="75, 280, 15" href="javascript:key(115)">
+		<area shape="circle" coords="150, 265 10" href="javascript:key(113)">
+		<area shape="circle" coords="225, 275, 15" href="javascript:key(402)">
 		
-		<area shape="circle" coords="95, 320, 15" href="javascript:key('vol down')">
-		<area shape="circle" coords="150, 300, 10" href="javascript:key('r u a lamer?')">
-		<area shape="circle" coords="205, 325, 15" href="javascript:key('bouquet down')">
+		<area shape="circle" coords="95, 320, 15" href="javascript:key(114)">
+		<area shape="circle" coords="150, 300, 10" href="javascript:key(1)">
+		<area shape="circle" coords="205, 325, 15" href="javascript:key(403)">
 		
-		<area shape="circle" coords="65, 365, 10" href="javascript:key('info')">
-		<area shape="circle" coords="145, 365, 15" href="javascript:key('up')">
-		<area shape="circle" coords="230, 370, 10" href="javascript:key('dreaming of a white christmas...')">
+		<area shape="circle" coords="65, 365, 10" href="javascript:key(358)">
+		<area shape="circle" coords="145, 365, 15" href="javascript:key(103)">
+		<area shape="circle" coords="230, 370, 10" href="javascript:key(141)">
 		
-		<area shape="circle" coords="90, 415, 15" href="javascript:key('left')">
-		<area shape="circle" coords="150, 415, 15" href="javascript:key('ok, ok ;-)')">
-		<area shape="circle" coords="200, 415, 15" href="javascript:key('right')">
+		<area shape="circle" coords="90, 415, 15" href="javascript:key(105)">
+		<area shape="circle" coords="150, 415, 15" href="javascript:key(352)">
+		<area shape="circle" coords="200, 415, 15" href="javascript:key(106)">
 		
-		<area shape="circle" coords="70, 470, 10" href="javascript:key('audio')">
-		<area shape="circle" coords="150, 460, 15" href="javascript:key('down')">
-		<area shape="circle" coords="220, 475, 10" href="javascript:key('video')">
+		<area shape="circle" coords="70, 470, 10" href="javascript:key(392)">
+		<area shape="circle" coords="150, 460, 15" href="javascript:key(108)">
+		<area shape="circle" coords="220, 475, 10" href="javascript:key(393)">
 		
-		<area shape="circle" coords="80, 525, 10" href="javascript:key('red')">
-		<area shape="circle" coords="125, 525, 10" href="javascript:key('green')">
-		<area shape="circle" coords="170, 525, 10" href="javascript:key('yellow')">
-		<area shape="circle" coords="215, 525, 10" href="javascript:key('blue')">
+		<area shape="circle" coords="80, 525, 10" href="javascript:key(398)">
+		<area shape="circle" coords="125, 525, 10" href="javascript:key(399)">
+		<area shape="circle" coords="170, 525, 10" href="javascript:key(400)">
+		<area shape="circle" coords="215, 525, 10" href="javascript:key(401)">
 		
-		<area shape="circle" coords="85, 575, 10" href="javascript:key('tv')">
-		<area shape="circle" coords="125, 575, 10" href="javascript:key('radio')">
-		<area shape="circle" coords="170, 580, 10" href="javascript:key('text')">
-		<area shape="circle" coords="210, 575, 10" href="javascript:key('help')">
+		<area shape="circle" coords="85, 575, 10" href="javascript:key(385)">
+		<area shape="circle" coords="125, 575, 10" href="javascript:key(392)">
+		<area shape="circle" coords="170, 580, 10" href="javascript:key(388)">
+		<area shape="circle" coords="210, 575, 10" href="javascript:key(138)">
 	</map>
 	<img src="rc_big.jpg" border="0" usemap="#rc">
 	</body>
