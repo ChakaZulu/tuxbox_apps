@@ -27,7 +27,7 @@ typedef unsigned char __u8;
 #include <ost/dmx.h>
 #include <ost/video.h>
 #include <ost/audio.h>
-#define NEW_CAMD
+// #define NEW_CAMD
 #else
 #include <xp/xp_osd_user.h>
 #include <vid/vid_inf.h>
