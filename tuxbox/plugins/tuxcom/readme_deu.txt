@@ -3,6 +3,10 @@ TuxCom:
 Historie:
 ---------
 
+22.09.2004 Version 1.5a
+ - Bugfix: Absturz im Editor / nach Schließen des Editors
+ - Bugfix: Absturz bei Verschieben (Button 6) von einzelnen Dateien
+
 30.08.2004 Version 1.5
  - Passwortschutz eingebaut (über Info->Blau änderbar)
  - Möglichkeit, beim Kopieren/Verschieben die Datei umzubenennen

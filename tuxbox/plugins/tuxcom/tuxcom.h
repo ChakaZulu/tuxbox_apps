@@ -89,7 +89,7 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.5\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.5a\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -417,7 +417,7 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
                   "Copy %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' kopieren ?"               ,
                   "Copying file '%s' to '%s'..."               ,"kopiere '%s' nach '%s' ..."                      ,
                   "Cannot copy to same Directory"              ,"kann nicht in das gleiche Verzeichnis kopieren"  ,
-                  "Move '%s' to '%s%s' ?"                      ,"'%s' nach '%s%s' verschieben ?"                  ,
+                  "Move '%s' to '%s' ?"                        ,"'%s' nach '%s' verschieben ?"                    ,
 				  "Move %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' verschieben ?"            ,
 				  "Moving file '%s' to '%s'..."                ,"verschiebe '%s' nach '%s' ..."                   ,
 				  "Delete '%s' ?"                              ,"'%s' löschen ?"                                  ,

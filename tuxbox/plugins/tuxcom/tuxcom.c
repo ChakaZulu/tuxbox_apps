@@ -1921,20 +1921,28 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 				case RC_OK:
 					if (markmode == 0)
 					{
+						*str = 0x00;
 						strncpy(str,szdst,maxchars);
-						while (str[strlen(str)-1] == ' ')
+						if (strlen(szdst) > 0)
 						{
-							str[strlen(str)-1] = 0x00;
+							str[strlen(szdst)-1] = 0x00;
+							while (str[strlen(str)-1] == ' ')
+								str[strlen(str)-1] = 0x00;
 						}
 						rccode = -1;
 						return RC_OK;
 					}
 					else
 					{
-						if (pos > markpos)
-							strncpy(szClipboard,(str+markpos),(pos-markpos));
-						else
-							strncpy(szClipboard,(str+pos),(markpos-pos));
+						*szClipboard = 0x00;
+						if (pos != markpos)
+						{
+							if (pos > markpos)
+								strncpy(szClipboard,(str+markpos),(pos-markpos));
+							else
+								strncpy(szClipboard,(str+pos),(markpos-pos));
+							szClipboard[strlen(szClipboard)-1] = 0x00;
+						}
 						markmode = 0;
 						break;
 					}
@@ -2386,9 +2394,9 @@ int CheckOverwrite(const char* szFile, int mode, char* szNew)
 {
 	char szMessage[356];
 
+	strcpy(szNew,szFile);
 	if (overwriteall != 0) return overwriteall;
 
-	strcpy(szNew,szFile);
 	if (FindFile(1-curframe,szFile) != NULL)
 	{
 		if (skipall != 0)      return skipall;
@@ -2427,7 +2435,6 @@ int CheckOverwrite(const char* szFile, int mode, char* szNew)
 
 void FillDir(int frame, int selmode)
 {
-
 	char* pch;
 	char selentry[256];
 	*selentry = 0x00;
@@ -2513,7 +2520,10 @@ void FillDir(int frame, int selmode)
 				pfe = getfileentry(frame, npos);
 				int ppos = strcspn((char*)(pzfe->name+zlen),"/");
 				if (ppos > 0)
+				{
 					strncpy(pfe->name,(char*)(pzfe->name+zlen),ppos);
+					pfe->name[strlen(pfe->name)-1] = 0x00;
+				}
 				else
 					strcpy(pfe->name,(char*)(pzfe->name+zlen));
 				memcpy(&pfe->fentry,&pzfe->fentry,sizeof(struct stat));
@@ -3144,6 +3154,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 					{
 						p1 = strchr(pcur,'\n');
 						int plen = (p1 ? p1-pcur: strlen(pcur));
+						int pnewlen,p1newlen;
 						strncpy(szInputBuffer,pcur,plen);
 						szInputBuffer[plen]=0x00;
 						RenderBox(0, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL-1 , viewx, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row+1)*FONTHEIGHT_SMALL+1, GRID, WHITE);
@@ -3151,11 +3162,14 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 						{
 							case RC_OK:
 							{
-								if (p1 && (plen != strlen(szInputBuffer)))
-								  memmove(pcur+strlen(szInputBuffer),p1,FILEBUFFER_SIZE-((pcur+strlen(szInputBuffer))-szFileBuffer));
+
+								pnewlen = strlen(szInputBuffer);
+								p1newlen = (FILEBUFFER_SIZE-pnewlen <= strlen(p1) ? FILEBUFFER_SIZE-pnewlen-1 : strlen(p1));
+								if (p1 && (plen != pnewlen))
+								    memmove((void*)(pcur+pnewlen),p1,p1newlen);//FILEBUFFER_SIZE-(((int)(pcur+pnewlen))-(int)szFileBuffer)-1);
 								if (sel > 0 && (*(pcur-1) != '\n')) {*pcur = '\n'; pcur++; count++;}
-								memcpy(pcur,szInputBuffer,strlen(szInputBuffer));
-								if (sel >= count-1) *(pcur+strlen(szInputBuffer)) = 0x00;
+								strncpy(pcur,szInputBuffer,pnewlen);
+								if (sel >= count-1) *(pcur+pnewlen) = 0x00;
 								changed = 1;
 								break;
 							}
@@ -3263,6 +3277,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 					switch (MessageBox(szMessage,"",YESNOCANCEL))
 					{
 						case YES:
+							fclose(pFile);
 							pFile = fopen(szFile,"w");
 							if (pFile)
 							{
@@ -3271,7 +3286,6 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 							}
 
 							rccode = -1;
-							fclose(pFile);
 							return;
 						case NO:
 							rccode = -1;
@@ -3378,6 +3392,7 @@ void DoTaskManager()
 				if (*p == 0x00) break;
 				sscanf(p,"%s%s",prid,uid);
 
+				memset(procname,0,256);
 				strncpy(procname,(char*)(p+26),255);
           		p2=strchr(procname,'\n');
           		if (p2 != NULL) *p2 = 0x00;
@@ -3427,6 +3442,7 @@ void DoTaskManager()
 					break;
 				case RC_RED:
 					sscanf(pcur,"%s%s",prid,uid);
+					memset(procname,0,256);
 					strncpy(procname,(char*)(pcur+26),255);
 	          		p2=strchr(procname,'\n');
 	          		if (p2 != NULL) *p2 = 0x00;

@@ -3,6 +3,10 @@ TuxCom:
 History:
 ---------
 
+22.09.2004 Version 1.5a
+ - bugfix: crash in editor / after closing editor
+ - bugfix: crash when moving (button 6) a single file
+
 30.08.2004 Version 1.5
  - password protection included (Button Info -> Blue)
  - possibility to rename file when copying or moving
