@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 14);
 	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.menu=fontRenderer->getFont("Arial", "Regular", 12);
-	display.setIconBasePath( DATADIR "/neutrino/icons/");
+	display.setIconBasePath( DATADIR "/lcdd/icons/");
 
 	if(!display.isAvailable())
 	{
