@@ -15,10 +15,12 @@
 int calcFontHeight( const gFont& font );
 
 class eListBoxEntry;
+class eProgress;
 
 class eListBoxBase: public eDecoWidget
 {
-	int recalced;
+	int removed_height_pixel;
+	eProgress *scrollbar;
 	const eWidget* descr;
 #ifndef DISABLE_LCD
 	eLabel* tmpDescr; // used for description Label in LCD
@@ -43,6 +45,7 @@ private:
 	void eraseBackground() {};
 	void recalcMaxEntries();
 	void recalcClientRect();
+	void recalcScrollBar();
 	int newFocus();
 	void redrawWidget(gPainter *target, const eRect &area);
 	void lostFocus();
