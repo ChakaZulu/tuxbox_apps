@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.295 2003/02/25 21:01:10 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.296 2003/02/28 19:37:46 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -224,6 +224,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		switch (frontend->setParameters(&t->second.feparams, t->second.polarization, t->second.DiSEqC)) {
 		case -1:
 			WARN("tuning failed\n");
+			tuned_transponder_id = 0;
 			return -1;
 		case 0:
 			break;
@@ -1409,7 +1410,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.295 2003/02/25 21:01:10 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.296 2003/02/28 19:37:46 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
