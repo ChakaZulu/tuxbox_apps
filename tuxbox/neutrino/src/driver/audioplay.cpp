@@ -154,6 +154,7 @@ CAudioPlayer::CAudioPlayer()
 
 void CAudioPlayer::init()
 {
+	CBaseDec::Init();
 	state = CBaseDec::STOP;
 }
 

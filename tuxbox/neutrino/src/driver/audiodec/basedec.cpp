@@ -34,9 +34,10 @@
 #include <dbox/avs_core.h>
 #define AVS_DEVICE "/dev/dbox/avs0"
 
+unsigned int CBaseDec::mSamplerate=0;
+
 bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int channels)
 {
-	static unsigned int samplerate=0;
 	bool crit_error=false;
 	 
 	if (::ioctl(soundfd, SNDCTL_DSP_RESET))
@@ -46,7 +47,7 @@ bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int
 	if(::ioctl(soundfd, SNDCTL_DSP_CHANNELS, &channels))
 		printf("channel set failed\n");
 #ifdef	 DBOX
-	if (dsp_speed != samplerate)
+	if (dsp_speed != mSamplerate)
 #endif	
    {
 		// mute audio to reduce pops when changing samplerate (avia_reset)
@@ -57,7 +58,7 @@ bool CBaseDec::SetDSP(int soundfd, int fmt, unsigned int dsp_speed, unsigned int
 			crit_error=true;
 	 	}
 	 	else
-	 		samplerate = dsp_speed;
+	 		mSamplerate = dsp_speed;
 		usleep(400000);
 		if (!was_muted)
 			avs_mute(false);
@@ -87,4 +88,8 @@ bool CBaseDec::avs_mute(bool mute)
 	 return (b==AVS_MUTE);
 }
 
+void CBaseDec::Init()
+{
+	mSamplerate=0;
+}
 
