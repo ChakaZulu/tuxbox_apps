@@ -1,16 +1,19 @@
 /*
 
-  $Id: tuxbox.h,v 1.1 2003/01/01 21:30:10 Jolt Exp $
+  $Id: tuxbox.h,v 1.2 2003/01/01 22:00:02 Jolt Exp $
  
   $Log: tuxbox.h,v $
+  Revision 1.2  2003/01/01 22:00:02  Jolt
+  Whooops ;)
+
   Revision 1.1  2003/01/01 21:30:10  Jolt
   Tuxbox info lib
 
 
 
 */
-#ifndef __libucodes__
-#define __libucodes__
+#ifndef __libtuxbox__
+#define __libtuxbox__
 
 
 #ifdef __cplusplus
