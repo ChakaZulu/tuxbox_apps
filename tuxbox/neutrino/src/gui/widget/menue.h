@@ -257,6 +257,7 @@ class CMenuWidget : public CMenuTarget
 		vector<CMenuItem*>	items;
 		string				name;
 		string				iconfile;
+		bool				localizing;
 
 		int			width;
 		int			height;
@@ -274,7 +275,7 @@ class CMenuWidget : public CMenuTarget
 			onPaintNotifier=NULL;
 			iconOffset= 0;
 		};
-		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=390);
+		CMenuWidget(string Name, string Icon="", int mwidth=400, int mheight=390, bool Localizing=true);
 		~CMenuWidget();
 
 		virtual void addItem(CMenuItem* menuItem, bool defaultselected=false);

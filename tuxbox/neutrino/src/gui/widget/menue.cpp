@@ -29,122 +29,6 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/*
-$Id: menue.cpp,v 1.49 2002/04/14 08:37:53 Simplex Exp $
-
-
-History:
- $Log: menue.cpp,v $
- Revision 1.49  2002/04/14 08:37:53  Simplex
- made menuitems activatable
-
- Revision 1.48  2002/03/22 17:34:04  field
- Massive Umstellungen - NVODs/SubChannels=KAPUTT!
- Infoviewer tw. kaputt! NON-STABLE!
-
- Revision 1.47  2002/03/11 17:25:57  Simplex
- locked bouquets work
-
- Revision 1.46  2002/03/06 11:18:39  field
- Fixes & Updates
-
- Revision 1.45  2002/03/03 17:18:18  Simplex
- menu and helper classes for youth protection
-
- Revision 1.44  2002/02/28 15:03:55  field
- Weiter Updates :)
-
- Revision 1.43  2002/02/28 12:05:34  field
- Kleinigkeiten
-
- Revision 1.42  2002/02/27 22:51:13  field
- Tasten kaputt gefixt - sollte wieder gehen :)
-
- Revision 1.41  2002/02/26 17:24:16  field
- Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
-
- Revision 1.40  2002/02/25 19:32:26  field
- Events <-> Key-Handling umgestellt! SEHR BETA!
-
- Revision 1.39  2002/02/25 01:27:33  field
- Key-Handling umgestellt (moeglicherweise beta ;)
-
- Revision 1.38  2002/02/24 21:41:58  field
- User-Interface verbessert
-
- Revision 1.37  2002/02/23 14:31:07  field
- neue Icons
-
- Revision 1.34  2002/02/19 23:41:48  McClean
- add neutrino-direct-start option (for alexW's-Images only at the moment)
-
- Revision 1.33  2002/01/04 02:38:05  McClean
- cleanup
-
- Revision 1.32  2002/01/03 20:03:20  McClean
- cleanup
-
- Revision 1.31  2001/12/31 16:27:13  McClean
- use lcddclient
-
- Revision 1.30  2001/12/29 02:17:00  McClean
- make some settings get from controld
-
- Revision 1.29  2001/12/25 11:40:30  McClean
- better pushback handling
-
- Revision 1.28  2001/12/25 03:28:42  McClean
- better pushback-handling
-
- Revision 1.27  2001/12/12 19:11:32  McClean
- prepare timing setup...
-
- Revision 1.26  2001/11/26 02:34:04  McClean
- include (.../../stuff) changed - correct unix-formated files now
-
- Revision 1.25  2001/11/15 11:42:41  McClean
- gpl-headers added
-
- Revision 1.24  2001/11/07 23:48:55  field
- Kleiner Bugfix (Sprachenmenue)
-
- Revision 1.23  2001/11/03 23:23:51  McClean
- radiomode background paint - bugfix
-
- Revision 1.22  2001/10/22 21:48:22  McClean
- design-update
-
- Revision 1.21  2001/10/22 15:00:18  McClean
- icon update
-
- Revision 1.20  2001/10/15 00:24:07  McClean
- lcd-optimize
-
- Revision 1.19  2001/10/11 21:04:58  rasc
- - EPG:
-   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
-   Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
- - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
-   (\r\n wg. falscher CSV Einstellung...)
-
- Revision 1.18  2001/10/10 01:20:10  McClean
- menue changed
-
- Revision 1.17  2001/10/01 20:41:08  McClean
- plugin interface for games - beta but nice.. :)
-
- Revision 1.16  2001/09/23 21:34:07  rasc
- - LIFObuffer Module, pushbackKey fuer RCInput,
- - In einige Helper und widget-Module eingebracht
-   ==> harmonischeres Menuehandling
- - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
-
-
-*/
-
-
-
-
 #include "menue.h"
 #include "../global.h"
 
@@ -159,7 +43,7 @@ bool isNumber(const string& str)
 
 
 
-CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight)
+CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight, bool Localizing)
 {
 	onPaintNotifier = NULL;
 	name = Name;
@@ -167,6 +51,7 @@ CMenuWidget::CMenuWidget(string Name, string Icon, int mwidth, int mheight)
 	selected = -1;
 	width = mwidth;
 	height = mheight; // height(menu_title)+10+...
+	localizing = Localizing;
 }
 
 CMenuWidget::~CMenuWidget()
@@ -349,9 +234,12 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-	string  l_name = g_Locale->getText(name);
+	string  l_name = name;
+	if(localizing)
+	{
+		l_name = g_Locale->getText(name);
+	}
 	g_lcdd->setMode(CLcddClient::MODE_MENU, l_name);
-
 
 
 	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name.c_str());
