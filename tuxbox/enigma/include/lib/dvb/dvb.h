@@ -632,8 +632,8 @@ public:
 	template <class T>
 	void forEachServiceReference(T ob)
 	{
-		for (std::list<eServiceReferenceDVB>::iterator i(list.begin()); i!=list.end(); ++i)
-			ob(*i);
+		for (std::list<eServiceReferenceDVB>::iterator it = list.begin(); it != list.end(); ++it )
+			ob(*it);
 	}
 	void add(const eServiceReferenceDVB &);
 	int remove(const eServiceReferenceDVB &);
@@ -861,7 +861,7 @@ public:
 	eServiceDVB *searchService(const eServiceReference &service);
 	const eServiceReferenceDVB *searchService(eDVBNamespace dvbnamespace, eOriginalNetworkID original_network_id, eServiceID service_id);
 	eServiceReferenceDVB searchServiceByNumber(int channel_number);
-	
+
 	template <class T> 
 	void forEachService(T ob)
 	{
@@ -887,8 +887,8 @@ public:
 
 	eTransponder *getFirstTransponder(int state);
 	eSatellite *findSatellite(int orbital_position);
-  std::multimap< int, eSatellite*>::iterator begin() { return satellites.begin(); }
-  std::multimap< int, eSatellite*>::iterator end() { return satellites.end(); }
+	std::multimap< int, eSatellite*>::iterator begin() { return satellites.begin(); }
+	std::multimap< int, eSatellite*>::iterator end() { return satellites.end(); }
 	std::list<eLNB>& getLNBs()	{	return lnbs;	}
 };
 

@@ -38,6 +38,11 @@ public:
 	void sendCAPMT( PMT *pmt );
 };
 
+static bool operator==( const CAService *caservice, const eServiceReferenceDVB &service )
+{
+	return caservice->getRef() == service;
+}
+
 class eDVBCAHandler: public eDVBCaPMTClient, public Object
 {
 	ePtrList<CAService> services;
@@ -45,38 +50,24 @@ class eDVBCAHandler: public eDVBCaPMTClient, public Object
 public:
 	void enterService( const eServiceReferenceDVB &service)
 	{
-		ePtrList<CAService>::iterator it(services.begin());
-		for (;it != services.end(); ++it)
-		{
-			if ( it->getRef() == service )
-				break;
-		}
+		ePtrList<CAService>::iterator it =
+			std::find(services.begin(), services.end(), service );
 		if ( it == services.end() )
 			services.push_back(new CAService( service ));
 	}
 	void leaveService( const eServiceReferenceDVB &service )
 	{
-		ePtrList<CAService>::iterator it(services.begin());
-		for (;it != services.end(); ++it)
-		{
-			if ( it->getRef() == service )
-			{
-				services.erase(it);
-				break;
-			}
-		}
+		ePtrList<CAService>::iterator it =
+			std::find(services.begin(), services.end(), service );
+		if ( it != services.end() )
+			services.erase(it);
 	}
 	void handlePMT( const eServiceReferenceDVB &service, PMT *pmt )
 	{
-		ePtrList<CAService>::iterator it(services.begin());
-		for (;it != services.end(); ++it)
-		{
-			if ( it->getRef() == service )
-			{
-				it->sendCAPMT(pmt);
-				break;
-			}
-		}
+		ePtrList<CAService>::iterator it =
+			std::find(services.begin(), services.end(), service );
+		if ( it != services.end() )
+			it->sendCAPMT(pmt);
 	}
 	eDVBCAHandler();
 	~eDVBCAHandler();

@@ -499,8 +499,7 @@ void eEPGCache::cleanLoop()
 					if ( !cnt ) // no more referenced
 					{
 						delete i->second;  // free memory
-						evIt->second.first.erase(i);  // remove from eventmap
-						i = evIt->second.first.begin();  // begin at first..
+						evIt->second.first.erase(i++);  // remove from eventmap
 					}
 					else 
 						++i;
