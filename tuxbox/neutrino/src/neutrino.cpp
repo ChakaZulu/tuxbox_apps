@@ -2429,13 +2429,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 	{
 		dprintf(DEBUG_INFO, "config file missing\n");
 		saveSetup();
-		ShowHintUTF("messagebox.info", g_Locale->getText("settings.noconffile"));
+		ShowHintUTF("messagebox.info", g_Locale->getText("settings.noconffile")); // UTF-8
 	}
 	else if(loadSettingsErg==2)
 	{
 		dprintf(DEBUG_INFO, "parts of configfile missing\n");
 		saveSetup();
-		ShowHintUTF("messagebox.info", g_Locale->getText("settings.missingoptionsconffile"));
+		ShowHintUTF("messagebox.info", g_Locale->getText("settings.missingoptionsconffile")); // UTF-8
 	}
 
 	CLCD::getInstance()->showServicename("Waiting...");
@@ -2865,7 +2865,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			standbyMode( false );
 		}
 		if( mode != mode_scart )
-			ShowHint ( "messagebox.info", g_Locale->getText("zaptotimer.announce") );
+			ShowHintUTF("messagebox.info", g_Locale->getText("zaptotimer.announce")); // UTF-8
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
@@ -2878,7 +2878,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				perror("etherwake failed");
 		}
 		if( mode != mode_scart )
-			ShowHint ( "messagebox.info", g_Locale->getText("recordtimer.announce") );
+			ShowHintUTF("messagebox.info", g_Locale->getText("recordtimer.announce")); // UTF-8
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)

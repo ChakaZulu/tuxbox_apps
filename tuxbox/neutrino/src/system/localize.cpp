@@ -134,30 +134,31 @@ void CLocaleManager::loadLocale(std::string locale)
 #warning dhcp     is missing in locales (used in neutrino.cpp)
 #warning NFS/CIFS is missing in locales (used in neutrino.cpp)
 			if (
-			    (strncmp(buf, "apidselector", 12) != 0) &&
-			    (strncmp(buf, "audiomenu", 9) != 0) &&
-			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
 			    (buf[0] != 'c') &&
+			    (buf[0] != 'k') &&
+			    (buf[0] != 'l') &&
+			    (buf[0] != 'n') &&
+			    (buf[0] != 'o') &&
+			    (buf[0] != 'v') &&
+			    (buf[0] != 'z') &&
+			    (strncmp(buf, "apidse", 6) != 0) &&
+			    (strncmp(buf, "au", 2) != 0) &&
+			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
 			    (strncmp(buf, "fa", 2) != 0) &&
 			    (strncmp(buf, "fi", 2) != 0) &&
 			    (strncmp(buf, "fo", 2) != 0) &&
-			    (buf[0] != 'k') &&
-			    (buf[0] != 'l') &&
-			    (strncmp(buf, "mainmenu", 8) != 0) &&
-			    (strncmp(buf, "messagebox", 10) != 0) &&
-			    (strncmp(buf, "miscsettings", 12) != 0) &&
-			    (strncmp(buf, "mp3", 3) != 0) &&
-			    (buf[0] != 'n') &&
-			    (buf[0] != 'o') &&
-			    (strncmp(buf, "parentallock", 12) != 0) &&
-			    (strncmp(buf, "pictureviewer", 13) != 0) &&
-			    (strncmp(buf, "recordingmenu", 13) != 0) &&
+			    (strncmp(buf, "me", 2) != 0) &&
+			    (strncmp(buf, "mi", 2) != 0) &&
+			    (strncmp(buf, "mp", 2) != 0) &&
+			    (strncmp(buf, "pa", 2) != 0) &&
+			    (strncmp(buf, "pic", 3) != 0) &&
+			    (strncmp(buf, "ping", 4) != 0) &&
+			    (strncmp(buf, "rec", 3) != 0) &&
 			    (strncmp(buf, "sa", 2) != 0) &&
 			    (strncmp(buf, "sc", 2) != 0) &&
 			    (strncmp(buf, "st", 2) != 0) &&
 			    (strncmp(buf, "timersettings", 13) != 0) &&
 			    (strncmp(buf, "timing", 6) != 0) &&
-			    (buf[0] != 'v') &&
 			    ((strncmp(buf, "flashupdate", 11) != 0) || 
 			     ((strcmp(buf, "flashupdate.actionreadflash") == 0) ||
 			      (strcmp(buf, "flashupdate.getinfofile") == 0) ||
@@ -168,13 +169,12 @@ void CLocaleManager::loadLocale(std::string locale)
 			      (strcmp(buf, "flashupdate.reallyflashmtd") == 0) ||
 			      (strcmp(buf, "flashupdate.savesuccess") == 0) ||
 			      (strcmp(buf, "flashupdate.versioncheck") == 0))) &&
-			    ((strncmp(buf, "mainsettings", 12) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&
+			    ((strncmp(buf, "ma", 3) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&
 			    ((strncmp(buf, "se", 2) != 0) || (strcmp(buf, "servicemenu.reload_hint") == 0)) &&
 			    ((strncmp(buf, "timerlist", 9) != 0) || (strncmp(buf, "timerlist.weekdays.hint", 23) == 0)) &&
 			    (strcmp(buf, "bouquetlist.head") != 0) &&
 			    (strcmp(buf, "dhcp") != 0) &&
 			    (strcmp(buf, "epglist.head") != 0) &&
-			    (strcmp(buf, "menu.back") != 0) &&
 			    (strcmp(buf, "NFS/CIFS") != 0) &&
 			    (strcmp(buf, "sleeptimerbox.title") != 0) &&
 			    (strcmp(buf, "ucodecheck.head") != 0)
