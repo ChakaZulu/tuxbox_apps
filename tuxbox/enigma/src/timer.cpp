@@ -284,14 +284,17 @@ eTimerManager::eTimerManager()
 	logfile = fopen(TIMER_LOGFILE, "a" );
 	writeToLogfile("Timer is comming up");
 
-	time_t now = time(0);
-	if ( now < 1072224000 ) // 01.01.2004
-		eDebug("RTC not ready... wait for transponder time");
-	else // inform all who's waiting for valid system time..
+	if ( eSystemInfo::getInstance()->getHwType >= eSystemInfo::DM7000 )
 	{
-		eDebug("Use valid Linux Time :) (RTC?)");
-		eDVB::getInstance()->time_difference=1;
-		/*emit*/ eDVB::getInstance()->timeUpdated();
+		time_t now = time(0);
+		if ( now < 1072224000 ) // 01.01.2004
+			eDebug("RTC not ready... wait for transponder time");
+		else // inform all who's waiting for valid system time..
+		{
+			eDebug("Use valid Linux Time :) (RTC?)");
+			eDVB::getInstance()->time_difference=1;
+			/*emit*/ eDVB::getInstance()->timeUpdated();
+		}
 	}
 }
 
@@ -1819,6 +1822,7 @@ eTimerListView::eTimerListView()
 	events->setName("events");
 	events->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight.background"), eSkin::getActive()->queryScheme("eServiceSelector.highlight.foreground"));
 	CONNECT(events->selected, eTimerListView::entrySelected );
+	events->setFlags(eListBoxBase::flagLostFocusOnFirst|eListBoxBase::flagLostFocusOnLast);
 
 	add = new eButton( this );
 	add->setName("add");
