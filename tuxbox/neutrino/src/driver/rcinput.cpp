@@ -863,6 +863,36 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*msg = NeutrinoMessages::EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS;
 									*data = *(unsigned*) p;
 								break;
+ 							case CZapitClient::EVT_SCAN_REPORT_FREQUENCY :
+ 									*msg = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCY;
+ 									*data = *(unsigned*) p;
+ 								break;
+ 							case CZapitClient::EVT_SCAN_FOUND_A_CHAN :
+ 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_A_CHAN;
+ 									*data = (unsigned) p;
+ 									dont_delete_p = true;
+ 								break;
+ 							case CZapitClient::EVT_SCAN_SERVICENAME :
+ 									*msg = NeutrinoMessages::EVT_SCAN_SERVICENAME;
+ 									*data = (unsigned) p;
+ 									dont_delete_p = true;
+ 								break;
+ 							case CZapitClient::EVT_SCAN_FOUND_TV_CHAN :
+ 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_TV_CHAN;
+ 									*data = *(unsigned*) p;
+ 								break;
+ 							case CZapitClient::EVT_SCAN_FOUND_RADIO_CHAN :
+ 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_RADIO_CHAN;
+ 									*data = *(unsigned*) p;
+ 								break;
+ 							case CZapitClient::EVT_SCAN_FOUND_DATA_CHAN :
+ 									*msg = NeutrinoMessages::EVT_SCAN_FOUND_DATA_CHAN;
+ 									*data = *(unsigned*) p;
+ 								break;
+ 							case CZapitClient::EVT_SCAN_REPORT_FREQUENCYP :
+ 									*msg = NeutrinoMessages::EVT_SCAN_REPORT_FREQUENCYP;
+ 									*data = *(unsigned*) p;
+ 								break;
 							case CZapitClient::EVT_SCAN_NUM_CHANNELS :
 									*msg = NeutrinoMessages::EVT_SCAN_NUM_CHANNELS;
 									*data = *(unsigned*) p;
