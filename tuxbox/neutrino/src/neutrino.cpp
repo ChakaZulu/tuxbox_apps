@@ -999,33 +999,31 @@ void CNeutrinoApp::channelsInit()
 	bouquetList = new CBouquetList();
 	bouquetList->orgChannelList = channelList;
 	CZapitClient::BouquetList zapitBouquets;
-	g_Zapit->getBouquets(zapitBouquets, false, true); // UTF-8
-	for(uint i=0; i<zapitBouquets.size(); i++)
-	{
-		bouquetList->addBouquet( zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
-	}
 
-	for( uint i=0; i< bouquetList->Bouquets.size(); i++ )
+	/* load non-empty bouquets only */
+	g_Zapit->getBouquets(zapitBouquets, false, true); // UTF-8
+	for(uint i = 0; i < zapitBouquets.size(); i++)
 	{
 		CZapitClient::BouquetChannelList zapitChannels;
-		g_Zapit->getBouquetChannels(bouquetList->Bouquets[i]->unique_key, zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
-		for(uint j=0; j<zapitChannels.size(); j++)
+
+		/* add terminating 0 to zapitBouquets[i].name */
+		char bouquetname[sizeof(zapitBouquets[i].name) + 1];
+		strncpy(bouquetname, zapitBouquets[i].name, sizeof(zapitBouquets[i].name));
+		bouquetname[sizeof(zapitBouquets[i].name)] = 0;
+
+		bouquetList->addBouquet(bouquetname, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
+
+
+		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr, zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
+
+		for (uint j = 0; j < zapitChannels.size(); j++)
 		{
 			CChannelList::CChannel* channel = channelList->getChannel(zapitChannels[j].nr);
+
+			/* observe that "bouquetList->Bouquets[i]" refers to the bouquet we just created using bouquetList->addBouquet */
 			bouquetList->Bouquets[i]->channelList->addChannel(channel);
-		}
-	}
-	// reload zapit bouquets including hidden , for pre-lock settings
-	zapitBouquets.clear();
-	g_Zapit->getBouquets(zapitBouquets, true, true); // UTF-8
-	for( uint i=0; i< zapitBouquets.size(); i++ )
-	{
-		CZapitClient::BouquetChannelList zapitChannels;
-		g_Zapit->getBouquetChannels(zapitBouquets[i].bouquet_nr , zapitChannels, CZapitClient::MODE_CURRENT, true); // UTF-8
-		for(uint j=0; j<zapitChannels.size(); j++)
-		{								 
-			CChannelList::CChannel* channel = channelList->getChannel(zapitChannels[j].nr);
-			if( zapitBouquets[i].locked)
+
+			if (zapitBouquets[i].locked)
 			{
 				channel->bAlwaysLocked = true;
 			}

@@ -76,7 +76,7 @@ CChannelList::CChannel::CChannel(const int _key, const int _number, const std::s
 }
 
 
-CChannelList::CChannelList( const std::string &Name )
+CChannelList::CChannelList(const char * const Name)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;

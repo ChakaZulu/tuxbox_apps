@@ -97,7 +97,7 @@ class CChannelList
 		void hide();
 
 	public:
-		CChannelList( const std::string& Name="" );
+		CChannelList(const char * const Name);
 		~CChannelList();
 		void addChannel(int key, int number, const std::string& name, const t_satellite_position& satellitePosition, t_channel_id ids = 0); // UTF-8
 		void addChannel(CChannel* chan);

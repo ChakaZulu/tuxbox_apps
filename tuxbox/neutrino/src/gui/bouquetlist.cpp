@@ -63,7 +63,7 @@ CBouquetList::~CBouquetList()
 	Bouquets.clear();
 }
 
-CBouquet* CBouquetList::addBouquet(const std::string& name, int BouquetKey, bool locked)
+CBouquet* CBouquetList::addBouquet(const char * const name, int BouquetKey, bool locked)
 {
 	if ( BouquetKey==-1 )
 		BouquetKey= Bouquets.size();

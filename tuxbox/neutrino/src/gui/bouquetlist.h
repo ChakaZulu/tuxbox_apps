@@ -57,11 +57,11 @@ class CBouquet
 		bool			bLocked;
 		CChannelList*	channelList;
 
-		CBouquet( int Unique_key=-1, const std::string& Name="", bool locked=false)
+		CBouquet(const int Unique_key, const char * const Name, const bool locked)
 		{
 			unique_key = Unique_key;
 			bLocked = locked;
-			channelList = new CChannelList( Name );
+			channelList = new CChannelList(Name);
 		}
 
 		~CBouquet()
@@ -101,7 +101,7 @@ class CBouquetList
 		std::vector<CBouquet*>	Bouquets;
 
 		CChannelList* orgChannelList;
-		CBouquet* addBouquet(const std::string& name, int BouquetKey=-1, bool locked=false );
+		CBouquet* addBouquet(const char * const name, int BouquetKey=-1, bool locked=false );
 		int getActiveBouquetNumber();
 		int activateBouquet( int id, bool bShowChannelList = false);
 		int show();
