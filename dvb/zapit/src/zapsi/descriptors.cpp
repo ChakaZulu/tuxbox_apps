@@ -1,8 +1,8 @@
 /*
- * $Id: descriptors.cpp,v 1.25 2002/04/20 21:16:51 obi Exp $
+ * $Id: descriptors.cpp,v 1.26 2002/04/24 21:25:12 Simplex Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -28,6 +28,7 @@
 #include "sdt.h"
 #include "scan.h"
 #include "zapitclient.h"
+#include "bouquets.h"
 
 std::map <uint32_t, transpondermap> scantransponders;
 std::map <uint32_t, scanchannel> scanchannels;
@@ -496,13 +497,24 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_PROVIDER, CEventServer::INITID_ZAPIT, (void *) lastProviderName.c_str(), lastProviderName.length() + 1);
 	}
 
+	int bouquetId = scanBouquetManager->existsBouquet(providerName);
+	CBouquet* bouquet = NULL;
+
 	switch (service_type)
 	{
 	case DIGITAL_TELEVISION_SERVICE:
 	case DIGITAL_RADIO_SOUND_SERVICE:
 	case NVOD_REFERENCE_SERVICE:
 	case NVOD_TIME_SHIFTED_SERVICE:
-		scanbouquets.insert(std::pair <std::string, bouquet_mulmap> (providerName.c_str(), bouquet_mulmap(providerName, serviceName, service_id, original_network_id)));
+		if (bouquetId == -1)
+		{
+			bouquet = scanBouquetManager->addBouquet(providerName);
+		}
+		else
+		{
+			bouquet = scanBouquetManager->Bouquets[bouquetId];
+		}
+		bouquet->addService( new CZapitChannel ( serviceName, service_id, 0, original_network_id, service_type, 0, 0));
 		break;
 
 	default:

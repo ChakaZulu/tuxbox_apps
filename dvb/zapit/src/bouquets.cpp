@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.25 2002/04/20 23:04:45 Simplex Exp $
+ * $Id: bouquets.cpp,v 1.26 2002/04/24 21:25:12 Simplex Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -441,6 +441,21 @@ void CBouquetManager::restoreBouquets()
 	for (unsigned int i=0; i<storedBouquets.size(); i++)
 	{
 		Bouquets.insert( Bouquets.end(), new CBouquet( *storedBouquets[i]));
+	}
+}
+
+void CBouquetManager::cleanUp()
+{
+	BouquetList::iterator it = Bouquets.end();
+	it--;
+	for( int i=Bouquets.size()-1; i>=0; i--, it--)
+	{
+		if ((Bouquets[i]->tvChannels.size() < 4) &&
+		    (Bouquets[i]->radioChannels.size() < 4))
+		{
+			delete Bouquets[i];
+			Bouquets.erase(it);
+		}
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- *  $Id: scan.h,v 1.13 2002/04/19 14:53:29 obi Exp $
+ *  $Id: scan.h,v 1.14 2002/04/24 21:25:12 Simplex Exp $
  */
 
 #ifndef __scan_h__
@@ -10,6 +10,8 @@
 
 #include <map>
 #include <string>
+
+#include "bouquets.h"
 
 struct scanchannel
 {
@@ -94,6 +96,6 @@ struct bouquet_mulmap
 
 extern std::map <uint32_t, transpondermap> scantransponders;
 extern std::map <uint32_t, scanchannel> scanchannels;
-extern std::multimap <std::string, bouquet_mulmap> scanbouquets;
+extern CBouquetManager* scanBouquetManager;
 
 #endif /* __scan_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.46 2002/04/20 12:02:04 Simplex Exp $
+ * $Id: scan.cpp,v 1.47 2002/04/24 21:25:12 Simplex Exp $
  */
 
 #include "frontend.h"
@@ -9,6 +9,7 @@
 #include "xml/xmltree.h"
 #include "zapit.h"
 #include "zapitclient.h"
+#include "bouquets.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,6 +23,8 @@ typedef std::multimap <std::string, bouquet_mulmap>::iterator sbiterator;
 
 short scan_runs;
 short curr_sat;
+
+CBouquetManager* scanBouquetManager;
 
 extern int found_transponders;
 extern int found_channels;
@@ -113,7 +116,6 @@ int write_xml_footer(FILE *fd)
 
 void write_bouquets()
 {
-	FILE *bouq_fd;
 	std::string oldname = "";
 
 	/*
@@ -126,41 +128,19 @@ void write_bouquets()
 	{
 		printf("[zapit] removing existing bouqets.xml\n");
 		system("/bin/rm " CONFIGDIR "/zapit/bouquets.xml");
-		scanbouquets.clear();
 		return;
 	}
-	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS) || (scanbouquets.empty()))
+	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS)/* || (scanbouquets.empty())*/)
 	{
 		printf("[zapit] leavin bouquets.xml untouched\n");
-		scanbouquets.clear();
 		return;
 	}
 	else
 	{
 		printf("[zapit] creating new bouquets.xml\n");
-
-		bouq_fd = write_xml_header(CONFIGDIR "/zapit/bouquets.xml");
-		for (sbiterator bI = scanbouquets.begin(); bI != scanbouquets.end(); bI++)
-      		{
-      			if (bI->second.provname != oldname)
-      			{
-      				if (oldname != "")
-      				{
-      					fprintf(bouq_fd, "</Bouquet>\n");
-      				}
-
-      				fprintf(bouq_fd, "<Bouquet name=\"%s\">\n", bI->second.provname.c_str());
-
-      			}
-      			fprintf(bouq_fd, "\t<channel serviceID=\"%04x\" name=\"%s\" onid=\"%04x\"/>\n", bI->second.sid, bI->second.servname.c_str(), bI->second.onid);
-
-      			oldname = bI->second.provname;
-      		}
-
-      		fprintf(bouq_fd, "</Bouquet>\n");
-		write_xml_footer(bouq_fd);
-      	}
-      	scanbouquets.clear();
+		scanBouquetManager->cleanUp();
+		scanBouquetManager->saveBouquets();
+	}
 	return;
 }
 
@@ -268,6 +248,8 @@ void stop_scan()
 	/* notify client about end of scan */
 	scan_runs = 0;
 	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT);
+	if (scanBouquetManager)
+		delete scanBouquetManager;
 }
 
 void *start_scanthread(void *param)
@@ -284,6 +266,8 @@ void *start_scanthread(void *param)
 	uint8_t polarization;
 	uint8_t fec_inner;
 	uint8_t modulation;
+
+	scanBouquetManager = new CBouquetManager();
 
 	curr_sat = 0;
 	if ((frontend == NULL) || (frontend->isInitialized() == false))
