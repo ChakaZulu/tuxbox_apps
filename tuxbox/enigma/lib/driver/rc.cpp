@@ -221,6 +221,7 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 		sn=new eSocketNotifier(eApp, handle, eSocketNotifier::Read);
 		CONNECT(sn->activated, eRCShortDriver::keyPressed);
 		eRCInput::getInstance()->setFile(handle);
+		flushBuffer();
 	}
 }
 
@@ -261,6 +262,7 @@ eRCInputEventDriver::eRCInputEventDriver(const char *filename): eRCDriver(eRCInp
 		sn=new eSocketNotifier(eApp, handle, eSocketNotifier::Read);
 		CONNECT(sn->activated, eRCInputEventDriver::keyPressed);
 		eRCInput::getInstance()->setFile(handle);
+		flushBuffer();
 	}
 }
 
