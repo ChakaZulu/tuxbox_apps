@@ -620,7 +620,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 
 	stream2file_error_msg_t error_msg = ::start_recording(filename,
 							      getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(),
-							      ((unsigned long long)SplitSize) * 1073741824ULL,
+							      ((unsigned long long)SplitSize) * 1048576ULL,
 							      numpids,
 							      pids,
 							      g_settings.misc_option[MISC_SETTING_SPTS_MODE]);
