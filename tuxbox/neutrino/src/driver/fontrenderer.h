@@ -1,3 +1,14 @@
+/*
+$Id: fontrenderer.h,v 1.11 2001/09/26 16:24:17 rasc Exp $
+
+
+$Log: fontrenderer.h,v $
+Revision 1.11  2001/09/26 16:24:17  rasc
+- kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
+
+
+*/
+
 #ifndef __FONTRENDERER__
 #define __FONTRENDERER__
 
@@ -95,6 +106,7 @@ class FontsDef
 			*alert, 
 			*channellist,
 			*channellist_number,
+			*channel_num_zap,
 
 			*infobar_number,
 			*infobar_channame,

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.47 2001/09/26 11:40:48 field Exp $
+        $Id: neutrino.cpp,v 1.48 2001/09/26 16:24:17 rasc Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.48  2001/09/26 16:24:17  rasc
+  - kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
+
   Revision 1.47  2001/09/26 11:40:48  field
   Tontraegerauswahl haut hin (bei Kanaelen mit EPG)
 
@@ -652,6 +655,7 @@ void CNeutrinoApp::SetupFonts()
 
 	g_Fonts->channellist=g_fontRenderer->getFont("Arial", "Regular", 20);
 	g_Fonts->channellist_number=g_fontRenderer->getFont("Arial", "Regular", 14);
+	g_Fonts->channel_num_zap=g_fontRenderer->getFont("Arial", "Regular", 40);
 	
 	g_Fonts->infobar_number=g_fontRenderer->getFont("Arial", "Regular", 50);
 	g_Fonts->infobar_channame=g_fontRenderer->getFont("Arial", "Regular", 30);
@@ -1459,7 +1463,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.47 2001/09/26 11:40:48 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.48 2001/09/26 16:24:17 rasc Exp $\n\n");
     tzset();
 
     initGlobals();

@@ -122,7 +122,7 @@ infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
 
 epgviewer.notfound keine EPG-Informationen gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
-epglist.head Ereignis-Liste - %s
+epglist.head Vorschau - %s
 epglist.noevents Kein EPG verfügbar...
 
 streaminfo.head Informationen

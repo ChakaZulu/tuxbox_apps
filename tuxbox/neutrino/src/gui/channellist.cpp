@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.24 2001/09/23 21:34:07 rasc Exp $
+// $Id: channellist.cpp,v 1.25 2001/09/26 16:24:17 rasc Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.25  2001/09/26 16:24:17  rasc
+// - kleinere Aenderungen: Channel Num Zap fuer >999 Channels (Eutelsat/Astra) und eigener Font
+//
 // Revision 1.24  2001/09/23 21:34:07  rasc
 // - LIFObuffer Module, pushbackKey fuer RCInput,
 // - In einige Helper und widget-Module eingebracht
@@ -366,7 +369,7 @@ bool CChannelList::showInfo(int pos)
 
 void CChannelList::zapTo(int pos)
 {
-	if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
+    if ( (pos >= (signed int) chanlist.size()) || (pos< 0) )
     {
         return;
     }
@@ -391,8 +394,8 @@ void CChannelList::numericZap(int key)
  
 	int ox=300;
     int oy=200;
-	int sx = g_Fonts->channellist->getRenderWidth("000")+14;
-    int sy = g_Fonts->channellist->getHeight()+6;
+	int sx = g_Fonts->channel_num_zap->getRenderWidth("0000")+14;
+    int sy = g_Fonts->channel_num_zap->getHeight()+6;
 	char valstr[10];
 	int chn=key;
 	int pos=1;
@@ -400,21 +403,28 @@ void CChannelList::numericZap(int key)
 	while(1)
 	{
 		sprintf((char*) &valstr, "%d", chn);
-		while(strlen(valstr)<3)
+		while(strlen(valstr)<4)
 		{
  			strcat(valstr,"-");
 		}
 		g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
-		g_Fonts->channellist->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
+		g_Fonts->channel_num_zap->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
 
         showInfo(chn- 1);
 
 		if ((key=g_RCInput->getKey(30))==CRCInput::RC_timeout)
     		break;
+		if (key==CRCInput::RC_left || key==CRCInput::RC_right)
+		break;
+// $$$ Das ist noch nicht rund hier!
+//  beim "querverlassen" muss der Ursprungskanal wieder in chn eingestellt sein.
+// da man nicht zappen moechte (siehe RC_DBOX_HOME), sorry ist nicht viel, aber
+// ich kann im Moment nicht kompilieren 8-(  [rasc]
+// BTW: jemand braeuchte mal einen Editor mit vernuenftigen TABs! ;-)
 
 		if ( (key>=0) && (key<=9) )
 		{ //numeric
-            if ( pos==3 )
+            if ( pos==4 )
             {
                 chn = key;
                 pos = 0;
@@ -436,8 +446,10 @@ void CChannelList::numericZap(int key)
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
-			else
+			else {
 				chn--;
+			      if (chn > (int)chanlist.size()) chn = (int)chanlist.size();
+			}
 		}
 		else if (key==g_settings.key_quickzap_up)
 		{
