@@ -80,3 +80,8 @@ function sendMessage2TV()
 {
 	NewWindow("/tvMessageWindow", "msg", "650", "150", "no");
 }
+
+function selectAudio()
+{
+	NewWindow("/cgi-bin/selectAudio", "audio", "200", "100", "no");
+}
