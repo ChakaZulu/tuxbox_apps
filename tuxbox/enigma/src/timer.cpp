@@ -1178,8 +1178,13 @@ void eTimerManager::cleanupEvents()
 		else
 	 		++i;
 }
-	
 
+void eTimerManager::clearEvents()
+{
+	for ( std::list<ePlaylistEntry>::iterator i( timerlist->getList().begin() ); i != timerlist->getList().end();)
+			i = timerlist->getList().erase(i);
+}
+	
 /*
 bool eTimerManager::updateRunningTimerEvent( eWidget *sel, const ePlaylistEntry& entry )
 {
