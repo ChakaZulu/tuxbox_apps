@@ -41,6 +41,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <iostream>
+#include <sstream>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -102,6 +104,7 @@ class CVCRControl
 		class CDevice			// basisklasse für die devices
 		{
 			public:
+				int sock_fd;
 				int deviceID;
 				std::string Name;
 				CVCRDevices deviceType;
@@ -112,17 +115,22 @@ class CVCRControl
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return false;};
 				CDevice(int deviceid, CVCRDevices devicetype){deviceID = deviceid; deviceType = devicetype; deviceState = CMD_VCR_STOP;};
+				virtual ~CDevice(){};
 		};
 
 		class CVCRDevice : public CDevice		// VCR per IR
 		{
+				bool sendCommand(std::string command,unsigned onidsid,unsigned long long epgid);
+				bool IRDeviceConnect();
+				void IRDeviceDisconnect();
 			public:
-				virtual bool Stop(){return false;};		// TODO: VCR ansteuerung
-				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0){return false;};	
-				virtual bool Pause(){return false;};
-				virtual bool Resume(){return false;};
+				virtual bool Stop();		// TODO: VCR ansteuerung
+				virtual bool Record(unsigned onidsid = 0, unsigned long long epgid = 0);	
+				virtual bool Pause();
+				virtual bool Resume();
 				virtual bool IsAvailable(){return true;};
 				CVCRDevice(int deviceid) : CDevice(deviceid,DEVICE_VCR) {};
+				virtual ~CVCRDevice(){};
 		};
 
 		class CServerDevice : public CDevice	// externer Streamingserver per tcp
@@ -137,9 +145,9 @@ class CVCRControl
 					unsigned int		onidsid;			// may be zero
 				};
 
-				int sock_fd;
 				bool serverConnect();
 				void serverDisconnect();
+
 				bool sendCommand(CVCRCommand command,unsigned onidsid = 0,unsigned long long epgid = 0);
 
 			public:
@@ -154,6 +162,7 @@ class CVCRControl
 				virtual bool Resume(){return false;};
 				virtual bool IsAvailable(){return true;};
 				CServerDevice(int deviceid) : CDevice(deviceid,DEVICE_SERVER) {};			
+				virtual ~CServerDevice(){};
 		};
 		typedef std::map<int, CDevice*> CDeviceMap;
 	
@@ -166,7 +175,7 @@ class CVCRControl
 		CDeviceMap Devices;
 		int registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo);
 		int registeredDevices(){return Devices.size();};
-		int getDeviceState(int deviceid = 0){ if (Devices[deviceid] != NULL) return Devices[deviceid]->deviceID; else return CMD_VCR_UNKNOWN;};
+		int getDeviceState(int deviceid = 0){ if (Devices[deviceid] != NULL) return Devices[deviceid]->deviceState; else return CMD_VCR_UNKNOWN;};
 		bool Stop(int deviceID = 0){if(Devices[deviceID] != NULL) return Devices[deviceID]->Stop(); else return false;};
 		bool Record(CTimerEvent::EventInfo *eventinfo,int deviceID = 0)
 		{

@@ -84,6 +84,7 @@ int CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo)
 		device->ServerPort = serverinfo->ServerPort;
 		Devices[device->deviceID] = (CDevice*) device;
 		printf("CVCRControl registered new serverdevice: %u %s\n",device->deviceID,device->Name.c_str());
+		return device->deviceID;
 	}
 	else if (deviceType == DEVICE_VCR)
 	{
@@ -91,10 +92,79 @@ int CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo)
 		device->Name = deviceInfo->Name;
 		Devices[device->deviceID] = (CDevice*) device;
 		printf("CVCRControl registered new vcrdevice: %u %s\n",device->deviceID,device->Name.c_str());
+		return device->deviceID;
 	}
+	else
+		return -1;
 }
 
 
+
+//-------------------------------------------------------------------------
+void CVCRControl::CVCRDevice::IRDeviceDisconnect()
+{
+	close(sock_fd);
+}
+
+//-------------------------------------------------------------------------
+bool CVCRControl::CVCRDevice::sendCommand(std::string command,unsigned onidsid,unsigned long long epgid)
+{
+	if(IRDeviceConnect())
+	{
+		std::stringstream ostr;
+		ostr << "SEND_ONCE " << Name << " " << command << std::endl << std::ends;
+		write(sock_fd, ostr.str().c_str(), ostr.str().length());
+		IRDeviceDisconnect();
+		return true;
+	}
+	else
+		return false;
+}
+//-------------------------------------------------------------------------
+bool CVCRControl::CVCRDevice::IRDeviceConnect()
+{
+	struct sockaddr_un addr;
+
+	addr.sun_family=AF_UNIX;
+	strcpy(addr.sun_path, "/dev/lircd");
+	sock_fd = socket(AF_UNIX,SOCK_STREAM,0);
+	if(!sock_fd)
+	{
+		printf("could not open lircd-socket\n");
+		return false;
+	};
+
+	if(!connect(sock_fd,(struct sockaddr *)&addr,sizeof(addr))==-1)
+	{
+		printf("could not connect to lircd-socket\n");
+		return false;
+	};
+	return true;
+
+}
+//-------------------------------------------------------------------------
+bool CVCRControl::CVCRDevice::Stop()
+{
+	return true;
+}
+
+//-------------------------------------------------------------------------
+bool CVCRControl::CVCRDevice::Record(unsigned onidsid, unsigned long long epgid)	
+{
+	return true;
+}
+
+//-------------------------------------------------------------------------
+bool CVCRControl::CVCRDevice::Pause()
+{
+	return true;
+}
+
+//-------------------------------------------------------------------------
+bool CVCRControl::CVCRDevice::Resume()
+{
+	return true;
+}
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::Stop()
@@ -164,6 +234,9 @@ bool CVCRControl::CServerDevice::sendCommand(CVCRCommand command,unsigned onidsi
 				break;
 			case CMD_VCR_AVAILABLE: extCommand="available";
 				break;
+			case CMD_VCR_UNKNOWN:
+			default:
+				printf("CVCRControl: Unknown Command\n");
 		}
 	
 		string extMessage = "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n\n";
