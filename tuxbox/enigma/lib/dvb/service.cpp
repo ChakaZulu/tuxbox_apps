@@ -191,6 +191,11 @@ eServiceHandler *eServiceInterface::getServiceHandler(int id)
 
 extern bool checkPin( int pin, const char * text );
 
+int eServiceInterface::play(const eServiceReference &s)
+{
+	return play(s,0);
+}
+
 int eServiceInterface::play(const eServiceReference &s, int workaround )
 {
 	int pLockActive = eConfig::getInstance()->pLockActive();

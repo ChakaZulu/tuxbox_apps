@@ -172,7 +172,8 @@ public:
 	int unregisterHandler(int id);
 	eServiceHandler *getServiceHandler(int id);
 
-	int play(const eServiceReference &service, int workaround=0 );
+	int play(const eServiceReference &service);
+	int play(const eServiceReference &service, int workaround );
 
 		// service related functions
 	Signal1<void,const eServiceEvent &> serviceEvent;

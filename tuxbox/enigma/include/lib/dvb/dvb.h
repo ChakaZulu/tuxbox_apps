@@ -227,7 +227,7 @@ public:
 	eTransportStreamID transport_stream_id;
 	eOriginalNetworkID original_network_id;
 	
-	static eDVBNamespace buildNamespace(eOriginalNetworkID onid, eTransportStreamID tsid, int orbital_position, int freq);
+	static eDVBNamespace buildNamespace(eOriginalNetworkID onid, eTransportStreamID tsid, int orbital_position, int freq, int pol);
 
 	enum
 	{

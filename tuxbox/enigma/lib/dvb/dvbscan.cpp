@@ -20,12 +20,12 @@ inline int isValidONIDTSID(eOriginalNetworkID onid, eTransportStreamID tsid)
 }
 
 		// work around for buggy transponders on hotbird (and maybe others)
-eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportStreamID tsid, int orbital_position, int freq)
+eDVBNamespace eTransponder::buildNamespace(eOriginalNetworkID onid, eTransportStreamID tsid, int orbital_position, int freq, int pol)
 {
 	int dvb_namespace=orbital_position<<16;
-		// on invalid ONIDs, build hash from frequency.
+		// on invalid ONIDs, build hash from frequency and polarisation
 	if (!isValidONIDTSID(onid, tsid))
-		dvb_namespace|=(freq/1000)&0xFFFF;
+		dvb_namespace|=((freq/1000)&0xFFFF)|((pol&1)<<15);
 	return eDVBNamespace(dvb_namespace);
 }
 
@@ -265,10 +265,10 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 							break;
 						}
 					}
-
+					
 					eDVBNamespace dvb_namespace =
 						tp.satellite.isValid()
-						?eTransponder::buildNamespace(onid,tsid,tp.satellite.orbital_position,tp.satellite.frequency)
+						?eTransponder::buildNamespace(onid,tsid,tp.satellite.orbital_position,tp.satellite.frequency, tp.satellite.polarisation)
 						:-1;
 
 					// schon bekannte transponder nicht nochmal scannen
@@ -388,7 +388,7 @@ int eDVBScanController::handleSDT(const SDT *sdt)
 
 		// build "namespace" to work around buggy satellites
 	if (transponder->satellite.valid)
-		dvb_namespace=eTransponder::buildNamespace(onid, tsid, transponder->satellite.orbital_position, transponder->satellite.frequency);
+		dvb_namespace=eTransponder::buildNamespace(onid, tsid, transponder->satellite.orbital_position, transponder->satellite.frequency, transponder->satellite.polarisation);
 	else
 		dvb_namespace=0;
 

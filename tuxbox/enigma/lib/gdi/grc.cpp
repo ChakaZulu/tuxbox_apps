@@ -123,7 +123,7 @@ void gPainter::setFont(const gFont &mfont)
 	font=mfont;
 }
 
-void gPainter::renderText(const eRect &pos, const eString &string, int flags)
+void gPainter::renderText(const eRect &pos, const std::string &string, int flags)
 {
 	if ( dc.islocked() )
 		return;
