@@ -36,6 +36,7 @@
 #include "menue.h"
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include <string>
 #include <vector>
@@ -57,11 +58,10 @@ class CExtendedInput : public CMenuTarget
 		std::vector<CExtendedInput_Item*> inputFields;
 		int selectedChar;
 
-		bool localizing;
-		std::string	name;
+		neutrino_locale_t name;
+		neutrino_locale_t hint_1;
+		neutrino_locale_t hint_2;
 
-		std::string  hint_1;
-		std::string  hint_2;
 		char*	value;
 		CChangeObserver*   observ;
 		bool* cancel;
@@ -72,7 +72,7 @@ class CExtendedInput : public CMenuTarget
 
 	public:
 
-		CExtendedInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL, bool Localizing=true, bool* cancel = NULL);
+		CExtendedInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL, bool* cancel = NULL);
 
 		void hide();
 		int exec( CMenuTarget* parent, const std::string & actionKey );
@@ -155,7 +155,7 @@ class CIPInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CIPInput(const char * const Name, std::string & Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
+		CIPInput(const neutrino_locale_t Name, std::string & Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL);
 };
 
 //----------------------------------------------------------------------------------------------------
@@ -171,7 +171,7 @@ class CDateInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CDateInput(const char * const Name, time_t* Time, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
+		CDateInput(const neutrino_locale_t Name, time_t* Time, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL);
 		~CDateInput();
 		char* getValue() {return value;}
 };
@@ -185,7 +185,7 @@ class CMACInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CMACInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL);
+		CMACInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL);
 };
 
 //----------------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ class CTimeInput : public CExtendedInput
 		virtual void onAfterExec();
 
 	public:
-		CTimeInput(const char * const Name, char* Value, const char * const Hint_1 = NULL, const char * const Hint_2 = NULL, CChangeObserver* Observ = NULL, bool* cancel=NULL);
+		CTimeInput(const neutrino_locale_t Name, char* Value, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL, bool* cancel=NULL);
 };
 
 

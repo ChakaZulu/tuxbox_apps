@@ -272,6 +272,10 @@ class CLocaleManager
 #define LOCALE_FILEBROWSER_SORT_TYPE               "filebrowser.sort.type"
 
 
+#define LOCALE_LANGUAGESETUP_HEAD                  "languagesetup.head"
+#define LOCALE_LANGUAGESETUP_SELECT                "languagesetup.select"
+
+
 #define LOCALE_MAINMENU_GAMES                      "mainmenu.games"
 #define LOCALE_MAINMENU_HEAD                       "mainmenu.head"
 #define LOCALE_MAINMENU_MOVIEPLAYER                "mainmenu.movieplayer"
@@ -311,8 +315,19 @@ class CLocaleManager
 #define LOCALE_MESSAGEBOX_INFO                     "messagebox.info"
 #define LOCALE_MESSAGEBOX_NO                       "messagebox.no"
 #define LOCALE_MESSAGEBOX_YES                      "messagebox.yes"
-
-
+#define LOCALE_MISCSETTINGS_BOOTINFO               "miscsettings.bootinfo"
+//#define LOCALE_MISCSETTINGS_BOXTYPE                "miscsettings.boxtype"                       /* FIXME: unused */
+#define LOCALE_MISCSETTINGS_DRIVER_BOOT            "miscsettings.driver_boot"
+#define LOCALE_MISCSETTINGS_FB_DESTINATION         "miscsettings.fb_destination"
+#define LOCALE_MISCSETTINGS_GENERAL                "miscsettings.general"
+#define LOCALE_MISCSETTINGS_HEAD                   "miscsettings.head"
+#define LOCALE_MISCSETTINGS_HWSECTIONS             "miscsettings.hwsections"
+#define LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY    "miscsettings.infobar_sat_display"
+#define LOCALE_MISCSETTINGS_SHUTDOWN_REAL          "miscsettings.shutdown_real"
+#define LOCALE_MISCSETTINGS_SHUTDOWN_REAL_RCDELAY  "miscsettings.shutdown_real_rcdelay"
+#define LOCALE_MISCSETTINGS_SPTSMODE               "miscsettings.sptsmode"
+#define LOCALE_MISCSETTINGS_STARTBHDRIVER          "miscsettings.startbhdriver"                   /* only for HAVE_DVB_API_VERSION == 1 */
+#define LOCALE_MOTORCONTROL_HEAD                   "motorcontrol.head"
 #define LOCALE_MOVIEPLAYER_BOOKMARK                "movieplayer.bookmark"
 #define LOCALE_MOVIEPLAYER_BOOKMARKNAME            "movieplayer.bookmarkname"
 #define LOCALE_MOVIEPLAYER_BOOKMARKNAME_HINT1      "movieplayer.bookmarkname_hint1"
@@ -343,6 +358,38 @@ class CLocaleManager
 #define LOCALE_MOVIEPLAYER_VCDPLAYBACK             "movieplayer.vcdplayback"
 #define LOCALE_MOVIEPLAYER_VLCHELP                 "movieplayer.vlchelp"
 #define LOCALE_MOVIEPLAYER_WRONGVLCVERSION         "movieplayer.wrongvlcversion"
+
+
+#define LOCALE_NETWORKMENU_BROADCAST               "networkmenu.broadcast"
+#define LOCALE_NETWORKMENU_GATEWAY                 "networkmenu.gateway"
+#define LOCALE_NETWORKMENU_HEAD                    "networkmenu.head"
+#define LOCALE_NETWORKMENU_IPADDRESS               "networkmenu.ipaddress"
+#define LOCALE_NETWORKMENU_NAMESERVER              "networkmenu.nameserver"
+#define LOCALE_NETWORKMENU_NETMASK                 "networkmenu.netmask"
+#define LOCALE_NETWORKMENU_SETUPNOW                "networkmenu.setupnow"
+#define LOCALE_NETWORKMENU_SETUPONSTARTUP          "networkmenu.setuponstartup"
+#define LOCALE_NETWORKMENU_SHOW                    "networkmenu.show"
+#define LOCALE_NETWORKMENU_TEST                    "networkmenu.test"
+#define LOCALE_NFS_ALREADYMOUNTED                  "nfs.alreadymounted"
+#define LOCALE_NFS_AUTOMOUNT                       "nfs.automount"
+#define LOCALE_NFS_DIR                             "nfs.dir"
+#define LOCALE_NFS_IP                              "nfs.ip"
+#define LOCALE_NFS_LOCALEDIR                       "nfs.localdir"
+#define LOCALE_NFS_MOUNT                           "nfs.mount"
+#define LOCALE_NFS_MOUNT_OPTIONS                   "nfs.mount_options"
+#define LOCALE_NFS_MOUNTERROR                      "nfs.mounterror"
+#define LOCALE_NFS_MOUNTERROR_NOTSUP               "nfs.mounterror_notsup"
+#define LOCALE_NFS_MOUNTNOW                        "nfs.mountnow"
+#define LOCALE_NFS_MOUNTTIMEOUT                    "nfs.mounttimeout"
+#define LOCALE_NFS_PASSWORD                        "nfs.password"
+#define LOCALE_NFS_REMOUNT                         "nfs.remount"
+#define LOCALE_NFS_TYPE                            "nfs.type"
+#define LOCALE_NFS_TYPE_CIFS                       "nfs.type_cifs"
+#define LOCALE_NFS_TYPE_NFS                        "nfs.type_nfs"
+#define LOCALE_NFS_UMOUNT                          "nfs.umount"
+#define LOCALE_NFS_UMOUNTERROR                     "nfs.umounterror"
+#define LOCALE_NFS_USERNAME                        "nfs.username"
+#define LOCALE_NFSMENU_HEAD                        "nfsmenu.head"
 
 
 #define LOCALE_TIMING_CHANLIST                     "timing.chanlist"

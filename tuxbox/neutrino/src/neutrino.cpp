@@ -1523,12 +1523,12 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 
 const char * misc_setting_files[MISC_SETTING_FILES_COUNT][4] =
 {
-	{"miscsettings.sptsmode"     , "/var/etc/.spts_mode"  , "options.off", "options.on" }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
-	{"miscsettings.bootinfo"     , "/var/etc/.cdkVcInfo"  , "options.on" , "options.off"},
+	{LOCALE_MISCSETTINGS_SPTSMODE     , "/var/etc/.spts_mode"  , "options.off", "options.on" }, /* cf. #define MISC_SETTING_SPTS_MODE 0 (settings.h) */
+	{LOCALE_MISCSETTINGS_BOOTINFO     , "/var/etc/.cdkVcInfo"  , "options.on" , "options.off"},
 #if HAVE_DVB_API_VERSION == 1
-	{"miscsettings.startbhdriver", "/var/etc/.bh"         , "options.off", "options.on" },
+	{LOCALE_MISCSETTINGS_STARTBHDRIVER, "/var/etc/.bh"         , "options.off", "options.on" },
 #endif
-	{"miscsettings.hwsections"   , "/var/etc/.hw_sections", "options.on" , "options.off"}
+	{LOCALE_MISCSETTINGS_HWSECTIONS   , "/var/etc/.hw_sections", "options.on" , "options.off"}
 };
 
 void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
@@ -1536,27 +1536,27 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	dprintf(DEBUG_DEBUG, "init miscsettings\n");
 	miscSettings.addItem(GenericMenuSeparator);
 	miscSettings.addItem(GenericMenuBack);
-	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.general" ) );
+	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_GENERAL));
 
-	CMenuOptionChooser *m1 = new CMenuOptionChooser("miscsettings.shutdown_real_rcdelay", &g_settings.shutdown_real_rcdelay, !g_settings.shutdown_real );
+	CMenuOptionChooser *m1 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL_RCDELAY, &g_settings.shutdown_real_rcdelay, !g_settings.shutdown_real );
 	m1->addOption(0, "options.off");
 	m1->addOption(1, "options.on");
 
 	CMiscNotifier* miscNotifier = new CMiscNotifier( m1 );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.shutdown_real", &g_settings.shutdown_real, true, miscNotifier );
+	CMenuOptionChooser *oj = new CMenuOptionChooser(LOCALE_MISCSETTINGS_SHUTDOWN_REAL, &g_settings.shutdown_real, true, miscNotifier );
 	oj->addOption(1, "options.off");
 	oj->addOption(0, "options.on");
 	miscSettings.addItem( oj );
 
-	CMenuOptionChooser *oj2 = new CMenuOptionChooser("miscsettings.infobar_sat_display", &g_settings.infobar_sat_display, true );
+	CMenuOptionChooser *oj2 = new CMenuOptionChooser(LOCALE_MISCSETTINGS_INFOBAR_SAT_DISPLAY, &g_settings.infobar_sat_display, true);
 	oj2->addOption(1, "options.on");
 	oj2->addOption(0, "options.off");
 	miscSettings.addItem( oj2 );
 
 	if (fromflash)
 	{
-		miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.driver_boot" ) );
+		miscSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_MISCSETTINGS_DRIVER_BOOT));
 
 		for (int i = 0; i < MISC_SETTING_FILES_COUNT; i++)
 		{
@@ -1575,7 +1575,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 			miscSettings.addItem(oj);
 		}
 
-		oj = new CMenuOptionChooser("miscsettings.fb_destination", &g_settings.uboot_console, true, ConsoleDestinationChanger );
+		oj = new CMenuOptionChooser(LOCALE_MISCSETTINGS_FB_DESTINATION, &g_settings.uboot_console, true, ConsoleDestinationChanger );
 		oj->addOption(0, "options.null");
 		oj->addOption(1, "options.serial");
 		oj->addOption(2, "options.fb");
@@ -1600,7 +1600,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 	languageSettings.addItem(GenericMenuBack);
 	languageSettings.addItem(GenericMenuSeparatorLine);
 
-	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser("languagesetup.select", (char*)&g_settings.language, true, this, false);
+	CMenuOptionStringChooser* oj = new CMenuOptionStringChooser(LOCALE_LANGUAGESETUP_SELECT, (char*)&g_settings.language, true, this, false);
 	//search available languages....
 
 	struct dirent **namelist;
@@ -1739,29 +1739,29 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem(GenericMenuSeparatorLine);
 
 	network_automatic_start = networkConfig.automatic_start ? 1 : 0;
-	CMenuOptionChooser* oj = new CMenuOptionChooser("networkmenu.setuponstartup", &network_automatic_start, true);
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_NETWORKMENU_SETUPONSTARTUP, &network_automatic_start, true);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 
 	networkSettings.addItem( oj );
-	networkSettings.addItem(new CMenuForwarder("networkmenu.test", true, NULL, this, "networktest"));
-	networkSettings.addItem(new CMenuForwarder("networkmenu.show", true, NULL, this, "networkshow"));
-	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", true, NULL, this, "network");
+	networkSettings.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_TEST, true, NULL, this, "networktest"));
+	networkSettings.addItem(new CMenuForwarder(LOCALE_NETWORKMENU_SHOW, true, NULL, this, "networkshow"));
+	CMenuForwarder *m0 = new CMenuForwarder(LOCALE_NETWORKMENU_SETUPNOW, true, NULL, this, "network");
 	networkSettings.addItem( m0 );
 
 	networkSettings.addItem(GenericMenuSeparatorLine);
 
-	CIPInput * networkSettings_NetworkIP  = new CIPInput("networkmenu.ipaddress" , networkConfig.address   , "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
-	CIPInput * networkSettings_NetMask    = new CIPInput("networkmenu.netmask"   , networkConfig.netmask   , "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput * networkSettings_Broadcast  = new CIPInput("networkmenu.broadcast" , networkConfig.broadcast , "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput * networkSettings_Gateway    = new CIPInput("networkmenu.gateway"   , networkConfig.gateway   , "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput * networkSettings_NameServer = new CIPInput("networkmenu.nameserver", networkConfig.nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_NetworkIP  = new CIPInput(LOCALE_NETWORKMENU_IPADDRESS , networkConfig.address   , "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
+	CIPInput * networkSettings_NetMask    = new CIPInput(LOCALE_NETWORKMENU_NETMASK   , networkConfig.netmask   , "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_Broadcast  = new CIPInput(LOCALE_NETWORKMENU_BROADCAST , networkConfig.broadcast , "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_Gateway    = new CIPInput(LOCALE_NETWORKMENU_GATEWAY   , networkConfig.gateway   , "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput * networkSettings_NameServer = new CIPInput(LOCALE_NETWORKMENU_NAMESERVER, networkConfig.nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
 
-	CMenuForwarder *m1 = new CMenuForwarder("networkmenu.ipaddress", networkConfig.inet_static, networkConfig.address, networkSettings_NetworkIP );
-	CMenuForwarder *m2 = new CMenuForwarder("networkmenu.netmask", networkConfig.inet_static, networkConfig.netmask, networkSettings_NetMask);
-	CMenuForwarder *m3 = new CMenuForwarder("networkmenu.broadcast", networkConfig.inet_static, networkConfig.broadcast, networkSettings_Broadcast );
-	CMenuForwarder *m4 = new CMenuForwarder("networkmenu.gateway", networkConfig.inet_static, networkConfig.gateway, networkSettings_Gateway );
-	CMenuForwarder *m5 = new CMenuForwarder("networkmenu.nameserver", networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer );
+	CMenuForwarder *m1 = new CMenuForwarder(LOCALE_NETWORKMENU_IPADDRESS , networkConfig.inet_static, networkConfig.address   , networkSettings_NetworkIP );
+	CMenuForwarder *m2 = new CMenuForwarder(LOCALE_NETWORKMENU_NETMASK   , networkConfig.inet_static, networkConfig.netmask   , networkSettings_NetMask   );
+	CMenuForwarder *m3 = new CMenuForwarder(LOCALE_NETWORKMENU_BROADCAST , networkConfig.inet_static, networkConfig.broadcast , networkSettings_Broadcast );
+	CMenuForwarder *m4 = new CMenuForwarder(LOCALE_NETWORKMENU_GATEWAY   , networkConfig.inet_static, networkConfig.gateway   , networkSettings_Gateway   );
+	CMenuForwarder *m5 = new CMenuForwarder(LOCALE_NETWORKMENU_NAMESERVER, networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer);
 
 	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5);
 
@@ -1780,8 +1780,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "NFS/CIFS") );
-	networkSettings.addItem(new CMenuForwarder("nfs.mount", true, NULL, new CNFSMountGui()));
-	networkSettings.addItem(new CMenuForwarder("nfs.umount", true, NULL, new CNFSUmountGui()));
+	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_MOUNT , true, NULL, new CNFSMountGui()));
+	networkSettings.addItem(new CMenuForwarder(LOCALE_NFS_UMOUNT, true, NULL, new CNFSUmountGui()));
 }
 
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
@@ -2640,24 +2640,24 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
 	//Main settings
-	CMenuWidget mainMenu(LOCALE_MAINMENU_HEAD, "mainmenue.raw");
-	CMenuWidget mainSettings(LOCALE_MAINSETTINGS_HEAD, NEUTRINO_ICON_SETTINGS);
-	CMenuWidget languageSettings("languagesetup.head", "language.raw");
-	CMenuWidget videoSettings("videomenu.head", "video.raw");
-	CMenuWidget audioSettings(LOCALE_AUDIOMENU_HEAD, "audio.raw");
-	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
-	CMenuWidget networkSettings("networkmenu.head", "network.raw");
-	CMenuWidget recordingSettings("recordingmenu.head", "recording.raw");
-	CMenuWidget streamingSettings("streamingmenu.head", "streaming.raw");
-	CMenuWidget colorSettings(LOCALE_COLORMENU_HEAD, "colors.raw");
-	CMenuWidget fontSettings("fontmenu.head", "colors.raw");
-	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
-	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400);
-	CMenuWidget miscSettings("miscsettings.head", NEUTRINO_ICON_SETTINGS);
-	CMenuWidget mp3picSettings("mp3picsettings.general", NEUTRINO_ICON_SETTINGS);
-	CMenuWidget scanSettings("servicemenu.scants", NEUTRINO_ICON_SETTINGS);
-	CMenuWidget service("servicemenu.head", NEUTRINO_ICON_SETTINGS);
-	CMenuWidget moviePlayer(LOCALE_MOVIEPLAYER_HEAD, "streaming.raw");
+	CMenuWidget mainMenu            (LOCALE_MAINMENU_HEAD       , "mainmenue.raw"       );
+	CMenuWidget mainSettings        (LOCALE_MAINSETTINGS_HEAD   , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget languageSettings    (LOCALE_LANGUAGESETUP_HEAD  , "language.raw"        );
+	CMenuWidget videoSettings       ("videomenu.head"           , "video.raw"           );
+	CMenuWidget audioSettings       (LOCALE_AUDIOMENU_HEAD      , "audio.raw"           );
+	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw"            , 500);
+	CMenuWidget networkSettings     (LOCALE_NETWORKMENU_HEAD    , "network.raw"         );
+	CMenuWidget recordingSettings   ("recordingmenu.head"       , "recording.raw"       );
+	CMenuWidget streamingSettings   ("streamingmenu.head"       , "streaming.raw"       );
+	CMenuWidget colorSettings       (LOCALE_COLORMENU_HEAD      , "colors.raw"          );
+	CMenuWidget fontSettings        ("fontmenu.head"            , "colors.raw"          );
+	CMenuWidget lcdSettings         ("lcdmenu.head"             , "lcd.raw"             );
+	CMenuWidget keySettings         ("keybindingmenu.head"      , "keybinding.raw"      , 400);
+	CMenuWidget miscSettings        (LOCALE_MISCSETTINGS_HEAD   , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget mp3picSettings      ("mp3picsettings.general"   , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget scanSettings        ("servicemenu.scants"       , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget service             ("servicemenu.head"         , NEUTRINO_ICON_SETTINGS);
+	CMenuWidget moviePlayer         (LOCALE_MOVIEPLAYER_HEAD    , "streaming.raw"       );
     
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
@@ -4040,7 +4040,7 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 		else
 			printf("Keine Streamingdevices registriert\n");
 	}
-	else if (strcmp(OptionName, "languagesetup.select") == 0)
+	else if (strcmp(OptionName, LOCALE_LANGUAGESETUP_SELECT) == 0)
 	{
 		bool use_true_unicode_font = g_Locale->loadLocale(g_settings.language);
 

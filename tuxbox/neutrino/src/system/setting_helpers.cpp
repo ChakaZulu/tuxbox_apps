@@ -508,13 +508,13 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	text += ": ";
 	text += mypinghost(our_ip);
 	text += '\n';
-	text += g_Locale->getText("networkmenu.gateway");
+	text += g_Locale->getText(LOCALE_NETWORKMENU_GATEWAY);
 	text += ": ";
 	text += our_gateway;
 	text += ' ';
 	text += mypinghost(our_gateway);
 	text += '\n';
-	text += g_Locale->getText("networkmenu.nameserver");
+	text += g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER);
 	text += ": ";
 	text += our_nameserver;
 	text += ' ';
@@ -522,7 +522,7 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	text += "\ndboxupdate.berlios.de: ";
 	text += mypinghost("195.37.77.138");
 
-	ShowMsgUTF("networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
+	ShowMsgUTF(LOCALE_NETWORKMENU_TEST, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 }
 
 void showCurrentNetworkSettings()
@@ -541,27 +541,27 @@ void showCurrentNetworkSettings()
 	else {
 		netGetNameserver(nameserver);
 		netGetDefaultRoute(router);
-		text  = g_Locale->getText("networkmenu.ipaddress");
+		text  = g_Locale->getText(LOCALE_NETWORKMENU_IPADDRESS );
 		text += ": ";
 		text += ip;
 		text += '\n';
-		text += g_Locale->getText("networkmenu.netmask");
+		text += g_Locale->getText(LOCALE_NETWORKMENU_NETMASK   );
 		text += ": ";
 		text += mask;
 		text += '\n';
-		text += g_Locale->getText("networkmenu.broadcast");
+		text += g_Locale->getText(LOCALE_NETWORKMENU_BROADCAST );
 		text += ": ";
 		text += broadcast;
 		text += '\n';
-		text += g_Locale->getText("networkmenu.nameserver");
+		text += g_Locale->getText(LOCALE_NETWORKMENU_NAMESERVER);
 		text += ": ";
 		text += nameserver;
 		text += '\n';
-		text += g_Locale->getText("networkmenu.gateway");
+		text += g_Locale->getText(LOCALE_NETWORKMENU_GATEWAY   );
 		text += ": ";
 		text += router;
 	}
-	ShowMsgUTF("networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
+	ShowMsgUTF(LOCALE_NETWORKMENU_SHOW, text, CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
 }
 
 unsigned long long getcurrenttime()
