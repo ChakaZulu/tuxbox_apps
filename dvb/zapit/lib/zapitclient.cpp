@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.62 2002/10/09 19:58:54 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.63 2002/10/12 19:52:46 obi Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -29,8 +29,8 @@
 #include <eventserver.h>
 
 
-#include "include/zapitclient.h"
-#include "msgtypes.h"
+#include <zapit/client/zapitclient.h>
+#include <zapit/client/msgtypes.h>
 
 std::string Utf8_to_Latin1(const std::string s)
 {

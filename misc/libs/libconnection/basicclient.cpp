@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.4 2002/10/07 10:59:48 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.5 2002/10/12 19:52:46 obi Exp $
  *
  * Basic Client Class (Neutrino) - DBoxII-Project
  *
@@ -30,7 +30,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "include/basicclient.h"
+#include <zapit/client/basicclient.h>
 
 CBasicClient::CBasicClient()
 {
