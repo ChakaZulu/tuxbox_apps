@@ -16,7 +16,7 @@ class eEventDisplay: public eWindow
 	void prevEvent();
 	void setEvent(EITEvent *event);
 protected:
-	int eventFilter(const eWidgetEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 public:
 	eEventDisplay(eString service, const ePtrList<EITEvent>* e=0, EITEvent* evt=0);
 	~eEventDisplay();
