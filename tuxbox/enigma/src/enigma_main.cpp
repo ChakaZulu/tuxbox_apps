@@ -6049,7 +6049,7 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 			prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8, 0, _("copy the selected provider to the bouquet list"));
 #ifndef DISABLE_FILE
 		else if ( (ref.type == eServiceReference::idDVB && ref.path)
-			|| ( ref.type == eServiceRef1erence::idUser
+			|| ( ref.type == eServiceReference::idUser
 				&& ( (ref.data[0] == eMP3Decoder::codecMPG)
 				  || (ref.data[0] == eMP3Decoder::codecMP3) ) ) )
 		{// deleteable file
