@@ -1800,7 +1800,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		else
 			g_settings.misc_option[i] = 0;
 		
-		if (i == 0) // SPTS-Mode
+		if (misc_setting_files[i].name == LOCALE_MISCSETTINGS_SPTSMODE) // SPTS-Mode
 			miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CSPTSNotifier(misc_setting_files[i].filename)));
 		else
 			miscSettings.addItem(new CMenuOptionChooser(misc_setting_files[i].name, &(g_settings.misc_option[i]), misc_setting_files[i].options, 2, true, new CTouchFileNotifier(misc_setting_files[i].filename)));
