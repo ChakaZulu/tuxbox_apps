@@ -1,3 +1,6 @@
+INCLUDES = \
+	@TUXBOX_CFLAGS@
+
 bin_PROGRAMS = tuxinfo
 
 tuxinfo_SOURCES = tuxinfo.c
