@@ -48,6 +48,8 @@ int dvb_device;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
+#include <config.h>
+
 int listenfd, connfd;
 socklen_t clilen;
 SAI cliaddr, servaddr;

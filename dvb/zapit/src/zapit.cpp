@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.52 2001/12/22 18:44:25 faralla Exp $
+  $Id: zapit.cpp,v 1.53 2001/12/24 15:33:27 obi Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -10,8 +10,8 @@
 
   Dies ist ein zapper der für die kommunikation über tcp/ip ausgelegt ist.
   Er benutzt Port 1505
-  Die Kanalliste muß als /var/zapit/settings.xml erstellt vorhanden sein.
-  Die Bouqueteinstellungen liegen in /var/zapit/bouquets.xml
+  Die Kanalliste muß als CONFIGDIR/zapit/settings.xml erstellt vorhanden sein.
+  Die Bouqueteinstellungen liegen in CONFIGDIR/zapit/bouquets.xml
 
   cmd = 1 zap to channel (numeric)
   param = channelnumber
@@ -92,6 +92,10 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.53  2001/12/24 15:33:27  obi
+  - do not kill camd which does not run before startup of zapit
+  - use CONFIGDIR
+
   Revision 1.52  2001/12/22 18:44:25  faralla
   scanning-log added (in /tmp/zapit_scan.log)
 
@@ -341,7 +345,7 @@ void termination_handler (int signum)
   dprintf("[zapit] received Signal\n");
   keep_going = 0;
   close(connfd);
-  system("cp /tmp/zapit_last_chan /var/zapit/last_chan");
+  system("cp /tmp/zapit_last_chan " CONFIGDIR "/zapit/last_chan");
 }
 
 void write_lcd(char *name) {
@@ -2310,9 +2314,8 @@ int main(int argc, char **argv) {
         }
     }
 
-  system("/usr/bin/killall camd");
-  system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.52 2001/12/22 18:44:25 faralla Exp $\n\n");
+  system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
+  printf("Zapit $Id: zapit.cpp,v 1.53 2001/12/24 15:33:27 obi Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
