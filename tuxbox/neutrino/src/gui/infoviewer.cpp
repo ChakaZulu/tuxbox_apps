@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.22 2001/09/20 11:37:29 fnbrd Exp $
+// $Id: infoviewer.cpp,v 1.23 2001/09/20 11:56:00 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.23  2001/09/20 11:56:00  field
+// Final fix for new structure
+//
 // Revision 1.22  2001/09/20 11:37:29  fnbrd
 // Fixed small bug.
 //
@@ -479,40 +482,30 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 // current
                 tmp_id = (unsigned long long)* dp;
                 dp+= sizeof(tmp_id);
-printf("id %llx\n", tmp_id);
                 epg_times = (sectionsd::sectionsdTime*) dp;
                 dp+= sizeof(sectionsd::sectionsdTime);
 
                 unsigned    dauer = epg_times->dauer/ 60;
         		sprintf((char*) &runningDuration, "%d min", dauer);
-printf("%s", runningDuration);
 
                 struct      tm *pStartZeit = localtime(&epg_times->startzeit);
         		sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-printf("%s", runningStart);
                 runningPercent=(unsigned)((float)(time(NULL)-epg_times->startzeit)/(float)epg_times->dauer*100.);
-printf("proz.: %d\n", runningPercent);
                 strncpy(running, dp, sizeof(running));
-		dp+=strlen(dp)+1;
-//                dp = copyStringto( dp, running, sizeof(running));
-printf("%s", running);
+                dp+=strlen(dp)+1;
+
                 // next
                 tmp_id = (unsigned long long)* dp;
                 dp+= sizeof(tmp_id);
-printf("id %llx\n", tmp_id);
-
                 epg_times = (sectionsd::sectionsdTime*) dp;
                 dp+= sizeof(sectionsd::sectionsdTime);
 
                 dauer = epg_times->dauer/ 60;
         		sprintf((char*) &nextDuration, "%d min", dauer);
-printf("%s", nextDuration);
                 pStartZeit = localtime(&epg_times->startzeit);
         		sprintf((char*) &nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
-printf("%s", nextStart);
                 strncpy(next, dp, sizeof(next));
-//                dp = copyStringto( dp, next, sizeof(next));
-printf("%s", next);
+
         		delete[] pData;
         		retval = true;
 
