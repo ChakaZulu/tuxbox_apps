@@ -4,7 +4,7 @@
 <TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
 	<TR>
 		<TD WIDTH=100%>
-			<P>#NOWT# #NOWD#min <B>#NOWST#</B> 
+			<P>#NOWT# (#NOWD# min) <B>#NOWST#</B> 
 			</P>
 		</TD>
 	</TR>
@@ -16,7 +16,7 @@
 	</TR>
 	<TR>
 		<TD WIDTH=100%>
-			<P>#NEXTT# #NEXTD#min <B>#NEXTST#</B> 
+			<P>#NEXTT# (#NEXTD# min) <B>#NEXTST#</B> 
 			</P>
 		</TD>
 	</TR>
