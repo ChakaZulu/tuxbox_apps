@@ -92,7 +92,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 eString getTitle(eString title)
 {
 	std::stringstream result;
-	result << "<span style=\"width: 100%; background-color: #93A198\">"
+	result << "<span style=\"width: 100%; background-color: #DEE6D6\">"
 		"<font style=\"font-family: Verdana; font-size: 14pt; font-weight: bold\">"
 		<< title
 		<< "</font></SPAN><br><br>";
@@ -343,7 +343,7 @@ static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnec
 	PMT *pmt=eDVB::getInstance()->getPMT();
 	if (!pmt)
 		return "result=ERROR\n";
-	eString res="result=OK\n";
+	eString res="result=+ok";
 	res+="PMT"+eString().sprintf("(%04x)\n", pmt->pid);
 	res+="program_number="+eString().sprintf("%04x\n", pmt->program_number);
 	res+="PCR_PID="+eString().sprintf("%04x\n", pmt->PCR_PID);
@@ -370,7 +370,7 @@ static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnec
 	EIT *eit=eDVB::getInstance()->getEIT();
 	if (!eit)
 		return "result=ERROR\n";
-	eString res="result=OK\n";
+	eString res="result=+ok";
 	res+="EIT"+eString().sprintf("(%04x)\n", eit->service_id);
 	res+="original_network_id="+eString().sprintf("%04x\n", eit->original_network_id);
 	res+="transport_stream_id="+eString().sprintf("%04x\n", eit->transport_stream_id);
@@ -439,7 +439,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 		mut=0;
 	} else {
 		eAVSwitch::getInstance()->toggleMute();
-		result+="[mute OK]";
+		result+="+ok";
 		return result;
 	}
 
@@ -457,7 +457,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 	vol=(int)temp;
 
 	eAVSwitch::getInstance()->changeVolume(1, 63-vol);
-	result+="[volume OK]";
+	result+="+ok";
 
 	return result;
 }
@@ -1697,20 +1697,20 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 		}
 	}
 
-	result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>"
+	result << "<html>" CHARSETMETA "<head><title>Stream Info</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#ffffff>"
 		"<!-- " << sapi->service << "-->" << std::endl <<
 		"<table cellspacing=0 cellpadding=0 border=0>"
-		"<tr><td>name:</td><td>" << name << "</td></tr>"
-		"<tr><td>provider:</td><td>" << provider << "</td></tr>"
-		"<tr><td>vpid:</td><td>" << vpid << "</td></tr>"
-		"<tr><td>apid:</td><td>" << apid << "</td></tr>"
-		"<tr><td>pcrpid:</td><td>" << pcrpid << "</td></tr>"
-		"<tr><td>tpid:</td><td>" << tpid << "</td></tr>"
-		"<tr><td>tsid:</td><td>" << tsid << "</td></tr>"
-		"<tr><td>onid:</td><td>" << onid << "</td></tr>"
-		"<tr><td>sid:</td><td>" << sid << "</td></tr>"
-		"<tr><td>pmt:</td><td>" << pmt << "</td></tr>"
-		"<tr><td>vidformat:<td>" << vidform << "</td></tr>"
+		"<tr><td>Name:</td><td>" << name << "</td></tr>"
+		"<tr><td>Provider:</td><td>" << provider << "</td></tr>"
+		"<tr><td>VPID:</td><td>" << vpid << "</td></tr>"
+		"<tr><td>APID:</td><td>" << apid << "</td></tr>"
+		"<tr><td>PCRPID:</td><td>" << pcrpid << "</td></tr>"
+		"<tr><td>TPID:</td><td>" << tpid << "</td></tr>"
+		"<tr><td>TSID:</td><td>" << tsid << "</td></tr>"
+		"<tr><td>ONID:</td><td>" << onid << "</td></tr>"
+		"<tr><td>SID:</td><td>" << sid << "</td></tr>"
+		"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
+		"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
 		"</table>"
 		"</body></html>";
 
@@ -1723,9 +1723,9 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 	{
 		opt = httpUnescape(opt);
 		eZapMain::getInstance()->postMessage(eZapMessage(1, "external message", opt, 10), 0);
-		return eString("ok\n");
+		return eString("+ok");
 	} else
-		return eString("error\n");
+		return eString("-error\n");
 }
 
 static eString start_plugin(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1757,7 +1757,7 @@ static eString stop_plugin(eString request, eString dirpath, eString opt, eHTTPC
 	if ( ePluginThread::getInstance() )
 	{
 		ePluginThread::getInstance()->kill(true);
-		return "OK plugin is stopped";
+		return "+ok, plugin is stopped";
 	}
 	else
 		return "E: no plugin is running";
@@ -1784,7 +1784,7 @@ static eString xmessage(eString request, eString dirpath, eString opt, eHTTPConn
 
 	eZapMain::getInstance()->postMessage(eZapMessage(1, opts["caption"], opts["body"], timeout), type != -1);
 
-	return eString("OK\n");
+	return eString("+ok");
 }
 
 static eString reload_settings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1797,7 +1797,7 @@ static eString reload_settings(eString request, eString dirpath, eString opt, eH
 		eDVB::getInstance()->settings->loadBouquets();
 		eZap::getInstance()->getServiceSelector()->actualize();
 		eServiceReference::loadLockedList( (eZapMain::getInstance()->getEplPath()+"/services.locked").c_str() );
-		return "+ok\n";
+		return "+ok";
 	}
 	return "-no settings to load\n";
 }
@@ -1806,50 +1806,50 @@ static eString reload_settings(eString request, eString dirpath, eString opt, eH
 static eString load_recordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->loadRecordings();
-	return "+ok\n";
+	return "+ok";
 }
 
 static eString save_recordings(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->saveRecordings();
-	return "+ok\n";
+	return "+ok";
 }
 #endif
 
 static eString load_timerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eTimerManager::getInstance()->loadTimerList();
-	return "+ok\n";
+	return "+ok";
 }
 
 static eString save_timerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eTimerManager::getInstance()->saveTimerList();
-	return "+ok\n";
+	return "+ok";
 }
 
 static eString load_playlist(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->loadPlaylist();
-	return "+ok\n";
+	return "+ok";
 }
 
 static eString save_playlist(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->savePlaylist();
-	return "+ok\n";
+	return "+ok";
 }
 
 static eString load_userBouquets(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->loadUserBouquets();
-	return "+ok\n";
+	return "+ok";
 }
 
 static eString save_userBouquets(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eZapMain::getInstance()->saveUserBouquets();
-	return "+ok\n";
+	return "+ok";
 }
 
 #define NAVIGATOR_PATH "/cgi-bin/navigator"
@@ -1887,7 +1887,7 @@ public:
 		iface.removeRef(e);
 
 		result+="</a></font></td></tr>\n";
-		eDebug("ok");
+		eDebug("+ok");
 		num++;
 	}
 };
@@ -1942,7 +1942,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 	{
 		eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 //		iface->play(current_service);
-		res+="ok, hear the music..";
+		res+="+ok, hear the music..";
 	} else
 	{
 		eNavigatorListDirectory navlist(res, spath + ";" + current + ";", *iface);
@@ -2012,10 +2012,10 @@ static eString screenshot(eString request, eString dirpath, eString opts, eHTTPC
 	{
 		content->local_header["Location"]="/root/tmp/screenshot.png";
 		content->code=307;
-		return "ok\n";
+		return "+ok";
 	}
 
-	return "not ok\n";
+	return "-not ok";
 }
 
 static eString listDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -2086,7 +2086,7 @@ static eString makeDirectory(eString request, eString dirpath, eString opt, eHTT
 	{
 		if ( system(eString().sprintf("mkdir %s", opt.c_str()).c_str()) >> 8 )
 			return eString().sprintf("E: create directory %s failed", opt.c_str() );
-		return "OK";
+		return "+ok";
 	}
 	return "E: invalid command";
 }
@@ -2097,7 +2097,7 @@ static eString removeDirectory(eString request, eString dirpath, eString opt, eH
 	{
 		if ( system(eString().sprintf("rmdir %s", opt.c_str()).c_str()) >> 8 )
 			return eString().sprintf("E: remove directory %s failed", opt.c_str() );
-		return "OK";
+		return "+ok";
 	}
 	return "E: invalid command";
 }
@@ -2108,7 +2108,7 @@ static eString removeFile(eString request, eString dirpath, eString opt, eHTTPCo
 	{
 		if ( system(eString().sprintf("rm %s", opt.c_str()).c_str()) >> 8 )
 			return eString().sprintf("E: remove file %s failed", opt.c_str() );
-		return "OK";
+		return "+ok";
 	}
 	return "E: invalid command";
 }
@@ -2124,7 +2124,7 @@ static eString moveFile(eString request, eString dirpath, eString opt, eHTTPConn
 			return "E: option dest missing or empty dest given";
 		if ( system(eString().sprintf("mv %s %s", opts["source"].c_str(), opts["dest"].c_str() ).c_str()) >> 8 )
 			return eString().sprintf("E: cannot move %s to %s", opts["source"].c_str(), opts["dest"].c_str() );
-		return "OK";
+		return "+ok";
 	}
 	return "E: invalid command";
 }
@@ -2140,7 +2140,7 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 			return "E: option dest missing or empty dest given";
 		if ( system(eString().sprintf("ln -sf %s %s", opts["source"].c_str(), opts["dest"].c_str() ).c_str()) >> 8 )
 			return eString().sprintf("E: cannot create symlink %s to %s", opts["source"].c_str(), opts["dest"].c_str() );
-		return "OK";
+		return "+ok";
 	}
 	return "E: invalid command";
 }
@@ -2148,7 +2148,7 @@ static eString createSymlink(eString request, eString dirpath, eString opt, eHTT
 static eString neutrino_suck_zapto(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	if(opt!="getpids")
-		return eString("ok\n");
+		return eString("+ok");
 	else
 		return eString().sprintf("%u\n%u\n", Decoder::current.vpid, Decoder::current.apid);
 }
