@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.29 2004/01/06 16:05:54 zwen Exp $
+	$Id: controlapi.cpp,v 1.30 2004/02/19 15:37:49 thegoodguy Exp $
 
 	License: GPL
 
@@ -607,7 +607,7 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 		}
 		else if (request->ParameterList["onidsid"] != "")
 		{
-			unsigned channel_id = atol( request->ParameterList["onidsid"].c_str());
+			t_channel_id channel_id = atol(request->ParameterList["onidsid"].c_str()); // FIXME: atol makes only sense for tsidonidsid
 			Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 			CChannelEventList::iterator eventIterator;
 

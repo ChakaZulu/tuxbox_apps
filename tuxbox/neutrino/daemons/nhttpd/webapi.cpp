@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.46 2004/02/09 16:30:57 metallica Exp $
+	$Id: webapi.cpp,v 1.47 2004/02/19 15:37:49 thegoodguy Exp $
 
 	License: GPL
 
@@ -615,7 +615,7 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 					cmd.service_id = ntohs(ni->service_id);
 					cmd.transport_stream_id = ntohs(ni->transport_stream_id);
 
-					t_channel_id channel_id = (cmd.original_network_id << 16) | cmd.service_id;
+					t_channel_id channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(cmd.service_id, cmd.original_network_id, cmd.transport_stream_id);
 					
 					timeString(ni->zeit.startzeit, timestr); // FIXME: time is wrong (at least on little endian)!
 
