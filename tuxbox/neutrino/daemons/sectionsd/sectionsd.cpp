@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.128 2002/08/27 19:00:45 obi Exp $
+//  $Id: sectionsd.cpp,v 1.129 2002/09/20 00:05:55 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.129  2002/09/20 00:05:55  thegoodguy
+//  Fixed potential deadlock
+//
 //  Revision 1.128  2002/08/27 19:00:45  obi
 //  use devfs device names
 //
@@ -1870,7 +1873,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.128 2002/08/27 19:00:45 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.129 2002/09/20 00:05:55 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3499,6 +3502,7 @@ static void *sdtThread(void *)
 			}
 			else if (rc < 0)
 			{
+				dmxSDT.unlock();
 				// DMX neu starten
 				dmxSDT.real_pause();
 				dmxSDT.real_unpause(); // leaves unlocked
@@ -4528,7 +4532,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.128 2002/08/27 19:00:45 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.129 2002/09/20 00:05:55 thegoodguy Exp $\n");
 
 	try
 	{
