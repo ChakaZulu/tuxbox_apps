@@ -163,7 +163,7 @@ PluginOffsetScreen::PluginOffsetScreen()
 	descr->setForegroundColor( foreColor );
 	descr->resize(eSize(568,300));
 	descr->move(ePoint(100,100));
-	descr->setText(_("here you can center the tuxtxt rectangle...\nfor more infos press help"));
+	descr->setText(_("here you can center the tuxtxt rectangle...\npress red to select the left top edge\npress green to select the right bottom edge\nuse the cursor keys to move the selected edges"));
 	eSize ext = descr->getExtend();
 	ext+=eSize(8,4);  // the given Size of the Text is okay... but the renderer sucks...
 	descr->resize( ext );

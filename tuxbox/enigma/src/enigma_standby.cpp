@@ -76,6 +76,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		return 0;
 	case eWidgetEvent::execBegin:
 	{
+		eConfig::getInstance()->flush();
 		/*emit*/ enterStandby();
 		FILE *f = fopen("/var/etc/enigma_enter_standby.sh", "r");
 		if (f)
