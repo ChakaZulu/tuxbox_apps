@@ -54,7 +54,7 @@ CScanTs::CScanTs()
 	y = (576 - height) >> 1;
 	radar = 0;
 	xpos_radar = x + 420;
-	ypos_radar = y + hheigt + (mheight >> 1);
+	ypos_radar = y + hheight + (mheight >> 1);
 	xpos1 = x + 10;
 	found_transponder = 0;
 }
