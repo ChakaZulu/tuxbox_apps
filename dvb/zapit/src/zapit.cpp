@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.150 2002/04/20 21:22:05 Simplex Exp $
+ * $Id: zapit.cpp,v 1.151 2002/04/20 21:42:02 Simplex Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -303,7 +303,7 @@ channel_msg load_settings()
 	{
 		output_msg.mode = 't';
 	}
-	valueName = Radiomode_on ? "lastChannelRadio" : "lastChannelTV";
+	valueName = (currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV";
 	output_msg.chan_nr = config->getInt( valueName, 1);
 
 	return output_msg;
@@ -1919,7 +1919,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.150 2002/04/20 21:22:05 Simplex Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.151 2002/04/20 21:42:02 Simplex Exp $\n\n");
 
 	if (argc > 1)
 	{
