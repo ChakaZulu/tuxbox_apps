@@ -330,6 +330,7 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 	int includesubdirs = 0;
 	eConfig::getInstance()->getKey("/picviewer/includesubdirs", includesubdirs);
 	listDirectory(directory, includesubdirs);
+	slideshowList.sort();
 	for (myIt = slideshowList.begin(); myIt != slideshowList.end(); myIt++)
 	{
 		eString tmp = *myIt;
@@ -337,7 +338,6 @@ bool ePictureViewer::ShowImage(const std::string & filename, bool unscaled)
 		if (tmp == filename)
 			break;
 	}
-	slideshowList.sort();
 	DecodeImage(filename, unscaled);
 	struct fb_var_screeninfo *screenInfo = fbClass::getInstance()->getScreenInfo();
 	if (screenInfo->bits_per_pixel != 16)
