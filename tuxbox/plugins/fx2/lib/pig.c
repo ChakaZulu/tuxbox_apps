@@ -9,53 +9,43 @@
 #include <sys/ioctl.h>
 
 #ifndef i386
+//Narf ... sucks
+#define _LINUX_TIME_H
 #include <linux/videodev.h>
 
-static	struct v4l2_window window = {
-
-	.x = 0,
-	.y = 0,
-	.width = 0,
-	.height = 0,
-	.chromakey = 0,
-	.clips = NULL,
-	.clipcount = 0,
-	.bitmap = NULL,
-	
-};
-	
+static	struct v4l2_format format;
 static	int			fd = -1;
 		int			fx2_use_pig = 1;
 
 void	Fx2SetPig( int x, int y, int width, int height )
 {
-	int preview;
+	int overlay;
 
 	if ( fd==-1 )
 		return;
-	if (( x == window.x ) && ( y == window.y ) &&
-		( width == window.height ) && ( height == window.height ))
+	if (( x == format.fmt.win.w.left ) && ( y == format.fmt.win.w.top ) &&
+		( width == format.fmt.win.w.width ) && ( height == format.fmt.win.w.height ))
 			return;
 			
-	preview = 0;
+	overlay = 0;
 			
-	ioctl(fd, VIDIOC_PREVIEW, &preview);
+	ioctl(fd, VIDIOC_OVERLAY, &overlay);
 
-	window.x=x;
-	window.y=y;
-	window.width=width;
-	window.height=height;
+	format.fmt.win.w.left=x;
+	format.fmt.win.w.top=y;
+	format.fmt.win.w.width=width;
+	format.fmt.win.w.height=height;
 
-	ioctl(fd, VIDIOC_S_WIN, &window);
+	ioctl(fd, VIDIOC_S_FMT, &format);
 
-	preview = 1;
+	overlay = 1;
 	
-	ioctl(fd, VIDIOC_PREVIEW, &preview);
+	ioctl(fd, VIDIOC_OVERLAY, &overlay);
 }
 
 void	Fx2ShowPig( int x, int y, int width, int height )
 {
-	int preview;
+	int overlay;
 	
 	if ( fd != -1 )
 	{
@@ -63,34 +53,34 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 		return;
 	}
 	if (( fd == -1 ) && fx2_use_pig )
-		fd = open( "/dev/v4l2/capture0", O_RDONLY );
+		fd = open( "/dev/v4l/video0", O_RDONLY );
 	if ( fd == -1 )
 		return;
 
-	window.x=x;
-	window.y=y;
-	window.width=width;
-	window.height=height;
+	format.fmt.win.w.left=x;
+	format.fmt.win.w.top=y;
+	format.fmt.win.w.width=width;
+	format.fmt.win.w.height=height;
 
-	ioctl(fd, VIDIOC_S_WIN, &window);
+	ioctl(fd, VIDIOC_S_FMT, &format);
 
 //FIXME	avia_pig_set_stack(fd,2);
 
-	preview = 1;
+	overlay = 1;
 	
-	ioctl(fd, VIDIOC_PREVIEW, &preview);
+	ioctl(fd, VIDIOC_OVERLAY, &overlay);
 }
 
 void	Fx2StopPig( void )
 {
-	int preview;
+	int overlay;
 
 	if ( fd == -1 )
 		return;
 
-	preview = 0;
+	overlay = 0;
 	
-	ioctl(fd, VIDIOC_PREVIEW, &preview);
+	ioctl(fd, VIDIOC_OVERLAY, &overlay);
 
 	close(fd);
 	fd=-1;
@@ -98,21 +88,21 @@ void	Fx2StopPig( void )
 
 void	Fx2PigPause( void )
 {
-	int preview;
+	int overlay;
 
 	if ( fd != -1 ) {
-		preview = 0;
-		ioctl(fd, VIDIOC_PREVIEW, &preview);
+		overlay = 0;
+		ioctl(fd, VIDIOC_OVERLAY, &overlay);
 	}
 }
 
 void	Fx2PigResume( void )
 {
-	int preview;
+	int overlay;
 
 	if ( fd != -1 ) {
-		preview = 1;
-		ioctl(fd, VIDIOC_PREVIEW, &preview);
+		overlay = 1;
+		ioctl(fd, VIDIOC_OVERLAY, &overlay);
 	}
 }
 

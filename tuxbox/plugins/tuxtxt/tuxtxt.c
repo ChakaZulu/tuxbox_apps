@@ -394,9 +394,9 @@ int Init()
 
 	//open pig
 
-		if((pig = open("/dev/v4l2/capture0", O_RDWR)) == -1)
+		if((pig = open("/dev/v4l/video0", O_RDWR)) == -1)
 		{
-			perror("TuxTxt <open /dev/v4l2/capture0>");
+			perror("TuxTxt <open /dev/v4l/video0>");
 			return 0;
 		}
 
@@ -451,15 +451,15 @@ int Init()
 
 void CleanUp()
 {
-	int preview;
+	int overlay;
 
 	//hide pig
 
 		if(screenmode) {
 
-			preview = 1;
+			overlay = 1;
 			
-			ioctl(pig, VIDIOC_PREVIEW ,&preview);
+			ioctl(pig, VIDIOC_OVERLAY, &overlay);
 			
 		}
 
@@ -719,7 +719,7 @@ void ConfigMenu(int Init)
 	struct dmx_pes_filter_params dmx_flt;
 	int val, byte, line, menuitem = 1;
 	int current_pid = 0;
-	int preview;
+	int overlay;
 
 	char menu[] =	"рсссссссссссссссссссссссссссстшллллллллллллллллллллллллллллллЫ"
 					"у    TuxTxt-Konfiguration    фщлддддддддддддддддддддддддддддлЫ"
@@ -785,9 +785,9 @@ void ConfigMenu(int Init)
 		{
 			screenmode = 0;
 
-			preview = 1;
+			overlay = 1;
 			
-			ioctl(pig, VIDIOC_PREVIEW ,&preview);
+			ioctl(pig, VIDIOC_OVERLAY, &overlay);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
@@ -1803,8 +1803,8 @@ void SwitchZoomMode()
 
 void SwitchScreenMode()
 {
-	int preview;
-	struct v4l2_window window;
+	int overlay;
+	struct v4l2_format format;
 
 	//reset transparency mode
 
@@ -1832,19 +1832,16 @@ void SwitchScreenMode()
 			desc.font.pix_width  = 8;
 			desc.font.pix_height = 21;
 
-			window.x = StartX+322;
-			window.y = StartY;
-			window.width = 320;
-			window.height = 526;
-			window.chromakey = 0;
-			window.clips = NULL;
-			window.clipcount = 0;
+			format.fmt.win.w.left = StartX+322;
+			format.fmt.win.w.top = StartY;
+			format.fmt.win.w.width = 320;
+			format.fmt.win.w.height = 526;
 			
-			ioctl(pig, VIDIOC_S_WIN, &window);
+			ioctl(pig, VIDIOC_S_FMT, &format);
 			
-			preview = 1;
+			overlay = 1;
 			
-			ioctl(pig, VIDIOC_PREVIEW ,&preview);
+			ioctl(pig, VIDIOC_OVERLAY, &overlay);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode2]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode2]);
@@ -1854,9 +1851,9 @@ void SwitchScreenMode()
 			desc.font.pix_width  = 16;
 			desc.font.pix_height = 22;
 
-			preview = 0;
+			overlay = 0;
 			
-			ioctl(pig, VIDIOC_PREVIEW ,&preview);
+			ioctl(pig, VIDIOC_OVERLAY, &overlay);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);

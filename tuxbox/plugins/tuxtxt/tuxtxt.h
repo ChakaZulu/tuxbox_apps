@@ -8,7 +8,10 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
+//Narf .. suckt
+#define _LINUX_TIME_H
 #include <linux/videodev.h>
+
 #include <dbox/avs_core.h>
 #include <dbox/saa7126_core.h>
 #include <dbox/fp.h>
