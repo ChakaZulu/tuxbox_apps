@@ -85,6 +85,7 @@ void	Fx2PigResume( void )
 
 #include <draw.h>
 
+		int			fx2_use_pig = 1;
 static	int			l_x = 0;
 static	int			l_y = 0;
 static	int			l_width = 0;
