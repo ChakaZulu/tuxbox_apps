@@ -1083,6 +1083,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		ojDiseqc->addOption( MINI_DISEQC, "satsetup.minidiseqc");
 		ojDiseqc->addOption( DISEQC_1_0,  "satsetup.diseqc10");
 		ojDiseqc->addOption( DISEQC_1_1,  "satsetup.diseqc11");
+		//ojDiseqc->addOption( DISEQC_1_2,  "satsetup.diseqc12");
 		ojDiseqc->addOption( SMATV_REMOTE_TUNING,  "satsetup.smatvremote");
 
 		settings.addItem( ojDiseqc );
@@ -3381,7 +3382,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.440 2003/05/05 08:52:50 mws Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.441 2003/05/05 15:42:20 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();
