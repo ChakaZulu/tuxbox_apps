@@ -66,6 +66,7 @@ class Font
 		void RenderString(int x, int y, int width, const char *string, unsigned char color);
 		
 		int getRenderWidth(const char *string);
+		int getHeight(void);
 
 		Font(CFrameBuffer *fb, fontRenderClass *render, FTC_FaceID faceid, int isize);
 		~Font(){}
@@ -76,11 +77,9 @@ class FontsDef
         public:
                 Font 
 					*menu, 
-					*menu_number,
 					*menu_title, 
 					*epg_title, 
-					*epg_info1, 
-					*epg_info2,
+					*epg_info, 
 					*epg_date,
 					*alert, 
 					*channellist,
