@@ -71,6 +71,7 @@ public:
 typedef std::multiset<eAction::directedAction,eAction::priorityComperator> eActionPrioritySet;
 
 class XMLTreeNode;
+class XMLTreeParser;
 
 class eActionMap
 {
@@ -112,6 +113,9 @@ class eActionMapList
 
 	std::map<eString, eString> existingStyles;
 	eString currentStyle;
+	
+	ePtrList<XMLTreeParser> xmlfiles;
+	XMLTreeNode *searchDevice(const eString &id);
 
 	static eActionMapList *instance;
 public:
@@ -124,6 +128,7 @@ public:
 	void addActionMap(const char *, eActionMap * );
 	void removeActionMap(const char *);
 	int loadXML(const char *filename);
+	int loadDevice(eRCDevice *device);
 	eActionMap *findActionMap(const char *id) const;
 	actionMapList &getActionMapList() { return actionmaps; }
 

@@ -141,6 +141,10 @@ eZap::eZap(int argc, char **argv)
 		}
 		free(namelist);
 	}
+	
+	for (std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
+			i != eRCInput::getInstance()->getDevices().end(); ++i)
+		eActionMapList::getInstance()->loadDevice(i->second);
 
 	char *language=0;
 	if (eConfig::getInstance()->getKey("/elitedvb/language", language))

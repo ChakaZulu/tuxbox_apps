@@ -4,7 +4,7 @@
 		<email>tmbinc@gmx.net</email>
 	</author>
 
-	<device identifier="Dreambox2" >
+	<device identifier="Dreambox IR RC" >
 		<keys>
 			<key name="0" code="00" />
 			<key name="1" code="01" />

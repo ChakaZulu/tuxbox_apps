@@ -6,6 +6,7 @@
 
 #include <lib/base/ebase.h>
 #include <libsig_comp.h>
+#include <lib/base/estring.h>
 
 class eRCInput;
 class eRCDriver;
@@ -21,7 +22,7 @@ class eRCDevice: public Object
 protected:
 	eRCInput *input;
 	eRCDriver *driver;
-	const char *id;
+	eString id;
 public:
 	/**
 	 * \brief Constructs a new remote control.
@@ -29,7 +30,7 @@ public:
 	 * \param id The identifier of the RC, for use in settings.
 	 * \param input The \ref eRCDriver where this remote gets its codes from.
 	 */
-	eRCDevice(const char *id, eRCDriver *input);
+	eRCDevice(eString id, eRCDriver *input);
 	~eRCDevice();
 	/**
 	 * \brief Handles a device specific code.
@@ -44,6 +45,7 @@ public:
 	 * \result The description.
 	 */
 	virtual const char *getDescription() const=0;
+	const eString getIdentifier() const { return id; }
 	/**
 	 * \brief Get a description for a specific key.
 	 * \param key The key to get the description for.
@@ -114,6 +116,7 @@ protected:
 	eSocketNotifier *sn;
 	void keyPressed(int);
 public:
+	eString getDeviceName();
 	eRCInputEventDriver(const char *filename);
 	~eRCInputEventDriver();
 };
@@ -173,15 +176,16 @@ class eRCInput: public Object
 	int handle;
 	static eRCInput *instance;
 
+public:
 	struct lstr
 	{
-		bool operator()(const char *a, const char* b) const
+		bool operator()(const eString &a, const eString &b) const
 		{
-			return strcmp(a, b)<0; 
+			return a<b;
 		}
 	};
-	
-	std::map<const char*,eRCDevice*,lstr> devices;
+protected:
+	std::map<eString,eRCDevice*,lstr> devices;
 public:
 	Signal1<void, const eRCKey&> keyEvent;
 	enum
@@ -209,9 +213,10 @@ public:
 		/*emit*/ keyEvent(key);
 	}
 	
-	void addDevice(const char *id, eRCDevice *dev);
-	void removeDevice(const char *id);
-	eRCDevice *getDevice(const char *id);
+	void addDevice(const eString &id, eRCDevice *dev);
+	void removeDevice(const eString &id);
+	eRCDevice *getDevice(const eString &id);
+	std::map<eString,eRCDevice*,lstr> &getDevices();
 	
 	static eRCInput *getInstance() { return instance; }
 	
