@@ -1,5 +1,5 @@
 /*
- * lcdmenu.cpp
+ * $Id: lcdmenu.cpp,v 1.2 2001/11/14 22:42:06 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -19,6 +19,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
+ * $Log: lcdmenu.cpp,v $
+ * Revision 1.2  2001/11/14 22:42:06  obi
+ * fall back to defaults correctly
+ *
+ * 
  */
 
 #include "lcdmenu.h"
@@ -27,45 +32,44 @@ CLCDMenu::CLCDMenu()
 {
 #ifndef X86_BUILD
     rc = new CRCInput();
-#endif /* X86_BUILD */
+#endif
     fontRenderer = new fontRenderClass(this);
     entryCount = 0;
     menuFont = fontRenderer->getFont("Arial", "Bold", fontSize);
 
     config = new CConfigManager();
-    if (config->loadConfig("/var/etc/lcdmenu.conf"))
-    {
-#ifdef X86_BUILD
-	config->dump();
-#endif /* XF86_BUILD */
-
-	/* user defineable settings */
-	fontSize = config->getInt("font_size");
-	lineSpacing = config->getInt("line_spacing");
-	defaultEntry = config->getInt("default_entry") - 1;
-	textAlign = config->getInt("text_align");
-	showNumbers = config->getBool("show_numbers");
-	cryptedPin = config->getString("pin");
-	entries = config->getStringVector("menu_items");
-	pinEntries = config->getIntVector("pin_protect");
-    }
-    else
+    if (!config->loadConfig("/var/etc/lcdmenu.conf"))
     {
 	/* defaults */
-	fontSize = 12;
-	lineSpacing = 3;
-	defaultEntry = 0;
-	textAlign = 0;
-	showNumbers = false;
-	cryptedPin = string("__lUISdFwUYjg");
-	
+	config->setInt("font_size", 12);
+	config->setInt("line_spacing", 3);
+	config->setInt("default_entry", 0);
+	config->setInt("text_align", 0);
+	config->setBool("show_numbers", false);
+	config->setString("pin", string("__lUISdFwUYjg"));
 	addEntry("EliteDVB");
 	addEntry("Neutrino");
-	addEntry("Multicast Zap");
+	addEntry("Lcars");
 	addEntry("Maintenance");
-	
+	config->setStringVector("menu_items", entries);
 	addPinProtection(4);
+	config->setIntVector("pin_protect", pinEntries);
     }
+
+#ifdef X86_BUILD
+    config->dump();
+#endif
+
+    /* user defineable settings */
+    fontSize = config->getInt("font_size");
+    lineSpacing = config->getInt("line_spacing");
+    defaultEntry = config->getInt("default_entry") - 1;
+    textAlign = config->getInt("text_align");
+    showNumbers = config->getBool("show_numbers");
+    cryptedPin = config->getString("pin");
+    entries = config->getStringVector("menu_items");
+    pinEntries = config->getIntVector("pin_protect");
+    entryCount = entries.size();
 
     /* get salt from old password */
     strncpy(oldSalt, cryptedPin.c_str(), 2);
@@ -80,20 +84,21 @@ CLCDMenu::~CLCDMenu()
 {
 #ifndef X86_BUILD
     delete rc;
-#endif /* X86_BUILD */
+#endif
     delete menuFont;
     delete fontRenderer;
     delete config;
 }
 
+// TODO: Rewrite!
 void CLCDMenu::addEntry(string title)
 {
     entryCount++;
-    if ((showNumbers) && (entryCount < 10))
+    if (showNumbers)
     {
-	char *entryCountChar = (char *) malloc(3);
+	char *entryCountChar = (char *) malloc(sizeof(entryCount)+2);
 	sprintf(entryCountChar, "%d) ", entryCount);
-	entries.push_back(entryCountChar + title);
+	entries.push_back(string(entryCountChar) + title);
     }
     else
     {
@@ -124,7 +129,7 @@ bool CLCDMenu::selectEntry(int index)
 	update();
 #else
 	cout << "selectEntry(" << index << "): " << entries[index] << endl;
-#endif /* X86_BUILD */
+#endif
 	return true;
     }
     else
@@ -146,12 +151,12 @@ bool CLCDMenu::drawMenu()
 	    top = border + (i+1) * fontSize + (i) * lineSpacing;
 #ifdef X86_BUILD
 	    cout << "drawString(\"" << entries[i] << "\"," << top << "," << textAlign << ",CLCDDisplay::PIXEL_ON)" << endl;
-#endif /* X86_BUILD */
+#endif
 	    drawString(entries[i], top, textAlign, CLCDDisplay::PIXEL_ON);
 	}
 #ifndef X86_BUILD
 	update();
-#endif /* X86_BUILD */
+#endif
 
 	return true;
     }
@@ -180,13 +185,13 @@ bool CLCDMenu::drawString(string text, int top, int align, int color)
     
     if (width > maxWidth)
     {
-	cout << "string exceeded " << maxWidth << " pixels. width: " << width << endl;
+	cerr << "string exceeded " << maxWidth << " pixels. width: " << width << endl;
         return false;
     }
     else
     {
 #ifdef X86_BUILD
-    cout << "menufont->RenderString(" << left << "," << top << "," << width << ",\"" << text.c_str() << "\"," << color << ")" << endl;
+	cout << "menufont->RenderString(" << left << "," << top << "," << width << ",\"" << text.c_str() << "\"," << color << ")" << endl;
 #endif
 	menuFont->RenderString(left, top, width, text.c_str(), color);
         return true;
@@ -206,8 +211,7 @@ bool CLCDMenu::rcLoop()
 #else
 	cout << "rc->getKey(" << timeoutValue << ")" << endl;
 	int pressedKey = 4;
-#endif /* X86_BUILD */
-
+#endif
 	switch (pressedKey)
 	{
 	    /* 0-9: number keys */
@@ -245,7 +249,7 @@ bool CLCDMenu::rcLoop()
 		cout << "pressedKey: " << pressedKey << endl;
 	}
 
-	/* check pin for maintenance mode */
+	/* check pin if selected entry is protected  */
 	if ((selected) && (isPinProtected(selectedEntry)) && (!checkPin("Enter PIN")))
 	{
 	    selectEntry(defaultEntry);
@@ -281,7 +285,7 @@ bool CLCDMenu::changePin()
 	{
 	    /* ... dann kann der alte pin durch den neuen ersetzt werden. */
 	    cryptedPin = newCryptedPin;
-	    config->setModifiedFlag();
+	    config->setModifiedFlag(false);
 	    // TODO: notify successful change via lcd
 	    printf("pin changed successfully.\n");
 	    return true;
@@ -309,7 +313,7 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
     drawString("_ _ _ _", 3*fontSize, CENTERED, CLCDDisplay::PIXEL_ON);
 #ifndef X86_BUILD
     update();
-#endif /* X86_BUILD */
+#endif
 
     int i, pin_length = 4;
     int left = 120 - (pin_length * fontSize * 7/4); //wie das wohl ausschaut?
@@ -322,14 +326,14 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
 #else
 	pin[i] = '0';
 	cout << "pin[" << i << "]=" << pin[i] << endl;
-#endif /* X86_BUILD */
+#endif
 
 	menuFont->RenderString(left, 3*fontSize, fontSize, "*", CLCDDisplay::PIXEL_ON);
 #ifdef X86_BUILD
     cout << "menuFont->RenderString(" << left << "," << 3*fontSize << "," << fontSize << ",*,CLCDDisplay::PIXEL_ON)" << endl;
 #else
 	update();
-#endif /* X86_BUILD */
+#endif
 	left+=fontSize;
     }
 
@@ -348,7 +352,7 @@ bool CLCDMenu::checkPin(string title)
     if (cryptedPin ==  pinScreen(title, false))
     {
         /* TODO: complain about invalid pin on lcd */
-	cout << "invalid pin entered." << endl;
+	cerr << "invalid pin entered." << endl;
         return false;
     }
     else
@@ -359,6 +363,9 @@ bool CLCDMenu::checkPin(string title)
 
 int main(int argc, char **argv)
 {
+    /* print version information */
+    cout << "$Id: lcdmenu.cpp,v 1.2 2001/11/14 22:42:06 obi Exp $" << endl;
+
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();
 
@@ -373,19 +380,12 @@ int main(int argc, char **argv)
     
     if (menu->getConfig()->getModifiedFlag())
     {
-	cout << "saving configuration" << endl;
-
-#ifndef X86_BUILD
-	menu->getConfig()->dumpToFile("lcdmenu.conf");
-#endif /* XF86_BUILD */
+	/* save configuraion */
+	menu->getConfig()->saveConfig("/var/etc/lcdmenu.conf");
 
 	/* reset modified flag */
 	menu->getConfig()->setModifiedFlag(false);
     }
-
-#ifdef X86_BUILD
-    menu->getConfig()->dumpToFile("lcdmenu.conf.x86");
-#endif /* X86_BUILD */
 
     /* clear screen before exit */
     menu->draw_fill_rect(0, 0, 119, 63, CLCDDisplay::PIXEL_OFF);
@@ -394,7 +394,7 @@ int main(int argc, char **argv)
     cout << "return (" << menu->getSelectedEntry() << ")" << endl;
 #else
     menu->update();
-#endif /* XF86_BUILD */
+#endif
 
     return menu->getSelectedEntry();
 }

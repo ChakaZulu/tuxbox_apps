@@ -55,12 +55,12 @@ pin=__lUISdFwUYjg
 
 #
 # option menu_items (string, ...)
-# default: EliteDVB,Neutrino,Multicast Zap,Maintenance
+# default: EliteDVB,Neutrino,Lcars,Maintenance
 #
-menu_items=EliteDVB,Neutrino,Multicast Zap,Maintenance
+menu_items=EliteDVB,Neutrino,Lcars,Maintenance
 
 #
 # option: pin_protect (number, ...)
-# default: (none)
+# default: 4
 #
 pin_protect=1,2,3,4
