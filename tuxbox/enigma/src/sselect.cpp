@@ -1880,6 +1880,9 @@ void eServiceSelector::invalidateCurrent( eServiceReference ref )
 
 int eServiceSelector::toggleMoveMode()
 {
+	if ( editMode )  // don't editmode and movemode at the same time..
+		eZapMain::getInstance()->toggleEditMode(this);
+
 	services->beginAtomic();
 
 	movemode^=1;
@@ -1899,6 +1902,8 @@ int eServiceSelector::toggleMoveMode()
 
 int eServiceSelector::toggleEditMode()
 {
+	if ( movemode )  // don't editmode and movemode at the same time..
+		eZapMain::getInstance()->toggleMoveMode(this);
 	editMode^=1;
 	return editMode;
 }

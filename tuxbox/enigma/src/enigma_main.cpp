@@ -4139,10 +4139,13 @@ void eZapMain::createMarker(eServiceSelector *sel)
 	}
 }
 
-	void eZapMain::copyProviderToBouquets(eServiceSelector *sel)
+void eZapMain::copyProviderToBouquets(eServiceSelector *sel)
 {
 	eServiceReference ref=sel->getSelected();
 	eServiceReference path=sel->getPath().current();
+
+	eServiceReference oldref = currentSelectedUserBouquetRef;
+	ePlaylist *oldBouquet = currentSelectedUserBouquet;
 
 	// create new user bouquet
 	currentSelectedUserBouquetRef = eServicePlaylistHandler::getInstance()->newPlaylist();
@@ -4179,8 +4182,9 @@ void eZapMain::createMarker(eServiceSelector *sel)
 	sel->setPath( safe, ref );
 
 	currentSelectedUserBouquet->save();
-	currentSelectedUserBouquet=0;
-	currentSelectedUserBouquetRef = eServiceReference();
+
+	currentSelectedUserBouquetRef=oldref;
+	currentSelectedUserBouquet=oldBouquet;
 }
 
 void eZapMain::showServiceMenu(eServiceSelector *sel)
@@ -4546,6 +4550,9 @@ void eZapMain::addServiceToUserBouquet(eServiceReference *service, int dontask)
 	if (!service)
 		return;
 
+	eServiceReference oldRef = currentSelectedUserBouquetRef;
+	ePlaylist *old = currentSelectedUserBouquet;
+
 	if (!dontask)
 	{
 		if ( (mode > modeFile) || (mode < 0) )
@@ -4578,9 +4585,9 @@ void eZapMain::addServiceToUserBouquet(eServiceReference *service, int dontask)
 		if (!dontask)
 		{
 			currentSelectedUserBouquet->save();
-			currentSelectedUserBouquet=0;
+			currentSelectedUserBouquet = old;
 			eServiceInterface::getInstance()->removeRef( currentSelectedUserBouquetRef );
-			currentSelectedUserBouquetRef = eServiceReference();
+			currentSelectedUserBouquetRef = oldRef;
 		}
 	}
 }
