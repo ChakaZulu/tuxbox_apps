@@ -212,9 +212,10 @@ bool CFlashUpdate::checkVersion4Update()
 
 		msg_body = "flashupdate.msgbox_manual";
 	}
-	sprintf((char*) &msg, g_Locale->getText(msg_body).c_str(), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getBaseImageVersion(), versionInfo->getType());
+	sprintf(msg, g_Locale->getText(msg_body).c_str(), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getBaseImageVersion(), versionInfo->getType());
 	if (strcmp("1.6", versionInfo->getBaseImageVersion()))
 	{
+		delete versionInfo;
 		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
 		return false;
 	}
