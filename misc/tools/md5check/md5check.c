@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../libucodes/libucodes.h"
+#include <libucodes/libucodes.h>
 
 
 int main(int argc, char **argv)

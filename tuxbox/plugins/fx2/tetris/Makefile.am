@@ -1,4 +1,4 @@
-INCLUDES = -I../lib
+INCLUDES = -I$(srcdir)/../lib
 
 bin_PROGRAMS = tetris
 noinst_LTLIBRARIES = libtetris.la

@@ -1,4 +1,4 @@
-INCLUDES = -I../lib
+INCLUDES = -I$(srcdir)/../lib
 
 noinst_LTLIBRARIES = libpac.la
 
