@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.225 2002/09/16 13:06:27 obi Exp $
+ * $Id: zapit.cpp,v 1.226 2002/09/16 21:48:28 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -919,7 +919,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				read(connfd, &msgExistsChInBq, sizeof(msgExistsChInBq));
 				// -- for some unknown reason BQ-IDs are externally  1..n
 				// -- internally BQ-IDs are 0..n-1, so subtract 1!!
-				responseBool.status = bouquetManager->existsChannelInBouquet(msgExistsChInBq.bouquet - 1, msgExistsChInBq.onid_sid);
+				responseBool.status = bouquetManager->existsChannelInBouquet(msgExistsChInBq.bouquet - 1, msgExistsChInBq.channel_id);
 				send(connfd, &responseBool, sizeof(responseBool), 0);
 				break;
 			}
@@ -934,14 +934,16 @@ void parse_command (CZapitClient::commandHead &rmsg)
 			{
 				CZapitClient::commandAddChannelToBouquet msgAddChannelToBouquet;
 				read(connfd, &msgAddChannelToBouquet, sizeof(msgAddChannelToBouquet));
-				addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.onid_sid);
+				addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.channel_id);
 				break;
 			}
 			case CZapitClient::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET:
 			{
 				CZapitClient::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
 				read(connfd, &msgRemoveChannelFromBouquet, sizeof(msgRemoveChannelFromBouquet));
-				removeChannelFromBouquet(msgRemoveChannelFromBouquet.bouquet, msgRemoveChannelFromBouquet.onid_sid);
+				msgRemoveChannelFromBouquet.bouquet--;
+				if (msgRemoveChannelFromBouquet.bouquet < bouquetManager->Bouquets.size())
+					bouquetManager->Bouquets[msgRemoveChannelFromBouquet.bouquet]->removeService(msgRemoveChannelFromBouquet.channel_id);
 				break;
 			}
 			case CZapitClient::CMD_BQ_MOVE_CHANNEL:
@@ -1083,7 +1085,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.225 2002/09/16 13:06:27 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.226 2002/09/16 21:48:28 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1283,13 +1285,6 @@ void addChannelToBouquet(unsigned int bouquet, const t_channel_id channel_id)
 		bouquetManager->Bouquets[bouquet-1]->addService(chan);
 	else
 		printf("channel_id not found in channellist!\n");
-}
-
-void removeChannelFromBouquet(unsigned int bouquet, const t_channel_id channel_id)
-{
-	printf("removing %d in bouquet %d \n", channel_id, bouquet);
-	bouquetManager->Bouquets[bouquet-1]->removeService(channel_id);
-	printf("removing %d in bouquet %d done\n", channel_id, bouquet);
 }
 
 void sendBouquets(bool emptyBouquetsToo)
