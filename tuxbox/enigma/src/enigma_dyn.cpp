@@ -235,6 +235,14 @@ eString httpUnescape(const eString &string)
 	return result;
 }
 
+eString filter_string(eString string)
+{
+	string.strReplace("\xc2\x86","");
+	string.strReplace("\xc2\x87","");
+	string.strReplace("\xc2\x8a"," ");
+	return string;
+}
+
 eString httpEscape(const eString &string)
 {
 	eString result;
@@ -713,6 +721,20 @@ static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnec
 	return result;
 }
 
+static eString getCurService()
+{
+	eString result = "&nbsp;";
+
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
+		if (current)
+			result = current->service_name.c_str();
+	}
+	return filter_string(result);
+}
+
 static eString getChannelNavi(void)
 {
 	eString result = "&nbsp;";
@@ -958,14 +980,6 @@ static eString getIP()
 	return eString().sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
 }
 
-eString filter_string(eString string)
-{
-	string.strReplace("\xc2\x86","");
-	string.strReplace("\xc2\x87","");
-	string.strReplace("\xc2\x8a"," ");
-	return string;
-}
-
 #ifndef DISABLE_FILE
 extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 
@@ -1058,20 +1072,6 @@ static eString getRecordingStat()
 		result << "&nbsp;";
 
 	return result.str();
-}
-
-static eString getCurService()
-{
-	eString result = "&nbsp;";
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (sapi)
-	{
-		eService *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-		if (current)
-			result = current->service_name.c_str();
-	}
-	return filter_string(result);
 }
 
 static eString getEITC(eString result)
