@@ -2952,6 +2952,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		setVolume(msg, (mode != mode_scart));
 		return messages_return::handled;
+#warning check if we leak memory here (NeutrinoMessages::EVT_VOLCHANGED)
 	}
 	else if( msg == CRCInput::RC_spkr )
 	{
@@ -3245,15 +3246,15 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			scartMode( false );
 		}
 	}
-	else if( msg == NeutrinoMessages::EVT_START_PLUGIN )
+	else if (msg == NeutrinoMessages::EVT_START_PLUGIN)
 	{
-		std::string plugname = std::string((char *) data);
-				g_PluginList->setvtxtpid( g_RemoteControl->current_PIDs.PIDs.vtxtpid );
-		g_PluginList->startPlugin( plugname );
+		g_PluginList->setvtxtpid(g_RemoteControl->current_PIDs.PIDs.vtxtpid);
+		g_PluginList->startPlugin((const char *)data);
 		delete (unsigned char*) data;
+		return messages_return::handled;
 	}
 
-	if( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
+	if ((msg >= CRCInput::RC_WithData) && (msg < CRCInput::RC_WithData + 0x10000000))
 		delete (unsigned char*) data;
 
 	return messages_return::unhandled;
