@@ -29,18 +29,19 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
-#include <math.h>
-#include <global.h>
-#include <neutrino.h>
+#include <gui/widget/lcdcontroler.h>
 
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 
 #include <gui/color.h>
+#include <gui/widget/messagebox.h>
 
-#include "lcdcontroler.h"
-#include "messagebox.h"
+#include <global.h>
+#include <neutrino.h>
+
+#include <math.h>
+
 
 #define BRIGHTNESSFACTOR 2.55
 #define CONTRASTFACTOR 0.63
@@ -162,7 +163,7 @@ int CLcdControler::exec(CMenuTarget* parent, std::string)
 					case 0:
 						if (contrast < 63)
 						{
-							int val = lrint(log(contrast+1));
+							int val = lrint(::log(contrast+1));
 
 							if (contrast + val < 63)
 								contrast += val;
@@ -206,7 +207,7 @@ int CLcdControler::exec(CMenuTarget* parent, std::string)
 					case 0:
 						if (contrast > 0)
 						{
-							contrast -= lrint(log(contrast));
+							contrast -= lrint(::log(contrast));
 
 							paintSlider(x+10, y+hheight, contrast, CONTRASTFACTOR, g_Locale->getText("lcdcontroler.contrast"),"contrast", true);
 							setLcd();
