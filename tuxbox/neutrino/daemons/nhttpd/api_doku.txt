@@ -129,9 +129,7 @@ Die EVENTID dient als Handle um genauere Informationen abzufragen.
 Beispiel:
 
 >>>http://dbox/control/epg?ext
-69530 21:30 45 4556718105 Planet RTL
-69531 20:00 15 4556783630 News on the Hour
-
+8716330 1025382300 6900 571233417784 Rocky 2
 
 
 
