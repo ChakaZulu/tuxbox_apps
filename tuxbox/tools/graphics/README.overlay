@@ -1,0 +1,24 @@
+Overlay
+-------
+overlay <left> <top> <width> <height> <secs>
+
+A small Overlay-testing tool.
+
+Overlay is intertwined with the capturing module because it can actually
+only display something that has been captured. 
+
+Because of this it's not possible to capture an image and use overlay 
+at the same time for a different area. (Though it might be possible
+to grab what's shown but not safely with the current v4l2-driver, 
+so don't try, I warned you!)
+
+The original image used in this tool is always 720x576. Since the scaling 
+is restricted to what the hardware can do (integer values 1..30) 
+you won't get the full 720x576 image for all possible settings. 
+
+The Capture part will always try to set the parameters to the next 
+bigger settings, so the shown overlay will always be filled completely.
+
+This tool was merely written for testing and debugging.
+
+Carsten Juttner

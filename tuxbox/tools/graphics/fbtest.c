@@ -3,7 +3,7 @@
  *	test program for the tuxbox-framebuffer device
  *	tests all GTX/eNX supported modes
  *                                                                            
- *	(c) Carsten Juttner 2003 (carjay@gmx.net)
+ *	(c) 2003 Carsten Juttner (carjay@gmx.net)
  *
  * 	This program is free software; you can redistribute it and/or modify
  * 	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *  									      
  ******************************************************************************
- * $Id: fbtest.c,v 1.1 2003/10/31 01:07:51 carjay Exp $
+ * $Id: fbtest.c,v 1.2 2003/11/14 00:16:29 carjay Exp $
  ******************************************************************************/
 
 // TODO: - should restore the colour map and mode to what it was before
@@ -113,7 +113,7 @@ const struct pixelformat pixelformattable[] = {
 		.blue =  { .offset = 0, .length=5, .msb_right =0 },
 		.transp=  { .offset = 0, .length=1, .msb_right =0 }
 	},
-	{ .name = "RGB332",	// RGB332, essentially CLUT8 as well but fixed index
+	{ .name = "RGB332",	// RGB332, essentially CLUT8 as well but fixed palette
 		.bpp = 8, .pixenum = RGB332,
 		.red = 	 { .offset = 5, .length=3, .msb_right =0 },
 		.green = { .offset = 2, .length=3, .msb_right =0 },
@@ -218,7 +218,7 @@ int setmode(int fbd, const struct pixelformat *pixf,const struct vidsize *vids){
 
 // unefficient implementation, do NOT use it for your next ego shooter, please :)
 // for 4-Bit only rectangles with even width are supported
-// CLUT-modes use length of red component as index
+// CLUT-modes use value of red component as index
 void drawrect(void *videoram, struct rect *r, const struct pixelformat *pixf, const struct vidsize *vids){
 	int x,y,corwidth, bpp = 0, tocopy = 1;
 	struct pixel pix;

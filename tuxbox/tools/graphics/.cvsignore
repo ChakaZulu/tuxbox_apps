@@ -1,2 +1,6 @@
 Makefile
 fbtest
+vgrab
+overlay
+unsquasher
+yuv2ppm

@@ -1,0 +1,84 @@
+Capture
+-------
+There are 3 tools in this directory dedicated to capturing:
+
+    vgrab, unsquasher and yuv2ppm
+
+All 3 use the v4l2-API.
+A short description follows:
+
+
+1. Vgrab - capturing an image
+-----------------------------
+vgrab <filename> <left> <top> <width> <height> <scale_x> <scale_y> [<opt>]
+
+vgrab applies the requested parameters, grabs one image and stores
+it to a file with the given filename.
+
+If you want to know how to do this with v4l2, look at the source, it's
+basically setting an input cropping window and defining the resulting
+output format. All hardware restrictions are checked by the driver, so it's
+recommended to read back the format to make sure everything works as
+expected.
+
+Restrictions in short:
+    - left start pixel must begin on an even position (0..718)
+    - top captured line must be on a even position (0..575)
+    - width must be a multiple of 2
+    - scale_x and scale_y can only be positive integer values (1..30)
+      for y,	if the scale is odd (1,3,5..) both fields are captured
+	        if the scale is even (2,4,6..) only the even field is captured
+    - opt is not used yet (future extension)
+
+    If the captured width (decimated, so after scaling) is odd, then
+        (- for GTX it is PROBABLY padded to a multiple of 2) (TODO: confirm this)
+        - for the eNX it is padded to a multiple of 4 if the fields are stored
+	    planar and to a multiple of 2 if stored interlaced
+    One final restriction is that currently the biggest size that can be output
+    is half 720x576 (but you can set the cropping window to full screen and
+    scale down). This is because of the reserved capture RAM which is not big
+    enough. It doesn't matter how to get the half resolution though: 
+    720x288, 360x576 both work fine... (the framesize itself is checked in
+    the driver)
+
+The field data is stored planarly for GTX (eNX let's you configure 
+this as being interlaced, but that's not implemented yet).
+
+Keep this in mind because it means that if you have an EVEN scale_y, you get 
+only one field and everything's OK. But if you have an ODD scale_y there will
+be 2 fields, one after the other, so you might need to reorder the lines.
+
+Confused enough? Well, blame it on the hardware. :)
+
+The output file will start with 6 header bytes, first 2 bytes are the width, 
+the next 2 bytes are the height and the last 2 are reserved. Order is
+bigendian.
+
+
+2. Unsquasher - get the original Y Cb Cr back
+---------------------------------------------
+unsquasher <input filename> <output_filename>
+
+GTX/eNX use a proprietary format to represent the 8-Bit Y/Cb/Cr in a
+"squashed" 4-Bit format. Unsqasher turns this back to a 8-Bit-format.
+
+It expects the format that vgrab writes, so it expects 6 bytes as header
+containing the width and height-information.
+
+The written file will be in the YUY2-order (Y0 Cb Y1 Cr) and also have a 6
+byte header in bigendian order.
+
+
+3. yuv2ppm - turns the yuv-data into an RGB-image
+-------------------------------------------------
+yuv2ppm <input filename> <output filename>
+
+Simple tool that turns the image data from the Unsquasher into an RGB-ppm
+image format. The YUV<->RGB-matrix should be the correct inverse matrix
+but since it's using floating point, it's very slow on a dbox2, so you
+might want to compile this on a faster platform (I tested it on i386).
+
+Of course you can always use the v4l2-code to get what you want, these
+tools were mostly written for driver testing.
+
+Carsten Juttner
