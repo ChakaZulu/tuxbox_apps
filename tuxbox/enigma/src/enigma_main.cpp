@@ -6039,16 +6039,17 @@ eServiceContextMenu::eServiceContextMenu(const eServiceReference &ref, const eSe
 	}
 	else if (ref) // not in a playlist
 	{
-		// not in file mode
 		// add current service to favourite
-		if ( (ref.type == eServiceReference::idFile) || !(ref.flags & eServiceReference::flagDirectory) )
+		if ( !(ref.flags & eServiceReference::flagDirectory)
+			&& !(ref.type == eServiceReference::idDVB)
+			&& !ref.path )
 			prev = new eListBoxEntryText(&list, _("add to specific bouquet"), (void*)4, 0, _("add the selected service to a selectable bouquet"));
 		// copy provider to bouquet list
-		else if (ref.data[0] == -2 || ref.data[0] == -3 )
+		if (ref.data[0] == -2 || ref.data[0] == -3 )
 			prev = new eListBoxEntryText(&list, _("copy to bouquet list"), (void*)8, 0, _("copy the selected provider to the bouquet list"));
 #ifndef DISABLE_FILE
 		else if ( (ref.type == eServiceReference::idDVB && ref.path)
-			|| ( ref.type == eServiceReference::idUser
+			|| ( ref.type == eServiceRef1erence::idUser
 				&& ( (ref.data[0] == eMP3Decoder::codecMPG)
 				  || (ref.data[0] == eMP3Decoder::codecMP3) ) ) )
 		{// deleteable file
