@@ -72,14 +72,14 @@ class CMP3Player
 	const char		*MadErrorString(const struct mad_stream *Stream);
 	unsigned short	MadFixedToUshort(mad_fixed_t Fixed);
 	void				CreateInfo();
-	int				MpegAudioDecoder(FILE *InputFp,FILE *OutputFp);
+	int				MpegAudioDecoder(FILE *InputFp,int OutputFd);
 
 
 public:
 	enum State {STOP = 0, PLAY, PAUSE, FF, REV};
 	State state;
 	static CMP3Player* getInstance();
-	bool SetDSP(FILE *soundfd, struct mad_header *Header);
+	bool SetDSP(int soundfd, struct mad_header *Header);
 	bool play(const char *filename);
 	void stop();
    void pause();

@@ -241,8 +241,8 @@ void CMP3Player::CreateInfo()
  * Main decoding loop. This is where mad is used.							*
  ****************************************************************************/
 #define INPUT_BUFFER_SIZE	(2*8192)
-#define OUTPUT_BUFFER_SIZE	2048 /* Must be an integer multiple of 4. */
-int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
+#define OUTPUT_BUFFER_SIZE	1022*4 /* AVIA_GT_PCM_MAX_SAMPLES-1 */
+int CMP3Player::MpegAudioDecoder(FILE *InputFp,int OutputFd)
 {
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
@@ -443,7 +443,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 		 */
 		if(FrameCount==0)
 		{
-			if (SetDSP(OutputFp, &Frame.header))
+			if (SetDSP(OutputFd, &Frame.header))
 			{
 				Status=1;
 				break;
@@ -518,7 +518,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 			   /* Flush the buffer if it is full. */
             if(OutputPtr==OutputBufferEnd)
             {
-               if(fwrite(OutputBuffer,1,OUTPUT_BUFFER_SIZE,OutputFp)!=OUTPUT_BUFFER_SIZE)
+               if(write(OutputFd, OutputBuffer, OUTPUT_BUFFER_SIZE)!=OUTPUT_BUFFER_SIZE)
                {
                   fprintf(stderr,"%s: PCM write error (%s).\n",
                           ProgName,strerror(errno));
@@ -544,9 +544,9 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 	 */
 	if(OutputPtr!=OutputBuffer && Status!=2)
 	{
-		size_t	BufferSize=OutputPtr-OutputBuffer;
+		ssize_t	BufferSize=OutputPtr-OutputBuffer;
 
-		if(fwrite(OutputBuffer,1,BufferSize,OutputFp)!=BufferSize)
+		if(write(OutputFd, OutputBuffer, BufferSize)!=BufferSize)
   		{
 			fprintf(stderr,"%s: PCM write error (%s).\n",
 					ProgName,strerror(errno));
@@ -586,7 +586,7 @@ q		 * next mad_frame_decode() invocation. (See the comments marked
 /****************************************************************************
  * Program entry point.														*
  ****************************************************************************/
-bool  CMP3Player::SetDSP(FILE *soundfd, struct mad_header *Header)
+bool  CMP3Player::SetDSP(int soundfd, struct mad_header *Header)
 {
 	 int fmt=AFMT_S16_BE;
 	 unsigned int dsp_speed;
@@ -597,13 +597,13 @@ bool  CMP3Player::SetDSP(FILE *soundfd, struct mad_header *Header)
 	 // Single channel is transformed to dual channel in MpegAudioDecoder, there for set oss channels to 2 always
 	 channels=2;
     
-	 if (::ioctl(fileno(soundfd), SNDCTL_DSP_RESET))
+	 if (::ioctl(soundfd, SNDCTL_DSP_RESET))
 		 printf("reset failed\n");
-	 if(::ioctl(fileno(soundfd), SNDCTL_DSP_SETFMT, &fmt))
+	 if(::ioctl(soundfd, SNDCTL_DSP_SETFMT, &fmt))
 		 printf("setfmt failed\n");
-	 if(::ioctl(fileno(soundfd), SNDCTL_DSP_CHANNELS, &channels))
+	 if(::ioctl(soundfd, SNDCTL_DSP_CHANNELS, &channels))
 		 printf("channel set failed\n");
-	 if (::ioctl(fileno(soundfd), SNDCTL_DSP_SPEED, &dsp_speed))
+	 if (::ioctl(soundfd, SNDCTL_DSP_SPEED, &dsp_speed))
 	 {
 		 printf("speed set failed\n");
 		 crit_error=true;
@@ -652,9 +652,9 @@ CMP3Player* CMP3Player::getInstance()
 void* CMP3Player::PlayThread(void * filename)
 {
 	FILE *fp;
-	FILE *soundfd;
-	soundfd=::fopen("/dev/sound/dsp","w");
-	if (soundfd!=NULL)
+	int soundfd;
+	soundfd=::open("/dev/sound/dsp",O_WRONLY);
+	if (soundfd < 0)
 	{
 		fp = ::fopen((char *)filename,"r");
 		if (fp!=NULL)
@@ -672,7 +672,7 @@ void* CMP3Player::PlayThread(void * filename)
 		}
 		else
 			fprintf(stderr,"Error opening file %s\n",(char *) filename);
-		fclose(soundfd);
+		close(soundfd);
 	}
 	else
 		fprintf(stderr,"Error opening /dev/sound/dsp\n");
