@@ -33,7 +33,7 @@
 #ifndef __neutrino__
 #define __neutrino__
 
-
+#include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "helpers/setting_helpers.h"
 
@@ -45,61 +45,6 @@ using namespace std;
 #define widest_number "1"
 
 
-struct messages_return {
-	enum
-		{
-			none 		= 0x00,
-			handled		= 0x01,
-			unhandled	= 0x02,
-			cancel_all	= 0x04,
-			cancel_info = 0x08
-		};
-};
-
-struct NeutrinoMessages {
-	enum
-		{
-			SHOW_EPG	= CRCInput::RC_Messages + 1,
-			SHOW_INFOBAR= CRCInput::RC_Messages + 2,
-			VCR_ON		= CRCInput::RC_Messages + 3,
-			VCR_OFF		= CRCInput::RC_Messages + 4,
-			STANDBY_ON	= CRCInput::RC_Messages + 5,
-			STANDBY_OFF	= CRCInput::RC_Messages + 6,
-			SHUTDOWN	= CRCInput::RC_Messages + 7,
-
-			EVT_VOLCHANGED 	= 			CRCInput::RC_Events + 1,
-			EVT_MUTECHANGED	=	 		CRCInput::RC_Events + 2,
-			EVT_VCRCHANGED	= 			CRCInput::RC_Events + 3,
-			EVT_MODECHANGED = 			CRCInput::RC_Events + 4,
-			EVT_BOUQUETSCHANGED =		CRCInput::RC_Events + 6,
-			EVT_SERVICESCHANGED =		CRCInput::RC_Events + 7,
-			EVT_CURRENTNEXT_EPG =		CRCInput::RC_Events + 8,
-			EVT_ZAP_GOT_SUBSERVICES =	CRCInput::RC_Events + 9,
-			EVT_ZAP_GOTPIDS		= 		CRCInput::RC_Events + 10,
-			EVT_ZAP_COMPLETE	= 		CRCInput::RC_Events + 11,
-			EVT_ZAP_GOTAPIDS	= 		CRCInput::RC_Events + 12,
-			EVT_ZAP_FAILED		= 		CRCInput::RC_Events + 13,
-			EVT_ZAP_ISNVOD		=		CRCInput::RC_Events + 14,
-			EVT_ZAP_SUB_COMPLETE=		CRCInput::RC_Events + 15,
-			EVT_SCAN_COMPLETE	=		CRCInput::RC_Events + 16,
-			EVT_SCAN_NUM_TRANSPONDERS =	CRCInput::RC_Events + 17,
-			EVT_SCAN_NUM_CHANNELS =		CRCInput::RC_Events + 18,
-			EVT_SHUTDOWN =				CRCInput::RC_Events + 19,
-			EVT_TIMER =					CRCInput::RC_Events + 20,
-			EVT_NEXTPROGRAM		=		CRCInput::RC_Events + 21,
-			EVT_PROGRAMLOCKSTATUS	=	CRCInput::RC_Events + 22,
-			EVT_NOEPG_YET		=		CRCInput::RC_Events + 23,
-			EVT_RECORDMODE_ACTIVATED=	CRCInput::RC_Events + 24,
-			EVT_RECORDMODE_DEACTIVATED=	CRCInput::RC_Events + 25,
-
-
-			EVT_CURRENTEPG 		=		CRCInput::RC_WithData + 1,
-			EVT_SCAN_SATELLITE	=		CRCInput::RC_WithData + 2,
-			EVT_SCAN_PROVIDER	=		CRCInput::RC_WithData + 3,
-			EVT_NEXTEPG 		=		CRCInput::RC_WithData + 4,
-			EVT_TIMESET 		= 		CRCInput::RC_WithData + 5
-		};
-};
 
 /**************************************************************************************
 *                                                                                     *

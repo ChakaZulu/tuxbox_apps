@@ -29,10 +29,22 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "global.h"
 
 #include "rcinput.h"
-#include "../global.h"
-#include "../neutrino.h"
+#include "neutrino.h"
+
+#include <dbox/fp.h>
+#include <stdio.h>
+#include <asm/types.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/time.h>
+
+#include <utime.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 
 void printbin( int a)
