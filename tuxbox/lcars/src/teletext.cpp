@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.10  2002/10/05 23:20:33  obi
+*hust*
+
 Revision 1.9  2002/10/05 23:10:01  obi
 "das ist ja c++" ;)
 
@@ -85,9 +88,10 @@ void teletext::startReinsertion(int PID)
 
 void teletext::stopReinsertion()
 {
+	if (txtfd == -1)
+		return;
+
 	std::cout << "Stop reinsertion" << std::endl;
-	
-	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
 	
 	if (ioctl(txtfd, DMX_STOP) < 0)
 		perror("DMX_STOP");
