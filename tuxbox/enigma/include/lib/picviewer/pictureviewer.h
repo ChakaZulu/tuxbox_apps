@@ -51,8 +51,8 @@ public:
 	void SetAspectRatio(float aspect_ratio) {m_aspect = aspect_ratio;}
 	void showBusy(int sx, int sy, int width, char r, char g, char b);
 	void hideBusy();
-	void Zoom(float factor);
-	void Move(int dx, int dy);
+//	void Zoom(float factor);
+//	void Move(int dx, int dy);
 	void slideshowTimeout();
 private:
 	CFormathandler *fh_root;

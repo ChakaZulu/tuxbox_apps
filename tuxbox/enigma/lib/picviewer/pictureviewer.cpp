@@ -358,21 +358,10 @@ void ePictureViewer::slideshowTimeout()
 	eString tmp = *myIt;
 	eDebug("[PICTUREVIEWER] slideshowTimeout: show %s", tmp.c_str());
 	ShowImage(tmp, false);
-	if (++myIt == slideshowList.end())
-	{
-		int wrap = 1;
-		eConfig::getInstance()->getKey("/picviewer/wraparound", wrap);
-		if (wrap == 1)
-			myIt = slideshowList.begin();
-		else
-			setTimer = false;
-	}
-	if (setTimer)
-	{
-		int timeout = 5;
-		eConfig::getInstance()->getKey("/picviewer/slideshowtimeout", timeout);
-		slideshowTimer.start(timeout * 1000, true);
-	}
+	nextPicture();
+	int timeout = 5;
+	eConfig::getInstance()->getKey("/picviewer/slideshowtimeout", timeout);
+	slideshowTimer.start(timeout * 1000, true);
 }
 
 int ePictureViewer::eventHandler(const eWidgetEvent &evt)
@@ -489,6 +478,7 @@ bool ePictureViewer::DisplayNextImage()
 	return true;
 }
 
+#if 0
 void ePictureViewer::Zoom(float factor)
 {
 	eDebug("Zoom %f {",factor);
@@ -565,6 +555,7 @@ void ePictureViewer::Move(int dx, int dy)
 	fb_display(m_NextPic_Buffer, m_NextPic_X, m_NextPic_Y, m_NextPic_XPan, m_NextPic_YPan, m_NextPic_XPos, m_NextPic_YPos);
 	eDebug("Move }");
 }
+#endif
 
 void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 {
