@@ -65,14 +65,12 @@ function cleanupTimerList()
 {
 	win=window.open("/cleanupTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
 	win.focus();
-	parent.setTimeout("close()", 300);
 }
 
 function clearTimerList()
 {
 	win=window.open("/clearTimerList", "switchStatus", "width=1, height=1, left=0, top=0");
 	win.focus();
-	parent.setTimeout("close()", 300);
 }
 
 function DVRrecord(xy)
