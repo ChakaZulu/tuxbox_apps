@@ -1187,6 +1187,8 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				    selected.path.right(4).upper() == ".BMP" ||
 				    selected.path.right(4).upper() == ".GIF") 
 				{
+					if (ePictureViewer::getInstance())
+						ePictureViewer::getInstance()->quitPicViewer();
 					ePicViewerStyleSelector f(1);
 #ifndef DISABLE_LCD
 					f.setLCD( LCDTitle, LCDElement );

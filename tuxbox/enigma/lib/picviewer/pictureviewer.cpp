@@ -335,11 +335,20 @@ void ePictureViewer::slideshowTimeout()
 {
 	printf("[PICTUREVIEWER] slideshowTimeout...\n");
 	
-	slideshowTimer.start(5000, true);
-	++myIt;
 	eString tmp = *myIt;
 	printf("[PICTUREVIEWER] slideshowTimeout: show %s\n", tmp.c_str());
 	ShowImage(*myIt, false);
+	if (myIt != slideshowList.end())
+	{
+		printf("[PICTUREVIEWER] slideshowTimeout: next slide...\n");
+		++myIt;
+	}
+	else
+	{
+		printf("[PICTUREVIEWER] slideshowTimeout: start with first slide again...\n");
+		myIt = slideshowList.begin();
+	}
+	slideshowTimer.start(5000, true);
 }
 
 bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
@@ -356,13 +365,13 @@ bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 	if (d)
 	{
 		while (struct dirent *e = readdir(d))
-			slideshowList.push_back(eString(e->d_name));
+			if (eString(e->d_name) != "." && eString(e->d_name) != "..")
+				slideshowList.push_back(directory + "/" + eString(e->d_name));
 		closedir(d);
 	}
 	slideshowList.sort();
 	myIt = slideshowList.begin();
-	slideshowTimer.start(5000, true);
-	ShowImage(*myIt, unscaled);
+	slideshowTimeout();
 	printf("Show Slideshow }\n");
 	return true;
 }
@@ -572,4 +581,9 @@ void ePictureViewer::displayImage(eString filename)
 void ePictureViewer::displaySlideshow(eString filename)
 {
 	messages.send(Message(Message::slideshow, filename.c_str()));
+}
+
+void ePictureViewer::quitPicViewer()
+{
+	messages.send(Message(Message::quit, ""));
 }

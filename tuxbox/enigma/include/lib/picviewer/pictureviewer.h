@@ -75,6 +75,7 @@ public:
 	void displayImage(eString filename);
 	void displaySlideshow(eString filename);
 	void slideshowTimeout();
+	void quitPicViewer();
 
 private:
 	CFormathandler *fh_root;
