@@ -360,16 +360,6 @@ bool CAudioSetupNotifier::changeNotify(const std::string & OptionName, void*)
 {
 	//printf("notify: %s\n", OptionName.c_str() );
 
-	if(OptionName=="audiomenu.avs_control")
-	{
-		if (g_settings.audio_DolbyDigital && g_settings.audio_avs_Control == 2)   //lirc
-			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
-		else
-			g_Controld->setVolume(100, g_settings.audio_avs_Control);
-
-		return true;
-	}
-
 	if(OptionName=="audiomenu.PCMOffset")
 	{
 		if (g_settings.audio_avs_Control == 2)   //lirc
@@ -392,14 +382,15 @@ CAudioSetupNotifier2::CAudioSetupNotifier2( CMenuItem* i1)
 
 bool CAudioSetupNotifier2::changeNotify(const std::string & OptionName, void*)
 {
-	toDisable[0]->setActive(g_settings.audio_DolbyDigital==1);
+	toDisable[0]->setActive(g_settings.audio_avs_Control == 2);
 
-	if (g_settings.audio_DolbyDigital && g_settings.audio_avs_Control == 2)   
+	if (g_settings.audio_avs_Control == 2)   
 		g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
-	else if (g_settings.audio_avs_Control == 2)
-		g_Controld->setVolume(100, 0);
+	else
+		g_Controld->setVolume(100, g_settings.audio_avs_Control);
  
 	return true;
+
 }
 
 bool CVideoSetupNotifier::changeNotify(const std::string & OptionName, void*)

@@ -1549,18 +1549,17 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 
 	audioSettings.addItem( oj );
 
-	CStringInput * audio_PCMOffset = new CStringInput("audiomenu.PCMOffset", g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
-	CMenuForwarder *mf = new CMenuForwarder("audiomenu.PCMOffset", true, g_settings.audio_PCMOffset, audio_PCMOffset );
-	CAudioSetupNotifier2 *AudioSetupNotifier2 = new CAudioSetupNotifier2(mf);
-
-	oj = new CMenuOptionChooser("audiomenu.dolbydigital", &g_settings.audio_DolbyDigital, true, AudioSetupNotifier2);
+	oj = new CMenuOptionChooser("audiomenu.dolbydigital", &g_settings.audio_DolbyDigital, true, audioSetupNotifier);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	audioSettings.addItem( oj );
 
+	CStringInput * audio_PCMOffset = new CStringInput("audiomenu.PCMOffset", g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
+	CMenuForwarder *mf = new CMenuForwarder("audiomenu.PCMOffset", true, g_settings.audio_PCMOffset, audio_PCMOffset );
+	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
 	audioSettings.addItem( mf);
 
-	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier);
+	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier2);
 	oj->addOption(0, "audiomenu.ost");
 	oj->addOption(1, "audiomenu.avs");
 	oj->addOption(2, "audiomenu.lirc");
