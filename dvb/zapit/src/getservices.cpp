@@ -34,6 +34,7 @@ void nameinsert(std::string name, uint onid_sid, uint sm)
 			newname = name + cnumber;
 		}
 		namechans_radio.insert(std::pair<std::string, uint>(newname, onid_sid));
+		allchans_radio.find(onid_sid)->second.name = newname;
 	}
 	else
 	{
@@ -43,6 +44,7 @@ void nameinsert(std::string name, uint onid_sid, uint sm)
 			newname = name + cnumber;
 		}
 		namechans_tv.insert(std::pair<std::string, uint>(newname, onid_sid));
+		allchans_tv.find(onid_sid)->second.name = newname;
 	}
 }
 
