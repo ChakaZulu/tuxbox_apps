@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.15 2003/12/28 22:53:40 rasc Exp $
+$Id: dmx_pes.c,v 1.16 2003/12/30 14:05:37 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,11 @@ $Id: dmx_pes.c,v 1.15 2003/12/28 22:53:40 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.16  2003/12/30 14:05:37  rasc
+just some annotations, so I do not forget these over Sylvester party...
+(some alkohol may reformat parts of /devbrain/0 ... )
+cheers!
+
 Revision 1.15  2003/12/28 22:53:40  rasc
 some minor changes/cleanup
 
@@ -294,10 +299,28 @@ static long pes_SyncRead (int fd, u_char *buf, u_long len, u_long *skipped_bytes
     // -- simple PES sync... seek for 0x000001 (PES_SYNC_BYTE)
     // -- $$$ Q: has this to be byteshifted or bit shifted???
     // -- $$$ to be improved:
+    //
+    // ISO/IEC 13818-1:
+    // -- packet_start_code_prefix -- The packet_start_code_prefix is
+    // -- a 24-bit code. Together with the stream_id that follows it constitutes
+    // -- a packet start code that identifies the beginning of a packet.
+    // -- The packet_start_code_prefix  is the bit string '0000 0000 0000 0000
+    // -- 0000 0001' (0x000001).
+    // ==>   Check the stream_id with "dvb_str.c", if you do changes!
+ 
+
+    // $$$ TODO: currently seeking 0x000001 is not sufficient for syncing PES
+    // $$$ TODO: I have to check for valid streamIDs, as packet start, too!!!!!
+    // $$$ TODO: dvbsnoop currently is not syncing PES correctly, so results may
+    // $$$ TODO: random... (identify by wrong stream_ID)...
+    // $$$ TODO: also:  syncing reads should be speed optimized! (less reads)
+
+
 
     *skipped_bytes = 0;
     buf[0] = 0xff;				// illegal bytes
     buf[1] = 0xff;
+    buf[2] = 0xff;
     while (1) {
     	n = read(fd,buf+2,1);
 	if (n <= 0) return n;			// error or strange, abort

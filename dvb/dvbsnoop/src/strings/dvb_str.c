@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.31 2003/12/28 00:01:15 rasc Exp $
+$Id: dvb_str.c,v 1.32 2003/12/30 14:05:38 rasc Exp $
 
 
  http://dvbsnoop.sourceforge.net/
@@ -18,6 +18,11 @@ $Id: dvb_str.c,v 1.31 2003/12/28 00:01:15 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.32  2003/12/30 14:05:38  rasc
+just some annotations, so I do not forget these over Sylvester party...
+(some alkohol may reformat parts of /devbrain/0 ... )
+cheers!
+
 Revision 1.31  2003/12/28 00:01:15  rasc
 some minor changes/adds...
 
@@ -1882,7 +1887,8 @@ char *dvbstrPESstream_ID (u_int i)
 
 {
   STR_TABLE  Table[] = {
-     {  0x00, 0xBB,  "??$$$?? report!" },
+     // on changes:  adapt dmx_pes.c!!!
+     {  0x00, 0xBB,  "!!!unknown or PES stream not in sync... (!!!)" },
      {  0xBC, 0xBC,  "program_stream_map" },
      {  0xBD, 0xBD,  "private_stream_1" },
      {  0xBE, 0xBE,  "padding_stream" },

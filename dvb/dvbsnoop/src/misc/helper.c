@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.16 2003/12/29 22:14:53 rasc Exp $
+$Id: helper.c,v 1.17 2003/12/30 14:05:37 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,11 @@ $Id: helper.c,v 1.16 2003/12/29 22:14:53 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.17  2003/12/30 14:05:37  rasc
+just some annotations, so I do not forget these over Sylvester party...
+(some alkohol may reformat parts of /devbrain/0 ... )
+cheers!
+
 Revision 1.16  2003/12/29 22:14:53  rasc
 more dsm-cc INT UNT descriptors
 
@@ -433,7 +438,7 @@ void displ_IPv4_addr (int v, u_long ip)
 
 void displ_IPv6_addr (int v, struct IPv6ADDR *a)
 {
-   out (v,"%x.%x.%x.%x.%x.%x.%x.%x",
+   out (v,"%x:%x:%x:%x:%x:%x:%x:%x",
 	(a->ip[0]>>16) & 0xFFFF, (a->ip[0]) & 0xFFFF,
 	(a->ip[1]>>16) & 0xFFFF, (a->ip[1]) & 0xFFFF,
 	(a->ip[2]>>16) & 0xFFFF, (a->ip[2]) & 0xFFFF,

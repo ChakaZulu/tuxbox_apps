@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.14 2003/12/28 22:53:40 rasc Exp $
+$Id: dmx_ts.c,v 1.15 2003/12/30 14:05:37 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dmx_ts.c,v 1.14 2003/12/28 22:53:40 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.15  2003/12/30 14:05:37  rasc
+just some annotations, so I do not forget these over Sylvester party...
+(some alkohol may reformat parts of /devbrain/0 ... )
+cheers!
+
 Revision 1.14  2003/12/28 22:53:40  rasc
 some minor changes/cleanup
 
@@ -81,8 +86,9 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #define TS_BUF_SIZE  (256 * 1024)
-#define READ_BUF_SIZE (188)          /* TS RDSIZE is fixed !! */
-#define TS_SYNC_BYTE  (0x47)         /* SyncByte fuer TS  ISO 138181-1 */
+#define TS_PACKET_LEN (188)              /* TS RDSIZE is fixed !! */
+#define TS_SYNC_BYTE  (0x47)             /* SyncByte fuer TS  ISO 138181-1 */
+#define READ_BUF_SIZE (3*TS_PACKET_LEN)	 /* min. 2x TS_PACKET_LEN!!! */
 
 
 
@@ -96,7 +102,7 @@ int  doReadTS (OPTION *opt)
 
 {
   int     fd_dmx = 0, fd_dvr = 0;
-  u_char  buf[READ_BUF_SIZE]; /* data buffer */
+  u_char  buf[READ_BUF_SIZE]; 	/* data buffer */
   long    count;
   int     i;
   char    *f;
@@ -256,6 +262,8 @@ static long  ts_SyncRead (int fd, u_char *buf, long buflen, long *skipped_bytes)
     // -- simple TS sync...
     // -- $$$ to be improved:
     // -- $$$  (best would be: check if buf[188] is also a sync byte)
+ 
+    // -- $$$ TODO speed optimize! (read TS_PACKET_LEN, seek Sync, read missing parts)
 
     *skipped_bytes = 0;
     while (1) {
@@ -269,7 +277,7 @@ static long  ts_SyncRead (int fd, u_char *buf, long buflen, long *skipped_bytes)
     // -- Sync found!
     // -- read buffersize-1
 
-    n = read(fd,buf+1,buflen-1);		// read TS
+    n = read(fd,buf+1,TS_PACKET_LEN-1);		// read TS
     if (n >=0) n++;				// we already read one byte...
 
     return n;
