@@ -59,10 +59,23 @@ using namespace std;
 #define DARKGREY "#ABABAB"
 #define LEFTNAVICOLOR "#316183"
 #define TOPNAVICOLOR "#316183"
+#define OCKER "#FFCC33"
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
+
+eString read_file(eString filename)
+{
+	eString result;
+	eString line;
+
+	ifstream infile(filename.c_str());
+	while (getline(infile, line, '\n'))
+		result += line + "\n";
+
+	return result;
+}
 
 static eString getVersionInfo(const char *info)
 {
@@ -481,6 +494,31 @@ static eString audio(eString request, eString dirpath, eString opts, eHTTPConnec
 	return result;
 }
 
+static eString setAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString,eString> opt = getRequestOptions(opts);
+	eString audioChannel = opt["channel"];
+
+	// set audio channel here...
+
+	return "<script language=\"javascript\">window.close();</script>";
+}
+
+static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	// retrieve audio channels here...
+	// add some fake entries for the time being...
+	eString audioChannels = "<option>German</option><option>English</option>";
+
+	eString result = read_file(TEMPLATE_DIR + "audioSelection.tmp");
+	result.strReplace("#AUDIOCHANS#", audioChannels);
+
+	return result;
+}
+
 static eString getPMT(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -632,18 +670,6 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 	}
 
 	result += "<script language=\"javascript\">window.close();</script>";
-
-	return result;
-}
-
-eString read_file(eString filename)
-{
-	eString result;
-	eString line;
-
-	ifstream infile(filename.c_str());
-	while (getline(infile, line, '\n'))
-		result += line + "\n";
 
 	return result;
 }
@@ -1564,7 +1590,8 @@ static eString getContent(eString mode, eString path)
 
 		if (sapi && sapi->service)
 		{
-			eString buttons = button(100, "EPG", GREEN, "javascript:openEPG()");
+			eString buttons = button(100, "AUDIO", OCKER, "javascript:selectAudio()");
+			buttons += button(100, "EPG", GREEN, "javascript:openEPG()");
 			buttons += button(100, "Info", YELLOW, "javascript:openSI()");
 #ifndef DISABLE_FILE
 			buttons += button(100, "Record", RED, "javascript:DVRrecord('start')");
@@ -2262,7 +2289,7 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 	if (opt.length())
 	{
 		opt = httpUnescape(opt);
-		eZapMain::getInstance()->postMessage(eZapMessage(1, "external message", opt, 10), 0);
+		eZapMain::getInstance()->postMessage(eZapMessage(1, "External Message", opt, 10), 0);
 		return eString("+ok");
 	} else
 		return eString("-error\n");
@@ -2924,6 +2951,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
+	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio);
+	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getEIT", getEIT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);

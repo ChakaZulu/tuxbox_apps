@@ -1,0 +1,14 @@
+<html>
+<head>
+<title>Audio Channel Selection</title>
+</head>
+<body>
+Please select audio channel:
+<br>
+<form action="/cgi-bin/setAudio">
+<select name="audio" size="1">
+#AUDIOCHANS#
+</select>
+</form>
+</body>
+</html>

@@ -52,6 +52,11 @@ function openEPG(xy)
 	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', '600', '700', 'yes');
 }
 
+function selectAudio()
+{
+	NewWindow('/cgi-bin/selectAudio', 'AudioSelect', '200', '100', 'no');
+}
+
 function openMultiEPG(xy)
 {
 	NewWindow('/getMultiEPG?ref='+xy, 'MultiEPG', screen.width, screen.height, 'yes');
