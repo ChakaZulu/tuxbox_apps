@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.259 2002/05/03 08:42:26 field Exp $
+        $Id: neutrino.cpp,v 1.260 2002/05/03 20:22:32 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1354,19 +1354,19 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
 	colorSettings.addItem( new CMenuForwarder("menu.back") );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuWidget colorSettings_Themes("colorthememenu.head", "settings.raw");
-	InitColorThemesSettings(colorSettings_Themes);
+	CMenuWidget *colorSettings_Themes = new CMenuWidget("colorthememenu.head", "settings.raw");
+	InitColorThemesSettings(*colorSettings_Themes);
 
-	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", &colorSettings_Themes) );
+	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", colorSettings_Themes) );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CMenuWidget colorSettings_menuColors("colormenusetup.head", "settings.raw", 400, 400);
-	InitColorSettingsMenuColors(colorSettings_menuColors);
-	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, "", &colorSettings_menuColors) );
+	CMenuWidget *colorSettings_menuColors = new CMenuWidget("colormenusetup.head", "settings.raw", 400, 400);
+	InitColorSettingsMenuColors(*colorSettings_menuColors);
+	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, "", colorSettings_menuColors) );
 
-	CMenuWidget colorSettings_statusbarColors("colormenu.statusbar", "settings.raw");
-	InitColorSettingsStatusBarColors(colorSettings_statusbarColors);
-	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", &colorSettings_statusbarColors) );
+	CMenuWidget *colorSettings_statusbarColors = new CMenuWidget("colormenu.statusbar", "settings.raw");
+	InitColorSettingsStatusBarColors(*colorSettings_statusbarColors);
+	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
 
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
@@ -2521,7 +2521,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.259 2002/05/03 08:42:26 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.260 2002/05/03 20:22:32 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
