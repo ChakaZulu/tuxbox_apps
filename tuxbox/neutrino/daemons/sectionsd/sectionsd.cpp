@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.5 2001/07/14 10:19:26 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.6 2001/07/14 16:38:46 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.6  2001/07/14 16:38:46  fnbrd
+//  Mit workaround fuer defektes mktime der glibc
+//
 //  Revision 1.5  2001/07/14 10:19:26  fnbrd
 //  Mit funktionierendem time-thread (mktime der glibc muss aber gefixt werden)
 //
@@ -340,6 +343,9 @@ struct SI_section_TOT_header {
       unsigned short descriptors_loop_length : 12;
 } __attribute__ ((packed)) ; // 10 bytes
 
+/*
+// BR schickt falschen Time-Offset, daher per TZ und Rest hier auskommentiert
+
 struct descr_gen_struct {
   unsigned char descriptor_tag : 8;
   unsigned char descriptor_length : 8;
@@ -395,6 +401,7 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
     des+=desc->descriptor_length+2;
   }
 }
+*/
 
 static void *timeThread(void *)
 {
@@ -450,30 +457,14 @@ char *buf;
       break;
     }
     time_t tim=changeUTCtoCtime(((const unsigned char *)&header)+3);
-    printf("time: %ld\n", tim);
+//    printf("time: %ld\n", tim);
     if(tim) {
-      timeOffsetFound=0;
-      parseDescriptors(buf+sizeof(struct SI_section_TOT_header), ((struct SI_section_TOT_header *)buf)->descriptors_loop_length, "DEU");
-/*
-      struct tm tm_time;
-      memset(&tm_time, 0, sizeof(tm_time));
-      tm_time.tm_sec=(seconds&0x0f)+((seconds&0xf0)>>4)*10;
-      tm_time.tm_min=(minutes&0x0f)+((minutes&0xf0)>>4)*10;
-      tm_time.tm_hour=(hour&0x0f)+((hour&0xf0)>>4)*10;
-      tm_time.tm_mday=day;
-      tm_time.tm_mon=month-1;
-      tm_time.tm_year=year-1900;
-      tm_time.tm_isdst=0;
-*/
-//      time_t t=time(NULL);
-//      printf("local time: %s", ctime(&t));
-//      printf("%d:%d:%d\n", tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
-//      printf("%d.%d.%d\n", tm_time.tm_mday, tm_time.tm_mon, tm_time.tm_year);
-//      tim=mktime(&tm_time);
+//      timeOffsetFound=0;
+//      parseDescriptors(buf+sizeof(struct SI_section_TOT_header), ((struct SI_section_TOT_header *)buf)->descriptors_loop_length, "DEU");
 //      printf("local time: %s", ctime(&tim));
-      if(timeOffsetFound)
-        tim+=timeOffsetMinutes*60L;
-      printf("local time: %s", ctime(&tim));
+//      printf("Time offset %d", timeOffsetMinutes);
+//      if(timeOffsetFound)
+//        tim+=timeOffsetMinutes*60L;
       if(stime(&tim)< 0) {
         perror("cannot set date");
 	break;
@@ -609,7 +600,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.5 2001/07/14 10:19:26 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.6 2001/07/14 16:38:46 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
