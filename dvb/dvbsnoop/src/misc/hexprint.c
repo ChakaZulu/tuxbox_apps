@@ -1,5 +1,5 @@
 /*
-$Id: hexprint.c,v 1.3 2003/11/26 16:27:46 rasc Exp $
+$Id: hexprint.c,v 1.4 2003/12/17 23:57:29 rasc Exp $
 
  DVBSNOOP
 
@@ -12,6 +12,10 @@ $Id: hexprint.c,v 1.3 2003/11/26 16:27:46 rasc Exp $
 
 
 $Log: hexprint.c,v $
+Revision 1.4  2003/12/17 23:57:29  rasc
+add. hexdump mode, different layout for some purpose
+option:  -ph 4
+
 Revision 1.3  2003/11/26 16:27:46  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -93,6 +97,10 @@ void printhex_buf (int verbose, u_char *buf, int n)
 	printasciiline_buf (verbose,buf,n);
 	break;
 
+      case 4:
+	printhexdump2_buf (verbose,buf,n);
+	break;
+
 
       default:
 	printhexdump_buf (verbose,buf,n);
@@ -106,7 +114,10 @@ void printhex_buf (int verbose, u_char *buf, int n)
 
 
 /*
- -- multi line dump
+ -- multi line dump HEX+ASCII
+  0000:  42 f1 59 04 41 f1 00 00 00 01 ff 2e e3 ff 80 1f 
+  0000:   B  .  Y  .  A  .  .  .  .  .  .  .  .  .  .  . 
+
 */
 void printhexdump_buf (int verbose, u_char *buf, int n)
 {
@@ -121,15 +132,15 @@ while (j*WID < n) {
  for (i=0; i<WID; i++) {
    if ( (i+j*WID) >= n) break;
    c = buf[i+j*WID];
-   out (verbose," %c ",isprint((int)c) ?c:'.');
+   out (verbose,"%02x ",(int)c);
  }
  out_NL (verbose);
- out (verbose,"  %04x:  ",j*WID);
 
+ out (verbose,"  %04x:  ",j*WID);
  for (i=0; i<WID; i++) {
    if ( (i+j*WID) >= n) break;
    c = buf[i+j*WID];
-   out (verbose,"%02x ",(int)c);
+   out (verbose," %c ",isprint((int)c) ?c:'.');
  }
  out_NL (verbose);
  
@@ -144,7 +155,8 @@ while (j*WID < n) {
 
 
 /*
- -- single line dump
+ -- single line dump HEX
+   42 f1 59 04 41 f1 00 00 00 01 ff 2e e3 ff 80 1f 4
 */
 void printhexline_buf (int verbose, u_char *buf, int n)
 {
@@ -161,6 +173,7 @@ void printhexline_buf (int verbose, u_char *buf, int n)
 
 /*
  -- single line ascii
+    B.Y.A...........H...RTL World...RTL. Television.
 */
 void printasciiline_buf (int verbose, u_char *buf, int n)
 {
@@ -173,5 +186,53 @@ void printasciiline_buf (int verbose, u_char *buf, int n)
  }
  out_NL (verbose);
 }
+
+
+
+/*
+ -- single line dump HEX+ASCII
+*/
+void printhexdump2_buf (int verbose, u_char *buf, int n)
+{
+ int    i, j;
+ int    k;
+ u_char c;
+ int    WID=16;
+
+j = 0;
+while (j*WID < n) {
+
+ out (verbose,"  %04x:  ",j*WID);
+
+ for (i=0; i<WID; i++) {
+   if ( (i+j*WID) >= n) break;
+   c = buf[i+j*WID];
+   out (verbose,"%02x ",(int)c);
+   if ((i+1)%8 == 0) out (verbose," ");
+ }
+
+ for (k=i; k<WID; k++) {
+   out (verbose, "   ");   // filler
+   if ((k+1)%8 == 0) out (verbose," ");
+ }
+
+ out (verbose," ");
+
+ for (i=0; i<WID; i++) {
+   if ( (i+j*WID) >= n) break;
+   c = buf[i+j*WID];
+   out (verbose,"%c",isprint((int)c) ?c:'.');
+ }
+ out_NL (verbose);
+
+ 
+ j++;
+
+}
+
+
+}
+
+
 
 

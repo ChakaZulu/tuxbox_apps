@@ -3,7 +3,6 @@
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
 
  http://dvbsnoop.sourceforge.net/
 
@@ -17,7 +16,9 @@
 
 void setHexPrintMode (int i);
 void printhex_buf (int verbose, u_char *buf, int len);
+
 void printhexdump_buf (int verbose, u_char *buf, int len);
+void printhexdump2_buf (int verbose, u_char *buf, int len);
 void printhexline_buf (int verbose, u_char *buf, int len);
 void printasciiline_buf (int verbose, u_char *buf, int len);
 

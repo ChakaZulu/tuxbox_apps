@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.15 2003/12/15 22:29:27 rasc Exp $
+$Id: cmdline.c,v 1.16 2003/12/17 23:57:29 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: cmdline.c,v 1.15 2003/12/15 22:29:27 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.16  2003/12/17 23:57:29  rasc
+add. hexdump mode, different layout for some purpose
+option:  -ph 4
+
 Revision 1.15  2003/12/15 22:29:27  rasc
 pidscan improved, problems with max filters on demux
 
@@ -219,7 +223,7 @@ void usage (void)
     printf("   -b:           binary output of packets (disables other output)\n");
     printf("   -if:          input file, reads from binary file instead of demux device\n");
     printf("   -ph mode:     print hex buffer, modes: [-ph 1]\n");
-    printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line\n");
+    printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
     printf("   -nph:         don't print hex buffer (= -ph 0)\n");
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
