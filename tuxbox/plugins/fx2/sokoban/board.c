@@ -100,7 +100,7 @@ void	DrawScore( void )
 	char tmoves[ 64 ];
 	char tpushes[ 64 ];		/* fx2 - nix C++ !!! */
 
-	sprintf(tmoves,"%d",(char)moves);
+	sprintf(tmoves,"%d",moves);
 
 	FBDrawString( 100, 480, 30, "Moves", WHITE, 0 );
 	FBFillRect( 100, 510, 30, 30, BLACK );
