@@ -115,8 +115,8 @@ class CZapitClient:public CBasicClient
 	
 	struct commandSetScanMotorPosList
 	{
-		char satName[30];
-		int  motorPos;
+		t_satellite_position satPosition;
+		int motorPos;
 	};
 	typedef std::vector<commandSetScanMotorPosList> ScanMotorPosList;
 
