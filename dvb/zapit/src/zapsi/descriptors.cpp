@@ -34,31 +34,31 @@ int priv_data_desc(char *buffer)
 int network_name_desc(char *buffer)
 {
 	int len = buffer[1];
-	int i;
+	/*int i;
 	std::string name;
 		
 	for (i=0;i<len;i++)
 		name += buffer[i+2];
 	
 	printf("Network-name: %s\n",name.c_str());
-	
+	*/
 	return len+2;
 }
 
 int service_list_desc(char *buffer)
 {
 	int len = buffer[1];
-	int current = 1;
+	/*int current = 1;
 	
 	while (current < len)
 	{
 		int sid, st;
 		sid = (buffer[++current]<<8)|buffer[++current];
 		st = buffer[++current];
-		//printf("service_id: %04x\n", sid);
-		//printf("service-type: %04d\n", st);
+		printf("service_id: %04x\n", sid);
+		printf("service-type: %04d\n", st);
 	}
-	
+	*/
 	return len+2;
 }
 

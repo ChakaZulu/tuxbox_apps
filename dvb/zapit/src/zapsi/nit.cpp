@@ -26,11 +26,17 @@ void nit(int diseqc)
   	char buffer[1024];
   	int r;
   	int current, sec_len;
+  	int step = 0;
+  	
+  	while (step < 10)
+  	{
+  	step++;
+  	printf("Reading NIT step %d\n", step);
   	
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
     		perror("/dev/ost/demux0");
-    		exit(0);
+    		return;
   	}
 
   	memset (&flt.filter, 0, sizeof (struct dmxFilter));
@@ -38,7 +44,7 @@ void nit(int diseqc)
   	flt.pid=0x10;
   	flt.filter.filter[0] = 0x40;
     	flt.filter.mask[0]  =0xFF;
-  	flt.timeout=12000;
+  	flt.timeout=25000;
   	flt.flags=DMX_ONESHOT | DMX_CHECK_CRC;
   	
   	if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
@@ -52,7 +58,7 @@ void nit(int diseqc)
   	dmx_fd.revents = 0;
 	
   
-  	pt = poll(&dmx_fd, 1, 10000);
+  	pt = poll(&dmx_fd, 1, 15000);
   
   	if (!pt)
   	{
@@ -63,20 +69,26 @@ void nit(int diseqc)
   	
   	
   	if ((r=read(demux, buffer, 3))<=0)  {
-   		perror("read");
+   		perror("read NIT.");
     		close(demux);
-    		exit(0);
+    		continue;
     	}
     	
   	sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
   	//printf("Section-length: %d bytes\n", sec_len);
   	
     	if ((r=read(demux, buffer+3, sec_len))<=0)  {
-    		perror("read");
+    		perror("read NIT.");
     		close(demux);
-    		exit(0);
+    		continue;
 	}
+	
 	close(demux);
+	break;
+	};
+
+	if (step == 10)
+		return;
 	/*
 	printf("<NIT>\n");
 	printf("Network-ID %04x\n", (buffer[3]<<8)|buffer[4]);
@@ -152,8 +164,8 @@ void nit(int diseqc)
 				
 				tsid = (buffer[current]<<8)|buffer[++current];
 				onid = (buffer[++current]<<8)|buffer[++current];
-				//printf("TS-ID: %x\n",tsid);
-				//printf("Original network-id: %x\n", onid);
+				printf("TS-ID: %x\n",tsid);
+				printf("Original network-id: %x\n", onid);
 				
 				desc_len = ((buffer[++current]&0xF)<<8)|buffer[++current];
 				//printf("transport_descriptors_length = %d bytes\n",desc_len);

@@ -31,7 +31,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
     		perror("/dev/ost/demux0");
-    		exit(0);
+    		return -1;
   	}
 
   	memset (&flt.filter, 0, sizeof (struct dmxFilter));
@@ -69,7 +69,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
 		if ((r=read(demux, buffer, 3))<=0)  {
    			perror("read");
     			close(demux);
-    			exit(0);
+    			return -1;
     		}
     		
   		sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
@@ -77,7 +77,7 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
     		if ((r=read(demux, buffer+3, sec_len))<=0)  {
     			perror("read");
     			close(demux);
-    			exit(0);
+    			return -1;
 		}
 		
 		close(demux);
@@ -100,7 +100,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 	demux=open(DEMUX_DEV, O_RDWR);
   	if (demux<0) {
     		perror("/dev/ost/demux0");
-    		exit(0);
+    		return -1;
   	}
 
   	memset (&flt.filter, 0, sizeof (struct dmxFilter));
@@ -138,7 +138,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
 		if ((r=read(demux, buffer, 3))<=0)  {
    			perror("read");
     			close(demux);
-    			exit(0);
+    			return -1;
     		}
     		
   		sec_len = (((buffer[1]&0xF)<<8) + buffer[2]);
@@ -146,7 +146,7 @@ int pat(uint oonid,std::map<uint,channel> *cmap)
     		if ((r=read(demux, buffer+3, sec_len))<=0)  {
     			perror("read");
     			close(demux);
-    			exit(0);
+    			return -1;
 		}
 		
 		close(demux);

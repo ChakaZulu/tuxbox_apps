@@ -47,22 +47,31 @@ int issatbox()
 
 void get_nits(int freq, int symbolrate, int polarity, int fec,int diseq)
 {
-  finaltune(freq,symbolrate,polarity,fec,diseq);
-  nit(diseq);
-  //else
-    //printf("No signal found on transponder\n");
+  if (finaltune(freq,symbolrate,polarity,fec,diseq)>0)
+  	nit(diseq);
+  else
+  {
+    printf("No signal found on transponder\n");
+    }
 }
 
 void get_sdts()
 {
+	
   for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
     {
-      finaltune(tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,0);
+    	int sdt_tries = 0;
+      if (finaltune(tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,tI->second.diseqc) > 0)
+      {
         //if (pat(tI->second.freq,tI->second.symbolrate) >0)
 	//{
 	  printf("GETTING SDT FOR TSID: %04x\n",tI->second.tsid);
-	  while (sdt(tI->second.tsid,true) == -2);
+	  while (sdt(tI->second.tsid,true) == -2 && sdt_tries != 5)
+	  	sdt_tries++;
 	//}
+	}
+	else
+    		printf("No signal found on transponder\n");
     }
 }
 
@@ -310,8 +319,8 @@ void *start_scanthread(void *)
       scantransponders.clear();
 
       printf("---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
-      get_nits(12655,27500,1,3,0);
-      get_nits(12521,27500,1,3,0);
+      get_nits(12655,27500,1,3,2);
+      get_nits(12521,27500,1,3,2);
       get_sdts();
 
        if (!scantransponders.empty())
@@ -322,7 +331,7 @@ void *start_scanthread(void *)
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	  	fprintf(fd,"<ZAPIT>\n");
       	}
-	fprintf(fd, "<satellite name=\"Kopernikus\" diseqc=\"0\">\n");
+	fprintf(fd, "<satellite name=\"Kopernikus\" diseqc=\"3\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	    {
 	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid); 
