@@ -60,7 +60,7 @@ class CLcdControler : public CMenuTarget
 
 		void paint();
 		void setLcd();
-		void paintSlider(int x, int y, unsigned int spos, float factor, const char * const text, const char * const iconname, bool selected); // text in UTF-8
+		void paintSlider(int x, int y, unsigned int spos, float factor, const char * const text_to_localize, const char * const iconname, bool selected); // text in UTF-8
 
 	public:
 
