@@ -111,12 +111,55 @@ void init_clock(screen_t s) {
 	circle(MX, MY, 31, 1, s);
 	putpixel(MX, MY, 1, s);
 
-	for (m = 0; m < 60; m++) {
+	for (m = 0; m < 60; m+=5) {
 		x = MX - isin(-m*SIN_SIZE/30)*29/SIN_MUL;
 		y = MY + isin(-SIN_SIZE/2 - m*SIN_SIZE/30)*29/SIN_MUL;
 		putpixel(x, y, 1, s);
 	}
 }
+
+/* geklaut von Shadow's lcd.c  -- haut mich dafür! */
+int sgn (int arg) {
+	if(arg<0) return -1;
+	if(arg>0) return 1;
+	return 0;
+}
+
+void render_line(int x1, int y1, int x2, int y2, int color, int space, screen_t s)  {   
+	int dx,dy,sdx,sdy,px,py,dxabs,dyabs,i,remspace;
+	float slope;
+   
+	remspace = 0;
+	dx=x2-x1;      
+	dy=y2-y1;      
+	dxabs=abs(dx);
+	dyabs=abs(dy);
+	sdx=sgn(dx);
+	sdy=sgn(dy);
+	if (dxabs>=dyabs) /* the line is more horizontal than vertical */ {
+		slope=(float)dy / (float)dx;
+		for(i=0;i!=dx;i+=sdx) {	     
+			px=i+x1;
+			py=slope*i+y1;
+			if (remspace==0) {
+				putpixel(px, py, color, s);
+				remspace = space;
+			} else remspace--;
+		}
+	}
+	else /* the line is more vertical than horizontal */ {	
+		slope=(float)dx / (float)dy;
+		for(i=0;i!=dy;i+=sdy) {
+			px=slope*i+x1;
+			py=i+y1;
+			if (remspace==0) {
+				putpixel(px, py, color, s);
+				remspace = space;
+			} else remspace--;
+		}
+	}
+}
+
 
 void render_clock(screen_t back, screen_t s) {
         char timestr[50];
@@ -140,16 +183,18 @@ void render_clock(screen_t back, screen_t s) {
 		putpixel(x+1, y, 1, s);
 	}
 
-	si = isin(-(t->tm_min*60+t->tm_sec)*SIN_SIZE/1800);
-	co = isin(-SIN_SIZE/2 - (t->tm_min*60+t->tm_sec)*SIN_SIZE/1800);
-	for (bla=0; bla<30; bla++)
-		putpixel(MX-si*bla/SIN_MUL, MY+co*bla/SIN_MUL, 1, s);
+	x = MX - isin(-(t->tm_min*60+t->tm_sec)*SIN_SIZE/1800)*RAD/SIN_MUL;
+	y = MY + isin(-SIN_SIZE/2 - (t->tm_min*60+t->tm_sec)*SIN_SIZE/1800)*RAD/SIN_MUL;
+	render_line(MX, MY, x, y, LCD_PIXEL_ON, 0, s);
+	//si = isin(-(t->tm_min*60+t->tm_sec)*SIN_SIZE/1800);
+	//co = isin(-SIN_SIZE/2 - (t->tm_min*60+t->tm_sec)*SIN_SIZE/1800);
+	//for (bla=0; bla<30; bla++)
+		//putpixel(MX-si*bla/SIN_MUL, MY+co*bla/SIN_MUL, 1, s);
 
-	x = MX - isin(-t->tm_sec*SIN_SIZE/30)*RAD/SIN_MUL;
-	y = MY + isin(-SIN_SIZE/2 - t->tm_sec*SIN_SIZE/30)*RAD/SIN_MUL;
-	putpixel(x, y, LCD_PIXEL_INV, s);
-	
-	//printf("%i\n", t->tm_sec);
+	x = MX - isin(-t->tm_sec*SIN_SIZE/30)*31/SIN_MUL;
+	y = MY + isin(-SIN_SIZE/2 - t->tm_sec*SIN_SIZE/30)*31/SIN_MUL;
+	render_line(MX, MY, x, y, LCD_PIXEL_ON, 1, s);
+	//putpixel(x, y, LCD_PIXEL_INV, s);
 }
 
 int main(int argc, char *args[]) {
