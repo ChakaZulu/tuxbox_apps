@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = gnu
 
 SUBDIRS = \
-	include
+	include tuxtxt
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = \
