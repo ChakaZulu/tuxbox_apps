@@ -1,4 +1,8 @@
+#ifdef DBOX
 #define DEMUX "/dev/ost/demux0"
+#else
+#define DEMUX "/dev/demuxapi0"
+#endif
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +10,11 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/ioctl.h>
+#ifdef DBOX
 #include <ost/dmx.h>
+#else
+#include <xp/xp_osd_user.h>
+#endif
 #include "esection.h"
 
 QList<eSection> eSection::active;
@@ -21,6 +29,15 @@ eSection::eSection(int pid, int tableid, int tableidext, int version, int flags,
 	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
 	if (!(flags&SECREAD_NOABORT))
 		active.append(this);
+}
+
+eSection::eSection()
+{
+	timer=0;
+	handle=-1;
+	notifier=0;
+	section=0;
+	lockcount=0;
 }
 
 eSection::~eSection()
@@ -46,7 +63,6 @@ void eSection::closeFilter()
 		delete notifier;
 		notifier=0;
 		timer->stop();
-//		qDebug(" -----------------------------> -%d", handle);
 		close(handle);
 		handle=-1;
 	}
@@ -61,9 +77,12 @@ void eSection::data(int socket)
 {
 	if (lockcount)
 		qFatal("eSection::data on locked section!");
-	qDebug("data");
 	timer->start(10000, true);
-	read(handle, buf, 3);
+#ifdef DBOX
+	if (read(handle, buf, 3)<0)
+	{
+		perror("read section");
+	}
 	int seclen=0;
 	seclen |= ((buf[1] & 0x0F) << 8);
 	seclen |= (buf[2] & 0xFF);
@@ -74,16 +93,22 @@ void eSection::data(int socket)
 		printf("CRC check failed!\n");
 		return;
 	}
+#else
+	if (read(handle, buf, 16384)<0)
+	{
+		perror("read section");
+	}
+#endif
 	maxsec=buf[7];
 	
-//	printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
+	// printf("%d/%d, we want %d  | service_id %04x | version %04x\n", buf[6], maxsec, section, (buf[3]<<8)|buf[4], buf[5]);
 
 	version=buf[5];
 
 	if ((!(flags&SECREAD_INORDER)) || (section==buf[6]))
 	{
 		int err;
-		if ((err=sectionRead(buf))) // || !(flags&SECREAD_INORDER))
+		if ((err=sectionRead(buf)))
 		{
 			if (err>0)
 				err=0;
@@ -121,7 +146,6 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 	} 
 	if (version!=-1)
 	{
-//		qDebug("FILTERING version %x", version);
 		data[3]=version; mask[3]=0xFF;
 	}
 	return setFilter(pid, data, mask, 4);
@@ -129,10 +153,14 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 
 int eSection::setFilter(int pid, __u8 *data, __u8 *mask, int len)
 {
+#ifdef DBOX
 	dmxSctFilterParams secFilterParams;
+#else
+	demux_filter_para secFilterParams;
+#endif
+
 	closeFilter();
 	handle=open(DEMUX, O_RDWR);
-//	qDebug(" -----------------------------> +%d", handle);
 	if (handle<0)
 	{
 		perror(DEMUX);
@@ -142,24 +170,54 @@ int eSection::setFilter(int pid, __u8 *data, __u8 *mask, int len)
 	connect(notifier, SIGNAL(activated(int)), SLOT(data(int)));
 
 	secFilterParams.pid=pid;
-	memset(&secFilterParams.filter.filter, 0, DMX_FILTER_SIZE);
-	memset(&secFilterParams.filter.mask, 0, DMX_FILTER_SIZE);
+#ifdef DBOX
+	const int maxsize=DMX_FILTER_SIZE;
+	memset(secFilterParams.filter.filter, 0, maxsize);
+	memset(secFilterParams.filter.mask, 0, maxsize);
+
 	secFilterParams.timeout=0;
 	secFilterParams.flags=DMX_IMMEDIATE_START;
-
 	if (flags&SECREAD_CRC)
 		secFilterParams.flags|=DMX_CHECK_CRC;
-
 	for (int i = 0; i < DMX_FILTER_SIZE; i++)
 	{
 		secFilterParams.filter.filter[i]=i<len?data[i]:0;
 		secFilterParams.filter.mask[i]=i<len?mask[i]:0;
 	}
+
 	if (ioctl(handle, DMX_SET_FILTER, &secFilterParams) < 0)
 	{
 		close(handle);
 		return -1;
 	}
+#else
+	if (len>FILTER_LENGTH)
+		len=FILTER_LENGTH;
+	memset(secFilterParams.filter, 0, 6);
+	memset(secFilterParams.mask, 0, 6);
+	memcpy(secFilterParams.filter, data, len);
+	memcpy(secFilterParams.mask, mask, len);
+	len=6;
+	secFilterParams.filter_length=len;
+	printf("%02x: ", pid);
+	for (int i=0; i<len; i++)
+		printf("%02x ", secFilterParams.filter[i]);
+	printf("\n    ");
+	for (int i=0; i<len; i++)
+		printf("%02x ", secFilterParams.mask[i]);
+	printf("\n");
+	if (ioctl(handle, DEMUX_FILTER_SET, &secFilterParams))
+	{
+		close(handle);
+		return -1;
+	}
+	if (ioctl(handle, DEMUX_START, 0))
+	{
+		close(handle);
+		return -1;
+	}
+#endif
+
 	return 0;
 }
 
@@ -192,13 +250,11 @@ void eSection::sectionFinish(int)
 
 int eSection::lock()
 {
-//	qDebug("lock on %p: now: %d", this, lockcount+1);
 	return ++lockcount;
 }
 
 int eSection::unlock()
 {
-//	qDebug("unlock on %p: now: %d", this, lockcount-1);
 	if (lockcount)
 		return lockcount--;
 	else
@@ -209,15 +265,18 @@ int eSection::unlock()
 void eTable::sectionFinish(int err)
 {
 	if (err)
-	{
-		qDebug("eTable: error %d", err);
 		error=err;
-	}
 	ready=1;
 	emit tableReady(error);
 }
 
 eTable::eTable(int pid, int tableid, int tableidext, int version): eSection(pid, tableid, tableidext, version, (pid==0x14)?0:(SECREAD_INORDER|SECREAD_CRC))
+{
+	error=0;
+	ready=0;
+}
+
+eTable::eTable(): eSection()
 {
 	error=0;
 	ready=0;

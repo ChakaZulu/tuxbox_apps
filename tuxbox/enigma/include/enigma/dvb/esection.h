@@ -32,6 +32,7 @@ public slots:
 	void timeout();
 public:
 	eSection(int pid, int tableid, int tableidext, int version, int flags, int tableidmask=0xFF);
+	eSection();
 	virtual ~eSection();
 
 	int setFilter(int pid, __u8 *data, __u8 *mask, int len);
@@ -57,6 +58,7 @@ signals:
 	void tableReady(int);
 public:
 	eTable(int pid, int tableid, int tableidext=-1, int version=-1);
+	eTable();
 	virtual eTable *createNext();
 	int incrementVersion(int version) { return (version&0xC1)|((version+2)&0x3E); }
 	int error;
@@ -139,6 +141,13 @@ public:
 	int ready()
 	{
 		return !!current;
+	}
+	
+	void inject(Table *t)
+	{
+		delete next;
+		next=t;
+		getNext(0);
 	}
 
 	void getNext(int error)
