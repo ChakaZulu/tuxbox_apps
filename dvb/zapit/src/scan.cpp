@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.92 2002/12/23 00:51:31 thegoodguy Exp $
+ * $Id: scan.cpp,v 1.93 2002/12/27 17:01:39 obi Exp $
  */
 
 #include <fcntl.h>
@@ -186,7 +186,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 	switch (frontend->getInfo()->type) {
 	case FE_QAM: /* cable */
 		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hhu\" symbol_rate=\"%u\" fec_inner=\"%hhu\" modulation=\"%hhu\">\n",
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" modulation=\"%hu\">\n",
 			tI->second.transport_stream_id,
 			tI->second.original_network_id,
 			tI->second.feparams.frequency,
@@ -198,7 +198,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 
 	case FE_QPSK: /* satellite */
 		fprintf(fd,
-			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hhu\" symbol_rate=\"%u\" fec_inner=\"%hhu\" polarization=\"%hhu\">\n",
+			"\t\t<transponder id=\"%04x\" onid=\"%04x\" frequency=\"%u\" inversion=\"%hu\" symbol_rate=\"%u\" fec_inner=\"%hu\" polarization=\"%hu\">\n",
 			tI->second.transport_stream_id,
 			tI->second.original_network_id,
 			tI->second.feparams.frequency,
@@ -253,7 +253,7 @@ FILE *write_provider(FILE *fd, const char *type, const char *provider_name, cons
 		/* satellite tag */
 		else
 		{
-			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hhd\">\n", type, provider_name, DiSEqC);
+			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\">\n", type, provider_name, DiSEqC);
 		}
 
 		/* channels */
@@ -342,36 +342,31 @@ void *start_scanthread(void *param)
 		/* read all transponders */
 		while ((transponder = xmlGetNextOccurence(transponder, "transponder")) != NULL)
 		{
-			uint8_t tmp;
 			dvb_frontend_parameters feparams;
 
-			sscanf(xmlGetAttribute(transponder, "frequency"), "%u", &feparams.frequency);
+			feparams.frequency = xmlGetNumericAttribute(transponder, "frequency", 0);
 			feparams.inversion = INVERSION_AUTO;
 
 			/* cable */
 			if (frontend->getInfo()->type == FE_QAM)
 			{
-				sscanf(xmlGetAttribute(transponder, "symbol_rate"), "%u", &feparams.u.qam.symbol_rate);
-				sscanf(xmlGetAttribute(transponder, "fec_inner"), "%hhu", &tmp);
-				feparams.u.qam.fec_inner = (fe_code_rate_t) tmp;
-				sscanf(xmlGetAttribute(transponder, "modulation"), "%hhu", &tmp);
-				feparams.u.qam.modulation = (fe_modulation_t) tmp;
+				feparams.u.qam.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
+				feparams.u.qam.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
+				feparams.u.qam.modulation = (fe_modulation_t) xmlGetNumericAttribute(transponder, "modulation", 0);
 			}
 
 			/* satellite */
 			else if (frontend->getInfo()->type == FE_QPSK)
 			{
-				sscanf(xmlGetAttribute(transponder, "symbol_rate"), "%u", &feparams.u.qpsk.symbol_rate);
-				sscanf(xmlGetAttribute(transponder, "fec_inner"), "%hhu", &tmp);
-				feparams.u.qpsk.fec_inner = (fe_code_rate_t) tmp;
-				sscanf(xmlGetAttribute(transponder, "polarization"), "%hhu", &polarization);
+				feparams.u.qpsk.symbol_rate = xmlGetNumericAttribute(transponder, "symbol_rate", 0);
+				feparams.u.qpsk.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(transponder, "fec_inner", 0);
+				polarization = xmlGetNumericAttribute(transponder, "polarization", 0);
 			}
 
 			/* terrestrial */
 			else if (frontend->getInfo()->type == FE_OFDM)
 			{
-				sscanf(xmlGetAttribute(transponder, "bandwidth"), "%hhu", &tmp);
-				feparams.u.ofdm.bandwidth = (fe_bandwidth_t) tmp;
+				feparams.u.ofdm.bandwidth = (fe_bandwidth_t) xmlGetNumericAttribute(transponder, "bandwidth", 0);
 				feparams.u.ofdm.code_rate_HP = FEC_AUTO;
 				feparams.u.ofdm.code_rate_LP = FEC_AUTO;
 				feparams.u.ofdm.constellation = QAM_AUTO;

@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.65 2002/12/23 10:35:46 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.66 2002/12/27 17:01:39 obi Exp $
  */
 
 #include <stdio.h>
@@ -15,79 +15,45 @@
 extern std::map <uint32_t, transponder> transponders;
 extern tallchans allchans;
 
-
-#define GET_ATTR(node, name, fmt, arg)					\
-	do {								\
-		char * ptr = xmlGetAttribute(node, name);		\
-		if ((ptr == NULL) || (sscanf(ptr, fmt, &arg) <= 0))	\
-			arg = 0;					\
-	}								\
-	while (0)
-
-
 void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC)
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
 	dvb_frontend_parameters feparams;
 	uint8_t polarization = 0;
-	uint8_t tmp;
 
 	/* read all transponders */
 	while ((node = xmlGetNextOccurence(node, "transponder")) != NULL)
 	{
 		/* common */
-		GET_ATTR(node, "id", "%hx", transport_stream_id);
-		GET_ATTR(node, "onid", SCANF_ORIGINAL_NETWORK_ID_TYPE, original_network_id);
-		GET_ATTR(node, "frequency", "%u", feparams.frequency);
-		GET_ATTR(node, "inversion", "%hhu", tmp);
-
-		switch (tmp) {
-		case 0:
-			feparams.inversion = INVERSION_OFF;
-			break;
-		case 1:
-			feparams.inversion = INVERSION_ON;
-			break;
-		default:
-			feparams.inversion = INVERSION_AUTO;
-			break;
-		}
+		transport_stream_id = xmlGetNumericAttribute(node, "id", 16);
+		original_network_id = xmlGetNumericAttribute(node, "onid", 16);
+		feparams.frequency = xmlGetNumericAttribute(node, "frequency", 0);
+		feparams.inversion = (fe_spectral_inversion_t) xmlGetNumericAttribute(node, "inversion", 0);
 
 		/* cable */
 		if (DiSEqC == 0xFF) {
-
-			GET_ATTR(node, "symbol_rate", "%u", feparams.u.qam.symbol_rate);
-			GET_ATTR(node, "fec_inner", "%hhu", tmp);
-			feparams.u.qam.fec_inner = (fe_code_rate_t) tmp;
-			GET_ATTR(node, "modulation", "%hhu", tmp);
-			feparams.u.qam.modulation = CFrontend::getModulation(tmp);
+			feparams.u.qam.symbol_rate = xmlGetNumericAttribute(node, "symbol_rate", 0);
+			feparams.u.qam.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(node, "fec_inner", 0);
+			feparams.u.qam.modulation = CFrontend::getModulation(xmlGetNumericAttribute(node, "modulation", 0));
 		}
 
 		/* terrestrial */
 		else if (DiSEqC == 0xFE) {
-			GET_ATTR(node, "bandwidth", "%hhu", tmp);
-			feparams.u.ofdm.bandwidth = (fe_bandwidth_t) tmp;
-			GET_ATTR(node, "code_rate_HP", "%hhu", tmp);
-			feparams.u.ofdm.code_rate_HP = (fe_code_rate_t) tmp;
-			GET_ATTR(node, "code_rate_LP", "%hhu", tmp);
-			feparams.u.ofdm.code_rate_LP = (fe_code_rate_t) tmp;
-			GET_ATTR(node, "constellation", "%hhu", tmp);
-			feparams.u.ofdm.constellation = (fe_modulation_t) tmp;
-			GET_ATTR(node, "transmission_mode", "%hhu", tmp);
-			feparams.u.ofdm.transmission_mode = (fe_transmit_mode_t) tmp;
-			GET_ATTR(node, "guard_interval", "%hhu", tmp);
-			feparams.u.ofdm.guard_interval = (fe_guard_interval_t) tmp;
-			GET_ATTR(node, "hierarchy_information", "%hhu", tmp);
-			feparams.u.ofdm.hierarchy_information = (fe_hierarchy_t) tmp;
+			feparams.u.ofdm.bandwidth = (fe_bandwidth_t) xmlGetNumericAttribute(node, "bandwidth", 0);
+			feparams.u.ofdm.code_rate_HP = (fe_code_rate_t) xmlGetNumericAttribute(node, "code_rate_HP", 0);
+			feparams.u.ofdm.code_rate_LP = (fe_code_rate_t) xmlGetNumericAttribute(node, "code_rate_LP", 0);
+			feparams.u.ofdm.constellation = (fe_modulation_t) xmlGetNumericAttribute(node, "constellation", 0);
+			feparams.u.ofdm.transmission_mode = (fe_transmit_mode_t) xmlGetNumericAttribute(node, "transmission_mode", 0);
+			feparams.u.ofdm.guard_interval = (fe_guard_interval_t) xmlGetNumericAttribute(node, "guard_interval", 0);
+			feparams.u.ofdm.hierarchy_information = (fe_hierarchy_t) xmlGetNumericAttribute(node, "hierarchy_information", 0);
 		}
 
 		/* satellite */
 		else {
-			GET_ATTR(node, "symbol_rate", "%u", feparams.u.qpsk.symbol_rate);
-			GET_ATTR(node, "fec_inner", "%hhu", tmp);
-			feparams.u.qpsk.fec_inner = (fe_code_rate_t) tmp;
-			GET_ATTR(node, "polarization", "%hhu", polarization);
+			feparams.u.qpsk.symbol_rate = xmlGetNumericAttribute(node, "symbol_rate", 0);
+			feparams.u.qpsk.fec_inner = (fe_code_rate_t) xmlGetNumericAttribute(node, "fec_inner", 0);
+			polarization = xmlGetNumericAttribute(node, "polarization", 0);
 		}
 
 		/* add current transponder to list */
@@ -125,9 +91,9 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 
 	while ((node = xmlGetNextOccurence(node, "channel")) != NULL)
 	{
-		GET_ATTR(node, "service_id", SCANF_SERVICE_ID_TYPE, service_id);
+		service_id = xmlGetNumericAttribute(node, "service_id", 16);
 		name = xmlGetAttribute(node, "name");
-		GET_ATTR(node, "service_type", "%hhx", service_type);
+		service_type = xmlGetNumericAttribute(node, "service_type", 16);
 
 		switch (service_type) {
 		case DIGITAL_TELEVISION_SERVICE:
@@ -174,7 +140,7 @@ void FindTransponder(xmlNodePtr search)
 			DiSEqC = 0xff;
 
 		else if (!(strcmp(xmlGetName(search), "sat")))
-			GET_ATTR(search, "diseqc", "%hhu", DiSEqC);
+			DiSEqC = xmlGetNumericAttribute(search, "diseqc", 0);
 
 		else if (!(strcmp(xmlGetName(search), "terrestrial")))
 			DiSEqC = 0xfe;
