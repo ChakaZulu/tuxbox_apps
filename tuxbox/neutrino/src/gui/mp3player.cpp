@@ -227,18 +227,25 @@ int CMP3PlayerGui::show()
 			// stop if mode was changed in another thread
 			loop=false;
 		}
-		if(m_state != CMP3PlayerGui::STOP && CMP3Player::getInstance()->state==CMP3Player::STOP && playlist.size() >0)
+		if ((m_state != CMP3PlayerGui::STOP) && 
+		    (CMP3Player::getInstance()->state == CMP3Player::STOP) && 
+		    (!playlist.empty()))
 		{
 			int next = getNext();
-			if(next>=0)
+			if (next >= 0)
 				play(next);
 			else
 				stop();
 		}
 
-		if(update)
+		if (update)
 		{
+		  /* 
+		   * let's try without hide(); to save some painting and prevent flickering
+		   */
+		  /*
 			hide();
+		  */
 			update=false;
 			paint();
 		}
