@@ -12,6 +12,7 @@ mainmenu.shutdown Wylaczyc
 mainmenu.settings Settings
 
 mainsettings.head Settings
+mainsettings.savesettingsnow save settings now
 mainsettings.language Jezyk
 mainsettings.audio Dzwiek
 mainsettings.video Obraz

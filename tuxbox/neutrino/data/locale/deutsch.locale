@@ -12,6 +12,7 @@ mainmenu.shutdown Ausschalten
 mainmenu.settings Einstellungen
 
 mainsettings.head Einstellungen
+mainsettings.savesettingsnow Einstellung jetzt speichern
 mainsettings.language Sprache
 mainsettings.audio Ton
 mainsettings.video Video

@@ -12,6 +12,7 @@ mainmenu.shutdown mettre hors circuit
 mainmenu.settings Settings
 
 mainsettings.head Settings
+mainsettings.savesettingsnow save settings now
 mainsettings.language Langue
 mainsettings.audio Argile
 mainsettings.video Vidéo

@@ -12,6 +12,7 @@ mainmenu.shutdown KAPAT
 mainmenu.settings AYARLAR
 
 mainsettings.head AYARLAR
+mainsettings.savesettingsnow save settings now
 mainsettings.language MENÜ DIL
 mainsettings.audio SES
 mainsettings.video VIDEO
