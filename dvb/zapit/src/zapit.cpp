@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.208 2002/08/31 19:13:07 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.209 2002/08/31 22:30:28 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -234,8 +234,8 @@ void save_settings (bool write)
 			CBouquetManager::ChannelIterator cit = bouquetManager->radioChannelsFind(channel->getOnidSid());
 			if (!(cit.EndOfChannels()))
 			{
-				config->setInt("lastChannelRadio", (*cit)->getChannelNumber());
-				config->setInt("lastChannelMode", 1);
+				config->setInt32("lastChannelRadio", (*cit)->getChannelNumber());
+				config->setInt32("lastChannelMode", 1);
 			}
 		}
 		else
@@ -243,16 +243,16 @@ void save_settings (bool write)
 			CBouquetManager::ChannelIterator cit = bouquetManager->tvChannelsFind(channel->getOnidSid());
 			if (!(cit.EndOfChannels()))
 			{
-				config->setInt("lastChannelTV", (*cit)->getChannelNumber());
-				config->setInt("lastChannelMode", 0);
+				config->setInt32("lastChannelTV", (*cit)->getChannelNumber());
+				config->setInt32("lastChannelMode", 0);
 			}
 		}
 	}
 
 	if (write)
 	{
-		config->setInt("diseqcRepeats", frontend->getDiseqcRepeats());
-		config->setInt("diseqcType", frontend->getDiseqcType());
+		config->setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
+		config->setInt32("diseqcType", frontend->getDiseqcType());
 		config->saveConfig(CONFIGFILE);
 	}
 }
@@ -261,7 +261,7 @@ channel_msg load_settings()
 {
 	channel_msg output_msg;
 	string valueName;
-	if (config->getInt("lastChannelMode", 0))
+	if (config->getInt32("lastChannelMode", 0))
 	{
 		output_msg.mode = 'r';
 	}
@@ -270,7 +270,7 @@ channel_msg load_settings()
 		output_msg.mode = 't';
 	}
 	valueName = (currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV";
-	output_msg.chan_nr = config->getInt(valueName, 1);
+	output_msg.chan_nr = config->getInt32(valueName, 1);
 
 	return output_msg;
 }
@@ -1117,7 +1117,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.208 2002/08/31 19:13:07 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.209 2002/08/31 22:30:28 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1197,17 +1197,17 @@ int main (int argc, char **argv)
 	{
 		char tmp[16];
 
-		frontend->setDiseqcType((diseqc_t) config->getInt("diseqcType", NO_DISEQC));
-		frontend->setDiseqcRepeats(config->getInt("diseqcRepeats", 0));
+		frontend->setDiseqcType((diseqc_t) config->getInt32("diseqcType", NO_DISEQC));
+		frontend->setDiseqcRepeats(config->getInt32("diseqcRepeats", 0));
 
 		for (i = 0; i < MAX_LNBS; i++)
 		{
 			/* low offset */
 			sprintf(tmp, "lnb%d_OffsetLow", i);
-			frontend->setLnbOffset(false, i, config->getInt(tmp, 9750000));
+			frontend->setLnbOffset(false, i, config->getInt32(tmp, 9750000));
 			/* high offset */
 			sprintf(tmp, "lnb%d_OffsetHigh", i);
-			frontend->setLnbOffset(true, i, config->getInt(tmp, 10600000));
+			frontend->setLnbOffset(true, i, config->getInt32(tmp, 10600000));
 		}
 	}
 

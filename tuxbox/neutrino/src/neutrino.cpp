@@ -345,87 +345,87 @@ int CNeutrinoApp::loadSetup()
 	}
 
 	//video
-	g_settings.video_Signal = configfile.getInt( "video_Signal", 0 ); //composite
-	g_settings.video_Format = configfile.getInt( "video_Format", 2 ); //4:3
+	g_settings.video_Signal = configfile.getInt32( "video_Signal", 0 ); //composite
+	g_settings.video_Format = configfile.getInt32( "video_Format", 2 ); //4:3
 
 	//misc
-	g_settings.shutdown_real = configfile.getInt( "shutdown_real", 1 );
-	g_settings.shutdown_showclock = configfile.getInt( "shutdown_showclock", 1 );
-	g_settings.show_camwarning = configfile.getInt( "show_camwarning", 1 );
+	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", 1 );
+	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
+	g_settings.show_camwarning = configfile.getInt32( "show_camwarning", 1 );
 
 	//audio
-	g_settings.audio_AnalogMode = configfile.getInt( "audio_AnalogMode", 0 );
-	g_settings.audio_DolbyDigital = configfile.getInt( "audio_DolbyDigital", 0 );
+	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
+	g_settings.audio_DolbyDigital = configfile.getInt32( "audio_DolbyDigital", 0 );
 
 	//vcr
-	g_settings.vcr_AutoSwitch = configfile.getInt( "vcr_AutoSwitch", 1 );
+	g_settings.vcr_AutoSwitch = configfile.getInt32( "vcr_AutoSwitch", 1 );
 
 	//language
 	strcpy( g_settings.language, configfile.getString( "language", "deutsch" ).c_str() );
 
 	//timing
-	g_settings.timing_menu = configfile.getInt( "timing_menu", 10 );
-	g_settings.timing_chanlist = configfile.getInt( "timing_chanlist", 10 );
-	g_settings.timing_epg = configfile.getInt( "timing_epg", 8 );
-	g_settings.timing_infobar = configfile.getInt( "timing_infobar", 8 );
+	g_settings.timing_menu = configfile.getInt32( "timing_menu", 10 );
+	g_settings.timing_chanlist = configfile.getInt32( "timing_chanlist", 10 );
+	g_settings.timing_epg = configfile.getInt32( "timing_epg", 8 );
+	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", 8 );
 
 	//widget settings
-	g_settings.widget_fade = configfile.getInt( "widget_fade", 1 );
+	g_settings.widget_fade = configfile.getInt32( "widget_fade", 1 );
 
 	//colors (neutrino defaultcolors)
-	g_settings.menu_Head_alpha = configfile.getInt( "menu_Head_alpha", 0x00 );
-	g_settings.menu_Head_red = configfile.getInt( "menu_Head_red", 0x00 );
-	g_settings.menu_Head_green = configfile.getInt( "menu_Head_green", 0x0A );
-	g_settings.menu_Head_blue = configfile.getInt( "menu_Head_blue", 0x19 );
+	g_settings.menu_Head_alpha = configfile.getInt32( "menu_Head_alpha", 0x00 );
+	g_settings.menu_Head_red = configfile.getInt32( "menu_Head_red", 0x00 );
+	g_settings.menu_Head_green = configfile.getInt32( "menu_Head_green", 0x0A );
+	g_settings.menu_Head_blue = configfile.getInt32( "menu_Head_blue", 0x19 );
 
-	g_settings.menu_Head_Text_alpha = configfile.getInt( "menu_Head_Text_alpha", 0x00 );
-	g_settings.menu_Head_Text_red = configfile.getInt( "menu_Head_Text_red", 0x5f );
-	g_settings.menu_Head_Text_green = configfile.getInt( "menu_Head_Text_green", 0x46 );
-	g_settings.menu_Head_Text_blue = configfile.getInt( "menu_Head_Text_blue", 0x00 );
+	g_settings.menu_Head_Text_alpha = configfile.getInt32( "menu_Head_Text_alpha", 0x00 );
+	g_settings.menu_Head_Text_red = configfile.getInt32( "menu_Head_Text_red", 0x5f );
+	g_settings.menu_Head_Text_green = configfile.getInt32( "menu_Head_Text_green", 0x46 );
+	g_settings.menu_Head_Text_blue = configfile.getInt32( "menu_Head_Text_blue", 0x00 );
 
-	g_settings.menu_Content_alpha = configfile.getInt( "menu_Content_alpha", 0x14 );
-	g_settings.menu_Content_red = configfile.getInt( "menu_Content_red", 0x00 );
-	g_settings.menu_Content_green = configfile.getInt( "menu_Content_green", 0x0f );
-	g_settings.menu_Content_blue = configfile.getInt( "menu_Content_blue", 0x23 );
+	g_settings.menu_Content_alpha = configfile.getInt32( "menu_Content_alpha", 0x14 );
+	g_settings.menu_Content_red = configfile.getInt32( "menu_Content_red", 0x00 );
+	g_settings.menu_Content_green = configfile.getInt32( "menu_Content_green", 0x0f );
+	g_settings.menu_Content_blue = configfile.getInt32( "menu_Content_blue", 0x23 );
 
-	g_settings.menu_Content_Text_alpha = configfile.getInt( "menu_Content_Text_alpha", 0x00 );
-	g_settings.menu_Content_Text_red = configfile.getInt( "menu_Content_Text_red", 0x64 );
-	g_settings.menu_Content_Text_green = configfile.getInt( "menu_Content_Text_green", 0x64 );
-	g_settings.menu_Content_Text_blue = configfile.getInt( "menu_Content_Text_blue", 0x64 );
+	g_settings.menu_Content_Text_alpha = configfile.getInt32( "menu_Content_Text_alpha", 0x00 );
+	g_settings.menu_Content_Text_red = configfile.getInt32( "menu_Content_Text_red", 0x64 );
+	g_settings.menu_Content_Text_green = configfile.getInt32( "menu_Content_Text_green", 0x64 );
+	g_settings.menu_Content_Text_blue = configfile.getInt32( "menu_Content_Text_blue", 0x64 );
 
-	g_settings.menu_Content_Selected_alpha = configfile.getInt( "menu_Content_Selected_alpha", 0x14 );
-	g_settings.menu_Content_Selected_red = configfile.getInt( "menu_Content_Selected_red", 0x19 );
-	g_settings.menu_Content_Selected_green = configfile.getInt( "menu_Content_Selected_green", 0x37 );
-	g_settings.menu_Content_Selected_blue = configfile.getInt( "menu_Content_Selected_blue", 0x64 );
+	g_settings.menu_Content_Selected_alpha = configfile.getInt32( "menu_Content_Selected_alpha", 0x14 );
+	g_settings.menu_Content_Selected_red = configfile.getInt32( "menu_Content_Selected_red", 0x19 );
+	g_settings.menu_Content_Selected_green = configfile.getInt32( "menu_Content_Selected_green", 0x37 );
+	g_settings.menu_Content_Selected_blue = configfile.getInt32( "menu_Content_Selected_blue", 0x64 );
 
-	g_settings.menu_Content_Selected_Text_alpha = configfile.getInt( "menu_Content_Selected_Text_alpha", 0x00 );
-	g_settings.menu_Content_Selected_Text_red = configfile.getInt( "menu_Content_Selected_Text_red", 0x00 );
-	g_settings.menu_Content_Selected_Text_green = configfile.getInt( "menu_Content_Selected_Text_green", 0x00 );
-	g_settings.menu_Content_Selected_Text_blue = configfile.getInt( "menu_Content_Selected_Text_blue", 0x00 );
+	g_settings.menu_Content_Selected_Text_alpha = configfile.getInt32( "menu_Content_Selected_Text_alpha", 0x00 );
+	g_settings.menu_Content_Selected_Text_red = configfile.getInt32( "menu_Content_Selected_Text_red", 0x00 );
+	g_settings.menu_Content_Selected_Text_green = configfile.getInt32( "menu_Content_Selected_Text_green", 0x00 );
+	g_settings.menu_Content_Selected_Text_blue = configfile.getInt32( "menu_Content_Selected_Text_blue", 0x00 );
 
-	g_settings.menu_Content_inactive_alpha = configfile.getInt( "menu_Content_inactive_alpha", 0x14 );
-	g_settings.menu_Content_inactive_red = configfile.getInt( "menu_Content_inactive_red", 0x00 );
-	g_settings.menu_Content_inactive_green = configfile.getInt( "menu_Content_inactive_green", 0x0f );
-	g_settings.menu_Content_inactive_blue = configfile.getInt( "menu_Content_inactive_blue", 0x23 );
+	g_settings.menu_Content_inactive_alpha = configfile.getInt32( "menu_Content_inactive_alpha", 0x14 );
+	g_settings.menu_Content_inactive_red = configfile.getInt32( "menu_Content_inactive_red", 0x00 );
+	g_settings.menu_Content_inactive_green = configfile.getInt32( "menu_Content_inactive_green", 0x0f );
+	g_settings.menu_Content_inactive_blue = configfile.getInt32( "menu_Content_inactive_blue", 0x23 );
 
-	g_settings.menu_Content_inactive_Text_alpha = configfile.getInt( "menu_Content_inactive_Text_alpha", 0x00 );
-	g_settings.menu_Content_inactive_Text_red = configfile.getInt( "menu_Content_inactive_Text_red", 55 );
-	g_settings.menu_Content_inactive_Text_green = configfile.getInt( "menu_Content_inactive_Text_green", 70 );
-	g_settings.menu_Content_inactive_Text_blue = configfile.getInt( "menu_Content_inactive_Text_blue", 85 );
+	g_settings.menu_Content_inactive_Text_alpha = configfile.getInt32( "menu_Content_inactive_Text_alpha", 0x00 );
+	g_settings.menu_Content_inactive_Text_red = configfile.getInt32( "menu_Content_inactive_Text_red", 55 );
+	g_settings.menu_Content_inactive_Text_green = configfile.getInt32( "menu_Content_inactive_Text_green", 70 );
+	g_settings.menu_Content_inactive_Text_blue = configfile.getInt32( "menu_Content_inactive_Text_blue", 85 );
 
-	g_settings.infobar_alpha = configfile.getInt( "infobar_alpha", 0x14 );
-	g_settings.infobar_red = configfile.getInt( "infobar_red", 0x00 );
-	g_settings.infobar_green = configfile.getInt( "infobar_green", 0x0e );
-	g_settings.infobar_blue = configfile.getInt( "infobar_blue", 0x23 );
+	g_settings.infobar_alpha = configfile.getInt32( "infobar_alpha", 0x14 );
+	g_settings.infobar_red = configfile.getInt32( "infobar_red", 0x00 );
+	g_settings.infobar_green = configfile.getInt32( "infobar_green", 0x0e );
+	g_settings.infobar_blue = configfile.getInt32( "infobar_blue", 0x23 );
 
-	g_settings.infobar_Text_alpha = configfile.getInt( "infobar_Text_alpha", 0x00 );
-	g_settings.infobar_Text_red = configfile.getInt( "infobar_Text_red", 0x64 );
-	g_settings.infobar_Text_green = configfile.getInt( "infobar_Text_green", 0x64 );
-	g_settings.infobar_Text_blue = configfile.getInt( "infobar_Text_blue", 0x64 );
+	g_settings.infobar_Text_alpha = configfile.getInt32( "infobar_Text_alpha", 0x00 );
+	g_settings.infobar_Text_red = configfile.getInt32( "infobar_Text_red", 0x64 );
+	g_settings.infobar_Text_green = configfile.getInt32( "infobar_Text_green", 0x64 );
+	g_settings.infobar_Text_blue = configfile.getInt32( "infobar_Text_blue", 0x64 );
 
 	//network
-	g_settings.networkSetOnStartup = configfile.getInt( "networkSetOnStartup", fromflash==true?1:0 );
-	g_settings.network_dhcp = configfile.getInt( "network_dhcp", 1);
+	g_settings.networkSetOnStartup = configfile.getInt32( "networkSetOnStartup", fromflash==true?1:0 );
+	g_settings.network_dhcp = configfile.getInt32( "network_dhcp", 1);
 	strcpy( g_settings.network_ip, configfile.getString( "network_ip", "10.10.10.100" ).c_str() );
 	strcpy( g_settings.network_netmask, configfile.getString( "network_netmask", "255.255.255.0" ).c_str() );
 	strcpy( g_settings.network_broadcast, configfile.getString( "network_broadcast", "10.10.10.255" ).c_str() );
@@ -433,48 +433,48 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nameserver, configfile.getString( "network_nameserver", "" ).c_str() );
 
 	//streaming
-	g_settings.network_streaming_use = configfile.getInt( "network_streaming_use", 0 );
-	g_settings.network_streaming_stopplayback = configfile.getInt( "network_streaming_stopplayback", 0 );
-	g_settings.network_streaming_stopsectionsd = configfile.getInt( "network_streaming_stopsectionsd", 1 );
+	g_settings.network_streaming_use = configfile.getInt32( "network_streaming_use", 0 );
+	g_settings.network_streaming_stopplayback = configfile.getInt32( "network_streaming_stopplayback", 0 );
+	g_settings.network_streaming_stopsectionsd = configfile.getInt32( "network_streaming_stopsectionsd", 1 );
 	strcpy( g_settings.network_streamingserver, configfile.getString( "network_streamingserver", "10.10.10.10").c_str() );
 	strcpy( g_settings.network_streamingserverport, configfile.getString( "network_streamingserverport", "4000").c_str() );
 
 	//rc-key configuration
-	g_settings.key_tvradio_mode = configfile.getInt( "key_tvradio_mode", CRCInput::RC_nokey );
+	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
 
-	g_settings.key_channelList_pageup = configfile.getInt( "key_channelList_pageup",  CRCInput::RC_red );
-	g_settings.key_channelList_pagedown = configfile.getInt( "key_channelList_pagedown", CRCInput::RC_green );
-	g_settings.key_channelList_cancel = configfile.getInt( "key_channelList_cancel",  CRCInput::RC_home );
+	g_settings.key_channelList_pageup = configfile.getInt32( "key_channelList_pageup",  CRCInput::RC_red );
+	g_settings.key_channelList_pagedown = configfile.getInt32( "key_channelList_pagedown", CRCInput::RC_green );
+	g_settings.key_channelList_cancel = configfile.getInt32( "key_channelList_cancel",  CRCInput::RC_home );
 
-	g_settings.key_quickzap_up = configfile.getInt( "key_quickzap_up",  CRCInput::RC_up );
-	g_settings.key_quickzap_down = configfile.getInt( "key_quickzap_down",  CRCInput::RC_down );
-	g_settings.key_bouquet_up = configfile.getInt( "key_bouquet_up",  CRCInput::RC_right );
-	g_settings.key_bouquet_down = configfile.getInt( "key_bouquet_down",  CRCInput::RC_left );
-	g_settings.key_subchannel_up = configfile.getInt( "key_subchannel_up",  CRCInput::RC_right );
-	g_settings.key_subchannel_down = configfile.getInt( "key_subchannel_down",  CRCInput::RC_left );
+	g_settings.key_quickzap_up = configfile.getInt32( "key_quickzap_up",  CRCInput::RC_up );
+	g_settings.key_quickzap_down = configfile.getInt32( "key_quickzap_down",  CRCInput::RC_down );
+	g_settings.key_bouquet_up = configfile.getInt32( "key_bouquet_up",  CRCInput::RC_right );
+	g_settings.key_bouquet_down = configfile.getInt32( "key_bouquet_down",  CRCInput::RC_left );
+	g_settings.key_subchannel_up = configfile.getInt32( "key_subchannel_up",  CRCInput::RC_right );
+	g_settings.key_subchannel_down = configfile.getInt32( "key_subchannel_down",  CRCInput::RC_left );
 
 	strcpy( g_settings.repeat_blocker, configfile.getString( "repeat_blocker", g_info.box_Type==3?"150":"25" ).c_str() );
 	strcpy( g_settings.repeat_genericblocker, configfile.getString( "repeat_genericblocker", g_info.box_Type==3?"25":"0" ).c_str() );
 
 	//screen configuration
-	g_settings.screen_StartX = configfile.getInt( "screen_StartX", 37 );
-	g_settings.screen_StartY = configfile.getInt( "screen_StartY", 23 );
-	g_settings.screen_EndX = configfile.getInt( "screen_EndX", 668 );
-	g_settings.screen_EndY = configfile.getInt( "screen_EndY", 555 );
+	g_settings.screen_StartX = configfile.getInt32( "screen_StartX", 37 );
+	g_settings.screen_StartY = configfile.getInt32( "screen_StartY", 23 );
+	g_settings.screen_EndX = configfile.getInt32( "screen_EndX", 668 );
+	g_settings.screen_EndY = configfile.getInt32( "screen_EndY", 555 );
 
 	//Software-update
-	g_settings.softupdate_mode = configfile.getInt( "softupdate_mode", 1 );
+	g_settings.softupdate_mode = configfile.getInt32( "softupdate_mode", 1 );
 	strcpy( g_settings.softupdate_currentversion, configfile.getString( "softupdate_currentversion", "" ).c_str() );
 	strcpy( g_settings.softupdate_proxyserver, configfile.getString( "softupdate_proxyserver", "" ).c_str() );
 	strcpy( g_settings.softupdate_proxyusername, configfile.getString( "softupdate_proxyusername", "" ).c_str() );
 	strcpy( g_settings.softupdate_proxypassword, configfile.getString( "softupdate_proxypassword", "" ).c_str() );
 
 	//BouquetHandling
-	g_settings.bouquetlist_mode = configfile.getInt( "bouquetlist_mode", 0 );
+	g_settings.bouquetlist_mode = configfile.getInt32( "bouquetlist_mode", 0 );
 
 	// parentallock
-	g_settings.parentallock_prompt = configfile.getInt( "parentallock_prompt", 0 );
-	g_settings.parentallock_lockage = configfile.getInt( "parentallock_lockage", 12 );
+	g_settings.parentallock_prompt = configfile.getInt32( "parentallock_prompt", 0 );
+	g_settings.parentallock_lockage = configfile.getInt32( "parentallock_lockage", 12 );
 	strcpy( g_settings.parentallock_pincode, configfile.getString( "parentallock_pincode", "0000" ).c_str() );
 
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
@@ -507,87 +507,87 @@ void CNeutrinoApp::saveSetup()
 	}
 
 	//video
-	configfile.setInt( "video_Signal", g_settings.video_Signal );
-	configfile.setInt( "video_Format", g_settings.video_Format );
+	configfile.setInt32( "video_Signal", g_settings.video_Signal );
+	configfile.setInt32( "video_Format", g_settings.video_Format );
 
 	//misc
-	configfile.setInt( "shutdown_real", g_settings.shutdown_real );
-	configfile.setInt( "shutdown_showclock", g_settings.shutdown_showclock );
-	configfile.setInt( "show_camwarning", g_settings.show_camwarning );
+	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
+	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock );
+	configfile.setInt32( "show_camwarning", g_settings.show_camwarning );
 
 	//audio
-	configfile.setInt( "audio_AnalogMode", g_settings.audio_AnalogMode );
-	configfile.setInt( "audio_DolbyDigital", g_settings.audio_DolbyDigital );
+	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
+	configfile.setInt32( "audio_DolbyDigital", g_settings.audio_DolbyDigital );
 
 	//vcr
-	configfile.setInt( "vcr_AutoSwitch", g_settings.vcr_AutoSwitch );
+	configfile.setInt32( "vcr_AutoSwitch", g_settings.vcr_AutoSwitch );
 
 	//language
 	configfile.setString( "language", g_settings.language );
 
 	//timing
-	configfile.setInt( "timing_menu", g_settings.timing_menu );
-	configfile.setInt( "timing_chanlist", g_settings.timing_chanlist );
-	configfile.setInt( "timing_epg", g_settings.timing_epg );
-	configfile.setInt( "timing_infobar", g_settings.timing_infobar );
+	configfile.setInt32( "timing_menu", g_settings.timing_menu );
+	configfile.setInt32( "timing_chanlist", g_settings.timing_chanlist );
+	configfile.setInt32( "timing_epg", g_settings.timing_epg );
+	configfile.setInt32( "timing_infobar", g_settings.timing_infobar );
 
 	//widget settings
-	configfile.setInt( "widget_fade", g_settings.widget_fade );
+	configfile.setInt32( "widget_fade", g_settings.widget_fade );
 
 	//colors
-	configfile.setInt( "menu_Head_alpha", g_settings.menu_Head_alpha );
-	configfile.setInt( "menu_Head_red", g_settings.menu_Head_red );
-	configfile.setInt( "menu_Head_green", g_settings.menu_Head_green );
-	configfile.setInt( "menu_Head_blue", g_settings.menu_Head_blue );
+	configfile.setInt32( "menu_Head_alpha", g_settings.menu_Head_alpha );
+	configfile.setInt32( "menu_Head_red", g_settings.menu_Head_red );
+	configfile.setInt32( "menu_Head_green", g_settings.menu_Head_green );
+	configfile.setInt32( "menu_Head_blue", g_settings.menu_Head_blue );
 
-	configfile.setInt( "menu_Head_Text_alpha", g_settings.menu_Head_Text_alpha );
-	configfile.setInt( "menu_Head_Text_red", g_settings.menu_Head_Text_red );
-	configfile.setInt( "menu_Head_Text_green", g_settings.menu_Head_Text_green );
-	configfile.setInt( "menu_Head_Text_blue", g_settings.menu_Head_Text_blue );
+	configfile.setInt32( "menu_Head_Text_alpha", g_settings.menu_Head_Text_alpha );
+	configfile.setInt32( "menu_Head_Text_red", g_settings.menu_Head_Text_red );
+	configfile.setInt32( "menu_Head_Text_green", g_settings.menu_Head_Text_green );
+	configfile.setInt32( "menu_Head_Text_blue", g_settings.menu_Head_Text_blue );
 
-	configfile.setInt( "menu_Content_alpha", g_settings.menu_Content_alpha );
-	configfile.setInt( "menu_Content_red", g_settings.menu_Content_red );
-	configfile.setInt( "menu_Content_green", g_settings.menu_Content_green );
-	configfile.setInt( "menu_Content_blue", g_settings.menu_Content_blue );
+	configfile.setInt32( "menu_Content_alpha", g_settings.menu_Content_alpha );
+	configfile.setInt32( "menu_Content_red", g_settings.menu_Content_red );
+	configfile.setInt32( "menu_Content_green", g_settings.menu_Content_green );
+	configfile.setInt32( "menu_Content_blue", g_settings.menu_Content_blue );
 
-	configfile.setInt( "menu_Content_Text_alpha", g_settings.menu_Content_Text_alpha );
-	configfile.setInt( "menu_Content_Text_red", g_settings.menu_Content_Text_red );
-	configfile.setInt( "menu_Content_Text_green", g_settings.menu_Content_Text_green );
-	configfile.setInt( "menu_Content_Text_blue", g_settings.menu_Content_Text_blue );
+	configfile.setInt32( "menu_Content_Text_alpha", g_settings.menu_Content_Text_alpha );
+	configfile.setInt32( "menu_Content_Text_red", g_settings.menu_Content_Text_red );
+	configfile.setInt32( "menu_Content_Text_green", g_settings.menu_Content_Text_green );
+	configfile.setInt32( "menu_Content_Text_blue", g_settings.menu_Content_Text_blue );
 
-	configfile.setInt( "menu_Content_Selected_alpha", g_settings.menu_Content_Selected_alpha );
-	configfile.setInt( "menu_Content_Selected_red", g_settings.menu_Content_Selected_red );
-	configfile.setInt( "menu_Content_Selected_green", g_settings.menu_Content_Selected_green );
-	configfile.setInt( "menu_Content_Selected_blue", g_settings.menu_Content_Selected_blue );
+	configfile.setInt32( "menu_Content_Selected_alpha", g_settings.menu_Content_Selected_alpha );
+	configfile.setInt32( "menu_Content_Selected_red", g_settings.menu_Content_Selected_red );
+	configfile.setInt32( "menu_Content_Selected_green", g_settings.menu_Content_Selected_green );
+	configfile.setInt32( "menu_Content_Selected_blue", g_settings.menu_Content_Selected_blue );
 
-	configfile.setInt( "menu_Content_Selected_Text_alpha", g_settings.menu_Content_Selected_Text_alpha );
-	configfile.setInt( "menu_Content_Selected_Text_red", g_settings.menu_Content_Selected_Text_red );
-	configfile.setInt( "menu_Content_Selected_Text_green", g_settings.menu_Content_Selected_Text_green );
-	configfile.setInt( "menu_Content_Selected_Text_blue", g_settings.menu_Content_Selected_Text_blue );
+	configfile.setInt32( "menu_Content_Selected_Text_alpha", g_settings.menu_Content_Selected_Text_alpha );
+	configfile.setInt32( "menu_Content_Selected_Text_red", g_settings.menu_Content_Selected_Text_red );
+	configfile.setInt32( "menu_Content_Selected_Text_green", g_settings.menu_Content_Selected_Text_green );
+	configfile.setInt32( "menu_Content_Selected_Text_blue", g_settings.menu_Content_Selected_Text_blue );
 
-	configfile.setInt( "menu_Content_inactive_alpha", g_settings.menu_Content_inactive_alpha );
-	configfile.setInt( "menu_Content_inactive_red", g_settings.menu_Content_inactive_red );
-	configfile.setInt( "menu_Content_inactive_green", g_settings.menu_Content_inactive_green );
-	configfile.setInt( "menu_Content_inactive_blue", g_settings.menu_Content_inactive_blue );
+	configfile.setInt32( "menu_Content_inactive_alpha", g_settings.menu_Content_inactive_alpha );
+	configfile.setInt32( "menu_Content_inactive_red", g_settings.menu_Content_inactive_red );
+	configfile.setInt32( "menu_Content_inactive_green", g_settings.menu_Content_inactive_green );
+	configfile.setInt32( "menu_Content_inactive_blue", g_settings.menu_Content_inactive_blue );
 
-	configfile.setInt( "menu_Content_inactive_Text_alpha", g_settings.menu_Content_inactive_Text_alpha );
-	configfile.setInt( "menu_Content_inactive_Text_red", g_settings.menu_Content_inactive_Text_red );
-	configfile.setInt( "menu_Content_inactive_Text_green", g_settings.menu_Content_inactive_Text_green );
-	configfile.setInt( "menu_Content_inactive_Text_blue", g_settings.menu_Content_inactive_Text_blue );
+	configfile.setInt32( "menu_Content_inactive_Text_alpha", g_settings.menu_Content_inactive_Text_alpha );
+	configfile.setInt32( "menu_Content_inactive_Text_red", g_settings.menu_Content_inactive_Text_red );
+	configfile.setInt32( "menu_Content_inactive_Text_green", g_settings.menu_Content_inactive_Text_green );
+	configfile.setInt32( "menu_Content_inactive_Text_blue", g_settings.menu_Content_inactive_Text_blue );
 
-	configfile.setInt( "infobar_alpha", g_settings.infobar_alpha );
-	configfile.setInt( "infobar_red", g_settings.infobar_red );
-	configfile.setInt( "infobar_green", g_settings.infobar_green );
-	configfile.setInt( "infobar_blue", g_settings.infobar_blue );
+	configfile.setInt32( "infobar_alpha", g_settings.infobar_alpha );
+	configfile.setInt32( "infobar_red", g_settings.infobar_red );
+	configfile.setInt32( "infobar_green", g_settings.infobar_green );
+	configfile.setInt32( "infobar_blue", g_settings.infobar_blue );
 
-	configfile.setInt( "infobar_Text_alpha", g_settings.infobar_Text_alpha );
-	configfile.setInt( "infobar_Text_red", g_settings.infobar_Text_red );
-	configfile.setInt( "infobar_Text_green", g_settings.infobar_Text_green );
-	configfile.setInt( "infobar_Text_blue", g_settings.infobar_Text_blue );
+	configfile.setInt32( "infobar_Text_alpha", g_settings.infobar_Text_alpha );
+	configfile.setInt32( "infobar_Text_red", g_settings.infobar_Text_red );
+	configfile.setInt32( "infobar_Text_green", g_settings.infobar_Text_green );
+	configfile.setInt32( "infobar_Text_blue", g_settings.infobar_Text_blue );
 
 	//network
-	configfile.setInt( "networkSetOnStartup", g_settings.networkSetOnStartup );
-	configfile.setInt( "network_dhcp", g_settings.network_dhcp );
+	configfile.setInt32( "networkSetOnStartup", g_settings.networkSetOnStartup );
+	configfile.setInt32( "network_dhcp", g_settings.network_dhcp );
 	configfile.setString( "network_ip", g_settings.network_ip );
 	configfile.setString( "network_netmask", g_settings.network_netmask );
 	configfile.setString( "network_broadcast", g_settings.network_broadcast );
@@ -595,48 +595,48 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nameserver", g_settings.network_nameserver );
 
 	//streaming
-	configfile.setInt( "network_streaming_use", g_settings.network_streaming_use );
-	configfile.setInt( "network_streaming_stopplayback", g_settings.network_streaming_stopplayback );
-	configfile.setInt( "network_streaming_stopsectionsd", g_settings.network_streaming_stopsectionsd );
+	configfile.setInt32( "network_streaming_use", g_settings.network_streaming_use );
+	configfile.setInt32( "network_streaming_stopplayback", g_settings.network_streaming_stopplayback );
+	configfile.setInt32( "network_streaming_stopsectionsd", g_settings.network_streaming_stopsectionsd );
 	configfile.setString( "network_streamingserver", g_settings.network_streamingserver );
 	configfile.setString( "network_streamingserverport", g_settings.network_streamingserverport );
 
 	//rc-key configuration
-	configfile.setInt( "key_tvradio_mode", g_settings.key_tvradio_mode );
+	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
 
-	configfile.setInt( "key_channelList_pageup", g_settings.key_channelList_pageup );
-	configfile.setInt( "key_channelList_pagedown", g_settings.key_channelList_pagedown );
-	configfile.setInt( "key_channelList_cancel", g_settings.key_channelList_cancel );
+	configfile.setInt32( "key_channelList_pageup", g_settings.key_channelList_pageup );
+	configfile.setInt32( "key_channelList_pagedown", g_settings.key_channelList_pagedown );
+	configfile.setInt32( "key_channelList_cancel", g_settings.key_channelList_cancel );
 
-	configfile.setInt( "key_quickzap_up", g_settings.key_quickzap_up );
-	configfile.setInt( "key_quickzap_down", g_settings.key_quickzap_down );
-	configfile.setInt( "key_bouquet_up", g_settings.key_bouquet_up );
-	configfile.setInt( "key_bouquet_down", g_settings.key_bouquet_down );
-	configfile.setInt( "key_subchannel_up", g_settings.key_subchannel_up );
-	configfile.setInt( "key_subchannel_down", g_settings.key_subchannel_down );
+	configfile.setInt32( "key_quickzap_up", g_settings.key_quickzap_up );
+	configfile.setInt32( "key_quickzap_down", g_settings.key_quickzap_down );
+	configfile.setInt32( "key_bouquet_up", g_settings.key_bouquet_up );
+	configfile.setInt32( "key_bouquet_down", g_settings.key_bouquet_down );
+	configfile.setInt32( "key_subchannel_up", g_settings.key_subchannel_up );
+	configfile.setInt32( "key_subchannel_down", g_settings.key_subchannel_down );
 
 	configfile.setString( "repeat_blocker", g_settings.repeat_blocker );
 	configfile.setString( "repeat_genericblocker", g_settings.repeat_genericblocker );
 
 	//screen configuration
-	configfile.setInt( "screen_StartX", g_settings.screen_StartX );
-	configfile.setInt( "screen_StartY", g_settings.screen_StartY );
-	configfile.setInt( "screen_EndX", g_settings.screen_EndX );
-	configfile.setInt( "screen_EndY", g_settings.screen_EndY );
+	configfile.setInt32( "screen_StartX", g_settings.screen_StartX );
+	configfile.setInt32( "screen_StartY", g_settings.screen_StartY );
+	configfile.setInt32( "screen_EndX", g_settings.screen_EndX );
+	configfile.setInt32( "screen_EndY", g_settings.screen_EndY );
 
 	//Software-update
-	configfile.setInt( "softupdate_mode", g_settings.softupdate_mode );
+	configfile.setInt32( "softupdate_mode", g_settings.softupdate_mode );
 	configfile.setString( "softupdate_currentversion", g_settings.softupdate_currentversion );
 	configfile.setString( "softupdate_proxyserver", g_settings.softupdate_proxyserver );
 	configfile.setString( "softupdate_proxyusername", g_settings.softupdate_proxyusername );
 	configfile.setString( "softupdate_proxypassword", g_settings.softupdate_proxypassword );
 
 	//BouquetHandling
-	configfile.setInt( "bouquetlist_mode", g_settings.bouquetlist_mode );
+	configfile.setInt32( "bouquetlist_mode", g_settings.bouquetlist_mode );
 
 	// parentallock
-	configfile.setInt( "parentallock_prompt", g_settings.parentallock_prompt );
-	configfile.setInt( "parentallock_lockage", g_settings.parentallock_lockage );
+	configfile.setInt32( "parentallock_prompt", g_settings.parentallock_prompt );
+	configfile.setInt32( "parentallock_lockage", g_settings.parentallock_lockage );
 	configfile.setString( "parentallock_pincode", g_settings.parentallock_pincode );
 
 	if(configfile.getModifiedFlag())
@@ -2778,7 +2778,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.309 2002/08/29 21:59:32 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.310 2002/08/31 22:30:27 obi Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

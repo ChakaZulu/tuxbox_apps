@@ -32,10 +32,11 @@
 #ifndef __settings__
 #define __settings__
 
-#include <vector>
 #include <string>
-#include "zapitclient.h"
-#include "libconfigfile/configfile.h"
+#include <vector>
+
+#include <configfile.h>
+#include <zapitclient.h>
 
 using namespace std;
 

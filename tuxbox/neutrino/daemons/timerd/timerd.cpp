@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.15 2002/08/30 18:07:54 dirch Exp $
+   $Id: timerd.cpp,v 1.16 2002/08/31 22:30:28 obi Exp $
 
    License: GPL
 
@@ -45,7 +45,7 @@
 #include "timerdMsg.h"
 #include "debug.h"
 #include "config.h"
-#include "configfile.h"
+#include <configfile.h>
 
 void loadTimersFromConfig()
 {
@@ -59,14 +59,14 @@ void loadTimersFromConfig()
    else
    {
       vector<int> savedIDs;
-      savedIDs = config->getIntVector ("IDS");
+      savedIDs = config->getInt32Vector ("IDS");
       printf("[TIMERD]IDS: %d\n",savedIDs.size());
       for(unsigned int i=0; i < savedIDs.size(); i++)
       {
          stringstream ostr;
          ostr << savedIDs[i];
          string id=ostr.str();
-         CTimerEvent::CTimerEventTypes type=(CTimerEvent::CTimerEventTypes)config->getInt ("EVENT_TYPE_"+id,0);
+         CTimerEvent::CTimerEventTypes type=(CTimerEvent::CTimerEventTypes)config->getInt32 ("EVENT_TYPE_"+id,0);
          time_t now = time(NULL);
          switch(type)
          {

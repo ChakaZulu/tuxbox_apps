@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.24 2002/08/31 00:24:55 dirch Exp $
+	$Id: timermanager.cpp,v 1.25 2002/08/31 22:30:28 obi Exp $
 
 	License: GPL
 
@@ -267,18 +267,18 @@ CTimerEvent::CTimerEvent(CTimerEventTypes evtype,CConfigFile *config, int iId)
    stringstream ostr;
    ostr << iId;
    string id=ostr.str();
-   time_t announcetime=config->getInt("ANNOUNCE_TIME_"+id);
-   time_t alarmtime=config->getInt("ALARM_TIME_"+id);
-   time_t stoptime=config->getInt("STOP_TIME_"+id);
-   CTimerEventRepeat evrepeat=(CTimerEventRepeat)config->getInt("EVENT_REPEAT_"+id);
+   time_t announcetime=config->getInt32("ANNOUNCE_TIME_"+id);
+   time_t alarmtime=config->getInt32("ALARM_TIME_"+id);
+   time_t stoptime=config->getInt32("STOP_TIME_"+id);
+   CTimerEventRepeat evrepeat=(CTimerEventRepeat)config->getInt32("EVENT_REPEAT_"+id);
    eventRepeat = evrepeat;
    eventState = TIMERSTATE_SCHEDULED; 
    eventType = evtype;
    announceTime = announcetime;
    alarmTime = alarmtime;
    stopTime = stoptime;
-   eventState = (CTimerEventStates ) config->getInt ("EVENT_STATE_"+id);
-   previousState = (CTimerEventStates) config->getInt("PREVIOUS_STATE_"+id);
+   eventState = (CTimerEventStates ) config->getInt32 ("EVENT_STATE_"+id);
+   previousState = (CTimerEventStates) config->getInt32("PREVIOUS_STATE_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent::Reschedule()
@@ -366,24 +366,24 @@ void CTimerEvent::saveToConfig(CConfigFile *config)
    if(config->getString ("IDS")!="")
    {
        // sonst bekomemn wir den bloeden 0er
-       allIDs=config->getIntVector("IDS");
+       allIDs=config->getInt32Vector("IDS");
    }
 
    allIDs.push_back(eventID);
    //SetInt-Vector haengt komischerweise nur an, deswegen erst loeschen
    config->setString("IDS","");
-   config->setIntVector ("IDS",allIDs);
+   config->setInt32Vector ("IDS",allIDs);
    
    stringstream ostr;
    ostr << eventID;
    string id=ostr.str();
-   config->setInt("EVENT_TYPE_"+id, eventType);
-   config->setInt("EVENT_STATE_"+id, eventState);
-   config->setInt("PREVIOUS_STATE_"+id, previousState);
-   config->setInt("EVENT_REPEAT_"+id, eventRepeat);
-   config->setInt("ANNOUNCE_TIME_"+id, announceTime);
-   config->setInt("ALARM_TIME_"+id, alarmTime);
-   config->setInt("STOP_TIME_"+id, stopTime);
+   config->setInt32("EVENT_TYPE_"+id, eventType);
+   config->setInt32("EVENT_STATE_"+id, eventState);
+   config->setInt32("PREVIOUS_STATE_"+id, previousState);
+   config->setInt32("EVENT_REPEAT_"+id, eventRepeat);
+   config->setInt32("ANNOUNCE_TIME_"+id, announceTime);
+   config->setInt32("ALARM_TIME_"+id, alarmTime);
+   config->setInt32("STOP_TIME_"+id, stopTime);
 
 }
 
@@ -452,7 +452,7 @@ CTimerEvent(TIMER_RECORD, config, iId)
    stringstream ostr;
    ostr << iId;
    string id=ostr.str();
-   standby_on = config->getLongLong ("STANDBY_ON_"+id);
+   standby_on = config->getInt64("STANDBY_ON_"+id);
 }
 //------------------------------------------------------------
 
@@ -487,8 +487,8 @@ CTimerEvent(TIMER_RECORD, config, iId)
    stringstream ostr;
    ostr << iId;
    string id=ostr.str();
-   eventInfo.epgID = config->getLongLong ("EVENT_INFO_EPG_ID_"+id);
-   eventInfo.onidSid = config->getInt("EVENT_INFO_ONID_SID_"+id);
+   eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
+   eventInfo.onidSid = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::announceEvent()
@@ -524,8 +524,8 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
    stringstream ostr;
    ostr << eventID;
    string id=ostr.str();
-   config->setLongLong ("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-   config->setInt("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+   config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
+   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
 }
 //=============================================================
 // Zapto Event
@@ -536,8 +536,8 @@ CTimerEvent(TIMER_RECORD, config, iId)
    stringstream ostr;
    ostr << iId;
    string id=ostr.str();
-   eventInfo.epgID = config->getLongLong ("EVENT_INFO_EPG_ID_"+id);
-   eventInfo.onidSid = config->getInt("EVENT_INFO_ONID_SID_"+id);
+   eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
+   eventInfo.onidSid = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Zapto::announceEvent()
@@ -566,8 +566,8 @@ void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
    stringstream ostr;
    ostr << eventID;
    string id=ostr.str();
-   config->setLongLong ("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-   config->setInt("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+   config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
+   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
 }
 //=============================================================
 // NextProgram Event
@@ -578,8 +578,8 @@ CTimerEvent(TIMER_RECORD, config, iId)
    stringstream ostr;
    ostr << iId;
    string id=ostr.str();
-   eventInfo.epgID = config->getLongLong ("EVENT_INFO_EPG_ID_"+id);
-   eventInfo.onidSid = config->getInt("EVENT_INFO_ONID_SID_"+id);
+   eventInfo.epgID = config->getInt64("EVENT_INFO_EPG_ID_"+id);
+   eventInfo.onidSid = config->getInt32("EVENT_INFO_ONID_SID_"+id);
 }
 //------------------------------------------------------------
 
@@ -611,8 +611,8 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
    stringstream ostr;
    ostr << eventID;
    string id=ostr.str();
-   config->setLongLong ("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
-   config->setInt("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+   config->setInt64("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
+   config->setInt32("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
 }
 //=============================================================
 //=============================================================

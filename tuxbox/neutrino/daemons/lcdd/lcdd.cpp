@@ -58,11 +58,11 @@ void CLCDD::saveConfig()
 	if(inSave==false)
 	{
 		inSave=true;
-		configfile.setInt( "lcd_brightness", lcdPainter.getBrightness() );
-		configfile.setInt( "lcd_standbybrightness", lcdPainter.getBrightnessStandby() );
-		configfile.setInt( "lcd_contrast", lcdPainter.getContrast() );
-		configfile.setInt( "lcd_power", lcdPainter.getPower() );
-		configfile.setInt( "lcd_inverse", lcdPainter.getInverse() );
+		configfile.setInt32( "lcd_brightness", lcdPainter.getBrightness() );
+		configfile.setInt32( "lcd_standbybrightness", lcdPainter.getBrightnessStandby() );
+		configfile.setInt32( "lcd_contrast", lcdPainter.getContrast() );
+		configfile.setInt32( "lcd_power", lcdPainter.getPower() );
+		configfile.setInt32( "lcd_inverse", lcdPainter.getInverse() );
 
 		if(configfile.getModifiedFlag())
 		{
@@ -86,11 +86,11 @@ void CLCDD::loadConfig()
 		return;
 	}
 
-	lcdPainter.setBrightness( configfile.getInt("lcd_brightness", 0xff) );
-	lcdPainter.setBrightnessStandby( configfile.getInt("lcd_standbybrightness", 0xaa) );
-	lcdPainter.setContrast( configfile.getInt("lcd_contrast", 0x0F) );
-	lcdPainter.setPower( configfile.getInt("lcd_power", 0x01) );
-	lcdPainter.setInverse( configfile.getInt("lcd_inverse", 0x00) );
+	lcdPainter.setBrightness( configfile.getInt32("lcd_brightness", 0xff) );
+	lcdPainter.setBrightnessStandby( configfile.getInt32("lcd_standbybrightness", 0xaa) );
+	lcdPainter.setContrast( configfile.getInt32("lcd_contrast", 0x0F) );
+	lcdPainter.setPower( configfile.getInt32("lcd_power", 0x01) );
+	lcdPainter.setInverse( configfile.getInt32("lcd_inverse", 0x00) );
 }
 
 void CLCDD::parse_command(int connfd, CLcddMsg::commandHead rmsg)
@@ -216,7 +216,7 @@ void CLCDD::sig_catch(int)
 int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.53 2002/08/22 09:24:15 obi Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.54 2002/08/31 22:30:27 obi Exp $\n\n");
 
 	InitNewClock();
 

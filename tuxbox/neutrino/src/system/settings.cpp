@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.8 2002/08/29 21:59:32 dirch Exp $
+        $Id: settings.cpp,v 1.9 2002/08/31 22:30:28 obi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -111,29 +111,29 @@ bool CScanSettings::loadSettings( string fileName )
 		return false;
 	}
 
-	if(configfile.getInt("fe",-1) != g_info.fe)
+	if(configfile.getInt32("fe",-1) != g_info.fe)
 	{
 		//config stammt von sat/kabelbox - passt nicht
 		configfile.clear();
 		return false;
 	}
 
-	diseqcMode = (diseqc_t) configfile.getInt( "diseqcMode", NO_DISEQC );
-	diseqcRepeat = configfile.getInt( "diseqcRepeat", 0 );
-	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt( "bouquetMode", CZapitClient::BM_DONTTOUCHBOUQUETS );
+	diseqcMode = (diseqc_t) configfile.getInt32( "diseqcMode", NO_DISEQC );
+	diseqcRepeat = configfile.getInt32( "diseqcRepeat", 0 );
+	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32( "bouquetMode", CZapitClient::BM_DONTTOUCHBOUQUETS );
 
 	strcpy( satNameNoDiseqc, configfile.getString( "satNameNoDiseqc", g_info.fe==1?"Astra 19.2E":"Telekom").c_str() );
 
 	if (diseqcMode != NO_DISEQC)
 	{
-		int satCount = configfile.getInt( "satCount", 0 );
+		int satCount = configfile.getInt32( "satCount", 0 );
 		for (int i=0; i<satCount; i++)
 		{
 			char tmp[10];
 			sprintf((char*)&tmp, "SatName%d", i);
 			strcpy( satName[i], configfile.getString( tmp, "" ).c_str() );
 			sprintf((char*)&tmp, "satDiseqc%d", i);
-			satDiseqc[i] = configfile.getInt( tmp, -1 );
+			satDiseqc[i] = configfile.getInt32( tmp, -1 );
 		}
 	}
 	return true;
@@ -141,10 +141,10 @@ bool CScanSettings::loadSettings( string fileName )
 
 bool CScanSettings::saveSettings( string fileName )
 {
-	configfile.setInt( "fe", g_info.fe );
-	configfile.setInt( "diseqcMode", diseqcMode );
-	configfile.setInt( "diseqcRepeat", diseqcRepeat );
-	configfile.setInt( "bouquetMode", bouquetMode );
+	configfile.setInt32( "fe", g_info.fe );
+	configfile.setInt32( "diseqcMode", diseqcMode );
+	configfile.setInt32( "diseqcRepeat", diseqcRepeat );
+	configfile.setInt32( "bouquetMode", bouquetMode );
 	configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
 	if (diseqcMode != NO_DISEQC)
 	{
@@ -156,7 +156,7 @@ bool CScanSettings::saveSettings( string fileName )
 				satCount++;
 			}
 		}
-		configfile.setInt( "satCount", satCount );
+		configfile.setInt32( "satCount", satCount );
 		satCount = 0;
 		for (int i=0; i<MAX_SATELLITES; i++)
 		{
@@ -166,7 +166,7 @@ bool CScanSettings::saveSettings( string fileName )
 				sprintf((char*)&tmp, "SatName%d", satCount);
 				configfile.setString( tmp, satName[i] );
 				sprintf((char*)&tmp, "satDiseqc%d", satCount);
-				configfile.setInt( tmp, satDiseqc[i] );
+				configfile.setInt32( tmp, satDiseqc[i] );
 				satCount++;
 			}
 		}

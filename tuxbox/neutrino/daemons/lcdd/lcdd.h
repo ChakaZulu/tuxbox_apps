@@ -27,7 +27,7 @@
 #define __lcdd__
 
 #include "lcdpainter.h"
-#include <libconfigfile/configfile.h>
+#include <configfile.h>
 #include <liblcddisplay.h>
 #include <lcddclient.h>
 #include <lcddMsg.h>

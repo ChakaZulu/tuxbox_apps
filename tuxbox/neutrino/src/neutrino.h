@@ -34,13 +34,12 @@
 #define __neutrino__
 
 // hat beides hier drin nix verloren
-#define DVB_API_VERSION 1
 #include "zapit/getservices.h"
 
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
-#include "libconfigfile/configfile.h"
+#include <configfile.h>
 #include "driver/vcrcontrol.h"
 #include <string>
 
