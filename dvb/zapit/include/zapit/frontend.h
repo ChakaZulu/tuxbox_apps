@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.28 2003/05/22 11:52:49 digi_casi Exp $
+ * $Id: frontend.h,v 1.29 2003/11/27 00:32:06 homar Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -23,7 +23,6 @@
 #define __zapit_frontend_h__
 
 #include <inttypes.h>
-#include <linux/dvb/frontend.h>
 #include <zapit/types.h>
 
 #define MAX_LNBS	64	/* due to Diseqc 1.1  (2003-01-10 rasc) */
@@ -37,14 +36,8 @@ class CFrontend
 		bool tuned;
 		/* information about the used frontend type */
 		struct dvb_frontend_info info;
-		/* current tuned frequency */
-		uint32_t currentFrequency;
 		/* current 22kHz tone mode */
 		fe_sec_tone_mode_t currentToneMode;
-		/* current H/V voltage */
-		fe_sec_voltage_t currentVoltage;
-		/* current diseqc position */
-		uint8_t currentDiseqc;
 		/* current satellite position */
 		int32_t currentSatellitePosition;
 		/* how often to repeat DiSEqC 1.1 commands */
@@ -55,6 +48,13 @@ class CFrontend
 		int32_t lnbOffsetsLow[MAX_LNBS];
 		/* high lnb offsets */
 		int32_t lnbOffsetsHigh[MAX_LNBS];
+		/* current Transponderdata */
+		TP_params currentTransponder;
+		/* speed up sat and cable search*/
+		fe_spectral_inversion_t last_inversion;
+		/* speed up cable seach */
+		fe_modulation_t last_qam;
+
 
 		uint32_t			getBitErrorRate(void) const;
 		uint32_t			getDiseqcReply(const int timeout_ms) const;
@@ -77,13 +77,15 @@ class CFrontend
 		void				sendToneBurst(const fe_sec_mini_cmd_t burst, const uint32_t ms);
 		void				setFrontend(const struct dvb_frontend_parameters *feparams);
 		void				setSec(const uint8_t sat_no, const uint8_t pol, const bool high_band, const uint32_t frequency);
+		void				reset(void);
+
 
 	public:
 		CFrontend(void);
 		~CFrontend(void);
 
 		static fe_code_rate_t		getCodeRate(const uint8_t fec_inner);
-		uint8_t				getDiseqcPosition(void) const		{ return currentDiseqc; }
+		uint8_t				getDiseqcPosition(void) const		{ return currentTransponder.diseqc; }
 		uint8_t				getDiseqcRepeats(void) const		{ return diseqcRepeats; }
 		diseqc_t			getDiseqcType(void) const		{ return diseqcType; }
 		uint32_t			getFrequency(void) const;
@@ -95,10 +97,13 @@ class CFrontend
 		void				setDiseqcRepeats(const uint8_t repeats)	{ diseqcRepeats = repeats; }
 		void				setDiseqcType(const diseqc_t type);
 		void				setLnbOffset(const bool high, const uint8_t index, const int offset);
-		int				setParameters(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
+		int					setParameters(TP_params *TP);
+		int					setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization = VERTICAL, const uint8_t diseqc = 0);
+		const TP_params*	getParameters(void) const			{ return &currentTransponder; };
+		struct dvb_frontend_event*	setParametersResponse(TP_params *TP);
 		void 				setCurrentSatellitePosition(int32_t satellitePosition) {currentSatellitePosition = satellitePosition; }
-		
-		void 				positionMotor(uint8_t motorPosition); 
+
+		void 				positionMotor(uint8_t motorPosition);
 		void				sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t command, uint8_t num_parameters, uint8_t parameter1, uint8_t parameter2);
 };
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.95 2003/10/14 12:48:58 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.96 2003/11/27 00:32:08 homar Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -341,7 +341,7 @@ bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool
 	CZapitMessages::responseGeneralInteger responseInteger;
 	responseGetBouquetChannels             response;
 	char                                   buffer[30 + 1];
-	
+
 	channels.clear();
 
 	if (CBasicClient::receive_data((char* )&responseInteger, sizeof(responseInteger)))
@@ -352,7 +352,7 @@ bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool
 		{
 			if (!CBasicClient::receive_data((char*)&response, sizeof(responseGetBouquetChannels)))
 				return false;
-			
+
 			response.nr++;
 			if (!utf_encoded)
 			{
@@ -478,6 +478,16 @@ delivery_system_t CZapitClient::getDeliverySystem(void)
 	return response.system;
 }
 
+bool CZapitClient::get_current_TP(TP_params* TP)
+{
+	TP_params TP_temp;
+	send(CZapitMessages::CMD_GET_CURRENT_TP);
+	bool reply = CBasicClient::receive_data((char*)&TP_temp, sizeof(TP_temp));
+	memcpy(TP, &TP_temp, sizeof(TP_temp));
+	close_connection();
+	return reply;
+}
+
 /* sends diseqc 1.2 motor command */
 void CZapitClient::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t cmd, uint8_t num_parameters, uint8_t param1, uint8_t param2)
 {
@@ -497,18 +507,26 @@ void CZapitClient::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t cm
 
 
 /***********************************************/
-/*					     */
-/*  Scanning stuff			     */
-/*					     */
+/*                                             */
+/*  Scanning stuff                             */
+/*                                             */
 /***********************************************/
 
 /* start TS-Scan */
 bool CZapitClient::startScan()
 {
 	bool reply = send(CZapitMessages::CMD_SCANSTART);
-	
+
 	close_connection();
-	
+
+	return reply;
+}
+
+/* start manual scan */
+bool CZapitClient::scan_TP(TP_params* TP)
+{
+	bool reply = send(CZapitMessages::CMD_SCAN_TP, (char*)TP, sizeof(TP));
+	close_connection();
 	return reply;
 }
 
@@ -533,19 +551,18 @@ bool CZapitClient::isScanReady(unsigned int &satellite,  unsigned int &processed
 void CZapitClient::getScanSatelliteList(SatelliteList& satelliteList)
 {
 	uint32_t satlength;
-	
+
 	send(CZapitMessages::CMD_SCANGETSATLIST);
-	
+
 	responseGetSatelliteList response;
 	while (CBasicClient::receive_data((char*)&satlength, sizeof(satlength)))
 	{
 		if (satlength == SATNAMES_END_MARKER)
 			break;
-		
+
 		if (!CBasicClient::receive_data((char*)&(response), satlength))
 			break;
-		
-		//printf("[zapitclient] received %s, %d\n", response.satName, response.satPosition);
+
 		satelliteList.push_back(response);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.53 2003/11/27 00:02:56 obi Exp $
+ * $Id: frontend.cpp,v 1.54 2003/11/27 00:32:05 homar Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -39,10 +39,12 @@ CFrontend::CFrontend(void)
 {
 	tuned = false;
 	currentToneMode = SEC_TONE_OFF;
-	currentVoltage = SEC_VOLTAGE_13;
-	currentFrequency = 0;
+	currentTransponder.polarization = VERTICAL;
+	currentTransponder.feparams.frequency = 0;
 	diseqcRepeats = 0;
 	diseqcType = NO_DISEQC;
+	last_inversion = INVERSION_OFF;
+	last_qam = QAM_64;
 
 	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK)) < 0)
 		ERROR(FRONTEND_DEVICE);
@@ -54,8 +56,16 @@ CFrontend::~CFrontend(void)
 {
 	if (diseqcType > MINI_DISEQC)
 		sendDiseqcStandby();
-	
+
 	close(fd);
+}
+
+void CFrontend::reset(void)
+{
+	close(fd);
+
+	if ((fd = open(FRONTEND_DEVICE, O_RDWR|O_NONBLOCK|O_SYNC)) < 0)
+		ERROR(FRONTEND_DEVICE);
 }
 
 fe_code_rate_t CFrontend::getCodeRate(const uint8_t fec_inner)
@@ -81,6 +91,8 @@ fe_code_rate_t CFrontend::getCodeRate(const uint8_t fec_inner)
 fe_modulation_t CFrontend::getModulation(const uint8_t modulation)
 {
 	switch (modulation) {
+	case 0x00:
+		return QPSK;
 	case 0x01:
 		return QAM_16;
 	case 0x02:
@@ -101,23 +113,20 @@ uint32_t CFrontend::getFrequency(void) const
 	switch (info.type) {
 	case FE_QPSK:
 		if (currentToneMode == SEC_TONE_OFF)
-			return currentFrequency + lnbOffsetsLow[currentDiseqc];
+			return currentTransponder.feparams.frequency + lnbOffsetsLow[currentTransponder.diseqc];
 		else
-			return currentFrequency + lnbOffsetsHigh[currentDiseqc];
+			return currentTransponder.feparams.frequency + lnbOffsetsHigh[currentTransponder.diseqc];
 
 	case FE_QAM:
 	case FE_OFDM:
 	default:
-		return currentFrequency;
+		return currentTransponder.feparams.frequency;
 	}
 }
 
 uint8_t CFrontend::getPolarization(void) const
 {
-	if (currentVoltage == SEC_VOLTAGE_13)
-		return 1;
-	else
-		return 0;
+	return currentTransponder.polarization;
 }
 
 fe_status_t CFrontend::getStatus(void) const
@@ -181,88 +190,70 @@ void CFrontend::setFrontend(const struct dvb_frontend_parameters *feparams)
 	fop(ioctl, FE_SET_FRONTEND, feparams);
 }
 
+#define TIME_STEP 200
+#define TIMEOUT_MAX_MS (10*TIME_STEP)
+
 struct dvb_frontend_parameters CFrontend::getFrontend(void) const
 {
-	struct dvb_frontend_parameters feparams;
-
-	fop(ioctl, FE_GET_FRONTEND, &feparams);
-
-	return feparams;
+	return currentTransponder.feparams;
 }
-
-#define TIMEOUT_MAX_MS 3000
 
 struct dvb_frontend_event CFrontend::getEvent(void)
 {
 	struct dvb_frontend_event event;
 	struct pollfd pfd;
-	struct timeval tv, tv2;
 
-	int msec = TIMEOUT_MAX_MS;
+	int msec = TIME_STEP;
 
 	pfd.fd = fd;
 	pfd.events = POLLIN;
+	pfd.revents = 0;
 
-	gettimeofday(&tv, NULL);
+	memset(&event, 0, sizeof(struct dvb_frontend_event));
 
-	while (msec > 0) {
+	while (msec <= TIMEOUT_MAX_MS )
+	{
+		poll(&pfd, 1, TIME_STEP);
 
-		int res = poll(&pfd, 1, msec);
-
-		if (res <= 0)
-			break;
-
-		gettimeofday(&tv2, NULL);
-		msec = TIMEOUT_MAX_MS - ((tv2.tv_sec - tv.tv_sec) * 1000) - ((tv2.tv_usec - tv.tv_usec) / 1000);
-
-		if (pfd.revents & POLLIN) {
-#if 0
-			/* ignore too fast events - tuning in 0 msec is not possible */
-			if ((TIMEOUT_MAX_MS - msec) == 0)
-				continue;
-#endif
-			INFO("event after %d milliseconds", TIMEOUT_MAX_MS - msec);
-
+		if (pfd.revents & POLLIN)
+		{
 			memset(&event, 0, sizeof(struct dvb_frontend_event));
-	
 			fop(ioctl, FE_GET_EVENT, &event);
 
-			if (event.status & FE_HAS_LOCK) {
-				currentFrequency = event.parameters.frequency;
-				INFO("FE_HAS_LOCK: freq %u", currentFrequency);
+			if (event.status & FE_HAS_LOCK)
+			{
+				currentTransponder.feparams.frequency = event.parameters.frequency;
+				INFO("FE_HAS_LOCK: freq %lu", (long unsigned int)currentTransponder.feparams.frequency);
 				tuned = true;
 				break;
 			}
-
-			else if ((TIMEOUT_MAX_MS - msec > 1000) && (event.status & FE_TIMEDOUT)) {
+			else if (event.status & FE_TIMEDOUT)
+			{
 				WARN("FE_TIMEDOUT");
 				break;
 			}
-
-			else {
+			else
+			{
 				if (event.status & FE_HAS_SIGNAL)
-					WARN("FE_HAS_SIGNAL");
+					INFO("FE_HAS_SIGNAL");
 				if (event.status & FE_HAS_CARRIER)
-					WARN("FE_HAS_CARRIER");
+					INFO("FE_HAS_CARRIER");
 				if (event.status & FE_HAS_VITERBI)
-					WARN("FE_HAS_VITERBI");
+					INFO("FE_HAS_VITERBI");
 				if (event.status & FE_HAS_SYNC)
-					WARN("FE_HAS_SYNC");
-				if (event.status & FE_TIMEDOUT)
-					WARN("FE_TIMEDOUT");
+					INFO("FE_HAS_SYNC");
 				if (event.status & FE_REINIT)
-					WARN("FE_REINIT");
+					INFO("FE_REINIT");
+				msec = TIME_STEP;
 			}
 		}
-
-		else {
-			WARN("pfd[0].revents %d", pfd.revents);
-		}
-
+		else if (pfd.revents & POLLHUP)
+			reset();
+		msec += TIME_STEP;
 	}
 
 	if (!tuned)
-		currentFrequency = 0;
+		currentTransponder.feparams.frequency = 0;
 
 	return event;
 }
@@ -304,12 +295,12 @@ void CFrontend::secSetTone(const fe_sec_tone_mode_t toneMode, const uint32_t ms)
 void CFrontend::secSetVoltage(const fe_sec_voltage_t voltage, const uint32_t ms)
 {
 	TIMER_START();
-	
+
 	if (fop(ioctl, FE_SET_VOLTAGE, voltage) == 0) {
-		currentVoltage = voltage;
+		currentTransponder.polarization = voltage;
 		usleep(1000 * ms);
 	}
-	
+
 	TIMER_STOP();
 }
 
@@ -429,17 +420,17 @@ void CFrontend::setLnbOffset(const bool high, const uint8_t index, int offset)
 void CFrontend::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t command, uint8_t num_parameters, uint8_t parameter1, uint8_t parameter2)
 {
 	struct dvb_diseqc_master_cmd cmd;
-	
+
 	printf("[frontend] sendMotorCommand: cmdtype   = %x, address = %x, cmd   = %x\n", cmdtype, address, command);
 	printf("[frontend] sendMotorCommand: num_parms = %d, parm1   = %x, parm2 = %x\n", num_parameters, parameter1, parameter2);
-	
+
 	cmd.msg[0] = cmdtype; //command type
 	cmd.msg[1] = address; //address
 	cmd.msg[2] = command; //command
 	cmd.msg[3] = parameter1;
 	cmd.msg[4] = parameter2;
 	cmd.msg_len = 3 + num_parameters;
-	
+
 	sendDiseqcCommand(&cmd, 15);
 	printf("[frontend] motor positioning command sent.\n");
 }
@@ -447,7 +438,7 @@ void CFrontend::sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t comma
 void CFrontend::positionMotor(uint8_t motorPosition)
 {
 	struct dvb_diseqc_master_cmd cmd;
-	
+
 	if (motorPosition != 0)
 	{
 		cmd.msg[0] = 0xE0; //command type
@@ -460,73 +451,121 @@ void CFrontend::positionMotor(uint8_t motorPosition)
 	}
 }
 
-int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization, const uint8_t diseqc)
+int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uint8_t polarization, const uint8_t diseqc )
+{
+	TP_params TP;
+	memcpy(&TP.feparams, feparams, sizeof(struct dvb_frontend_parameters));
+	TP.polarization = polarization;
+	TP.diseqc = diseqc;
+	return setParameters(&TP);
+
+}
+
+int CFrontend::setParameters(TP_params *TP)
 {
 	int ret, freq_offset = 0;
+	bool can_not_auto_qam = !(info.caps & FE_CAN_QAM_AUTO);
+	bool can_not_auto_inversion = !(info.caps & FE_CAN_INVERSION_AUTO);
+	bool do_auto_qam = TP->feparams.u.qam.modulation == QAM_AUTO;
+	bool do_auto_inversion = TP->feparams.inversion == INVERSION_AUTO;
 
-	if (info.type == FE_QPSK) {
+	if (info.type == FE_QPSK)
+	{
 		bool high_band;
 
-		if (feparams->frequency < 11700000) {
+		if (TP->feparams.frequency < 11700000)
+		{
 			high_band = false;
-			freq_offset = lnbOffsetsLow[diseqc];
+			freq_offset = lnbOffsetsLow[TP->diseqc];
 		}
-		else {
+		else
+		{
 			high_band = true;
-			freq_offset = lnbOffsetsHigh[diseqc];
+			freq_offset = lnbOffsetsHigh[TP->diseqc];
 		}
 
-		feparams->frequency -= freq_offset;
-		setSec(diseqc, polarization, high_band, feparams->frequency);
+		TP->feparams.frequency -= freq_offset;
+		setSec(TP->diseqc, TP->polarization, high_band, TP->feparams.frequency);
 	}
-
-
 
 	/*
 	 * frontends which can not handle auto inversion but
-	 * are set to auto inversion will try without first
+	 * are set to auto inversion will try with stored value first
 	 */
-
-	bool sw_auto_inversion;
-
-	if ((feparams->inversion == INVERSION_AUTO) && (!(info.caps & FE_CAN_INVERSION_AUTO)))
-		sw_auto_inversion = true;
-	else
-		sw_auto_inversion = false;
-
-
+	if (do_auto_inversion && can_not_auto_inversion)
+		TP->feparams.inversion = last_inversion;
 
 	/*
-	 * frontends which can not handle auto modulation detection
-	 * are set to QAM64 which is common in Germany.
+	 * frontends which can not handle auto qam but
+	 * are set to auto qam will try with stored value first
 	 */
-
-	if ((feparams->u.qam.modulation == QAM_AUTO) && (!(info.caps & FE_CAN_QAM_AUTO)))
-		feparams->u.qam.modulation = QAM_64;
-
-
+	if (do_auto_qam && can_not_auto_qam)
+		TP->feparams.u.qam.modulation = last_qam;
 
 	struct dvb_frontend_event event;
 
-	do {
-		tuned = false;
+	do
+	{
+		do
+		{
+			tuned = false;
+			setFrontend (&TP->feparams);
+			event = getEvent();	/* check if tuned */
 
-		setFrontend(feparams);
-		event = getEvent();
+			if (do_auto_inversion && can_not_auto_inversion && !tuned)
+			{
+				switch (TP->feparams.inversion)
+				{
+					case INVERSION_OFF:
+						TP->feparams.inversion = INVERSION_ON;
+						break;
+					case INVERSION_ON:
+					default:
+						TP->feparams.inversion = INVERSION_OFF;
+						break;
+				}
+				if (TP->feparams.inversion == last_inversion) /* can´t tune */
+					break;
+			}
+			else
+				break; /* tuned */
+		} while(1);
 
-		/*
-		 * software auto inversion for stupid frontends
-		 */
+		if (do_auto_qam && can_not_auto_qam && !tuned)
+		{
+			switch (TP->feparams.u.qam.modulation)
+			{
+				case QAM_16:
+					TP->feparams.u.qam.modulation = QAM_32;
+					break;
+				case QAM_32:
+					TP->feparams.u.qam.modulation = QAM_64;
+					break;
+				case QAM_64:
+					TP->feparams.u.qam.modulation = QAM_128;
+					break;
+				case QAM_128:
+					TP->feparams.u.qam.modulation = QAM_256;
+					break;
+				case QAM_256:
+				default:
+					TP->feparams.u.qam.modulation = QAM_16;
+					break;
+			}
+			if (TP->feparams.u.qam.modulation == last_qam) /* can`t tune */
+				break;
 
-		if ((!tuned) && (sw_auto_inversion) && (feparams->inversion == INVERSION_OFF)) {
-			feparams->inversion = INVERSION_ON;
-			continue;
+			continue; /* QAM changed, next try to tune */
 		}
+		else
+			break; /* tuned */
+	} while (1);
 
-	} while (0);
-
-	if (tuned) {
-		ret = diff(event.parameters.frequency, feparams->frequency);
+	if (tuned)
+	{
+		last_inversion = TP->feparams.inversion; /* store good value */
+		last_qam = TP->feparams.u.qam.modulation; /* store good value */
+		ret = diff(event.parameters.frequency, TP->feparams.frequency);
 #if 1
 		/*
 		 * if everything went ok, then it is a good idea to copy the real
@@ -534,13 +573,11 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uin
 		 *
 		 * TODO: set a flag to indicate a change in the service list
 		 */
-
-		if (memcmp(feparams, &event.parameters, sizeof(struct dvb_frontend_parameters)))
-			memcpy(feparams, &event.parameters, sizeof(struct dvb_frontend_parameters));
+		memcpy(&currentTransponder.feparams, &event.parameters, sizeof(struct dvb_frontend_parameters));
 #endif
 	}
-
-	else {
+	else
+	{
 		ret = -1;
 	}
 
@@ -553,7 +590,7 @@ int CFrontend::setParameters(struct dvb_frontend_parameters *feparams, const uin
 	 */
 
 	if (info.type == FE_QPSK)
-		feparams->frequency += freq_offset;
+		TP->feparams.frequency += freq_offset;
 
 	return ret;
 }
@@ -631,7 +668,7 @@ void CFrontend::setSec(const uint8_t sat_no, const uint8_t pol, const bool high_
 
 	secSetTone(t, 15);
 
-	currentDiseqc = sat_no;
+	currentTransponder.diseqc = sat_no;
 }
 
 void CFrontend::sendDiseqcPowerOn(void)
@@ -681,4 +718,3 @@ void CFrontend::sendDiseqcSmatvRemoteTuningCommand(const uint32_t frequency)
 
 	sendDiseqcCommand(&cmd, 15);
 }
-

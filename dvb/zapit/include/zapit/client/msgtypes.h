@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.17 2003/09/17 16:12:00 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.18 2003/11/27 00:32:06 homar Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -70,8 +70,10 @@ class CZapitMessages
 			CMD_GET_CURRENT_SERVICEINFO,
 			CMD_GET_DELIVERY_SYSTEM,
 			CMD_GET_CURRENT_SATELLITE_POSITION,
+			CMD_GET_CURRENT_TP,
 
 			CMD_SCANSTART,
+			CMD_SCAN_TP,
 			CMD_SCANREADY,
 			CMD_SCANGETSATLIST,
 			CMD_SCANSETSCANSATLIST,
@@ -307,7 +309,7 @@ class CZapitMessages
 	{
 		delivery_system_t system;
 	};
-	
+
 	struct commandMotor
 	{
 		uint8_t cmdtype;

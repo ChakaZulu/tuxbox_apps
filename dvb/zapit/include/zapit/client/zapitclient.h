@@ -114,7 +114,7 @@ class CZapitClient:public CBasicClient
 		int  diseqc;
 	};
 	typedef std::vector<commandSetScanSatelliteList> ScanSatelliteList;
-	
+
 	struct commandSetScanMotorPosList
 	{
 		t_satellite_position satPosition;
@@ -239,7 +239,7 @@ class CZapitClient:public CBasicClient
 
 	/* return the current (tuned) ServiceID */
 	t_channel_id getCurrentServiceID();
-	
+
 	/* return the current satellite position */
 	int32_t getCurrentSatellitePosition();
 
@@ -266,6 +266,9 @@ class CZapitClient:public CBasicClient
 
 	/* get the name of a channel */
 	std::string getChannelName(const t_channel_id channel_id);
+
+	/* get the current_TP */
+	bool get_current_TP(TP_params* TP);
 
 	/* restore bouquets so as if they where just loaded*/
 	void restoreBouquets();
@@ -304,7 +307,7 @@ class CZapitClient:public CBasicClient
 	delivery_system_t getDeliverySystem(void);
 
 	void zaptoNvodSubService(const int num);
-	
+
 	/* send diseqc 1.2 motor command */
 	void sendMotorCommand(uint8_t cmdtype, uint8_t address, uint8_t cmd, uint8_t num_parameters, uint8_t param1, uint8_t param2);
 
@@ -316,6 +319,9 @@ class CZapitClient:public CBasicClient
 	/* start TS-Scan */
 	bool startScan();
 
+	/* start manual scan */
+	bool scan_TP(TP_params* TP);
+
 	/* query if ts-scan is ready - response gives status */
 	bool isScanReady(unsigned int &satellite, unsigned int &processed_transponder, unsigned int &transponder, unsigned int &services );
 
@@ -324,7 +330,7 @@ class CZapitClient:public CBasicClient
 
 	/* tell zapit which satellites to scan*/
 	void setScanSatelliteList( ScanSatelliteList& satelliteList );
-	
+
 	/* tell zapit stored satellite positions in diseqc 1.2 motor */
 	void setScanMotorPosList( ScanMotorPosList& motorPosList );
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zapittypes.h,v 1.18 2003/06/04 16:47:48 digi_casi Exp $
+ * $Id: zapittypes.h,v 1.19 2003/11/27 00:32:06 homar Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
@@ -27,6 +27,9 @@
 
 
 #include <inttypes.h>
+#include <string>
+#include <map>
+#include <linux/dvb/frontend.h>
 
 typedef uint16_t t_service_id;
 #define SCANF_SERVICE_ID_TYPE "%hx"
@@ -97,4 +100,40 @@ typedef enum {
 	ST_RCS_FLS,
 	ST_DVB_MHP_SERVICE
 } service_type_t;
+
+#define	VERTICAL 0
+#define HORIZONTAL 1
+
+/* complete transponder-parameters in a struct */
+typedef struct TP_parameter
+{
+	uint32_t TP_id;					/* diseqc<<24 | feparams->frequency>>8 */
+	struct dvb_frontend_parameters feparams;
+	uint8_t polarization;
+	uint8_t diseqc;
+} TP_params;
+
+/* complete channel-parameters in a struct */
+typedef struct Channel_parameter
+{
+	std::string name;
+	t_service_id service_id;
+	t_transport_stream_id transport_stream_id;
+	t_original_network_id original_network_id;
+	unsigned char service_type;
+	uint32_t TP_id;					/* diseqc<<24 | feparams->frequency>>8 */
+} CH_params;
+
+typedef struct TP_map
+{
+	TP_params TP;
+	TP_map(const TP_params p_TP)
+	{
+		TP = p_TP;
+	}
+}t_transponder;
+
+typedef std::map <uint32_t, TP_map> TP_map_t;
+typedef std::map <uint32_t, TP_map>::iterator TP_iterator;
+
 #endif /* __zapittypes_h__ */

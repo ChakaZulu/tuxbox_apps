@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.337 2003/11/24 06:15:38 obi Exp $
+ * $Id: zapit.cpp,v 1.338 2003/11/27 00:32:07 homar Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -110,6 +110,9 @@ extern int processed_transponders;
 extern int found_channels;
 extern short curr_sat;
 extern short scan_runs;
+extern void get_transponder (TP_params *TP);
+extern void scan_transponder(TP_params *TP);
+
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
 /* the map which stores the wanted cable/satellites */
@@ -228,7 +231,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	}
 
 	stopPlayBack();
-	
+
 	/* have motor move satellite dish to satellite's position if necessary */
 	if ((diseqcType == DISEQC_1_2) && (motorPositions[channel->getSatellitePosition()] != 0))
 	{
@@ -237,12 +240,12 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 			printf("[zapit] currentSatellitePosition = %d, satellitePosition = %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
 			printf("[zapit] motorPosition = %d\n", motorPositions[channel->getSatellitePosition()]);
 			frontend->positionMotor(motorPositions[channel->getSatellitePosition()]);
-		
+
 			waitForMotor = abs(channel->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
 			printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
 			eventServer->sendEvent(CZapitClient::EVT_ZAP_MOTOR, CEventServer::INITID_ZAPIT, &waitForMotor, sizeof(waitForMotor));
 			sleep(waitForMotor);
-		
+
 			frontend->setCurrentSatellitePosition(channel->getSatellitePosition());
 		}
 	}
@@ -296,7 +299,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	else {
 		thisChannel = new CZapitChannel(channel->getName(),
 					channel_id & 0xffff, (tsid_onid >> 16) & 0xffff,
-					tsid_onid & 0xffff, 1, frontend->getDiseqcPosition(), 
+					tsid_onid & 0xffff, 1, frontend->getDiseqcPosition(),
 					channel->getSatellitePosition());
 	}
 
@@ -400,7 +403,7 @@ int change_audio_pid(uint8_t index)
 		WARN("No current audio channel");
 		return -1;
 	}
-	
+
 	if (currentAudioChannel->isAc3)
 		audioDecoder->enableBypass();
 	else
@@ -548,7 +551,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		zapTo(msgZapto.bouquet, msgZapto.channel);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_ZAPTO_CHANNELNR:
 	{
 		CZapitMessages::commandZaptoChannelNr msgZaptoChannelNr;
@@ -576,7 +579,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		zapTo_ChannelID(msgZaptoServiceID.channel_id, (rmsg.cmd == CZapitMessages::CMD_ZAPTO_SUBSERVICEID_NOWAIT));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_LAST_CHANNEL:
 	{
 		CZapitClient::responseGetLastChannel responseGetLastChannel;
@@ -584,14 +587,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &responseGetLastChannel, sizeof(responseGetLastChannel)); // bouquet & channel number are already starting at 0!
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_CURRENT_SATELLITE_POSITION:
 	{
 		int32_t currentSatellitePosition = frontend->getCurrentSatellitePosition();
 		CBasicServer::send_data(connfd, &currentSatellitePosition, sizeof(currentSatellitePosition));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SET_AUDIOCHAN:
 	{
 		CZapitMessages::commandSetAudioChannel msgSetAudioChannel;
@@ -599,7 +602,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		change_audio_pid(msgSetAudioChannel.channel);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SET_MODE:
 	{
 		CZapitMessages::commandSetMode msgSetMode;
@@ -610,7 +613,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			setRadioMode();
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_MODE:
 	{
 		CZapitMessages::responseGetMode msgGetMode;
@@ -618,7 +621,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &msgGetMode, sizeof(msgGetMode));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_CURRENT_SERVICEID:
 	{
 		CZapitMessages::responseGetCurrentServiceID msgCurrentSID;
@@ -626,7 +629,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &msgCurrentSID, sizeof(msgCurrentSID));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_CURRENT_SERVICEINFO:
 	{
 		CZapitClient::CCurrentServiceInfo msgCurrentServiceInfo;
@@ -646,7 +649,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &msgCurrentServiceInfo, sizeof(msgCurrentServiceInfo));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_DELIVERY_SYSTEM:
 	{
 		CZapitMessages::responseDeliverySystem response;
@@ -672,7 +675,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		sendBouquets(connfd, msgGetBouquets.emptyBouquetsToo); // bouquet & channel number are already starting at 0!
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_BOUQUET_CHANNELS:
 	{
 		CZapitMessages::commandGetBouquetChannels msgGetBouquetChannels;
@@ -680,7 +683,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		sendBouquetChannels(connfd, msgGetBouquetChannels.bouquet, msgGetBouquetChannels.mode); // bouquet & channel number are already starting at 0!
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_CHANNELS:
 	{
 		CZapitMessages::commandGetChannels msgGetChannels;
@@ -688,7 +691,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		sendChannels(connfd, msgGetChannels.mode, msgGetChannels.order); // bouquet & channel number are already starting at 0!
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_GET_CHANNEL_NAME:
 	{
 		t_channel_id                           requested_channel_id;
@@ -704,6 +707,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+	case CZapitMessages::CMD_GET_CURRENT_TP:
+	{
+		TP_params TP;
+		get_transponder(&TP);
+		INFO("current frequency: %lu", (long unsigned int)TP.feparams.frequency);
+		CBasicServer::send_data(connfd, &TP, sizeof(TP));
+		break;
+	}
+
 	case CZapitMessages::CMD_BQ_RESTORE:
 	{
 		CZapitMessages::responseCmd response;
@@ -712,7 +724,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_REINIT_CHANNELS:
 	{
 		CZapitMessages::responseCmd response;
@@ -722,7 +734,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_COMMIT_CHANGE:
 	{
 		CZapitMessages::responseCmd response;
@@ -733,11 +745,19 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SCANSTART:
 		if (start_scan() == -1)
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_FAILED, CEventServer::INITID_ZAPIT);
 		break;
+
+	case CZapitMessages::CMD_SCAN_TP:
+	{
+		TP_params TP;
+		CBasicServer::receive_data(connfd, &TP, sizeof(TP));
+		scan_transponder(&TP);
+		break;
+	}
 
 	case CZapitMessages::CMD_SCANREADY:
 	{
@@ -756,7 +776,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_SCANGETSATLIST:
 	{
-		if (!scanInputParser) 
+		if (!scanInputParser)
 		{
 			parseScanInputXml();
 			if (!scanInputParser)
@@ -798,20 +818,20 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		}
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SCANSETSCANMOTORPOSLIST:
 	{
 		CZapitClient::commandSetScanMotorPosList pos;
 		bool changed = false;
 		FILE * fd;
-		
-		while (CBasicServer::receive_data(connfd, &pos, sizeof(pos))) 
+
+		while (CBasicServer::receive_data(connfd, &pos, sizeof(pos)))
 		{
 			//printf("adding %d (motorPos %d)\n", pos.satPosition, pos.motorPos);
 			changed |= (motorPositions[pos.satPosition] != pos.motorPos);
 			motorPositions[pos.satPosition] = pos.motorPos;
 		}
-		
+
 		if (changed)
 		{
 			// save to motor.conf
@@ -827,7 +847,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		}
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SCANSETDISEQCTYPE:
 	{
 		CBasicServer::receive_data(connfd, &diseqcType, sizeof(diseqcType));
@@ -835,7 +855,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		DBG("set diseqc type %d", diseqcType);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SCANSETDISEQCREPEAT:
 	{
 		uint32_t repeats;
@@ -844,7 +864,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		DBG("set diseqc repeats to %d", repeats);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SCANSETBOUQUETMODE:
 		CBasicServer::receive_data(connfd, &bouquetMode, sizeof(bouquetMode));
 		break;
@@ -867,7 +887,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SB_GET_PLAYBACK_ACTIVE:
 	{
 		CZapitMessages::responseGetPlaybackState msgGetPlaybackState;
@@ -886,7 +906,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		bouquetManager->addBouquet(convert_to_UTF8(std::string(msgAddBouquet.name)));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_DELETE_BOUQUET:
 	{
 		CZapitMessages::commandDeleteBouquet msgDeleteBouquet;
@@ -894,7 +914,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		bouquetManager->deleteBouquet(msgDeleteBouquet.bouquet);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_RENAME_BOUQUET:
 	{
 		CZapitMessages::commandRenameBouquet msgRenameBouquet;
@@ -903,7 +923,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			bouquetManager->Bouquets[msgRenameBouquet.bouquet]->Name = convert_to_UTF8(std::string(msgRenameBouquet.name));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_EXISTS_BOUQUET:
 	{
 		CZapitMessages::commandExistsBouquet msgExistsBouquet;
@@ -913,7 +933,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &responseInteger, sizeof(responseInteger)); // bouquet & channel number are already starting at 0!
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET:
 	{
 		CZapitMessages::commandExistsChannelInBouquet msgExistsChInBq;
@@ -923,7 +943,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &responseBool, sizeof(responseBool));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_MOVE_BOUQUET:
 	{
 		CZapitMessages::commandMoveBouquet msgMoveBouquet;
@@ -931,7 +951,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		bouquetManager->moveBouquet(msgMoveBouquet.bouquet, msgMoveBouquet.newPos);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_ADD_CHANNEL_TO_BOUQUET:
 	{
 		CZapitMessages::commandAddChannelToBouquet msgAddChannelToBouquet;
@@ -939,7 +959,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		addChannelToBouquet(msgAddChannelToBouquet.bouquet, msgAddChannelToBouquet.channel_id);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_REMOVE_CHANNEL_FROM_BOUQUET:
 	{
 		CZapitMessages::commandRemoveChannelFromBouquet msgRemoveChannelFromBouquet;
@@ -948,7 +968,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			bouquetManager->Bouquets[msgRemoveChannelFromBouquet.bouquet]->removeService(msgRemoveChannelFromBouquet.channel_id);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_MOVE_CHANNEL:
 	{
 		CZapitMessages::commandMoveChannel msgMoveChannel;
@@ -968,7 +988,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			bouquetManager->Bouquets[msgBouquetLockState.bouquet]->bLocked = msgBouquetLockState.state;
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_SET_HIDDENSTATE:
 	{
 		CZapitMessages::commandBouquetState msgBouquetHiddenState;
@@ -977,7 +997,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			bouquetManager->Bouquets[msgBouquetHiddenState.bouquet]->bHidden = msgBouquetHiddenState.state;
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_BQ_RENUM_CHANNELLIST:
 		bouquetManager->renumServices();
 		bouquetManager->storeBouquets();
@@ -991,7 +1011,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SB_START_PLAYBACK:
 		playbackStopForced = false;
 		/* FIXME: nvod */
@@ -1092,7 +1112,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		audioDecoder->setVolume(msgVolume.left, msgVolume.right);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SET_STANDBY:
 	{
 		CZapitMessages::commandBoolean msgBoolean;
@@ -1111,7 +1131,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		select_nvod_subservice_num(msg.val);
 		break;
 	}
-	
+
 	case CZapitMessages::CMD_SEND_MOTOR_COMMAND:
 	{
 		CZapitMessages::commandMotor msgMotor;
@@ -1120,7 +1140,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		frontend->sendMotorCommand(msgMotor.cmdtype, msgMotor.address, msgMotor.cmd, msgMotor.num_parameters, msgMotor.param1, msgMotor.param2);
 		break;
 	}
-	
+
 	default:
 		WARN("unknown command %d (version %d)", rmsg.cmd, CZapitMessages::ACTVERSION);
 		break;
@@ -1548,7 +1568,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.337 2003/11/24 06:15:38 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.338 2003/11/27 00:32:07 homar Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1589,7 +1609,7 @@ int main(int argc, char **argv)
 		setRadioMode();
 	else
 		setTVMode();
-	
+
 	if (!frontend)
 		frontend = new CFrontend();
 
