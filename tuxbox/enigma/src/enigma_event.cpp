@@ -11,17 +11,22 @@ void eEventDisplay::keyDown(int rc)
 	if (eventlist)
 	switch (rc)
 	{
-	case eRCInput::RC_RIGHT:
-		++(*events);
-		if (*events == eventlist->end())
-			*events = eventlist->begin();
-		setEvent(**events);
+		case eRCInput::RC_RIGHT:
+			if (*events == --eventlist->end())
+				*events = eventlist->begin();
+			else
+				++(*events);
+    	
+			setEvent(**events);
 		break;
-	case eRCInput::RC_LEFT:
-		--(*events);
-		if (*events == eventlist->begin())
-			*events = eventlist->end();
-		setEvent(**events);
+
+		case eRCInput::RC_LEFT:
+			if (*events == eventlist->begin())
+				*events = --eventlist->end();
+	  	else
+				--(*events);	
+    	
+			setEvent(**events);
 		break;
 	}
 }
@@ -149,6 +154,7 @@ void eEventDisplay::setList(const ePtrList<EITEvent> &e)
 		delete events;
 	eventlist=new ePtrList<EITEvent>(e);
 	events=new ePtrList<EITEvent>::iterator(*eventlist);
+	printf(eventlist->isAutoDelete()?"eventList benutzt autoDelete\n": "eventList benutzt kein autoDelete\n");
 	setEvent(**events);
 }
 

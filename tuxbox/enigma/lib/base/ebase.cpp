@@ -138,7 +138,7 @@ void eMainloop::processOneEvent()
 	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
 		TimerList.begin()->activate();
 
-	int ret=poll(&(*pfd.begin()), notifiers.size(), !TimerList?-1:usec / 1000);  // milli .. not micro seks
+	int ret=poll(&(*pfd.begin()), notifiers.size(), TimerList ? usec / 1000 : -1);  // milli .. not micro seks
 
 	if (ret>0)
 	{

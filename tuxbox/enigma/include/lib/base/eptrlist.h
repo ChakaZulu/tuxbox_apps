@@ -9,7 +9,8 @@ class ePtrList : public std::list<T*>
 	bool autoDelete;
 	iterator cur;
 public:
-	ePtrList(): autoDelete(false)	{	}
+	ePtrList(): autoDelete(false), cur(std::list<T*>::end())	{	}
+	ePtrList(const ePtrList& e)		:std::list<T*>(e), autoDelete(false), cur(e.cur)	{	}
 	~ePtrList();
 	class iterator;
 	class const_iterator;
@@ -27,9 +28,9 @@ public:
 	void sort()	{		std::list<T*>::sort(ePtrList<T>::less()); }	
 // changed methods for autodelete and current implementation
 	void remove(T* t);
-	iterator erase(iterator& it);
+	iterator erase(iterator it);
 	iterator erase(iterator from, iterator to);
-	void clear()	{		erase(std::list<T*>::begin(),std::list<T*>::end());	}
+	void clear()	{		erase(std::list<T*>::begin(), std::list<T*>::end());	}
 	void pop_back();
 	void pop_front();
 // added methods for current implementation
@@ -122,7 +123,10 @@ inline ePtrList<T>::~ePtrList()
 	if (autoDelete)
 	{
 		for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
+		{
 			delete *it;
+			*it=0;	//sicher ist sicher
+		}
 	}
 }
 
@@ -130,28 +134,30 @@ inline ePtrList<T>::~ePtrList()
 template <class T>
 inline void ePtrList<T>::remove(T* t)
 {
-	if (autoDelete)
-		delete t;
-	
-	while (*cur == t && cur != end() )
-		cur++;
-
-	std::list<T*>::remove(t);
+	for (std::list<T*>::iterator it(std::list<T*>::begin()); it != std::list<T*>::end(); it++)
+		if (*it == t)
+		{
+			printf("remove Element\n");
+			it=erase(it);
+			printf("after remove Element\n");
+		}
 }
 
 /////////////////// ePtrList erase(iterator) ///////////////////////
 template <class T>
-inline ePtrList<T>::iterator ePtrList<T>::erase(iterator& it)
+inline ePtrList<T>::iterator ePtrList<T>::erase(iterator it)
 {
-	if (autoDelete)
+	printf("In the erase from ePtrList\n");
+	if (autoDelete && *it)
+	{
 		delete *it;
-	
-	iterator tmp = std::list<T*>::erase(it);
-	
-	if (*cur == *it)
-		cur = tmp;
-	
-  return tmp;
+		*it = 0;  // sicher ist sicher...
+	}
+
+	if (cur == it)
+		return cur = std::list<T*>::erase(it);
+	else
+		return std::list<T*>::erase(it);
 }
 
 /////////////////// ePtrList erase(iterator from. iterator to) //////////////////
@@ -168,26 +174,14 @@ inline ePtrList<T>::iterator ePtrList<T>::erase(iterator from, iterator to)
 template <class T>
 inline void ePtrList<T>::pop_back()
 {
-	if (autoDelete && *std::list<T*>::end())
-		delete *std::list<T*>::end();
-
-	if (*cur == *end())
-		cur++;
-
-	std::list<T*>::pop_back();
+	erase(--end());
 }
 
 /////////////////// ePtrList pop_front() ////////////////////
 template <class T>
 inline void ePtrList<T>::pop_front()
 {
-	if (autoDelete && *std::list<T*>::begin())
-		delete *std::list<T*>::begin();
-
-	if (*cur == *begin())
-		cur++;
-
-	std::list<T*>::pop_front();
+	erase(begin());
 }
 
 /////////////////// ePtrList take() ////////////////////
@@ -195,10 +189,8 @@ template <class T>
 inline T* ePtrList<T>::take()
 {
 	T* tmp = *cur;
-
-	cur = std::list<T*>::erase(cur);
-
-	return tmp;
+ 	cur = std::list<T*>::erase(cur);
+ 	return tmp;
 }
 
 #endif // _E_PTRLIST
