@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.46 2003/03/14 07:31:50 obi Exp $
+ * $Id: bouquets.h,v 1.47 2003/06/13 21:13:44 digi_casi Exp $
  */
 
 #ifndef __bouquets_h__
@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <inttypes.h>
+#include <zapit/client/zapitclient.h>
 
 #include "channel.h"
 #include "xmlinterface.h"
@@ -52,8 +53,8 @@ class CBouquet
 
 		void moveService (const unsigned int oldPosition, const unsigned int newPosition, const unsigned char serviceType);
 
-		int recModeRadioSize( unsigned int);
-		int recModeTVSize( unsigned int);
+		int recModeRadioSize(unsigned int);
+		int recModeTVSize(unsigned int);
 		CZapitChannel* getChannelByChannelID(const t_channel_id channel_id, const unsigned char serviceType = 0);
 };
 
@@ -66,6 +67,9 @@ class CBouquetManager
 		void makeRemainingChannelsBouquet();
 		void parseBouquetsXml(const xmlNodePtr root);
 		void storeBouquets();
+		void writeBouquetHeader(FILE * bouq_fd, uint i, const char * bouquetName);
+		void writeBouquetFooter(FILE * bouq_fd);
+		void writeBouquetChannels(FILE * bouq_fd, uint i);
 	public:
 		CBouquetManager() { remainChannels = NULL; };
 		class ChannelIterator
@@ -92,17 +96,18 @@ class CBouquetManager
 		BouquetList Bouquets;
 		BouquetList storedBouquets;
 
-		void saveBouquets();
-		void loadBouquets( bool ignoreBouquetFile = false);
+		void saveBouquets(void);
+		void saveBouquets(CZapitClient::bouquetMode bouquetMode, char * providerName);
+		void loadBouquets(bool ignoreBouquetFile = false);
 		void restoreBouquets();
 		void renumServices();
 
-		CBouquet* addBouquet( string name);
+		CBouquet* addBouquet(string name);
 		void deleteBouquet(const unsigned int id);
 		void deleteBouquet(const CBouquet* bouquet);
-		int  existsBouquet( string name);
+		int  existsBouquet(string name);
 		void moveBouquet(const unsigned int oldId, const unsigned int newId);
-		bool existsChannelInBouquet( unsigned int bq_id, const t_channel_id channel_id);
+		bool existsChannelInBouquet(unsigned int bq_id, const t_channel_id channel_id);
 
 		void clearAll();
 

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.85 2003/06/04 08:29:16 digi_casi Exp $
+ * $Id: bouquets.cpp,v 1.86 2003/06/13 21:13:44 digi_casi Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -26,6 +26,8 @@
 #include <map>
 #include <set>
 
+#include <unistd.h>
+
 /* tuxbox headers */
 #include <configfile.h>
 
@@ -34,10 +36,15 @@
 #include <zapit/sdt.h>
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
+#include <zapit/frontend.h>
 
 extern tallchans allchans;   //  defined in zapit.cpp
 extern CConfigFile config;   //  defined in zapit.cpp
 extern std::map<std::string, int16_t>satellitePositions;
+extern CFrontend *frontend;
+
+char *getFrontendName(void);
+void cp(char * from, char * to);
 
 
 #define GET_ATTR(node, name, fmt, arg)                                  \
@@ -176,52 +183,187 @@ int CBouquet::recModeTVSize( unsigned int tsid)
 	return size;
 }
 
+void copy_to_bouquet(FILE * fd, FILE * fd1, const char * bouquetName)
+{
+	//copies bouquets from previous bouquets.xml file from start up to the bouquet that is being written...
+	char buffer[256] = "";
+	
+	//printf("[bouquets] copy_to_bouquet: %s\n", bouquetName);
+	//look for bouqet to be written... or end of file
+	fgets(buffer, 255, fd1);
+	while(!feof(fd1) && !((strstr(buffer, "Bouquet name") && strstr(buffer, bouquetName)) || strstr(buffer, "</zapit>")))
+	{
+		fputs(buffer, fd);
+		fgets(buffer, 255, fd1);
+	}
+	
+	// if not end of file
+	if (!feof(fd1) && !strstr(buffer, "</zapit>"))
+		// skip to end of bouquet
+		while (!feof(fd1) && !strstr(buffer, "</Bouquet>"))
+			fgets(buffer, 255, fd1);
+}
+
+void copy_to_end(FILE * fd, FILE * fd1)
+{
+	//copies the services from previous services.xml file from the end of sat being scanned to the end of the file...
+	//printf("[bouquets] copying to end...\n");
+	char buffer[256] ="";
+	
+	fgets(buffer, 255, fd1);
+	while(!feof(fd1) && !strstr(buffer, "</zapit>"))
+	{
+		fputs(buffer, fd);
+		fgets(buffer, 255, fd1);
+	}
+	fclose(fd1);
+	unlink(BOUQUETS_TMP);
+}
+
+void CBouquetManager::writeBouquetHeader(FILE * bouq_fd, uint i, const char * bouquetName)
+{
+	//printf("[bouquets] writing bouquet header: %s\n", bouquetName);
+	fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
+		bouquetName,
+		Bouquets[i]->bHidden ? 1 : 0,
+		Bouquets[i]->bLocked ? 1 : 0);	
+}
+
+void CBouquetManager::writeBouquetFooter(FILE * bouq_fd)
+{
+	fprintf(bouq_fd, "\t</Bouquet>\n");
+}
+
+void CBouquetManager::writeBouquetChannels(FILE * bouq_fd, uint i)
+{
+	for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
+	{
+		fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
+				Bouquets[i]->tvChannels[j]->getServiceId(),
+				convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
+				Bouquets[i]->tvChannels[j]->getTransportStreamId(), 
+				Bouquets[i]->tvChannels[j]->getOriginalNetworkId(),
+				Bouquets[i]->tvChannels[j]->getSatellitePosition());
+	}
+	for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
+	{
+		fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
+				Bouquets[i]->radioChannels[j]->getServiceId(),
+				convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
+				Bouquets[i]->radioChannels[j]->getTransportStreamId(), 
+				Bouquets[i]->radioChannels[j]->getOriginalNetworkId(), 
+				Bouquets[i]->radioChannels[j]->getSatellitePosition());
+	}
+}
+
 
 /**** class CBouquetManager *************************************************/
 void CBouquetManager::saveBouquets(void)
 {
-	INFO("creating new bouquets.xml");
-	FILE* bouq_fd = fopen(BOUQUETS_XML, "w");
-
-	if (bouq_fd == NULL)
-	{
-		ERROR(BOUQUETS_XML);
-		return;
-	}
-
+	FILE * bouq_fd = NULL;
+	
+	bouq_fd = fopen(BOUQUETS_XML, "w");
+		
 	fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
 
 	for (unsigned int i = 0; i < Bouquets.size(); i++)
 	{
 		if (Bouquets[i] != remainChannels)
 		{
-			fprintf(bouq_fd, "\t<Bouquet name=\"%s\" hidden=\"%d\" locked=\"%d\">\n",
-				convert_UTF8_To_UTF8_XML(Bouquets[i]->Name).c_str(),
-				Bouquets[i]->bHidden ? 1 : 0,
-				Bouquets[i]->bLocked ? 1 : 0);
-			for ( unsigned int j=0; j<Bouquets[i]->tvChannels.size(); j++)
-			{
-				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
-						Bouquets[i]->tvChannels[j]->getServiceId(),
-						convert_UTF8_To_UTF8_XML(Bouquets[i]->tvChannels[j]->getName()).c_str(),
-						Bouquets[i]->tvChannels[j]->getTransportStreamId(), 
-						Bouquets[i]->tvChannels[j]->getOriginalNetworkId(),
-						Bouquets[i]->tvChannels[j]->getSatellitePosition());
-			}
-			for ( unsigned int j=0; j<Bouquets[i]->radioChannels.size(); j++)
-			{
-				fprintf(bouq_fd, "\t\t<channel serviceID=\"%04x\" name=\"%s\" tsid=\"%04x\" onid=\"%04x\" sat_position=\"%hd\"/>\n",
-						Bouquets[i]->radioChannels[j]->getServiceId(),
-						convert_UTF8_To_UTF8_XML(Bouquets[i]->radioChannels[j]->getName()).c_str(),
-						Bouquets[i]->radioChannels[j]->getTransportStreamId(), 
-						Bouquets[i]->radioChannels[j]->getOriginalNetworkId(), 
-						Bouquets[i]->radioChannels[j]->getSatellitePosition());
-			}
-			fprintf(bouq_fd, "\t</Bouquet>\n");
+			writeBouquetHeader(bouq_fd, i, convert_UTF8_To_UTF8_XML(Bouquets[i]->Name).c_str());
+			writeBouquetChannels(bouq_fd, i);
+			writeBouquetFooter(bouq_fd);
 		}
 	}
+	
 	fprintf(bouq_fd, "</zapit>\n");
-	fclose(bouq_fd);
+}
+
+void CBouquetManager::saveBouquets(CZapitClient::bouquetMode bouquetMode, char * providerName)
+{
+	diseqc_t diseqcType;
+	char * frontendType;
+	FILE * bouq_fd = NULL;
+	FILE * fd2 = NULL;
+	
+	//printf("[bouquets] creating new bouquets for %s\n", providerName);
+	
+	diseqcType = frontend->getDiseqcType();
+	frontendType = getFrontendName();
+	
+	if (diseqcType != DISEQC_1_2)
+	{
+		// not diseqc 1.2 or (diseqc 1.2 and no bouquets.xml file exists)
+		bouq_fd = fopen(BOUQUETS_XML, "w");
+		
+		fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<zapit>\n");
+
+		for (unsigned int i = 0; i < Bouquets.size(); i++)
+		{
+			if (Bouquets[i] != remainChannels)
+			{
+				writeBouquetHeader(bouq_fd, i, convert_UTF8_To_UTF8_XML(Bouquets[i]->Name).c_str());
+				writeBouquetChannels(bouq_fd, i);
+				writeBouquetFooter(bouq_fd);
+			}
+		}
+	
+		fprintf(bouq_fd, "</zapit>\n");
+	}
+	else
+	{
+		//diseqc 1.2
+		//just replace existings bouquets
+		
+		if (bouquetMode == CZapitClient::BM_CREATEBOUQUETS)
+		{
+			for (unsigned int i = 0; i < Bouquets.size(); i++)
+			{
+				//printf("[bouquets] creating bouquet: %s\n", convert_UTF8_To_UTF8_XML(Bouquets[i]->Name).c_str());
+				if (Bouquets[i] != remainChannels)
+				{
+					cp(BOUQUETS_XML, BOUQUETS_TMP);
+					fd2 = fopen(BOUQUETS_TMP, "r");
+					bouq_fd = fopen(BOUQUETS_XML, "w");
+					writeBouquetHeader(bouq_fd, i, providerName);
+					copy_to_bouquet(bouq_fd, fd2, convert_UTF8_To_UTF8_XML(Bouquets[i]->Name).c_str());
+					writeBouquetChannels(bouq_fd, i);
+					writeBouquetFooter(bouq_fd);
+					copy_to_end(bouq_fd, fd2);
+					fprintf(bouq_fd, "</zapit>\n");
+					fclose(bouq_fd);
+				}
+			}
+		}
+		else
+		if (bouquetMode == CZapitClient::BM_CREATESATELLITEBOUQUET)
+		{
+			if (providerName != NULL)
+			{
+				//create satellite bouquet
+				//printf("[bouquets] creating satellite bouquet for %s\n", providerName);
+				cp(BOUQUETS_XML, BOUQUETS_TMP);
+				fd2 = fopen(BOUQUETS_TMP, "r");
+				bouq_fd = fopen(BOUQUETS_XML, "w");
+				copy_to_bouquet(bouq_fd, fd2, providerName);
+				uint i = 1;
+				writeBouquetHeader(bouq_fd, i, providerName);
+				for (unsigned int i = 0; i < Bouquets.size(); i++)
+				{
+					if (Bouquets[i] != remainChannels)
+					{
+						writeBouquetChannels(bouq_fd, i);
+					}
+				}
+				writeBouquetFooter(bouq_fd);
+				copy_to_end(bouq_fd, fd2);
+				fprintf(bouq_fd, "</zapit>\n");
+				fclose(bouq_fd);
+			}
+		}
+		else
+			printf("[bouquets] unknown bouquet mode.\n");
+	}
 }
 
 void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
