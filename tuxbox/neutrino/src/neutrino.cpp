@@ -2832,6 +2832,7 @@ void CNeutrinoApp::ExitRun()
 #ifdef USEACTIONLOG
 	g_ActionLog->println("neutrino shutdown");
 #endif
+	CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
 
 	dprintf(DEBUG_INFO, "exit\n");
 	for(int x=0;x<256;x++)
@@ -2865,6 +2866,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 	int x = g_settings.screen_EndX-dx;
 	int y = g_settings.screen_StartY;
 
+	CLCD::getInstance()->setMuted(newValue);
 	if( newValue != current_muted )
 	{
 		current_muted = newValue;
@@ -2925,6 +2927,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 				current_volume += 5;
 			}
 			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+			CLCD::getInstance()->showVolume(current_volume);
 			//additinal volume setting via lirc
 			CIRSend irs("volplus");
 			irs.Send();
@@ -2936,6 +2939,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 				current_volume -= 5;
 			}
 			g_Controld->setVolume(current_volume,(g_settings.audio_avs_Control));
+			CLCD::getInstance()->showVolume(current_volume);
 			//additinal volume setting via lirc
 			CIRSend irs("volminus");
 			irs.Send();
@@ -2974,6 +2978,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 
 void CNeutrinoApp::tvMode( bool rezap )
 {
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	if( mode == mode_tv )
 	{
 		return;
@@ -3024,7 +3029,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 		if(frameBuffer->getActive())
 			memset(frameBuffer->getFrameBufferPointer(), 255, frameBuffer->getStride()*576);
 		g_Controld->setScartMode( 1 );
-
+		CLCD::getInstance()->setMode(CLCD::MODE_SCART);
 		lastMode = mode;
 		mode = mode_scart;
 	}
@@ -3113,6 +3118,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 void CNeutrinoApp::radioMode( bool rezap)
 {
+	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	if( mode==mode_radio )
 	{
 		return;
@@ -3290,7 +3296,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.374 2002/12/17 22:17:37 McClean Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.375 2002/12/17 23:48:07 McClean Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
