@@ -4,10 +4,43 @@
 		<email>McClean@sth-tech.de</email>
 	</author>
 
+
+	<fonts>
+		<font file="bluehigh.ttf" name="Blue.Regular" /> <!-- Found at dafont.com freeware -->
+		<font file="bluebold.ttf" name="Blue.Bold" /> <!-- Found at dafont.com freeware -->
+		<font file="v5loxicar.ttf" name="v5Robusta" /> <!-- Found at dafont.com freeware -->
+		<font file="v5loxical.ttf" name="v5Lixera" /> <!-- Found at dafont.com freeware -->
+	</fonts>
+
+	<fontalias>
+		<map name="eStatusBar" font="Blue.Regular" size="24" />
+		<map name="eWindow.TitleBar" font="Blue.Bold" size="32" />
+		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
+
+		<map name="eListBox.EntryText.normal" font="Blue.Regular" size="30" />
+		<map name="eServiceSelector.singleColumn.Entry.Name" font="Blue.Regular" size="30" />
+		<!--map name="eBouquetSelector.Entry.Name" font="Blue.Regular" size="32" /-->
+		<map name="eEPGSelector.Entry.Description" font="Blue.Regular" size="30" />
+		<map name="eEPGSelector.Entry.DateTime" font="Blue.Bold" size="24" />
+
+		<map name="eventview.description" font="Blue.Regular" size="32" />
+		<map name="eventview.date" font="Blue.Regular" size="30" />
+		<map name="eventview.time" font="Blue.Regular" size="30" />
+		<map name="eventview.channel" font="Blue.Regular" size="30" />
+
+		<map name="lcd.menu.title" font="v5Robusta" size="18" />
+		<map name="lcd.menu.element" font="Blue.Regular" size="18" />
+
+		<map name="lcd.main.service_name" font="v5Robusta" size="18" />
+		<map name="lcd.main.clock" font="v5Robusta" size="18" />
+	</fontalias>
+
+
 	<colors>
 		<color name="header" color="#030FA4" end="#FFE403" size="16" />
 		<color name="content" color="#22030F60" end="#ffffff" size="16" />
 		<color name="content_selected" color="#2290A0FF" end="#000F33" size="16" />
+		<color name="shadow_red" color="#586D88" end="#ff0303" size="4" />
 
 		<color name="osd_normal" color="#11000F9A" end="#ffffff" size="16" />
 		<color name="osd_epg" color="#11000F9A" end="#9090e0" size="16" />
@@ -39,12 +72,15 @@
 		<map name="eWindow.titleBar" color="header" />
 		<map name="eWindow.titleBarFont" color="header+15" />
 
-		<map name="eServiceSelector.highlight.background" color="content_selected" />
-		<map name="eServiceSelector.highlight.foreground" color="content_selected+15" />
-
 		<map name="eProgress.border" color="osd_normal+15" />
 		<map name="eProgress.left" color="osd_normal+10" />
 		<map name="eProgress.right" color="osd_normal+5" />
+		<map name="eSlider.activated.left" color="shadow_red+3" />
+		<map name="eSlider.activated.right" color="shadow_blue" />
+		
+		<map name="eServiceSelector.highlight.background" color="content_selected" />
+		<map name="eServiceSelector.highlight.foreground" color="content_selected+15" />
+
 	</colorscheme>
 
 	<values>
@@ -52,8 +88,8 @@
 		<value name="eWindow.borderLeft" value="0" />
 		<value name="eWindow.borderRight" value="0" />
 		<value name="eWindow.borderBottom" value="0" />
-		<value name="eWindow.borderTop" value="32" />
-		<value name="eWindow.titleOffsetX" value="10" />
+		<value name="eWindow.borderTop" value="0" />
+		<value name="eWindow.titleOffsetX" value="0" />
 		<value name="eWindow.titleOffsetY" value="0" />
 		<value name="eWindow.titleHeight" value="32" />
 		<value name="fontsize" value="24" />
