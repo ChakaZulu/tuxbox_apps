@@ -26,7 +26,7 @@ enigma_LDADD = \
 	@MAD_LIBS@ \
 	@MD5SUM_LIBS@ \
 	@SIGC_LIBS@ \
-	@TUXBOX_LIBX@ \
+	@TUXBOX_LIBS@ \
 	@XMLTREE_LIBS@ \
 	-ldl -lpthread -lcrypt -lresolv
 #\
