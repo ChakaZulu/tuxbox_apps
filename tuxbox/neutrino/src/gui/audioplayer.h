@@ -61,7 +61,6 @@ class CAudiofile
 	time_t Duration;
 	std::string Genre;
 	bool VBR;
-	int Index;
 	CFile::FileType FileType;
 };
 

@@ -329,7 +329,7 @@ int CPictureViewerGui::show()
 			if(m_state==MENU)
 			{
 				hide();
-				if(m_filebrowser->exec(Path))
+				if(m_filebrowser->exec(Path.c_str()))
 				{
 					Path=m_filebrowser->getCurrentDir();
 					CFileList::iterator files = m_filebrowser->getSelectedFiles()->begin();

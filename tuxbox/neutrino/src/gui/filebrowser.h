@@ -173,7 +173,7 @@ class CFileBrowser
 		CFileBrowser();
 		~CFileBrowser();
 
-		bool		exec(std::string Dirname);
+		bool		exec(const char * const dirname);
 		CFile		*getSelectedFile();
 		CFileList	*getSelectedFiles();
 		std::string getCurrentDir() {return Path;}

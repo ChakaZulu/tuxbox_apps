@@ -4102,8 +4102,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		std::string startdir=g_settings.network_nfs_mp3dir;
-		if (b.exec(startdir))
+		if (b.exec(g_settings.network_nfs_mp3dir))
 			strncpy(g_settings.network_nfs_mp3dir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_mp3dir)-1);
 		return menu_return::RETURN_REPAINT;
 	}
@@ -4112,8 +4111,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		std::string startdir=g_settings.network_nfs_picturedir;
-		if (b.exec(startdir))
+		if (b.exec(g_settings.network_nfs_picturedir))
 			strncpy(g_settings.network_nfs_picturedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_picturedir)-1);
 		return menu_return::RETURN_REPAINT;
 	}
@@ -4122,8 +4120,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		std::string startdir=g_settings.network_nfs_moviedir;
-		if (b.exec(startdir))
+		if (b.exec(g_settings.network_nfs_moviedir))
 			strncpy(g_settings.network_nfs_moviedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_moviedir)-1);
 		return menu_return::RETURN_REPAINT;
 	}
@@ -4132,8 +4129,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		parent->hide();
 		CFileBrowser b;
 		b.Dir_Mode=true;
-		std::string startdir=g_settings.network_nfs_recordingdir;
-		if (b.exec(startdir))
+		if (b.exec(g_settings.network_nfs_recordingdir))
 			strncpy(g_settings.network_nfs_recordingdir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_recordingdir)-1);
 		return menu_return::RETURN_REPAINT;
 	}

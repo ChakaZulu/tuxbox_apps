@@ -483,16 +483,21 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 
 //------------------------------------------------------------------------
 
-bool CFileBrowser::exec(std::string Dirname)
+bool CFileBrowser::exec(const char * const dirname)
 {
 	neutrino_msg_t      msg;
 	neutrino_msg_data_t data;
+	std::string Dirname = dirname;
 
 	bool res = false;
 
-	m_baseurl = "http://" + g_settings.streaming_server_ip +
-	            ':' + g_settings.streaming_server_port + "/admin/dboxfiles.html?dir=";
-	for( unsigned int pos=Dirname.find('\\'); pos!=std::string::npos ; pos=Dirname.find('\\'))
+	m_baseurl = "http://";
+	m_baseurl += g_settings.streaming_server_ip;
+	m_baseurl += ':';
+	m_baseurl += g_settings.streaming_server_port;
+	m_baseurl += "/admin/dboxfiles.html?dir=";
+
+	for(unsigned int pos=Dirname.find('\\'); pos!=std::string::npos ; pos=Dirname.find('\\'))
 		Dirname[pos]='/';
 	name = Dirname;
 	paintHead();

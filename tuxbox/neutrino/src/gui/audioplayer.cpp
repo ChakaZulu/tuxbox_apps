@@ -42,7 +42,10 @@
 #include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+#define DBOX 1
+#ifdef DBOX
 #include <driver/aviaext.h>
+#endif
 
 #include <daemonc/remotecontrol.h>
 
@@ -81,11 +84,6 @@
 #endif
 #define ConnectLineBox_Width	15
 
-//------------------------------------------------------------------------
-bool sortByIndex (const CAudiofile& a, const CAudiofile& b)
-{
-	return a.Index < b.Index ;
-}
 //------------------------------------------------------------------------
 
 CAudioPlayerGui::CAudioPlayerGui()
@@ -186,8 +184,10 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// Stop sectionsd
 	g_Sectionsd->setPauseScanning(true); 
 
+#ifdef DBOX
 	// disable iec aka digi out
 	CAViAExt::getInstance()->iecOff();
+#endif
 	
 	/*int ret =*/
 
@@ -212,8 +212,10 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 	// Start Sectionsd
 	g_Sectionsd->setPauseScanning(false);
 
+#ifdef DBOX
 	// disable iec aka digi out
 	CAViAExt::getInstance()->iecOff();
+#endif
 
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , m_LastMode );
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
@@ -417,7 +419,7 @@ int CAudioPlayerGui::show()
 			if(key_level==0)
 			{
 				hide();
-				if(filebrowser->exec(Path))
+				if(filebrowser->exec(Path.c_str()))
 				{
 					Path=filebrowser->getCurrentDir();
 					CFileList::iterator files = filebrowser->getSelectedFiles()->begin();
@@ -530,26 +532,22 @@ int CAudioPlayerGui::show()
 		}
 		else if(msg==CRCInput::RC_blue)
 		{
-			if(key_level==0)
+			if (key_level == 0)
 			{
-				int i=0;
-				srandom((unsigned int) time(NULL));
-				for(CPlayList::iterator p=playlist.begin(); p!=playlist.end() ;p++)
+				if (!(playlist.empty()))
 				{
-					p->Index = random();
-					if(i==current)
+					if (current > 0)
 					{
-						p->Index=-1;
+						std::swap(playlist[0], playlist[current]);
+						current = 0;
 					}
-					i++;
+				
+					std::random_shuffle((current != 0) ? playlist.begin() : playlist.begin() + 1, playlist.end());
+
+					selected = 0;
+
+					update = true;
 				}
-				sort(playlist.begin(),playlist.end(),sortByIndex);
-				selected=0;
-				if(m_state!=CAudioPlayerGui::STOP)
-					current=0;
-				else
-					current=-1;
-				update=true;
 			}
 			else
 			{
@@ -1374,7 +1372,9 @@ void CAudioPlayerGui::GetMetaData(CAudiofile *File)
 	}
 }
 
-void CAudioPlayerGui::savePlaylist() {
+void CAudioPlayerGui::savePlaylist()
+{
+	const char * path;
 	
 	// .m3u playlist
 	// http://hanna.pyxidis.org/tech/m3u.html
@@ -1385,9 +1385,8 @@ void CAudioPlayerGui::savePlaylist() {
 	CFileFilter dirFilter;
 	dirFilter.addFilter("m3u");
 	browser.Filter = &dirFilter;
-	std::string path;
 	// select preferred directory if exists
-	if(strlen(g_settings.network_nfs_mp3dir)!=0)
+	if (strlen(g_settings.network_nfs_mp3dir) != 0)
 		path = g_settings.network_nfs_mp3dir;
 	else
 		path = "/";
@@ -1398,23 +1397,23 @@ void CAudioPlayerGui::savePlaylist() {
 		// refresh view
 		this->paint();
 		CFile *file = browser.getSelectedFile();
-		std::string playlistDirPath = file->getPath();
-		std::string absPlaylistDir;
+		std::string absPlaylistDir = file->getPath();
 		
 		// add a trailing slash if necessary
-		if (playlistDirPath.size() > 0 
-		    && playlistDirPath[playlistDirPath.size()-1] == '/') {
-			absPlaylistDir = playlistDirPath + file->getFileName();
-		} else {
-			absPlaylistDir = playlistDirPath + "/" + file->getFileName();
+		if ((absPlaylistDir.empty()) || ((*(absPlaylistDir.rbegin()) != '/')))
+		{
+			absPlaylistDir += '/';
 		}
+		absPlaylistDir += file->getFileName();
 		
 		const int filenamesize = 30;
 		char filename[filenamesize+1] = "";
 		
 		if (file->getType() == CFile::FILE_PLAYLIST) {
 			// file is playlist so we should ask if we can overwrite it
-			std::string name = file->getPath() + "/" + file->getFileName();
+			std::string name = file->getPath();
+			name += '/';
+			name += file->getFileName();
 			bool overwrite = askToOverwriteFile(name);
 			if (!overwrite) {
 				return;
@@ -1432,7 +1431,10 @@ void CAudioPlayerGui::savePlaylist() {
 			filenameInput.exec(NULL, "");
 			// refresh view
 			this->paint();
-			std::string name = absPlaylistDir + "/" + filename + ".m3u";
+			std::string name = absPlaylistDir;
+			name += '/';
+			name += filename;
+			name += ".m3u";
 			std::ifstream input(name.c_str());
 			
 			// test if file exists and query for overwriting it or not
@@ -1448,7 +1450,9 @@ void CAudioPlayerGui::savePlaylist() {
 			return;
 		}
 		std::string absPlaylistFilename = absPlaylistDir;
-		absPlaylistFilename.append("/").append(filename).append(".m3u");
+		absPlaylistFilename += '/';
+		absPlaylistFilename += filename;
+		absPlaylistFilename += ".m3u";		
 		std::ofstream playlistFile(absPlaylistFilename.c_str());
 		std::cout << "Audioplayer: writing playlist to " << absPlaylistFilename << std::endl;
 		if (!playlistFile) {
