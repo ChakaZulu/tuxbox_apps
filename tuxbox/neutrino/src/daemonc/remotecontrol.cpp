@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: remotecontrol.cpp,v 1.30 2001/11/15 11:42:41 McClean Exp $
+// $Id: remotecontrol.cpp,v 1.31 2001/11/21 20:31:58 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
+// Revision 1.31  2001/11/21 20:31:58  field
+// Perspektiven gefixt
+//
 // Revision 1.30  2001/11/15 11:42:41  McClean
 // gpl-headers added
 //
@@ -189,10 +192,10 @@ void CRemoteControl::getNVODs( char *channel_name )
         }
         pthread_mutex_trylock( &send_mutex );
 
-    } while ( ( nvod_list.size()== 0 ) && ( rep_cnt< 10) && ( strlen( audio_chans_int.name )!= 0 ) );
+    } while ( ( nvod_list.size()== 0 ) && ( rep_cnt< 20) && ( strlen( audio_chans_int.name )!= 0 ) );
 
     subChannels_internal.clear( channel_name );
-
+    subChannels_internal.are_subchannels= false;
     for(CSubServiceListSorted::iterator nvod=nvod_list.begin(); nvod!=nvod_list.end(); ++nvod)
         subChannels_internal.list.insert(subChannels_internal.list.end(), * nvod );
 }
