@@ -43,6 +43,7 @@ class audioControl
 		static void setAudioMode(int mode);
 		static void setVolume(char volume);
 		static void setMute(bool mute);
+		static void setMuteSPDIF(bool mute);
 
 };
 
