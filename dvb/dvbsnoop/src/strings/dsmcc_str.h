@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.7 2003/11/26 23:54:49 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.8 2003/11/29 23:11:43 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc_str.h,v 1.7 2003/11/26 23:54:49 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.8  2003/11/29 23:11:43  rasc
+no message
+
 Revision 1.7  2003/11/26 23:54:49  rasc
 -- bugfixes on Linkage descriptor
 
@@ -66,7 +69,7 @@ char *dsmccStrPlatform_ID (u_int id);
 char *dsmccStrCarouselType_ID (u_int id);
 char *dsmccStrHigherProtocol_ID (u_int id);
 char *dsmccStrUpdateType_ID (u_int id);
-
+char *dsmccStrOUI  (u_int id);
 
 #endif
 
