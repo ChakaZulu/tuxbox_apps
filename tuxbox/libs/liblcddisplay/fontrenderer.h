@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.h,v 1.5 2002/10/09 15:27:42 thegoodguy Exp $
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.h,v 1.6 2002/10/29 13:57:02 thegoodguy Exp $
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -55,7 +55,7 @@ class Font
         public:
                 void RenderString(int x, int y, int width, const char *text, int color, int selected=0, const bool utf8_encoded = false);
 
-                int getRenderWidth(const char *text);
+                int getRenderWidth(const char *text, const bool utf8_encoded = false);
 
                 Font(CLCDDisplay *fb, fontRenderClass *render, FTC_FaceID faceid, int isize);
                 ~Font(){}

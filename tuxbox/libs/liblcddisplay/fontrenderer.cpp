@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.5 2002/10/28 21:05:32 thegoodguy Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.6 2002/10/29 13:57:02 thegoodguy Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -180,7 +180,52 @@ FT_Error Font::getGlyphBitmap(FT_ULong glyph_index, FTC_SBit *sbit)
 	return renderer->getGlyphBitmap(&font, glyph_index, sbit);
 }
 
-void Font::RenderString(int x, int y, int width, const char *text, int color, int selected, const bool utf8_encoded)
+int UTF8ToUnicode(const char * &text, const bool utf8_encoded) // returns -1 on error
+{
+	int unicode_value;
+	
+	if (utf8_encoded && ((((unsigned char)(*text)) & 0x80) != 0))
+	{
+		int remaining_unicode_length;
+		if ((((unsigned char)(*text)) & 0xf8) == 0xf0)
+		{
+			unicode_value = ((unsigned char)(*text)) & 0x07;
+			remaining_unicode_length = 3;
+		}
+		else if ((((unsigned char)(*text)) & 0xf0) == 0xe0)
+		{
+			unicode_value = ((unsigned char)(*text)) & 0x0f;
+			remaining_unicode_length = 2;
+		}
+		else if ((((unsigned char)(*text)) & 0xe0) == 0xc0)
+		{
+			unicode_value = ((unsigned char)(*text)) & 0x1f;
+			remaining_unicode_length = 1;
+		}
+		else                     // cf.: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+			return -1;       // corrupted character or a character with > 4 bytes utf-8 representation
+		
+		for (int i = 0; i < remaining_unicode_length; i++)
+		{
+			text++;
+			if (((*text) & 0xc0) != 0x80)
+			{
+				remaining_unicode_length = -1;
+				return -1;          // incomplete or corrupted character
+			}
+			unicode_value <<= 6;
+			unicode_value |= ((unsigned char)(*text)) & 0x3f;
+		}
+		if (remaining_unicode_length == -1)
+			return -1;                  // incomplete or corrupted character
+	}
+	else
+		unicode_value = (unsigned char)(*text);
+
+	return unicode_value;
+}
+
+void Font::RenderString(int x, int y, int width, const char * text, int color, int selected, const bool utf8_encoded)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
@@ -205,45 +250,10 @@ void Font::RenderString(int x, int y, int width, const char *text, int color, in
 		  y += step_y;
 		}
 
-		int unicode_value;
+		int unicode_value = UTF8ToUnicode(text, utf8_encoded);
 
-		if (utf8_encoded && ((((unsigned char)(*text)) & 0x80) != 0))
-		{
-			int remaining_unicode_length;
-			if ((((unsigned char)(*text)) & 0xf8) == 0xf0)
-			{
-				unicode_value = ((unsigned char)(*text)) & 0x07;
-				remaining_unicode_length = 3;
-			}
-			else if ((((unsigned char)(*text)) & 0xf0) == 0xe0)
-			{
-				unicode_value = ((unsigned char)(*text)) & 0x0f;
-				remaining_unicode_length = 2;
-			}
-			else if ((((unsigned char)(*text)) & 0xe0) == 0xc0)
-			{
-				unicode_value = ((unsigned char)(*text)) & 0x1f;
-				remaining_unicode_length = 1;
-			}
-			else                     // cf.: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
-				break;           // corrupted character or a character with > 4 bytes utf-8 representation
-
-			for (int i = 0; i < remaining_unicode_length; i++)
-			{
-				text++;
-				if (((*text) & 0xc0) != 0x80)
-				{
-					remaining_unicode_length = -1;
-					break;           // incomplete or corrupted character
-				}
-				unicode_value <<= 6;
-				unicode_value |= ((unsigned char)(*text)) & 0x3f;
-			}
-			if (remaining_unicode_length == -1)
-				break;           // incomplete or corrupted character
-		}
-		else
-		    unicode_value = (unsigned char)(*text);
+		if (unicode_value == -1)
+			break;
 
 		int index = FT_Get_Char_Index(face, unicode_value);
 
@@ -281,7 +291,7 @@ void Font::RenderString(int x, int y, int width, const char *text, int color, in
     }
 }
 
-int Font::getRenderWidth(const char *text)
+int Font::getRenderWidth(const char * text, const bool utf8_encoded)
 {
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
 	{ 
@@ -293,7 +303,13 @@ int Font::getRenderWidth(const char *text)
 	{
 		FTC_SBit glyph;
 
-		int index=FT_Get_Char_Index(face, *text);
+		int unicode_value = UTF8ToUnicode(text, utf8_encoded);
+
+		if (unicode_value == -1)
+			break;
+
+		int index=FT_Get_Char_Index(face, unicode_value);
+
 		if (!index)
 			continue;
 		if (getGlyphBitmap(index, &glyph))

@@ -45,7 +45,7 @@ class CLcddClient:private CBasicClient
 	public:
 		void setMode(char mode, std::string head="");
 		void setMenuText(char pos, std::string text, char highlight=0);
-		void setServiceName(std::string name);
+		void setServiceName(std::string name);  // name must be UTF-8 encoded
 		void setMute(bool);
 		void setVolume(char);
 		void shutdown();
