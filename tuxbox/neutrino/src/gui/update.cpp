@@ -58,10 +58,11 @@
 #define gTmpPath "/var/tmp/"
 #define gUserAgent "neutrino/softupdater 1.0"
 
-
-
-CHTTPUpdater::CHTTPUpdater()
+CFlashUpdate::CFlashUpdate()
+	:CProgressWindow()
 {
+	setTitle( g_Locale->getText("flashupdate.head") );
+
 	BasePath = "http://dboxupdate.berlios.de/update/";
 	ImageFile = "cramfs.img";
 	VersionFile = "version";
@@ -99,146 +100,47 @@ CHTTPUpdater::CHTTPUpdater()
 		printf("[CHTTPUpdater] Image-Filename: %s\n", ImageFile.c_str() );
 		printf("[CHTTPUpdater] Version-Filename: %s\n", VersionFile.c_str() );
 	}
-	statusViewer = NULL;
 }
 
-void CHTTPUpdater::setStatusViewer( CProgress_StatusViewer* statusview )
-{
-	statusViewer = statusview;
-}
-
-bool CHTTPUpdater::getInfo()
+bool CFlashUpdate::getInfo()
 {
 	CHTTPTool httpTool;
-	httpTool.setStatusViewer( statusViewer );
-
-	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getinfofile") );
+	httpTool.setStatusViewer( this );
+	showStatusMessage( g_Locale->getText("flashupdate.getinfofile") );
 	string gURL = BasePath + VersionFile;
 	string sFileName = gTmpPath+ VersionFile;
 
-	return httpTool.downloadFile( gURL, sFileName );
+	//printf("get versioninfo (url): %s - %s\n", gURL.c_str(), sFileName.c_str());
+	return httpTool.downloadFile( gURL, sFileName, 20 );
 }
 
-bool CHTTPUpdater::getFile( string version )
+bool CFlashUpdate::getUpdateImage( string version )
 {
 	CHTTPTool httpTool;
-	httpTool.setStatusViewer( statusViewer );
+	httpTool.setStatusViewer( this );
 
-	statusViewer->showStatusMessage( g_Locale->getText("flashupdate.getupdatefile")+ " v"+ version );
+	showStatusMessage( g_Locale->getText("flashupdate.getupdatefile")+ " v"+ version );
 	string gURL = BasePath + ImageFile;
 	string sFileName = gTmpPath+ ImageFile;
 
-	return httpTool.downloadFile( gURL, sFileName, 25 );
+	return httpTool.downloadFile( gURL, sFileName, 40 );
 }
 
-
-CFlashUpdate::CFlashUpdate()
+bool CFlashUpdate::checkVersion4Update(string &sFileName)
 {
-	frameBuffer = CFrameBuffer::getInstance();
-	width = 430;
-	hheight = g_Fonts->menu_title->getHeight();
-	mheight = g_Fonts->menu->getHeight();
-	height = hheight+5*mheight+20;
-
-	globalstatus = -1;
-
-	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
-	y=(576-height)>>1;
-}
-
-
-int CFlashUpdate::exec(CMenuTarget* parent, string)
-{
-	if (parent)
+	if(g_settings.softupdate_mode==1) //internet-update
 	{
-		parent->hide();
-	}
-	g_Sectionsd->setPauseScanning( true );
-	paint();
-	g_Sectionsd->setPauseScanning( false );
-
-	int res = g_RCInput->messageLoop();
-
-	hide();
-	return res;
-}
-
-void CFlashUpdate::hide()
-{
-	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
-}
-
-int CFlashUpdate::getGlobalStatus()
-{
-	return globalstatus;
-}
-
-void CFlashUpdate::showGlobalStatus(int prog)
-{
-	if(prog>100)
-	{
-		prog = 100;
-	}
-	if(prog<0)
-	{
-		prog=0;
-	}
-	if(globalstatus==prog)
-	{
-		return;
-	}
-	globalstatus = prog;
-
-	int pos = x+10;
-	if(prog!=0)
-	{
-		pos += int( float(width-20)/100.0*prog);
-		//vordergrund
-		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
-	}
-	//hintergrund
-	frameBuffer->paintBox(pos, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
-}
-
-void CFlashUpdate::showLocalStatus(int prog)
-{
-	static int lastprog = -1;
-
-	if(prog>100)
-	{
-		prog = 100;
-	}
-	if(prog<0)
-	{
-		prog=0;
+		if(!getInfo())
+		{
+			ShowHint("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
+			return false;
+		}
 	}
 
-	if(lastprog==prog)
-	{
-		return;
-	}
-	lastprog = prog;
+	showLocalStatus(100);
+	showGlobalStatus(20);
+	showStatusMessage(g_Locale->getText("flashupdate.versioncheck").c_str());
 
-	int pos = x+10;
-	if(prog!=0)
-	{
-		pos += int( float(width-20)/100.0*prog);
-		//vordergrund
-		frameBuffer->paintBox(x+10, localstatusY,pos, localstatusY+10, COL_MENUCONTENT +7);
-	}
-	//hintergrund
-	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
-
-}
-
-void CFlashUpdate::showStatusMessage(string text)
-{
-	frameBuffer->paintBox(statusTextX-5, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(statusTextX, statusTextY, width -(statusTextX- x), text.c_str(), COL_MENUCONTENT);
-}
-
-bool CFlashUpdate::checkVersion4Update(int ypos, string &sFileName)
-{
 	//installierte version...
 	installed_major = installed_provider = 0;
 	strcpy(installed_minor, "0");
@@ -249,7 +151,7 @@ bool CFlashUpdate::checkVersion4Update(int ypos, string &sFileName)
 	strcpy(new_minor, "0");
 	strcpy(new_md5sum, "");
 
-	sFileName = gTmpPath+ httpUpdater.VersionFile;
+	sFileName = gTmpPath+VersionFile;
 	FILE* fd = fopen(sFileName.c_str(), "r");
 	if(!fd)
 	{
@@ -257,9 +159,10 @@ bool CFlashUpdate::checkVersion4Update(int ypos, string &sFileName)
 		fd = fopen(sFileName.c_str(), "r");
 	}
 
+	hide();
 	if(!fd)
 	{
-		showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
+		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
 		return false;
 	}
 	char buf[100];
@@ -271,7 +174,7 @@ bool CFlashUpdate::checkVersion4Update(int ypos, string &sFileName)
 	}
 	else
 	{
-		showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
+		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getinfofileerror") );
 		return false;
 	}
 	if(fgets(buf,sizeof(buf),fd)!=NULL)
@@ -284,102 +187,71 @@ bool CFlashUpdate::checkVersion4Update(int ypos, string &sFileName)
 	//printf("new - %d : %d : %s\n", new_major, new_provider, new_minor);
 	if(installed_major!=new_major)
 	{
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.majorversiondiffer1").c_str() , COL_MENUCONTENT);
-		ypos+= mheight;
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.majorversiondiffer2").c_str() , COL_MENUCONTENT);
+		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.majorversiondiffer1") + "\n" + g_Locale->getText("flashupdate.majorversiondiffer2") );
 		return false;
 	}
+
 	if(installed_provider!=new_provider)
 	{
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.providerversiondiffer1").c_str() , COL_MENUCONTENT);
-		ypos+= mheight;
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.providerversiondiffer2").c_str() , COL_MENUCONTENT);
+		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.providerversiondiffer1") + "\n" + g_Locale->getText("flashupdate.providerversiondiffer2") );
 		return false;
 	}
 	if(strcmp(installed_minor,new_minor)== 0)
 	{
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.nonewversion1").c_str() , COL_MENUCONTENT);
-		ypos+= mheight;
-		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.nonewversion2").c_str() , COL_MENUCONTENT);
+		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.nonewversion1") );
 		return false;
 	}
-	return true;
-}
-
-void CFlashUpdate::paint()
-{
-	int ypos=y;
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText("flashupdate.head").c_str(), COL_MENUHEAD);
-	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
-
-	ypos+= hheight + (mheight >>1);
-
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10,  g_Locale->getText("flashupdate.action").c_str(), COL_MENUCONTENT);
-	statusTextY = ypos+mheight;
-	statusTextX = x+10 + g_Fonts->menu->getRenderWidth(g_Locale->getText("flashupdate.action").c_str())+10;
-	ypos+= mheight;
-
-	localstatusY = ypos+ mheight-20;
-	showLocalStatus(0);
-	ypos+= mheight+10;
-
-	httpUpdater.setStatusViewer(this);
-
-	if(g_settings.softupdate_mode==1) //internet-update
-	{
-		if(!httpUpdater.getInfo())
-		{
-			showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
-			return;
-		}
-	}
-	//versionsprüfung.....
-	showLocalStatus(100);
-	showStatusMessage(g_Locale->getText("flashupdate.versioncheck").c_str());
-
-	string sFileName = "";
-	if(!checkVersion4Update(ypos, sFileName))
-	{
-		return;
-	}
-
 	char msg[250];
 	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), new_major, new_provider, new_minor);
     if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
     {
-    	return;
+		return false;
     }
 
-	//start update
-	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT);
-	ypos+= mheight;
+	return true;
+}
 
-	globalstatusY = ypos+ mheight-20;
-	ypos+= mheight >>1;
-	showGlobalStatus(0);
+int CFlashUpdate::exec(CMenuTarget* parent, string)
+{
+	if(parent)
+	{
+		parent->hide();
+	}
+	paint();
+
+	string sFileName = "";
+	if(!checkVersion4Update(sFileName))
+	{
+		hide();
+		return menu_return::RETURN_REPAINT;
+	}
+	showGlobalStatus(19);
+	paint();
+	showGlobalStatus(20);
 
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
-		if(!httpUpdater.getFile( new_minor))
+		if(!getUpdateImage(new_minor))
 		{
-			showStatusMessage(g_Locale->getText("flashupdate.getupdatefileerror") );
-			return;
+			hide();
+			ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.getupdatefileerror") );
+			return menu_return::RETURN_REPAINT;
 		}
 	}
 
-	showGlobalStatus(25);
+	showGlobalStatus(40);
 
 	//md5check...
 	unsigned char   md5buffer[16];
 	char            md5string[40]="";
 
-	sFileName = gTmpPath+ httpUpdater.ImageFile;
+	sFileName = gTmpPath+ ImageFile;
 	showStatusMessage(g_Locale->getText("flashupdate.md5check") );
 	if( md5_file(sFileName.c_str(), 1, (unsigned char*) &md5buffer))
 	{
-		showStatusMessage(g_Locale->getText("flashupdate.cantopenfile") );
-		return;
+		hide();
+		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.cantopenfile") );
+		return menu_return::RETURN_REPAINT;
 	}
 	for(int count=0;count<16;count++)
 	{
@@ -390,19 +262,21 @@ void CFlashUpdate::paint()
 	printf("%s\n%s\n\n", new_md5sum, md5string);
 	if(strcmp(md5string, new_md5sum)!=0)
 	{
-		showStatusMessage(g_Locale->getText("flashupdate.md5sumerror") );
-		return;
+		hide();
+		ShowHint ( "messagebox.error", g_Locale->getText("flashupdate.md5sumerror") );
+		return menu_return::RETURN_REPAINT;
 	}
+	showGlobalStatus(60);
 
-	showGlobalStatus(50);
 	//flash it...
 	CFlashTool ft;
 	ft.setMTDDevice("/dev/mtd/3");
 	ft.setStatusViewer(this);
-	if(!ft.program(sFileName, 75, 100))
+	if(!ft.program(sFileName, 80, 100))
 	{
-		showStatusMessage( ft.getErrorMessage() );
-		return;
+		hide();
+		ShowHint ( "messagebox.error", ft.getErrorMessage() );
+		return menu_return::RETURN_REPAINT;
 	}
 
 	//versionsinfo schreiben
@@ -411,20 +285,20 @@ void CFlashUpdate::paint()
 	fflush(fd2);
 	fclose(fd2);
 
-
+	//status anzeigen
 	showGlobalStatus(100);
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
 
 	CNeutrinoApp::getInstance()->exec(NULL, "savesettings");
-
 	sleep(2);
 
-	frameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width- 10, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
-
-	sleep(2);
+	hide();
+	ShowHint ( "messagebox.info", g_Locale->getText("flashupdate.flashreadyreboot") );
 	ft.reboot();
 	sleep(20000);
+
+	hide();
+	return menu_return::RETURN_REPAINT;
 }
 
 

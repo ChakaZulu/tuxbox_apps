@@ -44,64 +44,28 @@
 using namespace std;
 
 
-class CHTTPUpdater
-{
-		string						BasePath;
-		CProgress_StatusViewer*	statusViewer;
-
-	public:
-		string						ImageFile;
-		string						VersionFile;
-
-		CHTTPUpdater();
-		void setStatusViewer( CProgress_StatusViewer* statusview );
-
-		bool getInfo();
-		bool getFile( string version );
-
-};
-
-
-class CFlashUpdate : public CMenuTarget, CProgress_StatusViewer
+class CFlashUpdate : public CProgressWindow
 {
 	private:
-		CFrameBuffer	*frameBuffer;
-		int fd_fp;
+		string	BasePath;
+		string	ImageFile;
+		string	VersionFile;
 
-		CHTTPUpdater httpUpdater;
-
-		int x;
-		int y;
-		int width;
-		int height;
-		int hheight,mheight; // head/menu font height
-
-		int globalstatus, globalstatusX, globalstatusY, localstatusY;
-		int statusTextX, statusTextY;
-
-		int installed_major, installed_provider;
-		int new_major, new_provider;
-		char installed_minor[50], new_minor[50];
+		int		installed_major, installed_provider;
+		int		new_major, new_provider;
+		char	installed_minor[50], new_minor[50];
 
 		char new_md5sum[50];
 
-		void paint();
-
-		void showGlobalStatus(int prog);
-		int getGlobalStatus();
-		void showLocalStatus(int prog);
-		void showStatusMessage(string text);
-
-		bool checkVersion4Update(int ypos, string &sFileName);
+		bool getInfo();
+		bool getUpdateImage(string version);
+		bool checkVersion4Update(string &sFileName);
 
 	public:
 		CFlashUpdate();
-
-		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
 
 };
-
 
 class CFlashExpert : public CProgressWindow
 {
