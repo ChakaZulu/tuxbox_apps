@@ -130,6 +130,7 @@ int CAudioPlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 {
 	CAudioPlayer::getInstance()->init();
 	m_state=CAudioPlayerGui::STOP;
+	m_select_title_by_name = g_settings.mp3player_select_title_by_name==1;
 	current=-1;
 	selected = 0;
 	width = 710;
