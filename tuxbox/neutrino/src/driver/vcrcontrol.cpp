@@ -276,7 +276,7 @@ bool CVCRControl::CServerDevice::Stop()
 //-------------------------------------------------------------------------
 bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode, unsigned long long epgid, uint apid) 
 {
-	printf("Record channel_id: %x epg: %llx, apid %u\n", channel_id, epgid, apid);
+	printf("Record channel_id: %x epg: %llx, apid %u mode %d\n", channel_id, epgid, apid,mode);
 	if(channel_id != 0)		// wenn ein channel angegeben ist
 	{
 		last_mode = CNeutrinoApp::getInstance()->getMode();

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.52 2002/11/08 09:25:22 Zwen Exp $
+   $Id: timermanager.cpp,v 1.53 2002/11/10 20:07:02 Zwen Exp $
 
 	License: GPL
 
@@ -671,16 +671,18 @@ void CTimerEvent_Record::announceEvent()
 {
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 																				CTimerdClient::EVT_ANNOUNCE_RECORD,
-																				CEventServer::INITID_TIMERD,
-																				&eventInfo, sizeof(CTimerd::EventInfo));
+																				CEventServer::INITID_TIMERD);
 	dprintf("Record announcement\n"); 
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::stopEvent()
 {
+	CTimerd::RecordingStopInfo stopinfo;
+	stopinfo.eventID = eventID;
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 																				CTimerdClient::EVT_RECORD_STOP,
-																				CEventServer::INITID_TIMERD);
+																				CEventServer::INITID_TIMERD,
+																				&stopinfo, sizeof(CTimerd::RecordingStopInfo));
 	// Programmiere shutdwon timer, wenn in wakeup state und kein record/zapto timer in 10 min
 	CTimerManager::getInstance()->shutdownOnWakeup();
 	dprintf("Recording stopped\n"); 
@@ -699,10 +701,12 @@ void CTimerEvent_Record::fireEvent()
 		dprintf("EPG-ID found %llu:%d(%s)\n",e.eventID,(int)e.epg_times.startzeit,e.title.c_str());     
 		eventInfo.epgID = e.eventID ;
 	}
+	CTimerd::RecordingInfo ri=eventInfo;
+	ri.eventID=eventID;
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 																				CTimerdClient::EVT_RECORD_START,
 																				CEventServer::INITID_TIMERD,
-																				&eventInfo, sizeof(CTimerd::EventInfo));
+																				&ri, sizeof(CTimerd::RecordingInfo));
 	dprintf("Record Timer fired\n"); 
 }
 

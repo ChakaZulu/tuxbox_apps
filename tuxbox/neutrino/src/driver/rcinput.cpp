@@ -761,8 +761,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 						{
 							case CTimerdClient::EVT_ANNOUNCE_RECORD :
 									*msg = NeutrinoMessages::ANNOUNCE_RECORD;
-									*data = (unsigned) p;
-									dont_delete_p = true;
+									*data = 0;
 								break;
 							case CTimerdClient::EVT_ANNOUNCE_ZAPTO :
 									*msg = NeutrinoMessages::ANNOUNCE_ZAPTO;
@@ -787,7 +786,8 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 								break;
 							case CTimerdClient::EVT_RECORD_STOP :
 									*msg = NeutrinoMessages::RECORD_STOP;
-									*data = 0;
+									*data = (unsigned) p;
+									dont_delete_p = true;
 								break;
 							case CTimerdClient::EVT_ZAPTO :
 									*msg = NeutrinoMessages::ZAPTO;

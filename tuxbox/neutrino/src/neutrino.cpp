@@ -2364,6 +2364,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						{
 							CVCRControl::getInstance()->Stop();
 							recordingstatus=0;
+							startNextRecording();
 						}
 					}
 					// Scart-Mode verlassen
@@ -2414,6 +2415,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			else
 				g_RCInput->postMsg( NeutrinoMessages::VCR_OFF, 0 );
 		}
+		delete (unsigned char*) data;
 		return messages_return::handled | messages_return::cancel_info;
 	}
 	else if( msg == CRCInput::RC_standby )
@@ -2523,37 +2525,64 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if(msg == NeutrinoMessages::RECORD_START)
 	{
-		if(CVCRControl::getInstance()->isDeviceRegistered())
+		if(recordingstatus == 0)
 		{
-			CVCRControl::CServerDeviceInfo serverinfo;
-			serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
-			serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
+			if(CVCRControl::getInstance()->isDeviceRegistered())
+			{
+				CVCRControl::CServerDeviceInfo serverinfo;
+				serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
+				serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
 
-			CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
-
-			if(CVCRControl::getInstance()->Record((CTimerd::EventInfo *) data))
-				recordingstatus = 1;
+				CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
+				recording_id = ((CTimerd::RecordingInfo *) data)->eventID;
+				if(CVCRControl::getInstance()->Record((CTimerd::RecordingInfo *) data))
+					recordingstatus = 1;
+				else
+					recordingstatus = 0;
+			}
 			else
-				recordingstatus = 0;
+				printf("Keine vcr Devices registriert\n");
+			delete (unsigned char*) data;
 		}
 		else
-			printf("Keine vcr Devices registriert\n");
+		{
+			// Es läuft bereits eine Aufnahme
+			if(nextRecordingInfo!=NULL)
+			{
+				delete nextRecordingInfo;
+				nextRecordingInfo=NULL;
+			}
+			nextRecordingInfo=((CTimerd::RecordingInfo*)data);
+		}
 		return messages_return::handled | messages_return::cancel_all;
 	}
 	else if( msg == NeutrinoMessages::RECORD_STOP)
 	{
-		if(CVCRControl::getInstance()->isDeviceRegistered())
-		{
-			if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
+		if(((CTimerd::RecordingStopInfo*)data)->eventID==recording_id)
+		{ // passendes stop zur Aufnahme
+			if(CVCRControl::getInstance()->isDeviceRegistered())
 			{
-				CVCRControl::getInstance()->Stop();
-				recordingstatus=0;
+				if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
+				{
+					CVCRControl::getInstance()->Stop();
+					recordingstatus=0;
+				}
+				else
+					printf("falscher state\n");
 			}
 			else
-				printf("falscher state\n");
+				printf("Keine vcr Devices registriert\n");
+			startNextRecording();
 		}
-		else
-			printf("Keine vcr Devices registriert\n");
+		else if(nextRecordingInfo!=NULL)
+		{
+			if(((CTimerd::RecordingStopInfo*)data)->eventID == nextRecordingInfo->eventID)
+			{
+				delete nextRecordingInfo;
+				nextRecordingInfo=NULL;
+			}
+		}
+		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ZAPTO)
@@ -2561,6 +2590,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		CTimerd::EventInfo * eventinfo; 
 		eventinfo = (CTimerd::EventInfo *) data;
 		channelList->zapTo_ChannelID(eventinfo->channel_id);
+		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
@@ -2653,12 +2683,14 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		if( mode != mode_scart )
 			ShowHint ( "messagebox.info", string((char *) data) );
+		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::EVT_EXTMSG )
 	{
 		if( mode != mode_scart )
 			ShowMsg ( "messagebox.info", string((char *) data) , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::REMIND)
@@ -2671,6 +2703,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		}
 		if( mode != mode_scart )
 			ShowMsg ( "timerlist.type.remind", text , CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw",0 );
+		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::CHANGEMODE )
@@ -3026,7 +3059,27 @@ void CNeutrinoApp::radioMode( bool rezap)
 	}
 }
 
+void CNeutrinoApp::startNextRecording()
+{
+	if(recordingstatus==0 && nextRecordingInfo!=NULL)
+	{
+		if(CVCRControl::getInstance()->isDeviceRegistered())
+		{
+			CVCRControl::CServerDeviceInfo serverinfo;
+			serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
+			serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
 
+			CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
+			recording_id = nextRecordingInfo->eventID;
+			if(CVCRControl::getInstance()->Record(nextRecordingInfo))
+				recordingstatus = 1;
+			else
+				recordingstatus = 0;
+		}
+		delete nextRecordingInfo;
+		nextRecordingInfo=NULL;
+	}
+}
 /**************************************************************************************
 *                                                                                     *
 *          CNeutrinoApp -  exec, menuitem callback (shutdown)                         *
@@ -3117,6 +3170,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 		{
 			if(recordingstatus == 1)
 			{
+				recording_id=0;
 				eventinfo.channel_id = g_RemoteControl->current_channel_id;
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 				eventinfo.apid = 0;
@@ -3139,6 +3193,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 			else
 			{
 				CVCRControl::getInstance()->Stop();
+				startNextRecording();
 			}
 			return true;
 		}
@@ -3158,7 +3213,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.358 2002/11/08 09:25:22 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.359 2002/11/10 20:07:02 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.19 2002/11/08 01:01:56 dirch Exp $
+	$Id: webapi.cpp,v 1.20 2002/11/10 20:07:01 Zwen Exp $
 
 	License: GPL
 
@@ -1040,7 +1040,7 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
 	for(; channel != channellist.end();channel++)
 	{
-		request->printf("<option value=\"%d\"",channel->channel_id);
+		request->printf("<option value=\"%u\"",channel->channel_id);
 		if(channel->channel_id == current_channel)
 			request->SocketWrite(" selected");
 		request->printf(">%s\n",channel->name);

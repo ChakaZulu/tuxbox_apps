@@ -42,7 +42,7 @@
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
-
+#include "timerdclient/timerdtypes.h"
 
 using namespace std;
 
@@ -88,7 +88,9 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		bool				softupdate;
 		bool				fromflash;
 		int				recordingstatus;
-		bool				record_mode;
+		int				recording_id;
+		CTimerd::RecordingInfo* nextRecordingInfo;
+		//		bool				record_mode;
 
 		long long 			standby_pressed_at;
 
@@ -122,6 +124,8 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void setupRecordingDevice(void);
 		void testNetwork();
 		void showNetwork();
+		
+		void startNextRecording();
 
 		void saveSetup();
 		int loadSetup();

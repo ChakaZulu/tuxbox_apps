@@ -180,6 +180,7 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 		CTimerd::EventInfo eventinfo;
 		eventinfo.epgID=0;
 		eventinfo.channel_id=timerNew.channel_id;
+		eventinfo.mode = timerNew.mode;
 		eventinfo.apid=0;
 		timerNew.standby_on = (timerNew_standby_on == 1);
 		void *data=NULL;
