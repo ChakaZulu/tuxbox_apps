@@ -1,4 +1,4 @@
-#include "pictureviewer.h"
+#include <lib/picviewer/pictureviewer.h>
 
 unsigned char * simple_resize(unsigned char * orgin,int ox,int oy,int dx,int dy)
 {

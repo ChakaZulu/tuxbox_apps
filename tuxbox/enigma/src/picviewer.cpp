@@ -21,6 +21,8 @@
 #include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
+#include <lib/base/message.h>
+#include <lib/picviewer/pictureviewer.h>
 
 struct PicViewerStyleSelectorActions
 {
@@ -74,11 +76,17 @@ void ePicViewerStyleSelector::entrySelected(eListBoxEntryText* e)
 		switch(selection)
 		{
 			case 1: printf("[PICVIEWER] show slideshow now...\n");
+				/*
+				for (all pics in directory)
+					pictureViewer->("picture.jpb");
+				*/
 				break;
 			default: 
 				printf("[PICVIEWER] show picture now...\n");
+				ePictureViewer::getInstance()->displayImage("picture.jpg");
+				break;
 		}
-		close((int)e->getKey());  // ???
+		close((int)e->getKey()); // ???
 	}
 	else
 		close(-1);

@@ -7,7 +7,7 @@
 	#include <fcntl.h>
 	#include <unistd.h>
 
-	#include "pictureviewer.h"
+	#include <lib/picviewer/pictureviewer.h>
 
 	#define PNG_BYTES_TO_CHECK 4
 	#define min(x,y) ((x) < (y) ? (x) : (y))

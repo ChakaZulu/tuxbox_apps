@@ -1,68 +1,75 @@
-#ifndef __pictureviewer__
-#define __pictureviewer__
+#ifndef __pictureviewer_h
+#define __pictureviewer_h
 
-/*
-  pictureviewer  -   DBoxII-Project
+#include <lib/base/thread.h>
+#include <lib/base/message.h>
+#include <lib/base/estring.h>
 
-  Copyright (C) 2001 Steffen Hehn 'McClean'
-  Homepage: http://dbox.cyberphoria.org/
+#define FH_ERROR_OK 0
+#define FH_ERROR_FILE 1		/* read/access error */
+#define FH_ERROR_FORMAT 2	/* file format error */
+#define FH_ERROR_MALLOC 3	/* error during malloc */
 
+#define dbout(fmt, args...) {struct timeval tv; gettimeofday(&tv, NULL); \
+        printf( "PV[%ld|%02ld] " fmt, (long)tv.tv_sec, (long)tv.tv_usec / 10000, ## args);}
 
-
-  License: GPL
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
-
-#include <string>
-#include <stdio.h>    /* printf       */
-#include <sys/time.h> /* gettimeofday */
-
-class ePictureViewer
+class ePictureViewer: public eMainloop, private eThread, public Object
 {
+	struct Message
+	{
+		int type;
+		const char *filename;
+		enum
+		{
+			display,
+			zoom,
+			move,
+			quit
+		};
+		Message(int type = 0, const char *filename = 0)
+			:type(type), filename(filename)
+		{}
+	};
+
+	eFixedMessagePump<Message> messages;
+	static ePictureViewer *instance;
+	void gotMessage(const Message &message);
+	void thread();
+	
 	struct cformathandler 
 	{
 		struct cformathandler *next;
-		int (*get_size)(const char *,int *,int*,int,int);
-		int (*get_pic)(const char *,unsigned char *,int,int);
+		int (*get_size)(const char *, int *, int *, int, int);
+		int (*get_pic)(const char *, unsigned char *, int, int);
 		int (*id_pic)(const char *);
 	};
 	typedef  struct cformathandler CFormathandler;
-
- public:
-	enum ScalingMode
-		{
-			NONE=0,
-			SIMPLE=1,
-			COLOR=2
-		};
+public:
 	ePictureViewer();
-	~ePictureViewer(){Cleanup();};
-	bool ShowImage(const std::string & filename, bool unscaled=false);
-	bool DecodeImage(const std::string & name, bool showBusySign=false, bool unscaled=false);
+	~ePictureViewer();
+	static ePictureViewer *getInstance() {return instance;}
+	
+	enum ScalingMode
+	{
+		NONE = 0,
+		SIMPLE = 1,
+		COLOR = 2
+	};
+	
+	bool ShowImage(const std::string& filename, bool unscaled = false);
+	bool DecodeImage(const std::string& name, bool showBusySign = false, bool unscaled = false);
 	bool DisplayNextImage();
-	void SetScaling(ScalingMode s){m_scaling=s;}
-	void SetAspectRatio(float aspect_ratio) {m_aspect=aspect_ratio;}
+	void SetScaling(ScalingMode s) {m_scaling = s;}
+	void SetAspectRatio(float aspect_ratio) {m_aspect = aspect_ratio;}
 	void showBusy(int sx, int sy, int width, char r, char g, char b);
 	void hideBusy();
 	void Zoom(float factor);
 	void Move(int dx, int dy);
 	void Cleanup();
 	void SetVisible(int startx, int endx, int starty, int endy);
-	
- private:
+	void displayImage(eString filename);
+
+private:
 	CFormathandler *fh_root;
 	ScalingMode m_scaling;
 	float m_aspect;
@@ -96,16 +103,6 @@ class ePictureViewer
 	
 	CFormathandler * fh_getsize(const char *name,int *x,int *y, int width_wanted, int height_wanted);
 	void init_handlers(void);
-	void add_format(int (*picsize)(const char *,int *,int*,int,int),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*));
-
+	void add_format(int (*picsize)(const char *, int *, int*, int, int), int (*picread)(const char *, unsigned char *, int , int), int (*id)(const char *));
 };
-
-
-#define FH_ERROR_OK 0
-#define FH_ERROR_FILE 1		/* read/access error */
-#define FH_ERROR_FORMAT 2	/* file format error */
-#define FH_ERROR_MALLOC 3	/* error during malloc */
-
-#define dbout(fmt, args...) {struct timeval tv; gettimeofday(&tv,NULL); \
-        printf( "PV[%ld|%02ld] " fmt, (long)tv.tv_sec, (long)tv.tv_usec/10000, ## args);}
 #endif

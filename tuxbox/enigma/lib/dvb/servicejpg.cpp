@@ -1,7 +1,7 @@
 #ifndef DISABLE_FILE
 
-#include <lib/dvb/servicejpg.h>
 #include <config.h>
+#include <lib/dvb/servicejpg.h>
 #include <lib/dvb/servicefile.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
@@ -13,6 +13,10 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <stdio.h>
+
+#include <src/picviewer.h>
+
+ePicViewerStyleSelector e(1);
 
 eServiceHandlerJPG::eServiceHandlerJPG(): eServiceHandler(0x2000)
 {
@@ -55,6 +59,26 @@ int eServiceHandlerJPG::play(const eServiceReference &service, int workaround )
 //	serviceEvent(eServiceEvent(eServiceEvent::evtStart));
 //	serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 
+#ifndef DISABLE_LCD
+//	e.setLCD(LCDTitle, LCDElement);
+#endif
+	e.show();
+	int ret = e.exec();
+//	e.hide();
+	switch (ret)
+	{
+		case 1:
+			printf("[SERVICEJPG] show slide now...\n");
+//			showSlide((eServiceReferenceDVB&)selected);
+			break;
+		case 2:
+			printf("[SERVICEJPG] show slideshow now...\n");
+//			showSlideShow((eServiceReferenceDVB&)selected);
+			break;
+		default:
+			break;
+	}
+
 	return 0;
 }
 
@@ -62,6 +86,7 @@ int eServiceHandlerJPG::stop(int workaround)
 {
 	if (!workaround)
 	{
+		e.hide();
 		printf("[SERVICEJPG] stop.\n");
 //		removeRef(runningService);
 //		runningService=eServiceReference();

@@ -29,7 +29,7 @@ enigma_LDADD_WHOLE = \
 	$(top_builddir)/lib/gui/libenigma_gui.a \
 	$(top_builddir)/lib/gdi/libenigma_gdi.a \
 	$(top_builddir)/lib/socket/libenigma_socket.a \
-	$(top_builddir)/lib/system/libenigma_system.a
+	$(top_builddir)/lib/system/libenigma_system.a 
 
 enigma_LDADD = \
 	@FREETYPE_LIBS@ \
