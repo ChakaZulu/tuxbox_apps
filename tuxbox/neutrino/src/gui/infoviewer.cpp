@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.69 2002/01/30 20:58:55 field Exp $
+// $Id: infoviewer.cpp,v 1.70 2002/01/30 21:41:01 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.70  2002/01/30 21:41:01  McClean
+// channame-position
+//
 // Revision 1.69  2002/01/30 20:58:55  field
 // DD-Symbol
 //
@@ -364,7 +367,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         g_Fonts->infobar_channame->RenderString(BoxEndX-timewidth-10, ChanNameY+height, timewidth+ 5, timestr, COL_INFOBAR);
 
 		// ... with channel name
-        g_Fonts->infobar_channame->RenderString(ChanNameX+ 20, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
+        g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
 
         ChanInfoX = BoxStartX + (ChanWidth >>1);
         int ChanInfoY = BoxStartY + ChanHeight+10;
