@@ -490,16 +490,15 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, string actionKey)
 	return 1;
 }
 
-string mypinghost(char* host)
+const std::string mypinghost(const char * const host)
 {
-int retvalue=0;
-	retvalue = pinghost(host);
+	int retvalue = pinghost(host);
 	switch (retvalue)
 	{
-		case 1: return ( g_Locale->getText("ping.ok") );
-		case 0: return ( g_Locale->getText("ping.unreachable") );
-		case -1: return ( g_Locale->getText("ping.protocol") );
-		case -2: return ( g_Locale->getText("ping.socket") );
+		case 1: return (g_Locale->getText("ping.ok"));
+		case 0: return (g_Locale->getText("ping.unreachable"));
+		case -1: return (g_Locale->getText("ping.protocol"));
+		case -2: return (g_Locale->getText("ping.socket"));
 	}
 	return "";
 }
@@ -511,6 +510,8 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	char our_broadcast[16];
 	char our_gateway[16];
 	char our_nameserver[16];
+	std::string text;
+
 	if (!dhcp) {
 		strcpy(our_ip,ip);
 		strcpy(our_mask,netmask);
@@ -530,22 +531,25 @@ void testNetworkSettings(const char* ip, const char* netmask, const char* broadc
 	printf("testNw Gateway: %s\n", our_gateway);
 	printf("testNw Nameserver: %s\n", our_nameserver);
 
-	string 	text;
-	char _text[100];
+	text = our_ip;
+	text += ": ";
+	text += mypinghost(our_ip);
+	text += '\n';
+	text += g_Locale->getText("networkmenu.gateway");
+	text += ": ";
+	text += our_gateway;
+	text += ' ';
+	text += mypinghost(our_gateway);
+	text += '\n';
+	text += g_Locale->getText("networkmenu.nameserver");
+	text += ": ";
+	text += our_nameserver;
+	text += ' ';
+	text += mypinghost(our_nameserver);
+	text += "\ndboxupdate.berlios.de: ";
+	text += mypinghost("195.37.77.138");
 
-	sprintf(_text, "%s %s\n", our_ip, mypinghost(our_ip).c_str() );
-	text= _text;
-
-	sprintf(_text, "Gateway %s %s\n", our_gateway, mypinghost(our_gateway).c_str() );
-	text= text+ _text;
-
-	sprintf(_text, "Nameserver %s %s\n", our_nameserver, mypinghost(our_nameserver).c_str() );
-	text= text+ _text;
-
-	sprintf(_text, "dboxupdate.berlios.de %s\n",mypinghost("195.37.77.138").c_str() );
-	text= text+ _text;
-
-	ShowMsg( "networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack );
+	ShowMsg("networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack);
 }
 
 void showCurrentNetworkSettings()
@@ -555,7 +559,7 @@ void showCurrentNetworkSettings()
 	char broadcast[16];
 	char router[16];
 	char nameserver[16];
-	string text;
+	std::string text;
 
 	netGetIP("eth0",ip,mask,broadcast);
 	if (ip[0] == 0) {
@@ -584,7 +588,7 @@ void showCurrentNetworkSettings()
 		text += ": ";
 		text += router;
 	}
-	ShowMsg( "networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack );
+	ShowMsg("networkmenu.show", text, CMessageBox::mbrBack, CMessageBox::mbBack);
 }
 
 unsigned long long getcurrenttime()
