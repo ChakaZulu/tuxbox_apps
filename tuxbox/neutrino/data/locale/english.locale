@@ -7,7 +7,7 @@ options.fb framebuffer
 options.null null
 options.default Reset to defaults
 
-mainmenu.head Main menue
+mainmenu.head Main Menu
 mainmenu.tvmode TV-Mode
 mainmenu.radiomode Radio-Mode
 mainmenu.scartmode Scart-Mode
@@ -50,7 +50,7 @@ satsetup.motorcontrol Manual Motor-Setup
 
 mainsettings.head Settings
 mainsettings.savesettingsnow save settings now
-mainsettings.savesettingsnow_hint Saveing settings,\nplease wait...
+mainsettings.savesettingsnow_hint Saving settings,\nplease wait...
 mainsettings.language Language
 mainsettings.audio Audio
 mainsettings.video Video
@@ -293,8 +293,8 @@ epglist.noevents EPG is not available...
 streaminfo.head Stream-Information
 streaminfo.resolution Resolution
 streaminfo.bitrate Bitrate
-streaminfo.aratio Aspect Radio
-streaminfo.aratio_unknown Aspect Radio: unknown
+streaminfo.aratio Aspect Ratio
+streaminfo.aratio_unknown Aspect Ratio: unknown
 streaminfo.framerate Framerate
 streaminfo.framerate_unknown Framerate: unknown
 streaminfo.audiotype Audiotype
@@ -448,7 +448,7 @@ messagebox.error Error
 messagebox.discard Discard changes?
 messagebox.info Information
 
-settings.noconffile No neutrino-settings found.\nUseing defaults.
+settings.noconffile No neutrino-settings found.\nUsing defaults.
 settings.missingoptionsconffile The neutrino-settings have been updated.\nNew Options will be set to default.
 
 cam.wrong ATTENTION, YOUR CARD \nDOES NOT MATCH CAMALPHA.BIN!!\n\nDo you whish to get this warning again?
@@ -459,7 +459,7 @@ stringinput.clear clear all
 
 streamingserver.noconnect No connection to streamingserver.\nRecording canceled.
 
-GENRE.MOVIE.0 Spielfilm / Drama
+GENRE.MOVIE.0 movie/drama
 GENRE.MOVIE.1 detective/thriller
 GENRE.MOVIE.2 adventure/western/war
 GENRE.MOVIE.3 science fiction/fantasy/horror
@@ -469,7 +469,7 @@ GENRE.MOVIE.6 romance
 GENRE.MOVIE.7 serious/classical/religious/historical movie/drama
 GENRE.MOVIE.8 adult movie/drama
 
-GENRE.NEWS.0 Nachrichten
+GENRE.NEWS.0 news
 GENRE.NEWS.1 news/weather report
 GENRE.NEWS.2 news magazine
 GENRE.NEWS.3 documentary
@@ -480,27 +480,27 @@ GENRE.SHOW.1 game show/quiz/contest
 GENRE.SHOW.2 variety show
 GENRE.SHOW.3 talk show
 
-GENRE.SPORTS.0 Sport
+GENRE.SPORTS.0 sports
 GENRE.SPORTS.1 special events (Olympic Games,World Cup etc.)
 GENRE.SPORTS.2 sports magazines
 GENRE.SPORTS.3 football/soccer
 GENRE.SPORTS.4 tennis/squash
 GENRE.SPORTS.5 team sports (excluding football)
 GENRE.SPORTS.6 athletics
-GENRE.SPORTS.7 motor sport
-GENRE.SPORTS.8 water sport
+GENRE.SPORTS.7 motor sports
+GENRE.SPORTS.8 water sports
 GENRE.SPORTS.9 winter sports
 GENRE.SPORTS.10 equestrian
 GENRE.SPORTS.11 martial sports
 
-GENRE.CHILDRENs_PROGRAMMES.0 Kinder / Jugendprogramm
+GENRE.CHILDRENs_PROGRAMMES.0 children / juvenile program
 GENRE.CHILDRENs_PROGRAMMES.1 pre-school children's programmes
 GENRE.CHILDRENs_PROGRAMMES.2 entertainment programmes for 6 to 14
 GENRE.CHILDRENs_PROGRAMMES.3 entertainment programmes for 10 to 16
 GENRE.CHILDRENs_PROGRAMMES.4 informational/educational/school programmes
 GENRE.CHILDRENs_PROGRAMMES.5 cartoons/puppets
 
-GENRE.MUSIC_DANCE.0 Musik / Ballet / Tanz
+GENRE.MUSIC_DANCE.0 music / ballet / dance
 GENRE.MUSIC_DANCE.1 rock/pop
 GENRE.MUSIC_DANCE.2 serious music/classical music
 GENRE.MUSIC_DANCE.3 folk/traditional music
@@ -508,7 +508,7 @@ GENRE.MUSIC_DANCE.4 jazz
 GENRE.MUSIC_DANCE.5 musical/opera
 GENRE.MUSIC_DANCE.6 ballet
 
-GENRE.ARTS.0 Kunst / Kultur
+GENRE.ARTS.0 arts / culture
 GENRE.ARTS.1 performing arts
 GENRE.ARTS.2 fine arts
 GENRE.ARTS.3 religion
@@ -521,12 +521,12 @@ GENRE.ARTS.9 new media
 GENRE.ARTS.10 arts/culture magazines
 GENRE.ARTS.11 fashion
 
-GENRE.SOZIAL_POLITICAL.0 Sozial & Politikereignisse / Wirtschaft
+GENRE.SOZIAL_POLITICAL.0 social & politic events / business
 GENRE.SOZIAL_POLITICAL.1 magazines/reports/documentary
 GENRE.SOZIAL_POLITICAL.2 economics/social advisory
 GENRE.SOZIAL_POLITICAL.3 remarkable people
 
-GENRE.DOCUS_MAGAZINES.0 Doku / Magazin
+GENRE.DOCUS_MAGAZINES.0 documentation / magazine
 GENRE.DOCUS_MAGAZINES.1 nature/animals/environment
 GENRE.DOCUS_MAGAZINES.2 technology/natural sciences
 GENRE.DOCUS_MAGAZINES.3 medicine/physiology/psychology
@@ -535,7 +535,7 @@ GENRE.DOCUS_MAGAZINES.5 social/spiritual sciences
 GENRE.DOCUS_MAGAZINES.6 further education
 GENRE.DOCUS_MAGAZINES.7 languages
 
-GENRE.TRAVEL_HOBBIES.0 Reise & Freizeit
+GENRE.TRAVEL_HOBBIES.0 travel & recreation
 GENRE.TRAVEL_HOBBIES.1 tourism/travel
 GENRE.TRAVEL_HOBBIES.2 handicraft
 GENRE.TRAVEL_HOBBIES.3 motoring
@@ -544,7 +544,7 @@ GENRE.TRAVEL_HOBBIES.5 cooking
 GENRE.TRAVEL_HOBBIES.6 advertisement/shopping
 GENRE.TRAVEL_HOBBIES.7 gardening
 
-GENRE.UNKNOWN Unbekannt
+GENRE.UNKNOWN unknown
 
 parentallock.parentallock Youth protection
 
@@ -697,7 +697,7 @@ mp3player.stop Stop
 mp3player.playall Play all
 mp3player.shuffle shuffle
 mp3player.deleteall delete all
-mp3player.title Titel
+mp3player.title Title
 mp3player.artist Artist
 mp3player.playing Current Track
 mp3player.id3scan Scanning ID3 tags
