@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.25  2003/02/07 14:07:23  alexw
+for those with new api
+
 Revision 1.24  2003/02/07 13:55:16  alexw
 frontend needs to be opened only once
 
@@ -95,6 +98,14 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 tuner::tuner(settings *s)
 {
 	setting = s;
+	
+#ifdef HAVE_LINUX_DVB_VERSION_H
+	if ((frontend = open(FRONTEND_DEV, O_RDWR|O_NONBLOCK)) < 0)
+	{
+		perror("OPEN FRONTEND DEVICE");
+		exit(1);
+	}
+#endif
 }
 
 tuner::~tuner()
