@@ -1,5 +1,5 @@
 /*
-$Id: mdt.c,v 1.2 2004/08/24 21:30:23 rasc Exp $
+$Id: mdt.c,v 1.3 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: mdt.c,v 1.2 2004/08/24 21:30:23 rasc Exp $
 
 
 $Log: mdt.c,v $
+Revision 1.3  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.2  2004/08/24 21:30:23  rasc
 more Metadata
 
@@ -101,4 +104,45 @@ void decode_MDT (u_char *b, int len)
 
   outBit_Sx_NL (5,"CRC: ",				b,  0, 32);
 }
+
+
+
+
+
+/*
+ *  $$$ TODO
+
+metadata_byte: This 8-bit contains contiguous bytes from a metadata Access Unit.
+  Q: so is it a contigous stream splitted over serveral sections?
+  A: guess so...
+
+
+
+
+Table Amd.1-10 – Metadata Access Unit Wrapper
+
+Metadata_AU_wrapper () {
+	for (i=0; i<N;i++){
+		Metadata_AU_cell ()
+	}
+}
+
+
+Table Amd.1-11 – Metadata AU cell
+
+Metadata_AU_cell () {
+	metadata_service_id
+	sequence_number
+	cell_fragment_indication
+	decoder_config_flag
+	random_access_indicator
+	reserved
+	AU_cell_data_length
+	for (i=0; I<AU_cell_data_length;i++){
+		AU_cell_data_byte
+	}
+}
+
+
+*/
 

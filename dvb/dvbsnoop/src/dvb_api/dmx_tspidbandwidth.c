@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidbandwidth.c,v 1.6 2004/01/11 21:01:31 rasc Exp $
+$Id: dmx_tspidbandwidth.c,v 1.7 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -12,6 +12,9 @@ $Id: dmx_tspidbandwidth.c,v 1.6 2004/01/11 21:01:31 rasc Exp $
 
 
 $Log: dmx_tspidbandwidth.c,v $
+Revision 1.7  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.6  2004/01/11 21:01:31  rasc
 PES stream directory, PES restructured
 
@@ -70,7 +73,7 @@ new: bandwidth usage reporting for a PID
 
 #define TS_LEN			188
 #define TS_SYNC_BYTE		0x47
-#define TS_BUF_SIZE		(TS_LEN * 2048)
+#define TS_BUF_SIZE		(TS_LEN * 2048)		/* fix dmx buffer size */
 
 
 static int sync_ts (u_char *buf, int len);
@@ -120,6 +123,7 @@ int ts_pidbandwidth (OPTION *opt)
 
 	if ((dmxfd=open(opt->devDemux,O_RDWR)) < 0) {
 		IO_error(opt->devDemux);
+		close(pfd.fd);
 		return -1;
 	}
 	ioctl (dmxfd,DMX_SET_BUFFER_SIZE, sizeof(buf));
@@ -131,6 +135,8 @@ int ts_pidbandwidth (OPTION *opt)
 		flt.flags = DMX_IMMEDIATE_START;
 		if (ioctl(dmxfd, DMX_SET_PES_FILTER, &flt) < 0) {
 			IO_error("DMX_SET_PES_FILTER");
+			close(pfd.fd);
+			close(dmxfd);
 			return -1;
 		}
 

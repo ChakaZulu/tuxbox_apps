@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.25 2004/04/18 19:30:32 rasc Exp $
+$Id: dmx_ts.c,v 1.26 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.25 2004/04/18 19:30:32 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.26  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.25  2004/04/18 19:30:32  rasc
 Transport Stream payload sub-decoding (Section, PES data) improved
 
@@ -124,9 +127,9 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-#define TS_BUF_SIZE  (256 * 1024)
 #define TS_PACKET_LEN (188)              /* TS RDSIZE is fixed !! */
 #define TS_SYNC_BYTE  (0x47)             /* SyncByte fuer TS  ISO 138181-1 */
+#define TS_BUF_SIZE   (256 * 1024)	 /* default DMX_Buffer Size for TS */
 #define READ_BUF_SIZE (3*TS_PACKET_LEN)	 /* min. 2x TS_PACKET_LEN!!! */
 
 
@@ -145,9 +148,9 @@ int  doReadTS (OPTION *opt)
   u_char  buf[READ_BUF_SIZE]; 	/* data buffer */
   u_char  *b;			/* ptr for packet start */
   long    count;
-  int     i;
   char    *f;
   int     fileMode;
+  long    dmx_buffer_size = TS_BUF_SIZE;
 
 
   
@@ -184,7 +187,18 @@ int  doReadTS (OPTION *opt)
     }
 
 
-    ioctl (fd_dmx,DMX_SET_BUFFER_SIZE, TS_BUF_SIZE);
+    // -- alloc dmx buffer for TS
+    if (opt->rd_buffer_size > 0) {
+	    dmx_buffer_size = opt->rd_buffer_size;
+    }
+
+    if (ioctl(fd_dmx,DMX_SET_BUFFER_SIZE, dmx_buffer_size) < 0) {
+	IO_error ("DMX_SET_BUFFER_SIZE failed: ");
+	close (fd_dmx);
+	close (fd_dvr);
+	return -1;
+    }
+
     memset (&flt, 0, sizeof (struct dmx_pes_filter_params));
 
     flt.pid = opt->pid;
@@ -193,9 +207,11 @@ int  doReadTS (OPTION *opt)
     flt.pes_type = DMX_PES_OTHER;
     flt.flags = DMX_IMMEDIATE_START;
 
-    if ((i=ioctl(fd_dmx,DMX_SET_PES_FILTER,&flt)) < 0) {
-      IO_error ("DMX_SET_PES_FILTER failed: ");
-      return -1;
+    if (ioctl(fd_dmx,DMX_SET_PES_FILTER,&flt) < 0) {
+	IO_error ("DMX_SET_PES_FILTER failed: ");
+	close (fd_dmx);
+	close (fd_dvr);
+	return -1;
     }
 
   }

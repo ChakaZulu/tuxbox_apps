@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.21 2004/03/31 21:14:23 rasc Exp $
+$Id: dmx_sect.c,v 1.22 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.21 2004/03/31 21:14:23 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.22  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.21  2004/03/31 21:14:23  rasc
 New: Spider section pids  (snoop referenced section pids),
 some minor changes
@@ -108,7 +111,10 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "errno.h"
 
 
-#define SECT_BUF_SIZE (256*1024)
+
+#define SECT_BUF_SIZE (256*1024)	/* default DMX buffer size */
+#define READ_BUF_SIZE (32*1024)		/* section work buffer (section is @5K) */
+
 
 static long  sect_read (int fd, u_char *buf, long buflen);
 static int   doReadSECT_2 (OPTION *opt);
@@ -167,12 +173,12 @@ static int  doReadSECT_2 (OPTION *opt)
 
 {
   int     fd;
-  u_char  buf[SECT_BUF_SIZE]; 		/* data buffer */
+  u_char  buf[READ_BUF_SIZE]; 		/* data buffer */
   long    count;
-  int     i;
   char    *f;
   int     openMode;
   int     dmxMode;
+  long    dmx_buffer_size = SECT_BUF_SIZE;
 
 
 
@@ -199,7 +205,22 @@ static int  doReadSECT_2 (OPTION *opt)
 
   if (dmxMode) {
     struct dmx_sct_filter_params flt;
+
+
+    // -- alloc dmx buffer for SECTION
+    if (opt->rd_buffer_size > 0) {
+	    dmx_buffer_size = opt->rd_buffer_size;
+    }
+
+    if (ioctl(fd,DMX_SET_BUFFER_SIZE, dmx_buffer_size) < 0) {
+	IO_error ("DMX_SET_BUFFER_SIZE failed: ");
+	close (fd);
+	return -1;
+    }
+
+
     memset (&flt, 0, sizeof (struct dmx_sct_filter_params));
+
     flt.pid = opt->pid;
     flt.filter.filter[0] = opt->filter;
     flt.filter.mask[0] = opt->mask;
@@ -207,9 +228,10 @@ static int  doReadSECT_2 (OPTION *opt)
     flt.flags = DMX_IMMEDIATE_START;
     if (opt->crc) flt.flags |= DMX_CHECK_CRC;
 
-    if ((i=ioctl (fd, DMX_SET_FILTER, &flt)) < 0) {
-      IO_error ("DMX_SET_FILTER failed: ");
-      return -1;
+    if (ioctl (fd, DMX_SET_FILTER, &flt) < 0) {
+	IO_error ("DMX_SET_FILTER failed: ");
+ 	close(fd);
+	return -1;
     }
 
   }

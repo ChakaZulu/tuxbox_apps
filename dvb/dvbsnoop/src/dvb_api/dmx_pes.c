@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.27 2004/04/18 19:30:32 rasc Exp $
+$Id: dmx_pes.c,v 1.28 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dmx_pes.c,v 1.27 2004/04/18 19:30:32 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.28  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.27  2004/04/18 19:30:32  rasc
 Transport Stream payload sub-decoding (Section, PES data) improved
 
@@ -128,8 +131,8 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dmx_pes.h"
 
 
-#define PES_BUF_SIZE  (256 * 1024)
-#define READ_BUF_SIZE (2 * 64 * 1024)  // larger (64KB + 6 Bytes) !!!
+#define PES_BUF_SIZE  (256 * 1024)		/* default PES dmx buffer size */
+#define READ_BUF_SIZE (2 * 64 * 1024)  		/* larger (64KB + 6 Bytes) !!! */
 
 
 
@@ -148,10 +151,11 @@ int  doReadPES (OPTION *opt)
   u_char  buf[READ_BUF_SIZE]; 		/* data buffer */
   u_char  *b;				/* ptr to packet start */
   long    count;
-  int     i;
   char    *f;
   int     openMode;
   int     dmxMode;
+  long    dmx_buffer_size = PES_BUF_SIZE;
+
 
 
 
@@ -181,7 +185,18 @@ int  doReadPES (OPTION *opt)
   if (dmxMode) {
     struct dmx_pes_filter_params flt;
 
-    ioctl (fd,DMX_SET_BUFFER_SIZE, PES_BUF_SIZE);
+
+    // -- alloc dmx buffer for PES
+    if (opt->rd_buffer_size > 0) {
+	    dmx_buffer_size = opt->rd_buffer_size;
+    }
+
+    if (ioctl(fd,DMX_SET_BUFFER_SIZE, dmx_buffer_size) < 0) {
+	IO_error ("DMX_SET_BUFFER_SIZE failed: ");
+	close (fd);
+	return -1;
+    }
+
     memset (&flt, 0, sizeof (struct dmx_pes_filter_params));
 
     flt.pid = opt->pid;
@@ -190,9 +205,10 @@ int  doReadPES (OPTION *opt)
     flt.pes_type = DMX_PES_OTHER;
     flt.flags = DMX_IMMEDIATE_START;
 
-    if ((i=ioctl(fd,DMX_SET_PES_FILTER,&flt)) < 0) {
-      IO_error ("DMX_SET_PES_FILTER failed: ");
-      return -1;
+    if (ioctl(fd,DMX_SET_PES_FILTER,&flt) < 0) {
+	IO_error ("DMX_SET_PES_FILTER failed: ");
+	close (fd);
+	return -1;
     }
 
   }

@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.27 2004/08/06 22:21:38 rasc Exp $
+$Id: descriptor.c,v 1.28 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: descriptor.c,v 1.27 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.28  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.27  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 
@@ -111,6 +114,7 @@ kleiner Fehler
 #include "dsmcc_carousel_descriptor.h"
 #include "dsmcc_int_unt_descriptor.h"
 #include "mhp_ait_descriptor.h"
+#include "tva_rnt_descriptor.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 

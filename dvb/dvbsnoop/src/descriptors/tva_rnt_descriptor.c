@@ -1,5 +1,5 @@
 /*
-$Id: tva_rnt_descriptor.c,v 1.2 2004/08/27 23:25:52 rasc Exp $ 
+$Id: tva_rnt_descriptor.c,v 1.3 2004/09/01 20:20:34 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: tva_rnt_descriptor.c,v 1.2 2004/08/27 23:25:52 rasc Exp $
 
 
 $Log: tva_rnt_descriptor.c,v $
+Revision 1.3  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.2  2004/08/27 23:25:52  rasc
  - Update: changes due to  EN 300 468 v1.6.1
  - Bugfix: Multilingual component descriptor  (tnx to Karsten Siebert)
@@ -143,9 +146,9 @@ void descriptorTVA_RAR_over_DVB_stream (u_char *b)
 
 
   // $$$ TODO this part is re-usable
-  outBit_S2x_NL (4,"Network_id: ",		b, 104, 16,
+  outBit_S2x_NL (4,"network_id: ",		b, 104, 16,
 			(char *(*)(u_long)) dvbstrNetworkIdent_ID);
-  outBit_S2x_NL (4,"Original_network_id: ",	b, 120, 16,
+  outBit_S2x_NL (4,"original_network_id: ",	b, 120, 16,
 			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
   outBit_Sx_NL  (4,"transport_stream_ID: ",	b, 132, 16);
   outBit_S2Tx_NL(4,"service_ID: ",		b, 148, 16,
@@ -252,9 +255,9 @@ void descriptorTVA_RNT_scan (u_char *b)
 
   while (len > 0) {
 
-	outBit_S2x_NL (4,"Network_id: ",		b,   0, 16,
+	outBit_S2x_NL (4,"network_id: ",		b,   0, 16,
 			(char *(*)(u_long)) dvbstrNetworkIdent_ID);
-	outBit_S2x_NL (4,"Original_network_id: ",	b,  16, 16,
+	outBit_S2x_NL (4,"original_network_id: ",	b,  16, 16,
 			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
 
 

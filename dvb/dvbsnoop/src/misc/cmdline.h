@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.19 2004/04/15 03:38:50 rasc Exp $
+$Id: cmdline.h,v 1.20 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -38,6 +38,7 @@ typedef struct _OPTIONS {
   char        *devDemux;		// input device DMX
   char        *devDvr;			// input device DVR
   char        *devFE;			// input device Frontend
+  long        rd_buffer_size;		// read buffer size in (0L = default)
   u_int       pid;			// decode PID
   u_int       filter;			// PID filter
   u_int       mask;			// PID mask

@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.16 2004/02/12 23:00:22 rasc Exp $
+$Id: datagram.c,v 1.17 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: datagram.c,v 1.16 2004/02/12 23:00:22 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.17  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.16  2004/02/12 23:00:22  rasc
 no message
 
@@ -205,4 +208,43 @@ void decode_DSMCC_DATAGRAM (u_char *b, int len)
 		   ?"CRC: " :"Checksum: ",	b,0,32);
 }
 
+
+
+/*
+$$$ TODO   realtime parameters in MPE
+
+EN 301 192 v1.4.1
+
+9.10 Real time parameters
+On an elementary stream where Time Slicing and/or MPE-FEC are used, each MPE section and MPE-FEC section shall
+carry real time parameters described in table 42. For the MPE sections, real time parameters are carried within the
+MAC_address_4…MAC_address_1, as illustrated in figure 20.
+
+Table 42: Time Slicing and MPE-FEC real time parameters
+Syntax Number of bits Identifier
+real_time_parameters () {
+delta_t 12 uimsbf
+table_boundary 1 bslbf
+frame_boundary 1 bslbf
+address 18 uimsbf
+}
+
+delta_t: Usage of this 12-bit field depends on whether Time Slicing is used on the elementary stream.
+The following applies when Time Slicing is used (regardless whether MPE-FEC is used or not):
+• The field indicates the time (delta-t) to the next Time Slice burst within the elementary stream. The time
+information is in all MPE sections and MPE-FEC sections within a burst and the value may differ section by
+section. The resolution of the delta-t is 10 ms. Value 0x00 is reserved to indicate that no more bursts will be
+transmitted within the elementary stream (e.g. end of service). In such a case, all MPE sections and MPE-FEC
+sections within the burst shall have the same value in this field.
+EXAMPLE: delta-t value 0xC00 = 3072 indicates the time to the next burst is 30,72 s.
+• Delta-t information is the time from the transport packet carrying the first byte of the current MPE section or
+MPE-FEC section to the transport packet carrying the first byte of next burst. Therefore the delta-t information
+may differ between MPE sections and between MPE-FEC sections within a burst.
+• The time indicated by delta-t shall be beyond the end of the maximum burst duration of the actual burst. This
+ensures a decoder can always reliably distinguish two sequential bursts within an elementary stream.
+
+...
+
+
+*/
 

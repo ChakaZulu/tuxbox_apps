@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.61 2004/08/25 21:33:41 rasc Exp $
+$Id: dvb_str.c,v 1.62 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.61 2004/08/25 21:33:41 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.62  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.61  2004/08/25 21:33:41  rasc
 small fix: Priority wrong in Terr. Sys Delivery descriptor
 
@@ -792,7 +795,7 @@ char *dvbstrStream_TYPE (u_int flag)
      {  0x7F, 0x7F,  "IPMP stream" },
 
      // $$$ ATSC ID Names could be includes...
-     // $$$ streamtype == 0x90 at MPE_FEC , see EN 301192 v1.4.1 s9.5
+     // $$$ TODO  streamtype == 0x90 at MPE_FEC , see EN 301192 v1.4.1 s9.5
      {  0x80, 0xFF,  "User private" },
      {  0,0, NULL }
   };

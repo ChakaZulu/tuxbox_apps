@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.16 2004/04/05 17:32:13 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.17 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dmx_tspidscan.c,v 1.16 2004/04/05 17:32:13 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.17  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.16  2004/04/05 17:32:13  rasc
 mass typo fix adaption --> adaptation
 
@@ -118,7 +121,7 @@ pidscan on transponder
 
 #define TS_LEN			188
 #define TS_SYNC_BYTE		0x47
-#define TS_BUF_SIZE		(TS_LEN * 2048)
+#define TS_BUF_SIZE		(TS_LEN * 2048)		/* fix buffer size */
 
 
 
@@ -231,6 +234,7 @@ int ts_pidscan (OPTION *opt)
 				}
 			}
 
+			// -- default buffer should be sufficient
 			// ioctl (dmxfd[i],DMX_SET_BUFFER_SIZE, sizeof(buf));
 
 			// -- skip already scanned pids (rescan-mode)

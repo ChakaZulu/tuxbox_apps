@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.34 2004/04/15 03:38:50 rasc Exp $
+$Id: cmdline.c,v 1.35 2004/09/01 20:20:34 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.34 2004/04/15 03:38:50 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.35  2004/09/01 20:20:34  rasc
+new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
+
 Revision 1.34  2004/04/15 03:38:50  rasc
 new: TransportStream sub-decoding (ts2PES, ts2SEC)  [-tssubdecode]
 checks for continuity errors, etc. and decode in TS enclosed sections/pes packets
@@ -178,6 +181,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->devDemux = DEMUX_DEVICE;
   opt->devDvr = DVR_DEVICE;
   opt->devFE = FRONTEND_DEVICE;
+  opt->rd_buffer_size = 0L;	// use default read buffersize
   opt->pid = INVALID_PID;
   opt->filter = 0;
   opt->mask = 0;
@@ -217,6 +221,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-npd")) opt->printdecode = 0;
      else if (!strcmp (argv[i],"-hideproginfo")) opt->hide_copyright= 1;
      else if (!strcmp (argv[i],"-timeout")) opt->timeout_ms = str2i(argv[++i]);
+     else if (!strcmp (argv[i],"-buffersize")) opt->rd_buffer_size = str2i(argv[++i]) * 1024;
      else if (!strcmp (argv[i],"-tf")) opt->time_mode = FULL_TIME;
      else if (!strcmp (argv[i],"-td")) opt->time_mode = DELTA_TIME;
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
@@ -323,6 +328,8 @@ static void usage (void)
     printf("                         feinfo = frontend information\n");
     printf("                 stream type or pidscan\n");
     printf("   -timeout ms:  section read timeout in ms [-TIMEOUT 0]\n");
+    printf("   -buffersize kb: read buffersize in KBytes  [-buffersize 0]\n");
+    printf("                 (0 = use default read buffer size)\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
