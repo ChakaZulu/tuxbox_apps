@@ -45,8 +45,6 @@
 
 #include <sys/socket.h>
 
-#include <tuxbox.h>
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -110,7 +108,7 @@ static void initGlobals(void)
 	g_Fonts         = NULL;
 
 	g_RCInput       = NULL;
-	g_Controld      = NULL;
+	g_Controld      = new CControldClient;
 	g_Timerd        = NULL;
 	g_Zapit         = new CZapitClient;
 	g_RemoteControl = NULL;
@@ -472,8 +470,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_subchannel_up = configfile.getInt32( "key_subchannel_up",  CRCInput::RC_right );
 	g_settings.key_subchannel_down = configfile.getInt32( "key_subchannel_down",  CRCInput::RC_left );
 
-	strcpy( g_settings.repeat_blocker, configfile.getString( "repeat_blocker", g_info.box_Type==3?"150":"25" ).c_str() );
-	strcpy( g_settings.repeat_genericblocker, configfile.getString( "repeat_genericblocker", g_info.box_Type==3?"25":"0" ).c_str() );
+	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
+	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
 
 	//screen configuration
 	g_settings.screen_StartX = configfile.getInt32( "screen_StartX", 37 );
@@ -1690,7 +1688,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", colorSettings_statusbarColors) );
 
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	if(tuxbox_get_vendor() != TUXBOX_VENDOR_NOKIA)
+	if(g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA)
 	{
 		//menuefaden nur bei enx-chips!
 		CMenuOptionChooser* oj = new CMenuOptionChooser("colormenu.fade", &g_settings.widget_fade, true );
@@ -2084,21 +2082,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName.c_str());
 
-	switch(tuxbox_get_vendor()) {
-		case TUXBOX_VENDOR_NOKIA:
-			g_info.box_Type = 1;
-			break;
-		case TUXBOX_VENDOR_PHILIPS:
-			g_info.box_Type = 2;
-			break;
-		case TUXBOX_VENDOR_SAGEM:
-			g_info.box_Type = 3;
-			break;
-		default:
-			g_info.box_Type = 3;
-	}
+	g_info.box_Type = g_Controld->getBoxType();
 	
-	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d (%s %s)\n", g_info.box_Type, tuxbox_get_vendor_str(), tuxbox_get_model_str());
+	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d\n", g_info.box_Type);
 
 
 
@@ -2106,7 +2092,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	int loadSettingsErg = loadSetup();
 
 	//lcd aktualisieren
-	g_Controld = new CControldClient;
 	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control==1));
 	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control==1));
 
@@ -3368,7 +3353,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.416 2003/02/19 17:08:26 waldi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.417 2003/02/19 18:43:29 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

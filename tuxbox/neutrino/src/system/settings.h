@@ -237,7 +237,7 @@ struct SNeutrinoSettings
 
 struct SglobalInfo
 {
-	int               box_Type;
+	unsigned char     box_Type;
 	delivery_system_t delivery_system;
 };
 
