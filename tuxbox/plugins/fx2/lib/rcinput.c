@@ -9,12 +9,6 @@
 #include <termios.h>
 #include <unistd.h>
 
-#ifdef i386
-#define RC_IOCTL_BCODES 0
-#else
-#include <dbox/fp.h>
-#endif
-
 #include "draw.h"
 #include "rcinput.h"
 
@@ -152,113 +146,49 @@ void	KbClose( void )
 		tcsetattr(kbfd,TCSANOW,&tios);
 }
 
-static	int		fd_is_ext = 0;
-
 int	RcInitialize( int extfd )
 {
-	char	buf[32];
-
 	//KbInitialize();
-	if ( extfd == -1 )
+	fd = open( "/dev/input/event0", O_RDONLY );
+	if ( fd == -1 )
 	{
-		fd_is_ext = 0;
-		fd = open( "/dev/dbox/rc0", O_RDONLY );
-		if ( fd == -1 )
-		{
-			return kbfd;
-		}
-		fcntl(fd, F_SETFL, O_NONBLOCK );
-		ioctl(fd, RC_IOCTL_BCODES, 1);
+		return kbfd;
 	}
-	else
-	{
-		fd_is_ext = 1;
-		fd = extfd;
-		fcntl(fd, F_SETFL, O_NONBLOCK );
-	}
-
-/* clear rc-buffer */
-	read( fd, buf, 32 );
+	fcntl(fd, F_SETFL, O_NONBLOCK );
 
 	return 0;
 }
 
-static	unsigned short translate( unsigned short code )
-{
-	if ((code&0xFF00)==0x5C00)
-	{
-		switch (code&0xFF)
-		{
-		case 0x0C: return RC_STANDBY;
-		case 0x20: return RC_HOME;
-		case 0x27: return RC_SETUP;
-		case 0x00: return RC_0;
-		case 0x01: return RC_1;
-		case 0x02: return RC_2;
-		case 0x03: return RC_3;
-		case 0x04: return RC_4;
-		case 0x05: return RC_5;
-		case 0x06: return RC_6;
-		case 0x07: return RC_7;
-		case 0x08: return RC_8;
-		case 0x09: return RC_9;
-		case 0x3B: return RC_BLUE;
-		case 0x52: return RC_YELLOW;
-		case 0x55: return RC_GREEN;
-		case 0x2D: return RC_RED;
-		case 0x54: return RC_PAGE_UP;
-		case 0x53: return RC_PAGE_DOWN;
-		case 0x0E: return RC_UP;
- 		case 0x0F: return RC_DOWN;
-		case 0x2F: return RC_LEFT;
- 		case 0x2E: return RC_RIGHT;
-		case 0x30: return RC_OK;
- 		case 0x16: return RC_PLUS;
- 		case 0x17: return RC_MINUS;
- 		case 0x28: return RC_SPKR;
- 		case 0x82: return RC_HELP;
-		default:
-			//perror("unknown old rc code");
-			return 0xee;
-		}
-	} else if (!(code&0x00))
-		return code&0x3F;
-	return 0xee;
-}
-
 void		RcGetActCode( void )
 {
-	char			buf[32];
 	int				x=0;
 	unsigned short	code = 0;
 static  unsigned short cw=0;
+	struct input_event ev;
 
-	if ( fd != -1 )
-		x = read( fd, buf, 32 );
-	if ( x < 2 )
+	if ( fd != -1 ) {
+
+		do {	
+		
+			x = read(fd, &ev, sizeof(struct input_event));
+			
+			if ((x == sizeof(struct input_event)) && (ev.value == 1))
+				break;
+
+		} while (x == sizeof(struct input_event));
+		
+	}
+		
+	if ( x % sizeof(struct input_event) )
 	{
 		//KbGetActCode();
 		realcode=0xee;
-		if ( realcode == 0xee )
-		{
-			if ( cw == 1 )
-				cw=0;
-		}
 		return;
 	}
 
 	Debug("%d bytes from FB received ...\n",x);
 
-	x-=2;
-
-	memcpy(&code,buf+x,2);
-
-	code = translate(code);
-
-	realcode=code;
-
-	if ( code == 0xee )
-		return;
+	realcode=code=ev.code;
 
 	Debug("code=%04x\n",code);
 
@@ -309,6 +239,5 @@ void	RcClose( void )
 	KbClose();
 	if ( fd == -1 )
 		return;
-	if ( !fd_is_ext )
-		close(fd);
+	close(fd);
 }
