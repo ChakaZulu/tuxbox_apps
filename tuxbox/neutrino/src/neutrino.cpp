@@ -3049,8 +3049,9 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
+	exit(0);
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.327 2002/09/19 13:12:02 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.328 2002/09/19 19:26:58 TheDOC Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
