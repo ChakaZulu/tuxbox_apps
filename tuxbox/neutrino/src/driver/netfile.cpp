@@ -125,6 +125,42 @@ known bugs:
 	#undef fseek
 #endif
 
+
+
+
+typedef struct
+{
+	const unsigned char mask[4];
+	const unsigned char mode[4];
+	const char *        type;
+} magic_t;
+
+magic_t known_magic[] =
+{
+	{{0xFF, 0xFF, 0xFF, 0x00}, {'I' , 'D' , '3' , 0x00}, "audio/mpeg"},
+	{{0xFF, 0xFF, 0xFF, 0x00}, {'O' , 'g' , 'g' , 0x00}, "audio/ogg" },
+	{{0xFF, 0xFF, 0x00, 0x00}, {0xFF, 0xFA, 0x00, 0x00}, "audio/mpeg"}
+};
+
+#if 0
+#warning if a magic is contained in a file (for instance in .cdr) there is no way to play it correctly with neutrino
+#warning the third magic is pretty short - hence disabled by default
+/* 1111 1111 1111 1010 0000 0000 0000 0000
+   AAAA AAAA AAAB BCC
+   where A: frame sync
+   B: MPEG audio ID (11 = MPEG Version 1)
+   C: Layer description (01 = Layer III)
+   see http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm */
+
+#define known_magic_count (sizeof(known_magic) / sizeof(magic_t))
+#else
+#define known_magic_count 2
+#endif
+
+
+
+
+
 char err_txt[2048];		/* human readable error message */
 static int debug = 0;		/* print debugging output or not */
 static char logfile[255];	/* redirect errors from stderr */
@@ -965,58 +1001,50 @@ FILE *f_open(const char *filename, const char *acctype)
 			 break;
 
   case MODE_FILE:	
-  default:	       {
-  			   uint32_t magic = 0;
+  default:
+  {
+	  unsigned char magic[4] = {0, 0, 0, 0};
 			   
-			   fd = fopen(url.file, type);
-			   fread(&magic, sizeof(uint32_t), 1, fd);
-			   rewind(fd);
+	  fd = fopen(url.file, type);
+	  fread(&magic, 4, 1, fd);
+	  rewind(fd);
 			   
-			   /* first stage: try to determine the filetype from the file */
-			   /* magic, if there is any */
-			   magic = htonl(magic) & 0xffffff00;
+	  /* first stage: try to determine the filetype from the file */
+	  /* magic, if there is any */
+	  for (int i = 0; i < known_magic_count; i++)
+	  {
+		  for (int j = 0; j < 4; j++)
+			  if ((magic[j] & known_magic[i].mask[j]) != known_magic[i].mode[j])
+				  goto next;
+		  f_type(fd, (char *)known_magic[i].type);
+		  goto magic_found;
+	  next:
+		  ;
+	  }
 
-			   dprintf(stderr, "magic: %08x (%s)\n", magic, &magic);
+	  /* stage two: try to determine the filetype from the file name */
+	  /* a smarter solution would be to get this info from /etc/mime.types */
 
-			   if( strstr( (char*)&magic, "ID3") )	{ f_type(fd, "audio/mpeg"); magic = 0; }
-			   if( strstr( (char*)&magic, "Ogg") )	{ f_type(fd, "audio/ogg");  magic = 0; }
-
-#if 0
-#warning if the following magic is contained in a file (it can be contained in .cdr for instance) there is no way to play it correctly with neutrino - hence disabled by default
-			   /* 1111 1111 1111 1010 0000 0000 0000 0000
-			      AAAA AAAA AAAB BCC
-				  where A: frame sync
-				        B: MPEG audio ID (11 = MPEG Version 1)
-						C: Layer description (01 = Layer III)
-			      see http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm */
-			   if ((magic & 0xFFFA0000) == 0xFFFA0000)
-			   {
-				   f_type(fd, "audio/mpeg"); magic = 0;
-			   }
-#endif
-
-			   /* stage two: try to determine the filetype from the file name */
-			   /* a smarter solution would be to get this info from /etc/mime.types */
-
-  			   ptr = strrchr(url.file , '.');
+	  ptr = strrchr(url.file , '.');
 #warning what about filenames without dots?
                          
-#warning what if initial bytes are zero (i.e. magic == 0)?
-			   if (magic && (ptr++))
-                           {
-                             if( strcasecmp(ptr, "cdr") == 0) f_type(fd, "audio/cdr");
-                             if( strcasecmp(ptr, "wav") == 0) f_type(fd, "audio/wave");
-                             if( strcasecmp(ptr, "aif") == 0) f_type(fd, "audio/aifc");
-                             if( strcasecmp(ptr, "snd") == 0) f_type(fd, "audio/snd");
-
-			     /* they should be obsolete now due to the file magic detection */
-                             if( strcasecmp(ptr, "ogg") == 0) f_type(fd, "audio/ogg");
-                             if( strcasecmp(ptr, "mp3") == 0) f_type(fd, "audio/mpeg");
-                             if( strcasecmp(ptr, "mp2") == 0) f_type(fd, "audio/mpeg");
-                             if( strcasecmp(ptr, "mpa") == 0) f_type(fd, "audio/mpeg");
-                           }
-			 }
-  			 break;
+	  if (ptr++)
+	  {
+		  if( strcasecmp(ptr, "cdr") == 0) f_type(fd, "audio/cdr");
+		  if( strcasecmp(ptr, "wav") == 0) f_type(fd, "audio/wave");
+		  if( strcasecmp(ptr, "aif") == 0) f_type(fd, "audio/aifc");
+		  if( strcasecmp(ptr, "snd") == 0) f_type(fd, "audio/snd");
+		  
+		  /* they should be obsolete now due to the file magic detection */
+		  if( strcasecmp(ptr, "ogg") == 0) f_type(fd, "audio/ogg");
+		  if( strcasecmp(ptr, "mp3") == 0) f_type(fd, "audio/mpeg");
+		  if( strcasecmp(ptr, "mp2") == 0) f_type(fd, "audio/mpeg");
+		  if( strcasecmp(ptr, "mpa") == 0) f_type(fd, "audio/mpeg");
+	  }
+  magic_found:
+	  ;
+  }
+  break;
   }
   
   return fd;
