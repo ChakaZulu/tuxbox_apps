@@ -13,7 +13,7 @@ class tsText: public eWidget
 {
 	eLabel *headline, *body;
 protected:
-	void keyUp(int rc);
+	int keyUp(int rc);
 	int eventFilter(const eWidgetEvent &event);
 public:
 	void redrawWidget();
@@ -46,7 +46,7 @@ class tsFindInit: public eWidget
 	int state;
 	virtual int eventFilter(const eWidgetEvent &event);
 protected:
-	void keyUp(int rc);
+	int keyUp(int rc);
 private:
 	void tunedIn(eTransponder *trans, int error);
 	void showSignalStrength();

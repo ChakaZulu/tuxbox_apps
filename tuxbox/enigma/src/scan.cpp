@@ -38,16 +38,18 @@ int tsText::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-void tsText::keyUp(int rc)
+int tsText::keyUp(int rc)
 {
 	switch(rc)
 	{
 	case eRCInput::RC_OK:
 		close(0);
-		break;
+		return 1;
 	case eRCInput::RC_HELP:
 		close(2);
-		break;
+		return 1;
+	default:
+		return 0;
 	}
 }
 
@@ -223,7 +225,7 @@ void tsFindInit::showSignalStrength()
 	signalbar->setPerc(sig);
 }
 
-void tsFindInit::keyUp(int rc)
+int tsFindInit::keyUp(int rc)
 {
 	switch(rc)
 	{
@@ -232,10 +234,12 @@ void tsFindInit::keyUp(int rc)
 			close(0);
 		if (state==sFailed)
 			close(1);
-		break;
+		return 1;
 	case eRCInput::RC_HELP:
 		close(2);
-		break;
+		return 1;
+	default:
+		return 0;
 	}
 }
 
@@ -368,18 +372,21 @@ TransponderScan::TransponderScan()
 			window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
+	qDebug("%x", s);
 
 	s=new tsFindInit(window);
 	s->move(ePoint(0, 0));
 	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
+	qDebug("%x", s);
 
 	s=new tsDoScan((tsFindInit*)s, window);
 	s->move(ePoint(0, 0));
 	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
+	qDebug("%x", s);
 	s=new tsText("ÜBERSTANDEN!",
 		"Herzlichen Glückwunsch!\n"
 		"Sie haben es heil überstanden!\n\n"
@@ -392,6 +399,7 @@ TransponderScan::TransponderScan()
 			window->getClientSize().width(), window->getClientSize().height()-30));
 	s->hide();
 	mp.addPage(s);
+	qDebug("%x", s);
 }
 
 TransponderScan::~TransponderScan()
@@ -408,6 +416,7 @@ int TransponderScan::exec()
 	ret=0;
 	do
 	{
+		qDebug("current %x", mp.current());
 		int n=mp.at();
 		int total=mp.count();
 		progress_text->setText(eString().sprintf("%d/%d", n+1, total));
@@ -416,6 +425,7 @@ int TransponderScan::exec()
 		total--;
 		progress->setPerc(n*100/total);
 		int res=mp.current()->exec();
+		qDebug("res: %d", res);
 		if (res==1)
 		{
 			mp.prev();
