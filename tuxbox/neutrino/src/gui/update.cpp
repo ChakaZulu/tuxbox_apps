@@ -63,7 +63,7 @@
 CFlashUpdate::CFlashUpdate()
 	:CProgressWindow()
 {
-	setTitle( g_Locale->getText("flashupdate.head") );
+	setTitle(g_Locale->getText("flashupdate.head")); // UTF-8
 
 	BasePath = "http://dboxupdate.berlios.de/images/";
 	ImageFile = "cdk.cramfs";
@@ -319,7 +319,7 @@ void CFlashExpert::readmtd(int readmtd)
 		filename = "/tmp/flashimage.img";
 		readmtd = 4;
 	}
-	setTitle(g_Locale->getText("flashupdate.titlereadflash"));
+	setTitle(g_Locale->getText("flashupdate.titlereadflash")); // UTF-8
 	paint();
 	showGlobalStatus(0);
 	showStatusMessage(g_Locale->getText("flashupdate.actionreadflash") + " (" + string(CMTDInfo::getInstance()->getMTDName(readmtd)) + ")");
@@ -352,7 +352,7 @@ void CFlashExpert::writemtd(string filename, int mtdNumber)
     {
     	return;
     }
-	setTitle( g_Locale->getText("flashupdate.titlewriteflash"));
+	setTitle(g_Locale->getText("flashupdate.titlewriteflash")); // UTF-8
 	paint();
 	showGlobalStatus(0);
 	CFlashTool ft;

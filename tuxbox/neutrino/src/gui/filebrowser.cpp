@@ -587,7 +587,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 void CFileBrowser::paintHead()
 {
 	char l_name[100];
-	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head").c_str(), name.c_str());
+	snprintf(l_name, sizeof(l_name), "%s %s", CZapitClient::Utf8_to_Latin1(g_Locale->getText("filebrowser.head")).c_str(), name.c_str());  // <- FIXME (UTF-8 and Latin combination)
 
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD);
@@ -611,20 +611,20 @@ void CFileBrowser::paintFoot()
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
 			frameBuffer->paintIcon("ok.raw", x +3 , by -3);
-			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		}
 
 		if(Multi_Select)
 		{
 			frameBuffer->paintIcon("gelb.raw", x + (2 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_small->RenderString(x + 25 + (2 * dx), ty, dx - 25, g_Locale->getText("filebrowser.mark").c_str(), COL_INFOBAR, 0, true); // UTF-8
 			
 		}
 
 		if(Filter != NULL)
 		{
 			frameBuffer->paintIcon("blau.raw", x + (3 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, g_Locale->getText("filebrowser.filter").c_str(), COL_INFOBAR);
+			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, g_Locale->getText("filebrowser.filter").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		}
 	}
 }
@@ -637,7 +637,7 @@ void CFileBrowser::paint()
 
 //	if (filelist[0].Name.length() != 0)
 //		frameBuffer->paintIcon("help.raw", x+ width- 30, y+ 5 );
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU, g_Locale->getText("filebrowser.head") );
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("filebrowser.head") );
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 		paintItem(count);

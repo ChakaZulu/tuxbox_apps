@@ -33,14 +33,12 @@
 #include "menue.h"
 
 
-using namespace std;
-
 class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 {
 	protected:
 
-		CFrameBuffer	*frameBuffer;
-		string		caption;
+		CFrameBuffer *frameBuffer;
+		std::string  caption;      // UTF-8
 
 		int x;
 		int y;
@@ -53,7 +51,7 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 		int globalstatusY;
 		int localstatusY;
 		int statusTextY;
-		string statusText;
+		std::string statusText;
 
 
 		//----------------------------
@@ -63,15 +61,15 @@ class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
 	public:
 
 		CProgressWindow();
-		void setTitle( string title );
+		void setTitle(const std::string title); // UTF-8
 		virtual void hide();
 
-		virtual int exec( CMenuTarget* parent, string actionKey );
+		virtual int exec( CMenuTarget* parent, std::string actionKey );
 
 		virtual void showGlobalStatus(int prog);
 		virtual int getGlobalStatus();
 		virtual void showLocalStatus(int prog);
-		virtual void showStatusMessage(string text);
+		virtual void showStatusMessage(std::string text);
 
 };
 

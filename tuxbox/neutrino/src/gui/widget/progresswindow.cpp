@@ -48,7 +48,7 @@ CProgressWindow::CProgressWindow()
 	y=(576-height)>>1;
 }
 
-void CProgressWindow::setTitle( string title )
+void CProgressWindow::setTitle(const std::string title)
 {
 	caption = title;
 }
@@ -111,7 +111,7 @@ void CProgressWindow::showLocalStatus(int prog)
 	frameBuffer->paintBox(pos, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
 }
 
-void CProgressWindow::showStatusMessage(string text)
+void CProgressWindow::showStatusMessage(std::string text)
 {
 	statusText = text;
 	frameBuffer->paintBox(x, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
@@ -134,7 +134,7 @@ void CProgressWindow::paint()
 {
 	int ypos=y;
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText(caption).c_str(), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight + (mheight >>1);
@@ -155,7 +155,7 @@ void CProgressWindow::paint()
 
 }
 
-int CProgressWindow::exec( CMenuTarget* parent, string actionKey )
+int CProgressWindow::exec( CMenuTarget* parent, std::string actionKey )
 {
 	if(parent)
 	{
