@@ -1,5 +1,5 @@
 /*
- * $Id: program_map_section.cpp,v 1.3 2004/05/31 21:21:23 obi Exp $
+ * $Id: program_map_section.cpp,v 1.4 2004/06/17 00:06:00 mws Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -44,6 +44,7 @@ uint16_t ElementaryStreamInfo::getPid(void) const
 
 ProgramMapSection::ProgramMapSection(const uint8_t * const buffer) : LongCrcSection(buffer)
 {
+	programNumber = UINT16(&buffer[3]);
 	pcrPid = DVB_PID(&buffer[8]);
 	programInfoLength = DVB_LENGTH(&buffer[10]);
 
@@ -52,6 +53,11 @@ ProgramMapSection::ProgramMapSection(const uint8_t * const buffer) : LongCrcSect
 
 	for (size_t i = programInfoLength + 12; i < sectionLength - 1; i += DVB_LENGTH(&buffer[i + 3]) + 5)
 		esInfo.push_back(new ElementaryStreamInfo(&buffer[i]));
+}
+
+uint16_t ProgramMapSection::getProgramNumber(void) const
+{
+	return programNumber;
 }
 
 uint16_t ProgramMapSection::getPcrPid(void) const

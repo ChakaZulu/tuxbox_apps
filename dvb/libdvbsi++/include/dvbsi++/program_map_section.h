@@ -1,5 +1,5 @@
 /*
- * $Id: program_map_section.h,v 1.1 2004/02/13 15:27:38 obi Exp $
+ * $Id: program_map_section.h,v 1.2 2004/06/17 00:06:00 mws Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -49,6 +49,7 @@ typedef ElementaryStreamInfoVector::const_iterator ElementaryStreamInfoConstIter
 class ProgramMapSection : public LongCrcSection, public DescriptorContainer
 {
 	protected:
+		unsigned programNumber			: 16;
 		unsigned pcrPid					: 13;
 		unsigned programInfoLength			: 12;
 		ElementaryStreamInfoVector esInfo;
@@ -60,6 +61,7 @@ class ProgramMapSection : public LongCrcSection, public DescriptorContainer
 		static const enum TableId TID = TID_PMT;
 		static const uint32_t TIMEOUT = 600;
 
+		uint16_t getProgramNumber(void) const;
 		uint16_t getPcrPid(void) const;
 		const ElementaryStreamInfoVector *getEsInfo(void) const;
 
