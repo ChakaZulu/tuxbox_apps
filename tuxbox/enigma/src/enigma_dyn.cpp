@@ -72,7 +72,7 @@ static QString switchService(QString request, QString path, QString opt, eHTTPCo
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 		eService *meta=0;
-		eDVB::getInstance()->getTransponders()->searchService(original_network_id, service_id);
+		meta=eDVB::getInstance()->getTransponders()->searchService(original_network_id, service_id);
 		if (meta)
 			eDVB::getInstance()->switchService(meta);
 		else
@@ -665,7 +665,7 @@ static QString switchServiceWeb(QString request, QString path, QString opt, eHTT
 	{
 		eService *meta=0;
 
-		eDVB::getInstance()->getTransponders()->searchService(original_network_id, service_id);
+		meta=eDVB::getInstance()->getTransponders()->searchService(original_network_id, service_id);
 
 		if (meta)
 			eDVB::getInstance()->switchService(meta);
