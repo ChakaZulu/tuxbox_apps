@@ -972,9 +972,9 @@ void CNeutrinoApp::channelsInit()
 			CChannelList::CChannel* channel = channelList->getChannel(zapitChannels[j].nr);
 
 			bouquetList->Bouquets[i]->channelList->addChannel(channel);
-			if( bouquetList->Bouquets[i]->bLocked)
+			if( !bouquetList->Bouquets[i]->bLocked)
 			{
-				channel->bAlwaysLocked = true;
+				channel->bAlwaysLocked = false;
 			}
 		}
 	}
