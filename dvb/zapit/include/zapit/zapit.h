@@ -68,7 +68,7 @@ SAI cliaddr, servaddr;
 struct rmsg {
   		unsigned char version;
   		unsigned char cmd;
-  		unsigned short param;
+  		unsigned char param;
   		unsigned short param2;
   		char param3[30];
 
