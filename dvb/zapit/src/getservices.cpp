@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.54 2002/10/14 23:54:38 obi Exp $
+ * $Id: getservices.cpp,v 1.55 2002/10/23 20:52:27 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -10,8 +10,6 @@
 #include <zapit/getservices.h>
 #include <zapit/settings.h>
 #include <zapit/xmlinterface.h>
-
-uint8_t curr_diseqc = 0;
 
 extern std::map <uint32_t, transponder> transponders;
 extern tallchans allchans;
