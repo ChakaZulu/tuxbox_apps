@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.12 2003/10/17 18:16:54 rasc Exp $
+$Id: dvb_str.c,v 1.13 2003/10/17 19:04:11 rasc Exp $
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -15,6 +15,10 @@ $Id: dvb_str.c,v 1.12 2003/10/17 18:16:54 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.13  2003/10/17 19:04:11  rasc
+- started more work on newer ISO 13818  descriptors
+- some reorg/update work started
+
 Revision 1.12  2003/10/17 18:16:54  rasc
 - started more work on newer ISO 13818  descriptors
 - some reorg work started
@@ -483,9 +487,10 @@ char *dvbstrService_TYPE (u_int flag)
 char *dvbstrStream_TYPE (u_int flag)
 
 {
-  /* ISO 13818-1  Table 2.36  */
+  /* ISO 13818-1  */
 
   STR_TABLE  Table[] = {
+	  // -- updated 2003-10-17  from H.220
      {  0x00, 0x00,  "ITU-T | ISO-IE Reserved" },
      {  0x01, 0x01,  "ISO/IEC 11172 Video" },
      {  0x02, 0x02,  "ITU-T Rec. H.262 | ISO/IEC 13818-2 Video | ISO/IEC 11172-2 constr. parameter video stream" },
@@ -501,7 +506,14 @@ char *dvbstrStream_TYPE (u_int flag)
      {  0x0C, 0x0C,  "ISO/IEC 13818-6 Type C" },
      {  0x0D, 0x0D,  "ISO/IEC 13818-6 Type D" },
      {  0x0E, 0x0E,  "ISO/IEC 13818-1 auxiliary" },
-     {  0x0F, 0x7F,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
+     {  0x0F, 0x0F,  "ISO/IEC 13818-7 Audio with ADTS transport sytax" },
+     {  0x10, 0x10,  "ISO/IEC 14496-2 Visual" },
+     {  0x11, 0x11,  "ISO/IEC 14496-3 Audio with LATM transport syntax as def. in ISO/IEC 14496-3/AMD1" },
+     {  0x12, 0x12,  "ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in PES packets" },
+     {  0x13, 0x13,  "ISO/IEC 14496-1 SL-packetized stream or FlexMux stream carried in ISO/IEC 14496 sections" },
+     {  0x14, 0x14,  "ISO/IEC 13818-6 synchronized download protocol" },
+
+     {  0x15, 0x7F,  "ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved" },
      {  0x80, 0xFF,  "User private" },
      {  0,0, NULL }
   };
