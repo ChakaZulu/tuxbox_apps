@@ -1,7 +1,8 @@
 /*
- * $Id:
+ * $Id: audio.h,v 1.2 2002/05/12 12:54:47 obi Exp $
  *
- * (C) 2002 by Steffen Hehn 'McClean'
+ * (C) 2002 by Steffen Hehn 'McClean' &
+ *	Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,34 +23,43 @@
 #ifndef __audio_h__
 #define __audio_h__
 
-
-#define AUDIO_DEV "/dev/ost/audio0"
-
+#include <ost/audio.h>
 
 class CAudio
 {
-	
 	private:
-		int						audio_fd;		//dvb audio device
-		//audioStatus_t	status;	//audio status
-		//struct audioMixer_t		mixerStatus;	//audio mixersettings
+		/* dvb audio device */
+		int fd;
 
-		int setMute (bool mute);
-		int setBypassMode (bool bypass);
+		/* current audio settings */
+		struct audioStatus status;
+		struct audioMixer mixer;
+
+		/* internal methods */
+		bool setMute (bool mute);
+		bool setBypassMode (bool bypass);
+
+		/* true if constructor had success */
+		bool initialized;
 
 	public:
+		/* construct & destruct */
 		CAudio();
 		~CAudio();
 
+		/* check if initialitation failed before rocking */
+		bool isInitialized() { return initialized; }
+
+		/* shut up */
 		bool mute();
 		bool unMute();
 
+		/* bypass audio to external decoder */
 		bool enableBypass();
 		bool disableBypass();
 
-		int setVolume (unsigned int left, unsigned int right);
-
+		/* volume, min = 0, max = 64 */
+		bool setVolume (unsigned char left, unsigned char right);
 };
 
-
-#endif
+#endif /* __audio_h__ */

@@ -1,7 +1,8 @@
 /*
- * $Id:
+ * $Id: audio.cpp,v 1.2 2002/05/12 12:54:47 obi Exp $
  *
- * (C) 2002 by Steffen Hehn 'McClean'
+ * (C) 2002 by Steffen Hehn 'McClean' &
+ *	Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,145 +20,113 @@
  *
  */
 
-#include "audio.h"
-
-#include <ost/audio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <stdio.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
+#include "audio.h"
+
+#define AUDIO_DEV "/dev/ost/audio0"
 
 
 CAudio::CAudio()
 {
-	audio_fd = -1;
+	initialized = false;
+
+	if ((fd = open(AUDIO_DEV, O_RDWR)) < 0)
+	{
+		perror(AUDIO_DEV);
+	}
+	else if (ioctl(fd, AUDIO_GET_STATUS, &status) < 0)
+	{
+		perror("AUDIO_GET_STATUS");
+		close(fd);
+	}
+	else
+	{
+		initialized = true;
+	}
 }
 
 CAudio::~CAudio()
 {
-	if (audio_fd != -1)
+	if (initialized)
 	{
-		close(audio_fd);
+		close(fd);
 	}
 }
 
- /*
- * return 0 on success or if nothing to do
- * return -1 otherwise
- */
-int CAudio::setBypassMode (bool isAc3)
+bool CAudio::setBypassMode (bool enable)
 {
-/*
-	if (isAc3 == wasAc3)
+	if (ioctl(fd, AUDIO_SET_BYPASS_MODE, enable ? 0 : 1) < 0)
 	{
-		return 0;
-	}
-*/
-	if (audio_fd != -1)
-	{
-		close(audio_fd);
+		perror("AUDIO_SET_BYPASS_MODE");
+		return false;
 	}
 
-	if ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0)
-	{
-		perror("[zapit] " AUDIO_DEV);
-		return -1;
-	}
-
-	if (ioctl(audio_fd, AUDIO_SET_BYPASS_MODE, isAc3 ? 0 : 1) < 0)
-	{
-		perror("[zapit] AUDIO_SET_BYPASS_MODE");
-		close(audio_fd);
-		return -1;
-	}
-
-//	wasAc3 = isAc3;
-
-	return 0;
+	status.bypassMode = enable;
+	return true;
 }
 
-/*
- * return 0 on success
- * return -1 otherwise
- */
-int CAudio::setMute (bool mute)
+bool CAudio::setMute (bool enable)
 {
-	if ((audio_fd == -1) && ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0))
-	{
-		perror("[zapit] " AUDIO_DEV);
-		return -1;
-	}
-
-	if (ioctl(audio_fd, AUDIO_SET_MUTE, mute) < 0)
+	if (ioctl(fd, AUDIO_SET_MUTE, enable) < 0)
 	{
 		perror("[zapit] AUDIO_SET_MUTE");
-		return -1;
+		return false;
 	}
 
-	return 0;
+	status.muteState = enable;
+	return true;
 }
 
-/*
- * return false on success
- * return true otherwise
- */
 bool CAudio::mute()
 {
-	return setMute(true);
+	if (status.muteState == false)
+		return setMute(true);
+	else
+		return false;
+
 }
 
-/*
- * return false on success
- * return true otherwise
- */
 bool CAudio::unMute()
 {
-	return setMute(false);
+	if (status.muteState == true)
+		return setMute(false);
+	else
+		return false;
 }
 
-/*
- * return false on success
- * return true otherwise
- */
 bool CAudio::enableBypass()
 {
-	return setBypassMode(true);
+	if (status.bypassMode == false)
+		return setBypassMode(true);
+	else
+		return false;
 }
 
-/*
- * return false on success
- * return true otherwise
- */
 bool CAudio::disableBypass()
 {
-	return setBypassMode(false);
+	if (status.bypassMode == true)
+		return setBypassMode(false);
+	else
+		return false;
 }
 
-/*
- * return 0 on success
- * return -1 otherwise
- */
-int CAudio::setVolume (unsigned int left, unsigned int right)
+bool CAudio::setVolume (unsigned char left, unsigned char right)
 {
-	audioMixer_t mixer;
-
-	if ((audio_fd == -1) && ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0))
-	{
-		perror("[zapit] " AUDIO_DEV);
-		return -1;
-	}
-
 	mixer.volume_left = left;
 	mixer.volume_right = right;
 
-	if (ioctl(audio_fd, AUDIO_SET_MIXER, &mixer) < 0)
+	if (ioctl(fd, AUDIO_SET_MIXER, &mixer) < 0)
 	{
-		perror("[zapit] AUDIO_SET_MIXER");
-		return -1;
+		perror("AUDIO_SET_MIXER");
+		return false;
 	}
 
-	return 0;
+	return true;
 }
+
