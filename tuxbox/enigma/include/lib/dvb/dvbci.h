@@ -25,6 +25,7 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	eTimer pollTimer;
 
 	unsigned char CAPMT[256];
+	char appName[256];
 	int CAPMTlen;
 	int CAPMTpos;
 	int CAPMTstate;
@@ -47,8 +48,8 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	void incoming(unsigned char *buffer,int len);
 	void dataAvailable(int what);
 	void poll();
-		
-		
+	void updateCIinfo(unsigned char *buffer);
+				
 public:
 	struct eDVBCIMessage
 	{
@@ -85,6 +86,6 @@ public:
 	~eDVBCI();
 	
 	void thread();
-
+	Signal1<void, const char*> ci_progress;
 };
 #endif
