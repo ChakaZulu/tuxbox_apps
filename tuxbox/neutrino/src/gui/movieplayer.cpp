@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.31 2003/09/01 17:22:14 zwen Exp $
+        $Id: movieplayer.cpp,v 1.32 2003/09/02 09:26:38 gagga Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -26,23 +26,24 @@
 */
 
 /* KNOWN ISSUES:
- * - PS Playback does not work as the performance is too bad; I left it in because it might work on other boxes; It will be replaced by a server-side ps2ts conversion anyway
+  - When changing the video rate in the settings the audio rate gets deleted and needs to be reconfigured as well. (other settings have the same problem) 
+  - Drivers are not correctly reset and buffers are not prefilled after pause/resume. This causes audio/video being out of sync. 
+  - AC3 handling does not work
+  - TS which are played back from CIFS drives may not work in a good quality.
 */
 
 
 /* TODOs / Release Plan:
-
  - always: fix bugs
 (currently planned order)
  - Buffer underrun protection (increases playback quality)
  - Better internal state machine
- - Support for playing back arbitrary files (not only SVCD and DVD). VLC 0.6.2 is required for that.
  - Chapter support for DVD and (S)VCD
  - Nicer UI
  - Playing from Bookmarks
  - MP3 HTTP streaming
-
 */
+
 #include <config.h>
 #if HAVE_DVB_API_VERSION >= 3
 #include <global.h>
@@ -126,6 +127,15 @@ unsigned short pida, pidv;
 CHintBox *hintBox;
 
 //------------------------------------------------------------------------
+size_t
+CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
+{
+  std::string * pStr = (std::string *) data;
+  *pStr += (char *) ptr;
+  return size * nmemb;
+}
+
+//------------------------------------------------------------------------
 
 CMoviePlayerGui::CMoviePlayerGui ()
 {
@@ -141,10 +151,10 @@ CMoviePlayerGui::CMoviePlayerGui ()
   videofilefilter.addFilter ("ps");
   videofilefilter.addFilter ("mpg");
   filebrowser->Filter = &videofilefilter;
-  if(strlen(g_settings.network_nfs_moviedir)!=0)
-	  Path = g_settings.network_nfs_moviedir;
+  if (strlen (g_settings.network_nfs_moviedir) != 0)
+    Path = g_settings.network_nfs_moviedir;
   else
-	  Path = "/";
+    Path = "/";
 }
 
 //------------------------------------------------------------------------
@@ -244,6 +254,10 @@ ReceiveStreamThread (void *mrl)
   int port;
   char baseurl[200];
   char url[200];
+  std::string empty_response = "";
+  std::string add_response = "";
+  std::string sout_response = "";
+  std::string play_response = "";
 
   CURL *curl;
   CURLcode httpres;
@@ -262,22 +276,25 @@ ReceiveStreamThread (void *mrl)
   strcat (baseurl, "/");
   printf ("baseurl: %s\n", baseurl);
 
-  // clear playlist
+  // empty playlist
   strcpy (url, baseurl);
   strcat (url, "?control=empty");
   printf ("emptyurl: %s\n", url);
   curl = curl_easy_init ();
   curl_easy_setopt (curl, CURLOPT_URL, url);
+  curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+  curl_easy_setopt (curl, CURLOPT_FILE, (void *) &empty_response);
   httpres = curl_easy_perform (curl);
   printf ("HTTP Result: %d\n", httpres);
   curl_easy_cleanup (curl);
   if (httpres != 0)
     {
-      ShowMsg ( "messagebox.error", g_Locale->getText("movieplayer.nostreamingserver"), CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw" );
+      ShowMsg ("messagebox.error",
+	       g_Locale->getText ("movieplayer.nostreamingserver"),
+	       CMessageBox::mbrCancel, CMessageBox::mbCancel, "error.raw");
       playstate = STOPPED;
       pthread_exit (NULL);
       // Assume safely that all succeeding HTTP requests are successful
-
     }
 
   // add MRL
@@ -286,14 +303,13 @@ ReceiveStreamThread (void *mrl)
   // DemoMovie: c:\\TestMovies\\dolby.mpg
   // SVCD: vcd:D:@1:1
   strcpy (url, baseurl);
-  //strcat (url, "?control=add&mrl=dvdsimple:");
-  //strcat (url, g_settings.streaming_server_cddrive);
-  //strcat (url, "@1:1");
   strcat (url, "?control=add&mrl=");
   strcat (url, (char *) mrl);
   printf ("addurl: %s\n", url);
   curl = curl_easy_init ();
   curl_easy_setopt (curl, CURLOPT_URL, url);
+  curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+  curl_easy_setopt (curl, CURLOPT_FILE, (void *) &add_response);
   httpres = curl_easy_perform (curl);
   curl_easy_cleanup (curl);
 
@@ -311,6 +327,8 @@ ReceiveStreamThread (void *mrl)
   printf ("souturl: %s\n", url);
   curl = curl_easy_init ();
   curl_easy_setopt (curl, CURLOPT_URL, url);
+  curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+  curl_easy_setopt (curl, CURLOPT_FILE, (void *) &sout_response);
   httpres = curl_easy_perform (curl);
   curl_easy_cleanup (curl);
 
@@ -320,81 +338,99 @@ ReceiveStreamThread (void *mrl)
   printf ("playurl: %s\n", url);
   curl = curl_easy_init ();
   curl_easy_setopt (curl, CURLOPT_URL, url);
+  curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+  curl_easy_setopt (curl, CURLOPT_FILE, (void *) &play_response);
   httpres = curl_easy_perform (curl);
   curl_easy_cleanup (curl);
 
 // TODO: Better way to detect if http://<server>:8080/dboxstream is already alive. For example repetitive checking for HTTP 404.
 // Unfortunately HTTP HEAD requests are not supported by VLC :(
 // vlc 0.6.3 and up will support HTTP HEAD requests.
-  printf ("Sleeping for 5 seconds\n");
-  sleep (5);
 
 // Open HTTP connection to VLC
-  struct sockaddr_in servAddr;
-  printf ("Trying to call socket\n");
-  skt = socket (AF_INET, SOCK_STREAM, 0);
-  printf ("Server: %s\n", server);
-  printf ("Port: %d\n", port);
+  bool vlc_is_sending = false;
 
+  struct sockaddr_in servAddr;
   servAddr.sin_family = AF_INET;
   servAddr.sin_port = htons (port);
   servAddr.sin_addr.s_addr = inet_addr (server);
   int res;
-
-  printf ("Trying to setup socket\n");
-  res = connect (skt, (struct sockaddr *) &servAddr, sizeof (servAddr));
-  if (res < 0)
-    {
-      perror ("SOCKET");
-      playstate = STOPPED;
-      pthread_exit (NULL);
-    }
-  fcntl (skt, O_NONBLOCK);
-  printf ("Socket OK\n");
-
-
-  // Skip HTTP header
-  char *msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
-  int len = strlen (msg);
-  if (send (skt, msg, len, 0) == -1)
-    {
-      perror ("send()");
-      playstate = STOPPED;
-      pthread_exit (NULL);
-    }
-
-  printf ("GET Sent\n");
-
+  printf ("Server: %s\n", server);
+  printf ("Port: %d\n", port);
   char buf[RINGBUFFERSIZE];
+  int len;
 
-  // Skip HTTP Header
-  int found = 0;
-  while (found < 4)
+  while (!vlc_is_sending)
     {
-      len = recv (skt, buf, 1, 0);
-      if ((found == 0) & (buf[0] == '\r'))
-	{
-	  found++;
-	}
-      else if ((found == 1) & (buf[0] == '\n'))
-	{
-	  found++;
-	}
-      else if ((found == 2) & (buf[0] == '\r'))
-	{
-	  found++;
-	}
-      else if ((found == 3) & (buf[0] == '\n'))
-	{
-	  found++;
-	}
-      else
-	{
-	  (found = 0);
-	}
-      //printf ("HTTP header skip: %s\n", buf);
-    }
 
+      //printf ("Trying to call socket\n");
+      skt = socket (AF_INET, SOCK_STREAM, 0);
+
+      printf ("Trying to connect socket\n");
+      res = connect (skt, (struct sockaddr *) &servAddr, sizeof (servAddr));
+      if (res < 0)
+	{
+	  perror ("SOCKET");
+	  playstate = STOPPED;
+	  pthread_exit (NULL);
+	}
+      fcntl (skt, O_NONBLOCK);
+      printf ("Socket OK\n");
+
+      // Skip HTTP header
+      char *msg = "GET /dboxstream HTTP/1.0\r\n\r\n";
+      int msglen = strlen (msg);
+      if (send (skt, msg, msglen, 0) == -1)
+	{
+	  perror ("send()");
+	  playstate = STOPPED;
+	  pthread_exit (NULL);
+	}
+
+      printf ("GET Sent\n");
+
+      // Skip HTTP Header
+      int found = 0;
+      char line[200];
+      strcpy (line, "");
+      while (found < 4)
+	{
+	  len = recv (skt, buf, 1, 0);
+	  strncat (line, buf, 1);
+	  if (strcmp (line, "HTTP/1.0 404") == 0)
+	    {
+	      printf ("VLC still does not send. Retrying...\n");
+	      close (skt);
+	      break;
+	    }
+	  if ((found == 0) & (buf[0] == '\r'))
+	    {
+	      found++;
+	    }
+	  else if ((found == 1) & (buf[0] == '\n'))
+	    {
+	      found++;
+	    }
+	  else if ((found == 2) & (buf[0] == '\r'))
+	    {
+	      found++;
+	    }
+	  else if ((found == 3) & (buf[0] == '\n'))
+	    {
+	      found++;
+	    }
+	  else
+	    {
+	      (found = 0);
+	    }
+	  //printf ("HTTP header skip: %s\n", buf);
+	}
+      if (found == 4)
+	{
+	  vlc_is_sending = true;
+
+	}
+    }
   printf ("Read sockets created\n");
   printf ("Buffering approx. 3 seconds\n");
 
@@ -402,12 +438,12 @@ ReceiveStreamThread (void *mrl)
   int size;
   streamingrunning = 1;
   int fd = open ("/tmp/tmpts", O_CREAT | O_WRONLY);
-  
+
   struct pollfd poller[0];
   poller[0].fd = skt;
   poller[0].events = POLLIN | POLLPRI;
   int pollret;
-  
+
   while (streamingrunning == 1)
     {
       while ((size = ringbuffer_write_space (ringbuf)) == 0)
@@ -419,7 +455,7 @@ ReceiveStreamThread (void *mrl)
 	  if (firstbufferfilled == 0)
 	    {
 	      // find apid and vpid. Easiest way to do that is to write the TS to a file 
-	      // and use the usuasl find_avpids function. This is not even overhead as the
+	      // and use the usual find_avpids function. This is not even overhead as the
 	      // buffer needs to be prefilled anyway
 	      close (fd);
 	      fd = open ("/tmp/tmpts", O_RDONLY);
@@ -434,46 +470,46 @@ ReceiveStreamThread (void *mrl)
 	  firstbufferfilled = 1;
 	}
       //printf("ringbuf write space:%d\n",size);
-      
-      
+
+
       //len = recv (skt, buf, size, 0);
-      	  if (playstate == STOPPED)
-	    {
-	      pthread_exit (NULL);
-	    }
-	    
+      if (playstate == STOPPED)
+	{
+	  pthread_exit (NULL);
+	}
+
       len = 0;
       pollret = poll (poller, (unsigned long) 1, -1);
 
-	  if (pollret < 0)
-	    {
-	    	perror ("Error while polling()");
-      		playstate = STOPPED;
-      		pthread_exit (NULL);
-	    }
+      if (pollret < 0)
+	{
+	  perror ("Error while polling()");
+	  playstate = STOPPED;
+	  pthread_exit (NULL);
+	}
 
-	  if (((poller[0].revents & POLLHUP) == POLLHUP) ||
-	      ((poller[0].revents & POLLERR) == POLLERR) ||
-	      ((poller[0].revents & POLLNVAL) == POLLNVAL))
-	    {
-	    	perror ("Error while polling()");
-      		playstate = STOPPED;
-      		pthread_exit (NULL);
-	    }
+      if (((poller[0].revents & POLLHUP) == POLLHUP) ||
+	  ((poller[0].revents & POLLERR) == POLLERR) ||
+	  ((poller[0].revents & POLLNVAL) == POLLNVAL))
+	{
+	  perror ("Error while polling()");
+	  playstate = STOPPED;
+	  pthread_exit (NULL);
+	}
 
 
-	  if ((poller[0].revents & POLLIN) == POLLIN)
-	    {
-	      len = recv (poller[0].fd, buf, size, 0);
-	      //printf ("[%d POLLIN bytes read]\n", wr);
-	    }
-	  if ((poller[0].revents & POLLPRI) == POLLPRI)
-	    {
-	      len = recv (poller[0].fd, buf, size, 0);
-	      //printf ("[%d POLLPRI bytes read]\n", wr);
-	    }
-	    
-	    //--------------------
+      if ((poller[0].revents & POLLIN) == POLLIN)
+	{
+	  len = recv (poller[0].fd, buf, size, 0);
+	  //printf ("[%d POLLIN bytes read]\n", wr);
+	}
+      if ((poller[0].revents & POLLPRI) == POLLPRI)
+	{
+	  len = recv (poller[0].fd, buf, size, 0);
+	  //printf ("[%d POLLPRI bytes read]\n", wr);
+	}
+
+      //--------------------
       if (len > 0)
 	{
 	  //printf ("bytes received:%d\n", len);
@@ -499,7 +535,9 @@ ReceiveStreamThread (void *mrl)
 void *
 PlayStreamThread (void *mrl)
 {
-
+  std::string pause_response = "";
+  std::string unpause_response = "";
+  std::string stop_response = "";
   char buf[348 * 188];
   bool failed = false;
   // use global pida and pidv
@@ -520,7 +558,6 @@ PlayStreamThread (void *mrl)
   // Get Server and Port from Config
   server = g_settings.streaming_server_ip.c_str ();
   sscanf (g_settings.streaming_server_port, "%d", &port);
-  //sprintf(baseurl,"%s%s%s%s%s","http://",server,":",g_settings.streaming_server_port,"/?control=");
   strcpy (baseurl, "http://");
   strcat (baseurl, server);
   strcat (baseurl, ":");
@@ -567,8 +604,6 @@ PlayStreamThread (void *mrl)
 	  if (!driverready)
 	    {
 	      driverready = true;
-	      //pidv = 0x44;
-	      //pida = 0x45;
 	      // pida and pidv should have been set by ReceiveStreamThread now
 	      fprintf (stdout,
 		       "[movieplayer.cpp] PlayStreamthread: while streaming found pida: 0x%04X ; pidv: 0x%04X\n",
@@ -620,6 +655,8 @@ PlayStreamThread (void *mrl)
 	      printf ("pauseurl: %s\n", url);
 	      curl = curl_easy_init ();
 	      curl_easy_setopt (curl, CURLOPT_URL, url);
+	      curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+	      curl_easy_setopt (curl, CURLOPT_FILE, (void *) &pause_response);
 	      httpres = curl_easy_perform (curl);
 	      curl_easy_cleanup (curl);
 
@@ -634,6 +671,9 @@ PlayStreamThread (void *mrl)
 	      printf ("unpauseurl: %s\n", url);
 	      curl = curl_easy_init ();
 	      curl_easy_setopt (curl, CURLOPT_URL, url);
+	      curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+	      curl_easy_setopt (curl, CURLOPT_FILE,
+				(void *) &unpause_response);
 	      httpres = curl_easy_perform (curl);
 	      curl_easy_cleanup (curl);
 
@@ -703,11 +743,13 @@ PlayStreamThread (void *mrl)
   printf ("stopurl: %s\n", url);
   curl = curl_easy_init ();
   curl_easy_setopt (curl, CURLOPT_URL, url);
+  curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, CurlDummyWrite);
+  curl_easy_setopt (curl, CURLOPT_FILE, (void *) &stop_response);
   httpres = curl_easy_perform (curl);
   curl_easy_cleanup (curl);
-  printf("Waiting for RCST to stop\n");
+  printf ("Waiting for RCST to stop\n");
   pthread_join (rcst, NULL);
-  printf("Seems that RCST was stopped succesfully\n");
+  printf ("Seems that RCST was stopped succesfully\n");
   pthread_exit (NULL);
 }
 
@@ -855,7 +897,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
 {
   uint msg, data;
   string sel_filename;
-  bool update_info = true, start_play = false, exit = false, open_filebrowser=true;
+  bool update_info = true, start_play = false, exit =
+    false, open_filebrowser = true;
   char mrl[200];
   if (streamtype == STREAMTYPE_DVD)
     {
@@ -864,8 +907,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
       strcat (mrl, "@1:1");
       printf ("Generated MRL: %s\n", mrl);
       sel_filename = "DVD";
-      open_filebrowser=false; 
-      start_play=true;
+      open_filebrowser = false;
+      start_play = true;
     }
   else if (streamtype == STREAMTYPE_SVCD)
     {
@@ -874,15 +917,15 @@ CMoviePlayerGui::PlayStream (int streamtype)
       strcat (mrl, "@1:1");
       printf ("Generated MRL: %s\n", mrl);
       sel_filename = "(S)VCD";
-      open_filebrowser=false; 
-      start_play=true;
+      open_filebrowser = false;
+      start_play = true;
 
     }
 
   playstate = STOPPED;
   /* playstate == STOPPED         : stopped
-   * playstate == PREPARING	  : preparing stream from server
-   * playstate == ERROR		  : error setting up server
+   * playstate == PREPARING       : preparing stream from server
+   * playstate == ERROR           : error setting up server
    * playstate == PLAY            : playing
    * playstate == PAUSE           : pause-mode
    * playstate == FF              : fast-forward
@@ -905,10 +948,10 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	{
 	  open_filebrowser = false;
 	  filename = NULL;
-	  char startDir[40+6];
-	  strcpy(startDir,"vlc://");
-	  strcat(startDir,g_settings.streaming_server_startdir);
-	  printf("Startdir: %s\n",startDir);
+	  char startDir[40 + 6];
+	  strcpy (startDir, "vlc://");
+	  strcat (startDir, g_settings.streaming_server_startdir);
+	  printf ("Startdir: %s\n", startDir);
 	  //if (filebrowser->exec ("vlc://C:/TestMovies"))
 	  if (filebrowser->exec (startDir))
 	    {
@@ -918,15 +961,18 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		{
 		  sel_filename =
 		    filebrowser->getSelectedFile ()->getFileName ();
-		  printf("sel_filename: %s\n",filename);
+		  printf ("sel_filename: %s\n", filename);
 		  //strcpy (mrl, "c:\\TestMovies\\dolby.mpg");
-		  int namepos = filebrowser->getSelectedFile ()->Name.rfind("vlc://");
-	          string mrl_str = filebrowser->getSelectedFile ()->Name.substr(namepos + 6);
-				 char* tmp=curl_escape(mrl_str.c_str(), 0);
-	          strncpy (mrl,tmp, sizeof(mrl)-1);
-				 curl_free(tmp);
-      		  printf ("Generated FILE MRL: %s\n", mrl);
-		  
+		  int namepos =
+		    filebrowser->getSelectedFile ()->Name.rfind ("vlc://");
+		  string mrl_str =
+		    filebrowser->getSelectedFile ()->Name.substr (namepos +
+								  6);
+		  char *tmp = curl_escape (mrl_str.c_str (), 0);
+		  strncpy (mrl, tmp, sizeof (mrl) - 1);
+		  curl_free (tmp);
+		  printf ("Generated FILE MRL: %s\n", mrl);
+
 		  update_info = true;
 		  start_play = true;
 		}
