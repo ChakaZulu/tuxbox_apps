@@ -1022,7 +1022,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 	softupdate = false;
 	fromflash = false;
 
-	fontName = NULL;
+	font.name = NULL;
 
 	for(int x=1; x<argc; x++)
 	{
@@ -1040,24 +1040,24 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		{
 			if ((x + 3) < argc)
 			{
-				fontName = argv[x + 1];
-				fontsSizeOffset = atoi(argv[x + 2]);
-				fontFilename[0] = argv[x + 3];
+				font.name = argv[x + 1];
+				font.size_offset = atoi(argv[x + 2]);
+				font.filename[0] = argv[x + 3];
 				if ((x + 4) < argc)
 				{
-					fontFilename[1] = argv[x + 4];
+					font.filename[1] = argv[x + 4];
 					x++;
 				}
 				else
-					fontFilename[1] = NULL;
+					font.filename[1] = NULL;
 
 				if ((x + 4) < argc)
 				{
-					fontFilename[2] = argv[x + 4];
+					font.filename[2] = argv[x + 4];
 					x++;
 				}
 				else
-					fontFilename[2] = NULL;
+					font.filename[2] = NULL;
 			}
 			x += 3;
 		}
@@ -1103,14 +1103,7 @@ void CNeutrinoApp::SetupFrameBuffer()
 *                                                                                     *
 **************************************************************************************/
 
-typedef struct standard_font
-{
-	const char * const name;
-	const char * const filename[3];
-	const int          size_offset;
-} standard_font_struct;
-
-const standard_font_struct predefined_font[2] = 
+const neutrino_font_descr_struct predefined_font[2] = 
 {
 	{"Micron"            , {FONTDIR "/micron.ttf"        , FONTDIR "/micron_bold.ttf", FONTDIR "/micron_italic.ttf"}, 0},
 	{"MD King KhammuRabi", {FONTDIR "/md_khmurabi_10.ttf", NULL                      , NULL                        }, 0}
@@ -1125,21 +1118,21 @@ void CNeutrinoApp::SetupFonts()
 
 	g_fontRenderer = new FBFontRenderClass();
 
-	style[0] = g_fontRenderer->AddFont(fontFilename[0]);
+	style[0] = g_fontRenderer->AddFont(font.filename[0]);
 
-	style[1] = (fontFilename[1] == NULL) ? "Bold Regular" : g_fontRenderer->AddFont(fontFilename[1]);
+	style[1] = (font.filename[1] == NULL) ? "Bold Regular" : g_fontRenderer->AddFont(font.filename[1]);
 
-	if (fontFilename[2] == NULL)
+	if (font.filename[2] == NULL)
 	{
-		g_fontRenderer->AddFont(fontFilename[0], true);  // make italics
+		g_fontRenderer->AddFont(font.filename[0], true);  // make italics
 		style[2] = "Italic";
 	}
 	else
-		style[2] = g_fontRenderer->AddFont(fontFilename[2]);
+		style[2] = g_fontRenderer->AddFont(font.filename[2]);
 
 	for (int i = 0; i < FONT_TYPE_COUNT; i++)
 	{
-		g_Font[i] = g_fontRenderer->getFont(fontName, style[neutrino_font[i].style], configfile.getInt32(neutrino_font[i].name, neutrino_font[i].defaultsize) + neutrino_font[i].size_offset * fontsSizeOffset);
+		g_Font[i] = g_fontRenderer->getFont(font.name, style[neutrino_font[i].style], configfile.getInt32(neutrino_font[i].name, neutrino_font[i].defaultsize) + neutrino_font[i].size_offset * font.size_offset);
 	}
 }
 
@@ -2495,16 +2488,10 @@ int CNeutrinoApp::run(int argc, char **argv)
 	/* load locales before setting up any fonts to determine whether we need a true unicode font */
 	bool use_true_unicode_font = g_Locale->loadLocale(g_settings.language);
 
-	if (fontName == NULL) /* no font specified in command line */
-	{
-		fontName = predefined_font[use_true_unicode_font].name;
-		fontFilename[0] = predefined_font[use_true_unicode_font].filename[0];
-		fontFilename[1] = predefined_font[use_true_unicode_font].filename[1];
-		fontFilename[2] = predefined_font[use_true_unicode_font].filename[2];
-		fontsSizeOffset = predefined_font[use_true_unicode_font].size_offset;
-	}
+	if (font.name == NULL) /* no font specified in command line */
+		font = predefined_font[use_true_unicode_font];
 
-	CLCD::getInstance()->init(fontFilename[0], fontName);
+	CLCD::getInstance()->init(font.filename[0], font.name);
 	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control == 1));
 	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control == 1));
 
@@ -3871,13 +3858,9 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 	{
 		bool use_true_unicode_font = g_Locale->loadLocale(g_settings.language);
 
-		if (fontName == predefined_font[(!use_true_unicode_font)].name)
+		if (font.name == predefined_font[(!use_true_unicode_font)].name)
 		{
-			fontName = predefined_font[use_true_unicode_font].name;
-			fontFilename[0] = predefined_font[use_true_unicode_font].filename[0];
-			fontFilename[1] = predefined_font[use_true_unicode_font].filename[1];
-			fontFilename[2] = predefined_font[use_true_unicode_font].filename[2];
-			fontsSizeOffset = predefined_font[use_true_unicode_font].size_offset;
+			font = predefined_font[use_true_unicode_font];
 			SetupFonts();
 #warning TODO: reload LCD fonts, too
 		}

@@ -57,6 +57,13 @@
 *                                                                                     *
 **************************************************************************************/
 
+typedef struct neutrino_font_descr
+{
+	const char * name;
+	const char * filename[3];
+	int          size_offset;
+} neutrino_font_descr_struct;
+
 class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 {
 	private:
@@ -82,9 +89,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int                             network_dhcp;
 		int                             network_automatic_start;
 
-		const char *                    fontName;
-		const char *                    fontFilename[3];
-		int				fontsSizeOffset;
+		neutrino_font_descr_struct      font;
 
 		int				mode;
 		int				lcdpower;
