@@ -11,7 +11,7 @@ class eCheckbox;
 
 class eZapVideoSetup: public eWindow
 {
-	eButton *ok;
+	eButton *ok, *testpicture;
 	eStatusBar *status;
 	eCheckbox *c_disableWSS, *ac3default, *VCRSwitching;
 	eListBox<eListBoxEntryText> *colorformat, *pin8, *tvsystem;
@@ -26,6 +26,7 @@ private:
 	void TVSystemChanged( eListBoxEntryText * );
 	void VCRChanged(int);	
 	void okPressed();
+	void showTestpicture();
 	int eventHandler( const eWidgetEvent &e );
 
 public:

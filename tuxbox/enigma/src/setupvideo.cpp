@@ -11,6 +11,7 @@
 #include <lib/gui/ebutton.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/echeckbox.h>
+#include <lib/gui/testpicture.h>
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
 #include <lib/system/init.h>
@@ -168,6 +169,17 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	CONNECT(ok->selected, eZapVideoSetup::okPressed);		
 
+	testpicture=new eButton(this);
+	testpicture->setText(_("test"));
+	testpicture->setShortcut("blue");
+	testpicture->setShortcutPixmap("blue");
+	testpicture->move(ePoint(260, 250));
+	testpicture->resize(eSize(100, 40));
+	testpicture->setHelpText(_("show testpicture"));
+	testpicture->loadDeco();
+
+	CONNECT(testpicture->selected, eZapVideoSetup::showTestpicture);		
+
 	status = new eStatusBar(this);	
 	status->move( ePoint(0, clientrect.height()-50) );
 	status->resize( eSize( clientrect.width(), 50) );
@@ -179,6 +191,17 @@ eZapVideoSetup::~eZapVideoSetup()
 {
 	if (status)
 		delete status;
+}
+
+void eZapVideoSetup::showTestpicture()
+{
+	hide();
+	
+	int mode = 1;
+	while ((mode > 0) && (mode < 9))
+		mode = eTestPicture::display(mode-1);
+	
+	show();
 }
 
 void eZapVideoSetup::okPressed()
