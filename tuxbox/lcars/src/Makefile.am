@@ -1,6 +1,7 @@
 INCLUDES = \
-	@CURL_CFLAGS@
-	@FREETYPE_CFLAGS@
+	@CURL_CFLAGS@ \
+	@FREETYPE_CFLAGS@ \
+	@PLUGINS_CFLAGS@
 
 bin_PROGRAMS = lcars
 
@@ -16,8 +17,6 @@ lcars_LDADD = \
 	@CURL_LIBS@ \
 	@FREETYPE_LIBS@ \
 	-lpthread -ldl -lz
-
-endif
 
 install-data-local:
 	install -d $(CONFIGDIR)/lcars
