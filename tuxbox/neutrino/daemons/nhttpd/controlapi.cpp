@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.26 2003/09/18 16:45:19 zwen Exp $
+	$Id: controlapi.cpp,v 1.27 2003/11/02 00:28:27 dirch Exp $
 
 	License: GPL
 
@@ -582,6 +582,30 @@ bool CControlAPI::EpgCGI(CWebserverRequest *request)
 				request->SocketWriteLn(epg.info2);
 				return true;
 			}
+		}
+		else if (request->ParameterList["onidsid"] != "")
+		{
+			unsigned channel_id = atol( request->ParameterList["onidsid"].c_str());
+			Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
+			CChannelEventList::iterator eventIterator;
+
+			for (eventIterator = Parent->eList.begin(); eventIterator != Parent->eList.end(); eventIterator++)
+			{
+			CShortEPGData epg;
+			
+				if (Parent->Sectionsd->getEPGidShort(eventIterator->eventID,&epg))
+				{
+					request->printf("%llu %ld %d\n", eventIterator->eventID, eventIterator->startTime, eventIterator->duration);
+					if(epg.title.length() > 0)
+					request->printf("%s\n",epg.title.c_str());
+					if(epg.info1.length() > 0)
+					request->printf("%s\n",epg.info1.c_str());
+					if(epg.info2.length() > 0)
+					request->printf("%s\n\n",epg.info2.c_str());
+				}
+			}
+			return true;
+		
 		}
 		else
 		{

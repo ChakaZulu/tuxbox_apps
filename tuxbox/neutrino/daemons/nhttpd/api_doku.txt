@@ -94,8 +94,30 @@ Beispiel:
 571231699927 1021325700 1500 The Hitchhiker
 571231699928 1021327200 1500 The Hitchhiker
 
- 
- 
+
+
+Parameter: onidsid=ONIDSID
+Rückgabe:
+
+Als Rückgabe wird die Eventliste des durch die ONIDSID identifizierten Senders gesendet, das heisst eine Liste, was für Filme auf einem Sender kommen. Jeder Datensatz wird von einem EnterEnder (\n\n) vom  Nächsten getrennt.
+
+Rückgabe-Format: 
+ONIDSID EVENTID DURATION
+TITLE INFO1 INFO2
+
+Die EVENTID dient als Handle um genauere EPG-Informationen abzufragen.
+
+Beispiel:
+
+>>>http://dbox/control/epg?onidsid8716304
+6143198520 1067754600 1800
+Daten der Woche
+Moderation: Andrea Müller
+Themen:Š* Kandidatenkür: Maas wird SpitzenkandidatŠ* Aufsteiger: Auszeichnung für ScheerŠ* Dikussion: Längere Arbeitszeiten; dazu ein Interview mit Christian Scholz, WirtschaftswissenschaftlerŠ* Ladenschluss: Öffnungszeiten am Sonntag
+
+6143198521 1067756400 1800
+Abendschau
+Themen:Š* Protestmarsch "Es reicht"Š* Vorabdruck: Harry PotterŠ* Militär-MusikfestŠAbendschauNewsŠ* Ermittlungen gegen Michael Krausz   Š* Bahnunfall am AlexanderplatzŠ* Aubis Urteil
 
 
 Parameter: eventid=EVENTID
