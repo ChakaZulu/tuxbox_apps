@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.51 2004/12/25 23:56:37 chakazulu Exp $
+	$Id: timerdclient.cpp,v 1.52 2005/01/12 20:27:14 chakazulu Exp $
 
 	License: GPL
 
@@ -156,6 +156,13 @@ void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID
 
 bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount)
 {
+	return modifyTimerEvent(eventid,announcetime,alarmtime,stoptime,evrepeat,repeatcount,NULL);
+}
+//-------------------------------------------------------------------------
+
+bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount, void *data,
+				     int datalen)
+{
 	// set new time values for event eventid
 
 	CTimerdMsg::commandModifyTimer msgModifyTimer;
@@ -167,11 +174,23 @@ bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t al
 	msgModifyTimer.repeatCount = repeatcount;
 	send(CTimerdMsg::CMD_MODIFYTIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
+	if (data && datalen)
+		send_data((char*)data,datalen);
+
 	CTimerdMsg::responseStatus response;
 	receive_data((char*)&response, sizeof(response));
 
 	close_connection();
 	return true;
+}
+//-------------------------------------------------------------------------
+
+bool CTimerdClient::modifyRecordTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount,
+					   const char * const recordingdir)
+{
+	CTimerdMsg::commandRecordDir rdir;
+	strncpy(rdir.recDir,recordingdir,RECORD_DIR_MAXLEN-1);
+	return modifyTimerEvent(eventid,announcetime,alarmtime,stoptime,evrepeat,repeatcount,&rdir,sizeof(rdir));
 }
 //-------------------------------------------------------------------------
 
@@ -222,11 +241,12 @@ int CTimerdClient::addTimerEvent( CTimerEventTypes evType, void* data , int min,
 int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount)
 {
 	CTimerd::TransferEventInfo tei; 
+	CTimerd::TransferRecordingInfo tri;
 	CTimerdMsg::commandAddTimer msgAddTimer;
 	msgAddTimer.alarmTime  = alarmtime;
 	msgAddTimer.announceTime = announcetime;
 	msgAddTimer.stopTime   = stoptime;
-	msgAddTimer.eventType = evType ;
+	msgAddTimer.eventType = evType;
 	msgAddTimer.eventRepeat = evrepeat;
 	msgAddTimer.repeatCount = repeatcount;
 	int length;
@@ -235,7 +255,7 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 		length = 0;
 	}
 	else if(evType == CTimerd::TIMER_NEXTPROGRAM || evType == CTimerd::TIMER_ZAPTO || 
-			  evType == CTimerd::TIMER_RECORD || evType == CTimerd::TIMER_IMMEDIATE_RECORD )
+		evType == CTimerd::TIMER_IMMEDIATE_RECORD )
 	{
 		CTimerd::EventInfo *ei=static_cast<CTimerd::EventInfo*>(data); 
 		strcpy(tei.apids, ei->apids.substr(0, TIMERD_APIDS_MAXLEN-1).c_str());
@@ -245,6 +265,18 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 		tei.recordingSafety = ei->recordingSafety;
 		length = sizeof( CTimerd::TransferEventInfo);
 		data = &tei;
+	}
+	else if(evType == CTimerd::TIMER_RECORD)
+	{
+		CTimerd::RecordingInfo *ri=static_cast<CTimerd::RecordingInfo*>(data); 
+		strncpy(tri.apids, ri->apids, TIMERD_APIDS_MAXLEN-1);
+		tri.channel_id = ri->channel_id;
+		tri.epg_starttime	= ri->epg_starttime;
+		tri.epgID = ri->epgID;
+		tri.recordingSafety = ri->recordingSafety;
+		strncpy(tri.recordingDir, ri->recordingDir, RECORD_DIR_MAXLEN-1);
+		length = sizeof( CTimerd::TransferRecordingInfo);
+		data = &tri;
 	}
 	else if(evType == CTimerd::TIMER_STANDBY)
 	{

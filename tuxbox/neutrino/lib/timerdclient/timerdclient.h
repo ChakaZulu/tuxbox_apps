@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.44 2004/12/25 23:56:37 chakazulu Exp $
+	$Id: timerdclient.h,v 1.45 2005/01/12 20:27:14 chakazulu Exp $
 
 	License: GPL
 
@@ -75,6 +75,11 @@ class CTimerdClient:private CBasicClient
 
 		// modify existing timer event
 		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE, uint repeatcount=0);
+		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount,
+				      void *data,int datalen=0);
+
+		bool modifyRecordTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount, const char * const recordingdir);
+
 		void modifyTimerAPid(int eventid, std::string apids);
 
 		// set existing sleeptimer to new times or create new sleeptimer with these times
@@ -102,15 +107,16 @@ class CTimerdClient:private CBasicClient
 
 		// adds new record timer event
 		int addRecordTimerEvent(const t_channel_id channel_id, time_t alarmtime, time_t stoptime, 
-										unsigned long long epgID=0, time_t epg_starttime=0, time_t announcetime = 0, 
-										std::string apids="", bool safety=false) 
+					unsigned long long epgID=0, time_t epg_starttime=0, time_t announcetime = 0, 
+					std::string apids="", bool safety=false,std::string recDir="") 
 		{
-			CTimerd::EventInfo eventInfo;
+			CTimerd::RecordingInfo eventInfo;
 			eventInfo.channel_id = channel_id;
 			eventInfo.epgID = epgID;
 			eventInfo.epg_starttime = epg_starttime;
-			eventInfo.apids = apids;
+			strncpy(eventInfo.apids,apids.c_str(), TIMERD_APIDS_MAXLEN);
 			eventInfo.recordingSafety = safety;
+			strncpy(eventInfo.recordingDir, recDir.c_str(), RECORD_DIR_MAXLEN);
 			return addTimerEvent(CTimerd::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
 		};
 		
