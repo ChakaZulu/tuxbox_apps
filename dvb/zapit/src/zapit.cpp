@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.98 2002/03/19 22:30:12 obi Exp $
+  $Id: zapit.cpp,v 1.99 2002/03/20 01:31:23 happydude Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -293,11 +293,13 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 	int ap_count = ret_pids->count_apids;
 	int vp_count = ret_pids->count_vpids;
 	int ecm_pid = ret_pids->ecmpid;
+	int destination_apid_list_entry = -1;
+	bool apid_previously_found = false;
 
 	stream_type = buffer[0];
 	elementary_PID = ((buffer[1] & 0x1f) << 8) | buffer[2];
 	ES_info_length = ((buffer[3] & 0x0f) << 8) | buffer[4];
-
+	
 	if ((stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06) && ap_count < max_num_apids)
 	{
 		ret_pids->apids[ap_count].component_tag = -1;
@@ -309,6 +311,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 	{
 		descriptor_tag = buffer[descr_pos];
 		descriptor_length = buffer[descr_pos + 1];
+		destination_apid_list_entry = -1;
 
 		switch (descriptor_tag)
 		{
@@ -370,13 +373,39 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 			case 0xc0: /* User Private descriptor - used in Canal+ - does anyone know what it's good for? */
 				break;
 
-			case 0xc5: /* User Private descriptor - Canal+ Radio */
-				if (ap_count < max_num_apids && (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06))
+			case 0xc5: /* User Private descriptor - Canal+ Radio                                     */
+				   /* Double apid entries are ignored or overwritten (depending on the name tag) */
+				if (stream_type == 0x03 || stream_type == 0x04 || stream_type == 0x06)
 				{
-					if (ret_pids->apids[ap_count].desc[0] == 0)
+					int apid_list_entry = 0;
+
+					while (destination_apid_list_entry == -1 && apid_list_entry < ap_count)
 					{
-						memcpy(ret_pids->apids[ap_count].desc, &(buffer[descr_pos + 3]), 0x18);
-						ret_pids->apids[ap_count].desc[24] = 0;
+						if (elementary_PID == ret_pids->apids[apid_list_entry].pid)
+						{
+							apid_previously_found = true;
+							if (strcmp(ret_pids->apids[apid_list_entry].desc, "LIBRE") == 0 ||
+							    ret_pids->apids[apid_list_entry].desc[0] == 0)
+							{
+								destination_apid_list_entry = apid_list_entry;
+								ret_pids->apids[apid_list_entry].desc[0] = 0;
+							}
+						}
+						apid_list_entry++;
+					}
+
+					if (destination_apid_list_entry == -1 && ap_count < max_num_apids)
+					{
+						destination_apid_list_entry = ap_count;
+					}
+
+					if (destination_apid_list_entry != -1)
+					{
+						if (ret_pids->apids[destination_apid_list_entry].desc[0] == 0)
+						{
+							memcpy(ret_pids->apids[destination_apid_list_entry].desc, &(buffer[descr_pos + 3]), 0x18);
+							ret_pids->apids[destination_apid_list_entry].desc[24] = 0;
+						}
 					}
 				}
 				break;
@@ -410,17 +439,22 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 		case 0x03:
 		case 0x04:
 		case 0x06:
-			if (ap_count < max_num_apids)
+			if (stream_type == 0x03 || stream_type == 0x04 || ret_pids->apids[ap_count].is_ac3)
 			{
-				if (stream_type == 0x03 || stream_type == 0x04 || ret_pids->apids[ap_count].is_ac3)
+				if (destination_apid_list_entry == -1 && ap_count < max_num_apids)
 				{
+					destination_apid_list_entry = ap_count;
+				}
 
-					if (ret_pids->apids[ap_count].desc[0] == 0)
+				if (destination_apid_list_entry != -1)
+				{
+					ret_pids->apids[destination_apid_list_entry].pid = elementary_PID;
+					if ((!apid_previously_found) || (destination_apid_list_entry == ap_count && 
+					    ret_pids->apids[destination_apid_list_entry].desc[0] != 0 &&
+					    strncmp(ret_pids->apids[destination_apid_list_entry].desc, "LIBRE", 5) != 0))
 					{
-						sprintf(ret_pids->apids[ap_count].desc, "%02d", ap_count + 1);
+						ap_count++;
 					}
-					ret_pids->apids[ap_count].pid = elementary_PID;
-					ap_count++;
 				}
 			}
 			break;
@@ -475,6 +509,7 @@ uint16_t parse_ES_info(uint8_t *buffer, pids *ret_pids, uint16_t ca_system_id)
 	ret_pids->count_apids = ap_count;
 	ret_pids->count_vpids = vp_count;
 	ret_pids->ecmpid = ecm_pid;
+
 	return ES_info_length + 5;
 }
 
@@ -559,6 +594,14 @@ pids parse_pmt (uint16_t pid, uint16_t ca_system_id, uint16_t program_number)
 	for (pos = 12 + program_info_length; pos < section_length - 1; pos += ES_info_length)
 	{
 		ES_info_length = parse_ES_info(buffer+pos, &ret_pids, ca_system_id);
+	}
+
+	for (int apid_list_entry = 0; apid_list_entry < ret_pids.count_apids; apid_list_entry++)
+	{
+		if (ret_pids.apids[apid_list_entry].desc[0] == 0)
+		{
+			sprintf(ret_pids.apids[apid_list_entry].desc, "%02d", apid_list_entry + 1);
+		}
 	}
 
 	return ret_pids;
@@ -2706,7 +2749,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.98 2002/03/19 22:30:12 obi Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.99 2002/03/20 01:31:23 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{
