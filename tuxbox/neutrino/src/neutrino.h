@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.61 2002/03/06 11:18:38 field Exp $
+//  $Id: neutrino.h,v 1.62 2002/03/07 11:45:04 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.62  2002/03/07 11:45:04  field
+//  Bugfix...
+//
 //  Revision 1.61  2002/03/06 11:18:38  field
 //  Fixes & Updates
 //
@@ -271,7 +274,8 @@ struct messages {
 
 			EVT_VOLCHANGED 	= CRCInput::RC_Events + 1,
 			EVT_MUTECHANGED	= CRCInput::RC_Events + 2,
-			EVT_VCRCHANGED	= CRCInput::RC_Events + 3
+			EVT_VCRCHANGED	= CRCInput::RC_Events + 3,
+			EVT_MODECHANGED = CRCInput::RC_Events + 4
 		};
 };
 

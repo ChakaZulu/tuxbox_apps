@@ -257,31 +257,42 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 				//printf("[neutrino] network - read!\n");
 				CEventServer::eventHead emsg;
 				int read_bytes= recv(fd_eventclient, &emsg, sizeof(emsg), MSG_WAITALL);
-				//printf("[neutrino] event read %d\n", read_bytes);
+				//printf("[neutrino] event read %d bytes - following %d bytes\n", read_bytes, emsg.dataSize );
 				if ( read_bytes == sizeof(emsg) )
 				{
-					if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
+                    unsigned char* p;
+					p= new unsigned char[ emsg.dataSize ];
+					if ( p!=NULL )
 					{
-						*msg = messages::EVT_VOLCHANGED;
-						char vol;
-						recv(fd_eventclient, &vol, sizeof(vol), MSG_WAITALL);
-						*data = vol;
+						read_bytes= recv(fd_eventclient, p, emsg.dataSize, MSG_WAITALL);
+						//printf("[neutrino] eventbody read %d bytes\n", read_bytes );
+
+						if (emsg.eventID==CControldClient::EVT_VOLUMECHANGED)
+						{
+							*msg = messages::EVT_VOLCHANGED;
+							*data = *(char*) p;
+						}
+
+						if (emsg.eventID==CControldClient::EVT_MUTECHANGED)
+						{
+							*msg = messages::EVT_MUTECHANGED;
+							*data = *(bool*) p;
+						}
+						else if (emsg.eventID==CControldClient::EVT_VCRCHANGED)
+						{
+            	            *msg = messages::EVT_VCRCHANGED;
+							*data = *(int*) p;
+						}
+						else if (emsg.eventID==CControldClient::EVT_MODECHANGED)
+						{
+            	            *msg = messages::EVT_MODECHANGED;
+							*data = *(int*) p;
+						}
+
+						delete p;
+						p= NULL;
 					}
 
-					if (emsg.eventID==CControldClient::EVT_MUTECHANGED)
-					{
-						*msg = messages::EVT_MUTECHANGED;
-						bool muted;
-						recv(fd_eventclient, &muted, sizeof(muted), MSG_WAITALL);
-						*data = muted;
-					}
-					if (emsg.eventID==CControldClient::EVT_VCRCHANGED)
-					{
-                        *msg = messages::EVT_VCRCHANGED;
-						int VCRState;
-						recv(fd_eventclient, &VCRState, sizeof(VCRState), MSG_WAITALL);
-						*data = VCRState;
-					}
 				}
 				else
 				{
