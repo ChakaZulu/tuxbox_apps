@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.12: added zoom, removed +/-10                                        *
  *    V1.11: added pagecatching, use 16:9 for text&picture mode               *
  *    V1.10: added conceal/hold mosaics/release mosaics                       *
  *    V1.09: enx fixed, subpage zapping fixed, tvmode reactivated             *
@@ -28,7 +29,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.11 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.12 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -96,16 +97,13 @@ void plugin_exec(PluginParam *par)
 					case RC_DOWN:	GetPrevPageOne();
 									break;
 
-					case RC_RIGHT:	GetNextPageTen();
+					case RC_RIGHT:	GetNextSubPage();
 									break;
 
-					case RC_LEFT:	GetPrevPageTen();
+					case RC_LEFT:	GetPrevSubPage();
 									break;
 
-					case RC_PLUS:	GetNextSubPage();
-									break;
-
-					case RC_MINUS:	GetPrevSubPage();
+					case RC_OK:		PageCatching();
 									break;
 
 					case RC_0:		PageInput(0);
@@ -138,10 +136,10 @@ void plugin_exec(PluginParam *par)
 					case RC_9:		PageInput(9);
 									break;
 
-					case RC_OK:		PageCatching();
+					case RC_PLUS:	SwitchZoomMode();
 									break;
 
-					case RC_DBOX:	SwitchScreenMode();
+					case RC_MINUS:	SwitchScreenMode();
 									break;
 
 					case RC_MUTE:	SwitchTranspMode();
@@ -358,6 +356,10 @@ void CleanUp()
 		ioctl(dmx, DMX_STOP);
 		close(dmx);
 
+	//close avs
+
+		close(avs);
+
 	//close freetype
 
 		FT_Done_FreeType(library);
@@ -387,6 +389,7 @@ void CleanUp()
 void PageInput(int Number)
 {
 	static int temp_page;
+	int zoom = 0;
 
 	//clear temp_page
 
@@ -396,14 +399,6 @@ void PageInput(int Number)
 
 		if(Number == 0 && inputcounter == 2)
 		{
-			//show feedback
-
-				PosX = StartX + 8*fontwidth;
-				PosY = StartY;
-				RenderCharFB('<', white);
-				RenderCharFB('0', white);
-				RenderCharFB('>', white);
-
 			//set page
 
 				temp_page = 0x100;
@@ -412,14 +407,6 @@ void PageInput(int Number)
 		}
 		else if(Number == 9 && inputcounter == 2)
 		{
-			//show feedback
-
-				PosX = StartX + 8*fontwidth;
-				PosY = StartY;
-				RenderCharFB('<', white);
-				RenderCharFB('9', white);
-				RenderCharFB('>', white);
-
 			//set page
 
 				temp_page = lastpage;
@@ -429,23 +416,28 @@ void PageInput(int Number)
 
 	//show pageinput
 
-		PosY = StartY;
-
-		switch(inputcounter)
+		if(zoommode != 2)
 		{
-			case 2:	PosX = StartX + 8*fontwidth;
-					RenderCharFB(Number | '0', white);
-					RenderCharFB('-', white);
-					RenderCharFB('-', white);
-					break;
+			if(zoommode == 1) zoom = 1<<9;
 
-			case 1:	PosX = StartX + 9*fontwidth;
-					RenderCharFB(Number | '0', white);
-					break;
+			PosY = StartY;
 
-			case 0:	PosX = StartX + 10*fontwidth;
-					RenderCharFB(Number | '0', white);
-					break;
+			switch(inputcounter)
+			{
+				case 2:	PosX = StartX + 8*fontwidth;
+						RenderCharFB(Number | '0', white);
+						RenderCharFB('-', white);
+						RenderCharFB('-', white);
+						break;
+
+				case 1:	PosX = StartX + 9*fontwidth;
+						RenderCharFB(Number | '0', white);
+						break;
+
+				case 0:	PosX = StartX + 10*fontwidth;
+						RenderCharFB(Number | '0', white);
+						break;
+			}
 		}
 
 	//generate pagenumber
@@ -474,6 +466,8 @@ void PageInput(int Number)
 
 				if(subpagetable[page] != 0xFF)
 				{
+					if(zoommode == 2) zoommode = 1;
+
 					subpage = subpagetable[page];
 					pageupdate = 1;
 					printf("TuxTxt <DirectInput => %.3X-%.2X>\n", page, subpage);
@@ -500,14 +494,6 @@ void GetNextPageOne()
 
 		inputcounter = 2;
 
-	//show feedback
-
-		PosX = StartX + 8*fontwidth;
-		PosY = StartY;
-		RenderCharFB('-', white);
-		RenderCharFB('-', white);
-		RenderCharFB('>', white);
-
 	//find next cached page
 
 		lastpage = page;
@@ -529,6 +515,8 @@ void GetNextPageOne()
 
 	//update page
 
+		if(zoommode == 2) zoommode = 1;
+
 		subpage = subpagetable[page];
 		pageupdate = 1;
 		printf("TuxTxt <NextPageOne => %.3X-%.2X>\n", page, subpage);
@@ -547,14 +535,6 @@ void GetPrevPageOne()
 	//abort pageinput
 
 		inputcounter = 2;
-
-	//show feedback
-
-		PosX = StartX + 8*fontwidth;
-		PosY = StartY;
-		RenderCharFB('<', white);
-		RenderCharFB('-', white);
-		RenderCharFB('-', white);
 
 	//find previous cached page
 
@@ -577,107 +557,11 @@ void GetPrevPageOne()
 
 	//update page
 
+		if(zoommode == 2) zoommode = 1;
+
 		subpage = subpagetable[page];
 		pageupdate = 1;
 		printf("TuxTxt <PrevPageOne => %.3X-%.2X>\n", page, subpage);
-}
-
-/******************************************************************************
- * GetNextPageTen                                                             *
- ******************************************************************************/
-
-void GetNextPageTen()
-{
-	//disable subpage zapping
-
-		zap_subpage_manual = 0;
-
-	//abort pageinput
-
-		inputcounter = 2;
-
-	//show feedback
-
-		PosX = StartX + 8*fontwidth;
-		PosY = StartY;
-		RenderCharFB('-', white);
-		RenderCharFB('>', white);
-		RenderCharFB('>', white);
-
-	//find next cached page
-
-		lastpage = page;
-
-		page &= 0xFF0;
-
-		do
-		{
-			//find next ten
-
-				if((page & 0x0F0) == 0x090) page += 0x070;
-				else						page += 0x010;
-
-			//wrap around
-
-				if(page >= 0x900) page = 0x100;
-
-		}while(subpagetable[page] == 0xFF);
-
-	//update page
-
-		subpage = subpagetable[page];
-		pageupdate = 1;
-		printf("TuxTxt <NextPageTen => %.3X-%.2X>\n", page, subpage);
-}
-
-/******************************************************************************
- * GetPrevPageTen                                                             *
- ******************************************************************************/
-
-void GetPrevPageTen()
-{
-	//disable subpage zapping
-
-		zap_subpage_manual = 0;
-
-	//abort pageinput
-
-		inputcounter = 2;
-
-	//show feedback
-
-		PosX = StartX + 8*fontwidth;
-		PosY = StartY;
-		RenderCharFB('<', white);
-		RenderCharFB('<', white);
-		RenderCharFB('-', white);
-
-	//find previous cached page
-
-		lastpage = page;
-
-		if(page & 0x00F) page += 0x010;
-
-		page &= 0xFF0;
-
-		do
-		{
-			//find previous ten
-
-				if((page & 0x0F0) == 0x000) page -= 0x070;
-				else 						page -= 0x010;
-
-			//wrap around
-
-				if(page <= 0x090) page = 0x890;
-
-		}while(subpagetable[page] == 0xFF);
-
-	//update page
-
-		subpage = subpagetable[page];
-		pageupdate = 1;
-		printf("TuxTxt <PrevPageTen => %.3X-%.2X>\n", page, subpage);
 }
 
 /******************************************************************************
@@ -702,19 +586,13 @@ void GetNextSubPage()
 				{
 					if(cachetable[page][loop] != 0)
 					{
-						//show feedback
-
-							PosX = StartX + 8*fontwidth;
-							PosY = StartY;
-							RenderCharFB('U', white);
-							RenderCharFB('+', white);
-							RenderCharFB('1', white);
-
 						//enable manual subpage zapping
 
 							zap_subpage_manual = 1;
 
 						//update page
+
+							if(zoommode == 2) zoommode = 1;
 
 							subpage = loop;
 							pageupdate = 1;
@@ -727,19 +605,13 @@ void GetNextSubPage()
 				{
 					if(cachetable[page][loop] != 0)
 					{
-						//show feedback
-
-							PosX = StartX + 8*fontwidth;
-							PosY = StartY;
-							RenderCharFB('U', white);
-							RenderCharFB('+', white);
-							RenderCharFB('1', white);
-
 						//enable manual subpage zapping
 
 							zap_subpage_manual = 1;
 
 						//update page
+
+							if(zoommode == 2) zoommode = 1;
 
 							subpage = loop;
 							pageupdate = 1;
@@ -778,19 +650,13 @@ void GetPrevSubPage()
 				{
 					if(cachetable[page][loop] != 0)
 					{
-						//show feedback
-
-							PosX = StartX + 8*fontwidth;
-							PosY = StartY;
-							RenderCharFB('U', white);
-							RenderCharFB('-', white);
-							RenderCharFB('1', white);
-
 						//enable manual subpage zapping
 
 							zap_subpage_manual = 1;
 
 						//update page
+
+							if(zoommode == 2) zoommode = 1;
 
 							subpage = loop;
 							pageupdate = 1;
@@ -803,19 +669,13 @@ void GetPrevSubPage()
 				{
 					if(cachetable[page][loop] != 0)
 					{
-						//show feedback
-
-							PosX = StartX + 8*fontwidth;
-							PosY = StartY;
-							RenderCharFB('U', white);
-							RenderCharFB('-', white);
-							RenderCharFB('1', white);
-
 						//enable manual subpage zapping
 
 							zap_subpage_manual = 1;
 
 						//update page
+
+							if(zoommode == 2) zoommode = 1;
 
 							subpage = loop;
 							pageupdate = 1;
@@ -874,6 +734,8 @@ void PageCatching()
 		while(RCCode != RC_OK);
 
 	//set new page
+
+		if(zoommode == 2) zoommode = 1;
 
 		lastpage = page;
 		page = catched_page;
@@ -1005,11 +867,17 @@ void CatchPrevPage()
 void RenderCatchedPage()
 {
 	static int old_row, old_col;
+	int zoom = 0;
+
+	//handle zoom
+
+		if(zoommode) zoom = 1<<9;
 
 	//restore pagenumber
 
 		PosX = StartX + old_col*fontwidth;
-		PosY = StartY + old_row*fixfontheight;
+		if(zoommode == 2) PosY = StartY + (old_row-12)*fixfontheight*((zoom>>9)+1);
+		else			  PosY = StartY + old_row*fixfontheight*((zoom>>9)+1);
 
 		RenderCharFB(page_char[old_row*40 + old_col    ], page_atrb[old_row*40 + old_col    ]);
 		RenderCharFB(page_char[old_row*40 + old_col + 1], page_atrb[old_row*40 + old_col + 1]);
@@ -1020,8 +888,20 @@ void RenderCatchedPage()
 
 	//mark pagenumber
 
+		if(zoommode == 1 && catch_row > 11)
+		{
+			zoommode = 2;
+			CopyBB2FB();
+		}
+		else if(zoommode == 2 && catch_row < 12)
+		{
+			zoommode = 1;
+			CopyBB2FB();
+		}
+
 		PosX = StartX + catch_col*fontwidth;
-		PosY = StartY + catch_row*fixfontheight;
+		if(zoommode == 2) PosY = StartY + (catch_row-12)*fixfontheight*((zoom>>9)+1);
+		else			  PosY = StartY + catch_row*fixfontheight*((zoom>>9)+1);
 
 		RenderCharFB(page_char[catch_row*40 + catch_col    ], page_atrb[catch_row*40 + catch_col    ] & 1<<9 | (page_atrb[catch_row*40 + catch_col    ] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col    ] & 0xF0)>>4);
 		RenderCharFB(page_char[catch_row*40 + catch_col + 1], page_atrb[catch_row*40 + catch_col + 1] & 1<<9 | (page_atrb[catch_row*40 + catch_col + 1] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col + 1] & 0xF0)>>4);
@@ -1029,31 +909,21 @@ void RenderCatchedPage()
 }
 
 /******************************************************************************
- * SwitchTranspMode                                                           *
+ * SwitchZoomMode                                                             *
  ******************************************************************************/
 
-void SwitchTranspMode()
+void SwitchZoomMode()
 {
-	if(!screenmode)
-	{
-		//toggle mode
+	//toggle mode
 
-			transpmode++;
-			if(transpmode == 3) transpmode = 0;
+		zoommode++;
+		if(zoommode == 3) zoommode = 0;
 
-			printf("TuxTxt <SwitchTranspMode => %d>\n", transpmode);
+		printf("TuxTxt <SwitchZoomMode => %d>\n", zoommode);
 
-		//set mode
+	//update page
 
-			if(!transpmode || transpmode == 1)
-			{
-				pageupdate = 1;
-			}
-			else
-			{
-				memset(lfb, transp, var_screeninfo.xres * var_screeninfo.yres);
-			}
-	}
+		CopyBB2FB();
 }
 
 /******************************************************************************
@@ -1097,6 +967,7 @@ void SwitchScreenMode()
 
 				avia_pig_set_pos(pig, (StartX+269), (StartY+20));
 				avia_pig_set_size(pig, 320, 504);
+				avia_pig_set_stack(pig, 1);
 				avia_pig_show(pig);
 			}
 			else
@@ -1113,6 +984,34 @@ void SwitchScreenMode()
 			if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
 			{
 				printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
+			}
+	}
+}
+
+/******************************************************************************
+ * SwitchTranspMode                                                           *
+ ******************************************************************************/
+
+void SwitchTranspMode()
+{
+	if(!screenmode)
+	{
+		//toggle mode
+
+			transpmode++;
+			if(transpmode == 3) transpmode = 0;
+
+			printf("TuxTxt <SwitchTranspMode => %d>\n", transpmode);
+
+		//set mode
+
+			if(!transpmode || transpmode == 1)
+			{
+				pageupdate = 1;
+			}
+			else
+			{
+				memset(lfb, transp, var_screeninfo.xres * var_screeninfo.yres);
 			}
 	}
 }
@@ -1165,7 +1064,13 @@ void RenderCharFB(int Char, int Attribute)
 					{
 						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute & 15;
 
-						if(Attribute & 1<<9) *(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute & 15;
+						if(zoommode && (Attribute & 1<<9))
+						{
+							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute & 15;
+							*(lfb + (x+PosX) + ((y+PosY+2)*var_screeninfo.xres)) = Attribute & 15;
+							*(lfb + (x+PosX) + ((y+PosY+3)*var_screeninfo.xres)) = Attribute & 15;
+						}
+						else if(zoommode || (Attribute & 1<<9)) *(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute & 15;
 					}
 					else
 					{
@@ -1177,7 +1082,13 @@ void RenderCharFB(int Char, int Attribute)
 
 						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute>>4 & 15;
 
-						if(Attribute & 1<<9) *(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute>>4 & 15;
+						if(zoommode && (Attribute & 1<<9))
+						{
+							*(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute>>4 & 15;
+							*(lfb + (x+PosX) + ((y+PosY+2)*var_screeninfo.xres)) = Attribute>>4 & 15;
+							*(lfb + (x+PosX) + ((y+PosY+3)*var_screeninfo.xres)) = Attribute>>4 & 15;
+						}
+						else if(zoommode || (Attribute & 1<<9)) *(lfb + (x+PosX) + ((y+PosY+1)*var_screeninfo.xres)) = Attribute>>4 & 15;
 					}
 
 					x++;
@@ -1187,7 +1098,8 @@ void RenderCharFB(int Char, int Attribute)
 			x = 0;
 			y++;
 
-			if(Attribute & 1<<9) y++;
+			if(zoommode && (Attribute & 1<<9)) y += 3;
+			else if(zoommode || (Attribute & 1<<9)) y++;
 		}
 
 	PosX += fontwidth;
@@ -1272,6 +1184,10 @@ void RenderPageNotFound()
 	char message_3[] = "åææææææææææææææææææææææææææææææææææææçé";
 	char message_4[] = "ëìììììììììììììììììììììììììììììììììììììê";
 
+	//reset zoom
+
+		zoommode = 0;
+
 	//set colors
 
 		if(screenmode == 1)
@@ -1344,6 +1260,7 @@ void RenderPage()
 {
 	int row, col, byte;
 
+
 	if(transpmode != 2 && pageupdate && current_page != page && inputcounter == 2)
 	{
 		//reset update flag
@@ -1377,9 +1294,9 @@ void RenderPage()
 
 		//update framebuffer
 
-			memcpy(lfb, &backbuffer, sizeof(backbuffer));
+			CopyBB2FB();
 	}
-	else if(transpmode != 2)
+	else if(transpmode != 2 && zoommode != 2)
 	{
 		//update timestring
 
@@ -1391,6 +1308,41 @@ void RenderPage()
 				RenderCharFB(timestring[byte], page_atrb[32]);
 			}
 	}
+}
+
+/******************************************************************************
+ * CopyBB2FB                                                                  *
+ ******************************************************************************/
+
+void CopyBB2FB()
+{
+	int src, dst = 0;
+
+	//copy backbuffer to framebuffer
+
+		if(!zoommode)
+		{
+			memcpy(lfb, &backbuffer, sizeof(backbuffer));
+			return;
+		}
+		else if(zoommode == 1)
+		{
+			src = StartX + StartY*var_screeninfo.xres;
+		}
+		else
+		{
+			src = StartX + StartY*var_screeninfo.xres + 12*fixfontheight*var_screeninfo.xres;
+		}
+
+		do
+		{
+			memcpy(lfb + StartX + StartY*var_screeninfo.xres + dst, backbuffer + src, fontwidth*40);
+			dst += var_screeninfo.xres;
+			memcpy(lfb + StartX + StartY*var_screeninfo.xres + dst, backbuffer + src, fontwidth*40);
+			dst += var_screeninfo.xres;
+			src += var_screeninfo.xres;
+		}
+		while(dst < var_screeninfo.xres * 24*fixfontheight);
 }
 
 /******************************************************************************
@@ -1662,10 +1614,7 @@ int GetRCCode()
 							case RC1_LEFT:	RCCode = RC_LEFT;
 											break;
 
-							case RC1_PLUS:	RCCode = RC_PLUS;
-											break;
-
-							case RC1_MINUS:	RCCode = RC_MINUS;
+							case RC1_OK:	RCCode = RC_OK;
 											break;
 
 							case RC1_0:		RCCode = RC_0;
@@ -1698,19 +1647,19 @@ int GetRCCode()
 							case RC1_9:		RCCode = RC_9;
 											break;
 
-							case RC1_OK:	RCCode = RC_OK;
+							case RC1_PLUS:	RCCode = RC_PLUS;
 											break;
 
-							case RC1_DBOX:	RCCode = RC_DBOX;
-											break;
-
-							case RC1_HOME:	RCCode = RC_HOME;
+							case RC1_MINUS:	RCCode = RC_MINUS;
 											break;
 
 							case RC1_MUTE:	RCCode = RC_MUTE;
 											break;
 
 							case RC1_HELP:	RCCode = RC_HELP;
+											break;
+
+							case RC1_HOME:	RCCode = RC_HOME;
 						}
 					}
 					else
