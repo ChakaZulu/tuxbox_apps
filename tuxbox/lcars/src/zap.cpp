@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.15  2003/01/28 00:25:24  thedoc
+why does it always show such strange error messages?
+
 Revision 1.14  2003/01/26 00:00:20  thedoc
 mv bugs /dev/null
 
@@ -346,25 +349,25 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 
 	if (useaudio)
 	{
-		ioctl(audio, DMX_START);
+		if (ioctl(audio, DMX_START) < 0)
 			perror("[zap.cpp]DMX_START audio");
 	}
 
 	if (usevideo)
 	{	
-		ioctl(video,DMX_START);
+		if (ioctl(video, DMX_START) < 0)
 			perror("[zap.cpp]DMX_START video");
 	}
 
 	if (usevideo)
 	{	
-		ioctl(vid, VIDEO_PLAY);
+		if (ioctl(vid, VIDEO_PLAY) < 0)
 			perror("[zap.cpp]VIDEO_PLAY");
 	}
 
 	if (useaudio)
 	{	
-		ioctl(aud, AUDIO_PLAY);
+		if (ioctl(aud, AUDIO_PLAY) < 0)
 			perror("[zap.cpp]AUDIO_PLAY");
 	}
 
