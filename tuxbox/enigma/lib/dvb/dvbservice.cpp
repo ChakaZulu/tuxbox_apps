@@ -529,7 +529,7 @@ void eDVBServiceController::scanPMT()
 
 	int sac3default=eAudio::getInstance()->getAC3default();
 
-	if ( Decoder::parms.pcrpid == -1 && !service.path.size() )
+	if ( Decoder::parms.pcrpid != pmt->PCR_PID && !service.path.size() )
 		Decoder::parms.pcrpid = pmt->PCR_PID;
 
 	// get last selected audio / video pid from pid cache
