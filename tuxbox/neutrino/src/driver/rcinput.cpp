@@ -1187,7 +1187,7 @@ bool CRCInput::isNumeric(const unsigned int key)
 **************************************************************************/
 int CRCInput::getNumericValue(const unsigned int key)
 {
-	return ((key == RC_0) ? 0 : (((key >= RC_1) && (key <= RC_9)) ? key - RC_1 + 1 : -1));
+	return ((key == RC_0) ? (int)0 : (((key >= RC_1) && (key <= RC_9)) ? (int)(key - RC_1 + 1) : (int)-1));
 }
 
 /**************************************************************************
