@@ -336,15 +336,23 @@ int main(int argc, char **argv)
 {
 	debugoutput = true;
 
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.43 2002/03/18 00:02:57 McClean Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.44 2002/04/19 09:56:05 field Exp $\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
-	fontRenderer->AddFont(FONTDIR "/Arial.ttf");
+//	fontRenderer->AddFont(FONTDIR "/Arial.ttf");
+	fontRenderer->AddFont(FONTDIR "/gs_reg.ttf");
 	fontRenderer->InitFontCache();
+/*
 	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.time=fontRenderer->getFont("Arial", "Regular", 14);
 	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.menu=fontRenderer->getFont("Arial", "Regular", 12);
+*/
+	fonts.channelname=fontRenderer->getFont("GillSans", "Regular", 15);
+	fonts.time=fontRenderer->getFont("GillSans", "Regular", 14);
+	fonts.menutitle=fontRenderer->getFont("GillSans", "Regular", 15);
+	fonts.menu=fontRenderer->getFont("GillSans", "Regular", 12);
+
 	display.setIconBasePath( DATADIR "/lcdd/icons/");
 
 	if(!display.isAvailable())
