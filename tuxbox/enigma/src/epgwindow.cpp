@@ -56,7 +56,7 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 		eEventDisplay ei(sapi->service->service_name.c_str(), 0, &entry->event);
 		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		ei.show();
-		while(ret = ei.exec())
+		while((ret = ei.exec()))
 		{
 			eListBoxEntryEPG* tmp;
 
