@@ -57,7 +57,7 @@ class CChannelList
 				int         	number;
 				t_channel_id    channel_id;
 				CChannelEvent	currentEvent;
-				const std::string getName() const { return name; };
+				inline const std::string & getName(void) const { return name; };
 
 				// flag that tells if channel is staticly locked by bouquet-locking
 				bool bAlwaysLocked;
@@ -106,13 +106,15 @@ class CChannelList
 		CChannel* getChannel( int number);
 		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
 		int getKey(int);
-		const char * const getName() const { return name.c_str(); };
-		std::string getActiveChannelName(); // UTF-8
-		t_satellite_position getActiveSatellitePosition();
-		int getActiveChannelNumber();
-		t_channel_id CChannelList::getActiveChannel_ChannelID();
-//		const std::string getActiveChannelID();
-		CChannel* getChannelFromChannelID(const t_channel_id channel_id);
+
+		const char * const   getName                   (void) const { return name.c_str(); };
+		const std::string &  getActiveChannelName      (void) const; // UTF-8
+		t_satellite_position getActiveSatellitePosition(void) const;
+		int                  getActiveChannelNumber    (void) const;
+		t_channel_id         getActiveChannel_ChannelID(void) const;
+
+/*		CChannel *   getChannelFromChannelID(const t_channel_id channel_id); */
+
 		void zapTo(int pos, bool forceStoreToLastChannels = false);
 		bool zapTo_ChannelID(const t_channel_id channel_id);
 		bool adjustToChannelID(const t_channel_id channel_id);

@@ -162,44 +162,35 @@ int CChannelList::getKey(int id)
 	return chanlist[id]->key;
 }
 
-std::string CChannelList::getActiveChannelName()
+static const std::string empty_string;
+
+const std::string & CChannelList::getActiveChannelName(void) const
 {
-	if (selected< chanlist.size())
+	if (selected < chanlist.size())
 		return chanlist[selected]->name;
 	else
-		return "";
+		return empty_string;
 }
 
-t_satellite_position CChannelList::getActiveSatellitePosition()
+t_satellite_position CChannelList::getActiveSatellitePosition(void) const
 {
-	if (selected< chanlist.size())
+	if (selected < chanlist.size())
 		return chanlist[selected]->satellitePosition;
 	else
 		return 0;
 }
 
-/*
-const std::string CChannelList::getActiveChannelID()
+t_channel_id CChannelList::getActiveChannel_ChannelID(void) const
 {
-	std::string  id;
-	char anid[10];
-	snprintf( anid, 10, "%x", getActiveChannel_ChannelID() );
-	id= anid;
-	return id;
-}
-*/
-
-t_channel_id CChannelList::getActiveChannel_ChannelID()
-{
-	if (selected< chanlist.size())
+	if (selected < chanlist.size())
 		return chanlist[selected]->channel_id;
 	else
 		return 0;
 }
 
-int CChannelList::getActiveChannelNumber()
+int CChannelList::getActiveChannelNumber(void) const
 {
-	return selected+1;
+	return (selected + 1);
 }
 
 int CChannelList::show()
@@ -1044,6 +1035,7 @@ void CChannelList::paint()
 	g_Sectionsd->setPauseSorting( false );
 }
 
+/*
 CChannelList::CChannel* CChannelList::getChannelFromChannelID(const t_channel_id channel_id)
 {
 	for (std::vector<CChannel *>::iterator it = chanlist.begin(); it != chanlist.end(); it++)
@@ -1053,7 +1045,7 @@ CChannelList::CChannel* CChannelList::getChannelFromChannelID(const t_channel_id
 	}
 	return NULL;
 }
-
+*/
 
 
 

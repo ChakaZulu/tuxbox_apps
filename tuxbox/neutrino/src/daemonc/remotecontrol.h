@@ -106,15 +106,15 @@ public:
 	void queryAPIDs();
 	void setAPID(uint APID);
 	void processAPIDnames();
-	std::string setSubChannel(const int numSub, const bool force_zap = false);
-	std::string subChannelUp(void);
-	std::string subChannelDown(void);
+	const std::string & setSubChannel(const int numSub, const bool force_zap = false);
+	const std::string & subChannelUp(void);
+	const std::string & subChannelDown(void);
 
 	void radioMode();
 	void tvMode();
 
 	int handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
-	std::string getCurrentChannelName(){ return current_channel_name; }
+	inline const std::string & getCurrentChannelName(void) const { return current_channel_name; }
 };
 
 

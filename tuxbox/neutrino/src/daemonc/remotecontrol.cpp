@@ -480,13 +480,15 @@ void CRemoteControl::setAPID( uint APID )
 	g_Zapit->setAudioChannel( APID );
 }
 
-std::string CRemoteControl::setSubChannel(const int numSub, const bool force_zap)
+static const std::string empty_string;
+
+const std::string & CRemoteControl::setSubChannel(const int numSub, const bool force_zap)
 {
 	if ((numSub < 0) || (numSub >= (int)subChannels.size()))
-		return "";
+		return empty_string;
 
 	if ((selected_subchannel == numSub ) && (!force_zap))
-		return "";
+		return empty_string;
 
 	selected_subchannel = numSub;
 	current_sub_channel_id = subChannels[numSub].getChannelID();
@@ -495,12 +497,12 @@ std::string CRemoteControl::setSubChannel(const int numSub, const bool force_zap
 	return subChannels[numSub].subservice_name;
 }
 
-std::string CRemoteControl::subChannelUp(void)
+const std::string & CRemoteControl::subChannelUp(void)
 {
 	return setSubChannel((subChannels.size() == 0) ? -1 : (int)((selected_subchannel + 1) % subChannels.size()));
 }
 
-std::string CRemoteControl::subChannelDown(void)
+const std::string & CRemoteControl::subChannelDown(void)
 {
 	return setSubChannel((selected_subchannel <= 0) ? (subChannels.size() - 1) : (selected_subchannel - 1));
 }
