@@ -32,6 +32,7 @@
 #include <lib/dvb/service.h>
 #include <lib/dvb/record.h>
 #include <lib/dvb/serviceplaylist.h>
+#include <lib/dvb/frontend.h>
 
 #include <lib/system/info.h>
 #include <lib/system/http_dyn.h>
@@ -66,9 +67,30 @@ eString getConfigRotor(void)
 	return result;
 }
 
+static eString sendDiSEqCCmd(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	eString addr = opt["addr"];
+	eString cmd = opt["cmd"];
+	eString params = opt["params"];
+	eString frame = opt["frame"];
+	if (!frame)
+		frame = "0xE0";
+	
+	int iaddr, icmd, iframe;
+	sscanf(addr.c_str(), "%x", &iaddr);
+	sscanf(cmd.c_str(), "%x", &icmd);
+	sscanf(frame.c_str(), "%x", &iframe);
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eFrontend::getInstance()->sendDiSEqCCmd(iaddr, icmd, params, iframe);
+	
+	return closeWindow(content, "", 500);
+}
+
 void ezapRotorInitializeDyn(eHTTPDynPathResolver *dyn_resolver, bool lockWeb)
 {
-//	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigSwapFile", setConfigSwapFile, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/sendDiSEqCCmd", sendDiSEqCCmd, lockWeb);
 //	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigMultiBoot", setConfigMultiBoot, lockWeb);
 }
 #endif
