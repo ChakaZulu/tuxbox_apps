@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.70 2002/04/01 21:46:01 McClean Exp $
+//  $Id: neutrino.h,v 1.71 2002/04/05 14:20:18 happydude Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -82,6 +82,8 @@
 #include "helpers/streaminfo.h"
 #include "helpers/locale.h"
 #include "widget/messagebox.h"
+
+#include "favorites/favorites.h"
 
 #include <string>
 #include <vector>
