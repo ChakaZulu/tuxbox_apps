@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <dbox/fp.h>
 
 int main(int argc, char **argv)

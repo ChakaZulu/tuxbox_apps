@@ -17,10 +17,9 @@
 #define VERSION "0.1"
 
 /** */
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int fd;
-	int err;
 	unsigned long arg;
 
 	struct event_t event;
@@ -44,7 +43,7 @@ main(int argc, char **argv)
 			perror("select");
 		if (FD_ISSET(fd, &fdset))
 			printf("select returned readable event\n");
-		if ( read(fd,&event,sizeof(event_t)) <= 0 )
+		if ( read(fd,&event,sizeof(struct event_t)) <= 0 )
 			perror("read");
 		else
 			printf("event: %d\n",event.event);

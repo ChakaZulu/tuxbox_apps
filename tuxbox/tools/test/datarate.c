@@ -68,6 +68,7 @@ int main()
 	
   munmap(lfb, available);
   close(fd);
+  return 0;
 }
 
 void Check(char *text, int what)
@@ -91,7 +92,7 @@ void Check(char *text, int what)
 	delta=end.tms_utime-begin.tms_utime;
 	bm/=delta;
 	bm*=CLOCKS_PER_SEC;
-	printf("%s: %d kb/s\n", text, bm/1024);
+	printf("%s: %ld kb/s\n", text, bm/1024);
 }
 
 void Do(int what)

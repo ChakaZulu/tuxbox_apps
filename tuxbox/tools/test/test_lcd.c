@@ -177,8 +177,7 @@ int main(int argc, char **argv)
 {
 	int fd; // ,fd_sec;
 	int pa,col,i;
-    lcd_pixel pix;
-    int x,y;
+    //lcd_pixel pix;
 	if((fd = open("/dev/dbox/lcd0",O_RDWR)) < 0){
 		perror("LCD: ");
 		return -1;

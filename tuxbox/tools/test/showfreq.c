@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   }
   
   for (i=0; i<4; i++)
-    sscanf(argv[i+1], "%x", buffer+i);
+    sscanf(argv[i+1], "%hhx", buffer+i);
 
   div=buffer[1]|((buffer[0]&0x7F)<<8)|(((buffer[2]>>5)&3)<<15);
   r=buffer[2]&15;

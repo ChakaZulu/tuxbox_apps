@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   }
   
   for (i=0; i<4; i++)
-    sscanf(argv[i+1], "%x", buffer+i);
+    sscanf(argv[i+1], "%hhx", buffer+i);
 /*
        26 25 24 |23 22 21 20 19 18 17 16 | |... 00
        p2 p1 p0  t0 os c0 r2 r1 r0 pe ... freq
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   div=b&(65536*2-1);
   
   printf("div: %d\n", div);
-  printf("p=%d t=%d os=%d c=%d r=%d pe=%d (rest: %x)\n", p, t, os, c, r, pe, b&~((1<<28)-1));
+  printf("p=%d t=%d os=%d c=%d r=%d pe=%d (rest: %lx)\n", p, t, os, c, r, pe, b&~((1<<28)-1));
   div*=125000;          // tun->res
   div*=4;
   div-=479500000;        // tun->IFPCoff
