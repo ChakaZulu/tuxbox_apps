@@ -11,7 +11,7 @@ extern	void	MazeInitialize( void );
 extern	void	CheckGhosts( void );
 extern	void	DrawGameOver( void );
 extern	void	DrawScore( void );
-extern	void	InitLevel( void );
+extern	void	InitLevel( int l );
 extern	void	NextLevel( void );
 extern	void	MazePig( void );
 

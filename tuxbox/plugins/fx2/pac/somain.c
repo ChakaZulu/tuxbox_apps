@@ -22,6 +22,7 @@ extern	int	gametime;
 extern	int	pices;
 extern	int	score;
 extern	unsigned short	actcode;
+extern	unsigned short	realcode;
 
 static	void	setup_colors( void )
 {
@@ -39,6 +40,7 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 {
 	struct timeval	tv;
 	int				x;
+	int				jumplevel=-1;
 
 	if ( FBInitialize( 720, 576, 8, fdfb ) < 0 )
 		return -1;
@@ -48,7 +50,7 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	if ( RcInitialize( fdrc ) < 0 )
 		return -1;
 
-	InitLevel();
+	InitLevel( 0 );
 
 	while( doexit != 3 )
 	{
@@ -88,17 +90,36 @@ int pacman_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 			FBFlushGrafic();
 #endif
 			doexit=0;
+			jumplevel=-1;
 			while(( actcode != RC_OK ) && !doexit )
 			{
 				tv.tv_sec = 0;
 				tv.tv_usec = 100000;
 				x = select( 0, 0, 0, 0, &tv );		/* 100ms pause */
 				RcGetActCode( );
+				if ( actcode == RC_HELP )
+				{
+					while( realcode != 0xee )
+						RcGetActCode( );
+					actcode=0xee;
+					while(( actcode == 0xee ) && !doexit )
+					{
+						tv.tv_sec = 0;
+						tv.tv_usec = 100000;
+						x = select( 0, 0, 0, 0, &tv );		/* 100ms pause */
+						RcGetActCode( );
+					}
+					if ( actcode <= RC_9 )
+					{
+						jumplevel=actcode;
+						actcode=RC_OK;
+					}
+				}
 			}
 			if ( gametime )
 				NextLevel();
 			else
-				InitLevel();
+				InitLevel( jumplevel );
 		}
 	}
 

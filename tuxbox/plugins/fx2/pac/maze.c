@@ -32,7 +32,7 @@ int				level = 0;
 int				score = 0;
 static	int		timeleft=0;
 
-static	int		piccs[] = { 133, 126, 125, 133 };
+static	int		piccs[] = { 133, 126, 125, 133, 167, 123, 125, 217, 144, 126 };
 
 typedef struct _Ghost
 {
@@ -82,10 +82,47 @@ static	Ghost	ighost3[4] = {
 { 8, 16, 0, 0, BLUE, 1 },
 { 9, 16, 0, 0, RED, 1 } };
 
-static	unsigned char	pig_x[] = { 13, 13, 13, 13 };
-static	unsigned char	pig_y[] = { 11, 3, 11, 11 };
+static	Ghost	ighost4[4] = {
+{ 1, 3, 0, 0, RED, 1 },
+{ 20, 3, 0, 0, DARK, 1 },
+{ 1, 16, 0, 0, BLUE, 1 },
+{ 11, 16, 0, 0, GRAY, 1 } };
 
-static	Ghost	*ighosts[] = { ighost0, ighost1, ighost2, ighost3 };
+static	Ghost	ighost5[4] = {
+{ 10, 9, 0, 0, RED, 1 },
+{ 1, 3, 0, 0, GREEN, 1 },
+{ 7, 13, 0, 0, BLUE, 1 },
+{ 20, 3, 0, 0, GRAY, 1 } };
+
+static	Ghost	ighost6[4] = {
+{ 1, 13, 0, 0, RED, 1 },
+{ 9, 4, 0, 0, DARK, 1 },
+{ 11, 9, 0, 0, GREEN, 1 },
+{ 20, 4, 0, 0, GREEN, 1 } };
+
+static	Ghost	ighost7[4] = {
+{ 5, 15, 0, 0, BLUE, 1 },
+{ 5, 7, 0, 0, DARK, 1 },
+{ 12, 3, 0, 0, RED, 1 },
+{ 17, 9, 0, 0, GRAY, 1 } };
+
+static	Ghost	ighost8[4] = {
+{ 16, 9, 0, 0, GREEN, 1 },
+{ 20, 5, 0, 0, RED, 1 },
+{ 1, 16, 0, 0, GRAY, 1 },
+{ 6, 3, 0, 0, BLUE, 1 } };
+
+static	Ghost	ighost9[4] = {
+{ 7, 8, 0, 0, GRAY, 1 },
+{ 15, 9, 0, 0, BLUE, 1 },
+{ 20, 5, 0, 0, DARK, 1 },
+{ 3, 14, 0, 0, RED, 1 } };
+
+static	unsigned char	pig_x[] = { 13, 13, 13, 13, 13, 13, 13, 13, 13, 13 };
+static	unsigned char	pig_y[] = { 11, 3, 11, 11, 11, 11, 11, 11, 11, 11 };
+
+static	Ghost	*ighosts[] = { ighost0, ighost1, ighost2, ighost3, ighost4,
+							ighost5, ighost6, ighost7, ighost8, ighost9 };
 
 static	Pac		pac;
 static	Pac		ipac[] = {
@@ -93,11 +130,18 @@ static	Pac		ipac[] = {
 { 7, 9, 0, 0, 1, 0, 0 },
 { 1, 3, 0, 0, 3, 0, 0 },
 { 1, 3, 0, 0, 0, 0, 0 },
+{ 2, 5, 0, 0, 2, 0, 0 },
+{ 9, 8, 0, 0, 1, 0, 0 },
+{ 1, 16, 0, 0, 1, 0, 0 },
+{ 10, 9, 0, 0, 2, 0, 0 },
+{ 1, 3, 0, 0, 3, 0, 0 },
+{ 1, 3, 0, 0, 0, 0, 0 },
  };
 
 static	unsigned char	maze[ 22 * 20 ];
 
-static	unsigned char	*mazes[] = { maze0, maze1, maze2, maze3 };
+static	unsigned char	*mazes[] = { maze0, maze1, maze2, maze3, maze4,
+									maze5, maze6, maze7, maze8, maze9 };
 
 unsigned	char	*pacs[] = {
 		pac_0_1, pac_0_2, pac_0_3, pac_0_4, pac_0_5,
@@ -596,17 +640,22 @@ void	DrawScore( void )
 	FBDrawString(250+x+18,264,64,cscore,WHITE,0);
 }
 
-void	InitLevel( void )
+void	InitLevel( int l )
 {
-	level=0;
+	level= (l == -1) ? 0 : l;
 	score=0;
 }
 
 void	NextLevel( void )
 {
 	level++;
-	if ( level > 3 )
+	if ( level > 9 )
 		level=0;
+}
+
+void	JumpLevel( int l )
+{
+	level=l;
 }
 
 void	MazePig( void )
