@@ -445,7 +445,7 @@ void CNeutrinoApp::channelsInit()
 		
 		//printf("Name received: %s\n", channel_name);
 		//printf("Channelnumber received: %d\n", channel_nr);
-		channelList->addChannel(channel_nr, channel_name);
+		channelList->addChannel(channel_nr, channel_nr, channel_name);
 		memset(&zapitchannel,0,sizeof(zapitchannel));
 	} 
 	printf("All channels received\n");
@@ -474,7 +474,7 @@ void CNeutrinoApp::channelsInit()
 	char shortname[100];
     strcpy(shortname, buffer+7);
     strcpy(longname, buffer+7);
-	channelList->addChannel(count, longname);
+	channelList->addChannel(count, count+1, longname);
 	count++;
   }
   pclose(fp);
@@ -522,6 +522,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//paint...
 	fonts.menu=fontRenderer->getFont("Arial", "Bold", 20);
 	fonts.menu->RenderString( 10,100, 500, "DEMO!", 0 );
+        fonts.menu_number=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.menu_title=fontRenderer->getFont("Arial Black", "Regular", 24);
 	fonts.menu_title->RenderString( 10,100, 500, "DEMO!", 0 );
 	fonts.epg_title=fontRenderer->getFont("Arial", "Regular", 30);

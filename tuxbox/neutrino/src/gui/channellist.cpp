@@ -24,10 +24,11 @@ CChannelList::~CChannelList()
 	chanlist.clear();
 }
 
-void CChannelList::addChannel(int key, string name)
+void CChannelList::addChannel(int key, int number, string name)
 {
 	channel* tmp = new channel();
 	tmp->key=key;
+	tmp->number=number;
 	tmp->name=name;
 	chanlist.insert(chanlist.end(), tmp);
 
@@ -146,7 +147,13 @@ void CChannelList::paintItem(CFrameBuffer* frameBuffer, FontsDef *fonts, int pos
 	if(liststart+pos<chanlist.size())
 	{
 		channel* chan = chanlist[liststart+pos];
-		fonts->menu->RenderString(x+10,ypos+17, width, chan->name.c_str(), color);
+		//number
+                char tmp[10];
+                sprintf((char*) tmp, "%d", chan->number);
+		int numpos = x+5+numwidth-fonts->menu_number->getRenderWidth(tmp);
+		fonts->menu_number->RenderString(numpos,ypos+16, numwidth+5, tmp, color);
+		//name
+		fonts->menu->RenderString(x+5+numwidth+5,ypos+17, width-numwidth-20, chan->name.c_str(), color);
 	}
 }
 
@@ -268,9 +275,20 @@ void CChannelList::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
 	fonts->menu_title->RenderString(x+10,y+23, width, name.c_str(), COL_MENUHEAD);
 	
 	liststart = (selected/listmaxshow)*listmaxshow;
+
+
+	int lastnum =  chanlist[liststart]->number + listmaxshow;
+	string map = "";
+	while(lastnum>0)
+	{
+		map += "0";
+		lastnum = lastnum/10;
+	}
+	numwidth = fonts->menu_number->getRenderWidth(map.c_str());
+	
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
-		paintItem(frameBuffer, fonts, count);
+		paintItem(frameBuffer, fonts, count );
 	}
 
 }

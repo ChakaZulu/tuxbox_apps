@@ -20,7 +20,8 @@ class CChannelList
 
 	struct channel
 	{
-		int		key;
+		int	key;
+		int	number;
 		string	name;
 	};
 
@@ -29,6 +30,7 @@ class CChannelList
 		unsigned int		tuned;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
+		unsigned int		numwidth;
 
 		int					key;
 		string				name;
@@ -39,7 +41,7 @@ class CChannelList
 		int x;
 		int y;
 
-		void paintItem(CFrameBuffer* fb, FontsDef *Fonts, int pos);
+		void paintItem(CFrameBuffer* fb, FontsDef *Fonts, int pos );
 		void paint(CFrameBuffer* fb, FontsDef *Fonts);
 		void hide(CFrameBuffer* fb);
 
@@ -47,7 +49,7 @@ class CChannelList
 
 		CChannelList(int Key=-1, string Name="");
 		~CChannelList();
-		void addChannel(int key, string name);
+		void addChannel(int key, int number, string name);
 		void setName(string Name);
 		int getKey(int);
 		string getActiveChannelName();

@@ -76,6 +76,7 @@ class FontsDef
         public:
                 Font 
 					*menu, 
+					*menu_number,
 					*menu_title, 
 					*epg_title, 
 					*epg_info1, 
