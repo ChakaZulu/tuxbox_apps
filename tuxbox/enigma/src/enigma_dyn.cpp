@@ -101,7 +101,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 		"' value=\"" << buttonText <<
 		"\" onclick=" << ref1 << buttonRef <<
 		ref2 << "><span class=\"button\">" << buttonText <<
-		"</class></button>";
+		"</span></button>";
 	return result.str();
 }
 
@@ -110,7 +110,7 @@ eString getTitle(eString title)
 	std::stringstream result;
 	result << "<span class=\"title\" style=\"width: 100%; background-color: " << LIGHTGREY << "\">"
 		<< title
-		<< "</SPAN><br><br>";
+		<< "</span><br><br>";
 	return result.str();
 }
 
@@ -787,15 +787,15 @@ static eString getZapContent(eString mode, eString path)
 	eString result;
 	eString tpath;
 
-	int pos = 0, lastpos = 0, temp = 0;
+	unsigned int pos = 0, lastpos = 0, temp = 0;
 
-	if ((path.find(";", 0)) == -1)
+	if ((path.find(";", 0)) == eString::npos )
 		path = ";" + path;
 
-	while ((pos = path.find(";", lastpos)) != -1)
+	while ((pos = path.find(";", lastpos)) != eString::npos )
 	{
 		lastpos = pos + 1;
-		if ((temp = path.find(";", lastpos)) != -1)
+		if ((temp = path.find(";", lastpos)) != eString::npos )
 		{
 			tpath = path.mid(lastpos, temp - lastpos);
 		}
