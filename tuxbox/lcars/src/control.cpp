@@ -1865,7 +1865,8 @@ void control::openMenu(int menuNumber)
 			}
 			plugins_obj->setfb(fb_obj->getHandle());
 			plugins_obj->setrc(rc_obj->getHandle());
-			plugins_obj->setlcd(-1);
+			int lcdfd = open("/dev/dbox/lcd0", O_RDWR);
+			plugins_obj->setlcd(lcdfd);
 			plugins_obj->setvtxtpid(channels_obj->getCurrentTXT());
 			rc_obj->stoprc();
 			plugins_obj->startPlugin(number - 1);
@@ -1875,6 +1876,7 @@ void control::openMenu(int menuNumber)
 			}
 			rc_obj->startrc();
 			rc_obj->restart();
+			close(lcdfd);
 			osd_obj->initPalette();
 			usleep(400000);
 			fb_obj->clearScreen();
