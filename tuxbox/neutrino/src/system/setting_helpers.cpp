@@ -304,7 +304,7 @@ bool CColorSetupNotifier::changeNotify(const neutrino_locale_t, void *)
 
 bool CAudioSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
 {
-	//printf("notify: %s\n", OptionName);
+	//printf("notify: %d\n", OptionName);
 
 	if (ARE_LOCALES_EQUAL(OptionName, LOCALE_AUDIOMENU_PCMOFFSET))
 	{
@@ -354,7 +354,7 @@ bool CVideoSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void 
 		g_Controld->setVideoFormat( g_settings.video_Format );
 	}
 
-	printf("video notify: %s\n", OptionName);
+	printf("video notify: %d\n", OptionName);
 	return false;
 }
 
