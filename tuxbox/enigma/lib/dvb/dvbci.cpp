@@ -57,7 +57,7 @@ eDVBCI::eDVBCI()
 
 	CONNECT(messages.recv_msg, eDVBCI::gotMessage);
 
-	memset(appName,0,sizeof(appName));
+	strcpy(appName, _("no module"));
 	tempPMTentrys=0;
 
 	for (int i=0; i < MAXTRANSPORTSESSIONS; ++i)
@@ -105,7 +105,10 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			sendqueue.pop();
 		}
 		if(!ci_state)
-			ci_progress(_("no module"));	
+		{
+			strcpy(appName,_("no module"));
+			ci_progress(appName);
+		}
 		ci_state=0;
 		clearCAIDs();
 //		if (::ioctl(fd,CI_RESET)<0 )
@@ -120,7 +123,10 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			newService();
 		}
 		else
-			ci_progress(_("no module"));	
+		{
+			strcpy(appName,_("no module"));
+			ci_progress(appName);
+		}
 		break;
 	case eDVBCIMessage::go:
 		newService();
@@ -1241,8 +1247,8 @@ void eDVBCI::dataAvailable(int what)
 				sendqueue.pop();
 			}
 
-			memset(appName,0,sizeof(appName));
-			ci_progress(_("no module"));
+			strcpy(appName,_("no module"));
+			ci_progress(appName);
 
 			char *buf="\x9f\x88\x00\x00";
 			ci_mmi_progress(buf,4);
