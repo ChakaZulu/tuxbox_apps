@@ -4,9 +4,12 @@ sendburst
 set22k
 setpid
 setvoltage
+stream_to_ts
 test_av
 test_clip
 test_clip_pes
+test_clip_vlc
+test_clip_vls
 test_pes
 test_sec_ne
 test_sections
