@@ -23,6 +23,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "lcdd.h"
+
+#include <config.h>
+
+#include "bigclock.h"
+
+/* Signal quality */
+#include <ost/frontend.h>
+#include <dbox/fp.h>
+
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -33,45 +43,29 @@
 #include <stdio.h>
 #include <sys/timeb.h>
 #include <time.h>
-#include "pthread.h"
 #include <signal.h>
 
-/* Signal quality */
-#include <ost/frontend.h>
-#include <liblcddisplay.h>
-#include "lcddclient.h"
-#include "bigclock.h"
 
-#include "config.h"
-
-class FontsDef
+CLCDD::CLCDD()
+	: configfile('\t')
 {
-	public:
-		Font *channelname; Font* time; Font *menutitle; Font *menu;
-};
+}
 
-CLCDDisplay		display;
-fontRenderClass	*fontRenderer;
-FontsDef		fonts;
-pthread_t		thrTime;
+CLCDD::~CLCDD()
+{
+}
 
-CLcddClient::mode	mode;
-raw_display_t	icon_lcd;
-raw_display_t	icon_setup;
-raw_display_t	icon_power;
+CLCDD* CLCDD::getInstance()
+{
+	static CLCDD* lcdd = NULL;
+	if(lcdd == NULL)
+	{
+		lcdd = new CLCDD();
+	}
+	return lcdd;
+}
 
-char			servicename[40];
-char			volume;
-bool			muted, shall_exit, debugoutput;
-bool			showclock;
-
-void show_servicename(string);
-void show_volume(char);
-void set_mode(CLcddClient::mode, char *title);
-void show_menu(int position, char* text, int highlight=0);
-
-
-void parse_command(int connfd, CLcddClient::commandHead rmsg)
+void CLCDD::parse_command(int connfd, CLcddClient::commandHead rmsg)
 {
 	if(rmsg.version != CLcddClient::ACTVERSION)
 	{
@@ -114,7 +108,7 @@ void parse_command(int connfd, CLcddClient::commandHead rmsg)
 	}
 }
 
-void show_servicename( string name )
+void CLCDD::show_servicename( string name )
 {
 
 	if (mode!=CLcddClient::MODE_TVRADIO)
@@ -135,14 +129,14 @@ void show_servicename( string name )
 		} while ( ( pos != -1 ) && ( fonts.channelname->getRenderWidth(text1.c_str())> 120 ) );
 
 		if ( fonts.channelname->getRenderWidth(text1.c_str())<= 120 )
-			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()+ 1, -1).c_str(), CLCDDisplay::PIXEL_ON);
+			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()+ 1).c_str(), CLCDDisplay::PIXEL_ON);
 		else
 		{
 			string text1 = name;
 			while (fonts.channelname->getRenderWidth(text1.c_str())> 120)
 				text1= text1.substr(0, text1.length()- 1);
 
-			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length(), -1).c_str(), CLCDDisplay::PIXEL_ON);
+			fonts.channelname->RenderString(1,29+16, 130, name.substr(text1.length()).c_str(), CLCDDisplay::PIXEL_ON);
 		}
 
 		fonts.channelname->RenderString(1,29, 130, text1.c_str(), CLCDDisplay::PIXEL_ON);
@@ -154,7 +148,7 @@ void show_servicename( string name )
 	display.update();
 }
 
-void show_time()
+void CLCDD::show_time()
 {
 	char timestr[50];
 	struct timeb tm;
@@ -185,7 +179,7 @@ void show_time()
 	}
 }
 
-void show_signal()
+void CLCDD::show_signal()
 {
 	int fd, status, signal, res;
 
@@ -201,10 +195,9 @@ void show_signal()
 	close(fd);
 }
 
-
-void show_volume(char vol)
+void CLCDD::show_volume(char vol)
 {
-if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
+	if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
 	{
 		display.draw_fill_rect (1,52,73,61, CLCDDisplay::PIXEL_OFF);
 		//strichlin
@@ -222,7 +215,7 @@ if ((mode==CLcddClient::MODE_TVRADIO) || (mode==CLcddClient::MODE_SCART))
 	}
 }
 
-void show_menu(int position, char* text, int highlight )
+void CLCDD::show_menu(int position, char* text, int highlight )
 {
 	if (mode != CLcddClient::MODE_MENU)
 	{
@@ -234,12 +227,29 @@ void show_menu(int position, char* text, int highlight )
 	display.update();
 }
 
+void CLCDD::dimmlcd(int val)
+{
+	int fd;
 
-void set_mode(CLcddClient::mode m, char *title)
+	if ((fd = open("/dev/dbox/fp0",O_RDWR)) <= 0)
+	{
+		perror("open");
+	}
+
+	if (ioctl(fd,FP_IOCTL_LCD_DIMM, &val) < 0)
+	{
+		perror("dimm");
+	}
+	close(fd);
+}
+
+
+void CLCDD::set_mode(CLcddClient::mode m, char *title)
 {
 	switch (m)
 	{
 		case CLcddClient::MODE_TVRADIO:
+			dimmlcd(lcd_brightness);
 			//printf("[lcdd] mode: tvradio\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
@@ -250,6 +260,7 @@ void set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			break;
 		case CLcddClient::MODE_SCART:
+			dimmlcd(lcd_brightness);
 			//printf("[lcdd] mode: scart\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
@@ -259,6 +270,7 @@ void set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			break;
 		case CLcddClient::MODE_MENU:
+			dimmlcd(lcd_brightness);
 			//printf("[lcdd] mode: menu\n");
 			mode = m;
 			showclock = false;
@@ -268,6 +280,7 @@ void set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			break;
 		case CLcddClient::MODE_SHUTDOWN:
+			dimmlcd(lcd_brightness);
 			//printf("[lcdd] mode: shutdown\n");
 			mode = m;
 			showclock = false;
@@ -277,6 +290,7 @@ void set_mode(CLcddClient::mode m, char *title)
 			break;
 		case CLcddClient::MODE_STANDBY:
 			//printf("[lcdd] mode: standby\n");
+			dimmlcd(lcd_standbybrightness);
 			mode = m;
 			showclock = true;
 			display.draw_fill_rect (-1,0,120,64, CLCDDisplay::PIXEL_OFF);
@@ -290,28 +304,58 @@ void set_mode(CLcddClient::mode m, char *title)
 	}
 }
 
+void CLCDD::saveConfig()
+{
+	static bool inSave=false;
+	if(inSave==false)
+	{
+		inSave=true;
+		configfile.setInt( "lcd_brightness", lcd_brightness );
+		configfile.setInt( "lcd_standbybrightness", lcd_standbybrightness );
 
-void * TimeThread (void *)
+		if(configfile.getModifiedFlag())
+		{
+			printf("[lcdd] save config\n");
+			configfile.saveConfig(CONFIGDIR "/lcdd.conf");
+		}
+		inSave=false;
+	}
+}
+
+void CLCDD::loadConfig()
+{
+	printf("[lcdd] load config\n");
+	if(!configfile.loadConfig(CONFIGDIR "/lcdd.conf"))
+	{
+		lcd_brightness = 0xff;
+		lcd_standbybrightness = 0xaa;
+		return;
+	}
+
+	lcd_brightness = configfile.getInt("lcd_brightness", 0xff);
+	lcd_standbybrightness = configfile.getInt("lcd_standbybrightness", 0xaa);
+}
+
+void* CLCDD::TimeThread(void *)
 {
 	while(1)
 	{
 		sleep(10);
-		show_time();
+		CLCDD::getInstance()->show_time();
 	}
 	return NULL;
 }
 
-void sig_catch(int)
+void CLCDD::sig_catch(int)
 {
-	//printf("[lcdd] Signal: %d\n", sig);
+	 CLCDD::getInstance()->saveConfig();
+	 exit(0);
 }
 
-
-int main(int argc, char **argv)
+int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.46 2002/04/23 06:57:12 obi Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.47 2002/05/14 23:58:15 McClean Exp $\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
 	fontRenderer->AddFont(FONTDIR "/micron.ttf");
@@ -323,34 +367,32 @@ int main(int argc, char **argv)
 	fonts.menutitle=fontRenderer->getFont(FONTNAME, "Regular", 15);
 	fonts.menu=fontRenderer->getFont(FONTNAME, "Regular", 12);
 
-
+	loadConfig();
+	dimmlcd(lcd_brightness);
 	display.setIconBasePath( DATADIR "/lcdd/icons/");
 
 	if(!display.isAvailable())
 	{
 		printf("exit...(no lcd-support)\n");
-		exit(-1);
+		return -1;
 	}
 
 	if (!display.paintIcon("neutrino_setup.raw",0,0,false))
 	{
 		printf("exit...(no neutrino_setup.raw)\n");
-		exit(-1);
-	}
+		return -1;	}
 	display.dump_screen(&icon_setup);
 
 	if (!display.paintIcon("neutrino_power.raw",0,0,false))
 	{
 		printf("exit...(no neutrino_power.raw)\n");
-		exit(-1);
-	}
+		return -1;	}
 	display.dump_screen(&icon_power);
 
 	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
 	{
 		printf("exit...(no neutrino_lcd.raw)\n");
-		exit(-1);
-	}
+		return -1;	}
 	display.dump_screen(&icon_lcd);
 
 	mode = CLcddClient::MODE_TVRADIO;
@@ -378,33 +420,49 @@ int main(int argc, char **argv)
 	if ((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 	{
 		perror("socket");
+		return -1;
 	}
 
 	if ( bind(listenfd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
 		perror("[lcdd] bind failed...\n");
-		exit(-1);
+		return -1;
 	}
 
 	if (listen(listenfd, 5) !=0)
 	{
 		perror("[lcdd] listen failed...\n");
-		exit( -1 );
+		return -1;
 	}
 
-	/* alles geladen, daemonize Now! ;) */
-	if (fork() != 0) return 0;
+	switch (fork())
+	{
+		case -1: /* can't fork */
+			perror("[lcdd] fork");
+			return -1;
 
-	//workarround for buggy busybox :(
+		case 0: /* child, process becomes a daemon */
+			if (setsid() == -1)
+			{
+				perror("[lcdd] setsid");
+				return -1;
+			}
+			break;
+
+		default: /* parent returns to calling process */
+			return 0;
+	}
+
 	signal(SIGHUP,sig_catch);
 	signal(SIGINT,sig_catch);
 	signal(SIGQUIT,sig_catch);
-
+	signal(SIGTERM, sig_catch);
 
 	/* Thread erst nach dem forken erstellen, da sonst Abbruch */
 	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
 	{
 		perror("[lcdd]: pthread_create(TimeThread)");
+		return -1;
 	}
 
 	shall_exit = false;
@@ -417,5 +475,13 @@ int main(int argc, char **argv)
 		close(connfd);
 	}
 	close(listenfd);
+	saveConfig();
+	return 0;
+}
+
+
+int main(int argc, char **argv)
+{
+	return CLCDD::getInstance()->main(argc, argv);
 }
 
