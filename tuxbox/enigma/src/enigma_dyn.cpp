@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <malloc.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -52,7 +53,7 @@ using namespace std;
 
 #define WEBXFACEVERSION "1.3.4"
 
-int smallScreen = 0;
+int pdaScreen = 0;
 
 int currentBouquet = 0;
 int currentChannel = -1;
@@ -482,18 +483,6 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 	return "<script language=\"javascript\">window.close();</script>";
 }
 
-static eString setScreen(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString, eString> opt = getRequestOptions(opts, '&');
-	smallScreen = 0;
-	if (opt["size"] == "0")
-	 	smallScreen = 1;
-
-	content->code=204;
-	content->code_descr="No Content";
-	return NOCONTENT;
-}
-
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
@@ -548,22 +537,21 @@ eString getCurrentSubChannel(eString curServiceRef)
 			{
 				if (d->Tag() == DESCR_LINKAGE)
 				{
-					char tmp[256];
 					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
-					if ((unsigned int)ld->priv_len < sizeof(tmp))
+					if (ld->linkage_type == 0xB0) //subchannel
 					{
+						char *tmp = (char *)malloc(ld->priv_len);
 						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
 						tmp[ld->priv_len] = '\0';
+						eString subService(tmp);
+						free(tmp);
+
+						eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
+								  + eString(nspace) + ":0:0:0:";
+
+						if (subServiceRef == curServiceRef)
+							subChannel = removeBadChars(subService);
 					}
-					else
-						strcpy(tmp, "buffer too small");
-					eString subService(tmp);
-
-					eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
-							  + eString(nspace) + ":0:0:0:";
-
-					if (subServiceRef == curServiceRef)
-						subChannel = removeBadChars(subService);
 				}
 			}
 			eit->unlock();
@@ -597,18 +585,14 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 			{
 				if (d->Tag() == DESCR_LINKAGE)
 				{
-					char tmp[256];
 					LinkageDescriptor *ld =(LinkageDescriptor *)*d;
 					if (ld->linkage_type == 0xB0) //subchannel
 					{
-						if ((unsigned int)ld->priv_len < sizeof(tmp))
-						{
-							strncpy(tmp, (char *)ld->private_data, ld->priv_len);
-							tmp[ld->priv_len] = '\0';
-						}
-						else
-							strcpy(tmp, "buffer too small");
+						char *tmp = (char *)malloc(ld->priv_len);
+						strncpy(tmp, (char *)ld->private_data, ld->priv_len);
+						tmp[ld->priv_len] = '\0';
 						eString subService(tmp);
+						free(tmp);
 
 						eString subServiceRef = "1:0:7:" + eString().sprintf("%x", ld->service_id) + ":" + eString().sprintf("%x", ld->transport_stream_id) + ":" + eString().sprintf("%x", ld->original_network_id) + ":"
 								  + eString(nspace) + ":0:0:0:";
@@ -718,7 +702,7 @@ static eString getChannelNavi(void)
 		if (getCurService() != "&nbsp;" || getCurrentSubChannel(ref2string(sapi->service)) != "")
 		{
 			result += button(100, "EPG", GREEN, "javascript:openEPG()");
-			if (smallScreen == 0)
+			if (pdaScreen == 0)
 			{
 				result += button(100, "Info", PINK, "javascript:openChannelInfo()");
 				result += button(100, "Stream Info", YELLOW, "javascript:openSI()");
@@ -753,7 +737,7 @@ static eString getLeftNavi(eString mode, eString path)
 	eString result;
 	if (mode.find("zap") == 0)
 	{
-		if (smallScreen == 0)
+		if (pdaScreen == 0)
 		{
 			if (zap[zapMode][ZAPSUBMODESATELLITES])
 			{
@@ -857,7 +841,7 @@ static eString getTopNavi(eString mode, eString path)
 	eString result;
 	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
 	result += button(100, "CONTROL", TOPNAVICOLOR, "?mode=control");
-	if (smallScreen == 0)
+	if (pdaScreen == 0)
 	{
 		result += button(100, "CONFIG", TOPNAVICOLOR, "?mode=config");
 		result += button(100, "UPDATES", TOPNAVICOLOR, "?mode=updates");
@@ -1715,7 +1699,7 @@ static eString getZap(eString mode, eString path)
 {
 	eString result;
 
-	if (smallScreen == 0)
+	if (pdaScreen == 0)
 		result += getZapNavi(mode, path);
 #ifndef DISABLE_FILE
 	if (path == ";4097:7:0:1:0:0:0:0:0:0:") // recordings
@@ -1728,7 +1712,7 @@ static eString getZap(eString mode, eString path)
 	else
 #endif
 	{
-		if (smallScreen == 0)
+		if (pdaScreen == 0)
 		{
 			eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
 			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
@@ -2194,7 +2178,7 @@ static eString getControlScreenShot(void)
 	{
 		FILE *bitstream = 0;
 		int xres = 0, yres = 0, yres2 = 0, aspect = 0, winxres = 620, winyres = 0, rh = 0, rv = 0;
-		if (smallScreen == 1)
+		if (pdaScreen == 1)
 			winxres = 240;
 		if (Decoder::current.vpid != -1)
 			bitstream=fopen("/proc/bus/bitstream", "rt");
@@ -2250,7 +2234,7 @@ static eString getContent(eString mode, eString path)
 	if (mode == "zap")
 	{
 		tmp = "ZAP";
-		if (smallScreen == 0)
+		if (pdaScreen == 0)
 		{
 			if (path == ";4097:7:0:1:0:0:0:0:0:0:")
 				tmp += ": Recordings";
@@ -2342,7 +2326,7 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("CONTROL: OSDShot");
 		if (!getOSDShot("fb"))
-			if (smallScreen == 0)
+			if (pdaScreen == 0)
 				result += "<img width=\"620\" src=\"/root/tmp/osdshot.png\" border=0>";
 			else
 				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
@@ -2353,7 +2337,7 @@ static eString getContent(eString mode, eString path)
 	{
 		result = getTitle("CONTROL: LCDShot");
 		if (!getOSDShot("lcd"))
-			if (smallScreen == 0)
+			if (pdaScreen == 0)
 				result += "<img width=\"620\" src=\"/root/tmp/osdshot.png\" border=0>";
 			else
 				result += "<img width=\"240\" src=\"/root/tmp/osdshot.png\" border=0>";
@@ -3360,7 +3344,7 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	eString result;
 
-	smallScreen = 1;
+	pdaScreen = 1;
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -3383,7 +3367,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	{
 		eString sWidth = opt["screenWidth"];
 		int screenWidth = atoi(sWidth.c_str());
-		smallScreen = (screenWidth < 800) ? 1 : 0;
+		pdaScreen = (screenWidth < 800) ? 1 : 0;
 	}
 	else
 	{
@@ -3391,7 +3375,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 			return readFile(TEMPLATE_DIR + "index.tmp");
 	}
 
-	if (smallScreen == 0)
+	if (pdaScreen == 0)
 	{
 		result = readFile(TEMPLATE_DIR + "index_big.tmp");
 
@@ -4206,7 +4190,6 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectAudio", selectAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setAudio", setAudio, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/selectSubChannel", selectSubChannel, lockWeb);
-	dyn_resolver->addDyn("GET", "/cgi-bin/setScreen", setScreen, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigUSB", setConfigUSB, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/setConfigHDD", setConfigHDD, lockWeb);
