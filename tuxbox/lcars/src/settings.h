@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.h,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -41,8 +44,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #define SETTINGS_H
 
 #include <string>
-#include <strstream.h>
-#include <iostream.h>
+#include <sstream>
+#include <iostream>
 #include <fstream>
 
 #include <config.h>
@@ -68,6 +71,7 @@ struct setting_s
 	bool switch_vcr;
 	std::string proxy_server;
 	int proxy_port;
+	int inversion;
 };
 
 class settings
@@ -118,6 +122,9 @@ public:
 
 	void setSwitchVCR(bool swit) { setting.switch_vcr = swit; }
 	bool getSwitchVCR() { return setting.switch_vcr; }
+
+	void setInversion(int inversion) { setting.inversion = inversion; }
+	int getInversion() { return setting.inversion; }
 
 	void setProxyServer(std::string proxy) { setting.proxy_server = proxy; }
 	std::string getProxyServer() { return setting.proxy_server; }

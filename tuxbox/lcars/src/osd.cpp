@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.cpp,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -67,10 +70,13 @@ void* osd::start_osdqueue( void * this_ptr )
 	}
 }
 
-osd::osd(settings &set, fbClass *f) :setting(set)
+osd::osd(settings &set, fbClass *f, variables *v) :setting(set)
 {
 	fb = f;
+	vars = v;
+
 	proginfo_shown = false;
+	vars->setvalue("%PROGINFO_SHOWN", "false");
 	proginfo_hidetime = time(0) + 10000;
 	printf("OSD\n");
 	//fb->setMode(720, 576, 16);
@@ -105,6 +111,9 @@ void osd::initPalette()
 	fb->setFade(7, 1, 1, 1, 255, 255, 255);
 	fb->setFade(8, 240, 240, 0, 1, 1, 1);
 	fb->setFade(9, 255, 255, 255, 255, 0, 0);
+	fb->setFade(10, 240, 240, 0, 0, 0, 0);
+	fb->setFade(11, 255, 0, 0, 0, 0, 0);
+	fb->setFade(12, 0, 255, 0, 0, 0, 0);
 }
 
 void osd::loadSkin(std::string filename)
@@ -260,7 +269,7 @@ void osd::executeCommand()
 	{
 		std::string command2;
 		std::getline(iss, command2, ' ');
-		std::string parms[10];
+		std::string parms[30];
 		int parm_count = 0;
 
 		while(std::getline(iss, parms[parm_count++], ' '));
@@ -301,33 +310,33 @@ void osd::executeCommand()
 			{
 				setServiceNumber(atoi(parms[1].c_str()));
 			}
-			else if (parms[0] == "set_red_available")
+			else if (parms[0] == "set_channels_available")
 			{
 				if (parms[1] == "true")
-					setRedAvailable(true);
+					setChannelsAvailable(true);
 				else
-					setRedAvailable(false);
+					setChannelsAvailable(false);
 			}
-			else if (parms[0] == "set_green_available")
+			else if (parms[0] == "set_perspective_available")
 			{
 				if (parms[1] == "true")
-					setGreenAvailable(true);
+					setPerspectiveAvailable(true);
 				else
-					setGreenAvailable(false);
+					setPerspectiveAvailable(false);
 			}
-			else if (parms[0] == "set_yellow_available")
+			else if (parms[0] == "set_epg_available")
 			{
 				if (parms[1] == "true")
-					setYellowAvailable(true);
+					setEPGAvailable(true);
 				else
-					setYellowAvailable(false);
+					setEPGAvailable(false);
 			}
-			else if (parms[0] == "set_blue_available")
+			else if (parms[0] == "set_menu_available")
 			{
 				if (parms[1] == "true")
-					setBlueAvailable(true);
+					setMenuAvailable(true);
 				else
-					setBlueAvailable(false);
+					setMenuAvailable(false);
 			}
 			else if (parms[0] == "set_teletext")
 			{
@@ -394,16 +403,33 @@ void osd::executeCommand()
 			{
 				setNumberEntry(atoi(parms[1].c_str()));
 			}
+			else if (parms[0] == "add")
+			{
+				addNumberEntry(atoi(parms[1].c_str()));
+			}
 			else if (parms[0] == "text")
 			{
-				setNumberText(parms[1]);
+				if (!vars->isavailable(parms[1]))
+					setNumberText(parms[1]);
+				else
+					setNumberText(vars->getvalue(parms[1]));
 			}
 		}
 		else if (command2 == "perspective")
 		{
 			if (parms[0] == "name")
 			{
-				setPerspectiveName(parms[1]);
+				std::string new_string;
+				for (int i = 1; i < parm_count; i++)
+				{
+					if (!vars->isavailable(parms[i]))
+						new_string.append(parms[i]);
+					else
+						new_string.append(vars->getvalue(parms[i]));
+					new_string.append(" ");
+				}
+
+				setPerspectiveName(new_string);
 			}
 		}
 		else if (command2 == "menu")
@@ -745,10 +771,10 @@ void osd::createProgramInfo()
 {
 	serviceName = "";
 	serviceNumber = 0;
-	redAvailable = false;
-	greenAvailable = false;
-	yellowAvailable = false;
-	blueAvailable = false;
+	channelsAvailable = true;
+	perspectiveAvailable = false;
+	epgAvailable = true;
+	menuAvailable = true;
 	teletext = false;
 	nowTime = 0;
 	nextTime = 0;
@@ -761,9 +787,10 @@ void osd::createProgramInfo()
 void osd::setServiceName(std::string  name)
 {
 	serviceName = name;
-	fb->addVariable("%SERVICENAME%", name);
+	vars->setvalue("%SERVICENAME%", name);
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (prog_com_list_servicename.size() < 1)
 		{
 			fb->fillBox(130, 30, 330, 50, 0);
@@ -782,9 +809,10 @@ void osd::setServiceName(std::string  name)
 void osd::setServiceNumber(int number)
 {
 	serviceNumber = number;
-	fb->addVariable("%SERVICENUMBER%", number);
+	vars->setvalue("%SERVICENUMBER%", number);
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (prog_com_list_servicenumber.size() < 1)
 		{
 			fb->fillBox(75, 30, 120, 50, 0);
@@ -800,9 +828,9 @@ void osd::setServiceNumber(int number)
 	}
 }
 
-void osd::setRedAvailable(bool available)
+void osd::setChannelsAvailable(bool available)
 {
-	redAvailable = available;
+	channelsAvailable = available;
 }
 
 void osd::setTeletext(bool available)
@@ -810,6 +838,7 @@ void osd::setTeletext(bool available)
 	teletext = available;
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (teletext)
 		{
 			fb->fillBox(80, 401, 120, 419, 0);
@@ -820,19 +849,34 @@ void osd::setTeletext(bool available)
 	}
 }
 
-void osd::setGreenAvailable(bool available)
+void osd::setPerspectiveAvailable(bool available)
 {
-	greenAvailable = available;
+	perspectiveAvailable = available;
+	if (vars->getvalue("%SHOWHELP") == "true")
+	{
+		if (proginfo_shown)
+		{
+			if (perspectiveAvailable)
+			{
+				fb->setTextSize(0.34);
+				fb->fillBox(300, 383, 385, 400, 7);
+				fb->fillBox(283, 383, 300, 400, 12);
+				fb->putText(302, 385, 7, "Perspective");
+			}
+			else
+				fb->fillBox(283, 383, 385, 400, -1);
+		}
+	}
 }
 
-void osd::setYellowAvailable(bool available)
+void osd::setEPGAvailable(bool available)
 {
-	yellowAvailable = available;
+	epgAvailable = available;
 }
 
-void osd::setBlueAvailable(bool available)
+void osd::setMenuAvailable(bool available)
 {
-	blueAvailable = available;
+	menuAvailable = available;
 }
 
 void osd::setNowTime(time_t starttime)
@@ -842,10 +886,11 @@ void osd::setNowTime(time_t starttime)
 	struct tm *t;
 	t = localtime(&nowTime);
 	strftime(nowtime, sizeof nowtime, "%H:%M", t);
-	fb->addVariable("%NOWTIME%", nowtime);
+	vars->setvalue("%NOWTIME%", nowtime);
 	
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (prog_com_list_nowtime.size() < 1)
 		{
 			fb->fillBox(65, 425, 125, 445, 0);
@@ -864,9 +909,10 @@ void osd::setNowTime(time_t starttime)
 void osd::setNowDescription(std::string  description)
 {
 	nowDescription = description;
-	fb->addVariable("%NOWDESCRIPTION%", nowDescription);
+	vars->setvalue("%NOWDESCRIPTION%", nowDescription);
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (prog_com_list_nowdescription.size() < 1)
 		{
 			fb->fillBox(149, 425, 650, 445, 0);
@@ -889,14 +935,15 @@ void osd::setNextTime(time_t starttime)
 	struct tm *t;
 	t = localtime(&nextTime);
 	strftime(nexttime, sizeof nexttime, "%H:%M", t);
-	fb->addVariable("%NEXTTIME%", nexttime);
+	vars->setvalue("%NEXTTIME%", nexttime);
 	
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (prog_com_list_nexttime.size() < 1)
 		{
 			fb->fillBox(65, 495, 125, 515, 0);
-			fb->putText(70, 497, 0, nexttime); // Uhrzeit des nächsten Programms
+			fb->putText(70, 497, 0, nexttime); // Uhrzeit des n„chsten Programms
 		}
 		else
 		{
@@ -911,13 +958,14 @@ void osd::setNextTime(time_t starttime)
 void osd::setNextDescription(std::string  description)
 {
 	nextDescription = description;
-	fb->addVariable("%NEXTDESCRIPTION%", nextDescription);
+	vars->setvalue("%NEXTDESCRIPTION%", nextDescription);
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (prog_com_list_nextdescription.size() < 1)
 		{
 			fb->fillBox(149, 495, 650, 515, 0);
-			fb->putText(150, 497, 0, nextDescription, 490); // Erste Zeile des nächsten Programms
+			fb->putText(150, 497, 0, nextDescription, 490); // Erste Zeile des n„chsten Programms
 		}
 		else
 		{
@@ -932,9 +980,10 @@ void osd::setNextDescription(std::string  description)
 void osd::setLanguage(std::string language_name)
 {
 	strcpy(language, language_name.c_str());
-	fb->addVariable("%LANGUAGE%", language);
+	vars->setvalue("%LANGUAGE%", language);
 	if (proginfo_shown)
 	{
+		fb->setTextSize(0.4);
 		if (prog_com_list_language.size() < 1)
 		{
 			if (language_name != "")
@@ -965,6 +1014,7 @@ void osd::setParentalRating(int rating)
 			fb->fillBox(310, 401, 390, 419, 0);
 			char rattext[10];
 			sprintf(rattext, "FSK: %d", par_rating + 3);
+			fb->setTextSize(0.4);
 			fb->putText(315, 402, 0, rattext);
 		}
 		else
@@ -977,7 +1027,8 @@ void osd::showProgramInfo()
 	if (proginfo_shown == true)
 		return;
 	proginfo_shown = true;
-
+	vars->setvalue("%PROGINFO_SHOWN", "true");
+	
 	char nowtime[10], nexttime[10], acttime[10], number[10];
 	time_t act_time = time(0);
 	struct tm *t;
@@ -988,29 +1039,21 @@ void osd::showProgramInfo()
 	t = localtime(&nextTime);
 	strftime(nexttime, sizeof nexttime, "%H:%M", t);
 
-	fb->addVariable("%SERVICENAME%", serviceName);
-	fb->addVariable("%SERVICENUMBER%", serviceNumber);
-	fb->addVariable("%NOWTIME%", nowtime);
-	fb->addVariable("%NEXTTIME%", nexttime);
-	fb->addVariable("%ACTTIME%", acttime);
-	fb->addVariable("%NOWDESCRIPTION%", nowDescription);
-	fb->addVariable("%NEXTDESCRIPTION%", nextDescription);
-	fb->addVariable("%LANGUAGE%", language);
+	vars->setvalue("%SERVICENAME%", serviceName);
+	vars->setvalue("%SERVICENUMBER%", serviceNumber);
+	vars->setvalue("%NOWTIME%", nowtime);
+	vars->setvalue("%NEXTTIME%", nexttime);
+	vars->setvalue("%ACTTIME%", acttime);
+	vars->setvalue("%NOWDESCRIPTION%", nowDescription);
+	vars->setvalue("%NEXTDESCRIPTION%", nextDescription);
+	vars->setvalue("%LANGUAGE%", language);
 
 	if (prog_com_list_show.size() < 1)
 	{
 		printf("%d - %s\n", serviceNumber, serviceName.c_str());
 		printf("Now (%d): %s\n", (int)nowTime, nowDescription.c_str());
 		printf("Next (%d): %s\n", (int)nextTime, nextDescription.c_str());
-		if (redAvailable)
-			printf("Red ");
-		
-		if (yellowAvailable)
-			printf("Yellow ");
-		if (blueAvailable)
-			printf("Blue ");
-		printf("\n");
-	
+
 		char pname[30], now[200], next[200];
 	
 		//fb->fillBox(100, 100, 200, 200, 9);
@@ -1048,9 +1091,9 @@ void osd::showProgramInfo()
 		fb->fillBox(650, 410, 660, 550, 1);
 		fb->fillBox(70, 480, 660, 490, 1);
 		fb->fillBox(130, 420, 140, 550, 1);
-		
+	
 		fb->setTextSize(0.4);
-		
+
 		strcpy(pname, serviceName.c_str());
 		fb->putText(135, 32, 0, pname, 195);
 
@@ -1060,7 +1103,7 @@ void osd::showProgramInfo()
 		fb->putText(560, 32, 0, acttime); // aktuelle Uhrzeit
 		
 		fb->putText(70, 427, 0, nowtime); // Uhrzeit des laufenden Programms
-		fb->putText(70, 497, 0, nexttime); // Uhrzeit des nächsten Programms
+		fb->putText(70, 497, 0, nexttime); // Uhrzeit des n„chsten Programms
 
 		strcpy(now, nowDescription.c_str());
 		strcpy(next, nextDescription.c_str());
@@ -1085,13 +1128,44 @@ void osd::showProgramInfo()
 			fb->putText(315, 402, 0, rattext);
 		}
 		
-		if (greenAvailable)
-			fb->putText(600, 402, 6, "O");
-		
+
 		fb->putText(150, 427, 0, now, 490); // Erste Zeile des aktuellen Programms
 
-		fb->putText(150, 497, 0, next, 490); // Erste Zeile des nächsten Programms
-		
+		fb->putText(150, 497, 0, next, 490); // Erste Zeile des n„chsten Programms
+
+		if (vars->getvalue("%SHOWHELP") == "true")
+		{
+	
+			fb->setTextSize(0.34);
+			if (channelsAvailable)
+			{
+				fb->fillBox(200, 383, 285, 400, 7);
+				fb->fillBox(183, 383, 200, 400, 11);
+				fb->putText(202, 385, 7, "Channels");
+			}
+			
+			if (perspectiveAvailable)
+			{
+				fb->fillBox(300, 383, 385, 400, 7);
+				fb->fillBox(283, 383, 300, 400, 12);
+				fb->putText(302, 385, 7, "Perspective");
+			}
+
+			if (epgAvailable)
+			{
+				fb->fillBox(400, 383, 485, 400, 7);
+				fb->fillBox(383, 383, 400, 400, 10);
+				fb->putText(402, 385, 7, "EPG Info");
+			}
+
+			if (menuAvailable)
+			{
+				fb->fillBox(500, 383, 585, 400, 7);
+				fb->fillBox(483, 383, 500, 400, 3);
+				fb->putText(502, 385, 7, "Menu");
+			}
+		}
+
 		char text[100];
 		sprintf(text, "CAID: %x", setting.getCAID());
 	}
@@ -1107,6 +1181,7 @@ void osd::showProgramInfo()
 void osd::hideProgramInfo()
 {
 	proginfo_shown = false;
+	vars->setvalue("%PROGINFO_SHOWN", "false");
 	if (prog_com_list_hide.size() < 1)
 	{
 		printf("Hiding program info\n");
@@ -1132,6 +1207,15 @@ void osd::createNumberEntry()
 void osd::setNumberEntry(int setnumber)
 {
 	number = setnumber;
+	vars->setvalue("%NUMBERENTRY", number);
+}
+
+void osd::addNumberEntry(int setnumber)
+{
+	if (number == -1)
+		number = 0;
+	number = number * 10 + setnumber;
+	vars->setvalue("%NUMBERENTRY", number);
 }
 
 void osd::setNumberText(std::string  text)
@@ -1142,6 +1226,10 @@ void osd::setNumberText(std::string  text)
 void osd::showNumberEntry()
 {
 	char buffer[100];
+
+	int tmp_number = atoi(vars->getvalue("%NUMBERENTRY").c_str());
+	if (tmp_number != number)
+		number = tmp_number;
 
 	fb->setTextSize(0.7);
 	for (int j = 0; j <= 17; j++)
@@ -1241,6 +1329,11 @@ void osd::showPerspective()
 	//char pname[400];
 	//strcpy(pname, perspective_name.c_str());
 	fb->setTextSize(0.4);
+	//fb->runCommand("SETTEXTSIZE 0.4");
+	/*std::stringstream ostr;
+	ostr << "PUTTEXT 175 504 0 370 0 " << perspective_name << std::ends;
+	std::string tmp = ostr.str();
+	fb->runCommand(tmp.c_str());*/
 	fb->putText(175, 504, 0, perspective_name.c_str(), 370);
 }
 
@@ -1500,7 +1593,7 @@ types:
 1 - Select entry
 2 - Switching entry
 */
-void osd::addMenuEntry(int index, std::string  caption, int type = 0)
+void osd::addMenuEntry(int index, std::string  caption, int type)
 {
 	menu[number_menu_entries].index = index;
 	menu[number_menu_entries].caption = caption;
@@ -1578,7 +1671,7 @@ int osd::menuSelectedIndex()
 	return menu[selected_entry].index;
 }
 
-void osd::drawMenuEntry(int number, bool selected = false)
+void osd::drawMenuEntry(int number, bool selected)
 {
 	int color1 = 5;
 	int color2 = 0;
@@ -1773,7 +1866,7 @@ void osd::addScheduleInformation(time_t starttime, std::string description, int 
 	sched.insert(sched.end(), tmp_sched);
 }
 
-void osd::selectScheduleInformation(int select, bool redraw = true)
+void osd::selectScheduleInformation(int select, bool redraw)
 {
 	printf("Selektiere %d von %d\n", select, selected_sched);
 	if (redraw)
@@ -2041,15 +2134,15 @@ void osd::showAbout()
 	
 	fb->setTextSize(1);
 
-	fb->putText(240, 200, 5, setting.getVersion());
+	fb->putText(220, 200, 5, setting.getVersion());
 
 	fb->setTextSize(0.5);
-	fb->putText(280, 250, 5, "GUI coded by TheDOC");
-	fb->putText(190, 270, 5, "Drivers and stuff by the Tuxbox-Team");
+	fb->putText(260, 250, 5, "GUI coded by TheDOC");
+	fb->putText(170, 270, 5, "Drivers and stuff by the Tuxbox-Team");
 	
 	fb->setTextSize(0.4);
-	fb->putText(195, 330, 5, "Info's about LCARS: http://www.chatville.de");
-	fb->putText(200, 350, 5, "Info's about tuxbox: http://dbox2.elxsi.de");
+	fb->putText(175, 330, 5, "Info's about LCARS: http://www.chatville.de");
+	fb->putText(180, 350, 5, "Info's about tuxbox: http://dbox2.elxsi.de");
 }
 
 void osd::hideAbout()

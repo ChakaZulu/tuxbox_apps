@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.4  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -25,7 +28,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
 */
-#include <iostream.h>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -98,22 +101,24 @@ void zap::close_dev()
 
 void zap::zap_allstop()
 {
-	//ioctl(video,DMX_STOP, true);
-	//ioctl(audio,DMX_STOP, true);
+	ioctl(video,DMX_STOP, true);
+	ioctl(audio,DMX_STOP, true);
+	ioctl(pcr,DMX_STOP, true);
 	ioctl(vid, VIDEO_STOP, true);
 	ioctl(aud, AUDIO_STOP, true);
 }
 
-void zap::zap_to(int VPID, int APID, int ECM, int SID, int ONID, int TS, int PID1 = -1, int PID2 = -1)
+void zap::zap_to(int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1, int PID2)
 {
 	zap_allstop();
 
-	//close(vid);
-	//close(aud);
+	close(vid);
+	close(aud);
 	close(video);
 	close(audio);
+	close(pcr);
 
-	//vid = open("/dev/ost/video0", O_RDWR);
+	vid = open("/dev/ost/video0", O_RDWR);
 	if (vid < 0)
 		perror("/dev/ost/video0");
 
@@ -122,7 +127,12 @@ void zap::zap_to(int VPID, int APID, int ECM, int SID, int ONID, int TS, int PID
 		exit(1);
 	}
 
-	//aud = open("/dev/ost/audio0", O_RDWR);
+	if((pcr = open("/dev/ost/demux0", O_RDWR)) < 0) {
+		perror("/dev/ost/demux0");
+		exit(1);
+	}
+
+	aud = open("/dev/ost/audio0", O_RDWR);
 	if (aud < 0)
 		perror("/dev/ost/audio0");
 
@@ -137,8 +147,9 @@ void zap::zap_to(int VPID, int APID, int ECM, int SID, int ONID, int TS, int PID
 
 	printf("Zappe auf\nSID: %04x\nVPID: %04x\nAPID: %04x\nECM: %04x\nONID: %04x\n\n", SID, VPID, APID, ECM, ONID);
 
+	bool usevideo = false, useaudio = false, usepcr = false;
 	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 0);
-	if (VPID != 0x1fff)
+	if ((VPID >= 0x20) && (VPID <= 0x1FFB))
 	{
 		/* vpid */
 		pes_filter.pid     = VPID;
@@ -147,56 +158,78 @@ void zap::zap_to(int VPID, int APID, int ECM, int SID, int ONID, int TS, int PID
 		pes_filter.pesType = DMX_PES_VIDEO;
 		pes_filter.flags   = 0;
 		ioctl(video,DMX_SET_PES_FILTER,&pes_filter);
+		usevideo = true;
 	}
 
 	/* apid */
-	pes_filter.pid     = APID;
-	pes_filter.input   = DMX_IN_FRONTEND;
-	pes_filter.output  = DMX_OUT_DECODER;
-	pes_filter.pesType = DMX_PES_AUDIO;
-	pes_filter.flags   = 0;
-	ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
+	if ((APID >= 0x20) && (APID <= 0x1FFB))
+	{
+		pes_filter.pid     = APID;
+		pes_filter.input   = DMX_IN_FRONTEND;
+		pes_filter.output  = DMX_OUT_DECODER;
+		pes_filter.pesType = DMX_PES_AUDIO;
+		pes_filter.flags   = 0;
+		ioctl(audio,DMX_SET_PES_FILTER,&pes_filter);
+		useaudio = true;
+	}
 
-	if (VPID != 0x1fff)
+	/* apid */
+	if ((PCR >= 0x20) && (PCR <= 0x1FFB))
 	{
-		ioctl(video,DMX_START);
+		pes_filter.pid     = PCR;
+		pes_filter.input   = DMX_IN_FRONTEND;
+		pes_filter.output  = DMX_OUT_DECODER;
+		pes_filter.pesType = DMX_PES_PCR;
+		pes_filter.flags   = 0;
+		ioctl(pcr,DMX_SET_PES_FILTER,&pes_filter);
+		usepcr = true;
 	}
-	ioctl(audio,DMX_START);
-	if (VPID != 0x1fff)
-	{
+
+	if (usevideo)
 		ioctl(vid, VIDEO_PLAY);
-	}
-	ioctl(aud, AUDIO_PLAY);
+	
+	if (useaudio)
+		ioctl(aud, AUDIO_PLAY);
+	
+	if (usepcr)
+		ioctl(pcr, DMX_START);
+	
+	if (useaudio)
+		ioctl(audio,DMX_START);
+	if (usevideo)
+		ioctl(video,DMX_START);
+	
+	
 	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 1);
 
 	printf("Zapping...\n");
-	ca.initialize();
-	if (VPID != 0x1fff)
+	if (ECM != 0)
 	{
-		ca.addPID(VPID);
-	}
-	ca.addPID(APID);
-	ca.setECM(ECM);
-	ca.setSID(SID);
-	ca.setONID(ONID);
-	if (PID1 != -1)
-	{
-		ca.addPID(PID1);
-	}
-	if (PID2 != -1)
-		ca.addPID(PID2);
-
-	if (old_TS != TS)
-	{
-		ca.reset();
-		ca.setEMM(setting.getEMMpid());
-		ca.startEMM();
-	}
+		ca.initialize();
+		if (VPID != 0x1fff)
+		{
+			ca.addPID(VPID);
+		}
+		ca.addPID(APID);
+		ca.setECM(ECM);
+		ca.setSID(SID);
+		ca.setONID(ONID);
+		if (PID1 != -1)
+			{
+			ca.addPID(PID1);
+		}
+		if (PID2 != -1)
+			ca.addPID(PID2);
 	
-	
+		if (old_TS != TS)
+		{
+			ca.reset();
+			ca.setEMM(setting.getEMMpid());
+			ca.startEMM();
+		}
+		ca.descramble();
+	}
 
-	printf("finalcam\n");
-	ca.descramble();
 	old_TS = TS;
 
 }

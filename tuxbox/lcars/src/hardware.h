@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.h,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -45,6 +48,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <dbox/fp.h>
 
 #include "settings.h"
+#include "variables.h"
 
 #define OUTPUT_FBAS 0
 #define OUTPUT_RGB 1
@@ -59,11 +63,12 @@ class hardware
 	bool muted;
 	int avs;
 	settings *setting;
+	variables *vars;
 	bool vcr_on;
 	bool old_DD_state;
 	int old_fblk;
 public:	
-	hardware(settings *s);
+	hardware(settings *s, variables *v);
 	void hardware::setOutputMode(int i);
 	void setfblk(int i);
 	int getfblk();

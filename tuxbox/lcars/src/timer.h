@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.h,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -46,6 +49,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "zap.h"
 #include "tuner.h"
 #include "osd.h"
+#include "variables.h"
 
 #include <config.h>
 
@@ -73,11 +77,12 @@ class timer
 	zap *zap_obj;
 	tuner *tuner_obj;
 	osd *osd_obj;
+	variables *vars;
 
 	time_t dumped_starttimes[20];
 	int dumped_channels[20];
 public:	
-	timer(hardware *h, channels *c, zap *z, tuner *t, osd *o);
+	timer(hardware *h, channels *c, zap *z, tuner *t, osd *o, variables *v);
 	int start_thread();
 
 	void runTimer();

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.6  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.5  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -50,6 +53,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "eit.h"
 #include "cam.h"
 #include "hardware.h"
+#include "variables.h"
 
 enum
 {
@@ -64,7 +68,7 @@ struct channel
 	int SID;
 	int PMT;
 	int VPID;
-	int APID[4];
+	std::vector<int> APID;
 	bool DD[4];
 	int PCR;
 	int CAID[5];
@@ -111,10 +115,15 @@ struct dvbchannel
 	unsigned short ONID;
 };
 
+struct transponder
+{
+	int ONID;
+	int TS;
+};
+
 struct transportstream
 {
-	int TS;
-	int ONID;
+	transponder trans;
 	long FREQU;
 	int SYMBOL;
 	int POLARIZATION; // 0->H, 1->V -- Nur Sat
@@ -122,13 +131,29 @@ struct transportstream
 	int diseqc;
 };
 
+struct ltstr2
+{
+  bool operator()(transponder s1, transponder s2) const
+  {
+    if (s1.TS < s2.TS)
+		return true;
+	else if (s1.TS > s2.TS)
+		return false;
+	else
+		if (s1.ONID < s2.ONID)
+			return true;
+		else
+			return false;
+  }
+};
+
 class channels
 {
 	std::vector<struct channel> basic_channellist; // the list of channels
-	std::multimap<int, struct transportstream> basic_TSlist; // the list of transportstreams
+	std::multimap<struct transponder, struct transportstream, ltstr2> basic_TSlist; // the list of transportstreams
 	std::multimap<int, int> services_list; // services multimap pointing to basic_channellist-entries
 	int cur_pos; // position for getChannel/setChannel
-	std::multimap<int, struct transportstream>::iterator cur_pos_TS;
+	std::multimap<struct transponder, struct transportstream>::iterator cur_pos_TS;
 	settings *setting;
 	pat *pat_obj;
 	pmt *pmt_obj;
@@ -136,6 +161,7 @@ class channels
 	cam *cam_obj;
 	osd *osd_obj;
 	zap *zap_obj;
+	variables *vars;
 	tuner *tuner_obj;
 	hardware *hardware_obj;
 	event now, next;
@@ -144,12 +170,14 @@ class channels
 	int video_component, component[10], number_components;
 	int curr_perspective;
 	int current_mode;
-	int old_TS;
+	int old_TS, old_ONID;
+	std::queue<int> last_channels;
 public:	
-	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t);
+	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v);
 	channels(settings *setting, pat *p1, pmt *p2);
 
-	void setStuff(eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t);
+	void setStuff(eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v);
+	void setTuner(tuner *t);
 
 	// multiperspective-stuff
 
@@ -157,16 +185,19 @@ public:
 	int currentNumberPerspectives();
 	void parsePerspectives();
 	void setPerspective(int number);
+	std::string getPerspectiveName(int number);
 
 	// end multiperspective-stuff
 	
 	void zapCurrentChannel();
+	void zapLastChannel();
 	void setCurrentOSDProgramInfo(osd *osd_obj);
 	void receiveCurrentEIT();
 	void setCurrentOSDProgramEIT(osd *osd_obj);
 	void setCurrentOSDEvent(osd *osd_obj);
 	void updateCurrentOSDProgramEIT(osd *osd_obj);
 	void zapCurrentAudio(int apid);
+	int getCurrentAudio() { return apid; }
 	void updateCurrentOSDProgramAPIDDescr(osd *osd_obj);
 
 	event getCurrentNow() { return now; }
@@ -235,11 +266,6 @@ public:
 	std::string getCurrentProviderName();
 
 	bool addTS(int TS, int ONID, int FREQU, int SYMBOL, int POLARIZATION = -1, int FEC = -1, int diseqc = 1);
-	int getFrequency(int TS) { return (*basic_TSlist.find(TS)).second.FREQU; }
-	int getSymbolrate(int TS) { return (*basic_TSlist.find(TS)).second.SYMBOL; }
-	int getPolarization(int TS) { return (*basic_TSlist.find(TS)).second.POLARIZATION; }
-	int getFEC(int TS) { return (*basic_TSlist.find(TS)).second.FEC; }
-	int getDiseqc(int TS) { return (*basic_TSlist.find(TS)).second.diseqc; }
 	
 	int getFrequency(int TS, int ONID);
 	int getSymbolrate(int TS, int ONID);
@@ -248,14 +274,14 @@ public:
 	int getDiseqc(int TS, int ONID);
 	transportstream getTS(int TS, int ONID);
 
-	int tune(int TS, tuner *tuner);
-	int tuneCurrentTS(tuner *tuner);
+	int tune(int TS, int ONID);
+	int tuneCurrentTS();
 
 	void setBeginTS() { cur_pos_TS = basic_TSlist.begin(); }
 	bool setNextTS();
 	void clearTS() { basic_TSlist.clear(); }
-	int getCurrentSelectedTS() { return (*cur_pos_TS).second.TS; }
-	int getCurrentSelectedONID() { return (*cur_pos_TS).second.ONID; }
+	int getCurrentSelectedTS() { return (*cur_pos_TS).second.trans.TS; }
+	int getCurrentSelectedONID() { return (*cur_pos_TS).second.trans.ONID; }
 	int getCurrentFrequency() { return (*cur_pos_TS).second.FREQU; }
 	int getCurrentSymbolrate() { return (*cur_pos_TS).second.SYMBOL; }
 	int getCurrentPolarization() { return (*cur_pos_TS).second.POLARIZATION; }
@@ -268,6 +294,9 @@ public:
 
 	void saveDVBChannels();
 	void loadDVBChannels();
+
+	void saveTS();
+	void loadTS();
 };
 
 #endif

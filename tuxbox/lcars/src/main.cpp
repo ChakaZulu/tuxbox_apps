@@ -15,8 +15,8 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
-Revision 1.14  2002/04/22 19:11:12  obi
-sync vbi header with drivers
+Revision 1.15  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
 
 Revision 1.13  2002/03/03 23:06:51  TheDOC
 update-fix
@@ -58,7 +58,7 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
  added
 
 */
-#include <iostream.h>
+#include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -93,6 +93,8 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include "timer.h"
 #include "update.h"
 #include "control.h"
+#include "variables.h"
+#include "ir.h"
 
 #include "config.h"
 
@@ -101,7 +103,8 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 
 int main(int argc, char **argv)
 {
-
+	variables variables;
+	ir ir;
 	
 	int cramfs = 6;
 	bool update_enabled = false;
@@ -111,7 +114,7 @@ int main(int argc, char **argv)
 	std::string font = FONTDIR "/ds9.ttf";
 	std::string vtfont = FONTDIR "/ds9.ttf";
 
-	cout << "Fonts: " << font << endl;
+	std::cout << "Fonts: " << font << std::endl;
 
 
     
@@ -124,15 +127,15 @@ int main(int argc, char **argv)
 
 	settings settings(&cam);
 
-	settings.setVersion("0.20");
+	settings.setVersion("0.21 TP7");
 
-	hardware hardware(&settings);
+	hardware hardware(&settings, &variables);
 	hardware.useDD(false);
 	
 	rc rc(&hardware, &settings);
 	
 	printf("Starting OSD\n");
-	fbClass fb;
+	fbClass fb(&variables);
 	fb.setPalette(255, 0, 0, 0, 0xff);
 	fb.setTransparent(255);
 	fb.clearScreen();
@@ -140,8 +143,9 @@ int main(int argc, char **argv)
 	//fb.setFade(1, 22, 5, 57, 63, 63, 63);
 	//fb.fillBox(100, 100, 200, 200, 1);
 	//sleep(10);
+	//fb.test();
 
-	osd osd(settings, &fb);
+	osd osd(settings, &fb, &variables);
 	osd.start_thread();
 
 	
@@ -207,17 +211,17 @@ int main(int argc, char **argv)
 	close(test);
 
 	printf("Starting\n");
-	tuner tuner(settings);
+	tuner tuner(&settings);
 	zap zap(settings, osd, tuner, cam);
 	
 	pmt pmt;
 	pat pat;
 	tot tot(&settings);
 
-	eit eit(&settings, &osd);
+	eit eit(&settings, &osd, &variables);
 	eit.start_thread();
 
-	channels channels(&settings, &pat, &pmt, &eit, &cam, &hardware, &osd, &zap, &tuner);
+	channels channels(&settings, &pat, &pmt, &eit, &cam, &hardware, &osd, &zap, &tuner, &variables);
 	checker checker(&settings, &hardware);
 	checker.set_16_9_mode(settings.getVideoFormat());
 
@@ -233,7 +237,7 @@ int main(int argc, char **argv)
 		{
 			printf("Emergency channel-scan\n");
 			channels = scan.scanChannels();
-			channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner);
+			channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner, &variables);
 			channels.saveDVBChannels();
 			while(rc.command_available())
 				rc.read_from_rc();
@@ -244,13 +248,15 @@ int main(int argc, char **argv)
 	teletext teletext(&fb, &rc);
 	
 	channels.loadDVBChannels();
+	channels.loadTS();
 
-	if (channels.numberChannels() == 0)
+	if (channels.numberChannels() == 0 || channels.numberTransponders() == 0)
 	{
 		channels = scan.scanChannels();
 		printf("Number Channels: %d\n", channels.numberChannels());
-		channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner);
+		channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner, &variables);
 		channels.saveDVBChannels();
+		channels.saveTS();
 	}
 	container container(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan);
 	
@@ -258,16 +264,16 @@ int main(int argc, char **argv)
 	while (channels.getCurrentFrequency() == 0)
 		channels.setNextTS();
 
-	channels.tuneCurrentTS(&tuner);
+	channels.tuneCurrentTS();
 
-	settings.getEMMpid();
+	//settings.getEMMpid();
 	
 	printf("container-chans: %d\n", (*container.channels_obj).numberChannels());
 
 	network network(container, &rc);
 	network.startThread();
 
-	timer timer(&hardware, &channels, &zap, &tuner, &osd);
+	timer timer(&hardware, &channels, &zap, &tuner, &osd, &variables);
 	timer.loadTimer();
 	timer.start_thread();
 	tot.start_thread();
@@ -319,10 +325,10 @@ int main(int argc, char **argv)
 
 	hardware.setOutputMode(settings.getOutputFormat());
 	rc.start_thread();
-	
-	//control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner);
-	//exit(0);
-	do
+
+	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir);
+	exit(0);
+	/*do
 	{
 		
 		time_t act_time;
@@ -1031,7 +1037,7 @@ int main(int argc, char **argv)
 			printf("APID: %d\n", apid);
 			printf("Current NVOD: %d\n", curr_nvod);
 			if (old_TS != nvods[curr_nvod].TS)
-				channels.tune(nvods[curr_nvod].TS, &tuner);
+				channels.tune(nvods[curr_nvod].TS);
 			
 			printf("Tuning to TS: %d\n", nvods[curr_nvod].TS);
 			
@@ -1304,12 +1310,12 @@ int main(int argc, char **argv)
 				}
 				else if (number == 7 && update_enabled)
 				{
-					printf("7 gedrückt\n");
+					printf("7 gedrckt\n");
 					update.run(UPDATE_MANUALFILES);
 				}
 				else if (number == 8 && update_enabled)
 				{
-					printf("8 gedrückt\n");
+					printf("8 gedrckt\n");
 					update.run(UPDATE_INET);
 				}
 				else if (number == 9)
@@ -2099,5 +2105,5 @@ int main(int argc, char **argv)
 	sleep(1);
 	ioctl(fpfd,FP_IOCTL_POWEROFF);
 	close(fpfd);
-	//hardware.shutdown();
+	//hardware.shutdown();*/
 }

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
+Revision 1.6  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.5  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -33,13 +36,14 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 */
 #include "timer.h"
 
-timer::timer(hardware *h, channels *c, zap *z, tuner *t, osd *o)
+timer::timer(hardware *h, channels *c, zap *z, tuner *t, osd *o, variables *v)
 {
 	hardware_obj = h;
 	channels_obj = c;
 	zap_obj = z;
 	tuner_obj = t;
 	osd_obj = o;
+	vars = v;
 }
 
 int timer::start_thread()
@@ -75,10 +79,11 @@ void* timer::start_timer( void * this_ptr )
 		}
 		
 		t->runTimer();
+		sleep(5);
 	}
 }
 
-void timer::addTimer(time_t starttime, int type, std::string comment, int duration = 0, int channel = -1)
+void timer::addTimer(time_t starttime, int type, std::string comment, int duration, int channel)
 {
 	struct timer_entry new_timer;
 
@@ -132,11 +137,11 @@ void timer::runTimer()
 		(*hardware_obj).reboot();
 	else if (act_timer.type == 2)
 	{
-		int last_channel = (*channels_obj).getCurrentChannelNumber();
+		//int last_channel = (*channels_obj).getCurrentChannelNumber();
 		(*channels_obj).setCurrentChannel(act_timer.channel);
 		(*channels_obj).zapCurrentChannel();
-		if (act_timer.duration != 0)
-			addTimer(time(0) + act_timer.duration, 2, 0, last_channel);
+		/*if (act_timer.duration != 0)
+			addTimer(time(0) + act_timer.duration, 2, 0, last_channel);*/
 		(*channels_obj).setCurrentOSDProgramInfo(osd_obj);
 		(*hardware_obj).fnc(0);
 		(*hardware_obj).fnc(2);
@@ -145,6 +150,14 @@ void timer::runTimer()
 		(*channels_obj).setCurrentOSDProgramEIT(osd_obj);
 		(*channels_obj).updateCurrentOSDProgramAPIDDescr(osd_obj);
 
+		vars->addEvent("VCR_START");
+		std::cout << "Starttime: " << act_timer.starttime << std::endl << "Duration: " << act_timer.duration << std::endl;
+		//std::cout << (act_timer.starttime + (act_timer.duration / 60)) << std::endl;
+		addTimer((act_timer.starttime + act_timer.duration ) - 1, 3, "stop-vcr");
+	}
+	else if (act_timer.type == 3)
+	{
+		vars->addEvent("VCR_STOP");
 	}
 }
 

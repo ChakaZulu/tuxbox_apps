@@ -10,11 +10,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
-#include <iostream.h>
+#include <iostream>
+#include <png.h>
 
 #include <string>
 #include <sstream>
 #include <map>
+
+#include <config.h>
+#include "variables.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -23,12 +27,14 @@
 #include FT_CACHE_SMALL_BITMAPS_H
 
 #define FB_DEV "/dev/fb/0"
+#define COLORFADE 5
+#define MAXFADE 20
 
 class fbClass
 {
 	int fbfd;
-	struct fb_var_screeninfo vinfo; // tatsächliche vinfo
-	struct fb_fix_screeninfo finfo; // tatsächliche finfo
+	struct fb_var_screeninfo vinfo; // tats„chliche vinfo
+	struct fb_fix_screeninfo finfo; // tats„chliche finfo
 	struct fb_var_screeninfo old_vinfo; // gesicherte vinfo
 	struct fb_fix_screeninfo old_finfo; // gesicherte finfo
 
@@ -74,18 +80,17 @@ class fbClass
 	typedef std::multimap<char, struct font_cache>::iterator It;
 
 	int fade_down[256]; // runtergerechnete farben
-	char fades[10][10];
+	char fades[MAXFADE][COLORFADE];
 	std::multimap<float, int> ycorrector;
 
-	std::multimap<std::string, std::string> variables;
+	variables *vars;
 
 public:
-	fbClass(int x = 720, int y = 576, int bpp = 8);
+	fbClass(variables *v, int x = 720, int y = 576, int bpp = 8);
 	~fbClass();
 
-	void addVariable(std::string, std::string);
-	void addVariable(std::string, int);
-	void clearVariables() { variables.clear(); }
+	void test();
+
 	void runCommand(std::string command_string);
 
 	// Paletten-Funktionen

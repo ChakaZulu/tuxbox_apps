@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.h,v $
+Revision 1.6  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.5  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -42,10 +45,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <vector>
 #include <map>
 #include <dlfcn.h> 
-#include <strstream.h>
+#include <sstream>
 #include <sstream>
 #include <fstream>
-#include <iostream.h>
+#include <iostream>
 
 #include <plugin.h>
 

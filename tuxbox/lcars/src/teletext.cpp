@@ -15,8 +15,8 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
-Revision 1.5  2002/04/22 19:13:04  obi
-sync vbi header with drivers
+Revision 1.6  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
 
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20

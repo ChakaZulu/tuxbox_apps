@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.cpp,v $
+Revision 1.4  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -46,22 +49,29 @@ bool pat::readPAT()
 	unsigned char buffer[BSIZE];
 
 	fd=open("/dev/ost/demux0", O_RDONLY);
-	
+	if (fd < 0)
+	{
+		perror("open readPAT-open");
+	}
+	//ioctl(fd,DMX_STOP,0);
 	memset (&flt.filter, 0, sizeof (struct dmxFilter));
 	r = BSIZE;
-	flt.pid            = 0;
+	flt.pid            = 0x0;
+	//flt.filter.filter[0] = 0x0;
 	flt.filter.mask[0] = 0xff;
-	flt.timeout        = 1000;
+	flt.timeout        = 10000;
 	flt.flags          = DMX_IMMEDIATE_START;
 
 	if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
 	{
-		perror("DMX_SET_FILTER");
+		perror("DMX_SET_FILTER readPAT");
 	}
 	r=read(fd, buffer, r);
 
-	ioctl(fd,DMX_STOP,0);
-	
+	close(fd);
+	close(fd);
+	close(fd);
+
 	int transport_stream_id = (buffer[3] << 8) | buffer[4];
 	if (oldpatTS != transport_stream_id)
 	{
@@ -85,8 +95,7 @@ bool pat::readPAT()
 			}
 		}
 	}
-	close(fd);
-
+	
 	return (r > 0);
 }
 

@@ -15,8 +15,8 @@ void update::eraseall()
 	int fd;
 	erase_info_t erase;
 
-	ostrstream ostr;
-	ostr << "/dev/mtd/" << cramfsmtd << ends;
+	std::stringstream ostr;
+	ostr << "/dev/mtd/" << cramfsmtd << std::ends;
 	std::string mtd_device = ostr.str();
 
 	if( (fd = open( mtd_device.c_str(), O_RDWR )) < 0 )
@@ -36,9 +36,9 @@ void update::eraseall()
 	
 	for (erase.start = 0; erase.start < meminfo.size; erase.start += meminfo.erasesize)
 	{
-		ostrstream ostr;
+		std::stringstream ostr;
 		
-		ostr << "Erasing: " << (erase.start*100/meminfo.size) << "% completed" << ends;
+		ostr << "Erasing: " << (erase.start*100/meminfo.size) << "% completed" << std::ends;
 		osd_obj->setPerspectiveName(ostr.str());
 		osd_obj->addCommand("SHOW perspective");
 
@@ -56,8 +56,8 @@ void update::run(int type)
 	system("umount /var/tmp/tmpcramfs");
 	std::string mtd_block_device_mount;
 	{
-		ostrstream ostr;
-		ostr << "mount /dev/mtdblock/" << cramfsmtd << " /var/tmp/tmpcramfs" << ends;
+		std::stringstream ostr;
+		ostr << "mount /dev/mtdblock/" << cramfsmtd << " /var/tmp/tmpcramfs" << std::ends;
 		mtd_block_device_mount= ostr.str();
 	}
 	
@@ -85,8 +85,8 @@ void update::run(int type)
 	mkdir("/var/tmp/newcramfs", (mode_t)0755);
 	mkdir("/var/tmp/newcramfs/update", (mode_t)0755);
 	{	
-		ostrstream ostr;
-		ostr << "Copying files, this may take a while" << ends;
+		std::stringstream ostr;
+		ostr << "Copying files, this may take a while" << std::ends;
 		osd_obj->setPerspectiveName(ostr.str());
 		osd_obj->addCommand("SHOW perspective");
 	}
@@ -126,8 +126,8 @@ void update::run(int type)
 			fgets(version, 5, fp);
 			fclose(fp);
 			std::string version_string(version);
-			cout << "Version eigen: " << settings_obj->getSmallVersion() << "-" << endl;
-			cout << "Version Server: " << version_string << "-" << endl;
+			std::cout << "Version eigen: " << settings_obj->getSmallVersion() << "-" << std::endl;
+			std::cout << "Version Server: " << version_string << "-" << std::endl;
 			if (version_string == settings_obj->getSmallVersion())
 			{
 				osd_obj->setPerspectiveName("No update available.");
@@ -215,9 +215,9 @@ void update::run(int type)
 	osd_obj->setPerspectiveName("Copying CramFS to flash... Stay tuned");
 	osd_obj->addCommand("SHOW perspective");
 	{
-		ostrstream ostr;
-		ostr << "cat /var/tmp/cramfs.img > /dev/mtdblock/" << cramfsmtd << ends;
-		system (ostr.str());
+		std::stringstream ostr;
+		ostr << "cat /var/tmp/cramfs.img > /dev/mtdblock/" << cramfsmtd << std::ends;
+		system (ostr.str().c_str());
 	}
 	osd_obj->setPerspectiveName("Update Done... Reboot now!");
 	osd_obj->addCommand("SHOW perspective");

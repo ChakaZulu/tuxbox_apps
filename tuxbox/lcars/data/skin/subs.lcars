@@ -1,0 +1,27 @@
+------
++++
+Title:
+VCR_START
++++
+Actions:
+	IR Set ORION
+	IR Send POWER
+	CONTROL Wait 1
+	IR Send CH1
+	CONTROL Wait 1
+	IR Send CH1
+	CONTROL Wait 1
+	IR Send CH0
+	CONTROL Wait 1
+	IR Send RECOTR
+------
++++
+Title:
+VCR_STOP
++++
+Actions:
+	IR Set ORION
+	IR Send STOP
+	CONTROL Wait 2
+	IR Send POWER
+------

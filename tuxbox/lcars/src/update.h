@@ -16,7 +16,7 @@
 /* zlib required.. */
 #include <zlib.h>
 #include <string>
-#include <strstream.h>
+#include <sstream>
 #include <linux/mtd/mtd.h>
 #include <curl/curl.h>
 #include "rc.h"

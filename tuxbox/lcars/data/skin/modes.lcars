@@ -1,0 +1,468 @@
+------
++++
+Title:
+Zap to start
++++
+Index:
+0
++++
+Init:
+	CONTROL Var Set SHOWHELP true
+	CONTROL Var Set NUMBERLASTCHANNELS 2
+	OSD direct SHOW proginfo 5
+	CHANNELS Zap Number 0
+	CHANNELS Zap Zap
+	SCAN Read Updates
+	CONTROL Var Set OLD_MODE 1
+	CONTROL Mode 1
+------
++++
+Title:
+Main Mode
++++
+Index:
+1
++++
+Actions:
+0:
+	OSD direct SHOW proginfo 5
+	CHANNELS Zap Last
+	CHANNELS Zap Zap
+	SCAN Read Updates
+UP:
+	OSD direct SHOW proginfo 5
+	CHANNELS Zap Up
+	CHANNELS Zap Zap
+	SCAN Read Updates
+DOWN:
+	OSD direct SHOW proginfo 5
+	CHANNELS Zap Down
+	CHANNELS Zap Zap
+	SCAN Read Updates
+RIGHT:
+	CHANNELS Zap Audio Next
+LEFT:
+	CHANNELS Zap Audio Previous
+OK:
+	? %PROGINFO_SHOWN=true OSD direct HIDE proginfo
+	?! OSD direct SHOW proginfo 5
+BLUE:
+	CONTROL Menu Mode 0
+DBOX:
+	HARDWARE Switch Vcr
+MUTE:
+	HARDWARE Switch Mute
+	? %IS_MUTED OSD direct COMMAND vol mute true
+	?! OSD direct COMMAND vol mute false
+VOLPLUS:
+	HARDWARE Set Vol Plus 5
+	OSD Set Vol %VOLUME
+	OSD direct SHOW vol
+	CONTROL Mode 11
+VOLMINUS:
+	HARDWARE Set Vol Minus 5
+	OSD Set Vol %VOLUME
+	OSD direct SHOW vol
+	CONTROL Mode 11
+GREEN:
+	? %IS_MULTIPERSPECTIVE CONTROL Mode 10
+	?! NOOP
+RED:
+	CONTROL Mode 4
+YELLOW:
+	CONTROL Mode 13
+HELP:
+	OSD direct CREATE schedule
+	EIT Dump Schedule
+	OSD direct SHOW schedule
+	CONTROL Mode 20
+STANDBY:
+	HARDWARE Shutdown
+1:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 1
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+2:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 2
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME	
+	OSD direct SHOW number
+	CONTROL Mode 21
+3:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 3
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+4:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 4
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+5:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 5
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+6:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 6
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+7:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 7
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+8:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 8
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+9:
+	OSD direct CREATE number
+	OSD direct COMMAND number add 9
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+	CONTROL Mode 21
+------
++++
+Title:
+Number Entry
++++
+Index:
+21
++++
+Actions:
+1:
+	OSD direct COMMAND number add 1
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+2:
+	OSD direct COMMAND number add 2
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+3:
+	OSD direct COMMAND number add 3
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+4:
+	OSD direct COMMAND number add 4
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+5:
+	OSD direct COMMAND number add 5
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+6:
+	OSD direct COMMAND number add 6
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+7:
+	OSD direct COMMAND number add 7
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+8:
+	OSD direct COMMAND number add 8
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+9:
+	OSD direct COMMAND number add 9
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+0:
+	OSD direct COMMAND number add 0
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+UP:
+	CONTROL Var Add NUMBERENTRY 1
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+DOWN:
+	CONTROL Var Sub NUMBERENTRY 1
+	CONTROL Var Value Channelname %NUMBERENTRY TMPCHANNELNAME
+	OSD direct COMMAND number text %TMPCHANNELNAME
+	OSD direct SHOW number
+OK:
+	OSD direct HIDE number
+	OSD direct SHOW proginfo 5
+	CHANNELS Zap Number %NUMBERENTRY
+	CHANNELS Zap Zap
+	SCAN Read Updates
+	CONTROL Mode 1
+HOME:
+	OSD direct HIDE number
+	CONTROL Mode 1
+------
++++
+Title:
+Scheduling
++++
+Index:
+20
++++
+Init:
+	OSD direct COMMAND schedule select
++++
+Actions:
+OK:
+	OSD direct HIDE schedule
+	CONTROL Mode 1
+UP:
+	OSD direct COMMAND schedule select prev
+DOWN:
+	OSD direct COMMAND schedule select next
+RIGHT:
+	OSD direct COMMAND schedule page next
+LEFT:
+	OSD direct COMMAND schedule page prev
+GREEN:
+	TIMER Set Schedule
+	TIMER Save
+STANDBY:
+	HARDWARE Shutdown
+------
++++
+Title:
+EPG Info Now
++++
+Index:
+13
++++
+Init:
+	OSD Set EPG EventName %NOWEVENTNAME
+	OSD Set EPG EventShortText %NOWSHORTTEXT
+	OSD Set EPG EventExtendedText %NOWEXTENDEDTEXT
+	OSD Set EPG Starttime %NOWSTARTTIME
+	OSD Set EPG Duration %NOWDURATION
+	OSD Set EPG ProgramName %SERVICENAME%
+	OSD direct SHOW epg
++++
+Actions:
+RIGHT:
+	CONTROL Mode 14
+YELLOW:
+	OSD direct HIDE epg
+	CONTROL Mode 1
+OK:
+	OSD direct HIDE epg
+	CONTROL Mode 1
+STANDBY:
+	HARDWARE Shutdown
+------
++++
+Title:
+EPG Info Next
++++
+Index:
+14
++++
+Init:
+	OSD Set EPG EventName %NEXTEVENTNAME
+	OSD Set EPG EventShortText %NEXTSHORTTEXT
+	OSD Set EPG EventExtendedText %NEXTEXTENDEDTEXT
+	OSD Set EPG Starttime %NEXTSTARTTIME
+	OSD Set EPG Duration %NEXTDURATION
+	OSD Set EPG ProgramName %SERVICENAME%
+	OSD direct SHOW epg
++++
+Actions:
+LEFT:
+	CONTROL Mode 13
+YELLOW:
+	OSD direct HIDE epg
+	CONTROL Mode 1
+OK:
+	OSD direct HIDE epg
+	CONTROL Mode 1
+STANDBY:
+	HARDWARE Shutdown
+------
++++
+Title:
+Perspective Init
++++
+Index:
+10
++++
+Init:
+	OSD direct COMMAND perspective name Select perspective 1 - %NUMBER_PERSPECTIVES
+	OSD direct SHOW perspective
+	CHANNELS Perspectives Parse
+	CONTROL Var Set OLD_MODE 2
+	CONTROL Mode 2
+------
++++
+Title:
+Perspective
++++
+Index:
+2
++++
+Actions:
+GREEN:
+	CHANNELS Zap Zap
+	CONTROL Mode 1
+BLUE:
+	CONTROL Menu Mode 0
+OK:
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+DBOX:
+	HARDWARE Switch Vcr
+1:
+	CHANNELS Perspectives Zap 0
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+2:
+	CHANNELS Perspectives Zap 1
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+3:
+	CHANNELS Perspectives Zap 2
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+4:
+	CHANNELS Perspectives Zap 3
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+5:
+	CHANNELS Perspectives Zap 4
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+6:
+	CHANNELS Perspectives Zap 5
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+7:
+	CHANNELS Perspectives Zap 6
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+8:
+	CHANNELS Perspectives Zap 7
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+9:
+	CHANNELS Perspectives Zap 8
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+UP:
+	CHANNELS Perspectives Zap Previous
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+DOWN:
+	CHANNELS Perspectives Zap Previous
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+UP:
+	CHANNELS Perspectives Zap Next
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+RIGHT:
+	CHANNELS Zap Audio Next
+LEFT:
+	CHANNELS Zap Audio Previous
+STANDBY:
+	HARDWARE Shutdown
+------
++++
+Title:
+Perspective Wait
++++
+Index:
+3
++++
+Init:
+	RC Wait Timed 3
+	OSD direct HIDE perspective
+	CONTROL Mode %OLD_MODE
+------
++++
+Title:
+Volume Wait
++++
+Index:
+11
++++
+Init:
+	RC Wait Timed 3
+	OSD direct HIDE vol
+	CONTROL Mode %OLD_MODE
+------
++++
+Title:
+Channellist
++++
+Index:
+4
++++
+Init:
+	OSD Channellist Dump
+	OSD Channellist Select Current
++++
+Actions:
+OK:
+	OSD direct HIDE list
+	OSD direct SHOW proginfo 5
+	OSD Channellist Get Selected SELECTED_CHANNEL
+	CHANNELS Zap Number %SELECTED_CHANNEL
+	CHANNELS Zap Zap
+	SCAN Read Updates
+	CONTROL Mode 1
+DOWN:
+	OSD Channellist Select Next
+UP:
+	OSD Channellist Select Previous
+RIGHT:
+	OSD Channellist Select NextPage
+LEFT:
+	OSD Channellist Select PreviousPage
+RED:
+	OSD direct HIDE list
+	CONTROL Mode 1
+HOME:
+	OSD direct HIDE list
+	CONTROL Mode 1
+STANDBY:
+	HARDWARE Shutdown
+------

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.h,v $
+Revision 1.4  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.3  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -30,6 +33,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "osd.h"
 #include "settings.h"
+#include "variables.h"
 
 #include <time.h>
 #include <string>
@@ -143,10 +147,12 @@ class eit
 	std::multimap<int, struct event> eventlist;
 	settings *setting;
 	osd *osd_obj;
+	variables *vars;
 
 	std::queue<std::string> command_queue;
 	
 	int lastSID;
+	
 	int audio_comp;
 
 	pthread_t eitThread;
@@ -158,7 +164,7 @@ class eit
 	std::multimap<struct sid, std::multimap<time_t, int>, ltstr> sid_eventid;
 
 public:	
-	eit(settings *s, osd *o);
+	eit(settings *s, osd *o, variables *v);
 	event getNow() { return now; }
 	event getNext() { return next; }
 	void receiveNow(int SID);
@@ -178,7 +184,7 @@ public:
 	void dumpSchedule(int TS, int ONID, int SID, osd *osd);
 	event getEvent(int eventid);
 
-	void eit::dumpSchedule(int SID, osd *osd);
+	void dumpSchedule(int SID, osd *osd);
 };
 
 #endif

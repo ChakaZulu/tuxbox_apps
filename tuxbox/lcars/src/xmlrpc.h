@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: xmlrpc.h,v $
+Revision 1.3  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.2  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -28,11 +31,11 @@ initial release
 #ifndef XMLRPC_H
 #define XMLRPC_H
 
-#include <iostream.h>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
-#include <strstream.h>
+#include <sstream>
 #include <fstream>
 #include <sstream>
 #include <stdarg.h>
@@ -97,7 +100,7 @@ public:
 	xmlrpc_array getArrayValue() { return array_value; }
 	xmlrpc_struct getStructValue() { return struct_value; }
 
-	void getXML(ostrstream *ostr);
+	void getXML(std::stringstream *ostr);
 	int parseXML(std::vector<struct command> *command_list, int *counter);
 };
 
@@ -111,7 +114,7 @@ public:
 	int paramCount() { return params.size(); }
 	xmlrpc_value* getParam(int number) { return params[number]; }
 
-	void getXML(ostrstream *ostr);
+	void getXML(std::stringstream *ostr);
 };
 
 class xmlrpc_fault
@@ -125,7 +128,7 @@ public:
 	void setFaultString(std::string name) { faultString = name; }
 	std::string getFaultString() { return faultString; }
 
-	void getXML(ostrstream *ostr);
+	void getXML(std::stringstream *ostr);
 };
 
 class xmlrpc_response

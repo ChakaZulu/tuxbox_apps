@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -36,9 +39,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 */
 #include "hardware.h"
 
-hardware::hardware(settings *s) 
+hardware::hardware(settings *s, variables *v) 
 {
 	setting = s;
+	vars = v;
 	vcr_on = false;
 	old_DD_state = true;
 	old_fblk = OUTPUT_RGB;
@@ -70,7 +74,7 @@ int hardware::getVCRStatus()
 	ioctl(fp, FP_IOCTL_GET_VCR, &val);
 
 	close(fp);
-	cout << "VCR-Val: " << val << endl;
+	std::cout << "VCR-Val: " << val << std::endl;
 	return val;
 }
 
@@ -90,7 +94,7 @@ int hardware::getARatio()
 
 bool hardware::switch_vcr()
 {
-	int i = 0, j = 0, nothing, fblk = 2;
+	int i = 0, j = 0, nothing, nothinga, fblk = 2;
 	
 	printf("Getbox: %d\n", setting->getBox());
 	if (!vcr_on)
@@ -107,16 +111,19 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW2,&nothing);
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
+			ioctl(avs,AVSIOSASW2,&nothinga);
 		}
 		else if (setting->getBox() == NOKIA) // Nokia
 		{
 			i = 3;
 			j = 2;
-			nothing = 7;
+			nothing = 1;
+			nothinga = 2;
 			ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW2,&nothing);
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
+			ioctl(avs,AVSIOSASW2,&nothinga);
 		}
 		else if (setting->getBox() == PHILIPS) // Philips
 		{
@@ -150,12 +157,13 @@ bool hardware::switch_vcr()
 		{
 			i = 5;
 			j = 1;
-			nothing = 7;
-
+			nothing = 1;
+			nothinga = 2;
 			//ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW2,&nothing);
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
+			ioctl(avs,AVSIOSASW2,&nothinga);
 		}
 		else if (setting->getBox() == PHILIPS)
 		{
@@ -183,9 +191,15 @@ void hardware::switch_mute()
 	int i;
 	
 	if (muted)
+	{
 		i = AVS_UNMUTE;
+		vars->setvalue("%IS_MUTED", "false");
+	}
 	else
+	{
 		i = AVS_MUTE;
+		vars->setvalue("%IS_MUTED", "true");
+	}
 	avs = open("/dev/dbox/avs0",O_RDWR);
 	ioctl(avs, AVSIOSMUTE, &i);
 	close(avs);
@@ -205,6 +219,7 @@ int hardware::vol_minus(int value)
 		i = 63;
 	ioctl(avs, AVSIOSVOL, &i);
 	close(avs);
+	vars->setvalue("%VOLUME", 63 - i);
 	return i;
 }
 
@@ -219,6 +234,7 @@ int hardware::vol_plus(int value)
 		i = 0;
 	ioctl(avs, AVSIOSVOL, &i);
 	close(avs);
+	vars->setvalue("%VOLUME", 63 - i);
 	return i;
 }
 

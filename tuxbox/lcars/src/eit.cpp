@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -76,11 +79,12 @@ void* eit::start_eitqueue( void * this_ptr )
 	}
 }
 
-eit::eit(settings *s, osd *o)
+eit::eit(settings *s, osd *o, variables *v)
 {
 	setting = s;
 	number_perspectives = 0;
 	osd_obj = o;
+	vars = v;
 }
 
 void eit::addCommand(std::string command)
@@ -205,7 +209,7 @@ void eit::receiveNow(int SID)
 			int start = 26;
 			int descriptors_length = ((buffer[13 + 11] & 0xf) << 8) | buffer[13 + 12];
 			int text_length = 0;
-			printf("Descriptoren-Länge: %x\n", ((buffer[13 + 11] & 0xf) << 8) | buffer[13 + 12]);
+			printf("Descriptoren-L„nge: %x\n", ((buffer[13 + 11] & 0xf) << 8) | buffer[13 + 12]);
 			while (start < 20 + descriptors_length)
 			{
 				printf("Type: %x\n", buffer[start]);
@@ -233,6 +237,7 @@ void eit::receiveNow(int SID)
 					tmp_event.linkage_descr[tmp_event.number_perspectives].TS = (buffer[start + 2] << 8) | buffer[start + 3];
 					tmp_event.linkage_descr[tmp_event.number_perspectives].ONID = (buffer[start + 4] << 8) | buffer[start + 5];
 					tmp_event.linkage_descr[tmp_event.number_perspectives].SID = (buffer[start + 6] << 8) | buffer[start + 7];
+					printf("TS: %x\nSID: %x\n", tmp_event.linkage_descr[tmp_event.number_perspectives].TS, tmp_event.linkage_descr[tmp_event.number_perspectives].SID);
 					
 					char name[100];
 					if (buffer[start + 8] != 0xb0)
@@ -339,6 +344,22 @@ void eit::receiveNow(int SID)
 	(*osd_obj).setNextTime(next.starttime);
 	(*osd_obj).setNextDescription(next.event_name);
 	(*osd_obj).setParentalRating(now.par_rating);
+	
+	
+	vars->setvalue("%NOWEVENTNAME", now.event_name);
+	vars->setvalue("%NOWSHORTTEXT", now.event_short_text);
+	vars->setvalue("%NOWEXTENDEDTEXT", now.event_extended_text);
+	//vars->setvalue("%NOWDESCRIPTION", now.event_extended_text);
+	vars->setvalue("%NOWSTARTTIME", now.starttime);
+	vars->setvalue("%NOWDURATION", now.duration);
+	
+	vars->setvalue("%NEXTEVENTNAME", next.event_name);
+	vars->setvalue("%NEXTSHORTTEXT", next.event_short_text);
+	vars->setvalue("%NEXTEXTENDEDTEXT", next.event_extended_text);
+	//vars->setvalue("%NEXTDESCRIPTION", now.event_extended_text);
+	vars->setvalue("%NEXTSTARTTIME", next.starttime);
+	vars->setvalue("%NEXTDURATION", next.duration);
+
 	bool found = false;
 	for (int i = 0; i < now.number_components; i++)
 	{
@@ -351,6 +372,18 @@ void eit::receiveNow(int SID)
 
 	if (!found)
 		(*osd_obj).setLanguage("");
+
+	if (now.number_perspectives > 1)
+	{
+		vars->setvalue("%NUMBER_PERSPECTIVES", now.number_perspectives);
+		vars->setvalue("%IS_MULTIPERSPECTIVE", "true");		
+		osd_obj->setPerspectiveAvailable(true);
+	}
+	else
+	{
+		vars->setvalue("%IS_MULTIPERSPECTIVE", "false");		
+		osd_obj->setPerspectiveAvailable(false);
+	}
 	
 
 	printf("endeit\n");
@@ -728,11 +761,11 @@ void eit::dumpSchedule(int SID, osd *osd)
 				{
 					event_header tmp_event_header;
 					memcpy (&tmp_event_header, &(buffer[sizeof(struct eit_header) + end_counter]), sizeof(struct event_header));
-					
+					int i = sizeof(struct eit_header) + end_counter;
 					time_t starttime = dvbtimeToLinuxTime(tmp_event_header.start_time_mjd, tmp_event_header.start_time_time) + ((*setting).getTimeOffset() * 60L);
 					tmp_event.starttime = starttime;
 					tmp_event.eventid = tmp_event_header.event_id;
-					tmp_event.duration = tmp_event_header.duration;
+					tmp_event.duration = (((buffer[i + 7] & 0xf0) >> 4) * 10 + (buffer[i + 7] & 0xf)) * 3600 + (((buffer[i + 8] & 0xf0) >> 4) * 10 + (buffer[i + 8] & 0xf)) * 60 + (((buffer[i + 9] & 0xf0) >> 4) * 10 + (buffer[i + 9] & 0xf));
 					tmp_event.running_status = tmp_event_header.running_status;
 
 					int ext_event_length = 0;

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.h,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -37,11 +40,14 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sstream>
 #include "fbClass.h"
 #include "settings.h"
+#include "variables.h"
 
 typedef std::vector<std::string> command_list;
 
 class osd
 {
+	variables *vars;
+	
 	struct list_entry
 	{
 		int index;
@@ -63,10 +69,10 @@ class osd
 	// ProgramInfo
 	std::string serviceName;
 	int serviceNumber;
-	bool redAvailable;
-	bool greenAvailable;
-	bool yellowAvailable;
-	bool blueAvailable;
+	bool channelsAvailable;
+	bool perspectiveAvailable;
+	bool epgAvailable;
+	bool menuAvailable;
 	time_t nowTime;
 	time_t nextTime;
 	std::string nowDescription;
@@ -150,7 +156,7 @@ public:
 	bool proginfo_shown;
 	time_t proginfo_hidetime;
 	int start_thread();
-	osd(settings &set, fbClass *fbclass);
+	osd(settings &set, fbClass *fbclass, variables *v);
 
 	void initPalette();
 
@@ -176,10 +182,10 @@ public:
 	void setServiceName(std::string name);
 	void setLanguage(std::string language_name);
 	void setServiceNumber(int number);
-	void setRedAvailable(bool available);
-	void setGreenAvailable(bool available);
-	void setYellowAvailable(bool available);
-	void setBlueAvailable(bool available);
+	void setPerspectiveAvailable(bool available);
+	void setChannelsAvailable(bool available);
+	void setEPGAvailable(bool available);
+	void setMenuAvailable(bool available);
 	void setTeletext(bool available);
 	void setNowTime(time_t starttime);
 	void setNowDescription(std::string description);
@@ -213,6 +219,7 @@ public:
 	void hideEPG();
 
 	void createNumberEntry();
+	void addNumberEntry(int setnumber);
 	void setNumberEntry(int setnumber);
 	void setNumberText(std::string text);
 	void showNumberEntry();

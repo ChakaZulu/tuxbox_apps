@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.cpp,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -41,7 +44,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "rc.h"
 #include <unistd.h>
 #include <fcntl.h>
-#include <iostream.h>
+#include <iostream>
 
 rc::rc(hardware *h, settings *s)
 {
@@ -108,7 +111,14 @@ rc::rc(hardware *h, settings *s)
 			RC2_LEFT
 		}
 	};
-	rc_codes = rcs;
+	//rc_codes = rcs;
+	for (int i = 0; i < NUMBER_RCS; i++)
+	{
+		for (int j = 0; j < 25; j++)
+		{
+			rc_codes[i][j] = rcs[i][j];
+		}
+	}
 }
 
 rc::~rc()
@@ -116,7 +126,7 @@ rc::~rc()
 	close(fp);
 }
 
-int rc::start_thread(bool withoutkeyboard = false)
+int rc::start_thread(bool withoutkeyboard)
 {
 	
 	int status;
@@ -150,8 +160,117 @@ void* rc::start_rcqueue( void * this_ptr )
 		pthread_mutex_lock( &r->blockingmutex );
 		
 		r->key = r->read_from_rc2();
-		cout << "Key: " << r->key << endl;
+		std::cout << "Key: " << r->key << std::endl;
 	}
+}
+
+int rc::parseKey(std::string key)
+{
+	if (key == "1")
+	{
+		return RC1_1;
+	}
+	else if (key == "2")
+	{
+		return RC1_2;
+	}
+	else if (key == "3")
+	{
+		return RC1_3;
+	}
+	else if (key == "4")
+	{
+		return RC1_4;
+	}
+	else if (key == "5")
+	{
+		return RC1_5;
+	}
+	else if (key == "6")
+	{
+		return RC1_6;
+	}
+	else if (key == "7")
+	{
+		return RC1_7;
+	}
+	else if (key == "8")
+	{
+		return RC1_8;
+	}
+	else if (key == "9")
+	{
+		return RC1_9;
+	}
+	else if (key == "0")
+	{
+		return RC1_0;
+	}
+	else if (key == "STANDBY")
+	{
+		return RC1_STANDBY;
+	}
+	else if (key == "HOME")
+	{
+		return RC1_HOME;
+	}
+	else if (key == "DBOX")
+	{
+		return RC1_DBOX;
+	}
+	else if (key == "RED")
+	{
+		return RC1_RED;
+	}
+	else if (key == "GREEN")
+	{
+		return RC1_GREEN;
+	}
+	else if (key == "YELLOW")
+	{
+		return RC1_YELLOW;
+	}
+	else if (key == "BLUE")
+	{
+		return RC1_BLUE;
+	}
+	else if (key == "OK")
+	{
+		return RC1_OK;
+	}
+	else if (key == "VOLPLUS")
+	{
+		return RC1_VOLPLUS;
+	}
+	else if (key == "VOLMINUS")
+	{
+		return RC1_VOLMINUS;
+	}
+	else if (key == "MUTE")
+	{
+		return RC1_MUTE;
+	}
+	else if (key == "HELP")
+	{
+		return RC1_HELP;
+	}
+	else if (key == "UP")
+	{
+		return RC1_UP;
+	}
+	else if (key == "DOWN")
+	{
+		return RC1_DOWN;
+	}
+	else if (key == "RIGHT")
+	{
+		return RC1_RIGHT;
+	}
+	else if (key == "LEFT")
+	{
+		return RC1_LEFT;
+	}
+	return -1;
 }
 
 void* rc::start_keyboardqueue( void * this_ptr )
@@ -167,7 +286,7 @@ void* rc::start_keyboardqueue( void * this_ptr )
 	{
 		char character;
 		
-		cin.get(character);
+		std::cin.get(character);
 		
 		if (character > 47 && character < 58)
 			r->cheat_command(character - 48);
@@ -217,7 +336,7 @@ void rc::cheat_command(unsigned short cmd)
 {
 	key = cmd;
 	last_read = cmd;
-	cout << "Command: " << cmd << endl;
+	std::cout << "Command: " << cmd << std::endl;
 	pthread_mutex_unlock( &blockingmutex );
 	usleep(100);
 	pthread_mutex_lock( &blockingmutex );
@@ -271,7 +390,7 @@ unsigned short rc::read_from_rc()
 		pthread_mutex_lock( &blockingmutex );
 		pthread_mutex_unlock( &blockingmutex );
 	}
-	cout << "KEY: " << key << endl;
+	std::cout << "KEY: " << key << std::endl;
 	int returnkey = key;
 	key = -1;
 	return returnkey;

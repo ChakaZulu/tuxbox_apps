@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tuner.h,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -29,7 +32,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #ifndef TUNER_H
 #define TUNER_H
 
-#include <iostream.h>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -50,9 +53,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 class tuner
 {
-	settings setting;
+	settings *setting;
 public:
-	tuner(settings &s);
+	tuner(settings *s);
 	CodeRate getFEC(int fec);
 	int tune(int frequ, int symbol, int polarization = -1, int fec = 0, int diseqc = 0);
 };

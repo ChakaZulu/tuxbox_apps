@@ -1,8 +1,9 @@
 #include "fbClass.h"
 
-fbClass::fbClass(int x = 720, int y = 576, int bpp = 8)
+fbClass::fbClass(variables *v, int x, int y, int bpp)
 {
 	int fd;
+	vars = v;
 
 	// In den Grafikmode gehen wenn die Konsole auf dem fb ist
 	if ((fd = open("/dev/console", O_RDWR)) < 0)
@@ -46,7 +47,7 @@ fbClass::fbClass(int x = 720, int y = 576, int bpp = 8)
 
 	for (int i = 0; i < 256; i++)
 	{
-		fade_down[i] = (int) (((float)i / (float)255) * 9);
+		fade_down[i] = (int) (((float)i / (float)255) * (COLORFADE - 1));
 	}
 
 }
@@ -56,19 +57,29 @@ fbClass::~fbClass()
 	close (fbfd);
 }
 
-void fbClass::addVariable(std::string name, std::string content)
+void fbClass::test()
 {
-	if (variables.count(name) > 0)
-		variables.erase(variables.find(name));
-	variables.insert(std::pair<std::string, std::string>(name, content));
+	/*png_byte *header = malloc(sizeof(png_byte) * 100);
+	int number = 8;
+	bool is_png;
+	
+	FILE *fp = fopen(CONFIGDIR "/lcars/skin/skin.png", "rb");
+	if (!fp)
+	{
+		perror("Open skin.png");
+		return;
+	}
+	fread((void*)header, 1, number, fp);
+	//is_png = !png_sig_cmp(header, 0, number);
+	if (!is_png)
+	{
+		perror("Isn't PNG");
+		return;
+	}
+*/
 }
 
-void fbClass::addVariable(std::string name, int number)
-{
-	char text[100];
-	sprintf(text, "%d", number);
-	addVariable(name, text);
-}
+
 
 void fbClass::runCommand(std::string command_string)
 {
@@ -77,7 +88,7 @@ void fbClass::runCommand(std::string command_string)
 	std::getline(iss, command, ' ');
 	int values_int[10];
 	std::string value;
-	//printf("Command: %s\n", command.c_str());
+	printf("Command (fb): %s\n", command_string.c_str());
 
 	if (command == "FILLBOX")
 	{
@@ -87,7 +98,7 @@ void fbClass::runCommand(std::string command_string)
 			values_int[i++] = atoi(value.c_str());
 		}
 		if (i < 4)
-			cout << "Syntax error: Too few arguments to FILLBOX" << endl;
+			std::cout << "Syntax error: Too few arguments to FILLBOX" << std::endl;
 		else
 		{
 			fillBox(values_int[0], values_int[1], values_int[2], values_int[3], values_int[4]);
@@ -102,7 +113,7 @@ void fbClass::runCommand(std::string command_string)
 		}
 
 		if (i < 7)
-			cout << "Syntax error: Too few arguments to SETFADE" << endl;
+			std::cout << "Syntax error: Too few arguments to SETFADE" << std::endl;
 		else
 		{
 			setFade(values_int[0], values_int[1], values_int[2], values_int[3], values_int[4], values_int[5], values_int[6]);
@@ -119,8 +130,9 @@ void fbClass::runCommand(std::string command_string)
 		float size;
 		sscanf(value.c_str(), "%f", &size);
 		std::getline(iss, value, '\n');
-		if (variables.count(value) > 0)
-			value = (*variables.find(value)).second;
+
+		if (vars->isavailable(value))
+			value = vars->getvalue(value);
 		if (size != factor)
 			setTextSize(size);
 
@@ -136,6 +148,7 @@ void fbClass::runCommand(std::string command_string)
 		std::getline(iss, value, ' ');
 		float val;
 		sscanf(value.c_str(), "%f", &val);
+		std::cout << "Value: " << val << std::endl;
 
 		setTextSize(val);
 	}
@@ -145,7 +158,7 @@ void fbClass::setMode(int x, int y, int bpp)
 {
 	int screensize;
 
-	cout << "Changing FB-Mode to x: " << x << " y: " << y << " bpp: " << bpp << endl;
+	std::cout << "Changing FB-Mode to x: " << x << " y: " << y << " bpp: " << bpp << std::endl;
 
 	memcpy(&vinfo, &old_vinfo, sizeof(struct fb_var_screeninfo));
 	memcpy(&finfo, &old_finfo, sizeof(struct fb_fix_screeninfo));
@@ -220,16 +233,16 @@ void fbClass::setPalette(int color, int red, int green, int blue, int transp)
 
 void fbClass::setFade(int color, int r_start, int g_start, int b_start, int r_stop, int g_stop, int b_stop)
 {
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < COLORFADE; i++)
 	{
 		//float percent = (i * 24) / (float) 255;
-		float percent = (i * 24) / (float) 255;
+		float percent = (i * (255 / COLORFADE)) / (float) 255;
 
 		int r = r_start + (int) ((r_stop - r_start) * percent);
 		int g = g_start + (int) ((g_stop - g_start) * percent);
 		int b = b_start + (int) ((b_stop - b_start) * percent);
 		
-		int act_color = color * 10 + i;
+		int act_color = color * COLORFADE + i;
 		setPalette(act_color, r, g, b, 0);
 		fades[color][i] = act_color;
 	}
@@ -414,7 +427,7 @@ void fbClass::draw_bitmap(font_cache font, int x, int y, int color)
 	}
 }
 
-void fbClass::putText(int xpos, int ypos, int color, std::string text, int max_size = -1, int alignment = 0)
+void fbClass::putText(int xpos, int ypos, int color, std::string text, int max_size, int alignment)
 {
 	char c_text[500];
 	strcpy(c_text, text.c_str());
@@ -422,7 +435,7 @@ void fbClass::putText(int xpos, int ypos, int color, std::string text, int max_s
 	
 }
 
-void fbClass::putText(int xpos, int ypos, int color, int i, int max_size = -1, int alignment = 0)
+void fbClass::putText(int xpos, int ypos, int color, int i, int max_size, int alignment)
 {
 	char c_text[500];
 	sprintf(c_text, "%d", i);
@@ -432,7 +445,7 @@ void fbClass::putText(int xpos, int ypos, int color, int i, int max_size = -1, i
 
 
 // alignment: 0: left, 1: right
-void fbClass::putText(int xpos, int ypos, int color, char text[500], int max_size = -1, int alignment = 0)
+void fbClass::putText(int xpos, int ypos, int color, char text[500], int max_size, int alignment)
 {
 	int error;
 

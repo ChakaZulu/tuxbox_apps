@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.5  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -348,7 +351,7 @@ void *network::startlistening(void *object)
 					else if (path[2] == "rc")
 					{
 						write(inbound_connection, headerok.c_str(), headerok.length());
-						ostrstream ostr;
+						std::stringstream ostr;
 						ostr << "<map name=\"rc\">";
 						ostr << "<area target=\"command\" alt=\"1\" shape=\"circle\" coords=\"103,67,8\" href=\"1\">";
 						ostr << "<area target=\"command\" alt=\"2\" shape=\"CIRCLE\" coords=\"123,64,8\" href=\"2\">";
@@ -378,7 +381,7 @@ void *network::startlistening(void *object)
 						ostr << "<area target=\"command\" alt=\"help\" shape=\"CIRCLE\" coords=\"146,329,11\" href=\"help\">";
 						ostr << "</map>";
 						ostr << "<img src=\"/datadir/rc.jpg\" width=\"200\" height=\"500\"border=\"0\" usemap=\"#rc\">";
-						ostr << ends;
+						ostr << std::ends;
 						n->writetext(ostr.str());
 					}
 					else if (path[2] == "1")
@@ -528,15 +531,15 @@ void *network::startlistening(void *object)
 			{
 				std::string request(buffer);
 				std::string xml = request.substr(request.find("\r\n\r\n"));
-				cout << "Parsing\n" << endl;
+				std::cout << "Parsing\n" << std::endl;
 				n->xmlrpc_obj.setInput(xml);
 				n->xmlrpc_obj.parse();
-				cout << "End Parsing\n" << endl;
+				std::cout << "End Parsing\n" << std::endl;
 				xml = n->xmlrpc_obj.getOutput();
 				
-				//cout << xml << endl;
-				cout << "Making HTTP\n" << endl;
-				ostrstream ostr;
+				//std::cout << xml << std::endl;
+				std::cout << "Making HTTP\n" << std::endl;
+				std::stringstream ostr;
 				ostr.clear();
 	
 				ostr << "HTTP/1.1 200 OK\r\n";
@@ -545,11 +548,11 @@ void *network::startlistening(void *object)
 				ostr << "Content-Type: text/xml\r\n";
 				ostr << "Date: Fri, 17 Jul 1998 19:55:08 GMT\r\n";
 				ostr << "Server: LCARS Webserver\r\n\r\n";
-				ostr << xml << ends;
+				ostr << xml << std::ends;
 	
 				std::string send = ostr.str();
-				cout << "Sending now XML\n" << endl;
-				//cout << send << endl;
+				std::cout << "Sending now XML\n" << std::endl;
+				//std::cout << send << std::endl;
 				write(inbound_connection, send.c_str(), send.length());
 			}
 		}

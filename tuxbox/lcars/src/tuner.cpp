@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.11  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.10  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -50,8 +53,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "tuner.h"
 
-tuner::tuner(settings &s) : setting(s)
+tuner::tuner(settings *s)
 {
+	setting = s;
 }
 
 CodeRate tuner::getFEC(int fec)
@@ -81,7 +85,7 @@ CodeRate tuner::getFEC(int fec)
 // -- New Tuning API
 // -- 2001-12-16 rasc
 // polarization = 0 -> H, polarization = 1 -> V
-int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = 0, int dis = 0)
+int tuner::tune(int frequ, int symbol, int polarization, int fec, int dis)
 {
 	int device;
 	int frontend;
@@ -91,7 +95,7 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = 0, int d
 	int i, status;
 	long state1,state2;
 
-	if (setting.boxIsSat())
+	if (setting->boxIsSat())
 	{
 
 // $$$ rasc
@@ -157,7 +161,7 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = 0, int d
 		close(device);
 	}
 
-	if (setting.boxIsCable())
+	if (setting->boxIsCable())
 	{
 		frontp.Frequency = frequ * 100;
 		frontp.u.qam.SymbolRate = symbol * 1000;
@@ -168,8 +172,18 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = 0, int d
 
 	// -- Spektrum Inversion
 	// -- should be configurable, fixed for now (rasc)
-	frontp.Inversion = INVERSION_OFF;
-
+	if (setting->getInversion() == INVERSION_ON)
+	{
+		frontp.Inversion = INVERSION_ON;
+	}
+	else if (setting->getInversion() == INVERSION_OFF)
+	{
+		frontp.Inversion = INVERSION_OFF;
+	}
+	else if (setting->getInversion() == INVERSION_AUTO)
+	{
+		frontp.Inversion = INVERSION_AUTO;
+	}
 	if ((frontend = open("/dev/ost/frontend0", O_RDWR)) < 0)
 	{
 		perror("OPEN FRONTEND DEVICE");

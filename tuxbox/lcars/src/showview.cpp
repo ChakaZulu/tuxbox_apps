@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: showview.cpp,v $
+Revision 1.4  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -77,7 +80,7 @@ showview::showview()
 	acSender[41] = "FAB [41]";
 	acSender[42] = "[42]";
 	acSender[43] = "[43]";
-	acSender[44] = "tv.M¸nchen [44]";
+	acSender[44] = "tv.MÅnchen [44]";
 	acSender[45] = "[45]";
 	acSender[46] = "[46]";
 	acSender[47] = "[47]";
@@ -124,8 +127,8 @@ showview::showview()
 	acSender[88] = "NL 1 [88]";
 	acSender[89] = "NL 2 [89]";
 	acSender[90] = "NL 3 [90]";
-	acSender[91] = "D‰nemark [91]";
-	acSender[92] = "D‰n. TV 2 [92]";
+	acSender[91] = "DÑnemark [91]";
+	acSender[92] = "DÑn. TV 2 [92]";
 	acSender[93] = "TF1 [93]";
 	acSender[94] = "France 2 [94]";
 	acSender[95] = "France 3 [95]";
@@ -1753,7 +1756,7 @@ int showview::getTimeIndex(time_t begin_time, int duration_start)
 	printf("Startzeit: %d\n", starttime);
 	char acttime[100];
 	strftime(acttime, sizeof acttime, "%H:%M %d.%m", tm_time);
-	printf("Showviecode f¸r %s Dauer %d\n", acttime, duration);
+	printf("Showviecode fÅr %s Dauer %d\n", acttime, duration);
 	for (int durstepper = 0; durstepper < 20 && index == -1; durstepper++)
 	{
 		for (int stepper = 0; stepper < 80 && index == -1; stepper++)
@@ -1762,7 +1765,7 @@ int showview::getTimeIndex(time_t begin_time, int duration_start)
 			printf("stepper: %d\n", stepper);
 			printf("Minuten: %d\n", (*tm_time).tm_min);
 			strftime(acttime, sizeof acttime, "%H:%M %d.%m", tm_time);
-			printf("Showviecode f¸r %s Dauer %d\n", acttime, duration);
+			printf("Showviecode fÅr %s Dauer %d\n", acttime, duration);
 			for (int i = 0; i < 1024; i++)
 			{
 				if (anStart[i] == starttime && anLength[i] == duration)

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.6  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.5  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -135,7 +138,7 @@ settings::settings(cam *c)
 	loadSettings();
 }
 
-int settings::getEMMpid(int TS = -1)
+int settings::getEMMpid(int TS)
 {
 	if (EMM < 2 || oldTS != TS || TS == -1)
 	{
@@ -221,10 +224,10 @@ int settings::getTransparentColor()
 
 void settings::setIP(char n1, char n2, char n3, char n4)
 {
-	ostrstream ostr;
-	ostr << "ifconfig eth0 " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << " &" << ends; 
+	std::stringstream ostr;
+	ostr << "ifconfig eth0 " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << " &" << std::ends; 
 	std::string command = ostr.str();
-	cout << command << endl;
+	std::cout << command << std::endl;
 	
 	setting.ip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
 
@@ -269,10 +272,10 @@ char settings::getIP(char number)
 
 void settings::setgwIP(char n1, char n2, char n3, char n4)
 {
-	ostrstream ostr;
-	ostr << "route add default gw " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << ends; 
+	std::stringstream ostr;
+	ostr << "route add default gw " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << std::ends; 
 	std::string command = ostr.str();
-	cout << command << endl;
+	std::cout << command << std::endl;
 	system(command.c_str());
 
 	setting.gwip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
@@ -285,10 +288,10 @@ char settings::getgwIP(char number)
 
 void settings::setdnsIP(char n1, char n2, char n3, char n4)
 {
-	ostrstream ostr;
-	ostr << "echo \"nameserver " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << "\" > /etc/resolv.conf" << ends; 
+	std::stringstream ostr;
+	ostr << "echo \"nameserver " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << "\" > /etc/resolv.conf" << std::ends; 
 	std::string command = ostr.str();
-	cout << command << endl;
+	std::cout << command << std::endl;
 	system(command.c_str());
 
 	setting.dnsip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
@@ -311,39 +314,40 @@ char settings::getserverIP(char number)
 
 void settings::saveSettings()
 {
-	ostrstream ostr;
-	ostr << "TimeOffset=" << setting.timeoffset << endl;
-	ostr << "BoxIP=" << (int)getIP(0) << "." << (int)getIP(1) << "." << (int)getIP(2) << "." << (int)getIP(3) << endl;
-	ostr << "GatewayIP=" << (int)getgwIP(0) << "." << (int)getgwIP(1) << "." << (int)getgwIP(2) << "." << (int)getgwIP(3) << endl;
-	ostr << "DNSIP=" << (int)getdnsIP(0) << "." << (int)getdnsIP(1) << "." << (int)getdnsIP(2) << "." << (int)getdnsIP(3) << endl;
+	std::stringstream ostr;
+	ostr << "TimeOffset=" << setting.timeoffset << std::endl;
+	ostr << "BoxIP=" << (int)getIP(0) << "." << (int)getIP(1) << "." << (int)getIP(2) << "." << (int)getIP(3) << std::endl;
+	ostr << "GatewayIP=" << (int)getgwIP(0) << "." << (int)getgwIP(1) << "." << (int)getgwIP(2) << "." << (int)getgwIP(3) << std::endl;
+	ostr << "DNSIP=" << (int)getdnsIP(0) << "." << (int)getdnsIP(1) << "." << (int)getdnsIP(2) << "." << (int)getdnsIP(3) << std::endl;
 	if (setting.serverip != 0)
-		ostr << "ServerIP=" << (int)getserverIP(0) << "." << (int)getserverIP(1) << "." << (int)getserverIP(2) << "." << (int)getserverIP(3) << endl;
+		ostr << "ServerIP=" << (int)getserverIP(0) << "." << (int)getserverIP(1) << "." << (int)getserverIP(2) << "." << (int)getserverIP(3) << std::endl;
 
 	ostr << "SupportOldRC=";
 	if (setting.supportOldRc)
-		ostr << "true" << endl;
+		ostr << "true" << std::endl;
 	else
-		ostr << "false" << endl;
+		ostr << "false" << std::endl;
 
 	ostr << "RCRepeat=";
 	if (setting.rcRepeat)
-		ostr << "true" << endl;
+		ostr << "true" << std::endl;
 	else
-		ostr << "false" << endl;
+		ostr << "false" << std::endl;
 
 	ostr << "SwitchVCR=";
 	if (setting.switch_vcr)
-		ostr << "true" << endl;
+		ostr << "true" << std::endl;
 	else
-		ostr << "false" << endl;
+		ostr << "false" << std::endl;
 
-	ostr << "ProxyServer=" << setting.proxy_server << endl;
-	ostr << "ProxyPort=" << setting.proxy_port << endl;
+	ostr << "ProxyServer=" << setting.proxy_server << std::endl;
+	ostr << "ProxyPort=" << setting.proxy_port << std::endl;
 
-	ostr << "OutputFormat=" << setting.output_format << endl;
-	ostr << "VideoFormat=" << setting.video_format << endl;
+	ostr << "OutputFormat=" << setting.output_format << std::endl;
+	ostr << "VideoFormat=" << setting.video_format << std::endl;
+	ostr << "Inversion=" << setting.inversion << std::endl;
 
-	ostr << ends;
+	ostr << std::ends;
 	std::string configfile = ostr.str();
 	int fd = open(CONFIGDIR "/lcars/lcars.conf", O_WRONLY|O_TRUNC|O_CREAT, 0666);
 	write(fd, configfile.c_str(), configfile.length());
@@ -385,7 +389,7 @@ void settings::loadSettings()
 			}
 			if (ipcount != 4)
 			{
-				cout << "Error in Config-File on " << cmd << endl;
+				std::cout << "Error in Config-File on " << cmd << std::endl;
 				continue;
 			}
 			else
@@ -423,7 +427,7 @@ void settings::loadSettings()
 			else if (parm == "false")
 				setting.supportOldRc = false;
 			else
-				cout << "Error in Config-File on " << cmd << endl;
+				std::cout << "Error in Config-File on " << cmd << std::endl;
 		}
 		else if (cmd == "RCRepeat")
 		{
@@ -432,7 +436,7 @@ void settings::loadSettings()
 			else if (parm == "false")
 				setting.rcRepeat = false;
 			else
-				cout << "Error in Config-File on " << cmd << endl;
+				std::cout << "Error in Config-File on " << cmd << std::endl;
 		}
 		else if (cmd == "SwitchVCR")
 		{
@@ -441,11 +445,15 @@ void settings::loadSettings()
 			else if (parm == "false")
 				setting.switch_vcr = false;
 			else
-				cout << "Error in Config-File on " << cmd << endl;
+				std::cout << "Error in Config-File on " << cmd << std::endl;
 		}
 		else if (cmd == "ProxyServer")
 		{
 			setProxyServer(parm);
+		}
+		else if (cmd == "Inversion")
+		{
+			setInversion(atoi(parm.c_str()));
 		}
 		else if (cmd == "ProxyPort")
 		{
@@ -461,7 +469,7 @@ void settings::loadSettings()
 		}
 		else
 		{
-			cout << "Error in Config-File on " << cmd << endl;
+			std::cout << "Error in Config-File on " << cmd << std::endl;
 		}
 	}
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: nit.cpp,v $
+Revision 1.4  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -30,7 +33,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <memory.h>
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 
 #include <ost/dmx.h>
 
@@ -38,7 +41,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #define BSIZE 10000
 
-int nit::getTransportStreams(channels *channels, int diseqc = 1)
+int nit::getTransportStreams(channels *channels, int diseqc)
 {
 	
 	long fd, r;

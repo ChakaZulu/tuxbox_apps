@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.6  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.5  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -92,8 +95,8 @@ void plugins::addParm(std::string cmd, std::string value)
 
 void plugins::addParm(std::string cmd, int value)
 {
-	ostrstream ostr;
-	ostr << value << ends;
+	std::stringstream ostr;
+	ostr << value << std::ends;
 	addParm(cmd, ostr.str());
 }
 
@@ -227,7 +230,7 @@ void plugins::parseCfg(plugin *plugin_data)
 
 PluginParam* plugins::makeParam(std::string id, PluginParam *next)
 {
-	cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
+	std::cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << std::endl;
 	
 	PluginParam *startparam = new PluginParam;
 	startparam->next = next;
@@ -236,7 +239,7 @@ PluginParam* plugins::makeParam(std::string id, PluginParam *next)
 	strcpy(startparam->id, id.c_str());
 	strcpy(startparam->val, params.find(id)->second.c_str());
 	
-	cout << "Startparam: " << (int) startparam << endl;
+	std::cout << "Startparam: " << (int) startparam << std::endl;
 	return startparam;
 }
 
@@ -261,28 +264,28 @@ void plugins::startPlugin(int number)
 
 	if (plugin_list[number].fb)
 	{
-		cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<endl;
+		std::cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<std::endl;
 		startparam = makeParam(P_ID_FBUFFER, startparam);
-		cout << "New Startparam: " << startparam << endl;
-		cout << "New Tmpparam: " << tmpparam << endl;
+		std::cout << "New Startparam: " << startparam << std::endl;
+		std::cout << "New Tmpparam: " << tmpparam << std::endl;
 
 
 	}
 	if (plugin_list[number].rc)
 	{
-		cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
+		std::cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << std::endl;
 
 		startparam = makeParam(P_ID_RCINPUT, startparam);
 	}
 	if (plugin_list[number].lcd)
 	{
-		cout << "With LCD " << endl;
+		std::cout << "With LCD " << std::endl;
 
 		startparam = makeParam(P_ID_LCD, startparam);
 	}
 	if (plugin_list[number].vtxtpid)
 	{
-		cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
+		std::cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << std::endl;
 
 		startparam = makeParam(P_ID_VTXTPID, startparam);
 	}
@@ -294,13 +297,13 @@ void plugins::startPlugin(int number)
 		printf("%d\n", par->next);
 	}
 
-	cout << "Mark-2" << endl;
+	std::cout << "Mark-2" << std::endl;
 
 	std::string pluginname = plugin_list[number].filename;
 
 	strcpy(depstring, plugin_list[number].depend.c_str());
 
-	cout << "Mark-1" << endl;
+	std::cout << "Mark-1" << std::endl;
 	
 	argc=0;
 	if ( depstring[0] )
@@ -320,7 +323,7 @@ void plugins::startPlugin(int number)
 				break;
 		}
 	}
-	cout << "Mark0" << endl;
+	std::cout << "Mark0" << std::endl;
 	for( i=0; i<argc; i++ )
 	{
 		std::string libname = argv[i];
@@ -334,7 +337,7 @@ void plugins::startPlugin(int number)
 			break;
 		}
 	}
-	cout << "Mark1" << endl;
+	std::cout << "Mark1" << std::endl;
 	while ( i == argc )		// alles geladen
 	{
 		handle = dlopen ( plugin_list[number].sofile.c_str(), RTLD_NOW);

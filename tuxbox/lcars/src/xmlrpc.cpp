@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: xmlrpc.cpp,v $
+Revision 1.3  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.2  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -74,56 +77,56 @@ void xmlrpc_value::setValue(int t, void* value)
 }
 
 // Einfache In-Order Traversierung (jedenfalls ne Abwandlung davon ;)
-void xmlrpc_value::getXML(ostrstream *ostr)
+void xmlrpc_value::getXML(std::stringstream *ostr)
 {
-	cout << "Value getXML: " << type << endl;
+	std::cout << "Value getXML: " << type << std::endl;
 
-	*ostr << "<value>" << endl;
-	cout << "MARKME" << endl;
+	*ostr << "<value>" << std::endl;
+	std::cout << "MARKME" << std::endl;
 	switch(type)
 	{
 	case INT:
-		cout << "Int" << endl;
-		*ostr << "<i4>" << int_value << "</i4>" << endl;
+		std::cout << "Int" << std::endl;
+		*ostr << "<i4>" << int_value << "</i4>" << std::endl;
 		break;
 	case BOOLEAN:
-		cout << "Boolean" << endl;
-		*ostr << "<boolean>" << (boolean_value?1:0) << "</boolean>" << endl;
+		std::cout << "Boolean" << std::endl;
+		*ostr << "<boolean>" << (boolean_value?1:0) << "</boolean>" << std::endl;
 		break;
 	case DOUBLE:
-		cout << "Double" << endl;
-		*ostr << "<double>" << double_value << "</double>" << endl;
+		std::cout << "Double" << std::endl;
+		*ostr << "<double>" << double_value << "</double>" << std::endl;
 		break;
 	case STRING:
-		cout << "String" << endl;
-		*ostr << "<string>" << string_value << "</string>" << endl;
+		std::cout << "String" << std::endl;
+		*ostr << "<string>" << string_value << "</string>" << std::endl;
 		break;
 	case DATETIME:
-		cout << "Datetime" << endl;
-		*ostr << "<dateTime.iso8601>" << date_to_ISO8601(datetime_value) << "</dateTime.iso8601>" << endl;
+		std::cout << "Datetime" << std::endl;
+		*ostr << "<dateTime.iso8601>" << date_to_ISO8601(datetime_value) << "</dateTime.iso8601>" << std::endl;
 	case ARRAY:
-		cout << "Array" << endl;
-		*ostr << "<array><data>" << endl;
+		std::cout << "Array" << std::endl;
+		*ostr << "<array><data>" << std::endl;
 		for (int i = 0; i < array_value.size(); i++)
 		{
 			array_value[i]->getXML(ostr);
 		}
-		*ostr << "</data></array>" << endl;
+		*ostr << "</data></array>" << std::endl;
 		break;
 	case STRUCT:
-		cout << "Struct" << endl;
+		std::cout << "Struct" << std::endl;
 		sleep(3);
-		*ostr << "<struct>" << endl;
+		*ostr << "<struct>" << std::endl;
 		for (xmlrpc_struct::iterator it = struct_value.begin(); it != struct_value.end(); ++it)
 		{
-			*ostr << "<member>" << endl << "<name>" << (*it).first << "</name>" << endl;
+			*ostr << "<member>" << std::endl << "<name>" << (*it).first << "</name>" << std::endl;
 			(*it).second->getXML(ostr);
-			*ostr << "</member>" << endl;
+			*ostr << "</member>" << std::endl;
 		}
-		*ostr << "</struct>" << endl;
+		*ostr << "</struct>" << std::endl;
 		break;
 	}
-	*ostr << "</value>" << endl;
+	*ostr << "</value>" << std::endl;
 	//return ostr.str();
 }
 
@@ -216,11 +219,11 @@ std::string xmlrpc_value::date_to_ISO8601 (time_t value)
 
 int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *counter)
 {
-	//cout << "Parse XML " << ((*command_list)[*counter].cmd) << " - " << counter << " - " << (*counter) << endl;
+	//std::cout << "Parse XML " << ((*command_list)[*counter].cmd) << " - " << counter << " - " << (*counter) << std::endl;
 	
 	if ((*command_list)[*counter].cmd == "value")
 	{
-		//cout << "value" << endl;
+		//std::cout << "value" << std::endl;
 		(*counter)++;
 
 		if ((*command_list)[*counter].cmd == "int" || (*command_list)[*counter].cmd == "i4")
@@ -228,11 +231,11 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 			(*counter)++;
 			type = INT;
 			int_value = atoi((*command_list)[*counter].parm.c_str());
-			//cout << "Int-Value: " << int_value << endl;
+			//std::cout << "Int-Value: " << int_value << std::endl;
 
 			if ((*command_list)[*counter].cmd != "/int" && (*command_list)[*counter].cmd != "/i4")
 			{
-				cout << "</int> or </i4> missing" << endl;
+				std::cout << "</int> or </i4> missing" << std::endl;
 				return -1;
 			}
 		}
@@ -241,11 +244,11 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 			(*counter)++;
 			type = DOUBLE;
 			double_value = atof((*command_list)[*counter].parm.c_str());
-			//cout << "Double-Value: " << double_value << endl;
+			//std::cout << "Double-Value: " << double_value << std::endl;
 
 			if ((*command_list)[*counter].cmd != "/double")
 			{
-				cout << "</double> missing" << endl;
+				std::cout << "</double> missing" << std::endl;
 				return -1;
 			}
 		}
@@ -254,11 +257,11 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 			(*counter)++;
 			type = STRING;
 			string_value = (*command_list)[*counter].parm.c_str();
-			//cout << "String-Value: " << string_value << endl;
+			//std::cout << "String-Value: " << string_value << std::endl;
 
 			if ((*command_list)[*counter].cmd != "/string")
 			{
-				cout << "</string> missing" << endl;
+				std::cout << "</string> missing" << std::endl;
 				return -1;
 			}
 		}
@@ -272,15 +275,15 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 				boolean_value = true;
 			else
 			{
-				cout << "Wrong Boolean value: " << (*command_list)[*counter].parm << endl;
+				std::cout << "Wrong Boolean value: " << (*command_list)[*counter].parm << std::endl;
 				return -1;
 			}
 
-			//cout << "Boolean-Value: " << boolean_value << endl;
+			//std::cout << "Boolean-Value: " << boolean_value << std::endl;
 
 			if ((*command_list)[*counter].cmd != "/boolean")
 			{
-				cout << "</boolean> missing" << endl;
+				std::cout << "</boolean> missing" << std::endl;
 				return -1;
 			}
 		}
@@ -289,11 +292,11 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 			(*counter)++;
 			type = DATETIME;
 			datetime_value = date_from_ISO8601((*command_list)[*counter].parm.c_str());
-			//cout << "Datetime-Value: " << datetime_value << endl;
+			//std::cout << "Datetime-Value: " << datetime_value << std::endl;
 
 			if ((*command_list)[*counter].cmd != "/dateTime.iso8601")
 			{
-				cout << "</dateTime.iso8601> missing" << endl;
+				std::cout << "</dateTime.iso8601> missing" << std::endl;
 				return -1;
 			}
 		}
@@ -301,10 +304,10 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 		{
 			(*counter)++;
 		
-			//cout << "array" << endl;
+			//std::cout << "array" << std::endl;
 			if ((*command_list)[*counter].cmd != "data")
 			{
-				cout << "<data> missing" << endl;
+				std::cout << "<data> missing" << std::endl;
 			}
 			(*counter)++;
 
@@ -320,11 +323,11 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 			}
 			(*counter)++;
 			
-			//cout << "Aktuelles Kommando: " << (*command_list)[*counter].cmd << endl;
+			//std::cout << "Aktuelles Kommando: " << (*command_list)[*counter].cmd << std::endl;
 			
 			if ((*command_list)[*counter].cmd != "/array")
 			{
-				cout << "</array> missing" << endl;
+				std::cout << "</array> missing" << std::endl;
 				return -1;
 			}
 
@@ -332,32 +335,32 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 		else if ((*command_list)[*counter].cmd == "struct")
 		{
 			(*counter)++;
-			//cout << "struct" << endl;
+			//std::cout << "struct" << std::endl;
 			type = STRUCT;
 
 			struct_value.clear();
 					
 			while((*command_list)[*counter].cmd == "member")
 			{
-				//cout << "member" << endl;
+				//std::cout << "member" << std::endl;
 				(*counter)++;
 				std::string structName;
 				
 				if ((*command_list)[*counter].cmd == "name")
 				{
-					//cout << "name" << endl;
+					//std::cout << "name" << std::endl;
 					(*counter)++;
 					structName = (*command_list)[*counter].parm;
 					if ((*command_list)[*counter].cmd != "/name")
 					{
-						cout << "</name> missing" << endl;
+						std::cout << "</name> missing" << std::endl;
 						return -1;
 					}
 					(*counter)++;
 				}
 				else
 				{
-					cout << "Struct-Name missing" << endl;
+					std::cout << "Struct-Name missing" << std::endl;
 					return -1;
 				}
 				xmlrpc_value *tmp_value = new xmlrpc_value();
@@ -365,10 +368,10 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 					return -1;
 				struct_value.insert(xmlrpc_value::xmlrpc_struct_pair(structName, tmp_value));
 				(*counter)++;
-				//cout << "COMMAND: " << (*command_list)[*counter].cmd << endl;
+				//std::cout << "COMMAND: " << (*command_list)[*counter].cmd << std::endl;
 				if ((*command_list)[*counter].cmd != "/member")
 				{
-					cout << "</member> missing" << endl;
+					std::cout << "</member> missing" << std::endl;
 					return -1;
 				}
 				(*counter)++;
@@ -377,7 +380,7 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 
 			if ((*command_list)[*counter].cmd != "/struct")
 			{
-				cout << "</struct> missing" << endl;
+				std::cout << "</struct> missing" << std::endl;
 				return -1;
 			}
 
@@ -386,7 +389,7 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 		(*counter)++;
 		if ((*command_list)[*counter].cmd != "/value")
 		{
-			cout << "</value> missing" << endl;
+			std::cout << "</value> missing" << std::endl;
 			return -1;
 		}
 
@@ -394,7 +397,7 @@ int xmlrpc_value::parseXML(std::vector<struct command> *command_list, int *count
 
 	else
 	{
-		cout << "<value> missing" << endl;
+		std::cout << "<value> missing" << std::endl;
 		return -1;
 	}
 
@@ -411,23 +414,23 @@ void xmlrpc_params::addParam(xmlrpc_value* value)
 	params.insert(params.end(), value);
 }
 
-void xmlrpc_params::getXML(ostrstream *ostr)
+void xmlrpc_params::getXML(std::stringstream *ostr)
 {
 	if (params.size() != 0)
 	{
-		*ostr << "<params>" << endl;
+		*ostr << "<params>" << std::endl;
 
 		for (int i = 0; i < params.size(); i++)
 		{
-			*ostr << "<param>" << endl;
+			*ostr << "<param>" << std::endl;
 			params[i]->getXML(ostr);
-			*ostr << "</param>" << endl;
+			*ostr << "</param>" << std::endl;
 		}
-		*ostr << "</params>" << endl;
+		*ostr << "</params>" << std::endl;
 	}
 }
 
-void xmlrpc_fault::getXML(ostrstream *ostr)
+void xmlrpc_fault::getXML(std::stringstream *ostr)
 {
 	xmlrpc_value::xmlrpc_struct fault_struct;
 	xmlrpc_value *code = new xmlrpc_value(INT, (void*) faultCode);
@@ -441,16 +444,16 @@ void xmlrpc_fault::getXML(ostrstream *ostr)
 
 std::string xmlrpc_response::getXML()
 {
-	ostrstream ostr;
+	std::stringstream ostr;
 	ostr.clear();
 
-	ostr << "<?xml version=\"1.0\"?>" << endl;
-	ostr << "<methodResponse>" << endl;
+	ostr << "<?xml version=\"1.0\"?>" << std::endl;
+	ostr << "<methodResponse>" << std::endl;
 	if (type == RESPONSE)
 		params->getXML(&ostr);
 	else
 		fault->getXML(&ostr);
-	ostr << "</methodResponse>" << endl << ends;
+	ostr << "</methodResponse>" << std::endl << std::ends;
 	
 	return ostr.str();
 }
@@ -461,12 +464,12 @@ int xmlrpc_response::parseXML(std::vector<struct command> *command_list, int *co
 
 	if ((*command_list)[*counter].cmd == "params")
 	{
-		cout << "params" << endl;
+		std::cout << "params" << std::endl;
 		(*counter)++;
 
 		while ((*command_list)[*counter].cmd == "param")
 		{
-			cout << "param" << endl;
+			std::cout << "param" << std::endl;
 
 			(*counter)++;
 			xmlrpc_value *value = new xmlrpc_value();
@@ -476,7 +479,7 @@ int xmlrpc_response::parseXML(std::vector<struct command> *command_list, int *co
 			(*counter)++;
 			if ((*command_list)[*counter].cmd != "/param")
 			{
-				cout << "</param> missing" << endl;
+				std::cout << "</param> missing" << std::endl;
 				return -1;
 			}
 			(*counter)++;
@@ -484,11 +487,11 @@ int xmlrpc_response::parseXML(std::vector<struct command> *command_list, int *co
 	}
 	else if ((*command_list)[*counter].cmd == "fault")
 	{
-		cout << "fault" << endl;
+		std::cout << "fault" << std::endl;
 	}
 	else
 	{
-		cout << "params-Fehler" << endl;
+		std::cout << "params-Fehler" << std::endl;
 		return -1;
 	}
 
@@ -501,12 +504,12 @@ int xmlrpc_request::parseXML(std::vector<struct command> *command_list, int *cou
 
 	if ((*command_list)[*counter].cmd == "params")
 	{
-		//cout << "params" << endl;
+		//std::cout << "params" << std::endl;
 		(*counter)++;
 
 		while ((*command_list)[*counter].cmd == "param")
 		{
-			//cout << "param" << endl;
+			//std::cout << "param" << std::endl;
 
 			(*counter)++;
 			xmlrpc_value *value = new xmlrpc_value();
@@ -516,7 +519,7 @@ int xmlrpc_request::parseXML(std::vector<struct command> *command_list, int *cou
 			(*counter)++;
 			if ((*command_list)[*counter].cmd != "/param")
 			{
-				cout << "</param> missing" << endl;
+				std::cout << "</param> missing" << std::endl;
 				return -1;
 			}
 			(*counter)++;
@@ -524,7 +527,7 @@ int xmlrpc_request::parseXML(std::vector<struct command> *command_list, int *cou
 	}
 	else
 	{
-		cout << "params-Fehler" << endl;
+		std::cout << "params-Fehler" << std::endl;
 		return -1;
 	}
 
@@ -533,14 +536,14 @@ int xmlrpc_request::parseXML(std::vector<struct command> *command_list, int *cou
 
 std::string xmlrpc_request::getXML()
 {
-	ostrstream ostr;
+	std::stringstream ostr;
 	ostr.clear();
 
-	ostr << "<?xml version=\"1.0\"?>" << endl;
-	ostr << "<methodCall>" << endl;
-	ostr << "<methodName>" << methodName << "</methodName>" << endl;
+	ostr << "<?xml version=\"1.0\"?>" << std::endl;
+	ostr << "<methodCall>" << std::endl;
+	ostr << "<methodName>" << methodName << "</methodName>" << std::endl;
 	params->getXML(&ostr);
-	ostr << "</methodCall>" << endl << ends;
+	ostr << "</methodCall>" << std::endl << std::ends;
 	
 	return ostr.str();
 }
@@ -556,7 +559,7 @@ void xmlrpc_parse::readFile(std::string filename)
 	{
         xml.append(line);
     }
-	cout << xml << endl;
+	std::cout << xml << std::endl;
 
 	input.close();
 
@@ -577,7 +580,7 @@ int xmlrpc_parse::parseXML()
 		
 		std::getline(iss2, parm, '<');
 		std::getline(iss2, cmd, '<');
-		//cout << parm << " - " << cmd << endl;
+		//std::cout << parm << " - " << cmd << std::endl;
 
 		struct command tmp_command;
 		tmp_command.parm = parm;
@@ -593,7 +596,7 @@ int xmlrpc_parse::parseXML()
 
 	/*if (command_list[0].cmd.substr(4) != "?xml")
 	{
-		cout << "Kein XML-Dokument" << endl;
+		std::cout << "Kein XML-Dokument" << std::endl;
 		return -1;
 	}*/
 
@@ -603,36 +606,36 @@ int xmlrpc_parse::parseXML()
 		response = new xmlrpc_response();
 		
 		type = RESPONSE;
-		//cout << "methodResponse" << endl;
+		//std::cout << "methodResponse" << std::endl;
 		
 		counter = 2;
 
 		response->parseXML(&command_list, &counter);
-		cout << response->getXML() << endl;
+		std::cout << response->getXML() << std::endl;
 	}
 	else if (command_list[1].cmd == "methodCall")
 	{
 		request = new xmlrpc_request();
 
 		type = REQUEST;
-		//cout << "methodCall" << endl;
+		//std::cout << "methodCall" << std::endl;
 		if (command_list[2].cmd == "methodName" && command_list[3].cmd == "/methodName")
 		{
 			request->setMethodName(command_list[3].parm);
 		}
 		else
 		{
-			cout << "methodName-Fehler" << endl;
+			std::cout << "methodName-Fehler" << std::endl;
 			return -1;
 		}
 
 		counter = 4;
 		request->parseXML(&command_list, &counter);
-		//cout << request->getXML() << endl;
+		//std::cout << request->getXML() << std::endl;
 	}
 	else 
 	{
-		cout << "Parse error on method" << endl;
+		std::cout << "Parse error on method" << std::endl;
 		type = FAILED;
 		return -1;
 	}
@@ -640,13 +643,13 @@ int xmlrpc_parse::parseXML()
 
 std::string handle::makeHandle(int type, int count,  ...)
 {
-	ostrstream ostr;
+	std::stringstream ostr;
 
 	if (type == SERVICE)
 	{
 		va_list arguments;
 		va_start(arguments, count);
-		ostr << "SERVICE no=" << va_arg(arguments, int) << ends;
+		ostr << "SERVICE no=" << va_arg(arguments, int) << std::ends;
 		va_end(arguments);
 	}
 
@@ -769,19 +772,19 @@ void xmlrpc::parse()
 		}
 		else if (methodName == "getInfo")
 		{
-			cout << "getInfo" << endl;
+			std::cout << "getInfo" << std::endl;
 			tmp_handle = request->getParams()->getParam(0)->getStringValue();
-			cout << "Mark1" << endl;
+			std::cout << "Mark1" << std::endl;
 			xmlrpc_value::xmlrpc_struct tmp_struct;
-			cout << "Mark2" << endl;
+			std::cout << "Mark2" << std::endl;
 			if (tmp_handle == "")
 			{
 				xmlrpc_value *value = new xmlrpc_value(STRING, (void*) h.makeHandle(SERVICE, 1, container_obj->channels_obj->getCurrentChannelNumber()).c_str());
 				tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("handle", value));
 			}
-			cout << "Mark3" << endl;
+			std::cout << "Mark3" << std::endl;
 			h.parseHandle(tmp_handle);
-			cout << "Mark4" << endl;
+			std::cout << "Mark4" << std::endl;
 			if (h.handleIsValid() || tmp_handle == "")
 			{
 				std::string tmp_string;
@@ -790,9 +793,9 @@ void xmlrpc::parse()
 
 				if (h.getType() == SERVICE)
 				{
-					cout << "Mark5" << endl;
+					std::cout << "Mark5" << std::endl;
 					int channelnumber = h.getChannelNumber();
-					cout << "Channelnumber: " << channelnumber << endl;
+					std::cout << "Channelnumber: " << channelnumber << std::endl;
 					
 					if (channelnumber != container_obj->channels_obj->getCurrentChannelNumber())
 					{
@@ -804,27 +807,27 @@ void xmlrpc::parse()
 						container_obj->channels_obj->receiveCurrentEIT();
 						container_obj->channels_obj->setCurrentOSDProgramEIT(container_obj->osd_obj);
 						container_obj->channels_obj->updateCurrentOSDProgramAPIDDescr(container_obj->osd_obj);*/
-						cout << "Zapping complete" << endl;
+						std::cout << "Zapping complete" << std::endl;
 					}
 					
 					{
 						tmp_string = "";
 						xmlrpc_value *value = new xmlrpc_value(STRING, (void*) tmp_string.c_str());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("parentHandle", value));
-						cout << "ParentHandle" << endl;
+						std::cout << "ParentHandle" << std::endl;
 					}
 
 					{
 						xmlrpc_value *value = new xmlrpc_value(STRING, (void*) container_obj->channels_obj->getCurrentServiceName().c_str());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("caption", value));
-						cout << container_obj->channels_obj->getCurrentServiceName().c_str() << endl;
+						std::cout << container_obj->channels_obj->getCurrentServiceName().c_str() << std::endl;
 					}
 
 					{
 						tmp_string = "Service";
 						xmlrpc_value *value = new xmlrpc_value(STRING, (void*) tmp_string.c_str());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("type", value));
-						cout << tmp_string.c_str() << endl;
+						std::cout << tmp_string.c_str() << std::endl;
 						
 					}
 
@@ -832,13 +835,13 @@ void xmlrpc::parse()
 					{
 						xmlrpc_value *value = new xmlrpc_value(INT, (void*) container_obj->channels_obj->getCurrentVPID());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("videoPid", value));
-						cout << "VPID: " << container_obj->channels_obj->getCurrentVPID() << endl;
+						std::cout << "VPID: " << container_obj->channels_obj->getCurrentVPID() << std::endl;
 					}
 					if(false)
 					{
 						xmlrpc_value::xmlrpc_array apid_array;
 
-						cout << "APIDCount: " << container_obj->channels_obj->getCurrentAPIDcount() << endl;
+						std::cout << "APIDCount: " << container_obj->channels_obj->getCurrentAPIDcount() << std::endl;
 						
 						for (int i = 0; i < container_obj->channels_obj->getCurrentAPIDcount(); i++)
 						{
@@ -846,41 +849,41 @@ void xmlrpc::parse()
 							{
 								xmlrpc_value *value = new xmlrpc_value(INT, (void*) container_obj->channels_obj->getCurrentAPID(i));
 								apid_struct.insert(xmlrpc_value::xmlrpc_struct_pair("audioPid", value));
-								cout << "APID: " << container_obj->channels_obj->getCurrentAPID(i) << endl;
+								std::cout << "APID: " << container_obj->channels_obj->getCurrentAPID(i) << std::endl;
 							}
 							{
 								tmp_string = (container_obj->channels_obj->getCurrentDD(i)?"ac3":"mpeg");
 								xmlrpc_value *value = new xmlrpc_value(INT, (void*) tmp_string.c_str());
 								apid_struct.insert(xmlrpc_value::xmlrpc_struct_pair("type", value));
-								cout << tmp_string.c_str() << endl;
+								std::cout << tmp_string.c_str() << std::endl;
 							}
 
 							xmlrpc_value *value = new xmlrpc_value(STRUCT, &apid_struct);
 							apid_array.push_back(value);
 						}
-						cout << "Adding APID to array" << endl;
+						std::cout << "Adding APID to array" << std::endl;
 						xmlrpc_value *value = new xmlrpc_value(ARRAY, &apid_array);
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("audioPids", value));
 						
-						/*ostrstream *ostr;
+						/*std::stringstream *ostr;
 						value->getXML(ostr);
-						(*ostr) << endl << ends;
-						cout << ostr->str() << endl;*/
+						(*ostr) << std::endl << std::ends;
+						std::cout << ostr->str() << std::endl;*/
 						
-						cout << "Added" << endl;
+						std::cout << "Added" << std::endl;
 					}
 
 
 				}
-				cout << "Adding Struct" << endl;
+				std::cout << "Adding Struct" << std::endl;
 				xmlrpc_params params;
 				xmlrpc_value *struct_value = new xmlrpc_value(STRUCT, &tmp_struct);
-				cout << "Struct added" << endl;
+				std::cout << "Struct added" << std::endl;
 				
-				/*ostrstream *ostr;
+				/*std::stringstream *ostr;
 				struct_value->getXML(ostr);
-				(*ostr) << endl << ends;
-				cout << ostr->str() << endl;*/
+				(*ostr) << std::endl << std::ends;
+				std::cout << ostr->str() << std::endl;*/
 				params.addParam(struct_value);
 				response.setParams(&params);
 			}
@@ -893,11 +896,11 @@ void xmlrpc::parse()
 				response.setType(FAULT);
 				response.setFault(&fault);
 			}
-			cout << "Mark6" << endl;			
+			std::cout << "Mark6" << std::endl;			
 			
 			xmlout = response.getXML();
-			cout << xmlout << endl;
-			cout << "Mark7" << endl;
+			std::cout << xmlout << std::endl;
+			std::cout << "Mark7" << std::endl;
 		}
 		else if (methodName == "beginRecordMode")
 		{

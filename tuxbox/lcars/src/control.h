@@ -11,9 +11,41 @@
 #include "cam.h"
 #include "zap.h"
 #include "tuner.h"
+#include "update.h"
+#include "timer.h"
+#include "plugins.h"
+#include "checker.h"
+#include "fbClass.h"
+#include "variables.h"
+#include "commandcoding.h"
+#include "ir.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 
 #include <vector>
 #include <map>
+
+// Warum zur H÷lle schmeisst mir gcc da nen Fehler, wenn ich die struct
+// in die Klasse nehme?! Gut, machen wir's halt global :(
+struct command_class
+{
+	int if_type;
+	std::string if_var;
+	std::string if_value;
+
+	int cmd_class;
+	int command;
+	std::vector<std::string> args;
+	std::vector<int> var;
+};
+
+struct Service
+{
+	int TS;
+	int ONID;
+	int SID;
+};
 
 class control
 {
@@ -27,29 +59,52 @@ class control
 	cam *cam_obj;
 	zap *zap_obj;
 	tuner *tuner_obj;
-
-	int runCommand(std::string command, bool value = true);
+	update *update_obj;
+	timer *timer_obj;
+	plugins *plugins_obj;
+	checker *checker_obj;
+	fbClass *fb_obj;
+	ir *ir_obj;
 
 	// Modes
-	typedef std::vector<std::string> commandlist;
+	typedef std::vector<command_class> commandlist;
+	typedef std::vector<std::string> string_commandlist;
 	typedef std::map<int, commandlist> keylist;
 	
 	struct mode
 	{
-		int number;
-		std::string name;
+		int index;
+		std::string title;
+		commandlist init_commands;
 		keylist keys;
 	};
+
+	int selected_channel;
+	Service last_read;
 	
+	int current_mode;
+	bool leave_mode;
+	bool quit_modes;
 	void loadModes();
+	void runMode(int modeNumber);
+	void runMode();
+	std::map<int, mode> modes;
+
+	// Subs
+	std::map<std::string, commandlist> subs;
+	void loadSubs();
+	
+
+	// Helps
+	void dumpchannel(int channelnr);
 
 	// Menue
 	struct menu_entry
 	{
 		int type;
 		std::string description;
-		commandlist switches;
-		commandlist value_commands;
+		string_commandlist switches;
+		string_commandlist value_commands;
 		commandlist action_commands;
 	};
 	struct menu
@@ -62,16 +117,36 @@ class control
 	};
 	std::map<int, menu> menus;
 	
+	// Menues laden
 	void loadMenus();
-	void openMenu(int menuNumber);
-	void getMenu(int menuNumber);
-	void closeMenu();
 	
+	// Menue oeffnen und starten
+	void openMenu(int menuNumber);
 
+	// Aktuelle Menuedaten laden
+	void getMenu(int menuNumber);
+
+	// Menue schliessen
+	void closeMenu();
+
+	
+	// Aktuelles Kommando sofort ausfuehren 
+	int runCommand(command_class command, bool value = true);
+	bool checkSetting(std::string var);
+
+	command_class parseCommand(std::string cmd);
+
+	bool lastcheck;
+
+	pthread_t thread;
+	static void *startlistening(void *object);
 public:
-	control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t);
+	variables *vars;
+	void startThread();
+	control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i);
 
-
+	void runSub(std::string);
+	bool subAvailable(std::string);
 };
 
 #endif

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.h,v $
+Revision 1.4  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.3  2002/03/03 22:57:59  TheDOC
 lcars 0.20
 
@@ -126,6 +129,8 @@ public:
 	rc(hardware *h, settings *s);
 	~rc();
 	
+	int parseKey(std::string key);
+
 	void stoprc();
 	void startrc();
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.4  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.3  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -42,7 +45,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <ost/ca.h>
 #include <dbox/avs_core.h>
 #include <dbox/event.h>
-#include <iostream.h>
+#include <iostream>
 
 #include "checker.h"
 #include "pthread.h"
@@ -118,20 +121,20 @@ void* checker::startEventChecker(void* object)
 		read(fd, &event, sizeof(event_t));
 		if (event.event == EVENT_VCR_CHANGED)
 		{
-			cout << "Event: EVENT_VCR_CHANGED" << endl;
+			std::cout << "Event: EVENT_VCR_CHANGED" << std::endl;
 			switch (c->hardware_obj->getVCRStatus())
 			{
 			case VCR_STATUS_ON:
-				cout << "Event: EVENT_VCR_ON" << endl;
-				cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << endl;
+				std::cout << "Event: EVENT_VCR_ON" << std::endl;
+				std::cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << std::endl;
 				if (c->hardware_obj->vcrIsOn())
 				{
-					cout << "ON" << endl;
+					std::cout << "ON" << std::endl;
 					c->hardware_obj->fnc(2);
 	
 				}
 				else
-					cout << "Off" << endl;
+					std::cout << "Off" << std::endl;
 				if (c->setting->getSwitchVCR())
 					if (!c->hardware_obj->vcrIsOn())
 					{
@@ -141,16 +144,16 @@ void* checker::startEventChecker(void* object)
 					}
 				break;
 			case VCR_STATUS_OFF:
-				cout << "Event: EVENT_VCR_OFF" << endl;
-				cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << endl;
+				std::cout << "Event: EVENT_VCR_OFF" << std::endl;
+				std::cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << std::endl;
 				if (c->hardware_obj->vcrIsOn())
 				{
-					cout << "ON" << endl;
+					std::cout << "ON" << std::endl;
 					c->hardware_obj->fnc(0);
 	
 				}
 				else
-					cout << "Off" << endl;
+					std::cout << "Off" << std::endl;
 				if (c->setting->getSwitchVCR())
 					if (c->hardware_obj->vcrIsOn())
 					{
@@ -159,50 +162,50 @@ void* checker::startEventChecker(void* object)
 					}
 				break;
 			case VCR_STATUS_16_9:
-				cout << "Event: EVENT_VCR_16:9" << endl;
-				cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << endl;
+				std::cout << "Event: EVENT_VCR_16:9" << std::endl;
+				std::cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << std::endl;
 				if (c->hardware_obj->vcrIsOn())
 				{
-					cout << "ON" << endl;
+					std::cout << "ON" << std::endl;
 					c->hardware_obj->fnc(1);
 	
 				}
 				else
-					cout << "Off" << endl;
-				cout << "16:9 switch on vcr" << endl;
+					std::cout << "Off" << std::endl;
+				std::cout << "16:9 switch on vcr" << std::endl;
 
 				break;
 			}	
 		}
 		else if (event.event == EVENT_ARATIO_CHANGE)
 		{
-			cout << "ARATIO-Change Event: " << c->laststat << " - " << c->laststat_mode << endl;
+			std::cout << "ARATIO-Change Event: " << c->laststat << " - " << c->laststat_mode << std::endl;
 			
 			c->aratioCheck();
 
 		}
 		else
-			cout << "UNKNOWN EVENT!!!! PLEASE REPORT!!! " << event.event << endl;
+			std::cout << "UNKNOWN EVENT!!!! PLEASE REPORT!!! " << event.event << std::endl;
 
 /*		else if (event.event == EVENT_SBVCR_CHANGE)
 		{
-			cout << "Event: EVENT_SBVCR_CHANGE" << endl;
-			cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << endl;
+			std::cout << "Event: EVENT_SBVCR_CHANGE" << std::endl;
+			std::cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << std::endl;
 			if (c->hardware_obj->vcrIsOn())
 			{
 				// TODO add code when driver supports it
-				cout << "ON" << endl;
+				std::cout << "ON" << std::endl;
 
 			}
 			else
-				cout << "Off" << endl;
-			cout << "16:9 switch on vcr" << endl;
+				std::cout << "Off" << std::endl;
+			std::cout << "16:9 switch on vcr" << std::endl;
 		}*/
 
 			/*else if (event.event == EVENT_VCR_OFF)
 		{
-			cout << "Event: EVENT_VCR_OFF" << endl;
-			cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << endl;
+			std::cout << "Event: EVENT_VCR_OFF" << std::endl;
+			std::cout << "Status: " << (c->hardware_obj->getAvsStatus() & 0x0c) << std::endl;
 			if (c->setting->getSwitchVCR())
 				if (c->hardware_obj->vcrIsOn())
 				{

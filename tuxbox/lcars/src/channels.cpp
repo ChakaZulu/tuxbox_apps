@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.7  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.6  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -59,10 +62,11 @@ channels::channels(settings *set, pat *p1, pmt *p2)
 	pat_obj = p1;
 	pmt_obj = p2;
 	setting = set;
+	current_mode = CHANNEL;
 }
 
 
-channels::channels(settings *set, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t)
+channels::channels(settings *set, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v)
 {
 	setting = set;
 	cur_pos = -1;
@@ -74,15 +78,22 @@ channels::channels(settings *set, pat *p1, pmt *p2, eit *e, cam *c, hardware *h,
 	osd_obj = o;
 	zap_obj = z;
 	tuner_obj = t;
+	vars = v;
 }
 
-void channels::setStuff(eit *e, cam *c, hardware *h, osd*o, zap *z, tuner *t)
+void channels::setStuff(eit *e, cam *c, hardware *h, osd*o, zap *z, tuner *t, variables *v)
 {
 	eit_obj = e;
 	cam_obj = c;
 	hardware_obj = h;
 	osd_obj = o;
 	zap_obj = z;
+	tuner_obj = t;
+	vars = v;
+}
+
+void channels::setTuner(tuner *t)
+{
 	tuner_obj = t;
 }
 
@@ -105,11 +116,11 @@ void channels::parsePerspectives()
 		printf("%s\n", basic_channellist[cur_pos].perspective[i].name);
 	}
 	curr_perspective = 0;
-	osd_obj->createPerspective();
+	/*osd_obj->createPerspective();
 	char message[100];
 	sprintf(message, "Please choose perspective (%d - %d)", 1, basic_channellist[cur_pos].number_perspectives);
 	osd_obj->setPerspectiveName(message);
-	osd_obj->addCommand("SHOW perspective");
+	osd_obj->addCommand("SHOW perspective");*/
 }
 
 void channels::setPerspective(int number)
@@ -123,8 +134,13 @@ void channels::setPerspective(int number)
 	printf("----------------------\n");
 	printf("APID: %d\n", apid);
 	printf("Current perspective: %d\n", curr_perspective);
-	if (old_TS != basic_channellist[cur_pos].perspective[curr_perspective].TS)
-		tune(basic_channellist[cur_pos].perspective[curr_perspective].TS, tuner_obj);
+	if (old_TS != basic_channellist[cur_pos].perspective[curr_perspective].TS || old_ONID != basic_channellist[cur_pos].perspective[curr_perspective].ONID)
+	{
+		std::cout << "New TS selected" << std::endl;
+		std::cout << "The new TS is: " << basic_channellist[cur_pos].perspective[curr_perspective].TS << std::endl;
+		tune(basic_channellist[cur_pos].perspective[curr_perspective].TS, basic_channellist[cur_pos].perspective[curr_perspective].ONID);
+	}
+	old_ONID = basic_channellist[cur_pos].perspective[curr_perspective].ONID;
 	old_TS = basic_channellist[cur_pos].perspective[curr_perspective].TS;
 	
 	zap_obj->close_dev();
@@ -155,25 +171,30 @@ void channels::setPerspective(int number)
 			ECM = pmt_entry.ECM[i];
 		printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
 	}
-	osd_obj->addCommand("HIDE perspective");
+/*	osd_obj->addCommand("HIDE perspective");
 	osd_obj->createPerspective();
 	osd_obj->setPerspectiveName(basic_channellist[cur_pos].perspective[curr_perspective].name);
-	osd_obj->addCommand("SHOW perspective");
+	osd_obj->addCommand("SHOW perspective");*/
 	printf("%s\n", basic_channellist[cur_pos].perspective[curr_perspective].name);
 	if (basic_channellist[cur_pos].perspective[curr_perspective].APIDcount == 1)
-		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[apid] , ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS);
+		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[apid], pmt_entry.PCR, ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS);
 	else
-		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[0], ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS, basic_channellist[cur_pos].perspective[curr_perspective].APID[1]);
+		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[0], pmt_entry.PCR, ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS, basic_channellist[cur_pos].perspective[curr_perspective].APID[1]);
 
+}
+
+std::string channels::getPerspectiveName(int number)
+{
+	return basic_channellist[cur_pos].perspective[number].name;
 }
 
 void channels::zapCurrentChannel()
 {
 	zap_obj->zap_allstop();
-	
+
 	current_mode = CHANNEL;
 
-	tune(getCurrentTS(), tuner_obj);
+	tune(getCurrentTS(), getCurrentONID());
 
 	fprintf(stderr, "Getting pat\n");
 	pat_obj->readPAT();
@@ -228,9 +249,9 @@ void channels::zapCurrentChannel()
 
 		hardware_obj->useDD(getCurrentDD(0));
 		if (getCurrentAPIDcount() == 1)
-			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS());
+			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), pmt_entry.PCR, ECM, getCurrentSID(), getCurrentONID(), getCurrentTS());
 		else
-			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
+			(*zap_obj).zap_to(getCurrentVPID(), getCurrentAPID(0), pmt_entry.PCR, ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
 		
 		
 
@@ -239,6 +260,24 @@ void channels::zapCurrentChannel()
 		else
 			(*eit_obj).setAudioComponent(-1);
 	}
+
+	last_channels.push(cur_pos);
+	int number_last_chans = 2;
+	if (vars->isavailable("%NUMBERLASTCHANNELS"))
+	{
+		number_last_chans = atoi(vars->getvalue("%NUMBERLASTCHANNELS").c_str());
+	}
+	if (last_channels.size() > number_last_chans)
+	{
+		last_channels.pop();
+	}
+}
+
+void channels::zapLastChannel()
+{
+	int numb = last_channels.front();
+	last_channels.pop();
+	setCurrentChannel(numb);
 }
 
 void channels::setCurrentOSDProgramInfo(osd *osd_obj)
@@ -341,7 +380,11 @@ dvbchannel channels::getDVBChannel(int number)
 
 	memset (&chan, 0, sizeof(struct dvbchannel));
 
-	std::multimap<int, struct transportstream>::iterator ts = basic_TSlist.find(tmp_chan.TS);
+	transponder trans;
+	trans.TS = tmp_chan.TS;
+	trans.ONID = tmp_chan.ONID;
+	std::multimap<struct transponder, struct transportstream>::iterator ts;
+	// = basic_TSlist.find(trans);
 		
 	chan.init[0] = 'D';
 	chan.init[1] = 'V';
@@ -390,6 +433,7 @@ void channels::addDVBChannel(dvbchannel chan)
 {
 	struct channel tmp_chan;
 	memset (&tmp_chan, 0, sizeof(struct channel));
+	tmp_chan.APID.clear();
 
 	tmp_chan.SID = chan.SID;
 	tmp_chan.PMT = chan.PMT;
@@ -410,16 +454,19 @@ void channels::addDVBChannel(dvbchannel chan)
 	struct transportstream tmp_TS;
 	memset (&tmp_TS, 0, sizeof(struct transportstream));
 	
-	tmp_TS.TS = chan.TS;
-	tmp_TS.ONID = chan.ONID;
+	tmp_TS.trans.TS = chan.TS;
+	tmp_TS.trans.ONID = chan.ONID;
 	tmp_TS.FREQU = chan.FREQU;
 	tmp_TS.SYMBOL = chan.SYMBOL;
 	tmp_TS.POLARIZATION = chan.POLARIZATION & 0x1;
 	tmp_TS.FEC = chan.FEC;
 
-	if (basic_TSlist.count(chan.TS) == 0)
+	transponder trans;
+	trans.TS = chan.TS;
+	trans.ONID = chan.ONID;
+	if (basic_TSlist.count(trans) == 0)
 	{
-		basic_TSlist.insert(std::pair<int, struct transportstream>(tmp_TS.TS, tmp_TS));
+		basic_TSlist.insert(std::pair<struct transponder, struct transportstream>(trans, tmp_TS));
 	}
 
 
@@ -462,7 +509,10 @@ bool channels::setCurrentChannel(int channelnumber)
 	if ((channelnumber > numberChannels() - 1) || (channelnumber < 0))
 		return false;
 	cur_pos = channelnumber;
-	cur_pos_TS = basic_TSlist.find(basic_channellist[channelnumber].TS);
+	transponder trans;
+	trans.TS = basic_channellist[channelnumber].TS;
+	trans.ONID = basic_channellist[channelnumber].ONID;
+	cur_pos_TS = basic_TSlist.find(trans);
 	return true;
 }
 
@@ -500,14 +550,15 @@ void channels::setCurrentVPID(int VPID)
 {
 	printf("setCurrentVPID to %d \n", VPID);
 	basic_channellist[cur_pos].VPID = VPID;
+	printf("end setCurrentVPID to %d \n", VPID);
 }
 
-void channels::addCurrentAPID(int APID, int number = -1)
+void channels::addCurrentAPID(int APID, int number)
 {
 	if (number == -1)
 		number = getCurrentAPIDcount();
 	printf("addCurrentAPID %d to %04x\n", number, APID);
-	basic_channellist[cur_pos].APID[number] = APID;
+	basic_channellist[cur_pos].APID.insert(basic_channellist[cur_pos].APID.end(), APID);// = APID;
 	basic_channellist[cur_pos].DD[number] = false;
 }
 
@@ -517,7 +568,7 @@ void channels::addCurrentAPID(int APID, bool DD)
 	basic_channellist[cur_pos].DD[getCurrentAPIDcount() - 1] = DD;
 }
 
-bool channels::getCurrentDD(int number = 0)
+bool channels::getCurrentDD(int number)
 {
 	return basic_channellist[cur_pos].DD[number];
 }
@@ -532,7 +583,7 @@ void channels::setCurrentTXT(int TXT)
 	basic_channellist[cur_pos].TXT = TXT;
 }
 
-void channels::addCurrentCA(int CAID, int ECM, int number = -1)
+void channels::addCurrentCA(int CAID, int ECM, int number)
 {
 	printf("addCurrentCA to %d - %d\n", CAID, ECM);
 	if (number == -1)
@@ -552,7 +603,7 @@ void channels::setCurrentType(int type)
 	basic_channellist[cur_pos].type = type;
 }
 
-void channels::addCurrentNVOD(int NVOD_TS, int NVOD_SID, int number = -1)
+void channels::addCurrentNVOD(int NVOD_TS, int NVOD_SID, int number)
 {
 	printf("addCurrentNVOD to %d - %d\n", NVOD_TS, NVOD_SID);
 	if (number == -1)
@@ -582,6 +633,8 @@ void channels::setCurrentProviderName(std::string providerName)
 
 std::string channels::getServiceName(int channelnumber)
 {
+	if (channelnumber < 0 || channelnumber >= numberChannels())
+		return "";
 	int position = 0;
 	char name[100];
 	for (int i = 0; i < (int)strlen(basic_channellist[channelnumber].serviceName); i++)
@@ -642,7 +695,13 @@ int channels::getCurrentONID()
 
 int channels::getCurrentSID()
 {
-	return basic_channellist[cur_pos].SID;
+	if (current_mode == CHANNEL)
+		return basic_channellist[cur_pos].SID;
+	else if (current_mode == LINKAGE)
+		return basic_channellist[cur_pos].perspective[curr_perspective].SID;
+	else
+		return 0;
+
 }
 
 int channels::getCurrentPMT()
@@ -660,10 +719,8 @@ int channels::getCurrentAPIDcount()
 	int count = 0;
 	if (current_mode == CHANNEL)
 	{
-		while(basic_channellist[cur_pos].APID[count++] != 0)
-			if (count > 3)
-				break;
-		count--;
+		std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++APID-count: " << basic_channellist[cur_pos].APID.size() << std::endl;
+		count = basic_channellist[cur_pos].APID.size();
 	}
 	else if (current_mode == LINKAGE)
 	{
@@ -677,14 +734,14 @@ int channels::getCurrentAPIDcount()
 
 void channels::deleteCurrentAPIDs()
 {
-	for (int i = 0; i < 2; i++)
-	{
-		basic_channellist[cur_pos].APID[i] = 0;
-	}
+	basic_channellist[cur_pos].APID.clear();
+
 }
 
-int channels::getCurrentAPID(int number = 0)
+int channels::getCurrentAPID(int number)
 {
+	std::cout << "---------------------------------------------------------- Getting APID: " << basic_channellist[cur_pos].APID[number] << " with number " << number << std::endl;
+	//number++;
 	return basic_channellist[cur_pos].APID[number];
 }
 
@@ -705,12 +762,12 @@ int channels::getCurrentCAcount()
 	return count;
 }
 
-int channels::getCurrentCAID(int number = 0)
+int channels::getCurrentCAID(int number)
 {
 	return basic_channellist[cur_pos].CAID[number];
 }
 
-int channels::getCurrentECM(int number = 0)
+int channels::getCurrentECM(int number)
 {
 	return basic_channellist[cur_pos].ECM[number];
 }
@@ -759,88 +816,116 @@ std::string channels::getCurrentProviderName()
 	return pname;
 }
 
-bool channels::addTS(int TS, int ONID, int FREQU, int SYMBOL, int POLARIZATION = -1, int FEC = -1, int diseqc = 1)
+bool channels::addTS(int TS, int ONID, int FREQU, int SYMBOL, int POLARIZATION, int FEC, int diseqc)
 {
 	struct transportstream new_transportstream;
 
 	memset (&new_transportstream, 0, sizeof(struct transportstream));
-	if ((*basic_TSlist.find(TS)).second.FREQU == FREQU)
+	transponder trans;
+	trans.TS = TS;
+	trans.ONID = ONID;
+	if ((*basic_TSlist.find(trans)).second.FREQU == FREQU)
 		return false;
 
-	new_transportstream.TS = TS;
-	new_transportstream.ONID = ONID;
+	new_transportstream.trans.TS = TS;
+	new_transportstream.trans.ONID = ONID;
 	new_transportstream.FREQU = FREQU;
 	new_transportstream.SYMBOL = SYMBOL;
 	new_transportstream.POLARIZATION = POLARIZATION;
 	new_transportstream.FEC = FEC;
 	new_transportstream.diseqc = diseqc;
 
-	basic_TSlist.insert(std::pair<int, struct transportstream>(TS, new_transportstream));
+	basic_TSlist.insert(std::pair<struct transponder, struct transportstream>(new_transportstream.trans, new_transportstream));
   
 	return true;
 }
 
 int channels::getFrequency(int TS, int ONID)
 {
-	std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
+	transponder trans;
+	trans.TS = TS;
+	trans.ONID = ONID;
+	return basic_TSlist.find(trans)->second.FREQU;
+
+	/*std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<struct transponder, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
 	for (std::multimap<int, struct transportstream>::iterator it = ip.first; it != ip.second; ++it)
 	{
 		if ((*it).second.ONID == ONID)
 			return (*it).second.FREQU;
 	}
 	
-	return -1;
+	return -1;*/
 }
 
 int channels::getSymbolrate(int TS, int ONID)
 {
-	std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
+	transponder trans;
+	trans.TS = TS;
+	trans.ONID = ONID;
+	return basic_TSlist.find(trans)->second.SYMBOL;	
+
+/*std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
 	for (std::multimap<int, struct transportstream>::iterator it = ip.first; it != ip.second; ++it)
 	{
 		if ((*it).second.ONID == ONID)
 			return (*it).second.SYMBOL;
 	}
 	
-	return -1;
+	return -1;*/
 }
 
 int channels::getPolarization(int TS, int ONID)
 {
-	std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
+	transponder trans;
+	trans.TS = TS;
+	trans.ONID = ONID;
+	return basic_TSlist.find(trans)->second.POLARIZATION;
+
+	/*std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
 	for (std::multimap<int, struct transportstream>::iterator it = ip.first; it != ip.second; ++it)
 	{
 		if ((*it).second.ONID == ONID)
 			return (*it).second.POLARIZATION;
 	}
 	
-	return -1;
+	return -1;*/
 }
 
 int channels::getFEC(int TS, int ONID)
 {
-	std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
+	transponder trans;
+	trans.TS = TS;
+	trans.ONID = ONID;
+	return basic_TSlist.find(trans)->second.FEC;	
+
+/*std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
 	for (std::multimap<int, struct transportstream>::iterator it = ip.first; it != ip.second; ++it)
 	{
 		if ((*it).second.ONID == ONID)
 			return (*it).second.FEC;
 	}
 	
-	return -1;
+	return -1;*/
 }
 
 int channels::getDiseqc(int TS, int ONID)
 {
-	std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
+	transponder trans;
+	trans.TS = TS;
+	trans.ONID = ONID;
+	return basic_TSlist.find(trans)->second.diseqc;	
+
+/*std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
 	for (std::multimap<int, struct transportstream>::iterator it = ip.first; it != ip.second; ++it)
 	{
 		if ((*it).second.ONID == ONID)
 			return (*it).second.diseqc;
 	}
 	
-	return -1;
+	return -1;*/
 }
 
-transportstream channels::getTS(int TS, int ONID)
+/*transportstream channels::getTS(int TS, int ONID)
 {
 	std::pair<std::multimap<int, struct transportstream>::iterator, std::multimap<int, struct transportstream>::iterator> ip = basic_TSlist.equal_range(TS);
 	for (std::multimap<int, struct transportstream>::iterator it = ip.first; it != ip.second; ++it)
@@ -853,14 +938,14 @@ transportstream channels::getTS(int TS, int ONID)
 
 	tmp_ts.TS = -1;
 	return tmp_ts;
-}
+}*/
 
 
 void channels::dumpTS()
 {
-	for (std::multimap<int, struct transportstream>::iterator it = basic_TSlist.begin(); it != basic_TSlist.end(); ++it)
+	for (std::multimap<struct transponder, struct transportstream>::iterator it = basic_TSlist.begin(); it != basic_TSlist.end(); ++it)
 	{
-		printf("TS: %d - FREQU: %ld - SYMBOL: %d - POL: %d - FEC: %d\n", (*it).second.TS, (*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC);
+		printf("ONID: %d - TS: %d - FREQU: %ld - SYMBOL: %d - POL: %d - FEC: %d\n", (*it).second.trans.ONID, (*it).second.trans.TS, (*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC);
 	}
 }
 
@@ -871,14 +956,21 @@ void channels::dumpChannels()
 	{
 		printf("#%d TS: %04x - SID: %04x - Name: %s\n", (*it).channelnumber, (*it).TS, (*it).SID, (*it).serviceName);
 	}
-	printf("Das sind %d Kanäle\n", basic_channellist.size());
+	printf("Das sind %d Kan„le\n", basic_channellist.size());
 }
 
-int channels::tune(int TS, tuner *tuner)
+int channels::tune(int TS, int ONID)
 {
-	std::multimap<int, struct transportstream>::iterator it = basic_TSlist.find(TS);
+	transponder trans;
+	trans.TS = TS;
+	trans.ONID = ONID;
+	std::multimap<struct transponder, struct transportstream>::iterator it = basic_TSlist.find(trans);
 
-	(*tuner).tune((*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC, (*cur_pos_TS).second.diseqc);
+	std::cout << basic_TSlist.size() << std::endl;
+	std::cout << "ONID: " << trans.ONID << std::endl;
+	std::cout << "TS: " << trans.TS << std::endl;
+	std::cout << "Tuning (channel) to " << (*it).second.FREQU << " - " << (*it).second.SYMBOL << std::endl;
+	tuner_obj->tune((*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC, (*cur_pos_TS).second.diseqc);
 	return true;
 }
 
@@ -891,9 +983,9 @@ bool channels::setNextTS()
 	return false;
 }
 
-int channels::tuneCurrentTS(tuner *tuner)
+int channels::tuneCurrentTS()
 {
-	(*tuner).tune((*cur_pos_TS).second.FREQU, (*cur_pos_TS).second.SYMBOL, (*cur_pos_TS).second.POLARIZATION, (*cur_pos_TS).second.FEC, (*cur_pos_TS).second.diseqc);
+	tuner_obj->tune((*cur_pos_TS).second.FREQU, (*cur_pos_TS).second.SYMBOL, (*cur_pos_TS).second.POLARIZATION, (*cur_pos_TS).second.FEC, (*cur_pos_TS).second.diseqc);
 
 	return true;
 }
@@ -910,7 +1002,10 @@ void channels::saveDVBChannels()
 
 		memset (&chan, 0, sizeof(struct dvbchannel));
 
-		std::multimap<int, struct transportstream>::iterator ts = basic_TSlist.find((*it).TS);
+		transponder trans;
+		trans.TS = it->TS;
+		trans.ONID = it->ONID;
+		std::multimap<struct transponder, struct transportstream>::iterator ts = basic_TSlist.find(trans);
 		
 		printf("SID: %x\n", (*it).SID);
 		chan.init[0] = 'D';
@@ -965,11 +1060,12 @@ void channels::loadDVBChannels()
 	{
 		struct channel tmp_chan;
 		memset (&tmp_chan, 0, sizeof(struct channel));
+		tmp_chan.APID.clear();
 
 		tmp_chan.SID = chan.SID;
 		tmp_chan.PMT = chan.PMT;
 		tmp_chan.VPID = chan.VPID;
-		tmp_chan.APID[0] = chan.APID;
+		tmp_chan.APID.insert(tmp_chan.APID.end(), chan.APID);
 		tmp_chan.PCR = chan.PCR;
 		tmp_chan.ECM[0] = chan.ECM;
 		tmp_chan.CAID[0] = setting->getCAID();
@@ -986,20 +1082,65 @@ void channels::loadDVBChannels()
 		struct transportstream tmp_TS;
 		memset (&tmp_TS, 0, sizeof(struct transportstream));
 
-		tmp_TS.TS = chan.TS;
-		tmp_TS.ONID = chan.ONID;
+		tmp_TS.trans.TS = chan.TS;
+		tmp_TS.trans.ONID = chan.ONID;
 		tmp_TS.FREQU = chan.FREQU;
 		tmp_TS.SYMBOL = chan.SYMBOL;
 		tmp_TS.POLARIZATION = chan.POLARIZATION & 0x1;
 		tmp_TS.FEC = chan.FEC;
 		tmp_TS.diseqc = chan.DISEQC;
 
-		if (basic_TSlist.count(chan.TS) == 0)
+		transponder trans;
+		trans.TS = chan.TS;
+		trans.ONID = chan.ONID;
+		if (basic_TSlist.count(trans) == 0)
 		{
-			basic_TSlist.insert(std::pair<int, struct transportstream>(tmp_TS.TS, tmp_TS));
+			basic_TSlist.insert(std::pair<struct transponder, struct transportstream>(trans, tmp_TS));
 		}
 	}
 	close(fd);
 	printf("Channels loaded\n");
+}
+
+void channels::saveTS()
+{
+	FILE *fp;
+
+	printf("Save TS File\n");
+	fp = fopen(CONFIGDIR "/lcars/transponders.dvb2", "wb");
+
+	for (std::multimap<struct transponder, struct transportstream>::iterator it = basic_TSlist.begin(); it != basic_TSlist.end(); ++it)
+	{
+		transportstream tmp_ts;
+		tmp_ts = it->second;
+		fwrite(&tmp_ts, sizeof(transportstream), 1, fp);
+		
+		printf("TS: %d - FREQU: %ld - SYMBOL: %d - POL: %d - FEC: %d\n", (*it).second.trans.TS, (*it).second.FREQU, (*it).second.SYMBOL, (*it).second.POLARIZATION, (*it).second.FEC);
+	}
+	
+	fclose(fp);
+}
+
+void channels::loadTS()
+{
+	basic_TSlist.clear();
+	int fd;
+	
+	printf("Loading TS\n");
+	if ((fd = open(CONFIGDIR "/lcars/transponders.dvb2", O_RDONLY)) < 0)
+	{
+		printf("No TS available!\n");	
+		return;
+	}
+	transportstream tmp_ts;
+
+	while(read(fd, &tmp_ts, sizeof(transportstream)) > 0)
+	{
+		if (basic_TSlist.count(tmp_ts.trans) == 0)
+		{
+			basic_TSlist.insert(std::pair<struct transponder, struct transportstream>(tmp_ts.trans, tmp_ts));
+		}
+	}
+	close(fd);
 }
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.10  2002/05/18 02:55:24  TheDOC
+LCARS 0.21TP7
+
 Revision 1.9  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -97,7 +100,7 @@ void scan::readUpdates()
 }
 
 
-channels scan::scanChannels(bool full = false, int start_frequency = -1, int start_symbol = -1, int start_polarization = -1, int start_fec = -1)
+channels scan::scanChannels(bool full, int start_frequency, int start_symbol, int start_polarization, int start_fec)
 {
 	int number;
 	channels channels(setting, pat_obj, pmt_obj);
@@ -114,25 +117,49 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 
 	if (setting->boxIsCable())
 	{
-		start_frequency = 3460;
 		start_symbol = 6900;
 		osd_obj->createPerspective();
 		
-
-		while(channels.numberTransponders() < 1)
+		for (int i = 0; (i < 3) && (channels.numberTransponders() < 1); i++)
 		{
-			char message[100];
-			sprintf(message, "Searching NIT on %d - %d", start_frequency, start_symbol);
-			osd_obj->setPerspectiveName(message);
-			osd_obj->addCommand("SHOW perspective");
+			start_frequency = 3460;		
+			if (i == 1)
+			{
+				std::cout << "Inversion off " << std::endl;			
+				setting->setInversion(INVERSION_OFF);
+			}
+			else if (i == 0)
+			{
+				std::cout << "Inversion auto" << std::endl;			
+				setting->setInversion(INVERSION_AUTO);
+			}
+			else if (i == 2)
+			{
+				std::cout << "Inversion on" << std::endl;			
+				setting->setInversion(INVERSION_ON);
+			}
 			
-			tuner_obj->tune(start_frequency, start_symbol);
-
-			number = nit_obj->getTransportStreams(&channels);
-			channels.dumpTS();
-			start_frequency += 80;
-			if (start_frequency > 4000)
-				break;
+			
+			while(channels.numberTransponders() < 1)
+			{
+				char message[100];
+				sprintf(message, "Searching NIT on %d - %d", start_frequency, start_symbol);
+				osd_obj->setPerspectiveName(message);
+				osd_obj->addCommand("SHOW perspective");
+				
+				tuner_obj->tune(start_frequency, start_symbol);
+				std::cout << "Checking frequ: " << start_frequency << " with symbol: " << start_symbol << std::endl;
+	
+				number = nit_obj->getTransportStreams(&channels);
+				if (channels.numberTransponders() > 0)
+				{
+					channels.dumpTS();
+					break;
+				}
+				start_frequency += 80;
+				if (start_frequency > 4000)
+					break;
+			}
 		}
 
 		if (channels.numberTransponders() < 1)
@@ -275,16 +302,18 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 	sprintf(message, "Scanning Channels");
 	osd_obj->setPerspectiveName(message);
 	osd_obj->addCommand("SHOW perspective");
-
+	
+	channels.setTuner(tuner_obj);
 	do
 	{
-		channels.tuneCurrentTS(tuner_obj);	
+		channels.tuneCurrentTS();	
 
 		printf("getChannels - Start\n");
 		sdt_obj->getChannels(&channels);
 			
 		if (full)
 		{
+			std::cout << "Full Channel Scan" << std::endl;
 			pat_obj->readPAT();
 			for (int i = numberChannels; i < channels.numberChannels(); i++)
 			{

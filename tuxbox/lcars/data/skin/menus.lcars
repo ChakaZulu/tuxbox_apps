@@ -19,7 +19,9 @@ Entries:
 +++
 Actions:
 1:
-	Show_About
+	OSD direct SHOW about
+	RC Wait Command
+	OSD direct HIDE about
 2:
 	CONTROL Menu Mode 1
 4:
@@ -27,9 +29,9 @@ Actions:
 6:
 	CONTROL Menu Mode 3
 7:
-	UPDATE: Manual_Update
+	UPDATE Update Manual
 8:
-	UPDATE: Internet_Update
+	UPDATE Update Internet
 9:
 	CONTROL Menu Mode 4
 ------
@@ -41,7 +43,8 @@ Index:
 1
 +++
 Init:
-	TIMER: Add_Timers
+	OSD direct COMMAND menu set_size 200
+	TIMER Timers Dump
 ------
 +++
 Title:
@@ -51,7 +54,7 @@ Index:
 2
 +++
 Init:
-	Add_PIDs(VPID, APIDs)
+	CONTROL Add PIDs VPID APIDs SID PMT TS
 ------
 +++
 Title:
@@ -61,7 +64,8 @@ Index:
 3
 +++
 Init:
-	Add_Plugins
+	PLUGINS Plugins Load
+	PLUGINS Plugins Dump
 ------
 +++
 Title:
@@ -127,6 +131,7 @@ Actions:
 8:
 	SCAN Scan Normal
 	CHANNELS Save DVB
+	CHANNELS Save TS
 9:
 	CONTROL Menu Mode 5
 10:
