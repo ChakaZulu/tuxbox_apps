@@ -36,6 +36,7 @@ protected:
 	ePtrList<eListBoxEntry> childs;
 	eListBoxEntry* getCurrent()	{ return current != childs.end() ? *current : 0; }
 	eListBoxEntry* getNext() { ePtrList<eListBoxEntry>::iterator c=current; ++c; return c != childs.end() ? *c : 0; }
+	eListBoxEntry* getFirst() { return getCount() != 0 ? *(childs.begin()) : 0; }
 	eListBoxEntry* goNext();
 	eListBoxEntry* goPrev();
 	int setProperty(const eString &prop, const eString &value);
@@ -100,6 +101,7 @@ public:
 	}
 	T* getCurrent()	{ return (T*)eListBoxBase::getCurrent(); }
 	T* getNext() { return (T*)eListBoxBase::getNext(); }
+	T* getFirst() { return (T*)eListBoxBase::getFirst(); }
 	T* goNext() { return (T*)eListBoxBase::goNext(); }
 	T* goPrev() { return (T*)eListBoxBase::goPrev(); }
 
