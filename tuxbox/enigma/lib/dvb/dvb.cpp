@@ -582,7 +582,7 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 				amodulation="3";
 			if (!afec_inner)
 				afec_inner="0";
-			int frequency=atoi(afrequency)/*/1000*/,
+			int frequency=atoi(afrequency)*1000,
 					symbol_rate=atoi(asymbol_rate),
 					inversion=atoi(ainversion),
 					modulation=atoi(amodulation),
