@@ -73,7 +73,7 @@ inline eString eString::left(unsigned int len) const
 {
 //	Returns a substring that contains the len leftmost characters of the string.
 //	The whole string is returned if len exceeds the length of the string.
- 	return len >= length() ? *this : substr(0, len);
+	return len >= length() ? (char *) this : substr(0, len);
 }
 
 //////////////////////////////////////// eString mid ////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ inline eString eString::right(unsigned int len) const
 //	Returns a substring that contains the len rightmost characters of the string.
 //	The whole string is returned if len exceeds the length of the string.
 	register unsigned int strlen = length();
-	return len >= strlen ? *this : substr(strlen-len, len);
+	return len >= strlen ? (char *) this : substr(strlen-len, len);
 }
 
 inline bool eString::isNull() const
