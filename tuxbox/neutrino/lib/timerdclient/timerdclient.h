@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.19 2002/10/10 22:32:52 Zwen Exp $
+	$Id: timerdclient.h,v 1.20 2002/10/11 15:12:27 thegoodguy Exp $
 
 	License: GPL
 
@@ -27,24 +27,9 @@
 #ifndef __timerdclient__
 #define __timerdclient__
 
-#include <stdio.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
 #include <string>
 
 #include "timerdMsg.h"
-#include "../timermanager.h"
 
 using namespace std;
 

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.19 2002/10/10 22:32:52 Zwen Exp $
+	$Id: timerdMsg.h,v 1.20 2002/10/11 15:12:27 thegoodguy Exp $
 
 	License: GPL
 
@@ -26,16 +26,8 @@
 #ifndef __timerd__
 #define __timerd__
 
-#include <stdio.h>
-#include <unistd.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
 #include <string>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 #include "../timermanager.h"
