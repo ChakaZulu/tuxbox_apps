@@ -1,12 +1,11 @@
 <tr>
 	<td>#ID#</td>
 	<td>#MOUNTED#</td>
-	<td>#ACTIONBUTTON#</td>
-	<td>#CHANGEBUTTON#</td>
-	<td>#DELETEBUTTON#</td>
+	<td width=75>#ACTIONBUTTON#</td>
+	<td width=75>#CHANGEBUTTON#</td>
+	<td width=75>#DELETEBUTTON#</td>
 	<td>#FSTYPE#</td>
 	<td>#LDIR#</td>
 	<td>#MDIR#</td>
-	<td>#IP#</td>
 	<td>#AUTO#</td>
 </tr>
