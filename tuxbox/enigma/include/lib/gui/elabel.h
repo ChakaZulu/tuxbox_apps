@@ -18,7 +18,6 @@ protected:
 	void validate( const eSize* s=0 );
 	int eventHandler(const eWidgetEvent &event);
 	void redrawWidget(gPainter *target, const eRect &area);
-	int setProperty(const eString &prop, const eString &value);
 	int yOffs;
 	gPixmap *shortcutPixmap; // shortcut pixmap to be displayed right after description
 public:
@@ -32,6 +31,7 @@ public:
 	void removeFlags(int flags);
 	void setAlign(int align);
 	void setShortcutPixmap(const eString &shortcut);
+	int setProperty(const eString &prop, const eString &value);
 
 	eSize getExtend();
 	ePoint getLeftTop();

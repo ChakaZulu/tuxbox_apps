@@ -254,7 +254,7 @@ EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, time_t t)
 
 		if (service.getServiceType() == 4)// NVOD
 		{
-			// get NVOD Refs fromn this NVDO Service
+			// get NVOD Refs from this NVDO Service
 			for ( std::list<NVODReferenceEntry>::iterator it( NVOD[key].begin() ); it != NVOD[key].end(); it++ )
 			{
 				eventCache::iterator evIt = eventDB.find(uniqueEPGKey( it->service_id, it->original_network_id ));

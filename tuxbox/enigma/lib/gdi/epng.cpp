@@ -12,7 +12,7 @@ gImage *loadPNG(const char *filename)
 	
 	if (!fp)
 	{
-		eDebug("couldn't open");
+//		eDebug("couldn't open %s", filename );
 		return 0;
 	}
 	if (!fread(header, 8, 1, fp))

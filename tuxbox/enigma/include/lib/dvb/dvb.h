@@ -130,7 +130,7 @@ public:
 		int frequency, symbol_rate, polarisation, fec, inversion, orbital_position;
 		void set(const SatelliteDeliverySystemDescriptor *descriptor);
 		int tune(eTransponder *);
-		int isValid() { return valid; }
+		int isValid() const { return valid; }
 		bool operator == (const satellite &c) const
 		{
 			if (valid != c.valid)
@@ -240,7 +240,7 @@ class eServiceDVB: public eService
 public:
 	enum cacheID
 	{
-		cVPID, cAPID, cTPID, cPCRPID, cacheMax
+		cVPID, cAPID, cTPID, cPCRPID, cAC3PID, cacheMax
 	};
 	eServiceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number=-1);
 	eServiceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number=-1);
@@ -560,6 +560,8 @@ struct eDiSEqC
 	int uncommitted_switch; // send to uncommited switch
 	int uncommitted_gap;    // send uncommitted switch in DiSEqC Repeat gap
 	int useGotoXX;          // Rotor Support gotoXX Position ?
+	int useRotorInPower;    // can we use Rotor Input Power to detect Rotor state ?
+	double DegPerSec;       // degress per Second.. used when no Input Power can used
 	enum { NORTH, SOUTH, EAST, WEST };
 	int gotoXXLoDirection;  // EAST, WEST
 	int gotoXXLaDirection;  // NORT, SOUTH

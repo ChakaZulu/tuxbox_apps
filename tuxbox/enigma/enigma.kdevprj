@@ -1488,7 +1488,7 @@ type=PO
 
 [src/Makefile.am]
 dist=true
-files=src/channelinfo.cpp,src/channelinfo.h,src/download.cpp,src/download.h,src/enigma.cpp,src/enigma.h,src/enigma_dyn.h,src/enigma_event.cpp,src/enigma_event.h,src/enigma_info.cpp,src/enigma_info.h,src/enigma_lcd.cpp,src/enigma_lcd.h,src/enigma_main.cpp,src/enigma_main.h,src/enigma_mainmenu.cpp,src/enigma_mainmenu.h,src/enigma_plugins.cpp,src/enigma_plugins.h,src/enigma_scan.cpp,src/enigma_scan.h,src/enigma_setup.cpp,src/enigma_setup.h,src/enigma_vcr.cpp,src/enigma_vcr.h,src/enigma_xmlrpc.cpp,src/enigma_xmlrpc.h,src/epgwindow.cpp,src/epgwindow.h,src/Makefile.am,src/satconfig.cpp,src/satconfig.h,src/scan.cpp,src/scan.h,src/setup_harddisk.cpp,src/setup_harddisk.h,src/setup_language.cpp,src/setup_language.h,src/setup_lcd.cpp,src/setup_lcd.h,src/setup_osd.cpp,src/setup_osd.h,src/setup_rc.cpp,src/setup_rc.h,src/setupnetwork.cpp,src/setupnetwork.h,src/setupskin.cpp,src/setupskin.h,src/setupvideo.cpp,src/setupvideo.h,src/showbnversion.cpp,src/showbnversion.h,src/sselect.cpp,src/sselect.h,src/streaminfo.cpp,src/streaminfo.h,src/timer.cpp,src/timer.h,src/enigma_ci.h,src/enigma_ci.cpp,src/enigma_dyn.cpp,src/satfind.cpp,src/satfind.h
+files=src/channelinfo.cpp,src/channelinfo.h,src/download.cpp,src/download.h,src/enigma.cpp,src/enigma.h,src/enigma_dyn.h,src/enigma_event.cpp,src/enigma_event.h,src/enigma_info.cpp,src/enigma_info.h,src/enigma_lcd.cpp,src/enigma_lcd.h,src/enigma_main.cpp,src/enigma_main.h,src/enigma_mainmenu.cpp,src/enigma_mainmenu.h,src/enigma_plugins.cpp,src/enigma_plugins.h,src/enigma_scan.cpp,src/enigma_scan.h,src/enigma_setup.cpp,src/enigma_setup.h,src/enigma_vcr.cpp,src/enigma_vcr.h,src/enigma_xmlrpc.cpp,src/enigma_xmlrpc.h,src/epgwindow.cpp,src/epgwindow.h,src/Makefile.am,src/satconfig.cpp,src/satconfig.h,src/scan.cpp,src/scan.h,src/setup_harddisk.cpp,src/setup_harddisk.h,src/setup_language.cpp,src/setup_language.h,src/setup_lcd.cpp,src/setup_lcd.h,src/setup_osd.cpp,src/setup_osd.h,src/setup_rc.cpp,src/setup_rc.h,src/setupnetwork.cpp,src/setupnetwork.h,src/setupskin.cpp,src/setupskin.h,src/setupvideo.cpp,src/setupvideo.h,src/showbnversion.cpp,src/showbnversion.h,src/sselect.cpp,src/sselect.h,src/streaminfo.cpp,src/streaminfo.h,src/timer.cpp,src/timer.h,src/enigma_ci.h,src/enigma_ci.cpp,src/enigma_dyn.cpp,src/satfind.cpp,src/satfind.h,src/rotorconfig.cpp,src/rotorconfig.h
 install=false
 install_location=
 sharedlib_LDFLAGS=-version-info 0:0:0
@@ -1683,6 +1683,18 @@ install_location=
 type=SOURCE
 
 [src/epgwindow.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[src/rotorconfig.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[src/rotorconfig.h]
 dist=true
 install=false
 install_location=

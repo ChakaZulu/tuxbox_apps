@@ -37,8 +37,8 @@ class eTimerManager: public Object
 // nextStarting event, or the current running Event
 	std::list<ePlaylistEntry>::iterator nextStartingEvent;
 
-// both methods are NOT always connected to the eDVB Signals
-	void serviceChanged( const eServiceReferenceDVB& );
+// all methods are NOT always connected to the eDVB Signals
+	void switchedService( const eServiceReferenceDVB&, int err );
 	void leaveService( const eServiceReferenceDVB& );
 
 	long getSecondsToBegin();

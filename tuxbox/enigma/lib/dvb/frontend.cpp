@@ -191,7 +191,7 @@ int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 	cmd.msg[2]=Cmd;
 	cmd.msg_len=0;
 
-	for (uint8_t i = 0; i < params.length() && i < 12; i += 4)
+	for (uint8_t i = 0; i < params.length() && i < 6; i += 2)
 		cmd.msg[3 + cmd.msg_len++] = strtol( params.mid(i, 2).c_str(), 0, 16 );
 
 	if (ioctl(fd, FE_SET_TONE, SEC_TONE_OFF) < 0) {
@@ -203,15 +203,16 @@ int eFrontend::sendDiSEqCCmd( int addr, int Cmd, eString params, int frame )
 		perror("FE_DISEQC_SEND_MASTER_CMD");
 		return -1;
 	}
-
+	
+	lastcsw = -1;
 	return 0;
 }
 
 #if 0
 int eFrontend::RotorUseTimeout(secCmdSequence& seq, int newPosition )
 {
-	int TimePerDegree=600; // msec
-	int startDelay=500;//1000;
+	int TimePerDegree=1000; // msec
+	int startDelay=800;//1000;
 
 	// send DiSEqC Sequence ( normal diseqc switches )
 	if ( ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
@@ -386,16 +387,17 @@ int eFrontend::tune(eTransponder *trans,
 
 	if (sat)   // then we must do Satellite Stuff
 	{
-		int cmdCount=0;
 		struct dvb_diseqc_master_cmd* commands = NULL;
 		eSwitchParameter &swParams = sat->getSwitchParams();
 		eLNB *lnb = sat->getLNB();
     		// Variables to detect if DiSEqC must sent .. or not
 		int csw = lnb->getDiSEqC().DiSEqCParam,
-		    RotorCmd=-1,
-		    SmatvFreq=-1,
-		    ToneBurst=-1;
+		    ToneBurst = lnb->getDiSEqC().MiniDiSEqCParam,
+		    RotorCmd = -1,
+		    SmatvFreq = -1;
 
+		int cmdCount=0;
+		
 		if (csw <= eDiSEqC::BB)  // use AA/AB/BA/BB ?
 		{
 			eDebug("csw=%d, csw<<2=%d", csw, csw << 2);
@@ -409,6 +411,7 @@ int eFrontend::tune(eTransponder *trans,
 		//else we sent directly the cmd 0xF0..0xFF
 
 		eDebug("DiSEqC Switch cmd = %04x", csw);
+
 #if 0
 		// Rotor Support
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 )
@@ -489,29 +492,30 @@ int eFrontend::tune(eTransponder *trans,
 
 		if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 )
 		{
-			int loops;
-
-			if ( cmdCount )  // Smatv or Rotor is avail...
+			if (csw != lastcsw || (ToneBurst && ToneBurst != lastToneBurst) )
 			{
-				loops = cmdCount - 1;  // do not overwrite rotor cmd
-			}
-			else // no rotor or smatv
-			{
+				int loops;
+				if ( cmdCount )  // Smatv or Rotor is avail...
+				{
+					loops = cmdCount - 1;  // do not overwrite rotor cmd
+				}
+				else // no rotor or smatv
+				{
 				// DiSEqC Repeats and uncommitted switches only when DiSEqC >= V1_1
-				if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1 )
-				{
-					if ( lnb->getDiSEqC().uncommitted_gap ) // then we add 2 * repeats + 1;
-						loops = cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 1;
-					else // then we add repeats + 1
+					if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1 )
+					{
+						if ( lnb->getDiSEqC().uncommitted_gap ) // then we add 2 * repeats + 1;
+							loops = cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 1;
+						else // then we add repeats + 1
 						loops = cmdCount = lnb->getDiSEqC().DiSEqCRepeats + 1;
-				}
-				else // send only one DiSEqC Command
-				{
-					loops = cmdCount = 1;
-				}
+					}
+					else // send only one DiSEqC Command
+					{
+						loops = cmdCount = 1;
+					}
 
 				// allocate memory for all DiSEqC commands
-				commands = new dvb_diseqc_master_cmd[cmdCount];
+					commands = new dvb_diseqc_master_cmd[cmdCount];
 			}
 
 			for ( int i = 0; i < loops;)  // fill commands...
@@ -546,136 +550,115 @@ int eFrontend::tune(eTransponder *trans,
 				}
 			}
 		}
-
-
-
-		else // no DiSEqC
-		{
-			eDebug("no DiSEqC");
-			cmdCount = 0;
-		}
-
-		eDebug("Commands to send = %d", cmdCount);
-
-
-
-
-		// calc Frequency
-		int local = Frequency - ( Frequency > lnb->getLOFThreshold() ? lnb->getLOFHi() : lnb->getLOFLo() );
-		front.frequency = local > 0 ? local : -local;
-
-
-
-
-		// FIXME: set only once
-		if (lnb->getIncreasedVoltage())
-			ioctl(fd, FE_ENABLE_HIGH_LNB_VOLTAGE, 1);
-
-
-
-		// disable tone before anything else
-		if ( csw != lastcsw || ToneBurst != lastToneBurst )
-			ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
-
-
-		if ( csw != lastcsw )
-		{
-        		// Voltage( 0/14/18V  vertical/horizontal )
-			if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
-			{
-				ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_13);
-				usleep(15 * 1000);
-			}
-			else if ( swParams.VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams.VoltageMode == eSwitchParameter::HV)  )
-			{
-				ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_18);
-				usleep(15 * 1000);
-			}
-		}
-
-
-#if 0
-		// handle DiSEqC Rotor
-		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && (lastRotorCmd != RotorCmd) )
-		{
-			lastRotorCmd = RotorCmd;
-
-			// drive rotor always with 18V ( is faster )
-			seq.voltage = SEC_VOLTAGE_18;
-
-			RotorUseInputPower(seq, (void*) commands, lnb->getDiSEqC().SeqRepeat );
-			//RotorUseTimeout(seq, sat->getOrbitalPosition() );
-
-			// set the right voltage
-			if ( voltage != SEC_VOLTAGE_18 )
-				ioctl(secfd, SEC_SET_VOLTAGE, &voltage);
-		}
-		else
-#endif
-
-
-		// DiSEqC commands
-		if ( csw != lastcsw && lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 && commands && cmdCount)
-		{
-			ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &commands[0]);
-
-			for (int i = 1; i < cmdCount; i++) 
-			{
-				usleep(80 * 1000);
-				ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &commands[i]);
-			}
-
-			usleep(15 * 1000);
-		}
-
-
-
-		// Toneburst (MiniDiSEqC)
-		if ( ToneBurst != lastToneBurst )
-		{
-			if ( lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::A)
-			{
-				ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_A);
-				usleep(15 * 1000);
-			}
-			else if (lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::B)
-			{
-				ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_B);
-				usleep(15 * 1000);
-			}
-		}
-
-
-		// set Continuous Tone ( 22 Khz... low - high band )
-		if ( csw != lastcsw || ToneBurst != lastToneBurst )
-		{
-	    		if ( (swParams.HiLoSignal == eSwitchParameter::ON) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency > lnb->getLOFThreshold()) ) )
-        		{
-				ioctl(fd, FE_SET_TONE, SEC_TONE_ON);
-			}
-			else if ( (swParams.HiLoSignal == eSwitchParameter::OFF) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency <= lnb->getLOFThreshold()) ) )
-			{
-				ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
-			}
-			lastToneBurst = ToneBurst;
-			lastcsw = csw;
-		}
-
-
-
-		// delete allocated memory...
-		if (cmdCount)
-			delete [] commands;
+	}
+	else // no DiSEqC
+	{
+		eDebug("no DiSEqC");
+		cmdCount = 0;
 	}
 
-	else {
+	eDebug("Commands to send = %d", cmdCount);
+
+	// calc Frequency
+	int local = Frequency - ( Frequency > lnb->getLOFThreshold() ? lnb->getLOFHi() : lnb->getLOFLo() );
+	front.frequency = local > 0 ? local : -local;
+
+	// FIXME: set only once
+	if (lnb->getIncreasedVoltage())
+		ioctl(fd, FE_ENABLE_HIGH_LNB_VOLTAGE, 1);
+
+	// disable tone before anything else
+	if ( csw != lastcsw )
+		ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
+    
+	// Voltage( 0/14/18V  vertical/horizontal )
+	if ( swParams.VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams.VoltageMode == eSwitchParameter::HV )  )
+	{
+		ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_13);
+		usleep(15 * 1000);
+	}
+	else if ( swParams.VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams.VoltageMode == eSwitchParameter::HV)  )
+	{
+		ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_18);
+		usleep(15 * 1000);
+	}
+
+#if 0
+	// handle DiSEqC Rotor
+	if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::V1_2 && (lastRotorCmd != RotorCmd) )
+	{
+		lastRotorCmd = RotorCmd;
+
+		// drive rotor always with 18V ( is faster )
+		seq.voltage = SEC_VOLTAGE_18;
+
+		RotorUseInputPower(seq, (void*) commands, lnb->getDiSEqC().SeqRepeat );
+		//RotorUseTimeout(seq, sat->getOrbitalPosition() );
+
+		// set the right voltage
+		if ( voltage != SEC_VOLTAGE_18 )
+			ioctl(secfd, SEC_SET_VOLTAGE, &voltage);
+	}
+	else
+#endif
+
+	// DiSEqC commands
+	if ( csw != lastcsw && lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 && commands && cmdCount)
+	{
+		ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &commands[0]);
+
+		for (int i = 1; i < cmdCount; i++) 
+		{
+			usleep(80 * 1000);
+			ioctl(fd, FE_DISEQC_SEND_MASTER_CMD, &commands[i]);
+		}
+
+		usleep(15 * 1000);
+	}
+
+        // Toneburst (MiniDiSEqC)
+	if ( ToneBurst && ToneBurst != lastToneBurst )
+	{
+		if ( lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::A)
+		{
+			ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_A);
+			usleep(15 * 1000);
+		}
+		else if (lnb->getDiSEqC().MiniDiSEqCParam == eDiSEqC::B)
+		{
+			ioctl(fd, FE_DISEQC_SEND_BURST, SEC_MINI_B);
+			usleep(15 * 1000);
+		}
+	}
+
+	// set Continuous Tone ( 22 Khz... low - high band )
+	if ( csw != lastcsw || ToneBurst != lastToneBurst )
+	{
+    		if ( (swParams.HiLoSignal == eSwitchParameter::ON) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency > lnb->getLOFThreshold()) ) )
+    		{
+			ioctl(fd, FE_SET_TONE, SEC_TONE_ON);
+		}
+		else if ( (swParams.HiLoSignal == eSwitchParameter::OFF) || ( (swParams.HiLoSignal == eSwitchParameter::HILO) && (Frequency <= lnb->getLOFThreshold()) ) )
+		{
+			ioctl(fd, FE_SET_TONE, SEC_TONE_OFF);
+		}
+	}
+
+	lastcsw = csw;
+	lastToneBurst = ToneBurst;
+	
+	// delete allocated memory...
+	if (cmdCount)
+		delete [] commands;
+	}
+	else 
+	{
 		// we have only a cable box
 		eDebug("no valid LNB... Cable Box ?");
 	}
 
 
 	front.inversion=Inversion;
-
 
 	switch (type)
 	{

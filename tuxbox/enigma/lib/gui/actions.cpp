@@ -224,7 +224,7 @@ int eActionMapList::loadXML(const char *filename)
 	FILE *in=fopen(filename, "rt");
 	if (!in)
 	{
-		eFatal("cannot open %s", filename);
+//		eDebug("cannot open %s", filename);
 		return -1;
 	}
 

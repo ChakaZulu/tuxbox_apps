@@ -17,12 +17,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_harddisk.cpp,v 1.4 2002/12/19 21:17:27 Ghostrider Exp $
+ * $Id: setup_harddisk.cpp,v 1.5 2003/01/12 00:49:03 Ghostrider Exp $
  */
 
 #include <setup_harddisk.h>
 #include <lib/gui/emessage.h>
 #include <sys/vfs.h> // for statfs
+#include <unistd.h>
+#include <signal.h>
+
+// #define EXT3
 
 static int getCapacity(int dev)
 {
@@ -119,7 +123,52 @@ int freeDiskspace(int dev, eString mp="")
 	return -1;
 }
 
-eHarddiskSetup::eHarddiskSetup(): eListBoxWindow<eListBoxEntryText>(_("harddisk setup..."), 5, 420, true)
+eString getPartFS(int dev, eString mp="")
+{
+	FILE *f=fopen("/proc/mounts", "rb");
+	if (!f)
+		return "";
+	eString path;
+	int host=dev/4;
+	int bus=!!(dev&2);
+	int target=!!(dev&1);
+	path.sprintf("/dev/ide/host%d/bus%d/target%d/lun0/", host, bus, target);
+
+	while (1)
+	{
+		char line[1024];
+		if (!fgets(line, 1024, f))
+			break;
+
+		if (!strncmp(line, path.c_str(), path.size()))
+		{
+			eString mountpoint=line;
+			mountpoint=mountpoint.mid(mountpoint.find(' ')+1);
+			mountpoint=mountpoint.left(mountpoint.find(' '));
+//			eDebug("mountpoint: %s", mountpoint.c_str());
+			if ( mp && mountpoint != mp )
+				continue;
+
+			if (!strncmp(line, path.c_str(), path.size()))
+			{
+				eString fs=line;
+				fs=fs.mid(fs.find(' ')+1);
+				fs=fs.mid(fs.find(' ')+1);
+				fs=fs.left(fs.find(' '));
+				eString mpath=line;
+				mpath=mpath.left(mpath.find(' '));
+				mpath=mpath.mid(mpath.rfind('/')+1);
+				fclose(f);
+				return fs+','+mpath;
+			}
+		}
+	}
+	fclose(f);
+	return "";
+}
+
+eHarddiskSetup::eHarddiskSetup()
+: eListBoxWindow<eListBoxEntryText>(_("harddisk setup..."), 5, 420, true)
 {
 	nr=0;
 	
@@ -191,6 +240,16 @@ void eHarddiskSetup::selectedHarddisk(eListBoxEntryText *t)
 	show();
 }
 
+void eHarddiskMenu::check()
+{
+	hide();
+	ePartitionCheck check(dev);
+	check.show();
+	check.exec();
+	check.hide();
+	show();
+}
+
 void eHarddiskMenu::s_format()
 {
 	hide();
@@ -224,6 +283,9 @@ void eHarddiskMenu::s_format()
 		int bus=!!(dev&2);
 		int target=!!(dev&1);
 
+// kill samba server... (exporting /hdd)
+		system("killall -9 smbd");
+
 		system(
 				eString().sprintf(
 				"/bin/umount /dev/ide/host%d/bus%d/target%d/lun0/part*", host, bus, target).c_str());
@@ -251,18 +313,28 @@ void eHarddiskMenu::s_format()
 		fclose(f);
 
 		
-		if ((system(
+		if ( (system("sync") >> 8)
+			||
+			( system(
 #ifdef EXT3
 				eString().sprintf(
 				"/sbin/mkfs.ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 )
-#else // REISERFS
-				eString().sprintf(
-				"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 )
-#endif
+				||
+				(system("sync") >> 8)
 				||
 				(system(
 				eString().sprintf(
-				"/bin/mount /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8 ) ||
+				"/bin/mount -t ext3 /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8 ) ||
+#else // REISERFS
+				eString().sprintf(
+				"/sbin/mkreiserfs -f -f /dev/ide/host%d/bus%d/target%d/lun0/part1", host, bus, target).c_str())>>8 )
+				||
+				(system("sync") >> 8)
+				||
+				(system(
+				eString().sprintf(
+				"/bin/mount -t reiserfs /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str())>>8 ) ||
+#endif
 				(system("mkdir /hdd/movie")>>8 )
 				)
 		{
@@ -287,7 +359,8 @@ void eHarddiskMenu::s_format()
 		}
 		readStatus();
 	} while (0);
-	
+	// restart samba...
+	system("/bin/smbd -D");
 	show();
 }
 
@@ -314,7 +387,7 @@ void eHarddiskMenu::readStatus()
 	else if (!numpart)
 		status->setText(_("uninitialized - format it to use!"));
 	else if ((fds=freeDiskspace(dev)) != -1)
-		status->setText(eString().sprintf(_("in use, %d.%03d GB (~%d minutes) free"), fds/1000, fds%1000, fds/33));
+		status->setText(eString().sprintf(_("in use, %d.%03d GB (~%d minutes) free"), fds/1000, fds%1000, fds/33 ));
 	else
 		status->setText(_("initialized, but unknown filesystem"));
 }
@@ -328,12 +401,144 @@ eHarddiskMenu::eHarddiskMenu(int dev): dev(dev)
 	
 	close=new eButton(this); close->setName("close");
 	format=new eButton(this); format->setName("format");
+	bcheck=new eButton(this); bcheck->setName("check");
 
 	if (eSkin::getActive()->build(this, "eHarddiskMenu"))
 		eFatal("skin load of \"eHarddiskMenu\" failed");
-	
+
 	readStatus();
-	
+
 	CONNECT(close->selected, eWidget::accept);
-	CONNECT(format->selected, eHarddiskMenu::s_format);	
+	CONNECT(format->selected, eHarddiskMenu::s_format);
+	CONNECT(bcheck->selected, eHarddiskMenu::check);
+}
+
+ePartitionCheck::ePartitionCheck( int dev )
+:dev(dev), fsck(0)
+{
+	lState = new eLabel(this);
+	lState->setName("state");
+	bCancel = new eButton(this);
+	bCancel->setName("cancel");
+	bClose = new eButton(this);
+	bClose->setName("close");
+	CONNECT( bCancel->selected, ePartitionCheck::onCancel );
+	CONNECT( bClose->selected, ePartitionCheck::accept );
+	if (eSkin::getActive()->build(this, "ePartitionCheck"))
+		eFatal("skin load of \"ePartitionCheck\" failed");
+	bClose->hide();
+}
+
+int ePartitionCheck::eventHandler( const eWidgetEvent &e )
+{
+	switch(e.type)
+	{
+		case eWidgetEvent::execBegin:
+		{
+			eString fs = getPartFS(dev,"/hdd"),
+							part = fs.mid( fs.find(",")+1 );
+
+			fs = fs.left( fs.find(",") );
+
+			eDebug("part = %s, fs = %s", part.c_str(), fs.c_str() );
+
+			int host=dev/4;
+			int bus=!!(dev&2);
+			int target=!!(dev&1);
+
+			// kill samba server... (exporting /hdd)
+			system("killall -9 smbd");
+
+			if ( system("/bin/umount /hdd") >> 8)
+			{
+				eMessageBox msg(
+				_("could not unmount the filesystem... "),
+				_("check filesystem..."),
+				 eMessageBox::btOK|eMessageBox::iconError);
+				close(-1);
+			}
+			if ( fs == "ext3" )
+			{
+				fsck = new eConsoleAppContainer( eString().sprintf("/sbin/fsck.ext3 -f /dev/ide/host%d/bus%d/target%d/lun0/%s", host, bus, target, part.c_str()) );
+
+				if ( !fsck->running() )
+				{
+					eMessageBox msg(
+						_("sorry, couldn't find fsck.ext3 utility to check the ext3 filesystem."),
+						_("check filesystem..."),
+						eMessageBox::btOK|eMessageBox::iconError);
+					msg.show();
+					msg.exec();
+					msg.hide();
+					close(-1);
+				}
+				else
+				{
+					eDebug("fsck.ext3 opened");
+					CONNECT( fsck->dataAvail, ePartitionCheck::getData );
+					CONNECT( fsck->appClosed, ePartitionCheck::fsckClosed );
+				}
+			}
+			else if ( fs == "reiserfs" )
+			{
+				
+			}
+			else
+			{
+				eMessageBox msg(
+					_("not supportet filesystem for check."),
+					_("check filesystem..."),
+					eMessageBox::btOK|eMessageBox::iconError);
+				msg.show();
+				msg.exec();
+				msg.hide();
+				close(-1);
+			}
+		}
+		break;
+
+		case eWidgetEvent::execDone:
+			if (fsck)
+				delete fsck;
+		break;
+
+		default:
+			return eWindow::eventHandler( e );
+	}
+	return 1;	
+}
+
+void ePartitionCheck::onCancel()
+{
+	if (fsck)
+		fsck->kill();
+}
+
+void ePartitionCheck::fsckClosed(int state)
+{
+	int host=dev/4;
+	int bus=!!(dev&2);
+	int target=!!(dev&1);
+
+	if ( system( eString().sprintf("/bin/mount /dev/ide/host%d/bus%d/target%d/lun0/part1 /hdd", host, bus, target).c_str() ) >> 8 )
+		eDebug("mount hdd after check failed");
+
+	system("/bin/smbd -D");
+	eDebug("smbd restarted");
+
+	if (fsck)
+	{
+		delete fsck;
+		fsck=0;
+	}
+
+	bClose->show();
+}
+
+void ePartitionCheck::getData( eString str )
+{
+	lState->setText(str);
+	
+	if ( str.find("<y>") != eString::npos )
+		fsck->write("y");
 }

@@ -1,8 +1,8 @@
 #include <lib/gui/combobox.h>
 #include <lib/gdi/font.h>
 
-eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, const char *deco )
-:eButton(parent, desc, 1, deco), listbox(0), button( this, 0, 0, eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0)?"eButton":""), pm(0), entries(OpenEntries)
+eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, int takefocus, const char *deco )
+:eButton(parent, desc, takefocus, deco), listbox(0, 0, takefocus), button( this, 0, 0, eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0)?"eButton":""), pm(0), entries(OpenEntries)
 {
 	align=eTextPara::dirLeft;
 	if ( eSkin::getActive()->queryValue("eComboBox.smallButton.decoWidth",0) )
@@ -43,7 +43,9 @@ void eComboBox::onOkPressed()
 		listbox.move( ePoint( pt.x(), pt.y()-listbox.getSize().height() ) );
 	else
 		listbox.move( ePoint( pt.x(), pt.y()+getSize().height() ) );
- listbox.show();
+
+	eWindow::globalCancel( eWindow::OFF );
+	listbox.show();
 }
 
 int eComboBox::setProperty( const eString& prop, const eString& val )
@@ -106,21 +108,35 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 	return 1;
 }
 
+int eComboBox::moveSelection ( int dir )
+{
+	int ret = listbox.moveSelection( dir );
+	eListBoxEntryText *cur = listbox.getCurrent();
+	if ( cur )
+		setText( cur->getText() );
+	return ret;
+}
+
+
 void eComboBox::onEntrySelected( eListBoxEntryText* e)
 {
- listbox.hide();
+	listbox.hide();
 	if (flags & flagShowEntryHelp)
 		setHelpText( oldHelpText );
 
 	if (e && button.getText() != e->getText() )
 	{
-		setText( e->getText() );
+		setText( e->getText(), false );
 		setFocus( this );
+		if ( parent->LCDElement )
+			parent->LCDElement->setText("");
 		/* emit */ selchanged_id(this, e);
 		/* emit */ selchanged(e);
 	}
 	else
 		setFocus( this );
+
+	eWindow::globalCancel( eWindow::ON );
 }
 
 void eComboBox::onSelChanged(eListBoxEntryText* le)

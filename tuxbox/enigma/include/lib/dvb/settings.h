@@ -36,6 +36,7 @@ public:
 	
 	void clearList();
 	void removeOrbitalPosition(int orbital_position);
+	int importSatcoDX(eString line);
 	
 	eDVBSettings(eDVB &dvb);
 	~eDVBSettings();

@@ -15,4 +15,3 @@ libenigma_dvb_la_SOURCES = \
 libenigma_dvb_la_LDFLAGS = @ID3TAG_LIBS@ @MAD_LIBS@ -ltuxbox
 
 AM_CPPFLAGS = -DPROFILE
-

@@ -2,7 +2,7 @@
 #define __enigma_h
 
 #include <lib/base/ebase.h>
-#include <sselect.h>
+#include <src/sselect.h>
 
 class eServiceSelector;
 class eServicePath;

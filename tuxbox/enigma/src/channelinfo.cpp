@@ -196,20 +196,14 @@ void eChannelInfo::ParseEITInfo(EITEvent *e)
 void eChannelInfo::closeEIT()
 {
 	if (eit)
-	{
-//		eDebug("close EIT");
 		eit->abort();
-	}
 }
 
 void eChannelInfo::getServiceInfo( const eServiceReferenceDVB& service )
 {
 	closeEIT();
-	if (eit)
-	{
-		eit=0;
-		delete eit;
-	}
+	delete eit;
+	eit=0;
 	
 	// eService *service=eServiceInterface::getInstance()->addRef(service);
 	

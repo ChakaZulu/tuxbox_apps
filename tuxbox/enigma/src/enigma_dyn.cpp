@@ -38,6 +38,7 @@
 // #include <lib/dvr/dvrsocket.h>
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
+#define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 
 #define DELETE(WHAT) result.strReplace(#WHAT, "")
 
@@ -141,12 +142,13 @@ static std::map<eString,eString> getRequestOptions(eString opt)
 
 static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result;
 	time_t atime;
 	time(&atime);
 	atime+=eDVB::getInstance()->time_difference;
 	result="<html>\n"
+		CHARSETMETA
 		"<head>\n"
 		"  <title>enigma status</title>\n"
 		"  <link rel=stylesheet type=\"text/css\" href=\"/index.css\">\n"
@@ -163,7 +165,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 
 static eString switchService(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	unsigned int optval=opt.find("=");
@@ -190,20 +192,20 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 
 static eString admin(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString command=opt["command"];
 	if (command && command=="shutdown")
 	{
 		eZap::getInstance()->quit();
-		return "<html><head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>\n";
+		return "<html>" CHARSETMETA "<head><title>Shutdown</title></head><body>Shutdown initiated.</body></html>\n";
 	} else
-		return "<html><head><title>Error</title></head><body>Unknown admin command.</body></html>\n";
+		return "<html>" CHARSETMETA "<head><title>Error</title></head><body>Unknown admin command.</body></html>\n";
 }
 
 static eString audio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString,eString> opt=getRequestOptions(opts);
 	eString result="";
 	eString volume=opt["volume"];
@@ -260,7 +262,7 @@ static eString version(eString request, eString dirpath, eString opt, eHTTPConne
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
 	eString result="";
-	content->local_header["Content-Type"]="text/plain";
+	content->local_header["Content-Type"]="text/plain; charset=utf-8";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
@@ -286,7 +288,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 	eString result="";
 	int mut=0, vol=0;
 
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	result+="<script language=\"javascript\">window.close();</script>";
 	mute=opt["mute"];
@@ -731,7 +733,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	eString tmp;
 	eService* current;
 
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
@@ -741,7 +743,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	if(!current)
 		return eString("epg not ready yet");
 
-	result+=eString("<html><head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/epgview.css\"></head><body bgcolor=#000000>");
+	result+=eString("<html>" CHARSETMETA "<head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/epgview.css\"></head><body bgcolor=#000000>");
 	result+=eString("<span class=\"title\">");
 	result+=eString(current->service_name);
 	result+=eString("</span>");
@@ -788,7 +790,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	eString onid("");
 	eString sid("");
 
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
@@ -841,7 +843,7 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	}
 
 
-	result+=eString("<html><head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>");
+	result+=eString("<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>");
 	result+=eString("<table cellspacing=0 cellpadding=0 border=0>");
 	result+=eString("<tr><td>name:</td><td>"+name+"</td></tr>");
 	result+=eString("<tr><td>provider:</td><td>"+provider+"</td></tr>");
@@ -984,7 +986,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		content->local_header["Location"]=eString(NAVIGATOR_PATH) + "?path=" + ref2string(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0));
 		return "redirecting..";
 	}
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString spath=opts["path"];
 
 	eServiceInterface *iface=eServiceInterface::getInstance();
@@ -1010,6 +1012,7 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 	eString res;
 	
 	res="<html>\n"
+		CHARSETMETA
 		"<head><title>Enigma Navigator</title></head>\n"
 		"<body bgcolor=\"#f0f0f0\">\n"
 		"<font color=\"#000000\">\n";
@@ -1043,7 +1046,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 {
 	eString result;
 	std::map<eString,eString> opt=getRequestOptions(opts);
-	content->local_header["Content-Type"]="text/html";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
 	eString mode=opt["mode"];
 	eString spath=opt["path"];

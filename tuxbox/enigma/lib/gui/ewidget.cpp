@@ -174,9 +174,12 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 		if (area.width()>0)
 		{
 			gPainter *p=getPainter(area);
-			eraseBackground(p, area);
-			redrawWidget(p, area);
-			delete p;
+			if (p)
+			{
+				eraseBackground(p, area);
+				redrawWidget(p, area);
+				delete p;
+			}
 		}
 		if(!childlist.empty())
 		{
@@ -218,6 +221,7 @@ void eWidget::invalidate(eRect area, int force)
 		area.moveBy(w->position.x(), w->position.y());
 		w=w->parent;
 		area.moveBy(w->clientrect.x(), w->clientrect.y());
+		area&=w->clientrect;
 	}
 	w->redraw(area);
 }
@@ -294,7 +298,7 @@ void eWidget::show()
 	ASSERT(!(state&stateVisible));
 
 	state|=stateShow;
-
+	
 	if (!parent || (parent->state&stateVisible))
 	{
 		getTLW()->just_showing++;
@@ -305,6 +309,7 @@ void eWidget::show()
 		redraw();
 	}
 }
+
 
 void eWidget::accept()
 {
@@ -452,10 +457,7 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 		break;
 
 	case eWidgetEvent::changedSize:
-	case eWidgetEvent::changedText:
 	case eWidgetEvent::changedFont:
-	case eWidgetEvent::changedForegroundColor:
-	case eWidgetEvent::changedBackgroundColor:
 	case eWidgetEvent::changedPosition:
 	case eWidgetEvent::changedPixmap:
 		invalidate();
@@ -538,10 +540,7 @@ void eWidget::redrawWidget(gPainter *target, const eRect &clip)
 void eWidget::eraseBackground(gPainter *target, const eRect &clip)
 {
 	if (((int)getBackgroundColor())!=-1)
-	{
 		target->clear();
-		target->flush();
-	}
 }
 
 void eWidget::focusNext(int dir)
@@ -605,14 +604,32 @@ void eWidget::focusNext(int dir)
 				continue;
 			if (!(i->state&stateVisible))
 				continue;
-			ePoint m1=i->getPosition();
-			m1+=ePoint(i->getSize().width()/2, i->getSize().height()/2);
-			ePoint m2=_focusList.current()->getPosition();
-			m2+=ePoint(_focusList.current()->getSize().width()/2, _focusList.current()->getSize().height()/2);
+			ePoint m1=i->getAbsolutePosition();
+			ePoint m2=_focusList.current()->getAbsolutePosition();
+			switch (dir)
+			{
+			case focusDirN:		// diff between our TOP and new BOTTOM
+				m1+=ePoint(i->getSize().width()/2, i->getSize().height());
+				m2+=ePoint(_focusList.current()->getSize().width()/2, 0);
+				break;
+			case focusDirS:		// diff between our BOTTOM and new TOP
+				m1+=ePoint(i->getSize().width()/2, 0);
+				m2+=ePoint(_focusList.current()->getSize().width()/2, _focusList.current()->getSize().height());
+				break;
+			case focusDirE:		// diff between our RIGHT and new LEFT border
+				m1+=ePoint(0, i->getSize().height()/2);
+				m2+=ePoint(_focusList.current()->getSize().width(), _focusList.current()->getSize().height()/2);
+				break;
+			case focusDirW:		// diff between our LEFT and new RIGHT border
+				m1+=ePoint(i->getSize().width(), i->getSize().height()/2);
+				m2+=ePoint(0, _focusList.current()->getSize().height()/2);
+				break;
+			}
 			
 			int xd=m1.x()-m2.x();
 			int yd=m1.y()-m2.y();
-#if 0
+#define METHOD 0
+#if METHOD == 0
 			int dif=xd*xd+yd*yd;
 			int eff=0;
 
@@ -635,16 +652,16 @@ void eWidget::focusNext(int dir)
 					eff=1<<30;
 				break;
 			}
-			
+
 			if (eff < difference)
 			{
 				difference=eff;
 				nearest=*i;
 			}
-#else
+#elif METHOD == 1
 			int ldir=focusDirN;
 			int mydiff=0;
-			
+
 			if (xd > mydiff)	// rechts
 			{
 				mydiff=xd;
@@ -674,6 +691,8 @@ void eWidget::focusNext(int dir)
 					nearest=*i;
 				}
 			}
+#elif METHOD == 2
+
 #endif
 
 		}
@@ -719,40 +738,46 @@ void eWidget::setFont(const gFont &fnt)
 	event(eWidgetEvent(eWidgetEvent::changedFont));
 }
 
-void eWidget::setText(const eString &label)
+void eWidget::setText(const eString &label, bool inv)
 {
 	if (label != text)	// ein compare ist immer weniger arbeit als ein unnoetiges redraw
 	{
 		text=label;
 		event(eWidgetEvent(eWidgetEvent::changedText));
+		if (inv)
+			invalidate();
 	}
 }
 
-void eWidget::setBackgroundColor(const gColor& color)
+void eWidget::setBackgroundColor(const gColor& color, bool inv)
 {
 	if (color!=backgroundColor)
 	{
 		backgroundColor=color;
 		event(eWidgetEvent(eWidgetEvent::changedBackgroundColor));
+		if (inv)
+			invalidate();
 	}
 }
 
-void eWidget::setForegroundColor(const gColor& color)
+void eWidget::setForegroundColor(const gColor& color, bool inv)
 {
 	if (color != foregroundColor)
 	{
 		foregroundColor=color;
 		event(eWidgetEvent(eWidgetEvent::changedForegroundColor));
+		if (inv)
+			invalidate();
 	}
 }
 
 void eWidget::setPixmap(gPixmap *pmap)
 {
-  if ( pixmap != pmap )
-  {  
-    pixmap=pmap;
-  	event(eWidgetEvent(eWidgetEvent::changedPixmap));
-  }
+	if ( pixmap != pmap )
+	{
+		pixmap=pmap;
+		event(eWidgetEvent(eWidgetEvent::changedPixmap));
+	}
 }
 
 void eWidget::setTarget(gDC *newtarget)
@@ -776,15 +801,18 @@ gPainter *eWidget::getPainter(eRect area)
 	eRect myclip=eRect(getAbsolutePosition(), size);
 	if (parent)
 		myclip&=parent->clientclip;
-	
+
 	eWidget *r=this;
-	while (r && !r->target)
+	while (r && r->parent && !r->target)
 		r = r->parent;
-		
+
 	ASSERT(r);
-	ASSERT(r->target);
+//	ASSERT(r->target);
+	if (!r->target)	// if target is 0, device is locked.
+		return 0;
 
 	gPainter *p=new gPainter(*r->target, myclip);
+	p->setLogicalZero(getAbsolutePosition());
 	if (!area.isNull())
 		p->clip(area);
 	p->setForegroundColor(foregroundColor);
@@ -872,7 +900,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		}
 		int err=parse(value.c_str(), v, e, 2);
 		if (err)
-			return err;		
+			return err;
 		resize(eSize(v[0], v[1]));
 	}
 	else if (prop=="csize")
@@ -892,7 +920,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 	else if (prop=="text")
 /*	{
 		eString text;
-		
+
 		std::string::const_iterator p(value.begin());
 
 		while(*p)
@@ -923,7 +951,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 			}
 			else
 				text+=*p;
-	
+
 			p++;
 		}
 		setText(text);
@@ -932,7 +960,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 	else if (prop=="helptext")
 		setHelpText(::gettext(value.c_str()));
 	else if (prop=="font")
-		setFont(eSkin::getActive()->queryFont(value));	
+		setFont(eSkin::getActive()->queryFont(value));
 	else if (prop=="name")
 		name=value;
 	else if (prop=="pixmap")
@@ -957,7 +985,7 @@ eWidget *eWidget::search(const eString &sname)
 {
 	if (name==sname)
 		return this;
-		
+
 	if (!childlist.empty())
 	{
 		std::list<eWidget*>::iterator It = childlist.begin();
@@ -1047,12 +1075,12 @@ int eDecoWidget::setProperty( const eString &prop, const eString &value)
 	{
 		if ( value != "" )
 			strDeco=value;
-	
+
 		loadDeco();
 	}
 	else
 		return eWidget::setProperty( prop, value );
-	
+
 	return 0;
 }
 

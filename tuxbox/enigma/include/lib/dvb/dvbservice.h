@@ -63,6 +63,7 @@ public:
 	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors);
 	
 	eDVBCI *DVBCI;
+	eDVBCI *DVBCI2;
 
 	void scanPMT();
 

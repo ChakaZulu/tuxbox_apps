@@ -5,7 +5,8 @@
 #include <lib/dvb/dvbci.h>
 #include <tuxbox/tuxbox.h>
 
-eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
+eDVBServiceController::eDVBServiceController(eDVB &dvb)
+: eDVBController(dvb)
 {
 	CONNECT(dvb.tPAT.tableReady, eDVBServiceController::PATready);
 	CONNECT(dvb.tPMT.tableReady, eDVBServiceController::PMTready);
@@ -117,30 +118,41 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	}
 	case eDVBServiceEvent::eventServiceTuneOK:
+	{
+		int nodvb=0;
 		/*emit*/ dvb.enterTransponder(event.transponder);
 		
-				// do we haved fixed PID values?
+				// do we haved fixed or cached PID values?
 		{
 		  eService *sp=eServiceInterface::getInstance()->addRef(service);
 		  if (sp)
 		  {
-		  	if (sp->dvb && (sp->dvb->dxflags & eServiceDVB::dxNoDVB))
+		  	if (sp->dvb)
 		  	{
-		  		eDebug("ok no DVB");
-		  		// yes, not a real dvb service.
+		  		if (sp->dvb->dxflags & eServiceDVB::dxNoDVB)
+		  			nodvb=1;
+		  		// set cached pids...
 		  		Decoder::parms.vpid=sp->dvb->get(eServiceDVB::cVPID);
-		  		Decoder::parms.apid=sp->dvb->get(eServiceDVB::cAPID);
+		  		if (sp->dvb->get(eServiceDVB::cAC3PID) != -1)
+		  		{
+		  			Decoder::parms.audio_type=DECODE_AUDIO_AC3;
+			  		Decoder::parms.apid=sp->dvb->get(eServiceDVB::cAC3PID);
+					} else
+					{
+		  			Decoder::parms.audio_type=DECODE_AUDIO_MPEG;
+			  		Decoder::parms.apid=sp->dvb->get(eServiceDVB::cAPID);
+			  	}
 		  		Decoder::parms.tpid=sp->dvb->get(eServiceDVB::cTPID);
 		  		Decoder::parms.pcrpid=sp->dvb->get(eServiceDVB::cPCRPID);
 		  		Decoder::Set();
-					dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitched));
-					break;
 		  	}
 		  	eServiceInterface::getInstance()->removeRef(service);
 		  }
 		}
-
-		dvb.tPAT.start(new PAT());
+		
+		if (!nodvb)		// if not a dvb service, don't even try to search a PAT, PMT etc.
+			dvb.tPAT.start(new PAT());
+			
 		if (tdt)
 			delete tdt;
 		if (tMHWEIT)
@@ -149,6 +161,17 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		tdt=new TDT();
 		CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
 		tdt->start();
+
+
+		if (nodvb)
+		{
+			dvb.tEIT.start(new EIT(EIT::typeNowNext, service.getServiceID().get(), EIT::tsActual));
+			service_state=0;
+			/*emit*/ dvb.enterService(service);
+			/*emit*/ dvb.switchedService(service, -service_state);
+			dvb.setState(eDVBServiceState(eDVBServiceState::stateIdle));
+			break;
+		}
 
 		dvb.tSDT.start(new SDT());
 		switch (service.getServiceType())
@@ -179,6 +202,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 			break;
 		}
 		break;
+	}
 	case eDVBServiceEvent::eventServiceTuneFailed:
 		eDebug("[TUNE] tune failed");
 		service_state=ENOENT;
@@ -290,7 +314,14 @@ void eDVBServiceController::EITready(int error)
 	eDebug("EITready %s", strerror(-error));
 	if (!error)
 	{
-		EIT *eit=dvb.tEIT.getCurrent();
+		EIT *eit=dvb.getEIT();
+		if ( service.getServiceType() == 4 ) // NVOD Service
+		{
+			delete dvb.nvodEIT;
+			dvb.nvodEIT = new EIT( eit );
+			dvb.nvodEIT->events.setAutoDelete(true);
+			eit->events.setAutoDelete(false);
+		}
 		/*emit*/ dvb.gotEIT(eit, 0);
 		eit->unlock();
 	} else
@@ -318,11 +349,29 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 	
 	Decoder::Flush();
 	/*emit*/ dvb.leaveService(service);
-	
+
 	service=newservice;
 	
+	dvb.tEIT.start(0);  // clear eit	
+	dvb.tPAT.start(0);  // clear tables.
+	dvb.tPMT.start(0);
+	dvb.tSDT.start(0);
+
 	if (service)
 		dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceSwitch));
+
+	switch(newservice.getServiceType())
+	{
+		case 1:
+		case 2:
+			delete dvb.nvodEIT;
+			dvb.nvodEIT = 0;
+		break;
+		case 5:
+			eDebug("NVOD EIT Fake");
+			dvb.gotEIT(0,0);   // eit for nvod reference services
+		break;
+	}
 	return 1;
 }
 
@@ -350,38 +399,52 @@ void eDVBServiceController::scanPMT()
 	Decoder::parms.descriptor_length=0;
 	
 	DVBCI=eDVB::getInstance()->DVBCI;
-  //DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::flush, pmt->program_number));
+	DVBCI2=eDVB::getInstance()->DVBCI2;
+	
   DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
+  DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTflush, pmt->program_number));
 
 	isca+=checkCA(calist, pmt->program_info);
-
-	//DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::es));
 	
 	PMTEntry *audio=0, *video=0, *teletext=0;
-	
+
+	int audiopid=-1, videopid=-1;
+
+		// check formerly selected languages
+  eService *sp=eServiceInterface::getInstance()->addRef(service);
+  if (sp)
+  {
+  	if (sp->dvb)
+	 	{
+  		videopid=sp->dvb->get(eServiceDVB::cVPID);
+  		audiopid=sp->dvb->get(eServiceDVB::cAPID);
+  		sp->dvb->set(eServiceDVB::cPCRPID, Decoder::parms.pcrpid);
+  	}
+  	eServiceInterface::getInstance()->removeRef(service);
+  }
+
 	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
 		PMTEntry *pe=*i;
 
 		DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
+		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddPID, pe->elementary_PID,pe->stream_type));
 
 		switch (pe->stream_type)
 		{
 		case 1:	// ISO/IEC 11172 Video
 		case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
-			if (!video)
+			if ((!video) || (pe->elementary_PID == videopid))
 			{
   			video=pe;
-        //DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addVideo, pe->elementary_PID));
 			}
 			isca+=checkCA(calist, pe->ES_info);
 			break;
 		case 3:	// ISO/IEC 11172 Audio
 		case 4: // ISO/IEC 13818-3 Audio
-			if (!audio)
+			if ((!audio) || (pe->elementary_PID == audiopid))
 			{
 				audio=pe;
-        //DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addAudio, pe->elementary_PID));
 			}
 			isca+=checkCA(calist, pe->ES_info);
 			break;
@@ -390,10 +453,9 @@ void eDVBServiceController::scanPMT()
 			isca+=checkCA(calist, pe->ES_info);
 			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 			{
-				if ((i->Tag()==DESCR_AC3))
+				if ((i->Tag()==DESCR_AC3) && (pe->elementary_PID == audiopid))
 				{
-	        //DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addAudio, pe->elementary_PID));
-					/* audio=pe; */
+					audio=pe;
 				}
 				if (i->Tag()==DESCR_TELETEXT)
 					teletext=pe;
@@ -424,6 +486,7 @@ void eDVBServiceController::scanPMT()
 	}
 
   DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
+  DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
   
 	setPID(video);
 	setPID(audio);
@@ -479,15 +542,45 @@ void eDVBServiceController::setPID(const PMTEntry *entry)
 				}
 			}
 		}
+
+	  eService *sp=eServiceInterface::getInstance()->addRef(service);
 		if (isaudio)
 		{
-			Decoder::parms.audio_type=isAC3?DECODE_AUDIO_AC3:DECODE_AUDIO_MPEG;
-			Decoder::parms.apid=entry->elementary_PID;
+			if (isAC3)
+			{
+				Decoder::parms.audio_type=DECODE_AUDIO_AC3;
+				Decoder::parms.apid=entry->elementary_PID;
+				if (sp && sp->dvb)
+				{
+					sp->dvb->set(eServiceDVB::cAC3PID, entry->elementary_PID);
+					sp->dvb->set(eServiceDVB::cAPID, -1);
+				}
+			} else
+			{
+				Decoder::parms.audio_type=DECODE_AUDIO_MPEG;
+				Decoder::parms.apid=entry->elementary_PID;
+				if (sp && sp->dvb)
+				{
+					sp->dvb->set(eServiceDVB::cAC3PID, -1);
+					sp->dvb->set(eServiceDVB::cAPID, entry->elementary_PID);
+				}
+			}
 		}
 		if (isvideo)
+		{
 			Decoder::parms.vpid=entry->elementary_PID;
+			if (sp && sp->dvb)
+				sp->dvb->set(eServiceDVB::cVPID, entry->elementary_PID);
+		}
 		if (isteletext)
+		{
+			if (sp && sp->dvb)
+				sp->dvb->set(eServiceDVB::cTPID, entry->elementary_PID);
 			Decoder::parms.tpid=entry->elementary_PID;
+		}
+
+  	if (sp)
+	  	eServiceInterface::getInstance()->removeRef(service);
 	}
 }
 
@@ -555,15 +648,16 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 			memcpy(buf, ca->data, ca->data[1]+2);
       DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf));
 
+			unsigned  char *buf2=new unsigned char[ca->data[1]+2];
+			memcpy(buf2, ca->data, ca->data[1]+2);
+      DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::PMTaddDescriptor, buf2));
+
 			int avail=0;
 			for (std::list<int>::iterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
 			{
 				eDebug("ca id %d == %d", *i, ca->CA_system_ID );
 				if (*i == ca->CA_system_ID)
 				{
-					//unsigned  char *buf=new unsigned char[ca->data[1]+2];
-					//memcpy(buf, ca->data, ca->data[1]+2);
-          //DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addDescr, buf));
 					avail++;
 				}
 			}
@@ -583,7 +677,7 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 					CA *n=new CA;
 					n->ecmpid=ca->CA_PID;
 					n->casysid=ca->CA_system_ID;
-					n->emmpid=-1;					
+					n->emmpid=-1;
 					list.push_back(n);
 				}
 			}

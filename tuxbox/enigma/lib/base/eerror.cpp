@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <lib/gui/emessage.h>
 
@@ -22,7 +23,7 @@ void eFatal(const char* fmt, ...)
 		msg.show();
 		msg.exec();
 	}
-	exit(0);
+	_exit(0);
 }
 
 #ifdef DEBUG

@@ -442,7 +442,6 @@ int eHTTPConnection::processRemoteState()
 				abort=1;
 				break;
 			}
-			eDebug("%s", line.c_str());
 			if (!line.length())
 			{
 				if (parent)
@@ -470,7 +469,9 @@ int eHTTPConnection::processRemoteState()
 					content_length=atoi(remote_header["Content-Length"].c_str());
 					content_length_remaining=content_length;
 				}
-				if (content_length || remote_header.count("Content-Type") || 1)
+				if (content_length || 		// if content-length is set, we have content
+						remote_header.count("Content-Type") || 		// content-type - the same
+						(localstate != stateResponse))	// however, if we are NOT in response-state, so we are NOT server, there's ALWAYS more data to come. (exception: http/1.1 persistent)
 					remotestate=stateData;
 				else
 				{

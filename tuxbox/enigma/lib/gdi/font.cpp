@@ -181,6 +181,27 @@ fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 	return;
 }
 
+float fontRenderClass::getLineHeight(const gFont& font)
+{
+	if (!instance)
+		return 0;
+	Font *fnt = getFont( font.family.c_str(), font.pointSize);
+	if (!fnt)
+		return 0;
+	eLocker lock(ftlock);
+	FT_Face current_face;
+	if (FTC_Manager_Lookup_Size(cacheManager, &fnt->font.font, &current_face, &fnt->size)<0)
+	{
+		eDebug("FTC_Manager_Lookup_Size failed!");
+		return 0;
+	}
+	int linegap=current_face->size->metrics.height-(current_face->size->metrics.ascender+current_face->size->metrics.descender);
+	float height=(current_face->size->metrics.ascender+current_face->size->metrics.descender+linegap/2.0)/64;
+	delete fnt;
+	return height;
+}
+
+
 fontRenderClass::~fontRenderClass()
 {
 	ftlock.lock();
@@ -306,7 +327,7 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags, int rflags)
 	}
 
   eRect* bbox = new eRect();
-	bbox->setLeft( (flags&GS_ISFIRST|glyphs.empty()?cursor.x():cursor.x()-1) + glyph->left );	
+	bbox->setLeft( (flags&GS_ISFIRST|glyphs.empty()?cursor.x():cursor.x()-1) + glyph->left );
 	bbox->setTop( cursor.y() - glyph->top );
 	bbox->setWidth( glyph->width );
 	bbox->setHeight( glyph->height );
@@ -508,7 +529,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 					unicode|=(*p++)&0x3F;
 			}
 		}
-	
+
 		if (!(rflags&RS_DIRECT))
 		{
 			switch (unicode)
@@ -577,21 +598,40 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 
 	gPixmap &target=dc.getPixmap();
 
-	if (target.bpp != 8)
-		eFatal("eTextPara::blit - can't render into %d bpp buffer", target.bpp);
-
 	register int opcode;
-	gColor *lookup=0;
+	gColor *lookup8=0;
+	__u32 lookup32[16];
 		
-	if (target.clut.data)
+	if (target.bpp == 8)
 	{
-		lookup=getColor(target.clut, background, foreground).lookup;
-		opcode=0;
+		if (target.clut.data)
+		{
+			lookup8=getColor(target.clut, background, foreground).lookup;
+			opcode=0;
+		} else
+			opcode=1;
+	} else if (target.bpp == 32)
+	{
+		opcode=3;
+		if (target.clut.data)
+		{
+			lookup8=getColor(target.clut, background, foreground).lookup;
+			for (int i=0; i<16; ++i)
+				lookup32[i]=((target.clut.data[lookup8[i]].a<<24)|
+					(target.clut.data[lookup8[i]].r<<16)|
+					(target.clut.data[lookup8[i]].g<<8)|
+					(target.clut.data[lookup8[i]].b))^0xFF000000;
+		} else
+		{
+			for (int i=0; i<16; ++i)
+				lookup32[i]=(0x010101*i)|0xFF000000;
+		}
 	} else
 	{
-		opcode=1;
+		eWarning("can't render to %dbpp", target.bpp);
+		return;
 	}
-		
+	
 	eRect clip(0, 0, target.x, target.y);
 	clip&=dc.getClip();
 
@@ -604,7 +644,7 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 			continue;
 		int rx=i->x+glyph_bitmap->left + offset.x();
 		int ry=i->y-glyph_bitmap->top  + offset.y();
-		__u8 *d=(__u8*)(target.data)+buffer_stride*ry+rx;
+		__u8 *d=(__u8*)(target.data)+buffer_stride*ry+rx*target.bypp;
 		__u8 *s=glyph_bitmap->buffer;
 		register int sx=glyph_bitmap->width;
 		int sy=glyph_bitmap->height;
@@ -618,7 +658,7 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 			s+=diff;
 			sx-=diff;
 			rx+=diff;
-			d+=diff;
+			d+=diff*target.bypp;
 		}
 		if (ry < clip.top())
 		{
@@ -631,27 +671,41 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 		if (sx>0)
 			for (int ay=0; ay<sy; ay++)
 			{
-				register __u8 *td=d;
-				register int ax;
-				if (!opcode)
+				if (!opcode)		// 4bit lookup to 8bit
 				{
+					register __u8 *td=d;
+					register int ax;
 					for (ax=0; ax<sx; ax++)
 					{	
 						register int b=(*s++)>>4;
 						if(b)
-							*td++=lookup[b];
+							*td++=lookup8[b];
 						else
 							td++;
 					}
-				} else
+				} else if (opcode == 1)	// 8bit direct
 				{
+					register __u8 *td=d;
+					register int ax;
 					for (ax=0; ax<sx; ax++)
 					{	
 						register int b=*s++;
 						*td++^=b;
 					}
+				} else
+				{
+					register __u32 *td=(__u32*)d;
+					register int ax;
+					for (ax=0; ax<sx; ax++)
+					{	
+						register int b=(*s++)>>4;
+						if(b)
+							*td++=lookup32[b];
+						else
+							td++;
+					}
 				}
-				s+=glyph_bitmap->pitch-ax;
+				s+=glyph_bitmap->pitch-sx;
 				d+=buffer_stride;
 			}
 	}

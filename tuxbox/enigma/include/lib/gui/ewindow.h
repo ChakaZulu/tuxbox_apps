@@ -16,6 +16,7 @@ class eWindow: public eWidget
 {
 	eDecoration deco;
 	gColor fontColor, titleBarColor;
+	static int globCancel;
 protected:
 	int borderTop, borderLeft, borderBottom, borderRight;
 	int titleOffsetLeft, titleOffsetRight, titleOffsetTop, titleFontSize, titleHeight;
@@ -27,6 +28,8 @@ protected:
 	void willShow();
 	void willHide();
 public:
+	enum { OFF, ON };
+	static void globalCancel(int mode) { globCancel=mode; }
 	eRect getTitleBarRect();
 	/**
 	 * \brief Constructs the window

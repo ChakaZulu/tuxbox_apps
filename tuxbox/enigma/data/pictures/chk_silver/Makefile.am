@@ -1,3 +1,5 @@
+SUBDIRS = mainmenu
+
 installdir = $(DATADIR)/enigma/pictures/chk_silver
 
 install_DATA = \

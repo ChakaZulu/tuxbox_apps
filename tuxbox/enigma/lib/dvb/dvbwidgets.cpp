@@ -21,7 +21,7 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 		l = new eLabel(this);
 		l->setName( "lSat" );
 
-		sat=new eComboBox(this, 4, l);
+		sat=new eComboBox(this, 4, l, edit);
 		sat->setName("sat");
 
 		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
@@ -46,7 +46,7 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 		l = new eLabel(this);
 		l->setName( "lPol" );
 
-		polarity=new eListBox<eListBoxEntryText>(this, l);
+		polarity=new eListBox<eListBoxEntryText>(this, l, edit);
 		polarity->setName("polarity");
 		polarityEntry[0]=new eListBoxEntryText(polarity, _("vertical"), (void*)0);
 		polarityEntry[1]=new eListBoxEntryText(polarity, _("horizontal"), (void*)1);
@@ -54,7 +54,7 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 		l = new eLabel(this);
 		l->setName( "lFec" );
 
-		fec=new eListBox<eListBoxEntryText>(this, l);
+		fec=new eListBox<eListBoxEntryText>(this, l, edit);
 		fec->setName("fec");
 		fecEntry[0]=new eListBoxEntryText(fec, "Auto", (void*)0);
 		fecEntry[1]=new eListBoxEntryText(fec, "1/2", (void*)1);

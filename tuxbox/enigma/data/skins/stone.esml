@@ -338,17 +338,17 @@
 		<map name="eStatusBar.bottom" img="3DBorder.unselected.hor.dark" />
 		<map name="eStatusBar.right" img="3DBorder.unselected.ver.dark" />
 		<map name="eStatusBar.bottomRight" img="3DBorder.unselected.corner.dark" />		
-		<map name="eStatusBar.topRight" img="3DBorder.unselected.corner.lightDark" />
+		<map name="eStatusBar.topRight" img="3DBorder.unselected.corner.darkLight" />
 		<map name="eStatusBar.bottomLeft" img="3DBorder.unselected.corner.lightDark" />		
 
 		<map name="eComboBox.top" img="3DBorder.unselected.hor.dark" />
 		<map name="eComboBox.left" img="3DBorder.unselected.ver.dark" />
-		<map name="eComboBox.topLeft" img="3DBorder.unselected.corner.dark.swap" />
+		<map name="eComboBox.topLeft" img="3DBorder.unselected.corner.light.swap" />
 		<map name="eComboBox.bottom" img="3DBorder.unselected.hor.light" />
 		<map name="eComboBox.right" img="3DBorder.unselected.ver.light" />
-		<map name="eComboBox.bottomRight" img="3DBorder.unselected.corner.light.swap" />		
+		<map name="eComboBox.bottomRight" img="3DBorder.unselected.corner.dark.swap" />
 		<map name="eComboBox.topRight" img="3DBorder.unselected.corner.darkLight.swap" />
-		<map name="eComboBox.bottomLeft" img="3DBorder.unselected.corner.darkLight.swap" />		
+		<map name="eComboBox.bottomLeft" img="3DBorder.unselected.corner.lightDark.swap" />
 
 		<map name="eComboBox.listbox.bottom" img="3DBorder.unselected.hor.dark" />
 		<map name="eComboBox.listbox.right" img="3DBorder.unselected.ver.dark" />
@@ -365,26 +365,26 @@
 		<map name="eButton.bottom" img="3DBorder.unselected.hor.dark" />
 		<map name="eButton.right" img="3DBorder.unselected.ver.dark" />
 		<map name="eButton.bottomRight" img="3DBorder.unselected.corner.dark" />
-		<map name="eButton.topRight" img="3DBorder.unselected.corner.lightDark" />
+		<map name="eButton.topRight" img="3DBorder.unselected.corner.darkLight" />
 		<map name="eButton.bottomLeft" img="3DBorder.unselected.corner.lightDark" />
 
 		<map name="eNumber.top" img="3DBorder.unselected.hor.dark" />
 		<map name="eNumber.left" img="3DBorder.unselected.ver.dark" />
 		<map name="eNumber.bottom" img="3DBorder.unselected.hor.light" />
 		<map name="eNumber.right" img="3DBorder.unselected.ver.light" />
-		<map name="eNumber.topLeft" img="3DBorder.unselected.corner.dark.swap" />
-		<map name="eNumber.bottomRight" img="3DBorder.unselected.corner.light.swap" />		
+		<map name="eNumber.topLeft" img="3DBorder.unselected.corner.light.swap" />
+		<map name="eNumber.bottomRight" img="3DBorder.unselected.corner.dark.swap" />
 		<map name="eNumber.topRight" img="3DBorder.unselected.corner.darkLight.swap" />
-		<map name="eNumber.bottomLeft" img="3DBorder.unselected.corner.darkLight.swap" />		
+		<map name="eNumber.bottomLeft" img="3DBorder.unselected.corner.lightDark.swap" />
 
 		<map name="eListBox.top" img="3DBorder.unselected.hor.dark" />
 		<map name="eListBox.left" img="3DBorder.unselected.ver.dark" />
-		<map name="eListBox.topLeft" img="3DBorder.unselected.corner.dark.swap" />
+		<map name="eListBox.topLeft" img="3DBorder.unselected.corner.light.swap" />
 		<map name="eListBox.bottom" img="3DBorder.unselected.hor.light" />
 		<map name="eListBox.right" img="3DBorder.unselected.ver.light" />
-		<map name="eListBox.bottomRight" img="3DBorder.unselected.corner.light.swap" />		
+		<map name="eListBox.bottomRight" img="3DBorder.unselected.corner.dark.swap" />
 		<map name="eListBox.topRight" img="3DBorder.unselected.corner.darkLight.swap" />
-		<map name="eListBox.bottomLeft" img="3DBorder.unselected.corner.darkLight.swap" />		
+		<map name="eListBox.bottomLeft" img="3DBorder.unselected.corner.darkLight.swap" />
 	</imagealias>
 
 	
@@ -496,17 +496,6 @@
 			
 			
 		</eZapMain>
-	</object>
-	
-	
-	<object name="eventview">
-		<eWindow cposition="60:80" csize="590:400" name="title">
-			<eLabel position="10:5" size="e:e-35" name="epg_description" font="eventview.description" wrap="on"/>
-			<eWidget position="0:e-35" size="600:e-10" />
-			<eLabel position="10:e-35" size="130:e-10" name="date" font="eventview.date" backgroundColor="content" foregroundColor="white" />
-			<eLabel position="130:e-35" size="230:e-10" name="time" font="eventview.time" backgroundColor="content" foregroundColor="white" />
-			<eLabel position="360:e-35" size="230:e-10" name="channel" font="eventview.channel" backgroundColor="content" foregroundColor="white" align="right"/>
-		</eWindow>
 	</object>
 
 </eskin>

@@ -31,6 +31,7 @@ class tpPacket
 public:
 	std::string name;
 	int scanflags;
+	int orbital_position;
 	std::list<eTransponder> possibleTransponders;
 };
 
@@ -75,6 +76,7 @@ class tsAutomatic: public existNetworks, public eWidget
 	int nextNetwork(int first=0);
 	int nextTransponder(int next);
 	int tuneNext(int next);
+	int eventHandler(const eWidgetEvent &event);
 public:
 	tsAutomatic(eWidget *parent);
 };

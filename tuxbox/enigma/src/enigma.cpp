@@ -120,29 +120,17 @@ eZap::eZap(int argc, char **argv)
 	desktop_lcd->setBackgroundColor(gColor(0));
 	desktop_lcd->show();
 
-	eDebug("[ENIGMA] loading default keymaps...");
-	
-	struct dirent **namelist;
-	int n;
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdreambox2.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml");
 
-	n = scandir(DATADIR "/enigma/resources/", &namelist, 0, alphasort);
-	if (n < 0)
-		perror("scandir");
-	else
-	{
-		while(n--)
-		{
-			std::string tmp_name(DATADIR "/enigma/resources/");
-			tmp_name.append(namelist[n]->d_name);
-			if (!strcmp(namelist[n]->d_name, ".."))
-				break;
-			eActionMapList::getInstance()->loadXML( tmp_name.c_str());
-			free(namelist[n]);
-		}
-		free(namelist);
-	}
-	
-	for (std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdbox.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox.xml");
+
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdboxbuttons.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdboxbuttons.xml");
+
+	eDebug("[ENIGMA] loading default keymaps...");
+	for(std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
 			i != eRCInput::getInstance()->getDevices().end(); ++i)
 		eActionMapList::getInstance()->loadDevice(i->second);
 
@@ -182,7 +170,7 @@ eZap::eZap(int argc, char **argv)
 
 	serialhttpd=0;
 #if 0
-  if ( atoi(eDVB::getInstance()->getInfo("mID").c_str()) > 4 )
+	if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
   {
   	eDebug("[ENIGMA] starting httpd on serial port...");
     int fd=::open("/dev/tts/0", O_RDWR);

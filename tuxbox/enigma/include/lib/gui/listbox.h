@@ -37,7 +37,7 @@ public:
 	int getColumns() { return columns; }
 	void setMoveMode(int move) { movemode=move; }
 protected:
-	eListBoxBase(eWidget* parent, const eWidget* descr=0, const char *deco="eListBox" );
+	eListBoxBase(eWidget* parent, const eWidget* descr=0, int takefocus=1, const char *deco="eListBox" );
 	eRect getEntryRect(int n);
 	int setProperty(const eString &prop, const eString &value);
 	int eventHandler(const eWidgetEvent &event);
@@ -61,7 +61,7 @@ class eListBox: public eListBoxBase
 	void lostFocus();
 	void gotFocus();
 public:
-	eListBox(eWidget *parent, const eWidget* descr=0 );
+	eListBox(eWidget *parent, const eWidget* descr=0, int takefocus=1 );
 	~eListBox();
 
 	void init();
@@ -278,8 +278,10 @@ inline void eListBox<T>::clearList()
 		invalidateContent();
 	} else
 	{
-		atomic_selchanged=1;
+		atomic_selchanged=0;
 		atomic_redraw=arAll;
+		atomic_new=0;
+		atomic_old=0;
 	}
 }
 
@@ -310,8 +312,8 @@ inline T* eListBox<T>::goPrev()
 }
 
 template <class T>
-inline eListBox<T>::eListBox(eWidget *parent, const eWidget* descr)
-	:eListBoxBase(parent, descr),
+inline eListBox<T>::eListBox(eWidget *parent, const eWidget* descr, int takefocus )
+	:eListBoxBase(parent, descr, takefocus),
 		top(childs.end()), bottom(childs.end()), current(childs.end()), recalced(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
@@ -363,8 +365,6 @@ inline void eListBox<T>::redrawWidget(gPainter *target, const eRect &where)
 
 		i++;
 	}
-
-	target->flush();
 }
 
 template <class T>

@@ -12,7 +12,8 @@
 class eProgress: public eWidget
 {
 protected:
-	int perc, border;
+	int perc, border, start;
+	int direction;
 	gColor left, right;
 public:
 	eProgress(eWidget *parent, int takeFocus=0);
@@ -24,6 +25,7 @@ public:
 	 * \param perc The range is \c 0..100
 	 */
 	void setPerc(int perc);
+	void setStart(int perc);
 	void redrawWidget(gPainter *target, const eRect &area);
 	
 	/**
@@ -33,9 +35,12 @@ public:
 	 * \arg \c leftColor, the color of the left part
 	 * \arg \c rightColor, the color of the right part
 	 * \arg \c border, the size of the border (in pixels)
+	 * \arg \c direction, direction (0 for horiz., 1 for vert.)
 	 * \sa eWidget::setProperty
 	 */
 	int setProperty(const eString &prop, const eString &value);
+	
+	void setDirection(int d) { direction = d; }
 	void setBorder( int b ) { border = b; }
 	void setLeftColor( const gColor& c )	{ left = c; }
 	void setRightColor( const gColor& c )	{ right = c; }

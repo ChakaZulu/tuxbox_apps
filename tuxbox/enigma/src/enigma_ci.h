@@ -51,15 +51,20 @@ private:
 	int ci_state;
 
 public:
-	enigmaCImmi();
+	enigmaCImmi(eDVBCI *DVBCI);
 	~enigmaCImmi();
+
+
 };
 
 class enigmaCI: public eWindow
 {
 	eButton *ok,*reset,*init,*app;
+	eButton *reset2,*init2,*app2;
+
 	eStatusBar *status;
 	eDVBCI *DVBCI;
+	eDVBCI *DVBCI2;
 
 private:
 	void okPressed();
@@ -67,7 +72,11 @@ private:
 	void resetPressed();
 	void initPressed();
 	void appPressed();
+	void reset2Pressed();
+	void init2Pressed();
+	void app2Pressed();
 	void updateCIinfo(const char*);
+	void updateCI2info(const char*);
 
 public:
 	enigmaCI();

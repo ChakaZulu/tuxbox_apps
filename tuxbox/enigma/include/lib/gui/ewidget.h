@@ -188,6 +188,7 @@ protected:
 	gPixmap *pixmap;
 
 	eString descr;
+
 public:
 	inline eWidget *getNonTransparentBackground()
 	{
@@ -413,13 +414,14 @@ public:
 	 *
 	 * \param label The text to assign to the widget.
 	 */
-	void setText(const eString &label);
+	void setText(const eString &label, bool inv=true);
 	
 	const	eString& getText() const { return text; }
-	void setBackgroundColor(const gColor& color);
-	void setForegroundColor(const gColor& color);
+	void setBackgroundColor(const gColor& color, bool inv=true);
+	void setForegroundColor(const gColor& color, bool inv=true);
 	void setPixmap(gPixmap *pmap);
 	void setTarget(gDC *target);
+	gDC *getTarget() { return target; }
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
 	void setName(const char *name);
 	const eString& getName() const { return name; }

@@ -1,3 +1,5 @@
+SUBDIRS = mainmenu
+
 installdir = $(DATADIR)/enigma/pictures/chk_stone
 
 install_DATA = \
@@ -12,5 +14,10 @@ install_DATA = \
 	green-button.png info-bg.png lbarrow_down.png lbarrow_left.png lbarrow.png\
 	lbarrow_right.png lbarrow_up.png lcdmenu.png logo.png l.png no-button.png\
 	png.png red-button.png r.png speaker.png tl.png t.png tr.png unchecked.png\
-	yellow-button.png mainmenu/background-fs8.png folder.png rec_symbol-fs8.png
+	yellow-button.png folder.png rec_symbol-fs8.png\
+	status-big-b-break.png status-big-b-left.png status-big-b-middle.png\
+	status-big-break.png status-big-b-right.png status-big-left.png status-big-middle.png\
+	status-big-right.png status-small-b-break.png status-small-b-left.png\
+	status-small-b-middle.png status-small-break.png status-small-b-right.png\
+	status-small-left.png status-small-middle.png status-small-right.png
 

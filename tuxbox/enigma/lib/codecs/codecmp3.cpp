@@ -82,7 +82,7 @@ int eAudioDecoderMP3::decodeMore(int last, int maxsamples)
 			if (avgbr==-1)
 				avgbr=frame.header.bitrate;
 			else
-				avgbr=(avgbr*7+frame.header.bitrate)>>3;
+				avgbr=(avgbr*255+frame.header.bitrate)>>8;
 		}
 
 		if (++framecnt < speed)

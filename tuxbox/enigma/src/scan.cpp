@@ -65,6 +65,7 @@ void tsSelectType::selected(eListBoxEntryText *entry)
 tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LCDTitle, eWidget *LCDElement)
 :eWidget(parent), transponder(transponder)
 {
+	addActionMap(&i_cursorActions->map);
 	setLCD(LCDTitle, LCDElement);
 	int ft=0;
 	switch (eFrontend::getInstance()->Type())
@@ -114,8 +115,6 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LC
 	CONNECT(b_start->selected, tsManual::start);
 	CONNECT(b_abort->selected, tsManual::abort);
 	CONNECT(transponder_widget->updated, tsManual::retune);
-
-	retune();
 }
 
 void tsManual::start()
@@ -152,9 +151,31 @@ int tsManual::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->cancel)
+			close(2);
+		else
+			break;
+		return 1;
 	case eWidgetEvent::execBegin:
-		retune();
+//			retune();
 		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
+int tsAutomatic::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if (event.action == &i_cursorActions->cancel)
+			close(2);
+		else
+			break;
+		return 1;
 	default:
 		break;
 	}
@@ -163,6 +184,7 @@ int tsManual::eventHandler(const eWidgetEvent &event)
 
 tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 {
+	addActionMap(&i_cursorActions->map);
 	eLabel* l = new eLabel(this);
 	l->setName("lNet");
 	l_network=new eComboBox(this, 3, l);
@@ -392,7 +414,8 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 		position="0";
 
 	int orbital_position=atoi(position);
-
+	packet.orbital_position = orbital_position;
+	
 	for (node=node->GetChild(); node; node=node->GetNext())
 	{
 		eTransponder t(*eDVB::getInstance()->settings->getTransponders());
@@ -459,7 +482,7 @@ int tsAutomatic::loadNetworks()
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 			for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
-				if ( ( i->possibleTransponders.front().satellite.orbital_position == s->getOrbitalPosition() ) || (fetype == eFrontend::feCable) )
+				if ( ( i->orbital_position == s->getOrbitalPosition() ) || (fetype == eFrontend::feCable) )
 					new eListBoxEntryText(*l_network, i->name, (void*)&*i, eTextPara::dirCenter);
 
 	return 0;

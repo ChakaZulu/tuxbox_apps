@@ -47,6 +47,8 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 		perror(DEMUX);
 		return -errno;
 	}
+	else
+	  ioctl (handle,DMX_SET_BUFFER_SIZE, 64*1024);
 
 	secFilterParams.pid=pid;
 
@@ -125,7 +127,7 @@ eSection::~eSection()
 		eDebug("deleted still locked table");
 }
 
-int eSection::start()
+	int eSection::start()
 {
 	if (timer && (version==-1) && !(flags&SECREAD_NOTIMEOUT))
 		timer->start((pid==0x14)?60000:10000, true);

@@ -132,6 +132,7 @@ eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 int eZapPlugins::exec()
 {
 	const eString PluginPath = PLUGINDIR "/";
+	const eString PluginPath2 = GAMESDIR "/";	
 	struct dirent **namelist;
 
 	int n = scandir(PLUGINDIR "/", &namelist, 0, alphasort);
@@ -151,12 +152,27 @@ int eZapPlugins::exec()
 		eString	FileName = namelist[count]->d_name;
 
 		if ( FileName.find(".cfg") != eString::npos )
-			new ePlugin(&list, (PluginPath+FileName).c_str());		
+			new ePlugin(&list, (PluginPath+FileName).c_str());
 
 		free(namelist[count]);
   }
-
 	free(namelist);
+
+// look in var/tuxbox/games
+	n = scandir(GAMESDIR "/", &namelist, 0, alphasort);
+	if (n > 0)
+	{
+		for(int count=0;count<n;count++)
+		{
+			eString	FileName = namelist[count]->d_name;
+			
+			if ( FileName.find(".cfg") != eString::npos )
+				new ePlugin(&list, (PluginPath2+FileName).c_str());
+
+			free(namelist[count]);
+		}
+		free(namelist);
+	}
 
 	show();
 	int res=eListBoxWindow<ePlugin>::exec();

@@ -108,8 +108,12 @@ public:
 		if (next)
 			delete next;
 		next=cur;
-		CONNECT(next->tableReady, eAUTable::slotTableReady);
-		return next->start();
+		if (cur)
+		{
+			CONNECT(next->tableReady, eAUTable::slotTableReady);
+			return next->start();
+		} else
+			return 0;
 	}
 	
 	int get()

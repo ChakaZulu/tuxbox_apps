@@ -196,15 +196,18 @@ eString eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coA
 						}
 					}
 					delete e;
+					if (sdescr.length())
+					{
+						descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
+						descrPara->setFont( descrFont );
+						descrPara->renderString( sdescr );
+						descrXOffs = nameXOffs+namePara->getBoundBox().width();
+						if (numPara)
+							descrXOffs += numPara->getBoundBox().height();
+						descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
+					}
 				}
 			}
-			descrPara = new eTextPara( eRect( 0, 0, rect.width(), rect.height() ) );
-			descrPara->setFont( descrFont );
-			descrPara->renderString( sdescr );
-			descrXOffs = nameXOffs+namePara->getBoundBox().width();
-			if (numPara)
-				descrXOffs += numPara->getBoundBox().height();
-			descrYOffs = ((rect.height() - descrPara->getBoundBox().height()) / 2 ) - descrPara->getBoundBox().top();
 		}
 		if (descrPara)  // only render descr Para, when avail...
 			rc->renderPara(*descrPara, ePoint( rect.left()+descrXOffs, rect.top() + descrYOffs ) );

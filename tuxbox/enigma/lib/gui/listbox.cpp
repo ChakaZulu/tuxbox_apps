@@ -4,8 +4,8 @@
 gFont eListBoxEntryText::font;
 gFont eListBoxEntryTextStream::font;
 
-eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, const char *deco)
-:   eDecoWidget(parent, 1, deco),
+eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus, const char *deco )
+:   eDecoWidget(parent, takefocus, deco),
 		iArrowUpDown(eSkin::getActive()->queryImage("eListBox.arrow.updown")),
 		iArrowUp(eSkin::getActive()->queryImage("eListBox.arrow.up")),
 		iArrowDown(eSkin::getActive()->queryImage("eListBox.arrow.down")),

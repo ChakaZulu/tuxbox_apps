@@ -7,6 +7,8 @@
 #include <lib/gui/guiactions.h>
 #include <lib/gdi/font.h>
 
+int eWindow::globCancel = eWindow::ON;
+
 eWindow::eWindow(int takefocus)
 	:eWidget(0, takefocus)
 {
@@ -58,7 +60,6 @@ void eWindow::eraseBackground(gPainter *target, const eRect &clip)
 {
 	target->clip(getClientRect());
 	target->clear();
-	target->flush();
 	target->clippop();
 }
 
@@ -70,7 +71,6 @@ void eWindow::drawTitlebar(gPainter *target)
 	{
 		target->setForegroundColor(titleBarColor);
 		target->fill( rc );
-		target->flush();
 	}
 
 	eTextPara *p = new eTextPara( rc );
@@ -79,7 +79,6 @@ void eWindow::drawTitlebar(gPainter *target)
 	target->setBackgroundColor(titleBarColor);
 	target->setForegroundColor(fontColor);
 	target->renderPara( *p );
-	target->flush();
 	p->destroy();
   target->clippop();
 }
@@ -100,7 +99,7 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 		}
     
 		case eWidgetEvent::evtAction:
-			if ((event.action == &i_cursorActions->cancel) && in_loop)	// hack
+			if (globCancel && (event.action == &i_cursorActions->cancel) && in_loop)	// hack
 			{
 				close(-1);
 				return eWidget::eventHandler(event);

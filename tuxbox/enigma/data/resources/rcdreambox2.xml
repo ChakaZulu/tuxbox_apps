@@ -149,6 +149,15 @@
 			<action name="showServiceSelector" key="ok" flags="m" />
 		</actionmap>
 
+		<actionmap name="rotorMenu" >
+			<action name="driveEastStep" key="right" flags="m" />
+			<action name="driveEast" key="right" flags="r" />
+			<action name="driveEastStop" key="right" flags="b" />
+			<action name="driveWestStep" key="left" flags="m" />
+			<action name="driveWest" key="left" flags="r" />
+			<action name="driveWestStop" key="left" flags="b" />
+		</actionmap>
+
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="next" flags="mr" />
 			<action name="prevBouquet" key="prev" flags="mr" />

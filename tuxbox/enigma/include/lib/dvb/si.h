@@ -415,6 +415,7 @@ public:
 	};
 	
 	EIT(int type, int service_id=-1, int ts=tsActual, int version=-1);
+	EIT( const EIT* eit );
 	EIT();
 	eTable *createNext();
 	

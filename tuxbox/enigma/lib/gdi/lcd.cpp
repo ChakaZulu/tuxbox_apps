@@ -95,7 +95,7 @@ eDBoxLCD::eDBoxLCD(): eLCD(eSize(128, 64))
 		}
 		if( eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast) )
 		{
-			lcdcontrast=13;
+			lcdcontrast=32;
 			eConfig::getInstance()->setKey("/ezap/lcd/contrast", lcdcontrast);
 		}
 		setLCDParameter(lcdbrightness, lcdcontrast);

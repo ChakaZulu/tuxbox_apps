@@ -4,7 +4,6 @@
 #include <linux/input.h>
 #include <sys/stat.h>
 
-
 #include <lib/base/ebase.h>
 #include <lib/system/init.h>
 

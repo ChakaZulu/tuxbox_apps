@@ -44,7 +44,7 @@ void eTimer::start(long msek, bool singleShot)
 	interval = msek;
  	gettimeofday(&nextActivation, 0);		
 //	eDebug("this = %p\nnow sec = %d, usec = %d\nadd %d msec", this, nextActivation.tv_sec, nextActivation.tv_usec, msek);
-	nextActivation += msek;
+	nextActivation += (msek<0 ? 0 : msek);
 //	eDebug("next Activation sec = %d, usec = %d", nextActivation.tv_sec, nextActivation.tv_usec );
 	context.addTimer(this);
 }
@@ -143,7 +143,7 @@ void eMainloop::processOneEvent()
 				if (!--ret)
 					break;
 			} else if (pfd[i].revents & (POLLERR|POLLHUP|POLLNVAL))
-				eDebug("poll: unhandled POLLERR/HUP/NVAL for fd %d", pfd[i].fd);
+				eDebug("poll: unhandled POLLERR/HUP/NVAL for fd %d(%d)", pfd[i].fd,pfd[i].revents);
 		}
 	}
 	else if (ret<0)

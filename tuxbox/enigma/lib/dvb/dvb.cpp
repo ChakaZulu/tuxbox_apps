@@ -109,6 +109,7 @@ eServiceDVB::eServiceDVB(const eServiceDVB &c):
 	service_type=c.service_type;
 	service_provider=c.service_provider;
 	service_number=c.service_number;
+	dxflags=c.dxflags;
 	memcpy(cache, c.cache, sizeof(cache));
 	dvb=this;
 }
@@ -542,6 +543,12 @@ void eTransponderList::readLNBData()
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/useGotoXX").c_str(), tmpint );
 		lnb.getDiSEqC().useGotoXX = tmpint;
 
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/useRotorInPower").c_str(), tmpint );
+		lnb.getDiSEqC().useRotorInPower = tmpint;
+
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DegPerSec").c_str(), tmpdouble );
+		lnb.getDiSEqC().DegPerSec = tmpdouble;
+
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/gotoXXLoDirection").c_str(), tmpint );
 		lnb.getDiSEqC().gotoXXLoDirection = tmpint;
 
@@ -612,6 +619,8 @@ void eTransponderList::readLNBData()
 			lnb.getDiSEqC().uncommitted_switch=0;
 			lnb.getDiSEqC().uncommitted_gap=0;
 			lnb.getDiSEqC().useGotoXX=1;
+			lnb.getDiSEqC().useRotorInPower=40<<8;
+			lnb.getDiSEqC().DegPerSec=1.0;
 			lnb.getDiSEqC().gotoXXLatitude=0.0;
 			lnb.getDiSEqC().gotoXXLongitude=0.0;
 			lnb.getDiSEqC().gotoXXLoDirection=eDiSEqC::EAST;
@@ -637,6 +646,8 @@ void eTransponderList::readLNBData()
 			lnb.getDiSEqC().uncommitted_switch=0;
 			lnb.getDiSEqC().uncommitted_gap=0;
 			lnb.getDiSEqC().useGotoXX=1;
+			lnb.getDiSEqC().useRotorInPower=40<<8;
+			lnb.getDiSEqC().DegPerSec=1.0;
 			lnb.getDiSEqC().gotoXXLongitude=0.0;
 			lnb.getDiSEqC().gotoXXLatitude=0.0;
 			lnb.getDiSEqC().gotoXXLoDirection=eDiSEqC::EAST;
@@ -670,6 +681,8 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/uncommitted_switch").c_str(), (int) it->getDiSEqC().uncommitted_switch );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/uncommitted_gap").c_str(), (int) it->getDiSEqC().uncommitted_gap );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/useGotoXX").c_str(), (int) it->getDiSEqC().useGotoXX );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/useRotorInPower").c_str(), (int) it->getDiSEqC().useRotorInPower );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DegPerSec").c_str(), (double) it->getDiSEqC().DegPerSec );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/gotoXXLaDirection").c_str(), it->getDiSEqC().gotoXXLaDirection );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/gotoXXLoDirection").c_str(), it->getDiSEqC().gotoXXLoDirection );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/gotoXXLatitude").c_str(), it->getDiSEqC().gotoXXLatitude );

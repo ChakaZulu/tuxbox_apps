@@ -8,6 +8,8 @@
 #include <lib/dvb/decoder.h>
 #include <libmd5sum.h>
 #include <lib/dvb/edvb.h>
+#include <sys/mman.h>
+#include <tuxbox/tuxbox.h>
 
 #define TMP_IMAGE "/var/tmp/root.cramfs"
 
@@ -298,6 +300,9 @@ void eUpgrade::setError(int err)
 	case -2:
 		errmsg="Can't resolve hostname!";
 		break;
+	case -3:
+		errmsg="Can't connect! (check network settings)";
+		break;
 	default:
 		errmsg.sprintf("unknown error %d", err);
 	}
@@ -410,7 +415,38 @@ void eUpgrade::flashImage(int checkmd5)
 				mb.show();
 				sync();
 				Decoder::Flush();
-				int res=system("/bin/eraseall /dev/mtd/0")>>8;
+				eString mtd;
+				switch ( tuxbox_get_model() )
+				{
+				case TUXBOX_MODEL_DBOX2:		// d-box2
+					mtd="2";
+					break;
+				case TUXBOX_MODEL_DREAMBOX_DM5600:// dreambox
+				case TUXBOX_MODEL_DREAMBOX_DM7000:
+					mtd="0";
+					break;
+				default:
+					mtd="../null";
+				}
+				{
+					int fd=open(eString("/dev/mtdblock/" + mtd).c_str(), O_RDONLY);
+					void *ptr;
+					volatile int a;
+					if ((fd < 0) || !(ptr=mmap(0, 0x600000, PROT_READ, MAP_SHARED|MAP_LOCKED, fd, 0)))
+					{
+						eMessageBox mb(
+							_("upgrade failed with errorcode UD0"),
+							_("upgrade failed"),
+							eMessageBox::btOK|eMessageBox::iconError);
+						mb.show();
+						mb.exec();
+						mb.hide();
+						return;
+					}
+					for (int i=0; i<0x600000; ++i)
+						a=((__u8*)ptr)[i];
+				}
+				int res=system(eString("/bin/eraseall /dev/mtd/" + mtd).c_str())>>8;
 				mb.hide();
 				if (!res)
 				{
@@ -418,7 +454,7 @@ void eUpgrade::flashImage(int checkmd5)
 						_("Writing software to flash...\nPlease do not switch off box now!"),
 						_("upgrade in progress"), eMessageBox::iconInfo);
 					mb.show();
-					res=system("cat " TMP_IMAGE " > /dev/mtd/0")>>8;
+					res=system(eString("cat " TMP_IMAGE " > /dev/mtd/" + mtd).c_str())>>8;
 					mb.hide();
 					if (!res)
 					{
@@ -430,6 +466,7 @@ void eUpgrade::flashImage(int checkmd5)
 						mb.exec();
 						mb.hide();
 						system("/sbin/reboot");
+						system("/bin/reboot");
 						exit(0);
 					}
 				}

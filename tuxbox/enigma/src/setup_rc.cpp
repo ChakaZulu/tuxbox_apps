@@ -91,6 +91,8 @@ eZapRCSetup::eZapRCSetup(): eWindow(0)
 		rcStyle->setCurrent( current );
 	ok=new eButton(this);
 	ok->setText(_("save"));
+	ok->setShortcut("green");
+	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, clientrect.height()-80));
 	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("close window and save changes"));

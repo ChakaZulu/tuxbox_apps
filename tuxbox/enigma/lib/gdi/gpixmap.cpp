@@ -64,14 +64,30 @@ void gPixmap::fill(const eRect &area, const gColor &color)
 {
 	if ((area.height()<=0) || (area.width()<=0))
 		return;
-	for (int y=area.top(); y<area.bottom(); y++)
-		memset(((__u8*)data)+y*stride+area.left(), color.color, area.width());
+	if (bpp == 8)
+		for (int y=area.top(); y<area.bottom(); y++)
+			memset(((__u8*)data)+y*stride+area.left(), color.color, area.width());
+	else if (bpp == 32)
+		for (int y=area.top(); y<area.bottom(); y++)
+		{
+			__u32 *dst=(__u32*)(((__u8*)data)+y*stride+area.left()*bypp);
+			int x=area.width();
+			__u32 col;
+
+			if (clut.data && color < clut.colors)
+				col=(clut.data[color].a<<24)|(clut.data[color].r<<16)|(clut.data[color].g<<8)|(clut.data[color].b);
+			else
+				col=0x10101*color;
+			col^=0xFF000000;			
+			while (x--)
+				*dst++=col;
+		}
+	else
+		eWarning("couldn't fill %d bpp", bpp);
 }
 
 void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 {
-	if (bpp != src.bpp)
-		eFatal("cannot blit %dbpp from %dbpp", bpp, src.bpp);
 	
 	eRect area=eRect(pos, src.getSize());
 	if (!clip.isNull())
@@ -83,35 +99,84 @@ void gPixmap::blit(const gPixmap &src, ePoint pos, const eRect &clip, int flag)
 	eRect srcarea=area;
 	srcarea.moveBy(-pos.x(), -pos.y());
 
-	__u8 *srcptr=(__u8*)src.data;
-	__u8 *dstptr=(__u8*)data;
-	
-	srcptr+=srcarea.left()*bypp+srcarea.top()*src.stride;
-	dstptr+=area.left()*bypp+area.top()*stride;
-
-	for (int y=0; y<area.height(); y++)
+	if ((bpp == 8) && (src.bpp==8))
 	{
-		if (flag & blitAlphaTest)
+		__u8 *srcptr=(__u8*)src.data;
+		__u8 *dstptr=(__u8*)data;
+	
+		srcptr+=srcarea.left()*bypp+srcarea.top()*src.stride;
+		dstptr+=area.left()*bypp+area.top()*stride;
+		for (int y=0; y<area.height(); y++)
 		{
-        // no real alphatest yet
-			int width=area.width();
-			unsigned char *src=(unsigned char*)srcptr;
-			unsigned char *dst=(unsigned char*)dstptr;
-				// use duff's device here!
-			while (width--)
+			if (flag & blitAlphaTest)
 			{
-				if (!*src)
+  	      // no real alphatest yet
+				int width=area.width();
+				unsigned char *src=(unsigned char*)srcptr;
+				unsigned char *dst=(unsigned char*)dstptr;
+					// use duff's device here!
+				while (width--)
 				{
-					src++;
-					dst++;
-				} else
-					*dst++=*src++;
+					if (!*src)
+					{
+						src++;
+						dst++;
+					} else
+						*dst++=*src++;
+				}
+			} else
+				memcpy(dstptr, srcptr, area.width()*bypp);
+			srcptr+=src.stride;
+			dstptr+=stride;
+		}
+	} else if ((bpp == 32) && (src.bpp==8))
+	{
+		__u8 *srcptr=(__u8*)src.data;
+		__u8 *dstptr=(__u8*)data; // !!
+		__u32 pal[256];
+		
+		for (int i=0; i<256; ++i)
+		{
+			if (src.clut.data && (i<src.clut.colors))
+				pal[i]=(src.clut.data[i].a<<24)|(src.clut.data[i].r<<16)|(src.clut.data[i].g<<8)|(src.clut.data[i].b);
+			else
+				pal[i]=0x010101*i;
+			pal[i]^=0xFF000000;
+		}
+	
+		srcptr+=srcarea.left()*bypp+srcarea.top()*src.stride;
+		dstptr+=area.left()*bypp+area.top()*stride;
+		for (int y=0; y<area.height(); y++)
+		{
+			if (flag & blitAlphaTest)
+			{
+  	      // no real alphatest yet
+				int width=area.width();
+				unsigned char *src=(unsigned char*)srcptr;
+				__u32 *dst=(__u32*)dstptr;
+					// use duff's device here!
+				while (width--)
+				{
+					if (!*src)
+					{
+						src++;
+						dst++;
+					} else
+						*dst++=pal[*src++];
+				}
+			} else
+			{
+				int width=area.width();
+				unsigned char *src=(unsigned char*)srcptr;
+				__u32 *dst=(__u32*)dstptr;
+				while (width--)
+					*dst++=pal[*src++];
 			}
-		} else
-			memcpy(dstptr, srcptr, area.width()*bypp);
-		srcptr+=src.stride;
-		dstptr+=stride;
-	}
+			srcptr+=src.stride;
+			dstptr+=stride;
+		}
+	} else
+		eFatal("cannot blit %dbpp from %dbpp", bpp, src.bpp);
 }
 
 void gPixmap::mergePalette(const gPixmap &target)

@@ -91,14 +91,15 @@ eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): 
 			{
 				eButton *b=new eButton(this);
 				b->resize(eSize(size.width(), fontsize+4));
-				const char *t="";
+				const char *t="", *shortcut="";
 				switch (i)
 				{
-					case btOK: t=_("OK"); CONNECT(b->selected, eMessageBox::pressedOK); break;
-					case btCancel: t=_("Cancel"); CONNECT(b->selected, eMessageBox::pressedCancel); break;
-					case btYes: t=_("Yes"); CONNECT(b->selected, eMessageBox::pressedYes); break;
-					case btNo: t=_("No"); CONNECT(b->selected, eMessageBox::pressedNo); break;
+					case btOK: t=_("OK"); shortcut="green"; CONNECT(b->selected, eMessageBox::pressedOK); break;
+					case btCancel: t=_("Cancel"); shortcut="red"; CONNECT(b->selected, eMessageBox::pressedCancel); break;
+					case btYes: t=_("Yes"); shortcut="green"; CONNECT(b->selected, eMessageBox::pressedYes); break;
+					case btNo: t=_("No"); shortcut="red"; CONNECT(b->selected, eMessageBox::pressedNo); break;
 				}
+				b->setProperty("shortcut", shortcut);
 				b->setText(t);
 				eSize bSize=b->getExtend();
 				bSize.setWidth( bSize.width() * 2 );

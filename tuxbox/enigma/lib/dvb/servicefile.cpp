@@ -104,7 +104,9 @@ eService *eServiceFileHandler::createService(const eServiceReference &node)
 		if (n<0)
 			n=0;
 		eString path=node.path.mid(node.path.rfind("/", n)+1);
-		return new eService(path.c_str() );
+		if (!isUTF8(path))
+			path=convertLatin1UTF8(path);
+		return new eService(path.c_str());
 	}
 	eServiceHandler *handler=eServiceInterface::getInstance()->getServiceHandler(node.type);
 	if (!handler)

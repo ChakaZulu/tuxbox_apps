@@ -5,15 +5,20 @@
 #include <lib/dvb/si.h>
 
 class eLabel;
+class eProgress;
 
 class eEventDisplay: public eWindow
 {
 	eString service;
 	ePtrList<EITEvent>::iterator *events;
 	ePtrList<EITEvent> *eventlist;
-	eLabel *title, *long_description, *eventDate, *eventTime, *channel;
+	eWidget *descr;
+	eLabel *long_description, *eventDate, *eventTime, *channel;
+	eProgress *scrollbar;
 	void nextEvent();
 	void prevEvent();
+	int total;
+	void updateScrollbar();
 protected:
 	int eventHandler(const eWidgetEvent &event);
 public:

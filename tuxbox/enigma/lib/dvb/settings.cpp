@@ -1,5 +1,6 @@
 #include <lib/dvb/settings.h>
 #include <lib/dvb/edvb.h>
+#include <lib/dvb/frontend.h>
 
 typedef std::list<eServiceReferenceDVB>::iterator ServiceReferenceDVBIterator;
 
@@ -201,13 +202,18 @@ struct saveService: public std::unary_function<const eServiceDVB&, void>
 		fprintf(f, "%s\n", s.service_name.c_str());
 		if (s.dxflags)
 			fprintf(f, "f:%x,", s.dxflags);
-		if (s.dxflags & eServiceDVB::dxNoDVB)
-			for (int i=0; i<eServiceDVB::cacheMax; ++i)
-			{
-				if (s.cache[i] != -1)
-					fprintf(f, "c:%02d%04x,", i, s.cache[i]);
-			}
-		fprintf(f, "p:%s\n", s.service_provider.c_str());
+		for (int i=0; i<eServiceDVB::cacheMax; ++i)
+		{
+			if (s.cache[i] != -1)
+				fprintf(f, "c:%02d%04x,", i, s.cache[i]);
+		}
+		eString prov;
+		prov=s.service_provider;
+		for (std::string::iterator i=prov.begin(); i != prov.end(); ++i)
+			if (*i == ',')
+				*i='_';
+		
+		fprintf(f, "p:%s\n", prov.c_str());
 	}
 	~saveService()
 	{
@@ -349,7 +355,7 @@ void eDVBSettings::loadServices()
 		} else
 			while ((!str.empty()) && str[1]==':') // new: p:, f:, c:%02d...
 			{
-				int c=str.find(',');
+				unsigned int c=str.find(',');
 				char p=str[0];
 				eString v;
 				if (c == eString::npos)
@@ -361,13 +367,12 @@ void eDVBSettings::loadServices()
 					v=str.mid(2, c-2);
 					str=str.mid(c+1);
 				}
-				eDebug("%c ... %s", p, v.c_str());
+//				eDebug("%c ... %s", p, v.c_str());
 				if (p == 'p')
 					s.service_provider=v;
 				else if (p == 'f')
 				{
 					sscanf(v.c_str(), "%x", &s.dxflags);
-					eDebug("dxflags: %d", s.dxflags);
 				} else if (p == 'c')
 				{
 					int cid, val;
@@ -390,7 +395,7 @@ void eDVBSettings::saveBouquets()
 	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "wt");
 	if (!f)
 		eFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
-	fprintf(f, "eDVB bouquets /1/");
+	fprintf(f, "eDVB bouquets /1/\n");
 	fprintf(f, "bouquets\n");
 	for (ePtrList<eBouquet>::iterator i(*getBouquets()); i != getBouquets()->end(); ++i)
 	{
@@ -487,8 +492,160 @@ void eDVBSettings::removeOrbitalPosition(int orbital_position)
 	/*emit*/ dvb.bouquetListChanged();
 }
 
+int eDVBSettings::importSatcoDX(eString line)
+{
+		// hier versuchen wir das komische "SatcoDX"-format zu parsen, was wahrlich noch aus analog-tv zeiten stammt...
+	if (line.left(7) != "SATCODX")
+	{
+		eDebug("SatcoDX: header invalid.");
+		return -1;
+	}
+		// stammen MUSS.
+	if (line.mid(7, 1) != "1")
+	{
+		eDebug("SatcoDX: unsupported page.");
+		return -2;
+	}
+	if (line.mid(8, 2) != "03")
+	{
+		eDebug("SatcoDX: must be version 03");
+		return -3;
+	}
+		// denn damals kam man wohl mit 20 zeichen fuer den kanalnamen aus, und somit festen strukturen. dvb2k laesst gruessen.
+	if (line.size() != 128)
+	{
+		eDebug("SatcoDX: invalid line length.");
+		return -4;
+	}
+		// also definieren wir den satelliten-NAMEN. bloss nicht zu kompliziert. darf natuerlich nur begrenzt lang sein, klar.
+	eString satname=line.mid(10, 18);
+		// und den TYP. Ah! Doch etsi? service_type? nee quatsch. T fuer TV, R fuer Radio, D fuer Data (ist mpeg nicht auch data? *wunder*) und _ fuer "package transponder". HAE? naja gut.
+	eString type=line.mid(28, 1);
+		// oh und das broadcasting system. so wie im etsi? klar. TRAEUM WEITER. hier gibts es:
+		// (langweilig) 422_, ADR_, BMAC_, D2MAC (wie das in 4 zeichen passt ist mir WIRKLICH unklar.), DIC1, DIC2, ISDB, und jetzt kommts:
+		// MPG1 ... ok, MPEG-1 halt.
+		// MP15 MPEG-1.5 (HAEEE???? was issen das? mpeg 2.5 mag es ja noch geben (wer auch immer SOLCHE low bitrate services ueber dvb macht.. pah)
+		// MPG2 MPEG-2
+		// MPG4 MPEG-4
+		// MUSE, NTSC, PAL_, SECM (ich sag ja, analog.)
+	eString system=line.mid(29, 4);
+		// oh die frequenz. in ascii.
+	eString frequency=line.mid(33, 9);
+		// ooh! laut DVB? ne quatsch, man brauch mal wieder ne lookup table. 0 ist vertikal, 1 horiz, 2 ist linksdrehend und 3 ist im joghurt. (oder so)
+	eString polarization=line.mid(42, 1);
+		// der anfang vom ende. der kanalname. WELCH EIN WUNDER dass hier nicht noch die kanalNUMMER steht.
+	eString channelname=line.mid(43, 8);
+		// orbital position. JUHUU. endlich mal was brauchbares.
+	eString orbital_position=line.mid(51, 4);
+		// coverage mit dem man nix anfangen kann.
+	eString coverage=line.mid(55, 8);
+		// audio frequency ;))
+	eString audio_freq=line.mid(63, 6);
+		// die symbolrate.
+	eString symbolrate=line.mid(69, 5);
+		// FEC, gaenzlich unkonform aber naja. 0 fuer KEINE FEC .. (??), 1, 2, 3, 5, 7 fuer 1/2, 2/3, 3/4, 5/6, 7/8)
+	eString fec=line.mid(74, 1);
+		// die pids. in hex. .... .... Satcodx? nein, natuerlich IN ASCII.
+	eString vpid=line.mid(75, 4);
+	eString apid=line.mid(79, 4);
+	eString pcrpid=line.mid(83, 4);
+		// die sid
+	eString sid=line.mid(87, 5);
+		// die nid. (JA, die jungs kennen sich aus.)
+	eString onid=line.mid(92, 5);
+		// die tsid (JA, die jungs kennen sich WIRKLICH aus.)
+	eString tsid=line.mid(97, 5);
+		// die primary language. ok, wenn die danach filtern wollen, sollen sie es tun. meinetwegen.
+	eString lang=line.mid(102, 3);
+		// der mighty underscore
+	if (line[105] != '_')
+	{
+		eDebug("SatcoDX: underscore missing.");
+		return -5;
+	}
+		// blakram
+	eString cc=line.mid(106, 2);
+	eString lang2=line.mid(108, 2);
+	eString crypt=line.mid(111, 4);
+		// und der rest vom ende.
+	channelname+=line.mid(115, 12);
+	if (line[127] != '\r')
+	{
+		eDebug("SatcoDX: missing CR.");
+		return -6;
+	}
+	
+	if (type == '_')
+		return 0;
+	if (system.left(3) != "MPG")
+		return 0;
+	
+	int service_type=3;
+	if (type == "T")
+		service_type=1;
+	else if (type == "R")
+		service_type=2;
+
+	eServiceDVB &dvbservice=transponderlist->createService(
+		eServiceReferenceDVB(
+			eTransportStreamID(atoi(tsid.c_str())), eOriginalNetworkID(atoi(onid.c_str())), eServiceID(atoi(sid.c_str())),
+			service_type)
+		);
+	dvbservice.service_type=service_type;
+	dvbservice.service_name=channelname;
+	dvbservice.service_provider=satname;		// HA! jetzt hab ich's den lamern aber gegeben!
+	dvbservice.dxflags=eServiceDVB::dxNoDVB; // ists ja auch nicht.
+	if (vpid[0] != '_')
+		dvbservice.set(eServiceDVB::cVPID, atoi(vpid.c_str()));
+	if (apid[0] != '_')
+		dvbservice.set(eServiceDVB::cAPID, atoi(apid.c_str()));
+	if (pcrpid[0] != '_')
+	dvbservice.set(eServiceDVB::cPCRPID, atoi(pcrpid.c_str()));
+	
+	
+	// create transponder.
+	
+	int my_orbital_position=atoi(orbital_position.c_str());
+	if (my_orbital_position >= 1800) // convert 0..3599 to -1800..1799
+		my_orbital_position-=3600;
+
+	eTransponder &t=transponderlist->createTransponder(eTransportStreamID(atoi(tsid.c_str())), eOriginalNetworkID(atoi(onid.c_str())));
+	t.state=eTransponder::stateOK;
+
+	int myfec;
+	switch (atoi(fec.c_str()))
+	{
+	case 0:
+		myfec=FEC_AUTO;
+		break;
+	case 1:
+		myfec=FEC_1_2;
+		break;
+	case 2:
+		myfec=FEC_2_3;
+		break;
+	case 3:
+		myfec=FEC_3_4;
+		break;
+	case 5:
+		myfec=FEC_5_6;
+		break;
+	case 7:
+		myfec=FEC_7_8;
+		break;
+	default:
+		myfec=FEC_AUTO;
+		break;
+	}
+
+	t.setSatellite(atoi(frequency.c_str()), atoi(symbolrate.c_str())*1000, atoi(polarization.c_str())^1, myfec, my_orbital_position, 0);
+
+	return 0;
+}
+
 eDVBSettings::~eDVBSettings()
 {
+	saveServices();
 	if (transponderlist)
 		delete transponderlist;
 }

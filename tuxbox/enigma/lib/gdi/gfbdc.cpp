@@ -82,6 +82,9 @@ void gFBDC::calcRamp()
 
 void gFBDC::setPalette()
 {
+	if (!pixmap->clut.data)
+		return;
+	
 	for (int i=0; i<256; ++i)
 	{
 		fb->CMAP()->red[i]=ramp[pixmap->clut.data[i].r]<<8;

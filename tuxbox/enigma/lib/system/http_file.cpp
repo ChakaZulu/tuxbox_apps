@@ -204,6 +204,8 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 				mime="image/gif";
 			else if (ext==".css")
 				mime="text/css";
+			else if (ext==".png")
+				mime="image/png";
 
 			data=new eHTTPFile(conn, fd, method, mime);
 			break;

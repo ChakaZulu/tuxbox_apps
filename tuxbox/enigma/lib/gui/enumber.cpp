@@ -73,7 +73,6 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	else
 		p->renderText(pos, t);
 		
-	p->flush();
 	p->clippop();
 }
 

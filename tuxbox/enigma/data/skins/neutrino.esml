@@ -4,7 +4,6 @@
 		<email>McClean@sth-tech.de</email>
 	</author>
 
-
 	<fonts>
 		<font file="bluehigh.ttf" name="Blue.Regular" /> <!-- Found at dafont.com freeware -->
 		<font file="bluebold.ttf" name="Blue.Bold" /> <!-- Found at dafont.com freeware -->

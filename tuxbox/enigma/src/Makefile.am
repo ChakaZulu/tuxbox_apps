@@ -9,7 +9,8 @@ enigma_SOURCES = \
 	setupnetwork.cpp setupvideo.cpp showbnversion.cpp sselect.cpp streaminfo.cpp \
 	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp setup_language.cpp enigma_info.cpp \
 	enigma_scan.cpp setupskin.cpp setup_osd.cpp timer.cpp setup_lcd.cpp enigma_vcr.cpp \
-	setup_rc.cpp channelinfo.cpp setup_harddisk.cpp enigma_ci.cpp upgrade.cpp satfind.cpp
+	setup_rc.cpp channelinfo.cpp setup_harddisk.cpp enigma_ci.cpp upgrade.cpp satfind.cpp \
+	rotorconfig.cpp setup_rfmod.cpp
 
 enigma_LDADD = \
 	$(top_builddir)/lib/driver/libenigma_driver.la \
@@ -24,4 +25,6 @@ enigma_LDADD = \
 	@MD5SUM_LIBS@ \
 	@SIGC_LIBS@ \
 	@XMLTREE_LIBS@ \
-	-ldl -lpthread -lcrypt -lresolv -ltuxbox
+	-ldl -lpthread -lid3tag -lmad -lcrypt -lresolv -ltuxbox -lmd5sum
+#\
+#	/dbox2/cdkroot/lib/libmpatrolmt.a -lpthread -lbfd -liberty

@@ -456,7 +456,10 @@ int eServiceHandlerDVB::play(const eServiceReference &service)
 //	if (oldflags != flags)
 		serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 	if (sapi)
+	{
+		eDebug("play -> switchService");
 		return sapi->switchService((const eServiceReferenceDVB&)service);
+	}
 	return -1;
 }
 
@@ -501,10 +504,13 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 			return -1;
 		break;
 	case eServiceCommand::cmdSetSpeed:
+		eDebug("eServiceCommand::cmdSetSpeed");
 		if (!decoder)
 			return -1;
+		eDebug("decoder exist");
 		if ((state == statePlaying) || (state == statePause) || (state == stateSkipping))
 		{
+			eDebug("state...");
 			if (cmd.parm < 0)
 				return -1;
 			decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::setSpeed, cmd.parm));
@@ -515,7 +521,10 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 			else
 				state=stateSkipping;
 		} else
+			{
+			eDebug("return -2");
 			return -2;
+			}
 		break;
 	case eServiceCommand::cmdSkip:
 		if (!decoder)
@@ -597,6 +606,8 @@ int eServiceHandlerDVB::getErrorInfo()
 int eServiceHandlerDVB::stop()
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+
+	eDebug("eServiceHandlerDVB::stop()");
 
 	if (sapi)
 		sapi->switchService(eServiceReferenceDVB());

@@ -1,5 +1,6 @@
 #include <lib/base/message.h>
 #include <unistd.h>
+#include <lib/base/eerror.h>
 
 eMessagePump::eMessagePump(int mt): content(1024*1024), ismt(mt)
 {

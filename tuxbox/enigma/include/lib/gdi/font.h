@@ -37,12 +37,13 @@ class fontRenderClass
 	FT_Library library;
 	FTC_Manager			cacheManager;				/* the cache manager							 */
 	FTC_Image_Cache	imageCache;					/* the glyph image cache					 */
-	FTC_SBit_Cache	 sbitsCache;					/* the glyph small bitmaps cache	 */
+	FTC_SBit_Cache	 sbitsCache;				/* the glyph small bitmaps cache	 */
 
 	FTC_FaceID getFaceID(const char *face);
 	FT_Error getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_index, FTC_SBit *sbit);
 	static fontRenderClass *instance;
 public:
+	float getLineHeight(const gFont& font);
 	const char* AddFont(const char *filename);
 	static fontRenderClass *getInstance();
 	FT_Error FTC_Face_Requester(FTC_FaceID	face_id,

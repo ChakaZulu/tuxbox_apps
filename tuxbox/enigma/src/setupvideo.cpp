@@ -68,6 +68,8 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
+	ok->setShortcut("green");
+	ok->setShortcutPixmap("green");
 	ok->move(ePoint(20, 120));
 	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("save settings and leave video setup"));

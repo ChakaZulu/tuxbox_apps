@@ -13,6 +13,7 @@
 #include <lib/system/econfig.h>
 #include <lib/dvb/edvb.h>
 #include <lib/dvb/decoder.h>
+#include <tuxbox/tuxbox.h>
 
 /* sucks */
 
@@ -101,15 +102,13 @@ void eAVSwitch::reloadSettings()
 
 int eAVSwitch::setVolume(int vol)
 {
-	eString s = eDVB::getInstance()->getInfo("mID");
-
 	vol=63-vol/(65536/64);
 	if (vol<0)
 		vol=0;
 	if (vol>63)
 		vol=63;
 
-	if (s == "05" || s == "06")  // Dreambox
+	if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
 	{
 		audio_mixer_t mix;
 		mix.volume_left=(vol*vol)/64;
@@ -201,12 +200,11 @@ void eAVSwitch::sendVolumeChanged()
 
 void eAVSwitch::toggleMute()
 {
-	eString s = eDVB::getInstance()->getInfo("mID");
 	mute = !mute;
 	if (mute)
 	{
 //		setVolume(63);
-		if ( s == "05" || s == "06" )
+		if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
 			muteOstAudio(1);
 		else
 			muteAvsAudio(1);
@@ -214,7 +212,7 @@ void eAVSwitch::toggleMute()
 	else
 	{
 //		changeVolume(1,volume);
-		if ( s == "05" || s == "06" )
+		if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
 			muteOstAudio(0);
 		else
 			muteAvsAudio(0);
@@ -300,7 +298,10 @@ int eAVSwitch::setInput(int v)
 		changeVolume(1, volume);  // set Volume to TV Volume
 		if (mute)
 		{
-			muteAvsAudio(1);
+			if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
+				muteOstAudio(1);
+			else
+				muteAvsAudio(1);
 			sendVolumeChanged();
 		}
 		reloadSettings();						// reload ColorSettings
@@ -315,7 +316,12 @@ int eAVSwitch::setInput(int v)
 		ioctl(avsfd, AVSIOSVSW3, scart+4);
 		ioctl(avsfd, AVSIOSASW3, scart+5);
 		if (mute)
-			muteAvsAudio(0);
+		{
+			if (tuxbox_get_model() != TUXBOX_MODEL_DBOX2)
+				muteOstAudio(0);
+			else
+				muteAvsAudio(0);
+		}
 		changeVCRVolume(1, VCRVolume);
 		break;
 	}

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.15 2003/01/03 12:48:23 Jolt Exp $
+ * $Id: enigma_info.cpp,v 1.16 2003/01/12 00:49:03 Ghostrider Exp $
  */
 
 #include <enigma_info.h>
@@ -252,9 +252,18 @@ public:
 				eString ver=verid.mid(1, 3);
 				eString date=verid.mid(4, 8);
 //				eString time=verid.mid(12, 4);
-				version->setText(
-					eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]
-						+ ", " + date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4));
+				if (tuxbox_get_model() == TUXBOX_MODEL_DBOX2)
+					version->setText(
+														eString().sprintf
+															("%s %c.%d. %s", typea[type%3], ver[0],
+															atoi( eString().sprintf("%c%c",ver[1],ver[2]).c_str()	),
+															(date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4)).c_str()
+															)
+													);
+				else
+					version->setText(
+						eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]
+							+ ", " + date.mid(6, 2) + "." + date.mid(4,2) + "." + date.left(4));
 			}
 		}
 

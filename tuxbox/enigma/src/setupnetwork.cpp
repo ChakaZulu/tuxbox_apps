@@ -108,6 +108,8 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
+	ok->setShortcut("green");
+	ok->setShortcutPixmap("green");
 	ok->move(ePoint(10, 220));
 	ok->resize(eSize(170, 40));
 	ok->setHelpText(_("close window and save changes"));

@@ -26,12 +26,14 @@ void eSocket::close()
 
 void eSocket::enableRead()
 {
-	rsn->setRequested(rsn->getRequested()|eSocketNotifier::Read);
+	if (rsn)
+		rsn->setRequested(rsn->getRequested()|eSocketNotifier::Read);
 }
 
 void eSocket::disableRead()
 {
-	rsn->setRequested(rsn->getRequested()&~eSocketNotifier::Read);
+	if (rsn)
+		rsn->setRequested(rsn->getRequested()&~eSocketNotifier::Read);
 }
 
 eString eSocket::readLine()

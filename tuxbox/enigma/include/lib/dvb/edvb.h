@@ -33,6 +33,7 @@ class Descriptor;
 class eBouquet;
 class eAVSwitch;
 class eStreamWatchdog;
+class eRFmod;
 class MHWEIT;
 class eDVBRecorder;
 class eDVBScanController;
@@ -102,9 +103,11 @@ public:
 	eAUTable<NIT> tNIT, tONIT;
 	eAUTable<EIT> tEIT;
 	eAUTable<BAT> tBAT;
-	
+	EIT *nvodEIT;
+
 	eDVBRecorder *recorder;
 	eDVBCI *DVBCI;
+	eDVBCI *DVBCI2;
 
 public:
 	enum
@@ -145,7 +148,7 @@ public:
 		return instance;
 	}
 
-	eString getInfo(const char *info);
+	static eString getInfo(const char *info);
 	
 	PMT *getPMT();
 	EIT *getEIT();

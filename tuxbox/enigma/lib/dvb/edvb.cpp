@@ -18,6 +18,7 @@
 
 #include <lib/driver/eavswitch.h>
 #include <lib/driver/streamwd.h>
+#include <lib/driver/rfmod.h>
 #include <lib/dvb/esection.h>
 #include <lib/dvb/si.h>
 #include <lib/dvb/frontend.h>
@@ -54,7 +55,8 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 	event(eDVBEvent(eDVBEvent::eventTunedIn, err, trans));
 }
 
-eDVB::eDVB(): state(eDVBState::stateIdle)
+eDVB::eDVB()
+	: state(eDVBState::stateIdle), nvodEIT(0)
 {
 	settings=0;
 	time_difference=0;
@@ -66,6 +68,9 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 
 	DVBCI=new eDVBCI();
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
+
+	DVBCI2=new eDVBCI();
+	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
 
 		// initialize frontend (koennte auch nochmal raus)
 	eString frontend=getInfo("fe");
@@ -126,8 +131,11 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 			new eAVSwitchNokia;
 			break;
 		}
-	case TUXBOX_MODEL_DREAMBOX_DM7000:
+	break;
 	case TUXBOX_MODEL_DREAMBOX_DM5600:
+		new eRFmod;
+		eRFmod::getInstance()->init();
+	case TUXBOX_MODEL_DREAMBOX_DM7000:
 		new eAVSwitchNokia;
 		break;
 	default:
@@ -154,6 +162,10 @@ eDVB::~eDVB()
 
 	eAVSwitch::getInstance()->setActive(0);
 	delete eAVSwitch::getInstance();
+	
+	if(eRFmod::getInstance())
+		delete eRFmod::getInstance();
+		
 	Decoder::Close();
 
 	eFrontend::close();
@@ -202,7 +214,15 @@ PMT *eDVB::getPMT()
 
 EIT *eDVB::getEIT()
 {
-	return tEIT.ready()?tEIT.getCurrent():0;
+	if ( tEIT.ready() )
+		return tEIT.getCurrent();
+	else if ( nvodEIT )
+	{
+		nvodEIT->lock();
+		return nvodEIT;
+	}
+	else
+		return 0;
 }
 
 SDT *eDVB::getSDT()

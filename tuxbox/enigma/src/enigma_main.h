@@ -14,7 +14,6 @@
 #include <lib/base/message.h>
 #include <lib/dvb/service.h>
 
-
 class eLabel;
 class eProgress;
 class EIT;
@@ -165,6 +164,7 @@ class ePlaylist;
 
 class eZapMain: public eWidget
 {
+	friend class eEPGSelector;
 public:
 	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
 	enum { stateSleeping=2, stateInTimerMode=4, stateRecording=8, recDVR=16, recVCR=32 };
@@ -188,7 +188,7 @@ private:
 	// eRecordingStatus *recstatus;
 
 	eProgress *Progress, VolumeBar;
-	eMessageBox *pMsg;
+	eMessageBox *pMsg, *pRotorMsg;
 
 	eLock messagelock;
 	std::list<eZapMessage> messages;
@@ -285,6 +285,8 @@ private:
 	eServicePath modeLast[modeEnd];
 	int mode, last_mode, state;
 	int hddDev;
+	void onRotorStart( int newPos );
+	void onRotorStop();
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
