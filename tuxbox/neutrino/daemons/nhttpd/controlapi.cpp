@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.27 2003/11/02 00:28:27 dirch Exp $
+	$Id: controlapi.cpp,v 1.28 2003/11/30 18:40:29 thegoodguy Exp $
 
 	License: GPL
 
@@ -821,9 +821,14 @@ void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 void CControlAPI::SendSettings(CWebserverRequest* request)
 {
 	request->SocketWriteLn(
-		"Boxtype " + Parent->Dbox_Hersteller[Parent->Controld->getBoxType()] + "\n" + 
-		"videooutput " + Parent->videooutput_names[Parent->Controld->getVideoOutput()] + "\n" +
-		"videoformat " + Parent->videoformat_names[Parent->Controld->getVideoFormat()]
+		"Boxtype " +
+		Parent->Dbox_Hersteller[Parent->Controld->getBoxType()] +
+		"\n" 
+		"videooutput " +
+		Parent->videooutput_names[(unsigned char)Parent->Controld->getVideoOutput()] +
+		"\n"
+		"videoformat " +
+		Parent->videoformat_names[(unsigned char)Parent->Controld->getVideoFormat()]
 	);
 }
 
