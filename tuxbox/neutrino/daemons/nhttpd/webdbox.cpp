@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.24 2002/04/22 20:38:13 dirch Exp $
+	$Id: webdbox.cpp,v 1.25 2002/04/22 21:42:33 McClean Exp $
 
 	License: GPL
 
@@ -145,11 +145,11 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		{
 			if (request->ParameterList["1"] == "on")	// in standby mode schalten
 			{
-				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_ON, 80);
+				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD);
 				printf("Event fired\n");
 			}
 			if (request->ParameterList["1"] == "off")	// standby mode ausschalten
-				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_OFF, 80);
+				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_NHTTPD);
 		}
 		request->SocketWrite("ok");
 		return true;
@@ -265,7 +265,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		if (request->ParameterList.size() == 0)
 		{	//paramlos
 //			controld.shutdown();			// dbox runterfahren
-			Parent->EventServer.sendEvent(NeutrinoMessages::SHUTDOWN, 80);
+			Parent->EventServer.sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD);
 
 			request->SocketWrite("ok");
 			return true;
@@ -725,7 +725,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 				request->SendFile(request->Parent->PrivateDocumentRoot,"/shutdown.include");
 				request->EndRequest();
 				sleep(1);
-				Parent->EventServer.sendEvent(NeutrinoMessages::SHUTDOWN, 80);
+				Parent->EventServer.sendEvent(NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD);
 //				controld.shutdown();
 				return true;
 			}
@@ -1100,11 +1100,11 @@ bool TWebDbox::ShowControlpanel(CWebserverRequest* request)
 		else if( request->ParameterList["standby"] != "")
 		{
 			if(request->ParameterList["standby"] == "on")
-				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_ON, 80);
+				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_ON, CEventServer::INITID_NHTTPD);
 
 //				zapit.stopPlayBack();
 			if(request->ParameterList["standby"] == "off")
-				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_OFF, 80);
+				Parent->EventServer.sendEvent(NeutrinoMessages::STANDBY_OFF, CEventServer::INITID_NHTTPD);
 //				zapit.startPlayBack();
 		}
 	}
