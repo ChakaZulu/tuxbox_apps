@@ -48,6 +48,7 @@ lib/Makefile
 lib/controldclient/Makefile
 lib/sectionsdclient/Makefile
 lib/timerdclient/Makefile
+lib/irsend/Makefile
 daemons/Makefile
 daemons/controld/Makefile
 daemons/controld/driver/Makefile

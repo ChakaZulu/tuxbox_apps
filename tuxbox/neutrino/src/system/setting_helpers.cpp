@@ -362,7 +362,7 @@ bool CAudioSetupNotifier::changeNotify(const std::string & OptionName, void*)
 	if(OptionName=="audiomenu.PCMOffset")
 	{
 		if (g_settings.audio_avs_Control == 2)   //lirc
-			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
+			g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), CControld::TYPE_OST);
 	}
 
 	if(OptionName=="audiomenu.analogout")
@@ -382,10 +382,10 @@ bool CAudioSetupNotifier2::changeNotify(const std::string & OptionName, void*)
 	toDisable[0]->setActive(g_settings.audio_avs_Control == 2);
 
 	if (g_settings.audio_avs_Control == 2)   
-		g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), 0);
-	else
-		g_RCInput->postMsg(NeutrinoMessages::EVT_VOLCHANGED, 0);
- 
+		g_Controld->setVolume(100 - atoi(g_settings.audio_PCMOffset), CControld::TYPE_OST);
+	// tell controld the new volume_type
+	g_Controld->setVolume(g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control),
+									 (CControld::volume_type)g_settings.audio_avs_Control); 
 	return true;
 }
 

@@ -25,6 +25,7 @@
 #define __controldclient__
 
 #include <connection/basicclient.h>
+#include <controldclient/controldMsg.h>
 
 
 #define VCR_STATUS_OFF 0
@@ -61,54 +62,39 @@ class CControldClient:private CBasicClient
 		static const bool VOLUME_MUTE = true;
 		static const bool VOLUME_UNMUTE = false;
 
-		//BoxType  /* cf. driver/include/tuxbox/tuxbox_info.h */
-		typedef enum tuxbox_maker
-			{
-				TUXBOX_MAKER_UNKNOWN			= 0,
-				TUXBOX_MAKER_NOKIA			= 1,
-				TUXBOX_MAKER_PHILIPS			= 2,
-				TUXBOX_MAKER_SAGEM			= 3,
-				TUXBOX_MAKER_DREAM_MM			= 4,
-				TUXBOX_MAKER_TECHNOTREND		= 5,
-			}
-		tuxbox_maker_t;
-
 		//scartmode
 		static const char SCARTMODE_ON  = 1;
 		static const char SCARTMODE_OFF = 0;
 
 		/*
-			setVolume(char) : Setzten der Lautstärke
+			setVolume(volume_type) : Setzten der Lautstärke
 			Parameter: 0..100 - 0=leise 100=laut
-			           avs == true : mute avs device
-			           avs == false: mute audio device
+			           volume_type     : device AVS/OST/UNKOWN(=last used)
 		*/
-		void setVolume(const char volume, const bool avs = true);
-		char getVolume(const bool avs = true);
+		void setVolume(const char volume, const CControld::volume_type volume_type = CControld::TYPE_UNKNOWN);
+		char getVolume(const CControld::volume_type volume_type = CControld::TYPE_UNKNOWN);
 
 		/*
-			setMute(bool, bool) : setzen von Mute
-			Parameter: VOLUME_MUTE   = ton aus
-			           VOLUME_UNMUTE = ton an
-			           avs == true : mute avs device
-			           avs == false: mute audio device
+			setMute(bool, volume_type) : setzen von Mute
+			Parameter: mute == true    : ton aus
+						  mute == false   : ton an
+			           volume_type     : device AVS/OST/UNKOWN(=last used)
 		*/
-		void setMute(const bool mute, const bool avs = true);
-		bool getMute(const bool avs = true);
+		void setMute(const bool mute, const CControld::volume_type volume_type = CControld::TYPE_UNKNOWN);
+		bool getMute(const CControld::volume_type volume_type = CControld::TYPE_UNKNOWN);
 
 		/*
-			Mute(bool) : Ton ausschalten
-			Parameter: avs == true : mute avs device
-			           avs == false: mute audio device
+			Mute(volume_type) : Ton ausschalten
+			Parameter: volume_type   : device AVS/OST/UNKOWN(=last used)
 		*/
-		void Mute(const bool avs = true);
+		void Mute(const CControld::volume_type volume_type = CControld::TYPE_UNKNOWN);
 
 		/*
 			UnMute(bool) : Ton wieder einschalten
-			Parameter: avs == true : mute avs device
-			           avs == false: mute audio device
+			Parameter: volume_type   : device AVS/OST/UNKOWN(=last used)
+			           
 		*/
-		void UnMute(const bool avs = true);
+		void UnMute(const CControld::volume_type volume_type = CControld::TYPE_UNKNOWN);
 
 
 		/*
@@ -139,8 +125,8 @@ class CControldClient:private CBasicClient
 		/*
 			setBoxType(CControldClient::tuxbox_vendor_t) : Setzten des Boxentyps ( nokia / sagem / philips )
 		*/
-		void setBoxType(const CControldClient::tuxbox_maker_t);
-		CControldClient::tuxbox_maker_t getBoxType();
+		void setBoxType(const CControld::tuxbox_maker_t);
+		CControld::tuxbox_maker_t getBoxType();
 
 		/*
 			setScartMode(char) : Scartmode ( an / aus )

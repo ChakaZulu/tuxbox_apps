@@ -32,13 +32,12 @@
 #include <string.h>
 
 #include <eventserver.h>
-#include <controldclient/controldMsg.h>
 #include <controldclient/controldclient.h>
 
 
 const unsigned char   CControldClient::getVersion   () const
 {
-	return CControld::ACTVERSION;
+	return CControldMsg::ACTVERSION;
 }
 
 const          char * CControldClient::getSocketName() const
@@ -48,29 +47,29 @@ const          char * CControldClient::getSocketName() const
 
 void  CControldClient::shutdown()
 {
-	send(CControld::CMD_SHUTDOWN);
+	send(CControldMsg::CMD_SHUTDOWN);
 	close_connection();
 }
 
-void CControldClient::setBoxType(CControldClient::tuxbox_maker_t type)
+void CControldClient::setBoxType(CControld::tuxbox_maker_t type)
 {
-	CControld::commandBoxType msg2;
+	CControldMsg::commandBoxType msg2;
 
 	msg2.boxtype = type;
 
-	send(CControld::CMD_SETBOXTYPE, (char*)&msg2, sizeof(msg2));
+	send(CControldMsg::CMD_SETBOXTYPE, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
 
-CControldClient::tuxbox_maker_t CControldClient::getBoxType()
+CControld::tuxbox_maker_t CControldClient::getBoxType()
 {
-	CControld::responseBoxType rmsg;
+	CControldMsg::responseBoxType rmsg;
 
-	send(CControld::CMD_GETBOXTYPE);
+	send(CControldMsg::CMD_GETBOXTYPE);
 
 	if (!receive_data((char*)&rmsg, sizeof(rmsg)))
-		rmsg.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
+		rmsg.boxtype = CControld::TUXBOX_MAKER_UNKNOWN;
 
 	close_connection();
 
@@ -79,40 +78,30 @@ CControldClient::tuxbox_maker_t CControldClient::getBoxType()
 
 void CControldClient::setScartMode(bool mode)
 {
-	CControld::commandScartMode msg2;
+	CControldMsg::commandScartMode msg2;
 
 	msg2.mode = mode;
 
-	send(CControld::CMD_SETSCARTMODE, (char*)&msg2, sizeof(msg2));
+	send(CControldMsg::CMD_SETSCARTMODE, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
 
-void CControldClient::setVolume(const char volume, const bool avs)
+void CControldClient::setVolume(const char volume, const CControld::volume_type volume_type)
 {
-	CControld::commandVolume msg2;
-
+	CControldMsg::commandVolume msg2;
+	msg2.type = volume_type;
 	msg2.volume = volume;
-
-	if (avs)
-		send(CControld::CMD_SETVOLUME_AVS, (char*)&msg2, sizeof(msg2));
-	else
-		send(CControld::CMD_SETVOLUME, (char*)&msg2, sizeof(msg2));
-
+	send(CControldMsg::CMD_SETVOLUME, (char*)&msg2, sizeof(msg2));
 	close_connection();
 }
 
-char CControldClient::getVolume(const bool avs)
+char CControldClient::getVolume(const CControld::volume_type volume_type)
 {
-	CControld::responseVolume rmsg;
-
-	if (avs)
-		send(CControld::CMD_GETVOLUME_AVS);
-	else
-		send(CControld::CMD_GETVOLUME);
-
+	CControldMsg::commandVolume rmsg;
+	rmsg.type = volume_type;
+	send(CControldMsg::CMD_GETVOLUME, (char*)&rmsg, sizeof(rmsg));
 	receive_data((char*)&rmsg, sizeof(rmsg));
-
 	close_connection();
 
 	return rmsg.volume;
@@ -120,20 +109,20 @@ char CControldClient::getVolume(const bool avs)
 
 void CControldClient::setVideoFormat(char format)
 {
-	CControld::commandVideoFormat msg2;
+	CControldMsg::commandVideoFormat msg2;
 
 	msg2.format = format;
 
-	send(CControld::CMD_SETVIDEOFORMAT, (char*)&msg2, sizeof(msg2));
+	send(CControldMsg::CMD_SETVIDEOFORMAT, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
 
 char CControldClient::getAspectRatio()
 {
-	CControld::responseAspectRatio rmsg;
+	CControldMsg::responseAspectRatio rmsg;
 
-	send(CControld::CMD_GETASPECTRATIO);
+	send(CControldMsg::CMD_GETASPECTRATIO);
 
 	receive_data((char*)&rmsg, sizeof(rmsg));
 
@@ -144,9 +133,9 @@ char CControldClient::getAspectRatio()
 
 char CControldClient::getVideoFormat()
 {
-	CControld::responseVideoFormat rmsg;
+	CControldMsg::responseVideoFormat rmsg;
 
-	send(CControld::CMD_GETVIDEOFORMAT);
+	send(CControldMsg::CMD_GETVIDEOFORMAT);
 
 	receive_data((char*)&rmsg, sizeof(rmsg));
 
@@ -157,20 +146,20 @@ char CControldClient::getVideoFormat()
 
 void CControldClient::setVideoOutput(char output)
 {
-	CControld::commandVideoOutput msg2;
+	CControldMsg::commandVideoOutput msg2;
 
 	msg2.output = output;
 
-	send(CControld::CMD_SETVIDEOOUTPUT, (char*)&msg2, sizeof(msg2));
+	send(CControldMsg::CMD_SETVIDEOOUTPUT, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
 
 char CControldClient::getVideoOutput()
 {
-	CControld::responseVideoOutput rmsg;
+	CControldMsg::responseVideoOutput rmsg;
 
-	send(CControld::CMD_GETVIDEOOUTPUT);
+	send(CControldMsg::CMD_GETVIDEOOUTPUT);
 
 	receive_data((char*)&rmsg, sizeof(rmsg));
 
@@ -179,46 +168,32 @@ char CControldClient::getVideoOutput()
 	return rmsg.output;
 }
 
-
-void CControldClient::Mute(const bool avs)
+void CControldClient::Mute(const CControld::volume_type volume_type)
 {
-	if (avs)
-		send(CControld::CMD_MUTE_AVS);
-	else
-		send(CControld::CMD_MUTE);
+	setMute(true,volume_type);
+}
+
+void CControldClient::UnMute(const CControld::volume_type volume_type)
+{
+	setMute(false,volume_type);
+}
+
+void CControldClient::setMute(const bool mute, const CControld::volume_type volume_type)
+{
+	CControldMsg::commandMute msg;
+	msg.mute = mute;
+	msg.type = volume_type;
+	send(CControldMsg::CMD_SETMUTE, (char*)&msg, sizeof(msg));
 	close_connection();
 }
 
-void CControldClient::UnMute(const bool avs)
+bool CControldClient::getMute(const CControld::volume_type volume_type)
 {
-	if (avs)
-		send(CControld::CMD_UNMUTE_AVS);
-	else
-		send(CControld::CMD_UNMUTE);
-	close_connection();
-}
-
-void CControldClient::setMute(const bool mute, const bool avs)
-{
-	if (mute)
-		Mute(avs);
-	else
-		UnMute(avs);
-}
-
-bool CControldClient::getMute(const bool avs)
-{
-	CControld::responseMute rmsg;
-
-	if (avs)
-		send(CControld::CMD_GETMUTESTATUS_AVS);
-	else
-		send(CControld::CMD_GETMUTESTATUS);
-
+	CControldMsg::commandMute rmsg;
+	rmsg.type = volume_type;
+	send(CControldMsg::CMD_GETMUTESTATUS, (char*)&rmsg, sizeof(rmsg));
 	receive_data((char*)&rmsg, sizeof(rmsg));
-
 	close_connection();
-
 	return rmsg.mute;
 }
 
@@ -230,7 +205,7 @@ void CControldClient::registerEvent(unsigned int eventID, unsigned int clientID,
 	msg2.clientID = clientID;
 	strcpy(msg2.udsName, udsName);
 
-	send(CControld::CMD_REGISTEREVENT, (char*)&msg2, sizeof(msg2));
+	send(CControldMsg::CMD_REGISTEREVENT, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
@@ -242,40 +217,40 @@ void CControldClient::unRegisterEvent(unsigned int eventID, unsigned int clientI
 	msg2.eventID = eventID;
 	msg2.clientID = clientID;
 
-	send(CControld::CMD_UNREGISTEREVENT, (char*)&msg2, sizeof(msg2));
+	send(CControldMsg::CMD_UNREGISTEREVENT, (char*)&msg2, sizeof(msg2));
 
 	close_connection();
 }
 
 void CControldClient::videoPowerDown(bool powerdown)
 {
-        CControld::commandVideoPowerSave msg2;
+        CControldMsg::commandVideoPowerSave msg2;
 
         msg2.powerdown = powerdown;
 
-        send(CControld::CMD_SETVIDEOPOWERDOWN, (char*)&msg2, sizeof(msg2));
+        send(CControldMsg::CMD_SETVIDEOPOWERDOWN, (char*)&msg2, sizeof(msg2));
 
         close_connection();
 }
 
 void CControldClient::saveSettings()
 {
-        send(CControld::CMD_SAVECONFIG);
+        send(CControldMsg::CMD_SAVECONFIG);
         close_connection();
 }
 
 void CControldClient::setRGBCsync(char val)
 {
-	CControld::commandCsync msg;
+	CControldMsg::commandCsync msg;
 	msg.csync = val;
-	send(CControld::CMD_SETCSYNC, (char*) &msg, sizeof(msg));
+	send(CControldMsg::CMD_SETCSYNC, (char*) &msg, sizeof(msg));
 	close_connection();
 }
 
 char CControldClient::getRGBCsync()
 {
-	CControld::commandCsync msg;
-	send(CControld::CMD_GETCSYNC);
+	CControldMsg::commandCsync msg;
+	send(CControldMsg::CMD_GETCSYNC);
 	receive_data((char*) &msg, sizeof(msg));
 	close_connection();
 	return msg.csync;

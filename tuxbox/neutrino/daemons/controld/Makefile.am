@@ -12,11 +12,13 @@ bin_PROGRAMS = controld
 controld_LDADD = \
 	driver/libcontrold_driver.a \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
+	$(top_builddir)/lib/irsend/libirsend.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
 	@EVENTSERVER_LIBS@ \
 	@TUXBOX_LIBS@ \
 	@ZAPIT_LIBS@ \
+	@LIRCDCLIENT_LIBS@ \
 	-lpthread
 
 controld_SOURCES = controld.cpp eventwatchdog.cpp

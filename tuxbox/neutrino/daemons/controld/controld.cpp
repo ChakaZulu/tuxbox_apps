@@ -47,6 +47,7 @@
 #include <controldclient/controldclient.h>
 #include <controldclient/controldMsg.h>
 #include <timerdclient/timerdclient.h>
+#include <irsend/irsend.h>
 
 #include <basicserver.h>
 #include <configfile.h>
@@ -82,8 +83,8 @@ struct Ssettings
 	int  videooutput;
 	int  videoformat;
 	int  csync;
-
-	CControldClient::tuxbox_maker_t boxtype; // not part of the config - set by setBoxType()
+	CControld::volume_type volume_type;
+	CControld::tuxbox_maker_t boxtype; // not part of the config - set by setBoxType()
 } settings;
 
 int	nokia_scart[7];
@@ -297,7 +298,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 
 		avsiosfncFormat = format;
 
-		if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
+		if (settings.boxtype == CControld::TUXBOX_MAKER_PHILIPS)
 		{
 			switch (format)
 			{
@@ -497,15 +498,15 @@ void switch_vcr( bool vcr_on)
 		//turn to scart-input
 	   activeAspectRatio = aspectRatio_vcr;
 		printf("[controld]: switch to scart-input... (%d)\n", settings.boxtype);
-		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
+		if (settings.boxtype == CControld::TUXBOX_MAKER_SAGEM)
 		{
 			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], sagem_scart[4], sagem_scart[5], sagem_scart[6]);
 		}
-		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_NOKIA)
+		else if (settings.boxtype == CControld::TUXBOX_MAKER_NOKIA)
 		{
 			routeVideo(nokia_scart[0], nokia_scart[1], nokia_scart[2], nokia_scart[3], nokia_scart[4], nokia_scart[5], nokia_scart[6]);
 		}
-		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
+		else if (settings.boxtype == CControld::TUXBOX_MAKER_PHILIPS)
 		{
 			routeVideo(philips_scart[0], philips_scart[1], philips_scart[2], philips_scart[3], philips_scart[4], philips_scart[5], philips_scart[6]);
 		}
@@ -514,15 +515,15 @@ void switch_vcr( bool vcr_on)
 	{	//turn to dvb...
 	   activeAspectRatio = aspectRatio_dvb;
 		printf("[controld]: switch to dvb-input... (%d)\n", settings.boxtype);
-		if (settings.boxtype == CControldClient::TUXBOX_MAKER_SAGEM)
+		if (settings.boxtype == CControld::TUXBOX_MAKER_SAGEM)
 		{
 			routeVideo( sagem_dvb[0], sagem_dvb[1], sagem_dvb[2], sagem_dvb[3], sagem_dvb[4], sagem_dvb[5], settings.videooutput);
 		}
-		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_NOKIA)
+		else if (settings.boxtype == CControld::TUXBOX_MAKER_NOKIA)
 		{
 			routeVideo( nokia_dvb[0], nokia_dvb[1], nokia_dvb[2], nokia_dvb[3], nokia_dvb[4], nokia_dvb[5], settings.videooutput);
 		}
-		else if (settings.boxtype == CControldClient::TUXBOX_MAKER_PHILIPS)
+		else if (settings.boxtype == CControld::TUXBOX_MAKER_PHILIPS)
 		{
 			routeVideo( philips_dvb[0], philips_dvb[1], philips_dvb[2], philips_dvb[3], philips_dvb[4], philips_dvb[5], settings.videooutput);
 		}
@@ -619,31 +620,31 @@ void setBoxType()
 	switch ( tuxbox_get_vendor() )
 	{
 	case TUXBOX_VENDOR_SAGEM:
-		settings.boxtype = CControldClient::TUXBOX_MAKER_SAGEM;
+		settings.boxtype = CControld::TUXBOX_MAKER_SAGEM;
 		break;
 	case TUXBOX_VENDOR_PHILIPS:
-		settings.boxtype = CControldClient::TUXBOX_MAKER_PHILIPS;
+		settings.boxtype = CControld::TUXBOX_MAKER_PHILIPS;
 		break;
 	case TUXBOX_VENDOR_NOKIA:
-		settings.boxtype = CControldClient::TUXBOX_MAKER_NOKIA;
+		settings.boxtype = CControld::TUXBOX_MAKER_NOKIA;
 		break;
 	case TUXBOX_VENDOR_DREAM_MM:
-		settings.boxtype = CControldClient::TUXBOX_MAKER_DREAM_MM;
+		settings.boxtype = CControld::TUXBOX_MAKER_DREAM_MM;
 		break;
 	case TUXBOX_VENDOR_TECHNOTREND:
-		settings.boxtype = CControldClient::TUXBOX_MAKER_TECHNOTREND;
+		settings.boxtype = CControld::TUXBOX_MAKER_TECHNOTREND;
 		break;
 	default:
-		settings.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
+		settings.boxtype = CControld::TUXBOX_MAKER_UNKNOWN;
 	}
 	// fallback to old way ( via env. var)
-	if (settings.boxtype==CControldClient::TUXBOX_MAKER_UNKNOWN)
+	if (settings.boxtype==CControld::TUXBOX_MAKER_UNKNOWN)
 	{
 #endif
 		char * strmID = getenv("mID");
 
 		if (strmID == NULL)
-			settings.boxtype = CControldClient::TUXBOX_MAKER_UNKNOWN;
+			settings.boxtype = CControld::TUXBOX_MAKER_UNKNOWN;
 		else
 		{
 			int mID = atoi(strmID);
@@ -651,13 +652,13 @@ void setBoxType()
 			switch (mID)
 			{
 			case 3:	
-				settings.boxtype= CControldClient::TUXBOX_MAKER_SAGEM;
+				settings.boxtype= CControld::TUXBOX_MAKER_SAGEM;
 				break;
 			case 2:	
-				settings.boxtype= CControldClient::TUXBOX_MAKER_PHILIPS;
+				settings.boxtype= CControld::TUXBOX_MAKER_PHILIPS;
 				break;
 			default:
-				settings.boxtype= CControldClient::TUXBOX_MAKER_NOKIA;
+				settings.boxtype= CControld::TUXBOX_MAKER_NOKIA;
 			}
 		}
 		printf("[controld] Boxtype detected: (%d)\n", settings.boxtype);
@@ -688,153 +689,180 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
 	switch (rmsg.cmd)
 	{
-	case CControld::CMD_SHUTDOWN:
+	case CControldMsg::CMD_SHUTDOWN:
 		return false;
 		break;
 		
-	case CControld::CMD_SAVECONFIG:
+	case CControldMsg::CMD_SAVECONFIG:
 		saveSettings();
 		break;
 		
-	case CControld::CMD_SETVOLUME:
-	case CControld::CMD_SETVOLUME_AVS:
-		CControld::commandVolume msg_commandVolume;
+	case CControldMsg::CMD_SETVOLUME:
+		CControldMsg::commandVolume msg_commandVolume;
 		CBasicServer::receive_data(connfd, &msg_commandVolume, sizeof(msg_commandVolume));
-
-		if (rmsg.cmd == CControld::CMD_SETVOLUME)
+		if (msg_commandVolume.type == CControld::TYPE_UNKNOWN)
+			msg_commandVolume.type = settings.volume_type;
+		else
+			settings.volume_type = msg_commandVolume.type;			
+			
+		if (msg_commandVolume.type == CControld::TYPE_OST)
 		{
 			settings.volume = msg_commandVolume.volume;
 			config->setInt32("volume", settings.volume);
 			zapit.setVolume(map_volume(msg_commandVolume.volume, false), map_volume(msg_commandVolume.volume, false));
 		}
-		else
+		else if (msg_commandVolume.type == CControld::TYPE_AVS)
 		{
 			settings.volume_avs = msg_commandVolume.volume;
 			config->setInt32("volume_avs", settings.volume_avs);
 			audioControl::setVolume(map_volume(msg_commandVolume.volume, true));
 		}
-		//lcdd.setVolume(msg_commandVolume.volume);
-#warning FIXME: generation of event is okay - however: event message is junk (what do i care about the new volume if i do not know which volume changed?)
-		eventServer->sendEvent(CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &msg_commandVolume.volume, sizeof(msg_commandVolume.volume));
+		else if (msg_commandVolume.type == CControld::TYPE_LIRC)
+		{
+			if (msg_commandVolume.volume > 50)
+			{
+				CIRSend irs("volplus");
+				irs.Send();
+			}
+			else if (msg_commandVolume.volume < 50)
+			{
+				CIRSend irs("volminus");
+				irs.Send();
+			}
+		}
+		eventServer->sendEvent(CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD);
 		break;
 
-	case CControld::CMD_MUTE:
-		settings.mute = true;
-		config->setBool("mute", settings.mute);
-		zapit.muteAudio(true);
-		//lcdd.setMute(true);
-		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
+	case CControldMsg::CMD_SETMUTE:
+		CControldMsg::commandMute msg_commandMute;
+		CBasicServer::receive_data(connfd, &msg_commandMute, sizeof(msg_commandMute));
+		if (msg_commandMute.type == CControld::TYPE_UNKNOWN)
+			msg_commandMute.type = settings.volume_type;
+		else
+			settings.volume_type = msg_commandMute.type;			
+			
+		if (msg_commandMute.type == CControld::TYPE_OST)
+		{
+			settings.mute = msg_commandMute.mute;
+			config->setBool("mute", settings.mute);
+			zapit.muteAudio(settings.mute);
+		}
+		else if (msg_commandMute.type == CControld::TYPE_AVS)
+		{
+			settings.mute_avs =  msg_commandMute.mute;
+			config->setBool("mute_avs", settings.mute_avs);
+			audioControl::setMute(settings.mute_avs);
+		}
+		else if (msg_commandMute.type == CControld::TYPE_LIRC)
+		{
+			CIRSend irs("mute");
+			irs.Send();
+		}
+		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &msg_commandMute, sizeof(msg_commandMute));
 		break;
-	case CControld::CMD_MUTE_AVS:
-		settings.mute_avs = true;
-		config->setBool("mute_avs", settings.mute_avs);
-		audioControl::setMute(true);
-		//lcdd.setMute(true);
-		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
+
+	case CControldMsg::CMD_GETVOLUME:
+		CControldMsg::commandVolume msg_responseVolume;
+		CBasicServer::receive_data(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
+		if (msg_responseVolume.type == CControld::TYPE_UNKNOWN)
+			msg_responseVolume.type = settings.volume_type;
+		if (msg_responseVolume.type == CControld::TYPE_OST)
+			msg_responseVolume.volume = settings.volume;
+		else if (msg_responseVolume.type == CControld::TYPE_AVS)
+			msg_responseVolume.volume = settings.volume_avs;
+		else if (msg_responseVolume.type == CControld::TYPE_LIRC)
+			msg_responseVolume.volume = 50; //we donnot really know...
+		CBasicServer::send_data(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
 		break;
-	case CControld::CMD_UNMUTE:
-		settings.mute = false;
-		config->setBool("mute", settings.mute);
-		zapit.muteAudio(false);
-		//lcdd.setMute(settings.mute_avs);
-		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
+
+	case CControldMsg::CMD_GETMUTESTATUS:
+		CControldMsg::commandMute msg_responseMute;
+		CBasicServer::receive_data(connfd, &msg_responseMute, sizeof(msg_responseMute));
+		if (msg_responseMute.type == CControld::TYPE_UNKNOWN)
+			msg_responseMute.type = settings.volume_type;
+		if (msg_responseMute.type == CControld::TYPE_OST)
+			msg_responseMute.mute = settings.mute;
+		else if (msg_responseMute.type == CControld::TYPE_AVS)
+			msg_responseMute.mute = settings.mute_avs;
+		else if (msg_responseMute.type == CControld::TYPE_LIRC)
+			msg_responseMute.mute = false; //we donnot really know...
+		CBasicServer::send_data(connfd, &msg_responseMute, sizeof(msg_responseMute));
 		break;
-	case CControld::CMD_UNMUTE_AVS:
-		settings.mute_avs = false;
-		config->setBool("mute_avs", settings.mute_avs);
-		audioControl::setMute(false);
-		//lcdd.setMute(settings.mute);
-		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
-		break;
-		
-	case CControld::CMD_SETVIDEOFORMAT:
+
+	case CControldMsg::CMD_SETVIDEOFORMAT:
 		//printf("[controld] set videoformat\n");
-		CControld::commandVideoFormat msg2;
+		CControldMsg::commandVideoFormat msg2;
 		CBasicServer::receive_data(connfd, &msg2, sizeof(msg2));
 		setVideoFormat(msg2.format);
 		break;
-	case CControld::CMD_SETVIDEOOUTPUT:
+	case CControldMsg::CMD_SETVIDEOOUTPUT:
 		//printf("[controld] set videooutput\n");
-		CControld::commandVideoOutput msg3;
+		CControldMsg::commandVideoOutput msg3;
 		CBasicServer::receive_data(connfd, &msg3, sizeof(msg3));
 		setvideooutput(msg3.output);
 		break;
-	case CControld::CMD_SETBOXTYPE:
+	case CControldMsg::CMD_SETBOXTYPE:
 		//printf("[controld] set boxtype\n");    //-------------------dummy!!!!!!!!!!
-		CControld::commandBoxType msg4;
+		CControldMsg::commandBoxType msg4;
 		CBasicServer::receive_data(connfd, &msg4, sizeof(msg4));
 		setBoxType();
 		break;
-	case CControld::CMD_SETSCARTMODE:
+	case CControldMsg::CMD_SETSCARTMODE:
 		//printf("[controld] set scartmode\n");
-		CControld::commandScartMode msg5;
+		CControldMsg::commandScartMode msg5;
 		CBasicServer::receive_data(connfd, &msg5, sizeof(msg5));
 		setScartMode(msg5.mode);
 		break;
-	case CControld::CMD_SETVIDEOPOWERDOWN:
+	case CControldMsg::CMD_SETVIDEOPOWERDOWN:
 		//printf("[controld] set scartmode\n");
-		CControld::commandVideoPowerSave msg10;
+		CControldMsg::commandVideoPowerSave msg10;
 		CBasicServer::receive_data(connfd, &msg10, sizeof(msg10));
 		disableVideoOutput(msg10.powerdown);
 		break;
 		
-	case CControld::CMD_GETVOLUME:
-	case CControld::CMD_GETVOLUME_AVS:
-		CControld::responseVolume msg_responseVolume;
-		msg_responseVolume.volume = (rmsg.cmd == CControld::CMD_GETVOLUME) ? settings.volume : settings.volume_avs;
-		CBasicServer::send_data(connfd, &msg_responseVolume, sizeof(msg_responseVolume));
-		break;
-
-	case CControld::CMD_GETMUTESTATUS:
-	case CControld::CMD_GETMUTESTATUS_AVS:
-		CControld::responseMute msg_responseMute;
-		msg_responseMute.mute = (rmsg.cmd == CControld::CMD_GETMUTESTATUS) ? settings.mute : settings.mute_avs;
-		CBasicServer::send_data(connfd, &msg_responseMute, sizeof(msg_responseMute));
-		break;
-
-	case CControld::CMD_GETVIDEOFORMAT:
+	case CControldMsg::CMD_GETVIDEOFORMAT:
 		//printf("[controld] get videoformat (fnc)\n");
-		CControld::responseVideoFormat msg8;
+		CControldMsg::responseVideoFormat msg8;
 		msg8.format = settings.videoformat;
 		CBasicServer::send_data(connfd,&msg8,sizeof(msg8));
 		break;
-	case CControld::CMD_GETASPECTRATIO:
+	case CControldMsg::CMD_GETASPECTRATIO:
 		//printf("[controld] get videoformat (fnc)\n");
-		CControld::responseAspectRatio msga;
+		CControldMsg::responseAspectRatio msga;
 		if (vcr)
 		  msga.aspectRatio = aspectRatio_vcr;
 		else
 		  msga.aspectRatio = aspectRatio_dvb;
 		CBasicServer::send_data(connfd,&msga,sizeof(msga));
 		break;
-	case CControld::CMD_GETVIDEOOUTPUT:
+	case CControldMsg::CMD_GETVIDEOOUTPUT:
 		//printf("[controld] get videooutput (fblk)\n");
-		CControld::responseVideoOutput msg9;
+		CControldMsg::responseVideoOutput msg9;
 		msg9.output = settings.videooutput;
 		CBasicServer::send_data(connfd,&msg9,sizeof(msg9));
 		break;
-	case CControld::CMD_GETBOXTYPE:
+	case CControldMsg::CMD_GETBOXTYPE:
 		//printf("[controld] get boxtype\n");
-		CControld::responseBoxType msg0;
+		CControldMsg::responseBoxType msg0;
 		msg0.boxtype = settings.boxtype;
 		CBasicServer::send_data(connfd,&msg0,sizeof(msg0));
 		break;
 
-	case CControld::CMD_SETCSYNC:
-		CControld::commandCsync msg11;
+	case CControldMsg::CMD_SETCSYNC:
+		CControldMsg::commandCsync msg11;
 		CBasicServer::receive_data(connfd, &msg11, sizeof(msg11));
 		setRGBCsync(msg11.csync);
 		break;
-	case CControld::CMD_GETCSYNC:
-		CControld::commandCsync msg12;
+	case CControldMsg::CMD_GETCSYNC:
+		CControldMsg::commandCsync msg12;
 		msg12.csync = getRGBCsync();
 		CBasicServer::send_data(connfd, &msg12, sizeof(msg12));
 		break;
 
-	case CControld::CMD_REGISTEREVENT:
+	case CControldMsg::CMD_REGISTEREVENT:
 		eventServer->registerEvent(connfd);
 		break;
-	case CControld::CMD_UNREGISTEREVENT:
+	case CControldMsg::CMD_UNREGISTEREVENT:
 		eventServer->unRegisterEvent(connfd);
 		break;
 
@@ -872,7 +900,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.114 2004/01/01 18:49:49 thegoodguy Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.115 2004/02/19 23:00:33 zwen Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -937,7 +965,7 @@ int main(int argc, char **argv)
 	settings.videooutput           = config->getInt32("videooutput", 1); // fblk1 - rgb
 	settings.videoformat           = config->getInt32("videoformat", 2); // fnc2 - 4:3
 	settings.csync                 = config->getInt32("csync", 0);
-	printf("cync %d\n",settings.csync);
+	settings.volume_type           = (CControld::volume_type) config->getInt32("volume_type", CControld::TYPE_OST);
 	setBoxType(); // dummy set - liest den aktuellen Wert aus!
 
 	watchDog = new CEventWatchDog();
@@ -959,7 +987,7 @@ int main(int argc, char **argv)
 	vcr=false;
 	videoOutputDisabled=false;
 	
-	controld_server.run(parse_command, CControld::ACTVERSION);
+	controld_server.run(parse_command, CControldMsg::ACTVERSION);
 
 	shutdownBox();
 

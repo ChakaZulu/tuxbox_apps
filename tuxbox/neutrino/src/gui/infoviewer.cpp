@@ -167,7 +167,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	channel_id = new_channel_id;
 	showButtonBar = !calledFromNumZap;
 
-	bool fadeIn = ((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM)) && // eNX only
+	bool fadeIn = ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
 		g_settings.widget_fade &&
 		(!is_visible) &&
 		showButtonBar;
@@ -377,7 +377,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 						g_RCInput->killTimer(fadeTimer);
 						fadeIn = false;
 					}
-					if (((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM)) && // eNX only
+					if (((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) && // eNX only
 						(!fadeOut) &&
 						g_settings.widget_fade
 						)

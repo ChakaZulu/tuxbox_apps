@@ -60,7 +60,7 @@
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <driver/vcrcontrol.h>
-#include <driver/irsend.h>
+#include <irsend/irsend.h>
 
 #include "gui/widget/colorchooser.h"
 #include "gui/widget/menue.h"
@@ -402,7 +402,7 @@ int CNeutrinoApp::loadSetup()
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
 	g_settings.audio_DolbyDigital = configfile.getInt32( "audio_DolbyDigital", 0 );
-	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", true );
+	g_settings.audio_avs_Control = configfile.getInt32( "audio_avs_Control", CControld::TYPE_AVS );
 	strcpy( g_settings.audio_PCMOffset, configfile.getString( "audio_PCMOffset", "0" ).c_str() );
 
 
@@ -542,8 +542,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.key_subchannel_up = configfile.getInt32( "key_subchannel_up",  CRCInput::RC_right );
 	g_settings.key_subchannel_down = configfile.getInt32( "key_subchannel_down",  CRCInput::RC_left );
 
-	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
-	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
+	strcpy(g_settings.repeat_blocker, configfile.getString("repeat_blocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "150" : "25").c_str());
+	strcpy(g_settings.repeat_genericblocker, configfile.getString("repeat_genericblocker", g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS ? "25" : "0").c_str());
 
 	//screen configuration
 	g_settings.screen_StartX = configfile.getInt32( "screen_StartX", 37 );
@@ -1616,13 +1616,13 @@ void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNoti
 	audioSettings.addItem( oj );
 
 	CStringInput * audio_PCMOffset = new CStringInput("audiomenu.PCMOffset", g_settings.audio_PCMOffset, 2, NULL, NULL, "0123456789 ", audioSetupNotifier);
-	CMenuForwarder *mf = new CMenuForwarder("audiomenu.PCMOffset", true, g_settings.audio_PCMOffset, audio_PCMOffset );
+	CMenuForwarder *mf = new CMenuForwarder("audiomenu.PCMOffset", (g_settings.audio_avs_Control == CControld::TYPE_LIRC), g_settings.audio_PCMOffset, audio_PCMOffset );
 	CAudioSetupNotifier2 *audioSetupNotifier2 = new CAudioSetupNotifier2(mf);
 
 	oj = new CMenuOptionChooser("audiomenu.avs_control", &g_settings.audio_avs_Control, true, audioSetupNotifier2);
-	oj->addOption(0, "audiomenu.ost");
-	oj->addOption(1, "audiomenu.avs");
-	oj->addOption(2, "audiomenu.lirc");
+	oj->addOption(CControld::TYPE_OST, "audiomenu.ost");
+	oj->addOption(CControld::TYPE_AVS, "audiomenu.avs");
+	oj->addOption(CControld::TYPE_LIRC, "audiomenu.lirc");
 	audioSettings.addItem(oj);
 	audioSettings.addItem(mf);
 }
@@ -2050,7 +2050,7 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings, CMenuWidget &fo
 	colorSettings.addItem( new CMenuForwarder("timing.head", true, NULL, colorSettings_timing));
 
 	colorSettings.addItem(GenericMenuSeparatorLine);
-	if ((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM)) // eNX
+	if ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM)) // eNX
 	{
 		CMenuOptionChooser* oj = new CMenuOptionChooser("colormenu.fade", &g_settings.widget_fade, true );
 		oj->addOption(0, "options.off");
@@ -2177,7 +2177,7 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	oj->addOption(1, "options.on");
 	lcdSettings.addItem( oj );
 
-	if ((g_info.box_Type == CControldClient::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControldClient::TUXBOX_MAKER_SAGEM))
+	if ((g_info.box_Type == CControld::TUXBOX_MAKER_PHILIPS) || (g_info.box_Type == CControld::TUXBOX_MAKER_SAGEM))
 	{
 		// Autodimm available on Sagem/Philips only
 		oj = new CMenuOptionChooser("lcdmenu.autodimm", &g_settings.lcd_setting[SNeutrinoSettings::LCD_AUTODIMM], true, lcdnotifier );
@@ -2503,8 +2503,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 		font = predefined_font[use_true_unicode_font];
 
 	CLCD::getInstance()->init(font.filename[0], font.name);
-	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control == 1));
-	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control == 1));
+	CLCD::getInstance()->showVolume(g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control));
+	CLCD::getInstance()->setMuted(g_Controld->getMute((CControld::volume_type)g_settings.audio_avs_Control));
 
 	g_info.box_Type = g_Controld->getBoxType();
 
@@ -2712,7 +2712,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//keySettings
 	InitKeySettings(keySettings);
 
-	AudioMute( g_Controld->getMute(g_settings.audio_avs_Control), true );
+	AudioMute( g_Controld->getMute((CControld::volume_type)g_settings.audio_avs_Control), true );
 
 	//load Pluginlist
 	g_PluginList->loadPlugins();
@@ -2981,7 +2981,6 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		setVolume(msg, (mode != mode_scart));
 		return messages_return::handled;
-#warning check if we leak memory here (NeutrinoMessages::EVT_VOLCHANGED)
 	}
 	else if( msg == CRCInput::RC_spkr )
 	{
@@ -2999,7 +2998,10 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	}
 	else if( msg == NeutrinoMessages::EVT_MUTECHANGED )
 	{
-		AudioMute( (bool)data, true );
+		CControldMsg::commandMute* cmd = (CControldMsg::commandMute*) data;
+		if(cmd->type == (CControld::volume_type)g_settings.audio_avs_Control)
+			AudioMute( cmd->mute, true );
+		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::EVT_RECORDMODE )
@@ -3333,10 +3335,10 @@ bool CNeutrinoApp::onPaintNotify(const std::string & MenuName)
 
 void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 {
-   if(g_settings.audio_avs_Control==2) //lirc
-   {
-      CIRSend irs("mute");
-      irs.Send();
+   if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC) //lirc
+   { // bei LIRC wissen wir nicht wikrlich ob jetzt ge oder entmuted wird, deswegen nix zeigen---
+		if( !isEvent )
+			g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
    }
    else
    {
@@ -3353,9 +3355,9 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
          if( !isEvent )
          {
             if( current_muted )
-               g_Controld->Mute((g_settings.audio_avs_Control));
+               g_Controld->Mute((CControld::volume_type)g_settings.audio_avs_Control);
             else
-               g_Controld->UnMute((g_settings.audio_avs_Control));
+               g_Controld->UnMute((CControld::volume_type)g_settings.audio_avs_Control);
          }
       }
 
@@ -3376,101 +3378,104 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 {
 	neutrino_msg_t msg = key;
-	if(g_settings.audio_avs_Control==2) //lirc
+
+	int dx = 256;
+	int dy = 40;
+	int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
+	int y = g_settings.screen_EndY- 100;
+
+	unsigned char* pixbuf = NULL;
+
+	if(bDoPaint)
 	{
-		if (msg == CRCInput::RC_plus)
-		{
-			CIRSend irs("volplus");
-			irs.Send();
-		}
-		else if (msg == CRCInput::RC_minus)
-		{
-			CIRSend irs("volminus");
-			irs.Send();
-		}
+		pixbuf= new unsigned char[ dx * dy ];
+		if(pixbuf!= NULL)
+			frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
+		frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
 	}
-	else
+
+	neutrino_msg_data_t data;
+
+	unsigned long long timeoutEnd;
+
+	char current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
+	
+	do
 	{
-		int dx = 256;
-		int dy = 40;
-		int x = (((g_settings.screen_EndX- g_settings.screen_StartX)- dx) / 2) + g_settings.screen_StartX;
-		int y = g_settings.screen_EndY- 100;
-
-		unsigned char* pixbuf = NULL;
-
-		if(bDoPaint)
-	  	{
-			pixbuf= new unsigned char[ dx * dy ];
-			if(pixbuf!= NULL)
-				frameBuffer->SaveScreen(x, y, dx, dy, pixbuf);
-			frameBuffer->paintIcon("volume.raw",x,y, COL_INFOBAR);
-		}
-
-		neutrino_msg_data_t data;
-
-		unsigned long long timeoutEnd;
-
-		char current_volume = g_Controld->getVolume(g_settings.audio_avs_Control == 1);
-
-		do
-	  	{
-			if (msg <= CRCInput::RC_MaxRC)
+		if (msg <= CRCInput::RC_MaxRC)
+		{
+			if (msg == CRCInput::RC_plus)
 			{
-				if (msg == CRCInput::RC_plus)
+				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
+				{
+					current_volume = 60; //>50 is plus
+				}
+				else
 				{
 					if (current_volume < 100 - 5)
 						current_volume += 5;
 					else
 						current_volume = 100;
 				}
-				else if (msg == CRCInput::RC_minus)
+			}
+			else if (msg == CRCInput::RC_minus)
+			{
+				if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
+				{
+					current_volume = 40; //<40 is minus
+				}
+				else
 				{
 					if (current_volume > 5)
 						current_volume -= 5;
 					else
 						current_volume = 0;
 				}
-				else
-				{
-					g_RCInput->postMsg(msg, data);
-					break;
-				}
-
-				g_Controld->setVolume(current_volume, g_settings.audio_avs_Control);
-
-				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
 			}
-			else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
-			{
-				current_volume = g_Controld->getVolume(g_settings.audio_avs_Control == 1);
-				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
-			}
-			else if (handleMsg(msg, data) & messages_return::unhandled)
+			else
 			{
 				g_RCInput->postMsg(msg, data);
 				break;
 			}
-
-			if (bDoPaint)
-		  	{
-				int vol = current_volume << 1;
-				frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR + 3);
-				frameBuffer->paintBoxRel(x + 40 + vol, y + 12, 200 - vol, 15, COL_INFOBAR + 1);
-			}
-
-			CLCD::getInstance()->showVolume(current_volume);
-			if (msg != CRCInput::RC_timeout)
+			
+			g_Controld->setVolume(current_volume, (CControld::volume_type)g_settings.audio_avs_Control);
+			
+			if((CControld::volume_type)g_settings.audio_avs_Control==CControld::TYPE_LIRC)
 			{
-				g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
+				current_volume = 50;
 			}
-
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
 		}
-		while (msg != CRCInput::RC_timeout);
-
-		if( (bDoPaint) && (pixbuf!= NULL) )
-			frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
-	}
-}
+		else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
+		{
+			current_volume = g_Controld->getVolume((CControld::volume_type)g_settings.audio_avs_Control);
+			timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
+		}
+		else if (handleMsg(msg, data) & messages_return::unhandled)
+		{
+			g_RCInput->postMsg(msg, data);
+			break;
+		}
+		
+		if (bDoPaint)
+		{
+			int vol = current_volume << 1;
+			frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR + 3);
+			frameBuffer->paintBoxRel(x + 40 + vol, y + 12, 200 - vol, 15, COL_INFOBAR + 1);
+		}
+		
+		CLCD::getInstance()->showVolume(current_volume);
+		if (msg != CRCInput::RC_timeout)
+		{
+			g_RCInput->getMsgAbsoluteTimeout(&msg, &data, &timeoutEnd );
+		}
+		
+		}
+	while (msg != CRCInput::RC_timeout);
+	
+	if( (bDoPaint) && (pixbuf!= NULL) )
+		frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
+}	
 
 void CNeutrinoApp::tvMode( bool rezap )
 {

@@ -755,11 +755,12 @@ void CRCInput::getMsg_us(neutrino_msg_t * msg, neutrino_msg_data_t * data, unsig
 						{
 							case CControldClient::EVT_VOLUMECHANGED :
 									*msg = NeutrinoMessages::EVT_VOLCHANGED;
-									*data = *(char*) p;
+									*data = 0;
 								break;
 							case CControldClient::EVT_MUTECHANGED :
 									*msg = NeutrinoMessages::EVT_MUTECHANGED;
-									*data = *(bool*) p;
+									*data = (unsigned) p;
+									dont_delete_p = true;
 								break;
 							case CControldClient::EVT_VCRCHANGED :
 									*msg = NeutrinoMessages::EVT_VCRCHANGED;

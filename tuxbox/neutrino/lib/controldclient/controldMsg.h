@@ -21,18 +21,16 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __controld__
-#define __controld__
+#ifndef __controldMsg__
+#define __controldMsg__
 
-
+#include <controldclient/controldtypes.h>
 #include <connection/basicmessage.h>
-#include <controldclient/controldclient.h>
-
 
 #define CONTROLD_UDS_NAME "/tmp/controld.sock"
 
 
-class CControld : public CBasicMessage
+class CControldMsg : public CBasicMessage
 {
 
 	public:
@@ -50,13 +48,8 @@ class CControld : public CBasicMessage
 			CMD_SETVOLUME_AVS,
 			CMD_GETVOLUME_AVS,
 
-			CMD_MUTE,
-			CMD_UNMUTE,
+			CMD_SETMUTE,
 			CMD_GETMUTESTATUS,
-
-			CMD_MUTE_AVS,
-			CMD_UNMUTE_AVS,
-			CMD_GETMUTESTATUS_AVS,
 
 			CMD_SETVIDEOFORMAT,
 			CMD_GETVIDEOFORMAT,
@@ -82,11 +75,17 @@ class CControld : public CBasicMessage
 			CMD_SETCSYNC,
 			CMD_GETCSYNC
 		};
-
-
+		
 		struct commandVolume
 		{
 			unsigned char volume;
+			CControld::volume_type type;
+		};
+
+		struct commandMute
+		{
+			bool mute;
+			CControld::volume_type type;
 		};
 
 		struct commandVideoFormat
@@ -101,7 +100,7 @@ class CControld : public CBasicMessage
 
 		struct commandBoxType
 		{
-			CControldClient::tuxbox_maker_t boxtype;
+			CControld::tuxbox_maker_t boxtype;
 		};
 
 		struct commandScartMode
@@ -115,15 +114,6 @@ class CControld : public CBasicMessage
 		};
 
 		//response structures
-		struct responseVolume
-		{
-			unsigned char volume;
-		};
-
-		struct responseMute
-		{
-			bool mute;
-		};
 
 		struct responseVideoFormat
 		{
@@ -142,7 +132,7 @@ class CControld : public CBasicMessage
 
 		struct responseBoxType
 		{
-			CControldClient::tuxbox_maker_t boxtype;
+			CControld::tuxbox_maker_t boxtype;
 		};
 
 		struct responseScartMode

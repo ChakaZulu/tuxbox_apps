@@ -32,7 +32,7 @@
 
 #include <gui/widget/messagebox.h>
 
-#include <driver/irsend.h>
+#include <irsend/irsend.h>
 
 #include <global.h>
 #include <neutrino.h>

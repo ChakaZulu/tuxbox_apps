@@ -29,6 +29,7 @@ neutrino_LDADD = \
 	$(top_builddir)/lib/controldclient/libcontroldclient.la \
 	$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la \
 	$(top_builddir)/lib/timerdclient/libtimerdclient.la \
+	$(top_builddir)/lib/irsend/libirsend.la \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
 	@CRAMFS_LIBS@ \
