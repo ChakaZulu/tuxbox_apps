@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.17 2002/06/11 21:19:03 dirch Exp $
+	$Id: timermanager.cpp,v 1.18 2002/06/24 23:17:18 dirch Exp $
 
 	License: GPL
 
@@ -76,24 +76,24 @@ void* CTimerManager::timerThread(void *arg)
 			if(event->announceTime > 0 && event->eventState == CTimerEvent::TIMERSTATE_SCHEDULED ) // if event wants to be announced
 				if( event->announceTime <= now ) // check if event announcetime has come
 				{
-					event->eventState = CTimerEvent::TIMERSTATE_PREANNOUNCE;
+					event->setState(CTimerEvent::TIMERSTATE_PREANNOUNCE);
 					event->announceEvent();							// event specific announce handler
 				}
 			
 			if(event->alarmTime > 0 && (event->eventState == CTimerEvent::TIMERSTATE_SCHEDULED || event->eventState == CTimerEvent::TIMERSTATE_PREANNOUNCE) ) // if event wants to be fired
 				if( event->alarmTime <= now ) // check if event alarmtime has come
 				{
-					event->eventState = CTimerEvent::TIMERSTATE_ISRUNNING;
+					event->setState(CTimerEvent::TIMERSTATE_ISRUNNING);
 					event->fireEvent();										// fire event specific handler
 					if(event->stopTime == 0)					// if event needs no stop event
-						event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED; 
+						event->setState(CTimerEvent::TIMERSTATE_HASFINISHED); 
 				}
 			
 			if(event->stopTime > 0 && event->eventState == CTimerEvent::TIMERSTATE_ISRUNNING  )		// check if stopevent is wanted
 				if( event->stopTime <= now ) // check if event stoptime has come
 				{
 					event->stopEvent();							//  event specific stop handler
-					event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED; 
+					event->setState(CTimerEvent::TIMERSTATE_HASFINISHED); 
 				}
 
 			if(event->eventState == CTimerEvent::TIMERSTATE_HASFINISHED)
@@ -101,7 +101,7 @@ void* CTimerManager::timerThread(void *arg)
 				if(event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
 					event->Reschedule();
 				else
-					event->eventState = CTimerEvent::TIMERSTATE_TERMINATED;
+					event->setState(CTimerEvent::TIMERSTATE_TERMINATED);
 			}
 
 			if(event->eventState == CTimerEvent::TIMERSTATE_TERMINATED)				// event is terminated, so delete it
@@ -144,6 +144,9 @@ bool CTimerManager::removeEvent(int eventID)
 {
 	if(events[eventID])							// if i have a event with this id
 	{
+		if( (events[eventID]->eventState == CTimerEvent::TIMERSTATE_ISRUNNING) && (events[eventID]->stopTime > 0) )	
+			events[eventID]->stopEvent();	// if event is running an has stopTime 
+
 		events[eventID]->eventState = CTimerEvent::TIMERSTATE_TERMINATED;		// set the state to terminated
 		return true;															// so timerthread will do the rest for us
 //		delete events[eventID];
@@ -280,6 +283,7 @@ void CTimerEvent::Reschedule()
 		dprintf("event %d not rescheduled, event will be terminated\n",eventID);
 	}
 }
+
 
 //------------------------------------------------------------
 void CTimerEvent::printEvent(void)
