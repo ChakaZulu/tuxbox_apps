@@ -605,27 +605,27 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, std::string ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const char * const Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
 {
-	text=Text;
 	option = Option;
 	option_string = NULL;
+	text=Text;
 	active = Active;
 	jumpTarget = Target;
-	actionKey = ActionKey;
+	actionKey = ActionKey ? ActionKey : "";
 	localizing = Localizing;
 	directKey = DirectKey;
 	iconName = IconName ? IconName : "";
 }
 
-CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, std::string ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
+CMenuForwarder::CMenuForwarder(const char * const Text, const bool Active, const std::string &Option, CMenuTarget* Target, const char * const ActionKey, const bool Localizing, uint DirectKey, const char * const IconName)
 {
-	text=Text;
 	option = NULL;
 	option_string = &Option;
+	text=Text;
 	active = Active;
 	jumpTarget = Target;
-	actionKey = ActionKey;
+	actionKey = ActionKey ? ActionKey : "";
 	localizing = Localizing;
 	directKey = DirectKey;
 	iconName = IconName ? IconName : "";

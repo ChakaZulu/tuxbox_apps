@@ -422,7 +422,7 @@ void CFlashExpert::showFileSelector(std::string actionkey)
 			int pos = filen.find(".img");
 			if(pos!=-1)
 			{
-				fileselector->addItem(new CMenuForwarder(filen.c_str(), true, NULL, this, actionkey + filen));
+				fileselector->addItem(new CMenuForwarder(filen.c_str(), true, NULL, this, (actionkey + filen).c_str()));
 #warning TODO: make sure filen is UTF-8 encoded
 			}
 			free(namelist[count]);

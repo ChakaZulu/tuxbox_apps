@@ -798,7 +798,7 @@ int CTimerList::newTimer()
 		{
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, std::string("SCT:") + cChannelId + channel->name));
+			mwtv->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string("SCT:") + cChannelId + channel->name).c_str()));
 		}
 		if (!subchannellist.empty())
 			mctv.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwtv));
@@ -809,7 +809,7 @@ int CTimerList::newTimer()
 		{
 			char cChannelId[11];
 			sprintf(cChannelId,"%010u",channel->channel_id);
-			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, std::string("SCR:") + cChannelId + channel->name));
+			mwradio->addItem(new CMenuForwarder(channel->name, true, NULL, this, (std::string("SCR:") + cChannelId + channel->name).c_str()));
 		}
 		if (!subchannellist.empty())
 			mcradio.addItem(new CMenuForwarder(bouquet->name, true, NULL, mwradio));

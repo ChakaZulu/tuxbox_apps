@@ -85,7 +85,7 @@ public:
 void *mount_thread(void* cmd)
 {
 	int ret;
-	ret=system((char*)cmd);
+	ret=system((const char *) cmd);
 	pthread_mutex_lock(&g_mut);
 	g_mntstatus=ret;
 	pthread_cond_broadcast(&g_cond);
@@ -426,8 +426,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 		cmd += g_settings.network_nfs_mount_options[1];
 	}
 	
-	sprintf(buffer,"%s",cmd.c_str());
-	pthread_create(&g_mnt, 0, mount_thread, buffer);
+	pthread_create(&g_mnt, 0, mount_thread, (void *) cmd.c_str());
 	
 	struct timespec timeout;
 	int retcode;
@@ -506,7 +505,7 @@ int CNFSUmountGui::menu()
 			s1 += mountOn;
 			std::string s2 = "doumount ";
 			s2 += mountOn;
-			umountMenu.addItem(new CMenuForwarder(s1.c_str(), true, NULL, this, s2));
+			umountMenu.addItem(new CMenuForwarder(s1.c_str(), true, NULL, this, s2.c_str()));
 		}
 	}
 	in.close();
