@@ -1,5 +1,5 @@
 /*
-$Id: ints.c,v 1.5 2003/10/26 19:06:26 rasc Exp $
+$Id: ints.c,v 1.6 2003/10/26 19:15:00 rasc Exp $
 
    INT Section
    IP/MAC Notification Section
@@ -9,6 +9,9 @@ $Id: ints.c,v 1.5 2003/10/26 19:06:26 rasc Exp $
 
 
 $Log: ints.c,v $
+Revision 1.6  2003/10/26 19:15:00  rasc
+no message
+
 Revision 1.5  2003/10/26 19:06:26  rasc
 no message
 
@@ -55,10 +58,10 @@ void decode_INT_DSMCC (u_char *b, int len)
     u_int      action_type;
     u_int      platform_id_hash;
     u_int      reserved_3;
-    u_int      version_nr;
+    u_int      version_number;
     u_int      current_next_indicator;
-    u_int      section_nr;
-    u_int      last_section_nr;
+    u_int      section_number;
+    u_int      last_section_number;
     u_long     platform_id;
     u_int      processing_order;
 
@@ -93,7 +96,7 @@ void decode_INT_DSMCC (u_char *b, int len)
  d.last_section_number 		 = getBits (b, 0, 56, 8);
 
  d.platform_id			 = getBits (b, 0, 64, 24);
- ... /*$$$ */
+ /*$$$ */
 
 
 
