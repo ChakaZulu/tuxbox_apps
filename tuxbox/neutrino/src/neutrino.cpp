@@ -3580,6 +3580,8 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	{
 		dprintf(DEBUG_DEBUG, "neutino - recordmode %s\n", ( data ) ? "on":"off" );
 
+		recordingstatus = data;
+		
 		if( ( !g_InfoViewer->is_visible ) && data )
 			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
