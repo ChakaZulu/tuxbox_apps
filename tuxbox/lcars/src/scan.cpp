@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.17  2002/10/31 19:53:37  TheDOC
+Cablescan should work now with the current (buggy?) drivers (it actually
+works for me)
+
 Revision 1.16  2002/10/20 02:03:37  TheDOC
 Some fixes and stuff
 
@@ -343,59 +347,60 @@ channels scan::scanChannels(int type, int start_frequency, int start_symbol, int
 	tmp_channels.setTuner(tuner_obj);
 	do
 	{
-		tmp_channels.tuneCurrentTS();
-
-		//printf("getChannels - Start\n");
-		sdt_obj->getChannels(&tmp_channels);
-
-		if (type == FULL)
+		if(tmp_channels.tuneCurrentTS())
 		{
-			//std::cout << "Full Channel Scan" << std::endl;
-			pat_obj->readPAT();
-			for (int i = numberChannels; i < tmp_channels.numberChannels(); i++)
+			//printf("getChannels - Start\n");
+			sdt_obj->getChannels(&tmp_channels);
+
+			if (type == FULL)
 			{
-				tmp_channels.setCurrentChannel(i);
-				tmp_channels.setCurrentPMT(pat_obj->getPMT(tmp_channels.getCurrentSID()));
-
-				pmt_data pmt_entry;
-				if (tmp_channels.getCurrentPMT() != 0)
+				//std::cout << "Full Channel Scan" << std::endl;
+				pat_obj->readPAT();
+				for (int i = numberChannels; i < tmp_channels.numberChannels(); i++)
 				{
-					pmt_entry = pmt_obj->readPMT(tmp_channels.getCurrentPMT());
+					tmp_channels.setCurrentChannel(i);
+					tmp_channels.setCurrentPMT(pat_obj->getPMT(tmp_channels.getCurrentSID()));
 
-					tmp_channels.setCurrentPCR(pmt_entry.PCR);
-
-					tmp_channels.deleteCurrentAPIDs();
-					for (int j = 0; j < pmt_entry.pid_counter; j++)
+					pmt_data pmt_entry;
+					if (tmp_channels.getCurrentPMT() != 0)
 					{
-						if (pmt_entry.type[j] == 0x02)
+						pmt_entry = pmt_obj->readPMT(tmp_channels.getCurrentPMT());
+
+						tmp_channels.setCurrentPCR(pmt_entry.PCR);
+
+						tmp_channels.deleteCurrentAPIDs();
+						for (int j = 0; j < pmt_entry.pid_counter; j++)
 						{
-							tmp_channels.setCurrentVPID(pmt_entry.PID[j]);
+							if (pmt_entry.type[j] == 0x02)
+							{
+								tmp_channels.setCurrentVPID(pmt_entry.PID[j]);
+							}
+							else if (pmt_entry.type[j] == 0x04 || pmt_entry.type[j] == 0x03)
+							{
+								tmp_channels.addCurrentAPID(pmt_entry.PID[j]);
+							}
 						}
-						else if (pmt_entry.type[j] == 0x04 || pmt_entry.type[j] == 0x03)
+
+						for (int j = 0; j < pmt_entry.ecm_counter; j++)
 						{
-							tmp_channels.addCurrentAPID(pmt_entry.PID[j]);
+							if (setting->getCAID() == pmt_entry.CAID[j])
+								tmp_channels.addCurrentCA(pmt_entry.CAID[j], pmt_entry.ECM[j]);
 						}
 					}
-
-					for (int j = 0; j < pmt_entry.ecm_counter; j++)
+					else
 					{
-						if (setting->getCAID() == pmt_entry.CAID[j])
-							tmp_channels.addCurrentCA(pmt_entry.CAID[j], pmt_entry.ECM[j]);
+						tmp_channels.deleteCurrentAPIDs();
+						tmp_channels.setCurrentVPID(0x1fff);
+						tmp_channels.addCurrentAPID(0x1fff);
 					}
+
+
+					numberChannels = tmp_channels.numberChannels();
+
 				}
-				else
-				{
-					tmp_channels.deleteCurrentAPIDs();
-					tmp_channels.setCurrentVPID(0x1fff);
-					tmp_channels.addCurrentAPID(0x1fff);
-				}
-
-
-				numberChannels = tmp_channels.numberChannels();
-
 			}
-		}
 
+		}
 		osd_obj->setScanChannelNumber(tmp_channels.numberChannels());
 		//printf("getChannels - Finish\n");
 		count++;
