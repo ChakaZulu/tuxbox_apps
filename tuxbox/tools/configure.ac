@@ -11,6 +11,6 @@ TUXBOX_APPS_DRIVER
 AC_OUTPUT([
 Makefile
 camd/Makefile
-skyscan/Makefile
+satfind/Makefile
 ])
 

@@ -1,3 +1,3 @@
 AUTOMAKE_OPTIONS = gnu
 
-SUBDIRS = camd skyscan
+SUBDIRS = camd satfind
