@@ -43,7 +43,7 @@
 
 int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 {
-	//	printf("ac: %s\n", actionKey.c_str());
+	printf("exec: %s\n", actionKey.c_str());
 	int returnval = menu_return::RETURN_REPAINT;
 
 	if(actionKey=="")
@@ -63,17 +63,23 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
    }
 	else if(actionKey.substr(0,10)=="mountentry")
 	{
+		printf("1\n");
 		parent->hide();
+		printf("2\n");
       returnval = menuEntry(actionKey[10]-'0');
+		printf("3\n");
 		for(int i=0 ; i< 4; i++)
 		{
+			printf("4\n");
 			string a;
 			if(g_settings.network_nfs_automount[i])
 				a=g_Locale->getText("messagebox.yes");
 			else
 				a=g_Locale->getText("messagebox.no");
+			printf("5\n");
 			sprintf(m_entry[i],"%s:%s -> %s auto: %s",g_settings.network_nfs_ip[i],g_settings.network_nfs_dir[i], 
 					  g_settings.network_nfs_local_dir[i], a.c_str());
+			printf("6\n");
 		}
    }
 	else if(actionKey.substr(0,7)=="domount")
@@ -87,6 +93,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 
 int CNFSMountGui::menu()
 {
+	printf("menu{\n");
 	CMenuWidget mountMenuW("nfs.mount", "network.raw", 720);
 	mountMenuW.addItem(new CMenuSeparator()); 
 	mountMenuW.addItem(new CMenuForwarder("menu.back")); 
@@ -98,11 +105,14 @@ int CNFSMountGui::menu()
 		sprintf(s2,"mountentry%d",i);
 		mountMenuW.addItem(new CMenuForwarder("", true, m_entry[i], this, s2));
 	}
-	return mountMenuW.exec(this,"");
+	int ret=mountMenuW.exec(this,"");
+	printf("menu}\n");
+	return ret;
 }
 
 int CNFSMountGui::menuEntry(int nr)
 {
+	printf("menuEntry{\n");
 	char *dir,*local_dir,*ip;
 	int* automount;
 	char cmd[9];
@@ -121,15 +131,16 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.ip", true, ip, &ipInput));
 	CStringInputSMS  dirInput("nfs.dir", dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/"); 
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.dir", true, dir, &dirInput));
-	CStringInputSMS  localDirInput("nfs.localdir", local_dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/"); 
+	CStringInputSMS  localDirInput("nfs.localdir", local_dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.localdir", true, local_dir, &localDirInput)); 
-	CMenuOptionChooser automountInput("nfs.automount", automount, true); 
-	automountInput.addOption(0, "messagebox.no");
-	automountInput.addOption(1, "messagebox.yes"); 
-	mountMenuEntryW.addItem(&automountInput);
+	CMenuOptionChooser *automountInput= new CMenuOptionChooser("nfs.automount", automount, true); 
+	automountInput->addOption(0, "messagebox.no");
+	automountInput->addOption(1, "messagebox.yes"); 
+	mountMenuEntryW.addItem(automountInput);
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.mountnow", true, NULL, this, cmd));
 
 	int ret = mountMenuEntryW.exec(this,"");
+	printf("menuEntry}\n");
 	return ret;
 }
 
