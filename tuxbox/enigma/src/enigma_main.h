@@ -395,6 +395,12 @@ private:
 	// actions
 public:
 	void showServiceSelector(int dir, int newTarget=0 );
+#ifndef DISABLE_FILE
+	void play();
+	void stop();
+	void pause();
+	void record();
+#endif
 private:
 	void nextService(int add=0);
 	void prevService();
@@ -424,10 +430,6 @@ private:
 	void showHelp( ePtrList<eAction>*, int );
 
 #ifndef DISABLE_FILE
-	void play();
-	void stop();
-	void pause();
-	void record();
 	enum { skipForward, skipReverse };
 	int skipcounter;
 	int skipping;

@@ -73,6 +73,11 @@ function clearTimerList()
 	win.focus();
 	parent.setTimeout("close()", 300);
 }
+
+function DVRrecord(xy)
+{
+	NewWindow("/cgi-bin/record?command="+xy, "record", "200", "100", "no");
+}
 </script>
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
