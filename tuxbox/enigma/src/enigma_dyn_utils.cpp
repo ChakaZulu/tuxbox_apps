@@ -228,7 +228,7 @@ eString closeWindow(eHTTPConnection *content)
 	else
 	{
 		content->local_header["Content-Type"]="text/html; charset=utf-8";
-		result = eString(CLOSEWINDOW);
+		result = eString(WINDOWCLOSE);
 	}
 	return result;
 }

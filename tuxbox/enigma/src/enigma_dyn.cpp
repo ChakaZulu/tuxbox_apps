@@ -396,10 +396,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 				result =  "enigma is sleeping now</body></html>";
 		}
 	}
-	if (pdaScreen == 0)
-		return "<html>" + eString(CHARSETMETA) + "<head><title>" + command + "</title></head><body>" + result + "</body></html>";
-	else
-		return "<html>" + eString(CHARSETMETA) + "<head><title>" + command + "</title></head><body><script>window.close();</script>" + result + "</body></html>";
+	return "<html>" + eString(CHARSETMETA) + "<head><title>" + command + "</title></head><body>" + result + "</body></html>";
 }
 
 #ifndef DISABLE_FILE
@@ -482,7 +479,7 @@ static eString setAudio(eString request, eString dirpath, eString opts, eHTTPCon
 			}
 	}
 
-	return "<script language=\"javascript\">window.close();</script>";
+	return WINDOWCLOSE;
 }
 
 static eString selectAudio(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1410,7 +1407,7 @@ public:
 			{
 				result += "<a href=\"javascript:deleteMovie('";
 				result += serviceRef;
-				result += "')\"><img src=\"trash.gif\" height=22 border=0></a>";
+				result += "')\"><img src=\"trash.gif\" height=12 border=0></a>";
 			}
 			else
 				result += "&#160;";
@@ -1702,30 +1699,26 @@ static eString getZap(eString mode, eString path)
 	eString result;
 
 	if (pdaScreen == 0)
+	{
 		result += getZapNavi(mode, path);
 #ifndef DISABLE_FILE
-	if (path == ";4097:7:0:1:0:0:0:0:0:0:") // recordings
-	{
-		eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
-		tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
-		result += tmpFile;
-		result += getZapContent3(mode, path);
+		if ((path == ";4097:7:0:1:0:0:0:0:0:0:") ) // recordings
+		{
+			eString tmpFile = readFile(TEMPLATE_DIR + "videocontrols.tmp");
+			tmpFile.strReplace("#VIDEOBAR#", getVideoBar());
+			result += tmpFile;
+			result += getZapContent3(mode, path);
+		}
+#endif
+		eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
+		tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
+		result += tmp;
 	}
 	else
-#endif
 	{
-		if (pdaScreen == 0)
-		{
-			eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
-			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
-			result += tmp;
-		}
-		else
-		{
-			result += getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
-			result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-			result += getZapContent(mode, path);
-		}
+		result += getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
+		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
+		result += getZapContent(mode, path);
 	}
 
 	return result;

@@ -15,7 +15,8 @@
 
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 #define NOCONTENT "<? header(\"HTTP/1.0 204 No Content\"); ?>"
-#define CLOSEWINDOW "<html><body><script>window.close();</script></body></html>"
+#define WINDOWCLOSE "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">close();</script></body></html>"
+#define WINDOWBACK "<html><head><META http-equiv=Content-Type content=\"text/html; charset=UTF-8\"></head><body><script  language=\"javascript\">back();</script></body></html>"
 
 #define BLUE "#12259E"
 #define RED "#CB0303"
