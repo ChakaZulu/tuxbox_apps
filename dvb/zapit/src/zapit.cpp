@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.219 2002/09/11 07:34:18 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.220 2002/09/11 09:23:48 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1079,7 +1079,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.219 2002/09/11 07:34:18 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.220 2002/09/11 09:23:48 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1556,8 +1556,6 @@ unsigned zapTo (unsigned int bouquet, unsigned int channel)
 		printf("[zapit] Invalid channel %d in bouquet %d\n", channel, bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
-
-	bouquetManager->saveAsLast(bouquet - 1, channel - 1);
 
 	return zapTo_Onid_Sid((*channels)[channel - 1]->getOnidSid(), false);
 }

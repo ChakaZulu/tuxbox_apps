@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.55 2002/09/11 07:45:07 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.56 2002/09/11 09:23:48 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -481,37 +481,6 @@ void CBouquetManager::moveBouquet(const unsigned int oldId, const unsigned int n
 	}
 }
 
-void CBouquetManager::saveAsLast( unsigned int BouquetId, unsigned int channelNr)
-{
-	FILE* BMSettings;
-	BMSettings = fopen("/tmp/zapit_last_bouq", "w");
-
-	if (BMSettings == NULL)
-	{
-		perror("[zapit] fopen: /tmp/zapit_last_bouq");
-	}
-
-	fwrite( &BouquetId, 1, sizeof(BouquetId), BMSettings);
-	fwrite( &channelNr, 1, sizeof(channelNr), BMSettings);
-	fclose( BMSettings);
-
-}
-
-void CBouquetManager::getLast( unsigned int* BouquetId, unsigned int* channelNr)
-{
-	FILE* BMSettings;
-	BMSettings = fopen("/tmp/zapit_last_bouq", "w");
-
-	if (BMSettings == NULL)
-	{
-		perror("[zapit] fopen: /tmp/zapit_last_bouq");
-	}
-
-	fread( BouquetId, 1, sizeof(BouquetId), BMSettings);
-	fread( channelNr, 1, sizeof(channelNr), BMSettings);
-	fclose( BMSettings);
-}
-
 void CBouquetManager::clearAll()
 {
 	for (unsigned int i=0; i<Bouquets.size(); i++)
@@ -519,16 +488,6 @@ void CBouquetManager::clearAll()
 
 	Bouquets.clear();
 	remainChannels = NULL;
-}
-
-void CBouquetManager::onTermination()
-{
-	system("cp /tmp/zapit_last_bouq " CONFIGDIR "/zapit/last_bouq");
-}
-
-void CBouquetManager::onStart()
-{
-	system("cp " CONFIGDIR "/zapit/last_bouq /tmp/zapit_last_bouq");
 }
 
 CZapitChannel* CBouquetManager::findChannelByOnidSid(const unsigned int onid_sid)

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.35 2002/09/11 07:34:18 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.36 2002/09/11 09:23:48 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -113,11 +113,7 @@ class CBouquetManager
 		void moveBouquet(const unsigned int oldId, const unsigned int newId);
 		bool existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid);
 
-		void saveAsLast( unsigned int BouquetId, unsigned int channelNr);
-		void getLast( unsigned int* BouquetId, unsigned int* channelNr);
 		void clearAll();
-		void onTermination();
-		void onStart();
 
 		CZapitChannel* findChannelByOnidSid(const unsigned int onid_sid);
 
