@@ -429,11 +429,11 @@ int CMP3PlayerGui::show()
 							std::string tmp = mp3.Filename.substr(mp3.Filename.rfind('/')+1);
 							tmp = tmp.substr(0,tmp.length()-4);	//remove .url
 							mp3.Title = tmp;
-							char url[1000];
+							char url[80];
 							FILE* f=fopen(files->Name.c_str(), "r");
                      if(f!=NULL)
                      {
-                        fgets(url, 1000, f);
+                        fgets(url, 80, f);
                         if(url[strlen(url)-1] == '\n') url[strlen(url)-1]=0;
                         if(url[strlen(url)-1] == '\r') url[strlen(url)-1]=0;
                         mp3.Album = url;
