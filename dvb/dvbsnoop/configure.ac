@@ -1,5 +1,5 @@
-AC_INIT([dvbsnoop],[1.1.24],[rasc@users.sourceforge.net])
-AM_INIT_AUTOMAKE([dvbsnoop],[1.1.24])
+AC_INIT([dvbsnoop],[1.1.25],[rasc@users.sourceforge.net])
+AM_INIT_AUTOMAKE([dvbsnoop],[1.1.25])
 
 AC_PROG_CC
 AC_PROG_RANLIB
