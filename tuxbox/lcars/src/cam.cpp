@@ -243,7 +243,13 @@ void cam::sendCAM(void *data, unsigned int len)
 	memcpy(ca_msg.msg, command + 1, len - 1);
 	
 	fd=open("/dev/dvb/adapter0/ca0", O_RDWR);
-	if (ioctl(fd, CA_SEND_MSG, &ca_msg) != 0)
+
+	if (fd < 0) {
+		perror("/dev/dvb/adapter0/ca0");
+		return;
+	}
+	
+	if (ioctl(fd, CA_SEND_MSG, &ca_msg) < 0)
 	{
 		perror("cam-ioctl");
 	}
@@ -264,7 +270,7 @@ void cam::readCAID()
 		int fd;
 	
 		fd=open("/dev/dvb/adapter0/ca0", O_RDWR);
-		if(fd <= 0)
+		if(fd < 0)
 		{
 			perror("open ca0");
 			return;
