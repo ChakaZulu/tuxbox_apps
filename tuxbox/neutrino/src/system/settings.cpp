@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.23 2003/05/21 20:13:54 digi_casi Exp $
+        $Id: settings.cpp,v 1.24 2003/05/21 20:36:50 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -34,7 +34,7 @@ CScanSettings::CScanSettings(void)
 	{
 		satName[i][0] = 0;
 		satDiseqc[i] = -1;
-		satMotorPos[i] = -1;
+		satMotorPos[i] = 0;
 	}
 }
 
