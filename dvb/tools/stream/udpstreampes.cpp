@@ -196,9 +196,9 @@ void * DmxTSReader( void * Ptr )
    int fd_dvr;
 	unsigned u;
 
-   fd_dvr = open("/dev/dvb/card0/dvr0", O_RDONLY);
+   fd_dvr = open("/dev/dvb/card0/dvr1", O_RDONLY);
    if (-1 == fd_dvr) {
-      perror("ERROR: main() - dvr0 open");
+      perror("ERROR: main() - dvr1 open");
       fprintf(stderr, "EXIT\n");
       fflush(stderr);
       exit(-1);
