@@ -146,36 +146,46 @@ bool CVCRControl::CVCRDevice::Stop()
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::ParseFile(string filename)
 {
-	FILE *inp;
+	ifstream inp;
 	char buffer[101];
 	int wait_time;
-	if( (inp = fopen(filename.c_str(),"r")) > 0)
+	inp.open(filename.c_str(),ifstream::in);
+	if( inp.is_open() )
 	{
 		CLircdClient lirc;
 		if(lirc.Connect())
 		{
-			while(!feof(inp))
+			while(inp.good())
 			{
-				if(fgets(buffer,100,inp) != NULL)
+				inp.getline(buffer,100);
+				if(buffer[0]!=0)
 				{
-					if(strncmp(buffer,"WAIT",4) == 0)
-					{			// if wait command then sleep for n seconds
-						sscanf(&buffer[4],"%d",&wait_time);
+					string line = buffer;
+					if(line.substr(0,4)=="WAIT" || line.substr(0,4)=="wait")
+					{
+						sscanf(line.substr(5).c_str(),"%d",&wait_time);
 						if(wait_time > 0)
-							sleep(wait_time);
+							usleep(wait_time*1000);
 					}
 					else
 					{
-						// remove \n
-						if(buffer[strlen(buffer)-1]=='\n')
-							buffer[strlen(buffer)-1]=0;
-						lirc.SendCmd(Name, buffer);
+						int duration=0;
+						unsigned int space_pos=line.find(" ");
+						if(space_pos!=string::npos)
+						{
+							sscanf(line.substr(space_pos+1).c_str(),"%d",&duration);
+						}
+						if(duration > 0)
+							lirc.SendUsecs(Name, line.substr(0,space_pos).c_str(),duration*1000);
+						else
+							lirc.SendOnce(Name, buffer);
 					}
 				}
 			}
 			lirc.Disconnect();
 			return true;
 		}
+		inp.close();
 	}
 	else
 		printf("konnte datei %s nicht oeffnen\n",filename.c_str());
@@ -214,6 +224,9 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, unsigned lon
 	}
 	// Auf Scart schalten
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::VCR_ON, 0 );
+	// Das ganze nochmal in die queue, da obiges RC_timeout erst in der naechsten ev. loop ausgeführt wird
+	// und dann das menu widget das display falsch rücksetzt
+	g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
 	deviceState = CMD_VCR_RECORD;
 	// Send IR
 	return ParseFile(LIRCDIR "record.lirc");

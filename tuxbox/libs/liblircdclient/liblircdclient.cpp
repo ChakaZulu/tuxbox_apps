@@ -100,7 +100,18 @@ const char* CLircdClient::ReadString()
 	return(buffer);
 }
 
-int CLircdClient::SendCmd(string device, string command)
+int CLircdClient::SendOnce(string device, string key)
+{
+	return Send("SEND_ONCE",device,key);
+}
+int CLircdClient::SendUsecs(string device, string key, int usecs)
+{
+	int ret1=Send("SEND_START",device,key);
+	usleep(usecs);
+	int ret2=Send("SEND_STOP",device,key);
+	return ret1+ret2;
+}
+int CLircdClient::Send(string cmd, string device, string key)
 {
 	enum packet_state
 	{
@@ -120,8 +131,8 @@ int CLircdClient::SendCmd(string device, string command)
 	unsigned long data_n=0;
 	char packet[PACKET_SIZE];
 
-	sprintf(packet,"SEND_ONCE %s %s\n",device.c_str(),command.c_str());
-	dprintf("sending to lircd (%s)\n",packet);
+	sprintf(packet,"%s %s %s\n",cmd.c_str(),device.c_str(),key.c_str());
+	dprintf("sending to lircd %s",packet);
 	todo=strlen(packet);
 	data=packet;
 	while(todo>0)

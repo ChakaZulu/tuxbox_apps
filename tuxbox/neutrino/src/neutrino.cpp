@@ -2618,6 +2618,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			// noch nicht im Scart-Mode...
 			scartMode( true );
 		}
+		else // sonst nur lcd akt.
+			g_lcdd->setMode(CLcddTypes::MODE_SCART);
 	}
 
 	else if( msg == NeutrinoMessages::VCR_OFF )
@@ -3063,7 +3065,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.345 2002/10/19 20:08:55 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.346 2002/10/20 00:20:36 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -38,7 +38,9 @@ class CLircdClient
 		const char* ReadString();
 		int fd;
 	public:
-		int  SendCmd(string device, string command);
+		int  SendUsecs(string device, string command,int usecs);
+		int  Send(string cmd, string device, string key);
+		int  SendOnce(string device, string key);
 		bool Connect();
 		void Disconnect();
 
