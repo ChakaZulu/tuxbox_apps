@@ -41,7 +41,6 @@
 struct SNeutrinoSettings
 {
 	//video
-	int video_Signal;
 	int video_Format;
 	unsigned char video_csync;
 

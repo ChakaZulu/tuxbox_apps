@@ -336,28 +336,6 @@ bool CAudioSetupNotifier2::changeNotify(const neutrino_locale_t, void *)
 	return true;
 }
 
-CVideoSetupNotifier::CVideoSetupNotifier( CMenuItem* i1)
-{
-   toDisable[0]=i1;
-}
-
-bool CVideoSetupNotifier::changeNotify(const neutrino_locale_t OptionName, void *)
-{
-	if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOSIGNAL))
-	{
-		g_Controld->setVideoOutput(g_settings.video_Signal);
-
-		toDisable[0]->setActive((g_settings.video_Signal == 1) || (g_settings.video_Signal == 3) || (g_settings.video_Signal == 4));
-	}
-	else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_VIDEOMENU_VIDEOFORMAT))
-	{
-		g_Controld->setVideoFormat( g_settings.video_Format );
-	}
-
-	printf("video notify: %d\n", OptionName);
-	return false;
-}
-
 bool CKeySetupNotifier::changeNotify(const neutrino_locale_t, void *)
 {
 	g_RCInput->repeat_block = atoi(g_settings.repeat_blocker)* 1000;

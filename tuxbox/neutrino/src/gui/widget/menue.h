@@ -76,8 +76,8 @@ class CMenuItem
 {
 	protected:
 		int x, y, dx, offx;
-		bool           active;
 	public:
+		bool           active;
 		neutrino_msg_t directKey;
 		std::string    iconName;
 

@@ -147,15 +147,6 @@ class CAudioSetupNotifier2 : public CChangeObserver
 		bool changeNotify(const neutrino_locale_t, void *);
 };
 
-class CVideoSetupNotifier : public CChangeObserver
-{
-	private:
-		CMenuItem* toDisable[1];
-	public:
-		CVideoSetupNotifier( CMenuItem* );
-		bool changeNotify(const neutrino_locale_t OptionName, void *);
-};
-
 class CKeySetupNotifier : public CChangeObserver
 {
 	public:
