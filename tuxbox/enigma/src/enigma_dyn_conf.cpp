@@ -44,11 +44,22 @@
 
 using namespace std;
 
+eString getImageMediaPath(void)
+{
+	eString mediaPath;
+	if (access("/tmp/org", R_OK) == 0)
+		mediaPath = getAttribute("/tmp/org", "mpoint");
+	else
+		mediaPath = getAttribute("/Image.info", "mpoint");
+	return mediaPath;
+}
+
 bool dreamFlashIsInstalled(void)
 {
-	return ((access("/var/mnt/usb/tools/lcdmenu.conf", R_OK) == 0)
-		&& (access("/var/mnt/usb/tools/lcdmenu", X_OK) == 0)
-		&& (access("/var/mnt/usb/tools/menu", X_OK) == 0)
+	eString mediaPath = getImageMediaPath();
+	return ((access(eString(mediaPath + "/tools/lcdmenu.conf").c_str(), R_OK) == 0)
+		&& (access(eString(mediaPath + "/tools/lcdmenu").c_str(), X_OK) == 0)
+		&& (access(eString(mediaPath + "/tools/menu").c_str(), X_OK) == 0)
 		);	
 }
 
@@ -58,8 +69,9 @@ eString getInstalledImages(void)
 	eString image;
 	unsigned int pos = 0;
 	int i = 0;
-	eString dreamFlashImages = getAttribute("/var/mnt/usb/tools/lcdmenu.conf", "menu_items");
-	eString activeImage = getAttribute("/var/mnt/usb/tools/lcdmenu.conf", "default_entry");
+	eString mediaPath = getImageMediaPath();
+	eString dreamFlashImages = getAttribute(mediaPath + "/tools/lcdmenu.conf", "menu_items");
+	eString activeImage = getAttribute(mediaPath + "/tools/lcdmenu.conf", "default_entry");
 	if (dreamFlashImages.length() > 0)
 		dreamFlashImages = dreamFlashImages.substr(0, dreamFlashImages.length() - 1); //remove last comma
 	while (dreamFlashImages.length() > 0)

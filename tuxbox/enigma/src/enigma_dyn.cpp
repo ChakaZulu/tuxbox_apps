@@ -2152,10 +2152,12 @@ eString getConfigMultiBoot(void)
 	if (dreamFlashIsInstalled())
 	{
 		result = readFile(TEMPLATE_DIR + "configMultiBoot.tmp");
-		eString dreamFlashVersion = getAttribute("/var/mnt/usb/tools/lcdmenu.conf", "version");
+		eString mediaPath = getImageMediaPath();
+		eString dreamFlashVersion = getAttribute(mediaPath + "/tools/lcdmenu.conf", "version");
 		if (dreamFlashVersion == "&nbsp;")
 			dreamFlashVersion = "not installed";
 		result.strReplace("#DREAMFLASHVERSION#", dreamFlashVersion);
+		result.strReplace("#MEDIAPATH#", getImageMediaPath());
 		result.strReplace("#INSTALLEDIMAGES#", getInstalledImages());
 		result.strReplace("#REBOOTBUTTON#", button(110, "Reboot", RED, "javascript:admin(\'/cgi-bin/admin?command=reboot\')"));
 	}
