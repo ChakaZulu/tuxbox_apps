@@ -294,7 +294,9 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 {
 	printf("readDir_vlc %s\n",dirname.c_str());
 	std::string answer="";
-	std::string url = m_baseurl + dirname.substr(strlen(VLC_URI));
+	char *dir_escaped = curl_escape(dirname.substr(strlen(VLC_URI)).c_str(), 0);
+	std::string url = m_baseurl + dir_escaped;
+	curl_free(dir_escaped);
 	cout << "[FileBrowser] vlc URL: " << url << endl;
 	CURL *curl_handle;
 	CURLcode httpres;
@@ -318,7 +320,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	/* Convert \ to / */
 	for( unsigned int pos=answer.find("\\"); pos!=std::string::npos ; pos=answer.find("\\"))
 		answer[pos]='/';
-	//cout << "Answer:" << endl << "----------------" << endl << answer << endl;
+	// cout << "Answer:" << endl << "----------------" << endl << answer << endl;
 	/*!!! TODO check httpres and display error */
 	if (!answer.empty() && !httpres)
 	{
@@ -327,7 +329,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 		{
 			CFile file;
 			std::string entry = answer.substr(start, pos-start);
-			if (entry.find("DIR:")!=-1) 
+			if (entry.find("DIR:")==0) 
 				file.Mode = S_IFDIR + 0777 ;
 			else
 				file.Mode = S_IFREG + 0777 ;
