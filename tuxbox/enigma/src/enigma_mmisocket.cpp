@@ -9,17 +9,13 @@
 
 int eSocketMMIHandler::send_to_mmisock( void* buf, size_t len)
 {
-	if ( connsn )
-	{
-		int ret = write(connfd, buf, len);
-		if ( ret < 0 )
-			eDebug("[eSocketMMIHandler] write (%m)");
-		else if ( (uint)ret != len )
-			eDebug("[eSocketMMIHandler] only %d bytes sent.. %d bytes should be sent", ret, len );
-		return ret;
-	}
+	int ret = write(connfd, buf, len);
+	if ( ret < 0 )
+		eDebug("[eSocketMMIHandler] write (%m)");
+	else if ( (uint)ret != len )
+		eDebug("[eSocketMMIHandler] only %d bytes sent.. %d bytes should be sent", ret, len );
 	else
-		eDebug("no connection (mmi client)");
+		return ret;
 	return 0;
 }
 
