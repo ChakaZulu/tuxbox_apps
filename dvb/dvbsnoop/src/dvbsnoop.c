@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.13 2003/11/07 16:33:31 rasc Exp $
+$Id: dvbsnoop.c,v 1.14 2003/12/03 20:06:33 obi Exp $
 
  DVBSNOOP
 
@@ -16,6 +16,12 @@ $Id: dvbsnoop.c,v 1.13 2003/11/07 16:33:31 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.14  2003/12/03 20:06:33  obi
+- reduced auto* to minimal required checks, obsoletes acinclude.m4
+- added version number to configure.ac, removed it from version.h
+  (needed for "make dist" anyway)
+- removed autoheader dependency
+
 Revision 1.13  2003/11/07 16:33:31  rasc
 no message
 
@@ -97,8 +103,7 @@ int main(int argc, char **argv)
   indent (0);
   if (! opt.binary_out) {
      if (! opt.hide_copyright) {
-        out_nl (1, "dvbsnoop  Vers. %s   -- %s ",
-			DVBSNOOP_VERSION,DVBSNOOP_URL);
+        out_nl (1, "%s -- %s ", PACKAGE_VERSION, DVBSNOOP_URL);
      }
      out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
      out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);

@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.15 2003/11/26 19:55:31 rasc Exp $
+$Id: dvbsnoop.h,v 1.16 2003/12/03 20:06:33 obi Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dvbsnoop.h,v 1.15 2003/11/26 19:55:31 rasc Exp $
 
 
 $Log: dvbsnoop.h,v $
+Revision 1.16  2003/12/03 20:06:33  obi
+- reduced auto* to minimal required checks, obsoletes acinclude.m4
+- added version number to configure.ac, removed it from version.h
+  (needed for "make dist" anyway)
+- removed autoheader dependency
+
 Revision 1.15  2003/11/26 19:55:31  rasc
 no message
 
@@ -76,13 +82,11 @@ dvbsnoop v0.7  -- Commit to CVS
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <config.h>
-
-#ifndef HAVE_OST_DMX_H
+#if defined(HAVE_LINUX_DVB_DMX_H)
 #include <linux/dvb/dmx.h>
 #define DEMUX_DEVICE "/dev/dvb/adapter0/demux0"
 #define DVR_DEVICE   "/dev/dvb/adapter0/dvr0"
-#else
+#elif defined(HAVE_OST_DMX_H)
 #include <ost/dmx.h>
 #define DEMUX_DEVICE "/dev/dvb/card0/demux0"
 #define DVR_DEVICE   "/dev/dvb/card0/dvr0"

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.8 2003/11/26 16:27:46 rasc Exp $
+$Id: cmdline.c,v 1.9 2003/12/03 20:06:35 obi Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: cmdline.c,v 1.8 2003/11/26 16:27:46 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.9  2003/12/03 20:06:35  obi
+- reduced auto* to minimal required checks, obsoletes acinclude.m4
+- added version number to configure.ac, removed it from version.h
+  (needed for "make dist" anyway)
+- removed autoheader dependency
+
 Revision 1.8  2003/11/26 16:27:46  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -150,7 +156,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
   if (argc==1 || opt->help || opt->pid == 0xFFFF) {
     printf("dvbsnoop  - a dvb/mpeg2 stream analyzer tool\n");
-    printf("Version: %s  (%s %s)\n",DVBSNOOP_VERSION,__DATE__,__TIME__);
+    printf("Version: %s  (%s %s)\n",PACKAGE_VERSION,__DATE__,__TIME__);
     printf("         %s  \n",DVBSNOOP_URL);
     printf("         %s  \n",DVBSNOOP_COPYRIGHT);
     printf("\n");

@@ -30,22 +30,12 @@ if test "$DIE" -eq 1; then
 	exit 1
 fi
 
-if [ ! -e acinclude.m4 ]; then
-	for i in .. ../.. ../../..; do
-		if [ -e `pwd`/$i/acinclude.m4 ]; then
-			ln -s `pwd`/$i/acinclude.m4 .
-		fi
-	done
-fi
-
 echo "Generating configuration files for $package, please wait...."
 
 echo "  aclocal"
 aclocal
 echo "  autoconf"
 autoconf
-echo "  autoheader"
-autoheader
 echo "  automake --add-missing"
 automake --add-missing 
 
