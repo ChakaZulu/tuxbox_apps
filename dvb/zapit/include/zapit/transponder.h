@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.h,v 1.4 2002/05/20 09:51:47 obi Exp $
+ * $Id: transponder.h,v 1.5 2002/05/20 09:53:33 obi Exp $
  *
  * (C) 2002 by Steffen Hehn "McClean" <McClean@tuxbox.org>
  *
@@ -72,4 +72,4 @@ class CTransponder
 		unsigned int getTsidOnid();
 };
 
-#endif
+#endif /* __transponder_h__ */
