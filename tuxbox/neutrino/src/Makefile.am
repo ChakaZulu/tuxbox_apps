@@ -43,5 +43,6 @@ neutrino_LDADD = \
 	@PNG_LIBS@ \
 	@MAD_LIBS@ \
 	@ID3TAG_LIBS@ \
-	-ltuxbox \
 	-lpthread
+
+AM_CPPFLAGS = -DSKIP_CA_STATUS
