@@ -515,7 +515,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	}
 
 	std::string ext_channel_name = g_Zapit->getChannelName(channel_id);
-	if (!(ext_channel_name.empty()))
+	if (g_settings.recording_epg_for_filename && !(ext_channel_name.empty()))
 	{
 		strcpy(&(filename[pos]), UTF8_TO_FILESYSTEM_ENCODING(ext_channel_name.c_str()));
 		char * p_act = &(filename[pos]);
@@ -531,7 +531,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	}
 
 	pos = strlen(filename);
-	if (epgid != 0)
+	if (g_settings.recording_epg_for_filename && epgid != 0)
 	{
 		CSectionsdClient sdc;
 		CShortEPGData epgdata;
