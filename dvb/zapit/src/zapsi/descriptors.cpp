@@ -53,8 +53,8 @@ int service_list_desc(char *buffer)
 int cable_deliv_system_desc(char *buffer, int tsid)
 {
 	int len = buffer[1];
-	int freq = (((buffer[2] & 0xf0) >> 4) * 1000) + ((buffer[2] & 0xf) * 100) + (((buffer[3] & 0xf0) >> 4) * 10) + ((buffer[3] & 0xf));
-	int symbolrate = (((buffer[9] & 0xf0) >> 4) * 1000) + ((buffer[9] & 0xf) * 100) + (((buffer[10] & 0xf0) >> 4) * 10) + ((buffer[10] & 0xf));
+	int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100)   + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
+	int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
 	int fec_inner = (buffer[12]&0xF0);
 	
 	//printf("frequency: %d\n",freq);
@@ -71,11 +71,12 @@ int cable_deliv_system_desc(char *buffer, int tsid)
 int sat_deliv_system_desc(char *buffer, int tsid)
 {
 	int len = buffer[1];
-	int freq = (((buffer[2] & 0xf0) >> 4) * 1000) + ((buffer[2] & 0xf) * 100) + (((buffer[3] & 0xf0) >> 4) * 10) + ((buffer[3] & 0xf));
-	int symbolrate = (((buffer[9] & 0xf0) >> 4) * 1000) + ((buffer[9] & 0xf) * 100) + (((buffer[10] & 0xf0) >> 4) * 10) + ((buffer[10] & 0xf));
+	int freq = (((buffer[2] & 0xf0) >> 4) * 100000) + ((buffer[2] & 0xf) * 10000) + (((buffer[3] & 0xf0) >> 4) * 1000) + ((buffer[3] & 0xf)*100) + (((buffer[4]&0xf0)>>4)*10) + (buffer[4]&0xf);
+	int symbolrate = (((buffer[9] & 0xf0) >> 4) * 100000) + ((buffer[9] & 0xf) * 10000) + (((buffer[10] & 0xf0) >> 4) * 1000) + ((buffer[10] & 0xf)*100) + (((buffer[11]&0xf0)<<4)*10) + (buffer[11]&0xf);
 	int fec_inner = (buffer[12]&0xF0);
 	int polarisation = ((buffer[8]&0x6)>>5);
 	
+	printf("tsid: %04x\n", tsid);
 	printf("frequency: %d\n", freq);
 	printf("Polarisation: %d\n", polarisation);
 	printf("Symbolrate: %d\n", symbolrate);
