@@ -74,7 +74,7 @@ int CMountChooser::exec(CMenuTarget* parent, const std::string & actionKey)
 	{
 		int mount_id = -1;
 		sscanf(&key[4],"%d",&mount_id);
-		if ((mount_id > 0) && (mount_id < NETWORK_NFS_NR_OF_ENTRIES))
+		if ((mount_id > -1) && (mount_id < NETWORK_NFS_NR_OF_ENTRIES))
 		{
 			if (index)
 				*index = mount_id;
