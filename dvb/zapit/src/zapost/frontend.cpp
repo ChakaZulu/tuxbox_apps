@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.18 2002/05/31 22:38:55 obi Exp $
+ * $Id: frontend.cpp,v 1.19 2002/07/16 22:47:45 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -603,6 +603,12 @@ const bool CFrontend::tuneFrequency (FrontendParameters feparams, uint8_t polari
 
 		/* wait for completion */
 		getEvent();
+
+		if (tuned == false)
+		{
+			// unknown state
+			currentFrequency = 0;
+		}
 	}
 
 	return tuned;
