@@ -445,10 +445,15 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	services->beginAtomic();
 	services->clearList();
 
-	if ( path.size() > 1 && style != styleCombiColumn )
-		goUpEntry = new eListBoxEntryService(services, eServiceReference(), eListBoxEntryService::flagIsReturn);
-	else
-		goUpEntry = 0;
+	if ( !movemode )
+	{
+		if ( path.size() > 1 && style != styleCombiColumn )
+		{
+			goUpEntry = new eListBoxEntryService(services, eServiceReference(), eListBoxEntryService::flagIsReturn);
+		}
+		else
+			goUpEntry = 0;
+	}
 
 	eServiceInterface *iface=eServiceInterface::getInstance();
 	ASSERT(iface);
