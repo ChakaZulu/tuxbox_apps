@@ -62,8 +62,6 @@ struct enigmaMainActions
 
 eAutoInitP0<enigmaMainActions> i_enigmaMainActions(5, "enigma main actions");
 
-// #define NEUTRINO_STYLED_NAVIGATION
-
 /*
 
 schoene kleine demonstration von enigma:
