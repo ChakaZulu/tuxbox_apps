@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.50 2003/09/19 20:11:41 alexw Exp $
+  $Id: movieplayer.cpp,v 1.51 2003/09/23 08:38:44 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -911,6 +911,38 @@ PlayFileThread (void *filename)
 	pthread_exit (NULL);
 }
 
+
+void updateLcd(const std::string & sel_filename)
+{
+	char tmp[20];
+	std::string lcd;
+	
+	switch(playstate)
+	{
+	case CMoviePlayerGui::PAUSE:
+		lcd = "|| (";
+		lcd += sel_filename;
+		lcd += ')';
+		break;
+	case CMoviePlayerGui::REW:
+		sprintf(tmp, "%dx<< ", speed);
+		lcd = tmp;
+		lcd += sel_filename;
+		break;
+	case CMoviePlayerGui::FF:
+		sprintf(tmp, "%dx>> ", speed);
+		lcd = tmp;
+		lcd += sel_filename;
+		break;
+	default:
+		lcd = "> ";
+		lcd += sel_filename;
+		break;
+	}
+	
+	CLCD::getInstance()->showServicename(lcd);
+}
+
 //------------------------------------------------------------------------
 void
 CMoviePlayerGui::PlayStream (int streamtype)
@@ -975,17 +1007,14 @@ CMoviePlayerGui::PlayStream (int streamtype)
 			if (filebrowser->exec (startDir))
 			{
 				Path = filebrowser->getCurrentDir ();
-				if ((filename =
-				     filebrowser->getSelectedFile ()->Name.c_str ()) != NULL)
+				CFile * file;
+				if ((file = filebrowser->getSelectedFile()) != NULL)
 				{
-					sel_filename =
-						filebrowser->getSelectedFile ()->getFileName ();
+					filename = file->Name.c_str();
+					sel_filename = file->getFileName();
 					//printf ("[movieplayer.cpp] sel_filename: %s\n", filename);
-					int namepos =
-						filebrowser->getSelectedFile ()->Name.rfind ("vlc://");
-					std::string mrl_str =
-						filebrowser->getSelectedFile ()->Name.substr (namepos +
-											      6);
+					int namepos = file->Name.rfind("vlc://");
+					std::string mrl_str = file->Name.substr(namepos + 6);
 					char *tmp = curl_escape (mrl_str.c_str (), 0);
 					strncpy (mrl, tmp, sizeof (mrl) - 1);
 					curl_free (tmp);
@@ -1007,27 +1036,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		if (update_info)
 		{
 			update_info = false;
-			char tmp[20];
-			std::string lcd;
-			switch (playstate)
-			{
-			case CMoviePlayerGui::PAUSE:
-				lcd = "|| (" + sel_filename + ')';
-				break;
-			case CMoviePlayerGui::REW:
-				sprintf (tmp, "%dx<< ", speed);
-				lcd = tmp + sel_filename;
-				break;
-			case CMoviePlayerGui::FF:
-				sprintf (tmp, "%dx>> ", speed);
-				lcd = tmp + sel_filename;
-				break;
-			default:
-				lcd = "> " + sel_filename;
-				break;
-			}
-
-			CLCD::getInstance ()->showServicename (lcd);
+			updateLcd(sel_filename);
 		}
 
 		if (start_play)
@@ -1059,17 +1068,8 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		}
 		else if (msg == CRCInput::RC_yellow)
 		{
-			if (playstate != CMoviePlayerGui::PAUSE)
-			{
-				update_info = true;
-				playstate = CMoviePlayerGui::PAUSE;
-			}
-			else
-			{
-				// resume play
-				update_info = true;
-				playstate = CMoviePlayerGui::SOFTRESET;
-			}
+			update_info = true;
+			playstate = (playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::SOFTRESET : CMoviePlayerGui::PAUSE;
 		}
 		else
 			if (msg == NeutrinoMessages::RECORD_START
@@ -1124,17 +1124,16 @@ CMoviePlayerGui::PlayFile (void)
 		{
 			open_filebrowser = false;
 			filename = NULL;
-			if (filebrowser->exec (g_settings.network_nfs_moviedir))
+			if (filebrowser->exec(g_settings.network_nfs_moviedir))
 			{
-				Path = filebrowser->getCurrentDir ();
-				if ((filename =
-				     filebrowser->getSelectedFile ()->Name.c_str ()) != NULL)
-#warning FIXME: what is the use of the above (c_str() will always be != NULL or am I mistaken)
+				Path = filebrowser->getCurrentDir();
+				CFile * file;
+				if ((file = filebrowser->getSelectedFile()) != NULL)
 				{
+					filename = file->Name.c_str();
 					update_lcd = true;
 					start_play = true;
-					sel_filename =
-						filebrowser->getSelectedFile ()->getFileName ();
+					sel_filename = filebrowser->getSelectedFile()->getFileName();
 				}
 			}
 			else
@@ -1149,27 +1148,7 @@ CMoviePlayerGui::PlayFile (void)
 		if (update_lcd)
 		{
 			update_lcd = false;
-			char tmp[20];
-			std::string lcd;
-			switch (playstate)
-			{
-			case CMoviePlayerGui::PAUSE:
-				lcd = "|| (" + sel_filename + ')';
-				break;
-			case CMoviePlayerGui::REW:
-				sprintf (tmp, "%dx<< ", speed);
-				lcd = tmp + sel_filename;
-				break;
-			case CMoviePlayerGui::FF:
-				sprintf (tmp, "%dx>> ", speed);
-				lcd = tmp + sel_filename;
-				break;
-			default:
-				lcd = "> " + sel_filename;
-				break;
-			}
-
-			CLCD::getInstance ()->showServicename (lcd);
+			updateLcd(sel_filename);
 		}
 
 		if (start_play)
@@ -1197,17 +1176,8 @@ CMoviePlayerGui::PlayFile (void)
 		}
 		else if (msg == CRCInput::RC_yellow)
 		{
-			if (playstate != CMoviePlayerGui::PAUSE)
-			{
-				update_lcd = true;
-				playstate = CMoviePlayerGui::PAUSE;
-			}
-			else
-			{
-				// resume play
-				update_lcd = true;
-				playstate = CMoviePlayerGui::SOFTRESET;
-			}
+			update_lcd = true;
+			playstate = (playstate == CMoviePlayerGui::PAUSE) ? CMoviePlayerGui::SOFTRESET : CMoviePlayerGui::PAUSE;
 		}
 		else if (msg == CRCInput::RC_blue)
 		{
@@ -1416,12 +1386,9 @@ CMoviePlayerGui::hide ()
 void
 CMoviePlayerGui::paintHead ()
 {
-//      printf("[movieplayer.cpp] paintHead{\n");
-	std::string strCaption = g_Locale->getText ("movieplayer.head");
-	frameBuffer->paintBoxRel (x, y + title_height, width, theight,
-				  COL_MENUHEAD);
+	frameBuffer->paintBoxRel (x, y + title_height, width, theight, COL_MENUHEAD);
 	frameBuffer->paintIcon ("movie.raw", x + 7, y + title_height + 10);
-	g_Fonts->menu_title->RenderString (x + 35, y + theight + title_height + 0, width - 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
+	g_Fonts->menu_title->RenderString (x + 35, y + theight + title_height + 0, width - 45, g_Locale->getText("movieplayer.head"), COL_MENUHEAD, 0, true); // UTF-8
 	int ypos = y + title_height;
 	if (theight > 26)
 		ypos = (theight - 26) / 2 + y + title_height;
@@ -1492,15 +1459,17 @@ CMoviePlayerGui::paintFoot ()
 
 /*  frameBuffer->paintIcon (NEUTRINO_ICON_BUTTON_RED, x + 0 * ButtonWidth + 10,
     y + (height - info_height - 2 * buttonHeight) + 4);
-    g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText ("movieplayer.bookmark"), COL_INFOBAR, 0, true);	// UTF-8
+    g_Fonts->infobar_small->RenderString (x + 0 * ButtonWidth + 30, y + (height - info_height - 2 * buttonHeight) + 24 - 1, ButtonWidth - 20, g_Locale->getText("movieplayer.bookmark"), COL_INFOBAR, 0, true);	// UTF-8
 */
 }
 
 void
 CMoviePlayerGui::paint ()
 {
-	CLCD::getInstance ()->setMode (CLCD::MODE_TVRADIO);
-	CLCD::getInstance ()->showServicename ("Movieplayer");
+	CLCD * lcd = CLCD::getInstance();
+	lcd->setMode(CLCD::MODE_TVRADIO);
+	lcd->showServicename("Movieplayer");
+
 	frameBuffer->loadPal ("radiomode.pal", 18, COL_MAXFREE);
 	frameBuffer->loadBackground ("radiomode.raw");
 	frameBuffer->useBackground (true);
