@@ -37,6 +37,11 @@ public:
 	{
 	}
 
+	eZapMessage::eZapMessage(int type)
+		: type(type)
+	{
+	}
+
 	const eString & getCaption() { return caption; }
 	const eString & getBody() { return body; }
 	void setTimeout(int _timeout)
@@ -50,6 +55,10 @@ public:
 	bool isSameType(const eZapMessage &msg) const
 	{
 		return type == msg.type;
+	}
+	bool isEmpty() const
+	{
+		return ! (caption.length() || body.length());
 	}
 };
 
@@ -201,7 +210,8 @@ class eZapMain: public eWidget
 	void showEPG();
 	void showInfobar();
 	void hideInfobar();
-	
+
+	static eZapMain *instance;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -226,6 +236,7 @@ public:
 	void stopMessages();
 	void pauseMessages();
 	void nextMessage();
+	static eZapMain *getInstance() { return instance; }
 
 	eZapMain();
 	~eZapMain();

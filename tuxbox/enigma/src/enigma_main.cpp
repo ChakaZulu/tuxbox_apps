@@ -429,6 +429,8 @@ eServiceNumberWidget::~eServiceNumberWidget()
 {
 }
 
+eZapMain *eZapMain::instance;
+
 void eZapMain::redrawWidget(gPainter *painter, const eRect &where)
 {
 }
@@ -439,6 +441,8 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 
 eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), message_notifier(eApp), timeout(eApp), clocktimer(eApp), messagetimeout(eApp)
 {
+	if (!instance)
+		instance=this;
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "ezap_main"))
@@ -504,6 +508,7 @@ eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), message_notifier(eApp), timeout(eA
 	CONNECT(eServiceInterface::getInstance()->serviceEvent, eZapMain::handleServiceEvent);
 
 	CONNECT(timeout.timeout, eZapMain::timeOut);
+
 	CONNECT(clocktimer.timeout, eZapMain::clockUpdate);
 	CONNECT(messagetimeout.timeout, eZapMain::nextMessage);
 
@@ -526,6 +531,8 @@ eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), message_notifier(eApp), timeout(eA
 
 eZapMain::~eZapMain()
 {
+	if (instance == this)
+		instance = 0;
 	eZapLCD *pLCD=eZapLCD::getInstance();
 	pLCD->lcdMain->hide();
 	pLCD->lcdShutdown->show();
@@ -1173,6 +1180,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 	{
 	case 0:
 		Description->setText(_(""));
+		postMessage(eZapMessage(0), 1);
 		break;
 	case -EAGAIN:
 		Description->setText(_("Einen Moment bitte..."));
@@ -1430,7 +1438,8 @@ void eZapMain::postMessage(const eZapMessage &message, int clear)
 			} else
 				++i;
 	}
-	messages.push_back(message);
+	if (!message.isEmpty())
+		messages.push_back(message);
 	message_notifier.send(c);
 }
 
@@ -1475,14 +1484,14 @@ void eZapMain::nextMessage()
 			hide();
 		pMsg = new eMessageBox(msg.getBody(), msg.getCaption(), showonly);
 		pMsg->show();
-		if (showonly)
+		if (!showonly)
 		{
 			pMsg->exec();
 			pMsg->hide();
 			delete pMsg;
 			pMsg=0;
 		} else if (msg.getTimeout())
-			messagetimeout.start(msg.getTimeout());
+			messagetimeout.start(msg.getTimeout()*1000);
 	} else
 		messagelock.unlock();
 }

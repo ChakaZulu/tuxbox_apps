@@ -458,7 +458,7 @@ int eHTTPConnection::processRemoteState()
 #if 1
 			eDebug("remote stateDone");
 #endif
-			remotestate=stateRequest;
+			remotestate=stateClose;
 			break;
 		case stateClose:
 #if 1

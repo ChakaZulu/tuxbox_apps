@@ -16,6 +16,7 @@
 
 #include <config.h>
 #include <apps/enigma/enigma.h>
+#include <apps/enigma/enigma_main.h>
 #include <core/system/http_dyn.h>
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
@@ -979,16 +980,37 @@ static eString neutrino_suck_zapto(eString request, eString path, eString opt, e
 
 static eString message(eString request, eString path, eString opt, eHTTPConnection *content)
 {
-	if(eZap::getInstance()->focus==0)
+	if (opt.length())
 	{
 		opt.strReplace("%20", " ");
-		eMessageBox msg(opt, "message");
-		msg.show();
-		msg.exec();
-		msg.hide();
-		return(eString("ok\n"));
-	}	
-	return eString("error\n");
+		eZapMain::getInstance()->postMessage(eZapMessage(1, "external message", opt, 10), 0);
+		return eString("ok\n");
+	} else
+		return eString("error\n");
+}
+
+static eString xmessage(eString request, eString path, eString opt, eHTTPConnection *content)
+{
+	std::map<eString,eString> opts=getRequestOptions(opt);
+	
+	if (opts.find("timeout") == opts.end())
+		return "E: no timeout set";
+	
+	if (opts.find("caption") == opts.end())
+		return "E: no caption set";
+
+	if (opts.find("body") == opts.end())
+		return "E: no body set";
+
+	int type=-1;
+	if (opts.find("type") != opts.end())
+		type=atoi(opts["type"].c_str());
+	
+	int timeout=atoi(opts["timeout"].c_str());
+	
+	eZapMain::getInstance()->postMessage(eZapMessage(1, opts["caption"], opts["body"], timeout), type != -1);
+
+	return eString("OK\n");
 }
 
 /*
@@ -1026,6 +1048,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/audio", audio);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getPMT", getPMT);
 	dyn_resolver->addDyn("GET", "/cgi-bin/message", message);
+	dyn_resolver->addDyn("GET", "/cgi-bin/xmessage", xmessage);
 
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
