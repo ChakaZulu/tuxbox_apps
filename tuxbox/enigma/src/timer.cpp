@@ -888,7 +888,11 @@ void eTimerManager::actionHandler()
 						i*=2; // force.. look in eZapMain::handleStandby
 
 					writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
-					eZapMain::getInstance()->handleStandby(i);
+					if ( prevEvent != timerlist->getConstList().end() 
+						&& prevEvent->type & ePlaylistEntry::stateFinished )
+					{
+						eZapMain::getInstance()->handleStandby(i);
+					}
 				}
 			}
 			writeToLogfile(eString().sprintf("<-- actionHandler() calldepth=%d setNextEvent", calldepth--));
