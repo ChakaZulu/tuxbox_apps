@@ -5,10 +5,10 @@
 	<table border=0 cellpadding=0 cellspacing=0>
 		<tr>
 			<td>
-				<select style="width: 200px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=#SELSIZE#></select>
+				<select style="width: 200px; font-weight: bold; background-color: #F4F4F4" onChange=bouquetChange() name="bouquet" size=#SELSIZE#></select>
 			</td>
 			<td>
-				<select style="width: 430px; font-weight: bold;" onChange=channelChange() name="channel" size=#SELSIZE#></select>
+				<select style="width: 430px; font-weight: bold; background-color: #F4F4F4" onChange=channelChange() name="channel" size=#SELSIZE#></select>
 			</td>
 		</tr>
 	</table>
