@@ -1,17 +1,14 @@
 #ifndef __echeckbox_h
 #define __echeckbox_h
 
-#include "ebutton.h"
+#include <core/gui/ebutton.h>
 
 class eCheckbox: public eButton
 {
-//	Q_OBJECT
 protected:
 	int ischecked;
-private: // slots:
+private:
 	void sel();
-/*signals:
-	void checked(int);*/
 	Signal1<void, int> checked;
 	int eventFilter(const eWidgetEvent &event);
 public:

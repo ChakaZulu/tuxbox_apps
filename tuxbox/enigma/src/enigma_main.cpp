@@ -1,29 +1,31 @@
 #include <time.h>
 #include <errno.h>
-#include "enigma_main.h"
-#include "elistbox.h"
 #include "iso639.h"
-#include "edvb.h"
-#include "enigma_mainmenu.h"
-#include "elabel.h"
-#include "eprogress.h"
-#include "enigma_event.h"
-#include "sselect.h"
-#include "enumber.h"
-#include "eskin.h"
-#include "streamwd.h"
-#include "font.h"
-#include "rc.h"
+
 #include "enigma.h"
-#include "enigma_lcd.h"
-#include "decoder.h"
+#include "enigma_main.h"
+#include "enigma_mainmenu.h"
+#include "enigma_event.h"
 #include "enigma_plugins.h"
+#include "enigma_lcd.h"
 #include "download.h"
-#include "epgcache.h"
+#include "sselect.h"
 #include "epgwindow.h"
 
-#include "ebutton.h"
-#include "esection.h"
+#include <core/dvb/edvb.h>
+#include <core/dvb/epgcache.h>
+#include <core/dvb/esection.h>
+#include <core/dvb/decoder.h>
+#include <core/gdi/font.h>
+#include <core/gui/elabel.h>
+#include <core/gui/eprogress.h>
+#include <core/gui/enumber.h>
+#include <core/gui/eskin.h>
+#include <core/gui/elistbox.h>
+#include <core/gui/ebutton.h>
+#include <core/driver/rc.h>
+#include <core/driver/streamwd.h>
+
 
 /*
 
@@ -750,6 +752,7 @@ void eZapMain::keyUp(int code)
 	{
 		if (isVisible())
 			hide();
+
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();

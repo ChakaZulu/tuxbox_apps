@@ -9,7 +9,7 @@
 class eString : public std::string
 {
 public:
-// Constructors
+// constructors
 	inline eString()	{}	
 	inline eString(const char* p);
 	inline eString(const std::string &s);
@@ -37,7 +37,7 @@ inline eString::eString(const std::string &s)
 }
 
 inline eString::eString(const char* p)
-	:std::string(p)
+	:std::string(p?p:"")	 // when the char* p is null, than use ""... otherwise crash...
 {
 }
 
@@ -90,8 +90,8 @@ inline eString eString::right(unsigned int len) const
 
 inline bool eString::isNull() const
 {
-//	Returns a bool, that contains true, when the internal char* is null
-	return c_str();
+//	Returns a bool, that contains true, when the internal char* is null (only when a string ist empty constructed)
+	return !c_str();
 }
 
 #endif // __E_STRING__

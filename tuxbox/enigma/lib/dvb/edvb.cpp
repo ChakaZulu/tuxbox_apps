@@ -27,7 +27,7 @@
 
 eDVB *eDVB::instance;
 
-std::string eDVB::getVersion()
+eString eDVB::getVersion()
 {
 	return "eDVB core 1.0, compiled " __DATE__;
 }
@@ -52,7 +52,7 @@ void eDVB::removeDVBBouquets()
 void eDVB::addDVBBouquet(BAT *bat)
 {
 	printf("wir haben da eine bat, id %x\n", bat->bouquet_id);
-	std::string bouquet_name="Weiteres Bouquet";
+	eString bouquet_name="Weiteres Bouquet";
 	for (ePtrList<Descriptor>::iterator i(bat->bouquet_descriptors); i != bat->bouquet_descriptors.end(); ++i)
 	{
 		if (i->Tag()==DESCR_BOUQUET_NAME)
@@ -78,7 +78,7 @@ eBouquet *eDVB::getBouquet(int bouquet_id)
 	return 0;
 }
 
-static std::string beautifyBouquetName(std::string bouquet_name)
+static eString beautifyBouquetName(eString bouquet_name)
 {
 	if (bouquet_name.find("ARD")!=-1)
 		bouquet_name="ARD";		
@@ -95,7 +95,7 @@ static std::string beautifyBouquetName(std::string bouquet_name)
 	return bouquet_name;
 }
 
-eBouquet *eDVB::getBouquet(std::string bouquet_name)
+eBouquet *eDVB::getBouquet(eString bouquet_name)
 {
 	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
 		if (!stricmp(i->bouquet_name.c_str(), bouquet_name.c_str()))
@@ -103,7 +103,7 @@ eBouquet *eDVB::getBouquet(std::string bouquet_name)
 	return 0;
 }
 
-eBouquet* eDVB::createBouquet(const eBouquet *parent, int bouquet_id, std::string bouquet_name)
+eBouquet* eDVB::createBouquet(const eBouquet *parent, int bouquet_id, eString bouquet_name)
 {
 	eBouquet *n=getBouquet(bouquet_id);
 	if (!n)
@@ -111,7 +111,7 @@ eBouquet* eDVB::createBouquet(const eBouquet *parent, int bouquet_id, std::strin
 	return n;
 }
 
-eBouquet *eDVB::createBouquet(const eBouquet *parent, std::string bouquet_name)
+eBouquet *eDVB::createBouquet(const eBouquet *parent, eString bouquet_name)
 {
 	eBouquet *n=getBouquet(bouquet_name);
 	if (!n)
@@ -884,7 +884,7 @@ eDVB::eDVB()
 	if (instance)
 		qFatal("eDVB already initialized!");
 	instance=this;
-	std::string frontend=getInfo("fe");
+	eString frontend=getInfo("fe");
 	int fe;
 	if (!frontend.length())
 	{
@@ -934,7 +934,7 @@ eDVB::eDVB()
 	tdt=0;
 
 	int type=0;
-	std::string mid=getInfo("mID");
+	eString mid=getInfo("mID");
 	if (mid.length())
 		type=atoi(mid.c_str());
 	
@@ -1012,12 +1012,12 @@ void eDVB::setTransponders(eTransponderList *tlist)
 	/*emit*/ serviceListChanged();
 }
 
-std::string eDVB::getInfo(const char *info)
+eString eDVB::getInfo(const char *info)
 {
 	FILE *f=fopen("/proc/bus/dbox", "rt");
 	if (!f)
 		return "";
-	std::string result;
+	eString result;
 	while (1)
 	{
 		char buffer[128];
@@ -1028,7 +1028,7 @@ std::string eDVB::getInfo(const char *info)
 		if ((!strncmp(buffer, info, strlen(info)) && (buffer[strlen(info)]=='=')))
 		{
 			int i = strlen(info)+1;
-			result = std::string(buffer).substr(i, strlen(buffer)-i);
+			result = eString(buffer).substr(i, strlen(buffer)-i);
 			break;
 		}
 	}	
@@ -1100,7 +1100,7 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 	}
 	void operator()(eService &service)
 	{
-		std::string add;
+		eString add;
 		switch (service.service_type)
 		{
 			case 1:

@@ -1,13 +1,13 @@
 #include "echeckbox.h"
-#include "font.h"
-#include "init.h"
-#include "eskin.h"
+
+#include <core/gdi/font.h>
+#include <core/system/init.h>
+#include <core/gui/eskin.h>
 
 eCheckbox::eCheckbox(eWidget *parent, int checked=0, int Size, eLabel* descr):
 	eButton(parent, descr)
 {
 	setCheck(checked);
-//	connect(this, SIGNAL(selected()), SLOT(sel()));
 	CONNECT(selected, eCheckbox::sel);
 }
 

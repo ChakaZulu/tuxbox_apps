@@ -65,7 +65,7 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eventview"))
 		eFatal("skin load of \"eventview\" failed");
-	eDebug("Hier sind wir noch ?");
+
 	ASSIGN(long_description, eLabel, "epg_description");
 	long_description->setFlags(RS_WRAP);
 	ASSIGN(title, eLabel, "title");

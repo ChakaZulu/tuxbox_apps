@@ -1,8 +1,8 @@
 #ifndef __enigma_plugins_h
 #define __enigma_plugins_h
 
-#include "ewidget.h"
-#include "elbwindow.h"
+#include <core/gui/ewidget.h>
+#include <core/gui/elbwindow.h>
 
 class eListboxEntry;
 

@@ -1,25 +1,29 @@
-#include <dlfcn.h>
-#include <dirent.h>
 #include "enigma_plugins.h"
-#include "rc.h"
-#include "elistbox.h"
-#include "ewindow.h"
-#include "edvb.h"
-#include "enigma.h"
-#include "emessage.h"
+
 #include "config.h"
-#include "eskin.h"
-#include "lcd.h"
 #include <plugin.h>
 #include <dbox/avia_gt_vbi.h>
+
+#include <dlfcn.h>
+#include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include "decoder.h"
-#include <eerror.h>
+
+#include "enigma.h"
+
+#include <core/base/eerror.h>
+#include <core/gdi/lcd.h>
+#include <core/driver/rc.h>
+#include <core/dvb/edvb.h>
+#include <core/dvb/decoder.h>
+#include <core/gui/elistbox.h>
+#include <core/gui/ewindow.h>
+#include <core/gui/emessage.h>
+#include <core/gui/eskin.h>
 
 eString getInfo(const char *file, const char *info)
 {
@@ -27,7 +31,7 @@ eString getInfo(const char *file, const char *info)
 	if (!f)
 		return 0;
 
-	eString result(0);
+	eString result;
 
 	char buffer[128];
 
@@ -76,26 +80,29 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 		isback=1;
 		return;
 	}
+	isback=0;
 
 	eDebug(cfgfile);
 	name=getInfo(cfgfile, "name");
-	if (!name)
+
+	if (name.isNull())
 		name="(" + eString(cfgfile) + " is invalid)";
 		
 	desc=getInfo(cfgfile, "desc");
-	if (!desc)
+
+	if (desc.isNull())
 		desc="";
 
 	depend=getInfo(cfgfile, "depend");
 
 	eString atype=getInfo(cfgfile, "type"),
-			apluginVersion=getInfo(cfgfile, "pluginversion"),
-			aneedfb=getInfo(cfgfile, "needfb"),
-			aneedrc=getInfo(cfgfile, "needrc"),
-			aneedlcd=getInfo(cfgfile, "needlcd"),
-			aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
-			aneedoffsets=getInfo(cfgfile, "needoffsets"),
-			apigon=getInfo(cfgfile, "pigon");
+					apluginVersion=getInfo(cfgfile, "pluginversion"),
+					aneedfb=getInfo(cfgfile, "needfb"),
+					aneedrc=getInfo(cfgfile, "needrc"),
+					aneedlcd=getInfo(cfgfile, "needlcd"),
+					aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
+					aneedoffsets=getInfo(cfgfile, "needoffsets"),
+					apigon=getInfo(cfgfile, "pigon");
 
 	needfb=(aneedfb.isNull()?false:atoi(aneedfb));
 	needlcd=(aneedlcd.isNull()?false:atoi(aneedlcd));
@@ -105,9 +112,10 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	version=(apluginVersion.isNull()?0:atoi(apluginVersion));
 	showpig=(apigon.isNull()?false:atoi(apigon));
 
-	isback=0;
 	sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg
+
 	pluginname=eString(cfgfile).mid(eString(cfgfile).rfind('/')+1);
+
 	pluginname=pluginname.left(pluginname.length()-4);
 }
 
@@ -115,8 +123,10 @@ eString ePlugin::getText(int t) const
 {
 	if (t)
 		return 0;
+
 	if (isback)
 		return "[Zurück]";
+
 	return name + " - " + desc;
 }
 
@@ -127,7 +137,6 @@ eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 	window->setLCD(lcdTitle, lcdElement);
 	new ePlugin(window->list, 0);
 	CONNECT(window->list->selected, eZapPlugins::selected);
-//	connect(window->list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 }
 
 int eZapPlugins::exec()
@@ -147,26 +156,26 @@ int eZapPlugins::exec()
 		return -1;
 	}
 
-	int nPlugins = 0;
+/*	int nPlugins = 0;
 
 	for(int count=0; count<n; count++)
 	{       	
 		eString	FileName = namelist[count]->d_name;
-		if (FileName.find(".cfg"))
+		if ( FileName.find(".cfg") != -1 )
 			nPlugins++;
 	}
-
 	if (nPlugins > 1)
-	{
+	{*/
 		for(int count=0;count<n;count++)
 		{
 			eString	FileName = namelist[count]->d_name;
-			if (FileName.find(".cfg"))
+
+			if ( FileName.find(".cfg") != -1 )
 				new ePlugin(window->list, (PluginPath+FileName).c_str());		
 
 			free(namelist[count]);
 	  }
-	}
+//	}
 	free(namelist);
 
 	window->show();
@@ -250,8 +259,8 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		}
 	}
 
-/*	PluginParam *par = first;
-	for( ; par; par=par->next )
+/*	
+	for(PluginParam *par = first; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
 		printf("%d\n", par->next);
@@ -287,10 +296,10 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		}
 		else
 		{		
-			printf("exec Plugin now...\n");
+			eDebug("exec Plugin now...");
 			execPlugin(first);
 			dlclose(libhandle[i-1]);
-			printf("exec done...\n");
+			eDebug("exec done...");
 		}
 
 		while (i--)
@@ -338,8 +347,6 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 		return;
 	}
 
-//	window->hide();
-	
 	execPlugin(plugin);
 
 	window->hide();

@@ -144,11 +144,11 @@ struct eServiceReference
 class eBouquet
 {
 public:
-	inline eBouquet(const eBouquet *parent, int bouquet_id, std::string bouquet_name): parent(parent), bouquet_id(bouquet_id), bouquet_name(bouquet_name) { }
+	inline eBouquet(const eBouquet *parent, int bouquet_id, eString& bouquet_name): parent(parent), bouquet_id(bouquet_id), bouquet_name(bouquet_name) { }
 	void add(int transport_stream_id, int original_network_id, int service_id);
 	int remove(int transport_stream_id, int original_network_id, int service_id);
 	int bouquet_id;
-	std::string bouquet_name;
+	eString bouquet_name;
 	std::list<eServiceReference> list;
 	const eBouquet *parent;
 	bool operator == (const eBouquet &c) const

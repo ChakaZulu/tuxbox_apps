@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "nconfig.h"
 #include <list>
-#include <string>
+#include <estring.h>
 #include <eptrlist.h>
 
 #include <sigc++/signal_system.h>
@@ -59,9 +59,9 @@ protected:
 	void removeDVBBouquets();
 	void addDVBBouquet(BAT *bat);
 	eBouquet *getBouquet(int bouquet_id);
-	eBouquet *getBouquet(std::string bouquet_name);
-	eBouquet *createBouquet(const eBouquet *parent, int bouquet_id, std::string bouquet_name);
-	eBouquet *createBouquet(const eBouquet *parent, std::string bouquet_name);
+	eBouquet *getBouquet(eString bouquet_name);
+	eBouquet *createBouquet(const eBouquet *parent, int bouquet_id, eString bouquet_name);
+	eBouquet *createBouquet(const eBouquet *parent, eString bouquet_name);
 	int getUnusedBouquetID(int range);
 	
 	void revalidateBouquets();
@@ -197,7 +197,7 @@ public:
 	int switchService(int nservice_id, int noriginal_network_id, int ntransport_stream_id, int nservice_type); /** -> stateServiceSwitched */
 
 public:
-	std::string getVersion();
+	eString getVersion();
 	eDVB();
 	~eDVB();
 	eTransponderList *getTransponders();
@@ -208,7 +208,7 @@ public:
 	}
 	void setTransponders(eTransponderList *tlist);
 
-	std::string getInfo(const char *info);
+	eString getInfo(const char *info);
 	
 	void setPID(PMTEntry *entry);
 	void setDecoder();
