@@ -2772,10 +2772,12 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{
 				if( mode == mode_scart )
 				{
-					//wenn Aufnahme dann stoppen
+					//wenn VCR Aufnahme dann stoppen
 					if(CVCRControl::getInstance()->isDeviceRegistered())
 					{
-						if(CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE)
+						if( (CVCRControl::getInstance()->Device->deviceType == CVCRControl::DEVICE_VCR) &&
+							 (CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_RECORD || 
+							 CVCRControl::getInstance()->getDeviceState() == CVCRControl::CMD_VCR_PAUSE))
 						{
 							CVCRControl::getInstance()->Stop();
 							recordingstatus=0;
