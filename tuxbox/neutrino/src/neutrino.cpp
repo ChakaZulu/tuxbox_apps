@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.142 2002/01/29 23:45:29 Simplex Exp $
+        $Id: neutrino.cpp,v 1.143 2002/01/30 10:16:59 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.143  2002/01/30 10:16:59  McClean
+  move bouquet-edit to service
+
   Revision 1.142  2002/01/29 23:45:29  Simplex
   first lines for bouquet editor
 
@@ -1214,9 +1217,6 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", true, "", this, "radio") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
-#ifdef USEBOUQUETEDDI
-	mainMenu.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
-#endif
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	streamstatus = 0;
@@ -1256,6 +1256,9 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	CMenuWidget* TSScan = new CMenuWidget("servicemenu.scants", "mainmenue.raw");
 	TSScan->addItem( new CMenuForwarder("menu.back") );
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	#ifdef USEBOUQUETEDDI
+		service.addItem( new CMenuForwarder("bouqueteditor.name", true, "", new CBEBouquetWidget()));
+	#endif
 	CMenuOptionChooser* oj = new CMenuOptionChooser("scants.bouquet", &g_settings.scan_bouquet, true );
 	oj->addOption(256, "scants.bouquet_leave");
 	oj->addOption(512, "scants.bouquet_create");
@@ -2439,7 +2442,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.142 2002/01/29 23:45:29 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.143 2002/01/30 10:16:59 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
