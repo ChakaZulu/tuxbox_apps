@@ -54,10 +54,10 @@ void next_hex(int *i, int inc) /* skip to next */
 {
 	(*i) += inc;
 
-	if (*i > 0x899)
+	if (*i > 0x8FF)
 		*i = 0x100;
 	else if (*i < 0x100)
-		*i = 0x899;
+		*i = 0x8FF;
 }
 
 int getIndexOfPageInHotlist()
@@ -393,7 +393,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.65 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.66 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -4537,32 +4537,16 @@ void *CacheThread(void *arg)
 					}
 
 					b1 &= 7;
-
+					if (b1 == 0)
+						b1 = 8;
 					current_page[magazine] = page_receiving = b1<<8 | b2<<4 | b3;
 
-					if (current_page[magazine] < 0x100)
+					if (b2 > 9 || b3 > 9) /* hex page number: just copy page */
 					{
-						current_page[magazine] += 0x800;
-						page_receiving += 0x800;
-					}
-
-					if (b2 > 9 || b3 > 9)
-					{
-						current_subpage[magazine] = 0; /* copy page */
+						current_subpage[magazine] = 0;
+						subpagetable[current_page[magazine]] = 0;
 						allocate_cache(magazine); /* FIXME: only until TOP-Info decoded? */
 						continue;
-					}
-
-					/* check parity */
-					for (byte = 10; byte < 42; byte++)
-					{
-						if ((vtxt_row[byte]&1) ^ ((vtxt_row[byte]>>1)&1) ^
-						    ((vtxt_row[byte]>>2)&1) ^ ((vtxt_row[byte]>>3)&1) ^
-						    ((vtxt_row[byte]>>4)&1) ^ ((vtxt_row[byte]>>5)&1) ^
-						    ((vtxt_row[byte]>>6)&1) ^ (vtxt_row[byte]>>7))
-							vtxt_row[byte] &= 127;
-						else
-							vtxt_row[byte] = ' ';
 					}
 
 					/* get subpagenumber */
@@ -4609,6 +4593,18 @@ void *CacheThread(void *arg)
 
 					/* store current subpage for this page */
 					subpagetable[current_page[magazine]] = current_subpage[magazine];
+
+					/* check parity */
+					for (byte = 10; byte < 42; byte++)
+					{
+						if ((vtxt_row[byte]&1) ^ ((vtxt_row[byte]>>1)&1) ^
+						    ((vtxt_row[byte]>>2)&1) ^ ((vtxt_row[byte]>>3)&1) ^
+						    ((vtxt_row[byte]>>4)&1) ^ ((vtxt_row[byte]>>5)&1) ^
+						    ((vtxt_row[byte]>>6)&1) ^ (vtxt_row[byte]>>7))
+							vtxt_row[byte] &= 127;
+						else
+							vtxt_row[byte] = ' ';
+					}
 
 					/* copy timestring */
 					memcpy(&timestring, &vtxt_row[34], 8);
