@@ -162,7 +162,7 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 			if ( np )
 				*np=0;
 			argv[ argc++ ] = (*p == '/') ?
-				QString(p) : "/lib/"+QString(p);
+				QString(p) : PLUGINDIR "/" + QString(p);
 			p=np?np+1:0;
 		}
 	}
@@ -179,8 +179,9 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 		libhandle[i]=dlopen(argv[i], RTLD_NOW|RTLD_GLOBAL);
 		if (!libhandle[i])
 		{
-			qDebug(dlerror());
-			eMessageBox msg(dlerror(), "plugin loading failed");
+			const char *de=dlerror();
+			qDebug(de);
+			eMessageBox msg(de, "plugin loading failed");
 			msg.show();
 			msg.exec();
 			msg.hide();
