@@ -608,6 +608,8 @@ void CFlashUpdate::paint()
 
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
 
+	neutrino->exec(NULL, "savesettings");
+
 	sleep(2);
 
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
