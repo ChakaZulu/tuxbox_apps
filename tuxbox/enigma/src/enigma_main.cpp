@@ -296,16 +296,30 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	ASSIGN(Description, eLabel, "description");
 	ASSIGN(VolumeBar, eProgress, "volume_bar");
 	ASSIGN(Progress, eProgress, "progress_bar");
+	
+	ASSIGN(ButtonRed, eLabel, "button_red");
+	ASSIGN(ButtonGreen, eLabel, "button_green");
+	ASSIGN(ButtonYellow, eLabel, "button_yellow");
+	ASSIGN(ButtonBlue, eLabel, "button_blue");
+	
+	ButtonRed->setFlags(RS_DIRECT);
+	ButtonRed->setText("\x19");
+	ButtonGreen->setFlags(RS_DIRECT);
+	ButtonGreen->setText("\x19");
+	ButtonYellow->setFlags(RS_DIRECT);
+	ButtonYellow->setText("\x19");
+	ButtonBlue->setFlags(RS_DIRECT);
+	ButtonBlue->setText("\x19");
+	
+	ButtonRed->hide();
+	ButtonGreen->hide();
+	ButtonYellow->hide();
+	ButtonBlue->hide();
 
 	Clock=new eLabel(this);
 	ASSIGN(Clock, eLabel, "time");
 
 	cur_start=cur_duration=-1;
-
-	ButtonRed=new eLabel(this);
-	ButtonGreen=new eLabel(this);
-	ButtonYellow=new eLabel(this);
-	ButtonBlue=new eLabel(this);
 
 	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(aspectRatioChanged(int)));
 	connect(this, SIGNAL(AC3detected(bool)), SLOT(isAC3(bool)));
@@ -442,9 +456,9 @@ void eZapMain::setEIT(EIT *eit)
 		flags|=ENIGMA_SUBSERVICES;
 	}
 	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
-		ButtonGreen->setText("\x19");
+		ButtonGreen->show();
 	else
-		ButtonGreen->setText("TestText");
+		ButtonGreen->hide();
 	QList<EITEvent> dummy;
 	if (actual_eventDisplay)
 		actual_eventDisplay->setList(eit?eit->events:dummy);
@@ -675,14 +689,14 @@ void eZapMain::serviceChanged(eService *service, int err)
 	ChannelNumber->setText(QString().sprintf("%d", service->service_number));
 	
 	if (flags&(ENIGMA_NVOD|ENIGMA_SUBSERVICES))
-		ButtonGreen->setText("\x19");	// ein runder knopf
+		ButtonGreen->show();
 	else
-		ButtonGreen->setText("");
+		ButtonGreen->hide();
 
 	if (flags&ENIGMA_AUDIO)
-		ButtonYellow->setText("\x19");	// ein runder knopf
+		ButtonYellow->show();
 	else
-		ButtonYellow->setText("");
+		ButtonYellow->hide();
 
 	if (!eZap::getInstance()->focus)
 		show();

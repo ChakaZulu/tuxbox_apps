@@ -29,6 +29,11 @@
 		<color name="osd_shadow" color="#030320" end="#B1B2D9" size="16" />
 		<color name="osd_timebar" color="#1010AA"/>
 		<color name="osd_timebarborder" color="#ffffff"/>
+		
+		<color name="shadow_red" color="#030320" end="#ff0303" size="16" />
+		<color name="shadow_green" color="#030320" end="#03ff03" size="16" />
+		<color name="shadow_yellow" color="#030320" end="#ffff03" size="16" />
+		<color name="shadow_blue" color="#030320" end="#0303ff" size="16" />
 
 	</colors>
 	
@@ -157,6 +162,11 @@
 
 			<eLabel name="description" />
 			
+			<eLabel name="button_red" position="230:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_red" />
+			<eLabel name="button_green" position="260:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_green"  />
+			<eLabel name="button_yellow" position="290:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_yellow"  />
+			<eLabel name="button_blue" position="320:21" size="24:24" font="Marlett Regular;24" backgroundColor="shadow_blue"  />
+	
 		</eZapMain>
 	</object>
 </eskin>
