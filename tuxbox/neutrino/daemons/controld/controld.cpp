@@ -139,19 +139,67 @@ void shutdownBox()
     }
 }
 
-
-void setVideoRGB()
+void setVideoType(int format)
 {
-	if(fork()==0)
+	int fd;
+	/*
+		RGB : fblk 1
+	*/
+	if (format < 0)
 	{
-		if (execlp("/bin/switch", "/bin/switch", "-fnc", "2", "-fblk", "1", 0)<0)
-		{
-			perror("exec failed - /bin/switch\n");
-		}
+		format=0;
 	}
+	if (format > 3)
+	{
+		format=3;
+	}
+
+	settings.videotype = format;
+	
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSFBLK,&format)< 0)
+	{
+		perror("AVSIOSFBLK:");
+		return;
+	}
+	close(fd);
 }
 
+void setVideoFormat(int format)
+{
+	int fd;
+	/*
+		16:9 : fnc 1
+		4:3  : fnc 2 
+	*/
+	if (format < 0)
+	{
+		format=0;
+	}
+	if (format > 3)
+	{
+		format=3;
+	}
+	settings.videoformat = format;
 
+	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if (ioctl(fd,AVSIOSFNC,&format)< 0)
+	{
+		perror("AVSIOSFNC:");
+		return;
+	}
+	close(fd);
+}
 
 void setVolume(char volume)
 {
@@ -237,45 +285,61 @@ void parse_command(int connfd)
   rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
  
  
-  printf("Command received\n");
-  printf("  Version: %d\n", rmsg.version);
-  printf("  Command: %d\n", rmsg.cmd);
-  printf("  Param: %d\n", rmsg.param);
-  printf("  Param2: %d\n", rmsg.param2);
-  printf("  Param3: %s\n", rmsg.param3);
+  printf("[controld] Command received\n");
+  printf("[controld]   Version: %d\n", rmsg.version);
+  printf("[controld]   Command: %d\n", rmsg.cmd);
+  printf("[controld]   Param: %d\n", rmsg.param);
+  printf("[controld]   Param2: %d\n", rmsg.param2);
+  printf("[controld]   Param3: %s\n", rmsg.param3);
  
  
   if(rmsg.version!=1)
   {
-    perror("unknown version\n");
+    perror("[controld] unknown version\n");
     return;
   }
  
   switch (rmsg.cmd)
   {
     case 1:
-      printf("shutdown\n");
+      printf("[controld] shutdown\n");
       shutdownBox();
       break;
     case 2:
-      printf("set volume\n");
+      printf("[controld] set volume\n");
       setVolume(rmsg.param);
       break;
     case 3:
-      printf("mute\n");
+      printf("[controld] mute\n");
       Mute();
       break;
     case 4:
-      printf("unmute\n");
+      printf("[controld] unmute\n");
       UnMute();
       break;
+    case 5:
+      printf("[controld] set videoformat\n");
+      setVideoFormat(rmsg.param);
+      break;
+    case 6:
+      printf("[controld] set videotype\n");
+      setVideoType(rmsg.param);
+      break;
 	case 128:
-		printf("get volume\n");
+		printf("[controld] get volume\n");
 		write(connfd,&settings.volume,sizeof(settings.volume));
+		break;
+	case 129:
+		printf("[controld] get videoformat (fnc)\n");
+		write(connfd,&settings.volume,sizeof(settings.videoformat));
+		break;
+	case 130:
+		printf("[controld] get videotype (fblk)\n");
+		write(connfd,&settings.volume,sizeof(settings.videotype));
 		break;
 
     default:
-		printf("unknown command\n");
+		printf("[controld] unknown command\n");
   }
  
 }
@@ -329,13 +393,15 @@ int main(int argc, char **argv)
 	{
 		printf("[controld] useing defaults\n");
 		settings.volume = 100;
-		settings.videotype = 0;
-		settings.videoformat = 0;
+		settings.videotype = 1; // fblk1 - rgb
+		settings.videoformat = 2; // fnc2 - 4:3
 	}
 
 
 	//init 
 	setVolume(settings.volume);
+	setVideoType(settings.videotype);
+	setVideoFormat(settings.videoformat);
 	while(1)
 	{
 		clilen = sizeof(cliaddr);
