@@ -45,7 +45,7 @@
 int CFavorites::addChannelToFavorites()
 
 {
-	unsigned int bouquet_id;
+	signed int   bouquet_id;
 	t_channel_id channel_id;
 	char         *fav_bouquetname;
 	int          status = 0;
@@ -60,10 +60,10 @@ int CFavorites::addChannelToFavorites()
 	//
 	// -- check if Favorite Bouquet exists: if not, create it.
 	//
-	bouquet_id = g_Zapit->existsBouquet (fav_bouquetname);
-	if (!bouquet_id) {
-		g_Zapit->addBouquet (fav_bouquetname);
-	        bouquet_id = g_Zapit->existsBouquet (fav_bouquetname);
+	bouquet_id = g_Zapit->existsBouquet(fav_bouquetname);
+	if (bouquet_id == -1) {
+		g_Zapit->addBouquet(fav_bouquetname);
+	        bouquet_id = g_Zapit->existsBouquet(fav_bouquetname);
 		status |= 1;
 	}
 
@@ -71,7 +71,7 @@ int CFavorites::addChannelToFavorites()
 	channel_id = g_Zapit->getCurrentServiceID();
 
 	if ( ! g_Zapit->existsChannelInBouquet(bouquet_id, channel_id) ) {
-		g_Zapit->addChannelToBouquet(bouquet_id - 1, channel_id);
+		g_Zapit->addChannelToBouquet(bouquet_id, channel_id);
 		status |= 2;
 	}
 

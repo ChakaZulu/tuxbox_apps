@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.3 2002/10/03 19:05:12 thegoodguy Exp $
+	$Id: bouqueteditapi.cpp,v 1.4 2002/10/03 19:31:03 thegoodguy Exp $
 
 	License: GPL
 
@@ -99,7 +99,7 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 		}
 		else
 		{
-			if (Parent->Zapit->existsBouquet(request->ParameterList["name"]) == 0) {
+			if (Parent->Zapit->existsBouquet(request->ParameterList["name"]) == -1) {
 				Parent->Zapit->addBouquet(request->ParameterList["name"]);
 				request->Send302("/bouquetedit/main#akt");
 			} else {
@@ -244,7 +244,7 @@ bool CBouqueteditAPI::Execute(CWebserverRequest* request)
 			request->SocketWrite("<select multiple size=\"20\" name=\"achannels\">\n");
 			for(; allChannels != AllChannelList.end();allChannels++)
 			{
-				if (!Parent->Zapit->existsChannelInBouquet(selected, allChannels->channel_id)){
+				if (!Parent->Zapit->existsChannelInBouquet(selected - 1, allChannels->channel_id)){
 					sprintf(outbuff, "<option value=\"%i\">", allChannels->channel_id);
 					request->SocketWrite(outbuff);
 					request->SocketWrite(allChannels->name);

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.59 2002/10/03 19:05:12 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.60 2002/10/03 19:31:03 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -62,7 +62,7 @@ void CZapitClient::send(const unsigned char command, char* data = NULL, const un
 /***********************************************/
 
 /* zaps to channel of specified bouquet */
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::zapTo(const unsigned int bouquet, const unsigned int channel)
 {
 	CZapitMessages::commandZapto msg;
@@ -230,7 +230,7 @@ void CZapitClient::getPIDS( responseGetPIDs& pids )
 }
 
 /* gets all bouquets */
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::getBouquets(BouquetList& bouquets, bool emptyBouquetsToo)
 {
 	CZapitMessages::commandGetBouquets msg;
@@ -247,7 +247,7 @@ void CZapitClient::getBouquets(BouquetList& bouquets, bool emptyBouquetsToo)
 }
 
 /* gets all channels that are in specified bouquet */
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode)
 {
 	CZapitMessages::commandGetBouquetChannels msg;
@@ -445,7 +445,7 @@ void CZapitClient::addBouquet(std::string name)
 }
 
 /* moves a bouquet from one position to another */
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::moveBouquet(const unsigned int bouquet, const unsigned int newPos)
 {
 	CZapitMessages::commandMoveBouquet msg;
@@ -458,7 +458,7 @@ void CZapitClient::moveBouquet(const unsigned int bouquet, const unsigned int ne
 }
 
 /* deletes a bouquet with all its channels*/
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::deleteBouquet(const unsigned int bouquet)
 {
 	CZapitMessages::commandDeleteBouquet msg;
@@ -471,7 +471,7 @@ void CZapitClient::deleteBouquet(const unsigned int bouquet)
 }
 
 /* assigns new name to bouquet */
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::renameBouquet(const unsigned int bouquet, const std::string newName)
 {
 	CZapitMessages::commandRenameBouquet msg;
@@ -484,11 +484,10 @@ void CZapitClient::renameBouquet(const unsigned int bouquet, const std::string n
 	zapit_close();
 }
 
-//
-// -- check if Bouquet-Name exists (2002-04-02 rasc)
-// -- Return: Bouquet-ID  or  0 == no Bouquet found
-//
-unsigned int CZapitClient::existsBouquet(std::string name)
+// -- check if Bouquet-Name exists
+// -- Return: Bouquet-ID  or  -1 == no Bouquet found
+/* bouquets are numbered starting at 0 */
+signed int CZapitClient::existsBouquet(const std::string name)
 {
 	CZapitMessages::commandExistsBouquet msg;
 	CZapitMessages::responseGeneralInteger response;
@@ -499,20 +498,18 @@ unsigned int CZapitClient::existsBouquet(std::string name)
 
 	CBasicClient::receive_data((char* )&response, sizeof(response));
 	zapit_close();
-	return (unsigned int) response.number + 1;
+	return response.number;
 }
 
-
-//
-// -- check if Channel already is in Bouquet (2002-04-02 rasc)
+// -- check if Channel already is in Bouquet
 // -- Return: true/false
-//
+/* bouquets are numbered starting at 0 */
 bool CZapitClient::existsChannelInBouquet(const unsigned int bouquet, const t_channel_id channel_id)
 {
 	CZapitMessages::commandExistsChannelInBouquet msg;
 	CZapitMessages::responseGeneralTrueFalse response;
 
-	msg.bouquet    = bouquet - 1;
+	msg.bouquet    = bouquet;
 	msg.channel_id = channel_id;
 
 	send(CZapitMessages::CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET, (char*)&msg, sizeof(msg));
@@ -525,7 +522,7 @@ bool CZapitClient::existsChannelInBouquet(const unsigned int bouquet, const t_ch
 
 
 /* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode)
 {
 	CZapitMessages::commandMoveChannel msg;
@@ -543,7 +540,7 @@ void CZapitClient::moveChannel( unsigned int bouquet, unsigned int oldPos, unsig
 /* adds a channel at the end of then channel list to specified bouquet */
 /* same channels can be in more than one bouquet */
 /* bouquets can contain both tv and radio channels */
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_id)
 {
 	CZapitMessages::commandAddChannelToBouquet msg;
@@ -557,7 +554,7 @@ void CZapitClient::addChannelToBouquet(const unsigned int bouquet, const t_chann
 }
 
 /* removes a channel from specified bouquet */
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::removeChannelFromBouquet(const unsigned int bouquet, const t_channel_id channel_id)
 {
 	CZapitMessages::commandRemoveChannelFromBouquet msg;
@@ -571,7 +568,7 @@ void CZapitClient::removeChannelFromBouquet(const unsigned int bouquet, const t_
 }
 
 /* set a bouquet's lock-state*/
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::setBouquetLock(const unsigned int bouquet, const bool lock)
 {
 	CZapitMessages::commandBouquetState msg;
@@ -585,7 +582,7 @@ void CZapitClient::setBouquetLock(const unsigned int bouquet, const bool lock)
 }
 
 /* set a bouquet's hidden-state*/
-/* exception: bouquets are numbered starting at 0 in this routine! */
+/* bouquets are numbered starting at 0 */
 void CZapitClient::setBouquetHidden(const unsigned int bouquet, const bool hidden)
 {
 	CZapitMessages::commandBouquetState msg;

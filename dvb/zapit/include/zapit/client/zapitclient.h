@@ -189,7 +189,7 @@ class CZapitClient:public CBasicClient
 	/****************************************/
 
 	/* zaps to channel of specified bouquet */
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void zapTo(const unsigned int bouquet, const unsigned int channel);
 
 	/* zaps to channel  */
@@ -217,11 +217,11 @@ class CZapitClient:public CBasicClient
 	void setAudioChannel( unsigned channel );
 
 	/* gets all bouquets */
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void getBouquets( BouquetList& bouquets, bool emptyBouquetsToo = false);
 
 	/* gets all channels that are in specified bouquet */
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void getBouquetChannels(const unsigned int bouquet, BouquetChannelList& channels, channelsMode mode = MODE_CURRENT);
 
 	/* gets all channels */
@@ -294,46 +294,48 @@ class CZapitClient:public CBasicClient
 	void addBouquet(std::string name);
 
 	/* moves a bouquet from one position to another */
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void moveBouquet(const unsigned int bouquet, const unsigned int newPos);
 	/* deletes a bouquet with all its channels */
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void deleteBouquet(const unsigned int bouquet);
 
 	/* assigns new name to bouquet*/
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void renameBouquet(const unsigned int bouquet, std::string newName);
 
 	/* moves a channel of a bouquet from one position to another, channel lists begin at position=1*/
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void moveChannel(const unsigned int bouquet, unsigned int oldPos, unsigned int newPos, channelsMode mode = MODE_CURRENT);
 
 	// -- check if Bouquet-Name exists (2002-04-02 rasc)
-	// -- Return bq_id or 0
-	unsigned int  existsBouquet(std::string name);
+	// -- Return bq_id or -1
+	/* bouquets are numbered starting at 0 */
+	signed int existsBouquet(const std::string name);
 
 
 	// -- check if Channel already in Bouquet (2002-04-05 rasc)
 	// -- Return true/false
+	/* bouquets are numbered starting at 0 */
 	bool  existsChannelInBouquet(const unsigned int bouquet, const t_channel_id channel_id);
 
 
 	/* adds a channel at the end of then channel list to specified bouquet */
 	/* same channels can be in more than one bouquet */
 	/* bouquets can contain both tv and radio channels */
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void addChannelToBouquet(const unsigned int bouquet, const t_channel_id channel_id);
 
 	/* removes a channel from specified bouquet */
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void removeChannelFromBouquet(const unsigned int bouquet, const t_channel_id channel_id);
 
 	/* set a bouquet's lock-state*/
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void setBouquetLock(const unsigned int bouquet, const bool lock);
 
 	/* set a bouquet's hidden-state*/
-	/* exception: bouquets are numbered starting at 0 in this routine! */
+	/* bouquets are numbered starting at 0 */
 	void setBouquetHidden(const unsigned int bouquet, const bool hidden);
 
 	/* renums the channellist, means gives the channels new numbers */
