@@ -4,7 +4,7 @@ noinst_LTLIBRARIES = tetris.la
 
 tetris_la_SOURCES = board.c somain.c
 
-tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version @LIBCURL_LIBS@
+tetris_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 
 install-exec-local:
 	install -d $(PLUGINDIR)
