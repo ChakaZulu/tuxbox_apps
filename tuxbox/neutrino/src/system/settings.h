@@ -55,7 +55,7 @@ struct SNeutrinoSettings
 	//audio
 	int audio_AnalogMode;
 	int audio_DolbyDigital;
-	int audio_SPDIF_Control;
+	int audio_avs_ost_Control;
 
 	//vcr
 	int	vcr_AutoSwitch;
