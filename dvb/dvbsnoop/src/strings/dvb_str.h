@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.15 2004/01/01 20:09:40 rasc Exp $ 
+$Id: dvb_str.h,v 1.16 2004/02/02 23:34:11 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,12 @@ $Id: dvb_str.h,v 1.15 2004/01/01 20:09:40 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.16  2004/02/02 23:34:11  rasc
+- output indent changed to avoid \r  (which sucks on logged output)
+- EBU PES data started (teletext, vps, wss, ...)
+- bugfix: PES synch. data stream
+- some other stuff
+
 Revision 1.15  2004/01/01 20:09:40  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -121,6 +127,10 @@ char *dvbstrPESstream_ID(u_int id);
 char *dvbstrPESscrambling_ctrl_TYPE(u_int id);
 char *dvbstrPESTrickModeControl (u_int i);
 char *dvbstrPESDataIdentifier (u_int i);
+char *dvbstrPES_EBUDataUnitID (u_int i);
+
+char *dvbstrTELETEXT_framingcode (u_int i);
+char *dvbstrTELETEXT_packetnr (u_int i);
 
 
 

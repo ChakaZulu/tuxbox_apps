@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.21 2004/01/22 22:26:35 rasc Exp $
+$Id: pespacket.c,v 1.22 2004/02/02 23:34:08 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: pespacket.c,v 1.21 2004/01/22 22:26:35 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.22  2004/02/02 23:34:08  rasc
+- output indent changed to avoid \r  (which sucks on logged output)
+- EBU PES data started (teletext, vps, wss, ...)
+- bugfix: PES synch. data stream
+- some other stuff
+
 Revision 1.21  2004/01/22 22:26:35  rasc
 pes_pack_header
 section read timeout
@@ -98,7 +104,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "dvbsnoop.h"
 #include "pespacket.h"
 #include "pes_std.h"
-#include "pes_data.h"
 #include "pes_dsmcc.h"
 #include "pes_psm.h"
 #include "pes_psdir.h"
@@ -128,8 +133,6 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 
  PES_Packet   p;
- int          len2;
- int          n;
 
 
  p.packet_start_code_prefix		 = getBits (b, 0,  0, 24);
@@ -152,10 +155,8 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
  b   += 6;
  len -= 6;
- len2  = p.PES_packet_length;
 
 
- n = 0;
  switch (p.stream_id) {
 
 	// -- special ProgramStream (PS) - IDs
@@ -167,37 +168,50 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
 
 	case 0xBC:		// program_stream_map
-		PES_decodePSM (b, len2);
+		PES_decodePSM (b, p.PES_packet_length);
 		break;
+
+//	case 0xBD:		// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
+	// $$$ TODO  this is a wrong here ???
+//    		out_nl (3,"PES_data_packet:");
+//		indent (+1);
+//		PES_decodeDATA (b, p.PES_packet_length);
+//		indent (-1);
+//		break;
+
+	case 0xBE:		// padding stream!
+		print_databytes (3,"Padding_bytes:", b, p.PES_packet_length);
+		break;
+
+	case 0xF2:		// DSMCC stream
+		PES_decodeDSMCC (b, p.PES_packet_length);
+		break;
+
+	case 0xFF:		// program_stream_directory
+		PES_decodePSDIR (b, p.PES_packet_length);
+		break;
+
 
 	case 0xBF:		// private_stream_2  (EN301192-1.3.1 S.10)
 	case 0xF0:		// ECM
 	case 0xF1:		// EMM
-	case 0xF8:		// ITE-T Rec. H.222.1 type E
-		print_databytes (3,"PES_packet_data_bytes:", b, len2);
-		n = len2;
+	case 0xF8:		// ITU-T Rec. H.222.1 type E
+		print_databytes (3,"PES_packet_data_bytes:", b, p.PES_packet_length);
 		break;
 
-	case 0xBD:		// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
-    		out_nl (3,"PES_data_packet:");
-		indent (+1);
-		PES_decodeDATA (b, len2);
-		indent (-1);
-		break;
 
-	case 0xBE:		// padding stream!
-		print_databytes (3,"Padding_bytes:", b, len2);
-		n = len2;
-		break;
-
-	case 0xF2:		// DSMCC stream
-		PES_decodeDSMCC (b, len2);
-		break;
-
-	case 0xFF:		// program_stream_directory
-		PES_decodePSDIR (b, len2);
-		break;
-
+	// case 0xBD:		// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
+	// case 0xC0-0xDF	// ISO/IEC 13818-3 or 11172-3 or 13818-7 or 14496-3 audio stream 
+	// case 0xE0-0xEF	// ITU-T Rec. H.262 | ISO/IEC 13818-2 or 11172-2 or 14496-2 video stream
+	// case 0xF3		// ISO/IEC_13522_stream
+	// case 0xF4		// ITU-T Rec. H.222.1 type A
+	// case 0xF5		// ITU-T Rec. H.222.1 type B
+	// case 0xF6		// ITU-T Rec. H.222.1 type C
+	// case 0xF7		// ITU-T Rec. H.222.1 type D
+	// case 0xF9		// ancillary_stream
+	// case 0xFA		// ISO/IEC14496-1_SL-packetized_stream
+	// case 0xFB		// ISO/IEC14496-1_FlexMux_stream
+	// case 0xFC-0xFE	// reserved data stream
 	default:
  		if ((p.PES_packet_length==0) && ((p.stream_id & 0xF0)==0xE0)) {
 
@@ -205,9 +219,9 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
  		} else {
 
-    			out_nl (3,"Default PES decoding:");
+			// $$$ TODO  DATA sync VTX, etc... wie hier machen?
 			indent (+1);
-			PES_decode_std (b, len2);
+			PES_decode_std (b, p.PES_packet_length, p.stream_id);
 			indent (-1);
 
 		}

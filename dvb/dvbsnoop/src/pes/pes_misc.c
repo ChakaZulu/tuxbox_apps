@@ -1,5 +1,5 @@
 /*
-$Id: pes_misc.c,v 1.3 2004/01/25 21:37:28 rasc Exp $
+$Id: pes_misc.c,v 1.4 2004/02/02 23:34:08 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: pes_misc.c,v 1.3 2004/01/25 21:37:28 rasc Exp $
 
 
 $Log: pes_misc.c,v $
+Revision 1.4  2004/02/02 23:34:08  rasc
+- output indent changed to avoid \r  (which sucks on logged output)
+- EBU PES data started (teletext, vps, wss, ...)
+- bugfix: PES synch. data stream
+- some other stuff
+
 Revision 1.3  2004/01/25 21:37:28  rasc
 bugfixes, minor changes & enhancments
 
@@ -71,6 +77,19 @@ void  print_xTS_field (int v, const char *str, u_char *b, int bit_offset)
     ul = (xTS_32_30<<30) + (xTS_29_15<<15) + xTS_14_0;
     out_nl (v," ==> %s: %lu (0x%08lx) [cycles of the 90 kHz system clock]",
 		str, ul,ul);
+
+    // -- display time
+    {
+	int     h,m,s,u;
+	u_long  p = ul/90;
+
+	h=(p/(1000*60*60));
+	m=(p/(1000*60))-(h*60);
+	s=(p/1000)-(h*3600)-(m*60);
+	u=p-(h*1000*60*60)-(m*1000*60)-(s*1000);
+
+	out_nl (v," ==> %s: %d:%02d:%02d.%03d", str, h,m,s,u);
+    }
 
   indent (-1);
 }

@@ -1,5 +1,5 @@
-AC_INIT([dvbsnoop],[1.2.23],[rasc@users.sourceforge.net])
-AM_INIT_AUTOMAKE([dvbsnoop],[1.2.23])
+AC_INIT([dvbsnoop],[1.2.33],[rasc@users.sourceforge.net])
+AM_INIT_AUTOMAKE([dvbsnoop],[1.2.33])
 #AM_MAINTAINER_MODE
 
 AC_PROG_CC
@@ -22,11 +22,12 @@ src/Makefile
 src/datacarousel/Makefile
 src/descriptors/Makefile
 src/dvb_api/Makefile
+src/ebu/Makefile
+src/misc/Makefile
 src/pes/Makefile
 src/sections/Makefile
-src/ts/Makefile
-src/testdata/Makefile
 src/strings/Makefile
-src/misc/Makefile
+src/testdata/Makefile
+src/ts/Makefile
 ])
 

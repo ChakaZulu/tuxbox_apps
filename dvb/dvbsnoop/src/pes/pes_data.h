@@ -1,5 +1,5 @@
 /*
-$Id: pes_data.h,v 1.1 2004/01/11 21:01:32 rasc Exp $
+$Id: pes_data.h,v 1.2 2004/02/02 23:34:08 rasc Exp $
 
    
  DVBSNOOP
@@ -17,7 +17,7 @@ $Id: pes_data.h,v 1.1 2004/01/11 21:01:32 rasc Exp $
 #define __PES_DATA_H 1
 
 
-void PES_decodeDATA (u_char *b, int len);
+void PES_decodeDATA_private_stream_1 (u_char *b, int len);
 
 
 #endif

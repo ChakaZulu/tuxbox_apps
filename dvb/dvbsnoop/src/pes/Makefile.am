@@ -9,6 +9,8 @@ noinst_HEADERS = \
 	pes_psm.h \
 	pes_psdir.h \
 	pes_data.h \
+	pes_data_sync.h \
+	pes_data_ebu.h \
 	pes_misc.h 
 
 
@@ -19,6 +21,8 @@ libpes_a_SOURCES = \
 	pes_psm.c \
 	pes_psdir.c \
 	pes_data.c \
+	pes_data_sync.c \
+	pes_data_ebu.c \
 	pes_misc.c 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: output.c,v 1.7 2004/01/02 16:40:37 rasc Exp $
+$Id: output.c,v 1.8 2004/02/02 23:34:07 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: output.c,v 1.7 2004/01/02 16:40:37 rasc Exp $
 
 
 $Log: output.c,v $
+Revision 1.8  2004/02/02 23:34:07  rasc
+- output indent changed to avoid \r  (which sucks on logged output)
+- EBU PES data started (teletext, vps, wss, ...)
+- bugfix: PES synch. data stream
+- some other stuff
+
 Revision 1.7  2004/01/02 16:40:37  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -56,9 +62,10 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 */
 
 static int  verbose_level = 0;
+static int  col0 = 0;		//2
 
 static int  indent_level = 0;
-int   table_indent [] = {0,4,8,12,15,18,21};
+int   table_indent [] = {0,4,8,12,15,18,21,24,27,30};
 
 #define MAX_INDENT_LEVEL  ( (sizeof(table_indent)/sizeof(int)) - 1)
 
@@ -86,8 +93,8 @@ void indent (int v)
   if (indent_level >= MAX_INDENT_LEVEL)
      indent_level = MAX_INDENT_LEVEL;
 
-  fputc ('\r',stdout);
-  print_indent();
+//2  fputc ('\r',stdout);
+//2  print_indent();
 //    out_nl2 (0);
 }
 
@@ -122,6 +129,7 @@ void out(int verbose, const char *msgfmt,...)
   va_list args;
 
   if (verbose <= verbose_level) {
+     print_indent(); //2
      va_start (args,msgfmt);
      vfprintf (stdout, msgfmt, args);
      va_end   (args);
@@ -134,6 +142,7 @@ void out_nl(int verbose, const char *msgfmt,...)
   va_list args;
 
   if (verbose <= verbose_level) {
+     print_indent();  //2
      va_start (args,msgfmt);
      vfprintf (stdout, msgfmt, args);
      va_end   (args);
@@ -151,7 +160,8 @@ void  out_nl2 (int verbose)
 {
   if (verbose <= verbose_level) {
      fputc ('\n',stdout);
-     print_indent();
+     col0 = 1; //2
+//2     print_indent();
   }
 
 }
@@ -162,9 +172,14 @@ void print_indent (void)
 {
  int i;
 
+ if (! col0)  return; //2
+
  for (i=0; i<table_indent[indent_level]; i++) {
    fputc (' ',stdout);
  }
 
+ col0 = 0; //2
 }
+
+
 

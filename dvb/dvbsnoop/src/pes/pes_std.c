@@ -1,5 +1,5 @@
 /*
-$Id: pes_std.c,v 1.2 2004/01/22 22:26:35 rasc Exp $
+$Id: pes_std.c,v 1.3 2004/02/02 23:34:08 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,12 @@ $Id: pes_std.c,v 1.2 2004/01/22 22:26:35 rasc Exp $
 
 
 $Log: pes_std.c,v $
+Revision 1.3  2004/02/02 23:34:08  rasc
+- output indent changed to avoid \r  (which sucks on logged output)
+- EBU PES data started (teletext, vps, wss, ...)
+- bugfix: PES synch. data stream
+- some other stuff
+
 Revision 1.2  2004/01/22 22:26:35  rasc
 pes_pack_header
 section read timeout
@@ -32,6 +38,7 @@ PES stream directory, PES restructured
 
 #include "dvbsnoop.h"
 #include "pes_std.h"
+#include "pes_data.h"
 #include "pes_misc.h"
 #include "strings/dvb_str.h"
 #include "misc/hexprint.h"
@@ -46,7 +53,7 @@ PES stream directory, PES restructured
  *  PES  Decoding
  */
 
-void  PES_decode_std (u_char *b, int len)
+void  PES_decode_std (u_char *b, int len, u_int PES_streamID)
 {
  /* IS13818-1  2.4.3.6  */
 
@@ -93,6 +100,8 @@ void  PES_decode_std (u_char *b, int len)
  p.PES_header_data_length		= getBits (b, 0, 16, 8);
 
 
+
+ // $$$ TODO own subroutine for PES_header (get and out)
 
  out_SB_NL  (6,"reserved1: ",p.reserved1);
  out_S2B_NL (3,"PES_scrambling_control: ",p.PES_scrambling_control,
@@ -316,13 +325,61 @@ void  PES_decode_std (u_char *b, int len)
 
 
 
+
+
  /* 
   * -- stuffing bytes
-  * -- PES packet_data_bytes
   */
 
-   print_databytes (4,"PES_packet_data_bytes / stuffing bytes:",
-		   b, len - (b - b_start) );
+  // PES_header_data_length : An 8-bit field specifying the total number of
+  // bytes occupied by the optional fields and any stuffing bytes contained
+  // in this PES packet header. The presence of optional fields is indicated
+  // in the byte that precedes the PES_header_data_length field.
+  //
+  // --> This means (??) +3, due to the option fields before ..._length field
+  // $$$ TODO be checked!  (so far verified by experience)
+
+
+  {
+    int len2 = p.PES_header_data_length + 3 - (b - b_start);
+
+    if (len2 > 0) {
+    	print_databytes (4,"stuffing bytes:", b, len2);
+    	b += len2;
+    }
+  }
+
+
+
+
+ /* 
+  * -- PES packet_data_bytes
+  * -- check streamID
+  */
+
+   // $$$ TODO data_identifier (Teletext, DVB subtitles, etc...)
+
+  {
+    int len2 = len - (b - b_start);
+
+
+    if (len2 > 0) {
+      switch (PES_streamID) {
+
+	case 0xBD:	// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
+    		out_nl (3,"PES_data (private_stream_1):");
+		indent (+1);
+		PES_decodeDATA_private_stream_1 (b, len2);
+		indent (-1);
+		break;
+
+	default:
+		print_databytes (4,"PES_packet_data_bytes:", b, len2);
+		break;
+      }
+    } // if
+
+  }
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: pes_data.c,v 1.1 2004/01/11 21:01:32 rasc Exp $
+$Id: pes_data.c,v 1.2 2004/02/02 23:34:08 rasc Exp $
 
 
  DVBSNOOP
@@ -11,13 +11,18 @@ $Id: pes_data.c,v 1.1 2004/01/11 21:01:32 rasc Exp $
 
 
 
- -- PES Data
+ -- PES Data   Privat_stream_1
+ -- Data Packet Synchronous and synchronized data streaming
+
 
 
 
 $Log: pes_data.c,v $
-Revision 1.1  2004/01/11 21:01:32  rasc
-PES stream directory, PES restructured
+Revision 1.2  2004/02/02 23:34:08  rasc
+- output indent changed to avoid \r  (which sucks on logged output)
+- EBU PES data started (teletext, vps, wss, ...)
+- bugfix: PES synch. data stream
+- some other stuff
 
 
 
@@ -29,6 +34,8 @@ PES stream directory, PES restructured
 
 #include "dvbsnoop.h"
 #include "pes_data.h"
+#include "pes_data_ebu.h"
+#include "pes_data_sync.h"
 #include "strings/dvb_str.h"
 #include "misc/helper.h"
 #include "misc/hexprint.h"
@@ -40,83 +47,43 @@ PES stream directory, PES restructured
 
 /*
    -- Data Packet Synchronous and synchronized data streaming
-   -- EN 301 192  v1.3.1  S. 11
+   -- Privat_stream_1
 */
 
-void PES_decodeDATA (u_char *b, int len)
+void PES_decodeDATA_private_stream_1 (u_char *b, int len)
 {
-
- typedef struct  _PES_DATA {
-        u_int     data_identifier;
-        u_int     sub_stream_id;
-        u_int     PTS_extension_flag;
-        u_int     output_data_rate_flag;
-        u_int     reserved;
-        u_int     PES_data_packet_header_length;
-
-	// N ... optional data
-
- } PES_DATA;
-
- PES_DATA   p;
- int        len2;
+  u_int     data_identifier;
 
 
-   p.data_identifier			= getBits (b, 0,  0,  8);
-   p.sub_stream_id			= getBits (b, 0,  8,  8);
-   p.PTS_extension_flag			= getBits (b, 0, 16,  1);
-   p.output_data_rate_flag		= getBits (b, 0, 17,  1);
-   p.reserved                           = getBits (b, 0, 18,  2);
-   p.PES_data_packet_header_length	= getBits (b, 0, 20,  4);
-   b   += 3;
-   len -= 3;
-   len2 = p.PES_data_packet_header_length;
+  // -- Data Buffer starts at PES_DATA_BYTES...
+
+  data_identifier		= getBits (b, 0,  0,  8);
 
 
-   out_S2B_NL  (3,"data_identifier: ", p.data_identifier,
-		   dvbstrPESDataIdentifier (p.data_identifier) );
-   out_SB_NL  (3,"sub_stream_id: ", p.sub_stream_id);
-   out_SB_NL  (3,"PTS_extension_flag: ", p.PTS_extension_flag);
-   out_SB_NL  (3,"output_data_rate_flag: ", p.output_data_rate_flag);
-   out_SB_NL  (6,"reserved_1: ", p.reserved);
-   out_SB_NL  (3,"PES_data_packet_header_length: ", p.PES_data_packet_header_length);
 
-   if (p.PTS_extension_flag == 0x01) {
-   	out_nl (3,"PTS_extension:");
-	indent (+1);
-	out_SB_NL  (6,"reserved: ", getBits (b, 0,  0,  7) );
-	out_SW_NL  (3,"PTS_extension: ", getBits (b, 0,  7, 9) );
-	/* $$$ TODO  PCR extension output in clear text, see ISO 13818-1*/
-	b   += 2;
-	len -= 2;
-	len2 -= 2;
-	indent (-1);
-   }
-
-   if (p.output_data_rate_flag == 0x01) {
-   	out_nl (3,"output_data_rate:");
-	indent (+1);
-	out_SB_NL  (6,"reserved: ", getBits (b, 0,  0,  4) );
-	out_SL_NL  (3,"output_data_rate: ", getBits (b, 0,  4, 28) );
-	b   += 4;
-	len -= 4;
-	len2 -= 4;
-	indent (-1);
-   }
+	// -- Async Data Streaming will be done as private_stream_2 (pes_std)
 
 
-   print_databytes (3,"PES_data_private_byte:", b, len2);
-   b   += len2;
-   len -= len2;
+  if (data_identifier >= 0x10 && data_identifier <= 0x1F) {
 
-   print_databytes (3,"PES_data_byte:", b, len);
-   b   += len;
-   len -= len;
+  	// Teletext EBU data (see EN 300 472)
+	PES_decodeDATA_EBU_etc (b, len);
+
+  } else if (data_identifier == 0x20) {
+
+	// DVB subtitling (see EN 300 743)
+
+	// $$$ TODO DVB subtitling (see EN 300 743)
+	print_databytes (4,"TODO  dvb subtitles:", b, len);
+
+
+  } else {
+
+  	// default sync. data streams (see EN 301 192)
+	PES_decodeDATA_SYNC (b, len);
+
+  }
 
 }
-
-
-
-
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.39 2004/01/25 21:37:28 rasc Exp $
+$Id: dvb_str.c,v 1.40 2004/02/02 23:34:11 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,12 @@ $Id: dvb_str.c,v 1.39 2004/01/25 21:37:28 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.40  2004/02/02 23:34:11  rasc
+- output indent changed to avoid \r  (which sucks on logged output)
+- EBU PES data started (teletext, vps, wss, ...)
+- bugfix: PES synch. data stream
+- some other stuff
+
 Revision 1.39  2004/01/25 21:37:28  rasc
 bugfixes, minor changes & enhancments
 
@@ -2455,25 +2461,96 @@ char *dvbstrPESTrickModeControl (u_int i)
 
 /*
   -- Data Identifier 
-  -- ETR 162 [3] and EN 300 472 [6]).
+  -- ETR 162 and EN 300 472 and EN 301 775).
 */
 
 char *dvbstrPESDataIdentifier (u_int i)
-
 {
   STR_TABLE  Table[] = {
 	{ 0x00, 0x0F,   "reserved" },
-	{ 0x10, 0x1F,   "EBU data EN 300 472" },
+	{ 0x10, 0x1F,   "EBU data EN 300 472 (teletext)" },
 	{ 0x20, 0x20,   "DVB subtitling EN 300 743" },
 	{ 0x21, 0x21,   "DVB synchronous data stream" },
 	{ 0x22, 0x22,   "DVB synchronized data stream" },
 	{ 0x23, 0x7F,   "reserved" },
-	{ 0x80, 0xFF,   "user defined" },
+	{ 0x80, 0x98,   "user defined" },
+	{ 0x99, 0x9B,   "EBU teletext/VPS/WSS/closed caption/VBI sample data" }, // EN 301 775
+	{ 0x9C, 0xFF,   "user defined" },
      	{  0,0, NULL }
   };
 
   return findTableID (Table, i);
 }
+
+
+
+
+/*
+  -- dvbstrPES_EBUDataUnitID  (Teletext, VPS, WSS, etc.)
+  -- EN 300 472  and EN 301 775.
+*/
+
+char *dvbstrPES_EBUDataUnitID (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x01,   "reserved" },
+	{ 0x02, 0x02,   "EBU Teletext non-subtitle data" },
+	{ 0x03, 0x03,   "EBU Teletext subtitle data" },
+	{ 0x04, 0x7F,   "reserved" },
+	{ 0x80, 0xBE,   "user defined" },
+	{ 0xC0, 0xC0,   "inverted teletext" },
+	{ 0xC1, 0xC2,   "reserved" },
+	{ 0xC3, 0xC3,   "VPS" },
+	{ 0xC4, 0xC4,   "WSS" },
+	{ 0xC5, 0xC5,   "closed caption" },
+	{ 0xC6, 0xC6,   "monochrome 4:2:2 samples" },
+	{ 0xC7, 0xFE,   "reserved" },
+	{ 0xFF, 0xFF,   "data_unit for stuffing" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+  -- dvbstrTELETEXT_framingcode
+  -- EN 300 472  and EN 301 775.
+*/
+
+char *dvbstrTELETEXT_framingcode (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0xE4, 0xE4,   "EBU Teletext" },
+	{ 0x1B, 0x1B,   "inverted EBU Teletext" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+/*
+  -- dvbstrTELETEXT_packetnr
+  -- EN 300 472  and EN 301 775.
+*/
+
+char *dvbstrTELETEXT_packetnr (u_int i)
+{
+  STR_TABLE  Table[] = {
+	{ 0x00, 0x00,   "page header" },
+	{ 0x01, 0x19,   "normal packet intended for direct display" },
+	{ 0x1A, 0x1F,   "non-displayable packet (see: EN 300 706)" },
+     	{  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
 
 
 
