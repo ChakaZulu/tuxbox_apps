@@ -190,6 +190,8 @@ int CTimerList::exec(CMenuTarget* parent, string actionKey)
 				  timerNew.eventType==CTimerd::TIMER_ZAPTO ||
 				  timerNew.eventType==CTimerd::TIMER_RECORD)
 		{
+			if (strcmp(timerNew_channel_name, "---")==0)
+				return menu_return::RETURN_REPAINT;
 			data= &eventinfo;
 		}
 		else if(timerNew.eventType==CTimerd::TIMER_REMIND)
