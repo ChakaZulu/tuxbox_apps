@@ -57,6 +57,8 @@ class CMotorControl : public CMenuTarget
 		int ypos;
 		int ypos_status;
 		int ypos_menue;
+		int xpos1;
+		int xpos2;
 		
 		int8_t stepSize;
 		int32_t stepDelay;
@@ -69,8 +71,8 @@ class CMotorControl : public CMenuTarget
 		void paint();
 		void paintMenu(void);
 		void paintStatus(void);
-		void paintLine(int xpos, int * ypos, char * txt);
-		void paintLine(int xpos, int ypos, char * txt);
+		void paintLine(int x, int * y, int width, char * txt);
+		void paintLine(int x, int y, int width, char * txt);
 		void paintSeparator(int xpos, int * ypos, int width, char * txt);
 		void motorStepEast(void);
 		void motorStepWest(void);
