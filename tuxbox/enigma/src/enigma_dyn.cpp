@@ -4073,10 +4073,11 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 				ePlaylistEntry::errorUserAborted|
 				ePlaylistEntry::errorZapFailed|
 				ePlaylistEntry::errorOutdated);
-		oldType &= ~(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown);
+	}
+
+	oldType &= ~(ePlaylistEntry::doGoSleep|ePlaylistEntry::doShutdown);
 		oldType |= ePlaylistEntry::stateWaiting;
 		oldType |= atoi(after_event.c_str());
-	}
 
 	if (oldType & ePlaylistEntry::isRepeating)
 	{
