@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.15 2002/12/18 14:00:06 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.16 2002/12/22 20:48:50 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -84,10 +84,10 @@ std::string convert_to_UTF8(const std::string s)
 	return r;
 }
 
-XMLTreeParser* parseXmlFile(const std::string filename)
+xmlDocPtr parseXmlFile(const std::string filename)
 {
 	char buffer[2048];
-	XMLTreeParser* tree_parser;
+	xmlDocPtr tree_parser;
 	size_t done;
 	size_t length;
 	FILE* xml_file;
@@ -100,9 +100,7 @@ XMLTreeParser* parseXmlFile(const std::string filename)
 		return NULL;
 	}
 
-//	tree_parser = new XMLTreeParser("ISO-8859-1"); // old encoding
 	tree_parser = new XMLTreeParser(NULL);
-//	tree_parser = new XMLTreeParser("UTF-8");      // new encoding
 
 	do
 	{

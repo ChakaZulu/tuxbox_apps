@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.88 2002/12/20 19:19:46 obi Exp $
+ * $Id: scan.cpp,v 1.89 2002/12/22 20:48:50 thegoodguy Exp $
  */
 
 #include <fcntl.h>
@@ -37,7 +37,7 @@ extern std::map <t_channel_id, uint8_t> service_types;
 
 /* zapit.cpp */
 extern CFrontend *frontend;
-extern XMLTreeParser *scanInputParser;
+extern xmlDocPtr scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
 extern CZapitClient::bouquetMode bouquetMode;
 
@@ -315,8 +315,8 @@ void *start_scanthread(void *param)
 	}
 
 	/* get first child */
-	XMLTreeNode *search = scanInputParser->RootNode()->GetChild();
-	XMLTreeNode *transponder = NULL;
+	xmlNodePtr search = scanInputParser->RootNode()->xmlChildrenNode;
+	xmlNodePtr transponder = NULL;
 
 	std::map <uint8_t, std::string>::iterator spI;
 
@@ -336,7 +336,7 @@ void *start_scanthread(void *param)
 		/* provider is not wanted - jump to the next one */
 		if (spI == scanProviders.end())
 		{
-			search = search->GetNext();
+			search = search->xmlNextNode;
 			continue;
 		}
 
@@ -355,7 +355,7 @@ void *start_scanthread(void *param)
 
 		/* send sat name to client */
 		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &providerName, strlen(providerName) + 1);
-		transponder = search->GetChild();
+		transponder = search->xmlChildrenNode;
 
 		/* read all transponders */
 		while ((transponder) && (!strcmp(transponder->GetType(), "transponder")))
@@ -409,7 +409,7 @@ void *start_scanthread(void *param)
 			}
 
 			/* next transponder */
-			transponder = transponder->GetNext();
+			transponder = transponder->xmlNextNode;
 		}
 
 		/* 
@@ -449,10 +449,10 @@ void *start_scanthread(void *param)
 		fd = write_provider(fd, type, providerName, diseqc_pos);
 
 		/* go to next satellite */
-		search = search->GetNext();
+		search = search->xmlNextNode;
 	}
 
-	/* clean up - should this be done before every GetNext() ? */
+	/* clean up - should this be done before every xmlNextNode ? */
 	delete transponder;
 	delete search;
 

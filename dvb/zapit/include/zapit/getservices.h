@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.h,v 1.50 2002/11/02 17:21:15 obi Exp $
+ * $Id: getservices.h,v 1.51 2002/12/22 20:48:50 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -37,11 +37,11 @@
 #define NONE 0x0000
 #define INVALID 0x1FFF
 
-void ParseTransponders (XMLTreeNode * xmltransponder, unsigned char DiSEqC);
-void ParseChannels (XMLTreeNode * node, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id, unsigned char DiSEqC);
-void FindTransponder (XMLTreeNode * root);
-void LoadSortList ();
-int LoadServices ();
+void ParseTransponders(xmlNodePtr xmltransponder, const unsigned char DiSEqC);
+void ParseChannels    (xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC);
+void FindTransponder  (xmlNodePtr root);
+void LoadSortList     ();
+int LoadServices      ();
 
 struct transponder
 {

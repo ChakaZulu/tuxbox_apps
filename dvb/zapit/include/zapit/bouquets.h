@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.44 2002/10/08 19:39:13 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.45 2002/12/22 20:48:50 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -63,7 +63,7 @@ class CBouquetManager
 	private:
 		CBouquet* remainChannels;
 		void makeRemainingChannelsBouquet();
-		void parseBouquetsXml(const XMLTreeNode *root);
+		void parseBouquetsXml(const xmlNodePtr root);
 		void storeBouquets();
 	public:
 		CBouquetManager() { remainChannels = NULL; };

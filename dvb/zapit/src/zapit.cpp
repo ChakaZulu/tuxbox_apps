@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.281 2002/12/22 18:30:02 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.282 2002/12/22 20:48:50 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -68,7 +68,7 @@ CVideo * video = NULL;
 /* the current channel */
 CZapitChannel * channel = NULL;
 /* the transponder scan xml input */
-XMLTreeParser * scanInputParser = NULL;
+xmlDocPtr scanInputParser = NULL;
 /* the bouquet manager */
 CBouquetManager * bouquetManager = NULL;
 
@@ -664,12 +664,12 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		}
 
 		CZapitClient::responseGetSatelliteList msgResponseGetSatelliteList;
-		XMLTreeNode *search = scanInputParser->RootNode()->GetChild();
+		xmlNodePtr search = scanInputParser->RootNode()->xmlChildrenNode;
 
 		while (search) {
 			strncpy(msgResponseGetSatelliteList.satName, search->GetAttributeValue("name"), sizeof(msgResponseGetSatelliteList.satName));
 			send(connfd, &msgResponseGetSatelliteList, sizeof(msgResponseGetSatelliteList), 0);
-			search = search->GetNext();
+			search = search->xmlNextNode;
 		}
 		break;
 	}
@@ -1408,7 +1408,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.281 2002/12/22 18:30:02 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.282 2002/12/22 20:48:50 thegoodguy Exp $\n");
 
 	if (argc > 1)
 	{

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.74 2002/12/07 23:07:18 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.75 2002/12/22 20:48:50 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -209,16 +209,16 @@ void CBouquetManager::saveBouquets()
 	fclose(bouq_fd);
 }
 
-void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
+void CBouquetManager::parseBouquetsXml(const xmlNodePtr root)
 {
-	XMLTreeNode *search=root->GetChild();
-	XMLTreeNode *channel_node;
+	xmlNodePtr search=root->xmlChildrenNode;
+	xmlNodePtr channel_node;
 
 	if (search)
 	{
 		while (strcmp(search->GetType(), "Bouquet"))
 		{
-			search = search->GetNext();
+			search = search->xmlNextNode;
 		}
 
 		unsigned int original_network_id, service_id;
@@ -232,7 +232,7 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 			char* locked = search->GetAttributeValue("locked");
 			newBouquet->bHidden = hidden ? (strcmp(hidden, "1") == 0) : false;
 			newBouquet->bLocked = locked ? (strcmp(locked, "1") == 0) : false;
-			channel_node = search->GetChild();
+			channel_node = search->xmlChildrenNode;
 
 			while (channel_node)
 			{
@@ -244,10 +244,10 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 				if (chan != NULL)
 					newBouquet->addService(chan);
 
-				channel_node = channel_node->GetNext();
+				channel_node = channel_node->xmlNextNode;
 			}
 
-			search = search->GetNext();
+			search = search->xmlNextNode;
 		}
 	
 		INFO("found %d bouquets", Bouquets.size());
@@ -257,7 +257,7 @@ void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root)
 
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 {
-	XMLTreeParser* parser;
+	xmlDocPtr parser;
 
 	if (ignoreBouquetFile == false)
 	{

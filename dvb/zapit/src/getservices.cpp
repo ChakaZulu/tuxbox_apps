@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.60 2002/12/20 19:19:46 obi Exp $
+ * $Id: getservices.cpp,v 1.61 2002/12/22 20:48:50 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -25,7 +25,7 @@ extern tallchans allchans;
 	while (0)
 
 
-void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
+void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC)
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
@@ -108,16 +108,16 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 		);
 
 		/* read channels that belong to the current transponder */
-		ParseChannels(node->GetChild(), transport_stream_id, original_network_id, DiSEqC);
+		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC);
 
 		/* hop to next transponder */
-		node = node->GetNext();
+		node = node->xmlNextNode;
 	}
 
 	return;
 }
 
-void ParseChannels (XMLTreeNode *node, t_transport_stream_id transport_stream_id, t_original_network_id original_network_id, uint8_t DiSEqC)
+void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC)
 {
 	t_service_id service_id;
 	std::string  name;
@@ -158,13 +158,13 @@ void ParseChannels (XMLTreeNode *node, t_transport_stream_id transport_stream_id
 			break;
 		}
 
-		node = node->GetNext();
+		node = node->xmlNextNode;
 	}
 
 	return;
 }
 
-void FindTransponder (XMLTreeNode *search)
+void FindTransponder(xmlNodePtr search)
 {
 	uint8_t DiSEqC;
 
@@ -180,13 +180,13 @@ void FindTransponder (XMLTreeNode *search)
 			DiSEqC = 0xfe;
 
 		else {
-			search = search->GetNext();
+			search = search->xmlNextNode;
 			continue;
 		}
 
 		INFO("going to parse dvb-%c provider %s", search->GetType()[0], search->GetAttributeValue("name"));
-		ParseTransponders(search->GetChild(), DiSEqC);
-		search = search->GetNext();
+		ParseTransponders(search->xmlChildrenNode, DiSEqC);
+		search = search->xmlNextNode;
 	}
 }
 
@@ -197,7 +197,7 @@ int LoadServices(void)
 	if (parser == NULL)
 		return -1;
 
-	FindTransponder(parser->RootNode()->GetChild());
+	FindTransponder(parser->RootNode()->xmlChildrenNode);
 	delete parser;
 	return 0;
 }
