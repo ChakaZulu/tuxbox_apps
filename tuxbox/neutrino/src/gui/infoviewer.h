@@ -113,7 +113,7 @@ class CInfoViewer
 	void	Set_CA_Status(int Status);
 #endif
 	
-	int     handleMsg(uint msg, uint64_t data);
+	int     handleMsg(uint msg, uint data);
 };
 
 

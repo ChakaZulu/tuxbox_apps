@@ -476,7 +476,7 @@ int CPINInput::exec( CMenuTarget* parent, string )
 	paint();
 
 	bool loop = true;
-	uint msg; uint64_t data;
+	uint msg; uint data;
 
 	while(loop)
 	{

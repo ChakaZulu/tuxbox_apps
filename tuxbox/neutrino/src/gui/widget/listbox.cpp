@@ -172,7 +172,7 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 	toSave = false;
 	while (loop)
 	{
-		uint msg; uint64_t data;
+		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
 		if (( msg == (uint) g_settings.key_channelList_cancel) || ( msg ==CRCInput::RC_home))

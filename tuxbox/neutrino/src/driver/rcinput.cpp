@@ -466,7 +466,7 @@ void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *
 	}
 }
 
-void CRCInput::getMsg(uint *msg, unsigned long long *data, int Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 {
 	getMsg_us( msg, (uint *)data, (unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
 }
