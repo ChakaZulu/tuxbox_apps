@@ -292,6 +292,7 @@ int CMP3PlayerGui::show()
 			hide();
 			if(filebrowser->exec(Path))
 			{
+				Path=filebrowser->getCurrentDir();
 /*				CProgressWindow * progress;
 				int nrOfFiles=filebrowser->getSelectedFiles()->size();
 				if(nrOfFiles > 100)

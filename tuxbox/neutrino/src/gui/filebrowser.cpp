@@ -648,3 +648,4 @@ void CFileBrowser::paint()
 
 	frameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 }
+

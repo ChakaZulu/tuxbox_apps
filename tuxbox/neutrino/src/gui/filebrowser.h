@@ -146,8 +146,7 @@ class CFileBrowser
 		bool		exec(string Dirname);
 		CFile		*getSelectedFile();
 		CFileList	*getSelectedFiles();
-
-		
+		string getCurrentDir() {return Path;}
 };
 
 
