@@ -422,7 +422,7 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 					updated();
 				}
 			}
-			else if ( event.action == &i_texteditActions->showHelp && !helpwidget )
+			else if ( event.action == &i_texteditActions->showHelp && !helpwidget && editMode )
 			{
 				eTextInputFieldHelpWindow wnd;
 				helpwidget = wnd.helpwidget;
