@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.162 2003/03/03 03:43:58 obi Exp $
+//  $Id: sectionsd.cpp,v 1.163 2003/03/03 05:42:58 obi Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -1052,7 +1052,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.162 2003/03/03 03:43:58 obi Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.163 2003/03/03 05:42:58 obi Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3487,7 +3487,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.162 2003/03/03 03:43:58 obi Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.163 2003/03/03 05:42:58 obi Exp $\n");
 
 	try
 	{
@@ -3541,17 +3541,7 @@ int main(int argc, char **argv)
 
 		// from here on forked
 
-		//catch all signals... (busybox workaround)
 		signal(SIGHUP, signalHandler);
-
-		signal(SIGINT, signalHandler);
-
-		signal(SIGQUIT, signalHandler);
-
-		signal(SIGTERM, signalHandler);
-
-		for (int x = 0;x < 32;x++)
-			signal(x, signalHandler);
 
 		eventServer = new CEventServer;
 		/*
