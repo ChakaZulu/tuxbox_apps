@@ -24,8 +24,11 @@
 #include <lib/system/econfig.h>
 
 #define TIMER_LOGFILE CONFIGDIR "/enigma/timer.log"
+#undef WRITE_LOGFILE
 
+#ifdef WRITE_LOGFILE
 static int logfilesize;
+#endif
 
 static const unsigned char monthdays[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 /* bug fix - at localization, 
@@ -199,6 +202,7 @@ static eString buildDayString(int type)
 
 void eTimerManager::writeToLogfile( const char *str )
 {
+#ifdef WRITE_LOGFILE
 	if ( logfile && str )
 	{
 		time_t tmp = time(0)+eDVB::getInstance()->time_difference;
@@ -207,6 +211,7 @@ void eTimerManager::writeToLogfile( const char *str )
 		str2.sprintf("%02d.%02d, %02d:%02d - %s\n", now.tm_mday, now.tm_mon+1, now.tm_hour, now.tm_min, str );
 		logfilesize += (fwrite(str2.c_str(), str2.size(), 1, logfile) * str2.size());
 	}
+#endif
 }
 
 void eTimerManager::writeToLogfile( eString str )
@@ -244,6 +249,7 @@ eTimerManager::eTimerManager()
 	CONNECT( actionTimer.timeout, eTimerManager::actionHandler );
 	CONNECT( eDVB::getInstance()->timeUpdated, eTimerManager::timeChanged );
 
+#if WRITE_LOGFILE
 	struct stat tmp;
 	if ( stat( TIMER_LOGFILE, &tmp ) != -1 )
 		logfilesize=tmp.st_size;
@@ -253,6 +259,9 @@ eTimerManager::eTimerManager()
 		unlink(TIMER_LOGFILE);
 		logfilesize=0;
 	}
+#else
+		unlink(TIMER_LOGFILE);
+#endif
 
 	int deepstandbywakeup=0;
 	eConfig::getInstance()->getKey("/ezap/timer/deepstandbywakeupset", deepstandbywakeup);
@@ -298,8 +307,12 @@ eTimerManager::eTimerManager()
 		eConfig::getInstance()->flush();
 	}
 
+#ifdef WRITE_LOGFILE
 	logfile = fopen(TIMER_LOGFILE, "a" );
 	writeToLogfile("Timer is comming up");
+#else
+	logfile=0;
+#endif
 
 	if ( eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 	{
@@ -463,9 +476,11 @@ void eTimerManager::actionHandler()
 					writeToLogfile("must stop running recording :(");
 					eZapMain::getInstance()->recordDVR(0,0);
 				}
+				eServiceHandler *handler=eServiceInterface::getInstance()->getService();		
 		// workaround for start recording in background when a playback
 		// is running or the service is on the same transponder and satellite
 				if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
+					&& handler && handler->getState() != eServiceHandler::stateStopped
 					&& rec && ( rec.path || ( canHandleTwoServices && onSameTP(rec,Ref) ) ) )
 				{
 					eDebug("[eTimerManager] change to service in background :)");
@@ -701,6 +716,7 @@ void eTimerManager::actionHandler()
 
 		case setNextEvent:
 		{
+#ifdef WRITE_LOGFILE
 //////////// SHRINK LOGFILE WHEN TO BIG //////////////////
 			if ( logfilesize > 100*1024 )
 			{
@@ -721,6 +737,7 @@ void eTimerManager::actionHandler()
 				}
 			}
 ///////////////////////////////////////////
+#endif
 			writeToLogfile(eString().sprintf("--> actionHandler() calldepth=%d setNextEvent", ++calldepth));
 			eDebug("[eTimerManager] setNextEvent");
 			if (conn.connected() )
@@ -860,7 +877,10 @@ void eTimerManager::actionHandler()
 				writeToLogfile("no more waiting events...");
 				actionTimer.stop();
 			}
-			if ( prevEvent != nextStartingEvent )
+			if ( prevEvent != nextStartingEvent || 
+				( prevEvent->type & ePlaylistEntry::isRepeating && 
+					prevEvent->type & ePlaylistEntry::stateFinished &&
+					!(prevEvent->type & ePlaylistEntry::stateWaiting) ) )
 			{
 				if ( prevEvent != timerlist->getConstList().end() )
 				{
@@ -897,6 +917,13 @@ void eTimerManager::actionHandler()
 						{
 							eZapMain::getInstance()->handleStandby(i);
 						}
+					}
+					if ( prevEvent->type & ePlaylistEntry::isRepeating 
+						&& prevEvent->type & ePlaylistEntry::stateFinished
+						&& !(prevEvent->type & ePlaylistEntry::stateWaiting) )
+					{
+						eDebug("[eTimerManager]reset stateWaiting to repeating timer");
+						prevEvent->type |= ePlaylistEntry::stateWaiting;
 					}
 				}
 			}
@@ -1088,7 +1115,9 @@ void eTimerManager::actionHandler()
 			eDebug("unhandled timer action %d", nextAction);
 		}
 	}
+#ifdef WRITE_LOGFILE
 	fflush(logfile);
+#endif
 }
 
 void eTimerManager::switchedService( const eServiceReferenceDVB &ref, int err)
@@ -1244,7 +1273,9 @@ eTimerManager::~eTimerManager()
 		eConfig::getInstance()->delKey("/ezap/timer/deepstandbywakeupset");
 
 	writeToLogfile("~eTimerManager()");
+#ifdef WRITE_LOGFILE
 	fclose(logfile);
+#endif
 	eDebug("[eTimerManager] down ( %d events in list )", timerlist->getList().size() );
 	if (this == instance)
 		instance = 0;
@@ -2255,11 +2286,14 @@ void eTimerEditView::applyPressed()
 				if ( curEntry->type & ePlaylistEntry::stateRunning )
 				{
 					time_t now = time(0)+eDVB::getInstance()->time_difference;
-					time_t newEnd = curEntry->time_begin + evt.duration;
+
+					time_t newEnd = (curEntry->type & ePlaylistEntry::isRepeating) ?
+						getNextEventStartTime(curEntry->time_begin, curEntry->duration, curEntry->type) + evt.duration :
+						curEntry->time_begin + evt.duration;
 
 					int ret = eMessageBox::btYes;
 					if ( newEnd < now )
-					{
+					{  
 						eString str=_("The new endtime is before now time!\n"
 													"This stops the running timer(recording)\n");
 						str+=_("Really update this event?");
@@ -2576,6 +2610,9 @@ int eTimerEditView::eventHandler( const eWidgetEvent &event )
 
 void eTimerEditView::changeTime( int dir )
 {
+	if ( dir < 0 && curEntry && curEntry->type&ePlaylistEntry::stateRunning )
+  // don't let event start_time via volume +/- when the event ist currently running		
+		return;
 	time_t curBegin;
 	int duration;
 	getData( curBegin, duration );
