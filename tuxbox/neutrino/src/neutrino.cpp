@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.134 2002/01/18 02:09:39 McClean Exp $
+        $Id: neutrino.cpp,v 1.135 2002/01/18 02:12:58 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.135  2002/01/18 02:12:58  McClean
+  initial-setting fixed
+
   Revision 1.134  2002/01/18 02:09:39  McClean
   tv-radiomode-switch implemented
 
@@ -668,7 +671,7 @@ void CNeutrinoApp::setupDefaults()
 	
 
 	//key bindings
-	g_settings.key_tvradio_mode = CRCInput::RC_nokey;
+	g_settings.key_tvradio_mode = CRCInput::RC_home;
 	g_settings.key_channelList_pageup = CRCInput::RC_red;
 	g_settings.key_channelList_pagedown = CRCInput::RC_green;
 	g_settings.key_channelList_cancel = CRCInput::RC_home;
@@ -2371,7 +2374,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.134 2002/01/18 02:09:39 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.135 2002/01/18 02:12:58 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
