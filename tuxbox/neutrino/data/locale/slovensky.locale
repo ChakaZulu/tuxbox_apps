@@ -187,6 +187,7 @@ infoviewer.waittime cakam na cas...
 
 epgviewer.notfound EPG nebolo najdene
 epgviewer.nodetailed podrobna informacia nie je k dispozicii
+epgviewer.More_Screenings More Screenings on this Channel
 epglist.head Prehlad programu - %s
 epglist.noevents EPG informacia nie je k dispozicii
 

@@ -345,6 +345,14 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 		processTextToArray( GetGenre(epgData.contentClassification[0]) );
 //	processTextToArray( epgData.userClassification.c_str() );
 
+
+	// -- display more screenings on the same channel
+	// -- 2002-05-03 rasc
+	processTextToArray("\n") ;
+	processTextToArray(g_Locale->getText("epgviewer.More_Screenings")+":");
+	int i = FollowScreenings(onid_sid, epgData.title);
+
+
 	//show the epg
 	frameBuffer->paintBoxRel(sx, sy- toph, ox, toph, COL_MENUHEAD);
 	g_Fonts->epg_title->RenderString(sx+10, sy- toph+ topheight+ 3, ox-15, text1.c_str(), COL_MENUHEAD);
@@ -406,6 +414,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 			switch ( msg )
 			{
 				case CRCInput::RC_left:
+// $$$ BUG scrollpos passt u.U. nicht zu screen
 					if (prev_id != 0)
 					{
 						frameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
@@ -416,6 +425,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 					break;
 
 				case CRCInput::RC_right:
+// $$$ BUG scrollpos passt u.U. nicht zu screen
 					if (next_id != 0)
 					{
 						frameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
@@ -545,3 +555,65 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 
 }
 
+
+//
+// -- get following screenings of this program title
+// -- yek! a better class design would be more helpfull
+// -- BAD THING: Cross channel screenings will not be shown
+// --            $$$TODO
+// -- 2002-05-03 rasc
+//
+
+int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
+
+{
+  CChannelEventList	evtlist;
+  CChannelEventList::iterator e;
+  time_t		curtime;
+  struct  tm		*tmStartZeit;
+  string		datetime_str;
+  string		screening_dates;
+  int			count;
+  char			tmpstr[256];
+
+
+  	count = 0;
+	screening_dates = "";
+	evtlist = g_Sectionsd->getEventsServiceKey( onid_sid );
+    	curtime = time(NULL);
+
+	for ( e= evtlist.begin(); e != evtlist.end(); ++e )
+	{
+	    	if (e->startTime <= curtime) continue;
+		if (! e->eventID) continue;
+		if (e->description == title) {
+			count++;
+			tmStartZeit = localtime(&(e->startTime));
+
+			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
+			datetime_str = std::string( g_Locale->getText(tmpstr) );
+			datetime_str += std::string(".");
+
+			strftime(tmpstr, sizeof(tmpstr), " %d. ", tmStartZeit );
+			datetime_str = std::string( tmpstr );
+
+			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
+			datetime_str += std::string( g_Locale->getText(tmpstr) );
+
+			strftime(tmpstr, sizeof(tmpstr), ". %H:%M ", tmStartZeit );
+			datetime_str += std::string( tmpstr );
+
+			// this is quick&dirty
+			screening_dates += "    ";
+			screening_dates += datetime_str;
+			screening_dates += "\n";
+
+			//fprintf (stderr,"FollowScreen: %s \n",datetime_str.c_str() );
+		}
+	}
+
+	//fprintf (stderr,"FollowScreen: count %d \n",count );
+	if (count) processTextToArray( screening_dates );
+
+	return count;
+}

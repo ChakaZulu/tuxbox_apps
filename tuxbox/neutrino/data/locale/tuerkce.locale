@@ -187,6 +187,7 @@ infoviewer.waittime Waiting for time...
 
 epgviewer.notfound EPG BILGISI BULUNAMADI
 epgviewer.nodetailed AYRINTILI BILGI YOK
+epgviewer.More_Screenings More Screenings on this Channel
 epglist.head GELECEK PROGRAMDAN PARCALAR - %s
 epglist.noevents EPG YOK...
 

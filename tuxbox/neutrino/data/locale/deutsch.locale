@@ -188,6 +188,7 @@ infoviewer.waittime Warte auf Uhrzeit...
 
 epgviewer.notfound keine Programminformationen (EPG) gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
+epgviewer.More_Screenings Weitere Termine auf diesem Kanal
 epglist.head Vorschau - %s
 epglist.noevents Keine EPG-Information verfügbar.
 

@@ -188,6 +188,7 @@ infoviewer.waittime Waiting for time...
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
+epgviewer.More_Screenings More Screenings on this Channel
 epglist.head Vorschau - %s
 epglist.noevents EPG niedostepne...
 
