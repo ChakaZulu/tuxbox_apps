@@ -34,11 +34,11 @@
 		<color name="osd_timebarborder" color="#ffffff"/>
 
 
-		<color name="shadow_red" color="#586D88" end="#ff0303" size="4" />
-		<color name="shadow_green" color="#586D88" end="#03ff03" size="4" />
-		<color name="shadow_yellow" color="#586D88" end="#ffff03" size="4" />
-		<color name="shadow_blue" color="#586D88" end="#0303ff" size="4" />
-		<color name="shadow_gray" color="#586D88" end="#282828" size="4" />
+		<color name="shadow_red" color="#586D88" end="#ff0303" size="16" />
+		<color name="shadow_green" color="#586D88" end="#03ff03" size="16" />
+		<color name="shadow_yellow" color="#586D88" end="#ffff03" size="16" />
+		<color name="shadow_blue" color="#586D88" end="#0303ff" size="16" />
+		<color name="shadow_gray" color="#586D88" end="#282828" size="16" />
 	</colors>
 	
 	<colorscheme>
