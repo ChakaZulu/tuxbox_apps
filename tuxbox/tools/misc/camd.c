@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.22 2003/08/03 22:35:48 obi Exp $
+ * $Id: camd.c,v 1.23 2003/08/06 00:56:30 obi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -27,8 +27,8 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-int send_to_camd(unsigned char *buf, size_t len) {
-
+int send_to_camd(unsigned char *buf, size_t len)
+{
 	struct sockaddr_un servaddr;
 	int clilen;
 	int sock;
@@ -46,23 +46,26 @@ int send_to_camd(unsigned char *buf, size_t len) {
 	return EXIT_FAILURE;
 }
 
-int main(int argc, char **argv) {
-
-	size_t length;
+int main(int argc, char **argv)
+{
+	size_t length = 0;
 	unsigned char in_buf[8192];
 	unsigned char out_buf[4096];
 	unsigned int i, j = 0;
-	unsigned int pid;
+	unsigned int id;
 	unsigned short desc_len;
 
-	if (argc != 5) {
-		fprintf(stderr, "usage: %s <vpid> <apid> <pmtpid> <cadescriptors>\n", argv[0]);
+	if ((argc < 4) || (argc > 5)) {
+		fprintf(stderr, "usage: %s <vpid> <apid> <sid> [cadescriptors]\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
 	/* convert ascii to hex */
-	for (length = 0; length < (strlen(argv[4]) >> 1); length++)
-		sscanf(argv[4] + (length << 1), "%2hhx", &in_buf[length]);
+	if (argc == 5)
+		while (length < (strlen(argv[4]) >> 1)) {
+			sscanf(argv[4] + (length << 1), "%2hhx", &in_buf[length]);
+			length++;
+		}
 
 	out_buf[j++] = 0x9f;
 	out_buf[j++] = 0x80;
@@ -71,8 +74,12 @@ int main(int argc, char **argv) {
 	out_buf[j++] = 0x00; /* length_field */
 	out_buf[j++] = 0x00; /* length_field */
 	out_buf[j++] = 0x03; /* ca_pmt_list_management */
-	out_buf[j++] = 0x00; /* service_id [15:8] */
-	out_buf[j++] = 0x00; /* service_id [7:0] */
+
+	/* service id */
+	id = strtoul(argv[3], 0, 16);
+	out_buf[j++] = id >> 8;
+	out_buf[j++] = id;
+
 	out_buf[j++] = 0x00;
 	out_buf[j++] = 0x00; /* program_info_length [11:8] */
 	out_buf[j++] = 0x00; /* program_info_length [7:0] */
@@ -92,17 +99,17 @@ int main(int argc, char **argv) {
 
 	/* video pid */
 	out_buf[j++] = 0x02;
-	pid = strtoul(argv[1], 0, 16);
-	out_buf[j++] = pid >> 8;
-	out_buf[j++] = pid;
+	id = strtoul(argv[1], 0, 16);
+	out_buf[j++] = id >> 8;
+	out_buf[j++] = id;
 	out_buf[j++] = 0x00;
 	out_buf[j++] = 0x00;
 
 	/* audio pid */
 	out_buf[j++] = 0x04;
-	pid = strtoul(argv[2], 0, 16);
-	out_buf[j++] = pid >> 8;
-	out_buf[j++] = pid;
+	id = strtoul(argv[2], 0, 16);
+	out_buf[j++] = id >> 8;
+	out_buf[j++] = id;
 	out_buf[j++] = 0x00;
 	out_buf[j++] = 0x00;
 
