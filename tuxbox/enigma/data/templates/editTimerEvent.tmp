@@ -9,6 +9,7 @@
 			<input type="hidden" name="ref" value="#SERVICEREF#">
 			<input type="hidden" name="old_type" value="#OLD_TYPE#">
 			<input type="hidden" name="old_stime" value="#OLD_STIME#">
+			<input type="hidden" name="force" value="no">
 			<table width=100% border=0 cellpadding=0 cellspacing=10>
 				<tr>
 					<td>Start:</d>
