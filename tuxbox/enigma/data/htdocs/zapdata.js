@@ -19,4 +19,6 @@ function init()
 
 	loadBouquets(currentBouquet);
 	loadChannels(currentBouquet, currentChannel);
+	if (zapMode == 3)
+		update();
 }

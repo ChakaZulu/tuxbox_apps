@@ -1,0 +1,17 @@
+<html>
+<head>
+<script>
+function update()
+{
+	parent.updateVideoBar(playStatus, videoPosition, videoTime);
+}
+</script>
+</head>
+<body onLoad="update()">
+<script>
+	var videoTime = "#VIDEOTIME#";
+	var videoPosition = #VIDEOPOSITION#;
+	var playStatus = "#PLAYSTATUS#";
+</script>
+</body>
+</html>

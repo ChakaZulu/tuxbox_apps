@@ -10,12 +10,6 @@ function setVol(volume)
 	}
 }
 
-function setVid(xy)
-{
-	document.location = "setVideo?position="+xy;
-	setTimeout("reload()", 1000);
-}
-
 function toggleMute(xy)
 {
 	document.location = "setVolume?mute="+xy;
@@ -39,7 +33,7 @@ function switchChannel(xy, bouquet, channel)
 		if (zapMode < 4)
 			document.location = "cgi-bin/zapTo?path="+xy+"&curBouquet="+bouquet+"&curChannel="+channel;
 		else
-			document.location = "body?mode=zap&zapmode=4&zapsubmode=1&path="+xy;
+			document.location = "?path="+xy+"&mode=zap&zapmode=4&zapsubmode=1";
 
 		setTimeout("parent.data.location.reload()", 2000);
 		setTimeout("parent.channavi.location.reload()", 2000);
@@ -123,11 +117,6 @@ function openMultiEPG(xy)
 function admin(xy)
 {
 	NewWindow(xy+'&requester=webif', 'admin', '200', '100', 'no', '3000');
-}
-
-function vcontrol(xy)
-{
-	document.location = "cgi-bin/videocontrol?command="+xy;
 }
 
 function openSI()

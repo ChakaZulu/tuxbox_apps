@@ -56,11 +56,13 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.2.2"
+#define WEBIFVERSION "2.3.0"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
 eString lastTransponder;
+
+eString playStatus = "Off";
 
 int currentBouquet = 0;
 int currentChannel = -1;
@@ -1272,6 +1274,7 @@ static eString getMute()
 	return result.str();
 }
 
+#if 0
 #ifndef DISABLE_FILE
 static eString getVideoBar()
 {
@@ -1311,6 +1314,7 @@ static eString getVideoBar()
 
 	return result.str();
 }
+#endif
 #endif
 
 static eString getUpdates()
@@ -1797,38 +1801,28 @@ eString getEITC(eString);
 static eString getZap(eString mode, eString path)
 {
 	eString result, tmp;
+	int selsize = 0;
 
 	if (pdaScreen == 0)
 	{
 #ifndef DISABLE_FILE
 		if (zapMode == ZAPMODERECORDINGS) // recordings
 		{
-			eString tmp = readFile(TEMPLATE_DIR + "videocontrols.tmp");
-			tmp.strReplace("#VIDEOBAR#", getVideoBar());
-			result += tmp;
-
-			tmp = readFile(TEMPLATE_DIR + "rec.tmp");
-			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false, false));
-			if (screenWidth > 1024)
-				tmp.strReplace("#SELSIZE#", "25");
-			else
-				tmp.strReplace("#SELSIZE#", "10");
-			tmp.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()", "#FFFFFF"));
-			result += tmp;
+			result = readFile(TEMPLATE_DIR + "movies.tmp");
+			result.strReplace("#ZAPDATA#", getZapContent2(mode, path, 1, false, false));
+			selsize = (screenWidth > 1024) ? 25 : 10;
+			result.strReplace("#BUTTON#", button(100, "Delete", RED, "javascript:deleteMovie()", "#FFFFFF"));
 		}
 		else
 #endif
 		if (zapMode == ZAPMODEROOT) // root
 		{
-			result += readFile(TEMPLATE_DIR + "rec.tmp");
+			result = readFile(TEMPLATE_DIR + "root.tmp");
 			eString tmp = getZapContent2(mode, path, 1, false, false);
 			if (tmp)
 			{
 				result.strReplace("#ZAPDATA#", tmp);
-				if (screenWidth > 1024)
-					result.strReplace("#SELSIZE#", "25");
-				else
-					result.strReplace("#SELSIZE#", "10");
+				selsize = (screenWidth > 1024) ? 25 : 10;
 				result.strReplace("#BUTTON#", "");
 			}
 			else
@@ -1836,19 +1830,16 @@ static eString getZap(eString mode, eString path)
 		}
 		else
 		{
-			eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
-			if (screenWidth > 1024)
-				tmp.strReplace("#SELSIZE#", "30");
-			else
-				tmp.strReplace("#SELSIZE#", "15");
+			result = readFile(TEMPLATE_DIR + "zap.tmp");
+			selsize = (screenWidth > 1024) ? 30 : 15;
 			bool sortList = (zapSubMode ==  ZAPSUBMODESATELLITES || zapSubMode == ZAPSUBMODEPROVIDERS);
-			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path, 2, true, sortList));
-			result += tmp;
+			result.strReplace("#ZAPDATA#", getZapContent2(mode, path, 2, true, sortList));
 		}
+		result.strReplace("#SELSIZE#", eString().sprintf("%d", selsize));
 	}
 	else
 	{
-		result += getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
+		result = getEITC(readFile(TEMPLATE_DIR + "eit_small.tmp"));
 		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
 		eString tmp = getZapContent(mode, path);
 		if (tmp)
@@ -4811,6 +4802,36 @@ static eString data(eString request, eString dirpath, eString opt, eHTTPConnecti
 	return result;
 }
 
+static eString videodata(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "videodata.tmp");
+
+	int videopos = 0;
+	int min = 0, sec = 0;
+	int total = 0, current = 0;
+
+	if (eServiceHandler *handler = eServiceInterface::getInstance()->getService())
+	{
+		total = handler->getPosition(eServiceHandler::posQueryLength);
+		current = handler->getPosition(eServiceHandler::posQueryCurrent);
+	}
+
+	if ((total > 0) && (current != -1))
+	{
+		min = total - current;
+		sec = min % 60;
+		min /= 60;
+		videopos = (current * 20) / total;
+	}
+
+	result.strReplace("#VIDEOPOSITION#", eString().sprintf("%d", videopos));
+	result.strReplace("#VIDEOTIME#", eString().sprintf("%d:%02d", min, sec));
+	result.strReplace("#PLAYSTATUS#", playStatus);
+
+	return result;
+}
+
 static eString body(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	eString result;
@@ -4878,6 +4899,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	return result;
 }
 
+
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	int lockWebIf = 1;
@@ -4936,6 +4958,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 //	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
+	dyn_resolver->addDyn("GET", "/videodata", videodata, lockWeb);
 	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
 	dyn_resolver->addDyn("GET", "/blank", blank, lockWeb);
 	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
