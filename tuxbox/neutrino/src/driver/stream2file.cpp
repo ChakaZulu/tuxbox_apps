@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.11 2004/05/06 15:30:41 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.12 2004/05/06 16:37:50 obi Exp $
  * 
  * streaming to file/disc
  * 
@@ -124,7 +124,6 @@ static int setPesFilter(const unsigned short pid, const dmx_output_t dmx_output)
 	flt.input = DMX_IN_FRONTEND;
 	flt.output = dmx_output;
 	flt.pes_type = DMX_PES_OTHER;
-	/* what about DMX_CHECK_CRC ? */
 	flt.flags = DMX_IMMEDIATE_START;
 
 	if (ioctl(fd, DMX_SET_PES_FILTER, &flt) < 0)
