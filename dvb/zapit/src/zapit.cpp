@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.65 2002/01/29 17:22:33 field Exp $
+  $Id: zapit.cpp,v 1.66 2002/01/29 18:01:12 field Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -92,6 +92,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.66  2002/01/29 18:01:12  field
+  Schriebfehler...
+
   Revision 1.65  2002/01/29 17:22:33  field
   Speedup (debug-out), Cant decode verbessert
 
@@ -621,7 +624,7 @@ pids parse_pmt(int pid, int ca_system_id)
             if (((stype == 1) || (stype == 2)) && (epid != 0))
             {
             	if (ecm_pid == no_ecmpid_found)
-					ecm_pid= parsePMTInfo(&buffer[i_pt], esinfo, ca_system_id);
+					ecm_pid= parsePMTInfo(&buffer[dp], esinfo, ca_system_id);
 
                 ret_pids.vpid = epid;
                 vp_count++;
@@ -2492,7 +2495,7 @@ int main(int argc, char **argv) {
     }
 
   system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.65 2002/01/29 17:22:33 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.66 2002/01/29 18:01:12 field Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
