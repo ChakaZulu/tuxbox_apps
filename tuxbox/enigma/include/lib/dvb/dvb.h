@@ -165,6 +165,7 @@ public:
 		int tune(eTransponder *);
 		int isValid() const { return valid; }
 		inline bool useable( eLNB * lnb );
+		eString toString();
 		bool operator == (const satellite &c) const
 		{
 			if (valid != c.valid)

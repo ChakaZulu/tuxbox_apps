@@ -61,6 +61,21 @@ void eTransponder::satellite::set(const SatelliteDeliverySystemDescriptor *descr
 	valid=1;
 }
 
+eString eTransponder::satellite::toString()
+{
+	eString ret;
+	if (valid)
+	{
+		ret =  eString().sprintf("%d", frequency) + ":";
+		ret += eString().sprintf("%d", symbol_rate) + ":";
+		ret += eString().sprintf("%d", polarisation) + ":";
+		ret += eString().sprintf("%d", fec) + ":";
+		ret += eString().sprintf("%d", orbital_position) + ":";
+		ret += eString().sprintf("%d", inversion) + ":";
+	}
+	return ret;
+}
+
 int eTransponder::satellite::tune(eTransponder *trans)
 {
 	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
@@ -69,7 +84,7 @@ int eTransponder::satellite::tune(eTransponder *trans)
 
 	while ( it != trans->tplist.end() && it->second->getOrbitalPosition() != orbital_position )
 		++it;
-		
+
 	if (it == trans->tplist.end())
 	{
 		eDebug("no such satellite %d", orbital_position);
