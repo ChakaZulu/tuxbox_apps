@@ -174,7 +174,9 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 				servicemap.first.find(event_id);
 
 			eventData *evt = 0;
-	
+
+			bool debug=false;
+			// entry with this event_id is already exist ?
 			if ( it != servicemap.first.end() )
 			  // we can update existing entry in 
 			  // event_id map (do not rebuild sorted binary tree)
@@ -186,13 +188,21 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 
 				if ( It == servicemap.second.end() )
 				{
+					debug=true;
 					time_t oldTM = it->second->getStartTime();
+					eDebug("time changed old %d new %d", oldTM, TM );
 					// when event_time has changed we must remove the old entry from time map
-					servicemap.second.erase(oldTM);
+					It = servicemap.second.find(oldTM);
+					if ( It == servicemap.second.end() )
+						eFatal("!!!!No old event found");
+					else
+						servicemap.second.erase(It);
 					prevTimeIt=It=servicemap.second.end();
 				}
 				delete it->second;
-				it->second=evt=new eventData(eit_event, eit_event_size, source);
+				ASSERT(it->second=evt=new eventData(eit_event, eit_event_size, source));
+				if ( debug )
+					eDebug("update in map %d==%d %d", it->first, event_id, TM);
 			}
 			else // we must add new event.. ( in maps this is really slow.. )
 			{
@@ -204,6 +214,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 //						eDebug("skip %d - %d", It->second->type, source );
 						goto next;
 					}
+					bool bla=false;
 //					eDebug("update %d -> %d", It->second->type, source );
 					// we must search this event in servicemap ( realy slow :( )
 					for (eventMap::iterator it(servicemap.first.begin())
@@ -211,20 +222,27 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 					{
 						if ( it->second->getStartTime() == TM )
 						{
+							bla=true;
 							delete it->second;
 							servicemap.first.erase(it);
 							prevEventIt=servicemap.first.end();
 							break;
 						}
 					}
+					if (!bla) 
+						eFatal("old event in eventmap not found %d", TM);
 				}
-				evt=new eventData(eit_event, eit_event_size, source);
+				if (debug)
+					eDebug("add new event_map entry time %d, event_id %d", TM, event_id);
+				ASSERT(evt=new eventData(eit_event, eit_event_size, source));
 				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 			}
  
  // update only data pointer in timemap.. 
 			if ( It != servicemap.second.end() ) 
 			{
+				if (debug)
+					eDebug("update timemap entry time %d", TM);
 				It->second=evt;
 				prevTimeIt=It;
 			}
@@ -234,12 +252,14 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 				if ( TM != 3599 )
 #endif
 					prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+					if (debug)
+						eDebug("add new time_map entry time %d", TM);
 			}
 		}
 next:
-//		ASSERT(servicemap.first.size() == servicemap.second.size() );
+		ASSERT(servicemap.first.size() == servicemap.second.size() );
 		ptr += eit_event_size;
-		((__u8*)eit_event)+=eit_event_size;
+		eit_event=(eit_event_struct*)(((__u8*)eit_event)+eit_event_size);
 	}
 
 	tmpMap::iterator it = temp.find( service );
@@ -358,7 +378,7 @@ void eEPGCache::cleanLoop()
 		{
 			for (timeMap::iterator It = DBIt->second.second.begin(); It != DBIt->second.second.end();)
 			{
-//				ASSERT(DBIt->second.first.size() == DBIt->second.second.size());				
+				ASSERT(DBIt->second.first.size() == DBIt->second.second.size());				
 				cur_event = (*It->second).get();
 
 				duration = fromBCD( cur_event->duration_1)*3600 + fromBCD(cur_event->duration_2)*60 + fromBCD(cur_event->duration_3);
@@ -393,7 +413,7 @@ void eEPGCache::cleanLoop()
 //					eDebug("%d == %d", 
 //						DBIt->second.first.size(),
 //						DBIt->second.second.size());
-//					ASSERT(DBIt->second.first.size() == DBIt->second.second.size());
+					ASSERT(DBIt->second.first.size() == DBIt->second.second.size());
 				}
 				else  // valid entry found
 							// we must not check any other event in this map
@@ -813,7 +833,7 @@ void eEPGCache::gotMessage( const Message &msg )
 
 void eEPGCache::thread()
 {
-	nice(10);
+	nice(4);
 	CleanTimer.start(CLEAN_INTERVAL,true);
 	exec();
 }

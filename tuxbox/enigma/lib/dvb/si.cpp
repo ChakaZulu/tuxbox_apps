@@ -19,7 +19,7 @@ extern "C"
 static int getEncodingTable( const char * language_code )
 {
 	if (!memcmp(language_code, "gre", 3))
-		return 3;
+		return 7;  // ISO8859-7
 	else 
 		if (!memcmp(language_code, "pol", 3) // Polish
 /*		|| !memcmp(language_code, "cze", 3)  // Czech
@@ -32,7 +32,7 @@ static int getEncodingTable( const char * language_code )
 		|| !memcmp(language_code, "rum", 3)  // Romanian
 		|| !memcmp(language_code, "ron", 3)
 		|| !memcmp(language_code, "wen", 3)*/) // Sorbian language
-			return 6;
+			return 2; // ISO8859-2
 	else 
 		if (!memcmp(language_code,"rus", 3)  // Russian
 /*		|| !memcmp(language_code, "bul", 3)  // Bulgarian
@@ -41,8 +41,8 @@ static int getEncodingTable( const char * language_code )
 		|| !memcmp(language_code, "mac", 3)  // Macedonian 
 		|| !memcmp(language_code, "mkd", 3)
 		|| !memcmp(language_code, "ukr", 3)*/) // Ukrainian
-			return 1;
-	return 0;
+			return 5; // ISO8859-5
+	return 0;  // ISO8859-1 / Latin1
 }
 
 static eString qHex(int v)

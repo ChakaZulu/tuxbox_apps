@@ -5271,7 +5271,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		break;
 	}
 	case eServiceEvent::evtAddNewAudioStreamId:
-		eDebug("case eServiceEvent::evtAddNewAudioStreamId:.. %02x", event.param );
+//		eDebug("case eServiceEvent::evtAddNewAudioStreamId:.. %02x", event.param );
 		flags|=ENIGMA_AUDIO_PS;
 		audioselps.add(event.param);
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
@@ -5286,7 +5286,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		if ( playlist->current != playlist->getConstList().end()
 			&& playlist->current->current_position != -1 )
 			eDebug("dont seek to begin");
-		else if ( audioselps.getCount() == 3 )
+		else if ( audioselps.getCount() == 1 )
 // first stream_id found.. seek to begin.. we will see the complete file :)
 		{
 			Decoder::Pause(0);
@@ -5296,7 +5296,7 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 			Decoder::Resume(false);
 		}
 // new audio stream_id found.. when this is our saved stream_id.. then change
-		if ( audioselps.getCount() > 3 )
+		if ( audioselps.getCount() > 1 )
 		{
 			ButtonYellowDis->hide();
 			ButtonYellowEn->show();

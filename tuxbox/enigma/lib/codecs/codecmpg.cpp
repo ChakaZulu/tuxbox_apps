@@ -236,7 +236,7 @@ a:
 						cnt++;
 						if ( cnt == 10 )
 						{
-							eDebug("/*emit*/ (*newastreamid)(%02x)", code);
+//							eDebug("/*emit*/ (*newastreamid)(%02x)", code);
 							if ( !curAudioStreamID )
 							{
 								Decoder::parms.audio_type = DECODE_AUDIO_MPEG;
@@ -322,8 +322,8 @@ a:
 							cnt++;
 							if ( cnt == 10 )
 							{
-								eDebug("found new AC3 stream subid %02x", subid);
-								eDebug("/*emit*/ (*newastreamid)(%04x)", code);
+//								eDebug("found new AC3 stream subid %02x", subid);
+//								eDebug("/*emit*/ (*newastreamid)(%04x)", code);
 								if ( !curAudioStreamID )
 								{
 									Decoder::parms.audio_type = DECODE_AUDIO_AC3_VOB;

@@ -247,8 +247,8 @@ public:
 			:type(type), time(time) {}
 	};                   
 	eFixedMessagePump<Message> messages;
-	static pthread_mutex_t cache_lock;
 private:
+	static pthread_mutex_t cache_lock;
 	uniqueEPGKey current_service;
 	uniqueEvent firstScheduleEvent,
 							firstScheduleOtherEvent,

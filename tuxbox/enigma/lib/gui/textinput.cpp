@@ -44,12 +44,12 @@ eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFiel
 	addActionMap(&i_texteditActions->map);
 	flags=0;
 	align=eTextPara::dirLeft;
-	table=5;
+	table=0;
 	char *language=0;
 	if (!eConfig::getInstance()->getKey("/elitedvb/language", language))
 	{
 		if (strstr(language,"ru_RU"))
-			table=1;
+			table=5;
 		free(language);
 	}
 	if ( helpwidget )

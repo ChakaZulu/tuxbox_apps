@@ -270,17 +270,10 @@ eMP3Decoder::eMP3Decoder(int type, const char *filename, eServiceHandlerMP3 *han
 	}
 
 	CONNECT(messages.recv_msg, eMP3Decoder::gotMessage);
-	
-	if (type == codecMPG)
-	{
-		maxOutputBufferSize=1024*1024*4;
-		minOutputBufferSize=64*1024;
-	} else
-	{
-		maxOutputBufferSize=256*1024;
-		minOutputBufferSize=8*1024;
-	}
-	
+
+	maxOutputBufferSize=256*1024;
+	minOutputBufferSize=8*1024;
+
 	run();
 }
 
@@ -405,7 +398,6 @@ void eMP3Decoder::outputReady(int what)
 //			eDebug("reconfigured audio interface...");
 		}
 	}
-//	if ( type != codecMPG || output2.size() )
 	output.tofile(dspfd[0], 65536);
 	checkFlow(0);
 }
@@ -413,7 +405,6 @@ void eMP3Decoder::outputReady(int what)
 void eMP3Decoder::outputReady2(int what)
 {
 	(void)what;
-//	if ( output.size() )
 	output2.tofile(dspfd[1], 65536);
 	checkFlow(0);
 }
@@ -431,33 +422,43 @@ void eMP3Decoder::checkFlow(int last)
 		o[1]=output2.size();
 	else
 		o[1]=0;
-		
+
 //	eDebug("input: %d  video %d   audio %d", input.size(), output.size(), output2.size());
 	
 	// states:
 	// buffering  -> output is stopped (since queue is empty)
 	// playing    -> input queue (almost) empty, output queue filled
 	// bufferFull -> input queue full, reading disabled, output enabled
-	
-	if (!o[0] || (outputsn[1] && !o[1]) )
+
+	if (state == stateFileEnd)
 	{
-		if (state == stateFileEnd)
+		int bla=0;
+		if ( !o[0] )
 		{
+			bla |= 1;
 			outputsn[0]->stop();
-			if (outputsn[1])
-				outputsn[1]->stop();
+		}
+		if (outputsn[1] && !o[1])
+		{
+			bla|=2;
+			outputsn[1]->stop();
+		}
+		if ( bla == (outputsn[1] ? 3 : 1) )
+		{
 			eDebug("ok, everything played..");
 			if ( type != codecMPG )
 				handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::done));
 			else
 				checkVideoFinished();
-			return;
-		} else if (state != stateBuffering)
-		{
-//			eDebug("stateBuffering");
-			state=stateBuffering;
-			outputsn[0]->stop();
 		}
+		return;
+	} 
+	else if (state != stateBuffering && !o[0] && (!outputsn[1] || !o[1]) )
+	{
+//		eDebug("stateBuffering");
+		state=stateBuffering;
+		if ( !o[0] )
+			outputsn[0]->stop();
 	}
 
 	if (outputsn[1])
@@ -518,7 +519,6 @@ void eMP3Decoder::checkFlow(int last)
 		if (outputsn[1])
 			outputsn[1]->start();
 	}
-	
 }
 
 void eMP3Decoder::recalcPosition()
@@ -583,7 +583,7 @@ void eMP3Decoder::decodeMore(int what)
 	{
 		if (input.fromfile(sourcefd, audiodecoder->getMinimumFramelength()) < audiodecoder->getMinimumFramelength())
 		{
-			eDebug("couldn't read %d bytes", audiodecoder->getMinimumFramelength() );
+			eDebug("couldn't read %d bytes", audiodecoder->getMinimumFramelength());
 			flushbuffer=1;
 			break;
 		}
@@ -826,13 +826,27 @@ int eMP3Decoder::getPosition(int real)
 		unsigned int position=::lseek(sourcefd, 0, SEEK_CUR);
 		if ( !position )
 			return 0;
-//		eDebug("position = %d", position);
-		position-=1024*1024*2;// latency
-		position-=input.size();
-		position-=output.size();
-		position-=output2.size()*audio_tracks;
-		position-=getOutputDelay(0);
-		return position>0?position:0;
+		if ( position > (1024*1024*2) )
+			position-=1024*1024*2;// latency
+		else
+			return 0;
+		if ( position > (unsigned int)input.size() )
+			position-=input.size();
+		else
+			return 0;
+		if ( position > (unsigned int)output.size() )
+			position-=output.size();
+		else
+			return 0;
+		if ( position > (unsigned int)(output2.size()*audio_tracks) )
+			position-=output2.size()*audio_tracks;
+		else
+			return 0;
+		if ( position > (unsigned int)getOutputDelay(0) )
+			position-=getOutputDelay(0);
+		else
+			return 0;
+		return position;
 	}
 	recalcPosition();
 	eLocker l(poslock);

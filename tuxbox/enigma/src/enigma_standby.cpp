@@ -124,8 +124,11 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 #endif
 		if (handler->getFlags() & eServiceHandler::flagIsSeekable)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
-		if (rezap && eServiceInterface::getInstance()->service != ref)
+		if ( !eDVB::getInstance()->recorder && 
+			rezap && eServiceInterface::getInstance()->service != ref)
+		{
 			eServiceInterface::getInstance()->play(ref);
+		}
 		eAVSwitch::getInstance()->setInput(0);
 		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		eStreamWatchdog::getInstance()->reloadSettings();

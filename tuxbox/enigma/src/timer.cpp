@@ -847,36 +847,41 @@ void eTimerManager::actionHandler()
 			}
 			if ( prevEvent != nextStartingEvent )
 			{
-				if ( prevEvent != timerlist->getConstList().end() 
-					&& prevEvent->type & ePlaylistEntry::stateError
-					&& prevEvent->type & ePlaylistEntry::errorUserAborted )
-					writeToLogfile("user abort previous event .. don't handleStandby");
-				else if ( nextStartingEvent == timerlist->getConstList().end() || getSecondsToBegin() > 10*60 )
+				if ( prevEvent != timerlist->getConstList().end() )
 				{
-					int i=-1;
-					if ( prevEvent->type & ePlaylistEntry::doShutdown )
-						i=2;
-					else if ( prevEvent->type & ePlaylistEntry::doGoSleep )
-						i=3;
-
-					// is sleeptimer?
-					if ( prevEvent->type & ePlaylistEntry::doFinishOnly && 
-						!prevEvent->service )
-						i*=2; // force.. look in eZapMain::handleStandby
-
-					// this gets wasSleeping from enigma.. 
-					// 2 -> enigma was Wakedup from timer
-					// 3 -> enigma was coming up from deepstandby.. initiated by timer
-					int enigmaState = eZapMain::getInstance()->handleStandby(1);
-
-					if ( i == -1 )
-						i = enigmaState;
-
-					writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
-					if ( prevEvent != timerlist->getConstList().end() 
-						&& prevEvent->type & ePlaylistEntry::stateFinished )
+					if ( prevEvent->type&ePlaylistEntry::stateError && 
+							 prevEvent->type&ePlaylistEntry::errorUserAborted )
+						writeToLogfile("don't handleStandby.. user has aborted the previous event");
+					else if ( prevEvent->type&ePlaylistEntry::stateWaiting ||
+						!(prevEvent->type&ePlaylistEntry::stateFinished) )
+						writeToLogfile("don't handleStandby.. prev event is not finished.. or was waiting");
+					else if ( nextStartingEvent == timerlist->getConstList().end() || getSecondsToBegin() > 10*60 )
 					{
-						eZapMain::getInstance()->handleStandby(i);
+						int i=-1;
+						if ( prevEvent->type & ePlaylistEntry::doShutdown )
+							i=2;
+						else if ( prevEvent->type & ePlaylistEntry::doGoSleep )
+							i=3;
+
+						// is sleeptimer?
+						if ( prevEvent->type & ePlaylistEntry::doFinishOnly && 
+							!prevEvent->service )
+							i*=2; // force.. look in eZapMain::handleStandby
+
+						// this gets wasSleeping from enigma.. 
+						// 2 -> enigma was Wakedup from timer
+						// 3 -> enigma was coming up from deepstandby.. initiated by timer
+						int enigmaState = eZapMain::getInstance()->handleStandby(1);
+
+						if ( i == -1 )
+							i = enigmaState;
+
+						writeToLogfile(eString().sprintf("call eZapMain::handleStandby(%d)",i));
+						if ( prevEvent != timerlist->getConstList().end() 
+							&& prevEvent->type & ePlaylistEntry::stateFinished )
+						{
+							eZapMain::getInstance()->handleStandby(i);
+						}
 					}
 				}
 			}
