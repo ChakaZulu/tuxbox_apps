@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.21 2003/05/20 06:54:28 digi_casi Exp $
+        $Id: settings.cpp,v 1.22 2003/05/20 07:10:24 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -101,7 +101,7 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 	else if  (diseqcMode == DISEQC_1_2)
 	{
 		strncpy( sat.satName, satNameNoDiseqc, 30);
-		sat.diseqc = 0;
+		sat.diseqc = -1;
 		for (int i = 0; i < MAX_SATELLITES; i++)
 		{
 			if (satName[i] == satNameNoDiseqc)
