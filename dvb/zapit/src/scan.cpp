@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.51 2002/06/27 19:46:00 Homar Exp $
+ * $Id: scan.cpp,v 1.52 2002/07/17 03:08:08 obi Exp $
  */
 
 #include <clientlib/zapitclient.h>
@@ -154,32 +154,22 @@ int write_xml_footer(FILE *fd)
 
 void write_bouquets()
 {
-	std::string oldname = "";
-
-	/*
-	mode&1024 - loesche bouquets und erstelle sich nicht neu
-	mode&512 - erstelle bouquets immer neu
-	mode&256 - keine aenderung an bouqets
-	*/
-
 	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS)
 	{
 		printf("[zapit] removing existing bouqets.xml\n");
-		system("/bin/rm " CONFIGDIR "/zapit/bouquets.xml");
-		return;
+		unlink(CONFIGDIR "/zapit/bouquets.xml");
 	}
+
 	else if ((bouquetMode == CZapitClient::BM_DONTTOUCHBOUQUETS)/* || (scanbouquets.empty())*/)
 	{
 		printf("[zapit] leavin bouquets.xml untouched\n");
-		return;
 	}
+
 	else
 	{
-		printf("[zapit] creating new bouquets.xml\n");
 		scanBouquetManager->cleanUp();
 		scanBouquetManager->saveBouquets();
 	}
-	return;
 }
 
 void write_transponder(FILE *fd, uint16_t transport_stream_id, uint16_t original_network_id, uint8_t diseqc)
