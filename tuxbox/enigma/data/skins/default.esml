@@ -24,6 +24,7 @@
 		<img name="eCheckbox.unchecked" src="unchecked.png" />
 		<img name="eCheckboxLCD.checked" src="checked_lcd.png" nomerge="yes" />
 		<img name="eCheckboxLCD.unchecked" src="unchecked_lcd.png" nomerge="yes" />
+		<!--img name="sat_scan" src="sat.png" /-->
 	</images>
 	
 	<colors>
@@ -115,6 +116,18 @@
 			<eButton text="start scan" name="start" position="10:e-30" size="200:30" />
 			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" />
 		</tsAutomatic>
+	</object>
+
+	<object name="tsScan">
+		<tsScan position="0:0" size="e:350">
+			<eLabel position="10:5" size="200:30" text="scanning..." />
+			<eLabel position="10:40" size="200:30" text="Progress:" />
+			<eProgress name="scan_progress" position="145:45" size="e-10:20" />
+			<eLabel name="time_left" position="10:80" size="e-10:30" />
+			<eLabel name="service_name" position="10:120" size="e-10:30" />
+			<eLabel name="service_provider" position="10:160" size="e-10:30" />
+			<!--eLabel position="100:200" size="100:97" pixmap="sat_scan" alphatest="on"/-->			
+		</tsScan>
 	</object>
 	
 	<object name="setup.skins">
