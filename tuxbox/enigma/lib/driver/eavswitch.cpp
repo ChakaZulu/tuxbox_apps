@@ -204,14 +204,14 @@ void eAVSwitch::changeVolume(int abs, int vol)
 	if (volume>63)
 		volume=63;
 
-	if ( vol )
-	{
+//	if (volume) 
+//	{
 		if ( (!mute && volume == 63)
 			|| (mute && volume != 63 ) )
 			toggleMute();
 
 		sendVolumeChanged();
-	}
+//	}
 
 	setVolume( (63-volume) * 65536/64 );
 }
@@ -262,7 +262,7 @@ void eAVSwitch::sendVolumeChanged()
 
 void eAVSwitch::toggleMute()
 {
-	if ( input == 1 ) //Scart 
+	if ( input == 1 ) //Scart
 	{
 		switch ( eSystemInfo::getInstance()->getHwType() )
 		{

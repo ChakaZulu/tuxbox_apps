@@ -996,11 +996,6 @@ static eString channels_getcurrent(eString request, eString dirpath, eString opt
 	return "-1";
 }
 
-static eString getVolume()
-{
-	return eString().setNum((63 - eAVSwitch::getInstance()->getVolume()) * 100 / 63, 10);
-}
-
 static eString setVolume(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
@@ -1013,13 +1008,6 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 	if (volume)
 	{
 		int vol = atoi(volume.c_str());
-		if (vol > 10) vol = 10;
-		if (vol < 1) vol = 1;
-
-		float temp = (float)vol;
-		temp = temp * 6.3;
-		vol = (int)temp;
-
 		eAVSwitch::getInstance()->changeVolume(1, 63 - vol);
 	}
 
@@ -1268,13 +1256,13 @@ static eString getEITC(eString result)
 static eString getVolBar()
 {
 	std::stringstream result;
-	int volume = atoi(getVolume().c_str());
+	int volume = 63 - eAVSwitch::getInstance()->getVolume();
 
-	for (int i = 1; i <= 10; i++)
+	for (int i = 9; i <= 63; i+=6)
 	{
 		result << "<td width=\"15\" height=\"8\">"
 			"<a href=\"javascript:setVol(" << i << ")\">";
-		if (i <= volume / 10)
+		if (i <= volume)
 			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
 		else
 			result << "<img src=\"led_off.gif\" border=\"0\" width=\"15\" height=\"8\">";

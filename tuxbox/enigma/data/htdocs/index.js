@@ -1,19 +1,19 @@
 function setVol(xy)
 {
 	document.location = "/setVolume?volume="+xy;
-	setTimeout("reload()", 100);
+	setTimeout("reload()", 1000);
 }
 
 function setVid(xy)
 {
 	document.location = "/setVideo?position="+xy;
-	setTimeout("reload()", 100);
+	setTimeout("reload()", 1000);
 }	
 
 function Mute(xy)
 {
 	document.location = "/setVolume?mute="+xy;
-	setTimeout("reload()", 100);
+	setTimeout("reload()", 1000);
 }
 
 function switchChannel(xy, bouquet, channel)
