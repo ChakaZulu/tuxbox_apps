@@ -231,7 +231,7 @@ void* Play_Thread( void* filename )
 		pida=0x900;
 		pidv=0x8ff;
 	}
-	lseek( fd, 0, SEEK_SET );
+	lseek( fd, 0L, SEEK_SET );
 
 	if( (dmxa = open(DMX, O_RDWR)) < 0 ||
 	    (dmxv = open(DMX, O_RDWR)) < 0 ||
@@ -288,8 +288,9 @@ void* Play_Thread( void* filename )
 		{
 			done = 0;
 
-			if( playstate == 2 )
-			{	// pause play
+			switch( playstate )
+			{
+			case 2:	// pause play
 				while( playstate == 2 )
 					usleep(200000);
 
@@ -300,6 +301,17 @@ void* Play_Thread( void* filename )
 				p.pid = pidv;
 				p.pes_type = DMX_PES_VIDEO;
 				ioctl(dmxv, DMX_SET_PES_FILTER, &p);
+				break;
+
+			case 3:	// todo: ff
+				//lseek( fd, 1000000L, SEEK_CUR );
+				playstate = 1;
+				break;
+
+			case 4:	// todo: rew
+				//lseek( fd, -1000000L, SEEK_CUR );
+				playstate = 1;
+				break;
 			}
 
 			while( r > 0 )
@@ -342,10 +354,12 @@ void CMoviePlayerGui::PlayStream( void )
 	bool update_lcd = true, open_filebrowser = true, start_play = false, exit = false;
 
 	playstate = 0;
-	/*
-	 * playstate == 0 : stopped
+
+	/* playstate == 0 : stopped
 	 * playstate == 1 : playing
 	 * playstate == 2 : pause-mode
+	 * playstate == 3 : fast-forward
+	 * playstate == 4 : rewind
 	 */
 
 	do
@@ -359,7 +373,6 @@ void CMoviePlayerGui::PlayStream( void )
 				if( isTS )
 				{
 					playstate = 0;
-					pthread_join( rct, NULL );
 					break;
 				}
 				else
@@ -442,10 +455,27 @@ void CMoviePlayerGui::PlayStream( void )
 		  		playstate = 1;
 		  	}
 		}
-		else if( msg == CRCInput::RC_left ||
-		         msg == CRCInput::RC_right )
+		else if( msg == CRCInput::RC_left )
+		{
+			// fast-forward
+			playstate = 3;
+		}
+		else if( msg == CRCInput::RC_right )
+		{
+			// rewind
+			playstate = 4;
+		}
+		else if( msg == CRCInput::RC_up ||
+			 msg == CRCInput::RC_down )
 		{
 			// todo: next/prev file
+		}
+		else if( msg == CRCInput::RC_help )
+		{
+			// todo: infobar
+		}
+		else if( msg == CRCInput::RC_ok )
+		{
 			open_filebrowser = true;
 		}
 		else if( msg == NeutrinoMessages::RECORD_START ||
@@ -465,6 +495,8 @@ void CMoviePlayerGui::PlayStream( void )
 			exit = true;
 		}
 	} while( playstate >= 1 );
+
+	pthread_join( rct, NULL );
 }
 
 int CMoviePlayerGui::show()
