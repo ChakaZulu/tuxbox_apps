@@ -176,7 +176,7 @@ date.Oct  Oct
 date.Nov  Nov
 date.Dec  Dec
 
-nvod.starting (starting in %s min)
+nvod.starting (starting in %d min)
 nvod.proz (%d%% over)
 
 
