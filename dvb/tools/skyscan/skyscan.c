@@ -16,34 +16,33 @@
 #define VERSION "0.1a"
 
 void help(char addr, int speed) {
-  printf("commands:
-address [any|polar|elevation]    DiSEqC device to address (30/31/32)
-                                 current address: %02X
-reset                            reset
-sleep                            sleep
-awake                            wakeup
-standby                          standby
-power                            power on
-halt                             stop movement
-nolimits                         disable limits
-status                           get status (needs DiSEqC 2.2 !!)
-limit_east                       set east limit
-limit_west                       set west limit
-east (<value>)                   drive east <value>
-west (<value>)                   drive west <value>
-store <value>                    store position <value>
-goto <value>                     goto position <value>
-drive <value>(.<value>)          drive to angular position
-recalc (<value> (<value>))       recalculate satellite positions
-speed <value>                    motor speed (1-4) (current: %d)
-exit                             leave
-\n",addr,speed);
+  printf("commands:\n");
+  printf("address [any|polar|elevation]    DiSEqC device to address (30/31/32)\n");
+  printf("                                 current address: %02X\n", addr);
+  printf("reset                            reset\n");
+  printf("sleep                            sleep\n");
+  printf("awake                            wakeup\n");
+  printf("standby                          standby\n");
+  printf("power                            power on\n");
+  printf("halt                             stop movement\n");
+  printf("nolimits                         disable limits\n");
+  printf("status                           get status (needs DiSEqC 2.2 !!)\n");
+  printf("limit_east                       set east limit\n");
+  printf("limit_west                       set west limit\n");
+  printf("east (<value>)                   drive east <value>\n");
+  printf("west (<value>)                   drive west <value>\n");
+  printf("store <value>                    store position <value>\n");
+  printf("goto <value>                     goto position <value>\n");
+  printf("drive <value>(.<value>)          drive to angular position\n");
+  printf("recalc (<value> (<value>))       recalculate satellite positions\n");
+  printf("speed <value>                    motor speed (1-4) (current: %d)", speed);
+  printf("exit                             leave\n\n");
 }
 
 int main(int argc, char **argv) {
-  int device,count,speed;
+  int device,count,speed=1;
   char foo;
-  secVoltage volt;
+  secVoltage volt=SEC_VOLTAGE_13;
   struct secStatus state;
   struct secCmdSequence seq;
   struct secCommand cmd;
