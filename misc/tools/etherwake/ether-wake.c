@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 	/* Note: PF_INET, SOCK_DGRAM, IPPROTO_UDP would allow SIOCGIFHWADDR to
 	   work as non-root, but we need SOCK_PACKET to specify the Ethernet
 	   destination address. */
-	if ((s = socket(AF_INET, SOCK_PACKET, SOCK_PACKET)) < 0) {
+	if ((s = socket(PF_PACKET, SOCK_PACKET, SOCK_PACKET)) < 0) {
 		if (errno == EPERM)
 			fprintf(stderr, "ether-wake must run as root\n");
 		else
