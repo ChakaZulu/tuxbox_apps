@@ -1,5 +1,5 @@
 /*
-        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.4 2002/10/09 15:27:42 thegoodguy Exp $        
+        $Header: /cvs/tuxbox/apps/tuxbox/libs/liblcddisplay/fontrenderer.cpp,v 1.5 2002/10/28 21:05:32 thegoodguy Exp $        
 
 	LCD-Daemon  -   DBoxII-Project
 
@@ -231,7 +231,7 @@ void Font::RenderString(int x, int y, int width, const char *text, int color, in
 			for (int i = 0; i < remaining_unicode_length; i++)
 			{
 				text++;
-				if ((*text) & 0xc0 != 0x80)
+				if (((*text) & 0xc0) != 0x80)
 				{
 					remaining_unicode_length = -1;
 					break;           // incomplete or corrupted character
