@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2003-09-18 14:12+0200\n"
-"PO-Revision-Date: Thu Sep 18 13:57:01 CEST 2003\n"
+"POT-Creation-Date: 2003-10-03 22:02+0200\n"
+"PO-Revision-Date: Fri Oct 3 21:56:52 CEST 2003\n"
 "Last-Translator: unknown\n"
 "Language-Team: Czech / Hombre <midex@post.cz>\n"
 "MIME-Version: 1.0\n"
@@ -20,7 +20,7 @@ msgstr ""
 msgid "FF "
 msgstr "FF"
 
-#: default.esml:707
+#: default.esml:716
 msgid "search event name for this beg-/end time in epg"
 msgstr "vyhledat úlohu pro tento koncový cas v EPG"
 
@@ -36,11 +36,11 @@ msgstr "Satelity"
 msgid "Pause "
 msgstr "Pauza"
 
-#: default.esml:368 default.esml:398 default.esml:453 default.esml:542
-#: default.esml:808 src/parentallock.cpp:96 src/setup_lcd.cpp:107
-#: src/setup_osd.cpp:252 src/setup_rc.cpp:116 src/setup_rfmod.cpp:125
+#: default.esml:368 default.esml:398 default.esml:453 default.esml:551
+#: default.esml:817 src/parentallock.cpp:96 src/setup_lcd.cpp:107
+#: src/setup_osd.cpp:252 src/setup_rc.cpp:116 src/setup_rfmod.cpp:128
 #: src/setup_timezone.cpp:48 src/setupengrab.cpp:97 src/setupnetwork.cpp:457
-#: src/setupvideo.cpp:109 src/tpeditwindow.cpp:112 src/tpeditwindow.cpp:161
+#: src/setupvideo.cpp:119 src/tpeditwindow.cpp:112 src/tpeditwindow.cpp:161
 msgid "save"
 msgstr "ulozit"
 
@@ -48,16 +48,15 @@ msgstr "ulozit"
 msgid "motor power input difference between running and not running"
 msgstr "rozdíl vstupního proudu motoru v klidu a v provozu"
 
-#: default.esml:690 src/epgwindow.cpp:115 src/timer.cpp:141
+#: default.esml:699 src/epgwindow.cpp:115 src/timer.cpp:141
 msgid "Tue"
 msgstr "Ut"
 
 #: default.esml:385
-#, fuzzy
 msgid "send the complete DiSEqC sequence twice"
-msgstr "posli kompletní DiSEqC sekvenci"
+msgstr "posli 2x kompletní DiSEqC sekvenci"
 
-#: default.esml:463 default.esml:549 src/rotorconfig.cpp:594
+#: default.esml:463 default.esml:558 src/rotorconfig.cpp:594
 msgid "Satellite:"
 msgstr "Satelit :"
 
@@ -69,7 +68,7 @@ msgstr "Play"
 msgid "choose the Satellite you wish to find"
 msgstr "zvolte satelit, který chcete prohledat"
 
-#: default.esml:716
+#: default.esml:725
 msgid "processor: "
 msgstr "procesor :"
 
@@ -77,20 +76,19 @@ msgstr "procesor :"
 msgid "choose entry to edit or remove"
 msgstr "vyber bod pro editaci nebo vymazání"
 
-#: default.esml:687
+#: default.esml:696
 msgid "Endtime"
 msgstr "Koncový cas"
 
 #: default.esml:450
-#, fuzzy
 msgid "add to table/existing will be overwritten"
-msgstr "vybrat seznam/prepsat stávající"
+msgstr "dalsí do seznamu/prepsat stávající"
 
 #: default.esml:387
 msgid "send no DiSEqC when only Hi/Lo or H/V changes"
 msgstr "nevysílat povel DiSEqC pri prepínání Hor/Vert"
 
-#: default.esml:717
+#: default.esml:726
 msgid "frontend: "
 msgstr "predrazený :"
 
@@ -98,7 +96,7 @@ msgstr "predrazený :"
 msgid "enter where this orbital position is (to) stored in motor"
 msgstr "zadej orbitální pozici nastavenou v motoru"
 
-#: default.esml:591
+#: default.esml:600
 msgid "SNR"
 msgstr "SNR"
 
@@ -110,7 +108,7 @@ msgstr "AGC :"
 msgid "Uncommitted Switch:"
 msgstr "Uncommitted Switch:?"
 
-#: default.esml:555
+#: default.esml:564
 msgid "enable/disable inversion here (ok)"
 msgstr "umoznit / zakázat inverzi ( OK )"
 
@@ -118,7 +116,7 @@ msgstr "umoznit / zakázat inverzi ( OK )"
 msgid "prev. page"
 msgstr "pred.strana"
 
-#: default.esml:396 src/enigma_scan.cpp:46
+#: default.esml:396 src/enigma_scan.cpp:48
 msgid "Motor Setup"
 msgstr "Natácecí systém"
 
@@ -126,11 +124,11 @@ msgstr "Natácecí systém"
 msgid "LOF/L:"
 msgstr "LOF/L :"
 
-#: default.esml:734 default.esml:746 default.esml:758
+#: default.esml:743 default.esml:755 default.esml:767
 msgid "standby  "
 msgstr "stanby"
 
-#: default.esml:691 src/timer.cpp:1992
+#: default.esml:700 src/timer.cpp:1992
 msgid "Wednesday"
 msgstr "Streda"
 
@@ -138,15 +136,15 @@ msgstr "Streda"
 msgid "Toneburst:"
 msgstr "Toneburst :"
 
-#: default.esml:783
+#: default.esml:792
 msgid "Partition Check"
 msgstr "Kontrola partition"
 
-#: default.esml:731 default.esml:755
+#: default.esml:740 default.esml:764
 msgid "enter recording end time (0..9, left, right, ok)"
 msgstr "nastav cas vypnutí nahrávání ( 0..9, <, >, OK )"
 
-#: default.esml:696 default.esml:700
+#: default.esml:705 default.esml:709
 msgid "select year (ok)"
 msgstr "Vyber rok ( OK )"
 
@@ -154,11 +152,11 @@ msgstr "Vyber rok ( OK )"
 msgid "increased voltage"
 msgstr "zvýsit napetí"
 
-#: default.esml:559
+#: default.esml:568
 msgid "FEC:"
 msgstr "FEC :"
 
-#: default.esml:417 default.esml:594
+#: default.esml:417 default.esml:603
 msgid "LOCK"
 msgstr "LOCK"
 
@@ -166,19 +164,19 @@ msgstr "LOCK"
 msgid "Latitude:"
 msgstr "Pozice :"
 
-#: default.esml:418 default.esml:595
+#: default.esml:418 default.esml:604
 msgid "SYNC"
 msgstr "SYNC"
 
-#: default.esml:540
+#: default.esml:549
 msgid "Skins:"
 msgstr "Prostredí :"
 
-#: default.esml:416 default.esml:723
+#: default.esml:416 default.esml:732
 msgid "ok"
 msgstr "OK"
 
-#: default.esml:558
+#: default.esml:567
 msgid "choose polarity (left, right)"
 msgstr "vyber polaritu ( <, > )"
 
@@ -186,7 +184,7 @@ msgstr "vyber polaritu ( <, > )"
 msgid "enable/disable use BAT for scan (if exists)"
 msgstr "povolit/zakázat pouzití BAT pri vyhledávání"
 
-#: default.esml:555
+#: default.esml:564
 msgid "Inv:"
 msgstr "Inv :"
 
@@ -194,7 +192,7 @@ msgstr "Inv :"
 msgid "&#175;/sec"
 msgstr ""
 
-#: default.esml:699
+#: default.esml:708
 msgid "edit the start time (0..9, left, right)"
 msgstr "upravit cas zacátku ( 0..9, <, > )"
 
@@ -206,23 +204,23 @@ msgstr "zadej LNB kmitocet pro nízké pásmo (0..9,OK)"
 msgid "Record "
 msgstr "Zápis"
 
-#: default.esml:539
+#: default.esml:548
 msgid "Skin Selector"
 msgstr "Volba prostredí"
 
-#: default.esml:527
+#: default.esml:529
 msgid "transponder scanned:"
 msgstr "nalezené transpondéry :"
 
-#: default.esml:685
+#: default.esml:694
 msgid "press ok to change event name manually"
 msgstr "pres OK zmeníte úlohu rucne"
 
-#: default.esml:754
+#: default.esml:763
 msgid "recording end time:"
 msgstr "cas vypnutí záznamu :"
 
-#: default.esml:693 src/timer.cpp:1993
+#: default.esml:702 src/timer.cpp:1993
 msgid "Friday"
 msgstr "Pátek"
 
@@ -230,7 +228,7 @@ msgstr "Pátek"
 msgid "Use motor input power for running detection.. else use timeout"
 msgstr "Pro detekci motoru pouzijte vstupní proud..nebo casový limit."
 
-#: default.esml:508
+#: default.esml:509
 msgid "no circ polariz."
 msgstr "není kruhová polar."
 
@@ -238,17 +236,17 @@ msgstr "není kruhová polar."
 msgid "Direction:"
 msgstr "Smer :"
 
-#: default.esml:554 default.esml:572
+#: default.esml:563 default.esml:581
 msgid "MHz"
 msgstr "MHz"
 
-#: default.esml:526
+#: default.esml:528
 msgid "services scanned     :"
 msgstr "nalezené kanály :"
 
-#: default.esml:542 src/parentallock.cpp:101 src/setup_lcd.cpp:112
+#: default.esml:551 src/parentallock.cpp:101 src/setup_lcd.cpp:112
 #: src/setup_osd.cpp:257 src/setup_rc.cpp:121 src/setup_timezone.cpp:53
-#: src/setupengrab.cpp:102 src/setupnetwork.cpp:462 src/setupvideo.cpp:114
+#: src/setupengrab.cpp:102 src/setupnetwork.cpp:462 src/setupvideo.cpp:124
 #: src/tpeditwindow.cpp:118 src/tpeditwindow.cpp:164
 msgid "save changes and return"
 msgstr "zapis zmeny a uzavri"
@@ -257,7 +255,7 @@ msgstr "zapis zmeny a uzavri"
 msgid "Orbital Position:"
 msgstr "Pozice satelitu :"
 
-#: default.esml:451 default.esml:678 default.esml:837
+#: default.esml:451 default.esml:687 default.esml:846
 msgid "remove"
 msgstr "vymazat"
 
@@ -273,11 +271,11 @@ msgstr "nastav v LNB kmitocet vysokého pásma (0..9, OK)"
 msgid "DiSEqC Repeats:"
 msgstr "DiSEgC opakování :"
 
-#: default.esml:808
+#: default.esml:817
 msgid "save changes and close window"
 msgstr "zapis zmeny a uzavri okno"
 
-#: default.esml:571
+#: default.esml:580
 msgid "enter frequency (0..9, left, right)"
 msgstr "nastav kmitocet ( 0..9 , <, > )"
 
@@ -289,7 +287,7 @@ msgstr "vymaz vybrané"
 msgid "select Uncommitted Switch 2 option"
 msgstr "select Uncommitted Switch 2 option?"
 
-#: default.esml:733 default.esml:757
+#: default.esml:742 default.esml:766
 msgid "shutdown the box after recording (ok)"
 msgstr "vypni box po záznamu ( OK )"
 
@@ -305,11 +303,11 @@ msgstr "Swapovací instrukce"
 msgid "opens the motor setup"
 msgstr "otevre nastavení motoru"
 
-#: default.esml:823
+#: default.esml:832
 msgid "Please choose your DiSEqC-Configuration:"
 msgstr "Zvolte vasi konfiguraci DiSEqC:"
 
-#: default.esml:729 default.esml:753
+#: default.esml:738 default.esml:762
 msgid "Stop Record"
 msgstr "Stop Záznamu"
 
@@ -321,7 +319,12 @@ msgstr "nastav v LNB prahový kmitocet (0..9, OK)"
 msgid "close motor setup"
 msgstr "opustit nastavení motoru"
 
-#: default.esml:564 default.esml:576
+#: default.esml:508 default.esml:519
+#, fuzzy
+msgid "add only unscrambled services"
+msgstr "Neukazuj zamknuté kanály"
+
+#: default.esml:573 default.esml:585
 msgid "KSymb/s"
 msgstr "KSymb/s"
 
@@ -329,19 +332,19 @@ msgstr "KSymb/s"
 msgid "Mode:"
 msgstr "Mód :"
 
-#: default.esml:798
+#: default.esml:807
 msgid "abort"
 msgstr "zavri"
 
-#: default.esml:530
+#: default.esml:532
 msgid "Progress:"
 msgstr "Stav :"
 
-#: default.esml:777
+#: default.esml:786
 msgid "select filsystem to format"
 msgstr "vyber souborový system pro formát"
 
-#: default.esml:336 src/enigma_scan.cpp:45
+#: default.esml:336 src/enigma_scan.cpp:47
 msgid "Satellite Configuration"
 msgstr "Nastavení satelitu "
 
@@ -349,15 +352,15 @@ msgstr "Nastavení satelitu "
 msgid "SNR:"
 msgstr "SNR :"
 
-#: default.esml:786
+#: default.esml:795
 msgid "close window"
 msgstr "uzavri okno"
 
-#: default.esml:706
+#: default.esml:715
 msgid "save data and close window"
 msgstr "zapis zmeny a uzavri okno"
 
-#: default.esml:412 default.esml:593
+#: default.esml:412 default.esml:602
 msgid "BER"
 msgstr "BER"
 
@@ -369,7 +372,7 @@ msgstr "Max.hodnota :"
 msgid "Recalc Params:"
 msgstr "Prepocti parametry :"
 
-#: default.esml:553
+#: default.esml:562
 msgid "enter transponder frequeny (0..9, left, right)"
 msgstr "nastav kmitocet transpondéru ( 0..9, <, > )"
 
@@ -381,7 +384,7 @@ msgstr "zapis zmeny"
 msgid "plugins"
 msgstr "plugins"
 
-#: default.esml:836
+#: default.esml:845
 msgid "edit selected transponder (ok)"
 msgstr "edituj vybraný transpondér (OK)"
 
@@ -389,23 +392,23 @@ msgstr "edituj vybraný transpondér (OK)"
 msgid "save in motor"
 msgstr "ulozit v motoru"
 
-#: default.esml:775
+#: default.esml:784
 msgid "do a filesystem check"
 msgstr "dokoncit test souboru"
 
-#: default.esml:557
+#: default.esml:566
 msgid "Polarity:"
 msgstr "Polarita :"
 
-#: default.esml:450 default.esml:677 default.esml:835
+#: default.esml:450 default.esml:686 default.esml:844
 msgid "add"
 msgstr "dalsí"
 
-#: default.esml:774
+#: default.esml:783
 msgid "initialize the disk for use with the dreambox"
 msgstr "inicializace disku pro pouzití v DreamBoxu"
 
-#: default.esml:689
+#: default.esml:698
 msgid "Mo"
 msgstr "Po"
 
@@ -417,32 +420,28 @@ msgstr "zacní vyhledávat vysílání"
 msgid "LNB"
 msgstr "LNB"
 
-#: default.esml:498 default.esml:509 default.esml:519
+#: default.esml:498 default.esml:510 default.esml:521 default.esml:543
 msgid "start scan"
 msgstr "zacni vyhledávat"
-
-#: default.esml:496
-msgid "remove all services before scan"
-msgstr "vymazat sluzby pred vyhledáváním "
 
 #: default.esml:379
 msgid "select DiSEqC parameter (ok)"
 msgstr "nastav DiSEqC parametry ( OK )"
 
-#: default.esml:786
+#: default.esml:795
 msgid "close"
 msgstr "uzavri"
 
-#: default.esml:775
+#: default.esml:784
 msgid "check"
 msgstr "zkontroluj"
 
-#: default.esml:552 default.esml:570
+#: default.esml:561 default.esml:579
 msgid "Frequency:"
 msgstr "Kmitocet :"
 
-#: default.esml:607 default.esml:614 default.esml:621 default.esml:629
-#: default.esml:640 default.esml:651
+#: default.esml:616 default.esml:623 default.esml:630 default.esml:638
+#: default.esml:649 default.esml:660
 msgid "Services"
 msgstr "Programy"
 
@@ -454,7 +453,7 @@ msgstr "nenalezeny"
 msgid "select Uncommitted Switch 1 option"
 msgstr "select Uncommitted Switch 1 option?"
 
-#: default.esml:837
+#: default.esml:846
 msgid "remove selected satellite"
 msgstr "výmaz vybraného satelitu"
 
@@ -462,15 +461,15 @@ msgstr "výmaz vybraného satelitu"
 msgid "U-Switch 4:"
 msgstr "U-prepínac 4:"
 
-#: default.esml:563 default.esml:575
+#: default.esml:572 default.esml:584
 msgid "enter symbol rate (0..9, left, right)"
 msgstr "zadej prenosovou rychlost ( 0..9, <, > )"
 
-#: default.esml:806
+#: default.esml:815
 msgid "press ok to enter the name"
 msgstr "pres OK zvolite tento název"
 
-#: default.esml:579
+#: default.esml:588
 msgid "enable/disable inversion (ok)"
 msgstr "umoznit/zakázat inverzi (OK)"
 
@@ -478,7 +477,7 @@ msgstr "umoznit/zakázat inverzi (OK)"
 msgid "subservices"
 msgstr "dalsí sluzby"
 
-#: default.esml:678
+#: default.esml:687
 msgid "delete the current selected timer (ok)"
 msgstr "vymazat tento zvolený cas ( OK )"
 
@@ -486,11 +485,11 @@ msgstr "vymazat tento zvolený cas ( OK )"
 msgid "select MiniDiSEqC parameter (ok)"
 msgstr "vyber MiniDiSEqC parametry ( OK )"
 
-#: default.esml:504 default.esml:515
+#: default.esml:504 default.esml:516
 msgid "Network:"
 msgstr "Sít :"
 
-#: default.esml:721
+#: default.esml:730
 msgid "Software Version:"
 msgstr "Verze software :"
 
@@ -502,7 +501,7 @@ msgstr "U-prepínac 2:"
 msgid "enter your longitude (0..9, +, -, ok)"
 msgstr "zadej svou zemepisnou délku ( 0..9, +, -, OK )"
 
-#: default.esml:746
+#: default.esml:755
 msgid "goto standby (ok)"
 msgstr "prejdi do Standby (press)"
 
@@ -510,15 +509,15 @@ msgstr "prejdi do Standby (press)"
 msgid "remove the selected Satellite"
 msgstr "výmaz vybraného satelitu"
 
-#: default.esml:550
+#: default.esml:559
 msgid "choose wished satellite (ok)"
 msgstr "zvol vybranou druzici ( OK )"
 
-#: default.esml:697 default.esml:701
+#: default.esml:706 default.esml:710
 msgid "select month (ok)"
 msgstr "vyber mesíc ( OK )"
 
-#: default.esml:776
+#: default.esml:785
 msgid "show extended configuration"
 msgstr "Zobrazit podrobneji konfiguraci "
 
@@ -534,11 +533,11 @@ msgstr "DiSEgC Mód :"
 msgid "choose what you want to do"
 msgstr "zvolte co chcete vykonat"
 
-#: default.esml:695 src/timer.cpp:1992
+#: default.esml:704 src/timer.cpp:1992
 msgid "Sunday"
 msgstr "Nedele"
 
-#: default.esml:525
+#: default.esml:527 src/scan.cpp:468
 msgid "scanning..."
 msgstr "vyhledávám ..."
 
@@ -550,7 +549,7 @@ msgstr "LNB nastavení "
 msgid "Number in motor:"
 msgstr "Císlo v motoru :"
 
-#: default.esml:766
+#: default.esml:775
 msgid "model:"
 msgstr "model :"
 
@@ -578,7 +577,7 @@ msgstr "Sat/LNB zobrazení :"
 msgid "save changes and use current selected LNB for the chosen satellite"
 msgstr "ulozit zmeny a pouzít toto LNB pro zvolený satelit"
 
-#: default.esml:592
+#: default.esml:601
 msgid "AGC"
 msgstr "AGC"
 
@@ -604,7 +603,7 @@ msgstr "select Uncommitted Input?"
 msgid "enable/disable check ONIT on any transponder"
 msgstr "povolit/zakázat kontrolu ONIT pro kazdý transpondér"
 
-#: default.esml:719
+#: default.esml:728
 msgid "harddisk: "
 msgstr "harddisk :"
 
@@ -616,7 +615,7 @@ msgstr "Pouzít vstupní proud Motoru"
 msgid "when the motor support this, then use"
 msgstr "pokud má motor podporu, pouzijte cítac (pohybu)"
 
-#: default.esml:772
+#: default.esml:781
 msgid "status:"
 msgstr "výsledek :"
 
@@ -628,15 +627,15 @@ msgstr "select Uncommitted Switch 4 option?"
 msgid "use BAT"
 msgstr "pouzít BAT"
 
-#: default.esml:686
+#: default.esml:695
 msgid "Starttime"
 msgstr "Pocátecní cas"
 
-#: default.esml:574
+#: default.esml:583
 msgid "Symbolrate:"
 msgstr "Rychlost :"
 
-#: default.esml:741
+#: default.esml:750
 msgid "Set Sleeptimer"
 msgstr "Nastav cas vypnutí"
 
@@ -648,7 +647,12 @@ msgstr "HTTP Download"
 msgid "goto prev page (LNB)"
 msgstr "predchozí strana ( LNB )"
 
-#: default.esml:831
+#: default.esml:542
+#, fuzzy
+msgid "press ok to change"
+msgstr "pres OK zameníte"
+
+#: default.esml:840
 msgid "Transponders"
 msgstr "Transpondér"
 
@@ -656,7 +660,7 @@ msgstr "Transpondér"
 msgid "FR "
 msgstr "FR"
 
-#: default.esml:735 default.esml:759
+#: default.esml:744 default.esml:768
 msgid "set recording end time and close window (ok)"
 msgstr "Nastav konec záznamu a uzavri okno ( OK )"
 
@@ -668,31 +672,27 @@ msgstr "Pouzít gotoXX funkci"
 msgid "close Satellite Configuration"
 msgstr "uzavrít nastavení satelitu "
 
-#: default.esml:496
-msgid "clear list before"
-msgstr "odstranit prehled"
-
-#: default.esml:669 default.esml:675 stone.esml:462 silver.esml:469
+#: default.esml:678 default.esml:684 stone.esml:462 silver.esml:469
 msgid "EPG"
 msgstr "EPG"
 
-#: default.esml:836
+#: default.esml:845
 msgid "edit"
 msgstr "Edituj"
 
-#: default.esml:694
+#: default.esml:703
 msgid "Sa"
 msgstr "So"
 
-#: default.esml:688
+#: default.esml:697
 msgid "for a multiple event enable this"
 msgstr "pro násobnou úlohu pouzit toto"
 
-#: default.esml:770
+#: default.esml:779
 msgid "connected:"
 msgstr "pripojený :"
 
-#: default.esml:676
+#: default.esml:685
 msgid "press ok to select another event"
 msgstr "pres OK vyber jinou úlohu"
 
@@ -700,11 +700,11 @@ msgstr "pres OK vyber jinou úlohu"
 msgid "next page"
 msgstr "nás.strana"
 
-#: default.esml:733 default.esml:745 default.esml:757
+#: default.esml:742 default.esml:754 default.esml:766
 msgid "shutdown  "
 msgstr "Vypnout box"
 
-#: default.esml:562
+#: default.esml:571
 msgid "Symbol Rate:"
 msgstr "Rychlost :"
 
@@ -712,7 +712,7 @@ msgstr "Rychlost :"
 msgid "Transponder:"
 msgstr "Transpondér :"
 
-#: default.esml:735 default.esml:747 default.esml:759 src/enigma_main.cpp:5708
+#: default.esml:744 default.esml:756 default.esml:768 src/enigma_main.cpp:5747
 msgid "set"
 msgstr "nastavit"
 
@@ -729,7 +729,7 @@ msgstr "pro presun motoru stiskni <, >"
 msgid "calc param 2 (see your motor manual or let it 00)"
 msgstr "zadej param 2 ( viz. motor manuál nebo nastav 00 )"
 
-#: default.esml:704
+#: default.esml:713
 msgid "select the timer type (ok)"
 msgstr "zvol typ casu ( OK )"
 
@@ -737,11 +737,11 @@ msgstr "zvol typ casu ( OK )"
 msgid "22Khz"
 msgstr "22 kHz"
 
-#: default.esml:505 default.esml:516
+#: default.esml:505 default.esml:517
 msgid "choose satellite/cable provider (ok)"
 msgstr "zvolte satelit /kabelovka ( OK )"
 
-#: default.esml:756
+#: default.esml:765
 msgid "o'clock"
 msgstr "hodin"
 
@@ -757,15 +757,15 @@ msgstr "select Uncommitted Switch 3 option?"
 msgid "motor drive speed, in degrees per second"
 msgstr "úhlová rychlost motoru, stupne za sekundu"
 
-#: default.esml:713 src/enigma_info.cpp:56
+#: default.esml:722 src/enigma_info.cpp:56
 msgid "About..."
 msgstr "Info ..."
 
-#: default.esml:677
+#: default.esml:686
 msgid "add new Timer (ok)"
 msgstr "pridat nový cas ( OK )"
 
-#: default.esml:705
+#: default.esml:714
 msgid "to change service press ok"
 msgstr "ke zmene sluzby pouzijte OK"
 
@@ -785,7 +785,7 @@ msgstr "pouzít ONIT"
 msgid "enable/disable initiate network search"
 msgstr "umoznit/vypnout inicializaci hledání síte"
 
-#: default.esml:707
+#: default.esml:716
 msgid "scan EPG"
 msgstr "prohledej EPG"
 
@@ -797,7 +797,7 @@ msgstr "OK"
 msgid "audio track"
 msgstr "audio stopa"
 
-#: default.esml:695
+#: default.esml:704
 msgid "Su"
 msgstr "Ne"
 
@@ -805,7 +805,7 @@ msgstr "Ne"
 msgid "new"
 msgstr "nový"
 
-#: default.esml:742
+#: default.esml:751
 msgid "duration:"
 msgstr "Doba trvaní :"
 
@@ -817,11 +817,11 @@ msgstr "Stop"
 msgid "Fast DiSEqC"
 msgstr "Fast  DiSEqC"
 
-#: default.esml:691 src/epgwindow.cpp:115 src/timer.cpp:141
+#: default.esml:700 src/epgwindow.cpp:115 src/timer.cpp:141
 msgid "Wed"
 msgstr "St"
 
-#: default.esml:560
+#: default.esml:569
 msgid "choose the FEC (left, right)"
 msgstr "zvol FEC ( <, > )"
 
@@ -829,11 +829,11 @@ msgstr "zvol FEC ( <, > )"
 msgid "select DiSEqC repeats (ok)"
 msgstr "nastav DiSEqC opakování (OK)"
 
-#: default.esml:814 src/system_settings.cpp:52
+#: default.esml:823 src/system_settings.cpp:53
 msgid "OSD Language"
 msgstr "OSD jazyk"
 
-#: default.esml:792
+#: default.esml:801
 msgid "Software upgrade..."
 msgstr "Aktualizace software..."
 
@@ -845,15 +845,15 @@ msgstr "Zemepisná délka :"
 msgid "choose direction"
 msgstr "vyber smer"
 
-#: default.esml:768
+#: default.esml:777
 msgid "capacity:"
 msgstr "kapacita :"
 
-#: default.esml:822
+#: default.esml:831
 msgid "DiSEqC..."
 msgstr "DiSEqC..."
 
-#: default.esml:541
+#: default.esml:550
 msgid "select skin and press ok or choose save"
 msgstr "vyber Prostredí a uloz ( OK )"
 
@@ -865,11 +865,11 @@ msgstr "zadej param 1 (viz. motor manuál nebo nastav 00)"
 msgid "prev page"
 msgstr "pred.strana"
 
-#: default.esml:698 default.esml:702
+#: default.esml:707 default.esml:711
 msgid "select day (ok)"
 msgstr "vyber den (OK)"
 
-#: default.esml:692 src/epgwindow.cpp:115 src/timer.cpp:141
+#: default.esml:701 src/epgwindow.cpp:115 src/timer.cpp:141
 msgid "Thu"
 msgstr "Ct"
 
@@ -877,36 +877,36 @@ msgstr "Ct"
 msgid "goto next page (DiSEqC)"
 msgstr "na dalsí stranu (DiSEqC)"
 
-#: default.esml:508
+#: default.esml:509
 msgid "change circular to linear polarization"
 msgstr "zmen kruhovou polarizaci na linearní"
 
-#: default.esml:745
+#: default.esml:754
 msgid "shutdown the box to deepstandby (ok)"
 msgstr "vypnout  box ( OK )"
 
-#: default.esml:703
+#: default.esml:712
 msgid "edit the end time (0..9, left, right)"
 msgstr "uprav cas konce záznamu ( 0..9, <, > )"
 
-#: default.esml:690 src/timer.cpp:1992
+#: default.esml:699 src/timer.cpp:1992
 msgid "Tuesday"
 msgstr "Uterý"
 
-#: default.esml:834
+#: default.esml:843
 msgid "select sat(up/down), ok(edit), green(add new), red(delete)"
 msgstr ""
 "vyber satelit (nahoru/dolu), ok(edituj), zelene (nový), cervený (smazat)"
 
-#: default.esml:730
+#: default.esml:739
 msgid "recording duration:"
 msgstr "délka záznamu :"
 
-#: default.esml:706
+#: default.esml:715
 msgid "apply"
 msgstr "vse"
 
-#: default.esml:684
+#: default.esml:693
 msgid "Timer Edit"
 msgstr "Editace casovace"
 
@@ -914,7 +914,7 @@ msgstr "Editace casovace"
 msgid "U-Switch 3:"
 msgstr "U-prepínac 3:"
 
-#: default.esml:693
+#: default.esml:702
 msgid "Fr"
 msgstr "Pá"
 
@@ -922,23 +922,23 @@ msgstr "Pá"
 msgid "choose the Transponder you wish to find"
 msgstr "zvolte Transpondér, který chcete prohledat"
 
-#: default.esml:835
+#: default.esml:844
 msgid "add new Transponder to selected sat (ok)"
 msgstr "pridat nový transpondér do vybraného satelitu (OK)"
 
-#: default.esml:692 src/timer.cpp:1993
+#: default.esml:701 src/timer.cpp:1993
 msgid "Thursday"
 msgstr "Ctvrtek"
 
-#: default.esml:688
+#: default.esml:697
 msgid "Repeated timer"
 msgstr "Opakování "
 
-#: default.esml:747
+#: default.esml:756
 msgid "set sleeptimer and close window (ok)"
 msgstr "Nastav prechod do sleep modu a uzavri okno ( OK )"
 
-#: default.esml:784
+#: default.esml:793
 msgid "status output:"
 msgstr "ukazatel výstupu :"
 
@@ -958,11 +958,11 @@ msgstr "ulozené pozice druzic"
 msgid "open transponder scan"
 msgstr "otevre vyhledávání vysílání"
 
-#: default.esml:765
+#: default.esml:774
 msgid "Harddisk"
 msgstr "Harddisk"
 
-#: default.esml:732 default.esml:744
+#: default.esml:741 default.esml:753
 msgid "min"
 msgstr "min"
 
@@ -970,11 +970,11 @@ msgstr "min"
 msgid "mA"
 msgstr "mA"
 
-#: default.esml:734 default.esml:758
+#: default.esml:743 default.esml:767
 msgid "goto standby after recording (ok)"
 msgstr "vypni do Standby po záznamu ( OK )"
 
-#: default.esml:578
+#: default.esml:587
 msgid "Inversion:"
 msgstr "Inverze :"
 
@@ -982,27 +982,31 @@ msgstr "Inverze :"
 msgid "goto advanced motor setup"
 msgstr "do rozsirených nastavení Motoru"
 
-#: default.esml:689 src/timer.cpp:1992
+#: default.esml:698 src/timer.cpp:1992
 msgid "Monday"
 msgstr "Pondelí"
 
-#: default.esml:694 src/timer.cpp:1993
+#: default.esml:496 default.esml:508 default.esml:519
+msgid "only Free"
+msgstr ""
+
+#: default.esml:703 src/timer.cpp:1993
 msgid "Saturday"
 msgstr "Sobota"
 
-#: default.esml:774
+#: default.esml:783
 msgid "format"
 msgstr "formát"
 
-#: default.esml:743
+#: default.esml:752
 msgid "(0..9, left, right, ok)"
 msgstr "( 0..9 , <, >,ok )"
 
-#: default.esml:509 default.esml:519
+#: default.esml:510 default.esml:521
 msgid "starts the transponder scan"
 msgstr "vyhledávání vysílání"
 
-#: default.esml:834
+#: default.esml:843
 msgid "sat"
 msgstr "satelit"
 
@@ -1018,11 +1022,16 @@ msgstr "Napetí"
 msgid "network search"
 msgstr "hledání síte"
 
-#: default.esml:600
+#: default.esml:609
 msgid "Help"
 msgstr "Nápoveda"
 
-#: lib/dvb/dvbci.cpp:106 lib/dvb/dvbci.cpp:118 lib/dvb/dvbci.cpp:1098
+#: default.esml:496
+#, fuzzy
+msgid "add only not scrambled services"
+msgstr "Neukazuj zamknuté kanály"
+
+#: lib/dvb/dvbci.cpp:106 lib/dvb/dvbci.cpp:118 lib/dvb/dvbci.cpp:1105
 msgid "no module"
 msgstr "zadný modul"
 
@@ -1035,7 +1044,7 @@ msgid "horizontal"
 msgstr "horizontální"
 
 #: lib/dvb/service.cpp:192 lib/dvb/service.cpp:222 src/enigma_bouquet.cpp:203
-#: src/enigma_main.cpp:3220 src/enigma_main.cpp:3232 src/parentallock.cpp:123
+#: src/enigma_main.cpp:3259 src/enigma_main.cpp:3271 src/parentallock.cpp:123
 #: src/parentallock.cpp:155 src/timer.cpp:1772
 msgid "parental"
 msgstr "zámek kanalu"
@@ -1076,11 +1085,11 @@ msgstr "Satelity (Radio)"
 msgid "Satellites (Data)"
 msgstr "Satelity (Data)"
 
-#: lib/dvb/servicedvb.cpp:989
+#: lib/dvb/servicedvb.cpp:987
 msgid " - provider"
 msgstr "-provider"
 
-#: lib/dvb/servicedvb.cpp:997
+#: lib/dvb/servicedvb.cpp:995
 msgid " - services"
 msgstr "- Programy"
 
@@ -1117,7 +1126,7 @@ msgstr "Soubory"
 msgid "TV/Radio"
 msgstr "TV / Rádio"
 
-#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5607
+#: lib/dvb/servicestructure.cpp:17 src/enigma_main.cpp:5646
 #: src/sselect.cpp:368
 msgid "Bouquets"
 msgstr "Prehled"
@@ -1134,7 +1143,7 @@ msgstr "Ano"
 msgid "No"
 msgstr "Ne"
 
-#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2549
+#: lib/gui/listbox.cpp:679 src/enigma_main.cpp:2588
 msgid "no description available"
 msgstr "Popis není k dispozici"
 
@@ -1504,7 +1513,7 @@ msgstr "TV"
 msgid "Radio"
 msgstr "Rádio"
 
-#: src/enigma_bouquet.cpp:35 src/enigma_setup.cpp:41
+#: src/enigma_bouquet.cpp:35 src/enigma_setup.cpp:40
 msgid "Service Organising"
 msgstr "Setrídit sluzby"
 
@@ -1576,18 +1585,17 @@ msgstr "do menu Common Interface "
 msgid "resetting....please wait"
 msgstr "Resetuji ... prosím cekejte"
 
-#: src/enigma_ci.cpp:184 src/enigma_ci.cpp:502 src/enigma_ci.cpp:574
+#: src/enigma_ci.cpp:184 src/enigma_ci.cpp:535 src/enigma_ci.cpp:608
 msgid "Common Interface Module - mmi"
 msgstr "Moduly Common Interface "
 
 #: src/enigma_ci.cpp:189
-#, fuzzy
 msgid "waiting for CI answer..."
-msgstr "cekám na modul"
+msgstr "cekám na odpoved CI ..."
 
-#: src/enigma_ci.cpp:509
+#: src/enigma_ci.cpp:542
 msgid "input all digits or press ok to send data"
-msgstr ""
+msgstr "vloz vsechny cislice a pres ok posli data"
 
 #: src/enigma_epg.cpp:42
 msgid "Programm Guide"
@@ -1815,7 +1823,7 @@ msgstr "pauza prehrávání"
 msgid "resume playback"
 msgstr "pokracovat v prehrávání"
 
-#: src/enigma_main.cpp:112 src/enigma_main.cpp:2539
+#: src/enigma_main.cpp:112 src/enigma_main.cpp:2578
 msgid "record"
 msgstr "záznam"
 
@@ -1972,54 +1980,51 @@ msgstr "Oblíbené (TV)"
 msgid "Favourites (Radio)"
 msgstr "Oblíbené (Rádio)"
 
-#: src/enigma_main.cpp:1632
-#, fuzzy
+#: src/enigma_main.cpp:1638
 msgid "please wait while initializing Common Interface ..."
-msgstr ""
-"Cekejte inicializuji harddisk.\n"
-"Tento proces bude trvat pár minut.\n"
+msgstr "Cekejte inicializuji Common Interface ,,,"
 
-#: src/enigma_main.cpp:1919
+#: src/enigma_main.cpp:1926
 msgid "no EPG available"
 msgstr "EPG není k dispozici"
 
-#: src/enigma_main.cpp:2375
+#: src/enigma_main.cpp:2413
 msgid "ShutdownTimer"
 msgstr "Casovac vypnutí"
 
-#: src/enigma_main.cpp:2375
+#: src/enigma_main.cpp:2413
 msgid "SleepTimer"
 msgstr "Casovac sleep modu"
 
-#: src/enigma_main.cpp:2539
+#: src/enigma_main.cpp:2578
 msgid "Sorry, you cannot record this service."
 msgstr "Tuto sluzbu nelze nahrát (zaznamenat)."
 
-#: src/enigma_main.cpp:2695
+#: src/enigma_main.cpp:2734
 msgid "Show recorded movies?"
 msgstr "Ukázka ulozených filmu?"
 
-#: src/enigma_main.cpp:2695
+#: src/enigma_main.cpp:2734
 msgid "recording finished"
 msgstr "záznam ukoncen"
 
-#: src/enigma_main.cpp:2869
+#: src/enigma_main.cpp:2908
 msgid "Enter new name:"
 msgstr "Zadej nový název:"
 
-#: src/enigma_main.cpp:2870
+#: src/enigma_main.cpp:2909
 msgid "Rename entry"
 msgstr "Prejmenuj daný"
 
-#: src/enigma_main.cpp:2925
+#: src/enigma_main.cpp:2964
 msgid "Sorry, you cannot delete this service."
 msgstr "Tuto sluzbu nemuzete vymazat."
 
-#: src/enigma_main.cpp:2925
+#: src/enigma_main.cpp:2964
 msgid "delete service"
 msgstr "vymazat sluzbu"
 
-#: src/enigma_main.cpp:2950
+#: src/enigma_main.cpp:2989
 msgid ""
 "This is a recorded stream!\n"
 "Really delete?"
@@ -2027,11 +2032,11 @@ msgstr ""
 "Toto je zaznamenaný Stream!\n"
 "Vymazat ?"
 
-#: src/enigma_main.cpp:2950
+#: src/enigma_main.cpp:2989
 msgid "Delete recorded stream"
 msgstr "Vymazat záznam streamu"
 
-#: src/enigma_main.cpp:2969
+#: src/enigma_main.cpp:3008
 msgid ""
 "This is a complete Bouquet!\n"
 "Really delete?"
@@ -2039,51 +2044,51 @@ msgstr ""
 "Toto je celý balík!\n"
 "Vymazat ?"
 
-#: src/enigma_main.cpp:2970
+#: src/enigma_main.cpp:3009
 msgid "Delete bouquet"
 msgstr "Smaz prehled"
 
-#: src/enigma_main.cpp:3012
+#: src/enigma_main.cpp:3051
 msgid "Enter new name for the bouquet:"
 msgstr "Nový název uzivatelského prehledu:"
 
-#: src/enigma_main.cpp:3013
+#: src/enigma_main.cpp:3052
 msgid "Rename bouquet"
 msgstr "Prejmenuj prehled"
 
-#: src/enigma_main.cpp:3039
+#: src/enigma_main.cpp:3078
 msgid "Enter name for the new bouquet:"
 msgstr "Zadej název nového prehledu:"
 
-#: src/enigma_main.cpp:3040
+#: src/enigma_main.cpp:3079
 msgid "Add new bouquet"
 msgstr "Vytvorit nový prehled"
 
-#: src/enigma_main.cpp:3081
+#: src/enigma_main.cpp:3120
 msgid "unnamed"
 msgstr "bez názvu"
 
-#: src/enigma_main.cpp:3082
+#: src/enigma_main.cpp:3121
 msgid "Enter marker name:"
 msgstr "Zadej název zálozky:"
 
-#: src/enigma_main.cpp:3083
+#: src/enigma_main.cpp:3122
 msgid "create marker"
 msgstr "Vytvor oznacník"
 
-#: src/enigma_main.cpp:3122
+#: src/enigma_main.cpp:3161
 msgid "unnamed bouquet"
 msgstr "bez názvu"
 
-#: src/enigma_main.cpp:3397 src/enigma_main.cpp:3398
+#: src/enigma_main.cpp:3436 src/enigma_main.cpp:3437
 msgid "This directory doesn't contain anything playable!"
 msgstr "Tento adresár neobsahuje nic pro prehrávání !"
 
-#: src/enigma_main.cpp:3398
+#: src/enigma_main.cpp:3437
 msgid "Play"
 msgstr "Play"
 
-#: src/enigma_main.cpp:3742
+#: src/enigma_main.cpp:3781
 msgid ""
 "A timer based digital recording is currently in progress!\n"
 "This stops the timer, and digital recording!"
@@ -2091,7 +2096,7 @@ msgstr ""
 "Momentálne probíhá nacasované nahrávání!\n"
 "Toto prerusí casovac a zápis!"
 
-#: src/enigma_main.cpp:3752
+#: src/enigma_main.cpp:3791
 msgid ""
 "A digital recording is currently in progress!\n"
 "This stops the digital recording!"
@@ -2099,7 +2104,7 @@ msgstr ""
 "Momentálne probíhá nahrávání!\n"
 "Tímto prerusíte zápis!"
 
-#: src/enigma_main.cpp:3764
+#: src/enigma_main.cpp:3803
 msgid ""
 "A timer event is currently in progress!\n"
 "This stops the timer event!"
@@ -2107,201 +2112,201 @@ msgstr ""
 "Probíhá nacasovaná událost!\n"
 "Tímto proces zrusite!"
 
-#: src/enigma_main.cpp:3772
+#: src/enigma_main.cpp:3811
 msgid "Really do this?"
 msgstr "Jste si jist ?"
 
-#: src/enigma_main.cpp:4490 src/enigma_main.cpp:4491
+#: src/enigma_main.cpp:4523 src/enigma_main.cpp:4524
 msgid "One moment please..."
 msgstr "Prosím cekejte ..."
 
-#: src/enigma_main.cpp:4491 src/enigma_main.cpp:4496 src/enigma_main.cpp:4506
-#: src/enigma_main.cpp:4514 src/enigma_main.cpp:4521 src/enigma_main.cpp:4526
-#: src/enigma_main.cpp:4532 src/timer.cpp:1645
+#: src/enigma_main.cpp:4524 src/enigma_main.cpp:4529 src/enigma_main.cpp:4539
+#: src/enigma_main.cpp:4547 src/enigma_main.cpp:4554 src/enigma_main.cpp:4559
+#: src/enigma_main.cpp:4565 src/timer.cpp:1645
 msgid "switch"
 msgstr "Info"
 
-#: src/enigma_main.cpp:4495 src/enigma_main.cpp:4496
+#: src/enigma_main.cpp:4528 src/enigma_main.cpp:4529
 msgid "Service could not be found !"
 msgstr "Sluzba nenalezena !"
 
-#: src/enigma_main.cpp:4505 src/enigma_main.cpp:4506
+#: src/enigma_main.cpp:4538 src/enigma_main.cpp:4539
 msgid "This service could not be descrambled"
 msgstr "Sluzba nemuze být dekódována"
 
-#: src/enigma_main.cpp:4513 src/enigma_main.cpp:4514
+#: src/enigma_main.cpp:4546 src/enigma_main.cpp:4547
 msgid "This service doesn't currently send a signal"
 msgstr "Sluzba nevysílá (momentálne) signál"
 
-#: src/enigma_main.cpp:4519 src/enigma_main.cpp:4521
+#: src/enigma_main.cpp:4552 src/enigma_main.cpp:4554
 msgid "This content could not be displayed"
 msgstr "Obsah nemuze být zobrazen"
 
-#: src/enigma_main.cpp:4524 src/enigma_main.cpp:4526
+#: src/enigma_main.cpp:4557 src/enigma_main.cpp:4559
 msgid "NVOD Service - please select a starttime"
 msgstr "NVOD sluzba - prosím, zvolte cas zahájení"
 
-#: src/enigma_main.cpp:4530 src/enigma_main.cpp:4532
+#: src/enigma_main.cpp:4563 src/enigma_main.cpp:4565
 msgid "Unknown error!!"
 msgstr "Neznámá chyba !!"
 
-#: src/enigma_main.cpp:4992 src/sselect.cpp:374
+#: src/enigma_main.cpp:5025 src/sselect.cpp:374
 msgid "Playlist"
 msgstr "Prehled"
 
-#: src/enigma_main.cpp:4994
+#: src/enigma_main.cpp:5027
 msgid "History"
 msgstr "Historie"
 
-#: src/enigma_main.cpp:5265
+#: src/enigma_main.cpp:5298
 msgid "Service Menu"
 msgstr "Servisní menu"
 
-#: src/enigma_main.cpp:5278 src/sselect.cpp:111
+#: src/enigma_main.cpp:5311 src/sselect.cpp:111
 msgid "add service to playlist"
 msgstr "pridej sluzbu do Playlistu"
 
-#: src/enigma_main.cpp:5287
+#: src/enigma_main.cpp:5320
 msgid "create new bouquet"
 msgstr "vytvorit nový prehled"
 
-#: src/enigma_main.cpp:5296
+#: src/enigma_main.cpp:5331
 msgid "duplicate bouquet"
 msgstr "duplikovat prehled"
 
-#: src/enigma_main.cpp:5299 src/enigma_main.cpp:5333
+#: src/enigma_main.cpp:5334 src/enigma_main.cpp:5369
 msgid "add to specific bouquet"
 msgstr "pridat do vybraného prehledu"
 
-#: src/enigma_main.cpp:5301
+#: src/enigma_main.cpp:5336
 msgid "add marker"
 msgstr "dalsí znacka"
 
-#: src/enigma_main.cpp:5308 src/enigma_main.cpp:5312 src/sselect.cpp:353
+#: src/enigma_main.cpp:5343 src/enigma_main.cpp:5347 src/sselect.cpp:353
 msgid "rename"
 msgstr "prejmenovat"
 
-#: src/enigma_main.cpp:5315 src/sselect.cpp:351
+#: src/enigma_main.cpp:5350 src/sselect.cpp:351
 msgid "delete"
 msgstr "vymazat"
 
-#: src/enigma_main.cpp:5321
+#: src/enigma_main.cpp:5357
 msgid "disable move mode"
 msgstr "zakázat presun"
 
-#: src/enigma_main.cpp:5323
+#: src/enigma_main.cpp:5359
 msgid "enable move mode"
 msgstr "povolit presun"
 
-#: src/enigma_main.cpp:5339
+#: src/enigma_main.cpp:5375
 msgid "copy to bouquet list"
 msgstr "Zkopíruj do prehledu"
 
-#: src/enigma_main.cpp:5350
+#: src/enigma_main.cpp:5386
 msgid "disable edit mode"
 msgstr "zakázat editaci"
 
-#: src/enigma_main.cpp:5352
+#: src/enigma_main.cpp:5388
 msgid "enable edit mode"
 msgstr "povolit editaci"
 
-#: src/enigma_main.cpp:5360
+#: src/enigma_main.cpp:5398
 msgid "unlock"
 msgstr "odemknout"
 
-#: src/enigma_main.cpp:5362
+#: src/enigma_main.cpp:5400
 msgid "lock"
 msgstr "zamknout"
 
-#: src/enigma_main.cpp:5365
+#: src/enigma_main.cpp:5404
 msgid "disable parental lock"
 msgstr "zakázat zámek kanálu"
 
-#: src/enigma_main.cpp:5367
+#: src/enigma_main.cpp:5406
 msgid "enable parental lock"
 msgstr "zapnout zámek kanálu"
 
-#: src/enigma_main.cpp:5385
+#: src/enigma_main.cpp:5424
 msgid "Shutdown/Standby Menu"
 msgstr "Vypnutí/Standby Menu"
 
-#: src/enigma_main.cpp:5392
+#: src/enigma_main.cpp:5431
 msgid "reboot now"
 msgstr "restartuj nyní"
 
-#: src/enigma_main.cpp:5395
+#: src/enigma_main.cpp:5434
 msgid "shutdown now"
 msgstr "Vypnout box"
 
-#: src/enigma_main.cpp:5396
+#: src/enigma_main.cpp:5435
 msgid "restart"
 msgstr "restart"
 
-#: src/enigma_main.cpp:5399
+#: src/enigma_main.cpp:5438
 msgid "goto standby"
 msgstr "prejdi do Standby"
 
-#: src/enigma_main.cpp:5400
+#: src/enigma_main.cpp:5439
 msgid "set sleeptimer"
 msgstr "nastavit cas vypnutí (sleeptimer)"
 
-#: src/enigma_main.cpp:5501
+#: src/enigma_main.cpp:5540
 msgid "Record Menu"
 msgstr "Menu záznamu"
 
-#: src/enigma_main.cpp:5507
+#: src/enigma_main.cpp:5546
 msgid "stop record now"
 msgstr "stop záznamu"
 
-#: src/enigma_main.cpp:5509
+#: src/enigma_main.cpp:5548
 msgid "set record duration"
 msgstr "nastav délku zápisu"
 
-#: src/enigma_main.cpp:5510
+#: src/enigma_main.cpp:5549
 msgid "set record stop time"
 msgstr "nastav konec záznamu"
 
-#: src/enigma_main.cpp:5584
+#: src/enigma_main.cpp:5623
 msgid "press ok to start edit mode"
 msgstr "pres OK vyber editacní mód"
 
-#: src/enigma_main.cpp:5632 src/time_settings.cpp:36
+#: src/enigma_main.cpp:5671 src/time_settings.cpp:36
 msgid "Time Correction"
 msgstr "Zmena casu"
 
-#: src/enigma_main.cpp:5639
+#: src/enigma_main.cpp:5678
 msgid "Transponder Time:"
 msgstr "Cas transpondéru :"
 
-#: src/enigma_main.cpp:5648
+#: src/enigma_main.cpp:5687
 msgid "Transponder Date:"
 msgstr "Datum transpondéru :"
 
-#: src/enigma_main.cpp:5655
+#: src/enigma_main.cpp:5694
 msgid "New Time:"
 msgstr "Nový cas:"
 
-#: src/enigma_main.cpp:5668
+#: src/enigma_main.cpp:5707
 msgid "enter correct time here"
 msgstr "zadej správný cas "
 
-#: src/enigma_main.cpp:5674
+#: src/enigma_main.cpp:5713
 msgid "New Date:"
 msgstr "Nový datum:"
 
-#: src/enigma_main.cpp:5683
+#: src/enigma_main.cpp:5722
 msgid "press ok to select another day"
 msgstr "pres OK vyber jiný den"
 
-#: src/enigma_main.cpp:5689
+#: src/enigma_main.cpp:5728
 msgid "press ok to select another month"
 msgstr "pres OK vyber jiný mesíc"
 
-#: src/enigma_main.cpp:5698
+#: src/enigma_main.cpp:5737
 msgid "press ok to select another year"
 msgstr "pres OK vyber jiný rok"
 
-#: src/enigma_main.cpp:5714
+#: src/enigma_main.cpp:5753
 msgid "set new time and close window"
 msgstr "nastav nový cas a zavri okno"
 
@@ -2331,7 +2336,7 @@ msgid "Shutdown"
 msgstr "Vypnout box"
 
 #: src/enigma_mainmenu.cpp:63 src/enigma_mainmenu.cpp:81
-#: src/enigma_setup.cpp:37
+#: src/enigma_setup.cpp:36
 msgid "Setup"
 msgstr "Nastavení"
 
@@ -2382,43 +2387,48 @@ msgstr "balícek '%s' nenalezen"
 msgid "no name given"
 msgstr "název neexistuje"
 
-#: src/enigma_scan.cpp:39 src/enigma_setup.cpp:42
+#: src/enigma_scan.cpp:39 src/enigma_setup.cpp:41
 msgid "Service Searching"
 msgstr "Hledání sluzby"
 
-#: src/enigma_scan.cpp:45
+#: src/enigma_scan.cpp:47
 msgid "open satellite config"
 msgstr "otevre nastavení satelitu"
 
-#: src/enigma_scan.cpp:46
+#: src/enigma_scan.cpp:48
 msgid "goto Motor Setup"
 msgstr "do nastavení motoru"
 
-#: src/enigma_scan.cpp:47 src/tpeditwindow.cpp:149
+#: src/enigma_scan.cpp:49 src/tpeditwindow.cpp:149
 msgid "Transponder Edit"
 msgstr "Editace transpondéru"
 
-#: src/enigma_scan.cpp:47
+#: src/enigma_scan.cpp:49
 msgid "for automatic transponder scan"
 msgstr "do automatického vyhledávání"
 
-#: src/enigma_scan.cpp:50
+#: src/enigma_scan.cpp:52
 msgid "Automatic Transponder Scan"
 msgstr "Automatické vyhledávání trnspondéru"
 
-#: src/enigma_scan.cpp:50 src/scan.cpp:36
+#: src/enigma_scan.cpp:52 src/enigma_scan.cpp:54 src/scan.cpp:37
 msgid "open automatic transponder scan"
 msgstr "otevre automatické vyhledávání"
 
-#: src/enigma_scan.cpp:51
+#: src/enigma_scan.cpp:54
+#, fuzzy
+msgid "Automatic Multisat Scan"
+msgstr "Automatické vyhledávání trnspondéru"
+
+#: src/enigma_scan.cpp:56
 msgid "Manual Transponder Scan"
 msgstr "Rucní vyhledávání transpondéru"
 
-#: src/enigma_scan.cpp:51 src/scan.cpp:37
+#: src/enigma_scan.cpp:56 src/scan.cpp:38
 msgid "open manual transponder scan"
 msgstr "Otevre rucní vyhledávání"
 
-#: src/enigma_scan.cpp:106
+#: src/enigma_scan.cpp:123
 msgid ""
 "More than one LNB have DiSEqC 1.2 enabled, please select the LNB where the "
 "motor is connected"
@@ -2426,11 +2436,11 @@ msgstr ""
 "Více jak jedno LNB povolené v DiSEqC 1.2, vyberte jen jedno LNB pripojené k "
 "Motoru."
 
-#: src/enigma_scan.cpp:106
+#: src/enigma_scan.cpp:123
 msgid "Info"
 msgstr "Info"
 
-#: src/enigma_scan.cpp:120
+#: src/enigma_scan.cpp:137
 msgid ""
 "Found no LNB with DiSEqC 1.2 enabled,\n"
 "please goto Satellite Config first, and enable DiSEqC 1.2"
@@ -2438,82 +2448,66 @@ msgstr ""
 "Zádné LNB nenastaveno pro DiSEqC 1.2, \n"
 "prejdete do základního nastavení Satelit."
 
-#: src/enigma_scan.cpp:120 src/rotorconfig.cpp:693 src/rotorconfig.cpp:888
+#: src/enigma_scan.cpp:137 src/rotorconfig.cpp:693 src/rotorconfig.cpp:888
 msgid "Warning"
 msgstr "Výstraha"
 
-#: src/enigma_scan.cpp:162
+#: src/enigma_scan.cpp:179
 msgid "Select LNB"
 msgstr "Vyber LNB"
 
-#: src/enigma_scan.cpp:165 src/setup_harddisk.cpp:182
+#: src/enigma_scan.cpp:182 src/setup_harddisk.cpp:182
 msgid "back"
 msgstr "zpet"
 
-#: src/enigma_scan.cpp:165
+#: src/enigma_scan.cpp:182
 msgid "go to prev menu"
 msgstr "predchozí menu"
 
-#: src/enigma_scan.cpp:171
+#: src/enigma_scan.cpp:188
 #, c-format
 msgid "use LNB %d for Motor"
 msgstr "pouzít LNB %d pro Motor"
 
-#: src/enigma_setup.cpp:41
+#: src/enigma_setup.cpp:40
 msgid "open service organising"
 msgstr "otevre setrídení sluzeb"
 
-#: src/enigma_setup.cpp:42
+#: src/enigma_setup.cpp:41
 msgid "open service searching"
 msgstr "otevri hledání sluzeb"
 
-#: src/enigma_setup.cpp:44 src/system_settings.cpp:36
+#: src/enigma_setup.cpp:43 src/system_settings.cpp:36
 msgid "System Settings"
 msgstr "Nastavení systému"
 
-#: src/enigma_setup.cpp:44
+#: src/enigma_setup.cpp:43
 msgid "open system settings"
 msgstr "Otevre nastavení systému"
 
-#: src/enigma_setup.cpp:47
+#: src/enigma_setup.cpp:46
 msgid "Common Interface"
 msgstr "Common Interface"
 
-#: src/enigma_setup.cpp:47
+#: src/enigma_setup.cpp:46
 msgid "open common interface menu"
 msgstr "otevre menu Common Interface "
 
-#: src/enigma_setup.cpp:51 src/system_settings.cpp:48
-msgid "Harddisc Setup"
-msgstr "Nastavení harddisku"
-
-#: src/enigma_setup.cpp:51 src/system_settings.cpp:48
-msgid "open harddisc setup"
-msgstr "otevre nastavení harddisku"
-
-#: src/enigma_setup.cpp:53
+#: src/enigma_setup.cpp:48
 msgid "Parental Lock"
 msgstr "Zámek kanalu"
 
-#: src/enigma_setup.cpp:53
+#: src/enigma_setup.cpp:48
 msgid "open parental setup"
 msgstr "otevre nastavení zámku kanálú"
 
-#: src/enigma_setup.cpp:55 src/setup_extra.cpp:31
+#: src/enigma_setup.cpp:50 src/setup_extra.cpp:31
 msgid "Expert Setup"
 msgstr "Expert nastavení"
 
-#: src/enigma_setup.cpp:55
+#: src/enigma_setup.cpp:50
 msgid "open expert setup"
 msgstr "otevre Expert nastavení"
-
-#: src/enigma_setup.cpp:123 src/system_settings.cpp:116
-msgid "sorry, no harddisks found!"
-msgstr "Harddisk nenalezen !"
-
-#: src/enigma_setup.cpp:123 src/system_settings.cpp:116
-msgid "Harddisk setup..."
-msgstr "Nastavení harddisku..."
 
 #: src/epgwindow.cpp:115 src/timer.cpp:141
 msgid "Sun"
@@ -3236,15 +3230,15 @@ msgstr "Vstup 16"
 msgid "select uncommitted switch Input 16"
 msgstr "select Uncommitted Switch Input 16?"
 
-#: src/scan.cpp:36
+#: src/scan.cpp:37
 msgid "auto scan"
 msgstr "automatické"
 
-#: src/scan.cpp:37
+#: src/scan.cpp:38
 msgid "manual scan.."
 msgstr "rucní vyhledávání..."
 
-#: src/scan.cpp:226
+#: src/scan.cpp:230
 msgid ""
 "To begin searching for a valid satellite press OK, or choose your desired "
 "satellite manually and press OK"
@@ -3252,7 +3246,7 @@ msgstr ""
 "Pro zacátek vyhledávání satelitu stiskni OK nebo vyber satelit manuálne a "
 "stiskni OK"
 
-#: src/scan.cpp:229
+#: src/scan.cpp:233
 msgid ""
 "To begin searching for a valid cable provider press OK, or choose your "
 "desired cable provider manually and press OK"
@@ -3260,12 +3254,12 @@ msgstr ""
 "Pro zacátek vyhledávání sluzby stiskni OK nebo vyber sluzbu manuálne a "
 "stiskni OK"
 
-#: src/scan.cpp:300
+#: src/scan.cpp:306
 msgid ""
 "A valid transponder has been found. Verify that the right network is selected"
 msgstr "Byl nalezen aktivní transpondér,  potvrdte je-li sluzba správná."
 
-#: src/scan.cpp:368
+#: src/scan.cpp:374
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try manual search if its some obscure satellite/"
@@ -3274,7 +3268,7 @@ msgstr ""
 "Vsechny transpondéry byly testovány, nové sluzby nenalezeny.Zkontrolujte "
 "nastavení príjímace nebo zkuste jinou druzici ."
 
-#: src/scan.cpp:376
+#: src/scan.cpp:382
 msgid ""
 "All known transponders have been tried, but no lock was possible. Verify "
 "antenna-/cable-setup or try another satellite/network."
@@ -3282,29 +3276,41 @@ msgstr ""
 "Vsechny transpondéry byly testovány, nové sluzby nenalezeny.Zkontrolujte "
 "nastavení príjímace nebo zkuste jinou druzici ."
 
-#: src/scan.cpp:385
+#: src/scan.cpp:391
 msgid "Search in progress "
 msgstr "Probíhá vyhledávání"
 
-#: src/scan.cpp:501
+#: src/scan.cpp:518
 #, c-format
 msgid "%02i minutes and %02i seconds left"
 msgstr "%02i minut a %02i sekund zbývá"
 
-#: src/scan.cpp:503
+#: src/scan.cpp:520
 #, c-format
 msgid "%02i seconds left"
 msgstr "%02i sekund zbývá"
 
-#: src/scan.cpp:594
+#: src/scan.cpp:640
+msgid "[only free]"
+msgstr ""
+
+#: src/scan.cpp:641
+msgid "[all]"
+msgstr ""
+
+#: src/scan.cpp:641
+msgid "[nothing]"
+msgstr ""
+
+#: src/scan.cpp:743
 msgid "Transponder Scan"
 msgstr "Vyhledávání vysílání"
 
-#: src/scan.cpp:739
+#: src/scan.cpp:997 src/scan.cpp:1034
 msgid "Scan is in progress... please wait"
 msgstr "Vyhledávání vysílání ... prosím cekejte"
 
-#: src/scan.cpp:743
+#: src/scan.cpp:1015 src/scan.cpp:1038
 #, c-format
 msgid ""
 "The transponder scan has finished and found \n"
@@ -3321,15 +3327,15 @@ msgstr ""
 " %i nových datových sluzeb.Prohledáno \n"
 "%i Transpondéru a %i sluzeb."
 
-#: src/scan.cpp:752
+#: src/scan.cpp:1047
 msgid "Done."
 msgstr "Hotovo."
 
-#: src/scan.cpp:759
+#: src/scan.cpp:1054
 msgid "Scan is in finished, press ok to close window"
 msgstr "Vyhledávání ukonceno, pres OK uzavri okno"
 
-#: src/scan.cpp:765
+#: src/scan.cpp:1060
 #, c-format
 msgid ""
 "Do you want\n"
@@ -3340,15 +3346,15 @@ msgstr ""
 "prohledávat dalsí \n"
 "%s?"
 
-#: src/scan.cpp:765
+#: src/scan.cpp:1060
 msgid "Satellite"
 msgstr "Satelity"
 
-#: src/scan.cpp:765
+#: src/scan.cpp:1060
 msgid "Transponder"
 msgstr "Transpondér"
 
-#: src/scan.cpp:766
+#: src/scan.cpp:1061
 msgid "Scan finished"
 msgstr "Prohledávání ukonceno"
 
@@ -3565,7 +3571,7 @@ msgstr ""
 "zde muzete vystredit prostredí teletextu... \n"
 "pro dalsí nápovedu pouzij help"
 
-#: src/setup_osd.cpp:181 src/system_settings.cpp:51
+#: src/setup_osd.cpp:181 src/system_settings.cpp:52
 msgid "OSD Settings"
 msgstr "Nastavení OSD"
 
@@ -3649,7 +3655,7 @@ msgstr "Prodleva stisknutí tlacítek (msek) v textových polích"
 msgid "UHF-Modulator Setup"
 msgstr "UHF-Modulátor nastavení "
 
-#: src/setup_rfmod.cpp:27 src/setup_rfmod.cpp:155
+#: src/setup_rfmod.cpp:27 src/setup_rfmod.cpp:158
 msgid "Test Pattern"
 msgstr "Kontrolní obraz"
 
@@ -3685,19 +3691,19 @@ msgstr "6.5 MHz"
 msgid "change sound subcarrier frequency"
 msgstr "zmente zvuk nosné "
 
-#: src/setup_rfmod.cpp:95
+#: src/setup_rfmod.cpp:97
 msgid "change channel"
 msgstr "zmena kanálu"
 
-#: src/setup_rfmod.cpp:121
+#: src/setup_rfmod.cpp:124
 msgid "250Khz steps"
 msgstr "250 kHz krok"
 
-#: src/setup_rfmod.cpp:131
+#: src/setup_rfmod.cpp:134
 msgid "save settings and leave rf setup"
 msgstr "ulozit a opustit menu RF"
 
-#: src/setup_rfmod.cpp:155
+#: src/setup_rfmod.cpp:158
 msgid "if you can read this your rfmod will not work."
 msgstr "Jeslize je toto citelné RF nepracuje."
 
@@ -3837,77 +3843,86 @@ msgstr "odmítnout príchozí pripojení na portech 137,138,139"
 msgid "reject incoming connections on ports 21"
 msgstr "odmítnout príchozí pripojení na portu 21"
 
-#: src/setupvideo.cpp:40 src/system_settings.cpp:42
+#: src/setupvideo.cpp:43 src/system_settings.cpp:42
 msgid "A/V Settings"
 msgstr "Nastavení A/V "
 
-#: src/setupvideo.cpp:45
+#: src/setupvideo.cpp:48
 msgid "Color Format:"
 msgstr "Formát barev:"
 
-#: src/setupvideo.cpp:55
+#: src/setupvideo.cpp:58
 msgid "CVBS"
 msgstr "CVBS"
 
-#: src/setupvideo.cpp:56
+#: src/setupvideo.cpp:59
 msgid "RGB"
 msgstr "RGB"
 
-#: src/setupvideo.cpp:57
+#: src/setupvideo.cpp:60
 msgid "SVideo"
 msgstr "SVideo"
 
-#: src/setupvideo.cpp:60
+#: src/setupvideo.cpp:63
 msgid "YPbPr"
 msgstr "YPbPr"
 
-#: src/setupvideo.cpp:63
+#: src/setupvideo.cpp:66
 msgid "choose color format ( left, right )"
 msgstr "vyberte formát obrazu ( <, > )"
 
-#: src/setupvideo.cpp:67
+#: src/setupvideo.cpp:70
 msgid "Aspect Ratio:"
 msgstr "Pomer :"
 
-#: src/setupvideo.cpp:77
+#: src/setupvideo.cpp:80
 msgid "choose aspect ratio ( left, right )"
 msgstr "zvolte pomer ( <, > )"
 
-#: src/setupvideo.cpp:78
+#: src/setupvideo.cpp:81
 msgid "4:3 letterbox"
 msgstr "4:3 letterbox"
 
-#: src/setupvideo.cpp:79
+#: src/setupvideo.cpp:82
 msgid "4:3 panscan"
 msgstr "4:3 panscan"
 
-#: src/setupvideo.cpp:80
+#: src/setupvideo.cpp:83
 msgid "16:9"
 msgstr "16:9"
 
-#: src/setupvideo.cpp:87
+#: src/setupvideo.cpp:90
 msgid "Disable WSS on 4:3"
 msgstr "Vypnout WSS pro 4:3"
 
-#: src/setupvideo.cpp:88
+#: src/setupvideo.cpp:91
 msgid "don't send WSS signal when A-ratio is 4:3"
 msgstr "neposílej WSS signál pokud je pomer stran 4:3"
 
-#: src/setupvideo.cpp:95
+#: src/setupvideo.cpp:98
 msgid "AC3 default output"
 msgstr "AC3 implicitní výstup"
 
-#: src/setupvideo.cpp:98
+#: src/setupvideo.cpp:101
 msgid "enable/disable ac3 default output (ok)"
 msgstr "umoznit/zakázat implicitne AC3 výstup  (OK)"
 
-#: src/setupvideo.cpp:102
+#: src/setupvideo.cpp:105
 msgid "use PAL-M for NTSC"
 msgstr "pouzij PAL-M po NTSC"
 
-#: src/setupvideo.cpp:105
+#: src/setupvideo.cpp:108
 msgid "use PAL-M instead of real NTSC"
 msgstr "pouzij PAL-M namísto NTSC"
+
+#: src/setupvideo.cpp:112
+msgid "Auto VCR switching"
+msgstr ""
+
+#: src/setupvideo.cpp:115
+#, fuzzy
+msgid "auto switch to VCR connector"
+msgstr "prepni do TV módu"
 
 #: src/software_update.cpp:33
 msgid "Internet Update"
@@ -4079,11 +4094,11 @@ msgstr "Root"
 msgid "Movies"
 msgstr "Filmy"
 
-#: src/sselect.cpp:743
+#: src/sselect.cpp:742
 msgid "Select No or press Abort to lock/unlock the complete directory"
 msgstr "Vyber No nebo Abort k zamcení/odemcení celého adresáre"
 
-#: src/sselect.cpp:743
+#: src/sselect.cpp:742
 msgid "Enter Directory"
 msgstr "Vybrat adresár"
 
@@ -4404,7 +4419,6 @@ msgid "Transponders changed"
 msgstr "Transpondér zmenen"
 
 #: src/tpeditwindow.cpp:267
-#, fuzzy
 msgid "Transponders couldn't be written to file!"
 msgstr "Transpondéry nelze ulozit do souboru !"
 
@@ -4493,8 +4507,8 @@ msgstr "stav aktualizace"
 msgid "Can't read flashimage.img!"
 msgstr "Nemohu precíst flashimage.img !"
 
-#: src/upgrade.cpp:573 src/upgrade.cpp:587 src/upgrade.cpp:603
-#: src/upgrade.cpp:614
+#: src/upgrade.cpp:573 src/upgrade.cpp:587 src/upgrade.cpp:605
+#: src/upgrade.cpp:616
 msgid "Flash"
 msgstr "Flash"
 
@@ -4502,19 +4516,19 @@ msgstr "Flash"
 msgid "flashimage.img has filesize of 0byte!"
 msgstr "flashimage.img ma nulovou délku !"
 
-#: src/upgrade.cpp:603
+#: src/upgrade.cpp:605
 msgid "Erase error!"
 msgstr "Chyba mazání!"
 
-#: src/upgrade.cpp:614
+#: src/upgrade.cpp:616
 msgid "Can't open mtd!"
 msgstr "Nelze otevrít mtd!"
 
-#: src/upgrade.cpp:629
+#: src/upgrade.cpp:631
 msgid "Writing Software to Flash..."
 msgstr "Zapisuji software do Flash ..."
 
-#: src/upgrade.cpp:651
+#: src/upgrade.cpp:653
 msgid ""
 "upgrade successful!\n"
 "restarting..."
@@ -4522,31 +4536,31 @@ msgstr ""
 "aktualizace ukoncena!\n"
 "restartuji ..."
 
-#: src/upgrade.cpp:652
+#: src/upgrade.cpp:654
 msgid "upgrade ok"
 msgstr "aktualizace OK"
 
-#: src/upgrade.cpp:679
+#: src/upgrade.cpp:681
 msgid "Erasing Flash..."
 msgstr "Mazu Flash..."
 
-#: src/upgrade.cpp:713
+#: src/upgrade.cpp:715
 msgid "This is the currently installed release."
 msgstr "Aktuální nainstalovaná verze."
 
-#: src/upgrade.cpp:716
+#: src/upgrade.cpp:718
 msgid "This is an older release."
 msgstr "Toto je starsí verze."
 
-#: src/upgrade.cpp:719
+#: src/upgrade.cpp:721
 msgid "No changelog data available."
 msgstr "Zadné nové informace nezjisteny."
 
-#: src/upgrade.cpp:733
+#: src/upgrade.cpp:735
 msgid "No new features were added in this release."
 msgstr "Nebyly pridány zadné nové funkce v této verzi."
 
-#: src/upgrade.cpp:736
+#: src/upgrade.cpp:738
 msgid "The following new features were added in this release:\n"
 msgstr "Následující nové funkce byli v této verzi dodané:\n"
 
@@ -4582,29 +4596,45 @@ msgstr "otevre nastavení Casového pásma"
 msgid "open A/V settings"
 msgstr "Otevre A/V nastavení"
 
-#: src/system_settings.cpp:44
+#: src/system_settings.cpp:45
 msgid "UHF Modulator"
 msgstr "UHF Modulátor"
 
-#: src/system_settings.cpp:44
+#: src/system_settings.cpp:45
 msgid "open UHF-Modulator setup"
 msgstr "Otevre nastavení UHF modulátoru"
 
-#: src/system_settings.cpp:51
+#: src/system_settings.cpp:49
+msgid "Harddisc Setup"
+msgstr "Nastavení harddisku"
+
+#: src/system_settings.cpp:49
+msgid "open harddisc setup"
+msgstr "otevre nastavení harddisku"
+
+#: src/system_settings.cpp:52
 msgid "open on screen display settings"
 msgstr "otevre nastavení OSD"
 
-#: src/system_settings.cpp:52
+#: src/system_settings.cpp:53
 msgid "open language selector"
 msgstr "Otevre nastavení Jazyka"
 
-#: src/system_settings.cpp:54
+#: src/system_settings.cpp:55
 msgid "LCD Settings"
 msgstr "LCD nastavení"
 
-#: src/system_settings.cpp:54
+#: src/system_settings.cpp:55
 msgid "open LCD settings"
 msgstr "otervri nastavení LCD"
+
+#: src/system_settings.cpp:117
+msgid "sorry, no harddisks found!"
+msgstr "Harddisk nenalezen !"
+
+#: src/system_settings.cpp:117
+msgid "Harddisk setup..."
+msgstr "Nastavení harddisku..."
 
 #: src/time_settings.cpp:35
 msgid "Timezone Configuration"
@@ -4626,17 +4656,8 @@ msgstr "K synchronizaci casu musíte naladit nejaký program"
 msgid "time correction change error"
 msgstr "zmena casu neúspesná"
 
-#~ msgid "mmi input field"
-#~ msgstr "mmi vstup"
+#~ msgid "clear list before"
+#~ msgstr "odstranit prehled"
 
-#~ msgid "my"
-#~ msgstr "mé"
-
-#~ msgid "Processor: XPC823, 80MHz"
-#~ msgstr "Procesor : XPC823, 80MHz"
-
-#~ msgid "send data to CI"
-#~ msgstr "posli data do CI"
-
-#~ msgid "Unknown"
-#~ msgstr "Neznámý"
+#~ msgid "remove all services before scan"
+#~ msgstr "vymazat sluzby pred vyhledáváním "
