@@ -14,11 +14,6 @@
 
 int eventData::CacheSize=0;
 
-#ifdef ZAP_DELAY
-#undef ZAP_DELAY
-#define ZAP_DELAY 2000
-#endif
-
 eEPGCache *eEPGCache::instance;
 pthread_mutex_t eEPGCache::cache_lock=
 	PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;

@@ -20,7 +20,7 @@
 
 #define CLEAN_INTERVAL 60000    //  1 min
 #define UPDATE_INTERVAL 3600000  // 60 min
-#define ZAP_DELAY 4000          // 4 sek
+#define ZAP_DELAY 2000          // 2 sek
 
 #define HILO(x) (x##_hi << 8 | x##_lo)
 
