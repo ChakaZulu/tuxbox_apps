@@ -744,11 +744,15 @@ movieplayer.toomanybookmarks Du hesch scho zviu Bookmarks aagleit.\nEs muess zer
 movieplayer.bookmarkname Bookmark Name
 movieplayer.bookmarkname_hint1 Gib ä Name für's nöie Bookmark i.
 movieplayer.bookmarkname_hint2 
-movieplayer.skipping Neupositionierig - bitte warte
 movieplayer.goto Schpringe zu ...
 movieplayer.goto.h1 = -> absolute Schprung
 movieplayer.goto.h2 +,- -> relative Schprung
 movieplayer.wrongvlcversion Funktion isch mit dere Version vom VLC nid müglech
+
+bookmarkmanager.name Bookmarks
+bookmarkmanager.delete Lösche
+bookmarkmanager.rename Umbenenne
+bookmarkmanager.select Uswähle
 
 filebrowser.head Filebrowser
 filebrowser.filter.active Föuter a
@@ -764,6 +768,9 @@ filebrowser.sort.size (Grössi)
 filebrowser.nextpage Site vor
 filebrowser.prevpage Site zrugg
 filebrowser.showrights Dateirächt aazeige
+filebrowser.delete Lösche
+filebrowser.dodelete1 Söu
+filebrowser.dodelete2 glöscht wärde?
 
 nfs.mount NFS/CIFS Verzeichnis mounte
 nfs.ip NFS/CIFS Sörver IP
@@ -783,6 +790,7 @@ nfs.type_cifs CIFS
 nfs.username CIFS Benutzername
 nfs.password CIFS Passwort
 nfs.mounterror_notsup Dateisystem-Typ wird nid ungerstützt
+nfs.remount Verzeichnisse erneut mounte
 nfsmenu.head NFS/CIFS Ischtöuige
 
 apids.hint_1 Gib diä z'streamende APIDs i,
@@ -802,3 +810,16 @@ rclock.menueadd FB schperre
 rclock.title Färnbedienig schperre
 rclock.lockmsg d'Färnbedienig vo de DBOX2 wird gschperrt.\n um d'Schperri ufzhebe, bitte\n <ROT> u <DBOX> uf dr Färnbedienig\n druecke.
 rclock.unlockmsg DBOX2 Färnbedienig reaktiviert...
+
+EPGMenu.head EPG - Programm Informatione
+EPGMenu.eventinfo Info zur Sändig
+EPGMenu.eventlist Vorschou aktuells Programm
+EPGMenu.epgplus Vorschou Übersicht
+EPGMenu.streaminfo technischi Information
+
+EPGPlus.head Vorschou Übersicht (EPG Plus)
+EPGPlus.record Ufnahm
+EPGPlus.refresh_epg Aktualisiere
+EPGPlus.remind Vormerke
+EPGPlus.scroll_mode Scroll Mode
+EPGPlus.stretch_mode Stretch Mode
