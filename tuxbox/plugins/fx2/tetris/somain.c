@@ -507,8 +507,17 @@ int tetris_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 		while( !doexit )
 		{
 			tv.tv_sec = 0;
-			tv.tv_usec = 20000;
+			tv.tv_usec = 10000;
 			x = select( 0, 0, 0, 0, &tv );		/* 10ms pause */
+			RcGetActCode( );
+			if ( doexit )
+				break;
+			tv.tv_sec = 0;
+			tv.tv_usec = 10000;
+			x = select( 0, 0, 0, 0, &tv );		/* 10ms pause */
+			RcGetActCode( );
+			if ( doexit )
+				break;
 			MoveSide();
 			if ( !FallDown() )
 			{
