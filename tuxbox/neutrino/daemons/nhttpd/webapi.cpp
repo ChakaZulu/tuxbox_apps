@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.8 2002/10/06 01:18:49 dirch Exp $
+	$Id: webapi.cpp,v 1.9 2002/10/06 02:04:02 Zwen Exp $
 
 	License: GPL
 
@@ -24,6 +24,7 @@
 */
 #include "webapi.h"
 #include "debug.h"
+#include "algorithm"
 
 //-------------------------------------------------------------------------
 bool CWebAPI::Execute(CWebserverRequest* request)
@@ -101,7 +102,7 @@ bool CWebAPI::Timer(CWebserverRequest* request)
 
 	if(Parent->Timerd->isTimerdAvailable())
 	{
-		if((request->ParameterList.size() > 0))
+		if(request->ParameterList.size() > 0)
 		{
 			if(request->ParameterList["action"] == "remove")
 			{
@@ -129,6 +130,11 @@ bool CWebAPI::Timer(CWebserverRequest* request)
 			{
 				doNewTimer(request);
 				loadTimerMain(request);
+			}
+			else if(request->ParameterList["action"] == "none")
+			{
+				request->SendPlainHeader("text/html");
+				ShowTimerList(request);
 			}
 			else
 			{
@@ -664,9 +670,9 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 
    CTimerd::TimerList timerlist;             // List of bouquets
 
-
    timerlist.clear();
    Parent->Timerd->getTimerList(timerlist);
+   sort(timerlist.begin(), timerlist.end());
 
    CZapitClient::BouquetChannelList channellist;     
    channellist.clear();
@@ -775,7 +781,7 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	char zType[20+1];
 	Parent->timerEventType2Str(timer.eventType,zType,20);
 
-	request->SendHTMLHeader("MODIFY TIMER" + timerId);
+	request->SendHTMLHeader("MODIFY TIMER");
 	request->SocketWrite("<center>");
 	request->SocketWrite("<TABLE border=2 ><tr CLASS=\"a\"><TD>\n");
 	request->SocketWrite("<form method=\"GET\" name=\"modify\" action=\"/fb/timer.dbox2\">\n");
@@ -826,9 +832,11 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	request->SocketWrite("</select></TD></TR>\n");
 
 	request->SocketWrite("<TR><TD colspan=2 height=10></TR>\n");
-	request->SocketWrite("<TR><TD><center><INPUT TYPE=\"submit\" value=\"OK\"></center></TD>\n");
-	request->SocketWrite("<TD><center><form method=\"GET\" action=\"/fb/timer.dbox2\"><INPUT TYPE=\"submit\" value=\"CANCEL\"><form></center></TD>\n");
-	request->SocketWrite("</TR></TABLE></form>");
+	request->SocketWrite("<TR><TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form></TD>\n");
+	request->SocketWrite("<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\">\n");
+	request->SocketWrite("<INPUT type=\"hidden\" name=\"action\" value=\"none\">\n");
+	request->SocketWrite("<INPUT TYPE=\"submit\" value=\"CANCEL\"></form></TD>\n");
+	request->SocketWrite("</TR></TABLE></TABLE>");
 	request->SendHTMLFooter();
 }
 
@@ -995,12 +1003,14 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("</selected></TR>\n");
 	//standby
 	request->SocketWrite("<tr id=\"StandbyRow\" style=\"visibility:hidden\"><TD colspan=2>\n");
-	request->SocketWrite("Standby on ?<INPUT TYPE=\"radio\" name=\"sbon\" value=\"1\">Yes\n");
-	request->SocketWrite("<INPUT TYPE=\"radio\" name=\"sbon\" value=\"0\" checked>No</TD></TR>\n");
+	request->SocketWrite("Standby <INPUT TYPE=\"radio\" name=\"sbon\" value=\"1\">On\n");
+	request->SocketWrite("<INPUT TYPE=\"radio\" name=\"sbon\" value=\"0\" checked>Off</TD></TR>\n");
 	// Buttons
-	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\">\n");
-	request->SocketWrite("<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\"><INPUT TYPE=\"submit\" value=\"CANCEL\"><form></center></TD>\n");
-	request->SocketWrite("</TABLE></form></TABLE>\n");
+	request->SocketWrite("<TD align=\"center\"><INPUT TYPE=\"submit\" value=\"OK\"></form>\n");
+	request->SocketWrite("<TD align=\"center\"><form method=\"GET\" action=\"/fb/timer.dbox2\">\n");
+	request->SocketWrite("<INPUT TYPE=\"hidden\" NAME=\"action\" VALUE=\"none\">\n");
+	request->SocketWrite("<INPUT TYPE=\"submit\" value=\"CANCEL\"></form></TD>\n");
+	request->SocketWrite("</TABLE></TABLE>\n");
 	request->SendHTMLFooter();
 }
 
