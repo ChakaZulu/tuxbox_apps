@@ -132,10 +132,15 @@ void CEpgData::processTextToArray(std::string text) // UTF-8
 
 void CEpgData::showText( int startPos, int ypos )
 {
+	// recalculate
+	medlineheight=g_Fonts->epg_info1->getHeight();
+	medlinecount=(oy- botboxheight)/medlineheight;
+
 	int textCount = epgText.size();
 	int y=ypos;
 	int linecount=medlinecount;
 	int sb = linecount* medlineheight;
+
 	frameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT);
 
 	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
@@ -394,24 +399,24 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 			switch ( msg )
 			{
 				case CRCInput::RC_left:
-// $$$ BUG scrollpos passt u.U. nicht zu screen
 					if (prev_id != 0)
 					{
 						frameBuffer->paintBoxRel(sx+ 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ 10, sy+ oy- 3, widthr, "<", COL_MENUCONTENT+ 1);
 
 						show(channel_id, prev_id, &prev_zeit, false);
+						showPos=0;
 					}
 					break;
 
 				case CRCInput::RC_right:
-// $$$ BUG scrollpos passt u.U. nicht zu screen
 					if (next_id != 0)
 					{
 						frameBuffer->paintBoxRel(sx+ ox- botboxheight+ 8- 5, sy+ oy- botboxheight+ 4, botboxheight- 8, botboxheight- 8,  COL_MENUCONTENT+ 1);
 						g_Fonts->epg_date->RenderString(sx+ ox- botboxheight+ 8, sy+ oy- 3, widthr, ">", COL_MENUCONTENT+ 1);
 
 						show(channel_id, next_id, &next_zeit, false);
+						showPos=0;
 					}
 					break;
 
@@ -491,6 +496,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 						g_Fonts->epg_info2->setSize((int)(g_Fonts->epg_info2->getSize() / BIG_FONT_FAKTOR));
 					}
 					show(channel_id, id, startzeit, false);
+					showPos=0;
 					break;
 
 				case CRCInput::RC_ok:
