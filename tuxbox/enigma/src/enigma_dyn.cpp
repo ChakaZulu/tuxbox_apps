@@ -1556,18 +1556,18 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	result << "<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>"
 						"<!-- " << sapi->service << "-->" << std::endl <<
 						"<table cellspacing=0 cellpadding=0 border=0>"
-						"<tr><td>name:</td><td>" << name << "</td></tr>" <<
-						"<tr><td>provider:</td><td>" << provider << "</td></tr>" <<
-						"<tr><td>vpid:</td><td>" << vpid << "</td></tr>" <<
-						"<tr><td>apid:</td><td>" << apid << "</td></tr>" <<
-						"<tr><td>pcrpid:</td><td>" << pcrpid << "</td></tr>" <<
-						"<tr><td>tpid:</td><td>" << tpid << "</td></tr>" <<
-						"<tr><td>tsid:</td><td>" << tsid << "</td></tr>" <<
-						"<tr><td>onid:</td><td>" << onid << "</td></tr>" <<
-						"<tr><td>sid:</td><td>" << sid << "</td></tr>" <<
-						"<tr><td>pmt:</td><td>" << pmt << "</td></tr>" <<
-						"<tr><td>vidformat:<td>" << vidform << "</td></tr>" <<
-						"</table>" <<
+						"<tr><td>name:</td><td>" << name << "</td></tr>"
+						"<tr><td>provider:</td><td>" << provider << "</td></tr>"
+						"<tr><td>vpid:</td><td>" << vpid << "</td></tr>"
+						"<tr><td>apid:</td><td>" << apid << "</td></tr>"
+						"<tr><td>pcrpid:</td><td>" << pcrpid << "</td></tr>"
+						"<tr><td>tpid:</td><td>" << tpid << "</td></tr>"
+						"<tr><td>tsid:</td><td>" << tsid << "</td></tr>"
+						"<tr><td>onid:</td><td>" << onid << "</td></tr>"
+						"<tr><td>sid:</td><td>" << sid << "</td></tr>"
+						"<tr><td>pmt:</td><td>" << pmt << "</td></tr>"
+						"<tr><td>vidformat:<td>" << vidform << "</td></tr>"
+						"</table>"
 						"</body></html>";
 
 	return result.str();
@@ -1798,8 +1798,8 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 		spath="";
 	}
 
-	eDebug("current service: %s\n", current.c_str());
-	eServiceReference current_service=string2ref(current);
+	eDebug("current service: %s", current.c_str());
+	eServiceReference current_service(current);
 
 	eString res;
 
@@ -2152,8 +2152,8 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 	{
-		eServiceReference ref(serviceRef);
-		current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
+		eServiceReference ref(string2ref(serviceRef));
+		current = eDVB::getInstance()->settings->getTransponders()->searchService((eServiceReferenceDVB&)ref);
 		if(current)
 		{
 			EITEvent *event = eEPGCache::getInstance()->lookupEvent((eServiceReferenceDVB&)ref, eventid );
@@ -2165,7 +2165,7 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 					{
 						// ok, we probably found the event...
 						description = ((ShortEventDescriptor*)*d)->event_name;
-						eDebug("[ENIGMA_DYN] addTimerEvent: found description = %s\n", description.c_str());
+						eDebug("[ENIGMA_DYN] addTimerEvent: found description = %s", description.c_str());
 						break;
 					}
 				}
