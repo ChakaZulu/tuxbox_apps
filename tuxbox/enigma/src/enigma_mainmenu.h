@@ -1,13 +1,18 @@
 #ifndef __enigma_mainmenu_h
 #define __enigma_mainmenu_h
 
-#include <core/gui/listbox.h>
 #include <include/libsig_comp.h>
+#include <core/gui/ewidget.h>
 
-class eMainMenu: public Object
+class gPixmap;
+class eLabel;
+
+class eMainMenu: public eWidget
 {
-	eListBoxWindow<eListBoxEntryMenu> window;
-private:
+	gPixmap *pixmaps[7][2];
+	eLabel *label[7], *description;
+	int active;
+	void setActive(int i);
 	void sel_tv();
 	void sel_radio();
 	void sel_vcr();
@@ -15,10 +20,10 @@ private:
 	void sel_info();	
 	void sel_quit();
 	void sel_plugins();
+protected:
+	int eventHandler(const eWidgetEvent &event);
 public:
 	eMainMenu();
-	void setLCD(eWidget *a, eWidget *b);
-	int exec();
 };
 
 #endif

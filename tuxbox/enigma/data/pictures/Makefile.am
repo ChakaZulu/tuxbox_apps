@@ -1,4 +1,4 @@
-SUBDIRS = chk chk_v2 decoration
+SUBDIRS = chk chk_v2 decoration mainmenu
 
 EXTRA_DIST = \
 	ch-bar.png checked.png ch-num.png crypt_off.png crypt_on.png \

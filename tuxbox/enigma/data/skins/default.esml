@@ -53,11 +53,45 @@
 		<img name="lcd_enigma_logo" src="enigma2.png" nomerge="yes" />
 		<img name="lcd_menu" src="lcdmenu.png" nomerge="yes" />
 		<img name="lcd_scart" src="video.png" nomerge="yes" />
+		
+			<!-- main menu -->
+		<img name="mainmenu.background" src="mainmenu/background-fs8.png" />
+		<img name="mainmenu.info" src="mainmenu/info-fs8.png" />
+		<img name="mainmenu.info.sel" src="mainmenu/info_sel-fs8.png" />
+		<img name="mainmenu.setup" src="mainmenu/setup-fs8.png" />
+		<img name="mainmenu.setup.sel" src="mainmenu/setup_sel-fs8.png" />
+		<img name="mainmenu.shutdown" src="mainmenu/shutdown-fs8.png" />
+		<img name="mainmenu.shutdown.sel" src="mainmenu/shutdown_sel-fs8.png" />
+		<img name="mainmenu.scart" src="mainmenu/scart-fs8.png" />
+		<img name="mainmenu.scart.sel" src="mainmenu/scart_sel-fs8.png" />
+		<img name="mainmenu.games" src="mainmenu/games-fs8.png" />
+		<img name="mainmenu.games.sel" src="mainmenu/games_sel-fs8.png" />
+		<img name="mainmenu.tv" src="mainmenu/tv-fs8.png" />
+		<img name="mainmenu.tv.sel" src="mainmenu/tv_sel-fs8.png" />
+		<img name="mainmenu.radio" src="mainmenu/radio-fs8.png" />
+		<img name="mainmenu.radio.sel" src="mainmenu/radio_sel-fs8.png" />
 	</images>
 	
 	<colors>
 		<color name="background" color="#ff000000" />
 	</colors>
+	
+	<object name="eZapMainMenu">
+		<eWidget position="0:300" size="720:276" backgroundColor="-1" >
+			<eLabel pixmap="mainmenu.background" position="0:0" size="e:e" name="background" />
+			<eLabel position="22:60" size="70:70" name="l3" alphatest="on" />
+			<eLabel position="114:40" size="70:70" name="l2" alphatest="on" />
+			<eLabel position="208:28" size="70:70" name="l1" alphatest="on" />
+			<eLabel position="312:11" size="100:100" name="m" alphatest="on" />
+			<eLabel position="443:28" size="70:70" name="r1" alphatest="on" />
+			<eLabel position="537:40" size="70:70" name="r2" alphatest="on" />
+			<eLabel position="629:60" size="70:70" name="r3" alphatest="on" />
+			
+			<eLabel position="200:200" size="320:48" align="center" font="eWindow.TitleBar"
+				foregroundColor="eWindow.titleBar" backgroundColor="background" 
+				name="description" />
+		</eWidget>
+	</object>
  
 	<object name="eventview">
 		<eWindow cposition="50:80" csize="590:400" name="title">
