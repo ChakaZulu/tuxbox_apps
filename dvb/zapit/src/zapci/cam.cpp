@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.21 2002/09/20 16:53:39 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.22 2002/09/21 17:58:42 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -36,10 +36,7 @@
 
 CCam::CCam ()
 {
-}
-
-CCam::~CCam ()
-{
+	camdSocket = -1;
 }
 
 bool CCam::camdConnect ()
@@ -78,26 +75,6 @@ void CCam::camdDisconnect ()
 	}
 }
 
-ca_msg_t CCam::getMessage (unsigned short length)
-{
-	ca_msg_t ca_msg;
-
-	ca_msg.index = 0;
-	ca_msg.type = 0;
-
-	if (camdSocket == -1)
-	{
-		ca_msg.length = 0;
-	}
-	else if ((ca_msg.length = read(camdSocket, ca_msg.msg, length)) < 0)
-	{
-		perror("[CCam::getMessage] read");
-		ca_msg.length = 0;
-	}
-
-	return ca_msg;
-}
-
 int CCam::sendMessage (unsigned char * data, unsigned short length)
 {
 	camdDisconnect();
@@ -124,4 +101,3 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 
 	return sendMessage(buffer, pos);
 }
-

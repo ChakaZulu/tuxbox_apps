@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.16 2002/08/21 09:59:23 obi Exp $
+ * $Id: cam.h,v 1.17 2002/09/21 17:58:42 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,8 +22,6 @@
 #ifndef __cam_h__
 #define __cam_h__
 
-#include <ost/ca.h>
-
 #include "ci.h"
 
 class CCam
@@ -34,12 +32,10 @@ class CCam
 		bool camdConnect ();
 		void camdDisconnect ();
 
-		ca_msg_t CCam::getMessage (unsigned short length);
 		int sendMessage (unsigned char * data, unsigned short length);
 
 	public:
 		CCam();
-		~CCam();
 
 		int setCaPmt (CCaPmt * caPmt);
 };
