@@ -506,9 +506,8 @@ timer.eventrecord.msg   Die Sendung wurde zur Aufnahme vergemerkt
 timerlist.name Timerliste
 timerlist.delete Löschen
 timerlist.empty Es gibt momentan keine Timer
-timerlist.deleting Timer wird gelöscht
 timerlist.type.shutdown Shutdown
-timerlist.type.nextprogramm Nächstes Programm
+timerlist.type.nextprogram Nächstes Programm
 timerlist.type.zapto Umschalten
 timerlist.type.standby Standby
 timerlist.type.record Aufnahme
@@ -526,6 +525,18 @@ timerlist.repeat.unknown unbekannt
 timerlist.program.unknown Programm unbekannt
 timerlist.standby.on Aufwachen aus Standby
 timerlist.standby.off Auf Standby gehen
+timerlist.alarmtime Alarmzeit
+timerlist.stoptime Stopzeit
+timerlist.new Neuer Timer
+timerlist.menumodify Timer bearbeiten
+timerlist.type Timertyp
+timerlist.repeat Wiederholung
+timerlist.save Timer speichern
+timerlist.standby SB Modus
+timerlist.channel Kanal
+timerlist.menunew Neuer Timer
+timerlist.reload Aktualisieren
+timerlist.modify Bearbeiten
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Titel

@@ -45,7 +45,6 @@
 #include "gui/widget/menue.h"
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"
-#include "gui/widget/progresswindow.h"
 #include "gui/color.h"
 #include "gui/infoviewer.h"
 
@@ -53,6 +52,49 @@
 
 #define info_height 60
 
+class CTimerListNewNotifier : public CChangeObserver
+{
+	private:
+		CMenuForwarder* m1;
+		CMenuOptionChooser* m2;
+		CMenuOptionChooser* m3;
+		int* iType;
+		time_t* stopTime;
+	public:
+		CTimerListNewNotifier( int* Type, time_t* time,CMenuForwarder* a1, CMenuOptionChooser* a2, CMenuOptionChooser* a3)
+		{
+			m1 = a1;
+			m2 = a2;
+			m3 = a3;
+			iType=Type;
+			stopTime=time;
+		}
+		bool changeNotify(string OptionName, void* dummy)
+		{
+			CTimerEvent::CTimerEventTypes type = (CTimerEvent::CTimerEventTypes) *iType;
+			if(type == CTimerEvent::TIMER_RECORD)
+			{
+				m1->setActive (true);
+				*stopTime=time(NULL);
+			}
+			else
+			{
+				m1->setActive (false);
+				*stopTime=0;
+			}
+			if(type == CTimerEvent::TIMER_RECORD ||
+				type == CTimerEvent::TIMER_ZAPTO ||
+				type == CTimerEvent::TIMER_NEXTPROGRAM)
+				m2->setActive(true);
+			else
+				m2->setActive(false);
+			if(type == CTimerEvent::TIMER_STANDBY)
+				m3->setActive(true);
+			else
+				m3->setActive(false);
+			return true;
+		}
+};
 
 
 CTimerList::CTimerList()
@@ -68,6 +110,7 @@ CTimerList::CTimerList()
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	Timer = new CTimerdClient();
+	skipEventID=0;
 }
 
 CTimerList::~CTimerList()
@@ -78,6 +121,38 @@ CTimerList::~CTimerList()
 
 int CTimerList::exec(CMenuTarget* parent, string actionKey)
 {
+	if(actionKey=="modifytimer")
+	{
+		timerlist[selected].announceTime = timerlist[selected].alarmTime -60;
+		Timer->modifyTimerEvent (timerlist[selected].eventID, timerlist[selected].announceTime, 
+										 timerlist[selected].alarmTime, 
+										 timerlist[selected].stopTime, timerlist[selected].eventRepeat);
+		return menu_return::RETURN_EXIT;
+	}
+	if(actionKey=="newtimer")
+	{
+		timerNew.announceTime=timerNew.alarmTime-60;
+		CTimerEvent::EventInfo eventinfo;
+		eventinfo.epgID=0;
+		eventinfo.onidSid=timerNew.onidSid;
+		timerNew.standby_on = (timerNew_standby_on == 1);
+		void *data=NULL;
+		if(timerNew.eventType == CTimerEvent::TIMER_STANDBY)
+			data=&(timerNew.standby_on);
+		else if(timerNew.eventType==CTimerEvent::TIMER_NEXTPROGRAM || 
+				  timerNew.eventType==CTimerEvent::TIMER_ZAPTO ||
+				  timerNew.eventType==CTimerEvent::TIMER_RECORD)
+			data= &eventinfo;
+		Timer->addTimerEvent(timerNew.eventType,data,timerNew.announceTime,timerNew.alarmTime,
+									timerNew.stopTime,timerNew.eventRepeat);
+		return menu_return::RETURN_EXIT;
+	}
+/*	if(actionKey.substr(0,3)=="SC!")
+	{
+		printf("SC: %s\n",actionKey.substr(3).c_str());
+	}*/
+
+
 	if (parent)
 	{
 		parent->hide();
@@ -107,6 +182,16 @@ void CTimerList::updateEvents(void)
 {
 	timerlist.clear();
 	Timer->getTimerList (timerlist);
+	//Remove last deleted event from List
+   CTimerd::TimerList::iterator timer = timerlist.begin();
+   for(; timer != timerlist.end();timer++)
+   {
+		if(timer->eventID==skipEventID)
+		{
+			timerlist.erase(timer);
+			break;
+		}
+	}
 	height = 450;
 	listmaxshow = (height-theight-0)/(fheight*2);
 	height = theight+0+listmaxshow*fheight*2; // recalc height
@@ -115,7 +200,7 @@ void CTimerList::updateEvents(void)
 		listmaxshow=timerlist.size();
 		height = theight+0+listmaxshow*fheight*2; // recalc height
 	}
-	if(selected==timerlist.size())
+	if(selected==timerlist.size() && timerlist.size()!=0)
 	{
 		selected=timerlist.size()-1;
 		liststart = (selected/listmaxshow)*listmaxshow;
@@ -146,8 +231,8 @@ int CTimerList::show()
 			if(timerlist.size()==0)
 			{
 				//evtl. anzeige dass keine kanalliste....
-				ShowHint ( "messagebox.info", g_Locale->getText("timerlist.empty"));		
-				return -1;
+			  /* ShowHint ( "messagebox.info", g_Locale->getText("timerlist.empty"));		
+				return -1;*/
 			}
 			paint();
 		}
@@ -161,7 +246,7 @@ int CTimerList::show()
 		{ //Exit after timeout or cancel key
 			loop=false;
 		}
-		else if ( msg == CRCInput::RC_up )
+		else if ( msg == CRCInput::RC_up && timerlist.size() > 0)
 		{
 			int prevselected=selected;
 			if(selected==0)
@@ -182,7 +267,7 @@ int CTimerList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( msg == CRCInput::RC_down )
+		else if ( msg == CRCInput::RC_down && timerlist.size() > 0)
 		{
 			int prevselected=selected;
 			selected = (selected+1)%timerlist.size();
@@ -198,19 +283,30 @@ int CTimerList::show()
 				paintItem(selected - liststart);
 			}
 		}
-		else if ( msg == CRCInput::RC_ok )
+		else if ( msg == CRCInput::RC_ok && timerlist.size() > 0)
 		{
 			// OK button
-		}
-		else if(msg==CRCInput::RC_red)
-		{
-			Timer->removeTimerEvent(timerlist[selected].eventID);
+			modifyTimer();  
 			update=true;
 		}
-		else if((msg==CRCInput::RC_green) ||
-				 (msg==CRCInput::RC_yellow) ||
-				 (msg==CRCInput::RC_blue) ||
-		         (CRCInput::isNumeric(msg)) )
+		else if(msg==CRCInput::RC_red && timerlist.size() > 0)
+		{
+			Timer->removeTimerEvent(timerlist[selected].eventID);
+			skipEventID=timerlist[selected].eventID;
+			update=true;
+		}
+		else if(msg==CRCInput::RC_green)
+		{
+			newTimer();
+			update=true;
+		}
+		else if(msg==CRCInput::RC_yellow)
+		{
+			update=true;
+		}
+		else if((msg==CRCInput::RC_blue) ||
+				  (msg==CRCInput::RC_setup) ||
+				  (CRCInput::isNumeric(msg)) )
 		{
 			//pushback key if...
 			g_RCInput->postMsg( msg, data );
@@ -283,23 +379,7 @@ void CTimerList::paintItem(int pos)
          case CTimerEvent::TIMER_ZAPTO :
          case CTimerEvent::TIMER_RECORD :
          {
-				if(channellist.size()==0)
-				{
-					CZapitClient *Zapit = new CZapitClient();
-					Zapit->getChannels(channellist);
-					delete Zapit;
-				}
-				CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
-				for(; channel != channellist.end();channel++)
-				{
-					if(channel->channel_id==timer.onidSid)
-				   {
-						zAddData = channel->name;
-						break;
-					}
-               if(channel == channellist.end())
-						zAddData=g_Locale->getText("timerlist.program.unknown");
-            }
+				zAddData=convertChannelId2String(timer.onidSid);
 			}
 			break;
 			case CTimerEvent::TIMER_STANDBY :
@@ -334,15 +414,21 @@ void CTimerList::paintFoot()
 	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD);
 	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
 
-	frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
-/*
+	if(timerlist.size()>0)
+	{
+		frameBuffer->paintIcon("rot.raw", x+width- 4* ButtonWidth - 20, y+height+4);
+		g_Fonts->infobar_small->RenderString(x+width- 4* ButtonWidth, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.delete").c_str(), COL_INFOBAR);
+	}
+
 	frameBuffer->paintIcon("gruen.raw", x+width- 3* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.add").c_str(), COL_INFOBAR);
+	g_Fonts->infobar_small->RenderString(x+width- 3* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.new").c_str(), COL_INFOBAR);
 
 	frameBuffer->paintIcon("gelb.raw", x+width- 2* ButtonWidth - 30, y+height+4);
-	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("bouqueteditor.move").c_str(), COL_INFOBAR);
-*/
+	g_Fonts->infobar_small->RenderString(x+width- 2* ButtonWidth - 10, y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.reload").c_str(), COL_INFOBAR);
+
+	frameBuffer->paintIcon("ok.raw", x+width- 1* ButtonWidth - 30, y+height);
+	g_Fonts->infobar_small->RenderString(x+width-1 * ButtonWidth , y+height+24 - 2, ButtonWidth- 26, g_Locale->getText("timerlist.modify").c_str(), COL_INFOBAR);
+
 }
 
 void CTimerList::paint()
@@ -373,7 +459,7 @@ string CTimerList::convertTimerType2String(CTimerEvent::CTimerEventTypes type)
    switch(type)
    {
       case CTimerEvent::TIMER_SHUTDOWN : return g_Locale->getText("timerlist.type.shutdown");
-      case CTimerEvent::TIMER_NEXTPROGRAM : return g_Locale->getText("timerlist.type.nextprogramm");
+      case CTimerEvent::TIMER_NEXTPROGRAM : return g_Locale->getText("timerlist.type.nextprogram");
       case CTimerEvent::TIMER_ZAPTO : return g_Locale->getText("timerlist.type.zapto");
       case CTimerEvent::TIMER_STANDBY : return g_Locale->getText("timerlist.type.standby");
       case CTimerEvent::TIMER_RECORD : return g_Locale->getText("timerlist.type.record");
@@ -397,4 +483,142 @@ string CTimerList::convertTimerRepeat2String(CTimerEvent::CTimerEventRepeat rep)
       default: return g_Locale->getText("timerlist.repeat.unknown");
 	}
 }
+string CTimerList::convertChannelId2String(t_channel_id id)
+{
+	string name=g_Locale->getText("timerlist.program.unknown");
+				
+	if(channellist.size()==0)
+   {
+		CZapitClient *Zapit = new CZapitClient();
+		Zapit->getChannels(channellist);
+		delete Zapit;
+	}
+	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
+	for(; channel != channellist.end();channel++)
+	{
+		if(channel->channel_id==id)
+		{
+			name=channel->name;
+			break;
+		}
+	}
+	return name;
+}
+
+void CTimerList::modifyTimer()
+{
+	CTimerd::responseGetTimer* timer=&timerlist[selected];
+	CMenuWidget timerSettings("timerlist.menumodify", "settings.raw");
+	timerSettings.addItem( new CMenuSeparator() );
+	timerSettings.addItem( new CMenuForwarder("menu.back") );
+	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	
+	char type[80];
+	strcpy(type,convertTimerType2String(timer->eventType ).c_str()); 
+	CMenuForwarder *m0 = new CMenuForwarder("timerlist.type", false, type);
+	timerSettings.addItem( m0);
+	
+	CDateInput*	timerSettings_alarmTime= new CDateInput("timerlist.alarmtime", &timer->alarmTime , "ipsetup.hint_1", "ipsetup.hint_2");
+	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime->getValue (), timerSettings_alarmTime );
+	timerSettings.addItem( m1);
+	
+	CDateInput*	timerSettings_stopTime= new CDateInput("timerlist.stoptime", &timer->stopTime , "ipsetup.hint_1", "ipsetup.hint_2");
+	CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", true, timerSettings_stopTime->getValue (), timerSettings_stopTime );
+	if(timer->stopTime != 0)
+	{
+		timerSettings.addItem( m2);
+	}
+
+	CMenuOptionChooser* m3 = new CMenuOptionChooser("timerlist.repeat", &((int)timer->eventRepeat ), true);
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_ONCE , "timerlist.repeat.once");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_DAILY , "timerlist.repeat.daily");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_WEEKLY , "timerlist.repeat.weekly");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_BIWEEKLY , "timerlist.repeat.biweekly");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_FOURWEEKLY , "timerlist.repeat.fourweekly");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_MONTHLY , "timerlist.repeat.monthly");
+
+	timerSettings.addItem(m3);
+	
+	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, "", this, "modifytimer") );
+
+	if (timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
+		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
+}
+
+void CTimerList::newTimer()
+{
+	// Defaults
+	timerNew.eventType = CTimerEvent::TIMER_SHUTDOWN ;
+	timerNew.eventRepeat = CTimerEvent::TIMERREPEAT_ONCE ;
+	timerNew.alarmTime = time(NULL);
+	timerNew.stopTime = 0;
+	timerNew.onidSid = 0;
+	timerNew_standby_on =false;
+	timerNew.onidSid = 0;
+	strcpy(timerNew_channel_name,"0");
+
+	CMenuWidget timerSettings("timerlist.menunew", "settings.raw");
+	timerSettings.addItem( new CMenuSeparator() );
+	timerSettings.addItem( new CMenuForwarder("menu.back") );
+	timerSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	
+	CDateInput*	timerSettings_alarmTime= new CDateInput("timerlist.alarmtime", &(timerNew.alarmTime) , "ipsetup.hint_1", "ipsetup.hint_2");
+	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime->getValue (), timerSettings_alarmTime );
+	
+	CDateInput*	timerSettings_stopTime= new CDateInput("timerlist.stoptime", &(timerNew.stopTime) , "ipsetup.hint_1", "ipsetup.hint_2");
+	CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", false, timerSettings_stopTime->getValue (), timerSettings_stopTime );
+	
+	CMenuOptionChooser* m3 = new CMenuOptionChooser("timerlist.repeat", &((int)timerNew.eventRepeat ), true); 
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_ONCE , "timerlist.repeat.once");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_DAILY , "timerlist.repeat.daily");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_WEEKLY , "timerlist.repeat.weekly");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_BIWEEKLY , "timerlist.repeat.biweekly");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_FOURWEEKLY , "timerlist.repeat.fourweekly");
+	m3->addOption((int)CTimerEvent::TIMERREPEAT_MONTHLY , "timerlist.repeat.monthly");
+
+	CMenuOptionChooser* m4 = new CMenuOptionChooser("timerlist.channel", &((int) timerNew.onidSid) , false); 
+	if(channellist.size()==0)
+   {
+		CZapitClient *Zapit = new CZapitClient();
+		Zapit->getChannels(channellist);
+		delete Zapit;
+	}
+	CZapitClient::BouquetChannelList::iterator channel = channellist.begin();
+	m4->addOption (0, "---");
+	for(; channel != channellist.end();channel++)
+	{
+		m4->addOption((int)channel->channel_id , channel->name);
+	}
+//	CMenuWidget mc ("xxx", "settings.raw");
+//	CMenuForwarder* m4 = new CMenuForwarder("timerlist.channel", true, timerNew_channel_name, &mc); 
+
+
+	CMenuOptionChooser* m5 = new CMenuOptionChooser("timerlist.standby", &timerNew_standby_on , false); 
+	m5->addOption(0 , "timerlist.standby.off");
+	m5->addOption(1 , "timerlist.standby.on");
+
+	
+	CTimerListNewNotifier* notifier = new CTimerListNewNotifier(&((int)timerNew.eventType ),
+																					&timerNew.stopTime,m2,m4,m5);
+	CMenuOptionChooser* m0 = new CMenuOptionChooser("timerlist.type", &((int)timerNew.eventType ), true, notifier); 
+	m0->addOption((int)CTimerEvent::TIMER_SHUTDOWN, "timerlist.type.shutdown");
+	//m0->addOption((int)CTimerEvent::TIMER_NEXTPROGRAM, "timerlist.type.nextprogram");
+	m0->addOption((int)CTimerEvent::TIMER_ZAPTO, "timerlist.type.zapto");
+	m0->addOption((int)CTimerEvent::TIMER_STANDBY, "timerlist.type.standby");
+	m0->addOption((int)CTimerEvent::TIMER_RECORD, "timerlist.type.record");
+	m0->addOption((int)CTimerEvent::TIMER_SLEEPTIMER, "timerlist.type.sleeptimer");
+
+	
+	timerSettings.addItem( m0);
+	timerSettings.addItem( m1);
+	timerSettings.addItem( m2);
+	timerSettings.addItem( m3);
+	timerSettings.addItem( m4);
+	timerSettings.addItem( m5);
+	timerSettings.addItem( new CMenuForwarder("timerlist.save", true, "", this, "newtimer") );
+	
+	if (timerSettings.exec(this,"")==menu_return::RETURN_EXIT_ALL)
+		g_RCInput->postMsg( CRCInput::RC_setup, 0 );
+}
+
 

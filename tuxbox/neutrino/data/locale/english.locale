@@ -510,7 +510,7 @@ timerlist.delete Delete
 timerlist.deleting Deleting timer
 timerlist.empty There are no timers at the moment
 timerlist.type.shutdown Shutdown
-timerlist.type.nextprogramm Next program
+timerlist.type.nextprogram Next program
 timerlist.type.zapto Zap to
 timerlist.type.standby Standby
 timerlist.type.record Record
@@ -528,6 +528,18 @@ timerlist.repeat.unknown unknown
 timerlist.program.unknown Program unknown
 timerlist.standby.on Leave standby
 timerlist.standby.off Enter standby
+timerlist.alarmtime Alarmtime
+timerlist.stoptime Stoptime
+timerlist.new New timer
+timerlist.menumodify Modify timer
+timerlist.type Timertyp
+timerlist.repeat Repeat
+timerlist.save Save timer
+timerlist.standby SB mode
+timerlist.channel Channel
+timerlist.menunew New timer
+timerlist.reload Reload
+timerlist.modify Modify
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Title

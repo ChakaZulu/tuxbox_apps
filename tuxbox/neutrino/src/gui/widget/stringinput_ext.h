@@ -154,6 +154,23 @@ class CIPInput : public CExtendedInput
 		CIPInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
 };
 
+//----------------------------------------------------------------------------------------------------
+
+class CDateInput : public CExtendedInput
+{
+   private:
+		time_t* time;
+
+	protected:
+		virtual void onBeforeExec();
+		virtual void onAfterExec();
+
+	public:
+		CDateInput(string Name, time_t* Time, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+		~CDateInput();
+		char* getValue() {return value;}
+};
+
 
 #endif
 

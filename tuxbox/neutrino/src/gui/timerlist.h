@@ -58,17 +58,24 @@ class CTimerList : public CMenuTarget
 		CTimerdClient *Timer;
 		CTimerd::TimerList timerlist;             // List of timers		
 		CZapitClient::BouquetChannelList channellist;     
+		CTimerd::responseGetTimer timerNew;
+		int timerNew_standby_on;
+		char timerNew_channel_name[30];/*!!!*/
 
 		int 			width;
 		int 			height;
 		int 			x;
 		int 			y;
 
+		int skipEventID;
+
 		void paintItem(int pos);
 		void paint();
 		void paintHead();
 		void paintFoot();
 		void hide();
+		void modifyTimer();
+		void newTimer();
 
 	public:
 		CTimerList();
@@ -78,6 +85,7 @@ class CTimerList : public CMenuTarget
 		int  exec(CMenuTarget* parent, string actionKey);
 		string convertTimerType2String(CTimerEvent::CTimerEventTypes type);
 		string convertTimerRepeat2String(CTimerEvent::CTimerEventRepeat rep);
+		string convertChannelId2String(t_channel_id id);
 };
 
 

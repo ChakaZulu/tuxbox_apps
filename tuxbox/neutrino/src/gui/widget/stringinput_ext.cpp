@@ -413,3 +413,86 @@ void CIPInput::onAfterExec()
 	}
 }
 
+//-----------------------------#################################-------------------------------------------------------
+CDateInput::CDateInput(string Name, time_t* Time, string Hint_1, string Hint_2, CChangeObserver* Observ)
+	: CExtendedInput(Name, "", Hint_1, Hint_2, Observ)
+{
+	time=Time;
+	value= new char[20];
+	struct tm *tmTime = localtime(time);
+	sprintf( value, "%02d.%02d.%04d %02d:%02d", tmTime->tm_mday, tmTime->tm_mon+1,
+				tmTime->tm_year+1900,
+				tmTime->tm_hour, tmTime->tm_min);
+	
+	frameBuffer = CFrameBuffer::getInstance();
+	addInputField( new CExtendedInput_Item_Char("0123") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char(".",false) );
+	addInputField( new CExtendedInput_Item_Char("01") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char(".",false) );
+	addInputField( new CExtendedInput_Item_Char("2",false) );
+	addInputField( new CExtendedInput_Item_Char("0",false) );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Spacer(20) );
+	addInputField( new CExtendedInput_Item_Char("012") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_Char(":",false) );
+	addInputField( new CExtendedInput_Item_Char("012345") );
+	addInputField( new CExtendedInput_Item_Char("0123456789") );
+	addInputField( new CExtendedInput_Item_newLiner(30) );
+	calculateDialog();
+}
+CDateInput::~CDateInput()
+{
+	delete value;
+}
+void CDateInput::onBeforeExec()
+{
+	struct tm *tmTime = localtime(time);
+	sprintf( value, "%02d.%02d.%04d %02d:%02d", tmTime->tm_mday, tmTime->tm_mon+1,
+				tmTime->tm_year+1900,
+				tmTime->tm_hour, tmTime->tm_min);
+}
+
+void CDateInput::onAfterExec()
+{
+	struct tm tmTime;
+	sscanf( value, "%02d.%02d.%04d %02d:%02d", &tmTime.tm_mday, &tmTime.tm_mon,
+				&tmTime.tm_year,
+				&tmTime.tm_hour, &tmTime.tm_min);
+	tmTime.tm_mon-=1;
+	tmTime.tm_year-=1900;
+   
+	if(tmTime.tm_year>129)
+      tmTime.tm_year=129;
+   if(tmTime.tm_year<0)
+      tmTime.tm_year=0;
+   if(tmTime.tm_mon>11)
+      tmTime.tm_mon=11;
+   if(tmTime.tm_mon<0)
+      tmTime.tm_mon=0;
+   if(tmTime.tm_mday>31) //-> eine etwas laxe pruefung, aber mktime biegt das wieder grade
+      tmTime.tm_mday=31;
+   if(tmTime.tm_mday<1)
+      tmTime.tm_mday=1;
+   if(tmTime.tm_hour>23)
+      tmTime.tm_hour=23;
+   if(tmTime.tm_hour<0)
+      tmTime.tm_hour=0;
+   if(tmTime.tm_min>59)
+      tmTime.tm_min=59;
+   if(tmTime.tm_min<0)
+      tmTime.tm_min=0;
+   if(tmTime.tm_sec>59)
+      tmTime.tm_sec=59;
+   if(tmTime.tm_sec<0)
+      tmTime.tm_sec=0;
+	*time=mktime(&tmTime);
+	struct tm *tmTime2 = localtime(time);
+	sprintf( value, "%02d.%02d.%04d %02d:%02d", tmTime2->tm_mday, tmTime2->tm_mon+1,
+				tmTime2->tm_year+1900,
+				tmTime2->tm_hour, tmTime2->tm_min);
+}
+
