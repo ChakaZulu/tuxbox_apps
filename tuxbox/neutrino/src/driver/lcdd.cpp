@@ -279,7 +279,7 @@ void CLCD::showVolume(char vol)
 		display.update();
 	}
 }
-void CLCD::showPercentOver(char perc)
+void CLCD::showPercentOver(const unsigned char perc)
 {
 	percentOver = perc;
 	if ((mode==MODE_TVRADIO) && !g_settings.lcd_show_volume)
