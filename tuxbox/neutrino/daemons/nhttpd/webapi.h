@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webapi.h,v 1.5 2002/10/25 11:18:08 dirch Exp $
+        $Id: webapi.h,v 1.6 2003/03/06 21:45:31 obi Exp $
 
         License: GPL
 
@@ -73,6 +73,7 @@ class CWebAPI
 		void modifyTimerForm(CWebserverRequest *request, unsigned timerId);
 		void newTimerForm(CWebserverRequest *request);
 		void doNewTimer(CWebserverRequest *request);
+		void timeString(time_t time, char string[6]);
 
 
 	public:

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.33 2003/03/04 19:27:43 dirch Exp $
+	$Id: webapi.cpp,v 1.34 2003/03/06 21:45:31 obi Exp $
 
 	License: GPL
 
@@ -508,51 +508,65 @@ char mode;
 bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 {
 	CZapitClient::BouquetChannelList *channellist;
-	if(BouquetNr > 0)
-		channellist = Parent->GetBouquet(BouquetNr,CZapitClient::MODE_CURRENT);
+	
+	if (BouquetNr > 0)
+		channellist = Parent->GetBouquet(BouquetNr, CZapitClient::MODE_CURRENT);
 	else
 		channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
 
 	Parent->GetChannelEvents();
 
 	request->SendHTMLHeader("DBOX2-Neutrino Kanalliste");
-
 	request->SocketWriteLn("<TABLE cellspacing=0 border=0 WIDTH=\"90%\">");
 
 	int i = 1;
 	char classname;
 	t_channel_id current_channel = Parent->Zapit->getCurrentServiceID();
 	int prozent;
+	CSectionsdClient::responseGetCurrentNextInfoChannelID currentNextInfo;
+	char timestr[6];
 
 	CZapitClient::BouquetChannelList::iterator channel = channellist->begin();
-	for(; channel != channellist->end();channel++)
+	for (; channel != channellist->end();channel++)
 	{
-		classname = (i++&1)?'a':'b';
-		if(channel->channel_id == current_channel)
+		classname = (i++ & 1)?'a':'b';
+		if (channel->channel_id == current_channel)
 			classname = 'c';
 
-
-		string bouquetstr = (BouquetNr >=0)?"&bouquet="+itoa(BouquetNr):"";
+		string bouquetstr = (BouquetNr >= 0) ? "&bouquet=" + itoa(BouquetNr) : "";
 		
 		request->printf("<TR><TD colspan=2 CLASS=\"%c\">",classname);
 		request->printf("%s<A CLASS=\"clist\" HREF=\"switch.dbox2?zapto=%d%s\">%d. %s</A>&nbsp;<A HREF=\"epg.dbox2?eventlist=%u\">%s</A>",((channel->channel_id == current_channel)?"<A NAME=akt></a>":" "),channel->channel_id,bouquetstr.c_str(),channel->nr,channel->name,channel->channel_id,((Parent->ChannelListEvents[channel->channel_id])?"<img border=0 src=\"../images/elist.gif\" ALT=\"Programmvorschau\">":""));
 
-		if(channel->channel_id == current_channel)
+		if (channel->channel_id == current_channel)
 			request->printf("&nbsp;&nbsp;<A HREF=\"/fb/info.dbox2\"><IMG SRC=\"/images/streaminfo.png\" BORDER=0 ALT=\"Streaminfo\"></A>");
 		request->printf("</TD></TR>");
+
 		CChannelEvent *event = Parent->ChannelListEvents[channel->channel_id];
-		if(event)
+
+		bool has_current_next = Parent->Sectionsd->getCurrentNextServiceKey(channel->channel_id, currentNextInfo);
+
+		if (event)
 		{
 			prozent = 100 * (time(NULL) - event->startTime) / event->duration;
+			timeString(event->startTime, timestr);
 			request->printf("<TR><TD align=left width=31 CLASS=\"%cepg\">",classname);
 			request->printf("<TABLE border=0 rules=none heigth=10 width=30 cellspacing=0 cellpadding=0><TR><TD ROWSPAN=3 BGCOLOR=#000000><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD BGCOLOR=#000000 COLSPAN=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD ROWSPAN=3 BGCOLOR=#000000><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR>");
 			request->printf("<TR><TD bgcolor=\"#2211FF\" height=10 width=%d><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD><TD bgcolor=\"#EAEBFF\" heigth=10 width=%d><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR><TR><TD BGCOLOR=#000000 COLSPAN=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR></TABLE></TD>",(prozent / 10) * 3,(10 - (prozent / 10))*3);
 			request->printf("<TD CLASS=\"%cepg\">",classname);
 			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx>",event->eventID);
 //			request->printf("<A CLASS=\"clistsmall\" HREF=epg.dbox2?epgid=%llx&startzeit=%lx>",event->eventID,event->startTime);
-			request->printf("%s&nbsp;",event->description.c_str()); 
-			request->printf("<font size=-3><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>&nbsp;</TD></TR>\n",(time(NULL) - event->startTime)/60,event->duration / 60,prozent  ); 
+			request->printf("%s&nbsp;%s&nbsp;", timestr, event->description.c_str()); 
+			request->printf("<font size=-3><NOBR>(%ld von %d min, %d%%)</NOBR></font></a>", (time(NULL) - event->startTime)/60,event->duration / 60,prozent);
+
+			if ((has_current_next) && (currentNextInfo.flags & CSectionsdClient::epgflags::has_next)) {
+				timeString(currentNextInfo.next_zeit.startzeit, timestr);
+				request->printf("<BR>%s&nbsp;%s", timestr, currentNextInfo.next_name.c_str());
+			}
+
+			request->printf("</TD></TR>\n");
 		}
+
 		request->printf("<tr height=2><TD colspan=2><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD></TR>\n");
 
 	}
@@ -1248,5 +1262,12 @@ time_t	announceTimeT = 0,
 		data=msg;
 	}
 	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep);
+}
+
+void CWebAPI::timeString(time_t time, char string[6])
+{
+	struct tm *tm = localtime(&time);
+	if (!strftime(string, 6, "%H:%M", tm))
+		sprintf(string, "??:??");
 }
 
