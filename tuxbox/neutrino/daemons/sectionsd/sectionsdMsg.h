@@ -1,5 +1,7 @@
+#ifndef SECTIONSDMSG_H
+#define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.3 2001/07/16 11:49:31 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.4 2001/07/16 12:52:30 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -23,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.4  2001/07/16 12:52:30  fnbrd
+//  Fehler behoben.
+//
 //  Revision 1.3  2001/07/16 11:49:31  fnbrd
 //  Neuer Befehl, Zeichen fuer codetable aus den Texten entfernt
 //
@@ -61,3 +66,5 @@ enum sectionsdCommands {
 //   data of response:
 //     is a string (c-string) describing the EPG (for
 //     compatibility with old epgd)
+
+#endif // SECTIONSDMSG_H

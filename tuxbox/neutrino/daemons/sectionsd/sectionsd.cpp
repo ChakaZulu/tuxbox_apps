@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.14 2001/07/16 11:49:31 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.15 2001/07/16 12:52:30 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.15  2001/07/16 12:52:30  fnbrd
+//  Fehler behoben.
+//
 //  Revision 1.14  2001/07/16 11:49:31  fnbrd
 //  Neuer Befehl, Zeichen fuer codetable aus den Texten entfernt
 //
@@ -108,7 +111,9 @@ static SIservices services; // die Menge mit den services (aus der sdt)
 static pthread_mutex_t eventsLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
 static pthread_mutex_t dmxEITlock=PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t dmxEITnvodLock=PTHREAD_MUTEX_INITIALIZER;
 static int dmxEITfd=0;
+static int dmxEITfd2=0;
 
 static int stopDMXeit(void)
 {
@@ -132,6 +137,31 @@ static int startDMXeit(void)
     return -1;
   }
   pthread_mutex_unlock(&dmxEITlock);
+  return 0;
+}
+
+static int stopDMXeitNVOD(void)
+{
+  pthread_mutex_lock(&dmxEITnvodLock);
+  if (ioctl (dmxEITfd2, DMX_STOP, 0) == -1) {
+    close(dmxEITfd2);
+    dmxEITfd2=0;
+    perror ("DMX_STOP");
+    return -1;
+  }
+  return 0;
+}
+
+static int startDMXeitNVOD(void)
+{
+  if (ioctl (dmxEITfd2, DMX_START, 0) == -1) {
+    close(dmxEITfd2);
+    dmxEITfd2=0;
+    perror ("DMX_START");
+    pthread_mutex_unlock(&dmxEITnvodLock);
+    return -1;
+  }
+  pthread_mutex_unlock(&dmxEITnvodLock);
   return 0;
 }
 
@@ -170,18 +200,18 @@ static const SIevent &findNextSIeventForService(const unsigned short serviceID, 
 {
 static SIevent nullEvt; // Null-Event, falls keins gefunden
 
-  SIevent& nextEvt=nullEvt;
+  const SIevent * nextEvt=&nullEvt;
   for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
     if(e->serviceID==serviceID)
       for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
         if(t->startzeit>=end_time_last_evt)
-	  if(nextEvt.times.size()) {
-            if(t->startzeit<nextEvt.times.begin()->startzeit)
-	      nextEvt=*e;
+	  if(nextEvt->times.size()) {
+            if(t->startzeit<nextEvt->times.begin()->startzeit)
+	      nextEvt=&(*e);
           }
           else
-	    nextEvt=*e;
-  return nextEvt;
+	    nextEvt=&(*e);
+  return *nextEvt;
 }
 
 static const SIevent &findActualSIeventForService(const SIservice &s)
@@ -195,6 +225,13 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
         if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
           return *e;
   return nullEvt;
+}
+
+// Liefert 1 wenn das Event entweder ein zu einem NVOD-Service gehoert
+// oder selbst nur NVOD-Zeiten hat
+static int isNVODevent(const SIevent &e)
+{
+  return 0;
 }
 
 // Liest n Bytes aus einem Socket per read
@@ -748,7 +785,7 @@ int timeset=0;
 
 //*********************************************************************
 //			EIT-thread
-// reads EPG-datas
+// reads EPG-datas (scheduled)
 //*********************************************************************
 static void *eitThread(void *)
 {
@@ -790,24 +827,22 @@ const unsigned timeoutInSeconds=2;
     pthread_mutex_lock(&dmxEITlock);
     int rc=readNbytes(dmxEITfd, (char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
-//      close(fd);
-//      return 0; // timeout -> kein EPG
+      pthread_mutex_unlock(&dmxEITlock);
       continue; // timeout -> kein EPG
     }
     else if(rc<0) {
       close(dmxEITfd);
       dmxEITfd=0;
-//      perror ("read header");
+      pthread_mutex_unlock(&dmxEITlock);
       break;
-//      return 3;
     }
     buf=new char[sizeof(header)+header.section_length-5];
     if(!buf) {
       close(dmxEITfd);
       dmxEITfd=0;
+      pthread_mutex_unlock(&dmxEITlock);
       fprintf(stderr, "Not enough memory!\n");
       break;
-//      return 4;
     }
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
@@ -853,6 +888,96 @@ const unsigned timeoutInSeconds=2;
 }
 
 //*********************************************************************
+//			EIT-nvod-thread
+// reads EPG-datas (nvod)
+//*********************************************************************
+static void *eitNVODthread(void *)
+{
+struct SI_section_header header;
+struct dmxSctFilterParams flt;
+char *buf;
+const unsigned timeoutInSeconds=2;
+
+  printf("eit-thread (nvod) started.\n");
+  memset (&flt.filter, 0, sizeof (struct dmxFilter));
+  flt.pid              = 0x12;
+  flt.filter.filter[0] = 0x4f; // present/following
+  flt.filter.mask[0]   = 0xff;
+  flt.timeout          = 0;
+  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+
+  if ((dmxEITfd2 = open("/dev/ost/demux0", O_RDWR)) == -1) {
+    perror ("/dev/ost/demux0");
+    return 0;
+//    return 1;
+  }
+  if (ioctl (dmxEITfd2, DMX_SET_FILTER, &flt) == -1) {
+    close(dmxEITfd2);
+    dmxEITfd2=0;
+    perror ("DMX_SET_FILTER");
+    return 0;
+//    return 2;
+  }
+  for(;;) {
+    pthread_mutex_lock(&dmxEITnvodLock);
+    int rc=readNbytes(dmxEITfd2, (char *)&header, sizeof(header), timeoutInSeconds);
+    if(!rc) {
+      pthread_mutex_unlock(&dmxEITnvodLock);
+      continue; // timeout -> kein EPG
+    }
+    else if(rc<0) {
+      close(dmxEITfd2);
+      dmxEITfd2=0;
+      pthread_mutex_unlock(&dmxEITnvodLock);
+      break;
+    }
+    buf=new char[sizeof(header)+header.section_length-5];
+    if(!buf) {
+      close(dmxEITfd2);
+      dmxEITfd2=0;
+      pthread_mutex_unlock(&dmxEITnvodLock);
+      fprintf(stderr, "Not enough memory!\n");
+      break;
+    }
+    // Den Header kopieren
+    memcpy(buf, &header, sizeof(header));
+    rc=readNbytes(dmxEITfd2, buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+    pthread_mutex_unlock(&dmxEITnvodLock);
+    if(!rc) {
+      delete[] buf;
+      continue; // timeout -> kein EPG
+    }
+    else if(rc<0) {
+      close(dmxEITfd2);
+      dmxEITfd2=0;
+      delete[] buf;
+      break;
+    }
+    if(header.current_next_indicator) {
+      // Wir wollen nur aktuelle sections
+      SIsectionEIT eit(SIsection(sizeof(header)+header.section_length-5, buf));
+      time_t zeit=time(NULL);
+      // Nicht alle Events speichern
+      // nur mit nvod und im Zeitrahmen
+      for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
+        if(isNVODevent(*e)) {
+          if(e->times.size()>0) { // Geht schief bei nvods
+            if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L) {
+              pthread_mutex_lock(&eventsLock);
+              events.insert(*e);
+              pthread_mutex_unlock(&eventsLock);
+            }
+	  }
+        }
+    } // if
+    else
+      delete[] buf;
+  } // for
+  printf("eit-thread (nvod) ended\n");
+  return 0;
+}
+
+//*********************************************************************
 //			housekeeping-thread
 // does cleaning on fetched datas
 //*********************************************************************
@@ -865,6 +990,8 @@ static void *houseKeepingThread(void *)
       rc=sleep(rc); // sleep 60 seconds
     printf("housekeeping.\n");
     if(stopDMXeit())
+      return 0;
+    if(stopDMXeitNVOD())
       return 0;
     pthread_mutex_lock(&eventsLock);
     unsigned anzEventsAlt=events.size();
@@ -882,6 +1009,8 @@ static void *houseKeepingThread(void *)
     pthread_mutex_unlock(&servicesLock);
     if(startDMXeit())
       return 0;
+    if(startDMXeitNVOD())
+      return 0;
     // Speicher-Info abfragen
     struct mallinfo speicherinfo=mallinfo();
     printf("total size of memory occupied by chunks handed out by malloc: %d\n", speicherinfo.uordblks);
@@ -891,12 +1020,12 @@ static void *houseKeepingThread(void *)
 
 int main(void)
 {
-pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
+pthread_t threadTOT, threadEIT, threadEITnvod, threadSDT, threadHouseKeeping;
 int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.14 2001/07/16 11:49:31 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.15 2001/07/16 12:52:30 fnbrd Exp $\n");
   printf("caching %d hours\n", HOURS_TO_CACHE);
 
   tzset(); // TZ auswerten
@@ -936,6 +1065,13 @@ struct sockaddr_in serverAddr;
     fprintf(stderr, "failed to create eit-thread (rc=%d)\n", rc);
     return 1;
   }
+
+  // EIT-Thread (NVOD) starten
+//  rc=pthread_create(&threadEITnvod, 0, eitNVODthread, 0);
+//  if(rc) {
+//    fprintf(stderr, "failed to create eit-thread (rc=%d)\n", rc);
+//    return 1;
+//  }
 
   // time-Thread starten
   rc=pthread_create(&threadTOT, 0, timeThread, 0);
