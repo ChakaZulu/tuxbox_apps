@@ -195,6 +195,7 @@ class CZapitClient:public CBasicClient
 	struct responseGetSatelliteList
 	{
 		char satName[30];
+		int32_t satPosition;
 	};
 	typedef std::vector<responseGetSatelliteList> SatelliteList;
 

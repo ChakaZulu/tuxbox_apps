@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.314 2003/05/22 20:41:31 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.315 2003/05/28 18:51:55 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -93,7 +93,6 @@ int debug = 0;
 
 int waitForMotor = 0;
 int motorRotationSpeed = 0; //in 0.1 degrees per second
-bool firstZapAfterBoot = true;
 diseqc_t diseqcType;
 
 /* near video on demand */
@@ -220,19 +219,15 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	/* have motor move satellite dish to satellite's position if necessary */
 	if ((diseqcType == DISEQC_1_2) && (motorPositions[channel->getSatelliteName()] != 0))
 	{
-		if (firstZapAfterBoot || (frontend->getCurrentSatellitePosition() != channel->getSatellitePosition()))
+		if (frontend->getCurrentSatellitePosition() != channel->getSatellitePosition())
 		{
-			firstZapAfterBoot = false; //just send motor positioning command the first time after a boot to make sure motor is in right position
 			printf("[zapit] currentSatellitePosition = %d, satellitePosition = %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
 			printf("[zapit] motorPosition = %d\n", motorPositions[channel->getSatelliteName()]);
 			frontend->positionMotor(motorPositions[channel->getSatelliteName()]);
 		
-			if (!firstZapAfterBoot)
-			{
-				waitForMotor = abs(channel->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
-				printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
-				sleep(waitForMotor);
-			}
+			waitForMotor = abs(channel->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
+			printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
+			sleep(waitForMotor);
 		
 			frontend->setCurrentSatellitePosition(channel->getSatellitePosition());
 		}
@@ -716,28 +711,32 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 	case CZapitMessages::CMD_SCANGETSATLIST:
 	{
-		if (!scanInputParser) {
+		if (!scanInputParser) 
+		{
 			parseScanInputXml();
 			if (!scanInputParser)
 				break;
 		}
 
-		uint32_t   satnamelength;
-		char *     satname;
-		xmlNodePtr search       = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
-		char *     frontendname = getFrontendName();
+		uint32_t satlength;
+		char * satname;
+		xmlNodePtr search = xmlDocGetRootElement(scanInputParser)->xmlChildrenNode;
+		char * frontendname = getFrontendName();
+		CZapitClient::responseGetSatelliteList sat;
 
 		if (frontendname != NULL)
 			while ((search = xmlGetNextOccurence(search, frontendname)) != NULL)
 			{
 				satname = xmlGetAttribute(search, "name");
-				satnamelength = strlen(satname);
-				CBasicServer::send_data(connfd, &satnamelength, sizeof(satnamelength));
-				CBasicServer::send_data(connfd, satname, satnamelength);
+				strncpy(sat.satName, satname, 29);
+				sat.satPosition = satellitePositions[satname];
+				satlength = sizeof(sat);
+				CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
+				CBasicServer::send_data(connfd, (char *)&sat, satlength);
 				search = search->xmlNextNode;
 			}
-		satnamelength = SATNAMES_END_MARKER;
-		CBasicServer::send_data(connfd, &satnamelength, sizeof(satnamelength));
+		satlength = SATNAMES_END_MARKER;
+		CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
 		break;
 	}
 
@@ -1501,7 +1500,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.314 2003/05/22 20:41:31 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.315 2003/05/28 18:51:55 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

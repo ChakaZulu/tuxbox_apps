@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.88 2003/05/18 11:34:34 digi_casi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.89 2003/05/28 18:47:26 digi_casi Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -513,23 +513,18 @@ bool CZapitClient::isScanReady(unsigned int &satellite,  unsigned int &processed
 /* query possible satellits*/
 void CZapitClient::getScanSatelliteList(SatelliteList& satelliteList)
 {
-	uint32_t   satnamelength;
+	uint32_t satlength;
 	
 	send(CZapitMessages::CMD_SCANGETSATLIST);
 	
 	responseGetSatelliteList response;
-	while (CBasicClient::receive_data((char*)&satnamelength, sizeof(satnamelength)))
+	while (CBasicClient::receive_data((char*)&satlength, sizeof(satlength)))
 	{
-		if (satnamelength == SATNAMES_END_MARKER)
+		if (satlength == SATNAMES_END_MARKER)
 			break;
 		
-		if (satnamelength >= sizeof(response.satName)) /* name exceeds specification in zapitclient.h */
+		if (!CBasicClient::receive_data((char*)&(response), satlength))
 			break;
-
-		if (!CBasicClient::receive_data((char*)&(response.satName), satnamelength))
-			break;
-		
-		response.satName[satnamelength] = 0;
 		
 		satelliteList.push_back(response);
 	}
