@@ -78,7 +78,7 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 }
 
 eEPGWindow::eEPGWindow(eService* service)
-:current(service),eListBoxWindow<eListBoxEntryEPG>("Select Service...", 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
+	:eListBoxWindow<eListBoxEntryEPG>("Select Service...", 16, eSkin::getActive()->queryValue("fontsize", 20), 600), current(service)
 {
 	move(ePoint(50, 50));
 	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
