@@ -171,8 +171,8 @@ bool CFlashUpdate::checkVersion4Update()
 		}
 		else
 		{
-			newVersion = configfile.getString( "version", "" );
-			if(newVersion=="")
+			newVersion = configfile.getString("version", "");
+			if (newVersion.empty())
 			{
 				ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.getinfofileerror")); // UTF-8
 				return false;

@@ -436,18 +436,21 @@ void CNFSMountGui::automount()
 int CNFSUmountGui::exec( CMenuTarget* parent, std::string actionKey )
 {
 	//	printf("ac: %s\n", actionKey.c_str());
-	int returnval = menu_return::RETURN_REPAINT;
+	int returnval;
 
-	if(actionKey=="")
+	if (actionKey.empty())
 	{
 		parent->hide();
-      returnval = menu();
-   }
+		returnval = menu();
+	}
 	else if(actionKey.substr(0,8)=="doumount")
 	{
-      umount(actionKey.substr(9));
+		umount(actionKey.substr(9));
 		returnval = menu_return::RETURN_EXIT;
 	}
+	else
+		returnval = menu_return::RETURN_REPAINT;
+
 	return returnval;
 }
 int CNFSUmountGui::menu()
