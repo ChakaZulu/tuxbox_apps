@@ -512,8 +512,6 @@ int eSkin::queryValue(const eString& name, int d) const
 	if (it != values.end())
 		return it->second;
 	
-	eDebug("%s does not exist", name.c_str());
-
 	return d;
 }
 
