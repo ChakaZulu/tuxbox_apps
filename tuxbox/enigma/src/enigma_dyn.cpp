@@ -1755,95 +1755,111 @@ public:
 
 					for(It=evt->begin(); It!= evt->end(); It++)
 					{
+						eString ext_description;
+						eString short_description;
 						EITEvent event(*It->second);
 						for (ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
 						{
 							Descriptor *descriptor=*d;
 							if (descriptor->Tag() == DESCR_SHORT_EVENT)
 							{
-								time_t eventStart = event.start_time;
-								time_t eventEnd = event.start_time + event.duration;
-								int eventDuration = 0;
-								int colWidth = 0;
-								if ((eventStart > end) || (eventEnd < tableTime))
-								{
-									eventDuration = 0;
-								}
-								else
-								if ((eventStart < tableTime) && (eventEnd > tableTime))
-								{
-									eventDuration = eventEnd - tableTime;
-								}
-								else
-								if (eventStart == tableTime)
-								{
-									eventDuration = event.duration;
-								}
-								else
-								if ((eventStart > tableTime) && (eventStart < end))
-								{
-									eventDuration = eventStart - tableTime;
-									colWidth = eventDuration / 60 * d_min;
-									result << "<td width=" << colWidth << ">&nbsp;</td>";
-									tableTime = eventStart;
-									tablePos += colWidth;
-									eventDuration = event.duration;
-								}
+								short_description = ((ShortEventDescriptor*)descriptor)->event_name;
+							}
+							if (d->Tag() == DESCR_EXTENDED_EVENT)
+							{
+								ext_description += ((ExtendedEventDescriptor*)descriptor)->item_description;
+							}
+						}
 
-								if ((eventDuration > 0) && (eventDuration < 15 * 60))
-									eventDuration = 15 * 60;
+						time_t eventStart = event.start_time;
+						time_t eventEnd = event.start_time + event.duration;
+						int eventDuration = 0;
+						int colWidth = 0;
+						if ((eventStart > end) || (eventEnd < tableTime))
+						{
+							eventDuration = 0;
+						}
+						else
+						if ((eventStart < tableTime) && (eventEnd > tableTime))
+						{
+							eventDuration = eventEnd - tableTime;
+						}
+						else
+						if (eventStart == tableTime)
+						{
+							eventDuration = event.duration;
+						}
+						else
+						if ((eventStart > tableTime) && (eventStart < end))
+						{
+							eventDuration = eventStart - tableTime;
+							colWidth = eventDuration / 60 * d_min;
+							result << "<td width=" << colWidth << ">&nbsp;</td>";
+							tableTime = eventStart;
+							tablePos += colWidth;
+							eventDuration = event.duration;
+						}
 
-								if (tableTime + eventDuration > end)
-									eventDuration = end - tableTime;
+						if ((eventDuration > 0) && (eventDuration < 15 * 60))
+							eventDuration = 15 * 60;
 
-								colWidth = eventDuration  / 60 * d_min;
-								if (colWidth > 0)
-								{
-									result << "<td width=" << colWidth << ">"
-										<< "<span class=\"epg\">";
+						if (tableTime + eventDuration > end)
+							eventDuration = end - tableTime;
+
+						colWidth = eventDuration  / 60 * d_min;
+						if (colWidth > 0)
+						{
+							result << "<td width=" << colWidth << ">"
+								<< "<span class=\"epg\">";
 #if 0
-									tm* t2 = localtime(&tableTime);
-									result << tablePos << "/" << colWidth << ":"
-										<< std::setfill('0')
-										<< std::setw(2) << t2->tm_mday << '.'
-										<< std::setw(2) << t2->tm_mon+1 << ". - "
-										<< std::setw(2) << t2->tm_hour << ':'
-										<< std::setw(2) << t2->tm_min << ' '
-										<< "<br>"
-										<< eventDuration
-										<< "<br>";
+							tm* t2 = localtime(&tableTime);
+							result << tablePos << "/" << colWidth << ":"
+								<< std::setfill('0')
+								<< std::setw(2) << t2->tm_mday << '.'
+								<< std::setw(2) << t2->tm_mon+1 << ". - "
+								<< std::setw(2) << t2->tm_hour << ':'
+								<< std::setw(2) << t2->tm_min << ' '
+								<< "<br>"
+								<< eventDuration
+								<< "<br>";
 #endif
 #ifndef DISABLE_FILE
-									result << "<a href=\"javascript:record('ref="
-										<< ref2string(ref)
-										<< "&ID="
-										<< event.event_id
-										<< "&start="
-										<< event.start_time
-										<< "&duration="
-										<< event.duration
-										<< "')\"><img src=\"kalarm.png\" border=0></a>"
-										<< "&nbsp;&nbsp;";
+							result << "<a href=\"javascript:record('ref="
+								<< ref2string(ref)
+								<< "&ID="
+								<< event.event_id
+								<< "&start="
+								<< event.start_time
+								<< "&duration="
+								<< event.duration
+								<< "')\"><img src=\"kalarm.png\" border=0></a>"
+								<< "&nbsp;&nbsp;";
 #endif
-									tm* t = localtime(&event.start_time);
-									result << std::setfill('0')
-										<< std::setw(2) << t->tm_mday << '.'
-										<< std::setw(2) << t->tm_mon+1 << ". - "
-										<< std::setw(2) << t->tm_hour << ':'
-										<< std::setw(2) << t->tm_min << ' '
-										<< " (" << event.duration / 60 << " min)"
-										<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
-										<< "&ID=" << event.event_id
-										<< "\")\'>"
-										<< "<br>"
-										<< ((ShortEventDescriptor*)descriptor)->event_name
-										<< "</a></span></u><br>\n";
+							tm* t = localtime(&event.start_time);
+							result << std::setfill('0')
+								<< std::setw(2) << t->tm_mday << '.'
+								<< std::setw(2) << t->tm_mon+1 << ". - "
+								<< std::setw(2) << t->tm_hour << ':'
+								<< std::setw(2) << t->tm_min << ' '
+								<< " (" << event.duration / 60 << " min)"
 
-									result << "</td>";
-									tablePos += colWidth;
-									tableTime += eventDuration;
-								}
-							}
+//								<< "<a href=\"/" << "?path=" + ref2string(ref) << "\">"
+								<< "<br><b>"
+
+//								<< "<a href=\'javascript:EPGDetails(\"ref=" << ref2string(ref)
+//								<< "&ID=" << event.event_id
+//								<< "\")\'>"
+
+								<< short_description
+//								<< "</a>"
+								<< "</b></span><br>\n";
+
+							if (eventDuration >= 15 * 60)
+								result << "<span class=\"white\">" << ext_description << "</span>";
+
+							result << "</td>";
+							tablePos += colWidth;
+							tableTime += eventDuration;
 						}
 					}
 					if (tablePos < tableWidth)
