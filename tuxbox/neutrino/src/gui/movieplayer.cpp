@@ -217,7 +217,6 @@ void* Play_Thread( void* filename )
 	ssize_t wr = 0;
 	ssize_t cache = sizeof(buf);
 	size_t r = 0;
-	ipack pack;
 
 	if( (char *) filename == NULL ) {
 	    	playstate = 0;
@@ -237,9 +236,10 @@ void* Play_Thread( void* filename )
 	}
 	else
 	{	// Play PES
-		pida=0x900;
-		pidv=0x8ff;
+		pida = 0x900;
+		pidv = 0x8ff;
 	}
+
 	lseek( fd, 0L, SEEK_SET );
 
 	if( (dmxa = open(DMX, O_RDWR)) < 0 || (dmxv = open(DMX, O_RDWR)) < 0 || (dvr  = open(DVR, O_WRONLY)) < 0 ||
@@ -256,16 +256,13 @@ void* Play_Thread( void* filename )
 	p.pes_type = DMX_PES_AUDIO;
 
 	if( ioctl(dmxa, DMX_SET_PES_FILTER, &p) < 0)
-	{
 		failed = true;
-	}
 
 	p.pid = pidv;
 	p.pes_type = DMX_PES_VIDEO;
+
 	if( ioctl(dmxv, DMX_SET_PES_FILTER, &p) < 0)
-	{
 		failed = true;
-	}
 
 	if( isTS && !failed )
 	{
@@ -334,7 +331,11 @@ void* Play_Thread( void* filename )
 	close(adec);
 	close(vdec);
 
-	playstate = STOPPED;
+	if( playstate != STOPPED )
+	{
+		playstate = STOPPED;
+		g_RCInput->postMsg( CRCInput::RC_red, 0 );	// for faster exit in PlayStream(); do NOT remove!
+	}
 
 	pthread_exit(NULL);
 }
@@ -342,6 +343,7 @@ void* Play_Thread( void* filename )
 void CMoviePlayerGui::PlayStream( void )
 {
 	uint msg, data;
+	string sel_filename;
 	bool update_lcd = true, open_filebrowser = true, start_play = false, exit = false;
 
 	playstate = STOPPED;
@@ -349,8 +351,8 @@ void CMoviePlayerGui::PlayStream( void )
 	/* playstate == STOPPED		: stopped
 	 * playstate == PLAY		: playing
 	 * playstate == PAUSE		: pause-mode
-	 * playstate == FF			: fast-forward
-	 * playstate == REW			: rewind
+	 * playstate == FF		: fast-forward
+	 * playstate == REW		: rewind
 	 * playstate == SOFTRESET	: softreset without clearing buffer (playstate toggle to 1)
 	 */
 
@@ -362,8 +364,8 @@ void CMoviePlayerGui::PlayStream( void )
 
 			if( playstate >= PLAY )
 			{
-					playstate = STOPPED;
-					break;
+				playstate = STOPPED;
+				break;
 			}
 		}
 
@@ -380,6 +382,7 @@ void CMoviePlayerGui::PlayStream( void )
 				{
 					update_lcd = true;
 					start_play = true;
+					sel_filename = filebrowser->getSelectedFile()->getFileName();
 				}
 			}
 			else
@@ -389,6 +392,33 @@ void CMoviePlayerGui::PlayStream( void )
 			}
 
 			CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
+		}
+
+		if( update_lcd )
+		{
+			update_lcd = false;
+			char tmp[10];
+			string lcd;
+
+			switch( playstate )
+			{
+			case PAUSE:
+				lcd = "|| (" + sel_filename + ")";
+				break;
+			case REW:
+				sprintf( tmp, "%1dx<< ", speed);
+				lcd = tmp + sel_filename;
+				break;
+			case FF:
+				sprintf( tmp, "%1dx>> ", speed);
+				lcd = tmp + sel_filename;
+				break;
+			default:
+				lcd = "> " + sel_filename;
+				break;
+			}
+
+			CLCD::getInstance()->showServicename( lcd );
 		}
 
 		if( start_play )
@@ -406,16 +436,6 @@ void CMoviePlayerGui::PlayStream( void )
 				break;
 			}
 			playstate = SOFTRESET;
-		}
-
-		if( update_lcd )
-		{
-			update_lcd = false;
-
-			if( playstate == PLAY )
-				CLCD::getInstance()->showServicename(filebrowser->getSelectedFile()->getFileName());
-			else
-				CLCD::getInstance()->showServicename("("+filebrowser->getSelectedFile()->getFileName()+")");
 		}
 
 		g_RCInput->getMsg( &msg, &data, 100 );	// 10 secs..
@@ -443,17 +463,21 @@ void CMoviePlayerGui::PlayStream( void )
 		else if( msg == CRCInput::RC_left )
 		{
 			// rewind
-			if ( speed > 1) speed = 1;
+			if ( speed > 1 )
+				speed = 1;
 			speed *= -2;
 			speed *= (speed > 1 ? -1 : 1);
 			playstate = REW;
+	  		update_lcd = true;
 		}
 		else if( msg == CRCInput::RC_right )
 		{
 			// fast-forward
-			if ( speed < 1) speed = 1;
+			if ( speed < 1 )
+				speed = 1;
 			speed *= 2;
 			playstate = FF;
+	  		update_lcd = true;
 		}
 		else if( msg == CRCInput::RC_up ||
 			 msg == CRCInput::RC_down )
@@ -467,13 +491,9 @@ void CMoviePlayerGui::PlayStream( void )
 		else if( msg == CRCInput::RC_ok )
 		{
 			if (playstate > PLAY)
-			{
 				playstate = SOFTRESET;
-			}
 			else
-			{
 				open_filebrowser = true;
-			}
 		}
 		else if( msg == NeutrinoMessages::RECORD_START ||
 			 msg == NeutrinoMessages::ZAPTO ||
