@@ -29,6 +29,7 @@ public:
 	void handleCode(int code);
 	eRCDeviceDBoxNew(eRCDriver *driver);
 	const char *getDescription() const;
+	int getCompatibleCode() const;
 };
 
 class eRCDeviceDBoxButton: public eRCDevice
@@ -54,6 +55,7 @@ class eRCKeyDBoxOld: public eRCKey
 {
 public:
 	const char *getDescription() const;
+	int getCompatibleCode() const;
 	eRCKeyDBoxOld(eRCDevice *producer, int code, int flags)
 			: eRCKey(producer, code, flags)
 	{
@@ -64,6 +66,7 @@ class eRCKeyDBoxNew: public eRCKey
 {
 public:
 	const char *getDescription() const;
+	int getCompatibleCode() const;
 	eRCKeyDBoxNew(eRCDevice *producer, int code, int flags)
 			: eRCKey(producer, code, flags)
 	{
