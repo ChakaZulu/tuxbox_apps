@@ -10,8 +10,8 @@
 #include "eavswitch.h"
 #include "streamwd.h"
 
-#define ASSIGN(v, t, n)	\
-	v =(t*)search(n); if (! v ) { qFatal("skin has undefined element: %s", n); }
+/*#define ASSIGN(v, t, n)	\
+	v =(t*)search(n); if (! v ) { qFatal("skin has undefined element: %s", n); }*/
 
 void eZapVideoSetup::setPin8(int w)
 {
@@ -47,19 +47,53 @@ void eZapVideoSetup::setColorFormat(eAVColorFormat w)
 
 eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 {
-	eSkin *skin=eSkin::getActive();
+/*	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "setup.video"))
 		qFatal("skin load of \"setup.video\" failed");
 
 	ASSIGN(colorformat, eButton, "colorformat");
 	ASSIGN(pin8, eButton, "pin8");
-	ASSIGN(ok, eButton, "ok");
-	ASSIGN(abort, eButton, "abort");
+	ASSIGN(colorformat, eButton, "colorformat");
+	ASSIGN(abort, eButton, "abort");*/
+
+	int fd=eSkin::getActive()->queryValue("fontsize", 20);
+
+	setText("Video Setup");
+	move(QPoint(150, 136));
+	resize(QSize(350, 250));
+
+	eLabel *l=new eLabel(this);
+	l->setText("Colorformat:");
+	l->move(QPoint(10, 20));
+	l->resize(QSize(150, fd+4));
 	
+	colorformat=new eButton(this);
+	colorformat->setText("[color]");
+	colorformat->move(QPoint(160, 20));
+	colorformat->resize(QSize(85, fd+4));
 	connect(colorformat, SIGNAL(selected()), SLOT(toggleColorformat()));
+
+	eLabel *l2=new eLabel(this);
+	l2->setText("Aspect Ratio:");
+	l2->move(QPoint(10, 55));
+	l2->resize(QSize(170, fd+4));
+
+	pin8=new eButton(this);
+	pin8->setText("[Pin8]");
+	pin8->move(QPoint(160, 55));
+	pin8->resize(QSize(140, fd+4));
 	connect(pin8, SIGNAL(selected()), SLOT(togglePin8()));
 
+	ok=new eButton(this);
+	ok->setText("[OK]");
+	ok->move(QPoint(10, 150));
+	ok->resize(QSize(50, fd+4));
 	connect(ok, SIGNAL(selected()), SLOT(okPressed()));
+
+	abort=new eButton(this);
+	abort->setText("[ABORT]");
+	abort->move(QPoint(80, 150));
+	abort->resize(QSize(100, fd+4));
 	connect(abort, SIGNAL(selected()), SLOT(abortPressed()));
 
 	unsigned int temp;
