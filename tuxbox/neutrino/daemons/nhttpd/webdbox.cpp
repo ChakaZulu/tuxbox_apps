@@ -251,6 +251,8 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 	{
 		request->SendPlainHeader();          // Standard httpd header senden
 		if(Parent->DEBUG) printf("EPG, Parameter: %d\n",request->ParameterList->Count);
+		if(Parent->DEBUG && request->ParameterList->Count > 0)
+			request->ParameterList->PrintParameterList();
 		if(request->ParameterList->Count == 0)
 		{
 			
@@ -259,7 +261,9 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			char buffer[255];
 			for(int i = 0; i < ChannelList.size();i++)
 			{
-				printf("channel id: %ld\n",ChannelList[i].onid_sid);
+				sprintf(buffer,"channel id: %ld\n",ChannelList[i].onid_sid);
+				if(Parent->DEBUG) printf(buffer);
+				request->SocketWrite(buffer);
 				channel = channel->Next;
 			}
 		}
@@ -727,6 +731,16 @@ void TWebDbox::SendStreaminfo(TWebserverRequest* request)
 
 void TWebDbox::SendcurrentVAPid(TWebserverRequest* request)
 {
+CZapitClient::responseGetPIDs pids;
+	zapit.getPIDS(pids);
+
+	char *buf = new char[300];
+	printf("%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
+	sprintf(buf, "%u\n%u\n", pids.PIDs.vpid, pids.APIDs[0].pid);
+	request->SocketWrite(buf);
+	delete buf;
+
+/*
 char return_buf[4] = {0};
 st_rmsg		sendmessage;
 int sock_fd;
@@ -760,6 +774,7 @@ Tmconnect con;
 
 		close(sock_fd);
 	}
+*/
 }
 
 //-------------------------------------------------------------------------
@@ -849,7 +864,7 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request,CZapitClient::BouquetC
 		params->Add("CHANNEL_ID",id);
 		params->Add("CHANNEL_NAME",channellist[i].name);
 		char nr[3] ={0};
-		sprintf(nr,"%d",i);
+		sprintf(nr,"%d",i + 1);
 		params->Add("CHANNEL_NR",nr);
 
 
