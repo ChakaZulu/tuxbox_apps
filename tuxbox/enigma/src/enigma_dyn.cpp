@@ -2686,7 +2686,6 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	eMEPG mepg(start, bouquetRef);
 
 	eString result = readFile(TEMPLATE_DIR + "mepg.tmp");
-	result.strReplace("#TABLEWIDTH#", eString().sprintf("%d", mepg.getTableWidth()));
 	result.strReplace("#TIMESCALE#", mepg.getTimeScale());
 	result.strReplace("#BODY#", mepg.getMultiEPG());
 	return result;
@@ -3276,6 +3275,18 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 //		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
 			result.strReplace("#TOPBALK#", "topbalk4_small.png");
 	}
+
+	return result;
+}
+
+static eString wap_web_root(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	std::map<eString,eString> opt = getRequestOptions(opts);
+	content->local_header["Content-Type"]="text/vnd.wap.wml";
+
+	result = readFile(TEMPLATE_DIR + "wap.tmp");
 
 	return result;
 }
@@ -3920,6 +3931,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 {
 	dyn_resolver->addDyn("GET", "/", web_root, true);
+	dyn_resolver->addDyn("GET", "/wap", wap_web_root);
 //	dyn_resolver->addDyn("GET", NAVIGATOR_PATH, navigator, true);
 
 	dyn_resolver->addDyn("GET", "/cgi-bin/ls", listDirectory);
