@@ -61,7 +61,9 @@ class CExtendedInput : public CMenuTarget
 		vector<CExtendedInput_Item*> inputFields;
 		int selectedChar;
 
+		bool localizing;
 		string	name;
+
 		string  hint_1, hint_2;
 		char*	value;
 		CChangeObserver*   observ;
@@ -72,7 +74,7 @@ class CExtendedInput : public CMenuTarget
 
 	public:
 
-		CExtendedInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CExtendedInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL, bool Localizing=true);
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );

@@ -32,7 +32,7 @@
 #include "stringinput_ext.h"
 #include "../global.h"
 
-CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ)
+CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ, bool Localizing)
 {
 	name = Name;
 	value = Value;
@@ -46,7 +46,15 @@ CExtendedInput::CExtendedInput(string Name, char* Value, string Hint_1, string H
 	mheight = g_Fonts->menu->getHeight();
 	iheight = g_Fonts->menu_info->getHeight();
 
-	width = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str())+20;
+	localizing = Localizing;
+	if(localizing)
+	{
+		width = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str())+20;
+	}
+	else
+	{
+		width = g_Fonts->menu_title->getRenderWidth( name.c_str())+20;
+	}
 	height = hheight+ mheight+ 20;
 
 	if ( hint_1.length()> 0 )
@@ -206,17 +214,39 @@ void CExtendedInput::hide()
 void CExtendedInput::paint()
 {
 	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	if(localizing)
+	{
+		g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	}
+	else
+	{
+		g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, name.c_str(), COL_MENUHEAD);
+	}
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	if ( hint_1.length()> 0 )
 	{
-		g_Fonts->menu_info->RenderString(x+ 20, hintPosY, width- 20, g_Locale->getText(hint_1).c_str(), COL_MENUCONTENT);
-
+		if(localizing)
+		{
+			g_Fonts->menu_info->RenderString(x+ 20, hintPosY, width- 20, g_Locale->getText(hint_1).c_str(), COL_MENUCONTENT);
+		}
+		else
+		{
+			g_Fonts->menu_info->RenderString(x+ 20, hintPosY, width- 20, hint_1.c_str(), COL_MENUCONTENT);
+		}
 		if ( hint_2.length()> 0 )
-			g_Fonts->menu_info->RenderString(x+ 20, hintPosY + iheight, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
-	}
+		{
+			if(localizing)
+			{
+				g_Fonts->menu_info->RenderString(x+ 20, hintPosY + iheight, width- 20, g_Locale->getText(hint_2).c_str(), COL_MENUCONTENT);
+			}
+			else
+			{
+				g_Fonts->menu_info->RenderString(x+ 20, hintPosY + iheight, width- 20, hint_2.c_str(), COL_MENUCONTENT);
+			}
 
+		}
+	}
 
 	for(int i=0; i<inputFields.size();i++)
 	{
