@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.h,v 1.4 2002/04/28 16:14:20 McClean Exp $
+ * $Id: configfile.h,v 1.5 2002/05/07 22:53:00 McClean Exp $
  *
  * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -45,6 +45,8 @@ class CConfigFile
 
 		const bool loadConfig (const std::string p_filename);
 		const bool saveConfig (const std::string p_filename);
+
+		void clear();
 
 		std::string getString (const std::string p_keyName, const std::string defaultValue = "");
 		void setString (const std::string p_keyName, const std::string p_keyValue);

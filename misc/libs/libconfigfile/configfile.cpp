@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.4 2002/04/28 16:14:20 McClean Exp $
+ * $Id: configfile.cpp,v 1.5 2002/05/07 22:53:00 McClean Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -33,6 +33,11 @@ CConfigFile::CConfigFile(const char p_delimiter)
 	delimiter = p_delimiter;
 }
 
+void CConfigFile::clear()
+{
+	configData.clear();
+}
+
 const bool CConfigFile::loadConfig(string p_filename)
 {
 	FILE* fd = fopen(p_filename.c_str(), "r");
@@ -43,7 +48,7 @@ const bool CConfigFile::loadConfig(string p_filename)
 		return false;
 	}
 
-	configData.clear();
+	clear();
 	modifiedFlag = false;
 
 	char buf[1000];
