@@ -194,17 +194,17 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 		16:9 : fnc 1
 		4:3  : fnc 2
 	*/
-	if (format < 0)
-	{
-		format=0;
-	}
-	if (format > 3)
-	{
-		format=3;
-	}
 
-	if (bUnregNotifier) // only set settings if we dont come from watchdog
+
+	if (bUnregNotifier) // only set settings if we dont come from watchdog or video_off
+	{
+		if (format < 0)
+			format=0;
+		if (format > 3)
+			format=3;
+
 		settings.videoformat = format;
+	}
 
 	if (format==0) // automatic switch
 	{
@@ -222,6 +222,8 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 			perror("open");
 			return;
 		}
+		if (format< 0)
+			format= 0;
 
 		int avsiosfncFormat = format;
 		if (settings.boxtype == CControldClient::BOXTYPE_PHILIPS) // Philips
@@ -243,7 +245,7 @@ void setVideoFormat(int format, bool bUnregNotifier = true)
 		}
 		close(fd);
 
-		switch( format)
+		switch( format )
 		{
 			//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
 			case AVS_FNCOUT_EXT169	:
@@ -411,8 +413,10 @@ void disableVideoOutput(bool disable)
 	}
 	else
 	{
+		int fd;
+
 		setvideooutput(0, false);
-		setVideoFormat(0, false);
+		setVideoFormat(-1, false);
 		zapit.stopPlayBack();
 	}
 }
