@@ -31,11 +31,14 @@
 
 /*
  
-$Id: framebuffer.cpp,v 1.14 2002/01/03 20:03:20 McClean Exp $
+$Id: framebuffer.cpp,v 1.15 2002/01/18 02:08:45 McClean Exp $
  
  
  
 $Log: framebuffer.cpp,v $
+Revision 1.15  2002/01/18 02:08:45  McClean
+speedup backgrounds
+
 Revision 1.14  2002/01/03 20:03:20  McClean
 cleanup
 
@@ -79,6 +82,7 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 	backgroundColor = 0;
 	useBackgroundPaint = false;
 	background = NULL;
+	backgroundFilename = "";
 
 	fd=open(fb, O_RDWR);
 	if (fd<0)
@@ -560,6 +564,12 @@ bool CFrameBuffer::savePictureFromMem(string filename, unsigned char* memp)
 
 bool CFrameBuffer::loadBackground(string filename, unsigned char col)
 {
+	if(backgroundFilename==filename)
+	{
+		//ist bereits geladen
+		return true;
+	}
+	
 	if(background)
 	{
 		delete[] background;
@@ -606,7 +616,7 @@ bool CFrameBuffer::loadBackground(string filename, unsigned char col)
 			pos--;
 		}
 	}
-
+	backgroundFilename = filename;
 	close(fd);
 	return false;
 }

@@ -30,10 +30,13 @@
 */
 
 /*
-$Id: framebuffer.h,v 1.11 2002/01/03 20:03:20 McClean Exp $
+$Id: framebuffer.h,v 1.12 2002/01/18 02:08:45 McClean Exp $
  
  
 $Log: framebuffer.h,v $
+Revision 1.12  2002/01/18 02:08:45  McClean
+speedup backgrounds
+
 Revision 1.11  2002/01/03 20:03:20  McClean
 cleanup
 
@@ -93,6 +96,7 @@ class CFrameBuffer
 		int				available;
 		unsigned char	*background;
 		int				backgroundColor;
+		string			backgroundFilename;
 		bool			useBackgroundPaint;
 		unsigned int xRes, yRes, stride, bpp;
 		struct fb_var_screeninfo screeninfo, oldscreen;
