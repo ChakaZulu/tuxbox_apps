@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.64 2001/10/05 02:37:00 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.65 2001/10/10 02:53:47 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.65  2001/10/10 02:53:47  fnbrd
+//  Neues kommando (noch nicht voll funktionsfaehig).
+//
 //  Revision 1.64  2001/10/05 02:37:00  fnbrd
 //  Removed forgotten comment.
 //
@@ -346,6 +349,26 @@ static MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey mySIeventsOrderFirstEn
 typedef std::map<unsigned, unsigned long long, std::less<unsigned> > MySIeventUniqueKeysMetaOrderServiceUniqueKey;
 static MySIeventUniqueKeysMetaOrderServiceUniqueKey mySIeventUniqueKeysMetaOrderServiceUniqueKey;
 
+/*
+class NvodSubEvent {
+  public:
+    NvodSubEvent() {
+      uniqueServiceID=0;
+      uniqueEventID=0;
+    }
+    NvodSubEvent(const NvodSubEvent &n) {
+      uniqueServiceID=n.uniqueServiceID;
+      uniqueEventID=n.uniqueEventID;
+    }
+    unsigned uniqueServiceID; // zum zappen per onid+sid
+    unsigned long long uniqueMetaEventID; // ID des Meta-Events
+    unsigned long long uniqueMetaEventID; // ID des eigentlichen Events
+};
+
+// Menge sortiert nach Meta-ServiceIDs (NVODs)
+typedef std::multimap<unsigned, class NvodSubEvent *, std::less<unsigned> > nvodSubEvents;
+*/
+
 // Loescht ein Event aus allen Mengen
 static void deleteEvent(const unsigned long long uniqueKey)
 {
@@ -420,7 +443,7 @@ static void addNVODevent(const SIevent &evt)
     e->times.insert(e2->second->times.begin(), e2->second->times.end());
   }
   // Damit in den nicht nach Event-ID sortierten Mengen
-  // Mehrere Events mit gleicher ID sind, diese vorher loeschen
+  // mehrere Events mit gleicher ID sind, diese vorher loeschen
   deleteEvent(e->uniqueKey());
   mySIeventsOrderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
   mySIeventsNVODorderUniqueKey.insert(std::make_pair(e->uniqueKey(), e));
@@ -1140,7 +1163,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.64 2001/10/05 02:37:00 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.65 2001/10/10 02:53:47 fnbrd Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1800,6 +1823,73 @@ static void commandEPGepgIDshort(struct connectionData *client, char *data, cons
   }
 }
 
+static void commandTimesNVODservice(struct connectionData *client, char *data, const unsigned dataLength)
+{
+  if(dataLength!=4)
+    return;
+  unsigned uniqueServiceKey=*(unsigned *)data;
+  dprintf("Request of NVOD times for 0x%x\n", uniqueServiceKey);
+  if(dmxEIT.pause()) // -> lock
+    return;
+  lockEvents();
+  lockServices();
+  MySIservicesNVODorderUniqueKey::iterator si=mySIservicesNVODorderUniqueKey.find(uniqueServiceKey);
+  char *msgData=0;
+  struct sectionsd::msgResponseHeader responseHeader;
+  responseHeader.dataLength=0;
+  if(si!=mySIservicesNVODorderUniqueKey.end()) {
+    dprintf("NVODServices: %u\n", si->second->nvods.size());
+    if(si->second->nvods.size()) {
+      responseHeader.dataLength=(4+1+4)*si->second->nvods.size();
+      msgData=new char[responseHeader.dataLength];
+      if(!msgData) {
+	fprintf(stderr, "low on memory!\n");
+	unlockServices();
+	unlockEvents();
+	dmxEIT.unpause(); // -> unlock
+	return;
+      }
+      char *p=msgData;
+      time_t t=time(NULL);
+      for(SInvodReferences::iterator ni=si->second->nvods.begin(); ni!=si->second->nvods.end(); ni++) {      
+        // Zeiten sind erstmal dummy, d.h. pro Service eine Zeit
+        *(unsigned *)p=ni->uniqueKey();
+        p+=4;
+        *p=1;
+	p++;
+        *(time_t *)p=t;
+	t+=3600*2;
+	p+=4;
+      }
+    }
+  }
+  dprintf("data bytes: %u\n", responseHeader.dataLength);
+  int rc=writeNbytes(client->connectionSocket, (const char *)&responseHeader, sizeof(responseHeader), TIMEOUT_CONNECTIONS);
+  if(rc>0) {
+    if(responseHeader.dataLength) {
+      writeNbytes(client->connectionSocket, msgData, responseHeader.dataLength, TIMEOUT_CONNECTIONS);
+      delete[] msgData;
+    }
+  }
+  else
+    dputs("[sectionsd] Fehler/Timeout bei write");
+/*
+  MySIeventUniqueKeysMetaOrderServiceUniqueKey::iterator ei=mySIeventUniqueKeysMetaOrderServiceUniqueKey.find(uniqueServiceKey);
+  if(ei!=mySIeventUniqueKeysMetaOrderServiceUniqueKey.end()) {
+    MySIeventsOrderUniqueKey::iterator e=mySIeventsOrderUniqueKey.find(ei->second);
+    if(e!=mySIeventsOrderUniqueKey.end()) {
+      // ist ein MetaEvent, d.h. mit Zeiten fuer NVOD-Event
+      dprintf("Times: %u\n", e->second->times.size());
+    }
+    else
+      dprintf("Event not found!\n");
+  }
+*/
+  unlockServices();
+  unlockEvents();
+  dmxEIT.unpause(); // -> unlock
+}
+
 static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectionData *, char *, const unsigned)  = {
   commandActualEPGchannelName,
   commandEventListTV,
@@ -1820,7 +1910,8 @@ static void (*connectionCommands[sectionsd::numberOfCommands]) (struct connectio
   commandEPGepgID,
   commandEPGepgIDshort,
   commandCurrentComponentTagsChannelID,
-  commandAllEventsChannelID
+  commandAllEventsChannelID,
+  commandTimesNVODservice
 };
 
 static void *connectionThread(void *conn)
@@ -2440,7 +2531,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.64 2001/10/05 02:37:00 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.65 2001/10/10 02:53:47 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {

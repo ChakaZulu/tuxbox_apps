@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.20 2001/10/04 19:25:59 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.21 2001/10/10 02:53:47 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.21  2001/10/10 02:53:47  fnbrd
+//  Neues kommando (noch nicht voll funktionsfaehig).
+//
 //  Revision 1.20  2001/10/04 19:25:59  fnbrd
 //  Neues Kommando allEventsChannelID.
 //
@@ -96,7 +99,7 @@ struct sectionsd {
     unsigned dauer;
   } __attribute__ ((packed)) ;
 
-  static const int numberOfCommands=20;
+  static const int numberOfCommands=21;
   enum commands {
     actualEPGchannelName=0,
     actualEventListTVshort,
@@ -117,7 +120,8 @@ struct sectionsd {
     epgEPGid,
     epgEPGidShort,
     CurrentComponentTagsChannelID,
-    allEventsChannelID
+    allEventsChannelID,
+    timesNVODservice
   };
 };
 
@@ -239,7 +243,7 @@ struct sectionsd {
 //
 // currentNextInformationID:
 //   data of request:
-//     4 byte channel ID (4 byte onid<<16+sid)
+//     4 byte channel ID (4 byte, onid<<16+sid)
 //     1 byte number of Events (noch nicht implementiert)
 //   data of response:
 //     is a string (c-string) describing the current/next EPGs
@@ -267,7 +271,7 @@ struct sectionsd {
 //   - gets all ComponentDescriptor-Tags for the currently running Event
 //
 //   data of request:
-//     is channel ID (4 byte onid<<16+sid)
+//     is channel ID (4 byte, onid<<16+sid)
 //   data of response:
 //      for each component-descriptor (zB %02hhx %02hhx %02hhx\n%s\n)
 //          componentTag
@@ -277,10 +281,21 @@ struct sectionsd {
 //
 // allEventsChannelID:
 //   data of request:
-//     is channel ID (4 byte onid<<16+sid)
+//     is channel ID (4 byte, onid<<16+sid)
 //   data of response:
 //     is a string (c-string) describing the cached events for the requestet channel
 //     1 line per event, format: uniqueEventKey DD.MM HH:MM durationInMinutes Event name
+//
+// timesNVODservice
+//   data of request:
+//     is channel ID (4 byte, onid<<16+sid)
+//   data of response:
+//     for every (sub-)channel
+//       channelID (4 byte, onid<<16+sid)
+//       number of start times (1 byte)
+//       start time 1 (4 bytes ctime)
+//       ...
+//       start time n (4 bytes ctime)
 //
 //  was auch noch nett waere, ist bei actualEPGchannelID ein PrevID und NextID (+ jeweils Anfangzeit)
 //
