@@ -431,14 +431,14 @@ void parse_command(int connfd)
   rmsg.param = ((rmsg.param & 0x00ff) << 8) | ((rmsg.param & 0xff00) >> 8);
   rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
 
-
+/*
   printf("[controld] Command received\n");
   printf("[controld]   Version: %d\n", rmsg.version);
   printf("[controld]   Command: %d\n", rmsg.cmd);
   printf("[controld]   Param: %d\n", rmsg.param);
   printf("[controld]   Param2: %d\n", rmsg.param2);
   printf("[controld]   Param3: %s\n", rmsg.param3);
-
+*/
 
   if(rmsg.version!=1)
   {
@@ -491,11 +491,11 @@ void parse_command(int connfd)
 		break;
 	case 130:
 		printf("[controld] get videoformat (fnc)\n");
-		write(connfd,&settings.volume,sizeof(settings.videoformat));
+		write(connfd,&settings.videoformat,sizeof(settings.videoformat));
 		break;
 	case 131:
 		printf("[controld] get videotype (fblk)\n");
-		write(connfd,&settings.volume,sizeof(settings.videotype));
+		write(connfd,&settings.videotype,sizeof(settings.videotype));
 		break;
 	case 132:
 		printf("[controld] get boxtype\n");
