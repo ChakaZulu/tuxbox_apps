@@ -788,6 +788,21 @@ void CZapitClient::setRecordMode( bool activate )
 	zapit_close();
 }
 
+bool CZapitClient::isRecordModeActive()
+{
+	commandHead msgHead;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_GET_RECORD_MODE;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+
+	responseGetRecordModeState response;
+	receive((char* )&response, sizeof(response));
+
+	zapit_close();
+	return response.activated;
+}
 
 void CZapitClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
 {

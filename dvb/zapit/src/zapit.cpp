@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.145 2002/04/20 17:52:40 obi Exp $
+ * $Id: zapit.cpp,v 1.146 2002/04/20 18:14:04 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1589,6 +1589,12 @@ void parse_command ()
 					unsetRecordMode();
 			break;
 
+			case CZapitClient::CMD_GET_RECORD_MODE :
+				CZapitClient::responseGetRecordModeState msgGetRecordModeState;
+				msgGetRecordModeState.activated = (currentMode & RECORD_MODE);
+				send( connfd, &msgGetRecordModeState, sizeof(msgGetRecordModeState),0);
+			break;
+
 			case CZapitClient::CMD_BQ_ADD_BOUQUET :
 				CZapitClient::commandAddBouquet msgAddBouquet;
 				read( connfd, &msgAddBouquet, sizeof(msgAddBouquet));
@@ -1872,7 +1878,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.145 2002/04/20 17:52:40 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.146 2002/04/20 18:14:04 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{
