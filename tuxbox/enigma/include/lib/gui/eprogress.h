@@ -15,6 +15,7 @@ public:
 	
 	void setPerc(int perc);
 	void redrawWidget(gPainter *target, const QRect &area);
+	int setProperty(const QString &prop, const QString &value);
 };
 
 #endif

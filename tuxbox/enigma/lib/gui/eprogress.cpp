@@ -40,3 +40,14 @@ void eProgress::redrawWidget(gPainter *target, const QRect &area)
 	target->setForegroundColor(right);
 	target->fill(QRect(2+dh, 2, size.width()-4-dh, size.height()-4));
 }
+
+int eProgress::setProperty(const QString &prop, const QString &value)
+{
+	if (prop=="leftColor")
+		left=eSkin::getActive()->queryColor(value);
+	else if (prop=="rightColor")
+		right=eSkin::getActive()->queryColor(value);
+	else
+		return eWidget::setProperty(prop, value);
+	return 0;
+}
