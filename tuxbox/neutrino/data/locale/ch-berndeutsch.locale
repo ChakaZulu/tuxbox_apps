@@ -1,7 +1,7 @@
-menu.back Zrogg
+menu.back Zrugg
 
-options.off aus
-options.on ein
+options.off ein
+options.on aus
 options.serial seriell
 options.fb framebuffer
 options.null nou
@@ -28,7 +28,7 @@ servicemenu.head Service
 servicemenu.update Software-Aktualisierig
 servicemenu.scants Kanausuächi
 servicemenu.ucodecheck UCodes überprüäfe
-servicemenu.reload Kanaulischtä nöi ladä
+servicemenu.reload Kanauischtä nöi ladä
 servicemenu.reload_hint Kanaulischtä wärde nöi gladä,\nbitte wartä...
 
 cablesetup.provider Kabuabiäter
@@ -89,7 +89,7 @@ audiomenu.avs_control Volume Schtüürig avs/ost
 audiomenu.avs avs
 audiomenu.ost ost
 audiomenu.lirc lirc
-audiomenu.PCMOffset Lutsterkisänkig PCM
+audiomenu.PCMOffset Lutschterchisänkig PCM
 
 videomenu.head Video-Ischtöuigä
 videomenu.screensetup Böudbeeich ischtöuä
@@ -123,7 +123,7 @@ recordingmenu.server_ip Ufnahmesörver IP
 recordingmenu.server_port Ufnahmesörver Port
 recordingmenu.stopplayback Playbäck aahautä
 recordingmenu.stopsectionsd Sectionsd aahautä
-recordingmenu.vcr_devicename VCR Namä (lirc)
+recordingmenu.vcr_devicename VCR Name (lirc)
 recordingmenu.off aus
 recordingmenu.server Sörver
 recordingmenu.vcr Videorekorder
@@ -139,12 +139,12 @@ streamingmenu.server_port Streamings�r Port
 streamingmenu.streaming_server_cddrive DVD Loufw㱣h
 streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Daterate Video
-streamingmenu.streaming_audiorate Daterate Audio
+streamingmenu.streaming_audiorate DateFrate Audio
 streamingmenu.streaming_ac3_enabled AC3 Ungerschtützig
 streamingmenu.off Deaktiviert
 streamingmenu.on Aktiviert
 streamingmenu.streaming_force_transcode Transcode Forcieren
-streamingmenu.streaming_resolution Auflösung
+streamingmenu.streaming_resolution Uflösig
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
@@ -396,10 +396,10 @@ flashupdate.md5sumerror s'Image isch fählerhaft
 flashupdate.url_file Konfigfile
 flashupdate.proxyserver_sep Proxysörver
 flashupdate.proxyserver Proxyname
-flashupdate.proxyserver_hint1 Gib ä Proxynamä oder IP i (Host:Port)
+flashupdate.proxyserver_hint1 Gib ä Proxyname oder IP i (Host:Port)
 flashupdate.proxyserver_hint2 ä läre Iitrag bedütet kei Proxy
-flashupdate.proxyusername Benutzernamä
-flashupdate.proxyusername_hint1 Gib ä Proxy-Benutzernamä i
+flashupdate.proxyusername Benutzername
+flashupdate.proxyusername_hint1 Gib ä Proxy-Benutzername i
 flashupdate.proxyusername_hint2 ä lääre Iitrag bedütet kei Authentifiziärig
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Gib s'Proxy-Passwort i
@@ -412,15 +412,15 @@ flashupdate.readflash ganzes Flashimage usläse
 flashupdate.writeflash ganzes Flashimage iischpilä
 flashupdate.readflashmtd einzälni Partition usläse
 flashupdate.writeflashmtd einzälni Partition iischpilä
-flashupdate.savesuccess s'Image isch erfougrich ungerem\nDateinamä %s gschpicheret worde.
+flashupdate.savesuccess s'Image isch erfougrich ungerem\nDateiname %s gschpicheret worde.
 flashupdate.mtdselector Partitions-Uswau
 flashupdate.titlereadflash Flash usläse
 flashupdate.actionreadflash lisä flash
 flashupdate.fileselector Datei-Uswau
 flashupdate.titlewriteflash Flash schribä
 flashupdate.actionwriteflash schribä flash
-flashupdate.flashreadyreboot s'Image isch erfougrich gflasht wordä.\nd'DBox wird jetzt nöi gschtartet.
-flashupdate.reallyflashmtd Wosch dä Flashvorgang würklech düräfüerä?\n\nFaus ä Fähler uftritt oder s'Image nid\nfunktionstüchtig isch, wird dini Box nüm bootä.\n\nImagenamä: %s\nZiel: %s
+flashupdate.flashreadyreboot s'Image isch erfougrich gflascht wordä.\nd'DBox wird jetzt nöi gschtartet.
+flashupdate.reallyflashmtd Wosch dä Flashvorgang würklech düräfüerä?\n\nFaus ä Fähler uftritt oder s'Image nid\nfunktionstüchtig isch, wird dini Box nüm bootä.\n\nImagename: %s\nZiel: %s
 flashupdate.wrongbase s'Releasezyklus wiicht ab, bitte\nzersch äs nöis Komplett-Image inschtaliäre!
 flashupdate.experimentalimage Du hesch ä Snapshot usgwäut, bitte beacht,\ndass diä Version nid teschtet isch u\neventuell dini Box nochem update\nnümfunktionsfähig isch.\n\nosch diä Version wörklech installiere?
 
@@ -431,8 +431,8 @@ bouqueteditor.move Vörschiäbe
 bouqueteditor.rename Umbenänne
 bouqueteditor.hide Vörschteckä
 bouqueteditor.lock Schperrä
-bouqueteditor.newbouquetname Nöiä Namä vom Bouquet
-bouqueteditor.bouquetname Namä vom Bouquet
+bouqueteditor.newbouquetname Nöiä Name vom Bouquet
+bouqueteditor.bouquetname Name vom Bouquet
 bouqueteditor.savechanges? Söuä d'änderigä gschpicheret wärde?
 bouqueteditor.savingchanges änderigä wärde gschpicheret. Bitte warte ...
 bouqueteditor.discardingchanges änderigä wärde verworfe. Bitte warte ...
@@ -464,7 +464,7 @@ GENRE.MOVIE.1 Krimi/Thriller
 GENRE.MOVIE.2 Abentürföum/Western/Chriägsföum
 GENRE.MOVIE.3 Science-Fiction/Fäntäsy/Horror
 GENRE.MOVIE.4 Comedy
-GENRE.MOVIE.5 Soap/Melodrama/Folklore
+GENRE.MOVIE.5 Soap/Melodrama/Fouklore
 GENRE.MOVIE.6 Romantik
 GENRE.MOVIE.7 serious/classical/religious/historical movie/drama
 GENRE.MOVIE.8 adult movie/Drama
@@ -571,7 +571,7 @@ pinprotection.head PIN-Abfroog
 favorites.bouquetname Mini Favorite
 favorites.nobouquets Favorite si nume mit aktivierte Bouquets müglech
 favorites.addchannel Dr aktuell Kanau wird zum Bouquet \n"Mini Favorite" däzuägfüegt. \ns'Schpichere bruucht ä Momänt...
-favorites.menueadd Kanau Favorite däzuefüege
+favorites.menueadd Kanau i d'Favorite däzuefüege
 favorites.bqcreated Bouquet "Mini Favorite" isch aagleit worde...\n
 favorites.chadded Dr aktuell Kanau isch zu dä Favoritä däzuägfüegt worde...\n
 favorites.chalreadyinbq dr aktuell Kanau isch bereits i dä Favorite...\n
@@ -684,7 +684,7 @@ fontmenu.epg EPG
 fontmenu.infobar Infobar
 fontmenu.gamelist Gamelischte
 
-colormenu.gtx_alpha Transparenz (GTX)
+colormenu.gtx_alpha Transparänz (GTX)
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
 
