@@ -1353,7 +1353,7 @@ void CAudioPlayerGui::updateMetaData()
 		return;
 
 	if( CAudioPlayer::getInstance()->hasMetaDataChanged()
-		|| m_metainfo.empty() );
+		|| m_metainfo.empty() )
 	{
 		const CAudioMetaData meta =
 			CAudioPlayer::getInstance()->getMetaData();
