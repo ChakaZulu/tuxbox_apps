@@ -5,7 +5,7 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Wed Nov 19 17:55:14 CET 2003\nLast-Translator: unknown\nLanguage-Team: Croatia / www.clarkdigital.biz <clark@clark.hr>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Sun Nov 23 16:58:31 CET 2003\nLast-Translator: unknown\nLanguage-Team: Croatia / www.clarkdigital.biz <clark@clark.hr>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
 
 msgid " (%d entries)"
@@ -2537,7 +2537,7 @@ msgstr "Molim odaberite verziju na koju želite nadograditi ili pritisnite LAME!
 
 
 msgid "please wait while initializing Common Interface ..."
-msgstr "molim pričekajte tijekom inicijalizacije modul Zajedničkog sučelja..."
+msgstr "molim pričekajte tijekom inicijalizacije Modul zajedničkog sučelja ..."
 
 
 msgid "please wait while initializing harddisk.\nThis might take some minutes.\n"
@@ -3945,7 +3945,7 @@ msgstr "Ned"
 
 
 msgid "subservices"
-msgstr "Usluge"
+msgstr "podusluge"
 
 
 msgid "successfully formatted your disk!"
@@ -4033,11 +4033,11 @@ msgstr ""
 
 
 msgid "Team Sports"
-msgstr "Sportovi"
+msgstr "Timski Sport"
 
 
 msgid "Technology"
-msgstr ""
+msgstr "Tehnologija"
 
 
 msgid "temporary disable the parental locking"
@@ -4045,7 +4045,7 @@ msgstr "onemoguće mod za editiranje"
 
 
 msgid "Tennis"
-msgstr ""
+msgstr "Tenis"
 
 
 msgid "Test Pattern"
@@ -4065,7 +4065,7 @@ msgstr "Sljedeće nove opcije su dodane u ovoj verziji:\n"
 
 
 msgid "The PINs are not equal!\n\nDo you want to retry?"
-msgstr ""
+msgstr "PIN-ovi nisu jednaki!\n\nDali želite pokušati ponovno?"
 
 
 msgid "The transponder scan has finished and found \n   %i new Transponders,\n   %i new TV Services,\n   %i new Radio Services and\n   %i new Data Services.\n%i Transponders within %i Services scanned."
@@ -4093,7 +4093,7 @@ msgstr "Događaj je več dodat u timer listu."
 
 
 msgid "This is a complete Bouquet!\nReally delete?"
-msgstr "Ovo je snimljemni stream!\nželite izbrisati?"
+msgstr "Ovo je kompletni butik!\nželite izbrisati?"
 
 
 msgid "This is a recorded stream!\nReally delete?"
@@ -4113,7 +4113,7 @@ msgstr "Ovu uslugu nije moguće dekodirati"
 
 
 msgid "This service doesn't currently send a signal"
-msgstr "Usluga trenutno ne šalje signal"
+msgstr "Ova usluga trenutno ne šalje signal"
 
 
 msgid "Three"
@@ -4133,7 +4133,7 @@ msgstr "Četvrtak"
 
 
 msgid "Time Correction"
-msgstr "Direktorij:"
+msgstr "Korekcija Vremena"
 
 
 msgid "time correction change error"
@@ -4141,15 +4141,15 @@ msgstr ""
 
 
 msgid "Time Settings"
-msgstr "Direktorij:"
+msgstr "Vremenske postavke"
 
 
 msgid "Time Zone Setup"
-msgstr "Vremenska zona"
+msgstr "Postavke Vremenske Zone"
 
 
 msgid "Time Zone:"
-msgstr "Vremeska zona:"
+msgstr "Vremenska zona:"
 
 
 msgid "Timer"
@@ -4157,7 +4157,7 @@ msgstr "Timer"
 
 
 msgid "Timer Edit"
-msgstr "Timer lista"
+msgstr "Editiranje Timera"
 
 
 msgid "Timer Edit View"
@@ -4173,11 +4173,11 @@ msgstr "Timerlista"
 
 
 msgid "timerView"
-msgstr ""
+msgstr "pregled timera"
 
 
 msgid "Timezone Configuration"
-msgstr "Konfiguracija LNB-a"
+msgstr "Konfiguracija vremenske zone"
 
 
 msgid "title"
@@ -4221,7 +4221,7 @@ msgstr ""
 
 
 msgid "Toneburst:"
-msgstr "Kontrast:"
+msgstr "Toneburst:"
 
 
 msgid "track"
@@ -4233,7 +4233,7 @@ msgstr "Transponder"
 
 
 msgid "Transponder Date:"
-msgstr "Transponder:"
+msgstr "Datum Transpondera:"
 
 
 msgid "Transponder Edit"
@@ -4253,7 +4253,7 @@ msgstr "transpondera skenirano:"
 
 
 msgid "Transponder Time:"
-msgstr "Transponder:"
+msgstr "Vrijeme Transpondera:"
 
 
 msgid "Transponder:"
@@ -4261,7 +4261,7 @@ msgstr "Transponder:"
 
 
 msgid "Transponders"
-msgstr "Transponder:"
+msgstr "Transponderi:"
 
 
 msgid "Transponders changed"
@@ -4273,11 +4273,11 @@ msgstr "odaberite Transponder koji želite pronaći"
 
 
 msgid "Travel"
-msgstr "pohrani"
+msgstr "Putovanje"
 
 
 msgid "try to autodetect server MAC address"
-msgstr ""
+msgstr "pokušaj autodetektirati MAC adresu servera"
 
 
 msgid "Tue"
@@ -4301,7 +4301,7 @@ msgstr "TuxText pozicija"
 
 
 msgid "TV"
-msgstr ""
+msgstr "TV"
 
 
 msgid "TV mode"
@@ -4317,7 +4317,7 @@ msgstr "Dva"
 
 
 msgid "UHF Modulator"
-msgstr "Postavke RF-Modulatora"
+msgstr "UHF-Modulator"
 
 
 msgid "UHF-Modulator Setup"
@@ -4329,7 +4329,7 @@ msgstr ""
 
 
 msgid "uninitialized - format it to use!"
-msgstr "neincijalizirani - formatiraj ga za korištenje!"
+msgstr "neinicijalizirani - formatiraj ga za korištenje!"
 
 
 msgid "unknown"
@@ -4345,19 +4345,19 @@ msgstr "Nepoznata usluga"
 
 
 msgid "unlock"
-msgstr "Sati"
+msgstr "Otključaj"
 
 
 msgid "unnamed"
-msgstr "preimenuj"
+msgstr "bezimena"
 
 
 msgid "unnamed bouquet"
-msgstr ""
+msgstr "bezimeni butik"
 
 
 msgid "Unpublished"
-msgstr ""
+msgstr "Neobjavljeni"
 
 
 msgid "Update event in timerlist"
@@ -4397,7 +4397,7 @@ msgstr "Koristi DiSEqC Verzije 1.0"
 
 
 msgid "Use DiSEqC Version 1.1"
-msgstr "Koristi DiSEqC Verzije 1.1"
+msgstr "Koristi DiSEqC Verziju 1.1"
 
 
 msgid "Use DiSEqC Version 1.2"
@@ -4405,7 +4405,7 @@ msgstr "Koristi DiSEqC Verzije 1.2"
 
 
 msgid "Use gotoXX Function"
-msgstr ""
+msgstr "Koristi gotoXX Funkciju"
 
 
 msgid "use LNB %d for Motor"
@@ -4413,11 +4413,11 @@ msgstr "koristi LNB %d za Motor"
 
 
 msgid "Use Motor Input Power"
-msgstr ""
+msgstr "Koristi ulazno napajanje Motora"
 
 
 msgid "Use motor input power for running detection.. else use timeout"
-msgstr ""
+msgstr "Koristi ulazno napajanje motora za pokretanje detekcije.. inače koristi timeout"
 
 
 msgid "use ONIT"
@@ -4433,11 +4433,11 @@ msgstr "koristi PAL-M umjesto pravog NTSC-a"
 
 
 msgid "use Provider DVB Bouquet Tables if exist"
-msgstr ""
+msgstr "koristi DVB butik providera ako postoji"
 
 
 msgid "Variety"
-msgstr ""
+msgstr "Raznolikost"
 
 
 msgid "VCR"
@@ -4485,7 +4485,7 @@ msgstr "pojačaj zvuk"
 
 
 msgid "waiting for CI answer..."
-msgstr "čekam CI modul"
+msgstr "čekam odgovor CI modula..."
 
 
 msgid "waiting for module"
@@ -4505,7 +4505,7 @@ msgstr "Upozorenje"
 
 
 msgid "Water Sports"
-msgstr "Materijalni Sportovi"
+msgstr "Vodeni Sportovi"
 
 
 msgid "Weather"
@@ -4529,11 +4529,11 @@ msgstr "Zapad"
 
 
 msgid "when the motor support this, then use"
-msgstr "kada motor to podrava, onda to koristite"
+msgstr "kada motor to podržava, onda to koristite"
 
 
 msgid "Winter Sports"
-msgstr "Sportovi"
+msgstr "Zimski Sportovi"
 
 
 msgid "Write Error"
@@ -4545,11 +4545,11 @@ msgstr "greška programiranja tijekom skidanja softwera..."
 
 
 msgid "Writing Software to Flash..."
-msgstr ""
+msgstr "Pišem softver u Flash..."
 
 
 msgid "Wrong use of this function can corrupt all stored sat positions.\nAre you sure you want to use this function?"
-msgstr ""
+msgstr "Krivo korištenje ove funkcije može korupirati sve pohranjene pozicije.\nDali želite koristiti ovu funkciju?"
 
 
 msgid "year"
@@ -4561,7 +4561,7 @@ msgstr "Da"
 
 
 msgid "You are trying to delete '%s'.\nReally do this?"
-msgstr ""
+msgstr "Vi želite izbrisati '%s'.\nStvarno želite?"
 
 
 msgid "You have to restart enigma to apply the new skin\nRestart now?"

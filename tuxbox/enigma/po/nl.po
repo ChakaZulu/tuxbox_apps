@@ -5,7 +5,7 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Wed Nov 19 17:55:10 CET 2003\nLast-Translator: unknown\nLanguage-Team: Dutch / Michel Weeren <sales@dream-multimedia.nl>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Sun Nov 23 16:58:27 CET 2003\nLast-Translator: unknown\nLanguage-Team: Dutch / Michel Weeren <sales@dream-multimedia.nl>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
 #: lib/dvb/serviceplaylist.cpp:123
 #, c-format

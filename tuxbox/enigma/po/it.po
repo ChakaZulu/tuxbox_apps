@@ -5,7 +5,7 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Wed Nov 19 17:55:08 CET 2003\nLast-Translator: unknown\nLanguage-Team: Italian / language-ita@dmmtv.de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Sun Nov 23 16:58:25 CET 2003\nLast-Translator: unknown\nLanguage-Team: Italian / language-ita@dmmtv.de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
 #: lib/dvb/serviceplaylist.cpp:123
 #, c-format
@@ -797,10 +797,9 @@ msgid "Channel"
 msgstr "Canale"
 
 #: src/sselect.cpp:61
-#, fuzzy
 
 msgid "Channel EPG"
-msgstr "Canale"
+msgstr "canale epg"
 
 #: src/enigma_main.cpp:990
 
@@ -1788,10 +1787,9 @@ msgid "EPG - "
 msgstr "EPG -"
 
 #: src/sselect.cpp:54
-#, fuzzy
 
 msgid "EPG Style"
-msgstr "Stile"
+msgstr "stile epg"
 
 #: src/sselect.cpp:43
 #, fuzzy
@@ -3014,7 +3012,7 @@ msgstr ""
 #: src/sselect.cpp:61
 
 msgid "open EPG for selected Channel"
-msgstr ""
+msgstr "aprire epg del canale selezionato"
 
 #: src/enigma_setup.cpp:50
 #, fuzzy

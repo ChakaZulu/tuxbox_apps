@@ -5,7 +5,7 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Wed Nov 19 17:55:18 CET 2003\nLast-Translator: unknown\nLanguage-Team: Portugues / Satelliboy@hotmail.com\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Sun Nov 23 16:58:34 CET 2003\nLast-Translator: unknown\nLanguage-Team: Portugues / Satelliboy@hotmail.com\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
 
 msgid " (%d entries)"
@@ -417,7 +417,7 @@ msgstr "artista"
 
 
 msgid "Aspect Ratio:"
-msgstr "Formato video:"
+msgstr "Formato TV:"
 
 
 msgid "Athletics"
@@ -633,7 +633,7 @@ msgstr "Infantil"
 
 
 msgid "choose aspect ratio ( left, right )"
-msgstr "escolher a relação de aspecto ( esquerda, direita)"
+msgstr "escolher o formato TV ( esquerda, direita)"
 
 
 msgid "choose color format ( left, right )"
@@ -713,7 +713,7 @@ msgstr "fechar eventos"
 
 
 msgid "Color Format:"
-msgstr "formato VIDEO"
+msgstr "Formato Cor:"
 
 
 msgid "Comedy"
@@ -4453,7 +4453,7 @@ msgstr "Video"
 
 
 msgid "Video format:"
-msgstr "formato VIDEO"
+msgstr "Formato Video:"
 
 
 msgid "Voltage"

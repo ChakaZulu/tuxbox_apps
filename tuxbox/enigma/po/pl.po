@@ -5,7 +5,7 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Wed Nov 19 17:55:12 CET 2003\nLast-Translator: unknown\nLanguage-Team: Polish / seweryn@visoduck.pl\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Sun Nov 23 16:58:29 CET 2003\nLast-Translator: unknown\nLanguage-Team: Polish / seweryn@visoduck.pl\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
 #: lib/dvb/serviceplaylist.cpp:123
 #, c-format
@@ -126,9 +126,8 @@ msgstr "(blad odczytu informacji)"
 
 #: src/sselect.cpp:274
 #, fuzzy
-
 msgid "(removed service)"
-msgstr "kasuj serwis"
+msgstr "(Zkasowany serwis)"
 
 #: default.esml:439
 #, fuzzy
@@ -323,7 +322,7 @@ msgstr "Frontend: Satellite"
 #: src/timer.cpp:1123 src/timer.cpp:1145 src/timer.cpp:1180
 
 msgid "Add event to timerlist"
-msgstr "Dodaj pozycje do listy timer"
+msgstr "Dodaj pozycje do listy Timer"
 
 #: src/enigma_main.cpp:5583
 
@@ -343,16 +342,14 @@ msgid "Add new bouquet"
 msgstr "Dodaj nowy bukiet uzytkownika"
 
 #: src/timer.cpp:1258
-#, fuzzy
 
 msgid "add new event to Timerlist"
-msgstr "Dodaj pozycje do listy timer"
+msgstr "Dodaj pozycje do listy Timer"
 
 #: src/tpeditwindow.cpp:186
-#, fuzzy
 
 msgid "add new Network"
-msgstr "dodaj nowy Timer (ok)"
+msgstr "Dodaj nowa siec"
 
 #: default.esml:699
 
@@ -383,10 +380,9 @@ msgid "add selected service to the playlist"
 msgstr "dodaj serwis do playlist-y"
 
 #: src/sselect.cpp:113
-#, fuzzy
 
 msgid "add service to a specific bouquet"
-msgstr "dodaj serwis do okreslonych bukietów uzytkownika"
+msgstr "Dodaj serwis do okreslonego bukietu uzytkownika"
 
 #: src/enigma_main.cpp:5558 src/sselect.cpp:112
 
@@ -493,10 +489,9 @@ msgid "All known transponders have been tried, but no lock was possible. Verify 
 msgstr "Sprawdzono wszystkie znane transpondery, zaden nie jest aktywny Sprawdz ustawienie anteny/kabel lub w przypadku malo znanego satelity/sieci sprobuj szukiwania recznego."
 
 #: src/sselect.cpp:363
-#, fuzzy
 
 msgid "All Services"
-msgstr "Serwisy"
+msgstr "Serwisy (wszystkie)"
 
 #: lib/dvb/servicedvb.cpp:593
 #, fuzzy
@@ -807,10 +802,9 @@ msgid "Channel"
 msgstr "Kanal"
 
 #: src/sselect.cpp:61
-#, fuzzy
 
 msgid "Channel EPG"
-msgstr "Kanal"
+msgstr "Kanal EPG"
 
 #: src/enigma_main.cpp:990
 
@@ -967,7 +961,7 @@ msgstr "Modul Warunkowego Dostepu CI"
 #: src/enigma_ci.cpp:39
 
 msgid "Common Interface Module"
-msgstr "Modul Warunkowego Dostepu"
+msgstr "Modul dostepu warunkowego (CI)"
 
 #: src/enigma_ci.cpp:184 src/enigma_ci.cpp:535 src/enigma_ci.cpp:608
 
@@ -1008,9 +1002,8 @@ msgstr ""
 
 #: src/streaminfo.cpp:174
 #, fuzzy
-
 msgid "composer"
-msgstr "zamknij"
+msgstr ""
 
 #: src/satconfig.cpp:132
 
@@ -1144,12 +1137,12 @@ msgstr "Grudzien"
 #: src/timer.cpp:1527
 
 msgid "decrease the event begin time in 1 minute steps"
-msgstr ""
+msgstr "Zmniejsz poczatkowy czas pozycji o 1 minute"
 
 #: src/timer.cpp:1529
 
 msgid "decrease the event end time in 1 minute steps"
-msgstr ""
+msgstr "Zmniejsz zakonczenie czasu pozycji o 1 minute"
 
 #: src/enigma_main.cpp:5597 src/sselect.cpp:352
 
@@ -1157,10 +1150,9 @@ msgid "delete"
 msgstr "kasuj"
 
 #: src/tpeditwindow.cpp:473
-#, fuzzy, c-format
-
+#, c-format
 msgid "Delete %s"
-msgstr "usun mnie"
+msgstr "Usun %s"
 
 #: src/enigma_main.cpp:3061
 #, fuzzy
@@ -1191,10 +1183,9 @@ msgid "Delete recorded stream"
 msgstr "Kasuj nagrany strumien danych"
 
 #: src/sselect.cpp:127
-#, fuzzy
 
 msgid "delete selected entry"
-msgstr "usun wybrany wpis"
+msgstr "Usun wybrany wpis"
 
 #: src/enigma_main.cpp:3016
 
@@ -1215,7 +1206,7 @@ msgstr "usun aktualnie wybrany timer (ok)"
 #: src/timer.cpp:1060
 
 msgid "Delete the event from the timerlist"
-msgstr "Skasuj pozycje z listy timer"
+msgstr "Skasuj pozycje z listy Timer"
 
 #: src/enigma_main.cpp:5631
 
@@ -1376,7 +1367,7 @@ msgstr "Gotów."
 #: src/tpeditwindow.cpp:103
 
 msgid "dont scan NITs from known Networks\nfaster scan"
-msgstr ""
+msgstr "Nie skanuj znanych sieci NIT\nszybsze skanowanie"
 
 #: src/upgrade.cpp:491
 
@@ -1805,10 +1796,9 @@ msgid "EPG - "
 msgstr "EPG"
 
 #: src/sselect.cpp:54
-#, fuzzy
 
 msgid "EPG Style"
-msgstr "tytul"
+msgstr "Styl EPG"
 
 #: src/sselect.cpp:43
 #, fuzzy
@@ -1865,10 +1855,9 @@ msgid "Expert Setup"
 msgstr "Konfiguracja pozycjonera/silownika"
 
 #: src/tpeditwindow.cpp:96
-#, fuzzy
 
 msgid "Extended networks search"
-msgstr "wyszukiwanie sieciowe"
+msgstr "Rozszezone wyszukiwanie sieciowe"
 
 #: src/channelinfo.cpp:99
 
@@ -2232,7 +2221,7 @@ msgstr "Zainteresowania"
 #: lib/dvb/dvbwidgets.cpp:54
 
 msgid "horizontal"
-msgstr "poziomy"
+msgstr "Poziomo"
 
 #: default.esml:347
 
@@ -2263,12 +2252,12 @@ msgstr "w uzyciu, %d.%03d GB (~%d minut) wolnych"
 #: src/timer.cpp:1526
 
 msgid "increase the event begin time in 1 minute steps"
-msgstr ""
+msgstr "Powieksz poczatkowy czas pozycji o 1 minute"
 
 #: src/timer.cpp:1528
 
 msgid "increase the event end time in 1 minute steps"
-msgstr ""
+msgstr "Powieksz zakonczenie czasu pozycji o 1 minute"
 
 #: default.esml:384
 
@@ -2421,7 +2410,7 @@ msgstr "Inv:"
 #: src/timer.cpp:1867
 
 msgid "Invalid begin or end time.!\nPlease check time and date"
-msgstr "Zly czas rozpoczecia lub zakonczenia. !\n Sprawdz raz jeszcze date i czas"
+msgstr "Nieprawidlowy czas rozpoczecia lub zakonczenia. !\nProsze poprawic date i czas"
 
 #: default.esml:600
 
@@ -2488,7 +2477,7 @@ msgstr ""
 #: src/streaminfo.cpp:178
 
 msgid "length"
-msgstr ""
+msgstr "dlugosc"
 
 #: src/channelinfo.cpp:98
 
@@ -2613,10 +2602,9 @@ msgid "mark"
 msgstr ""
 
 #: src/sselect.cpp:128
-#, fuzzy
 
 msgid "mark selected entry for move"
-msgstr "usun wybrany wpis"
+msgstr "Zaznacz wybrany wpis do przenoszenia"
 
 #: src/sselect.cpp:355
 
@@ -2717,10 +2705,9 @@ msgid "Movie"
 msgstr "Film"
 
 #: src/sselect.cpp:374
-#, fuzzy
 
 msgid "Movies"
-msgstr "Film"
+msgstr "Nagrania"
 
 #: src/sselect.cpp:62
 
@@ -2749,10 +2736,9 @@ msgid "Nature"
 msgstr "Kultura"
 
 #: src/tpeditwindow.cpp:90
-#, fuzzy
 
 msgid "Network search"
-msgstr "wyszukiwanie sieciowe"
+msgstr "Wyszukiwanie sieciowe"
 
 #: default.esml:510
 
@@ -2786,10 +2772,9 @@ msgid "New Media"
 msgstr ""
 
 #: src/tpeditwindow.cpp:443
-#, fuzzy
 
 msgid "new Satellite"
-msgstr "Satelita:"
+msgstr "Nowy satelita"
 
 #: src/enigma_main.cpp:5984
 
@@ -2814,7 +2799,7 @@ msgstr "nastepna strona"
 #: src/timer.cpp:1652
 
 msgid "Ngrab"
-msgstr ""
+msgstr "Serwis Ngrab"
 
 #: src/setupengrab.cpp:25
 #, fuzzy
@@ -2854,10 +2839,9 @@ msgid "no description available"
 msgstr "opis niedostepny"
 
 #: src/timer.cpp:2076
-#, fuzzy
 
 msgid "no description found"
-msgstr "opis niedostepny"
+msgstr "Opis niedostepny"
 
 #: src/engrab.cpp:36 src/enigma_event.cpp:283 src/enigma_event.cpp:294
 #: src/timer.cpp:1716
@@ -3055,10 +3039,9 @@ msgid "open harddisc setup"
 msgstr "otwórz konfiguracje dysku twardego"
 
 #: src/software_update.cpp:33
-#, fuzzy
 
 msgid "open internet update"
-msgstr "Otwórz konfiguracje Wideo"
+msgstr "Otwórz aktualizacje przez Internet"
 
 #: src/system_settings.cpp:53
 
@@ -3445,10 +3428,9 @@ msgid "press ok to change connection type"
 msgstr "wcisnij ok aby wprowadzic nazwe"
 
 #: src/tpeditwindow.cpp:81
-#, fuzzy
 
 msgid "press ok to change direction"
-msgstr "wcisnij ok aby wprowadzic nazwe"
+msgstr "Przycisnij ok aby zmienic kierunek obrotnicy"
 
 #: default.esml:707
 #, fuzzy
@@ -3457,10 +3439,9 @@ msgid "press ok to change event name manually"
 msgstr "wcisnij ok aby wprowadzic nazwe"
 
 #: src/tpeditwindow.cpp:63
-#, fuzzy
 
 msgid "press ok to change satellite name"
-msgstr "wcisnij ok aby wprowadzic nazwe"
+msgstr "Nacisnij ok aby zmienic nazwe satelity"
 
 #: src/setupnetwork.cpp:383
 #, fuzzy
@@ -3648,15 +3629,14 @@ msgid "Ready to upgrade"
 msgstr "Gotów do uaktualnienia oprogramowania"
 
 #: src/tpeditwindow.cpp:472
-#, fuzzy
 
 msgid "Really delete the selected satellite?"
-msgstr "usun wybrany wpis"
+msgstr "Czy chcesz naprawde usunac wybrany wpis?"
 
 #: src/timer.cpp:1061
 
 msgid "Really delete this event?"
-msgstr "Jestes pewien by skasowac ta pozycje ?"
+msgstr "Jestes pewien ze chcesz skasowac ta pozycje ?"
 
 #: src/enigma_main.cpp:4022
 
@@ -3666,7 +3646,7 @@ msgstr "Wykonac?"
 #: src/timer.cpp:1067
 
 msgid "Really update this event?"
-msgstr " Rzeczywiscie uaktualnic to?"
+msgstr "Czy naprawde chcesz aktualizowac ta pozycje?"
 
 #: src/enigma_main.cpp:5686
 #, fuzzy
@@ -3712,7 +3692,7 @@ msgstr "Nagrywanie"
 #: src/timer.cpp:1648
 
 msgid "record DVR"
-msgstr "zapisz DVR"
+msgstr "Zapisz DVR"
 
 #: src/enigma_main.cpp:5813
 
@@ -3725,7 +3705,6 @@ msgid "Record mode - read manual"
 msgstr ""
 
 #: src/timer.cpp:1660
-#, fuzzy
 
 msgid "Record VCR"
 msgstr "Nagrywanie"
@@ -3814,10 +3793,9 @@ msgid "remove selected entry"
 msgstr "usun wybrany wpis"
 
 #: src/tpeditwindow.cpp:187
-#, fuzzy
 
 msgid "remove selected Network"
-msgstr "usun wybrany wpis"
+msgstr "Usun wybrana siec"
 
 #: default.esml:888
 #, fuzzy
@@ -3839,7 +3817,7 @@ msgstr "usun wybrany wpis"
 #: src/timer.cpp:1259
 
 msgid "remove this entry from timer list"
-msgstr "usun wpis z listy timer"
+msgstr "Usun wpis z listy Timer"
 
 #: src/enigma_event.cpp:23
 
@@ -3875,10 +3853,9 @@ msgid "Rename File"
 msgstr "Zmien nazwe  bukietu u¿ytkownika"
 
 #: src/sselect.cpp:129
-#, fuzzy
 
 msgid "rename selected entry"
-msgstr "usun wybrany wpis"
+msgstr "Zmien nazwe wybranego wpisu"
 
 #: src/enigma_main.cpp:5590
 #, fuzzy
@@ -4018,10 +3995,9 @@ msgid "Satellite Configuration"
 msgstr "Konfiguracja Satelity"
 
 #: src/tpeditwindow.cpp:57
-#, fuzzy
 
 msgid "Satellite Edit"
-msgstr "Satelita:"
+msgstr "Edytuj satelite"
 
 #: default.esml:426 default.esml:476 default.esml:571 src/rotorconfig.cpp:594
 
@@ -4029,10 +4005,9 @@ msgid "Satellite:"
 msgstr "Satelita:"
 
 #: src/sselect.cpp:365
-#, fuzzy
 
 msgid "Satellites"
-msgstr "Satelita:"
+msgstr "Satelity"
 
 #: lib/dvb/servicedvb.cpp:608
 #, fuzzy
@@ -4072,10 +4047,9 @@ msgid "save"
 msgstr "save"
 
 #: src/tpeditwindow.cpp:254
-#, fuzzy
 
 msgid "Save changed Transponders?"
-msgstr "zachowaj zmiany i powróc"
+msgstr "Czy zapisac zmiany w liscie transponderów?"
 
 #: default.esml:406
 #, fuzzy
@@ -4152,12 +4126,12 @@ msgstr "Skanowanie trwaprosze czekac"
 #: src/tpeditwindow.cpp:91
 
 msgid "scan Network Information Table(s)\nthis is recommend"
-msgstr ""
+msgstr "Skanuj tabele informacyjne sieci\njest to zalecone"
 
 #: src/tpeditwindow.cpp:97
 
 msgid "scan NITs of other transponders\nthis is slower, but sometimes needed)"
-msgstr ""
+msgstr "Skanuj tabele NIT innych transponderów\nopcja powolna, czasami potrzebna"
 
 #: default.esml:540 src/scan.cpp:474
 
@@ -4781,10 +4755,9 @@ msgid "Show"
 msgstr "Pokaz"
 
 #: src/sselect.cpp:122
-#, fuzzy
 
 msgid "show all services"
-msgstr "wyswietl wybór serwisów"
+msgstr "Waswietl wszystkie serwisy"
 
 #: src/enigma_main.cpp:90
 
@@ -4797,10 +4770,9 @@ msgid "Show BN version"
 msgstr "wyswietl wersje BN"
 
 #: src/sselect.cpp:125
-#, fuzzy
 
 msgid "show bouquet list"
-msgstr "Dodaj serwis do ulubionych"
+msgstr "Wyswietl liste serwisów"
 
 #: src/setup_extra.cpp:47
 #, fuzzy
@@ -4869,10 +4841,9 @@ msgid "Show remaining Time"
 msgstr "wyswietl menu glówne"
 
 #: src/sselect.cpp:123
-#, fuzzy
 
 msgid "show satellite list"
-msgstr "kieruj na pozycje satelitarna"
+msgstr "Pokaz liste serwiów satelitów"
 
 #: src/enigma_main.cpp:88
 
@@ -4977,7 +4948,7 @@ msgstr "Konfiguracja Satelity"
 #: src/tpeditwindow.cpp:102
 
 msgid "Skip known Networks"
-msgstr ""
+msgstr "Pomin znane sieci"
 
 #: src/enigma_main.cpp:2461
 #, fuzzy
@@ -5266,7 +5237,7 @@ msgstr "Niedziela"
 #: src/streaminfo.cpp:464
 
 msgid "supported coding systems:"
-msgstr "obslugiwane systemy kodowania:"
+msgstr "Wspomagane systemy kodowania:"
 
 #: src/setupvideo.cpp:60
 
@@ -5387,7 +5358,7 @@ msgstr "Obraz Kontrolny"
 #: src/timer.cpp:1169
 
 msgid "The Endtime overlaps with another event in the timerlist"
-msgstr "Czas zakonczenia wpisu koliduje z czasem innego wpisu"
+msgstr "Czas zakonczenia wpisu koliduje z czasem innej pozycji"
 
 #: src/parentallock.cpp:267
 
@@ -5428,12 +5399,12 @@ msgstr "Ten katalog nie zawiera zadnych danych mozliwych do odtwarzania!"
 #: src/timer.cpp:1178
 
 msgid "This event cannot added to the timerlist.\nThe event overlaps with another event in the timerlist\nPlease check the timerlist manually."
-msgstr "Ten wpis nie moze zostac dodany do timera.\n Zdarzenie koliduje z innym zdarzeniem w liscie timera\n Sprawdz liste timera recznie."
+msgstr "Ten wpis nie moze zostac dodany do listy Timer.\nPozycja koliduje z inna pozycja w liscie\nSprawdz liste Timer recznie."
 
 #: src/timer.cpp:1122 src/timer.cpp:1145
 
 msgid "This event is already in the timerlist."
-msgstr "Ten wpis istnieje juz w timer"
+msgstr "Ten wpis istnieje juz w liscie Timer"
 
 #: src/enigma_main.cpp:3060
 #, fuzzy
@@ -5526,10 +5497,9 @@ msgid "Timer Edit"
 msgstr "Zawartosc Timer"
 
 #: src/timer.cpp:1525
-#, fuzzy
 
 msgid "Timer Edit View"
-msgstr "Zawartosc Timer"
+msgstr "Edycja zawartosci Timer"
 
 #: src/timer.cpp:1453
 
@@ -5544,7 +5514,7 @@ msgstr "Lista Timer"
 #: src/timer.cpp:1257
 
 msgid "timerView"
-msgstr "timerView"
+msgstr "Zawartosc listy Timer"
 
 #: src/time_settings.cpp:35
 #, fuzzy
@@ -5610,10 +5580,9 @@ msgid "Toneburst:"
 msgstr "Kontrast:"
 
 #: src/streaminfo.cpp:176
-#, fuzzy
 
 msgid "track"
-msgstr "wstecz"
+msgstr "Nagranie"
 
 #: src/scan.cpp:1077
 #, fuzzy
@@ -5666,16 +5635,14 @@ msgid "Transponders"
 msgstr "Transponder:"
 
 #: src/tpeditwindow.cpp:255
-#, fuzzy
 
 msgid "Transponders changed"
-msgstr "Skanowanie Transponderów"
+msgstr "Nastapila zmiana transponderów"
 
 #: src/tpeditwindow.cpp:265
-#, fuzzy
 
 msgid "Transponders couldn't be written to file!"
-msgstr "wybierz Transponder który chcesz znalezc"
+msgstr "Blad zapisu transponderów!"
 
 #: src/channelinfo.cpp:110
 #, fuzzy
@@ -5770,10 +5737,9 @@ msgid "Unknown error!!"
 msgstr "Nieznany blad !!!"
 
 #: src/timer.cpp:1736
-#, fuzzy
 
 msgid "unknown service"
-msgstr "nieznany"
+msgstr "Nieznany serwis"
 
 #: src/enigma_main.cpp:5653
 #, fuzzy
@@ -5800,7 +5766,7 @@ msgstr ""
 #: src/timer.cpp:1066 src/timer.cpp:1867
 
 msgid "Update event in timerlist"
-msgstr "Aktualizuj pozycje w timer"
+msgstr "Aktualizuj pozycje w liscie Timer"
 
 #: src/upgrade.cpp:545
 
@@ -5829,10 +5795,9 @@ msgid "use automatically daylight saving time"
 msgstr "Zasilanie regulowane automatycznie"
 
 #: src/tpeditwindow.cpp:108
-#, fuzzy
 
 msgid "Use BAT"
-msgstr "uzyj BAT"
+msgstr "Uzyj BAT"
 
 #: default.esml:508
 
@@ -5893,7 +5858,7 @@ msgstr ""
 #: src/tpeditwindow.cpp:109
 
 msgid "use Provider DVB Bouquet Tables if exist"
-msgstr ""
+msgstr "Uzyj tabele bukietów DVB providera jesli istnieje"
 
 #: src/channelinfo.cpp:80
 
@@ -5919,7 +5884,7 @@ msgstr "SVideo"
 #: src/streaminfo.cpp:385
 
 msgid "Video format:"
-msgstr "Format Video:"
+msgstr "Format Wideo:"
 
 #: default.esml:358
 
@@ -6025,10 +5990,9 @@ msgid "Winter Sports"
 msgstr "Sport"
 
 #: src/tpeditwindow.cpp:266
-#, fuzzy
 
 msgid "Write Error"
-msgstr "Blad!"
+msgstr "Blad zapisu!"
 
 #: src/upgrade.cpp:505 src/upgrade.cpp:507
 
@@ -6075,7 +6039,7 @@ msgstr "Kasujesz aktualnie uruchomione zdarzenie...\n spowoduje to zatrzymanie n
 #: src/timer.cpp:1065
 
 msgid "You would to update the running event.. \nthis stops the timer mode (recording)!"
-msgstr "Modyfikujesz uruchomione juz zdarzenie...\n spowoduje to przerwanie nagrywania w trybie timer!"
+msgstr "Modyfikujesz uruchomione nagrywanie...\nSpowoduje to przerwanie nagrywania w trybie Timer!"
 
 #: src/setupvideo.cpp:63
 
