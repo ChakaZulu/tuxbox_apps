@@ -258,8 +258,11 @@ int CMP3PlayerGui::show()
 			// nothing
 		}
 		else if( msg == CRCInput::RC_home)
-		{ //Exit after cancel key
-			loop=false;
+		{ 
+			if (key_level==1)
+				stop();        
+			else
+				loop=false;
 		}
 		else if( msg == CRCInput::RC_left)
 		{
