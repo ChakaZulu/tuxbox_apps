@@ -38,6 +38,8 @@
 #include "framebuffer.h"
 #include "gui/color.h"
 
+#define BACKGROUNDIMAGEWIDTH 720
+
 CFrameBuffer::CFrameBuffer()
 : active ( true )
 {
@@ -660,12 +662,12 @@ bool CFrameBuffer::loadPictureToMem(const std::string filename, const uint16_t w
 
 bool CFrameBuffer::loadPicture2Mem(const std::string filename, uint8_t * memp)
 {
-	return loadPictureToMem(filename, 720, 576, 0, memp);
+	return loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, memp);
 }
 
 bool CFrameBuffer::loadPicture2FrameBuffer(const std::string filename)
 {
-	return loadPictureToMem(filename, 720, 576, getStride(), getFrameBufferPointer());
+	return loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, getStride(), getFrameBufferPointer());
 }
 
 bool CFrameBuffer::savePictureFromMem(const std::string filename, uint8_t * memp)
@@ -674,7 +676,7 @@ bool CFrameBuffer::savePictureFromMem(const std::string filename, uint8_t * memp
 	uint16_t         width, height;
 	int              fd;
 	
-	width = 720;
+	width = BACKGROUNDIMAGEWIDTH;
 	height = 576;
 
 	header.width_lo  = width  &  0xFF;
@@ -712,9 +714,9 @@ bool CFrameBuffer::loadBackground(const std::string filename, const unsigned cha
 		delete[] background;
 	}
 
-	background = new uint8_t[720*576];
+	background = new uint8_t[BACKGROUNDIMAGEWIDTH * 576];
 
-	if (!loadPictureToMem(filename, 720, 576, 0, background))
+	if (!loadPictureToMem(filename, BACKGROUNDIMAGEWIDTH, 576, 0, background))
 	{
 		delete[] background;
 		return false;
@@ -723,7 +725,7 @@ bool CFrameBuffer::loadBackground(const std::string filename, const unsigned cha
 	if(col!=0)//pic-offset
 	{
 		unsigned char *bpos = background;
-		int pos = 720*576;
+		int pos = BACKGROUNDIMAGEWIDTH * 576;
 		while(pos>0)
 		{
 			*bpos += col;
@@ -792,12 +794,12 @@ void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
 	else
 	{
 		unsigned char *fbpos = lfb + x + stride*y;
-		unsigned char *bkpos = background + x + stride*y;
+		unsigned char *bkpos = background + x + BACKGROUNDIMAGEWIDTH * y;
 		for(int count=0;count<dy;count++)
 		{
 			memcpy(fbpos, bkpos, dx);
 			fbpos += stride;
-			bkpos += stride;
+			bkpos += BACKGROUNDIMAGEWIDTH;
 		}
 	}
 }
@@ -815,7 +817,7 @@ void CFrameBuffer::paintBackground()
 	if (useBackgroundPaint && (background != NULL))
 	{
 		for (int i = 0; i < 576; i++)
-			memcpy(lfb + i * stride, background + i * 720, 720);
+			memcpy(lfb + i * stride, background + i * BACKGROUNDIMAGEWIDTH, BACKGROUNDIMAGEWIDTH);
 	}
 	else
 		memset(lfb, backgroundColor, stride*576);
