@@ -173,7 +173,7 @@ eString getConfigSettings(void)
 	eConfig::getInstance()->getKey("/elitedvb/network/samba", samba);
 	result.strReplace("#SAMBA#", (samba == 1) ? "checked" : "");
 	int webLock = 1;
-	eConfig::getInstance()->getKey("/ezap/webif/webIfLock", webLock);
+	eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", webLock);
 	result.strReplace("#WEBIFLOCK#", (webLock == 1) ? "checked" : "");
 	int hddti = 24;
 	eConfig::getInstance()->getKey("/extras/hdparm-s", hddti);
@@ -212,7 +212,7 @@ eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPC
 
 //	eConfig::getInstance()->setKey("/extras/fastshutdown", (fastshutdown == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/elitedvb/network/samba", (samba == "on" ? 1 : 0));
-	eConfig::getInstance()->setKey("/ezap/webif/webIfLock", (webiflock == "on" ? 1 : 0));
+	eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", (webiflock == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/extras/showSatPos", (showsatpos == "on" ? 1 : 0));
 	eConfig::getInstance()->setKey("/enigma/timeroffset", atoi(timeroffset.c_str()));
 	eConfig::getInstance()->setKey("/elitedvb/network/maxmtu", atoi(maxmtu.c_str()));
