@@ -221,9 +221,7 @@ filebrowser.sort.name (имя файла)
 filebrowser.sort.namedirsfirst (имя файла2)
 filebrowser.sort.size (размер)
 filebrowser.sort.type (тип)
-flashupdate.action Действие:
 flashupdate.actionreadflash чтение
-flashupdate.actionwriteflash запись
 flashupdate.cantopenfile не могу открыть файл
 flashupdate.cantopenmtd не могу открыть устройство mtd
 flashupdate.checkupdate поиск новой версии
@@ -265,7 +263,6 @@ flashupdate.readflash Прочитать всю прошивку
 flashupdate.readflashmtd Прочитать один раздел 
 flashupdate.ready готов
 flashupdate.reallyflashmtd Уверены что хотите записать?\n\nЕсли произойдет ошибка или прошивка не\nправильная тюнер не перегрузится.\n\nимя имиджа: %s\nЦель: %s
-flashupdate.reboot перегружаемся...
 flashupdate.savesuccess Прошивка успешно сохранена\nпод %s.
 flashupdate.selectimage Доступные прошивки
 flashupdate.titlereadflash Чтение флеша
@@ -309,7 +306,6 @@ fontsize.menu_info Информация Меню
 fontsize.menu_title Заголовок меню Menu Title
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
-infoviewer.cantdecode Не могу декодировать
 infoviewer.epgnotload EPG не загружено....
 infoviewer.epgwait ожидаем EPG...
 infoviewer.eventlist Телегид
@@ -405,11 +401,9 @@ mainsettings.language Языки
 mainsettings.lcd ЖК-дисплей
 mainsettings.misc Прочие настройки
 mainsettings.network Сеть
-mainsettings.plugins Настройки плагинов
 mainsettings.recording Запись
 mainsettings.savesettingsnow сохранить изменения
 mainsettings.savesettingsnow_hint изменения сохраняю,\nодин момент...
-mainsettings.scan Настройки сканирования
 mainsettings.streaming Видеоплеер
 mainsettings.video Видео
 menu.back назад
@@ -421,7 +415,6 @@ messagebox.info Информация
 messagebox.no Нет
 messagebox.yes Да
 miscsettings.bootinfo Показывать информацию при старте
-miscsettings.boxtype Тип DBox
 miscsettings.driver_boot Драйвер и Старт настройки 
 miscsettings.fb_destination Expert! Boot-Console
 miscsettings.general Главное
@@ -505,7 +498,6 @@ parentallock.lockage18 до 18 лет
 parentallock.lockedprogram Закрыть программы (с %d лет по)
 parentallock.never никогда
 parentallock.onsignal широковещательный
-parentallock.onstart при старте
 parentallock.parentallock Возрастная защита
 parentallock.prompt введите Ваш PIN
 pictureviewer.defdir Стартовая директория.
@@ -543,7 +535,6 @@ recordingmenu.setupnow применить изменения
 recordingmenu.stopplayback Остановить воспроизведение
 recordingmenu.stopsectionsd Остановить sectionsd
 recordingmenu.vcr vcr
-recordingmenu.vcr_devicename VCR имя (lirc)
 recordtimer.announce Запись начинается через несколько минут
 repeatblocker.hint_1 Время в ms  для распознавания 2 нажатия кнопки
 repeatblocker.hint_2 Нажмите  0 для переключения  (красная - пробел)
@@ -553,7 +544,6 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.diseqcrepeat DiSEqC-повторы
 satsetup.extended DiSEqC-Настройки
-satsetup.extended_lnb LNB-Настройки
 satsetup.extended_motor Настройки мотора
 satsetup.minidiseqc мини-DiSEqC
 satsetup.motorcontrol Ручная настройка мотора
@@ -579,7 +569,6 @@ scants.numberofradioservices Радио
 scants.numberoftotalservices Всего
 scants.numberoftvservices ТВ
 scants.provider Провайдеры:
-scants.services Сервисы:
 scants.startnow старт сканирования
 scants.transponders Транспондеры:
 screensetup.lowerright green = настроить снизу справо
@@ -598,18 +587,15 @@ sleeptimerbox.hint1 Время до выключения. (000=откл)
 sleeptimerbox.hint2 Ваш dbox2 будет выключен через это время.
 sleeptimerbox.title Таймер сна
 streamfeatures.head Характеристики
-streamfeatures.info Информация о потоке
 streaminfo.aratio Aspect Ratio
 streaminfo.aratio_unknown Aspect Ratio: неизвестный
 streaminfo.audiotype Тип аудио
 streaminfo.audiotype_unknown Audiotype: неизвестный
 streaminfo.bitrate Bitrate
-streaminfo.ecm_invalid invalid CA-system
 streaminfo.framerate Кадры в секунду
 streaminfo.framerate_unknown Framerate: неизвестный
 streaminfo.head Информация о потоке
 streaminfo.not_available не представлен
-streaminfo.not_crypted не кодирован
 streaminfo.resolution Разрешение
 streaming.dir_not_writable нельзя записать в папку-записи.\n запись не возможна
 streamingmenu.352x288 352x288
@@ -648,7 +634,6 @@ timerlist.bouquetselect выбор букета
 timerlist.channel Каналы
 timerlist.channelselect выбор канала
 timerlist.delete Удалить
-timerlist.empty НЕту таймеров в данное время
 timerlist.menumodify Изменить таймер
 timerlist.menunew Новый таймер
 timerlist.message Сообщение
