@@ -1246,7 +1246,7 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		show();
 
 // Quick und Dirty ... damit die aktuelle Volume sofort angezeigt wird.
-	eAVSwitch::getInstance()->changeVolume(0, 0);
+	eAVSwitch::getInstance()->sendVolumeChanged();
 
 	eServiceHandler *sapi=eServiceInterface::getInstance()->getService();
 	if (!sapi)

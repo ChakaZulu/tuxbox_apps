@@ -261,7 +261,7 @@ static eString setVolume(eString request, eString path, eString opts, eHTTPConne
 	if(!mute) {
 		mut=0;
 	} else {
-		eAVSwitch::getInstance()->changeVolume(2,1);
+		eAVSwitch::getInstance()->toggleMute();
 		result+="[mute OK]";
 		return result;
 	}
