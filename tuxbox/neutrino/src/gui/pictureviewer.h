@@ -105,11 +105,11 @@ class CPictureViewerGui : public CMenuTarget
 		CFileFilter picture_filter;
 		void view(unsigned int nr, bool unscaled=false);
 		void endView();
+		int  show();
 
 	public:
 		CPictureViewerGui();
 		~CPictureViewerGui();
-		int  show();
 		int  exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
