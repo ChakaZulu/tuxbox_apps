@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.148 2002/04/20 18:51:29 obi Exp $
+ * $Id: zapit.cpp,v 1.149 2002/04/20 20:55:59 McClean Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -734,11 +734,13 @@ void setTVMode ()
 void setRecordMode ()
 {
 	currentMode |= RECORD_MODE;
+	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_ACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
 void unsetRecordMode ()
 {
 	currentMode &= ~RECORD_MODE;
+	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
 int prepare_channels ()
@@ -1917,7 +1919,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.148 2002/04/20 18:51:29 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.149 2002/04/20 20:55:59 McClean Exp $\n\n");
 
 	if (argc > 1)
 	{
