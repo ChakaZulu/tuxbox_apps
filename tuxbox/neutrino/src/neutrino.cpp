@@ -46,7 +46,8 @@
 #include <dlfcn.h>
 #include <signal.h>
 #include <sys/wait.h>
-
+#include <sys/statvfs.h>
+#include <sys/vfs.h>
 
 #include <sys/socket.h>
 
@@ -78,6 +79,7 @@
 #include "gui/widget/keychooser.h"
 #include "gui/widget/stringinput.h"
 #include "gui/widget/stringinput_ext.h"
+#include "gui/widget/mountchooser.h"
 
 #include "gui/color.h"
 
@@ -113,6 +115,9 @@
 #include <system/settings.h>
 #include <system/debug.h>
 #include <system/flashtool.h>
+#include <system/fsmounter.h>
+
+#include <timerdclient/timerdmsg.h>
 
 #include <string.h>
 
@@ -147,6 +152,8 @@ extern const char * locale_real_names[]; /* #include <system/locals_intern.h> */
 
 CZapitClient::SatelliteList satList;
 CZapitClient::SatelliteList::iterator satList_it;
+
+CVCRControl::CDevice * recordingdevice = NULL;
 
 #define NEUTRINO_SETTINGS_FILE          CONFIGDIR "/neutrino.conf"
 #define NEUTRINO_RECORDING_ENDED_SCRIPT CONFIGDIR "/recording.end"
@@ -631,6 +638,8 @@ int CNeutrinoApp::loadSetup()
 		strcpy( g_settings.network_nfs_mount_options1[i], configfile.getString( cfg_key, "ro,soft,udp" ).c_str() );
 		sprintf(cfg_key, "network_nfs_mount_options2_%d", i);
 		strcpy( g_settings.network_nfs_mount_options2[i], configfile.getString( cfg_key, "nolock,rsize=8192,wsize=8192" ).c_str() );
+		sprintf(cfg_key, "network_nfs_mac_%d", i);
+		strcpy( g_settings.network_nfs_mac[i], configfile.getString( cfg_key, "11:22:33:44:55:66").c_str() );
 	}
 	strcpy( g_settings.network_nfs_audioplayerdir, configfile.getString( "network_nfs_audioplayerdir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_picturedir, configfile.getString( "network_nfs_picturedir", "" ).c_str() );
@@ -653,6 +662,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_stream_all_audio_pids = configfile.getBool("recordingmenu.stream_all_audio_pids", true );
 	g_settings.recording_stream_vtxt_pid       = configfile.getBool("recordingmenu.stream_vtxt_pid"      , false);
 	strcpy( g_settings.recording_ringbuffers, configfile.getString( "recordingmenu.ringbuffers", "20").c_str() );
+	g_settings.recording_choose_direct_rec_dir = configfile.getInt32( "recording_choose_direct_rec_dir", 0 );
+	g_settings.recording_epg_for_filename      = configfile.getBool("recording_epg_for_filename"         , true);
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
@@ -953,6 +964,8 @@ void CNeutrinoApp::saveSetup()
 		configfile.setString( cfg_key, g_settings.network_nfs_mount_options1[i]);		
 		sprintf(cfg_key, "network_nfs_mount_options2_%d", i);
 		configfile.setString( cfg_key, g_settings.network_nfs_mount_options2[i]);	
+		sprintf(cfg_key, "network_nfs_mac_%d", i);
+		configfile.setString( cfg_key, g_settings.network_nfs_mac[i]);
 	}
 	configfile.setString( "network_nfs_audioplayerdir", g_settings.network_nfs_audioplayerdir);
 	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
@@ -975,6 +988,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setBool  ("recordingmenu.stream_all_audio_pids", g_settings.recording_stream_all_audio_pids);
 	configfile.setBool  ("recordingmenu.stream_vtxt_pid"      , g_settings.recording_stream_vtxt_pid      );
 	configfile.setString("recordingmenu.ringbuffers"          , g_settings.recording_ringbuffers);
+	configfile.setInt32 ("recording_choose_direct_rec_dir"    , g_settings.recording_choose_direct_rec_dir);
+	configfile.setBool  ("recording_epg_for_filename"         , g_settings.recording_epg_for_filename     );
 
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
@@ -2091,7 +2106,9 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CMACInput * recordingSettings_server_mac = new CMACInput(LOCALE_RECORDINGMENU_SERVER_MAC,  g_settings.recording_server_mac, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder * mf3 = new CMenuForwarder(LOCALE_RECORDINGMENU_SERVER_MAC, ((g_settings.recording_type == RECORDING_SERVER) && g_settings.recording_server_wakeup==1), g_settings.recording_server_mac, recordingSettings_server_mac);
+
 	CRecordingNotifier2 * RecordingNotifier2 = new CRecordingNotifier2(mf3);
+	
 	CMenuOptionChooser * oj2 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_SERVER_WAKEUP, &g_settings.recording_server_wakeup, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER), RecordingNotifier2);
 
 	CMenuOptionChooser* oj3 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STOPPLAYBACK, &g_settings.recording_stopplayback, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_SERVER));
@@ -2111,23 +2128,32 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * timerSettings_record_safety_time_after = new CStringInput(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, g_settings.record_safety_time_after, 2, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_1, LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER_HINT_2,"0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf6 = new CMenuForwarder(LOCALE_TIMERSETTINGS_RECORD_SAFETY_TIME_AFTER, true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
+
 	// for direct recording
-	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, (g_settings.recording_type == RECORDING_FILE), g_settings.network_nfs_recordingdir,this,"recordingdir");
+	CMenuWidget *directRecordingSettings = new CMenuWidget(LOCALE_RECORDINGMENU_FILESETTINGS, NEUTRINO_ICON_RECORDING);
+	
+	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_RECORDINGMENU_FILESETTINGS,(g_settings.recording_type == RECORDING_FILE),NULL,directRecordingSettings);
+
+	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_RECORDINGMENU_DEFDIR, true, g_settings.network_nfs_recordingdir,this,"recordingdir");
 	CStringInput * recordingSettings_splitsize = new CStringInput(LOCALE_RECORDINGMENU_SPLITSIZE, g_settings.recording_splitsize, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
-	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_RECORDINGMENU_SPLITSIZE, (g_settings.recording_type == RECORDING_FILE), g_settings.recording_splitsize,recordingSettings_splitsize);
+	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_RECORDINGMENU_SPLITSIZE, true, g_settings.recording_splitsize,recordingSettings_splitsize);
 
-	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_O_SYNC, &g_settings.recording_use_o_sync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_O_SYNC, &g_settings.recording_use_o_sync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 	
-	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_FDATASYNC, &g_settings.recording_use_fdatasync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_FDATASYNC, &g_settings.recording_use_fdatasync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 	
-	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+	CMenuOptionChooser* oj8 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
-	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_VTXT_PID, &g_settings.recording_stream_vtxt_pid, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+	CMenuOptionChooser* oj9 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_VTXT_PID, &g_settings.recording_stream_vtxt_pid, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
 
 	CStringInput * recordingSettings_ringbuffers = new CStringInput(LOCALE_RECORDINGMENU_RINGBUFFERS, g_settings.recording_ringbuffers, 2, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
-	CMenuForwarder* mf9 = new CMenuForwarder(LOCALE_RECORDINGMENU_RINGBUFFERS, (g_settings.recording_type == RECORDING_FILE), g_settings.recording_ringbuffers,recordingSettings_ringbuffers);
+	CMenuForwarder* mf10 = new CMenuForwarder(LOCALE_RECORDINGMENU_RINGBUFFERS, true, g_settings.recording_ringbuffers,recordingSettings_ringbuffers);
+	CMenuOptionChooser* oj10 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_CHOOSE_DIRECT_REC_DIR, &g_settings.recording_choose_direct_rec_dir, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+
+	CMenuOptionChooser* oj11 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_EPG_FOR_FILENAME, &g_settings.recording_epg_for_filename, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, true);
+
 	
-	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6, oj7, oj8, oj9,mf9);
+	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7);//mf8,oj6, oj7, oj8, oj9,mf9,oj10,oj11);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, RECORDINGMENU_RECORDING_TYPE_OPTIONS, RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT, true, RecordingNotifier);
 
@@ -2142,22 +2168,28 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( mf2);
 	recordingSettings.addItem( oj2);
 	recordingSettings.addItem( mf3);
-	recordingSettings.addItem( oj3 );
+	recordingSettings.addItem( oj3);
 	recordingSettings.addItem( oj4);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj5);
 	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_TIMERSETTINGS_SEPARATOR));
 	recordingSettings.addItem( mf5);
 	recordingSettings.addItem( mf6);
-	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_RECORDINGMENU_FILESETTINGSSEPARATOR));
+//	recordingSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_RECORDINGMENU_FILESETTINGSSEPARATOR));
 	recordingSettings.addItem( mf7);
-	recordingSettings.addItem( mf8);
-	recordingSettings.addItem( mf9);
-	recordingSettings.addItem(oj6);
-	recordingSettings.addItem(oj7);
-	recordingSettings.addItem(oj8);
-	recordingSettings.addItem(oj9);
 
+	directRecordingSettings->addItem(GenericMenuSeparator);
+	directRecordingSettings->addItem(GenericMenuBack);
+	directRecordingSettings->addItem(GenericMenuSeparatorLine);
+	directRecordingSettings->addItem(mf8);
+	directRecordingSettings->addItem(mf9);
+	directRecordingSettings->addItem(mf10);
+	directRecordingSettings->addItem(oj6);
+	directRecordingSettings->addItem(oj7);
+	directRecordingSettings->addItem(oj8);
+	directRecordingSettings->addItem(oj9);
+	directRecordingSettings->addItem(oj10);
+	directRecordingSettings->addItem(oj11);
 	recordingstatus = 0;
 }
 
@@ -2748,7 +2780,6 @@ void CNeutrinoApp::ShowStreamFeatures()
 {
 	CMenuWidget StreamFeatureSelector(LOCALE_STREAMFEATURES_HEAD, "features.raw", 350);
 	StreamFeatureSelector.addItem(GenericMenuSeparator);
-
 	char id[5];
 	int cnt = 0;
 	int enabled_count = 0;
@@ -2762,7 +2793,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 			sprintf(id, "%d", count);
 
 			enabled_count++;
-
+			
 			StreamFeatureSelector.addItem(new CMenuForwarderNonLocalized(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, (cnt== 0) ? CRCInput::RC_blue : CRCInput::convertDigitToKey(enabled_count-1), (cnt == 0) ? NEUTRINO_ICON_BUTTON_BLUE : ""), (cnt == 0));
 			cnt++;
 		}
@@ -2783,7 +2814,8 @@ void CNeutrinoApp::ShowStreamFeatures()
 	{
 		StreamFeatureSelector.addItem(new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, MAINMENU_RECORDING_OPTIONS, MAINMENU_RECORDING_OPTION_COUNT, true, this, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	}
-	// -- Timer Liste
+
+	// -- Timer-Liste
 	StreamFeatureSelector.addItem(new CMenuForwarder(LOCALE_TIMERLIST_NAME, true, NULL, new CTimerList(), id, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
 	StreamFeatureSelector.addItem(GenericMenuSeparatorLine);
@@ -2813,10 +2845,105 @@ void CNeutrinoApp::ShowStreamFeatures()
 #endif
 	// ------
 
-	StreamFeatureSelector.exec(NULL, "");
+	StreamFeatureSelector.exec(NULL,"");
 
 	// restore mute symbol
 	AudioMute(current_muted, true);
+
+}
+
+bool CNeutrinoApp::doGuiRecord(char * preselectedDir, bool addTimer)
+{
+	CTimerd::RecordingInfo eventinfo;
+	bool refreshGui = false;
+	if(CVCRControl::getInstance()->isDeviceRegistered())
+	{
+		if(recordingstatus == 1)
+		{
+			CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
+			eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
+			CEPGData		epgData;
+			if (g_Sectionsd->getActualEPGServiceKey(g_RemoteControl->current_channel_id, &epgData ))
+			{
+				eventinfo.epgID = epgData.eventID;
+				eventinfo.epg_starttime = epgData.epg_times.startzeit;
+			}
+			else
+			{
+				eventinfo.epgID = 0;
+				eventinfo.epg_starttime = 0;
+			}
+			strcpy(eventinfo.apids, "");
+			bool doRecord = true;
+			if (g_settings.recording_type == RECORDING_FILE)
+			{
+				char *recDir = (preselectedDir != NULL) ? preselectedDir : g_settings.network_nfs_recordingdir;
+				// data == NULL -> called after stream problem so do not show a dialog again
+				// but which dir has been chosen?
+				if(preselectedDir == NULL && g_settings.recording_choose_direct_rec_dir) {
+					int userDecision = -1;
+					
+					CMountChooser recDirs(LOCALE_TIMERLIST_RECORDING_DIR,NEUTRINO_ICON_SETTINGS,&userDecision,NULL,g_settings.network_nfs_recordingdir);
+					recDirs.exec(NULL,"");
+					refreshGui = true;
+					//streamFeatures->paint();
+					if (userDecision != -1)
+					{
+						if (!CFSMounter::isMounted(g_settings.network_nfs_local_dir[userDecision]))
+						{
+							CFSMounter::MountRes mres = 
+								CFSMounter::mount(g_settings.network_nfs_ip[userDecision].c_str(),
+										  g_settings.network_nfs_dir[userDecision], 
+										  g_settings.network_nfs_local_dir[userDecision],
+										  (CFSMounter::FSType) g_settings.network_nfs_type[userDecision],
+										  g_settings.network_nfs_username[userDecision],
+										  g_settings.network_nfs_password[userDecision],
+										  g_settings.network_nfs_mount_options1[userDecision], 
+										  g_settings.network_nfs_mount_options2[userDecision]);
+							if (mres == CFSMounter::MRES_OK)
+							{
+								recDir = g_settings.network_nfs_local_dir[userDecision];
+							} else {
+								doRecord = false;
+								const char * merr = mntRes2Str(mres);
+								int msglen = strlen(merr) + strlen(g_settings.network_nfs_local_dir[userDecision]) + 7;
+								char msg[msglen];
+								strcpy(msg,merr);
+								strcat(msg,"\nDir: ");
+								strcat(msg,g_settings.network_nfs_local_dir[userDecision]);
+								
+								ShowMsgUTF(LOCALE_MESSAGEBOX_ERROR, msg,
+									   CMessageBox::mbrBack, CMessageBox::mbBack,NEUTRINO_ICON_ERROR, 450, 10); // UTF-8
+							}
+						}	
+					} else 
+					{
+						doRecord = false;
+					}
+				}
+				(static_cast<CVCRControl::CFileDevice*>(recordingdevice))->Directory = recDir;
+			}
+			if(!doRecord || (CVCRControl::getInstance()->Record(&eventinfo)==false))
+			{
+				recordingstatus=0;
+				return refreshGui;
+			}
+			else if (addTimer)
+			{
+				time_t now = time(NULL);
+				recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, eventinfo.epgID, eventinfo.epg_starttime);
+			}
+		}
+		else
+		{
+			g_Timerd->stopTimerEvent(recording_id);
+			startNextRecording();
+		}
+		return refreshGui;
+	}
+	else
+		puts("[neutrino.cpp] no recording devices");
+	return false;
 }
 
 
@@ -2839,8 +2966,6 @@ void CNeutrinoApp::InitZapper()
 
 void CNeutrinoApp::setupRecordingDevice(void)
 {
-	CVCRControl::CDevice * recordingdevice;
-
 	if (g_settings.recording_type == RECORDING_SERVER)
 	{
 		unsigned int port;
@@ -2943,13 +3068,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 	UCodeChecker              = new CUCodeCheckExec;
 	NVODChanger               = new CNVODChangeExec;
 	StreamFeaturesChanger     = new CStreamFeaturesChangeExec;
-	MoviePluginChanger     = new CMoviePluginChangeExec;
+	MoviePluginChanger        = new CMoviePluginChangeExec;
 	MyIPChanger               = new CIPChangeNotifier;
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
 
-	CNFSMountGui::automount();
+	CFSMounter::automount();
 
 	// setup recording device
 	if (g_settings.recording_type != RECORDING_OFF)
@@ -2975,7 +3100,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget    scanSettings        (LOCALE_SERVICEMENU_SCANTS            , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    service             (LOCALE_SERVICEMENU_HEAD              , NEUTRINO_ICON_SETTINGS);
 	CMenuWidget    moviePlayer         (LOCALE_MOVIEPLAYER_HEAD              , "streaming.raw"       );
-    
+
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
 					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
 					 service, fontSettings, audioplPicSettings, streamingSettings, moviePlayer);
@@ -3556,6 +3681,23 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			if(system(command.c_str()) != 0)
 				perror("etherwake failed");
 		}
+		if (g_settings.recording_type == RECORDING_FILE)
+		{
+			char * recDir = ((CTimerdMsg::commandRecordDir*)data)->recDir;
+			for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
+			{
+				if (strcmp(g_settings.network_nfs_local_dir[i],recDir) == 0)
+				{			
+					printf("[neutrino] waking up %s (%s)\n",g_settings.network_nfs_ip[i].c_str(),recDir); 
+					std::string command = "etherwake ";
+					command += g_settings.network_nfs_mac[i];
+					if(system(command.c_str()) != 0)
+						perror("etherwake failed");
+					break;
+				}
+			}
+		}
+		delete (unsigned char*) data;
 		if( mode != mode_scart )
 			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_RECORDTIMER_ANNOUNCE));
 		return messages_return::handled;
@@ -3631,7 +3773,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if (msg == NeutrinoMessages::EVT_EXTMSG)
 	{
 		if (mode != mode_scart)
-			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
@@ -3641,13 +3783,13 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		{
 			neutrino_locale_t msgbody;
 			
-			if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_IDLE)
+			if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_IDLE)
 				msgbody = LOCALE_STREAMING_SUCCESS;
-			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
+			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_BUFFER_OVERFLOW)
 				msgbody = LOCALE_STREAMING_BUFFER_OVERFLOW;
-			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_WRITE_OPEN_FAILURE)
+			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_WRITE_OPEN_FAILURE)
 				msgbody = LOCALE_STREAMING_WRITE_ERROR_OPEN;
-			else if ((* (stream2file_status_t *) data) == STREAM2FILE_STATUS_WRITE_FAILURE)
+			else if ((* (stream2file_status2_t *) data).status == STREAM2FILE_STATUS_WRITE_FAILURE)
 				msgbody = LOCALE_STREAMING_WRITE_ERROR;
 			else
 				goto skip_message;
@@ -3657,19 +3799,20 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			 * in case of STREAM2FILE_STATUS_IDLE we might even have to immediately start the next recording
 			 */
 #warning TODO: it might make some sense to have some log-file (but where do we store this information? nfs/flash/ram?) that collects these messages and maybe a menu-entry to view the lasted XXX messages
-			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, 5); // UTF-8
+			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO, 450, 5); // UTF-8
 
 		skip_message:
 			;
 		}
-		if ((* (stream2file_status_t *) data) != STREAM2FILE_STATUS_IDLE)
+		if ((* (stream2file_status2_t *) data).status != STREAM2FILE_STATUS_IDLE)
 		{
 			/* 
 			 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
 			 * instead it checks the state of the variable recordingstatus
 			 */
 			/* restart recording */
-			changeNotify(LOCALE_MAINMENU_RECORDING_START, NULL);
+			doGuiRecord((*(stream2file_status2_t *) data).dir);
+			//changeNotify(LOCALE_MAINMENU_RECORDING_START, data);
 		}
 
 		delete (unsigned char*) data;
@@ -3684,7 +3827,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			text[pos] = '\n';
 		}
 		if( mode != mode_scart )
-			ShowMsgUTF(LOCALE_TIMERLIST_TYPE_REMIND, text, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			ShowMsgUTF(LOCALE_TIMERLIST_TYPE_REMIND, text, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
@@ -4104,10 +4247,54 @@ void CNeutrinoApp::startNextRecording()
 	if ((recordingstatus   == 0   ) &&
 	    (nextRecordingInfo != NULL))
 	{
+		bool doRecord = true;
 		if (CVCRControl::getInstance()->isDeviceRegistered())
 		{
 			recording_id = nextRecordingInfo->eventID;
-			if(CVCRControl::getInstance()->Record(nextRecordingInfo))
+			if (g_settings.recording_type == RECORDING_FILE)
+			{
+				char *recDir = strlen(nextRecordingInfo->recordingDir) > 0 ?
+					nextRecordingInfo->recordingDir : g_settings.network_nfs_recordingdir;
+				if (!CFSMounter::isMounted(recDir))
+				{
+					doRecord = false;
+					for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
+					{
+						if (strcmp(g_settings.network_nfs_local_dir[i],recDir) == 0)
+						{			
+							CFSMounter::MountRes mres = 
+								CFSMounter::mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], 
+										  g_settings.network_nfs_local_dir[i], (CFSMounter::FSType) g_settings.network_nfs_type[i],
+										  g_settings.network_nfs_username[i], g_settings.network_nfs_password[i],
+										  g_settings.network_nfs_mount_options1[i], g_settings.network_nfs_mount_options2[i]);
+							if (mres == CFSMounter::MRES_OK)
+							{
+								doRecord = true;
+							} else {
+								const char * merr = mntRes2Str(mres);
+								int msglen = strlen(merr) + strlen(nextRecordingInfo->recordingDir) + 7;
+								char msg[msglen];
+								strcpy(msg,merr);
+								strcat(msg,"\nDir: ");
+								strcat(msg,nextRecordingInfo->recordingDir);
+
+								ShowHintUTF(LOCALE_MESSAGEBOX_ERROR, msg); // UTF-8
+								doRecord = false;
+							}
+							break;
+						}
+					}
+					if (!doRecord)
+					{
+						// recording dir does not seem to exist in config anymore
+						// -> try default dir
+						recDir = g_settings.network_nfs_recordingdir;
+						doRecord = true;
+					}
+				}
+				(static_cast<CVCRControl::CFileDevice*>(recordingdevice))->Directory = std::string(recDir);
+			}
+			if(doRecord && CVCRControl::getInstance()->Record(nextRecordingInfo))
 				recordingstatus = 1;
 			else
 				recordingstatus = 0;
@@ -4319,51 +4506,11 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 *          changeNotify - features menu recording start / stop                        *
 *                                                                                     *
 **************************************************************************************/
-bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
+bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *data)
 {
 	if ((ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING_START)) || (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING)))
 	{
-		CTimerd::RecordingInfo eventinfo;
-
-		if(CVCRControl::getInstance()->isDeviceRegistered())
-		{
-			if(recordingstatus == 1)
-			{
-				CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
-				eventinfo.channel_id = CREATE_CHANNEL_ID_FROM_SERVICE_ORIGINALNETWORK_TRANSPORTSTREAM_ID(si.sid, si.onid, si.tsid);
-				CEPGData		epgData;
-				if (g_Sectionsd->getActualEPGServiceKey(g_RemoteControl->current_channel_id, &epgData ))
-				{
-					eventinfo.epgID = epgData.eventID;
-					eventinfo.epg_starttime = epgData.epg_times.startzeit;
-				}
-				else
-				{
-					eventinfo.epgID = 0;
-					eventinfo.epg_starttime = 0;
-				}
-				strcpy(eventinfo.apids, "");
-
-				if(CVCRControl::getInstance()->Record(&eventinfo)==false)
-				{
-					recordingstatus=0;
-					return false;
-				}
-				else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING))
-				{
-					time_t now = time(NULL);
-					recording_id = g_Timerd->addImmediateRecordTimerEvent(eventinfo.channel_id, now, now+4*60*60, eventinfo.epgID, eventinfo.epg_starttime);
-				}
-			}
-			else
-			{
-				g_Timerd->stopTimerEvent(recording_id);
-				startNextRecording();
-			}
-			return true;
-		}
-		else
-			puts("[neutrino.cpp] no recording devices");
+		return doGuiRecord(NULL,ARE_LOCALES_EQUAL(OptionName, LOCALE_MAINMENU_RECORDING));
 	}
 	else if (ARE_LOCALES_EQUAL(OptionName, LOCALE_LANGUAGESETUP_SELECT))
 	{
@@ -4379,7 +4526,6 @@ bool CNeutrinoApp::changeNotify(const neutrino_locale_t OptionName, void *)
 	}
 	return false;
 }
-
 
 /**************************************************************************************
 *                                                                                     *
