@@ -16,7 +16,6 @@
 
 #include <pics.h>
 
-
 extern	int		doexit;
 
 extern	unsigned short	realcode;
@@ -30,6 +29,8 @@ typedef struct _Pic
 	int				width;
 	int				height;
 } Pic;
+
+#define	NUMPICS		31
 
 static	Pic	pics[] = {
 { 0,	0,	2,	14,	14 },		// 0 cursor
@@ -61,7 +62,9 @@ static	Pic	pics[] = {
 { 0,	0,	1,	17,	1 },
 { 0,	0,	1,	25,	6 },
 { 0,	0,	1,	32,	32 },
-{ 0,	0,	5,	9,	13 } };		// 30 menu-icons
+{ 0,	0,	5,	9,	13 },	// 29 menu-icons (no ani)
+{ 0,	0,	1,	14, 14 } 	// 30 level6 short mask
+};
 
 static	int		piccolors[] = {
 	0x00EE00,
@@ -189,12 +192,19 @@ int	LoadPics( void )
 
 	pics[0].pic_data=data;
 	sz=pics[0].width*pics[0].height*pics[0].ani;
-	for( i=1; i<30; i++ )
+	for( i=1; i<NUMPICS; i++ )
 	{
 		data+=sz;
 		pics[i].pic_data=data;
 		sz=pics[i].width*pics[i].height*pics[i].ani;
 	}
+
+#if 0
+// add new
+	pics[30].pic_data=p31_data;
+	WritePics();
+#endif
+
 	return 0;
 }
 
@@ -225,7 +235,7 @@ void	RemovePics( void )
 {
 	int		i;
 
-	for( i=0; i<30; i++ )
+	for( i=0; i<NUMPICS; i++ )
 		if ( pics[i].pic_flip )
 			free( pics[i].pic_flip );
 	if ( pics[0].pic_data )
