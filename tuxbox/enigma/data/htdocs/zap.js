@@ -13,7 +13,8 @@ function bouquetChange()
 {
 	var i = document.channelselector.bouquet.selectedIndex;
 	currentBouquet = i;
-	loadChannels(i);
+	currentChannel = -1;
+	loadChannels(i, currentChannel);
 }
 function epg()
 {
