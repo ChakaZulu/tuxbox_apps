@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.25 2003/03/14 07:31:50 obi Exp $
+ * $Id: frontend.h,v 1.26 2003/05/09 12:07:04 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -45,6 +45,8 @@ class CFrontend
 		fe_sec_voltage_t currentVoltage;
 		/* current diseqc position */
 		uint8_t currentDiseqc;
+		/* current satellite position */
+		int32_t currentSatellitePosition;
 		/* how often to repeat DiSEqC 1.1 commands */
 		uint8_t diseqcRepeats;
 		/* DiSEqC type of attached hardware */
@@ -88,11 +90,13 @@ class CFrontend
 		static fe_modulation_t		getModulation(const uint8_t modulation);
 		uint8_t				getPolarization(void) const;
 		const struct dvb_frontend_info *getInfo(void) const			{ return &info; };
+		const int32_t 			getCurrentSatellitePosition() { return currentSatellitePosition; }
 
 		void				setDiseqcRepeats(const uint8_t repeats)	{ diseqcRepeats = repeats; }
 		void				setDiseqcType(const diseqc_t type);
 		void				setLnbOffset(const bool high, const uint8_t index, const int offset);
 		int				setParameters(struct dvb_frontend_parameters *feparams, uint8_t polarization, uint8_t diseqc);
+		void 				setCurrentSatellitePosition(int32_t satellitePosition) {currentSatellitePosition = satellitePosition; } 
 };
 
 #endif /* __zapit_frontend_h__ */
