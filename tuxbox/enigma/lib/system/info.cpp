@@ -68,10 +68,11 @@ eSystemInfo::eSystemInfo()
 			cpustr="STB04500, 252MHz";
 			break;
 		case TUXBOX_SUBMODEL_DBOX2:
-			defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab;
+			defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 			caids.insert(0x1702);
 			caids.insert(0x1722);
 			caids.insert(0x1762);
+			canrecordts=1;
 			hasstandbywakeuptimer=haslcd=1;
 			helpstr="dbox2";
 			modelstr="d-Box 2";
