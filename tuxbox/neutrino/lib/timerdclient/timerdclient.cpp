@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.11 2002/05/30 19:57:30 dirch Exp $
+	$Id: timerdclient.cpp,v 1.12 2002/05/31 20:27:38 dirch Exp $
 
 	License: GPL
 
@@ -130,7 +130,7 @@ int timerID;
 	else
 	{
 		dprintf("Set New Sleeptimerannounce: %d alarm: %d\n",announcetime,alarmtime);
-		timerID = addTimerEvent(CTimerEvent::TIMER_SLEEPTIMER,true,NULL,announcetime,alarmtime,0);
+		timerID = addTimerEvent(CTimerEvent::TIMER_SLEEPTIMER,NULL,announcetime,alarmtime,0);
 	}
 
 	return timerID;	
@@ -245,6 +245,7 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_
 
 }
 
+/*
 int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data , int min, int hour, int day, int month, CTimerEvent::CTimerEventRepeat evrepeat)
 {
 	dprintf("addTimerEvent(Typ:%d,min: %d, hour: %d, day: %d, month: %d repeat:%d\n",evType,min,hour,day,month,evrepeat);
@@ -262,8 +263,8 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 	
 	addTimerEvent(evType,true,data,0,mktime(actTime),0);
 }
-
-int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, bool _new, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat)
+*/
+int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat)
 {
 	dprintf("addTimerEvent(Type: %d,data: %x announce: %ld, alarm: %ld, stop: %ld repeat: %d\n",evType,data,announcetime,alarmtime,stoptime,evrepeat);
 	CTimerd::commandHead msg;

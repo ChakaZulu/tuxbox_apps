@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.13 2002/05/30 19:44:02 dirch Exp $
+	$Id: timerdclient.h,v 1.14 2002/05/31 20:27:38 dirch Exp $
 
 	License: GPL
 
@@ -74,7 +74,8 @@ class CTimerdClient
 			EVT_RECORD_START,
 			EVT_RECORD_STOP,
 			EVT_ANNOUNCE_RECORD,
-			EVT_ANNOUNCE_SLEEPTIMER
+			EVT_ANNOUNCE_SLEEPTIMER,
+			EVT_SLEEPTIMER
 		};
 
 
@@ -85,8 +86,8 @@ class CTimerdClient
 
 		bool isTimerdAvailable();			// check if timerd is running
 
-		int addTimerEvent( CTimerEvent::CTimerEventTypes evType,bool _new, void* data, time_t alarmtime,time_t announcetime = 0, time_t stoptime = 0, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
-		int addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, int min, int hour, int day = 0, int month = 0, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
+		int addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, time_t alarmtime,time_t announcetime = 0, time_t stoptime = 0, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
+//		int addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, int min, int hour, int day = 0, int month = 0, CTimerEvent::CTimerEventRepeat evrepeat = CTimerEvent::TIMERREPEAT_ONCE);
 
 		void removeTimerEvent( int evId);	// remove timer event
 
@@ -113,33 +114,39 @@ class CTimerdClient
 
 		// adds new sleeptimer event
 		int addSleepTimerEvent(time_t announcetime,time_t alarmtime)	// sleeptimer setzen
-			{return addTimerEvent(CTimerEvent::TIMER_SLEEPTIMER, true, NULL, announcetime, alarmtime, 0);};
+			{return addTimerEvent(CTimerEvent::TIMER_SLEEPTIMER, NULL, announcetime, alarmtime, 0);};
 
 		// adds new shutdown timer event
 		int addShutdownTimerEvent(time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0)
-			{return addTimerEvent(CTimerEvent::TIMER_SHUTDOWN, true, NULL, announcetime, alarmtime, stoptime);};
+			{return addTimerEvent(CTimerEvent::TIMER_SHUTDOWN, NULL, announcetime, alarmtime, stoptime);};
 
 		// adds new record timer event
-		int addRecordTimerEvent(time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
-			{return addTimerEvent(CTimerEvent::TIMER_RECORD,true, NULL,  announcetime, alarmtime, stoptime);};
+		int addRecordTimerEvent(unsigned onidSid,unsigned long long epgID,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
+			{
+				CTimerEvent::EventInfo eventInfo;
+				eventInfo.onidSid = onidSid;
+				eventInfo.epgID = epgID;
+				return addTimerEvent(CTimerEvent::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
+			};
 
 		// adds new standby timer event
 		int addStandbyTimerEvent(bool standby_on,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
-			{return addTimerEvent(CTimerEvent::TIMER_STANDBY, true, &standby_on,  announcetime, alarmtime, stoptime);};
+			{return addTimerEvent(CTimerEvent::TIMER_STANDBY, &standby_on,  announcetime, alarmtime, stoptime);};
 
 		// adds new zapto timer event
-		int addZaptoTimerEvent(unsigned onidSid,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
+		int addZaptoTimerEvent(unsigned onidSid,unsigned long long epgID,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0) 
 		{
 			CTimerEvent::EventInfo eventInfo;
 			eventInfo.onidSid = onidSid;
-			return addTimerEvent(CTimerEvent::TIMER_ZAPTO, &eventInfo, true, announcetime, alarmtime, stoptime);
+			eventInfo.epgID = epgID;
+			return addTimerEvent(CTimerEvent::TIMER_ZAPTO, &eventInfo, announcetime, alarmtime, stoptime);
 		};
 
-		int addNextProgramTimerEvent(CTimerEvent::EventInfo eventInfo,int min, int hour, int day = 0, int month = 0)
+		int addNextProgramTimerEvent(CTimerEvent::EventInfo eventInfo,time_t alarmtime, time_t announcetime = 0, time_t stoptime = 0)
 		{
 			// mal auf verdacht eingebaut
 			// keine ahnung ob / was hier noch fehlt
-			return addTimerEvent(CTimerEvent::TIMER_NEXTPROGRAM, &eventInfo, min, hour, day, month);
+			return addTimerEvent(CTimerEvent::TIMER_NEXTPROGRAM, &eventInfo, alarmtime, announcetime, stoptime);
 		};
 };
 

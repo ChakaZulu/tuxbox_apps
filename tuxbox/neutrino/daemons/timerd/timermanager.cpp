@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.15 2002/05/30 19:44:02 dirch Exp $
+	$Id: timermanager.cpp,v 1.16 2002/05/31 20:27:38 dirch Exp $
 
 	License: GPL
 
@@ -29,7 +29,7 @@
 #include "clientlib/timerdclient.h"
 
 
-CTimerEvent_NextProgram::EventMap CTimerEvent_NextProgram::events;
+//CTimerEvent_NextProgram::EventMap CTimerEvent_NextProgram::events;
 
 
 //------------------------------------------------------------
@@ -99,11 +99,9 @@ void* CTimerManager::timerThread(void *arg)
 			if(event->eventState == CTimerEvent::TIMERSTATE_HASFINISHED)
 			{
 				if(event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
-				{
 					event->Reschedule();
-				}
 				else
-					event->eventState == CTimerEvent::TIMERSTATE_TERMINATED;
+					event->eventState = CTimerEvent::TIMERSTATE_TERMINATED;
 			}
 
 			if(event->eventState == CTimerEvent::TIMERSTATE_TERMINATED)				// event is terminated, so delete it
@@ -349,7 +347,7 @@ void CTimerEvent_Sleeptimer::fireEvent()
 	dprintf("Sleeptimer Timer fired\n");
 	//event in neutrinos remoteq. schreiben
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
-		CTimerdClient::EVT_SHUTDOWN,
+		CTimerdClient::EVT_SLEEPTIMER,
 		CEventServer::INITID_TIMERD);
 }
 
