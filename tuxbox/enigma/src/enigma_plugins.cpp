@@ -87,13 +87,13 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	depend=getInfo(cfgfile, "depend");
 
 	QString atype=getInfo(cfgfile, "type"),
-					apluginVersion=getInfo(cfgfile, "pluginversion"),
-					aneedfb=getInfo(cfgfile, "needfb"),
-					aneedrc=getInfo(cfgfile, "needrc"),
-					aneedlcd=getInfo(cfgfile, "needlcd"),
-					aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
-					aneedoffsets=getInfo(cfgfile, "needoffsets"),
-					apigon=getInfo(cfgfile, "pigon");
+			apluginVersion=getInfo(cfgfile, "pluginversion"),
+			aneedfb=getInfo(cfgfile, "needfb"),
+			aneedrc=getInfo(cfgfile, "needrc"),
+			aneedlcd=getInfo(cfgfile, "needlcd"),
+			aneedvtxtpid=getInfo(cfgfile, "needvtxtpid"),
+			aneedoffsets=getInfo(cfgfile, "needoffsets"),
+			apigon=getInfo(cfgfile, "pigon");
 
 	needfb=(aneedfb.isNull()?false:atoi(aneedfb));
 	needlcd=(aneedlcd.isNull()?false:atoi(aneedlcd));
@@ -124,7 +124,7 @@ eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 	window->move(QPoint(150, 136));
 	window->setLCD(lcdTitle, lcdElement);
 	new ePlugin(window->list, 0);
-  connect(window->list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
+	connect(window->list, SIGNAL(selected(eListboxEntry*)), SLOT(selected(eListboxEntry*)));
 }
 
 int eZapPlugins::exec()
@@ -245,7 +245,7 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 		// versuche, den gtx/enx_vbi zu stoppen	
 		qDebug("try to stop gtx/enx_vbi");
 		MakeParam(P_ID_VTXTPID, Decoder::parms.tpid);
-    int fd = open("/dev/dbox/vbi0", O_RDWR);
+		int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{
 			qDebug("stop gtx/enx_vbi");
@@ -257,8 +257,8 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 	PluginParam *par = first;
 	for( ; par; par=par->next )
 	{
-		 printf ("id: %s - val: %s\n", par->id, par->val);
-		 printf("%d\n", par->next);
+		printf ("id: %s - val: %s\n", par->id, par->val);
+		printf("%d\n", par->next);
 	}
 
 	for (i=0; i<argc; i++)
