@@ -102,12 +102,12 @@ static eString addChangeMountPoint(eString request, eString dirpath, eString opt
 	if (action == "change")
 	{
 		eMountMgr::getInstance()->changeMountPoint(atoi(id.c_str()), mp);
-		result = "<html><body>Mount point changed successfully.";
+		result = "<html><body onUnload=\"parent.window.opener.location.reload(true)\">Mount point changed successfully.";
 	}
 	else
 	{
 		eMountMgr::getInstance()->addMountPoint(mp);
-		result = "<html><body>Mount point added successfully.";
+		result = "<html><body onUnload=\"parent.window.opener.location.reload(true)\">Mount point added successfully.";
 	}
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
