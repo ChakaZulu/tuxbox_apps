@@ -344,8 +344,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 		            	res = messages_return::cancel_info;
 		            }
 				}
-				else if ( ( msg == g_settings.key_quickzap_up ) ||
-               	 	 	  ( msg == g_settings.key_quickzap_down ) ||
+				else if ( ( msg == (uint) g_settings.key_quickzap_up ) ||
+               	 	 	  ( msg == (uint) g_settings.key_quickzap_down ) ||
                	 	 	  ( msg == CRCInput::RC_0 ) ||
                	 	 	  ( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 				{
@@ -678,7 +678,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
         		 ( info_CurrentNext.flags & sectionsd::epgflags::has_next) &&
         		 ( showButtonBar ) )
         	{
-        		if ( info_CurrentNext.next_zeit.startzeit < ( info_CurrentNext.current_zeit.startzeit+ info_CurrentNext.current_zeit.dauer ) )
+        		if ( (uint) info_CurrentNext.next_zeit.startzeit < ( info_CurrentNext.current_zeit.startzeit+ info_CurrentNext.current_zeit.dauer ) )
         		{
         			is_nvod = true;
         		}
@@ -840,7 +840,7 @@ void CInfoViewer::showButton_Audio()
                 };
 */
 	// grün, wenn mehrere APIDs
-	int count = g_RemoteControl->current_PIDs.APIDs.size();
+	uint count = g_RemoteControl->current_PIDs.APIDs.size();
 	if ( count > 1 )
 	{
 		frameBuffer->paintIcon("gruen.raw", BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );

@@ -139,7 +139,7 @@ int CBouquetList::activateBouquet( int id, bool bShowChannelList)
 		{
 			orgChannelList->zapTo(Bouquets[selected]->channelList->getKey(nNewChannel)-1);
 		}
-		else if ( nNewChannel = -2 )
+		else if ( nNewChannel == -2 )
 		{
 			// -2 bedeutet EXIT_ALL
 			res = menu_return::RETURN_EXIT_ALL;
@@ -157,7 +157,7 @@ int CBouquetList::exec( bool bShowChannelList)
 	{
 		return activateBouquet( selected, bShowChannelList );
 	}
-	else if ( res = -1)
+	else if ( res == -1)
 	{
 		// -1 bedeutet nur REPAINT
 		return menu_return::RETURN_REPAINT;
@@ -206,12 +206,12 @@ int CBouquetList::show()
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
 		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == g_settings.key_channelList_cancel ) )
+			 ( msg == (uint) g_settings.key_channelList_cancel ) )
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if ( msg == g_settings.key_channelList_pageup )
+		else if ( msg == (uint) g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>Bouquets.size()-1)
@@ -219,7 +219,7 @@ int CBouquetList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == g_settings.key_channelList_pagedown )
+		else if ( msg == (uint) g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=Bouquets.size()-1;

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.34 2002/07/23 23:47:00 woglinde Exp $
+	$Id: webdbox.cpp,v 1.35 2002/07/25 22:15:58 woglinde Exp $
 
 	License: GPL
 
@@ -57,7 +57,7 @@ void TWebDbox::UpdateBouquets(void)
 void TWebDbox::ZapTo(string target)
 {
 	int sidonid = atoi(target.c_str());
-	if(sidonid == zapit->getCurrentServiceID())
+	if(sidonid == (int) zapit->getCurrentServiceID())
 	{
 		if(Parent->DEBUG) printf("Kanal ist aktuell\n");
 		return;

@@ -128,7 +128,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
 
-		if ( msg == g_settings.key_channelList_pageup )
+		if ( msg == (uint) g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>evtlist.size()-1)
@@ -136,7 +136,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == g_settings.key_channelList_pagedown )
+		else if ( msg == (uint) g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=evtlist.size()-1;
@@ -183,7 +183,7 @@ int EventList::exec(unsigned onidSid, const std::string& channelname)
 			}
 		}
 		else if ( ( msg == CRCInput::RC_timeout ) ||
-			 	  ( msg == g_settings.key_channelList_cancel ) )
+			 	  ( msg == (uint) g_settings.key_channelList_cancel ) )
 		{
 			selected = oldselected;
 			loop=false;

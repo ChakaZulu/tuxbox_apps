@@ -171,7 +171,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
 
-		if ((msg==CRCInput::RC_timeout) || (msg==g_settings.key_channelList_cancel))
+		if ((msg==CRCInput::RC_timeout) || (msg == (uint) g_settings.key_channelList_cancel))
 		{
 			if (state == beDefault)
 			{
@@ -372,7 +372,7 @@ void CBEChannelWidget::cancelMoveChannel()
 
 void CBEChannelWidget::internalMoveChannel( unsigned int fromPosition, unsigned int toPosition)
 {
-	if ( toPosition == -1 ) return;
+	if ( (int) toPosition == -1 ) return;
 	if ( toPosition == Channels.size()) return;
 
 	CZapitClient::responseGetBouquetChannels Channel = Channels[fromPosition];

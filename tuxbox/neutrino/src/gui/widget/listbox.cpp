@@ -131,7 +131,7 @@ void CListBox::hide()
 	frameBuffer->paintBackgroundBoxRel(x,y, width,height+ButtonHeight);
 }
 
-int	CListBox::getItemCount()
+unsigned int	CListBox::getItemCount()
 {
 	return 10;
 }
@@ -175,7 +175,7 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, g_settings.timing_epg );
 
-		if (( msg ==g_settings.key_channelList_cancel) || ( msg ==CRCInput::RC_home))
+		if (( msg == (uint) g_settings.key_channelList_cancel) || ( msg ==CRCInput::RC_home))
 		{
 			loop = false;
 		}
@@ -238,7 +238,7 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 		{
 			onBlueKeyPressed();
 		}
-		else if ( msg ==g_settings.key_channelList_pageup)
+		else if ( msg == (uint) g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
 			if (selected>getItemCount()-1)
@@ -246,7 +246,7 @@ int CListBox::exec(CMenuTarget* parent, string actionKey)
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg ==g_settings.key_channelList_pagedown)
+		else if ( msg == (uint) g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=getItemCount()-1;

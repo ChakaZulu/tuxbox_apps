@@ -106,4 +106,5 @@ bool CEventServer::sendEvent2Client(unsigned int eventID, unsigned int initiator
 //		printf ("[eventserver]: eventbody sent 0x%x - peventbody= %x eventbody= %x\n", written, (unsigned)eventbody, *(unsigned*)eventbody );
 	}
 	close(sock_fd);
+	return true;
 }

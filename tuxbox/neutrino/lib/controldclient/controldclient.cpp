@@ -68,17 +68,24 @@ bool CControldClient::controld_close()
 	{
 		close(sock_fd);
 		sock_fd=0;
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
 bool CControldClient::send(char* data, int size)
 {
 	write(sock_fd, data, size);
+	return true;
 }
 
 bool CControldClient::receive(char* data, int size)
 {
 	read(sock_fd, data, size);
+	return true;
 }
 
 void  CControldClient::shutdown()

@@ -166,7 +166,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 		}
 		else if (msg==CRCInput::RC_right)
 		{
-			if(selectedChar<inputFields.size()-1)
+			if(selectedChar< (int) inputFields.size()-1)
 			{
 				bool found = false;
 				int oldSelectedChar = selectedChar;
@@ -268,7 +268,7 @@ void CExtendedInput::paint()
 
 	for(unsigned int i=0; i<inputFields.size();i++)
 	{
-		inputFields[i]->paint( x+20, y+hheight +20, (i==selectedChar) );
+		inputFields[i]->paint( x+20, y+hheight +20, (i== (unsigned int) selectedChar) );
 	}
 
 
@@ -320,7 +320,7 @@ void CExtendedInput_Item_Char::paint(int x, int y, bool focusGained )
 
 bool CExtendedInput_Item_Char::isAllowedChar( char ch )
 {
-	return (allowedChars.find(ch) != -1);
+	return ( (int) allowedChars.find(ch) != -1);
 }
 
 int CExtendedInput_Item_Char::getCharID( char ch )

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.25 2002/07/25 09:00:22 waldi Exp $
+	$Id: request.cpp,v 1.26 2002/07/25 22:15:58 woglinde Exp $
 
 	License: GPL
 
@@ -247,7 +247,7 @@ string sheader;
 //			if(Parent->DEBUG) printf("%s: %s\n",sheader.substr(0,pos).c_str(),HeaderList[sheader.substr(0,pos)].c_str());
 		}
 	}
-	
+return true;	
 }
 
 //-------------------------------------------------------------------------
@@ -294,7 +294,7 @@ int ende;
 
 		if(ParseFirstLine(zeile1))
 		{
-			int i;
+			unsigned int i;
 			for(i = 0; ((rawbuffer[i] != '\n') || (rawbuffer[i+2] != '\n')) && (i < rawbuffer.length());i++);
 			int headerende = i;
 //			if(Parent->DEBUG) printf("headerende: %d buffer_len: %d\n",headerende,rawbuffer_len);
@@ -393,7 +393,7 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 	if(HeaderList["Content-Length"] != "")
 	{
 		if(Parent->DEBUG) printf("Contenlaenge gefunden\n");
-		int contentsize = atol(HeaderList["Content-Length"].c_str());
+		long contentsize = atol(HeaderList["Content-Length"].c_str());
 		if(Parent->DEBUG) printf("Contenlaenge :%ld\n",contentsize);
 		char *buffer2 =(char *) malloc(contentsize);
 		if(!buffer2)
@@ -427,6 +427,16 @@ bool CWebserverRequest::HandleUpload()				// momentan broken
 			if(Parent->DEBUG) printf("Upload komplett gelesen: %ld bytes\n",contentsize);
 			return true;
 		}
+		else
+		{
+			if(Parent->DEBUG) printf("Upload konnte nicht komplett gelesen werden  %ld bytes\n",contentsize);
+			return false;
+		}
+	}
+	else
+	{
+		printf("Content-Length ist nicht in der HeaderListe\n");
+		return false;
 	}
 }
 //-------------------------------------------------------------------------

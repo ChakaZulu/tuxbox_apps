@@ -96,7 +96,7 @@ int CChannelList::exec()
 		zapTo(nNewChannel);
 		return menu_return::RETURN_REPAINT;
 	}
-	else if ( nNewChannel = -1)
+	else if ( nNewChannel == -1)
 	{
 		// -1 bedeutet nur REPAINT
 		return menu_return::RETURN_REPAINT;

@@ -48,7 +48,7 @@ CBEChannelSelectWidget::CBEChannelSelectWidget(string Caption, unsigned int Bouq
 	height = 440;
 }
 
-int	CBEChannelSelectWidget::getItemCount()
+uint	CBEChannelSelectWidget::getItemCount()
 {
 	return Channels.size();
 }
@@ -70,7 +70,7 @@ bool CBEChannelSelectWidget::hasChanged()
 	return toSave;
 }
 
-void CBEChannelSelectWidget::paintItem(int itemNr, int paintNr, bool selected)
+void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 {
 	int ypos = y+ theight + paintNr*getItemHeight();
 	int color = COL_MENUCONTENT;

@@ -122,7 +122,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 		int handled= false;
 
-		for (i= 0; i< items.size(); i++)
+		for (unsigned int i= 0; i< items.size(); i++)
 		{
 			CMenuItem* titem = items[i];
 			if ( (titem->directKey!= CRCInput::RC_nokey) && (titem->directKey== msg) )

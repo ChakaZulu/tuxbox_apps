@@ -197,7 +197,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_epg );
 
 		if ( (msg==CRCInput::RC_timeout) ||
-			 (msg==g_settings.key_channelList_cancel))
+			 (msg== (uint) g_settings.key_channelList_cancel))
 		{
 			if (state == beDefault)
 			{
@@ -494,7 +494,7 @@ string CBEBouquetWidget::inputName( string defaultName, string caption)
 
 void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned int toPosition)
 {
-	if ( toPosition == -1 ) return;
+	if ( (int) toPosition == -1 ) return;
 	if ( toPosition == Bouquets.size()) return;
 
 	CZapitClient::responseGetBouquets Bouquet = Bouquets[fromPosition];

@@ -498,7 +498,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 
 				default:
 					// konfigurierbare Keys handlen...
-					if ( msg == g_settings.key_channelList_cancel )
+					if ( msg == (uint) g_settings.key_channelList_cancel )
 						loop = false;
 					else
 					{

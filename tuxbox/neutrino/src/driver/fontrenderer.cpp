@@ -414,5 +414,6 @@ int Font::getRenderWidth(const char *text)
 int Font::getRenderWidth(string text)
 {
 	getRenderWidth( text.c_str() );
+	return 0;
 }
 

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 	
-	$Id: timerdclient.cpp,v 1.13 2002/06/11 21:15:37 dirch Exp $
+	$Id: timerdclient.cpp,v 1.14 2002/07/25 22:15:59 woglinde Exp $
 
 	License: GPL
 
@@ -65,6 +65,11 @@ bool CTimerdClient::timerd_close()
 	{
 		close(sock_fd);
 		sock_fd=0;
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -217,12 +222,14 @@ bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t al
 	send((char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
 	timerd_close();
+	return true;
 
 }
 
 bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t diff)
 {
 	rescheduleTimerEvent(eventid,diff,diff,diff);
+	return true;
 }
 
 bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_t alarmdiff, time_t stopdiff)
@@ -242,6 +249,7 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_
 	send((char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
 	timerd_close();
+	return true;
 
 }
 

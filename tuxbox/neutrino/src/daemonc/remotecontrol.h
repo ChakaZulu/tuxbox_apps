@@ -81,8 +81,8 @@ typedef std::vector<CSubService> CSubServiceListSorted;
 
 class CRemoteControl
 {
-		int								current_programm_timer;
-		unsigned long long				zap_completion_timeout;
+		unsigned int				current_programm_timer;
+		unsigned long long			zap_completion_timeout;
 
 		void getNVODs();
 		void processAPIDnames();
@@ -90,34 +90,34 @@ class CRemoteControl
 		void copySubChannelsToZapit();
 
 	public:
-		string							current_channel_name;
-		unsigned int					current_onid_sid;
-		unsigned int					current_sub_onid_sid;
-		unsigned long long				current_EPGid;
-		unsigned long long				next_EPGid;
-		CZapitClient::responseGetPIDs	current_PIDs;
+		string					current_channel_name;
+		unsigned int				current_onid_sid;
+		unsigned int				current_sub_onid_sid;
+		unsigned long long			current_EPGid;
+		unsigned long long			next_EPGid;
+		CZapitClient::responseGetPIDs		current_PIDs;
 
 		// APID - Details
-		bool							has_ac3;
-		bool							has_unresolved_ctags;
+		bool					has_ac3;
+		bool					has_unresolved_ctags;
 
 		// SubChannel/NVOD - Details
 		CSubServiceListSorted			subChannels;
-		int								selected_subchannel;
-		bool                        	are_subchannels;
-		bool							needs_nvods;
-		int								director_mode;
+		int					selected_subchannel;
+		bool                        		are_subchannels;
+		bool					needs_nvods;
+		int					director_mode;
 
 		// Video / Parental-Lock
-		bool							is_video_started;
-		unsigned int					zapCount;
+		bool					is_video_started;
+		unsigned int				zapCount;
 
 		CRemoteControl();
 		void zapTo_onid_sid( unsigned int onid_sid, string channame, bool start_video = true );
 		void startvideo();
 		void stopvideo();
 		void queryAPIDs();
-		void setAPID(int APID);
+		void setAPID(uint APID);
 		string setSubChannel(unsigned numSub, bool force_zap = false );
 		string subChannelUp();
 		string subChannelDown();

@@ -415,7 +415,7 @@ void CRemoteControl::copySubChannelsToZapit()
 }
 
 
-void CRemoteControl::setAPID( int APID )
+void CRemoteControl::setAPID( uint APID )
 {
 	if ((current_PIDs.PIDs.selected_apid == APID ) || (APID < 0) || (APID >= current_PIDs.APIDs.size()) )
 		return;
@@ -434,7 +434,7 @@ string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
 	if ((numSub < 0) || (numSub >= subChannels.size()))
 		return "";
 
-	if ((selected_subchannel == numSub ) && (!force_zap))
+	if (( (uint) selected_subchannel == numSub ) && (!force_zap))
 		return "";
 
 	selected_subchannel = numSub;

@@ -321,7 +321,7 @@ int CRCInput::addTimer(const time_t *Timeout)
 	return addTimer( (unsigned long long)*Timeout* (unsigned long long) 1000000, true, false );
 }
 
-void CRCInput::killTimer(int id)
+void CRCInput::killTimer(uint id)
 {
 	//printf("killing timer %d\n", id);
 	vector<timer>::iterator e;
@@ -474,7 +474,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			else
 			{
              	targetTimeout = timers[0].times_out - t_n;
-				if (targetTimeout> Timeout)
+				if ( (unsigned long long) targetTimeout> Timeout)
 					targetTimeout= Timeout;
 				else
 					timer_id = timers[0].id;
@@ -887,7 +887,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 						if(keyok)
 						{
 							last_keypress = now_pressed;
-							int trkey= translate(rc_key);
+							uint trkey= translate(rc_key);
 							//printf("--!!!!!  translated key: %04x\n", trkey );
 							if (trkey!=RC_nokey)
 							{
@@ -925,7 +925,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			gettimeofday( &tv, NULL );
 			long long getKeyNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
 			long long diff = (getKeyNow - getKeyBegin);
-			if( Timeout <= diff )
+			if( Timeout <= (unsigned long long) diff )
 			{
 				*msg = RC_timeout;
 				*data = 0;

@@ -81,7 +81,7 @@ class CListBox : public CMenuWidget
 		virtual void onOtherKeyPressed( int key ){};
 
 		//------gibt die Anzahl der Listenitems---
-		virtual int	getItemCount();
+		virtual unsigned int getItemCount();
 
 		//------malen der Items-------------------
 		virtual int getItemHeight();

@@ -223,7 +223,7 @@ int CMessageBox::exec(int timeout)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( ( (msg==CRCInput::RC_timeout) ||
-			   (msg==g_settings.key_channelList_cancel) ) &&
+			   (msg == (uint) g_settings.key_channelList_cancel) ) &&
 			 ( ( showbuttons & mbCancel ) || ( showbuttons & mbBack ) ) )
 		{
 			cancel();

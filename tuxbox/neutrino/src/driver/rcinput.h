@@ -51,22 +51,22 @@ class CRCInput
 
 		struct timer
 		{
-			uint		id;
+			uint			id;
 			unsigned long long	interval;
 			unsigned long long	times_out;
-			bool		correct_time;
+			bool			correct_time;
 		};
 
-		uint			timerid;
+		uint		timerid;
 		vector<timer>	timers;
 
 		int 		fd_pipe_high_priority[2];
 		int 		fd_pipe_low_priority[2];
-		int         fd_rc;
-		int			fd_keyb;
-		int			fd_event;
+		int         	fd_rc;
+		int		fd_keyb;
+		int		fd_event;
 
-		int			fd_max;
+		int		fd_max;
 
 		void open();
 		void close();
@@ -78,9 +78,9 @@ class CRCInput
 
 	public:
 		//rc-code definitions
-		static const uint RC_MaxRC		= 0x3F;
+		static const uint RC_MaxRC	= 0x3F;
 		static const uint RC_KeyBoard	= 0x4000;
-		static const uint RC_Events		= 0x80000000;
+		static const uint RC_Events	= 0x80000000;
 		static const uint RC_Messages	= 0x90000000;
 		static const uint RC_WithData	= 0xA0000000;
 		enum
@@ -117,7 +117,7 @@ class CRCInput
 		int addTimer(struct timeval Timeout);
 		int addTimer(const time_t *Timeout);
 
-		void killTimer(int id);
+		void killTimer(uint id);
 
 		long long calcTimeoutEnd( int Timeout );
 		long long calcTimeoutEnd_MS( int Timeout );

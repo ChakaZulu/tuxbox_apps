@@ -49,12 +49,12 @@ class CInfoViewer
 	private:
 		CFrameBuffer	*frameBuffer;
 
-		bool	gotTime;
-		bool	recordModeActive;
+		bool		gotTime;
+		bool		recordModeActive;
 
 		int		InfoHeightY;
 		int		InfoHeightY_Info;
-		bool	showButtonBar;
+		bool		showButtonBar;
 
 		int		BoxEndX;
 		int		BoxEndY;
@@ -66,14 +66,14 @@ class CInfoViewer
 		int		ChanHeight;
 		int		ChanInfoX;
 
-		string						CurrentChannel;
+		string		CurrentChannel;
 		sectionsd::CurrentNextInfo	info_CurrentNext;
-        unsigned int				current_onid_sid;
+        	unsigned int			current_onid_sid;
 
 		char aspectRatio;
 
-		int	 	sec_timer_id;
-		int 	fadeTimer;
+		uint	sec_timer_id;
+		uint 	fadeTimer;
 
 		void show_Data( bool calledFromEvent = false );
 		void paintTime( bool show_dot, bool firstPaint );
