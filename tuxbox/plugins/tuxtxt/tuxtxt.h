@@ -18,6 +18,9 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_CACHE_H
+#include FT_CACHE_SMALL_BITMAPS_H
+
 #include "config.h"
 
 #define PAGESIZE 40*24
@@ -179,8 +182,11 @@ struct fb_fix_screeninfo fix_screeninfo;
 
 //freetype stuff
 
-FT_Library	library;
-FT_Face		face;
+FT_Library		library;
+FTC_Manager		manager;
+FTC_SBitCache	cache;
+FTC_SBit		sbit;
+FTC_Image_Desc	desc;
 
 //some data
 
@@ -191,10 +197,9 @@ int PosX, PosY, StartX, StartY;
 int cached_pages, current_page, current_subpage, page, subpage, lastpage, pageupdate, zap_subpage_manual;
 int inputcounter;
 int zoommode, screenmode, transpmode, hintmode, boxed;
-int fontwidth, fontheight;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
-int fnc_old, saa_old, screen_mode1, screen_mode2, screen_old1, screen_old2;
+int fnc_old, saa_old, screen_mode1, screen_mode2, screen_old1, screen_old2, color_mode, color_old;
 int clear_page, clear_subpage;
 int pids_found, current_service;
 int SDT_ready;
@@ -230,13 +235,19 @@ unsigned short page_atrb[PAGESIZE];	// ??????:h:c:bbbb:ffff -> ?=reserved, h=dou
 unsigned char *cachetable[0x900][0x80];
 unsigned char subpagetable[0x900];
 
-//colormap
+//colormaps
 
-unsigned short rd[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
-unsigned short gn[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8};
-unsigned short bl[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8};
-unsigned short tr[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 };
-struct fb_cmap colormap = {1, 12, rd, gn, bl, tr};
+unsigned short rd1[] = {0x01<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
+unsigned short gn1[] = {0x01<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8};
+unsigned short bl1[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0xFF<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8};
+unsigned short tr1[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 };
+struct fb_cmap colormap_1 = {1, 12, rd1, gn1, bl1, tr1};
+
+unsigned short rd2[] = {0x01<<8, 0xA0<<8, 0x00<<8, 0xA0<<8, 0x00<<8, 0xA0<<8, 0x00<<8, 0xA0<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0x00<<8};
+unsigned short gn2[] = {0x01<<8, 0x00<<8, 0xA0<<8, 0xA0<<8, 0x00<<8, 0x00<<8, 0xA0<<8, 0xA0<<8, 0x00<<8, 0x20<<8, 0x10<<8, 0x20<<8};
+unsigned short bl2[] = {0x01<<8, 0x00<<8, 0x00<<8, 0x00<<8, 0xA0<<8, 0xA0<<8, 0xA0<<8, 0xA0<<8, 0x00<<8, 0x40<<8, 0x20<<8, 0x40<<8};
+unsigned short tr2[] = {0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0x0000 , 0xFFFF , 0x0000 , 0x0000 , 0x0A00 };
+struct fb_cmap colormap_2 = {1, 12, rd2, gn2, bl2, tr2};
 
 //hamming table
 

@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.40: add color setup, use fontcaching                                 *
  *    V1.39: ported to dvb api v3 by obi                                      *
  *    V1.38: some mods & fixes                                                *
  *    V1.37: fixing includes by woglinde                                      *
@@ -55,7 +56,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.38 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.40 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -207,6 +208,15 @@ void plugin_exec(PluginParam *par)
 }
 
 /******************************************************************************
+ * MyFaceRequester
+ ******************************************************************************/
+
+FT_Error MyFaceRequester(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face *aface)
+{
+	return FT_New_Face(library, face_id, 0, aface);
+}
+
+/******************************************************************************
  * Init                                                                       *
  ******************************************************************************/
 
@@ -245,36 +255,50 @@ int Init()
 
 		UpdateLCD();
 
+	//load config
+
+		if((conf = fopen(CONFIGDIR "/tuxtxt/tuxtxt.conf", "rb+")) == 0)
+		{
+			perror("TuxTxt <fopen tuxtxt.conf>");
+			return 0;
+		}
+
+		fread(&screen_mode1, 1, sizeof(screen_mode1), conf);
+		fread(&screen_mode2, 1, sizeof(screen_mode2), conf);
+		fread(&color_mode, 1, sizeof(color_mode), conf);
+
+		screen_old1 = screen_mode1;
+		screen_old2 = screen_mode2;
+		color_old   = color_mode;
+
 	//init fontlibrary
 
-		if((error = FT_Init_FreeType(&library)) != 0)
+		if((error = FT_Init_FreeType(&library)))
 		{
-			printf("TuxTxt <FT_Init_FreeType => 0x%.2X>", error);
+			printf("TuxTxt <FT_Init_FreeType: 0x%.2X>", error);
 			return 0;
 		}
 
-	//load font
-
-		if((error = FT_New_Face(library, FONTDIR "/tuxtxt.fon", 0, &face)) != 0)
+		if((error = FTC_Manager_New(library, 0, 0, 0, &MyFaceRequester, NULL, &manager)))
 		{
-			printf("TuxTxt <FT_New_Face => 0x%.2X>", error);
+			printf("TuxTxt <FTC_Manager_New: 0x%.2X>\n", error);
 			return 0;
 		}
 
-	//set fontsize
-
-		fontwidth  = 16;
-		fontheight = 22;
-
-		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
+		if((error = FTC_SBit_Cache_New(manager, &cache)))
 		{
-			printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
+			printf("TuxTxt <FTC_SBit_Cache_New: 0x%.2X>\n", error);
 			return 0;
 		}
+
+		desc.font.face_id	 = FONTDIR "/tuxtxt.fon";
+		desc.image_type		 = ftc_image_mono;
+		desc.font.pix_width  = 16;
+		desc.font.pix_height = 22;
 
 	//center screen
 
-		StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
+		StartX = sx + (((ex-sx) - 40*desc.font.pix_width) / 2);
 		StartY = sy + (((ey-sy) - 25*fixfontheight) / 2);
 
 	//get fixed screeninfo
@@ -295,10 +319,21 @@ int Init()
 
 	//set new colormap
 
-		if (ioctl(fb, FBIOPUTCMAP, &colormap) == -1)
+		if(color_mode)
 		{
-			perror("TuxTxt <FBIOPUTCMAP>");
-			return 0;
+			if (ioctl(fb, FBIOPUTCMAP, &colormap_2) == -1)
+			{
+				perror("TuxTxt <FBIOPUTCMAP>");
+				return 0;
+			}
+		}
+		else
+		{
+			if (ioctl(fb, FBIOPUTCMAP, &colormap_1) == -1)
+			{
+				perror("TuxTxt <FBIOPUTCMAP>");
+				return 0;
+			}
 		}
 
 	//map framebuffer into memory
@@ -323,6 +358,7 @@ int Init()
 
 		if(GetVideotextPIDs() == 0)
 		{
+			FTC_Manager_Done(manager);
 			FT_Done_FreeType(library);
 			munmap(lfb, fix_screeninfo.smem_len);
 			close(dmx);
@@ -333,20 +369,6 @@ int Init()
 			RenderCharLCD(pids_found/10,  7, 44);
 			RenderCharLCD(pids_found%10, 19, 44);
 		}
-
-	//load config
-
-		if((conf = fopen(CONFIGDIR "/tuxtxt/tuxtxt.conf", "rb+")) == 0)
-		{
-			perror("TuxTxt <fopen tuxtxt.conf>");
-			return 0;
-		}
-
-		fread(&screen_mode1, 1, sizeof(screen_mode1), conf);
-		fread(&screen_mode2, 1, sizeof(screen_mode2), conf);
-
-		screen_old1 = screen_mode1;
-		screen_old2 = screen_mode2;
 
 	//open avs
 
@@ -401,7 +423,7 @@ int Init()
 		dmx_flt.pid		= vtxtpid;
 		dmx_flt.input	= DMX_IN_FRONTEND;
 		dmx_flt.output	= DMX_OUT_TAP;
-		dmx_flt.pes_type	= DMX_PES_OTHER;
+		dmx_flt.pes_type= DMX_PES_OTHER;
 		dmx_flt.flags	= DMX_IMMEDIATE_START;
 
 		if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
@@ -467,6 +489,7 @@ void CleanUp()
 
 	//close freetype
 
+		FTC_Manager_Done(manager);
 		FT_Done_FreeType(library);
 
 	//unmap framebuffer
@@ -488,12 +511,13 @@ void CleanUp()
 
 	//save config
 
-		if(screen_mode1 != screen_old1 || screen_mode2 != screen_old2)
+		if(screen_mode1 != screen_old1 || screen_mode2 != screen_old2 || color_mode != color_old)
 		{
 			rewind(conf);
 
 			fwrite(&screen_mode1, 1, sizeof(screen_mode1), conf);
 			fwrite(&screen_mode2, 1, sizeof(screen_mode2), conf);
+			fwrite(&color_mode, 1, sizeof(color_mode), conf);
 
 			printf("TuxTxt <saving config>\n");
 		}
@@ -700,6 +724,10 @@ void ConfigMenu(int Init)
 					"ã16:9 im Standard-Modus = ausäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
 					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
 					"ã16:9 im TextBild-Modus = einäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ã       Farbintensit{t       äéËÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
+					"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
+					"ãText-Farben reduzieren = ausäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
 					"åææææææææææææææææææææææææææææçéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
 					"ëìììììììììììììììììììììììììììììê›››››››››››››››››››››››››››››››";
 
@@ -722,10 +750,11 @@ void ConfigMenu(int Init)
 		if(current_pid == 0 || pids_found == 1)				 menu[6*62 +  1] = ' ';
 		if(current_pid == pids_found - 1 || pids_found == 1) menu[6*62 + 28] = ' ';
 
-	//set 16:9 modi
+	//set 16:9 modi & color correction
 
-		if(screen_mode1 == 1) memcpy(&menu[10*62 + 26], "ein", 3);
-		if(screen_mode2 == 0) memcpy(&menu[12*62 + 26], "aus", 3);
+		if(screen_mode1) memcpy(&menu[10*62 + 26], "ein", 3);
+		if(!screen_mode2) memcpy(&menu[12*62 + 26], "aus", 3);
+		if(color_mode) memcpy(&menu[16*62 + 26], "ein", 3);
 
 	//clear framebuffer
 
@@ -751,18 +780,17 @@ void ConfigMenu(int Init)
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
 
-			fontwidth  = 16;
-			fontheight = 22;
-			FT_Set_Pixel_Sizes(face, fontwidth, fontheight);
+			desc.font.pix_width  = 16;
+			desc.font.pix_height = 22;
 		}
 
 	//render menu
 
 		PosY = StartY + fixfontheight*5;
 
-		for(line = 0; line < 15; line++)
+		for(line = 0; line < 19; line++)
 		{
-			PosX = StartX + fontwidth*4 + fontwidth/2;
+			PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
 
 			for(byte = 0; byte < 31; byte++)
 			{
@@ -787,73 +815,101 @@ void ConfigMenu(int Init)
 			{
 				case RC_UP:		if(menuitem > 1) menuitem--;
 
-								if(menuitem == 1)
+								switch(menuitem)
 								{
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*11;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*6 + byte], menu[62*6 + byte+31]);
-									}
+									case 1:	PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*11;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*6 + byte], menu[62*6 + byte+31]);
+											}
 
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*15;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*10 + byte], menu[62*10 + byte+31]);
-									}
-								}
-								else
-								{
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*15;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
-									}
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*15;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*10 + byte], menu[62*10 + byte+31]);
+											}
+											break;
 
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*17;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*12 + byte], menu[62*10 + byte+31]);
-									}
+									case 2:	PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*15;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
+											}
+
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*17;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*12 + byte], menu[62*12 + byte+31]);
+											}
+											break;
+
+									case 3:	PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*17;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*12 + byte], menu[62*6 + byte+31]);
+											}
+
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*21;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*16 + byte], menu[62*16 + byte+31]);
+											}
 								}
 								break;
 
-				case RC_DOWN:	if(menuitem < 3) menuitem++;
+				case RC_DOWN:	if(menuitem < 4) menuitem++;
 
-								if(menuitem == 2)
+								switch(menuitem)
 								{
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*11;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*6 + byte], menu[62*10 + byte+31]);
-									}
+									case 2:	PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*11;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*6 + byte], menu[62*10 + byte+31]);
+											}
 
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*15;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
-									}
-								}
-								else
-								{
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*15;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*10 + byte], menu[62*10 + byte+31]);
-									}
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*15;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
+											}
+											break;
 
-									PosX = StartX + fontwidth*4 + fontwidth/2;
-									PosY = StartY + fixfontheight*17;
-									for(byte = 0; byte < 31; byte++)
-									{
-										RenderCharFB(menu[62*12 + byte], menu[62*6 + byte+31]);
-									}
+									case 3:	PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*15;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*10 + byte], menu[62*10 + byte+31]);
+											}
+
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*17;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*12 + byte], menu[62*6 + byte+31]);
+											}
+											break;
+
+									case 4:	PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*17;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*12 + byte], menu[62*12 + byte+31]);
+											}
+
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*21;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*16 + byte], menu[62*6 + byte+31]);
+											}
 								}
 								break;
 
@@ -880,7 +936,7 @@ void ConfigMenu(int Init)
 											}
 										}
 
-									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
 									PosY = StartY + fixfontheight*11;
 									for(byte = 0; byte < 31; byte++)
 									{
@@ -912,7 +968,7 @@ void ConfigMenu(int Init)
 										}
 									}
 
-									PosX = StartX + fontwidth*4 + fontwidth/2;
+									PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
 									PosY = StartY + fixfontheight*11;
 									for(byte = 0; byte < 31; byte++)
 									{
@@ -996,7 +1052,7 @@ void ConfigMenu(int Init)
 														dmx_flt.pid		= vtxtpid;
 														dmx_flt.input	= DMX_IN_FRONTEND;
 														dmx_flt.output	= DMX_OUT_TAP;
-														dmx_flt.pes_type	= DMX_PES_OTHER;
+														dmx_flt.pes_type= DMX_PES_OTHER;
 														dmx_flt.flags	= DMX_IMMEDIATE_START;
 
 														if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
@@ -1028,10 +1084,10 @@ void ConfigMenu(int Init)
 									case 2:	screen_mode1++;
 											screen_mode1 &= 1;
 
-											if(screen_mode1 == 1) memcpy(&menu[62*10 + 26], "ein", 3);
-											else				  memcpy(&menu[62*10 + 26], "aus", 3);
+											if(screen_mode1) memcpy(&menu[62*10 + 26], "ein", 3);
+											else			 memcpy(&menu[62*10 + 26], "aus", 3);
 
-											PosX = StartX + fontwidth*4 + fontwidth/2;
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
 											PosY = StartY + fixfontheight*15;
 											for(byte = 0; byte < 31; byte++)
 											{
@@ -1046,14 +1102,43 @@ void ConfigMenu(int Init)
 									case 3:	screen_mode2++;
 											screen_mode2 &= 1;
 
-											if(screen_mode2 == 1) memcpy(&menu[62*12 + 26], "ein", 3);
-											else				  memcpy(&menu[62*12 + 26], "aus", 3);
+											if(screen_mode2) memcpy(&menu[62*12 + 26], "ein", 3);
+											else			 memcpy(&menu[62*12 + 26], "aus", 3);
 
-											PosX = StartX + fontwidth*4 + fontwidth/2;
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
 											PosY = StartY + fixfontheight*17;
 											for(byte = 0; byte < 31; byte++)
 											{
 												RenderCharFB(menu[62*12 + byte], menu[62*6 + byte+31]);
+											}
+											break;
+
+									case 4:	color_mode++;
+											color_mode &= 1;
+
+											if(color_mode) memcpy(&menu[62*16 + 26], "ein", 3);
+											else		   memcpy(&menu[62*16 + 26], "aus", 3);
+
+											PosX = StartX + desc.font.pix_width*4 + desc.font.pix_width/2;
+											PosY = StartY + fixfontheight*21;
+											for(byte = 0; byte < 31; byte++)
+											{
+												RenderCharFB(menu[62*16 + byte], menu[62*6 + byte+31]);
+											}
+
+											if(color_mode)
+											{
+												if (ioctl(fb, FBIOPUTCMAP, &colormap_2) == -1)
+												{
+													perror("TuxTxt <FBIOPUTCMAP>");
+												}
+											}
+											else
+											{
+												if (ioctl(fb, FBIOPUTCMAP, &colormap_1) == -1)
+												{
+													perror("TuxTxt <FBIOPUTCMAP>");
+												}
 											}
 								}
 			}
@@ -1113,17 +1198,17 @@ void PageInput(int Number)
 
 		switch(inputcounter)
 		{
-			case 2:	PosX = StartX + 8*fontwidth;
+			case 2:	PosX = StartX + 8*desc.font.pix_width;
 					RenderCharFB(Number | '0', black<<4 | white);
 					RenderCharFB('-', black<<4 | white);
 					RenderCharFB('-', black<<4 | white);
 					break;
 
-			case 1:	PosX = StartX + 9*fontwidth;
+			case 1:	PosX = StartX + 9*desc.font.pix_width;
 					RenderCharFB(Number | '0', black<<4 | white);
 					break;
 
-			case 0:	PosX = StartX + 10*fontwidth;
+			case 0:	PosX = StartX + 10*desc.font.pix_width;
 					RenderCharFB(Number | '0', black<<4 | white);
 					break;
 		}
@@ -1156,13 +1241,13 @@ void PageInput(int Number)
 				{
 					subpage = subpagetable[page];
 					pageupdate = 1;
-					printf("TuxTxt <DirectInput => %.3X-%.2X>\n", page, subpage);
+					printf("TuxTxt <DirectInput: %.3X-%.2X>\n", page, subpage);
 				}
 				else
 				{
 					subpage = 0;
 					RenderMessage(PageNotFound);
-					printf("TuxTxt <DirectInput => %.3X not found>\n", page);
+					printf("TuxTxt <DirectInput: %.3X not found>\n", page);
 				}
 		}
 }
@@ -1206,7 +1291,7 @@ void GetNextPageOne()
 
 		subpage = subpagetable[page];
 		pageupdate = 1;
-		printf("TuxTxt <NextPageOne => %.3X-%.2X>\n", page, subpage);
+		printf("TuxTxt <NextPageOne: %.3X-%.2X>\n", page, subpage);
 }
 
 /******************************************************************************
@@ -1248,7 +1333,7 @@ void GetPrevPageOne()
 
 		subpage = subpagetable[page];
 		pageupdate = 1;
-		printf("TuxTxt <PrevPageOne => %.3X-%.2X>\n", page, subpage);
+		printf("TuxTxt <PrevPageOne: %.3X-%.2X>\n", page, subpage);
 }
 
 /******************************************************************************
@@ -1283,7 +1368,7 @@ void GetNextSubPage()
 
 							subpage = loop;
 							pageupdate = 1;
-							printf("TuxTxt <NextSubPage => %.3X-%.2X>\n", page, subpage);
+							printf("TuxTxt <NextSubPage: %.3X-%.2X>\n", page, subpage);
 							return;
 					}
 				}
@@ -1302,16 +1387,16 @@ void GetNextSubPage()
 
 							subpage = loop;
 							pageupdate = 1;
-							printf("TuxTxt <NextSubPage => %.3X-%.2X>\n", page, subpage);
+							printf("TuxTxt <NextSubPage: %.3X-%.2X>\n", page, subpage);
 							return;
 					}
 				}
 
-				printf("TuxTxt <NextSubPage => no other SubPage>\n");
+				printf("TuxTxt <NextSubPage: no other SubPage>\n");
 		}
 		else
 		{
-			printf("TuxTxt <NextSubPage => no SubPages>\n");
+			printf("TuxTxt <NextSubPage: no SubPages>\n");
 		}
 }
 
@@ -1347,7 +1432,7 @@ void GetPrevSubPage()
 
 							subpage = loop;
 							pageupdate = 1;
-							printf("TuxTxt <PrevSubPage => %.3X-%.2X>\n", page, subpage);
+							printf("TuxTxt <PrevSubPage: %.3X-%.2X>\n", page, subpage);
 							return;
 					}
 				}
@@ -1366,16 +1451,16 @@ void GetPrevSubPage()
 
 							subpage = loop;
 							pageupdate = 1;
-							printf("TuxTxt <PrevSubPage => %.3X-%.2X>\n", page, subpage);
+							printf("TuxTxt <PrevSubPage: %.3X-%.2X>\n", page, subpage);
 							return;
 					}
 				}
 
-				printf("TuxTxt <PrevSubPage => no other SubPage>\n");
+				printf("TuxTxt <PrevSubPage: no other SubPage>\n");
 		}
 		else
 		{
-			printf("TuxTxt <PrevSubPage => no SubPages>\n");
+			printf("TuxTxt <PrevSubPage: no SubPages>\n");
 		}
 }
 
@@ -1393,7 +1478,7 @@ void Prev100()
 	inputcounter = 2;
 	pageupdate = 1;
 
-	printf("TuxTxt <Prev100 => %.3X>\n", page);
+	printf("TuxTxt <Prev100: %.3X>\n", page);
 }
 
 /******************************************************************************
@@ -1410,7 +1495,7 @@ void Prev10()
 	inputcounter = 2;
 	pageupdate = 1;
 
-	printf("TuxTxt <Prev10 => %.3X>\n", page);
+	printf("TuxTxt <Prev10: %.3X>\n", page);
 }
 
 /******************************************************************************
@@ -1427,7 +1512,7 @@ void Next10()
 	inputcounter = 2;
 	pageupdate = 1;
 
-	printf("TuxTxt <Next10 => %.3X>\n", page);
+	printf("TuxTxt <Next10: %.3X>\n", page);
 }
 
 /******************************************************************************
@@ -1444,7 +1529,7 @@ void Next100()
 	inputcounter = 2;
 	pageupdate = 1;
 
-	printf("TuxTxt <Next100 => %.3X>\n", page);
+	printf("TuxTxt <Next100: %.3X>\n", page);
 }
 
 /******************************************************************************
@@ -1554,7 +1639,7 @@ void CatchNextPage(int Init)
 
 						catch_col += 3;
 
-						printf("TuxTxt <PageCatching => %.3X\n", catched_page);
+						printf("TuxTxt <PageCatching: %.3X\n", catched_page);
 
 						return;
 					}
@@ -1566,7 +1651,7 @@ void CatchNextPage(int Init)
 
 		if(Init)
 		{
-			printf("TuxTxt <PageCatching => no PageNumber>\n");
+			printf("TuxTxt <PageCatching: no PageNumber>\n");
 			return;
 		}
 
@@ -1609,7 +1694,7 @@ void CatchPrevPage()
 
 						catch_col -= 3;
 
-						printf("TuxTxt <PageCatching => %.3X\n", catched_page);
+						printf("TuxTxt <PageCatching: %.3X\n", catched_page);
 
 						return;
 					}
@@ -1646,7 +1731,7 @@ void RenderCatchedPage()
 
 	//restore pagenumber
 
-		PosX = StartX + old_col*fontwidth;
+		PosX = StartX + old_col*desc.font.pix_width;
 		if(zoommode == 2) PosY = StartY + (old_row-12)*fixfontheight*((zoom>>9)+1);
 		else			  PosY = StartY + old_row*fixfontheight*((zoom>>9)+1);
 
@@ -1670,7 +1755,7 @@ void RenderCatchedPage()
 			CopyBB2FB();
 		}
 
-		PosX = StartX + catch_col*fontwidth;
+		PosX = StartX + catch_col*desc.font.pix_width;
 		if(zoommode == 2) PosY = StartY + (catch_row-12)*fixfontheight*((zoom>>9)+1);
 		else			  PosY = StartY + catch_row*fixfontheight*((zoom>>9)+1);
 
@@ -1692,7 +1777,7 @@ void SwitchZoomMode()
 			zoommode++;
 			if(zoommode == 3) zoommode = 0;
 
-			printf("TuxTxt <SwitchZoomMode => %d>\n", zoommode);
+			printf("TuxTxt <SwitchZoomMode: %d>\n", zoommode);
 
 		//update page
 
@@ -1706,8 +1791,6 @@ void SwitchZoomMode()
 
 void SwitchScreenMode()
 {
-	int error;
-
 	//reset transparency mode
 
 		if(transpmode) transpmode = 0;
@@ -1717,7 +1800,7 @@ void SwitchScreenMode()
 		screenmode++;
 		screenmode &= 1;
 
-		printf("TuxTxt <SwitchScreenMode => %d>\n", screenmode);
+		printf("TuxTxt <SwitchScreenMode: %d>\n", screenmode);
 
 	//update page
 
@@ -1731,8 +1814,8 @@ void SwitchScreenMode()
 
 		if(screenmode)
 		{
-			fontwidth  =  8;
-			fontheight = 21;
+			desc.font.pix_width  = 8;
+			desc.font.pix_height = 21;
 
 			avia_pig_set_pos(pig, (StartX+322), StartY);
 			avia_pig_set_size(pig, 320, 526);
@@ -1744,18 +1827,13 @@ void SwitchScreenMode()
 		}
 		else
 		{
-			fontwidth  = 16;
-			fontheight = 22;
+			desc.font.pix_width  = 16;
+			desc.font.pix_height = 22;
 
 			avia_pig_hide(pig);
 
 			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
-		}
-
-		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)
-		{
-			printf("TuxTxt <FT_Set_Pixel_Sizes => 0x%.2X>", error);
 		}
 }
 
@@ -1772,7 +1850,7 @@ void SwitchTranspMode()
 			transpmode++;
 			if(transpmode == 3) transpmode = 0;
 
-			printf("TuxTxt <SwitchTranspMode => %d>\n", transpmode);
+			printf("TuxTxt <SwitchTranspMode: %d>\n", transpmode);
 
 		//set mode
 
@@ -1804,7 +1882,7 @@ void SwitchHintMode()
 		hintmode++;
 		hintmode &= 1;
 
-		printf("TuxTxt <SwitchHintMode => %d>\n", hintmode);
+		printf("TuxTxt <SwitchHintMode: %d>\n", hintmode);
 
 	//update page
 
@@ -1822,10 +1900,10 @@ void RenderCharFB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FTC_SBit_Cache_Lookup(cache, &desc, Char + ((Attribute>>8 & 1) * (128-32)) + 1, &sbit)))
 		{
-			printf("TuxTxt <FT_Load_Char => 0x%.2X>\n", error);
-			PosX += fontwidth;
+			printf("TuxTxt <FTC_SBit_Cache_Lookup: 0x%.2X>\n", error);
+			PosX += desc.font.pix_width;
 			return;
 		}
 
@@ -1833,11 +1911,11 @@ void RenderCharFB(int Char, int Attribute)
 
 		for(Row = 0; Row < fixfontheight; Row++)
 		{
-			for(Pitch = 0; Pitch < face->glyph->bitmap.pitch; Pitch++)
+			for(Pitch = 0; Pitch < sbit->pitch; Pitch++)
 			{
 				for(Bit = 7; Bit >= 0; Bit--)
 				{
-					if((face->glyph->bitmap.buffer[Row * face->glyph->bitmap.pitch + Pitch]) & 1<<Bit)
+					if((sbit->buffer[Row * sbit->pitch + Pitch]) & 1<<Bit)
 					{
 						*(lfb + (x+PosX) + ((y+PosY)*var_screeninfo.xres)) = Attribute & 15;
 
@@ -1879,7 +1957,7 @@ void RenderCharFB(int Char, int Attribute)
 			else if(zoommode || (Attribute & 1<<9)) y++;
 		}
 
-	PosX += fontwidth;
+	PosX += desc.font.pix_width;
 }
 
 /******************************************************************************
@@ -1895,16 +1973,16 @@ void RenderCharBB(int Char, int Attribute)
 
 		if(Char == 0xFF)
 		{
-			PosX += fontwidth;
+			PosX += desc.font.pix_width;
 			return;
 		}
 
 	//load char
 
-		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FTC_SBit_Cache_Lookup(cache, &desc, Char + ((Attribute>>8 & 1) * (128-32)) + 1, &sbit)))
 		{
-			printf("TuxTxt <FT_Load_Char %.3d => 0x%.2X>\n", Char, error);
-			PosX += fontwidth;
+			printf("TuxTxt <FT_SBit_Cache_Lookup %.3d: 0x%.2X>\n", Char, error);
+			PosX += desc.font.pix_width;
 			return;
 		}
 
@@ -1912,11 +1990,11 @@ void RenderCharBB(int Char, int Attribute)
 
 		for(Row = 0; Row < fixfontheight; Row++)
 		{
-			for(Pitch = 0; Pitch < face->glyph->bitmap.pitch; Pitch++)
+			for(Pitch = 0; Pitch < sbit->pitch; Pitch++)
 			{
 				for(Bit = 7; Bit >= 0; Bit--)
 				{
-					if((face->glyph->bitmap.buffer[Row * face->glyph->bitmap.pitch + Pitch]) & 1<<Bit)
+					if((sbit->buffer[Row * sbit->pitch + Pitch]) & 1<<Bit)
 					{
 						backbuffer[(x+PosX) + ((y+PosY)*var_screeninfo.xres)] = Attribute & 15;
 
@@ -1945,7 +2023,7 @@ void RenderCharBB(int Char, int Attribute)
 			if(Attribute & 1<<9) y++;
 		}
 
-	PosX += fontwidth;
+	PosX += desc.font.pix_width;
 }
 
 /******************************************************************************
@@ -2032,7 +2110,7 @@ void RenderMessage(int Message)
 
 	//render infobar
 
-		PosX = StartX + fontwidth+5;
+		PosX = StartX + desc.font.pix_width+5;
 		PosY = StartY + fixfontheight*16;
 		for(byte = 0; byte < 37; byte++)
 		{
@@ -2040,7 +2118,7 @@ void RenderMessage(int Message)
 		}
 		RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth+5;
+		PosX = StartX + desc.font.pix_width+5;
 		PosY = StartY + fixfontheight*17;
 		RenderCharFB(message_2[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -2050,7 +2128,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_2[36], menucolor<<4 | menu2);
 		RenderCharFB(message_2[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth+5;
+		PosX = StartX + desc.font.pix_width+5;
 		PosY = StartY + fixfontheight*18;
 		RenderCharFB(message_3[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -2060,7 +2138,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_3[36], menucolor<<4 | menu2);
 		RenderCharFB(message_3[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth+5;
+		PosX = StartX + desc.font.pix_width+5;
 		PosY = StartY + fixfontheight*19;
 		RenderCharFB(message_4[0], menucolor<<4 | menu2);
 		for(byte = 1; byte < 36; byte++)
@@ -2070,7 +2148,7 @@ void RenderMessage(int Message)
 		RenderCharFB(message_4[36], menucolor<<4 | menu2);
 		RenderCharFB(message_4[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth+5;
+		PosX = StartX + desc.font.pix_width+5;
 		PosY = StartY + fixfontheight*20;
 		for(byte = 0; byte < 37; byte++)
 		{
@@ -2078,7 +2156,7 @@ void RenderMessage(int Message)
 		}
 		RenderCharFB(message_5[37], fbcolor<<4 | menu2);
 
-		PosX = StartX + fontwidth+5;
+		PosX = StartX + desc.font.pix_width+5;
 		PosY = StartY + fixfontheight*21;
 		for(byte = 0; byte < 38; byte++)
 		{
@@ -2139,7 +2217,7 @@ void RenderPage()
 		{
 			//update timestring
 
-				PosX = StartX + 32*fontwidth;
+				PosX = StartX + 32*desc.font.pix_width;
 				PosY = StartY;
 
 				for(byte = 0; byte < 8; byte++)
@@ -2408,7 +2486,7 @@ void UpdateLCD()
 
 		if(update_lcd)
 		{
-			//printf("TuxTxt <update LCD => %.3x-%.2x/%.2x %.2d %.1d %.4d>\n", page, subpage, subpage_max, pids_found, hintmode, cached_pages);
+			//printf("TuxTxt <update LCD: %.3x-%.2x/%.2x %.2d %.1d %.4d>\n", page, subpage, subpage_max, pids_found, hintmode, cached_pages);
 
 			write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
 		}
