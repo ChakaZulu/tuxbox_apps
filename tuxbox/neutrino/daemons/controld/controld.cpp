@@ -402,9 +402,9 @@ void disableVideoOutput(bool disable)
 	*/
 	if(!disable)
 	{
+		zapit.startPlayBack();
 		setvideooutput(settings.videooutput);
 		setVideoFormat(settings.videoformat);
-		zapit.startPlayBack();
 	}
 	else
 	{
