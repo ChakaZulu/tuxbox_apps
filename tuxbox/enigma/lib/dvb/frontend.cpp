@@ -1096,7 +1096,7 @@ void eFrontend::RotorRunningLoop()
 
 void eFrontend::RotorFinish(bool tune)
 {
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( eSystemInfo::getInstance()->canMeasureLNBCurrent() == 1 )
 	{
 		if ( voltage != eSecCmdSequence::VOLTAGE_18 )
 #if HAVE_DVB_API_VERSION < 3
@@ -1108,7 +1108,7 @@ void eFrontend::RotorFinish(bool tune)
 		curVoltage = voltage;
 #endif
 	}
-	else  // workaround.. fix later..
+	else  // can only measure with lower lnb voltage ( 13V )
 	{
 		if ( voltage != eSecCmdSequence::VOLTAGE_13 )
 #if HAVE_DVB_API_VERSION < 3
@@ -1887,7 +1887,7 @@ int eFrontend::tune_qpsk(eTransponder *trans,
 		// or we know which orbital pos currently is selected
 		if ( lnb->getDiSEqC().useRotorInPower&1 )
 		{
-			if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
+			if ( eSystemInfo::getInstance()->canMeasureLNBCurrent() == 1 )  // can measure with voltage > 13V ?
 				seq.voltage = eSecCmdSequence::VOLTAGE_18;
 			else
 				seq.voltage = eSecCmdSequence::VOLTAGE_13;

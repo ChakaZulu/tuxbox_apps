@@ -170,15 +170,30 @@ eSystemInfo::eSystemInfo()
 					caids.insert(0x4a70);
 					break;
 				case 9:
+				{
 					midstr="9";
 					modelstr="DM7020";
 					cpustr="STB04500, 252MHz";
-					haskeyboard = hasrfmod = hashdd = haslcd = canmeasurelnbcurrent = hasci
+					haskeyboard = hasrfmod = hashdd = haslcd = hasci
 					= canrecordts = hasstandbywakeuptimer = 1;
+
+					// check if the box revision is new enough to measure
+					// lnb power with > 13V ( revisions with lnbp21 can this )
+					int fd = open("/dev/dbox/fp0", O_RDWR);
+					if ( fd >=0 )
+					{
+						if ( ::ioctl( fd, 0x100, 0 ) == 0 )
+							canmeasurelnbcurrent=1;
+						else
+							canmeasurelnbcurrent=2;
+						close(fd);
+					}
+
 					hwtype = DM7020;
 					caids.insert(0x4a70);
 					defaulttimertype=ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR;
 					break;
+				}
 			}
 			break;
 		case 1 ... 3:
