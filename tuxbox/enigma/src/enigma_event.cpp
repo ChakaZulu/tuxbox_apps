@@ -30,20 +30,19 @@ void eEventDisplay::prevEvent()
 	setEvent(**events);
 }
 
-int eEventDisplay::eventFilter(const eWidgetEvent &event)
+int eEventDisplay::eventHandler(const eWidgetEvent &event)
 {
-	eDebug("event.type = %i == %i", event.type, eWidgetEvent::evtAction );
 	switch (event.type)
 	{
 		case eWidgetEvent::evtAction:
-			if (event.action == &i_cursorActions->left)
-				if (events) prevEvent();
-			else if (event.action == &i_cursorActions->right)
-				if (events) nextEvent();
+			if ((event.action == &i_cursorActions->left) && events)
+				prevEvent();
+			else if ((event.action == &i_cursorActions->right) && events)
+				nextEvent();
 			else if(event.action == &i_cursorActions->cancel)
 				close(0);
 			else
-				return 0;
+				break;
 		return 1;
 	}
 	return eWidget::eventHandler(event);
