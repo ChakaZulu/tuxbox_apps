@@ -475,7 +475,10 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 		return false;
 	}
 	else
+	{
+		deviceState = CMD_VCR_RECORD;
 		return true;
+	}
 }
 
 
