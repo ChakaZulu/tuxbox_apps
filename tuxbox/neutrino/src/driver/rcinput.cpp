@@ -540,7 +540,27 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 			else
 			 				printf("[neutrino] event INITID_CONTROLD - unknown eventID 0x%x\n",  emsg.eventID );
 			 		}
-			 		else if ( emsg.initiatorID == CEventServer::INITID_SECTIONSD )
+			 		else if ( emsg.initiatorID == CEventServer::INITID_NHTTPD )
+			 		{
+			 			if (emsg.eventID==NeutrinoMessages::SHUTDOWN)
+			 			{
+			 				*msg = NeutrinoMessages::SHUTDOWN;
+			 				*data = 0;
+			 			}
+			 			else if (emsg.eventID==NeutrinoMessages::STANDBY_ON)
+			 			{
+			 				*msg = NeutrinoMessages::STANDBY_ON;
+			 				*data = 0;
+			 			}
+						else if (emsg.eventID==NeutrinoMessages::STANDBY_OFF)
+			 			{
+			 				*msg = NeutrinoMessages::STANDBY_OFF;
+			 				*data = 0;
+			 			}
+						else
+							printf("[neutrino] event INITID_NHTTPD - unknown eventID 0x%x\n",  emsg.eventID );
+					}
+					else if ( emsg.initiatorID == CEventServer::INITID_SECTIONSD )
 			 		{
 			 			//printf("[neutrino] event - from SECTIONSD %x %x\n", emsg.eventID, *(unsigned*) p);
 			 			if (emsg.eventID==CSectionsdClient::EVT_TIMESET)
