@@ -53,13 +53,14 @@
 #include "global.h"
 #include "neutrino.h"
 
-#include "daemonc/remotecontrol.h"
+#include <daemonc/remotecontrol.h>
 
-#include "driver/framebuffer.h"
-#include "driver/fontrenderer.h"
-#include "driver/rcinput.h"
-#include "driver/vcrcontrol.h"
-#include "driver/irsend.h"
+#include <driver/encoding.h>
+#include <driver/framebuffer.h>
+#include <driver/fontrenderer.h>
+#include <driver/rcinput.h>
+#include <driver/vcrcontrol.h>
+#include <driver/irsend.h>
 
 #include "gui/widget/colorchooser.h"
 #include "gui/widget/menue.h"
@@ -98,10 +99,10 @@
 #include "gui/pictureviewer.h"
 #include "gui/motorcontrol.h"
 
-#include "system/setting_helpers.h"
-#include "system/settings.h"
-#include "system/debug.h"
-#include "system/flashtool.h"
+#include <system/setting_helpers.h>
+#include <system/settings.h>
+#include <system/debug.h>
+#include <system/flashtool.h>
 
 #include <string.h>
 
@@ -2171,7 +2172,7 @@ void CNeutrinoApp::SelectNVOD()
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder((CZapitClient::Utf8_to_Latin1(e->subservice_name)).c_str(), true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
+				NVODSelector.addItem( new CMenuForwarder((Latin1_to_UTF8(e->subservice_name)).c_str(), true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
 			}
 
 			count++;
