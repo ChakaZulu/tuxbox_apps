@@ -1,6 +1,3 @@
-# was ist mit $(DRIVER) passiert? verdammt...
-INCLUDES = -I$(top_srcdir)/../../../driver/dvb/include
-
 bin_PROGRAMS = \
 	diseqc \
 	set22k \
