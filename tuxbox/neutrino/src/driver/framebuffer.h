@@ -29,14 +29,17 @@ class CFrameBuffer
 
 		string iconBasePath;
 
-		int fd;
+		int				fd;
+		int				available;
+		unsigned char	*background;
+		int				backgroundColor;
+		bool			useBackgroundPaint;
 		unsigned int xRes, yRes, stride, bpp;
-		int available;
 		struct fb_var_screeninfo screeninfo, oldscreen;
 		fb_cmap cmap;
 		__u16 red[256], green[256], blue[256], trans[256];
-		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 
+		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 
 	public:
 		//pointer to framebuffer
@@ -73,6 +76,14 @@ class CFrameBuffer
 		bool paintIcon8(string filename, int x, int y, unsigned char offset=0);
 		void loadPal(string filename, unsigned char offset=0, unsigned char endidx=255 );
 		void setIconBasePath(string);
+
+
+		void setBackgroundColor(int color);
+		bool loadBackground(string filename, unsigned char col = 0);
+		void useBackground(bool);
+
+		void paintBackgroundBox(int xa, int ya, int xb, int yb);
+		void paintBackgroundBoxRel(int x, int y, int dx, int dy);
 };
 
 

@@ -11,6 +11,9 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 	cmap.green=green;
 	cmap.blue=blue;
 	cmap.transp=trans;
+	backgroundColor = 0;
+	useBackgroundPaint = false;
+	background = NULL;
 
 	fd=open(fb, O_RDWR);
 	if (fd<0)
@@ -54,6 +57,11 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 
 CFrameBuffer::~CFrameBuffer()
 {
+	if(background)
+	{
+		delete[] background;
+	}
+
 	/*
 	if (available)
 		ioctl(fd, FBIOPUT_VSCREENINFO, &oldscreen);
@@ -367,4 +375,93 @@ void CFrameBuffer::paintLine(int xa, int ya, int xb, int yb, unsigned char col)
     }
     paintPixel (x, y, col);
   }
+}
+
+void CFrameBuffer::setBackgroundColor(int color)
+{
+	backgroundColor = color;
+}
+
+bool CFrameBuffer::loadBackground(string filename, unsigned char col)
+{
+	if(background)
+	{
+		delete[] background;
+	}
+	
+	short width, height;
+	unsigned char tr;
+	int fd;
+	filename = iconBasePath + filename;
+
+	fd = open(filename.c_str(), O_RDONLY );
+	
+	if (fd==-1)
+	{
+		printf("error while loading icon: %s", filename.c_str() );
+		return false;
+	}
+
+	read(fd, &width,  2 );
+	read(fd, &height, 2 );
+	read(fd, &tr, 1 );
+
+	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
+	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
+
+	if((width!=720) || (height!=576))
+	{
+		printf("error while loading icon: %s - invalid resulution = %dx%d", filename.c_str(), width, height );
+		return false;
+	}
+
+	background = new unsigned char[720*576];
+	
+	read(fd, background, 720*576);
+	
+	if(col!=0)//pic-offset
+	{
+		unsigned char *bpos = background;
+		int pos = 720*576;
+		while(pos>0)
+		{
+			*bpos += col;
+			bpos += 1;
+			pos--;
+		}
+	}
+
+	close(fd);
+	return false;
+}
+
+void CFrameBuffer::useBackground(bool ub)
+{
+	useBackgroundPaint = ub;
+}
+
+void CFrameBuffer::paintBackgroundBox(int xa, int ya, int xb, int yb)
+{
+	int dx = xb - xa;
+	int dy = yb - ya;
+	paintBackgroundBoxRel(xa, ya, dx, dy);
+}
+
+void CFrameBuffer::paintBackgroundBoxRel(int x, int y, int dx, int dy)
+{
+	if(!useBackgroundPaint)
+	{
+		paintBoxRel(x, y, dx, dy, backgroundColor);
+	}
+	else
+	{
+		unsigned char *fbpos = lfb + x + stride*y;
+		unsigned char *bkpos = background + x + stride*y;
+		for(int count=0;count<dy;count++)
+		{
+			memcpy(fbpos, bkpos, dx);
+			fbpos += stride;
+			bkpos += stride;
+		}
+	}
 }
