@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.16 2003/05/13 07:05:21 digi_casi Exp $
+        $Id: settings.cpp,v 1.17 2003/05/13 09:47:11 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -29,24 +29,24 @@ CScanSettings::CScanSettings(void)
 {
 	delivery_system = DVB_S;
 	satNameNoDiseqc[0] = 0;
-	for( int i=0; i<MAX_SATELLITES; i++)
+	for( int i = 0; i < MAX_SATELLITES; i++)
 	{
 		satName[i][0] = 0;
-		satDiseqc[i]  = -1;
+		satDiseqc[i] = -1;
 		satMotorPos[i] = -1;
 	}
 }
 
-int * CScanSettings::diseqscOfSat( char* satname)
+int * CScanSettings::diseqscOfSat(char* satname)
 {
 	for( int i=0; i<MAX_SATELLITES; i++)
 	{
 		if ( !strcmp(satName[i], ""))
 		{
-			strncpy( satName[i], satname, 30);
+			strncpy(satName[i], satname, 30);
 			return &satDiseqc[i];
 		}
-		else if ( !strcmp(satName[i], satname))
+		else if (!strcmp(satName[i], satname))
 		{
 			return &satDiseqc[i];
 		}
@@ -54,16 +54,16 @@ int * CScanSettings::diseqscOfSat( char* satname)
 	return(NULL);
 }
 
-int * CScanSettings::motorPosOfSat( char* satname)
+int * CScanSettings::motorPosOfSat(char* satname)
 {
-	for( int i=0; i<MAX_SATELLITES; i++)
+	for( int i = 0; i < MAX_SATELLITES; i++)
 	{
 		if ( !strcmp(satName[i], ""))
 		{
-			strncpy( satName[i], satname, 30);
+			strncpy(satName[i], satname, 30);
 			return &satMotorPos[i];
 		}
-		else if ( !strcmp(satName[i], satname))
+		else if (!strcmp(satName[i], satname))
 		{
 			return &satMotorPos[i];
 		}
@@ -78,7 +78,7 @@ char * CScanSettings::satOfDiseqc(int diseqc) const
 		
 	if (diseqc >= 0 && diseqc < MAX_SATELLITES) 
 	{
-		for (int i=0; i<MAX_SATELLITES;i++) 
+		for (int i = 0; i < MAX_SATELLITES; i++) 
 		{
 			if(diseqc == satDiseqc[i]) 
 				return (char *)&satName[i];
@@ -118,12 +118,9 @@ void CScanSettings::toMotorPosList(CZapitClient::ScanMotorPosList& motorPosList)
 	
 	for (int i = 0; i < MAX_SATELLITES; i++)
 	{
-		if (satMotorPos[i] != -1)
-		{
-			strncpy(sat.satName, satName[i], 30);
-			sat.motorPos = satMotorPos[i];
-			motorPosList.insert(motorPosList.end(), sat);
-		}
+		strncpy(sat.satName, satName[i], 30);
+		sat.motorPos = satMotorPos[i];
+		motorPosList.insert(motorPosList.end(), sat);
 	}
 }
 
@@ -170,7 +167,7 @@ bool CScanSettings::loadSettings(const std::string fileName, const delivery_syst
 	diseqcRepeat = configfile.getInt32("diseqcRepeat", diseqcRepeat);
 	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32("bouquetMode" , bouquetMode);
 	strcpy(satNameNoDiseqc, configfile.getString("satNameNoDiseqc", satNameNoDiseqc).c_str());
-	satCount = configfile.getInt32("satCount", 0);
+	satCount = configfile.getInt32("satCount", MAX_SATELLITES);
 
 	if (diseqcMode != NO_DISEQC)
 	{
