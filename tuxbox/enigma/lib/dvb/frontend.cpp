@@ -2038,9 +2038,6 @@ int eFrontend::savePower()
 	rotorTimer1.stop();
 	rotorTimer2.stop();
 #if HAVE_DVB_API_VERSION < 3
-	if ( ioctl(fd, FE_SET_POWER_STATE, FE_POWER_OFF) < 0 )
-		eDebug("FE_SET_POWER_STATE failed (%m)");
-
 	if (secfd != -1)
 	{        
 		eSecCmdSequence seq;
@@ -2055,6 +2052,8 @@ int eFrontend::savePower()
 			return -1;
 		}
 	}
+	if ( ioctl(fd, FE_SET_POWER_STATE, FE_POWER_OFF) < 0 )
+		eDebug("FE_SET_POWER_STATE failed (%m)");
 #else
 	if (ioctl(fd, FE_SET_VOLTAGE, SEC_VOLTAGE_OFF) < 0)
 		eDebug("FE_SET_VOLTAGE (off) failed (%m)");
