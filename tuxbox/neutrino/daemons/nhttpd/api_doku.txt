@@ -22,36 +22,6 @@ Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 15. Bouquet abfragen		http://dbox/control/getbouquet
 
 
-TODO:
-bouquets
-bouquet
-[13:16] <|McClean> dbox/setmode?radio
-[13:16] <|McClean> dbox/setmode?tv
-[13:16] <|McClean> dbox/setmode?record
-[13:16] <|McClean> wobei record optionen zusätzlich verstehen muss
-[13:16] <|McClean> dbox/setmode?record=start
-[13:16] <|McClean> dbox/setmode?record=stop
-[13:17] <|McClean> dbox/setmode?record=stop&stopplayback=true
-[13:17] <|McClean> wobei stopplayback optional sein muss
-[13:17] <|McClean> und normal nicht gestoppt werden soll
-[13:17] <Dirch> und dbox/setmode?status
-[13:17] <|McClean> sectionsd stoppen wir immer
-[13:17] <|McClean> jo status
-[13:17] <|McClean> zum abfragen
-[13:17] <|McClean> wär ok
-
-[14:11] <|McClean> so dann machst das um shutdown zu machen:
-[14:14] <|McClean> CEventServer evServer;
-[14:14] <|McClean> evServer.registerEvent2( NeutrinoMessages::SHUTDOWN, CEventServer::INITID_NHTTPD, "/tmp/neutrino.sock");
-[14:14] <|McClean> evServer.sendEvent(NeutrinoMessages::SHUTDOWN, 80);
-[14:14] <|McClean> so - das sollte gehen
-[14:14] <|McClean> wenns in nhttpd drin ist sag bidde bescheit
-[14:14] <|McClean> neutrino macht da im moment noch nix
-[14:16] <|McClean> den eventserver kannst dir global in nhttpd machen
-[14:16] <|McClean> und das registerevent dann nur 1x
-[14:16] <|McClean> und dann wo dus brauchst das sendevent
-[14:16] <Dirch> ok, ich probiers mal aus
-[14:16] <|McClean> denn du noch STANDBY_ON und STANDBY_OFF registerst kannst das alles schicken
 
 **********************************************************************************************
 1. Die Kanalliste
