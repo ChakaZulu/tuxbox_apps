@@ -15,6 +15,8 @@
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
 #include <iomanip>
+#include <iostream>
+#include <fstream>
 
 #include <enigma.h>
 #include <timer.h>
@@ -42,15 +44,18 @@
 #include <lib/system/econfig.h>
 #include <lib/system/info.h>
 
+using namespace std;
+
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 #define CHARSETMETA "<META http-equiv=Content-Type content=\"text/html; charset=UTF-8\">\n"
 
 #define DELETE(WHAT) result.strReplace(#WHAT, "")
 
-#define BLUE "12259E"
-#define RED "CB0303"
-#define LEFTNAVICOLOR "316183"
-#define TOPNAVICOLOR "316183"
+#define BLUE "#12259E"
+#define RED "#CB0303"
+#define LIGHTGREY "#DEE6D6"
+#define LEFTNAVICOLOR "#316183"
+#define TOPNAVICOLOR "#316183"
 
 extern eString getRight(const eString&, char);  // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp
@@ -91,7 +96,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 	}
 	result << "<button name=\"" << buttonText << "\""
 		"type=\"button\" style='width: " << width <<
-		"px; height: 22px; background-color: #" << buttonColor <<
+		"px; height: 22px; background-color: " << buttonColor <<
 		"' value=\"" << buttonText <<
 		"\" onclick=" << ref1 << buttonRef <<
 		ref2 << "><span class=\"button\">" << buttonText <<
@@ -102,7 +107,7 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 eString getTitle(eString title)
 {
 	std::stringstream result;
-	result << "<span style=\"width: 100%; background-color: #DEE6D6\">"
+	result << "<span style=\"width: 100%; background-color: " << LIGHTGREY << "\">"
 		"<font style=\"font-family: Verdana; font-size: 14pt; font-weight: bold\">"
 		<< title
 		<< "</font></SPAN><br><br>";
@@ -412,18 +417,13 @@ static eString version(eString request, eString dirpath, eString opt, eHTTPConne
 
 static eString channels_getcurrent(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	eString result;
 	content->local_header["Content-Type"]="text/plain; charset=utf-8";
 
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "-1";
+	if (eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI())
+		if (eServiceDVB *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service))
+			return current->service_name.c_str();
 
-	eServiceDVB *current=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
-	if (current)
-		return current->service_name.c_str();
-	else
-		return "-1";
+	return "-1";
 }
 
 static eString getVolume()
@@ -474,22 +474,13 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 
 eString read_file(eString filename)
 {
-#define BLOCKSIZE 8192
-	int fd;
-	fd=open(filename.c_str(), O_RDONLY);
-	if (!fd)
-		return eString("file: "+filename+" not found\n");
-
-	int size=0;
-
-	char tempbuf[BLOCKSIZE+200];
 	eString result;
+	eString line;
 
-	while((size=read(fd, tempbuf, BLOCKSIZE))>0)
-	{
-		tempbuf[size]=0;
-		result+=eString(tempbuf);
-	}
+	ifstream infile(filename.c_str());
+	while (getline(infile, line, '\n'))
+		result += line + "\n";
+
 	return result;
 }
 
@@ -510,17 +501,13 @@ static eString getIP()
 	int sd;
 	struct ifreq ifr;
 	sd=socket(AF_INET, SOCK_DGRAM, 0);
-	if (sd<0)
-	{
+	if (sd < 0)
 		return "?.?.?.?-socket-error";
-	}
 	memset(&ifr, 0, sizeof(ifr));
-	ifr.ifr_addr.sa_family=AF_INET; // fixes problems with some linux vers.
+	ifr.ifr_addr.sa_family = AF_INET; // fixes problems with some linux vers.
 	strncpy(ifr.ifr_name, "eth0", sizeof(ifr.ifr_name));
 	if (ioctl(sd, SIOCGIFADDR, &ifr) < 0)
-	{
 		return "?.?.?.?-ioctl-error";
-	}
 	close(sd);
 
 	tmp.sprintf("%s", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
@@ -616,23 +603,21 @@ extern int freeRecordSpace(void);  // implemented in enigma_main.cpp
 static eString getDiskSpace(void)
 {
 	eString result;
-	eString tmp;
+
 	result += "Remaining Disk Space: ";
 	int fds = freeRecordSpace();
 	if (fds != -1)
 	{
 		if (fds < 1024)
-			tmp.sprintf("%d MB", fds);
+			result += eString().sprintf("%d MB", fds);
 		else
-			tmp.sprintf("%d.%02d GB", fds/1024, (int)((fds%1024)/10.34));
-		result += tmp;
+			result += eString().sprintf("%d.%02d GB", fds/1024, (int)((fds % 1024) / 10.34));
 		result += "/";
-		int min = fds/33;
+		int min = fds / 33;
 		if (min < 60)
-			tmp.sprintf("~%d min", min);
+			result += eString().sprintf("~%d min", min);
 		else
-			tmp.sprintf("~%dh%02dmin", min/60, min%60);
-		result += tmp;
+			result += eString().sprintf("~%d h%02d min", min/60, min%60);
 	}
 	else
 		result += "unknown";
@@ -645,14 +630,13 @@ static eString getStats()
 {
 	eString result;
 	eString apid, vpid;
-	int bootcount = 0;
 
 #ifndef DISABLE_FILE
 	result += getDiskSpace();
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 #endif
 	int sec = atoi(read_file("/proc/uptime").c_str());
-	result += eString().sprintf("%d:%02dh up", sec/3600, (sec%3600)/60);
+	result += eString().sprintf("%d:%02d h up", sec/3600, (sec%3600)/60);
 	result += "&nbsp;<img src=\"squ.png\">&nbsp;";
 
 	result += getIP();
@@ -672,36 +656,39 @@ static eString getVolBar()
 {
 // returns the volumebar
 	eString result;
-	int volume=atoi(getVolume().c_str());
+	int volume = atoi(getVolume().c_str());
 
-	result+="<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
-	result+="<tr>";
+	result += "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
+	result += "<tr>";
 
-	for(int i=1;i<=(volume/10);i++)
+	for (int i = 1; i <= (volume / 10); i++)
 	{
-		result+="<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(";
-		result+=eString().setNum(i, 10);
-		result+=")\"><img src=\"trans.gif\" border=0></a></span></td>";
+		result += "<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(";
+		result += eString().setNum(i, 10);
+		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
 	}
-	for(int i=(volume/10)+1;i<=(100/10);i++)
+	for (int i = (volume / 10) + 1; i <= 10; i++)
 	{
-		result+="<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(";
-		result+=eString().setNum(i, 10);
-		result+=")\"><img src=\"trans.gif\" border=0></a></span></td>";
+		result += "<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(";
+		result += eString().setNum(i, 10);
+  		result += ")\"><img src=\"trans.gif\" border=0></a></span></td>";
 	}
 
-	result+="<td>";
-
-	if (eAVSwitch::getInstance()->getMute()==1) {
-		result+="<a class=\"mute\" href=\"javascript:Mute()\">";
-		result+="<img src=\"speak_off.gif\" border=0>";
-	} else {
-		result+="<a class=\"mute\" href=\"javascript:unMute()\">";
-		result+="<img src=\"speak_on.gif\" border=0>";
+	result += "<td>";
+	if (eAVSwitch::getInstance()->getMute() == 1)
+	{
+		result += "<a class=\"mute\" href=\"javascript:Mute()\">";
+		result += "<img src=\"speak_off.gif\" border=0></a>";
+	} 
+	else
+	{
+		result += "<a class=\"mute\" href=\"javascript:unMute()\">";
+		result += "<img src=\"speak_on.gif\" border=0></a>";
 	}
-	result+="</a></td>";
-	result+="</tr>";
-	result+="</table>";
+	result += "</td>";
+
+	result += "</tr>";
+	result += "</table>";
 	return result;
 }
 
@@ -736,7 +723,7 @@ public:
 			result += "c0c0c0";
 		else
 			result += "d0d0d0";
-		result+="\"><font color=\"#000000\">";
+		result+="\">";
 		if (!(e.flags & eServiceReference::isDirectory))
 		{
 			result += "<a href=\'javascript:openEPG(\"" + ref2string(e) + "\")\'>[EPG]</a>";
@@ -757,7 +744,7 @@ public:
 		if (e.flags & eServiceReference::isDirectory)
 			result += "</a>";
 
-		result+="</font></td></tr>\n";
+		result+="</td></tr>\n";
 		num++;
 	}
 };
@@ -1950,28 +1937,35 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	return result;
 }
 
-static eString screenshot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static int getOSDShot(eString mode)
 {
-	std::map<eString,eString> opt=getRequestOptions(opts);
-	gPixmap *p=0;
+	gPixmap *p = 0;
 #ifndef DISABLE_LCD
-	if (opt["mode"]=="lcd")
-		p=&gLCDDC::getInstance()->getPixmap();
+	if (mode == "lcd")
+		p = &gLCDDC::getInstance()->getPixmap();
 	else
 #endif
-		p=&gFBDC::getInstance()->getPixmap();
+		p = &gFBDC::getInstance()->getPixmap();
 
-	if (!p)
-		return "no\n";
+	if (p)
+		if (!savePNG("/tmp/screenshot.png", p))
+			return 0;
 
-	if (!savePNG("/tmp/screenshot.png", p))
+	return -1;
+}
+
+static eString osdshot(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt=getRequestOptions(opts);
+	
+	if (getOSDShot(opt["mode"]) == 0)
 	{
 		content->local_header["Location"]="/root/tmp/screenshot.png";
-		content->code=307;
+		content->code = 307;
 		return "+ok";
 	}
-
-	return "-not ok";
+	else
+		return "-error";
 }
 
 static eString listDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -2382,7 +2376,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/saveTimerList", save_timerList);
 	dyn_resolver->addDyn("GET", "/cgi-bin/startPlugin", start_plugin);
 	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stop_plugin);
-	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", screenshot);
+	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot);
+	dyn_resolver->addDyn("GET", "/cgi-bin/screenshot", osdshot); // for backward compatibility
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices);
 	dyn_resolver->addDyn("GET", "/control/zapto", neutrino_suck_zapto);
