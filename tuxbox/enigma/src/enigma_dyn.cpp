@@ -378,7 +378,7 @@ static eString getIP()
 	return tmp;
 }
 
-static eString filter_string(eString string)
+eString filter_string(eString string)
 {
 	return string.
 		removeChars('\x86').
@@ -855,6 +855,8 @@ static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnect
 	}
 
 	result+=eString("<html>" CHARSETMETA "<head><title>streaminfo</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/si.css\"></head><body bgcolor=#000000>");
+	result += "<!-- " + sapi->service.toString() + "-->\n";
+
 	result+=eString("<table cellspacing=0 cellpadding=0 border=0>");
 	result+=eString("<tr><td>name:</td><td>"+name+"</td></tr>");
 	result+=eString("<tr><td>provider:</td><td>"+provider+"</td></tr>");

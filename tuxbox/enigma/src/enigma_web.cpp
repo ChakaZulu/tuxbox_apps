@@ -262,21 +262,22 @@ eHTTPDataSource *eHTTPLogResolver::getDataSource(eString request, eString path, 
 	return 0;
 }
 
+extern eString filter_string(eString string);
+
 class ERCServiceHandle: public Object
 {
 	eString &result, search;
 	eServiceInterface &iface;
 public:
-	ERCServiceHandle(eString &result, eServiceInterface &iface, eString search): result(result), search(search), iface(iface)
+	ERCServiceHandle(eString &result, eServiceInterface &iface, eString search): result(result), search(search.upper()), iface(iface)
 	{
 	}
 	void addEntry(const eServiceReference &e)
 	{
-
 		eService *service=iface.addRef(e);
 		if (service)
 		{
-			if (service->service_name.find(search) == eString::npos)
+			if (filter_string(service->service_name).upper().find(search) == eString::npos)
 				return;
 			result += ref2string(e) + "\n";
 			result += service->service_name + "\n";
@@ -305,7 +306,7 @@ static eString erc_services(eString request, eString dirpath, eString opt, eHTTP
 	eString res = "+\n";
 	
 	ERCServiceHandle conv(res, *iface, opts["name"]);
-
+	
 	Signal1<void,const eServiceReference&> signal;
 	signal.connect(slot(conv, &ERCServiceHandle::addEntry));
 	
