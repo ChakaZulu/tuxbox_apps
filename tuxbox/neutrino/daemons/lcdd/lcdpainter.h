@@ -55,8 +55,11 @@ class CLCDPainter
 
 		string				servicename;
 		char				volume;
-		int					lcd_brightness;
-		int					lcd_standbybrightness;
+		int				lcd_brightness;
+		int				lcd_standbybrightness;
+		int				lcd_contrast;
+		int				lcd_power;
+		int				lcd_inverse;
 		bool				muted;
 		bool				showclock;
 
@@ -74,7 +77,7 @@ class CLCDPainter
 
 		bool set_mode(CLcddClient::mode m, char *title);
 
-		void dimmlcd(int val);
+		void setlcdparameter(int dimm, int contrast, int power, int inverse);
 
 		void setBrightness(int);
 		int getBrightness();
@@ -82,7 +85,18 @@ class CLCDPainter
 		void setBrightnessStandby(int);
 		int getBrightnessStandby();
 
+		void setContrast(int);
+		int getContrast();
+
+		void setPower(int);
+		int getPower();
+
+		void setInverse(int);
+		int getInverse();
+
 		void setMuted(bool);
+
+		void update();	// applies new brightness, contrast, etc
 };
 
 

@@ -56,7 +56,7 @@ bool CLCDPainter::init()
 	fonts.menutitle=fontRenderer->getFont(FONTNAME, "Regular", 15);
 	fonts.menu=fontRenderer->getFont(FONTNAME, "Regular", 12);
 
-	dimmlcd(lcd_brightness);
+	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 	display.setIconBasePath( DATADIR "/lcdd/icons/");
 
 	if(!display.isAvailable())
@@ -89,7 +89,7 @@ bool CLCDPainter::init()
 	mode = CLcddClient::MODE_TVRADIO;
 	show_servicename("Booting...");
 	showclock=true;
-
+	return true;
 }
 
 void CLCDPainter::show_servicename( string name )
@@ -202,7 +202,7 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 	switch (m)
 	{
 		case CLcddClient::MODE_TVRADIO:
-			dimmlcd(lcd_brightness);
+			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: tvradio\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
@@ -213,7 +213,7 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			break;
 		case CLcddClient::MODE_SCART:
-			dimmlcd(lcd_brightness);
+			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: scart\n");
 			display.load_screen(&icon_lcd);
 			mode = m;
@@ -223,7 +223,7 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			break;
 		case CLcddClient::MODE_MENU:
-			dimmlcd(lcd_brightness);
+			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: menu\n");
 			mode = m;
 			showclock = false;
@@ -232,7 +232,7 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			display.update();
 			break;
 		case CLcddClient::MODE_SHUTDOWN:
-			dimmlcd(lcd_brightness);
+			setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 			//printf("[lcdd] mode: shutdown\n");
 			mode = m;
 			showclock = false;
@@ -242,7 +242,7 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 			break;
 		case CLcddClient::MODE_STANDBY:
 			//printf("[lcdd] mode: standby\n");
-			dimmlcd(lcd_standbybrightness);
+			setlcdparameter(lcd_standbybrightness, lcd_contrast, lcd_power, lcd_inverse);
 			mode = m;
 			showclock = true;
 			display.draw_fill_rect (-1,0,120,64, CLCDDisplay::PIXEL_OFF);
@@ -256,19 +256,43 @@ bool CLCDPainter::set_mode(CLcddClient::mode m, char *title)
 	return shall_exit;
 }
 
-void CLCDPainter::dimmlcd(int val)
+void CLCDPainter::setlcdparameter(int dimm, int contrast, int power, int inverse)
 {
-	int fd;
+	int fp, fd;
+	if (power==0)
+		dimm=0;
 
-	if ((fd = open("/dev/dbox/fp0",O_RDWR)) <= 0)
+	if ((fp = open("/dev/dbox/fp0",O_RDWR)) <= 0)
 	{
-		perror("open");
+		perror("[lcdd] pen '/dev/dbox/fp0' failed!");
 	}
 
-	if (ioctl(fd,FP_IOCTL_LCD_DIMM, &val) < 0)
+	if ((fd = open("/dev/dbox/lcd0",O_RDWR)) <= 0)
 	{
-		perror("dimm");
+		perror("[lcdd] open '/dev/dbox/lcd0' failed!");
 	}
+
+	if (ioctl(fp,FP_IOCTL_LCD_DIMM, &dimm) < 0)
+	{
+		perror("[lcdd] set dimm failed!");
+	}
+	
+	if (ioctl(fd,LCD_IOCTL_SRV, &contrast) < 0)
+	{
+		perror("[lcdd] set contrast failed!");
+	}
+
+	if (ioctl(fd,LCD_IOCTL_ON, &power) < 0)
+	{
+		perror("[lcdd] set power failed!");
+	}
+
+	if (ioctl(fd,LCD_IOCTL_REVERSE, &inverse) < 0)
+	{
+		perror("[lcdd] set invert failed!");
+	}
+
+	close(fp);
 	close(fd);
 }
 
@@ -292,8 +316,43 @@ int CLCDPainter::getBrightnessStandby()
 	return lcd_standbybrightness;
 }
 
+void CLCDPainter::setContrast(int contrast)
+{
+	lcd_contrast = contrast;
+}
+
+int CLCDPainter::getContrast()
+{
+	return lcd_contrast;
+}
+
+void CLCDPainter::setPower(int power)
+{
+	lcd_power = power;
+}
+
+int CLCDPainter::getPower()
+{
+	return lcd_power;
+}
+
+void CLCDPainter::setInverse(int inverse)
+{
+	lcd_inverse = inverse;
+}
+
+int CLCDPainter::getInverse()
+{
+	return lcd_inverse;
+}
+
 void CLCDPainter::setMuted(bool mu)
 {
 	muted = mu;
 	show_volume(volume);
+}
+
+void CLCDPainter::update()
+{
+	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 }

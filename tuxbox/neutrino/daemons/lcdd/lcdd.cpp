@@ -59,6 +59,9 @@ void CLCDD::saveConfig()
 		inSave=true;
 		configfile.setInt( "lcd_brightness", lcdPainter.getBrightness() );
 		configfile.setInt( "lcd_standbybrightness", lcdPainter.getBrightnessStandby() );
+		configfile.setInt( "lcd_contrast", lcdPainter.getContrast() );
+		configfile.setInt( "lcd_power", lcdPainter.getPower() );
+		configfile.setInt( "lcd_inverse", lcdPainter.getInverse() );
 
 		if(configfile.getModifiedFlag())
 		{
@@ -76,11 +79,17 @@ void CLCDD::loadConfig()
 	{
 		lcdPainter.setBrightness(0xff);
 		lcdPainter.setBrightnessStandby(0xaa);
+		lcdPainter.setContrast(0x0F);
+		lcdPainter.setPower(0x01);
+		lcdPainter.setInverse(0x00);
 		return;
 	}
 
 	lcdPainter.setBrightness( configfile.getInt("lcd_brightness", 0xff) );
 	lcdPainter.setBrightnessStandby( configfile.getInt("lcd_standbybrightness", 0xaa) );
+	lcdPainter.setContrast( configfile.getInt("lcd_contrast", 0x0F) );
+	lcdPainter.setPower( configfile.getInt("lcd_power", 0x01) );
+	lcdPainter.setInverse( configfile.getInt("lcd_inverse", 0x00) );
 }
 
 void CLCDD::parse_command(int connfd, CLcddMsg::commandHead rmsg)
@@ -93,6 +102,10 @@ void CLCDD::parse_command(int connfd, CLcddMsg::commandHead rmsg)
 
 	switch (rmsg.cmd)
 	{
+		case CLcddMsg::CMD_SHUTDOWN:
+			saveConfig();
+			exit(0);
+			break;
 		case CLcddMsg::CMD_SETSERVICENAME:
 			CLcddMsg::commandServiceName msg;
 			read(connfd, &msg, sizeof(msg));
@@ -123,20 +136,54 @@ void CLCDD::parse_command(int connfd, CLcddMsg::commandHead rmsg)
 			read(connfd, &msg6, sizeof(msg6));
 			lcdPainter.setBrightness(msg6.brightness);
 			break;
-		case CLcddMsg::CMD_SETSTANDBYLCDBRIGHTNESS:
+		case CLcddMsg::CMD_SETLCDCONTRAST:
 			CLcddMsg::commandSetBrightness msg7;
 			read(connfd, &msg7, sizeof(msg7));
-			lcdPainter.setBrightnessStandby(msg6.brightness);
+			lcdPainter.setContrast(msg7.brightness);
+			break;
+		case CLcddMsg::CMD_SETSTANDBYLCDBRIGHTNESS:
+			CLcddMsg::commandSetBrightness msg8;
+			read(connfd, &msg8, sizeof(msg8));
+			lcdPainter.setBrightnessStandby(msg8.brightness);
 			break;
 		case CLcddMsg::CMD_GETLCDBRIGHTNESS:
-			CLcddMsg::responseGetBrightness msg8;
-			msg8.brightness = lcdPainter.getBrightness();
-			write(connfd, &msg8, sizeof(msg8));
+			CLcddMsg::responseGetBrightness msg9;
+			msg9.brightness = lcdPainter.getBrightness();
+			write(connfd, &msg9, sizeof(msg9));
+			break;
+		case CLcddMsg::CMD_GETLCDCONTRAST:
+			CLcddMsg::responseGetBrightness msg10;
+			msg10.brightness = lcdPainter.getContrast();
+			write(connfd, &msg10, sizeof(msg10));
 			break;
 		case CLcddMsg::CMD_GETSTANDBYLCDBRIGHTNESS:
-			CLcddMsg::responseGetBrightness msg9;
-			msg9.brightness = lcdPainter.getBrightnessStandby();
-			write(connfd, &msg9, sizeof(msg9));
+			CLcddMsg::responseGetBrightness msg11;
+			msg11.brightness = lcdPainter.getBrightnessStandby();
+			write(connfd, &msg11, sizeof(msg11));
+			break;
+
+		case CLcddMsg::CMD_SETLCDPOWER:
+			CLcddMsg::commandPower msg12;
+			read(connfd, &msg12, sizeof(msg12));
+			lcdPainter.setPower(msg12.power);
+			break;
+		case CLcddMsg::CMD_GETLCDPOWER:
+			CLcddMsg::commandPower msg13;
+			msg13.power = lcdPainter.getPower();
+			write(connfd, &msg13, sizeof(msg13));
+			break;
+		case CLcddMsg::CMD_SETLCDINVERSE:
+			CLcddMsg::commandInverse msg14;
+			read(connfd, &msg14, sizeof(msg14));
+			lcdPainter.setInverse(msg14.inverse);
+			break;
+		case CLcddMsg::CMD_GETLCDINVERSE:
+			CLcddMsg::commandInverse msg15;
+			msg15.inverse = lcdPainter.getInverse();
+			write(connfd, &msg15, sizeof(msg15));
+			break;
+		case CLcddMsg::CMD_UPDATE:
+			lcdPainter.update();
 			break;
 
 		default:
@@ -156,14 +203,13 @@ void* CLCDD::TimeThread(void *)
 
 void CLCDD::sig_catch(int)
 {
-	 CLCDD::getInstance()->saveConfig();
 	 exit(0);
 }
 
 int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.49 2002/06/03 23:04:23 obi Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.50 2002/07/07 17:44:07 dirch Exp $\n\n");
 
 	loadConfig();
 

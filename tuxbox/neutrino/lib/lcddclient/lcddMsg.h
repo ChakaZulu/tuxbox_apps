@@ -57,7 +57,15 @@ class CLcddMsg
 			CMD_SETLCDBRIGHTNESS,
 			CMD_GETLCDBRIGHTNESS,
 			CMD_SETSTANDBYLCDBRIGHTNESS,
-			CMD_GETSTANDBYLCDBRIGHTNESS
+			CMD_GETSTANDBYLCDBRIGHTNESS,
+			CMD_SETLCDCONTRAST,
+			CMD_GETLCDCONTRAST,
+			CMD_SETLCDPOWER,
+			CMD_GETLCDPOWER,
+			CMD_SETLCDINVERSE,
+			CMD_GETLCDINVERSE,
+			CMD_UPDATE,
+			CMD_SHUTDOWN
 
 		};
 
@@ -90,6 +98,16 @@ class CLcddMsg
 		struct commandMute
 		{
 			bool mute;
+		};
+
+		struct commandPower
+		{
+			bool power;
+		};
+
+		struct commandInverse
+		{
+			bool inverse;
 		};
 
 		struct commandVolume

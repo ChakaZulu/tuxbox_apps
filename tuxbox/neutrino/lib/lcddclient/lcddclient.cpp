@@ -82,17 +82,21 @@ bool CLcddClient::lcdd_close()
 		//printf("[lcddclient] close\n");
 		close(sock_fd);
 		sock_fd=0;
+		return true;
 	}
+	return false;
 }
 
 bool CLcddClient::send(char* data, int size)
 {
 	write(sock_fd, data, size);
+	return true;
 }
 
 bool CLcddClient::receive(char* data, int size)
 {
 	read(sock_fd, data, size);
+	return true;
 }
 
 void CLcddClient::setMode(char mode, string head)
@@ -163,6 +167,34 @@ void CLcddClient::setVolume(char volume)
 	lcdd_close();
 }
 
+void CLcddClient::setContrast(int contrast)
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandSetBrightness msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETLCDCONTRAST;
+	msg2.brightness = contrast;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+}
+
+int CLcddClient::getContrast()
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::responseGetBrightness msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_GETLCDCONTRAST;
+
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+
+	return msg2.brightness;
+}
+
 void CLcddClient::setBrightness(int brightness)
 {
 	CLcddMsg::commandHead msg;
@@ -219,9 +251,82 @@ int CLcddClient::getBrightnessStandby()
 	return msg2.brightness;
 }
 
+void CLcddClient::setPower(bool power)
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandPower msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETLCDPOWER;
+	msg2.power = power;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+}
+
+bool CLcddClient::getPower()
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandPower msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_GETLCDPOWER;
+
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+
+	return msg2.power;
+}
+
+void CLcddClient::setInverse(bool inverse)
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandInverse msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SETLCDINVERSE;
+	msg2.inverse = inverse;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	send((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+}
+
+bool CLcddClient::getInverse()
+{
+	CLcddMsg::commandHead msg;
+	CLcddMsg::commandInverse msg2;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_GETLCDINVERSE;
+
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	receive((char*)&msg2, sizeof(msg2));
+	lcdd_close();
+
+	return msg2.inverse;
+}
+
 void CLcddClient::shutdown()
 {
 	setMode(CLcddClient::MODE_SHUTDOWN, "");
+
+	CLcddMsg::commandHead msg;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_SHUTDOWN;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	lcdd_close();
+}
+
+void CLcddClient::update()
+{
+	CLcddMsg::commandHead msg;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_UPDATE;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	lcdd_close();
 }
 
 const std::string CLcddClient::getSystemId ()

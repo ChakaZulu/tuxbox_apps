@@ -76,6 +76,17 @@ class CLcddClient
 
 		void setBrightnessStandby(int brightness);
 		int getBrightnessStandby();
+
+		void setContrast(int contrast);
+		int getContrast();
+
+		void setPower(bool power);
+		bool getPower();
+
+		void setInverse(bool inverse);
+		bool getInverse();
+
+		void update();			// applies new brightness, contrast, etc
 };
 
 #endif
