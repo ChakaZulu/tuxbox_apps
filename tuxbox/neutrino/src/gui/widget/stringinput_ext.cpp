@@ -128,6 +128,7 @@ int CExtendedInput::exec( CMenuTarget* parent, string )
 		parent->hide();
 	}
 
+	strcpy(oldval, value);
 	paint();
 
 	uint msg; uint data;
