@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.5 2001/06/10 23:00:45 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.6 2001/06/11 01:15:16 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.6  2001/06/11 01:15:16  fnbrd
+// NVOD reference descriptors und Service-Typ
+//
 // Revision 1.5  2001/06/10 23:00:45  fnbrd
 // Nur ein Kommentar mehr (in Beschreibung von readSections)
 //
@@ -463,6 +466,7 @@ class SIsectionSDT : public SIsection
     void parse(void);
     void parseDescriptors(const char *desc, unsigned len, SIservice &s);
     void parseServiceDescriptor(const char *buf, SIservice &s);
+    void parseNVODreferenceDescriptor(const char *buf, SIservice &s);
 };
 
 // Fuer for_each

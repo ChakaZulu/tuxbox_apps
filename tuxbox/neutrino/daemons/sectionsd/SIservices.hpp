@@ -1,7 +1,7 @@
 #ifndef SISERVICES_HPP
 #define SISERVICES_HPP
 //
-// $Id: SIservices.hpp,v 1.1 2001/05/16 15:23:47 fnbrd Exp $
+// $Id: SIservices.hpp,v 1.2 2001/06/11 01:15:16 fnbrd Exp $
 //
 // classes SIservices and SIservices (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIservices.hpp,v $
+// Revision 1.2  2001/06/11 01:15:16  fnbrd
+// NVOD reference descriptors und Service-Typ
+//
 // Revision 1.1  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
@@ -45,10 +48,46 @@ struct sdt_service {
   unsigned short descriptors_loop_length : 12;
 } __attribute__ ((packed)) ; // 5 Bytes
 
+class SInvodReference
+{
+  public:
+    SInvodReference(unsigned short transport_stream_id, unsigned short original_network_id, unsigned short service_id) {
+      transportStreamID=transport_stream_id;
+      originalNetworkID=original_network_id;
+      serviceID=service_id;
+    }
+    SInvodReference(const SInvodReference &ref) {
+      transportStreamID=ref.transportStreamID;
+      originalNetworkID=ref.originalNetworkID;
+      serviceID=ref.serviceID;
+    }
+    bool operator < (const SInvodReference& ref) const {
+      // nach Service-ID sortieren
+      return serviceID < ref.serviceID;
+    }
+    void dump(void) const {
+      printf("NVOD Ref. Service-ID: %hu\n", serviceID);
+      printf("NVOD Ref. Transport-Stream-ID: %hu\n", transportStreamID);
+      printf("NVOD Ref. Original-Network-ID: %hu\n", originalNetworkID);
+    }
+    unsigned short serviceID;
+    unsigned short transportStreamID;
+    unsigned short originalNetworkID;
+};
+
+// Fuer for_each
+struct printSInvodReference : public unary_function<SInvodReference, void>
+{
+  void operator() (const SInvodReference &ref) { ref.dump();}
+};
+
+typedef set <SInvodReference, less<SInvodReference> > SInvodReferences;
+
 class SIservice {
   public:
     SIservice(const struct sdt_service *s) {
       serviceID=s->service_id;
+      serviceTyp=0;
       flags.EIT_schedule_flag=s->EIT_schedule_flag;
       flags.EIT_present_following_flag=s->EIT_present_following_flag;
       flags.running_status=s->running_status;
@@ -57,16 +96,21 @@ class SIservice {
     // Um einen service zum Suchen zu erstellen
     SIservice(unsigned short sid) {
       serviceID=sid;
+      serviceTyp=0;
       memset(&flags, 0, sizeof(flags));
     }
     // Std-Copy
     SIservice(const SIservice &s) {
       serviceID=s.serviceID;
+      serviceTyp=s.serviceTyp;
       providerName=s.providerName;
       serviceName=s.serviceName;
       flags=s.flags;
+      nvods=s.nvods;
     }
     unsigned short serviceID;
+    unsigned char serviceTyp;
+    SInvodReferences nvods;
     string serviceName; // Name aus dem Service-Descriptor
     string providerName; // Name aus dem Service-Descriptor
     int eitScheduleFlag(void) {return (int)flags.EIT_schedule_flag;}
@@ -80,10 +124,13 @@ class SIservice {
     }
     void dump(void) const {
       printf("Service-ID: %hu\n", serviceID);
+      printf("Service-Typ: %hhu\n", serviceTyp);
       if(providerName.length())
         printf("Provider-Name: %s\n", providerName.c_str());
       if(serviceName.length())
-        printf("Service-Name: %s\n\n", serviceName.c_str());
+        printf("Service-Name: %s\n", serviceName.c_str());
+      for_each(nvods.begin(), nvods.end(), printSInvodReference());
+      printf("\n");
     }
   protected:
     struct {

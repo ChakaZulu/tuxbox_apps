@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.8 2001/06/10 15:40:34 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.9 2001/06/11 01:15:16 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.9  2001/06/11 01:15:16  fnbrd
+// NVOD reference descriptors und Service-Typ
+//
 // Revision 1.8  2001/06/10 15:40:34  fnbrd
 // Kleine Aenderung die das einlesen von Sections mit nur einer Section beschleunigt (z.b. sdt).
 //
@@ -98,8 +101,6 @@ struct descr_extended_event_header {
 } __attribute__ ((packed)) ;
 
 //#pragma pack()
-
-//    printf("Dauer: %02x:%02x:%02x\n", (evt->duration)>>16, ((evt->duration)>>8)&0xff, (evt->duration)&0xff);
 
 void SIsectionEIT::parseComponentDescriptor(const char *buf, SIevent &e)
 {
@@ -206,10 +207,23 @@ void SIsectionEIT::parse(void)
   parsed=1;
 }
 
+void SIsectionSDT::parseNVODreferenceDescriptor(const char *buf, SIservice &s)
+{
+  struct descr_generic_header *hdr=(struct descr_generic_header *)buf;
+  unsigned short *spointer=(unsigned short *)(buf+sizeof(struct descr_generic_header));
+  while((const char *)spointer<=buf+sizeof(struct descr_generic_header)+hdr->descriptor_length-2) {
+    unsigned short transportStreamID=*spointer++;
+    unsigned short originalNetworkID=*spointer++;
+    unsigned short sID=*spointer++;
+    s.nvods.insert(SInvodReference(transportStreamID, originalNetworkID, sID));
+  }
+}
+
 void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
 {
   struct descr_service_header *sv=(struct descr_service_header *)buf;
   buf+=sizeof(struct descr_service_header);
+  s.serviceTyp=sv->service_typ;
   if(sv->service_provider_name_length)
     s.providerName=string(buf, sv->service_provider_name_length);
   buf+=sv->service_provider_name_length;
@@ -223,6 +237,7 @@ void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
 void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 {
   struct descr_generic_header *desc;
+  printf("Test\n");
   while(len>=sizeof(struct descr_generic_header)) {
     desc=(struct descr_generic_header *)des;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
@@ -230,6 +245,10 @@ void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
     if(desc->descriptor_tag==0x48) {
 //      printf("Found service descriptor\n");
       parseServiceDescriptor((const char *)desc, s);
+    }
+    else if(desc->descriptor_tag==0x4b) {
+//      printf("Found NVOD reference descriptor\n");
+      parseNVODreferenceDescriptor((const char *)desc, s);
     }
     len-=desc->descriptor_length+2;
     des+=desc->descriptor_length+2;

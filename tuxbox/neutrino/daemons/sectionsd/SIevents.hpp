@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.7 2001/06/10 14:55:51 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.8 2001/06/11 01:15:16 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.8  2001/06/11 01:15:16  fnbrd
+// NVOD reference descriptors und Service-Typ
+//
 // Revision 1.7  2001/06/10 14:55:51  fnbrd
 // Kleiner Aenderungen und Ergaenzungen (epgMini).
 //
@@ -248,9 +251,12 @@ struct printSIeventWithService : public unary_function<SIevent, void>
   printSIeventWithService(const SIservices &svs) { s=&svs;}
   void operator() (const SIevent &e) {
     SIservices::iterator k=s->find(SIservice(e.serviceID));
-    if(k!=s->end())
+    if(k!=s->end()) {
       printf("%s\n", k->serviceName.c_str());
-    e.dumpSmall();
+      printf("%s\n", k->providerName.c_str());
+    }
+    e.dump();
+//    e.dumpSmall();
   }
   const SIservices *s;
 };
