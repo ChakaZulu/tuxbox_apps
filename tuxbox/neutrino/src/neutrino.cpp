@@ -2971,16 +2971,16 @@ void CNeutrinoApp::InitZapper()
 	g_InfoViewer->start();
 	g_EpgData->start();
 
+	firstChannel();
+
 	// set initial PES/SPTS mode
 	if (g_settings.misc_spts != g_Zapit->PlaybackState())
 	{
-		if (g_settings.misc_spts)
+		if (g_settings.misc_spts && firstchannel.mode == 't' )
 			g_Zapit->PlaybackSPTS();
 		else
 			g_Zapit->PlaybackPES();
 	}
-
-	firstChannel();
 
 	if(firstchannel.mode == 't')
 	{
@@ -4111,6 +4111,11 @@ void CNeutrinoApp::setVolume(const neutrino_msg_t key, const bool bDoPaint)
 
 void CNeutrinoApp::tvMode( bool rezap )
 {
+	if(mode==mode_radio && g_settings.misc_spts==1)
+	{
+		g_Zapit->PlaybackSPTS();
+	}
+
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	if( mode == mode_tv )
 	{
@@ -4236,6 +4241,11 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 void CNeutrinoApp::radioMode( bool rezap)
 {
+	if(mode==mode_tv && g_settings.misc_spts==1)
+	{
+		g_Zapit->PlaybackPES();
+	}
+
 	CLCD::getInstance()->setMode(CLCD::MODE_TVRADIO);
 	if( mode==mode_radio )
 	{

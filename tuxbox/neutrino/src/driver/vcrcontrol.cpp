@@ -452,14 +452,25 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
 	bool sptsmode=g_settings.misc_spts;   // take default from settings
 
-	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set
-	if ((actmode != -1) && (actmode != 1) && g_settings.recording_in_spts_mode)
+	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set , only in tvmode
+	if ((actmode == 0) && g_settings.recording_in_spts_mode && mode == 1)
 	{
 		g_Zapit->PlaybackSPTS();
 		while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 1)) {
 			sleep(1); 
 		}
 		sptsmode = true;
+	}
+	else if(mode==2)
+	{
+		if(actmode== 1)
+		{
+			g_Zapit->PlaybackPES();
+			while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 0)) {
+				sleep(1); 
+			}
+		}
+		sptsmode = false;
 	}
 
 #define MAXPIDS		64
@@ -654,15 +665,22 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, int mode,
 	CutBackNeutrino(channel_id, mode);
 
 	int repeatcount=0;
-	int actmode=g_Zapit->PlaybackState(); // get actual decoder mode
+	int actmode=g_Zapit->PlaybackState() ; // get actual decoder mode
 
-	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set
-	if ((actmode != -1) && (actmode != 1) && g_settings.recording_in_spts_mode)
+	// aviaEXT is loaded, actual mode is not SPTS and switchoption is set , only in tvmode
+	if ((actmode == 0)  && g_settings.recording_in_spts_mode && mode == 1)
 	{
 		g_Zapit->PlaybackSPTS();
 		while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 1)) {
 			sleep(1); 
 		}
+	}
+	else if(mode==2  && actmode== 1)
+	{
+			g_Zapit->PlaybackPES();
+			while ((repeatcount++ < 10) && (g_Zapit->PlaybackState() != 0)) {
+				sleep(1); 
+			}
 	}
 
 	if(!sendCommand(CMD_VCR_RECORD,channel_id,epgid,apids))
