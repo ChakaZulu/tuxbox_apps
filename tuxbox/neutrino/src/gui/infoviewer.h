@@ -111,6 +111,7 @@ class CInfoViewer
 		char				runningStart[10];
 		char				nextStart[10];
 		char				runningDuration[10];
+		char				runningRest[10];
 		char				nextDuration[10];
 		char				runningPercent;
         unsigned char       Flag;

@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: infoviewer.cpp,v 1.56 2001/12/13 00:51:52 McClean Exp $
+// $Id: infoviewer.cpp,v 1.57 2001/12/13 01:10:35 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.57  2001/12/13 01:10:35  McClean
+// show rest time (current) in infobar
+//
 // Revision 1.56  2001/12/13 00:51:52  McClean
 // fix infobar - showepg-bug
 //
@@ -215,6 +218,7 @@ CInfoViewer::CInfoViewer()
 	strcpy( runningStart, "");
 	strcpy( nextStart, "");
 	strcpy( runningDuration, "");
+	strcpy( runningRest, "");
 	strcpy( nextDuration, "");
 
 	runningPercent = 0;
@@ -496,7 +500,7 @@ void CInfoViewer::showData()
 
 	//info running
 //	int start1width      = g_Fonts->infobar_info->getRenderWidth(runningStart);
-	int duration1Width   = g_Fonts->infobar_info->getRenderWidth(runningDuration);
+	int duration1Width   = g_Fonts->infobar_info->getRenderWidth(runningRest);
 	int duration1TextPos = BoxEndX-duration1Width-10;
     height = g_Fonts->infobar_info->getHeight();
     int xStart= BoxStartX + ChanWidth + 30;
@@ -537,7 +541,7 @@ void CInfoViewer::showData()
         {
             g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, runningStart, COL_INFOBAR);
             g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, running, COL_INFOBAR);
-            g_Fonts->infobar_info->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningDuration, COL_INFOBAR);
+            g_Fonts->infobar_info->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningRest, COL_INFOBAR);
 
             ChanInfoY += height;
 
@@ -811,8 +815,10 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 epg_times = (sectionsd::sectionsdTime*) dp;
                 dp+= sizeof(sectionsd::sectionsdTime);
 
-                unsigned    dauer = epg_times->dauer/ 60;
+                unsigned dauer = epg_times->dauer / 60;
+                unsigned rest = ( (epg_times->startzeit + epg_times->dauer) - time(NULL) ) / 60;
         		sprintf((char*) &runningDuration, "%d min", dauer);
+				sprintf((char*) &runningRest, "%d min", rest);
 
                 struct      tm *pStartZeit = localtime(&epg_times->startzeit);
         		sprintf((char*) &runningStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
