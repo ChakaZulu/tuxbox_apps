@@ -26,6 +26,7 @@
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 
+#define DELETE(WHAT) result.strReplace(#WHAT, "")
 
 static QMap<eString,eString> getRequestOptions(eString opt)
 {
@@ -402,7 +403,7 @@ static eString getContent(eString mode, int bouquetid)
 				{
 					result+=" selected";
 				}
-				result+=">" + eString(i->bouquet_name.c_str()) + "</option>";
+				result+=">" + tmp + "</option>";
 			}
 		}
 		result+="</select>";
@@ -441,7 +442,7 @@ static eString getContent(eString mode, int bouquetid)
 				{
 					result+=" selected";
 				}
-				result+=">" + eString(i->bouquet_name.c_str()) + "</option>";
+				result+=">" + tmp + "</option>";
 			}
 		}
 		result+="</select>";
@@ -666,31 +667,34 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 		eitc+="no eit";
 	}
 
-	if(eDVB::getInstance()->service)
-	{
-		result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">epg</a></u>");
-		result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">si</a></u>");
-	}
-	else
-	{
-		result.strReplace("#EPG#", "");
-		result.strReplace("#SI#", "");
-	}
-
 	result.strReplace("#STATS#", stats);
 	result.strReplace("#NAVI#", navi);
 	result.strReplace("#MODE#", tmp);
 	result.strReplace("#COP#", cop);
 	if((mode=="tv")||
            (mode=="radio"))
-		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
-	else
-		result.strReplace("#SERVICENAME#", "");
-	result.strReplace("#VOLBAR#", getVolBar());
-	if(mode=="tv"||mode=="radio")
+	{
 		result.strReplace("#EIT#", eitc);
+		result.strReplace("#SERVICENAME#", filter_string(getCurService()));
+		if(eDVB::getInstance()->service)
+		{
+			result.strReplace("#EPG#", "<u><a href=\"javascript:openEPG()\" class=\"small\">epg</a></u>");
+			result.strReplace("#SI#", "<u><a href=\"javascript:openSI()\" class=\"small\">si</a></u>");
+		}
+		else
+		{
+			DELETE(#EPG#);
+			DELETE(#SI#);
+		}
+	}
 	else
-		result.strReplace("#EIT#", "");
+	{
+		DELETE(#SERVICENAME#);
+		DELETE(#EPG#);
+		DELETE(#SI#);
+		DELETE(#EIT#);
+	}
+	result.strReplace("#VOLBAR#", getVolBar());
 	return result;
 }
 
