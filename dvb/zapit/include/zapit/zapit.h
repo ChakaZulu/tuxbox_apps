@@ -100,5 +100,6 @@ void sendBouquets(bool emptyBouquetsToo);
 void sendBouquetChannels(unsigned int bouquet);
 void startPlayBack();
 void stopPlayBack();
+void zapTo(unsigned int channel);
 void zapTo(unsigned int bouquet, unsigned int channel);
 
