@@ -128,12 +128,12 @@ void setvideooutput(int format, bool bSaveSettings = true)
 		format=5;
 	}
 
-	// 0 - COMPOSITE
-	// 1 - RGB
+	// 0 - CVBS only
+	// 1 - RGB with CVBS
 	// 2 - SVIDEO
 	// 3 - YUV with VBS
 	// 4 - YUV with CVBS
-
+	
 	if (bSaveSettings) // only set settings if we dont come from watchdog
 	{
 		settings.videooutput = format;
@@ -799,7 +799,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.105 2003/04/21 19:35:38 mws Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.106 2003/04/23 13:00:12 alexw Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
