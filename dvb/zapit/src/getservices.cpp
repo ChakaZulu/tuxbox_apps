@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.79 2003/06/10 09:43:36 digi_casi Exp $
+ * $Id: getservices.cpp,v 1.80 2003/06/12 09:26:01 digi_casi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -213,8 +213,8 @@ int LoadMotorPositions(void)
 		}
 		fclose(fd);
 		
-		for (mpos_it = motorPositions.begin(); mpos_it != motorPositions.end(); mpos_it++)
-			printf("satellitePosition = %d, motorPosition = %d\n", mpos_it->first, mpos_it->second);
+//		for (mpos_it = motorPositions.begin(); mpos_it != motorPositions.end(); mpos_it++)
+//			printf("satellitePosition = %d, motorPosition = %d\n", mpos_it->first, mpos_it->second);
 	}
 	else
 		printf("[getservices] motor.conf not found.\n");
@@ -255,8 +255,8 @@ int LoadSatellitePositions(void)
 	
 	xmlFreeDoc(parser);
 	
-	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
-		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
+//	for (spos_it = satellitePositions.begin(); spos_it != satellitePositions.end(); spos_it++)
+//		printf("satelliteName = %s, satellitePosition = %d\n", spos_it->first.c_str(), spos_it->second);
 		
 	return 0;
 }
