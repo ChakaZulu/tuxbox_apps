@@ -1,10 +1,10 @@
 /*
-//  $Id: neutrino.h,v 1.28 2001/10/31 12:35:39 field Exp $
+//  $Id: neutrino.h,v 1.29 2001/11/15 11:42:41 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
-	Homepage: http://mcclean.cyberphoria.org/
+	Homepage: http://dbox.cyberphoria.org/
 
 	Kommentar:
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.29  2001/11/15 11:42:41  McClean
+//  gpl-headers added
+//
 //  Revision 1.28  2001/10/31 12:35:39  field
 //  sectionsd stoppen waehrend scan
 //
