@@ -771,7 +771,7 @@ pictureviewer.scaling scaling
 pictureviewer.defdir start dir.
 
 rclock.menueadd Lock RC 
-rclock.header	DBOX2 - Lock Remote Control
-rclock.lockmsg  Your DBOX2 remote controll will be locked.\n To unlock the dbox2,\n press <RED> and <DBOX> on your\n remote control.
+rclock.header	Lock Remote Control
+rclock.lockmsg  Your DBOX2 remote control will be locked.\n To unlock the dbox2, press \n <RED> and <DBOX> on your\n remote control.
 rclock.releasemsg DBOX2 remote control reactivated
 

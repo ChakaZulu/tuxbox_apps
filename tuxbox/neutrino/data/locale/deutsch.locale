@@ -775,7 +775,7 @@ pictureviewer.scaling Skalierung
 pictureviewer.defdir Start-Verz.
 
 rclock.menueadd FB sperren 
-rclock.header	DBOX2 - Fernbedienung sperren
+rclock.header	Fernbedienung sperren
 rclock.lockmsg  Die Fernbedienung der dbox2 wird gesperrt.\n Um die Sperre aufzuheben, bitte\n <ROT> und <DBOX> auf der Fernbedienung\n druecken.
 rclock.releasemsg DBOX2 Fernbedienung reaktiviert...
 
