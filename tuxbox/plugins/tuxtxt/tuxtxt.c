@@ -4,6 +4,9 @@
  *             (c) Thomas "LazyT" Loewe 2002-2003 (LazyT@gmx.net)             *
  ******************************************************************************
  * $Log: tuxtxt.c,v $
+ * Revision 1.51  2003/11/03 04:52:45  carjay
+ * small fix for v4l2
+ *
  * Revision 1.50  2003/09/10 04:16:56  carjay
  * added error handling: "doubleheight" should not to be used in line 23 of
  * teletext but it seems this does not impress the broadcasters much
@@ -43,7 +46,7 @@
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.50 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.51 $", versioninfo[16];
 
 	//show versioninfo
 
@@ -2186,6 +2189,9 @@ void SwitchScreenMode()
 			desc0.font.pix_width = desc1.font.pix_width = desc2.font.pix_width = 8;
 			desc0.font.pix_height = desc1.font.pix_height = desc2.font.pix_height = 21;
 
+			ioctl(pig, VIDIOC_G_FMT, &format);
+
+			format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
 			format.fmt.win.w.left   = StartX+322;
 			format.fmt.win.w.top    = StartY;
 			format.fmt.win.w.width  = 320;

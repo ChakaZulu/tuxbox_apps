@@ -57,6 +57,8 @@ void	Fx2ShowPig( int x, int y, int width, int height )
 	if ( fd == -1 )
 		return;
 
+	ioctl(fd, VIDIOC_G_FMT, &format);
+	format.type = V4L2_BUF_TYPE_VIDEO_OVERLAY;
 	format.fmt.win.w.left=x;
 	format.fmt.win.w.top=y;
 	format.fmt.win.w.width=width;
