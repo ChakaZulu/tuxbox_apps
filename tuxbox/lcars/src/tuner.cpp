@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.9  2001/12/20 19:20:49  obi
+defined OLD_TUNER_API in Makefile.am instead of tuner.cpp
+
 Revision 1.8  2001/12/17 01:30:02  obi
 use /dev/ost/frontend0 for new tuner api.
 code for the new tuner api is still disabled by default.
@@ -61,8 +64,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "settings.h"
 #include "tuner.h"
 
-
-#define OLD_TUNER_API
 
 tuner::tuner(settings &s) : setting(s)
 {
