@@ -4,11 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-<<<<<<< timerdclient.h
-	$Id: timerdclient.h,v 1.8 2002/05/17 03:26:52 dirch Exp $
-=======
-	$Id: timerdclient.h,v 1.8 2002/05/17 03:26:52 dirch Exp $
->>>>>>> 1.7
+	$Id: timerdclient.h,v 1.9 2002/05/17 12:23:47 dirch Exp $
 
 	License: GPL
 
