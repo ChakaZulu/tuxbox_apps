@@ -34,7 +34,7 @@ unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,int dx,
 	unsigned char *cr,*p,*q;
 	int i,j,k,l,ya,yb;
 	int sq,r,g,b;
-	float q1,q2;
+
 	cr=(unsigned char*) malloc(dx*dy*3); 
 	if(cr==NULL)
 	{
@@ -43,23 +43,21 @@ unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,int dx,
 		return(orgin);
 	}
 	p=cr;
-	q1=ox/dx;            
-	q2=oy/dy; 
 
 	int xa_v[dx];
 	for(i=0;i<dx;i++)
-		xa_v[i] = (int)(i*q1);
+		xa_v[i] = i*ox/dx;
 	int xb_v[dx+1];
 	for(i=0;i<dx;i++)
 	{
-		xb_v[i]= (int)((i+1)*q1);
+		xb_v[i]= (i+1)*ox/dx;
 		if(xb_v[i]>=ox)
 			xb_v[i]=ox-1;
 	}
 	for(j=0;j<dy;j++)
 	{
-		ya= (int)(j*q2);
-		yb= (int)((j+1)*q2); if(yb>=oy) yb=oy-1;
+		ya= j*oy/dy;
+		yb= (j+1)*oy/dy; if(yb>=oy) yb=oy-1;
 		for(i=0;i<dx;i++,p+=3)
 		{
 			for(l=ya,r=0,g=0,b=0,sq=0;l<=yb;l++)
