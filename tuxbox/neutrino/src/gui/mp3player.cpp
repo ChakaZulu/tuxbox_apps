@@ -173,7 +173,7 @@ int CMP3PlayerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 		g_settings.audio_avs_Control = CControld::TYPE_AVS;
 	}
 	else
-		m_vol_ost = true;
+		m_vol_ost = false;
 
 	// tell neutrino we're in mp3_mode
 	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_mp3 );
