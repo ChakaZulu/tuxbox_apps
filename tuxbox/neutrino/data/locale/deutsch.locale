@@ -311,7 +311,7 @@ flashupdate.savesuccess Das Image wurde erfolgreich unter dem\nDateinamen %s ges
 flashupdate.mtdselector Partitions-Auswahl
 flashupdate.titlereadflash Flash auslesen
 flashupdate.actionreadflash lese flash
-
+flashupdate.fileselector Datei-Auswahl
 
 bouqueteditor.name Bouquet-Verwaltung
 bouqueteditor.delete Löschen

@@ -114,6 +114,11 @@ class CFlashUpdate : public CMenuTarget, CProgress_StatusViewer
 
 class CFlashExpert : public CProgressWindow
 {
+	private:
+		void readflash();
+		void writeflash();
+		void readmtd(int readmtd);
+
 	public:
 		CFlashExpert();
 		int exec( CMenuTarget* parent, string actionKey );
