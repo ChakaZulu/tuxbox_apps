@@ -34,34 +34,36 @@
 #include <config.h>
 #endif
 
-#include "mp3player.h"
+#include <gui/mp3player.h>
 
 #include <global.h>
 #include <neutrino.h>
 
-#include <assert.h>
 #include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
+
 #include <daemonc/remotecontrol.h>
+
+#include <gui/eventlist.h>
+#include <gui/color.h>
+#include <gui/infoviewer.h>
+#include <gui/nfs.h>
+
+#include <gui/widget/icons.h>
+#include <gui/widget/menue.h>
+#include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
+#include <gui/widget/stringinput.h>
+
 #include <system/settings.h>
+
+#include <id3tag.h>
+
+#include <assert.h>
 #include <algorithm>
 #include <sys/time.h>
 #include <fstream>
-
-#include "eventlist.h"
-#include "color.h"
-#include "infoviewer.h"
-#include "nfs.h"
-
-#include <gui/widget/icons.h>
-
-#include "widget/menue.h"
-#include "widget/messagebox.h"
-#include "widget/hintbox.h"
-#include "widget/stringinput.h"
-
-#include <id3tag.h>
 
 #if HAVE_DVB_API_VERSION >= 3
 #include <linux/dvb/audio.h>
@@ -118,7 +120,7 @@ CMP3PlayerGui::~CMP3PlayerGui()
 //------------------------------------------------------------------------
 int CMP3PlayerGui::exec(CMenuTarget* parent, std::string actionKey)
 {
-	m_state=STOP;
+	m_state=CMP3PlayerGui::STOP;
 	current=-1;
 	selected = 0;
 	width = 710;
@@ -250,7 +252,7 @@ int CMP3PlayerGui::show()
 			// stop if mode was changed in another thread
 			loop=false;
 		}
-		if(m_state != STOP && CMP3Player::getInstance()->state==CMP3Player::STOP && playlist.size() >0)
+		if(m_state != CMP3PlayerGui::STOP && CMP3Player::getInstance()->state==CMP3Player::STOP && playlist.size() >0)
 		{
 			int next = getNext();
 			play(next);
@@ -491,7 +493,7 @@ int CMP3PlayerGui::show()
 				}
 				sort(playlist.begin(),playlist.end(),sortByIndex);
 				selected=0;
-				if(m_state!=STOP)
+				if(m_state!=CMP3PlayerGui::STOP)
 					current=0;
 				else
 					current=-1;
@@ -512,7 +514,7 @@ int CMP3PlayerGui::show()
 			}
 			else
 			{
-				if(m_state!=STOP)
+				if(m_state!=CMP3PlayerGui::STOP)
 				{
 					key_level=1;
 					paintFoot();
@@ -595,7 +597,7 @@ int CMP3PlayerGui::show()
 	}
 	hide();
 
-	if(m_state != STOP)
+	if(m_state != CMP3PlayerGui::STOP)
 		stop();
 
 	return(res);
@@ -642,7 +644,7 @@ void CMP3PlayerGui::paintItem(int pos)
 			// id3tag noch nicht geholt
 			get_id3(&playlist[liststart+pos]);
 			get_mp3info(&playlist[liststart+pos]);
-			if(m_state!=STOP)
+			if(m_state!=CMP3PlayerGui::STOP)
 				usleep(100*1000);
 		}
 		char sNr[20];
@@ -670,7 +672,7 @@ void CMP3PlayerGui::paintItem(int pos)
 		if(liststart+pos==selected)
 			paintItemID3DetailsLine(pos);
 		
-		if(liststart+pos==selected && m_state==STOP)
+		if(liststart+pos==selected && m_state==CMP3PlayerGui::STOP)
 			CLCD::getInstance()->showMP3(playlist[liststart+pos].Artist, playlist[liststart+pos].Title, playlist[liststart+pos].Album);
 
 	}
@@ -706,7 +708,7 @@ void CMP3PlayerGui::paintHead()
 void CMP3PlayerGui::paintFoot()
 {
 //	printf("paintFoot{\n");
-	if(m_state==STOP) // insurance
+	if(m_state==CMP3PlayerGui::STOP) // insurance
 		key_level=0;
 	int ButtonWidth = (width-20) / 4;
 	int ButtonWidth2 = (width-50) / 2;
@@ -719,7 +721,7 @@ void CMP3PlayerGui::paintFoot()
 		g_Fonts->infobar_small->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, 
 						     ButtonWidth2- 28, g_Locale->getText("mp3player.play"), COL_INFOBAR, 0, true); // UTF-8
 	}
-	if(m_state!=STOP)
+	if(m_state!=CMP3PlayerGui::STOP)
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
 		g_Fonts->infobar_small->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, 
@@ -771,7 +773,7 @@ void CMP3PlayerGui::paintFoot()
 //------------------------------------------------------------------------
 void CMP3PlayerGui::paintInfo()
 {
-	if(m_state==STOP)
+	if(m_state==CMP3PlayerGui::STOP)
 		frameBuffer->paintBackgroundBoxRel(x, y, width, title_height);
 	else
 	{
@@ -854,7 +856,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 
    ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
 
-	if(m_state!=STOP)
+	if(m_state!=CMP3PlayerGui::STOP)
 		usleep(15000);
 	bool foundSyncmark=true;
 	// Check for sync mark (some encoder produce data befor 1st frame in mp3 stream)
@@ -873,7 +875,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 				n=0;
 				fseek(in, -1, SEEK_CUR);
 				ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-				if(m_state!=STOP)
+				if(m_state!=CMP3PlayerGui::STOP)
 					usleep(15000);
 			}
 		}
@@ -881,7 +883,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 		{
 			fseek(in, j, SEEK_SET);
 			ReadSize=fread(InputBuffer,1,BUFFER_SIZE,in);
-			if(m_state!=STOP)
+			if(m_state!=CMP3PlayerGui::STOP)
 				usleep(15000);
          foundSyncmark=true;
 		}
@@ -895,7 +897,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 
       mp3->VBR=false;
 
-      if(m_state!=STOP)
+      if(m_state!=CMP3PlayerGui::STOP)
          usleep(15000);
       mad_stream_finish(&Stream);
       // filesize
@@ -1227,7 +1229,7 @@ void CMP3PlayerGui::paintItemID3DetailsLine (int pos)
 
 void CMP3PlayerGui::stop()
 {
-	m_state=STOP;
+	m_state=CMP3PlayerGui::STOP;
 	current=-1;
 	//LCD
 	paintLCD();
@@ -1242,14 +1244,14 @@ void CMP3PlayerGui::stop()
 
 void CMP3PlayerGui::pause()
 {
-	if(m_state==PLAY || m_state==FF || m_state==REV)
+	if(m_state==CMP3PlayerGui::PLAY || m_state==CMP3PlayerGui::FF || m_state==CMP3PlayerGui::REV)
 	{
-		m_state=PAUSE;
+		m_state=CMP3PlayerGui::PAUSE;
 		CMP3Player::getInstance()->pause();
 	}
-	else if(m_state==PAUSE)
+	else if(m_state==CMP3PlayerGui::PAUSE)
    {
-		m_state=PLAY;
+		m_state=CMP3PlayerGui::PLAY;
 		CMP3Player::getInstance()->pause();
 	}
 	paintLCD();
@@ -1257,14 +1259,14 @@ void CMP3PlayerGui::pause()
 
 void CMP3PlayerGui::ff()
 {
-	if(m_state==FF)
+	if(m_state==CMP3PlayerGui::FF)
 	{
-		m_state=PLAY;
+		m_state=CMP3PlayerGui::PLAY;
 		CMP3Player::getInstance()->ff();
 	}
-	else if(m_state==PLAY || m_state==PAUSE || m_state==REV)
+	else if(m_state==CMP3PlayerGui::PLAY || m_state==CMP3PlayerGui::PAUSE || m_state==CMP3PlayerGui::REV)
 	{
-		m_state=FF;
+		m_state=CMP3PlayerGui::FF;
 		CMP3Player::getInstance()->ff();
 	}
 	paintLCD();
@@ -1272,14 +1274,14 @@ void CMP3PlayerGui::ff()
 
 void CMP3PlayerGui::rev()
 {
-	if(m_state==REV)
+	if(m_state==CMP3PlayerGui::REV)
 	{
-		m_state=PLAY;
+		m_state=CMP3PlayerGui::PLAY;
 		CMP3Player::getInstance()->rev();
 	}
-	else if(m_state==PLAY || m_state==PAUSE || m_state==FF)
+	else if(m_state==CMP3PlayerGui::PLAY || m_state==CMP3PlayerGui::PAUSE || m_state==CMP3PlayerGui::FF)
 	{
-		m_state=FF;
+		m_state=CMP3PlayerGui::FF;
 		CMP3Player::getInstance()->rev();
 	}
 	paintLCD();
@@ -1337,7 +1339,7 @@ void CMP3PlayerGui::play(int pos)
 	m_mp3info="";
 	m_time_played="0:00";
 	m_time_total=playlist[current].Duration;
-	m_state=PLAY;
+	m_state=CMP3PlayerGui::PLAY;
 	// Play
 	CMP3Player::getInstance()->play(playlist[current].Filename.c_str()); 
 	//LCD
@@ -1359,7 +1361,7 @@ int CMP3PlayerGui::getNext()
 }
 void CMP3PlayerGui::updateMP3Infos()
 {
-	if(m_state!=STOP)
+	if(m_state!=CMP3PlayerGui::STOP)
 	{
 		if(m_mp3info!=CMP3Player::getInstance()->getMp3Info())
 		{
@@ -1373,7 +1375,7 @@ void CMP3PlayerGui::updateMP3Infos()
 
 void CMP3PlayerGui::updateTimes(bool force)
 {
-	if(m_state!=STOP)
+	if(m_state!=CMP3PlayerGui::STOP)
 	{
 		bool updateTotal=false,updatePlayed=false;
 		if(m_time_total!=CMP3Player::getInstance()->getTimeTotal())
@@ -1400,12 +1402,12 @@ void CMP3PlayerGui::updateTimes(bool force)
 			g_Fonts->menu->RenderString(x+width-w1-10, y+4 + 1*fheight, w1, " / " + m_time_total,
 												 COL_MENUCONTENTSELECTED);
 		}
-		if(updatePlayed || force || m_state==PAUSE)
+		if(updatePlayed || force || m_state==CMP3PlayerGui::PAUSE)
 		{
 			frameBuffer->paintBoxRel(x+width-w1-w2-15, y+4, w2+4, 1*fheight, COL_MENUCONTENTSELECTED);
          struct timeval tv;
          gettimeofday(&tv, NULL);
-			if(m_state != PAUSE || (tv.tv_sec % 2) == 0)
+			if(m_state != CMP3PlayerGui::PAUSE || (tv.tv_sec % 2) == 0)
          {
             g_Fonts->menu->RenderString(x+width-w1-w2-11, y+4 + 1*fheight, w2, m_time_played, COL_MENUCONTENTSELECTED);
          }
@@ -1417,22 +1419,22 @@ void CMP3PlayerGui::paintLCD()
 {
 	switch(m_state)
 	{
-		case STOP:
+		case CMP3PlayerGui::STOP:
 			CLCD::getInstance()->showMP3Play(CLCD::MP3_STOP);
 			break;
-		case PLAY:
+		case CMP3PlayerGui::PLAY:
 			CLCD::getInstance()->showMP3Play(CLCD::MP3_PLAY);
 			CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title, playlist[current].Album);
 			break;
-		case PAUSE:
+		case CMP3PlayerGui::PAUSE:
 			CLCD::getInstance()->showMP3Play(CLCD::MP3_PAUSE);
 			CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title, playlist[current].Album);
 			break;
-		case FF:
+		case CMP3PlayerGui::FF:
 			CLCD::getInstance()->showMP3Play(CLCD::MP3_FF);
 			CLCD::getInstance()->showMP3(playlist[current].Artist, playlist[current].Title, playlist[current].Album);
 			break;
-		case REV:
+		case CMP3PlayerGui::REV:
 			break;
 	}
 }
