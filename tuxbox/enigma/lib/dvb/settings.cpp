@@ -6,6 +6,7 @@
 eDVBSettings::eDVBSettings(eDVB &dvb): dvb(dvb)
 {
 	transponderlist=0;
+	clearList();
 	loadServices();
 	loadBouquets();
 	bouquets.setAutoDelete(true);
@@ -59,7 +60,7 @@ eBouquet *eDVBSettings::getBouquet(int bouquet_id)
 
 static eString beautifyBouquetName(eString bouquet_name)
 {
-	if (bouquet_name.find("ARD")!=-1)
+	if (bouquet_name.find("ARD")!=eString::npos)
 		bouquet_name="ARD";		
 	if (bouquet_name=="ABsat")
 		bouquet_name="AB sat";
@@ -67,7 +68,7 @@ static eString beautifyBouquetName(eString bouquet_name)
 		bouquet_name="ASTRA";
 /*	if (bouquet_name=="CANALSATELLITE")
 		bouquet_name="CANAL SATELLITE"; */
-	if (bouquet_name.find("SES")!=-1)
+	if (bouquet_name.find("SES")!=eString::npos)
 		bouquet_name="SES Multimedia";
 	if (bouquet_name=="\x05ZDF.vision")	// ja ich weiss was \x05 bedeutet - SPÄTER
 		bouquet_name="ZDF.vision";
@@ -284,7 +285,7 @@ void eDVBSettings::loadServices()
 			if (line[1]=='c')
 			{
 				int frequency, symbol_rate, inversion=0;
-				sscanf(line+2, "%d:%d", &frequency, &symbol_rate, &inversion);
+				sscanf(line+2, "%d:%d:%d", &frequency, &symbol_rate, &inversion);
 				t.setCable(frequency, symbol_rate, inversion);
 			}
 		}
@@ -405,7 +406,8 @@ void eDVBSettings::loadBouquets()
 
 void eDVBSettings::clearList()
 {
-	delete transponderlist;
+	if (transponderlist)
+		delete transponderlist;
 	transponderlist=new eTransponderList;
 
 	/*emit*/ dvb.bouquetListChanged();
