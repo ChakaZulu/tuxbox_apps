@@ -17,7 +17,7 @@ solitair_la_SOURCES = \
 	pnm_res.cpp \
 	backbuffer.cpp
 
-solitair_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version -lz -lsupc++ -lgcc_eh
+solitair_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version -lz
 
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
