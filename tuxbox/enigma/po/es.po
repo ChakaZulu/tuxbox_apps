@@ -22,7 +22,7 @@ msgstr "FF"
 
 #: default.esml:841
 msgid "&#53;"
-msgstr ""
+msgstr "&#53;"
 
 #: default.esml:381
 msgid "here you can change your sat/lnb mapping"
@@ -163,11 +163,11 @@ msgstr "borrar elemento elegido"
 
 #: default.esml:857
 msgid "abc &lt;-&gt; ABC"
-msgstr ""
+msgstr "abc &lt;-&gt; ABC"
 
 #: default.esml:851
 msgid "&lt;"
-msgstr ""
+msgstr "&lt;"
 
 #: default.esml:398
 msgid "select DiSEqC mode (ok)"
@@ -240,11 +240,11 @@ msgstr "Servicios"
 
 #: default.esml:843
 msgid "&#54;"
-msgstr ""
+msgstr "&#54;"
 
 #: default.esml:837
 msgid "&#51;"
-msgstr ""
+msgstr "&#51;"
 
 #: default.esml:606
 msgid "enable/disable inversion (ok)"
@@ -260,7 +260,7 @@ msgstr "Red:"
 
 #: default.esml:855
 msgid "&gt;"
-msgstr ""
+msgstr "&gt;"
 
 #: default.esml:725 default.esml:729
 msgid "select month (ok)"
@@ -352,7 +352,7 @@ msgstr "LOF/H:"
 
 #: default.esml:835
 msgid "&#50;"
-msgstr ""
+msgstr "&#50;"
 
 #: default.esml:442
 msgid "motor drive speed, in degrees per second"
@@ -372,7 +372,7 @@ msgstr "Elegir otro servicio (ok)"
 
 #: default.esml:845
 msgid "&#55;"
-msgstr ""
+msgstr "&#55;"
 
 #: default.esml:735
 msgid "scan EPG"
@@ -557,7 +557,7 @@ msgstr "Hora parada"
 
 #: default.esml:839
 msgid "&#52;"
-msgstr ""
+msgstr "&#52;"
 
 #: default.esml:467
 msgid "add to table/existing will be overwritten"
@@ -569,7 +569,7 @@ msgstr "frontend:"
 
 #: default.esml:849
 msgid "&#57;"
-msgstr ""
+msgstr "&#57;"
 
 #: default.esml:344 default.esml:421
 msgid "AGC:"
@@ -629,7 +629,7 @@ msgstr "Viernes"
 
 #: default.esml:833
 msgid "&#49;"
-msgstr ""
+msgstr "&#49;"
 
 #: default.esml:461 src/tpeditwindow.cpp:71
 msgid "Orbital Position:"
@@ -765,7 +765,7 @@ msgstr "Entre su longituda (0..9, +, -, ok)"
 
 #: default.esml:858
 msgid "abc2 &lt;-&gt; 2abc"
-msgstr ""
+msgstr "abc2 &lt;-&gt; 2abc"
 
 #: default.esml:367
 msgid "remove the selected Satellite"
@@ -945,7 +945,7 @@ msgstr "Elige su preferencia"
 
 #: default.esml:847
 msgid "&#56;"
-msgstr ""
+msgstr "&#56;"
 
 #: default.esml:402
 msgid "select DiSEqC repeats (ok)"
@@ -997,7 +997,7 @@ msgstr "Aplicar"
 
 #: default.esml:853
 msgid "&#48;"
-msgstr ""
+msgstr "&#48;"
 
 #: default.esml:721
 msgid "Fr"
@@ -2200,7 +2200,7 @@ msgid ""
 "A timer based recording is currently in progress!\n"
 "This stops the timer, and recording!"
 msgstr ""
-"Está en curso una grabación pogramada!\n"
+"Está en curso una grabación programada!\n"
 "Eso va a terminar el temporizador y la grabación!"
 
 #: src/enigma_main.cpp:4204
@@ -3728,19 +3728,19 @@ msgstr "Mostrar actualizaciones del EPG en la Infobar"
 
 #: src/setup_extra.cpp:51
 msgid "Show remaining Time"
-msgstr "Mostrar tiempo restante del evento"
+msgstr "Mostrar tiempo restante"
 
 #: src/setup_extra.cpp:51
 msgid "show event remaining time in the infobar"
-msgstr "Mostrar tiempo restante en la Infobar"
+msgstr "Mostrar tiempo del evento restante en la Infobar"
 
 #: src/setup_extra.cpp:52
 msgid "Don't open serial port"
-msgstr ""
+msgstr "Cerrar puerto serie"
 
 #: src/setup_extra.cpp:52
 msgid "don't write debug messages to /dev/tts/0"
-msgstr ""
+msgstr "No enviar mensajes debug a /dev/tts/0"
 
 #: src/setup_extra.cpp:53
 msgid "Serviceselector help buttons"
@@ -4105,7 +4105,7 @@ msgstr "Dirección IP del receptor (0..9, izq., der.)"
 
 #: src/setupnetwork.cpp:414
 msgid "get Network data from a DHCP Server in the local Network"
-msgstr ""
+msgstr "Obtener información de la red local de un servidor DHCP"
 
 #: src/setupnetwork.cpp:427
 msgid "enter netmask of your network (0..9, left, right)"
@@ -4160,12 +4160,10 @@ msgid "press ok to edit your provider password"
 msgstr "Pulse OK para editar su contraseña"
 
 #: src/setupnetwork.cpp:533
-#, fuzzy
 msgid "Enable Network"
-msgstr "Añadir red nuevo"
+msgstr "Activar tarjeta red"
 
 #: src/setupnetwork.cpp:536
-#, fuzzy
 msgid "enable/disable network (ok)"
 msgstr "Activar/desactivar tarjeta red (ok)"
 
@@ -4191,11 +4189,11 @@ msgstr "Rechazar conexiones entrantes al puerto 21"
 
 #: src/setupnetwork.cpp:604
 msgid "mounts"
-msgstr "Directorios compartidos"
+msgstr "Montar"
 
 #: src/setupnetwork.cpp:609
 msgid "here you can setup nfs/cifs mounts"
-msgstr "Para incluir directorios compartidos en su red local"
+msgstr "Para montar un directorio compartido por red"
 
 #: src/setupnetwork.cpp:870
 msgid "enter IP Address (0..9, left, right)"
@@ -4270,15 +4268,14 @@ msgid "NFS/CIFS mount error already mounted"
 msgstr "El directorio ya fue activado"
 
 #: src/setupnetwork.cpp:1335
-#, fuzzy
 msgid ""
 "Recording on CIFS shares is unstable.\n"
 "Therefore CIFS support is not included in the standard distribution. Use it "
 "at your own risk!"
 msgstr ""
 "La grabación en directorios CIFS no funciona siempre.\n"
-"Por eso, CIFS no está incluido por defecto. Para usarlo, tiene que copiar el "
-"controlador 'cifs.o' al directorio /var y activarlo al inicio del sistema."
+"Por eso, CIFS no está incluido por defecto. Utilizelo bajo su propria "
+"responsabilidad !"
 
 #: src/setupvideo.cpp:50 src/system_settings.cpp:42
 msgid "A/V Settings"
@@ -4386,12 +4383,11 @@ msgstr "Abrir actualización manual"
 
 #: src/software_update.cpp:36
 msgid "Expert Flash Save/Restore"
-msgstr ""
+msgstr "Menú expertos"
 
 #: src/software_update.cpp:36
-#, fuzzy
 msgid "open expert flash tool"
-msgstr "Abrir configuración avanzada"
+msgstr "Abrir menú avanzado"
 
 #: src/software_update.cpp:57
 msgid ""
@@ -4783,15 +4779,16 @@ msgid ""
 "The new endtime is before now time!\n"
 "This stops the running timer(recording)\n"
 msgstr ""
+"La hora de parada ya pasó!\n"
+"Eso termina el temporizador actual(grabacion)\n"
 
 #: src/timer.cpp:1994
 msgid "New endtime are now adjusted"
-msgstr ""
+msgstr "Hora de parada ajustada"
 
 #: src/timer.cpp:2007
-#, fuzzy
 msgid "The event has already finished... you can not change endtime!"
-msgstr "Este evento ya está en la lista."
+msgstr "Este evento ya terminó... no se puede editar la hora de parada!"
 
 #: src/timer.cpp:2029
 msgid ""
