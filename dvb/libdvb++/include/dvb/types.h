@@ -1,5 +1,5 @@
 /*
- * $Id: types.h,v 1.1 2003/07/17 01:07:12 obi Exp $
+ * $Id: types.h,v 1.2 2004/09/03 13:50:33 mws Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -117,6 +117,33 @@ typedef enum nim_constellation {
 	NIM_CONSTELLATION_QAM64
 } nim_constellation_t;
 
+typedef enum nim_guard_interval {
+	NIM_GUARD_INTERVAL_1_32,
+	NIM_GUARD_INTERVAL_1_16,
+	NIM_GUARD_INTERVAL_1_8,
+	NIM_GUARD_INTERVAL_1_4,
+	NIM_GUARD_INTERVAL_AUTO
+} nim_guard_interval_t;
+
+typedef enum nim_transmit_mode {
+	NIM_TRANSMISSION_MODE_2K,
+	NIM_TRANSMISSION_MODE_8K,
+	NIM_TRANSMISSION_MODE_AUTO
+} nim_transmit_mode_t;
+
+typedef enum nim_hierarchy {
+	NIM_HIERARCHY_NONE,
+	NIM_HIERARCHY_1,
+	NIM_HIERARCHY_2,
+	NIM_HIERARCHY_4,
+	NIM_HIERARCHY_AUTO
+} nim_hierarchy_t;
+
+typedef enum nim_otherfrequencyflag {
+	NIM_OTHERFREQ_NO = 0x00,
+	NIM_OTHERFREQ_YES
+} nim_otherfrequencyflag_t;
+
 typedef enum nim_diseqc_addr {
 	NIM_DISEQC_ADDR_UNKNOWN,
 	NIM_DISEQC_ADDR1,
@@ -160,8 +187,15 @@ struct ts_parameters_satellite {
 };
 
 struct ts_parameters_terrestrial {
-	nim_frequency_t centreFrequency;
-	nim_symbol_rate_t symbolRate;
+	nim_frequency_t			centreFrequency;
+	nim_bandwidth_t			bandwidth;
+	nim_fec_inner_t			code_rate_HP;
+	nim_fec_inner_t			code_rate_LP;
+	nim_transmit_mode_t		transmission_mode;
+	nim_constellation_t		constellation;
+	nim_guard_interval_t		guard_interval;
+	nim_hierarchy_t			hierarchy_information;
+	nim_otherfrequencyflag_t	otherFrequencyFlag;
 };
 
 #endif /* __dvb_types_h__ */

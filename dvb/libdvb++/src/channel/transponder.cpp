@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.cpp,v 1.1 2003/07/17 01:07:41 obi Exp $
+ * $Id: transponder.cpp,v 1.2 2004/09/03 13:50:33 mws Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -122,38 +122,44 @@ Transponder::Transponder(
 	if (d == NULL)
 		DVB_FATAL("d == NULL");
 
-	DVB_FATAL("TODO");
+	p.t.centreFrequency = (nim_frequency_t) d->getCentreFrequency();
+	p.t.bandwidth = (nim_bandwidth_t) d->getBandwidth();
+	p.t.code_rate_HP = (nim_fec_inner_t) d->getCodeRateHpStream();
+	p.t.code_rate_LP = (nim_fec_inner_t) d->getCodeRateLpStream();
+	p.t.constellation = (nim_constellation_t) d->getConstellation();
+	p.t.guard_interval = (nim_guard_interval_t) d->getGuardInterval(); 
+	p.t.hierarchy_information = (nim_hierarchy_t) d->getHierarchyInformation();
+	p.t.transmission_mode = (nim_transmit_mode_t) d->getTransmissionMode();
+	p.t.otherFrequencyFlag = (nim_otherfrequencyflag_t) d->getOtherFrequencyFlag();
 }
 
 Transponder::Transponder(
 	const uint16_t pTransportStreamId,
 	const uint16_t pOriginalNetworkId,
 	const uint32_t pCentreFrequency,
-	const uint8_t pBandwidth,
-	const uint8_t pConstellation,
-	const uint8_t pHierarchyInformation,
-	const uint8_t pCodeRateHpStream,
-	const uint8_t pCodeRateLpStream,
-	const uint8_t pGuardInterval,
-	const uint8_t pTransmissionMode,
-	const uint8_t pOtherFrequencyFlag)
+	const nim_bandwidth_t pBandwidth,
+	const nim_constellation_t pConstellation,
+	const nim_hierarchy_t pHierarchyInformation,
+	const nim_fec_inner_t pCodeRateHpStream,
+	const nim_fec_inner_t pCodeRateLpStream,
+	const nim_guard_interval_t pGuardInterval,
+	const nim_transmit_mode_t pTransmissionMode,
+	const nim_otherfrequencyflag_t pOtherFrequencyFlag)
 {
 	type = TERRESTRIAL;
 	
 	transportStreamId = pTransportStreamId;
 	originalNetworkId = pOriginalNetworkId;
 
-	(void)pCentreFrequency;
-	(void)pBandwidth;
-	(void)pConstellation;
-	(void)pHierarchyInformation;
-	(void)pCodeRateHpStream;
-	(void)pCodeRateLpStream;
-	(void)pGuardInterval;
-	(void)pTransmissionMode;
-	(void)pOtherFrequencyFlag;
-	
-	DVB_FATAL("TODO");
+	p.t.centreFrequency = pCentreFrequency;
+	p.t.bandwidth = pBandwidth;
+	p.t.code_rate_HP = pCodeRateHpStream;
+	p.t.code_rate_LP = pCodeRateLpStream;
+	p.t.constellation = pConstellation;
+	p.t.guard_interval = pGuardInterval; 
+	p.t.hierarchy_information = pHierarchyInformation;
+	p.t.transmission_mode = pTransmissionMode;
+	p.t.otherFrequencyFlag = pOtherFrequencyFlag;
 }
 
 uint16_t Transponder::getTransportStreamId(void) const

@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.h,v 1.2 2004/02/13 16:18:23 obi Exp $
+ * $Id: transponder.h,v 1.3 2004/09/03 13:50:33 mws Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -80,19 +80,21 @@ class Transponder
 			const uint16_t pOriginalNetworkId,
 			const TerrestrialDeliverySystemDescriptor * const
 		);
+		
 		Transponder(
 			const uint16_t pTransportStreamId,
 			const uint16_t pOriginalNetworkId,
 			const uint32_t pCentreFrequency,
-			const uint8_t pBandwidth,
-			const uint8_t pConstellation,
-			const uint8_t pHierarchyInformation,
-			const uint8_t pCodeRateHpStream,
-			const uint8_t pCodeRateLpStream,
-			const uint8_t pGuardInterval,
-			const uint8_t pTransmissionMode,
-			const uint8_t pOtherFrequencyFlag
+			const nim_bandwidth_t pBandwidth,
+			const nim_constellation_t pConstellation,
+			const nim_hierarchy_t pHierarchyInformation,
+			const nim_fec_inner_t pCodeRateHpStream,
+			const nim_fec_inner_t pCodeRateLpStream,
+			const nim_guard_interval_t pGuardInterval,
+			const nim_transmit_mode_t pTransmissionMode,
+			const nim_otherfrequencyflag_t pOtherFrequencyFlag
 		);
+
 
 		enum {
 			UNKNOWN,
