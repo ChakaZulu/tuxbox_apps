@@ -847,6 +847,8 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 	}
 
+	if (result == "")
+		result = "&nbsp;";
 	return result;
 }
 
@@ -1922,7 +1924,7 @@ static eString getConfigUSB(void)
 		 + "</table>"
 		 + "<br>"
 		 + readFile(TEMPLATE_DIR + "configUSB.tmp");
-		 
+
 	int swapfile = 0;
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
@@ -2852,7 +2854,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 {
 	std::stringstream result;
 	eString description, ext_description, genre;
-	int genreCategory;
+	int genreCategory = 16;
 	result << std::setfill('0');
 
 	eService* current;
