@@ -1,11 +1,37 @@
-function zapKeyUp()
+function zapChannelKeyUP()
 {
 	var key = window.event.keyCode;
-	if (key == 38)
+	if (key == 13)
 		channelChange();
 	else
-	if (key == 40)
+	if (key == 37)
+		document.channelselector.bouquet.focus();
+	else
+	if (key == 38)
+	{
+		if ((document.channelselector.channel.selectedIndex == 0) && (autoBouquetChange == 1))
+		{
+			if (currentChannel == 0)
+				bouquetBackward();
+		}
 		channelChange();
+	}
+	else
+	if (key == 40)
+	{
+		if ((document.channelselector.channel.selectedIndex >= channels[currentBouquet].length - 1) && (autoBouquetChange == 1))
+		{
+			if (currentChannel == channels[currentBouquet].length - 1)
+				bouquetForward();
+		}
+		channelChange();
+	}
+	else
+	if (key == 33)
+		bouquetBackward();
+	else
+	if (key == 34)
+		bouquetForward();
 }
 function zapHeaderReload()
 {
@@ -31,6 +57,15 @@ function zapChannelForward()
 	var channel = document.channelselector.channel.options[currentChannel].value;
 	switchChannel(channel, currentBouquet, currentChannel);
 }
+function bouquetForward()
+{
+	currentBouquet = currentBouquet + 1;
+	if (currentBouquet >= bouquets.length)
+		currentBouquet = 0;
+	loadChannels(currentBouquet, 0);
+	document.channelselector.bouquet.selectedIndex = currentBouquet;
+	document.channelselector.channel.selectedIndex = 0;
+}
 function zapChannelBackward()
 {
 	currentChannel = currentChannel - 1;
@@ -39,6 +74,15 @@ function zapChannelBackward()
 	document.channelselector.channel.selectedIndex = currentChannel;
 	var channel = document.channelselector.channel.options[currentChannel].value;
 	switchChannel(channel, currentBouquet, currentChannel);
+}
+function bouquetBackward()
+{
+	currentBouquet = currentBouquet - 1;
+	if (currentBouquet < 0)
+		currentBouquet = bouquets.length - 1;
+	loadChannels(currentBouquet, currentChannel);
+	document.channelselector.bouquet.selectedIndex = currentBouquet;
+	document.channelselector.channel.selectedIndex = channels[currentBouquet].length - 1;
 }
 function bouquetChange()
 {

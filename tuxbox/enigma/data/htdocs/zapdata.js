@@ -8,6 +8,7 @@ var bouquetRefs = new Array(
 		);
 var currentBouquet = #CURRENTBOUQUET#;
 var currentChannel = #CURRENTCHANNEL#;
+var autoBouquetChange = #AUTOBOUQUETCHANGE#;
 			
 function init()
 {	
