@@ -145,14 +145,18 @@ void eMainloop::processOneEvent()
 //		printf("bin aussem poll raus und da war was\n");
 		for (std::vector<pollfd>::iterator i(pfd.begin()); i != pfd.end(); ++i)
 		{
-			int req = notifiers[i->fd]->getRequested();
-		
-			if ( (i->revents & req) == req)
+			std::map<int,eSocketNotifier*>::iterator n(notifiers.find(i->fd));
+			if (n != notifiers.end())
 			{
-				notifiers[i->fd]->activate(i->revents);
-
-				if (!--ret)		// shortcut
-					break;
+				int req = n->second->getRequested();
+		
+				if ( (i->revents & req) == req)
+				{
+					notifiers[i->fd]->activate(i->revents);
+	
+					if (!--ret)		// shortcut
+						break;
+				}
 			}
 		}
 	}
