@@ -30,10 +30,63 @@
 			<key name="left" code="5c2f" />
 			<key name="right" code="5c2e" />
 			<key name="ok" code="5c30" />
-			<key name="volup" code="5c16" />
-			<key name="voldown" code="5c17" />
+			<key name="+" code="5c16" />
+			<key name="-" code="5c17" />
 			<key name="mute" code="5c28" />
-			<key name="help" code="5c82" />
+			<key name="?" code="5c82" />
 		</keys>
+		
+		<actionmap name="cursor">
+			<action name="up" key="up" flags="mr" />
+			<action name="down" key="down" flags="mr" />
+			<action name="left" key="left" flags="mr" />
+			<action name="right" key="right" flags="mr" />
+			<action name="ok" key="ok" flags="m" />
+			<action name="cancel" key="?" flags="m" />
+			<action name="cancel" key="d-box" flags="m" />
+		</actionmap>
+
+		<actionmap name="focus">
+			<action name="up" key="up" flags="mr" />
+			<action name="down" key="down" flags="mr" />
+			<action name="left" key="left" flags="mr" />
+			<action name="right" key="right" flags="mr" />
+		</actionmap>
+
+		<actionmap name="list">
+			<action name="pagedown" key="right" flags="mr" />
+			<action name="pagedown" key="pageup" flags="mr" />
+			<action name="pageup" key="left" flags="mr" />
+			<action name="pagedown" key="pagedown" flags="mr" />
+		</actionmap>
+
+		<actionmap name="enigmaMain">
+			<action name="showMainMenu" key="d-box" flags="m" />
+			<action name="standby" key="power" flags="m" />
+			<action name="toggleInfobar" key="ok" flags="m" />
+			<action name="showServiceSelector" key="up" flags="m" />
+			<action name="showServiceSelector" key="down" flags="m" />
+			<action name="showSubservices" key="green" flags="m" />
+			<action name="showAudio" key="yellow" flags="m" />
+			<action name="pluginVTXT" key="blue" flags="m" />
+			<action name="showEPGList" key="red" flags="m" />
+			<action name="showEPG" key="?" flags="m" />
+			<action name="nextService" key="right" flags="mr" />
+			<action name="prevService" key="left" flags="mr" />
+			<action name="serviceListDown" key="down" flags="m" />
+			<action name="serviceListUp" key="up" flags="m" />
+			<action name="volumeUp" key="+" flags="mr" />
+			<action name="volumeDown" key="-" flags="mr" />
+			<action name="toggleMute" key="mute" flags="mr" />
+		</actionmap>
+
+		<actionmap name="serviceSelector">
+			<action name="nextBouquet" key="+" flags="mr" />
+			<action name="prevBouquet" key="-" flags="mr" />
+			<action name="showBouquetSelector" key="mute" flags="m" />
+			<action name="showEPGSelector" key="red" flags="m" />
+			<action name="showAllServices" key="home" flags="m" />
+		</actionmap>
+		
 	</device>
 </rcdefaults>
