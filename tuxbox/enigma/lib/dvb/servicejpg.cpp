@@ -7,6 +7,8 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/base/i18n.h>
+#include <lib/gdi/fb.h>
+#include <lib/picviewer/pictureviewer.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -14,8 +16,6 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <stdio.h>
-
-#include <src/picviewer.h>
 
 eServiceHandlerJPG::eServiceHandlerJPG(): eServiceHandler(0x2000)
 {
@@ -50,17 +50,16 @@ int eServiceHandlerJPG::play(const eServiceReference &service, int workaround )
 {
 	printf("[SERVICEJPG] start...\n");
 
-	serviceEvent(eServiceEvent(eServiceEvent::evtPicViewer));
+	eServiceReference sref = eServiceInterface::getInstance()->service;
+	printf("[SERVICEJPG] show %s\n", sref.path.c_str());
+	ePictureViewer::getInstance()->displayImage(sref.path);
 
 	return 0;
 }
 
 int eServiceHandlerJPG::stop(int workaround)
 {
-	if (!workaround)
-	{
-		printf("[SERVICEJPG] stop.\n");
-	}
+	printf("[SERVICEJPG] stop.\n");
 
 	return 0;
 }
@@ -75,7 +74,7 @@ void eServiceHandlerJPG::removeRef(const eServiceReference &service)
 	return eServiceFileHandler::getInstance()->removeRef(service);
 }
 
-eAutoInitP0<eServiceHandlerJPG> i_eServiceHandlerJPG(eAutoInitNumbers::service+2, "eServiceHandlerJPG");
+eAutoInitP0<eServiceHandlerJPG> i_eServiceHandlerJPG(eAutoInitNumbers::service + 2, "eServiceHandlerJPG");
 
 #endif
 #endif //DISABLE_FILE

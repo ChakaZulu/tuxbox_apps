@@ -47,15 +47,15 @@ class ePictureViewer: public eMainloop, private eThread, public Object
 public:
 	ePictureViewer();
 	~ePictureViewer();
-	static ePictureViewer *getInstance() {return instance;}
-	
+	static ePictureViewer *getInstance() {return (instance) ? instance : new ePictureViewer();}
+
 	enum ScalingMode
 	{
 		NONE = 0,
 		SIMPLE = 1,
 		COLOR = 2
 	};
-	
+
 	bool ShowImage(const std::string& filename, bool unscaled = false);
 	bool DecodeImage(const std::string& name, bool showBusySign = false, bool unscaled = false);
 	bool DisplayNextImage();
