@@ -60,12 +60,22 @@ enigmaCI::enigmaCI(): eWindow(0)
 	status->move( ePoint(0, clientrect.height()-30) );
 	status->resize( eSize( clientrect.width(), 30) );
 	status->loadDeco();
+	
+	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);		
+		
 }
 
 enigmaCI::~enigmaCI()
 {
 	if (status)
 		delete status;
+}
+
+void enigmaCI::updateCIinfo(const char *buffer)
+{
+	eDebug("new info %s",buffer);
+	app->setText(_(buffer));
+
 }
 
 void enigmaCI::okPressed()

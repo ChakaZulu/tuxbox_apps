@@ -23,6 +23,7 @@ private:
 	void resetPressed();
 	void initPressed();
 	void appPressed();
+	void updateCIinfo(const char*);
 
 public:
 	enigmaCI();
