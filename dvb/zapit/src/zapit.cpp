@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.190 2002/06/27 20:03:47 Homar Exp $
+ * $Id: zapit.cpp,v 1.191 2002/07/14 00:38:23 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -297,6 +297,7 @@ channel_msg load_settings()
  */
 int zapit (uint32_t onid_sid, bool in_nvod)
 {
+	bool transponder_change;
 	std::map <uint, CZapitChannel>::iterator cit;
 
 	if (in_nvod)
@@ -381,7 +382,11 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 			}
 		}
 
-		cam->reset(channel->getOriginalNetworkId());
+		transponder_change = true;
+	}
+	else
+	{
+		transponder_change = false;
 	}
 
 	if (channel->getServiceType() == NVOD_REFERENCE_SERVICE)
@@ -439,6 +444,15 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 			channel->resetPids();
 			return -1;
 		}
+	}
+
+	if (transponder_change == true)
+	{
+		channel->getCaPmt()->ca_pmt_list_management = 0x03;
+	}
+	else
+	{
+		channel->getCaPmt()->ca_pmt_list_management = 0x04;
 	}
 
 #ifdef DBOX2
@@ -1123,7 +1137,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.190 2002/06/27 20:03:47 Homar Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.191 2002/07/14 00:38:23 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

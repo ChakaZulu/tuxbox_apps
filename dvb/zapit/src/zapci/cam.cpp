@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.14 2002/05/13 17:17:04 obi Exp $
+ * $Id: cam.cpp,v 1.15 2002/07/14 00:38:23 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -99,17 +99,13 @@ ca_msg_t CCam::getMessage (unsigned short length)
 
 int CCam::sendMessage (unsigned char * data, unsigned short length)
 {
-	camdBuffer[0] = 0x50;
-	camdBuffer[1] = length;
-	memcpy(camdBuffer + 2, data, length);
-
 	camdDisconnect();
 
 	if (camdConnect() == false)
 	{
 		return -1;
 	}
-	else if (write(camdSocket, camdBuffer, length + 2) < 0)
+	else if (write(camdSocket, data, length) < 0)
 	{
 		perror("[CCam::sendMessage] write");
 		camdDisconnect();
@@ -121,43 +117,36 @@ int CCam::sendMessage (unsigned char * data, unsigned short length)
 	}
 }
 
-int CCam::reset (unsigned short originalNetworkId)
-{
-	unsigned char buffer[3];
-
-	buffer[0] = 0x09;
-	buffer[1] = originalNetworkId >> 8;
-	buffer[2] = originalNetworkId;
-
-	return sendMessage(buffer, 3);
-}
-
 int CCam::setCaPmt (CCaPmt * caPmt)
 {
-	unsigned char buffer[caPmt->length_field + 5];
+	/*
+	 * there is a spec violation inside, when length_field > 127
+	 * just hope that this will never happen :-)
+	 */
+
+	unsigned char buffer[caPmt->length_field + 4];
 	unsigned short pos;
 	unsigned short pos2;
 	unsigned short i;
 	unsigned short j;
 	unsigned short k;
 
-	buffer[0] = 0xCA;
-	buffer[1] = caPmt->ca_pmt_tag >> 16;
-	buffer[2] = caPmt->ca_pmt_tag >> 8;
-	buffer[3] = caPmt->ca_pmt_tag;
-	buffer[4] = caPmt->length_field;
-	buffer[5] = caPmt->ca_pmt_list_management;
-	buffer[6] = caPmt->program_number >> 8;
-	buffer[7] = caPmt->program_number;
-	buffer[8] = (caPmt->reserved1 << 6) | (caPmt->version_number << 1) | caPmt->current_next_indicator;
-	buffer[9] = (caPmt->reserved2 << 4) | (caPmt->program_info_length >> 8);
-	buffer[10] = caPmt->program_info_length;
+	buffer[0] = caPmt->ca_pmt_tag >> 16;
+	buffer[1] = caPmt->ca_pmt_tag >> 8;
+	buffer[2] = caPmt->ca_pmt_tag;
+	buffer[3] = caPmt->length_field;
+	buffer[4] = caPmt->ca_pmt_list_management;
+	buffer[5] = caPmt->program_number >> 8;
+	buffer[6] = caPmt->program_number;
+	buffer[7] = (caPmt->reserved1 << 6) | (caPmt->version_number << 1) | caPmt->current_next_indicator;
+	buffer[8] = (caPmt->reserved2 << 4) | (caPmt->program_info_length >> 8);
+	buffer[9] = caPmt->program_info_length;
 
 	if (caPmt->program_info_length != 0)
 	{
-		buffer[11] = caPmt->ca_pmt_cmd_id;
+		buffer[10] = caPmt->ca_pmt_cmd_id;
 
-		for (pos = 12, i = 0; pos < caPmt->program_info_length + 11; pos += caPmt->ca_descriptor[i]->descriptor_length + 2, i++)
+		for (pos = 11, i = 0; pos < caPmt->program_info_length + 10; pos += caPmt->ca_descriptor[i]->descriptor_length + 2, i++)
 		{
 			buffer[pos] = caPmt->ca_descriptor[i]->descriptor_tag;
 			buffer[pos + 1] = caPmt->ca_descriptor[i]->descriptor_length;
@@ -173,7 +162,7 @@ int CCam::setCaPmt (CCaPmt * caPmt)
 		}
 	}
 
-	for (pos = caPmt->program_info_length + 11, i = 0; pos < caPmt->length_field + 5; pos += caPmt->es_info[i]->ES_info_length + 5, i++)
+	for (pos = caPmt->program_info_length + 10, i = 0; pos < caPmt->length_field + 5; pos += caPmt->es_info[i]->ES_info_length + 5, i++)
 	{
 		buffer[pos] = caPmt->es_info[i]->stream_type;
 		buffer[pos + 1] = (caPmt->es_info[i]->reserved1 << 5) | (caPmt->es_info[i]->elementary_PID >> 8);

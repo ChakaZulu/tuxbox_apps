@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.14 2002/05/15 20:49:40 obi Exp $
+ * $Id: cam.h,v 1.15 2002/07/14 00:38:23 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -33,7 +33,6 @@
 class CCam
 {
 	private:
-		unsigned char camdBuffer[1024];
 		int camdSocket;
 
 		bool camdConnect ();
@@ -46,7 +45,6 @@ class CCam
 		CCam();
 		~CCam();
 
-		int reset (unsigned short originalNetworkId);
 		int setCaPmt (CCaPmt * caPmt);
 };
 
