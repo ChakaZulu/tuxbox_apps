@@ -1,6 +1,6 @@
 #include "control.h"
 
-control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2, sdt *s2)
+control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2, sdt *s2, lcd *l)
 {
 	osd_obj = o;
 	rc_obj = r;
@@ -22,6 +22,7 @@ control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c
 	pig_obj = p1;
 	teletext_obj = t2;
 	sdt_obj = s2;
+	lcd_obj = l;
 
 	last_read.TS = -1;
 	last_read.ONID = -1;
@@ -1072,6 +1073,17 @@ int control::runCommand(command_class command, bool val)
 					teletext_obj->stopReinsertion();
 					osd_obj->addCommand("COMMAND proginfo set_teletext false");
 				}
+				lcd_obj->loadFromFile(DATADIR "/lcars/lcdbackground.raw");
+				lcd_obj->writeToLCD();
+
+				lcd_obj->setTextSize(10);
+				std::stringstream ostr;
+				ostr << ((int)channels_obj->getCurrentChannelNumber());
+				lcd_obj->putText(8, 13, 0, ostr.str());
+				lcd_obj->setTextSize(12);
+				lcd_obj->putText(8, 33, 0, channels_obj->getCurrentServiceName());
+				//lcd_obj->setTextSize(12);
+				//lcd_obj->putText(80, 58, 0, "23:39");
 			}
 			else if (command.args[0] == "Audio")
 			{

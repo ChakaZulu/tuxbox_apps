@@ -15,6 +15,10 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.32  2003/07/07 23:53:11  thedoc
+
+lcd-support for lcars in HEAD
+
 Revision 1.31  2003/01/05 22:48:34  TheDOC
 mtd number
 
@@ -138,6 +142,7 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include "control.h"
 #include "variables.h"
 #include "ir.h"
+#include "lcd.h"
 
 #include "config.h"
 
@@ -175,6 +180,10 @@ int main(int argc, char **argv)
 	rc rc(&hardware, &settings);
 
 	//printf("Starting OSD\n");
+
+	lcd lcd;
+	lcd.loadFont(FONTDIR "/ds9.ttf");
+
 	fbClass fb(&variables);
 	fb.setPalette(255, 0, 0, 0, 0xff);
 	fb.setTransparent(255);
@@ -363,7 +372,7 @@ int main(int argc, char **argv)
 	hardware.setOutputMode(settings.getOutputFormat());
 	rc.start_thread();
 
-	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext, &sdt);
+	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext, &sdt, &lcd);
 	
 	network network(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan, &rc, &control, &variables);
 	network.startThread();

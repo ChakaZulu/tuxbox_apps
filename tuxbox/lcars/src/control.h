@@ -22,6 +22,7 @@
 #include "pig.h"
 #include "teletext.h"
 #include "sdt.h"
+#include "lcd.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -71,6 +72,7 @@ class control
 	pig *pig_obj;
 	teletext *teletext_obj;
 	sdt *sdt_obj;
+	lcd *lcd_obj;
 
 	// Modes
 	typedef std::vector<command_class> commandlist;
@@ -147,7 +149,7 @@ public:
 	variables *vars;
 	void run();
 	void startThread();
-	control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2, sdt *s2);
+	control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2, sdt *s2, lcd *l);
 
 	int runCommand(command_class command, bool value = true);
 	command_class parseCommand(std::string cmd);
