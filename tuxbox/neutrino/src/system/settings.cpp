@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.12 2003/02/14 15:05:16 thegoodguy Exp $
+        $Id: settings.cpp,v 1.13 2003/02/19 11:51:44 thegoodguy Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -110,7 +110,7 @@ void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 
 bool CScanSettings::loadSettings(const std::string fileName, const delivery_system_t _delivery_system)
 {
-	useDefaults(delivery_system);
+	useDefaults(_delivery_system);
 
 	if(!configfile.loadConfig(fileName))
 	{
