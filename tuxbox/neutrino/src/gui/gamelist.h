@@ -74,17 +74,20 @@ class CPlugins
 			int posx, posy, sizex, sizey;
 			bool showpig;
 			bool needoffset;
+			bool operator< (const plugin& a) const
+			{
+				return this->filename < a.filename ;
+			}
 		};
 
 		int fb, rc, lcd, pid;
 		int number_of_plugins;
 		std::string plugin_dir;
-		std::vector<struct plugin> plugin_list;
+		std::vector<plugin> plugin_list;
 
 		void parseCfg(plugin *plugin_data);
 		void scanDir(const char *dir);
 		bool plugin_exists(string filename);
-
 
 		std::map<std::string, std::string> params;
 	public:

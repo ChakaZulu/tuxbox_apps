@@ -105,6 +105,7 @@ void CPlugins::loadPlugins()
 
 	scanDir("/var/tuxbox/plugins");
 	scanDir(PLUGINDIR);
+   sort(plugin_list.begin(), plugin_list.end());
 }
 
 CPlugins::~CPlugins()
