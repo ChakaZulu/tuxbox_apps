@@ -73,6 +73,7 @@ void parse_command(lcdd_msg rmsg) {
 		return;
 	}
 
+	printf("[LCDD] received cmd=%i param=%i\n", rmsg.cmd, rmsg.param);
 	switch (rmsg.cmd)
 	{
 	case LC_CHANNEL:
@@ -159,12 +160,12 @@ void set_mode(lcdd_mode m) {
 	//raw_display_t s;
 	switch (m) {
 	case LCDM_TV:
-		mode = m;
 		display.load_screen(&icon_lcd);
 		show_volume(volume);
 		show_channelname(channelname);
 		show_time();
 		display.update();
+		mode = m;
 		break;
 	case LCDM_MENU:
 		mode = m;
