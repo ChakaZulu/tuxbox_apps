@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.81 2004/02/28 07:28:57 alexw Exp $
+  $Id: movieplayer.cpp,v 1.82 2004/03/09 22:32:17 zwen Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -39,6 +39,7 @@
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
+extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #include <system/settings.h>
 
 #include <gui/eventlist.h>
@@ -287,6 +288,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
 						 m_LastMode);
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
+	CLCD::getInstance()->showServicename(g_RemoteControl->getCurrentChannelName());
 	// always exit all
 	return menu_return::RETURN_REPAINT;
 }
@@ -1645,7 +1647,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.81 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.82 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1817,7 +1819,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.81 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.82 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
