@@ -21,6 +21,9 @@
  *
  *
  *   $Log: switch.c,v $
+ *   Revision 1.10  2001/07/23 16:19:56  gillem
+ *   - add get type
+ *
  *   Revision 1.9  2001/04/25 08:03:59  fnbrd
  *   Kleinigkeiten.
  *
@@ -46,7 +49,7 @@
  *
  *
  *
- *   $Revision: 1.9 $
+ *   $Revision: 1.10 $
  *
  */
 
@@ -261,7 +264,8 @@ void zcd_show() {
   if (ioctl(fd,AVSIOGZCD,&i)< 0) {
     perror("AVSIOGZCD:");
   }
-  printf("ZCD: %d\n",i);
+  else
+   printf("ZCD: %d\n",i);
 }
 
 void zcd_set(int i) {
@@ -279,7 +283,8 @@ void fnc_show() {
   if (ioctl(fd,AVSIOGFNC,&i)< 0) {
     perror("AVSIOGFNC:");
   }
-  printf("FNC: %d\n",i);
+  else
+   printf("FNC: %d\n",i);
 }
 
 void fnc_set(int i) {
@@ -297,7 +302,8 @@ void fblk_show() {
   if (ioctl(fd,AVSIOGFBLK,&i)< 0) {
     perror("AVSIOGFBLK:");
   }
-  printf("FBLK: %d\n",i);
+  else
+   printf("FBLK: %d\n",i);
 }
 
 void fblk_set(int i) {
@@ -314,10 +320,11 @@ void ycm_show() {
   int i=10;
 
   if (ioctl(fd,AVSIOGYCM,&i)< 0) {
-//Haesslich bei cxa2126    perror("AVSIOGYCM:");
-    return;
+//Haesslich bei cxa2126 <- das geht hier nicht nach schoenheit ...
+    perror("AVSIOGYCM:");
   }
-  printf("YCM: %d\n",i);
+  else
+   printf("YCM: %d\n",i);
 }
 
 void ycm_set(int i) {
@@ -334,11 +341,35 @@ void ycm_set(int i) {
 int main (int argc, char **argv) {
 
   int count,i;
+  int type;
 
   if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0) {
     perror("open");
     return -1;
   }
+
+	if (ioctl(fd,AVSIOGTYPE,&type)< 0) {
+    	perror("can't get avs-type:");
+		close(fd);
+		return -1;
+	}
+
+	switch(type)
+	{
+		case CXA2092:
+			printf("CXA2092 found\n");
+			break;
+		case CXA2126:
+			printf("CXA2126 found\n");
+			break;
+		case STV6412:
+			printf("STV6412 found\n");
+			break;
+		default:
+			printf("unknown avs type\n");
+			close(fd);
+			return -1;
+	}
 
   for(count=1;count<argc;count++) {
 
