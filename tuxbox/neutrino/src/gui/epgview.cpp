@@ -594,13 +594,13 @@ int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
 			datetime_str = std::string( g_Locale->getText(tmpstr) );
 			datetime_str += std::string(".");
 
-			strftime(tmpstr, sizeof(tmpstr), " %d. ", tmStartZeit );
-			datetime_str = std::string( tmpstr );
+			strftime(tmpstr, sizeof(tmpstr), "  %d.", tmStartZeit );
+			datetime_str += std::string( tmpstr );
 
 			strftime(tmpstr,sizeof(tmpstr), "date.%b", tmStartZeit );
 			datetime_str += std::string( g_Locale->getText(tmpstr) );
 
-			strftime(tmpstr, sizeof(tmpstr), ". %H:%M ", tmStartZeit );
+			strftime(tmpstr, sizeof(tmpstr), ".  %H:%M ", tmStartZeit );
 			datetime_str += std::string( tmpstr );
 
 			// this is quick&dirty
