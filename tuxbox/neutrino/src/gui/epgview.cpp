@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: epgview.cpp,v 1.37 2002/02/08 17:49:15 field Exp $
+// $Id: epgview.cpp,v 1.38 2002/02/22 14:56:43 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.38  2002/02/22 14:56:43  field
+// neues Plugin-Interface
+//
 // Revision 1.37  2002/02/08 17:49:15  field
 // epg verbessert
 //
@@ -385,7 +388,7 @@ void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long l
 			if ( pos!=-1 )
 				text1 = text1.substr( 0, pos );
 		} while ( ( pos != -1 ) && ( g_Fonts->epg_title->getRenderWidth(text1.c_str())> 520 ) );
-        text2 = epgData.title.substr(text1.length()+ 1, -1);
+        text2 = epgData.title.substr(text1.length()+ 1, uint(-1) );
 	}
 
 	int oldtoph= toph;

@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.26 2002/01/29 17:26:51 field Exp $
+$Id: gamelist.cpp,v 1.27 2002/02/22 14:56:43 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.27  2002/02/22 14:56:43  field
+neues Plugin-Interface
+
 Revision 1.26  2002/01/29 17:26:51  field
 Jede Menge Updates :)
 
@@ -62,35 +65,325 @@ gamelist: eigener Fontdef fuer 2-zeiliges Menue
 */
 
 #include "gamelist.h"
-#include "../include/debug.h"
+//#include "../include/debug.h"
 #include "../global.h"
-#include <config.h>
 
-// hi McClean - hab schon mal was geaendert - falls es nicht gefaellt
-// altes gamelist.cpp ist als svd.gamelist.cpp eingecheckt.
+#include <strstream.h>
+#include <sstream>
+#include <fstream>
+#include <iostream.h>
 
-/*
-if (plugin_list[number].vtxtpid)
-[11:54] <TheDOC1> 	{
-[11:54] <TheDOC1> 		cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
-[11:54] <TheDOC1> 		startparam = makeParam(P_ID_VTXTPID, startparam);
-[11:54] <TheDOC1> 	}
-[11:54] <TheDOC1> und dann makeParam als:
-[11:54] <TheDOC1> PluginParam* plugins::makeParam(std::string id, PluginParam *next)
-[11:54] <TheDOC1> {
-[11:54] <TheDOC1> 	cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
-[11:54] <TheDOC1>
-[11:54] <TheDOC1> 	PluginParam *startparam = new PluginParam;
-[11:54] <TheDOC1> 	startparam->next = next;
-[11:54] <TheDOC1> 	startparam->id = new char[id.length() + 2];
-[11:54] <TheDOC1> 	startparam->val = new char[params.find(id)->second.length() + 2];
-[11:54] <TheDOC1> 	strcpy(startparam->id, id.c_str());
-[11:54] <TheDOC1> 	strcpy(startparam->val, params.find(id)->second.c_str());
-[11:54] <TheDOC1>
-[11:54] <TheDOC1> 	cout << "Startparam: " << (int) startparam << endl;
-[11:54] <TheDOC1> 	return startparam;
-[11:54] <TheDOC1> }
-*/
+void plugins::loadPlugins()
+{
+	printf("Checking plugins-directory\n");
+	printf("Dir: %s\n", PLUGINDIR "/");
+
+	struct dirent **namelist;
+
+	int number_of_files = scandir(PLUGINDIR, &namelist, 0, alphasort);
+
+	number_of_plugins = 0;
+	plugin_list.clear();
+	for (int i = 0; i < number_of_files; i++)
+	{
+		std::string filename;
+
+		filename = namelist[i]->d_name;
+		int pos = filename.find(".cfg");
+		if (pos > -1)
+		{
+			number_of_plugins++;
+
+			plugin new_plugin;
+			new_plugin.filename = filename.substr(0, pos);
+			std::string fname = PLUGINDIR "/";
+			new_plugin.cfgfile = fname.append(new_plugin.filename);
+			new_plugin.cfgfile.append(".cfg");
+			fname = PLUGINDIR "/";
+			new_plugin.sofile = fname.append(new_plugin.filename);
+			new_plugin.sofile.append(".so");
+
+			parseCfg(&new_plugin);
+
+			plugin_list.insert(plugin_list.end(), new_plugin);
+		}
+	}
+	printf("%d plugins found...\n", number_of_plugins);
+
+}
+
+plugins::~plugins()
+{
+	plugin_list.clear();
+}
+
+void plugins::addParm(std::string cmd, std::string value)
+{
+	params[cmd] = value;
+}
+
+void plugins::addParm(std::string cmd, int value)
+{
+	char aval[10];
+	sprintf( aval, "%d", value );
+
+	addParm(cmd, aval);
+}
+
+void plugins::setfb(int fd)
+{
+	addParm(P_ID_FBUFFER, fd);
+}
+
+void plugins::setrc(int fd)
+{
+	addParm(P_ID_RCINPUT, fd);
+}
+
+void plugins::setlcd(int fd)
+{
+	addParm(P_ID_LCD, fd);
+}
+
+void plugins::setvtxtpid(int fd)
+{
+	addParm(P_ID_VTXTPID, fd);
+}
+
+void plugins::parseCfg(plugin *plugin_data)
+{
+	FILE *fd;
+
+	std::ifstream inFile;
+	std::string line[20];
+	int linecount = 0;
+
+	inFile.open(plugin_data->cfgfile.c_str());
+
+	while(linecount < 20 && getline(inFile, line[linecount++]));
+
+	plugin_data->fb = false;
+	plugin_data->rc = false;
+	plugin_data->lcd = false;
+	plugin_data->vtxtpid = false;
+	plugin_data->showpig = false;
+
+	for (int i = 0; i < linecount; i++)
+	{
+		std::istringstream iss(line[i]);
+		std::string cmd;
+		std::string parm;
+
+		getline(iss, cmd, '=');
+		getline(iss, parm, '=');
+
+		if (cmd == "pluginversion")
+		{
+			plugin_data->version = atoi(parm.c_str());
+		}
+		else if (cmd == "name")
+		{
+			plugin_data->name = parm;
+		}
+		else if (cmd == "desc")
+		{
+			plugin_data->description = parm;
+		}
+		else if (cmd == "depend")
+		{
+			plugin_data->depend = parm;
+		}
+		else if (cmd == "type")
+		{
+			plugin_data->type = atoi(parm.c_str());
+		}
+		else if (cmd == "needfb")
+		{
+			plugin_data->fb = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needrc")
+		{
+			plugin_data->rc = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needlcd")
+		{
+			plugin_data->lcd = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needvtxtpid")
+		{
+			plugin_data->vtxtpid = ((parm == "1")?true:false);
+		}
+		else if (cmd == "pigon")
+		{
+			plugin_data->showpig = ((parm == "1")?true:false);
+		}
+	}
+
+	inFile.close();
+}
+
+PluginParam* plugins::makeParam(std::string id, PluginParam *next)
+{
+	cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
+
+	PluginParam *startparam = new PluginParam;
+	startparam->next = next;
+	startparam->id = new char[id.length() + 2];
+	startparam->val = new char[params.find(id)->second.length() + 2];
+	strcpy(startparam->id, id.c_str());
+	strcpy(startparam->val, params.find(id)->second.c_str());
+
+	cout << "Startparam: " << (int) startparam << endl;
+	return startparam;
+}
+
+void plugins::startPlugin(int number)
+{
+	PluginExec execPlugin;
+	char depstring[129];
+	char			*argv[20];
+	void			*libhandle[20];
+	int				argc;
+	int				i;
+	char			*p;
+	char			*np;
+	void			*handle;
+	char			*error;
+
+	PluginParam *startparam;
+	PluginParam *tmpparam;
+
+	startparam = 0;
+	tmpparam = startparam;
+
+	setfb( g_FrameBuffer->getFileHandle() );
+	setrc( g_RCInput->getFileHandle() );
+	setlcd(0);
+
+	if (plugin_list[number].fb)
+	{
+		cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<endl;
+		startparam = makeParam(P_ID_FBUFFER, startparam);
+		cout << "New Startparam: " << startparam << endl;
+		cout << "New Tmpparam: " << tmpparam << endl;
+
+
+	}
+	if (plugin_list[number].rc)
+	{
+		cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
+
+		startparam = makeParam(P_ID_RCINPUT, startparam);
+	}
+	if (plugin_list[number].lcd)
+	{
+		cout << "With LCD " << endl;
+
+		startparam = makeParam(P_ID_LCD, startparam);
+	}
+	if (plugin_list[number].vtxtpid)
+	{
+		cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
+
+		startparam = makeParam(P_ID_VTXTPID, startparam);
+	}
+
+	PluginParam *par = startparam;
+	for( ; par; par=par->next )
+	{
+		printf ("id: %s - val: %s\n", par->id, par->val);
+		printf("%d\n", par->next);
+	}
+
+	cout << "Mark-2" << endl;
+
+	std::string pluginname = plugin_list[number].filename;
+
+	strcpy(depstring, plugin_list[number].depend.c_str());
+
+	cout << "Mark-1" << endl;
+
+	argc=0;
+	if ( depstring[0] )
+	{
+		p=depstring;
+		while( 1 )
+		{
+			argv[ argc ] = p;
+			argc++;
+			np = strchr(p,',');
+			if ( !np )
+				break;
+
+			*np=0;
+			p=np+1;
+			if ( argc == 20 )	// mehr nicht !
+				break;
+		}
+	}
+	cout << "Mark0" << endl;
+	for( i=0; i<argc; i++ )
+	{
+		std::string libname = argv[i];
+		printf("try load shared lib : %s\n",argv[i]);
+		libhandle[i] = dlopen ( *argv[i] == '/' ?
+			argv[i] : (PLUGINDIR "/"+libname).c_str(),
+			RTLD_NOW | RTLD_GLOBAL );
+		if ( !libhandle )
+		{
+			fputs (dlerror(), stderr);
+			break;
+		}
+	}
+	cout << "Mark1" << endl;
+	while ( i == argc )		// alles geladen
+	{
+		handle = dlopen ( plugin_list[number].sofile.c_str(), RTLD_NOW);
+		if (!handle)
+		{
+			fputs (dlerror(), stderr);
+			//should unload libs!
+			break;
+		}
+		execPlugin = (PluginExec) dlsym(handle, "plugin_exec");
+		if ((error = dlerror()) != NULL)
+		{
+			fputs(error, stderr);
+			dlclose(handle);
+			//should unload libs!
+			break;
+		}
+		printf("try exec...\n");
+		execPlugin(startparam);
+		dlclose(handle);
+		printf("exec done...\n");
+		//restore framebuffer...
+
+
+		if (plugin_list[number].rc)
+		{
+    		g_RCInput->restartInput();
+    		g_RCInput->clear();
+    	}
+
+    	if (plugin_list[number].fb)
+    	{
+    		g_FrameBuffer->paletteSet();
+    		g_FrameBuffer->paintBackgroundBox(0,0,720,576);
+    	}
+		//redraw menue...
+		break;	// break every time - never loop - run once !!!
+	}
+
+	/* unload shared libs */
+	for( i=0; i<argc; i++ )
+	{
+		if ( libhandle[i] )
+			dlclose(libhandle[i]);
+		else
+			break;
+	}
+}
 
 CGameList::CGameList(string Name)
 {
@@ -113,54 +406,9 @@ CGameList::CGameList(string Name)
 
 CGameList::~CGameList()
 {
-	for(unsigned int count=0;count<gamelist.size();count++)
-	{
-		delete gamelist[count];
-	}
-	gamelist.clear();
 }
 
-static	int	_loadInfo( const char *fname, struct SPluginInfo *info )
-{
-	FILE	*fp;
-	char	buffer[ 512 ];
-	char	*p;
 
-	*info->name=0;
-	*info->depend=0;
-	*info->desc=0;
-
-	fp=fopen( fname , "r" );
-	if ( !fp )
-		return -1;
-	while( fgets(buffer,512,fp) )
-	{
-		if ( !*buffer )
-			continue;
-		p=strchr(buffer,'\n');
-		if ( p )
-			*p=0;
-		p=strchr(buffer,'=');
-		if ( !p )
-			continue;
-		*p=0;
-		p++;
-		if ( !strcmp(buffer,"name") )
-			strcpy(info->name,p);
-		else if ( !strcmp(buffer,"desc") )
-			strcpy(info->desc,p);
-		else if ( !strcmp(buffer,"depend") )
-			strcpy(info->depend,p);
-		// rest ist erstma egal
-	}
-	fclose(fp);
-
-	if ( !*info->name || !*info->desc )
-		return -2;
-	return 0;
-}
-
-//void CGameList::exec()
 int CGameList::exec(CMenuTarget* parent, string actionKey)
 {
 	if (parent)
@@ -171,49 +419,9 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	paintHead();
 
 	//scan4games here!
-	for(unsigned int count=0;count<gamelist.size();count++)
-	{
-		delete gamelist[count];
-	}
-	gamelist.clear();
 
-	game* tmp = new game();
-	tmp->name = g_Locale->getText("menu.back");
-	gamelist.insert(gamelist.end(), tmp);
-
-	struct dirent **namelist;
-	int n;
-
-	n = scandir(PLUGINDIR "/", &namelist, 0, alphasort);
-	if (n < 0)
-	{
-		perror("scandir");
-	}
-	else
-	{
-		for(int count=0;count<n;count++)
-		{
-			SPluginInfo		info;
-			string			filen = namelist[count]->d_name;
-			int				pos = filen.find(".cfg");
-			if(pos!=-1)
-			{
-				string pluginname = filen.substr(0,pos);
-				printf("found game plugin: %s\n", pluginname.c_str());
-				if (_loadInfo( (PLUGINDIR"/"+filen).c_str(), &info ) )
-					continue;
-
-				game* tmp = new game();
-				tmp->name = info.name;
-				tmp->desc = info.desc;
-				tmp->depend = info.depend;
-				tmp->filename = pluginname;
-				gamelist.insert(gamelist.end(), tmp);
-			}
-			free(namelist[count]);
-		}
-		free(namelist);
-	}
+	plugin_list.setPluginDir(PLUGINDIR);
+	plugin_list.loadPlugins();
 
 	paint();
 
@@ -228,7 +436,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
-			if (selected>gamelist.size()-1)
+			if (selected>plugin_list.getNumberOfPlugins())
 				selected=0;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
@@ -236,7 +444,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
-				selected=gamelist.size()-1;
+				selected=plugin_list.getNumberOfPlugins();
 			else
 				selected -= listmaxshow;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -247,7 +455,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			int prevselected=selected;
 			if(selected==0)
 			{
-				selected = gamelist.size()-1;
+				selected = plugin_list.getNumberOfPlugins();
 			}
 			else
 				selected--;
@@ -266,7 +474,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==CRCInput::RC_down)
 		{
 			int prevselected=selected;
-			selected = (selected+1)%gamelist.size();
+			selected = (selected+1)%(plugin_list.getNumberOfPlugins()+1);
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -287,7 +495,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			}
 			else
 			{//exec the plugin :))
-				runGame( selected );
+				runGame( selected- 1 );
 			}
 		}
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
@@ -312,17 +520,6 @@ void CGameList::paintItem(int pos)
 {
 	int ypos = (y+theight) + pos*fheight;
 	int itemheight = fheight;
-	if(pos==0)
-	{	//back is half-height...
-		itemheight = (fheight / 2) + 3;
-		g_FrameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
-		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
-		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
-	}
-	else
-	{
-		ypos -= (fheight / 2) - 15;
-	}
 
 	int color = COL_MENUCONTENT;
 	if (liststart+pos==selected)
@@ -330,14 +527,32 @@ void CGameList::paintItem(int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
-	if(liststart+pos<gamelist.size())
-	{
-		game* aktgame = gamelist[liststart+pos];
-		// 2001-12-05 rasc: fonts sind in neutrino.cpp definiert
-		g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name.c_str(), color);
-		g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc.c_str(), color);
+	if(pos==0)
+	{	//back is half-height...
+		itemheight = (fheight / 2) + 3;
+		g_FrameBuffer->paintBoxRel(x,ypos+itemheight, width, 15, COL_MENUCONTENT);
+		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+5, width-20, 1, COL_MENUCONTENT+5);
+		g_FrameBuffer->paintBoxRel(x+10,ypos+itemheight+6, width-20, 1, COL_MENUCONTENT+2);
 
+		g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
+    	g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, g_Locale->getText("menu.back"), color);
+
+
+	}
+	else
+	{
+		ypos -= (fheight / 2) - 15;
+
+		g_FrameBuffer->paintBoxRel(x,ypos, width, itemheight, color);
+
+
+
+		if(liststart+pos-1<plugin_list.getNumberOfPlugins())
+		{
+			g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, plugin_list.getName(liststart+pos-1).c_str(), color);
+			g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, plugin_list.getDescription(liststart+pos-1).c_str(), color);
+
+		}
 	}
 }
 
@@ -360,99 +575,18 @@ void CGameList::paint()
 
 void CGameList::runGame(int selected )
 {
-	printf("PLUGINDEMO------------------------------------------------\n\n");
-	void			*handle;
-	PluginExecProc	execPlugin;
-	char			*error;
-	char			*p;
-	char			*np;
-	char			*argv[20];
-	void			*libhandle[20];
-	int				argc;
-	int				i;
-	char			depstring[129];
-
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("mode: game, " + gamelist[selected]->name);
 	#endif
 
-	string pluginname = gamelist[selected]->filename;
+	g_RemoteControl->CopyPIDs();
+	plugin_list.setvtxtpid( g_RemoteControl->vpid );
+	plugin_list.startPlugin( selected );
 
-	strcpy(depstring, gamelist[selected]->depend.c_str());
+    //redraw menue...
+    paintHead();
+    paint();
 
-	argc=0;
-	if ( depstring[0] )
-	{
-		p=depstring;
-		while( 1 )
-		{
-			argv[ argc ] = p;
-			argc++;
-			np = strchr(p,',');
-			if ( !np )
-				break;
-
-			*np=0;
-			p=np+1;
-			if ( argc == 20 )	// mehr nicht !
-				break;
-		}
-	}
-	for( i=0; i<argc; i++ )
-	{
-		string libname = argv[i];
-		printf("try load shared lib : %s\n",argv[i]);
-		libhandle[i] = dlopen ( *argv[i] == '/' ?
-		                        argv[i] : (PLUGINDIR "/" +libname).c_str(),
-		                        RTLD_NOW | RTLD_GLOBAL );
-		if ( !libhandle )
-		{
-			fputs (dlerror(), stderr);
-			break;
-		}
-	}
-	while ( i == argc )		// alles geladen
-	{
-		handle = dlopen ( (PLUGINDIR "/"+pluginname+".so").c_str(), RTLD_NOW);
-		if (!handle)
-		{
-			fputs (dlerror(), stderr);
-			//should unload libs!
-			break;
-		}
-		execPlugin = (PluginExecProc) dlsym(handle, (pluginname+"_exec").c_str());
-		if ((error = dlerror()) != NULL)
-		{
-			fputs(error, stderr);
-			dlclose(handle);
-			//should unload libs!
-			break;
-		}
-		printf("try exec...\n");
-		execPlugin(g_FrameBuffer->getFileHandle(),
-		           g_RCInput->getFileHandle(), -1,
-		           0 /*cfgfile*/);
-		dlclose(handle);
-		printf("exec done...\n");
-		g_RCInput->restartInput();
-		g_RCInput->clear();
-		//restore framebuffer...
-		g_FrameBuffer->paletteSet();
-		g_FrameBuffer->paintBackgroundBox(0,0,720,576);
-		//redraw menue...
-		paintHead();
-		paint();
-		break;	// break every time - never loop - run once !!!
-	}
-
-	/* unload shared libs */
-	for( i=0; i<argc; i++ )
-	{
-		if ( libhandle[i] )
-			dlclose(libhandle[i]);
-		else
-			break;
-	}
 	#ifdef USEACTIONLOG
 		if(NeutrinoMode==1)
 		{

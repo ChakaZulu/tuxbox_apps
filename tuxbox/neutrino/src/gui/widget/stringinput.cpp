@@ -44,11 +44,18 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 
 	observ = Observ;
 	width = (Size*20)+40;
+
+
 	if (width<420)
 	{
 		width=420;
 	}
 
+	int neededWidth = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str());
+	if (neededWidth+20> width)
+	{
+		width= neededWidth+20;
+    }
 
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
@@ -235,7 +242,7 @@ void CStringInput::hide()
 void CStringInput::paint()
 {
 	g_FrameBuffer->paintBoxRel(x, y, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+ 10, y+ hheight, width- 10, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	if ( hint_1.length()> 0 )
