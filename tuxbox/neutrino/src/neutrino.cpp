@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.191 2002/03/07 18:32:34 field Exp $
+        $Id: neutrino.cpp,v 1.192 2002/03/11 17:29:02 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -555,17 +555,18 @@ void CNeutrinoApp::isCamValid()
 **************************************************************************************/
 void CNeutrinoApp::channelsInit()
 {
+/*
 	int sock_fd;
 	SAI servaddr;
 	char rip[]="127.0.0.1";
 	char *return_buf;
 	channel_msg_2   zapitchannel;
-
+*/
 
 	//deleting old channelList for mode-switching.
 	delete channelList;
 	channelList = new CChannelList( "channellist.head" );
-
+/*
 	sendmessage.version=1;
 	// neu! war 5, mit neuem zapit holen wir uns auch die onid_tsid
 	sendmessage.cmd = 'c';
@@ -591,8 +592,6 @@ void CNeutrinoApp::channelsInit()
 		exit(-1);
 	}
 
-	//		printf("That was returned: %s\n", return_buf);
-
 	if ( strcmp(return_buf, "00c")!= 0 )
 	{
 		free(return_buf);
@@ -609,64 +608,14 @@ void CNeutrinoApp::channelsInit()
 	}
 	printf("All channels received\n");
 	close(sock_fd);
-/*
-	bouquet_msg   zapitbouquet;
-	//deleting old bouquetList for mode-switching.
-	delete bouquetList;
-	bouquetList = new CBouquetList( "bouquetlist.head" );
-	bouquetList->orgChannelList = channelList;
-
-	sendmessage.version=1;
-	sendmessage.cmd = 'q';
-
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1505);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("neutrino: connect(zapit)");
-		exit(-1);
-	}
-
-	write(sock_fd, &sendmessage, sizeof(sendmessage));
-	return_buf = (char*) malloc(4);
-	memset(return_buf, 0, 4);
-	if (recv(sock_fd, return_buf, 3,0) <= 0 )
-	{
-		perror("recv(zapit)");
-		exit(-1);
-	}
-	if ( strcmp(return_buf, "00q")!= 0 )
-	{
-		free(return_buf);
-		printf("Wrong Command was send for channelsInit(). Exiting.\n");
-		return;
-	}
-	free(return_buf);
-
-	printf("receiving bouquets...\n");
-
-	uint nBouquetCount = 0;
-	recv(sock_fd, &nBouquetCount, sizeof(&nBouquetCount),0);
-
-	memset(&zapitbouquet,0,sizeof(zapitbouquet));
-	for (uint i=0; i<nBouquetCount; i++)
-	{
-		recv(sock_fd, &zapitbouquet, sizeof(zapitbouquet),0);
-		CBouquet* bouquet;
-		char bouquet_name[30];
-
-		strncpy(bouquet_name, zapitbouquet.name,30);
-		bouquet = bouquetList->addBouquet( zapitbouquet.name, zapitbouquet.bouquet_nr );
-		//			printf("%s\n", zapitbouquet.name);
-	}
-
-	printf("All bouquets received (%d). Receiving channels... \n", nBouquetCount);
-	close(sock_fd);
 */
+
+	CZapitClient::BouquetChannelList zapitChannels;
+	g_Zapit->getChannels( zapitChannels);
+	for (uint i=0; i<zapitChannels.size(); i++)
+	{
+		channelList->addChannel( zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].onid_sid );
+	}
 
 	delete bouquetList;
 	bouquetList = new CBouquetList( "bouquetlist.head" );
@@ -675,53 +624,24 @@ void CNeutrinoApp::channelsInit()
 	g_Zapit->getBouquets(zapitBouquets, false);
 	for (uint i=0; i<zapitBouquets.size(); i++)
 	{
-		bouquetList->addBouquet( zapitBouquets[i].name, zapitBouquets[i].bouquet_nr);
+		bouquetList->addBouquet( zapitBouquets[i].name, zapitBouquets[i].bouquet_nr, zapitBouquets[i].locked);
 	}
 
-	printf("receiving channels for bouquets");
 	for ( uint i=0; i< bouquetList->Bouquets.size(); i++ )
 	{
-		sendmessage.version=1;
-		sendmessage.cmd = 'r';
-		sendmessage.param = bouquetList->Bouquets[i]->unique_key;
-
-		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		memset(&servaddr,0,sizeof(servaddr));
-		servaddr.sin_family=AF_INET;
-		servaddr.sin_port=htons(1505);
-		inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-		{
-			perror("neutrino: connect(zapit)");
-			exit(-1);
-		}
-
-		write(sock_fd, &sendmessage, sizeof(sendmessage));
-		return_buf = (char*) malloc(4);
-		memset(return_buf, 0, 4);
-		if (recv(sock_fd, return_buf, 3,0) <= 0 )
-		{
-			perror("recv(zapit)");
-			exit(-1);
-		}
-		if ( strcmp(return_buf, "00r")!= 0 )
-		{
-			free(return_buf);
-			printf("Wrong Command was send for channelsInit(). Exiting.\n");
-			return;
-		}
-		free(return_buf);
-
-		memset(&zapitchannel,0,sizeof(zapitchannel));
 		printf(".");
-		while (recv(sock_fd, &zapitchannel, sizeof(zapitchannel),0)>0)
+		CZapitClient::BouquetChannelList zapitChannels;
+		g_Zapit->getBouquetChannels( bouquetList->Bouquets[i]->unique_key, zapitChannels);
+		for (uint j=0; j<zapitChannels.size(); j++)
 		{
-			char channel_name[30];
-			strncpy(channel_name, zapitchannel.name,30);
-			bouquetList->Bouquets[i]->channelList->addChannel(zapitchannel.chan_nr, zapitchannel.chan_nr, channel_name, zapitchannel.onid_tsid);
+			CChannelList::CChannel* channel = channelList->getChannel( zapitChannels[j].nr);
+
+			bouquetList->Bouquets[i]->channelList->addChannel( channel);
+			if ( bouquetList->Bouquets[i]->bLocked)
+			{
+				channel->bAlwaysLocked = true;
+			}
 		}
-		close(sock_fd);
 	}
 	printf("\nAll bouquets-channels received\n");
 }
@@ -1142,10 +1062,10 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	parentallockSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, true);
-	oj->addOption(0, "parentallock.never");
-	oj->addOption(1, "parentallock.onstart");
-	oj->addOption(2, "parentallock.changetolocked");
-	oj->addOption(3, "parentallock.onsignal");
+	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , "parentallock.never");
+	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , "parentallock.onstart");
+	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
+	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , "parentallock.onsignal");
 	parentallockSettings.addItem( oj );
 
 	oj = new CMenuOptionChooser("parentallock.lockage", &g_settings.parentallock_lockage, true);
@@ -2308,7 +2228,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.191 2002/03/07 18:32:34 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.192 2002/03/11 17:29:02 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
