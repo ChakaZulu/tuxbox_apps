@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.23 2002/08/24 11:10:53 obi Exp $
+ * $Id: pmt.cpp,v 1.24 2002/08/27 21:12:36 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -52,7 +52,7 @@
  * 0xc6 User Private (Canal+)
  */
 
-unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, CCaPmt * caPmt, unsigned int * ca_pmt_length)
+unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, CCaPmt * caPmt)
 {
 	unsigned short ES_info_length;
 	unsigned short pos;
@@ -71,7 +71,6 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 	esInfo->reserved1 = buffer[1] >> 5;
 	esInfo->elementary_PID = ((buffer[1] & 0x1F) << 8) | buffer[2];
 	esInfo->reserved2 = buffer[3] >> 4;
-	esInfo->ES_info_length = 0;
 
 	ES_info_length = ((buffer[3] & 0x0F) << 8) | buffer[4];
 
@@ -91,7 +90,6 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 				break;
 
 			case 0x09:
-				esInfo->ES_info_length += descriptor_length + 2;
 				esInfo->addCaDescriptor(buffer + pos);
 				break;
 
@@ -249,13 +247,6 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 		break;
 	}
 
-	if (esInfo->ES_info_length != 0)
-	{
-		esInfo->ca_pmt_cmd_id = 0x01; // ok_descrambling
-		esInfo->ES_info_length += 1;
-	}
-
-	*ca_pmt_length += esInfo->ES_info_length + 5;
 	caPmt->es_info.insert(caPmt->es_info.end(), esInfo);
 
 	return ES_info_length;
@@ -267,9 +258,6 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 
 	/* current position in buffer */
 	unsigned short i;
-
-	/* ca pmt length field value */
-	unsigned int ca_pmt_length;
 
 	/* length of elementary stream description */
 	unsigned short ES_info_length;
@@ -310,13 +298,11 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 	CCaPmt * caPmt = new CCaPmt();
 
 	/* ca pmt */
-	ca_pmt_length = 6;
 	caPmt->program_number = (buffer[3] << 8) + buffer[4];
 	caPmt->reserved1 = buffer[5] >> 6;
 	caPmt->version_number = (buffer[5] >> 1) & 0x1F;
 	caPmt->current_next_indicator = buffer[5] & 0x01;
 	caPmt->reserved2 = buffer[10] >> 4;
-	caPmt->program_info_length = 0;
 
 	/* pmt */
 	section_length = ((buffer[1] & 0x0F) << 8) + buffer[2];
@@ -330,7 +316,6 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 			switch (buffer[i])
 			{
 			case 0x09:
-				caPmt->program_info_length += buffer[i + 1] + 2;
 				caPmt->addCaDescriptor(buffer + i);
 				break;
 
@@ -341,42 +326,9 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 		}
 	}
 
-	/* ca pmt */
-	if (caPmt->program_info_length != 0)
-	{
-		caPmt->ca_pmt_cmd_id = 0x01; // ok_descrambling
-		caPmt->program_info_length += 1;
-		ca_pmt_length += caPmt->program_info_length;
-	}
-
 	/* pmt */
 	for (i = 12 + program_info_length; i < section_length - 1; i += ES_info_length + 5)
-	{
-		ES_info_length = parse_ES_info(buffer + i, channel, caPmt, &ca_pmt_length);
-	}
-
-	if (ca_pmt_length < 128)
-	{
-		caPmt->length_field.push_back(ca_pmt_length);
-	}
-	else
-	{
-		unsigned int mask = 0xFF;
-		unsigned char length_field_size = 1;
-
-		while ((ca_pmt_length & mask) != ca_pmt_length)
-		{
-			length_field_size++;
-			mask = (mask << 8) | 0xFF;
-		}
-
-		caPmt->length_field.push_back((1 << 7) | length_field_size);
-
-		for (i = 0; i < length_field_size; i++)
-		{
-			caPmt->length_field.push_back(ca_pmt_length >> ((length_field_size - i - 1) << 3));
-		}
-	}
+		ES_info_length = parse_ES_info(buffer + i, channel, caPmt);
 
 	channel->setCaPmt(caPmt);
 	channel->setPidsFlag();

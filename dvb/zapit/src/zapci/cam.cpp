@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.19 2002/08/27 14:23:07 thegoodguy Exp $
+ * $Id: cam.cpp,v 1.20 2002/08/27 21:12:36 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -112,62 +112,14 @@ int CCam::sendMessage (unsigned char * data, unsigned short length)
 		return -1;
 	}
 	else
-	{
 		return 0;
-	}
 }
 
 int CCam::setCaPmt (CCaPmt * caPmt)
 {
 	unsigned char buffer[caPmt->getLength()];
-	unsigned char offset;
-	unsigned short pos;
-	unsigned short pos2;
-	unsigned short i;
-	unsigned short j;
 
-	buffer[0] = caPmt->ca_pmt_tag >> 16;
-	buffer[1] = caPmt->ca_pmt_tag >> 8;
-	buffer[2] = caPmt->ca_pmt_tag;
-
-	for (i = 0; i < caPmt->length_field.size(); i++)
-	{
-		buffer[i + 3] = caPmt->length_field[i];
-	}
-
-	offset = i - 1;
-
-	buffer[offset + 4] = caPmt->ca_pmt_list_management;
-	buffer[offset + 5] = caPmt->program_number >> 8;
-	buffer[offset + 6] = caPmt->program_number;
-	buffer[offset + 7] = (caPmt->reserved1 << 6) | (caPmt->version_number << 1) | caPmt->current_next_indicator;
-	buffer[offset + 8] = (caPmt->reserved2 << 4) | (caPmt->program_info_length >> 8);
-	buffer[offset + 9] = caPmt->program_info_length;
-
-	if (caPmt->program_info_length != 0)
-	{
-		buffer[offset + 10] = caPmt->ca_pmt_cmd_id;
-
-		for (pos = offset + 11, i = 0; pos < caPmt->program_info_length + offset + 10; i++)
-			pos += caPmt->ca_descriptor[i]->writeToBuffer(&(buffer[pos]));
-	}
-
-	for (pos = caPmt->program_info_length + offset + 10, i = 0; pos < caPmt->getLength(); pos += caPmt->es_info[i]->ES_info_length + 5, i++)
-	{
-		buffer[pos] = caPmt->es_info[i]->stream_type;
-		buffer[pos + 1] = (caPmt->es_info[i]->reserved1 << 5) | (caPmt->es_info[i]->elementary_PID >> 8);
-		buffer[pos + 2] = caPmt->es_info[i]->elementary_PID;
-		buffer[pos + 3] = (caPmt->es_info[i]->reserved2 << 4) | (caPmt->es_info[i]->ES_info_length >> 8);
-		buffer[pos + 4] = caPmt->es_info[i]->ES_info_length;
-
-		if (caPmt->es_info[i]->ES_info_length != 0)
-		{
-			buffer[pos + 5] = caPmt->es_info[i]->ca_pmt_cmd_id;
-
-			for (pos2 = pos + 6, j = 0; pos2 < pos + caPmt->es_info[i]->ES_info_length + 5; j++)
-				pos2 += caPmt->es_info[i]->ca_descriptor[j]->writeToBuffer(&(buffer[pos2]));
-		}
-	}
+	unsigned int pos = caPmt->writeToBuffer(buffer);
 
 	return sendMessage(buffer, pos);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: ci.h,v 1.3 2002/08/27 14:23:07 thegoodguy Exp $
+ * $Id: ci.h,v 1.4 2002/08/27 21:12:36 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -24,6 +24,8 @@
 
 #include <vector>
 
+unsigned int write_length_field (unsigned char * buffer);
+
 class CCaDescriptor
 {
 	private:
@@ -36,7 +38,8 @@ class CCaDescriptor
 
 	public:
 		CCaDescriptor (unsigned char * buffer);
-		unsigned int writeToBuffer (unsigned char * buffer); // returns number of bytes written
+		unsigned int    writeToBuffer (unsigned char * buffer);
+		unsigned int    getLength()                             { return descriptor_length + 2; };
 };
 
 /*
@@ -46,44 +49,44 @@ class CCaDescriptor
 class CCaTable
 {
 	public:
-		/* if (info_length != 0) */
-		unsigned char   ca_pmt_cmd_id		: 8;
+		unsigned char	reserved2		: 4;
+	private:
+		unsigned short	info_length		: 12;
 		std::vector <CCaDescriptor *> ca_descriptor;
-
+	protected:
+		CCaTable ()                                             { info_length = 0; };
+		~CCaTable ();
+		unsigned int    getLength()                             { return info_length + 2; };
+		unsigned int    writeToBuffer (unsigned char * buffer);
+	public:
 		void addCaDescriptor (unsigned char * buffer);
 };
 
 class CEsInfo : public CCaTable
 {
 	public:
-		CEsInfo ();
-		~CEsInfo ();
-
 		unsigned char	stream_type		: 8;
 		unsigned char	reserved1		: 3;
 		unsigned short	elementary_PID		: 13;
-		unsigned char	reserved2		: 4;
-		unsigned short	ES_info_length		: 12;
+	protected:
+		unsigned int    getLength()                             { return CCaTable::getLength() + 3; };
+		unsigned int    writeToBuffer (unsigned char * buffer);
+	friend class CCaPmt;
 };
 
 class CCaPmt : public CCaTable
 {
 	public:
-		CCaPmt ();
 		~CCaPmt ();
-		unsigned int getLength ();
+		unsigned int    getLength();
+		unsigned int    writeToBuffer (unsigned char * buffer);
 
-		unsigned int	ca_pmt_tag		: 24;
-		std::vector <unsigned char> length_field;
 		unsigned char	ca_pmt_list_management	: 8;
 		unsigned short	program_number		: 16;
 		unsigned char	reserved1		: 2;
 		unsigned char	version_number		: 5;
 		unsigned char	current_next_indicator	: 1;
-		unsigned char	reserved2		: 4;
-		unsigned short	program_info_length	: 12;
 
-		/* for (i = 0; i < n; i++) */
 		std::vector <CEsInfo *> es_info;
 };
 

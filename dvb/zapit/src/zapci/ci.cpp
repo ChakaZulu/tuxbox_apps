@@ -1,5 +1,5 @@
 /*
- * $Id: ci.cpp,v 1.6 2002/08/27 20:01:03 obi Exp $
+ * $Id: ci.cpp,v 1.7 2002/08/27 21:12:36 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -20,6 +20,37 @@
  */
 
 #include "ci.h"
+
+unsigned int write_length_field (unsigned char * buffer, unsigned int length)
+{
+        if (length < 128)
+        {
+                buffer[0] = length;
+                return 1;
+        }
+        else
+        {
+                unsigned int pos = 0;
+                unsigned int shiftby = 8;
+                unsigned char length_field_size = 1;
+
+                while ((length >> shiftby) != 0)
+                {
+                        length_field_size++;
+                        shiftby += 8;
+                }
+
+                buffer[pos++] = ((1 << 7) | length_field_size);
+
+                while (shiftby != 0)
+                {
+			shiftby -= 8;
+                        buffer[pos++] = length >> shiftby;
+                }
+                return pos;
+        }
+
+}
 
 /*
  * conditional access descriptors
@@ -52,80 +83,90 @@ unsigned int CCaDescriptor::writeToBuffer (unsigned char * buffer) // returns nu
 /*
  * generic table containing conditional access descriptors
  */
-
 void CCaTable::addCaDescriptor (unsigned char * buffer)
 {
-	ca_descriptor.push_back(new CCaDescriptor(buffer));
+	CCaDescriptor* dummy = new CCaDescriptor(buffer);
+	ca_descriptor.push_back(dummy);
+	if (info_length == 0)
+	    info_length = 1;
+	info_length += dummy->getLength();
 }
+
+unsigned int CCaTable::writeToBuffer (unsigned char * buffer) // returns number of bytes written
+{
+	buffer[0] = (reserved2 << 4) | (info_length >> 8);
+	buffer[1] = info_length;
+
+	if (info_length == 0)
+		return 2;
+
+	buffer[2] = 1;                  // ca_pmt_cmd_id: ok_descrambling= 1;
+	unsigned int pos = 3;
+
+	for (unsigned int i = 0; i < ca_descriptor.size(); i++)
+		pos += ca_descriptor[i]->writeToBuffer(&(buffer[pos]));
+	return pos;
+}
+
+CCaTable::~CCaTable ()
+{
+	for (unsigned int i = 0; i < ca_descriptor.size(); i++)
+		delete ca_descriptor[i];
+}
+
 
 /*
  * elementary stream information
  */
-
-CEsInfo::CEsInfo ()
+unsigned int CEsInfo::writeToBuffer (unsigned char * buffer) // returns number of bytes written
 {
-	ES_info_length = 0;
+	buffer[0] = stream_type;
+	buffer[1] = (reserved1 << 5) | (elementary_PID >> 8);
+	buffer[2] = elementary_PID;
+	return 3 + CCaTable::writeToBuffer(&(buffer[3]));
 }
 
-CEsInfo::~CEsInfo ()
-{
-	unsigned char i;
-
-	for (i = 0; i < ca_descriptor.size(); i++)
-	{
-		delete ca_descriptor[i];
-	}
-}
 
 /*
  * contitional access program map table
  */
-
-CCaPmt::CCaPmt ()
-{
-	ca_pmt_tag = 0x9F8032;
-	program_info_length = 0;
-}
-
 CCaPmt::~CCaPmt ()
 {
-	unsigned char i;
-
-	for (i = 0; i < ca_descriptor.size(); i++)
-	{
-		delete ca_descriptor[i];
-	}
-
-	for (i = 0; i < es_info.size(); i++)
-	{
+	for (unsigned int i = 0; i < es_info.size(); i++)
 		delete es_info[i];
-	}
 }
 
-unsigned int CCaPmt::getLength ()
+unsigned int CCaPmt::writeToBuffer (unsigned char * buffer) // returns number of bytes written
 {
-	unsigned char size_indicator = (length_field[0] >> 7) & 0x01;
-	unsigned int length_value = 0;
-	unsigned char length_field_size = 0;
+	unsigned int pos = 0;
+	unsigned int i;
 
-	if (size_indicator == 0)
-	{
-		length_field_size = 1;
-		length_value = length_field[0] & 0x7F;
-	}
+	buffer[pos++] = 0x9F;    // ca_pmt_tag
+	buffer[pos++] = 0x80;    // ca_pmt_tag
+	buffer[pos++] = 0x32;    // ca_pmt_tag
 
-	else if (size_indicator == 1)
-	{
-		unsigned int i;
+	pos += write_length_field(&(buffer[pos]), getLength());
 
-		length_field_size = length_field[0] & 0x7F;
+	buffer[pos++] = ca_pmt_list_management;
+	buffer[pos++] = program_number >> 8;
+	buffer[pos++] = program_number;
+	buffer[pos++] = (reserved1 << 6) | (version_number << 1) | current_next_indicator;
 
-		for (i = 0; i < length_field_size; i++)
-		{
-			length_value = (length_value << 8) | length_field[i + 1];
-		}
-	}
+	pos += CCaTable::writeToBuffer(&(buffer[pos]));
 
-	return 3 + length_field_size + length_value;
+	for (i = 0; i < es_info.size(); i++)
+		pos += es_info[i]->writeToBuffer(&(buffer[pos]));
+
+	return pos;
+}
+
+unsigned int CCaPmt::getLength ()  // the (3 + length_field()) initial bytes are not counted !
+{
+	unsigned int size = 4 + CCaTable::getLength();
+
+	for (unsigned int i = 0; i < es_info.size(); i++)
+		size += es_info[i]->getLength();
+
+	return size;
 }
 
