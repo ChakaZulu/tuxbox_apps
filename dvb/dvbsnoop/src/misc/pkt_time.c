@@ -1,5 +1,5 @@
 /*
-$Id: pkt_time.c,v 1.5 2003/12/14 23:38:46 rasc Exp $
+$Id: pkt_time.c,v 1.6 2003/12/20 05:11:42 obi Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: pkt_time.c,v 1.5 2003/12/14 23:38:46 rasc Exp $
 
 
 $Log: pkt_time.c,v $
+Revision 1.6  2003/12/20 05:11:42  obi
+simplified timeval to ms conversion
+
 Revision 1.5  2003/12/14 23:38:46  rasc
 - bandwidth reporting for a PID
 
@@ -52,12 +55,17 @@ static struct timeval    last_tv = {0,0};
 
 */
 
+static unsigned long timeval_to_ms(const struct timeval *tv)
+{
+	return (tv->tv_sec * 1000) + ((tv->tv_usec + 500) / 1000);
+}
+
 void  out_receive_time (int verbose, OPTION *opt)
 
 {
  struct timeval           tv;
  time_t                   t;
- long                     t_s,t_us;
+ long                     ms;
  char                     tstr[128];
 
 
@@ -74,13 +82,8 @@ void  out_receive_time (int verbose, OPTION *opt)
 
     case DELTA_TIME:
             gettimeofday (&tv, NULL);
-            t_s  = tv.tv_sec  - last_tv.tv_sec;
-            t_us = (tv.tv_usec - last_tv.tv_usec) / 1000;
-            if (t_us < 0) {
-                t_us += 1000;
-                t_s--;
-            }
-            out (verbose,"Time (delta) received: %0ld.%03ld (sec)\n", t_s,t_us );
+	    ms = timeval_to_ms(&tv);
+            out (verbose,"Time (delta) received: %0ld.%03ld (sec)\n", ms / 1000, ms % 1000);
             last_tv.tv_sec  =  tv.tv_sec;
             last_tv.tv_usec =  tv.tv_usec;
             break;
@@ -107,18 +110,7 @@ void  init_receive_time (void)
 
 long delta_time_ms (struct timeval *tv, struct timeval *last_tv)
 {
-	// - delta time
-	long t_s, t_ms;
-	
-
-       	t_s  = tv->tv_sec  - last_tv->tv_sec;
-	t_ms = (tv->tv_usec - last_tv->tv_usec) / 1000;
-	if (t_ms < 0) {
-		t_ms += 1000;
-		t_s--;
-	}
-
-	return (long) t_s * 1000L + t_ms;
+	return timeval_to_ms(tv) - timeval_to_ms(last_tv);
 }
 
 
