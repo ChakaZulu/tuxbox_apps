@@ -4,7 +4,11 @@
 #include <vector>
 #include <list>
 #include <ext/hash_map>
+#if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 4  // check if gcc version >= 3.4
 #include <ext/hash_fun.h>
+#else
+#include <ext/stl_hash_fun.h>
+#endif
 #include <errno.h>
 
 #include "si.h"
