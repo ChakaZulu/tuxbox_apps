@@ -31,14 +31,14 @@
 		
 		<area shape="circle" coords="54, 243, 15" href="javascript:key(115)" alt="volume up">
 		<area shape="circle" coords="107, 233, 10" href="javascript:key(113)" alt="mute">
-		<area shape="circle" coords="1590, 243, 15" href="javascript:key(402)" alt="bouquet up">
+		<area shape="circle" coords="159, 243, 15" href="javascript:key(402)" alt="bouquet up">
 		
 		<area shape="circle" coords="66, 274, 15" href="javascript:key(114)" alt="volume down">
 		<area shape="circle" coords="107, 258, 10" href="javascript:key(1)" alt="lame">
 		<area shape="circle" coords="147, 274, 15" href="javascript:key(403)" alt="bouquet down">
 		
 		<area shape="circle" coords="48, 306, 10" href="javascript:key(358)" alt="info">
-		<area shape="circle" coords="135, 309, 15" href="javascript:key(103)" alt="up">
+		<area shape="circle" coords="106, 310, 15" href="javascript:key(103)" alt="up">
 		<area shape="circle" coords="167, 306, 10" href="javascript:key(141)" alt="dream">
 		
 		<area shape="circle" coords="70, 343, 15" href="javascript:key(105)" alt="left">
@@ -46,7 +46,7 @@
 		<area shape="circle" coords="146, 343, 15" href="javascript:key(106)" alt="right">
 		
 		<area shape="circle" coords="53, 381, 10" href="javascript:key(392)" alt="audio">
-		<area shape="circle" coords="135, 374, 15" href="javascript:key(108)" alt="down">
+		<area shape="circle" coords="106, 374, 15" href="javascript:key(108)" alt="down">
 		<area shape="circle" coords="162, 381, 10" href="javascript:key(393)" alt="video">
 		
 		<area shape="circle" coords="56, 421, 10" href="javascript:key(398)" alt="red">
