@@ -433,6 +433,7 @@ void eDVB::serviceEvent(int event)
 	}
 	case eventServiceTuneOK:
 		emit enterTransponder(transponder);
+		tSDT.start(new SDT());
 		switch (service_type)
 		{
 		case 1:	// digital television service
@@ -446,11 +447,9 @@ void eDVB::serviceEvent(int event)
 		case 4:	// NVOD reference service
 			setState(stateServiceGetSDT);
 			tEIT.start(new EIT(EIT::typeNowNext, service_id, EIT::tsActual));
-			tSDT.start(new SDT());
 			break;
 		case 6:	// mosaic service
 			setState(stateServiceGetPAT);
-			tSDT.start(new SDT());
 			tPAT.get();
 			break;
 		case -1: // data
@@ -694,6 +693,15 @@ void eDVB::SDTready(int error)
 	case stateServiceGetSDT:
 		serviceEvent(eventServiceGotSDT);
 		break;
+	}
+	if (transponderlist)
+	{
+		SDT *sdt=tSDT.ready()?tSDT.getCurrent():0;
+		if (sdt)
+		{
+			transponderlist->handleSDT(sdt);
+			sdt->unlock();
+		}
 	}
 }
 

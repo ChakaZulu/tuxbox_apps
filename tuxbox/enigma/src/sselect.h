@@ -8,6 +8,16 @@ class eService;
 class eLBWindow;
 class eBouquet;
 
+class eListboxEntryService: public eListboxEntry
+{
+	QString sort;
+public:
+	eService &service;
+	QString getText(int col=0) const; 
+	eListboxEntryService(eService &service, eListbox *listbox);
+	~eListboxEntryService();
+};
+
 class eServiceSelector: public eLBWindow
 {
 	Q_OBJECT

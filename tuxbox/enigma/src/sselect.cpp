@@ -7,6 +7,42 @@
 #include "eskin.h"
 #include <algorithm>
 
+eListboxEntryService::eListboxEntryService(eService &service, eListbox *listbox): eListboxEntry(listbox), service(service)
+{
+	sort=QString().sprintf("%06d", service.service_number);
+}
+
+eListboxEntryService::~eListboxEntryService()
+{
+}
+
+QString eListboxEntryService::getText(int col=0) const
+{
+	switch (col)
+	{
+	case -1:
+		return sort;
+	case 0:
+	{
+		QString sname;
+		for (unsigned p=0; p<service.service_name.length(); p++)
+		{
+			QChar ch=service.service_name[p];
+			if (ch.unicode()<32)
+				continue;
+			if (ch.unicode()==0x86)
+				continue;
+			if (ch.unicode()==0x87)
+				continue;
+			sname+=ch;
+		}
+		return sname;
+	}
+	default:
+		return 0;
+	}
+}
+
 struct eServiceSelector_addService: public std::unary_function<std::pair<sref,eService>&,void>
 {
 	eListbox *list;
@@ -19,19 +55,7 @@ struct eServiceSelector_addService: public std::unary_function<std::pair<sref,eS
 		eService &c=r.second;
 		if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
 			return;
-		QString sname;
-		for (unsigned p=0; p<c.service_name.length(); p++)
-		{
-			QChar ch=c.service_name[p];
-			if (ch.unicode()<32)
-				continue;
-			if (ch.unicode()==0x86)
-				continue;
-			if (ch.unicode()==0x87)
-				continue;
-			sname+=ch;
-		}
-		eListboxEntry *l=new eListboxEntryText(list, sname, QString().sprintf("%06d", c.service_number), &c);
+		eListboxEntry *l=new eListboxEntryService(c, list);
 		if (&c==result)
 			list->setCurrent(l);
 	}
@@ -52,7 +76,7 @@ void eServiceSelector::fillServiceList()
 void eServiceSelector::entrySelected(eListboxEntry *entry)
 {
 	if (entry)
-		result=(eService*)entry->data;
+		result=&(((eListboxEntryService*)entry)->service);
 	else
 		result=0;
 	close(1);
@@ -136,25 +160,11 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 		setText(bouquet->bouquet_name);
 		for (QListIterator<eServiceReference> i(bouquet->list); i.current(); ++i)
 		{
-			eService *c=i.current()->service;
-			if (!c)
-				 continue;
-			if ((c->service_type!=1) && (c->service_type!=2) && (c->service_type!=4))
-				continue;
-			QString sname;
-			for (unsigned p=0; p<c->service_name.length(); p++)
-			{
-				QChar ch=c->service_name[p];
-				if (ch.unicode()<32)
-					continue;
-				if (ch.unicode()==0x86)
-					continue;
-				if (ch.unicode()==0x87)
-					continue;
-				sname+=ch;
-			}
-			eListboxEntry *l=new eListboxEntryText(list, sname, QString().sprintf("%06d", c->service_number), c);
-			if (c==result)
+			eService &c=*i.current()->service;
+			if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
+				return;
+			eListboxEntry *l=new eListboxEntryService(c, list);
+			if (&c==result)
 				list->setCurrent(l);
 		}
 		if (bouquet->bouquet_id>=0)
@@ -182,7 +192,7 @@ eService *eServiceSelector::next()
 {
 	eListboxEntry *s=list->goNext();
 	if (s)
-		return (eService*)s->data;
+		return &(((eListboxEntryService*)s)->service);
 	else
 		return 0;
 }
@@ -191,7 +201,7 @@ eService *eServiceSelector::prev()
 {
 	eListboxEntry *s=list->goPrev();
 	if (s)
-		return (eService*)s->data;
+		return &(((eListboxEntryService*)s)->service);
 	else
 		return 0;
 }

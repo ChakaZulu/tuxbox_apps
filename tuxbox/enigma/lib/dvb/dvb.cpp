@@ -220,7 +220,7 @@ void eService::update(SDTEntry *sdtentry)
 			service_provider=nd->service_provider;
 			service_type=nd->service_type;
 		}
-	qDebug("%04x:%04x %02x %s", transport_stream_id, service_id, service_type, (const char*)service_name);
+//	qDebug("%04x:%04x %02x %s", transport_stream_id, service_id, service_type, (const char*)service_name);
 }
 
 eTransponderList::eTransponderList()
@@ -266,21 +266,20 @@ eService &eTransponderList::createService(int transport_stream_id, int original_
 
 void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nservices)
 {
-#if 0
 	numtransponders=0;
 	scanned=0;
-	nservices=services.count();
-	for (QListIterator<eTransponder> i(transponders); i.current(); ++i)
+	nservices=services.size();
+	for(std::map<tsref,eTransponder>::iterator i(transponders.begin()); i!=transponders.end(); ++i)
 	{
-		if (!i.current()->isValid())
+		eTransponder &t=i->second;
+		if (!t.isValid())
 			continue;
-		if (i.current()->transport_stream_id==-1)
+		if (t.transport_stream_id==-1)
 			continue;
 		numtransponders++;
-		if (i.current()->state==eTransponder::stateOK)
+		if (t.state==eTransponder::stateOK)
 			scanned++;
 	}
-#endif
 }
 
 void eTransponderList::handleSDT(SDT *sdt)
