@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.90 2002/01/29 23:23:57 field Exp $
+//  $Id: sectionsd.cpp,v 1.91 2002/01/30 13:35:02 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.91  2002/01/30 13:35:02  field
+//  Verbesserungen
+//
 //  Revision 1.90  2002/01/29 23:23:57  field
 //  Mehr Details in ListAll
 //
@@ -1417,7 +1420,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.90 2002/01/29 23:23:57 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.91 2002/01/30 13:35:02 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2094,20 +2097,19 @@ static void sendEventList(struct connectionData *client, const unsigned char ser
                         *((unsigned *)liste)=t->dauer;
                         liste+=4;
                         strcpy(liste, e->first->name.c_str());
-                        liste+=strlen(e->first->name.c_str());
-                        *liste=0;
+                        liste+=strlen(liste);
+                        //*liste=0;
                         liste++;
                         if (e->first->text== "" )
                         {
-                        	strcpy(liste, e->first->extendedText.c_str());
-                        	liste+=strlen(e->first->extendedText.c_str());
+                        	strcpy(liste, e->first->extendedText.substr(0, 40).c_str());
+                        	liste+=strlen(liste);
                         }
                         else
                         {
                         	strcpy(liste, e->first->text.c_str());
-                        	liste+=strlen(e->first->text.c_str());
+                        	liste+=strlen(liste);
                         }
-                        *liste=0;
                         liste++;
                     } // else !sendServiceName
 
@@ -3103,7 +3105,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.90 2002/01/29 23:23:57 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.91 2002/01/30 13:35:02 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
