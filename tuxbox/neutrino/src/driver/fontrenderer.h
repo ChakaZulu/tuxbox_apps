@@ -106,7 +106,7 @@ class FBFontRenderClass
 		//FT_Face getFace(const char *family, const char *style);
 		Font *getFont(const char * const family, const char * const style, int size);
 
-		int AddFont(const char *filename, const bool make_italics = false);
+		const char * const AddFont(const char * const filename, const bool make_italics = false);
 
 		FBFontRenderClass();
 		~FBFontRenderClass();

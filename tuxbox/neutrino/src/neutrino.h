@@ -83,7 +83,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		int                             network_automatic_start;
 
 		const char *                    fontName;
-		std::string			fontFile;
+		const char *                    fontFilename[3];
 		int				fontsSizeOffset;
 
 		int				mode;

@@ -1026,27 +1026,42 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 
 	for(int x=1; x<argc; x++)
 	{
-		if( !strcmp(argv[x], "-su"))
+		if ((!strcmp(argv[x], "-u")) || (!strcmp(argv[x], "--enable-update")))
 		{
 			dprintf(DEBUG_NORMAL, "Software update enabled\n");
 			softupdate = true;
 		}
-		else if( !strcmp(argv[x], "-flash"))
+		else if ((!strcmp(argv[x], "-f")) || (!strcmp(argv[x], "--enable-flash")))
 		{
 			dprintf(DEBUG_NORMAL, "enable flash\n");
 			fromflash = true;
 		}
-		else if( !strcmp(argv[x], "-font"))
+		else if (!strcmp(argv[x], "--font"))
 		{
-			if( ( x + 3 ) < argc )
+			if ((x + 3) < argc)
 			{
-				fontFile = argv[x+ 1];
-				fontName = argv[x+ 2];
-				fontsSizeOffset = atoi(argv[x+ 3]);
+				fontName = argv[x + 1];
+				fontsSizeOffset = atoi(argv[x + 2]);
+				fontFilename[0] = argv[x + 3];
+				if ((x + 4) < argc)
+				{
+					fontFilename[1] = argv[x + 4];
+					x++;
+				}
+				else
+					fontFilename[1] = NULL;
+
+				if ((x + 4) < argc)
+				{
+					fontFilename[2] = argv[x + 4];
+					x++;
+				}
+				else
+					fontFilename[2] = NULL;
 			}
-			x+=3;
+			x += 3;
 		}
-		else if( !strcmp(argv[x], "-debuglevel"))
+		else if ((!strcmp(argv[x], "-v")) || (!strcmp(argv[x], "--verbose")))
 		{
 			int dl = atoi(argv[x+ 1]);
 			dprintf(DEBUG_NORMAL, "set debuglevel: %d\n", dl);
@@ -1055,7 +1070,7 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 		}
 		else
 		{
-			dprintf(DEBUG_NORMAL, "Usage: neutrino [-su] [-debuglevel 0..3] [-flash] [-font /fontdir/fontfile fontname fontsize]\n");
+			dprintf(DEBUG_NORMAL, "Usage: neutrino [-u | ---enable-update] [-f | --enable-flash] [-v | --verbose 0..3] [--font name sizeoffset /dir/file.ttf [/dir/bold.ttf [/dir/italic.ttf]]]\n");
 			exit(0);
 		}
 	}
@@ -1091,36 +1106,36 @@ void CNeutrinoApp::SetupFrameBuffer()
 typedef struct standard_font
 {
 	const char * const name;
-	const char * const filename;
+	const char * const filename[3];
 	const int          size_offset;
 } standard_font_struct;
 
 const standard_font_struct predefined_font[2] = 
 {
-	{"Micron",             FONTDIR "/micron",         0},
-	{"MD King KhammuRabi", FONTDIR "/md_khmurabi_10", 0}
+	{"Micron"            , {FONTDIR "/micron.ttf"        , FONTDIR "/micron_bold.ttf", FONTDIR "/micron_italic.ttf"}, 0},
+	{"MD King KhammuRabi", {FONTDIR "/md_khmurabi_10.ttf", NULL                      , NULL                        }, 0}
 };
 
 void CNeutrinoApp::SetupFonts()
 {
+	const char * style[3];
+
 	if (g_fontRenderer != NULL)
 		delete g_fontRenderer;
 
 	g_fontRenderer = new FBFontRenderClass();
 
+	style[0] = g_fontRenderer->AddFont(fontFilename[0]);
 
-	g_fontRenderer->AddFont((fontFile + ".ttf").c_str());
+	style[1] = (fontFilename[1] == NULL) ? "Bold Regular" : g_fontRenderer->AddFont(fontFilename[1]);
 
-	const char * bold_style_name;
-	if (g_fontRenderer->AddFont((fontFile + "_bold.ttf").c_str()) == 0)
-		bold_style_name = "Bold";
+	if (fontFilename[2] == NULL)
+	{
+		g_fontRenderer->AddFont(fontFilename[0], true);  // make italics
+		style[2] = "Italic";
+	}
 	else
-		bold_style_name = "Bold Regular";
-
-	if (g_fontRenderer->AddFont((fontFile + "_italic.ttf").c_str()) != 0)
-		g_fontRenderer->AddFont((fontFile + ".ttf").c_str(), true);  // make italics
-
-	const char * style[3] = {"Regular", bold_style_name, "Italic"};
+		style[2] = g_fontRenderer->AddFont(fontFilename[2]);
 
 	for (int i = 0; i < FONT_TYPE_COUNT; i++)
 	{
@@ -2483,11 +2498,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 	if (fontName == NULL) /* no font specified in command line */
 	{
 		fontName = predefined_font[use_true_unicode_font].name;
-		fontFile = predefined_font[use_true_unicode_font].filename;
+		fontFilename[0] = predefined_font[use_true_unicode_font].filename[0];
+		fontFilename[1] = predefined_font[use_true_unicode_font].filename[1];
+		fontFilename[2] = predefined_font[use_true_unicode_font].filename[2];
 		fontsSizeOffset = predefined_font[use_true_unicode_font].size_offset;
 	}
 
-	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName);
+	CLCD::getInstance()->init(fontFilename[0], fontName);
 	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control == 1));
 	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control == 1));
 
@@ -3857,7 +3874,9 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 		if (fontName == predefined_font[(!use_true_unicode_font)].name)
 		{
 			fontName = predefined_font[use_true_unicode_font].name;
-			fontFile = predefined_font[use_true_unicode_font].filename;
+			fontFilename[0] = predefined_font[use_true_unicode_font].filename[0];
+			fontFilename[1] = predefined_font[use_true_unicode_font].filename[1];
+			fontFilename[2] = predefined_font[use_true_unicode_font].filename[2];
 			fontsSizeOffset = predefined_font[use_true_unicode_font].size_offset;
 			SetupFonts();
 #warning TODO: reload LCD fonts, too

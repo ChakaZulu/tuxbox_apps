@@ -147,7 +147,7 @@ FT_Error FBFontRenderClass::getGlyphBitmap(FTC_Image_Desc *font, FT_ULong glyph_
 	return FTC_SBit_Cache_Lookup(sbitsCache, font, glyph_index, sbit);
 }
 
-int FBFontRenderClass::AddFont(const char *filename, const bool make_italics)
+const char * const FBFontRenderClass::AddFont(const char * const filename, const bool make_italics)
 {
 	fflush(stdout);
 	int error;
@@ -157,7 +157,7 @@ int FBFontRenderClass::AddFont(const char *filename, const bool make_italics)
 	if ((error=FT_New_Face(library, filename, 0, &face)))
 	{
 		dprintf(DEBUG_NORMAL, "[FONT] adding font %s, failed: %i\n", filename, error);
-		return error;
+		return NULL;
 	}
 	n->filename = strdup(filename);
 	n->family   = strdup(face->family_name);
@@ -166,7 +166,7 @@ int FBFontRenderClass::AddFont(const char *filename, const bool make_italics)
 	n->next=font;
 	dprintf(DEBUG_DEBUG, "[FONT] adding font %s... ok\n", filename);
 	font=n;
-	return 0;
+	return n->style;
 }
 
 FBFontRenderClass::fontListEntry::~fontListEntry()
