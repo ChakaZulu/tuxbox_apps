@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Dreambox Web Interface</title>
+		<title>Enigma Web Interface</title>
 		<link rel="stylesheet" type="text/css" href="webif.css">
 		<script language="javascript" type="text/javascript" src="window.js"></script>
 		<script language="javascript" type="text/javascript" src="index.js"></script>
