@@ -161,6 +161,7 @@ struct SNeutrinoSettings
 	int  recording_vcr_no_scart;
 	char recording_splitsize[10];
 	int  recording_use_o_sync;
+	int  recording_use_fdatasync;
 	int  recording_stream_all_audio_pids;
 	int  recording_stream_vtxt_pid;
 

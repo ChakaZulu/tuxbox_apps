@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.16 2004/07/02 09:45:54 thegoodguy Exp $
+ * $Id: stream2file.cpp,v 1.17 2004/11/03 10:25:25 thegoodguy Exp $
  * 
  * streaming to file/disc
  * 
@@ -51,11 +51,11 @@
 
 #include <linux/dvb/dmx.h>
 
-//#define INC_BUSY_COUNT printf ("inc (%d): %s,%d\n",++busy_count,__FUNCTION__,__LINE__);
-//#define DEC_BUSY_COUNT printf ("dec (%d): %s,%d\n",--busy_count,__FUNCTION__,__LINE__);
+//#define INC_BUSY_COUNT printf ("inc (%d): %s,%d\n",++busy_count,__FUNCTION__,__LINE__)
+//#define DEC_BUSY_COUNT printf ("dec (%d): %s,%d\n",--busy_count,__FUNCTION__,__LINE__)
 
-#define INC_BUSY_COUNT busy_count++;
-#define DEC_BUSY_COUNT busy_count--;
+#define INC_BUSY_COUNT busy_count++
+#define DEC_BUSY_COUNT busy_count--
 
 
 //#include <transform.h>
@@ -96,6 +96,7 @@ static unsigned char busy_count = 0;
 
 static pthread_t demux_thread[MAXPIDS];
 static bool use_o_sync;
+static bool use_fdatasync;
 static unsigned long long limit;
 
 static char myfilename[512];
@@ -228,7 +229,8 @@ void * FileThread(void * v_arg)
 			}
 
 		all_bytes_written:
-			fdatasync(fd2);
+			if (use_fdatasync)
+				fdatasync(fd2);
 			
 			remfile -= (unsigned long long)readsize;
 		}
@@ -385,7 +387,7 @@ void * DMXThread(void * v_arg)
 		while (demuxfd_count > 0)
 			unsetPesFilter(demuxfd[--demuxfd_count]);
 
-	DEC_BUSY_COUNT
+	DEC_BUSY_COUNT;
 
 	if ((v_arg == &dvrfd) || (v_arg == (&(demuxfd[0]))))
 	{
@@ -402,6 +404,7 @@ void * DMXThread(void * v_arg)
 stream2file_error_msg_t start_recording(const char * const filename,
 					const char * const info,
 					const bool with_o_sync,
+					const bool with_fdatasync,
 					const unsigned long long splitsize,
 					const unsigned int numpids,
 					const unsigned short * const pids,
@@ -424,7 +427,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			return STREAM2FILE_BUSY;
 	}
 
-	INC_BUSY_COUNT
+	INC_BUSY_COUNT;
 
 	strcpy(myfilename, filename);
 
@@ -438,7 +441,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	}
 	else
 	{
-		DEC_BUSY_COUNT
+		DEC_BUSY_COUNT;
 		return STREAM2FILE_INVALID_DIRECTORY;
 	}
 
@@ -449,13 +452,14 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	else
 		limit = splitsize;
 
-	use_o_sync = with_o_sync;
+	use_o_sync    = with_o_sync;
+	use_fdatasync = with_fdatasync;
 
 	for (unsigned int i = 0; i < numpids; i++)
 	{
 		if (pids[i] > 0x1fff)
 		{
-			DEC_BUSY_COUNT
+			DEC_BUSY_COUNT;
 			return STREAM2FILE_INVALID_PID;
 		}
 		
@@ -464,7 +468,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			for (unsigned int j = 0; j < i; j++)
 				unsetPesFilter(demuxfd[j]);
 
-			DEC_BUSY_COUNT
+			DEC_BUSY_COUNT;
 			return STREAM2FILE_PES_FILTER_FAILURE;
 		}
 	}
@@ -478,7 +482,7 @@ stream2file_error_msg_t start_recording(const char * const filename,
 			while (demuxfd_count > 0)
 				unsetPesFilter(demuxfd[--demuxfd_count]);
 
-			DEC_BUSY_COUNT
+			DEC_BUSY_COUNT;
 			return STREAM2FILE_DVR_OPEN_FAILURE;
 		}
 		exit_flag = STREAM2FILE_STATUS_RUNNING;
@@ -489,10 +493,10 @@ stream2file_error_msg_t start_recording(const char * const filename,
 		exit_flag = STREAM2FILE_STATUS_RUNNING;
 		for (unsigned int i = 0; i < numpids; i++)
 		{
-			INC_BUSY_COUNT
+			INC_BUSY_COUNT;
 			pthread_create(&demux_thread[i], 0, DMXThread, &demuxfd[i]);
 		}
-		DEC_BUSY_COUNT
+		DEC_BUSY_COUNT;
 	}
 
 	return STREAM2FILE_OK;
