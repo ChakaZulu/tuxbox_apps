@@ -589,6 +589,7 @@ recordingmenu.splitsize Max. Dateigröße (MB)
 recordingmenu.stopplayback Playback anhalten
 recordingmenu.stopsectionsd Sectionsd anhalten
 recordingmenu.stream_all_audio_pids Alle Audiopids aufzeichnen
+recordingmenu.use_o_sync Synchrones Schreiben (O_SYNC)
 recordingmenu.vcr Videorekorder
 recordtimer.announce Die Aufnahme beginnt in wenigen Minuten.
 repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken

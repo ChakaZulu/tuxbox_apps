@@ -110,6 +110,7 @@ void CVCRControl::setDeviceOptions(CDeviceInfo *deviceInfo)
 			if (!(serverinfo->Directory.empty()))
 				device->Directory = serverinfo->Directory;
 			device->SplitSize = serverinfo->SplitSize;
+			device->Use_O_Sync = serverinfo->Use_O_Sync;
 			device->StreamAllAudioPids = serverinfo->StreamAllAudioPids;
 
 			device->StopPlayBack = serverinfo->StopPlayBack;
@@ -640,6 +641,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 
 	stream2file_error_msg_t error_msg = ::start_recording(filename,
 							      getCommandString(CMD_VCR_RECORD, channel_id, epgid, apids).c_str(),
+							      Use_O_Sync,
 							      ((unsigned long long)SplitSize) * 1048576ULL,
 							      numpids,
 							      pids,

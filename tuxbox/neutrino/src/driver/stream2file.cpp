@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.cpp,v 1.15 2004/06/15 14:44:15 carjay Exp $
+ * $Id: stream2file.cpp,v 1.16 2004/07/02 09:45:54 thegoodguy Exp $
  * 
  * streaming to file/disc
  * 
@@ -95,6 +95,7 @@ static stream2file_status_t exit_flag = STREAM2FILE_STATUS_IDLE;
 static unsigned char busy_count = 0;
 
 static pthread_t demux_thread[MAXPIDS];
+static bool use_o_sync;
 static unsigned long long limit;
 
 static char myfilename[512];
@@ -171,7 +172,7 @@ void * FileThread(void * v_arg)
 				sprintf(filename, "%s.%3.3d.%s", myfilename, ++filecount, ((struct filenames_t *)v_arg)->extension);
 				if (fd2 != -1)
 					close(fd2);
-				if ((fd2 = open(filename, O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
+				if ((fd2 = open(filename, use_o_sync ? O_WRONLY | O_CREAT | O_SYNC | O_TRUNC | O_LARGEFILE : O_WRONLY | O_CREAT | O_TRUNC | O_LARGEFILE, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0)
 				{
 					perror("[stream2file]: error opening outfile");
 					exit_flag = STREAM2FILE_STATUS_WRITE_OPEN_FAILURE;
@@ -400,6 +401,7 @@ void * DMXThread(void * v_arg)
 
 stream2file_error_msg_t start_recording(const char * const filename,
 					const char * const info,
+					const bool with_o_sync,
 					const unsigned long long splitsize,
 					const unsigned int numpids,
 					const unsigned short * const pids,
@@ -446,6 +448,8 @@ stream2file_error_msg_t start_recording(const char * const filename,
 	}
 	else
 		limit = splitsize;
+
+	use_o_sync = with_o_sync;
 
 	for (unsigned int i = 0; i < numpids; i++)
 	{

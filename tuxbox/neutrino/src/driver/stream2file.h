@@ -1,5 +1,5 @@
 /*
- * $Id: stream2file.h,v 1.6 2004/06/15 14:44:15 carjay Exp $
+ * $Id: stream2file.h,v 1.7 2004/07/02 09:45:54 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -45,6 +45,7 @@ enum stream2file_status_t
 
 stream2file_error_msg_t start_recording(const char * const filename,
 					const char * const info,
+					const bool with_o_sync,
 					const unsigned long long splitsize,
 					const unsigned int numpids,
 					const unsigned short * const pids,

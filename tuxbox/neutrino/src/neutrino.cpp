@@ -652,7 +652,8 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
 	strcpy( g_settings.recording_splitsize, configfile.getString( "recording_splitsize", "2048").c_str() );
-	g_settings.recording_stream_all_audio_pids = configfile.getInt32("recordingmenu.stream_all_audio_pids", true);
+	g_settings.recording_use_o_sync            = configfile.getBool("recordingmenu.use_o_sync"           , true);
+	g_settings.recording_stream_all_audio_pids = configfile.getBool("recordingmenu.stream_all_audio_pids", true);
 
 	//streaming (server)
 	g_settings.streaming_type = configfile.getInt32( "streaming_type", 0 );
@@ -966,7 +967,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString("recording_server_mac",                g_settings.recording_server_mac);
 	configfile.setInt32 ("recording_vcr_no_scart",              g_settings.recording_vcr_no_scart);
 	configfile.setString("recording_splitsize",                 g_settings.recording_splitsize);
-	configfile.setInt32 ("recordingmenu.stream_all_audio_pids", g_settings.recording_stream_all_audio_pids);
+	configfile.setBool  ("recordingmenu.use_o_sync"           , g_settings.recording_use_o_sync           );
+	configfile.setBool  ("recordingmenu.stream_all_audio_pids", g_settings.recording_stream_all_audio_pids);
 
 	//streaming
 	configfile.setInt32 ( "streaming_type", g_settings.streaming_type );
@@ -2011,9 +2013,11 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * recordingSettings_splitsize = new CStringInput(LOCALE_RECORDINGMENU_SPLITSIZE, g_settings.recording_splitsize, 6, LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2, "0123456789 ");
 	CMenuForwarder* mf8 = new CMenuForwarder(LOCALE_RECORDINGMENU_SPLITSIZE, (g_settings.recording_type == RECORDING_FILE), g_settings.recording_splitsize,recordingSettings_splitsize);
 
-	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+	CMenuOptionChooser* oj6 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_USE_O_SYNC, &g_settings.recording_use_o_sync, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
 	
-	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6);
+	CMenuOptionChooser* oj7 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS, &g_settings.recording_stream_all_audio_pids, OPTIONS_OFF0_ON1_OPTIONS, OPTIONS_OFF0_ON1_OPTION_COUNT, (g_settings.recording_type == RECORDING_FILE));
+	
+	CRecordingNotifier *RecordingNotifier = new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7,mf8,oj6, oj7);
 
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser(LOCALE_RECORDINGMENU_RECORDING_TYPE, &g_settings.recording_type, RECORDINGMENU_RECORDING_TYPE_OPTIONS, RECORDINGMENU_RECORDING_TYPE_OPTION_COUNT, true, RecordingNotifier);
 

@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.5 2004/06/13 21:38:41 thegoodguy Exp $
+ * $Id: locals.h,v 1.6 2004/07/02 09:45:55 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -624,6 +624,7 @@ typedef enum
 	LOCALE_RECORDINGMENU_STOPPLAYBACK                     ,
 	LOCALE_RECORDINGMENU_STOPSECTIONSD                    ,
 	LOCALE_RECORDINGMENU_STREAM_ALL_AUDIO_PIDS            ,
+	LOCALE_RECORDINGMENU_USE_O_SYNC                       ,
 	LOCALE_RECORDINGMENU_VCR                              ,
 //	LOCALE_RECORDINGMENU_VCR_DEVICENAME                   , /* FIXME: unused */
 	LOCALE_RECORDTIMER_ANNOUNCE                           ,

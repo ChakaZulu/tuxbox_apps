@@ -559,8 +559,8 @@ recordingmenu.splitsize Max. file size (MB)
 recordingmenu.stopplayback stop playback
 recordingmenu.stopsectionsd stop sectionsd
 recordingmenu.stream_all_audio_pids record all audio pids
+recordingmenu.use_o_sync write synchronous (O_SYNC)
 recordingmenu.vcr vcr
-recordingmenu.vcr_devicename VCR Name (lirc)
 recordtimer.announce Recording starts in a few minutes
 repeatblocker.hint_1 Shortest time (in ms) to recognize 2 keystrokes
 repeatblocker.hint_2 Enter 0 to switch of the blocker (red is space)

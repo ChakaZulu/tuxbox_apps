@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.6 2004/06/13 21:04:15 thegoodguy Exp $
+ * $Id: locals_intern.h,v 1.7 2004/07/02 09:45:55 thegoodguy Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -615,6 +615,7 @@ const char * locale_real_names[] =
 	"recordingmenu.stopplayback",
 	"recordingmenu.stopsectionsd",
 	"recordingmenu.stream_all_audio_pids",
+	"recordingmenu.use_o_sync",
 	"recordingmenu.vcr",
 	"recordtimer.announce",
 	"repeatblocker.hint_1",
