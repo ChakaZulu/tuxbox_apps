@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.359 2005/01/09 16:56:55 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.360 2005/01/18 02:48:52 carjay Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -680,6 +680,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			break;
 		case FE_OFDM:
 			response.system = DVB_T;
+			break;
+		default:
 			break;
 		}
 		CBasicServer::send_data(connfd, &response, sizeof(response));
@@ -1691,7 +1693,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.359 2005/01/09 16:56:55 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.360 2005/01/18 02:48:52 carjay Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
