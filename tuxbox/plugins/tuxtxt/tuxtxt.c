@@ -5,7 +5,8 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
- *    V1,31: damned infobar                                                   *
+ *    V1.32: fix 16:9/4:3 (wss override)                                      *
+ *    V1.31: damned infobar                                                   *
  *    V1.30: change infobar, fix servicescan (segfault on RTL Shop)           *
  *    V1.29: infobar improvements by AlexW                                    *
  *    V1.28: use devfs device names by obi                                    *
@@ -47,7 +48,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.31 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.32 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -228,8 +229,11 @@ int Init()
 			return 0;
 		}
 
-		fread(&fnc_mode1, 1, sizeof(fnc_mode1), conf);
-		fread(&fnc_mode2, 1, sizeof(fnc_mode2), conf);
+		fread(&screen_mode1, 1, sizeof(screen_mode1), conf);
+		fread(&screen_mode2, 1, sizeof(screen_mode2), conf);
+
+		screen_old1 = screen_mode1;
+		screen_old2 = screen_mode2;
 
 	//open avs
 
@@ -240,8 +244,18 @@ int Init()
 		}
 
 		ioctl(avs, AVSIOGSCARTPIN8, &fnc_old);
+		ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 
-		ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
+	//open saa
+
+		if((saa = open("/dev/dbox/saa0", O_RDWR)) == -1)
+		{
+			perror("TuxTxt <open /dev/dbox/saa0>");
+			return 0;
+		}
+
+		ioctl(saa, SAAIOGWSS, &saa_old);
+		ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
 
 	//setup rc
 
@@ -391,6 +405,7 @@ void CleanUp()
 	//restore videoformat
 
 		ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
+		ioctl(saa, SAAIOSWSS, &saa_old);
 
 	//stop decode-thread
 
@@ -415,6 +430,10 @@ void CleanUp()
 
 		close(avs);
 
+	//close saa
+
+		close(saa);
+
 	//close freetype
 
 		FT_Done_FreeType(library);
@@ -438,12 +457,14 @@ void CleanUp()
 
 	//save config
 
-		if(fnc_mode1 != fnc_old1 || fnc_mode2 != fnc_old2)
+		if(screen_mode1 != screen_old1 || screen_mode2 != screen_old2)
 		{
 			rewind(conf);
 
-			fwrite(&fnc_mode1, 1, sizeof(fnc_mode1), conf);
-			fwrite(&fnc_mode2, 1, sizeof(fnc_mode2), conf);
+			fwrite(&screen_mode1, 1, sizeof(screen_mode1), conf);
+			fwrite(&screen_mode2, 1, sizeof(screen_mode2), conf);
+
+			printf("TuxTxt <saving config>\n");
 		}
 
 		fclose(conf);
@@ -671,8 +692,8 @@ void ConfigMenu()
 
 	//set 16:9 modi
 
-		if(fnc_mode1 == AVS_FNCOUT_EXT169) memcpy(&menu[10*62 + 26], "ein", 3);
-		if(fnc_mode2 == AVS_FNCOUT_EXT43)  memcpy(&menu[12*62 + 26], "aus", 3);
+		if(screen_mode1 == 1) memcpy(&menu[10*62 + 26], "ein", 3);
+		if(screen_mode2 == 0) memcpy(&menu[12*62 + 26], "aus", 3);
 
 	//clear framebuffer
 
@@ -695,7 +716,8 @@ void ConfigMenu()
 
 			avia_pig_hide(pig);
 
-			ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
+			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
+			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
 
 			fontwidth  = 16;
 			fontheight = 22;
@@ -942,11 +964,11 @@ void ConfigMenu()
 											}
 											break;
 
-									case 2:	fnc_mode1++;
-											if(fnc_mode1 > 2) fnc_mode1 = 1;
+									case 2:	screen_mode1++;
+											screen_mode1 &= 1;
 
-											if(fnc_mode1 == 1) memcpy(&menu[62*10 + 26], "ein", 3);
-											else			   memcpy(&menu[62*10 + 26], "aus", 3);
+											if(screen_mode1 == 1) memcpy(&menu[62*10 + 26], "ein", 3);
+											else				  memcpy(&menu[62*10 + 26], "aus", 3);
 
 											PosX = StartX + fontwidth*4 + fontwidth/2;
 											PosY = StartY + fixfontheight*15;
@@ -955,15 +977,16 @@ void ConfigMenu()
 												RenderCharFB(menu[62*10 + byte], menu[62*6 + byte+31]);
 											}
 
-											ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
+											ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
+											ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
 
 											break;
 
-									case 3:	fnc_mode2++;
-											if(fnc_mode2 > 2) fnc_mode2 = 1;
+									case 3:	screen_mode2++;
+											screen_mode2 &= 1;
 
-											if(fnc_mode2 == 1) memcpy(&menu[62*12 + 26], "ein", 3);
-											else			   memcpy(&menu[62*12 + 26], "aus", 3);
+											if(screen_mode2 == 1) memcpy(&menu[62*12 + 26], "ein", 3);
+											else				  memcpy(&menu[62*12 + 26], "aus", 3);
 
 											PosX = StartX + fontwidth*4 + fontwidth/2;
 											PosY = StartY + fixfontheight*17;
@@ -1634,7 +1657,8 @@ void SwitchScreenMode()
 			avia_pig_set_stack(pig, 2);
 			avia_pig_show(pig);
 
-			ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode2);
+			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode2]);
+			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode2]);
 		}
 		else
 		{
@@ -1643,7 +1667,8 @@ void SwitchScreenMode()
 
 			avia_pig_hide(pig);
 
-			ioctl(avs, AVSIOSSCARTPIN8, &fnc_mode1);
+			ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
+			ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
 		}
 
 		if((error = FT_Set_Pixel_Sizes(face, fontwidth, fontheight)) != 0)

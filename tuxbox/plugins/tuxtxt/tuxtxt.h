@@ -10,6 +10,7 @@
 
 #include <dbox/avia_gt_pig.h>
 #include <dbox/avs_core.h>
+#include <dbox/saa7126_core.h>
 #include <dbox/fp.h>
 #include <ost/dmx.h>
 #include <plugin.h>
@@ -182,7 +183,7 @@ FT_Face		face;
 
 //some data
 
-int dmx, pig, avs, rc, fb, lcd;
+int dmx, pig, avs, saa, rc, fb, lcd;
 int sx, ex, sy, ey;
 int vtxtpid;
 int PosX, PosY, StartX, StartY;
@@ -192,10 +193,13 @@ int zoommode, screenmode, transpmode, hintmode, boxed;
 int fontwidth, fontheight;
 int catch_row, catch_col, catched_page;
 int prev_100, prev_10, next_10, next_100;
-int fnc_old, fnc_mode1, fnc_mode2, fnc_old1, fnc_old2;
+int fnc_old, saa_old, screen_mode1, screen_mode2, screen_old1, screen_old2;
 int clear_page, clear_subpage;
 int pids_found, current_service;
 int SDT_ready;
+
+int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
+int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
 
 FILE *conf;
 
