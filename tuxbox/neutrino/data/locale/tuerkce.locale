@@ -6,7 +6,7 @@ options.on ein
 mainmenu.head ANA MENÜ
 mainmenu.tvmode TELEVIZYON
 mainmenu.radiomode RADIO
-mainmenu.vcrmode VIDEO
+mainmenu.scartmode SCART
 mainmenu.games OYUNLAR
 mainmenu.shutdown KAPAT
 mainmenu.settings AYARLAR
@@ -24,9 +24,6 @@ miscsettings.head SECENEKLER
 miscsettings.ucodecheck UCodes KONTROLLÜ
 miscsettings.epgold EPG SECENEKLERI GÖSTER
 miscsettings.boxtype DBox ÜRETICI
-miscsettings.boxtype_nokia Nokia
-miscsettings.boxtype_sagem Sagem
-miscsettings.boxtype_philips Philips
 
 languagesetup.head DIL AYARI
 languagesetup.select MENÜ DIL
@@ -103,12 +100,12 @@ keybindingmenu.channeldown KANAL ASAGI
 keybindingmenu.channeldown_head KANAL ASAGI TUSU
 keybindingmenu.bouquetup next bouquet
 keybindingmenu.bouquetup_head keysetup next bouquet
-keybindingmenu.bouquetupdown bouquet back
-keybindingmenu.bouquetupdown_head keysetup bouquet back
+keybindingmenu.bouquetdown bouquet back
+keybindingmenu.bouquetdown_head keysetup bouquet back
 keybindingmenu.bouquethandling Bouquet-control
-keybindingmenu.bouquetchannels_on_ok OK-key shows channel of current bouquet
-keybindingmenu.bouquetlist_on_ok OK-key shows bouquet-list
-keybindingmenu.allchannels_on_ok OK-key shows all-channels-list
+keybindingmenu.bouquetchannels_on_ok current bouquet
+keybindingmenu.bouquetlist_on_ok bouquet-list
+keybindingmenu.allchannels_on_ok all-services
 
 colorchooser.red KIRMIZI
 colorchooser.green YESIL

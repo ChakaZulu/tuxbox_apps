@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.33 2001/11/26 02:34:03 McClean Exp $
+//  $Id: neutrino.h,v 1.34 2001/12/05 01:40:55 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.34  2001/12/05 01:40:55  McClean
+//  fixed bouquet-options bugs, soft-update-bug and add scartmode-support
+//
 //  Revision 1.33  2001/11/26 02:34:03  McClean
 //  include (.../../stuff) changed - correct unix-formated files now
 //
@@ -157,7 +160,8 @@ class CNeutrinoApp : public CMenuTarget
 	enum
 	{
 		mode_tv = 1,
-		mode_radio = 2
+		mode_radio = 2,
+		mode_scart = 3
 	};
 
 //    EventList *eventlist;
@@ -196,6 +200,7 @@ class CNeutrinoApp : public CMenuTarget
 
 	void tvMode();
 	void radioMode();
+	void scartMode();
 	void setVolume(int key);
 	void AudioMuteToggle();
 

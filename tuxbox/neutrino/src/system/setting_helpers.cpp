@@ -93,6 +93,11 @@ bool CVideoSetupNotifier::changeNotify(string OptionName)
     return false;
 };
 
+bool CBoxTypeSetupNotifier::changeNotify(string OptionName)
+{
+	g_Controld->setBoxType( g_settings.box_Type );
+};
+
 
 void setNetworkAddress(char* ip, char* netmask, char* broadcast)
 {

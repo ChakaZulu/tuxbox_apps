@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.88 2001/12/03 19:09:10 McClean Exp $
+        $Id: neutrino.cpp,v 1.89 2001/12/05 01:40:55 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.89  2001/12/05 01:40:55  McClean
+  fixed bouquet-options bugs, soft-update-bug and add scartmode-support
+
   Revision 1.88  2001/12/03 19:09:10  McClean
   fixed install targets
 
@@ -932,7 +935,8 @@ void CNeutrinoApp::channelsInit()
 void CNeutrinoApp::CmdParser(int argc, char **argv)
 {
  	zapit = false;
-
+	softupdate = false;
+		
 	for(int x=1; x<argc; x++)
 	{
 		if ( !strcmp(argv[x], "-z")) {
@@ -1041,7 +1045,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuSeparator() );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.tvmode", true, "", this, "tv"), true );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.radiomode", (zapit), "", this, "radio") );
-	mainMenu.addItem( new CMenuForwarder("mainmenu.vcrmode", false, "", this, "vcr") );
+	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games") ));
 	mainMenu.addItem( new CMenuForwarder("mainmenu.shutdown", true, "", this, "shutdown") );
 	mainMenu.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1115,10 +1119,10 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 		oj->addOption(1, "options.on");
 	miscSettings.addItem( oj );
 
-	oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, true);
-		oj->addOption(1, "miscsettings.boxtype_nokia");
-		oj->addOption(2, "miscsettings.boxtype_sagem");
-		oj->addOption(3, "miscsettings.boxtype_philips");
+	oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, true, new CBoxTypeSetupNotifier, false );
+		oj->addOption(1, "Nokia");
+		oj->addOption(2, "Sagem");
+		oj->addOption(3, "Philips");
 	miscSettings.addItem( oj );
 
 	miscSettings.addItem( new CMenuForwarder("miscsettings.ucodecheck", true, "", g_UcodeCheck ) );
@@ -1338,7 +1342,7 @@ void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 	keySettings.addItem( new CMenuForwarder("keybindingmenu.tvradiomode", true, "", keySettings_tvradio_mode ));
 
 	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.channellist") );
-	CMenuOptionChooser *oj = new CMenuOptionChooser("keybindingmenu.bouquethandling" , &g_settings.bouquetlist_mode, true);
+	CMenuOptionChooser *oj = new CMenuOptionChooser("keybindingmenu.bouquethandling" , &g_settings.bouquetlist_mode, true );
 		oj->addOption(0, "keybindingmenu.bouquetchannels_on_ok");
 		oj->addOption(1, "keybindingmenu.bouquetlist_on_ok");
 		oj->addOption(2, "keybindingmenu.allchannels_on_ok");
@@ -1918,6 +1922,10 @@ void CNeutrinoApp::tvMode()
 	{
 		return;
 	}
+	else if(mode==mode_scart)
+	{
+		g_Controld->setScartMode( 0 );
+	}
 	mode = mode_tv;
 
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
@@ -1931,11 +1939,25 @@ void CNeutrinoApp::tvMode()
 	}
 }
 
+void CNeutrinoApp::scartMode()
+{
+	if(mode==mode_scart)
+	{
+		return;
+	}
+	mode = mode_scart;
+	g_Controld->setScartMode( 1 );
+}
+
 void CNeutrinoApp::radioMode()
 {
 	if(mode==mode_radio)
 	{
 		return;
+	}
+	else if(mode==mode_scart)
+	{
+		g_Controld->setScartMode( 0 );
 	}
 	mode = mode_radio;
 
@@ -1990,6 +2012,12 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 		radioMode();
 		returnval = CMenuTarget::RETURN_EXIT_ALL;
 	}
+	else if(actionKey=="scart")
+	{
+		//hmm
+		scartMode();
+		returnval = CMenuTarget::RETURN_EXIT_ALL;
+	}
 	else if(actionKey=="network")
 	{
 		setupNetwork( true );
@@ -2007,7 +2035,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.88 2001/12/03 19:09:10 McClean Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.89 2001/12/05 01:40:55 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -6,7 +6,7 @@ options.on wla
 mainmenu.head Menu Glowne
 mainmenu.tvmode Telewizja
 mainmenu.radiomode Radio
-mainmenu.vcrmode VCR-Mode
+mainmenu.scartmode Scart-Mode
 mainmenu.games w Gry grac
 mainmenu.shutdown Wylaczyc
 mainmenu.settings Settings
@@ -24,9 +24,6 @@ miscsettings.head Misc Settings
 miscsettings.ucodecheck Check ucodes
 miscsettings.epgold EPG starym sposobem pokazywac
 miscsettings.boxtype DBox type
-miscsettings.boxtype_nokia Nokia
-miscsettings.boxtype_sagem Sagem
-miscsettings.boxtype_philips Philips
 
 languagesetup.head Ustawienie jezyka
 languagesetup.select Jezyk
@@ -103,12 +100,12 @@ keybindingmenu.channeldown Kanal na dol
 keybindingmenu.channeldown_head Klawisz Kanal na dol
 keybindingmenu.bouquetup next bouquet
 keybindingmenu.bouquetup_head keysetup next bouquet
-keybindingmenu.bouquetupdown bouquet back
-keybindingmenu.bouquetupdown_head keysetup bouquet back
+keybindingmenu.bouquetdown bouquet back
+keybindingmenu.bouquetdown_head keysetup bouquet back
 keybindingmenu.bouquethandling Bouquet-control
-keybindingmenu.bouquetchannels_on_ok OK-key shows channel of current bouquet
-keybindingmenu.bouquetlist_on_ok OK-key shows bouquet-list
-keybindingmenu.allchannels_on_ok OK-key shows all-channels-list
+keybindingmenu.bouquetchannels_on_ok current bouquet
+keybindingmenu.bouquetlist_on_ok bouquet-list
+keybindingmenu.allchannels_on_ok all-services
 
 colorchooser.red czerwony
 colorchooser.green zielony
