@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.77 2001/10/30 21:13:11 field Exp $
+//  $Id: sectionsd.cpp,v 1.78 2001/10/31 12:38:30 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.78  2001/10/31 12:38:30  field
+//  Timethread auch gepaust beim scanning
+//
 //  Revision 1.77  2001/10/30 21:13:11  field
 //  bugfix
 //
@@ -909,6 +912,7 @@ int DMX::change(void)
 // falsch ist es zumindest nicht
 static DMX dmxEIT(0x12, 0x4e, 0xfe, 0x50, 0xf0, 384);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
+static DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
 
 //------------------------------------------------------------
 // misc. functions
@@ -1156,11 +1160,13 @@ static void commandPauseScanning(struct connectionData *client, char *data, cons
   if(scanning && pause) {
     dmxEIT.real_pause();
     dmxSDT.real_pause();
+    dmxTOT.real_pause();
     scanning=0;
   }
   else if(!pause && !scanning) {
     dmxSDT.real_unpause();
     dmxEIT.real_unpause();
+    dmxTOT.real_unpause();
     scanning=1;
   }
   pthread_mutex_unlock(&scanningLock);
@@ -1333,7 +1339,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.77 2001/10/30 21:13:11 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.78 2001/10/31 12:38:30 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2473,7 +2479,7 @@ static void *timeThread(void *)
 {
 const unsigned timeoutInSeconds=31;
 char *buf;
-DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
+// DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
 
   try {
 //  pthread_detach(pthread_self());
@@ -2508,18 +2514,27 @@ DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
       if(dmxTOT.start()) // -> unlock
         return 0;
     }
+
+    dmxTOT.lock();
     struct SI_section_TOT_header header;
+
     int rc=dmxTOT.read((char *)&header, sizeof(header), timeoutInSeconds);
-    if(!rc) {
+    if(!rc)
+    {
+      dmxTOT.unlock();
       dputs("dmxTOT.read timeout");
       continue; // timeout -> keine Zeit
     }
-    else if(rc<0) {
+    else if(rc<0)
+    {
+      dmxTOT.unlock();
       dmxTOT.closefd();
       break;
     }
     buf=new char[sizeof(header)+header.section_length-5];
-    if(!buf) {
+    if(!buf)
+    {
+      dmxTOT.unlock();
       fprintf(stderr, "Not enough memory!\n");
       dmxTOT.closefd();
       break;
@@ -2527,30 +2542,36 @@ DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
     // Den Header kopieren
     memcpy(buf, &header, sizeof(header));
     rc=dmxTOT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
+
+    dmxTOT.unlock();
     delete[] buf;
-    if(!rc) {
+    if(!rc)
+    {
       dputs("dmxTOT.read timeout after header");
       // DMX neu starten, noetig, da bereits der Header gelesen wurde
-      dmxTOT.pause(); // -> lock
-      dmxTOT.unpause(); // -> unlock
+      dmxTOT.real_pause(); // -> lock
+      dmxTOT.real_unpause(); // -> unlock
       continue; // timeout -> kein TDT
     }
-    else if(rc<0) {
+    else if(rc<0)
+    {
       dmxTOT.closefd();
       break;
     }
     time_t tim=changeUTCtoCtime(((const unsigned char *)&header)+3);
-    if(tim) {
+    if(tim)
+    {
 //      timeOffsetFound=0;
 //      parseDescriptors(buf+sizeof(struct SI_section_TOT_header), ((struct SI_section_TOT_header *)buf)->descriptors_loop_length, "DEU");
 //      printf("local time: %s", ctime(&tim));
 //      printf("Time offset %d", timeOffsetMinutes);
 //      if(timeOffsetFound)
 //        tim+=timeOffsetMinutes*60L;
-      if(stime(&tim)< 0) {
+      if(stime(&tim)< 0)
+      {
         perror("[sectionsd] cannot set date");
     	dmxTOT.closefd();
-	break;
+    	break;
       }
       timeset=1;
       time_t t=time(NULL);
@@ -2916,7 +2937,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.77 2001/10/30 21:13:11 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.78 2001/10/31 12:38:30 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
@@ -2962,27 +2983,27 @@ struct sockaddr_in serverAddr;
   // SDT-Thread starten
   rc=pthread_create(&threadSDT, 0, sdtThread, 0);
   if(rc) {
-    fprintf(stderr, "failed to create sdt-thread (rc=%d)\n", rc);
+    fprintf(stderr, "[sectionsd] failed to create sdt-thread (rc=%d)\n", rc);
     return 1;
   }
 
   // EIT-Thread starten
   rc=pthread_create(&threadEIT, 0, eitThread, 0);
   if(rc) {
-    fprintf(stderr, "failed to create eit-thread (rc=%d)\n", rc);
+    fprintf(stderr, "[sectionsd] failed to create eit-thread (rc=%d)\n", rc);
     return 1;
   }
   // time-Thread starten
   rc=pthread_create(&threadTOT, 0, timeThread, 0);
   if(rc) {
-    fprintf(stderr, "failed to create time-thread (rc=%d)\n", rc);
+    fprintf(stderr, "[sectionsd] failed to create time-thread (rc=%d)\n", rc);
     return 1;
   }
 
   // housekeeping-Thread starten
   rc=pthread_create(&threadHouseKeeping, 0, houseKeepingThread, 0);
   if(rc) {
-    fprintf(stderr, "failed to create houskeeping-thread (rc=%d)\n", rc);
+    fprintf(stderr, "[sectionsd] failed to create houskeeping-thread (rc=%d)\n", rc);
     return 1;
   }
 
@@ -3002,17 +3023,17 @@ struct sockaddr_in serverAddr;
     pthread_t threadConnection;
     rc=pthread_create(&threadConnection, &conn_attrs, connectionThread, client);
     if(rc) {
-      fprintf(stderr, "failed to create connection-thread (rc=%d)\n", rc);
+      fprintf(stderr, "[sectionsd] failed to create connection-thread (rc=%d)\n", rc);
       return 4;
     }
   }
   } // try
   catch (std::exception& e) {
-    fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+    fprintf(stderr, "[sectionsd] Caught std-exception in connection-thread %s!\n", e.what());
   }
   catch (...) {
-    fprintf(stderr, "Caught exception in main-thread!\n");
+    fprintf(stderr, "[sectionsd] Caught exception in main-thread!\n");
   }
-  printf("sectionsd ended\n");
+  printf("[sectionsd] ended\n");
   return 0;
 }
