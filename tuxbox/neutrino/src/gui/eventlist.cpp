@@ -1,7 +1,10 @@
 //
-// $Id: eventlist.cpp,v 1.1 2001/09/18 10:50:30 fnbrd Exp $
+// $Id: eventlist.cpp,v 1.2 2001/09/18 11:05:58 field Exp $
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.2  2001/09/18 11:05:58  field
+// Ausgabe quick'n'dirty gefixt
+//
 // Revision 1.1  2001/09/18 10:50:30  fnbrd
 // Eventlist, quick'n dirty
 //
@@ -238,18 +241,17 @@ void EventList::paintItem(int pos)
 		//number
 //                char tmp[10];
 //                sprintf((char*) tmp, "%d", chan->number);
-		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(evt->name.c_str());
-		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, evt->name.c_str(), color, fheight);
+//		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(evt->name.c_str());
+//		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, evt->name.c_str(), color, fheight);
 		printf("Rendering %s\n", evt->name.c_str());
-//		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
-/*
-		if(strlen(chan->currentEvent.c_str()))
-		{
+
+//		if(strlen(chan->currentEvent.c_str()))
+//		{
     			// name + description
-			char nameAndDescription[100];
-			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
-			g_Fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
-                }
+//			char nameAndDescription[100];
+//			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.c_str());
+			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width-numwidth-20, evt->name.c_str(), color);
+/*                }
 		else
 		  //name
 		  g_Fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, chan->name.c_str(), color);
