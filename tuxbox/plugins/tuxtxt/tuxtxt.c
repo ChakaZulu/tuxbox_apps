@@ -66,6 +66,7 @@ void gethotlist()
 	FILE *hl;
 	char line[100];
 
+	hotlistchanged = 0;
 	maxhotlist = -1;
 	sprintf(line, CONFIGDIR "/tuxtxt/hotlist%d.conf", vtxtpid);
 #if DEBUG
@@ -112,6 +113,7 @@ void savehotlist()
 	char line[100];
 	int i;
 
+	hotlistchanged = 0;
 	sprintf(line, CONFIGDIR "/tuxtxt/hotlist%d.conf", vtxtpid);
 #if DEBUG
 	printf("TuxTxt <savehotlist %s", line);
@@ -164,9 +166,6 @@ void decode_btt()
 	int i, current, b1, b2, b3, b4;
 
 	current = 0x100;
-#if DEBUG_BTT
-	printf("TuxTxt <BTT %03x ", current);
-#endif
 	for (i=0; i<799; i++)
 	{
 		b1 = cachetable[0x1f0][0][40+i];
@@ -175,31 +174,15 @@ void decode_btt()
 		else
 		{
 			b1 = dehamming[b1];
-
-			if (b1 == 0xFF)
+			if (b1 == 0xFF) /* hamming error in btt */
 			{
-#if DEBUG_BTT
-				printf("?%c?>\n", cachetable[0x1f0][40+0][i]);
 				cachetable[0x1f0][0][40+799] = 0; /* mark btt as not received */
 				return;
-#endif
 			}
 		}
 		basictop[current] = b1;
 		next_dec(&current);
-#if DEBUG_BTT
-		printf("%x", b1);
-		if ((current & 0x0FF) == 0)
-			printf(">\nTuxTxt <BTT %03x ", current);
-#endif
 	}
-#if DEBUG_BTT
-	printf(">\n");
-#endif
-
-#if DEBUG_BTT
-	printf("TuxTxt <btt/plt"); /* page linking table */
-#endif
 	/* page linking table */
 	maxadippg = -1; /* rebuild table of adip pages */
 	for (i = 0; i < 10; i++)
@@ -207,53 +190,29 @@ void decode_btt()
 		b1 = dehamming[cachetable[0x1f0][0][840 + 8*i +0]];
 
 		if (b1 == 0xE)
-		{
-#if DEBUG_BTT
-			printf(" (u)");
-#endif
 			continue; /* unused */
-		}
 		else if (b1 == 0xF)
-		{
-#if DEBUG_BTT
-			printf(" (end)");
-#endif
 			break; /* end */
-		}
 
 		b4 = dehamming[cachetable[0x1f0][0][840 + 8*i +7]];
 
 		if (b4 != 2) /* only adip, ignore multipage (1) */
-		{
-#if DEBUG_BTT
-			printf(" (%x)", b4);
-#endif
 			continue;
-		}
 
 		b2 = dehamming[cachetable[0x1f0][0][840 + 8*i +1]];
 		b3 = dehamming[cachetable[0x1f0][0][840 + 8*i +2]];
 
 		if (b1 == 0xFF || b2 == 0xFF || b3 == 0xFF)
 		{
-#if DEBUG_BTT
-			printf(" Biterror!>\n");
-#else
 			printf("TuxTxt <Biterror in btt/plt index %d>\n", i);
-#endif
 			cachetable[0x1f0][0][40+799] = 0; /* mark btt as not received */
 			return;
 		}
 
 		b1 = b1<<8 | b2<<4 | b3; /* page number */
 		adippg[++maxadippg] = b1;
-#if DEBUG_BTT
-		printf(" %03x", b1);
-#endif
 	}
-#if DEBUG_BTT
-	printf(">\n");
-#elif DEBUG
+#if DEBUG
 	printf("TuxTxt <BTT decoded>\n");
 #endif
 	bttok = 1;
@@ -274,20 +233,10 @@ void decode_adip() /* additional information table */
 				{
 					b1 = dehamming[cachetable[p][0][40+20*j+0]];
 					if (b1 == 0xE)
-					{
-#if DEBUG_ADIP
-						printf("TuxTxt <adip %03x %2d unused>\n", p, j);
-#endif
 						continue; /* unused */
-					}
 
 					if (b1 == 0xF)
-					{
-#if DEBUG_ADIP
-						printf("TuxTxt <adip %03x %2d end>\n", p, j);
-#endif
 						break; /* end */
-					}
 
 					b2 = dehamming[cachetable[p][0][40+20*j+1]];
 					b3 = dehamming[cachetable[p][0][40+20*j+2]];
@@ -306,9 +255,6 @@ void decode_adip() /* additional information table */
 
 					if (b1>8 || b2>9 || b3>9)
 					{
-#if DEBUG_ADIP
-						printf("TuxTxt <adip %03x %2d %x%x%x ignored>\n", p, j, b1, b2, b3);
-#endif
 						continue;
 					}
 
@@ -336,9 +282,6 @@ void decode_adip() /* additional information table */
 							charfound = 1;
 						}
 					}
-#if DEBUG_ADIP
-					printf("TuxTxt <adip %03x %2d %03x %s>\n", p, j, b1, adip[b1]);
-#endif
 				}
 				adippg[i] = 0; /* completely decoded: clear entry */
 			}
@@ -411,12 +354,12 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 #if 0
 	RenderCharBB(' ', attr);				 /* separator */
 #endif
-	for(col = 0; col < TOPMENULINEWIDTH; col++)
+	for(col = 0; col < TOPMENUCHARS; col++)
 	{
 		RenderCharBB(*p++, attr);
 	}
-	PosY += FONTHEIGHT_NORMAL;
-	memset(p-TOPMENULINEWIDTH, ' ', TOPMENULINEWIDTH); /* init with spaces */
+	PosY += fontheight;
+	memset(p-TOPMENUCHARS, ' ', TOPMENUCHARS); /* init with spaces */
 }
 
 void ClearBB(int color)
@@ -440,7 +383,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.63 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.64 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -506,6 +449,7 @@ void plugin_exec(PluginParam *par)
 				case RC_PLUS:
 				case RC_MINUS:
 				case RC_DBOX:
+				case RC_STANDBY:
 					transpmode = 1; /* switch to normal mode */
 					SwitchTranspMode();
 					break;		/* and evaluate key */
@@ -513,31 +457,31 @@ void plugin_exec(PluginParam *par)
 				case RC_MUTE:		/* regular toggle to transparent */
 					break;
 
-				case RC_HELP: /* switch to scart input */
+				case RC_HELP: /* switch to scart input and back */
 				{
-					int source = 2;
+					int i, n;
+					int vendor = tuxbox_get_vendor();
 
-					if (ioctl(avs, AVSIOSVSW1, &source) < 0)
-						printf("TuxTxt <error switcing to scart video>\n");
+					if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
+					{
+						for (i=0; i < 6; i++)
+						{
+							n = avstable_scart[vendor][i];
+							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
+								perror("TuxTxt <ioctl(avs)>");
+						}
+						
+						while (GetRCCode() != 1) /* wait for any key */
+							UpdateLCD();
 
-					source = 1;
-
-					if (ioctl(avs, AVSIOSASW1, &source) < 0)
-						printf("TuxTxt <error switcing to scart audio>\n");
-
-					while (GetRCCode() != 1) /* wait for any key */
-						UpdateLCD();
-
-					source = 0;
-
-					if (ioctl(avs, AVSIOSVSW1, &source) < 0)
-						printf("TuxTxt <error switcing from scart video>\n");
-
-					source = 0;
-
-					if (ioctl(avs, AVSIOSASW1, &source) < 0)
-						printf("TuxTxt <error switcing from scart audio>\n");
-					continue; /* ignore exit key */
+						for (i=1; i < 6; i += (RCCode == RC_HELP) ? 2 : 1) /* exit with ?: just restore video, leave audio */
+						{
+							n = avstable_dvb[vendor][i];
+							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
+								perror("TuxTxt <ioctl(avs)>");
+						}
+					}
+					continue; /* otherwise ignore exit key */
 				}
 				default:
 					continue; /* ignore all other keys */
@@ -598,7 +542,7 @@ FT_Error MyFaceRequester(FTC_FaceID face_id, FT_Library library, FT_Pointer requ
 
 #if DEBUG
 	if (!result)
-		printf("TuxTxt <Font (%s) loaded>\n", (char*)face_id);
+		printf("TuxTxt <font %s loaded>\n", (char*)face_id);
 	else
 		printf("TuxTxt <open font %s failed>\n", (char*)face_id);
 #endif
@@ -654,30 +598,44 @@ int Init()
 	UpdateLCD();
 
 	/* load config */
-	screen_mode1 = 1;
-	screen_mode2 = 1;
+	screen_mode1 = 0;
+	screen_mode2 = 0;
 	color_mode   = 1;
-	national_subset = 4;
+	national_subset = 4;	/* german */
 	auto_national   = 1;
 
-	if ((conf = fopen(CONFIGDIR "/tuxtxt/tuxtxt.conf", "rb+")) == 0)
+	if ((conf = fopen(TUXTXTCONF, "rt")) == 0)
 	{
 		perror("TuxTxt <fopen tuxtxt.conf>");
-		return 0;
 	}
-
-	fread(&screen_mode1, 1, sizeof(screen_mode1), conf);
-	fread(&screen_mode2, 1, sizeof(screen_mode2), conf);
-	fread(&color_mode, 1, sizeof(color_mode), conf);
-	fread(&national_subset, 1, sizeof(national_subset), conf);
-	fread(&auto_national, 1, sizeof(auto_national), conf);
-
-	screen_old1 = screen_mode1;
-	screen_old2 = screen_mode2;
-	color_old   = color_mode;
-	national_subset_old = national_subset;
-	auto_national_old   = auto_national;
-
+	else
+	{
+		while(1)
+		{
+			char line[100];
+			int ival;
+			
+			if (!fgets(line, sizeof(line), conf))
+				break;
+			
+			if (1 == sscanf(line, "ScreenMode16x9Normal %d", &ival))
+				screen_mode1 = ival & 1;
+			else if (1 == sscanf(line, "ScreenMode16x9Divided %d", &ival))
+				screen_mode2 = ival & 1;
+			else if (1 == sscanf(line, "ColorDimmed %d", &ival))
+				color_mode = ival & 1;
+			else if (1 == sscanf(line, "AutoNational %d", &ival))
+				auto_national = ival & 1;
+			else if (1 == sscanf(line, "NationalSubset %d", &ival))
+			{
+				if (ival >= 0 && ival <= 12)
+					national_subset = ival;
+			}
+		}
+		fclose(conf);
+	}
+	saveconfig = 0;
+	
 	/* init fontlibrary */
 	if ((error = FT_Init_FreeType(&library)))
 	{
@@ -685,17 +643,59 @@ int Init()
 		return 0;
 	}
 
-	if ((error = FTC_Manager_New(library, 3, 2, 0, &MyFaceRequester, NULL, &manager)))
+	if ((error = FTC_Manager_New(library, 7, 2, 0, &MyFaceRequester, NULL, &manager)))
 	{
+		FT_Done_FreeType(library);
 		printf("TuxTxt <FTC_Manager_New: 0x%.2X>\n", error);
 		return 0;
 	}
 
 	if ((error = FTC_SBit_Cache_New(manager, &cache)))
 	{
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
 		printf("TuxTxt <FTC_SBit_Cache_New: 0x%.2X>\n", error);
 		return 0;
 	}
+
+#if CFGTTF 
+
+	/* calculate font dimensions */
+	fontheight = (ey-sy) / 25;
+	fontwidth = fontwidth_normal = (ex-sx) / 40;
+	fontwidth_topmenumain = (ex-sx) * 3 / 4 / 40;
+	fontwidth_topmenusmall = (ex-sx - 40*fontwidth_topmenumain) / TOPMENUCHARS;
+	fontwidth_small = (ex-sx) / 2 / 40;
+	ymosaic[0] = 0; /* y-offsets for 2*3 mosaic */
+	ymosaic[1] = (fontheight + 1) / 3;
+	ymosaic[2] = (fontheight * 2 + 1) / 3;
+	ymosaic[3] = fontheight;
+
+	/* center screen */
+	StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
+	StartY = sy + (((ey-sy) - 25*fontheight) / 2);
+
+	typettf.font.face_id = (FTC_FaceID) TUXTXTTTF;
+	typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+	typettf.font.pix_height = (FT_UShort) fontheight;
+#if HAVE_DVB_API_VERSION >= 3
+	typettf.flags = FT_LOAD_MONOCHROME;
+#endif
+	if ((error = FTC_Manager_Lookup_Face(manager, TUXTXTTTF, &face)))
+	{
+		printf("TuxTxt <FTC_Manager_Lookup_Face failed with Errorcode 0x%.2X>\n", error);
+		FTC_Manager_Done(manager);
+		FT_Done_FreeType(library);
+		return 0;
+	}
+	ascender = fontheight * face->ascender / face->units_per_EM;
+#if DEBUG
+	printf("TuxTxt <fh%d fw%d fs%d tm%d ts%d ym%d %d %d sx%d sy%d a%d>\n",
+			 fontheight, fontwidth, fontwidth_small, fontwidth_topmenumain, fontwidth_topmenusmall,
+			 ymosaic[0], ymosaic[1], ymosaic[2], StartX, StartY, ascender);
+#endif
+	
+#else	 /* !TTF: fixed fonts */
 
 	type0.font.face_id = (FTC_FaceID) TUXTXT0;
 	type1.font.face_id = (FTC_FaceID) TUXTXT1;
@@ -703,20 +703,22 @@ int Init()
 #if HAVE_DVB_API_VERSION >= 3
 	type0.flags = type1.flags = type2.flags = FT_LOAD_MONOCHROME;
 #endif
-	type0.font.pix_width  = type1.font.pix_width  = type2.font.pix_width  = (FT_UShort) FONTWIDTH_NORMAL;
-	type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = (FT_UShort) FONTHEIGHT_NORMAL+1;
+	type0.font.pix_width  = type1.font.pix_width  = type2.font.pix_width  = (FT_UShort) fontwidth_normal;
+	type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = (FT_UShort) fontheight+2;
 
 	type0r = type0;
 	type1r = type1;
 	type2r = type2;
-	type0r.font.pix_width  = type1r.font.pix_width  = type2r.font.pix_width  = (FT_UShort) FONTWIDTH_TOPMENUMAIN;
+	type0r.font.pix_width  = type1r.font.pix_width  = type2r.font.pix_width  = (FT_UShort) fontwidth_topmenumain;
 	type0r.font.face_id = (FTC_FaceID) TUXTXT0R;
 	type1r.font.face_id = (FTC_FaceID) TUXTXT1R;
 	type2r.font.face_id = (FTC_FaceID) TUXTXT2R;
 
 	/* center screen */
-	StartX = sx + (((ex-sx) - 40*type0.font.pix_width) / 2);
-	StartY = sy + (((ey-sy) - 25*fixfontheight) / 2);
+	StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
+	StartY = sy + (((ey-sy) - 25*fontheight) / 2);
+
+#endif /* !TTF */
 
 	/* get fixed screeninfo */
 	if (ioctl(fb, FBIOGET_FSCREENINFO, &fix_screeninfo) == -1)
@@ -781,6 +783,7 @@ int Init()
 		perror("TuxTxt <mmap>");
 		return 0;
 	}
+	ClearBB(black); /* initialize backbuffer */
 
 	/* open demuxer */
 	if ((dmx = open(DMX, O_RDWR)) == -1)
@@ -808,8 +811,7 @@ int Init()
 		else
 		{
 			vtxtpid = pid_table[0].vtxt_pid;
-			strcpy(country_code, pid_table[0].country_code);
-
+			current_national_subset = pid_table[0].national_subset;
 			current_service = 0;
 			RenderMessage(ShowServiceName);
 		}
@@ -818,7 +820,7 @@ int Init()
 	{
 		SDT_ready = 0;
 		getpidsdone = 0;
-		strcpy(country_code, "deu"); /* assume default */
+		current_national_subset = national_subset; /* default from config file */
 		pageupdate = 1; /* force display of message page not found (but not twice) */
 	}
 
@@ -891,6 +893,9 @@ int Init()
 
 void CleanUp()
 {
+	int i, n;
+	int vendor = tuxbox_get_vendor();
+	
 	/* hide pig */
 	if (screenmode)
 		SwitchScreenMode(0); /* turn off divided screen */
@@ -898,6 +903,16 @@ void CleanUp()
 	/* restore videoformat */
 	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
 	ioctl(saa, SAAIOSWSS, &saa_old);
+
+	if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
+	{
+		for (i=0; i < 6; i++) /* reactivate dvb */
+		{
+			n = avstable_dvb[vendor][i];
+			if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
+				perror("TuxTxt <ioctl(avs)>");
+		}
+	}
 
 	/* stop decode-thread */
 	if (pthread_cancel(thread_id) != 0)
@@ -943,22 +958,27 @@ void CleanUp()
 			if (cachetable[clear_page][clear_subpage] != 0)
 				free(cachetable[clear_page][clear_subpage]);
 
+	if (hotlistchanged)
+		savehotlist();
+				
 	/* save config */
-	if (screen_mode1 != screen_old1 || screen_mode2 != screen_old2 ||
-	    color_mode != color_old || national_subset != national_subset_old || auto_national != auto_national_old)
+	if (saveconfig)
 	{
-		rewind(conf);
-
-		fwrite(&screen_mode1, 1, sizeof(screen_mode1), conf);
-		fwrite(&screen_mode2, 1, sizeof(screen_mode2), conf);
-		fwrite(&color_mode, 1, sizeof(color_mode), conf);
-		fwrite(&national_subset, 1, sizeof(national_subset), conf);
-		fwrite(&auto_national, 1, sizeof(auto_national), conf);
-
-		printf("TuxTxt <saving config>\n");
+		if ((conf = fopen(TUXTXTCONF, "wt")) == 0)
+		{
+			perror("TuxTxt <fopen tuxtxt.conf>");
+		}
+		else
+		{
+			printf("TuxTxt <saving config>\n");
+			fprintf(conf, "ScreenMode16x9Normal %d\n", screen_mode1);
+			fprintf(conf, "ScreenMode16x9Divided %d\n", screen_mode2);
+			fprintf(conf, "ColorDimmed %d\n", color_mode);
+			fprintf(conf, "AutoNational %d\n", auto_national);
+			fprintf(conf, "NationalSubset %d\n", national_subset);
+			fclose(conf);
+		}
 	}
-
-	fclose(conf);
 }
 
 /******************************************************************************
@@ -1054,6 +1074,8 @@ int GetTeletextPIDs()
 				{
 					if (PMT[desc_scan] == 0x56)
 					{
+						char country_code[4];
+							
 						for (pid_test = 0; pid_test < pids_found; pid_test++)
 							if (pid_table[pid_test].vtxt_pid == ((PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF))
 								goto skip_pid;
@@ -1062,18 +1084,22 @@ int GetTeletextPIDs()
 						pid_table[pids_found].service_id = PMT[0x03]<<8 | PMT[0x04];
 						if (PMT[desc_scan + 1] == 5)
 						{
-							pid_table[pids_found].country_code[0] = PMT[desc_scan + 2] | 0x20;
-							pid_table[pids_found].country_code[1] = PMT[desc_scan + 3] | 0x20;
-							pid_table[pids_found].country_code[2] = PMT[desc_scan + 4] | 0x20;
-							pid_table[pids_found].country_code[3] = 0;
+							country_code[0] = PMT[desc_scan + 2] | 0x20;
+							country_code[1] = PMT[desc_scan + 3] | 0x20;
+							country_code[2] = PMT[desc_scan + 4] | 0x20;
+							country_code[3] = 0;
+							pid_table[pids_found].national_subset = GetNationalSubset(country_code);
 						}
 						else
 						{
-							pid_table[pids_found].country_code[0] = 0;
+							country_code[0] = 0;
+							pid_table[pids_found].national_subset = -1;
 						}
 
 						if (pid_table[pids_found].vtxt_pid == vtxtpid)
-							printf("TuxTxt <Country code \"%s\">\n", pid_table[pids_found].country_code);
+							printf("TuxTxt <Country code \"%s\" national subset %d>\n",
+									 country_code,
+									 pid_table[pids_found].national_subset);
 
 						pids_found++;
 skip_pid:
@@ -1187,7 +1213,7 @@ skip_pid:
 		while (pid_table[current_service].vtxt_pid != vtxtpid && current_service < pids_found)
 			current_service++;
 
-		strcpy(country_code, pid_table[current_service].country_code);
+		current_national_subset = pid_table[current_service].national_subset;
 		RenderMessage(ShowServiceName);
 	}
 
@@ -1258,15 +1284,15 @@ int GetNationalSubset(char *cc)
 	if (memcmp(cc, "tur", 3) == 0)
 		return 12;
 
-	return countryconverstiontable[countrycontrolbitstable[page][subpage]];
+	return -1;
 }
 
 /******************************************************************************
  * ConfigMenu                                                                 *
  ******************************************************************************/
 
-#define Menu_StartX (StartX + type0.font.pix_width*9/2)
-#define Menu_StartY (StartY + fixfontheight)
+#define Menu_StartX (StartX + fontwidth*9/2)
+#define Menu_StartY (StartY + fontheight)
 #define Menu_Width 31
 
 const char MenuLine[] =
@@ -1296,7 +1322,7 @@ void Menu_HighlightLine(char *menu, int line, int high)
 	int byte;
 
 	PosX = Menu_StartX;
-	PosY = Menu_StartY + line*fixfontheight;
+	PosY = Menu_StartY + line*fontheight;
 
 	for (byte = 0; byte < Menu_Width; byte++)
 		RenderCharFB(menu[itext + byte], (high ? hilitline[byte] : menu[itext + byte+Menu_Width]));
@@ -1306,8 +1332,8 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 {
 	int i, j, k, attr;
 
-	PosX = Menu_StartX + 6*type0.font.pix_width;
-	PosY = Menu_StartY + (MenuLine[M_HOT]+1)*fixfontheight;
+	PosX = Menu_StartX + 6*fontwidth;
+	PosY = Menu_StartY + (MenuLine[M_HOT]+1)*fontheight;
 	j = 2*Menu_Width*(MenuLine[M_HOT]+1) + 6; /* start index in menu */
 
 	for (i=0; i<=maxhotlist+1; i++)
@@ -1335,21 +1361,21 @@ void Menu_UpdateHotlist(char *menu, int hotindex, int menuitem)
 
 		if (i == 4)
 		{
-			PosX = Menu_StartX + 6*type0.font.pix_width;
-			PosY += fixfontheight;
+			PosX = Menu_StartX + 6*fontwidth;
+			PosY += fontheight;
 			j += 2*Menu_Width - 4*4;
 		}
 		else
 		{
 			j += 4; /* one space distance */
-			PosX += type0.font.pix_width;
+			PosX += fontwidth;
 		}
 	}
 
 	hex2str(&menu[2*Menu_Width*MenuLine[M_HOT] + 20 + 2], (hotindex >= 0) ? hotlist[hotindex] : page);
 	memcpy(&menu[2*Menu_Width*MenuLine[M_HOT] + 24], (hotindex >= 0) ? "entf." : "dazu ", 5);
-	PosX = Menu_StartX + 20*type0.font.pix_width;
-	PosY = Menu_StartY + MenuLine[M_HOT]*fixfontheight;
+	PosX = Menu_StartX + 20*fontwidth;
+	PosY = Menu_StartY + MenuLine[M_HOT]*fontheight;
 
 	for (k = 20; k < (24+5); k++)
 		RenderCharFB(menu[2*Menu_Width*MenuLine[M_HOT] + k], (menuitem == M_HOT) ? 'X' : menu[2*Menu_Width*MenuLine[M_HOT] + k+Menu_Width]);
@@ -1372,8 +1398,8 @@ void ConfigMenu(int Init)
 		"åææææææææææææææææææææææææææææçé««««««««««««««««««««««««««««««›"
 		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
 		"ã1 Favoriten: Seite 111 dazu äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
-		"ã íîñò                       äéËÈÈ¨¨ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
-		"ã +-?                        äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ãíîñò                        äéËÈÈ¨¨ÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
+		"ã+-?                         äéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
 		"ã                            äéËËËËËËËËËËËËËËËËËËËËËËËËËËËËËË›"
 		"ã2     Teletext-Auswahl      äéË¤ÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇÇË›"
 		"ãí                          îäéËÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈÈË›"
@@ -1462,7 +1488,7 @@ void ConfigMenu(int Init)
 		for (byte = 0; byte < Menu_Width; byte++)
 			RenderCharFB(menu[line*2*Menu_Width + byte], menu[line*2*Menu_Width + byte+Menu_Width]);
 
-		PosY += fixfontheight;
+		PosY += fontheight;
 	}
 	Menu_HighlightLine(menu, MenuLine[menuitem], 1);
 	hotindex = getIndexOfPageInHotlist();
@@ -1549,7 +1575,7 @@ void ConfigMenu(int Init)
 
 						if (auto_national)
 						{
-							national_subset = GetNationalSubset(pid_table[current_pid].country_code);
+							national_subset = pid_table[current_pid].national_subset;
 
 							memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
 							Menu_HighlightLine(menu, MenuLine[M_NAT], 0);
@@ -1559,6 +1585,7 @@ void ConfigMenu(int Init)
 				}
 
 				case M_NAT:
+					saveconfig = 1;
 					if (national_subset > 0)
 					{
 						national_subset--;
@@ -1627,7 +1654,7 @@ void ConfigMenu(int Init)
 
 						if (auto_national)
 						{
-							national_subset = GetNationalSubset(pid_table[current_pid].country_code);
+							national_subset = pid_table[current_pid].national_subset;
 							memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
 							Menu_HighlightLine(menu, MenuLine[M_NAT], 0);
 						}
@@ -1635,6 +1662,7 @@ void ConfigMenu(int Init)
 					break;
 
 				case M_NAT:
+					saveconfig = 1;
 					if (national_subset < 12)
 					{
 						national_subset++;
@@ -1678,7 +1706,7 @@ void ConfigMenu(int Init)
 						{
 							hotindex = ++maxhotlist;
 							hotlist[hotindex] = page;
-							savehotlist();
+							hotlistchanged = 1;
 							Menu_UpdateHotlist(menu, hotindex, menuitem);
 						}
 					}
@@ -1690,7 +1718,7 @@ void ConfigMenu(int Init)
 							hotlist[hotindex] = hotlist[hotindex+1];
 							hotlist[hotindex+1] = temp;
 							hotindex++;
-							savehotlist();
+							hotlistchanged = 1;
 							Menu_UpdateHotlist(menu, hotindex, menuitem);
 						}
 					}
@@ -1715,7 +1743,7 @@ void ConfigMenu(int Init)
 							maxhotlist++;
 							hotindex = 0;
 							hotlist[hotindex] = page;
-							savehotlist();
+							hotlistchanged = 1;
 							Menu_UpdateHotlist(menu, hotindex, menuitem);
 						}
 					}
@@ -1727,7 +1755,7 @@ void ConfigMenu(int Init)
 							hotlist[hotindex] = hotlist[hotindex-1];
 							hotlist[hotindex-1] = temp;
 							hotindex--;
-							savehotlist();
+							hotlistchanged = 1;
 							Menu_UpdateHotlist(menu, hotindex, menuitem);
 						}
 					}
@@ -1747,7 +1775,7 @@ void ConfigMenu(int Init)
 						{
 							hotlist[++maxhotlist] = page;
 							hotindex = maxhotlist;
-							savehotlist();
+							hotlistchanged = 1;
 							Menu_UpdateHotlist(menu, hotindex, menuitem);
 						}
 					}
@@ -1764,7 +1792,7 @@ void ConfigMenu(int Init)
 							maxhotlist--;
 							if (hotindex > maxhotlist)
 								hotindex = maxhotlist;
-							savehotlist();
+							hotlistchanged = 1;
 							Menu_UpdateHotlist(menu, hotindex, menuitem);
 						}
 					}
@@ -1784,6 +1812,9 @@ void ConfigMenu(int Init)
 						else
 						{
 							unsigned char magazine;
+
+							if (hotlistchanged)
+								savehotlist();
 
 							/* stop old decode-thread */
 							if (pthread_cancel(thread_id) != 0)
@@ -1842,7 +1873,7 @@ void ConfigMenu(int Init)
 
 							/* start demuxer with new vtxtpid */
 							vtxtpid = pid_table[current_pid].vtxt_pid;
-							strcpy(country_code, pid_table[current_pid].country_code);
+							current_national_subset = pid_table[current_pid].national_subset;
 
 							dmx_flt.pid      = vtxtpid;
 							dmx_flt.input    = DMX_IN_FRONTEND;
@@ -1867,12 +1898,13 @@ void ConfigMenu(int Init)
 						RenderMessage(ShowServiceName);
 
 						fcntl(rc, F_SETFL, O_NONBLOCK);
-						RCCode = 0;
+						RCCode = -1;
 						return;
 					}
 					break;
 
 				case M_SC1:
+					saveconfig = 1;
 					screen_mode1++;
 					screen_mode1 &= 1;
 
@@ -1889,6 +1921,7 @@ void ConfigMenu(int Init)
 					break;
 
 				case M_SC2:
+					saveconfig = 1;
 					screen_mode2++;
 					screen_mode2 &= 1;
 
@@ -1901,6 +1934,7 @@ void ConfigMenu(int Init)
 					break;
 
 				case M_COL:
+					saveconfig = 1;
 					color_mode++;
 					color_mode &= 1;
 
@@ -1924,6 +1958,7 @@ void ConfigMenu(int Init)
 					break;
 
 				case M_AUN:
+					saveconfig = 1;
 					auto_national++;
 					auto_national &= 1;
 
@@ -1932,7 +1967,7 @@ void ConfigMenu(int Init)
 						memcpy(&menu[2*Menu_Width*MenuLine[M_AUN] + 26], "ein", 3);
 						menu[MenuLine[M_NAT]*2*Menu_Width +  1] = ' ';
 						menu[MenuLine[M_NAT]*2*Menu_Width + 28] = ' ';
-						national_subset = GetNationalSubset(pid_table[current_pid].country_code);
+						national_subset = pid_table[current_pid].national_subset;
 						memcpy(&menu[2*Menu_Width*MenuLine[M_NAT] + 2], &countrystring[national_subset*26], 26);
 					}
 					else
@@ -1964,12 +1999,13 @@ void ConfigMenu(int Init)
 				break;
 			}
 		}
+		UpdateLCD(); /* update number of cached pages */
 	} while ((RCCode != RC_HOME) && (RCCode != RC_DBOX) && (RCCode != RC_MUTE));
 
 	/* reset to nonblocking mode */
 	fcntl(rc, F_SETFL, O_NONBLOCK);
 	pageupdate = 1;
-	RCCode = 0;
+	RCCode = -1;
 	if (oldscreenmode)
 		SwitchScreenMode(oldscreenmode); /* restore divided screen */
 }
@@ -2021,19 +2057,19 @@ void PageInput(int Number)
 	switch (inputcounter)
 	{
 	case 2:
-		PosX = StartX + 8*type0.font.pix_width;
+		PosX = StartX + 8*fontwidth;
 		RenderCharFB(Number | '0', black<<4 | white);
 		RenderCharFB('-', black<<4 | white);
 		RenderCharFB('-', black<<4 | white);
 		break;
 
 	case 1:
-		PosX = StartX + 9*type0.font.pix_width;
+		PosX = StartX + 9*fontwidth;
 		RenderCharFB(Number | '0', black<<4 | white);
 		break;
 
 	case 0:
-		PosX = StartX + 10*type0.font.pix_width;
+		PosX = StartX + 10*fontwidth;
 		RenderCharFB(Number | '0', black<<4 | white);
 		break;
 	}
@@ -2362,11 +2398,7 @@ void Next100()
 void PageCatching()
 {
 	int val, byte;
-#ifndef DREAMBOX
-	char line25_2[] = " ïð w{hlen   ñò anzeigen   óô abbrechen ¤¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤";
-#else
-	char line25_2[] = " ïð w{hlen   ñò anzeigen   õö abbrechen ¤¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤";
-#endif
+	char line25_2[] = "        íïðî w{hlen   ñò anzeigen       ¤¤¤¤¤¤¤¤¨¨¨¨¤¤¤¤¤¤¤¤¤¤¨¨¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤";
 
 	pagecatching = 1;
 
@@ -2375,12 +2407,15 @@ void PageCatching()
 
 	/* show info line */
 	PosX = StartX;
-	PosY = StartY + 24*fixfontheight;
+	PosY = StartY + 24*fontheight;
 	for (byte = 0; byte < 40; byte++)
 		RenderCharFB(line25_2[byte], line25_2[byte + 40]);
 
 	/* check for pagenumber(s) */
-	CatchNextPage(1);
+	catch_row    = 1;
+	catch_col    = 0;
+	catched_page = 0;
+	CatchNextPage(0, 1);
 
 	if (!catched_page)
 	{
@@ -2399,21 +2434,45 @@ void PageCatching()
 
 		switch (RCCode)
 		{
+		case RC_LEFT:
+			CatchNextPage(0, -1);
+			break;
+		case RC_RIGHT:
+			CatchNextPage(0, 1);
+			break;
 		case RC_UP:
-			CatchPrevPage();
+			CatchNextPage(-1, -1);
 			break;
-
 		case RC_DOWN:
-			CatchNextPage(0);
+			CatchNextPage(1, 1);
 			break;
-
+		case RC_0:
+		case RC_1:
+		case RC_2:
+		case RC_3:
+		case RC_4:
+		case RC_5:
+		case RC_6:
+		case RC_7:
+		case RC_8:
+		case RC_9:
+		case RC_RED:
+		case RC_GREEN:
+		case RC_YELLOW:
+		case RC_BLUE:
+		case RC_PLUS:
+		case RC_MINUS:
+		case RC_DBOX:
 		case RC_HOME:
+		case RC_HELP:
+		case RC_MUTE:
 			fcntl(rc, F_SETFL, O_NONBLOCK);
 			pageupdate = 1;
 			pagecatching = 0;
-			RCCode = 0;
+			RCCode = -1;
 			return;
 		}
+		UpdateLCD();
 	} while (RCCode != RC_OK);
 
 	/* set new page */
@@ -2438,116 +2497,93 @@ void PageCatching()
  * CatchNextPage                                                              *
  ******************************************************************************/
 
-void CatchNextPage(int Init)
+void CatchNextPage(int firstlineinc, int inc)
 {
-	int tmp_page, pages_found=0;
-
-	/* init */
-	if (Init)
-	{
-		catch_row    = 1;
-		catch_col    = 0;
-		catched_page = 0;
-	}
+	int tmp_page, allowwrap = 1; /* allow first wrap around */
 
 	/* catch next page */
-	for (; catch_row < 24; catch_row++)
+	for(;;)
 	{
-		for (; catch_col < 40; catch_col++)
+		unsigned char *p = &(page_char[catch_row*40 + catch_col]);
+		int a = page_atrb[catch_row*40 + catch_col];
+		
+		if (!(a & 1<<8) && /* no mosaic */
+			 (((a & 0xF0) >> 4) != (a & 0x0F)) && /* not hidden */
+			 (*p >= '0' && *p <= '9' &&
+			  *(p+1) >= '0' && *(p+1) <= '9' &&
+			  *(p+2) >= '0' && *(p+2) <= '9') &&
+			 (catch_row == 0 || (*(p-1) < '0' || *(p-1) > '9')) &&
+			 (catch_row == 37 || (*(p+3) < '0' || *(p+3) > '9')))
 		{
-			if (!(page_atrb[catch_row*40 + catch_col] & 1<<8) && (page_char[catch_row*40 + catch_col] >= '0' &&
-			    page_char[catch_row*40 + catch_col] <= '9' && page_char[catch_row*40 + catch_col + 1] >= '0' &&
-			    page_char[catch_row*40 + catch_col + 1] <= '9' && page_char[catch_row*40 + catch_col + 2] >= '0' &&
-			    page_char[catch_row*40 + catch_col + 2] <= '9') && (page_char[catch_row*40 + catch_col - 1] < '0' ||
-			    page_char[catch_row*40 + catch_col - 1] > '9') && (page_char[catch_row*40 + catch_col + 3] < '0' ||
-			    page_char[catch_row*40 + catch_col + 3] > '9'))
+			tmp_page = ((*p - '0')<<8) | ((*(p+1) - '0')<<4) | (*(p+2) - '0');
+
+			if (tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
 			{
-				tmp_page = ((page_char[catch_row*40 + catch_col] - '0')<<8) | ((page_char[catch_row*40 + catch_col + 1] - '0')<<4) | (page_char[catch_row*40 + catch_col + 2] - '0');
-
-				if (tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
-				{
-					catched_page = tmp_page;
-					pages_found++;
-
-					RenderCatchedPage();
-					catch_col += 3;
-
-					printf("TuxTxt <PageCatching: %.3X\n", catched_page);
-
-					return;
-				}
+				catched_page = tmp_page;
+				RenderCatchedPage();
+				catch_col += inc;	/* FIXME: limit */
+				printf("TuxTxt <PageCatching: %.3X\n", catched_page);
+				return;
 			}
 		}
 
-		catch_col = 0;
-	}
-
-	if (Init)
-	{
-		printf("TuxTxt <PageCatching: no PageNumber>\n");
-		return;
-	}
-
-	/* wrap around */
-	catch_row = 1;
-	catch_col = 0;
-
-	if (!pages_found)
-		return;
-
-	pages_found = 0;
-	CatchNextPage(0);
-}
-
-/******************************************************************************
- * CatchPrevPage                                                              *
- ******************************************************************************/
-
-void CatchPrevPage()
-{
-	int tmp_page, pages_found=0;
-
-	/* catch prev page */
-	for (; catch_row > 0; catch_row--)
-	{
-		for (; catch_col > 0; catch_col--)
+		if (firstlineinc > 0)
 		{
-			if (!(page_atrb[catch_row*40 + catch_col] & 1<<8) && (page_char[catch_row*40 + catch_col] >= '0' &&
-			    page_char[catch_row*40 + catch_col] <= '9' && page_char[catch_row*40 + catch_col + 1] >= '0' &&
-			    page_char[catch_row*40 + catch_col + 1] <= '9' && page_char[catch_row*40 + catch_col + 2] >= '0' &&
-			    page_char[catch_row*40 + catch_col + 2] <= '9') && (page_char[catch_row*40 + catch_col - 1] < '0' ||
-			    page_char[catch_row*40 + catch_col - 1] > '9') && (page_char[catch_row*40 + catch_col + 3] < '0' ||
-			    page_char[catch_row*40 + catch_col + 3] > '9'))
+			catch_row++;
+			catch_col = 0;
+			firstlineinc = 0;
+		}
+		else if (firstlineinc < 0)
+		{
+			catch_row--;
+			catch_col = 37;
+			firstlineinc = 0;
+		}
+		else
+			catch_col += inc;
+			
+		if (catch_col > 37)
+		{
+			catch_row++;
+			catch_col = 0;
+		}
+		else if (catch_col < 0)
+		{
+			catch_row--;
+			catch_col = 37;
+		}
+
+		if (catch_row > 23)
+		{
+			if (allowwrap)
 			{
-				tmp_page = ((page_char[catch_row*40 + catch_col] - '0')<<8) | ((page_char[catch_row*40 + catch_col + 1] - '0')<<4) | (page_char[catch_row*40 + catch_col + 2] - '0');
-
-				if (tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
-				{
-					catched_page = tmp_page;
-					pages_found++;
-
-					RenderCatchedPage();
-					catch_col -= 3;
-
-					printf("TuxTxt <PageCatching: %.3X\n", catched_page);
-
-					return;
-				}
+				allowwrap = 0;
+				catch_row = 1;
+				catch_col = 0;
+			}
+			else
+			{
+				printf("TuxTxt <PageCatching: no PageNumber>\n");
+				return;
 			}
 		}
-		catch_col = 39;
+		else if (catch_row < 1)
+		{
+			if (allowwrap)
+			{
+				allowwrap = 0;
+				catch_row = 23;
+				catch_col =37;
+			}
+			else
+			{
+				printf("TuxTxt <PageCatching: no PageNumber>\n");
+				return;
+			}
+		}
 	}
-
-	/* wrap around */
-	catch_row = 23;
-	catch_col = 39;
-
-	if (!pages_found)
-		return;
-
-	pages_found = 0;
-	CatchPrevPage();
 }
+
 
 /******************************************************************************
  * RenderCatchedPage                                                          *
@@ -2562,12 +2598,12 @@ void RenderCatchedPage()
 		zoom = 1<<10;
 
 	/* restore pagenumber */
-	PosX = StartX + pc_old_col*type0.font.pix_width;
+	PosX = StartX + pc_old_col*fontwidth;
 
 	if (zoommode == 2)
-		PosY = StartY + (pc_old_row-12)*fixfontheight*((zoom>>10)+1);
+		PosY = StartY + (pc_old_row-12)*fontheight*((zoom>>10)+1);
 	else
-		PosY = StartY + pc_old_row*fixfontheight*((zoom>>10)+1);
+		PosY = StartY + pc_old_row*fontheight*((zoom>>10)+1);
 
 	if (pc_old_row && pc_old_col) /* not at first call */
 	{
@@ -2591,16 +2627,25 @@ void RenderCatchedPage()
 		CopyBB2FB();
 	}
 
-	PosX = StartX + catch_col*type0.font.pix_width;
+	PosX = StartX + catch_col*fontwidth;
 
 	if (zoommode == 2)
-		PosY = StartY + (catch_row-12)*fixfontheight*((zoom>>10)+1);
+		PosY = StartY + (catch_row-12)*fontheight*((zoom>>10)+1);
 	else
-		PosY = StartY + catch_row*fixfontheight*((zoom>>10)+1);
+		PosY = StartY + catch_row*fontheight*((zoom>>10)+1);
 
-	RenderCharFB(page_char[catch_row*40 + catch_col    ], (page_atrb[catch_row*40 + catch_col    ] & 1<<10) | ((page_atrb[catch_row*40 + catch_col    ] & 0x0F)<<4) | ((page_atrb[catch_row*40 + catch_col    ] & 0xF0)>>4));
-	RenderCharFB(page_char[catch_row*40 + catch_col + 1], (page_atrb[catch_row*40 + catch_col + 1] & 1<<10) | ((page_atrb[catch_row*40 + catch_col + 1] & 0x0F)<<4) | ((page_atrb[catch_row*40 + catch_col + 1] & 0xF0)>>4));
-	RenderCharFB(page_char[catch_row*40 + catch_col + 2], (page_atrb[catch_row*40 + catch_col + 2] & 1<<10) | ((page_atrb[catch_row*40 + catch_col + 2] & 0x0F)<<4) | ((page_atrb[catch_row*40 + catch_col + 2] & 0xF0)>>4));
+	RenderCharFB(page_char[catch_row*40 + catch_col    ],
+					 (page_atrb[catch_row*40 + catch_col    ] & 1<<10) |
+					 ((page_atrb[catch_row*40 + catch_col    ] & 0x0F)<<4) |
+					 ((page_atrb[catch_row*40 + catch_col    ] & 0xF0)>>4));
+	RenderCharFB(page_char[catch_row*40 + catch_col + 1],
+					 (page_atrb[catch_row*40 + catch_col + 1] & 1<<10) |
+					 ((page_atrb[catch_row*40 + catch_col + 1] & 0x0F)<<4) |
+					 ((page_atrb[catch_row*40 + catch_col + 1] & 0xF0)>>4));
+	RenderCharFB(page_char[catch_row*40 + catch_col + 2],
+					 (page_atrb[catch_row*40 + catch_col + 2] & 1<<10) |
+					 ((page_atrb[catch_row*40 + catch_col + 2] & 0x0F)<<4) |
+					 ((page_atrb[catch_row*40 + catch_col + 2] & 0xF0)>>4));
 }
 
 /******************************************************************************
@@ -2649,12 +2694,14 @@ void SwitchScreenMode(int newscreenmode)
 	/* update page */
 	pageupdate = 1;
 
-	/* clear both buffers */
+	/* clear back buffer */
 #ifndef DREAMBOX
-	ClearB(black);
+	clearbbcolor = black;
 #else
-	ClearB(screenmode?transp:black);
+	clearbbcolor = screenmode?transp:black;
 #endif
+	ClearBB(clearbbcolor);
+	
 
 	/* set mode */
 	if (screenmode)								 /* split */
@@ -2666,35 +2713,47 @@ void SwitchScreenMode(int newscreenmode)
 		{
 			if (screen_mode2)	/* 16:9 */
 			{
-				fw = FONTWIDTH_SMALL;
-				fh = FONTHEIGHT_NORMAL;
+				fw = fontwidth_small;
+				fh = fontheight;
+				tw = TV169WIDTH;
+#if CFGTTF 
+		StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
+#endif
 				tx = TV169STARTX;
 				ty = TV169STARTY;
-				tw = TV169WIDTH;
 				th = TV169HEIGHT;
 			}
 			else /* 4:3 */
 			{
-				fw = FONTWIDTH_TOPMENUMAIN;
-				fh = FONTHEIGHT_NORMAL;
+				fw = fontwidth_topmenumain;
+				fh = fontheight;
+				tw = TV43WIDTH;
+#if CFGTTF 
+		StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
+#endif
 				tx = TV43STARTX;
 				ty = TV43STARTY;
-				tw = TV43WIDTH;
 				th = TV43HEIGHT;
 			}
 		}
 		else /* 2: split with full height tv picture */
 		{
-			fw = FONTWIDTH_SMALL;
-			fh = FONTHEIGHT_NORMAL;
-			tx = StartX+322;
+			fw = fontwidth_small;
+			fh = fontheight;
+			tx = StartX+2+40*fontwidth_small;
 			ty = StartY;
 			tw = 320;
 			th = 526;
 		}
 		
+#if CFGTTF 
+		fontwidth = fw;
+		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+		StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
+#else	 /* !TTF */
 		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fw;
-		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = fh;
+		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = fh+1;
+#endif	 /* !TTF */
 
 #if HAVE_DVB_API_VERSION < 3
 		avia_pig_hide(pig);
@@ -2724,8 +2783,15 @@ void SwitchScreenMode(int newscreenmode)
 #else
 		ioctl(pig, VIDIOC_OVERLAY, &screenmode);
 #endif
-		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = FONTWIDTH_NORMAL;
-		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = FONTHEIGHT_NORMAL+1;
+
+#if CFGTTF 
+		fontwidth = fontwidth_normal;
+		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+		StartX = sx + (ex-sx - 40*fontwidth) / 2; /* center screen */
+#else	 /* !TTF */
+		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fontwidth_normal;
+		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = fontheight+2;
+#endif	 /* !TTF */
 
 		ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screen_mode1]);
 		ioctl(saa, SAAIOSWSS, &saamodes[screen_mode1]);
@@ -2783,25 +2849,382 @@ void SwitchHintMode()
 }
 
 /******************************************************************************
- * RenderChar                                                                 *
+ * RenderChar (TTF)                                                           *
  ******************************************************************************/
+
+#if CFGTTF
+
+void FillRect(int x, int y, int w, int h, int color)
+{
+	unsigned char *p = lfb + x + y * var_screeninfo.xres;
+
+	if (w > 0)
+		for ( ; h > 0 ; h--)
+		{
+			memset(p, color, w);
+			p += var_screeninfo.xres;
+		}
+}
+
+void DrawVLine(int x, int y, int l, int color)
+{
+	unsigned char *p = lfb + x + y * var_screeninfo.xres;
+
+	for ( ; l > 0 ; l--)
+	{
+		*p = color;
+		p += var_screeninfo.xres;
+	}
+}
+
+void DrawHLine(int x, int y, int l, int color)
+{
+	if (l > 0)
+		memset(lfb + x + y * var_screeninfo.xres, color, l);
+}
+
+void FillRectMosaicSeparated(int x, int y, int w, int h, int fgcolor, int bgcolor, int set)
+{
+	FillRect(x, y, w, h, bgcolor);
+	if (set)
+	{
+		FillRect(x+1, y+1, w-2, h-2, fgcolor);
+	}
+}
 
 void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 {
-	unsigned char *p; /* running pointer into framebuffer */
+	int Row, Pitch, Bit;
+	int error, glyph;
+	int bgcolor, fgcolor;
+	int factor;
 	unsigned char *sbitbuffer;
+
+	/* skip doubleheight chars in lower line */
+	if (Char == 0xFF)
+	{
+		PosX += fontwidth;
+		return;
+	}
+
+	/* get colors */
+	if (transpmode == 1 && PosY < StartY + 24*fontheight)
+		bgcolor = transp2;
+	else
+		bgcolor = (Attribute>>4) & 0x0F;
+	fgcolor = Attribute & 0x0F;
+
+	/* handle mosaic */
+	if ((Attribute & 0x300) &&
+		 ((Char&0xA0) == 0x20))
+	{
+		int w1 = fontwidth / 2;
+		int w2 = fontwidth - w1;
+		int y;
+		
+		Char = (Char & 0x1f) | ((Char & 0x40) >> 1);
+		if (Attribute & 0x200) /* separated mosaic */
+			for (y=0; y<3; y++)
+			{
+				FillRectMosaicSeparated(PosX,      PosY + yoffset + ymosaic[y], w1, ymosaic[y+1] - ymosaic[y], fgcolor, bgcolor, Char & 0x01);
+				FillRectMosaicSeparated(PosX + w1, PosY + yoffset + ymosaic[y], w2, ymosaic[y+1] - ymosaic[y], fgcolor, bgcolor, Char & 0x02);
+				Char >>= 2;
+			}
+		else
+			for (y=0; y<3; y++)
+			{
+				FillRect(PosX,      PosY + yoffset + ymosaic[y], w1, ymosaic[y+1] - ymosaic[y], (Char & 0x01) ? fgcolor : bgcolor);
+				FillRect(PosX + w1, PosY + yoffset + ymosaic[y], w2, ymosaic[y+1] - ymosaic[y], (Char & 0x02) ? fgcolor : bgcolor);
+				Char >>= 2;
+			}
+		
+		PosX += fontwidth;
+		return;
+	}
+	
+	if (zoom && (Attribute & 1<<10))
+		factor = 4;
+	else if (zoom || (Attribute & 1<<10))
+		factor = 2;
+	else
+		factor = 1;
+		
+	if (!Char || Char == ' ')
+	{
+		FillRect(PosX, PosY + yoffset, fontwidth, factor*fontheight, bgcolor);
+		PosX += fontwidth;
+		return;
+	}
+	
+	/* load char */
+	switch (Char)
+	{
+	case 0x23:
+	case 0x24:
+		Char = nationaltable23[national_subset][Char-0x23];
+		break;
+	case 0x40:
+		Char = nationaltable40[national_subset];
+		break;
+	case 0x5B:
+	case 0x5C:
+	case 0x5D:
+	case 0x5E:
+	case 0x5F:
+	case 0x60:
+		Char = nationaltable5b[national_subset][Char-0x5B];
+		break;
+	case 0x7B:
+	case 0x7C:
+	case 0x7D:
+	case 0x7E:
+		Char = nationaltable7b[national_subset][Char-0x7B];
+		break;
+	case 0x00:
+	case 0x20:
+		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0x7F:
+		FillRect(PosX, PosY + yoffset, fontwidth, factor*ascender, fgcolor);
+		FillRect(PosX, PosY + yoffset + factor*ascender, fontwidth, factor*(fontheight-ascender), bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE0: /* |- */
+		DrawHLine(PosX, PosY + yoffset, fontwidth, fgcolor);
+		DrawVLine(PosX, PosY + yoffset +1, fontheight -1, fgcolor);
+		FillRect(PosX +1, PosY + yoffset +1, fontwidth-1, fontheight-1, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE1: /* - */
+		DrawHLine(PosX, PosY + yoffset, fontwidth, fgcolor);
+		FillRect(PosX, PosY + yoffset +1, fontwidth, fontheight-1, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE2: /* -| */
+		DrawHLine(PosX, PosY + yoffset, fontwidth, fgcolor);
+		DrawVLine(PosX + fontwidth -1, PosY + yoffset +1, fontheight -1, fgcolor);
+		FillRect(PosX, PosY + yoffset +1, fontwidth-1, fontheight-1, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE3: /* |  */
+		DrawVLine(PosX, PosY + yoffset, fontheight, fgcolor);
+		FillRect(PosX +1, PosY + yoffset, fontwidth -1, fontheight, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE4: /*  | */
+		DrawVLine(PosX + fontwidth -1, PosY + yoffset, fontheight, fgcolor);
+		FillRect(PosX, PosY + yoffset, fontwidth -1, fontheight, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE5: /* |_ */
+		DrawHLine(PosX, PosY + yoffset + fontheight -1, fontwidth, fgcolor);
+		DrawVLine(PosX, PosY + yoffset, fontheight -1, fgcolor);
+		FillRect(PosX +1, PosY + yoffset, fontwidth-1, fontheight-1, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE6: /* _ */
+		DrawHLine(PosX, PosY + yoffset + fontheight -1, fontwidth, fgcolor);
+		FillRect(PosX, PosY + yoffset, fontwidth, fontheight-1, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE7: /* _| */
+		DrawHLine(PosX, PosY + yoffset + fontheight -1, fontwidth, fgcolor);
+		DrawVLine(PosX + fontwidth -1, PosY + yoffset, fontheight -1, fgcolor);
+		FillRect(PosX, PosY + yoffset, fontwidth-1, fontheight-1, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE8: /* Ii */
+		FillRect(PosX +1, PosY + yoffset, fontwidth -1, fontheight, bgcolor);
+		for (Row=0; Row < fontwidth/2; Row++)
+			DrawVLine(PosX + Row, PosY + yoffset + Row, fontheight - Row, fgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xE9: /* II */
+		FillRect(PosX, PosY + yoffset, fontwidth/2, fontheight, fgcolor);
+		FillRect(PosX + fontwidth/2, PosY + yoffset, (fontwidth+1)/2, fontheight, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xEA: /* °  */
+		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
+		FillRect(PosX, PosY + yoffset, fontwidth/2, fontwidth/2, fgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xEB: /* ¬ */
+		FillRect(PosX, PosY + yoffset +1, fontwidth, fontheight -1, bgcolor);
+		for (Row=0; Row < fontwidth/2; Row++)
+			DrawHLine(PosX + Row, PosY + yoffset + Row, fontwidth - Row, fgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xEC: /* -- */
+		FillRect(PosX, PosY + yoffset, fontwidth, fontwidth/2, fgcolor);
+		FillRect(PosX, PosY + yoffset + fontwidth/2, fontwidth, fontheight - fontwidth/2, bgcolor);
+		PosX += fontwidth;
+		return;
+	case 0xED:
+	case 0xEE:
+	case 0xEF:
+	case 0xF0:
+	case 0xF1:
+	case 0xF2:
+	case 0xF3:
+	case 0xF4:
+	case 0xF5:
+	case 0xF6:
+		Char = arrowtable[Char - 0xED];
+		break;
+	default:
+		break;
+	}
+
+	if (!(glyph = FT_Get_Char_Index(face, Char)))
+	{
+#if 1
+		printf("TuxTxt <FT_Get_Char_Index for Char %x \"%c\" failed\n", Char, Char);
+#endif
+		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
+		PosX += fontwidth;
+		return;
+	}
+
+	if ((error = FTC_SBitCache_Lookup(cache, &typettf, glyph, &sbit, NULL)) != 0)
+	{
+#if DEBUG
+		printf("TuxTxt <FTC_SBitCache_Lookup: 0x%x> c%x a%x g%x w%d h%d x%d y%d\n",
+				 error, Char, Attribute, glyph, fontwidth, fontheight, PosX, PosY);
+#endif
+		PosX += fontwidth;
+		return;
+	}
+
+	/* render char */
+	sbitbuffer = sbit->buffer;
+  	if (yoffset >= 0)	/* framebuffer */
+	{
+		unsigned char *p;
+		int f; /* runningh counter for zoom factor */
+		
+		Row = factor * (ascender - sbit->top);
+		FillRect(PosX, PosY + yoffset, fontwidth, Row, bgcolor); /* fill upper margin */
+
+		p = lfb + PosX + (yoffset + PosY + Row) * var_screeninfo.xres; /* running pointer into framebuffer */
+		for (Row = sbit->height; Row; Row--) /* row counts up, but down may be a little faster :) */
+		{
+			int pixtodo = sbit->width;
+			char *pstart = p;
+
+#if 1
+			for (Bit = sbit->left; Bit > 0; Bit--) /* fill left margin */
+			{
+				for (f = factor-1; f >= 0; f--)
+					*(p + f*var_screeninfo.xres) = bgcolor;
+				p++;
+			}
+#endif
+
+			for (Pitch = sbit->pitch; Pitch; Pitch--)
+			{
+				for (Bit = 0x80; Bit; Bit >>= 1)
+				{
+					int color;
+				
+					if (--pixtodo < 0)
+						break;
+
+					if (*sbitbuffer & Bit) /* bit set -> foreground */
+						color = fgcolor;
+					else /* bit not set -> background */
+						color = bgcolor;
+				
+					for (f = factor-1; f >= 0; f--)
+						*(p + f*var_screeninfo.xres) = color;
+
+					p++;
+				}
+				sbitbuffer++;
+			}
+
+#if 1
+			for (Bit = fontwidth - sbit->width - sbit->left; Bit > 0; Bit--) /* fill rest of char width */
+#else
+			for (Bit = fontwidth - sbit->width; Bit > 0; Bit--) /* fill rest of char width */
+#endif
+			{
+				for (f = factor-1; f >= 0; f--)
+					*(p + f*var_screeninfo.xres) = bgcolor;
+				p++;
+			}
+
+			p = pstart + factor*var_screeninfo.xres;
+		}
+
+		Row = ascender - sbit->top + sbit->height;
+		FillRect(PosX, PosY + yoffset + Row*factor, fontwidth, (fontheight - Row) * factor, bgcolor); /* fill lower margin */
+
+		PosX += fontwidth;
+
+	}
+	else /* yoffset<0: LCD */
+	{
+		int x = ((-yoffset) & 0xFF) + sbit->left;
+		int y = ((-yoffset)>>8 & 0xFF) + ascender - sbit->top;
+		int xstart = x;
+
+		for (Row = fontheight; Row; Row--) /* row counts up, but down may be a little faster :) */
+		{
+			int pixtodo = sbit->width;
+			int lcdbase = (y/8)*120;
+			int lcdmask = 1 << (y%8);
+
+			for (Pitch = sbit->pitch; Pitch; Pitch--)
+			{
+				for (Bit = 0x80; Bit; Bit >>= 1)
+				{
+					if (--pixtodo < 0)
+						break;
+
+					if (*sbitbuffer & Bit)
+						lcd_backbuffer[x + lcdbase] |= lcdmask;
+					else
+						lcd_backbuffer[x + lcdbase] &= ~lcdmask;
+					x++;
+				}
+				sbitbuffer++;
+			}
+			x = xstart;
+			y++;
+		}
+	}
+}
+
+/******************************************************************************
+ * RenderChar (!TTF)                                                          *
+ ******************************************************************************/
+
+#else	 /* !TTF */
+
+void RenderChar(int Char, int Attribute, int zoom, int yoffset)
+{
 	int Row, Pitch, Bit;
 	int error;
 	int bgcolor, fgcolor;
+	unsigned char *sbitbuffer;
 	FONTTYPE *pt;
 
-#if (FONTWIDTH_TOPMENUMAIN==FONTWIDTH_SMALL)
+	/* skip doubleheight chars in lower line */
+	if (Char == 0xFF)
+	{
+		PosX += fontwidth;
+		return;
+	}
+
+#if (fontwidth_topmenumain==fontwidth_small)
 #define pt0 &type0
 #define pt1 &type1
 #define pt2 &type2
 #else
 	FONTTYPE *pt0, *pt1, *pt2;
-	if (type0.font.pix_width == FONTWIDTH_TOPMENUMAIN)
+	if (fontwidth == fontwidth_topmenumain)
 	{
 		/* pointer to current main font type (8/16pt or 12pt for split screen with topmenu) */
 		pt0 = &type0r;
@@ -2815,13 +3238,6 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		pt2 = &type2;
 	}
 #endif
-
-	/* skip doubleheight chars in lower line */
-	if (Char == 0xFF)
-	{
-		PosX += (*pt0).font.pix_width;
-		return;
-	}
 
 	/* load char */
 	if ((Attribute>>8) & 3)
@@ -2889,67 +3305,107 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	{
 #if DEBUG
 		printf("TuxTxt <FTC_SBitCache_Lookup: 0x%x> c%x a%x w%d h%d x%d y%d\n",
-				 error, Char, Attribute, (*pt0).font.pix_width, (*pt0).font.pix_height, PosX, PosY);
+				 error, Char, Attribute, (*pt).font.pix_width, (*pt).font.pix_height, PosX, PosY);
 #endif
-		PosX += (*pt2).font.pix_width;
+		PosX += (*pt).font.pix_width;
 		return;
 	}
 
 	/* render char */
-	p = lfb + PosX + (yoffset+PosY)*var_screeninfo.xres; /* running pointer into framebuffer */
 	sbitbuffer = sbit->buffer;
-	if (transpmode == 1 && PosY < StartY + 24*fixfontheight)
-		bgcolor = transp2;
-	else
-		bgcolor = (Attribute>>4) & 0x0F;
-	fgcolor = Attribute & 0x0F;
-	
-	for (Row = fixfontheight; Row; Row--) /* row counts up, but down may be a little faster :) */
+  	if (yoffset >= 0)	/* framebuffer */
 	{
-		int pixtodo = sbit->width;
-		char *pstart = p;
-
-		for (Pitch = sbit->pitch; Pitch; Pitch--)
+		unsigned char *p = lfb + PosX + (yoffset+PosY)*var_screeninfo.xres; /* running pointer into framebuffer */
+		if (transpmode == 1 && PosY < StartY + 24*fontheight)
+			bgcolor = transp2;
+		else
+			bgcolor = (Attribute>>4) & 0x0F;
+		fgcolor = Attribute & 0x0F;
+		
+		for (Row = sbit->height; Row; Row--) /* row counts up, but down may be a little faster :) */
 		{
-			for (Bit = 0x80; Bit; Bit >>= 1)
+			int pixtodo = sbit->width;
+			char *pstart = p;
+
+			for (Pitch = sbit->pitch; Pitch; Pitch--)
 			{
-				int color;
-				
-				if (--pixtodo < 0)
-					break;
-
-				if (*sbitbuffer & Bit) /* bit set -> foreground */
-					color = fgcolor;
-				else /* bit not set -> background */
-					color = bgcolor;
-				
-				*p = color;
-
-				if (zoom || (Attribute & 1<<10))
+				for (Bit = 0x80; Bit; Bit >>= 1)
 				{
-					*(p + 1*var_screeninfo.xres) = color;
-					if (zoom && (Attribute & 1<<10))
-					{
-						*(p + 2*var_screeninfo.xres) = color;
-						*(p + 3*var_screeninfo.xres) = color;
-					}
-				}
+					int color;
+				
+					if (--pixtodo < 0)
+						break;
 
-				p++;
+					if (*sbitbuffer & Bit) /* bit set -> foreground */
+						color = fgcolor;
+					else /* bit not set -> background */
+						color = bgcolor;
+				
+					*p = color;
+
+					if (zoom || (Attribute & 1<<10))
+					{
+						*(p + 1*var_screeninfo.xres) = color;
+						if (zoom && (Attribute & 1<<10))
+						{
+							*(p + 2*var_screeninfo.xres) = color;
+							*(p + 3*var_screeninfo.xres) = color;
+						}
+					}
+
+					p++;
+				}
+				sbitbuffer++;
 			}
-			sbitbuffer++;
+
+			if (zoom && (Attribute & 1<<10))
+				p = pstart + 4*var_screeninfo.xres;
+			else if (zoom || (Attribute & 1<<10))
+				p = pstart + 2*var_screeninfo.xres;
+			else
+				p = pstart + 1*var_screeninfo.xres;
 		}
 
-		if (zoom && (Attribute & 1<<10))
-			p = pstart + 4*var_screeninfo.xres;
-		else if (zoom || (Attribute & 1<<10))
-			p = pstart + 2*var_screeninfo.xres;
-		else
-			p = pstart + 1*var_screeninfo.xres;
+#if 0		
+		PosX += sbit->xadvance;
+#else
+		PosX += fontwidth;
+#endif
 	}
+	else /* yoffset<0: LCD */
+	{
+		int x = (-yoffset) & 0xFF;
+		int y = (-yoffset)>>8 & 0xFF;
+		int xstart = x;
 
-	PosX += sbit->width;
+		for (Row = fontheight; Row; Row--) /* row counts up, but down may be a little faster :) */
+		{
+			int pixtodo = sbit->width;
+			int lcdbase = (y/8)*120;
+			int lcdmask = 1 << (y%8);
+
+			for (Pitch = sbit->pitch; Pitch; Pitch--)
+			{
+				for (Bit = 0x80; Bit; Bit >>= 1)
+				{
+					if (--pixtodo < 0)
+						break;
+
+					if (*sbitbuffer & Bit)
+						lcd_backbuffer[x + lcdbase] |= lcdmask;
+					else
+						lcd_backbuffer[x + lcdbase] &= ~lcdmask;
+					x++;
+				}
+				sbitbuffer++;
+			}
+			x = xstart;
+			y++;
+		}
+	}
 }
+
+#endif /* !TTF */
 
 /******************************************************************************
  * RenderCharFB                                                               *
@@ -2992,6 +3448,20 @@ void RenderCharLCD(int Digit, int XPos, int YPos)
 		}
 	}
 }
+
+#if 0
+void RenderCharLCDsmall(int Char, int XPos, int YPos)
+{
+	int old_width = fontwidth;
+	int old_height = fontheight;
+	typettf.font.pix_width = fontwidth = fontwidth_small_lcd;
+	typettf.font.pix_height = fontheight = fontwidth_small_lcd;
+	RenderChar(Char, 0, 0, -(YPos<<8 | XPos));
+	fontwidth = old_width;
+	typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+	typettf.font.pix_height = fontheight = old_height;
+}
+#endif
 
 /******************************************************************************
  * RenderMessage                                                              *
@@ -3068,44 +3538,44 @@ void RenderMessage(int Message)
 		memcpy(&message_3, &message_7, sizeof(message_7));
 
 	/* render infobar */
-	PosX = StartX + type0.font.pix_width+5;
-	PosY = StartY + fixfontheight*16;
+	PosX = StartX + fontwidth+5;
+	PosY = StartY + fontheight*16;
 	for (byte = 0; byte < 37; byte++)
 		RenderCharFB(message_1[byte], menucolor<<4 | menu2);
 	RenderCharFB(message_1[37], fbcolor<<4 | menu2);
 
-	PosX = StartX + type0.font.pix_width+5;
-	PosY = StartY + fixfontheight*17;
+	PosX = StartX + fontwidth+5;
+	PosY = StartY + fontheight*17;
 	RenderCharFB(message_2[0], menucolor<<4 | menu2);
 	for (byte = 1; byte < 36; byte++)
 		RenderCharFB(message_2[byte], menucolor<<4 | white);
 	RenderCharFB(message_2[36], menucolor<<4 | menu2);
 	RenderCharFB(message_2[37], fbcolor<<4 | menu2);
 
-	PosX = StartX + type0.font.pix_width+5;
-	PosY = StartY + fixfontheight*18;
+	PosX = StartX + fontwidth+5;
+	PosY = StartY + fontheight*18;
 	RenderCharFB(message_3[0], menucolor<<4 | menu2);
 	for (byte = 1; byte < 36; byte++)
 		RenderCharFB(message_3[byte], menucolor<<4 | white);
 	RenderCharFB(message_3[36], menucolor<<4 | menu2);
 	RenderCharFB(message_3[37], fbcolor<<4 | menu2);
 
-	PosX = StartX + type0.font.pix_width+5;
-	PosY = StartY + fixfontheight*19;
+	PosX = StartX + fontwidth+5;
+	PosY = StartY + fontheight*19;
 	RenderCharFB(message_4[0], menucolor<<4 | menu2);
 	for (byte = 1; byte < 36; byte++)
 		RenderCharFB(message_4[byte], menucolor<<4 | white);
 	RenderCharFB(message_4[36], menucolor<<4 | menu2);
 	RenderCharFB(message_4[37], fbcolor<<4 | menu2);
 
-	PosX = StartX + type0.font.pix_width+5;
-	PosY = StartY + fixfontheight*20;
+	PosX = StartX + fontwidth+5;
+	PosY = StartY + fontheight*20;
 	for (byte = 0; byte < 37; byte++)
 		RenderCharFB(message_5[byte], menucolor<<4 | menu2);
 	RenderCharFB(message_5[37], fbcolor<<4 | menu2);
 
-	PosX = StartX + type0.font.pix_width+5;
-	PosY = StartY + fixfontheight*21;
+	PosX = StartX + fontwidth+5;
+	PosY = StartY + fontheight*21;
 	for (byte = 0; byte < 38; byte++)
 		RenderCharFB(message_6[byte], fbcolor<<4 | menu2);
 }
@@ -3126,8 +3596,13 @@ void RenderPage()
 	{
 		/* get national subset */
 		if (auto_national)
-			national_subset = GetNationalSubset(country_code);
-
+		{
+			if (current_national_subset >= 0)
+				national_subset = current_national_subset;
+			else
+				national_subset = countryconversiontable[countrycontrolbitstable[page][subpage]];
+		}
+		
 		/* reset update flag */
 		pageupdate = 0;
 
@@ -3150,7 +3625,7 @@ void RenderPage()
 			for (col = 0; col < 40; col++)
 				RenderCharBB(page_char[row*40 + col], page_atrb[row*40 + col]);
 
-			PosY += fixfontheight;
+			PosY += fontheight;
 		}
 
 		/* update framebuffer */
@@ -3159,7 +3634,7 @@ void RenderPage()
 	else if (transpmode != 2 && zoommode != 2)
 	{
 		/* update timestring */
-		PosX = StartX + 32*type0.font.pix_width;
+		PosX = StartX + 32*fontwidth;
 		PosY = StartY;
 
 		for (byte = 0; byte < 8; byte++)
@@ -3218,23 +3693,22 @@ void CreateLine25()
 
 	if (bttok && screenmode == 1) /* TOP-Info present, divided screen -> create TOP overview */
 	{
-#if (TOPMENULINEWIDTH < (TOPMENUINDENTDEF+12+TOPMENUSPC+3+1))
-		char line[TOPMENUINDENTDEF+12+TOPMENUSPC+3+1];
-#else
-		char line[TOPMENULINEWIDTH];
-#endif
+		char line[TOPMENUCHARS];
 		int current;
 		int prev10done, next10done, next100done, indent;
 		int attrcol; /* color attribute for navigation keys */
 		int attr;
 		int topmenuendy = screen_mode2 ? TOPMENU169ENDY : TOPMENU43ENDY;
 
-#if (FONTWIDTH_TOPMENUMAIN != FONTWIDTH_TOPMENU)
-		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = FONTWIDTH_TOPMENU;
-#endif
+#if CFGTTF 
+		fontwidth = fontwidth_topmenusmall;
+		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+#else	 /* !TTF */
+		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fontwidth_topmenusmall;
+#endif /* !TTF */
 
 		PosY = TOPMENUSTARTY;
-		memset(line, ' ', TOPMENULINEWIDTH); /* init with spaces */
+		memset(line, ' ', TOPMENUCHARS); /* init with spaces */
 
 		memcpy(line+TOPMENUINDENTBLK, adip[prev_100], 12);
 		hex2str(&line[TOPMENUINDENTDEF+12+TOPMENUSPC+2], prev_100);
@@ -3249,21 +3723,21 @@ void CreateLine25()
 #endif
 
 		prev10done = next10done = next100done = 0;
-		while (PosY <= (topmenuendy-fixfontheight))
+		while (PosY <= (topmenuendy-fontheight))
 		{
 			attr = 0;
 			attrcol = black<<4 | white;
-			if (!next100done && (PosY > (topmenuendy - 2*fixfontheight))) /* last line */
+			if (!next100done && (PosY > (topmenuendy - 2*fontheight))) /* last line */
 			{
 				attrcol = 'X';
 				current = next_100;
 			}
-			else if (!next10done && (PosY > (topmenuendy - 3*fixfontheight))) /* line before */
+			else if (!next10done && (PosY > (topmenuendy - 3*fontheight))) /* line before */
 			{
 				attrcol = 'A';
 				current = next_10;
 			}
-			else if (!prev10done && (PosY > (topmenuendy - 4*fixfontheight))) /* line before */
+			else if (!prev10done && (PosY > (topmenuendy - 4*fontheight))) /* line before */
 			{
 				attrcol = '1';
 				current = prev_10;
@@ -3318,14 +3792,17 @@ void CreateLine25()
 			hex2str(&line[TOPMENUINDENTDEF+12+TOPMENUSPC+2], current);
 			RenderClearMenuLineBB(line, attrcol, attr);
 		}
-#if (FONTWIDTH_TOPMENUMAIN != FONTWIDTH_TOPMENU)
-		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = screen_mode2 ? FONTWIDTH_SMALL : FONTWIDTH_TOPMENUMAIN;
-#endif
+#if CFGTTF 
+		fontwidth = screen_mode2 ? fontwidth_small : fontwidth_topmenumain;
+		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+#else	 /* !TTF */
+		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = screen_mode2 ? fontwidth_small : fontwidth_topmenumain;
+#endif /* !TTF */
 	}
 
 	/* render line 25 */
 	PosX = StartX;
-	PosY = StartY + 24*fixfontheight;
+	PosY = StartY + 24*fontheight;
 
 	for (byte = 0; byte < 40; byte++)
 	{
@@ -3359,16 +3836,20 @@ void CopyBB2FB()
 		if (ioctl(fb, FBIOPAN_DISPLAY, &var_screeninfo) == -1)
 			perror("TuxTxt <FBIOPAN_DISPLAY>");
 
-		if (StartX > 0 && *lfb != *(lfb + var_screeninfo.xres * var_screeninfo.yres)) /* adapt Background of backbuffer if changed */
+		if (StartX > 0 && *lfb != *(lfb + var_screeninfo.xres * var_screeninfo.yres)) /* adapt background of backbuffer if changed */
 			 ClearBB(*(lfb + var_screeninfo.xres * var_screeninfo.yoffset));
-
+		if (clearbbcolor >= 0)
+		{
+			ClearBB(clearbbcolor);
+			clearbbcolor = -1;
+		}
 		return;
 	}
 
 	src = dst = lfb + StartY*var_screeninfo.xres;
 
 	if (zoommode == 2)
-		src += 12*fixfontheight*var_screeninfo.xres;
+		src += 12*fontheight*var_screeninfo.xres;
 
 	if (var_screeninfo.yoffset)
 		dst += var_screeninfo.xres * var_screeninfo.yres;
@@ -3382,7 +3863,7 @@ void CopyBB2FB()
 
 	memset(dst - StartY*var_screeninfo.xres, fillcolor, StartY*var_screeninfo.xres);
 
-	for (i = 12*fixfontheight; i; i--)
+	for (i = 12*fontheight; i; i--)
 	{
 		memcpy(dst, src, var_screeninfo.xres);
 		dst += var_screeninfo.xres;
@@ -3391,8 +3872,8 @@ void CopyBB2FB()
 		src += var_screeninfo.xres;
 	}
 
-	memcpy(dst, src, var_screeninfo.xres*fixfontheight); /* copy line25 in normal height */
-	memset(dst + var_screeninfo.xres*fixfontheight, fillcolor, var_screeninfo.xres * (var_screeninfo.yres - StartY - 25*fixfontheight));
+	memcpy(dst, src, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
+	memset(dst + var_screeninfo.xres*fontheight, fillcolor, var_screeninfo.xres * (var_screeninfo.yres - StartY - 25*fontheight));
 }
 
 /******************************************************************************
@@ -3414,35 +3895,25 @@ void UpdateLCD()
 			int lcdbase = (y/8)*120;
 			int lcdmask = 1 << (y%8);
 			
-			#if 1
-			for (x = 0; x < 120; x++)
-			{
-				if (lcd_layout[x + y*120])
-					lcd_backbuffer[x + lcdbase] |= lcdmask;
-				else
-					lcd_backbuffer[x + lcdbase] &= ~lcdmask;
-			}
-			#else
 			for (x = 0; x < 120; )
 			{
-				int mask;
-				int lcdbyte = lcd_layout[x/8 + y*120/8];
+				int rommask;
+				int rombyte = lcd_layout[x/8 + y*120/8];
 				
-				for (mask = 0x80; mask; mask >>= 1)
+				for (rommask = 0x80; rommask; rommask >>= 1)
 				{
-					if (lcdbyte & mask)
+					if (rombyte & rommask)
 						lcd_backbuffer[x + lcdbase] |= lcdmask;
 					else
 						lcd_backbuffer[x + lcdbase] &= ~lcdmask;
 					x++;
 				}
 			}
-			#endif
 		}
 
 		write(lcd, &lcd_backbuffer, sizeof(lcd_backbuffer));
 
-		for (y = 16; y <= 56; y += 8)	/* clear rectangle in backbuffer */
+		for (y = 16; y < 56; y += 8)	/* clear rectangle in backbuffer */
 			for (x = 1; x < 118; x++)
 				lcd_backbuffer[x + (y/8)*120] = 0;
 
@@ -3530,10 +4001,24 @@ void UpdateLCD()
 		/* cachestatus */
 		if (old_cached_pages != cached_pages)
 		{
+			#if 0
+			int s;
+			int p = cached_pages;
+			for (s=107; s >= 107-4*fontwidth_small_lcd; s -= fontwidth_small_lcd)
+			{
+				int c = p % 10;
+				if (p)
+					RenderCharLCDsmall('0'+c, s, 44);
+				else
+					RenderCharLCDsmall(' ', s, 44);
+				p /= 10;
+			}
+			#else
 			RenderCharLCD(cached_pages/1000, 67, 44);
 			RenderCharLCD(cached_pages%1000/100, 79, 44);
 			RenderCharLCD(cached_pages%100/10, 91, 44);
 			RenderCharLCD(cached_pages%10, 103, 44);
+			#endif
 
 			old_cached_pages = cached_pages;
 			update_lcd = 1;
@@ -3892,13 +4377,13 @@ int GetRCCode()
 #else
 		else
 		{
-			RCCode = 0;
+			RCCode = -1;
 			rc_last_key = KEY_RESERVED;
 		}
 #endif
 	}
 
-	RCCode = 0;
+	RCCode = -1;
 	usleep(1000000/100);
 
 	return 0;
@@ -3946,7 +4431,7 @@ void *CacheThread(void *arg)
 		ssize_t readcnt;
 		readcnt = read(dmx, &pes_packet, sizeof(pes_packet));
 
-		if ((readcnt == -1) || (readcnt != sizeof(pes_packet)))
+		if (readcnt != sizeof(pes_packet))
 		{
 #if DEBUG
 			printf ("TuxTxt: readerror\n");
@@ -4132,15 +4617,13 @@ void *CacheThread(void *arg)
 			}
 		}
 	}
-
 	return 0;
 }
+
 /* Local Variables: */
 /* indent-tabs-mode:t */
 /* tab-width:3 */
 /* c-basic-offset:3 */
 /* comment-column:0 */
 /* fill-column:120 */
-/* time-stamp-line-limit:30 */
-/* time-stamp-format:"%02d.%02m.%:y %02H:%02M:%02S %u@%s" */
 /* End: */

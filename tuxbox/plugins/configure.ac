@@ -16,6 +16,7 @@ TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
 TUXBOX_APPS_LIB_PKGCONFIG(PNG,libpng)
 TUXBOX_APPS_LIB_PKGCONFIG(SIGC,sigc++-1.2)
+TUXBOX_APPS_LIB_PKGCONFIG(TUXBOX,tuxbox)
 TUXBOX_APPS_LIB_PKGCONFIG(XMLTREE,tuxbox-xmltree)
 TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 
@@ -49,12 +50,6 @@ tuxtxt/font/Makefile
 tuxcom/Makefile
 vncviewer/Makefile
 vncviewer/rfb/Makefile
-enigma/Makefile
-enigma/demo/Makefile
-enigma/ngrabstart/Makefile
-enigma/ngrabstop/Makefile
-enigma/dslconnect/Makefile
-enigma/dsldisconnect/Makefile
 tuxbox-plugins.pc
 ])
 

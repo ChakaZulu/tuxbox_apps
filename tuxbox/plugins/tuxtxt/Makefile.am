@@ -3,7 +3,8 @@ SUBDIRS = font
 noinst_LTLIBRARIES = tuxtxt.la
 
 AM_CPPFLAGS = \
-	@FREETYPE_CFLAGS@ \
+	 @TUXBOX_CFLAGS@ \
+	 @FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/include
 
 #tuxtxt_la_CFLAGS = -DDREAMBOX
@@ -11,6 +12,7 @@ AM_CPPFLAGS = \
 tuxtxt_la_SOURCES = tuxtxt.c
 
 tuxtxt_la_LIBADD = \
+	 @TUXBOX_LIBS@  \
 	 @FREETYPE_LIBS@ \
 	-lpthread
 
