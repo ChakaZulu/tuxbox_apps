@@ -91,7 +91,6 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 		break;
 	case eDVBScanEvent::eventScanBegin:
 		eDebug("[SCAN] eventScanBegin");
-		
 		if (flags & flagClearList)
 		{
 			if (knownTransponder.front().satellite.isValid())
@@ -99,11 +98,7 @@ void eDVBScanController::handleEvent(const eDVBEvent &event)
 			else
 				dvb.settings->clearList();
 		}
-
 		current=knownTransponder.begin();
-
-		dvb.event(eDVBScanEvent(eDVBScanEvent::eventScanNext));
-		break;
 	case eDVBScanEvent::eventScanNext:
 	{
 		eDebug("[SCAN] eventScanNext");
