@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.24 2002/12/24 12:34:17 Zwen Exp $
+	$Id: webapi.cpp,v 1.25 2002/12/27 18:05:07 Zwen Exp $
 
 	License: GPL
 
@@ -29,7 +29,9 @@
 #include "webapi.h"
 #include "debug.h"
 #include "algorithm"
+#include "sstream"
 
+using namespace std;
 
 //-------------------------------------------------------------------------
 bool CWebAPI::Execute(CWebserverRequest* request)
@@ -714,7 +716,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 		request->printf("<TD CLASS=\"%ctimer\" align=center>%s", classname, zType);
 
 		// Add Data
-		char zAddData[20+1]={0};
+		string sAddData="";
 		switch(timer->eventType)
 		{
 			case CTimerd::TIMER_NEXTPROGRAM :
@@ -732,13 +734,12 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 					{
 						if (channel->channel_id == timer->channel_id)
 						{
-							strncpy(zAddData, channel->name, 20);
-							zAddData[20]=0;
+							sAddData=channel->name;
 							break;
 						}
 					}
 					if(channel == channellist_radio.end())
-						strcpy(zAddData,"Unbekannter Radiokanal");
+						sAddData="Unbekannter Radiokanal";
 				}
 				else
 				{ //TV Kanal
@@ -751,33 +752,54 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 					{
 						if (channel->channel_id == timer->channel_id)
 						{
-							strncpy(zAddData, channel->name, 20);
-							zAddData[20]=0;
+							sAddData=channel->name;
 							break;
 						}
 					}
 					if(channel == channellist_tv.end())
-						strcpy(zAddData,"Unbekannter TV-Kanal");
+						sAddData="Unbekannter TV-Kanal";
+				}
+				if(timer->apid!=0)
+				{
+					char apid[21];
+					sprintf(apid," (0x%x)",timer->apid);
+					sAddData+=apid;
+				}
+				if(timer->epgID!=0)
+				{
+					stringstream ss;
+					CSectionsdClient sdc;
+					CEPGData epgdata;
+					if (sdc.getEPGid(timer->epgID, timer->epg_starttime, &epgdata))
+					{
+						ss << "<BR><A CLASS=\"timer\" HREF=\"epg.dbox2?epgid=" << hex << timer->epgID 
+							<< "&startzeit=" << timer->epg_starttime
+							<< "\">" << epgdata.title << "</A>";
+						sAddData+=ss.str();
+					}
 				}
 
 			}
 			break;
 			case CTimerd::TIMER_STANDBY :
 			{
-				sprintf(zAddData,"Standby: %s",(timer->standby_on ? "An" : "Aus"));
+				sAddData = "Standby: ";
+				if(timer->standby_on)
+					sAddData+= "An";
+				else
+					sAddData+="Aus";
 			}
 			break;
 			case CTimerd::TIMER_REMIND :
 			{
-				strncpy(zAddData, timer->message, 20);
-				zAddData[20]=0;
+				sAddData = string(timer->message).substr(0,20);
 			}
 			break;
 
 			default:{}
 		}
 		request->printf("<TD CLASS=\"%ctimer\" align=center>%s\n",
-			classname, zAddData);
+			classname, sAddData.c_str());
 		request->printf("<TD CLASS=\"%ctimer\" align=center><a HREF=\"/fb/timer.dbox2?action=remove&id=%d\">\n",
 			classname, timer->eventID);
 		request->SocketWrite("<img src=\"../images/remove.gif\" alt=\"Timer löschen\"></a></TD>\n");
@@ -802,7 +824,7 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	CTimerd::responseGetTimer timer;             // Timer
 
 	Parent->Timerd->getTimer(timer, timerId);
-
+	
 	char zType[20+1];
 	Parent->timerEventType2Str(timer.eventType,zType,20);
 
@@ -852,6 +874,8 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 			 stopTime->tm_hour );
 		request->printf("<INPUT TYPE=\"text\" name=\"smi\" value=\"%02d\" size=2 maxlength=2></TD></TR>\n",
 			 stopTime->tm_min);
+		request->printf("<TR><TD align=\"center\">APID: 0x<INPUT TYPE=\"text\" name=\"ap\" value=\"%04x\" size=4 maxlength=4></TD></TR>\n",
+          timer.apid);
 	}
 	request->SocketWrite("<TR><TD align=\"center\">Wiederholung\n");
 	request->SocketWrite("<select name=\"rep\" onchange=\"onEventChange();\">\n");
@@ -957,6 +981,11 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
 		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
 	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
+	if(request->ParameterList["ap"] != "")
+	{
+		uint apid=strtol(request->ParameterList["ap"].c_str(),NULL, 16);
+		Parent->Timerd->modifyTimerAPid(modyId,apid);
+	}
 }
 
 //-------------------------------------------------------------------------
@@ -1178,8 +1207,9 @@ time_t	announceTimeT = 0,
 		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
 	bool standby_on = (request->ParameterList["sbon"]=="1");
 	CTimerd::EventInfo eventinfo;
-	eventinfo.epgID      = 0;
+	eventinfo.epgID = 0;
 	eventinfo.epg_starttime = 0;
+	eventinfo.apid = 0;
 	if(request->ParameterList["channel_id"].substr(0,1)=="R")
 		eventinfo.mode = CTimerd::MODE_RADIO;
 	else

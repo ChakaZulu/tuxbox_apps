@@ -129,6 +129,13 @@ table.timer
         border-collapse: separated;
 	border-spacing: 0px 2px;    	
 }
+
+a.timer
+{
+	color:#000080;
+	text-decoration:underline;
+}
+
 .atimer
 {
 	background-color:#E0E0E0;

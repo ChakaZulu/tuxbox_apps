@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.42 2002/12/24 12:34:17 Zwen Exp $
+	$Id: timerd.cpp,v 1.43 2002/12/27 18:05:08 Zwen Exp $
 
 	License: GPL
 
@@ -100,7 +100,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 
 					if(event->eventType == CTimerd::TIMER_STANDBY)
 						resp.standby_on = static_cast<CTimerEvent_Standby*>(event)->standby_on;
-					else if(event->eventID == CTimerd::TIMER_NEXTPROGRAM)
+					else if(event->eventType == CTimerd::TIMER_NEXTPROGRAM)
 					{
 						resp.epgID = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID;
 						resp.epg_starttime = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epg_starttime;
@@ -108,7 +108,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
 						resp.mode = static_cast<CTimerEvent_Record*>(event)->eventInfo.mode;
 					}
-					else if(event->eventID == CTimerd::TIMER_RECORD)
+					else if(event->eventType == CTimerd::TIMER_RECORD)
 					{
 						CTimerEvent_Record* ev= static_cast<CTimerEvent_Record*>(event);
 						if (ev->eventInfo.epgID==0)
@@ -119,7 +119,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.apid = ev->eventInfo.apid;
 						resp.mode = ev->eventInfo.mode;
 					}
-					else if(event->eventID == CTimerd::TIMER_ZAPTO)
+					else if(event->eventType == CTimerd::TIMER_ZAPTO)
 					{
 						CTimerEvent_Zapto* ev= static_cast<CTimerEvent_Zapto*>(event);
 						if (ev->eventInfo.epgID==0)
@@ -130,7 +130,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.apid = ev->eventInfo.apid;
 						resp.mode = ev->eventInfo.mode;
 					}
-					else if(event->eventID == CTimerd::TIMER_REMIND)
+					else if(event->eventType == CTimerd::TIMER_REMIND)
 					{
 						memset(resp.message, 0, sizeof(resp.message));
 						strncpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message, sizeof(resp.message)-1);
