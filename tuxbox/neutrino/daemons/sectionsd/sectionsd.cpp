@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.2 2001/07/06 10:25:04 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.3 2001/07/11 22:08:55 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.3  2001/07/11 22:08:55  fnbrd
+//  wegen gcc 3.0
+//
 //  Revision 1.2  2001/07/06 10:25:04  fnbrd
 //  Debug-Zeug raus.
 //
@@ -406,7 +409,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.2 2001/07/06 10:25:04 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.3 2001/07/11 22:08:55 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
@@ -455,7 +458,7 @@ struct sockaddr_in serverAddr;
 
 
   // Unsere Endlosschliefe
-  socklen_t clientInputLen = sizeof(connectionData::clientAddr);
+  socklen_t clientInputLen = sizeof(serverAddr);
   for(;;) {
     // wir warten auf eine Verbindung
     struct connectionData *client=new connectionData; // Wird vom Thread freigegeben
