@@ -80,8 +80,8 @@
 		<img name="osd_crypt_off" src="chk_v2/crypt_off.png" />
 		<img name="osd_format_off" src="chk_v2/format_off.png" />
 
-<img name="br" src="chk_v2/br2.png" />
-<img name="bl" src="chk_v2/bl2.png" />
+		<img name="br" src="chk_v2/br2.png" />
+		<img name="bl" src="chk_v2/bl2.png" />
 		
 		<img name="enigma_logo" src="chk_v2/logo.png" nomerge="yes" />
 		<img name="lcd_menu" src="chk_v2/lcdmenu.png" nomerge="yes" />
@@ -98,7 +98,9 @@
 		<img name="eWindow.bottomLeft" src="chk_v2/bl.png" />
 		<img name="eWindow.bottom" src="chk_v2/b.png" />
 		<img name="eWindow.bottomRight" src="chk_v2/br.png" />
-		
+
+		<img name="eCheckbox.checked" src="checked.png" />
+		<img name="eCheckbox.unchecked" src="unchecked.png" />
 	</images>
 	
 	<object name="eventview">
