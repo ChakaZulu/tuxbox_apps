@@ -322,7 +322,7 @@ void CFlashTool::reboot()
 	if(fd_fp!=-1)
 	{
 		/* Nokia FP_IOCTL_REBOOT does not work after writing directly to flash */
-		if(g_info.box_Type != CControldClient::TUXBOX_MAKER_NOKIA)
+		if(g_info.box_Type == CControldClient::TUXBOX_MAKER_NOKIA)
 		{
 			if (ioctl(fd_fp,FP_IOCTL_POWEROFF)< 0)
 			{
