@@ -36,7 +36,8 @@ tsSelectType::tsSelectType(eWidget *parent)
 
 	list->setFlags(eListBox<eListBoxEntryText>::flagShowEntryHelp);
 	new eListBoxEntryText(list, _("Automatic Transponder Scan"), (void*)2, 0, _("open automatic transponder scan") );
-	new eListBoxEntryText(list, _("Automatic Multisat Scan"), (void*)3, 0, _("open automatic multisat transponder scan") );
+	if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
+		new eListBoxEntryText(list, _("Automatic Multisat Scan"), (void*)3, 0, _("open automatic multisat transponder scan") );
 	new eListBoxEntryText(list, _("manual scan.."), (void*)1, 0, _("open manual transponder scan") );
 	CONNECT(list->selected, tsSelectType::selected);
 }
