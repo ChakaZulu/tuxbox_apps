@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.22 2001/10/10 14:56:30 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.23 2001/10/18 21:09:51 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.23  2001/10/18 21:09:51  field
+//  neuer Befehl fuer EPGPrev/Next
+//
 //  Revision 1.22  2001/10/10 14:56:30  fnbrd
 //  tsid wird bei nvod mitgeschickt
 //
@@ -102,7 +105,7 @@ struct sectionsd {
     unsigned dauer;
   } __attribute__ ((packed)) ;
 
-  static const int numberOfCommands=21;
+  static const int numberOfCommands=22;
   enum commands {
     actualEPGchannelName=0,
     actualEventListTVshort,
@@ -124,7 +127,8 @@ struct sectionsd {
     epgEPGidShort,
     CurrentComponentTagsChannelID,
     allEventsChannelID,
-    timesNVODservice
+    timesNVODservice,
+    getEPGPrevNext
   };
 };
 
@@ -301,6 +305,14 @@ struct sectionsd {
 //       ...
 //       start time n (4 bytes ctime)
 //
-//  was auch noch nett waere, ist bei actualEPGchannelID ein PrevID und NextID (+ jeweils Anfangzeit)
+//  getEPGPrevNext
+//   data of request:
+//     8 bytes (long long in 32 bit world) with unique key (binary) of the event for wich the next should be delivered
+//     4 bytes with start time (ctime) of the above event
+//   data of response:
+//     is a string (c-string) describing the EPG:
+//     unique key (long long, hex) 0xff start time GMT (ctime, hex ) for previous event
+//     unique key (long long, hex) 0xff start time GMT (ctime, hex ) for next event
+
 //
 #endif // SECTIONSDMSG_H
