@@ -13,14 +13,18 @@
 #define ASSIGN(v, t, n)	\
 	v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
 
+eZapLCD* eZapLCD::instance;
+
 eZapLCD::eZapLCD(): eWidget()
 {
+	instance = this;
 	setTarget(gLCDDC::getInstance());
 	move(QPoint(0, 0));
 	resize(QSize(120, 64));
 
-	mp.addPage(new eZapLCDMain(this));
-	mp.first();
+	lcdMain = new eZapLCDMain(this);
+	lcdMenu = new eZapLCDMenu(this);
+	lcdMenu->hide();
 }
 
 void eZapLCDMain::clockUpdate()
@@ -55,12 +59,12 @@ void eZapLCDMain::serviceChanged(eService *service, int)
 
 eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
 {
-	if (eSkin::getActive()->build(this, "enigma_lcd"))
+	if (eSkin::getActive()->build(this, "enigma_lcd_main"))
 		qFatal("skin load of \"enigma_lcd\" failed");
 
+	ASSIGN(Volume, eProgress, "volume_bar");
 	ASSIGN(ServiceName, eLabel, "service_name");
 	ASSIGN(Clock, eLabel, "clock");
-	ASSIGN(Volume, eProgress, "volume_bar");
 	Volume->show();
 	
 	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
@@ -68,4 +72,13 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
 
 	clockUpdate();
+}
+
+eZapLCDMenu::eZapLCDMenu(eWidget *parent): eWidget(parent, 0)
+{	
+	if (eSkin::getActive()->build(this, "enigma_lcd_menu"))
+		qFatal("skin load of \"enigma_lcd_menu\" failed");
+
+	ASSIGN(Title, eLabel, "title");
+	ASSIGN(Element, eLabel, "element");
 }

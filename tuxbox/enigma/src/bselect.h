@@ -14,7 +14,7 @@ private slots:
 	void fillBouquetList();
 	void entrySelected(eListboxEntry *entry);
 public:
-	eBouquetSelector();
+	eBouquetSelector(eWidget* lcdTitle, eWidget* lcdElement);
 	~eBouquetSelector();
 	eBouquet *choose(eBouquet *current=0, int irc=-1);
 	eBouquet *next();

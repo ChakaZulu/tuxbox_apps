@@ -28,6 +28,7 @@ public:
 	virtual ~eListboxEntry();
 	virtual QString getText(int col=0) const =0;
 	virtual void renderInto(gPainter *rc, QRect rect) const;
+	
 };
 
 class eListboxEntryText: public eListboxEntry

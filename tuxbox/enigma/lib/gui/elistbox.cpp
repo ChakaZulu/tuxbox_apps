@@ -3,6 +3,7 @@
 #include "rc.h"
 #include "eskin.h"
 #include <qrect.h>
+#include "elabel.h"
 
 QString eListboxEntryText::getText(int col) const
 {
@@ -94,6 +95,9 @@ void eListbox::lostFocus()
 			if (entry.current()==current->current())
 				invalidateEntry(i);
 	}
+
+	if (parent && parent->LCDElement)
+		parent->LCDElement->setText("");
 }
 
 void eListbox::actualize()
@@ -121,6 +125,10 @@ void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, cons
 	QRect rect=QRect(QPoint(0, pos*item_height), QSize(size.width(), item_height));
 	if (!where.contains(rect))
 		return;
+
+	if (parent && parent->LCDElement && (entry == current->current()))
+		parent->LCDElement->setText(entry->getText(0));
+
 	target->setForegroundColor((have_focus && entry && entry==current->current())?col_active:getBackgroundColor());
 	target->fill(rect);
 	target->flush();
@@ -295,7 +303,8 @@ eListboxEntry *eListbox::goPrev()
 	return current?current->current():0;
 }
 
-eListbox::eListbox(eWidget *parent, int type, int ih): eWidget(parent, 1), type(type)
+eListbox::eListbox(eWidget *parent, int type, int ih)
+	 :eWidget(parent, 1, 0), type(type)
 {
 	col_active=eSkin::getActive()->queryScheme("focusedColor");
 	top=0;

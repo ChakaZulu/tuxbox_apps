@@ -57,7 +57,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 		case eRCInput::RC_PLUS:
 		{
 			eBouquet *b;
-			b=bs.next();
+			b=pbs->next();
 			if (b)
 				useBouquet(b);
 			return 1;
@@ -65,7 +65,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 		case eRCInput::RC_MINUS:
 		{
 			eBouquet *b;
-			b=bs.prev();
+			b=pbs->prev();
 			if (b)
 				useBouquet(b);
 			return 1;
@@ -79,7 +79,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 		{
 			eBouquet *b;
 			hide();
-			b=bs.choose();
+			b=pbs->choose();
 			if (b)
 				useBouquet(b);
 			show();
@@ -96,8 +96,11 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-eServiceSelector::eServiceSelector(): eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 400)
+eServiceSelector::eServiceSelector(eWidget* lcdTitle, eWidget* lcdElement)
+								:eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 400, lcdTitle, lcdElement)
 {
+	pbs = new eBouquetSelector(lcdTitle, lcdElement);
+
 	move(QPoint(70, 60));
 	
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
@@ -109,6 +112,8 @@ eServiceSelector::eServiceSelector(): eLBWindow("Select Service...", eListbox::t
 
 eServiceSelector::~eServiceSelector()
 {
+	if (pbs)
+		delete pbs;
 }
 
 void eServiceSelector::useBouquet(eBouquet *bouquet)

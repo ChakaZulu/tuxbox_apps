@@ -12,14 +12,14 @@ class eServiceSelector: public eLBWindow
 {
 	Q_OBJECT
 	eService *result;
-	eBouquetSelector bs;
+	eBouquetSelector* pbs;
 protected:
 	int eventFilter(const eWidgetEvent &event);
 private slots:
 	void fillServiceList();
 	void entrySelected(eListboxEntry *entry);
 public:
-	eServiceSelector();
+	eServiceSelector(eWidget* lcdTitle=0, eWidget* lcdElement=0);
 	~eServiceSelector();
 	void useBouquet(eBouquet *bouquet);
 	eService *choose(eService *current=0, int irc=-1);

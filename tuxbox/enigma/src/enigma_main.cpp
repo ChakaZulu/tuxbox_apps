@@ -13,6 +13,7 @@
 #include "eskin.h"
 #include "streamwd.h"
 #include "font.h"
+#include "enigma_lcd.h"
 
 static QString getISO639Description(char *iso)
 {
@@ -548,7 +549,12 @@ void eZapMain::keyDown(int code)
 	case eRCInput::RC_UP:
 	{
 		hide();
+		eZapLCD* pLCD = eZapLCD::getInstance();
+		pLCD->lcdMain->hide();
+		pLCD->lcdMenu->show();
 		eService *service=eZap::getInstance()->getServiceSelector()->choose(0, code);
+		pLCD->lcdMain->show();
+		pLCD->lcdMenu->hide();
 		if (!service)
 			break;
 		if (service)

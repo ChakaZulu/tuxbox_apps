@@ -31,7 +31,7 @@
 #include "eskin_register.h"
 #include "epng.h"
 #include "eavswitch.h"
-
+#include "enigma_lcd.h"
 #include "actions.h"
 #include "rc.h"
 #include "gfbdc.h"
@@ -128,10 +128,6 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 	skin->setPalette(gFBDC::getInstance());
 	skin->makeActive();
 
-	serviceSelector=new eServiceSelector;
-	
-	qDebug("<-- service selector");
-
 	eDVB::getInstance()->configureNetwork();
 	
 	main=0;
@@ -181,6 +177,10 @@ eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
 
 #endif
 	main=new eZapMain();
+
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	serviceSelector=new eServiceSelector(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
+	qDebug("<-- service selector");
 	
 	qDebug("[ENIGMA] starting httpd");
 	eHTTPD *httpd=new eHTTPD(80);
@@ -309,7 +309,8 @@ int main(int argc, char **argv)
 
 eMainMenu::eMainMenu()
 {
-	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 240);
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	window=new eLBWindow("enigma 0.1" , eListbox::tBorder, 12, eSkin::getActive()->queryValue("fontsize", 20), 240, pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->move(QPoint(70, 150));
 	connect(new eListboxEntryText(window->list, "TV Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "VCR Mode"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_vcr(eListboxEntry*)));
@@ -325,6 +326,9 @@ eMainMenu::eMainMenu()
 
 int eMainMenu::exec()
 {
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	pLCD->lcdMain->hide();
+	pLCD->lcdMenu->show();
 	window->show();
 	int res=window->exec();
 	window->hide();
@@ -338,6 +342,9 @@ eMainMenu::~eMainMenu()
 
 void eMainMenu::sel_close(eListboxEntry *lbe)
 {
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	pLCD->lcdMenu->hide();
+	pLCD->lcdMain->show();
 	window->close(0);
 }
 
@@ -373,7 +380,8 @@ void eMainMenu::sel_streaminfo(eListboxEntry *)
 
 void eMainMenu::sel_setup(eListboxEntry *)
 {
-	eZapSetup setup;
+	eZapLCD* pLCD = eZapLCD::getInstance();
+	eZapSetup setup(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 	window->hide();
 	setup.exec();
 	window->show();

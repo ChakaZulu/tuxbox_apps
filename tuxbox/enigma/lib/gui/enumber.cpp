@@ -11,12 +11,21 @@ QRect eNumber::getNumberRect(int n)
 void eNumber::redrawNumber(gPainter *p, int n, const QRect &area)
 {
 	QRect pos=QRect(n*space, 0, space, size.height());
+
 	if (!area.contains(pos))
 		return;
+	
 	p->setForegroundColor((have_focus && n==active)?cursor:normal);
 	p->fill(pos);
 	p->setFont(font);
-	p->renderText(pos, QString().sprintf("%s%d", n?".":"", number[n]));
+
+/*	if (!parent->LCDElement && have_focus && n == active)
+	{
+		p->renderText(pos, QString().sprintf("%s|%d|", n?".":"", number[n]));
+	}
+	else*/
+		p->renderText(pos, QString().sprintf("%s%d", n?".":"", number[n]));
+
 	p->flush();
 }
 
@@ -37,8 +46,8 @@ int eNumber::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-eNumber::eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive):
-	eWidget(parent, 1), len(len), min(min), max(max), maxdigits(maxdigits), isactive(isactive)
+eNumber::eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive, eLabel* descr)
+:eWidget(parent, 1), len(len), min(min), max(max), maxdigits(maxdigits), isactive(isactive), descr(descr?descr->getText():"")
 {
 	active=0;
 	digit=isactive;
@@ -59,6 +68,9 @@ void eNumber::keyUp(int key)
 
 void eNumber::keyDown(int key)
 {
+	if (LCDTmp)
+		((eNumber*) LCDTmp)->keyDown(key);
+
 	switch (key)
 	{
 	case eRCInput::RC_OK:
@@ -103,12 +115,15 @@ void eNumber::keyDown(int key)
 			if ((digit>=maxdigits) || (nn==0))
 			{
 				active++;
+				redraw(getNumberRect(active-1));
 				digit=0;
+			
 				if (active>=len)
 				{
 					emit selected(number);
 					active=0;
-				} else
+				}
+				else
 					redraw(getNumberRect(active));
 			}
 		}
@@ -122,10 +137,37 @@ void eNumber::gotFocus()
 	have_focus++;
 	digit=isactive;
 	redraw(getNumberRect(active));
+	if (parent && parent->LCDElement)
+	{
+		if (descr != "")
+		{
+			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive);
+			QSize s = parent->LCDElement->getSize();
+			LCDTmp->move(QPoint(0,s.height()/2));
+			LCDTmp->resize(QSize(s.width(), s.height()/2));
+	  	parent->LCDElement->setText(descr);
+		}
+		else
+		{
+			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive);
+			QSize s = parent->LCDElement->getSize();
+			LCDTmp->resize(s);
+			LCDTmp->move(QPoint(0,0));
+		}
+		((eNumber*)LCDTmp)->digit=digit;
+		((eNumber*)LCDTmp)->active=active;
+	}
 }
 
 void eNumber::lostFocus()
 {
+	if (LCDTmp)
+	{
+		parent->LCDElement->setText("");
+		delete LCDTmp;
+		LCDTmp=0;
+	}
+
 	have_focus--;
 	redraw(getNumberRect(active));
 }

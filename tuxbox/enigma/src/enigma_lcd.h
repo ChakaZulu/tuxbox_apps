@@ -8,12 +8,17 @@
 class eLabel;
 class eService;
 class eProgress;
+class eZapLCDMain;
+class eZapLCDMenu;
 
 class eZapLCD: public eWidget
 {
 	Q_OBJECT
-	eMultipage mp;
+	static eZapLCD* instance;
 public:
+	static eZapLCD* getInstance() { return instance; }
+	eZapLCDMain* lcdMain;
+	eZapLCDMenu* lcdMenu;
 	eZapLCD();
 };
 
@@ -29,6 +34,17 @@ private slots:
 	void serviceChanged(eService *, int);
 public:
 	eZapLCDMain(eWidget *parent);
+};
+
+class eZapLCDMenu: public eWidget
+{
+	Q_OBJECT
+private slots:
+
+public:
+	eLabel *Title;
+	eWidget *Element;
+	eZapLCDMenu(eWidget *parent);
 };
 
 #endif /* __enigma_lcd_h */

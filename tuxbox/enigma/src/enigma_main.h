@@ -7,6 +7,7 @@
 #include "si.h"
 #include "dvb.h"
 #include "enigma_lcd.h"
+#include "multipage.h"
 
 class eListbox;
 class eLabel;
@@ -167,7 +168,7 @@ public:
 	eZapMain();
 	~eZapMain();
 signals: 
-        void AC3detected(bool);
+  void AC3detected(bool);
 };
 
 #endif /* __enigma_main_h */

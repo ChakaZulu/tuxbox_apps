@@ -21,7 +21,8 @@ static void pack(__u32 &l, int *t)
 		l|=(*t++)<<((3-i)*8);
 }
 
-eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
+eZapNetworkSetup::eZapNetworkSetup(eWidget *lcdTitle, eWidget *lcdElement ):
+eWindow(0, lcdTitle, lcdElement)
 {
 	setText("Network Setup");
 	move(QPoint(150, 136));
@@ -44,7 +45,7 @@ eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
 	l->resize(QSize(150, fd+4));
 
 	unpack(sip, de);
-	ip=new eNumber(this, 4, 0, 255, 3, de);
+	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	ip->move(QPoint(160, 0));
 	ip->resize(QSize(200, fd+4));
 
@@ -54,7 +55,7 @@ eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
 	l->resize(QSize(150, fd+4));
 
 	unpack(snetmask, de);
-	netmask=new eNumber(this, 4, 0, 255, 3, de);
+	netmask=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	netmask->move(QPoint(160, 40));
 	netmask->resize(QSize(200, fd+4));
 	
@@ -64,7 +65,7 @@ eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
 	l->resize(QSize(150, fd+4));
 
 	unpack(sdns, de);
-	dns=new eNumber(this, 4, 0, 255, 3, de);
+	dns=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	dns->move(QPoint(160, 80));
 	dns->resize(QSize(200, fd+4));
 
@@ -74,7 +75,7 @@ eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
 	l->resize(QSize(150, fd+4));
 
 	unpack(sgateway, de);
-	gateway=new eNumber(this, 4, 0, 255, 3, de);
+	gateway=new eNumber(this, 4, 0, 255, 3, de, 0, l);
 	gateway->move(QPoint(160, 120));
 	gateway->resize(QSize(200, fd+4));
 
@@ -85,7 +86,7 @@ eZapNetworkSetup::eZapNetworkSetup(): eWindow(0)
 	l->move(QPoint(130, 160));
 	l->resize(QSize(240, fd+4));
 
-	dosetup=new eCheckbox(this, sdosetup, fd);
+	dosetup=new eCheckbox(this, sdosetup, fd, l);
 	dosetup->move(QPoint(100, 163));
 	dosetup->resize(QSize(fd+4, fd+4));
 
@@ -111,7 +112,7 @@ eZapNetworkSetup::~eZapNetworkSetup()
 
 void eZapNetworkSetup::fieldSelected(int *number)
 {
-	focusNext();
+	focusNext(0);
 }
 
 

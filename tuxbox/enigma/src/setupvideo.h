@@ -27,7 +27,7 @@ private slots:
 protected:
 	int eventFilter(const eWidgetEvent &event);
 public:
-	eZapVideoSetup();
+	eZapVideoSetup(eWidget *lcdTitle=0, eWidget *lcdElement=0);
 	~eZapVideoSetup();
 };
 

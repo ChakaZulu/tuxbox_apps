@@ -1,7 +1,7 @@
 #include "elbwindow.h"
 
-eLBWindow::eLBWindow(QString Title, int LBType, int Entrys, int FontSize, int width)
-	: eWindow(0), Entrys(Entrys), width(width)
+eLBWindow::eLBWindow(QString Title, int LBType, int Entrys, int FontSize, int width, eWidget* lcdTitle, eWidget* lcdElement)
+	: eWindow(0, lcdTitle, lcdElement), Entrys(Entrys), width(width)
 {
 	setText(Title);
 	resize(QSize(width, 10+Entrys*(FontSize+4)));

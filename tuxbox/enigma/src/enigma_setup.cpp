@@ -6,9 +6,10 @@
 #include "edvb.h"
 #include "eskin.h"
 
-eZapSetup::eZapSetup()
+eZapSetup::eZapSetup( eWidget *lcdTitle, eWidget *lcdElement)
+:eWidget(0,0, lcdTitle, lcdElement)
 {
-	window=new eLBWindow("SETUP", eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220);
+	window=new eLBWindow("SETUP", eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220, LCDTitle, LCDElement);
 	window->move(QPoint(150, 136));
 	connect(new eListboxEntryText(window->list, "[Zurück]"), SIGNAL(selected(eListboxEntry*)), SLOT(sel_close(eListboxEntry*)));
 	connect(new eListboxEntryText(window->list, "Bouquets..."), SIGNAL(selected(eListboxEntry*)), SLOT(sel_bouquet(eListboxEntry*)));
@@ -42,7 +43,7 @@ void eZapSetup::sel_bouquet(eListboxEntry *lbe)
 
 void eZapSetup::sel_network(eListboxEntry *lbe)
 {
-	eZapNetworkSetup setup;
+	eZapNetworkSetup setup(LCDTitle, LCDElement);
 	window->hide();
 	setup.show();
 	setup.exec();
@@ -56,7 +57,7 @@ void eZapSetup::sel_sound(eListboxEntry *lbe)
 
 void eZapSetup::sel_video(eListboxEntry *lbe)
 {
-	eZapVideoSetup setup;
+	eZapVideoSetup setup(LCDTitle, LCDElement);
 	window->hide();
 	setup.show();
 	setup.exec();

@@ -7,13 +7,16 @@
 #include "epng.h"
 #include "eskin.h"
 
-eWidget::eWidget(eWidget *parent, int takefocus): 
+eWidget::eWidget(eWidget *parent, int takefocus, eWidget *lcdTitle, eWidget *lcdElement):
 	QObject(parent), 
 	parent(parent), 
 	takefocus(takefocus), 
 	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
 	backgroundColor(parent?gColor(-1):gColor(0x20)),
-	foregroundColor(parent?parent->foregroundColor:gColor(0x2F))
+	foregroundColor(parent?parent->foregroundColor:gColor(0x2F)),
+	LCDTitle(lcdTitle),
+	LCDElement(lcdElement),
+	LCDTmp(0)
 {
 	target=parent?0:gFBDC::getInstance();
 	in_loop=0;

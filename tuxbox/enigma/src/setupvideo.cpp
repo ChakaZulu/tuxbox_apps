@@ -45,7 +45,7 @@ void eZapVideoSetup::setColorFormat(eAVColorFormat w)
 	}
 }
 
-eZapVideoSetup::eZapVideoSetup(): eWindow(0)
+eZapVideoSetup::eZapVideoSetup(eWidget *lcdTitle, eWidget *lcdElement): eWindow(0, lcdTitle, lcdElement)
 {
 /*	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "setup.video"))
@@ -67,18 +67,18 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	l->move(QPoint(10, 20));
 	l->resize(QSize(150, fd+4));
 	
-	colorformat=new eButton(this);
+	colorformat=new eButton(this, l);
 	colorformat->setText("[color]");
 	colorformat->move(QPoint(160, 20));
 	colorformat->resize(QSize(85, fd+4));
 	connect(colorformat, SIGNAL(selected()), SLOT(toggleColorformat()));
 
-	eLabel *l2=new eLabel(this);
-	l2->setText("Aspect Ratio:");
-	l2->move(QPoint(10, 55));
-	l2->resize(QSize(170, fd+4));
+  l=new eLabel(this);
+	l->setText("Aspect Ratio:");
+	l->move(QPoint(10, 55));
+	l->resize(QSize(170, fd+4));
 
-	pin8=new eButton(this);
+	pin8=new eButton(this, l);
 	pin8->setText("[Pin8]");
 	pin8->move(QPoint(160, 55));
 	pin8->resize(QSize(140, fd+4));

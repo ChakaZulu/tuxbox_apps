@@ -5,7 +5,6 @@
 #include <qpoint.h>
 #include <qsize.h>
 #include <qlist.h>
-
 #include "grc.h"
 
 class eWidgetEvent
@@ -94,6 +93,10 @@ protected:
 	gPixmap *pixmap;
 
 public:
+	eWidget *LCDTitle;
+	eWidget *LCDElement;
+	eWidget *LCDTmp;
+
 	inline QPoint getAbsolutePosition()
 	{
 		return (parent?(parent->getAbsolutePosition()+parent->clientrect.topLeft()+position):position);
@@ -104,7 +107,7 @@ public:
 	}
 	virtual void redrawWidget(gPainter *target, const QRect &area);
 	virtual void eraseBackground(gPainter *target, const QRect &area);
-	eWidget(eWidget *parent=0, int takefocus=0);
+	eWidget(eWidget *parent=0, int takefocus=0, eWidget *lcdTitle=0, eWidget *lcdElement=0);
 	virtual ~eWidget();
 	QList<eWidget> *focusList() { return &_focusList; }
 
@@ -129,6 +132,7 @@ public:
 	
 	void setFont(const gFont &font);
 	void setText(const QString &label);
+	const	QString& getText() { return text; }
 	void setBackgroundColor(gColor color);
 	void setForegroundColor(gColor color);
 	void setPixmap(gPixmap *pmap);

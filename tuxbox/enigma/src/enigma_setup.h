@@ -6,7 +6,7 @@
 
 class eListboxEntry;
 
-class eZapSetup: public QObject
+class eZapSetup: public eWidget
 {
 	Q_OBJECT
 	eLBWindow *window;
@@ -17,7 +17,7 @@ private slots:
 	void sel_sound(eListboxEntry *);
 	void sel_video(eListboxEntry *);
 public:
-	eZapSetup();
+	eZapSetup(eWidget* lcdTitle = 0, eWidget* lcdElement = 0);
 	~eZapSetup();
 	int exec();
 };

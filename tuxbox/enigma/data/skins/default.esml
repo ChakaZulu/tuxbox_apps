@@ -70,6 +70,7 @@
 		<img name="osd_crypt_off" src="crypt_off.png" />
 		<img name="osd_format_off" src="format_off.png" />
 		<img name="enigma_logo" src="enigma2.png" />
+		<img name="lcd_menu" src="lcdmenu.png" />
 
 
 		<!--
@@ -104,16 +105,24 @@
 		</eWindow>
 	</object>
 
-	<object name="enigma_lcd">
+	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
-			<!--eLabel position="0:0" size="70:18" font="NimbusSansL-Regular Sans L Regular;16" text="Enigma" /-->
 			<ePixmap position="0:0" size="120:18" pixmap="enigma_logo" />
 			<eLabel position="0:18" size="120:32" font="NimbusSansL-Regular Sans L Regular;16" wrap="on" name="service_name" />
 			<eLabel position="74:48" size="46:16" font="NimbusSansL-Regular Sans L Regular;16" name="clock" />
 			<eProgress position="0:55" size="70:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
 		</eZapLCDMain>
 	</object> 
-	
+
+	<object name="enigma_lcd_menu">
+		<eZapLCDMenu position="0:0" size="120:64">
+			<eLabel position="0:0" size="120:18" font="NimbusSansL-Regular Sans L Regular;14" name="title" />
+		  <ePixmap position="0:18" size="120:3" pixmap="lcd_menu" />
+			<eLabel position="0:21" size="120:40" font="NimbusSansL-Regular Sans L Regular;14" name="element" />
+		  <ePixmap position="0:61" size="120:3" pixmap="lcd_menu" />
+		</eZapLCDMenu>
+	</object>
+
 	<object name="ezap_main">
 		<eZapMain position="50:355" size="670:180">
 

@@ -2,6 +2,7 @@
 #define __enumber_h
 
 #include "ewidget.h"
+#include "elabel.h"
 #include "grc.h"
 
 class eNumber: public eWidget
@@ -17,6 +18,7 @@ private:
 	gColor cursor, normal;
 	int have_focus;
 	int min, max, digit, maxdigits, isactive;
+	QString descr;
 signals:
 	void selected(int *number);
 protected:
@@ -25,7 +27,7 @@ protected:
 	void gotFocus();
 	void lostFocus();
 public:
-	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0);
+	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eLabel* descr=0);
 	~eNumber();
 	int getNumber(int f=0) { if ((f>=0) && (f<len)) return number[f]; return -1; }
 };

@@ -4,9 +4,10 @@
 #include "grc.h"
 #include "eskin.h"
 #include "epng.h"
+#include "elabel.h"
 
-eWindow::eWindow(int takefocus)
-	: eWidget(0, takefocus)
+eWindow::eWindow(int takefocus, eWidget* lcdTitle, eWidget* lcdElement)
+	:eWidget(0, takefocus, lcdTitle, lcdElement)
 {
 	titleSize=10;
 	border=5;
@@ -162,3 +163,14 @@ int eWindow::eventFilter(const eWidgetEvent &event)
 	}
 	return 0;
 }
+
+void eWindow::willShow()
+{
+	if (LCDTitle)
+		LCDTitle->setText(text);
+}
+
+void eWindow::willHide()
+{
+}
+
