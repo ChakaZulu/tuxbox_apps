@@ -79,11 +79,11 @@ struct Ssettings
 	char boxtype; // not part of the config - set by setBoxType()
 } settings;
 
-int	nokia_scart[6];
+int	nokia_scart[7];
 int	nokia_dvb[6];
-int	sagem_scart[6];
+int	sagem_scart[7];
 int	sagem_dvb[6];
-int	philips_scart[6];
+int	philips_scart[7];
 int	philips_dvb[6];
 char aspectRatio;
 
@@ -313,6 +313,7 @@ void LoadScart_Settings()
 	sagem_scart[3]= 0;
 	sagem_scart[4]= 0;
 	sagem_scart[5]= 0;
+	sagem_scart[6]= 0;
 
 	nokia_scart[0]= 3;
 	nokia_scart[1]= 2;
@@ -320,6 +321,7 @@ void LoadScart_Settings()
 	nokia_scart[3]= 0;
 	nokia_scart[4]= 1;
 	nokia_scart[5]= 1;
+	nokia_scart[6]= 2;
 
 	philips_scart[0]= 2;
 	philips_scart[1]= 2;
@@ -327,6 +329,7 @@ void LoadScart_Settings()
 	philips_scart[3]= 0;
 	philips_scart[4]= 3;
 	philips_scart[5]= 0;
+	philips_scart[6]= 2;
 
 	// dvb
 	sagem_dvb[0]= 0;
@@ -360,7 +363,7 @@ void LoadScart_Settings()
 
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "nokia_scart: %d %d %d %d %d %d\n", &nokia_scart[0], &nokia_scart[1], &nokia_scart[2], &nokia_scart[3], &nokia_scart[4], &nokia_scart[5] );
+			sscanf( buf, "nokia_scart: %d %d %d %d %d %d %d\n", &nokia_scart[0], &nokia_scart[1], &nokia_scart[2], &nokia_scart[3], &nokia_scart[4], &nokia_scart[5], &nokia_scart[6] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
@@ -370,7 +373,7 @@ void LoadScart_Settings()
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "sagem_scart: %d %d %d %d %d %d\n", &sagem_scart[0], &sagem_scart[1], &sagem_scart[2], &sagem_scart[3], &sagem_scart[4], &sagem_scart[5] );
+			sscanf( buf, "sagem_scart: %d %d %d %d %d %d %d\n", &sagem_scart[0], &sagem_scart[1], &sagem_scart[2], &sagem_scart[3], &sagem_scart[4], &sagem_scart[5], &sagem_scart[6] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
@@ -380,7 +383,7 @@ void LoadScart_Settings()
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
 		{
-			sscanf( buf, "philips_scart: %d %d %d %d %d %d\n", &philips_scart[0], &philips_scart[1], &philips_scart[2], &philips_scart[3], &philips_scart[4], &philips_scart[5] );
+			sscanf( buf, "philips_scart: %d %d %d %d %d %d %d\n", &philips_scart[0], &philips_scart[1], &philips_scart[2], &philips_scart[3], &philips_scart[4], &philips_scart[5], &philips_scart[6] );
 			//printf( buf );
 		}
 		if(fgets(buf,sizeof(buf),fd)!=NULL)
@@ -467,15 +470,15 @@ void switch_vcr( bool vcr_on)
 		printf("[controld]: switch to scart-input... (%s)\n", BoxNames[settings.boxtype]);
 		if (settings.boxtype == 2) // Sagem
 		{
-			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], sagem_scart[4], sagem_scart[5], 0);
+			routeVideo(sagem_scart[0], sagem_scart[1], sagem_scart[2], sagem_scart[3], sagem_scart[4], sagem_scart[5], sagem_scart[6]);
 		}
 		else if (settings.boxtype == 1) // Nokia
 		{
-			routeVideo(nokia_scart[0], nokia_scart[1], nokia_scart[2], nokia_scart[3], nokia_scart[4], nokia_scart[5], 2);
+			routeVideo(nokia_scart[0], nokia_scart[1], nokia_scart[2], nokia_scart[3], nokia_scart[4], nokia_scart[5], nokia_scart[6]);
 		}
 		else if (settings.boxtype == 3) // Philips
 		{
-			routeVideo(philips_scart[0], philips_scart[1], philips_scart[2], philips_scart[3], philips_scart[4], philips_scart[5], 2);
+			routeVideo(philips_scart[0], philips_scart[1], philips_scart[2], philips_scart[3], philips_scart[4], philips_scart[5], philips_scart[6]);
 		}
 	}
 	else
@@ -769,7 +772,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.85 2003/01/04 12:50:07 Zwen Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.86 2003/01/04 16:45:15 Zwen Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
