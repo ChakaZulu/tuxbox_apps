@@ -63,9 +63,10 @@ int dvb_device;
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
 
+struct sockaddr_un servaddr;
 int listenfd, connfd;
-socklen_t clilen;
-SAI cliaddr, servaddr;
+int clilen;
+
 int lofHigh=10600;
 int lofLow=9750;
 int offset=0;
