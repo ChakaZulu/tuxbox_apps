@@ -1,9 +1,10 @@
 /*
-	Timer Daemon  -   DBoxII-Project
+	Timer-Daemon  -   DBoxII-Project
 
-	Copyright (C) 2002 Dirk Szymanski 'Dirch'
+	Copyright (C) 2001 Steffen Hehn 'McClean'
+	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdMsg.h,v 1.23 2002/10/13 19:40:56 thegoodguy Exp $
+	$Id: timerdtypes.h,v 1.1 2002/10/15 17:30:27 Zwen Exp $
 
 	License: GPL
 
@@ -23,25 +24,50 @@
 */
 
 
-#ifndef __timerd__
-#define __timerd__
+#ifndef __timerdtypes__
+#define __timerdtypes__
 
-#include <string>
+#include <zapit/zapittypes.h>
 #include <vector>
 
-using namespace std;
-
-
+#define REMINDER_MESSAGE_MAXLEN 31
 #define TIMERD_UDS_NAME "/tmp/timerd.sock"
 
 class CTimerd
 {
-
 	public:
+		enum CTimerEventRepeat 
+		{ 
+			TIMERREPEAT_ONCE = 0,
+			TIMERREPEAT_DAILY, 
+			TIMERREPEAT_WEEKLY, 
+			TIMERREPEAT_BIWEEKLY, 
+			TIMERREPEAT_FOURWEEKLY, 
+			TIMERREPEAT_MONTHLY, 
+			TIMERREPEAT_BYEVENTDESCRIPTION
+		};
 
+		enum CTimerEventTypes
+		{
+			TIMER_SHUTDOWN = 1,
+			TIMER_NEXTPROGRAM,
+			TIMER_ZAPTO,
+			TIMER_STANDBY,
+			TIMER_RECORD,
+			TIMER_REMIND,
+			TIMER_SLEEPTIMER
+		};
+		
+		enum CTimerEventStates 
+		{ 
+			TIMERSTATE_SCHEDULED, 
+			TIMERSTATE_PREANNOUNCE, 
+			TIMERSTATE_ISRUNNING, 
+			TIMERSTATE_HASFINISHED, 
+			TIMERSTATE_TERMINATED 
+		};
 
 		static const char ACTVERSION = 1;
-
 
 		enum commands
 		{
@@ -56,7 +82,8 @@ class CTimerd
 			CMD_REGISTEREVENT,
 			CMD_UNREGISTEREVENT,
 			CMD_TIMERDAVAILABLE,
-			CMD_SHUTDOWN
+			CMD_SHUTDOWN,
+			CMD_SETAPID
 		};
 
 
@@ -70,8 +97,8 @@ class CTimerd
 
 		struct commandAddTimer
 		{
-			CTimerEvent::CTimerEventTypes	eventType;
-			CTimerEvent::CTimerEventRepeat	eventRepeat;
+			CTimerEventTypes	eventType;
+			CTimerEventRepeat eventRepeat;
 			time_t							alarmTime;
 			time_t							announceTime;
 			time_t							stopTime;			
@@ -86,6 +113,12 @@ class CTimerd
 		struct commandRemoveTimer
 		{
 			int   eventID;
+		};
+
+		struct commandSetAPid
+		{
+			int   eventID;
+			uint  apid;
 		};
 
 		struct responseAvailable
@@ -114,7 +147,7 @@ class CTimerd
 			time_t		announceTime;
 			time_t		alarmTime;
 			time_t		stopTime;
-			CTimerEvent::CTimerEventRepeat	eventRepeat;
+			CTimerEventRepeat	eventRepeat;
 		};
 
 		struct commandRemind
@@ -122,17 +155,25 @@ class CTimerd
 			char message[REMINDER_MESSAGE_MAXLEN];
 		};
 
+		struct EventInfo
+		{
+			unsigned long long epgID;
+			t_channel_id       channel_id;
+			uint               apid;
+		};
+
 		struct responseGetTimer
 		{		
 			int								eventID;
-			CTimerEvent::CTimerEventTypes	eventType;
-			CTimerEvent::CTimerEventStates	eventState;
-			CTimerEvent::CTimerEventRepeat	eventRepeat;
+			CTimerEventTypes	eventType;
+			CTimerEventStates	eventState;
+			CTimerEventRepeat	eventRepeat;
 			time_t							alarmTime;
 			time_t							announceTime;
 			time_t							stopTime;
 			t_channel_id channel_id; //only filled if applicable
 			unsigned long long epgID; //only filled if applicable
+			uint apid; //only filled if applicable
 			bool standby_on; //only filled if applicable
 			char message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
 			bool operator< (const responseGetTimer& a) const
@@ -147,6 +188,7 @@ class CTimerd
 		{
 			bool status;
 		};
-};
 
+	
+};
 #endif

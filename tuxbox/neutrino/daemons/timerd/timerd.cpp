@@ -4,7 +4,7 @@
    Copyright (C) 2001 Steffen Hehn 'McClean'
    Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timerd.cpp,v 1.26 2002/10/13 11:35:03 woglinde Exp $
+   $Id: timerd.cpp,v 1.27 2002/10/15 17:30:27 Zwen Exp $
 
    License: GPL
 
@@ -42,8 +42,8 @@
 #include <config.h>
 #include <configfile.h>
 
-#include <timerdclient/timerdclient.h>
-#include <timerdclient/debug.h>
+#include <debug.h>
+#include <timermanager.h>
 #include <sectionsdclient/sectionsdclient.h>
 
 
@@ -68,11 +68,11 @@ void loadTimersFromConfig()
          stringstream ostr;
          ostr << savedIDs[i];
          string id=ostr.str();
-         CTimerEvent::CTimerEventTypes type=(CTimerEvent::CTimerEventTypes)config->getInt32 ("EVENT_TYPE_"+id,0);
+         CTimerd::CTimerEventTypes type=(CTimerd::CTimerEventTypes)config->getInt32 ("EVENT_TYPE_"+id,0);
          time_t now = time(NULL);
          switch(type)
          {
-            case CTimerEvent::TIMER_SHUTDOWN :
+            case CTimerd::TIMER_SHUTDOWN :
                {
                   CTimerEvent_Shutdown *event=
                   new CTimerEvent_Shutdown(config, savedIDs[i]);
@@ -80,10 +80,10 @@ void loadTimersFromConfig()
                   {
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
-                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
                   {
                      // old periodic timers need to be rescheduled
-                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
                   else
@@ -93,7 +93,7 @@ void loadTimersFromConfig()
                   }
                   break;
                }       
-            case CTimerEvent::TIMER_NEXTPROGRAM :
+            case CTimerd::TIMER_NEXTPROGRAM :
                {
                   CTimerEvent_NextProgram *event=
                   new CTimerEvent_NextProgram(config, savedIDs[i]);
@@ -101,10 +101,10 @@ void loadTimersFromConfig()
                   {
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
-                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
                   {
                      // old periodic timers need to be rescheduled
-                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
                   else
@@ -114,7 +114,7 @@ void loadTimersFromConfig()
                   }
                   break;
                }       
-            case CTimerEvent::TIMER_ZAPTO :
+            case CTimerd::TIMER_ZAPTO :
                {
                   CTimerEvent_Zapto *event=
                   new CTimerEvent_Zapto(config, savedIDs[i]);
@@ -122,10 +122,10 @@ void loadTimersFromConfig()
                   {
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
-                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
                   {
                      // old periodic timers need to be rescheduled
-                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
                   else
@@ -135,7 +135,7 @@ void loadTimersFromConfig()
                   }
                   break;
                }          
-            case CTimerEvent::TIMER_STANDBY :
+            case CTimerd::TIMER_STANDBY :
                {
                   CTimerEvent_Standby *event=
                   new CTimerEvent_Standby(config, savedIDs[i]);
@@ -143,10 +143,10 @@ void loadTimersFromConfig()
                   {
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
-                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
                   {
                      // old periodic timers need to be rescheduled
-                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
                   else
@@ -156,7 +156,7 @@ void loadTimersFromConfig()
                   }
                   break;
                }           
-            case CTimerEvent::TIMER_RECORD :
+            case CTimerd::TIMER_RECORD :
                {
                   CTimerEvent_Record *event=
                   new CTimerEvent_Record(config, savedIDs[i]);
@@ -164,10 +164,10 @@ void loadTimersFromConfig()
                   {
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
-                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
                   {
                      // old periodic timers need to be rescheduled
-                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
                   else
@@ -177,7 +177,7 @@ void loadTimersFromConfig()
                   }
                   break;
                }          
-            case CTimerEvent::TIMER_SLEEPTIMER :
+            case CTimerd::TIMER_SLEEPTIMER :
                {
                   CTimerEvent_Sleeptimer *event=
                   new CTimerEvent_Sleeptimer(config, savedIDs[i]);
@@ -185,10 +185,10 @@ void loadTimersFromConfig()
                   {
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
-                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
                   {
                      // old periodic timers need to be rescheduled
-                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
                   else
@@ -198,7 +198,7 @@ void loadTimersFromConfig()
                   }
                   break;
                }
-            case CTimerEvent::TIMER_REMIND :
+            case CTimerd::TIMER_REMIND :
                {
                   CTimerEvent_Remind *event=
                   new CTimerEvent_Remind(config, savedIDs[i]);
@@ -206,10 +206,10 @@ void loadTimersFromConfig()
                   {
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
-                  else if (event->eventRepeat != CTimerEvent::TIMERREPEAT_ONCE)
+                  else if(event->eventRepeat != CTimerd::TIMERREPEAT_ONCE)
                   {
                      // old periodic timers need to be rescheduled
-                     event->eventState = CTimerEvent::TIMERSTATE_HASFINISHED;
+                     event->eventState = CTimerd::TIMERSTATE_HASFINISHED;
                      CTimerManager::getInstance()->addEvent(event,false);
                   }
                   else
@@ -260,14 +260,14 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
             if(events.size() > 0)
             {
                for(pos = events.begin();(pos != events.end());pos++)
-					{
+               {
                   printf("ID: %u type: %u\n",pos->second->eventID,pos->second->eventType);
-						if(pos->second->eventType == CTimerEvent::TIMER_SLEEPTIMER)
-						{
-							rspGetSleeptimer.eventID = pos->second->eventID;
-							break;
-						}
-					}
+                  if(pos->second->eventType == CTimerd::TIMER_SLEEPTIMER)
+                  {
+                     rspGetSleeptimer.eventID = pos->second->eventID;
+                     break;
+                  }
+               }
             }
          }
          write( connfd, &rspGetSleeptimer, sizeof(rspGetSleeptimer));
@@ -290,26 +290,27 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                resp.alarmTime = event->alarmTime;
                resp.stopTime = event->stopTime;
 
-               if(event->eventType == CTimerEvent::TIMER_STANDBY)
+               if(event->eventType == CTimerd::TIMER_STANDBY)
                   resp.standby_on = static_cast<CTimerEvent_Standby*>(event)->standby_on;
-               else if(event->eventID == CTimerEvent::TIMER_NEXTPROGRAM)
+               else if(event->eventID == CTimerd::TIMER_NEXTPROGRAM)
                {
                   resp.epgID = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
                }
-               else if(event->eventID == CTimerEvent::TIMER_RECORD)
+               else if(event->eventID == CTimerd::TIMER_RECORD)
                {
                   resp.epgID = static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id;
+                  resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
                }
-               else if(event->eventID == CTimerEvent::TIMER_ZAPTO)
+               else if(event->eventID == CTimerd::TIMER_ZAPTO)
                {
                   resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
                }
-               else if(event->eventID == CTimerEvent::TIMER_REMIND)
+               else if(event->eventID == CTimerd::TIMER_REMIND)
                {
-						memset(resp.message, 0, sizeof(resp.message));
+                  memset(resp.message, 0, sizeof(resp.message));
                   strncpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message, sizeof(resp.message)-1);
                }
             }
@@ -333,52 +334,53 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                resp.announceTime = event->announceTime;
                resp.alarmTime = event->alarmTime;
                resp.stopTime = event->stopTime;
-               if(event->eventType == CTimerEvent::TIMER_STANDBY)
+               if(event->eventType == CTimerd::TIMER_STANDBY)
                   resp.standby_on = static_cast<CTimerEvent_Standby*>(event)->standby_on;
-               else if(event->eventType == CTimerEvent::TIMER_NEXTPROGRAM)
+               else if(event->eventType == CTimerd::TIMER_NEXTPROGRAM)
                {
                   resp.epgID = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
                }
-               else if(event->eventType == CTimerEvent::TIMER_RECORD)
+               else if(event->eventType == CTimerd::TIMER_RECORD)
                {
                   resp.epgID = static_cast<CTimerEvent_Record*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_Record*>(event)->eventInfo.channel_id;
+                  resp.apid = static_cast<CTimerEvent_Record*>(event)->eventInfo.apid;
                }
-               else if(event->eventType == CTimerEvent::TIMER_ZAPTO)
+               else if(event->eventType == CTimerd::TIMER_ZAPTO)
                {
                   resp.epgID = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.epgID;
                   resp.channel_id = static_cast<CTimerEvent_Zapto*>(event)->eventInfo.channel_id;
                }
-               else if(event->eventType == CTimerEvent::TIMER_REMIND)
+               else if(event->eventType == CTimerd::TIMER_REMIND)
                {
-						strcpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message);
-					}
+                  strcpy(resp.message, static_cast<CTimerEvent_Remind*>(event)->message);
+               }
                write( connfd, &resp, sizeof(CTimerd::responseGetTimer));
             }
          }
          break;
 
       case CTimerd::CMD_RESCHEDULETIMER:        // event nach vorne oder hinten schieben
-		{
-         read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
-         int ret=CTimerManager::getInstance()->rescheduleEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
-			CTimerd::responseStatus rspStatus;
-         rspStatus.status = (ret!=0);
-         write( connfd, &rspStatus, sizeof(rspStatus));
-         break;
-		}
+         {
+            read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
+            int ret=CTimerManager::getInstance()->rescheduleEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime);
+            CTimerd::responseStatus rspStatus;
+            rspStatus.status = (ret!=0);
+            write( connfd, &rspStatus, sizeof(rspStatus));
+            break;
+         }
 
       case CTimerd::CMD_MODIFYTIMER:            // neue zeiten setzen
-		{
-         read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
-		   int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime,
-																			  msgModifyTimer.eventRepeat );
-			CTimerd::responseStatus rspStatus;
-         rspStatus.status = (ret!=0);
-         write( connfd, &rspStatus, sizeof(rspStatus));
-         break;
-		}
+         {
+            read(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
+            int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime,
+                                                              msgModifyTimer.eventRepeat );
+            CTimerd::responseStatus rspStatus;
+            rspStatus.status = (ret!=0);
+            write( connfd, &rspStatus, sizeof(rspStatus));
+            break;
+         }
 
       case CTimerd::CMD_ADDTIMER:                  // neuen timer hinzufügen
          CTimerd::commandAddTimer msgAddTimer;
@@ -386,22 +388,22 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 
          CTimerd::responseAddTimer rspAddTimer;
          CTimerEvent* event;
-         CTimerEvent::EventInfo evInfo;
+         CTimerd::EventInfo evInfo;
          switch(msgAddTimer.eventType)
          {
-            case CTimerEvent::TIMER_STANDBY :
+            case CTimerd::TIMER_STANDBY :
                CTimerd::commandSetStandby standby;
                read( connfd, &standby, sizeof(CTimerd::commandSetStandby));
 
                event = new CTimerEvent_Standby(
                                               msgAddTimer.announceTime,
                                               msgAddTimer.alarmTime,
-															 standby.standby_on,
+                                              standby.standby_on,
                                               msgAddTimer.eventRepeat);
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
 
-            case CTimerEvent::TIMER_SHUTDOWN :
+            case CTimerd::TIMER_SHUTDOWN :
                event = new CTimerEvent_Shutdown(
                                                msgAddTimer.announceTime,
                                                msgAddTimer.alarmTime,
@@ -409,7 +411,7 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
 
-            case CTimerEvent::TIMER_SLEEPTIMER :
+            case CTimerd::TIMER_SLEEPTIMER :
                event = new CTimerEvent_Sleeptimer(
                                                  msgAddTimer.announceTime,
                                                  msgAddTimer.alarmTime,
@@ -417,35 +419,36 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
 
-            case CTimerEvent::TIMER_RECORD :
-               read( connfd, &evInfo, sizeof(CTimerEvent::EventInfo));
+            case CTimerd::TIMER_RECORD :
+               read( connfd, &evInfo, sizeof(CTimerd::EventInfo));
                event = new CTimerEvent_Record(
                                              msgAddTimer.announceTime,
                                              msgAddTimer.alarmTime,
                                              msgAddTimer.stopTime,
-															evInfo.channel_id,
-															evInfo.epgID,
+                                             evInfo.channel_id,
+                                             evInfo.epgID,
+                                             evInfo.apid,
                                              msgAddTimer.eventRepeat);
                rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                break;
 
-            case CTimerEvent::TIMER_ZAPTO :
-               read( connfd, &evInfo, sizeof(CTimerEvent::EventInfo));
+            case CTimerd::TIMER_ZAPTO :
+               read( connfd, &evInfo, sizeof(CTimerd::EventInfo));
                if(evInfo.channel_id > 0)
                {
                   event = new CTimerEvent_Zapto(
                                                msgAddTimer.announceTime,
                                                msgAddTimer.alarmTime,
-															  evInfo.channel_id,
-															  evInfo.epgID,
+                                               evInfo.channel_id,
+                                               evInfo.epgID,
                                                msgAddTimer.eventRepeat);
                   rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
                }
                break;
 
-            case CTimerEvent::TIMER_NEXTPROGRAM :
+            case CTimerd::TIMER_NEXTPROGRAM :
 //					CTimerd::EventInfo evInfo;
-               read( connfd, &evInfo, sizeof(CTimerEvent::EventInfo));
+               read( connfd, &evInfo, sizeof(CTimerd::EventInfo));
 /*
                it = CTimerEvent_NextProgram::events.find( evInfo.uniqueKey);
                if (it == CTimerEvent_NextProgram::events.end())
@@ -471,15 +474,15 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
                }
 */
                break;
-            case CTimerEvent::TIMER_REMIND :
+            case CTimerd::TIMER_REMIND :
                CTimerd::commandRemind remind;
                read( connfd, &remind, sizeof(CTimerd::commandRemind));
-					event = new CTimerEvent_Remind(msgAddTimer.announceTime,
-																msgAddTimer.alarmTime,
-																remind.message,
-																msgAddTimer.eventRepeat);
-					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
-					break;
+               event = new CTimerEvent_Remind(msgAddTimer.announceTime,
+                                              msgAddTimer.alarmTime,
+                                              remind.message,
+                                              msgAddTimer.eventRepeat);
+               rspAddTimer.eventID = CTimerManager::getInstance()->addEvent( event);
+               break;
 
             default:
                printf("[timerd] Unknown TimerType\n");
@@ -497,19 +500,28 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
          break;
 
       case CTimerd::CMD_TIMERDAVAILABLE:              // testen ob server läuft ;)
-         CTimerd::responseAvailable rspAvailable;
-         rspAvailable.available = true;
-         write( connfd, &rspAvailable, sizeof(rspAvailable));
+         {
+            CTimerd::responseAvailable rspAvailable;
+            rspAvailable.available = true;
+            write( connfd, &rspAvailable, sizeof(rspAvailable));
+         }
          break;
-		case CTimerd::CMD_SHUTDOWN:
-		{
-			bool ret=CTimerManager::getInstance()->shutdown();
-			CTimerd::responseStatus rspStatus;
-			rspStatus.status = ret;
-			write( connfd, &rspStatus, sizeof(rspStatus));
-			doLoop=false;
-		}
-		break;
+      case CTimerd::CMD_SHUTDOWN:
+         {
+            bool ret=CTimerManager::getInstance()->shutdown();
+            CTimerd::responseStatus rspStatus;
+            rspStatus.status = ret;
+            write( connfd, &rspStatus, sizeof(rspStatus));
+            doLoop=false;
+         }
+         break;
+      case CTimerd::CMD_SETAPID:            // apid setzen
+         {
+            CTimerd::commandSetAPid data;
+            read(connfd,&data, sizeof(data));
+            int ret=CTimerManager::getInstance()->modifyEvent(data.eventID , data.apid );
+         }
+         break;
       default:
          dprintf("unknown command\n");
    }
@@ -521,8 +533,8 @@ int main(int argc, char **argv)
    struct sockaddr_un servaddr;
    int clilen;
    bool do_fork = true;
-	bool no_wait = false;
-	doLoop=true;
+   bool no_wait = false;
+   doLoop=true;
 
    dprintf("startup!!!\n\n");
    if(argc > 1)
@@ -536,8 +548,8 @@ int main(int argc, char **argv)
          }
          else if(strncmp(argv[i], "-w", 2) == 0)
          {
-				no_wait=true;
-			}
+            no_wait=true;
+         }
       }
    }
 
@@ -584,16 +596,16 @@ int main(int argc, char **argv)
       exit( -1 );
    }
 
-	if(!no_wait)
-	{
-		// wait for correct date to be set...
-		CSectionsdClient* sectionsd = new CSectionsdClient;
-		while(!sectionsd->getIsTimeSet())
-			sleep(1);
-	}
+   if(!no_wait)
+   {
+      // wait for correct date to be set...
+      CSectionsdClient* sectionsd = new CSectionsdClient;
+      while(!sectionsd->getIsTimeSet())
+         sleep(1);
+   }
    loadTimersFromConfig();
-   
-	//startup Timer
+
+   //startup Timer
    try
    {
       struct CTimerd::commandHead rmessage;
