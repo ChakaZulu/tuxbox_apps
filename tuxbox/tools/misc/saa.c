@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <sys/poll.h>
 
-#include "../../driver/saa7126/saa7126_core.h"
+#include "../../driver/include/dbox/saa7126_core.h"
 
 #define SAA7126_DEVICE "/dev/dbox/saa0"
 
