@@ -46,7 +46,7 @@ static	void	DoYellow( void )
 {
 	if ( pig_dis )
 	{
-		Fx2ShowPig( pig_x[actplayer], 300, 160, 144 );
+		Fx2ShowPig( pig_x[actplayer]-51, 300+10, 160, 144 );
 		pig_dis=0;
 	}
 	else
@@ -554,7 +554,7 @@ void	RunYahtzee( void )
 			return;
 
 		if ( !pig_dis )
-			Fx2ShowPig( pig_x[actplayer], 300, 160, 144 );
+			Fx2ShowPig( pig_x[actplayer]-51, 300+10, 160, 144 );
 
 		memset(wu,0,5);		/* mark all wuerfel for roll */
 		memset(mwu,0,5);	/* mark all wuerfel for roll */
