@@ -192,6 +192,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 								paint();
 								break;
 						}
+						g_RCInput->clearMsg();
 					}
 					break;
 
