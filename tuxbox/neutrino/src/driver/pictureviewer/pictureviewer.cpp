@@ -24,27 +24,27 @@ extern unsigned char * color_average_resize(unsigned char * orgin,int ox,int oy,
 
 
 #ifdef FBV_SUPPORT_GIF
-    extern int fh_gif_getsize(char *,int *,int*);
-    extern int fh_gif_load(char *,unsigned char *,int,int);
-    extern int fh_gif_id(char *);
+    extern int fh_gif_getsize(const char *,int *,int*);
+    extern int fh_gif_load(const char *,unsigned char *,int,int);
+    extern int fh_gif_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_JPEG
-    extern int fh_jpeg_getsize(char *,int *,int*);
-    extern int fh_jpeg_load(char *,unsigned char *,int,int);
-    extern int fh_jpeg_id(char *);
+    extern int fh_jpeg_getsize(const char *,int *,int*);
+    extern int fh_jpeg_load(const char *,unsigned char *,int,int);
+    extern int fh_jpeg_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_PNG
-    extern int fh_png_getsize(char *,int *,int*);
-    extern int fh_png_load(char *,unsigned char *,int,int);
-    extern int fh_png_id(char *);
+    extern int fh_png_getsize(const char *,int *,int*);
+    extern int fh_png_load(const char *,unsigned char *,int,int);
+    extern int fh_png_id(const char *);
 #endif
 #ifdef FBV_SUPPORT_BMP
-    extern int fh_bmp_getsize(char *,int *,int*);
-    extern int fh_bmp_load(char *,unsigned char *,int,int);
-    extern int fh_bmp_id(char *);
+    extern int fh_bmp_getsize(const char *,int *,int*);
+    extern int fh_bmp_load(const char *,unsigned char *,int,int);
+    extern int fh_bmp_id(const char *);
 #endif
 
-void CPictureViewer::add_format(int (*picsize)(char *,int *,int*),int (*picread)(char *,unsigned char *,int,int), int (*id)(char*))
+void CPictureViewer::add_format(int (*picsize)(const char *,int *,int*),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*))
 {
     CFormathandler *fhn;
     fhn=(CFormathandler *) malloc(sizeof(CFormathandler));
@@ -71,31 +71,39 @@ void CPictureViewer::init_handlers(void)
 #endif
 }
 
-CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(char *name,int *x,int *y)
+CPictureViewer::CFormathandler * CPictureViewer::fh_getsize(const char *name,int *x,int *y)
 {
-   dbout("fh_getsize {\n"); 
 	CFormathandler *fh;
     for(fh=fh_root;fh!=NULL;fh=fh->next)
     {
 	if(fh->id_pic(name))
 	    if(fh->get_size(name,x,y)==FH_ERROR_OK) return(fh);
     }
-	 dbout("fh_getsize }\n"); 
     return(NULL);
 }
 
-int CPictureViewer::show_image(char *name)
+bool CPictureViewer::DecodeImage(std::string name)
 {
-   dbout("show_image {\n"); 
-	int x,y,xs,ys,xpos,ypos,xdelta,ydelta,eol,xstep,ystep,imx,imy;
-    unsigned char *buffer;
-    CFormathandler *fh;
-    eol=1;
-    if((fh=fh_getsize(name,&x,&y)))
-    {
-		buffer=(unsigned char *) malloc(x*y*3);
-		if(fh->get_pic(name,buffer,x,y)==FH_ERROR_OK)
+   dbout("DecodeImage {\n"); 
+	int x,y,xs,ys,imx,imy;
+   CFormathandler *fh;
+   if((fh=fh_getsize(name.c_str(),&x,&y)))
+   {
+      if(m_Pic_Buffer!=NULL)
+      {
+         if(x!=m_Pic_X || y!=m_Pic_Y)
+         {
+            free(m_Pic_Buffer);
+            m_Pic_Buffer=(unsigned char *) malloc(x*y*3);
+         }
+      }
+      else
+         m_Pic_Buffer=(unsigned char *) malloc(x*y*3);
+		
+      dbout("---Decoding Start(%d/%d)\n",x,y);
+		if(fh->get_pic(name.c_str(),m_Pic_Buffer,x,y)==FH_ERROR_OK)
 		{
+			dbout("---Decoding Done\n");
 			getCurrentRes(&xs,&ys);
 			if((x>xs || y>ys) && m_scaling!=NONE)
 			{
@@ -109,89 +117,101 @@ int CPictureViewer::show_image(char *name)
 					imx=x*ys/y;
 					imy=ys;
 				}
+				dbout("---Scaling Start\n");
 				if(m_scaling==SIMPLE)
-					buffer=simple_resize(buffer,x,y,imx,imy);
+					m_Pic_Buffer=simple_resize(m_Pic_Buffer,x,y,imx,imy);
 				else
-					buffer=color_average_resize(buffer,x,y,imx,imy);
+					m_Pic_Buffer=color_average_resize(m_Pic_Buffer,x,y,imx,imy);
+				dbout("---Scaling Done\n");
 				x=imx; y=imy;
 			}
-			if(x<xs) xpos=(xs-x)/2; else xpos=0;
-			if(y<ys) ypos=(ys-y)/2; else ypos=0;
-			xdelta=0; ydelta=0;
-
-			xstep=min(max(x/20,1),xs);
-			ystep=min(max(y/20,1),ys);
-			fb_display(buffer,x,y,xdelta,ydelta,xpos,ypos);
-
-/*
-			for(eol=-1,rfrsh=1;eol==-1 ;)
-			{
-				if(rfrsh) fb_display(buffer,x,y,xdelta,ydelta,xpos,ypos);
-				rfrsh=0;
-				if(!delay)
-				{
-					c=getchar();
-					switch(c)
-					{
-						case 'a': case 'D':
-								xdelta-=xstep;
-							if(xdelta<0) xdelta=0;
-							rfrsh=1;
-							break;
-						case 'd': case 'C':
-							if(xpos) break;
-							xdelta+=xstep;
-							if(xdelta>(x-xs)) xdelta=x-xs;
-							rfrsh=1;
-							break;
-						case 'w': case 'A':
-							ydelta-=ystep;
-							if(ydelta<0) ydelta=0;
-							rfrsh=1;
-							break;
-						case 'x': case 'B':
-							if(ypos) break;
-							ydelta+=ystep;
-							if(ydelta>(y-ys)) ydelta=y-ys;
-							rfrsh=1;
-							break;
-						case ' ': case 10: eol=1; break;
-						case 'r': rfrsh=1; break;
-						case '.': case '>': eol=NEXT_IMG; break;
-						case ',': case '<': case 127: case 255: eol=PREV_IMG; break;
-						case 'q': eol=0; break;
-					}
-				}
-				else
-				{
-					if(imm_getchar(delay / 10,delay % 10)=='q') eol=0; else eol=1;
-					break;
-				}
-			}
-*/
+         m_Pic_Name = name;
+         m_Pic_X=x;
+         m_Pic_Y=y;
+			if(x<xs) 
+            m_Pic_XPos=(xs-x)/2; 
+         else 
+            m_Pic_XPos=0;
+			if(y<ys) 
+            m_Pic_YPos=(ys-y)/2; 
+         else 
+            m_Pic_YPos=0;
+			if(x > xs)
+            m_Pic_XPan=(x-xs) / 2;
+         else
+            m_Pic_XPan=0;
+			if(y > ys)
+            m_Pic_YPan=(y-ys) / 2;
+         else
+            m_Pic_YPan=0;
 		}
 		else
+      {
 			printf("Unable to read file !\n");
-		free(buffer);
+         free(m_Pic_Buffer);
+			m_Pic_Buffer=(unsigned char *) malloc(x*y*3);
+			memset(m_Pic_Buffer, 0 , x*y*3);
+         m_Pic_X=0;
+         m_Pic_Y=0;
+			m_Pic_XPos=0;
+			m_Pic_YPos=0;
+			m_Pic_XPan=0;
+			m_Pic_YPan=0;
+      }
 	}
 	else
+   {
+      if(m_Pic_Buffer!=NULL)
+      {
+         free(m_Pic_Buffer);
+      }
+		m_Pic_Buffer=(unsigned char *) malloc(x*y*3);
+		memset(m_Pic_Buffer, 0 , x*y*3);
+		m_Pic_X=0;
+		m_Pic_Y=0;
+		m_Pic_XPos=0;
+		m_Pic_YPos=0;
+		m_Pic_XPan=0;
+		m_Pic_YPan=0;
 		printf("Unable to read file or format not recognized!\n");
+   }
 	
-   dbout("show_image }\n"); 
-	return(eol);
+   dbout("DecodeImage }\n"); 
+	return(m_Pic_Buffer!=NULL);
 }
 
 
 bool CPictureViewer::ShowImage(std::string filename)
 {
-    int r;
-    r=show_image((char *)filename.c_str());
-    return true;
+   if(filename!=m_Pic_Name)
+   {
+      // Picture not yet decoded
+      DecodeImage(filename);
+   }
+   DisplayImage();
+   return true;
 }
+bool CPictureViewer::DisplayImage()
+{
+   if(m_Pic_Buffer != NULL)
+      fb_display(m_Pic_Buffer, m_Pic_X, m_Pic_Y, m_Pic_XPan, m_Pic_YPan,
+                 m_Pic_XPos, m_Pic_YPos);
+	return true;
+}
+
 CPictureViewer::CPictureViewer()
 {
 	fh_root=NULL;
 	m_scaling=NONE;
+   m_Pic_Name="";
+   m_Pic_Buffer=NULL;
+   m_Pic_X=0;
+   m_Pic_Y=0;
+   m_Pic_XPos=0;
+   m_Pic_YPos=0;
+   m_Pic_XPan=0;
+   m_Pic_YPan=0;
+
 	init_handlers();																     
 }
 

@@ -679,3 +679,9 @@ apids.hint_1 Enter APIDs to be streamed
 apids.hint_2 in hex notation seperated by ' '
 
 mainmenu.pictureviewer Picture viewer
+pictureviewer.head Picture viewer
+pictureviewer.sortorder change sort order
+pictureviewer.show show
+pictureviewer.slideshow slideshow
+
+

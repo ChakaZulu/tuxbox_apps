@@ -44,6 +44,9 @@ class CPicture
 {
 public:
 	string Filename;
+	string Name;
+	string Type;
+	time_t Date;
 };
 
 typedef std::vector<CPicture> CViewList;
@@ -55,23 +58,20 @@ class CPictureViewerGui : public CMenuTarget
 		enum State
 		{
 			VIEW=0,
-			MENU
+			MENU,
+			SLIDESHOW
 		};
 	private:
 		CFrameBuffer		*frameBuffer;
 		CFileBrowser		*m_filebrowser;
 		CPictureViewer		*m_viewer;
 		unsigned int		selected;
-		int      current;
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
 		int					fheight; // Fonthoehe Playlist-Inhalt
 		int					theight; // Fonthoehe Playlist-Titel
 		int					sheight; // Fonthoehe MP Info
 		int					buttonHeight;
-		int               title_height;
-		int               info_height;
-		int               key_level;
 		bool				visible;			
 		State          m_state;
 
@@ -83,6 +83,7 @@ class CPictureViewerGui : public CMenuTarget
 		int 			x;
 		int 			y;
 		int         m_title_w;
+		long        m_time;
 
 		int         m_LastMode;
 

@@ -585,8 +585,8 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 
 				rawtime = actual_file->Time;
 				strftime(timestring, 18, "%d-%m-%Y %H:%M", gmtime(&rawtime));
-
-				g_Fonts->filebrowser_item->RenderString(x + width - 160 , ypos+ fheight, 150, timestring, color);
+				int breite = g_Fonts->filebrowser_item->getRenderWidth(timestring);
+				g_Fonts->filebrowser_item->RenderString(x + width - 20 - breite , ypos+ fheight, breite+1, timestring, color);
 			}
 		}
 	}

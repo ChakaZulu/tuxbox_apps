@@ -10,7 +10,7 @@
 #define PNG_BYTES_TO_CHECK 4
 #define min(x,y) ((x) < (y) ? (x) : (y))
 
-int fh_png_id(char *name)
+int fh_png_id(const char *name)
 {
     int fd;
     char id[4];
@@ -22,7 +22,7 @@ int fh_png_id(char *name)
 }
 			    
 
-int fh_png_load(char *name,unsigned char *buffer,int x,int y)
+int fh_png_load(const char *name,unsigned char *buffer,int x,int y)
 {
     png_structp png_ptr;
     png_infop info_ptr;
@@ -83,7 +83,7 @@ int fh_png_load(char *name,unsigned char *buffer,int x,int y)
     fclose(fh);
     return(FH_ERROR_OK);
 }
-int fh_png_getsize(char *name,int *x,int *y)
+int fh_png_getsize(const char *name,int *x,int *y)
 {
     png_structp png_ptr;
     png_infop info_ptr;

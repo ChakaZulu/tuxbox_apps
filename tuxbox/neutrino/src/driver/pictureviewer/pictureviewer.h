@@ -31,20 +31,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#define IDSTRING "fbv"
-#define dbout(fmt, args...) printf( "FBD[%d] " fmt, (int)time(NULL), ## args)
-
-//using namespace std;
+#include <sys/time.h>
 
 class CPictureViewer
 {
 struct cformathandler 
 {
     struct cformathandler *next;
-    int (*get_size)(char *,int *,int*);
-    int (*get_pic)(char *,unsigned char *,int,int);
-    int (*id_pic)(char *);
+    int (*get_size)(const char *,int *,int*);
+    int (*get_pic)(const char *,unsigned char *,int,int);
+    int (*id_pic)(const char *);
 };
 typedef  struct cformathandler CFormathandler;
 
@@ -58,15 +54,25 @@ public:
 	CPictureViewer();
 	~CPictureViewer(){};
 	bool ShowImage(std::string filename);
+   bool DecodeImage(std::string);
+   bool DisplayImage();
 	void SetScaling(ScalingMode s){m_scaling=s;}
 	
 private:
 	CFormathandler *fh_root;
 	ScalingMode m_scaling;
-	int show_image(char *name);
-	CFormathandler * fh_getsize(char *name,int *x,int *y);
+   std::string m_Pic_Name;
+   unsigned char* m_Pic_Buffer;
+   int m_Pic_X;
+   int m_Pic_Y;
+   int m_Pic_XPos;
+   int m_Pic_YPos;
+   int m_Pic_XPan;
+   int m_Pic_YPan;
+	
+	CFormathandler * fh_getsize(const char *name,int *x,int *y);
 	void init_handlers(void);
-	void add_format(int (*picsize)(char *,int *,int*),int (*picread)(char *,unsigned char *,int,int), int (*id)(char*));
+	void add_format(int (*picsize)(const char *,int *,int*),int (*picread)(const char *,unsigned char *,int,int), int (*id)(const char*));
 
 };
 

@@ -16,7 +16,7 @@
 #define agrflush { DGifCloseFile(gft); return(FH_ERROR_FORMAT); }
 
 
-int fh_gif_id(char *name)
+int fh_gif_id(const char *name)
 {
     int fd;
     char id[4];
@@ -39,7 +39,7 @@ inline void m_rend_gif_decodecolormap(unsigned char *cmb,unsigned char *rgbb,Col
 	*(rgbb++)=cmentry->Blue;
     }
 }
-int fh_gif_load(char *name,unsigned char *buffer,int x,int y)
+int fh_gif_load(const char *name,unsigned char *buffer,int x,int y)
 {
     int px,py,i,fby,fbx,fbl,ibxs;
     int eheight,j;
@@ -115,7 +115,7 @@ int fh_gif_load(char *name,unsigned char *buffer,int x,int y)
     DGifCloseFile(gft);
     return(FH_ERROR_OK);
 }
-int fh_gif_getsize(char *name,int *x,int *y)
+int fh_gif_getsize(const char *name,int *x,int *y)
 {
     int px,py,i,fby,fbx,fbl,ibxs;
     int eheight,j;

@@ -41,25 +41,22 @@ int openFB(const char *name);
 //void closeFB(int fh);
 //void getVarScreenInfo(int fh, struct fb_var_screeninfo *var);
 //void setVarScreenInfo(int fh, struct fb_var_screeninfo *var);
-void getFixScreenInfo(int fh, struct fb_fix_screeninfo *fix);
-void set332map(int fh);
-void* convertRGB2FB(int fh, unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp);
-void blit2FB(int fh, void *fbbuff,
+void getFixScreenInfo(struct fb_fix_screeninfo *fix);
+void set332map();
+void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp);
+void blit2FB(void *fbbuff,
 	unsigned int pic_xs, unsigned int pic_ys,
 	unsigned int scr_xs, unsigned int scr_ys,
 	unsigned int xp, unsigned int yp,
 	unsigned int xoffs, unsigned int yoffs,
 	int cpp);
+void clearFB(int cpp);
 
 void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y_pan, int x_offs, int y_offs)
 {
-	dbout("fb_display {\n");
     struct fb_var_screeninfo *var;
     unsigned short *fbbuff = NULL;
-    int fh = -1, bp = 0;
-    
-    /* get the framebuffer device handle */
-    fh = CFrameBuffer::getInstance()->getFileHandle();
+    int bp = 0;
     
     /* read current video mode */
     var = CFrameBuffer::getInstance()->getScreenInfo();
@@ -67,18 +64,19 @@ void fb_display(unsigned char *rgbbuff, int x_size, int y_size, int x_pan, int y
     lfb = CFrameBuffer::getInstance()->getFrameBufferPointer();
 
     /* correct panning */
-    if(x_pan > x_size - var->xres) x_pan = 0;
-    if(y_pan > y_size - var->yres) y_pan = 0;
+    if(x_pan > x_size - (int)var->xres) x_pan = 0;
+    if(y_pan > y_size - (int)var->yres) y_pan = 0;
     /* correct offset */
-    if(x_offs + x_size > var->xres) x_offs = 0;
-    if(y_offs + y_size > var->yres) y_offs = 0;
+    if(x_offs + x_size > (int)var->xres) x_offs = 0;
+    if(y_offs + y_size > (int)var->yres) y_offs = 0;
     
     /* blit buffer 2 fb */
-    fbbuff = (unsigned short *) convertRGB2FB(fh, rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
-    blit2FB(fh, fbbuff, x_size, y_size, var->xres, var->yres, x_pan, y_pan, x_offs, y_offs, bp);
+    fbbuff = (unsigned short *) convertRGB2FB(rgbbuff, x_size * y_size, var->bits_per_pixel, &bp);
+    /* ClearFB if image is smaller */
+    if(x_size < (int)var->xres || y_size < (int)var->yres)
+       clearFB(bp);
+    blit2FB(fbbuff, x_size, y_size, var->xres, var->yres, x_pan, y_pan, x_offs, y_offs, bp);
     free(fbbuff);
-    /* close device */
-	 dbout("fb_display }\n");
 }
 
 void getCurrentRes(int *x, int *y)
@@ -89,58 +87,8 @@ void getCurrentRes(int *x, int *y)
     *y = var->yres;
 }
 
-/*
-int openFB(const char *name)
-{
-	return ;
-    int fh;
-    char *dev;
-
-    if(name == NULL){
-	dev = getenv("FRAMEBUFFER");
-	if(dev) name = dev;
-	else name = "/dev/fb/0";
-    }
-    
-    if ((fh = open(name, O_WRONLY)) == -1){
-        fprintf(stderr, "open %s: %s\n", name, strerror(errno));
-	exit(1);
-    }
-    return fh;
-}
-
-void closeFB(int fh)
-{
-//    close(fh);
-}
-*/
-/*
-void getVarScreenInfo(int fh, struct fb_var_screeninfo *var)
-{
-    if (ioctl(fh, FBIOGET_VSCREENINFO, var)){
-        fprintf(stderr, "ioctl FBIOGET_VSCREENINFO: %s\n", strerror(errno));
-	exit(1);
-    }
-}
-void setVarScreenInfo(int fh, struct fb_var_screeninfo *var)
-{
-    if (ioctl(fh, FBIOPUT_VSCREENINFO, var)){
-        fprintf(stderr, "ioctl FBIOPUT_VSCREENINFO: %s\n", strerror(errno));
-	exit(1);
-    }
-}
-
-void getFixScreenInfo(int fh, struct fb_fix_screeninfo *fix)
-{
-    if (ioctl(fh, FBIOGET_FSCREENINFO, fix)){
-        fprintf(stderr, "ioctl FBIOGET_FSCREENINFO: %s\n", strerror(errno));
-	exit(1);
-    }
-}
-*/
 void make332map(struct fb_cmap *map)
 {
-	dbout("make332map {\n");
 	int rs, gs, bs, i;
 	int r = 8, g = 8, b = 4;
 
@@ -157,7 +105,6 @@ void make332map(struct fb_cmap *map)
 		map->green[i] = (gs * ((i / b) % g)) * 255;
 		map->blue[i]  = (bs * ((i) % b)) * 255;
 	}
-	dbout("make332map }\n");
 }
 /*
 void set8map(int fh, struct fb_cmap *map)
@@ -176,22 +123,19 @@ void get8map(int fh, struct fb_cmap *map)
     }
 }
 */
-void set332map(int fh)
+void set332map()
 {
-	dbout("set332map {\n");
     make332map(&map332);
     CFrameBuffer::getInstance()->paletteSet(&map332);
-	 dbout("set332map }\n");
 }
 
-void blit2FB(int fh, void *fbbuff,
+void blit2FB(void *fbbuff,
 	unsigned int pic_xs, unsigned int pic_ys,
 	unsigned int scr_xs, unsigned int scr_ys,
 	unsigned int xp, unsigned int yp,
 	unsigned int xoffs, unsigned int yoffs,
 	int cpp)
 {
-	dbout("blit2FB {\n");
     int i, xc, yc;
     unsigned char *cp; unsigned short *sp; unsigned int *ip;
     cp = (unsigned char *) sp = (unsigned short *) ip = (unsigned int *) fbbuff;
@@ -201,33 +145,29 @@ void blit2FB(int fh, void *fbbuff,
     
 	 switch(cpp){
 		 case 1:
-//	    get8map(fh, &map_back);
-	    set332map(fh);
+	    set332map();
 	    for(i = 0; i < yc; i++){
-//		lseek(fh, ((i+yoffs)*scr_xs+xoffs)*cpp, SEEK_SET);
-//		write(fh, cp + (i+yp)*pic_xs+xp, xc*cpp);
-		/*copy buffer to frambuffer*/
 			 memcpy(lfb+((i+yoffs)*scr_xs+xoffs)*cpp,cp + (i+yp)*pic_xs+xp,xc*cpp);
 		 }
 		 break;
 		 case 2:
 			 for(i = 0; i < yc; i++){
-//		lseek(fh, ((i+yoffs)*scr_xs+xoffs)*cpp, SEEK_SET);
-//		write(fh, sp + (i+yp)*pic_xs+xp, xc*cpp);
-//	    	printf("i: %d\t",i);
 				 memcpy(lfb+((i+yoffs)*scr_xs+xoffs)*cpp,sp + (i+yp)*pic_xs+xp, xc*cpp);
-//	    	memcpy(lfb+xoffs*cpp,sp + yp*pic_xs+xp, yc*xc*cpp);
 			 }
 			 break;
 		 case 4:
 			 for(i = 0; i < yc; i++){
-//		lseek(fh, ((i+yoffs)*scr_xs+xoffs)*cpp, SEEK_SET);
-//		write(fh, ip + (i+yp)*pic_xs+xp, xc*cpp);
 				 memcpy(lfb+((i+yoffs)*scr_xs+xoffs)*cpp,ip + (i+yp)*pic_xs+xp, xc*cpp);
 			 }
 			 break;
 	 }
-	 dbout("blit2FB }\n");
+}
+
+void clearFB(int cpp)
+{
+   int x,y;
+   getCurrentRes(&x,&y);
+   memset(lfb, 0, x*y*cpp);
 }
 
 inline unsigned char make8color(unsigned char r, unsigned char g, unsigned char b)
@@ -249,18 +189,10 @@ inline unsigned short make15color(unsigned char r, unsigned char g, unsigned cha
 inline unsigned short make16color(unsigned char r, unsigned char g, unsigned char b)
 {
        return (0x8000 | ((((b >> 3) & 31) << 10) | (((g >> 3) & 31) << 5)  | ((r >> 3) & 31)));
-//      return (0x8000);
-/*
-       return (
-	(((r >> 3) & 31) << 11) |
-	(((g >> 2) & 63) << 5)  |
-	 ((b >> 3) & 31)        );
-*/
 }
 
-void* convertRGB2FB(int fh, unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp)
+void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *cpp)
 {
-	dbout("convertRGB2FB {\n");
     unsigned long i;
     void *fbbuff = NULL;
     unsigned char *c_fbbuff;
@@ -304,7 +236,6 @@ void* convertRGB2FB(int fh, unsigned char *rgbbuff, unsigned long count, int bpp
 	    fprintf(stderr, "Unsupported video mode! You've got: %dbpp\n", bpp);
 	    exit(1);
     }
-	 dbout("convertRGB2FB }\n");
     return fbbuff;
 }
 

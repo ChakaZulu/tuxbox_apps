@@ -2854,6 +2854,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			lastMode=mode;
 			mode=mode_mp3;
 		}
+		if((data &mode_mask)== mode_pic)
+		{
+			lastMode=mode;
+			mode=mode_pic;
+		}
 	}
 	else if( msg == NeutrinoMessages::VCR_ON )
 	{
@@ -2936,7 +2941,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		}
 	}
 
-	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3))
+	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic))
 	{
 		// anzeigen NUR, wenn es vom Event kommt
 		if( current_muted )
@@ -3367,7 +3372,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.402 2003/02/10 20:21:16 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.403 2003/02/11 21:12:42 zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

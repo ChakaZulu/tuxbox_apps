@@ -22,14 +22,14 @@ struct color {
 	unsigned char blue;
 };
 
-int fh_bmp_id(char *name)
+int fh_bmp_id(const char *name)
 {
 	int fd;
 	char id[2];
 	
 	fd = open(name, O_RDONLY);
 	if (fd == -1) {
-		dbout("fh_bmp_id {\n");
+//		dbout("fh_bmp_id {\n");
 		return(0);
 	}
 	
@@ -43,7 +43,7 @@ int fh_bmp_id(char *name)
 
 void fetch_pallete(int fd, struct color pallete[], int count)
 {
-	dbout("fetch_palette {\n");
+//	dbout("fetch_palette {\n");
 	unsigned char buff[4];
 	int i;
 
@@ -54,13 +54,13 @@ void fetch_pallete(int fd, struct color pallete[], int count)
 		pallete[i].green = buff[1];
 		pallete[i].blue = buff[0];
 	}
-	dbout("fetch_palette }\n");
+//	dbout("fetch_palette }\n");
 	return;
 }
 
-int fh_bmp_load(char *name,unsigned char *buffer,int x,int y)
+int fh_bmp_load(const char *name,unsigned char *buffer,int x,int y)
 {
-	dbout("fh_bmp_load {\n");
+//	dbout("fh_bmp_load {\n");
 	int fd, bpp, raster, i, j, k, skip;
 	unsigned char buff[4];
 	unsigned char *wr_buffer = buffer + x*(y-1)*3;
@@ -71,23 +71,20 @@ int fh_bmp_load(char *name,unsigned char *buffer,int x,int y)
 		return(FH_ERROR_FILE);
 	}
 
-	dbout("fh_bmp_load 1\n");
 	if (lseek(fd, BMP_TORASTER_OFFSET, SEEK_SET) == -1) {
 		return(FH_ERROR_FORMAT);
 	}
-	dbout("fh_bmp_load 2\n");
+
 	read(fd, buff, 4);
 	raster = buff[0] + (buff[1]<<8) + (buff[2]<<16) + (buff[3]<<24);
 
-	dbout("fh_bmp_load 3\n");
 	if (lseek(fd, BMP_BPP_OFFSET, SEEK_SET) == -1) {
 		return(FH_ERROR_FORMAT);
 	}
-	dbout("fh_bmp_load 4\n");
+
 	read(fd, buff, 2);
 	bpp = buff[0] + (buff[1]<<8);
 	
-	dbout("fh_bmp_load 5\n");
 	switch (bpp){
 		case 1: /* monochrome */
 			skip = fill4B(x/8+(x%8?1:0));
@@ -217,15 +214,14 @@ int fh_bmp_load(char *name,unsigned char *buffer,int x,int y)
 		default:
 			return(FH_ERROR_FORMAT);
 	}
-	dbout("fh_bmp_load 6\n");
 
 	close(fd);
-	dbout("fh_bmp_load }\n");
+//	dbout("fh_bmp_load }\n");
 	return(FH_ERROR_OK);
 }
-int fh_bmp_getsize(char *name,int *x,int *y)
+int fh_bmp_getsize(const char *name,int *x,int *y)
 {
-	dbout("fh_bmp_getsize {\n");
+//	dbout("fh_bmp_getsize {\n");
 	int fd;
 	unsigned char size[4];
 
@@ -244,7 +240,7 @@ int fh_bmp_getsize(char *name,int *x,int *y)
 	*y = size[0] + (size[1]<<8) + (size[2]<<16) + (size[3]<<24);
 	
 	close(fd);
-	dbout("fh_bmp_getsize }\n");
+//	dbout("fh_bmp_getsize }\n");
 	return(FH_ERROR_OK);
 }
 #endif

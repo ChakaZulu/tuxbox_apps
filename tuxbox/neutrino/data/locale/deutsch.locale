@@ -679,4 +679,8 @@ apids.hint_1 Geben Sie die zu streamenden APIDs ein,
 apids.hint_2 getrennt durch ' ' in hexadezimaler Form
 
 mainmenu.pictureviewer Bildbetrachter
+pictureviewer.head Bildbetrachter
+pictureviewer.sortorder Sortierreihenfolge ändern
+pictureviewer.show Anzeigen
+pictureviewer.slideshow Diaschau
 
