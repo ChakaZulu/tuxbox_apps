@@ -115,32 +115,7 @@ void parse_command(int connfd, CLcddClient::commandHead rmsg)
 }
 
 void show_servicename( string name )
-{/*
-	if (mode!=CLcddClient::MODE_TVRADIO)
-	{
-		return;
-	}
-	display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
-	if (fonts.channelname->getRenderWidth(name.c_str())>120)
-	{
-		//try split...
-		int pos = name.find(" ");
-		if(pos!=-1)
-		{               //ok-show 2-line text
-			string text1 = name.substr(0,pos);
-			string text2 = name.substr(pos+1, name.length()-(pos+1) );
-			fonts.channelname->RenderString(1,29, 130, text1.c_str(), CLCDDisplay::PIXEL_ON);
-			fonts.channelname->RenderString(1,29+16, 130, text2.c_str(), CLCDDisplay::PIXEL_ON);
-		}
-		else
-			fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
-	}
-	else
-	{
-		fonts.channelname->RenderString(1,37, 130, name.c_str(), CLCDDisplay::PIXEL_ON);
-	}
-	display.update();
-	*/
+{
 
 	if (mode!=CLcddClient::MODE_TVRADIO)
 	{
@@ -336,22 +311,18 @@ int main(int argc, char **argv)
 {
 	debugoutput = true;
 
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.44 2002/04/19 09:56:05 field Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.45 2002/04/20 20:27:41 McClean Exp $\n\n");
 
 	fontRenderer = new fontRenderClass( &display );
-//	fontRenderer->AddFont(FONTDIR "/Arial.ttf");
-	fontRenderer->AddFont(FONTDIR "/gs_reg.ttf");
+	fontRenderer->AddFont(FONTDIR "/micron.ttf");
 	fontRenderer->InitFontCache();
-/*
-	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 15);
-	fonts.time=fontRenderer->getFont("Arial", "Regular", 14);
-	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
-	fonts.menu=fontRenderer->getFont("Arial", "Regular", 12);
-*/
-	fonts.channelname=fontRenderer->getFont("GillSans", "Regular", 15);
-	fonts.time=fontRenderer->getFont("GillSans", "Regular", 14);
-	fonts.menutitle=fontRenderer->getFont("GillSans", "Regular", 15);
-	fonts.menu=fontRenderer->getFont("GillSans", "Regular", 12);
+
+	#define FONTNAME "Micron"
+	fonts.channelname=fontRenderer->getFont(FONTNAME, "Regular", 15);
+	fonts.time=fontRenderer->getFont(FONTNAME, "Regular", 14);
+	fonts.menutitle=fontRenderer->getFont(FONTNAME, "Regular", 15);
+	fonts.menu=fontRenderer->getFont(FONTNAME, "Regular", 12);
+
 
 	display.setIconBasePath( DATADIR "/lcdd/icons/");
 
