@@ -324,6 +324,7 @@ int bouquet_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 	int				i;
 	int				idx=0;
 	int				cnum;
+	int				x;
 	Channel			*ch=NULL;
 	FILE			*fp;
 	char			line[512];

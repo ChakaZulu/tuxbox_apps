@@ -37,6 +37,9 @@ static	void	setup_colors( void )
 
 int yahtzee_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 {
+	struct timeval	tv;
+	int				x;
+
 	if ( FBInitialize( 720, 576, 8, fdfb ) < 0 )
 		return -1;
 
