@@ -10,7 +10,7 @@ eEPGCache *eEPGCache::instance;
 
 #define HILO(x) (x##_hi << 8 | x##_lo)
 
-eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
+eEPGCache::eEPGCache():eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xC0)
 {
 	qDebug("[EPGC] Initialized EPGCache");
 	isRunning=0;
@@ -39,6 +39,11 @@ int eEPGCache::sectionRead(__u8 *data)
 		int duration;
 		sref SREF = sref(original_network_id,service_id);
 		time_t TM;
+		
+		if (*data >= 0x70)
+			return 0;
+		if (*data < 0x4E)	// < 0x50 wenn present&following geskippt werden soll
+			return 0;
 
   	updateMap::iterator It = temp.find(SREF);
 			
