@@ -64,6 +64,8 @@ int dvb_device;
 int listenfd, connfd;
 socklen_t clilen;
 SAI cliaddr, servaddr;
+int lofHigh=10600;
+int lofLow=9750;
 int offset=0;
 int caid = 0;
 int caver = 0;
@@ -123,4 +125,3 @@ void startPlayBack();
 void stopPlayBack();
 void zapTo(unsigned int channel);
 void zapTo(unsigned int bouquet, unsigned int channel);
-
