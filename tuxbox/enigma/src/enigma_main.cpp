@@ -763,7 +763,11 @@ void eZapMain::keyUp(int code)
 	{
 		if (isEPG)
 		{
+			eZapLCD* pLCD = eZapLCD::getInstance();
+			pLCD->lcdMain->hide();
+			pLCD->lcdMenu->show();
 			eEPGWindow wnd(eDVB::getInstance()->service);
+			wnd.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 			if (isVisible())
 			{
 				timeout.stop();
@@ -772,6 +776,8 @@ void eZapMain::keyUp(int code)
 			wnd.show();
 			wnd.exec();
 			wnd.hide();
+			pLCD->lcdMenu->hide();
+			pLCD->lcdMain->show();
 		}
 		break;
 	}

@@ -106,11 +106,12 @@ inline void eEPGCache::enterService(eService* service, int err)
 {
 	current_service = service;
 	firstEventId = 0;
-	time_t t = serviceLastUpdated[sref(service->original_network_id,service->service_id)];
+	sref SREF = sref(service->original_network_id,service->service_id);
+	time_t t = serviceLastUpdated[SREF];
 
 	if (!err)
 	{
-		int update = ( t ? ( UPDATE_INTERVAL - ( (time(0)+eDVB::getInstance()->time_difference-t) * 1000 ) ) : ZAP_DELAY );
+		int update = ( t>ZAP_DELAY ? ( UPDATE_INTERVAL - ( (time(0)+eDVB::getInstance()->time_difference-t) * 1000 ) ) : ZAP_DELAY );
 		zapTimer.start(update, 1);
 		if (update >= 60000)
 			qDebug("[EPGC] next update in %i min", update/60000);
@@ -118,7 +119,7 @@ inline void eEPGCache::enterService(eService* service, int err)
 			qDebug("[EPGC] next update in %i sec", update/1000);
 	}
 
-	if (t)
+	if (!eventDB[SREF].empty())
 	{
 		qDebug("[EPGC] service has EPG");
 		emit EPGAvail(1);

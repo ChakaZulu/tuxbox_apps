@@ -30,11 +30,13 @@ class eEPGWindow: public eLBWindow
 {
 	Q_OBJECT
 	eService* current;
+	QTimer closeTimer;
 protected:
 	int eventFilter(const eWidgetEvent &event);
 private slots:
 	void fillEPGList();
 	void entrySelected(eListboxEntry *entry);
+	void closeWnd();
 public:
 	eEPGWindow(eService* service);
 	inline ~eEPGWindow(){};

@@ -141,11 +141,18 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 				fillServiceList();
 				return 1;
 			}
+		}
+		break;
+		case eWidgetEvent::keyUp:
+			switch (event.parameter)
+			{
 			case eRCInput::RC_RED:
 			{
 				if ( eEPGCache::getInstance()->lookupCurrentEvent(selected->original_network_id, selected->service_id ) != 0)
 				{
 					eEPGWindow wnd(selected);
+					if (LCDElement && LCDTitle)
+						wnd.setLCD(LCDTitle, LCDElement);
 					hide();
 					wnd.show();
 					wnd.exec();
@@ -154,11 +161,6 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 				}
 				return 1;
 			}
-		}
-		break;
-		case eWidgetEvent::keyUp:
-			switch (event.parameter)
-			{
 			}
 		break;
 	}

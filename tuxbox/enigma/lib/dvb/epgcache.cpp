@@ -34,50 +34,60 @@ int eEPGCache::sectionRead(__u8 *data)
 		int original_network_id=HILO(eit->original_network_id);
 		int len=HILO(eit->section_length)-1;//+3-4;
 		int ptr=EIT_SIZE;
+		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
+		int eit_event_size;
+		int duration;
+		sref SREF = sref(original_network_id,service_id);
+		time_t TM;
 
-		if (!temp[sref(original_network_id,service_id)])
-		  temp[sref(original_network_id,service_id)] = time(0)+eDVB::getInstance()->time_difference;
+		if (temp[SREF] <= 0)
+		  temp[SREF] = time(0)+eDVB::getInstance()->time_difference;
 
-		if (!firstEventId)
-				firstEventId = HILO( ((eit_event_struct*) (data+ptr))->event_id );
+		if (firstEventId == HILO( eit_event->event_id ) )  // EPGCache around....
+		{
+			stopEPG();
+			zapTimer.start(UPDATE_INTERVAL, 1);
+			qDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
+			
+			updateMap::iterator It = temp.begin();
+
+			while (It != temp.end())
+				serviceLastUpdated.insert(*(It++));
+
+			// diese SREF verdeckt hier die obige.. deshalb klapp das
+			sref SREF=sref(current_service->original_network_id, current_service->service_id);
+
+			if (temp[SREF])
+			  serviceLastUpdated[SREF] = time(0)+eDVB::getInstance()->time_difference;
+				// ich verstehe nicht, warum ich diesen einen Eintrag in serviceLastUpdated manuell machen muss
+				// eigentlich müsste dieser Eintrage mit in obiger while schleife erzeugt werden.
+				// Komischerweise wird er aber nicht in der while schleife erzeugt......
+
+			if (!eventDB[SREF].empty())
+		  	emit EPGAvail(1);
+
+			return -1;
+		}
 		else
-			if (firstEventId == HILO( ((eit_event_struct*) (data+ptr))->event_id ) )  // EPGCache around....
-			{
-				stopEPG();
-				zapTimer.start(UPDATE_INTERVAL, 1);
-				qDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
-				
-				updateMap::iterator It = temp.begin();
-
-				while (It != temp.end())
-					serviceLastUpdated.insert(*(It++));
-
-				if (temp[sref(current_service->original_network_id, current_service->service_id)])
-				{
-				  serviceLastUpdated[sref(current_service->original_network_id,	current_service->service_id)] = time(0)+eDVB::getInstance()->time_difference;
-			  	emit EPGAvail(1);
-				}
-
-				return -1;
-			}
+			if (!firstEventId)
+					firstEventId = HILO( eit_event->event_id );
 
 		while (ptr<len)
 		{
-			eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
-			int eit_event_size=HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
+			eit_event_size = HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
 
-			int duration=	fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
-
-			time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);
+			duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
+			TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);
 
 			if ( (time(0)+eDVB::getInstance()->time_difference) <= (TM+duration))  // old events should not be cached
 			{
-				eventMap &service = eventDB[sref(original_network_id,service_id)];
+				eventMap &service = eventDB[SREF];
 
 				if (service.find(TM) == service.end())   // event still not cached
-					eventDB[sref(original_network_id,service_id)][TM]=new eventData(eit_event, eit_event_size);
+					eventDB[SREF][TM]=new eventData(eit_event, eit_event_size);
 			}
 			ptr += eit_event_size;
+			((__u8*)eit_event)+=eit_event_size;
 		}
 		return 0;
 }

@@ -47,29 +47,41 @@ int eEPGWindow::eventFilter(const eWidgetEvent &event)
 	switch (event.type)
 	{
 		case eWidgetEvent::keyUp:
-			if (event.parameter != eRCInput::RC_OK)
+		{
+			switch (event.parameter)
+			{
+				case eRCInput::RC_HELP:
+				case eRCInput::RC_RED:
+				case eRCInput::RC_HOME:
+				case eRCInput::RC_DBOX:
+					closeTimer.start(100,1);   // without Timer ... no return 1 :-(
 				return 1;
-			else
-				return 0;
+
+				case eRCInput::RC_OK:
+					return 0;
+			}
+			return 1;
+		}
 
 		case eWidgetEvent::keyDown:
 		{
 			switch (event.parameter)
-			{
-				case eRCInput::RC_HOME:
- 					close(0);
-				break;
-
-				case eRCInput::RC_LEFT:
-				case eRCInput::RC_RIGHT:
-				case eRCInput::RC_UP:
-				case eRCInput::RC_DOWN:
-					return 0;
-				break;
+			{	
+					case eRCInput::RC_LEFT:
+					case eRCInput::RC_RIGHT:					
+					case eRCInput::RC_UP:
+					case eRCInput::RC_DOWN:
+						return 0;
 			}
+			return 1;	
 		}
 	}
-  return 1;
+	return 0;
+}
+
+void eEPGWindow::closeWnd()
+{
+	close(0);
 }
 
 eEPGWindow::eEPGWindow(eService* service):current(service),
@@ -78,5 +90,6 @@ eEPGWindow::eEPGWindow(eService* service):current(service),
 	move(QPoint(50, 50));
 	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
+	connect(&closeTimer, SIGNAL(timeout()), SLOT(closeWnd()));
 	fillEPGList();
 }
