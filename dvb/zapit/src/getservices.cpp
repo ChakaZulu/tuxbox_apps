@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.57 2002/11/18 00:27:56 obi Exp $
+ * $Id: getservices.cpp,v 1.58 2002/11/28 23:45:32 obi Exp $
  */
 
 #include <stdio.h>
@@ -59,7 +59,7 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 
 			GET_ATTR(node, "symbol_rate", "%u", feparams.u.qam.symbol_rate);
 			GET_ATTR(node, "fec_inner", "%hhu", tmp);
-			feparams.u.qam.fec_inner = CFrontend::getCodeRate(tmp);
+			feparams.u.qam.fec_inner = (fe_code_rate_t) tmp;
 			GET_ATTR(node, "modulation", "%hhu", tmp);
 			feparams.u.qam.modulation = CFrontend::getModulation(tmp);
 		}
@@ -68,7 +68,7 @@ void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 		else {
 			GET_ATTR(node, "symbol_rate", "%u", feparams.u.qpsk.symbol_rate);
 			GET_ATTR(node, "fec_inner", "%hhu", tmp);
-			feparams.u.qpsk.fec_inner = CFrontend::getCodeRate(tmp);
+			feparams.u.qpsk.fec_inner = (fe_code_rate_t) tmp;
 			GET_ATTR(node, "polarization", "%hhu", polarization);
 		}
 

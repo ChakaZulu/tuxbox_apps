@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.84 2002/11/27 03:42:36 obi Exp $
+ * $Id: scan.cpp,v 1.85 2002/11/28 23:45:32 obi Exp $
  */
 
 #include <fcntl.h>
@@ -414,10 +414,10 @@ void *start_scanthread(void *param)
 
 			if (!strcmp(type,"cable") && satfeed)
 				/* build special transponder for cable with satfeed*/
-				status = build_bf_transponder(frequency, symbol_rate, CFrontend::getCodeRate(fec_inner), CFrontend::getModulation(modulation));
+				status = build_bf_transponder(frequency, symbol_rate, (fe_code_rate_t) fec_inner, CFrontend::getModulation(modulation));
 			else
 				/* read network information table */
-				status = get_nits(frequency, symbol_rate, CFrontend::getCodeRate(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
+				status = get_nits(frequency, symbol_rate, (fe_code_rate_t) fec_inner, polarization, diseqc_pos, CFrontend::getModulation(modulation));
 			/* next transponder */
 			transponder = transponder->GetNext();
 		}
