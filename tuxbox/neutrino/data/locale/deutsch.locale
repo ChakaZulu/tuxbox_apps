@@ -647,6 +647,7 @@ mp3player.deleteall Alle löschen
 mp3player.title Titel
 mp3player.artist Interpret
 mp3player.playing Aktueller Track
+mp3player.id3scan Scanne ID3-Tags
 
 filebrowser.head Filebrowser
 filebrowser.filter Filter
