@@ -391,7 +391,8 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 
 int eDVRPlayerThread::getBufferSize()
 {
-	int buffersize=0, tmp=0;
+	int buffersize=buffer.size(),  // enigma buffer
+		tmp=0;
 	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
 	{
@@ -410,7 +411,6 @@ int eDVRPlayerThread::getBufferSize()
 			}
 		}
 		buffersize+=buffersize/8;   	// assume overhead..
-		buffersize+=buffer.size(); 		// enigma buffer
 		fclose(bitstream);
 	}
 	return buffersize;
