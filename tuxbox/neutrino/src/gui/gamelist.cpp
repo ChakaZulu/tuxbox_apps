@@ -28,11 +28,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.31 2002/02/22 20:30:23 field Exp $
+$Id: gamelist.cpp,v 1.32 2002/02/22 22:10:38 field Exp $
 
 $Log: gamelist.cpp,v $
-Revision 1.31  2002/02/22 20:30:23  field
-Stream-Info durch "Features" ersetzt (vtxt usw :)
+Revision 1.32  2002/02/22 22:10:38  field
+vtxt: avia_vbi start/stop
 
 Revision 1.26  2002/01/29 17:26:51  field
 Jede Menge Updates :)
@@ -298,6 +298,13 @@ void CPlugins::startPlugin(int number)
 	{
 		// cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
 
+		// versuche, den gtx/enx_vbi zu stoppen
+        int fd = open("/dev/dbox/vbi0", O_RDWR);
+		if (fd > 0)
+		{
+			ioctl(fd, AVIA_VBI_STOP_VTXT, 0);
+			close(fd);
+		}
 		startparam = makeParam(P_ID_VTXTPID, startparam);
 	}
 	if (plugin_list[number].needoffset)
@@ -393,6 +400,22 @@ void CPlugins::startPlugin(int number)
     		g_FrameBuffer->paletteSet();
     		g_FrameBuffer->paintBackgroundBox(0,0,720,576);
     	}
+
+    	if (plugin_list[number].vtxtpid)
+    	{
+    		int vtpid= atoi(params.find(P_ID_VTXTPID)->second.c_str());
+    		if (vtpid!=0)
+    		{
+    			// versuche, den gtx/enx_vbi wieder zu starten
+        		int fd = open("/dev/dbox/vbi0", O_RDWR);
+				if (fd > 0)
+				{
+					ioctl(fd, AVIA_VBI_START_VTXT, vtpid);
+					close(fd);
+				}
+			}
+		}
+
 		//redraw menue...
 		break;	// break every time - never loop - run once !!!
 	}
