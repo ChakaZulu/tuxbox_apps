@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.12 2002/05/30 19:48:17 dirch Exp $
+	$Id: webserver.cpp,v 1.13 2002/06/24 23:22:04 dirch Exp $
 
 	License: GPL
 
@@ -61,7 +61,7 @@ CWebserver::CWebserver(bool debug)
 
 	if (!Config->loadConfig(NHTTPD_CONFIGFILE) )
 	{
-		Config->setBool("NewGui",true);
+		Config->setBool("NewGui",false);
 		Config->setInt("Port", 80);
 		Config->setBool("THREADS",true);
 		Config->setBool("VERBOSE",false);
