@@ -142,6 +142,7 @@ function loadChannels(bouquet, channel)
 	addChannelOptions(bouquet);
 	document.channelselector.channel.selectedIndex = channel;
 	document.channelselector.channel.focus();
+	currentBouquet = bouquet;
 }
 function addChannelOptions(bouquet)
 {
