@@ -678,12 +678,8 @@ void CGameList::paintItems()
 
 void CGameList::runGame(int selected )
 {
-	#ifdef USEACTIONLOG
-		g_ActionLog->println("mode: game, " + gamelist[selected]->name);
-	#endif
-
 	g_PluginList->startPlugin( gamelist[selected]->number );
 
-    //redraw menue...
-    paint();
+	//redraw menue...
+	paint();
 }

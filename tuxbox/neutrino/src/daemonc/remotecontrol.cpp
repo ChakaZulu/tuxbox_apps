@@ -478,11 +478,6 @@ void CRemoteControl::setAPID( uint APID )
 
 	current_PIDs.PIDs.selected_apid = APID;
 	g_Zapit->setAudioChannel( APID );
-	#ifdef USEACTIONLOG
-		char buf[1000];
-		sprintf((char*) buf, "select audio: \"%s\"", current_PIDs.APIDs[APID].desc );
-		g_ActionLog->println(buf);
-	#endif
 }
 
 std::string CRemoteControl::setSubChannel(const int numSub, const bool force_zap)
@@ -497,25 +492,7 @@ std::string CRemoteControl::setSubChannel(const int numSub, const bool force_zap
 	current_sub_channel_id = subChannels[numSub].getChannelID();
 	g_Zapit->zapTo_subServiceID_NOWAIT( current_sub_channel_id );
 
-	std::string perspectiveName = subChannels[numSub].subservice_name;
-
-	#ifdef USEACTIONLOG
-		char buf[1000];
-		if(perspectiveName!="")
-		{
-			sprintf((char*) buf, "perspective change: \"%s\"", perspectiveName.c_str() );
-			g_ActionLog->println(buf);
-		}
-		else
-		{
-			struct  tm *tmZeit;
-			tmZeit= localtime( &subChannels[numSub].startzeit );
-			sprintf((char*) buf, "select nvod: (%02d:%02d)", tmZeit->tm_hour, tmZeit->tm_min );
-			g_ActionLog->println(buf);
-		}
-	#endif
-
-	return perspectiveName;
+	return subChannels[numSub].subservice_name;
 }
 
 std::string CRemoteControl::subChannelUp(void)
@@ -551,15 +528,6 @@ void CRemoteControl::zapTo_ChannelID(const t_channel_id channel_id, const std::s
 	selected_subchannel = -1;
 	needs_nvods = false;
 	director_mode = 0;
-
-	#ifdef USEACTIONLOG
-		if(channame!="")
-		{
-			char buf[1000];
-			sprintf((char*) buf, "zapto: %08x \"%s\"", channel_id, channame.c_str() );
-			g_ActionLog->println(buf);
-		}
-	#endif
 
 	unsigned long long now = getcurrenttime();
 	if ( zap_completion_timeout < now )

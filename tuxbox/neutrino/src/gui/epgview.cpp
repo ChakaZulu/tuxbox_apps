@@ -608,9 +608,6 @@ void CEpgData::hide()
 {
 	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
         showTimerEventBar (false);
-	#ifdef USEACTIONLOG
-		g_ActionLog->println("epg: closed");
-	#endif
 }
 
 void CEpgData::GetEPGData(const t_channel_id channel_id, unsigned long long id, time_t* startzeit )
@@ -647,12 +644,6 @@ void CEpgData::GetEPGData(const t_channel_id channel_id, unsigned long long id, 
 				epg_done= nProcentagePassed;
 		}
 	}
-
-	#ifdef USEACTIONLOG
-		char buf[1000];
-		sprintf((char*) buf, "epg: %08x %s %s - %s, \"%s\"", channel_id, epgData.date.c_str(), epgData.start.c_str(), epgData.end.c_str(), epgData.title.c_str() );
-		g_ActionLog->println(buf);
-	#endif
 }
 
 void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )

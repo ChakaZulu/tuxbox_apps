@@ -2799,11 +2799,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_PluginList = new CPlugins;
 	g_PluginList->setPluginDir(PLUGINDIR);
 
-#ifdef USEACTIONLOG
-	g_ActionLog = new CActionLog;
-	g_ActionLog->println("neutrino startup");
-#endif
-
 	colorSetupNotifier        = new CColorSetupNotifier;
 	audioSetupNotifier        = new CAudioSetupNotifier;
 	APIDChanger               = new CAPIDChangeExec;
@@ -3605,9 +3600,6 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 
 void CNeutrinoApp::ExitRun()
 {
-#ifdef USEACTIONLOG
-	g_ActionLog->println("neutrino shutdown");
-#endif
 	CLCD::getInstance()->setMode(CLCD::MODE_SHUTDOWN);
 
 	dprintf(DEBUG_INFO, "exit\n");
@@ -3794,9 +3786,6 @@ void CNeutrinoApp::tvMode( bool rezap )
 	}
 
 	mode = mode_tv;
-#ifdef USEACTIONLOG
-	g_ActionLog->println("mode: tv");
-#endif
 
 	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
 		g_Controld->setVideoFormat(g_settings.video_Format);
@@ -3817,11 +3806,6 @@ void CNeutrinoApp::tvMode( bool rezap )
 
 void CNeutrinoApp::scartMode( bool bOnOff )
 {
-#ifdef USEACTIONLOG
-	g_ActionLog->println( ( bOnOff ) ? "mode: scart on" : "mode: scart off" );
-#endif
-
-
 	//printf( ( bOnOff ) ? "mode: scart on\n" : "mode: scart off\n" );
 
 	if( bOnOff )
@@ -3860,11 +3844,6 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 
 void CNeutrinoApp::standbyMode( bool bOnOff )
 {
-#ifdef USEACTIONLOG
-	g_ActionLog->println( ( bOnOff ) ? "mode: standby on" : "mode: standby off" );
-#endif
-
-
 	//printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
 
 	if( bOnOff )
@@ -3932,9 +3911,6 @@ void CNeutrinoApp::radioMode( bool rezap)
 	}
 
 	mode = mode_radio;
-#ifdef USEACTIONLOG
-	g_ActionLog->println("mode: radio");
-#endif
 
 	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
 		g_Controld->setVideoFormat(CControldClient::VIDEOFORMAT_4_3);

@@ -148,12 +148,6 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 
 	int oldselected = selected;
 
-	#ifdef USEACTIONLOG
-		char buf[1000];
-		sprintf((char*) buf, "epg-Eventlist: %08x \"%s\"", channel_id, channelname.c_str() );
-		g_ActionLog->println(buf);
-	#endif
-
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_CHANLIST]);
 
 	bool loop=true;
@@ -343,10 +337,6 @@ int EventList::exec(const t_channel_id channel_id, const std::string& channelnam
 	}
 
 	hide();
-
-	#ifdef USEACTIONLOG
-		g_ActionLog->println("epg-Eventlist: closed");
-	#endif
 
 	return res;
 }

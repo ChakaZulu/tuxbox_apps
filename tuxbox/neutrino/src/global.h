@@ -32,8 +32,6 @@
 */
 
 
-//#define USEACTIONLOG
-
 #include <zapit/client/zapitclient.h>
 
 #include <controldclient/controldclient.h>
@@ -75,11 +73,5 @@ NEUTRINO_CPP  CInfoViewer		*g_InfoViewer;
 NEUTRINO_CPP  EventList			*g_EventList;
 
 NEUTRINO_CPP CLocaleManager		*g_Locale;
-
-
-#ifdef USEACTIONLOG
-	#include "helpers/actionlog.h"
-	NEUTRINO_CPP CActionLog		*g_ActionLog;
-#endif
 
 #endif /* __neutrino_global_h__ */

@@ -500,12 +500,6 @@ bool CFileBrowser::exec(std::string Dirname)
 
 	int oldselected = selected;
 
-	#ifdef USEACTIONLOG
-		char buf[1000];
-		sprintf((char*) buf, "Filebrowser: \"%s\"", dirname.c_str() );
-		g_ActionLog->println(buf);
-	#endif
-
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing[SNeutrinoSettings::TIMING_FILEBROWSER]);
 
 	bool loop=true;
@@ -707,10 +701,6 @@ bool CFileBrowser::exec(std::string Dirname)
 		progress->hide();
 		delete progress;
 	}
-
-	#ifdef USEACTIONLOG
-		g_ActionLog->println("Filebrowser: closed");
-	#endif
 
 	return res;
 }

@@ -655,10 +655,6 @@ int CInfoViewer::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			printf("zap failed!\n");
 			showFailure();
 			CLCD::getInstance()->showPercentOver(255);
-
-			#ifdef USEACTIONLOG
-				g_ActionLog->println("channel unavailable");
-			#endif
 		}
 		return messages_return::handled;
 	}
@@ -903,19 +899,13 @@ void CInfoViewer::showButton_Audio()
 
                         std::string  disp_text;
                         if ( ( g_RemoteControl->ecmpid == invalid_ecmpid_found ) )
-						{
-                                disp_text= g_Locale->getText(LOCALE_INFOVIEWER_CANTDECODE);
-								#ifdef USEACTIONLOG
-									g_ActionLog->println("cannot decode");
-								#endif
-						}
+			{
+			disp_text= g_Locale->getText(LOCALE_INFOVIEWER_CANTDECODE);
+			}
                         else
-						{
-                                disp_text= g_Locale->getText(LOCALE_INFOVIEWER_NOTAVAILABLE);
-								#ifdef USEACTIONLOG
-									g_ActionLog->println("not available");
-								#endif
-						}
+			{
+			disp_text= g_Locale->getText(LOCALE_INFOVIEWER_NOTAVAILABLE);
+			}
 
                         frameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR_PLUS_0);
                         g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text, COL_INFOBAR, 0, true); // UTF-8
