@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.51 2003/09/23 08:38:44 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.52 2003/09/23 16:01:06 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -336,7 +336,7 @@ ReceiveStreamThread (void *mrl)
 		souturl += g_settings.streaming_videorate;
 		souturl += ",acodec=mpga,ab=";
 		souturl += g_settings.streaming_audiorate;
-		souturl + ",channels=2}:duplicate{dst=std{access=http,mux=ts,url=:";
+		souturl += ",channels=2}:duplicate{dst=std{access=http,mux=ts,url=:";
 		souturl += g_settings.streaming_server_port;
 		souturl += "/dboxstream}}";
 	}
