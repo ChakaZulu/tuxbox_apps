@@ -1,90 +1,94 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <time.h>
-#include <sys/poll.h>
-#include <errno.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
+#define BSIZE		4096
+
+#ifdef HAVE_OST_DMX_H
+#include <ost/dmx.h>
+#define DMXDEV	"/dev/dvb/card0/demux0"
+#define dmx_sct_filter_params dmxSctFilterParams
+#else
 #include <linux/dvb/dmx.h>
+#define DMXDEV	"/dev/dvb/adapter0/demux0"
+#endif
 
-#define BSIZE					 10000
-
-int main(int argc, char **argv)
+int main(void)
 {
-	int fd, pid,filter,mask;
-	struct dmx_sct_filter_params flt; 
+	int fd, pid, filter, mask;
+	struct dmx_sct_filter_params flt;
 	char buffer[BSIZE], *bp;
+	unsigned char c;
+	ssize_t r, w;
 
-	memset(&flt.filter, 0, sizeof(struct dmx_filter));
+	bp = buffer;
 
-	bp=buffer;
-
-	while (bp-buffer < BSIZE)
-	{
-		unsigned char c;
-		read(1, &c, 1);
-		if ((*bp++=c)=='\n')
-			break;
+	while (bp - buffer < BSIZE) {
+		if (read(STDIN_FILENO, &c, 1) == 1)
+			if ((*bp++ = c) == '\n')
+				break;
 	}
 
-	*bp++=0;
-	
-	bp=buffer;
-	if (!strncmp(buffer, "GET /", 5))
-	{
-		printf("HTTP/1.1 200 OK\r\nServer: d-Box network\r\n\r\n"); // Content-Type: video/mpeg\r\n\r\n");
-		bp+=5;
-	}
-	fflush(stdout);
-	
-	fd=open("/dev/dvb/adapter0/demux0", O_RDONLY);
+	*bp = '\0';
 
-	if (fd<0)
-	{
-		perror("/dev/dvb/adapter0/demux0");
-		return -fd;
+	bp = buffer;
+
+	if (!strncmp(buffer, "GET /", 5)) {
+		printf("HTTP/1.1 200 OK\r\nServer: d-Box network\r\n\r\n");
+		fflush(stdout);
+		bp += 5;
 	}
-	
-	sscanf(bp, "%4x %2x %2x", &pid,&filter,&mask);
-	
+
+	if ((fd = open(DMXDEV, O_RDONLY)) == -1) {
+		perror(DMXDEV);
+		return EXIT_FAILURE;
+	}
+
+	if (sscanf(bp, "%4x,%2x,%2x", &pid, &filter, &mask) != 3)
+		return EXIT_FAILURE;
+
 	printf("pid: %x\n", pid);
-	printf("filter: %x\n",filter);
-	printf("mask: %x\n",mask);
-	
-	flt.pid=pid;
-	flt.filter.filter[0]=filter;
-	flt.filter.mask[0]=mask;
-	flt.timeout=10000;
-	flt.flags=DMX_IMMEDIATE_START;
-		
-	
-	if (ioctl(fd, DMX_SET_FILTER, &flt)<0)
-	{
-		perror("DMX_SET_PES_FILTER");
-		return errno;
+	printf("filter: %x\n", filter);
+	printf("mask: %x\n", mask);
+
+	memset(&flt, 0, sizeof(struct dmx_sct_filter_params));
+	flt.pid = pid;
+	flt.filter.filter[0] = filter;
+	flt.filter.mask[0] = mask;
+	flt.flags = DMX_IMMEDIATE_START;
+
+	if (ioctl(fd, DMX_SET_FILTER, &flt) == -1) {
+		perror("DMX_SET_FILTER");
+		close(fd);
+		return EXIT_FAILURE;
 	}
 
-	while (1)
-	{
-		int r,a;
+	for (;;) {
+		if ((r = read(fd, buffer, BSIZE)) == -1) {
+			perror("read");
+			continue;
+		}
 
-		if ((r=read(fd,buffer,3)) <=0) perror("read");
-		a=(((buffer[1] & 0xF)<<8) + buffer[2]);
-		if ((r=read(fd,buffer+3,a)) <=0) perror("read");
+		bp = buffer;
 
-		if (write(1, buffer, a)!=a)
-		{
-			perror("output");
-			break;
+		while (r != 0) {
+			if ((w = write(STDOUT_FILENO, bp, r)) == -1) {
+				perror("write");
+				continue;
+			}
+
+			bp += w;
+			r -= w;
 		}
 	}
-	
+
 	close(fd);
-	return 0;
+
+	return EXIT_SUCCESS;
 }
 
