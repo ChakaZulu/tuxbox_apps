@@ -422,7 +422,7 @@ void RenderClearMenuLineBB(char *p, int attrcol, int attr)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.60 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.61 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -787,6 +787,11 @@ int Init()
 	fcntl(rc, F_SETFL, O_NONBLOCK);
 	ioctl(rc, RC_IOCTL_BCODES, 1);
 
+	if (ioctl(dmx, DMX_SET_BUFFER_SIZE, 64*1024)<0)
+	{
+		perror("Tuxtxt <DMX_SET_BUFFERSIZE>");
+		return 0;
+	}
 
 	/* set filter & start demuxer */
 	dmx_flt.pid      = vtxtpid;
@@ -3999,8 +4004,14 @@ void *CacheThread(void *arg)
 		pthread_testcancel();
 
 		/* read packet */
-		read(dmx, &pes_packet, sizeof(pes_packet));
-
+		unsigned int readcnt;
+		readcnt = read(dmx, &pes_packet, sizeof(pes_packet));
+		if (!readcnt||(readcnt!=sizeof(pes_packet))){
+#if DEBUG
+			printf ("TuxTxt: readerror\n");
+#endif
+			continue;
+		}
 		/* analyze it */
 		for (line = 0; line < 4; line++)
 		{
