@@ -319,8 +319,7 @@ flashupdate.proxyusername_hint2 Ein leerer Eintrag bedeutet keine Authentifizier
 flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Geben sie das Proxy-Passwort ein
 flashupdate.proxypassword_hint2
-flashupdate.msgbox Es wurde folgendes neues Image gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie
-diese Version jetzt herunterladen\nund installieren?
+flashupdate.msgbox Es wurde folgendes neues Image gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie diese Version jetzt herunterladen\nund installieren?
 flashupdate.msgbox_manual Es wurde ein neues Image gefunden:\nDatum: %s, %s\nBasisImage: %s\nImageTyp: %s\n\nWollen Sie diese Version jetzt installieren?
 flashupdate.expertfunctions Experten-Funktionen
 flashupdate.readflash ganzes Flashimage auslesen
@@ -377,7 +376,7 @@ GENRE.MOVIE.2 Abenteuerfilm/Western/Kriegsfilm
 GENRE.MOVIE.3 Science-Fiction/Fantasy/Horror
 GENRE.MOVIE.4 Comedy
 GENRE.MOVIE.5 Soap/Melodram/Folklore
-GENRE.MOVIE.6 Romatik
+GENRE.MOVIE.6 Romantik
 GENRE.MOVIE.7 serious/classical/religious/historical movie/drama
 GENRE.MOVIE.8 adult movie/Drama
 
