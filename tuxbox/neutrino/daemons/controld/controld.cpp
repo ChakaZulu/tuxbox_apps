@@ -92,6 +92,7 @@ int	philips_dvb[6];
 char aspectRatio_vcr;
 char aspectRatio_dvb;
 bool vcr;
+bool videoOutputDisabled;
 
 
 
@@ -525,6 +526,7 @@ void setScartMode(bool onoff)
 void disableVideoOutput(bool disable)
 {
 	int arg=disable?1:0;
+	videoOutputDisabled=disable;
 	int fd;
 	printf("[controld] videoOutput %s\n", disable?"off":"on");
 
@@ -832,7 +834,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.110 2003/10/21 22:48:25 zwen Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.111 2003/11/20 18:33:08 zwen Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
@@ -914,6 +916,9 @@ int main(int argc, char **argv)
 	setvideooutput(settings.videooutput);
 	setVideoFormat(settings.videoformat, false);
 
+	vcr=false;
+	videoOutputDisabled=false;
+	
 	controld_server.run(parse_command, CControld::ACTVERSION);
 
 	shutdownBox();
@@ -937,7 +942,7 @@ void CControldAspectRatioNotifier::aspectRatioChanged( int newAspectRatio )
 	else
 	   activeAspectRatio = aspectRatio_dvb;
 
-	if ( settings.videoformat == 0 )
+	if ( settings.videoformat == 0 && (vcr || !videoOutputDisabled))
 	{
 		switch (activeAspectRatio)
 		{
