@@ -11,8 +11,7 @@ class eStreamWatchdog: public QObject
 	int last;
 	QTimer timer;
 	static eStreamWatchdog *instance;
-	PMTEntry* stream;
-private slots:
+	private slots:
 	void checkstate();
 public:
 	eStreamWatchdog();
