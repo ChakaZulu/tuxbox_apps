@@ -139,7 +139,8 @@ eString firmwareLevel(eString verid)
 		eString ver = verid.mid(1, 3);
 		eString date = verid.mid(4, 8);
 //		eString time = verid.mid(12, 4);
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
 			result = eString(typea[type%3]) + eString(" ") + ver[0] + "." + ver[1] + "." + ver[2]+ ", " + date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4);
 		else
 			result = eString().sprintf("%s %c.%d. %s", typea[type%3], ver[0], atoi(eString().sprintf("%c%c", ver[1], ver[2]).c_str()), (date.mid(6, 2) + "." + date.mid(4, 2) + "." + date.left(4)).c_str());
@@ -1020,7 +1021,8 @@ static eString getLeftNavi(eString mode, bool javascript)
 	else
 	if (mode.find("help") == 0)
 	{
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
 		{
 			result += button(110, "DMM Sites", LEFTNAVICOLOR, pre + "?mode=helpDMMSites" + post);
 			result += "<br>";
@@ -3391,7 +3393,8 @@ eString getPDAContent(eString mode, eString path, eString opts)
 	result.strReplace("#TOPNAVI#", getTopNavi(false));
 	result.strReplace("#CHANNAVI#", getChannelNavi());
 	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, false));
-	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
+		|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
 		result.strReplace("#TOPBALK#", "topbalk_small.png");
 	else
 	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
@@ -3451,11 +3454,13 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	if (pdaScreen == 0)
 	{
 		result = readFile(TEMPLATE_DIR + "index_big.tmp");
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
 			result.strReplace("#BOX#", "Dreambox");
 		else
 			result.strReplace("#BOX#", "dBox");
-		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000
+			|| eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7020)
 			result.strReplace("#TOPBALK#", "topbalk.png");
 		else
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
