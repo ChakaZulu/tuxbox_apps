@@ -2089,7 +2089,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
 
-	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName.c_str());
+	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName.c_str(), false);
 
 	g_info.box_Type = g_Controld->getBoxType();
 	
@@ -2101,6 +2101,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	int loadSettingsErg = loadSetup();
 
 	//lcd aktualisieren
+	CLCD::getInstance()->setlcdparameter();
 	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control==1));
 	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control==1));
 
@@ -3362,7 +3363,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.419 2003/02/22 18:36:49 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.420 2003/02/25 17:35:11 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -69,11 +69,11 @@ void* CLCD::TimeThread(void *)
 	return NULL;
 }
 
-void CLCD::init(const char * fontfile, const char * fontname)
+void CLCD::init(const char * fontfile, const char * fontname, const bool _setlcdparameter)
 {
 	InitNewClock();
 
-	if(!lcdInit(fontfile, fontname))
+	if(!lcdInit(fontfile, fontname, _setlcdparameter))
 	{
 		printf("LCD-Init failed!\n");
 		return;
@@ -86,7 +86,7 @@ void CLCD::init(const char * fontfile, const char * fontname)
 	}
 }
 
-bool CLCD::lcdInit(const char * fontfile, const char * fontname)
+bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _setlcdparameter)
 {
 	fontRenderer = new LcdFontRenderClass(&display);
 	fontRenderer->AddFont(fontfile);
@@ -97,7 +97,9 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname)
 	fonts.menutitle   = fontRenderer->getFont(fontname, "Regular", 15);
 	fonts.menu        = fontRenderer->getFont(fontname, "Regular", 12);
 
-	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+	if (_setlcdparameter)
+		setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
+
 	display.setIconBasePath( DATADIR "/lcdd/icons/");
 
 	if(!display.isAvailable())
@@ -171,6 +173,11 @@ void CLCD::setlcdparameter(int dimm, int contrast, int power, int inverse)
 
 	close(fp);
 	close(fd);
+}
+
+void CLCD::setlcdparameter(void)
+{
+	setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 }
 
 void CLCD::showServicename(const std::string name) // UTF-8
