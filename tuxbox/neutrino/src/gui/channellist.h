@@ -56,11 +56,7 @@ class CChannelList
 		class CChannel
 		{
 			private:
-				// flag if there is currently running a programm
-				// that that should be locked with the actual youth
-				// protection settings
-				// ( for internal use of isCurrentlyLocked()-method )
-				bool bLockedProgramIsRunning;
+				unsigned long long	last_unlocked_EPGid;
 
 			public:
 				int         key;
@@ -74,16 +70,6 @@ class CChannelList
 
 				// constructor
 				CChannel();
-
-				// isCurrentlyLocked returns true if the channel is locked
-				// considering youth-protection-settings, bouquet-locking
-				// and currently running program
-				bool isCurrentlyLocked();
-
-				// lockedProgramStarts should be called when a locked program starts
-				void lockedProgramStarts( uint age);
-				// lockedProgramEnds should be called when a locked program ends
-				void lockedProgramEnds();
 
 				friend class CChannelList;
 		};
@@ -142,7 +128,6 @@ class CChannelList
 		void quickZap(int key);
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
-		bool handleLockage( CChannel* chan);
 
 		int handleMsg(uint msg, uint data);
 }

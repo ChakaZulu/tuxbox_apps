@@ -37,32 +37,6 @@
 CChannelList::CChannel::CChannel()
 {
 	bAlwaysLocked = false;
-	bLockedProgramIsRunning = false;
-}
-
-// isCurrentlyLocked returns true if the channel is locked
-// considering youth-protection-settings, bouquet-locking
-// and currently running program
-bool CChannelList::CChannel::isCurrentlyLocked()
-{
-	printf("bAlwaysLocked: %d, bLockedProgramIsRunning %d\n",bAlwaysLocked,bLockedProgramIsRunning );
-	return ( bAlwaysLocked || bLockedProgramIsRunning);
-//	return( true);
-}
-
-// lockedProgramStarts should be called when a locked program starts
-void CChannelList::CChannel::lockedProgramStarts( uint age)
-{
-	if ((g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSIGNAL) && ( age >= g_settings.parentallock_lockage))
-	{
-		bLockedProgramIsRunning = true;
-	}
-}
-
-// lockedProgramEnds should be called when a locked program ends
-void CChannelList::CChannel::lockedProgramEnds()
-{
-	bLockedProgramIsRunning = false;
 }
 
 
@@ -225,7 +199,6 @@ void CChannelList::addChannel(int key, int number, const std::string& name, unsi
 	tmp->name=name;
 	tmp->onid_sid=ids;
 	tmp->bAlwaysLocked = false;
-	tmp->bLockedProgramIsRunning = false;
 	chanlist.insert(chanlist.end(), tmp);
 }
 
@@ -485,13 +458,21 @@ int CChannelList::handleMsg(uint msg, uint data)
 			{
 				if ( data>= g_settings.parentallock_lockage )
 				{
-					g_RemoteControl->stopvideo();
-					zapProtection = new CZapProtection( g_settings.parentallock_pincode, data );
+					if ( ( chanlist[selected]->last_unlocked_EPGid != g_RemoteControl->current_EPGid ) ||
+						 ( g_RemoteControl->current_EPGid == 0 ) )
+					{
+						g_RemoteControl->stopvideo();
+						zapProtection = new CZapProtection( g_settings.parentallock_pincode, data );
 
-					if ( zapProtection->check() )
-						g_RemoteControl->startvideo();
-					delete zapProtection;
-					zapProtection = NULL;
+						if ( zapProtection->check() )
+						{
+							g_RemoteControl->startvideo();
+							// merken fürs nächste hingehen
+							chanlist[selected]->last_unlocked_EPGid= g_RemoteControl->current_EPGid;
+						}
+						delete zapProtection;
+						zapProtection = NULL;
+					}
 				}
 				else
 					g_RemoteControl->startvideo();
@@ -502,27 +483,6 @@ int CChannelList::handleMsg(uint msg, uint data)
 	}
     else
 		return messages_return::unhandled;
-}
-
-
-bool CChannelList::handleLockage( CChannel* chan)
-{
-	printf("[neutrino] handleLockage\n");
-	if (chan->isCurrentlyLocked())
-	{
-		printf("[neutrino] channel is locked\n");
-//		g_Zapit->stopPlayBack();
-		CZapProtection zapProtection( g_settings.parentallock_pincode,0  );
-		if (!zapProtection.check())
-		{
-			if (bouquetList != NULL)
-				bouquetList->adjustToChannel( getActiveChannelNumber());
-			g_InfoViewer->killTitle(); // in case we came from numzap
-			return( false);
-		}
-	}
-//	g_Zapit->startPlayBack();
-	return( true);
 }
 
 
@@ -543,7 +503,6 @@ void CChannelList::zapToOnidSid (unsigned int onid_sid)
 	}
 
 }
-
 
 
 void CChannelList::zapTo(int pos)
