@@ -1,5 +1,5 @@
 //
-// $Id: SIevents.cpp,v 1.2 2001/05/19 22:46:50 fnbrd Exp $
+// $Id: SIevents.cpp,v 1.3 2001/05/20 14:40:15 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.cpp,v $
+// Revision 1.3  2001/05/20 14:40:15  fnbrd
+// Mit parental_rating
+//
 // Revision 1.2  2001/05/19 22:46:50  fnbrd
 // Jetzt wellformed xml.
 //
@@ -66,6 +69,7 @@ SIevent::SIevent(const SIevent &e)
   contentClassification=e.contentClassification;
   userClassification=e.userClassification;
   components=e.components;
+  ratings=e.ratings;
 }
 
 int SIevent::saveXML(FILE *file, const char *serviceName) const
@@ -128,6 +132,7 @@ int SIevent::saveXML2(FILE *file) const
   for(unsigned i=0; i<userClassification.length(); i++)
     fprintf(file, "    <user_classification>0x%02hhx</user_classification>\n", userClassification[i]);
   for_each(components.begin(), components.end(), saveSIcomponentXML(file));
+  for_each(ratings.begin(), ratings.end(), saveSIparentalRatingXML(file));
   fprintf(file, "  </event>\n");
   return 0;
 }
@@ -165,6 +170,7 @@ void SIevent::dump(void) const
     printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
   printf("\n");
   for_each(components.begin(), components.end(), printSIcomponent());
+  for_each(ratings.begin(), ratings.end(), printSIparentalRating());
 }
 
 void SIevent::dumpSmall(void) const
@@ -179,5 +185,6 @@ void SIevent::dumpSmall(void) const
     printf("Startzeit: %s", ctime(&startzeit));
   if(dauer)
     printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
+  for_each(ratings.begin(), ratings.end(), printSIparentalRating());
   printf("\n");
 }

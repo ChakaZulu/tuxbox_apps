@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.5 2001/05/19 20:15:08 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.6 2001/05/20 14:40:15 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.6  2001/05/20 14:40:15  fnbrd
+// Mit parental_rating
+//
 // Revision 1.5  2001/05/19 20:15:08  fnbrd
 // Kleine Aenderungen (und epgXML).
 //
@@ -74,6 +77,13 @@ class SIcomponent {
       if(comp->descriptor_length>sizeof(struct descr_component_header)-2)
         component=string(((const char *)comp)+sizeof(struct descr_component_header), comp->descriptor_length-(sizeof(struct descr_component_header)-2));
     }
+    // Std-copy
+    SIcomponent(const SIcomponent &c) {
+      streamContent=c.streamContent;
+      componentType=c.componentType;
+      componentTag=c.componentTag;
+      component=c.component;
+    }
     // Der Operator zum sortieren
     bool operator < (const SIcomponent& c) const {
       return streamContent < c.streamContent;
@@ -111,8 +121,50 @@ struct saveSIcomponentXML : public unary_function<SIcomponent, void>
   void operator() (const SIcomponent &c) { c.saveXML(f);}
 };
 
-
 typedef multiset <SIcomponent, less<SIcomponent> > SIcomponents;
+
+class SIparentalRating {
+  public:
+    SIparentalRating(const string &cc, unsigned char rate) {
+      rating=rate;
+      countryCode=cc;
+    }
+    // Std-Copy
+    SIparentalRating(const SIparentalRating &r) {
+      rating=r.rating;
+      countryCode=r.countryCode;
+    }
+    // Der Operator zum sortieren
+    bool operator < (const SIparentalRating& c) const {
+      return countryCode < c.countryCode;
+    }
+    void dump(void) const {
+      printf("Rating: %s %hhu (+3)\n", countryCode.c_str(), rating);
+    }
+    int saveXML(FILE *file) const {
+      if(fprintf(file, "    <parental_rating country=\"%s\" rating=\"%hhu\" />\n", countryCode.c_str(), rating)<0)
+        return 1;
+      return 0;
+    }
+    string countryCode;
+    unsigned char rating; // Bei 1-16 -> Minumim Alter = rating +3
+};
+
+// Fuer for_each
+struct printSIparentalRating : public unary_function<SIparentalRating, void>
+{
+  void operator() (const SIparentalRating &r) { r.dump();}
+};
+
+// Fuer for_each
+struct saveSIparentalRatingXML : public unary_function<SIparentalRating, void>
+{
+  FILE *f;
+  saveSIparentalRatingXML(FILE *fi) { f=fi;}
+  void operator() (const SIparentalRating &r) { r.saveXML(f);}
+};
+
+typedef set <SIparentalRating, less<SIparentalRating> > SIparentalRatings;
 
 class SIevent {
   public:
@@ -131,6 +183,7 @@ class SIevent {
     unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
     unsigned short serviceID;
     SIcomponents components;
+    SIparentalRatings ratings;
     // Der Operator zum sortieren
     bool operator < (const SIevent& e) const {
       // Erst nach Service-ID, dann nach Event-ID sortieren

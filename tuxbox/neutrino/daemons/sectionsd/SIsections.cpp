@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.3 2001/05/18 20:31:04 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.4 2001/05/20 14:40:15 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.4  2001/05/20 14:40:15  fnbrd
+// Mit parental_rating
+//
 // Revision 1.3  2001/05/18 20:31:04  fnbrd
 // Aenderungen fuer -Wall
 //
@@ -104,6 +107,16 @@ void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e)
   }
 }
 
+void SIsectionEIT::parseParentalRatingDescriptor(const char *buf, SIevent &e)
+{
+  struct descr_generic_header *cont=(struct descr_generic_header *)buf;
+  const char *s=buf+sizeof(struct descr_generic_header);
+  while(s<buf+sizeof(struct descr_generic_header)+cont->descriptor_length-4) {
+    e.ratings.insert(SIparentalRating(string(s, 3), *(s+3)));
+    s+=4;
+  }
+}
+
 void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e)
 {
   struct descr_extended_event_header *evt=(struct descr_extended_event_header *)buf;
@@ -155,6 +168,8 @@ void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
       parseContentDescriptor((const char *)desc, e);
     else if(desc->descriptor_tag==0x50)
       parseComponentDescriptor((const char *)desc, e);
+    else if(desc->descriptor_tag==0x55)
+      parseParentalRatingDescriptor((const char *)desc, e);
     len-=desc->descriptor_length+2;
     des+=desc->descriptor_length+2;
   }
