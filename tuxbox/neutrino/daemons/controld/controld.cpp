@@ -557,9 +557,8 @@ void disableVideoOutput(bool disable)
 	}
 }
 
-void setBoxType(char type)
+void setBoxType()
 {
-	// settings.boxtype = type;
 	FILE* fd = fopen("/proc/bus/dbox", "rt");
 	if (fd==NULL)
 	{
@@ -802,7 +801,7 @@ void sig_catch(int)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.50 2002/03/14 10:14:52 field Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.51 2002/03/15 17:07:29 McClean Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	if (fork() != 0)
@@ -854,7 +853,7 @@ int main(int argc, char **argv)
 		settings.boxtype = 1; //nokia
 	}
 
-	setBoxType( 0 ); // dummy set - liest den aktuellen Wert aus!
+	setBoxType(); // dummy set - liest den aktuellen Wert aus!
 
 	watchDog = new CEventWatchDog();
 	aspectRatioNotifier = new CControldAspectRatioNotifier();
