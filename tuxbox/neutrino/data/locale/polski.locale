@@ -231,6 +231,7 @@ lcdmenu.lcdcontroler Kontrast / Jasnosc
 lcdmenu.statusline Linia Statusowa
 lcdmenu.statusline.volume Glosnosc
 lcdmenu.statusline.playtime Czas odtwarzania
+lcdmenu.statusline.both change me
 
 lcdcontroler.head Ustawienia LCD
 lcdcontroler.contrast Kontrast

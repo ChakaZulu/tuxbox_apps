@@ -935,7 +935,7 @@ void CInfoViewer::Set_CA_Status(int Status)
 
 void CInfoViewer::showLcdPercentOver()
 {
-   if(!g_settings.lcd_show_volume)
+   if(g_settings.lcd_show_volume != 1)
    {
       int runningPercent=-1;
       if ( ! (info_CurrentNext.flags & CSectionsdClient::epgflags::has_current))

@@ -1869,6 +1869,7 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	oj = new CMenuOptionChooser("lcdmenu.statusline", &g_settings.lcd_show_volume, true );
 	oj->addOption(0, "lcdmenu.statusline.playtime");
 	oj->addOption(1, "lcdmenu.statusline.volume");
+	oj->addOption(2, "lcdmenu.statusline.both");
 	lcdSettings.addItem( oj );
 }
 
@@ -3424,7 +3425,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.463 2003/06/05 14:49:54 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.464 2003/06/06 00:13:10 gagga Exp $\n\n");
 
 	tzset();
 	initGlobals();

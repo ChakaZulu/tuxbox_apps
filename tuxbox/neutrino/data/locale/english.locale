@@ -231,6 +231,7 @@ lcdmenu.lcdcontroler Contrast / Brightness
 lcdmenu.statusline status line
 lcdmenu.statusline.volume volume
 lcdmenu.statusline.playtime playtime
+lcdmenu.statusline.both volume / playtime
 
 lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Contrast

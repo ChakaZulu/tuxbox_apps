@@ -231,6 +231,7 @@ lcdmenu.lcdcontroler Kontrast / Helligkeid
 lcdmenu.statusline Statuszeiln
 lcdmenu.statusline.volume Lautstärkn
 lcdmenu.statusline.playtime Spuizeit
+lcdmenu.statusline.both change me
 
 lcdcontroler.head LCD Eistellunga
 lcdcontroler.contrast Kontrast

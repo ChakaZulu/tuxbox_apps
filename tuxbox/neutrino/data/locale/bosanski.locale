@@ -231,6 +231,7 @@ lcdmenu.lcdcontroler kontrast / svjetlost
 lcdmenu.statusline statusna linija
 lcdmenu.statusline.volume glasnost
 lcdmenu.statusline.playtime igrano vrijeme
+lcdmenu.statusline.both change me
 
 lcdcontroler.head namjestiti tecni kristal
 lcdcontroler.contrast kontrast

@@ -231,6 +231,7 @@ lcdmenu.lcdcontroler Kontrast / Hälligkeit
 lcdmenu.statusline Statusziile
 lcdmenu.statusline.volume Lutstärki
 lcdmenu.statusline.playtime Sendigsfortschritt
+lcdmenu.statusline.both change me
 
 lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Kontrast

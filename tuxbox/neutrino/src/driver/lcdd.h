@@ -76,6 +76,7 @@ class CLCD
 
 		raw_display_t		icon_lcd;
 		raw_display_t		icon_lcd2;
+		raw_display_t		icon_lcd3;
 		raw_display_t		icon_setup;
 		raw_display_t		icon_power;
 

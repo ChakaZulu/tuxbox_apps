@@ -231,6 +231,7 @@ lcdmenu.lcdcontroler Contrasto / Luminosita
 lcdmenu.statusline Linia Progresso
 lcdmenu.statusline.volume Volume
 lcdmenu.statusline.playtime Tempo trascorso
+lcdmenu.statusline.both change me
 
 lcdcontroler.head Impostazioni LCD
 lcdcontroler.contrast Contrasto

@@ -135,6 +135,13 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _set
 		return false;
 	}
 	display.dump_screen(&icon_lcd2);
+	
+	if (!display.paintIcon("neutrino_lcd3.raw",0,0,false))
+	{
+		printf("exit...(no neutrino_lcd2.raw)\n");
+		return false;
+	}
+	display.dump_screen(&icon_lcd3);
 
 	mode = MODE_TVRADIO;
 	showServicename("Booting...");
@@ -282,20 +289,38 @@ void CLCD::showVolume(char vol)
 void CLCD::showPercentOver(const unsigned char perc)
 {
 	percentOver = perc;
-	if ((mode==MODE_TVRADIO) && !g_settings.lcd_show_volume)
+	if ((mode==MODE_TVRADIO))
 	{
-		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
-		//strichlin
-		if (perc==255)
+		if(g_settings.lcd_show_volume == 0)
 		{
-			display.draw_line (12,55,72,59, CLCDDisplay::PIXEL_ON);
+			display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
+			//strichlin
+			if (perc==255)
+			{
+				display.draw_line (12,55,72,59, CLCDDisplay::PIXEL_ON);
+			}
+			else
+			{
+				int dp = int( perc/100.0*61.0+12.0);
+				display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
+			}
+			display.update();
 		}
-		else
+		else if (g_settings.lcd_show_volume == 2)
 		{
-			int dp = int( perc/100.0*61.0+12.0);
-			display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
+			display.draw_fill_rect (11,2,117,8, CLCDDisplay::PIXEL_OFF);
+			//strichlin
+			if (perc==255)
+			{
+				display.draw_line (12,3,116,7, CLCDDisplay::PIXEL_ON);
+			}
+			else
+			{
+				int dp = int( perc/100.0*105.0+12.0);
+				display.draw_fill_rect (11,2,dp,8, CLCDDisplay::PIXEL_ON);
+			}
+			display.update();
 		}
-		display.update();
 	}
 }
 
@@ -372,15 +397,20 @@ void CLCD::setMode(MODES m, std::string title)
 			//printf("[lcdd] mode: tvradio\n");
 			mode = m;
 			showclock = true;
-			if(g_settings.lcd_show_volume)
-			{
-				display.load_screen(&icon_lcd);
-				showVolume(volume);
-			}
-			else
-			{
+			switch(g_settings.lcd_show_volume){
+			case 0:
 				display.load_screen(&icon_lcd2);
 				showPercentOver(percentOver);
+				break;
+			case 1:
+				display.load_screen(&icon_lcd);
+				showVolume(volume);
+				break;
+			case 2:
+				display.load_screen(&icon_lcd3);
+				showVolume(volume);
+				showPercentOver(percentOver);
+				break;
 			}
 			showServicename(servicename);
 			showTime();
