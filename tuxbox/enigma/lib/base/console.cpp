@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: console.cpp,v 1.9 2004/11/26 02:05:15 ghostrider Exp $
+ * $Id: console.cpp,v 1.10 2005/02/02 16:00:52 ghostrider Exp $
  */
 
 #include <lib/base/console.h>
@@ -56,7 +56,7 @@ int bidirpipe(int pfd[], char *cmd , char *argv[])
 		for (unsigned int i=3; i < 90; ++i )
 			close(i);
 
-		execv(cmd,argv);
+		execvp(cmd,argv);
 		_exit(0);
 	}
 	if (close(pfdout[0]) == -1 || close(pfdin[1]) == -1 || close(pfderr[1]) == -1)
@@ -86,6 +86,15 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 	if (!str.length())
 		return;
 
+	std::map<char,char> brackets;
+	brackets.insert(std::pair<char,char>('\'','\''));
+	brackets.insert(std::pair<char,char>('"','"'));
+	brackets.insert(std::pair<char,char>('`','`'));
+	brackets.insert(std::pair<char,char>('(',')'));
+	brackets.insert(std::pair<char,char>('{','}'));
+	brackets.insert(std::pair<char,char>('[',']'));
+	brackets.insert(std::pair<char,char>('<','>'));
+
 	unsigned int idx=0;
 	eString path = str.left( (idx = str.find(' ')) != eString::npos ? idx : str.length() );
 //	eDebug("path = %s", path.c_str() );
@@ -94,9 +103,19 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 //	eDebug("cmds = %s", cmds.c_str() );
 
 	idx = 0;
+	std::map<char,char>::iterator it = brackets.find(cmds[idx]);
 	while ( (idx = cmds.find(' ',idx) ) != eString::npos )  // count args
 	{
-		cnt++;
+		if (it != brackets.end())
+		{
+			if (cmds[idx-1] == it->second)
+				it = brackets.end();
+		}
+		if (it == brackets.end())
+		{
+			cnt++;
+			it = brackets.find(cmds[idx+1]);
+		}
 		idx++;
 	}
 
@@ -118,13 +137,43 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 	{
 		cnt=1;  // do not overwrite path in argv[0]
 
-		while ( (idx = cmds.find(' ')) != eString::npos )  // parse all args..
+		it = brackets.find(cmds[0]);
+		idx=0;
+		while ( (idx = cmds.find(' ',idx)) != eString::npos )  // parse all args..
 		{
-			argv[cnt] = new char[ idx ];
-//			eDebug("idx=%d, arg = %s", idx, cmds.left(idx).c_str() );
-			strcpy( argv[cnt++], cmds.left( idx ).c_str() );
-			cmds = cmds.mid(idx+1);
-//			eDebug("str = %s", cmds.c_str() );
+			bool bracketClosed=false;
+			if ( it != brackets.end() )
+			{
+				if (cmds[idx-1]==it->second)
+				{
+					it = brackets.end();
+					bracketClosed=true;
+				}
+			}
+			if ( it == brackets.end() )
+			{
+				eString tmp = cmds.left(idx);
+				if (bracketClosed)
+				{
+					tmp.erase(0,1);
+					tmp.erase(tmp.length()-1, 1);
+					bracketClosed=false;
+				}
+				argv[cnt] = new char[ tmp.length()+1 ];
+//				eDebug("idx=%d, arg = %s", idx, tmp.c_str() );
+				strcpy( argv[cnt++], tmp.c_str() );
+				cmds = cmds.mid(idx+1);
+//				eDebug("str = %s", cmds.c_str() );
+				it = brackets.find(cmds[0]);
+				idx=0;
+			}
+			else
+				idx++;
+		}
+		if ( it != brackets.end() )
+		{
+			cmds.erase(0,1);
+			cmds.erase(cmds.length()-1, 1);
 		}
 		// store the last arg
 		argv[cnt] = new char[ cmds.length() ];
@@ -132,6 +181,10 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 	}
 
   // get one read ,one write and the err pipe to the prog..
+
+//	int tmp=0;
+//	while(argv[tmp])
+//		eDebug("%d is %s", tmp, argv[tmp++]);
   
 	if ( (pid = bidirpipe(fd, argv[0], argv)) == -1 )
 	{
@@ -145,7 +198,7 @@ eConsoleAppContainer::eConsoleAppContainer( const eString &cmd )
 		delete [] argv[cnt];
 	delete [] argv;
 
-	eDebug("pipe in = %d, out = %d, err = %d", fd[0], fd[1], fd[2]);
+//	eDebug("pipe in = %d, out = %d, err = %d", fd[0], fd[1], fd[2]);
 
 	in = new eSocketNotifier(eApp, fd[0], 19 );  // 19 = POLLIN, POLLPRI, POLLHUP
 	out = new eSocketNotifier(eApp, fd[1], eSocketNotifier::Write, false);  // POLLOUT
