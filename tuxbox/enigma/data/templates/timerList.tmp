@@ -1,0 +1,22 @@
+<html>
+<head>
+	<title>Timer List</title>
+	<link rel="stylesheet" type="text/css" href="/epgview.css">
+	<script language="javascript">
+		function record()
+		{
+			win=window.open("/record", "switchStatus", "width=200, height=200, left=0, top=0");
+			win.focus();
+		}
+
+		function EPGDetails()
+		{
+			win=window.open("/EPGDetails", "switchStatus", "width=200, height=200, left=0, top=0");
+			win.focus();
+		}
+	</script>
+</head>
+<body bgcolor="#ffffff">
+#BODY#
+</body>
+</html>

@@ -77,6 +77,12 @@
   win.focus();
  }
 
+ function TimerList()
+ {
+  win=window.open("/showTimerList", "timerlist", "width=600, height=500, left=0, top=0, scrollbars=yes, resizable=yes");
+  win.focus();
+ }
+
  function openSI()
  {
   win=window.open("/cgi-bin/streaminfo", "si", "width=300, height=200, left=0, top=0");
@@ -137,7 +143,7 @@
 				document.write("<a href=\"?path=;0:7:1:0:0:0:0:0:0:0:\">TV</a><br><a href=\"?path=;0:7:2:0:0:0:0:0:0:0:\">Radio</a><br><a href=\"?path=;0:7:6:0:0:0:0:0:0:0:\">Data</a><br><a href=\"?path=;2:47:0:0:0:0:%2f\">Root</a><br><a href=\"?path=;2:47:0:0:0:0:%2fhdd%2f\">Harddisk</a><br><a href=\"?path=;4097:7:0:1:0:0:0:0:0:0:\">Recordings</a><br>");
 			}
 			if('#MODE#'.indexOf("MENU") >- 1) {
-				document.write("<a href=\"?mode=menuShutdown\">Shutdown</a><br><a href=\"?mode=menuRestart\">Restart</a><br><a href=\"?mode=menuReboot\">Reboot</a><br><a href=\"?mode=menuStandby\">Standby</a><br><a href=\"?mode=menuWakeup\">Wakeup</a><br><br><a href=\"?mode=menuFBShot\">Framebuffershot</a><br><a href=\"?mode=menuScreenShot\">Screenshot</a>");
+				document.write("<a href=\"?mode=menuShutdown\">Shutdown</a><br><a href=\"?mode=menuRestart\">Restart</a><br><a href=\"?mode=menuReboot\">Reboot</a><br><a href=\"?mode=menuStandby\">Standby</a><br><a href=\"?mode=menuWakeup\">Wakeup</a><br><br><a href=\"?mode=menuFBShot\">Framebuffershot</a><br><a href=\"?mode=menuScreenShot\">Screenshot</a><br><a href=\"javascript:TimerList()\">Timer List</a>");
 			}
 			if('#MODE#'.indexOf("LINKS") >- 1) {
 				document.write("<a href=\"?mode=linksOfficialSites\">Official sites</a><br><a href=\"?mode=linksOtherSites\">Other sites</a><br><a href=\"?mode=linksForums\">Forums</a>");
