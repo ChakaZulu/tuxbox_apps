@@ -1,5 +1,5 @@
 /*
-$Id: vps.c,v 1.1 2004/03/09 20:59:22 rasc Exp $
+$Id: vps.c,v 1.2 2004/03/09 21:57:58 rasc Exp $
 
 
 
@@ -19,6 +19,9 @@ $Id: vps.c,v 1.1 2004/03/09 20:59:22 rasc Exp $
 
 
 $Log: vps.c,v $
+Revision 1.2  2004/03/09 21:57:58  rasc
+VPS decoding (fix NPP)
+
 Revision 1.1  2004/03/09 20:59:22  rasc
 VPS decoding (someone check the NPP & PTY code output please...)
 
@@ -76,6 +79,8 @@ VPS decoding (someone check the NPP & PTY code output please...)
 
 int  print_vps_decode (int v, u_char *b, int len)
 {
+	// warning!  Nipples e.g. _2_7 may not be msb...lsb order!
+	//           see: ETSI EN 300 231  for this notation!
    u_int  pcs;
    u_int  cni_1_4;
    u_int  pil;
@@ -129,7 +134,7 @@ int  print_vps_decode (int v, u_char *b, int len)
 	pty	 	=  getBits (b,  8, 32,  8);			// byte 15
 
 
-	out_SB_NL  (v,"NPP[0..1]: ", npp_0_1);
+	out_SB_NL  (v,"NPP_1: ", npp_0_1);
 
 
 	out_ST  (v,"Program Identificaion Label (PIL): ", pil);
@@ -152,13 +157,14 @@ int  print_vps_decode (int v, u_char *b, int len)
 	}
 
 
-	out_S2B_NL (v,"Country[5..8]: ", country_5_8,
+	out_S2B_NL (v,"Country: ", country_5_8,
 			dvbstrVPS_cni_countrycode(1+(country_5_8 << 4)) );
 
-	out_SB_NL  (v,"NPP[2..7]: ", npp_2_7);
-	npp = npp_0_1 + (npp_2_7 << 2);
+	out_SB_NL  (v,"NPP_2: ", npp_2_7);
+	npp = (npp_0_1 << 6) + (npp_2_7);	// msb ... lsb
 	out_S2B_NL (v,"  ==> Network/Program Provider (NPP): ", npp, dvbstrVPS_npp(npp) );
 	out_S2B_NL (v,"Program Type (PTY): ", pty, dvbstrVPS_pty(pty) );
+
 
 
 	indent (-1);
