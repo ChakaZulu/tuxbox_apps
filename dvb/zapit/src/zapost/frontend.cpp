@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.35 2002/11/19 20:29:02 obi Exp $
+ * $Id: frontend.cpp,v 1.36 2002/11/29 00:36:05 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -299,7 +299,7 @@ struct dvb_frontend_event CFrontend::getEvent ()
 				break;
 			}
 
-			else if (event.status & FE_TIMEDOUT) {
+			else if ((TIMEOUT_MAX_MS - msec > 1000) && (event.status & FE_TIMEDOUT)) {
 				WARN("FE_TIMEDOUT");
 				break;
 			}
