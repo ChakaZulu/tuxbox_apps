@@ -34,6 +34,11 @@ AC_ARG_ENABLE(filesystems-utf8-encoded,
          [],
          [AC_DEFINE(FILESYSTEM_IS_ISO8859_1_ENCODED,1,[iso8859-1 encoded filesystems])])
 
+AC_ARG_ENABLE(16-bit-mode,
+         [  --enable-16-bit-mode                enable 16 bit graphics mode],
+         [],
+         [AC_DEFINE(FB_USE_PALETTE,1,[8 bit graphics mode])])
+
 AC_ARG_ENABLE(keyboard-no-rc,
          [  --enable-keyboard-no-rc             enable keyboard control, disable rc control],
          [AC_DEFINE(KEYBOARD_INSTEAD_OF_REMOTE_CONTROL,1,[enable keyboard control, disable rc control])])
