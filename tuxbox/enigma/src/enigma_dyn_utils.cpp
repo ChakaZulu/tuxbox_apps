@@ -64,19 +64,22 @@ eString readFile(eString filename)
 	return result;
 }
 
-eString button(int width, eString buttonText, eString buttonColor, eString buttonRef)
+eString button(int width, eString buttonText, eString buttonColor, eString buttonRef, eString target)
 {
 	eString ref1, ref2;
-
+	
+	if (!target)
+		target = "self";
+		
 	std::stringstream result;
-
+	
 	if (pdaScreen == 0)
 	{
 		int height = 22;
 
 		if (buttonRef.find("javascript") == eString::npos)
 		{
-			ref1 = "\"self.location.href='";
+			ref1 = "\"" + target + ".location.href='";
 			ref2 = "'\"";
 		}
 
@@ -85,13 +88,11 @@ eString button(int width, eString buttonText, eString buttonColor, eString butto
 			"height:" << height << "px;";
 		if (buttonColor != "")
 			result << "background-color: " << buttonColor;
-		result << "' value=\"" << buttonText <<
-			"\" onclick=" << ref1 << buttonRef << ref2 << ">";
+		result << "' value=\"" << buttonText << "\" onclick=" << ref1 << buttonRef << ref2 << ">";
 	}
 	else
-	{
 		result << "<a href=\"" << buttonRef << "\"><span class=\"button\">" << buttonText << "</span></a>&nbsp;";
-	}
+
 	return result.str();
 }
 

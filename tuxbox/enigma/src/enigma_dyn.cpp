@@ -55,7 +55,7 @@
 
 using namespace std;
 
-#define WEBXFACEVERSION "1.5.6"
+#define WEBIFVERSION "2.0.0"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -65,7 +65,6 @@ int currentBouquet = 0;
 int currentChannel = -1;
 
 int zapMode = ZAPMODETV;
-
 int zapSubMode = ZAPSUBMODEBOUQUETS;
 eString zapSubModes[5] = {"Name", "Category", "Satellites", "Providers", "Bouquets"};
 
@@ -242,7 +241,7 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 		"<h1>Enigma status</h1>\n"
 		"<table>\n"
 		"<tr><td>Current time:</td><td>" + eString(ctime(&atime)) + "</td></tr>\n"
-		"<tr><td>WebIf-Version:</td><td>" + eString(WEBXFACEVERSION) + "</td></tr>\n"
+		"<tr><td>WebIf-Version:</td><td>" + eString(WEBIFVERSION) + "</td></tr>\n"
 		"<tr><td>Standby:</td><td>";
 		if (eZapMain::getInstance()->isSleeping())
 			result += "ON";
@@ -789,7 +788,7 @@ static eString getEIT(eString request, eString dirpath, eString opt, eHTTPConnec
 	return result;
 }
 
-eString getCurService()
+eString getCurService(void)
 {
 	eString result = "&nbsp;";
 
@@ -812,9 +811,9 @@ static eString getChannelNavi(void)
 	if (sapi && sapi->service)
 	{
 		result = button(100, "Audio", OCKER, "javascript:selectAudio()");
-		result += button(100, "SubChannel", OCKER, "javascript:selectSubChannel()");
+		result += button(100, "Video", OCKER, "javascript:selectSubChannel()");
 
-		if (getCurService() != "&nbsp;" || getCurrentSubChannel(ref2string(sapi->service)) != "")
+		if (getCurService() != "&nbsp;" || getCurrentSubChannel(ref2string(sapi->service)))
 		{
 			result += button(100, "EPG", GREEN, "javascript:openEPG()");
 			if (pdaScreen == 0)
@@ -834,40 +833,48 @@ static eString getChannelNavi(void)
 	return result;
 }
 
-static eString getZapNavi(eString mode, eString path)
+static eString getLeftNavi(eString mode, bool javascript)
 {
 	eString result;
-	result += button(100, "TV", RED, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS));
-	result += button(100, "Radio", GREEN, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS));
-	result += button(100, "Data", BLUE, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES));
-#ifndef DISABLE_FILE
-	result += button(100, "Movies", OCKER, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY));
-#endif
-	result += button(100, "Root", PINK, "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY));
-	result += "<br><br>";
-	return result;
-}
-
-static eString getLeftNavi(eString mode, eString path)
-{
-	eString result;
+	eString pre, post;
+	
+	if (javascript)
+	{
+		pre = "javascript:leftnavi('";
+		post = "')";
+	}
+	
 	if (mode.find("zap") == 0)
 	{
 		if (pdaScreen == 0)
 		{
+			result += "<span class=\"zapnavi\">";
+			result += button(110, "TV", RED, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODETV) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
+			result += "<br>";
+			result += button(110, "Radio", GREEN, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERADIO) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
+			result += "<br>";
+			result += button(110, "Data", BLUE, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEDATA) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post);
+			result += "<br>";
+#ifndef DISABLE_FILE
+			result += button(110, "Movies", OCKER, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODERECORDINGS) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post);
+			result += "<br>";
+#endif
+			result += button(110, "Root", PINK, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", ZAPMODEROOT) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODECATEGORY) + post);
+			result += "</span>";
+			result += "<br><br>";
 			if (zap[zapMode][ZAPSUBMODESATELLITES])
 			{
-				result += button(110, "Satellites", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES));
+				result += button(110, "Satellites", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODESATELLITES) + post);
 				result += "<br>";
 			}
 			if (zap[zapMode][ZAPSUBMODEPROVIDERS])
 			{
-				result += button(110, "Providers", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS));
+				result += button(110, "Providers", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEPROVIDERS) + post);
 				result += "<br>";
 			}
 			if (zap[zapMode][ZAPSUBMODEBOUQUETS])
 			{
-				result += button(110, "Bouquets", LEFTNAVICOLOR, "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS));
+				result += button(110, "Bouquets", LEFTNAVICOLOR, pre + "?mode=zap&zapmode=" + eString().sprintf("%d", zapMode) + "&zapsubmode=" + eString().sprintf("%d", ZAPSUBMODEBOUQUETS) + post);
 				result += "<br>";
 			}
 		}
@@ -902,23 +909,23 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Wakeup", LEFTNAVICOLOR, "javascript:admin(\'/cgi-bin/admin?command=wakeup\')");
 		result += "<br>";
-		result += button(110, "OSDshot", LEFTNAVICOLOR, "?mode=controlFBShot");
+		result += button(110, "OSDshot", LEFTNAVICOLOR, pre + "?mode=controlFBShot" + post);
 #ifndef DISABLE_LCD
 		result += "<br>";
-		result += button(110, "LCDshot", LEFTNAVICOLOR, "?mode=controlLCDShot");
+		result += button(110, "LCDshot", LEFTNAVICOLOR, pre + "?mode=controlLCDShot" + post);
 #endif
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
 			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		{
 			result += "<br>";
-			result += button(110, "Screenshot", LEFTNAVICOLOR, "?mode=controlScreenShot");
+			result += button(110, "Screenshot", LEFTNAVICOLOR, pre + "?mode=controlScreenShot" + post);
 		}
 		result += "<br>";
 		result += button(110, "Message", LEFTNAVICOLOR, "javascript:sendMessage2TV()");
 		result += "<br>";
-		result += button(110, "Plugins", LEFTNAVICOLOR, "?mode=controlPlugins");
+		result += button(110, "Plugins", LEFTNAVICOLOR, pre + "?mode=controlPlugins" + post);
 		result += "<br>";
-		result += button(110, "Timer", LEFTNAVICOLOR, "?mode=controlTimerList");
+		result += button(110, "Timer", LEFTNAVICOLOR, pre + "?mode=controlTimerList" + post);
 #ifndef DISABLE_FILE
 		result += "<br>";
 		result += button(110, "Recover Movies", LEFTNAVICOLOR, "javascript:recoverMovies()");
@@ -926,7 +933,7 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Logging", LEFTNAVICOLOR, "javascript:logging()");
 		result += "<br>";
-		result += button(110, "Satfinder", LEFTNAVICOLOR, "?mode=controlSatFinder");
+		result += button(110, "Satfinder", LEFTNAVICOLOR, pre + "?mode=controlSatFinder" + post);
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
 			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
 		{
@@ -948,21 +955,21 @@ static eString getLeftNavi(eString mode, eString path)
 	{
 #ifndef DISABLE_FILE
 #ifdef ENABLE_DYN_CONF
-		result += button(110, "Mount Manager", LEFTNAVICOLOR, "?mode=configMountMgr");
+		result += button(110, "Mount Manager", LEFTNAVICOLOR, pre + "?mode=configMountMgr" + post);
 		result += "<br>";
 #endif
 #endif
 #ifdef ENABLE_DYN_FLASH
-		result += button(110, "Flash Manager", LEFTNAVICOLOR, "?mode=configFlashMgr");
+		result += button(110, "Flash Manager", LEFTNAVICOLOR, pre + "?mode=configFlashMgr" + post);
 		result += "<br>";
 #endif
 #ifndef DISABLE_FILE
 #ifdef ENABLE_DYN_CONF
-		result += button(110, "Swap File", LEFTNAVICOLOR, "?mode=configSwapFile");
+		result += button(110, "Swap File", LEFTNAVICOLOR, pre + "?mode=configSwapFile" + post);
 		result += "<br>";
-		result += button(110, "Multi-Boot", LEFTNAVICOLOR, "?mode=configMultiBoot");
+		result += button(110, "Multi-Boot", LEFTNAVICOLOR, pre + "?mode=configMultiBoot" + post);
 		result += "<br>";
-		result += button(110, "Settings", LEFTNAVICOLOR, "?mode=configSettings");
+		result += button(110, "Settings", LEFTNAVICOLOR, pre + "?mode=configSettings" + post);
 		result += "<br>";
 #endif
 #endif
@@ -970,19 +977,19 @@ static eString getLeftNavi(eString mode, eString path)
 	else
 	if (mode.find("updates") == 0)
 	{
-		result += button(110, "Internet", LEFTNAVICOLOR, "?mode=updatesInternet");
+		result += button(110, "Internet", LEFTNAVICOLOR, pre + "?mode=updatesInternet" + post);
 	}
 	else
 	if (mode.find("help") == 0)
 	{
 		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		{
-			result += button(110, "DMM Sites", LEFTNAVICOLOR, "?mode=helpDMMSites");
+			result += button(110, "DMM Sites", LEFTNAVICOLOR, pre + "?mode=helpDMMSites" + post);
 			result += "<br>";
-			result += button(110, "Other Sites", LEFTNAVICOLOR, "?mode=helpOtherSites");
+			result += button(110, "Other Sites", LEFTNAVICOLOR, pre + "?mode=helpOtherSites" + post);
 			result += "<br>";
 		}
-		result += button(110, "Boards", LEFTNAVICOLOR, "?mode=helpForums");
+		result += button(110, "Boards", LEFTNAVICOLOR, pre + "?mode=helpForums" + post);
 		result += "<br>";
 	}
 
@@ -990,7 +997,7 @@ static eString getLeftNavi(eString mode, eString path)
 	return result;
 }
 
-static eString getTopNavi(eString mode, eString path)
+static eString getTopNavi(void)
 {
 	eString result;
 	result += button(100, "ZAP", TOPNAVICOLOR, "?mode=zap");
@@ -1184,104 +1191,6 @@ static eString getRecordingStat()
 		result << "&nbsp;";
 
 	return result.str();
-}
-
-static eString getEITC(eString result)
-{
-	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext = "&nbsp;";
-	eString next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
-
-	EIT *eit = eDVB::getInstance()->getEIT();
-
-	if (eit)
-	{
-		int p = 0;
-
-		for (ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
-		{
-			if (*event)
-			{
-				if (p == 0)
-				{
-					if (event->start_time != 0)
-					{
-						now_time.sprintf("%s", ctime(&event->start_time));
-						now_time=now_time.mid(10, 6);
-					}
-
-					now_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
-				}
-				if (p == 1)
-				{
-					if (event->start_time != 0)
-					{
- 						next_time.sprintf("%s", ctime(&event->start_time));
-						next_time=next_time.mid(10, 6);
-						next_duration.sprintf("&nbsp;(%d&nbsp;min)&nbsp;", (int)(event->duration/60));
-					}
-				}
-				for (ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
-				{
-					if (descriptor->Tag() == DESCR_SHORT_EVENT)
-					{
-						ShortEventDescriptor *ss =(ShortEventDescriptor*)*descriptor;
-						switch(p)
-						{
-							case 0:
-								now_text=ss->event_name;
-								break;
-							case 1:
-								next_text=ss->event_name;
-								break;
-						}
-					}
-					else
-					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
-					{
-						ExtendedEventDescriptor *ss =(ExtendedEventDescriptor*)*descriptor;
-						switch(p)
-						{
-							case 0:
-								now_longtext+=ss->text;
-								break;
-							case 1:
-								next_longtext+=ss->text;
-								break;
-						}
-					}
-				}
-				p++;
-		 	}
-		}
-
-		if (now_time != "&nbsp;")
-		{
-			now_longtext = filter_string(now_longtext);
-			if (now_longtext.find("&nbsp;") == 0)
-				now_longtext = now_longtext.right(now_longtext.length() - 6);
-
-			next_longtext = filter_string(next_longtext);
-			if (next_longtext.find("&nbsp;") == 0)
-				next_longtext = next_longtext.right(next_longtext.length() - 6);
-
-			result.strReplace("#NOWT#", now_time);
-			result.strReplace("#NOWD#", now_duration);
-			result.strReplace("#NOWST#", now_text);
-			result.strReplace("#NOWLT#", now_longtext);
-			result.strReplace("#NEXTT#", next_time);
-			result.strReplace("#NEXTD#", next_duration);
-			result.strReplace("#NEXTST#", next_text);
-			result.strReplace("#NEXTLT#", next_longtext);
-		}
-		else
-			result = "<br>";
-
-		eit->unlock();
-	}
-	else
-		result = "<br>";
-
-	return result;
 }
 
 static eString getVolBar()
@@ -1677,7 +1586,7 @@ public:
 			if (evt)
 			{
 				timeMap::const_iterator It;
-				for (It = evt->begin(); (It != evt->end() && short_description == ""); ++It)
+				for (It = evt->begin(); (It != evt->end() && !short_description); ++It)
 				{
 					EITEvent event(*It->second);
 					time_t now = time(0) + eDVB::getInstance()->time_difference;
@@ -1839,13 +1748,14 @@ static eString getZapContent2(eString mode, eString path, int depth, bool addEPG
 	return result;
 }
 
+eString getEITC(eString);
+
 static eString getZap(eString mode, eString path)
 {
 	eString result, tmp;
 
 	if (pdaScreen == 0)
 	{
-		result += getZapNavi(mode, path);
 #ifndef DISABLE_FILE
 		if (zapMode == ZAPMODERECORDINGS) // recordings
 		{
@@ -1868,7 +1778,7 @@ static eString getZap(eString mode, eString path)
 		{
 			result += readFile(TEMPLATE_DIR + "rec.tmp");
 			eString tmp = getZapContent2(mode, path, 1, false, false);
-			if (tmp != "")
+			if (tmp)
 			{
 				result.strReplace("#ZAPDATA#", tmp);
 				if (screenWidth > 1024)
@@ -2023,7 +1933,7 @@ static eString aboutDreambox(void)
 		<< "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>";
 		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000)
 			result << "<tr><td>FP Firmware:</td><td>" << eString().sprintf(" 1.%02d", eDreamboxFP::getFPVersion()) << "</td></tr>";
-		result << "<tr><td>Web Interface:</td><td>" << WEBXFACEVERSION << "</td></tr>"
+		result << "<tr><td>Web Interface:</td><td>" << WEBIFVERSION << "</td></tr>"
 		<< "</table>";
 
 	return result.str();
@@ -2239,8 +2149,11 @@ eString getConfigSwapFile(void)
 	std::stringstream tmp;
 	tmp.str(procswaps);
 	tmp >> th1 >> th2 >> th3 >> th4 >> th5 >> td1 >> td2 >> td3 >> td4 >> td5;
-	if (td1 == "")
-		td1 = "none";
+	if (!td1)
+	{
+		th1 = "&nbsp;"; th2 = th3 = th4 = th5 = "&nbsp;";
+		td1 = "none"; td2 = td3 = td4 = td5 = "&nbsp;";
+	}
 	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
 	char *swapfilename;
 	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
@@ -2549,7 +2462,7 @@ static eString getContent(eString mode, eString path, eString opts)
 
 		result = getTitle(tmp);
 		tmp = getZap(mode, path);
-		if (tmp != "")
+		if (tmp)
 			result += tmp;
 		else
 			result = "";
@@ -2703,10 +2616,10 @@ static eString getContent(eString mode, eString path, eString opts)
 	return result;
 }
 
-eString getEITC2(eString result)
+eString getEITC(eString result)
 {
-	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;",
-		next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;";
+	eString now_time = "&nbsp;", now_duration = "&nbsp;", now_text = "&nbsp;", now_longtext ="&nbsp;",
+		next_time = "&nbsp;", next_duration = "&nbsp;", next_text = "&nbsp;", next_longtext = "&nbsp;";
 
 	EIT *eit = eDVB::getInstance()->getEIT();
 	if (eit)
@@ -2750,8 +2663,19 @@ eString getEITC2(eString result)
 								next_text = ss->event_name;
 								break;
 						}
-						if (p)  // we have all we need
-							break;
+					}
+					if (descriptor->Tag() == DESCR_EXTENDED_EVENT)
+					{
+						ExtendedEventDescriptor *ss =(ExtendedEventDescriptor*)*descriptor;
+						switch(p)
+						{
+							case 0:
+								now_longtext += ss->text;
+								break;
+							case 1:
+								next_longtext += ss->text;
+								break;
+						}
 					}
 				}
 				p++;
@@ -2767,26 +2691,28 @@ eString getEITC2(eString result)
 		now_duration = "(" + now_duration + ")";
 	result.strReplace("#NOWD#", now_duration);
 	result.strReplace("#NOWST#", now_text);
+	result.strReplace("#NOWLT#", now_longtext);
 	result.strReplace("#NEXTT#", next_time);
 	if (next_duration != "&nbsp;")
 		next_duration = "(" + next_duration + ")";
 	result.strReplace("#NEXTD#", next_duration);
 	result.strReplace("#NEXTST#", next_text);
+	result.strReplace("#NEXTLT#", next_longtext);
 	result.strReplace("#VOLBAR#", getVolBar());
 	result.strReplace("#MUTE#", getMute());
+	
 	eString curService = getCurService();
 	eString curServiceRef;
 	eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
 	if (sapi)
 		curServiceRef = ref2string(sapi->service);
 	eString curSubService = getCurrentSubChannel(curServiceRef);
-	if (curSubService != "")
+	if (curSubService)
 	{
 		if (curService != "&nbsp;")
-			curService += ": ";
+			curService += ": " + curSubService;
 		else
-			curService = "";
-		curService += curSubService;
+			curService = curSubService;
 	}
 	result.strReplace("#SERVICENAME#", curService);
 	result.strReplace("#STATS#", getStats());
@@ -2801,65 +2727,6 @@ static eString audiom3u(eString request, eString dirpath, eString opt, eHTTPConn
 {
 	content->local_header["Content-Type"]="audio/mpegfile";
 	return "http://" + getIP() + ":31338/" + eString().sprintf("%02x\n", Decoder::current.apid);
-}
-
-
-static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPConnection *content)
-{
-	eString result;
-	eService* current;
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-
-	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-	if (!sapi)
-		return "not available";
-
-	eServiceReference ref(opt);
-
-	current=eDVB::getInstance()->settings->getTransponders()->searchService(ref?ref:sapi->service);
-	if (!current)
-		return eString("epg not ready yet");
-
-	result+=eString("<html>" CHARSETMETA "<head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/webif.css\"></head><body bgcolor=#000000>");
-	result+=eString("<span class=\"title\">");
-	result+=filter_string(current->service_name);
-	result+=eString("</span>");
-	result+=eString("<br>\n");
-
-	eEPGCache::getInstance()->Lock();
-	const timeMap* evt=ref ?
-		eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref)
-			:
-		eEPGCache::getInstance()->getTimeMap(sapi->service);
-
-	if (!evt)
-	{
-		eEPGCache::getInstance()->Unlock();
-		return eString("epg not ready yet");
-	}
-
-	timeMap::const_iterator It;
-
-	for(It=evt->begin(); It!= evt->end(); ++It)
-	{
-		EITEvent event(*It->second);
-		for(ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
-		{
-			Descriptor *descriptor=*d;
-			if (descriptor->Tag()==DESCR_SHORT_EVENT)
-			{
-				tm* t = localtime(&event.start_time);
-				result += eString().sprintf("<!-- ID: %04x -->", event.event_id);
-				result += eString().sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-				result += ((ShortEventDescriptor*)descriptor)->event_name;
-				result += "</span><br>\n";
-			}
-		}
-	}
-	result += "</body></html>";
-	eEPGCache::getInstance()->Unlock();
-	return result;
 }
 
 #define CHANNELWIDTH 200
@@ -2950,14 +2817,14 @@ public:
 										genreCategory = ce->content_nibble_level_1;
 									if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
 									{
-										if (genre == "")
+										if (!genre)
 											genre = gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
 									}
 								}
 							}
 						}
 
-						if (genre == "")
+						if (!genre)
 							genre = "n/a";
 
 						time_t eventStart = adjust2FifteenMinutes(event.start_time);
@@ -3072,7 +2939,7 @@ public:
 	}
 
 	eMEPG(time_t start, const eServiceReference & bouquetRef, int channelWidth)
-		:hours(6)   // horizontally visible hours
+		:hours(hours)   // horizontally visible hours
 		,d_min((pdaScreen == 0) ? 5 : 3)  // distance on time scale for 1 minute
 		,start(start)
 		,end(start + hours * 3600)
@@ -3131,6 +2998,8 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 
 	time_t start = time(0) + eDVB::getInstance()->time_difference;
 	start -= ((start % 900) + (60 * 60)); // align to 15 mins & start 1 hour before now
+	int hours = 24;
+	eConfig::getInstance()->getKey("/elitedvb/multiepg/hours", hours); // horizontally visible hours
 
 	eMEPG mepg(start, bouquetRef, channelWidth);
 
@@ -3140,7 +3009,7 @@ static eString getMultiEPG(eString request, eString dirpath, eString opts, eHTTP
 	return result;
 }
 
-static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
 	eString description, ext_description, genre;
@@ -3151,7 +3020,8 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	eServiceReference ref;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	std::map<eString,eString> opt=getRequestOptions(opts, '&');
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString type = opt["type"];
 
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if (!sapi)
@@ -3163,7 +3033,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 	else
 		ref = string2ref(serviceRef);
 
-	eDebug("[ENIGMA_DYN] getcurepg2: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
+	eDebug("[ENIGMA_DYN] getcurepg: opts = %s, serviceRef = %s", opts.c_str(), serviceRef.c_str());
 
 	current = eDVB::getInstance()->settings->getTransponders()->searchService(ref);
 
@@ -3204,57 +3074,72 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 							genreCategory = ce->content_nibble_level_1;
 						if (eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2))
 						{
-							if (genre == "")
+							if (!genre)
 								genre += gettext(eChannelInfo::getGenre(genreCategory * 16 + ce->content_nibble_level_2).c_str());
 						}
 					}
 				}
 			}
 
-			if (genre == "")
-				genre = "n/a";
-
 			tm* t = localtime(&event.start_time);
-			result << "<tr valign=\"middle\">"
-				<< "<td>"
-				<< "<span class=\"time\">"
-				<< std::setw(2) << t->tm_mday << '.'
-				<< std::setw(2) << t->tm_mon+1 << ". - "
-				<< std::setw(2) << t->tm_hour << ':'
-				<< std::setw(2) << t->tm_min << ' '
-				<< "</span>"
-				<< "</td>";
+			
+			if (type == "extended")
+			{
+				if (!genre)
+					genre = "n/a";
+
+				result << "<tr valign=\"middle\">"
+					<< "<td>"
+					<< "<span class=\"time\">"
+					<< std::setw(2) << t->tm_mday << '.'
+					<< std::setw(2) << t->tm_mon+1 << ". - "
+					<< std::setw(2) << t->tm_hour << ':'
+					<< std::setw(2) << t->tm_min << ' '
+					<< "</span>"
+					<< "</td>";
 #ifndef DISABLE_FILE
-			result << "<td>"
-				<< "<a href=\"javascript:record('"
-				<< "ref=" << ref2string(ref)
-				<< "&start=" << event.start_time
-				<< "&duration=" << event.duration;
-			eString tmp = filter_string(description);
-			tmp.strReplace("\'", "\\\'");
-			tmp.strReplace("\"", "\\\"");
-			result  << "&descr=" << tmp
-				<< "&channel=" << filter_string(current->service_name)
-				<< "')\"><img src=\"timer.gif\" border=0></a>"
-				<< "</td>";
+				result << "<td>"
+					<< "<a href=\"javascript:record('"
+					<< "ref=" << ref2string(ref)
+					<< "&start=" << event.start_time
+					<< "&duration=" << event.duration;
+				eString tmp = filter_string(description);
+				tmp.strReplace("\'", "\\\'");
+				tmp.strReplace("\"", "\\\"");
+				result  << "&descr=" << tmp
+					<< "&channel=" << filter_string(current->service_name)
+					<< "')\"><img src=\"timer.gif\" border=0></a>"
+					<< "</td>";
 #endif
-			result  << "<td class=\"genre" << eString().sprintf("%02d", genreCategory) << "\">"
-				<< "<span class=\"event\">"
-				<< filter_string(description)
-				<< "</span>"
-				<< "<br>"
-				<< "Genre: " << genre
-				<< "<br>"
-				<< "<span class=\"description\">"
-				<< filter_string(ext_description)
-				<< "</span>"
-				<< "</td>"
-				<< "</tr>\n";
+				result  << "<td class=\"genre" << eString().sprintf("%02d", genreCategory) << "\">"
+					<< "<span class=\"event\">"
+					<< filter_string(description)
+					<< "</span>"
+					<< "<br>"
+					<< "Genre: " << genre
+					<< "<br>"
+					<< "<span class=\"description\">"
+					<< filter_string(ext_description)
+					<< "</span>"
+					<< "</td>"
+					<< "</tr>\n";
+			}
+			else
+			{
+				result  << eString().sprintf("<!-- ID: %04x -->", event.event_id)
+					<< eString().sprintf("<span class=\"epg\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min)
+					<< description
+					<< "</span><br>\n";
+			}
 		}
 	}
 	eEPGCache::getInstance()->Unlock();
 
-	eString tmp = readFile(TEMPLATE_DIR + "epg.tmp");
+	eString tmp;
+	if (type == "extended")
+		tmp = readFile(TEMPLATE_DIR + "epg.tmp");
+	else
+		tmp = readFile(TEMPLATE_DIR + "epg_old.tmp");
 	tmp.strReplace("#CHANNEL#", filter_string(current->service_name));
 	tmp.strReplace("#BODY#", result.str());
 	return tmp;
@@ -3400,7 +3285,7 @@ static eString message(eString request, eString dirpath, eString opt, eHTTPConne
 	std::map<eString, eString> opts = getRequestOptions(opt, '&');
 	eString msg = opts["msg"];
 	eString result = "-error";
-	if (msg == "")
+	if (!msg)
 		msg = opt;
 	if (msg.length())
 	{
@@ -3598,9 +3483,9 @@ eString getPDAContent(eString mode, eString path, eString opts)
 	result.strReplace("#CONTENT#", getContent(mode, path, opts));
 	result.strReplace("#VOLBAR#", getVolBar());
 	result.strReplace("#MUTE#", getMute());
-	result.strReplace("#TOPNAVI#", getTopNavi(mode, path));
+	result.strReplace("#TOPNAVI#", getTopNavi());
 	result.strReplace("#CHANNAVI#", getChannelNavi());
-	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, path));
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, false));
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 		result.strReplace("#TOPBALK#", "topbalk_small.png");
 	else
@@ -3659,7 +3544,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	if (pdaScreen == 0)
 	{
 		result = readFile(TEMPLATE_DIR + "index_big.tmp");
-
+		result.strReplace("#TOPNAVI#", getTopNavi());
 		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
 			result.strReplace("#BOX#", "Dreambox");
 		else
@@ -4116,7 +4001,7 @@ static eString TVBrowserTimerEvent(eString request, eString dirpath, eString opt
 	eString emin = opt["emin"];
 	eString channel = httpUnescape(opt["channel"]);
 	eString description = httpUnescape(opt["descr"]);
-	if (description == "")
+	if (!description)
 		description = "No description available";
 
 	time_t now = time(0) + eDVB::getInstance()->time_difference;
@@ -4732,10 +4617,32 @@ static eString EPGDetails(eString request, eString dirpath, eString opts, eHTTPC
 	return result;
 }
 
-static eString blank(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+static eString topnavi(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	return readFile(TEMPLATE_DIR + "blank.tmp");
+	eString result = readFile(TEMPLATE_DIR + "topnavi.tmp");
+	return result;
+}
+
+static eString leftnavi(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString mode = opt["mode"];
+	if (!mode)
+		mode = "zap";
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "leftnavi.tmp");
+	
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, true));
+	return result;
+}
+
+static eString channavi(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "channavi.tmp");
+	result.strReplace("#CHANNAVI#", getChannelNavi());
+	return result;
 }
 
 static eString header(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -4743,22 +4650,95 @@ static eString header(eString request, eString dirpath, eString opt, eHTTPConnec
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eString result = readFile(TEMPLATE_DIR + "header.tmp");
 	if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000)
-	{
 		result.strReplace("#TOPBALK#", "topbalk.png");
-	}
 	else
-	{
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
-			result.strReplace("#TOPBALK#", "topbalk2.png");
-		else
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem)
-			result.strReplace("#TOPBALK#", "topbalk3.png");
-		else
-//		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::dbox2Philips)
-			result.strReplace("#TOPBALK#", "topbalk4.png");
-	}
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Nokia)
+		result.strReplace("#TOPBALK#", "topbalk2.png");
+	else
+	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Sagem)
+		result.strReplace("#TOPBALK#", "topbalk3.png");
+	else
+//	if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::dbox2Philips)
+		result.strReplace("#TOPBALK#", "topbalk4.png");
 	result.strReplace("#CHANNAVI#", getChannelNavi());
-	return getEITC2(result);
+	result.strReplace("#EMPTYCELL#", "&nbsp;");
+	return getEITC(result);
+}
+
+static eString data(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eString result = readFile(TEMPLATE_DIR + "data.tmp");
+	
+	// epg data
+	result = getEITC(result);
+	
+	// webif update cycle
+	int updateCycle = 10000;
+	eConfig::getInstance()->getKey("/ezap/webif/updateCycle", updateCycle);
+	result.strReplace("#UPDATECYCLE#", eString().sprintf("%d", updateCycle));
+	
+	// standby
+	result.strReplace("#STANDBY#", (eZapMain::getInstance()->isSleeping()) ? "1" : "0");
+		
+	// uptime
+	int sec = atoi(readFile("/proc/uptime").c_str());
+	result.strReplace("#UPTIME#", eString().sprintf("%d:%02d h up", sec / 3600, (sec % 3600) / 60));
+
+	// IP
+	result.strReplace("#IP#", getIP());
+
+	// webif lock
+	int lockWebIf = 1;
+	eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf);
+	result.strReplace("#LOCK#", (lockWebIf == 1) ? "locked" : "unlocked");
+
+	// vpid
+	eString vpid = (Decoder::current.vpid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.vpid);
+	result.strReplace("#VPID#", (Decoder::current.vpid == -1) ? "none" : vpid.sprintf("0x%x", Decoder::current.vpid));
+
+	// apid
+	eString apid = (Decoder::current.apid == -1) ? "none" : eString().sprintf("0x%x", Decoder::current.apid);
+	result.strReplace("#APID#", (Decoder::current.apid == -1) ? "none" : apid.sprintf("0x%x", Decoder::current.apid));
+	
+	// free recording space on disk
+#ifndef DISABLE_FILE
+	int fds = freeRecordSpace();
+#else
+	int fds = 0;
+#endif
+	if (fds != -1)
+	{
+		if (fds < 1024)
+			result.strReplace("#DISKGB#", eString().sprintf("%d MB", fds));
+		else
+			result.strReplace("#DISKGB#", eString().sprintf("%d.%02d GB", fds/1024, (int)((fds % 1024) / 10.34)));
+		
+		int min = fds / 33;
+		if (min < 60)
+			result.strReplace("#DISKH#", eString().sprintf("~%d min", min));
+		else
+			result.strReplace("#DISKH#", eString().sprintf("~%d h, %02d min", min/60, min%60));
+	}
+	
+	// volume
+	result.strReplace("#VOLUME#", (eAVSwitch::getInstance()->getMute()) ? "0" : eString().sprintf("%d", 63 - eAVSwitch::getInstance()->getVolume()));
+
+	// mute
+	result.strReplace("#STANDBY#", (eAVSwitch::getInstance()->getMute()) ? "1" : "0");
+	
+	// channel stats
+	result.strReplace("#DOLBY#", (eZapMain::getInstance()->getAC3Logo()) ? "0" : "1");
+	result.strReplace("#CRYPT#", (eZapMain::getInstance()->getSmartcardLogo()) ? "0" : "1");
+	result.strReplace("#FORMAT#", (eZapMain::getInstance()->get16_9Logo()) ? "0" : "1");
+	
+	// recording status
+#ifndef DISABLE_FILE
+	result.strReplace("#RECORDING#", (eZapMain::getInstance()->isRecording()) ? "1" : "0");
+#else
+	result.strReplace("#RECORDING#", "0");
+#endif
+	return result;
 }
 
 static eString body(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -4773,12 +4753,14 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	eString mode = opt["mode"];
 	if (!mode)
 		mode = "zap";
+
 	eString zapModeS = opt["zapmode"];
 	if (zapModeS)
 		zapMode = atoi(zapModeS.c_str());
 	eString zapSubModeS = opt["zapsubmode"];
 	if (zapSubModeS)
 		zapSubMode = atoi(zapSubModeS.c_str());
+
 	eString curBouquet = opt["curBouquet"];
 	if (curBouquet)
 		currentBouquet = atoi(curBouquet.c_str());
@@ -4797,10 +4779,9 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	}
 
 	result = readFile(TEMPLATE_DIR + "index2.tmp");
-	result.strReplace("#TOPNAVI#", getTopNavi(mode, path));
-	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, path));
+	result.strReplace("#LEFTNAVI#", getLeftNavi(mode, false));
 	eString tmp = getContent(mode, path, opts);
-	if (tmp != "")
+	if (tmp)
 		result.strReplace("#CONTENT#", tmp);
 	else
 		result = "";
@@ -4810,7 +4791,7 @@ static eString body(eString request, eString dirpath, eString opts, eHTTPConnect
 	else
 		result.strReplace("#ONLOAD#", "");
 
-	if (result == "")
+	if (!result)
 		result = closeWindow(content, "Please wait...", 3000);
 
 	return result;
@@ -4874,9 +4855,12 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/version", version, lockWeb);
 	dyn_resolver->addDyn("GET", "/header", header, lockWeb);
 	dyn_resolver->addDyn("GET", "/body", body, lockWeb);
-	dyn_resolver->addDyn("GET", "/blank", blank, lockWeb);
+	dyn_resolver->addDyn("GET", "/data", data, lockWeb);
+	dyn_resolver->addDyn("GET", "/topnavi", topnavi, lockWeb);
+	dyn_resolver->addDyn("GET", "/leftnavi", leftnavi, lockWeb);
+	dyn_resolver->addDyn("GET", "/channavi", channavi, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg, lockWeb);
-	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2, lockWeb);
+	dyn_resolver->addDyn("GET", "/getcurrentepg", getcurepg, lockWeb);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getstreaminfo, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/channelinfo", getchannelinfo, lockWeb);

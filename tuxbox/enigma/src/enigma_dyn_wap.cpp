@@ -40,8 +40,8 @@
 
 using namespace std;
 
-extern eString zap[4][5];
-extern eString getEITC2(eString result);
+extern eString zap[5][5];
+extern eString getEITC(eString result);
 extern eString getCurService();
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
 
@@ -195,11 +195,11 @@ struct getWapEntryString
 				channel = filter_string(service->service_name);
 		}
 		if (!channel)
-			channel = _("No channel available");
+			channel = "No channel available";
 
 		description = getRight(description, '/');
 		if (!description)
-			description = _("No description available");
+			description = "No description available";
 
 		result 	<< std::setw(2) << startTime.tm_mday << '.'
 			<< std::setw(2) << startTime.tm_mon+1 << ". - "
@@ -229,12 +229,12 @@ static eString wapTimerList(void)
 	{
 		result << std::setfill('0');
 		if (!eTimerManager::getInstance()->getTimerCount())
-			result << eString(_("No timer events available"));
+			result << eString("No timer events available");
 		else
 			eTimerManager::getInstance()->forEachEntry(getWapEntryString(result, 0));
 	}
 	else
-		result << eString(_("No timer events available"));
+		result << eString("No timer events available");
 
 	tmp.strReplace("#BODY#", result.str());
 
@@ -324,7 +324,7 @@ static eString wapAddTimerEvent(eString opts)
 	eString channel = httpUnescape(opt["channel"]);
 	eString description = httpUnescape(opt["descr"]);
 	if (description == "")
-		description = _("No description available");
+		description = "No description available";
 
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
@@ -340,9 +340,9 @@ static eString wapAddTimerEvent(eString opts)
 	entry.service.descr = channel + "/" + description;
 
 	if (eTimerManager::getInstance()->addEventToTimerList(entry) == -1)
-		result += _("Timer event could not be added because time of the event overlaps with an already existing event.");
+		result += "Timer event could not be added because time of the event overlaps with an already existing event.";
 	else
-		result += _("Timer event was created successfully.");
+		result += "Timer event was created successfully.";
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
 }
@@ -354,7 +354,7 @@ static eString wapEPGDetails(eString serviceRef, eString eventID)
 	eString ext_description;
 	std::stringstream record;
 	int eventid;
-	eString description = _("No description available");
+	eString description = "No description available";
 
 	sscanf(eventID.c_str(), "%x", &eventid);
 	eDebug("[ENIGMA_DYN] getEPGDetails: serviceRef = %s, ID = %04x", serviceRef.c_str(), eventid);
@@ -384,7 +384,7 @@ static eString wapEPGDetails(eString serviceRef, eString eventID)
 					}
 				}
 				if (!ext_description)
-					ext_description = _("No detailed information available");
+					ext_description = "No detailed information available";
 #ifndef DISABLE_FILE
 				record << "<a href=\"/wap?mode=addTimerEvent"
 					<< ",path=" << ref2string(ref)
@@ -482,7 +482,7 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 	else
 	{
 		result = readFile(TEMPLATE_DIR + "wap.tmp");
-		result = getEITC2(result);
+		result = getEITC(result);
 		result.strReplace("#SERVICE#", getCurService());
 	}
 
