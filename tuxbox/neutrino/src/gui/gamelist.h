@@ -117,7 +117,7 @@ class CPlugins
 
 		void startPlugin(int number);
 
-		void startPlugin(const std::string & filename); // start plugins also by name
+		void startPlugin(const char * const filename); // start plugins also by name
 };
 
 

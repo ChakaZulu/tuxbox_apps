@@ -249,11 +249,11 @@ PluginParam* CPlugins::makeParam(const std::string & id, PluginParam *next)
 	return startparam;
 }
 
-void CPlugins::startPlugin(const std::string & name)
+void CPlugins::startPlugin(const char * const name)
 {
 	int pluginnr = find_plugin(name);
-	if( pluginnr > -1)
-		startPlugin( pluginnr );
+	if (pluginnr > -1)
+		startPlugin(pluginnr);
 }
 
 void CPlugins::startPlugin(int number)
