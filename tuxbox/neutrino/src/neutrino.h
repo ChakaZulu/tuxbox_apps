@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.68 2002/03/23 19:21:33 field Exp $
+//  $Id: neutrino.h,v 1.69 2002/03/24 14:59:40 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -133,10 +133,15 @@ struct messages {
 			EVT_ZAP_COMPLETE	= 		CRCInput::RC_Events + 11,
 			EVT_ZAP_GOTAPIDS	= 		CRCInput::RC_Events + 12,
 			EVT_ZAP_FAILED		= 		CRCInput::RC_Events + 13,
-			EVT_ZAP_ISNVOD	= 			CRCInput::RC_Events + 14,
+			EVT_ZAP_ISNVOD		=		CRCInput::RC_Events + 14,
 			EVT_ZAP_SUB_COMPLETE=		CRCInput::RC_Events + 15,
+			EVT_SCAN_COMPLETE	=		CRCInput::RC_Events + 16,
+			EVT_SCAN_NUM_TRANSPONDERS =	CRCInput::RC_Events + 17,
+			EVT_SCAN_NUM_CHANNELS =		CRCInput::RC_Events + 18,
 
-			EVT_CURRENTEPG 	=		CRCInput::RC_WithData + 1
+			EVT_CURRENTEPG 		=		CRCInput::RC_WithData + 1,
+			EVT_SCAN_SATELLITE	=		CRCInput::RC_WithData + 2,
+			EVT_SCAN_PROVIDER	=	 	CRCInput::RC_WithData + 3
 		};
 };
 

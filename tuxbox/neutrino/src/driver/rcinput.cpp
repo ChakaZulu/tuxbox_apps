@@ -253,7 +253,6 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 	//set 0
 	*data = 0;
 
-
 	if(Timeout==-1)
 	{
 		tvslectp = NULL;
@@ -312,7 +311,7 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 */
 		if(FD_ISSET(fd_event, &rfds))
 		{
-			//printf("[neutrino] network - accept!\n");
+			//printf("[neutrino] event - accept!\n");
 			socklen_t	clilen;
 			SAI			cliaddr;
 			clilen = sizeof(cliaddr);
@@ -331,12 +330,14 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 				//printf("[neutrino] event read %d bytes - following %d bytes\n", read_bytes, emsg.dataSize );
 				if ( read_bytes == sizeof(emsg) )
 				{
+					bool dont_delete_p = false;
+
                     unsigned char* p;
 					p= new unsigned char[ emsg.dataSize + 1 ];
 					if ( p!=NULL )
 					{
 						read_bytes= recv(fd_eventclient, p, emsg.dataSize, MSG_WAITALL);
-						//printf("[neutrino] eventbody read %d bytes\n", read_bytes );
+						//printf("[neutrino] eventbody read %d bytes - initiator %x\n", read_bytes, emsg.initiatorID );
 
                         if ( emsg.initiatorID == CEventServer::INITID_CONTROLD )
                         {
@@ -365,28 +366,82 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 						}
 						else if ( emsg.initiatorID == CEventServer::INITID_SECTIONSD )
                         {
+							//printf("[neutrino] event - from SECTIONSD %x %x\n", emsg.eventID, *(unsigned*) p);
 							if (emsg.eventID==CSectionsdClient::EVT_TIMESET)
 							{
 								*msg = messages::EVT_TIMESET;
 								*data = 0;
-								//printf("[neutrino] event - CSectionsdClient::EVT_TIMESET\n");
 							}
-							else
-							if (emsg.eventID==CSectionsdClient::EVT_GOT_CN_EPG)
+							else if (emsg.eventID==CSectionsdClient::EVT_GOT_CN_EPG)
 							{
 								*msg = messages::EVT_CURRENTNEXT_EPG;
 								*data = *(unsigned*) p;
-								//printf("[neutrino] event - CSectionsdClient::EVT_CURRENTNEXT_EPG (for %x)\n", *(unsigned*)data );
 							}
 
 							else
 								printf("[neutrino] event INITID_SECTIONSD - unknown eventID 0x%x\n",  emsg.eventID );
 						}
+						else if ( emsg.initiatorID == CEventServer::INITID_ZAPIT )
+                        {
+                        	//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
+							if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE)
+							{
+								*msg = messages::EVT_ZAP_COMPLETE;
+								*data = *(unsigned*) p;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_ZAP_FAILED)
+							{
+								*msg = messages::EVT_ZAP_FAILED;
+								*data = *(unsigned*) p;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD)
+							{
+								*msg = messages::EVT_ZAP_ISNVOD;
+								*data = *(unsigned*) p;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_ZAP_SUB_COMPLETE)
+							{
+								*msg = messages::EVT_ZAP_SUB_COMPLETE;
+								*data = *(unsigned*) p;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_SCAN_COMPLETE)
+							{
+								*msg = messages::EVT_SCAN_COMPLETE;
+								*data = 0;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_SCAN_NUM_TRANSPONDERS)
+							{
+								*msg = messages::EVT_SCAN_NUM_TRANSPONDERS;
+								*data = *(unsigned*) p;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_SCAN_NUM_CHANNELS)
+							{
+								*msg = messages::EVT_SCAN_NUM_CHANNELS;
+								*data = *(unsigned*) p;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_SCAN_PROVIDER)
+							{
+								*msg = messages::EVT_SCAN_PROVIDER;
+								*data = (unsigned) p;
+								dont_delete_p = true;
+							}
+							else if (emsg.eventID==CZapitClient::EVT_SCAN_SATELLITE)
+							{
+								*msg = messages::EVT_SCAN_SATELLITE;
+								*data = (unsigned) p;
+								dont_delete_p = true;
+							}
+							else
+								printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
+						}
 						else
 							printf("[neutrino] event - unknown initiatorID 0x%x\n",  emsg.initiatorID);
 
-						delete p;
-						p= NULL;
+						if ( !dont_delete_p )
+						{
+							delete p;
+							p= NULL;
+						}
 					}
 
 				}

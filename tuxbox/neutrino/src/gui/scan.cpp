@@ -82,9 +82,63 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	g_FrameBuffer->loadPal("radar.pal", 17, 37);
 	int pos = 0;
 	bool finish = false;
+
+	ypos= y+ hheight + (mheight >>1);
+
+	uint msg; uint data;
+
 	while (!finish)
 	{
-		if(pos==0)
+		char filename[30];
+		sprintf(filename, "radar%d.raw", pos);
+		pos = (pos+1)%10;
+		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
+
+		long long timeoutEnd = g_RCInput->calcTimeoutEnd( 5 );
+
+		while ( ! ( msg == CRCInput::RC_timeout ) )
+		{
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, timeoutEnd );
+
+			if ( msg == messages::EVT_SCAN_SATELLITE )
+			{
+				g_FrameBuffer->paintBoxRel(xpos3, ypos+ 2* mheight, 80, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(xpos3, ypos+ 3*mheight, width, (char*)data, COL_MENUCONTENT);
+
+				delete (unsigned char*) data;
+			}
+            else
+			if ( msg == messages::EVT_SCAN_PROVIDER )
+			{
+				g_FrameBuffer->paintBoxRel(xpos3, ypos+ 3* mheight, 80, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(xpos3, ypos+ 4* mheight, width, (char*)data, COL_MENUCONTENT);
+
+				delete (unsigned char*) data;
+			}
+			else
+			if ( msg == messages::EVT_SCAN_NUM_CHANNELS )
+			{
+				char cb[10];
+				sprintf(cb, "%d", data);
+				g_FrameBuffer->paintBoxRel(xpos2, ypos+ mheight, 80, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(xpos2, ypos+ 2* mheight, width, cb, COL_MENUCONTENT);
+			}
+			else
+			if ( msg == messages::EVT_SCAN_NUM_TRANSPONDERS )
+			{
+				char cb[10];
+				sprintf(cb, "%d", data);
+				g_FrameBuffer->paintBoxRel(xpos2, ypos, 80, mheight, COL_MENUCONTENT);
+				g_Fonts->menu->RenderString(xpos2, ypos+ mheight, width, cb, COL_MENUCONTENT);
+			}
+            else
+			if ( msg == messages::EVT_SCAN_COMPLETE )
+			{
+				finish= true;
+			}
+		}
+
+/*		if(pos==0)
 		{	//query zapit every xth loop
 			finish = g_Zapit->isScanReady( sat, ts, services);
 		}
@@ -143,6 +197,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 		//g_RCInput->getKey(190);
 		usleep(100000);
+*/
 	}
 
 

@@ -37,22 +37,36 @@
 CRemoteControl::CRemoteControl()
 {
 	current_onid_sid = 0;
+	current_sub_onid_sid = 0;
+	waiting_for_zap_completion = false;
 	current_EPGid= 0;
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
-	current_PIDs.APIDs.clear();
-
-	pthread_cond_init( &send_cond, NULL );
-
-	if (pthread_mutex_init( &send_mutex, NULL ) != 0)
-		perror("CRemoteControl: pthread_mutex_init failed\n");
-
-	if (pthread_create (&thrSender, NULL, RemoteControlThread, (void *) this) != 0 )
-		perror("CRemoteControl: Create RemoteControlThread failed\n");
+    selected_apid = 0;
+	has_ac3 = false;
+	selected_subchannel = -1;
+	needs_nvods = false;
 }
 
 
 int CRemoteControl::handleMsg(uint msg, uint data)
 {
+	if ( waiting_for_zap_completion )
+	{
+    	if ( ( msg == messages::EVT_ZAP_COMPLETE ) ||
+    		 ( msg == messages:: EVT_ZAP_FAILED ) ||
+    		 ( msg == messages:: EVT_ZAP_ISNVOD ) )
+		{
+			if ( data != current_onid_sid )
+			{
+				g_Zapit->zapTo_serviceID_NOWAIT( current_onid_sid );
+				waiting_for_zap_completion = true;
+
+				return messages_return::handled;
+			}
+			else
+				waiting_for_zap_completion = false;
+		}
+	}
 
     if ( msg == messages::EVT_CURRENTEPG )
 	{
@@ -78,7 +92,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 	}
 	else if ( ( msg == messages::EVT_ZAP_COMPLETE ) || ( msg == messages:: EVT_ZAP_SUB_COMPLETE ) )
 	{
-		if ( data == current_onid_sid )
+		if ( data == (( msg == messages::EVT_ZAP_COMPLETE )?current_onid_sid:current_sub_onid_sid) )
 		{
 			g_Zapit->getPIDS( current_PIDs );
 			g_RCInput->postMsg( messages::EVT_ZAP_GOTPIDS, current_onid_sid, false );
@@ -240,63 +254,12 @@ void CRemoteControl::processAPIDnames()
 							break;
 						}
 				}
-
-
 			}
 		}
 	}
+
 
 	g_RCInput->postMsg( messages::EVT_ZAP_GOTAPIDS, current_onid_sid, false );
-}
-
-
-void * CRemoteControl::RemoteControlThread (void *arg)
-{
-	CRemoteControl* RemoteControl = (CRemoteControl*) arg;
-
-	while(1)
-	{
-		pthread_mutex_lock( &RemoteControl->send_mutex );
-		pthread_cond_wait( &RemoteControl->send_cond, &RemoteControl->send_mutex );
-
-		unsigned	_zapTo_onid_sid;
-		unsigned	_subChannel_zapTo_onid_sid;
-		unsigned	zapStatus;
-
-		do
-		{
-			_zapTo_onid_sid = RemoteControl->_zapTo_onid_sid;
-			_subChannel_zapTo_onid_sid = RemoteControl->_subChannel_zapTo_onid_sid;
-			pthread_mutex_unlock( &RemoteControl->send_mutex );
-
-			if ( _subChannel_zapTo_onid_sid == 0 )
-			{
-				zapStatus = g_Zapit->zapTo_serviceID( _zapTo_onid_sid );
-
-				if ( !( zapStatus & CZapitClient::ZAP_OK ) )
-					g_RCInput->postMsg( messages::EVT_ZAP_FAILED, _zapTo_onid_sid, false );
-				else if ( zapStatus & CZapitClient::ZAP_IS_NVOD )
-					g_RCInput->postMsg( messages::EVT_ZAP_ISNVOD, _zapTo_onid_sid, false );
-				else
-					g_RCInput->postMsg( messages::EVT_ZAP_COMPLETE, _zapTo_onid_sid, false );
-			}
-			else
-			{
-				zapStatus = g_Zapit->zapTo_subServiceID( _subChannel_zapTo_onid_sid );
-
-				if ( !( zapStatus & CZapitClient::ZAP_OK ) )
-					g_RCInput->postMsg( messages::EVT_ZAP_FAILED, _zapTo_onid_sid, false );
-				else
-					g_RCInput->postMsg( messages::EVT_ZAP_SUB_COMPLETE, _zapTo_onid_sid, false );
-			}
-
-			pthread_mutex_lock( &RemoteControl->send_mutex );
-		}
-		while ( _zapTo_onid_sid != RemoteControl->_zapTo_onid_sid );
-
-		pthread_mutex_unlock( &RemoteControl->send_mutex );
-	}
-	return NULL;
 }
 
 
@@ -324,22 +287,18 @@ void CRemoteControl::setAPID( int APID )
 	g_Zapit->setAudioChannel( APID );
 }
 
-string CRemoteControl::setSubChannel(unsigned numSub)
+string CRemoteControl::setSubChannel(unsigned numSub, bool force_zap )
 {
-	if ((selected_subchannel == numSub ) || (numSub < 0) || (numSub >= subChannels.size()))
+	if ((numSub < 0) || (numSub >= subChannels.size()))
 		return "";
 
-    pthread_mutex_lock( &send_mutex );
-
-	_zapTo_onid_sid = current_onid_sid;
-	_subChannel_zapTo_onid_sid = subChannels[numSub].onid_sid;
-
-	pthread_mutex_unlock( &send_mutex );
-
-	pthread_cond_signal( &send_cond );
-	usleep(10);
+	if ((selected_subchannel == numSub ) && (!force_zap))
+		return "";
 
 	selected_subchannel = numSub;
+	current_sub_onid_sid = subChannels[numSub].onid_sid;
+
+	g_Zapit->zapTo_subServiceID_NOWAIT( current_sub_onid_sid );
 
 	return subChannels[numSub].subservice_name;
 }
@@ -365,6 +324,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 {
 	current_onid_sid = onid_sid;
 
+    current_sub_onid_sid = 0;
 	current_EPGid = 0;
 
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
@@ -374,23 +334,14 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 	has_ac3 = false;
 
 	subChannels.clear();
-	selected_subchannel = 0;
+	selected_subchannel = -1;
 	needs_nvods = false;
 
-	pthread_mutex_lock( &send_mutex );
-
-	_zapTo_onid_sid = onid_sid;
-	_subChannel_zapTo_onid_sid = 0;
-
-	#ifdef USEACTIONLOG
-		char buf[1000];
-		sprintf((char*) buf, "zapto: %08x \"%s\"", onid_sid, channame.c_str() );
-		g_ActionLog->println(buf);
-	#endif
-	pthread_mutex_unlock( &send_mutex );
-
-	pthread_cond_signal( &send_cond );
-	usleep(10);
+	if ( !waiting_for_zap_completion )
+	{
+		g_Zapit->zapTo_serviceID_NOWAIT( onid_sid );
+		waiting_for_zap_completion = true;
+	}
 }
 
 

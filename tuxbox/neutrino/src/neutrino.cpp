@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.203 2002/03/23 19:21:33 field Exp $
+        $Id: neutrino.cpp,v 1.204 2002/03/24 14:59:40 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1473,6 +1473,27 @@ int CNeutrinoApp::run(int argc, char **argv)
 	// Parentallock settings
 	InitParentalLockSettings( parentallockSettings);
 
+	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
+    g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
+	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
+	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
+
+	g_Sectionsd->registerEvent(CSectionsdClient::EVT_TIMESET, 222, NEUTRINO_UDS_NAME);
+	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
+
+	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_FAILED, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_COMPLETE, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_COMPLETE, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SATELLITE, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_CHANNELS, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_PROVIDER, 222, NEUTRINO_UDS_NAME);
+
+	//init programm
+	InitZapper();
+
 	//network Setup
 	InitNetworkSettings(networkSettings);
 
@@ -1496,20 +1517,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//keySettings
 	InitKeySettings(keySettings);
 
-	//init programm
-	InitZapper();
-
 	current_volume= g_Controld->getVolume();
-	g_Controld->registerEvent(CControldClient::EVT_VOLUMECHANGED, 222, NEUTRINO_UDS_NAME);
-
 	AudioMute( g_Controld->getMute(), true );
-	g_Controld->registerEvent(CControldClient::EVT_MUTECHANGED, 222, NEUTRINO_UDS_NAME);
-
-	g_Controld->registerEvent(CControldClient::EVT_MODECHANGED, 222, NEUTRINO_UDS_NAME);
-	g_Controld->registerEvent(CControldClient::EVT_VCRCHANGED, 222, NEUTRINO_UDS_NAME);
-
-	g_Sectionsd->registerEvent(CSectionsdClient::EVT_TIMESET, 222, NEUTRINO_UDS_NAME);
-	g_Sectionsd->registerEvent(CSectionsdClient::EVT_GOT_CN_EPG, 222, NEUTRINO_UDS_NAME);
 
 	RealRun(mainMenu);
 
@@ -1704,13 +1713,14 @@ void CNeutrinoApp::showProfiling( string text )
 
 int CNeutrinoApp::handleMsg(uint msg, uint data)
 {
-	int res;
+	int res = 0;
 
-	res = g_InfoViewer->handleMsg(msg, data);
 	res = res | g_RemoteControl->handleMsg(msg, data);
+	res = res | g_InfoViewer->handleMsg(msg, data);
 
 	if ( res != messages_return::unhandled )
 		return ( res & ( 0xFFFFFFFF - messages_return::unhandled ) );
+
 
 
     if ( msg == messages::EVT_VCRCHANGED )
@@ -1825,6 +1835,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		return messages_return::handled;
 
 	}
+
+    if ( ( msg>= CRCInput::RC_WithData ) && ( msg< CRCInput::RC_WithData+ 0x10000000 ) )
+		delete (unsigned char*) data;
 
 	return messages_return::unhandled;
 }
@@ -2223,7 +2236,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.203 2002/03/23 19:21:33 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.204 2002/03/24 14:59:40 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

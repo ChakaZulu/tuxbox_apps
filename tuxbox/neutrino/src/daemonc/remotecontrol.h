@@ -101,12 +101,7 @@ typedef std::vector<CSubService> CSubServiceListSorted;
 
 class CRemoteControl
 {
-		unsigned		_zapTo_onid_sid;
-		unsigned		_subChannel_zapTo_onid_sid;
-		pthread_t       thrSender;
-		pthread_cond_t  send_cond;
-		pthread_mutex_t send_mutex;
-		static void * RemoteControlThread (void *arg);
+		bool							waiting_for_zap_completion;
 
 		void getNVODs();
 		void processAPIDnames();
@@ -115,6 +110,7 @@ class CRemoteControl
 
 	public:
 		unsigned int					current_onid_sid;
+		unsigned int					current_sub_onid_sid;
 		unsigned long long				current_EPGid;
 		CZapitClient::responseGetPIDs	current_PIDs;
 
@@ -133,7 +129,7 @@ class CRemoteControl
 		void zapTo_onid_sid( unsigned int onid_sid, string channame );
 		void queryAPIDs();
 		void setAPID(int APID);
-		string setSubChannel(unsigned numSub);
+		string setSubChannel(unsigned numSub, bool force_zap = false );
 		string subChannelUp();
 		string subChannelDown();
 
