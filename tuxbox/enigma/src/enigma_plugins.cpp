@@ -1,7 +1,6 @@
 #include <enigma_plugins.h>
 
 #include <plugin.h>
-#include <dbox/avia_gt_vbi.h>
 
 #include <dlfcn.h>
 #include <dirent.h>
