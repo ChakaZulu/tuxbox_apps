@@ -23,7 +23,12 @@
 
 #ifndef __libevent__
 #define __libevent__
-		
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
 #include <string>
 #include <map>
 
@@ -32,30 +37,43 @@ using namespace std;
 
 class CEventServer
 {
+		struct eventClient
+		{
+			unsigned int clientID;//doppelt..
+			char udsName[50];
+		};
+
+		//key: clientid 
+		typedef std::map<unsigned int, eventClient> eventClientMap;
+
+		//key: eventid
+		std::map<unsigned int, eventClientMap> eventData;
+
+		bool sendEvent2Client(unsigned int eventID, unsigned int initiatorID, eventClient* ClientData, void* eventbody=NULL, unsigned int eventbodysize=0);
+
 	public:
-		
+
 		struct commandRegisterEvent
 		{
-			int eventID;
+			unsigned int eventID;
 			char udsName[50];
 		};
 
 		struct commandUnRegisterEvent
 		{
-			int eventID;
+			unsigned int eventID;
 			char udsName[50];
 		};
 
 		struct eventHead
 		{
-			int eventID;
-			int initiatorID;
+			unsigned int eventID;
+			unsigned int initiatorID;
 		};
 
-
-		void registerEvent(int eventID, int ClientID, string udsName);
-		void unRegisterEvent(int eventID, int ClientID);
-		void sendEvent(int eventID, int ClientID, void* eventbody=NULL, int eventsize=0);
+		void registerEvent(unsigned int eventID, unsigned int ClientID, string udsName);
+		void unRegisterEvent(unsigned int eventID, unsigned int ClientID);
+		void sendEvent(unsigned int eventID, unsigned int initiatorID, void* eventbody=NULL, unsigned int eventbodysize=0);
 };
 
 

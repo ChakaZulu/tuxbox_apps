@@ -23,3 +23,62 @@
 
 #include "eventserver.h"
 
+void CEventServer::registerEvent(unsigned int eventID, unsigned int ClientID, string udsName)
+{
+	strcpy( eventData[eventID][ClientID].udsName, udsName.c_str());
+	eventData[eventID][ClientID].clientID=ClientID;
+}
+
+void CEventServer::unRegisterEvent(unsigned int eventID, unsigned int ClientID)
+{
+	eventData[eventID].erase( ClientID );
+}
+
+void CEventServer::sendEvent(unsigned int eventID, unsigned int initiatorID, void* eventbody, unsigned int eventbodysize)
+{
+	eventClientMap notifyClients = eventData[eventID];
+
+	eventClientMap::iterator pos = notifyClients.begin();
+	for(;pos!=notifyClients.end();pos++)
+	{
+		//allen clients ein event schicken
+		eventClient client = pos->second;
+		printf("send event (%d) to: %d - %s\n", eventID, client.clientID, client.udsName);
+		sendEvent2Client(eventID, initiatorID, &client, eventbody, eventbodysize);
+	}
+}
+
+bool CEventServer::sendEvent2Client(unsigned int eventID, unsigned int initiatorID, eventClient* ClientData, void* eventbody, unsigned int eventbodysize)
+{
+	struct sockaddr_un servaddr;
+	int clilen, sock_fd;
+
+	memset(&servaddr, 0, sizeof(struct sockaddr_un));
+	servaddr.sun_family = AF_UNIX;
+	strcpy(servaddr.sun_path, ClientData->udsName);
+	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	
+	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+	{
+		perror("[eventserver]: socket");
+		return false;
+	}	
+
+	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
+	{
+  		perror("[eventserver]: connect");
+		return false;
+	}
+	return true;
+
+	eventHead head;
+	head.eventID = eventID;
+	head.initiatorID = initiatorID;
+	write(sock_fd, &head, sizeof(head));
+	
+	if(eventbodysize!=0)
+	{
+		write(sock_fd, eventbody, eventbodysize);
+	}
+	close(sock_fd);
+}
