@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.40 2002/08/30 14:04:08 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.41 2002/08/30 15:51:44 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -302,13 +302,10 @@ void CBouquetManager::saveBouquets()
 	fclose(bouq_fd);
 }
 
-void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
+void CBouquetManager::parseBouquetsXml(const XMLTreeNode *root, int &nChNrTv, int &nChNrRadio)
 {
 	XMLTreeNode *search=root->GetChild();
 	XMLTreeNode *channel_node;
-
-	int nChNrRadio = 1;
-	int nChNrTV = 1;
 
 	if (search)
 	{
@@ -342,9 +339,9 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 					{
 						case 1:
 						case 4:
-							chan->setChannelNumber(nChNrTV);
+							chan->setChannelNumber(nChNrTv);
 							newBouquet->addService(chan);
-							nChNrTV++;
+							nChNrTv++;
 						break;
 						case 2:
 							chan->setChannelNumber(nChNrRadio);
@@ -365,18 +362,16 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 			search = search->GetNext();
 		}
 	}
-
-	makeRemainingChannelsBouquet( nChNrTV, nChNrRadio, (Bouquets.size() == 0) ? "Alle Kanäle" : "Andere");  // TODO: use locales
-
 	printf("\n[zapit] Found %d bouquets.\n", Bouquets.size());
-
 }
 
 void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 {
 	FILE * in;
 	XMLTreeParser * parser;
-	
+	int nChNrTv = 1;
+	int nChNrRadio = 1;
+
 	if (ignoreBouquetFile == false)
 	{
 		char buf[2048];
@@ -410,17 +405,15 @@ void CBouquetManager::loadBouquets(bool ignoreBouquetFile)
 			while (!done);
 
 			if (parser->RootNode())
-				parseBouquetsXml(parser->RootNode());
+				parseBouquetsXml(parser->RootNode(), nChNrTv, nChNrRadio);
 
 			delete parser;
 
 			fclose(in);
 		}
 	}
-	else
-	{
-		makeRemainingChannelsBouquet( 1, 1, "Alle Kanäle");    // TODO: use locales
-	}
+
+	makeRemainingChannelsBouquet( nChNrTv, nChNrRadio, (Bouquets.size() == 0) ? "Alle Kanäle" : "Andere");  // TODO: use locales
 
 	storeBouquets();
 }
