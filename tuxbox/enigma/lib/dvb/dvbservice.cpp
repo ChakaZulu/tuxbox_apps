@@ -155,7 +155,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 				if ( tmp != -1 && !service.path.length() )
 					Decoder::parms.pcrpid=tmp;
 // start yet...
-				eDebug("Set");
 				Decoder::Set();
 
 				if (sp->dvb->dxflags & eServiceDVB::dxNoPMT)
@@ -253,7 +252,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		if (dvb.getState() != eDVBServiceState::stateServiceGetPAT)
 			break;
 
-		eDebug("eventServiceGotPAT");
 		PAT *pat=dvb.tPAT.getCurrent();
 		PATEntry *pe=pat->searchService(service.getServiceID().get());
 		if (!pe)
@@ -274,7 +272,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	}	
 	case eDVBServiceEvent::eventServiceGotPMT:
-		eDebug("eventServiceGotPMT");
 		service_state=0;
 		scanPMT();
 		{
@@ -292,8 +289,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	case eDVBServiceEvent::eventServiceGotSDT:
 	{
-		eDebug("eventServiceGotSDT");
-
 		if (dvb.getState() != eDVBServiceState::stateServiceGetSDT)
 			break;
 
@@ -324,12 +319,13 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 
 void eDVBServiceController::PATready(int error)
 {
+	eDebug("PATready (%d)",error);
 	dvb.event(eDVBServiceEvent(error?eDVBServiceEvent::eventServiceFailed:eDVBServiceEvent::eventServiceGotPAT));
 }
 
 void eDVBServiceController::SDTready(int error)
 {
-	(void)error;
+	eDebug("SDTready (%d)", error);
 	dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceGotSDT));
 	if (dvb.settings->getTransponders())
 	{
@@ -352,17 +348,16 @@ void eDVBServiceController::freeCheckFinished()
 
 void eDVBServiceController::PMTready(int error)
 {
-	(void)error;
+	eDebug("PMTready (%d)", error);
 	dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceGotPMT));
 }
 
 void eDVBServiceController::EITready(int error)
 {
-	eDebug("EITready %s", strerror(-error));
+	eDebug("EITready (%d)", error);
 	if (!error)
 	{
 		EIT *eit=dvb.getEIT();
-		eDebug("eit = %p", eit);
 
 		if ( service.getServiceType() == 4 ) // NVOD Service
 		{
@@ -371,14 +366,11 @@ void eDVBServiceController::EITready(int error)
 			dvb.parentEIT->events.setAutoDelete(true);
 			eit->events.setAutoDelete(false);
 		}
-		eDebug("emit dvb.gotEIT(no error)");
 		/*emit*/ dvb.gotEIT(eit, 0);
 		eit->unlock();
-	} else
-	{
-		eDebug("emit dvb.gotEIT(with error)");
-		/*emit*/ dvb.gotEIT(0, error);
 	}
+	else
+		/*emit*/ dvb.gotEIT(0, error);
 }
 
 void eDVBServiceController::TDTready(int error)

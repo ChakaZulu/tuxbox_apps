@@ -20,7 +20,7 @@ void eDVBRecorder::dataAvailable(int)
 {
 	int res = 0;
 
-	int r = buffer.fromfile(dvrfd,32768*8);
+	int r = buffer.fromfile(dvrfd,65536);
 	if (r<=0)
 	{
 		eDebug("reading failed..(err %d)", -r);

@@ -249,12 +249,13 @@ void eDVB::recUpdatePIDs( PMT *pmt )
 {
 	if (recorder && pmt)
 	{
+		eDebug("recUpdatePIDs");
 		pmt->lock();
+
+		recorder->addNewPID(0); // PAT
 
 		if (Decoder::parms.pmtpid != -1)  // PMT
 			recorder->addNewPID(Decoder::parms.pmtpid);
-
-		recorder->addNewPID(0); // PAT
 
 		recorder->addNewPID(pmt->PCR_PID);  // PCR
 
@@ -302,6 +303,11 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 
 	CONNECT(recorder->recMessage, eDVB::recMessage);
 
+	recorder->addPID(0); // PAT
+
+	if (Decoder::parms.pmtpid != -1)
+		recorder->addPID(Decoder::parms.pmtpid);
+
 	PMT *pmt=getPMT();
 	if (!pmt)
 	{
@@ -316,13 +322,12 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 	}
 	else
 	{
-
+		recorder->addPID(pmt->PCR_PID);
 #ifdef RECORD_ECM
 		for (ePtrList<Descriptor>::iterator i(pmt->program_info.begin()); i != pmt->program_info.end(); ++i)
 			if (i->Tag() == 9)
 				recorder->addPID(((CADescriptor*)*i)->CA_PID);
 #endif
-
 		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 		{
 			int record=0;
@@ -358,13 +363,6 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 		}
 		pmt->unlock();
 	}
-
-	recorder->addPID(pmt->PCR_PID);
-
-	recorder->addPID(0); // PAT
-
-	if (Decoder::parms.pmtpid != -1)
-		recorder->addPID(Decoder::parms.pmtpid);
 
 	// build SMI table.
 	
