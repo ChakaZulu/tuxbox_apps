@@ -228,7 +228,6 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 	result.strReplace("#IP1#", eString().sprintf("%d", mp.ip[1]));
 	result.strReplace("#IP2#", eString().sprintf("%d", mp.ip[2]));
 	result.strReplace("#IP3#", eString().sprintf("%d", mp.ip[3]));
-	result.strReplace("#ID#", eString().sprintf("%d", mp.id));
 	result.strReplace("#ASYNC#", async);
 	result.strReplace("#SYNC#", sync);
 	result.strReplace("#ATIME#", atime);
