@@ -39,6 +39,12 @@ class CAPIDChangeExec : public CMenuTarget
         int exec(CMenuTarget* parent, string actionKey);
 };
 
+class CNVODChangeExec : public CMenuTarget
+{
+	public:
+        int exec(CMenuTarget* parent, string actionKey);
+};
+
 void setDefaultGateway(char* ip);
 void setNetworkAddress(char* ip, char* netmask, char* broadcast);
 void setNameServer(char* ip);

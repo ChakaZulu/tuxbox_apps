@@ -1,9 +1,9 @@
 //
-// $Id: remotecontrol.cpp,v 1.18 2001/10/15 12:08:31 field Exp $
+// $Id: remotecontrol.cpp,v 1.19 2001/10/15 17:27:19 field Exp $
 //
 // $Log: remotecontrol.cpp,v $
-// Revision 1.18  2001/10/15 12:08:31  field
-// nstreamzapd-support (mccleans patch gepatcht :)
+// Revision 1.19  2001/10/15 17:27:19  field
+// nvods (fast) implementiert (umschalten funkt noch nicht)
 //
 // Revision 1.17  2001/10/13 00:46:48  McClean
 // nstreamzapd-support broken - repaired
@@ -57,57 +57,73 @@ void CRemoteControl::send()
 }
 
 // quick'n dirty, damit der Rest was zum arbeiten hat ;)
-static void getNVODs(unsigned onidSid)
+static void getNVODs(unsigned onidSid, st_nvod_info *nvods )
 {
-  char rip[]="127.0.0.1";
+    char rip[]="127.0.0.1";
 
-  int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  SAI servaddr;
-  memset(&servaddr,0,sizeof(servaddr));
-  servaddr.sin_family=AF_INET;
-  servaddr.sin_port=htons(sectionsd::portNumber);
-  inet_pton(AF_INET, rip, &servaddr.sin_addr);
+    int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    SAI servaddr;
+    memset(&servaddr,0,sizeof(servaddr));
+    servaddr.sin_family=AF_INET;
+    servaddr.sin_port=htons(sectionsd::portNumber);
+    inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
-  if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1) {
-    perror("Couldn't connect to sectionsd!");
-    return;
-  }
-  sectionsd::msgRequestHeader req;
-  req.version = 2;
-  req.command = sectionsd::timesNVODservice;
-  req.dataLength = 4;
-  write(sock_fd, &req, sizeof(req));
-  write(sock_fd, &onidSid, req.dataLength);
-  sectionsd::msgResponseHeader resp;
-  memset(&resp, 0, sizeof(resp));
-  if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) {
-    close(sock_fd);
-    return;
-  }
-  if(resp.dataLength) {
-    char* pData = new char[resp.dataLength] ;
-    if(read(sock_fd, pData, resp.dataLength)>0) {
-      printf("dataLength: %u\n", resp.dataLength);
-      char *p=pData;
-      while(p<pData+resp.dataLength) {
-	unsigned onidsid2=*(unsigned *)p;
-	printf("onid_sid: 0x%x\n", onidsid2);
-	p+=4;
-    unsigned short tsid=*(unsigned short *)p;
-	printf("tsid: 0x%x\n", tsid);
-	p+=2;
-	unsigned char numberOfTimes=*p;
-	p++;
-	for(int i=0; i<numberOfTimes; i++) {
-	  time_t zeit=*(time_t *)p;
-	  p+=4;
-	  printf("%s", ctime(&zeit));
-	}
-      }
+    if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+    {
+        perror("CRemoteControl - getNVODs - couldn't connect to sectionsd!\n");
+        return;
     }
-    delete[] pData;
-  }
-  close(sock_fd);
+    sectionsd::msgRequestHeader req;
+    req.version = 2;
+    req.command = sectionsd::timesNVODservice;
+    req.dataLength = 4;
+    write(sock_fd, &req, sizeof(req));
+    write(sock_fd, &onidSid, req.dataLength);
+    sectionsd::msgResponseHeader resp;
+    memset(&resp, 0, sizeof(resp));
+    if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+    {
+        close(sock_fd);
+        return;
+    }
+
+    if(resp.dataLength)
+    {
+        char* pData = new char[resp.dataLength] ;
+        if(read(sock_fd, pData, resp.dataLength)>0)
+        {
+            //printf("dataLength: %u\n", resp.dataLength);
+            char *p=pData;
+
+            (short)nvods->count_nvods = -1;
+            while(p<pData+resp.dataLength)
+            {
+                nvods->count_nvods+= 1;
+                unsigned onidsid2=*(unsigned *)p;
+                printf("onid_sid: 0x%x\n", onidsid2);
+                nvods->nvods[nvods->count_nvods].onid_sid = onidsid2;
+
+                p+=4;
+                unsigned short tsid=*(unsigned short *)p;
+                printf("tsid: 0x%x\n", tsid);
+                nvods->nvods[nvods->count_nvods].tsid = tsid;
+
+                p+=2;
+                unsigned char numberOfTimes=*p;
+                p++;
+                for(int i=0; i<numberOfTimes; i++)
+                {
+                    time_t zeit=*(time_t *)p;
+                    p+=4;
+                    printf("%s", ctime(&zeit));
+                    if (i == 0)
+                        nvods->nvods[nvods->count_nvods].startzeit = zeit;
+                }
+            }
+        }
+        delete[] pData;
+    }
+    close(sock_fd);
 }
 
 void * CRemoteControl::RemoteControlThread (void *arg)
@@ -156,7 +172,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
               		perror("CRemoteControl::RemoteControlThread - Couldn't connect to serverd zapit!");
 //            		exit(-1);
             	}
-
+                printf("sending %d\n", r_msg.cmd);
                 write(sock_fd, &r_msg, sizeof(r_msg));
 	
                 return_buf = (char*) malloc(4);
@@ -170,132 +186,136 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 //                printf("Received %d bytes\n", bytes_recvd);
 //                printf("That was returned: %s\n", return_buf);
 	
-                int ZapReturned;
                 char ZapStatus = return_buf[1];
 
                 do_immediatly = false;
 
-                sscanf(&return_buf[2], "%x", (uint *) &ZapReturned);
                 if ( return_buf[0] == '-' )
-                    ZapReturned*= -1;
-
-                switch ( ZapReturned )
                 {
-                    case 0: printf("Unknown error reported from zapper\n");
-//                            exit(-1);
-                            break;
-                    case 1: {
-                                printf("Zapping by number returned successful\n");
-                                break;
-                            }
-                    case -1: printf("Zapping by number returned UNsuccessful\n");
-                            break;
-                    case 2: printf("zapit should be killed now.\n");
-                            break;
-                    case -2: printf("zapit could not be killed\n");
-                            break;
-                    case 3: {
-                                // printf("Zapping by name returned successful\n");
-
-                                // ueberpruefen, ob wir die Audio-PIDs holen sollen...
-//                                printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);
-                                pthread_mutex_trylock( &RemoteControl->send_mutex );
-                                if ( ( RemoteControl->remotemsg.cmd== 3 ) &&
-                                     ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) )
-                                {
-                                    // noch immer der gleiche Kanal, Abfrage 8 starten
-                                    RemoteControl->remotemsg.cmd= 8;
-
-                                    strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
-                                    do_immediatly = true;
-//                                    printf("Audio-PIDs holen for %s\n", RemoteControl->apids.name);
-                                }
-                                else
-                                    pthread_mutex_unlock( &RemoteControl->send_mutex );
-
-                                break;
-                            }
-                            break;
-                    case -3: printf("\n\nHier waere Platz fuer ne Fehlerbild-funktion\n\n");
-                            break;
-                    case 4: printf("Shutdown Box returned successful\n");
-                            break;
-                    case -4: printf("Shutdown Box was not succesful\n");
-                            break;
-                    case 5: printf("get Channellist returned successful\n");
-                            printf("Should not be received in remotecontrol.cpp. Exiting\n");
-//                            exit(-1);
-                            break;
-                    case -5: printf("get Channellist returned UNsuccessful\n");
-                            printf("Should not be received in remotecontrol.cpp. Exiting\n");
-//                            exit(-1);
-                            break;
-                    case 6: printf("Changed to radio-mode\n");
-                            break;
-                    case -6: printf("Could not change to radio-mode\n");
-                            break;
-                    case 7: printf("Changed to TV-mode\n");
-                            break;
-                    case -7: printf("Could not change to TV-Mode\n");
-                            break;
-                    case 8:
-                    case 0x0d: {
-                                if (ZapReturned == 0x0d)
-                                {
-                                    // 0x0d... result
-                                    printf("Zapped with onid_sid\n");
-                                    printf("Status: %hhx\n", ZapStatus);
-
-                                    strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
-                                };
-
-//                                printf("Got a pid-description\n");
-
-                                struct  pids    apid_return_buf;
-                                memset(&apid_return_buf, 0, sizeof(apid_return_buf));
-
-                                if ( read(sock_fd, &apid_return_buf, sizeof(apid_return_buf)) > 0 )
-                                {
-                                // PIDs emfangen, ueberpruefen, ob wir die Audio-PIDs uebernehmen sollen...
-
-                                    pthread_mutex_trylock( &RemoteControl->send_mutex );
-                                    if ( strlen( RemoteControl->audio_chans_int.name )!= 0 )
-                                    {
-                                        // noch immer der gleiche Kanal
-
-                                        RemoteControl->audio_chans_int.count_apids = apid_return_buf.count_apids;
-                                        printf("got apids for: %s - %d apids!\n", RemoteControl->audio_chans_int.name, RemoteControl->audio_chans_int.count_apids);
-                                        // printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
-                                        for(int count=0;count<apid_return_buf.count_apids;count++)
-                                        {
-//                                           printf("%s \n", apid_return_buf.apids[count].desc);
-                                            strcpy(RemoteControl->audio_chans_int.apids[count].name, apid_return_buf.apids[count].desc);
-                                            RemoteControl->audio_chans_int.apids[count].ctag= apid_return_buf.apids[count].component_tag;
-                                            RemoteControl->audio_chans_int.apids[count].is_ac3= apid_return_buf.apids[count].is_ac3;
-                                        }
-                                        RemoteControl->ecm_pid= apid_return_buf.ecmpid;
-                                        // printf("ECM_PID %x\n", RemoteControl->ecm_pid);
-
-                                        pthread_cond_signal( &g_InfoViewer->lang_cond );
+                    printf("zapit failed for function >%s<\n", &return_buf[2]);
+                }
+                else
+                {
+                    switch ( return_buf[2] )
+                    {
+                        case '0':   printf("Unknown error reported from zapper\n");
+                                    break;
+                        case '1':   {
+                                        printf("Zapping by number returned successful\n");
+                                        break;
                                     }
-                                    pthread_mutex_unlock( &RemoteControl->send_mutex );
-                                }
-                                else
-                                    printf("pid-description fetch failed!\n");
-                                break;
-                            }
-                    case -8: printf("Could not get a pid-description\n");
-                            printf("should not be done in remotecontrol.cpp.\n");
-                            break;
-                    case 9: printf("Changed apid\n");
-                            break;
-                    case -9: printf("Could not change apid\n");
-                            break;
-                    case -0x0d: printf("Could not zap with onid_sid\n");
-                            break;
+                        case '2':   printf("zapit should be killed now.\n");
+                                    break;
+                        case '3':   {
+                                        // printf("Zapping by name returned successful\n");
 
-                    default: printf("Unknown return-code\n");
-//                            exit(-1);
+                                        // ueberpruefen, ob wir die Audio-PIDs holen sollen...
+                                        // printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);
+                                        pthread_mutex_trylock( &RemoteControl->send_mutex );
+                                        if ( ( RemoteControl->remotemsg.cmd== 3 ) &&
+                                             ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) )
+                                        {
+                                            // noch immer der gleiche Kanal, Abfrage 8 starten
+                                            RemoteControl->remotemsg.cmd= 8;
+
+                                            strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
+                                            do_immediatly = true;
+                                            // printf("Audio-PIDs holen for %s\n", RemoteControl->apids.name);
+                                        }
+                                        else
+                                            pthread_mutex_unlock( &RemoteControl->send_mutex );
+
+                                        break;
+                                    }
+                                    break;
+                        case '4':   printf("Shutdown Box returned successful\n");
+                                    break;
+                        case '5':   printf("get Channellist returned successful\n");
+                                    printf("Should not be received in remotecontrol.cpp. Exiting\n");
+                                    break;
+                        case '6':   printf("Changed to radio-mode\n");
+                                    break;
+                        case '7':   printf("Changed to TV-mode\n");
+                                    break;
+                        case '8':
+                        case 'd':   {
+                                        struct  pids    apid_return_buf;
+                                        memset(&apid_return_buf, 0, sizeof(apid_return_buf));
+
+                                        if ( read(sock_fd, &apid_return_buf, sizeof(apid_return_buf)) > 0 )
+                                        {
+                                            // PIDs emfangen...
+
+                                            pthread_mutex_trylock( &RemoteControl->send_mutex );
+                                            if ( ( strlen( RemoteControl->audio_chans_int.name )!= 0 ) ||
+                                                 ( ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) && (return_buf[2] == 'd') ) )
+                                            {
+                                                // noch immer der gleiche Kanal
+
+                                                if ( (return_buf[2] == 'd') && ( ZapStatus & 0x80 ) )
+                                                {
+                                                    unsigned int onid_sid;
+
+                                                    printf("NVOD-Basechannel!\n");
+
+                                                    sscanf( r_msg.param3, "%x", &onid_sid );
+                                                    getNVODs( onid_sid, &RemoteControl->nvods_int );
+
+                                                    strcpy( RemoteControl->nvods_int.name, r_msg.param3 );
+
+                                                    if ( RemoteControl->nvods_int.count_nvods> 0 )
+                                                    {
+                                                        // übertragen der ids an zapit initialisieren
+
+                                                        // !!! AUSKOMMENTIERT, weil das tut noch nicht... !!!
+
+                                                        //RemoteControl->remotemsg.cmd= 'i';
+                                                        //do_immediatly = true;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    if (return_buf[2] == 'd')
+                                                        strcpy( RemoteControl->audio_chans_int.name, r_msg.param3 );
+
+                                                    // Nur dann die Audio-Channels abholen, wenn nicht NVOD-Basechannel
+
+                                                    RemoteControl->audio_chans_int.count_apids = apid_return_buf.count_apids;
+                                                    printf("got apids for: %s - %d apids!\n", RemoteControl->audio_chans_int.name, RemoteControl->audio_chans_int.count_apids);
+                                                    // printf("%d - %d - %d - %d - %d\n", apid_return_buf.apid[0], apid_return_buf.apid[1], apid_return_buf.apid[2], apid_return_buf.apid[3], apid_return_buf.apid[4] );
+                                                    for(int count=0;count<apid_return_buf.count_apids;count++)
+                                                    {
+                                                        // printf("%s \n", apid_return_buf.apids[count].desc);
+                                                        strcpy(RemoteControl->audio_chans_int.apids[count].name, apid_return_buf.apids[count].desc);
+                                                        RemoteControl->audio_chans_int.apids[count].ctag= apid_return_buf.apids[count].component_tag;
+                                                        RemoteControl->audio_chans_int.apids[count].is_ac3= apid_return_buf.apids[count].is_ac3;
+                                                    }
+                                                    RemoteControl->ecm_pid= apid_return_buf.ecmpid;
+                                                }
+
+                                                pthread_cond_signal( &g_InfoViewer->lang_cond );
+                                            }
+                                            pthread_mutex_unlock( &RemoteControl->send_mutex );
+                                        }
+                                        else
+                                            printf("pid-description fetch failed!\n");
+                                        break;
+                                    }
+                        case 'i':   {
+                                        printf("Sending NVODs to zapit\n");
+                                        for(int count=0;count<RemoteControl->nvods_int.count_nvods;count++)
+                                        {
+                                            printf("Sending %d\n", count);
+                                            write(sock_fd, &RemoteControl->nvods_int.nvods[count].onid_sid, 4);
+                                            write(sock_fd, &RemoteControl->nvods_int.nvods[count].tsid, 2);
+                                        }
+                                        break;
+                                    }
+                        case '9':   printf("Changed apid\n");
+                                    break;
+
+                        default: printf("Unknown return-code >%s<, %d\n", return_buf, return_buf[2]);
+                    }
                 }
                 if ( !do_immediatly )
                     usleep(100000);
@@ -336,6 +356,13 @@ void CRemoteControl::CopyAPIDs()
     pthread_mutex_unlock( &send_mutex );
 }
 
+void CRemoteControl::CopyNVODs()
+{
+    pthread_mutex_lock( &send_mutex );
+    memcpy(&nvods, &nvods_int, sizeof(nvods));
+    pthread_mutex_unlock( &send_mutex );
+}
+
 void CRemoteControl::queryAPIDs()
 {
     pthread_mutex_lock( &send_mutex );
@@ -370,6 +397,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid )
     snprintf( (char*) &remotemsg.param3, 10, "%x", onid_sid);
 
     memset(&audio_chans_int, 0, sizeof(audio_chans_int));
+    memset(&nvods_int, 0, sizeof(nvods_int));
 
     pthread_mutex_unlock( &send_mutex );
 
@@ -386,6 +414,7 @@ void CRemoteControl::zapTo(string chnlname )
     strcpy( remotemsg.param3, chnlname.c_str() );
 
     memset(&audio_chans_int, 0, sizeof(audio_chans_int));
+    memset(&nvods_int, 0, sizeof(nvods_int));
 
     pthread_mutex_unlock( &send_mutex );
 

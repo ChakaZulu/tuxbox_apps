@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.65 2001/10/15 12:08:31 field Exp $
+        $Id: neutrino.cpp,v 1.66 2001/10/15 17:27:19 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.65  2001/10/15 12:08:31  field
-  nstreamzapd-support (mccleans patch gepatcht :)
+  Revision 1.66  2001/10/15 17:27:19  field
+  nvods (fast) implementiert (umschalten funkt noch nicht)
 
   Revision 1.64  2001/10/14 23:39:55  McClean
   VCR-Mode prepared
@@ -1043,6 +1043,43 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 	return (char *)++from;
 }
 
+void CNeutrinoApp::SelectNVOD()
+{
+    g_RemoteControl->CopyNVODs();
+
+    char to_compare[50];
+    if ( g_settings.epg_byname == 0 )
+        snprintf( to_compare, 10, "%x", channelList->getActiveChannelOnid_sid() );
+    else
+        strcpy( to_compare, channelList->getActiveChannelName().c_str() );
+
+    if ( ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 ) &&
+         ( g_RemoteControl->nvods.count_nvods> 0 ) )
+    {
+        // NVOD- Kanal!
+
+    	CMenuWidget NVODSelector("nvodselector.head", "audio.raw");
+
+        NVODSelector.addItem( new CMenuSeparator() );
+        NVODSelector.addItem( new CMenuForwarder("menu.back") );
+	    NVODSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+        for(int count=0;count<g_RemoteControl->nvods.count_nvods;count++)
+        {
+            char nvod_id[5];
+            sprintf(nvod_id, "%d", count);
+
+            char nvod_time[20];
+//            strcpy( nvod_time, ctime(&g_RemoteControl->nvods.nvods[count].startzeit) );
+            struct  tm *tmZeit;
+            tmZeit = localtime(&g_RemoteControl->nvods.nvods[count].startzeit);
+            strftime( nvod_time, sizeof(nvod_time), "%X", tmZeit );
+            NVODSelector.addItem( new CMenuForwarder(nvod_time, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->nvods.selected) );
+        }
+        NVODSelector.exec(NULL, "");
+    }
+}
+
 void CNeutrinoApp::SelectAPID()
 {
     g_RemoteControl->CopyAPIDs();
@@ -1238,6 +1275,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			{	// APID
                 SelectAPID();
 			}
+            else if (key==CRCInput::RC_yellow)
+			{	// NVODs
+                SelectNVOD();
+			}
 			else if ((key==g_settings.key_quickzap_up) || (key==g_settings.key_quickzap_down))
 			{
 				//quickzap
@@ -1336,6 +1377,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	audioSetupNotifier = new CAudioSetupNotifier;
 	videoSetupNotifier = new CVideoSetupNotifier;
 	APIDChanger        = new CAPIDChangeExec;
+	NVODChanger        = new CNVODChangeExec;
 
     colorSetupNotifier->changeNotify("initial");
 
@@ -1569,7 +1611,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.65 2001/10/15 12:08:31 field Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.66 2001/10/15 17:27:19 field Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;

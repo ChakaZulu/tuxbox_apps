@@ -126,6 +126,7 @@ infoviewer.eventlist Lista Programowa
 infoviewer.languages Wybor Dzwieku
 infoviewer.notavailable Kanal (na razie) niedostepny
 infoviewer.cantdecode Kanal nie mozliwy do dekodowania
+infoviewer.selecttime Timeselection
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
@@ -143,6 +144,8 @@ streaminfo.audiotype Typ Dzwieku
 streaminfo.audiotype_unknown Typ Dzwieku: nieznany
 
 apidselector.head Wybor Jezyka
+
+nvodselector.head Select starting-time
 
 ucodecheck.head UCode check
 ucodecheck.avia500 Avia 500

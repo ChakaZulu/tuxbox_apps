@@ -81,7 +81,8 @@ class CInfoViewer
         bool getEPGData( string channelName, unsigned int onid_tsid );
 		void showData();
         void showWarte();
-        void showButtons();
+        void showButtonAudio();
+        void showButtonNVOD();
 	public:
 
         bool                is_visible;

@@ -122,10 +122,11 @@ channellist.head Alle Kanäle
 infoviewer.epgnotload EPG noch nicht geladen...
 infoviewer.epgwait Warte auf EPG...
 infoviewer.streaminfo Stream-Info
-infoviewer.eventlist Ereignis-Liste
+infoviewer.eventlist Programm...
 infoviewer.languages Tonauswahl
 infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar
 infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
+infoviewer.selecttime Startzeiten
 
 epgviewer.notfound keine EPG-Informationen gefunden
 epgviewer.nodetailed Keine ausführlichen Informationen verfügbar
@@ -143,6 +144,8 @@ streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: unbekannt
 
 apidselector.head Sprachauswahl
+
+nvodselector.head Anfangszeit auswählen
 
 ucodecheck.head UCode Überprüfung
 ucodecheck.avia500 Avia 500

@@ -29,7 +29,7 @@ struct st_rmsg
 {
 	unsigned char version;
  	unsigned char cmd;
-	unsigned short param;
+	unsigned char param;
 	unsigned short param2;
 	char param3[30];
 };
@@ -49,11 +49,29 @@ struct st_audio_info
     int         selected;
 };
 
+struct nvod_info
+{
+    time_t          startzeit;
+    unsigned int    onid_sid;
+    unsigned short  tsid;
+};
+
+
+struct st_nvod_info
+{
+    char        name[100];
+    ushort      count_nvods;
+    nvod_info   nvods[10];
+    int         selected;
+};
+
+
+
 class CRemoteControl
 {
-
-	st_rmsg		remotemsg;
+        st_rmsg		remotemsg;
         st_audio_info	audio_chans_int;
+        st_nvod_info    nvods_int;
         unsigned int    ecm_pid;
 
 		void send();
@@ -67,6 +85,7 @@ class CRemoteControl
 
 	public:
         st_audio_info   audio_chans;
+        st_nvod_info    nvods;
 
 		CRemoteControl();
         void zapTo_onid_sid( unsigned int onid_sid );
@@ -79,7 +98,8 @@ class CRemoteControl
 		void radioMode();
 		void tvMode();
 
-	    void CopyAPIDs();
+        void CopyAPIDs();
+        void CopyNVODs();
         unsigned int GetECMPID();
 };
 

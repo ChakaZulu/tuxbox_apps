@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.26 2001/10/14 23:32:15 McClean Exp $
+//  $Id: neutrino.h,v 1.27 2001/10/15 17:27:19 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -31,6 +31,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 //  $Log: neutrino.h,v $
+//  Revision 1.27  2001/10/15 17:27:19  field
+//  nvods (fast) implementiert (umschalten funkt noch nicht)
+//
 //  Revision 1.26  2001/10/14 23:32:15  McClean
 //  menu structure - prepared for VCR-Switching
 //
@@ -153,6 +156,7 @@ class CNeutrinoApp : public CMenuTarget
     CLanguageSetupNotifier  *languageSetupNotifier;
     CKeySetupNotifier       *keySetupNotifier;
     CAPIDChangeExec         *APIDChanger;
+    CNVODChangeExec         *NVODChanger;
 
 	CChannelList		*channelList;
 
@@ -193,6 +197,7 @@ class CNeutrinoApp : public CMenuTarget
 	void SetupFonts();
 	void SetupFrameBuffer();
     void SelectAPID();
+    void SelectNVOD();
 	void CmdParser(int argc, char **argv);
 
 

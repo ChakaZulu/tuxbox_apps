@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.37 2001/10/14 14:30:47 rasc Exp $
+// $Id: infoviewer.cpp,v 1.38 2001/10/15 17:27:19 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.38  2001/10/15 17:27:19  field
+// nvods (fast) implementiert (umschalten funkt noch nicht)
+//
 // Revision 1.37  2001/10/14 14:30:47  rasc
 // -- EventList Darstellung ueberarbeitet
 // -- kleiner Aenderungen und kleinere Bugfixes
@@ -241,6 +244,9 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
         g_FrameBuffer->paintIcon("rot.raw", BoxEndX- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
+
+        showButtonNVOD();
+        showButtonAudio();
     }
 
     pthread_cond_signal( &epg_cond );
@@ -290,40 +296,62 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 }
 
 
-void CInfoViewer::showButtons()
+void CInfoViewer::showButtonNVOD()
 {
-    // welche Bedingung auch immer für die gelbe Taste...?
-    if ( false )
+    char to_compare[50];
+    if ( g_settings.epg_byname == 0 )
+        snprintf( to_compare, 10, "%x", Current_onid_tsid );
+    else
+        strcpy( to_compare, CurrentChannel.c_str() );
+
+    if ( strcmp(g_RemoteControl->nvods.name, to_compare )== 0 )
     {
-        g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-        g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
+        // gelbe Taste für NVODs
+        if ( g_RemoteControl->nvods.count_nvods> 0 )
+        {
+            g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+            g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.selecttime").c_str(), COL_INFOBAR);
+        };
     };
+}
 
-    // grün, wenn mehrere APIDs
-    if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
+void CInfoViewer::showButtonAudio()
+{
+    char to_compare[50];
+    if ( g_settings.epg_byname == 0 )
+        snprintf( to_compare, 10, "%x", Current_onid_tsid );
+    else
+        strcpy( to_compare, CurrentChannel.c_str() );
+
+    if ( strcmp(g_RemoteControl->audio_chans.name, to_compare )== 0 )
     {
-        int height = g_Fonts->infobar_info->getHeight();
-        int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
-        int xStart= BoxStartX + ChanWidth + 30;
+        if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
+        {
+            int height = g_Fonts->infobar_info->getHeight();
+            int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
+            int xStart= BoxStartX + ChanWidth + 30;
 
-    	//int ChanNameX = BoxStartX + ChanWidth + 10;
-    	int ChanNameY = BoxStartY + ChanHeight + 10;
-    	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
+        	//int ChanNameX = BoxStartX + ChanWidth + 10;
+        	int ChanNameY = BoxStartY + ChanHeight + 10;
+        	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
 
-        string  disp_text;
-        if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
-            disp_text= g_Locale->getText("infoviewer.cantdecode");
-        else
-            disp_text= g_Locale->getText("infoviewer.notavailable");
+            string  disp_text;
+            if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
+                disp_text= g_Locale->getText("infoviewer.cantdecode");
+            else
+                disp_text= g_Locale->getText("infoviewer.notavailable");
 
-        g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
-        KillShowEPG = true;
-    };
+            g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
+            KillShowEPG = true;
+        };
 
-    if ( g_RemoteControl->audio_chans.count_apids> 1 )
-    {
-        g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-        g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
+
+        // grün, wenn mehrere APIDs
+        if ( g_RemoteControl->audio_chans.count_apids> 1 )
+        {
+            g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+            g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
+        };
     };
 }
 
@@ -397,8 +425,6 @@ void CInfoViewer::killTitle()
 
 void * CInfoViewer::LangViewerThread (void *arg)
 {
-    char to_compare[50];
-
 	CInfoViewer* InfoViewer = (CInfoViewer*) arg;
 	while(1)
 	{
@@ -408,16 +434,10 @@ void * CInfoViewer::LangViewerThread (void *arg)
         if ( ( InfoViewer->is_visible ) && ( InfoViewer->ShowInfo_Info ) )
         {
             g_RemoteControl->CopyAPIDs();
+            InfoViewer->showButtonAudio();
 
-            if ( g_settings.epg_byname == 0 )
-                snprintf( to_compare, 10, "%x", InfoViewer->Current_onid_tsid );
-            else
-                strcpy( to_compare, InfoViewer->CurrentChannel.c_str() );
-
-            if ( strcmp(g_RemoteControl->audio_chans.name, to_compare )== 0 )
-            {
-                InfoViewer->showButtons();
-            }
+            g_RemoteControl->CopyNVODs();
+            InfoViewer->showButtonNVOD();
         }
 
         pthread_mutex_unlock( &InfoViewer->epg_mutex );

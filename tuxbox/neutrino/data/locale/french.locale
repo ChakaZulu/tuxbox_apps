@@ -126,6 +126,7 @@ infoviewer.eventlist l' événement énumérerait
 infoviewer.languages Choix linguistique
 infoviewer.notavailable Channel not available
 infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
+infoviewer.selecttime Timeselection
 
 epgviewer.notfound pas d' EPG informations trouvé
 epgviewer.nodetailed No detailed informations available
@@ -143,6 +144,8 @@ streaminfo.audiotype Argile version
 streaminfo.audiotype_unknown Argile version: inconnu
 
 apidselector.head Choix linguistique
+
+nvodselector.head Select starting-time
 
 ucodecheck.head UCode check
 ucodecheck.avia500 Avia 500

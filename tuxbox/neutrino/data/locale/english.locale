@@ -127,6 +127,7 @@ infoviewer.eventlist Event-List
 infoviewer.languages Audio
 infoviewer.notavailable Channel not available
 infoviewer.cantdecode Channel can't be decoded
+infoviewer.selecttime Timeselection
 
 epgviewer.notfound no epg found
 epgviewer.nodetailed No detailed informations available
@@ -144,6 +145,7 @@ streaminfo.audiotype Audiotype
 streaminfo.audiotype_unknown Audiotype: unknown
 
 apidselector.head Select language
+nvodselector.head Select starting-time
 
 ucodecheck.head UCode check
 ucodecheck.avia500 Avia 500
