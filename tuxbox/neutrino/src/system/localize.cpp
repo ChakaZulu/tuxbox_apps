@@ -134,34 +134,24 @@ void CLocaleManager::loadLocale(std::string locale)
 #warning dhcp     is missing in locales (used in neutrino.cpp)
 #warning NFS/CIFS is missing in locales (used in neutrino.cpp)
 			if (
-			    (buf[0] != 'a') &&
-			    (buf[0] != 'c') &&
-			    (buf[0] != 'g') &&
-			    (buf[0] != 'i') &&
-			    (buf[0] != 'k') &&
-			    (buf[0] != 'l') &&
-			    (buf[0] != 'm') &&
-			    (buf[0] != 'n') &&
-			    (buf[0] != 'o') &&
-			    (buf[0] != 'p') &&
-			    (buf[0] != 'r') &&
-			    (buf[0] != 's') &&
-			    (buf[0] != 'u') &&
-			    (buf[0] != 'v') &&
-			    (buf[0] != 'z') &&
-			    (buf[0] != 'N') &&
-			    (strncmp(buf, "bouqueteditor", 13) != 0) &&
-			    (strncmp(buf, "epgviewer.not", 13) != 0) &&
-			    (strncmp(buf, "timerl", 6) != 0) &&
-			    (strncmp(buf, "timers", 6) != 0) &&
-			    (strncmp(buf, "timing", 6) != 0) &&
-			    ((buf[0] != 'f') || 
-			     ((strcmp(buf, "flashupdate.actionreadflash") == 0) ||
-			      (strcmp(buf, "flashupdate.reallyflashmtd") == 0))) &&
-			    (strcmp(buf, "bouquetlist.head") != 0) &&
-			    (strcmp(buf, "dhcp") != 0) &&
-			    (strcmp(buf, "epglist.head") != 0)
-			     )
+			    (buf[0] == 'G') ||
+			    ((buf[0] == 'd') && (
+						(strcmp(buf, "dhcp") != 0)
+						)) ||
+			    ((buf[0] == 'e') && (
+						 (strncmp(buf, "epgviewer.not", 13) != 0) &&
+						 (strcmp(buf, "epglist.head") != 0)
+						 )) ||
+			    ((buf[0] == 'f') && (
+						 (strcmp(buf, "flashupdate.actionreadflash") == 0) ||
+						 (strcmp(buf, "flashupdate.reallyflashmtd") == 0)
+						 )) ||
+			    ((buf[0] == 't') && (
+						 (strncmp(buf, "timerl", 6) != 0) &&
+						 (strncmp(buf, "timers", 6) != 0) &&
+						 (strncmp(buf, "timing", 6) != 0)
+						 ))
+			    )
 				text = CZapitClient::Utf8_to_Latin1(text);
 			localeData[buf] = text;
 		}
