@@ -282,7 +282,7 @@ NVODReferenceDescriptor::NVODReferenceDescriptor(descr_gen_t *descr): Descriptor
 	entries.setAutoDelete(true);
 	int len=descr->descriptor_length;
 	for (int i=0; i<len; i+=6)
-		entries.append(new NVODReferenceEntry((((__u8*)(descr+1))[i+0]<<8) | (((__u8*)(descr+1))[i+1]),
+		entries.push_back(new NVODReferenceEntry((((__u8*)(descr+1))[i+0]<<8) | (((__u8*)(descr+1))[i+1]),
 			(((__u8*)(descr+1))[i+2]<<8) | (((__u8*)(descr+1))[i+3]),	(((__u8*)(descr+1))[i+4]<<8) | (((__u8*)(descr+1))[i+5])));
 }
 
@@ -294,13 +294,12 @@ QString NVODReferenceDescriptor::toString()
 {
 	QString res;
 	res="NVODReferenceDescriptor\n";
-	for (QListIterator<NVODReferenceEntry> i(entries); i.current(); ++i)
+	for (ePtrList<NVODReferenceEntry>::iterator i(entries); i != entries.end(); ++i)
 	{
-		NVODReferenceEntry *entry(i.current());
 		res+="	NVODReferenceEntry\n";
-		res+="		transport_stream_id: " + qHex(entry->transport_stream_id) + "\n";
-		res+="		original_network_id: " + qHex(entry->original_network_id) + "\n";
-		res+="		service_id: " + qHex(entry->service_id) + "\n";
+		res+="		transport_stream_id: " + qHex(i->transport_stream_id) + "\n";
+		res+="		original_network_id: " + qHex(i->original_network_id) + "\n";
+		res+="		service_id: " + qHex(i->service_id) + "\n";
 	}
 	return res;
 }
@@ -458,7 +457,7 @@ QString SatelliteDeliverySystemDescriptor::toString()
 	return res;
 }
 
-ServiceListDescriptorEntry::ServiceListDescriptorEntry(__u16 service_id, __u8 service_type): 
+ServiceListDescriptorEntry::ServiceListDescriptorEntry(__u16 service_id, __u8 service_type):
 	service_id(service_id), service_type(service_type)
 {
 }
@@ -473,7 +472,7 @@ ServiceListDescriptor::ServiceListDescriptor(descr_gen_t *descr): Descriptor(DES
 	entries.setAutoDelete(true);
 	int len=descr->descriptor_length;
 	for (int i=0; i<len; i+=3)
-		entries.append(new ServiceListDescriptorEntry((((__u8*)(descr+1))[i+0]<<8) | (((__u8*)(descr+1))[i+1]), ((__u8*)(descr+1))[i+2]));
+		entries.push_back(new ServiceListDescriptorEntry((((__u8*)(descr+1))[i+0]<<8) | (((__u8*)(descr+1))[i+1]), ((__u8*)(descr+1))[i+2]));
 }
 
 ServiceListDescriptor::~ServiceListDescriptor()
@@ -483,12 +482,11 @@ ServiceListDescriptor::~ServiceListDescriptor()
 QString ServiceListDescriptor::toString()
 {
 	QString res="ServiceListDescriptor\n";
-	for (QListIterator<ServiceListDescriptorEntry> i(entries); i.current(); ++i)
+	for (ePtrList<ServiceListDescriptorEntry>::iterator i(entries); i != entries.end(); ++i)
 	{
-		ServiceListDescriptorEntry *entry=i.current();
 		res+=QString().sprintf("	ServiceListDescriptorEntry\n");
-		res+=QString().sprintf("		service_id: %04x\n", entry->service_id);
-		res+=QString().sprintf("		service_type: %04x\n", entry->service_type);
+		res+=QString().sprintf("		service_id: %04x\n", i->service_id);
+		res+=QString().sprintf("		service_type: %04x\n", i->service_type);
 	}
 	return res;
 }
@@ -699,7 +697,7 @@ int PAT::data(__u8* data)
 	pat_prog_t *prog=(pat_prog_t*)(data+PAT_LEN);
 	
 	for (int ptr=PAT_LEN; ptr<slen-4; ptr+=PAT_PROG_LEN, prog++)
-		entries.append(new PATEntry(HILO(prog->program_number), HILO(prog->network_pid)));
+		entries.push_back(new PATEntry(HILO(prog->program_number), HILO(prog->network_pid)));
 	return 0;
 }
 
@@ -714,7 +712,7 @@ SDTEntry::SDTEntry(sdt_descr_t *descr)
 	while (ptr<dlen)
 	{
 		descr_gen_t *d=(descr_gen_t*)(((__u8*)descr)+ptr);
-		descriptors.append(Descriptor::create(d));
+		descriptors.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
 }
@@ -735,7 +733,7 @@ int SDT::data(__u8 *data)
 	while (ptr<slen-4)
 	{
 		sdt_descr_t *descr=(sdt_descr_t*)(data+ptr);
-		entries.append(new SDTEntry(descr));
+		entries.push_back(new SDTEntry(descr));
 		int dlen=HILO(descr->descriptors_loop_length);
 		ptr+=SDT_DESCR_LEN+dlen;
 	}
@@ -755,7 +753,7 @@ PMTEntry::PMTEntry(pmt_info_t* info)
 	while (ptr<elen)
 	{
 		descr_gen_t *d=(descr_gen_t*)(((__u8*)info)+PMT_info_LEN+ptr);
-		ES_info.append(Descriptor::create(d));
+		ES_info.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
 }
@@ -778,12 +776,12 @@ int PMT::data(__u8 *data)
 	while (ptr<(program_info_len+PMT_LEN))
 	{
 		descr_gen_t *d=(descr_gen_t*)(data+ptr);
-		program_info.append(Descriptor::create(d));
+		program_info.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
 	while (ptr<len)
 	{
-		streams.append(new PMTEntry((pmt_info_t*)(data+ptr)));
+		streams.push_back(new PMTEntry((pmt_info_t*)(data+ptr)));
 		ptr+=HILO(((pmt_info_t*)(data+ptr))->ES_info_length)+PMT_info_LEN;
 	}
 	return ptr!=len;
@@ -799,7 +797,7 @@ NITEntry::NITEntry(nit_ts_t* ts)
 	while (ptr<elen)
 	{
 		descr_gen_t *d=(descr_gen_t*)(((__u8*)ts)+NIT_TS_LEN+ptr);
-		transport_descriptor.append(Descriptor::create(d));
+		transport_descriptor.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
   }
 }
@@ -820,13 +818,13 @@ int NIT::data(__u8* data)
 	while (ptr<(network_descriptor_len+NIT_LEN))
 	{
 		descr_gen_t *d=(descr_gen_t*)(data+ptr);
-		network_descriptor.append(Descriptor::create(d));
+		network_descriptor.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
 	ptr+=2;
 	while (ptr<len)
 	{
-		entries.append(new NITEntry((nit_ts_t*)(data+ptr)));
+		entries.push_back(new NITEntry((nit_ts_t*)(data+ptr)));
 		ptr+=HILO(((nit_ts_t*)(data+ptr))->transport_descriptors_length)+NIT_TS_LEN;
 	}
 	return ptr!=len;
@@ -851,7 +849,7 @@ EITEvent::EITEvent(const eit_event_struct *event)
 	while (ptr<len)
 	{
 		descr_gen_t *d=(descr_gen_t*) (((__u8*)(event+1))+ptr);
-		descriptor.append(Descriptor::create(d));
+		descriptor.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
 }
@@ -873,7 +871,7 @@ int EIT::data(__u8 *data)
 	int ptr=EIT_SIZE;
 	while (ptr<len)
 	{
-		events.append(new EITEvent((eit_event_struct*)(data+ptr)));
+		events.push_back(new EITEvent((eit_event_struct*)(data+ptr)));
 		ptr+=HILO(((eit_event_struct*)(data+ptr))->descriptors_loop_length)+EIT_LOOP_SIZE;
 	}
 	return ptr!=len;
@@ -901,7 +899,7 @@ int TDT::data(__u8 *data)
 	tdt_t *tdt=(tdt_t*)data;
 	if (tdt->utc_time5!=0xFF)
 	{
-		UTC_time=parseDVBtime(tdt->utc_time1, tdt->utc_time2, tdt->utc_time3, 
+		UTC_time=parseDVBtime(tdt->utc_time1, tdt->utc_time2, tdt->utc_time3,
 			tdt->utc_time4, tdt->utc_time5);
 		return 1;
 	} else
@@ -929,7 +927,7 @@ BATEntry::BATEntry(bat_loop_struct *entry)
 	while (ptr<len)
 	{
 		descr_gen_t *d=(descr_gen_t*) (data+ptr);
-		transport_descriptors.append(Descriptor::create(d));
+		transport_descriptors.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
 }
@@ -943,7 +941,7 @@ int BAT::data(__u8 *data)
 	while (ptr<looplen)
 	{
 		descr_gen_t *d=(descr_gen_t*) (((__u8*)(bat+1))+ptr);
-		bouquet_descriptors.append(Descriptor::create(d));
+		bouquet_descriptors.push_back(Descriptor::create(d));
 		ptr+=d->descriptor_length+2;
 	}
 	data+=looplen+BAT_SIZE;
@@ -952,7 +950,7 @@ int BAT::data(__u8 *data)
 	ptr=0;
 	while (ptr<looplen)
 	{
-		entries.append(new BATEntry((bat_loop_struct*)(data+ptr)));
+		entries.push_back(new BATEntry((bat_loop_struct*)(data+ptr)));
 		ptr+=HILO(((bat_loop_struct*)(data+ptr))->transport_descriptors_length)+BAT_LOOP_SIZE;
 	}
 	return ptr!=looplen;

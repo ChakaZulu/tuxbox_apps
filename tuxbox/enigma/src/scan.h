@@ -23,15 +23,13 @@ public:
 class tpPacket
 {
 public:
-	tpPacket(QString name, int scanflags): name(name), scanflags(scanflags) {}
+	tpPacket(QString name, int scanflags): name(name), scanflags(scanflags)	
+	{
+		possibleTransponders.setAutoDelete(true);	
+	}
 	QString name;
 	int scanflags;
-	std::list<eTransponder*> possibleTransponders;
-	~tpPacket()
-	{
-		for (std::list<eTransponder*>::iterator It = possibleTransponders.begin(); It != possibleTransponders.end(); It++)
-			delete *It;
-	}
+	ePtrList<eTransponder> possibleTransponders;
 };
 
 class tsFindInit: public eWidget
@@ -39,7 +37,7 @@ class tsFindInit: public eWidget
 	eLabel *headline, *body;
 	eProgress *signalbar;
 	eTimer sstimer;
-	QList<tpPacket> packets;
+	ePtrList<tpPacket> packets;
 	enum
 	{
 		sInactive, sSearching, sFound, sFailed

@@ -100,8 +100,8 @@ void ShowBNVersion::eventOccured(int event)
 			{
 				int pid[2];
 				int n=0;
-				for (QListIterator<PMTEntry> i(pmt->streams); i.current() && n<2; ++i)
-					pid[n++]=i.current()->elementary_PID;
+				for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end() && n<2; ++i)
+					pid[n++]=i->elementary_PID;
 				
 				if (n>=1)
 				{
@@ -140,7 +140,6 @@ ShowBNVersion::ShowBNVersion(): eWindow(1)
 	res2->move(ePoint(10, 130));
 	res2->resize(eSize(380, 30));
 	
-//	connect(eDVB::getInstance(), SIGNAL(eventOccured(int)), SLOT(eventOccured(int)));
 	CONNECT(eDVB::getInstance()->eventOccured, ShowBNVersion::eventOccured);
 	bnd[0]=0;
 	bnd[1]=0;

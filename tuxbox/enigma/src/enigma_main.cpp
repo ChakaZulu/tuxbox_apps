@@ -124,10 +124,10 @@ QString NVODStream::getText(int col=0) const
 {
 	if (eit.ready && !eit.error)
 	{
-		for (QListIterator<EITEvent> i(eit.events); i.current(); ++i)		// always take the first one
+		for (ePtrList<EITEvent>::const_iterator i(eit.events); i != eit.events.end(); ++i)		// always take the first one
 		{
 			QString s="--:--";
-			EITEvent *event=i.current();
+			EITEvent *event=*i;
 			if (col==-1)
 				return QString().sprintf("%08x", (unsigned int)event->start_time);
 			tm *begin=event->start_time!=-1?localtime(&event->start_time):0;
@@ -190,9 +190,9 @@ QString AudioStream::getText(int col=0) const
 	QString language;
 	int component_tag=-1;
 	language.sprintf("PID %04x", stream->elementary_PID);
-	for (QListIterator<Descriptor> i(stream->ES_info); i.current(); ++i)
+	for (ePtrList<Descriptor>::iterator i(stream->ES_info); i != stream->ES_info.end(); ++i)
 	{
-		Descriptor *c=i.current();
+		Descriptor *c=*i;
 		if (c->Tag()==DESCR_AC3)
 			isAC3=1;
 		else if (c->Tag()==DESCR_ISO639_LANGUAGE)
@@ -210,12 +210,12 @@ QString AudioStream::getText(int col=0) const
 		EIT *eit=eDVB::getInstance()->getEIT();
 		if (eit)
 		{
-			for (QListIterator<EITEvent> e(eit->events); e.current(); ++e)
-				if ((e.current()->running_status>=2)||(!e.current()->running_status))		// currently running service
-					for (QListIterator<Descriptor> d(e.current()->descriptor); d.current(); ++d)
-						if (d.current()->Tag()==DESCR_COMPONENT)
-							if (((ComponentDescriptor*)d.current())->component_tag==component_tag)
-								language=((ComponentDescriptor*)d.current())->text;
+			for (ePtrList<EITEvent>::iterator e(eit->events); e != eit->events.end(); ++e)
+				if ((e->running_status>=2)||(!e->running_status))		// currently running service
+					for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+						if (d->Tag()==DESCR_COMPONENT)
+							if (((ComponentDescriptor*)*d)->component_tag==component_tag)
+								language=((ComponentDescriptor*)*d)->text;
 			eit->unlock();
 		}
 	}
@@ -533,27 +533,27 @@ void eZapMain::setEIT(EIT *eit)
 		int val=0;
 		int p=0;
 		
-		for (QListIterator<EITEvent> i(eit->events); i.current(); ++i)
+		for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
 		{
-			EITEvent *event=i.current();
+			EITEvent *event=*i;
 			if ((event->running_status>=2) || ((!p) && (!event->running_status)))
 			{
 				cur_start=event->start_time;
 				cur_duration=event->duration;
 				clockUpdate();
-				for (QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
-					if (d.current()->Tag()==DESCR_LINKAGE)
+				for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
+					if (d->Tag()==DESCR_LINKAGE)
 					{
-						LinkageDescriptor *ld=(LinkageDescriptor*)d.current();
+						LinkageDescriptor *ld=(LinkageDescriptor*)*d;
 						if (ld->linkage_type!=0xB0)
 							continue;
 						subservicesel.add(ld);
 						numsub++;
 					}
 			}
-			for (QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
+			for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 			{
-				Descriptor *descriptor=d.current();
+				Descriptor *descriptor=*d;
 				if (descriptor->Tag()==DESCR_SHORT_EVENT)
 				{
 					ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
@@ -629,7 +629,7 @@ void eZapMain::setEIT(EIT *eit)
 		ButtonGreenDis->show();
 		ButtonGreenEn->hide();
 	}
-	QList<EITEvent> dummy;
+	ePtrList<EITEvent> dummy;
 	if (actual_eventDisplay)
 		actual_eventDisplay->setList(eit?eit->events:dummy);
 }
@@ -637,10 +637,10 @@ void eZapMain::setEIT(EIT *eit)
 void eZapMain::handleNVODService(SDTEntry *sdtentry)
 {
 	nvodsel.clear();
-	for (QListIterator<Descriptor> i(sdtentry->descriptors); i.current(); ++i)
-		if (i.current()->Tag()==DESCR_NVOD_REF)
-			for (QListIterator<NVODReferenceEntry> e(((NVODReferenceDescriptor*)i.current())->entries); e.current(); ++e)
-				nvodsel.add(e);
+	for (ePtrList<Descriptor>::iterator i(sdtentry->descriptors); i != sdtentry->descriptors.end(); ++i)
+		if (i->Tag()==DESCR_NVOD_REF)
+			for (ePtrList<NVODReferenceEntry>::iterator e(((NVODReferenceDescriptor*)*i)->entries); e != ((NVODReferenceDescriptor*)*i)->entries.end(); ++e)
+				nvodsel.add(*e);
 	nvodsel.setText(eDVB::getInstance()->service->service_name.c_str());
 }
 
@@ -869,11 +869,11 @@ void eZapMain::keyUp(int code)
 		if (isEPG)  // EPG vorhanden
 		{
 			eventMap::const_iterator It = pMap->begin();
-			QList<EITEvent> events;
-			events.setAutoDelete(TRUE);
-			events.append( new EITEvent(*(It++)->second));
+			ePtrList<EITEvent> events;
+			events.setAutoDelete(true);
+			events.push_back( new EITEvent(*(It++)->second));
 			if (It != pMap->end())  // sicher ist sicher !
-				events.append( new EITEvent(*It->second));
+				events.push_back( new EITEvent(*It->second));
 			eEventDisplay ei(service->service_name.c_str(), &events);			
 			actual_eventDisplay=&ei;
 			ei.show();
@@ -884,7 +884,7 @@ void eZapMain::keyUp(int code)
 		else	
 		{
 			EIT *eit=eDVB::getInstance()->getEIT();
-			QList<EITEvent> dummy;
+			ePtrList<EITEvent> dummy;
 			{
 				eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
 				if (eit)
@@ -994,9 +994,9 @@ void eZapMain::gotSDT(SDT *sdt)
 	{
 	case 0x4:	// nvod reference
 	{
-		for (QListIterator<SDTEntry> i(sdt->entries); i.current(); ++i)
+		for (ePtrList<SDTEntry>::iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 		{
-			SDTEntry *entry=i.current();
+			SDTEntry *entry=*i;
 			if (entry->service_id==eDVB::getInstance()->service_id)
 				handleNVODService(entry);
 		}
@@ -1011,9 +1011,9 @@ void eZapMain::gotPMT(PMT *pmt)
 	qDebug("got pmt");
 	int numaudio=0;
 	audiosel.clear();
-	for (QListIterator<PMTEntry> i(pmt->streams); i.current(); ++i)
+	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
-		PMTEntry *pe=i.current();
+		PMTEntry *pe=*i;
 		int isaudio=0;
 		if (pe->stream_type==3)
 			isaudio=1;
@@ -1021,8 +1021,8 @@ void eZapMain::gotPMT(PMT *pmt)
 			isaudio=1;
 		if (pe->stream_type==6)
 		{
-			for (QListIterator<Descriptor> d(pe->ES_info); d.current(); ++d)
-				if (d.current()->Tag()==DESCR_AC3)
+			for (ePtrList<Descriptor>::iterator d(pe->ES_info); d != pe->ES_info.end(); ++d)
+				if (d->Tag()==DESCR_AC3)
 				{
 					isaudio++;
 					isAc3=true;

@@ -11,10 +11,10 @@ void eBouquetSelector::fillBouquetList()
 	list->clearList();
 	if (eDVB::getInstance()->getBouquets())
 	{
-		for (BouquetIterator i = eDVB::getInstance()->getBouquets()->begin(); i != eDVB::getInstance()->getBouquets()->end(); ++i)
+		for (ePtrList<eBouquet>::iterator i(*eDVB::getInstance()->getBouquets()); i != eDVB::getInstance()->getBouquets()->end(); ++i)
 		{
 			int usable=0;
-			for (std::list<eServiceReference>::iterator s = (*i)->list.begin(); (!usable) && s != (*i)->list.end(); s++)
+			for (std::list<eServiceReference>::iterator s = i->list.begin(); (!usable) && s != i->list.end(); s++)
 			{
 				if (!s->service)
 					continue;

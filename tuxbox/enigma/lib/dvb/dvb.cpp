@@ -199,10 +199,10 @@ void eService::update(SDTEntry *sdtentry)
 	service_provider="unknown";
 	service_type=0;
 	service_id=sdtentry->service_id;
-	for (QListIterator<Descriptor> d(sdtentry->descriptors); d.current(); ++d)
-		if (d.current()->Tag()==DESCR_SERVICE)
+	for (ePtrList<Descriptor>::iterator d(sdtentry->descriptors); d != sdtentry->descriptors.end(); ++d)
+		if (d->Tag()==DESCR_SERVICE)
 		{
-			ServiceDescriptor *nd=(ServiceDescriptor*)d.current();
+			ServiceDescriptor *nd=(ServiceDescriptor*)*d;
 			service_name=nd->service_name;
 			service_provider=nd->service_provider;
 			service_type=nd->service_type;
@@ -282,11 +282,10 @@ void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nser
 void eTransponderList::handleSDT(SDT *sdt)
 {
 		// todo: remove dead services (clean up current transport_stream)
-	for (QListIterator<SDTEntry> i(sdt->entries); i.current(); ++i)
+	for (ePtrList<SDTEntry>::iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 	{
-		SDTEntry *entry=i.current();
-		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, entry->service_id);
-		service.update(entry);
+		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, i->service_id);
+		service.update(*i);
 	}
 }
 

@@ -55,15 +55,13 @@ void eTimer::start(long msek, bool singleShot)
 {
 	if (bActive)
 		stop();
-	if (!bActive)
-	{
-		bActive = true;
-		bSingleShot = singleShot;
-		interval = msek;
-	 	gettimeofday(&nextActivation, 0);		
-		nextActivation += msek;
-		context.addTimer(this);
-	}
+
+	bActive = true;
+	bSingleShot = singleShot;
+	interval = msek;
+ 	gettimeofday(&nextActivation, 0);		
+	nextActivation += msek;
+	context.addTimer(this);
 }
 
 void eTimer::stop()
@@ -106,7 +104,8 @@ void eTimer::activate()   // Internal Funktion... called from eApplication
 
 	/*emit*/ timeout();
 }
-						// mainloop
+
+// mainloop
 
 void eMainloop::addSocketNotifier(eSocketNotifier *sn)
 {
@@ -135,9 +134,11 @@ void eMainloop::processOneEvent()
 	}
 			// process pending timers...
 	long usec;
-	while (!TimerList.empty() && (usec = timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
-		(*TimerList.begin())->activate();
-	int ret=poll(&(*pfd.begin()), notifiers.size(), TimerList.empty()?-1:usec / 1000);  // milli .. not micro seks
+
+	while (TimerList && (usec = timeout_usec( TimerList.begin()->getNextActivation() ) ) <= 0 )
+		TimerList.begin()->activate();
+
+	int ret=poll(&(*pfd.begin()), notifiers.size(), !TimerList?-1:usec / 1000);  // milli .. not micro seks
 
 	if (ret>0)
 	{
@@ -159,8 +160,8 @@ void eMainloop::processOneEvent()
 		printf("poll made error\n");
 
 		// check Timers...
-	while (!TimerList.empty() && (timeout_usec( (*TimerList.begin())->getNextActivation() ) ) <= 0 )
-		(*TimerList.begin())->activate();
+	while ( TimerList && timeout_usec( TimerList.begin()->getNextActivation() ) <= 0 )
+		TimerList.begin()->activate();
 }
 
 int eMainloop::exec()

@@ -2,7 +2,7 @@
 #define __thread_h
 
 #include <vector>
-#include <list>
+#include <eptrlist.h>
 #include <map>
 #include <libsig_comp.h>
 #include <sys/poll.h>
@@ -187,21 +187,14 @@ public:
 	void start(long msec, bool b=false);
 	void stop();
 	void changeInterval(long msek);
-
-	struct less
-	{
-		bool operator() (const eTimer* t1, const eTimer* t2)
-		{
-			return (t1->nextActivation < t2->nextActivation);
-		}
-	};
+	bool operator<(const eTimer& t) const	{		return nextActivation < t.nextActivation;		}
 };
 
 			// werden in einer mainloop verarbeitet
 class eMainloop : public Object
 {
 	std::map<int, eSocketNotifier*> notifiers;
-	std::list<eTimer*> TimerList;
+	ePtrList<eTimer> TimerList;
 	bool app_exit_loop;
 	bool app_quit_now;
 	int loop_level;
@@ -210,7 +203,7 @@ public:
 	eMainloop():loop_level(0),app_quit_now(0)	{	}
 	void addSocketNotifier(eSocketNotifier *sn);
 	void removeSocketNotifier(eSocketNotifier *sn);
-	void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort(eTimer::less());	}
+	void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort();	}
 	void removeTimer(eTimer* e)	{		TimerList.remove(e);	}	
 
 	int looplevel() { return loop_level; }

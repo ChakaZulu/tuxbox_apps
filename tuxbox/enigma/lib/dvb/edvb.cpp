@@ -33,18 +33,16 @@ std::string eDVB::getVersion()
 
 void eDVB::removeDVBBouquets()
 {
-	for (BouquetIterator i = bouquets.begin(); i != bouquets.end();)
+	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end();)
 	{
-		if ( (*i)->bouquet_id >= 0)
+		if ( i->bouquet_id >= 0)
 		{
-			printf("removing bouquet '%s'\n", (*i)->bouquet_name.c_str());
-			delete *i;
-			bouquets.erase(i);
-			i = bouquets.begin();
+			printf("removing bouquet '%s'\n", i->bouquet_name.c_str());
+			i = bouquets.erase(i);
 		}
 		else
 		{
-			printf("leaving bouquet '%s'\n", (const char*)(*i)->bouquet_name.c_str());
+			printf("leaving bouquet '%s'\n", i->bouquet_name.c_str());
 			i++;
 		}
 	}
@@ -54,28 +52,27 @@ void eDVB::addDVBBouquet(BAT *bat)
 {
 	printf("wir haben da eine bat, id %x\n", bat->bouquet_id);
 	std::string bouquet_name="Weiteres Bouquet";
-	for (QListIterator<Descriptor> i(bat->bouquet_descriptors); i.current(); ++i)
+	for (ePtrList<Descriptor>::iterator i(bat->bouquet_descriptors); i != bat->bouquet_descriptors.end(); ++i)
 	{
-		Descriptor *d=i.current();
-		if (d->Tag()==DESCR_BOUQUET_NAME)
-			bouquet_name=((BouquetNameDescriptor*)d)->name;
+		if (i->Tag()==DESCR_BOUQUET_NAME)
+			bouquet_name=((BouquetNameDescriptor*)*i)->name;
 	}
 	eBouquet *bouquet=createBouquet(0, bat->bouquet_id, bouquet_name);
 	
-	for (QListIterator<BATEntry> be(bat->entries); be.current(); ++be)
-		for (QListIterator<Descriptor> i(be.current()->transport_descriptors); i.current(); ++i)
-			if (i.current()->Tag()==DESCR_SERVICE_LIST)
+	for (ePtrList<BATEntry>::iterator be(bat->entries); be != bat->entries.end(); ++be)
+		for (ePtrList<Descriptor>::iterator i(be->transport_descriptors); i != be->transport_descriptors.end(); ++i)
+			if (i->Tag()==DESCR_SERVICE_LIST)
 			{
-				ServiceListDescriptor *s=(ServiceListDescriptor*)i.current();
-				for (QListIterator<ServiceListDescriptorEntry> a(s->entries); a.current(); ++a)
-					bouquet->add(be.current()->transport_stream_id, be.current()->original_network_id, a.current()->service_id);
+				ServiceListDescriptor *s=(ServiceListDescriptor*)*i;
+				for (ePtrList<ServiceListDescriptorEntry>::iterator a(s->entries); a != s->entries.end(); ++a)
+					bouquet->add(be->transport_stream_id, be->original_network_id, a->service_id);
 			}
 }
 
 eBouquet *eDVB::getBouquet(int bouquet_id)
 {
-	for (BouquetIterator i = bouquets.begin(); i != bouquets.end(); i++)
-		if ((*i)->bouquet_id==bouquet_id)
+	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
+		if (i->bouquet_id==bouquet_id)
 			return *i;
 	return 0;
 }
@@ -99,9 +96,9 @@ static std::string beautifyBouquetName(std::string bouquet_name)
 
 eBouquet *eDVB::getBouquet(std::string bouquet_name)
 {
-	for (BouquetIterator i = bouquets.begin(); i != bouquets.end(); i++)
-		if (!stricmp((*i)->bouquet_name.c_str(), bouquet_name.c_str()))
-			return (*i);
+	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
+		if (!stricmp(i->bouquet_name.c_str(), bouquet_name.c_str()))
+			return *i;
 	return 0;
 }
 
@@ -130,40 +127,48 @@ int eDVB::getUnusedBouquetID(int range)
 		range=-1;
 	else
 		range=1;
-	for (int bouquet_id=0; ; bouquet_id+=range)
+
+	int bouquet_id=0;
+
+	while(true)  // Evtl hier nochmal nachschauen....
+	{
 		if (!getBouquet(bouquet_id))
 			return bouquet_id;
+
+		bouquet_id+=range;
+	}
 }
 
 void eDVB::revalidateBouquets()
 {
 	printf("revalidating bouquets\n");
 	if (transponderlist)
-		for (BouquetIterator i = bouquets.begin(); i != bouquets.end(); i++)
-			for (ServiceReferenceIterator service = (*i)->list.begin(); service != (*i)->list.end(); service++)
+		for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
+			for (ServiceReferenceIterator service = i->list.begin(); service != i->list.end(); service++)
 				service->service=transponderlist->searchService(service->original_network_id, service->service_id);
 	/*emit*/ bouquetListChanged();
 	printf("ok\n");
 }
 
-int eDVB::checkCA(std::list<CA*> &list, const QList<Descriptor> &descriptors)
+int eDVB::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors)
 {
 	int found=0;
-	for (QListIterator<Descriptor> i(descriptors); i.current(); ++i)
+	for (ePtrList<Descriptor>::const_iterator i(descriptors); i != descriptors.end(); ++i)
 	{
-		if (i.current()->Tag()==9)	// CADescriptor
+		if (i->Tag()==9)	// CADescriptor
 		{
 			found++;
-			CADescriptor *ca=(CADescriptor*)i.current();
+			CADescriptor *ca=(CADescriptor*)*i;
 			Decoder::addCADescriptor((__u8*)(ca->data));
 			int avail=0;
-			for (IntIterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
+			for (std::list<int>::iterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
 				if (*i == ca->CA_system_ID)
 					avail++;
+
 			if (avail)
 			{
-				for (CAIterator a = list.begin(); a != list.end(); a++)
-					if ((*a)->casysid==ca->CA_system_ID)
+				for (ePtrList<CA>::iterator a = list.begin(); a != list.end(); a++)
+					if (a->casysid==ca->CA_system_ID)
 					{
 						avail=0;
 						break;
@@ -201,10 +206,10 @@ void eDVB::scanEvent(int event)
 			scanEvent(eventScanCompleted);
 			break;
 		}
-		for (std::list<eTransponder*>::const_iterator i = initialTransponders->begin(); i != initialTransponders->end(); ++i)
+		for (ePtrList<eTransponder>::const_iterator i(initialTransponders->begin()); i != initialTransponders->end(); ++i)
 		{
-			eTransponder &t=transponderlist->createTransponder((*i)->transport_stream_id, (*i)->original_network_id);
-			t.set(*(*i));
+			eTransponder &t=transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
+			t.set(i);  //(*(*i));
 		}
 		currentONID=-1;
 		knownNetworks.clear();
@@ -275,7 +280,7 @@ void eDVB::scanEvent(int event)
 			currentONID=sdt->original_network_id;
 			int known=0;
 
-			for (IntIterator It = knownNetworks.begin(); It != knownNetworks.end(); It++)
+			for (std::list<int>::iterator It = knownNetworks.begin(); It != knownNetworks.end(); It++)
 				if (*It == sdt->original_network_id)
 					known=1;
 			
@@ -306,12 +311,11 @@ void eDVB::scanEvent(int event)
 				if (currentONID!=-1)
 					knownNetworks.push_back(currentONID);
 #if 0
-			for (QListIterator<Descriptor> i(nit->network_descriptor; i.current(); ++i)
+			for (ePtrList<Descriptor> i(nit->network_descriptor; i != nit->network_descriptor.end(); ++i)
 			{
-				Descriptor *d=i.current();
-				if (d->Tag()==DESCR_LINKAGE)
+				if (i->Tag()==DESCR_LINKAGE)
 				{
-					LinkageDescriptor *l=(LinkageDescriptor*)d;
+					LinkageDescriptor *l=(LinkageDescriptor*)*i;
 					if ((l->linkage_type==0x01) && 		// information service
 							(original_network_id==transponder->original_network_id) &&
 							(transport_stream_id==transponder->transport_stream_id))
@@ -321,19 +325,18 @@ void eDVB::scanEvent(int event)
 				}
 			}
 #endif
-			for (QListIterator<NITEntry> i(nit->entries); i.current(); ++i)
+			for (ePtrList<NITEntry>::iterator i(nit->entries); i != nit->entries.end(); ++i)
 			{
-				NITEntry *entry=i.current();
-				eTransponder &transponder=transponderlist->createTransponder(entry->transport_stream_id, entry->original_network_id);
-				for (QListIterator<Descriptor> d(entry->transport_descriptor); d.current(); ++d)
+				eTransponder &transponder=transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
+				for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
 				{
-					switch (d.current()->Tag())
+					switch (d->Tag())
 					{
 					case DESCR_SAT_DEL_SYS:
-						transponder.setSatellite((SatelliteDeliverySystemDescriptor*)d.current());
+						transponder.setSatellite((SatelliteDeliverySystemDescriptor*)*d);
 						break;
 					case DESCR_CABLE_DEL_SYS:
-						transponder.setCable((CableDeliverySystemDescriptor*)d.current());
+						transponder.setCable((CableDeliverySystemDescriptor*)*d);
 						break;
 					}
 				}
@@ -577,9 +580,9 @@ void eDVB::scanPMT()
 	
 	PMTEntry *audio=0, *video=0, *teletext=0;
 	
-	for (QListIterator<PMTEntry> i(pmt->streams); i.current(); ++i)
+	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 	{
-		PMTEntry *pe=i.current();
+		PMTEntry *pe=*i;
 		switch (pe->stream_type)
 		{
 		case 1:	// ISO/IEC 11172 Video
@@ -597,12 +600,11 @@ void eDVB::scanPMT()
 		case 6:
 		{
 			isca+=checkCA(calist, pe->ES_info);
-			for (QListIterator<Descriptor> i(pe->ES_info); i.current(); ++i)
+			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 			{
-				Descriptor *d=i.current();
-				/* if ((d->Tag()==DESCR_AC3))
+				/* if ((i->Tag()==DESCR_AC3))
 					audio=pe; */
-				if (d->Tag()==DESCR_TELETEXT)
+				if (i->Tag()==DESCR_TELETEXT)
 					teletext=pe;
 			}
 			break;
@@ -612,15 +614,14 @@ void eDVB::scanPMT()
 			if (tMHWEIT)	// nur eine zur zeit
 				delete tMHWEIT;
 			tMHWEIT=0;
-			for (QListIterator<Descriptor> i(pe->ES_info); i.current(); ++i)
-				if (i.current()->Tag()==DESCR_MHW_DATA)
+			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
+				if (i->Tag()==DESCR_MHW_DATA)
 				{
-					MHWDataDescriptor *mhwd=(MHWDataDescriptor*)i.current();
+					MHWDataDescriptor *mhwd=(MHWDataDescriptor*)*i;
 					if (!strncmp(mhwd->type, "PILOTE", 6))
 					{
 						printf("starting MHWEIT on pid %x, sid %x\n", pe->elementary_PID, service_id);
 						tMHWEIT=new MHWEIT(pe->elementary_PID, service_id);
-						//connect(tMHWEIT, SIGNAL(ready(int)), SLOT(MHWEITready(int)));
 						CONNECT(tMHWEIT->ready, eDVB::MHWEITready);
 						tMHWEIT->start();
 						break;
@@ -637,7 +638,7 @@ void eDVB::scanPMT()
 
 	/*emit*/ scrambled(isca);
 
-	if (isca && calist.empty())
+	if (isca && !calist)
 	{
 		printf("NO CASYS\n");
 		service_state=ENOCASYS;
@@ -646,9 +647,9 @@ void eDVB::scanPMT()
 	if ((Decoder::parms.vpid==-1) && (Decoder::parms.apid==-1))
 		service_state=ENOSTREAM;
 
-	for (CAIterator i = calist.begin(); i != calist.end(); ++i)
+	for (ePtrList<CA>::iterator i(calist); i != calist.end(); ++i)
 	{
-		printf("CA %04x ECMPID %04x\n", (*i)->casysid, (*i)->ecmpid);
+		printf("CA %04x ECMPID %04x\n", i->casysid, i->ecmpid);
 	}
 
 	pmt->unlock();
@@ -668,7 +669,6 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 		delete tMHWEIT;
 	tMHWEIT=0;
 	tdt=new TDT();
-//	connect(tdt, SIGNAL(tableReady(int)), SLOT(TDTready(int)));
 	CONNECT(tdt->tableReady, eDVB::TDTready);
 	tdt->start();
 	switch (state)
@@ -828,8 +828,8 @@ void eDVB::MHWEITready(int error)
 			se->language_code[2]='?';
 			se->event_name=me->event_name;
 			se->text=me->short_description;
-			ev->descriptor.append(se);
-			e->events.append(ev);
+			ev->descriptor.push_back(se);
+			e->events.push_back(ev);
 		}
 		e->ready=1;
 		tEIT.inject(e);
@@ -840,7 +840,7 @@ void eDVB::MHWEITready(int error)
 	}
 }
 
-int eDVB::startScan(const std::list<eTransponder*> &initial, int flags)
+int eDVB::startScan(const ePtrList<eTransponder> &initial, int flags)
 {
 	if (state!=stateIdle)
 	{
@@ -907,7 +907,6 @@ eDVB::eDVB()
 	}
 	if (eFrontend::open(fe)<0)
 		qFatal("couldn't open frontend");
-//	connect(eFrontend::fe(), SIGNAL(tunedIn(eTransponder*,int)), SLOT(tunedIn(eTransponder*,int)));
 	CONNECT(eFrontend::fe()->tunedIn, eDVB::tunedIn);
 
 	transponderlist=0;
@@ -917,13 +916,6 @@ eDVB::eDVB()
 	loadBouquets();
 	Decoder::Initialize();
 	
-/*	connect(&tPAT, SIGNAL(tableReady(int)), SLOT(PATready(int)));
-	connect(&tPMT, SIGNAL(tableReady(int)), SLOT(PMTready(int)));
-	connect(&tSDT, SIGNAL(tableReady(int)), SLOT(SDTready(int)));
-	connect(&tNIT, SIGNAL(tableReady(int)), SLOT(NITready(int)));
-	connect(&tONIT, SIGNAL(tableReady(int)), SLOT(ONITready(int)));
-	connect(&tEIT, SIGNAL(tableReady(int)), SLOT(EITready(int)));
-	connect(&tBAT, SIGNAL(tableReady(int)), SLOT(BATready(int)));*/
 	CONNECT(tPAT.tableReady, eDVB::PATready);
 	CONNECT(tPMT.tableReady, eDVB::PMTready);
 	CONNECT(tSDT.tableReady, eDVB::SDTready);
@@ -975,6 +967,9 @@ eDVB::eDVB()
 	changeVolume(3, m);
 	
 	tMHWEIT=0;
+
+	bouquets.setAutoDelete(true);
+	calist.setAutoDelete(true);
 	
 	printf("eDVB::eDVB done.\n");
 }
@@ -986,22 +981,9 @@ eDVB::~eDVB()
 	eConfig::getInstance()->setKey("/elitedvb/audio/mute", mute);
 	Decoder::Close();
 
-	if (!calist.empty())
-	{
-		CAIterator It = calist.begin();
-		while (It != calist.end())
-			delete *It++;
-	}
-
-	if (!bouquets.empty())
-	{
-		BouquetIterator It = bouquets.begin();
-		while (It != bouquets.end())
-			delete *It++;
-	}
-
 	if (transponderlist)
 		delete transponderlist;
+
 	eFrontend::close();
 	instance=0;
 }
@@ -1011,7 +993,7 @@ eTransponderList *eDVB::getTransponders()
 	return transponderlist;
 }
 
-std::list<eBouquet*>* eDVB::getBouquets()
+ePtrList<eBouquet>* eDVB::getBouquets()
 {
 	return &bouquets;
 }
@@ -1055,28 +1037,27 @@ void eDVB::setPID(PMTEntry *entry)
 		int isvideo=0, isaudio=0, isteletext=0, isAC3=0;
 		switch (entry->stream_type)
 		{
-		case 1:	// ISO/IEC 11172 Video
-		case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
-			isvideo=1;
+			case 1:	// ISO/IEC 11172 Video
+			case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
+				isvideo=1;
 			break;
-		case 3:	// ISO/IEC 11172 Audio
-		case 4: // ISO/IEC 13818-3 Audio
-			isaudio=1;
+			case 3:	// ISO/IEC 11172 Audio
+			case 4: // ISO/IEC 13818-3 Audio
+				isaudio=1;
 			break;
-		case 6:
-		{
-			for (QListIterator<Descriptor> i(entry->ES_info); i.current(); ++i)
+			case 6:
 			{
-				Descriptor *d=i.current();
-				if (d->Tag()==DESCR_AC3)
+				for (ePtrList<Descriptor>::iterator i(entry->ES_info); i != entry->ES_info.end(); ++i)
 				{
-					isaudio=1;
-					isAC3=1;
+					if (i->Tag()==DESCR_AC3)
+					{
+						isaudio=1;
+						isAC3=1;
+					}
+					if (i->Tag()==DESCR_TELETEXT)
+						isteletext=1;
 				}
-				if (d->Tag()==DESCR_TELETEXT)
-					isteletext=1;
 			}
-		}
 		}
 		if (isaudio)
 		{
@@ -1116,16 +1097,16 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 		std::string add;
 		switch (service.service_type)
 		{
-		case 1:
-		case 4:
-		case 5:
-			add=" [TV]";
+			case 1:
+			case 4:
+			case 5:
+				add=" [TV]";
 			break;
-		case 2:
-			add=" [Radio]";
+			case 2:
+				add=" [Radio]";
 			break;
-		default:
-			add=" [Data]";
+			default:
+				add=" [Data]";
 		}
 		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider.c_str())+add);
 		b->add(service.transport_stream_id, service.original_network_id, service.service_id);
@@ -1150,8 +1131,7 @@ struct saveService: public std::unary_function<const eService&, void>
 	}
 	void operator()(eService& s)
 	{
-		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id, s.transport_stream_id,
-				s.original_network_id, s.service_type, s.service_number);
+		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id, s.transport_stream_id,s.original_network_id, s.service_type, s.service_number);
 		fprintf(f, "%s\n", s.service_name.c_str());
 		fprintf(f, "%s\n", s.service_provider.c_str());
 	}
@@ -1293,7 +1273,7 @@ void eDVB::saveBouquets()
 		qFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
 	fprintf(f, "eDVB bouquets - modify as long as you don't blame me!\n");
 	fprintf(f, "bouquets\n");
-	for (BouquetIterator i = (*getBouquets()).begin(); i != (*getBouquets()).end(); ++i)
+	for (ePtrList<eBouquet>::iterator i(*getBouquets()); i != getBouquets()->end(); ++i)
 	{
 		eBouquet *b=*i;
 		fprintf(f, "%0d\n", b->bouquet_id);
@@ -1366,20 +1346,20 @@ void eDVB::changeVolume(int abs, int vol)
 {
 	switch (abs)
 	{
-	case 0:
-		volume+=vol;
-		mute=0;
+		case 0:
+			volume+=vol;
+			mute=0;
 		break;
-	case 1:
-		volume=vol;
-		mute=0;
+		case 1:
+			volume=vol;
+			mute=0;
 		break;
-	case 2:
-		if (vol)
+		case 2:
+			if (vol)
 			mute=!mute;
 		break;
-	case 3:
-		mute=vol;
+		case 3:
+			mute=vol;
 		break;
 	}
 	

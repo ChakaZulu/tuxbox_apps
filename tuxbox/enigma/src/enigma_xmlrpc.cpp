@@ -5,12 +5,13 @@
 
 static eBouquet *getBouquetByID(const char *id)
 {
+	ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->getBouquets();
 	int bouquet_id;
 	if (sscanf(id, "B:%x", &bouquet_id)!=1)
 		return 0;
-	if (eDVB::getInstance()->getBouquets())
-		for (BouquetIterator i = eDVB::getInstance()->getBouquets()->begin(); i != eDVB::getInstance()->getBouquets()->end(); ++i)
-			if ((*i)->bouquet_id==bouquet_id)
+	if (pBouquets)
+		for (ePtrList<eBouquet>::iterator i(*pBouquets); i != pBouquets->end(); ++i)
+			if (i->bouquet_id==bouquet_id)
 				return *i;
 	return 0;
 }
@@ -56,9 +57,10 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 	if (!param.length())		// root
 	{
 		QList<eXMLRPCVariant> l;
-		if (eDVB::getInstance()->getBouquets())
+		ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->getBouquets();
+		if (pBouquets)
 		{
-			for (BouquetIterator i = eDVB::getInstance()->getBouquets()->begin(); i != eDVB::getInstance()->getBouquets()->end(); ++i)
+			for (ePtrList<eBouquet>::iterator i(*pBouquets); i != pBouquets->end(); ++i)
 			{
 				eBouquet *b=*i;
 				QMap<QString, eXMLRPCVariant*> *s=new QMap<QString, eXMLRPCVariant*>;
@@ -150,15 +152,15 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 
 		QList<eXMLRPCVariant> l;
 
-		for (QListIterator<EITEvent> i(eit->events); i.current(); ++i)
+		for (ePtrList<EITEvent>::iterator i(eit->events); i != eit->events.end(); ++i)
 		{
-			EITEvent *event=i.current();
+			EITEvent *event=*i;
 
 			QString event_name=0;
 
-			for (QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
+			for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 			{
-				Descriptor *descriptor=d.current();
+				Descriptor *descriptor=*d;
 				if (descriptor->Tag()==DESCR_SHORT_EVENT)
 				{
 					ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
@@ -275,9 +277,9 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		}
 
 		PMTEntry *v=0;
-		for (QListIterator<PMTEntry> i(pmt->streams); (!v) && i.current(); ++i)
+		for (ePtrList<PMTEntry>::iterator i(pmt->streams); (!v) && i != pmt->streams.end(); ++i)
 		{
-			PMTEntry *pe=i.current();
+			PMTEntry *pe=*i;
 			switch (pe->stream_type)
 			{
 			case 1:	// ISO/IEC 11172 Video
@@ -295,9 +297,9 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 
 		QList<eXMLRPCVariant> asl;
 
-		for (QListIterator<PMTEntry> i(pmt->streams); i.current(); ++i)
+		for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
 		{
-			PMTEntry *pe=i.current();
+			PMTEntry *pe=*i;
 			int isaudio=0, isAC3=0;
 			
 			switch (pe->stream_type)
@@ -308,9 +310,9 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 				break;
 			case 6:
 			{
-				for (QListIterator<Descriptor> i(pe->ES_info); i.current(); ++i)
+				for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
 				{
-					Descriptor *d=i.current();
+					Descriptor *d=*i;
 					if (d->Tag()==DESCR_AC3)
 					{
 						isaudio=1;

@@ -276,8 +276,8 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	QString availcas="keine";
 	
 	int numsys=0;
-	
-	for (IntIterator i = eDVB::getInstance()->availableCASystems.begin(); i != eDVB::getInstance()->availableCASystems.end(); ++i)
+	std::list<int>& availCA = eDVB::getInstance()->availableCASystems;
+	for (std::list<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
 	{
 		if (!numsys)
 			availcas="";
@@ -306,8 +306,10 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	QString usedcas="keines";
 	
 	numsys=0;
-	
-	for (CAIterator i = eDVB::getInstance()->calist.begin(); i != eDVB::getInstance()->calist.end(); ++i)
+
+	ePtrList<eDVB::CA>& calist = eDVB::getInstance()->calist;
+
+	for (ePtrList<eDVB::CA>::iterator i(calist); i != calist.end(); ++i)
 	{
 		if (!numsys)
 			usedcas="";

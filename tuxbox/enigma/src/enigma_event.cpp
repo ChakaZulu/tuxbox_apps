@@ -13,15 +13,15 @@ void eEventDisplay::keyDown(int rc)
 	{
 	case eRCInput::RC_RIGHT:
 		++(*events);
-		if (!events->current())
-			events->toFirst();
-		setEvent(events->current());
+		if (*events == eventlist->end())
+			*events = eventlist->begin();
+		setEvent(**events);
 		break;
 	case eRCInput::RC_LEFT:
 		--(*events);
-		if (!events->current())
-			events->toLast();
-		setEvent(events->current());
+		if (*events == eventlist->begin())
+			*events = eventlist->end();
+		setEvent(**events);
 		break;
 	}
 }
@@ -36,7 +36,7 @@ void eEventDisplay::keyUp(int rc)
 	}
 }
 
-eEventDisplay::eEventDisplay(QString service, const QList<EITEvent>* e, EITEvent* evt): eWindow(1), service(service)
+eEventDisplay::eEventDisplay(QString service, const ePtrList<EITEvent>* e, EITEvent* evt): eWindow(1), service(service)
 	/*
 			kleine anmerkung:
 			
@@ -106,20 +106,20 @@ void eEventDisplay::setEvent(EITEvent *event)
 			_eventTime+=QString().sprintf(" - %02d:%02d", end->tm_hour, end->tm_min);
 		}
 
-		for (QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
+		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 		{
-			if (d.current()->Tag()==DESCR_SHORT_EVENT)
+			if (d->Tag()==DESCR_SHORT_EVENT)
 			{
-				ShortEventDescriptor *s=(ShortEventDescriptor*)d.current();
+				ShortEventDescriptor *s=(ShortEventDescriptor*)*d;
 				_title=s->event_name;
 				if ((s->text.length() > 0) && (s->text!=_title))
 				{
 					_long_description+=s->text;
 					_long_description+="\n\n";
 				}
-			} else if (d.current()->Tag()==DESCR_EXTENDED_EVENT)
+			} else if (d->Tag()==DESCR_EXTENDED_EVENT)
 			{
-				ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)d.current();
+				ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*d;
 				_long_description+=ss->item_description;
 			}
 		}
@@ -141,14 +141,14 @@ void eEventDisplay::setEvent(EITEvent *event)
 	}
 }
 
-void eEventDisplay::setList(const QList<EITEvent> &e)
+void eEventDisplay::setList(const ePtrList<EITEvent> &e)
 {
 	if (eventlist)
 		delete eventlist;
 	if (events)
 		delete events;
-	eventlist=new QList<EITEvent>(e);
-	events=new QListIterator<EITEvent>(*eventlist);
-	setEvent(events->current());
+	eventlist=new ePtrList<EITEvent>(e);
+	events=new ePtrList<EITEvent>::iterator(*eventlist);
+	setEvent(**events);
 }
 

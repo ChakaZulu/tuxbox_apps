@@ -155,6 +155,10 @@ public:
 	{
 		return bouquet_id==c.bouquet_id;
 	}
+	bool operator < (const eBouquet &c) const
+	{
+		return (bouquet_name < c.bouquet_name);
+	}
 };
 
 class eTransponderList

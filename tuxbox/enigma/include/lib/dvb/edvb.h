@@ -1,23 +1,18 @@
 #ifndef __edvb_h
 #define __edvb_h
 
-//#include "qobject.h"
-#include "qlist.h"
 #include "esection.h"
 #include <stdio.h>
 #include "nconfig.h"
 #include <list>
 #include <string>
+#include <eptrlist.h>
 
 #include <sigc++/signal_system.h>
 #ifdef SIGC_CXX_NAMESPACES
 using namespace SigC;
 #endif
 
-#define IntIterator std::list<int>::iterator
-#define BouquetIterator std::list<eBouquet*>::iterator
-#define CAIterator std::list<eDVB::CA*>::iterator
-					
 class eService;
 class eTransponder;
 class eTransponderList;
@@ -50,16 +45,15 @@ class eAVSwitch;
 class eStreamWatchdog;
 class MHWEIT;
 
-class eDVB: public /*Q*/Object
+class eDVB: public Object
 {
-//	Q_OBJECT
 	static eDVB *instance;
 protected:
 	friend class sortinChannel;
 		/** the main transponder/servicelist */
 	eTransponderList *transponderlist;
 	
-	std::list<eBouquet*> bouquets;
+	ePtrList<eBouquet> bouquets;
 	void removeDVBBouquets();
 	void addDVBBouquet(BAT *bat);
 	eBouquet *getBouquet(int bouquet_id);
@@ -72,7 +66,7 @@ protected:
 
 		/** the current transponder with errorcode */
 	eTransponder *currentTransponder;
-	const std::list<eTransponder*> *initialTransponders;
+	const ePtrList<eTransponder> *initialTransponders;
 	int currentTransponderState;
 
 		/** tables for current service/transponder */
@@ -100,13 +94,13 @@ public:
 	};
 	
 	std::list<int> availableCASystems;
-	std::list<CA*> calist;		/** currently used ca-systems */
+	ePtrList<CA> calist;		/** currently used ca-systems */
 	
 	int time_difference;
 
 protected:
 
-	int checkCA(std::list<CA*> &list, const QList<Descriptor> &descriptors);
+	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors);
 		/* SCAN internal */
 	int scanOK;	// 1 SDT, 2 NIT, 4 BAT, 8 oNIT
 	int currentONID, scanflags;
@@ -190,34 +184,9 @@ public:
 	Signal1<void, bool> scrambled;
 	Signal1<void, int> volumeChanged;
 	Signal0<void> timeUpdated;
-		/* generic state - public */
-//signals:
-//	void stateChanged(int newstate);
-//	void eventOccured(int event);
-//	void timeUpdated();
-		/* public general signals */
-//signals:
-//	void serviceListChanged();
-//	void bouquetListChanged();
-//	void leaveService(eService *);
-//	void enterService(eService *);	/** only succesfull channel-switches */
-
-//	void leaveTransponder(eTransponder *);
-//	void enterTransponder(eTransponder *);
-	
-//	void switchedTransponder(eTransponder*,int);
-//	void switchedService(eService*,int);
-	
-//	void gotEIT(EIT *eit, int);
-//	void gotSDT(SDT *sdt);
-//	void gotPMT(PMT *pmt);
-
-//	void scrambled(bool);
-//	void volumeChanged(int vol);
-
 		/* SCAN - public */
 public:
-	int startScan(const std::list<eTransponder*> &initital, int flags);	/** -> stateScanComplete */
+	int startScan(const ePtrList<eTransponder> &initital, int flags);	/** -> stateScanComplete */
 
 		/* SERVICE SWITCH - public */
 	int switchService(eService *service); /** -> eventServiceSwitched */
@@ -228,7 +197,7 @@ public:
 	eDVB();
 	~eDVB();
 	eTransponderList *getTransponders();
-	std::list<eBouquet*> *getBouquets();
+	ePtrList<eBouquet> *getBouquets();
 	static eDVB *getInstance()
 	{
 		return instance;

@@ -2,7 +2,6 @@
 #define __esection_h
 
 #include <ebase.h>
-#include <qlist.h>
 #include <asm/types.h>
 #include <libsig_comp.h>
 
@@ -23,11 +22,10 @@ public:
 	int read(__u8 *data);
 };
 
-class eSection: public /*Q*/Object
+class eSection: public Object
 {
-//	Q_OBJECT
 	eSectionReader reader;
-	static QList<eSection> active;
+	static ePtrList<eSection> active;
 	eSocketNotifier *notifier;
 	virtual int sectionRead(__u8 *data);
 	virtual void sectionFinish(int error);
@@ -39,7 +37,7 @@ class eSection: public /*Q*/Object
 	__u8 buf[65536];
 	int lockcount;
 	int setFilter(int pid, int tableid, int tableidext, int version);
-public:// slots:
+public:
 	void data(int socket);
 	void timeout();
 public:
@@ -59,13 +57,10 @@ public:
 
 class eTable: public eSection
 {
-//	Q_OBJECT
 	virtual int sectionRead(__u8 *d) { int err=data(d); if (err<0) error=err; return err; }
 	virtual void sectionFinish(int err);
 protected:
 	virtual int data(__u8 *data)=0;
-/*signals:
-	void tableReady(int);*/
 public:
 	Signal1<void, int> tableReady;
 	eTable(int pid, int tableid, int tableidext=-1, int version=-1);
@@ -77,12 +72,9 @@ public:
 };
 
 
-class eAUGTable: public /*Q*/Object
+class eAUGTable: public Object
 {
-/*	Q_OBJECT
-signals:
-	void tableReady(int);*/
-protected:/* slots:*/
+protected:
 	void slotTableReady(int);
 public:
 	Signal1<void, int> tableReady;
@@ -115,7 +107,6 @@ public:
 		if (next)
 			delete next;
 		next=cur;
-		//connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
 		CONNECT(next->tableReady, eAUTable::slotTableReady);
 		return next->start();
 	}
@@ -197,7 +188,6 @@ public:
 		next=(Table*)current->createNext();
 		if (next)
 		{
-			//connect(next, SIGNAL(tableReady(int)), SLOT(slotTableReady(int)));
 			CONNECT(next->tableReady, eAUTable::slotTableReady);
 			
 			next->start();

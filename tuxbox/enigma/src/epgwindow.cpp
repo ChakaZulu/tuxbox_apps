@@ -10,9 +10,9 @@ QString eListboxEntryEPG::getText(int col=0) const
 		tm* t = localtime(&event->start_time);
 		QString DateTime;
 		DateTime.sprintf("%2d.%d, %02d:%02d   ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
-		for (QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
+		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 		{
-			Descriptor *descriptor=d.current();
+			Descriptor *descriptor=*d;
 			if (descriptor->Tag()==DESCR_SHORT_EVENT)
 			{
 				ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;

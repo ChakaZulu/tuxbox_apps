@@ -66,9 +66,9 @@ QString eListboxEntryService::getText(int col=0) const
 			EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service->original_network_id, service->service_id);
 			if (e)
 			{
-				for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
+				for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
 				{
-					Descriptor *descriptor=d.current();
+					Descriptor *descriptor=*d;
 					if (descriptor->Tag()==DESCR_SHORT_EVENT)
 					{
 						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;

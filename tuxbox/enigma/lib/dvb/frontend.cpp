@@ -45,7 +45,7 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 		eConfig::getInstance()->setKey("/elitedvb/frontend/freqOffset", freq_offset);
 	}
 
-	qDebug("FreqOffset = %d", freq_offset);
+	printf("FreqOffset = %d\n", freq_offset);
 	
 	if (type==feCable)
 	{
@@ -63,16 +63,16 @@ eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 
 void eFrontend::timeout()
 {
-	qDebug("status %x lock %d\n", Status(), Locked());
+	printf("status %x lock %d\n", Status(), Locked());
 	if (Locked())
 	{
-		qDebug("+");
+		printf("+\n");
 		state=stateIdle;
 		/*emit*/ tunedIn(transponder, 0);
 	} else
 		if (--tries)
 		{
-			qDebug("-: %x", Status());
+			printf("-: %x\n", Status());
 			timer->start(100, true);
 		} else
 		{
@@ -239,7 +239,7 @@ int eFrontend::tune(eTransponder *trans,
 		diseqc.params[0]|=2;
 		seq.voltage=SEC_VOLTAGE_18;
 	} else
-		qFatal("BLA was ist dass denn fuer eine pol.");
+		printf("BLA was ist dass denn fuer eine pol.\n");
 	
 	if (hi)
 		diseqc.params[0]|=1;
@@ -291,19 +291,19 @@ int eFrontend::tune(eTransponder *trans,
 		front.u.qpsk.FEC_inner=FEC_inner;
 		break;
 	}
-	qDebug("IF: %d %d", front.Frequency, seq.continuousTone);
+	printf("IF: %d %d\n", front.Frequency, seq.continuousTone);
 
-	qDebug("ok, sec etc. done");
+	printf("ok, sec etc. done\n");
 	if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
 	{
 		perror("FE_SET_FRONTEND");
 		return -1;
 	}
-	qDebug("<--- FE_SET_FRONTEND");
+	printf("<--- FE_SET_FRONTEND\n");
 	state=stateTuning;
 	tries=10; // 1.0 second timeout
 	timer->start(50, true);
-	qDebug("<-- tuned");
+	printf("<-- tuned\n");
 	return 0;
 }
 

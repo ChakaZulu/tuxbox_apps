@@ -1,10 +1,11 @@
 INCLUDES = \
-	-I$(top_srcdir)/enigma/src/include
+	-I$(top_srcdir)/enigma/src/include \
+	-I$(top_srcdir)/enigma/src/core/base
 
 noinst_LTLIBRARIES = libbase.la
 
 libbase_la_SOURCES = \
-	ebase.cpp
+	ebase.cpp erect.cpp esize.cpp epoint.cpp eptrlist.cpp
 
 AM_CXXFLAGS = $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
 

@@ -21,7 +21,7 @@ extern "C"
 #endif
 #include "esection.h"
 
-QList<eSection> eSection::active;
+ePtrList<eSection> eSection::active;
 
 eSectionReader::eSectionReader()
 {
@@ -56,7 +56,7 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 	if (handle<0)
 	{
 		perror(DEMUX);
-		qFatal("DEMUX OPEN FAILED");
+		printf("DEMUX OPEN FAILED\n");
 		return -errno;
 	}
 
@@ -167,7 +167,7 @@ eSection::eSection(int pid, int tableid, int tableidext, int version, int flags,
 	timer=new eTimer(eApp);
 	CONNECT(timer->timeout, eSection::timeout);
 	if (!(flags&SECREAD_NOABORT))
-		active.append(this);
+		active.push_back(this);
 }
 
 eSection::eSection()
@@ -184,7 +184,7 @@ eSection::~eSection()
 		active.remove(this);
 	closeFilter();
 	if (lockcount)
-		qFatal("deleted still locked table");
+		printf("deleted still locked table\n");
 }
 
 int eSection::start()
@@ -239,7 +239,7 @@ void eSection::data(int socket)
 	while (max--)
 	{
 		if (lockcount)
-			qFatal("eSection::data on locked section!");
+			printf("eSection::data on locked section!\n");
 		timer->start(10000, true);
 		if (reader.read(buf))
 			break;
@@ -292,8 +292,8 @@ int eSection::abort()
 
 int eSection::abortAll()
 {
-	for (QListIterator<eSection> i(active); i.current(); ++i)
-		i.current()->abort();
+	for (ePtrList<eSection>::iterator i(active); i != active.end(); ++i)
+		i->abort();
 	return 0;
 }
 
@@ -316,7 +316,7 @@ int eSection::unlock()
 	if (lockcount)
 		return lockcount--;
 	else
-		qFatal("unlocking while not locked");
+		printf("unlocking while not locked\n");
 	return 0;
 }
 

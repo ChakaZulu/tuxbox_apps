@@ -10,7 +10,6 @@
 #include "http_dyn.h"
 #include "dvb.h"
 #include "edvb.h"
-#include <list>
 
 #include <config.h>
 #include <core/system/econfig.h>
@@ -175,17 +174,16 @@ static QString getPMT(QString request, QString path, QString opt, eHTTPConnectio
 	res+="program_number="+QString().sprintf("%04x\n", pmt->program_number);
 	res+="PCR_PID="+QString().sprintf("%04x\n", pmt->PCR_PID);
 	res+="program_info\n";
-	for (QListIterator<Descriptor> d(pmt->program_info); d.current(); ++d)
-		res+=d.current()->toString();
-	for (QListIterator<PMTEntry> s(pmt->streams); s.current(); ++s)
+	for (ePtrList<Descriptor>::iterator d(pmt->program_info); d != pmt->program_info.end(); ++d)
+		res+=d->toString();
+	for (ePtrList<PMTEntry>::iterator s(pmt->streams); s != pmt->streams.end(); ++s)
 	{
-		PMTEntry *e=s.current();
 		res+="PMTEntry\n";
-		res+="stream_type="+QString().sprintf("%02x\n", e->stream_type);
-		res+="elementary_PID="+QString().sprintf("%04x\n", e->elementary_PID);
+		res+="stream_type="+QString().sprintf("%02x\n", s->stream_type);
+		res+="elementary_PID="+QString().sprintf("%04x\n", s->elementary_PID);
 		res+="ES_info\n";
-		for (QListIterator<Descriptor> d(e->ES_info); d.current(); ++d)
-			res+=d.current()->toString();
+		for (ePtrList<Descriptor>::iterator d(s->ES_info); d != s->ES_info.end(); ++d)
+			res+=d->toString();
 	}
 	pmt->unlock();
 	return res;
@@ -309,11 +307,11 @@ static QString filter_string(QString string)
 
 eBouquet *getBouquet(int bouquet_id)
 {
-	std::list<eBouquet*>* b;
+	ePtrList<eBouquet>* b;
 	b=eDVB::getInstance()->getBouquets();
 
-	for (BouquetIterator It = b->begin(); It != b->end(); It++)
-    if ((*It)->bouquet_id == bouquet_id)
+	for (ePtrList<eBouquet>::iterator It(*b); It != b->end(); It++)
+    if (It->bouquet_id == bouquet_id)
        return *It;
 	
 	return 0;
@@ -361,7 +359,7 @@ static QString getContent(QString mode, int bouquetid)
 {
 	QString result="";
 	QString tmp="";
-	std::list<eBouquet*>* bouquets;
+	ePtrList<eBouquet>* bouquets;
 	std::list<eServiceReference> esref;
 	eService *es;
 
@@ -373,17 +371,17 @@ static QString getContent(QString mode, int bouquetid)
 	{
 		result+="<form action=\"/?mode=tv\" method=\"get\" name=\"bouquetsel\">";
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageTV(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
-		for(BouquetIterator i = bouquets->begin(); i != bouquets->end(); ++i)
+		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			tmp=filter_string((*i)->bouquet_name.c_str());
+			tmp=filter_string(i->bouquet_name.c_str());
 			if(tmp.find("[TV]")>-1)
 			{
-				result+="<option value=\"" + QString().setNum((*i)->bouquet_id, 10) + "\"";
-				if((*i)->bouquet_id==bouquetid)
+				result+="<option value=\"" + QString().setNum(i->bouquet_id, 10) + "\"";
+				if(i->bouquet_id==bouquetid)
 				{
 					result+=" selected";
 				}
-				result+=">" + QString((*i)->bouquet_name.c_str()) + "</option>";
+				result+=">" + QString(i->bouquet_name.c_str()) + "</option>";
 			}
 		}
 		result+="</select>";
@@ -409,17 +407,17 @@ static QString getContent(QString mode, int bouquetid)
 	{
 		result+="<form action=\"/?mode=radio\" method=\"get\" name=\"bouquetsel\">";
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
-		for(BouquetIterator i = bouquets->begin(); i != bouquets->end(); ++i)
+		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			tmp=filter_string((*i)->bouquet_name.c_str());
+			tmp=filter_string(i->bouquet_name.c_str());
 			if(tmp.find("[RADIO]")>-1)
 			{
-				result+="<option value=\"" + QString().setNum((*i)->bouquet_id, 10) + "\"";
-				if((*i)->bouquet_id==bouquetid)
+				result+="<option value=\"" + QString().setNum(i->bouquet_id, 10) + "\"";
+				if(i->bouquet_id==bouquetid)
 				{
 					result+=" selected";
 				}
-				result+=">" + QString((*i)->bouquet_name.c_str()) + "</option>";
+				result+=">" + QString(i->bouquet_name.c_str()) + "</option>";
 			}
 			result+="</select>";
 			result+="<select name=\"channel\" size=\"1\" onChange=\"javascript:switchtoChannel(this.form.channel.options[this.form.channel.options.selectedIndex].value)\"><option>-----</option>";
@@ -554,10 +552,9 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
  
 		int p=0;
 
-		for(QListIterator<EITEvent> i(eit->events); i.current(); ++i)
+		for(ePtrList<EITEvent>::iterator event(eit->events); event != eit->events.end(); ++event)
 		{
-			EITEvent *event=i.current();
-			if(event)
+			if(*event)
 			{
 				if(p==0)
 				{
@@ -579,12 +576,11 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 						now_time="";
 					}
 				}
-				for(QListIterator<Descriptor> d(event->descriptor); d.current(); ++d)
-			        {
-					Descriptor *descriptor=d.current();
+				for(ePtrList<Descriptor>::iterator descriptor(event->descriptor); descriptor != event->descriptor.end(); ++descriptor)
+        {
 					if(descriptor->Tag()==DESCR_SHORT_EVENT)
 					{
-						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+						ShortEventDescriptor *ss=(ShortEventDescriptor*)*descriptor;
 						switch(p)
 						{
 							case 0:
@@ -597,7 +593,7 @@ static QString web_root(QString request, QString path, QString opts, eHTTPConnec
 					}
 					if(descriptor->Tag()==DESCR_EXTENDED_EVENT)
 					{
-						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)descriptor;
+						ExtendedEventDescriptor *ss=(ExtendedEventDescriptor*)*descriptor;
 						switch(p)
 						{
 							case 0:

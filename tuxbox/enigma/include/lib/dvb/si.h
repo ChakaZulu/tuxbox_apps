@@ -3,7 +3,7 @@
 
 #include "esection.h"
 #include <qstring.h>
-#include <qlist.h>
+#include <eptrlist.h>
 #include <vector>
 #include "lowlevel/sdt.h"
 #include "lowlevel/descr.h"
@@ -16,9 +16,8 @@
 time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5);
 int fromBCD(int bcd);
 
-class Descriptor: public /*Q*/Object
+class Descriptor: public Object
 {
-//	Q_OBJECT
 public:
 	inline Descriptor(int tag):tag(tag){};
 	inline virtual ~Descriptor(){};
@@ -98,7 +97,7 @@ public:
   ~NVODReferenceDescriptor();
   QString toString();
   
-  QList<NVODReferenceEntry> entries;
+  ePtrList<NVODReferenceEntry> entries;
 };
 
 class TimeShiftedServiceDescriptor: public Descriptor
@@ -178,7 +177,7 @@ public:
   ~ServiceListDescriptor();
   QString toString();
   
-  QList<ServiceListDescriptorEntry> entries;
+  ePtrList<ServiceListDescriptorEntry> entries;
 };
 
 class ShortEventDescriptor: public Descriptor
@@ -271,7 +270,6 @@ public:
 
 class PAT: public eTable
 {
-//	Q_OBJECT
 protected:
 	int data(__u8 *data);
 public:
@@ -279,14 +277,14 @@ public:
 
 	PATEntry *searchService(int service_id)
 	{
-		for (QListIterator<PATEntry> i(entries); i.current(); ++i)
-			if (i.current()->program_number==service_id)
-				return i.current();
+		for (ePtrList<PATEntry>::iterator i(entries); i != entries.end(); ++i)
+			if (i->program_number==service_id)
+				return *i;
 		return 0;
 	}
 
 	int transport_stream_id;
-	QList<PATEntry> entries;
+	ePtrList<PATEntry> entries;
 };
 
 class SDTEntry
@@ -299,12 +297,11 @@ public:
 	int EIT_present_following_flag;
 	int running_status;
 	int free_CA_mode;
-	QList<Descriptor> descriptors;
+	ePtrList<Descriptor> descriptors;
 };
 
 class SDT: public eTable
 {
-//	Q_OBJECT
 protected:
 	int data(__u8 *data);
 public:
@@ -312,7 +309,7 @@ public:
 	SDT(int type=typeActual);
 
 	int transport_stream_id, original_network_id;
-	QList<SDTEntry> entries;
+	ePtrList<SDTEntry> entries;
 };
 
 class PMTEntry
@@ -321,7 +318,7 @@ public:
 	PMTEntry(pmt_info_t* info);
 	int stream_type;
 	int elementary_PID;
-	QList<Descriptor> ES_info;
+	ePtrList<Descriptor> ES_info;
 };
 
 class PMT: public eTable
@@ -335,8 +332,8 @@ public:
   int program_number;
   int PCR_PID;
   int pid;
-  QList<Descriptor> program_info;
-  QList<PMTEntry> streams;
+  ePtrList<Descriptor> program_info;
+  ePtrList<PMTEntry> streams;
 };
 
 class NITEntry
@@ -345,7 +342,7 @@ public:
   NITEntry(nit_ts_t* ts);
 
 	__u16 transport_stream_id, original_network_id;
-	QList<Descriptor> transport_descriptor;
+	ePtrList<Descriptor> transport_descriptor;
 };
 
 class NIT: public eTable
@@ -359,8 +356,8 @@ public:
 	};
 	NIT(int pid, int type=0);
 	int network_id;
-	QList<NITEntry> entries;
-	QList<Descriptor> network_descriptor;
+	ePtrList<NITEntry> entries;
+	ePtrList<Descriptor> network_descriptor;
 };
 
 class EITEvent
@@ -373,7 +370,7 @@ public:
 	int duration;
 	int running_status;
 	int free_CA_mode;
-	QList<Descriptor> descriptor;
+	ePtrList<Descriptor> descriptor;
 };
 
 class EIT: public eTable
@@ -395,7 +392,7 @@ public:
 	eTable *createNext();
 	
 	int type, ts, service_id, version_number, current_next_indicator, transport_stream_id, original_network_id;
-	QList<EITEvent> events;
+	ePtrList<EITEvent> events;
 };
 
 class TDT: public eTable
@@ -413,7 +410,7 @@ class BATEntry
 public:
 	BATEntry(bat_loop_struct *data);
 	int transport_stream_id, original_network_id;
-	QList<Descriptor> transport_descriptors;
+	ePtrList<Descriptor> transport_descriptors;
 };
 
 class BAT: public eTable
@@ -424,8 +421,8 @@ public:
 	BAT();
 	
 	int bouquet_id;
-	QList<Descriptor> bouquet_descriptors;
-	QList<BATEntry> entries;
+	ePtrList<Descriptor> bouquet_descriptors;
+	ePtrList<BATEntry> entries;
 };
 
 class MHWEITEvent
@@ -442,12 +439,9 @@ public:
 
 class MHWEIT: public eSection
 {
-//	Q_OBJECT
 	int sectionRead(__u8 *data);
 	int available;
 	void sectionFinish(int);
-/*signals:
-	void ready(int);*/
 public:
 	Signal1<void, int> ready;
 	MHWEIT(int pid, int service_id);
