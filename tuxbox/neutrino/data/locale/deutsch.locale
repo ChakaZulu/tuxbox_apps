@@ -206,12 +206,12 @@ colorchooser.green grün
 colorchooser.blue blau
 colorchooser.alpha alpha
 
-lcdmenu.head LCD Settings
+lcdmenu.head LCD Einstellungen
 lcdmenu.inverse Invertieren
 lcdmenu.power Power
 lcdmenu.lcdcontroler Kontrast / Helligkeit
 
-lcdcontroler.head LCD Stettings
+lcdcontroler.head LCD Einstellungen
 lcdcontroler.contrast Kontrast
 lcdcontroler.brightness normale Helligkeit 
 lcdcontroler.brightnessstandby Standby Helligkeit
