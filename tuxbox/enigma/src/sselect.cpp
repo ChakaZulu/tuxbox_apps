@@ -37,6 +37,9 @@ gPixmap *eListBoxEntryService::locked=0;
 int eListBoxEntryService::maxNumSize=0;
 std::set<eServiceReference> eListBoxEntryService::hilitedEntrys;
 eListBoxEntryService *eListBoxEntryService::selectedToMove=0;
+eStreamer streamer;
+bool streaming = false;
+eServiceReference streamingRef;
 
 struct EPGStyleSelectorActions
 {
@@ -108,7 +111,7 @@ void eEPGStyleSelector::entrySelected( eListBoxEntryText* e )
 struct serviceSelectorActions
 {
 	eActionMap map;
-	eAction nextBouquet, prevBouquet, pathUp, showEPGSelector, showMenu, 
+	eAction nextBouquet, prevBouquet, pathUp, showEPGSelector, showMenu,
 			addService, addServiceToUserBouquet, modeTV, modeRadio,
 			modeFile, toggleStyle, toggleFocus, gotoPrevMarker, gotoNextMarker,
 			showAll, showSatellites, showProvider, showBouquets, deletePressed,
@@ -394,8 +397,6 @@ void eServiceSelector::addService(const eServiceReference &ref)
 	if ( eZap::getInstance()->getServiceSelector() == this )
 	{
 #ifndef DISABLE_FILE
-		eServiceReference streamingRef;
-		bool streaming = eStreamer::getInstance()->getServiceReference(streamingRef);
 		if ((eDVB::getInstance()->recorder || streaming) && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 		{
 			eServiceReferenceDVB &Ref = (eServiceReferenceDVB&) ref;
@@ -471,6 +472,7 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	eServicePath p = path;
 
 	eServiceReference ref;
+	streaming = eStreamer::getInstance()->getServiceReference(streamingRef);
 
 	// build complete path ... for window titlebar..
 	do

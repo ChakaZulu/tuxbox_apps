@@ -1,10 +1,11 @@
 #include <enigma_streamer.h>
 
-eStreamer *eStreamer::instance;
+eStreamer *eStreamer::instance = 0;
 
 eStreamer::eStreamer()
 {
-	instance = this;
+	if (!instance)
+		instance = this;
 }
 
 eStreamer::~eStreamer()

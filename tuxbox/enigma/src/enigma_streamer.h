@@ -15,7 +15,7 @@ public:
 
 	bool getServiceReference(eServiceReference&);
 	void setServiceReference(eServiceReference);
-	static eStreamer *getInstance() {if (!instance) instance = new eStreamer(); return instance;}
+	static eStreamer *getInstance() {return instance;}
 };
 #endif
 
