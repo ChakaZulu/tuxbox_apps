@@ -306,7 +306,7 @@ int CNeutrinoApp::loadSetup()
 	}
 
 	//video
-	g_settings.video_Signal = configfile.getInt32( "video_Signal", 0 ); //composite
+	g_settings.video_Signal = configfile.getInt32( "video_Signal", 1 ); //RGB + CVBS
 	g_settings.video_Format = configfile.getInt32( "video_Format", 2 ); //4:3
 
 	//fb-alphawerte für gtx
@@ -731,7 +731,7 @@ void CNeutrinoApp::saveSetup()
 
 	configfile.setInt32( "mp3player_display", g_settings.mp3player_display );
 	configfile.setInt32( "mp3player_follow", g_settings.mp3player_follow );
-	
+
    if(configfile.getModifiedFlag())
 	{
 		dprintf(DEBUG_INFO, "saveing neutrino txt-config\n");
@@ -767,7 +767,6 @@ void CNeutrinoApp::doChecks()
 	if(fd)
 		fclose(fd);
 	ucodes_ok= ucodes_ok||(fd);
-/*	ucode.bin no longer needed, since buildin
 	fd = fopen(UCODEDIR "/ucode.bin", "r");
 	if(fd)
 		fclose(fd);
@@ -1409,6 +1408,8 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNoti
 	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
 	oj->addOption(1, "videomenu.videosignal_rgb");
 	oj->addOption(2, "videomenu.videosignal_svideo");
+	oj->addOption(3, "videomenu.videosignal_yuv_v");
+	oj->addOption(4, "videomenu.videosignal_yuv_c");
 	oj->addOption(0, "videomenu.videosignal_composite");
 
 	videoSettings.addItem( oj );
@@ -3365,7 +3366,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.435 2003/04/16 13:49:07 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.436 2003/04/21 19:36:23 mws Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -76,9 +76,11 @@ audiomenu.ost ost
 videomenu.head namjestiti video
 videomenu.screensetup namjestiti ekran
 videomenu.videosignal vrsta video signala
-videomenu.videosignal_rgb rgb
+videomenu.videosignal_rgb RGB + CVBS
 videomenu.videosignal_svideo s-video
-videomenu.videosignal_composite composite
+videomenu.videosignal_yuv_v YUV + VBS
+videomenu.videosignal_yuv_c YUV + CVBS
+videomenu.videosignal_composite CVBS
 videomenu.videoformat format ekrana
 videomenu.videoformat_43 4:3 (LB)
 videomenu.videoformat_431 4:3 (PS)
