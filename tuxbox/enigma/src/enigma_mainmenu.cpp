@@ -164,7 +164,12 @@ eMainMenu::eMainMenu()
 		"scart"
 		};
 
-		for (int i=0; i<MENU_ENTRIES; i++)
+		int count = MENU_ENTRIES;
+#ifdef DISABLE_FILE
+		if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
+			--count;
+#endif
+		for (int i=0; i<count; i++)
 		{
 			pixmaps[i][0]=eSkin::getActive()->queryImage(eString("mainmenu.") + eString(pixmap_name[i]) );
 			pixmaps[i][1]=eSkin::getActive()->queryImage(eString("mainmenu.") + eString(pixmap_name[i]) + ".sel" );
@@ -340,18 +345,24 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 #endif
 			break;
 		case eWidgetEvent::evtAction:
+		{
+			int count = MENU_ENTRIES;
+#ifdef DISABLE_FILE
+			if (eSystemInfo::getInstance()->getHwType()==eSystemInfo::DM500)
+				--count;
+#endif
 			if (event.action == &i_mainmenuActions->close)
 				close(0);
 			else if (event.action == &i_mainmenuActions->prev)
 			{
-				active+=MENU_ENTRIES-1;
-				active%=MENU_ENTRIES;
+				active+=count-1;
+				active%=count;
 				setActive(active);
 			}
 			else if (event.action == &i_mainmenuActions->next)
 			{
 				active++;
-				active%=MENU_ENTRIES;
+				active%=count;
 				setActive(active);
 			}
 			else if (event.action == &i_cursorActions->ok)
@@ -382,13 +393,14 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 				break;
 			if (num != -1)
 			{
-				if (num < MENU_ENTRIES)
+				if (num < count)
 				{
 					setActive(active=num);
 					selected(num);
 				}
 			}
 			return 1;
+		}
 		default:
 			break;
 		}
