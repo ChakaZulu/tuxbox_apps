@@ -633,7 +633,7 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			//printf("[controld] shutdown\n");
 			shutdownBox();
 			break;
-		case CControld::CMD_SETVOLUME:
+		case CControld::CMD_SETVOLUME_AVS:
 			//printf("[controld] set volume\n");
 			CControld::commandVolume msg;
 			read(connfd, &msg, sizeof(msg));
@@ -705,7 +705,7 @@ void parse_command(int connfd, CControld::commandHead* rmessage)
 			saveSettings();
 			break;
 
-		case CControld::CMD_GETVOLUME:
+		case CControld::CMD_GETVOLUME_AVS:
 			//printf("[controld] get volume\n");
 			CControld::responseVolume msg6;
 			msg6.volume = settings.volume;
@@ -775,7 +775,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.65 2002/10/10 18:34:38 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.66 2002/10/10 18:40:24 thegoodguy Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

@@ -154,7 +154,7 @@ void CControldClient::setVolume(char volume )
 
 	msg2.volume = volume;
 
-	send(CControld::CMD_SETVOLUME, (char*)&msg2, sizeof(msg2));
+	send(CControld::CMD_SETVOLUME_AVS, (char*)&msg2, sizeof(msg2));
 
 	controld_close();
 }
@@ -163,7 +163,7 @@ char CControldClient::getVolume()
 {
 	CControld::responseVolume rmsg;
 
-	send(CControld::CMD_GETVOLUME);
+	send(CControld::CMD_GETVOLUME_AVS);
 
 	receive((char*)&rmsg, sizeof(rmsg));
 
