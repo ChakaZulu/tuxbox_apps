@@ -218,7 +218,7 @@ int Font::getHeight(void)
 	return height;
 }
 
-void Font::RenderString(int x, int y, int width, const char *text, unsigned char color, int boxheight)
+void Font::RenderString(int x, int y, int width, const char *text, unsigned char color, int boxheight, const bool utf8_encoded)
 {
 	if (!frameBuffer->getActive())
 		return;
@@ -298,7 +298,49 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 			x  = left;
 			y += step_y;
 		}
-		int index=FT_Get_Char_Index(face, *text);
+
+		int unicode_value;
+
+		if (utf8_encoded && ((((unsigned char)(*text)) & 0x80) != 0))
+		{
+			int remaining_unicode_length;
+			if ((((unsigned char)(*text)) & 0xf8) == 0xf0)
+			{
+				unicode_value = ((unsigned char)(*text)) & 0x07;
+				remaining_unicode_length = 3;
+			}
+			else if ((((unsigned char)(*text)) & 0xf0) == 0xe0)
+			{
+				unicode_value = ((unsigned char)(*text)) & 0x0f;
+				remaining_unicode_length = 2;
+			}
+			else if ((((unsigned char)(*text)) & 0xe0) == 0xc0)
+			{
+				unicode_value = ((unsigned char)(*text)) & 0x1f;
+				remaining_unicode_length = 1;
+			}
+			else                     // cf.: http://www.cl.cam.ac.uk/~mgk25/unicode.html#utf-8
+				break;           // corrupted character or a character with > 4 bytes utf-8 representation
+
+			for (int i = 0; i < remaining_unicode_length; i++)
+			{
+				text++;
+				if ((*text) & 0xc0 != 0x80)
+				{
+					remaining_unicode_length = -1;
+					break;           // incomplete or corrupted character
+				}
+				unicode_value <<= 6;
+				unicode_value |= ((unsigned char)(*text)) & 0x3f;
+			}
+			if (remaining_unicode_length == -1)
+				break;           // incomplete or corrupted character
+		}
+		else
+		    unicode_value = (unsigned char)(*text);
+		    
+		int index = FT_Get_Char_Index(face, unicode_value);
+
 		if (!index)
 			continue;
 		if (getGlyphBitmap(index, &glyph))

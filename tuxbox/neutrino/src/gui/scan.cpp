@@ -136,7 +136,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 			if ( msg == NeutrinoMessages::EVT_SCAN_PROVIDER )
 			{
 				frameBuffer->paintBoxRel(x+ 10, ypos+ 3* mheight+2, width-20, mheight, COL_MENUCONTENT);
-				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE);
+				g_Fonts->menu->RenderString(x+ 10, ypos+ 4* mheight, width-20, (char*)data, COL_MENUCONTENTINACTIVE, true); // UTF-8
 				delete (unsigned char*) data;
 			}
 			else
