@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.3 2002/10/12 19:57:16 obi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.4 2002/10/17 09:41:10 thegoodguy Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -26,6 +26,7 @@
 
 
 #include "zapittypes.h"
+#include "basicmessage.h"
 #include "zapitclient.h"
 
 
@@ -100,12 +101,6 @@ class CZapitMessages
 			CMD_SET_VOLUME,
 			CMD_COMMIT_BOUQUET_CHANGE
 		};
-
-	struct commandHead
-	{
-		unsigned char version;
-		unsigned char cmd;
-	};
 
 	struct commandBoolean
 	{

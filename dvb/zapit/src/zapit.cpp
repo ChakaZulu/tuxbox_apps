@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.260 2002/10/12 23:14:20 obi Exp $
+ * $Id: zapit.cpp,v 1.261 2002/10/17 09:41:10 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -549,7 +549,7 @@ int start_scan ()
 	return 0;
 }
 
-bool parse_command (CZapitMessages::commandHead &rmsg)
+bool parse_command(CBasicMessage::Header &rmsg)
 {
 	debug("[zapit] cmd %d (version %d) received\n", rmsg.cmd, rmsg.version);
 
@@ -1021,7 +1021,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.260 2002/10/12 23:14:20 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.261 2002/10/17 09:41:10 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1191,7 +1191,7 @@ int main (int argc, char **argv)
 	
 	do
 	{
-		CZapitMessages::commandHead rmsg;
+		CBasicMessage::Header rmsg;
 		connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
 		memset(&rmsg, 0, sizeof(rmsg));
 		read(connfd, &rmsg, sizeof(rmsg));
