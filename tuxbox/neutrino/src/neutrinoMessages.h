@@ -70,7 +70,6 @@ struct NeutrinoMessages {
 		CHANGEMODE			=	CRCInput::RC_Messages + 17,
 		REMIND				=	CRCInput::RC_Messages + 18,
 
-
 		EVT_VOLCHANGED		=	CRCInput::RC_Events + 1,
 		EVT_MUTECHANGED		=	CRCInput::RC_Events + 2,
 		EVT_VCRCHANGED		=	CRCInput::RC_Events + 3,

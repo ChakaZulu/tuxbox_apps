@@ -53,6 +53,7 @@
 
 // in us
 #define FADE_TIME 40000
+#define LCD_UPDATE_TIME (60 * 1000 * 1000)
 
 int time_left_width;
 int time_dot_width;
@@ -90,6 +91,8 @@ void CInfoViewer::start()
 	time_left_width = 2* g_Fonts->infobar_channame->getRenderWidth(widest_number);
 	time_dot_width = g_Fonts->infobar_channame->getRenderWidth(":");
 	time_width = time_left_width* 2+ time_dot_width;
+   
+   lcdUpdateTimer = g_RCInput->addTimer( LCD_UPDATE_TIME, false );
 }
 
 void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
@@ -250,6 +253,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
 			showIcon_16_9();
 			showIcon_VTXT();
         }
+        showLcdPercentOver();
 
         if ( ( g_RemoteControl->current_channel_id == channel_id) &&
              !( ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) &&
@@ -514,13 +518,14 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 	{
 		CSectionsdClient::CurrentNextInfo info = getEPG( data );
 
-		if ( ( is_visible ) && ( data == channel_id) )
-		{
+      if(data == channel_id)
+      {
 			info_CurrentNext = info;
-			show_Data( true );
-		}
-
-	    return messages_return::handled;
+         if ( is_visible )
+            show_Data( true );
+      }
+      showLcdPercentOver();
+      return messages_return::handled;
 	}
 	else if ( msg == NeutrinoMessages::EVT_TIMER )
 	{
@@ -535,6 +540,11 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 
 			return messages_return::handled;
 		}
+		else if ( data == lcdUpdateTimer )
+      {
+         showLcdPercentOver();
+			return messages_return::handled;
+      }
 		else if ( data == sec_timer_id )
 			return messages_return::handled;
 	}
@@ -576,7 +586,8 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 			if ( is_visible && showButtonBar &&  ( !g_RemoteControl->are_subchannels ) )
 				show_Data( true );
 		}
-	    return messages_return::handled;
+      showLcdPercentOver();
+      return messages_return::handled;
 	}
 	else if ( msg == NeutrinoMessages::EVT_ZAP_FAILED )
 	{
@@ -585,7 +596,8 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 			// show failure..!
 			CLCD::getInstance()->showServicename("("+g_RemoteControl->getCurrentChannelName()+")");
 			printf("zap failed!\n");
-           	showFailure();
+         showFailure();
+         CLCD::getInstance()->showPercentOver(255);
 
 			#ifdef USEACTIONLOG
 				g_ActionLog->println("channel unavailable");
@@ -623,8 +635,8 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		return messages_return::handled;
 	}
 #endif
-
-	return messages_return::unhandled;
+	
+   return messages_return::unhandled;
 }
 
 
@@ -889,3 +901,24 @@ void CInfoViewer::Set_CA_Status(int Status)
 		showIcon_CA_Status();
 }
 #endif
+
+void CInfoViewer::showLcdPercentOver()
+{
+   if(!g_settings.lcd_show_volume)
+   {
+      int runningPercent=-1;
+      if ( ! (info_CurrentNext.flags & CSectionsdClient::epgflags::has_current))
+         info_CurrentNext = getEPG(channel_id);
+      if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
+      {
+         time_t jetzt=time(NULL);
+         int seit = ( jetzt - info_CurrentNext.current_zeit.startzeit ) / 60;
+         if ( seit< 0 )
+            runningPercent= 0;
+         else
+ 				runningPercent=(unsigned)((float)(jetzt-info_CurrentNext.current_zeit.startzeit)/
+                                      (float)info_CurrentNext.current_zeit.dauer*100.);
+      }
+      CLCD::getInstance()->showPercentOver(runningPercent);
+   }
+}

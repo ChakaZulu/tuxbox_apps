@@ -129,6 +129,13 @@ bool CLCD::lcdInit(const char * fontfile, const char * fontname, const bool _set
 	}
 	display.dump_screen(&icon_lcd);
 
+	if (!display.paintIcon("neutrino_lcd2.raw",0,0,false))
+	{
+		printf("exit...(no neutrino_lcd2.raw)\n");
+		return false;
+	}
+	display.dump_screen(&icon_lcd2);
+
 	mode = MODE_TVRADIO;
 	showServicename("Booting...");
 	showclock=true;
@@ -254,13 +261,14 @@ void CLCD::showTime()
 void CLCD::showVolume(char vol)
 {
 	volume = vol;
-	if ((mode==MODE_TVRADIO) || (mode==MODE_SCART) || (mode==MODE_MP3))
+	if ((mode==MODE_TVRADIO && g_settings.lcd_show_volume) 
+       || (mode==MODE_SCART) || (mode==MODE_MP3))
 	{
 		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
 		//strichlin
 		if (muted)
 		{
-			display.draw_line (12,55,73,60, CLCDDisplay::PIXEL_ON);
+			display.draw_line (12,55,72,59, CLCDDisplay::PIXEL_ON);
 		}
 		else
 		{
@@ -268,6 +276,25 @@ void CLCD::showVolume(char vol)
 			display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
 		}
 
+		display.update();
+	}
+}
+void CLCD::showPercentOver(char perc)
+{
+	percentOver = perc;
+	if ((mode==MODE_TVRADIO) && !g_settings.lcd_show_volume)
+	{
+		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
+		//strichlin
+		if (perc==255)
+		{
+			display.draw_line (12,55,72,59, CLCDDisplay::PIXEL_ON);
+		}
+		else
+		{
+			int dp = int( perc/100.0*61.0+12.0);
+			display.draw_fill_rect (11,54,dp,60, CLCDDisplay::PIXEL_ON);
+		}
 		display.update();
 	}
 }
@@ -343,16 +370,24 @@ void CLCD::setMode(MODES m, std::string title)
 		case MODE_TVRADIO:
 			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: tvradio\n");
-			display.load_screen(&icon_lcd);
 			mode = m;
 			showclock = true;
-			showVolume(volume);
+			if(g_settings.lcd_show_volume)
+			{
+				display.load_screen(&icon_lcd);
+				showVolume(volume);
+			}
+			else
+			{
+				display.load_screen(&icon_lcd2);
+				showPercentOver(percentOver);
+			}
 			showServicename(servicename);
 			showTime();
 			display.update();
 			break;
 		case MODE_MP3:
-	   {
+		{
 			setlcdparameter(g_settings.lcd_brightness, g_settings.lcd_contrast, g_settings.lcd_power, g_settings.lcd_inverse);
 			//printf("[lcdd] mode: mp3\n");
 			display.load_screen(&icon_lcd);

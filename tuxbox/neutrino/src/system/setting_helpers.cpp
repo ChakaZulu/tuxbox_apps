@@ -176,8 +176,6 @@ bool CLcdNotifier::changeNotify(string OptionName, void *Data)
 	return true;
 }
 
-
-
 /*
 bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 {

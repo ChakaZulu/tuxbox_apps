@@ -77,6 +77,7 @@ class CInfoViewer
 
 	uint           sec_timer_id;
 	uint           fadeTimer;
+	uint           lcdUpdateTimer;
 	
 
 	void show_Data( bool calledFromEvent = false );
@@ -93,6 +94,7 @@ class CInfoViewer
 	void showRecordIcon(const bool show);
 	
 	void showFailure();
+   void showLcdPercentOver();
 
  public:
 	bool	is_visible;
