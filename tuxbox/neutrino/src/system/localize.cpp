@@ -33,25 +33,48 @@
 #include <config.h>
 
 #include "localize.h"
-#include "iso639.h"
 #include <zapit/client/zapitclient.h> /* CZapitClient::Utf8_to_Latin1 */
 
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
 
-char* getISO639Description(char *iso)
+static const char * iso639filename = "/usr/share/iso-codes/iso-639.tab";
+static std::map<std::string, std::string> iso639;
+
+void initialize_iso639_map(void)
 {
-	unsigned int i;
-	for (i=0; i<sizeof(iso639)/sizeof(*iso639); ++i)
+	std::string s, t, u, v;
+	std::ifstream in(iso639filename);
+	if (in.is_open())
 	{
-		if (!strcmp(iso639[i].iso639foreign, iso))
-			return iso639[i].description1;
-		if (!strcmp(iso639[i].iso639int, iso))
-			return iso639[i].description1;
+		while (in.peek() == '#')
+			getline(in, s);
+		while (in >> s >> t >> u)
+		{
+			getline(in, v);
+			iso639[s] = v;
+			if (s != t)
+				iso639[t] = v;
+		}
 	}
-	return iso;
+	else
+		std::cout << "Loading " << iso639filename << " failed." << std::endl;
+}
+
+const char * getISO639Description(const char *iso)
+{
+	std::map<std::string, std::string>::const_iterator it = iso639.find(std::string(iso));
+	if (it == iso639.end())
+		return iso;
+	else
+		return it->second.c_str();
 }
 
 void CLocaleManager::loadLocale(std::string locale)
 {
+	initialize_iso639_map();
 	std::string filename[] = {"/var/tuxbox/config/locale/" + locale + ".locale",DATADIR  "/neutrino/locale/" + locale + ".locale"};
 	FILE* fd = fopen(filename[0].c_str(), "r");
 	if(!fd)

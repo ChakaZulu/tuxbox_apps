@@ -37,7 +37,7 @@
 #include <string>
 #include <map>
 
-char* getISO639Description(char *iso);
+const char * getISO639Description(const char * iso);
 
 typedef std::map<std::string, std::string> mapLocaleData;
 
