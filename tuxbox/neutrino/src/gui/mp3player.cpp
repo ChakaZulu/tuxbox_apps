@@ -890,7 +890,7 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 }
 
 
-
+/*
 std::string Latin1_to_UTF8(const std::string s)
 {
 	std::string r;
@@ -910,7 +910,7 @@ std::string Latin1_to_UTF8(const std::string s)
 	}		
 	return r;
 }
-
+*/
 //------------------------------------------------------------------------
 void CMP3PlayerGui::get_id3(CMP3 *mp3)
 {
@@ -1109,8 +1109,8 @@ void CMP3PlayerGui::get_id3(CMP3 *mp3)
 			else
 				mp3->Title	= tmp;
 		}
-		mp3->Artist = Latin1_to_UTF8(mp3->Artist);
-		mp3->Title = Latin1_to_UTF8(mp3->Title);
+		//		mp3->Artist = Latin1_to_UTF8(mp3->Artist);
+		//		mp3->Title = Latin1_to_UTF8(mp3->Title);
 	}
 	if(0)
 	{

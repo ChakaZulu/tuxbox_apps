@@ -586,7 +586,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 		if ( actual_file->Name.length() > 0 )
 		{
 			if (liststart+pos==selected)
-				CLCD::getInstance()->showMenuText(0, actual_file->getFileName().c_str() );
+				CLCD::getInstance()->showMenuText(0, actual_file->getFileName(), -1, true); // UTF-8
 			switch(actual_file->getType())
 			{
 				case CFile::FILE_MP3 : 
@@ -603,7 +603,7 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 			}
 			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
 			
-			g_Fonts->filebrowser_item->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName().c_str(), color);
+			g_Fonts->filebrowser_item->RenderString(x+35, ypos+ fheight, width -(35+170) , actual_file->getFileName(), color, 0, true); // UTF-8
 
 			if( S_ISREG(actual_file->Mode) )
 			{
