@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pmt.cpp,v $
+Revision 1.10  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.9  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -49,8 +52,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <linux/dvb/dmx.h>
-
+#include "devices.h"
 #include "pmt.h"
 
 #define BSIZE 10000
@@ -62,7 +64,7 @@ pmt_data pmt::readPMT(int pmt_pid)
 	unsigned char buffer[BSIZE];
 
 	// Lies den PMT
-	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd=open(DEMUX_DEV, O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 	r = BSIZE;

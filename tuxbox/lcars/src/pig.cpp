@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pig.cpp,v $
+Revision 1.5  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.4  2002/03/03 22:56:27  TheDOC
 lcars 0.20
 
@@ -29,6 +32,48 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 */
 #include "pig.h"
+
+#ifdef HAVE_LINUX_DVB_VERSION_H
+pig::pig()
+{
+	fd = open("/dev/v4l/video0", O_RDWR);
+}
+
+pig::~pig()
+{
+	close(fd);
+}
+
+void pig::show()
+{
+	//avia_pig_show(fd);
+}
+
+void pig::hide()
+{
+	//avia_pig_hide(fd);
+}
+
+void pig::setSize(int x, int y)
+{
+	//avia_pig_set_size(fd, x, y);
+}
+
+void pig::setPosition(int x, int y)
+{
+	//avia_pig_set_pos(fd, x, y);
+}
+
+void pig::setStack(int i)
+{
+	//avia_pig_set_stack(fd, i);
+}
+
+void pig::setSource(int x1, int y1, int x2, int y2)
+{
+}
+
+#elif HAVE_OST_DMX_H
 
 pig::pig()
 {
@@ -68,3 +113,5 @@ void pig::setStack(int i)
 void pig::setSource(int x1, int y1, int x2, int y2)
 {
 }
+
+#endif

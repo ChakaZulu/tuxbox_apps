@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pat.cpp,v $
+Revision 1.11  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.10  2002/11/26 20:03:14  TheDOC
 some debug-output and small fixes
 
@@ -53,10 +56,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <stdio.h>
 #include <iostream>
 
-#include <linux/dvb/dmx.h>
-
 #include <map>
 
+#include "devices.h"
 #include "pat.h"
 
 #define BSIZE 10000
@@ -67,7 +69,7 @@ bool pat::readPAT()
 	struct dmx_sct_filter_params flt;
 	unsigned char buffer[BSIZE];
 
-	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd=open(DEMUX_DEV, O_RDWR);
 	if (fd < 0)
 	{
 		perror("open readPAT-open");

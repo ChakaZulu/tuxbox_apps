@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: nit.cpp,v $
+Revision 1.9  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.8  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -47,8 +50,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <stdio.h>
 #include <iostream>
 
-#include <linux/dvb/dmx.h>
-
+#include "devices.h"
 #include "nit.h"
 
 #define BSIZE 10000
@@ -62,7 +64,7 @@ int nit::getTransportStreams(channels *channels, int diseqc)
 	int countTS = 0;
 
 	// Lies den NIT
-	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd=open(DEMUX_DEV, O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 

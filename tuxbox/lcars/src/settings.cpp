@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
+Revision 1.11  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.10  2002/11/26 20:03:14  TheDOC
 some debug-output and small fixes
 
@@ -53,15 +56,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 */
 #include <stdio.h>
-#include <dbox/info.h>
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <linux/dvb/dmx.h>
-#include <linux/dvb/video.h>
-#include <linux/dvb/frontend.h>
-#include <linux/dvb/audio.h>
-#include <linux/dvb/ca.h>
 #include <memory.h>
 #include <sstream>
 #include <sys/socket.h>
@@ -71,7 +69,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <net/if.h> 
 #include <arpa/inet.h>
 
-
+#include "devices.h"
 #include "settings.h"
 #include "help.h"
 #include "cam.h"
@@ -164,10 +162,10 @@ int settings::find_emmpid(int ca_system_id) {
 	int fd, r = 1000, count;
 	struct dmx_sct_filter_params flt;
 
-	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd=open(DEMUX_DEV, O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/dvb/adapter0/demux0");
+		perror(DEMUX_DEV);
 		return -fd;
 	}
 

@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.21  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.20  2002/11/26 20:03:14  TheDOC
 some debug-output and small fixes
 
@@ -84,7 +87,7 @@ tuner::tuner(settings *s)
 {
 	setting = s;
 
-	if ((frontend = open("/dev/dvb/adapter0/frontend0", O_RDWR|O_NONBLOCK)) < 0)
+	if ((frontend = open(FRONTEND_DEV, O_RDWR|O_NONBLOCK)) < 0)
 	{
 		perror("OPEN FRONTEND DEVICE");
 		exit(1);
@@ -125,6 +128,7 @@ fe_code_rate_t tuner::getFEC(int fec)
 // polarization = 0 -> H, polarization = 1 -> V
 bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int fec, int dis)
 {
+	#ifdef HAVE_LINUX_DVB_VERSION_H
 	struct dvb_frontend_parameters frontp;
 	struct dvb_frontend_event event;
 	struct dvb_diseqc_master_cmd cmd;
@@ -225,7 +229,6 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 	}
 	while (!(event.status & (FE_HAS_LOCK | FE_TIMEDOUT)));
 
-#ifdef DEBUG
 	printf (" Frequ: %u   ifreq: %u  Pol: %d  FEC: %d  Sym: %u  dis: %d\n",
 	        frequ, frontp.frequency, (int)polarization , (int)fec,
 	        symbol, (int)dis);
@@ -245,8 +248,148 @@ bool tuner::tune(unsigned int frequ, unsigned int symbol, int polarization, int 
 		std::cout << "Has lock" << std::endl;
 	else
 		std::cout << "Doesn't have lock" << std::endl;
-#endif
 
 	return (event.status & FE_HAS_LOCK);
+#elif HAVE_OST_DMX_H
+
+int device;
+	int frontend;
+	struct secCmdSequence seq;
+	struct secCommand cmd;
+	FrontendParameters frontp;
+	int status;
+
+	if (setting->boxIsSat())
+	{
+
+		// $$$ rasc
+		// Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
+		// Ebenso die ZF fuer die LNBs (1 + 2) fuer jeweils Hi und Lo - Band
+		// die Werte hier sind Standard fuer das Ku-Band, allerdings waere es
+		// interessant auch andere Werte zu haben (z.B. 10 GHz ZF, oder 4 GHz ZF)
+		// Dies ist sinnvoll, wenn man die dbox fuer den Sat-DX Empfang, oder
+		// aeltere LNBs (naja) nutzen moechte.
+
+		if (frequ > 11700)
+		{
+			frontp.Frequency = (frequ * 1000)-10600000;
+			seq.continuousTone = SEC_TONE_ON;
+		}
+		else
+		{
+			frontp.Frequency = (frequ * 1000)-9750000;
+			seq.continuousTone = SEC_TONE_OFF;
+		}
+
+		if (polarization == 0)
+		{
+			seq.voltage=SEC_VOLTAGE_18;
+		}
+		else
+		{
+			seq.voltage=SEC_VOLTAGE_13;
+		}
+
+		frontp.u.qpsk.FEC_inner = getFEC(fec);
+
+		// -- symbol rate (SAT)
+		frontp.u.qpsk.SymbolRate = symbol * 1000;
+
+		// diseqc Group Byte  (dis: 0..3)
+		// 2001-12-06 rasc
+
+		cmd.type=SEC_CMDTYPE_DISEQC;
+		cmd.u.diseqc.addr=0x10;
+		cmd.u.diseqc.cmd=0x38;
+		cmd.u.diseqc.numParams=1;
+		cmd.u.diseqc.params[0]=0xF0
+		                       | ((dis*4) & 0x0F)
+		                       | ((seq.voltage == SEC_VOLTAGE_18)     ? 2 : 0)
+		                       | ((seq.continuousTone == SEC_TONE_ON) ? 1 : 0);
+
+		seq.miniCommand=SEC_MINI_NONE;
+		seq.numCommands=1;
+		seq.commands=&cmd;
+
+		if((device = open("/dev/dvb/card0/sec0", O_RDWR)) < 0)
+		{
+			perror("OPEN SEC DEVICE");
+			exit(1);
+		}
+
+		if (ioctl(device,SEC_SEND_SEQUENCE,&seq) < 0)
+		{
+			perror("SEC_SEND_SEQUENCE");
+		}
+
+		close(device);
+	}
+
+	if (setting->boxIsCable())
+	{
+		frontp.Frequency = frequ * 100;
+		frontp.u.qam.SymbolRate = symbol * 1000;
+		frontp.u.qam.FEC_inner = getFEC(fec);
+		// frontp.u.qam.FEC_outer = FEC_AUTO;
+		frontp.u.qam.QAM = QAM_64;
+	}
+
+	// -- Spektrum Inversion
+	// -- should be configurable, fixed for now (rasc)
+	if (setting->getInversion() == INVERSION_ON)
+	{
+		frontp.Inversion = INVERSION_ON;
+	}
+	else if (setting->getInversion() == INVERSION_OFF)
+	{
+		frontp.Inversion = INVERSION_OFF;
+	}
+	else if (setting->getInversion() == INVERSION_AUTO)
+	{
+		frontp.Inversion = INVERSION_AUTO;
+	}
+	if ((frontend = open("/dev/dvb/card0/frontend0", O_RDWR)) < 0)
+	{
+		perror("OPEN FRONTEND DEVICE");
+		exit(1);
+	}
+
+	if (ioctl(frontend, FE_SET_FRONTEND, &frontp) < 0)
+	{
+		perror("FE_SET_FRONTEND");
+	}
+
+	if (ioctl(frontend, FE_READ_STATUS, &status) < 0)
+	{
+		perror("FE_READ_STATUS");
+	}
+
+	printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
+	        (long)frequ,(long)frontp.Frequency,(int)polarization ,(int)fec,
+	        (long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
+
+	printf ("... Tuner-Lock Status: %d\n",status);
+
+	int state1, state2;
+
+	if (ioctl(frontend, FE_READ_SNR, &state1) < 0)
+	{
+		perror("FE_READ_SNR");
+	}
+
+	if (ioctl(frontend, FE_READ_SIGNAL_STRENGTH, &state2) < 0)
+	{
+		perror("FE_READ_SIGNAL_STRENGTH");
+	}
+
+	printf ("... S/N: %d  SigStrength: %d \n",state1,state2);
+
+	close(frontend);
+
+	return (status & FE_HAS_SIGNAL);
+
+
+#endif
 }
+
 

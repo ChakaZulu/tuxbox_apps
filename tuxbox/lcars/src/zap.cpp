@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.cpp,v $
+Revision 1.13  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.12  2003/01/05 06:49:59  TheDOC
 lcars should work now with the new drivers more properly
 
@@ -60,13 +63,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <memory.h>
-#include <linux/dvb/dmx.h>
-#include <linux/dvb/video.h>
-//#include <linux/dvb/frontend.h>
-#include <linux/dvb/audio.h>
-//#include <linux/dvb/ca.h>
-#include <dbox/avs_core.h>
-#include <dbox/fp.h>
 
 #include <set>
 #include <algorithm>
@@ -89,7 +85,7 @@ zap::zap(settings &set, osd &o, tuner &t, cam &c) : setting(set), osdd(o), tune(
 	//printf("Initializing zapper...\n");
 
 	/*vid = open(VIDEO_DEV, O_RDWR);
-	if((video = open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0) {
+	if((video = open(DEMUX_DEV, O_RDWR)) < 0) {
 		//printf("Cannot open demux device \n");
 		exit(1);
 	}
@@ -133,7 +129,11 @@ void zap::zap_allstop()
 	{
 		if (ioctl(aud, AUDIO_GET_STATUS, &astatus) < 0)
 			perror ("[zap.cpp]AUDIO_GET_STATUS");
+#ifdef HAVE_LINUX_DVB_VERSION_H
 		if (astatus.play_state != AUDIO_STOPPED)
+#elif HAVE_OST_DMX_H
+		if (astatus.playState != AUDIO_STOPPED)
+#endif
 		{
 			std::cout << "[zap.cpp]Stopping audio-device" << std::endl;
 			if (ioctl(audio, DMX_STOP) < 0)
@@ -141,13 +141,21 @@ void zap::zap_allstop()
 			if (ioctl(aud, AUDIO_STOP) < 0)
 				perror("[zap.cpp]AUDIO_STOP");
 		}
+#ifdef HAVE_LINUX_DVB_VERSION_H
 	} while (astatus.play_state != AUDIO_STOPPED);
+#elif HAVE_OST_DMX_H
+	} while (astatus.playState != AUDIO_STOPPED);
+#endif
 	
 	do
 	{
 		if (ioctl(vid, VIDEO_GET_STATUS, &vstatus) < 0)
 			perror ("[zap.cpp]VIDEO_GET_STATUS");
+#ifdef HAVE_LINUX_DVB_VERSION_H
 		if (vstatus.play_state != VIDEO_STOPPED)
+#elif HAVE_OST_DMX_H
+		if (vstatus.playState != VIDEO_STOPPED)
+#endif
 		{
 			std::cout << "[zap.cpp]Stopping video-device" << std::endl;
 			if (ioctl(video, DMX_STOP) < 0)
@@ -155,7 +163,11 @@ void zap::zap_allstop()
 			if (ioctl(vid, VIDEO_STOP) < 0)
 				perror("[zap.cpp]VIDEO_STOP");
 		}
+#ifdef HAVE_LINUX_DVB_VERSION_H
 	} while (vstatus.play_state != VIDEO_STOPPED);
+#elif HAVE_OST_DMX_H
+	} while (vstatus.playState != VIDEO_STOPPED);
+#endif
 }
 
 void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, int ONID, int TS, int PID1, int PID2)
@@ -166,9 +178,9 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		APID = 0x1fff;
 	if (PCR == 0)
 		PCR = 0x1fff;
-
-	std::cout << "Start Zapping" << std::endl;
+	
 	zap_allstop();
+		
 	if (usevideo)
 	{
 		close(vid);
@@ -195,18 +207,20 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		useaudio = true;
 	}
 
+	std::cout << "Start Zapping" << std::endl;
+
 	if (usevideo)
 	{
 		std::cout << "[zap.cpp]Open video" << std::endl;
 		if ((vid = open(VIDEO_DEV, O_RDWR)) < 0)
 		{
-			perror("/dev/dvb/adapter0/video0");
+			perror(VIDEO_DEV);
 			exit(1);
 		}
 
 		std::cout << "[zap.cpp]Open video demux" << std::endl;
 		if((video = open(DEMUX_DEV, O_RDWR)) < 0) {
-			perror("/dev/dvb/adapter0/demux0");
+			perror(DEMUX_DEV);
 			exit(1);
 		}
 	}
@@ -215,7 +229,7 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	{
 		std::cout << "[zap.cpp]Open pcr demux" << std::endl;
 		if((pcr = open(DEMUX_DEV, O_RDWR)) < 0) {
-			perror("/dev/dvb/adapter0/demux0");
+			perror(DEMUX_DEV);
 			exit(1);
 		}
 	}
@@ -225,13 +239,13 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		std::cout << "[zap.cpp]Open audio" << std::endl;
 		if ((aud = open(AUDIO_DEV, O_RDWR)) < 0)
 		{	
-			perror("/dev/dvb/adapter0/audio0");
+			perror(AUDIO_DEV);
 			exit(1);
 		}
 
 		std::cout << "[zap.cpp]Open audio demux" << std::endl;
 		if((audio = open(DEMUX_DEV, O_RDWR)) < 0) {
-			perror("/dev/dvb/adapter0/demux0");
+			perror(DEMUX_DEV);
 			exit(1);
 		}
 	}
@@ -244,7 +258,11 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	//ioctl(audio,AUDIO_SET_BYPASS_MODE, 0);
 	if (usevideo)
 	{
+#ifdef HAVE_LINUX_DVB_VERSION_H
 		if (vstatus.stream_source != VIDEO_SOURCE_DEMUX)
+#elif HAVE_OST_DMX_H
+		if (vstatus.streamSource != VIDEO_SOURCE_DEMUX)
+#endif
 		{
 			if (ioctl(vid, VIDEO_SELECT_SOURCE, (video_stream_source_t)VIDEO_SOURCE_DEMUX) < 0)
 				perror ("[zap.cpp]VIDEO_SELECT_SOURCE");
@@ -254,7 +272,12 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		pes_filter.pid     = VPID;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
+#ifdef HAVE_LINUX_DVB_VERSION_H
 		pes_filter.pes_type = DMX_PES_VIDEO;
+#elif HAVE_OST_DMX_H
+		pes_filter.pesType = DMX_PES_VIDEO;
+#endif
+		
 		pes_filter.flags   = 0;
 		if (ioctl(video,DMX_SET_PES_FILTER,&pes_filter) < 0)
 			perror("[zap.cpp]DMX_SET_PES_FILTER video");
@@ -267,7 +290,11 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		pes_filter.pid     = PCR;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
+#ifdef HAVE_LINUX_DVB_VERSION_H
 		pes_filter.pes_type = DMX_PES_PCR;
+#elif HAVE_OST_DMX_H
+		pes_filter.pesType = DMX_PES_PCR;
+#endif
 		pes_filter.flags   = 0;
 		if (ioctl(pcr,DMX_SET_PES_FILTER,&pes_filter)< 0 )
 			perror("[zap.cpp]DMX_SET_PES_FILTER pcr");
@@ -277,7 +304,11 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 	/* apid */
 	if (useaudio)
 	{
+#ifdef HAVE_LINUX_DVB_VERSION_H
 		if (astatus.stream_source != AUDIO_SOURCE_DEMUX)
+#elif HAVE_OST_DMX_H
+		if (astatus.streamSource != AUDIO_SOURCE_DEMUX)
+#endif
 		{
 			if (ioctl(aud, AUDIO_SELECT_SOURCE, (audio_stream_source_t)AUDIO_SOURCE_DEMUX) < 0)
 				perror("[zap.cpp]AUDIO_SELECT_SOURCE");
@@ -286,7 +317,11 @@ void zap::zap_to(pmt_data pmt, int VPID, int APID, int PCR, int ECM, int SID, in
 		pes_filter.pid     = APID;
 		pes_filter.input   = DMX_IN_FRONTEND;
 		pes_filter.output  = DMX_OUT_DECODER;
+#ifdef HAVE_LINUX_DVB_VERSION_H
 		pes_filter.pes_type = DMX_PES_AUDIO;
+#elif HAVE_OST_DMX_H
+		pes_filter.pesType = DMX_PES_AUDIO;
+#endif
 		pes_filter.flags   = 0;
 		if (ioctl(audio,DMX_SET_PES_FILTER,&pes_filter) < 0)
 			perror("[zap.cpp]DMX_SET_PES_FILTER audio");
@@ -364,7 +399,7 @@ void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 	struct dmx_pes_filter_params pes_filter;
 
 	int i = AVS_MUTE;
-	int avs = open("/dev/dbox/avs0",O_RDWR);
+	int avs = open(AVS_DEV, O_RDWR);
 	ioctl(avs,AVSIOSMUTE,&i);
 	close(avs);
 	//ioctl(aud, AUDIO_STOP, true);
@@ -376,7 +411,11 @@ void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 	pes_filter.pid     = APID;
 	pes_filter.input   = DMX_IN_FRONTEND;
 	pes_filter.output  = DMX_OUT_DECODER;
+#ifdef HAVE_LINUX_DVB_VERSION_H
 	pes_filter.pes_type = DMX_PES_AUDIO;
+#elif HAVE_OST_DMX_H
+	pes_filter.pesType = DMX_PES_AUDIO;
+#endif
 	pes_filter.flags   = 0;
 	ioctl(audio, DMX_SET_PES_FILTER, &pes_filter);
 
@@ -384,7 +423,7 @@ void zap::zap_audio(int VPID, int APID, int ECM, int SID, int ONID)
 	//ioctl(aud, AUDIO_PLAY, true);
 	usleep(300000);
 	i = AVS_UNMUTE;
-	avs = open("/dev/dbox/avs0",O_RDWR);
+	avs = open(AVS_DEV,O_RDWR);
 	ioctl(avs,AVSIOSMUTE,&i);
 	close(avs);
 }

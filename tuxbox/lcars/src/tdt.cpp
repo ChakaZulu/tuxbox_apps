@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tdt.cpp,v $
+Revision 1.8  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.7  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -42,8 +45,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <memory.h>
 #include <stdio.h>
-
-#include <linux/dvb/dmx.h>
 
 #include "tdt.h"
 #include "help.h"
@@ -78,7 +79,7 @@ void* tdt::start_timereader( void * this_ptr )
 		while(acttime < 100000)
 		{
 			// Lies den TDT
-			if ((fd=open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0)
+			if ((fd=open(DEMUX_DEV, O_RDWR)) < 0)
 				perror("TDT open");
 
 			memset (&flt.filter, 0, sizeof (struct dmx_filter));

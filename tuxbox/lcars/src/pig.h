@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: pig.h,v $
+Revision 1.7  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.6  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -37,8 +40,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-
-#include <dbox/avia_gt_pig.h>
 
 class pig
 {

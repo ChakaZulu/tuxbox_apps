@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.cpp,v $
+Revision 1.9  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.8  2003/01/05 02:41:53  TheDOC
 lcars supports inputdev now
 
@@ -54,7 +57,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <unistd.h>
 #include <fcntl.h>
 #include <iostream>
-#include <linux/input.h>
 
 rc::rc(hardware *h, settings *s)
 {

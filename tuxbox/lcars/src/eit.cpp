@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.15  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.14  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -66,8 +69,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <linux/dvb/dmx.h>
-
+#include "devices.h"
 #include "eit.h"
 #include "help.h"
 #include "osd.h"
@@ -169,7 +171,7 @@ void eit::receiveNow(int SID)
 	//printf("Checking mutex\n");
 	pthread_mutex_lock( &mutex );
 	//printf("Mutex passed\n");
-	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd=open(DEMUX_DEV, O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 
@@ -492,7 +494,7 @@ void eit::readSchedule(int SID, osd *osd)
 	(*osd).setPerspectiveName("Reading Scheduling Information...");
 	(*osd).showPerspective();
 
-	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd=open(DEMUX_DEV, O_RDWR);
 	
 	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 	
@@ -714,7 +716,7 @@ void eit::dumpSchedule(int SID, osd *osd)
 	osd->addCommand("SHOW perspective");
 
 	pthread_mutex_lock( &mutex );
-	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
+	fd=open(DEMUX_DEV, O_RDWR);
 
 	memset (&flt.filter, 0, sizeof (struct dmx_filter));
 

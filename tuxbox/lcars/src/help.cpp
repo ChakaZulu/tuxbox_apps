@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: help.cpp,v $
+Revision 1.6  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.5  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -39,12 +42,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <sys/poll.h>
 #include <memory.h>
-#include <linux/dvb/dmx.h>
-#include <linux/dvb/video.h>
-#include <linux/dvb/frontend.h>
-#include <linux/dvb/audio.h>
-#include <linux/dvb/ca.h>
-#include <dbox/avs_core.h>
 #include <time.h>
 #include "settings.h"
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.14  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.13  2003/01/05 06:49:59  TheDOC
 lcars should work now with the new drivers more properly
 
@@ -64,7 +67,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <linux/dvb/dmx.h>
+#include "devices.h"
 
 #define BSIZE 10000
 
@@ -82,17 +85,20 @@ void teletext::startReinsertion(int PID)
 	pesFilterParams.pid = PID;
 	pesFilterParams.input = DMX_IN_FRONTEND;
 	pesFilterParams.output = DMX_OUT_DECODER;
+#ifdef HAVE_LINUX_DVB_VERSION_H
 	pesFilterParams.pes_type = DMX_PES_TELETEXT;
+#elif HAVE_OST_DMX_H
+	pesFilterParams.pesType = DMX_PES_TELETEXT;
+#endif
 	pesFilterParams.flags  = DMX_IMMEDIATE_START;
 
 	std::cout << "Start reinsertion on PID " << PID << std::endl;
 	
 	if (txtfd == -1)
-		txtfd = open("/dev/dvb/adapter0/demux0", O_RDWR);
+		txtfd = open(DEMUX_DEV, O_RDWR);
 	
 	if (ioctl(txtfd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
 		perror("[teletext.cpp]DMX_SET_PES_FILTER");
-
 }
 
 void teletext::stopReinsertion()

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tot.cpp,v $
+Revision 1.9  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.8  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -46,8 +49,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <memory.h>
 #include <stdio.h>
 
-#include <linux/dvb/dmx.h>
-
+#include "devices.h"
 #include "tot.h"
 #include "help.h"
 #include "pthread.h"
@@ -83,7 +85,7 @@ void* tot::start_timereader( void * this_ptr )
 	while(1)
 	{
 		// Lies den TOT
-		if ((fd=open("/dev/dvb/adapter0/demux0", O_RDWR)) < 0)
+		if ((fd=open(DEMUX_DEV, O_RDWR)) < 0)
 			perror("TOT open");
 
 		memset (&flt.filter, 0, sizeof (struct dmx_filter));

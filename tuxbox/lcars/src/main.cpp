@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.27  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.26  2003/01/05 02:41:53  TheDOC
 lcars supports inputdev now
 
@@ -103,6 +106,7 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include <dbox/fp.h>
 //#include <dbox/event.h>
 
+#include "devices.h"
 #include "sdt.h"
 #include "zap.h"
 #include "nit.h"
@@ -192,7 +196,7 @@ int main(int argc, char **argv)
 	//printf("Ending OSD\n");
 
 
-	int test = open("/dev/dvb/adapter0/demux0", O_RDWR);
+	int test = open(DEMUX_DEV, O_RDWR);
 	if (test < 0)
 	{
 		rc.start_thread();

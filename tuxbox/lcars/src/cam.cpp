@@ -11,7 +11,7 @@
 #include <sys/ioctl.h>
 #include <memory.h>
 
-#include <linux/dvb/ca.h>
+#include "devices.h"
 
 #include "cam.h"
 

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: checker.cpp,v $
+Revision 1.11  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.10  2002/11/12 19:09:02  obi
 ported to dvb api v3
 
@@ -54,15 +57,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <sys/ioctl.h>
 #include <memory.h>
 #include <stdio.h>
-#include <linux/dvb/dmx.h>
-#include <linux/dvb/video.h>
-#include <linux/dvb/frontend.h>
-#include <linux/dvb/audio.h>
-#include <linux/dvb/ca.h>
-#include <dbox/avs_core.h>
-#include <dbox/event.h>
 #include <iostream>
 
+#include "devices.h"
 #include "checker.h"
 #include "pthread.h"
 
@@ -98,7 +95,7 @@ int checker::startEventThread()
 void checker::fnc(int i, int mode_16_9)
 {
 	int	avs = open("/dev/dbox/avs0",O_RDWR);
-	int vid = open("/dev/dvb/adapter0/video0", O_RDWR);
+	int vid = open(VIDEO_DEV, O_RDWR);
 	if (!vid)
 		std::cout << "Couldn't open video-device for 16:9-change" << std::endl;
 	ioctl(avs, AVSIOSFNC, &i);

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: rc.h,v $
+Revision 1.7  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.6  2003/01/05 02:41:53  TheDOC
 lcars supports inputdev now
 
@@ -46,37 +49,41 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #ifndef RC_H
 #define RC_H
 
+#include <linux/input.h>
+
 #include "hardware.h"
 #include "settings.h"
 
 #define	NUMBER_RCS	1
 
-#define	RC_1		2
-#define	RC_2		3
-#define	RC_3		4
-#define	RC_4		5
-#define	RC_5		6
-#define	RC_6		7
-#define	RC_7		8
-#define	RC_8		9
-#define	RC_9		10
-#define	RC_0		11
-#define	RC_STANDBY	116
-#define	RC_HOME		102
-#define	RC_DBOX		141
+#define	RC_1		KEY_1
+#define	RC_2		KEY_2
+#define	RC_3		KEY_3
+#define	RC_4		KEY_4
+#define	RC_5		KEY_5
+#define	RC_6		KEY_6
+#define	RC_7		KEY_7
+#define	RC_8		KEY_8
+#define	RC_9		KEY_9
+#define	RC_0		KEY_0
+#define	RC_STANDBY	KEY_POWER
+#define	RC_HOME		KEY_HOME
+#define	RC_DBOX		KEY_SETUP
 #define	RC_RED		398
 #define	RC_GREEN	399
 #define	RC_YELLOW	400
 #define	RC_BLUE		401
 #define	RC_OK		352
-#define	RC_VOLPLUS	115
-#define	RC_VOLMINUS	114
-#define	RC_MUTE		113
-#define	RC_HELP		138
-#define	RC_UP		103
-#define	RC_DOWN		108
-#define	RC_RIGHT	106
-#define	RC_LEFT		105
+#define	RC_VOLPLUS	KEY_VOLUMEUP
+#define	RC_VOLMINUS	KEY_VOLUMEDOWN
+#define	RC_MUTE		KEY_MUTE
+#define	RC_HELP		KEY_HELP
+#define	RC_UP		KEY_UP
+#define	RC_DOWN		KEY_DOWN
+#define	RC_RIGHT	KEY_RIGHT
+#define	RC_LEFT		KEY_LEFT
+#define RC_PGUP		KEY_PAGEUP
+#define RC_PGDOWN	KEY_PAGEDOWN
 
 class rc
 {

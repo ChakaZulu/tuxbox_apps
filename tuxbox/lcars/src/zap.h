@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: zap.h,v $
+Revision 1.7  2003/01/05 19:28:45  TheDOC
+lcars should be old-api-compatible again
+
 Revision 1.6  2003/01/05 06:49:59  TheDOC
 lcars should work now with the new drivers more properly
 
@@ -37,14 +40,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #ifndef ZAP_H
 #define ZAP_H
 
+#include "devices.h"
 #include "settings.h"
 #include "osd.h"
 #include "tuner.h"
 #include "cam.h"
-
-#define VIDEO_DEV "/dev/dvb/adapter0/video0"
-#define AUDIO_DEV "/dev/dvb/adapter0/audio0"
-#define DEMUX_DEV "/dev/dvb/adapter0/demux0"
 
 class zap
 {
