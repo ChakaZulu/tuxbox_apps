@@ -64,7 +64,7 @@ CTimerEvent* CTimerManager::getNextEvent()
 	int lngTime = (events[0]->alarmtime.tm_mon+ 1)* 1000000+ (events[0]->alarmtime.tm_mday)* 10000+
 		(events[0]->alarmtime.tm_hour)* 100+ events[0]->alarmtime.tm_min;	
 	CTimerEvent *erg = events[0];
-	map<int, CTimerEvent*>::iterator pos = events.begin();
+	std::map<int, CTimerEvent*>::iterator pos = events.begin();
 	for(;pos!=events.end();pos++)
 	{
 		CTimerEvent *tmp = pos->second;

@@ -39,10 +39,10 @@ class CTimerManager
 	//singleton
 	private:
 		CTimerManager();
-		int						eventID;
-		map<int, CTimerEvent*>	events;
-		CTimerEvent				*nextEvent();
-		pthread_t				thrTimer;
+		int				eventID;
+		std::map<int, CTimerEvent*>	events;
+		CTimerEvent			*nextEvent();
+		pthread_t			thrTimer;
 
 		static void* timerThread(void *arg);
 

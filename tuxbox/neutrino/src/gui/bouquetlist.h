@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "../channels/lastchannel.h"
+#include "channels/lastchannel.h"
 
 using namespace std;
 
