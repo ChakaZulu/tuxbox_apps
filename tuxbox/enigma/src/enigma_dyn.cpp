@@ -945,17 +945,14 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += button(110, "Satfinder", LEFTNAVICOLOR, pre + "?mode=controlSatFinder" + post);
 		switch ( eSystemInfo::getInstance()->getHwType() )
 		{
-			case eSystemInfo::DM7000:
-			case eSystemInfo::DM7020:
-				result += "<br>";
-				result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dreambox')");
-				break;
 			case eSystemInfo::dbox2Nokia:
 			case eSystemInfo::dbox2Sagem:
 			case eSystemInfo::dbox2Philips:
 				result += "<br>";
 				result += button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dbox2')");
 			default:
+				if ( eSystemInfo::getInstance()->hasKeyboard() )
+				    result += "<br>"+button(110, "Remote Control", LEFTNAVICOLOR, "javascript:remoteControl('dreambox')");
 				break;
 		}
 	}
