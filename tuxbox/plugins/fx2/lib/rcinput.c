@@ -3,12 +3,14 @@
 */
 
 #include <stdio.h>
+#include <termios.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <rcinput.h>
 #include <draw.h>
 
 static	int				fd = -1;
+static	int				kbfd = -1;
 		unsigned short	realcode=0xee;
 		unsigned short	actcode=0xee;
 		int				doexit=0;
@@ -16,9 +18,130 @@ static	int				fd = -1;
 
 #define Debug	if(debug)printf
 
-#ifndef i386
-
+#ifdef i386
+#define RC_IOCTL_BCODES 0
+#else
 #include <dbox/fp.h>
+#endif
+
+static	struct termios	tios;
+
+void	KbInitialize( void )
+{
+	struct termios	ntios;
+
+	kbfd = 0;
+
+	if ( tcgetattr(kbfd,&tios) == -1 )
+	{
+		kbfd=-1;
+		return;
+	}
+	memset(&ntios,0,sizeof(ntios));
+	tcsetattr(kbfd,TCSANOW,&ntios);
+
+	return;
+}
+
+static	unsigned short kb_translate( unsigned char c )
+{
+	switch(c)
+	{
+	case 0x41 :
+		return RC_UP;
+	case 0x42 :
+		return RC_DOWN;
+	case 0x43 :
+		return RC_RIGHT;
+	case 0x44 :
+		return RC_LEFT;
+	}
+	return 0;
+}
+
+void		KbGetActCode( void )
+{
+	unsigned char	buf[256];
+	int				x=0;
+	int				left;
+	unsigned short	code = 0;
+	unsigned char	*p = buf;
+
+	realcode=0xee;
+
+	if ( kbfd != -1 )
+		x = read(kbfd,buf,256);
+	if ( x>0 )
+	{
+		for(p=buf, left=x; left; left--,p++)
+		{
+			switch(*p)
+			{
+			case 0x1b :
+				if ( left >= 3 )
+				{
+					p+=2;
+					code = kb_translate(*p);
+					if ( code )
+						actcode = code;
+					left-=2;
+				}
+				else
+					left=1;
+				break;
+			case 0x03 :
+				doexit=3;
+				break;
+			case 0x0d :
+				actcode=RC_OK;
+				break;
+#if 0
+			case 0x1c :
+				FBPrintScreen();
+				break;
+#endif
+			case '?' :
+				actcode=RC_HELP;
+				break;
+			case 'b' :
+				actcode=RC_BLUE;
+				break;
+			case 'r' :
+				actcode=RC_RED;
+				break;
+			case 'g' :
+				actcode=RC_GREEN;
+				break;
+			case 'y' :
+				actcode=RC_YELLOW;
+				break;
+			case '0' :
+			case '1' :
+			case '2' :
+			case '3' :
+			case '4' :
+			case '5' :
+			case '6' :
+			case '7' :
+			case '8' :
+			case '9' :
+				actcode=*p-48;
+				break;
+			case 'q' :
+				actcode=RC_SPKR;
+				FBPause();
+				break;
+			}
+		}
+		realcode=actcode;
+	}
+}
+
+void	KbClose( void )
+{
+	if ( kbfd != -1 )
+		tcsetattr(kbfd,TCSANOW,&tios);
+}
 
 static	int		fd_is_ext = 0;
 
@@ -26,14 +149,14 @@ int	RcInitialize( int extfd )
 {
 	char	buf[32];
 
+	KbInitialize();
 	if ( extfd == -1 )
 	{
 		fd_is_ext = 0;
 		fd = open( "/dev/dbox/rc0", O_RDONLY );
 		if ( fd == -1 )
 		{
-			perror("failed - open /dev/dbox/rc0");
-			return(-1);
+			return kbfd;
 		}
 		fcntl(fd, F_SETFL, O_NONBLOCK );
 		ioctl(fd, RC_IOCTL_BCODES, 1);
@@ -97,16 +220,20 @@ static	unsigned short translate( unsigned short code )
 void		RcGetActCode( void )
 {
 	char			buf[32];
-	int				x;
+	int				x=0;
 	unsigned short	code = 0;
 static  unsigned short cw=0;
 
-	x = read( fd, buf, 32 );
+	if ( fd != -1 )
+		x = read( fd, buf, 32 );
 	if ( x < 2 )
 	{
-		realcode=0xee;
-		if ( cw == 1 )
-			cw=0;
+		KbGetActCode();
+		if ( realcode == 0xee )
+		{
+			if ( cw == 1 )
+				cw=0;
+		}
 		return;
 	}
 
@@ -169,126 +296,9 @@ static  unsigned short cw=0;
 
 void	RcClose( void )
 {
+	KbClose();
+	if ( fd == -1 )
+		return;
 	if ( !fd_is_ext )
 		close(fd);
 }
-
-#else		/* i386 */
-
-#include <termios.h>
-
-static	struct termios	tios;
-
-int	RcInitialize( int extfd )
-{
-	struct termios	ntios;
-	fd = 0;
-
-	tcgetattr(fd,&tios);
-	memset(&ntios,0,sizeof(ntios));
-	tcsetattr(fd,TCSANOW,&ntios);
-
-	return 0;
-}
-
-static	unsigned short translate( unsigned char c )
-{
-	switch(c)
-	{
-	case 0x41 :
-		return RC_UP;
-	case 0x42 :
-		return RC_DOWN;
-	case 0x43 :
-		return RC_RIGHT;
-	case 0x44 :
-		return RC_LEFT;
-	}
-	return 0;
-}
-
-void		RcGetActCode( void )
-{
-	unsigned char	buf[256];
-	int				x;
-	int				left;
-	unsigned short	code = 0;
-	unsigned char	*p = buf;
-
-	realcode=0xee;
-
-	x = read(fd,buf,256);
-	if ( x>0 )
-	{
-		for(p=buf, left=x; left; left--,p++)
-		{
-			switch(*p)
-			{
-			case 0x1b :
-				if ( left >= 3 )
-				{
-					p+=2;
-					code = translate(*p);
-					if ( code )
-						actcode = code;
-					left-=2;
-				}
-				else
-					left=1;
-				break;
-			case 0x03 :
-				doexit=3;
-				break;
-			case 0x0d :
-				actcode=RC_OK;
-				break;
-#if 0
-			case 0x1c :
-				FBPrintScreen();
-				break;
-#endif
-			case '?' :
-				actcode=RC_HELP;
-				break;
-			case 'b' :
-				actcode=RC_BLUE;
-				break;
-			case 'r' :
-				actcode=RC_RED;
-				break;
-			case 'g' :
-				actcode=RC_GREEN;
-				break;
-			case 'y' :
-				actcode=RC_YELLOW;
-				break;
-			case '0' :
-			case '1' :
-			case '2' :
-			case '3' :
-			case '4' :
-			case '5' :
-			case '6' :
-			case '7' :
-			case '8' :
-			case '9' :
-				actcode=*p-48;
-				break;
-			case 'q' :
-				actcode=RC_SPKR;
-				FBPause();
-				break;
-			}
-		}
-		realcode=actcode;
-	}
-}
-
-void	RcClose( void )
-{
-	tcsetattr(fd,TCSANOW,&tios);
-
-	close(fd);
-}
-
-#endif
