@@ -463,5 +463,5 @@ favorites.chalreadyinbq Der aktuelle Kanal ist bereits in Ihren Favoriten...\n
 favorites.finalhint \nVersehentlich hinzugefügte Kanäle können mit\nder Bouquetverwaltung korrigiert werden.\n
 
 sleeptimerbox.title Sleeptimer
-sleeptimerbox.hint1 Ausschaltzeit in Min.
-sleeptimerbox.hint2 Die dbox2 schaltet sich nach der Zeit aus.
+sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
+sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
