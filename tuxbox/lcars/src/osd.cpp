@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.cpp,v $
+Revision 1.8  2002/06/12 17:46:53  TheDOC
+reinsertion readded
+
 Revision 1.7  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -877,6 +880,27 @@ void osd::setPerspectiveAvailable(bool available)
 				fb->fillBox(283, 383, 300, 400, 12);
 				fb->putText(302, 385, 7, "Perspective");
 			}
+			else if (NVODAvailable = false)
+				fb->fillBox(283, 383, 385, 400, -1);
+		}
+	}
+}
+
+void osd::setNVODAvailable(bool available)
+{
+	NVODAvailable = available;
+
+	if (vars->getvalue("%SHOWHELP") == "true")
+	{
+		if (proginfo_shown)
+		{
+			if (perspectiveAvailable)
+			{
+				fb->setTextSize(0.34);
+				fb->fillBox(300, 383, 385, 400, 7);
+				fb->fillBox(283, 383, 300, 400, 12);
+				fb->putText(302, 385, 7, "NVOD");
+			}
 			else
 				fb->fillBox(283, 383, 385, 400, -1);
 		}
@@ -1180,6 +1204,13 @@ void osd::showProgramInfo()
 				fb->fillBox(300, 383, 385, 400, 7);
 				fb->fillBox(283, 383, 300, 400, 12);
 				fb->putText(302, 385, 7, "Perspective");
+			}
+
+			if (NVODAvailable)
+			{
+				fb->fillBox(300, 383, 385, 400, 7);
+				fb->fillBox(283, 383, 300, 400, 12);
+				fb->putText(302, 385, 7, "NVOD");
 			}
 
 			if (epgAvailable)

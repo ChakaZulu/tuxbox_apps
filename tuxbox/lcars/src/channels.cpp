@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.15  2002/06/12 17:46:53  TheDOC
+reinsertion readded
+
 Revision 1.14  2002/06/08 20:21:09  TheDOC
 adding the cam-sources with slight interface-changes
 
@@ -286,12 +289,22 @@ void channels::zapCurrentChannel()
 		else
 			(*zap_obj).zap_to(pmt_entry, getCurrentVPID(), getCurrentAPID(0), getCurrentPCR(), ECM, getCurrentSID(), getCurrentONID(), getCurrentTS(), getCurrentAPID(1));
 
-
-
+		
 		if (getCurrentAPIDcount() > 1)
 			(*eit_obj).setAudioComponent(component[apid]);
 		else
 			(*eit_obj).setAudioComponent(-1);
+	}
+
+	if (getCurrentType() == 4)
+	{
+		vars->setvalue("%IS_NVOD", "true");
+		osd_obj->setNVODAvailable(true);
+	}
+	else 
+	{
+		vars->setvalue("%IS_NVOD", "false");
+		osd_obj->setNVODAvailable(false);
 	}
 
 	last_channels.push(cur_pos);

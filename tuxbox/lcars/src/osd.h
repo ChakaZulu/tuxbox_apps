@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: osd.h,v $
+Revision 1.8  2002/06/12 17:48:40  TheDOC
+reinsertion readded
+
 Revision 1.7  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -77,6 +80,7 @@ class osd
 	int serviceNumber;
 	bool channelsAvailable;
 	bool perspectiveAvailable;
+	bool NVODAvailable;
 	bool epgAvailable;
 	bool menuAvailable;
 	time_t nowTime;
@@ -192,6 +196,7 @@ public:
 	void setLanguage(std::string language_name);
 	void setServiceNumber(int number);
 	void setPerspectiveAvailable(bool available);
+	void setNVODAvailable(bool available);
 	void setChannelsAvailable(bool available);
 	void setEPGAvailable(bool available);
 	void setMenuAvailable(bool available);

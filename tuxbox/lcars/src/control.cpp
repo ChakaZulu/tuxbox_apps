@@ -908,6 +908,17 @@ int control::runCommand(command_class command, bool val)
 			{
 				//std::cout << "Zap current Channel" << std::endl;
 				channels_obj->zapCurrentChannel();
+
+				if (channels_obj->getCurrentTXT() != 0)
+				{
+					teletext_obj->startReinsertion(channels_obj->getCurrentTXT());
+					osd_obj->addCommand("COMMAND proginfo set_teletext true");
+				}
+				else
+				{				
+					teletext_obj->stopReinsertion();
+					osd_obj->addCommand("COMMAND proginfo set_teletext false");
+				}
 			}
 			else if (command.args[0] == "Audio")
 			{
@@ -1768,7 +1779,7 @@ void control::openMenu(int menuNumber)
 				continue;
 			//std::cout << "NUUUUMBER: " << number << std::endl;
 			osd_obj->addCommand("HIDE menu");
-			//teletext_obj->stopReinsertion();
+			teletext_obj->stopReinsertion();
 			if (plugins_obj->getShowPig(number - 1))
 			{
 				pig_obj->hide();
@@ -1792,7 +1803,10 @@ void control::openMenu(int menuNumber)
 			osd_obj->initPalette();
 			usleep(400000);
 			fb_obj->clearScreen();
-			//teletext_obj->startReinsertion(channels_obj->getCurrentTXT());
+			if (channels_obj->getCurrentTXT() != 0)
+			{
+				teletext_obj->startReinsertion(channels_obj->getCurrentTXT());
+			}
 			tmp_menu = menus[menuNumber];
 
 			getMenu(menuNumber);

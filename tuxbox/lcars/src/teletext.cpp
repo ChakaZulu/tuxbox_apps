@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.7  2002/06/12 17:46:53  TheDOC
+reinsertion readded
+
 Revision 1.6  2002/05/18 02:55:24  TheDOC
 LCARS 0.21TP7
 
@@ -56,6 +59,7 @@ void teletext::getTXT(int PID)
 
 void teletext::startReinsertion(int PID)
 {
+	std::cout << "Start reinsertion on PID " << PID << std::endl;
 	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
 	ioctl(txtfd, AVIA_VBI_START_VTXT, PID);
 
@@ -64,6 +68,7 @@ void teletext::startReinsertion(int PID)
 
 void teletext::stopReinsertion()
 {
+	std::cout << "Stop reinsertion" << std::endl;
 	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
 	ioctl(txtfd, AVIA_VBI_STOP_VTXT, true);
 
