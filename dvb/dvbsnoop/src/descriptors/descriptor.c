@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.20 2004/01/11 21:01:31 rasc Exp $
+$Id: descriptor.c,v 1.21 2004/01/12 23:05:24 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: descriptor.c,v 1.20 2004/01/11 21:01:31 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.21  2004/01/12 23:05:24  rasc
+no message
+
 Revision 1.20  2004/01/11 21:01:31  rasc
 PES stream directory, PES restructured
 
@@ -78,8 +81,7 @@ kleiner Fehler
 #include "descriptor.h"
 #include "mpeg_descriptor.h"
 #include "dvb_descriptor.h"
-#include "dsmcc_stream_descriptor.h"
-#include "dsmcc_module_descriptor.h"
+#include "dsmcc_carousel_descriptor.h"
 #include "dsmcc_int_unt_descriptor.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
@@ -115,7 +117,7 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
   switch  (scope) {
 
      case DSMCC_STREAM:
-  		descriptorDSMCC_STREAM (b); 
+  		descriptorMPEG (b); 
 		break;
 
      case DSMCC_CAROUSEL:

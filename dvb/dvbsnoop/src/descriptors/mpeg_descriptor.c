@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.13 2004/01/02 16:40:34 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.14 2004/01/12 23:05:25 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.13 2004/01/02 16:40:34 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.14  2004/01/12 23:05:25  rasc
+no message
+
 Revision 1.13  2004/01/02 16:40:34  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -134,6 +137,13 @@ int  descriptorMPEG  (u_char *b)
      case 0x13:  descriptorMPEG_Carousel_Identifier (b);  break; 
      case 0x14:  descriptorMPEG_Association_tag (b);  break; 
      case 0x15:  descriptorMPEG_Deferred_Association_tags (b);  break; 
+
+     /* DSM-CC stream descriptors */
+     // case 0x16: reserved....
+// $$$ TODO case 0x17:  descriptorMPEG_NPT_reference (b);  break; 
+// $$$ TODO case 0x18:  descriptorMPEG_NPT_endpoint (b);  break; 
+// $$$ TODO case 0x19:  descriptorMPEG_stream_mode (b);  break; 
+// $$$ TODO case 0x1A:  descriptorMPEG_stream_event (b);  break; 
 
      /* MPEG 4 */
      case 0x1B:  descriptorMPEG_MPEG4_video (b);  break; 
@@ -1203,6 +1213,40 @@ void descriptorMPEG_Deferred_Association_tags (u_char *b)
 
 
 
+/*
+ * ------------------------------------------------------------
+ *
+ * -- DSM-CC  STREAM Descriptors  ISO 13818-6
+ *
+ */
+
+
+
+
+/*
+  0x17   DSMCC  NPT-reference descriptor 
+  ISO 13818-6 
+*/
+
+void descriptorMPEG_NTP_reference (u_char *b)
+{
+   // descriptor_tag		 = b[0];
+   // descriptor_length       	 = b[1];
+
+   outBit_Sx_NL (4,"postDiscontinuityIndicator: ",  	b,16, 1);
+   outBit_Sx_NL (4,"contentId: ",		  	b,17, 7);
+   outBit_Sx_NL (6,"reserved: ",		  	b,24, 7);
+
+
+/*
+STC_Reference 33 uimsbf
+reserved 31 bsblf
+NPT_Reference 33 tcimsbf
+scaleNumerator 16 tcimsbf
+scaleDenominator 16 tcimsbf
+*/
+
+}
 
 
 
@@ -1216,6 +1260,33 @@ void descriptorMPEG_Deferred_Association_tags (u_char *b)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * ------------------------------------------------------------
+ *
+ * -- MPEG4 Descriptors  ISO 13818-1
+ *
+ */
 
 
 
