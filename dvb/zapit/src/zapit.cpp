@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.188 2002/05/28 15:46:00 happydude Exp $
+ * $Id: zapit.cpp,v 1.189 2002/05/31 16:33:48 happydude Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1039,7 +1039,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				responseGetOtherPIDs.ecmpid = NONE; // TODO: remove
 				responseGetOtherPIDs.vtxtpid = channel->getTeletextPid();
 				responseGetOtherPIDs.pcrpid = channel->getPcrPid();
-				responseGetOtherPIDs.selected_apid = channel->getAudioPid();
+				responseGetOtherPIDs.selected_apid = channel->getAudioChannelIndex();
 				send(connfd, &responseGetOtherPIDs, sizeof(responseGetOtherPIDs), 0);
 				sendAPIDs();
 				break;
@@ -1123,7 +1123,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.188 2002/05/28 15:46:00 happydude Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.189 2002/05/31 16:33:48 happydude Exp $\n\n");
 
 	if (argc > 1)
 	{
