@@ -254,7 +254,7 @@ void write_transponder(FILE *fd, uint16_t transport_stream_id)
 	return;
 }
 
-void write_sat(FILE *fd, const char *satname, const uint8_t diseqc_pos)
+FILE *write_sat(FILE *fd, const char *satname, const uint8_t diseqc_pos)
 {
 	if (!scantransponders.empty())
 	{
@@ -270,6 +270,8 @@ void write_sat(FILE *fd, const char *satname, const uint8_t diseqc_pos)
 	}
 	scanchannels.clear();
 	scantransponders.clear();
+
+	return fd;
 }
 
 void *start_scanthread(void *param)
@@ -351,24 +353,28 @@ void *start_scanthread(void *param)
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
 			printf("[scan.cpp] scanning %s\n", satName);
-			//get_nits(10788000, 22000000, FEC_5_6, 1, diseqc_pos);	// 54
+			get_nits(10788000, 22000000, FEC_5_6, 1, diseqc_pos);	// 54
 			get_nits(10832000, 22000000, FEC_5_6, 0, diseqc_pos);	// 57 **
-			//get_nits(10862000, 22000000, FEC_5_6, 0, diseqc_pos);	// 59
+			get_nits(10862000, 22000000, FEC_5_6, 0, diseqc_pos);	// 59
 			get_nits(10876000, 22000000, FEC_5_6, 1, diseqc_pos);	// 60 **
 #if 0
 			get_nits(11719500, 27500000, FEC_3_4, 0, diseqc_pos);	// 65
 			get_nits(11739500, 27500000, FEC_3_4, 1, diseqc_pos);	// 66
 			get_nits(11758500, 27500000, FEC_3_4, 0, diseqc_pos);	// 67
 			get_nits(11778000, 27500000, FEC_3_4, 1, diseqc_pos);	// 68
+#endif
 			get_nits(11798000, 27500000, FEC_3_4, 0, diseqc_pos);	// 69 *
+#if 0
 			get_nits(11817000, 27500000, FEC_3_4, 1, diseqc_pos);	// 70
 			get_nits(11836500, 27500000, FEC_3_4, 0, diseqc_pos);	// 71
 			get_nits(11856000, 27500000, FEC_3_4, 1, diseqc_pos);	// 72
 			get_nits(11876000, 27500000, FEC_3_4, 0, diseqc_pos);	// 73
 			get_nits(11895000, 27500000, FEC_3_4, 1, diseqc_pos);	// 74
+#endif
 			get_nits(11914000, 27500000, FEC_3_4, 0, diseqc_pos);	// 75 *
-			get_nits(11934000, 27500000, FEC_3_4, 1, diseqc_pos);	// 76
+			//get_nits(11934000, 27500000, FEC_3_4, 1, diseqc_pos);	// 76
 			get_nits(11953500, 27500000, FEC_3_4, 0, diseqc_pos);	// 77 *
+#if 0
 			get_nits(11973000, 27500000, FEC_3_4, 1, diseqc_pos);	// 78
 			get_nits(11992500, 27500000, FEC_3_4, 0, diseqc_pos);	// 79
 			get_nits(12012000, 27500000, FEC_3_4, 1, diseqc_pos);	// 80
@@ -420,7 +426,7 @@ void *start_scanthread(void *param)
 			get_nits(12728000, 22000000, FEC_5_6, 1, diseqc_pos);	// 120 empty?
 #endif
 			get_sdts();
-			write_sat(fd, satName, diseqc_pos);
+			fd = write_sat(fd, satName, diseqc_pos);
 		}
 
 		if (do_diseqc & 2)
@@ -452,7 +458,7 @@ void *start_scanthread(void *param)
 			get_nits(12539000, 27500000, FEC_3_4, 0, diseqc_pos); // 91
 			get_nits(12692000, 27500000, FEC_3_4, 0, diseqc_pos); // 99
 			get_sdts();
-			write_sat(fd, satName, diseqc_pos);
+			fd = write_sat(fd, satName, diseqc_pos);
 		}
 
 		if (do_diseqc & 4)
@@ -469,7 +475,7 @@ void *start_scanthread(void *param)
 			get_nits(12541000,  2168000, FEC_7_8, 1, diseqc_pos); // 1
 			get_nits(12658000, 27500000, FEC_3_4, 1, diseqc_pos); // 5
 			get_sdts();
-			write_sat(fd, satName, diseqc_pos);
+			fd = write_sat(fd, satName, diseqc_pos);
 		}
 
 		if (do_diseqc & 8)
@@ -486,7 +492,7 @@ void *start_scanthread(void *param)
 			get_nits(11154000,  4557000, FEC_3_4, 1, diseqc_pos); // 8
 			get_nits(11457000,  5632000, FEC_3_4, 1, diseqc_pos); // 1
 			get_sdts();
-			write_sat(fd, satName, diseqc_pos);
+			fd = write_sat(fd, satName, diseqc_pos);
 		}
 
 		if (do_diseqc & 16)
@@ -538,7 +544,7 @@ void *start_scanthread(void *param)
 			get_nits(12718,  4000, 0, 7, 2);
 #endif
 			get_sdts();
-			write_sat(fd, satName, diseqc_pos);
+			fd = write_sat(fd, satName, diseqc_pos);
 		}
 
 		if (do_diseqc & 32)
@@ -598,7 +604,7 @@ void *start_scanthread(void *param)
 			get_nits(12476, 27800, 0, 3, 3);
 #endif
 			get_sdts();
-			write_sat(fd, satName, diseqc_pos);
+			fd = write_sat(fd, satName, diseqc_pos);
 		}
 	}
 
