@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: x509.cpp,v 1.1 2002/03/02 21:53:26 waldi Exp $
+ * $Id: x509.cpp,v 1.2 2002/03/12 19:37:03 waldi Exp $
  */
 
 #include <main.hpp>
@@ -226,7 +226,7 @@ void Crypto::x509::cert::sign ( Crypto::evp::key::privatekey & key, Crypto::evp:
   libcrypto::X509_sign ( _cert, key, md );
 }
   
-int Crypto::x509::cert::verify ( store & store ) throw ( std::bad_alloc, Crypto::exception::no_item )
+int Crypto::x509::cert::verify ( store & store, int ( * callback ) ( int, libcrypto::X509_STORE_CTX * ) ) throw ( std::bad_alloc, Crypto::exception::no_item )
 {
   if ( ! _cert )
     throw Crypto::exception::no_item ( "Crypto::x509::cert" );
@@ -237,7 +237,7 @@ int Crypto::x509::cert::verify ( store & store ) throw ( std::bad_alloc, Crypto:
   if ( ! ctx )
     throw std::bad_alloc ();
   
-  _store -> verify_cb = verify_callback;
+  _store -> verify_cb = callback;
   libcrypto::X509_STORE_CTX_init ( ctx, _store, _cert, NULL );
   int ret = libcrypto::X509_verify_cert ( ctx );
   libcrypto::X509_STORE_CTX_free ( ctx );
@@ -260,22 +260,24 @@ Crypto::x509::cert::operator libcrypto::X509 * () throw ( Crypto::exception::no_
 
 int Crypto::x509::cert::verify_callback ( int ok, libcrypto::X509_STORE_CTX * ctx ) throw ()
 {
-  char buf[256];
-
-  if (!ok)
+  if ( ! ok )
   {
-    libcrypto::X509_NAME_oneline( libcrypto::X509_get_subject_name ( ctx -> current_cert ), buf, 256 );
-    std::cerr << buf << std::endl;
     std::cerr << "error " << ctx -> error << " at " << ctx -> error_depth
       << " depth lookup: " << libcrypto::X509_verify_cert_error_string ( ctx -> error ) << std::endl;
-    if ( ctx -> error == X509_V_ERR_CERT_HAS_EXPIRED ) ok = 1;
-    if ( ctx -> error == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) ok = 1;
-    if ( ctx -> error == X509_V_ERR_INVALID_CA ) ok = 1;
-    if ( ctx -> error == X509_V_ERR_PATH_LENGTH_EXCEEDED ) ok = 1;
-    if ( ctx -> error == X509_V_ERR_INVALID_PURPOSE ) ok = 1;
+
+    if ( ctx -> error == X509_V_ERR_CERT_HAS_EXPIRED ) 
+      return 1;
+    if ( ctx -> error == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT ) 
+      return 1;
+    if ( ctx -> error == X509_V_ERR_INVALID_CA )
+      return 1;
+    if ( ctx -> error == X509_V_ERR_PATH_LENGTH_EXCEEDED )
+      return 1;
+    if ( ctx -> error == X509_V_ERR_INVALID_PURPOSE )
+      return 1;
   }
 
-  return ok;
+  return 0;
 }
 
 Crypto::x509::crl::operator libcrypto::X509_CRL * () throw ( Crypto::exception::no_item )

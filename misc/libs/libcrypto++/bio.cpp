@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: bio.cpp,v 1.2 2002/03/03 13:41:05 waldi Exp $
+ * $Id: bio.cpp,v 1.3 2002/03/12 19:37:03 waldi Exp $
  */
 
 #include <main.hpp>
@@ -246,6 +246,26 @@ Crypto::bio::base64::base64 ()
 {
   TRACE_FUNCTION;
   _bio = libcrypto::BIO_new ( libcrypto::BIO_f_base64 () );
+}
+
+Crypto::bio::base64::base64 ( bio & bio )
+{
+  TRACE_FUNCTION;
+  _bio = libcrypto::BIO_new ( libcrypto::BIO_f_base64 () );
+  push ( bio );
+}
+
+Crypto::bio::base64NoNewline::base64NoNewline ()
+{
+  TRACE_FUNCTION;
+  BIO_set_flags ( _bio, BIO_FLAGS_BASE64_NO_NL );
+}
+
+Crypto::bio::base64NoNewline::base64NoNewline ( bio & bio )
+: base64 ( bio )
+{
+  TRACE_FUNCTION;
+  BIO_set_flags ( _bio, BIO_FLAGS_BASE64_NO_NL );
 }
 
 std::istream & operator >> ( std::istream & stream, Crypto::bio::bio & bio )

@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: evp.cpp,v 1.1 2002/03/02 21:53:26 waldi Exp $
+ * $Id: evp.cpp,v 1.2 2002/03/12 19:37:03 waldi Exp $
  */
 
 #include <main.hpp>
@@ -311,7 +311,7 @@ std::string Crypto::evp::digest::final ()
 
   libcrypto::EVP_DigestFinal ( &ctx, buf, &s );
 
-  return std::string ( reinterpret_cast < char * > ( buf ) );
+  return std::string ( reinterpret_cast < char * > ( buf ), s );
 }
 
 std::string Crypto::evp::sign::final ( Crypto::evp::key::privatekey & key )

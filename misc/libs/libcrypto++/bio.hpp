@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: bio.hpp,v 1.2 2002/03/03 13:41:05 waldi Exp $
+ * $Id: bio.hpp,v 1.3 2002/03/12 19:37:03 waldi Exp $
  */
 
 #ifndef __LIBCRYPTO__BIO_HPP
@@ -114,6 +114,14 @@ namespace Crypto
     {
       public:
         base64 ();
+        base64 ( bio & );
+    };
+
+    class base64NoNewline : public base64
+    {
+      public:
+        base64NoNewline ();
+        base64NoNewline ( bio & );
     };
   };
 };
