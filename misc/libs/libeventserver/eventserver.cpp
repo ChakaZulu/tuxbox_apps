@@ -29,9 +29,23 @@ void CEventServer::registerEvent(unsigned int eventID, unsigned int ClientID, st
 	eventData[eventID][ClientID].clientID=ClientID;
 }
 
+void CEventServer::registerEvent(int fd)
+{
+	commandRegisterEvent msg;
+	read(fd, &msg, sizeof(msg));
+	registerEvent(msg.eventID, msg.clientID, msg.udsName);
+}
+
 void CEventServer::unRegisterEvent(unsigned int eventID, unsigned int ClientID)
 {
 	eventData[eventID].erase( ClientID );
+}
+
+void CEventServer::unRegisterEvent(int fd)
+{
+	commandUnRegisterEvent msg;
+	read(fd, &msg, sizeof(msg));
+	unRegisterEvent(msg.eventID, msg.clientID);
 }
 
 void CEventServer::sendEvent(unsigned int eventID, unsigned int initiatorID, void* eventbody, unsigned int eventbodysize)

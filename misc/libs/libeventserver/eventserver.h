@@ -56,13 +56,14 @@ class CEventServer
 		struct commandRegisterEvent
 		{
 			unsigned int eventID;
+			unsigned int clientID;
 			char udsName[50];
 		};
 
 		struct commandUnRegisterEvent
 		{
 			unsigned int eventID;
-			char udsName[50];
+			unsigned int clientID;
 		};
 
 		struct eventHead
@@ -72,8 +73,12 @@ class CEventServer
 		};
 
 		void registerEvent(unsigned int eventID, unsigned int ClientID, string udsName);
+		void registerEvent(int fd);
 		void unRegisterEvent(unsigned int eventID, unsigned int ClientID);
+		void unRegisterEvent(int fd);
+
 		void sendEvent(unsigned int eventID, unsigned int initiatorID, void* eventbody=NULL, unsigned int eventbodysize=0);
+
 };
 
 
