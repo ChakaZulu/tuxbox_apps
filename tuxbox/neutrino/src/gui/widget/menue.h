@@ -19,7 +19,7 @@ class CChangeObserver
 {
 	public:
 		virtual ~CChangeObserver(){};
-		virtual void changeNotify(string OptionName){};
+		virtual bool changeNotify(string OptionName){return false;};
 };
 
 class CMenuTarget
@@ -113,16 +113,17 @@ class CMenuOptionChooser : public CMenuItem
 		string value;
 	};
 
-	vector<keyval*>		options;
-	int			height;
-	string			optionName;
-	bool			active;
-	int*			optionValue;
-	CChangeObserver*	observ;
+	vector<keyval*>    options;
+	int                height;
+	string             optionName;
+	bool               active;
+	int*               optionValue;
+	CChangeObserver*   observ;
+    bool               localizing;
 
 	public:
 		CMenuOptionChooser(){};
-		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL);
+		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionChooser();
 
 		void addOption(int key, string value);
@@ -141,10 +142,11 @@ class CMenuOptionStringChooser : public CMenuItem
 	bool			active;
 	char*			optionValue;
 	CChangeObserver*	observ;
+    bool               localizing;
 
 	public:
 		CMenuOptionStringChooser(){};
-		CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL);
+		CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionStringChooser();
 
 		void addOption( string value);

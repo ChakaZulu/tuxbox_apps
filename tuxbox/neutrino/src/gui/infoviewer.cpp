@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.16 2001/09/16 02:27:22 McClean Exp $
+// $Id: infoviewer.cpp,v 1.17 2001/09/17 12:45:12 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.17  2001/09/17 12:45:12  field
+// Sprache online umstellbar, kleine Aufraeumarbeiten
+//
 // Revision 1.16  2001/09/16 02:27:22  McClean
 // make neutrino i18n
 //
@@ -141,15 +144,14 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
         if ( key == CRCInput::RC_blue )
         {
             g_StreamInfo->exec(NULL, "");
-            key = -1;
+            key = CRCInput::RC_timeout;
         }
 
     } while (false);
 
     if ( ( key != CRCInput::RC_timeout ) &&
          ( ( key != CRCInput::RC_ok ) || ( CalledFromNumZap ) ) &&
-         ( ( key != CRCInput::RC_home ) || ( CalledFromNumZap ) ) &&
-         ( key != -1 ) )
+         ( ( key != CRCInput::RC_home ) || ( CalledFromNumZap ) ) )
     {
         g_RCInput->addKey2Buffer(key);
     };

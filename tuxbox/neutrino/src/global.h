@@ -1,3 +1,4 @@
+#include "neutrino.h"
 #include "daemonc/lcdd.h"
 #include "daemonc/controld.h"
 #include "daemonc/remotecontrol.h"
@@ -14,12 +15,14 @@
 #include "helpers/settings.h"
 #include "helpers/locale.h"
 
+extern  CNeutrinoApp        *neutrino;
 extern  SNeutrinoSettings   g_settings;
 
 extern  CLCDD           *g_lcdd;
 extern  CControld       *g_Controld;
 extern  CRemoteControl  *g_RemoteControl;
 
+extern  fontRenderClass *g_fontRenderer;
 extern  FontsDef        *g_Fonts;
 extern  CRCInput        *g_RCInput;
 extern  CFrameBuffer    *g_FrameBuffer;

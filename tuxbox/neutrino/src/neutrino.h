@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+
 #include "driver/framebuffer.h"
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
@@ -54,11 +55,13 @@
 #include "widget/keychooser.h"
 #include "widget/stringinput.h"
 #include "widget/screensetup.h"
+#include "widget/setting_helpers.h"
 
 #include "../zapit/getservices.h"
 
 #include "daemonc/remotecontrol.h"
 #include "daemonc/controld.h"
+
 #include "helpers/infoviewer.h"
 #include "helpers/epgdata.h"
 #include "helpers/settings.h"
@@ -77,10 +80,7 @@ using namespace std;
 *          CNeutrinoApp -  main run-class                                             *
 *                                                                                     *
 **************************************************************************************/
-class CColorSetupNotifier;
-class CAudioSetupNotifier;
-class CVideoSetupNotifier;
-class CNetworkSetupNotifier;
+
 class CNeutrinoApp : public CMenuTarget
 {
 	enum
@@ -90,7 +90,6 @@ class CNeutrinoApp : public CMenuTarget
 	};
 
 	string				settingsFile;
-//    struct SNeutrinoSettings	settings;
 
 	bool				nRun;
 	int				    mode;
@@ -102,18 +101,13 @@ class CNeutrinoApp : public CMenuTarget
 	channel_msg			firstchannel;
 	bool				zapit;
 
-//	CRCInput			rcInput;
-//	CFrameBuffer		frameBuffer;
-	fontRenderClass		*fontRenderer;
-//	FontsDef			*fonts;
-
-	CColorSetupNotifier* colorSetupNotifier;
+	CColorSetupNotifier    *colorSetupNotifier;
+	CAudioSetupNotifier    *audioSetupNotifier;
+	CVideoSetupNotifier    *videoSetupNotifier;
+	CNetworkSetupNotifier  *networkSetupNotifier;
+    CLanguageSetupNotifier  *languageSetupNotifier;
 
 	CChannelList		*channelList;
-//	CRemoteControl		remoteControl;
-//	CControld			Controld;
-//	CInfoViewer			infoViewer;
-//	CEpgData			epgData;
 
 	void firstChannel();
 	void channelsInit();
@@ -121,8 +115,7 @@ class CNeutrinoApp : public CMenuTarget
 	void setupColors_classic();
 	void setupColors_neutrino();
 	void setupNetwork( bool force= false );
-//	void saveSetup(SNeutrinoSettings* settings);
-//	bool loadSetup(SNeutrinoSettings* settings);
+
     void saveSetup();
 	bool loadSetup();
 
@@ -136,14 +129,14 @@ class CNeutrinoApp : public CMenuTarget
 	void InitZapper();
 	void InitKeySettings(CMenuWidget &);
 	void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
-	void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier);
+	void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
 	void InitColorSettings(CMenuWidget &);
 	void InitLanguageSettings(CMenuWidget &);
 	void InitColorThemesSettings(CMenuWidget &);
 	void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
-	void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier);
+	void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier* networkSetupNotifier);
 	void InitScreenSettings(CMenuWidget &);
-	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier);
+	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
 	void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
 			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings);
 	void ClearFrameBuffer();

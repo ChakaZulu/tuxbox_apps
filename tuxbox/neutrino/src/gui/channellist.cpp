@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.16 2001/09/14 16:18:46 field Exp $
+// $Id: channellist.cpp,v 1.17 2001/09/17 12:45:12 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.17  2001/09/17 12:45:12  field
+// Sprache online umstellbar, kleine Aufraeumarbeiten
+//
 // Revision 1.16  2001/09/14 16:18:46  field
 // Umstellung auf globale Variablen...
 //
@@ -125,7 +128,6 @@ void CChannelList::updateEvents(void)
   return;
 }
 
-//CChannelList::CChannelList(SNeutrinoSettings *settings, int Key=-1, string Name="", FontsDef *Fonts)
 CChannelList::CChannelList(int Key=-1, string Name="")
 {
 	key = Key;
@@ -441,7 +443,7 @@ void CChannelList::paintItem(int pos)
 void CChannelList::paintHead()
 {
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, name.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10,y+theight+0, width, g_Locale->getText(name).c_str(), COL_MENUHEAD);
 }
 
 void CChannelList::paint()

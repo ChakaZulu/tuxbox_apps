@@ -99,7 +99,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 
 	hide();
 
-    g_lcdd->setMode(LCDM_TV, name);
+    g_lcdd->setMode(LCDM_TV, g_Locale->getText(name));
 
 	return retval;
 }
@@ -111,15 +111,17 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-        g_lcdd->setMode(LCDM_MENU, name);
+    string  l_name = g_Locale->getText(name);
+    g_lcdd->setMode(LCDM_MENU, l_name);
 
 	width = 400;
 	height = 450; // height(menu_title)+10+...
 	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
+
 	int hheight = g_Fonts->menu_title->getHeight();
 	g_FrameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+36,y+hheight, width, name.c_str(), COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+36,y+hheight, width, l_name.c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+6);
 
 	int ypos = y+hheight;
@@ -142,13 +144,14 @@ void CMenuWidget::paint()
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ)
+CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
 	height= g_Fonts->menu->getHeight();
 	optionName = OptionName;
 	active = Active;
 	optionValue = OptionValue;
 	observ=Observ;
+    localizing= Localizing;
 }
 
 
@@ -210,18 +213,25 @@ int CMenuOptionChooser::paint( bool selected )
 		}
 	}
 
-	int stringwidth = g_Fonts->menu->getRenderWidth(option.c_str());
+    string  l_optionName = g_Locale->getText(optionName);
+    string  l_option;
+    if ( localizing )
+        l_option = g_Locale->getText(option);
+    else
+        l_option = option;
+
+	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
 	int stringstartposName = x + 10;
 	int stringstartposOption = x + dx - stringwidth - 10;
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx,  optionName.c_str(), color);
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx,  option.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx,  l_optionName.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx,  l_option.c_str(), color);
 
-        if(selected)
-        {
-                g_lcdd->setText(0, optionName);
-                g_lcdd->setText(1, option);
-        }
+    if(selected)
+    {
+        g_lcdd->setText(0, l_optionName);
+        g_lcdd->setText(1, l_option);
+    }
 
 	return y+height;
 }
@@ -229,13 +239,14 @@ int CMenuOptionChooser::paint( bool selected )
 
 //-------------------------------------------------------------------------------------------------------------------------------
 
-CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active, CChangeObserver* Observ)
+CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
 	height= g_Fonts->menu->getHeight();
 	optionName = OptionName;
 	active = Active;
 	optionValue = OptionValue;
 	observ=Observ;
+    localizing= Localizing;
 }
 
 
@@ -246,11 +257,12 @@ CMenuOptionStringChooser::~CMenuOptionStringChooser()
 
 void CMenuOptionStringChooser::addOption( string value)
 {
-		options.insert(options.end(), value);
+	options.insert(options.end(), value);
 }
 
 int CMenuOptionStringChooser::exec(CMenuTarget*)
 {
+    bool wantsRepaint = false;
 	//select next value
 	for(unsigned int count=0;count<options.size();count++)
 	{
@@ -265,9 +277,12 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 	paint(true);
 	if(observ)
 	{
-		observ->changeNotify( optionName );
+		wantsRepaint = observ->changeNotify( optionName );
 	}
-	return 0;
+    if ( wantsRepaint)
+        return RETURN_REPAINT;
+    else
+        return 0;
 }
 
 int CMenuOptionStringChooser::paint( bool selected )
@@ -280,20 +295,25 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
 
-	string option = optionValue;
+    string  l_optionName = g_Locale->getText(optionName);
+    string  l_option;
+    if ( localizing )
+        l_option = g_Locale->getText(optionValue);
+    else
+        l_option = optionValue;
 
-	int stringwidth = g_Fonts->menu->getRenderWidth(option.c_str());
+	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
 	int stringstartposName = x + 10;
 	int stringstartposOption = x + dx - stringwidth - 10;
 
-	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx,  optionName.c_str(), color);
-	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx,  option.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx, l_optionName.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx, l_option.c_str(), color);
 
-        if(selected)
-        {
-                g_lcdd->setText(0, optionName);
-                g_lcdd->setText(1, option);
-        }
+    if(selected)
+    {
+        g_lcdd->setText(0, l_optionName);
+        g_lcdd->setText(1, l_option);
+    }
 
 	return y+height;
 }
@@ -326,11 +346,13 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 
 int CMenuForwarder::paint(bool selected)
 {
+    string  l_text = g_Locale->getText(text);
+
 	int stringstartposX = x+10;
 
         if(selected)
         {
-            g_lcdd->setText(0, text);
+            g_lcdd->setText(0, l_text);
 
     		if (option)
                 g_lcdd->setText(1, option);
@@ -345,7 +367,7 @@ int CMenuForwarder::paint(bool selected)
 		color = COL_MENUCONTENTINACTIVE;
 
 	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
-	g_Fonts->menu->RenderString(stringstartposX, y+height,dx,  text.c_str(), color);
+	g_Fonts->menu->RenderString(stringstartposX, y+height,dx,  l_text.c_str(), color);
 
 	if(option)
 	{
@@ -380,11 +402,7 @@ CMenuSeparator::CMenuSeparator(int Type, string Text)
 
 int CMenuSeparator::paint(bool selected)
 {
-        if(selected)
-        {
-            g_lcdd->setText(0, text);
-            g_lcdd->setText(1, "");
-        }
+
 
 	g_FrameBuffer->paintBoxRel(x,y, dx, height, COL_MENUCONTENT );
 	if(type&LINE)
@@ -394,7 +412,8 @@ int CMenuSeparator::paint(bool selected)
 	}
 	if(type&STRING)
 	{
-		int stringwidth = g_Fonts->menu->getRenderWidth(text.c_str());
+        string  l_text = g_Locale->getText(text);
+		int stringwidth = g_Fonts->menu->getRenderWidth(l_text.c_str());
 		int stringstartposX = 0;
 
 		if(type&ALIGN_CENTER)
@@ -412,7 +431,13 @@ int CMenuSeparator::paint(bool selected)
 
 		g_FrameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
 
-		g_Fonts->menu->RenderString(stringstartposX, y+height,dx,  text.c_str(), COL_MENUCONTENT);
+		g_Fonts->menu->RenderString(stringstartposX, y+height,dx, l_text.c_str(), COL_MENUCONTENT);
+
+        if(selected)
+        {
+            g_lcdd->setText(0, l_text);
+            g_lcdd->setText(1, "");
+        }
 	}
 	return y+ height;
 }
