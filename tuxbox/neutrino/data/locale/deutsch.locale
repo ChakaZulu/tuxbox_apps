@@ -245,9 +245,7 @@ filebrowser.sort.name (Dateiname)
 filebrowser.sort.namedirsfirst (Dateiname2)
 filebrowser.sort.size (Größe)
 filebrowser.sort.type (Typ)
-flashupdate.action Aktion:
 flashupdate.actionreadflash lese flash
-flashupdate.actionwriteflash schreibe flash
 flashupdate.cantopenfile kann Datei nicht öffnen
 flashupdate.cantopenmtd kann das MTD-Device nicht öffnen
 flashupdate.checkupdate nach neuer Version suchen
@@ -289,7 +287,6 @@ flashupdate.readflash ganzes Flashimage auslesen
 flashupdate.readflashmtd einzelne Partition auslesen
 flashupdate.ready fertig
 flashupdate.reallyflashmtd Wollen Sie den Flashvorgang wirklich durchführen?\n\nFalls ein Fehler auftritt oder das Image nicht\nfunktionfähig ist, wird Ihre DBox nicht mehr booten.\n\nImagename: %s\nZiel: %s
-flashupdate.reboot Die DBox wird neu gestartet.
 flashupdate.savesuccess Das Image wurde erfolgreich unter dem\nDateinamen %s gespeichert.
 flashupdate.selectimage Verfügbare Images
 flashupdate.squashfs.noversion Bei SquashFS Updates werden Versionsüberprüfungen derzeit nur bei Web-Updates unterstützt.\nWollen Sie das ausgewählt Image wirklich installieren?
@@ -334,7 +331,6 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Titel
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
-infoviewer.cantdecode Kanal kann nicht entschlüsselt werden.
 infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.eventlist EPG/Vorschau
@@ -431,11 +427,9 @@ mainsettings.language Sprache
 mainsettings.lcd LC-Display
 mainsettings.misc Diverse Einstellungen
 mainsettings.network Netzwerk
-mainsettings.plugins Plugin Einstellungen
 mainsettings.recording Aufnahme
 mainsettings.savesettingsnow Einstellungen jetzt speichern
 mainsettings.savesettingsnow_hint Einstellungen werden jetzt gespeichert,\nbitte warten...
-mainsettings.scan Einstellungen Kanalsuche
 mainsettings.streaming Movieplayer
 mainsettings.video Video
 menu.back Zurück
@@ -448,7 +442,6 @@ messagebox.no Nein
 messagebox.yes Ja
 miscsettings.bootinfo Infos beim Booten anzeigen
 miscsettings.bootmenu Bootmenü anzeigen
-miscsettings.boxtype DBox Hersteller
 miscsettings.driver_boot Treiber- und Bootoptionen
 miscsettings.fb_destination EXPERT! Boot-Konsole
 miscsettings.general Allgemein
@@ -555,7 +548,6 @@ parentallock.lockedprogram Gesperrtes Programm (FSK ab %d)
 parentallock.lockedsender Vorgesperrter Sender...
 parentallock.never Nie
 parentallock.onsignal Bei gesendeter Vorsperre
-parentallock.onstart Beim Start
 parentallock.parentallock Jugendschutz
 parentallock.prompt PIN-Eingabe
 pictureviewer.defdir Start-Verz.
@@ -598,7 +590,6 @@ recordingmenu.stopplayback Playback anhalten
 recordingmenu.stopsectionsd Sectionsd anhalten
 recordingmenu.stream_all_audio_pids Alle Audiopids aufzeichnen
 recordingmenu.vcr Videorekorder
-recordingmenu.vcr_devicename VCR Name (lirc)
 recordtimer.announce Die Aufnahme beginnt in wenigen Minuten.
 repeatblocker.hint_1 Mindestzeit (in ms) zwischen 2 Tastendrücken
 repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")
@@ -608,7 +599,6 @@ satsetup.diseqc11 DiSEqC 1.1
 satsetup.diseqc12 DiSEqC 1.2
 satsetup.diseqcrepeat DiSEqC-Wiederholungen
 satsetup.extended DiSEqC-Einstellungen
-satsetup.extended_lnb LNB-Einstellungen
 satsetup.extended_motor Motor-Einstellungen
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.motorcontrol Manueller Motor-Setup
@@ -634,7 +624,6 @@ scants.numberofradioservices Radio
 scants.numberoftotalservices Gesamt
 scants.numberoftvservices TV
 scants.provider Anbieter:
-scants.services Services:
 scants.startnow Kanalsuche starten
 scants.transponders Transponder:
 screensetup.lowerright grün = Bildrand unten, rechts
@@ -653,18 +642,15 @@ sleeptimerbox.hint1 Ausschaltzeit in Min. (000=aus)
 sleeptimerbox.hint2 Die dbox2 schaltet sich nach dieser Zeit aus.
 sleeptimerbox.title Sleeptimer
 streamfeatures.head Features
-streamfeatures.info Stream-Information
 streaminfo.aratio Verhältnis
 streaminfo.aratio_unknown Verhältnis: unbekannt
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: unbekannt
 streaminfo.bitrate Bitrate
-streaminfo.ecm_invalid ungültiges CA-System
 streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: unbekannt
 streaminfo.head Tech. Information
 streaminfo.not_available nicht verfügbar
-streaminfo.not_crypted nicht verschlüsselt
 streaminfo.resolution Auflösung
 streaminfo.signal Empfangssignal
 streaming.buffer_overflow Die Aufnahme wurde leider abgebrochen,\nda die Daten nicht schnell genug geschrieben werden konnten.
@@ -709,7 +695,6 @@ timerlist.bouquetselect Bouquet wählen
 timerlist.channel Kanal
 timerlist.channelselect Kanal wählen
 timerlist.delete Löschen
-timerlist.empty Es gibt momentan keine Timer.
 timerlist.menumodify Timer bearbeiten
 timerlist.menunew Neuer Timer
 timerlist.message Nachricht
