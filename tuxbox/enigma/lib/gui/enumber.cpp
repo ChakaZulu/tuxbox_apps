@@ -39,8 +39,8 @@ int eNumber::eventFilter(const eWidgetEvent &event)
 	return 0;
 }
 
-eNumber::eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive, eLabel* descr)
-:eWidget(parent, 1), len(len), min(min), max(max), maxdigits(maxdigits), isactive(isactive), descr(descr?descr->getText():"")
+eNumber::eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
+	:eWidget(parent, grabfocus), len(len), min(min), max(max), maxdigits(maxdigits), isactive(isactive), descr(descr?descr->getText():"")
 {
 	active=0;
 	digit=isactive;
@@ -134,7 +134,8 @@ void eNumber::gotFocus()
 	{
 		if (descr != "")
 		{
-			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive);
+			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
+			LCDTmp->hide();
 			QSize s = parent->LCDElement->getSize();
 			LCDTmp->move(QPoint(0,s.height()/2));
 			LCDTmp->resize(QSize(s.width(), s.height()/2));
@@ -142,7 +143,8 @@ void eNumber::gotFocus()
 		}
 		else
 		{
-			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive);
+			LCDTmp = new eNumber(parent->LCDElement, len, min, max, maxdigits, &(number[0]), isactive, 0, 0);
+			LCDTmp->hide();
 			QSize s = parent->LCDElement->getSize();
 			LCDTmp->resize(s);
 			LCDTmp->move(QPoint(0,0));
@@ -152,6 +154,7 @@ void eNumber::gotFocus()
 		((eNumber*)LCDTmp)->normal=0;
 		((eNumber*)LCDTmp)->cursor=255;
 		((eNumber*)LCDTmp)->have_focus=1;
+		LCDTmp->show();
 	}
 }
 
