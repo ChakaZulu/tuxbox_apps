@@ -923,8 +923,7 @@ static eString getLeftNavi(eString mode, bool javascript)
 		result += "<br>";
 		result += button(110, "LCDshot", LEFTNAVICOLOR, pre + "?mode=controlLCDShot" + post);
 #endif
-		if (eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
-			|| eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7020)
+		if (eSystemInfo::getInstance()->getHwType() >= eSystemInfo::DM7000 )
 		{
 			result += "<br>";
 			result += button(110, "Screenshot", LEFTNAVICOLOR, pre + "?mode=controlScreenShot" + post);
@@ -3437,7 +3436,7 @@ static eString listDirectory(eString request, eString dirpath, eString opt, eHTT
 	{
 		if (opt[opt.length() - 1] != '/')
 			opt += '/';
-		d = opendir(opt.c_str());
+		d = opendir(httpUnescape(opt).c_str());
 	}
 	if (d)
 	{
@@ -3490,7 +3489,7 @@ static eString makeDirectory(eString request, eString dirpath, eString opt, eHTT
 {
 	if (opt.find("&&") == eString::npos)
 	{
-		if (system(eString().sprintf("mkdir %s", opt.c_str()).c_str()) >> 8)
+		if (system(eString().sprintf("mkdir %s", httpUnescape(opt).c_str()).c_str()) >> 8)
 			return eString().sprintf("E: create directory %s failed", opt.c_str());
 		return "+ok";
 	}
@@ -3501,7 +3500,7 @@ static eString removeDirectory(eString request, eString dirpath, eString opt, eH
 {
 	if (opt.find("&&") == eString::npos)
 	{
-		if (system(eString().sprintf("rmdir %s", opt.c_str()).c_str()) >> 8)
+		if (system(eString().sprintf("rmdir %s", httpUnescape(opt).c_str()).c_str()) >> 8)
 			return eString().sprintf("E: remove directory %s failed", opt.c_str());
 		return "+ok";
 	}
@@ -3512,7 +3511,7 @@ static eString removeFile(eString request, eString dirpath, eString opt, eHTTPCo
 {
 	if (opt.find("&&") == eString::npos)
 	{
-		if (system(eString().sprintf("rm %s", opt.c_str()).c_str()) >> 8)
+		if (system(eString().sprintf("rm %s", httpUnescape(opt).c_str()).c_str()) >> 8)
 			return eString().sprintf("E: remove file %s failed", opt.c_str());
 		return "+ok";
 	}
