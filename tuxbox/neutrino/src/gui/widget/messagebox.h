@@ -42,8 +42,6 @@
 #include "menue.h"
 
 
-using namespace std;
-
 class CMessageBoxNotifier
 {
   public:
@@ -66,13 +64,14 @@ class CMessageBox
 		int				fheight;
 		int				theight;
 
-		string				caption;
-		vector<string>			text;
-		string				iconfile;
-		CMessageBoxNotifier*		notifier;
+		std::string              caption;
+		std::vector<std::string> text;
+		std::string              iconfile;
+		CMessageBoxNotifier*     notifier;
 
-		int				selected;
-		int				showbuttons;
+		int                      selected;
+		int                      showbuttons;
+		bool                     utf8;        // utf8_encoded: Caption & Text
 
 		void paintHead();
 		void paintButtons();
@@ -100,12 +99,14 @@ class CMessageBox
 			mbBack = 0x08
 		} buttons;
 
-		CMessageBox( string Caption, string Text, CMessageBoxNotifier* Notifier, string Icon="", int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll );
+		// utf8_encoded: Caption & Text
+		CMessageBox(const std::string Caption, std::string Text, CMessageBoxNotifier* Notifier, const std::string Icon = "", int Width = 500, uint Default= mbrYes, uint ShowButtons= mbAll, const bool utf8_encoded = false);
 		int exec(int timeout = -1);
 
 };
 
-int ShowMsg ( string Caption, string Text, uint Default, uint ShowButtons, string Icon="", int Width = 450, int timeout = -1 );
+// utf8_encoded: Caption & Text
+int ShowMsg(const std::string Caption, std::string Text, uint Default, uint ShowButtons, const std::string Icon = "", int Width = 450, int timeout = -1, const bool utf8_encoded = false);
 
 
 #endif
