@@ -603,15 +603,40 @@
 	<object name="transpondersettings.cable">
 		<eTranspondersettings position="0:0" size="454:160">
 			<eLabel name="lFreq" text="Frequency:" position="10:10" size="150:32" vcenter="on" />
-			<eNumber name="frequency" position="164:10:" size="e-150:32" helptext="enter frequency (0..9, left, right)" loadDeco="" />
-			<eLabel text="MHz" position="e-145:10" size="e:32" vcenter="on" />
+			<eNumber name="frequency" position="164:10" size="e-150:32" helptext="enter transponder frequeny (0..9, left, right)" loadDeco="" />
+			<eLabel text="MHz" position="e-145:10" size="44:32" vcenter="on" />
+			<eCheckbox text="Inv:" name="inversion" position="e-84:10" size="e-10:32" helptext="enable/disable inversion here (ok)" swaptxtpixmap="on" />
 
-			<eLabel name="lSymb" text="Symbolrate:" position="10:52" size="150:32" vcenter="on" />
-			<eNumber name="symbolrate" position="164:52" size="e-150:32" helptext="enter symbol rate (0..9, left, right)" loadDeco="" />
-			<eLabel text="KSymb/s" position="e-145:52" size="e:32" vcenter="on" />
+			<eLabel name="lPol" text="Modulation:" position="10:55" size="152:34" vcenter="on" />
+			<eListbox name="polarity" position="164:55" size="e-150:34" loadDeco="" helptext="choose modulation (left, right)" noUpDownMovement="on" />
+			<eLabel name="lFec" text="FEC:" position="e-120:55" size="45:34" vcenter="on" />
+			<eListbox name="fec" position="e-70:55" size="e-10:34" loadDeco="" helptext="choose the FEC (left, right)" noUpDownMovement="on" />
 
-			<eLabel text="Inversion:" position="10:130" size="150:32" vcenter="on" />
-			<eCheckbox name="inversion" position="164:130" size="30:32" helptext="enable/disable inversion (ok)" />
+			<eLabel name="lSymb" text="Symbol Rate:" position="10:104" size="150:32" vcenter="on" />
+			<eNumber name="symbolrate" position="164:104:" size="e-150:32" helptext="enter symbol rate (0..9, left, right)" loadDeco="" />
+			<eLabel text="KSymb/s" position="e-145:104" size="e:32" vcenter="on" />
+
+		</eTranspondersettings>
+	</object>
+
+	<object name="transpondersettings.terrestrial">
+		<eTranspondersettings position="0:0" size="454:160">
+			<eLabel name="lFreq" text="Frequency:" position="10:3" size="150:32" vcenter="on" />
+			<eNumber name="frequency" position="154:0" size="e-150:32" helptext="enter transponder frequeny (0..9, left, right)" loadDeco="" />
+			<eLabel text="KHz" position="e-145:0" size="44:32" vcenter="on" />
+			<eCheckbox text="Inv:" name="inversion" position="e-70:0" size="e-10:32" helptext="enable/disable inversion here (ok)" swaptxtpixmap="on" />
+			<eLabel name="lPol" text="Constellation:" position="10:40" size="142:34" vcenter="on" />
+			<eListbox name="polarity" position="154:40" size="e-150:34" loadDeco="" helptext="choose modulation (left, right)" noUpDownMovement="on" />
+			<eLabel name="lFec" text="Guard:" position="e-135:40" size="60:34" vcenter="on" />
+			<eListbox name="fec" position="e-70:40" size="e-10:34" loadDeco="" helptext="choose the FEC (left, right)" noUpDownMovement="on" />
+			<eLabel name="lBandwidth" text="Bandwidth:" position="10:80" size="142:34" vcenter="on" />
+			<eListbox name="Bandwidth" position="154:80" size="75:34" loadDeco="" helptext="choose the bandwidth (left, right)" noUpDownMovement="on" />
+			<eLabel name="ltmMode" text="Transm. Mode:" position="245:80" size="142:34" vcenter="on" />
+			<eListbox name="tmMode" position="e-70:80" size="e-10:34" loadDeco="" helptext="choose the transmission mode (left, right)" noUpDownMovement="on" />
+			<eLabel name="lCodeRateLP" text="Coderate LP:" position="10:120" size="142:34" vcenter="on" />
+			<eListbox name="codeRateLP" position="154:120" size="75:34" loadDeco="" helptext="choose the code rate LP (left, right)" noUpDownMovement="on" />
+			<eLabel name="lCodeRateHP" text="Coderate HP:" position="245:120" size="142:34" vcenter="on" />
+			<eListbox name="codeRateHP" position="e-70:120" size="e-10:34" loadDeco="" helptext="choose the code rate HP (left, right)" noUpDownMovement="on" />
 		</eTranspondersettings>
 	</object>
 

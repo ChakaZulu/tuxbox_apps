@@ -605,12 +605,15 @@ eStreaminfo::eStreaminfo(int mode, const eServiceReference &ref, decoderParamete
 		eTransponderWidget *t = 0;
 		switch ( eSystemInfo::getInstance()->getFEType() )
 		{
+			default:
 			case eSystemInfo::feSatellite:
 				t = new eTransponderWidget(w, 0, eTransponderWidget::deliverySatellite);
 				break;
 			case eSystemInfo::feCable:
-			default:
 				t = new eTransponderWidget(w, 0, eTransponderWidget::deliveryCable);
+				break;
+			case eSystemInfo::feTerrestrial:
+				t = new eTransponderWidget(w, 0, eTransponderWidget::deliveryTerrestrial);
 				break;
 		}
 		t->move(ePoint(0, 0));

@@ -73,14 +73,15 @@ tsManual::tsManual(eWidget *parent, const eTransponder &transponder, eWidget *LC
 	int ft=0;
 	switch (eSystemInfo::getInstance()->getFEType())
 	{
+	default:	
 	case eSystemInfo::feSatellite:
 		ft=eTransponderWidget::deliverySatellite;
 		break;
 	case eSystemInfo::feCable:
 		ft=eTransponderWidget::deliveryCable;
 		break;
-	default:
-		ft=eTransponderWidget::deliverySatellite;
+	case eSystemInfo::feTerrestrial:
+		ft=eTransponderWidget::deliveryTerrestrial;
 		break;
 	}
 
@@ -568,9 +569,8 @@ int tsAutomatic::tuneNext(int next)
 	}
 	else if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
 	{
-		progress += eString().sprintf("\n%d,%d Mhz",
-			current_tp->terrestrial.centre_frequency/1000000,
-			current_tp->terrestrial.centre_frequency%1000000);
+		progress += eString().sprintf("\n%d Khz",
+			current_tp->terrestrial.centre_frequency/1000);
 	}
 	l_status->setText(progress);
 
@@ -793,22 +793,21 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 	case eDVBScanEvent::eventScanTuneBegin:
 		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 		{
-			transponder_data->setText( eString().sprintf("%d Mhz / %d ksyms / %s",
+			transponder_data->setText( eString().sprintf("%d MHz / %d ksyms / %s",
 				event.transponder->satellite.frequency / 1000,
 				event.transponder->satellite.symbol_rate / 1000,
 				event.transponder->satellite.polarisation?_("Vertical"):"Horizontal") );
 		}
 		else if( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
 		{
-			transponder_data->setText( eString().sprintf("%d Mhz / %d ksyms",
+			transponder_data->setText( eString().sprintf("%d MHz / %d ksyms",
 				event.transponder->cable.frequency / 1000,
 				event.transponder->cable.symbol_rate / 1000));
 		}
 		else 
 		{
-			transponder_data->setText( eString().sprintf("%d,%d Mhz",
-				event.transponder->terrestrial.centre_frequency/1000000,
-				event.transponder->terrestrial.centre_frequency%1000000));
+			transponder_data->setText( eString().sprintf("%d KHz",
+				event.transponder->terrestrial.centre_frequency/1000));
 		}
 		break;
 	case eDVBScanEvent::eventScanNext:
@@ -1084,7 +1083,7 @@ int TransponderScan::Exec()
 				switch (eSystemInfo::getInstance()->getFEType())
 				{
 				case eSystemInfo::feCable:
-					transponder.setCable(402000, 6900000, 0, 3);	// some cable transponder
+					transponder.setCable(402000, 6900000, 0, 3, 0);	// some cable transponder
 					break;
 				case eSystemInfo::feSatellite:
 					transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0);	// some astra transponder

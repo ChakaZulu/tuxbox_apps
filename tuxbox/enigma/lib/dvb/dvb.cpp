@@ -187,15 +187,16 @@ void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation
 	satellite.inversion=inversion;
 }
 
-void eTransponder::setCable(int frequency, int symbol_rate, int inversion, int modulation)
+void eTransponder::setCable(int frequency, int symbol_rate, int inversion, int modulation, int fec_inner)
 {
-        if (frequency > 1000*1000)
-                frequency=frequency/1000; //transponderlist was read from tuxbox
+	if (frequency > 1000*1000)
+		frequency=frequency/1000; //transponderlist was read from tuxbox
 
 	cable.frequency=frequency;
 	cable.symbol_rate=symbol_rate;
 	cable.inversion=inversion;
 	cable.modulation=modulation;
+	cable.fec_inner=fec_inner;
 	cable.valid=1;
 }
 
@@ -559,7 +560,8 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 			const char *afrequency=node->GetAttributeValue("frequency"),
 					*asymbol_rate=node->GetAttributeValue("symbol_rate"),
 					*ainversion=node->GetAttributeValue("inversion"),
-					*amodulation=node->GetAttributeValue("modulation");
+					*amodulation=node->GetAttributeValue("modulation"),
+					*afec_inner=node->GetAttributeValue("fec_inner");
 			if (!afrequency)
 				continue;
 			if (!asymbol_rate)
@@ -568,11 +570,14 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 				ainversion="2"; // auto
 			if (!amodulation)
 				amodulation="3";
+			if (!afec_inner)
+				afec_inner="0";
 			int frequency=atoi(afrequency)/*/1000*/,
 					symbol_rate=atoi(asymbol_rate),
 					inversion=atoi(ainversion),
-					modulation=atoi(amodulation);
-			t.setCable(frequency, symbol_rate, inversion, modulation );
+					modulation=atoi(amodulation),
+					fec_inner=atoi(afec_inner);
+			t.setCable(frequency, symbol_rate, inversion, modulation, fec_inner );
 			break;
 		}
 		case eSystemInfo::feSatellite:

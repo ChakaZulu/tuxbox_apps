@@ -292,7 +292,7 @@ struct saveTransponder
 		{
 			fprintf(f, "%08x:%04x:%04x\n", t.dvb_namespace.get(), t.transport_stream_id.get(), t.original_network_id.get());
 			if (t.cable.valid)
-				fprintf(f, "\tc %d:%d:%d:%d", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion, t.cable.modulation);
+				fprintf(f, "\tc %d:%d:%d:%d:%d", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion, t.cable.modulation, t.cable.fec_inner);
 			if (t.satellite.valid)
 				fprintf(f, "\ts %d:%d:%d:%d:%d:%d", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.orbital_position, t.satellite.inversion);
 			if (t.terrestrial.valid)
@@ -374,9 +374,14 @@ void eDVBSettings::loadServices()
 			}
 			if (line[1]=='c')
 			{
-				int frequency, symbol_rate, inversion=INVERSION_OFF, modulation=3;
-				sscanf(line+2, "%d:%d:%d:%d:%d", &frequency, &symbol_rate, &inversion, &modulation, &onlyFree);
-				t.setCable(frequency, symbol_rate, inversion, modulation);
+				int frequency, symbol_rate, inversion=INVERSION_OFF, modulation=3, fec_inner=0;
+				int ret = sscanf(line+2, "%d:%d:%d:%d:%d:%d", &frequency, &symbol_rate, &inversion, &modulation, &fec_inner, &onlyFree);
+				if ( ret < 6 )
+				{
+					onlyFree = fec_inner;
+					fec_inner=0;
+				}
+				t.setCable(frequency, symbol_rate, inversion, modulation, fec_inner);
 			}
 			if (line[1]=='t')
 			{

@@ -18,9 +18,12 @@ class eTransponderWidget: public eWidget
 	eNumber *frequency, *symbolrate;
 	eCheckbox *inversion;
 	int type, edit;
-	eListBoxEntryText *fecEntry[6], *polarityEntry[4];
-	
-	eListBox<eListBoxEntryText> *fec, *polarity;
+	eListBoxEntryText *fecEntry[7], *polarityEntry[6], 
+	*codeRateLPEntry[6], *codeRateHPEntry[6], *bandwidthEntry[5], *tmModeEntry[4];
+
+	eListBox<eListBoxEntryText> *fec/*guard*/, 
+				*polarity/*Modulation/Constellation*/,
+				*bandwidth, *tmMode, *codeRateLP, *codeRateHP;
 	eComboBox *sat;
 	void nextField0(int *);
 	void updated1(eListBoxEntryText *);
@@ -28,7 +31,7 @@ class eTransponderWidget: public eWidget
 public:
 	enum type
 	{
-		deliveryCable=1, deliverySatellite=2, flagNoSat=4, flagNoInv=8
+		deliveryCable=1, deliverySatellite=2, deliveryTerrestrial=4, flagNoSat=8, flagNoInv=16
 	};
 	Signal0<void> updated;
 	eTransponderWidget(eWidget *parent, int edit, int type);

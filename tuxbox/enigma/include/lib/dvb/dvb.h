@@ -245,7 +245,7 @@ public:
 	void setCable(CableDeliverySystemDescriptor *descr) { cable.set(descr); }
 	void setTerrestrial(TerrestrialDeliverySystemDescriptor *descr) { terrestrial.set(descr); }
 	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int orbital_position, int inversion);
-	void setCable(int frequency, int symbol_rate, int inversion, int modulation );
+	void setCable(int frequency, int symbol_rate, int inversion, int modulation, int fec_inner );
 	void setTerrestrial(int centre_frequency, int bandwidth, int constellation, int hierarchy_information, int code_rate_hp, int code_rate_lp, int guard_interval, int transmission_mode, int inversion);
 
 	eTransponder &operator=(const eTransponder &ref)
