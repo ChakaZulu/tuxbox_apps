@@ -13,7 +13,16 @@ using namespace std;
 
 	class CBEBouquetWidget : public CMenuWidget
 	{
+		enum state_
+		{
+			beDefault,
+			beMoving
+		} state;
+
 		unsigned int		selected;
+		unsigned int		origPosition;
+		unsigned int		newPosition;
+
 		unsigned int		liststart;
 		unsigned int		listmaxshow;
 		unsigned int		numwidth;
@@ -33,6 +42,16 @@ using namespace std;
 		void paintHead();
 		void paintFoot();
 		void hide();
+
+		void deleteBouquet();
+		void addBouquet();
+		void beginMoveBouquet();
+		void finishMoveBouquet();
+		void cancelMoveBouquet();
+		void internalMoveBouquet( unsigned int fromPosition, unsigned int toPosition);
+		void renameBouquet();
+
+		string inputName( string defaultName);
 
 	public:
 		CBEBouquetWidget();

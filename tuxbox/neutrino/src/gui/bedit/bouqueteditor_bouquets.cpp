@@ -14,6 +14,7 @@ CBEBouquetWidget::CBEBouquetWidget()
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 	liststart = 0;
+	state = beDefault;
 }
 
 void CBEBouquetWidget::paintItem(int pos)
@@ -26,6 +27,10 @@ void CBEBouquetWidget::paintItem(int pos)
 	}
 
 	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
+	if ((liststart+pos==selected) && (state == beMoving))
+	{
+		g_FrameBuffer->paintIcon("gelb.raw", x + 8, ypos+4);
+	}
 	if(liststart+pos<Bouquets.size())
 	{
 		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, Bouquets[liststart+pos].name, color);
@@ -117,8 +122,15 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		int key = g_RCInput->getKey(g_settings.timing_chanlist);
 		if ((key==CRCInput::RC_timeout) || (key==g_settings.key_channelList_cancel))
 		{
-			selected = oldselected;
-			loop=false;
+			if (state == beDefault)
+			{
+				selected = oldselected;
+				loop=false;
+			}
+			else if (state == beMoving)
+			{
+				cancelMoveBouquet();
+			}
 		}
 /*		else if (key==g_settings.key_channelList_pageup)
 		{
@@ -139,63 +151,201 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 		}
 */		else if (key==CRCInput::RC_up)
 		{
-			int prevselected=selected;
-			if(selected==0)
+			if (state == beDefault)
 			{
-				selected = Bouquets.size()-1;
+				int prevselected=selected;
+				if(selected==0)
+				{
+					selected = Bouquets.size()-1;
+				}
+				else
+					selected--;
+				paintItem(prevselected - liststart);
+				unsigned int oldliststart = liststart;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				if(oldliststart!=liststart)
+				{
+					paint();
+				}
+				else
+				{
+					paintItem(selected - liststart);
+				}
 			}
-			else
-				selected--;
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
+			else if (state == beMoving)
 			{
-				paint();
-			}
-			else
-			{
-				paintItem(selected - liststart);
+				internalMoveBouquet(selected, selected - 1);
 			}
 		}
 		else if (key==CRCInput::RC_down)
 		{
-			int prevselected=selected;
-			selected = (selected+1)%Bouquets.size();
-			paintItem(prevselected - liststart);
-			unsigned int oldliststart = liststart;
-			liststart = (selected/listmaxshow)*listmaxshow;
-			if(oldliststart!=liststart)
+			if (state == beDefault)
 			{
-				paint();
+				int prevselected=selected;
+				selected = (selected+1)%Bouquets.size();
+				paintItem(prevselected - liststart);
+				unsigned int oldliststart = liststart;
+				liststart = (selected/listmaxshow)*listmaxshow;
+				if(oldliststart!=liststart)
+				{
+					paint();
+				}
+				else
+				{
+					paintItem(selected - liststart);
+				}
 			}
-			else
+			else if (state == beMoving)
 			{
-				paintItem(selected - liststart);
+				internalMoveBouquet(selected, selected + 1);
 			}
 		}
 		else if(key==CRCInput::RC_red)
 		{
-			g_Zapit->deleteBouquet( selected + 1);
-			Bouquets.clear();
-			g_Zapit->getBouquets(Bouquets, true);
-			if (selected >= Bouquets.size())
-				selected--;
-			hide();
-			paintHead();
-			paint();
-			paintFoot();
+			if (state == beDefault)
+				deleteBouquet();
+		}
+		else if(key==CRCInput::RC_green)
+		{
+			if (state == beDefault)
+				addBouquet();
+		}
+		else if(key==CRCInput::RC_yellow)
+		{
+			liststart = (selected/listmaxshow)*listmaxshow;
+			if (state == beDefault)
+				beginMoveBouquet();
+			paintItem(selected - liststart);
+		}
+		else if(key==CRCInput::RC_blue)
+		{
+			if (state == beDefault)
+				renameBouquet();
+		}
+		else if(key==CRCInput::RC_ok)
+		{
+			if (state == beDefault)
+			{
+			}
+			else if (state == beMoving)
+			{
+				finishMoveBouquet();
+			}
 		}
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
 		         || (key==CRCInput::RC_standby)
 		         || (CRCInput::isNumeric(key)) )
 		{
-			selected = oldselected;
-			g_RCInput->pushbackKey (key);
-			loop=false;
+			if (state == beDefault)
+			{
+				selected = oldselected;
+				g_RCInput->pushbackKey (key);
+				loop=false;
+			}
+			else if (state == beMoving)
+			{
+				cancelMoveBouquet();
+			}
 		}
 	}
 	hide();
 	return RETURN_REPAINT;
+}
+
+void CBEBouquetWidget::deleteBouquet()
+{
+	g_Zapit->deleteBouquet( selected + 1);
+	Bouquets.clear();
+	g_Zapit->getBouquets(Bouquets, true);
+	if (selected >= Bouquets.size())
+		selected--;
+//	hide();
+//	paintHead();
+	paint();
+//	paintFoot();
+}
+
+void CBEBouquetWidget::addBouquet()
+{
+	string newName = inputName("");
+	if (newName != "")
+	{
+		g_Zapit->addBouquet( newName);
+		Bouquets.clear();
+		g_Zapit->getBouquets(Bouquets, true);
+		selected = Bouquets.size() - 1;
+	}
+	paint();
+}
+
+void CBEBouquetWidget::beginMoveBouquet()
+{
+	state = beMoving;
+	origPosition = selected;
+	newPosition = selected;
+}
+
+void CBEBouquetWidget::finishMoveBouquet()
+{
+	state = beDefault;
+	if (newPosition != origPosition)
+	{
+		g_Zapit->moveBouquet( origPosition+1, newPosition+1);
+		Bouquets.clear();
+		g_Zapit->getBouquets(Bouquets, true);
+	}
+	paint();
+}
+
+void CBEBouquetWidget::cancelMoveBouquet()
+{
+	state = beDefault;
+	internalMoveBouquet( newPosition, origPosition);
+}
+
+void CBEBouquetWidget::renameBouquet()
+{
+	string newName = inputName( Bouquets[selected].name);
+	g_Zapit->renameBouquet( selected + 1, newName);
+	Bouquets.clear();
+	g_Zapit->getBouquets(Bouquets, true);
+	paint();
+}
+
+string CBEBouquetWidget::inputName( string defaultName)
+{
+	char Name[30] = "";
+	if (defaultName != "")
+	{
+		strncpy( Name, defaultName.c_str(), 30);
+	}
+
+	CStringInputSMS* nameInput = new CStringInputSMS("", Name, 29,
+													 "" /* hint 1*/, "" /*hint2*/,
+													 "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+	nameInput->exec(this, "");
+	return( Name);
+}
+
+void CBEBouquetWidget::internalMoveBouquet( unsigned int fromPosition, unsigned int toPosition)
+{
+	if ( toPosition == -1 ) return;
+	if ( toPosition == Bouquets.size()) return;
+
+	CZapitClient::responseGetBouquets Bouquet = Bouquets[fromPosition];
+	if (fromPosition < toPosition)
+	{
+		for (unsigned int i=fromPosition; i<toPosition; i++)
+			Bouquets[i] = Bouquets[i+1];
+	}
+	else if (fromPosition > toPosition)
+	{
+		for (unsigned int i=fromPosition; i>toPosition; i--)
+			Bouquets[i] = Bouquets[i-1];
+	}
+	Bouquets[toPosition] = Bouquet;
+	selected = toPosition;
+	newPosition = toPosition;
+	paint();
 }
 
