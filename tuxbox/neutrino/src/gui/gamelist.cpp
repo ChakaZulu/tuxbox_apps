@@ -28,9 +28,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.38 2002/03/06 11:18:39 field Exp $
+$Id: gamelist.cpp,v 1.39 2002/03/22 17:34:04 field Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.39  2002/03/22 17:34:04  field
+Massive Umstellungen - NVODs/SubChannels=KAPUTT!
+Infoviewer tw. kaputt! NON-STABLE!
+
 Revision 1.38  2002/03/06 11:18:39  field
 Fixes & Updates
 
@@ -599,7 +603,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 				 (msg==CRCInput::RC_blue)  ||
 		         (CRCInput::isNumeric(msg)) )
 		{
-			g_RCInput->pushbackMsg( msg, data );
+			g_RCInput->postMsg( msg, data );
 			loop=false;
 		}
 		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
@@ -673,9 +677,7 @@ void CGameList::runGame(int selected )
 		g_ActionLog->println("mode: game, " + gamelist[selected]->name);
 	#endif
 
-	g_RemoteControl->CopyPIDs();
-
-	g_PluginList->setvtxtpid( g_RemoteControl->vtxtpid );
+	g_PluginList->setvtxtpid( g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 	g_PluginList->startPlugin( gamelist[selected]->number );
 
     //redraw menue...

@@ -43,7 +43,7 @@ bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 		ShowMsg ( "messagebox.error", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes);
 		messageShowed = true;
 	}
-	
+
 	if( *((int*) Data)!=0)
 	{	//file anlegen (direktstart)
 		FILE* fd = fopen("/var/etc/.specinv", "w");
@@ -178,7 +178,7 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
 	int sel= atoi(actionKey.c_str());
-	if (g_RemoteControl->audio_chans.selected!= sel )
+	if (g_RemoteControl->selected_apid!= sel )
 		g_RemoteControl->setAPID(atoi(actionKey.c_str()));
 	return menu_return::RETURN_EXIT;
 }
@@ -197,12 +197,12 @@ void showSubchan(string subChannelName)
 		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
 		uint msg; uint data;
 		g_RCInput->getMsg( &msg, &data, 25 );
-		g_RCInput->pushbackMsg( msg, data );
+		g_RCInput->postMsg( msg, data );
 		g_FrameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
 	}
 	else
 	{
-		g_RCInput->pushbackMsg( CRCInput::RC_help, 0 );
+		g_RCInput->postMsg( CRCInput::RC_help, 0 );
 	}
 }
 
@@ -231,7 +231,7 @@ int CStreamFeaturesChangeExec::exec(CMenuTarget* parent, string actionKey)
 	else
 	if (sel>=0)
 	{
-		g_PluginList->setvtxtpid( g_RemoteControl->vtxtpid );
+		g_PluginList->setvtxtpid( g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 		g_PluginList->startPlugin( sel );
 	}
 

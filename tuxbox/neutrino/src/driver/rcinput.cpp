@@ -44,13 +44,67 @@ void printbin( int a)
 }
 
 
-
 /**************************************************************************
 *	Constructor - opens rc-input device and starts threads
 *
 **************************************************************************/
 CRCInput::CRCInput()
 {
+	// pipe for internal event-queue
+	// -----------------------------
+	if (pipe(fd_pipe_high_priority) < 0)
+	{
+		perror("fd_pipe_high_priority");
+		exit(-1);
+	}
+
+	fcntl(fd_pipe_high_priority[0], F_SETFL, O_NONBLOCK );
+	fcntl(fd_pipe_high_priority[1], F_SETFL, O_NONBLOCK );
+
+	if (pipe(fd_pipe_low_priority) < 0)
+	{
+		perror("fd_pipe_low_priority");
+		exit(-1);
+	}
+
+	fcntl(fd_pipe_low_priority[0], F_SETFL, O_NONBLOCK );
+	fcntl(fd_pipe_low_priority[1], F_SETFL, O_NONBLOCK );
+
+
+	// open event-library
+	// -----------------------------
+	fd_event = 0;
+	fd_eventclient = -1;
+
+	//network-setup
+    struct sockaddr_un servaddr;
+    int clilen;
+    memset(&servaddr, 0, sizeof(struct sockaddr_un));
+    servaddr.sun_family = AF_UNIX;
+    strcpy(servaddr.sun_path, NEUTRINO_UDS_NAME);
+    clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+    unlink(NEUTRINO_UDS_NAME);
+
+    //network-setup
+    if ((fd_event = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+    {
+        perror("[neutrino] socket\n");
+    }
+
+	if ( bind(fd_event, (struct sockaddr*) &servaddr, clilen) <0 )
+	{
+		perror("[neutrino] bind failed...\n");
+		exit(-1);
+	}
+
+
+	if (listen(fd_event, 5) !=0)
+	{
+		perror("[neutrino] listen failed...\n");
+		exit( -1 );
+	}
+
+
 	open();
 }
 
@@ -81,36 +135,6 @@ void CRCInput::open()
 	fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
 
 	//+++++++++++++++++++++++++++++++++++++++
-	fd_event = 0;
-	fd_eventclient = -1;
-
-	//network-setup
-	struct sockaddr_un servaddr;
-	int clilen;
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, NEUTRINO_UDS_NAME);
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	unlink(NEUTRINO_UDS_NAME);
-
-	//network-setup
-	if ((fd_event = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("[neutrino] socket\n");
-	}
-
-	if ( bind(fd_event, (struct sockaddr*) &servaddr, clilen) <0 )
-	{
-		perror("[neutrino] bind failed...\n");
-		exit(-1);
-	}
-
-
-	if (listen(fd_event, 5) !=0)
-	{
-		perror("[neutrino] listen failed...\n");
-		exit( -1 );
-	}
 
 	calculateMaxFd();
 }
@@ -127,10 +151,6 @@ void CRCInput::close()
 		::close(fd_keyb);
 	}
 */
-	if(fd_event)
-	{
-		::close(fd_event);
-	}
 }
 
 void CRCInput::calculateMaxFd()
@@ -140,6 +160,10 @@ void CRCInput::calculateMaxFd()
 		fd_max = fd_event;
 	if(fd_eventclient > fd_max)
 		fd_max = fd_eventclient;
+	if(fd_pipe_high_priority[0] > fd_max)
+		fd_max = fd_pipe_high_priority[0];
+	if(fd_pipe_low_priority[0] > fd_max)
+		fd_max = fd_pipe_low_priority[0];
 }
 
 
@@ -150,6 +174,19 @@ void CRCInput::calculateMaxFd()
 CRCInput::~CRCInput()
 {
 	close();
+
+	if(fd_pipe_high_priority[0])
+		::close(fd_pipe_high_priority[0]);
+	if(fd_pipe_high_priority[1])
+		::close(fd_pipe_high_priority[1]);
+
+	if(fd_pipe_low_priority[0])
+		::close(fd_pipe_low_priority[0]);
+	if(fd_pipe_low_priority[1])
+		::close(fd_pipe_low_priority[1]);
+
+	if(fd_event)
+		::close(fd_event);
 }
 
 /**************************************************************************
@@ -216,18 +253,6 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 	//set 0
 	*data = 0;
 
-	//es ist ein event im Buffer - diesen zurückgeben
-	if( eventlist.size() > 0 )
-	{
-		vector<event*>::iterator e = eventlist.begin();
-
-		*msg = (*e)->msg;
-		*data = (*e)->data;
-		eventlist.erase( e );
-        delete *e;
-
-		return;
-	}
 
 	if(Timeout==-1)
 	{
@@ -249,15 +274,34 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 		tvselect.tv_usec = (Timeout*100000)%1000000;
 
 		FD_ZERO(&rfds);
-		FD_SET(fd_rc, &rfds);
-		//FD_SET(fd_keyb, &rfds);
+		if (fd_rc> 0)
+			FD_SET(fd_rc, &rfds);
+		if (fd_keyb> 0)
+			FD_SET(fd_keyb, &rfds);
+
 		FD_SET(fd_event, &rfds);
+		FD_SET(fd_pipe_high_priority[0], &rfds);
+		FD_SET(fd_pipe_low_priority[0], &rfds);
+
 		if(fd_eventclient!=-1)
 		{
 			FD_SET(fd_eventclient, &rfds);
 		}
 		calculateMaxFd();
+
 		int status =  select(fd_max+1, &rfds, NULL, NULL, tvslectp);
+		//printf("select returned %d\n", status);
+
+		if(FD_ISSET(fd_pipe_high_priority[0], &rfds))
+		{
+			uint buf[2];
+			read(fd_pipe_high_priority[0], &buf, sizeof(buf));
+			*msg = buf[0];
+			*data = buf[1];
+			printf("got event from high-pri pipe %x %x\n", *msg, *data );
+			return;
+		}
+
 /*
 		if(FD_ISSET(fd_keyb, &rfds))
 		{
@@ -432,6 +476,16 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 			}
 		}
 
+		if(FD_ISSET(fd_pipe_low_priority[0], &rfds))
+		{
+			uint buf[2];
+			read(fd_pipe_low_priority[0], &buf, sizeof(buf));
+			*msg = buf[0];
+			*data = buf[1];
+			printf("got event from low-pri pipe %x %x\n", *msg, *data );
+			return;
+		}
+
 		if ( InitialTimeout == 0 )
 		{//nicht warten wenn kein key da ist
 		   	*msg = RC_timeout;
@@ -457,39 +511,21 @@ void CRCInput::getMsg(uint *msg, uint *data, int Timeout=-1, bool bAllowRepeatLR
 	}
 }
 
-
-
-void CRCInput::insertMsgAtTop(uint msg, uint data)
+void CRCInput::postMsg(uint msg, uint data, bool Priority)
 {
-	event* tmp = new event();
-	tmp->msg 	= msg;
-	tmp->data	= data;
-	eventlist.insert(eventlist.begin(), tmp);
-}
-
-void CRCInput::pushbackMsg(uint msg, uint data)
-{
-	event* tmp = new event();
-	tmp->msg 	= msg;
-	tmp->data	= data;
-	eventlist.insert(eventlist.end(), tmp);
+	//printf("postMsg %x %x %d\n", msg, data, Priority );
+	uint buf[2];
+	buf[0] = msg;
+	buf[1] = data;
+	if ( Priority )
+		write(fd_pipe_high_priority[1], &buf, sizeof(buf));
+	else
+		write(fd_pipe_low_priority[1], &buf, sizeof(buf));
 }
 
 
-void CRCInput::clearMsg(uint min = 0, uint max = 0xFFFFFFFF )
+void CRCInput::clearMsg()
 {
-	vector<event*>::iterator e = eventlist.begin();
-
-	while ( e != eventlist.end() )
-	{
-		if ( ( (*e)->msg >= min ) && ( (*e)->msg <= max ) )
-		{
-			eventlist.erase( e );
-			delete *e;
-		}
-		else
-			e++;
-	}
 }
 
 /**************************************************************************

@@ -404,7 +404,7 @@ int CChannelList::show()
 		{
 			//pushback key if...
 			selected = oldselected;
-			g_RCInput->pushbackMsg( msg, data );
+			g_RCInput->postMsg( msg, data );
 			loop=false;
 		}
 		else if ( msg == CRCInput::RC_help )
@@ -424,7 +424,7 @@ int CChannelList::show()
 				     ( msg != CRCInput::RC_timeout ) )
 				{
 					// RC_red schlucken
-					g_RCInput->pushbackMsg( msg, data );
+					g_RCInput->postMsg( msg, data );
 				}
 
 				paintHead();
@@ -507,7 +507,7 @@ void CChannelList::zapTo(int pos)
 		tuned = pos;
 		g_RemoteControl->zapTo_onid_sid( chan->onid_sid, chan->name );
 	}
-	g_RCInput->pushbackMsg( messages::SHOW_INFOBAR, 0 );
+	g_RCInput->postMsg( messages::SHOW_INFOBAR, 0 );
 
 	if (bouquetList != NULL)
 		bouquetList->adjustToChannel( getActiveChannelNumber());
@@ -546,26 +546,30 @@ int CChannelList::numericZap(int key)
 	int sy = g_Fonts->channel_num_zap->getHeight()+6;
 	char valstr[10];
 	int chn=key;
+	int lastchan= -1;
 	int pos=1;
 	uint msg; uint data;
 	bool doZap = true;
 
+
 	while(1)
 	{
-		sprintf((char*) &valstr, "%d", chn);
-		while(strlen(valstr)<4)
+		if (lastchan != chn)
 		{
-			strcat(valstr,"·");   //"_"
-		}
-		g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
+			sprintf((char*) &valstr, "%d", chn);
+			while(strlen(valstr)<4)
+				strcat(valstr,"·");   //"_"
 
-		for (int i=3; i>=0; i--)
-		{
-			valstr[i+ 1]= 0;
-			g_Fonts->channel_num_zap->RenderString(ox+7+ i*((sx-14)>>2), oy+sy-3, sx, &valstr[i], COL_INFOBAR);
-		}
+			g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
 
-		showInfo(chn- 1);
+			for (int i=3; i>=0; i--)
+			{
+				valstr[i+ 1]= 0;
+				g_Fonts->channel_num_zap->RenderString(ox+7+ i*((sx-14)>>2), oy+sy-3, sx, &valstr[i], COL_INFOBAR);
+			}
+
+			showInfo(chn- 1);
+		}
 
 
 		g_RCInput->getMsg( &msg, &data, 30 );

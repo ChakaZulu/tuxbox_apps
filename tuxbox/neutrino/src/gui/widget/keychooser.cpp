@@ -87,7 +87,7 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-	g_RCInput->clearMsg( 0 );
+	g_RCInput->clearMsg();
 
 	bool doLoop = true;
 

@@ -30,12 +30,16 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.20 2002/03/06 11:18:39 field Exp $
+$Id: streaminfo.cpp,v 1.21 2002/03/22 17:34:04 field Exp $
 
 Module StreamInfo
 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.21  2002/03/22 17:34:04  field
+ Massive Umstellungen - NVODs/SubChannels=KAPUTT!
+ Infoviewer tw. kaputt! NON-STABLE!
+
  Revision 1.20  2002/03/06 11:18:39  field
  Fixes & Updates
 
@@ -248,23 +252,21 @@ void CStreamInfo::paint()
 
 	ypos+= mheight+ 10;
 
-	g_RemoteControl->CopyPIDs();
-
-	if ( g_RemoteControl->vpid == 0 )
+	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
 		sprintf((char*) buf, "%s: %s", "v_pid", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
-		sprintf((char*) buf, "%s: 0x%x", "v_pid", g_RemoteControl->vpid );
+		sprintf((char*) buf, "%s: 0x%x", "v_pid", g_RemoteControl->current_PIDs.PIDs.vpid );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
-	if ( g_RemoteControl->audio_chans.count_apids == 0 )
+	if ( g_RemoteControl->current_PIDs.APIDs.size() == 0 )
 		sprintf((char*) buf, "%s: %s", "a_pid(s)", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
 	{
 		sprintf((char*) buf, "%s: ", "a_pid(s)" );
-		for (int i= 0; i< g_RemoteControl->audio_chans.count_apids; i++)
+		for (int i= 0; i< g_RemoteControl->current_PIDs.APIDs.size(); i++)
 		{
-			sprintf((char*) buf2, " 0x%x",  g_RemoteControl->audio_chans.apids[i].pid );
+			sprintf((char*) buf2, " 0x%x",  g_RemoteControl->current_PIDs.APIDs[i].pid );
 
 			if (i > 0)
 			strcat((char*) buf, ",");
@@ -276,7 +278,7 @@ void CStreamInfo::paint()
 	ypos+= mheight;
 
 	sprintf((char*) buf, "%s: ", "ecm_pid");
-	switch ( g_RemoteControl->ecmpid )
+	switch ( g_RemoteControl->current_PIDs.PIDs.ecmpid )
 	{
 		case no_ecmpid_found :
 			strcat((char*) buf, g_Locale->getText("streaminfo.not_crypted").c_str() );
@@ -285,19 +287,19 @@ void CStreamInfo::paint()
 			strcat((char*) buf, g_Locale->getText("streaminfo.ecm_invalid").c_str() );
 			break;
 		default:
-			if ( g_RemoteControl->ecmpid == 0 )
+			if ( g_RemoteControl->current_PIDs.PIDs.ecmpid == 0 )
 				sprintf((char*) buf, "%s: %s", "ecm_pid", g_Locale->getText("streaminfo.not_available").c_str() );
 			else
-				sprintf((char*) buf, "%s: 0x%x", "ecm_pid", g_RemoteControl->ecmpid );
+				sprintf((char*) buf, "%s: 0x%x", "ecm_pid", g_RemoteControl->current_PIDs.PIDs.ecmpid );
 	}
 
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 
-	if ( g_RemoteControl->vtxtpid == 0 )
+	if ( g_RemoteControl->current_PIDs.PIDs.vtxtpid == 0 )
         	sprintf((char*) buf, "%s: %s", "vtxt_pid", g_Locale->getText("streaminfo.not_available").c_str() );
 	else
-        	sprintf((char*) buf, "%s: 0x%x", "vtxt_pid", g_RemoteControl->vtxtpid );
+        	sprintf((char*) buf, "%s: 0x%x", "vtxt_pid", g_RemoteControl->current_PIDs.PIDs.vtxtpid );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 	ypos+= mheight;
 }

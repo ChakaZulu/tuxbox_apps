@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.201 2002/03/20 18:57:34 field Exp $
+        $Id: neutrino.cpp,v 1.202 2002/03/22 17:34:03 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1299,44 +1299,43 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 
 void CNeutrinoApp::SelectNVOD()
 {
-	CSubChannel_Infos subChannels= g_RemoteControl->getSubChannels();
-
-	if ( subChannels.has_subChannels_for( channelList->getActiveChannelID() ) )
+/*
+	if ( g_RemoteControl->subChannels.has_subChannels_for( channelList->getActiveChannelID() ) )
 	{
 		// NVOD/SubService- Kanal!
-		CMenuWidget NVODSelector( subChannels.are_subchannels?"nvodselector.subservice":"nvodselector.head",
+		CMenuWidget NVODSelector( g_RemoteControl->subChannels.are_subchannels?"nvodselector.subservice":"nvodselector.head",
 		                          "video.raw", 400 );
 
 		NVODSelector.addItem( new CMenuSeparator() );
 
-		for(unsigned count=0;count<subChannels.list.size();count++)
+		for(unsigned count=0;count<g_RemoteControl->subChannels.list.size();count++)
 		{
 			char nvod_id[5];
 			sprintf(nvod_id, "%d", count);
 
-			if (!subChannels.are_subchannels)
+			if (!g_RemoteControl->subChannels.are_subchannels)
 			{
 				char nvod_time_a[50], nvod_time_e[50], nvod_time_x[50];
 				char nvod_s[100];
 				struct  tm *tmZeit;
 
-				tmZeit= localtime(&subChannels.list[count].startzeit);
+				tmZeit= localtime(&g_RemoteControl->subChannels.list[count].startzeit);
 				sprintf(nvod_time_a, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
 
-				time_t endtime=subChannels.list[count].startzeit+ subChannels.list[count].dauer;
+				time_t endtime=g_RemoteControl->subChannels.list[count].startzeit+ g_RemoteControl->subChannels.list[count].dauer;
 				tmZeit= localtime(&endtime);
 				sprintf(nvod_time_e, "%02d:%02d", tmZeit->tm_hour, tmZeit->tm_min);
 
 				time_t jetzt=time(NULL);
-				if (subChannels.list[count].startzeit > jetzt)
+				if (g_RemoteControl->subChannels.list[count].startzeit > jetzt)
 				{
-					int mins=(subChannels.list[count].startzeit- jetzt)/ 60;
+					int mins=(g_RemoteControl->subChannels.list[count].startzeit- jetzt)/ 60;
 					sprintf(nvod_time_x, g_Locale->getText("nvod.starting").c_str(), mins);
 				}
 				else
-					if ( (subChannels.list[count].startzeit<= jetzt) && (jetzt < endtime) )
+					if ( (g_RemoteControl->subChannels.list[count].startzeit<= jetzt) && (jetzt < endtime) )
 					{
-						int proz=(jetzt- subChannels.list[count].startzeit)*100/subChannels.list[count].dauer;
+						int proz=(jetzt- g_RemoteControl->subChannels.list[count].startzeit)*100/ g_RemoteControl->subChannels.list[count].dauer;
 						sprintf(nvod_time_x, g_Locale->getText("nvod.proz").c_str(), proz);
 					}
 					else
@@ -1344,38 +1343,33 @@ void CNeutrinoApp::SelectNVOD()
 
 				//string nvod_s= nvod_time_a+ " - "+ nvod_time_e+ " "+ nvod_time_x;
 				sprintf(nvod_s, "%s - %s %s", nvod_time_a, nvod_time_e, nvod_time_x);
-				NVODSelector.addItem( new CMenuForwarder(nvod_s, true, "", NVODChanger, nvod_id, false), (count == subChannels.selected) );
+				NVODSelector.addItem( new CMenuForwarder(nvod_s, true, "", NVODChanger, nvod_id, false), (count == g_RemoteControl->subChannels.selected) );
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder(subChannels.list[count].subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == subChannels.selected) );
+				NVODSelector.addItem( new CMenuForwarder(g_RemoteControl->subChannels.list[count].subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->subChannels.selected) );
 			}
 		}
 		NVODSelector.exec(NULL, "");
 	}
+*/
 }
 
 void CNeutrinoApp::SelectAPID()
 {
-	g_RemoteControl->CopyPIDs();
-
-	char to_compare[50];
-	snprintf( to_compare, 10, "%x", channelList->getActiveChannelOnid_sid() );
-
-	if ( ( strcmp(g_RemoteControl->audio_chans.name, to_compare )== 0 ) &&
-	        ( g_RemoteControl->audio_chans.count_apids> 1 ) )
+	if ( g_RemoteControl->current_PIDs.APIDs.size()> 1 )
 	{
 		// wir haben APIDs für diesen Kanal!
 
 		CMenuWidget APIDSelector("apidselector.head", "audio.raw", 300);
 		APIDSelector.addItem( new CMenuSeparator() );
 
-		for(int count=0;count<g_RemoteControl->audio_chans.count_apids;count++)
+		for( int count=0; count<g_RemoteControl->current_PIDs.APIDs.size(); count++ )
 		{
 			char apid[5];
 			sprintf(apid, "%d", count);
-			APIDSelector.addItem( new CMenuForwarder(g_RemoteControl->audio_chans.apids[count].name, true,
-								  "", APIDChanger, apid, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->audio_chans.selected) );
+			APIDSelector.addItem( new CMenuForwarder(g_RemoteControl->current_PIDs.APIDs[count].desc, true,
+								  "", APIDChanger, apid, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_apid) );
 		}
 		APIDSelector.exec(NULL, "");
 	}
@@ -1390,7 +1384,6 @@ void CNeutrinoApp::ShowStreamFeatures()
 	int cnt = 0;
 	int enabled_count = 0;
 
-	g_RemoteControl->CopyPIDs();
     g_PluginList->loadPlugins();
 
 	for(unsigned int count=0;count<g_PluginList->getNumberOfPlugins();count++)
@@ -1401,7 +1394,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 			sprintf(id, "%d", count);
 
-			bool enable_it = ( ( !g_PluginList->getVTXT(count) )  || (g_RemoteControl->vtxtpid!=0) );
+			bool enable_it = ( ( !g_PluginList->getVTXT(count) )  || (g_RemoteControl->current_PIDs.PIDs.vtxtpid!=0) );
 			if ( enable_it )
 				enabled_count++;
 
@@ -1759,23 +1752,37 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 	}
 }
 
+void CNeutrinoApp::showProfiling( string text )
+{
+	struct timeval tv;
+
+	gettimeofday( &tv, NULL );
+	long long now = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+
+	//printf("--> '%s' %f\n", text.c_str(), (now- last_profile_call)/ 1000.);
+	last_profile_call = now;
+}
+
 int CNeutrinoApp::handleMsg(uint msg, uint data)
 {
 	int res;
 
 	res = g_InfoViewer->handleMsg(msg, data);
+	res = res | g_RemoteControl->handleMsg(msg, data);
 
 	if ( res != messages_return::unhandled )
-		return res;
+		return ( res & ( 0xFFFFFFFF - messages_return::unhandled ) );
+
 
     if ( msg == messages::EVT_VCRCHANGED )
 	{
 		if ( g_settings.vcr_AutoSwitch == 1 )
 		{
 			if ( data != VCR_STATUS_OFF )
-				g_RCInput->pushbackMsg( messages::VCR_ON, 0 );
+				g_RCInput->postMsg( messages::VCR_ON, 0 );
 			else
-				g_RCInput->pushbackMsg( messages::VCR_OFF, 0 );
+				g_RCInput->postMsg( messages::VCR_OFF, 0 );
 		}
 		return messages_return::handled | messages_return::cancel_info;
 	}
@@ -1789,7 +1796,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 		if ( mode == mode_standby )
 		{
-        	g_RCInput->insertMsgAtTop( messages::STANDBY_OFF, 0 );
+        	g_RCInput->postMsg( messages::STANDBY_OFF, 0 );
 		}
 		else if ( !g_settings.shutdown_real )
 		{
@@ -1820,11 +1827,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 			} while ( ( msg != CRCInput::RC_timeout ) && ( diff < 10 ) );
 
-			g_RCInput->insertMsgAtTop( ( diff >= 10 ) ? messages::SHUTDOWN : messages::STANDBY_ON, 0 );
+			g_RCInput->postMsg( ( diff >= 10 ) ? messages::SHUTDOWN : messages::STANDBY_ON, 0 );
         }
         else
         {
-        	g_RCInput->insertMsgAtTop( messages::SHUTDOWN, 0 );
+        	g_RCInput->postMsg( messages::SHUTDOWN, 0 );
 		}
 		return messages_return::cancel_all | messages_return::handled;
 	}
@@ -1836,7 +1843,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		int diff = int((endtime - standby_pressed_at)/100000. );
 		if ( diff >= 10 )
 		{
-        	g_RCInput->insertMsgAtTop( messages::SHUTDOWN, 0 );
+        	g_RCInput->postMsg( messages::SHUTDOWN, 0 );
         	return messages_return::cancel_all | messages_return::handled;
         }
 	}
@@ -1997,7 +2004,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			{
 				if ( neutrino->handleMsg( msg, data ) & messages_return::unhandled )
 				{
-					g_RCInput->pushbackMsg( msg, data );
+					g_RCInput->postMsg( msg, data );
 
 					msg= CRCInput::RC_timeout;
 				}
@@ -2220,7 +2227,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 	}
 	else if(actionKey=="scart")
 	{
-		g_RCInput->pushbackMsg( messages::VCR_ON, 0 );
+		g_RCInput->postMsg( messages::VCR_ON, 0 );
 		returnval = menu_return::RETURN_EXIT_ALL;
 	}
 	else if(actionKey=="network")
@@ -2278,9 +2285,10 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.201 2002/03/20 18:57:34 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.202 2002/03/22 17:34:03 field Exp $\n\n");
 	tzset();
 	initGlobals();
+
 	neutrino = new CNeutrinoApp;
 	return neutrino->run(argc, argv);
 }

@@ -216,7 +216,7 @@ int CBEChannelSelectWidget::exec(CMenuTarget* parent, string actionKey)
 		else if( CRCInput::isNumeric(key) )
 		{
 			selected = oldselected;
-			g_RCInput->pushbackMsg( msg, data );
+			g_RCInput->postMsg( msg, data );
 			loop=false;
 		}*/
 		else

@@ -298,7 +298,7 @@ int CBouquetList::show()
 				 ( msg == CRCInput::RC_blue ) )
 		{
 			selected = oldselected;
-			g_RCInput->pushbackMsg( msg, data );
+			g_RCInput->postMsg( msg, data );
 			loop=false;
 		}
 		else

@@ -30,11 +30,15 @@
 */
 
 /*
-$Id: menue.cpp,v 1.47 2002/03/11 17:25:57 Simplex Exp $
+$Id: menue.cpp,v 1.48 2002/03/22 17:34:04 field Exp $
 
 
 History:
  $Log: menue.cpp,v $
+ Revision 1.48  2002/03/22 17:34:04  field
+ Massive Umstellungen - NVODs/SubChannels=KAPUTT!
+ Infoviewer tw. kaputt! NON-STABLE!
+
  Revision 1.47  2002/03/11 17:25:57  Simplex
  locked bouquets work
 
@@ -298,7 +302,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 				case (CRCInput::RC_yellow):
 				case (CRCInput::RC_blue):
 					{
-						g_RCInput->pushbackMsg( msg, data );
+						g_RCInput->postMsg( msg, data );
 						msg = CRCInput::RC_timeout;
 					}
 					break;

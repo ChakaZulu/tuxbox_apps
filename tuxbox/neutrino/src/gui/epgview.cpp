@@ -427,7 +427,7 @@ int CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long lo
 					break;
 
 				case CRCInput::RC_red:
-					g_RCInput->pushbackMsg( msg, data );
+					g_RCInput->postMsg( msg, data );
 
 				case CRCInput::RC_ok:
 				case CRCInput::RC_help:

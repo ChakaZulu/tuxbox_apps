@@ -37,14 +37,11 @@
 CRemoteControl::CRemoteControl()
 {
 	memset(&remotemsg, 0, sizeof(remotemsg) );
-	memset(&audio_chans, 0, sizeof(audio_chans));
-	memset(&audio_chans_int, 0, sizeof(audio_chans_int));
-	i_ecmpid = 0;
-    i_vtxtpid = 0;
-    i_vpid = 0;
-    ecmpid = 0;
-    vtxtpid = 0;
-    vpid = 0;
+
+	current_onid_sid = 0;
+	current_EPGid= 0;
+	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
+	current_PIDs.APIDs.clear();
 
 	pthread_cond_init( &send_cond, NULL );
 
@@ -82,122 +79,161 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 	return (char *)++from;
 }
 
-void CRemoteControl::getAPID_Names()
+int CRemoteControl::handleMsg(uint msg, uint data)
 {
-	unsigned int onid_tsid;
-	sscanf( audio_chans_int.name, "%x", &onid_tsid );
 
-	bool has_unresolved_ctags= false;
-	for(int count=0;count<audio_chans_int.count_apids;count++)
+    if ( msg == messages::EVT_CURRENTEPG )
 	{
-		if (audio_chans_int.apids[count].ctag != -1 )
+		sectionsd::CurrentNextInfo* info_CN = (sectionsd::CurrentNextInfo*) data;
+
+		if ( ( info_CN->current_uniqueKey >> 16) == current_onid_sid )
+		{
+			//CURRENT-EPG für den aktuellen Kanal bekommen!;
+
+			current_EPGid= info_CN->current_uniqueKey;
+
+			if ( has_unresolved_ctags )
+				processAPIDnames();
+
+			if ( info_CN->flags & sectionsd::epgflags::current_has_linkagedescriptors )
+				getSubChannels();
+		}
+	    return messages_return::handled;
+	}
+	else if ( msg == messages::EVT_ZAP_COMPLETE )
+	{
+		if ( data == current_onid_sid )
+		{
+			g_Zapit->getPIDS( current_PIDs );
+			g_RCInput->postMsg( messages::EVT_ZAP_GOTPIDS, current_onid_sid, false );
+
+			processAPIDnames();
+		}
+	    return messages_return::handled;
+	}
+	else
+		return messages_return::unhandled;
+}
+
+void CRemoteControl::getSubChannels()
+{
+	if ( subChannels.size() == 0 )
+	{
+		sectionsd::LinkageDescriptorList	linkedServices;
+		if ( g_Sectionsd->getLinkageDescriptorsUniqueKey( current_EPGid, linkedServices ) )
+		{
+			printf("got subchans %d\n",  linkedServices.size());
+
+            are_subchannels = true;
+			for (int i=0; i< linkedServices.size(); i++)
+			{
+				subChannels.insert(  CSubService( linkedServices[i].originalNetworkId<<16 | linkedServices[i].serviceId,
+												  linkedServices[i].transportStreamId,
+												  linkedServices[i].name) );
+			}
+
+			copySubChannelsToZapit();
+            g_RCInput->postMsg( messages::EVT_ZAP_GOT_SUBSERVICES, current_onid_sid, false );
+		}
+	}
+}
+
+void CRemoteControl::getNVODs()
+{
+	if ( subChannels.size() == 0 )
+	{
+		sectionsd::NVODTimesList	NVODs;
+		if ( g_Sectionsd->getNVODTimesServiceKey( current_onid_sid, NVODs ) )
+		{
+			printf("got nvods %d\n",  NVODs.size());
+
+			are_subchannels = false;
+			for (int i=0; i< NVODs.size(); i++)
+			{
+				if ( NVODs[i].zeit.dauer> 0 )
+					subChannels.insert(  CSubService( NVODs[i].onid_sid,
+													  NVODs[i].tsid,
+													  NVODs[i].zeit.startzeit,
+													  NVODs[i].zeit.dauer) );
+			}
+
+			copySubChannelsToZapit();
+            g_RCInput->postMsg( messages::EVT_ZAP_GOT_SUBSERVICES, current_onid_sid, false );
+		}
+	}
+}
+
+void CRemoteControl::processAPIDnames()
+{
+	has_unresolved_ctags= false;
+	has_ac3 = false;
+
+	for(int count=0; count< current_PIDs.APIDs.size(); count++)
+	{
+		if ( current_PIDs.APIDs[count].component_tag != -1 )
 			has_unresolved_ctags= true;
 
-		if ( strlen( audio_chans_int.apids[count].name ) == 3 )
+		if ( strlen( current_PIDs.APIDs[count].desc ) == 3 )
 		{
 			// unaufgeloeste Sprache...
-			strcpy( audio_chans_int.apids[count].name, getISO639Description( audio_chans_int.apids[count].name ) );
+			strcpy( current_PIDs.APIDs[count].desc, getISO639Description( current_PIDs.APIDs[count].desc ) );
 		}
 
-		if ( audio_chans_int.apids[count].is_ac3 )
-			strcat(audio_chans_int.apids[count].name, " (AC3)");
+		if ( current_PIDs.APIDs[count].is_ac3 )
+		{
+			strcat( current_PIDs.APIDs[count].desc, " (AC3)");
+			has_ac3 = true;
+		}
 	}
 
-	if ( has_unresolved_ctags && ( onid_tsid != 0 ) )
+	if ( has_unresolved_ctags )
 	{
-		int sock_fd;
-		SAI servaddr;
-		char rip[]="127.0.0.1";
-		bool retval = false;
-
-		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		memset(&servaddr,0,sizeof(servaddr));
-		servaddr.sin_family=AF_INET;
-		servaddr.sin_port=htons(sectionsd::portNumber);
-		inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+		if ( current_EPGid != 0 )
 		{
-			perror("Couldn't connect to server!");
-		}
-		else
-		{
-			sectionsd::msgRequestHeader req;
-			req.version = 2;
-			req.command = sectionsd::CurrentComponentTagsChannelID;
-			req.dataLength = 4;
-			write(sock_fd,&req,sizeof(req));
-
-			write(sock_fd, &onid_tsid, sizeof(onid_tsid));
-			printf("[remotecontrol]: query ComponentTags for onid_tsid >%x<\n", onid_tsid );
-
-			sectionsd::msgResponseHeader resp;
-			memset(&resp, 0, sizeof(resp));
-
-			read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader));
-
-			int nBufSize = resp.dataLength;
-			if(nBufSize>0)
+			sectionsd::ComponentTagList tags;
+			if ( g_Sectionsd->getComponentTagsUniqueKey( current_EPGid, tags ) )
 			{
-				char TagIDs[10];
-				char TagText[100];
-				unsigned char componentTag, componentType, streamContent;
+				has_unresolved_ctags = false;
+				has_ac3 = false;
 
-				char* pData = new char[nBufSize+1] ;
-				recv(sock_fd, pData, nBufSize, MSG_WAITALL);
-
-				char *actPos=pData;
-
-				while(*actPos && actPos<pData+resp.dataLength)
+				for (int i=0; i< tags.size(); i++)
 				{
-					*TagIDs=0;
-					actPos = copyStringto( actPos, TagIDs, sizeof(TagIDs), '\n');
-					*TagText=0;
-					actPos = copyStringto( actPos, TagText, sizeof(TagText), '\n');
-
-					sscanf(TagIDs, "%02hhx %02hhx %02hhx", &componentTag, &componentType, &streamContent);
-					// printf("%s - %d - %s\n", TagIDs, componentTag, TagText);
-
-					for(int count=0;count<audio_chans_int.count_apids;count++)
+					for (int j=0; j< current_PIDs.APIDs.size(); j++)
 					{
-						if ( audio_chans_int.apids[count].ctag == componentTag )
+						if ( current_PIDs.APIDs[j].component_tag == tags[i].componentTag )
 						{
-							strcpy(audio_chans_int.apids[count].name, TagText);
-							if ( audio_chans_int.apids[count].is_ac3 )
-								strcat(audio_chans_int.apids[count].name, " (AC3)");
-							audio_chans_int.apids[count].ctag = -1;
+							strncpy( current_PIDs.APIDs[j].desc, tags[i].component.c_str(), 25 );
+							if ( current_PIDs.APIDs[j].is_ac3 )
+								strncat( current_PIDs.APIDs[j].desc, " (AC3)", 25 );
+							current_PIDs.APIDs[j].component_tag = -1;
 							break;
 						}
 					}
 				}
 
-				delete[] pData;
-				retval = true;
-			}
-			close(sock_fd);
-		}
-
-		int count= 0;
-
-		while (count< audio_chans_int.count_apids)
-		{
-			if ( ( audio_chans_int.apids[count].ctag != -1 ) && ( audio_chans_int.apids[count].is_ac3 ))
-			{
-    			// AC3-Stream ohne Component-Tag = nicht ausgestrahlt -> löschen...
-
-				for (int i=(count+ 1); i< audio_chans_int.count_apids; i++)
+				CZapitClient::APIDList::iterator e = current_PIDs.APIDs.begin();
+				while ( e != current_PIDs.APIDs.end() )
 				{
-					memcpy(&audio_chans_int.apids[count+ 1], &audio_chans_int.apids[count], sizeof(audio_chans_int.apids[count+ 1]) );
+					if ( e->is_ac3 )
+					{
+						if ( e->component_tag != -1 )
+						{
+							current_PIDs.APIDs.erase( e );
+							continue;
+						}
+						else
+							has_ac3 = true;
+					}
+					e++;
 				}
-				audio_chans_int.count_apids--;
-    		}
-    		else
-    			count++;
-
+			}
 		}
 	}
+
+	g_RCInput->postMsg( messages::EVT_ZAP_GOTAPIDS, current_onid_sid, false );
 }
 
+/*
 void CRemoteControl::getNVODs( char *channel_name )
 {
 	static const int max_retry= 20;
@@ -289,7 +325,9 @@ void CRemoteControl::getNVODs( char *channel_name )
 	subChannels_internal.are_subchannels= false;
 	for(CSubServiceListSorted::iterator nvod=nvod_list.begin(); nvod!=nvod_list.end(); ++nvod)
 		subChannels_internal.list.insert(subChannels_internal.list.end(), * nvod );
+
 }
+*/
 
 void * CRemoteControl::RemoteControlThread (void *arg)
 {
@@ -387,7 +425,9 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 							// ueberpruefen, ob wir die Audio-PIDs holen sollen...
 							// printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);
 							//pthread_mutex_trylock( &RemoteControl->send_mutex );
-							pthread_mutex_lock( &RemoteControl->send_mutex );
+
+
+/*							pthread_mutex_lock( &RemoteControl->send_mutex );
 							if ( ( RemoteControl->remotemsg.cmd== 3 ) &&
 							        ( strcmp(RemoteControl->remotemsg.param3, r_msg.param3 )== 0 ) )
 							{
@@ -400,7 +440,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 							}
 							else
 								pthread_mutex_unlock( &RemoteControl->send_mutex );
-
+*/
 							break;
 						}
 						break;
@@ -419,13 +459,27 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 						break;
 						case '8':
 						case 'd':
+						{
+							struct  pids    apid_return_buf;
+							memset(&apid_return_buf, 0, sizeof(apid_return_buf));
+
+							if ( recv(sock_fd,  &apid_return_buf,  sizeof(apid_return_buf), MSG_WAITALL)==  sizeof(apid_return_buf) )
+							;
+
+							unsigned int onid_sid;
+							sscanf( r_msg.param3, "%x", &onid_sid );
+
+							g_RCInput->postMsg( messages::EVT_ZAP_COMPLETE, onid_sid, false );
+							break;
+						}
 						case 'e':
 						{
 							struct  pids    apid_return_buf;
 							memset(&apid_return_buf, 0, sizeof(apid_return_buf));
 
 							if ( recv(sock_fd,  &apid_return_buf,  sizeof(apid_return_buf), MSG_WAITALL)==  sizeof(apid_return_buf) )
-							{
+							;
+/*							{
 								// PIDs emfangen...
 
 								//pthread_mutex_trylock( &RemoteControl->send_mutex );
@@ -477,22 +531,23 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 										RemoteControl->i_vpid= apid_return_buf.vpid;
 										RemoteControl->i_vtxtpid= apid_return_buf.vtxtpid;
 
-										if (apid_return_buf.count_apids> 1)
-											RemoteControl->getAPID_Names();
+
+										//if (apid_return_buf.count_apids> 1)
+										//	RemoteControl->getAPID_Names();
 									}
 
-									pthread_cond_signal( &g_InfoViewer->cond_PIDs_available );
+//									pthread_cond_signal( &g_InfoViewer->cond_PIDs_available );
 								}
 								if (!do_immediatly)
 									pthread_mutex_unlock( &RemoteControl->send_mutex );
 							}
 							else
 								printf("pid-description fetch failed!\n");
-							break;
+*/							break;
 						}
 						case 'i':
 						{
-							//pthread_mutex_trylock( &RemoteControl->send_mutex );
+/*							//pthread_mutex_trylock( &RemoteControl->send_mutex );
 							pthread_mutex_lock( &RemoteControl->send_mutex );
 							unsigned short nvodcount= RemoteControl->subChannels_internal.list.size();
 							write(sock_fd, &nvodcount, 2);
@@ -515,6 +570,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 							}
 
 							// pthread_mutex_unlock( &RemoteControl->send_mutex );
+*/
 							break;
 						}
 						case '9':
@@ -540,52 +596,19 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 	return NULL;
 }
 
-
-void CRemoteControl::CopyPIDs()
+void CRemoteControl::copySubChannelsToZapit()
 {
-	pthread_mutex_lock( &send_mutex );
+	CZapitClient::subServiceList 		zapitList;
+	CZapitClient::commandAddSubServices	aSubChannel;
 
-	// Copy PIDs with Mutex locked...
-	memcpy(&audio_chans, &audio_chans_int, sizeof(audio_chans));
-	ecmpid = i_ecmpid;
-	vpid = i_vpid;
-	vtxtpid = i_vtxtpid;
-
-	pthread_mutex_unlock( &send_mutex );
+	for(CSubServiceListSorted::iterator e=subChannels.begin(); e!=subChannels.end(); ++e)
+	{
+		aSubChannel.onidsid = e->onid_sid;
+		aSubChannel.tsid = e->tsid;
+	}
+	g_Zapit->setSubServices( zapitList );
 }
 
-const CSubChannel_Infos CRemoteControl::getSubChannels()
-{
-	pthread_mutex_lock( &send_mutex );
-	CSubChannel_Infos subChannels(subChannels_internal);
-	pthread_mutex_unlock( &send_mutex );
-	return  subChannels;
-}
-
-void CRemoteControl::CopySubChannelsToZapit( const CSubChannel_Infos& subChannels )
-{
-	pthread_mutex_lock( &send_mutex );
-	subChannels_internal= subChannels;
-
-	remotemsg.version=1;
-	remotemsg.cmd='i';
-	remotemsg.param= 0;
-	//printf("sending subservices\n");
-	pthread_mutex_unlock( &send_mutex );
-	send();
-}
-
-
-void CRemoteControl::queryAPIDs()
-{
-	pthread_mutex_lock( &send_mutex );
-
-	remotemsg.version=1;
-	remotemsg.cmd=8;
-
-	pthread_mutex_unlock( &send_mutex );
-	send();
-}
 
 void CRemoteControl::setAPID(int APID)
 {
@@ -594,7 +617,7 @@ void CRemoteControl::setAPID(int APID)
 	remotemsg.version=1;
 	remotemsg.cmd=9;
 	snprintf( (char*) &remotemsg.param, 3, "%.1d", APID);
-	audio_chans_int.selected = APID;
+	selected_apid = APID;
 	// printf("changing APID to %d\n", audio_chans_int.selected);
 
 	pthread_mutex_unlock( &send_mutex );
@@ -603,13 +626,13 @@ void CRemoteControl::setAPID(int APID)
 
 string CRemoteControl::setSubChannel(unsigned numSub)
 {
-	pthread_mutex_lock( &send_mutex );
+/*	pthread_mutex_lock( &send_mutex );
 	if ((subChannels_internal.selected== numSub ) || (numSub < 0) || (numSub >= subChannels_internal.list.size()))
 	{
 		pthread_mutex_unlock( &send_mutex );
 		return "";
 	}
-	memset(&audio_chans_int, 0, sizeof(audio_chans_int));
+	//memset(&audio_chans_int, 0, sizeof(audio_chans_int));
 
 	remotemsg.version=1;
 	remotemsg.cmd='e';
@@ -619,16 +642,17 @@ string CRemoteControl::setSubChannel(unsigned numSub)
 	pthread_mutex_unlock( &send_mutex );
 	send();
 	return subChannels_internal.list[numSub].subservice_name;
+	*/
 }
 
 string CRemoteControl::subChannelUp()
 {
-	return setSubChannel( (subChannels_internal.selected + 1) % subChannels_internal.list.size());
+//	return setSubChannel( (subChannels_internal.selected + 1) % subChannels_internal.list.size());
 }
 
 string CRemoteControl::subChannelDown()
 {
-	if (subChannels_internal.selected == 0 )
+/*	if (subChannels_internal.selected == 0 )
 	{
 		return setSubChannel(subChannels_internal.list.size() - 1);
 	}
@@ -636,17 +660,29 @@ string CRemoteControl::subChannelDown()
 	{
 		return setSubChannel(subChannels_internal.selected - 1);
 	}
+*/
 }
 
 void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 {
+	current_onid_sid = onid_sid;
+
+	current_EPGid = 0;
+
+	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
+
+	current_PIDs.APIDs.clear();
+    selected_apid = 0;
+	has_ac3 = false;
+
+	subChannels.clear();
+	selected_subchannel = 0;
+
 	pthread_mutex_lock( &send_mutex );
 	remotemsg.version=1;
 	remotemsg.cmd= 'd';
 	snprintf( (char*) &remotemsg.param3, 10, "%x", onid_sid);
 
-	memset(&audio_chans_int, 0, sizeof(audio_chans_int));
-	subChannels_internal.clear();
 	#ifdef USEACTIONLOG
 		char buf[1000];
 		sprintf((char*) buf, "zapto: %08x \"%s\"", onid_sid, channame.c_str() );
@@ -655,6 +691,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 	pthread_mutex_unlock( &send_mutex );
 
 	send();
+
 }
 
 

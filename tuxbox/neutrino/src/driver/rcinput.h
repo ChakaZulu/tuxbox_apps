@@ -30,12 +30,16 @@
 */
 
 /*
-$Id: rcinput.h,v 1.24 2002/03/07 15:14:30 field Exp $
+$Id: rcinput.h,v 1.25 2002/03/22 17:34:04 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.25  2002/03/22 17:34:04  field
+ Massive Umstellungen - NVODs/SubChannels=KAPUTT!
+ Infoviewer tw. kaputt! NON-STABLE!
+
  Revision 1.24  2002/03/07 15:14:30  field
  weitere bugfixes, 16/9 Anzeige umgestellt
 
@@ -117,8 +121,6 @@ History:
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "ringbuffer.h"
-
 #include <string>
 #include <vector>
 
@@ -136,14 +138,13 @@ class CRCInput
 			uint	data;
 		};
 
+		int 		fd_pipe_high_priority[2];
+		int 		fd_pipe_low_priority[2];
 		int         fd_rc;
 		int			fd_keyb;
 		int			fd_event;
 		int			fd_eventclient;
 		int			fd_max;
-		CRingBuffer pb_keys;
-
-		vector<event*>	eventlist;
 
 		void open();
 		void close();
@@ -157,6 +158,7 @@ class CRCInput
 		static const uint RC_KeyBoard	= 0x4000;
 		static const uint RC_Events		= 0x80000000;
 		static const uint RC_Messages	= 0x90000000;
+		static const uint RC_WithData	= 0xA0000000;
 		enum
 		{
 		    RC_standby=0x10, RC_home=0x1F, RC_setup=0x18, RC_0=0x0, RC_1=0x1,
@@ -169,8 +171,6 @@ class CRCInput
 		    RC_timeout	= 0xFFFFFFFF,
 		    RC_nokey	= 0xFFFFFFFE
 		};
-
-
 
 		//only used for plugins (games) !!
 		int getFileHandle()
@@ -193,9 +193,8 @@ class CRCInput
 
 		void getMsgAbsoluteTimeout(uint *msg, uint* data, long long TimeoutEnd, bool bAllowRepeatLR= false);
 		void getMsg(uint *msg, uint* data, int Timeout=-1, bool bAllowRepeatLR= false);     //get message :)
-		void pushbackMsg(uint msg, uint data);     // push message back into buffer
-		void insertMsgAtTop(uint msg, uint data);
-		void clearMsg(uint min = 0, uint max = 0xFFFFFFFF );	// bestimmte Msgs aus der Schleife löschen - löscht zZ ALLES :(
+		void postMsg(uint msg, uint data, bool Priority = true );  // push message back into buffer
+		void clearMsg();						// Msgs aus der Schleife löschen - löscht zZ ALLES :(
 };
 
 #endif

@@ -293,7 +293,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
 				//selected = oldselected;
-				//g_RCInput->pushbackMsg( msg, data );
+				//g_RCInput->postMsg( msg, data );
 				//loop=false;
 			}
 			else if (state == beMoving)
@@ -425,7 +425,7 @@ void CBEBouquetWidget::saveChanges()
 	hintBox->hide();
 	delete hintBox;
 
-	g_RCInput->insertMsgAtTop( messages::EVT_BOUQUETSCHANGED, 0 );
+	g_RCInput->postMsg( messages::EVT_BOUQUETSCHANGED, 0 );
 }
 
 void CBEBouquetWidget::discardChanges()

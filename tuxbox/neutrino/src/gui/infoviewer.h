@@ -72,25 +72,13 @@ using namespace std;
 
 class CInfoViewer
 {
-		struct SubService
-		{
-			unsigned short  transportStreamId;
-			unsigned short  originalNetworkId;
-			unsigned short  serviceId;
-			string          name;
-		};
-
 	private:
-		bool		KillShowEPG;
-		bool		gotTime;
-
-		pthread_mutex_t	epg_mutex;
-
-		pthread_t	thrLangViewer;
+		bool	gotTime;
 
 		int		InfoHeightY;
 		int		InfoHeightY_Info;
 		bool	showButtonBar;
+
 		int		BoxEndX;
 		int		BoxEndY;
 		int		BoxStartX;
@@ -101,43 +89,29 @@ class CInfoViewer
 		int		ChanHeight;
 		int		ChanInfoX;
 
-		string		CurrentChannel;
-		unsigned int	Current_onid_tsid;
-		char		*EPG_NotFound_Text;
-
-		char running[50];
-		char next[50];
-		char runningStart[10];
-		char nextStart[10];
-		char runningDuration[10];
-		char runningRest[20];
-		char nextDuration[10];
-		char runningPercent;
-		unsigned char       Flag;
+		string						CurrentChannel;
+		sectionsd::CurrentNextInfo	info_CurrentNext;
+        unsigned int				current_onid_tsid;
 
 		char aspectRatio;
 
-		static void * LangViewerThread (void *arg);
-		bool getEPGData( unsigned int onid_tsid );
+		void getEPG();
 
 		void showData( bool calledFromEvent = false );
+
 		void showButtonAudio();
 		void showButtonNVOD( bool CalledFromShowData = false );
-		void show16_9( bool showAnyWay = false );
+		void show16_9();
 	public:
 
-		bool			is_visible;
-		pthread_cond_t		cond_PIDs_available;
-		vector<SubService*>	SubServiceList;
+		bool	is_visible;
 
 		CInfoViewer();
 
 		void start();
 
-		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0, bool CalledFromNumZap = false );
+		void showTitle( int ChanNum, string Channel, unsigned int onid_tsid = 0, bool calledFromNumZap = false );
 		void killTitle();
-
-		const std::string getActiveChannelID();
 
 		int handleMsg(uint msg, uint data);
 };

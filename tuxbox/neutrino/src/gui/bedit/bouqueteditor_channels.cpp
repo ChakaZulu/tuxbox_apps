@@ -266,7 +266,7 @@ int CBEChannelWidget::exec(CMenuTarget* parent, string actionKey)
 			{
 				//kein pushback - wenn man versehentlich wo draufkommt is die edit-arbeit umsonst
 				//selected = oldselected;
-				//g_RCInput->pushbackMsg( msg, data );
+				//g_RCInput->postMsg( msg, data );
 				//loop=false;
 			}
 			else if (state == beMoving)
