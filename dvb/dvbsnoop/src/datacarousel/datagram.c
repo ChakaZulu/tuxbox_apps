@@ -1,5 +1,5 @@
 /*
-$Id: datagram.c,v 1.15 2004/01/04 22:03:21 rasc Exp $
+$Id: datagram.c,v 1.16 2004/02/12 23:00:22 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: datagram.c,v 1.15 2004/01/04 22:03:21 rasc Exp $
 
 
 $Log: datagram.c,v $
+Revision 1.16  2004/02/12 23:00:22  rasc
+no message
+
 Revision 1.15  2004/01/04 22:03:21  rasc
 time for a version leap
 
@@ -197,14 +200,9 @@ void decode_DSMCC_DATAGRAM (u_char *b, int len)
  b += (len1 - 4);
 
 
- d.crc_checksum		 = getBits (b, 0, 0, 32);
- if (d.section_syntax_indicator) {
-     out_SB_NL (5,"CRC: ",d.crc_checksum);
- } else {
-     out_SB_NL (5,"Checksum: ",d.crc_checksum);
- }
 
-
+ outBit_Sx_NL (5, (d.section_syntax_indicator)
+		   ?"CRC: " :"Checksum: ",	b,0,32);
 }
 
 

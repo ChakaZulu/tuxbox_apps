@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.18 2004/01/25 22:36:52 rasc Exp $
+$Id: dmx_sect.c,v 1.19 2004/02/12 23:00:24 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_sect.c,v 1.18 2004/01/25 22:36:52 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.19  2004/02/12 23:00:24  rasc
+no message
+
 Revision 1.18  2004/01/25 22:36:52  rasc
 minor changes & enhancments
 
@@ -97,7 +100,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "errno.h"
 
 
-#define SECT_BUF_SIZE (64*1024)
+#define SECT_BUF_SIZE (256*1024)
 
 static long  sect_read (int fd, u_char *buf, long buflen);
 
