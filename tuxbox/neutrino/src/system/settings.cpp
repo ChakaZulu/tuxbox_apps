@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.17 2003/05/13 09:47:11 digi_casi Exp $
+        $Id: settings.cpp,v 1.18 2003/05/13 19:46:04 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -23,6 +23,7 @@
 
 
 #include "settings.h"
+#include <zapit/settings.h>
 
 CScanSettings::CScanSettings(void)
 	: configfile('\t')
@@ -194,6 +195,7 @@ bool CScanSettings::saveSettings(const std::string fileName)
 	int satCount = 0;
 	char tmp[20] = "";
 	int i = 0;
+	FILE * fd = NULL;
 	
 	configfile.setInt32("delivery_system", delivery_system);
 	configfile.setInt32( "diseqcMode", diseqcMode );
@@ -205,7 +207,7 @@ bool CScanSettings::saveSettings(const std::string fileName)
 	{
 		satCount = 0;
 		for (i = 0; i < MAX_SATELLITES; i++)
-			if (satName[i] != "")
+			if (satName[i][0] != 0)
 				satCount++;
 
 		configfile.setInt32("satCount", satCount);
@@ -229,6 +231,15 @@ bool CScanSettings::saveSettings(const std::string fileName)
 	{
 		printf("saving neutrino scan-config\n");
 		configfile.saveConfig(fileName);
+		
+		/* write motor.conf file */
+		if (diseqcMode == DISEQC_1_2)
+		{
+			fd = fopen(MOTORCONFIGFILE, "w");
+			for (i = 0; i < satCount; i++)
+				fprintf(fd, "\"%s\" %d\n", satName[i], satMotorPos[i]+1);
+			fclose(fd);
+		}
 	}
 
 	return true;
