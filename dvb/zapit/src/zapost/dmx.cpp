@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.13 2002/12/13 12:41:08 thegoodguy Exp $
+ * $Id: dmx.cpp,v 1.14 2002/12/27 16:59:41 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -34,83 +34,14 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 	if (fd < 0)
 		return -1;
 
-	memset(&sctFilterParams, 0x00, sizeof(sctFilterParams));
+	memset(&sctFilterParams.filter, 0, sizeof(struct dmx_filter));
 	memcpy(&sctFilterParams.filter.filter, filter, DMX_FILTER_SIZE);
 	memcpy(&sctFilterParams.filter.mask, mask, DMX_FILTER_SIZE);
 
 	sctFilterParams.pid = pid;
+	sctFilterParams.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 
-	switch (sctFilterParams.pid)
-	{
-	case 0x0000: /* Program Association Table */
-		sctFilterParams.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0001: /* Conditional Access Table */
-		sctFilterParams.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0002: /* Transport Streams Description Table */
-		sctFilterParams.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0003 ... 0x000F: /* reserved */
-		return -1;
-
-	case 0x0010: /* Network Information Table, Stuffing Table */
-		sctFilterParams.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0011: /* Service Description Table, Bouquet Association Table, Stuffing Table */
-		sctFilterParams.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0012: /* Event Information Table, Stuffing Table */
-		sctFilterParams.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0013: /* Running Status Table, Stuffing Table */
-		sctFilterParams.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0014: /* Time and Date Table, Time Offset Table, Stuffing Table */
-		sctFilterParams.flags = DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-
-	case 0x0015: /* network synchronization */
-		return -1;
-
-	case 0x0016 ... 0x001D: /* reserved */
-		return -1;
-
-	case 0x001E: /* Discontinuity Information Table */
-		return -1;
-
-	case 0x001F: /* Selection Information Table */
-		return -1;
-
-	case 0x0020 ... 0x1FFB:
-		sctFilterParams.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
-		break;
-	
-	case 0x1FFC: /* ATSC SI */
-		return -1;
-
-	case 0x1FFD: /* ATSC Master Program Guide */
-		return -1;
-
-	case 0x1FFE:
-		return -1;
-
-	case 0x1FFF: /* reserved */
-		return -1;
-
-	default:
-		break;
-	}
-
-	switch (sctFilterParams.filter.filter[0])
-	{
+	switch (sctFilterParams.filter.filter[0]) {
 	case 0x00: /* program_association_section */
 		sctFilterParams.timeout = 2000;
 		break;
@@ -127,8 +58,7 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 		sctFilterParams.timeout = 10000;
 		break;
 
-	case 0x04 ... 0x3F: /* reserved */
-		return -1;
+	/* 0x04 - 0x3F: reserved */
 
 	case 0x40: /* network_information_section - actual_network */
 		sctFilterParams.timeout = 10000;
@@ -142,22 +72,19 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 		sctFilterParams.timeout = 10000;
 		break;
 
-	case 0x43 ... 0x45: /* reserved for future use */
-		return -1;
+	/* 0x43 - 0x45: reserved for future use */
 
 	case 0x46: /* service_description_section - other_transport_stream */
 		sctFilterParams.timeout = 10000;
 		break;
 
-	case 0x47 ... 0x49: /* reserved for future use */
-		return -1;
+	/* 0x47 - 0x49: reserved for future use */
 
 	case 0x4A: /* bouquet_association_section */
 		sctFilterParams.timeout = 11000;
 		break;
 
-	case 0x4B ... 0x4D: /* reserved for future use */
-		return -1;
+	/* 0x4B - 0x4D: reserved for future use */
 
 	case 0x4E: /* event_information_section - actual_transport_stream, present/following */
 		sctFilterParams.timeout = 2000;
@@ -167,13 +94,8 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 		sctFilterParams.timeout = 10000;
 		break;
 
-	case 0x50 ... 0x5F: /* event_information_section - actual_transport_stream, schedule */
-		sctFilterParams.timeout = 10000;
-		break;
-
-	case 0x60 ... 0x6F: /* event_information_section - other_transport_stream, schedule */
-		sctFilterParams.timeout = 10000;
-		break;
+	/* 0x50 - 0x5F: event_information_section - actual_transport_stream, schedule */
+	/* 0x60 - 0x6F: event_information_section - other_transport_stream, schedule */
 
 	case 0x70: /* time_date_section */
 		sctFilterParams.timeout = 30000;
@@ -191,8 +113,7 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 		sctFilterParams.timeout = 30000;
 		break;
 
-	case 0x74 ... 0x7D: /* reserved for future use */
-		return -1;
+	/* 0x74 - 0x7D: reserved for future use */
 
 	case 0x7E: /* discontinuity_information_section */
 		sctFilterParams.timeout = 0;
@@ -202,14 +123,10 @@ int setDmxSctFilter (int fd, unsigned short pid, unsigned char * filter, unsigne
 		sctFilterParams.timeout = 0;
 		break;
 
-	case 0x80 ... 0x8F: /* ca_message_section */
-		sctFilterParams.timeout = 1000;
-		break;
-
-	case 0x90 ... 0xFE: /* user defined */
-		return -1;
-
-	case 0xFF: /* reserved */
+	/* 0x80 - 0x8F: ca_message_section */
+	/* 0x90 - 0xFE: user defined */
+	/*        0xFF: reserved */
+	default:
 		return -1;
 	}
 
@@ -284,9 +201,9 @@ int stopDmxFilter (int fd)
 int readDmx(int fd, unsigned char * buf, const size_t n)
 {
 	int return_value = read(fd, buf, n);
+	
 	if (return_value < 0)
-	{
 		ERROR("DMX_READ");
-	}
+
 	return return_value;
 }
