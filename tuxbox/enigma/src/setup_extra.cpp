@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.19 2005/01/03 20:53:04 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.20 2005/01/10 18:05:57 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -37,6 +37,10 @@ eExpertSetup::eExpertSetup()
 	int lockWebIf=1;
 	if ( eConfig::getInstance()->getKey("/ezap/webif/lockWebIf", lockWebIf) )
 		eConfig::getInstance()->setKey("/ezap/webif/lockWebIf", lockWebIf);
+		
+	int showSatPos=1;
+	if ( eConfig::getInstance()->getKey("/extras/showSatPos", showSatPos) )
+		eConfig::getInstance()->setKey("/extras/showSatPos", showSatPos);
 
 	int entry=0;
 #ifndef DISABLE_NETWORK
