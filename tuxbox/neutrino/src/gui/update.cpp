@@ -437,4 +437,52 @@ void CFlashUpdate::paint()
 }
 
 
+//--------------------------------------------------------------------------------------------------------------
 
+
+CFlashExpert::CFlashExpert()
+	:CProgressWindow()
+{
+
+}
+
+int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
+{
+	if(parent)
+	{
+		parent->hide();
+	}
+
+	if(actionKey=="readflash")
+	{
+		setTitle("Flash auslesen");
+		paint();
+		showGlobalStatus(0);
+		showStatusMessage("lese flash");
+		CFlashTool ft;
+		ft.setStatusViewer( this );
+		ft.setMTDDevice("/dev/mtd/5");
+		if(!ft.readFromMTD("/tmp/flashimage.img"))
+		{
+			showStatusMessage( ft.getErrorMessage() );
+		}
+		else
+		{
+			showStatusMessage( g_Locale->getText("flashupdate.ready"));
+		}
+		showGlobalStatus(100);
+	}
+	else if(actionKey=="writeflash")
+	{
+	}
+	else if(actionKey=="readflashmtd")
+	{
+	}
+	else if(actionKey=="writeflashmtd")
+	{
+	}
+
+	sleep(10);
+	hide();
+	return menu_return::RETURN_REPAINT;
+}

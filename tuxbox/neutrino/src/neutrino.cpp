@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.265 2002/05/09 00:34:58 McClean Exp $
+        $Id: neutrino.cpp,v 1.266 2002/05/09 02:00:17 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1054,11 +1054,12 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		mtdexpert->addItem( new CMenuSeparator() );
 		mtdexpert->addItem( new CMenuForwarder("menu.back") );
 		mtdexpert->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflash") );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflash") );
+		CFlashExpert* fe = new CFlashExpert();
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflash", true, "", fe, "readflash") );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflash", true, "", fe, "writeflash") );
 		mtdexpert->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd") );
-		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd") );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd", true, "", fe, "readflashmtd") );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd", true, "", fe, "writeflashmtd") );
 
 		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, "", mtdexpert ) );
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -2533,7 +2534,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.265 2002/05/09 00:34:58 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.266 2002/05/09 02:00:17 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	return CNeutrinoApp::getInstance()->run(argc, argv);

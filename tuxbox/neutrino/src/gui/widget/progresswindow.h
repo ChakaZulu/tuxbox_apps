@@ -25,13 +25,51 @@
 #define __progresswindow__
 
 #include "driver/framebuffer.h"
+
+#include "gui/widget/progressstatus.h"
 #include "gui/widget/menue.h"
 
 #include <string>
 
 using namespace std;
 
+class CProgressWindow : public CMenuTarget, public CProgress_StatusViewer
+{
+	protected:
 
+		CFrameBuffer	*frameBuffer;
+		string			caption;
+
+		int x;
+		int y;
+		int width;
+		int height;
+		int hheight,mheight; // head/menu font height
+
+		int globalstatus, globalstatusX, globalstatusY, localstatusY;
+		int statusTextY;
+		string statusText;
+
+
+
+		//----------------------------
+
+		void setTitle( string title );
+
+		virtual void paint();
+		virtual void hide();
+
+	public:
+
+		CProgressWindow();
+		virtual int exec( CMenuTarget* parent, string actionKey );
+
+		virtual void showGlobalStatus(int prog);
+		virtual int getGlobalStatus();
+		virtual void showLocalStatus(int prog);
+		virtual void showStatusMessage(string text);
+
+};
 
 
 #endif

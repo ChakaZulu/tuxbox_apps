@@ -37,6 +37,7 @@
 #include "driver/rcinput.h"
 
 #include "gui/widget/progressstatus.h"
+#include "gui/widget/progresswindow.h"
 #include "gui/widget/menue.h"
 #include "gui/color.h"
 
@@ -73,7 +74,6 @@ class CHTTPUpdater
 class CFlashUpdate : public CMenuTarget, CProgress_StatusViewer
 {
 	private:
-
 		CFrameBuffer	*frameBuffer;
 		int fd_fp;
 
@@ -102,11 +102,20 @@ class CFlashUpdate : public CMenuTarget, CProgress_StatusViewer
 		void showStatusMessage(string text);
 
 		bool checkVersion4Update(int ypos, string &sFileName);
-	public:
 
+	public:
 		CFlashUpdate();
 
 		void hide();
+		int exec( CMenuTarget* parent, string actionKey );
+
+};
+
+
+class CFlashExpert : public CProgressWindow
+{
+	public:
+		CFlashExpert();
 		int exec( CMenuTarget* parent, string actionKey );
 
 };

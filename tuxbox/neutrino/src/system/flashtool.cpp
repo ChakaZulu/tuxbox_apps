@@ -68,7 +68,6 @@ bool CFlashTool::readFromMTD( string filename )
 	if(statusViewer)
 	{
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage("");
 	}
 
 	if(mtdDevice=="")
@@ -89,7 +88,7 @@ bool CFlashTool::readFromMTD( string filename )
 		return false;
 	}
 
-	if( (fd2 = open( filename.c_str(), O_WRONLY )) < 0 )
+	if( (fd2 = open( filename.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR  |  S_IRGRP | S_IWGRP  |  S_IROTH | S_IWOTH)) < 0 )
 	{
 		ErrorMessage = g_Locale->getText("flashupdate.cantopenfile");
 		close(fd1);
@@ -135,7 +134,6 @@ bool CFlashTool::program( string filename )
 	if(statusViewer)
 	{
 		statusViewer->showLocalStatus(0);
-		statusViewer->showStatusMessage("");
 	}
 
 	if(mtdDevice=="")

@@ -30,5 +30,131 @@
 #include "driver/rcinput.h"
 
 #include "gui/color.h"
-#include "gui/widget/messagebox.h"
 
+
+
+CProgressWindow::CProgressWindow()
+{
+	frameBuffer = CFrameBuffer::getInstance();
+	width = 420;
+	hheight = g_Fonts->menu_title->getHeight();
+	mheight = g_Fonts->menu->getHeight();
+	height = hheight+5*mheight+20;
+
+	globalstatus = -1;
+	statusText = "";
+
+	x= ( ( ( g_settings.screen_EndX- g_settings.screen_StartX ) - width ) >> 1 ) + g_settings.screen_StartX;
+	y=(576-height)>>1;
+}
+
+void CProgressWindow::setTitle( string title )
+{
+	caption = title;
+}
+
+
+void CProgressWindow::showGlobalStatus(int prog)
+{
+	if(prog>100)
+	{
+		prog = 100;
+	}
+	if(prog<0)
+	{
+		prog=0;
+	}
+	if(globalstatus==prog)
+	{
+		return;
+	}
+	globalstatus = prog;
+
+	frameBuffer->paintBox(x+10, globalstatusY, x+width-10, globalstatusY+10, COL_MENUCONTENT +2);
+	if(prog!=0)
+	{
+		int pos = x+10+( (width- 20)/100* prog);
+		frameBuffer->paintBox(x+10, globalstatusY,pos, globalstatusY+10, COL_MENUCONTENT +7);
+	}
+}
+
+void CProgressWindow::showLocalStatus(int prog)
+{
+	static int lastprog = -1;
+
+	if(prog>100)
+	{
+		prog = 100;
+	}
+	if(prog<0)
+	{
+		prog=0;
+	}
+
+	if(lastprog==prog)
+	{
+		return;
+	}
+	lastprog = prog;
+
+	frameBuffer->paintBox(x+10, localstatusY, x+width-10, localstatusY+10, COL_MENUCONTENT +2);
+	if(prog!=0)
+	{
+		int pos = x+10+((width- 20)/100* prog);
+		frameBuffer->paintBox(x+10, localstatusY, pos, localstatusY+10, COL_MENUCONTENT +7);
+	}
+}
+
+void CProgressWindow::showStatusMessage(string text)
+{
+	statusText = text;
+	frameBuffer->paintBox(x, statusTextY-mheight, x+width, statusTextY,  COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+10, statusTextY, width-20, text.c_str(), COL_MENUCONTENT);
+}
+
+
+int CProgressWindow::getGlobalStatus()
+{
+	return globalstatus;
+}
+
+
+void CProgressWindow::hide()
+{
+	frameBuffer->paintBackgroundBoxRel(x,y, width,height);
+}
+
+void CProgressWindow::paint()
+{
+	int ypos=y;
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width- 10, g_Locale->getText(caption).c_str(), COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
+
+	ypos+= hheight + (mheight >>1);
+	statusTextY = ypos+mheight;
+	showStatusMessage(statusText);
+
+	ypos+= mheight;
+	localstatusY = ypos+ mheight-20;
+	showLocalStatus(0);
+	ypos+= mheight+10;
+
+	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width- 10, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT);
+	ypos+= mheight;
+
+	globalstatusY = ypos+ mheight-20;
+	ypos+= mheight >>1;
+	showGlobalStatus(globalstatus);
+
+}
+
+int CProgressWindow::exec( CMenuTarget* parent, string actionKey )
+{
+	if(parent)
+	{
+		parent->hide();
+	}
+	paint();
+	return menu_return::RETURN_REPAINT;
+}
