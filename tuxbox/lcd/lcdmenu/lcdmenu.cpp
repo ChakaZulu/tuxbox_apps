@@ -1,5 +1,5 @@
 /*
- * $Id: lcdmenu.cpp,v 1.7 2001/12/05 20:35:29 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.8 2001/12/05 21:49:31 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
  * $Log: lcdmenu.cpp,v $
+ * Revision 1.8  2001/12/05 21:49:31  obi
+ * - fix for more than four menu entries
+ *
  * Revision 1.7  2001/12/05 20:35:29  obi
  * - fix save method in configManager
  * - remember last selection
@@ -266,7 +269,7 @@ bool CLCDMenu::rcLoop()
 
 	    case 10: /* right arrow */
 	    case 13: /* down arrow */
-		if (selectedEntry < 3)
+		if (selectedEntry < entryCount)
 		    selectEntry(selectedEntry+1);
 		break;
 
@@ -416,7 +419,7 @@ bool CLCDMenu::checkPin(string title)
 int main(int argc, char **argv)
 {
     /* print version information */
-    cout << "$Id: lcdmenu.cpp,v 1.7 2001/12/05 20:35:29 obi Exp $" << endl;
+    cout << "$Id: lcdmenu.cpp,v 1.8 2001/12/05 21:49:31 obi Exp $" << endl;
 
     /* create menu instance */
     CLCDMenu *menu = new CLCDMenu();
