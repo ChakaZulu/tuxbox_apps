@@ -643,15 +643,16 @@ void subtitle_clear_screen(struct subtitle_ctx *sub)
 {
 		/* clear bbox */
 	int y;
-	
+
 	//eDebug("BBOX clear %d:%d -> %d:%d", sub->bbox_left, sub->bbox_top, sub->bbox_right, sub->bbox_bottom);
 
 	// do not draw when anyone has locked the 
 	// framebuffer ( non enigma plugins... )
+	sub->bbox_right = 720;
 	if (sub->bbox_right > sub->bbox_left && !fbClass::getInstance()->islocked())
 		for (y=sub->bbox_top; y < sub->bbox_bottom; ++y)
 			memset(sub->screen_buffer + y * sub->screen_width, 0, sub->bbox_right - sub->bbox_left);
-		
+
 	sub->bbox_right = 0;
 	sub->bbox_left = sub->screen_width;
 	sub->bbox_top = sub->screen_height;
@@ -660,8 +661,22 @@ void subtitle_clear_screen(struct subtitle_ctx *sub)
 
 void subtitle_redraw_all(struct subtitle_ctx *sub)
 {
+#if 1
+	struct subtitle_page *page = sub->pages;
+	if ( page )
+	{
+		struct subtitle_page_region *region = page->page_regions;
+		if ( region )
+			subtitle_clear_screen(sub);
+	}
+	while(page)
+	{
+		subtitle_redraw(sub, page->page_id);
+		page = page->next;
+	}
+#else
 	subtitle_clear_screen(sub);
-	
+
 	struct subtitle_page *page = sub->pages;
 	//eDebug("----------- end of display set");
 	//eDebug("active pages:");
@@ -700,6 +715,7 @@ void subtitle_redraw_all(struct subtitle_ctx *sub)
 		}
 		page = page->next;
 	}
+#endif
 }
 
 void subtitle_reset(struct subtitle_ctx *sub)
