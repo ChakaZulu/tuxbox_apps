@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.29 2004/03/13 23:22:14 obi Exp $
+$Id: helper.c,v 1.30 2004/04/19 22:09:33 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: helper.c,v 1.29 2004/03/13 23:22:14 obi Exp $
 
 
 $Log: helper.c,v $
+Revision 1.30  2004/04/19 22:09:33  rasc
+minor change
+
 Revision 1.29  2004/03/13 23:22:14  obi
 helper.c: In function `str_bit32':
 helper.c:784: warning: initialization from incompatible pointer type
@@ -802,5 +805,25 @@ char *str_bit32 (u_long value, int bits)
    return bitstr;
 }
 
+
+
+
+
+//
+//
+// -- Length Check Helper
+// -- return 1: ok, 0 = len<0
+//
+int lenCheckErrOut (int v, int len)
+{
+  const char *err_str="==> Something is seriously wrong (length overrun check)!!!";
+
+  if (len < 0) {
+	  out_nl (v,err_str);
+	  return 0;
+  }
+  return 1;
+
+}
 
 

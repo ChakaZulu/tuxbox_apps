@@ -61,6 +61,9 @@ void displ_IPv6_addr (int v, struct IPv6ADDR *ip);
 char *str_bit32 (u_long value, int bits);
 
 
+int lenCheckErrOut (int v, int len);
+
+
 #endif
 
 

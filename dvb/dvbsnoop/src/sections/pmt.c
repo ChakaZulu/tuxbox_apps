@@ -1,5 +1,5 @@
 /*
-$Id: pmt.c,v 1.10 2004/04/15 22:29:22 rasc Exp $
+$Id: pmt.c,v 1.11 2004/04/19 22:09:33 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: pmt.c,v 1.10 2004/04/15 22:29:22 rasc Exp $
 
 
 $Log: pmt.c,v $
+Revision 1.11  2004/04/19 22:09:33  rasc
+minor change
+
 Revision 1.10  2004/04/15 22:29:22  rasc
 PMT: some brainded section check
 TS: filter single pids from multi-pid ts-input-file
@@ -69,7 +72,6 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/pid_mem.h"
 
 
-const char *pmt_fatal_err="==> Something is seriously wrong with this descriptor or section!";
 
 
 void decode_PMT (u_char *b, int len)
@@ -79,6 +81,7 @@ void decode_PMT (u_char *b, int len)
  typedef struct  _PMT {
     u_int      table_id;
     u_int      section_syntax_indicator;		
+    u_int      b_null;		
     u_int      reserved_1;
     int        section_length;
     u_int      program_number;
@@ -120,6 +123,7 @@ void decode_PMT (u_char *b, int len)
  
  p.table_id 			 = b[0];
  p.section_syntax_indicator	 = getBits (b, 0, 8, 1);
+ p.b_null			 = getBits (b, 0, 9, 1);
  p.reserved_1 			 = getBits (b, 0, 10, 2);
  p.section_length		 = getBits (b, 0, 12, 12);
  p.program_number		 = getBits (b, 0, 24, 16);
@@ -144,7 +148,7 @@ void decode_PMT (u_char *b, int len)
 
 
  out_SB_NL (3,"section_syntax_indicator: ",p.section_syntax_indicator);
- out_SB_NL (6,"(fixed): ",0);
+ out_SB_NL (6,"(fixed '0'): ",p.b_null);
  out_SB_NL (6,"reserved_1: ",p.reserved_1);
  out_SW_NL (5,"Section_length: ",p.section_length);
  out_SW_NL (3,"Program_number: ",p.program_number);
@@ -177,6 +181,7 @@ void decode_PMT (u_char *b, int len)
    b += x;
    len1 -= x;
  }
+ lenCheckErrOut(3,len2);
  indent (-1);
  out_NL (3);
 
@@ -203,14 +208,6 @@ void decode_PMT (u_char *b, int len)
    out_SB_NL (6,"reserved_2: ",p2.reserved_2);
    out_SW_NL (5,"ES_info_length: ",p2.ES_info_length);
 
-   // -- this is due to some braindead providers
-   if (p2.ES_info_length > (len1-4)) {
-     out_nl (3,pmt_fatal_err);
-     out_nl (3,"...abort");
-     indent (-1);
-     return;
-   }
-
 
    b    += 5;
    len1 -= 5;
@@ -228,7 +225,7 @@ void decode_PMT (u_char *b, int len)
    indent (-1);
 
    // -- this is due to some braindead providers
-   if (len2 < 0) out_nl (3,pmt_fatal_err);
+   lenCheckErrOut(3,len2);
 
    out_NL (3);
 
