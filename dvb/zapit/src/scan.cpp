@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.127 2003/08/01 09:19:31 obi Exp $
+ * $Id: scan.cpp,v 1.128 2003/09/18 15:57:19 thegoodguy Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -272,7 +272,7 @@ void write_xml_footer(FILE *fd)
 	fclose(fd);
 }
 
-void write_bouquets(char * providerName)
+void write_bouquets(const char * const providerName)
 {
 	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS) 
 	{
