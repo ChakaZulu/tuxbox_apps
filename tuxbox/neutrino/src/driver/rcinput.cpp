@@ -840,7 +840,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			{
 				if(rc_key!=0x5cfe)
 				{
-					//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
+					//printf("got key native key: %04x %04x, translate: %04x -%s-\n", rc_key, rc_key&0x1f, translate(rc_key), getKeyName(translate(rc_key)).c_str() );
 					long long now_pressed;
 					bool keyok = true;
 
@@ -1066,6 +1066,8 @@ string CRCInput:: getKeyName(int code)
 int CRCInput::translate(int code)
 {
 
+	//printf("try to translate key: %d\n", code);
+
 	if ((code&0xFF00)==0x5C00)
 	{
 		switch (code&0xFF)
@@ -1096,10 +1098,6 @@ int CRCInput::translate(int code)
 				return RC_8;
 				case 0x09:
 				return RC_9;
-				case 0x14: //alte fb page up/down tasten...
-				return RC_page_up;
-				case 0x13:
-				return RC_page_down;
 				case 0x3B:
 				return RC_blue;
 				case 0x52:
