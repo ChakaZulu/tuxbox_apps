@@ -330,7 +330,7 @@
 		<eLabel position="60:400" size="630:150" pixmap="info-bg" name="osd" alphatest="on" />
 		<eLabel position="90:428" size="80:18" font="Blue.Bold;22" name="ch_number" 
 			foregroundColor="text1" align="center" />
-		<eLabel position="240:488" size="312:18" font="Blue.Bold;22" name="ch_name" 
+		<eLabel position="240:488" size="300:18" font="Blue.Bold;22" name="ch_name" 
 			foregroundColor="text1" align="center" wrap="on" />
 		<eLabel position="90:450" size="80:18" font="Blue.Bold;22" name="time" 
 			foregroundColor="text1" align="center" />
@@ -343,7 +343,8 @@
 		<eLabel position="107:489" size="23:20" pixmap="button_yellow" name="button_yellow_enabled" />
 		<eLabel position="84:489" size="23:20" pixmap="button_green" name="button_green_enabled" />
 		<eLabel position="64:489" size="23:20" pixmap="button_red" name="button_red_enabled" />
-		<eLabel name="recStatus" position="447:435" size="18:18" pixmap="rec_symbol" alphatest="on" />
+		<eLabel name="recStatus" position="542:488" size="15:18" text="R" foregroundColor="std_dred" 
+			backgroundColor="content" alphatest="on" font="Blue.Bold;22" align="center" />
 		<eLabel name="dvrInfoBar" position="170:419" size="433:62" alphatest="on" pixmap="dvrtable">
 		<eLabel name="TimeLeft" position="330:4" size="150:51" alphatest="on" font="Blue.Regular;24"
 			foregroundColor="white" wrap="on" />
