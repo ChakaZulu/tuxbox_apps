@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.15  2003/01/05 20:59:28  TheDOC
+old vbi possible now... just add -DOLD_VBI in Makefile.am to the INCLUDES line
+
 Revision 1.14  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -73,6 +76,9 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "teletext.h"
 
+#ifdef OLD_VBI
+#include <dbox/avia_gt_vbi.h>
+#endif
 
 void teletext::getTXT(int PID)
 {
@@ -80,6 +86,7 @@ void teletext::getTXT(int PID)
 
 void teletext::startReinsertion(int PID)
 {
+#ifndef OLD_VBI
 	dmx_pes_filter_params pesFilterParams;
 
 	pesFilterParams.pid = PID;
@@ -99,10 +106,19 @@ void teletext::startReinsertion(int PID)
 	
 	if (ioctl(txtfd, DMX_SET_PES_FILTER, &pesFilterParams) < 0)
 		perror("[teletext.cpp]DMX_SET_PES_FILTER");
+#else
+	std::cout << "Start reinsertion on PID " << PID << std::endl;
+	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
+	ioctl(txtfd, AVIA_VBI_START_VTXT, PID);
+
+	close(txtfd);
+
+#endif
 }
 
 void teletext::stopReinsertion()
 {
+#ifndef OLD_VBI
 	if (txtfd == -1)
 		return;
 
@@ -112,5 +128,14 @@ void teletext::stopReinsertion()
 
 	close(txtfd);
 	txtfd = -1;
+#else
+	std::cout << "Stop reinsertion" << std::endl;
+	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
+	ioctl(txtfd, AVIA_VBI_STOP_VTXT, true);
+
+	close(txtfd);
+
+#endif
 }
+
 

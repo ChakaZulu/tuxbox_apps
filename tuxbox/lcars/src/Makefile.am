@@ -1,7 +1,9 @@
 INCLUDES = \
 	@CURL_CFLAGS@ \
 	@FREETYPE_CFLAGS@ \
-	@PLUGINS_CFLAGS@
+	@PLUGINS_CFLAGS@ \
+	-Werror
+#	-DOLD_VBI
 
 bin_PROGRAMS = lcars
 
