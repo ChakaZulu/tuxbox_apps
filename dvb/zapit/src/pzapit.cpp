@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.11 2002/04/18 18:09:08 obi Exp $
+ * $Id: pzapit.cpp,v 1.12 2002/04/18 23:46:08 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -48,6 +48,7 @@ int main (int argc, char** argv)
 {
 	int i;
 	uint32_t j;
+	uint32_t k;
 
 	unsigned int bouquet = 0;
 	unsigned int channel = 0;
@@ -116,7 +117,7 @@ int main (int argc, char** argv)
 			if (i < argc - 2)
 			{
 				sscanf(argv[++i], "%d", &satmask);
-				diseqc[0] = strlen(argv[i]);
+				diseqc[0] = strlen(argv[i+1]);
 				for (i++, j = 0; j <= diseqc[0]; j++)
 				{
 					diseqc[j+1] = argv[i][j] - 48;
@@ -208,14 +209,21 @@ int main (int argc, char** argv)
 		std::vector<CZapitClient::commandSetScanSatelliteList> newSatelliteList;
 		CZapitClient::commandSetScanSatelliteList item;
 
-		for (i = 1, j = 0; j < satelliteList.size(); i = (i << 1), j++)
+		for (i = 1, j = 0, k = 0; j < satelliteList.size(); i = (i << 1), k++)
 		{
-			if ((satmask & i) && (j <= diseqc[0]))
+			if (satmask & i)
 			{
-				std::cout << "diseqc " << diseqc[j+1] << ": " << satelliteList[j].satName << std::endl;
-				strcpy(item.satName, satelliteList[j].satName);
-				item.diseqc = diseqc[j+1];
+				j++;
+				std::cout << "diseqc " << diseqc[j] << ": " << satelliteList[k].satName << std::endl;
+
+				strcpy(item.satName, satelliteList[k].satName);
+				item.diseqc = diseqc[j];
 				newSatelliteList.insert(newSatelliteList.end(), item);
+			}
+
+			if ((j >= diseqc[0]) || (k >= satelliteList.size()))
+			{
+				break;
 			}
 		}
 
