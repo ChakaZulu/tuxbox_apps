@@ -22,10 +22,7 @@
 #include <string>
 #include <stdio.h>
 
-//gen_vbi ist nicht im cvs. Workaround
-//#include <dbox/gen_vbi.h>
-#define VBI_START_VTXT 1
-#define VBI_STOP_VTXT 2
+#include <dbox/avia_vbi.h>
 
 #include "sdt.h"
 #include "zap.h"
