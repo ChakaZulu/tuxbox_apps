@@ -1,10 +1,11 @@
-#ifndef __DVB_CAHANDER_H_
+#ifndef __DVB_CAHANDLER_H_
 #define __DVB_CAHANDLER_H_
 
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <map>
 #include <lib/dvb/dvbservice.h>
 
@@ -23,6 +24,7 @@ public:
 		clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
 		sock = socket(PF_UNIX, SOCK_STREAM, 0);
 		connect(sock, (struct sockaddr *) &servaddr, clilen);
+		fcntl(sock, F_SETFL, O_NONBLOCK);
 //		eDebug("[eDVBCAHandler] new service %s", service.toString().c_str() );
 	}
 	~CAService()
