@@ -32,6 +32,7 @@
 #include "update.h"
 #include "../global.h"
 
+#define gTmpPath "/var/tmp/"
 
 CFlashTool::CFlashTool()
 {
@@ -199,6 +200,8 @@ bool CFlashTool::erase()
 CHTTPUpdater::CHTTPUpdater()
 {
 	BasePath = "http://dboxupdate.berlios.de/update/";
+	ImageFile = "cramfs.img";
+	VersionFile = "version";
 	//use other path?
 	FILE* fd = fopen("/var/etc/update.conf", "r");
 	if(fd)
@@ -209,9 +212,29 @@ CHTTPUpdater::CHTTPUpdater()
 		{
 			sscanf(buf, "basepath: %s\n", &buf2);
 		}
-		fclose(fd);
 		BasePath = buf2;
-		printf("useing HTTP-Basepath: %s\n", BasePath.c_str() );
+		if(fgets(buf,sizeof(buf),fd)!=NULL)
+		{
+			sscanf(buf, "imagefile: %s\n", &buf2);
+			if (strlen(buf2)> 0)
+			{
+				ImageFile = buf2;
+			}
+
+			if(fgets(buf,sizeof(buf),fd)!=NULL)
+			{
+				sscanf(buf, "versionfile: %s\n", &buf2);
+				if (strlen(buf2)> 0)
+				{
+					VersionFile = buf2;
+				}
+			}
+		}
+		fclose(fd);
+
+		printf("[CHTTPUpdater] HTTP-Basepath: %s\n", BasePath.c_str() );
+		printf("[CHTTPUpdater] Image-Filename: %s\n", ImageFile.c_str() );
+		printf("[CHTTPUpdater] Version-Filename: %s\n", VersionFile.c_str() );
 	}
 	statusViewer = NULL;
 }
@@ -235,12 +258,13 @@ bool CHTTPUpdater::getInfo()
 	CURL *curl;
 	CURLcode res;
 	FILE *headerfile;
-	headerfile = fopen("/var/tmp/version", "w");
+	string	sFileName = gTmpPath+ VersionFile;
+	headerfile = fopen(sFileName.c_str(), "w");
 	res = (CURLcode) 1;
 	curl = curl_easy_init();
 	if(curl)
 	{
-		string gURL = BasePath + "version";
+		string gURL = BasePath + VersionFile;
 		curl_easy_setopt(curl, CURLOPT_URL, gURL.c_str() );
 		curl_easy_setopt(curl, CURLOPT_FILE, headerfile);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
@@ -279,12 +303,13 @@ bool CHTTPUpdater::getFile()
 	CURL *curl;
 	CURLcode res;
 	FILE *headerfile;
-	headerfile = fopen("/var/tmp/cramfs.img", "w");
+	string	sFileName = gTmpPath+ ImageFile;
+	headerfile = fopen(sFileName.c_str(), "w");
 	res = (CURLcode) 1;
 	curl = curl_easy_init();
 	if(curl)
 	{
-		string gURL = BasePath + "cramfs.img";
+		string gURL = BasePath + ImageFile;
 		curl_easy_setopt(curl, CURLOPT_URL, gURL.c_str() );
 		curl_easy_setopt(curl, CURLOPT_FILE, headerfile);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, show_progress);
@@ -318,7 +343,7 @@ bool CHTTPUpdater::getFile()
 
 CFlashUpdate::CFlashUpdate()
 {
-	width = 320;
+	width = 400;
 	hheight = g_Fonts->menu_title->getHeight();
 	mheight = g_Fonts->menu->getHeight();
 	height = hheight+5*mheight+20;
@@ -447,15 +472,23 @@ void CFlashUpdate::paint()
 	showStatusMessage(g_Locale->getText("flashupdate.versioncheck").c_str());
 
 	//installierte version...
-	installed_major = installed_provider = installed_minor = 0;
-	sscanf(g_settings.softupdate_currentversion, "%d.%d.%d", &installed_major, &installed_provider, &installed_minor);
+	installed_major = installed_provider = 0;
+	strcpy(installed_minor, "0");
+	sscanf(g_settings.softupdate_currentversion, "%d.%d.%s", &installed_major, &installed_provider, (char*) &installed_minor);
 
 	//neue version?
-	new_major = new_provider = new_minor = 0;
+	new_major = new_provider = 0;
+	strcpy(new_minor, "0");
 	strcpy(new_md5sum, "");
-	FILE* fd = fopen("/var/tmp/version", "r");
+
+	string	sFileName = gTmpPath+ http.VersionFile;
+	FILE* fd = fopen(sFileName.c_str(), "r");
 	if(!fd)
-		fd = fopen("/var/tmp/version.txt", "r");
+	{
+		sFileName= sFileName+ ".txt";
+		fd = fopen(sFileName.c_str(), "r");
+	}
+
 	if(!fd)
 	{
 		showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
@@ -465,7 +498,13 @@ void CFlashUpdate::paint()
 	char buf[100];
 	if(fgets(buf,sizeof(buf),fd)!=NULL)
 	{
-		sscanf(buf, "version: %d.%d.%d\n", &new_major, &new_provider, &new_minor);
+		sscanf(buf, "version: %d.%d.%s\n", &new_major, &new_provider, (char*) &new_minor);
+	}
+	else
+	{
+		showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
+		close(fp_fd);
+		return;
 	}
 	if(fgets(buf,sizeof(buf),fd)!=NULL)
 	{
@@ -523,8 +562,9 @@ void CFlashUpdate::paint()
 	unsigned char   md5buffer[16];
 	char            md5string[40]="";
 
+	sFileName = gTmpPath+ http.ImageFile;
 	showStatusMessage(g_Locale->getText("flashupdate.md5check") );
-	if( md5_file("/var/tmp/cramfs.img", 1, (unsigned char*) &md5buffer))
+	if( md5_file(sFileName.c_str(), 1, (unsigned char*) &md5buffer))
 	{
 		showStatusMessage(g_Locale->getText("flashupdate.cantopenfile") );
 		close(fp_fd);
@@ -549,7 +589,7 @@ void CFlashUpdate::paint()
 	CFlashTool ft;
 	ft.setMTDDevice("/dev/mtd/3");
 	ft.setStatusViewer(this);
-	if(!ft.program("/var/tmp/cramfs.img"))
+	if(!ft.program(sFileName))
 	{
 		showStatusMessage( ft.getErrorMessage() );
 		close(fp_fd);
@@ -558,7 +598,7 @@ void CFlashUpdate::paint()
 
 	//versionsinfo schreiben
 	FILE* fd2 = fopen("/var/etc/version", "w");
-	fprintf(fd2, "%d.%d.%d\n", new_major, new_provider, new_minor);
+	fprintf(fd2, "%d.%d.%s\n", new_major, new_provider, new_minor);
 	fflush(fd2);
 	fclose(fd2);
 

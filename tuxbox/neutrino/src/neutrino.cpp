@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.161 2002/02/22 22:47:20 field Exp $
+        $Id: neutrino.cpp,v 1.162 2002/02/23 11:48:13 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.162  2002/02/23 11:48:13  field
+  Soft-Update auch fuer alternative "Provider" :)
+
   Revision 1.161  2002/02/22 22:47:20  field
   Features-Menue verbessert
 
@@ -1350,7 +1353,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 	if (softupdate)
 	{
 		printf("init soft-update-stuff\n");
-		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "mainmenue.raw");
+		CMenuWidget* updateSettings = new CMenuWidget("servicemenu.update", "softupdate.raw");
 		updateSettings->addItem( new CMenuSeparator() );
 		updateSettings->addItem( new CMenuForwarder("menu.back") );
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -2476,7 +2479,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.161 2002/02/22 22:47:20 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.162 2002/02/23 11:48:13 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

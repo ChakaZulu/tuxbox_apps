@@ -1,40 +1,43 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
- 
+
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
- 
+
 	Kommentar:
- 
+
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-	
- 
+
+
 	License: GPL
- 
+
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
- 
+
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-$Id: menue.cpp,v 1.34 2002/02/19 23:41:48 McClean Exp $
- 
- 
+$Id: menue.cpp,v 1.35 2002/02/23 11:48:13 field Exp $
+
+
 History:
  $Log: menue.cpp,v $
+ Revision 1.35  2002/02/23 11:48:13  field
+ Soft-Update auch fuer alternative "Provider" :)
+
  Revision 1.34  2002/02/19 23:41:48  McClean
  add neutrino-direct-start option (for alexW's-Images only at the moment)
 
@@ -46,60 +49,60 @@ History:
 
  Revision 1.31  2001/12/31 16:27:13  McClean
  use lcddclient
- 
+
  Revision 1.30  2001/12/29 02:17:00  McClean
  make some settings get from controld
- 
+
  Revision 1.29  2001/12/25 11:40:30  McClean
  better pushback handling
- 
+
  Revision 1.28  2001/12/25 03:28:42  McClean
  better pushback-handling
- 
+
  Revision 1.27  2001/12/12 19:11:32  McClean
  prepare timing setup...
- 
+
  Revision 1.26  2001/11/26 02:34:04  McClean
  include (.../../stuff) changed - correct unix-formated files now
- 
+
  Revision 1.25  2001/11/15 11:42:41  McClean
  gpl-headers added
- 
+
  Revision 1.24  2001/11/07 23:48:55  field
  Kleiner Bugfix (Sprachenmenue)
- 
+
  Revision 1.23  2001/11/03 23:23:51  McClean
  radiomode background paint - bugfix
- 
+
  Revision 1.22  2001/10/22 21:48:22  McClean
  design-update
- 
+
  Revision 1.21  2001/10/22 15:00:18  McClean
  icon update
- 
+
  Revision 1.20  2001/10/15 00:24:07  McClean
  lcd-optimize
- 
+
  Revision 1.19  2001/10/11 21:04:58  rasc
  - EPG:
    Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
    Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
  - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
    (\r\n wg. falscher CSV Einstellung...)
- 
+
  Revision 1.18  2001/10/10 01:20:10  McClean
  menue changed
- 
+
  Revision 1.17  2001/10/01 20:41:08  McClean
  plugin interface for games - beta but nice.. :)
- 
+
  Revision 1.16  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
    ==> harmonischeres Menuehandling
  - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
- 
- 
+
+
 */
 
 
@@ -219,7 +222,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 				case (CRCInput::RC_home):
 					key = CRCInput::RC_timeout;
 					break;
-	
+
 				case (CRCInput::RC_right):
 					break;
 
@@ -275,6 +278,12 @@ void CMenuWidget::paint()
 {
 	string  l_name = g_Locale->getText(name);
 	g_lcdd->setMode(CLcddClient::MODE_MENU, l_name);
+
+	int neededWidth = g_Fonts->menu_title->getRenderWidth(l_name.c_str());
+	if (neededWidth> width-48)
+	{
+		width= neededWidth+ 49;
+	}
 
 	//	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
