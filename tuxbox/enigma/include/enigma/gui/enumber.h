@@ -31,9 +31,10 @@ protected:
 	void lostFocus();
 public:
 	Signal1<void, int*> selected;
+	Signal0<void> numberChanged;
 	eNumber(eWidget *parent, int len, int min, int max, int maxdigits, int *init, int isactive=0, eLabel* descr=0, int grabfocus=1);
 	~eNumber();
-	int getNumber(int f=0) { if ((f>=0) && (f<len)) return number[f]; return -1; }
+	int getNumber(int f) { if ((f>=0) && (f<len)) return number[f]; return -1; }
 	void setNumber(int f, int n);
 
 	void setLimits(int min, int max);

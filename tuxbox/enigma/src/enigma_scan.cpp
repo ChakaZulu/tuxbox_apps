@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.3 2002/06/23 15:51:24 Ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.4 2002/06/29 23:56:33 tmbinc Exp $
  */
 
 #include "enigma_scan.h"
@@ -59,7 +59,7 @@ void eZapScan::sel_scan()
 
 void eZapScan::sel_bouquet()
 {
-	eDVB::getInstance()->sortInChannels();
+	eDVB::getInstance()->settings->sortInChannels();
 }
 
 void eZapScan::sel_satconfig()

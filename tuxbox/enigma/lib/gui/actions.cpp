@@ -7,7 +7,7 @@
 #include <core/xml/xmltree.h>
 
 eAction::eAction(eActionMap &map, char *identifier, char *description, int priority)
-		: map(&map),  description(description), identifier(identifier), priority(priority)
+		: description(description), identifier(identifier), map(&map), priority(priority)
 {
 	map.add(this);
 }

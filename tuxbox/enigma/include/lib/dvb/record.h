@@ -7,6 +7,8 @@
 #include <core/base/thread.h>
 #include <core/base/eerror.h>
 
+#include <set>
+
 /**
  * \brief The DVBRecorder
  *
@@ -33,6 +35,8 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 		eDVBRecorderMessage(eCode code, const char *filename): code(code), filename(filename) { }
 		eDVBRecorderMessage(eCode code, int pid): code(code), pid(pid) { }
 	};
+	
+	std::set<int> pids;
 
 	eFixedMessagePump<eDVBRecorderMessage> messagepump;
 	void thread();

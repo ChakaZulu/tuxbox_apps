@@ -60,7 +60,5 @@ int eMultipage::at()
 
 void eMultipage::addPage(eWidget *page)
 {
-	eDebug("adding %x", page);
 	list.push_back(page);
 }
-

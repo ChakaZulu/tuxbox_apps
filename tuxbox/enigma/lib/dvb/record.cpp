@@ -41,20 +41,25 @@ void eDVBRecorder::s_open(const char *filename)
 {
 	eDebug("eDVBRecorder::s_open(%s)", filename);
 	delete[] filename;
+	pids.clear();
 }
 
 void eDVBRecorder::s_addPID(int pid)
 {
+	pids.insert(pid);
 	eDebug("eDVBRecorder::s_addPID(0x%x)", pid);
 }
 
 void eDVBRecorder::s_removePID(int pid)
 {
+//	pids.remove(pid);
 	eDebug("eDVBRecorder::s_removePID(0x%x)", pid);
 }
 
 void eDVBRecorder::s_start()
 {
+/*	for (std::set<int>::iterator i(pids.begin()); i != pids.end(); ++i)
+		printf("opening pidfilter for pid %d\n", i); */
 	eDebug("eDVBRecorder::s_start();");
 }
 

@@ -14,10 +14,10 @@
 
 eWidget::eWidget(eWidget *parent, int takefocus):
 	parent(parent),
-	takefocus(takefocus), 
+	focus(0), takefocus(takefocus),
 	font(parent?parent->font:gFont("NimbusSansL-Regular Sans L Regular", eSkin::getActive()->queryValue("fontsize", 20))),
 	backgroundColor(parent?gColor(-1):gColor(0x20)),
-	foregroundColor(parent?parent->foregroundColor:gColor(0x2F)), focus(0)
+	foregroundColor(parent?parent->foregroundColor:gColor(0x2F))
 {
 	LCDTitle=0;
 	LCDElement=0;
@@ -48,6 +48,9 @@ eWidget::~eWidget()
 
 	if (parent && !parent->childlist.empty())
 		parent->childlist.remove(this);
+	
+	while (!childlist.empty())
+		delete childlist.front();
 }
 
 void eWidget::takeFocus()
@@ -233,19 +236,10 @@ int eWidget::exec()
 
 	event(eWidgetEvent(eWidgetEvent::execBegin));	// hat jemand was dagegen einzuwenden?
 	
-	if (!in_loop)	// hatte wohl jemand.
-	{
-		eWidget *ich=this;
-		while (ich->parent)
-			ich=ich->parent;
-		result=ich->result;
-	} else
+	if (in_loop)	// hatte wohl jemand.
 	{
 		in_loop=1;		// wir betreten die mainloop
-		if (parent)		// ... allerdings die vom parent
-			result=parent->exec();	// ... der uns auch das result gibt.
-		else
-			eApp->enter_loop();		// oder wir machen das halt selber.
+		eApp->enter_loop();		// oder wir machen das halt selber.
 		in_loop=0; // nu sind wir jedenfalls draussen.
 	}
 	event(eWidgetEvent(eWidgetEvent::execDone));
@@ -270,19 +264,11 @@ void eWidget::clear()
 
 void eWidget::close(int res)
 {
-	if (parent)
-	{
-		if (in_loop==1)
-			parent->close(res);
-		in_loop=0;	// in einer loop sind wir nun nichtmehr
-	} else
-	{
-		if (in_loop==0)
-			eFatal("attempt to close non-execing widget");
-		if (in_loop==1)	// nur wenn das ne echte loop ist
-			eApp->exit_loop();
-		result=res;
-	}
+	if (in_loop==0)
+		eFatal("attempt to close non-execing widget");
+	if (in_loop==1)	// nur wenn das ne echte loop ist
+		eApp->exit_loop();
+	result=res;
 }
 
 void eWidget::show()
@@ -296,7 +282,6 @@ void eWidget::show()
 
 	if (!parent || (parent->state&stateVisible))
 	{
-		int oldstate=state;
 		getTLW()->just_showing++;
 		willShowChildren();
 
@@ -442,6 +427,8 @@ int eWidget::eventHandler(const eWidgetEvent &evt)
 	case eWidgetEvent::changedPosition:
 	case eWidgetEvent::changedPixmap:
 		invalidate();
+		break;
+	default:
 		break;
 	}
 	return 0;
@@ -590,9 +577,10 @@ void eWidget::focusNext(int dir)
 			
 			int xd=m1.x()-m2.x();
 			int yd=m1.y()-m2.y();
+#if 0
 			int dif=xd*xd+yd*yd;
 			int eff=0;
-#if 0
+
 			switch (dir)
 			{
 			case focusDirN:

@@ -462,7 +462,6 @@ int eHTTPConnection::processRemoteState()
 				int del=line.find(": ");
 				eString name=line.left(del), value=line.mid(del+2);
 				remote_header[std::string(name)]=std::string(value);
-				const char *ct="Content-Type";
 			}
 			done=1;
 			break;
@@ -485,7 +484,6 @@ int eHTTPConnection::processRemoteState()
 				content_length_remaining-=len;
 				if (!content_length_remaining)
 				{
-					char buffer[100]="Content-Type";
 					data->haveData(0, 0);
 					remotestate=stateDone;
 					break;

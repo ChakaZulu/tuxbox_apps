@@ -77,14 +77,16 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 		} else
 			break;
 		return 1;
+	default:
+		break;
 	}
 	return eWidget::eventHandler(event);
 }
 
 eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, int *init, int isactive, eLabel* descr, int grabfocus)
-	:eWidget(parent, grabfocus), isactive(isactive), descr(descr?descr->getText():""),
-	active(0), digit(isactive),have_focus(0), cursor(cursor=eSkin::getActive()->queryScheme("focusedColor")),	normal(eSkin::getActive()->queryScheme("fgColor")),
-	tmpDescr(0)
+	:eWidget(parent, grabfocus), 
+	active(0), cursor(cursor=eSkin::getActive()->queryScheme("focusedColor")),	normal(eSkin::getActive()->queryScheme("fgColor")),
+	have_focus(0), digit(isactive), isactive(isactive), descr(descr?descr->getText():""), tmpDescr(0)
 {
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
@@ -121,7 +123,7 @@ int eNumber::keyDown(int key)
 				active++;
 				invalidate(getNumberRect(active-1));
 				digit=0;
-			
+				/*emit*/ numberChanged();
 				if (active>=len)
 				{
 					/*emit*/ selected(number);
@@ -242,7 +244,7 @@ void eNumber::setNumber(int n)
 int eNumber::getNumber()
 {
 	int n=0;
-	for (int i=len-1; i>=0; --i)
+	for (int i=0; i<len; i++)
 	{
 		n*=base;
 		n+=number[i];

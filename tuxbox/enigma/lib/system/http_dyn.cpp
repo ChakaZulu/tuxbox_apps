@@ -39,7 +39,7 @@ void eHTTPDynPathResolver::addDyn(eString request, eString path, eString (*funct
 eHTTPDataSource *eHTTPDynPathResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
 	eString p, opt;
-	if (path.find('?')!=-1)
+	if (path.find('?')!=eString::npos)
 	{
 		p=path.left(path.find('?'));
 		opt=path.mid(path.find('?')+1);

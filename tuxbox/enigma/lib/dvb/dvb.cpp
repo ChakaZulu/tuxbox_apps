@@ -113,11 +113,13 @@ int eTransponder::satellite::tune(eTransponder *trans)
 eService::eService(int transport_stream_id, int original_network_id, int service_id, int service_number):
 		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_number(service_number)
 {
+	clearCache();
 }
 
-eService::eService(int transport_stream_id, int original_network_id, SDTEntry *sdtentry, int service_number):
+eService::eService(int transport_stream_id, int original_network_id, const SDTEntry *sdtentry, int service_number):
 		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_number(service_number)
 {
+	clearCache();
 	service_id=sdtentry->service_id;
 	update(sdtentry);
 }
@@ -138,7 +140,13 @@ eTransponder::eTransponder(int transport_stream_id, int original_network_id):
 {
 	cable.valid=0;
 	satellite.valid=0;
-	state=stateListed;
+	state=stateToScan;
+}
+
+eTransponder::eTransponder(): transport_stream_id(-1), original_network_id(-1)
+{
+	cable.valid=satellite.valid=0;
+	state=stateToScan;
 }
 
 void eTransponder::setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb, int inversion)
@@ -192,7 +200,7 @@ int eTransponder::isValid()
 	}
 }
 
-void eService::update(SDTEntry *sdtentry)
+void eService::update(const SDTEntry *sdtentry)
 {
 	if (sdtentry->service_id != service_id)
 	{
@@ -203,10 +211,10 @@ void eService::update(SDTEntry *sdtentry)
 	service_provider="unknown";
 	service_type=0;
 	service_id=sdtentry->service_id;
-	for (ePtrList<Descriptor>::iterator d(sdtentry->descriptors); d != sdtentry->descriptors.end(); ++d)
+	for (ePtrList<Descriptor>::const_iterator d(sdtentry->descriptors); d != sdtentry->descriptors.end(); ++d)
 		if (d->Tag()==DESCR_SERVICE)
 		{
-			ServiceDescriptor *nd=(ServiceDescriptor*)*d;
+			const ServiceDescriptor *nd=(ServiceDescriptor*)*d;
 			service_name=nd->service_name;
 			service_provider=nd->service_provider;
 			service_type=nd->service_type;
@@ -283,10 +291,10 @@ void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nser
 	}
 }
 
-void eTransponderList::handleSDT(SDT *sdt)
+void eTransponderList::handleSDT(const SDT *sdt)
 {
 		// todo: remove dead services (clean up current transport_stream)
-	for (ePtrList<SDTEntry>::iterator i(sdt->entries); i != sdt->entries.end(); ++i)
+	for (ePtrList<SDTEntry>::const_iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 	{
 		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, i->service_id);
 		service.update(*i);

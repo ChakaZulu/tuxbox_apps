@@ -20,6 +20,11 @@
 #include <core/system/http_file.h>
 #include <core/system/http_dyn.h>
 #include <core/system/init.h>
+#include <core/gui/emessage.h>
+#include <core/gui/actions.h>
+#include <core/driver/rc.h>
+#include <core/dvb/dvbservice.h>
+
 #include <core/system/xmlrpc.h>
 #include <apps/enigma/enigma.h>
 #include <apps/enigma/enigma_dyn.h>
@@ -144,12 +149,13 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 
 	eConfig::getInstance()->setKey("/elitedvb/system/bootCount", bootcount);
 
-	if ((!(e = eConfig::getInstance()->getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->getTransponders()))
+	if ((!(e = eConfig::getInstance()->getKey("/ezap/ui/lastChannel", lastchannel))) && (eDVB::getInstance()->settings->getTransponders()))
 	{
-		eService *t = eDVB::getInstance()->getTransponders()->searchService(lastchannel >> 16, lastchannel & 0xFFFF);
+		eService *t = eDVB::getInstance()->settings->getTransponders()->searchService(lastchannel >> 16, lastchannel & 0xFFFF);
 		if (t)
 		{
-			eDVB::getInstance()->switchService(t);
+			if (eDVB::getInstance()->getServiceAPI())
+				eDVB::getInstance()->getServiceAPI()->switchService(t);
 		}
 	}
 	init->setRunlevel(10);
@@ -157,9 +163,12 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 
 eZap::~eZap()
 {
-	if (eDVB::getInstance()->service)
+	if (eDVB::getInstance()->getServiceAPI() &&
+			eDVB::getInstance()->getServiceAPI()->service)
 	{
-		eConfig::getInstance()->setKey("/ezap/ui/lastChannel", (__u32)((eDVB::getInstance()->original_network_id << 16) | eDVB::getInstance()->service_id));
+		eConfig::getInstance()->setKey("/ezap/ui/lastChannel", 
+			(__u32)((eDVB::getInstance()->getServiceAPI()->original_network_id << 16) 
+				|  eDVB::getInstance()->getServiceAPI()->service_id));
 	}
 
 	eDebug("[ENIGMA] beginning clean shutdown");

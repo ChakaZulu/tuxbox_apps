@@ -1,14 +1,17 @@
 #include <algorithm>
 #include <list>
 
-#include <apps/enigma/sselect.h>
-#include <apps/enigma/bselect.h>
-#include <apps/enigma/epgwindow.h>
+#include "sselect.h"
+#include "bselect.h"
+#include "epgwindow.h"
+
 #include <core/base/i18n.h>
 #include <core/gui/actions.h>
 #include <core/gui/eskin.h>
+#include <core/gui/elabel.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/dvb.h>
+#include <core/dvb/epgcache.h>
 #include <core/driver/rc.h>
 #include <core/system/init.h>
 
@@ -18,8 +21,8 @@ struct serviceSelectorActions
 	eAction nextBouquet, prevBouquet, showBouquetSelector, showEPGSelector, showAllServices;
 	serviceSelectorActions():
 		map("serviceSelector", _("service selector")),
-		prevBouquet(map, "prevBouquet", _("switch to previous bouquet"), eAction::prioDialogHi),
 		nextBouquet(map, "nextBouquet", _("switch to next bouquet"), eAction::prioDialogHi),
+		prevBouquet(map, "prevBouquet", _("switch to previous bouquet"), eAction::prioDialogHi),
 		showBouquetSelector(map, "showBouquetSelector", _("shows the bouquet selector"), eAction::prioDialog),
 		showEPGSelector(map, "showEPGSelector", _("shows the EPG selector for the highlighted channel"), eAction::prioDialog),
 		showAllServices(map, "showAllServices", _("switch to all services"), eAction::prioDialog)
@@ -29,8 +32,8 @@ struct serviceSelectorActions
 
 eAutoInitP0<serviceSelectorActions> i_serviceSelectorActions(5, "service selector actions");
 
-eListboxEntryService::eListboxEntryService(eService *service, eListBox<eListboxEntryService> *listbox)
-	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), service(service)
+eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eService *service): 
+		eListBoxEntry((eListBox<eListBoxEntry>*)lb), service(service)
 {
 	bouquet=0;
 #if 0
@@ -43,6 +46,7 @@ eListboxEntryService::eListboxEntryService(eService *service, eListBox<eListboxE
 		if (ch<32)
 			continue;
 		if (ch==0x86)
+
 			continue;
 		if (ch==0x87)
 			continue;
@@ -51,29 +55,74 @@ eListboxEntryService::eListboxEntryService(eService *service, eListBox<eListboxE
 #endif
 }
 
-eListboxEntryService::eListboxEntryService(eBouquet *service, eListBox<eListboxEntryService> *listbox)
-	:eListBoxEntry((eListBox<eListBoxEntry>*)listbox), bouquet(bouquet)
+eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eBouquet *bouquet): 
+		eListBoxEntry((eListBox<eListBoxEntry>*)lb), bouquet(bouquet)
 {
 	service=0;
 	sort="";
 }
 
-eListboxEntryService::~eListboxEntryService()
+eListBoxEntryService::~eListBoxEntryService()
 {
+}
+
+void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, const gColor &coActive, const gColor &coNormal, bool highlighted)
+{
+	eString sname;
+	if (service)
+	{
+		for (unsigned p=0; p<service->service_name.length(); p++)
+		{
+			char ch=service->service_name[p];
+			if (ch<32)
+				continue;
+			if (ch==0x86)
+				continue;
+			if (ch==0x87)
+				continue;
+			sname+=ch;
+		}
+		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service->original_network_id, service->service_id);
+		if (e)
+		{
+			for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+			{
+				Descriptor *descriptor=*d;
+				if (descriptor->Tag()==DESCR_SHORT_EVENT)
+				{
+					ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+					sname+=" (";
+					sname+=ss->event_name;
+					sname+=")";
+					break;
+				}
+			}
+			delete e;
+		}
+	} else if (bouquet)
+		sname=bouquet->bouquet_name;
+	else
+		return;
+	gColor col=highlighted?coActive:coNormal;
+	rc->setForegroundColor(col);
+	rc->setFont(listbox->getEntryFnt());
+	if (col != -1)
+		rc->fill(rect);
+	rc->renderText(rect, sname);
 }
 
 struct eServiceSelector_addService: public std::unary_function<eService&,void>
 {
-	eListBox<eListboxEntryService> &list;
+	eListBox<eListBoxEntryService> &list;
 	eService *result;
-	eServiceSelector_addService(eListBox<eListboxEntryService> &list, eService *result): list(list), result(result)
+	eServiceSelector_addService(eListBox<eListBoxEntryService> &list, eService *result): list(list), result(result)
 	{
 	}
 	void operator()(eService& c)
 	{
 		if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
 			return;
-		eListboxEntryService *l=new eListboxEntryService(&c, &list);
+		eListBoxEntryService *l=new eListBoxEntryService(&list, &c);
 		if (&c==result)
 			list.setCurrent(l);
 	}
@@ -82,32 +131,33 @@ struct eServiceSelector_addService: public std::unary_function<eService&,void>
 void eServiceSelector::fillServiceList()
 {
 	setText("full services");
-	list.clearList();
 
-	if (eDVB::getInstance()->getTransponders())
-		eDVB::getInstance()->getTransponders()->forEachChannel(eServiceSelector_addService(list, result));
+	services->clearList();
 
-	list.sort();
-	list.invalidate();
+	if (eDVB::getInstance()->settings->getTransponders())
+		eDVB::getInstance()->settings->getTransponders()->forEachChannel(eServiceSelector_addService(*services, result));
+
+	services->sort();
+	services->invalidate();
 }
 
-void eServiceSelector::entrySelected(eListboxEntryService *e)
+void eServiceSelector::entrySelected(eListBoxEntryService *entry)
 {
-	if (!e)
+	if (!entry)
 	{
 		result=0;
-		close(0);
-	} else if (e->service)
-	{
-		result=e->service;
 		close(1);
-	} else if (e->bouquet)
-		useBouquet(e->bouquet);
+	} else if (entry->service)
+	{
+		result=entry->service;
+		close(0);
+	} else if (entry->bouquet)
+		useBouquet(entry->bouquet);
 }
 
-void eServiceSelector::selchanged(eListboxEntryService *entry)
+void eServiceSelector::selchanged(eListBoxEntryService *entry)
 {
-	selected = entry->service;
+	selected = (((eListBoxEntryService*)entry)->service);
 }
 
 int eServiceSelector::eventHandler(const eWidgetEvent &event)
@@ -158,22 +208,40 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				fillServiceList();
 			else
 				break;
-
 			return 1;
+
+		default:
+			break;
 	}
-	return eListBoxWindow<eListboxEntryService>::eventHandler(event);
+	return eWindow::eventHandler(event);
 }
 
 eServiceSelector::eServiceSelector()
-	:eListBoxWindow<eListboxEntryService>("Select Service...", 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
+								:eWindow(0)
 {
+	services = new eListBox<eListBoxEntryService>(this);
+	services->setName("services");
+	services->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
+	
+	l_bouquet = new eLabel(this);
+	l_bouquet->setName("bouquet");
+	
+	l_bouquet_prev = new eLabel(this);
+	l_bouquet_prev->setName("bouquet_prev");
+	
+	l_bouquet_next = new eLabel(this);
+	l_bouquet_next->setName("bouquet_next");
+	
 	pbs = new eBouquetSelector();
-	move(ePoint(70, 60));
-	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	fillServiceList();
-	CONNECT(list.selected, eServiceSelector::entrySelected);
-	CONNECT(list.selchanged, eServiceSelector::selchanged);
+	CONNECT(services->selected, eServiceSelector::entrySelected);
+	CONNECT(services->selchanged, eServiceSelector::selchanged);
 	CONNECT(eDVB::getInstance()->serviceListChanged, eServiceSelector::fillServiceList);
+
+	if (eSkin::getActive()->build(this, "eServiceSelector"))
+		eWarning("Service selector widget build failed!");
+
+	services->init();
 	addActionMap(&i_serviceSelectorActions->map);
 }
 
@@ -185,10 +253,10 @@ eServiceSelector::~eServiceSelector()
 
 void eServiceSelector::useBouquet(eBouquet *bouquet)
 {
-	list.clearList();
+	services->clearList();
 	if (bouquet)
 	{
-		setText(bouquet->bouquet_name);
+		l_bouquet->setText(bouquet->bouquet_name);
 		for (std::list<eServiceReference>::iterator i(bouquet->list.begin()); i != bouquet->list.end(); i++)
 		{
 			if (!i->service)
@@ -196,22 +264,32 @@ void eServiceSelector::useBouquet(eBouquet *bouquet)
 			eService &c = *i->service;
 			if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
 				continue;
-			eListboxEntryService *l=new eListboxEntryService(&c, &list);
+			eListBoxEntryService *l=new eListBoxEntryService(services, &c);
 			if (&c==result)
-				list.setCurrent(l);
+				services->setCurrent(l);
 		}
 		if (bouquet->bouquet_id>=0)
-			list.sort();
+			services->sort();
 	}
-	list.invalidate();
+	services->invalidate();
 }
 
 eService *eServiceSelector::choose(eService *current, int irc)
 {
 	result=current;
-	list.moveSelection(irc);
+	switch (irc)
+	{
+	case dirUp:
+		services->moveSelection(eListBox<eListBoxEntryService>::dirUp);
+		break;
+	case dirDown:
+		services->moveSelection(eListBox<eListBoxEntryService>::dirDown);
+		break;
+	default:
+		break;
+	}
 	show();
-	if (!exec())
+	if (exec())
 		result=0;
 	hide();
 	return result;
@@ -219,7 +297,7 @@ eService *eServiceSelector::choose(eService *current, int irc)
 
 eService *eServiceSelector::next()
 {
-	eListboxEntryService *s=list.goNext();
+	eListBoxEntryService *s=services->goNext();
 	if (s)
 		return s->service;
 	else
@@ -228,7 +306,7 @@ eService *eServiceSelector::next()
 
 eService *eServiceSelector::prev()
 {
-	eListboxEntryService *s=list.goPrev();
+	eListBoxEntryService *s=services->goPrev();
 	if (s)
 		return s->service;
 	else

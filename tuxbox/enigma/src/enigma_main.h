@@ -26,7 +26,7 @@ class NVODStream: public eListBoxEntryTextStream
 private:
 	void EITready(int error);
 public:
-	NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id);
+	NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id, int type);
 	int transport_stream_id, original_network_id, service_id;
 	EIT eit;
 };

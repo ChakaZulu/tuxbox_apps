@@ -27,6 +27,18 @@
 #include <core/gui/actions.h>
 #include <core/driver/rc.h>
 #include <core/driver/streamwd.h>
+#include <core/dvb/dvbservice.h>
+
+#include "enigma_main.h"
+#include "enigma_mainmenu.h"
+#include "enigma_event.h"
+#include "sselect.h"
+#include <core/gui/eskin.h>
+#include "enigma.h"
+#include "enigma_lcd.h"
+#include "enigma_plugins.h"
+#include "download.h"
+#include "epgwindow.h"
 
 struct enigmaMainActions
 {
@@ -162,7 +174,7 @@ void NVODStream::EITready(int error)
 {
 	eDebug("NVOD eit ready: %d", error);
 
-	if (!eit.error)
+	if (eit.ready && !eit.error)
 	{
 		for (ePtrList<EITEvent>::const_iterator event(eit.events); event != eit.events.end(); ++event)		// always take the first one
 		{
@@ -196,11 +208,9 @@ void NVODStream::EITready(int error)
 
 }
 
-NVODStream::NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id)
+NVODStream::NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, int original_network_id, int service_id, int type)
 	: eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), transport_stream_id(transport_stream_id), original_network_id(original_network_id),
-		service_id(service_id), eit(EIT::typeNowNext, service_id,
-		(			(eDVB::getInstance()->transport_stream_id==transport_stream_id)
-			&&	(eDVB::getInstance()->original_network_id==original_network_id))?EIT::tsActual:EIT::tsOther		)
+		service_id(service_id), eit(EIT::typeNowNext, service_id, type)
 {
 	CONNECT(eit.tableReady, NVODStream::EITready);
 	eit.start();
@@ -208,9 +218,9 @@ NVODStream::NVODStream(eListBox<NVODStream> *listbox, int transport_stream_id, i
 
 void eNVODSelector::selected(NVODStream* nv)
 {
-	if (nv)
-		eDVB::getInstance()->switchService(nv->service_id, nv->original_network_id, nv->transport_stream_id, 5);	// faked service_type
-
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi && nv)
+		sapi->switchService(nv->service_id, nv->original_network_id, nv->transport_stream_id, 5);	// faked service_type
 	close(0);
 }
 
@@ -229,7 +239,12 @@ void eNVODSelector::clear()
 
 void eNVODSelector::add(NVODReferenceEntry *ref)
 {
-	new NVODStream(&list, ref->transport_stream_id, ref->original_network_id, ref->service_id);
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+	int type= ((sapi->transport_stream_id==ref->transport_stream_id)
+			&&	(sapi->original_network_id==ref->original_network_id)) ? EIT::tsActual:EIT::tsOther;
+	new NVODStream(&list, ref->transport_stream_id, ref->original_network_id, ref->service_id, type);
 }
 
 AudioStream::AudioStream(eListBox<AudioStream> *listbox, PMTEntry *stream)
@@ -289,10 +304,11 @@ void AudioStream::redraw(gPainter *rc, const eRect& rect, const gColor& coActive
 
 void eAudioSelector::selected(AudioStream *l)
 {
-	if (l)
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (l && sapi)
 	{
-		eDVB::getInstance()->setPID(l->stream);
-		eDVB::getInstance()->setDecoder();
+		sapi->setPID(l->stream);
+		sapi->setDecoder();
 	}
 	close(0);
 }
@@ -332,9 +348,9 @@ eSubServiceSelector::eSubServiceSelector()
 
 void eSubServiceSelector::selected(SubService *ss)
 {
-	if (ss)
-		eDVB::getInstance()->switchService(ss->service_id, ss->original_network_id, ss->transport_stream_id, 5);	// faked service_type
-
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi && ss)
+		sapi->switchService(ss->service_id, ss->original_network_id, ss->transport_stream_id, 5);	// faked service_type
 	close(0);
 }
 
@@ -477,9 +493,7 @@ eZapMain::eZapMain(): eWidget(0, 1), timeout(eApp), clocktimer(eApp)
 
 	actual_eventDisplay=0;
 
-	eDebug("...");
 	clockUpdate();	
-	eDebug("<-- clockUpdate");
 	
 	addActionMap(&i_enigmaMainActions->map);
 }
@@ -561,6 +575,7 @@ void eZapMain::setEIT(EIT *eit)
 {
 	int numsub=0;
 	subservicesel.clear();
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	
 	if (eit)
 	{
@@ -626,7 +641,7 @@ void eZapMain::setEIT(EIT *eit)
 				nexttime=start;
 				break;
 			}
-			if (!eDVB::getInstance()->service_state)
+			if (sapi && !sapi->service_state)
 				Description->setText(descr);
 			p++;
 		}
@@ -676,7 +691,9 @@ void eZapMain::handleNVODService(SDTEntry *sdtentry)
 		if (i->Tag()==DESCR_NVOD_REF)
 			for (ePtrList<NVODReferenceEntry>::iterator e(((NVODReferenceDescriptor*)*i)->entries); e != ((NVODReferenceDescriptor*)*i)->entries.end(); ++e)
 				nvodsel.add(*e);
-	nvodsel.setText(eDVB::getInstance()->service->service_name.c_str());
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+		nvodsel.setText(sapi->service->service_name.c_str());
 }
 
 void eZapMain::showServiceSelector(int dir)
@@ -690,29 +707,38 @@ void eZapMain::showServiceSelector(int dir)
 	pLCD->lcdMenu->hide();
 	if (!service)
 		return;
-	if (service)
-		if (eDVB::getInstance()->switchService(service))
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi && service)
+		if (sapi->switchService(service))
 			serviceChanged(service, -EAGAIN);
 }
 
 void eZapMain::nextService()
 {
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+		
 	eService *service=eZap::getInstance()->getServiceSelector()->next();
 	eDebug("nextService: %x", service);
 	if (!service)
 		return;
 	if (service)
-		if (eDVB::getInstance()->switchService(service))
+		if (sapi->switchService(service))
 			serviceChanged(service, -EAGAIN);	
 }
 
 void eZapMain::prevService()
 {
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+		
 	eService *service=eZap::getInstance()->getServiceSelector()->prev();
 	if (!service)
 		return;
 	if (service)
-		if (eDVB::getInstance()->switchService(service))
+		if (sapi->switchService(service))
 			serviceChanged(service, -EAGAIN);
 }
 
@@ -765,8 +791,9 @@ void eZapMain::toggleMute()
 			eService *service=eDVB::getInstance()->getTransponders()->searchServiceByNumber(chnum);
 			if (!service)
 				break;
-			if (service)
-				if (eDVB::getInstance()->switchService(service))
+			eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+			if (sapi && service)
+				if (sapi->switchService(service))
 					serviceChanged(service, -EAGAIN);
 		}
 		delete w;
@@ -877,13 +904,16 @@ void eZapMain::runVTXT()
 
 void eZapMain::showEPGList()
 {
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
 #if 1
 	if (isEPG)
 	{
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
-		eEPGWindow wnd(eDVB::getInstance()->service);
+		eEPGWindow wnd(sapi->service);
 		wnd.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		if (isVisible())
 		{
@@ -908,7 +938,11 @@ void eZapMain::showEPGList()
 
 void eZapMain::showEPG()
 {
-	eService* service = eDVB::getInstance()->service;
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+
+	eService* service = sapi->service;
 
 	if (!service)
 		return;
@@ -1000,9 +1034,9 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_enigmaMainActions->prevService)
 			prevService();
 		else if (event.action == &i_enigmaMainActions->serviceListDown)
-			showServiceSelector(eListBox<eService>::dirDown);
+			showServiceSelector(eServiceSelector::dirDown);
 		else if (event.action == &i_enigmaMainActions->serviceListUp)
-			showServiceSelector(eListBox<eService>::dirUp);
+			showServiceSelector(eServiceSelector::dirUp);
 		else if (event.action == &i_enigmaMainActions->volumeUp)
 			volumeUp();
 		else if (event.action == &i_enigmaMainActions->volumeDown) 
@@ -1012,6 +1046,8 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else 
 			break;
 		return 1;
+	default:
+		break;
 	}
 	return eWidget::eventHandler(event);
 }
@@ -1087,12 +1123,19 @@ void eZapMain::serviceChanged(eService *service, int err)
 
 // Quick und Dirty ... damit die aktuelle Volume sofort angezeigt wird.
 	eDVB::getInstance()->changeVolume(0, 0);
-	timeout.start(eDVB::getInstance()->service_state?10000:2000, 1);
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+
+	timeout.start(sapi->service_state?10000:2000, 1);
 }
 
 void eZapMain::gotEIT(EIT *eit, int error)
 {
 	setEIT(error?0:eit);
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
 
 	if (!error )
 	{
@@ -1102,21 +1145,25 @@ void eZapMain::gotEIT(EIT *eit, int error)
 		if (!eZap::getInstance()->focus && state)
 		{
 			show();
-			timeout.start(eDVB::getInstance()->service_state?10000:2000, 1);
+			timeout.start(sapi->service_state?10000:2000, 1);
 		}
 	}
 }
 
 void eZapMain::gotSDT(SDT *sdt)
 {
-	switch (eDVB::getInstance()->service_type)
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+
+	switch (sapi->service_type)
 	{
 	case 0x4:	// nvod reference
 	{
 		for (ePtrList<SDTEntry>::iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 		{
 			SDTEntry *entry=*i;
-			if (entry->service_id==eDVB::getInstance()->service_id)
+			if (entry->service_id==sapi->service_id)
 				handleNVODService(entry);
 		}
 		break;

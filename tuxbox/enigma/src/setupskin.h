@@ -26,7 +26,6 @@ class eSkinSetup: public eWindow
 	void loadSkins();
 	void accept();
 	void skinSelected(eListBoxEntrySkin *l);
-	int keyDown(int rc);
 public:
 	eSkinSetup();
 	~eSkinSetup();

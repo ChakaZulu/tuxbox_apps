@@ -14,7 +14,10 @@ eConfig::eConfig()
 	setName(CONFIGDIR "/enigma/registry");
 	int e=open();
 	if (e == NC_ERR_CORRUPT)
+	{
+		eFatal("CORRUTPED REGISTRY!");
 		::remove(CONFIGDIR "/enigma/registry");
+	}
 	if (e)
 	{
 		if (createNew())

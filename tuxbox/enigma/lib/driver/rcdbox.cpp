@@ -222,6 +222,7 @@ const char *eRCDeviceDBoxNew::getKeyDescription(const eRCKey &key) const
 	case 29: return "unten links";
 	case 30: return "unten rechts";
 	case 31: return "home";
+	default: return 0;
 	}
 }
 
@@ -305,6 +306,7 @@ const char *eRCDeviceDBoxButton::getKeyDescription(const eRCKey &key) const
 	case 1: return "power";
 	case 2: return "down";
 	case 3: return "up";
+	default: return 0;
 	}
 }
 
@@ -316,6 +318,7 @@ int eRCDeviceDBoxButton::getKeyCompatibleCode(const eRCKey &key) const
 	case 2: return eRCInput::RC_RIGHT;
 	case 3: return eRCInput::RC_LEFT;
 	}
+	return -1;
 }
 
 eRCDBoxDriver::eRCDBoxDriver(): eRCShortDriver("/dev/dbox/rc0")

@@ -1,5 +1,5 @@
 #include "ewindow.h"
-#include <core/gdi//grc.h>
+#include <core/gdi/grc.h>
 #include <core/gui/eskin.h>
 #include <core/system/init.h>
 #include <core/gdi/epng.h>
@@ -173,7 +173,9 @@ int eWindow::eventHandler(const eWidgetEvent &event)
 				close(-1);
 			else
 				break;
-		return 1;
+			return 1;
+		default:
+			break;
 	}
 	return eWidget::eventHandler(event);
 }

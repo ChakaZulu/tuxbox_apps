@@ -44,6 +44,13 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	CONNECT(fec->selected, eTransponderWidget::nextField1);
 	CONNECT(symbolrate->selected, eTransponderWidget::nextField0);
 	CONNECT(lnb->selected, eTransponderWidget::nextField0);
+	
+	CONNECT(fec->selchanged, eTransponderWidget::updated1);
+	CONNECT(polarity->selchanged, eTransponderWidget::updated1);
+	CONNECT(frequency->numberChanged, eTransponderWidget::updated0);
+	CONNECT(symbolrate->numberChanged, eTransponderWidget::updated0);
+	CONNECT(lnb->numberChanged, eTransponderWidget::updated0);
+	CONNECT(inversion->checked, eTransponderWidget::updated2);
 }
 
 void eTransponderWidget::nextField0(int *)
@@ -54,6 +61,21 @@ void eTransponderWidget::nextField0(int *)
 void eTransponderWidget::nextField1(eListBoxEntryText *)
 {
 	focusNext(eWidget::focusDirNext);
+}
+
+void eTransponderWidget::updated1(eListBoxEntryText *)
+{
+	updated();
+}
+
+void eTransponderWidget::updated0()
+{
+	updated();
+}
+
+void eTransponderWidget::updated2(int)
+{
+	updated();
 }
 
 int eTransponderWidget::load()
@@ -75,7 +97,7 @@ int eTransponderWidget::load()
 	return 0;
 }
 
-int eTransponderWidget::setTransponder(eTransponder *transponder)
+int eTransponderWidget::setTransponder(const eTransponder *transponder)
 {
 	if (!transponder)
 		return -1;
@@ -102,8 +124,28 @@ int eTransponderWidget::setTransponder(eTransponder *transponder)
 		
 		break;
 	}
+	default:
+		break;
 	}
 	return 0;
+}
+
+int eTransponderWidget::getTransponder(eTransponder *transponder)
+{
+	switch (type)
+	{
+	case deliveryCable:
+//	    void setCable(int frequency, int symbol_rate, int inversion)
+		return -1;
+	case deliverySatellite:
+		eDebug("setting to: %d %d %d %d %d %d", frequency->getNumber(), symbolrate->getNumber(), (int)polarity->getCurrent()->getKey(), (int)fec->getCurrent()->getKey(), lnb->getNumber(), inversion->isChecked());
+		transponder->setSatellite(frequency->getNumber()*1000, 
+			symbolrate->getNumber()*1000, !((int)polarity->getCurrent()->getKey()), 
+			((int)fec->getCurrent()->getKey()), lnb->getNumber(), inversion->isChecked());
+		return 0;
+	default:
+		return -1;
+	}
 }
 
 int eFEStatusWidget::eventHandler(const eWidgetEvent &event)
@@ -117,6 +159,8 @@ int eFEStatusWidget::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::willHide:
 		updatetimer.stop();
 		break;
+	default:
+		break;
 	}
 	return eWidget::eventHandler(event);
 }
@@ -129,10 +173,10 @@ eFEStatusWidget::eFEStatusWidget(eWidget *parent, eFrontend *fe): eWidget(parent
 	p_agc=new eProgress(this);
 	p_agc->setName("agc");
 	
-	c_sync=new eCheckbox(this);
+	c_sync=new eCheckbox(this, 0, 0);
 	c_sync->setName("sync");
 	
-	c_lock=new eCheckbox(this);
+	c_lock=new eCheckbox(this, 0, 0);
 	c_lock->setName("lock");
 	
 	CONNECT(updatetimer.timeout, eFEStatusWidget::update);

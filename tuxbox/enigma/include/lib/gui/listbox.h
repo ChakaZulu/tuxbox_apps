@@ -277,7 +277,8 @@ inline eListBox<T>::eListBox(eWidget *parent, int ih)
 		item_height(ih+2),
 		flags(0),
 		col_active(eSkin::getActive()->queryScheme("focusedColor")),
-		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size))
+		entryFnt(gFont("NimbusSansL-Regular Sans L Regular", font_size)),
+		have_focus(0)
 {
 	childs.setAutoDelete(false);	// machen wir selber
 
@@ -506,9 +507,10 @@ inline int eListBox<T>::eventHandler(const eWidgetEvent &event)
 			else
 				break;
 		return 1;
-	
-		case eWidgetEvent::changedSize:
-			init();
+	case eWidgetEvent::changedSize:
+		init();
+		break;
+	default:
 		break;
 	}
 	return eWidget::eventHandler(event);

@@ -42,6 +42,8 @@ void eZapVideoSetup::setColorFormat(eAVColorFormat w)
 	case cfYC:
 		colorformat->setText("SVideo");
 		break;
+	default:
+		colorformat->setText("Null");
 	}
 }
 

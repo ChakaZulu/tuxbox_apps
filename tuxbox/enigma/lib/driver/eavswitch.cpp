@@ -122,6 +122,7 @@ int eAVSwitch::setColorFormat(eAVColorFormat c)
 	int fblk = (c == cfRGB)?1:0;
 	ioctl(saafd, SAAIOSMODE, &arg);
 	ioctl(fd, AVSIOSFBLK, &fblk);
+	return 0;
 }
 
 int eAVSwitch::setInput(int v)
@@ -216,4 +217,5 @@ bool eAVSwitch::loadScartConfig()
 	{
 		eDebug("[eAVSwitch] failed to load scart-config (scart.conf), using standard-values");
 	}
+	return 0;
 }

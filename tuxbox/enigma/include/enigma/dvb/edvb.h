@@ -5,14 +5,16 @@
 #include <list>
 
 #include <include/libsig_comp.h>
+#include <core/dvb/esection.h>
+#include <core/system/econfig.h>
 #include <core/base/estring.h>
 #include <core/base/eptrlist.h>
-#include <core/dvb/esection.h>
-#include <core/system/nconfig.h>
+#include <core/dvb/settings.h>
 
 class eService;
 class eTransponder;
 class eTransponderList;
+class eDVBServiceController;
 
 class PAT;
 class PMT;
@@ -28,14 +30,54 @@ class Descriptor;
 #define ENOSTREAM 1001  /// no video or audio stream
 #define ENVOD			1002	/// nvod stream has to be selected
 
-#define SCAN_ONIT	1			/// scan network_other NIT
-#define SCAN_SKIP	2			/// skip known NITs (assuming they're all the same)
-
 class eBouquet;
 class eAVSwitch;
 class eStreamWatchdog;
 class MHWEIT;
 class eDVBRecorder;
+class eDVBScanController;
+class eDVB;
+
+class eTransponder;
+
+class eDVBEvent
+{
+public:
+	int type;
+	enum
+	{
+		eventTunedIn, 
+		eventUser,
+	};
+	int err;
+	eTransponder *transponder;
+	
+	eDVBEvent(int type): type(type) { }
+	eDVBEvent(int type, int err, eTransponder *transponder): type(type), err(err), transponder(transponder) { }
+};
+
+class eDVBState
+{
+public:
+	int state;
+	enum
+	{
+		stateIdle,
+		stateUser
+	};
+	eDVBState(int state): state(state) { }
+	operator int () const { return state; }
+};
+
+class eDVBController
+{
+protected:
+	eDVB &dvb;
+public:
+	eDVBController(eDVB &dvb): dvb(dvb) { }
+	virtual ~eDVBController()=0;
+	virtual void handleEvent(const eDVBEvent &event)=0;
+};
 
 /**
  * \brief High level DVB class.
@@ -47,27 +89,7 @@ class eDVBRecorder;
 class eDVB: public Object
 {
 	static eDVB *instance;
-protected:
-	friend class sortinChannel;
-		/** the main transponder/servicelist */
-	eTransponderList *transponderlist;
-	
-	ePtrList<eBouquet> bouquets;
-	void removeDVBBouquets();
-	void addDVBBouquet(BAT *bat);
-	eBouquet *getBouquet(int bouquet_id);
-	eBouquet *getBouquet(eString bouquet_name);
-	eBouquet *createBouquet(const eBouquet *parent, int bouquet_id, eString bouquet_name);
-	eBouquet *createBouquet(const eBouquet *parent, eString bouquet_name);
-	int getUnusedBouquetID(int range);
-	
-	void revalidateBouquets();
-
-		/** the current transponder with errorcode */
-	eTransponder *currentTransponder;
-	const ePtrList<eTransponder> *initialTransponders;
-	int currentTransponderState;
-
+public:
 		/** tables for current service/transponder */
 	eAUTable<PAT> tPAT;
 	eAUTable<PMT> tPMT;
@@ -75,162 +97,55 @@ protected:
 	eAUTable<NIT> tNIT, tONIT;
 	eAUTable<EIT> tEIT;
 	eAUTable<BAT> tBAT;
-	MHWEIT *tMHWEIT;
-	
-	TDT *tdt;
 	
 	eDVBRecorder *recorder;
-	
-public:
-		/** current service */
-	eService *service;	// meta-service
-	eTransponder *transponder;
-	int original_network_id, transport_stream_id, service_id, service_type;	// tunedIn only in idle-state. raw services.
-	int pmtpid;
-	int service_state;
-
-	struct CA
-	{
-		int casysid, ecmpid, emmpid;
-	};
-	
-	std::list<int> availableCASystems;
-	ePtrList<CA> calist;		/** currently used ca-systems */
-	
-	int time_difference;
-
-protected:
-
-	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors);
-		/* SCAN internal */
-	int scanOK;	// 1 SDT, 2 NIT, 4 BAT, 8 oNIT
-	int currentONID, scanflags;
-	eTransponder *scannedTransponder;
-	void scanEvent(int event);
-	std::list<int> knownNetworks;
-
-		/* SWITCH internal */
-
-	void serviceEvent(int event);	
-	void scanPMT();
-
-private:
-	void tunedIn(eTransponder*, int);
-	void PATready(int error);
-	void SDTready(int error);
-	void PMTready(int error);
-	void NITready(int error);
-	void ONITready(int error);
-	void EITready(int error);
-	void TDTready(int error);
-	void BATready(int error);
-	void MHWEITready(int error);
 
 public:
 	enum
 	{
-		stateIdle,
-		eventScanBegin,		// -> next
-		eventScanNext,		// -> tune
-		stateScanTune,		// tune ended mit "tuned" in switchedTransponder
-		eventScanTuneOK,	// tuneOK führt zu "getPAT"
-		eventScanTuneError,	// tuneError führt zu ScanError
-		stateScanGetPAT,	// -> gotPAT:scanError (PATready)
-		eventScanGotPAT,	// -> Wait
-		stateScanWait,
-		eventScanGotSDT,	// scanOK |= SDT
-		eventScanGotNIT,	// scanOK |= NIT
-		eventScanGotONIT,	// scanOK |= ONIT
-		eventScanGotBAT,	// scanOK |= BAT
-		eventScanComplete,
-		eventScanError,
-		stateScanComplete,
-		eventScanCompleted,
-		
-		eventServiceSwitch,		// -> eventServiceSwitched or eventServiceFailed
-		stateServiceTune,
-		eventServiceTuneOK,
-		eventServiceTuneFailed,	
-		stateServiceGetPAT,
-		eventServiceGotPAT,
-		stateServiceGetPMT,
-		eventServiceGotPMT,
-		eventServiceNewPIDs,
-		
-		stateServiceGetSDT,
-		eventServiceGotSDT,
-
-		eventServiceSwitched,
-		eventServiceFailed,
+		controllerNone,
+		controllerScan,
+		controllerService
 	};
+	
+	
+protected:
+  int controllertype;
+	eDVBController *controller;
 
 private:
-	int state;
-	void setState(int newstate) { /*emit*/ stateChanged(state=newstate); }
-
+	void tunedIn(eTransponder*, int);
+	eDVBState state;
 public:
-	Signal1<void, int> stateChanged;
-	Signal1<void, int> eventOccured;
-	Signal0<void> serviceListChanged;
-	Signal0<void> bouquetListChanged;
-	Signal1<void, eService*> leaveService;
-	Signal1<void, eService*> enterService;
-	Signal1<void, eTransponder*> leaveTransponder;
-	Signal1<void, eTransponder*> enterTransponder;
-	Signal2<void, eTransponder*, int> switchedTransponder;
-	Signal2<void, eService*, int> switchedService;
-	Signal2<void, EIT*, int> gotEIT;
-	Signal1<void, SDT*> gotSDT;
-	Signal1<void, PMT*> gotPMT;
-	Signal1<void, bool> scrambled;
+	
+	void setMode(int mode);
+
+	const eDVBState &getState() const { return state; }
+	void setState(const eDVBState &newstate) { /*emit*/ stateChanged(state=newstate); }
+	void event(const eDVBEvent &event);
+
+	Signal1<void, const eDVBState&> stateChanged;
+	Signal1<void, const eDVBEvent&> eventOccured;
+
+		// -> noch woanders hin
 	Signal1<void, int> volumeChanged;
 	Signal0<void> timeUpdated;
-		/* SCAN - public */
-public:
-	int startScan(const ePtrList<eTransponder> &initital, int flags);	/** -> stateScanComplete */
-
-		/* SERVICE SWITCH - public */
-	int switchService(eService *service); /** -> eventServiceSwitched */
-	int switchService(int nservice_id, int noriginal_network_id, int ntransport_stream_id, int nservice_type); /** -> stateServiceSwitched */
-
+	
 public:
 	eString getVersion();
 	eDVB();
 	~eDVB();
-	eTransponderList *getTransponders();
-	ePtrList<eBouquet> *getBouquets();
 	static eDVB *getInstance()
 	{
 		return instance;
 	}
-	void setTransponders(eTransponderList *tlist);
 
 	eString getInfo(const char *info);
 	
-	void setPID(PMTEntry *entry);
-	void setDecoder();
-
 	PMT *getPMT();
 	EIT *getEIT();
-	
-	/**
-	 * \brief Returns a pointer to the currently tuned in transponder.
-	 */
-	eTransponder *getCurrentTransponder()
-	{
-		return currentTransponder;
-	}
-	
-	void sortInChannels();
 
-	void saveServices();
-	void loadServices();
-
-	void saveBouquets();
-	void loadBouquets();
-	
-	int useBAT;
-
+		// -> decoder
 	int volume, mute;	
 	/**
 	 * \brief Changes the volume.
@@ -251,6 +166,7 @@ public:
 	 */
 	void configureNetwork();
 	
+			// recording
 		/// starts a new recording
 	void recBegin(const char *filename); 
 		/// pauses a recording
@@ -259,6 +175,27 @@ public:
 	void recResume();
 		/// closes a recording
 	void recEnd();
+	
+	int time_difference;
+	
+	/* container for settings */
+	eDVBSettings *settings;
+
+	eDVBServiceController *getServiceAPI();
+	eDVBScanController *getScanAPI();
+
+	Signal1<void, bool> scrambled;
+	Signal0<void> serviceListChanged;
+	Signal0<void> bouquetListChanged;
+	Signal1<void, eService*> leaveService;
+	Signal1<void, eService*> enterService;
+	Signal1<void, eTransponder*> leaveTransponder;
+	Signal1<void, eTransponder*> enterTransponder;
+	Signal2<void, eTransponder*, int> switchedTransponder;
+	Signal2<void, eService*, int> switchedService;
+	Signal2<void, EIT*, int> gotEIT;
+	Signal1<void, SDT*> gotSDT;
+	Signal1<void, PMT*> gotPMT;
 };
 
 #endif

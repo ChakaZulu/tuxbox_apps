@@ -21,14 +21,19 @@ class eTransponderWidget: public eWidget
 	eListBox<eListBoxEntryText> *fec, *polarity;
 	void nextField0(int *);
 	void nextField1(eListBoxEntryText *);
+	void updated1(eListBoxEntryText *);
+	void updated0();
+	void updated2(int);
 public:
 	enum type
 	{
 		deliveryCable, deliverySatellite
 	};
+	Signal0<void> updated;
 	eTransponderWidget(eWidget *parent, int edit, int type);
 	int load();
-	int setTransponder(eTransponder *transponder);
+	int setTransponder(const eTransponder *transponder);
+	int getTransponder(eTransponder *transponder);
 };
 
 class eFEStatusWidget: public eWidget

@@ -5,6 +5,7 @@
 
 class eLabel;
 class BNDirectory;
+class eDVBEvent;
 
 class ShowBNVersion: public eWindow
 {
@@ -13,9 +14,9 @@ class ShowBNVersion: public eWindow
 protected:
 	void willShow();
 	void willHide();
-	int keyUp(int rc);
+	int eventHandler(const eWidgetEvent &event);
 private:
-	void eventOccured(int event);
+	void eventOccured(const eDVBEvent &event);
 public:
 	ShowBNVersion();
 	~ShowBNVersion();

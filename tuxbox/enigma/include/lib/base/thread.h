@@ -9,7 +9,7 @@ class eThread
 	static void *wrapper(void *ptr);
 public:
 	eThread();
-	~eThread();
+	virtual ~eThread();
 	
 	void run();
 

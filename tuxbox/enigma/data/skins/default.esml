@@ -29,6 +29,16 @@
 	<colors>
 		<color name="background" color="#ff000000" />
 	</colors>
+ 
+	<object name="eventview">
+		<eWindow cposition="50:80" csize="590:400" name="title">
+			<eLabel position="10:5" size="e:e-30" name="epg_description" font="NimbusSansL-Regular Sans L Regular;24" wrap="on"/>
+			<eWidget position="0:e-30" size="600:e" />
+			<eLabel position="10:e-30" size="130:e" name="date" font="NimbusSansL-Regular Sans L Regular;18" />
+			<eLabel position="130:e-30" size="230:e" name="time" font="NimbusSansL-Regular Sans L Regular;18" />
+			<eLabel position="360:e-30" size="230:e" name="channel" font="NimbusSansL-Regular Sans L Regular;18" align="right"/>
+		</eWindow>
+	</object>
 
 	<object name="enigma_lcd_main">
 		<eZapLCDMain position="0:0" size="120:64">
@@ -63,7 +73,6 @@
 
 	<object name="eSatelliteConfigurationManager">
 		<eSatelliteConfigurationManager cposition="120:80" csize="500:370" text="Satellitenkonfiguration">
-			
 			<eLabel text="Satelliten:" position="0:0" size="400:30" font="NimbusSansL-Regular Sans L Regular;25" />
 			<eListbox name="list" position="0:30" size="400:300" />
 			<eButton name="close" position="300:300" size="50:30" text="[OK]"/>
@@ -80,9 +89,9 @@
 	</object>
 	
 	<object name="tsManual">
-		<tsManual position="0:0" size="e:400">
-			<eTranspondersettings name="transponder" position="0:0" size="400:200" />
-			<eFEStatus name="festatus" position="0:200" size="400:100" />
+		<tsManual position="0:0" size="e:350">
+			<eTranspondersettings name="transponder" position="0:0" size="400:160" />
+			<eFEStatus name="festatus" position="0:160" size="400:85" />
 			<eButton text="start scan" name="start" position="10:e-30" size="200:30" />
 			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" />
 			<eCheckbox text="use ONIT" name="useonit" position="10:e-100" size="200:30" />
@@ -102,7 +111,7 @@
 	</object>
 	
 	<object name="transpondersettings.satellite">
-		<eTranspondersettings position="0:0" size="400:200">
+		<eTranspondersettings position="0:0" size="400:160">
 			<eLabel text="Frequency:" position="10:10" size="140:30" />
 			<eNumber name="frequency" position="150:10:" size="e-150:30" />
 			<eLabel text="MHz" position="e-150:10" size="e:30" />
@@ -126,7 +135,7 @@
 	</object>
 
 	<object name="eFEStatusWidget">
-		<eFEStatusWidget size="400:100">
+		<eFEStatusWidget size="400:85">
 			<eProgress name="snr" position="80:5" size="e-10:20" />
 			<eProgress name="agc" position="80:30" size="e-10:20" />
 			<eLabel text="SNR" position="10:5" size="70:25" />
@@ -134,5 +143,14 @@
 			<eCheckbox text="Lock" name="lock" position="10:55" size="80:30" />
 			<eCheckbox text="Sync" name="sync" position="95:55" size="e:30" />
 		</eFEStatusWidget>
+	</object>
+	
+	<object name="eServiceSelector">
+		<eServiceSelector cposition="100:100" csize="500:400" text="Services">
+			<eLabel name="bouquet_prev" position="0:0" size="150:30" />
+			<eLabel name="bouquet" position="150:0" size="200:30" backgroundColor="content_selected" text="test" align="center" />
+			<eLabel name="bouquet_next" position="350:0" size="e:30" />
+			<eListbox name="services" position="0:30" size="e:e" />
+		</eServiceSelector>
 	</object>
 </eskin>

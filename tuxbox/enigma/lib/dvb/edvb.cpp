@@ -1,4 +1,4 @@
-#include "edvb.h"
+ #include "edvb.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -28,6 +28,12 @@
 #include <core/system/init.h>
 #include <core/system/econfig.h>
 
+#include "dvbservice.h"
+#include "dvbscan.h"
+
+eDVBController::~eDVBController()
+{
+}
 
 eDVB *eDVB::instance;
 
@@ -36,861 +42,29 @@ eString eDVB::getVersion()
 	return "eDVB core 1.0, compiled " __DATE__;
 }
 
-void eDVB::removeDVBBouquets()
+void eDVB::event(const eDVBEvent &event)
 {
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end();)
-	{
-		if ( i->bouquet_id >= 0)
-		{
-			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
-			i = bouquets.erase(i);
-		}
-		else
-		{
-			eDebug("leaving bouquet '%s'", i->bouquet_name.c_str());
-			i++;
-		}
-	}
-}
-
-void eDVB::addDVBBouquet(BAT *bat)
-{
-	eDebug("wir haben da eine bat, id %x", bat->bouquet_id);
-	eString bouquet_name="Weiteres Bouquet";
-	for (ePtrList<Descriptor>::iterator i(bat->bouquet_descriptors); i != bat->bouquet_descriptors.end(); ++i)
-	{
-		if (i->Tag()==DESCR_BOUQUET_NAME)
-			bouquet_name=((BouquetNameDescriptor*)*i)->name;
-	}
-	eBouquet *bouquet=createBouquet(0, bat->bouquet_id, bouquet_name);
-	
-	for (ePtrList<BATEntry>::iterator be(bat->entries); be != bat->entries.end(); ++be)
-		for (ePtrList<Descriptor>::iterator i(be->transport_descriptors); i != be->transport_descriptors.end(); ++i)
-			if (i->Tag()==DESCR_SERVICE_LIST)
-			{
-				ServiceListDescriptor *s=(ServiceListDescriptor*)*i;
-				for (ePtrList<ServiceListDescriptorEntry>::iterator a(s->entries); a != s->entries.end(); ++a)
-					bouquet->add(be->transport_stream_id, be->original_network_id, a->service_id);
-			}
-}
-
-eBouquet *eDVB::getBouquet(int bouquet_id)
-{
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-		if (i->bouquet_id==bouquet_id)
-			return *i;
-	return 0;
-}
-
-static eString beautifyBouquetName(eString bouquet_name)
-{
-	if (bouquet_name.find("ARD")!=-1)
-		bouquet_name="ARD";		
-	if (bouquet_name=="ABsat")
-		bouquet_name="AB sat";
-	if (bouquet_name=="Astra-Net")
-		bouquet_name="ASTRA";
-/*	if (bouquet_name=="CANALSATELLITE")
-		bouquet_name="CANAL SATELLITE"; */
-	if (bouquet_name.find("SES")!=-1)
-		bouquet_name="SES Multimedia";
-	if (bouquet_name=="\x05ZDF.vision")	// ja ich weiss was \x05 bedeutet - SPÄTER
-		bouquet_name="ZDF.vision";
-	return bouquet_name;
-}
-
-eBouquet *eDVB::getBouquet(eString bouquet_name)
-{
-	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-		if (!i->bouquet_name.icompare(bouquet_name))
-			return *i;
-	return 0;
-}
-
-eBouquet* eDVB::createBouquet(const eBouquet *parent, int bouquet_id, eString bouquet_name)
-{
-	eBouquet *n=getBouquet(bouquet_id);
-	if (!n)
-		bouquets.push_back(n=new eBouquet(parent, bouquet_id, bouquet_name));
-	return n;
-}
-
-eBouquet *eDVB::createBouquet(const eBouquet *parent, eString bouquet_name)
-{
-	eBouquet *n=getBouquet(bouquet_name);
-	if (!n)
-	{
-		int bouquet_id=getUnusedBouquetID(0);
-		bouquets.push_back(n=new eBouquet(parent, bouquet_id, bouquet_name));
-	}
-	return n;
-}
-
-int eDVB::getUnusedBouquetID(int range)
-{
-	if (range)
-		range=-1;
-	else
-		range=1;
-
-	int bouquet_id=0;
-
-	while(true)  // Evtl hier nochmal nachschauen....
-	{
-		if (!getBouquet(bouquet_id))
-			return bouquet_id;
-
-		bouquet_id+=range;
-	}
-}
-
-void eDVB::revalidateBouquets()
-{
-	eDebug("revalidating bouquets");
-	if (transponderlist)
-		for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-			for (ServiceReferenceIterator service = i->list.begin(); service != i->list.end(); service++)
-				service->service=transponderlist->searchService(service->original_network_id, service->service_id);
-	/*emit*/ bouquetListChanged();
-	eDebug("ok");
-}
-
-int eDVB::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors)
-{
-	int found=0;
-	for (ePtrList<Descriptor>::const_iterator i(descriptors); i != descriptors.end(); ++i)
-	{
-		if (i->Tag()==9)	// CADescriptor
-		{
-			found++;
-			CADescriptor *ca=(CADescriptor*)*i;
-			Decoder::addCADescriptor((__u8*)(ca->data));
-			int avail=0;
-			for (std::list<int>::iterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
-				if (*i == ca->CA_system_ID)
-					avail++;
-
-			if (avail)
-			{
-				for (ePtrList<CA>::iterator a = list.begin(); a != list.end(); a++)
-					if (a->casysid==ca->CA_system_ID)
-					{
-						avail=0;
-						break;
-					}
-				if (avail)
-				{
-					CA *n=new CA;
-					n->ecmpid=ca->CA_PID;
-					n->casysid=ca->CA_system_ID;
-					n->emmpid=-1;					
-					list.push_back(n);
-				}
-			}
-		}
-	}
-	return found;
-}
-
-void eDVB::scanEvent(int event)
-{
-	/*emit*/ eventOccured(event);
-	switch (event)
-	{
-	case eventScanBegin:
-		Decoder::Flush();
-		if (transponderlist)
-			delete transponderlist;
-		transponderlist=new eTransponderList();
-		if (useBAT)
-			removeDVBBouquets();
-		/*emit*/ serviceListChanged();
-		if (!initialTransponders)
-		{
-			eFatal("no initial transponders");
-			scanEvent(eventScanCompleted);
-			break;
-		}
-		for (ePtrList<eTransponder>::const_iterator i(initialTransponders->begin()); i != initialTransponders->end(); ++i)
-		{
-			eTransponder &t=transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
-			t=i;
-			t.transport_stream_id=i->transport_stream_id;
-			t.original_network_id=i->original_network_id;
-		}
-		currentONID=-1;
-		knownNetworks.clear();
-		scanEvent(eventScanNext);
-		break;
-	case eventScanNext:
-	{
-		eTransponder *next=transponderlist->getFirstTransponder(eTransponder::stateListed);
-		transponder=next;
-		
-		if (!next)
-			scanEvent(eventScanCompleted);
-		else
-		{
-			if (next->tune())
-				scanEvent(eventScanError);
-			else
-				setState(stateScanTune);
-		}
-		break;
-	}
-	case eventScanTuneError:
-		scanEvent(eventScanError);
-		break;
-	case eventScanTuneOK:
-		setState(stateScanGetPAT);
-		tPAT.get();
-		break;
-	case eventScanGotPAT:
-	{
-		if (state!=stateScanGetPAT)
-			eFatal("unexpected gotPAT");
-
-		if (!tPAT.ready())
-			eFatal("tmb suckt -> no pat");
-		PAT *pat=tPAT.getCurrent();
-		int nitpid;
-		PATEntry *pe=pat->searchService(0);
-		if (!pe)
-		{
-			eDebug("no NIT-PMTentry, assuming 0x10");
-			nitpid=0x10;
-		}	else
-			nitpid=pe->program_map_PID;
-		pat->unlock();
-		scanOK=0;
-		tNIT.start(new NIT(nitpid));
-		if (scanflags&SCAN_ONIT)
-			tONIT.start(new NIT(nitpid, NIT::typeOther));
-		else
-			scanOK|=8;
-		tSDT.start(new SDT());
-		if (useBAT)
-			tBAT.start(new BAT());
-		else
-			scanOK|=4;
-		setState(stateScanWait);
-		break;
-	}
-	case eventScanGotSDT:
-	{
-		SDT *sdt=tSDT.ready()?tSDT.getCurrent():0;
-		if (sdt)
-		{
-			transponder->transport_stream_id=sdt->transport_stream_id;
-			transponder->original_network_id=sdt->original_network_id;
-			
-			currentONID=sdt->original_network_id;
-			int known=0;
-
-			for (std::list<int>::iterator It = knownNetworks.begin(); It != knownNetworks.end(); It++)
-				if (*It == sdt->original_network_id)
-					known=1;
-			
-			if (known)
-			{
-				if (scanflags&SCAN_SKIP)
-				{
-					tNIT.abort();
-					tONIT.abort();
-				}
-			}
-			transponderlist->handleSDT(sdt);
-			sdt->unlock();
-		}
-		scanOK|=1;
-		eDebug("scanOK %d", scanOK);
-		if (scanOK==15)
-			scanEvent(eventScanComplete);
-		break;
-	}
-	case eventScanGotNIT:
-	case eventScanGotONIT:
-	{
-		NIT *nit=(event==eventScanGotNIT)?(tNIT.ready()?tNIT.getCurrent():0):(tONIT.ready()?tONIT.getCurrent():0);
-		if (nit)
-		{
-			if (event==eventScanGotNIT)
-				if (currentONID!=-1)
-					knownNetworks.push_back(currentONID);
-#if 0
-			for (ePtrList<Descriptor> i(nit->network_descriptor; i != nit->network_descriptor.end(); ++i)
-			{
-				if (i->Tag()==DESCR_LINKAGE)
-				{
-					LinkageDescriptor *l=(LinkageDescriptor*)*i;
-					if ((l->linkage_type==0x01) && 		// information service
-							(original_network_id==transponder->original_network_id) &&
-							(transport_stream_id==transponder->transport_stream_id))
-					{
-						tSDT.abort();
-					}
-				}
-			}
-#endif
-			for (ePtrList<NITEntry>::iterator i(nit->entries); i != nit->entries.end(); ++i)
-			{
-				eTransponder &transponder=transponderlist->createTransponder(i->transport_stream_id, i->original_network_id);
-				for (ePtrList<Descriptor>::iterator d(i->transport_descriptor); d != i->transport_descriptor.end(); ++d)
-				{
-					switch (d->Tag())
-					{
-					case DESCR_SAT_DEL_SYS:
-						transponder.setSatellite((SatelliteDeliverySystemDescriptor*)*d);
-						break;
-					case DESCR_CABLE_DEL_SYS:
-						transponder.setCable((CableDeliverySystemDescriptor*)*d);
-						break;
-					}
-				}
-			}
-			nit->unlock();
-		}
-		scanOK|=(event==eventScanGotNIT)?2:8;
-		eDebug("scanOK %d", scanOK);
-		if (scanOK==15)
-			scanEvent(eventScanComplete);
-		break;
-	}
-	case eventScanGotBAT:
-	{
-		BAT *bat=tBAT.ready()?tBAT.getCurrent():0;
-		if (bat)
-		{
-			addDVBBouquet(bat);
-			bat->unlock();
-		}
-		scanOK|=4;
-		eDebug("scanOK %d", scanOK);
-		if (scanOK==15)
-			scanEvent(eventScanComplete);
-		break;
-	}
-	case eventScanError:
-		eDebug("with error");
-	case eventScanComplete:
-		eDebug("completed");
-		if (transponder)
-		{
-			if (event==eventScanError)
-				transponder->state=eTransponder::stateError;
-			else
-				transponder->state=eTransponder::stateOK;
-		}
-		scanEvent(eventScanNext);
-		break;
-	case eventScanCompleted:
-		eDebug("scan has finally completed.");
-		saveServices();
-		sortInChannels();
-		/*emit*/ serviceListChanged();
-		setState(stateIdle);
-		break;
-	}
-}
-
-void eDVB::serviceEvent(int event)
-{
-	/*emit*/ eventOccured(event);
-#ifdef PROFILE
-	static timeval last_event;
-	
-	timeval now;
-	gettimeofday(&now, 0);
-	
-	int diff=(now.tv_sec-last_event.tv_sec)*1000000+(now.tv_usec-last_event.tv_usec);
-	last_event=now;
-	
-	char *what="unknown";
-
-	switch (event)
-	{
-	case	eventServiceSwitch: what="ServiceSwitch"; break;
-	case	eventServiceTuneOK: what="TuneOK"; break;
-	case	eventServiceTuneFailed: what="TuneFailed"; break;
-	case	eventServiceGotPAT: what="GotPAT"; break;
-	case	eventServiceGotPMT: what="GotPMT"; break;
-	case	eventServiceNewPIDs: what="NewPIDs"; break;
-	case	eventServiceGotSDT: what="GotSDT"; break;
-	case	eventServiceSwitched: what="Switched"; break;
-	case	eventServiceFailed: what="Failed"; break;
-
-	}
-	
-	eDebug("[PROFILE] [%s] +%dus", what, diff);
-#endif
-	switch (event)
-	{
-	case eventServiceSwitch:
-	{
-		if (!transponderlist)
-		{
-			service_state=ENOENT;
-			serviceEvent(eventServiceFailed);
-			return;
-		}
-		eTransponder *n=transponderlist->searchTS(original_network_id, transport_stream_id);
-		if (!n)
-		{
-			setState(eventServiceTuneFailed);
-			break;
-		}
-		if (n->state!=eTransponder::stateOK)
-		{
-			eDebug("couldn't tune");
-			service_state=ENOENT;
-			serviceEvent(eventServiceFailed);
-			return;
-		}
-
-		if (n==transponder)
-		{
-//			setState(stateServiceTune);
-			serviceEvent(eventServiceTuneOK);
-		} else
-		{
-			/*emit*/ leaveTransponder(transponder);
-			transponder=n;
-			if (n->tune())
-				serviceEvent(eventServiceTuneFailed);
-			else
-				setState(stateServiceTune);
-		}
-		eDebug("<-- tuned");
-		break;
-	}
-	case eventServiceTuneOK:
-		/*emit*/ enterTransponder(transponder);
-		tSDT.start(new SDT());
-		switch (service_type)
-		{
-		case 1:	// digital television service
-		case 2:	// digital radio service
-		case 3:	// teletext service
-			tEIT.start(new EIT(EIT::typeNowNext, service_id, EIT::tsActual));
-		case 5:	// NVOD time shifted service
-			setState(stateServiceGetPAT);
-			tPAT.get();
-			break;
-		case 4:	// NVOD reference service
-			setState(stateServiceGetSDT);
-			tEIT.start(new EIT(EIT::typeNowNext, service_id, EIT::tsActual));
-			break;
-		case 6:	// mosaic service
-			setState(stateServiceGetPAT);
-			tPAT.get();
-			break;
-		case -1: // data
-			setState(stateServiceGetPAT);
-			tPAT.get();
-			break;
-		default:
-			service_state=ENOSYS;
-			serviceEvent(eventServiceFailed);
-			break;
-		}
-		break;
-	case eventServiceTuneFailed:
-		eDebug("[TUNE] tune failed");
-		service_state=ENOENT;
-		serviceEvent(eventServiceFailed);
-		break;
-	case eventServiceGotPAT:
-	{
-		eDebug("eventServiceGotPAT");
-		PAT *pat=tPAT.getCurrent();
-		PATEntry *pe=pat->searchService(service_id);
-		if (!pe)
-		{
-			pmtpid=-1;
-		}	else
-			pmtpid=pe->program_map_PID;
-		pat->unlock();
-		if (pmtpid==-1)
-		{
-			eDebug("[PAT] no pat entry");
-			service_state=ENOENT;
-			serviceEvent(eventServiceFailed);
-			return;
-		}
-		tPMT.start(new PMT(pmtpid, service_id));
-		setState(stateServiceGetPMT);
-		break;
-	}	
-	case eventServiceGotPMT:
-		eDebug("eventServiceGotPMT");
-		service_state=0;
-		scanPMT();
-		{
-			PMT *pmt=tPMT.ready()?tPMT.getCurrent():0;
-			if (pmt)
-			{
-				/*emit*/ gotPMT(pmt);
-				pmt->unlock();
-			}
-		}
-		if (state==stateServiceGetPMT)
-			serviceEvent(eventServiceSwitched);
-		else
-			eDebug("nee, doch nicht");
-		break;
-	case eventServiceGotSDT:
-	{
-		eDebug("eventServiceGotSDT");
-		SDT *sdt=tSDT.ready()?tSDT.getCurrent():0;
-		if (sdt)
-		{
-			setState(stateIdle);
-			/*emit*/ gotSDT(sdt);
-			sdt->unlock();
-			if (service_type==4)
-				service_state=ENVOD;
-			serviceEvent(eventServiceSwitched);
-		} else
-			serviceEvent(eventServiceFailed);
-		break;
-	}
-	case eventServiceNewPIDs:
-		Decoder::Set();
-		break;
-	case eventServiceSwitched:
-		/*emit*/ enterService(service);
-	case eventServiceFailed:
-		/*emit*/ switchedService(service, -service_state);
-		setState(stateIdle);
-		break;
-	}
-}
-
-void eDVB::scanPMT()
-{
-	PMT *pmt=tPMT.ready()?tPMT.getCurrent():0;
-	if (!pmt)
-	{
-		eDebug("scanPMT with no available pmt");
-		return;
-	}
-	Decoder::parms.pmtpid=pmtpid;
-	Decoder::parms.pcrpid=pmt->PCR_PID;
-	Decoder::parms.ecmpid=Decoder::parms.emmpid=Decoder::parms.casystemid=-1;
-	Decoder::parms.vpid=Decoder::parms.apid=-1;
-	
-	int isca=0;
-	
-	calist.clear();
-	Decoder::parms.descriptor_length=0;
-
-	isca+=checkCA(calist, pmt->program_info);
-	
-	PMTEntry *audio=0, *video=0, *teletext=0;
-	
-	for (ePtrList<PMTEntry>::iterator i(pmt->streams); i != pmt->streams.end(); ++i)
-	{
-		PMTEntry *pe=*i;
-		switch (pe->stream_type)
-		{
-		case 1:	// ISO/IEC 11172 Video
-		case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
-			isca+=checkCA(calist, pe->ES_info);
-			if (!video)
-				video=pe;
-			break;
-		case 3:	// ISO/IEC 11172 Audio
-		case 4: // ISO/IEC 13818-3 Audio
-			isca+=checkCA(calist, pe->ES_info);
-			if (!audio)
-				audio=pe;
-			break;
-		case 6:
-		{
-			isca+=checkCA(calist, pe->ES_info);
-			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
-			{
-				/* if ((i->Tag()==DESCR_AC3))
-					audio=pe; */
-				if (i->Tag()==DESCR_TELETEXT)
-					teletext=pe;
-			}
-			break;
-		}
-		case 0xC1:
-		{
-			if (tMHWEIT)	// nur eine zur zeit
-				delete tMHWEIT;
-			tMHWEIT=0;
-			for (ePtrList<Descriptor>::iterator i(pe->ES_info); i != pe->ES_info.end(); ++i)
-				if (i->Tag()==DESCR_MHW_DATA)
-				{
-					MHWDataDescriptor *mhwd=(MHWDataDescriptor*)*i;
-					if (!strncmp(mhwd->type, "PILOTE", 6))
-					{
-						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service_id);
-						tMHWEIT=new MHWEIT(pe->elementary_PID, service_id);
-						CONNECT(tMHWEIT->ready, eDVB::MHWEITready);
-						tMHWEIT->start();
-						break;
-					}
-				}
-			break;
-		}
-		}
-	}
-
-	setPID(video);
-	setPID(audio);
-	setPID(teletext);
-
-	/*emit*/ scrambled(isca);
-
-	if (isca && !calist)
-	{
-		eDebug("NO CASYS");
-		service_state=ENOCASYS;
-	}
-
-	if ((Decoder::parms.vpid==-1) && (Decoder::parms.apid==-1))
-		service_state=ENOSTREAM;
-
-	for (ePtrList<CA>::iterator i(calist); i != calist.end(); ++i)
-	{
-		eDebug("CA %04x ECMPID %04x", i->casysid, i->ecmpid);
-	}
-
-	pmt->unlock();
-	setDecoder();
+	eventOccured(event);
+	if (controller)
+		controller->handleEvent(event);
 }
 
 void eDVB::tunedIn(eTransponder *trans, int err)
 {
-	currentTransponder=trans;
-	currentTransponderState=err;
-	if (!err)
-		/*emit*/ enterTransponder(trans);
-	tPAT.start(new PAT());
-	if (tdt)
-		delete tdt;
-	if (tMHWEIT)
-		delete tMHWEIT;
-	tMHWEIT=0;
-	tdt=new TDT();
-	CONNECT(tdt->tableReady, eDVB::TDTready);
-	tdt->start();
-	switch (state)
-	{
-	case stateIdle:
-		break;
-	case stateScanTune:
-		if (transponder==trans)
-			scanEvent(err?eventScanTuneError:eventScanTuneOK);
-		break;
-	case stateServiceTune:
-		if (transponder==trans)
-			serviceEvent(err?eventServiceTuneFailed:eventServiceTuneOK);
-		break;		
-	default:
-		eDebug("wrong state %d", state);
-	}
+	event(eDVBEvent(eDVBEvent::eventTunedIn, err, trans));
 }
 
-void eDVB::PATready(int error)
+eDVB::eDVB(): state(eDVBState::stateIdle)
 {
-	switch (state)
-	{
-	case stateScanGetPAT:
-		eDebug("stateScanGetPAT");
-		scanEvent(error?eventScanError:eventScanGotPAT);
-		break;
-	case stateServiceGetPAT:
-		eDebug("stateServiceGetPAT");
-		serviceEvent(error?eventServiceFailed:eventServiceGotPAT);
-		break;
-	default:
-		eDebug("anderer: %d", state);
-	}
-}
-
-void eDVB::SDTready(int error)
-{
-	eDebug("SDTready %s", strerror(-error));
-	switch (state)
-	{
-	case stateScanWait:
-		scanEvent(eventScanGotSDT);
-		break;
-	case stateServiceGetSDT:
-		serviceEvent(eventServiceGotSDT);
-		break;
-	}
-	if (transponderlist)
-	{
-		SDT *sdt=tSDT.ready()?tSDT.getCurrent():0;
-		if (sdt)
-		{
-			transponderlist->handleSDT(sdt);
-			sdt->unlock();
-		}
-	}
-}
-
-void eDVB::PMTready(int error)
-{
-	eDebug("PMTready %s", strerror(-error));
-	switch (state)
-	{
-	case stateIdle:
-	case stateServiceGetPMT:
-		serviceEvent(eventServiceGotPMT);
-		break;
-	}
-}
-
-void eDVB::NITready(int error)
-{
-	eDebug("NITready %s", strerror(-error));
-	switch (state)
-	{
-	case stateScanWait:
-		scanEvent(eventScanGotNIT);
-		break;
-	}
-}
-
-void eDVB::ONITready(int error)
-{
-	eDebug("ONITready %s", strerror(-error));
-	switch (state)
-	{
-	case stateScanWait:
-		scanEvent(eventScanGotONIT);
-		break;
-	}
-}
-
-void eDVB::EITready(int error)
-{
-	eDebug("EITready %s", strerror(-error));
-	if (!error)
-	{
-		EIT *eit=tEIT.getCurrent();
-		/*emit*/ gotEIT(eit, 0);
-		eit->unlock();
-	} else
-		/*emit*/ gotEIT(0, error);
-}
-
-void eDVB::TDTready(int error)
-{
-	eDebug("TDTready %d", error);
-	if (!error)
-	{
-		eDebug("[TIME] time update to %s", ctime(&tdt->UTC_time));
-		time_difference=tdt->UTC_time-time(0);
-		/*emit*/ timeUpdated();
-	}
-}
-
-void eDVB::BATready(int error)
-{
-	eDebug("BATready %s", strerror(-error));
-	switch (state)
-	{
-	case stateScanWait:
-		scanEvent(eventScanGotBAT);
-		break;	
-	}
-}
-
-void eDVB::MHWEITready(int error)
-{
-	if (!error)
-	{
-		EIT *e=new EIT();
-		e->ts=EIT::tsFaked;
-		e->type=EIT::typeNowNext;
-		e->version_number=0;
-		e->current_next_indicator=0;
-		e->transport_stream_id=transport_stream_id;
-		e->original_network_id=original_network_id;
-		
-		for (int i=0; i<2; i++)
-		{
-			MHWEITEvent *me=&tMHWEIT->events[i];
-			EITEvent *ev=new EITEvent;
-			int thisday=time_difference+time(0);
-			thisday-=thisday%(60*60*24);
-			if (thisday < (time_difference+time(0)))
-				thisday+=60*60*24;
-			e->service_id=me->service_id;
-			ev->event_id=0xFFFF;
-			ev->start_time=thisday+(me->starttime>>8)*60*60+(me->starttime&0xFF)*60;
-			ev->duration=(me->duration>>8)*60*60+(me->duration&0xFF)*60;
-			ev->running_status=1;
-			ev->free_CA_mode=0;
-			ShortEventDescriptor *se=new ShortEventDescriptor();
-			se->language_code[0]='?';
-			se->language_code[1]='?';
-			se->language_code[2]='?';
-			se->event_name=me->event_name;
-			se->text=me->short_description;
-			ev->descriptor.push_back(se);
-			e->events.push_back(ev);
-		}
-		e->ready=1;
-		tEIT.inject(e);
-	} else
-	{
-		delete tMHWEIT;
-		tMHWEIT=0;
-	}
-}
-
-int eDVB::startScan(const ePtrList<eTransponder> &initial, int flags)
-{
-	if (state!=stateIdle)
-	{
-		eFatal("BUSY");
-		return -EBUSY;
-	}
-	scanflags=flags;
-	initialTransponders=&initial;
-	scanEvent(eventScanBegin);
-	initialTransponders=0;
-	return 0;
-}
-
-int eDVB::switchService(eService *newservice)
-{
-	if (newservice==service)
-		return 0;
-	/*emit*/ leaveService(service);
-	service=newservice;
-	return switchService(service->service_id, service->original_network_id, service->transport_stream_id, service->service_type);
-}
-
-int eDVB::switchService(int nservice_id, int noriginal_network_id, int ntransport_stream_id, int nservice_type)
-{
-	original_network_id=noriginal_network_id;
-	transport_stream_id=ntransport_stream_id;
-	service_id=nservice_id;
-	service_type=nservice_type;
-	
-	serviceEvent(eventServiceSwitch);
-	eDebug("<--- switch service event");
-	return 1;
-}
-
-eDVB::eDVB()
-{
+	settings=0;
 	time_difference=0;
-	if (eConfig::getInstance()->getKey("/elitedvb/DVB/useBAT", useBAT))
-		useBAT=0;
+
+		// singleton
 	if (instance)
 		eFatal("eDVB already initialized!");
 	instance=this;
+
+		// initialize frontend (koennte auch nochmal raus)
 	eString frontend=getInfo("fe");
 	int fe;
 	if (!frontend.length())
@@ -915,33 +89,23 @@ eDVB::eDVB()
 	}
 	if (eFrontend::open(fe)<0)
 		eFatal("couldn't open frontend");
+
+	settings = new eDVBSettings(*this);
+		// tuned-in handling
 	CONNECT(eFrontend::fe()->tunedIn, eDVB::tunedIn);
 
-	transponderlist=0;
-	currentTransponder=0;
-	currentTransponderState=-1;
-	loadServices();
-	loadBouquets();
+		// decoder init
 	Decoder::Initialize();
 	
-	CONNECT(tPAT.tableReady, eDVB::PATready);
-	CONNECT(tPMT.tableReady, eDVB::PMTready);
-	CONNECT(tSDT.tableReady, eDVB::SDTready);
-	CONNECT(tNIT.tableReady, eDVB::NITready);
-	CONNECT(tONIT.tableReady, eDVB::ONITready);	
-	CONNECT(tEIT.tableReady, eDVB::EITready);
-	CONNECT(tBAT.tableReady, eDVB::BATready);
-	setState(stateIdle);
-
-	availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
-	availableCASystems.push_back(0x1722);	// BetaCrypt D (cable)
-	availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)
-
-	service=0;
-	tdt=0;
-
-	int type=0;
+		// set to idle state
+	controller=0;
+	setState(eDVBState(eDVBState::stateIdle));
 	
+		// intialize to service mode
+	setMode(controllerService);
+
+		// init AV switch
+	int type=0;
 	type=atoi( getInfo("mID").c_str() );
 	
 	switch (type)
@@ -960,11 +124,13 @@ eDVB::eDVB()
 		break;
 	}
 	
-	eDebug("instance: %p",  eAVSwitch::getInstance());
 	eAVSwitch::getInstance()->setInput(0);
 	eAVSwitch::getInstance()->setActive(1);
+	
+		// init stream watchdog
 	eStreamWatchdog::getInstance()->reloadSettings();
 
+		// initial volume settings
 	int vol, m;
 	if (eConfig::getInstance()->getKey("/elitedvb/audio/volume", vol))
 		vol=10;
@@ -973,21 +139,17 @@ eDVB::eDVB()
 	changeVolume(1, vol);
 	changeVolume(3, m);
 	
-	tMHWEIT=0;
+//	tMHWEIT=0;
 
-	bouquets.setAutoDelete(true);
-	calist.setAutoDelete(true);
-	
-	original_network_id=service_id=transport_stream_id=-1;
-
-	// tmbinc: das sollte man schon machen :-)
-/* --->>> */	recorder=0;
+		// init dvb recorder
+	recorder=0;
 	
 	eDebug("eDVB::eDVB done.");
 }
 
 eDVB::~eDVB()
 {
+	delete settings; 
 	recEnd();
 	
 	delete eAVSwitch::getInstance();
@@ -995,29 +157,8 @@ eDVB::~eDVB()
 	eConfig::getInstance()->setKey("/elitedvb/audio/mute", mute);
 	Decoder::Close();
 
-	if (transponderlist)
-		delete transponderlist;
-
 	eFrontend::close();
 	instance=0;
-}
-
-eTransponderList *eDVB::getTransponders	()
-{
-	return transponderlist;
-}
-
-ePtrList<eBouquet>* eDVB::getBouquets()
-{
-	return &bouquets;
-}
-
-void eDVB::setTransponders(eTransponderList *tlist)
-{
-	if (transponderlist)
-		delete transponderlist;
-	transponderlist=tlist;
-	/*emit*/ serviceListChanged();
 }
 
 eString eDVB::getInfo(const char *info)
@@ -1044,52 +185,7 @@ eString eDVB::getInfo(const char *info)
 	return result;
 }
 
-void eDVB::setPID(PMTEntry *entry)
-{
-	if (entry)
-	{
-		int isvideo=0, isaudio=0, isteletext=0, isAC3=0;
-		switch (entry->stream_type)
-		{
-			case 1:	// ISO/IEC 11172 Video
-			case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
-				isvideo=1;
-			break;
-			case 3:	// ISO/IEC 11172 Audio
-			case 4: // ISO/IEC 13818-3 Audio
-				isaudio=1;
-			break;
-			case 6:
-			{
-				for (ePtrList<Descriptor>::iterator i(entry->ES_info); i != entry->ES_info.end(); ++i)
-				{
-					if (i->Tag()==DESCR_AC3)
-					{
-						isaudio=1;
-						isAC3=1;
-					}
-					if (i->Tag()==DESCR_TELETEXT)
-						isteletext=1;
-				}
-			}
-		}
-		if (isaudio)
-		{
-			Decoder::parms.audio_type=isAC3?DECODE_AUDIO_AC3:DECODE_AUDIO_MPEG;
-			Decoder::parms.apid=entry->elementary_PID;
-		}
-		if (isvideo)
-			Decoder::parms.vpid=entry->elementary_PID;
-		if (isteletext)
-			Decoder::parms.tpid=entry->elementary_PID;
-	}
-}
-
-void eDVB::setDecoder()
-{
-	serviceEvent(eventServiceNewPIDs);
-}
-
+		// for external access only
 PMT *eDVB::getPMT()
 {
 	return tPMT.ready()?tPMT.getCurrent():0;
@@ -1098,262 +194,6 @@ PMT *eDVB::getPMT()
 EIT *eDVB::getEIT()
 {
 	return tEIT.ready()?tEIT.getCurrent():0;
-}
-
-struct sortinChannel: public std::unary_function<const eService&, void>
-{
-	eDVB &edvb;
-	sortinChannel(eDVB &edvb): edvb(edvb)
-	{
-	}
-	void operator()(eService &service)
-	{
-		eString add;
-		switch (service.service_type)
-		{
-			case 1:
-			case 4:
-			case 5:
-				add=" [TV]";
-			break;
-			case 2:
-				add=" [Radio]";
-			break;
-			default:
-				add=" [Data]";
-		}
-		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider.c_str())+add);
-		b->add(service.transport_stream_id, service.original_network_id, service.service_id);
-	}
-};
-
-void eDVB::sortInChannels()
-{
-	eDebug("sorting in channels");
-	removeDVBBouquets();
-	getTransponders()->forEachService(sortinChannel(*this));
-	revalidateBouquets();
-	saveBouquets();
-}
-
-struct saveService: public std::unary_function<const eService&, void>
-{
-	FILE *f;
-	saveService(FILE *out): f(out)
-	{
-	 	fprintf(f, "services\n");
-	}
-	void operator()(eService& s)
-	{
-		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id, s.transport_stream_id,s.original_network_id, s.service_type, s.service_number);
-		fprintf(f, "%s\n", s.service_name.c_str());
-		fprintf(f, "%s\n", s.service_provider.c_str());
-	}
-	~saveService()
-	{
-		fprintf(f, "end\n");
-	}
-};
-
-struct saveTransponder: public std::unary_function<const eTransponder&, void>
-{
-	FILE *f;
-	saveTransponder(FILE *out): f(out)
-	{
-		fprintf(f, "transponders\n");
-	}
-	void operator()(eTransponder &t)
-	{
-		if (t.state!=eTransponder::stateOK)
-			return;
-		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id, t.original_network_id, t.state);
-		if (t.cable.valid)
-			fprintf(f, "\tc %d:%d:%d\n", t.cable.frequency, t.cable.symbol_rate, t.cable.inversion);
-		if (t.satellite.valid)
-			fprintf(f, "\ts %d:%d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.lnb, t.satellite.inversion);
-		fprintf(f, "/\n");
-	}
-	~saveTransponder()
-	{
-		fprintf(f, "end\n");
-	}
-};
-
-void eDVB::saveServices()
-{
-	FILE *f=fopen(CONFIGDIR "/enigma/services", "wt");
-	if (!f)
-		eFatal("couldn't open servicefile - create " CONFIGDIR "/enigma!");
-	fprintf(f, "eDVB services - modify as long as you pay for the damage!\n");
-
-	getTransponders()->forEachTransponder(saveTransponder(f));
-	getTransponders()->forEachService(saveService(f));
-	fprintf(f, "Have a lot of fun!\n");
-	fclose(f);
-}
-
-void eDVB::loadServices()
-{
-	FILE *f=fopen(CONFIGDIR "/enigma/services", "rt");
-	if (!f)
-		return;
-	char line[256];
-	if ((!fgets(line, 256, f)) || strncmp(line, "eDVB services", 13))
-	{
-		eDebug("not a servicefile");
-		return;
-	}
-	eDebug("reading services");
-	if ((!fgets(line, 256, f)) || strcmp(line, "transponders\n"))
-	{
-		eDebug("services invalid, no transponders");
-		return;
-	}
-	if (transponderlist)
-		delete transponderlist;
-	transponderlist=new eTransponderList;
-
-	while (!feof(f))
-	{
-		if (!fgets(line, 256, f))
-			break;
-		if (!strcmp(line, "end\n"))
-			break;
-		int transport_stream_id=-1, original_network_id=-1, state=-1;
-		sscanf(line, "%04x:%04x %d", &transport_stream_id, &original_network_id, &state);
-		eTransponder &t=transponderlist->createTransponder(transport_stream_id, original_network_id);
-		t.state=state;
-		while (!feof(f))
-		{
-			fgets(line, 256, f);
-			if (!strcmp(line, "/\n"))
-				break;
-			if (line[1]=='s')
-			{
-				int frequency, symbol_rate, polarisation, fec, sat, inversion=0;
-				sscanf(line+2, "%d:%d:%d:%d:%d:%d", &frequency, &symbol_rate, &polarisation, &fec, &sat, &inversion);
-				t.setSatellite(frequency, symbol_rate, polarisation, fec, sat, inversion);
-			}
-			if (line[1]=='c')
-			{
-				int frequency, symbol_rate, inversion=0;
-				sscanf(line+2, "%d:%d", &frequency, &symbol_rate, &inversion);
-				t.setCable(frequency, symbol_rate, inversion);
-			}
-		}
-	}
-
-	if ((!fgets(line, 256, f)) || strcmp(line, "services\n"))
-	{
-		eDebug("services invalid, no services");
-		return;
-	}
-	
-	int count=0;
-
-	while (!feof(f))
-	{
-		if (!fgets(line, 256, f))
-			break;
-		if (!strcmp(line, "end\n"))
-			break;
-
-		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
-		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
-		eService &s=transponderlist->createService(transport_stream_id, original_network_id, service_id, service_number);
-		count++;
-		s.service_type=service_type;
-		fgets(line, 256, f);
-		if (strlen(line))
-			line[strlen(line)-1]=0;
-		s.service_name=line;
-		fgets(line, 256, f);
-		if (strlen(line))
-			line[strlen(line)-1]=0;
-		s.service_provider=line;
-	}
-	
-	eDebug("loaded %d services", count);
-	
-	fclose(f);
-}
-
-void eDVB::saveBouquets()
-{
-	eDebug("saving bouquets...");
-	
-	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "wt");
-	if (!f)
-		eFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
-	fprintf(f, "eDVB bouquets - modify as long as you don't blame me!\n");
-	fprintf(f, "bouquets\n");
-	for (ePtrList<eBouquet>::iterator i(*getBouquets()); i != getBouquets()->end(); ++i)
-	{
-		eBouquet *b=*i;
-		fprintf(f, "%0d\n", b->bouquet_id);
-		fprintf(f, "%s\n", b->bouquet_name.c_str());
-		for (ServiceReferenceIterator s = b->list.begin(); s != b->list.end(); s++)
-			fprintf(f, "%04x:%04x:%04x\n", s->service_id, s->transport_stream_id, s->original_network_id);
-		fprintf(f, "/\n");
-	}
-	fprintf(f, "end\n");
-	fprintf(f, "Have a lot of fun!\n");
-	fclose(f);
-	eDebug("done");
-}
-
-void eDVB::loadBouquets()
-{
-	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "rt");
-	if (!f)
-		return;
-	char line[256];
-	if ((!fgets(line, 256, f)) || strncmp(line, "eDVB bouquets", 13))
-	{
-		eDebug("not a bouquetfile");
-		return;
-	}
-	eDebug("reading bouquets");
-	if ((!fgets(line, 256, f)) || strcmp(line, "bouquets\n"))
-	{
-		eDebug("settings invalid, no transponders\n");
-		return;
-	}
-
-	bouquets.clear();
-
-	while (!feof(f))
-	{
-		eBouquet *parent=0;
-		if (!fgets(line, 256, f))
-			break;
-		if (!strcmp(line, "end\n"))
-			break;
-		int bouquet_id=-1, parent_id=-1;
-		sscanf(line, "%d:%d", &bouquet_id, &parent_id);
-		if (!fgets(line, 256, f))
-			break;
-		if (parent_id != -1)
-			parent=getBouquet(parent_id);
-		line[strlen(line)-1]=0;
-		eBouquet *bouquet=createBouquet(parent, bouquet_id, line);
-		while (!feof(f))
-		{
-			fgets(line, 256, f);
-			if (!strcmp(line, "/\n"))
-				break;
-			int service_id=-1, transport_stream_id=-1, original_network_id=-1;
-			sscanf(line, "%04x:%04x:%04x", &service_id, &transport_stream_id, &original_network_id);
-			bouquet->add(transport_stream_id, original_network_id, service_id);
-		}
-	}
-
-	eDebug("loaded %d bouquets", getBouquets()->size());
-	
-	fclose(f);
-	
-	revalidateBouquets();
-	eDebug("ok");
 }
 
 void eDVB::changeVolume(int abs, int vol)
@@ -1471,6 +311,38 @@ void eDVB::recEnd()
 	recorder->close();
 	delete recorder;
 	recorder=0;
+}
+
+void eDVB::setMode(int mode)
+{
+	if (controllertype == mode)
+		return;
+	controllertype = mode;
+	if (controller)
+		delete controller;
+	switch (mode)
+	{
+	case controllerScan:
+		controller = new eDVBScanController(*this);
+		break;
+	case controllerService:
+		controller = new eDVBServiceController(*this);
+		break;
+	}
+}
+
+eDVBServiceController *eDVB::getServiceAPI()
+{
+	if (controllertype != controllerService)
+		return 0;
+	return (eDVBServiceController*)controller;
+}
+
+eDVBScanController *eDVB::getScanAPI()
+{
+	if (controllertype != controllerScan)
+		return 0;
+	return (eDVBScanController*)controller;
 }
 
 eAutoInitP0<eDVB> init_dvb(4, "eDVB core");

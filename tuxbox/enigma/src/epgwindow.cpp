@@ -8,6 +8,7 @@
 #include <core/driver/rc.h>
 #include <core/gui/eskin.h>
 #include <core/dvb/edvb.h>
+#include <core/dvb/dvbservice.h>
 
 eListBoxEntryEPG::eListBoxEntryEPG(const eit_event_struct* evt, eListBox<eListBoxEntryEPG> *listbox)
 		:eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), event(evt)	
@@ -41,7 +42,9 @@ void eEPGWindow::fillEPGList()
 
 void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 {
-	if (!entry)
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+
+	if (!entry || !sapi) 
 		close(0);
 	else
 	{	
@@ -50,7 +53,7 @@ void eEPGWindow::entrySelected(eListBoxEntryEPG *entry)
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
-		eEventDisplay ei(eDVB::getInstance()->service->service_name.c_str(), 0, &entry->event);
+		eEventDisplay ei(sapi->service->service_name.c_str(), 0, &entry->event);
 		ei.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		ei.show();
 		while(ret = ei.exec())

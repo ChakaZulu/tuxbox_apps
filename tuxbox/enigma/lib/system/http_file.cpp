@@ -46,7 +46,7 @@ eHTTPFilePathResolver::eHTTPFilePathResolver()
 eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString path, eHTTPConnection *conn)
 {
 	eDebug("request = %s, path = %s", request.c_str(), path.c_str());
-	if (path.find("../")!=-1)		// evil hax0r
+	if (path.find("../")!=eString::npos)		// evil hax0r
 		return new eHTTPError(conn, 403);
 	eDebug("%s", path.c_str());
 	if (path[0] != '/')		// prepend '/'

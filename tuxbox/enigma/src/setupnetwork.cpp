@@ -90,7 +90,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 
 	CONNECT(ip->selected, eZapNetworkSetup::fieldSelected);
 
-	dosetup=new eCheckbox(this, sdosetup, fd);
+	dosetup=new eCheckbox(this, sdosetup, 1, fd);
 	dosetup->setText("Configure Network");
 	dosetup->move(ePoint(100, 163));
 	dosetup->resize(eSize(fd+4+240, fd+4));

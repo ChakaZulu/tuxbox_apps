@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <core/dvb/dvbservice.h>
 
 #include <core/dvb/dvb.h>
 #include <core/dvb/edvb.h>
@@ -6,7 +7,7 @@
 
 static eBouquet *getBouquetByID(const char *id)
 {
-	ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->getBouquets();
+	ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->settings->getBouquets();
 	int bouquet_id;
 	if (sscanf(id, "B:%x", &bouquet_id)!=1)
 		return 0;
@@ -19,7 +20,7 @@ static eBouquet *getBouquetByID(const char *id)
 
 static eService *getServiceByID(const char *id)
 {
-	eTransponderList *tl=eDVB::getInstance()->getTransponders();
+	eTransponderList *tl=eDVB::getInstance()->settings->getTransponders();
 	if (!tl)
 		return 0;
 	int original_network_id, transport_stream_id, service_id;
@@ -55,10 +56,17 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 	
 	eDebug("getList(%s);", param.c_str());
 	
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+	{
+		xmlrpc_fault(result, 3, "currently not available");
+		return 0;
+	}
+	
 	if (!param.length())		// root
 	{
 		ePtrList<eXMLRPCVariant> l;
-		ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->getBouquets();
+		ePtrList<eBouquet>* pBouquets=eDVB::getInstance()->settings->getBouquets();
 		if (pBouquets)
 		{
 			for (ePtrList<eBouquet>::iterator i(*pBouquets); i != pBouquets->end(); ++i)
@@ -137,12 +145,12 @@ static int getList(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 			xmlrpc_fault(result, 3, "invalid handle");
 			return 0;
 		}
-		if (eDVB::getInstance()->service != service)
+		if (sapi->service != service)
 		{
 			xmlrpc_fault(result, 4, "service currently not tuned in");
 			return 0;
 		}
-		if (eDVB::getInstance()->service_state==ENOENT)
+		if (sapi->service_state==ENOENT)
 		{
 			xmlrpc_fault(result, 4, "service couldn't be tuned in");
 			return 0;
@@ -216,6 +224,13 @@ static int zapTo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &
 	if (xmlrpc_checkArgs("s", params, result))
 		return 1;
 
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+	{
+		xmlrpc_fault(result, 3, "currently not available");
+		return 0;
+	}
+	
 	eString &param=*params[0].getString();
 
 	eDebug("zapTo(%s);", param.c_str());
@@ -224,7 +239,7 @@ static int zapTo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant> &
 	if (!s)
 		xmlrpc_fault(result, 3, "invalid handle");
 	else
-		eDVB::getInstance()->switchService(s);
+		sapi->switchService(s);
 	return 0;
 }
 
@@ -236,6 +251,13 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 	eString &param=*params[0].getString();
 
 	eDebug("getInfo(%s);", param.c_str());
+	
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+	{
+		xmlrpc_fault(result, 3, "currently not available");
+		return 0;
+	}
 	
 	eService *service=0;
 	
@@ -252,12 +274,12 @@ static int getInfo(std::vector<eXMLRPCVariant> &params, ePtrList<eXMLRPCVariant>
 			xmlrpc_fault(result, 3, "invalid handle");
 			return 0;
 		}
-		if (eDVB::getInstance()->service != service)
+		if (sapi->service != service)
 		{
 			xmlrpc_fault(result, 4, "service currently not tuned in");
 			return 0;
 		}
-		if (eDVB::getInstance()->service_state==ENOENT)
+		if (sapi->service_state==ENOENT)
 		{
 			xmlrpc_fault(result, 4, "service couldn't be tuned in");
 			return 0;

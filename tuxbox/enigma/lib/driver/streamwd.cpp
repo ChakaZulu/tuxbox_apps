@@ -59,7 +59,7 @@ void eStreamWatchdog::check(int)
 	struct event_t event;
 	int eventSize = sizeof (event);
 	int status;
-	while (status = read(handle, &event, eventSize) == eventSize)
+	while ((status = read(handle, &event, eventSize)) == eventSize)
 		if (event.event == EVENT_ARATIO_CHANGE)
 			reloadSettings();
 }

@@ -10,8 +10,9 @@ int eventData::CacheSize=0;
 eEPGCache *eEPGCache::instance;
 
 #define HILO(x) (x##_hi << 8 | x##_lo)
-eEPGCache::eEPGCache():CleanTimer(eApp), zapTimer(eApp),
-			eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0)
+eEPGCache::eEPGCache():
+			eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xF0),
+			CleanTimer(eApp), zapTimer(eApp)
 //eEPGCache::eEPGCache():eSection(0x12, 0x40, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOUT, 0xC0)
 {
 	eDebug("[EPGC] Initialized EPGCache");

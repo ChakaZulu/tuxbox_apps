@@ -4,8 +4,8 @@
 #include <core/system/init.h>
 #include <core/gui/eskin.h>
 
-eCheckbox::eCheckbox(eWidget *parent, int checked, int Size):
-	eButton(parent)
+eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, int Size):
+	eButton(parent, 0, takefocus)
 {
 	ischecked = -1;
 	setCheck(checked);
@@ -66,6 +66,8 @@ int eCheckbox::eventFilter(const eWidgetEvent &event)
 	case eWidgetEvent::changedSize:
 		pixmap_position=ePoint(2, (size.height()-20)/2);
 		text_position=ePoint(26, 0);
+		break;
+	default:
 		break;
 	}
 	return 0;

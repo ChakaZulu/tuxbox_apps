@@ -19,7 +19,11 @@
 #include <signal.h>
 #include <errno.h>
 
-typedef unsigned char __u8;
+#undef strcpy
+#undef strcmp
+#undef strlen
+#undef strnicmp
+#undef strncmp
 
 #ifdef DBOX
 #include <ost/dmx.h>
@@ -30,6 +34,8 @@ typedef unsigned char __u8;
 #include <vid/vid_inf.h>
 #include <aud/aud_inf.h>
 #endif
+
+typedef unsigned char __u8;
 
 #include "decoder.h"
 #include <core/base/eerror.h>
@@ -45,7 +51,6 @@ int Decoder::fd::demux_pcr;
 
 static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int casystemid, int descriptor_length, __u8 *descriptors)
 {
-#ifdef DBOX
 	static int lastpid=-1;
 
 	if (lastpid!=-1)
@@ -83,6 +88,13 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 		close(1);
 		close(2);
 #endif
+
+#ifdef DBOX
+#define CAMD "camd"
+#else
+#define CAMD "camdream"
+#endif
+
 #ifdef USE_CAMD
 		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[4], descriptor, 0)<0)
 			eDebug("camd");
@@ -92,7 +104,6 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 		break;
 	}
 	}
-#endif
 }
 
 int Decoder::Initialize()
@@ -222,6 +233,8 @@ int Decoder::Set()
 			pes_filter.pesType=DMX_PES_PCR;
 			if (ioctl(fd.demux_pcr, DEMUX_FILTER_PES_SET, &pes_filter)<0)
 				perror("DEMUX_FILTER_PES_SET - PCR\n");
+			if (ioctl(fd.demux_pcr, DEMUX_START)<0)
+				perror("DEMUX_START");
 #endif
 		}
 	}
@@ -251,6 +264,8 @@ int Decoder::Set()
 			eDebug("VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 			if (ioctl(fd.video, MPEG_VID_SELECT_SOURCE, 0)<0)
 				perror("MPEG_VID_SELECT_SOURCE\n");
+			if (ioctl(fd.video, MPEG_VID_SET_BLANK, 0)<0)
+				perror("MPEG_VID_SET_BLANK\n");
 			if (ioctl(fd.video, MPEG_VID_PLAY, 0)<0)
 				perror("MPEG_VID_PLAY");
 #endif
@@ -337,16 +352,6 @@ int Decoder::Set()
 #endif
 		}
 
-#ifndef DBOX
-	if (changed&3)
-	{
-		int syncmode=VID_SYNC_NO;
-		if ((parms.apid!=-1) && (parms.vpid!=-1))
-			syncmode=VID_SYNC_VID;
-		ioctl(fd.video, MPEG_VID_SYNC_ON, syncmode);
-	}
-#endif
-
   if (changed&8)
   	if ((!parms.recordmode) && (parms.pcrpid!=-1))
   	{
@@ -385,6 +390,29 @@ int Decoder::Set()
 				perror("DEMUX_START\n");
 #endif
 		}
+
+#ifndef DBOX
+	if (changed&3)
+	{
+		int syncmode=VID_SYNC_NO;
+		if ((parms.apid!=-1) && (parms.vpid!=-1))
+			syncmode=VID_SYNC_VID;
+		ioctl(fd.video, MPEG_VID_SYNC_ON, syncmode);
+	}
+#endif
+
+#ifndef DBOX
+	if (changed&3)
+	{
+		int syncmode=VID_SYNC_NO;
+/*		if ((parms.apid!=-1) && (parms.vpid!=-1))
+			syncmode=VID_SYNC_VID; */
+		ioctl(fd.video, MPEG_VID_SYNC_ON, syncmode);
+		
+		if (fd.audio>=0)
+			ioctl(fd.audio, MPEG_AUD_SYNC_ON, 1);
+	}
+#endif
 
 	current=parms;
 	return 0;

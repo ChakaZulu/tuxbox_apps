@@ -75,6 +75,7 @@ int eSocket::setSocket(int blub)
 	fcntl(socketdesc, F_SETFL, O_NONBLOCK);
 	rsn=new eSocketNotifier(eApp, getDescriptor(), eSocketNotifier::http);
 	CONNECT(rsn->activated, eSocket::readit);
+	return 0;
 }
 
 

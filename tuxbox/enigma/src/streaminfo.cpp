@@ -12,6 +12,7 @@
 #include <core/gui/guiactions.h>
 #include <core/dvb/dvbwidgets.h>
 #include <core/dvb/frontend.h>
+#include <core/dvb/dvbservice.h>
 
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
@@ -32,6 +33,8 @@ int eStreaminfo::eventHandler(const eWidgetEvent &event)
 		break;
 	case eWidgetEvent::execDone:
 		releaseFocus();
+		break;
+	default:
 		break;
 	}
 	return eWindow::eventHandler(event);
@@ -100,7 +103,11 @@ public:
 
 siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 {
-	eService *cservice=eDVB::getInstance()->service;
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+	
+	eService *cservice=sapi->service;
 	int yOffs=10;
 	int fs=eSkin::getActive()->queryValue("fontsize", 20);
 	
@@ -227,7 +234,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	tsid[0]->resize(eSize(230, fs+5));
 
 	tsid[1]=new eLabel(this);
-	tsid[1]->setText(eString().sprintf("%04xh", eDVB::getInstance()->transport_stream_id));
+	tsid[1]->setText(eString().sprintf("%04xh", sapi->transport_stream_id));
 	tsid[1]->move(ePoint(280, yOffs));
 	tsid[1]->resize(eSize(130, fs+5));
 	tsid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -239,7 +246,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	onid[0]->resize(eSize(210, fs+5));
 
 	onid[1]=new eLabel(this);
-	onid[1]->setText(eString().sprintf("%04xh", eDVB::getInstance()->original_network_id));
+	onid[1]->setText(eString().sprintf("%04xh", sapi->original_network_id));
 	onid[1]->move(ePoint(280, yOffs));
 	onid[1]->resize(eSize(130, fs+5));
 	onid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -251,7 +258,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	sid[0]->resize(eSize(185, fs+5));
 
 	sid[1]=new eLabel(this);
-	sid[1]->setText(eString().sprintf("%04xh", eDVB::getInstance()->service_id));
+	sid[1]->setText(eString().sprintf("%04xh", sapi->service_id));
 	sid[1]->move(ePoint(280, yOffs));
 	sid[1]->resize(eSize(130, fs+5));
 	sid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -271,6 +278,10 @@ public:
 
 siCA::siCA(eWidget *parent): eWidget(parent)
 {
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
+	
 	int yOffs=0;
 	int fs=eSkin::getActive()->queryValue("fontsize", 20);
 	availca[0]=new eLabel(this);
@@ -280,9 +291,9 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	yOffs+=fs+5;
 
 	eString availcas="keine";
-	
+
 	int numsys=0;
-	std::list<int>& availCA = eDVB::getInstance()->availableCASystems;
+	std::list<int>& availCA = sapi->availableCASystems;
 	for (std::list<int>::iterator i(availCA.begin()); i != availCA.end(); ++i)
 	{
 		if (!numsys)
@@ -294,6 +305,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 		}
 		availcas+= eString().sprintf( "%04xh:  %s\n", *i, getCAName(*i).c_str());
 	}
+
 	if (!numsys)
 		numsys++;
 
@@ -313,9 +325,9 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 	
 	numsys=0;
 
-	ePtrList<eDVB::CA>& calist = eDVB::getInstance()->calist;
+	ePtrList<eDVBServiceController::CA>& calist = sapi->calist;
 
-	for (ePtrList<eDVB::CA>::iterator i(calist); i != calist.end(); ++i)
+	for (ePtrList<eDVBServiceController::CA>::iterator i(calist); i != calist.end(); ++i)
 	{
 		if (!numsys)
 			usedcas="";
@@ -370,7 +382,11 @@ eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1)
 	t->move(ePoint(0, 0));
 	t->resize(eSize(clientrect.width(), 200));
 	t->load();
-	t->setTransponder(eDVB::getInstance()->transponder);
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+	{
+		t->setTransponder(sapi->transponder);
+	}
 
 	eWidget *fe=new eFEStatusWidget(n, eFrontend::fe());
 	fe->move(ePoint(0, 200));

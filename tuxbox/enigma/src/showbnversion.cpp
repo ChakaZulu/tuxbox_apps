@@ -1,9 +1,10 @@
 #include "showbnversion.h"
-
 #include <core/driver/rc.h>
 #include <core/dvb/edvb.h>
 #include <core/dvb/si.h>
 #include <core/gui/elabel.h>
+#include <core/dvb/dvbservice.h>
+#include <core/gui/guiactions.h>
 
 /*
 	was hier fehlt: parsen der BAT (batid: 5001) auf 0001:0085. daher wird 0001:0085:0F03 assumed.
@@ -47,7 +48,7 @@ int BNDirectory::sectionRead(__u8 *d)
 			version+=*d++;
 		d+=17;
 		eDebug("%s/%s/%s/%s", dst.c_str(), file.c_str(), dst2.c_str(), version.c_str());
-		if (versions.find(version)==-1)
+		if (versions.find(version)==eString::npos)
 		{
 			if (!first)
 				versions+=", ";
@@ -69,33 +70,47 @@ BNDirectory::BNDirectory(int pid, eString text, eLabel *res): eSection(pid, 0x80
 
 void ShowBNVersion::willShow()
 {
-	eDVB::getInstance()->switchService(0x0F03, 0x0085, 0x0001, -1);
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+	{
+		text->setText("Service system unavailable");
+		return;
+	}
+	
+	sapi->switchService(0x0F03, 0x0085, 0x0001, -1);
 	text->setText("Tuning in transponder...");
+}
+
+int ShowBNVersion::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::evtAction:
+		if ((event.action == &i_cursorActions->ok) || (event.action == &i_cursorActions->cancel))
+			close(0);
+		else
+			break;
+		return 1;
+	default:
+		break;
+	}
+	return eWidget::eventHandler(event);
 }
 
 void ShowBNVersion::willHide()
 {
 }
 
-int ShowBNVersion::keyUp(int rc)
+void ShowBNVersion::eventOccured(const eDVBEvent &event)
 {
-	switch (rc)
-	{
-	case eRCInput::RC_OK:
-	case eRCInput::RC_HELP:
-		close(0);
-		return 1;
-	default:
-		return 0;
-	}
-}
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return;
 
-void ShowBNVersion::eventOccured(int event)
-{
-	if (event==eDVB::eventServiceSwitched)
+	if (event.type==eDVBServiceEvent::eventServiceSwitched)
 	{
-		if ((eDVB::getInstance()->service_id==0x0F03) &&
-				(eDVB::getInstance()->original_network_id==0x0085))
+		if ((sapi->service_id==0x0F03) &&
+				(sapi->original_network_id==0x0085))
 		{
 			text->setText("Tuned in transponder.\nReading version information...");
 			PMT *pmt=eDVB::getInstance()->getPMT();
@@ -121,15 +136,16 @@ void ShowBNVersion::eventOccured(int event)
 			}
 		}
 	}
-	if (event==eDVB::eventServiceFailed)
+	if (event.type==eDVBServiceEvent::eventServiceFailed)
 		text->setText("Tune failed. Please do a channelsearch first.");
 }
 
 ShowBNVersion::ShowBNVersion(): eWindow(1)
 {
+	addActionMap(&i_cursorActions->map);
 	setText("Show current BN version");
-	move(ePoint(150, 150));
-	resize(eSize(400, 300));
+	cmove(ePoint(150, 150));
+	cresize(eSize(400, 300));
 	
 	text=new eLabel(this);
 	text->move(ePoint(10, 40));

@@ -1,77 +1,55 @@
 #ifndef __sselect_h
 #define __sselect_h
 
+#include <core/gui/ewindow.h>
 #include <apps/enigma/bselect.h>
 #include <core/gui/listbox.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/epgcache.h>
 
-class eListboxEntryService: public eListBoxEntry
+class eService;
+class eBouquet;
+class eLabel;
+
+class eListBoxEntryService: public eListBoxEntry
 {
-	friend class eServiceSelector;
-	friend class eListBox<eListboxEntryService>;
+	friend class eListBox<eListBoxEntryService>;
 	eString sort;
 public:
 	eService *service;
 	eBouquet *bouquet;
-	eListboxEntryService(eService *service, eListBox<eListboxEntryService> *listbox);
-	eListboxEntryService(eBouquet *bouquet, eListBox<eListboxEntryService> *listbox);
-	~eListboxEntryService();
-
-	bool operator < ( const eListboxEntryService& e) const
+	eString getText(int col=0) const;
+	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eService *service);
+	eListBoxEntryService(eListBox<eListBoxEntryService> *lb, eBouquet *bouquet);
+	~eListBoxEntryService();
+	
+	bool operator<(const eListBoxEntryService &r) const
 	{
-			return sort < e.sort;
+		return sort < r.sort;
 	}
-
 protected:
-	void redraw(gPainter *rc, const eRect& rect, const gColor& coActive, const gColor& coNormal, bool highlited) const
-	{
-			rc->setForegroundColor(highlited?coActive:coNormal);
-			rc->setFont(listbox->getEntryFnt());
-
-			if ((coNormal != -1 && !highlited) || (highlited && coActive != -1))
-					rc->fill(rect);
-
-			eString descr;
-
-			EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service->original_network_id, service->service_id);
-			if (e)
-			{
-				for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
-				{
-					Descriptor *descriptor=*d;
-					if (descriptor->Tag()==DESCR_SHORT_EVENT)
-					{
-						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-						descr+=" (";
-						descr+=ss->event_name;
-						descr+=")";
-						break;
-					}
-				}
-				delete e;
-			}
-
-			rc->renderText(rect, descr?sort+descr:sort);
-			
-			eWidget* p = listbox->getParent();			
-			if (highlited && p && p->LCDElement)
-				p->LCDElement->setText(sort);
-	}
-
+	void redraw(gPainter *rc, const eRect &rect, const gColor &coActive, const gColor &coNormal, bool highlighted);
 };
 
-class eServiceSelector: public eListBoxWindow<eListboxEntryService>
+class eServiceSelector: public eWindow
 {
 	eService *result, *selected;
+	
+	eListBox<eListBoxEntryService> *services;
+	eLabel *l_bouquet, *l_bouquet_prev, *l_bouquet_next;
+	
 	eBouquetSelector* pbs;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
 	void fillServiceList();
-	void entrySelected(eListboxEntryService *entry);
-	void selchanged(eListboxEntryService *entry);
+	void entrySelected(eListBoxEntryService *entry);
+	void selchanged(eListBoxEntryService *entry);
 public:
+	enum
+	{
+		dirNo,
+		dirUp,
+		dirDown
+	};
 	eServiceSelector();
 	~eServiceSelector();
 	void useBouquet(eBouquet *bouquet);

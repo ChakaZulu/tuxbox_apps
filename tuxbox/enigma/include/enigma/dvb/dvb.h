@@ -71,6 +71,7 @@ public:
 		int isValid() { return valid; }
 	} satellite;
 	eTransponder(int transport_stream_id, int original_network_id);
+	eTransponder();
 	void setSatellite(SatelliteDeliverySystemDescriptor *descr) { satellite.set(descr); }
 	void setCable(CableDeliverySystemDescriptor *descr) { cable.set(descr); }
 	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int lnb, int inversion);
@@ -91,12 +92,29 @@ public:
 	int transport_stream_id, original_network_id;
 	enum
 	{
-		stateListed, stateError, stateOK
+		stateToScan, stateError, stateOK
 	};
 	int state;
 	
+	bool operator==(const eTransponder &c) const
+	{
+		if (original_network_id != c.original_network_id)
+			return 0;
+		if (transport_stream_id != c.transport_stream_id)
+			return 0;
+		return 1;
+	}
+
 	bool operator<(const eTransponder &c) const
 	{
+		if ((original_network_id == -1) && (transport_stream_id == -1))
+		{
+			if ((c.original_network_id == -1) && (c.transport_stream_id == -1))
+				return this < &c;
+			else
+				return 1;
+		}
+
 		if (original_network_id < c.original_network_id)
 			return 1;
 		else if (original_network_id == c.original_network_id)
@@ -110,9 +128,13 @@ public:
 class eService
 {
 public:
-	eService(int transport_stream_id, int original_network_id, SDTEntry *sdtentry, int service_number=-1);
+	enum cacheID
+	{
+		cVPID, cAPID, cTPID, cPCRPID, cacheMax
+	};
+	eService(int transport_stream_id, int original_network_id, const SDTEntry *sdtentry, int service_number=-1);
 	eService(int transport_stream_id, int original_network_id, int service_id, int service_number=-1);
-	void update(SDTEntry *sdtentry);
+	void update(const SDTEntry *sdtentry);
 	
 	int transport_stream_id, original_network_id;
 	int service_id, service_type;
@@ -120,6 +142,24 @@ public:
 	std::string service_name, service_provider;
 	
 	int service_number;		// gleichzeitig sortierkriterium.
+	
+	int cache[cacheMax];
+	
+	void set(cacheID c, int v)
+	{
+		cache[c]=v;
+	}
+	
+	int get(cacheID c)
+	{
+		return cache[c];
+	}
+	
+	void clearCache()
+	{
+		for (int i=0; i<cacheMax; i++)
+			cache[i]=-1;
+	}
 	
 	bool operator<(const eService &c) const
 	{
@@ -186,7 +226,7 @@ public:
 	void updateStats(int &transponders, int &scanned, int &services);
 	eTransponder &createTransponder(int transport_stream_id, int original_network_id);
 	eService &createService(int transport_stream_id, int original_network_id, int service_id, int service_number=-1);
-	void handleSDT(SDT *sdt);
+	void handleSDT(const SDT *sdt);
 
 	void serialize(FILE *out, int ind);
 	eTransponder *searchTS(int original_network_id, int transport_stream_id);

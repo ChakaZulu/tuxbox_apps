@@ -1,17 +1,148 @@
-#include "scan.h"
-
 #include <time.h>
-
-#include <core/base/i18n.h>
+#include "scan.h"
 #include <core/dvb/frontend.h>
 #include <core/dvb/si.h>
 #include <core/dvb/dvb.h>
-#include <core/dvb/edvb.h>
+#include "enigma.h"
+
 #include <core/gui/elabel.h>
 #include <core/gui/ewindow.h>
-#include <core/gui/eprogress.h>
-#include <core/gui/guiactions.h>
 #include <core/gdi/font.h>
+#include <core/gui/eprogress.h>
+#include <core/dvb/edvb.h>
+#include <core/driver/rc.h>
+#include <core/gui/echeckbox.h>
+#include <core/gui/listbox.h>
+#include <core/gui/guiactions.h>
+#include <core/dvb/dvbwidgets.h>
+#include <core/dvb/dvbscan.h>
+#include <core/dvb/dvbservice.h>
+
+#include <string>
+
+tsSelectType::tsSelectType(eWidget *parent): eWidget(parent)
+{
+	list=new eListBox<eListBoxEntryText>(this);
+	list->setName("menu");
+	list->move(ePoint(100, 100));
+	list->resize(eSize(100, 100));
+	
+	eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "tsSelectType"))
+		eFatal("skin load of \"tsSelectType\" failed");
+
+	new eListBoxEntryText(list, "Automatische Suche...", (void*)1);
+	new eListBoxEntryText(list, "Manuelle Suche...", (void*)2);
+	list->setCurrent(new eListBoxEntryText(list, "Jetzt keine Suche durchführen", (void*)0));
+
+	CONNECT(list->selected, tsSelectType::selected);
+}
+
+void tsSelectType::selected(eListBoxEntryText *entry)
+{
+	if (!entry)
+		close(0);
+	else
+		close((int)entry->getKey());
+}
+
+tsManual::tsManual(eWidget *parent, const eTransponder &transponder, tpScanParameter &param): eWidget(parent), param(param), transponder(transponder)
+{
+	int ft=0;
+	switch (eFrontend::fe()->Type())
+	{
+	case eFrontend::feSatellite:
+		ft=eTransponderWidget::deliverySatellite;
+		break;
+	case eFrontend::feCable:
+		ft=eTransponderWidget::deliveryCable;
+		break;
+	default:
+		ft=eTransponderWidget::deliverySatellite;
+		break;
+	}
+	
+	transponder_widget=new eTransponderWidget(this, 1, ft);
+	transponder_widget->load();
+	transponder_widget->setName("transponder");
+	
+	festatus_widget=new eFEStatusWidget(this, eFrontend::fe());
+	festatus_widget->setName("festatus");
+
+	c_useonit=new eCheckbox(this);
+	c_useonit->setName("useonit");
+	
+	c_usebat=new eCheckbox(this);
+	c_usebat->setName("usebat");
+	
+	c_clearlist=new eCheckbox(this);
+	c_clearlist->setName("clearlist");
+
+	c_searchnit=new eCheckbox(this);
+	c_searchnit->setName("searchnit");
+
+	b_start=new eButton(this);
+	b_start->setName("start");
+
+	b_abort=new eButton(this);
+	b_abort->setName("abort");
+
+	eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "tsManual"))
+		eFatal("skin load of \"tsManual\" failed");
+		
+	transponder_widget->setTransponder(&transponder);
+
+	CONNECT(b_start->selected, tsManual::start);
+	CONNECT(b_abort->selected, tsManual::abort);
+	
+	CONNECT(transponder_widget->updated, tsManual::retune);
+	
+	retune();
+}
+
+void tsManual::start()
+{
+	eDVBScanController *sapi=eDVB::getInstance()->getScanAPI();
+	if (!sapi)
+	{	
+		eWarning("no scan active");
+		close(1);
+	} else
+	{
+		sapi->addTransponder(transponder);
+		sapi->setUseONIT(c_useonit->isChecked());
+		sapi->setUseBAT(c_usebat->isChecked());
+		sapi->setNetworkSearch(c_searchnit->isChecked());
+		sapi->setClearList(c_clearlist->isChecked());
+			
+		close(0);
+	}
+}
+
+void tsManual::abort()
+{
+	close(1);
+}
+
+void tsManual::retune()
+{
+	if (!transponder_widget->getTransponder(&transponder))
+		transponder.tune();
+}
+
+int tsManual::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::execBegin:
+		retune();
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
 
 tsText::tsText(eString sheadline, eString sbody, eWidget *parent): eWidget(parent, 1)
 {
@@ -33,7 +164,7 @@ int tsText::eventHandler(const eWidgetEvent &event)
 
 		body->move(ePoint(0, 40));
 		body->resize(eSize(size.width(), size.height()-40));
-		break;
+		return 1;
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->ok)
 			close(0);
@@ -42,350 +173,128 @@ int tsText::eventHandler(const eWidgetEvent &event)
 		else
 			break;
 		return 1;
+	default:
+		break;
 	}
 	return eWidget::eventHandler(event);
 }
 
-tsFindInit::tsFindInit(eWidget *parent): eWidget(parent, 1), sstimer(eApp)
+tsScan::tsScan(eWidget *parent): eWidget(parent, 1)
 {
 	addActionMap(&i_cursorActions->map);
 	headline=new eLabel(this);
-	headline->setText("Empfange");
-	headline->setFont(gFont("NimbusSansL-Regular Sans L Regular", 32));
+	headline->setText("Scanning...");
 	
-	body=new eLabel(this);
-	
-	signalbar=new eProgress(this);
-
-	packets.setAutoDelete(true);
-	
-	CONNECT(sstimer.timeout, tsFindInit::showSignalStrength);
-	CONNECT(eFrontend::fe()->tunedIn, tsFindInit::tunedIn);
-	state=sInactive;
+	CONNECT(eDVB::getInstance()->eventOccured, tsScan::dvbEvent);
+	CONNECT(eDVB::getInstance()->stateChanged, tsScan::dvbState);
 }
 
-void tsFindInit::scanPacket()
-{
-	if (!packets.current())
-	{
-		state=sFailed;
-		body->setText("Tja, leider konnte kein einziger Transponder gefunden werden. Vielleicht sollte die Antenne angeschlossen werden..."
-		"\nIm Ernst: es tut mir wirklich leid, aber da IST NICHTS.");
-		return;
-	}
-	body->setText("scanning " + packets.current()->name);
-	packets.current()->possibleTransponders.front()->tune();
-}
-
-int tsFindInit::eventHandler(const eWidgetEvent &event)
+int tsScan::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
-	case eWidgetEvent::execBegin:
-	{
-		packets.clear();
-		eTransponder *t;
-		tpPacket *p;
-		result=0;
-		int f;
-		switch (eFrontend::fe()->Type())
-		{
-		case eFrontend::feCable:
-			p=new tpPacket("Cable", SCAN_SKIP);
-			for (f=330000; f<=460000; f+=8000)
-			{
-				t=new eTransponder(-1, f/8000); t->setCable(f, 6900000, 0);	p->possibleTransponders.push_back(t);
-				t=new eTransponder(-2, f/8000); t->setCable(f, 6900000, 1);	p->possibleTransponders.push_back(t);
-				t=new eTransponder(-3, f/8000); t->setCable(f, 6875000, 0);	p->possibleTransponders.push_back(t);
-				t=new eTransponder(-4, f/8000); t->setCable(f, 6875000, 1);	p->possibleTransponders.push_back(t);
-			}
-			t=new eTransponder(-1, -2); t->setCable(330000, 6875000, 1); p->possibleTransponders.push_back(t);
-			packets.push_back(p);
-			break;
-		case eFrontend::feSatellite:
-			p=new tpPacket("Astra 19.2E", SCAN_SKIP);
-			t=new eTransponder(0x0009, 0x0085); t->setSatellite(12422000, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(0x0454, 0x0001); t->setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(0x0441, 0x0001); t->setSatellite(12187500, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			packets.push_back	(p);
-
-			p=new tpPacket("Hotbird 13.0E", SCAN_ONIT);
-			t=new eTransponder(-1, -1); t->setSatellite(12692000, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -2); t->setSatellite(12539000, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -3); t->setSatellite(11746000, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -4); t->setSatellite(12168500, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -5); t->setSatellite(12034000, 27500000, eFrontend::polVert, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -6); t->setSatellite(11919000, 27500000, eFrontend::polVert, 2, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -7); t->setSatellite(11804000, 27500000, eFrontend::polVert, 2, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -8); t->setSatellite(12169000, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -9); t->setSatellite(12539000, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -10); t->setSatellite(12111000, 27500000, eFrontend::polVert, 3, 0, 0); p->possibleTransponders.push_back(t);
-			packets.push_back(p);
-	
-/*			p=new tpPacket("Astra 24.2E", SCAN_ONIT);
-			t=new eTransponder(-1, -1); t->setSatellite(11913000, 27500000, eFrontend::polHor, 3, 0, 0); p->possibleTransponders.push_back(t);
-			packets.push_back(p); */
-	
-			p=new tpPacket("Astra 2 28E", 0);
-			t=new eTransponder(-1, -2); t->setSatellite(11954000, 27500000, eFrontend::polHor, 2, 0, 0); p->possibleTransponders.push_back(t);
-			t=new eTransponder(-1, -3); t->setSatellite(12051000, 27500000, eFrontend::polVert, 2, 0, 0); p->possibleTransponders.push_back(t);
-			packets.push_back(p);
-	
-			p=new tpPacket("andere...", SCAN_ONIT);
-			t=new eTransponder(-1, -1); t->setSatellite(11042000,  4340000, eFrontend::polHor, 4, 0, 0); p->possibleTransponders.push_back(t); // eut w2 16E
-			t=new eTransponder(-1, -2); t->setSatellite(11010000,  2928000, eFrontend::polHor, 4, 0, 0); p->possibleTransponders.push_back(t); // eut w1 10E
-			t=new eTransponder(-1, -3); t->setSatellite(11386000, 27500000, eFrontend::polHor, 4, 0, 0); p->possibleTransponders.push_back(t); // eut w3 7E
-	
-			t=new eTransponder(-1, -4); t->setSatellite(12245000, 27500000, eFrontend::polVert, 5, 0, 0); p->possibleTransponders.push_back(t); // sirius 5E
-			t=new eTransponder(-1, -5); t->setSatellite(10974000,  9000000, eFrontend::polVert, 5, 0, 0); p->possibleTransponders.push_back(t); // thor 1w
-			t=new eTransponder(-1, -6); t->setSatellite(12245000, 27500000, eFrontend::polVert, 5, 0, 0); p->possibleTransponders.push_back(t); // sirius 5E
-			packets.push_back(p);
-			break;
-	
-		default:
-			body->setText("Da geht gerade was gaanz merkwürdiges vor! Komischerweise entspricht dein DVB-Equipment absolut keiner Norm, und daher "
-				"kann das schöne EliteDVB sowas merkwürdiges nicht unterstützen! DVB-T? Oder was ist das?");
-			break;
-		}
-		packets.first();
-		scanPacket();
-		sstimer.start(1000);
-		state=sSearching;
-		break;
-	}
 	case eWidgetEvent::changedSize:
-		headline->move(ePoint(10, 0));
-		headline->resize(eSize(size.width()-20, 40));
-
-		body->move(ePoint(10, 40));
-		body->resize(eSize(size.width()-20, 100));
-	
-		signalbar->move(ePoint(10, 150));
-		signalbar->resize(eSize(size.width()-20, 10));
-		break;
-	case eWidgetEvent::execDone:
-		state=sInactive;
-		sstimer.stop();
-		break;
+		headline->move(ePoint(0, 0));
+		headline->resize(eSize(size.width(), 40));
+		return 1;
 	case eWidgetEvent::evtAction:
-		if (event.action == &i_cursorActions->ok)
-		{
-			eDebug("OK action, state %d", state);
-			if (state==sFound)
-				close(0);
-			if (state==sFailed)
-				close(1);
-		} else if (event.action == &i_cursorActions->cancel)
-		{
-			eDebug("cancel");
+		if (event.action == &i_cursorActions->cancel)
 			close(2);
-		}
 		else
 			break;
 		return 1;
+	case eWidgetEvent::execBegin:
+	{
+		eDVBScanController *sapi=eDVB::getInstance()->getScanAPI();
+		if (!sapi)
+		{	
+			eWarning("no scan active");
+			close(1);
+		} else
+			sapi->start();
+		break;
+	}
+	default:
+		break;
 	}
 	return eWidget::eventHandler(event);
 }
 
-void tsFindInit::tunedIn(eTransponder *trans, int error)
+void tsScan::dvbEvent(const eDVBEvent &event)
 {
-	if (!packets.current())
-		return;
-
-  static std::list<eTransponder*>::iterator current = packets.current()->possibleTransponders.begin();
-
-	if (trans != *current)
-		return;
-
-	if (!error)
+	switch (event.type)
 	{
-		state=sFound;
-		body->setFlags(RS_WRAP);
-		body->setText("Es wurde ein Transponder gefunden, die Suche kann nun beginnen.");
-		result=packets.take();
-	}
-	else
-	{
-		eTransponder *n = (++current != packets.current()->possibleTransponders.end()?*current:0);
-
-		if (!n)
-		{
-			packets.next();
-			current = packets.current()->possibleTransponders.begin();
-			scanPacket();
-		}	
-		else
-			n->tune();
-	}
-}
-
-void tsFindInit::showSignalStrength()
-{
-	int sig=eFrontend::fe()->SNR();
-	sig+=50000;
-	if (sig<0)
-		sig=0;
-	sig/=20000;
-	sig=100-sig;
-	if (sig<0)
-		sig=0;
-	signalbar->setPerc(sig);
-}
-
-void tsFindInit::redrawWidget()
-{
-}
-
-
-void tsDoScan::stateChanged(int newstate)
-{
-}
-
-void tsDoScan::eventOccured(int event)
-{
-	switch (event)
-	{
-	case eDVB::eventScanNext:
-		updateStats();
+	case eDVBScanEvent::eventScanNext:
+		// update();
 		break;
-	case eDVB::eventScanCompleted:
-	{
-		eDebug("SCAN HAS COMPLETED");
+	case eDVBScanEvent::eventScanCompleted:
 		close(0);
-	}
-	}
-}
-
-void tsDoScan::updateETA()
-{
-	time_t diff=time(0)-start;
-	int transponders, scanned, services;
-	eDVB::getInstance()->getTransponders()->updateStats(transponders, scanned, services);
-
-	time_t expected;
-	if (scanned>4)
-		expected=diff*transponders/scanned;
-	else
-		expected=fexp;
-	
-	fexp=(fexp*7+expected)/8;
-	
-	time_t left=fexp-diff;
-	if (left<0)
-		left=0;
-		
-	eta->setText(eString().sprintf(_("%d minutes and %02d seconds left"), (int)left/60, (int)left%60));
-}
-
-tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(init), etatimer(eApp)
-{
-	transp_found=new eLabel(this);
-	transp_found->move(ePoint(10, 0));
-	transp_found->resize(eSize(440, 30));
-
-	transp_scanned=new eLabel(this);
-	transp_scanned->move(ePoint(10, 30));
-	transp_scanned->resize(eSize(440, 30));
-
-	known_services=new eLabel(this);
-	known_services->move(ePoint(10, 60));
-	known_services->resize(eSize(440, 30));
-
-	bar=new eProgress(this);
-	bar->move(ePoint(10, 90));
-	bar->resize(eSize(440, 20));
-
-	eta=new eLabel(this);
-	eta->move(ePoint(10, 120));
-	eta->resize(eSize(440, 30));
-
-	CONNECT(eDVB::getInstance()->stateChanged, tsDoScan::stateChanged);
-	CONNECT(eDVB::getInstance()->eventOccured, tsDoScan::eventOccured);
-	CONNECT(etatimer.timeout, tsDoScan::updateETA);
-}
-
-int tsDoScan::eventFilter(const eWidgetEvent &event)
-{
-	switch(event.type)
-	{
-	case eWidgetEvent::execBegin:
-		start=time(0);
-		eDVB::getInstance()->startScan(init->result->possibleTransponders, init->result->scanflags);
-		delete init->result;
-		fexp=3*60;
-		etatimer.start(1000);
-
 		break;
-	case eWidgetEvent::execDone:
-		etatimer.stop();
+	default:
 		break;
 	}
-	return 0;
 }
 
-void tsDoScan::updateStats()
-{
-	int transponders, scanned, services;
-	eDVB::getInstance()->getTransponders()->updateStats(transponders, scanned, services);
-	transp_found->setText(eString().sprintf(_("%d\ttransponders found"), transponders));
-	transp_scanned->setText(eString().sprintf(_("%d\ttransponders scanned"), scanned));
-	known_services->setText(eString().sprintf(_("%d\tknown services"), services));
-	if (transponders)
-		bar->setPerc(scanned*100/transponders);
-}
-
-void tsDoScan::redrawWidget()
+void tsScan::dvbState(const eDVBState &state)
 {
 }
-
 
 TransponderScan::TransponderScan()
 {
-	window=new eWindow(0);
-	window->setText(_("Transponder scan"));
-	window->move(ePoint(100, 100));
-	window->resize(eSize(460, 300));
+	eTransponder transponder;
 	
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+
+	if (sapi && sapi->transponder)
+		transponder=*sapi->transponder;
+	else
+		switch (eFrontend::fe()->Type())
+		{
+		case eFrontend::feCable:
+			transponder.setCable(402000, 6900000, 0);	// some cable transponder
+			break;
+		case eFrontend::feSatellite:
+			transponder.setSatellite(12551500, 22000000, eFrontend::polVert, 4, 0, 0);	// some astra transponder
+			break;
+		default:
+			break;
+		}
+
+	window=new eWindow(0);
+	window->setText("Transponder Scan");
+	window->cmove(ePoint(100, 100));
+	window->cresize(eSize(460, 400));
+	
+	eSize size=eSize(window->getClientSize().width(), window->getClientSize().height()-30);
+
 	progress=new eProgress(window);
-	progress->move(ePoint(60, window->getClientSize().height()-25));
+	progress->move(ePoint(60, size.height()+5));
 	progress->resize(eSize(window->getClientSize().width()-70, 10));
 
 	progress_text=new eLabel(window);
-	progress_text->move(ePoint(0, window->getClientSize().height()-30));
+	progress_text->move(ePoint(0, size.height()));
 	progress_text->resize(eSize(50, 30));
 
-	eWidget *s=new tsText(_("Transponder scan"), "Willkommen bei der Kanalsuche.\n"
-			"OK zum fortfahren, ? zum Abbruch", window);
-	s->move(ePoint(0, 0));
-	s->resize(eSize(
-			window->getClientSize().width(), window->getClientSize().height()-30));
-	s->hide();
-	mp.addPage(s);
+	select_type=new tsSelectType(window);
+	select_type->hide();
+	mp.addPage(select_type);
 
-	s=new tsFindInit(window);
-	s->move(ePoint(0, 0));
-	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
-	s->hide();
-	mp.addPage(s);
+	manual_scan=new tsManual(window, transponder, scanparam);
+	manual_scan->hide();
+	mp.addPage(manual_scan);
+	
+	eWidget *scan;
+	scan=new tsScan(window);
+	scan->hide();
+	scan->move(ePoint(0, 0));
+	scan->resize(size);
+	mp.addPage(scan);
 
-	s=new tsDoScan((tsFindInit*)s, window);
-	s->move(ePoint(0, 0));
-	s->resize(eSize(window->getClientSize().width(), window->getClientSize().height()-30));
-	s->hide();
-	mp.addPage(s);
-
-	s=new tsText("ÜBERSTANDEN!",
-		"Herzlichen Glückwunsch!\n"
-		"Sie haben es heil überstanden!\n\n"
-		"Es erwartet sie nun eine schier unglaubliche\nProgrammnvielfalt! "
-		"(wenn denn beim Scan alles geklappt hat. Wenn nicht: Don't worry, "
-		"be happy und: Auf ein neues, wenn es wieder heisst:\nStarte V1.6!)"
-		, window);
-	s->move(ePoint(0, 0));
-	s->resize(eSize(
-			window->getClientSize().width(), window->getClientSize().height()-30));
-	s->hide();
-	mp.addPage(s);
+	tsText *finish=new tsText(_("Done."), _("The transponderscan has finished and found n new Transponders with n new services."), window);
+	finish->hide();
+	finish->move(ePoint(0, 0));
+	finish->resize(size);
+	mp.addPage(finish);
 }
 
 TransponderScan::~TransponderScan()
@@ -398,11 +307,12 @@ int TransponderScan::exec()
 	int ret;
 	window->show();
 	mp.first();
+	
+	eDVB::getInstance()->setMode(eDVB::controllerScan);
 
 	ret=0;
-	do
+	while (!ret)
 	{
-		eDebug("current %x", mp.getCurrent());
 		int n=mp.at();
 		int total=mp.count();
 		progress_text->setText(eString().sprintf("%d/%d", n+1, total));
@@ -411,19 +321,41 @@ int TransponderScan::exec()
 		total--;
 		progress->setPerc(n*100/total);
 		int res=mp.getCurrent()->exec();
-		eDebug("res: %d", res);
-		if (res==1)
+			
+		if (mp.getCurrent()==select_type)
 		{
-			mp.prev();
-			continue;
-		}
-		
-		if (res==-1)
+			switch (res)
+			{
+			case 0:
+				ret=-1;
+				break;
+			case 1:
+				mp.set(automatic_scan);
+				break;
+			case 2:
+				mp.set(manual_scan);
+				break;
+			}
+		} else
 		{
-			ret=-1;
-			break;
+			switch (res)
+			{
+			case 0:
+				if (mp.next())
+					ret=1;
+				break;
+			case 1:
+				mp.prev();
+				break;
+			case 2:
+				ret=-1;
+				break;
+			}
 		}
-	} while (!mp.next());
+	}
+
+	eDVB::getInstance()->setMode(eDVB::controllerService);
+
 	mp.getCurrent()->hide();
 	window->hide();
 	return ret;
