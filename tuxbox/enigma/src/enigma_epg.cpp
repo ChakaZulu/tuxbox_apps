@@ -151,7 +151,7 @@ void eZapEPG::entry::gotFocus()
 {
 #ifndef DISABLE_LCD
 	eZapLCD* pLCD = eZapLCD::getInstance();
-	int pos = 0;
+	unsigned int pos = 0;
 	for (int i=0; i < 4; ++i)
 		pos = helptext.find(' ', pos+1);
 	if ( pos != eString::npos && (pos+1) < helptext.length() )
