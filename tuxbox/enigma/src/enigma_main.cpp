@@ -667,7 +667,6 @@ void eZapMain::keyDown(int code)
 				serviceChanged(service, -EAGAIN);
 #endif
 			}
-		qDebug("bla7");
 		break;
 	}
 	case eRCInput::RC_RIGHT:
