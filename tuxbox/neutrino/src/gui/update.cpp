@@ -109,7 +109,7 @@ bool CFlashUpdate::selectHttpImage(void)
 	std::string url;
 	std::string name;
 	std::string version;
-	std::vector<std::string> urls, names, versions;
+	std::vector<std::string> urls, names, versions, descriptions;
 
 	httpTool.setStatusViewer(this);
 	showStatusMessageUTF(g_Locale->getText("flashupdate.getinfofile")); // UTF-8
@@ -156,7 +156,9 @@ bool CFlashUpdate::selectHttpImage(void)
 		description += ' ';
 		description += versionInfo.getTime();
 
-		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, description, new CUpdateMenuTarget(i, &selected)));
+		descriptions.push_back(description); /* workaround since CMenuForwarder does not store the Option String itself */
+
+		SelectionWidget.addItem(new CMenuForwarder(names[i].c_str(), true, descriptions[i], new CUpdateMenuTarget(i, &selected)));
 	}
 
 	SelectionWidget.exec(NULL, "");
