@@ -126,7 +126,7 @@ void eListbox::redrawEntry(gPainter *target, int pos, eListboxEntry *entry, cons
 	if (!where.contains(rect))
 		return;
 
-	if (parent && parent->LCDElement && (entry == current->current()))
+	if (parent && parent->LCDElement && entry &&(entry == current->current()))
 		parent->LCDElement->setText(entry->getText(0));
 
 	target->setForegroundColor((have_focus && entry && entry==current->current())?col_active:getBackgroundColor());
