@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dii.c,v 1.1 2004/02/15 18:58:27 rasc Exp $
+$Id: dsmcc_unm_dii.c,v 1.2 2004/02/15 20:46:09 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_unm_dii.c,v 1.1 2004/02/15 18:58:27 rasc Exp $
 
 
 $Log: dsmcc_unm_dii.c,v $
+Revision 1.2  2004/02/15 20:46:09  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.1  2004/02/15 18:58:27  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -145,4 +148,29 @@ int dsmcc_DownloadInfoIndication (int v, u_char *b, u_int len)
 // privateDataByte: these fields are user defined.
 
 
+
+
+
+// $$$ TODO
+
+
+// TS 102 812 --  B.2.2.2 DownloadInfoIndication
+// The DownloadInfoIndication is a message that describes a set of modules and gives the necessary parameters to locate the module and retrieve it.
+
+// B.2.2.4 ModuleInfo
+// The moduleInfo structure is placed in the moduleInfo 
+//
+// BIOP::ModuleInfo::Taps
+// The .rst tap shall have the "use"value 0x0017 (BIOP_OBJECT_USE).The
+// id and selector .elds are not used and the MHP terminal may ignore them.
+// The MHP terminal may ignore possible other taps in the list.
+// DVB
+// BIOP::ModuleInfo::
+// UserInfo
+// The userInfo .eld contains a loop of descriptors.These are speci .ed in the
+// DVB Data Broadcasting standard and/or this speci .cation.The MHP
+// terminal shall support the compressed_module_descriptor (tag 0x09)used
+// to signal that the module is transmitted in compressed form.The userInfo
+// .eld may also contain a caching_priority_descriptor and one or more label_
+// descriptors.  // DVB /This // spec.
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_unm_dsi.c,v 1.1 2004/02/15 18:58:28 rasc Exp $
+$Id: dsmcc_unm_dsi.c,v 1.2 2004/02/15 20:46:09 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_unm_dsi.c,v 1.1 2004/02/15 18:58:28 rasc Exp $
 
 
 $Log: dsmcc_unm_dsi.c,v $
+Revision 1.2  2004/02/15 20:46:09  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.1  2004/02/15 18:58:28  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -97,4 +100,27 @@ int dsmcc_DownloadServerInitiate (int v, u_char *b, u_int len)
 // --> SuperGroupInfo
 
 
+/* $$$ TODO
+GroupInfoIndication() {
+NumberOfGroups 2
+for(i=0;i< numberOfGroups;i++) {
+GroupId 4
+GroupSize 4
+GroupCompatibility()
+GroupInfoLength 2
+for(i=0;i<N;I++) {
+groupInfoByte
+}
+1
+}
+PrivateDataLength 2
+for(i=0;i< privateDataLength;i++) {
+privateDataByte
+}
+1
+}
 
+// groupInfobyte may contain BIOP, descriptor_carousel_loopm etc.
+
+
+*/

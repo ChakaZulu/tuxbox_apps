@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.8 2004/02/15 18:58:27 rasc Exp $
+$Id: dsmcc_misc.c,v 1.9 2004/02/15 20:46:09 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.8 2004/02/15 18:58:27 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.9  2004/02/15 20:46:09  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.8  2004/02/15 18:58:27  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -122,43 +125,49 @@ int dsmcc_CompatibilityDescriptor(u_char *b)
 
 
    out_nl (3,"DSMCC_Compatibility Descriptor (loop):");
+
    indent (+1);
    len   = outBit_Sx_NL (4,"compatibilityDescriptorLength: ",	b, 0,16);
-   count = outBit_Sx_NL (4,"DescriptorCount: ",			b,16,16);
-   b += 4;
-   len -= 4;
+
+   if (len > 0) {
+
+   	count = outBit_Sx_NL (4,"DescriptorCount: ",		b,16,16);
+	b += 4;
+	len -= 4;
 
 
-   while (count-- > 0) {
-	int  subDesc_count;
+	while (count-- > 0) {
+		int  subDesc_count;
 
-	out_nl (4,"Descriptor (loop):");
-	indent (+1);
-
-   	outBit_S2x_NL (4,"descriptorType: ",		b, 0, 8,
-			(char *(*)(u_long))dsmccStr_DescriptorType );
-   	outBit_Sx_NL (4,"descriptorLength: ",		b, 8, 8);
-
-   	outBit_S2x_NL (4,"specifierType: ",		b,16, 8,
-			(char *(*)(u_long))dsmccStr_SpecifierType );
-   	outBit_S2x_NL (4,"specifierData: ",		b,24,24,
-			(char *(*)(u_long))dsmccStrOUI );
-   	outBit_Sx_NL (4,"Model: ",			b,48,16);
-   	outBit_Sx_NL (4,"Version: ",			b,64,16);
-
-   	subDesc_count = outBit_Sx_NL (4,"SubDescriptorCount: ", b,80, 8);
-	b    += 11;
-
-	while (subDesc_count > 0) {
-		int  i;
-
-		out_nl (5,"SubDescriptor (loop):");
+		out_nl (4,"Descriptor (loop):");
 		indent (+1);
-		i = subDescriptor (b);
+
+   		outBit_S2x_NL (4,"descriptorType: ",		b, 0, 8,
+				(char *(*)(u_long))dsmccStr_DescriptorType );
+   		outBit_Sx_NL (4,"descriptorLength: ",		b, 8, 8);
+
+   		outBit_S2x_NL (4,"specifierType: ",		b,16, 8,
+				(char *(*)(u_long))dsmccStr_SpecifierType );
+   		outBit_S2x_NL (4,"specifierData: ",		b,24,24,
+				(char *(*)(u_long))dsmccStrOUI );
+   		outBit_Sx_NL (4,"Model: ",			b,48,16);
+   		outBit_Sx_NL (4,"Version: ",			b,64,16);
+
+   		subDesc_count = outBit_Sx_NL (4,"SubDescriptorCount: ", b,80, 8);
+		b    += 11;
+
+		while (subDesc_count > 0) {
+			int  i;
+
+			out_nl (5,"SubDescriptor (loop):");
+			indent (+1);
+			i = subDescriptor (b);
+   			indent (-1);
+		}
    		indent (-1);
-	}
-   	indent (-1);
-   }
+   	}
+
+   } // len > 0
 
 
    indent (-1);
@@ -369,6 +378,7 @@ u_long dsmcc_print_transactionID_32 (int v, u_char *b)
   	outBit_Sx_NL  (v,"  ==> update toggle flag: ", 	b, 31,  1);
 
 	return t_id;
+	// $$$ TODO  look for other transaction_id usage
 }
 
 

@@ -6,17 +6,18 @@ http://dvbsnoop.sourceforge.net/
 http://cvs.tuxbox.org/
 
 
-
-dvbsnoop is a simple dvb / mpeg stream analyzer program.
+dvbsnoop is a simple dvb/mpeg stream analyzer program.
 The program can be used to sniff, monitor, debug, dump
 or view dvb/mpeg/dsm-cc/MHP stream information (digital television)
 send via satellite, cable or terrestrial.
 
 The programm was mainly written to learn and understand the DVB 
-protocol structures and streams. This program is not performance optimized.
+protocol structures and streams.
 
 
-Docs/examples can be found at: http://dvbsnoop.sourceforge.net
+Documentation and example outputs can be found on:
+
+	http://dvbsnoop.sourceforge.net
 
 
 
@@ -79,6 +80,17 @@ Installation:
 
   - test
       dvbsnoop -help
+
+
+
+Posting DVBSNOOP output:
+  If you are posting dvbsnoop output to mail lists, newsgroups, public boards
+  or whatever, please always include the dvbsnoop header:
+
+   e.g.: " dvbsnoop V1.2.49 -- http://dvbsnoop.sourceforge.net/" 
+
+   The version information is helpfull if there are discussions about the
+   decoding output.
 
 
 

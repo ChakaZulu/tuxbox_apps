@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.28 2004/02/15 18:58:30 rasc Exp $
+$Id: dsmcc_str.c,v 1.29 2004/02/15 20:46:10 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.28 2004/02/15 18:58:30 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.29  2004/02/15 20:46:10  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.28  2004/02/15 18:58:30  rasc
 DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
 
@@ -1065,7 +1068,7 @@ char *dsmccStr_messageID (u_int id)
 {
   STR_TABLE  TableIDs[] = {
 	{ 0x1001, 0x1001,   "DownloadInfoRequest" },
-	{ 0x1002, 0x1002,   "DownloadInfoResponse, DownloadInfoIndication (DII)" },
+	{ 0x1002, 0x1002,   "DownloadInfoIndication (DII)" }, // also: DownloadInfoResponse
 	{ 0x1003, 0x1003,   "DownloadDataBlock (DDB)" },
 	{ 0x1004, 0x1004,   "DownloadDataRequest" },
 	{ 0x1005, 0x1005,   "DownloadCancel" },

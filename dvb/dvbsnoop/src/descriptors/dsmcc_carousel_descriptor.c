@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.18 2004/02/15 01:01:02 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.19 2004/02/15 20:46:10 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc_carousel_descriptor.c,v 1.18 2004/02/15 01:01:02 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.19  2004/02/15 20:46:10  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.18  2004/02/15 01:01:02  rasc
 DSM-CC  DDB (DownloadDataBlock Message)
 DSM-CC  U-N-Message  started
@@ -385,6 +388,10 @@ void descriptorDSMCC_MHP_caching_priority (u_char *b)
 }
 
 
+
+
+
+// $$$ TODO 0x72 content type descriptor
 
 
 
