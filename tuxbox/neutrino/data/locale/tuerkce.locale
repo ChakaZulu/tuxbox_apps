@@ -29,7 +29,10 @@ satsetup.satellite Satellite
 satsetup.extended DiSEqC-setings
 satsetup.nodiseqc no DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
-satsetup.stddiseqc DiSEqC
+satsetup.diseqc10 DiSEqC 1.0
+satsetup.diseqc11 DiSEqC 1.1
+satsetup.smatvremote SMATV Remote Tuning
+satsetup.diseqcrepeat DiSEqC-repeats
 
 mainsettings.head AYARLAR
 mainsettings.savesettingsnow save settings now

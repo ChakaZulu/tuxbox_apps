@@ -29,7 +29,10 @@ satsetup.satellite Satellit
 satsetup.extended DiSEqC-Einstellung
 satsetup.nodiseqc Kein DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
-satsetup.stddiseqc DiSEqC
+satsetup.diseqc10 DiSEqC 1.0
+satsetup.diseqc11 DiSEqC 1.1
+satsetup.smatvremote SMATV Remote Tuning
+satsetup.diseqcrepeat DiSEqC-Wiederholungen
 
 mainsettings.head Einstellungen
 mainsettings.savesettingsnow Einstellung jetzt speichern
