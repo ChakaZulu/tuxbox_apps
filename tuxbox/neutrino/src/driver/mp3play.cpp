@@ -537,6 +537,7 @@ void* CMP3Player::PlayThread(void * filename)
 	g_Sectionsd->setPauseScanning(false);
 	fclose(fp);
 	fclose(soundfd);
+	pthread_exit(0);
 	return NULL;
 }
 
@@ -545,6 +546,8 @@ bool CMP3Player::play(const char *filename)
 	ProgName=__FILE__;
 	if(true)
 	{
+		stop();
+		CMP3Player::getInstance()->state = PLAY;
 		if (pthread_create (&thrPlay, NULL, PlayThread,(void *) filename) != 0 )
 		{
 			perror("mp3play: pthread_create(PlayThread)");
