@@ -32,7 +32,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <math.h>
 
 
 void audioControl::setAudioMode(int mode)
@@ -76,8 +76,14 @@ void audioControl::setVolume(char volume)
 {
 	int fd;
 
-	int i = 64-int(volume*64.0/100.0);
+	int i = 63;
 
+	if(volume!=0)
+	{
+		i = 64-32*log(volume/13.5);
+	}
+
+	//printf("sndctl: %d\n", i);
 	if (i < 0)
 	{
 		i=0;
