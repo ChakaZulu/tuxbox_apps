@@ -18,7 +18,7 @@
   </HEAD> 
   <BODY> 
 	 <H1>dvbsnoop - A DVB Stream Analyzer Tool</H1> 
-	 <H2> dvbsnoop Quicklinks</H2>
+	 <H2> dvbsnoop Quicklinks</H2> 
 	 <P><B><A
 		HREF="http://dvbsnoop.sourceforge.net/">http://dvbsnoop.sourceforge.net/</A></B><BR>Get
 		tarballs at: <A
@@ -544,7 +544,12 @@ CRC: 3952000829 (0xeb8ebf3d)
 		tries to reveal all pids transmitted on a transponder, even pids which are not
 		present in PAT, PMT, etc.<BR><BR>Remark: The PID-SCAN snoop will only detect
 		pids, which are transmitted during the scan phase. Pids with a low repetition
-		rate may not be detected.</P> 
+		rate may not be detected.</P>
+	 <P></P> 
+	 <H4>dvbsnoop -pd 2 -n 1000 -s bandwidth</H4> 
+	 <P>Analyze bandwidth usage of a PID.<BR>In this example, stop if more than
+		1000 packets are read. for different output information, you can tweak the -pd
+		option.</P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>Pitfalls...</H2> 
 	 <P><B>dvbsnoop tries to decode every data it gets....</B><BR>E.g. if you

@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.12 2003/12/10 20:07:15 rasc Exp $
+$Id: cmdline.c,v 1.13 2003/12/14 23:38:46 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.12 2003/12/10 20:07:15 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.13  2003/12/14 23:38:46  rasc
+- bandwidth reporting for a PID
+
 Revision 1.12  2003/12/10 20:07:15  rasc
 minor stuff
 
@@ -140,6 +143,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
          if (!strcmp (s,"sec")) opt->packet_mode = SECT;
          else if (!strcmp (s,"ts")) opt->packet_mode = TS;
          else if (!strcmp (s,"pes")) opt->packet_mode = PES;
+         else if (!strcmp (s,"bandwidth")) opt->packet_mode = PIDBANDWIDTH;
          else if (!strcmp (s,"pidscan")) {
 		 	opt->packet_mode = PIDSCAN;
 			opt->pid = 0;	// dummy to avoid usage output
@@ -193,9 +197,14 @@ void usage (void)
     printf("Usage\n");
     printf(" dvbsnoop [opts] pid \n\n");
     printf(" Options:  \n");
-    printf("   -demux device:      demux device [%s]\n",DEMUX_DEVICE);
-    printf("   -dvr device:        dvr device [%s]\n",DVR_DEVICE);
+    printf("   -demux device: demux device [%s]\n",DEMUX_DEVICE);
+    printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
     printf("   -s [sec|ts|pes|pidscan]:  snoop type  [-s sec]\n");
+    printf("   -s [type]:    snoop type  [-s sec]\n");
+    printf("                 type: stream type (sec, pes or ts),\n");
+    printf("                       or special scan:\n");
+    printf("                         pidscan = transponder pid scan,\n");
+    printf("                         bandwidth = data rate statistics for pid\n");
     printf("                 stream type or pidscan\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");

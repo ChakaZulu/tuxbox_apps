@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.16 2003/12/10 20:07:14 rasc Exp $
+$Id: dvbsnoop.c,v 1.17 2003/12/14 23:38:46 rasc Exp $
 
  DVBSNOOP
 
@@ -16,6 +16,9 @@ $Id: dvbsnoop.c,v 1.16 2003/12/10 20:07:14 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.17  2003/12/14 23:38:46  rasc
+- bandwidth reporting for a PID
+
 Revision 1.16  2003/12/10 20:07:14  rasc
 minor stuff
 
@@ -143,6 +146,10 @@ int main(int argc, char **argv)
 
 		case PIDSCAN:
 			err = ts_pidscan (&opt);
+			break;
+
+		case PIDBANDWIDTH:
+			err = ts_pidbandwidth (&opt);
 			break;
 
 		default:

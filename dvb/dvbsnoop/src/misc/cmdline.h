@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.8 2003/12/07 23:36:13 rasc Exp $
+$Id: cmdline.h,v 1.9 2003/12/14 23:38:46 rasc Exp $
 
 
  DVBSNOOP
@@ -26,7 +26,7 @@ $Id: cmdline.h,v 1.8 2003/12/07 23:36:13 rasc Exp $
  -- defs...
 */
 
-enum PACKET_MODE  {SECT, TS, PES, PIDSCAN};
+enum PACKET_MODE  {SECT, TS, PES, PIDSCAN, PIDBANDWIDTH};
 enum TIME_MODE    {NO_TIME, FULL_TIME, DELTA_TIME};
 
 typedef struct _OPTIONS {

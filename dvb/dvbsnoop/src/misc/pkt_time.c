@@ -1,5 +1,5 @@
 /*
-$Id: pkt_time.c,v 1.4 2003/11/26 16:27:46 rasc Exp $
+$Id: pkt_time.c,v 1.5 2003/12/14 23:38:46 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: pkt_time.c,v 1.4 2003/11/26 16:27:46 rasc Exp $
 
 
 $Log: pkt_time.c,v $
+Revision 1.5  2003/12/14 23:38:46  rasc
+- bandwidth reporting for a PID
+
 Revision 1.4  2003/11/26 16:27:46  rasc
 - mpeg4 descriptors
 - simplified bit decoding and output function
@@ -99,4 +102,23 @@ void  init_receive_time (void)
 {
   gettimeofday (&last_tv, NULL);
 }
+
+
+
+long delta_time_ms (struct timeval *tv, struct timeval *last_tv)
+{
+	// - delta time
+	long t_s, t_ms;
+	
+
+       	t_s  = tv->tv_sec  - last_tv->tv_sec;
+	t_ms = (tv->tv_usec - last_tv->tv_usec) / 1000;
+	if (t_ms < 0) {
+		t_ms += 1000;
+		t_s--;
+	}
+
+	return (long) t_s * 1000L + t_ms;
+}
+
 
