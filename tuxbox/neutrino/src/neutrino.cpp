@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.211 2002/04/02 10:55:18 McClean Exp $
+        $Id: neutrino.cpp,v 1.212 2002/04/02 14:59:42 obi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -281,9 +281,9 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.scan_astra = 1;
 	g_settings.scan_eutel = 0;
 	g_settings.scan_kopernikus = 0;
+        g_settings.scan_digituerk = 0;
 	g_settings.scan_sirius = 0;
 	g_settings.scan_thor = 0;
-        g_settings.scan_digituerk = 0;
 	g_settings.scan_bouquet = 1024; //erase bouquets
 
 
@@ -764,17 +764,17 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 		oj->addOption(0, "options.off");
 		oj->addOption(4, "options.on");
 		TSScan->addItem( oj );
+                oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
+		oj->addOption(0, "options.off");
+		oj->addOption(8, "options.on");
+		TSScan->addItem( oj );
 		oj = new CMenuOptionChooser("scants.sirius", &g_settings.scan_sirius, true );
 		oj->addOption(0, "options.off");
 		oj->addOption(16, "options.on");
 		TSScan->addItem( oj );
 		oj = new CMenuOptionChooser("scants.thor", &g_settings.scan_thor, true );
 		oj->addOption(0, "options.off");
-		oj->addOption(18, "options.on");
-		TSScan->addItem( oj );
-                oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
-		oj->addOption(0, "options.off");
-		oj->addOption(8, "options.on");
+		oj->addOption(32, "options.on");
 		TSScan->addItem( oj );
 	}
 	TSScan->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -2213,7 +2213,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.211 2002/04/02 10:55:18 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.212 2002/04/02 14:59:42 obi Exp $\n\n");
 	tzset();
 	initGlobals();
 
