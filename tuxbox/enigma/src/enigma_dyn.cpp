@@ -1705,6 +1705,29 @@ void deactivateSwapFile(eString swapFile)
 	system(cmd.c_str());
 }
 
+void setSwapFile(int nextswapfile, eString nextswapfilename);
+{
+	int curswapfile = 0;
+	eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
+	char *curswapfilename;
+	if (eConfig::getInstance()->getKey("/extras/swapfilename", curswapfilename))
+		curswapfilename = "";
+	
+	if (curswapfile != nextswapfile)
+	{
+		if (curswapfile != 0)
+			deactivateSwapFile(eString(curswapfilename));
+			
+		if (nextswapfile != 0)
+			activateSwapFile(nextswapfilename);
+		else 
+			deactivateSwapFile(nextswapfilename);
+			
+		eConfig::getInstance()->setKey("/extras/swapfile", swapfile);
+		eConfig::getInstance()->setKey("/extras/swapfilename", swapUSBFile.c_str());
+	}
+}
+
 static eString getConfigUSB(void)
 {
 	eString result;
@@ -1732,39 +1755,17 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 	eString bootUSB = opt["bootUSB"];
 	eString bootUSBImage = opt["bootusbimage"];
 	
-	int swapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = "";
-	
 	if (swapUSB == "on")
 	{
-		switch(swapfile)
-		{
-			case 0: //no swap file active
-				activateSwapFile(swapUSBFile);
-				break;
-			case 1: //usb swap file active
-				//noop
-				break;
-			case 2: //hdd swap file active
-				deactivateSwapFile(eString(swapfilename));
-				activateSwapFile(swapUSBFile);
-				break;
-		}
+		setSwapFile(1, swapUSBFile);
 	}
 	else
 	{
-		if (swapfile == 1)
-		{
-			deactivateSwapFile(swapUSBFile);
-			swapfile = 0;
-		}
+		int curswapfile = 0;
+		eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
+		if (curswapfile == 1)
+			setSwapFile(0, swapUSBFile);
 	}
-	
-	eConfig::getInstance()->setKey("/extras/swapfile", swapfile);
-	eConfig::getInstance()->setKey("/extras/swapfilename", swapUSBFile.c_str());
 
 	content->code = 204;
 	content->code_descr = "No Content";
@@ -1779,39 +1780,17 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 	eString bootHDD = opt["bootHDD"];
 	eString bootHDDImage = opt["boothddimage"];
 	
-	int swapfile = 0;
-	eConfig::getInstance()->getKey("/extras/swapfile", swapfile);
-	char *swapfilename;
-	if (eConfig::getInstance()->getKey("/extras/swapfilename", swapfilename))
-		swapfilename = "";
-	
 	if (swapHDD == "on")
 	{
-		switch(swapfile)
-		{
-			case 0: //no swap file active
-				activateSwapFile(swapHDDFile);
-				break;
-			case 1: //usb swap file active
-				deactivateSwapFile(eString(swapfilename));
-				activateSwapFile(swapHDDFile);
-				break;
-			case 2: //hdd swap file active
-				//noop
-				break;
-		}
+		setSwapFile(2, swapHDDFile);
 	}
 	else
 	{
-		if (swapfile == 2)
-		{
-			deactivateSwapFile(swapHDDFile);
-			swapfile = 0;
-		}
+		int curswapfile = 0;
+		eConfig::getInstance()->getKey("/extras/swapfile", curswapfile);
+		if (curswapfile == 2)
+			setSwapFile(0, swapHDDFile);
 	}
-	
-	eConfig::getInstance()->setKey("/extras/swapfile", swapfile);
-	eConfig::getInstance()->setKey("/extras/swapfilename", swapHDDFile.c_str());
 
 	content->code=204;
 	content->code_descr="No Content";
