@@ -215,7 +215,7 @@ std::map<eString, eString> getRequestOptions(eString opt, char delimiter)
 	return result;
 }
 
-eString closeWindow(eHTTPConnection *content)
+eString closeWindow(eHTTPConnection *content, eString msg, int wait)
 {
 	eString result;
 
@@ -228,7 +228,9 @@ eString closeWindow(eHTTPConnection *content)
 	else
 	{
 		content->local_header["Content-Type"]="text/html; charset=utf-8";
-		result = eString(WINDOWCLOSE);
+		result = readFile(TEMPLATE_DIR + "pdaResponse.tmp");
+		result.strReplace("#WAIT#", eString().sprintf("%d", wait));
+		result.strReplace("#MSG#", msg);
 	}
 	return result;
 }

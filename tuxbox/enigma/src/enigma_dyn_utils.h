@@ -41,7 +41,7 @@ eString httpEscape(const eString &string);
 std::map<eString, eString> getRequestOptions(eString opt, char delimiter);
 eString ref2string(const eServiceReference &r);
 eServiceReference string2ref(const eString &service);
-eString closeWindow(eHTTPConnection *content);
+eString closeWindow(eHTTPConnection *content, eString msg, int wait);
 
 extern eString getRight(const eString&, char); // implemented in timer.cpp
 extern eString getLeft(const eString&, char);  // implemented in timer.cpp

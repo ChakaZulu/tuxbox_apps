@@ -432,7 +432,7 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 		eZapMain::getInstance()->play();
 	}
 
-	return closeWindow(content);
+	return closeWindow(content, "", 500);
 }
 #endif
 
@@ -906,7 +906,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 		eAVSwitch::getInstance()->changeVolume(1, 63 - vol);
 	}
 
-	return closeWindow(content);
+	return closeWindow(content, "", 500);
 }
 
 static eString setVideo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -932,7 +932,7 @@ static eString setVideo(eString request, eString dirpath, eString opts, eHTTPCon
 		}
 	}
 
-	return closeWindow(content);
+	return closeWindow(content, "", 500);
 }
 
 static eString getIP()
@@ -1340,7 +1340,7 @@ static eString deleteMovie(eString request, eString dirpath, eString opts, eHTTP
 			::unlink(eString().sprintf("%s.eit", getLeft(ref.path, '.').c_str()).c_str());
 		}
 	}
-	return closeWindow(content);
+	return closeWindow(content, "Please wait...", 2000);
 }
 #endif
 
@@ -1913,7 +1913,7 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 			setSwapFile(0, swapUSBFile);
 	}
 
-	return closeWindow(content);
+	return closeWindow(content, "", 500);
 }
 
 static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1936,7 +1936,7 @@ static eString setConfigHDD(eString request, eString dirpath, eString opts, eHTT
 			setSwapFile(0, swapHDDFile);
 	}
 
-	return closeWindow(content);
+	return closeWindow(content, "", 500);
 }
 #endif
 
@@ -3076,7 +3076,7 @@ static eString startPlugin(eString request, eString dirpath, eString opt, eHTTPC
 
 	result = plugins.execPluginByName((path + opts["name"]).c_str());
 	if (requester == "webif")
-		result = closeWindow(content);
+		result = closeWindow(content, "", 500);
 
 	return result;
 }
@@ -3096,7 +3096,7 @@ static eString stopPlugin(eString request, eString dirpath, eString opt, eHTTPCo
 		result = "E: no plugin is running";
 		
 	if (requester == "webif")
-		result = closeWindow(content);
+		result = closeWindow(content, "", 500);
 
 	return result;
 }
@@ -3208,7 +3208,7 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 		playService(current_service);
 
-	return closeWindow(content);
+	return closeWindow(content, "Please wait...", 3000);
 }
 
 #if 0
@@ -3371,9 +3371,11 @@ static eString pda_root(eString request, eString dirpath, eString opts, eHTTPCon
 	eString result;
 
 	pdaScreen = 1;
+	eConfig::getInstance()->setKey("/ezap/webif/pdaScreen", pdaScreen);
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	content->local_header["Content-Type"] = "text/html; charset=utf-8";
+	content->local_header["Cache-Control"] = "no-cache";
 
 	eString mode = opt["mode"];
 	eString spath = opt["path"];
@@ -3389,11 +3391,14 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
+	eConfig::getInstance()->getKey("/ezap/webif/pdaScreen", pdaScreen);
+
 	if (opts.find("screenWidth") != eString::npos)
 	{
 		eString sWidth = opt["screenWidth"];
 		int screenWidth = atoi(sWidth.c_str());
 		pdaScreen = (screenWidth < 800) ? 1 : 0;
+		eConfig::getInstance()->setKey("/ezap/webif/pdaScreen", pdaScreen);
 	}
 	else
 	{
@@ -3415,6 +3420,7 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 		eString mode = opt["mode"];
 		eString spath = opt["path"];
 		result = getPDAContent(mode, spath);
+		content->local_header["Cache-Control"] = "no-cache";
 	}
 
 	return result;
@@ -3640,7 +3646,7 @@ static eString cleanupTimerList(eString request, eString dirpath, eString opt, e
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eTimerManager::getInstance()->cleanupEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	return closeWindow(content);
+	return closeWindow(content, "", 500);
 }
 
 static eString clearTimerList(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -3648,7 +3654,7 @@ static eString clearTimerList(eString request, eString dirpath, eString opt, eHT
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	eTimerManager::getInstance()->clearEvents();
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
-	return closeWindow(content);
+	return closeWindow(content, "", 500);
 }
 
 static eString addTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
