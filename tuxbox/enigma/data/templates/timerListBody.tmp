@@ -1,37 +1,7 @@
-<h2>One-Time Timer Events</h2>
 <table id="timer" width=100% border=1 rules=all>
-	<thead>
-		<th align="left">Delete</th>
-		<th align="left">Edit</th>
-		<th align="left">State</th>
-		<th align="left">Start Time</th>
-		<th align="left">End Time</th>
-		<th align="left">Channel</th>
-		<th align="left">Description</th>
-	</thead>
-	<tbody>
-		#TIMER_REGULAR#
-	</tbody>
+	#TIMER_REPEATED#
+	#TIMER_REGULAR#
 </table>
 <br>
-#BUTTONADD#
-<h2>Repeating Timer Events</h2>
-<table id="timer2" width=100% border=1 rules=all>
-	<thead>
-		<th align="left">Delete</th>
-		<th align="left">Edit</th>
-		<th align="left">State</th>
-		<th align="left">Days</th>
-		<th align="left">From - To</th>
-		<th align="left">Channel</th>
-		<th align="left">Description</th>
-	</thead>
-	<tbody>
-		#TIMER_REPEATED#
-	</tbody>
-</table>
-<br>
-#BUTTONADD2#<br>
-<br>
-#BUTTONCLEANUP# #BUTTONCLEAR#
+#BUTTONADD# #BUTTONCLEANUP# #BUTTONCLEAR#
 

@@ -12,17 +12,20 @@ function clearTimerList()
 
 function editTimerEvent(xy)
 {
-	NewWindow('/editTimerEvent?'+xy, 'editTimer', '780', '350', 'no');
+	NewWindow('/showEditTimerEventWindow?'+xy, 'editTimer', '780', '350', 'no');
 }
 
 function deleteTimerEvent(xy)
 {
 	NewWindow('/deleteTimerEvent?'+xy, 'deleteTimer', '300', '150', 'no');
+	setTimeout("reload()", 1000);
 }
 
-function addTimerEvent(timer)
+function addTimerEvent()
 {
 	var url = "";
+	var currentTimer = document.channelselector.type.selectedIndex;
+	var timer = document.channelselector.type.options[currentTimer].value;
 	var currentChannel = document.channelselector.channel.selectedIndex;
 	var channel = document.channelselector.channel.options[currentChannel].value;
 	if (timer == "regular")
@@ -59,7 +62,7 @@ function addTimerEvent(timer)
 		var fr = "off";
 		var sa = "off";
 		var su = "off";
-		
+
 		if (document.channelselector.mo.checked)
 			mo = "on";
 		if (document.channelselector.tu.checked)
@@ -74,20 +77,20 @@ function addTimerEvent(timer)
 			sa = "on";
 		if (document.channelselector.su.checked)
 			su = "on";
-			
+
 		url = '/addTimerEvent?timer=repeating&ref=' + channel + '&shour=' + shour + '&smin=' + smin + '&ehour=' + ehour + '&emin=' + emin + '&mo=' + mo + '&tu=' + tu + '&we=' + we + '&th=' + th + '&fr=' + fr + '&sa=' + sa + '&su=' + su + '&descr=' + descr + '&after_event=' + after_event;
 	}
 	else
 	{
 		url = '/addTimerEvent?timer=regular&ref=' + channel + '&sday=' + sday + '&smonth=' + smonth + '&shour=' + shour + '&smin=' + smin + '&eday=' + eday + '&emonth=' + emonth + '&ehour=' + ehour + '&emin=' + emin + '&descr=' + descr + '&after_event=' + after_event;
 	}
-	
+
 	NewWindow(url, 'add', '200', '200', 'no', '5000');
 }
 
 function showAddTimerEventWindow(timer)
 {
-	NewWindow("/showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '290', 'no');
+	NewWindow("/showAddTimerEventWindow?timer=" + timer, 'addTimer', '780', '380', 'no');
 }
 
 
