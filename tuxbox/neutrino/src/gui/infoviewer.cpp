@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.33 2001/10/07 12:17:22 McClean Exp $
+// $Id: infoviewer.cpp,v 1.34 2001/10/09 20:10:08 fnbrd Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.34  2001/10/09 20:10:08  fnbrd
+// Ein paar fehlende Initialisierungen implementiert.
+//
 // Revision 1.33  2001/10/07 12:17:22  McClean
 // video mode setup (pre)
 //
@@ -97,6 +100,8 @@ CInfoViewer::CInfoViewer()
 {
 	intShowDuration = 15; //7,5 sec
     BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
+    is_visible=false;
+    ShowInfo_Info=false;
 
 	strcpy( running, "");
 	strcpy( next, "");
@@ -149,7 +154,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 	CurrentChannel = Channel;
     Current_onid_tsid = onid_tsid;
 
-//  Auskommentieren, falls es euch nicht gef„llt..?
+//  Auskommentieren, falls es euch nicht gefällt..?
     ShowInfo_Info = !CalledFromNumZap;
 //    ShowInfo_Info = false;
 
@@ -274,14 +279,14 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
 
 void CInfoViewer::showButtons()
 {
-    // welche Bedingung auch immer fr die gelbe Taste...?
+    // welche Bedingung auch immer für die gelbe Taste...?
     if ( false )
     {
         g_FrameBuffer->paintIcon("gelb.raw", BoxEndX- 2* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- 2* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
     };
 
-    // grn, wenn mehrere APIDs
+    // grün, wenn mehrere APIDs
     if ( ( g_RemoteControl->GetECMPID()== 0 ) || ( g_RemoteControl->audio_chans.count_apids== 0 ) )
     {
         int height = g_Fonts->infobar_info->getHeight();

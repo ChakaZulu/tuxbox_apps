@@ -1,9 +1,22 @@
+//
+// $Id: remotecontrol.cpp,v 1.13 2001/10/09 20:10:08 fnbrd Exp $
+//
+// $Log: remotecontrol.cpp,v $
+// Revision 1.13  2001/10/09 20:10:08  fnbrd
+// Ein paar fehlende Initialisierungen implementiert.
+//
+//
+
 #include "remotecontrol.h"
 #include "../global.h"
 
 CRemoteControl::CRemoteControl()
 {
 	memset(&remotemsg, 0, sizeof(remotemsg) );
+    memset(&audio_chans, 0, sizeof(audio_chans));
+    memset(&audio_chans_int, 0, sizeof(audio_chans_int));
+    ecm_pid=0;
+    zapit_mode=false;
 
     pthread_cond_init( &send_cond, NULL );
     pthread_mutex_init( &send_mutex, NULL );
@@ -107,7 +120,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                     case 3: {
                                 // printf("Zapping by name returned successful\n");
 
-                                // Überprüfen, ob wir die Audio-PIDs holen sollen...
+                                // šberprfen, ob wir die Audio-PIDs holen sollen...
 //                                printf("Checking for Audio-PIDs %s - %s - %d\n", RemoteControl->remotemsg.param3, r_msg.param3, RemoteControl->remotemsg.cmd);
                                 pthread_mutex_trylock( &RemoteControl->send_mutex );
                                 if ( ( RemoteControl->remotemsg.cmd== 3 ) &&
@@ -126,7 +139,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
                                 break;
                             }
                             break;
-                    case -3: printf("\n\nHier wäre Platz für ne Fehlerbild-funktion\n\n");
+                    case -3: printf("\n\nHier w„re Platz fr ne Fehlerbild-funktion\n\n");
                             break;
                     case 4: printf("Shutdown Box returned successful\n");
                             break;
@@ -157,7 +170,7 @@ void * CRemoteControl::RemoteControlThread (void *arg)
 
                                 if ( read(sock_fd, &apid_return_buf, sizeof(apid_return_buf)) > 0 )
                                 {
-                                // PIDs emfangen, überprüfen, ob wir die Audio-PIDs übernehmen sollen...
+                                // PIDs emfangen, berprfen, ob wir die Audio-PIDs bernehmen sollen...
 
                                     pthread_mutex_trylock( &RemoteControl->send_mutex );
                                     if ( //( remotemsg.cmd== 8 ) &&
