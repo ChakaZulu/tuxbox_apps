@@ -15,11 +15,12 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
-Revision 1.6  2001/12/11 13:38:44  TheDOC
-new cdk-path-variables, about 10 new features and stuff
+Revision 1.7  2001/12/17 00:18:18  obi
+readded revision 1.5
 
-Revision 1.4  2001/12/07 20:08:06  rasc
-fix to diseqc Step 3.
+Revision 1.5  2001/12/07 23:12:31  rasc
+scanfile.dat reorganized to handle more transponders,
+some small fixes
 
 Revision 1.3  2001/12/07 14:10:33  rasc
 Fixes for SAT tuning and Diseqc. Diseqc doesn't work properly for me (diseqc 2.0 switch).
@@ -123,14 +124,17 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 	{
 		int max_chans = 2;
 
-		int start_frq[20];
+		int start_frq[20];	// see: tuner
 		int start_sym[20];
 		int start_pol[20];
 		int start_fe[20];
-
+		int start_dis[20];	// start diseq 0..3, -1 = auto
 		FILE *fp;
+		int dis, dis_start, dis_end;
 
-		fp = fopen(DATADIR "/lcars/scanlist.dat", "r");
+
+
+		fp = fopen("/var/lcars/scanlist.dat", "r");
 		int co = 0;
 		while(!feof(fp))
 		{
@@ -140,30 +144,43 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 	
 			fgets(text, 255, fp);
 			if (!isdigit(*text)) continue;
-			sscanf (text,"%i,%i,%i,%i %s\n",
+			sscanf (text,"%i,%i,%i,%i,%i %s\n",
 				&start_frq[co], &start_sym[co],
-				&start_pol[co], &start_fe[co]);
-			printf ("Scandat: Freq:%d, SymR:%d, Pol:%d, FEC:%d\n",
+				&start_pol[co], &start_fe[co],
+				&start_dis[co]);
+			printf ("Scandat: Freq:%d, SymR:%d, Pol:%d, FEC:%d DiSeqc:%d\n",
 				start_frq[co], start_sym[co],
-				start_pol[co], start_fe[co]);
+				start_pol[co], start_fe[co],
+				start_dis[co]);
 			co++;
 			if (co >= (sizeof(start_fe)/sizeof(start_fe[0])) )
 				break;
 		}
 		max_chans = co;
 
-		for (int dis = 0; dis < 3; dis++)
-		{
-			printf("Diseqc: %d\n", dis);		
-			int i = 0;
 
-			int old = channels.numberTransponders();
-			while (i < max_chans)
+		printf("Diseqc: %d\n", dis);		
+		int i = 0;
+
+		int old = channels.numberTransponders();
+		while (i < max_chans)
+		{
+			printf("StartDef: %d\n", i);
+			printf("numtrans: %d - old: %d\n", channels.numberTransponders(), old);
+
+			if (start_dis[i]  < 0) {
+				dis_start = 0;
+				dis_end   = 3;	
+			} else {
+				dis_start = dis_end = start_dis[i];
+			}
+
+			for (int dis = dis_start; dis <= dis_end; dis++) 
 			{
-				printf("i: %d\n", i);
-				printf("numtrans: %d - old: %d\n", channels.numberTransponders(), old);
-				char message[100];
-				sprintf(message, "Searching NIT on %d - %d - %d - %d", start_frq[i], start_sym[i], start_pol[i], start_fe[i]);
+				char message[255];
+				sprintf(message, "Searching on %d - %d - %d - %d - %d",
+					start_frq[i], start_sym[i],
+					start_pol[i], start_fe[i], dis);
 				(*osd_obj).setPerspectiveName(message);
 				(*osd_obj).addCommand("SHOW perspective");
 
@@ -176,10 +193,9 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 				printf ("Start NIT\n");
 				number = nit_obj.getTransportStreams(&channels, dis);
 				printf ("End NIT\n");
-				i++;
-	
-			
 			}
+
+			i++;
 		}
 		
 		if (channels.numberTransponders() < 1)
