@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.21 2002/04/22 16:15:00 obi Exp $
+ * $Id: sdt.cpp,v 1.22 2002/05/08 14:32:57 faralla Exp $
  */
 
 #include <fcntl.h>
@@ -15,6 +15,49 @@
 #include "descriptors.h"
 
 #define DEMUX_DEV "/dev/ost/demux0"
+
+uint16_t get_onid ()
+{
+	struct dmxSctFilterParams flt;
+	int demux_fd;
+	uint8_t buffer[1024];
+	
+	/* service_description_section elements */
+	uint16_t original_network_id;
+	
+	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	{
+		perror("[sdt.cpp] " DEMUX_DEV);
+		return 0;
+	}
+
+	memset (&flt.filter, 0, sizeof(struct dmxFilter));
+
+	flt.pid = 0x0011;
+	flt.filter.filter[0] = 0x42;
+	flt.filter.mask[0] = 0xFF;
+	flt.timeout = 10000;		/* 10 sec max. accord. ETSI (2002-04-04 rasc) */
+	flt.flags = DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+
+	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
+	{
+		perror("[sdt.cpp] DMX_SET_FILTER");
+		close(demux_fd);
+		return 0;
+	}
+
+	if (read(demux_fd, buffer, sizeof(buffer)) < 0)
+	{
+		perror("[sdt.cpp] read");
+		close(demux_fd);
+		return 0;
+	}
+	
+	original_network_id = (buffer[8] << 8) | buffer[9];
+ 
+	close(demux_fd);
+	return original_network_id;
+}
 
 int parse_sdt ()
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: pat.h,v 1.7 2002/05/05 01:52:36 obi Exp $
+ * $Id: pat.h,v 1.8 2002/05/08 14:32:57 faralla Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -25,5 +25,6 @@
 #include "getservices.h"
 
 int parse_pat (int demux_fd, CZapitChannel * channel);
+void fake_pat(uint16_t onid, FrontendParameters feparams);
 
 #endif /* __pat_h__ */

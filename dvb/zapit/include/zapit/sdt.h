@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.h,v 1.5 2002/04/19 14:53:29 obi Exp $
+ * $Id: sdt.h,v 1.6 2002/05/08 14:32:57 faralla Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -44,5 +44,6 @@ enum service_type_e
 };
 
 int parse_sdt ();
+uint16_t get_onid ();
 
 #endif /* __sdt_h__ */

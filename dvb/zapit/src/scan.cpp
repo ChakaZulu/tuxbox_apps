@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.48 2002/05/05 01:52:36 obi Exp $
+ * $Id: scan.cpp,v 1.49 2002/05/08 14:32:57 faralla Exp $
  */
 
 #include "frontend.h"
@@ -10,6 +10,7 @@
 #include "zapit.h"
 #include "zapitclient.h"
 #include "bouquets.h"
+#include "pat.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -85,6 +86,26 @@ void get_sdts()
 	}
 }
 
+/* build transponder for cable-users with sat-feed*/
+void build_bf_transponder(uint32_t frequency, uint32_t symbol_rate, CodeRate FEC_inner, Modulation modulation)
+{
+	FrontendParameters feparams;
+	feparams.Frequency = frequency;
+	feparams.Inversion = INVERSION_AUTO;
+	feparams.u.qam.SymbolRate = symbol_rate;
+	feparams.u.qam.FEC_inner = FEC_inner;
+	feparams.u.qam.QAM = modulation;
+	
+	if (frontend->tuneFrequency(feparams, 0, 0) == true)
+	{
+		uint16_t onid = get_onid();
+		fake_pat(onid, feparams);
+	}
+	else
+	{
+		printf("No signal found on transponder\n");
+	}
+}
 FILE *write_xml_header (const char *filename)
 {
 	FILE *fd = fopen(filename, "w");
@@ -268,6 +289,8 @@ void *start_scanthread(void *param)
 	uint8_t polarization;
 	uint8_t fec_inner;
 	uint8_t modulation;
+	
+	bool satfeed = false;
 
 	scanBouquetManager = new CBouquetManager();
 
@@ -331,6 +354,12 @@ void *start_scanthread(void *param)
 			continue;
 		}
 
+		/* Special mode for cable-users with sat-feed*/
+		if (!strcmp(type, "cable") && search->GetAttributeValue("satfeed"))
+			if (!strcmp(search->GetAttributeValue("satfeed"),"true"))
+				satfeed = true;
+				
+		
 		/* increase sat counter */
 		curr_sat++;
 
@@ -364,8 +393,12 @@ void *start_scanthread(void *param)
 				sscanf(transponder->GetAttributeValue("polarization"), "%hhu", &polarization);
 			}
 
-			/* read network information table */
-			get_nits(frequency, symbol_rate, CFrontend::getFEC(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
+			if (!strcmp(type,"cable") && satfeed)
+				/* build special transponder for cable with satfeed*/
+				build_bf_transponder(frequency, symbol_rate, CFrontend::getFEC(fec_inner), CFrontend::getModulation(modulation));
+			else
+				/* read network information table */
+				get_nits(frequency, symbol_rate, CFrontend::getFEC(fec_inner), polarization, diseqc_pos, CFrontend::getModulation(modulation));
 
 			/* next transponder */
 			transponder = transponder->GetNext();

@@ -1,7 +1,7 @@
 /*
- * $Id: pat.cpp,v 1.19 2002/05/05 01:52:36 obi Exp $
+ * $Id: pat.cpp,v 1.20 2002/05/08 14:32:57 faralla Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002 by Andreas Oberritter <obi@tuxbox.org> jaja :)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,75 @@
 
 #include "dmx.h"
 #include "pat.h"
+#include "scan.h"
+#include "zapitclient.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#define DEMUX_DEV "/dev/ost/demux0"
 
 #define PAT_LENGTH 1024
+
+extern CEventServer *eventServer;
+extern uint32_t found_transponders;
+
+void fake_pat(uint16_t onid, FrontendParameters feparams)
+{
+	uint16_t tsid;
+	int demux_fd;
+	
+	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
+	{
+		perror("[pat.cpp] " DEMUX_DEV);
+		return;
+	}
+	
+	/* buffer for program association table */
+	unsigned char buffer[PAT_LENGTH];
+	
+	/* set filter for program association section */
+	setDmxSctFilter(demux_fd, 0x0000, 0x00);
+
+	/* read section */
+	if (read(demux_fd, buffer, PAT_LENGTH) < 0)
+	{
+		perror("[pat.cpp] read");
+    		return;
+    	}
+    	
+    	tsid = (buffer[3]<<8)|buffer[4];
+    	
+    	if (scantransponders.count((tsid << 16) | onid) == 0)
+	{
+		found_transponders++;
+
+		eventServer->sendEvent
+		(
+			CZapitClient::EVT_SCAN_NUM_TRANSPONDERS,
+			CEventServer::INITID_ZAPIT,
+			&found_transponders,
+			sizeof(found_transponders)
+		);
+		
+    		scantransponders.insert
+		(
+			std::pair <uint32_t, transpondermap>
+			(
+				(tsid << 16) | onid,
+				transpondermap
+				(
+					tsid,
+					onid,
+					feparams,
+					0,
+					0
+				)
+			)
+		);
+	}
+	close(demux_fd);
+}	
 
 int parse_pat (int demux_fd, CZapitChannel * channel)
 {

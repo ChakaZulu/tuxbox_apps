@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.27 2002/05/05 01:52:36 obi Exp $
+ * $Id: descriptors.cpp,v 1.28 2002/05/08 14:32:57 faralla Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -395,7 +395,7 @@ uint8_t cable_delivery_system_descriptor (uint8_t *buffer, uint16_t transport_st
 			&found_transponders,
 			sizeof(found_transponders)
 		);
-
+		
 		scantransponders.insert
 		(
 			std::pair <uint32_t, transpondermap>
