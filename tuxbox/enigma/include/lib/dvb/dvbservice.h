@@ -120,6 +120,7 @@ class eDVBServiceController
 	MHWEIT *tMHWEIT;
 	eTimer updateTDTTimer;
 public:
+	int lastTpTimeDifference;
 	int service_state;
 		/* current service */
 	eServiceReferenceDVB service;  // meta-service
