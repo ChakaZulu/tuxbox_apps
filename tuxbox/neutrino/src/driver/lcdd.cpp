@@ -374,6 +374,7 @@ void CLCD::setMode(MODES m, string title)
 void CLCD::setBrightness(int bright)
 {
 	lcd_brightness = bright;
+	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 }
 
 int CLCD::getBrightness()
@@ -394,6 +395,7 @@ int CLCD::getBrightnessStandby()
 void CLCD::setContrast(int contrast)
 {
 	lcd_contrast = contrast;
+	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 }
 
 int CLCD::getContrast()
@@ -404,6 +406,7 @@ int CLCD::getContrast()
 void CLCD::setPower(int power)
 {
 	lcd_power = power;
+	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 }
 
 int CLCD::getPower()
@@ -414,6 +417,7 @@ int CLCD::getPower()
 void CLCD::setInverse(int inverse)
 {
 	lcd_inverse = inverse;
+	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 }
 
 int CLCD::getInverse()
