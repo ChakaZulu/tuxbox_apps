@@ -3,6 +3,7 @@
 
 #include <core/gui/ewidget.h>
 #include <core/gdi/grc.h>
+#include <core/gui/decoration.h>
 
 // Definition Blit Flags
 #define BF_ALPHATEST 1
@@ -10,6 +11,7 @@
 class eLabel: public eWidget
 {
 protected:
+	eDecoration deco, deco_active;
 	int blitFlags;
 	int flags;
 	eTextPara *para;
@@ -22,7 +24,7 @@ public:
 	eLabel(eWidget *parent, int flags=0 /* RS_WRAP */ , int takefocus=0);
 	~eLabel();
 
-	void redrawWidget(gPainter *target, const eRect &area);
+	virtual void redrawWidget(gPainter *target, const eRect &area);
 	void setFlags(int flag);
 	void setAlign(int align);
 	int setProperty(const eString &prop, const eString &value);

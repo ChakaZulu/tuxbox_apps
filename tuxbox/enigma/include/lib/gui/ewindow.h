@@ -2,6 +2,7 @@
 #define __ewindow_h
 
 #include <core/gui/ewidget.h>
+#include <core/gui/decoration.h>
 
 /**
  * \brief A (decorated) top level widget.
@@ -13,12 +14,11 @@
  */
 class eWindow: public eWidget
 {
-	gPixmap *iTopLeft, *iTop,
-			*iTopRight, *iLeft, *iRight, 
-			*iBottomLeft, *iBottom, *iBottomRight;
+	eDecoration deco;
 	gColor fontColor, titleBarColor;
 protected:
-	int borderTop, borderLeft, borderBottom, borderRight, titleOffsetX, titleOffsetY, titleFontSize, titleHeight, titleBorderY;
+	int borderTop, borderLeft, borderBottom, borderRight;
+	int titleOffsetX, titleOffsetY, titleFontSize, titleHeight, titleBorderY;
 	void redrawWidget(gPainter *target, const eRect &where);
 	void drawTitlebar(gPainter *target);
 	void recalcClientRect();

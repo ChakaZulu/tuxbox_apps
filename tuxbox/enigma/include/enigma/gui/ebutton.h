@@ -12,6 +12,7 @@ class eButton: public eLabel
 	eLabel*	tmpDescr; // used for LCD with description
 protected:
 	gColor focusB, focusF, normalB, normalF;
+	int isActive;
 	eString descr;
 	int eventHandler(const eWidgetEvent &event);
 	void gotFocus();
@@ -32,6 +33,8 @@ public:
 	 * \param descr is for use with lcd
 	 */
 	eButton(eWidget *parent, eLabel* descr=0, int takefocus=1);
+
+	void redrawWidget(gPainter *target, const eRect &area);
 };
 
 #endif

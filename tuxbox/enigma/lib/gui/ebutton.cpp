@@ -11,6 +11,8 @@ eButton::eButton(eWidget *parent, eLabel* desc, int takefocus)
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),
 	descr(desc?desc->getText():"")
 {
+//	deco.load("eWindow");
+//	deco_active.load("eWindow");
 	addActionMap(&i_cursorActions->map);
 }
 
@@ -41,6 +43,7 @@ void eButton::gotFocus()
 
 	setBackgroundColor(focusB);
 	setForegroundColor(focusF);
+	isActive=1;
 	invalidate();
 }
 
@@ -63,6 +66,7 @@ void eButton::lostFocus()
 	}
 	setBackgroundColor(normalB);
 	setForegroundColor(normalF);
+	isActive=0;
 	invalidate();
 }
 
@@ -92,6 +96,15 @@ int eButton::eventHandler(const eWidgetEvent &event)
 		break;
 	}
 	return eWidget::eventHandler(event);
+}
+
+void eButton::redrawWidget(gPainter *target, const eRect &area)
+{
+	if (isActive)
+		deco_active.drawDecoration(target, ePoint(width(), height()));
+	else
+		deco.drawDecoration(target, ePoint(width(), height()));
+	eLabel::redrawWidget(target, area);
 }
 
 static eWidget *create_eButton(eWidget *parent)
