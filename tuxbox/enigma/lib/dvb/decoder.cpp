@@ -27,7 +27,7 @@ typedef unsigned char __u8;
 #include <ost/dmx.h>
 #include <ost/video.h>
 #include <ost/audio.h>
-// #define NEW_CAMD
+#define NEW_CAMD
 #else
 #include <xp/xp_osd_user.h>
 #include <vid/vid_inf.h>
@@ -248,7 +248,7 @@ int Decoder::Set()
 			qDebug("VIDEO_GET_STATUS, VIDEO_SELECT_SOURCE, VIDEO_PLAY");
 			if (ioctl(fd.video, VIDEO_GET_STATUS, &status)<0)
 				perror("VIDEO_GET_STATUS");
-			if (status.streamSource != (videoStreamSource_t)VIDEO_SOURCE_DEMUX)
+//			if (status.streamSource != (videoStreamSource_t)VIDEO_SOURCE_DEMUX)
 				if (ioctl(fd.video, VIDEO_SELECT_SOURCE, (videoStreamSource_t)VIDEO_SOURCE_DEMUX)<0)
 					perror("VIDEO_SELECT_SOURCE");
 			if (ioctl(fd.video, VIDEO_PLAY, 0)<0)
