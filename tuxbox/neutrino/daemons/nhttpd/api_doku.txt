@@ -5,23 +5,24 @@ nhttpd /control api doku
 Der Neutrino HTTP-Server läuft auf Port 80. Die Steuerfunktionen für externe Programme sind unter dem Context /control/ zu finden. 
 Bei Problem oder Fragen Mail an derdirch@web.de oder Dirch in #dbox2
 
-1. Die Kanalliste				http://dbox/control/channellist
-2. EPG-Abfrage					http://dbox/control/epg
+1. Die Kanalliste			http://dbox/control/channellist
+2. EPG-Abfrage				http://dbox/control/epg
 3. Die DBox herunterfahren		http://dbox/control/shutdown
-4. Standby Mode					http://dbox/control/standby
+4. Standby Mode				http://dbox/control/standby
 5. Lautstärke-Steuerung			http://dbox/control/volume
-6. Programm umschalten / Recode-Mode Steuerung	http://dbox/control/zapto
-7. Datum von der Box abfragen	http://dbox/control/getdate
-8. Uhrzeit von der Box abfragen	http://dbox/control/gettime
-9. Allgemeine Informationen 	http://dbox/control/info
-10. Aktuellen Kanal abfragen	http://dbox/control/getonidsid
-11. services.xml lesen			http://dbox/control/getservicesxml
-12. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
-13. aktuelle cramfs Version 	http://dbox/control/version (veraltet, bitte /control/info?version benutzen)
-14. Bouquetlist abfragen	http://dbox/control/getbouquets
-15. Bouquet abfragen		http://dbox/control/getbouquet
-16. Fenster in neutrino		http://dbox/control/message
-17. Timerd Interface		http://dbox/control/timer
+6. Programm umschalten / Playback	http://dbox/control/zapto
+7. Radio/TV, Record Mode		http://dbox/control/setmode
+8. Datum von der Box abfragen		http://dbox/control/getdate
+9. Uhrzeit von der Box abfragen		http://dbox/control/gettime
+10. Allgemeine Informationen 		http://dbox/control/info
+11. Aktuellen Kanal abfragen		http://dbox/control/getonidsid
+12. services.xml lesen			http://dbox/control/getservicesxml
+13. bouquets.xml auslesen		http://dbox/control/getbouquetsxml
+14. aktuelle cramfs Version 		http://dbox/control/version (veraltet, bitte /control/info?version benutzen)
+15. Bouquetlist abfragen		http://dbox/control/getbouquets
+16. Bouquet abfragen			http://dbox/control/getbouquet
+17. Fenster in neutrino			http://dbox/control/message
+18. Timerd Interface			http://dbox/control/timer
 
 
 **********************************************************************************************
@@ -272,7 +273,7 @@ Beispiel:
 
 
 **********************************************************************************************
-6. Programm umschalten / Recode-Mode Steuerung
+6. Programm umschalten
 **********************************************************************************************
 Handler: http://dbox/control/zapto
 
@@ -305,23 +306,6 @@ Beispiel:
 >>>http://dbox/control/zapto?getpids
 305
 306
- 
-
-
-Parameter: mode=TV|RADIO
-Rückgabe:
-
-	Schaltet in den Radio oder TV - Mode. 
-
-Rückgabe-Format: ok / error
-
-Beispiel:
-
->>>http://dbox/control/zapto?mode=TV
-ok
-
->>>http://dbox/control/zapto?mode=RADIO
-ok
 
 
 
@@ -394,9 +378,70 @@ Beispiel:
 ok  
  
 
+**********************************************************************************************
+7. 7. Radio/TV, Record Mode
+**********************************************************************************************
+Handler: http://dbox/control/setmode
+
+Parameter: status
+Rückgabe:
+
+Es wird der aktuelle record mode status zurückgegeben on / off
+
+Beispiel:
+
+>>>http://dbox/control/setmode?status
+on
 
 
-7. Datum von der Box abfragen
+Parameter: radio
+Rückgabe:
+
+Schaltet in den radio mode
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/setmode?radio
+ok
+
+
+
+Parameter: tv
+Rückgabe:
+
+Schaltet in den radio mode
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/setmode?tv
+ok
+
+
+
+Parameter: record
+Rückgabe:
+
+Schaltet in den radio mode
+
+Rückgabe-Format: ok / error
+
+Beispiel:
+
+>>>http://dbox/control/setmode?record=start
+ok
+
+>>>http://dbox/control/setmode?record=stop
+ok
+
+
+
+**********************************************************************************************
+8. Datum von der Box abfragen
+**********************************************************************************************
 Handler: http://dbox/control/getdate
 
 Parameter: keine
@@ -413,33 +458,20 @@ Beispiel:
  
  
 
-
-
-
 **********************************************************************************************
-8. Uhrzeit von der Box abfragen
+9. Programm umschalten
 **********************************************************************************************
-Handler: http://dbox/control/gettime
+Handler: http://dbox/control/zapto
 
 Parameter: keine
 Rückgabe:
 
-Es wird die Uhrzeit zurückgegeben.
-
-Rückgabe-Format: hh:mm:ss
-
-Beispiel:
-
->>>http://dbox/control/gettime
-13:25:07
- 
- 
-
+Es wird die ONIDSID des aktuell laufenden Senders zurückgegeben
 
 
 
 **********************************************************************************************
-9. Allgemeine Informationen abfragen
+10. Allgemeine Informationen abfragen
 **********************************************************************************************
 Handler: http://dbox/control/info
 
@@ -500,7 +532,7 @@ Beispiel:
 
 
 **********************************************************************************************
-10. Aktuellen Kanal abfragen
+11. Aktuellen Kanal abfragen
 **********************************************************************************************
 Handler: http://dbox/control/getonidsid
 
@@ -521,7 +553,7 @@ Beispiel:
 
 
 **********************************************************************************************
-11. services.xml lesen
+12. services.xml lesen
 **********************************************************************************************
 Handler: http://dbox/control/getservicesxml
 
@@ -546,7 +578,7 @@ Beispiel:
 
 
 **********************************************************************************************
-12. bouquets.xml auslesen
+13. bouquets.xml auslesen
 **********************************************************************************************
 Handler: http://dbox/control/getbouquetsxml
 
@@ -570,7 +602,7 @@ Beispiel:
 
 
 **********************************************************************************************
-13. aktuelle cramfs Version auslesen ( veraltet, bitte /control/info?version benutzen )
+14. aktuelle cramfs Version auslesen ( veraltet, bitte /control/info?version benutzen )
 **********************************************************************************************
 Handler: http://dbox/control/version
 
@@ -591,7 +623,7 @@ Erstellt von alexW
 
 
 **********************************************************************************************
-14. Bouquetlist abfragen
+15. Bouquetlist abfragen
 **********************************************************************************************
 Handler: http://dbox/control/getbouquets
 
@@ -612,7 +644,7 @@ Beispiel:
 
 
 **********************************************************************************************
-15. Bouquet abfragen
+16. Bouquet abfragen
 **********************************************************************************************
 Handler: http://dbox/control/getbouquet
 
@@ -635,7 +667,7 @@ Beispiel:
 
 
 **********************************************************************************************
-16. Popup-Fenster öffnen
+17. Popup-Fenster öffnen
 **********************************************************************************************
 Handler: http://dbox/control/message
 
@@ -668,8 +700,9 @@ Beispiel:
 >>>http://dbox/control/message?nmsg=Hallo%20Welt
 öffnet ein Message-Fenster auf dem Fernseher, in dem "Hallo Welt" steht
 
+
 **********************************************************************************************
-16. Timerd Interface
+18. Timerd Interface
 **********************************************************************************************
 Handler: http://dbox/control/timer
 

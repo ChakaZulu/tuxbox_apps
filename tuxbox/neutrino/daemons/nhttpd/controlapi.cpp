@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.7 2002/10/10 15:44:14 dirch Exp $
+	$Id: controlapi.cpp,v 1.8 2002/10/15 16:50:29 dirch Exp $
 
 	License: GPL
 
@@ -132,6 +132,8 @@ bool CControlAPI::TimerCGI(CWebserverRequest *request)
 
 bool CControlAPI::SetModeCGI(CWebserverRequest *request)
 {
+int mode;
+
 	request->SendPlainHeader("text/plain");          // Standard httpd header senden
 	if(request->ParameterList.size() > 0)
 	{
@@ -146,13 +148,15 @@ bool CControlAPI::SetModeCGI(CWebserverRequest *request)
 		
 		if (request->ParameterList["1"] == "radio")	// in radio mode schalten
 		{
-			Parent->Zapit->setMode(CZapitClient::MODE_RADIO);
+			mode = NeutrinoMessages::mode_radio;
+			Parent->EventServer->sendEvent(NeutrinoMessages::CHANGEMODE, CEventServer::INITID_HTTPD, (void *)&mode,sizeof(int));
 			sleep(1);
 			Parent->UpdateBouquets();
 		}
 		else if (request->ParameterList["1"] == "tv")	// in tv mode schalten
 		{
-			Parent->Zapit->setMode(CZapitClient::MODE_TV);
+			mode = NeutrinoMessages::mode_tv;
+			Parent->EventServer->sendEvent(NeutrinoMessages::CHANGEMODE, CEventServer::INITID_HTTPD, (void *)&mode,sizeof(int));
 			sleep(1);
 			Parent->UpdateBouquets();
 		}
@@ -521,6 +525,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 	}
 	else if (request->ParameterList.size() == 1)
 	{
+/*
 		if(request->ParameterList["mode"] != "")			// TV oder RADIO - Mode
 		{
 			if(request->ParameterList["mode"] == "TV")
@@ -541,6 +546,7 @@ bool CControlAPI::ZaptoCGI(CWebserverRequest *request)
 				return false;
 			}
 		}
+*/
 		if(request->ParameterList["1"] == "getpids")		// getpids !
 		{
 			SendcurrentVAPid(request);
