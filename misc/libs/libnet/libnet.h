@@ -7,10 +7,14 @@ extern "C"
 #endif /* __cplusplus */
 
 
-extern  int  netSetIP( char *dev, char *ip, char *mask, char *brdcast );
-extern  void netGetIP( char *dev, char *ip, char *mask, char *brdcast );
-extern  void netSetDefaultRoute( char *gw );
-
+extern  int 	netSetIP( char *dev, char *ip, char *mask, char *brdcast );
+extern  void	netGetIP( char *dev, char *ip, char *mask, char *brdcast );
+extern  void	netSetDefaultRoute( char *gw );
+extern	char	*netGetDomainname( void );
+extern	void	netSetDomainname( char *dom );
+extern	char	*netGetHostname( void );
+extern	void	netSetHostname( char *host );
+extern	void	netSetNameserver( char *ip );
 
 
 #ifdef __cplusplus

@@ -208,3 +208,54 @@ void	netSetDefaultRoute( char *gw )
 	close(fd);
 	return;
 }
+
+static	char	dombuf[256];
+static	char	hostbuf[256];
+static	char	domis=0;
+static	char	hostis=0;
+
+char	*netGetDomainname( void )
+{
+	if (!domis)
+		getdomainname( dombuf, 256 );
+	domis=1;
+	return dombuf;
+}
+
+void	netSetDomainname( char *dom )
+{
+	strcpy(dombuf,dom);
+	domis=1;
+	setdomainname(dombuf,strlen(dombuf)+1);
+}
+
+char	*netGetHostname( void )
+{
+	if (!hostis)
+		gethostname( hostbuf, 256 );
+	hostis=1;
+	return hostbuf;
+}
+
+void	netSetHostname( char *host )
+{
+	strcpy(hostbuf,host);
+	hostis=1;
+	sethostname(hostbuf,strlen(hostbuf)+1);
+}
+
+void	netSetNameserver( char *ip )
+{
+	FILE	*fp;
+	char	*dom;
+
+	fp = fopen("/etc/resolv.conf","w");
+	if (!fp)
+		return;
+
+	dom=netGetDomainname();
+	if (dom && strlen(dom)>2)
+		fprintf(fp,"search %s\n",dom);
+	fprintf(fp,"nameserver %s\n",ip);
+	fclose(fp);
+}
