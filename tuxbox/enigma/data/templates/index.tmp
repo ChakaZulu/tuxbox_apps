@@ -41,16 +41,6 @@ function NewWindow(mypage, myname, w, h, scroll)
 	}
 }
 
-function getNewPageTV(xy)
-{
-	document.location.href="/?mode=tv&bouquetid="+xy;
-}
-
-function getNewPageRadio(xy)
-{
-	document.location.href="/?mode=radio&bouquetid="+xy;
-}
-
 function reload()
 {
 	document.location.reload();
@@ -91,8 +81,7 @@ function openEPG(xy)
 
 function openSI()
 {
-	win=window.open("/cgi-bin/streaminfo", "si", "width=300, height=200, left=0, top=0");
-	win.focus();
+	NewWindow("/cgi-bin/streaminfo", "si", "300", "200", "no");
 }
 
 function cleanupTimerList()
