@@ -2355,6 +2355,8 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	{
 		unsigned int old_id = channelList->getActiveChannelOnid_sid();
 
+		g_Zapit->reinitChannels();  // reload services & bouquets
+
 		channelsInit();
 		tvMode( true );
 
@@ -2781,7 +2783,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.311 2002/09/02 11:28:44 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.312 2002/09/02 21:17:04 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

@@ -518,7 +518,6 @@ void CBEBouquetWidget::saveChanges()
 	CHintBox* hintBox= new CHintBox( "bouqueteditor.name", g_Locale->getText("bouqueteditor.savingchanges"), "info.raw", 480 );
 	hintBox->paint();
 	g_Zapit->saveBouquets();
-	g_Zapit->reinitChannels();
 	hintBox->hide();
 	delete hintBox;
 
