@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.13 2003/03/01 14:48:53 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/daemons/sectionsd/dmx.cpp,v 1.14 2003/03/01 14:58:13 thegoodguy Exp $
  *
  * DMX class (sectionsd) - d-box2 linux project
  *
@@ -259,7 +259,7 @@ int DMX::start(void)
 	
 	pthread_mutex_lock(&start_stop_mutex);
 
-	rc = immediate_start(void);
+	rc = immediate_start();
 
 	pthread_mutex_unlock(&start_stop_mutex);
 
