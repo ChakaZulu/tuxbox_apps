@@ -17,6 +17,8 @@ static	int			l_height = 0;
 
 void	Fx2SetPig( int x, int y, int width, int height )
 {
+	if ( fd==-1 )
+		return;
 	if (( x == l_x ) && ( y == l_y ) &&
 		( width == l_height ) && ( height == l_height ))
 			return;
