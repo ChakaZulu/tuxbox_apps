@@ -486,9 +486,6 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 
 	serviceentryflags=eListBoxEntryService::flagShowNumber;
 
-	if (ref.type == eServicePlaylistHandler::ID) // playlists have own numbers
-		serviceentryflags|=eListBoxEntryService::flagOwnNumber;
-
 	if ( eZap::getInstance()->getServiceSelector() == this
 		&& eDVB::getInstance()->recorder
 		&& eZapMain::getInstance()->getMode() != eZapMain::modeFile )
@@ -502,6 +499,8 @@ void eServiceSelector::fillServiceList(const eServiceReference &_ref)
 	}
 	else
 	{
+		if (ref.type == eServicePlaylistHandler::ID) // playlists have own numbers
+			serviceentryflags|=eListBoxEntryService::flagOwnNumber;
 		iface->enterDirectory(ref, signal);
 		iface->leaveDirectory(ref);	// we have a copy.
 	}
