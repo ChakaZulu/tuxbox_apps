@@ -72,7 +72,7 @@ int CEPGMenuHandler::doMenu ()
 {
 
 	CMenuWidget EPGSelector(LOCALE_EPGMENU_HEAD, "features.raw", 350);
-	EPGSelector.addItem(GenericMenuSeparator);
+	// EPGSelector.addItem(GenericMenuSeparator);
 
 
 	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EVENTLIST, true, NULL, new CEventListHandler(), "", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), false);

@@ -1004,6 +1004,7 @@ void CFrameBuffer::ClearFrameBuffer()
 	paletteSetColor(0xE, 0xFF00FF, 0);
 	paletteSetColor(0xF, 0x00FFFF, 0);
 	paletteSetColor(0x10, 0xFFFFFF, 0);
+	paletteSetColor(0x11, 0x000000, 0);
 
 	paletteSet();
 }

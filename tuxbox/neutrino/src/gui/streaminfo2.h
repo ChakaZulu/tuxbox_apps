@@ -20,15 +20,16 @@
 */
 
 
-#ifndef __streaminfo__
-#define __streaminfo__
+#ifndef __streaminfo2__
+#define __streaminfo2__
 
 #include <gui/widget/menue.h>
 
 #include <driver/framebuffer.h>
+#include <driver/pig.h>
 
 
-class CStreamInfo : public CMenuTarget
+class CStreamInfo2 : public CMenuTarget
 {
 	private:
 
@@ -37,13 +38,40 @@ class CStreamInfo : public CMenuTarget
 		int y;
 		int width;
 		int height;
-		int hheight,mheight; // head/menu font height
+		int hheight,iheight,sheight; 	// head/info/small font height
+
+		int  max_height;	// Frambuffer 0.. max
+		int  max_width;	
+
+		CPIG *pig;
+
+		// -- color hack using evil knowledge from frambuffer.c
+		enum {	COL_WHITE=0x60, COL_RED, COL_GREEN,
+			COL_BLUE, COL_YELLOW, COL_BLACK };
+
+		int  font_head;
+		int  font_info;
+		int  font_small;
+
+		int   sigBox_x;
+		int   sigBox_y;
+		int   sigBox_w;
+		int   sigBox_h;
+		int   sigBox_pos;
+
 
 		void paint();
+		void paint_pig(int x, int y, int w, int h);
+		void paint_techinfo(int x, int y);
+		void paint_signal_fe_box(int x, int y, int w, int h);
+		void paint_signal_fe(long ber, long snr, long sig );
+
+
 
 	public:
 
-		CStreamInfo();
+		CStreamInfo2();
+		~CStreamInfo2();
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);
@@ -52,3 +80,4 @@ class CStreamInfo : public CMenuTarget
 
 
 #endif
+

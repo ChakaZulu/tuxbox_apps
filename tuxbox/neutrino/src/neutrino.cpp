@@ -119,10 +119,11 @@
 
 // uncomment if you want to have a "test" menue entry  (rasc)
 
-// #define __EXPERIMENTAL_CODE__
+#define __EXPERIMENTAL_CODE__
 #ifdef __EXPERIMENTAL_CODE__
 
 #include "gui/ch_mosaic.h"
+#include "gui/streaminfo2.h"
 
 #endif
 
@@ -2666,7 +2667,10 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// -- Experimental Code
 	// -- rasc (2003-12)
 
-	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CChMosaicHandler(), id, true, CRCInput::RC_nokey, ""), false);
+	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CStreamInfo2(), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE), false);
+
+
+	// StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CChMosaicHandler(), id, true, CRCInput::RC_nokey, ""), false);
 
 
 #endif
