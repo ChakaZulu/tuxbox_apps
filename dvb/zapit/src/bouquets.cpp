@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.14 2002/02/09 22:04:05 Simplex Exp $
+  $Id: bouquets.cpp,v 1.15 2002/02/27 19:24:54 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.15  2002/02/27 19:24:54  Simplex
+  bugfix: loading empty bouquets.xml doesn't fail anymore
+
   Revision 1.14  2002/02/09 22:04:05  Simplex
   speed up discarding BQ-Ed. changes
 
@@ -310,61 +313,65 @@ void CBouquetManager::parseBouquetsXml(XMLTreeNode *root)
 	XMLTreeNode *search=root->GetChild();
 	XMLTreeNode *channel_node;
 
-	while (strcmp(search->GetType(), "Bouquet")) {
-		search = search->GetNext();
-	}
-
 	int nChNrRadio = 1;
 	int nChNrTV = 1;
 
-	uint onid, sid;
-
-	numchans_tv.clear();
-	numchans_radio.clear();
-
-	printf("[zapit] reading Bouquets ");
-	while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
+	if (search)
 	{
-		CBouquet* newBouquet = addBouquet( search->GetAttributeValue("name"));
-		channel_node = search->GetChild();
-
-		while (channel_node)
+		while (strcmp(search->GetType(), "Bouquet"))
 		{
-			sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &sid);
-			sscanf(channel_node->GetAttributeValue("onid"), "%x", &onid);
-
-			channel* chan = copyChannelByOnidSid( (onid << 16) + sid);
-
-			if ( chan != NULL)
-			{
-				switch (chan->service_type)
-				{
-					case 1:
-					case 4:
-						chan->chan_nr = nChNrTV;
-						newBouquet->addService( chan);
-						numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, (onid<<16)+sid));
-					break;
-					case 2:
-						chan->chan_nr = nChNrRadio;
-						newBouquet->addService( chan);
-						numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, (onid<<16)+sid));
-					break;
-				}
-			}
-			channel_node = channel_node->GetNext();
+			search = search->GetNext();
 		}
-		printf(".");
+
+		uint onid, sid;
+
+		numchans_tv.clear();
+		numchans_radio.clear();
+
+		printf("[zapit] reading Bouquets ");
+		while ((search) && (!(strcmp(search->GetType(), "Bouquet"))))
+		{
+			CBouquet* newBouquet = addBouquet( search->GetAttributeValue("name"));
+			channel_node = search->GetChild();
+
+			while (channel_node)
+			{
+				sscanf(channel_node->GetAttributeValue("serviceID"), "%x", &sid);
+				sscanf(channel_node->GetAttributeValue("onid"), "%x", &onid);
+
+				channel* chan = copyChannelByOnidSid( (onid << 16) + sid);
+
+				if ( chan != NULL)
+				{
+					switch (chan->service_type)
+					{
+						case 1:
+						case 4:
+							chan->chan_nr = nChNrTV;
+							newBouquet->addService( chan);
+							numchans_tv.insert(std::pair<uint, uint>(nChNrTV++, (onid<<16)+sid));
+						break;
+						case 2:
+							chan->chan_nr = nChNrRadio;
+							newBouquet->addService( chan);
+							numchans_radio.insert(std::pair<uint, uint>(nChNrRadio++, (onid<<16)+sid));
+						break;
+					}
+				}
+				channel_node = channel_node->GetNext();
+			}
+			printf(".");
 /*		printf(
 			"[zapit] Bouquet %s with %d tv- and %d radio-channels.\n",
 			newBouquet->Name.c_str(),
 			newBouquet->tvChannels.size(),
 			newBouquet->radioChannels.size());
 */
-		search = search->GetNext();
+			search = search->GetNext();
+		}
 	}
 
-	makeRemainingChannelsBouquet( nChNrTV, nChNrRadio, "Andere");  // TODO: use locales
+	makeRemainingChannelsBouquet( nChNrTV, nChNrRadio, (Bouquets.size() == 0) ? "Alle Kanäle" : "Andere");  // TODO: use locales
 
 	printf("\n[zapit] Found %d bouquets.\n", Bouquets.size());
 
