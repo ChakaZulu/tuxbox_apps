@@ -29,7 +29,7 @@ uint curr_diseqc;
 
 
 void ParseTransponder(XMLTreeNode *transponder) {
-  uint curr_freq = 0;
+  ushort curr_freq = 0;
   uint curr_symbolrate = 0;	
   ushort curr_polarity = 0;
   ushort curr_fec = 0;
@@ -41,18 +41,18 @@ void ParseTransponder(XMLTreeNode *transponder) {
       
       if (!strcmp("cable", type)){
 	//printf("Frequency: %s\n", services->GetAttributeValue("frequency"));
-	sscanf(services->GetAttributeValue("frequency"),"%u", &curr_freq);
+	sscanf(services->GetAttributeValue("frequency"),"%hu", &curr_freq);
 	sscanf(services->GetAttributeValue("symbolRate"), "%u", &curr_symbolrate);
-	sscanf(services->GetAttributeValue("Fec"), "%u", &curr_fec);
+	sscanf(services->GetAttributeValue("Fec"), "%hu", &curr_fec);
 	curr_symbolrate = curr_symbolrate * 1000;
       }
       else if (!strcmp("sat", type)){
 	//printf("In sat-section\n");
-	sscanf(services->GetAttributeValue("frequency"),"%u", &curr_freq);
+	sscanf(services->GetAttributeValue("frequency"),"%hu", &curr_freq);
 	sscanf(services->GetAttributeValue("symbolRate"), "%u", &curr_symbolrate);
 	curr_symbolrate = curr_symbolrate * 1000;
-	sscanf(services->GetAttributeValue("Polarity"), "%u", &curr_polarity);
-	sscanf(services->GetAttributeValue("Fec"), "%u", &curr_fec);
+	sscanf(services->GetAttributeValue("Polarity"), "%hu", &curr_polarity);
+	sscanf(services->GetAttributeValue("Fec"), "%hu", &curr_fec);
       }				
       else if (!strcmp("channel", type)){
 	if (atoi(services->GetAttributeValue("serviceType")) == serv_mode) {
