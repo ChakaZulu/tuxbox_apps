@@ -3,6 +3,15 @@ TuxCom:
 Historie:
 ---------
 
+30.08.2004 Version 1.5
+ - Passwortschutz eingebaut (über Info->Blau änderbar)
+ - Möglichkeit, beim Kopieren/Verschieben die Datei umzubenennen
+ - Anzeigefehler in Taskmanager bereinigt
+ - Bugfixes in Editor
+ - Anzeigefehler in Dateirechten bereinigt
+ - Abbruch eines FTP-Downloads möglich (und Wiederaufnahme des unterbrochenen Downloads, wenn der Server das unterstützt)
+ - Bugfixes in FTP-Client
+ 
 26.08.2004 Version 1.4b
  - Texteingabe: Möglichkeit, Text zu markieren (Taste grün ) und einzufügen (Taste blau) (sozusagen eine mini-Zwischenablage :-) )
  - Editor: Anzeigen von \r als weisses Kästchen (DOS/Win-Textdatei) (blaue Taste -> Umwandeln in Linux Format)
@@ -170,6 +179,7 @@ hoch/runter		Zeile zurück/vor
 volume +		Sprung zur 1. Zeile
 volume -		Sprung zur letzten Zeile
 rot			Prozess beenden 
+blau			Passwort ändern
 
 in allen Dialogen: 
 
@@ -217,3 +227,10 @@ blau		F8
 dream		F9
 info		F10
 mute		F11
+
+Nutzung des Passwortschutzes:
+-----------------------------
+Wenn man ein Passwort vergeben hat (im Taskmanager über blaue Taste),
+dann wird beim Starten des Plugins dieses Passwort abgefragt.
+Die Passwortabfrage kann wieder gelöscht werden, indem einfach ein leeres Passwort gesetzt wird.
+Wenn man das Passwort vergessen hat, kann man durch Löschen der Datei /var/tuxbox/config/tuxcom.conf das Passwort wieder löschen.

@@ -3,6 +3,15 @@ TuxCom:
 History:
 ---------
 
+30.08.2004 Version 1.5
+ - password protection included (Button Info -> Blue)
+ - possibility to rename file when copying or moving
+ - display error in taskmanager corrected
+ - bugfixes in Editor
+ - display error in properties corrected
+ - cancel of FTP-Download possible (and restart at current position, if supported by server)
+ - bugfixes in FTP-Client
+ 
 26.08.2004 Version 1.4b
  - Textinput: possibility to mark (green button) and insert text (blue button) (kind of a mini-clipboard :-) )
  - Editor: display \r as white box (DOS/Win-textfile) (blue button -> convert to linux-format)
@@ -170,6 +179,7 @@ up/down 		Line up/down
 volume +		jump to first line
 volume -		jump to last line
 red			kill process
+blue			change password
 
 in all dialogs: 
 
@@ -216,3 +226,10 @@ blue		F8
 dream		F9
 info		F10
 mute		F11
+
+use of password protection:
+---------------------------
+if you have entered a password (in taskmanager with blue button),
+you will be asked for the password after starting the plugin.
+you can remove the password protection by simply setting an empty password.
+if you have forgotten your password, you can reset it by deleting /var/tuxbox/config/tuxcom.conf.

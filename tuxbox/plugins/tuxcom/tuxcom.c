@@ -23,7 +23,6 @@
 */
 
 #include "tuxcom.h"
-
 /******************************************************************************
  * GetRCCode  (Code from TuxTxt)
  ******************************************************************************/
@@ -688,7 +687,22 @@ void plugin_exec(PluginParam *par)
 		GetRCCode(RC_NORMAL);
 
 		// hack to ignore the first OK press (from starting the plugin)
-		if (firstentry == 1 && rccode == RC_OK) continue;
+		if (firstentry == 1)
+		{
+			if (rccode == RC_OK) continue;
+
+			// check password
+			if (szPass[0] != 0x00)
+			{
+				char szP[20];
+				*szP = 0x00;
+				if (GetInputString(250,19,szP,info[INFO_PASS1*NUM_LANG+language], YES) != RC_OK) break;
+				if (strcmp(szP,szPass) != 0) break;
+				RenderFrame(LEFTFRAME);
+				RenderFrame(RIGHTFRAME);
+				memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
+			}
+		}
 		firstentry = 0;
 
 #if TUXCOM_DBOX_VERSION < 3
@@ -841,7 +855,7 @@ void plugin_exec(PluginParam *par)
 						int nok = 0;
 						while (nok == 0)
 						{
-							switch (GetInputString(400,255,szBuf,szMsg))
+							switch (GetInputString(400,255,szBuf,szMsg, NO))
 							{
 								case RC_OK:
 								{
@@ -924,10 +938,7 @@ void plugin_exec(PluginParam *par)
 											if (IsMarked(curframe,pos))
 											{
 												pfe = getfileentry(curframe, pos);
-												check = CheckOverwrite(pfe->name, OVERWRITESKIPCANCEL);
-												if (check < 0) break;
-												if (check == SKIP) continue;
-												DoCopy(pfe,YES);
+												if (DoCopy(pfe,YES, OVERWRITESKIPCANCEL) < 0) break;
 											}
 										}
 										DoZipCopyEnd();
@@ -940,10 +951,7 @@ void plugin_exec(PluginParam *par)
 											if (IsMarked(curframe,pos))
 											{
 												pfe = getfileentry(curframe, pos);
-												check = CheckOverwrite(pfe->name, OVERWRITESKIPCANCEL);
-												if (check < 0) break;
-												if (check == SKIP) continue;
-												DoCopy(pfe,HIDDEN);
+												if (DoCopy(pfe,HIDDEN, OVERWRITESKIPCANCEL) < 0) break;
 											}
 										}
 										break;
@@ -957,15 +965,13 @@ void plugin_exec(PluginParam *par)
 								switch (MessageBox(szMessage,(finfo[curframe].zipfile[0] == 0x00 ? info[INFO_COPY*NUM_LANG+language]:""),(finfo[curframe].zipfile[0] == 0x00 ? OKHIDDENCANCEL : OKCANCEL )))
 								{
 									case YES:
-										if (CheckOverwrite(pfe->name, OVERWRITECANCEL) < 0) break;
-										DoCopy(pfe,YES);
+										if (DoCopy(pfe,YES, OVERWRITECANCEL) < 0) break;
 										DoZipCopyEnd();
 										FillDir(1-curframe,SELECT_NOCHANGE);
 										FillDir(  curframe,SELECT_NOCHANGE);
 										break;
 									case HIDDEN:
-										if (CheckOverwrite(pfe->name, OVERWRITECANCEL) < 0) break;
-										DoCopy(pfe,HIDDEN);
+										DoCopy(pfe,HIDDEN, OVERWRITECANCEL);
 										break;
 									default:
 										rccode = 0;
@@ -990,12 +996,7 @@ void plugin_exec(PluginParam *par)
 										if (IsMarked(curframe,pos))
 										{
 											pfe = getfileentry(curframe, pos);
-											check = CheckOverwrite(pfe->name, OVERWRITESKIPCANCEL);
-											if (check < 0) break;
-											if (check == SKIP) continue;
-											sprintf(szMessage,msg[MSG_MOVE_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
-											MessageBox(szMessage,"",NOBUTTON);
-											DoMove(pfe->name, YES);
+											if (DoMove(pfe->name, YES, OVERWRITESKIPCANCEL) < 0) break;
 										}
 									}
 									ClearMarker(curframe);
@@ -1008,10 +1009,7 @@ void plugin_exec(PluginParam *par)
 										if (IsMarked(curframe,pos))
 										{
 											pfe = getfileentry(curframe, pos);
-											check = CheckOverwrite(pfe->name, OVERWRITESKIPCANCEL);
-											if (check < 0) break;
-											if (check == SKIP) continue;
-											DoMove(pfe->name, HIDDEN);
+											if (DoMove(pfe->name, HIDDEN, OVERWRITESKIPCANCEL) < 0) break;
 										}
 									}
 									ClearMarker(curframe);
@@ -1026,18 +1024,12 @@ void plugin_exec(PluginParam *par)
 							switch (MessageBox(szMessage,info[INFO_MOVE*NUM_LANG+language],OKHIDDENCANCEL))
 							{
 								case YES:
-									if (CheckOverwrite(pfe->name, OVERWRITECANCEL) < 0) break;
-									sprintf(action,"mv -f \"%s%s\" \"%s\" ",finfo[curframe].path,pfe->name, finfo[1-curframe].path);
-									sprintf(szMessage,msg[MSG_MOVE_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
-									MessageBox(szMessage,"",NOBUTTON);
-									DoExecute(action, SHOW_NO_OUTPUT);
+									if (DoMove(pfe->name,YES,OVERWRITECANCEL) < 0) break;
 									FillDir(1-curframe,SELECT_NOCHANGE);
 									FillDir(  curframe,SELECT_NOCHANGE);
 									break;
 								case HIDDEN:
-									if (CheckOverwrite(pfe->name, OVERWRITECANCEL) < 0) break;
-									sprintf(action,"mv -f \"%s%s\" \"%s\" &",finfo[curframe].path,pfe->name, finfo[1-curframe].path);
-									DoExecute(action, SHOW_NO_OUTPUT);
+									DoMove(pfe->name,HIDDEN,OVERWRITECANCEL);
 									break;
 								default:
 									rccode = 0;
@@ -1053,7 +1045,7 @@ void plugin_exec(PluginParam *par)
 						szDir[0] = 0x00;
 						char szMsg[356];
 						sprintf(szMsg,msg[MSG_MKDIR*NUM_LANG+language]);
-						switch (GetInputString(400,255,szDir,szMsg))
+						switch (GetInputString(400,255,szDir,szMsg, NO))
 						{
 							case RC_OK:
 							{
@@ -1120,7 +1112,7 @@ void plugin_exec(PluginParam *par)
 						szDir[0] = 0x00;
 						char szMsg[356];
 						sprintf(szMsg,msg[MSG_MKFILE*NUM_LANG+language], finfo[curframe].path);
-						switch (GetInputString(400,255,szDir,szMsg))
+						switch (GetInputString(400,255,szDir,szMsg, NO))
 						{
 							case RC_OK:
 							{
@@ -1146,7 +1138,7 @@ void plugin_exec(PluginParam *par)
 						strcpy(szDir,pfe->name);
 						char szMsg[356];
 						sprintf(szMsg,msg[MSG_MKLINK*NUM_LANG+language], finfo[curframe].path, pfe->name, finfo[1-curframe].path);
-						switch (GetInputString(400,255,szDir,szMsg))
+						switch (GetInputString(400,255,szDir,szMsg, NO))
 						{
 							case RC_OK:
 							{
@@ -1167,7 +1159,7 @@ void plugin_exec(PluginParam *par)
 					{
 						char szMsg[356];
 						sprintf(szMsg,msg[MSG_COMMAND*NUM_LANG+language]);
-						switch (GetInputString(400,commandsize,szCommand,szMsg))
+						switch (GetInputString(400,commandsize,szCommand,szMsg, NO))
 						{
 							case RC_OK:
 								DoExecute(szCommand, SHOW_OUTPUT);
@@ -1485,11 +1477,11 @@ int MessageBox(char* msg1, char* msg2, int mode)
 		case OVERWRITECANCEL:
 			ps[0] = OVERWRITE;
 			ps[1] = CANCEL;
-			ps[2] = 0;
+			ps[2] = RENAME;
 			ps[3] = 0;
 			ps[4] = 0;
 			sel = 1;
-			maxsel = 1;
+			maxsel = 2;
 			break;
 		case OVERWRITESKIPCANCEL:
 			ps[0] = OVERWRITE;
@@ -1499,6 +1491,15 @@ int MessageBox(char* msg1, char* msg2, int mode)
 			ps[4] = SKIPALL;
 			sel = 1;
 			maxsel = 4;
+			break;
+		case CANCELRUN:
+			ps[0] = CANCEL;
+			ps[1] = 0;
+			ps[2] = 0;
+			ps[3] = 0;
+			ps[4] = 0;
+			sel = 1;
+			maxsel = 1;
 			break;
 	}
 
@@ -1523,7 +1524,7 @@ int MessageBox(char* msg1, char* msg2, int mode)
 	if (mode == NOBUTTON) return 0;
 	int drawsel = 0;
 	do{
-		GetRCCode(RC_NORMAL);
+		if ((GetRCCode(RC_NORMAL) ==0) && mode == CANCELRUN) return NO;
 		switch(rccode)
 		{
 				case RC_OK:
@@ -1647,12 +1648,14 @@ void RenderButtons(int he, int mode)
 			RenderBox(viewx/2 -BUTTONWIDTH/2+1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 + BUTTONWIDTH/2 -1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, WHITE);
 			break;
 		case OVERWRITECANCEL:
-			RenderBox(viewx/2 - 2* BORDERSIZE -BUTTONWIDTH , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx/2 - 2* BORDERSIZE              ,viewy-(viewy-he)/2- 2* BORDERSIZE, FILL, RED  );
-			RenderBox(viewx/2 + 2* BORDERSIZE              , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx/2 + 2* BORDERSIZE +BUTTONWIDTH ,viewy-(viewy-he)/2- 2* BORDERSIZE, FILL, GREEN);
-			RenderString(mbox[BTN_OVERWRITE*NUM_LANG+language],viewx/2 - 2* BORDERSIZE -BUTTONWIDTH , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
-			RenderString(mbox[BTN_CANCEL   *NUM_LANG+language],viewx/2 + 2* BORDERSIZE              , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
-			RenderBox(viewx/2 + 2* BORDERSIZE                , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT  , viewx/2 + 2* BORDERSIZE +BUTTONWIDTH   ,viewy-(viewy-he)/2- 2* BORDERSIZE  , GRID, WHITE);
-			RenderBox(viewx/2 + 2* BORDERSIZE              +1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 + 2* BORDERSIZE +BUTTONWIDTH -1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, WHITE);
+			RenderBox(viewx/2 - 4* BORDERSIZE - BUTTONWIDTH - BUTTONWIDTH/2, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx/2 - 4* BORDERSIZE - BUTTONWIDTH/2             ,viewy-(viewy-he)/2- 2* BORDERSIZE, FILL, RED   );
+			RenderBox(viewx/2 - BUTTONWIDTH/2                              , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx/2 + BUTTONWIDTH/2                             ,viewy-(viewy-he)/2- 2* BORDERSIZE, FILL, GREEN );
+			RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2              , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2,viewy-(viewy-he)/2- 2* BORDERSIZE, FILL, YELLOW);
+			RenderString(mbox[BTN_OVERWRITE*NUM_LANG+language],viewx/2 - 4* BORDERSIZE -BUTTONWIDTH - BUTTONWIDTH/2 , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
+			RenderString(mbox[BTN_CANCEL   *NUM_LANG+language],(viewx-BUTTONWIDTH)/2  , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
+			RenderString(mbox[BTN_RENAME   *NUM_LANG+language],viewx/2 + 4* BORDERSIZE +BUTTONWIDTH/2            , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
+			RenderBox(viewx/2 -BUTTONWIDTH/2  , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT  , viewx/2 + BUTTONWIDTH/2   ,viewy-(viewy-he)/2- 2* BORDERSIZE  , GRID, WHITE);
+			RenderBox(viewx/2 -BUTTONWIDTH/2+1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 + BUTTONWIDTH/2 -1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, WHITE);
 			break;
 		case OVERWRITESKIPCANCEL:
 			RenderBox(viewx/2 - 4* BORDERSIZE - BUTTONWIDTH - BUTTONWIDTH/2, viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT, viewx/2 - 4* BORDERSIZE  - BUTTONWIDTH/2            ,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT, FILL, RED    );
@@ -1668,6 +1671,10 @@ void RenderButtons(int he, int mode)
 			RenderBox(viewx/2 -BUTTONWIDTH/2  , viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT  , viewx/2 + BUTTONWIDTH/2  ,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT  , GRID, WHITE);
 			RenderBox(viewx/2 -BUTTONWIDTH/2+1, viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT+1, viewx/2 + BUTTONWIDTH/2-1,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT-1, GRID, WHITE);
 			break;
+		case CANCELRUN:
+			RenderBox((viewx-BUTTONWIDTH)/2 , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx - (viewx-BUTTONWIDTH)/2,viewy-(viewy-he)/2 - 2*BORDERSIZE , FILL, RED  );
+			RenderString(mbox[BTN_CANCEL*NUM_LANG+language],(viewx-BUTTONWIDTH)/2  , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
+			RenderBox((viewx-BUTTONWIDTH)/2 , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx - (viewx-BUTTONWIDTH)/2,viewy-(viewy-he)/2 - 2*BORDERSIZE , GRID, WHITE);
 		case NOBUTTON:
 		    break;
 		default:
@@ -1735,12 +1742,18 @@ int ShowProperties()
 					}
 					break;
 				case RC_LEFT:
-					sel = YES;
-					drawsel = 1;
+					if (mode == OKCANCEL)
+					{
+						sel = YES;
+						drawsel = 1;
+					}
 					break;
 				case RC_RIGHT:
-					sel = NO;
-					drawsel = 1;
+					if (mode == OKCANCEL)
+					{
+						sel = NO;
+						drawsel = 1;
+					}
 					break;
 				case RC_UP:
 					if (mode == OKCANCEL)
@@ -1804,7 +1817,7 @@ int ShowProperties()
  * GetInputString                                                             *
  ******************************************************************************/
 
-int GetInputString(int width,int maxchars, char* str, char * msg)
+int GetInputString(int width,int maxchars, char* str, char * msg, int pass)
 {
 
 
@@ -1832,14 +1845,14 @@ int GetInputString(int width,int maxchars, char* str, char * msg)
 	RenderBox(x,y, x+width +2*BORDERSIZE, y+FONTHEIGHT_BIG+2*BORDERSIZE, FILL, trans_map[curvisibility]);
 	RenderBox(x,y, x+width              , y+FONTHEIGHT_BIG+2*BORDERSIZE, GRID, WHITE);
 
-	return DoEditString(x+BORDERSIZE,y+BORDERSIZE,width-2*BORDERSIZE,maxchars,str, BIG,BLUE1);
+	return DoEditString(x+BORDERSIZE,y+BORDERSIZE,width-2*BORDERSIZE,maxchars,str, BIG,BLUE1, pass);
 }
 /******************************************************************************
  * doEditString                                                               *
  ******************************************************************************/
 
 
-int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, int back)
+int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, int back, int pass)
 {
 
 	int pos = 0, start = 0, slen, he = (vsize==BIG ? FONTHEIGHT_BIG : FONTHEIGHT_SMALL);
@@ -1861,9 +1874,9 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 	RenderString(szdst,x, y+he-FONT_OFFSET, width, LEFT, vsize, WHITE);
 
 	colortool[0] = ACTION_CLEAR ;
-	colortool[1] = ACTION_MARKTEXT;
+	colortool[1] = (pass == NO ? ACTION_MARKTEXT : ACTION_NOACTION);
 	colortool[2] = (textuppercase == 0 ? ACTION_UPPERCASE : ACTION_LOWERCASE);
-	colortool[3] = ACTION_INSTEXT;
+	colortool[3] = (pass == NO ? ACTION_INSTEXT  : ACTION_NOACTION);
 	RenderMenuLine(-1, EDIT);
 
 	memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
@@ -2028,7 +2041,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 					}
 					break;
 				case RC_GREEN:
-					if (markmode == 0)
+					if (markmode == 0 && pass == NO)
 					{
 						markmode = 1;
 						markpos = pos;
@@ -2042,7 +2055,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 					}
 					break;
 				case RC_BLUE:
-					if (markmode == 0)
+					if (markmode == 0 && pass == NO)
 					{
 						if (szdst[pos] != 0x00 && szClipboard[0] != 0x00)
 						{
@@ -2083,7 +2096,10 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 			else
 				break;
 		}
-		strcpy(szbuf,(char*)(szdst+start));
+		if (pass == NO)
+			strcpy(szbuf,(char*)(szdst+start));
+		else
+			strcpy(szbuf,"******************");
 		if (markmode == 0)
 			szbuf[pos+1-start] = 0x00;
 		else
@@ -2107,13 +2123,20 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 
 		RenderBox(x-1,y, x+width+1, y+he, FILL, back);
 		RenderBox(x+slen2-1,y, x+slen+1, y+he, FILL, (markmode == 0 ? RED : GREEN));
-		RenderString((char*)(szdst+start),x, y+he-FONT_OFFSET, width, LEFT, vsize, WHITE);
+		if (pass == NO)
+			RenderString((char*)(szdst+start),x, y+he-FONT_OFFSET, width, LEFT, vsize, WHITE);
+		else
+		{
+			strcpy(szbuf,"******************");
+			szbuf[strlen(szdst)]=0x00;
+			RenderString(szbuf,x, y+he-FONT_OFFSET, width, LEFT, vsize, WHITE);
+		}
 		if (markmode == 0)
 		{
 			colortool[0] = ACTION_CLEAR ;
-			colortool[1] = ACTION_MARKTEXT;
+			colortool[1] = (pass == NO ? ACTION_MARKTEXT : ACTION_NOACTION);
 			colortool[2] = (textuppercase == 0 ? ACTION_UPPERCASE : ACTION_LOWERCASE);
-			colortool[3] = ACTION_INSTEXT;
+			colortool[3] = (pass == NO ? ACTION_INSTEXT  : ACTION_NOACTION);
 		}
 		else
 		{
@@ -2359,12 +2382,13 @@ int IsMarked(int frame, int pos)
 /******************************************************************************
  * CheckOverwrite                                                             *
  ******************************************************************************/
-int CheckOverwrite(const char* szFile, int mode)
+int CheckOverwrite(const char* szFile, int mode, char* szNew)
 {
 	char szMessage[356];
 
 	if (overwriteall != 0) return overwriteall;
 
+	strcpy(szNew,szFile);
 	if (FindFile(1-curframe,szFile) != NULL)
 	{
 		if (skipall != 0)      return skipall;
@@ -2382,6 +2406,12 @@ int CheckOverwrite(const char* szFile, int mode)
 			case SKIPALL:
 				skipall = SKIP;
 				return SKIP;
+			case RENAME:
+				sprintf(szMessage,msg[MSG_RENAME*NUM_LANG+language], szFile);
+				if (GetInputString(400,255,szNew,szMessage, NO) == RC_OK)
+					return RENAME;
+				else
+					return -1;
 			case CANCEL:
 				overwriteall = -1;
 				skipall = -1;
@@ -2592,10 +2622,15 @@ void FillDir(int frame, int selmode)
  * DoCopy                                                                     *
  ******************************************************************************/
 
-void DoCopy(struct fileentry* pfe, int typ)
+int DoCopy(struct fileentry* pfe, int typ, int checktype)
 {
 	int i = 1;
 	char action[512], szFullFile[1000], tp;
+	char szNew[FILENAME_MAX];
+
+	int check = CheckOverwrite(pfe->name, checktype, szNew);
+	if (check < 0 || check == SKIP) return check;
+
 	if (finfo[curframe].ftpconn != NULL)
 	{
 		char szMessage[400],buf[512], szMessage2[400], xbuf[FTPBUFFER_SIZE];
@@ -2605,14 +2640,16 @@ void DoCopy(struct fileentry* pfe, int typ)
 
 		struct sockaddr_in s_inlist;
 		long size = 0, r, rg = 0;
-		memcpy(&s_inlist,&finfo[curframe].s_in,sizeof(s_inlist));
+		memcpy(&s_inlist,&finfo[curframe].s_in,sizeof(struct sockaddr_in));
+
+		FTPcmd(curframe, "TYPE A", NULL, buf);
 
 		if (FTPcmd(curframe, "SIZE ", pfe->name, buf) == 213) size = atol(buf+4);
 		else
 		{
 			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"SIZE ",pfe->name);
 			MessageBox(szMessage,buf,OK);
-			return;
+			return check;
 		}
 
 		FTPcmd(curframe, "TYPE I", NULL, buf);
@@ -2621,8 +2658,52 @@ void DoCopy(struct fileentry* pfe, int typ)
 		{
 			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"PASV","");
 			MessageBox(szMessage,buf,OK);
-			return;
+			return check;
 		}
+		sprintf(szFullFile,"%s%s",finfo[1-curframe].path,szNew);
+		FILE* fnewFile = NULL;
+		struct stat st;
+		if ((lstat(szFullFile,&st) != -1) && (st.st_size > 0))
+		{
+			// append to downloaded file
+			sprintf(szMessage,msg[MSG_APPENDDOWNLOAD*NUM_LANG+language], szNew);
+			int res = MessageBox(szMessage,"",YESNOCANCEL);
+			switch (res)
+			{
+				case YES:
+					{
+						char szsize[50];
+						sprintf(szsize, "%ld", st.st_size);
+						if (FTPcmd(curframe,"REST", szsize, buf) == 350) {
+							size -= st.st_size;
+							fnewFile = fopen(szFullFile,"a");
+						}
+						else
+						{
+							sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"REST ",szsize);
+							MessageBox(szMessage,buf,OK);
+							return check;
+						}
+						break;
+					}
+				case NO:
+					fnewFile = fopen(szFullFile,"w");
+					break;
+				case CANCEL:
+					return check;
+			}
+		}
+		else
+			fnewFile = fopen(szFullFile,"w");
+
+		if (fnewFile == NULL)
+		{
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
+			MessageBox(szMessage,"open file failure",OK);
+			return check;
+		}
+
+
 		char* s = strrchr(buf, ',');
 		*s = 0;
 		int port = atoi(s+1);
@@ -2630,61 +2711,72 @@ void DoCopy(struct fileentry* pfe, int typ)
 		port += atoi(s+1) * 256;
 		s_inlist.sin_port = htons(port);
 		int sControl = socket(AF_INET, SOCK_STREAM, 0);
-		connect(sControl, (struct sockaddr *)&s_inlist, sizeof(s_inlist));
-		FILE* fData = fdopen(sControl, "rb+");
-
-		sprintf(szFullFile,"%s%s",finfo[1-curframe].path,pfe->name);
-		FILE* fnewFile = fopen(szFullFile,"wb");
-		if (fnewFile == NULL)
-		{
-			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
-			MessageBox(szMessage,"open file failure",OK);
-			return;
-		}
-
+		connect(sControl, (struct sockaddr *)&s_inlist, sizeof(struct sockaddr_in));
+		FILE* fData = fdopen(sControl, "r+");
 		if (FTPcmd(curframe, "RETR ", pfe->name, buf) > 150)
 		{
 			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
 			MessageBox(szMessage,buf,OK);
-			return;
+			return check;
 		}
 		if (fData == NULL)
 		{
 			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
 			MessageBox(szMessage,"open stream failure",OK);
 			fclose(fnewFile);
-			return;
+			return check;
 		}
 		do
 		{
 			sprintf(szMessage,msg[MSG_COPY_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
 			sprintf(szMessage2,"%lu/%lu Bytes (%d %%)", rg,size, (int)((((double)rg)/size)*100));
-			MessageBox(szMessage,szMessage2,NOBUTTON);
+			if (MessageBox(szMessage,szMessage2,CANCELRUN) == CANCEL)
+			{
+				if (MessageBox(msg[MSG_CANCELDOWNLOAD*NUM_LANG+language],pfe->name,OKCANCEL) == OK)
+				{
+					fclose(fnewFile);
+					fclose(fData);
 
-			r = fread (xbuf,1,FTPBUFFER_SIZE-2,fData);
+					FTPcmd(curframe, NULL, NULL, buf);
+					return check;
+				}
+			}
+
+			r = 0;
+			do
+			{
+				clearerr(fData);
+				r += fread((char *)xbuf + r, 1, FTPBUFFER_SIZE-2 - r, fData);
+			}
+			while (r < FTPBUFFER_SIZE-2 && r+rg < size && ferror(fData) && errno == EINTR);
+//			r = read (sControl,xbuf,FTPBUFFER_SIZE-2);
+
 			rg += r;
-			if (ferror(fData) || (feof(fData) && (rg < size)) || (r == 0))
+//			if (ferror(fData) || (feof(fData) && (rg < size)) || (r == 0))
+			if (((rg < size) && (r == 0))|| (r == -1) )
 			{
 				sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
 				MessageBox(szMessage,"reading stream failure",OK);
 				break;
 			}
-			if (fwrite(buf,1,r,fnewFile) != r)
+			if (fwrite(xbuf,1,r,fnewFile) != r)
 			{
 				sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
 				MessageBox(szMessage,"writing file failure",OK);
 				break;
 
 			}
+
 		}
 		while (rg < size);
 		fclose(fnewFile);
 		fclose(fData);
+
 		if (FTPcmd(curframe, NULL, NULL, buf) != 226)
 		{
 			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR",pfe->name);
 			MessageBox(szMessage,buf,OK);
-			return;
+			return check;
 		}
 	}
 	else if (finfo[curframe].zipfile[0] != 0x00)
@@ -2714,7 +2806,7 @@ void DoCopy(struct fileentry* pfe, int typ)
 				case BZIP2    : tp = 'j'; break;
 				case COMPRESS : tp = 'Z'; break;
 				case TAR      : tp = ' '; break;
-				default: return;
+				default: return check;
 			}
 			sprintf(szZipCommand,"tar  -x%c -f \"%s%s\" -C \"%s%s\""
 						,tp
@@ -2738,7 +2830,7 @@ void DoCopy(struct fileentry* pfe, int typ)
 						case BZIP2    : tp = 'j'; break;
 						case COMPRESS : tp = 'Z'; break;
 						case TAR      : tp = ' '; break;
-						default: return;
+						default: return check;
 					}
 					sprintf(szZipCommand,"tar  -x%c -f \"%s%s\" -C \"%s%s\""
 								,tp
@@ -2750,7 +2842,7 @@ void DoCopy(struct fileentry* pfe, int typ)
 
 				}
 
-				sprintf(szFullFile,"%s%s/",finfo[curframe].zippath,pfe->name);
+				sprintf(szFullFile,"%s%s/",finfo[curframe].zippath,szNew);
 				if (strncmp(pzfe->name,szFullFile,strlen(szFullFile))== 0)
 				{
 					int dlen = strlen(pzfe->name)+2;
@@ -2778,7 +2870,7 @@ void DoCopy(struct fileentry* pfe, int typ)
 		}
 		else
 		{
-			sprintf(szFullFile," \"%s%s\"",(char*)(finfo[curframe].zippath+1),pfe->name);
+			sprintf(szFullFile," \"%s%s\"",(char*)(finfo[curframe].zippath+1),szNew);
 			strcat(szZipCommand,szFullFile);
 		}
 	}
@@ -2790,9 +2882,10 @@ void DoCopy(struct fileentry* pfe, int typ)
 			sprintf(szMessage,msg[MSG_COPY_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
 			MessageBox(szMessage,"",NOBUTTON);
 		}
-		sprintf(action,"cp -dpR \"%s%s\" \"%s\"%s",finfo[curframe].path,pfe->name, finfo[1-curframe].path,typ == HIDDEN ? " &" : "");
+		sprintf(action,"cp -dpR \"%s%s\" \"%s%s\"%s",finfo[curframe].path,pfe->name, finfo[1-curframe].path,szNew,typ == HIDDEN ? " &" : "");
 		DoExecute(action, SHOW_NO_OUTPUT);
 	}
+	return check;
 }
 
 /******************************************************************************
@@ -2815,11 +2908,24 @@ void DoZipCopyEnd()
  * DoMove                                                                     *
  ******************************************************************************/
 
-void DoMove(char* szFile, int typ)
+int DoMove(char* szFile, int typ, int checktype)
 {
 	char action[1000];
-	sprintf(action,"mv -f \"%s%s\" \"%s\"%s",finfo[curframe].path,szFile, finfo[1-curframe].path,typ == HIDDEN ? " &":"");
+	char szMessage[400];
+	char szNew[FILENAME_MAX];
+
+
+	int check = CheckOverwrite(szFile, checktype, szNew);
+	if (check < 0 || check == SKIP) return check;
+
+	if (typ != HIDDEN)
+	{
+		sprintf(szMessage,msg[MSG_MOVE_PROGRESS*NUM_LANG+language], szFile, finfo[1-curframe].path, szNew);
+		MessageBox(szMessage,"",NOBUTTON);
+	}
+	sprintf(action,"mv -f \"%s%s\" \"%s%s\"%s",finfo[curframe].path,szFile, finfo[1-curframe].path,szNew,typ == HIDDEN ? " &":"");
 	DoExecute(action, SHOW_NO_OUTPUT);
+	return check;
 }
 /******************************************************************************
  * DoViewFile                                                                 *
@@ -2896,7 +3002,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 	}
 	lstat(szFile,&st);
 
-	if (st.st_size < FILEBUFFER_SIZE && strlen(szFileBuffer) > 0) count++;
+	if (st.st_size < FILEBUFFER_SIZE ) count++;
 	totalcount = count;
 
 
@@ -3041,13 +3147,13 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 						strncpy(szInputBuffer,pcur,plen);
 						szInputBuffer[plen]=0x00;
 						RenderBox(0, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL-1 , viewx, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row+1)*FONTHEIGHT_SMALL+1, GRID, WHITE);
-						switch (DoEditString(BORDERSIZE,2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL, viewx- 2*BORDERSIZE ,1000,szInputBuffer,BIG/*SMALL*/,BLUE2))
+						switch (DoEditString(BORDERSIZE,2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL, viewx- 2*BORDERSIZE ,1000,szInputBuffer,BIG/*SMALL*/,BLUE2, NO))
 						{
 							case RC_OK:
 							{
 								if (p1 && (plen != strlen(szInputBuffer)))
 								  memmove(pcur+strlen(szInputBuffer),p1,FILEBUFFER_SIZE-((pcur+strlen(szInputBuffer))-szFileBuffer));
-								if (sel > 0 && (*(pcur-1) != '\n')) {*pcur = '\n'; pcur++;}
+								if (sel > 0 && (*(pcur-1) != '\n')) {*pcur = '\n'; pcur++; count++;}
 								memcpy(pcur,szInputBuffer,strlen(szInputBuffer));
 								if (sel >= count-1) *(pcur+strlen(szInputBuffer)) = 0x00;
 								changed = 1;
@@ -3113,7 +3219,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 						p1 = strchr(pcur,'\n');
 						if (p1)
 						{
-							memmove(pcur,p1+1,FILEBUFFER_SIZE-(pcur-szFileBuffer));
+							memmove(pcur,p1+1,FILEBUFFER_SIZE-(pcur-szFileBuffer)-1);
 						}
 						else
 							*pcur = 0x00;
@@ -3125,7 +3231,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 				case RC_GREEN:
 					if (writable == YES)
 					{
-						memmove(pcur+1,pcur,FILEBUFFER_SIZE-(pcur-szFileBuffer+1));
+						memmove(pcur+1,pcur,FILEBUFFER_SIZE-(pcur-szFileBuffer)-1);
 						*pcur = '\n';
 						count++;
 						totalcount++;
@@ -3141,7 +3247,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 							p1 = strchr(p1,'\r');
 							if (p1)
 							{
-								memmove(p1,p1+1,FILEBUFFER_SIZE-(p1-szFileBuffer));
+								memmove(p1,p1+1,FILEBUFFER_SIZE-(p1-szFileBuffer)-1);
 								changed = 1;
 							}
 						}
@@ -3224,7 +3330,7 @@ void DoTaskManager()
 	colortool[0] = ACTION_KILLPROC;
 	colortool[1] = ACTION_NOACTION;
 	colortool[2] = ACTION_NOACTION;
-	colortool[3] = ACTION_NOACTION;
+	colortool[3] = ACTION_SETPASS ;
 	memset(tool, ACTION_NOACTION, sizeof(tool));
 
 	RenderMenuLine(-1, NO);
@@ -3269,15 +3375,15 @@ void DoTaskManager()
 					pcur = p;
 					RenderBox(BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+i*FONTHEIGHT_SMALL , viewx- BORDERSIZE , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL, FILL, BLUE2);
 				}
-
+				if (*p == 0x00) break;
 				sscanf(p,"%s%s",prid,uid);
 
 				strncpy(procname,(char*)(p+26),255);
           		p2=strchr(procname,'\n');
           		if (p2 != NULL) *p2 = 0x00;
-          		RenderString(    prid,2*BORDERSIZE           , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, viewx/6 , RIGHT, SMALL, WHITE);
-          		RenderString(     uid,5*BORDERSIZE+  viewx/6 , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, viewx/6 , LEFT , SMALL, WHITE);
-          		RenderString(procname,               viewx/3 , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, viewx/3 , LEFT , SMALL, WHITE);
+          		RenderString(    prid,2*BORDERSIZE           , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET,   viewx/6 , RIGHT, SMALL, WHITE);
+          		RenderString(     uid,5*BORDERSIZE+  viewx/6 , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET,   viewx/6 , LEFT , SMALL, WHITE);
+          		RenderString(procname,               viewx/3 , 2*BORDERSIZE+FONTHEIGHT_BIG+2*FONTHEIGHT_SMALL+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, 2*viewx/3 , LEFT , SMALL, WHITE);
           		p1=strchr(p,'\n');
 	            if (p1 == NULL)
 	            {
@@ -3324,8 +3430,8 @@ void DoTaskManager()
 					strncpy(procname,(char*)(pcur+26),255);
 	          		p2=strchr(procname,'\n');
 	          		if (p2 != NULL) *p2 = 0x00;
-					sprintf(szMsg,msg[MSG_KILLPROC2*NUM_LANG+language],procname);
-					if (MessageBox(msg[MSG_KILLPROC*NUM_LANG+language],szMsg,OKCANCEL) == OK)
+					sprintf(szMsg,msg[MSG_KILLPROC*NUM_LANG+language],procname);
+					if (MessageBox(szMsg, info[INFO_PROC*NUM_LANG+language],OKCANCEL) == OK)
 					{
 						char szCmd[2000];
 						sprintf(szCmd,"kill -9 %s", prid);
@@ -3355,6 +3461,15 @@ void DoTaskManager()
 						}
 						fclose(pFile);
 					}
+					break;
+				case RC_BLUE:
+					SetPassword();
+					colortool[0] = ACTION_KILLPROC;
+					colortool[1] = ACTION_NOACTION;
+					colortool[2] = ACTION_NOACTION;
+					colortool[3] = ACTION_SETPASS ;
+					memset(tool, ACTION_NOACTION, sizeof(tool));
+					RenderMenuLine(-1, YES);
 					break;
 
 			}
@@ -3564,7 +3679,7 @@ void OpenFTP()
 
 
 	int sControl = socket(AF_INET, SOCK_STREAM, 0);
-	if (connect(sControl, (struct sockaddr *)&finfo[curframe].s_in, sizeof(finfo[curframe].s_in)) < 0)
+	if (connect(sControl, (struct sockaddr *)&finfo[curframe].s_in, sizeof(struct sockaddr_in)) < 0)
 	{
 		MessageBox(msg[MSG_FTP_NOCONN*NUM_LANG+language],finfo[curframe].ftphost,OK);
 		return;
@@ -3645,9 +3760,11 @@ void ReadFTPDir(int frame, char* seldir)
 	}
 
 	long size = 0;
-	memcpy(&s_inlist,&finfo[frame].s_in,sizeof(s_inlist));
+	memcpy(&s_inlist,&finfo[frame].s_in,sizeof(struct sockaddr_in));
 
 	MessageBox(msg[MSG_FTP_READDIR*NUM_LANG+language],seldir,NOBUTTON);
+
+	FTPcmd(frame, "TYPE A", NULL, buf);
 
 	if (strcmp(seldir,"..") != 0)
 	{
@@ -3659,7 +3776,6 @@ void ReadFTPDir(int frame, char* seldir)
 		}
 	}
 
-	FTPcmd(frame, "TYPE A", NULL, buf);
 
 	if (FTPcmd(frame, "PASV", NULL, buf) != 227)
 	{
@@ -3676,7 +3792,7 @@ void ReadFTPDir(int frame, char* seldir)
 	port += atoi(s+1) * 256;
 	s_inlist.sin_port = htons(port);
 	int sControl = socket(AF_INET, SOCK_STREAM, 0);
-	connect(sControl, (struct sockaddr *)&s_inlist, sizeof(s_inlist));
+	connect(sControl, (struct sockaddr *)&s_inlist, sizeof(struct sockaddr_in));
 	FILE* fData = fdopen(sControl, "r+");
 
 
@@ -3710,7 +3826,8 @@ void ReadFTPDir(int frame, char* seldir)
 		{
 			char* pname = name;
 			while (*pname == ' ') pname++;
-			while (isspace(pname[strlen(pname)-1]))  pname[strlen(pname)-1] = 0x00;
+			while (!isprint(pname[strlen(pname)-1]))  pname[strlen(pname)-1] = 0x00;
+			if (strcmp(pname,"..") == 0) continue;
 			pzfe1 = malloc(sizeof(struct zipfileentry));
 
 			if (name[strlen(pname)-1] == '/') name[strlen(name)-1]=0x00;
@@ -3826,6 +3943,26 @@ void ShowFile(FILE* pipe, char* szAction)
 		}
 	}
 	rccode = -1;
+}
+
+/******************************************************************************
+ * SetPassword                                                                *
+ ******************************************************************************/
+
+void SetPassword()
+{
+	char szP1[20];
+	char szP2[20];
+	*szP1 = 0x00;
+	*szP2 = 0x00;
+	if (GetInputString(150,19,szP1,info[INFO_PASS2*NUM_LANG+language], NO) != RC_OK) return;
+	if (GetInputString(150,19,szP2,info[INFO_PASS3*NUM_LANG+language], NO) != RC_OK) return;
+	if (strcmp(szP1,szP2) == 0)
+	{
+		strcpy(szPass,szP1);
+		MessageBox(info[INFO_PASS4*NUM_LANG+language],"",OK);
+	}
+
 }
 
 /******************************************************************************
@@ -3963,6 +4100,10 @@ void ReadSettings()
 			{
 				strcpy(szClipboard, p);
 			}
+			else if ( !strcmp(line,"pass") )
+			{
+				strcpy(szPass, p);
+			}
 		}
 		fclose(fp);
 	}
@@ -4004,6 +4145,7 @@ void WriteSettings()
 		fprintf(fp,"lfirst=%lu\n",finfo[LEFTFRAME ].first);
 		fprintf(fp,"rfirst=%lu\n",finfo[RIGHTFRAME].first);
 		fprintf(fp,"clip=%s\n",szClipboard);
+		fprintf(fp,"pass=%s\n",szPass);
 		fclose(fp);
 	}
 }

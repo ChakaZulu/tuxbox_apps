@@ -32,6 +32,7 @@
 #include "config.h"
 #endif
 
+#include <errno.h>
 #include <locale.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -88,7 +89,7 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.4b\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.5\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -220,8 +221,8 @@ FT_Bool			use_kerning;
 
 
 
-enum {OK, OKCANCEL, OKHIDDENCANCEL,YESNOCANCEL,NOBUTTON,OVERWRITECANCEL,OVERWRITESKIPCANCEL};
-enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL,EDIT};
+enum {OK, OKCANCEL, OKHIDDENCANCEL,YESNOCANCEL,NOBUTTON,OVERWRITECANCEL,OVERWRITESKIPCANCEL,CANCELRUN};
+enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL,EDIT, RENAME};
 enum {GZIP,BZIP2,COMPRESS,TAR,FTP};
 
 #define FONTHEIGHT_VERY_SMALL 20
@@ -280,6 +281,7 @@ char* szCommand;
 char* szZipCommand;
 char tmpzipdir[256];
 char szClipboard[256];
+char szPass[20];
 long commandsize;
 
 int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
@@ -313,6 +315,7 @@ int language;
 #define ACTION_TOLINUX   11
 #define ACTION_MARKTEXT  12
 #define ACTION_INSTEXT   13
+#define ACTION_SETPASS   14
 
 
 
@@ -326,6 +329,7 @@ int language;
 #define BTN_SKIP          6
 #define BTN_OVERWRITEALL  7
 #define BTN_SKIPALL       8
+#define BTN_RENAME        9
 
 #define SORT_UP    1
 #define SORT_DOWN -1
@@ -369,15 +373,21 @@ enum {MSG_EXEC              ,
       MSG_FTP_ERROR         ,
       MSG_FTP_READDIR       ,
       MSG_KILLPROC          ,
-      MSG_KILLPROC2         ,
       MSG_PROCESSID         ,
       MSG_PROCESSUSER       ,
-      MSG_PROCESSNAME       };
+      MSG_PROCESSNAME       ,
+      MSG_CANCELDOWNLOAD    ,
+      MSG_APPENDDOWNLOAD    };
 
 enum {INFO_COPY   ,
       INFO_MOVE   ,
       INFO_EXEC   ,
-      INFO_MARKER };
+      INFO_MARKER ,
+      INFO_PROC   ,
+      INFO_PASS1  ,
+      INFO_PASS2  ,
+      INFO_PASS3  ,
+      INFO_PASS4  };
 
 
 char *numberchars[] = {  "0#!$%&?*()@\\",
@@ -391,10 +401,15 @@ char *numberchars[] = {  "0#!$%&?*()@\\",
                  		 "tuv8",
                  		 "wxyz9" };
 
-char *info[]   = { "(select 'hidden' to copy in background)"   ,"('versteckt' wählen zum Kopieren im Hintergrund)"   ,
-                   "(select 'hidden' to move in background)"   ,"('versteckt' wählen zum Verschieben im Hintergrund)",
-                   "(select 'hidden' to execute in background)","('versteckt' wählen zum Ausführen im Hintergrund)"  ,
-                   "selected:%d"                               ,"markiert:%d" };
+char *info[]   = { "(select 'hidden' to copy in background)"               ,"('versteckt' wählen zum Kopieren im Hintergrund)"              ,
+                   "(select 'hidden' to move in background)"               ,"('versteckt' wählen zum Verschieben im Hintergrund)"           ,
+                   "(select 'hidden' to execute in background)"            ,"('versteckt' wählen zum Ausführen im Hintergrund)"             ,
+                   "selected:%d"                                           ,"markiert:%d"                                                   ,
+				   "Warning: killing a process can make your box unstable!","Warnung: Prozesse beenden kann die Box instabil werden lassen!",
+				   "Please enter your password"                            ,"Bitte Passwort eingeben"                                       ,
+				   "Please enter new password"                             ,"Bitte neues Passwort eingeben"                                 ,
+				   "Please enter new password again"                       ,"Bitte neues Passwort wiederholen"                              ,
+				   "password has been changed"                             ,"Passwort wurde geändert"                                       };
 
 char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen ?"                                ,
                   "Cannot execute file '%s'"                   ,"Kann '%s' nicht ausführen"                       ,
@@ -402,7 +417,7 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
                   "Copy %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' kopieren ?"               ,
                   "Copying file '%s' to '%s'..."               ,"kopiere '%s' nach '%s' ..."                      ,
                   "Cannot copy to same Directory"              ,"kann nicht in das gleiche Verzeichnis kopieren"  ,
-                  "Move '%s' to '%s' ?"                        ,"'%s' nach '%s' verschieben ?"                    ,
+                  "Move '%s' to '%s%s' ?"                      ,"'%s' nach '%s%s' verschieben ?"                  ,
 				  "Move %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' verschieben ?"            ,
 				  "Moving file '%s' to '%s'..."                ,"verschiebe '%s' nach '%s' ..."                   ,
 				  "Delete '%s' ?"                              ,"'%s' löschen ?"                                  ,
@@ -422,11 +437,12 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
 				  "connecting to"                              ,"Verbinde mit"                                    ,
 				  "error in ftp command '%s%s'"                ,"Fehler bei FTP-Kommando '%s%s'"                  ,
 				  "reading directory"                          ,"Lese Verzeichnis"                                ,
-				  "Warning: killing a process can make your box unstable!","Warnung: Prozesse beenden kann die Box instabil werden lassen!",
-				  "Do you really want to kill process '%s'?"              ,"Wollen sie wirklich den Prozess '%s' beenden?"                 ,
-				  "Prozess ID"                                            ,"process id"                                                    ,
-				  "Besitzer"                                              ,"owner"                                                         ,
-				  "Prozess"                                               ,"process"                                                       };
+				  "Do you really want to kill process '%s'?"   ,"Wollen sie wirklich den Prozess '%s' beenden?"   ,
+				  "process id"                                 ,"Prozess ID"                                      ,
+				  "owner"                                      ,"Besitzer"                                        ,
+				  "process"                                    ,"Prozess"                                         ,
+				  "cancel download ?"                          ,"Download abbrechen ?"                            ,
+				  "append to file '%s' ?"                      ,"An Datei '%s' anhängen ?"                        };
 
 char *menuline[]  = { ""      , ""           ,
                       "rights", "Rechte"     ,
@@ -452,7 +468,8 @@ char *colorline[] = { ""               , "" ,
                       "kill process"   , "Prozess beenden"          ,
                       "to linux format", "in Linux-Format"          ,
                       "mark text"      , "Text markieren"           ,
-                      "insert text"    , "Text einfügen"            };
+                      "insert text"    , "Text einfügen"            ,
+                      "set password"   , "Passwort setzen"          };
 char *mbox[]     = { "OK"           , "OK"                ,
                      "Cancel"       , "Abbrechen"         ,
                      "Hidden"       , "Versteckt"         ,
@@ -461,7 +478,8 @@ char *mbox[]     = { "OK"           , "OK"                ,
                      "overwrite"    , "überschr."         ,
                      "skip"         , "überspringen"      ,
                      "overwrite all", "alle überschreiben",
-                     "skip all"     , "alle überspringen" };
+                     "skip all"     , "alle überspringen" ,
+                     "rename"       , "umben."            };
 char *props[]    = { "read"   , "lesen"    ,
                      "write"  , "schreiben",
                      "execute", "ausführen"};
@@ -516,6 +534,7 @@ struct frameinfo finfo[2];
 
 //functions
 
+void				SetPassword();
 void 				RenderBox(int sx, int sy, int ex, int ey, int mode, int color);
 void 	          	RenderFrame(int frame);
 void 	          	RenderMenuLine(int highlight, int refresh);
@@ -524,24 +543,24 @@ struct fileentry* 	GetSelected(int frame);
 void 				SetSelected(int frame, const char* szFile);
 void 	          	GetSizeString(char* sizeString, unsigned long long size);
 int 	          	MessageBox(char* msg1,char* msg2, int mode);
-int 	          	GetInputString(int width, int maxchars, char* str, char * msg);
+int 	          	GetInputString(int width, int maxchars, char* str, char * msg, int pass);
 void	          	ClearEntries(int frame);
 void 				ClearZipEntries(int frame);
 void	          	ClearMarker(int frame);
 void	          	RenameMarker(int frame, const char* szOld, const char* szNew);
 void	          	ToggleMarker(int frame);
 int               	IsMarked(int frame, int pos);
-int 			  	CheckOverwrite(const char* szFile, int mode);
+int 			  	CheckOverwrite(const char* szFile, int mode, char* szNew);
 void	          	ReadSettings();
 void	          	WriteSettings();
 void	          	DoExecute(char* szAction, int showoutput);
-void 				DoCopy(struct fileentry* pfe, int typ);
+int 				DoCopy(struct fileentry* pfe, int typ, int checkmode);
 void 				DoZipCopyEnd();
-void 				DoMove(char* szFile, int typ);
+int 				DoMove(char* szFile, int typ, int checktype);
 void	          	DoViewFile();
 void	          	DoEditFile(char* szFile, char* szTitle, int writable);
 void	          	DoTaskManager();
-int               	DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, int back);
+int               	DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, int back, int pass);
 int 	          	ShowProperties();
 void 		 	  	RenderButtons(int he, int mode);
 int 			  	flistcmp(struct fileentry * p1, struct fileentry * p2);
