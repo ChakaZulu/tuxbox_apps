@@ -27,24 +27,26 @@ class TDT;
 class BAT;
 class Descriptor;
 
-/*
-  eDVB contains high-level dvb-functions like 
-  "switchService" which can be called almost 
-  stateless from everywhere...
- */
+#define ENOCASYS	1000	/// service is not free and no valid caid
+#define ENOSTREAM 1001  /// no video or audio stream
+#define ENVOD			1002	/// nvod stream has to be selected
 
-#define ENOCASYS	1000	/** service is not free and no valid caid */
-#define ENOSTREAM 1001  /** no video or audio stream */
-#define ENVOD			1002	/** nvod stream has to be selected */
-
-#define SCAN_ONIT	1			/** scan network_other NIT */
-#define SCAN_SKIP	2			/** skip known NITs (assuming they're all the same) */
+#define SCAN_ONIT	1			/// scan network_other NIT
+#define SCAN_SKIP	2			/// skip known NITs (assuming they're all the same)
 
 class eBouquet;
 class eAVSwitch;
 class eStreamWatchdog;
 class MHWEIT;
+class eDVBRecorder;
 
+/**
+ * \brief High level DVB class.
+ *
+ * eDVB contains high-level dvb-functions like 
+ * "switchService" which can be called almost 
+ * stateless from everywhere...
+ */
 class eDVB: public Object
 {
 	static eDVB *instance;
@@ -79,6 +81,8 @@ protected:
 	MHWEIT *tMHWEIT;
 	
 	TDT *tdt;
+	
+	eDVBRecorder *recorder;
 	
 public:
 		/** current service */
@@ -223,11 +227,33 @@ public:
 	int useBAT;
 
 	int volume, mute;	
-	void changeVolume(int abs, int vol);		// vol: 0..63, 63 is MIN; abs=0/1 vol, 2/3 mute
+	/**
+	 * \brief Changes the volume.
+	 *
+	 * \param abs What to change:
+	 * \arg \c 0 Volume, relative
+	 * \arg \c 1 Volume, absolute
+	 * \arg \c 2 Mute, set
+	 * \arg \c 3 Mute, change
+	 * \param vol The volume/muteflag to set. In case of volume, 0 means max and 63 means min.
+	 */
+	void changeVolume(int abs, int vol);
 	
+	/**
+	 * \brief Configures the network.
+	 *
+	 * Configures the network according to the configuration stored in the registry.
+	 */
 	void configureNetwork();
-
-
+	
+		/// starts a new recording
+	void recBegin(const char *filename); 
+		/// pauses a recording
+	void recPause();
+		/// resumes a recording
+	void recResume();
+		/// closes a recording
+	void recEnd();
 };
 
 #endif

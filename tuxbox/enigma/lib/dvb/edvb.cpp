@@ -23,6 +23,7 @@
 #include <algorithm>
 #include "streamwd.h"
 #include <core/system/econfig.h>
+#include "record.h"
 
 eDVB *eDVB::instance;
 
@@ -976,6 +977,8 @@ eDVB::eDVB()
 
 eDVB::~eDVB()
 {
+	recEnd();
+	
 	delete eAVSwitch::getInstance();
 	eConfig::getInstance()->setKey("/elitedvb/audio/volume", volume);
 	eConfig::getInstance()->setKey("/elitedvb/audio/mute", mute);
@@ -1418,6 +1421,45 @@ void eDVB::configureNetwork()
 				printf("'%s' failed\n", (const char*)buffer);
 		}
 	}
+}
+
+void eDVB::recBegin(const char *filename)
+{
+	if (recorder)
+		recEnd();
+	recorder=new eDVBRecorder();
+	if (Decoder::parms.apid != -1)		// todo! get pids from PMT
+		recorder->addPID(Decoder::parms.apid);
+	if (Decoder::parms.vpid != -1)
+		recorder->addPID(Decoder::parms.vpid);
+	if (Decoder::parms.tpid != -1)
+		recorder->addPID(Decoder::parms.tpid);
+	if (Decoder::parms.pcrpid != -1)
+		recorder->addPID(Decoder::parms.pcrpid);
+	recorder->addPID(0);
+	if (Decoder::parms.pmtpid != -1)
+		recorder->addPID(Decoder::parms.pmtpid);
+	recResume();
+}
+
+void eDVB::recPause()
+{
+	recorder->stop();
+}
+
+void eDVB::recResume()
+{
+	recorder->start();
+}
+
+void eDVB::recEnd()
+{
+	if (!recorder)
+		return;
+	recPause();
+	recorder->close();
+	delete recorder;
+	recorder=0;
 }
 
 eAutoInitP0<eDVB> init_dvb(4, "eDVB core");
