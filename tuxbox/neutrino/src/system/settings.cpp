@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.6 2002/05/14 21:37:06 McClean Exp $
+        $Id: settings.cpp,v 1.7 2002/07/23 23:47:00 woglinde Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 

@@ -57,7 +57,7 @@ void audioControl::setVolume(char volume)
 {
 	int fd;
 
-	int i = 63;
+	unsigned int i = 63;
 
 	if(volume!=0)
 	{

@@ -34,10 +34,10 @@
 #include "gamelist.h"
 #include "neutrino.h"
 
-#include <strstream.h>
+/*#include <strstream.h>*/
 #include <sstream>
 #include <fstream>
-#include <iostream.h>
+#include <iostream>
 
 #include <dirent.h>
 #include <dlfcn.h>

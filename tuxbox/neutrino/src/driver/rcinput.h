@@ -110,7 +110,7 @@ class CRCInput
 		~CRCInput();     //destructor - closes rc-device
 
 
-		static bool isNumeric(int key);
+		static bool isNumeric(unsigned int key);
 
 		static string getKeyName(int);
 

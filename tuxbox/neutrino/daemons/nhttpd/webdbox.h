@@ -74,7 +74,7 @@ public:
 // get functions to collect data
 	void GetChannelEvents();
 	bool GetStreamInfo(int bitinfo[10]);
-	string GetServiceName(int onid_sid);
+	string GetServiceName(unsigned int onid_sid);
 	bool GetBouquets(void);
 	bool GetBouquet(unsigned int BouquetNr);
 	bool GetChannelList(void);
@@ -107,7 +107,7 @@ public:
 	bool ExecuteBouquetEditor(CWebserverRequest* request);
 // BouquetEditor functions
 
-	void BEShowBouquets(CWebserverRequest* request, int selected);
+	void BEShowBouquets(CWebserverRequest* request, unsigned int selected);
 
 // support functions
 	void ZapTo(string target);

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.33 2002/06/11 21:20:47 dirch Exp $
+	$Id: webdbox.cpp,v 1.34 2002/07/23 23:47:00 woglinde Exp $
 
 	License: GPL
 
@@ -48,7 +48,7 @@
 void TWebDbox::UpdateBouquets(void)
 {
 	GetBouquets();
-	for(int i = 1; i <= BouquetList.size();i++)
+	for(unsigned int i = 1; i <= BouquetList.size();i++)
 		GetBouquet(i);
 	GetChannelList();
 }
@@ -183,9 +183,9 @@ void TWebDbox::GetChannelEvents()
 		ChannelListEvents[(*eventIterator).serviceID()] = &(*eventIterator);
 }
 //-------------------------------------------------------------------------
-string TWebDbox::GetServiceName(int onid_sid)
+string TWebDbox::GetServiceName(unsigned int onid_sid)
 {
-	for(int i = 0; i < ChannelList.size();i++)
+	for(unsigned int i = 0; i < ChannelList.size();i++)
 		if( ChannelList[i].onid_sid == onid_sid)
 			return ChannelList[i].name;
 	return "";

@@ -353,7 +353,7 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	// -- 2002-05-03 rasc
 	processTextToArray("\n") ;
 	processTextToArray(g_Locale->getText("epgviewer.More_Screenings")+":");
-	int i = FollowScreenings(onid_sid, epgData.title);
+	unsigned int i = FollowScreenings(onid_sid, epgData.title);
 
 
 	//show the epg
@@ -571,7 +571,7 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 	prev_id= 0;
 	next_id= 0;
 
-	for ( int i= 0; i< evtlist.size(); i++ )
+	for ( unsigned int i= 0; i< evtlist.size(); i++ )
 	{
 		//printf("%d %llx/%llx - %x %x\n", i, evtlist[i].eventID, id, evtlist[i].startTime, *startzeit);
     	if ( ( evtlist[i].eventID == id ) && ( evtlist[i].startTime == *startzeit ) )

@@ -70,7 +70,7 @@ CMessageBox::CMessageBox( string Caption, string Text, CMessageBoxNotifier* Noti
 	if ( nw> width )
 		width= nw;
 
-	for (int i= 0; i< text.size(); i++)
+	for (unsigned int i= 0; i< text.size(); i++)
 	{
 		int nw= g_Fonts->menu->getRenderWidth( text[i].c_str() ) + 20;
 		if ( nw> width )
@@ -112,7 +112,7 @@ void CMessageBox::paintHead()
 		g_Fonts->menu_title->RenderString(x+10, y+theight+0, width- 10, g_Locale->getText(caption), COL_MENUHEAD);
 
 	frameBuffer->paintBoxRel(x,y+theight+0, width,height - theight + 0, COL_MENUCONTENT);
-	for (int i= 0; i< text.size(); i++)
+	for (unsigned int i= 0; i< text.size(); i++)
 		g_Fonts->menu->RenderString(x+10,y+ theight+ (fheight>>1)+ fheight* (i+ 1), width, text[i].c_str(), COL_MENUCONTENT);
 
 }

@@ -968,7 +968,7 @@ void CRCInput::clearRCMsg()
 *       isNumeric - test if key is 0..9
 *
 **************************************************************************/
-bool CRCInput::isNumeric(int key)
+bool CRCInput::isNumeric(unsigned int key)
 {
 	if( (key>=RC_0) && (key<=RC_9))
 		return true;

@@ -179,7 +179,7 @@ int CBouquetList::show()
 		return res;
 	}
 
-	maxpos= 1;
+	int maxpos= 1;
 	int i= Bouquets.size();
 	while ((i= i/10)!=0)
 		maxpos++;
@@ -191,7 +191,7 @@ int CBouquetList::show()
 	int firstselected = selected+ 1;
 	int zapOnExit = false;
 
-	int chn= 0;
+	unsigned int chn= 0;
 	int pos= maxpos;
 
 	uint msg; uint data;

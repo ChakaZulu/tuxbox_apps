@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.23 2002/07/20 20:15:44 wjoost Exp $
+	$Id: request.cpp,v 1.24 2002/07/23 23:47:00 woglinde Exp $
 
 	License: GPL
 
@@ -519,7 +519,7 @@ void CWebserverRequest::RewriteURL()
 	}
 	else
 	{		// Sonst aufsplitten
-		int split = URL.rfind('/') + 1;
+		unsigned int split = URL.rfind('/') + 1;
 
 		if(split > 0)
 			Path = URL.substr(0,split);
@@ -552,7 +552,7 @@ void CWebserverRequest::RewriteURL()
 		char filename[255]={0};
 		char * str = (char *) Filename.c_str();
 		if(Parent->DEBUG) printf("Mit Sonderzeichen: '%s'\n",str);
-		for (int i = 0,n = 0; i < strlen(str) ;i++ )
+		for (unsigned int i = 0,n = 0; i < strlen(str) ;i++ )
 		{
 			if(str[i] == '%')
 			{

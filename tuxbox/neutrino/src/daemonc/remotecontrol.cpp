@@ -115,7 +115,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
     		{
 				current_sub_onid_sid = data;
 
-				for( int i= 0; i< subChannels.size(); i++)
+				for( unsigned int i= 0; i< subChannels.size(); i++)
 					if ( subChannels[i].onid_sid == data )
 					{
 						selected_subchannel = i;
@@ -253,7 +253,7 @@ void CRemoteControl::getSubChannels()
 			if ( linkedServices.size()> 1 )
 			{
             	are_subchannels = true;
-				for (int i=0; i< linkedServices.size(); i++)
+				for (unsigned int i=0; i< linkedServices.size(); i++)
 				{
 					subChannels.insert( subChannels.end(),
 										 CSubService( linkedServices[i].originalNetworkId<<16 | linkedServices[i].serviceId,
@@ -276,7 +276,7 @@ void CRemoteControl::getNVODs()
 		if ( g_Sectionsd->getNVODTimesServiceKey( current_onid_sid, NVODs ) )
 		{
 			are_subchannels = false;
-			for (int i=0; i< NVODs.size(); i++)
+			for (unsigned int i=0; i< NVODs.size(); i++)
 			{
 				if ( NVODs[i].zeit.dauer> 0 )
 				{
@@ -317,7 +317,7 @@ void CRemoteControl::processAPIDnames()
 	has_unresolved_ctags= false;
 	has_ac3 = false;
 
-	for(int count=0; count< current_PIDs.APIDs.size(); count++)
+	for(unsigned int count=0; count< current_PIDs.APIDs.size(); count++)
 	{
 		if ( current_PIDs.APIDs[count].component_tag != 0xFF )
 		{
@@ -346,9 +346,9 @@ void CRemoteControl::processAPIDnames()
 				has_unresolved_ctags = false;
 				has_ac3 = false;
 
-				for (int i=0; i< tags.size(); i++)
+				for (unsigned int i=0; i< tags.size(); i++)
 				{
-					for (int j=0; j< current_PIDs.APIDs.size(); j++)
+					for (unsigned int j=0; j< current_PIDs.APIDs.size(); j++)
 					{
 						if ( current_PIDs.APIDs[j].component_tag == tags[i].componentTag )
 						{
@@ -379,7 +379,7 @@ void CRemoteControl::processAPIDnames()
 
 				if ( g_settings.audio_DolbyDigital == 1)
 				{
-					for (int j=0; j< current_PIDs.APIDs.size(); j++)
+					for (unsigned int j=0; j< current_PIDs.APIDs.size(); j++)
 						if ( current_PIDs.APIDs[j].is_ac3 )
 						{
 							setAPID( j );
@@ -510,7 +510,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame, boo
 		}
 	#endif
 
-	long long now = getcurrenttime();
+	unsigned long long now = getcurrenttime();
 	if ( zap_completion_timeout < now )
 	{
 		g_Zapit->zapTo_serviceID_NOWAIT( onid_sid );
