@@ -620,7 +620,7 @@ static eString aboutDreambox(void)
 			break;
 		case eSystemInfo::DM5620:
 			result += "<tr><td>Model:</td><td>DM5620</td></tr></td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>Box: Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>Dream-Multimedia-TV</td></tr>";
 			result += "<tr><td>Processor:</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM7000:
