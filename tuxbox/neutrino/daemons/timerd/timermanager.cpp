@@ -70,7 +70,7 @@ void* CTimerManager::timerThread(void *arg)
 			}
 			else if (pos->second->time() <= eNow.time()+10)
 			{
-				printf("[timerd] soon starting: %s (%d:%d)\n", static_cast<CTimerEvent_NextProgram*>(pos->second)->eventInfo.name, pos->second->alarmtime.tm_hour, pos->second->alarmtime.tm_min);
+				dprintf("[timerd] soon starting: %s (%d:%d)\n", static_cast<CTimerEvent_NextProgram*>(pos->second)->eventInfo.name, pos->second->alarmtime.tm_hour, pos->second->alarmtime.tm_min);
 			}
 		}
 
