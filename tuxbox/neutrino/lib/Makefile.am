@@ -1,4 +1,5 @@
 SUBDIRS = \
 	controldclient \
 	sectionsdclient \
-	timerdclient
+	timerdclient \
+	irsend
