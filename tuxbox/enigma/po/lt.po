@@ -5,5 +5,5 @@
 # *************************************
 #
 msgid ""
-msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Tue Mar 9 14:57:38 CET 2004\nLast-Translator: unknown\nLanguage-Team: Lithuania / rimas@centras.lt\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr "Project-Id-Version: tuxbox-enigma 0.1\nPOT-Creation-Date: na\nPO-Revision-Date: Thu Mar 25 16:08:14 CET 2004\nLast-Translator: unknown\nLanguage-Team: Lithuania / rimas@centras.lt\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
 
