@@ -1,5 +1,5 @@
 /*
- * $Id: camd.c,v 1.6 2002/07/29 19:22:33 obi Exp $
+ * $Id: camd.c,v 1.7 2002/08/03 15:14:32 obi Exp $
  *
  * (C) 2001, 2002 by gillem, Hunz, kwon, tmbinc, TripleDES, obi
  *
@@ -145,16 +145,23 @@ int reset (void)
 {
 	unsigned char buffer[1];
 
-#ifdef LOOKUP_ONID
 	unsigned char i;
-	unsigned short onid = parse_sdt();
+
+#ifdef LOOKUP_ONID
+	unsigned short onid;
+#endif /* LOOKUP_ONID */
 
 	for (i = 0; i < MAX_SERVICES; i++)
 	{
 		descrambleservice[i].valid = 0;
 		descrambleservice[i].onID = 0;
 		descrambleservice[i].sID = 0;
+		descrambleservice[i].caID = 0;
+		descrambleservice[i].ecmPID = 0;
 	}
+
+#ifdef LOOKUP_ONID
+	onid = parse_sdt();
 
 	if (onid == 0)
 	{
@@ -248,7 +255,7 @@ int adddescrambleservice (unsigned char numpids, unsigned short onid, unsigned s
 
 	for (i = 0; i < MAX_SERVICES; i++)
 	{
-		if ((descrambleservice[i].onID == onid) && (descrambleservice[i].sID == sid))
+		if ((descrambleservice[i].caID == caid) && (descrambleservice[i].sID == sid) && (descrambleservice[i].ecmPID == ecmpid))
 		{
 			printf("[camd] refusing duplicate service\n");
 			return -1;
