@@ -150,12 +150,15 @@ class CExtendedInput_Item_Char : public CExtendedInput_Item
 
 class CIPInput : public CExtendedInput
 {
+	char          IP[16];
+	std::string * ip;
+
 	protected:
 		virtual void onBeforeExec();
 		virtual void onAfterExec();
 
 	public:
-		CIPInput(string Name, char* Value, string Hint_1 = "", string Hint_2 = "", CChangeObserver* Observ = NULL);
+		CIPInput(std::string Name, std::string &Value, std::string Hint_1 = "", std::string Hint_2 = "", CChangeObserver* Observ = NULL);
 };
 
 //----------------------------------------------------------------------------------------------------

@@ -378,9 +378,10 @@ void CExtendedInput_Item_Char::keyPressed( int key )
 
 //-----------------------------#################################-------------------------------------------------------
 
-CIPInput::CIPInput(string Name, char* Value, string Hint_1, string Hint_2, CChangeObserver* Observ)
-	: CExtendedInput(Name, Value, Hint_1, Hint_2, Observ)
+CIPInput::CIPInput(std::string Name, std::string &Value, std::string Hint_1, std::string Hint_2, CChangeObserver* Observ)
+	: CExtendedInput(Name, IP, Hint_1, Hint_2, Observ)
 {
+	ip = &Value;
 	frameBuffer = CFrameBuffer::getInstance();
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
 	addInputField( new CExtendedInput_Item_Char("0123456789") );
@@ -403,14 +404,14 @@ CIPInput::CIPInput(string Name, char* Value, string Hint_1, string Hint_2, CChan
 
 void CIPInput::onBeforeExec()
 {
-	if(strcmp(value,"")==0)
+	if (ip->empty())
 	{
 		strcpy(value, "000.000.000.000");
 		printf("[neutrino] value-before(2): %s\n", value);
 		return;
 	}
 	int _ip[4];
-	sscanf( value, "%d.%d.%d.%d", &_ip[0], &_ip[1], &_ip[2], &_ip[3] );
+	sscanf(ip->c_str(), "%d.%d.%d.%d", &_ip[0], &_ip[1], &_ip[2], &_ip[3] );
 	sprintf( value, "%03d.%03d.%03d.%03d", _ip[0], _ip[1], _ip[2], _ip[3]);
 }
 
@@ -421,8 +422,10 @@ void CIPInput::onAfterExec()
 	sprintf( value, "%d.%d.%d.%d", _ip[0], _ip[1], _ip[2], _ip[3]);
 	if(strcmp(value,"0.0.0.0")==0)
 	{
-		strcpy(value, "");
+		(*ip) = "";
 	}
+	else
+		(*ip) = value;
 }
 
 //-----------------------------#################################-------------------------------------------------------

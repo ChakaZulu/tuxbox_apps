@@ -57,7 +57,7 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 				a=g_Locale->getText("messagebox.yes");
 			else
 				a=g_Locale->getText("messagebox.no");
-			sprintf(m_entry[i],"%s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i],g_settings.network_nfs_dir[i], 
+			sprintf(m_entry[i],"%s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i], 
 					  g_settings.network_nfs_local_dir[i], a.c_str());
 		}
       returnval = menu();
@@ -73,14 +73,14 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 				a=g_Locale->getText("messagebox.yes");
 			else
 				a=g_Locale->getText("messagebox.no");
-			sprintf(m_entry[i],"%s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i],g_settings.network_nfs_dir[i], 
+			sprintf(m_entry[i],"%s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i], 
 					  g_settings.network_nfs_local_dir[i], a.c_str());
 		}
    }
 	else if(actionKey.substr(0,7)=="domount")
 	{
 		int nr=atoi(actionKey.substr(7,1).c_str());
-		mount(g_settings.network_nfs_ip[nr], g_settings.network_nfs_dir[nr], g_settings.network_nfs_local_dir[nr],true);
+		mount(g_settings.network_nfs_ip[nr].c_str(), g_settings.network_nfs_dir[nr], g_settings.network_nfs_local_dir[nr],true);
 		returnval = menu_return::RETURN_EXIT;
 	}
 	else if(actionKey.substr(0,3)=="dir")
@@ -116,12 +116,11 @@ int CNFSMountGui::menu()
 
 int CNFSMountGui::menuEntry(int nr)
 {
-	char *dir,*local_dir,*ip;
+	char *dir,*local_dir;
 	int* automount;
 	char cmd[9];
 	char cmd2[9];
 
-	ip = g_settings.network_nfs_ip[nr];
 	dir = g_settings.network_nfs_dir[nr];
 	local_dir = g_settings.network_nfs_local_dir[nr];
 	automount=&g_settings.network_nfs_automount[nr];
@@ -132,8 +131,8 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(new CMenuSeparator()); 
 	mountMenuEntryW.addItem(new CMenuForwarder("menu.back")); 
 	mountMenuEntryW.addItem(new CMenuSeparator(CMenuSeparator::LINE));
-	CIPInput  ipInput("nfs.ip", ip);
-	mountMenuEntryW.addItem(new CMenuForwarder("nfs.ip", true, ip, &ipInput));
+	CIPInput  ipInput("nfs.ip", g_settings.network_nfs_ip[nr]);
+	mountMenuEntryW.addItem(new CMenuForwarder("nfs.ip", true, g_settings.network_nfs_ip[nr], &ipInput));
 	CStringInputSMS  dirInput("nfs.dir", dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.dir", true, dir, &dirInput));
 //	CStringInputSMS  localDirInput("nfs.localdir", local_dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
@@ -191,7 +190,7 @@ void CNFSMountGui::automount()
 		for(int i=0 ; i < 4 ;i++)
 		{
 			if(g_settings.network_nfs_automount[i])
-				mount(g_settings.network_nfs_ip[i], g_settings.network_nfs_dir[i], g_settings.network_nfs_local_dir[i], false);
+				mount(g_settings.network_nfs_ip[i].c_str(), g_settings.network_nfs_dir[i], g_settings.network_nfs_local_dir[i], false);
 		}
 	}
 }

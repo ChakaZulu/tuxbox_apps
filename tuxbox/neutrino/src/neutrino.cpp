@@ -172,22 +172,10 @@ CNeutrinoApp* CNeutrinoApp::getInstance()
 
 void CNeutrinoApp::setupNetwork(bool force)
 {
-	if((g_settings.networkSetOnStartup) || (force))
+	if ((g_settings.networkSetOnStartup) || (force))
 	{
-		if(!g_settings.network_dhcp)
-		{
-			dprintf(DEBUG_INFO, "doing network setup...\n");
-			//setup network
-			setNetworkAddress(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast);
-			if(strcmp(g_settings.network_nameserver, "000.000.000.000")!=0)
-			{
-				setNameServer(g_settings.network_nameserver);
-			}
-			if(strcmp(g_settings.network_defaultgateway, "000.000.000.000")!=0)
-			{
-				setDefaultGateway(g_settings.network_defaultgateway);
-			}
-		}
+		dprintf(DEBUG_INFO, "doing network setup...\n");
+		networkConfig.commitConfig();
 	}
 }
 
@@ -197,7 +185,7 @@ void CNeutrinoApp::testNetwork( )
 
 	dprintf(DEBUG_INFO, "doing network test...\n");
 	//test network
-	testNetworkSettings(g_settings.network_ip, g_settings.network_netmask, g_settings.network_broadcast, g_settings.network_defaultgateway, g_settings.network_nameserver,g_settings.network_dhcp);
+	testNetworkSettings(networkConfig.address.c_str(), networkConfig.netmask.c_str(), networkConfig.broadcast.c_str(), networkConfig.gateway.c_str(), networkConfig.nameserver.c_str(), networkConfig.inet_static);
 }
 
 void CNeutrinoApp::showNetwork( )
@@ -422,16 +410,10 @@ int CNeutrinoApp::loadSetup()
 
 	//network
 	g_settings.networkSetOnStartup = configfile.getInt32( "networkSetOnStartup", fromflash==true?1:0 );
-	g_settings.network_dhcp = configfile.getInt32( "network_dhcp", 1);
-	strcpy( g_settings.network_ip, configfile.getString( "network_ip", "10.10.10.100" ).c_str() );
-	strcpy( g_settings.network_netmask, configfile.getString( "network_netmask", "255.255.255.0" ).c_str() );
-	strcpy( g_settings.network_broadcast, configfile.getString( "network_broadcast", "10.10.10.255" ).c_str() );
-	strcpy( g_settings.network_defaultgateway, configfile.getString( "network_defaultgateway", "" ).c_str() );
-	strcpy( g_settings.network_nameserver, configfile.getString( "network_nameserver", "" ).c_str() );
-	strcpy( g_settings.network_nfs_ip[0], configfile.getString( "network_nfs_ip_1", "" ).c_str() );
-	strcpy( g_settings.network_nfs_ip[1], configfile.getString( "network_nfs_ip_2", "" ).c_str() );
-	strcpy( g_settings.network_nfs_ip[2], configfile.getString( "network_nfs_ip_3", "" ).c_str() );
-	strcpy( g_settings.network_nfs_ip[3], configfile.getString( "network_nfs_ip_4", "" ).c_str() );
+	g_settings.network_nfs_ip[0] = configfile.getString("network_nfs_ip_1", "");
+	g_settings.network_nfs_ip[1] = configfile.getString("network_nfs_ip_2", "");
+	g_settings.network_nfs_ip[2] = configfile.getString("network_nfs_ip_3", "");
+	g_settings.network_nfs_ip[3] = configfile.getString("network_nfs_ip_4", "");
 	strcpy( g_settings.network_nfs_dir[0], configfile.getString( "network_nfs_dir_1", "" ).c_str() );
 	strcpy( g_settings.network_nfs_dir[1], configfile.getString( "network_nfs_dir_2", "" ).c_str() );
 	strcpy( g_settings.network_nfs_dir[2], configfile.getString( "network_nfs_dir_3", "" ).c_str() );
@@ -449,7 +431,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_type = configfile.getInt32( "recording_type", 0 );
 	g_settings.recording_stopplayback = configfile.getInt32( "recording_stopplayback", 0 );
 	g_settings.recording_stopsectionsd = configfile.getInt32( "recording_stopsectionsd", 1 );
-	strcpy( g_settings.recording_server_ip, configfile.getString( "recording_server_ip", "10.10.10.10").c_str() );
+	g_settings.recording_server_ip = configfile.getString("recording_server_ip", "10.10.10.10");
 	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
@@ -652,12 +634,6 @@ void CNeutrinoApp::saveSetup()
 
 	//network
 	configfile.setInt32( "networkSetOnStartup", g_settings.networkSetOnStartup );
-	configfile.setInt32( "network_dhcp", g_settings.network_dhcp );
-	configfile.setString( "network_ip", g_settings.network_ip );
-	configfile.setString( "network_netmask", g_settings.network_netmask );
-	configfile.setString( "network_broadcast", g_settings.network_broadcast );
-	configfile.setString( "network_defaultgateway", g_settings.network_defaultgateway );
-	configfile.setString( "network_nameserver", g_settings.network_nameserver );
 	configfile.setString( "network_nfs_ip_1", g_settings.network_nfs_ip[0] );
 	configfile.setString( "network_nfs_ip_2", g_settings.network_nfs_ip[1] );
 	configfile.setString( "network_nfs_ip_3", g_settings.network_nfs_ip[2] );
@@ -1495,29 +1471,30 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( oj );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, "", this, "networktest") );
 	networkSettings.addItem( new CMenuForwarder("networkmenu.show", true, "", this, "networkshow") );
-	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", g_settings.network_dhcp==0, "", this, "network");
+	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", networkConfig.inet_static, "", this, "network");
 	networkSettings.addItem( m0 );
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-	CIPInput*   networkSettings_NetworkIP= new CIPInput("networkmenu.ipaddress", g_settings.network_ip, "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
-	CIPInput*   networkSettings_NetMask= new CIPInput("networkmenu.netmask", g_settings.network_netmask, "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput*   networkSettings_Broadcast= new CIPInput("networkmenu.broadcast", g_settings.network_broadcast, "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput*   networkSettings_Gateway= new CIPInput("networkmenu.gateway", g_settings.network_defaultgateway, "ipsetup.hint_1", "ipsetup.hint_2");
-	CIPInput*   networkSettings_NameServer= new CIPInput("networkmenu.nameserver", g_settings.network_nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*   networkSettings_NetworkIP= new CIPInput("networkmenu.ipaddress", networkConfig.address, "ipsetup.hint_1", "ipsetup.hint_2", MyIPChanger);
+	CIPInput*   networkSettings_NetMask= new CIPInput("networkmenu.netmask", networkConfig.netmask, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*   networkSettings_Broadcast= new CIPInput("networkmenu.broadcast", networkConfig.broadcast, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*   networkSettings_Gateway= new CIPInput("networkmenu.gateway", networkConfig.gateway, "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput*   networkSettings_NameServer= new CIPInput("networkmenu.nameserver", networkConfig.nameserver, "ipsetup.hint_1", "ipsetup.hint_2");
 
-	CMenuForwarder *m1 = new CMenuForwarder("networkmenu.ipaddress", g_settings.network_dhcp==0, g_settings.network_ip, networkSettings_NetworkIP );
-	CMenuForwarder *m2 = new CMenuForwarder("networkmenu.netmask", g_settings.network_dhcp==0, g_settings.network_netmask, networkSettings_NetMask );
-	CMenuForwarder *m3 = new CMenuForwarder("networkmenu.broadcast", g_settings.network_dhcp==0, g_settings.network_broadcast, networkSettings_Broadcast );
-	CMenuForwarder *m4 = new CMenuForwarder("networkmenu.gateway", g_settings.network_dhcp==0, g_settings.network_defaultgateway, networkSettings_Gateway );
-	CMenuForwarder *m5 = new CMenuForwarder("networkmenu.nameserver", g_settings.network_dhcp==0, g_settings.network_nameserver, networkSettings_NameServer );
+	CMenuForwarder *m1 = new CMenuForwarder("networkmenu.ipaddress", networkConfig.inet_static, networkConfig.address, networkSettings_NetworkIP );
+	CMenuForwarder *m2 = new CMenuForwarder("networkmenu.netmask", networkConfig.inet_static, networkConfig.netmask, networkSettings_NetMask );
+	CMenuForwarder *m3 = new CMenuForwarder("networkmenu.broadcast", networkConfig.inet_static, networkConfig.broadcast, networkSettings_Broadcast );
+	CMenuForwarder *m4 = new CMenuForwarder("networkmenu.gateway", networkConfig.inet_static, networkConfig.gateway, networkSettings_Gateway );
+	CMenuForwarder *m5 = new CMenuForwarder("networkmenu.nameserver", networkConfig.inet_static, networkConfig.nameserver, networkSettings_NameServer );
 
 	CDHCPNotifier* dhcpNotifier = new CDHCPNotifier(m1,m2,m3,m4,m5, m0);
 	if(g_settings.networkSetOnStartup)
 	{
 		dhcpNotifier->startStopDhcp();
 	}
-	oj = new CMenuOptionChooser("dhcp", &g_settings.network_dhcp, true, dhcpNotifier);
+	network_dhcp = networkConfig.inet_static ? 0 : 1;
+	oj = new CMenuOptionChooser("dhcp", &network_dhcp, true, dhcpNotifier);
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	networkSettings.addItem( oj );
@@ -3364,7 +3341,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.421 2003/03/03 22:19:15 mws Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.422 2003/03/05 02:20:47 thegoodguy Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

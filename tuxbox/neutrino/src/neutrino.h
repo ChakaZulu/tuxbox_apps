@@ -40,6 +40,7 @@
 #include "neutrinoMessages.h"
 #include "driver/framebuffer.h"
 #include "system/setting_helpers.h"
+#include "system/configure_network.h"
 #include "timerdclient/timerdtypes.h"
 
 #include <string>
@@ -77,6 +78,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		std::string			settingsFile;
 		std::string			scanSettingsFile;
 		CScanSettings			scanSettings;
+		int                             network_dhcp;
 
 		std::string			fontName;
 		std::string			fontFile;
@@ -184,6 +186,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		const CScanSettings& getScanSettings(){ return scanSettings;};
 
 		CChannelList				*channelList;
+		CNetworkConfig                  networkConfig;
 
 		static CNeutrinoApp* getInstance();
 

@@ -132,13 +132,7 @@ struct SNeutrinoSettings
 
 	//network
 	int networkSetOnStartup;
-	int network_dhcp;
-	char network_ip[20];
-	char network_netmask[20];
-	char network_broadcast[20];
-	char network_defaultgateway[20];
-	char network_nameserver[20];
-	char network_nfs_ip[4][20];
+	std::string network_nfs_ip[4];
 	char network_nfs_local_dir[4][100];
 	char network_nfs_dir[4][100];
 	int  network_nfs_automount[4];
@@ -147,7 +141,7 @@ struct SNeutrinoSettings
 	int  recording_type;
 	int  recording_stopplayback;
 	int  recording_stopsectionsd;
-	char recording_server_ip[31];
+	std::string recording_server_ip;
 	char recording_server_port[10];
 	int  recording_server_wakeup;
 	char recording_server_mac[31];
