@@ -164,3 +164,20 @@ Actions:
 10:
 	SETTINGS Settings Save
 ------
++++
+Title:
+Box-Setup
++++
+Index:
+5
++++
+Entries:
+1 Autostart On
+2 Autostart Off
++++
+Actions:
+1:
+	CONTROL Set Autostart On
+2:
+	CONTROL Set Autostart Off
+------

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.9  2002/06/08 15:11:47  TheDOC
+autostart in yadd added
+
 Revision 1.8  2002/06/08 14:40:23  TheDOC
 made lcars tuxvision-compatible
 
@@ -94,6 +97,7 @@ eit::eit(settings *s, osd *o, variables *v)
 	number_perspectives = 0;
 	osd_obj = o;
 	vars = v;
+	gotNow = false;
 }
 
 void eit::addCommand(std::string command)

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.13  2002/06/08 15:11:47  TheDOC
+autostart in yadd added
+
 Revision 1.12  2002/06/02 14:23:36  TheDOC
 some fixes and changes
 
@@ -324,6 +327,7 @@ void channels::receiveCurrentEIT()
 	memset (&next, 0, sizeof (struct event));
 
 	char cmd_text[100];
+	eit_obj->gotNow = false;
 	sprintf(cmd_text, "RECEIVE %d", getCurrentSID());
 	(*eit_obj).addCommand(cmd_text);
 }

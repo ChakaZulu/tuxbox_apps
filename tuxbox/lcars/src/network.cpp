@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.14  2002/06/08 15:11:47  TheDOC
+autostart in yadd added
+
 Revision 1.13  2002/06/08 14:40:23  TheDOC
 made lcars tuxvision-compatible
 
@@ -270,10 +273,10 @@ void *network::startlistening(void *object)
 		command[parm_count][act_pos - 1] = '\0';
 		parm_count++;
 
-		printf ("%d Parameter\n", parm_count);
+		//printf ("%d Parameter\n", parm_count);
 		for (int i = 0; i < parm_count; i++)
 		{
-			printf("Parameter %d: %s\n", i, command[i]);
+			//printf("Parameter %d: %s\n", i, command[i]);
 		}
 
 		std::string headerok = "HTTP/1.1 200 OK\nConnection: close\nContent-Type: text/html\n\r\n";

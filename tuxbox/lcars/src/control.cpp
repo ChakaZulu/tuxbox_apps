@@ -682,6 +682,20 @@ int control::runCommand(command_class command, bool val)
 				runSub(command.args[1]);
 			}
 		}
+		else if (command.command == C_Set)
+		{
+			if (command.args[0] == "Autostart")
+			{
+				if (command.args[1] == "On")
+				{
+					system("touch /var/etc/.lcars");
+				}
+				else if (command.args[1] == "Off")
+				{
+					system("rm /var/etc/.lcars");
+				}
+			}
+		}
 		else if (command.command == C_Var)
 		{
 			if (command.args[0] == "Set")
