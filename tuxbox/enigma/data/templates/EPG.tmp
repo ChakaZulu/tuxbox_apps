@@ -3,15 +3,16 @@
 	<title>EPG</title>
 	<link rel="stylesheet" type="text/css" href="/epgview.css">
 	<script language="javascript">
-		function record()
+		function record(xy)
 		{
-			win=window.open("/record", "switchStatus", "width=200, height=200, left=0, top=0");
+			win=window.open("/addTimerEntry?"+xy, "switchStatus", "width=200, height=200, left=0, top=0");
 			win.focus();
+			parent.setTimeout("reload()", 300);
 		}
 
-		function EPGDetails()
+		function EPGDetails(xy)
 		{
-			win=window.open("/EPGDetails", "switchStatus", "width=200, height=200, left=0, top=0");
+			win=window.open("/EPGDetails?"+xy, "switchStatus", "width=200, height=200, left=0, top=0");
 			win.focus();
 		}
 	</script>
