@@ -119,7 +119,7 @@
 
 // uncomment if you want to have a "test" menue entry  (rasc)
 
-#define __EXPERIMENTAL_CODE__
+// #define __EXPERIMENTAL_CODE__
 #ifdef __EXPERIMENTAL_CODE__
 
 #include "gui/ch_mosaic.h"
