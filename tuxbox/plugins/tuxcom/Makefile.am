@@ -1,5 +1,5 @@
 
-INCLUDES =  \
+AM_CPPFLAGS =  \
 	@FREETYPE_CFLAGS@ \
 	-I$(top_srcdir)/include
 
@@ -18,5 +18,5 @@ tuxcom_la_LDFLAGS = -rpath $(PLUGINDIR) -module -avoid-version
 install-exec-local:
 	install -d $(DESTDIR)$(PLUGINDIR)
 	install -d $(DESTDIR)$(CONFIGDIR)
-	$(LIBTOOL) install tuxcom.la $(DESTDIR)$(PLUGINDIR) 
+	$(LIBTOOL) --mode=install install tuxcom.la $(DESTDIR)$(PLUGINDIR) 
 	install -m 0644 $(srcdir)/tuxcom.cfg $(DESTDIR)$(PLUGINDIR)
