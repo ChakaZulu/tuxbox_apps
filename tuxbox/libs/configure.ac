@@ -16,7 +16,9 @@ AC_OUTPUT([
 Makefile
 libavs/Makefile
 liblcddisplay/Makefile
+liblircdclient/Makefile
 tuxbox-avs.pc
 tuxbox-lcddisplay.pc
+tuxbox-lircdclient.pc
 ])
 
