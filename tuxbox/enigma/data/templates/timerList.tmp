@@ -14,6 +14,6 @@
 <body bgcolor="#ffffff">
 #BODY#
 <br><br>
-<u><a href="javascript:clearTimerList()">Clear Timer List</a></u>
+<u><a href="javascript:clearTimerList()">Delete completed/failed timer events</a></u>
 </body>
 </html>
