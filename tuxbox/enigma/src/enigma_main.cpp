@@ -897,8 +897,10 @@ void eZapMain::leaveService(eService *service)
 
 	EINow->setText("");
 	EINowDuration->setText("");
+	EINowTime->setText("");
 	EINext->setText("");
 	EINextDuration->setText("");
+	EINextTime->setText("");
 	
 	Progress->clear();
 	Progress->hide();
