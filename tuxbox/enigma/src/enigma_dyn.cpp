@@ -859,7 +859,7 @@ static eString getLeftNavi(eString mode, eString path)
 		result += "<br>";
 		result += button(110, "Plugins", LEFTNAVICOLOR, "?mode=controlPlugins");
 		result += "<br>";
-		result += button(110, "Timer List", LEFTNAVICOLOR, "?mode=controlTimerList");
+		result += button(110, "Timer", LEFTNAVICOLOR, "?mode=controlTimerList");
 	}
 	else
 #ifndef DISABLE_FILE
@@ -1646,16 +1646,13 @@ static eString getZapContent2(eString mode, eString path)
 			}
 		}
 
-		eString tmpFile = readFile(HTDOCS_DIR + "zapdata.js");
-		tmpFile.strReplace("#BOUQUETS#", bouquets);
-		tmpFile.strReplace("#BOUQUETREFS#", bouquetrefs);
-		tmpFile.strReplace("#CHANNELS#", channels);
-		tmpFile.strReplace("#CHANNELREFS#", channelrefs);
-		tmpFile.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
-		tmpFile.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
-
-		result = readFile(TEMPLATE_DIR + "zap.tmp");
-		result.strReplace("#ZAPDATA#", tmpFile);
+		result = readFile(HTDOCS_DIR + "zapdata.js");
+		result.strReplace("#BOUQUETS#", bouquets);
+		result.strReplace("#BOUQUETREFS#", bouquetrefs);
+		result.strReplace("#CHANNELS#", channels);
+		result.strReplace("#CHANNELREFS#", channelrefs);
+		result.strReplace("#CURRENTBOUQUET#", eString().sprintf("%d", currentBouquet));
+		result.strReplace("#CURRENTCHANNEL#", eString().sprintf("%d", currentChannel));
 	}
 
 	return result;
@@ -1736,7 +1733,9 @@ static eString getZap(eString mode, eString path)
 		if (smallScreen == 0)
 		{
 			result += getZapNavi(mode, path);
-			result += getZapContent2(mode, path);
+			eString tmp = readFile(TEMPLATE_DIR + "zap.tmp");
+			tmp.strReplace("#ZAPDATA#", getZapContent2(mode, path));
+			result += tmp;
 		}
 		else
 		{
@@ -2093,6 +2092,7 @@ static eString getControlTimerList()
 	// buttons
 	result.strReplace("#BUTTONCLEANUP#", button(100, "Cleanup", BLUE, "javascript:cleanupTimerList()"));
 	result.strReplace("#BUTTONCLEAR#", button(100, "Clear", RED, "javascript:clearTimerList()"));
+	result.strReplace("#BUTTONADD#", button(100, "Add", GREEN, "javascript:showAddTimerEventWindow()"));
 
 	return result;
 }
@@ -2284,7 +2284,7 @@ static eString getContent(eString mode, eString path)
 	else
 	if (mode == "controlTimerList")
 	{
-		result = getTitle("CONTROL: Timer List");
+		result = getTitle("CONTROL: Timer");
 		result += getControlTimerList();
 	}
 	else
@@ -3632,6 +3632,60 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	return "<script language=\"javascript\">window.close();</script>";
 }
 
+static eString addTimerEvent2(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	eString result;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts);
+	eString serviceRef = opt["ref"];
+	eString eventID = opt["ID"];
+	eString sday = opt["sday"];
+	eString smonth = opt["smonth"];
+	eString shour = opt["shour"];
+	eString smin = opt["smin"];
+	eString eday = opt["eday"];
+	eString emonth = opt["emonth"];
+	eString ehour = opt["ehour"];
+	eString emin = opt["emin"];
+	eString description = httpUnescape(opt["descr"]);
+	eString channel = httpUnescape(opt["channel"]);
+
+	time_t now = time(0) + eDVB::getInstance()->time_difference;
+	tm start = *localtime(&now);
+	start.tm_mday = atoi(sday.c_str());
+	start.tm_mon = atoi(smonth.c_str()) - 1;
+	start.tm_hour = atoi(shour.c_str());
+	start.tm_min = atoi(smin.c_str());
+	start.tm_sec = 0;
+	tm end = *localtime(&now);
+	end.tm_mday = atoi(eday.c_str());
+	end.tm_mon = atoi(emonth.c_str()) -1 ;
+	end.tm_hour = atoi(ehour.c_str());
+	end.tm_min = atoi(emin.c_str());
+	end.tm_sec = 0;
+
+	time_t eventStartTime = mktime(&start);
+	time_t eventEndTime = mktime(&end);
+	int duration = eventEndTime - eventStartTime;
+#if 0
+	int eventid;
+	sscanf(eventID.c_str(), "%x", &eventid);
+	// printf("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d\n", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
+	//								end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
+
+	EITEvent evt;
+	evt.start_time = eventStartTime;
+	evt.duration = duration;
+	evt.event_id = eventid;
+	printf("[CHANGETIMER] startTime = %d, startDuration = %d, eventID = %x\n", evt.start_time, evt.duration, evt.event_id);
+	eServiceReference ref = string2ref(serviceRef);
+	eTimerManager::getInstance()->modifyEventInTimerList(&ref, &evt, channel + "/" + description);
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+#endif
+	return "<html><body>This function is not working yet.</body></html>";
+}
+
 static eString editTimerEvent(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
@@ -3667,6 +3721,33 @@ static eString editTimerEvent(eString request, eString dirpath, eString opts, eH
 
 	result.strReplace("#CHANNEL#", channel);
 	result.strReplace("#DESCRIPTION#", description);
+	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
+	return result;
+}
+
+static eString showAddTimerEventWindow(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	std::map<eString, eString> opt = getRequestOptions(opts);
+
+	time_t now = time(0) + eDVB::getInstance()->time_difference;
+	tm start = *localtime(&now);
+	tm end = *localtime(&now);
+
+	eString result = readFile(TEMPLATE_DIR + "addTimerEvent.tmp");
+
+	result.strReplace("#SDAYOPTS#", genOptions(1, 31, 1, start.tm_mday));
+	result.strReplace("#SMONTHOPTS#", genOptions(1, 12, 1, start.tm_mon + 1));
+	result.strReplace("#SHOUROPTS#", genOptions(0, 23, 1, start.tm_hour));
+	result.strReplace("#SMINOPTS#", genOptions(0, 55, 5, (start.tm_min / 5) * 5));
+
+	result.strReplace("#EDAYOPTS#", genOptions(1, 31, 1, end.tm_mday));
+	result.strReplace("#EMONTHOPTS#", genOptions(1, 12, 1, end.tm_mon + 1));
+	result.strReplace("#EHOUROPTS#", genOptions(0, 23, 1, end.tm_hour));
+	result.strReplace("#EMINOPTS#", genOptions(0, 55, 5, (end.tm_min / 5) * 5));
+
+	result.strReplace("#ZAPDATA#", getZapContent2("zap", zap[ZAPMODETV][ZAPSUBMODEBOUQUETS]));
+
 	eTimerManager::getInstance()->saveTimerList(); //not needed, but in case enigma crashes ;-)
 	return result;
 }
@@ -3845,8 +3926,10 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/setVideo", setVideo);
 	dyn_resolver->addDyn("GET", "/showTimerList", showTimerList, true);
 	dyn_resolver->addDyn("GET", "/addTimerEvent", addTimerEvent, true);
+	dyn_resolver->addDyn("GET", "/addTimerEvent2", addTimerEvent2, true);
 	dyn_resolver->addDyn("GET", "/deleteTimerEvent", deleteTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/editTimerEvent", editTimerEvent, true);
+	dyn_resolver->addDyn("GET", "/showAddTimerEventWindow", showAddTimerEventWindow, true);
 	dyn_resolver->addDyn("GET", "/changeTimerEvent", changeTimerEvent, true);
 	dyn_resolver->addDyn("GET", "/cleanupTimerList", cleanupTimerList, true);
 	dyn_resolver->addDyn("GET", "/clearTimerList", clearTimerList, true);

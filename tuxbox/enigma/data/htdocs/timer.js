@@ -12,7 +12,7 @@ function clearTimerList()
 
 function editTimerEvent(xy)
 {
-	NewWindow('/editTimerEvent?'+xy, 'editTimer', '750', '200', 'no');
+	NewWindow('/editTimerEvent?'+xy, 'editTimer', '780', '200', 'no');
 }
 
 function deleteTimerEvent(xy)
@@ -20,3 +20,15 @@ function deleteTimerEvent(xy)
 	document.location = "/deleteTimerEvent?"+xy;
 	setTimeout("reload()", 500);
 }
+
+function addTimerEvent()
+{
+	alert("Sorry, this function is not working yet...");
+}
+
+function showAddTimerEventWindow()
+{
+	NewWindow("/showAddTimerEventWindow", 'addTimer', '780', '250', 'no');
+}
+
+
