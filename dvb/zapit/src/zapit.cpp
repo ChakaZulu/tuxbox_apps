@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.212 2002/09/03 08:39:47 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.213 2002/09/03 09:02:21 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -782,7 +782,7 @@ void parse_command (CZapitClient::commandHead &rmsg)
 				prepare_channels();
 				response.cmd = CZapitClient::CMD_READY;
 				send(connfd, &response, sizeof(response), 0);
-				eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED);
+				eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
 				break;
 			}
 			case CZapitClient::CMD_SCANSTART:
@@ -1103,7 +1103,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.212 2002/09/03 08:39:47 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.213 2002/09/03 09:02:21 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
