@@ -191,7 +191,7 @@ keychooser.text2 CIKMAK ICIN BEKLEYINIZ
 screensetup.upperleft rot = EKRAN KENARI ÜST, SOL
 screensetup.lowerright grün = EKRAN KENARI ALT, SAG
 
-channellist.head BÜTÜN KANLLAR
+channellist.head BÃœTÃœN KANLLAR
 channellist.nonefound No channels were found!\nPlease execute a scan\n(dbox-key -> service)
 channellist.since since %02d:%02d
 

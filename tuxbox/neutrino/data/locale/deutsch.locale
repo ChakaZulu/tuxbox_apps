@@ -225,7 +225,7 @@ keychooser.text2 Zum abbrechen warten..
 screensetup.upperleft rot = Bildrand oben, links
 screensetup.lowerright grün = Bildrand unten, rechts
 
-channellist.head Alle Kanäle
+channellist.head Alle KanÃ¤le
 channellist.nonefound Es wurden keine Kanäle gefunden!\nFühren Sie bitte eine Kanalsuche durch\n(dbox-Taste -> Service)
 channellist.since seit %02d:%02d
 
