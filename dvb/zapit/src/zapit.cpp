@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.288 2003/01/30 17:21:16 obi Exp $
+ * $Id: zapit.cpp,v 1.289 2003/01/30 19:15:49 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -154,17 +154,16 @@ CZapitClient::responseGetLastChannel load_settings(void)
  * return -1 otherwise
  *
  */
+
+static uint32_t tuned_transponder_id = 0;
+
 int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 {
 	bool transponder_change;
 	tallchans_iterator cit;
 	uint32_t current_transponder_id;
-	uint32_t last_transponder_id;
 
-	if (!channel)
-		last_transponder_id = 0;
-	else
-		last_transponder_id = channel->getTsidOnid();
+	DBG("tuned_transponder_id: %08x", tuned_transponder_id);
 
 	/* usual zap */
 	if (!tsid_onid) {
@@ -210,7 +209,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	stopPlayBack();
 
 	/* if channel's transponder does not match the transponder tuned before ... */
-	if (current_transponder_id != last_transponder_id) {
+	if (current_transponder_id != tuned_transponder_id) {
 
 		/* ... tune to it if not in record mode ... */
 		if (currentMode & RECORD_MODE)
@@ -234,6 +233,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 		}
 
 		transponder_change = true;
+
+		tuned_transponder_id = current_transponder_id;
 	}
 	else {
 		transponder_change = false;
@@ -314,6 +315,9 @@ int select_nvod_subservice_num(int num)
 
 	if ((!channel) || (channel->getServiceType() != NVOD_REFERENCE_SERVICE) || (num < 0))
 		return -1;
+
+	if (channel->getTsidOnid() != tuned_transponder_id)
+		zapit(channel->getChannelID(), false, 0);
 
 	if (nvod_service_ids(channel->getTransportStreamId(), channel->getOriginalNetworkId(), channel->getServiceId(),
 				num, &transport_stream_id, &original_network_id, &service_id) < 0)
@@ -458,6 +462,7 @@ int start_scan(void)
 	allchans.clear();  // <- this invalidates all bouquets, too!
 	stopPlayBack();
 
+	tuned_transponder_id = 0;
 	found_transponders = 0;
 	found_channels = 0;
 	scan_runs = 1;
@@ -1381,7 +1386,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.288 2003/01/30 17:21:16 obi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.289 2003/01/30 19:15:49 obi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
