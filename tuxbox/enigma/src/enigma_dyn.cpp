@@ -1196,18 +1196,19 @@ static eString getVolBar()
 	std::stringstream result;
 	int volume = atoi(getVolume().c_str());
 
-	result << "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
+	result << "<table id=\"volumebar\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
 		"<tr>";
 
-	for (int i = 1; i <= (volume / 10); i++)
+	for (int i = 1; i <= 10; i++)
 	{
-		result << "<td width=15 height=8><a class=\"volgreen\" href=\"javascript:setVol(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></td>";
-	}
-	for (int i = (volume / 10) + 1; i <= 10; i++)
-	{
-		result << "<td width=15 height=8><a class=\"volnot\" href=\"javascript:setVol(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></td>";
+		result << "<td width=\"15\" height=\"8\">"
+			"<a href=\"javascript:setVol(" << i << ")\">";
+		if (i <= volume / 10)
+			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
+		else
+			result << "<img src=\"led_off.gif\" border=\"0\" width=\"15\" height=\"8\">";
+		result << "</a>"
+			"</td>";
 	}
 
 	result << "<td>"
@@ -1244,22 +1245,23 @@ static eString getVideoBar()
 		videopos = (current * 10) / total;
 	}
 
-	result << "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
+	result << "<table id=\"videobar\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
 		"<tr>";
 
-	for (int i = 1; i <= videopos; i++)
+	for (int i = 1; i <= 10; i++)
 	{
-		result << "<td width=15 height=8><a class=\"vidblue\" href=\"javascript:setVid(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></td>";
-	}
-	for (int i = videopos + 1; i <= 10; i++)
-	{
-		result << "<td width=15 height=8><a class=\"vidnot\" href=\"javascript:setVid(" << i << ")\">"
-			"<img src=\"trans.gif\" border=0></a></td>";
+		result << "<td width=\"15\" height=\"8\">"
+			"<a href=\"javascript:setVol(" << i << ")\">";
+		if (i <= videopos)
+			result << "<img src=\"led_on.gif\" border=\"0\" width=\"15\" height=\"8\">";
+		else
+			result << "<img src=\"led_off.gif\" border=\"0\" width=\"15\" height=\"8\">";
+		result << "</a>"
+			"</td>";
 	}
 
-	result << "<td>&nbsp;&nbsp;-" << min << ":" << sec << "</td>";
-	result << "</tr>"
+	result << "<td>&nbsp;&nbsp;-" << min << ":" << sec << "</td>"
+		"</tr>"
 		"</table>";
 	return result.str();
 }
@@ -2336,9 +2338,13 @@ static eString getEITC2(eString result)
 	now_text = now_text.left(30);
 	next_text = next_text.left(30);
 	result.strReplace("#NOWT#", now_time);
+	if (now_duration != "&nbsp;")
+		now_duration = "(" + now_duration + ")";
 	result.strReplace("#NOWD#", now_duration);
 	result.strReplace("#NOWST#", now_text);
 	result.strReplace("#NEXTT#", next_time);
+	if (next_duration != "&nbsp;")
+		next_duration = "(" + next_duration + ")";
 	result.strReplace("#NEXTD#", next_duration);
 	result.strReplace("#NEXTST#", next_text);
 	result.strReplace("#VOLBAR#", getVolBar());

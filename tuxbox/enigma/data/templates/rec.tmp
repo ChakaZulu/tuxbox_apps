@@ -8,7 +8,7 @@
 				<select style="width: 0px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=0></select>
 			</td>
 			<td>
-				<select style="width: 650px; font-weight: bold;" onChange=channelChange() name="channel" size=30></select>
+				<select style="width: 620px; font-weight: bold;" onChange=channelChange() name="channel" size=30></select>
 			</td>
 		</tr>
 	</table>
@@ -18,7 +18,7 @@
 		<td style="width: 210px">
 			<input type="button" name="delete" style="width: 100px; height: 22px; background-color: #CB0303" value="DELETE" onClick=javascript:deleteMovie()>
 		</td>
-		<td style="width: 450px" align=center>
+		<td style="width: 410px" align=center>
 			<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>
 			&nbsp;&nbsp;
 			<a href="javascript:zapChannelForward()"><img src="down.gif" border="0"></a>

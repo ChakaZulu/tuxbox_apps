@@ -20,7 +20,7 @@
 						<tr>
 							<td width=40 align=left><span class="epgzeit"><b>#NOWT#</b></span></td>
 							<td width=5>&nbsp;</td>
-							<td width=50 align=left><span class="epgdur">(#NOWD#)</span></td>
+							<td width=50 align=left><span class="epgdur">#NOWD#</span></td>
 							<td width=5>&nbsp;</td>
 							<td width=320 Align=left><span class="epgname"><b>#NOWST#</b></span></td>
 							<td width=5>&nbsp;</td>
@@ -29,7 +29,7 @@
 						<tr>
 							<td width=40 align=left><span class="epgzeit">#NEXTT#</span></td>
 							<td width=5>&nbsp;</td>
-							<td width=50 align=left><span class="epgdur">(#NEXTD#)</span></td>
+							<td width=50 align=left><span class="epgdur">#NEXTD#</span></td>
 							<td width=5>&nbsp;</td>
 							<td width=320 align=left><span class="epgname">#NEXTST#</b></td>
 							<td width=5>&nbsp;</td>
