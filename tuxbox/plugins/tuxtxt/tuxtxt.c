@@ -50,6 +50,16 @@ void prev_dec(int *i)           /* counting down */
 		*i = 0x899;
 }
 
+void next_hex(int *i, int inc) /* skip to next */
+{
+	(*i) += inc;
+
+	if (*i > 0x899)
+		*i = 0x100;
+	else if (*i < 0x100)
+		*i = 0x899;
+}
+
 int getIndexOfPageInHotlist()
 {
 	int i;
@@ -383,7 +393,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.64 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.65 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -464,7 +474,7 @@ void plugin_exec(PluginParam *par)
 
 					if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 					{
-						for (i=0; i < 6; i++)
+						for (i=0; i < 7; i++)
 						{
 							n = avstable_scart[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -474,7 +484,7 @@ void plugin_exec(PluginParam *par)
 						while (GetRCCode() != 1) /* wait for any key */
 							UpdateLCD();
 
-						for (i=1; i < 6; i += (RCCode == RC_HELP) ? 2 : 1) /* exit with ?: just restore video, leave audio */
+						for (i=1; i < 7; i += ((RCCode == RC_HELP) ? 2 : 1)) /* exit with ?: just restore video, leave audio */
 						{
 							n = avstable_dvb[vendor][i];
 							if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -603,6 +613,7 @@ int Init()
 	color_mode   = 1;
 	national_subset = 4;	/* german */
 	auto_national   = 1;
+	showhex         = 0;
 
 	if ((conf = fopen(TUXTXTCONF, "rt")) == 0)
 	{
@@ -631,6 +642,8 @@ int Init()
 				if (ival >= 0 && ival <= 12)
 					national_subset = ival;
 			}
+			else if (1 == sscanf(line, "ShowHexPages %d", &ival))
+				showhex = ival & 1;
 		}
 		fclose(conf);
 	}
@@ -756,7 +769,14 @@ int Init()
 	       var_screeninfo.xres_virtual, var_screeninfo.yres_virtual,
 	       var_screeninfo.yoffset);
 #endif
-		
+
+	/* "correct" semi-transparent for Nokia (GTX only allows 2(?) levels of transparency) */
+	if (tuxbox_get_vendor() == TUXBOX_VENDOR_NOKIA)
+	{
+		tr1[transp2-1] = 0xFFFF;
+		tr2[transp2-1] = 0xFFFF;
+	}
+
 	/* set new colormap */
 	if (color_mode)
 	{
@@ -906,7 +926,7 @@ void CleanUp()
 
 	if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 	{
-		for (i=0; i < 6; i++) /* reactivate dvb */
+		for (i=0; i < 7; i++) /* reactivate dvb */
 		{
 			n = avstable_dvb[vendor][i];
 			if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -1461,6 +1481,8 @@ void ConfigMenu(int Init)
 		menu[MenuLine[M_NAT]*2*Menu_Width +  1] = ' ';
 	if (national_subset == 12 || auto_national)
 		menu[MenuLine[M_NAT]*2*Menu_Width + 28] = ' ';
+	if (showhex)
+		menu[MenuLine[M_PID]*2*Menu_Width + 27] = '?';
 
 	/* clear framebuffer */
 	ClearFB(transp);
@@ -1798,6 +1820,11 @@ void ConfigMenu(int Init)
 					}
 				}
 				break;
+				case M_PID:
+					showhex ^= 1;
+					menu[MenuLine[M_PID]*2*Menu_Width + 27] = (showhex ? '?' : ' ');
+					Menu_HighlightLine(menu, MenuLine[menuitem], 1);
+				break;
 				}
 				break; /* RC_MUTE */
 
@@ -2128,7 +2155,10 @@ void GetNextPageOne()
 	lastpage = page;
 
 	do {
-		next_dec(&page);
+		if (showhex)
+			next_hex(&page, 1);
+		else
+			next_dec(&page);
 	} while (subpagetable[page] == 0xFF && page != lastpage);
 
 	/* update page */
@@ -2161,7 +2191,10 @@ void GetPrevPageOne()
 	lastpage = page;
 
 	do {
-		prev_dec(&page);
+		if (showhex)
+			next_hex(&page, -1);
+		else
+			prev_dec(&page);
 	} while (subpagetable[page] == 0xFF && page != lastpage);
 
 	/* update page */
@@ -2749,7 +2782,6 @@ void SwitchScreenMode(int newscreenmode)
 #if CFGTTF 
 		fontwidth = fw;
 		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
-		StartX = sx + (((ex-sx) - (40*fw+2+tw)) / 2); /* center screen */
 #else	 /* !TTF */
 		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fw;
 		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = fh+1;
@@ -2824,7 +2856,7 @@ void SwitchTranspMode()
 	}
 	else if (transpmode == 1)
 	{
-		ClearBB(transp2);
+		ClearBB(transp);
 		pageupdate = 1;
 	}
 	else
@@ -2908,11 +2940,16 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	}
 
 	/* get colors */
-	if (transpmode == 1 && PosY < StartY + 24*fontheight)
-		bgcolor = transp2;
+	fgcolor = Attribute & 0x0F;
+	if (transpmode == 1)
+	{
+		if (fgcolor == transp) /* outside boxed elements (subtitles, news) completely transparent */
+			bgcolor = transp;
+		else
+			bgcolor = transp2;
+	}
 	else
 		bgcolor = (Attribute>>4) & 0x0F;
-	fgcolor = Attribute & 0x0F;
 
 	/* handle mosaic */
 	if ((Attribute & 0x300) &&
@@ -3079,7 +3116,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 
 	if (!(glyph = FT_Get_Char_Index(face, Char)))
 	{
-#if 1
+#if DEBUG
 		printf("TuxTxt <FT_Get_Char_Index for Char %x \"%c\" failed\n", Char, Char);
 #endif
 		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
@@ -3093,6 +3130,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 		printf("TuxTxt <FTC_SBitCache_Lookup: 0x%x> c%x a%x g%x w%d h%d x%d y%d\n",
 				 error, Char, Attribute, glyph, fontwidth, fontheight, PosX, PosY);
 #endif
+		FillRect(PosX, PosY + yoffset, fontwidth, fontheight, bgcolor);
 		PosX += fontwidth;
 		return;
 	}
@@ -3316,11 +3354,16 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
   	if (yoffset >= 0)	/* framebuffer */
 	{
 		unsigned char *p = lfb + PosX + (yoffset+PosY)*var_screeninfo.xres; /* running pointer into framebuffer */
-		if (transpmode == 1 && PosY < StartY + 24*fontheight)
-			bgcolor = transp2;
+		fgcolor = Attribute & 0x0F;
+		if (transpmode == 1)
+		{
+			if (fgcolor == transp) /* outside boxed elements (subtitles, news) completely transparent */
+				bgcolor = transp;
+			else
+				bgcolor = transp2;
+		}
 		else
 			bgcolor = (Attribute>>4) & 0x0F;
-		fgcolor = Attribute & 0x0F;
 		
 		for (Row = sbit->height; Row; Row--) /* row counts up, but down may be a little faster :) */
 		{
@@ -3857,7 +3900,7 @@ void CopyBB2FB()
 		src += var_screeninfo.xres * var_screeninfo.yres;
 		
 	if (transpmode)
-		fillcolor = transp2;
+		fillcolor = transp;
 	else
 		fillcolor = black;
 
@@ -3872,7 +3915,7 @@ void CopyBB2FB()
 		src += var_screeninfo.xres;
 	}
 
-	memcpy(dst, src, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
+	memcpy(dst, lfb + (StartY+24*fontheight)*var_screeninfo.xres, var_screeninfo.xres*fontheight); /* copy line25 in normal height */
 	memset(dst + var_screeninfo.xres*fontheight, fillcolor, var_screeninfo.xres * (var_screeninfo.yres - StartY - 25*fontheight));
 }
 
@@ -4267,6 +4310,7 @@ void DecodePage()
 
 				case release_mosaic:
 					hold = 2;
+					break;
 				}
 
 				/* handle spacing attributes */

@@ -90,8 +90,6 @@ int ymosaic[4];
 #define fontwidth_topmenusmall 8
 #endif
 
-#define TOPMENU169 0	/* TOP-menu present in 16:9 mode (or TV picture in full height) */
-
 #define TV43STARTX (StartX + 40*fontwidth_topmenumain)
 #define TV169STARTX (StartX + 40*fontwidth_small)
 #define TVENDX (StartX + 40*fontwidth_normal)
@@ -381,7 +379,7 @@ int inputcounter;
 int zoommode, screenmode, transpmode, hintmode, boxed;
 int catch_row, catch_col, catched_page, pagecatching;
 int prev_100, prev_10, next_10, next_100;
-int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, national_subset, auto_national;
+int fnc_old, saa_old, screen_mode1, screen_mode2, color_mode, national_subset, auto_national, showhex;
 int clear_page, clear_subpage;
 int pids_found, current_service, getpidsdone;
 int SDT_ready;
@@ -429,21 +427,21 @@ const unsigned char countryconversiontable[] = { 1, 4, 11, 5, 3, 8, 0, 9 };
 
 unsigned char vendor;	/* 0 Nokia, 1 Philips, 2 Sagem */
 /* typ_vcr/dvb: 	v1 a1 v2 a2 v3 a3 (vcr_only: fblk) */
-const int avstable_ioctl[6] =
+const int avstable_ioctl[7] =
 {
-	AVSIOSVSW1, AVSIOSASW1, AVSIOSVSW2, AVSIOSASW2, AVSIOSVSW3, AVSIOSASW3
+	AVSIOSVSW1, AVSIOSASW1, AVSIOSVSW2, AVSIOSASW2, AVSIOSVSW3, AVSIOSASW3, AVSIOSFBLK
 };
-const unsigned char avstable_scart[3][6] =
+const unsigned char avstable_scart[3][7] =
 {
-	{ 3, 2, 1, 0, 1, 1 },
-	{ 3, 3, 2, 2, 3, 2 },
-	{ 2, 1, 0, 0, 0, 0 },
+	{ 3, 2, 1, 0, 1, 1, 2 },
+	{ 3, 3, 2, 2, 3, 2, 2 },
+	{ 2, 1, 0, 0, 0, 0, 0 },
 };
-const unsigned char avstable_dvb[3][6] =
+const unsigned char avstable_dvb[3][7] =
 {
-	{ 5, 1, 1, 0, 1, 1 },
-	{ 1, 1, 1, 1, 1, 1 },
-	{ 0, 0, 0, 0, 0, 0 },
+	{ 5, 1, 1, 0, 1, 1, 0 },
+	{ 1, 1, 1, 1, 1, 1, 0 },
+	{ 0, 0, 0, 0, 0, 0, 0 },
 };
 
 /* buffers */
