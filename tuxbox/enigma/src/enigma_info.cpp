@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.2 2002/05/12 16:22:25 Ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.3 2002/05/31 20:28:38 tmbinc Exp $
  */
 
 #include "enigma_info.h"
@@ -54,9 +54,9 @@ void eZapInfo::sel_close(eListboxEntry *)
 
 void eZapInfo::sel_streaminfo(eListboxEntry *)
 {
+	hide();	
 	eStreaminfo si;
 	si.setLCD(LCDTitle, LCDElement);
-	hide();	
 	si.show();
 	si.exec();
 	si.hide();
@@ -65,9 +65,9 @@ void eZapInfo::sel_streaminfo(eListboxEntry *)
 
 void eZapInfo::sel_bnversion(eListboxEntry *)
 {
+	hide();	
 	ShowBNVersion bn;
 	bn.setLCD(LCDTitle, LCDElement);
-	hide();	
 	bn.show();
 	bn.exec();
 	bn.hide();
