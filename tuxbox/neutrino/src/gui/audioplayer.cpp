@@ -597,8 +597,21 @@ int CAudioPlayerGui::show()
 										}
 										else
 										{
-											CAudiofileExt mp3( filename, CFile::FILE_MP3 );
-											addToPlaylist(mp3);
+											CFile playlistItem;
+											playlistItem.Name = filename;											
+											CFile::FileType fileType = playlistItem.getType();
+											if (fileType == CFile::FILE_CDR
+												|| fileType == CFile::FILE_MP3 
+												|| fileType == CFile::FILE_OGG
+												|| fileType == CFile::FILE_WAV) 
+											{
+												CAudiofileExt audioFile(filename,fileType);
+												addToPlaylist(audioFile);
+											} else
+											{
+												printf("Audioplayer: file type (%d) is *not* supported in playlists\n(%s)\n",
+													   fileType, filename.c_str()); 
+											}
 										}
 									}
 									testfile.close();
