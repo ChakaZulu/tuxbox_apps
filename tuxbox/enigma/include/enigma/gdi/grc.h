@@ -13,6 +13,8 @@
 #include "elock.h"
 #include "gpixmap.h"
 
+#include <deque>
+
 class eTextPara;
 
 class gDC;
@@ -101,7 +103,6 @@ struct gOpcode
 	gDC *dc;
 };
 
-
 class gRC
 {
 	static gRC *instance;
@@ -110,7 +111,8 @@ class gRC
 	pthread_t the_thread;
 	void *thread();
 	
-	int fd[2];
+	eLock queuelock;
+	std::deque<gOpcode> queue;
 	
 public:
 	gRC();

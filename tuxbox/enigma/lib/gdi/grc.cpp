@@ -6,6 +6,8 @@
 #include <pthread.h>
 #include "init.h"
 
+#define MAXSIZE 1024
+
 void *gRC::thread_wrapper(void *ptr)
 {
 	nice(1);
@@ -14,14 +16,11 @@ void *gRC::thread_wrapper(void *ptr)
 
 gRC *gRC::instance=0;
 
-gRC::gRC()
+gRC::gRC(): queuelock(MAXSIZE)
 {
 	ASSERT(!instance);
 	instance=this;
-	if (pipe(fd)<0)
-	{
-		perror("pipe");
-	}	
+	queuelock.lock(MAXSIZE);
 	pthread_create(&the_thread, 0, thread_wrapper, this);
 }
 
@@ -31,23 +30,20 @@ gRC::~gRC()
 	o.dc=0;
 	o.opcode=gOpcode::shutdown;
 	submit(o);
-	close(fd[1]);
 	instance=0;
 }
 
 void *gRC::thread()
 {
 	int rptr=0;
-	gOpcode o;
 	while (1)
 	{
-		read(fd[0], &o, sizeof(o));
+		queuelock.lock(1);
+		gOpcode &o(queue.front());
 		if (o.opcode==gOpcode::shutdown)
-		{
-			close(fd[0]);
 			break;
-		}
 		o.dc->exec(&o);
+		queue.pop_front();
 	}
 	pthread_exit(0);
 }
@@ -59,7 +55,14 @@ gRC &gRC::getInstance()
 
 void gRC::submit(const gOpcode &o)
 {
-	write(fd[1], &o, sizeof(o));
+	static int collected=0;
+	queue.push_back(o);
+	collected++;
+	if (o.opcode==gOpcode::end)
+	{
+		queuelock.unlock(collected);
+		collected=0;
+	}
 }
 
 static int gPainter_instances;
