@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.20 2004/01/12 22:49:53 rasc Exp $
+$Id: dsmcc_str.c,v 1.21 2004/01/15 21:27:22 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dsmcc_str.c,v 1.20 2004/01/12 22:49:53 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.21  2004/01/15 21:27:22  rasc
+DSM-CC stream descriptors
+
 Revision 1.20  2004/01/12 22:49:53  rasc
 get rid of stream descriptor module
 
@@ -728,6 +731,33 @@ char *dsmccStr_compression_method (u_int id)
 }
 
 
+
+
+/*
+  -- DSM-CC  Stream Mode
+  --  ISO 13818-6  (stream desc. 8.5)
+  --  
+*/
+
+char *dsmccStr_streamMode (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "Open" },
+	{ 0x01, 0x01,   "Pause" },
+	{ 0x02, 0x02,   "Transport" },
+	{ 0x03, 0x03,   "Transport Pause" },
+	{ 0x04, 0x04,   "Search Transport" },
+	{ 0x05, 0x05,   "Search Transport Pause" },
+	{ 0x06, 0x06,   "Pause Search Transport" },
+	{ 0x07, 0x07,   "End of Stream" },
+	{ 0x08, 0x08,   "Pre Search Transport" },
+	{ 0x09, 0x09,   "Pre Search Transport Pause" },
+	{ 0x0A, 0xFF,   "ISO/IEC 13818-6 reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.14 2004/01/12 23:05:25 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.15 2004/01/15 21:27:22 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.14 2004/01/12 23:05:25 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.15  2004/01/15 21:27:22  rasc
+DSM-CC stream descriptors
+
 Revision 1.14  2004/01/12 23:05:25  rasc
 no message
 
@@ -140,10 +143,10 @@ int  descriptorMPEG  (u_char *b)
 
      /* DSM-CC stream descriptors */
      // case 0x16: reserved....
-// $$$ TODO case 0x17:  descriptorMPEG_NPT_reference (b);  break; 
-// $$$ TODO case 0x18:  descriptorMPEG_NPT_endpoint (b);  break; 
-// $$$ TODO case 0x19:  descriptorMPEG_stream_mode (b);  break; 
-// $$$ TODO case 0x1A:  descriptorMPEG_stream_event (b);  break; 
+     case 0x17:  descriptorMPEG_NPT_reference (b);  break; 
+     case 0x18:  descriptorMPEG_NPT_endpoint (b);  break; 
+     case 0x19:  descriptorMPEG_stream_mode (b);  break; 
+     case 0x1A:  descriptorMPEG_stream_event (b);  break; 
 
      /* MPEG 4 */
      case 0x1B:  descriptorMPEG_MPEG4_video (b);  break; 
@@ -1228,7 +1231,7 @@ void descriptorMPEG_Deferred_Association_tags (u_char *b)
   ISO 13818-6 
 */
 
-void descriptorMPEG_NTP_reference (u_char *b)
+void descriptorMPEG_NPT_reference (u_char *b)
 {
    // descriptor_tag		 = b[0];
    // descriptor_length       	 = b[1];
@@ -1236,43 +1239,83 @@ void descriptorMPEG_NTP_reference (u_char *b)
    outBit_Sx_NL (4,"postDiscontinuityIndicator: ",  	b,16, 1);
    outBit_Sx_NL (4,"contentId: ",		  	b,17, 7);
    outBit_Sx_NL (6,"reserved: ",		  	b,24, 7);
+   outBit_Sx_NL (4,"STC_Reference: ",		  	b,31,33);   // $$$ TODO ref calc + info
+   outBit_Sx_NL (6,"reserved: ",		  	b,64,31);
+   outBit_Sx_NL (4,"NPT_Reference: ",		  	b,75,33);   // $$$ TODO ref calc + info
+   outBit_Sx_NL (4,"scaleNumerator: ",		  	b,108,16);
+   outBit_Sx_NL (4,"scaleDenominator: ",	  	b,124,16);
+
+   // $$$ TODO equation calc ISO 13818-6 8.1.x
+ 
+}
+
 
 
 /*
-STC_Reference 33 uimsbf
-reserved 31 bsblf
-NPT_Reference 33 tcimsbf
-scaleNumerator 16 tcimsbf
-scaleDenominator 16 tcimsbf
+  0x18   DSMCC  NPT-endpoint descriptor 
+  ISO 13818-6 
 */
 
+void descriptorMPEG_NPT_endpoint (u_char *b)
+{
+   // descriptor_tag		 = b[0];
+   // descriptor_length       	 = b[1];
+
+   outBit_Sx_NL (6,"reserved: ",		  	b,16,15);
+   outBit_Sx_NL (4,"startNPT: ",		  	b,31,33);   // $$$ TODO ref calc + info
+   outBit_Sx_NL (6,"reserved: ",		  	b,64,15);
+   outBit_Sx_NL (4,"stopNPT: ",			  	b,79,33);   // $$$ TODO ref calc + info
+
+   // $$$ TODO equation calc ISO 13818-6 8.1.x
+ 
 }
 
 
 
 
 
+/*
+  0x19   DSMCC  stream_mode descriptor 
+  ISO 13818-6 
+*/
+
+void descriptorMPEG_stream_mode (u_char *b)
+{
+   // descriptor_tag		 = b[0];
+   // descriptor_length       	 = b[1];
+
+   outBit_S2x_NL(4,"streamMode: ",		  	b,16, 8,
+		   	(char *(*)(u_long)) dsmccStr_streamMode);
+   outBit_Sx_NL (6,"reserved: ",		  	b,24, 8);
+ 
+}
 
 
 
 
 
+/*
+  0x1A   DSMCC  stream_event descriptor 
+  ISO 13818-6 
+*/
 
+void descriptorMPEG_stream_event (u_char *b)
+{
+   int len;
 
+   // descriptor_tag	 = b[0];
+   len		       	 = b[1];
 
+   outBit_Sx_NL (4,"eventId: ",		  		b,16,16);
+   outBit_Sx_NL (6,"reserved: ",		  	b,32,31);
+   outBit_Sx_NL (4,"eventNPT: ",		  	b,31,33);   // $$$ TODO ref calc + info
+   
+   b += 10;
+   len -= 8;
 
+   print_private_data (4, b, len);
 
-
-
-
-
-
-
-
-
-
-
-
+}
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.h,v 1.7 2004/01/01 20:31:22 rasc Exp $ 
+$Id: mpeg_descriptor.h,v 1.8 2004/01/15 21:27:22 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: mpeg_descriptor.h,v 1.7 2004/01/01 20:31:22 rasc Exp $
 
 
 $Log: mpeg_descriptor.h,v $
+Revision 1.8  2004/01/15 21:27:22  rasc
+DSM-CC stream descriptors
+
 Revision 1.7  2004/01/01 20:31:22  rasc
 PES program stream map, minor descriptor cleanup
 
@@ -73,6 +76,11 @@ void  descriptorMPEG_Carousel_Identifier (u_char *b);
 void  descriptorMPEG_Association_tag (u_char *b);
 void  descriptorMPEG_Deferred_Association_tags (u_char *b);
 
+	/* 13818-6  Stream descriptors */
+void descriptorMPEG_NPT_reference (u_char *b);
+void descriptorMPEG_NPT_endpoint (u_char *b);
+void descriptorMPEG_stream_mode (u_char *b);
+void descriptorMPEG_stream_event (u_char *b);
 
 	/* MPEG4 */
 void  descriptorMPEG_MPEG4_video (u_char *b);
