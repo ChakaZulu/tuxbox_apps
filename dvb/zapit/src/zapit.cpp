@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.87 2002/03/14 20:42:47 McClean Exp $
+  $Id: zapit.cpp,v 1.88 2002/03/14 20:56:50 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -775,7 +775,6 @@ channel_msg load_settings()
 {
 	FILE *channel_settings;
 	channel_msg output_msg;
-	char *buffer;
 
 	memset(&output_msg, 0, sizeof(output_msg));
 
@@ -2187,7 +2186,6 @@ void parse_command()
 
 	else if (rmsg.version == CZapitClient::ACTVERSION)
 	{
-		printf("[zapit] command version 2\n");
 		CZapitClient::responseCmd response;
 		switch( rmsg.cmd)
 		{
@@ -2497,7 +2495,7 @@ int main (int argc, char **argv)
 	}
 
 	system("cp " CONFIGDIR "/zapit/last_chan /tmp/zapit_last_chan");
-	printf("Zapit $Id: zapit.cpp,v 1.87 2002/03/14 20:42:47 McClean Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.88 2002/03/14 20:56:50 Simplex Exp $\n\n");
 	scan_runs = 0;
 	found_transponders = 0;
 	found_channels = 0;
