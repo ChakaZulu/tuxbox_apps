@@ -47,6 +47,7 @@ CBEChannelSelectWidget::CBEChannelSelectWidget(const std::string & Caption, unsi
 	mode =    Mode;
 	width =   500;
 	height =  440;
+	x = (((g_settings.screen_EndX - g_settings.screen_StartX) - width) / 2) + g_settings.screen_StartX;
 }
 
 uint	CBEChannelSelectWidget::getItemCount()
@@ -83,7 +84,7 @@ void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 
 	if(itemNr < getItemCount())
 	{
-		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x + 15, ypos+ fheight, width - 20- 15, Channels[itemNr].name, color);
+		g_Font[SNeutrinoSettings::FONT_TYPE_CHANNELLIST]->RenderString(x + 8 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 8, ypos+ fheight, width - (8 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 8 + 8), Channels[itemNr].name, color);
 
 		if( isChannelInBouquet(itemNr))
 		{
@@ -91,7 +92,7 @@ void CBEChannelSelectWidget::paintItem(uint itemNr, int paintNr, bool selected)
 		}
 		else
 		{
-			frameBuffer->paintBoxRel(x+8,ypos+4, 16, fheight-4, color);
+			frameBuffer->paintBoxRel(x+8, ypos+4, NEUTRINO_ICON_BUTTON_GREEN_WIDTH, fheight-4, color);
 		}
 	}
 }
