@@ -467,7 +467,7 @@ private:
 	void showEPGList(eServiceReferenceDVB ref);
 	void showEPG();
 	void showEPG_Streaminfo();
-	void showInfobar();
+	void showInfobar(bool startTimeout=false);
 	void hideInfobar();
 	void showHelp( ePtrList<eAction>*, int );
 

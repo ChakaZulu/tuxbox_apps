@@ -2405,14 +2405,14 @@ void eZapMain::showServiceSelector(int dir, int newTarget )
 			}
 		}
 		if (!doHideInfobar())
-			show();
+			showInfobar();
 		return;
 	}
 
 	if (*service == eServiceInterface::getInstance()->service)
 	{
 		if (!doHideInfobar())
-			show();
+			showInfobar();
 		return;
 	}
 
@@ -2720,7 +2720,7 @@ void eZapMain::showMainMenu()
 	pLCD->lcdMain->show();
 #endif
 	if (!doHideInfobar())
-		show();
+		showInfobar();
 
 	if (res == 1 && handleState())
 	{
@@ -2850,17 +2850,13 @@ standby:
 	}
 }
 
-void eZapMain::showInfobar()
+void eZapMain::showInfobar(bool startTimeout)
 {
 	if ( !isVisible() && eApp->looplevel() == 1 &&
-			(
-				!currentFocus ||
-				currentFocus == this
-			)
-		 )
-	show();
+		( !currentFocus || currentFocus == this ) )
+		show();
 
-	if (doHideInfobar())
+	if (startTimeout && doHideInfobar())
 		timeout.start(6000, 1);
 }
 
@@ -3344,9 +3340,7 @@ void eZapMain::startSkip(int dir)
 			s="(ts) "+s;
 		skipLabel1->setText(s);
 	}
-		
 	showInfobar();
-	timeout.stop();
 }
 
 void eZapMain::skipLoop()
@@ -4626,7 +4620,7 @@ void eZapMain::showSubserviceMenu()
 	pLCD->lcdMain->show();
 #endif
 	if (!doHideInfobar())
-		show();
+		showInfobar();
 }
 
 void eZapMain::showAudioMenu()
@@ -4666,7 +4660,7 @@ void eZapMain::showAudioMenu()
 		pLCD->lcdMain->show();
 #endif
 		if (!doHideInfobar())
-			show();
+			showInfobar();
 	}
 }
 
@@ -4689,7 +4683,7 @@ void eZapMain::runPluginExt()
 	eZapPlugins plugins(2);
 	plugins.exec();
 	if (!doHideInfobar())
-		show();
+		showInfobar();
 }
 
 void eZapMain::showSelectorStyleEPG()
@@ -4704,7 +4698,7 @@ void eZapMain::showSelectorStyleEPG()
 		int ret = e.exec();
 		e.hide();
 		if (!doHideInfobar())
-			show();
+			showInfobar();
 		switch ( ret )
 		{
 			case 1:
@@ -4782,7 +4776,7 @@ void eZapMain::showMultiEPG()
 	if ( !direction ) // switch to service requested...
 		playService(epg.getCurSelected()->service, psDontAdd|psSeekPos|psSetMode);
 	if (!doHideInfobar())
-		show();
+		showInfobar();
 }
 
 void eZapMain::runPluginEPG()
@@ -4792,7 +4786,7 @@ void eZapMain::runPluginEPG()
 	if ( plugins.execPluginByName("extepg.cfg") != "OK" )
 		plugins.execPluginByName("_extepg.cfg");
 	if (!doHideInfobar())
-		show();	
+		showInfobar();
 }
 
 void eZapMain::showEPGList(eServiceReferenceDVB service)
@@ -4830,7 +4824,7 @@ void eZapMain::showEPGList(eServiceReferenceDVB service)
 			pLCD->lcdMain->show();
 #endif
 		if (wasVisible && !doHideInfobar())
-			show();
+			showInfobar();
 	}
 }
 
@@ -4915,7 +4909,7 @@ void eZapMain::showEPG()
 
 	eServiceInterface::getInstance()->removeRef( ref );
 	if (wasVisible && !doHideInfobar())
-		show();
+		showInfobar();
 }
 
 void eZapMain::showHelp( ePtrList<eAction>* actionHelpList, int helpID )
@@ -4929,7 +4923,7 @@ void eZapMain::showHelp( ePtrList<eAction>* actionHelpList, int helpID )
 		helpwin.exec();
 		helpwin.hide();
 		if (!doHideInfobar())
-			show();
+			showInfobar();
 	}
 }
 
@@ -5137,7 +5131,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if ( !isVisible() && event.action == &i_enigmaMainActions->showInfobar)
 		{
 			stateOSD=1;
-			showInfobar();
+			showInfobar(true);
 		}
 		else if (event.action == &i_enigmaMainActions->hideInfobar)
 		{
@@ -5446,7 +5440,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_enigmaMainActions->toggleDVRFunctions)
 		{
 			showServiceInfobar(!dvrfunctions);
-			showInfobar();
+			showInfobar(true);
 		}
 		else if (event.action == &i_enigmaMainActions->toggleIndexmark)
 			toggleIndexmark();
@@ -5838,7 +5832,7 @@ void eZapMain::showEPG_Streaminfo()
 		si.exec();
 		si.hide();
 		if (!doHideInfobar())
-			show();
+			showInfobar();
 	}
 	else
 	{
@@ -6053,7 +6047,7 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 		}
 	}
 #endif // DISABLE_FILE
-	showInfobar();
+	showInfobar(true);
 	cur_event_id = -1;
 
 	eServiceInterface::getInstance()->removeRef(_serviceref);
@@ -6091,7 +6085,7 @@ void eZapMain::gotEIT()
 			if (old_event_id == -1 || state)
 			{
 				if (old_event_id != -1)
-					showInfobar();
+					showInfobar(true);
 				if ( doHideInfobar() && isVisible() )
 					timeout.start((sapi->getState() == eServiceHandler::statePlaying)?6000:2000, 1);
 			}
