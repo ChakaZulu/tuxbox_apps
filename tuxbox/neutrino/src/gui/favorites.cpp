@@ -52,6 +52,9 @@ int CFavorites::addChannelToFavorites()
 	int          status = 0;
 
 
+	// no bouquet-List?  do nothing
+	if (!bouquetlist) return status;
+
 	// -- get Favorites Bouquetname  from Locales
 	fav_bouquetname = (char *) g_Locale->getText("favorites.bouquetname").c_str();
 
@@ -85,7 +88,6 @@ int CFavorites::addChannelToFavorites()
 		neutrino->channelsInit();
 		neutrino->channelList->zapToOnidSid(onid_sid);
 */
-		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );
 	}
 
 	return status;
@@ -113,12 +115,12 @@ int CFavorites::exec(CMenuTarget* parent, string)
 		parent->hide();
 	}
 
-//	if (!bouquetList) {
-//		ShowMsg ( "favorites.bouquetname",
-//			g_Locale->getText("favorites.nobouquets"),
-//			CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
-//		return res;
-//	}
+	if (!bouquetList) {
+		ShowMsg ( "favorites.bouquetname",
+			g_Locale->getText("favorites.nobouquets"),
+			CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+		return res;
+	}
 
 
 	CHintBox* hintBox= new CHintBox( "favorites.bouquetname", g_Locale->getText("favorites.addchannel"), "info.raw", 380 );
@@ -140,6 +142,9 @@ int CFavorites::exec(CMenuTarget* parent, string)
 
 	ShowMsg ( "favorites.bouquetname", str, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
 
+	if (status) {
+		g_RCInput->postMsg( NeutrinoMessages::EVT_BOUQUETSCHANGED, 0 );
+	}
 
 	return res;
 }
