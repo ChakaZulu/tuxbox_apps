@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.9 2001/07/14 22:59:58 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.10 2001/07/15 04:32:46 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.10  2001/07/15 04:32:46  fnbrd
+//  neuer sectionsd (mit event-liste)
+//
 //  Revision 1.9  2001/07/14 22:59:58  fnbrd
 //  removeOldEvents() in SIevents
 //
@@ -78,8 +81,7 @@
 
 #include <ost/dmx.h>
 
-#include "epgTypes.h"
-
+#include "sectionsdMsg.h"
 #include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
@@ -94,7 +96,7 @@ static pthread_mutex_t eventsLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mu
 static pthread_mutex_t servicesLock=PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
 
 
-static const SIevent &findSIeventForServiceName(const char *serviceName)
+static const SIevent &findActualSIeventForServiceName(const char *serviceName)
 {
 static SIevent nullEvt; // Null-Event, falls keins gefunden
 
@@ -122,6 +124,19 @@ static SIevent nullEvt; // Null-Event, falls keins gefunden
       break;
     }
   }
+  return nullEvt;
+}
+
+static const SIevent &findActualSIeventForService(const SIservice &s)
+{
+static SIevent nullEvt; // Null-Event, falls keins gefunden
+
+  time_t zeit=time(NULL);
+  for(SIevents::iterator e=events.begin(); e!=events.end(); e++)
+    if(e->serviceID==s.serviceID)
+      for(SItimes::iterator t=e->times.begin(); t!=e->times.end(); t++)
+        if(t->startzeit<=zeit && zeit<=(long)(t->startzeit+t->dauer))
+          return *e;
   return nullEvt;
 }
 
@@ -170,72 +185,119 @@ struct connectionData {
   struct sockaddr_in clientAddr;
 };
 
-// Mostly copied from epgd (bugfixed ;) )
-static void oldDaemonCommands(struct connectionData *client)
+// Mostly copied from epgd (something bugfixed ;) )
+static void commandActualEPGchannelName(struct connectionData *client, char *data, unsigned dataLength)
 {
-  struct msgEPGRequest request;
-  memset(&request, 0, sizeof(request) );
-  if(readNbytes(client->connectionSocket, (char *)&request, sizeof(request) , 2)>0) {
-    // do
-    int nResultDataSize=0;
-    char* pResultData=0;
+  int nResultDataSize=0;
+  char* pResultData=0;
 
-    printf("Request of actual EPG for '%s'\n", request.Name);
+  data[dataLength-1]=0; // to be sure it has an trailing 0
+  printf("Request of actual EPG for '%s'\n", data);
 
-    const SIevent &evt=findSIeventForServiceName(request.Name);
+  const SIevent &evt=findActualSIeventForServiceName(data);
 
 //  readSection(request.Name, &pResultData, &nResultDataSize);
 
-    if(evt.serviceID!=0) {//Found
-      printf("EPG found.\n");
-      nResultDataSize=strlen(evt.name.c_str())+2+		//Name + del
-        strlen(evt.text.c_str())+2+		//Text + del
-        strlen(evt.extendedText.c_str())+2+	//ext + del
-        3+3+4+1+					//dd.mm.yyyy + del
-        3+2+1+					//std:min + del
-        3+2+1+1;				//std:min+ del + 0
-      pResultData = new char[nResultDataSize];
-      SItime siStart = *(evt.times.begin());
-      struct tm *pStartZeit = localtime(&siStart.startzeit);
-      int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon), nSYear(pStartZeit->tm_year+1900),
-       nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
+  if(evt.serviceID!=0) {//Found
+    printf("EPG found.\n");
+    nResultDataSize=strlen(evt.name.c_str())+2+		//Name + del
+      strlen(evt.text.c_str())+2+		//Text + del
+      strlen(evt.extendedText.c_str())+2+	//ext + del
+      3+3+4+1+					//dd.mm.yyyy + del
+      3+2+1+					//std:min + del
+      3+2+1+1;				//std:min+ del + 0
+    pResultData = new char[nResultDataSize];
+    SItime siStart = *(evt.times.begin());
+    struct tm *pStartZeit = localtime(&siStart.startzeit);
+    int nSDay(pStartZeit->tm_mday), nSMon(pStartZeit->tm_mon), nSYear(pStartZeit->tm_year+1900),
+     nSH(pStartZeit->tm_hour), nSM(pStartZeit->tm_min);
 
-      long int uiEndTime(siStart.startzeit+siStart.dauer);
-      struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
-      int nFH(pEndeZeit->tm_hour), nFM(pEndeZeit->tm_min);
+    long int uiEndTime(siStart.startzeit+siStart.dauer);
+    struct tm *pEndeZeit = localtime((time_t*)&uiEndTime);
+    int nFH(pEndeZeit->tm_hour), nFM(pEndeZeit->tm_min);
 
-      sprintf(pResultData, "%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF",
-        evt.name.c_str(),
-        evt.text.c_str(),
-        evt.extendedText.c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM );
-    }
-    else
-      printf("actual EPG not found!\n");
+    sprintf(pResultData, "%s\xFF%s\xFF%s\xFF%02d.%02d.%04d\xFF%02d:%02d\xFF%02d:%02d\xFF",
+      evt.name.c_str(),
+      evt.text.c_str(),
+      evt.extendedText.c_str(), nSDay, nSMon, nSYear, nSH, nSM, nFH, nFM );
+  }
+  else
+    printf("actual EPG not found!\n");
 
-    // response
-    char* pResponse=new char[sizeof(msgEPGResponse)+nResultDataSize];;
-    struct msgEPGResponse* pmResponse=(struct msgEPGResponse*)pResponse;
-    pmResponse->version=2;
-    snprintf( pmResponse->sizeOfBuffer, sizeof(pmResponse->sizeOfBuffer), "%d", nResultDataSize);
-
-    if( nResultDataSize > 0 ) {
-      memcpy(pmResponse->pEventBuffer, pResultData, nResultDataSize+1);
-      delete[] pResultData;
-    }
-//    printf("%s\n", pResultData);
-
-    write(client->connectionSocket, pResponse, sizeof(*pmResponse)+nResultDataSize );
-    delete[] pResponse;
+  // response
+  struct msgSectionsdResponseHeader pmResponse;
+  pmResponse.dataLength=nResultDataSize;
+  write(client->connectionSocket, &pmResponse, sizeof(pmResponse));
+  if( nResultDataSize > 0 ) {
+    write(client->connectionSocket, pResultData, nResultDataSize);
+    delete[] pResultData;
   }
 }
+
+static void commandEventListTV(struct connectionData *client, char *data, unsigned dataLength)
+{
+  puts("Request of TV event list.\n");
+  char *evtList=new char[256*256];
+  if(!evtList) {
+    fprintf(stderr, "low on memory!\n");
+    return;
+  }
+  *evtList=0;
+  for(SIservices::iterator s=services.begin(); s!=services.end(); s++)
+    if(s->serviceTyp==0x01) { // TV
+      const SIevent &evt=findActualSIeventForService(*s);
+      if(evt.serviceID!=0) {//Found
+        strcat(evtList, s->serviceName.c_str());
+	strcat(evtList, "\n");
+        strcat(evtList, evt.name.c_str());
+	strcat(evtList, "\n");
+      } // if found
+    } // if TV
+  struct msgSectionsdResponseHeader msgResponse;
+  msgResponse.dataLength=strlen(evtList)+1;
+  if(msgResponse.dataLength==1)
+    msgResponse.dataLength=0;
+  write(client->connectionSocket, &msgResponse, sizeof(msgResponse));
+  if(msgResponse.dataLength)
+    write(client->connectionSocket, evtList, msgResponse.dataLength);
+  return;
+}
+
+static void (*connectionCommands[NUMBER_OF_SECTIONSD_COMMANDS]) (struct connectionData *, char *, unsigned)  = {
+  commandActualEPGchannelName,
+  commandEventListTV
+};
 
 static void *connectionThread(void *conn)
 {
 struct connectionData *client=(struct connectionData *)conn;
 
   printf("Connection from %s\n", inet_ntoa(client->clientAddr.sin_addr));
-//  int connectionSocket=(int)socketNr;
-  oldDaemonCommands(client);
+  struct msgSectionsdRequestHeader header;
+  memset(&header, 0, sizeof(header));
+
+  if(readNbytes(client->connectionSocket, (char *)&header, sizeof(header) , 2)>0) {
+    printf("version: %hhd, cmd: %hhd\n", header.version, header.command);
+    if(header.version==2 && header.command<NUMBER_OF_SECTIONSD_COMMANDS) {
+      printf("data length: %hd\n", header.dataLength);
+      char *data=new char[header.dataLength+1];
+      if(!data)
+        fprintf(stderr, "low on memory!\n");
+      else {
+        int rc=1;
+        if(header.dataLength)
+	  rc=readNbytes(client->connectionSocket, data, header.dataLength, 2);
+        if(rc>0) {
+          printf("Starting command %hhd\n", header.command);
+          connectionCommands[header.command](client, data, header.dataLength);
+        }
+        delete[] data;
+      }
+    }
+    else
+      puts("Unknow format or version of request!");
+  }
+//  oldDaemonCommands(client);
   close(client->connectionSocket);
   printf("Connection from %s closed!\n", inet_ntoa(client->clientAddr.sin_addr));
   delete client;
@@ -338,18 +400,21 @@ struct SI_section_TOT_header {
       unsigned char reserved1 : 2;
       unsigned short section_length : 12;
       // 3 bytes
-      unsigned char utc_date_hi : 8;
-      unsigned char utc_date_lo : 8;
-      unsigned char utc_hour : 4;
-      unsigned char utc_hour_ten : 4;
-      unsigned char utc_min : 4;
-      unsigned char utc_min_ten : 4;
-      unsigned char utc_sec : 4;
-      unsigned char utc_sec_ten : 4;
-//      unsigned long long UTC_time : 40;
+      unsigned long long UTC_time : 40;
       // 8 bytes
       unsigned char reserved2 : 4;
       unsigned short descriptors_loop_length : 12;
+} __attribute__ ((packed)) ; // 10 bytes
+
+struct SI_section_TDT_header {
+      unsigned char table_id : 8;
+      // 1 byte
+      unsigned char section_syntax_indicator : 1;
+      unsigned char reserved_future_use : 1;
+      unsigned char reserved1 : 2;
+      unsigned short section_length : 12;
+      // 3 bytes
+      unsigned long long UTC_time : 40;
 } __attribute__ ((packed)) ; // 10 bytes
 
 /*
@@ -415,7 +480,6 @@ static void parseDescriptors(const char *des, unsigned len, const char *countryC
 static void *timeThread(void *)
 {
 int fd;
-struct SI_section_TOT_header header;
 struct dmxSctFilterParams flt;
 const unsigned timeoutInSeconds=31;
 char *buf;
@@ -423,12 +487,51 @@ char *buf;
   printf("time-thread started.\n");
   memset (&flt.filter, 0, sizeof (struct dmxFilter));
   flt.pid              = 0x14;
-  flt.filter.filter[0] = 0x73; // TOT
+  flt.filter.filter[0] = 0x70; // TDT
   flt.filter.mask[0]   = 0xff;
   flt.timeout          = 0;
-  flt.flags            = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+  flt.flags            = DMX_IMMEDIATE_START;
 
-  fd=0;  for(;;) {
+  // Zuerst per TDT (schneller)
+  if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
+    perror ("/dev/ost/demux0");
+    return 0;
+  }
+  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+    close(fd);
+    perror ("DMX_SET_FILTER");
+    return 0;
+  }
+  {
+  struct SI_section_TDT_header tdt_header;
+  int rc=readNbytes(fd, (char *)&tdt_header, sizeof(tdt_header), timeoutInSeconds);
+  if(rc>0) {
+    time_t tim=changeUTCtoCtime(((const unsigned char *)&tdt_header)+3);
+    if(tim) {
+      if(stime(&tim)< 0) {
+        perror("cannot set date");
+	close(fd);
+	return 0;
+      }
+      time_t t=time(NULL);
+      printf("local time: %s", ctime(&t));
+    }
+  }
+  }
+  if (ioctl (fd, DMX_STOP, &flt) == -1) {
+    close(fd);
+    perror ("DMX_STOP");
+    return 0;
+  }
+  flt.filter.filter[0] = 0x73; // TOT
+  flt.flags = DMX_IMMEDIATE_START | DMX_CHECK_CRC;
+  if (ioctl (fd, DMX_SET_FILTER, &flt) == -1) {
+    close(fd);
+    perror ("DMX_SET_FILTER");
+    return 0;
+  }
+  // Jetzt wird die Uhrzeit nur noch per TOT gesetzt (CRC)
+  for(;;) {
     if(!fd) {
       if ((fd = open("/dev/ost/demux0", O_RDWR)) == -1) {
         perror ("/dev/ost/demux0");
@@ -440,6 +543,7 @@ char *buf;
         return 0;
       }
     }
+    struct SI_section_TOT_header header;
     int rc=readNbytes(fd, (char *)&header, sizeof(header), timeoutInSeconds);
     if(!rc) {
       continue; // timeout -> kein EPG
@@ -590,6 +694,10 @@ static void *houseKeepingThread(void *)
     printf("housekeeping.\n");
     pthread_mutex_lock(&eventsLock);
     unsigned anzEventsAlt=events.size();
+    events.mergeAndRemoveTimeShiftedEvents(services);
+    if(events.size()!=anzEventsAlt)
+      printf("Removed %d time-shifted events.\n", anzEventsAlt-events.size());
+    anzEventsAlt=events.size();
     events.removeOldEvents();
     if(events.size()!=anzEventsAlt)
       printf("Removed %d old events.\n", anzEventsAlt-events.size());
@@ -612,7 +720,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.9 2001/07/14 22:59:58 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.10 2001/07/15 04:32:46 fnbrd Exp $\n");
 
   tzset(); // TZ auswerten
 
