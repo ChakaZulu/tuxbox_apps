@@ -9,28 +9,46 @@
 
 #include "../../driver/saa7126/saa7126_core.h"
 
-#define VERSION "0.1"
+#define VERSION "0.2pre"
 void help(char *prog_name) {
   printf("Version %s\n",VERSION);
   printf("Usage: %s <options>\n\n",prog_name);
   printf("Switches:\n
-      -h, --help       help
-      -r, --rgb        rgb mode
-      -f, --fbas       fbas mode
-      -s, --svideo     svideo mode
-      -p, --pal        pal mode
-      -n, --ntsc       ntsc mode
-      -i, --input <X>  input control
-                       MP1      = 1
-                       MP2      = 2
-                       CSYNC    = 4
-                       DEMOFF   = 8
-                       SYMP     = 16
-                       COLORBAR = 128
+      -h, --help            help
+      -o, --power-save <X>  power save mode
+                            0 power save off
+                            1 power save on
+      -r, --rgb             rgb mode
+      -f, --fbas            fbas mode
+      -s, --svideo          svideo mode
+      -p, --pal             pal mode
+      -n, --ntsc            ntsc mode
+      -i, --input <X>       input control
+                            MP1      = 1
+                            MP2      = 2
+                            CSYNC    = 4
+                            DEMOFF   = 8
+                            SYMP     = 16
+                            COLORBAR = 128
 \n");
   exit(0);
 }
 
+/** */
+int vps()
+{
+	char data[6];
+
+	memset(data,0,6);
+
+	/* vps on */
+	data[0] = 1;
+
+	/* 0: ??? 1: mono 2: stereo 3: dual sound */
+	data[1] |= 2;
+}
+
+/** */
 main(int argc, char **argv)
 {
 	int fd;
@@ -76,6 +94,16 @@ main(int argc, char **argv)
 
 	  arg = atoi(argv[count+1]);
 	  mode = SAAIOSINP;
+    }
+    else if ((strcmp("-o",argv[count]) == 0) || (strcmp("--power-save",argv[count]) == 0)) {
+      if(argc<3)
+	  {
+		help(argv[0]);
+		return;
+	  }
+
+	  arg = atoi(argv[count+1]);
+	  mode = SAAIOSPOWERSAVE;
     }
 	else {
       help(argv[0]);
