@@ -30,11 +30,15 @@
 */
 
 /* 
-$Id: fontrenderer.cpp,v 1.17 2001/11/26 02:34:03 McClean Exp $
+$Id: fontrenderer.cpp,v 1.18 2001/12/02 11:59:51 waldi Exp $
 
 -- misc font / text rendering functions
 
 $Log: fontrenderer.cpp,v $
+Revision 1.18  2001/12/02 11:59:51  waldi
+- add config.h include
+- change dir for fonts
+
 Revision 1.17  2001/11/26 02:34:03  McClean
 include (.../../stuff) changed - correct unix-formated files now
 
@@ -59,6 +63,7 @@ Revision 1.12  2001/10/14 14:30:47  rasc
 
 */
 
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,10 +97,10 @@ fontRenderClass::fontRenderClass()
 	fflush(stdout);
 	font=0;
 
-	AddFont("/usr/lib/fonts/Arial.ttf");
-	AddFont("/usr/lib/fonts/Arial_Bold.ttf");
-	AddFont("/usr/lib/fonts/Arial_Italic.ttf");
-    AddFont("/usr/lib/fonts/Arial_Black.ttf");
+	AddFont(FONTDIR "/Arial.ttf");
+	AddFont(FONTDIR "/Arial_Bold.ttf");
+	AddFont(FONTDIR "/Arial_Italic.ttf");
+	AddFont(FONTDIR "/Arial_Black.ttf");
 
 	int maxbytes=4*1024*1024;
 	printf("[FONT] Intializing font cache, using max. %dMB...", maxbytes/1024/1024);
