@@ -316,6 +316,7 @@ nvod.proz (%d%% po starcie)
 scants.head Strojenie
 scants.startnow Rozpocznij Strojenie
 scants.actsatellite Satelity:
+scants.actcable unset:
 scants.astra Astra
 scants.hotbird Hotbird
 scants.kopernikus Kopernikus

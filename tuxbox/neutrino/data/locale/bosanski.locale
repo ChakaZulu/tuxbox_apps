@@ -316,6 +316,7 @@ nvod.proz (%d%% proslo)
 scants.head trazenje kanala
 scants.startnow poceti trazenje kanala
 scants.actsatellite satelit:
+scants.actcable unset:
 scants.astra astra
 scants.hotbird hotbird
 scants.kopernikus kopernikus

@@ -316,6 +316,7 @@ nvod.proz (%d%% passati)
 scants.head Ricerca Canali
 scants.startnow Start Ricerca Canali
 scants.actsatellite Satellite:
+scants.actcable unset:
 scants.astra Astra
 scants.hotbird Hotbird
 scants.kopernikus Kopernikus

@@ -316,6 +316,7 @@ nvod.proz (%d%% vorbei)
 scants.head Senda suacha
 scants.startnow Ofanga mim Senda suacha
 scants.actsatellite Satellit:
+scants.actcable unset:
 scants.astra Astra
 scants.hotbird Hotbird
 scants.kopernikus Kopernikus

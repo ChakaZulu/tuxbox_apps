@@ -315,15 +315,16 @@ nvod.proz (%d%% umme)
 
 scants.head Kanalsuechi 
 scants.startnow Kanalsuechi starde 
-scants.actsatellite Sadellid: 
-scants.astra Astra 
-scants.hotbird Hotbörd 
-scants.kopernikus Kopernikus 
-scants.sirius Sirius 
-scants.thor Thor 
-scants.digituerk Digituerk 
-scants.tuerksat Tuerksat 
-scants.transponders Transponder: 
+scants.actsatellite Sadellid:
+scants.actcable unset:
+scants.astra Astra
+scants.hotbird Hotbörd
+scants.kopernikus Kopernikus
+scants.sirius Sirius
+scants.thor Thor
+scants.digituerk Digituerk
+scants.tuerksat Tuerksat
+scants.transponders Transponder:
 scants.freqdata	unset
 scants.servicenames	unset
 scants.services Services:

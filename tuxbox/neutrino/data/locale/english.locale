@@ -316,6 +316,7 @@ nvod.proz (%d%% over)
 scants.head Scan transponder
 scants.startnow start scan
 scants.actsatellite Satellite:
+scants.actcable Cable:
 scants.astra Astra
 scants.hotbird Hotbird
 scants.kopernikus Kopernikus
