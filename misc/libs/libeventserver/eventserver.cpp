@@ -87,7 +87,8 @@ bool CEventServer::sendEvent2Client(unsigned int eventID, unsigned int initiator
 	eventHead head;
 	head.eventID = eventID;
 	head.initiatorID = initiatorID;
-	//printf ("[eventserver]: sent 0x%x\n", write(sock_fd, &head, sizeof(head)) );
+	int written = write(sock_fd, &head, sizeof(head));
+	//printf ("[eventserver]: sent 0x%x\n", written );
 
 	if(eventbodysize!=0)
 	{
