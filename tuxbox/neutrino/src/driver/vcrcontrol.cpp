@@ -367,6 +367,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 #define MAXPIDS		64
 	unsigned short pids[MAXPIDS];
 	unsigned int numpids;
+	unsigned int pos;
 
 	CZapitClient::CCurrentServiceInfo si = g_Zapit->getCurrentServiceInfo();
 	pids[0] = si.vdid;
@@ -400,7 +401,7 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	char filename[512]; // UTF-8
 
 	// Create filename for recording
-	unsigned int pos = Directory.size();
+	pos = Directory.size();
 	strcpy(filename, Directory.c_str());
 	
 	if ((pos == 0) ||
@@ -464,6 +465,8 @@ bool CVCRControl::CFileDevice::Record(const t_channel_id channel_id, int mode, c
 	pos = strlen(filename);
 	time_t t = time(NULL);
 	strftime(&(filename[pos]), sizeof(filename) - pos - 1, "%Y%m%d_%H%M%S", localtime(&t));
+
+printf("start recording on file %s\n", filename);
 
 	if (!(::start_recording(filename, ((unsigned long long)SplitSize) * 1073741824ULL, numpids, pids)))
 	{
