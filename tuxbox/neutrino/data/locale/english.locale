@@ -33,7 +33,7 @@ servicemenu.reload_hint Reloading Channel-lists,\nplease wait...
 
 cablesetup.provider cable provider
 
-satsetup.disqeqc DiSEqC
+satsetup.diseqc DiSEqC
 satsetup.satellite Satellite
 satsetup.extended DiSEqC-Settings
 satsetup.extended_lnb LNB-Settings

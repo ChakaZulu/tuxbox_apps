@@ -33,7 +33,7 @@ servicemenu.reload_hint obnavljaju se liste kanala,\nčekajte molim ...
 
 cablesetup.provider snabdjevač
 
-satsetup.disqeqc diseqc
+satsetup.diseqc diseqc
 satsetup.satellite satelit
 satsetup.extended diseqc namjestiti
 satsetup.extended_lnb namješćenje lnb-ea

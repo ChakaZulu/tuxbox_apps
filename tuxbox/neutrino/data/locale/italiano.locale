@@ -33,7 +33,7 @@ servicemenu.reload_hint Nuona lettura lista Canali,\nPrego attendere
 
 cablesetup.provider Gestore Cavo
 
-satsetup.disqeqc DiSEqC
+satsetup.diseqc DiSEqC
 satsetup.satellite Satellite
 satsetup.extended DiSEqC-Controllo
 satsetup.extended_lnb Impostazioni-LNB
