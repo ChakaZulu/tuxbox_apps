@@ -63,6 +63,11 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 		eFatal("eDVB already initialized!");
 	instance=this;
 
+	DVBCI=new eDVBCI();
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
+
+
+
 		// initialize frontend (koennte auch nochmal raus)
 	eString frontend=getInfo("fe");
 	int fe;
@@ -131,8 +136,6 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 		// init dvb recorder
 	recorder=0;
 
-	DVBCI=new eDVBCI();
-	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
 		
 	eDebug("eDVB::eDVB done.");
 }

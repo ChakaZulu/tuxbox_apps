@@ -23,24 +23,26 @@ class eDVBCI: private eThread, public eMainloop, public Object
 	int buffersize;	
 		
 	eTimer pollTimer;
+	eLock lock;
 
-	unsigned char CAPMT[2048];
+	int tempPMTentrys;
+
 	char appName[256];
-	int CAPMTlen;
-	int CAPMTpos;
-	int CAPMTstate;
-	int CAPMTdescrpos;
-	int CAPMTdescrlen;
-	int CAPMTfirst;
+	unsigned short caids[256];
+	unsigned int caidcount;
 	
 	unsigned char ml_buffer[1024];
 	int ml_bufferlen;
 	int ml_buffersize;
 			
-	void createCAPMT(int type,unsigned char *data);
-	void sendCAPMT();
 	void clearCAIDs();
 	void addCAID(int caid);	
+	void pushCAIDs();	
+	void PMTflush(int program);
+	void PMTaddPID(int pid,int streamtype);
+	void PMTaddDescriptor(unsigned char *data);
+	void newService();
+	
 	void sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data);
 	void help_manager(unsigned int session);
 	void app_manager(unsigned int session);
@@ -76,21 +78,25 @@ public:
 			addAudio,
 			es,
 			go,
+			PMTflush,
+			PMTaddPID,
+			PMTaddDescriptor,
 			mmi_begin,
 			mmi_end,
 			mmi_answ,
 			mmi_menuansw,
+			getcaids,
 		};
 		int type;
-		union
-		{
-			unsigned char *data;
-			int pid;
-		};	
+		unsigned char *data;
+		int pid;
+		int streamtype;
+
 		eDVBCIMessage() { }
 		eDVBCIMessage(int type): type(type) { }
 		eDVBCIMessage(int type, unsigned char *data): type(type), data(data) { }
 		eDVBCIMessage(int type, int pid): type(type),pid(pid) { }
+		eDVBCIMessage(int type, int pid, int streamtype): type(type),pid(pid),streamtype(streamtype) { }
 
 	};
 	eFixedMessagePump<eDVBCIMessage> messages;

@@ -41,8 +41,17 @@ struct session_struct
 	unsigned int state;
 	unsigned int internal_state;
 };
-
 struct session_struct sessions[32];
+
+struct tempPMT_t
+{
+	int type;			//0=prg-nr 1=pid 2=descriptor
+	unsigned char *descriptor;
+	unsigned short pid;
+	unsigned short streamtype;
+};	
+#define PMT_ENTRYS	256	
+struct tempPMT_t tempPMT[PMT_ENTRYS];
 
 eDVBCI::eDVBCI(): pollTimer(this), messages(this, 1)
 {
@@ -67,7 +76,7 @@ eDVBCI::eDVBCI(): pollTimer(this), messages(this, 1)
 	
 	memset(appName,0,sizeof(appName));
 
-//  run();
+  run();
 }
 
 void eDVBCI::thread()
@@ -95,9 +104,11 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 			ci->start();
 			ci_state=0;
 		}
+		::ioctl(fd,CI_RESET);
+		dataAvailable(0);
 		break;
 	case eDVBCIMessage::reset:
-		eDebug("[DVBCI] got reset message..");
+		//eDebug("[DVBCI] got reset message..");
 		if(!ci_state)
 			ci_progress("no module");	
 		ci_state=0;
@@ -106,57 +117,14 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 		dataAvailable(0);
 		break;
 	case eDVBCIMessage::init:
-		eDebug("[DVBCI] got init message..");
+		//eDebug("[DVBCI] got init message..");
 		if(ci_state)
-			sendCAPMT();
+			newService();
 		else
 			ci_progress("no module");	
 		break;
-	case eDVBCIMessage::flush:
-		eDebug("[DVBCI] got flush message..");
-		createCAPMT(0, (unsigned char*)message.pid); // sid in this case
-		break;
-	case eDVBCIMessage::addDescr:
-		eDebug("[DVBCI] got addDescr message..");
-		createCAPMT(1, message.data);
-		delete[] message.data;
-		break;
-	case eDVBCIMessage::es:
-		eDebug("[DVBCI] got es message..");
-		createCAPMT(2,0);		
-		break;
-	case eDVBCIMessage::addVideo:
-		eDebug("[DVBCI] got addVideo message..");
-		CAPMT[CAPMTpos++]=0x2;
-		CAPMT[CAPMTpos++]=(unsigned char)(message.pid>>8);
-		CAPMT[CAPMTpos++]=(unsigned char)message.pid;
-		CAPMTdescrpos=CAPMTpos;
-		CAPMTdescrlen=0;
-		CAPMT[CAPMTpos++]=0x0;
-		CAPMT[CAPMTpos++]=0x0;
-		CAPMTlen+=5;
-		break;
-	case eDVBCIMessage::addAudio:
-		eDebug("[DVBCI] got addAudio message..");
-		CAPMT[CAPMTdescrpos]=(CAPMTdescrlen >> 8);
-		CAPMT[CAPMTdescrpos+1]=(CAPMTdescrlen & 0xff);
-		CAPMT[CAPMTpos++]=0x4;
-		CAPMT[CAPMTpos++]=(unsigned char)(message.pid>>8);
-		CAPMT[CAPMTpos++]=(unsigned char)message.pid;
-		CAPMTdescrpos=CAPMTpos;
-		CAPMTdescrlen=0;
-		CAPMT[CAPMTpos++]=0x0;
-		CAPMT[CAPMTpos++]=0x0;
-		CAPMTlen+=5;
-		break;
 	case eDVBCIMessage::go:
-		eDebug("[DVBCI] got go message.. cadescrpos %d", CAPMTdescrpos);
-		CAPMT[7]=CAPMTlen-8;
-		CAPMT[CAPMTdescrpos]=(CAPMTdescrlen >> 8);
-		CAPMT[CAPMTdescrpos+1]=(CAPMTdescrlen & 0xff);
-		if(ci_state)
-			sendCAPMT();
-		eDebug("go ok");
+		newService();
 		break;
 	case eDVBCIMessage::mmi_begin:
 		eDebug("[DVBCI] got mmi_begin message..");
@@ -177,6 +145,23 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 	case eDVBCIMessage::exit:
 		eDebug("[DVBCI] got exit message..");
 		quit();
+		break;
+	case eDVBCIMessage::getcaids:
+		//eDebug("[DVBCI] got getcaids message..");
+		pushCAIDs();
+		break;
+	case eDVBCIMessage::PMTflush:
+		//eDebug("[DVBCI] got PMTflush message..");
+		PMTflush(message.pid);
+		break;
+	case eDVBCIMessage::PMTaddPID:
+		//eDebug("[DVBCI] got PMTaddPID message..");
+		PMTaddPID(message.pid,message.streamtype);
+		break;
+	case eDVBCIMessage::PMTaddDescriptor:
+		//eDebug("[DVBCI] got PMTaddDescriptor message..");
+		PMTaddDescriptor(message.data);
+		delete[] message.data;
 		break;
 	}
 }
@@ -212,74 +197,113 @@ void eDVBCI::mmi_menuansw(int val)
 	sendTPDU(0xA0,9,1,buffer);
 }
 
-void eDVBCI::createCAPMT(int type, unsigned char *data)
+void eDVBCI::PMTflush(int program)
 {
-	switch(type)
+	//eDebug("got new PMT for Program:%x",program);
+	for(int i=0;i<PMT_ENTRYS;i++)
 	{
-		case 0:				//flush
-			int i;
-			for(i=0;i<MAX_SESSIONS;i++)
-				if(sessions[i].state && (sessions[i].service_class==0x30041 || sessions[i].service_class==0x34100))
-					break;
-			if(i==MAX_SESSIONS)
-				eDebug("NO SESSION ID for CA-MANAGER");		
-
-			memcpy(CAPMT,"\x90\x2\x0\x3\x9f\x80\x32\x0\x3\x0\x0\x0",12);
-			
-			CAPMT[3]=i;
-			CAPMT[9]=((int)data)>>8;
-			CAPMT[10]=((int)data);
-			CAPMTlen=14;
-			CAPMTpos=14;
-			CAPMT[7]=0;
-			CAPMTfirst=1;
-			break;
-		case 1:				//descriptor
+		if(tempPMT[i].type==2)
 		{
-			int y=0;
-			eDebug("descr:%x",data[0]);
-			if(CAPMTfirst)
-			{
-					CAPMT[CAPMTpos++]=0x1;
-					CAPMTfirst=0;
-					y=1;
-			}		
-			memcpy(CAPMT+CAPMTpos,data,data[1]+2);
-			CAPMTpos+=(data[1]+2);
-			if(y==1)
-			{
-				CAPMTdescrlen+=(data[1]+3);
-				CAPMTlen+=(data[1]+3);
-			}	
-			else
-			{
-				CAPMTdescrlen+=(data[1]+2);
-				CAPMTlen+=(data[1]+2);
-			}	
-				
-			break;
-		}	
-		case 2:				//mode es
-			CAPMT[12]=((CAPMTlen-14)<<8);
-			CAPMT[13]=((CAPMTlen-14) & 0xff);
-			CAPMTfirst=1;
-			break;
-	}		
+			free(tempPMT[i].descriptor);
+			tempPMT[i].type=0;
+		}		
+	}
+	
+	tempPMT[0].type=0;
+	tempPMT[0].pid=program;	
+	tempPMTentrys=1;		
 }
 
-void eDVBCI::sendCAPMT()
+void eDVBCI::PMTaddPID(int pid, int streamtype)
 {
-	int i;
-	printf("CA-PMT:");
-	for(i=0;i<CAPMTlen;i++)
-		printf("%02x ",CAPMT[i]);
-	printf("\n");	
-	
-	if(CAPMTlen>0)
-		sendTPDU(0xA0,CAPMTlen,1,CAPMT);
+	//eDebug("got new PID:%x",pid);
 
-	ci_progress(appName);
+	tempPMT[tempPMTentrys].type=1;
+	tempPMT[tempPMTentrys].streamtype=streamtype;
+	tempPMT[tempPMTentrys++].pid=pid;
+}
+
+void eDVBCI::PMTaddDescriptor(unsigned char *data)
+{
+	//eDebug("got new CA-Descr. for CAID:%.2x%.2x",data[2],data[3]);
+
+	tempPMT[tempPMTentrys].type=2;
+	tempPMT[tempPMTentrys].descriptor=(unsigned char*)malloc(data[1]+2);
+	memcpy(tempPMT[tempPMTentrys++].descriptor,data,data[1]+2);
+}
+
+void eDVBCI::newService()
+{
+	//eDebug("got new %d PMT entrys",tempPMTentrys);
 	
+	unsigned char capmt[2048];
+	
+	int i;
+	for(i=0;i<MAX_SESSIONS;i++)
+		if(sessions[i].state && (sessions[i].service_class==0x30041 || sessions[i].service_class==0x34100))
+			break;
+	if(i==MAX_SESSIONS)
+		eDebug("NO SESSION ID for CA-MANAGER");		
+	
+	memcpy(capmt,"\x90\x2\x0\x3\x9f\x80\x32",7); //session nr.3 & capmt-tag
+	capmt[3]=i;			//session_id
+	capmt[8]=0x03;	//ca_pmt_list_management
+	capmt[9]=(unsigned char)((tempPMT[0].pid>>8) & 0xff);			//prg-nr
+	capmt[10]=(unsigned char)(tempPMT[0].pid & 0xff);					//prg-nr
+	capmt[11]=0x00;	//reserved - version - current/next
+	capmt[12]=0x00;	//reserved - prg-info len
+	capmt[13]=0x00;	//prg-info len
+	
+	int lenpos=12;
+	int len=0;
+	int first=1;
+	int wp=14;
+		
+	for(int i=0;i<tempPMTentrys;i++)
+	{
+		switch(tempPMT[i].type)
+		{
+			case 1:				//PID
+				capmt[lenpos]=((len & 0xf00)>>8);
+				capmt[lenpos+1]=(len & 0xff);
+				len=0;
+				lenpos=wp+3;
+				first=1;
+				capmt[wp++]=(tempPMT[i].streamtype & 0xffff);
+				capmt[wp++]=((tempPMT[i].pid >> 8) & 0xff);
+				capmt[wp++]=(tempPMT[i].pid & 0xff);
+				wp+=2;
+				break;
+			case 2:				//Descriptor
+				unsigned int x;
+				for(x=0;x<caidcount;x++)
+					if(caids[x]==((tempPMT[i].descriptor[2]<<8)|tempPMT[i].descriptor[3]))
+					//if(caids[x]==(unsigned short)tempPMT[i].descriptor[3])
+						break;
+				if(x!=caidcount)
+				{		
+					if(first)
+					{
+						first=0;
+						capmt[wp++]=0x01;				//ca_pmt_command_id
+						len++;
+					}
+					memcpy(capmt+wp,tempPMT[i].descriptor,tempPMT[i].descriptor[1]+2);
+					wp+=tempPMT[i].descriptor[1]+2;
+					len+=tempPMT[i].descriptor[1]+2;
+				}															
+				break;
+		}
+	}			
+	capmt[7]=wp-8;
+	capmt[lenpos]=((len & 0xf00)>>8);
+	capmt[lenpos+1]=(len & 0xff);
+
+	sendTPDU(0xA0,wp,1,capmt);
+	
+	//for(int i=0;i<wp;i++)
+	//	printf("%02x ",capmt[i]);
+	//printf("\n");	
 }
 
 void eDVBCI::clearCAIDs()
@@ -289,11 +313,20 @@ void eDVBCI::clearCAIDs()
 		return;
 		
 	std::list<int>& availCA = sapi->availableCASystems;
-	
+
+	lock.lock();
 	availCA.clear();
+	lock.unlock();
+	
+	caidcount=0;
 }
 
 void eDVBCI::addCAID(int caid)
+{
+	caids[caidcount++]=caid & 0xffff;
+}
+
+void eDVBCI::pushCAIDs()
 {
 	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	if(!sapi)
@@ -301,8 +334,10 @@ void eDVBCI::addCAID(int caid)
 		
 	std::list<int>& availCA = sapi->availableCASystems;
 	
-	availCA.push_back(caid);
-
+	lock.lock();	
+	for(unsigned int i=0;i<caidcount;i++)
+		availCA.push_back(caids[i]);
+	lock.unlock();
 }
 
 void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_id,unsigned char *data)
@@ -429,7 +464,8 @@ void eDVBCI::ca_manager(unsigned int session)
       {
         eDebug("[DVBCI] [CA MANAGER] send ca_pmt\n");
 
-				sendCAPMT();
+				//sendCAPMT();
+				newService();
         sessions[session].internal_state=2;
 
         break;
@@ -478,6 +514,7 @@ void eDVBCI::handle_session(unsigned char *data,int len)
 			eDebug("[DVBCI] [CA MANAGER] add CAID: %04x",data[i]<<8|data[i+1]);
 			addCAID(data[i]<<8|data[i+1]);
 		}	
+		pushCAIDs();
 
 		for(i=0;i<MAX_SESSIONS;i++)
 			if(sessions[i].state && (sessions[i].service_class==0x30041 || sessions[i].service_class==0x34100))
@@ -734,7 +771,7 @@ void eDVBCI::dataAvailable(int what)
 
 		::read(fd,&buffer,0);	
 
-		::ioctl(fd,CI_TS_ACTIVATE);
+		//::ioctl(fd,CI_TS_ACTIVATE);
 	
 		if(::ioctl(fd,CI_RESET)!=0)
 		{
