@@ -33,6 +33,7 @@
 #include <global.h>
 #include <neutrino.h>
 
+#include <assert.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
