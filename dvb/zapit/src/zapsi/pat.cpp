@@ -19,6 +19,7 @@ using namespace std;
 
 map<uint,channel> nvodchannels;
 map<uint,channel>::iterator cI;
+extern int found_transponders;
 
 
 int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
@@ -81,8 +82,9 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr)
 		close(demux);
 		
 		tsid = (buffer[3]<<8)|buffer[4];
-		printf("TSID: %04x\n", tsid);
+		//printf("TSID: %04x\n", tsid);
 		(*tmap).insert(std::pair<int,transpondermap>(tsid,transpondermap(tsid, freq, sr, 0)));
+		found_transponders++;
 		
 	}
 	return 23;
