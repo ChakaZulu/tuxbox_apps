@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.18 2002/10/16 10:30:47 dirch Exp $
+        $Id: request.h,v 1.19 2002/10/18 12:32:51 thegoodguy Exp $
 
         License: GPL
 
@@ -47,8 +47,6 @@ using namespace std;
 
 typedef map<string,string> CStringList;
 
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
 
 enum Method_Typ {M_UNKNOWN=0,M_POST = 1,M_GET = 2,M_PUT = 3,M_HEAD = 4};
 

@@ -42,9 +42,6 @@
 
 using namespace std;
 
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-
 //-------------------------------------------------------------------------
 
 CWebserver* webserver;
