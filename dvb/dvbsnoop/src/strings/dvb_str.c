@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.44 2004/02/12 21:21:22 rasc Exp $
+$Id: dvb_str.c,v 1.45 2004/02/15 18:58:31 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.44 2004/02/12 21:21:22 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.45  2004/02/15 18:58:31  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.44  2004/02/12 21:21:22  rasc
 MHP AIT descriptors
 some smaller changes
@@ -265,7 +268,7 @@ char *dvbstrTableID (u_int id)
      {  0x71, 0x71,  "Running Status Table (RST)" },
      {  0x72, 0x72,  "Stuffing Table (ST)" },
      {  0x73, 0x73,  "Time Offset Table (TOT)" },
-     {  0x74, 0x74,  "Application Information Table (AIT)" }, /* MHP */
+     {  0x74, 0x74,  "MHP- Application Information Table (AIT)" }, /* MHP */
      {  0x75, 0x7D,  "reserved" },
      {  0x7E, 0x7E,  "Discontinuity Information Table (DIT)" },
      {  0x7F, 0x7F,  "Selection Information Table (SIT)" },
@@ -1023,7 +1026,6 @@ char *dvbstrOriginalNetwork_ID (u_int i)
 char *dvbstrNetworkIdent_ID (u_int i)
 
 {
-	// $$$ TODO same as OriginalNetworkID??
   STR_TABLE  Table[] = {
      {  0x0000, 0x0000,  "reserved" },
      {  0x0001, 0x0001,  "Astra Satellite Network 19.2E / Satellite / SES" },
@@ -1042,7 +1044,7 @@ char *dvbstrNetworkIdent_ID (u_int i)
      {  0x047E, 0x047F,  "Eutelsat Satellite System 12.5W / Satellite / ETSO" },
      {  0x052E, 0x052F,  "Eutelsat Satellite System  8.5W / Satellite / ETSO" },
 
-//$$$ lots are missing
+	//$$$ lots are missing
      {  0x0530, 0xFFFF,  "--> please lookup at http://www.dvb.org" },
 
      {  0,0, NULL }
@@ -1382,7 +1384,7 @@ char *dvbstrStreamContent_Component_TYPE (u_int i)
      {  0x03B0, 0x03FE,  "User defined" },
      {  0x03FF, 0x03FF,  "reserved" },
      {  0x0400, 0x0400,  "reserved" },
-     {  0x0401, 0x047F,  "AC3 modes  (ERROR: to be defined more specific $$$)" },
+     {  0x0401, 0x047F,  "AC3 modes  (to be defined more specific $$$)" },
 
      {  0x0480, 0x04FF,  "reserved" },
      {  0x0500, 0x0BFF,  "reserved" },
@@ -1785,7 +1787,7 @@ char *dvbstrShortSmoothingBufLeakRate_TYPE (u_int i)
 char *dvbstrAC3Component_TYPE (u_int i)
 
 {
-  char *s = "ERROR:  TODO $$$  - AC3 Component type";
+  char *s = "TODO:  $$$  - AC3 Component type";	// $$$ TODO
 
 
   return s;

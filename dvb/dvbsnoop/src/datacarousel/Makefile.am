@@ -10,6 +10,9 @@ noinst_HEADERS = \
 	datagram.h \
 	dsmcc_ddb.h \
 	dsmcc_unm.h \
+	dsmcc_unm_dsi.h \
+	dsmcc_unm_dii.h \
+	dsmcc_unm_dlcancel.h \
 	dsmcc_misc.h \
 	mhp_misc.h \
 	llc_snap.h
@@ -23,6 +26,9 @@ libdatacarousel_a_SOURCES = \
 	datagram.c \
 	dsmcc_ddb.c \
 	dsmcc_unm.c \
+	dsmcc_unm_dsi.c \
+	dsmcc_unm_dii.c \
+	dsmcc_unm_dlcancel.c \
 	dsmcc_misc.c \
 	mhp_misc.c \
 	llc_snap.c

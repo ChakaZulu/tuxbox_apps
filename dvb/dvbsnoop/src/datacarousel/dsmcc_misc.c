@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.7 2004/02/15 01:01:00 rasc Exp $
+$Id: dsmcc_misc.c,v 1.8 2004/02/15 18:58:27 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,9 @@ $Id: dsmcc_misc.c,v 1.7 2004/02/15 01:01:00 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.8  2004/02/15 18:58:27  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.7  2004/02/15 01:01:00  rasc
 DSM-CC  DDB (DownloadDataBlock Message)
 DSM-CC  U-N-Message  started
@@ -189,22 +192,22 @@ static int subDescriptor (u_char *b)
 
 
 
-
 /*
  * ISO/IEC 13818-6
  * dsmccMessageHeader() 
  */
 
-int dsmcc_MessageHeader (int v, u_char *b, int len, int *msg_len,
-				int *dsmccType, int *messageId)
+int dsmcc_MessageHeader (int v, u_char *b, int len,  DSMCC_MSG_HD *d)
 {
    u_char *b_start = b;
    int    adapt_len;
    int    pdiscr;
 
 
-   	*dsmccType = 0;
-   	*messageId = 0;
+   	d->dsmccType = 0;
+   	d->messageId = 0;
+   	d->transaction_id = 0;
+   	d->msg_len = 0;
 
 	out_nl (v, "DSM-CC Message Header:");
 	indent (+1);
@@ -217,25 +220,24 @@ int dsmcc_MessageHeader (int v, u_char *b, int len, int *msg_len,
 
 
 
-  	*dsmccType = outBit_S2x_NL (4,"dsmccType: ",	b+1, 0, 8,
+  	d->dsmccType = outBit_S2x_NL (4,"dsmccType: ",	b+1, 0, 8,
 			(char *(*)(u_long))dsmccStr_dsmccType);
   
-  	*messageId = outBit_S2x_NL (v,"messageId: ", 	b+2, 0, 16,
+  	d->messageId = outBit_S2x_NL (v,"messageId: ", 	b+2, 0, 16,
 			(char *(*)(u_long))dsmccStr_messageID);	
 
 
-	if (*dsmccType == 0x03 && *messageId == DownloadDataBlock) {
-  		outBit_Sx_NL (v,"downloadId: ",		b+4, 0, 32);  // see ARIB STD B24 3.2	
-	} else {
-		dsmcc_print_transactionID_32 (v, b+4);
-	}
+  	d->transaction_id = (d->dsmccType == 0x03 && d->messageId == DownloadDataBlock)
+		? outBit_Sx_NL (v,"downloadId: ",  b+4, 0, 32)
+		: dsmcc_print_transactionID_32 (v, b+4);
 
 
-  	outBit_Sx_NL (v,"reserved: ",	 		b+8, 0,  8);
-  	adapt_len = outBit_Sx_NL (v,"adaptionLength: ", b+9, 0,  8);
-  	*msg_len  = outBit_Sx_NL (v,"messageLength: ", 	b+10,0, 16);
+  		      outBit_Sx_NL (v,"reserved: ", 		b+8, 0,  8);
+  	adapt_len   = outBit_Sx_NL (v,"adaptionLength: ",	b+9, 0,  8);
+  	d->msg_len  = outBit_Sx_NL (v,"messageLength: ",	b+10,0, 16);
 	b += 12;
 	// len -= 12;
+
 
 	if (adapt_len > 0) {
 		int x;
@@ -337,7 +339,8 @@ int dsmcc_UserID (int v, u_char *b, int len)
 	indent (+1);
   	outBit_Sx_NL  (v,"reserved: ",	 	b  , 0,  8);
 
-	print_databytes (v,"UserId:", b+1, 20);	// $$$ TODO detail decode??
+	// print_databytes (v,"UserId:", b+1, 20);
+	dsmcc_carousel_NSAP_address_B20 (v, "UserId: ", b+1);
 
 	indent (-1);
 	return 21;
@@ -350,11 +353,14 @@ int dsmcc_UserID (int v, u_char *b, int len)
  * ISO/IEC 13818-6
  * TS 102 812 v1.2.1  B.2.7
  * split transactionID in parts and print
+ * return: transaction_id
  */
 
-int dsmcc_print_transactionID_32 (int v, u_char *b)
+u_long dsmcc_print_transactionID_32 (int v, u_char *b)
 {
-  	outBit_Sx_NL  (v,"transactionID: ", 		b,  0, 32);
+  u_long  t_id;
+
+  	t_id = outBit_Sx_NL  (v,"transactionID: ", 	b,  0, 32);
 
   	outBit_S2x_NL (v,"  ==> originator: ", 		b,  0,  2,
 			(char *(*)(u_long)) dsmccStr_transactionID_originator);
@@ -362,8 +368,85 @@ int dsmcc_print_transactionID_32 (int v, u_char *b)
   	outBit_Sx_NL  (v,"  ==> identification: ", 	b, 16, 15);
   	outBit_Sx_NL  (v,"  ==> update toggle flag: ", 	b, 31,  1);
 
-	return 4;
+	return t_id;
 }
+
+
+
+
+
+/*
+ * print carousel NSAP  Address
+ * ISO/IEC 13818-6
+ * ETSI 301 192  9.2.1
+ * len = 20 Bytes
+ */
+
+int  dsmcc_carousel_NSAP_address_B20 (int v, const char *s, u_char *b)
+{
+   int  afi;
+   int  type,stype;
+
+
+	// The AFI (authority and format identifier) shall be set to 0x00.
+	// This value is defined in ISO 8348 Annex B as NSAP addresses
+	// reserved for private use. As such, the rest of the NSAP address
+	// fields are available for private definition.
+	//
+	// The type field shall be set to 0x00 when the Carousel NSAP
+	// address points to a U-U Object Carousel. The values in the
+	// range 0x01 to 0x7F shall be reserved to ISO/IEC 13818-6. The
+	// values in the range 0x80 to 0xFF shall be user private and
+	// their use is outside the scope of this part of ISO/IEC 13818.
+
+
+  	out_nl  (v,"%s  (NSAP address):", s);
+	indent (+1);
+
+  	afi  = outBit_Sx_NL  (v,"Authority and Format Identifier: ", 	b   ,  0,  8);
+  	type = outBit_Sx_NL  (v,"Type: ", 				b+1 ,  0,  8);
+
+
+	if (afi != 0x00 || type != 0x00) {
+
+  		print_databytes (v,"address bytes:", b+2, 18);
+
+	} else {
+
+
+  		outBit_Sx_NL  (v,"carousel id: ",	b+2 ,  0, 32);
+		b += 6;
+
+
+		stype = outBit_S2x_NL (4,"specifier type: ", 	b, 0,  8,
+				   (char *(*)(u_long))dsmccStr_SpecifierType );
+		if (stype == 0x01) {
+			outBit_S2x_NL (4,"OUI: ", 		b, 8, 24,
+				   (char *(*)(u_long))dsmccStrOUI );
+		} else {
+  			outBit_Sx_NL  (v,"specifier: ",		b,  8, 24);
+		}
+
+
+
+		// -- private data...
+
+		outBit_Sx_NL  (4,"transport_stream_ID: ",	b,  0, 16);
+		outBit_S2x_NL (4,"Original_network_id: ",	b, 16, 16,
+				(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
+		outBit_Sx     (4,"service_ID: ",		b, 32, 16);
+				out_nl (4," --> refers to PMS program_number"); 
+		outBit_Sx_NL  (4,"reserved: ",			b, 48, 32);
+
+	}
+
+	indent (-1);
+	return 20;
+}
+
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_ddb.h,v 1.1 2004/02/15 01:02:10 rasc Exp $
+$Id: dsmcc_ddb.h,v 1.2 2004/02/15 18:58:27 rasc Exp $
 
 
  DVBSNOOP
@@ -17,7 +17,7 @@ $Id: dsmcc_ddb.h,v 1.1 2004/02/15 01:02:10 rasc Exp $
 #define __DSMCC_DDB_H 
 
 
-int   dsmcc_DownloadDataMessage (int v, u_char *b, int len);
+int   dsmcc_DownloadDataMessage (int v, u_char *b, u_int len);
 
 
 #endif

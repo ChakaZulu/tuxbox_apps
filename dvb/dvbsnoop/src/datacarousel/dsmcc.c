@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.8 2004/02/15 01:01:00 rasc Exp $
+$Id: dsmcc.c,v 1.9 2004/02/15 18:58:27 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dsmcc.c,v 1.8 2004/02/15 01:01:00 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.9  2004/02/15 18:58:27  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.8  2004/02/15 01:01:00  rasc
 DSM-CC  DDB (DownloadDataBlock Message)
 DSM-CC  U-N-Message  started
@@ -87,6 +90,8 @@ void decode_DSMCC_section (u_char *b, int len)
  u_int      section_length;
  u_int      section_syntax_indicator;
  u_int      private_indicator;
+ u_int	    sect_nr;
+ u_int      last_sect_nr;
 
 
 
@@ -114,17 +119,19 @@ void decode_DSMCC_section (u_char *b, int len)
  outBit_Sx_NL (3,"Version_number: ",		b,42, 5);
  outBit_S2x_NL(3,"Current_next_indicator: ",	b,47, 1,
 			(char *(*)(u_long))dvbstrCurrentNextIndicator );
- outBit_Sx_NL (3,"Section_number: ",		b,48, 8);
- outBit_Sx_NL (3,"Last_section_number: ",	b,56, 8);
+
+ sect_nr      = outBit_Sx_NL (3,"Section_number: ",		b,48, 8);
+ last_sect_nr = outBit_Sx_NL (3,"Last_section_number: ",	b,56, 8);
 
 
  b += 8;
- len1 = section_length - 5 - 4;	    // -4 == CRC/Checksum
+ len1 = section_length - 5 - 4;	    	// -4 == CRC/Checksum
+
 
 
  if (table_id == 0x3A) {
 
-	llc_snap (3,b);		 /*  ISO/IEC 8802-2   */
+	llc_snap (3,b);		 	//  ISO/IEC 8802-2 
 
  } else if (table_id == 0x3B) {
 
@@ -138,9 +145,8 @@ void decode_DSMCC_section (u_char *b, int len)
 
 	DSMCC_descriptor_list (b,len1);
 
- } else if (table_id == 0x3E) {
+ } else if (table_id == 0x3E) {	 	// $$$ Remark: DVB defines 0x3E as datagram!!
 
-	 // $$$ Remark: DVB defines 0x3E as datagram!!  // $$$ TODO ??
 	 print_private_data (4, b, len1);
 
  }

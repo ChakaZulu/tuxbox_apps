@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_ddb.c,v 1.1 2004/02/15 01:02:10 rasc Exp $
+$Id: dsmcc_ddb.c,v 1.2 2004/02/15 18:58:27 rasc Exp $
 
 
  DVBSNOOP
@@ -14,6 +14,9 @@ $Id: dsmcc_ddb.c,v 1.1 2004/02/15 01:02:10 rasc Exp $
 
 
 $Log: dsmcc_ddb.c,v $
+Revision 1.2  2004/02/15 18:58:27  rasc
+DSM-CC  data/object carousell continued   (DSI, DII, DDB, DCancel)
+
 Revision 1.1  2004/02/15 01:02:10  rasc
 DSM-CC  DDB (DownloadDataBlock Message)
 DSM-CC  U-N-Message  started
@@ -47,15 +50,16 @@ Carousel Descriptors completed
  */
 
 
-int dsmcc_DownloadDataMessage (int v, u_char *b, int len)
+int dsmcc_DownloadDataMessage (int v, u_char *b, u_int len)
 {
-   int   x;
-   int   msg_len, msgId, dsmcctype;
-   int   len_org = len;
+   int   	x;
+   int   	len_org = len;
+   DSMCC_MSG_HD	dmh;
 
 
 
-	x = dsmcc_MessageHeader (v, b, len, &msg_len, &dsmcctype, &msgId);
+
+	x = dsmcc_MessageHeader (v, b, len, &dmh);
 	b += x;
 	len -= x;
 
@@ -75,6 +79,22 @@ int dsmcc_DownloadDataMessage (int v, u_char *b, int len)
 	return len_org;
 }
 
+
+
+
+
+// $$$ TODO
+
+
+//
+// 11.2.4 Transport of BIOP Messages
+//
+// BIOP messages are transported in Modules of DSM-CC Data Carousels.
+// Multiple BIOP messages may be carried in one Module. The Modules of
+// the Data Carousel are fragmented into Blocks. These Blocks are
+// transported in DownloadDataBlock() messages (described in clause 7).
+// Figure 11-3 illustrates the applied encapsulation and fragmentation
+// methods.
 
 
 
