@@ -1,9 +1,9 @@
 /*
- * $Id: main.cpp,v 1.1 2002/01/03 17:31:40 obi Exp $
+ * $Id: main.cpp,v 1.2 2002/04/14 23:20:38 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
- * Copyright (C) 2001,2002 Andreas Oberritter <obi@saftware.de>
+ * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,19 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Log: main.cpp,v $
- * Revision 1.1  2002/01/03 17:31:40  obi
- * moved main method out of class source
- *
- *
  */
 
 #include "main.h"
 
-int main(int argc, char **argv)
+int main (int argc, char **argv)
 {
     /* create menu instance */
-    //CLCDMenu *menu = new CLCDMenu(CONFIGFILE);
     CLCDMenu *menu = CLCDMenu::getInstance();
 
     /* draw the menu */
@@ -53,14 +47,7 @@ int main(int argc, char **argv)
     if (menu->getConfig()->getModifiedFlag())
     {
 	/* save configuraion */
-#ifdef DEBUG
-	cout << "saving configuration..." << endl;
-	menu->getConfig()->dump();
-#endif
 	menu->getConfig()->saveConfig(CONFIGFILE);
-
-	/* reset modified flag */
-	menu->getConfig()->setModifiedFlag(false);
     }
 
     /* clear screen before exit */

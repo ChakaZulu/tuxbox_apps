@@ -1,9 +1,9 @@
 /*
- * $Id: lcdmenu.cpp,v 1.15 2002/03/02 06:48:07 obi Exp $
+ * $Id: lcdmenu.cpp,v 1.16 2002/04/14 23:20:38 obi Exp $
  *
  * A startup menu for the d-box 2 linux project
  *
- * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
+ * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,66 +19,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *
- * $Log: lcdmenu.cpp,v $
- * Revision 1.15  2002/03/02 06:48:07  obi
- * replaced ezap by enigma
- *
- * Revision 1.14  2002/01/08 14:53:33  obi
- * added menu->update() to timeout method :)
- *
- * Revision 1.13  2002/01/03 17:18:59  obi
- * some reorganization.
- * removed buffer classes.
- * removed threading from rcinput.
- * moved timer from rc-class to menu-class.
- * manually add fonts to fontRendererClass.
- * fixed small bugs that noone would ever find and added new ones.
- *
- * Revision 1.12  2001/12/15 12:49:21  obi
- * do not protect any entry with pin by default
- *
- * Revision 1.11  2001/12/14 16:57:13  obi
- * power off after three pin failures
- *
- * Revision 1.10  2001/12/14 06:09:05  obi
- * moved fontrenderer and lcddisplay to a lib
- *
- * Revision 1.9  2001/12/10 06:25:34  obi
- * changed config path to tuxbox default
- *
- * Revision 1.8  2001/12/05 21:49:31  obi
- * - fix for more than four menu entries
- *
- * Revision 1.7  2001/12/05 20:35:29  obi
- * - fix save method in configManager
- * - remember last selection
- * - store default_entry c-like, beginnig from 0
- *
- * Revision 1.6  2001/11/16 20:49:04  obi
- * - option show_numbers now works with config file too
- *
- * Revision 1.5  2001/11/16 20:05:36  obi
- * - pin does really work now, can be checked, changed and saved :)
- * - default selection is visible again on startup
- * - fontsize parameter might work better now
- *
- * Revision 1.4  2001/11/16 14:07:25  McClean
- * fixed missing index-check
- *
- * Revision 1.3  2001/11/15 22:37:47  obi
- * fix pin protection settings
- * actually display words not dots :-)
- *
- * Revision 1.2  2001/11/14 22:42:06  obi
- * fall back to defaults correctly
- *
  */
 
 #include "lcdmenu.h"
 
 CLCDMenu *CLCDMenu::instance;
 
-CLCDMenu::CLCDMenu(string configFilename)
+CLCDMenu::CLCDMenu (std::string configFilename)
 {
 	rc = new CRCInput();
 
@@ -88,7 +35,7 @@ CLCDMenu::CLCDMenu(string configFilename)
 
 	entryCount = 0;
 
-	config = new CConfigManager();
+	config = new CConfigFile(',');
 	if (!config->loadConfig(configFilename))
 	{
 		/* defaults */
@@ -97,7 +44,7 @@ CLCDMenu::CLCDMenu(string configFilename)
 		config->setInt("default_entry", 0);
 		config->setInt("text_align", 0);
 		config->setBool("show_numbers", false);
-		config->setString("pin", string("__lUISdFwUYjg"));
+		config->setString("pin", std::string("__lUISdFwUYjg"));
 		addEntry("Enigma");
 		addEntry("Neutrino");
 		addEntry("Lcars");
@@ -106,10 +53,6 @@ CLCDMenu::CLCDMenu(string configFilename)
 		//addPinProtection(3);
 		config->setIntVector("pin_protect", pinEntries);
 	}
-
-#ifdef DEBUG
-	config->dump();
-#endif
 
 	/* user defineable settings */
 	fontSize = config->getInt("font_size");
@@ -130,23 +73,23 @@ CLCDMenu::CLCDMenu(string configFilename)
 	pinFailures = 0;
 }
 
-void CLCDMenu::addNumberPrefix()
+void CLCDMenu::addNumberPrefix ()
 {
 	int i;
 	for(i = 0; i < entryCount; i++)
 	{
 		char *entryCountChar = (char *) malloc(sizeof(i+1)+2);
 		sprintf(entryCountChar, "%d) ", i+1);
-		entries[i] = string(entryCountChar) + entries[i];
+		entries[i] = std::string(entryCountChar) + entries[i];
 	}
 }
 
-const char *CLCDMenu::getCurrentSalt()
+const char *CLCDMenu::getCurrentSalt ()
 {
 	return cryptedPin.substr(0, 2).c_str();
 }
 
-char *CLCDMenu::getNewSalt()
+char *CLCDMenu::getNewSalt ()
 {
 	char *salt = (char *) malloc(2);
 	FILE *fd = fopen("/dev/urandom", "r");
@@ -155,7 +98,7 @@ char *CLCDMenu::getNewSalt()
 	return salt;
 }
 
-CLCDMenu::~CLCDMenu()
+CLCDMenu::~CLCDMenu ()
 {
 	delete rc;
 	delete menuFont;
@@ -163,18 +106,18 @@ CLCDMenu::~CLCDMenu()
 	delete config;
 }
 
-void CLCDMenu::addEntry(string title)
+void CLCDMenu::addEntry (std::string title)
 {
 	entryCount++;
 	entries.push_back(title);
 }
 
-void CLCDMenu::addPinProtection(int index)
+void CLCDMenu::addPinProtection (int index)
 {
 	pinEntries.push_back(index + 1);
 }
 
-bool CLCDMenu::selectEntry(int index)
+bool CLCDMenu::selectEntry (int index)
 {
 	if ((index < entryCount) && (index >= 0))
 	{
@@ -188,9 +131,6 @@ bool CLCDMenu::selectEntry(int index)
 		drawString(entries[index], top, textAlign, CLCDDisplay::PIXEL_OFF);
 
 		update();
-#ifdef DEBUG
-		cout << "selectEntry(" << index << "): " << entries[index] << endl;
-#endif
 		return true;
 	}
 	else
@@ -199,7 +139,7 @@ bool CLCDMenu::selectEntry(int index)
 	}
 }
 
-bool CLCDMenu::drawMenu()
+bool CLCDMenu::drawMenu ()
 {
 	if (entryCount > 0)
 	{
@@ -207,13 +147,9 @@ bool CLCDMenu::drawMenu()
 		int border = (entryCount * fontSize + (entryCount - 1) * lineSpacing - 63) / -2;
 
 		draw_fill_rect (0, 0, 119, 63, CLCDDisplay::PIXEL_OFF);
-		for (i=0; i<entryCount; i++)
+		for (i = 0; i < entryCount; i++)
 		{
 			top = border + (i+1) * fontSize + (i) * lineSpacing;
-#ifdef DEBUG
-			cout << "drawString(\"" << entries[i] << "\"," << top << ",";
-			cout << textAlign << ",CLCDDisplay::PIXEL_ON)" << endl;
-#endif
 			drawString(entries[i], top, textAlign, CLCDDisplay::PIXEL_ON);
 		}
 		
@@ -226,7 +162,7 @@ bool CLCDMenu::drawMenu()
 	}
 }
 
-bool CLCDMenu::drawString(string text, int top, int align, int color)
+bool CLCDMenu::drawString (std::string text, int top, int align, int color)
 {
     int left, maxWidth;
     
@@ -245,23 +181,16 @@ bool CLCDMenu::drawString(string text, int top, int align, int color)
     
     if (width > maxWidth)
     {
-#ifdef DEBUG
-	cerr << "string exceeded " << maxWidth << " pixels. width: " << width << endl;
-#endif
         return false;
     }
     else
     {
-#ifdef DEBUG
-	cout << "menufont->RenderString(" << left << "," << top << "," << width;
-	cout << ",\"" << text.c_str() << "\"," << color << ",0)" << endl;
-#endif
 	menuFont->RenderString(left, top, width, text.c_str(), color, 0);
         return true;
     }
 }
 
-void CLCDMenu::timeout(int signal)
+void CLCDMenu::timeout (int signal)
 {
 	CLCDMenu *menu = getInstance();
 	if (menu->isPinProtected(menu->selectedEntry))
@@ -279,7 +208,7 @@ void CLCDMenu::timeout(int signal)
 	}
 }
 
-bool CLCDMenu::rcLoop()
+bool CLCDMenu::rcLoop ()
 {
 	int timeoutValue = 10; // sekunden
 	bool selected = false;
@@ -381,9 +310,6 @@ bool CLCDMenu::changePin()
 			newSalt = getNewSalt();
 
 			// TODO: notify successful change via lcd
-#ifdef DEBUG
-			cout << "pin changed successfully." << endl;
-#endif
 			return true;
 		}
 		else
@@ -393,7 +319,7 @@ bool CLCDMenu::changePin()
 		return false;
 }
 
-string CLCDMenu::pinScreen(string title, bool isNewPin)
+std::string CLCDMenu::pinScreen (std::string title, bool isNewPin)
 {
     string pin;
 
@@ -414,10 +340,6 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
 	sprintf(digit, "%d", rc->getKey());
 	pin += string(digit);
 
-#ifdef DEBUG
-	cout << "pin[" << i << "]=" << pin[i] << endl;
-	cout << "menuFont->RenderString(" << left << "," << 3*fontSize << "," << fontSize << ",*,CLCDDisplay::PIXEL_ON, 0)" << endl;
-#endif
 	menuFont->RenderString(left, 3*fontSize, fontSize, "*", CLCDDisplay::PIXEL_ON, 0);
 
 	update();
@@ -430,14 +352,11 @@ string CLCDMenu::pinScreen(string title, bool isNewPin)
         return string(crypt(pin.c_str(), getCurrentSalt()));
 }
 
-bool CLCDMenu::checkPin(string title)
+bool CLCDMenu::checkPin (std::string title)
 {
     if (cryptedPin != pinScreen(title, false))
     {
         /* TODO: complain about invalid pin on lcd */
-#ifdef DEBUG
-	cout << "invalid pin entered." << endl;
-#endif
 	if (pinFailures >= 2)
 		poweroff();
 	else
@@ -447,33 +366,23 @@ bool CLCDMenu::checkPin(string title)
     }
     else
     {
-#ifdef DEBUG
-	cout << "pin accepted" << endl;
-#endif
 	pinFailures = 0;
         return true;
     }
 }
 
-void CLCDMenu::poweroff()
+void CLCDMenu::poweroff ()
 {
 	int fd = open("/dev/dbox/fp0", O_RDWR);
 	if (fd < 0)
 	{
-#ifdef DEBUG
-		cerr << "unable to open /dev/dbox/fp0" << endl;
-#endif
 		return;
 	}
 
-	int val;
-	if(ioctl(fd, FP_IOCTL_POWEROFF, &val) < 0)
+	if(ioctl(fd, FP_IOCTL_POWEROFF, 0) < 0)
 	{
-#ifdef DEBUG
-		cerr << "poweroff failed." << endl;
-#endif
+		close(fd);
 		return;
 	}
-	close(fd);
 }
 

@@ -1,7 +1,7 @@
 /*
- * $Id: lcdmenu.h,v 1.10 2002/01/03 17:18:59 obi Exp $
+ * $Id: lcdmenu.h,v 1.11 2002/04/14 23:20:38 obi Exp $
  *
- * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
+ * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,19 +23,22 @@
 #define __LCDMENU_H__
 
 #include <crypt.h>
+#include <dbox/fp.h>
 #include <signal.h>
 #include <unistd.h>
 
-#include <dbox/fp.h>
-#include <liblcddisplay.h>
-
 #include <string>
 #include <vector>
-using namespace std;
 
-#include "configManager.h"
+#include "configfile.h"
+#include "liblcddisplay.h"
 #include "rcinput.h"
+
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#else
+#define CONFIGDIR "/var/tuxbox/config"
+#endif
 
 #define LEFTALIGNED	0
 #define CENTERED	1
@@ -50,41 +53,41 @@ class CLCDMenu : public CLCDDisplay
 			return instance;
 		}
 
-		void addEntry(string);
-		bool selectEntry(int);
-		int getDefaultEntry() { return defaultEntry; }
-		int getSelectedEntry() { return selectedEntry; }
-		void addNumberPrefix();
+		void addEntry (std::string);
+		bool selectEntry (int);
+		int getDefaultEntry () { return defaultEntry; }
+		int getSelectedEntry () { return selectedEntry; }
+		void addNumberPrefix ();
 
-		bool drawMenu();
-		bool drawString(string, int, int, int);
-		int getTextAlign() { return textAlign; } /* 0=left, 1=centered */
+		bool drawMenu ();
+		bool drawString (std::string, int, int, int);
+		int getTextAlign () { return textAlign; } /* 0=left, 1=centered */
 
-		CRCInput *getRc()  { return rc; }
-		bool rcLoop();
+		CRCInput *getRc ()  { return rc; }
+		bool rcLoop ();
 
-		string pinScreen(string, bool);
-		bool changePin();
-		bool checkPin(string);
-		bool isPinProtected(int);
-		void addPinProtection(int);
+		std::string pinScreen (std::string, bool);
+		bool changePin ();
+		bool checkPin (std::string);
+		bool isPinProtected (int);
+		void addPinProtection (int);
 
-		const char *getCurrentSalt();
-		char *getNewSalt();
+		const char *getCurrentSalt ();
+		char *getNewSalt ();
 	
-		void poweroff();
+		void poweroff ();
 
-		CConfigManager *getConfig() { return config; }
+		CConfigFile *getConfig () { return config; }
 
 	protected:
-		CLCDMenu(string); /* configuration filename */
-		~CLCDMenu();
+		CLCDMenu (std::string); /* configuration filename */
+		~CLCDMenu ();
 		
 	private:
 		static CLCDMenu *instance;
-		static void timeout(int);
+		static void timeout (int);
 	
-		CConfigManager *config;
+		CConfigFile *config;
 		CRCInput *rc;
 		fontRenderClass *fontRenderer;
 		Font *menuFont;
@@ -98,11 +101,11 @@ class CLCDMenu : public CLCDDisplay
 		int entryCount;
 		int defaultEntry;
 
-		vector<string> entries;
-		vector<int> pinEntries;
+		std::vector <std::string> entries;
+		std::vector <int> pinEntries;
 
 		int pinFailures;
-		string cryptedPin;
+		std::string cryptedPin;
 		char *newSalt;
 };
 

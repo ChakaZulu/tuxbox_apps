@@ -1,7 +1,7 @@
 /*
- * $Id: main.h,v 1.1 2002/01/03 17:31:40 obi Exp $
+ * $Id: main.h,v 1.2 2002/04/14 23:20:38 obi Exp $
  *
- * Copyright (C) 2001 Andreas Oberritter <obi@saftware.de>
+ * Copyright (C) 2001, 2002 Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,18 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#define CONFIGFILE CONFIGDIR "/lcdmenu.conf"
-
-#include <config.h>
-
-#include "configManager.h"
-#include "lcdmenu.h"
-
 #include <string>
 #include <vector>
-using namespace std;
+
+#include "configfile.h"
+#include "lcdmenu.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#else
+#define CONFIGDIR "/var/tuxbox/config"
+#endif
+
+#define CONFIGFILE CONFIGDIR "/lcdmenu.conf"
 
 #endif /* __MAIN_H__ */
