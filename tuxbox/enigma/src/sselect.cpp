@@ -153,7 +153,7 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 				fillServiceList();
 				return 1;
 			}
-			case eRCInput::RC_HELP:
+			case eRCInput::RC_RED:
 			{
 				if ( eEPGCache::getInstance()->lookupCurrentEvent(selected->original_network_id, selected->service_id ) != 0)
 				{
