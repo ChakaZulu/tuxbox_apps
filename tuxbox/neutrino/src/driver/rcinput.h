@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.14 2002/01/29 17:26:51 field Exp $
+$Id: rcinput.h,v 1.15 2002/02/17 15:55:56 McClean Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.15  2002/02/17 15:55:56  McClean
+ prepare for keyboard - useless at the moment
+
  Revision 1.14  2002/01/29 17:26:51  field
  Jede Menge Updates :)
 
@@ -102,7 +105,9 @@ using namespace std;
 class CRCInput
 {
 	private:
-		int         fd;
+		int         fd_rc;
+		int			fd_keyb;
+		int			fd_max;
 		CRingBuffer pb_keys;
 
 		void open();
@@ -122,10 +127,12 @@ class CRCInput
 		    RC_timeout=-1, RC_nokey=-2
 		};
 
+		static const int RC_KeyBoard = 0x4000;
+
 		//only used for plugins (games) !!
 		int getFileHandle()
 		{
-			return fd;
+			return fd_rc;
 		}
 		void stopInput();
 		void restartInput();

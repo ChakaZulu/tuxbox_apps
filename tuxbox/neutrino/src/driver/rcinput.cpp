@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.26 2002/01/29 17:26:51 field Exp $
+ $Id: rcinput.cpp,v 1.27 2002/02/17 15:55:56 McClean Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.27  2002/02/17 15:55:56  McClean
+ prepare for keyboard - useless at the moment
+
  Revision 1.26  2002/01/29 17:26:51  field
  Jede Menge Updates :)
 
@@ -129,22 +132,42 @@ CRCInput::CRCInput()
 void CRCInput::open()
 {
 	close();
-	fd=::open("/dev/dbox/rc0", O_RDONLY);
-	if (fd<0)
+
+	fd_rc=::open("/dev/dbox/rc0", O_RDONLY);
+	if (fd_rc<0)
 	{
 		perror("/dev/dbox/rc0");
 		exit(-1);
 	}
-	ioctl(fd, RC_IOCTL_BCODES, 1);
-	fcntl(fd, F_SETFL, O_NONBLOCK );
+	ioctl(fd_rc, RC_IOCTL_BCODES, 1);
+	fcntl(fd_rc, F_SETFL, O_NONBLOCK );
+
+	fd_keyb= 0;
+	/*
+	::open("/dev/dbox/rc0", O_RDONLY);
+	if (fd_keyb<0)
+	{
+		perror("/dev/stdin");
+		exit(-1);
+	}
+	*/
+	fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
+
+	fd_max = fd_rc;
 }
 
 void CRCInput::close()
 {
-	if(fd)
+	if(fd_rc)
 	{
-		::close(fd);
+		::close(fd_rc);
 	}
+/*
+	if(fd_keyb)
+	{
+		::close(fd_keyb);
+	}
+*/
 }
 
 /**************************************************************************
@@ -218,11 +241,19 @@ int CRCInput::getKey(int Timeout, bool bAllowRepeatLR)
 		tvselect.tv_usec = (Timeout*100000)%1000000;
 
 		FD_ZERO(&rfds);
-		FD_SET(fd, &rfds);
-		int status =  select(fd+1, &rfds, NULL, NULL, tvslectp);
-		if(status)
+		FD_SET(fd_rc, &rfds);
+		FD_SET(fd_keyb, &rfds);
+		int status =  select(fd_max+1, &rfds, NULL, NULL, tvslectp);
+
+		if(FD_ISSET(fd_keyb, &rfds))
 		{
-			status = read(fd, &rc_key, sizeof(rc_key));
+			char key = 0;
+			read(fd_keyb, &key, sizeof(key));
+			printf("keyboard: %d\n", rc_key);
+		}
+		if(FD_ISSET(fd_rc, &rfds))
+		{
+			status = read(fd_rc, &rc_key, sizeof(rc_key));
 			if (status==2)
 			{	//loslassen bei alten nokia fb's
 				if(rc_key!=0x5cfe)
