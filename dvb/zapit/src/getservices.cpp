@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.77 2003/06/02 22:22:07 digi_casi Exp $
+ * $Id: getservices.cpp,v 1.78 2003/06/03 08:27:01 digi_casi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -39,7 +39,7 @@ std::map<t_satellite_position, uint8_t>::iterator mpos_it;
 std::map<string, int> satelliteDiseqcs; //diseqcs per satellite
 std::map<string, int>::iterator satdiseqc_it;
 
-void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, std::string satellite, t_satellite_position satellitePosition)
+void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, t_satellite_position satellitePosition)
 {
 	t_transport_stream_id transport_stream_id;
 	t_original_network_id original_network_id;
@@ -100,7 +100,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, std::string satell
 		);
 
 		/* read channels that belong to the current transponder */
-		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellite, satellitePosition);
+		ParseChannels(node->xmlChildrenNode, transport_stream_id, original_network_id, DiSEqC, satellitePosition);
 
 		/* hop to next transponder */
 		node = node->xmlNextNode;
@@ -109,7 +109,7 @@ void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, std::string satell
 	return;
 }
 
-void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, std::string satellite, t_satellite_position satellitePosition)
+void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream_id, const t_original_network_id original_network_id, const unsigned char DiSEqC, t_satellite_position satellitePosition)
 {
 	t_service_id service_id;
 	std::string  name;
@@ -139,7 +139,6 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 						original_network_id,
 						service_type,
 						DiSEqC, 
-						satellite, 
 						satellitePosition
 					)
 				)
@@ -184,7 +183,7 @@ void FindTransponder(xmlNodePtr search)
 		}
 
 		INFO("going to parse dvb-%c provider %s", xmlGetName(search)[0], xmlGetAttribute(search, "name"));
-		ParseTransponders(search->xmlChildrenNode, DiSEqC, satellite, satellitePosition);
+		ParseTransponders(search->xmlChildrenNode, DiSEqC, satellitePosition);
 		search = search->xmlNextNode;
 	}
 }

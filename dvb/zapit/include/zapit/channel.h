@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.23 2003/05/28 08:12:46 digi_casi Exp $
+ * $Id: channel.h,v 1.24 2003/06/03 08:27:01 digi_casi Exp $
  *
  * (C) 2002 Steffen Hehn <mcclean@berlios.de>
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
@@ -45,8 +45,6 @@ class CZapitChannel
 	private:
 		/* channel name */
 		std::string name;
-		/* satellite */
-		std::string satellite;
 
 		/* pids of this channel */
 		std::vector <CZapitAudioChannel *> audioChannels;
@@ -77,7 +75,7 @@ class CZapitChannel
 
 	public:
 		/* constructor, desctructor */
-		CZapitChannel(std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, std::string p_satellite, int32_t p_satellite_position);
+		CZapitChannel(std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, t_satellite_position p_satellite_position);
 		~CZapitChannel(void);
 
 		/* get methods - read only variables */
@@ -89,12 +87,10 @@ class CZapitChannel
 		unsigned char        	getDiSEqC(void)            	const { return DiSEqC; }
 		t_channel_id         	getChannelID(void)         	const { return CREATE_CHANNEL_ID; }
 		uint32_t             	getTsidOnid(void)          	const { return (transport_stream_id << 16) | original_network_id; }
-		uint64_t             	getSposTsidOnid(void)          	const { return ((uint64_t)satellitePosition << 32 | transport_stream_id << 16) | original_network_id; }
-
+		
 		/* get methods - read and write variables */
 		const std::string	getName(void)			const { return name; }
-		const std::string	getSatelliteName(void)		const { return satellite; }
-		int32_t			getSatellitePosition(void)	const { return satellitePosition; }
+		t_satellite_position	getSatellitePosition(void)	const { return satellitePosition; }
 		unsigned char 		getAudioChannelCount(void)	{ return audioChannels.size(); }
 		unsigned short		getPcrPid(void)			{ return pcrPid; }
 		unsigned short		getPmtPid(void)			{ return pmtPid; }
