@@ -472,10 +472,10 @@ void CRemoteControl::setAPID( uint APID )
 
 std::string CRemoteControl::setSubChannel(const int numSub, const bool force_zap)
 {
-	if ((numSub < 0) || (numSub >= subChannels.size()))
+	if ((numSub < 0) || (numSub >= (int)subChannels.size()))
 		return "";
 
-	if (( (uint) selected_subchannel == numSub ) && (!force_zap))
+	if ((selected_subchannel == numSub ) && (!force_zap))
 		return "";
 
 	selected_subchannel = numSub;
