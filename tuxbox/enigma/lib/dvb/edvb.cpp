@@ -269,81 +269,80 @@ void eDVB::configureNetwork()
 				_exit(0);
 			}
 		}
-#ifndef DISABLE_NFS		
-		//NFS
-		system("umount -a");
+#ifndef DISABLE_NFS
+//		system("umount -a");  // do not umount all...
 		for(int e=0;e<4;)
 		{
-		    int automount=0;
-		    eString cmd,sdir,ldir,opt;
-		    
-		    cmd.sprintf("/elitedvb/network/nfs%d/",e++);
-		    eConfig::getInstance()->getKey((cmd+"automount").c_str(), automount);
-		    if(automount)
-		    {
-			__u32 sip = 0;
-			char *cvalue  = 0;
-			int ivalue = 0, fstype = 0;
-			int de[4],a;
-			a = 0;
-			
-			eConfig::getInstance()->getKey((cmd+"fstype").c_str(), fstype);
-			eConfig::getInstance()->getKey((cmd+"sdir").c_str(), cvalue);
-			eConfig::getInstance()->getKey((cmd+"options").c_str(), ivalue);
-			eConfig::getInstance()->getKey((cmd+"ip").c_str(), sip);
-			unpack(sip, de);
-	
-			if(fstype){
-			    sdir.sprintf("//%d.%d.%d.%d/%s",de[0],de[1],de[2],de[3],cvalue);
-			    eConfig::getInstance()->getKey((cmd+"username").c_str(), cvalue);
-			    opt.sprintf("username=%s",cvalue);
-    			    eConfig::getInstance()->getKey((cmd+"password").c_str(), cvalue);
-			    opt.sprintf("%s,password=%s,unc=%s",opt.c_str(),cvalue,sdir.c_str());
-			    if(ivalue>0)
-				opt=opt+",";
-			}
-			else
-			    sdir.sprintf("%d.%d.%d.%d:%s",de[0],de[1],de[2],de[3],cvalue);
-			
-			eConfig::getInstance()->getKey((cmd+"ldir").c_str(), cvalue);
-			ldir.sprintf("%s",cvalue);
-			
-			switch(ivalue)
+			int automount=0;
+			eString cmd,sdir,ldir,opt;
+			cmd.sprintf("/elitedvb/network/nfs%d/",e++);
+			eConfig::getInstance()->getKey((cmd+"automount").c_str(), automount);
+			if(automount)
 			{
-			    case  1:opt=opt+"ro";break;
-			    case  2:opt=opt+"rw";break;
-			    case  3:opt=opt+"ro,nolock";break;
-			    case  4:opt=opt+"rw,nolock";break;
-			    case  5:opt=opt+"ro,soft";break;
-			    case  6:opt=opt+"rw,soft";break;	
-			    case  7:opt=opt+"ro,soft,nolock";break;
-			    case  8:opt=opt+"rw,soft,nolock";break;
-			    case  9:opt=opt+"ro,udp,nolock";break;
-			    case 10:opt=opt+"rw,udp,nolock";break;
-			    case 11:opt=opt+"ro,soft,udp";break;
-			    case 12:opt=opt+"rw,soft,udp";break;
-			    case 13:opt=opt+"ro,soft,udp,nolock";break;
-			    case 14:opt=opt+"rw,soft,udp,nolock";break;	
-			    default:
-			     break;
+				__u32 sip = 0;
+				char *cvalue  = 0;
+				int ivalue = 0, fstype = 0;
+				int de[4],a;
+				a = 0;
+
+				eConfig::getInstance()->getKey((cmd+"fstype").c_str(), fstype);
+				eConfig::getInstance()->getKey((cmd+"sdir").c_str(), cvalue);
+				eConfig::getInstance()->getKey((cmd+"options").c_str(), ivalue);
+				eConfig::getInstance()->getKey((cmd+"ip").c_str(), sip);
+				unpack(sip, de);
+
+				if(fstype)
+				{
+					sdir.sprintf("//%d.%d.%d.%d/%s",de[0],de[1],de[2],de[3],cvalue);
+					eConfig::getInstance()->getKey((cmd+"username").c_str(), cvalue);
+					opt.sprintf("username=%s",cvalue);
+					eConfig::getInstance()->getKey((cmd+"password").c_str(), cvalue);
+					opt.sprintf("%s,password=%s,unc=%s",opt.c_str(),cvalue,sdir.c_str());
+					if(ivalue>0)
+						opt=opt+",";
+				}
+				else
+					sdir.sprintf("%d.%d.%d.%d:%s",de[0],de[1],de[2],de[3],cvalue);
+
+				eConfig::getInstance()->getKey((cmd+"ldir").c_str(), cvalue);
+				ldir.sprintf("%s",cvalue);
+
+				switch(ivalue)
+				{
+					case  1:opt=opt+"ro";break;
+					case  2:opt=opt+"rw";break;
+					case  3:opt=opt+"ro,nolock";break;
+					case  4:opt=opt+"rw,nolock";break;
+					case  5:opt=opt+"ro,soft";break;
+					case  6:opt=opt+"rw,soft";break;	
+					case  7:opt=opt+"ro,soft,nolock";break;
+					case  8:opt=opt+"rw,soft,nolock";break;
+					case  9:opt=opt+"ro,udp,nolock";break;
+					case 10:opt=opt+"rw,udp,nolock";break;
+					case 11:opt=opt+"ro,soft,udp";break;
+					case 12:opt=opt+"rw,soft,udp";break;
+					case 13:opt=opt+"ro,soft,udp,nolock";break;
+					case 14:opt=opt+"rw,soft,udp,nolock";break;	
+					default:
+						break;
+				}
+
+				eConfig::getInstance()->getKey((cmd+"extraoptions").c_str(), cvalue);
+				opt.sprintf("%s,%s",opt.c_str(),cvalue);
+
+				signal(SIGCHLD, SIG_IGN);
+				if (fork() == 0)
+				{
+					for (unsigned int i=3; i < 90; ++i )
+						close(i);
+					if(fstype)
+						execlp("busybox", "mount", "-t", "cifs", sdir.c_str(), ldir.c_str(), "-o", opt.c_str(), NULL);
+					else
+						execlp("busybox", "mount", "-t", "nfs", sdir.c_str(), ldir.c_str(), "-o", opt.c_str(), NULL);
+					_exit(0);	
+				}
 			}
-			
-			eConfig::getInstance()->getKey((cmd+"extraoptions").c_str(), cvalue);
-			opt.sprintf("%s,%s",opt.c_str(),cvalue);
-			       
-			signal(SIGCHLD, SIG_IGN);
-			if (fork() == 0)
-			{
-			    for (unsigned int i=3; i < 90; ++i )
-				close(i);
-			    if(fstype)
-				execlp("busybox", "mount", "-t", "cifs", sdir.c_str(), ldir.c_str(), "-o", opt.c_str(), NULL);
-			    else
-				execlp("busybox", "mount", "-t", "nfs", sdir.c_str(), ldir.c_str(), "-o", opt.c_str(), NULL);
-			    _exit(0);	
-			}
-		    }//automount
-		}//NFS mount
+		}
 #endif
 	} //sdosetup
 }
