@@ -388,36 +388,26 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 
 		eDebug("TEXT:%s",text);
 
-		eMMIEnqWindow wnd(text, nrcount, blind );
+		eMMIEnqWindow wnd(convertLatin1UTF8(text), nrcount, blind );
 		open = &wnd;
 		int ret = wnd.exec();
 		open = 0;
-		eDebug("raus aus eMMIEnq. ret = %d", ret );
 
-		unsigned char buf[ret == -1 ? 2 : 2 + nrcount];
-		eDebug("bufsize = %d", ret == -1 ? 2 : 2 + nrcount );
+		unsigned char *buf = new unsigned char[ret == -1 ? 2 : 2 + nrcount];
+
 		buf[1] = ret == -1 ? 0 : 1; // answer ok.. or user canceled
-		eDebug("answer type = %d", buf[1] );
+
 		buf[0] = buf[1] ? nrcount+1 : 1;  // length
-		eDebug("answer bytes = %d", buf[0] );
+
 		// when user have cancelled only one byte is answered to the ci
 
 		eString atext = wnd.getAnswer();  // get Answer from number
 
-		if ( buf[1] )
-			eDebugNoNewLine("answer is %02x %02x ", buf[0], buf[1]);
-		for (uint i=0; i < buf[0]-1; ++i )  // copy user input to answer
-		{
-			eDebugNoNewLine("%02x ", buf[2+i]);
+		for (int i=0; i < buf[0]-1; ++i )  // copy user input to answer
 			buf[2+i] = atext[i];
-		}
-		if ( buf[1] )
-			eDebug("");
 
-		eDebug("sent Answer");
 		ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_enqansw, buf));
 
-		eDebug("showWaitForCIAnswer");
 		showWaitForCIAnswer(ret);
 	}
 	else if( memcmp(data+rp,TAG_MMI_MENU_LAST,TAG_LENGTH)==0 ||
@@ -465,24 +455,23 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 				int size=LengthField((unsigned char*)data+rp, MAX_LENGTH_BYTES, &LengthBytes);
 				rp += LengthBytes;
 
-				char text[size+2];
-				memset(text,0,size+2);
-				memcpy(text+1,data+rp,size);
-				text[0]=0x20;
+				char text[size+1];
+				memset(text,0,size+1);
+				memcpy(text,data+rp,size);
 				eDebug("TEXT:%s",text);
 				currElement++;
 
 				if(currElement==1)
-					titleText=text;
+					titleText=convertLatin1UTF8(text);
 				if(currElement==2)
-					subTitleText=text;
+					subTitleText=convertLatin1UTF8(text);
 				if(currElement==3)
-					bottomText=text;
+					bottomText=convertLatin1UTF8(text);
 
 				if(currElement>3)
 				{
 					eDebug("new entry text %s", text);
-					entrys.push_back( std::pair<eString, int>( text, currElement-3 ) );
+					entrys.push_back( std::pair<eString, int>( convertLatin1UTF8(text), currElement-3 ) );
 				}
 				rp += size;
 			}
@@ -534,19 +523,6 @@ bool enigmaMMI::handleMMIMessage(const char *data)
 	return true;
 }
 
-eString &removeSpaces( eString &s )
-{
-	unsigned int length = s.length();
-	while ( length && s[0] == 32 )
-	{
-		s.erase(0,1);
-		--length;
-	}
-	while ( length && s[length-1] == 32 )
-		s.erase(--length,1);
-	return s;
-}
-
 eMMIEnqWindow::eMMIEnqWindow( eString text, int num, bool blind )
 	:num(num)
 {
@@ -566,7 +542,7 @@ eMMIEnqWindow::eMMIEnqWindow( eString text, int num, bool blind )
 
 	int newHeight = size.height() - getClientSize().height() + 100;
 
-	if ( removeSpaces(text) )
+	if ( text )
 	{
 		newHeight+=10;
 		title = new eLabel(this);
@@ -616,10 +592,11 @@ int eMMIEnqWindow::eventHandler( const eWidgetEvent &e )
 
 eString eMMIEnqWindow::getAnswer()
 {
-	static eString ret;
+	eString ret;
 	ret="";
 	for ( int i=0; i < num; i++ )
 		ret += (char)(input->getNumber( i )+0x30);
+	eDebug("ret = %d", ret.c_str() );
 	return ret;
 }
 
@@ -629,11 +606,11 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 	cmove(ePoint(120, 130));
 
 	for ( std::list< std::pair<eString,int> >::iterator it( entrys.begin() ); it != entrys.end(); ++it )
-		new eListBoxEntryText( &list, removeSpaces(it->first), (void*) it->second );
+		new eListBoxEntryText( &list, it->first, (void*) it->second );
 
 	int newHeight = height();
 
-	if ( removeSpaces(titleTextT) )
+	if ( titleTextT )
 	{
 		newHeight+=10;
 		title = new eLabel(this);
@@ -652,7 +629,7 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 		list.move( pos );
 	}
 
-	if ( removeSpaces(subtitleTextT) )
+	if ( subtitleTextT )
 	{
 		newHeight+=10;
 		subtitle = new eLabel(this);
@@ -678,7 +655,7 @@ eMMIListWindow::eMMIListWindow(eString titleTextT, eString subtitleTextT, eStrin
 		list.move( pos );
 	}
 
-	if ( removeSpaces(bottomTextT) )
+	if ( bottomTextT )
 	{
 		newHeight += 10;
 		bottomText = new eLabel(this);
