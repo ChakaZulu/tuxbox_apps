@@ -1,0 +1,21 @@
+<html>
+<head>
+	<title>epgview</title>
+	<script language="javascript">
+		function record()
+		{
+			win=window.open("/record", "switchStatus", "width=200, height=200, left=0, top
+			win.focus();
+		}
+
+		function EPGDetails()
+		{
+			win=window.open("/EPGDetails", "switchStatus", "width=200, height=200, left=0,
+			win.focus();
+		}
+	</script>
+</head>
+<body bgcolor="#000000"><span class="title">#CHANNEL#</span><br>
+#BODY#
+</body>
+</html>

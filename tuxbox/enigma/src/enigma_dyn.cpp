@@ -433,7 +433,7 @@ static eString setVolume(eString request, eString dirpath, eString opts, eHTTPCo
 	return result;
 }
 
-static eString read_file(eString filename)
+eString read_file(eString filename)
 {
 #define BLOCKSIZE 8192
 	int fd;
@@ -641,47 +641,47 @@ static eString aboutDreambox(void)
 	switch (eSystemInfo::getInstance()->getHwType())
 	{
 		case eSystemInfo::dbox2Nokia:
-			result += "<tr><td>Model:</td><td>d-Box 2</td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>Nokia</td></tr>";
-			result += "<tr><td>Processor:</td><td>XPC823, 66MHz</td></tr>";
+			result += "<tr><td>Model:</td><td>&nbsp;</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Nokia</td></tr>";
+			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::dbox2Philips:
-			result += "<tr><td>Model:</td><td>d-Box 2</td></tr>";
-			result += "<tr><td>Manufacturer</td><td>Philips</td></tr>";
-			result += "<tr><td>Processor</td><td>XPC823, 66MHz</td></tr>";
+			result += "<tr><td>Model:</td><td>&nbsp;</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Manufacturer</td><td>&nbsp;</td><td>Philips</td></tr>";
+			result += "<tr><td>Processor</td><td>&nbsp;</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::dbox2Sagem:
-			result += "<tr><td>Model:</td><td>d-Box 2</td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>Sagem</td></tr>";
-			result += "<tr><td>Processor</td><td>XPC823, 66MHz</td></tr>";
+			result += "<tr><td>Model:</td><td>&nbsp;</td><td>d-Box 2</td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Sagem</td></tr>";
+			result += "<tr><td>Processor</td><td>&nbsp;</td><td>XPC823, 66MHz</td></tr>";
 			break;
 		case eSystemInfo::DM5600:
-			result += "<tr><td>Model:</td><td>DM5600</td></tr>";
-			result += "<tr><td>Manufacturer</td><td>Dream-Multimedia-TV</td></tr>";
-			result += "<tr><td>Processor:</td><td>STBx25xx, 252MHz</td></tr>";
+			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM5600</td></tr>";
+			result += "<tr><td>Manufacturer</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM5620:
-			result += "<tr><td>Model:</td><td>DM5620</td></tr></td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>Dream-Multimedia-TV</td></tr>";
-			result += "<tr><td>Processor:</td><td>STBx25xx, 252MHz</td></tr>";
+			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM5620</td></tr></td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STBx25xx, 252MHz</td></tr>";
 			break;
 		case eSystemInfo::DM7000:
-			result += "<tr><td>Model:</td><td>DM7000</td></tr>";
-			result += "<tr><td>Manufacturer:</td><td>Dream-Multimedia-TV</td></tr>";
-			result += "<tr><td>Processor:</td><td>STB04500, 252MHz</td></tr>";
+			result += "<tr><td>Model:</td><td>&nbsp;</td><td>DM7000</td></tr>";
+			result += "<tr><td>Manufacturer:</td><td>&nbsp;</td><td>Dream-Multimedia-TV</td></tr>";
+			result += "<tr><td>Processor:</td><td>&nbsp;</td><td>STB04500, 252MHz</td></tr>";
 			break;
 	}
 
 	switch (eSystemInfo::getInstance()->getFEType())
 	{
 		case eSystemInfo::feSatellite:
-			result += "<tr><td>Frontend:</td><td>Satellite</td></tr>";
+			result += "<tr><td>Frontend:</td><td>&nbsp;</td><td>Satellite</td></tr>";
 			break;
 		case eSystemInfo::feCable:
-			result += "<tr><td>Frontend:</td><td>Cable</td></tr>";
+			result += "<tr><td>Frontend:</td><td>&nbsp;</td><td>Cable</td></tr>";
 			break;
 		case eSystemInfo::feTerrestrial:
-			result += "<tr><td>Frontend:</td><td>Terrestrial</td></tr>";
+			result += "<tr><td>Frontend:</td><td>&nbsp;</td><td>Terrestrial</td></tr>";
 			break;
 	}
 
@@ -726,13 +726,13 @@ static eString aboutDreambox(void)
 		}
 	}
 
-	result += "<tr><td>Harddisk:</td><td>";
+	result += "<tr><td>Harddisk:</td><td>&nbsp;</td><td>";
 	if (sharddisks == "")
 		sharddisks="none</td></tr>";
 	result += sharddisks;
 #endif //DISABLE_FILE
 
-	result += "<tr><td>Firmware:</td><td>&nbsp;</td>";
+	result += "<tr><td>Firmware:</td><td>&nbsp;</td><td>";
 	eString verid=getVersionInfo("version");
 	if (!verid)
 	{
@@ -1057,13 +1057,14 @@ static eString getStats()
 	if ((tmp.find("cramfs") != eString::npos) || (tmp.find("/dev/root / jffs2") != eString::npos))
 	{
 //		result+="<span class=\"white\">running from flash</span>";
+//		result+=" | ";
 		result+="";
 	}
 	else
 	{
 		result+="<span class=\"white\">running via net</span>";
+		result+=" | ";
 	}
-	result+=" | ";
 
 	eConfig::getInstance()->getKey("/elitedvb/system/bootCount", bootcount);
 
@@ -1197,6 +1198,72 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	}
 	result+="</body></html>";
 	return result;
+}
+
+static eString getcurepg2(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	eString result("");
+	eString tmp;
+	eService* current;
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (!sapi)
+		return "not available";
+
+	eServiceReference ref(opt);
+
+	current=eDVB::getInstance()->settings->getTransponders()->searchService(ref?ref:sapi->service);
+	if(!current)
+		return eString("epg not ready yet");
+
+	result+=eString("<html>" CHARSETMETA "<head><title>epgview</title><link rel=\"stylesheet\" type=\"text/css\" href=\"/epgview.css\"></head><body bgcolor=#000000>");
+	result+=eString("<span class=\"title\">");
+	result+=filter_string(current->service_name);
+	result+=eString("</span>");
+	result+=eString("<br>\n");
+
+	const timeMap* evt=ref ?
+		eEPGCache::getInstance()->getTimeMap((eServiceReferenceDVB&)ref)
+			:
+		eEPGCache::getInstance()->getTimeMap(sapi->service);
+
+	if(!evt)
+		return eString("epg not ready yet");
+
+	timeMap::const_iterator It;
+
+	for(It=evt->begin(); It!= evt->end(); It++)
+	{
+		EITEvent event(*It->second);
+		for(ePtrList<Descriptor>::iterator d(event.descriptor); d != event.descriptor.end(); ++d)
+		{
+			Descriptor *descriptor=*d;
+			if(descriptor->Tag()==DESCR_SHORT_EVENT)
+			{
+				tm* t = localtime(&event.start_time);
+				result+=eString().sprintf("<!-- ID: %04x -->", event.event_id);
+				tmp.sprintf("<u><a href=\"javascript:record()\">Record</a></u>&nbsp;<span class=\"epg\"><a  href=\"javascript:EPGDetails()\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
+				result+=tmp;
+				result+=((ShortEventDescriptor*)descriptor)->event_name;
+				result+="</span></a></u><br>\n";
+			}
+		}
+
+	}
+	result+="</body></html>";
+	return result;
+}
+
+static eString record(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	return "<html>" CHARSETMETA "<head><title>Record Event</title></head><body>Coming soon ;-)</body></html>\n";
+}
+
+static eString EPGDetails(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	return "<html>" CHARSETMETA "<head><title>EPG Details</title></head><body>Coming soon ;-)</body></html>\n";
 }
 
 static eString getsi(eString request, eString dirpath, eString opt, eHTTPConnection *content)
@@ -1867,6 +1934,8 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/ln", createSymlink, true );
 
 	dyn_resolver->addDyn("GET", "/setVolume", setVolume);
+	dyn_resolver->addDyn("GET", "/record", record);
+	dyn_resolver->addDyn("GET", "/EPGDetails", EPGDetails);
 	dyn_resolver->addDyn("GET", "/cgi-bin/status", doStatus);
 	dyn_resolver->addDyn("GET", "/cgi-bin/switchService", switchService);
 	dyn_resolver->addDyn("GET", "/cgi-bin/admin", admin);
@@ -1880,6 +1949,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);
 	dyn_resolver->addDyn("GET", "/cgi-bin/reloadSettings", reload_settings);
