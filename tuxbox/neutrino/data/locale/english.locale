@@ -15,7 +15,7 @@ mainmenu.sleeptimer SleepTimer
 mainmenu.shutdown Shutdown
 mainmenu.settings Settings
 mainmenu.service Service
-mainmenu.streaming Streaming (recorde)
+mainmenu.streaming Streaming (record)
 mainmenu.streaming_start start
 mainmenu.streaming_stop stop
 
@@ -175,7 +175,7 @@ lcdmenu.lcdcontroler Contrast / Brightness
 
 lcdcontroler.head LCD Stettings
 lcdcontroler.contrast Contrast
-lcdcontroler.brightness normale Brightness
+lcdcontroler.brightness normal Brightness
 lcdcontroler.brightnessstandby Standby Brightness
 
 keychoosermenu.setnew setup new key
@@ -324,8 +324,8 @@ flashupdate.proxypassword_hint2
 flashupdate.msgbox Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to download and install this version now?
 flashupdate.msgbox_manual Found the following new image:\nDate: %s, %s\nBaseImage: %s\nImageType: %s\n\nDo you want to install this version now?
 flashupdate.expertfunctions Expert-functions
-flashupdate.readflash Read hole image
-flashupdate.writeflash Write hole image
+flashupdate.readflash Read whole image
+flashupdate.writeflash Write whole image
 flashupdate.readflashmtd Read one partition
 flashupdate.writeflashmtd Write one partition
 flashupdate.savesuccess The image was successfully saved \nunder %s.
@@ -370,7 +370,7 @@ ucodes.failure ATTENTION, µCodes could NOT be found!\n\nPlease upload them via F
 
 stringinput.caps caps / no caps
 
-streamingserver.noconnect No connection to stramingserver.\nRecording canceled.
+streamingserver.noconnect No connection to streamingserver.\nRecording canceled.
 
 GENRE.MOVIE.0 Spielfilm / Drama
 GENRE.MOVIE.1 detective/thriller
@@ -482,7 +482,7 @@ pinprotection.wrongcode PIN-Code was wrong! Try again.
 pinprotection.head Enter PIN code
 
 favorites.bouquetname My Favorites
-favorites.nobouquets Favorites are available with activeted Bouquets only.
+favorites.nobouquets Favorites are available with activated Bouquets only.
 favorites.addchannel The current channel will be added \nto the bouquet "My Favorites". \n This will take a few seconds...
 favorites.menueadd add channel to favorites
 favorites.bqcreated Bouquet "My Favorites" has been created...\n
