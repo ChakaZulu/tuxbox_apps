@@ -415,11 +415,11 @@ int eFrontend::tune(eTransponder *trans,
     }*/
     if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_0 )
     {
-      int loops = cmdCount;
+      int loops;
 
       if ( cmdCount )  // Smatv or Rotor is avail...
       {
-        loops--;  // do not overwrite rotor cmd
+        loops = cmdCount - 1;  // do not overwrite rotor cmd
       }
       else // no rotor or smatv
       {
@@ -427,13 +427,13 @@ int eFrontend::tune(eTransponder *trans,
         if ( lnb->getDiSEqC().DiSEqCMode >= eDiSEqC::V1_1 )  
         {
           if ( lnb->getDiSEqC().uncommitted_gap ) // then we add 2 * repeats + 1;
-            cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 1;
+            loops = cmdCount = ( lnb->getDiSEqC().DiSEqCRepeats << 1 ) + 1;
           else // then we add repeats + 1
-            cmdCount = lnb->getDiSEqC().DiSEqCRepeats + 1;
+            loops = cmdCount = lnb->getDiSEqC().DiSEqCRepeats + 1;
         }
         else // send only one DiSEqC Command
         {
-          cmdCount = 1;
+          loops = cmdCount = 1;
         }
           
         // allocate memory for all DiSEqC commands
@@ -656,6 +656,8 @@ int eFrontend::tune(eTransponder *trans,
       ::close(fp);
     }
     else  // no Rotor avail... we send the complete cmd...
+    {
+      seq.numCommands=cmdCount;
       if ( sendSeq && ioctl(secfd, SEC_SEND_SEQUENCE, &seq) < 0 )
    		{
    			perror("SEC_SEND_SEQUENCE");
@@ -666,6 +668,7 @@ int eFrontend::tune(eTransponder *trans,
         usleep( 80000 ); // between seq repeats we wait 80ms
         ioctl(secfd, SEC_SEND_SEQUENCE, &seq);  // just do it *g*
       }
+    }
 
     // delete allocated memory...
     if (cmdCount)
