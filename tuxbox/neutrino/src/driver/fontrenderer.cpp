@@ -351,13 +351,28 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
 
 #ifdef FB_USE_PALETTE
+#define PRE_CALC_TRANSLATION_TABLE
+#ifdef PRE_CALC_TRANSLATION_TABLE
+	unsigned char colors[256];
+
+	int coff = 7 - ((color + 2) & 7);
+	for (int i = (256 - 32); i >= 0; i -= 32)
+	{
+		memset(&(colors[i]), coff + color, 32);
+
+		if (coff != 0)
+			coff--;
+	}
+#else
 	fb_pixel_t bgcolor = color;
 	int fgcolor = (((((int)color) + 2) | 7) - 2) + 1;
+	int delta = fgcolor - bgcolor;
+#endif
 #else
 	fb_pixel_t bgcolor = frameBuffer->realcolor[color];
 	int fgcolor = frameBuffer->realcolor[(((((int)color) + 2) | 7) - 2)];
-#endif 
 	int delta = fgcolor - bgcolor;
+#endif 
 	
 	int spread_by = 0;
 	if (stylemodifier == Font::Embolden)
@@ -417,8 +432,16 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 			for (ax=0; ax < w + spread_by; ax++)
 			{
 				if (stylemodifier != Font::Embolden)
-				{
+				{			
+#ifdef FB_USE_PALETTE
+#ifdef PRE_CALC_TRANSLATION_TABLE
+					*td++= colors[*s++];
+#else
 					*(td++) = bgcolor + (fb_pixel_t)(((int)(*s++)) * delta / 256);
+#endif
+#else
+					*(td++) = bgcolor + (fb_pixel_t)(((int)(*s++)) * delta / 256);
+#endif
 				}
 				else
 				{
@@ -438,7 +461,15 @@ void Font::RenderString(int x, int y, const int width, const char *text, const u
 					for (int i = start; i < end; i++)
 						if (color < *(s - i))
 							color = *(s - i);
+#ifdef FB_USE_PALETTE
+#ifdef PRE_CALC_TRANSLATION_TABLE
+					*td++= colors[color];
+#else
 					*(td++) = bgcolor + (fb_pixel_t)(color * delta / 256);
+#endif
+#else
+					*(td++) = bgcolor + (fb_pixel_t)(color * delta / 256);
+#endif
 					s++;
 				}
 			}
