@@ -1,9 +1,13 @@
 /* 
-$Id: fontrenderer.cpp,v 1.14 2001/10/16 19:11:16 rasc Exp $
+$Id: fontrenderer.cpp,v 1.15 2001/10/18 10:55:56 field Exp $
 
 -- misc font / text rendering functions
 
 $Log: fontrenderer.cpp,v $
+Revision 1.15  2001/10/18 10:55:56  field
+Rendert jetzt auch Schriftfarben zwischen den Hauptfarben richtig (zb
+COLOR_MENUCONTENT+1)
+
 Revision 1.14  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
 
@@ -303,6 +307,8 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		__u8 *d=g_FrameBuffer->lfb + g_FrameBuffer->Stride()*ry + rx;
 		__u8 *s=glyph->buffer;
     
+        //color=((color+ 2)>>3)*8- 2;
+        int coff=(color+ 2)%8;
 		for (int ay=0; ay<glyph->height; ay++)
 		{
 			__u8 *td=d;
@@ -310,7 +316,9 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
  			int ax; 
 			for (ax=0; ax<w; ax++)
 			{
-				int c = (*s++>>5); // c = 0..7
+				int c = (*s++>>5)- coff; // c = 0..7
+                if (c< 0)
+                    c= 0;
 				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
 			}
 			s+=glyph->pitch-ax;
