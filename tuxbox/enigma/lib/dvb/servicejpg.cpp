@@ -30,16 +30,16 @@ eServiceHandlerJPG::~eServiceHandlerJPG()
 
 void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 {
-	if (filename.right(4).upper() == ".JPG")
+	if (filename.right(4).upper() == ".JPG" ||
+	    filename.right(4).upper() == ".GIF" ||
+	    filename.right(4).upper() == ".PNG" ||
+	    filename.right(4).upper() == ".BMP")
 	{
 		struct stat s;
 		if (!(::stat(filename.c_str(), &s)))
 		{
 			eServiceReference ref(id, 0, filename);
-			eString name = filename;
-			while (int pos = name.find("/") != eString::npos)
-				name = name.mid(pos + 1, name.length() - pos - 1);
-			ref.descr = name;
+			ref.descr = filename.substr(filename.find_last_of("/") + 1, filename.length() - 1);
 			eServiceFileHandler::getInstance()->addReference(node, ref);
 		}
 	}
