@@ -1,0 +1,8 @@
+TODO: lots ;-)
+
+DONE: 
+- get rid of reuqired lib ofbis
+- convertet frambuffer mode from RGB565 to RGB555
+- tuxbox plugin architecture
+- IR-RC support
+

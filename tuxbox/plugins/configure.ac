@@ -14,6 +14,7 @@ TUXBOX_APPS_DRIVER
 
 TUXBOX_APPS_LIB_CONFIG(CURL,curl-config)
 TUXBOX_APPS_LIB_CONFIG(FREETYPE,freetype-config)
+TUXBOX_APPS_LIB_PKGCONFIG(CONFIGFILE,tuxbox-configfile)
 
 AC_OUTPUT([
 Makefile
@@ -39,6 +40,7 @@ tuxmail/Makefile
 tuxmail/daemon/Makefile
 tuxtxt/Makefile
 tuxtxt/font/Makefile
+vncviewer/Makefile
 tuxbox-plugins.pc
 ])
 
