@@ -126,7 +126,10 @@ void enigmaCImmi::getmmi(const char *data)
 						bt->setText(buffer);					
 					if(menupos>2)
 					{
-						eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,"blub");
+						lentrys->beginAtomic();	
+						eListBoxMenuEntry *e=new eListBoxMenuEntry(lentrys,buffer);
+						lentrys->endAtomic();	
+
 					}							
 					menupos++;
 				}	
