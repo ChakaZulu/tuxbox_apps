@@ -15,7 +15,13 @@
 
 #include <sys/mman.h>
 
+#include <linux/version.h>
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,7)
+#include <linux/compiler.h>
+#include <mtd/mtd-user.h>
+#else
 #include <linux/mtd/mtd.h>
+#endif
 #include <sys/ioctl.h>
 #include <sys/mount.h>
 
