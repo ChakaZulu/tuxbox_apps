@@ -20,7 +20,7 @@
  * 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  ******************************************************************************
- * $Id: vgrab.c,v 1.2 2003/11/14 18:07:28 carjay Exp $
+ * $Id: vgrab.c,v 1.3 2005/01/25 01:49:59 carjay Exp $
  ******************************************************************************/
 
 #include <stdio.h>
@@ -92,7 +92,7 @@ void usage (char *name){
 		"         <left> must be even\n"
 		"         <width> must be even\n"
 		"         <scale> must be an integer value 1..30\n"
-		"         <opt> TODO", name);
+		"         <opt> TODO\n", name);
 }
 
 int main(int argc, char **argv){
