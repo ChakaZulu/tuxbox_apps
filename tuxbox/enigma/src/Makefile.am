@@ -19,7 +19,8 @@ enigma_SOURCES = \
 	bselect.cpp enigma.cpp enigma_dyn.cpp enigma_event.cpp enigma_lcd.cpp \
 	enigma_main.cpp enigma_plugins.cpp enigma_setup.cpp enigma_xmlrpc.cpp scan.cpp \
 	setupnetwork.cpp setupvideo.cpp showbnversion.cpp sselect.cpp streaminfo.cpp \
-	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp setup_language.cpp enigma_info.cpp enigma_scan.cpp
+	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp setup_language.cpp enigma_info.cpp enigma_scan.cpp \
+	setupskin.cpp
 
 enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/driver/libenigma_driver.la \

@@ -31,7 +31,9 @@
                 bootCount
 /ezap/ui/
          lastChannel
+         skin
       rc/
          repeatRate
+         repeatDelay
       osd/
           useBigOSD

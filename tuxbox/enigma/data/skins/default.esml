@@ -77,4 +77,13 @@
 			<eListbox name="menu" position="0:30" size="400:0" />
 		</tsSelectType>
 	</object>
+	
+	<object name="setup.skins">
+		<eSkinSetup cposition="100:100" csize="400:300" text="Skin Setup">
+			<eLabel text="Skins:" position="0:0" size="100:30" />
+			<eListbox name="skins" position="100:0" size="e-10:e-10" />
+			<eButton text="ok" name="accept" position="0:100" size="100:30" />
+			<eButton text="abort" name="reject" position="0:150" size="100:30" />
+		</eSkinSetup>
+	</object>
 </eskin>

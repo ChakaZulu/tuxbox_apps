@@ -4,8 +4,9 @@
 #include <core/gui/eskin.h>
 #include <core/gdi/gfbdc.h>
 #include <core/system/init.h>
+#include <core/system/econfig.h>
 
-
+#define DEFAULTSKIN "chk_blue2.esml"
 
 class eSkinInit
 {
@@ -15,12 +16,20 @@ public:
 	{
 		if (default_skin.load( DATADIR "/enigma/skins/default.esml"))
 			eFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
-		if (default_skin.load( DATADIR "/enigma/skins/neutrino.esml"))
-			eDebug("skin load failed (" DATADIR "/enigma/skins/neutrino.esml)");
-/*		if (default_skin.load( DATADIR "/enigma/skins/dream.esml"))
-			qWarning("skin load failed (" DATADIR "/enigma/skins/dream.esml)"); */
-/*		if (default_skin.load( DATADIR "/enigma/skins/chkdesign.esml"))
-			qWarning("skin load failed (" DATADIR "/enigma/skins/chkdesign.esml)"); */
+
+		char *temp="neutrino.esml";
+		eConfig::getInstance()->getKey("/ezap/ui/skin", temp);
+
+		eString skinfile=DATADIR "/enigma/skins/";
+		skinfile+=temp;
+				
+		if (default_skin.load(skinfile.c_str()))
+		{
+			eWarning("failed to load user defined skin %s, falling back to " DEFAULTSKIN, skinfile.c_str());
+			if (default_skin.load(DATADIR "/enigma/skins/neutrino.esml"))
+				eFatal("couldn't load fallback skin " DATADIR "/enigma/skins/" DEFAULTSKIN);
+		}
+
 		default_skin.setPalette(gFBDC::getInstance());
 		default_skin.makeActive();
 	}

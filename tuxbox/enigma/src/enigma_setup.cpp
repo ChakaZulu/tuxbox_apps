@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.13 2002/05/12 16:22:25 Ghostrider Exp $
+ * $Id: enigma_setup.cpp,v 1.14 2002/05/12 20:46:28 tmbinc Exp $
  */
 
 #include "enigma_setup.h"
@@ -25,7 +25,10 @@
 #include "setupnetwork.h"
 #include "setupvideo.h"
 #include "setup_language.h"
+#include "enigma_scan.h"
+#include "setupskin.h"
 
+#include <core/gui/emessage.h>
 #include <core/base/i18n.h>
 #include <core/dvb/edvb.h>
 #include <core/gui/elistbox.h>
@@ -42,6 +45,7 @@ eZapSetup::eZapSetup()
 	CONNECT((new eListboxEntryText(&list, _("Network...")))->selected, eZapSetup::sel_network);
 //	CONNECT((list, _("Audio...")))->selected, sel_sound);
 	CONNECT((new eListboxEntryText(&list, _("Video...")))->selected, eZapSetup::sel_video);
+	CONNECT((new eListboxEntryText(&list, _("Skin...")))->selected, eZapSetup::sel_skin);
 	CONNECT((new eListboxEntryText(&list, _("Language...")))->selected, eZapSetup::sel_language);
 }
 
@@ -56,9 +60,9 @@ void eZapSetup::sel_close(eListboxEntry *lbe)
 
 void eZapSetup::sel_channels(eListboxEntry *lbe)
 {
+	hide();
 	eZapScan setup;
 	setup.setLCD(LCDTitle, LCDElement);
-	hide();
 	setup.show();
 	setup.exec();
 	setup.hide();
@@ -67,9 +71,9 @@ void eZapSetup::sel_channels(eListboxEntry *lbe)
 
 void eZapSetup::sel_network(eListboxEntry *lbe)
 {
+	hide();
 	eZapNetworkSetup setup;
 	setup.setLCD(LCDTitle, LCDElement);
-	hide();
 	setup.show();
 	setup.exec();
 	setup.hide();
@@ -80,11 +84,30 @@ void eZapSetup::sel_sound(eListboxEntry *lbe)
 {
 }
 
+void eZapSetup::sel_skin(eListboxEntry *lbe)
+{
+	hide();
+	eSkinSetup setup;
+	int res;
+	setup.setLCD(LCDTitle, LCDElement);
+	setup.show();
+	res=setup.exec();
+	setup.hide();
+	if (!res)
+	{
+		eMessageBox msg(_("You have to reboot to apply the new skin"), _("Skin changed"));
+		msg.show();
+		msg.exec();
+		msg.hide();
+	}
+	show();
+}
+
 void eZapSetup::sel_video(eListboxEntry *lbe)
 {
+	hide();
 	eZapVideoSetup setup;
 	setup.setLCD(LCDTitle, LCDElement);
-	hide();
 	setup.show();
 	setup.exec();
 	setup.hide();
@@ -93,8 +116,8 @@ void eZapSetup::sel_video(eListboxEntry *lbe)
 
 void eZapSetup::sel_language(eListboxEntry *lbe)
 {
-	eZapLanguageSetup setup;
 	hide();
+	eZapLanguageSetup setup;
 	setup.show();
 	setup.exec();
 	setup.hide();
