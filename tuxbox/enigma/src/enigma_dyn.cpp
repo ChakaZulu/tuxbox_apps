@@ -56,7 +56,7 @@
 
 using namespace std;
 
-#define WEBIFVERSION "2.2.1"
+#define WEBIFVERSION "2.2.2"
 
 int pdaScreen = 0;
 int screenWidth = 1024;
@@ -740,6 +740,9 @@ eString getSubChannels(void)
 			eit->unlock();
 		}
 	}
+	if (!result)
+		result = "<option>none</option>";
+
 	return result;
 }
 
@@ -748,8 +751,6 @@ static eString selectSubChannel(eString request, eString dirpath, eString opts, 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	content->local_header["Cache-Control"] = "no-cache";
 	eString subChannels = getSubChannels();
-	if (!subChannels)
-		subChannels = "<option>No subchannels available</option>";
 
 	eString result = readFile(TEMPLATE_DIR + "subChannelSelection.tmp");
 	result.strReplace("#SUBCHANS#", subChannels);
