@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.20 2004/01/25 21:37:28 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.21 2004/02/07 01:28:07 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,10 @@ $Id: dsmcc_str.h,v 1.20 2004/01/25 21:37:28 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.21  2004/02/07 01:28:07  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.20  2004/01/25 21:37:28  rasc
 bugfixes, minor changes & enhancments
 
@@ -94,6 +98,8 @@ some updates to dvbsnoop...
 
 char *dsmccStrDSMCC_CAROUSEL_DescriptorTAG (u_int i);
 char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i);
+char *dsmccStrMHP_AIT_DescriptorTAG (u_int i);
+
 
 char *dsmccStrMHPOrg (u_int id);
 char *dsmccStrAction_Type (u_int id);
@@ -127,6 +133,15 @@ char *dsmccStr_postDiscontinuityIndicator (u_int id);
 
 char *dsmccStrOUI  (u_int id);
 char *dsmccStr_LLC_SNAP_prot (u_int id);
+
+
+
+char *dsmccStrMHP_application_type (u_int id);
+char *dsmccStrMHP_application_id (u_int id);
+char *dsmccStrMHP_application_control_code (u_int id);
+char *dsmccStrMHP_visibility_state (u_int id);
+char *dsmccStrMHP_protocol_id (u_int id);
+
 
 
 #endif

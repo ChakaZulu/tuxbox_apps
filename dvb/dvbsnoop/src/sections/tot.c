@@ -1,5 +1,5 @@
 /*
-$Id: tot.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
+$Id: tot.c,v 1.7 2004/02/07 01:28:04 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: tot.c,v 1.6 2004/01/02 16:40:40 rasc Exp $
 
 
 $Log: tot.c,v $
+Revision 1.7  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.6  2004/01/02 16:40:40  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -117,6 +121,7 @@ void decode_TOT (u_char *b, int len)
  len1 = t.descriptors_loop_length;
  b   += 10;
 
+ indent (+1);
  while (len1 > 0) {
    int x;
 
@@ -124,6 +129,7 @@ void decode_TOT (u_char *b, int len)
    len1 -= x;
    b += x;
  }
+ indent (-1);
 
 
 

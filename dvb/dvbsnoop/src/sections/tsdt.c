@@ -1,5 +1,5 @@
 /*
-$Id: tsdt.c,v 1.9 2004/01/02 16:40:40 rasc Exp $
+$Id: tsdt.c,v 1.10 2004/02/07 01:28:04 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: tsdt.c,v 1.9 2004/01/02 16:40:40 rasc Exp $
 
 
 $Log: tsdt.c,v $
+Revision 1.10  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.9  2004/01/02 16:40:40  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -112,7 +116,7 @@ void decode_TSDT (u_char *b, int len)
  out_SB_NL (3,"Last_Section_number: ",t.last_section_number);
 
 
-
+ indent (+1);
  while (len1 > 4) {
    int x;
 
@@ -120,6 +124,7 @@ void decode_TSDT (u_char *b, int len)
    b   += x;
    len1 -= x;
  }
+ indent (-1);
 
 
  t.crc		 = getBits (b, 0, 0, 32);

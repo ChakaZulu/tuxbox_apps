@@ -1,5 +1,5 @@
 /*
-$Id: teletext.c,v 1.4 2004/02/05 10:30:56 rasc Exp $
+$Id: teletext.c,v 1.5 2004/02/07 01:28:03 rasc Exp $
 
 
 
@@ -17,6 +17,10 @@ $Id: teletext.c,v 1.4 2004/02/05 10:30:56 rasc Exp $
 
 
 $Log: teletext.c,v $
+Revision 1.5  2004/02/07 01:28:03  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.4  2004/02/05 10:30:56  rasc
 no message
 
@@ -308,4 +312,6 @@ void print_teletext_data_x0_x25 (int v, char *s, u_char *b, int len)
 
 
 
-// $$$ TODO  Packet 30/8
+// $$$ TODO  Packet 30/8   -- EN 300 231 8.2.1  (VPS via Teletext)
+//
+//

@@ -1,5 +1,5 @@
 /*
-$Id: pmt.c,v 1.6 2004/01/02 16:40:39 rasc Exp $
+$Id: pmt.c,v 1.7 2004/02/07 01:28:04 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: pmt.c,v 1.6 2004/01/02 16:40:39 rasc Exp $
 
 
 $Log: pmt.c,v $
+Revision 1.7  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.6  2004/01/02 16:40:39  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -146,6 +150,7 @@ void decode_PMT (u_char *b, int len)
  b   += 9 + 3;
 
  len2 = p.program_info_length;
+ indent (+1);
  while (len2 > 0) {
    int x;
 
@@ -154,6 +159,7 @@ void decode_PMT (u_char *b, int len)
    b += x;
    len1 -= x;
  }
+ indent (-1);
 
 
  indent (+1);
@@ -177,6 +183,7 @@ void decode_PMT (u_char *b, int len)
    len1 -= 5;
    len2 = p2.ES_info_length;
 
+   indent (+1);
    while (len2 > 0) {
       int x;
 
@@ -185,6 +192,7 @@ void decode_PMT (u_char *b, int len)
       b += x;
       len1 -= x;
    }
+   indent (-1);
 
 
  } // while len1

@@ -1,5 +1,5 @@
 /*
-$Id: nit.c,v 1.7 2004/01/02 16:40:39 rasc Exp $
+$Id: nit.c,v 1.8 2004/02/07 01:28:04 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: nit.c,v 1.7 2004/01/02 16:40:39 rasc Exp $
 
 
 $Log: nit.c,v $
+Revision 1.8  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.7  2004/01/02 16:40:39  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -150,6 +154,7 @@ void decode_NIT (u_char *b, int len)
  l1 = n.network_descriptor_length;
  b += 10;
 
+ indent (+1);
  while ( l1 > 0 ) {
    int x;
 
@@ -157,6 +162,7 @@ void decode_NIT (u_char *b, int len)
    l1 -= x;
    b += x;
  }
+ indent (-1);
 
 
  // get transport stream loop / descriptors...
@@ -195,6 +201,7 @@ void decode_NIT (u_char *b, int len)
     l1 -= 6;
     l2  = nt.transport_descriptor_length;
 
+    indent (+1);
     while (l2 > 0) {
       int x;
 
@@ -203,6 +210,7 @@ void decode_NIT (u_char *b, int len)
       l2 -= x;
       l1 -= x;
     }
+    indent (-1);
 
  }
  indent(-1);

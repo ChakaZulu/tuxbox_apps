@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.22 2004/01/25 21:37:27 rasc Exp $
+$Id: descriptor.c,v 1.23 2004/02/07 01:28:01 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: descriptor.c,v 1.22 2004/01/25 21:37:27 rasc Exp $
 
 
 $Log: descriptor.c,v $
+Revision 1.23  2004/02/07 01:28:01  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.22  2004/01/25 21:37:27  rasc
 bugfixes, minor changes & enhancments
 
@@ -86,6 +90,7 @@ kleiner Fehler
 #include "dvb_descriptor.h"
 #include "dsmcc_carousel_descriptor.h"
 #include "dsmcc_int_unt_descriptor.h"
+#include "mhp_ait_descriptor.h"
 #include "misc/hexprint.h"
 #include "misc/output.h"
 
@@ -132,8 +137,8 @@ int  descriptor  (u_char *b, DTAG_SCOPE scope)
 		else 		descriptorDVB (b);
 		break;
 
-     case MHP:
-		descriptor_any (b);	// $$$ TODO  MHP AIT descriptors
+     case MHP_AIT:
+		descriptorMHP_AIT (b);
 		break;
 
      case MPEG:

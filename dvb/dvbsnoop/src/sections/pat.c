@@ -1,5 +1,5 @@
 /*
-$Id: pat.c,v 1.6 2004/01/02 16:40:39 rasc Exp $
+$Id: pat.c,v 1.7 2004/02/07 01:28:04 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: pat.c,v 1.6 2004/01/02 16:40:39 rasc Exp $
 
 
 $Log: pat.c,v $
+Revision 1.7  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.6  2004/01/02 16:40:39  rasc
 DSM-CC  INT/UNT descriptors complete
 minor changes and fixes
@@ -136,7 +140,7 @@ void decode_PAT (u_char *b, int len)
 	pl.network_pmt_PID	 = getBits (b, 0, 19, 13);
 	b += 4;
 
-      out_NL (3);
+ 	out_NL (3);
 	out_SW_NL (3,"Program_number: ",pl.program_number);
 	out_SB_NL (6,"reserved: ",pl.reserved);
 	out_SW_NL (3,(pl.program_number) ?"Program_map_PID: " :"Network_PID: ",

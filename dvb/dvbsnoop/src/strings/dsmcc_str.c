@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.23 2004/01/25 21:37:28 rasc Exp $
+$Id: dsmcc_str.c,v 1.24 2004/02/07 01:28:07 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: dsmcc_str.c,v 1.23 2004/01/25 21:37:28 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.24  2004/02/07 01:28:07  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.23  2004/01/25 21:37:28  rasc
 bugfixes, minor changes & enhancments
 
@@ -144,7 +148,6 @@ static char *findTableID (STR_TABLE *t, u_int id)
  */
 
 char *dsmccStrDSMCC_CAROUSEL_DescriptorTAG (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "reserved" },
@@ -177,7 +180,6 @@ char *dsmccStrDSMCC_CAROUSEL_DescriptorTAG (u_int i)
  */
 
 char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i)
-
 {
   STR_TABLE  Table[] = {
      {  0x00, 0x00,  "reserved" },
@@ -211,6 +213,44 @@ char *dsmccStrDSMCC_INT_UNT_DescriptorTAG (u_int i)
   return findTableID (Table, i);
 }
 
+
+
+
+/*
+  -- MHP  AIT Descriptors
+  -- Private Tag Space  (AIT)
+  -- see   TS 102 812
+ */
+
+char *dsmccStrMHP_AIT_DescriptorTAG (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "Application descriptor" },
+     {  0x01, 0x01,  "Application name descriptor" },
+     {  0x02, 0x02,  "Transport protocol descriptor" },
+     {  0x03, 0x03,  "DVB-J application descriptor" },
+     {  0x04, 0x04,  "DVB-J application location descriptor" },
+     {  0x05, 0x05,  "External application authorisation descriptor" },
+     {  0x06, 0x06,  "Routing Descriptor IPv4" },
+     {  0x07, 0x07,  "Routing Descriptor IPv6" },
+     {  0x08, 0x08,  "DVB-HTML application descriptor" },
+     {  0x09, 0x09,  "DVB-HTML application location descriptor" },
+     {  0x0A, 0x0A,  "DVB-HTML application boundary descriptor" },
+     {  0x0B, 0x0B,  "Application icons descriptor" },
+     {  0x0C, 0x0C,  "Pre-fetch descriptor" },
+     {  0x0D, 0x0D,  "DII location descriptor" },
+     {  0x0E, 0x0E,  "delegated application descriptor" },
+     {  0x0F, 0x0F,  "Plug-in descriptor" },
+     {  0x10, 0x10,  "Application storage descriptor" },
+     {  0x11, 0x5E,  "reserved to MHP" },
+     {  0x5F, 0x5F,  "private data specifier descriptor" },
+     {  0x60, 0x7F,  "reserved to MHP" },
+     {  0x80, 0xFF,  "user defined" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
 
 
 
@@ -810,6 +850,137 @@ char *dsmccStr_LLC_SNAP_prot (u_int id)
 
   return findTableID (TableIDs, id);
 }
+
+
+
+
+
+
+
+
+
+
+/*
+  -- MHP application type
+*/
+
+char *dsmccStrMHP_application_type (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x0000, 0x0000,   "reserved" },
+	{ 0x0001, 0x0001,   "DVB-J application" },
+	{ 0x0002, 0x0002,   "DVB-HTML application" },
+	{ 0x0003, 0x7FFF,   "subject to registration with DVB" },  // $$$ TODO ??
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- MHP application type
+*/
+
+char *dsmccStrMHP_application_id (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x0000, 0x3FFF,   "unsigned applications" },
+	{ 0x4000, 0x7FFF,   "signed applications" },
+	{ 0x8000, 0xFFFD,   "reserved" },
+	{ 0xFFFE, 0xFFFE,   "wildcard value for signed applications of an org." },
+	{ 0xFFFF, 0xFFFF,   "wildcard value all applications of an org." },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- MHP application control code
+*/
+
+char *dsmccStrMHP_application_control_code (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "AUTOSTART" },
+	{ 0x02, 0x02,   "PRESENT" },
+	{ 0x03, 0x03,   "DESTROY" },
+	{ 0x04, 0x04,   "KILL" },
+	{ 0x05, 0x05,   "PREFETCH" },
+	{ 0x06, 0x06,   "REMOTE" },
+	{ 0x07, 0xFF,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- MHP visibility state
+*/
+
+char *dsmccStrMHP_visibility_state (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "application not visible to user and appl. listening api" },
+	{ 0x01, 0x01,   "application not visible to user, but visible to appl. listening api" },
+	{ 0x02, 0x02,   "reserved" },
+	{ 0x03, 0x03,   "application visible to user and appl. listening api" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+/*
+  -- MHP protocoll_id  
+  -- ETR162
+*/
+
+char *dsmccStrMHP_protocol_id (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x0000, 0x0000,   "reserved" },
+	{ 0x0001, 0x0001,   "MHP Object Carousel" },
+	{ 0x0002, 0x0002,   "IP via DVB multiprotocol encapsulation" },
+	{ 0x0003, 0x0003,   "Transport via HTTP over the interaction channel" },
+	{ 0x0004, 0x00FF,   "Reserved for use by DVB" },
+	{ 0x0100, 0xFFFF,   "Subject to registration in ETSI TR 101 162" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

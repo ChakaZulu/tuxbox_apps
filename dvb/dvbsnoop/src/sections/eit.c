@@ -1,5 +1,5 @@
 /*
-$Id: eit.c,v 1.7 2004/01/01 20:09:31 rasc Exp $
+$Id: eit.c,v 1.8 2004/02/07 01:28:04 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: eit.c,v 1.7 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: eit.c,v $
+Revision 1.8  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.7  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -191,6 +195,7 @@ void decode_EIT (u_char *b, int len)
    len1 -= (12 + e2.descriptors_loop_length);
    len2 = e2.descriptors_loop_length;
 
+   indent (+1);
    while (len2 > 0) {
       int x;
 
@@ -198,6 +203,7 @@ void decode_EIT (u_char *b, int len)
       b    += x;
       len2 -= x;
    }
+   indent (-1);
 
  } // while len1
  indent (-1);

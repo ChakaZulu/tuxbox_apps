@@ -1,5 +1,5 @@
 /*
-$Id: bat.c,v 1.7 2004/01/01 20:09:31 rasc Exp $
+$Id: bat.c,v 1.8 2004/02/07 01:28:04 rasc Exp $
 
  DVBSNOOP
 
@@ -16,6 +16,10 @@ $Id: bat.c,v 1.7 2004/01/01 20:09:31 rasc Exp $
 
 
 $Log: bat.c,v $
+Revision 1.8  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.7  2004/01/01 20:09:31  rasc
 DSM-CC INT/UNT descriptors
 PES-sync changed, TS sync changed,
@@ -147,6 +151,7 @@ void decode_BAT (u_char *b, int len)
  b   += 10;
 
  len2 = t.bouquet_descriptors_length;
+ indent (+1);
  while (len2 > 0) {
    int x;
 
@@ -155,6 +160,7 @@ void decode_BAT (u_char *b, int len)
    b += x;
    len1 -= x;
  }
+ indent (-1);
 
 
  t.reserved_5	 		 = getBits (b, 0, 0, 4);
@@ -188,6 +194,7 @@ void decode_BAT (u_char *b, int len)
    len1 -= 6;
    len2  = t2.transport_descriptors_length;
 
+   indent (+1);
    while (len2 > 0) {
       int x;
 
@@ -196,6 +203,7 @@ void decode_BAT (u_char *b, int len)
       b    += x;
       len1 -= x;
    }
+   indent (-1);
 
 
  } // while len1

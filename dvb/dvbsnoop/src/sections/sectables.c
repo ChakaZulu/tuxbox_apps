@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.19 2004/01/04 22:03:22 rasc Exp $
+$Id: sectables.c,v 1.20 2004/02/07 01:28:04 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: sectables.c,v 1.19 2004/01/04 22:03:22 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.20  2004/02/07 01:28:04  rasc
+MHP Application  Information Table
+some AIT descriptors
+
 Revision 1.19  2004/01/04 22:03:22  rasc
 time for a version leap
 
@@ -100,6 +104,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "eit.h"
 #include "emm_ecm.h"
 #include "userdef.h"
+#include "datacarousel/ait.h"
 #include "datacarousel/dsmcc.h"
 #include "datacarousel/datagram.h"
 #include "datacarousel/ints.h"
@@ -274,6 +279,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x71, 0x71,  decode_RST },
      {  0x72, 0x72,  decode_ST  },
      {  0x73, 0x73,  decode_TOT },
+     {  0x74, 0x74,  decode_MHP_AIT },
      /* res. */
      {  0x7E, 0x7E,  decode_DIT },
      {  0x7F, 0x7F,  decode_SIT },
