@@ -56,9 +56,8 @@
 #endif
 
 
-NEUTRINO_CPP int		NeutrinoMode;
-
-NEUTRINO_CPP  SNeutrinoSettings   g_settings;
+NEUTRINO_CPP  SNeutrinoSettings	g_settings;
+NEUTRINO_CPP  SglobalInfo		g_info;
 
 NEUTRINO_CPP  CLcddClient		*g_lcdd;
 NEUTRINO_CPP  CControldClient	*g_Controld;

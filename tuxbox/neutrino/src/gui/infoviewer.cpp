@@ -36,23 +36,11 @@
 
 #include "gui/widget/hintbox.h"
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
 #include <sys/timeb.h>
 #include <time.h>
 
 #include <string>
 #include <controldclient.h>
-
 
 #define COL_INFOBAR_BUTTONS				COL_INFOBAR_SHADOW+ 1
 #define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW+ 1
@@ -63,22 +51,15 @@
 #define BOTTOM_BAR_OFFSET 0
 #define SHADOW_OFFSET 6
 
-
 int time_left_width;
 int time_dot_width;
 int time_width;
 int time_height;
 char old_timestr[10];
-int mID;
 
 CInfoViewer::CInfoViewer()
 {
 	frameBuffer = CFrameBuffer::getInstance();
-	// UGLY
-	char strmID[40];
-	strcpy( strmID, getenv("mID") );
-	mID = atoi(strmID);
-	// (tm)
 
 	BoxStartX= BoxStartY= BoxEndX= BoxEndY=0;
 	recordModeActive= false;
@@ -169,7 +150,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
         current_onid_sid = onid_sid;
         showButtonBar = !calledFromNumZap;
 
-        bool fadeIn = ( !is_visible ) && showButtonBar && ( mID>= 2 ); // only enx
+        bool fadeIn = ( ( !is_visible ) && showButtonBar &&
+        			    ( g_info.enx_ID != -1 ) && ( g_settings.widget_fade ) ); // only enx
         bool fadeOut = false;
         int fadeValue;
 
@@ -344,7 +326,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
     					g_RCInput->killTimer(fadeTimer);
     					fadeIn = false;
     				}
-    				if ( (!fadeOut) && ( mID>= 2 ) ) // only enx
+    				if ( (!fadeOut) &&
+    					 ( g_info.enx_ID != -1 ) && ( g_settings.widget_fade ) )
     				{
                     	fadeOut = true;
                     	fadeTimer = g_RCInput->addTimer( 40000, false );

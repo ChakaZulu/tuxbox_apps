@@ -133,12 +133,12 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void InitZapper();
 		void InitKeySettings(CMenuWidget &);
 		void InitServiceSettings(CMenuWidget &, CMenuWidget &);
-		void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
+		void InitColorSettingsMenuColors(CMenuWidget &);
 		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
 		void InitColorSettings(CMenuWidget &);
 		void InitLanguageSettings(CMenuWidget &);
 		void InitColorThemesSettings(CMenuWidget &);
-		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
+		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors);
 		void InitNetworkSettings(CMenuWidget &networkSettings);
 		void InitScreenSettings(CMenuWidget &);
 		void InitMiscSettings(CMenuWidget &);

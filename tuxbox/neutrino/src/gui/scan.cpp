@@ -41,9 +41,6 @@
 
 #include "libucodes/libucodes.h"
 
-#include <stdio.h>
-
-
 CScanTs::CScanTs()
 {
 	frameBuffer = CFrameBuffer::getInstance();

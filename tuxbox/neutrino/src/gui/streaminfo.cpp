@@ -37,10 +37,6 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-#include <stdio.h>
-
-
-
 
 CStreamInfo::CStreamInfo()
 {

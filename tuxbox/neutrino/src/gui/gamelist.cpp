@@ -635,17 +635,5 @@ void CGameList::runGame(int selected )
     //redraw menue...
     paintHead();
     paint();
-
-	#ifdef USEACTIONLOG
-		if(NeutrinoMode==1)
-		{
-			g_ActionLog->println("mode: tv");
-		}
-		else
-		{
-			g_ActionLog->println("mode: radio");
-		}
-	#endif
-
 }
 

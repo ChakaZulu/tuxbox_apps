@@ -103,6 +103,7 @@ colormenu.background Background
 colormenu.background_head Background
 colormenu.textcolor Textcolor
 colormenu.textcolor_head Textcolor
+colormenu.fade Fade menus
 
 colorthememenu.head Theme Selector
 colorthememenu.neutrino_theme Neutrino Theme

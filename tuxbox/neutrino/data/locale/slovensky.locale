@@ -101,6 +101,7 @@ colormenu.background farba pozadia
 colormenu.background_head farba pozadia
 colormenu.textcolor farba textu
 colormenu.textcolor_head farba textu
+colormenu.fade Fade menus
 
 colorthememenu.head Theme vybrat
 colorthememenu.neutrino_theme Neutrino Theme

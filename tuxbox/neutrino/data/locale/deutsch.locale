@@ -102,6 +102,7 @@ colormenu.background Hintergrundfarbe
 colormenu.background_head Hintergrundfarbe
 colormenu.textcolor Textfarbe
 colormenu.textcolor_head Textfarbe
+colormenu.fade Menüs faden
 
 colorthememenu.head Theme auswählen
 colorthememenu.neutrino_theme Neutrino Theme

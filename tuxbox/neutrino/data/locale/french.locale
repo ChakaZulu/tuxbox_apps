@@ -102,6 +102,7 @@ colormenu.background Couleur de Arrière-plan
 colormenu.background_head Couleur de Arrière-plan
 colormenu.textcolor Couleur de Texte
 colormenu.textcolor_head Couleur de Texte
+colormenu.fade Fade menus
 
 colorthememenu.head Theme choisir
 colorthememenu.neutrino_theme Neutrino Thème

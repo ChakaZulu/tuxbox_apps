@@ -44,7 +44,6 @@ struct SNeutrinoSettings
 	int video_Format;
 
 	//misc
-	int box_Type;
 	int shutdown_real;
 	int shutdown_showclock;
 	int show_camwarning;
@@ -65,17 +64,9 @@ struct SNeutrinoSettings
 	int timing_epg;
 	int timing_infobar;
 
-	//scan
-	int scan_astra;
-	int scan_eutel;
-	int scan_kopernikus;
-	int scan_sirius;
-	int scan_thor;
-	int scan_digituerk;
-	int scan_tuerksat;
-	int scan_bouquet;
-
 	//colors
+	int	widget_fade;
+
 	unsigned char menu_Head_alpha;
 	unsigned char menu_Head_red;
 	unsigned char menu_Head_green;
@@ -179,6 +170,14 @@ struct SNeutrinoSettings
 	int parentallock_lockage;
 	char parentallock_pincode[5];
 };
+
+struct SglobalInfo
+{
+	int box_Type;
+	int gtx_ID;
+	int enx_ID;
+};
+
 
 const int PARENTALLOCK_PROMPT_NEVER          = 0;
 const int PARENTALLOCK_PROMPT_ONSTART        = 1;

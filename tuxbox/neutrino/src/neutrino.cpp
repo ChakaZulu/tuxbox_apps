@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.248 2002/04/25 20:47:55 McClean Exp $
+        $Id: neutrino.cpp,v 1.249 2002/04/26 08:22:51 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -348,17 +348,6 @@ void CNeutrinoApp::setupDefaults()
 
 	//colors
 	setupColors_neutrino();
-
-	//ts-scan
-	g_settings.scan_astra = 1;
-	g_settings.scan_eutel = 0;
-	g_settings.scan_kopernikus = 0;
-        g_settings.scan_digituerk = 0;
-	g_settings.scan_sirius = 0;
-	g_settings.scan_thor = 0;
-	g_settings.scan_tuerksat = 0;
-	g_settings.scan_bouquet = 256; // keep bouquets (because of favorites, and sort)
-
 
 	//network
 	strcpy(g_settings.network_netmask, "255.255.255.0");
@@ -1011,13 +1000,13 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.general" ) );
 
-	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, false, NULL, false );
+/*	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, false, NULL, false );
 	oj->addOption(1, "Nokia");
 	oj->addOption(2, "Sagem");
 	oj->addOption(3, "Philips");
 	miscSettings.addItem( oj );
-
-	oj = new CMenuOptionChooser("miscsettings.shutdown_real", &g_settings.shutdown_real, true );
+*/
+	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.shutdown_real", &g_settings.shutdown_real, true );
 	oj->addOption(1, "options.off");
 	oj->addOption(0, "options.on");
 	miscSettings.addItem( oj );
@@ -1219,18 +1208,40 @@ void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
 	colorSettings.addItem( new CMenuSeparator() );
 	colorSettings.addItem( new CMenuForwarder("menu.back") );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CMenuWidget colorSettings_Themes("colorthememenu.head", "settings.raw");
+	InitColorThemesSettings(colorSettings_Themes);
+
+	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", &colorSettings_Themes) );
+	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CMenuWidget colorSettings_menuColors("colormenusetup.head", "settings.raw", 400, 400);
+	InitColorSettingsMenuColors(colorSettings_menuColors);
+	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, "", &colorSettings_menuColors) );
+
+	CMenuWidget colorSettings_statusbarColors("colormenu.statusbar", "settings.raw");
+	InitColorSettingsStatusBarColors(colorSettings_statusbarColors);
+	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", &colorSettings_statusbarColors) );
+
+	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CMenuOptionChooser* oj = new CMenuOptionChooser("colormenu.fade", &g_settings.widget_fade, true );
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	colorSettings.addItem( oj );
+
 }
 
-void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &audioSettings_Themes)
+void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &colorSettings_Themes)
 {
-	audioSettings_Themes.addItem( new CMenuSeparator() );
-	audioSettings_Themes.addItem( new CMenuForwarder("menu.back") );
-	audioSettings_Themes.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	audioSettings_Themes.addItem( new CMenuForwarder("colorthememenu.neutrino_theme", true, "", this, "theme_neutrino") );
-	audioSettings_Themes.addItem( new CMenuForwarder("colorthememenu.classic_theme", true, "", this, "theme_classic") );
+	colorSettings_Themes.addItem( new CMenuSeparator() );
+	colorSettings_Themes.addItem( new CMenuForwarder("menu.back") );
+	colorSettings_Themes.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	colorSettings_Themes.addItem( new CMenuForwarder("colorthememenu.neutrino_theme", true, "", this, "theme_neutrino") );
+	colorSettings_Themes.addItem( new CMenuForwarder("colorthememenu.classic_theme", true, "", this, "theme_classic") );
 }
 
-void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &colorSettings)
+void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors)
 {
 	colorSettings_menuColors.addItem( new CMenuSeparator() );
 	colorSettings_menuColors.addItem( new CMenuForwarder("menu.back") );
@@ -1263,11 +1274,9 @@ void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuCo
 	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colormenusetup.menucontent_selected") );
 	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.background", true, "", chContentSelectedcolor ));
 	colorSettings_menuColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chContentSelectedTextcolor ));
-
-	colorSettings.addItem( new CMenuForwarder("colormenu.menucolors", true, "", &colorSettings_menuColors) );
 }
 
-void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors, CMenuWidget &colorSettings)
+void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors)
 {
 	colorSettings_statusbarColors.addItem( new CMenuSeparator() );
 
@@ -1281,8 +1290,6 @@ void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_s
 	colorSettings_statusbarColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "colorstatusbar.text") );
 	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.background", true, "", chInfobarcolor ));
 	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chInfobarTextcolor ));
-	colorSettings.addItem( new CMenuForwarder("colorstatusbar.head", true, "", &colorSettings_statusbarColors) );
-
 }
 
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
@@ -1473,7 +1480,11 @@ void CNeutrinoApp::InitZapper()
 
 int CNeutrinoApp::run(int argc, char **argv)
 {
-	g_Controld = new CControldClient;
+	g_info.box_Type = atoi(getenv("mID"));
+	g_info.gtx_ID = -1;
+	sscanf(getenv("gtxID"), "%x", &g_info.gtx_ID);
+	g_info.enx_ID = -1;
+	sscanf(getenv("enxID"), "%x", &g_info.gtx_ID);
 
 	if(!loadSetup())
 	{
@@ -1488,10 +1499,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_settings.timing_epg = 2* 60;
 	g_settings.timing_infobar = 8;
 
-	//get dbox-type everytime!
-	g_settings.box_Type = g_Controld->getBoxType();
-	//printf("got boxtype from controld: %d\n", g_settings.box_Type);
-
 	CmdParser(argc, argv);
 
 	g_Fonts = new FontsDef;
@@ -1499,6 +1506,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	ClearFrameBuffer();
 
+	g_Controld = new CControldClient;
 	g_Locale = new CLocaleManager;
 	g_RCInput = new CRCInput;
 	g_lcdd = new CLcddClient;
@@ -1610,20 +1618,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//color Setup
 	InitColorSettings(colorSettings);
-
-	CMenuWidget colorSettings_Themes("colorthememenu.head", "settings.raw");
-	InitColorThemesSettings(colorSettings_Themes);
-
-	// Hacking Shit
-	colorSettings.addItem( new CMenuForwarder("colormenu.themeselect", true, "", &colorSettings_Themes) );
-	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	// Meno
-
-	CMenuWidget colorSettings_menuColors("colormenusetup.head", "settings.raw", 400, 400);
-	InitColorSettingsMenuColors(colorSettings_menuColors, colorSettings);
-
-	CMenuWidget colorSettings_statusbarColors("colormenu.statusbar", "settings.raw");
-	InitColorSettingsStatusBarColors(colorSettings_statusbarColors, colorSettings);
 
 	//keySettings
 	InitKeySettings(keySettings);
@@ -2115,7 +2109,6 @@ void CNeutrinoApp::tvMode( bool rezap )
 	}
 
 	mode = mode_tv;
-	NeutrinoMode = mode_tv;
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("mode: tv");
 	#endif
@@ -2237,7 +2230,6 @@ void CNeutrinoApp::radioMode( bool rezap = true )
 	}
 
 	mode = mode_radio;
-	NeutrinoMode = mode_radio;
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("mode: radio");
 	#endif
@@ -2352,7 +2344,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.248 2002/04/25 20:47:55 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.249 2002/04/26 08:22:51 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

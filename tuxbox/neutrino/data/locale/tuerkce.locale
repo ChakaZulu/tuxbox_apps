@@ -102,6 +102,7 @@ colormenu.background ALT RENK
 colormenu.background_head ALT RENK
 colormenu.textcolor  YAZI RENGI
 colormenu.textcolor_head Textfarbe
+colormenu.fade Fade menus
 
 colorthememenu.head RENK SECIMINI SECINIZ
 colorthememenu.neutrino_theme NEUTRINO RENK SECIMI

@@ -102,6 +102,7 @@ colormenu.background Kolor Tla
 colormenu.background_head Kolor Tla
 colormenu.textcolor Kolor Tekstu
 colormenu.textcolor_head Kolor Tekstu
+colormenu.fade Fade menus
 
 colorthememenu.head Wybor Tematu
 colorthememenu.neutrino_theme Neutrino Temat

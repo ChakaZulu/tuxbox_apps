@@ -41,9 +41,6 @@
 #include "gui/widget/messagebox.h"
 #include "gui/color.h"
 
-#include <stdio.h>
-
-
 CScreenSetup::CScreenSetup()
 {
 	frameBuffer = CFrameBuffer::getInstance();
