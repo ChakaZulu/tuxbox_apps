@@ -445,6 +445,10 @@ private:
 	void showAudioMenu();
 	void runVTXT();
 	void runPluginExt();
+	void showSelectorStyleEPG();
+	void showCurrentStyleEPG();
+	void showMultiEPG();
+	void runPluginEPG();
 	void showEPGList(eServiceReferenceDVB ref);
 	void showEPG();
 	void showEPG_Streaminfo();

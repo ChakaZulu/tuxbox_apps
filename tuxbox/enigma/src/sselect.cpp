@@ -48,52 +48,50 @@ struct EPGStyleSelectorActions
 };
 eAutoInitP0<EPGStyleSelectorActions> i_EPGStyleSelectorActions(eAutoInitNumbers::actions, "EPG Style Selector actions");
 
-class eEPGStyleSelector: public eListBoxWindow<eListBoxEntryText>
-{
-public:
-	eEPGStyleSelector()
+eEPGStyleSelector::eEPGStyleSelector()
 		:eListBoxWindow<eListBoxEntryText>(_("EPG Style"), 5, 350, true)
+{
+	addActionMap( &i_EPGStyleSelectorActions->map );
+	move(ePoint(100, 100));
+	int last=1;
+	eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
+	eListBoxEntryText *sel[3];
+	sel[0] = new eListBoxEntryText(&list,_("Channel EPG"), (void*)1, 0, _("open EPG for selected Channel") );
+	sel[1] = new eListBoxEntryText(&list,_("Multi EPG"), (void*)2, 0, _("open EPG for next five channels") );
+	sel[2] = new eListBoxEntryText(&list,_("External EPG"), (void*)3, 0, _("open external plugin EPG") );
+	list.setCurrent(sel[last-1]);
+	CONNECT( list.selected, eEPGStyleSelector::entrySelected );
+}
+
+int eEPGStyleSelector::eventHandler( const eWidgetEvent &event )
+{
+	switch (event.type)
 	{
-		addActionMap( &i_EPGStyleSelectorActions->map );
-		move(ePoint(100,100));
-		int last=1;
-		eListBoxEntryText*sel=0;
-		eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
-		new eListBoxEntryText(&list,_("Channel EPG"), (void*)1, 0, _("open EPG for selected Channel") );
-		sel = new eListBoxEntryText(&list,_("Multi EPG"), (void*)2, 0, _("open EPG for next five channels") );
-		if ( last==2 )
-			list.setCurrent(sel);
-		CONNECT( list.selected, eEPGStyleSelector::entrySelected );
-	}
-	int eventHandler( const eWidgetEvent &event )
-	{
-		switch (event.type)
-		{
-			case eWidgetEvent::evtAction:
-				if ( event.action == &i_EPGStyleSelectorActions->infoPressed )
-					entrySelected( list.getCurrent() );
-				else
-					break;
-				return 1;
-			default:
+		case eWidgetEvent::evtAction:
+			if ( event.action == &i_EPGStyleSelectorActions->infoPressed )
+				entrySelected( list.getCurrent() );
+			else
 				break;
-		}
-		return eWindow::eventHandler( event );
+			return 1;
+		default:
+			break;
 	}
-	void entrySelected( eListBoxEntryText* e )
+	return eWindow::eventHandler( event );
+}
+
+void eEPGStyleSelector::entrySelected( eListBoxEntryText* e )
+{
+	if (e)
 	{
-		if (e)
-		{
-			int last=1;
-			eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
-			if ( last != (int) e->getKey() )
-				eConfig::getInstance()->setKey("/ezap/serviceselector/lastEPGStyle", (int)e->getKey());
-			close( (int)e->getKey() );
-		}
-		else
-			close(-1);
+		int last=1;
+		eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
+		if ( last != (int) e->getKey() )
+			eConfig::getInstance()->setKey("/ezap/serviceselector/lastEPGStyle", (int)e->getKey());
+		close( (int)e->getKey() );
 	}
-};
+	else
+		close(-1);
+}
 
 struct serviceSelectorActions
 {

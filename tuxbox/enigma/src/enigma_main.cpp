@@ -24,6 +24,7 @@
 #include <helpwindow.h>
 #include <timer.h>
 #include <download.h>
+#include <enigma_epg.h>
 #include <epgwindow.h>
 #include <lib/base/i18n.h>
 #include <lib/system/init.h>
@@ -4411,8 +4412,100 @@ void eZapMain::runPluginExt()
 		show();
 }
 
+void eZapMain::showSelectorStyleEPG()
+{
+	if ( doubleklickTimer.isActive() )
+	{		
+		doubleklickTimer.stop();
+		doubleklickTimerConnection.disconnect();
+		hide();
+		eEPGStyleSelector e;
+		e.show();
+		int ret = e.exec();
+		e.hide();
+		if (!doHideInfobar())
+			show();
+		switch ( ret )
+		{
+			case 1:
+				showEPGList((eServiceReferenceDVB&)eServiceInterface::getInstance()->service);
+				break;			
+			case 2:
+				showMultiEPG();
+				break;
+			case 3:
+				runPluginEPG();
+				break;
+			default:
+				break;
+		}
+	}
+	else
+	{
+		doubleklickTimer.start(300,true);
+		doubleklickTimerConnection = CONNECT( doubleklickTimer.timeout, eZapMain::showCurrentStyleEPG );
+	}
+}
+
+void eZapMain::showCurrentStyleEPG()
+{
+	if ( doubleklickTimerConnection.connected() )
+		doubleklickTimerConnection.disconnect();
+		
+	int lastEPGStyle=1;
+	eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", lastEPGStyle);
+		
+	switch ( lastEPGStyle )
+	{
+		case 1:
+			showEPGList((eServiceReferenceDVB&)eServiceInterface::getInstance()->service);
+			break;
+		case 2:
+			showMultiEPG();
+			break;
+		case 3:
+			runPluginEPG();
+			break;
+		default:
+			showEPGList((eServiceReferenceDVB&)eServiceInterface::getInstance()->service);
+			break;
+	}
+}
+
+void eZapMain::showMultiEPG()
+{
+	eZapEPG epg;
+	
+	int direction = 2;
+	hide();
+	epg.show();
+	do
+	{
+		epg.buildPage(direction);
+		direction = epg.exec();
+	}
+	while ( direction > 0 );
+	epg.hide();
+	if ( !direction ) // switch to service requested...
+		playService(epg.getCurSelected()->service, psDontAdd|psSeekPos);
+	if (!doHideInfobar())
+		show();
+}
+
+void eZapMain::runPluginEPG()
+{
+	eZapPlugins plugins(2);
+	hide();
+	if ( plugins.execPluginByName("extepg.cfg") != "OK" )
+		plugins.execPluginByName("_extepg.cfg");
+	if (!doHideInfobar())
+		show();	
+}
+
 void eZapMain::showEPGList(eServiceReferenceDVB service)
 {
+	if (!isEPG)
+		return;
 	if (service.type != eServiceReference::idDVB)
 		return;
 	eEPGCache::getInstance()->Lock();
@@ -4740,9 +4833,9 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 			runVTXT();
 		else if (event.action == &i_enigmaMainActions->pluginExt)
 			runPluginExt();
-		else if (event.action == &i_enigmaMainActions->showEPGList && isEPG)
+		else if (event.action == &i_enigmaMainActions->showEPGList)
 		{
-			showEPGList((eServiceReferenceDVB&)eServiceInterface::getInstance()->service);
+			showSelectorStyleEPG();
 		}
 		else if ( subservicesel.quickzapmode() && event.action == &i_enigmaMainActions->nextSubService )
 		{

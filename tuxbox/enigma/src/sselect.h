@@ -12,6 +12,14 @@
 class eService;
 class eLabel;
 
+class eEPGStyleSelector: public eListBoxWindow<eListBoxEntryText>
+{
+public:
+	eEPGStyleSelector();
+	int eventHandler( const eWidgetEvent &event );
+	void entrySelected( eListBoxEntryText* e );
+};
+
 class eListBoxEntryService: public eListBoxEntry
 {
 	friend class eServiceSelector;
