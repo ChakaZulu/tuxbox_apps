@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: xmlrpc.h,v $
+Revision 1.2  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.1  2001/12/11 13:34:59  TheDOC
 initial release
 

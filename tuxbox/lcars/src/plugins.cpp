@@ -15,9 +15,24 @@
  ***************************************************************************/
 /*
 $Log: plugins.cpp,v $
+Revision 1.5  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+<<<<<<< plugins.cpp
+Revision 1.4  2001/12/20 00:31:38  tux
+Plugins korrigiert
+
+Revision 1.3  2001/12/19 04:48:37  tux
+Neue Plugin-Schnittstelle
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
+=======
 Revision 1.4  2002/01/12 21:04:35  fx2
 libfx2 is now in PLUGINDIR (moved from /lib)
 
+>>>>>>> 1.4
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -69,11 +84,111 @@ void plugins::loadPlugins()
 
 }
 
+
+void plugins::addParm(std::string cmd, std::string value)
+{
+	params[cmd] = value;
+}
+
+void plugins::addParm(std::string cmd, int value)
+{
+	ostrstream ostr;
+	ostr << value << ends;
+	addParm(cmd, ostr.str());
+}
+
+void plugins::setfb(int fd)
+{
+	addParm(P_ID_FBUFFER, fd);
+}
+
+void plugins::setrc(int fd)
+{
+	addParm(P_ID_RCINPUT, fd);
+}
+
+void plugins::setlcd(int fd)
+{
+	addParm(P_ID_LCD, fd);
+}
+
+void plugins::setvtxtpid(int fd)
+{
+	addParm(P_ID_VTXTPID, fd);
+}
+
 void plugins::parseCfg(plugin *plugin_data)
 {
 	FILE *fd;
+
+	std::ifstream inFile;
+	std::string line[20];
+	int linecount = 0;
+
+	inFile.open(plugin_data->cfgfile.c_str());
 	
-	printf("Name: %s\n", plugin_data->cfgfile.c_str());
+	while(linecount < 20 && getline(inFile, line[linecount++]));
+	
+	plugin_data->fb = false;
+	plugin_data->rc = false;
+	plugin_data->lcd = false;
+	plugin_data->vtxtpid = false;
+	plugin_data->showpig = false;
+
+	for (int i = 0; i < linecount; i++)
+	{
+		std::istringstream iss(line[i]);
+		std::string cmd;
+		std::string parm;
+
+		getline(iss, cmd, '=');
+		getline(iss, parm, '=');
+
+		if (cmd == "pluginversion")
+		{
+			plugin_data->version = atoi(parm.c_str());
+		}
+		else if (cmd == "name")
+		{
+			plugin_data->name = parm;
+		}
+		else if (cmd == "desc")
+		{
+			plugin_data->description = parm;
+		}
+		else if (cmd == "depend")
+		{
+			plugin_data->depend = parm;
+		}
+		else if (cmd == "type")
+		{
+			plugin_data->type = atoi(parm.c_str());
+		}
+		else if (cmd == "needfb")
+		{
+			plugin_data->fb = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needrc")
+		{
+			plugin_data->rc = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needlcd")
+		{
+			plugin_data->lcd = ((parm == "1")?true:false);
+		}
+		else if (cmd == "needvtxtpid")
+		{
+			plugin_data->vtxtpid = ((parm == "1")?true:false);
+		}
+		else if (cmd == "pigon")
+		{
+			plugin_data->showpig = ((parm == "1")?true:false);
+		}
+	}
+
+	inFile.close();
+	
+	/*printf("Name: %s\n", plugin_data->cfgfile.c_str());
 	fd = fopen(plugin_data->cfgfile.c_str(), "rt");
 
 	char text[512];
@@ -98,6 +213,7 @@ void plugins::parseCfg(plugin *plugin_data)
 		sscanf(text, "needrc=%d\n", &(plugin_data->rc));
 
 		sscanf(text, "needlcd=%d\n", &(plugin_data->lcd));
+		sscanf(text, "needvtxtpid=%d\n", &(plugin_data->vtxtpid));
 		
 		sscanf(text, "pigon=%d\n", &(plugin_data->showpig));
 		sscanf(text, "pigsize=%dx%d\n", &(plugin_data->sizex), &(plugin_data->sizey));
@@ -105,12 +221,28 @@ void plugins::parseCfg(plugin *plugin_data)
 		
 	}
 
-	fclose(fd);
+	local_plugin_data = plugin_data;
+	fclose(fd);*/
+}
+
+PluginParam* plugins::makeParam(std::string id, PluginParam *next)
+{
+	cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
+	
+	PluginParam *startparam = new PluginParam;
+	startparam->next = next;
+	startparam->id = new char[id.length() + 2];
+	startparam->val = new char[params.find(id)->second.length() + 2];
+	strcpy(startparam->id, id.c_str());
+	strcpy(startparam->val, params.find(id)->second.c_str());
+	
+	cout << "Startparam: " << (int) startparam << endl;
+	return startparam;
 }
 
 void plugins::startPlugin(int number)
 {
-	PluginExecProc execPlugin;
+	PluginExec execPlugin;
 	char depstring[129];
 	char			*argv[20];
 	void			*libhandle[20];
@@ -121,11 +253,55 @@ void plugins::startPlugin(int number)
 	void			*handle;
 	char			*error;
 
+	PluginParam *startparam;
+	PluginParam *tmpparam;
+
+	startparam = 0;
+	tmpparam = startparam;
+
+	if (plugin_list[number].fb)
+	{
+		cout << "With FB " << params.find(P_ID_FBUFFER)->second.c_str() <<endl;
+		startparam = makeParam(P_ID_FBUFFER, startparam);
+		cout << "New Startparam: " << startparam << endl;
+		cout << "New Tmpparam: " << tmpparam << endl;
+
+
+	}
+	if (plugin_list[number].rc)
+	{
+		cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
+
+		startparam = makeParam(P_ID_RCINPUT, startparam);
+	}
+	if (plugin_list[number].lcd)
+	{
+		cout << "With LCD " << endl;
+
+		startparam = makeParam(P_ID_LCD, startparam);
+	}
+	if (plugin_list[number].vtxtpid)
+	{
+		cout << "With VTXTPID " << params.find(P_ID_VTXTPID)->second.c_str() << endl;
+
+		startparam = makeParam(P_ID_VTXTPID, startparam);
+	}
+
+	PluginParam *par = startparam;
+	for( ; par; par=par->next )
+	{
+		printf ("id: %s - val: %s\n", par->id, par->val);
+		printf("%d\n", par->next);
+	}
+
+	cout << "Mark-2" << endl;
 
 	std::string pluginname = plugin_list[number].filename;
 
 	strcpy(depstring, plugin_list[number].depend.c_str());
 
+	cout << "Mark-1" << endl;
+	
 	argc=0;
 	if ( depstring[0] )
 	{
@@ -144,6 +320,7 @@ void plugins::startPlugin(int number)
 				break;
 		}
 	}
+	cout << "Mark0" << endl;
 	for( i=0; i<argc; i++ )
 	{
 		std::string libname = argv[i];
@@ -157,7 +334,7 @@ void plugins::startPlugin(int number)
 			break;
 		}
 	}
-
+	cout << "Mark1" << endl;
 	while ( i == argc )		// alles geladen
 	{
 		handle = dlopen ( plugin_list[number].sofile.c_str(), RTLD_NOW);
@@ -167,7 +344,7 @@ void plugins::startPlugin(int number)
 			//should unload libs!
 			break;
 		}
-		execPlugin = (PluginExecProc) dlsym(handle, (pluginname+"_exec").c_str());
+		execPlugin = (PluginExec) dlsym(handle, "plugin_exec");
 		if ((error = dlerror()) != NULL)
 		{
 			fputs(error, stderr);
@@ -176,7 +353,7 @@ void plugins::startPlugin(int number)
 			break;
 		}
 		printf("try exec...\n");
-		execPlugin(fb, rc, lcd);
+		execPlugin(startparam);
 		dlclose(handle);
 		printf("exec done...\n");
 		//restore framebuffer...

@@ -15,6 +15,18 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.4  2001/12/18 02:03:29  tux
+VCR-Switch-Eventkram implementiert
+
+Revision 1.3  2001/12/17 16:54:47  tux
+Settings halb komplett
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -24,10 +36,12 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 */
 #include "hardware.h"
 
-hardware::hardware(settings &s) : setting(s)
+hardware::hardware(settings *s) 
 {
+	setting = s;
 	vcr_on = false;
 	old_DD_state = true;
+	old_fblk = OUTPUT_RGB;
 }
 
 void hardware::fnc(int i)
@@ -38,16 +52,53 @@ void hardware::fnc(int i)
 	close(avs);
 }
 
+int hardware::getAvsStatus()
+{
+	avs = open("/dev/dbox/avs0",O_RDWR);
+	int val;
+	ioctl(avs, AVSIOGSTATUS, &val);
+
+	close(avs);
+	return val;
+}
+
+int hardware::getVCRStatus()
+{
+	int val;
+	int fp = open("/dev/dbox/fp0",O_RDWR);
+	
+	ioctl(fp, FP_IOCTL_GET_VCR, &val);
+
+	close(fp);
+	cout << "VCR-Val: " << val << endl;
+	return val;
+}
+
+int hardware::getARatio()
+{
+	int check = 0;
+	char buffer[100];
+	FILE* fp = fopen("/proc/bus/bitstream", "r");
+	while (!feof(fp))
+	{
+		fgets(buffer, 100, fp);
+		sscanf(buffer, "A_RATIO: %d", &check);
+	}	
+	fclose(fp);
+	return check;
+}
 
 bool hardware::switch_vcr()
 {
 	int i = 0, j = 0, nothing, fblk = 2;
-	avs = open("/dev/dbox/avs0",O_RDWR);
-	printf("Getbox: %d\n", setting.getBox());
+	
+	printf("Getbox: %d\n", setting->getBox());
 	if (!vcr_on)
 	{
 		printf("on\n");
-		if (setting.getBox() == SAGEM) // Sagem
+		old_fblk = getfblk();
+		avs = open("/dev/dbox/avs0",O_RDWR);
+		if (setting->getBox() == SAGEM) // Sagem
 		{
 			i = 2;
 			j = 1;
@@ -57,7 +108,7 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 		}
-		else if (setting.getBox() == NOKIA) // Nokia
+		else if (setting->getBox() == NOKIA) // Nokia
 		{
 			i = 3;
 			j = 2;
@@ -67,7 +118,7 @@ bool hardware::switch_vcr()
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 		}
-		else if (setting.getBox() == PHILIPS) // Philips
+		else if (setting->getBox() == PHILIPS) // Philips
 		{
 			nothing = 3;
 
@@ -81,35 +132,38 @@ bool hardware::switch_vcr()
 	}
 	else
 	{		
-		if (setting.getBox() == SAGEM)
+		setOutputMode(old_fblk);
+		avs = open("/dev/dbox/avs0",O_RDWR);
+		if (setting->getBox() == SAGEM)
 		{
 			i = 0;
 			j = 0;
 			nothing = 0;
-			ioctl(avs,AVSIOSFBLK,&fblk);
+			
+			//ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW2,&nothing);
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 		
 		}
-		else if (setting.getBox() == NOKIA)
+		else if (setting->getBox() == NOKIA)
 		{
 			i = 5;
 			j = 1;
 			nothing = 7;
 
-			ioctl(avs,AVSIOSFBLK,&fblk);
+			//ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW2,&nothing);
 			ioctl(avs,AVSIOSVSW1,&i);
 			ioctl(avs,AVSIOSASW1,&j);
 		}
-		else if (setting.getBox() == PHILIPS)
+		else if (setting->getBox() == PHILIPS)
 		{
 			i = 1;
 			j = 1;
 			nothing = 1;
-
-			ioctl(avs,AVSIOSFBLK,&fblk);
+			
+			//ioctl(avs,AVSIOSFBLK,&fblk);
 			ioctl(avs,AVSIOSVSW3,&nothing);
 			ioctl(avs,AVSIOSVSW2,&i);
 			ioctl(avs,AVSIOSASW2,&j);
@@ -172,21 +226,21 @@ void hardware::setOutputMode(int i)
 {
 	int setmode = 0;
 
-	if (setting.getBox() == NOKIA)
+	if (setting->getBox() == NOKIA)
 	{
 		if (i == OUTPUT_FBAS)
 			setmode = 0;
 		else
 			setmode = 3;
 	}
-	else if (setting.getBox() == PHILIPS)
+	else if (setting->getBox() == PHILIPS)
 	{
 		if (i == OUTPUT_FBAS)
 			setmode = 0;
 		else
 			setmode = 1;
 	}
-	else if (setting.getBox() == SAGEM)
+	else if (setting->getBox() == SAGEM)
 	{
 	}
 
@@ -211,14 +265,14 @@ int hardware::getfblk()
 	close(avs);
 
 	int outputtype = 0;
-	if (setting.getBox() == NOKIA)
+	if (setting->getBox() == NOKIA)
 	{
 		if (fblk == 3)
 			outputtype = OUTPUT_RGB;
 		else if (fblk == 0)
 			outputtype = OUTPUT_FBAS;
 	}
-	else if (setting.getBox() == PHILIPS)
+	else if (setting->getBox() == PHILIPS)
 	{
 		if (fblk == 1)
 			outputtype = OUTPUT_RGB;
@@ -226,7 +280,7 @@ int hardware::getfblk()
 			outputtype = OUTPUT_FBAS;
 
 	}
-	else if (setting.getBox() == SAGEM)
+	else if (setting->getBox() == SAGEM)
 	{
 
 	}

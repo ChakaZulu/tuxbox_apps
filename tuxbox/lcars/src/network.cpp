@@ -15,6 +15,27 @@
  ***************************************************************************/
 /*
 $Log: network.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.7  2001/12/20 00:31:38  tux
+Plugins korrigiert
+
+Revision 1.6  2001/12/17 14:00:41  tux
+Another commit
+
+Revision 1.5  2001/12/17 03:52:42  tux
+Netzwerkfernbedienung fertig
+
+Revision 1.4  2001/12/17 02:36:05  tux
+Fernbedienung ueber's Netzwerk, 1. Schritt
+
+Revision 1.3  2001/12/17 01:55:28  tux
+scan.cpp fix
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -44,9 +65,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "pat.h"
 #include "pmt.h"
 
-network::network(container &contain) : cont(contain)
+network::network(container &contain, rc *r) : cont(contain)
 {
 	xmlrpc_obj.setObjects(&cont);
+	rc_obj = r;
 }
 
 void network::startThread()
@@ -178,6 +200,7 @@ void *network::startlistening(void *object)
 					write(inbound_connection, (*n->cont.settings_obj).getVersion().c_str(), (*n->cont.settings_obj).getVersion().length());
 					strcpy(writebuffer, "<br><br><a href=\"/channels/gethtmlchannels\">Channellist</a>");
 					write(inbound_connection, writebuffer, strlen(writebuffer));
+					n->writetext("<br><br><a href=\"rc/frame\">Remote Control</a>");
 					n->writetext("<br><br><a href=\"/epg/now\">EPG Now</a>");
 					n->writetext("<br><br><a href=\"/epg/next\">EPG Next</a>");
 					strcpy(writebuffer, "<br><br><a href=\"/channels/lcars.dvb\">Channellist in DVB2000-format</a>");
@@ -243,7 +266,7 @@ void *network::startlistening(void *object)
 																	
 						(*n->cont.channels_obj).setCurrentChannel(number);
 	
-						(*n->cont.channels_obj).zapCurrentChannel(n->cont.zap_obj, n->cont.tuner_obj);
+						(*n->cont.channels_obj).zapCurrentChannel();
 						(*n->cont.channels_obj).setCurrentOSDProgramInfo(n->cont.osd_obj);
 						
 						(*n->cont.channels_obj).receiveCurrentEIT();
@@ -315,9 +338,165 @@ void *network::startlistening(void *object)
 					n->writetext(text);
 
 				}
-				else if (!strncmp(command[i], "GET /file", strlen("GET /file")))
+				else if (path[1] == "rc")
 				{
+					if (path[2] == "frame")
+					{
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						n->writetext("<frameset  rows=\"0,*\"><frame name=\"command\" src=\"\" marginwidth=\"0\" marginheight=\"0\" scrolling=\"no\" frameborder=\"0\"><frame name=\"main\" src=\"/rc/rc\" marginwidth=\"0\" marginheight=\"0\" scrolling=\"auto\" frameborder=\"0\"></frameset>");
+					}
+					else if (path[2] == "rc")
+					{
+						write(inbound_connection, headerok.c_str(), headerok.length());
+						ostrstream ostr;
+						ostr << "<map name=\"rc\">";
+						ostr << "<area target=\"command\" alt=\"1\" shape=\"circle\" coords=\"103,67,8\" href=\"1\">";
+						ostr << "<area target=\"command\" alt=\"2\" shape=\"CIRCLE\" coords=\"123,64,8\" href=\"2\">";
+						ostr << "<area target=\"command\" alt=\"3\" shape=\"CIRCLE\" coords=\"143,63,8\" href=\"3\">";
+						ostr << "<area target=\"command\" alt=\"4\" shape=\"circle\" coords=\"105,88,8\" href=\"4\">";
+						ostr << "<area target=\"command\" alt=\"5\" shape=\"CIRCLE\" coords=\"125,85,9\" href=\"5\">";
+						ostr << "<area target=\"command\" alt=\"6\" shape=\"CIRCLE\" coords=\"142,81,8\" href=\"6\">";
+						ostr << "<area target=\"command\" alt=\"7\" shape=\"circle\" coords=\"102,108,9\" href=\"7\">";
+						ostr << "<area target=\"command\" alt=\"8\" shape=\"circle\" coords=\"121,106,8\" href=\"8\">";
+						ostr << "<area target=\"command\" alt=\"9\" shape=\"circle\" coords=\"145,101,9\" href=\"9\">";
+						ostr << "<area target=\"command\" alt=\"0\" shape=\"circle\" coords=\"102,131,9\" href=\"0\">";
+						ostr << "<area target=\"command\" alt=\"standby\" coords=\"54,59,86,75\" href=\"standby\">";
+						ostr << "<area target=\"command\" alt=\"home\" coords=\"55,80,86,95\" href=\"home\">";
+						ostr << "<area target=\"command\" alt=\"dbox\" coords=\"56,99,86,117\" href=\"dbox\">";
+						ostr << "<area target=\"command\" alt=\"blue\" shape=\"circle\" coords=\"143,143,9\" href=\"blue\">";
+						ostr << "<area target=\"command\" alt=\"yellow\" shape=\"circle\" coords=\"102,156,12\" href=\"yellow\">";
+						ostr << "<area target=\"command\" alt=\"green\" shape=\"circle\" coords=\"80,174,11\" href=\"green\">";
+						ostr << "<area target=\"command\" alt=\"red\" shape=\"circle\" coords=\"66,193,11\" href=\"red\">";
+						ostr << "<area target=\"command\" alt=\"ok\" shape=\"CIRCLE\" coords=\"106,238,18\" href=\"ok\">";
+						ostr << "<area target=\"command\" alt=\"up\" coords=\"83,200,134,217\" href=\"up\">";
+						ostr << "<area target=\"command\" alt=\"down\" coords=\"86,255,129,275\" href=\"down\" shape=\"RECT\">";
+						ostr << "<area target=\"command\" alt=\"right\" coords=\"128,218,149,262\" href=\"right\" shape=\"RECT\">";
+						ostr << "<area target=\"command\" alt=\"left\" coords=\"72,218,90,256\" href=\"left\" shape=\"RECT\">";
+						ostr << "<area target=\"command\" alt=\"plus\" shape=\"circle\" coords=\"62,266,8\" href=\"plus\">";
+						ostr << "<area target=\"command\" alt=\"minus\" shape=\"circle\" coords=\"74,289,10\" href=\"minus\">";
+						ostr << "<area target=\"command\" alt=\"mute\" shape=\"CIRCLE\" coords=\"104,314,8\" href=\"mute\">";
+						ostr << "<area target=\"command\" alt=\"help\" shape=\"CIRCLE\" coords=\"146,329,11\" href=\"help\">";
+						ostr << "</map>";
+						ostr << "<img src=\"/datadir/rc.jpg\" width=\"200\" height=\"500\"border=\"0\" usemap=\"#rc\">";
+						ostr << ends;
+						n->writetext(ostr.str());
+					}
+					else if (path[2] == "1")
+					{
+						n->rc_obj->cheat_command(RC1_1);
+					}
+					else if (path[2] == "2")
+					{
+						n->rc_obj->cheat_command(RC1_2);
+					}
+					else if (path[2] == "3")
+					{
+						n->rc_obj->cheat_command(RC1_3);
+					}
+					else if (path[2] == "4")
+					{
+						n->rc_obj->cheat_command(RC1_4);
+					}
+					else if (path[2] == "5")
+					{
+						n->rc_obj->cheat_command(RC1_5);
+					}
+					else if (path[2] == "6")
+					{
+						n->rc_obj->cheat_command(RC1_6);
+					}
+					else if (path[2] == "7")
+					{
+						n->rc_obj->cheat_command(RC1_7);
+					}
+					else if (path[2] == "8")
+					{
+						n->rc_obj->cheat_command(RC1_8);
+					}
+					else if (path[2] == "9")
+					{
+						n->rc_obj->cheat_command(RC1_9);
+					}
+					else if (path[2] == "0")
+					{
+						n->rc_obj->cheat_command(RC1_0);
+					}
+					else if (path[2] == "standby")
+					{
+						n->rc_obj->cheat_command(RC1_STANDBY);
+					}
+					else if (path[2] == "home")
+					{
+						n->rc_obj->cheat_command(RC1_HOME);
+					}
+					else if (path[2] == "dbox")
+					{
+						n->rc_obj->cheat_command(RC1_DBOX);
+					}
+					else if (path[2] == "blue")
+					{
+						n->rc_obj->cheat_command(RC1_BLUE);
+					}
+					else if (path[2] == "yellow")
+					{
+						n->rc_obj->cheat_command(RC1_YELLOW);
+					}
+					else if (path[2] == "green")
+					{
+						n->rc_obj->cheat_command(RC1_GREEN);
+					}
+					else if (path[2] == "red")
+					{
+						n->rc_obj->cheat_command(RC1_RED);
+					}
+					else if (path[2] == "up")
+					{
+						n->rc_obj->cheat_command(RC1_UP);
+					}
+					else if (path[2] == "down")
+					{
+						n->rc_obj->cheat_command(RC1_DOWN);
+					}
+					else if (path[2] == "right")
+					{
+						n->rc_obj->cheat_command(RC1_RIGHT);
+					}
+					else if (path[2] == "left")
+					{
+						n->rc_obj->cheat_command(RC1_LEFT);
+					}
+					else if (path[2] == "ok")
+					{
+						n->rc_obj->cheat_command(RC1_OK);
+					}
+					else if (path[2] == "mute")
+					{
+						n->rc_obj->cheat_command(RC1_MUTE);
+					}
+					else if (path[2] == "plus")
+					{
+						n->rc_obj->cheat_command(RC1_VOLPLUS);
+					}
+					else if (path[2] == "minus")
+					{
+						n->rc_obj->cheat_command(RC1_VOLMINUS);
+					}
+					else if (path[2] == "help")
+					{
+						n->rc_obj->cheat_command(RC1_HELP);
+					}
 
+
+				}
+				
+				else if (path[1] == "datadir")
+				{
+					std::string filename = DATADIR "/lcars/" + path[2];
+					int fd = open(filename.c_str(), O_RDONLY);
+					char c;
+					while(read(fd, &c, 1))
+						write(inbound_connection, &c, 1);
+					close(fd);
 
 				}
 				else
@@ -370,6 +549,7 @@ void *network::startlistening(void *object)
 	
 				std::string send = ostr.str();
 				cout << "Sending now XML\n" << endl;
+				//cout << send << endl;
 				write(inbound_connection, send.c_str(), send.length());
 			}
 		}

@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: eit.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -203,7 +209,7 @@ void eit::receiveNow(int SID)
 			while (start < 20 + descriptors_length)
 			{
 				printf("Type: %x\n", buffer[start]);
-				if (buffer[start] == 0x4d) // short_event_descriptor
+				if (buffer[start] == 0x4d) // short_event_descripto
 				{	
 					std::string tmp_string;
 					int event_name_length = buffer[start + 5];
@@ -250,7 +256,7 @@ void eit::receiveNow(int SID)
 					}
 					tmp_event.number_perspectives++;
 				}
-				else if (buffer[start] == 0x4e) // extended_event_descriptor
+				else if (buffer[start] == 0x4e) // extended_event_descripto
 				{
 					int pos = start + 6 + buffer[start + 6];
 					
@@ -482,7 +488,7 @@ void eit::readSchedule(int SID, osd *osd)
 					int text_length = 0;
 					while (start < count /*+ 14 */+ descriptors_length)
 					{
-						if (buffer[start] == 0x4d) // short_event_descriptor
+						if (buffer[start] == 0x4d) // short_event_descripto
 						{	
 							std::string tmp_string;
 							int event_name_length = buffer[start + 5];
@@ -528,7 +534,7 @@ void eit::readSchedule(int SID, osd *osd)
 							}
 							number_perspectives++;
 						}
-						else if (buffer[start] == 0x4e) // extended_event_descriptor
+						else if (buffer[start] == 0x4e) // extended_event_descripto
 						{
 							int pos = start + 6 + buffer[start + 6];
 							

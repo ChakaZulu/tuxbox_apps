@@ -15,8 +15,11 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
-Revision 1.8  2001/12/17 00:58:08  obi
-scanlist.dat is in CONFIGDIR/lcars now
+Revision 1.9  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/17 01:00:41  tux
+scan.cpp fix
 
 Revision 1.7  2001/12/17 00:18:18  obi
 readded revision 1.5
@@ -38,10 +41,61 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <stdio.h>
 #include "scan.h"
 
-scan::scan(settings &s, pat &p1, pmt &p2, nit &n, sdt &s1, osd *o, tuner &t) : setting(s), pat_obj(p1), pmt_obj(p2), nit_obj(n), sdt_obj(s1), osd_obj(o), tuner_obj(t)
+scan::scan(settings *s, pat *p1, pmt *p2, nit *n, sdt *s1, osd *o, tuner *t, channels *c)
 {
-
+        setting = s;
+        pat_obj = p1;
+        pmt_obj = p2;
+        nit_obj = n;
+        sdt_obj = s1;
+        osd_obj = o;
+        tuner_obj = t;
+		channels_obj = c;
 }
+
+void scan::readUpdates()
+{
+	channels tmp_channels(setting, pat_obj, pmt_obj);
+	sdt_obj->getChannels(&tmp_channels);
+
+	bool changed = false;
+	bool new_channels = false;
+
+	int old_number = channels_obj->getCurrentChannelNumber();
+	for (int i = 0; i < tmp_channels.numberChannels(); i++)
+	{
+		channel tmp_channel = tmp_channels.getChannelByNumber(i);
+		int channelnumber = channels_obj->getChannelNumber(tmp_channel.TS, tmp_channel.ONID, tmp_channel.SID);
+		if (channelnumber == -1)
+		{
+			channels_obj->addChannel(tmp_channel);
+			changed = true;
+			new_channels = true;
+		}
+		else
+		{
+			channel tmp_channel_old = channels_obj->getChannelByNumber(channelnumber);
+			if (strcmp(tmp_channel.serviceName, tmp_channel_old.serviceName))
+			{
+				channels_obj->updateChannel(channelnumber, tmp_channel);
+				if (channelnumber == old_number)
+					osd_obj->setServiceName(tmp_channel.serviceName);
+				changed = true;
+			}
+		}
+	}
+	channels_obj->setCurrentChannel(old_number);
+	if (changed)
+		channels_obj->saveDVBChannels();
+	if (new_channels)
+	{
+		osd_obj->setPerspectiveName("New Channels found and added!!!!");
+		osd_obj->addCommand("SHOW perspective");
+		sleep(5);
+		osd_obj->addCommand("HIDE perspective");
+	}
+}
+
 
 channels scan::scanChannels(bool full = false, int start_frequency = -1, int start_symbol = -1, int start_polarization = -1, int start_fec = -1)
 {
@@ -50,31 +104,31 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 	bool badcable = false;
 
 	//settings settings;
-	(*osd_obj).createScan();
-	(*osd_obj).addCommand("SHOW scan");
+	osd_obj->createScan();
+	osd_obj->addCommand("SHOW scan");
 	sleep(1);
 
-	(*osd_obj).setScanProgress(0);
-	(*osd_obj).setScanChannelNumber(0);
+	osd_obj->setScanProgress(0);
+	osd_obj->setScanChannelNumber(0);
 
 
-	if (setting.boxIsCable())
+	if (setting->boxIsCable())
 	{
 		start_frequency = 3460;
 		start_symbol = 6900;
-		(*osd_obj).createPerspective();
+		osd_obj->createPerspective();
 		
 
 		while(channels.numberTransponders() < 1)
 		{
 			char message[100];
 			sprintf(message, "Searching NIT on %d - %d", start_frequency, start_symbol);
-			(*osd_obj).setPerspectiveName(message);
-			(*osd_obj).addCommand("SHOW perspective");
+			osd_obj->setPerspectiveName(message);
+			osd_obj->addCommand("SHOW perspective");
 			
-			tuner_obj.tune(start_frequency, start_symbol);
+			tuner_obj->tune(start_frequency, start_symbol);
 
-			number = nit_obj.getTransportStreams(&channels);
+			number = nit_obj->getTransportStreams(&channels);
 			channels.dumpTS();
 			start_frequency += 80;
 			if (start_frequency > 4000)
@@ -83,8 +137,8 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 
 		if (channels.numberTransponders() < 1)
 		{
-			(*osd_obj).setPerspectiveName("Sorry, no NIT found! Check cables!!!");
-			(*osd_obj).addCommand("SHOW perspective");
+			osd_obj->setPerspectiveName("Sorry, no NIT found! Check cables!!!");
+			osd_obj->addCommand("SHOW perspective");
 			
 			exit(-1);
 		}
@@ -94,9 +148,9 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 
 		if (test_frequ > 10000)
 		{
-			(*osd_obj).setPerspectiveName("Your cable-company sucks! Manually searching...");
+			osd_obj->setPerspectiveName("Your cable-company sucks! Manually searching...");
 			badcable = true;
-			(*osd_obj).addCommand("SHOW perspective");
+			osd_obj->addCommand("SHOW perspective");
 
 			channels.clearTS();
 
@@ -106,14 +160,14 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 			{
 				char message[100];
 				sprintf(message, "Checking %d - %d", i, 6900);
-				(*osd_obj).setPerspectiveName(message);
-				(*osd_obj).addCommand("SHOW perspective");
+				osd_obj->setPerspectiveName(message);
+				osd_obj->addCommand("SHOW perspective");
 
-				tuner_obj.tune(i, 6900);
+				tuner_obj->tune(i, 6900);
 
-				if (pat_obj.readPAT())
+				if (pat_obj->readPAT())
 				{
-					channels.addTS(pat_obj.getTS(), pat_obj.getONID(), i, 6900);
+					channels.addTS(pat_obj->getTS(), pat_obj->getONID(), i, 6900);
 				}
 				
 
@@ -123,11 +177,11 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 
 
 	}
-	else if (setting.boxIsSat())
+	else if (setting->boxIsSat())
 	{
 		int max_chans = 2;
 
-		int start_frq[20];	// see: tuner
+		int start_frq[20];	// see: tune
 		int start_sym[20];
 		int start_pol[20];
 		int start_fe[20];
@@ -184,17 +238,17 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 				sprintf(message, "Searching on %d - %d - %d - %d - %d",
 					start_frq[i], start_sym[i],
 					start_pol[i], start_fe[i], dis);
-				(*osd_obj).setPerspectiveName(message);
-				(*osd_obj).addCommand("SHOW perspective");
+				osd_obj->setPerspectiveName(message);
+				osd_obj->addCommand("SHOW perspective");
 
 				printf ("Start tuning\n");
 	
-				tuner_obj.tune(start_frq[i], start_sym[i], start_pol[i], start_fe[i], dis);
+				tuner_obj->tune(start_frq[i], start_sym[i], start_pol[i], start_fe[i], dis);
 				
 				printf("FInished tuning\n");	
 
 				printf ("Start NIT\n");
-				number = nit_obj.getTransportStreams(&channels, dis);
+				number = nit_obj->getTransportStreams(&channels, dis);
 				printf ("End NIT\n");
 			}
 
@@ -203,8 +257,8 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 		
 		if (channels.numberTransponders() < 1)
 		{
-			(*osd_obj).setPerspectiveName("Sorry, no NIT found! Check cables!!!");
-			(*osd_obj).addCommand("SHOW perspective");
+			osd_obj->setPerspectiveName("Sorry, no NIT found! Check cables!!!");
+			osd_obj->addCommand("SHOW perspective");
 			exit(-1);
 		}
 	}
@@ -219,28 +273,28 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 	
 	char message[100];
 	sprintf(message, "Scanning Channels");
-	(*osd_obj).setPerspectiveName(message);
-	(*osd_obj).addCommand("SHOW perspective");
+	osd_obj->setPerspectiveName(message);
+	osd_obj->addCommand("SHOW perspective");
 
 	do
 	{
-		channels.tuneCurrentTS(&tuner_obj);	
+		channels.tuneCurrentTS(tuner_obj);	
 
 		printf("getChannels - Start\n");
-		sdt_obj.getChannels(&channels);
+		sdt_obj->getChannels(&channels);
 			
 		if (full)
 		{
-			pat_obj.readPAT();
+			pat_obj->readPAT();
 			for (int i = numberChannels; i < channels.numberChannels(); i++)
 			{
 				channels.setCurrentChannel(i);
-				channels.setCurrentPMT(pat_obj.getPMT(channels.getCurrentSID()));
+				channels.setCurrentPMT(pat_obj->getPMT(channels.getCurrentSID()));
 
 				pmt_data pmt_entry;
 				if (channels.getCurrentPMT() != 0)
 				{
-					pmt_entry = pmt_obj.readPMT(channels.getCurrentPMT());
+					pmt_entry = pmt_obj->readPMT(channels.getCurrentPMT());
 					
 					channels.setCurrentPCR(pmt_entry.PCR);
 
@@ -259,7 +313,7 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 		
 					for (int j = 0; j < pmt_entry.ecm_counter; j++)
 					{
-						if (setting.getCAID() == pmt_entry.CAID[j])
+						if (setting->getCAID() == pmt_entry.CAID[j])
 							channels.addCurrentCA(pmt_entry.CAID[j], pmt_entry.ECM[j]);
 					}
 				}
@@ -276,18 +330,18 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 			}
 		}
 
-		(*osd_obj).setScanChannelNumber(channels.numberChannels());
+		osd_obj->setScanChannelNumber(channels.numberChannels());
 		printf("getChannels - Finish\n");
 		count++;
-		(*osd_obj).setScanProgress((int)(((float)count / numberTS) * 100));
+		osd_obj->setScanProgress((int)(((float)count / numberTS) * 100));
 	} while(channels.setNextTS());
 
-	(*osd_obj).addCommand("HIDE scan");
-	(*osd_obj).addCommand("HIDE perspective");
-	(*osd_obj).hidePerspective();
+	osd_obj->addCommand("HIDE scan");
+	osd_obj->addCommand("HIDE perspective");
+	osd_obj->hidePerspective();
 
 	printf("Found channels: %d\n", channels.numberChannels());
-	channels.saveDVBChannels();
+	//channels.saveDVBChannels();
 	
 	return channels;
 }

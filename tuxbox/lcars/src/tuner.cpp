@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.10  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
 Revision 1.9  2001/12/20 19:20:49  obi
 defined OLD_TUNER_API in Makefile.am instead of tuner.cpp
 
@@ -44,175 +47,49 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
 */
-#include <iostream.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <memory.h>
-#include <ost/dmx.h>
-#include <ost/video.h>
-#include <ost/frontend.h>
-#include <ost/audio.h>
-#include <ost/sec.h>
-#include <ost/sec.h>
-#include <ost/ca.h>
-#include <dbox/avs_core.h>
 
-#include "settings.h"
 #include "tuner.h"
-
 
 tuner::tuner(settings &s) : setting(s)
 {
 }
 
-#ifdef OLD_TUNER_API
-
-// polarization = 0 -> H, polarization = 1 -> V
-int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int dis = 0)
+CodeRate tuner::getFEC(int fec)
 {
-	int device;
-	int frontend;
-	struct secCmdSequence seq;
-	struct secCommand cmd;
-	struct qpskParameters front;
-
-
-	if (setting.boxIsSat())
+	switch (fec)
 	{
-
-// $$$ rasc
-// Das Verhalten von Sectone (22KHz) sollte konfigurierbar sein.
-// Ebenso die ZF fuer die LNBs (1 + 2) fuer jeweils Hi und Lo - Band
-// die Werte hier sind Standard fuer das Ku-Band, allerdings waere es
-// interessant auch andere Werte zu haben (z.B. 10 GHz ZF, oder 4 GHz ZF)
-// Dies ist sinnvoll, wenn man die dbox fuer den Sat-DX Empfang, oder
-// aeltere LNBs (naja) nutzen moechte.  
-
-		if (frequ > 11700) {
-			front.iFrequency = (frequ * 1000)-10600000;
-			seq.continuousTone = SEC_TONE_ON;
-		} else {
-			front.iFrequency = (frequ * 1000)-9750000;
-			seq.continuousTone = SEC_TONE_OFF;
-		}
-
-		if (polarization == 0) {
-			seq.voltage=SEC_VOLTAGE_18;
-		} else {
-			seq.voltage=SEC_VOLTAGE_13;	
-		}
-
-		switch (fec)
-		{
-			case 1:
-				front.FEC_inner = FEC_1_2;
-				break;
-			case 2:
-				front.FEC_inner = FEC_2_3;
-				break;
-			case 3:
-				front.FEC_inner = FEC_3_4;
-				break;
-			case 4:
-				front.FEC_inner = FEC_5_6;
-				break;
-			case 5:
-				front.FEC_inner = FEC_7_8;
-				break;
-			case -1:
-				front.FEC_inner = FEC_AUTO;
-				break;
-		}
-
-
-		// diseqc Group Byte  (dis: 0..3)
-		// 2001-12-06 rasc
-
-		cmd.type=SEC_CMDTYPE_DISEQC;
-		cmd.u.diseqc.addr=0x10;
-		cmd.u.diseqc.cmd=0x38;
-		cmd.u.diseqc.numParams=1;
-		cmd.u.diseqc.params[0]=0xF0 
-				| ((dis*4) & 0x0F) 
-				| ((seq.voltage == SEC_VOLTAGE_18)     ? 2 : 0)
-				| ((seq.continuousTone == SEC_TONE_ON) ? 1 : 0);
-
-		seq.miniCommand=SEC_MINI_NONE;
-		seq.numCommands=1;
-		seq.commands=&cmd;
-
-
-
-		if((device = open("/dev/ost/sec0", O_RDWR)) < 0)
-		{
-			exit(1);
-		}
-		ioctl(device,SEC_SEND_SEQUENCE,&seq);
-	
-		close(device);
-
+	case -1:
+	case 15:
+		return FEC_NONE;
+	case 0:
+		return FEC_AUTO;
+	case 1:
+		return FEC_1_2;
+	case 2:
+		return FEC_2_3;
+	case 3:
+		return FEC_3_4;
+	case 4:
+		return FEC_5_6;
+	case 5:
+		return FEC_7_8;
+	default:
+		return FEC_AUTO;
 	}
-
-	
-	if (setting.boxIsCable())
-	{
-		front.iFrequency = frequ * 100;
-		front.FEC_inner = 0;
-	}
-	
-	front.SymbolRate = symbol * 1000;
-	
-	frontend = open("/dev/ost/qpskfe0", O_RDWR);
-	ioctl(frontend, QPSK_TUNE, &front);
-
-
-	int i, status;
-
-	for (i = 0; i < 200; i++)
-	{
-		
-		ioctl(frontend, FE_READ_STATUS, &status);
-		// normaly  FE_HAS_LOCK|FE_HAS_SIGNAL    (rasc)
-		if (status & (FE_HAS_SIGNAL))
-			break;
-		usleep(100);
-	}
-
-// $$$ rasc: Debug
-	printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
-	(long)frequ,(long)front.iFrequency,(int)polarization ,(int)fec,
-	(long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
-
-
-	printf ("... Tuner-Lock Status: %ld\n",status);
-	long state1,state2;
-	ioctl(frontend, FE_READ_SNR, &state1); 
-	ioctl(frontend, FE_READ_SIGNAL_STRENGTH, &state2);    
-	printf ("... S/N: %ld  SigStrength: %ld \n",state1,state2);
-// $$$
-
-	close(frontend);
-	return (status & (FE_HAS_SIGNAL));
 }
-
-
-#else
 
 // -- New Tuning API
 // -- 2001-12-16 rasc
 // polarization = 0 -> H, polarization = 1 -> V
-int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int dis = 0)
+int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = 0, int dis = 0)
 {
 	int device;
 	int frontend;
 	struct secCmdSequence seq;
 	struct secCommand cmd;
 	FrontendParameters frontp;
-
+	int i, status;
+	long state1,state2;
 
 	if (setting.boxIsSat())
 	{
@@ -223,43 +100,29 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 // die Werte hier sind Standard fuer das Ku-Band, allerdings waere es
 // interessant auch andere Werte zu haben (z.B. 10 GHz ZF, oder 4 GHz ZF)
 // Dies ist sinnvoll, wenn man die dbox fuer den Sat-DX Empfang, oder
-// aeltere LNBs (naja) nutzen moechte.  
+// aeltere LNBs (naja) nutzen moechte.
 
-		if (frequ > 11700) {
+		if (frequ > 11700)
+		{
 			frontp.Frequency = (frequ * 1000)-10600000;
 			seq.continuousTone = SEC_TONE_ON;
-		} else {
+		}
+		else
+		{
 			frontp.Frequency = (frequ * 1000)-9750000;
 			seq.continuousTone = SEC_TONE_OFF;
 		}
 
-		if (polarization == 0) {
+		if (polarization == 0)
+		{
 			seq.voltage=SEC_VOLTAGE_18;
-		} else {
+		}
+		else
+		{
 			seq.voltage=SEC_VOLTAGE_13;	
 		}
 
-		switch (fec)
-		{
-			case 1:
-				frontp.u.qpsk.FEC_inner = FEC_1_2;
-				break;
-			case 2:
-				frontp.u.qpsk.FEC_inner = FEC_2_3;
-				break;
-			case 3:
-				frontp.u.qpsk.FEC_inner = FEC_3_4;
-				break;
-			case 4:
-				frontp.u.qpsk.FEC_inner = FEC_5_6;
-				break;
-			case 5:
-				frontp.u.qpsk.FEC_inner = FEC_7_8;
-				break;
-			case -1:
-				frontp.u.qpsk.FEC_inner = FEC_AUTO;
-				break;
-		}
+		frontp.u.qpsk.FEC_inner = getFEC(fec);
 
 		// -- symbol rate (SAT)
 		frontp.u.qpsk.SymbolRate = symbol * 1000;
@@ -280,71 +143,71 @@ int tuner::tune(int frequ, int symbol, int polarization = -1, int fec = -1, int 
 		seq.numCommands=1;
 		seq.commands=&cmd;
 
-
-
 		if((device = open("/dev/ost/sec0", O_RDWR)) < 0)
 		{
+			perror("OPEN SEC DEVICE");
 			exit(1);
 		}
-		ioctl(device,SEC_SEND_SEQUENCE,&seq);
-	
-		close(device);
 
+		if (ioctl(device,SEC_SEND_SEQUENCE,&seq) < 0)
+		{
+			perror("SEC_SEND_SEQUENCE");
+		}
+
+		close(device);
 	}
 
-	
 	if (setting.boxIsCable())
 	{
-		// some help needed here!  (rasc, can test cable)
 		frontp.Frequency = frequ * 100;
 		frontp.u.qam.SymbolRate = symbol * 1000;
-		frontp.u.qam.FEC_inner = FEC_AUTO;
+		frontp.u.qam.FEC_inner = getFEC(fec);
 		// frontp.u.qam.FEC_outer = FEC_AUTO;
-		frontp.u.qam.QAM = QAM_64;		// ??? valid
+		frontp.u.qam.QAM = QAM_64;
 	}
-
-//	if (setting.boxIsDVBT () ) 
-//	{
-//		// to be done
-//	}
 
 	// -- Spektrum Inversion
 	// -- should be configurable, fixed for now (rasc)
 	frontp.Inversion = INVERSION_OFF;
 
-	
-	frontend = open("/dev/ost/frontend0", O_RDWR);
-	ioctl(frontend, FE_SET_FRONTEND, &frontp);
-
-
-	int i, status;
-
-	for (i = 0; i < 200; i++)
+	if ((frontend = open("/dev/ost/frontend0", O_RDWR)) < 0)
 	{
-		
-		ioctl(frontend, FE_READ_STATUS, &status);
-		// normaly  FE_HAS_LOCK|FE_HAS_SIGNAL    (rasc)
-		if (status & (FE_HAS_SIGNAL))
-			break;
-		usleep(100);
+		perror("OPEN FRONTEND DEVICE");
+		exit(1);
+	}
+	
+	if (ioctl(frontend, FE_SET_FRONTEND, &frontp) < 0)
+	{
+		perror("FE_SET_FRONTEND");
 	}
 
-// $$$ rasc: Debug
-	printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
-	(long)frequ,(long)frontp.Frequency,(int)polarization ,(int)fec,
-	(long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
+	if (ioctl(frontend, FE_READ_STATUS, &status) < 0)
+	{
+		perror("FE_READ_STATUS");
+	}
 
+#ifdef DEBUG
+	printf (" Frequ: %ld   ifreq: %ld  Pol: %d  FEC: %d  Sym: %ld  dis: %d  (param: 0x%02x)\n",
+		(long)frequ,(long)frontp.Frequency,(int)polarization ,(int)fec,
+		(long)symbol, (int)dis,(int)cmd.u.diseqc.params[0]);
 
 	printf ("... Tuner-Lock Status: %ld\n",status);
-	long state1,state2;
-	ioctl(frontend, FE_READ_SNR, &state1); 
-	ioctl(frontend, FE_READ_SIGNAL_STRENGTH, &state2);    
+
+	if (ioctl(frontend, FE_READ_SNR, &state1) < 0)
+	{
+		perror("FE_READ_SNR");
+	}
+
+	if (ioctl(frontend, FE_READ_SIGNAL_STRENGTH, &state2) < 0)
+	{
+		perror("FE_READ_SIGNAL_STRENGTH");
+	}
+
 	printf ("... S/N: %ld  SigStrength: %ld \n",state1,state2);
-// $$$
+#endif
 
 	close(frontend);
-	return (status & (FE_HAS_SIGNAL));
+
+	return (status & FE_HAS_SIGNAL);
 }
 
-
-#endif

@@ -15,6 +15,21 @@
  ***************************************************************************/
 /*
 $Log: rc.h,v $
+Revision 1.3  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.5  2001/12/17 16:54:47  tux
+Settings halb komplett
+
+Revision 1.4  2001/12/17 14:00:41  tux
+Another commit
+
+Revision 1.3  2001/12/17 03:52:42  tux
+Netzwerkfernbedienung fertig
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -22,8 +37,8 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #ifndef RC_H
 #define RC_H
 
-#include <queue>
 #include "hardware.h"
+#include "settings.h"
 
 #define	NUMBER_RCS	2
 
@@ -93,35 +108,41 @@ class rc
 	int fp;
 	unsigned short last_read;	
 	int rc_codes[NUMBER_RCS][25];
-	bool repeat;
-	bool support_old;
-	std::queue<unsigned short> taken_commands;
 
 	pthread_t rcThread;
+	pthread_t keyboardThread;
 	pthread_mutex_t mutex;
-	
+		
     static void* start_rcqueue( void * );
+	static void* start_keyboardqueue( void * );
+	settings *setting;
+	
 public:
+	bool rcstop;
+	pthread_mutex_t blockingmutex;
+	int key;
 	hardware *hardware_obj;
 
-	rc(hardware *h);
+	rc(hardware *h, settings *s);
 	~rc();
 	
-	int start_thread();
+	void stoprc();
+	void startrc();
+
+	int start_thread(bool withoutkeyboard = false);
 	int getHandle() { return fp; }
 	void restart();
+
+	void cheat_command(unsigned short cmd);
 	// Waits for the RC to receive a command and returns it
 	unsigned short read_from_rc();
+	unsigned short read_from_rc2();
 	unsigned short read_from_rc_raw();
 	unsigned short get_last();
 	unsigned short convert_code(unsigned short rc);
 	int command_available();
-	void setRepeat(bool input);
-	bool getRepeat() { return repeat; }
-	void setSupportOld(bool support) { support_old = support; }
-	bool getSupportOld() { return support_old; }
+
 	int old_to_new(int read_code);
-	int get_command_without_removing();
 
 	// Returns -1 if the latest command isn't a number, returns number else
 	int get_number();

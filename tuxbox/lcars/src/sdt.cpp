@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: sdt.cpp,v $
+Revision 1.3  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 
@@ -70,7 +76,7 @@ int sdt::getChannels(channels *channels)
 		int length = ((buffer[start + 3] & 0xf) << 8) | buffer[start + 4], counter = 0;;	
 		while (length > counter)
 		{
-			if (buffer[start + 5 + counter] == 0x48) // Service Descriptor
+			if (buffer[start + 5 + counter] == 0x48) // Service Descripto
 			{
 				type = buffer[start + 5 + counter + 2];
 				

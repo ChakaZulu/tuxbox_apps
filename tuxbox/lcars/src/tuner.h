@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: tuner.h,v $
+Revision 1.4  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
 Revision 1.3  2001/12/07 14:10:33  rasc
 Fixes for SAT tuning and Diseqc. Diseqc doesn't work properly for me (diseqc 2.0 switch).
 Someone should check this please..
@@ -26,6 +29,23 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #ifndef TUNER_H
 #define TUNER_H
 
+#include <iostream.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
+#include <memory.h>
+#include <ost/dmx.h>
+#include <ost/video.h>
+#include <ost/frontend.h>
+#include <ost/audio.h>
+#include <ost/sec.h>
+#include <ost/sec.h>
+#include <ost/ca.h>
+#include <dbox/avs_core.h>
+
 #include "settings.h"
 
 class tuner
@@ -33,7 +53,8 @@ class tuner
 	settings setting;
 public:
 	tuner(settings &s);
-	int tune(int frequ, int symbol, int polarization = -1, int fec = -1, int diseqc = 0);
+	CodeRate getFEC(int fec);
+	int tune(int frequ, int symbol, int polarization = -1, int fec = 0, int diseqc = 0);
 };
 
 #endif

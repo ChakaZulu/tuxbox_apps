@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: pmt.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -88,11 +94,11 @@ pmt_data pmt::readPMT(int pmt_pid)
 		int descriptors_length = ((buffer[count + 3] & 0xf) << 8 | buffer[count + 4]);
 		while (start < count + 5 + descriptors_length)
 		{
-			if (buffer[start] == 0x52) // stream_identifier_descriptor
+			if (buffer[start] == 0x52) // stream_identifier_descripto
 			{
 				tmp_pmt.component[tmp_pmt.pid_counter] = buffer[start + 2];
 			}
-			else if (buffer[start] == 0x56) // teletext_descriptor
+			else if (buffer[start] == 0x56) // teletext_descripto
 			{
 				printf("---> teletext_descriptor: <---\n");
 				for (int i = start + 3; i < start + 3 + buffer[start + 1]; i += 5)

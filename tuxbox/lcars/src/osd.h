@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: osd.h,v $
+Revision 1.4  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -258,6 +264,7 @@ public:
 
 	void createIP();
 	void setIP(unsigned char number);
+	void setIPn(unsigned char position, unsigned char number);
 	void drawIPPosition(int position, int color);
 	void setIPDescription(std::string descr);
 	void setIPPosition(unsigned char position);

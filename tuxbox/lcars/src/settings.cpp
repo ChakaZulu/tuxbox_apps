@@ -15,9 +15,20 @@
  ***************************************************************************/
 /*
 $Log: settings.cpp,v $
-Revision 1.4  2001/12/16 18:45:35  waldi
-- move all configfiles to CONFIGDIR
-- make CONFIGDIR in install-data-local
+Revision 1.5  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.6  2001/12/18 02:03:29  tux
+VCR-Switch-Eventkram implementiert
+
+Revision 1.5  2001/12/17 18:37:05  tux
+Finales Settingsgedoens
+
+Revision 1.4  2001/12/17 16:54:47  tux
+Settings halb komplett
+
+Revision 1.3  2001/12/17 01:00:41  tux
+scan.cpp fix
 
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
@@ -28,7 +39,6 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 */
 #include <stdio.h>
 #include <dbox/info.h>
-#include <ost/ca.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
@@ -40,15 +50,22 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <ost/sec.h>
 #include <ost/ca.h>
 #include <memory.h>
+#include <sstream>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <net/if.h> 
+#include <arpa/inet.h>
 
-#include <config.h>
 
 #include "settings.h"
 #include "help.h"
 #include "cam.h"
 
-settings::settings(cam &c): ca(c)
+settings::settings(cam *c)
 {
+	cam_obj = c;
 	FILE *fp;
 	char buffer[100];
 	int type = -1;
@@ -92,13 +109,30 @@ settings::settings(cam &c): ca(c)
 	
 	isCable = (type == DBOX_FE_CABLE);
 
-	CAID = ca.getCAID();
+	CAID = cam_obj->getCAID();
 	printf("Set-CAID: %x\n", CAID);
 	
 	oldTS = -1;
 	usediseqc = true;
 	setting.timeoffset = 60;
-	
+	setting.ip = 0;
+	setting.gwip = 0;
+	setting.serverip = 0;
+	setting.dnsip = 0;
+	if (box == NOKIA)
+	{
+		setting.rcRepeat = true;
+		setting.supportOldRc = true;
+	}
+	else if (box == SAGEM || box == PHILIPS)
+	{
+		setting.rcRepeat = false;
+		setting.supportOldRc = false;
+	}
+	setting.output_format = 1;
+	setting.video_format = 0;
+	setting.switch_vcr = true;
+	loadSettings();
 }
 
 int settings::getEMMpid(int TS = -1)
@@ -187,27 +221,250 @@ int settings::getTransparentColor()
 
 void settings::setIP(char n1, char n2, char n3, char n4)
 {
+	ostrstream ostr;
+	ostr << "ifconfig eth0 " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << " &" << ends; 
+	std::string command = ostr.str();
+	cout << command << endl;
+	
 	setting.ip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
+
+	system(command.c_str());
+	/*struct sockaddr_in sin;
+	int sk;
+	unsigned char *ptr;
+	struct ifreq ifr;
+
+	memset(&ifr, 0x00, sizeof ifr);
+	memset(&sin, 0x00, sizeof sin);
+
+	sin.sin_family = AF_INET;
+	//sin.sin_len    = sizeof sin;
+	char test[] = "192.168.40.4";
+	if (inet_aton(test, &sin.sin_addr)==0) { // 0 if error occurs
+		printf("failed conversion\n");
+	}
+
+	strcpy(ifr.ifr_name, "eth0");
+	memcpy(&ifr.ifr_addr, &sin, sizeof(ifr.ifr_addr));
+	printf("IP: %x\n", ifr.ifr_addr);
+	if ((sk = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+		printf("no socket\n");
+	}
+
+	if (ioctl(sk, SIOCSIFADDR, &ifr)==-1) {
+		printf("didn't set IP: %s\n", strerror(errno));
+	}
+
+	memcpy(&sin, &ifr.ifr_addr, sizeof(sin));
+	//ptr = inet_ntoa((unsigned char*) sin.sin_addr);
+	//printf("IP Address is :%s\n",ptr);
+	close (sk);*/
+
 }
 
 char settings::getIP(char number)
 {
-	return (setting.ip >> (3 - number)) & 0xff;
+	return (setting.ip >> ((3 - number) * 8)) & 0xff;
+}
+
+void settings::setgwIP(char n1, char n2, char n3, char n4)
+{
+	ostrstream ostr;
+	ostr << "route add default gw " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << ends; 
+	std::string command = ostr.str();
+	cout << command << endl;
+	system(command.c_str());
+
+	setting.gwip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
+}
+
+char settings::getgwIP(char number)
+{
+	return (setting.gwip >> ((3 - number) * 8)) & 0xff;
+}
+
+void settings::setdnsIP(char n1, char n2, char n3, char n4)
+{
+	ostrstream ostr;
+	ostr << "echo \"nameserver " << (int)n1 << "." << (int)n2 << "." << (int)n3 << "." << (int)n4 << "\" > /etc/resolv.conf" << ends; 
+	std::string command = ostr.str();
+	cout << command << endl;
+	system(command.c_str());
+
+	setting.dnsip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
+}
+
+char settings::getdnsIP(char number)
+{
+	return (setting.dnsip >> ((3 - number) * 8)) & 0xff;
+}
+
+void settings::setserverIP(char n1, char n2, char n3, char n4)
+{
+	setting.serverip = (n1 << 24) | (n2 << 16) | (n3 << 8) | n4;
+}
+
+char settings::getserverIP(char number)
+{
+	return (setting.serverip >> ((3 - number) * 8)) & 0xff;
 }
 
 void settings::saveSettings()
 {
+	ostrstream ostr;
+	ostr << "TimeOffset=" << setting.timeoffset << endl;
+	ostr << "BoxIP=" << (int)getIP(0) << "." << (int)getIP(1) << "." << (int)getIP(2) << "." << (int)getIP(3) << endl;
+	ostr << "GatewayIP=" << (int)getgwIP(0) << "." << (int)getgwIP(1) << "." << (int)getgwIP(2) << "." << (int)getgwIP(3) << endl;
+	ostr << "DNSIP=" << (int)getdnsIP(0) << "." << (int)getdnsIP(1) << "." << (int)getdnsIP(2) << "." << (int)getdnsIP(3) << endl;
+	if (setting.serverip != 0)
+		ostr << "ServerIP=" << (int)getserverIP(0) << "." << (int)getserverIP(1) << "." << (int)getserverIP(2) << "." << (int)getserverIP(3) << endl;
+
+	ostr << "SupportOldRC=";
+	if (setting.supportOldRc)
+		ostr << "true" << endl;
+	else
+		ostr << "false" << endl;
+
+	ostr << "RCRepeat=";
+	if (setting.rcRepeat)
+		ostr << "true" << endl;
+	else
+		ostr << "false" << endl;
+
+	ostr << "SwitchVCR=";
+	if (setting.switch_vcr)
+		ostr << "true" << endl;
+	else
+		ostr << "false" << endl;
+
+	ostr << "ProxyServer=" << setting.proxy_server << endl;
+	ostr << "ProxyPort=" << setting.proxy_port << endl;
+
+	ostr << "OutputFormat=" << setting.output_format << endl;
+	ostr << "VideoFormat=" << setting.video_format << endl;
+
+	ostr << ends;
+	std::string configfile = ostr.str();
 	int fd = open(CONFIGDIR "/lcars/lcars.conf", O_WRONLY|O_TRUNC|O_CREAT, 0666);
-	if (fd < 0)
-	{
-		perror("lcars.conf");
-		return;
-	}
-	write(fd, &setting, sizeof(setting_s));
+	write(fd, configfile.c_str(), configfile.length());
 	close (fd);
 }
 
 void settings::loadSettings()
 {
+	std::ifstream inFile;
+	std::string line[20];
+	int linecount = 0;
+
+	inFile.open(CONFIGDIR "/lcars/lcars.conf");
+	
+	while(linecount < 20 && getline(inFile, line[linecount++]));
+	
+	for (int i = 0; i < linecount; i++)
+	{
+		std::istringstream iss(line[i]);
+		std::string cmd;
+		std::string parm;
+
+		getline(iss, cmd, '=');
+		getline(iss, parm, '=');
+
+		if (cmd == "TimeOffset")
+		{
+			setting.timeoffset = atoi(parm.c_str());
+		}
+		else if (cmd == "BoxIP" || cmd == "GatewayIP" || cmd == "DNSIP" || cmd == "ServerIP")
+		{
+			unsigned char ip[4];
+			int ipcount = 0;
+			std::istringstream iss2(parm);
+			std::string ippart;
+			while(getline(iss2, ippart, '.'))
+			{
+				ip[ipcount++] = atoi(ippart.c_str());
+			}
+			if (ipcount != 4)
+			{
+				cout << "Error in Config-File on " << cmd << endl;
+				continue;
+			}
+			else
+			{
+				bool isvalid = false;
+				for (int j = 0; j < 4; j++)
+				{
+					if (ip[j] != 0)
+						isvalid = true;
+				}
+				if (!isvalid)
+					continue;
+				if (cmd == "BoxIP")
+				{
+					setIP(ip[0], ip[1], ip[2], ip[3]);
+				}
+				else if (cmd == "GatewayIP")
+				{
+					setgwIP(ip[0], ip[1], ip[2], ip[3]);
+				}
+				else if (cmd == "ServerIP")
+				{
+					setserverIP(ip[0], ip[1], ip[2], ip[3]);
+				}
+				else if (cmd == "DNSIP")
+				{
+					setdnsIP(ip[0], ip[1], ip[2], ip[3]);
+				}
+			}
+		}
+		else if (cmd == "SupportOldRC")
+		{
+			if (parm == "true")
+				setting.supportOldRc = true;
+			else if (parm == "false")
+				setting.supportOldRc = false;
+			else
+				cout << "Error in Config-File on " << cmd << endl;
+		}
+		else if (cmd == "RCRepeat")
+		{
+			if (parm == "true")
+				setting.rcRepeat = true;
+			else if (parm == "false")
+				setting.rcRepeat = false;
+			else
+				cout << "Error in Config-File on " << cmd << endl;
+		}
+		else if (cmd == "SwitchVCR")
+		{
+			if (parm == "true")
+				setting.switch_vcr = true;
+			else if (parm == "false")
+				setting.switch_vcr = false;
+			else
+				cout << "Error in Config-File on " << cmd << endl;
+		}
+		else if (cmd == "ProxyServer")
+		{
+			setProxyServer(parm);
+		}
+		else if (cmd == "ProxyPort")
+		{
+			setProxyPort(atoi(parm.c_str()));
+		}
+		else if (cmd == "OutputFormat")
+		{
+			setting.output_format = atoi(parm.c_str());
+		}
+		else if (cmd == "VideoFormat")
+		{
+			setting.video_format = atoi(parm.c_str());
+		}
+		else
+		{
+			cout << "Error in Config-File on " << cmd << endl;
+		}
+	}
+
+	inFile.close();
 }
 

@@ -15,6 +15,15 @@
  ***************************************************************************/
 /*
 $Log: xmlrpc.cpp,v $
+Revision 1.2  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/20 00:31:38  tux
+Plugins korrigiert
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.1  2001/12/11 13:34:59  TheDOC
 initial release
 
@@ -67,24 +76,33 @@ void xmlrpc_value::setValue(int t, void* value)
 // Einfache In-Order Traversierung (jedenfalls ne Abwandlung davon ;)
 void xmlrpc_value::getXML(ostrstream *ostr)
 {
+	cout << "Value getXML: " << type << endl;
+
 	*ostr << "<value>" << endl;
+	cout << "MARKME" << endl;
 	switch(type)
 	{
 	case INT:
+		cout << "Int" << endl;
 		*ostr << "<i4>" << int_value << "</i4>" << endl;
 		break;
 	case BOOLEAN:
+		cout << "Boolean" << endl;
 		*ostr << "<boolean>" << (boolean_value?1:0) << "</boolean>" << endl;
 		break;
 	case DOUBLE:
+		cout << "Double" << endl;
 		*ostr << "<double>" << double_value << "</double>" << endl;
 		break;
 	case STRING:
+		cout << "String" << endl;
 		*ostr << "<string>" << string_value << "</string>" << endl;
 		break;
 	case DATETIME:
+		cout << "Datetime" << endl;
 		*ostr << "<dateTime.iso8601>" << date_to_ISO8601(datetime_value) << "</dateTime.iso8601>" << endl;
 	case ARRAY:
+		cout << "Array" << endl;
 		*ostr << "<array><data>" << endl;
 		for (int i = 0; i < array_value.size(); i++)
 		{
@@ -93,6 +111,8 @@ void xmlrpc_value::getXML(ostrstream *ostr)
 		*ostr << "</data></array>" << endl;
 		break;
 	case STRUCT:
+		cout << "Struct" << endl;
+		sleep(3);
 		*ostr << "<struct>" << endl;
 		for (xmlrpc_struct::iterator it = struct_value.begin(); it != struct_value.end(); ++it)
 		{
@@ -725,7 +745,7 @@ void xmlrpc::parse()
 			{
 					container_obj->channels_obj->setCurrentChannel(h.getChannelNumber());
 
-					container_obj->channels_obj->zapCurrentChannel(container_obj->zap_obj, container_obj->tuner_obj);
+					container_obj->channels_obj->zapCurrentChannel();
 					container_obj->channels_obj->setCurrentOSDProgramInfo(container_obj->osd_obj);
 					
 					container_obj->channels_obj->receiveCurrentEIT();
@@ -749,18 +769,19 @@ void xmlrpc::parse()
 		}
 		else if (methodName == "getInfo")
 		{
+			cout << "getInfo" << endl;
 			tmp_handle = request->getParams()->getParam(0)->getStringValue();
-
+			cout << "Mark1" << endl;
 			xmlrpc_value::xmlrpc_struct tmp_struct;
-
+			cout << "Mark2" << endl;
 			if (tmp_handle == "")
 			{
 				xmlrpc_value *value = new xmlrpc_value(STRING, (void*) h.makeHandle(SERVICE, 1, container_obj->channels_obj->getCurrentChannelNumber()).c_str());
 				tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("handle", value));
 			}
-			
+			cout << "Mark3" << endl;
 			h.parseHandle(tmp_handle);
-		
+			cout << "Mark4" << endl;
 			if (h.handleIsValid() || tmp_handle == "")
 			{
 				std::string tmp_string;
@@ -769,45 +790,55 @@ void xmlrpc::parse()
 
 				if (h.getType() == SERVICE)
 				{
+					cout << "Mark5" << endl;
 					int channelnumber = h.getChannelNumber();
+					cout << "Channelnumber: " << channelnumber << endl;
 					
 					if (channelnumber != container_obj->channels_obj->getCurrentChannelNumber())
 					{
 						container_obj->channels_obj->setCurrentChannel(h.getChannelNumber());
 
-						container_obj->channels_obj->zapCurrentChannel(container_obj->zap_obj, container_obj->tuner_obj);
-						container_obj->channels_obj->setCurrentOSDProgramInfo(container_obj->osd_obj);
+						container_obj->channels_obj->zapCurrentChannel();
+						/*container_obj->channels_obj->setCurrentOSDProgramInfo(container_obj->osd_obj);
 					
 						container_obj->channels_obj->receiveCurrentEIT();
 						container_obj->channels_obj->setCurrentOSDProgramEIT(container_obj->osd_obj);
-						container_obj->channels_obj->updateCurrentOSDProgramAPIDDescr(container_obj->osd_obj);
+						container_obj->channels_obj->updateCurrentOSDProgramAPIDDescr(container_obj->osd_obj);*/
+						cout << "Zapping complete" << endl;
 					}
 					
 					{
 						tmp_string = "";
 						xmlrpc_value *value = new xmlrpc_value(STRING, (void*) tmp_string.c_str());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("parentHandle", value));
+						cout << "ParentHandle" << endl;
 					}
 
 					{
 						xmlrpc_value *value = new xmlrpc_value(STRING, (void*) container_obj->channels_obj->getCurrentServiceName().c_str());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("caption", value));
+						cout << container_obj->channels_obj->getCurrentServiceName().c_str() << endl;
 					}
 
 					{
 						tmp_string = "Service";
 						xmlrpc_value *value = new xmlrpc_value(STRING, (void*) tmp_string.c_str());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("type", value));
+						cout << tmp_string.c_str() << endl;
+						
 					}
 
 					if (container_obj->channels_obj->getCurrentType() == 0x1)
 					{
 						xmlrpc_value *value = new xmlrpc_value(INT, (void*) container_obj->channels_obj->getCurrentVPID());
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("videoPid", value));
+						cout << "VPID: " << container_obj->channels_obj->getCurrentVPID() << endl;
 					}
-
+					if(false)
 					{
 						xmlrpc_value::xmlrpc_array apid_array;
+
+						cout << "APIDCount: " << container_obj->channels_obj->getCurrentAPIDcount() << endl;
 						
 						for (int i = 0; i < container_obj->channels_obj->getCurrentAPIDcount(); i++)
 						{
@@ -815,25 +846,41 @@ void xmlrpc::parse()
 							{
 								xmlrpc_value *value = new xmlrpc_value(INT, (void*) container_obj->channels_obj->getCurrentAPID(i));
 								apid_struct.insert(xmlrpc_value::xmlrpc_struct_pair("audioPid", value));
+								cout << "APID: " << container_obj->channels_obj->getCurrentAPID(i) << endl;
 							}
 							{
 								tmp_string = (container_obj->channels_obj->getCurrentDD(i)?"ac3":"mpeg");
 								xmlrpc_value *value = new xmlrpc_value(INT, (void*) tmp_string.c_str());
 								apid_struct.insert(xmlrpc_value::xmlrpc_struct_pair("type", value));
+								cout << tmp_string.c_str() << endl;
 							}
 
 							xmlrpc_value *value = new xmlrpc_value(STRUCT, &apid_struct);
 							apid_array.push_back(value);
 						}
-
+						cout << "Adding APID to array" << endl;
 						xmlrpc_value *value = new xmlrpc_value(ARRAY, &apid_array);
 						tmp_struct.insert(xmlrpc_value::xmlrpc_struct_pair("audioPids", value));
+						
+						/*ostrstream *ostr;
+						value->getXML(ostr);
+						(*ostr) << endl << ends;
+						cout << ostr->str() << endl;*/
+						
+						cout << "Added" << endl;
 					}
 
 
 				}
+				cout << "Adding Struct" << endl;
 				xmlrpc_params params;
 				xmlrpc_value *struct_value = new xmlrpc_value(STRUCT, &tmp_struct);
+				cout << "Struct added" << endl;
+				
+				/*ostrstream *ostr;
+				struct_value->getXML(ostr);
+				(*ostr) << endl << ends;
+				cout << ostr->str() << endl;*/
 				params.addParam(struct_value);
 				response.setParams(&params);
 			}
@@ -846,9 +893,11 @@ void xmlrpc::parse()
 				response.setType(FAULT);
 				response.setFault(&fault);
 			}
-			
+			cout << "Mark6" << endl;			
 			
 			xmlout = response.getXML();
+			cout << xmlout << endl;
+			cout << "Mark7" << endl;
 		}
 		else if (methodName == "beginRecordMode")
 		{
@@ -863,7 +912,7 @@ void xmlrpc::parse()
 					{
 						container_obj->channels_obj->setCurrentChannel(h.getChannelNumber());
 
-						container_obj->channels_obj->zapCurrentChannel(container_obj->zap_obj, container_obj->tuner_obj);
+						container_obj->channels_obj->zapCurrentChannel();
 						container_obj->channels_obj->setCurrentOSDProgramInfo(container_obj->osd_obj);
 					
 						container_obj->channels_obj->receiveCurrentEIT();

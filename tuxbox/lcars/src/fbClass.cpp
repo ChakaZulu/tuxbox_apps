@@ -8,6 +8,7 @@ fbClass::fbClass(int x = 720, int y = 576, int bpp = 8)
 	if ((fd = open("/dev/console", O_RDWR)) < 0)
 		perror ("/dev/console");
 	else if (ioctl(fd, KDSETMODE, KD_GRAPHICS) < 0)
+	//else if (ioctl(fd, KDSETMODE, KD_TEXT) < 0)
 		perror("KDSETMODE");
 	close (fd);
 
@@ -415,7 +416,7 @@ void fbClass::draw_bitmap(font_cache font, int x, int y, int color)
 
 void fbClass::putText(int xpos, int ypos, int color, std::string text, int max_size = -1, int alignment = 0)
 {
-	char c_text[100];
+	char c_text[500];
 	strcpy(c_text, text.c_str());
 	putText(xpos, ypos, color, c_text, max_size, alignment);
 	
@@ -423,7 +424,7 @@ void fbClass::putText(int xpos, int ypos, int color, std::string text, int max_s
 
 void fbClass::putText(int xpos, int ypos, int color, int i, int max_size = -1, int alignment = 0)
 {
-	char c_text[100];
+	char c_text[500];
 	sprintf(c_text, "%d", i);
 	putText(xpos, ypos, color, c_text, max_size,alignment);
 	
@@ -431,7 +432,7 @@ void fbClass::putText(int xpos, int ypos, int color, int i, int max_size = -1, i
 
 
 // alignment: 0: left, 1: right
-void fbClass::putText(int xpos, int ypos, int color, char text[150], int max_size = -1, int alignment = 0)
+void fbClass::putText(int xpos, int ypos, int color, char text[500], int max_size = -1, int alignment = 0)
 {
 	int error;
 

@@ -15,6 +15,21 @@
  ***************************************************************************/
 /*
 $Log: settings.h,v $
+Revision 1.4  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.5  2001/12/18 02:03:29  tux
+VCR-Switch-Eventkram implementiert
+
+Revision 1.4  2001/12/17 18:37:05  tux
+Finales Settingsgedoens
+
+Revision 1.3  2001/12/17 16:54:47  tux
+Settings halb komplett
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -26,6 +41,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #define SETTINGS_H
 
 #include <string>
+#include <strstream.h>
+#include <iostream.h>
+#include <fstream>
+
+#include <config.h>
 
 #include "cam.h"
 
@@ -37,7 +57,17 @@ struct setting_s
 {
 	int timeoffset;
 	unsigned int ip;
+	unsigned int gwip;
+	unsigned int dnsip;
+	unsigned int serverip;
 	bool txtreinsertion;
+	bool rcRepeat;
+	bool supportOldRc;
+	int video_format;
+	int output_format;
+	bool switch_vcr;
+	std::string proxy_server;
+	int proxy_port;
 };
 
 class settings
@@ -50,19 +80,51 @@ class settings
 	int box; // 1= nokia 2=sagem
 	int oldTS;
 	bool usediseqc;
-	cam ca;
+	cam *cam_obj;
 	std::string version;
 	setting_s setting;
 public:	
-	settings(cam &c);
+	settings(cam *c);
 	void initme();
 	bool boxIsCable();
 	bool boxIsSat();
 	int getCAID();
 	int getTransparentColor();
 	int getEMMpid(int TS = -1);
+	
 	void setIP(char n1, char n2, char n3, char n4);
 	char getIP(char number);
+
+	void setgwIP(char n1, char n2, char n3, char n4);
+	char getgwIP(char number);
+
+	void setdnsIP(char n1, char n2, char n3, char n4);
+	char getdnsIP(char number);
+
+	void setserverIP(char n1, char n2, char n3, char n4);
+	char getserverIP(char number);
+
+	void setRcRepeat(bool repeat) { setting.rcRepeat = repeat; }
+	bool getRCRepeat() { return setting.rcRepeat; }
+
+	void setSupportOldRc(bool old) { setting.supportOldRc = old; }
+	bool getSupportOldRc() { return setting.supportOldRc; }
+
+	void setVideoFormat(int format) { setting.video_format = format; }
+	int getVideoFormat() { return setting.video_format; }
+
+	void setOutputFormat(int format) { setting.output_format = format; }
+	int getOutputFormat() { return setting.output_format; }
+
+	void setSwitchVCR(bool swit) { setting.switch_vcr = swit; }
+	bool getSwitchVCR() { return setting.switch_vcr; }
+
+	void setProxyServer(std::string proxy) { setting.proxy_server = proxy; }
+	std::string getProxyServer() { return setting.proxy_server; }
+
+	void setProxyPort(int port) { setting.proxy_port = port; }
+	int getProxyPort() { return setting.proxy_port; }
+		
 	int getBox() { return box; }
 	bool boxIsGTX() { return isGTX; }
 	void setDiseqc(bool use) { usediseqc = use; }
@@ -72,7 +134,8 @@ public:
 	bool getTXTReinsertion() { return setting.txtreinsertion; }
 
 	void setVersion(std::string ver) { version = ver; }
-	std::string getVersion() { return version; }
+	std::string getVersion() { return "LCARS V" + version; }
+	std::string getSmallVersion() { return version; }
 	void setTimeOffset(int offset) { setting.timeoffset = offset; }
 	int getTimeOffset() { return setting.timeoffset; }
 	void saveSettings();

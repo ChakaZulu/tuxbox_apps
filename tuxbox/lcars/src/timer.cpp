@@ -15,9 +15,14 @@
  ***************************************************************************/
 /*
 $Log: timer.cpp,v $
-Revision 1.4  2001/12/16 18:45:35  waldi
-- move all configfiles to CONFIGDIR
-- make CONFIGDIR in install-data-local
+Revision 1.5  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/17 01:00:41  tux
+scan.cpp fix
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
 
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
@@ -129,7 +134,7 @@ void timer::runTimer()
 	{
 		int last_channel = (*channels_obj).getCurrentChannelNumber();
 		(*channels_obj).setCurrentChannel(act_timer.channel);
-		(*channels_obj).zapCurrentChannel(zap_obj, tuner_obj);
+		(*channels_obj).zapCurrentChannel();
 		if (act_timer.duration != 0)
 			addTimer(time(0) + act_timer.duration, 2, 0, last_channel);
 		(*channels_obj).setCurrentOSDProgramInfo(osd_obj);

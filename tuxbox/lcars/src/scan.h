@@ -15,6 +15,15 @@
  ***************************************************************************/
 /*
 $Log: scan.h,v $
+Revision 1.4  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/17 01:00:34  tux
+scan.cpp fix
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -38,17 +47,19 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 class scan
 {
-	settings setting;
-	pat pat_obj;
-	pmt pmt_obj;
-	nit nit_obj;
-	sdt sdt_obj;
+	settings *setting;
+	pat *pat_obj;
+	pmt *pmt_obj;
+	nit *nit_obj;
+	sdt *sdt_obj;
 	osd *osd_obj;
-	tuner tuner_obj;
+	tuner *tuner_obj;
+	channels *channels_obj;
 public:
-	scan(settings &s, pat &p1, pmt &p2, nit &n, sdt &s1, osd *o, tuner &t);	
+	scan::scan(settings *s, pat *p1, pmt *p2, nit *n, sdt *s1, osd *o, tuner *t, channels *c);
 	channels scanChannels(bool full = false, int start_frequency = -1, int start_symbol = -1, int start_polarization = -1, int start_fec = -1);
 	void updateChannels(channels *chan);
+	void readUpdates();
 };
 
 #endif

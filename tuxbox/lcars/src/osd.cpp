@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: osd.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -1232,10 +1238,10 @@ void osd::showPerspective()
 	fb->fillBox(170, 500, 550, 520, 0);
 	fb->fillBox(550, 500, 560, 520, 1);
 
-	char pname[100];
-	strcpy(pname, perspective_name.c_str());
+	//char pname[400];
+	//strcpy(pname, perspective_name.c_str());
 	fb->setTextSize(0.4);
-	fb->putText(175, 504, 0, pname, 370);
+	fb->putText(175, 504, 0, perspective_name.c_str(), 370);
 }
 
 void osd::hidePerspective()
@@ -1481,6 +1487,11 @@ void osd::createMenu()
 	selected_entry = -1;
 	number_menu_entries = 0;
 	addCommand("COMMAND menu set_size 0");
+	for (int i = 0; i < 20; i++)
+	{
+		menu[i].switches.clear();
+		menu[i].selected = 0;
+	}
 }
 
 /*
@@ -1517,10 +1528,19 @@ void osd::selectEntry(int number)
 {
 	if (number_menu_entries == 0)
 		return;
+	if (number == 0)
+		return;
 	if (selected_entry != -1)
 		drawMenuEntry(selected_entry);
-	selected_entry = number;
-	drawMenuEntry(number, true);
+	for (int i = 0; i < number_menu_entries; i++)
+		if (menu[i].index == number)
+		{
+			selected_entry = i;
+			drawMenuEntry(i, true);
+			return;
+		}
+	drawMenuEntry(selected_entry, true);
+
 }
 
 void osd::selectNextEntry()
@@ -1919,6 +1939,13 @@ void osd::setIP(unsigned char number)
 {
 	ip[ip_position] = number;
 	drawIPPosition(ip_position, 0);
+}
+
+void osd::setIPn(unsigned char position, unsigned char number)
+{
+	ip[position * 3 + 2] = number % 10;
+	ip[position * 3 + 1] = (unsigned char)(number % 100 / 10);
+	ip[position * 3] = (unsigned char) (number % 1000 / 100);
 }
 
 void osd::drawIPPosition(int position, int color)

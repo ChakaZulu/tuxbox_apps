@@ -15,6 +15,15 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.5  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/17 01:00:33  tux
+scan.cpp fix
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.4  2001/12/12 15:23:55  TheDOC
 Segfault after Scan-Bug fixed
 
@@ -42,6 +51,11 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "cam.h"
 #include "hardware.h"
 
+enum
+{
+	CHANNEL, LINKAGE, NVOD
+};
+
 struct channel
 {
 	int channelnumber; // equals the vector-number... don't know, if i need that, yet ;)
@@ -63,6 +77,8 @@ struct channel
 	int NVOD_SID[10]; // Nur bei type = 4 - SID des NVOD-services
 	char serviceName[100];
 	char providerName[100];
+	int number_perspectives;
+	linkage perspective[20];
 };
 
 struct dvbchannel
@@ -113,29 +129,44 @@ class channels
 	std::multimap<int, int> services_list; // services multimap pointing to basic_channellist-entries
 	int cur_pos; // position for getChannel/setChannel
 	std::multimap<int, struct transportstream>::iterator cur_pos_TS;
-	settings setting;
-	pat pat_obj;
-	pmt pmt_obj;
+	settings *setting;
+	pat *pat_obj;
+	pmt *pmt_obj;
 	eit *eit_obj;
 	cam *cam_obj;
+	osd *osd_obj;
+	zap *zap_obj;
+	tuner *tuner_obj;
 	hardware *hardware_obj;
 	event now, next;
 	char audio_description[20];
 	int ECM, apid;
 	int video_component, component[10], number_components;
+	int curr_perspective;
+	int current_mode;
+	int old_TS;
 public:	
-	channels(settings &setting, pat &p1, pmt &p2, eit *e, cam *c, hardware *h);
-	channels(settings &setting, pat &p1, pmt &p2);
+	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t);
+	channels(settings *setting, pat *p1, pmt *p2);
 
-	void setStuff(eit *e, cam *c, hardware *h);
+	void setStuff(eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t);
 
-	void zapCurrentChannel(zap *zap_obj, tuner *tuner_obj);
+	// multiperspective-stuff
+
+	bool currentIsMultiPerspective();
+	int currentNumberPerspectives();
+	void parsePerspectives();
+	void setPerspective(int number);
+
+	// end multiperspective-stuff
+	
+	void zapCurrentChannel();
 	void setCurrentOSDProgramInfo(osd *osd_obj);
 	void receiveCurrentEIT();
 	void setCurrentOSDProgramEIT(osd *osd_obj);
 	void setCurrentOSDEvent(osd *osd_obj);
 	void updateCurrentOSDProgramEIT(osd *osd_obj);
-	void zapCurrentAudio(int apid, zap *zap_obj);
+	void zapCurrentAudio(int apid);
 	void updateCurrentOSDProgramAPIDDescr(osd *osd_obj);
 
 	event getCurrentNow() { return now; }
@@ -173,8 +204,8 @@ public:
 	int getCurrentChannelNumber() { return cur_pos; } // returns the currently set channelnumber / -1 if not set
 
 	int getChannelNumber(int TS, int ONID, int SID);
-
 	channel getChannelByNumber(int number);
+	void updateChannel(int number, channel channel_data);
 
 	dvbchannel getDVBChannel(int number);
 
@@ -235,8 +266,6 @@ public:
 	void dumpTS();
 	void dumpChannels();
 
-	void saveChannels();
-	void loadChannels();
 	void saveDVBChannels();
 	void loadDVBChannels();
 };

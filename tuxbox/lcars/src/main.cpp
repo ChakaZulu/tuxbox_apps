@@ -15,9 +15,29 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
-Revision 1.11  2001/12/16 18:45:35  waldi
-- move all configfiles to CONFIGDIR
-- make CONFIGDIR in install-data-local
+Revision 1.12  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.10  2001/12/19 04:48:37  tux
+Neue Plugin-Schnittstelle
+
+Revision 1.9  2001/12/19 03:23:01  tux
+event mit 16:9-Umschaltung
+
+Revision 1.7  2001/12/17 18:37:05  tux
+Finales Settingsgedoens
+
+Revision 1.6  2001/12/17 16:54:47  tux
+Settings halb komplett
+
+Revision 1.4  2001/12/17 03:52:41  tux
+Netzwerkfernbedienung fertig
+
+Revision 1.3  2001/12/17 01:00:41  tux
+scan.cpp fix
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
 
 Revision 1.10  2001/12/12 15:48:35  TheDOC
 Segfault with too big numbers fixed (perhaps the oldest bug in lcars *g*)
@@ -42,6 +62,7 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 
 #include <dbox/avia_vbi.h>
 #include <dbox/fp.h>
+//#include <dbox/event.h>
 
 #include "sdt.h"
 #include "zap.h"
@@ -56,7 +77,6 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include "fbClass.h"
 #include "checker.h"
 #include "container.h"
-#include "serial.h"
 #include "teletext.h"
 #include "network.h"
 #include "scan.h"
@@ -65,134 +85,46 @@ Revision 1.6  2001/11/15 00:43:45  TheDOC
 #include "plugins.h"
 #include "pig.h"
 #include "timer.h"
+#include "update.h"
+#include "control.h"
 
 #include "config.h"
 
-// del
-#include <stdio.h>
-// del
+//#include <stdio.h>
+
 
 int main(int argc, char **argv)
 {
+
+	
+	int cramfs = 6;
+	bool update_enabled = true;
+	
 	int key = -1;
 	int number = -1;	
 	std::string font = FONTDIR "/ds9.ttf";
 	std::string vtfont = FONTDIR "/ds9.ttf";
 
 	cout << "Fonts: " << font << endl;
+
+
     
 	plugins plugins;
 	
-
-/*	xmlrpc_value *testvalue = new xmlrpc_value(INT, (void*) 5);
-
-	xmlrpc_value::xmlrpc_array test2;
-	test2.insert(test2.end(), testvalue);
-	testvalue = new xmlrpc_value(STRING, (void*)font.c_str());
-	
-	test2.insert(test2.end(), testvalue);
-
-	xmlrpc_value testvalue2(ARRAY, &test2);
-
-	xmlrpc_params parameter;
-	parameter.addParam(&testvalue2);
-	parameter.addParam(testvalue);
-	
-	//cout << testvalue2.getXML() << endl;
-
-	xmlrpc_value::xmlrpc_struct test_struct;
-	xmlrpc_value *testvalue3 = new xmlrpc_value(INT, (void*) 194);
-	
-	test_struct.insert(xmlrpc_value::xmlrpc_struct_pair("Erster Test", testvalue3));
-
-	xmlrpc_value *testvalue_struct = new xmlrpc_value(STRUCT, &test_struct);
-	//cout << testvalue_struct->getXML() << endl;
-	//cout << testvalue2.getXML() << endl;
-	parameter.addParam(testvalue_struct);
-
-	xmlrpc_response testresponse;
-	testresponse.setParams(&parameter);
-	//cout << testresponse.getXML() << endl;
-
-	xmlrpc_request testrequest;
-	testrequest.setParams(&parameter);
-	testrequest.setMethodName("Kleine.Test.Methode");
-	//cout << testrequest.getXML() << endl;
-
-	xmlrpc_parse test_parse;
-	test_parse.readFile("test.xml");
-	test_parse.parseXML();
-	//printf("%s\n", testvalue_struct->getXML().c_str());
-
-	//std::string teststring = "Hallo";
-	//xmlrpc::xmlrpc_value test2(STRING, (void*)teststring.c_str());
-	//printf("%s\n", test2.string_value.c_str());
-	
-*/
-	FILE *fp;
-	fp = fopen(CONFIGDIR "/lcars/dirs.conf", "r");
-	
-	if (fp == NULL)
-	{
-		printf("File " CONFIGDIR "/lcars/dirs.conf not found!");
-		//exit(0);
-	}
-	else
-	{
-	
-		char pluginpath[100];
-		fgets(pluginpath, 100, fp);
-		printf("Plugins-Pfad: %s\n", pluginpath);
-		fclose(fp);
-	
-		std::string ppath(pluginpath);
-		
-		plugins.setPluginDir(ppath.substr(0, ppath.length() - 1));
-		plugins.loadPlugins();
-	}
 	cam cam;
 	sdt sdt;
 	nit nit;
 	cam.readCAID();	
 
-	settings settings(cam);
+	settings settings(&cam);
 
-	settings.setVersion("LCARS V0.15");
+	settings.setVersion("0.20");
 
-	hardware hardware(settings);
+	hardware hardware(&settings);
 	hardware.useDD(false);
 	
-	rc rc(&hardware);
-	rc.start_thread();
+	rc rc(&hardware, &settings);
 	
-	char n0 = settings.getIP(0);
-	char n1 = settings.getIP(1);
-	char n2 = settings.getIP(2);
-	char n3 = settings.getIP(3);
-
-	if (!((n0 == 0) && (n1 == 0) && (n2 == 0) && (n3 == 0)))
-	{
-		char command[100];
-		sprintf(command, "ifconfig eth0 %d.%d.%d.%d", n0, n1, n2, n3);
-		printf("%s\n", command);
-		system(command);
-	}
-
-
-	if (argc == 3 || argc == 4 || argc == 5)
-		rc.setRepeat(strcmp(argv[2], "repeat=off"));
-	else
-		rc.setRepeat(true);
-	
-	if (argc == 4 || argc == 5)
-	{
-		rc.setSupportOld(!strcmp(argv[3], "old=on"));
-	}
-
-	if (argc == 5)
-	{
-		font = argv[4];
-	}
 	printf("Starting OSD\n");
 	fbClass fb;
 	fb.setPalette(255, 0, 0, 0, 0xff);
@@ -205,6 +137,11 @@ int main(int argc, char **argv)
 
 	osd osd(settings, &fb);
 	osd.start_thread();
+
+	
+
+	update update(&osd, &rc, &settings);
+	update.cramfsmtd = 6;
 	//osd.loadSkin("/home/projekte/lcarsneu/skin.lcars");
 	//command_list list;
 	//list.insert(list.end(), "FILLBOX 100 100 200 200 1");
@@ -214,12 +151,13 @@ int main(int argc, char **argv)
 	pig.hide();
 
 	printf("Ending OSD\n");
-
+	
 
 	int test = open("/dev/ost/demux0", O_RDWR);
 	if (test < 0)
 	{
-		osd.addCommand("CREATE ip");
+		rc.start_thread(true);
+		osd.createIP();
 		osd.setIPDescription("Please enter IP-address!");
 		osd.addCommand("SHOW ip");
 		osd.addCommand("COMMAND ip position 0");
@@ -248,14 +186,14 @@ int main(int argc, char **argv)
 			char command[100];
 			sprintf(command, "ifconfig eth0 %d.%d.%d.%d", osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));
 			printf("%s\n", command);
-			system(command);
+			//system(command);
 				
-			system(command);
+			
 		}
 		osd.addCommand("HIDE ip");
 		osd.createPerspective();
-		
-		osd.setPerspectiveName("Please copy the ucodes now!");
+		update.run(UPDATE_UCODES);
+		osd.setPerspectiveName("Reboot now!");
 		osd.addCommand("SHOW perspective");
 		sleep(4);
 		exit(1);
@@ -273,14 +211,14 @@ int main(int argc, char **argv)
 	eit eit(&settings, &osd);
 	eit.start_thread();
 
+	channels channels(&settings, &pat, &pmt, &eit, &cam, &hardware, &osd, &zap, &tuner);
+	checker checker(&settings, &hardware);
+	checker.set_16_9_mode(settings.getVideoFormat());
 
-	channels channels(settings, pat, pmt, &eit, &cam, &hardware);
-	checker checker;
+	//checker.start_16_9_thread();
+	checker.startEventThread();
 	
-
-	checker.start_16_9_thread();
-	
-	scan scan(settings, pat, pmt, nit, sdt, &osd, tuner);
+	scan scan(&settings, &pat, &pmt, &nit, &sdt, &osd, &tuner, &channels);
 	
 	if (rc.command_available())
 	{
@@ -289,7 +227,7 @@ int main(int argc, char **argv)
 		{
 			printf("Emergency channel-scan\n");
 			channels = scan.scanChannels();
-			channels.setStuff(&eit, &cam, &hardware);
+			channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner);
 			channels.saveDVBChannels();
 			while(rc.command_available())
 				rc.read_from_rc();
@@ -305,7 +243,7 @@ int main(int argc, char **argv)
 	{
 		channels = scan.scanChannels();
 		printf("Number Channels: %d\n", channels.numberChannels());
-		channels.setStuff(&eit, &cam, &hardware);
+		channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner);
 		channels.saveDVBChannels();
 	}
 	container container(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan);
@@ -320,7 +258,7 @@ int main(int argc, char **argv)
 	
 	printf("container-chans: %d\n", (*container.channels_obj).numberChannels());
 
-	network network(container);
+	network network(container, &rc);
 	network.startThread();
 
 	timer timer(&hardware, &channels, &zap, &tuner, &osd);
@@ -329,6 +267,7 @@ int main(int argc, char **argv)
 	tot.start_thread();
 	
 	int mode = 0; // 0 = Main Menu
+	int ipmode;
 
 	int final_number;
 	bool finish;
@@ -372,8 +311,11 @@ int main(int argc, char **argv)
 	char text[20];
 	int txtfd;
 
-	hardware.setOutputMode(OUTPUT_RGB);
+	hardware.setOutputMode(settings.getOutputFormat());
+	rc.start_thread();
 	
+	//control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner);
+	//exit(0);
 	do
 	{
 		
@@ -395,7 +337,8 @@ int main(int argc, char **argv)
 			osd.addCommand("SHOW proginfo 5");
 			channels.setCurrentOSDProgramInfo(&osd);
 			printf("Startzapping\n");
-			channels.zapCurrentChannel(&zap, &tuner);
+			channels.zapCurrentChannel();
+			scan.readUpdates();
 			printf("Enzzapping\n");
 			schedule_read = false;
 			if (channels.getCurrentTXT() != 0)
@@ -434,14 +377,38 @@ int main(int argc, char **argv)
 					if (key == RC1_DBOX)
 					{
 						hardware.switch_vcr();
-						allowkeys = !allowkeys;
+						if (hardware.vcrIsOn())
+						{
+							allowkeys = false;
+							switch(hardware.getVCRStatus())
+							{
+							case VCR_STATUS_OFF:
+								hardware.fnc(0);
+								checker.laststat = 0;
+								break;
+							case VCR_STATUS_ON:
+								hardware.fnc(2);
+								checker.laststat = 0;
+								break;
+							case VCR_STATUS_16_9:
+								hardware.fnc(1);
+								checker.laststat = 1;
+								break;
+							}
+						}
+						else 
+						{
+							allowkeys = true;
+							checker.aratioCheck();
+							
+						}
 					}
 					if (key == RC1_RIGHT)
 					{
 						apid++;
 						if (apid >= channels.getCurrentAPIDcount())
 							apid = 0;
-						channels.zapCurrentAudio(apid, &zap);
+						channels.zapCurrentAudio(apid);
 					}
 					else if (key == RC1_LEFT)
 					{
@@ -449,7 +416,7 @@ int main(int argc, char **argv)
 						if (apid < 0 )
 							apid = channels.getCurrentAPIDcount() - 1;
 						
-						channels.zapCurrentAudio(apid, &zap);
+						channels.zapCurrentAudio(apid);
 					}
 					else if (key == RC1_MUTE)
 					{
@@ -562,22 +529,12 @@ int main(int argc, char **argv)
 					mode = 9;
 					switchmode = 2;
 			}
-			else if ((eit.isMultiPerspective()) && (key == RC1_GREEN))
+			else if (channels.currentIsMultiPerspective() && (key == RC1_GREEN))
 			{	
 				mode = 5;
-				number_perspectives = eit.numberPerspectives();
-				for (int i = 0; i < number_perspectives; i++)
-				{
-					perspective[i] = eit.nextLinkage();
-					printf("%s\n", perspective[i].name);
-				}
-				curr_perspective = 0;
-				osd.createPerspective();
-				char message[100];
-				sprintf(message, "Please choose perspective (%d - %d)", 1, number_perspectives);
-				osd.setPerspectiveName(message);
-				osd.addCommand("SHOW perspective");
- 			}
+				number_perspectives = channels.currentNumberPerspectives();
+				channels.parsePerspectives();
+			}
 			else if ((channels.getCurrentType() == 4) && (key == RC1_GREEN))
 			{
 				mode = 7;
@@ -641,6 +598,11 @@ int main(int argc, char **argv)
 					}
 					else if (key == RC1_OK)
 						finish = true;
+					else if (key == RC1_BLUE && final_number == 7493)
+					{
+						update_enabled = true;
+						network.update_enabled = true;
+					}
 					else if (key == RC1_MUTE)
 					{
 						if (hardware.isMuted())
@@ -798,55 +760,76 @@ int main(int argc, char **argv)
 		case 5: // linkage
 			do
 			{
-				key = rc.read_from_rc();
-				number = rc.get_number();
-				if (key == RC1_YELLOW)
-					osd.clearScreen();
-				else if (key == RC1_MUTE)
+				do
 				{
-					if (hardware.isMuted())
+					key = rc.read_from_rc();
+					number = rc.get_number();
+					if (key == RC1_YELLOW)
+						osd.clearScreen();
+					else if (key == RC1_DBOX)
 					{
-						osd.setMute(false);
-						hardware.switch_mute();
-					}
-					else
-					{
-						osd.setMute(true);
-						hardware.switch_mute();
-					}
-					
-				}
-				else if (key == RC1_RIGHT)
-				{
-					apid++;
-					if (apid >= perspective[curr_perspective].APIDcount)
-						apid = 0;
-	
-					zap.zap_audio(perspective[curr_perspective].VPID, perspective[curr_perspective].APID[apid] , ECM, perspective[curr_perspective].SID, perspective[curr_perspective].ONID);
-						
-					for (int i = 0; i < now.number_components; i++)
-					{
-						if (now.component_tag[i] == component[apid])
+						hardware.switch_vcr();
+						if (hardware.vcrIsOn())
 						{
-							strcpy(audio_description, now.audio_description[i]);
+							allowkeys = false;
+							switch(hardware.getVCRStatus())
+							{
+							case VCR_STATUS_OFF:
+								hardware.fnc(0);
+								checker.laststat = 0;
+								break;
+							case VCR_STATUS_ON:
+								hardware.fnc(2);
+								checker.laststat = 0;
+								break;
+							case VCR_STATUS_16_9:
+								hardware.fnc(1);
+								checker.laststat = 1;
+								break;
+							}
+						}
+						else 
+						{
+							allowkeys = true;
+							checker.aratioCheck();
+							
 						}
 					}
+					else if (key == RC1_MUTE)
+					{
+						if (hardware.isMuted())
+						{
+							osd.setMute(false);
+							hardware.switch_mute();
+						}
+						else
+						{
+							osd.setMute(true);
+							hardware.switch_mute();
+						}
+						
+					}
+				} while(!allowkeys);
+				if (key == RC1_RIGHT)
+				{
+					apid++;
+					if (apid >= channels.getCurrentAPIDcount())
+						apid = 0;
+	
+					channels.zapCurrentAudio(apid);
+					//zap.zap_audio(perspective[curr_perspective].VPID, perspective[curr_perspective].APID[apid] , ECM, perspective[curr_perspective].SID, perspective[curr_perspective].ONID);
+						
+
 				}
 				else if (key == RC1_LEFT)
 				{
 					apid--;
 					if (apid < 0 )
-						apid = perspective[curr_perspective].APIDcount - 1;
+						apid = channels.getCurrentAPIDcount() - 1;
 
-					zap.zap_audio(perspective[curr_perspective].VPID, perspective[curr_perspective].APID[apid] , ECM, perspective[curr_perspective].SID, perspective[curr_perspective].ONID);
+					channels.zapCurrentAudio(apid);
+					//zap.zap_audio(perspective[curr_perspective].VPID, perspective[curr_perspective].APID[apid] , ECM, perspective[curr_perspective].SID, perspective[curr_perspective].ONID);
 							
-					for (int i = 0; i < now.number_components; i++)
-					{
-						if (now.component_tag[i] == component[apid])
-						{
-							strcpy(audio_description, now.audio_description[i]);
-						}
-					}
 				}
 			} while(key != RC1_GREEN && number == -1 && key != RC1_BLUE && key != RC1_STANDBY && key != RC1_DOWN && key != RC1_UP);
 
@@ -862,7 +845,7 @@ int main(int argc, char **argv)
 				{
 					
 					if (number < number_perspectives + 1 && number > 0)
-						curr_perspective = (number % (eit.numberPerspectives() + 1)) - 1;
+						curr_perspective = (number % (number_perspectives + 1)) - 1;
 
 				}
 				mode = 6;
@@ -888,52 +871,10 @@ int main(int argc, char **argv)
 				switchmode = 5;
 				continue;
 			}
-			printf("----------------------\n");
-			printf("APID: %d\n", apid);
-			printf("Current perspective: %d\n", curr_perspective);
-			if (old_TS != perspective[curr_perspective].TS)
-				channels.tune(perspective[curr_perspective].TS, &tuner);
-			old_TS = perspective[curr_perspective].TS;
+
+			channels.setPerspective(curr_perspective);
+
 			
-			zap.close_dev();
-			pat.readPAT();
-			ECM = 0;
-			
-			memset (&pmt_entry, 0, sizeof (struct pmt_data));
-			pmt_entry = pmt.readPMT(pat.getPMT(perspective[curr_perspective].SID));
-			channels.deleteCurrentAPIDs();
-			perspective[curr_perspective].APIDcount = 0;
-			for (int i = 0; i < pmt_entry.pid_counter; i++)
-			{
-				if (pmt_entry.type[i] == 0x02)
-					perspective[curr_perspective].VPID = pmt_entry.PID[i];
-				else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03 || pmt_entry.type[i] == 0x06)
-				{
-					printf("an APID: %04x\n", pmt_entry.PID[i]);
-					perspective[curr_perspective].APID[perspective[curr_perspective].APIDcount++] = pmt_entry.PID[i];
-				}
-				printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
-			}
-
-			printf("ECMs: %d\n", pmt_entry.ecm_counter);
-				
-			for (int i = 0; i < pmt_entry.ecm_counter; i++)
-			{
-				if (settings.getCAID() == pmt_entry.CAID[i])
-					ECM = pmt_entry.ECM[i];
-				printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
-
-			}
-			osd.addCommand("HIDE perspective");
-			osd.createPerspective();
-			osd.setPerspectiveName(perspective[curr_perspective].name);
-			osd.addCommand("SHOW perspective");
-			printf("%s\n", perspective[curr_perspective].name);
-			if (perspective[curr_perspective].APIDcount == 1)
-				zap.zap_to(perspective[curr_perspective].VPID, perspective[curr_perspective].APID[apid] , ECM, perspective[curr_perspective].SID, perspective[curr_perspective].ONID, perspective[curr_perspective].TS);
-			else
-				zap.zap_to(perspective[curr_perspective].VPID, perspective[curr_perspective].APID[0], ECM, perspective[curr_perspective].SID, perspective[curr_perspective].ONID, perspective[curr_perspective].TS, perspective[curr_perspective].APID[1]);
-
 			schedule_read = false;
 			break;
 			
@@ -949,24 +890,56 @@ int main(int argc, char **argv)
 
 			do
 			{
-				key = rc.read_from_rc();
-				number = rc.get_number();
-				if (key == RC1_YELLOW)
-					osd.clearScreen();
-				else if (key == RC1_MUTE)
+				do
 				{
-					if (hardware.isMuted())
+					key = rc.read_from_rc();
+					number = rc.get_number();
+					if (key == RC1_YELLOW)
+						osd.clearScreen();
+					else if (key == RC1_DBOX)
 					{
-						osd.setMute(false);
-						hardware.switch_mute();
+						hardware.switch_vcr();
+						if (hardware.vcrIsOn())
+						{
+							allowkeys = false;
+							switch(hardware.getVCRStatus())
+							{
+							case VCR_STATUS_OFF:
+								hardware.fnc(0);
+								checker.laststat = 0;
+								break;
+							case VCR_STATUS_ON:
+								hardware.fnc(2);
+								checker.laststat = 0;
+								break;
+							case VCR_STATUS_16_9:
+								hardware.fnc(1);
+								checker.laststat = 1;
+								break;
+							}
+						}
+						else 
+						{
+							allowkeys = true;
+							checker.aratioCheck();
+							
+						}
 					}
-					else
+					else if (key == RC1_MUTE)
 					{
-						osd.setMute(true);
-						hardware.switch_mute();
+						if (hardware.isMuted())
+						{
+							osd.setMute(false);
+							hardware.switch_mute();
+						}
+						else
+						{
+							osd.setMute(true);
+							hardware.switch_mute();
+						}
 					}
-				}
-				else if (key == RC1_RIGHT)
+				} while(!allowkeys);
+				if (key == RC1_RIGHT)
 				{
 					apid++;
 					if (apid >= APIDcount)
@@ -1240,10 +1213,14 @@ int main(int argc, char **argv)
 				osd.addMenuEntry(5, "Teletext");
 			
 			osd.addMenuEntry(6, "Plug-Ins");
-			
+						
 			osd.addMenuEntry(0, "Setup", 3);
 
-			osd.addMenuEntry(8, "Visual Setup");
+			if (update_enabled)
+				osd.addMenuEntry(7, "Manual Update");
+			if (update_enabled)
+				osd.addMenuEntry(8, "Internet Update");
+			//osd.addMenuEntry(8, "Visual Setup");
 
 			osd.addMenuEntry(9, "General Setup");
 			osd.addCommand("SHOW menu");
@@ -1319,6 +1296,16 @@ int main(int argc, char **argv)
 				{
 					mode = 16;
 				}
+				else if (number == 7 && update_enabled)
+				{
+					printf("7 gedrückt\n");
+					update.run(UPDATE_MANUALFILES);
+				}
+				else if (number == 8 && update_enabled)
+				{
+					printf("8 gedrückt\n");
+					update.run(UPDATE_INET);
+				}
 				else if (number == 9)
 				{
 					mode = 10;
@@ -1344,18 +1331,21 @@ int main(int argc, char **argv)
 			osd.setSelected(0, checker.get_16_9_mode()); // Centercut
 
 			osd.addMenuEntry(2, "RC Repeat", 1);
-			osd.setSelected(1, rc.getRepeat());
-
+			osd.setSelected(1, settings.getRCRepeat());
+			
 			osd.addMenuEntry(3, "Scart", 2);
 			osd.addSwitchParameter(2, "FBAS"); // 1
 			osd.addSwitchParameter(2, "RGB"); // 0
 			if (hardware.getfblk() == OUTPUT_FBAS)
-				osd.setSelected(0, 1);
+				osd.setSelected(2, 1);
 			else 
-				osd.setSelected(0, 0);
+				osd.setSelected(2, 0);
 
 			osd.addMenuEntry(4, "Support old RC", 1);
-			osd.setSelected(1, rc.getSupportOld());
+			osd.setSelected(3, settings.getSupportOldRc());
+
+			osd.addMenuEntry(5, "Switch on VCR", 1);
+			osd.setSelected(4, settings.getSwitchVCR());
 
 			osd.addMenuEntry(0, "Scan-Options", 3);
 
@@ -1368,6 +1358,8 @@ int main(int argc, char **argv)
 			osd.addMenuEntry(0, "Setup-Stuff", 3);
 			
 			osd.addMenuEntry(9, "Box-Setup");
+
+			osd.addMenuEntry(10, "Save Settings");
 
 			osd.addCommand("SHOW menu");
 
@@ -1397,13 +1389,14 @@ int main(int argc, char **argv)
 						else
 							osd.setSelected(0, osd.getSelected(0) + 1);
 						checker.set_16_9_mode(osd.getSelected(0));
+						settings.setVideoFormat(osd.getSelected(0));
 						
 						osd.selectEntry(0);
 					}
 					else if (number == 2)
 					{
 						osd.setSelected(1, !osd.getSelected(1));
-						rc.setRepeat(osd.getSelected(1));
+						settings.setRcRepeat(osd.getSelected(1));
 						osd.selectEntry(1);
 					}
 					else if (number == 3)
@@ -1414,9 +1407,15 @@ int main(int argc, char **argv)
 							osd.setSelected(2, osd.getSelected(2) + 1);
 						
 						if (osd.getSelected(2) == 0)
+						{
 							hardware.setOutputMode(OUTPUT_RGB);
+							settings.setOutputFormat(OUTPUT_RGB);
+						}
 						else if (osd.getSelected(2) == 1)
+						{
 							hardware.setOutputMode(OUTPUT_FBAS);
+							settings.setOutputFormat(OUTPUT_FBAS);
+						}
 						
 						
 						osd.selectEntry(2);
@@ -1424,14 +1423,20 @@ int main(int argc, char **argv)
 					else if (number == 4)
 					{
 						osd.setSelected(3, !osd.getSelected(3));
-						rc.setSupportOld(osd.getSelected(3));
-						if (osd.getSelected(3))
+						settings.setSupportOldRc(osd.getSelected(3));
+						if (osd.getSelected(1))
 						{
-							rc.setRepeat(true);
+							settings.setRcRepeat(true);
 							osd.setSelected(1, true);
 							osd.drawMenuEntry(1);
 						}
 						osd.selectEntry(3);
+					}
+					else if (number == 5)
+					{
+						osd.setSelected(4, !osd.getSelected(4));
+						settings.setSwitchVCR(osd.getSelected(4));
+						osd.selectEntry(4);
 					}
 					else if (key == RC1_MUTE)
 					{
@@ -1476,7 +1481,7 @@ int main(int argc, char **argv)
 				{
 					osd.addCommand("HIDE menu");
 					channels = scan.scanChannels(true);
-					channels.setStuff(&eit, &cam, &hardware);
+					channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner);
 					channels.saveDVBChannels();
 					osd.addCommand("SHOW menu");
 				}
@@ -1484,7 +1489,7 @@ int main(int argc, char **argv)
 				{
 					osd.addCommand("HIDE menu");
 					channels = scan.scanChannels();
-					channels.setStuff(&eit, &cam, &hardware);
+					channels.setStuff(&eit, &cam, &hardware, &osd, &zap, &tuner);
 					channels.saveDVBChannels();
 					osd.addCommand("SHOW menu");
 				}
@@ -1492,6 +1497,10 @@ int main(int argc, char **argv)
 				{
 					osd.addCommand("HIDE menu");
 					mode = 13;
+				}
+				else if (number == 10)
+				{
+					settings.saveSettings();
 				}
 				else
 					leave = false;
@@ -1581,7 +1590,27 @@ int main(int argc, char **argv)
 			osd.setMenuTitle("Box Setup");
 
 			osd.addMenuEntry(1, "IP Setup");
+			osd.addMenuEntry(2, "Gateway Setup");
+			osd.addMenuEntry(3, "DNS Setup");
+
+			if (update_enabled)
+			{
+				osd.addMenuEntry(0, "LCARS UPDATE", 3);
+				osd.addMenuEntry(8, "CramFS MTD", 2);
 			
+				osd.addSwitchParameter(4, "6"); // 6
+				osd.addSwitchParameter(4, "5"); // 5
+				osd.addSwitchParameter(4, "4"); // 4
+				osd.addSwitchParameter(4, "3"); // 3
+				osd.addSwitchParameter(4, "2"); // 2
+				osd.addSwitchParameter(4, "1"); // 1
+				osd.addSwitchParameter(4, "0"); // 0
+				
+				osd.setSelected(4, cramfs);
+
+				osd.addMenuEntry(9, "LCARS Update Server IP");
+			}
+
 			osd.addCommand("SHOW menu");
 
 			osd.addCommand("COMMAND menu select next");
@@ -1603,7 +1632,17 @@ int main(int argc, char **argv)
 					}
 					if (key == RC1_OK)
 						number = osd.menuSelectedIndex();
-
+					if (number == 8 && update_enabled)
+					{
+						if (osd.getSelected(4) >= 6)
+							osd.setSelected(4, 0);
+						else
+							osd.setSelected(4, osd.getSelected(4) + 1);
+						
+						cramfs = osd.getSelected(4);
+						update.cramfsmtd = osd.getSelected(4);
+						osd.selectEntry(4);
+					}	
 					else if (key == RC1_MUTE)
 					{
 						if (hardware.isMuted())
@@ -1638,6 +1677,28 @@ int main(int argc, char **argv)
 				{
 					osd.addCommand("HIDE menu");
 					mode = 14;
+					ipmode = 1;
+
+				}
+				else if (number == 2)
+				{
+					osd.addCommand("HIDE menu");
+					mode = 14;
+					ipmode = 3;
+
+				}
+				else if (number == 3)
+				{
+					osd.addCommand("HIDE menu");
+					mode = 14;
+					ipmode = 4;
+
+				}
+				else if (number == 9 && update_enabled)
+				{
+					osd.addCommand("HIDE menu");
+					mode = 14;
+					ipmode = 2;
 
 				}
 				else
@@ -1648,7 +1709,38 @@ int main(int argc, char **argv)
 			break;
 		case 14: // IP Setup
 			osd.createIP();
-			osd.setIPDescription("Please enter IP-address!");
+			if (ipmode == 1)
+			{
+				osd.setIPn(0, settings.getIP(0));
+				osd.setIPn(1, settings.getIP(1));
+				osd.setIPn(2, settings.getIP(2));
+				osd.setIPn(3, settings.getIP(3));
+				osd.setIPDescription("Please enter IP-address!");
+			}
+			else if (ipmode == 2 && update_enabled)
+			{
+				osd.setIPn(0, settings.getserverIP(0));
+				osd.setIPn(1, settings.getserverIP(1));
+				osd.setIPn(2, settings.getserverIP(2));
+				osd.setIPn(3, settings.getserverIP(3));
+				osd.setIPDescription("Please enter LCARS-Server IP-address!");
+			}
+			else if (ipmode == 3)
+			{
+				osd.setIPn(0, settings.getgwIP(0));
+				osd.setIPn(1, settings.getgwIP(1));
+				osd.setIPn(2, settings.getgwIP(2));
+				osd.setIPn(3, settings.getgwIP(3));
+				osd.setIPDescription("Please enter gateway's IP-address!");
+			}
+			else if (ipmode == 4)
+			{
+				osd.setIPn(0, settings.getdnsIP(0));
+				osd.setIPn(1, settings.getdnsIP(1));
+				osd.setIPn(2, settings.getdnsIP(2));
+				osd.setIPn(3, settings.getdnsIP(3));				
+				osd.setIPDescription("Please enter DNS-IP-address!");
+			}
 			osd.addCommand("SHOW ip");
 			osd.addCommand("COMMAND ip position 0");
 			
@@ -1674,18 +1766,29 @@ int main(int argc, char **argv)
 			mode = 13;
 			if (key == RC1_OK)
 			{
-				settings.setIP(osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));
-
-				char command[100];
-				sprintf(command, "ifconfig eth0 %d.%d.%d.%d", osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));
-				printf("%s\n", command);
-				system(command);
-				
-				system(command);
+				if (ipmode == 1)
+				{
+					settings.setIP(osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));
+				}
+				else if (ipmode == 2)
+				{
+					settings.setserverIP(osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));
+					update.ip[0] = osd.getIPPart(0);
+					update.ip[1] = osd.getIPPart(1);
+					update.ip[2] = osd.getIPPart(2);
+					update.ip[3] = osd.getIPPart(3);
+				}
+				if (ipmode == 3)
+				{
+					settings.setgwIP(osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));					
+				}
+				if (ipmode == 4)
+				{
+					settings.setdnsIP(osd.getIPPart(0), osd.getIPPart(1), osd.getIPPart(2), osd.getIPPart(3));
+					
+				}
 			}
-
 			osd.addCommand("HIDE ip");
-
 			
 			break;
 		case 15: // PIDs
@@ -1850,6 +1953,7 @@ int main(int argc, char **argv)
 				}
 				else if (number <= plugins.getNumberOfPlugins() && number > 0)
 				{
+					teletext.stopReinsertion();
 					if (plugins.getShowPig(number - 1))
 					{
 						pig.hide();	
@@ -1863,16 +1967,19 @@ int main(int argc, char **argv)
 					plugins.setrc(rc.getHandle());
 					printf("Handle: %d\n", rc.getHandle());
 					plugins.setlcd(-1);
+					plugins.setvtxtpid(channels.getCurrentTXT());
+					rc.stoprc();
 					plugins.startPlugin(number - 1);
 					if (plugins.getShowPig(number - 1))
 					{
 						pig.hide();
 					}
+					rc.startrc();
 					rc.restart();
 					osd.initPalette();
 					usleep(400000);
 					fb.clearScreen();
-				
+					teletext.startReinsertion(channels.getCurrentTXT());
 				}
 				else
 					leave = false;
@@ -1882,7 +1989,7 @@ int main(int argc, char **argv)
 			
 
 			break;
-		case 17: // Timer
+		case 17: // Time
 			osd.createMenu();
 			osd.setMenuTitle("Timer");
 			osd.addCommand("COMMAND menu set_size 200");
@@ -1968,10 +2075,15 @@ int main(int argc, char **argv)
 	
 	int fpfd = open("/dev/dbox/fp0", O_RDWR);
 	int on_time = (int) ((timer.getTime() - time(0)) / 60);
-	if (on_time < 1)
-		on_time = 1;
+	if (timer.getNumberTimer() > 0)
+	{
+		if (on_time < 1 && on_time > 0)
+			on_time = 1;
+		else
+			on_time--;
+	}
 	else
-		on_time--;
+		on_time = 0;
 
 	printf("on_time: %d\n", timer.getTime() - time(0));
 	printf("on_time: %d\n", on_time);

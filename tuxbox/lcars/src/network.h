@@ -15,6 +15,15 @@
  ***************************************************************************/
 /*
 $Log: network.h,v $
+Revision 1.4  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/17 03:52:42  tux
+Netzwerkfernbedienung fertig
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -30,6 +39,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include "container.h"
 #include "xmlrpc.h"
+#include "rc.h"
 
 #define PORT 80
 
@@ -38,10 +48,12 @@ class network
 	pthread_t thread;
 	
 public:
+	bool update_enabled;
 	xmlrpc xmlrpc_obj;
 	container cont;
+	rc *rc_obj;
 	void writetext(std::string text);
-	network(container &container);
+	network(container &container, rc *r);
 	int fd;
 	int inbound_connection;
 	static void *startlistening(void *object);

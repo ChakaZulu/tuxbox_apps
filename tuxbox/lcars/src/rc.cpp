@@ -15,6 +15,21 @@
  ***************************************************************************/
 /*
 $Log: rc.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.5  2001/12/17 16:54:47  tux
+Settings halb komplett
+
+Revision 1.4  2001/12/17 14:00:41  tux
+Another commit
+
+Revision 1.3  2001/12/17 03:52:42  tux
+Netzwerkfernbedienung fertig
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -28,8 +43,10 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include <fcntl.h>
 #include <iostream.h>
 
-rc::rc(hardware *h)
+rc::rc(hardware *h, settings *s)
 {
+	setting = s;
+	rcstop = false;
 	hardware_obj = h;
 
 	fp = open("/dev/dbox/rc0", O_RDONLY);
@@ -99,17 +116,23 @@ rc::~rc()
 	close(fp);
 }
 
-int rc::start_thread()
+int rc::start_thread(bool withoutkeyboard = false)
 {
 	
 	int status;
   	
 	pthread_mutex_init(&mutex, NULL);
-	/*status = pthread_create( &rcThread,
+	status = pthread_create( &rcThread,
                            NULL,
                            start_rcqueue,
                            (void *)this );
-						   */
+	
+	if (!withoutkeyboard)
+		status = pthread_create( &keyboardThread,
+                           NULL,
+                           start_keyboardqueue,
+                           (void *)this );
+						   
 	return status;
 
 }
@@ -120,22 +143,103 @@ void* rc::start_rcqueue( void * this_ptr )
 	
 	while(1)
 	{
-		sleep(1);
-		if ((r->get_command_without_removing() % 0x40) == RC1_STANDBY)
-			r->hardware_obj->shutdown();
+		if (!r->rcstop)
+			pthread_mutex_unlock( &r->blockingmutex );
+		else
+			sleep(1);
+		pthread_mutex_lock( &r->blockingmutex );
+		
+		r->key = r->read_from_rc2();
+		cout << "Key: " << r->key << endl;
 	}
 }
 
+void* rc::start_keyboardqueue( void * this_ptr )
+{
+	rc *r = (rc *) this_ptr;
+	struct termios t,ot;
+
+	tcgetattr(0,&t);
+	t.c_lflag &= ~(ECHO | ICANON | ECHOK | ECHOE | ECHONL);
+	ot = t;
+	tcsetattr(0,TCSANOW,&t); 
+	while(1)
+	{
+		char character;
+		
+		cin.get(character);
+		
+		if (character > 47 && character < 58)
+			r->cheat_command(character - 48);
+		switch(character)
+		{
+		case 10:
+			r->cheat_command(RC1_OK);
+			break;
+		case 65:
+			r->cheat_command(RC1_UP);
+			break;
+		case 66:
+			r->cheat_command(RC1_DOWN);
+			break;
+		case 67:
+			r->cheat_command(RC1_RIGHT);
+			break;
+		case 68:
+			r->cheat_command(RC1_LEFT);
+			break;
+		case 113: // q
+			r->cheat_command(RC1_RED);
+			break;
+		case 119: // w
+			r->cheat_command(RC1_GREEN);
+			break; 
+		case 101: // e
+			r->cheat_command(RC1_YELLOW);
+			break;
+		case 114: // r
+			r->cheat_command(RC1_BLUE);
+			break;
+		case 32: // SPACE
+			r->cheat_command(RC1_MUTE);
+			break;
+		case 8: // BACKSPACE
+			r->cheat_command(RC1_HOME);
+			break;
+
+
+		}
+		printf("%d\n", character);
+	}
+}
+
+void rc::cheat_command(unsigned short cmd)
+{
+	key = cmd;
+	last_read = cmd;
+	cout << "Command: " << cmd << endl;
+	pthread_mutex_unlock( &blockingmutex );
+	usleep(100);
+	pthread_mutex_lock( &blockingmutex );
+}
+
+void rc::stoprc()
+{
+	rcstop = true;
+	pthread_mutex_unlock( &blockingmutex );
+	pthread_mutex_lock( &blockingmutex );
+}
+
+void rc::startrc()
+{
+	rcstop = false;
+	pthread_mutex_unlock( &blockingmutex );
+}
 
 void rc::restart()
 {
 	close(fp);
 	fp = open("/dev/dbox/rc0", O_RDONLY);
-}
-
-void rc::setRepeat(bool input)
-{
-	repeat = input;
 }
 
 unsigned short rc::read_from_rc_raw()
@@ -161,27 +265,31 @@ unsigned short rc::convert_code(unsigned short rc)
 
 unsigned short rc::read_from_rc()
 {
+	usleep(100);
+	if (key == -1)
+	{
+		pthread_mutex_lock( &blockingmutex );
+		pthread_mutex_unlock( &blockingmutex );
+	}
+	cout << "KEY: " << key << endl;
+	int returnkey = key;
+	key = -1;
+	return returnkey;
+}
+
+unsigned short rc::read_from_rc2()
+{
 	unsigned short read_code = 0;
 
 	pthread_mutex_lock( &mutex );
 
-	if (!taken_commands.empty())
-	{
-		read_code = taken_commands.front();
-		taken_commands.pop();
-		last_read = read_code;
-		pthread_mutex_unlock(&mutex);
-		return read_code;
-	}
-
-
-	if (!repeat)
+	if (!setting->getRCRepeat())
 	{
 		do
 		{
 			read(fp, &read_code, 2);
 			printf("RC: %x\n", read_code);
-			if (support_old)
+			if (setting->getSupportOldRc())
 				read_code = old_to_new(read_code);
 		} while (read_code == last_read || (read_code & 0xff00) == 0x5c00);
 	}
@@ -191,7 +299,7 @@ unsigned short rc::read_from_rc()
 		{
 			read(fp, &read_code, 2);
 			printf("RC: %x\n", read_code);
-			if (support_old)
+			if (setting->getSupportOldRc())
 				read_code = old_to_new(read_code);
 		} while ((read_code & 0xff00) == 0x5c00);
 
@@ -286,60 +394,5 @@ int rc::get_number()
 
 int rc::command_available()
 {
-	int rc;
-	fd_set fds;
-	struct timeval tv;
-	
-	pthread_mutex_lock( &mutex );
-
-	FD_ZERO(&fds);
-	FD_SET(fp,&fds);
-	tv.tv_sec = tv.tv_usec = 0;
-	
-	rc = select(fp + 1, &fds, NULL, NULL, &tv);
-	pthread_mutex_unlock( &mutex );
-    if (rc < 0)
-      return -1;
-
-    return FD_ISSET(fp, &fds) ? 1 : 0;
+	return (key != -1);
 }
-
-int rc::get_command_without_removing()
-{
-	if (command_available())
-	{
-		unsigned short read_code;
-		
-		pthread_mutex_lock( &mutex );
-		if (!repeat)
-		{
-			do
-			{
-				read(fp, &read_code, 2);
-				printf("RC: %x\n", read_code);
-				if (support_old)
-					read_code = old_to_new(read_code);
-			} while (read_code == last_read || (read_code & 0xff00) == 0x5c00);
-		}
-		else
-		{
-			do
-			{
-				read(fp, &read_code, 2);
-				printf("RC: %x\n", read_code);
-				if (support_old)
-					read_code = old_to_new(read_code);
-			} while ((read_code & 0xff00) == 0x5c00);
-	
-		}
-	
-		
-		taken_commands.push(read_code);
-		
-		pthread_mutex_unlock( &mutex );
-		return read_code %= 40;
-	}
-	else
-		return -1;
-}
-

@@ -15,6 +15,15 @@
  ***************************************************************************/
 /*
 $Log: teletext.h,v $
+Revision 1.4  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/20 00:31:38  tux
+Plugins korrigiert
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -36,6 +45,7 @@ public:
 	teletext(fbClass *f, rc *r) { fb_obj = f; rc_obj = r; }
 	void getTXT(int PID);
 	void startReinsertion(int PID);
+	void stopReinsertion();
 };
 
 #endif

@@ -15,9 +15,14 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
-Revision 1.5  2001/12/16 18:45:35  waldi
-- move all configfiles to CONFIGDIR
-- make CONFIGDIR in install-data-local
+Revision 1.6  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/17 01:00:41  tux
+scan.cpp fix
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
 
 Revision 1.4  2001/12/12 15:23:55  TheDOC
 Segfault after Scan-Bug fixed
@@ -48,44 +53,144 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 #include <config.h>
 
-channels::channels(settings &set, pat &p1, pmt &p2) : setting(set), pat_obj(p1), pmt_obj(p2)
+channels::channels(settings *set, pat *p1, pmt *p2)
 {
 	cur_pos = -1;
+	pat_obj = p1;
+	pmt_obj = p2;
+	setting = set;
 }
 
 
-channels::channels(settings &set, pat &p1, pmt &p2, eit *e, cam *c, hardware *h) : setting(set), pat_obj(p1), pmt_obj(p2)
+channels::channels(settings *set, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t)
 {
+	setting = set;
 	cur_pos = -1;
+	pat_obj = p1;
+	pmt_obj = p2;
 	eit_obj = e;
 	cam_obj = c;
 	hardware_obj = h;
+	osd_obj = o;
+	zap_obj = z;
+	tuner_obj = t;
 }
 
-void channels::setStuff(eit *e, cam *c, hardware *h)
+void channels::setStuff(eit *e, cam *c, hardware *h, osd*o, zap *z, tuner *t)
 {
 	eit_obj = e;
 	cam_obj = c;
 	hardware_obj = h;
+	osd_obj = o;
+	zap_obj = z;
+	tuner_obj = t;
 }
 
-void channels::zapCurrentChannel(zap *zap_obj, tuner *tuner_obj)
+bool channels::currentIsMultiPerspective()
 {
-	(*zap_obj).zap_allstop();
+	return eit_obj->isMultiPerspective();
+}
+
+int channels::currentNumberPerspectives()
+{
+	return eit_obj->numberPerspectives();
+}
+
+void channels::parsePerspectives()
+{
+	basic_channellist[cur_pos].number_perspectives = eit_obj->numberPerspectives();
+	for (int i = 0; i < basic_channellist[cur_pos].number_perspectives; i++)
+	{
+		basic_channellist[cur_pos].perspective[i] = eit_obj->nextLinkage();
+		printf("%s\n", basic_channellist[cur_pos].perspective[i].name);
+	}
+	curr_perspective = 0;
+	osd_obj->createPerspective();
+	char message[100];
+	sprintf(message, "Please choose perspective (%d - %d)", 1, basic_channellist[cur_pos].number_perspectives);
+	osd_obj->setPerspectiveName(message);
+	osd_obj->addCommand("SHOW perspective");
+}
+
+void channels::setPerspective(int number)
+{
+	pmt_data pmt_entry;
+
+	current_mode = LINKAGE;
+
+	curr_perspective = number;
+
+	printf("----------------------\n");
+	printf("APID: %d\n", apid);
+	printf("Current perspective: %d\n", curr_perspective);
+	if (old_TS != basic_channellist[cur_pos].perspective[curr_perspective].TS)
+		tune(basic_channellist[cur_pos].perspective[curr_perspective].TS, tuner_obj);
+	old_TS = basic_channellist[cur_pos].perspective[curr_perspective].TS;
+	
+	zap_obj->close_dev();
+	pat_obj->readPAT();
+	ECM = 0;
+			
+	memset (&pmt_entry, 0, sizeof (struct pmt_data));
+	pmt_entry = pmt_obj->readPMT(pat_obj->getPMT(basic_channellist[cur_pos].perspective[curr_perspective].SID));
+	//channels.deleteCurrentAPIDs();
+	basic_channellist[cur_pos].perspective[curr_perspective].APIDcount = 0;
+	for (int i = 0; i < pmt_entry.pid_counter; i++)
+	{
+		if (pmt_entry.type[i] == 0x02)
+			basic_channellist[cur_pos].perspective[curr_perspective].VPID = pmt_entry.PID[i];
+		else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03 || pmt_entry.type[i] == 0x06)
+		{
+			printf("an APID: %04x\n", pmt_entry.PID[i]);
+			basic_channellist[cur_pos].perspective[curr_perspective].APID[basic_channellist[cur_pos].perspective[curr_perspective].APIDcount++] = pmt_entry.PID[i];
+		}
+		printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
+	}
+
+	printf("ECMs: %d\n", pmt_entry.ecm_counter);
+				
+	for (int i = 0; i < pmt_entry.ecm_counter; i++)
+	{
+		if (setting->getCAID() == pmt_entry.CAID[i])
+			ECM = pmt_entry.ECM[i];
+		printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
+	}
+	osd_obj->addCommand("HIDE perspective");
+	osd_obj->createPerspective();
+	osd_obj->setPerspectiveName(basic_channellist[cur_pos].perspective[curr_perspective].name);
+	osd_obj->addCommand("SHOW perspective");
+	printf("%s\n", basic_channellist[cur_pos].perspective[curr_perspective].name);
+	if (basic_channellist[cur_pos].perspective[curr_perspective].APIDcount == 1)
+		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[apid] , ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS);
+	else
+		zap_obj->zap_to(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[0], ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID, basic_channellist[cur_pos].perspective[curr_perspective].TS, basic_channellist[cur_pos].perspective[curr_perspective].APID[1]);
+
+}
+
+void channels::zapCurrentChannel()
+{
+	zap_obj->zap_allstop();
+	
+	current_mode = CHANNEL;
+
 	tune(getCurrentTS(), tuner_obj);
 
-	pat_obj.readPAT();
+	fprintf(stderr, "Getting pat\n");
+	pat_obj->readPAT();
+	fprintf(stderr, "Got it\n");
 
 	ECM = 0;
 		
 	apid = 0;
 
-	int tmp_pmt = pat_obj.getPMT(getCurrentSID());
+	fprintf(stderr, "Getting pmt\n");
+	int tmp_pmt = pat_obj->getPMT(getCurrentSID());
+	fprintf(stderr, "Got it\n");
 		
 	if (tmp_pmt != 0)
 	{
-		setCurrentPMT(pat_obj.getPMT(getCurrentSID()));
-		pmt_data pmt_entry = (pmt_obj.readPMT(getCurrentPMT()));
+		setCurrentPMT(pat_obj->getPMT(getCurrentSID()));
+		pmt_data pmt_entry = (pmt_obj->readPMT(getCurrentPMT()));
 		deleteCurrentAPIDs();
 		number_components = 0;
 		video_component = 0;
@@ -116,7 +221,7 @@ void channels::zapCurrentChannel(zap *zap_obj, tuner *tuner_obj)
 	
 		for (int i = 0; i < pmt_entry.ecm_counter; i++)
 		{
-			if (setting.getCAID() == pmt_entry.CAID[i])
+			if (setting->getCAID() == pmt_entry.CAID[i])
 				ECM = pmt_entry.ECM[i];
 			printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
 		}
@@ -188,19 +293,37 @@ void channels::setCurrentOSDEvent(osd *osd_obj)
 	(*osd_obj).setEPGduration(now.duration);
 }
 
-void channels::zapCurrentAudio(int pid, zap *zap_obj)
+void channels::zapCurrentAudio(int pid)
 {
 	apid = pid;
 	//hardware_obj->useDD(true);
-	
-	if (basic_channellist[cur_pos].DD[pid])
-		printf("Dolby Digital ON ......................................\n");
-	else
-		printf("Dolby Digital OFF ......................................\n");
-	hardware_obj->useDD(getCurrentDD(apid));
-	(*zap_obj).zap_audio(getCurrentVPID(), getCurrentAPID(apid), ECM, getCurrentSID(), getCurrentONID());
-	
-	(*eit_obj).setAudioComponent(component[apid]);
+
+	if (current_mode == CHANNEL)
+	{
+		if (basic_channellist[cur_pos].DD[pid])
+			printf("Dolby Digital ON ......................................\n");
+		else
+			printf("Dolby Digital OFF ......................................\n");
+		hardware_obj->useDD(getCurrentDD(apid));
+		zap_obj->zap_audio(getCurrentVPID(), getCurrentAPID(apid), ECM, getCurrentSID(), getCurrentONID());
+		
+		eit_obj->setAudioComponent(component[apid]);
+	}
+	else if (current_mode == LINKAGE)
+	{
+		zap_obj->zap_audio(basic_channellist[cur_pos].perspective[curr_perspective].VPID, basic_channellist[cur_pos].perspective[curr_perspective].APID[apid] , ECM, basic_channellist[cur_pos].perspective[curr_perspective].SID, basic_channellist[cur_pos].perspective[curr_perspective].ONID);
+		//zap_obj->zap_audio(getCurrentVPID(), getCurrentAPID(apid), ECM, getCurrentSID(), getCurrentONID());
+
+		event now = eit_obj->getNow();
+/*		for (int i = 0; i < now.number_components; i++)
+		{
+			if (now.component_tag[i] == component[apid])
+			{
+				osd_obj->
+				//strcpy(audio_description, now.audio_description[i]);
+			}
+		}*/
+	}
 
 
 }
@@ -259,6 +382,7 @@ void channels::addChannel(channel new_channel)
 {
 	new_channel.channelnumber = numberChannels();
 	basic_channellist.insert(basic_channellist.end(), new_channel);
+	services_list.insert(std::pair<int, int>(new_channel.SID, basic_channellist.size() - 1));
 	cur_pos = numberChannels() - 1;
 }
 
@@ -273,7 +397,7 @@ void channels::addDVBChannel(dvbchannel chan)
 	tmp_chan.APID[0] = chan.APID;
 	tmp_chan.PCR = chan.PCR;
 	tmp_chan.ECM[0] = chan.ECM;
-	tmp_chan.CAID[0] = setting.getCAID();
+	tmp_chan.CAID[0] = setting->getCAID();
 	tmp_chan.type = chan.type;
 	tmp_chan.TS = chan.TS;
 	for (int i = 0; i < 24; i++)
@@ -304,6 +428,11 @@ void channels::addDVBChannel(dvbchannel chan)
 channel channels::getChannelByNumber(int number)
 {
 	return basic_channellist[number];
+}
+
+void channels::updateChannel(int number, channel channel_data)
+{
+	basic_channellist[number] = channel_data;
 }
 
 int channels::getChannelNumber(int TS, int ONID, int SID)
@@ -529,10 +658,20 @@ int channels::getCurrentVPID()
 int channels::getCurrentAPIDcount()
 {
 	int count = 0;
-	while(basic_channellist[cur_pos].APID[count++] != 0)
-		if (count > 3)
-			break;
-	count--;
+	if (current_mode == CHANNEL)
+	{
+		while(basic_channellist[cur_pos].APID[count++] != 0)
+			if (count > 3)
+				break;
+		count--;
+	}
+	else if (current_mode == LINKAGE)
+	{
+		while(basic_channellist[cur_pos].perspective[curr_perspective].APID[count++] != 0)
+			if (count > 3)
+				break;
+		count--;
+	}
 	return count;
 }
 
@@ -759,28 +898,6 @@ int channels::tuneCurrentTS(tuner *tuner)
 	return true;
 }
 
-void channels::saveChannels()
-{
-	int fd;
-	printf("Writing\n");
-	fd = open(CONFIGDIR "/lcars/channels.dat", O_WRONLY|O_TRUNC|O_CREAT, 0666);
-	for (std::vector<struct channel>::iterator it = basic_channellist.begin(); it != basic_channellist.end(); ++it)
-	{
-		channel test;
-		test = (*it);
-		write(fd, &test, sizeof(channel));
-	}
-	close(fd);
-	fd = open(CONFIGDIR "/lcars/transponders.dat", O_WRONLY|O_TRUNC|O_CREAT, 0666);
-	for (std::multimap<int, struct transportstream>::iterator it = basic_TSlist.begin(); it != basic_TSlist.end(); ++it)
-	{
-		printf("%d\n", (*it).second.TS);
-		write(fd, &((*it).second), sizeof(transportstream));
-	}
-	close(fd);
-	printf("Written\n");
-}
-
 void channels::saveDVBChannels()
 {
 	FILE *fp;
@@ -815,7 +932,7 @@ void channels::saveDVBChannels()
 		chan.PCR = (*it).PCR;
 		for (int i = 0; i < 5; i++)
 		{
-			if (setting.getCAID() == (*it).CAID[i])
+			if (setting->getCAID() == (*it).CAID[i])
 				chan.ECM = (*it).ECM[i];
 		}
 		chan.type = (*it).type;
@@ -855,7 +972,7 @@ void channels::loadDVBChannels()
 		tmp_chan.APID[0] = chan.APID;
 		tmp_chan.PCR = chan.PCR;
 		tmp_chan.ECM[0] = chan.ECM;
-		tmp_chan.CAID[0] = setting.getCAID();
+		tmp_chan.CAID[0] = setting->getCAID();
 		tmp_chan.type = chan.type;
 		tmp_chan.TS = chan.TS;
 		tmp_chan.TXT = chan.TXT;
@@ -884,44 +1001,5 @@ void channels::loadDVBChannels()
 	}
 	close(fd);
 	printf("Channels loaded\n");
-  }
-
-void channels::loadChannels()
-{
-	int fd;
-	fd = open(CONFIGDIR "/lcars/channels.dat", O_RDONLY);
-		
-	int size = lseek(fd, 0, SEEK_END);
-	lseek(fd, 0, 0);
-
-	printf("Channels: %d\n", size / sizeof(channel));
-	for (int i = 0; i < (int)(size / sizeof(channel)); i++)
-	{
-		
-		channel temp_chan;
-		read(fd, &temp_chan, sizeof(channel));
-	
-		basic_channellist.insert(basic_channellist.end(), temp_chan);
-
-	}
-	close(fd);
-
-	fd = open(CONFIGDIR "/lcars/transponders.dat", O_RDONLY);
-	size = lseek(fd, 0, SEEK_END);
-	lseek(fd, 0, 0);
-
-	printf("Transponders: %d\n", size / sizeof(transportstream));
-	for (int i = 0; i < (int)(size / sizeof(transportstream)); i++)
-	{
-		
-		struct transportstream temp_TS;
-		read(fd, &temp_TS, sizeof(transportstream));
-
-		basic_TSlist.insert(std::pair<int, struct transportstream>(temp_TS.TS, temp_TS));
-
-	}
-	close(fd);
-
-
 }
 

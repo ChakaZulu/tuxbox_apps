@@ -15,6 +15,15 @@
  ***************************************************************************/
 /*
 $Log: timer.h,v $
+Revision 1.4  2002/03/03 22:57:59  TheDOC
+lcars 0.20
+
+Revision 1.3  2001/12/17 01:00:34  tux
+scan.cpp fix
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -38,7 +47,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 #include "tuner.h"
 #include "osd.h"
 
-#include "config.h"
+#include <config.h>
 
 struct timer_entry
 {
@@ -76,6 +85,7 @@ public:
 
 	void addTimer(time_t starttime, int type, std::string comment, int duration = 0, int channel = -1);
 	time_t getTime();
+	int getNumberTimer() { return timer_list.size(); }
 	void dumpTimer();
 	int getDumpedChannel(int i) { return dumped_channels[i]; }
 	time_t getDumpedStarttime(int i) { return dumped_starttimes[i]; }

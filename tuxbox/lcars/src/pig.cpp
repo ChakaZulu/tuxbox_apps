@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: pig.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/11/19 10:08:10  TheDOC
 pig fixed
 

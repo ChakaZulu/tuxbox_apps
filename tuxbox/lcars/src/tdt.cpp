@@ -15,6 +15,12 @@
  ***************************************************************************/
 /*
 $Log: tdt.cpp,v $
+Revision 1.3  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.2  2001/11/15 00:43:45  TheDOC
  added
 

@@ -15,6 +15,18 @@
  ***************************************************************************/
 /*
 $Log: teletext.cpp,v $
+Revision 1.4  2002/03/03 22:56:27  TheDOC
+lcars 0.20
+
+Revision 1.4  2001/12/20 00:31:38  tux
+Plugins korrigiert
+
+Revision 1.3  2001/12/17 14:00:41  tux
+Another commit
+
+Revision 1.2  2001/12/16 22:36:05  tux
+IP Eingaben erweitert
+
 Revision 1.3  2001/12/11 13:38:44  TheDOC
 new cdk-path-variables, about 10 new features and stuff
 
@@ -37,51 +49,20 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 void teletext::getTXT(int PID)
 {
-	int fd, r;
-	struct dmxPesFilterParams flt;
-	unsigned char buffer[BSIZE];
-		
-	if ((fd=open("/dev/ost/demux0", O_RDONLY)) < 0)
-		perror("Teletext open");
-		
-	r = BSIZE;
-	printf("TXT-PID: %x\n", PID);
-	flt.pid            = PID;
-	flt.input=DMX_IN_FRONTEND;
-    flt.output=DMX_OUT_TAP;
-    flt.pesType=DMX_PES_OTHER;
-    flt.flags=DMX_IMMEDIATE_START;
-
-	if (ioctl(fd, DMX_SET_PES_FILTER, &flt) < 0)
-		perror("Teletext ioctl");
-
-	for (int i = 0; i < 100; i++)
-	{
-		r = BSIZE;
-		r=read(fd, buffer, r);
-		printf("\n-------------------------------\n");
-		printf("r: %d\n", r);
-		for (int j = 0; j < r; j++)
-		{
-			if ((buffer[j] > 64 && buffer[j] < 123) || buffer[j] == 32 || buffer[j] == 0x2c || buffer[j] == 0x2e || buffer[j] == 0xfc || buffer[j] == 0xf6 || buffer[j] == 0xe4 || buffer[j] == 0xdf)
-				printf("%c", buffer[j]);
-			else if (buffer[j] == 10)
-				printf("\n");
-			else
-				printf("%x ", buffer[j]);
-			
-		}
-	}
-	
-	ioctl(fd,DMX_STOP,0);
-
-	close(fd);
 }
 
 void teletext::startReinsertion(int PID)
 {
 	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
 	ioctl(txtfd, AVIA_VBI_START_VTXT, PID);
+
+	close(txtfd);
+}
+
+void teletext::stopReinsertion()
+{
+	int txtfd = open("/dev/dbox/vbi0", O_RDWR);
+	ioctl(txtfd, AVIA_VBI_STOP_VTXT, true);
 
 	close(txtfd);
 }
