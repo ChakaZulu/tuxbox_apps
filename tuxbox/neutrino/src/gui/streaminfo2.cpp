@@ -306,8 +306,8 @@ void CStreamInfo2::SignalRenderStr (unsigned long value, int x, int y)
 void CStreamInfo2::paint(int mode)
 {
 	const char * head_string;
-	int ypos = y;
-	int xpos = x;
+	int ypos = y+5;
+	int xpos = x+10;
 
 
 
@@ -518,89 +518,6 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 	sprintf((char*) buf, "Provider / Sat: %s",CNeutrinoApp::getInstance()->getScanSettings().satOfDiseqc(si.diseqc));
 	g_Font[font_info]->RenderString(xpos, ypos+ iheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
