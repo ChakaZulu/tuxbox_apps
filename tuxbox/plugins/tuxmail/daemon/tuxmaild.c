@@ -3,9 +3,11 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.c,v $
+ * Revision 1.3  2003/05/10 08:24:35  lazyt
+ * add simple spamfilter, show account details in message/popup
+ *
  * Revision 1.2  2003/04/29 10:36:43  lazyt
  * enable/disable audio via .conf
- *
  *
  * Revision 1.1  2003/04/21 09:24:52  lazyt
  * add tuxmail, todo: sync (filelocking?) between daemon and plugin
@@ -107,12 +109,11 @@ int ReadConf()
 			}
 
 			fprintf(fd_conf, "STARTDELAY=30\n");
-			fprintf(fd_conf, "INTERVALL=15\n");
+			fprintf(fd_conf, "INTERVALL=15\n\n");
 			fprintf(fd_conf, "POP3LOG=Y\n");
-			fprintf(fd_conf, "LOGMODE=S\n");
+			fprintf(fd_conf, "LOGMODE=S\n\n");
 			fprintf(fd_conf, "AUDIO=Y\n");
-			fprintf(fd_conf, "HTTPCMD=http://127.0.0.1/cgi-bin/startPlugin?name=tuxmail.cfg\n");
-
+			fprintf(fd_conf, "VIDEO=1\n\n");
 			fprintf(fd_conf, "NAME0=\n");
 			fprintf(fd_conf, "HOST0=\n");
 			fprintf(fd_conf, "USER0=\n");
@@ -126,7 +127,7 @@ int ReadConf()
 	//clear database
 
 		memset(account_db, 0, sizeof(account_db));
-		startdelay = intervall = pop3log = logmode = audio = http_command[0] = 0;
+		startdelay = intervall = pop3log = logmode = audio = video = 0;
 
 	//fill database
 
@@ -142,7 +143,7 @@ int ReadConf()
 
 			else if((ptr = strstr(line_buffer, "AUDIO="))) sscanf(ptr + 6, "%c", &audio);
 
-			else if((ptr = strstr(line_buffer, "HTTPCMD="))) sscanf(ptr + 8, "%s", http_command);
+			else if((ptr = strstr(line_buffer, "VIDEO="))) sscanf(ptr + 6, "%d", &video);
 
 			else if((ptr = strstr(line_buffer, "NAME0="))) sscanf(ptr + 6, "%s", account_db[0].name);
 			else if((ptr = strstr(line_buffer, "HOST0="))) sscanf(ptr + 6, "%s", account_db[0].host);
@@ -195,6 +196,39 @@ int ReadConf()
 			else if((ptr = strstr(line_buffer, "PASS9="))) sscanf(ptr + 6, "%s", account_db[9].pass);
 		}
 
+	//check for update
+
+		if(!startdelay || !intervall || !pop3log || !logmode || !audio || !video)
+		{
+			printf("TuxMailD <missing Param(s), update Config>\n");
+
+			fd_conf = freopen(CFGPATH CFGFILE, "w", fd_conf);
+
+			if(!startdelay) startdelay = 30;
+			if(!intervall) intervall = 15;
+			if(!pop3log) pop3log = 'Y';	
+			if(!logmode) logmode = 'S';
+			if(!audio) audio = 'Y';
+			if(!video) video = 1;
+
+			fprintf(fd_conf, "STARTDELAY=%d\n", startdelay);
+			fprintf(fd_conf, "INTERVALL=%d\n\n", intervall);
+			fprintf(fd_conf, "POP3LOG=%c\n", pop3log);
+			fprintf(fd_conf, "LOGMODE=%c\n\n", logmode);
+			fprintf(fd_conf, "AUDIO=%c\n", audio);
+			fprintf(fd_conf, "VIDEO=%d\n", video);
+
+			for(loop = 0; loop < 10; loop++)
+			{
+				fprintf(fd_conf, "\nNAME%d=%s\n", loop, account_db[loop].name);
+				fprintf(fd_conf, "HOST%d=%s\n", loop, account_db[loop].host);
+				fprintf(fd_conf, "USER%d=%s\n", loop, account_db[loop].user);
+				fprintf(fd_conf, "PASS%d=%s\n", loop, account_db[loop].pass);
+
+				if(!account_db[loop + 1].name[0]) break;
+			}
+		}
+
 		fclose(fd_conf);
 
 	//check config
@@ -230,7 +264,11 @@ int ReadConf()
 			audio = 'Y';
 		}
 
-		if(!http_command[0]) printf("TuxMailD <HTTPCMD empty, Notification disabled>\n");
+		if(video < 1 || video > 4)
+		{
+			printf("TuxMailD <VIDEO=%d invalid, set to \"1\">\n", video);
+			video = 1;
+		}
 
 		accounts = 0;
 
@@ -252,6 +290,38 @@ int ReadConf()
 			printf("TuxMailD <no valid Accounts found>\n");
 			return 0;
 		}
+}
+
+/******************************************************************************
+ * ReadSpamList
+ ******************************************************************************/
+
+void ReadSpamList()
+{
+	FILE *fd_spam;
+	char line_buffer[64];
+
+	if(!(fd_spam = fopen(CFGPATH SPMFILE, "r")))
+	{
+		printf("TuxMailD <no Spamlist found, Filter disabled>\n");
+		return;
+	}
+	else
+	{
+		while(fgets(line_buffer, sizeof(line_buffer), fd_spam) && spam_entries < 100)
+		{
+			if(sscanf(line_buffer, "%s", spamfilter[spam_entries].address) == 1) spam_entries++;
+		}
+
+		if(spam_entries)
+		{
+			use_spamfilter = 1;
+			printf("TuxMailD <Spamlist contains %d Entries, Filter enabled>\n", spam_entries);
+		}
+		else printf("TuxMailD <empty Spamlist, Filter disabled>\n");
+	}
+
+	fclose(fd_spam);
 }
 
 /******************************************************************************
@@ -312,8 +382,8 @@ int SendPOPCommand(int command, char *param)
 	struct sockaddr_in SockAddr;
 	FILE *fd_log;
 	char send_buffer[128], recv_buffer[4096], month[4];
-	char *ptr;
-	int day, hour, minute;
+	char *ptr, *ptr1;
+	int loop, day, hour, minute;
 
 	//build commandstring
 
@@ -432,10 +502,13 @@ int SendPOPCommand(int command, char *param)
 						break;
 
 				case TOP:	stringindex = 0;
+						memset(header, 0, sizeof(header));
 
-						if((ptr = strstr(recv_buffer, "Date: ")))
+						if((ptr = strstr(recv_buffer, "\nDate:")))
 						{
 							ptr += 6;
+
+							while(*ptr == ' ') ptr++;
 
 							if(*ptr < '0' || *ptr > '9') sscanf(ptr, "%*s %d %s %*d %d:%d", &day, &month[0], &hour, &minute);
 							else sscanf(ptr, "%d %s %*d %d:%d", &day, &month[0], &hour, &minute);
@@ -449,14 +522,33 @@ int SendPOPCommand(int command, char *param)
 							stringindex += 13;
 						}
 		
-						if((ptr = strstr(recv_buffer, "From: ")))
+						if((ptr = strstr(recv_buffer, "\nFrom:")))
 						{
 							ptr += 6;
+
+							while(*ptr == ' ') ptr++;
+
+							ptr1 = &header[stringindex];
 
 							while(*ptr != '\r')
 							{
 								if(*ptr == '=' && *(ptr + 1) == '?') ptr += ConvertHeader(ptr);
 								else memcpy(&header[stringindex++], ptr++, 1);
+							}
+
+							if(use_spamfilter)
+							{
+								spam_detected = 0;
+
+								for(loop = 0; loop < spam_entries; loop++)
+								{
+									if(strstr(ptr1, spamfilter[loop].address))
+									{
+										printf("TuxMailD <Spamfilter active, delete Mail from \"%s\">\n", ptr1);
+										spam_detected = 1;
+										break;
+									}
+								}
 							}
 
 							header[stringindex++] = '|';
@@ -467,9 +559,11 @@ int SendPOPCommand(int command, char *param)
 							stringindex += 4;
 						}
 
-						if((ptr = strstr(recv_buffer, "Subject: ")))
+						if((ptr = strstr(recv_buffer, "\nSubject:")))
 						{
 							ptr += 9;
+
+							while(*ptr == ' ') ptr++;
 
 							while(*ptr != '\r')
 							{
@@ -588,8 +682,6 @@ int CheckAccount(int account)
 
 					if(skip_uid_check)
 					{
-						account_db[account].mail_new++;
-
 						if(!SendPOPCommand(TOP, mailnumber))
 						{
 							free(known_uids);
@@ -597,7 +689,21 @@ int CheckAccount(int account)
 							return 0;
 						}
 
-						if(fd_status) fprintf(fd_status, "|N|%s|%s\n", uid, header);
+						if(use_spamfilter && spam_detected)
+						{
+							if(!SendPOPCommand(DELE, mailnumber))
+							{
+								free(known_uids);
+								if(fd_status) fclose(fd_status);
+								return 0;
+							}
+						}
+						else
+						{
+							account_db[account].mail_new++;
+
+							if(fd_status) fprintf(fd_status, "|N|%s|%s\n", uid, header);
+						}
 					}
 					else
 					{
@@ -628,8 +734,6 @@ int CheckAccount(int account)
 						}
 						else
 						{
-							account_db[account].mail_new++;
-
 							if(!SendPOPCommand(TOP, mailnumber))
 							{
 								free(known_uids);
@@ -637,7 +741,21 @@ int CheckAccount(int account)
 								return 0;
 							}
 
-							if(fd_status) fprintf(fd_status, "|N|%s|%s\n", uid, header);
+							if(use_spamfilter && spam_detected)
+							{
+								if(!SendPOPCommand(DELE, mailnumber))
+								{
+									free(known_uids);
+									if(fd_status) fclose(fd_status);
+									return 0;
+								}
+							}
+							else
+							{
+								account_db[account].mail_new++;
+	
+								if(fd_status) fprintf(fd_status, "|N|%s|%s\n", uid, header);
+							}
 						}
 					}
 				}
@@ -729,26 +847,58 @@ void NotifyUser()
 {
 	CURL *curl;
 	CURLcode res;
-	char errorbuffer[CURL_ERROR_SIZE];
+	int loop;
+	char errorbuffer[CURL_ERROR_SIZE], http_cmd[1024], tmp_buffer[128];
+	char http_cmd1[] = "http://127.0.0.1/cgi-bin/startPlugin?name=tuxmail.cfg";
+	char http_cmd2[] = "http://127.0.0.1/cgi-bin/message?Es%20liegen%20neue%20Nachrichten%20auf%20dem%20Server:\\n\\n";
+	char http_cmd3[] = "http://127.0.0.1/control/message?nmsg=Es%20liegen%20neue%20Nachrichten%20auf%20dem%20Server:%0A%0A";
+	char http_cmd4[] = "http://127.0.0.1/control/message?popup=Es%20liegen%20neue%20Nachrichten%20auf%20dem%20Server:%0A%0A";
 
-	if(audio == 'Y') PlaySound();
+	//audio notify
 
-	if(http_command[0])
-	{
+		if(audio == 'Y') PlaySound();
+
+	//video notify
+
+		switch(video)
+		{
+			case 4:	strcpy(http_cmd, http_cmd4);
+				break;
+
+			case 3:	strcpy(http_cmd, http_cmd3);
+				break;
+
+			case 2:	strcpy(http_cmd, http_cmd2);
+				break;
+
+			default:strcpy(http_cmd, http_cmd1);
+		}
+
+		if(video > 1)
+		{
+			for(loop = 0; loop < 10; loop++)
+			{
+				if(account_db[loop].mail_new)
+				{
+					if(video == 2) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20für%%20%s\\n", loop, account_db[loop].mail_new, account_db[loop].name);
+					if(video == 3 || video == 4) sprintf(tmp_buffer, "%%20%%20%%20%%20%%20Konto%%20#%d:%%20%.3d%%20Mail(s)%%20für%%20%s%%0A", loop, account_db[loop].mail_new, account_db[loop].name);
+					strcat(http_cmd, tmp_buffer);
+				}
+			}
+		}
+
 		if((curl = curl_easy_init()))
 		{
-			curl_easy_setopt(curl, CURLOPT_URL, http_command);
+			curl_easy_setopt(curl, CURLOPT_URL, http_cmd);
 			curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
 //			curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 			res = curl_easy_perform(curl);
 			curl_easy_cleanup(curl);
 
-			if(res) printf("TuxMailD <HTTP-Command \"%s\" failed (%s)>\n", http_command, errorbuffer);
-			else    printf("TuxMailD <HTTP-Command \"%s\" sended>\n", http_command);
+			if(res) printf("TuxMailD <HTTP-Command failed: %s>\n", errorbuffer);
+			else    printf("TuxMailD <HTTP-Command sended>\n");
 		}
 		else printf("TuxMailD <HTTP-Commands not available>\n");
-	}
-	else printf("TuxMailD <HTTP-Commands disabled>\n");
 }
 
 /******************************************************************************
@@ -777,7 +927,7 @@ void SigHandler(int signal)
 
 int main(int argc, char **argv)
 {
-	char cvs_revision[] = "$Revision: 1.2 $", versioninfo[12];
+	char cvs_revision[] = "$Revision: 1.3 $", versioninfo[12];
 	int account, mailstatus;
 	pthread_t thread_id;
 	void *thread_result = 0;
@@ -801,9 +951,13 @@ int main(int argc, char **argv)
 			default:	exit(0);
 		}
 
-	//read or create config
+	//read, update or create config
 
 		if(!ReadConf()) return -1;
+
+	//read spamlist
+
+		ReadSpamList();
 
 	//check for running daemon
 

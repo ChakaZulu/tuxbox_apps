@@ -3,9 +3,11 @@
  *                (c) Thomas "LazyT" Loewe 2003 (LazyT@gmx.net)
  *-----------------------------------------------------------------------------
  * $Log: tuxmaild.h,v $
+ * Revision 1.3  2003/05/10 08:24:35  lazyt
+ * add simple spamfilter, show account details in message/popup
+ *
  * Revision 1.2  2003/04/29 10:36:43  lazyt
  * enable/disable audio via .conf
- *
  *
  * Revision 1.1  2003/04/21 09:24:52  lazyt
  * add tuxmail, todo: sync (filelocking?) between daemon and plugin
@@ -34,6 +36,7 @@
 
 #define CFGPATH "/var/tuxbox/config/tuxmail/"
 #define CFGFILE "tuxmail.conf"
+#define SPMFILE "spamlist"
 #define SCKFILE "/tmp/tuxmaild.sock"
 #define LOGFILE "/tmp/tuxmaild.log"
 #define PIDFILE "/tmp/tuxmaild.pid"
@@ -55,23 +58,27 @@ struct
 
 }account_db[10];
 
-//http command
+//spam database
 
-char http_command[256];
+struct
+{
+	char address[64];
+
+}spamfilter[100];
 
 //some data
 
 FILE *fd_pid;
 int pid;
 int startdelay, intervall;
+char pop3log, logmode, audio;
+int video;
 char online = 1;
-char pop3log;
-char logmode;
-char audio;
 int accounts;
 int sock;
 int messages, deleted_messages;
 int stringindex;
+int use_spamfilter = 0, spam_entries = 0, spam_detected;
 char uid[128];
 char header[1024];
 char timeinfo[22];
