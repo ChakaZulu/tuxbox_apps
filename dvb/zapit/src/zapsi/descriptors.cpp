@@ -1,5 +1,5 @@
 /*
- * $Id: descriptors.cpp,v 1.33 2002/09/04 11:52:56 obi Exp $
+ * $Id: descriptors.cpp,v 1.34 2002/09/09 18:56:56 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -527,7 +527,7 @@ uint8_t service_descriptor (uint8_t *buffer, uint16_t service_id, uint16_t trans
 		{
 			bouquet = scanBouquetManager->Bouquets[bouquetId];
 		}
-		bouquet->addService( new CZapitChannel ( serviceName, service_id, 0, original_network_id, service_type, 0, 0));
+		bouquet->addService( new CZapitChannel ( serviceName, service_id, 0, original_network_id, service_type, 0));
 		break;
 
 	default:

@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.52 2002/09/09 08:51:32 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.53 2002/09/09 18:56:56 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -414,10 +414,8 @@ void CBouquetManager::makeRemainingChannelsBouquet(unsigned int tvChanNr, unsign
 
 	for (unsigned int i = 0; i < unnumberedChannels.size(); i++)
 	{
-		CZapitChannel* chan = copyChannelByOnidSid(unnumberedChannels[i]->getOnidSid());
-		allchans_tv.find(chan->getOnidSid())->second.setChannelNumber(tvChanNr);         // necessary?
-		chan->setChannelNumber(tvChanNr++);
-		remainChannels->addService(chan);
+		tvChanNr++;
+		remainChannels->addService(copyChannelByOnidSid(unnumberedChannels[i]->getOnidSid()));
 	}
 
 	unnumberedChannels.clear();
@@ -430,10 +428,8 @@ void CBouquetManager::makeRemainingChannelsBouquet(unsigned int tvChanNr, unsign
 
 	for (unsigned int i = 0; i < unnumberedChannels.size(); i++)
 	{
-		CZapitChannel* chan = copyChannelByOnidSid(unnumberedChannels[i]->getOnidSid());
-		allchans_radio.find(chan->getOnidSid())->second.setChannelNumber(radioChanNr);         // necessary?
-		chan->setChannelNumber(radioChanNr++);
-		remainChannels->addService(chan);
+		radioChanNr++;
+		remainChannels->addService(copyChannelByOnidSid(unnumberedChannels[i]->getOnidSid()));
 	}
 
 	if ((remainChannels->tvChannels.size() == 0) && (remainChannels->radioChannels.size() == 0))
@@ -454,17 +450,13 @@ void CBouquetManager::renumServices()
 	{
 		for (unsigned int j = 0; j < Bouquets[i]->tvChannels.size(); j++)
 		{
-			uint32_t OnidSid = Bouquets[i]->tvChannels[j]->getOnidSid();
-			allchans_tv.find(OnidSid)->second.setChannelNumber(tvChanNr);         // necessary?
-			Bouquets[i]->tvChannels[j]->setChannelNumber(tvChanNr++);
-			tvchans_processed.insert(OnidSid);
+			tvChanNr++;
+			tvchans_processed.insert(Bouquets[i]->tvChannels[j]->getOnidSid());
 		}
 		for (unsigned int j = 0; j < Bouquets[i]->radioChannels.size(); j++)
 		{
-			uint32_t OnidSid = Bouquets[i]->radioChannels[j]->getOnidSid();
-			allchans_radio.find(OnidSid)->second.setChannelNumber(radioChanNr);         // necessary?
-			Bouquets[i]->radioChannels[j]->setChannelNumber(radioChanNr++);
-			radiochans_processed.insert(OnidSid);
+			radioChanNr++;
+			radiochans_processed.insert(Bouquets[i]->radioChannels[j]->getOnidSid());
 		}
 	}
 
@@ -672,7 +664,7 @@ CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::FindChannelNr
 	return (*this);
 }
 
-int CBouquetManager::ChannelIterator::getLowestChannelNumberWithOnidSid(const unsigned int onid_sid)
+int CBouquetManager::ChannelIterator::getLowestChannelNumberWithOnidSid(const uint32_t onid_sid)
 {
 	int i = 0;
 
@@ -681,4 +673,18 @@ int CBouquetManager::ChannelIterator::getLowestChannelNumberWithOnidSid(const un
 			if ((**this)->getOnidSid() == onid_sid)
 			    return i;
 	return -1; // not found
+}
+
+
+int CBouquetManager::ChannelIterator::getNrofFirstChannelofBouquet(const unsigned int bouquet_nr)
+{
+	if (bouquet_nr >= Owner->Bouquets.size())
+		return -1;  // not found
+
+	int i = 0;
+
+	for (b = 0; b < bouquet_nr; b++)
+		i += getBouquet()->size();
+
+	return i;
 }

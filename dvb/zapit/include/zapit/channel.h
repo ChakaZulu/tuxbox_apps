@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.7 2002/09/09 08:51:32 thegoodguy Exp $
+ * $Id: channel.h,v 1.8 2002/09/09 18:56:56 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -60,9 +60,6 @@ class CZapitChannel
 		/* last selected audio channel */
 		unsigned char currentAudioChannel;
 
-		/* number in channel list */
-		unsigned short channelNumber;
-
 		/* read only properties, set by constructor */
 		unsigned short serviceId;
 		unsigned short transportStreamId;
@@ -75,7 +72,7 @@ class CZapitChannel
 
 	public:
 		/* constructor, desctructor */
-		CZapitChannel (std::string p_name, unsigned short p_sid, unsigned short p_tsid, unsigned short p_onid, unsigned char p_service_type, unsigned short p_chan_nr, unsigned char p_DiSEqC);
+		CZapitChannel (std::string p_name, unsigned short p_sid, unsigned short p_tsid, unsigned short p_onid, unsigned char p_service_type, unsigned char p_DiSEqC);
 		~CZapitChannel ();
 
 		/* get methods - read only variables */
@@ -94,7 +91,6 @@ class CZapitChannel
 		unsigned short getPmtPid()		{ return pmtPid; }
 		unsigned short getTeletextPid()		{ return teletextPid; }
 		unsigned short getVideoPid()		{ return videoPid; }
-		unsigned short getChannelNumber()	{ return channelNumber; }
 		bool getPidsFlag()			{ return pidsFlag; }
 		CCaPmt * getCaPmt()			{ return caPmt; }
 
@@ -112,7 +108,6 @@ class CZapitChannel
 		void setPmtPid(unsigned short pPmtPid)			{ pmtPid = pPmtPid; }
 		void setTeletextPid(unsigned short pTeletextPid)	{ teletextPid = pTeletextPid; }
 		void setVideoPid(unsigned short pVideoPid)		{ videoPid = pVideoPid; }
-		void setChannelNumber(unsigned short pChannelNumber)	{ channelNumber = pChannelNumber; }
 		void setPidsFlag()					{ pidsFlag = true; }
 		void setCaPmt(CCaPmt * pCaPmt)				{ caPmt = pCaPmt; }
 

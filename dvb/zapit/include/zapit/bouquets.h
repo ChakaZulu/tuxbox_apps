@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.33 2002/09/06 00:37:24 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.34 2002/09/09 18:56:56 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -95,7 +95,8 @@ class CBouquetManager
 				ChannelIterator operator ++(int);
 				CZapitChannel* operator *();
 				ChannelIterator FindChannelNr(const unsigned int channel);
-				int getLowestChannelNumberWithOnidSid(const unsigned int onid_sid);
+				int getLowestChannelNumberWithOnidSid(const uint32_t onid_sid);
+				int getNrofFirstChannelofBouquet(const unsigned int bouquet_nr);
 				bool EndOfChannels() { return (c == -2); };
 		};
 

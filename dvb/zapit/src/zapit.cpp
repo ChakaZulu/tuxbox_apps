@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.216 2002/09/04 13:57:39 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.217 2002/09/09 18:56:56 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1022,7 +1022,6 @@ void parse_command (CZapitClient::commandHead &rmsg)
 						    msgAddSubService.tsid,
 						    (msgAddSubService.onidsid>>16),
 						    1,
-						    0,
 						    channel->getDiSEqC()
 						)
 					    )
@@ -1083,7 +1082,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.216 2002/09/04 13:57:39 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.217 2002/09/09 18:56:56 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1325,7 +1324,7 @@ void sendBouquets(bool emptyBouquetsToo)
 	}
 }
 
-void internalSendChannels(ChannelList* channels)
+void internalSendChannels(ChannelList* channels, const unsigned int first_channel_nr)
 {
 	for (uint32_t i = 0; i < channels->size();i++)
 	{
@@ -1335,7 +1334,7 @@ void internalSendChannels(ChannelList* channels)
 		CZapitClient::responseGetBouquetChannels response;
 		strncpy(response.name, (*channels)[i]->getName().c_str(),30);
 		response.onid_sid = (*channels)[i]->getOnidSid();
-		response.nr = (*channels)[i]->getChannelNumber();
+		response.nr = first_channel_nr + i;
 
 		if (send(connfd, &response, sizeof(response),0) == -1)
 		{
@@ -1366,22 +1365,18 @@ void sendAPIDs()
 
 void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode)
 {
-	bouquet--;
-
-	if ((bouquet < 0) || (bouquet >= bouquetManager->Bouquets.size()))
+	if ((bouquet < 1) || (bouquet > bouquetManager->Bouquets.size()))
 	{
-		printf("[zapit] invalid bouquet number: %d",bouquet);
+		printf("[zapit] invalid bouquet number: %d", bouquet);
 		return;
 	}
 
-	ChannelList channels;
+	bouquet--;
 
 	if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode == CZapitClient::MODE_RADIO))
-		channels = bouquetManager->Bouquets[bouquet]->radioChannels;
+		internalSendChannels(&(bouquetManager->Bouquets[bouquet]->radioChannels), bouquetManager->radioChannelsBegin().getNrofFirstChannelofBouquet(bouquet) + 1);
 	else
-		channels = bouquetManager->Bouquets[bouquet]->tvChannels;
-
-	internalSendChannels( &channels);
+		internalSendChannels(&(bouquetManager->Bouquets[bouquet]->tvChannels), bouquetManager->tvChannelsBegin().getNrofFirstChannelofBouquet(bouquet) + 1);
 }
 
 void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder order)
@@ -1394,7 +1389,7 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 		for (; !(cit.EndOfChannels()); cit++)
 			channels.push_back(*cit);
 	}
-	else if (order == CZapitClient::SORT_ALPHA)   // ATTENTION: in this case response.nr (getChannelNumber()) does not return the actual number of the channel!
+	else if (order == CZapitClient::SORT_ALPHA)   // ATTENTION: in this case response.nr does not return the actual number of the channel for zapping!
 	{
 		if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO))
 		{
@@ -1409,7 +1404,7 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 		sort(channels.begin(), channels.end(), CmpChannelByChName());
 	}
 
-	internalSendChannels( &channels);
+	internalSendChannels(&channels, 1);
 }
 
 int startPlayBack()
