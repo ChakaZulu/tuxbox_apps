@@ -83,18 +83,50 @@ void write_fake_bouquets(FILE *fd)
 }
 
 
-void write_bouquets()
+void write_bouquets(unsigned short mode)
 {
 	FILE *bouq_fd;
 	std::string oldname = "";
 	
+	/*
+	mode&1024 == löschn bouqets und erstelle sich nicht neu.
+	mode&512 == erstelle bouquets immer neu
+	mode&256 = keine änderung an bouqets.
+	*/
+
+	if (mode&1024)
+	{
+		printf("[zapit] removin existing bouqets.xml\n");
+		system("/bin/rm /var/zapit/bouquets.xml");
+		scanbouquets.clear();
+		return;
+	}
+		
 	bouq_fd = fopen("/var/zapit/bouquets.xml", "r");
 	
-	if (bouq_fd != NULL || scanbouquets.empty())
+	
+	if (mode&256 || scanbouquets.empty())
+	{
+		printf("[zapit] leavin bouquets.xml untouched\n");
+		scanbouquets.clear();
+		if (bouq_fd != NULL)
+			fclose(bouq_fd);
 		return;
+	}
 	else
 	{
+		printf("[zapit] creating new bouquets.xml\n");
+		if (bouq_fd != NULL)
+			fclose(bouq_fd);
 		bouq_fd = fopen("/var/zapit/bouquets.xml", "w");
+		
+		if (bouq_fd == NULL)
+			{
+				perror("fopen /var/zapit/bouquets.xml");
+				scanbouquets.clear();
+				return;
+			}
+			
 		
 		fprintf(bouq_fd, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n<ZAPIT>\n");
 		
@@ -207,7 +239,7 @@ void *start_scanthread(void *param)
   FILE *fd = NULL;
   std::string transponder;
   
-  unsigned short *do_diseqc = (unsigned short *) (param);
+  unsigned short do_diseqc = *(unsigned short *) (param);
 
   scan_runs = 1;
   if (!issatbox())
@@ -218,6 +250,7 @@ void *start_scanthread(void *param)
 	{
 	  //get_nits(freq,symbolrate,0,0,0);
 	  //printf("get_nits() done\n");
+	  //printf("scanning cable\n");
 	  if (finaltune(freq,symbolrate,0,0,0)>0)
     	  	fake_pat(&scantransponders, freq, symbolrate);
   	  else
@@ -225,6 +258,7 @@ void *start_scanthread(void *param)
 	}
 	if (finaltune(3300,6875,0,0,0)>0)
     	  	fake_pat(&scantransponders, 3300,6875);
+    	
 	get_sdts();
       if (!scantransponders.empty())
       {
@@ -239,15 +273,13 @@ void *start_scanthread(void *param)
 	}
       fprintf(fd,"</cable>\n");
 	}
-
       scantransponders.clear();
       scanchannels.clear();
-
     }
   else
     {
       
-      if (*do_diseqc & 1)
+      if (do_diseqc & 1)
       {
       	curr_sat = 1;
       printf("---------------------------\nSCANNING ASTRA\n---------------------------\n");
@@ -290,7 +322,7 @@ void *start_scanthread(void *param)
       scantransponders.clear();
 	}
 
-      if (*do_diseqc & 2)
+      if (do_diseqc & 2)
       {
       	curr_sat = 2;
       printf("---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
@@ -330,7 +362,7 @@ void *start_scanthread(void *param)
       scantransponders.clear();
       }
 	
-      if (*do_diseqc & 4)
+      if (do_diseqc & 4)
       {
       	curr_sat = 4;
       printf("---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
@@ -360,7 +392,7 @@ void *start_scanthread(void *param)
        }
       
       
-      if (*do_diseqc & 8)
+      if (do_diseqc & 8)
       {
       	curr_sat = 8;
       printf("---------------------------\nSCANNING TÜRKSAT\n---------------------------\n");
@@ -413,10 +445,10 @@ void *start_scanthread(void *param)
       }
       write_fake_bouquets(fd);
   fprintf(fd,"</ZAPIT>\n"); 
-  fclose(fd);
-
-  write_bouquets();  
-        	
+  if (fd != NULL)
+  	fclose(fd);
+  
+  write_bouquets(do_diseqc);   	
   if (prepare_channels() <0) 
   {
     printf("Error parsing Services\n");
