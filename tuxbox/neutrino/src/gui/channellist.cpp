@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.33 2001/10/16 18:34:13 rasc Exp $
+// $Id: channellist.cpp,v 1.34 2001/10/18 14:31:23 field Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.34  2001/10/18 14:31:23  field
+// Scrollleisten :)
+//
 // Revision 1.33  2001/10/16 18:34:13  rasc
 // -- QuickZap to last channel verbessert.
 // -- Standard Kanal muss ca. 2-3 Sekunden aktiv sein fuer LastZap Speicherung.
@@ -567,25 +570,26 @@ void CChannelList::paintItem(int pos)
 		color = COL_MENUCONTENTSELECTED;
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width, fheight, color);
+	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if(liststart+pos<chanlist.size())
 	{
-		channel* chan = chanlist[liststart+pos];
+        channel* chan = chanlist[liststart+pos];
 		//number
-                char tmp[10];
-                sprintf((char*) tmp, "%d", chan->number);
+        char tmp[10];
+        sprintf((char*) tmp, "%d", chan->number);
+
 		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 		if(strlen(chan->currentEvent.description.c_str()))
 		{
-    			// name + description
+    		// name + description
 			char nameAndDescription[100];
 			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.description.c_str());
-			g_Fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, nameAndDescription, color);
-                }
+			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
+        }
 		else
 		  //name
-		  g_Fonts->channellist->RenderString(x+5+numwidth+10,ypos+fheight, width-numwidth-20, chan->name.c_str(), color);
+		  g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name.c_str(), color);
 	}
 }
 
@@ -615,5 +619,16 @@ void CChannelList::paint()
 	{
 		paintItem(count);
 	}
+
+    int ypos = y+ theight;
+    int sb = fheight* listmaxshow;
+    g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+
+    int sbc= ((chanlist.size()- 1)/ listmaxshow)+ 1;
+    float sbh= (sb- 4)/ sbc;
+    int sbs= (selected/listmaxshow);
+
+    g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+
 }
 

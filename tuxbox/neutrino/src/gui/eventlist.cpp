@@ -1,11 +1,14 @@
 //
-// $Id: eventlist.cpp,v 1.15 2001/10/14 14:30:47 rasc Exp $
+// $Id: eventlist.cpp,v 1.16 2001/10/18 14:31:23 field Exp $
 //
 //  -- EPG Event List // Vorschau 
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.16  2001/10/18 14:31:23  field
+// Scrollleisten :)
+//
 // Revision 1.15  2001/10/14 14:30:47  rasc
 // -- EventList Darstellung ueberarbeitet
 // -- kleiner Aenderungen und kleinere Bugfixes
@@ -156,6 +159,7 @@ void EventList::readEvents(unsigned onidSid, const std::string& channelname)
             actPos = copyStringto( actPos, ename, sizeof(ename), '\n');
 
             event* evt = new event();
+
 
             sscanf(epgID, "%llx", &evt->epg.id);
             sscanf(edate, "%02d.%02d", &tmZeit.tm_mday, &tmZeit.tm_mon);
@@ -338,23 +342,26 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 		{
 			loop= false;
 		}
-                else if (key==CRCInput::RC_left) {
+        else if (key==CRCInput::RC_left)
+        {
 			loop= false;
 		}
-                else if (key==CRCInput::RC_red) {
+        else if (key==CRCInput::RC_red)
+        {
 			loop= false;
 		}
    		else if (key==CRCInput::RC_help || key==CRCInput::RC_right)
 		{
-		  event* evt = evtlist[selected];
-		  if ( evt->epg.id != 0 ) {
-			hide();
+            event* evt = evtlist[selected];
+            if ( evt->epg.id != 0 )
+            {
+    			hide();
 
-			g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
+    			g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
 
-			paintHead();
-			paint();
-		  }
+    			paintHead();
+    			paint();
+            }
 		}
 	}
 
@@ -385,7 +392,7 @@ void EventList::paintItem(unsigned int pos)
 		color = COL_MENUCONTENT;
 	}
 
-	g_FrameBuffer->paintBoxRel(x,ypos, width, fheight, color);
+	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 
 	if(liststart+pos<evtlist.size())
 	{
@@ -396,19 +403,22 @@ void EventList::paintItem(unsigned int pos)
 
 
 //$$$ RASC: das color +1 ist falsch hier (Absicht, damit man sieht hier muss was getan werden)
+//Behoben der Fontrenderer kommt jetzt damit zurecht
+
 //$$$ auch sollten wg. der besseren Darstellung andere Fontmappings benutzt werden...
+
 		//  datetime1_str  datetime2_str    duration_str
 		//  evt->epg.description
 
 		// 1st line
 		g_Fonts->eventlist_datetime->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,
 			evt->datetime1_str.c_str(), color);
-		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10,
+		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20,
 			evt->datetime2_str.c_str(), color);
-		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5, ypos+ fheight1+3, fwidth2,
+		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2,
 			evt->duration_str.c_str(), color);
 		// 2nd line
-		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25,
+		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25- 20,
 			evt->epg.description.c_str(), color);
 	}
 }
@@ -431,6 +441,17 @@ void EventList::paint()
 	{
 		paintItem(count);
 	}
+
+    int ypos = y+ theight;
+    int sb = fheight* listmaxshow;
+    g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+
+    int sbc= ((evtlist.size()- 1)/ listmaxshow)+ 1;
+    float sbh= (sb- 4)/ sbc;
+    int sbs= (selected/listmaxshow);
+
+    g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+
 }
 
 

@@ -1,7 +1,10 @@
 //
-// $Id: epgview.cpp,v 1.15 2001/10/11 21:04:58 rasc Exp $
+// $Id: epgview.cpp,v 1.16 2001/10/18 14:31:23 field Exp $
 //
 // $Log: epgview.cpp,v $
+// Revision 1.16  2001/10/18 14:31:23  field
+// Scrollleisten :)
+//
 // Revision 1.15  2001/10/11 21:04:58  rasc
 // - EPG:
 //   Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
@@ -117,7 +120,7 @@ void CEpgData::processTextToArray( char* text  )
     			aktWord += *text;
 
     			int aktWordWidth = g_Fonts->epg_info2->getRenderWidth(aktWord.c_str());
-    			if((aktWordWidth+aktWidth)<(ox-20))
+    			if((aktWordWidth+aktWidth)<(ox- 20- 15))
     			{//space ok, add
 				    aktWidth += aktWordWidth;
     				aktLine += aktWord;
@@ -147,16 +150,26 @@ void CEpgData::showText( int startPos, int ypos )
 	int y=ypos;
 	int linecount=medlinecount;
 	string t;
-	g_FrameBuffer->paintBoxRel(sx, y, ox, linecount*medlineheight, COL_MENUCONTENT);
+    int sb = linecount* medlineheight;
+	g_FrameBuffer->paintBoxRel(sx, y, ox- 15, sb, COL_MENUCONTENT);
 
 	for(int i=startPos; i<textCount && i<startPos+linecount; i++,y+=medlineheight)
 	{
 		t=epgText[i];
         if ( i< info1_lines )
-            g_Fonts->epg_info1->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
+            g_Fonts->epg_info1->RenderString(sx+10, y+medlineheight, ox- 15- 15, t.c_str(), COL_MENUCONTENT);
         else
-    		g_Fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox-15, t.c_str(), COL_MENUCONTENT);
+    		g_Fonts->epg_info2->RenderString(sx+10, y+medlineheight, ox- 15- 15, t.c_str(), COL_MENUCONTENT);
 	}
+
+    g_FrameBuffer->paintBoxRel(sx+ ox- 15, ypos, 15, sb,  COL_MENUCONTENT+ 1);
+
+    int sbc= ((textCount- 1)/ linecount)+ 1;
+    float sbh= (sb- 4)/ sbc;
+    int sbs= (startPos)/linecount;
+
+    g_FrameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+
 }
 
 void CEpgData::show( string channelName, unsigned int onid_tsid, unsigned long long id, time_t* startzeit )
