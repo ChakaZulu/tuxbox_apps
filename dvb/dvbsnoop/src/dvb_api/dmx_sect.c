@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.22 2004/09/01 20:20:34 rasc Exp $
+$Id: dmx_sect.c,v 1.23 2004/10/12 20:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dmx_sect.c,v 1.22 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.23  2004/10/12 20:37:47  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.22  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -278,6 +283,8 @@ static int  doReadSECT_2 (OPTION *opt)
        indent (0);
        print_packet_header (opt, "SECT", opt->pid, count, n, 0);
 
+// $$$ TODO: check pid in -if  (warnung: dmx read may use mask!)
+// $$$ TODO: mask may also be used with -if
 
        if (opt->buffer_hexdump) {
            printhex_buf (0,buf, n);
@@ -300,8 +307,8 @@ static int  doReadSECT_2 (OPTION *opt)
 
 
     // count packets ?
-    if (opt->packet_count > 0) {
-       if (count >= opt->packet_count) break;
+    if (opt->rd_packet_count > 0) {
+       if (count >= opt->rd_packet_count) break;
     }
 
 

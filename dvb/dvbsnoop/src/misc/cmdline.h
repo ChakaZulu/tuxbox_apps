@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.h,v 1.20 2004/09/01 20:20:34 rasc Exp $
+$Id: cmdline.h,v 1.21 2004/10/12 20:37:48 rasc Exp $
 
 
  DVBSNOOP
@@ -43,8 +43,10 @@ typedef struct _OPTIONS {
   u_int       filter;			// PID filter
   u_int       mask;			// PID mask
   int         crc;			// section CRC check?
+  int         max_dmx_filter;		// max dmx filter use? (pidscan)
   long        timeout_ms;		// read timeout in ms
-  long        packet_count;		// read n packets
+  long        rd_packet_count;		// read max. n packets
+  long        dec_packet_count;		// decode max. n packets
   int         spider_pid;		// Section PID spider mode
   int         ts_subdecode;		// sub decode PES or SEC in TS stream
   int         time_mode;		// time print mode

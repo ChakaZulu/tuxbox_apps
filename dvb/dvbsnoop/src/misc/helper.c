@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.33 2004/08/12 22:57:18 rasc Exp $
+$Id: helper.c,v 1.34 2004/10/12 20:37:48 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,11 @@ $Id: helper.c,v 1.33 2004/08/12 22:57:18 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.34  2004/10/12 20:37:48  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.33  2004/08/12 22:57:18  rasc
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
@@ -753,7 +758,7 @@ static char *_str_cell_latitude_longitude (long ll, int angle)
  g2 = x % 1000;
  if (g2 <0) g2 = 0 - g2;
 
- sprintf (s,"%ld.%03ld grad",g1,g2);
+ sprintf (s,"%ld.%03ld degree",g1,g2);
  return s;
 }
 

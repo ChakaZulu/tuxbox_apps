@@ -1,5 +1,5 @@
 /*
-$Id: tslayer.c,v 1.19 2004/04/15 22:29:23 rasc Exp $
+$Id: tslayer.c,v 1.20 2004/10/12 20:37:48 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,11 @@ $Id: tslayer.c,v 1.19 2004/04/15 22:29:23 rasc Exp $
 
 
 $Log: tslayer.c,v $
+Revision 1.20  2004/10/12 20:37:48  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.19  2004/04/15 22:29:23  rasc
 PMT: some brainded section check
 TS: filter single pids from multi-pid ts-input-file
@@ -129,28 +134,6 @@ void decodeTS_buf (u_char *b, int len, u_int opt_pid)
 
 
  t.sync_byte 			 = b[0];
-
- if (t.sync_byte != 0x47) {
-     out_nl (3,"!!! SyncByte is wrong (= no TS)!!!\n");
-     // $$$ return;
- }
- if (len != 188) {
-   out_nl (3,"Fixed packet length is wrong (not 188)!!!\n");
- }
-
-
-
- t.pid				 = getBits (b, 0,11, 13);
-
- // -- filter pid?  (e.g. if multi-pid-ts-file)
- if (opt_pid >= 0 && opt_pid <= MAX_PID) {
-	 if (opt_pid != t.pid) {
- 		out_SW_NL(6,"skipped packet, assigned PID: ",t.pid);
-		return;
-	 }
- }
-
-
  t.transport_error_indicator	 = getBits (b, 0, 8, 1);
  t.payload_unit_start_indicator	 = getBits (b, 0, 9, 1);
  t.transport_priority		 = getBits (b, 0,10, 1);

@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.17 2004/09/01 20:20:34 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.18 2004/10/12 20:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dmx_tspidscan.c,v 1.17 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.18  2004/10/12 20:37:47  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.17  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -114,7 +119,7 @@ pidscan on transponder
 #define PID_TIMEOUT_HIGH	(30100 - PID_TIME_WAIT)
 
 // max filters (will be checked dynamically)
-#define MAX_PID_FILTER		128
+#define MAX_PID_FILTER		256
 
 // highest pid
 #define MAX_PID                 0x1FFF
@@ -172,7 +177,7 @@ int ts_pidscan (OPTION *opt)
 
    //  -- max demux filters to use...
    max_pid_filter = MAX_PID_FILTER;
-   if (opt->filter > 0) max_pid_filter = opt->filter;	// -f opt
+   if (opt->max_dmx_filter > 0) max_pid_filter = opt->max_dmx_filter;	// -maxdmx opt
 
 
    // alloc pids

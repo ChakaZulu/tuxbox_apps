@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.35 2004/09/01 20:20:34 rasc Exp $
+$Id: cmdline.c,v 1.36 2004/10/12 20:37:48 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: cmdline.c,v 1.35 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.36  2004/10/12 20:37:48  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.35  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -186,10 +191,12 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
   opt->filter = 0;
   opt->mask = 0;
   opt->timeout_ms = 0;		// no timeout (0) or default timeout in ms (SECTIONS)
+  opt->max_dmx_filter = 0;	// use module default  (pidscan)
   opt->crc = 0;
   opt->spider_pid = 0;
   opt->ts_subdecode = 0;
-  opt->packet_count = 0;
+  opt->rd_packet_count = 0;
+  opt->dec_packet_count = 0;
   opt->packet_header_sync = 1;
   opt->packet_mode = SECT;
   opt->time_mode = FULL_TIME;
@@ -208,13 +215,15 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      if (!strcmp (argv[i],"-demux")) opt->devDemux = argv[++i];
      else if (!strcmp (argv[i],"-dvr")) opt->devDvr = argv[++i];
      else if (!strcmp (argv[i],"-frontend")) opt->devFE = argv[++i];
+     else if (!strcmp (argv[i],"-maxdmx")) opt->max_dmx_filter = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-f")) opt->filter = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-m")) opt->mask = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-crc")) opt->crc = 1;
      else if (!strcmp (argv[i],"-nocrc")) opt->crc = 0;
      else if (!strcmp (argv[i],"-sync")) opt->packet_header_sync = 1;
      else if (!strcmp (argv[i],"-nosync")) opt->packet_header_sync = 0;
-     else if (!strcmp (argv[i],"-n")) opt->packet_count = str2i(argv[++i]);
+     else if (!strcmp (argv[i],"-n")) opt->rd_packet_count = str2i(argv[++i]);
+     else if (!strcmp (argv[i],"-N")) opt->dec_packet_count = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-b")) opt->binary_out = 1;
      else if (!strcmp (argv[i],"-ph")) opt->printhex = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-pd")) opt->printdecode = str2i(argv[++i]);
@@ -232,7 +241,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-tssubdecode")) opt->ts_subdecode = 1;
      else if (!strcmp (argv[i],"-spiderpid")) {
 	 opt->spider_pid = 1;
-	 opt->packet_count = 1;
+	 opt->rd_packet_count = 1;
      } else if (!strcmp (argv[i],"-if")) {
 	 opt->inpPidFile = argv[++i];		// input filename
 	 if (!opt->inpPidFile) opt->inpPidFile = ""; 
@@ -319,7 +328,7 @@ static void usage (void)
     printf("   -demux device: demux device [%s]\n",DEMUX_DEVICE);
     printf("   -dvr device:   dvr device [%s]\n",DVR_DEVICE);
     printf("   -frontend device: frontend   device [%s]\n",FRONTEND_DEVICE);
-    printf("   -s [type]:    snoop type  [-s sec]\n");
+    printf("   -s type:    snoop type or mode <type>  [-s sec]\n");
     printf("                   stream type: sec, pes or ts\n");
     printf("                   or special scan type:\n");
     printf("                         pidscan = transponder pid scan,\n");
@@ -328,20 +337,21 @@ static void usage (void)
     printf("                         feinfo = frontend information\n");
     printf("                 stream type or pidscan\n");
     printf("   -timeout ms:  section read timeout in ms [-TIMEOUT 0]\n");
+    printf("   -maxdmx n:    max demux filters <n> to use in pidscan mode (0=default) [-maxdmx 0]\n");
     printf("   -buffersize kb: read buffersize in KBytes  [-buffersize 0]\n");
     printf("                 (0 = use default read buffer size)\n");
     printf("   -f filter:    filtervalue for 'sec' demux [-f 0]\n");
-    printf("   -f maxdmx:    max demux filters to use in pidscan mode\n");
     printf("   -m mask:      maskvalue for 'sec' demux [-m 0]\n");
     printf("   -crc:         CRC check when reading 'sec' [-nocrc]\n");
     printf("   -nocrc:       No CRC check when reading 'sec' [-nocrc]\n");
     printf("   -sync:        Simple packet header sync when reading 'ts' or 'pes' [-snyc]\n");
     printf("   -nosync:      No header sync when reading 'ts' or 'pes' [-snyc]\n");
-    printf("   -n count:     receive count packets (0=no limit) [-n 0]\n");
+    printf("   -n count:     receive/read max. <count> packets (0=no limit) [-n 0]\n");
+//    printf("   -N count:     decode max. <count> packets (0=no limit) [-N 0]\n");
     printf("   -spiderpid:   snoop referenced section pids (sets -n 1) \n");
     printf("   -tssubdecode: sub-decode sections or pes from ts stream decoding\n");
     printf("   -b:           binary output of packets (disables other output)\n");
-    printf("   -if:          input file, reads from binary file instead of demux device\n");
+    printf("   -if file:     input file, reads from binary <file> instead of demux device\n");
     printf("   -ph mode:     data hex dump mode, modes: [-ph 4]\n");
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
     printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer -ph 0]\n");

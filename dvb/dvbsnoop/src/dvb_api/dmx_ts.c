@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.26 2004/09/01 20:20:34 rasc Exp $
+$Id: dmx_ts.c,v 1.27 2004/10/12 20:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dmx_ts.c,v 1.26 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.27  2004/10/12 20:37:47  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.26  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -269,6 +274,11 @@ int  doReadTS (OPTION *opt)
 
     } else {
 
+       int   is_ts_packet = 1;
+       int   filter_match = 1;
+
+
+
        // -- subdecode prev. collected TS data
        if (opt->printdecode && opt->ts_subdecode) {
 	       ts2SecPes_subdecode (b, n, opt->pid);
@@ -280,14 +290,37 @@ int  doReadTS (OPTION *opt)
        print_packet_header (opt, "TS", opt->pid, count, n, skipped_bytes);
 
 
-       if (opt->buffer_hexdump) {
+	// -- SyncByte for TS packet and correct len?
+	if (b[0] != 0x47) {
+	   out_nl (3,"!!! SyncByte is wrong (= no TS)!!!\n");
+	   is_ts_packet = 0; 
+ 	}
+	if (n != 188) {
+	   out_nl (3,"Fixed packet length is wrong (not 188)!!!\n");
+	   is_ts_packet = 0; 
+ 	}
+
+
+	// -- filter pid?  (e.g. if multi-pid-ts-file)
+	if ((opt->pid >= 0) && (opt->pid <= MAX_PID) && is_ts_packet) {
+	   int packet_pid = getBits (b, 0,11, 13);
+	   if (opt->pid != packet_pid) {
+ 		out_SW_NL(6,"skipped packet, assigned PID: ",packet_pid);
+		filter_match = 0;
+	   }
+ 	}
+
+
+
+       // hex output (also on wrong packets)
+       if (opt->buffer_hexdump && filter_match) {
            printhex_buf (0, b, n);
            out_NL(0);
        }
 
 
-       // decode protocol
-       if (opt->printdecode) {
+       // decode protocol (if ts packet)
+       if (opt->printdecode && is_ts_packet && filter_match) {
           decodeTS_buf (b, n ,opt->pid);
           out_nl (3,"==========================================================");
           out_NL (3);
@@ -306,8 +339,8 @@ int  doReadTS (OPTION *opt)
 
 
     // count packets ?
-    if (opt->packet_count > 0) {
-       if (count >= opt->packet_count) break;
+    if (opt->rd_packet_count > 0) {
+       if (count >= opt->rd_packet_count) break;
     }
 
 

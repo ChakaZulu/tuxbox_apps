@@ -1,5 +1,5 @@
 /*
-$Id: fe_signal.c,v 1.11 2004/04/05 17:32:13 rasc Exp $
+$Id: fe_signal.c,v 1.12 2004/10/12 20:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,11 @@ $Id: fe_signal.c,v 1.11 2004/04/05 17:32:13 rasc Exp $
 
 
 $Log: fe_signal.c,v $
+Revision 1.12  2004/10/12 20:37:47  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.11  2004/04/05 17:32:13  rasc
 mass typo fix adaption --> adaptation
 
@@ -120,8 +125,8 @@ int  do_SignalStrength (OPTION *opt)
    out_NL (2);
    out_nl (2,"---------------------------------------------------------");
    out_nl (2,"Transponder/Frequency signal strength statistics...");
-   if (opt->packet_count > 0) {
-	   out_nl (2,"max cycle count: %ld ", opt->packet_count);
+   if (opt->rd_packet_count > 0) {
+	   out_nl (2,"max cycle count: %ld ", opt->rd_packet_count);
    }
    out_nl (9,"Capabilities: BER: %d  SNR: %d  SIG: %d  STAT: %d  UBLK: %d",
 		   has.ber, has.snr, has.strength, has.status, has.ublocks);
@@ -179,7 +184,7 @@ int  do_SignalStrength (OPTION *opt)
 
 
 	// count cycles? ?
-	if (opt->packet_count && (opt->packet_count <= count)) break;
+	if (opt->rd_packet_count && (opt->rd_packet_count <= count)) break;
 
   } // while
 

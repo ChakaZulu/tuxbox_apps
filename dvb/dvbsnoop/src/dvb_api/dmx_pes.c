@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.28 2004/09/01 20:20:34 rasc Exp $
+$Id: dmx_pes.c,v 1.29 2004/10/12 20:37:47 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,11 @@ $Id: dmx_pes.c,v 1.28 2004/09/01 20:20:34 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.29  2004/10/12 20:37:47  rasc
+ - Changed: TS pid filtering from file, behavior changed
+ - New: new cmdline option -maxdmx <n>  (replaces -f using pidscan)
+ - misc. changes
+
 Revision 1.28  2004/09/01 20:20:34  rasc
 new cmdline option: -buffersize KB  (set demux buffersize in KBytes)
 
@@ -288,8 +293,8 @@ int  doReadPES (OPTION *opt)
 
 
     // count packets ?
-    if (opt->packet_count > 0) {
-       if (count >= opt->packet_count) break;
+    if (opt->rd_packet_count > 0) {
+       if (count >= opt->rd_packet_count) break;
     }
 
 
