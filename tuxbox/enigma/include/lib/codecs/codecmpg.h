@@ -4,6 +4,7 @@
 #define __lib_codecs_codecmpg_h
 
 #include <map>
+#include <set>
 #include <lib/base/buffer.h>
 #include <lib/codecs/codec.h>
 
@@ -28,6 +29,7 @@ class eMPEGDemux: public eAudioDecoder
 	unsigned long getBits(unsigned int num);
 	void syncBits();
 	std::map<int,int> audiostreams;
+	std::set<unsigned char> videostreams;
 	int synced;
 	int fd;
 	std::list<syncAudioPacket> syncbuffer;

@@ -245,10 +245,11 @@ a:
 				case 0xE0 ... 0xEF:  // Video Stream
 				{
 					int length=getBits(16);
-					if ( length > minFrameLength )
+					if ( (length+6) > minFrameLength )
 					{
-						if ( (minFrameLength+2048) > length )
-							minFrameLength=length;
+						
+						if ( (minFrameLength+2048) > (length+6) )
+							minFrameLength=length+6;
 						else
 							minFrameLength+=2048;
 						eDebug("minFrameLength now %d", minFrameLength );
@@ -356,10 +357,16 @@ a:
 							}
 						}
 					}
-					if (code == 0xE0)
+					if (code > 0xDF && code < 0xF0)
 					{
-						video.write(buffer, p);
-						written+=p;
+						videostreams.insert(code);
+						if ( code != 0xE0 && videostreams.find(240) != videostreams.end() )
+							; // dont play video streams != 0xE0 when 0xE0 is avail...
+						else
+						{
+							video.write(buffer, p);
+							written+=p;
+						}
 					}
 					else if ( code == curAudioStreamID )
 					{
