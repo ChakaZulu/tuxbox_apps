@@ -321,10 +321,10 @@ void CLCD::showMP3(const std::string artist, const std::string title,
 	}
 	// reload specified line
 	display.draw_fill_rect (-1,10,106,24, CLCDDisplay::PIXEL_OFF);
-	display.draw_fill_rect (-1,20,121,37, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (-1,20,106,37, CLCDDisplay::PIXEL_OFF);
 	display.draw_fill_rect (-1,33,121,50, CLCDDisplay::PIXEL_OFF);
 	fonts.menu->RenderString(0,22, 111, artist.c_str() , CLCDDisplay::PIXEL_ON, 0);
-	fonts.menu->RenderString(0,35, 125, album.c_str() , CLCDDisplay::PIXEL_ON, 0);
+	fonts.menu->RenderString(0,35, 111, album.c_str() , CLCDDisplay::PIXEL_ON, 0);
 	fonts.menu->RenderString(0,48, 125, title.c_str() , CLCDDisplay::PIXEL_ON, 0);
 	display.update();
 }

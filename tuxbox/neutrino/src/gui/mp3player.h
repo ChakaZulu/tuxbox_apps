@@ -97,6 +97,8 @@ class CMP3PlayerGui : public CMenuTarget
 		void paint();
 		void paintHead();
 		void paintFoot();
+		void paintInfo();
+		void paintLCD();
 		void hide();
 
 		void get_id3(CMP3 * mp3);

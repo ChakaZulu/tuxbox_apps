@@ -402,7 +402,6 @@ bool CFileBrowser::exec(string Dirname)
 					else
 					{
 						filelist[selected].Marked = true;
-						printf("Mark %s\n",filelist[selected].Name.c_str());
 						loop = false;
 						res = true;
 					}

@@ -215,12 +215,11 @@ int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 			break;
 	}
 
-	fprintf(fp,"%s: %lu kb/s audio mpeg layer %s stream %s crc, "
-			"%s with %s emphasis at %d Hz sample rate\n",
-			ProgName,Header->bitrate,Layer,
-			Header->flags&MAD_FLAG_PROTECTION?"with":"without",
-			Mode,Emphasis,Header->samplerate);
-	fprintf(fp,"This roxx!;)\n");
+//	fprintf(fp,"%s: %lu kb/s audio mpeg layer %s stream %s crc, "
+//			"%s with %s emphasis at %d Hz sample rate\n",
+//			ProgName,Header->bitrate,Layer,
+//			Header->flags&MAD_FLAG_PROTECTION?"with":"without",
+//			Mode,Emphasis,Header->samplerate);
    sprintf(m_mp3info,"%lukbs / %.1fKHz / %s / layer %s",Header->bitrate/1000,(float)Header->samplerate/1000,
            Mode,Layer);
 	return(ferror(fp));
@@ -233,8 +232,6 @@ int CMP3Player::PrintFrameInfo(FILE *fp, struct mad_header *Header)
 #define OUTPUT_BUFFER_SIZE	8192 /* Must be an integer multiple of 4. */
 int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 {
-	printf("Start audio decoder\n");
-
 	struct mad_stream	Stream;
 	struct mad_frame	Frame;
 	struct mad_synth	Synth;
@@ -493,8 +490,8 @@ int CMP3Player::MpegAudioDecoder(FILE *InputFp,FILE *OutputFp)
 		 */
 		mad_timer_string(Timer,Buffer,"%lu:%02lu.%03u",
 						 MAD_UNITS_MINUTES,MAD_UNITS_MILLISECONDS,0);
-		fprintf(stderr,"%s: %lu frames decoded (%s).\n",
-				ProgName,FrameCount,Buffer);
+//		fprintf(stderr,"%s: %lu frames decoded (%s).\n",
+//				ProgName,FrameCount,Buffer);
 	}
 
 	/* That's the end of the world (in the H. G. Wells way). */

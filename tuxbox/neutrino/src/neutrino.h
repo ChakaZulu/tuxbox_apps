@@ -202,6 +202,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 
 		int getMode() {return mode;}
 		int getLastMode() {return lastMode;}
+		bool isMuted() {return current_muted;}
 
 	friend class CNeutrinoBouquetEditorEvents;
 };

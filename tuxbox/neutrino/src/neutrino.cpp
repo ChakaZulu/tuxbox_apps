@@ -2910,7 +2910,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		}
 	}
 
-	if( isEvent && ( mode != mode_scart ) )
+	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3))
 	{
 		// anzeigen NUR, wenn es vom Event kommt
 		if( current_muted )
@@ -3341,7 +3341,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.393 2003/01/26 15:07:11 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.394 2003/01/26 18:08:51 zwen Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 
