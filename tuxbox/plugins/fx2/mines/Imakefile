@@ -15,5 +15,8 @@ mines.so: somain.o $(OBJS)
 	$(CC) -o mines.so -shared -Wl,-soname,mines.so somain.o $(OBJS)
 	$(STRIP) mines.so
 
+InstallMultipleFlags(mines.so,../../mczap/neutrinoNG/games,-m 755)
+InstallMultipleFlags(mines.cfg,../../mczap/neutrinoNG/games,-m 644)
+
 clean::
 	rm -f mines.so

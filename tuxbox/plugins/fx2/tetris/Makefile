@@ -744,6 +744,24 @@ tetris.so: somain.o $(OBJS)
 	$(CC) -o tetris.so -shared -Wl,-soname,tetris.so somain.o $(OBJS)
 	$(STRIP) tetris.so
 
+install:: tetris.so
+	@if [ -d $(DESTDIR)../../mczap/neutrinoNG/games ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)../../mczap/neutrinoNG/games); fi
+	@for flag in ${MAKEFLAGS} ''; do \
+	case "$$flag" in *=*) ;; *[i]*) set +e;; esac; done; \
+	for i in tetris.so; do \
+	(set -x; $(INSTALL) $(INSTALLFLAGS) -m 755 $$i $(DESTDIR)../../mczap/neutrinoNG/games); \
+	done
+
+install:: tetris.cfg
+	@if [ -d $(DESTDIR)../../mczap/neutrinoNG/games ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)../../mczap/neutrinoNG/games); fi
+	@for flag in ${MAKEFLAGS} ''; do \
+	case "$$flag" in *=*) ;; *[i]*) set +e;; esac; done; \
+	for i in tetris.cfg; do \
+	(set -x; $(INSTALL) $(INSTALLFLAGS) -m 644 $$i $(DESTDIR)../../mczap/neutrinoNG/games); \
+	done
+
 clean::
 	rm -f tetris.so
 

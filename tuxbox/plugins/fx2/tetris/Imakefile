@@ -15,5 +15,8 @@ tetris.so: somain.o $(OBJS)
 	$(CC) -o tetris.so -shared -Wl,-soname,tetris.so somain.o $(OBJS)
 	$(STRIP) tetris.so
 
+InstallMultipleFlags(tetris.so,../../mczap/neutrinoNG/games,-m 755)
+InstallMultipleFlags(tetris.cfg,../../mczap/neutrinoNG/games,-m 644)
+
 clean::
 	rm -f tetris.so

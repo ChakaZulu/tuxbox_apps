@@ -744,6 +744,24 @@ mines.so: somain.o $(OBJS)
 	$(CC) -o mines.so -shared -Wl,-soname,mines.so somain.o $(OBJS)
 	$(STRIP) mines.so
 
+install:: mines.so
+	@if [ -d $(DESTDIR)../../mczap/neutrinoNG/games ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)../../mczap/neutrinoNG/games); fi
+	@for flag in ${MAKEFLAGS} ''; do \
+	case "$$flag" in *=*) ;; *[i]*) set +e;; esac; done; \
+	for i in mines.so; do \
+	(set -x; $(INSTALL) $(INSTALLFLAGS) -m 755 $$i $(DESTDIR)../../mczap/neutrinoNG/games); \
+	done
+
+install:: mines.cfg
+	@if [ -d $(DESTDIR)../../mczap/neutrinoNG/games ]; then set +x; \
+	else (set -x; $(MKDIRHIER) $(DESTDIR)../../mczap/neutrinoNG/games); fi
+	@for flag in ${MAKEFLAGS} ''; do \
+	case "$$flag" in *=*) ;; *[i]*) set +e;; esac; done; \
+	for i in mines.cfg; do \
+	(set -x; $(INSTALL) $(INSTALLFLAGS) -m 644 $$i $(DESTDIR)../../mczap/neutrinoNG/games); \
+	done
+
 clean::
 	rm -f mines.so
 
