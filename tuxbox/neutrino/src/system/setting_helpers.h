@@ -66,6 +66,15 @@ class CCableSpectalInversionNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 
+class CLcdNotifier : public CChangeObserver
+{
+	private:
+		int *LcdPowerSetting, *LcdInverseSetting;
+	public:
+		CLcdNotifier(int *lcdPowerSetting,int *lcdInverseSetting);
+		bool changeNotify(string OptionName, void*);
+};
+
 class CStartNeutrinoDirectNotifier : public CChangeObserver
 {
 	public:

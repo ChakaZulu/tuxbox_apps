@@ -59,6 +59,7 @@ bool CSatDiseqcNotifier::changeNotify(string OptionName, void* Data)
 		extMenu->setActive(true);
 		repeatMenu->setActive(true);
 	}
+	return true;
 }
 
 CDHCPNotifier::CDHCPNotifier( CMenuForwarder* a1, CMenuForwarder* a2, CMenuForwarder* a3, CMenuForwarder* a4, CMenuForwarder* a5, CMenuForwarder* a6)
@@ -107,6 +108,21 @@ bool CDHCPNotifier::changeNotify(string OptionName, void*)
 	startStopDhcp();
 	for(int x=0;x<6;x++)
 		toDisable[x]->setActive(g_settings.network_dhcp==0);
+	return true;
+}
+
+CLcdNotifier::CLcdNotifier(int *lcdPowerSetting,int *lcdInverseSetting)
+{
+	LcdPowerSetting = lcdPowerSetting;
+	LcdInverseSetting = lcdInverseSetting;
+}
+
+bool CLcdNotifier::changeNotify(string OptionName, void*)
+{
+	g_lcdd->setPower(*LcdPowerSetting == 1);
+	g_lcdd->setInverse(*LcdInverseSetting == 1);
+	g_lcdd->update();
+	return true;
 }
 
 
@@ -127,11 +143,14 @@ bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 		{
 			fclose(fd);
 		}
+		else
+			return false;
 	}
 	else
 	{
 		remove("/var/etc/.specinv");
 	}
+	return true;
 }
 
 bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
@@ -143,11 +162,14 @@ bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 		{
 			fclose(fd);
 		}
+		else
+			return false;
 	}
 	else
 	{
 		remove("/var/etc/.neutrino");
 	}
+	return true;
 }
 
 bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
@@ -155,12 +177,13 @@ bool CIPChangeNotifier::changeNotify(string OptionName, void* Data)
 	int ip_1, ip_2, ip_3, ip_4;
 	sscanf( (char*) Data, "%d.%d.%d.%d", &ip_1, &ip_2, &ip_3, &ip_4 );
 	sprintf( g_settings.network_broadcast, "%d.%d.%d.255", ip_1, ip_2, ip_3 );
+	return true;
 }
 
 bool CColorSetupNotifier::changeNotify(string OptionName, void*)
 {
 	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
-	unsigned char r,g,b;
+//	unsigned char r,g,b;
 	//setting colors-..
 	frameBuffer->paletteGenFade(COL_MENUHEAD,
 	                              convertSetupColor2RGB(g_settings.menu_Head_red, g_settings.menu_Head_green, g_settings.menu_Head_blue),
@@ -254,7 +277,7 @@ bool CKeySetupNotifier::changeNotify(string OptionName, void*)
 int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
-	int sel= atoi(actionKey.c_str());
+	unsigned int sel= atoi(actionKey.c_str());
 	if (g_RemoteControl->current_PIDs.PIDs.selected_apid!= sel )
 	{
 		g_RemoteControl->setAPID(sel);
@@ -317,6 +340,7 @@ int CUCodeCheckExec::exec(CMenuTarget* parent, string actionKey)
 	text= text+ "\n"+ buf;
 
 	ShowMsg( "ucodecheck.head", text, CMessageBox::mbrBack, CMessageBox::mbBack );
+	return 1;
 }
 
 void setNetworkAddress(char* ip, char* netmask, char* broadcast)
@@ -356,17 +380,18 @@ void setNameServer(char* ip)
 }
 
 string mypinghost(char* host)
-	{
-	int retvalue=0;
+{
+int retvalue=0;
 	retvalue = pinghost(host);
 	switch (retvalue)
-		{
+	{
 		case 1: return ( g_Locale->getText("ping.ok") );
 		case 0: return ( g_Locale->getText("ping.unreachable") );
 		case -1: return ( g_Locale->getText("ping.protocol") );
 		case -2: return ( g_Locale->getText("ping.socket") );
-		}
 	}
+	return "";
+}
 
 void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway, char* nameserver)
 {

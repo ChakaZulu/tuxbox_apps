@@ -48,6 +48,7 @@
 #include "gui/widget/messagebox.h"
 #include "gui/widget/hintbox.h"
 #include "gui/widget/colorchooser.h"
+#include "gui/widget/lcdcontroler.h"
 #include "gui/widget/keychooser.h"
 #include "gui/widget/stringinput.h"
 #include "gui/widget/stringinput_ext.h"
@@ -893,8 +894,8 @@ void CNeutrinoApp::ClearFrameBuffer()
 }
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
-                                CMenuWidget &networkSettings, CMenuWidget &streamingSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings,
-                                CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
+                                CMenuWidget &networkSettings, CMenuWidget &streamingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings, 
+								CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem( new CMenuSeparator() );
@@ -932,6 +933,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainSettings.addItem( new CMenuForwarder("mainsettings.streaming", true, "", &streamingSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.language", true, "", &languageSettings ) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.colors", true,"", &colorSettings) );
+	mainSettings.addItem( new CMenuForwarder("mainsettings.lcd", true,"", &lcdSettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.keybinding", true,"", &keySettings) );
 	mainSettings.addItem( new CMenuForwarder("mainsettings.misc", true, "", &miscSettings ) );
 
@@ -1498,6 +1500,34 @@ void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_s
 	colorSettings_statusbarColors.addItem( new CMenuForwarder("colormenu.textcolor", true, "", chInfobarTextcolor ));
 }
 
+void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
+{
+	static int lcdpower = g_lcdd->getPower()?1:0;
+	static int lcdinverse = g_lcdd->getInverse()?1:0;
+	dprintf(DEBUG_DEBUG, "init lcdsettings\n");
+	lcdSettings.addItem( new CMenuSeparator() );
+
+	lcdSettings.addItem( new CMenuForwarder("menu.back") );
+	lcdSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+
+	CLcdControler* lcdsliders = new CLcdControler("lcdmenu.head", NULL);
+
+	CLcdNotifier* lcdnotifier = new CLcdNotifier(&lcdpower,&lcdinverse);
+
+	CMenuOptionChooser* oj = new CMenuOptionChooser("lcdmenu.inverse", &lcdinverse, true, lcdnotifier );
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	lcdSettings.addItem( oj );
+	
+	oj = new CMenuOptionChooser("lcdmenu.power", &lcdpower, true, lcdnotifier );
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	lcdSettings.addItem( oj );
+	
+	lcdSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	lcdSettings.addItem( new CMenuForwarder("lcdmenu.lcdcontroler", true, "", lcdsliders ));
+}
+
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
 	dprintf(DEBUG_DEBUG, "init keysettings\n");
@@ -1613,7 +1643,7 @@ void CNeutrinoApp::SelectAPID()
 		CMenuWidget APIDSelector("apidselector.head", "audio.raw", 300);
 		APIDSelector.addItem( new CMenuSeparator() );
 
-		for( int count=0; count<g_RemoteControl->current_PIDs.APIDs.size(); count++ )
+		for( unsigned int count=0; count<g_RemoteControl->current_PIDs.APIDs.size(); count++ )
 		{
 			char apid[5];
 			sprintf(apid, "%d", count);
@@ -1635,7 +1665,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
     g_PluginList->loadPlugins();
 
-	for(unsigned int count=0;count<g_PluginList->getNumberOfPlugins();count++)
+	for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 	{
     	if ( g_PluginList->getType(count)== 2 )
     	{
@@ -1784,14 +1814,15 @@ int CNeutrinoApp::run(int argc, char **argv)
 	CMenuWidget parentallockSettings("parentallock.parentallock", "lock.raw", 500);
 	CMenuWidget networkSettings("networkmenu.head", "network.raw");
 	CMenuWidget streamingSettings("streamingmenu.head", "streaming.raw");
-	CMenuWidget colorSettings("colormenu.head", "colors.raw");
+	CMenuWidget colorSettings("colormenu.head", "colors.raw");	
+	CMenuWidget lcdSettings("lcdmenu.head", "lcd.raw");
 	CMenuWidget keySettings("keybindingmenu.head", "keybinding.raw", 400, 460);
 	CMenuWidget miscSettings("miscsettings.head", "settings.raw");
 	CMenuWidget scanSettings("servicemenu.scants", "settings.raw");
 	CMenuWidget service("servicemenu.head", "settings.raw");
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, streamingSettings,
-	             colorSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
+	             colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings, service);
 
 	//service
 	InitServiceSettings(service, scanSettings);
@@ -1882,6 +1913,9 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	//color Setup
 	InitColorSettings(colorSettings);
+
+	//LCD Setup
+	InitLcdSettings(lcdSettings);
 
 	//keySettings
 	InitKeySettings(keySettings);
@@ -2023,7 +2057,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					g_EpgData->show( channelList->getActiveChannelOnid_sid() );
 
 				}
-				else if ( msg == g_settings.key_tvradio_mode )
+				else if ( msg == (uint) g_settings.key_tvradio_mode )
 				{
 					if ( mode == mode_tv )
 					{
@@ -2081,7 +2115,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				{	// NVODs
 					SelectNVOD();
 				}
-				else if ( ( msg == g_settings.key_quickzap_up ) || ( msg == g_settings.key_quickzap_down ) )
+				else if ( ( msg == (uint) g_settings.key_quickzap_up ) || ( msg == (uint) g_settings.key_quickzap_down ) )
 				{
 					//quickzap
 					channelList->quickZap( msg );
@@ -2104,12 +2138,12 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 					else
 						channelList->numericZap( msg );
 				}
-				else if ( msg == g_settings.key_subchannel_up )
+				else if ( msg == (uint) g_settings.key_subchannel_up )
 				{
 					g_RemoteControl->subChannelUp();
 					g_InfoViewer->showSubchan();
 				}
-				else if ( msg == g_settings.key_subchannel_down )
+				else if ( msg == (uint) g_settings.key_subchannel_down )
 				{
 					g_RemoteControl->subChannelDown();
 					g_InfoViewer->showSubchan();
@@ -2694,7 +2728,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.297 2002/07/05 23:52:37 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.298 2002/07/07 17:41:25 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

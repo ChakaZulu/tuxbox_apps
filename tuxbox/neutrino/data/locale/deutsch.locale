@@ -43,6 +43,7 @@ mainsettings.video Video
 mainsettings.network Netzwerk
 mainsettings.streaming Streamingserver
 mainsettings.colors Farben / Themes
+mainsettings.lcd LCD - Einstellungen
 mainsettings.keybinding Tasten-Einstellungen
 mainsettings.misc Diverse Einstellungen
 mainsettings.scan Einstellungen Kanalsuche
@@ -163,6 +164,16 @@ colorchooser.red rot
 colorchooser.green grün
 colorchooser.blue blau
 colorchooser.alpha alpha
+
+lcdmenu.head LCD Settings
+lcdmenu.inverse Invertieren
+lcdmenu.power Power
+lcdmenu.lcdcontroler Kontrast / Helligkeit
+
+lcdcontroler.head LCD Stettings
+lcdcontroler.contrast Kontrast
+lcdcontroler.brightness normale Helligkeit 
+lcdcontroler.brightnessstandby Standby Helligkeit
 
 keychoosermenu.setnew Neue Taste einstellen
 keychoosermenu.setnone Keine Taste

@@ -43,6 +43,7 @@ mainsettings.video Video
 mainsettings.network Network
 mainsettings.streaming Streamingserver
 mainsettings.colors Colors
+mainsettings.lcd LCD Settings
 mainsettings.keybinding Key Setup
 mainsettings.misc Misc Settings
 mainsettings.scan Scan settings
@@ -165,6 +166,16 @@ colorchooser.red red
 colorchooser.green green
 colorchooser.blue blue
 colorchooser.alpha alpha
+
+lcdmenu.head LCD Settings
+lcdmenu.inverse Invert
+lcdmenu.power Power
+lcdmenu.lcdcontroler Contrast / Brightness
+
+lcdcontroler.head LCD Stettings
+lcdcontroler.contrast Contrast
+lcdcontroler.brightness normale Brightness
+lcdcontroler.brightnessstandby Standby Brightness
 
 keychoosermenu.setnew setup new key
 keychoosermenu.setnone no key
