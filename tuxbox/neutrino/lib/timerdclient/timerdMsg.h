@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-
+	$Id: timerdMsg.h,v 1.6 2002/05/14 23:08:00 dirch Exp $
 
 	License: GPL
 
@@ -35,6 +35,7 @@
 #include <sys/un.h>
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -46,6 +47,14 @@ class CTimerd
 {
 
 	public:
+
+		struct EventInfo
+		{
+			int      uniqueKey;
+			int      onidSid;
+			char     name[50];
+			int      fsk;
+		};
 
 		static const char ACTVERSION = 1;
 
@@ -72,14 +81,20 @@ class CTimerd
 
 		struct commandAddTimer
 		{
+			int   evType;
 			int   month;
 			int   day;
 			int   hour;
 			int   min;
-			int   evType;
 		};
 
+
 		struct responseAddTimer
+		{
+			int   eventID;
+		};
+
+		struct commandRemoveTimer
 		{
 			int   eventID;
 		};
@@ -88,6 +103,30 @@ class CTimerd
 		{
 			bool available;
 		};
+		
+		struct commandGetTimer
+		{
+			int   eventID;
+		};
+
+		struct commandSetStandby
+		{
+			bool standby_on;
+		};
+
+		struct responseGetTimer
+		{			
+			int	  eventID;
+			int   month;
+			int   day;
+			int   hour;
+			int   min;
+			int   eventType;
+			unsigned data;
+		};
+		typedef std::vector<responseGetTimer> TimerList;
+
+
 };
 
 #endif
