@@ -1,6 +1,7 @@
 #include "eprogress.h"
 #include "fb.h"
 #include <qrect.h>
+#include <stdlib.h>
 #include "lcd.h"
 #include "eskin.h"
 
@@ -10,6 +11,7 @@ eProgress::eProgress(eWidget *parent)
 	left=eSkin::getActive()->queryScheme("eProgress.left");
 	right=eSkin::getActive()->queryScheme("eProgress.right");
 	perc=0;
+	border=2;
 	setForegroundColor(eSkin::getActive()->queryScheme("eProgress.border"));
 }
 
@@ -25,20 +27,20 @@ void eProgress::setPerc(int p)
 
 void eProgress::redrawWidget(gPainter *target, const QRect &area)
 {
-	int dh=perc*(size.width()-4)/100;
+	int dh=perc*(size.width()-border*2)/100;
 	if (dh<0)
 		dh=0;
-	if (dh>(size.width()-4))
-		dh=size.width()-4;
+	if (dh>(size.width()-border*2))
+		dh=size.width()-border*2;
 	target->setForegroundColor(getForegroundColor());
-	target->fill(QRect(0, 0, size.width(), 2));
-	target->fill(QRect(0, 2, 2, size.height()-2));
-	target->fill(QRect(2, size.height()-2, size.width()-2, 2));
-	target->fill(QRect(size.width()-2, 2, 2, size.height()-2));
+	target->fill(QRect(0, 0, size.width(), border));
+	target->fill(QRect(0, border, border, size.height()-border));
+	target->fill(QRect(border, size.height()-border, size.width()-border, border));
+	target->fill(QRect(size.width()-border, border, border, size.height()-border));
 	target->setForegroundColor(left);
-	target->fill(QRect(2, 2, dh, size.height()-4));
+	target->fill(QRect(border, border, dh, size.height()-border*2));
 	target->setForegroundColor(right);
-	target->fill(QRect(2+dh, 2, size.width()-4-dh, size.height()-4));
+	target->fill(QRect(border+dh, border, size.width()-border*2-dh, size.height()-border*2));
 }
 
 int eProgress::setProperty(const QString &prop, const QString &value)
@@ -47,6 +49,8 @@ int eProgress::setProperty(const QString &prop, const QString &value)
 		left=eSkin::getActive()->queryColor(value);
 	else if (prop=="rightColor")
 		right=eSkin::getActive()->queryColor(value);
+	else if (prop=="border")
+		border=atoi(value);
 	else
 		return eWidget::setProperty(prop, value);
 	return 0;

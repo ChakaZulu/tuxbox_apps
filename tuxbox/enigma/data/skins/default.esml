@@ -103,7 +103,7 @@
 			<eLabel position="0:0" size="70:18" font="NimbusSansL-Regular Sans L Regular;16" text="Enigma" />
 			<eLabel position="0:20" size="120:30" font="NimbusSansL-Regular Sans L Regular;15" wrap="on" name="service_name" />
 			<eLabel position="74:48" size="46:16" font="NimbusSansL-Regular Sans L Regular;16" name="clock" />
-			<eProgress position="0:57" size="64:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0"/>
+			<eProgress position="0:57" size="64:6" name="volume_bar" foregroundColor="255" leftColor="255" rightColor="0" border="1" />
 		</eZapLCDMain>
 	</object> 
 	
