@@ -1,5 +1,5 @@
 /*
-$Id: tva_rnt_descriptor.c,v 1.1 2004/08/06 22:21:38 rasc Exp $ 
+$Id: tva_rnt_descriptor.c,v 1.2 2004/08/27 23:25:52 rasc Exp $ 
 
 
  DVBSNOOP
@@ -17,6 +17,10 @@ $Id: tva_rnt_descriptor.c,v 1.1 2004/08/06 22:21:38 rasc Exp $
 
 
 $Log: tva_rnt_descriptor.c,v $
+Revision 1.2  2004/08/27 23:25:52  rasc
+ - Update: changes due to  EN 300 468 v1.6.1
+ - Bugfix: Multilingual component descriptor  (tnx to Karsten Siebert)
+
 Revision 1.1  2004/08/06 22:21:38  rasc
 New: TV-Anytime (TS 102 323) RNT descriptors 0x40 - 0x42
 
@@ -144,8 +148,8 @@ void descriptorTVA_RAR_over_DVB_stream (u_char *b)
   outBit_S2x_NL (4,"Original_network_id: ",	b, 120, 16,
 			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
   outBit_Sx_NL  (4,"transport_stream_ID: ",	b, 132, 16);
-  outBit_Sx     (4,"service_ID: ",		b, 148, 16);
-		out_nl (4," --> refers to PMT program_number"); 
+  outBit_S2Tx_NL(4,"service_ID: ",		b, 148, 16,
+			" --> refers to PMT program_number"); 
   outBit_Sx_NL  (4,"component_tag: ",		b, 164,  8);
   //  ---
 

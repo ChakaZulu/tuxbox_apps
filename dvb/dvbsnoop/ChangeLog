@@ -1,4 +1,6 @@
 
+ - Update: changes due to  EN 300 468 v1.6.1
+ - Bugfix: Multilingual component descriptor  (tnx to Karsten Siebert)
  - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
  - Change: FE adaptions (due to change defines on API)
  - Bugfix: multilang service descriptor fix  (tnx to Karsten Siebert)

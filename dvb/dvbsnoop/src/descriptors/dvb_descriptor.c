@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.38 2004/08/25 19:51:09 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.39 2004/08/27 23:25:52 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,10 @@ $Id: dvb_descriptor.c,v 1.38 2004/08/25 19:51:09 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.39  2004/08/27 23:25:52  rasc
+ - Update: changes due to  EN 300 468 v1.6.1
+ - Bugfix: Multilingual component descriptor  (tnx to Karsten Siebert)
+
 Revision 1.38  2004/08/25 19:51:09  rasc
  - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
 
@@ -298,13 +302,12 @@ int  descriptorDVB  (u_char *b)
 
 /*
   0x40 NetName  descriptor  (network name descriptor)
+  EN 300 468
+  -- checked v1.6.1
 */
 
 void descriptorDVB_NetName (u_char *b)
-
 {
- /* ETSI 300 468 */
-
   int  len;
 
   // tag	 = b[0];
@@ -318,58 +321,42 @@ void descriptorDVB_NetName (u_char *b)
 
 /*
   0x41 Service List Descriptor 
+  EN 300 468
+  -- adapted v1.6.1
 */
 
 void descriptorDVB_ServList (u_char *b)
-
 {
- /* ETSI 300 468  6.2.xx */
-
- typedef struct  _descServList {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    // N ... Service ID & Types
-
- } descServList;
+ int    len;
 
 
- typedef struct _descServList2 {
-    u_int      service_id;
-    u_int      service_type;
- } descServList2;
+ // tag 	= b[0];
+ len 		= b[1];
 
-
- descServList  d;
- descServList2 d2;
- int           len;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
-
- len = d.descriptor_length - 2;
- b += 2;
+ b   += 2;
+ len -= 2;
 
  indent (+1);
  while (len > 0) {
-   d2.service_id 		= getBits (b, 0, 0, 16);
-   d2.service_type 		= getBits (b, 0, 16, 8);
+   int	stype;
+
+   stype = b[2];   // prefetch service_type == (b, 16,8)
+
+   outBit_Sx (4,"service_ID: ", 	b,  0,  16);
+   if (stype != 0x04) {    // 0x04 = NVOD
+	out (4,	"[ --> refers to PMT program_number]");
+   }
+   out_NL (4);
+
+   outBit_S2x_NL  (4,"service_type: ", 	b, 16,  8,
+		 (char *(*)(u_long)) dvbstrService_TYPE );
+
    b   += 3;
    len -= 3;
-   
-
-    out_S2W_NL (4,"Service_ID: ",d2.service_id,
-	   " --> refers to PMT program_number");
-    out_S2B_NL (4,"Service_type: ",d2.service_type,
-	   dvbstrService_TYPE(d2.service_type));
-    out_NL (4);
+   out_NL (4);
 
  }
  indent (-1);
-
 
 }
 
@@ -394,12 +381,12 @@ void descriptorDVB_Stuffing (u_char *b)
 
 /*
   0x43 SatDelivSys  descriptor  (Satellite delivery system descriptor)
+  EN 300 468
+  -- adapted v1.6.1
 */
 
 void descriptorDVB_SatDelivSys (u_char *b)
-
 {
- /* ETSI 300 468    6.2.xx */
 
  typedef struct  _descSDS {
     u_int      descriptor_tag;
@@ -463,6 +450,8 @@ void descriptorDVB_SatDelivSys (u_char *b)
 
 /*
   0x44 CableDelivSys  descriptor  (Cable delivery system descriptor)
+  EN 300 468
+  -- adapted v1.6.1
 */
 
 void descriptorDVB_CableDelivSys (u_char *b)
@@ -529,6 +518,7 @@ void descriptorDVB_CableDelivSys (u_char *b)
 /*
   0x45  VBI Data  descriptor 
   ETSI EN 300 468  2.2.42
+  -- checked v1.6.1
 */
 
 void descriptorDVB_VBI_Data  (u_char *b)
@@ -631,55 +621,31 @@ void descriptorDVB_BouquetName  (u_char *b)
 /*
   0x48  Service  descriptor 
   ETSI EN 300 468   6.2.xx
+  -- checked v1.6.1
 */
 
 void descriptorDVB_Service  (u_char *b)
 
 {
-
- typedef struct  _descService {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      service_type;
-    u_int      service_provider_name_length;
-
-    // N   char 
-    // char   *service_provider_name;
-
-    u_int      service_name_length;
-
-    // N2  char
-    // char   *service_name;
-
- } descService;
+  int   len2;
 
 
- descService d;
+  // tag	= b[0];
+  // len = 	= b[1];
 
 
+  outBit_S2x_NL(4,"service_type: ",  	b,  16,  8,
+		 (char *(*)(u_long)) dvbstrService_TYPE );
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
+  len2 = outBit_Sx_NL (4,"service_provider_name_length: ",  	b,  24,  8);
+  b += 4;
+  print_text_468A     (4,"service_provider_name: ", b,len2);
+  b += len2;
 
- d.service_type			 = getBits (b, 0, 16, 8);
- d.service_provider_name_length  = getBits (b, 0, 24, 8);
 
-
- b += 4;
-
- out_S2B_NL (4,"Service_type: ",d.service_type,
-	dvbstrService_TYPE(d.service_type));
- out_SB_NL (5,"Service_provider_name_length: ",d.service_provider_name_length);
- print_text_468A (4, "Service_provider_name: ", b,d.service_provider_name_length);
- 
-
- b += d.service_provider_name_length;
- d.service_name_length		  = getBits (b, 0, 0, 8);
- b += 1;
-
- out_SW_NL (5,"Service_name_length: ",d.service_name_length);
- print_text_468A (4, "Service_name: ", b,d.service_name_length);
+  len2 = outBit_Sx_NL (4,"service_name_length: ",  		b,   0,  8);
+  b += 1;
+  print_text_468A (4, "Service_name: ", b,len2);
 
 }
 
@@ -690,51 +656,34 @@ void descriptorDVB_Service  (u_char *b)
 /*
   0x49  Country Availibility  descriptor 
   ETSI EN 300 468   6.2.xx
+  -- checked v1.6.1
 */
 
 void descriptorDVB_CountryAvail  (u_char *b)
 
 {
-
- typedef struct  _descCountryAvail {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      country_availability_flag;
-    u_int      reserved_1;
-
-    //  N   countrycodes[3]
-
- } descCountryAvail;
+ int     len;
 
 
- descCountryAvail d;
- int              len;
- u_char           country_code[4];
+ // tag 	= b[0];
+ len		= b[1];
 
+ outBit_Sx_NL (4,"country_availability_flag: ",  	b,  16,  1);
+ outBit_Sx_NL (6,"reserved: ", 			 	b,  17,  7);
 
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.country_availability_flag	 = getBits (b, 0, 16, 1);
- d.reserved_1			 = getBits (b, 0, 17, 7);
-
- 
- out_SB_NL (4,"country_availability_flag: ",d.country_availability_flag);
- out_SB_NL (6,"reserved_1: ",d.reserved_1);
-
- b  += 3;
- len = d.descriptor_length - 1;
+ b   += 3;
+ len -= 1;
 
  indent (+1);
  while (len > 0) {
-    strncpy (country_code, b, 3);
+    u_char  country_code[4];
+
+    strncpy (country_code, b, 3);	// 24 bit
     *(country_code+3) = '\0';
     b   += 3;
     len -= 3;
 
-    out_nl (4,"Country:  %3.3s",country_code);
+    out_nl (4,"country_code:  %3.3s",country_code);
  }
  indent (-1);
 
@@ -780,12 +729,12 @@ void descriptorDVB_Linkage (u_char *b)
  d.linkage_type			 = getBits (b, 0, 64, 8);
 
 
- out_SW_NL  (4,"Transport_stream_ID: ",d.transport_stream_id);
- out_S2W_NL (4,"Original_network_ID: ",d.original_network_id,
+ out_SW_NL  (4,"transport_stream_ID: ",d.transport_stream_id);
+ out_S2W_NL (4,"original_network_ID: ",d.original_network_id,
 	dvbstrOriginalNetwork_ID(d.original_network_id));
- out_S2W_NL (4,"Service_ID: ",d.service_id,
+ out_S2W_NL (4,"service_ID: ",d.service_id,
       " --> refers to PMT program_number");
- out_S2B_NL (4,"Linkage_type: ",d.linkage_type,
+ out_S2B_NL (4,"linkage_type: ",d.linkage_type,
 	dvbstrLinkage_TYPE (d.linkage_type));
 
  len = d.descriptor_length - 7;
@@ -1040,52 +989,30 @@ void sub_descriptorDVB_Linkage0x0C (u_char *b, int len)
 /*
   0x4B  NVOD Reference  descriptor 
   ETSI EN 300 468  6.2.xx
+  --- checked v1.6.1
 */
 
 void descriptorDVB_NVOD_Reference  (u_char *b)
-
 {
-
- typedef struct  _descNVODRef {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    // N ...  Ref2
- } descNVODRef;
-
- typedef struct  _descNVODRef2 {
-    u_int      transport_stream_id;
-    u_int      original_network_id;
-    u_int      service_id;
- } descNVODRef2;
-
-
- descNVODRef  d;
- descNVODRef2 d2;
  int          len;
 
 
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
+ // tag 	= b[0];
+ len		= b[1];
 
  b  += 2;
- len = d.descriptor_length;
 
  indent (+1);
  while (len > 0) {
-    d2.transport_stream_id	 = getBits (b, 0, 0, 16);
-    d2.original_network_id	 = getBits (b, 0, 16, 16);
-    d2.service_id		 = getBits (b, 0, 32, 16);
+    // $$$ TODO this part is re-usable
+    outBit_Sx_NL  (4,"transport_stream_ID: ",	b,   0, 16);
+    outBit_S2x_NL (4,"original_network_id: ",	b,  16, 16,
+			(char *(*)(u_long)) dvbstrOriginalNetwork_ID);
+    outBit_S2Tx_NL(4,"service_ID: ",		b,  32, 16,
+			" --> refers to PMT program_number"); 
 
     len -= 6;
     b   += 6;
-
-    out_SW_NL  (4,"Transport_stream_ID: ",d2.transport_stream_id);
-    out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
-	  dvbstrOriginalNetwork_ID(d2.original_network_id));
-    out_S2W_NL (4,"Service_ID: ",d2.service_id,
-        " --> refers to PMT program_number");
     out_NL (4);
  }
  indent (-1);
@@ -1101,31 +1028,15 @@ void descriptorDVB_NVOD_Reference  (u_char *b)
 /*
   0x4C  Time Shifted Service   descriptor 
   ETSI EN 300 468     6.2.xx
+  -- checked v1.6.1
 */
 
 void descriptorDVB_TimeShiftedService  (u_char *b)
-
 {
+  // tag		= b[0];
+  // len		= b[1];
 
- typedef struct  _descTimShiftServ {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      reference_service_id;
-
- } descTimShiftServ;
-
-
- descTimShiftServ  d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.reference_service_id		 = getBits (b, 0, 16, 16);
-
- out_SW_NL (4,"Reference_service_ID: ",d.reference_service_id);
+  outBit_Sx_NL  (4,"reference_service_ID: ",	b,   16, 16);
 
 }
 
@@ -1138,50 +1049,32 @@ void descriptorDVB_TimeShiftedService  (u_char *b)
 /*
   0x4D  Short Event  descriptor 
   ETSI EN 300 468     6.2.xx
+  -- checked v1.6.1
 */
 
 void descriptorDVB_ShortEvent  (u_char *b)
-
 {
-
- typedef struct  _descShortEvent {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_char     ISO639_2_language_code[4];
-    u_int      event_name_length;
-
-    // N   char event_name
-
-    u_int      text_length;
-
-    // N2  char  text char
-
- } descShortEvent;
+  int      len2;
+  u_char   ISO639_2_language_code[4];
 
 
- descShortEvent d;
+  // tag	= b[0];
+  // len	= b[1];
+
+ getISO639_3 (ISO639_2_language_code, b+2);
+ out_nl (4,"  ISO639_2_language_code:  %3.3s", ISO639_2_language_code);
+ b+= 5;
 
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- getISO639_3 (d.ISO639_2_language_code, b+2);
- out_nl (4,"  ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
-
-
- d.event_name_length		 = getBits (b, 5, 0, 8);
- b += 6;
-
- out_SB_NL (5,"Event_name_length: ",d.event_name_length);
- print_text_468A (4, "Event_name: ", b,d.event_name_length);
-
- b += d.event_name_length;
-
- d.text_length			 = getBits (b, 0, 0, 8);
+ len2 =  outBit_Sx_NL  (4,"event_name_length: ", b,  0, 8);
  b += 1;
- out_SB_NL (5,"Text_length: ",d.text_length);
- print_text_468A (4, "Text: ", b,d.text_length);
+ print_text_468A (4, "event_name: ", b,len2);
+ b += len2;
+
+
+ len2 =  outBit_Sx_NL  (4,"text_length: ", b,  0, 8);
+ b += 1;
+ print_text_468A (4, "text_char: ", b,len2);
 
 }
 
@@ -1193,10 +1086,10 @@ void descriptorDVB_ShortEvent  (u_char *b)
 /*
   0x4E  Extended Event  descriptor 
   ETSI EN 300 468     6.2.xx
+  -- checked v1.6.1
 */
 
 void descriptorDVB_ExtendedEvent  (u_char *b)
-
 {
 
  typedef struct  _descExtendedEvent {
@@ -1238,10 +1131,10 @@ void descriptorDVB_ExtendedEvent  (u_char *b)
  d.length_of_items		 = getBits (b, 0, 48, 8);
 
 
- out_SB_NL (4,"Descriptor_number: ",d.descriptor_number);
- out_SB_NL (4,"Last_descriptor_number: ",d.last_descriptor_number);
- out_nl    (4,"ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
- out_SB_NL (5,"Length_of_items: ",d.length_of_items);
+ out_SB_NL (4,"descriptor_number: ",d.descriptor_number);
+ out_SB_NL (4,"last_descriptor_number: ",d.last_descriptor_number);
+ out_nl    (4,"iSO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
+ out_SB_NL (5,"length_of_items: ",d.length_of_items);
 
 
  b   += 7;
@@ -1253,15 +1146,15 @@ void descriptorDVB_ExtendedEvent  (u_char *b)
  
    d2.item_description_length	 = getBits (b, 0, 0, 8);
    out_NL (4);
-   out_SB_NL (5,"Item_description_length: ",d2.item_description_length);
-   print_text_468A (4, "Item_description: ", b+1, d2.item_description_length);
+   out_SB_NL (5,"item_description_length: ",d2.item_description_length);
+   print_text_468A (4, "item_description: ", b+1, d2.item_description_length);
 
    b += 1 + d2.item_description_length;
    
 
    d2.item_length	 	 = getBits (b, 0, 0, 8);
-   out_SB_NL (5,"Item_length: ",d2.item_length);
-   print_text_468A (4, "Item: ", b+1, d2.item_length);
+   out_SB_NL (5,"item_length: ",d2.item_length);
+   print_text_468A (4, "item: ", b+1, d2.item_length);
 
    b += 1 + d2.item_length;
 
@@ -1279,8 +1172,8 @@ void descriptorDVB_ExtendedEvent  (u_char *b)
    lenB -= 1;
 
 
-   out_SB_NL (5,"Text_length: ",d.text_length);
-   print_text_468A (4, "Text: ", b,d.text_length);
+   out_SB_NL (5,"text_length: ",d.text_length);
+   print_text_468A (4, "text: ", b,d.text_length);
 
 }
 
@@ -1293,36 +1186,18 @@ void descriptorDVB_ExtendedEvent  (u_char *b)
 /*
   0x4F  Time Shifted Event  descriptor 
   ETSI EN 300 468     6.2.xx
+  --- checked v1.6.1
 */
 
 void descriptorDVB_TimeShiftedEvent  (u_char *b)
-
 {
 
- typedef struct  _descTimeShiftedEvent {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
+  // tag	= b[0];
+  // len	= b[1];
 
-    u_int      reference_service_id;
-    u_int      reference_event_id;
-
- } descTimeShiftedEvent;
-
-
- descTimeShiftedEvent d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.reference_service_id		 = getBits (b, 0, 16, 16);
- d.reference_event_id		 = getBits (b, 0, 32, 16);
-
+  outBit_Sx_NL  (4,"reference_service_id: ", b,  16, 16);
+  outBit_Sx_NL  (4,"reference_event_id: ",   b,  32, 16);
  
- out_SW_NL (4,"Reference_service_id: ",d.reference_service_id);
- out_SW_NL (4,"Reference_event_id: ",d.reference_service_id);
-
 }
 
 
@@ -1334,10 +1209,10 @@ void descriptorDVB_TimeShiftedEvent  (u_char *b)
 /*
   0x50  Component descriptor 
   ETSI EN 300 468     6.2.xx
+  -- checked v1.6.1
 */
 
 void descriptorDVB_Component  (u_char *b)
-
 {
 
  typedef struct  _descComponent {
@@ -1369,17 +1244,17 @@ void descriptorDVB_Component  (u_char *b)
  getISO639_3 (d.ISO639_2_language_code, b+5);	
 
  
- out_SB_NL (6,"reserved_1: ",d.reserved_1);
- out_SB_NL (4,"Stream_content: ",d.stream_content);
- out_SB_NL (4,"Component_type: ",d.component_type);
+ out_SB_NL (6,"reserved: ",d.reserved_1);
+ out_SB_NL (4,"stream_content: ",d.stream_content);
+ out_SB_NL (4,"component_type: ",d.component_type);
  out_nl    (4,"   == Content&Component: (= %s)",
       dvbstrStreamContent_Component_TYPE(
 	(d.stream_content << 8) | d.component_type ) );
 
- out_SB_NL (4,"Component_tag: ",d.component_tag);
- out_nl    (4,"ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
+ out_SB_NL (4,"component_tag: ",d.component_tag);
+ out_nl    (4,"ISO639_language_code:  %3.3s", d.ISO639_2_language_code);
 
- print_text_468A (4, "Component-Description: ", b+8,d.descriptor_length - 6);
+ print_text_468A (4, "component-description: ", b+8,d.descriptor_length - 6);
 
 }
 
@@ -1519,7 +1394,7 @@ void descriptorDVB_Mosaic  (u_char *b)
 	d2.bouquet_id		 = getBits (b, 0, 0, 16);
 	b    += 2;
 	len1 -= 2;
-	out_S2W_NL (4,"Bouquet_ID: ",d2.bouquet_id,dvbstrBouquetTable_ID(d2.bouquet_id));
+	out_S2W_NL (4,"bouquet_ID: ",d2.bouquet_id,dvbstrBouquetTable_ID(d2.bouquet_id));
 	break;
 
       case 0x02:
@@ -1531,10 +1406,10 @@ void descriptorDVB_Mosaic  (u_char *b)
 	b    += 6;
 	len1 -= 6;
 
- 	out_SW_NL  (4,"Transport_stream_ID: ",d2.transport_stream_id);
-	out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
+ 	out_SW_NL  (4,"transport_stream_ID: ",d2.transport_stream_id);
+	out_S2W_NL (4,"original_network_ID: ",d2.original_network_id,
 	    dvbstrOriginalNetwork_ID(d2.original_network_id));
-	out_S2W_NL (4,"Service_ID: ",d2.service_id,
+	out_S2W_NL (4,"service_ID: ",d2.service_id,
           " --> refers to PMT program_number");
 
 
@@ -1571,32 +1446,16 @@ void descriptorDVB_Mosaic  (u_char *b)
 /*
   0x52  Stream Identifier descriptor
   ETSI EN 300 468  6.2.xx
-
+  -- checked v1.6.1
 */
 
 void descriptorDVB_StreamIdent (u_char *b)
-
 {
 
- typedef struct  _descStreamIdent {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
+  // tag	= b[0];
+  // len	= b[1];
 
-    u_int      component_tag;		
- } descStreamIdent;
-
-
- descStreamIdent  d;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.component_tag		 = getBits (b,0,16,8);
-
-
- out_SB_NL (4,"Component_tag: ",d.component_tag);
+  outBit_Sx_NL  (4,"component_tag: ",   b,  16, 8);
 
 }
 
@@ -1610,40 +1469,23 @@ void descriptorDVB_StreamIdent (u_char *b)
 /*
   0x53  CA Identifier  descriptor 
   ETSI EN 300 468   6.2.xx
+  -- checked v1.6.1
 */
 
 void descriptorDVB_CAIdentifier  (u_char *b)
-
 {
-
- typedef struct  _descCAIdent {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    // N   CA_SysIDs
-
- } descCAIdent;
-
-
- descCAIdent d;
- u_int       CA_system_ID;
  int         len;
 
+ // tag		= b[0];
+ len 		= b[1];
 
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- len = d.descriptor_length; 
  b  += 2;
 
  indent (+1);
  while (len > 0) {
 
-   CA_system_ID 		 = getBits (b,0,0,16);
-
-   out_S2W_NL (4,"CA_system_ID: ",CA_system_ID,
-      dvbstrCASystem_ID(CA_system_ID));
+   outBit_S2x_NL (4,"CA_system_ID: ",	b,  0, 16,
+			(char *(*)(u_long)) dvbstrCASystem_ID );
 
    b   += 2;
    len -= 2;
@@ -2336,7 +2178,7 @@ void descriptorDVB_MultilingComponent (u_char *b)
  out_SB_NL (4,"Component_tag: ",d.component_tag);
 
  b += 3;
- len1 = d.descriptor_length + 1;
+ len1 = d.descriptor_length - 1;
 
  indent (+1);
  while (len1 > 0 ) {
@@ -3100,7 +2942,7 @@ void descriptorDVB_TransportStream  (u_char *b)
  d.descriptor_length       	 = b[1];
 
  
- print_databytes (4,"Transport_stream_bytes:", b+2, d.descriptor_length);
+ print_databytes (4,"transport_stream_bytes:", b+2, d.descriptor_length);
 
 }
 
@@ -3288,47 +3130,30 @@ void descriptorDVB_AC3  (u_char *b)
 
 /*
   0x6B  Ancillary Data  descriptor 
-  ETSI EN 300 468     6.2.xx
+  ETSI EN 300 468 v1.6.1
+
 */
 
 void descriptorDVB_AncillaryData  (u_char *b)
 {
-
- typedef struct  _descAncillaryData {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    u_int      ancillary_data_identifier;
-
- } descAncillaryData;
+  u_int  adi;
 
 
- descAncillaryData  d;
- u_int              i;
+  // tag		 = b[0];
+  // len       	 = b[1];
 
 
+  adi = outBit_Sx_NL (4,"Ancillary_data_identifier: ",   b,  16,  8);
 
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
- d.ancillary_data_identifier	 = b[2];
-
- out_SB_NL (4,"Ancillary_data_identifier: ",
-	d.ancillary_data_identifier);
-
-
- // $$$  the following should normally in dvbStrAncillaryData...()
-
- i = d.ancillary_data_identifier;
- indent (+1);
-   if (i & 0x01) out_nl (4,"[= DVD-Video Ancillary Data]");
-   if (i & 0x02) out_nl (4,"[= Extended Ancillary Data]");
-   if (i & 0x04) out_nl (4,"[= Announcement Switching Data]");
-   if (i & 0x08) out_nl (4,"[= DAB Ancillary Data]");
-   if (i & 0x10) out_nl (4,"[= Scale Factor Error Check]");
-   if (i & 0xE0) out_nl (4,"[= reserved ]");
- indent (-1);
-
+  // $$$  the following should normally in dvbStrAncillaryData...()
+  indent (+1);
+   if (adi & 0x01) out_nl (4,"[= DVD-Video Ancillary Data]");
+   if (adi & 0x02) out_nl (4,"[= Extended Ancillary Data]");
+   if (adi & 0x04) out_nl (4,"[= Announcement Switching Data]");
+   if (adi & 0x08) out_nl (4,"[= DAB Ancillary Data]");
+   if (adi & 0x10) out_nl (4,"[= Scale Factor Error Check]");
+   if (adi & 0xE0) out_nl (4,"[= reserved ]");
+  indent (-1);
 
 }
 
@@ -3549,11 +3374,11 @@ void descriptorDVB_AnnouncementSupport (u_char *b)
        b   += 7;
        len -= 7;
 
-       out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
+       out_S2W_NL (4,"original_network_ID: ",d2.original_network_id,
            dvbstrOriginalNetwork_ID(d2.original_network_id));
-       out_SW_NL  (4,"Transport_stream_ID: ",d2.transport_stream_id);
-       out_SW_NL  (4,"Service_ID: ",d2.service_id);
-       out_SB_NL  (4,"Component_tag: ",d2.component_tag);
+       out_SW_NL  (4,"transport_stream_ID: ",d2.transport_stream_id);
+       out_SW_NL  (4,"service_ID: ",d2.service_id);
+       out_SB_NL  (4,"component_tag: ",d2.component_tag);
 
     } // if
 
