@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.1 2001/05/16 15:23:47 fnbrd Exp $
+// $Id: SIsections.cpp,v 1.2 2001/05/18 13:11:46 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,10 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.2  2001/05/18 13:11:46  fnbrd
+// Fast komplett, fehlt nur noch die Auswertung der time-shifted events
+// (Startzeit und Dauer der Cinedoms).
+//
 // Revision 1.1  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
@@ -47,7 +51,7 @@
 
 // #pragma pack(1) // fnbrd: geht anscheinend nicht beim gcc
 
-struct descr_gen_struct {
+struct descr_generic_header {
   unsigned char descriptor_tag : 8;
   unsigned char descriptor_length : 8;
 } __attribute__ ((packed)) ;
@@ -66,9 +70,58 @@ struct descr_service_header {
   unsigned char service_provider_name_length : 8;
 } __attribute__ ((packed)) ;
 
+struct descr_extended_event_header {
+  unsigned char descriptor_tag : 8;
+  unsigned char descriptor_length : 8;
+  unsigned char descriptor_number : 4;
+  unsigned char last_descriptor_number : 4;
+  unsigned iso_639_2_language_code : 24;
+  unsigned char length_of_items : 8;
+} __attribute__ ((packed)) ;
+
 //#pragma pack()
 
 //    printf("Dauer: %02x:%02x:%02x\n", (evt->duration)>>16, ((evt->duration)>>8)&0xff, (evt->duration)&0xff);
+
+void SIsectionEIT::parseComponentDescriptor(const char *buf, SIevent &e)
+{
+  e.components.insert(SIcomponent((const struct descr_component_header *)buf));
+}
+
+void SIsectionEIT::parseContentDescriptor(const char *buf, SIevent &e)
+{
+  struct descr_generic_header *cont=(struct descr_generic_header *)buf;
+  const char *classification=buf+sizeof(struct descr_generic_header);
+  while(classification<=buf+sizeof(struct descr_generic_header)+cont->descriptor_length-2) {
+    e.contentClassification+=string(classification, 1);
+//    printf("Content: 0x%02hhx\n", *classification);
+    e.userClassification+=string(classification+1, 1);
+//    printf("User: 0x%02hhx\n", *(classification+1));
+    classification+=2;
+  }
+}
+
+void SIsectionEIT::parseExtendedEventDescriptor(const char *buf, SIevent &e)
+{
+  struct descr_extended_event_header *evt=(struct descr_extended_event_header *)buf;
+  unsigned char *items=(unsigned char *)(buf+sizeof(struct descr_extended_event_header));
+  while(items<(unsigned char *)(buf+sizeof(struct descr_extended_event_header)+evt->length_of_items)) {
+    if(*items) {
+      e.itemDescription=string((const char *)(items+1), *items);
+//      printf("Item Description: %s\n", e.itemDescription.c_str());
+    }
+    items+=1+*items;
+    if(*items) {
+      e.item=string((const char *)(items+1), *items);
+//      printf("Item: %s\n", e.item.c_str());
+    }
+    items+=1+*items;
+  }
+  if(*items) {
+    e.extendedText+=string((const char *)(items+1), *items);
+//    printf("Extended Text: %s\n", e.extendedText.c_str());
+  }
+}
 
 void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e)
 {
@@ -87,13 +140,18 @@ void SIsectionEIT::parseShortEventDescriptor(const char *buf, SIevent &e)
 
 void SIsectionEIT::parseDescriptors(const char *des, unsigned len, SIevent &e)
 {
-  struct descr_gen_struct *desc;
-  while(len>=sizeof(struct descr_gen_struct)) {
-    desc=(struct descr_gen_struct *)des;
+  struct descr_generic_header *desc;
+  while(len>=sizeof(struct descr_generic_header)) {
+    desc=(struct descr_generic_header *)des;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
     if(desc->descriptor_tag==0x4D)
-//      printf("Found short EventDescriptor\n");
       parseShortEventDescriptor((const char *)desc, e);
+    else if(desc->descriptor_tag==0x4E)
+      parseExtendedEventDescriptor((const char *)desc, e);
+    else if(desc->descriptor_tag==0x54)
+      parseContentDescriptor((const char *)desc, e);
+    else if(desc->descriptor_tag==0x50)
+      parseComponentDescriptor((const char *)desc, e);
     len-=desc->descriptor_length+2;
     des+=desc->descriptor_length+2;
   }
@@ -106,7 +164,7 @@ void SIsectionEIT::parse(void)
   if(!buffer || bufferLength<sizeof(SI_section_EIT_header)+sizeof(struct eit_event) || parsed)
     return;
   const char *actPos=buffer+sizeof(SI_section_EIT_header);
-  while(actPos<=buffer+bufferLength-sizeof(struct eit_event)) {
+  while(actPos<buffer+bufferLength-sizeof(struct eit_event)) {
     struct eit_event *evt=(struct eit_event *)actPos;
     SIevent e(evt);
     e.serviceID=serviceID();
@@ -134,9 +192,9 @@ void SIsectionSDT::parseServiceDescriptor(const char *buf, SIservice &s)
 
 void SIsectionSDT::parseDescriptors(const char *des, unsigned len, SIservice &s)
 {
-  struct descr_gen_struct *desc;
-  while(len>=sizeof(struct descr_gen_struct)) {
-    desc=(struct descr_gen_struct *)des;
+  struct descr_generic_header *desc;
+  while(len>=sizeof(struct descr_generic_header)) {
+    desc=(struct descr_generic_header *)des;
 //    printf("Type: %s\n", decode_descr(desc->descriptor_tag));
 //    printf("Length: %hhu\n", desc->descriptor_length);
     if(desc->descriptor_tag==0x48) {

@@ -1,7 +1,7 @@
 #ifndef SISECTIONS_HPP
 #define SISECTIONS_HPP
 //
-// $Id: SIsections.hpp,v 1.1 2001/05/16 15:23:47 fnbrd Exp $
+// $Id: SIsections.hpp,v 1.2 2001/05/18 13:11:46 fnbrd Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -24,6 +24,10 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.hpp,v $
+// Revision 1.2  2001/05/18 13:11:46  fnbrd
+// Fast komplett, fehlt nur noch die Auswertung der time-shifted events
+// (Startzeit und Dauer der Cinedoms).
+//
 // Revision 1.1  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
@@ -355,6 +359,9 @@ class SIsectionEIT : public SIsection
     void parse(void);
     void parseDescriptors(const char *desc, unsigned len, SIevent &e);
     void parseShortEventDescriptor(const char *buf, SIevent &e);
+    void parseExtendedEventDescriptor(const char *buf, SIevent &e);
+    void parseContentDescriptor(const char *buf, SIevent &e);
+    void parseComponentDescriptor(const char *buf, SIevent &e);
 };
 
 // Fuer for_each

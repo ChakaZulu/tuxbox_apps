@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.12 2001/05/16 15:23:47 fnbrd Exp $
+// $Id: epg.cpp,v 1.13 2001/05/18 13:11:46 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,10 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.13  2001/05/18 13:11:46  fnbrd
+// Fast komplett, fehlt nur noch die Auswertung der time-shifted events
+// (Startzeit und Dauer der Cinedoms).
+//
 // Revision 1.12  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
@@ -70,9 +74,9 @@
 int main(int argc, char **argv)
 {
   time_t starttime, endtime;
+  SIsectionsSDT sdtset;
 #ifdef READ_PRESENT_INFOS
   SIsectionsEIT epgset;
-  SIsectionsSDT sdtset;
 #else
   SIsectionsEITschedule epgset;
 #endif
@@ -81,18 +85,13 @@ int main(int argc, char **argv)
 
   starttime=time(NULL);
   epgset.readSections();
-#ifdef READ_PRESENT_INFOS
   sdtset.readSections();
-#endif
   endtime=time(NULL);
   printf("EIT Sections read: %d\n", epgset.size());
-#ifdef READ_PRESENT_INFOS
   printf("SDT Sections read: %d\n", sdtset.size());
-#endif
   printf("Time needed: %ds\n", (int)difftime(endtime, starttime));
 //  for_each(epgset.begin(), epgset.end(), printSmallSectionHeader());
 //  for_each(epgset.begin(), epgset.end(), printSIsection());
-#ifdef READ_PRESENT_INFOS
   SIevents events;
   for(SIsectionsEIT::iterator k=epgset.begin(); k!=epgset.end(); k++)
     events.insert((k->events()).begin(), (k->events()).end());
@@ -104,6 +103,5 @@ int main(int argc, char **argv)
   for_each(events.begin(), events.end(), printSIeventWithService(services));
 //  for_each(events.begin(), events.end(), printSIevent());
 //  for_each(epgset.begin(), epgset.end(), printSIsectionEIT());
-#endif
   return 0;
 }

@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.2 2001/05/17 01:53:35 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.3 2001/05/18 13:11:46 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,10 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.3  2001/05/18 13:11:46  fnbrd
+// Fast komplett, fehlt nur noch die Auswertung der time-shifted events
+// (Startzeit und Dauer der Cinedoms).
+//
 // Revision 1.2  2001/05/17 01:53:35  fnbrd
 // Jetzt mit lokaler Zeit.
 //
@@ -29,6 +33,8 @@
 // Alles neu macht der Mai.
 //
 //
+
+#include <stdio.h>
 
 #include <time.h>
 #include <string.h>
@@ -130,7 +136,9 @@ time_t changeUTCtoCtime(const unsigned char *buffer)
     utc = (utc << 32) & 0xff00000000LL;
     utc = utc | (buffer[1] << 24) | (buffer[2] << 16)
               | (buffer[3] << 8) | buffer[4];
-
+    if(utc==0xffffffffffffffffLL)
+      // keine Uhrzeit
+      return 0;
     mjd  = (utc >> 24) & 0xffff;
     time = utc & 0xffffff;
 
