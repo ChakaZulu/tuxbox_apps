@@ -83,8 +83,8 @@ static	Ghost	ighost3[4] = {
 { 8, 16, 0, 0, BLUE, 1 },
 { 9, 16, 0, 0, RED, 1 } };
 
-static	unsigned char	pig_x[] = { 365, 365, 365, 365 };
-static	unsigned char	pig_y[] = { 362, 76, 362, 362 };
+static	unsigned char	pig_x[] = { 13, 13, 13, 13 };
+static	unsigned char	pig_y[] = { 11, 3, 11, 11 };
 
 static	Ghost	*ighosts[] = { ighost0, ighost1, ighost2, ighost3 };
 
@@ -629,5 +629,5 @@ void	NextLevel( void )
 
 void	MazePig( void )
 {
-	Fx2ShowPig( (int)pig_x[ level ], (int)pig_y[level], 256, 208 );
+	Fx2ShowPig( (int)pig_x[ level ]*32+51, (int)pig_y[level]*32-10, 256, 208 );
 }
