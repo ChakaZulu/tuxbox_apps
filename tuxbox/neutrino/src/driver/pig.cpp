@@ -21,6 +21,14 @@
 
 
 
+#ifdef !_V4L_API_
+
+//  -- altes PIG-API
+
+
+
+
+
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -231,5 +239,20 @@ CPIG::PigStatus  CPIG::getStatus(void)
 	return status;
 
 }
+
+
+
+#else
+
+//  Video4Linux API  for PIG
+
+
+
+
+//   Todo.....  (rasc)
+
+
+
+#endif   // _V4L_API_
 
 

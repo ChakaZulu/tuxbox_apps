@@ -24,6 +24,9 @@
 #define __PIG_CONTROL__
 
 
+#ifdef !_V4L_API_
+
+
 //
 //  -- Picture in Graphics  Control
 //  --  adapted source from fx2  (;-) )
@@ -71,6 +74,18 @@ class CPIG
 };
 
 
+
+
+#else
+
+//  Video4Linux API  for PIG
+
+
+//   TODO.....
+
+
+#endif   // _V4L_API_
+
+
+
 #endif
-
-
