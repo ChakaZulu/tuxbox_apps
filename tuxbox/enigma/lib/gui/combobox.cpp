@@ -272,8 +272,6 @@ int eComboBox::setCurrent( void* key, bool sendSelChanged )
 	if (!listbox.getCount())
 		return E_COULDNT_FIND;
 
-	eListBoxEntryText* cur = listbox.getCurrent();
-
 	int err;
 	if ( (err=listbox.forEachEntry( selectEntryByKey(key, &listbox, sendSelChanged ) ) ) )
 		return E_COULDNT_FIND;
