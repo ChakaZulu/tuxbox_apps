@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.1 2002/05/13 17:18:05 obi Exp $
+ * $Id: channel.cpp,v 1.2 2002/05/13 18:24:00 McClean Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -92,7 +92,7 @@ unsigned short CZapitChannel::getAudioPid (unsigned char index = 0xFF)
 	return 0;
 }
 
-int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, string description, unsigned char componentTag)
+int CZapitChannel::addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag)
 {
 	unsigned char i;
 

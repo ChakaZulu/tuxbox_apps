@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.1 2002/05/13 17:18:05 obi Exp $
+ * $Id: channel.h,v 1.2 2002/05/13 18:24:00 McClean Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -102,7 +102,7 @@ class CZapitChannel
 		CZapitAudioChannel * getAudioChannel (unsigned char index = 0xFF);
 		unsigned short getAudioPid (unsigned char index = 0xFF);
 
-		int addAudioChannel(unsigned short pid, bool isAc3, string description, unsigned char componentTag);
+		int addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag);
 
 		/* set methods */
 		void setName(std::string pName)				{ name = pName; }
