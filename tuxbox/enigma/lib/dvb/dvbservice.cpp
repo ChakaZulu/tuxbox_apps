@@ -631,6 +631,8 @@ void eDVBServiceController::TDTready(int error)
 		else if ( !dvb.time_difference )
 			dvb.time_difference=1;
 
+		lastTpTimeDifference=tdt->UTC_time-t;
+
 		/*emit*/ dvb.timeUpdated();
 	}
 }
