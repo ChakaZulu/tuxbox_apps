@@ -1,0 +1,15 @@
+<rcdefaults>
+	<author>
+		<name>Felix Domke</name>
+		<email>tmbinc@gmx.net</email>
+	</author>
+	
+	<device identifier="Dreambox" >
+		<actionmap name="global">
+			<action name="selection_up" code="1410" flags="mr" />
+			<action name="selection_down" code="1411" flags="mr" />
+			<action name="selection_left" code="1412" flags="mr" />
+			<action name="selection_down" code="1413" flags="mr" />
+		</actionmap>
+	</device>
+</rcdefaults>

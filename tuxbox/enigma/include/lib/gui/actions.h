@@ -33,26 +33,30 @@ public:
 	}
 };
 
+class XMLTreeNode;
+
 class eActionMap
 {
-	typedef std::list<const eAction*> actionList;
+	typedef std::list<eAction*> actionList;
 	actionList actions;
 	const char *identifier, *description;
 public:
 	eActionMap(const char *identifier, char *description);
 	~eActionMap();
-	void add(const eAction *action)
+	void add(eAction *action)
 	{
 		actions.push_back(action);
 	}
-	void remove(const eAction *action)
+	void remove(eAction *action)
 	{
 		actions.remove(action);
 	}
 	const eAction *findAction(const eRCKey &key) const;
+	eAction *findAction(const char *id) const;
 	const char *getDescription() const { return description; }
 	const char *getIdentifier() const { return identifier; }
 	void reloadConfig();
+	void loadXML(eRCDevice *device, const XMLTreeNode *node);
 	void saveConfig();
 };
 
@@ -77,6 +81,7 @@ public:
 	~eActionMapList();
 	void addActionMap(const char *, eActionMap *);
 	void removeActionMap(const char *);
+	int loadXML(const char *filename);
 	eActionMap *findActionMap(const char *id) const;
 	actionMapList &getActionMapList() { return actionmaps; }
 

@@ -2,6 +2,7 @@
 #include "init.h"
 #include "nconfig.h"
 #include "edvb.h"
+#include <core/xml/xmltree.h>
 
 eAction::eAction(eActionMap &map, char *identifier, char *description)
 		: map(&map),  description(description), identifier(identifier)
@@ -18,9 +19,18 @@ eAction::~eAction()
 
 const eAction *eActionMap::findAction(const eRCKey &key) const
 {
-	for (std::list<const eAction*>::const_iterator i=actions.begin(); i!=actions.end(); ++i)
+	for (std::list<eAction*>::const_iterator i=actions.begin(); i!=actions.end(); ++i)
 		if ((*i)->containsKey(key))
 			return *i;
+	return 0;
+}
+
+eAction *eActionMap::findAction(const char *id) const
+{
+	for (std::list<eAction*>::const_iterator i=actions.begin(); i!=actions.end(); ++i)
+		if (!strcmp((*i)->getIdentifier(), id))
+			return *i;
+	return 0;
 }
 
 eActionMap::eActionMap(const char *identifier, char *description): 
@@ -32,6 +42,46 @@ eActionMap::eActionMap(const char *identifier, char *description):
 eActionMap::~eActionMap()
 {
 	eActionMapList::getInstance()->removeActionMap(identifier);
+}
+
+void eActionMap::loadXML(eRCDevice *device, const XMLTreeNode *node)
+{
+	for (XMLTreeNode *xaction=node->GetChild(); xaction; xaction=xaction->GetNext())
+	{
+		if (strcmp(xaction->GetType(), "action"))
+		{
+			eDebug("illegal type %s, expected 'action'", xaction->GetType());
+			continue;
+		}
+		const char *name=xaction->GetAttributeValue("name");
+		eAction *action=0;
+		if (name)
+			action=findAction(name);
+		if (!action)
+		{
+			eDebug("please specify a valid action with name=. valid actions are:");
+			for (actionList::iterator i(actions.begin()); i != actions.end(); ++i)
+				eDebug("  %s (%s)", (*i)->getIdentifier(), (*i)->getDescription());
+			continue;
+		}
+		const char *code=xaction->GetAttributeValue("code");
+		if (!code)
+		{
+			eDebug("please specify a number as code=.");
+			continue;
+		}
+		int icode=-1;
+		sscanf(code, "%x", &icode);
+		const char *flags=xaction->GetAttributeValue("flags");
+		if (!flags || !*flags)
+			flags="b";
+		if (strchr(flags, 'm'))
+			action->getKeyList().insert(eRCKey(device, icode, 0));
+		if (strchr(flags, 'b'))
+			action->getKeyList().insert(eRCKey(device, icode, eRCKey::flagBreak));
+		if (strchr(flags, 'r'))
+			action->getKeyList().insert(eRCKey(device, icode, eRCKey::flagRepeat));
+	}
 }
 
 void eActionMap::reloadConfig()
@@ -121,7 +171,83 @@ void eActionMapList::removeActionMap(const char *id)
 {
 	actionmaps.erase(id);
 }
-    
+
+int eActionMapList::loadXML(const char *filename)
+{
+	FILE *in=fopen(filename, "rt");
+	if (!in)
+		return -1;
+
+	XMLTreeParser *parser=new XMLTreeParser("ISO-8859-1");
+	char buf[2048];
+	
+	int done;
+	do
+	{
+		unsigned int len=fread(buf, 1, sizeof(buf), in);
+		done=len<sizeof(buf);
+		if (!parser->Parse(buf, len, done))
+		{
+			eDebug("parse error: %s at line %d",
+				parser->ErrorString(parser->GetErrorCode()),
+				parser->GetCurrentLineNumber());
+			delete parser;
+			parser=0;
+			fclose(in);
+			return -1;
+		}
+	} while (!done);
+	fclose(in);
+
+	XMLTreeNode *root=parser->RootNode();
+	if (!root)
+		return -1;
+	if (strcmp(root->GetType(), "rcdefaults"))
+	{
+		eDebug("not an rcdefaults file.");
+		return -1;
+	}
+	
+	XMLTreeNode *node=parser->RootNode();
+	
+	for (node=node->GetChild(); node; node=node->GetNext())
+		if (!strcmp(node->GetType(), "device"))
+		{
+			const char *identifier=node->GetAttributeValue("identifier");
+			
+			eRCDevice *device=0;
+			if (identifier)
+				device=eRCInput::getInstance()->getDevice(identifier);
+			if (!device)
+			{
+				eDebug("please specify an remote control identifier!");
+				continue;
+			}
+			
+			for (XMLTreeNode *xam=node->GetChild(); xam; xam=xam->GetNext())
+				if (!strcmp(xam->GetType(), "actionmap"))
+				{
+					eActionMap *am=0;
+					const char *name=xam->GetAttributeValue("name");
+					if (name)
+						am=findActionMap(name);
+					if (!am)
+					{
+						eDebug("please specify a valid actionmap name (with name=)");
+						eDebug("valid actionmaps are:");
+						for (actionMapList::iterator i(actionmaps.begin()); i != actionmaps.end(); ++i)
+							eDebug("  %s", i->first);
+						continue;
+					}
+					am->loadXML(device, xam);
+				}
+		}
+
+	delete parser;
+	
+	return 0;
+}
+
 eActionMap *eActionMapList::findActionMap(const char *id) const
 {
 	std::map<const char *,eActionMap*>::const_iterator i;
