@@ -41,31 +41,6 @@
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 
-/*
-CMountChooserTarget::CMountChooserTarget(int * selectedIndex, char * selectedLocalDir)
-{
-	index = selectedIndex;
-	localDir = selectedLocalDir;
-}
-
-CMountChooserTarget::exec(CMenuTarget* parent, const std::string & actionKey)
-{
-
-	char * key = actionKey.c_str();
-	if (strncmp(key, "MID:",4) == 0)
-	{
-		int mount_id = -1;
-		sscanf(&key[4],"%d",&mount_id);
-		if ((mount_id > 0) && (mount_id < NETWORK_NFS_NR_OF_ENTRIES))
-		{
-			*index = mount_id;
-			selectedLocalDir = g_settings.network_nfs_local_dir[mount_id];
-		}
-		return menu_return::RETURN_EXIT;
-	}
-}
-*/
-
 CMountChooser::CMountChooser(const neutrino_locale_t Name, const std::string & Icon, int * chosenIndex, char * chosenLocalDir, const char * const selectedLocalDir, const int mwidth, const int mheight)
 	: CMenuWidget(Name, Icon,mwidth,mheight), index(chosenIndex), localDir(chosenLocalDir)
 {
@@ -73,7 +48,9 @@ CMountChooser::CMountChooser(const neutrino_locale_t Name, const std::string & I
 	for(int i=0 ; i < NETWORK_NFS_NR_OF_ENTRIES ; i++)
 	{
 		if (g_settings.network_nfs_local_dir[i] != NULL &&
-		    strcmp(g_settings.network_nfs_local_dir[i],"") != 0)
+		    strcmp(g_settings.network_nfs_local_dir[i],"") != 0 &&
+		    (strstr(g_settings.network_nfs_mount_options1[i],"rw") != NULL ||
+		     strstr(g_settings.network_nfs_mount_options2[i],"rw") != NULL))
 		{
 			std::string s(g_settings.network_nfs_local_dir[i]);
 			s += " (";
