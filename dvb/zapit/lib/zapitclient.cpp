@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.89 2003/05/28 18:47:26 digi_casi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.90 2003/05/28 20:23:45 digi_casi Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -153,6 +153,17 @@ void CZapitClient::getLastChannel(unsigned int &channumber, char &mode)
 	mode = response.mode;
 
 	close_connection();
+}
+
+int32_t CZapitClient::getCurrentSatellitePosition(void)
+{
+	send(CZapitMessages::CMD_GET_CURRENT_SATELLITE_POSITION);
+
+	int32_t response;
+	CBasicClient::receive_data((char *)&response, sizeof(response));
+
+	close_connection();
+	return response;
 }
 
 void CZapitClient::setAudioChannel(const unsigned int channel)

@@ -235,6 +235,9 @@ class CZapitClient:public CBasicClient
 
 	/* return the current (tuned) ServiceID */
 	t_channel_id getCurrentServiceID();
+	
+	/* return the current satellite position */
+	int32_t getCurrentSatellitePosition();
 
 	/* get last channel-information */
 	void getLastChannel(unsigned int &channumber, char &mode);

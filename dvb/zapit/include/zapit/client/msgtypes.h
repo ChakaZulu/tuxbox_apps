@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.15 2003/05/15 20:09:54 digi_casi Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.16 2003/05/28 20:24:30 digi_casi Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -69,6 +69,7 @@ class CZapitMessages
 			CMD_GET_CURRENT_SERVICEID,
 			CMD_GET_CURRENT_SERVICEINFO,
 			CMD_GET_DELIVERY_SYSTEM,
+			CMD_GET_CURRENT_SATELLITE_POSITION,
 
 			CMD_SCANSTART,
 			CMD_SCANREADY,
