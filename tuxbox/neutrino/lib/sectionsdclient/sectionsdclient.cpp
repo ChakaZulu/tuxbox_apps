@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.23 2002/10/13 11:35:03 woglinde Exp $
+  $Id: sectionsdclient.cpp,v 1.24 2002/10/13 21:21:49 thegoodguy Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: sectionsdclient.cpp,v $
+  Revision 1.24  2002/10/13 21:21:49  thegoodguy
+  Cleanup includes
+
   Revision 1.23  2002/10/13 11:35:03  woglinde
 
 
@@ -89,6 +92,19 @@
 
 
 */
+#include <stdio.h>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/in_systm.h>
+#include <netinet/ip.h>
+#include <netdb.h>
+#include <arpa/inet.h>
 
 
 #include <eventserver.h>

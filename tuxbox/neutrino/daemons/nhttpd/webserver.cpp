@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski
 
-	$Id: webserver.cpp,v 1.18 2002/10/05 20:32:06 dirch Exp $
+	$Id: webserver.cpp,v 1.19 2002/10/13 21:21:49 thegoodguy Exp $
 
 	License: GPL
 
@@ -25,6 +25,7 @@
 */
 #include <netinet/in.h> 
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 #include <sys/socket.h> 
 #include <sys/wait.h> 
 
