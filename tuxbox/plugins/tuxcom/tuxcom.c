@@ -1,25 +1,25 @@
 /*
-TuxCom - TuxBox-Commander Plugin
+	TuxCom - TuxBox-Commander Plugin
 
-Copyright (C) 2004 'dbluelle' (dbluelle@blau-weissoedingen.de)
+	Copyright (C) 2004 'dbluelle' (dbluelle@blau-weissoedingen.de)
 
-Homepage: http://www.blau-weissoedingen.de/dreambox/
+	Homepage: http://www.blau-weissoedingen.de/dreambox/
 
-License: GPL
+	License: GPL
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
 */
 
 #include "tuxcom.h"
@@ -547,6 +547,7 @@ void plugin_exec(PluginParam *par)
 #endif
 
 
+
 	//init backbuffer
 
 	if(!(lbb = malloc(var_screeninfo.xres*var_screeninfo.yres)))
@@ -557,9 +558,24 @@ void plugin_exec(PluginParam *par)
 		munmap(lfb, fix_screeninfo.smem_len);
 		return;
 	}
-
 	memset(lbb, 0, var_screeninfo.xres*var_screeninfo.yres);
 	RenderBox(0,0,var_screeninfo.xres,var_screeninfo.yres,FILL,BLACK);
+
+	//open avs
+	if((avs = open(AVS, O_RDWR)) == -1)
+	{
+		printf("TuxCom <open AVS>");
+		return;
+	}
+	ioctl(avs, AVSIOGSCARTPIN8, &fnc_old);
+	ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screenmode]);
+	//open saa
+	if((saa = open(SAA, O_RDWR)) == -1)
+	{
+		printf("TuxCom <open SAA>");
+		return;
+	}
+
 
 
 	//init data
@@ -567,6 +583,7 @@ void plugin_exec(PluginParam *par)
 	cursort = SORT_UP;
 	curvisibility = 0;
 	textuppercase = 0;
+	screenmode=0;
 	commandsize =sysconf(_SC_ARG_MAX )-100;
 	szCommand = (char*)malloc(commandsize);
 	szCommand [0]= 0x00;
@@ -581,6 +598,8 @@ void plugin_exec(PluginParam *par)
 	memset(&finfo[0], 0, sizeof(finfo[0]));
 	memset(&finfo[1], 0, sizeof(finfo[0]));
 	ReadSettings();
+	ioctl(saa, SAAIOGWSS, &saa_old);
+	ioctl(saa, SAAIOSWSS, &saamodes[screenmode]);
 
 	printf("Settings read\n");
 
@@ -625,7 +644,7 @@ void plugin_exec(PluginParam *par)
 					break;
 				case RC_OK:
 					pfe = GetSelected(curframe);
-					if (pfe && S_ISDIR(pfe->fentry.st_mode))
+					if (pfe && (S_ISDIR(pfe->fentry.st_mode) ||  (finfo[curframe].zipfile[0] != 0x00 && S_ISLNK(pfe->fentry.st_mode))))
 					{
 						if (strcmp(pfe->name,"..") == 0)
 						{
@@ -689,7 +708,7 @@ void plugin_exec(PluginParam *par)
 						}
 
 					}
-					else if (pfe && ((pfe->fentry.st_mode & S_IRUSR) == S_IRUSR) && ((check = CheckZip(pfe->name))>= GZIP))
+					else if (pfe && ((pfe->fentry.st_mode & S_IRUSR) == S_IRUSR) && ((check = CheckZip(pfe->name))>= GZIP) && (finfo[curframe].zipfile[0] == 0x00))
 					{
 						ReadZip(check);
 						FillDir(curframe,SELECT_NOCHANGE);
@@ -800,8 +819,7 @@ void plugin_exec(PluginParam *par)
 					if (tool[ACTION_VIEW-1] == ACTION_VIEW)
 					{
 						RenderMenuLine(ACTION_VIEW-1, YES);
-						pfe = GetSelected(curframe);
-						DoViewFile(pfe->name);
+						DoViewFile();
 					}
 					break;
 				case RC_4:
@@ -814,7 +832,9 @@ void plugin_exec(PluginParam *par)
 						RenderMenuLine(ACTION_EDIT-1, YES);
 						pfe = GetSelected(curframe);
 						sprintf(action,"%s%s",finfo[curframe].path, pfe->name);
-						DoEditFile(action);
+						DoEditFile(action, YES);
+						FillDir(1-curframe,SELECT_NOCHANGE);
+						FillDir(  curframe,SELECT_NOCHANGE);
 					}
 					break;
 				case RC_5:
@@ -1113,6 +1133,11 @@ void plugin_exec(PluginParam *par)
 					curvisibility++;
 					if (curvisibility > 2) curvisibility = 0;
 					break;
+				case RC_DBOX: // toggle screenmode
+					screenmode = 1-screenmode;
+					ioctl(avs, AVSIOSSCARTPIN8, &fncmodes[screenmode]);
+					ioctl(saa, SAAIOSWSS, &saamodes[screenmode]);
+					break;
 
 				default:
 					continue;
@@ -1139,7 +1164,13 @@ void plugin_exec(PluginParam *par)
 	free(lbb);
 	munmap(lfb, fix_screeninfo.smem_len);
 
-	fcntl(rc, F_SETFL, O_NONBLOCK);
+	//restore videoformat
+	ioctl(avs, AVSIOSSCARTPIN8, &fnc_old);
+	ioctl(saa, SAAIOSWSS, &saa_old);
+	close(avs);
+	close(saa);
+
+ 	fcntl(rc, F_SETFL, O_NONBLOCK);
 
 	ClearEntries   (LEFTFRAME );
 	ClearEntries   (RIGHTFRAME);
@@ -1261,7 +1292,7 @@ void RenderFrame(int frame)
 			if (bselected)
 			{
 				tool[ACTION_COPY-1] = (finfo[1-frame].writable  ? ACTION_COPY : ACTION_NOACTION); // copy allowed, if other frame writable;
-				tool[ACTION_VIEW-1] = ACTION_VIEW; // view allowed
+				tool[ACTION_VIEW-1] = (finfo[frame].ftpconn != NULL ? ACTION_NOACTION : ACTION_VIEW); // view allowed, if not in FTP-Connection
 			}
 		}
 		if ((pfe->fentry.st_mode & S_IWUSR) == S_IWUSR )
@@ -1746,6 +1777,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 {
 
 	int pos = 0, start = 0, slen, he = (vsize==BIG ? FONTHEIGHT_BIG : FONTHEIGHT_SMALL);
+	int prev_key = -1;
 	char szbuf[maxchars+1];
 	char szdst[maxchars+1];
 	char * pch;
@@ -1783,9 +1815,11 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 					return RC_OK;
 				case RC_LEFT:
 					pos--;
+					prev_key = -1;
 					break;
 				case RC_RIGHT:
 					pos++;
+					prev_key = -1;
 					break;
 				case RC_PLUS:
 					if (szdst[pos] != 0x00)
@@ -1794,13 +1828,20 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 						szdst[pos] = ' ';
 						strcpy((char*)(szdst+pos+1),szbuf);
 					}
+					prev_key = -1;
 					break;
 				case RC_MINUS:
-					if (szdst[pos] != 0x00)
+					if (pos== strlen(szdst)-1) // remove last char when at end of line
+					{
+						pos--;
+						szdst[pos] = 0x00;
+					}
+					else if (szdst[pos] != 0x00)
 					{
 						strcpy(szbuf,(char*)(szdst+pos+1));
 						strcpy((char*)(szdst+pos),szbuf);
 					}
+					prev_key = -1;
 					break;
 				case RC_DOWN:
 					pch = strchr(charset,szdst[pos]);
@@ -1810,6 +1851,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 						if (pch == charset) szdst[pos] = charset[strlen(charset)-1];
 						else szdst[pos] = *((char*)pch-1);
 					}
+					prev_key = -1;
 					break;
 				case RC_UP:
 					pch = strchr(charset,szdst[pos]);
@@ -1819,6 +1861,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 						if (pch == &(charset[strlen(charset)-1])) szdst[pos] = charset[0];
 						else szdst[pos] = *((char*)pch+1);
 					}
+					prev_key = -1;
 					break;
 				case RC_0:
 				case RC_1:
@@ -1830,6 +1873,17 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 				case RC_7:
 				case RC_8:
 				case RC_9:
+					if (prev_key != -1 && rccode != prev_key) // jump to next char when other number pressed
+					{
+						pos++;
+						if (pos >= strlen(szdst))
+						{
+							if (pos > maxchars) pos = maxchars;
+							else
+								strcat(szdst," ");
+						}
+					}
+					prev_key = rccode;
 					pch = strchr(numberchars[rccode],tolower(szdst[pos]));
 					if (pch == NULL) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0] : toupper(numberchars[rccode][0]));
 					else
@@ -1840,6 +1894,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 					break;
 				case RC_RED:
 					szdst[0] = 0x00;
+					prev_key = -1;
 					break;
 				case RC_YELLOW:
 					textuppercase = 1-textuppercase;
@@ -1990,6 +2045,13 @@ void ClearZipEntries(int frame)
 	}
 	finfo[frame].allziplist = NULL;
 	finfo[frame].zipfile[0] = 0x00;
+	if (finfo[frame].ftpconn != NULL)
+	{
+		char buf[512];
+		FTPcmd("QUIT",NULL,buf);
+		fclose(finfo[frame].ftpconn);
+		finfo[frame].ftpconn = NULL;
+	}
 
 }
 /******************************************************************************
@@ -2151,7 +2213,7 @@ void FillDir(int frame, int selmode)
 	{
 		if ((selmode == SELECT_UPDIR) &&(frame == curframe))
 		{
-			finfo[curframe].zippath[strlen(finfo[curframe].zippath)-1]=0x00;
+			finfo[frame].zippath[strlen(finfo[frame].zippath)-1]=0x00;
 			pch = strrchr(finfo[frame].zippath,'/');
 			if (pch)
 			{
@@ -2159,19 +2221,26 @@ void FillDir(int frame, int selmode)
 				*(pch+1) = 0x00;
 			}
 		}
+		ReadFTPDir();
 		finfo[frame].count = 1;
 		finfo[frame].size  = 0;
 		finfo[frame].writable = 0;
 		struct zipfileentry * pzfe;
 		int zlen = strlen(finfo[frame].zippath);
 
+		char szDir[2000];
+		sprintf(szDir,"%s.",finfo[frame].zippath);
+
 		pzfe = finfo[frame].allziplist;
 		while (pzfe != NULL)
 		{
-			if ((strncmp(finfo[frame].zippath,pzfe->name,zlen) == 0) && (strrchr(pzfe->name,'/') == (char*)(pzfe->name+zlen-1)))
+			if (strcmp(pzfe->name, szDir) != 0)
 			{
-				finfo[frame].count++;
-				finfo[frame].size+= pzfe->fentry.st_size;
+				if ((strncmp(finfo[frame].zippath,pzfe->name,zlen) == 0) && (strrchr(pzfe->name,'/') == (char*)(pzfe->name+zlen-1)))
+				{
+					finfo[frame].count++;
+					finfo[frame].size+= pzfe->fentry.st_size;
+				}
 			}
 			pzfe = pzfe->next;
 		}
@@ -2304,13 +2373,104 @@ void DoCopy(struct fileentry* pfe, int typ)
 {
 	int i = 1;
 	char action[512], szFullFile[1000], tp;
-	if (finfo[curframe].zipfile[0] != 0x00)
+	if (finfo[curframe].ftpconn != NULL)
+	{
+		char szMessage[400],buf[512], szMessage2[400];
+		sprintf(szMessage,msg[MSG_COPY_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
+		MessageBox(szMessage,"",NOBUTTON);
+
+
+		struct sockaddr_in s_inlist;
+		long size = 0, r, rg = 0;
+		memcpy(&s_inlist,&finfo[curframe].s_in,sizeof(s_inlist));
+
+		if (FTPcmd("SIZE ", pfe->name, buf) == 213) size = atol(buf+4);
+		else
+		{
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"SIZE ",pfe->name);
+			MessageBox(szMessage,buf,OK);
+			return;
+		}
+
+		FTPcmd("TYPE I", NULL, buf);
+
+		if (FTPcmd("PASV", NULL, buf) != 227)
+		{
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"PASV","");
+			MessageBox(szMessage,buf,OK);
+			return;
+		}
+		char* s = strrchr(buf, ',');
+		*s = 0;
+		int port = atoi(s+1);
+		s = strrchr(buf, ',');
+		port += atoi(s+1) * 256;
+		s_inlist.sin_port = htons(port);
+		int sControl = socket(AF_INET, SOCK_STREAM, 0);
+		connect(sControl, (struct sockaddr *)&s_inlist, sizeof(s_inlist));
+		FILE* fData = fdopen(sControl, "rb+");
+
+		sprintf(szFullFile,"%s%s",finfo[1-curframe].path,pfe->name);
+		FILE* fnewFile = fopen(szFullFile,"wb");
+		if (fnewFile == NULL)
+		{
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
+			MessageBox(szMessage,"open file failure",OK);
+			return;
+		}
+
+		if (FTPcmd("RETR ", pfe->name, buf) > 150)
+		{
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
+			MessageBox(szMessage,buf,OK);
+			return;
+		}
+		if (fData == NULL)
+		{
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
+			MessageBox(szMessage,"open stream failure",OK);
+			fclose(fnewFile);
+			return;
+		}
+		do
+		{
+
+			r = fread (buf,1,510,fData);
+			rg += r;
+			sprintf(szMessage,msg[MSG_COPY_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
+			sprintf(szMessage2,"%lu/%lu", rg,size);
+			MessageBox(szMessage,szMessage2,NOBUTTON);
+			if (ferror(fData) || (feof(fData) && (rg < size)) || (r == 0))
+			{
+				sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
+				MessageBox(szMessage,"reading stream failure",OK);
+				break;
+			}
+			if (fwrite(buf,1,r,fnewFile) != r)
+			{
+				sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
+				MessageBox(szMessage,"writing file failure",OK);
+				break;
+
+			}
+		}
+		while (rg < size);
+		fclose(fnewFile);
+		fclose(fData);
+		if (FTPcmd(NULL, NULL, buf) != 226)
+		{
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR",pfe->name);
+			MessageBox(szMessage,buf,OK);
+			return;
+		}
+	}
+	else if (finfo[curframe].zipfile[0] != 0x00)
 	{
 		if (tmpzipdir[0] == 0x00)
 		while(1)
 		{
 			char szMessage[400];
-			sprintf(szMessage,msg[MSG_EXTRACT*NUM_LANG+language], finfo[curframe].zipfile);
+			sprintf(szMessage ,msg[MSG_EXTRACT*NUM_LANG+language], finfo[curframe].zipfile);
 			MessageBox(szMessage,"",NOBUTTON);
 
 			sprintf(tmpzipdir,"ziptmp%d",i);
@@ -2418,7 +2578,7 @@ void DoCopy(struct fileentry* pfe, int typ)
 
 void DoZipCopyEnd()
 {
-	if (finfo[curframe].zipfile[0] != 0x00)
+	if (finfo[curframe].zipfile[0] != 0x00 && finfo[curframe].ftpconn == NULL)
 	{
 		int zlen = strlen(szZipCommand);
 		if (zlen > 0) DoExecute(szZipCommand, SHOW_NO_OUTPUT);
@@ -2442,46 +2602,66 @@ void DoMove(char* szFile, int typ)
  * DoViewFile                                                                 *
  ******************************************************************************/
 
-void DoViewFile(char* szFile)
+void DoViewFile()
 {
-	char action[400];
+	char action[4000];
 	FILE* pFile;
-	if (finfo[curframe].zipfile[0] != 0x00)
+	struct fileentry* pfe = GetSelected(curframe);
+	if (pfe->fentry.st_size >= FILEBUFFER_SIZE)
 	{
-		sprintf(action,"tar  -x%cO -f \"%s%s\"  \"%s%s\"",finfo[curframe].ziptype == GZIP ? 'z' :'j',finfo[curframe].path,finfo[curframe].zipfile,(char*)(finfo[curframe].zippath+1),szFile);
-		pFile = OpenPipe(action);
+		if (finfo[curframe].zipfile[0] != 0x00)
+		{
+			sprintf(action,"tar  -x%cO -f \"%s%s\"  \"%s%s\"",finfo[curframe].ziptype == GZIP ? 'z' :'j',finfo[curframe].path,finfo[curframe].zipfile,(char*)(finfo[curframe].zippath+1),pfe->name);
+			pFile = OpenPipe(action);
+		}
+		else
+		{
+			sprintf(action,"%s%s",finfo[curframe].path, pfe->name);
+			pFile = fopen(action,"r");
+		}
+		if  (pFile != NULL)
+		{
+			ShowFile(pFile, pfe->name);
+			fclose(pFile);
+		}
 	}
 	else
 	{
-		sprintf(action,"%s%s",finfo[curframe].path, szFile);
-		pFile = fopen(action,"r");
+		if (finfo[curframe].zipfile[0] != 0x00)
+		{
+			sprintf(action,"tar  -x%cO -f \"%s%s\"  \"%s%s\" > /tmp/tuxcom.out",finfo[curframe].ziptype == GZIP ? 'z' :'j',finfo[curframe].path,finfo[curframe].zipfile,(char*)(finfo[curframe].zippath+1),pfe->name);
+			DoExecute(action, SHOW_NO_OUTPUT);
+			DoEditFile("/tmp/tuxcom.out",NO);
+		}
+		else
+		{
+			sprintf(action,"%s%s",finfo[curframe].path, pfe->name);
+			DoEditFile(action,NO);
+		}
 	}
-	if  (pFile != NULL)
-	{
-		ShowFile(pFile, szFile);
-		fclose(pFile);
-	}
+
 }
 /******************************************************************************
  * DoEditFile                                                                 *
  ******************************************************************************/
 
-void DoEditFile(char* szFile)
+void DoEditFile(char* szFile, int writable)
 {
 	FILE* pFile = fopen(szFile,"r");
 	char *p = szFileBuffer, *p1, *pcur = szFileBuffer;
 	char szInputBuffer[1001];
 	char szLineNumber[20];
-	int count = 1;
+	int count = 0;
 	int changed = 0;
 
-	*szFileBuffer = 0x00;
+	memset(szFileBuffer,0,FILEBUFFER_SIZE);
 	while( fgets( p, FILEBUFFER_SIZE, pFile ) )
 	{
 	  p = (char*)(p+strlen(p));
 	  count++;
 	}
 	fclose(pFile);
+	if (strlen(szFileBuffer) > 0 && szFileBuffer[strlen(szFileBuffer)-1] == '\n') count++;
 
 	int i,row = 0, sel = 0, strsize;
 
@@ -2502,6 +2682,7 @@ void DoEditFile(char* szFile)
 		if (sel >= count) sel = count-1;
 		if (sel < row) row = sel;
 		if (sel > row+(framerows-2)) row = sel-(framerows-2);
+		if (writable == NO) row = sel;
 		for (i =0; i < row; i++)
 		{
           p1=strchr(p,'\n');
@@ -2517,7 +2698,7 @@ void DoEditFile(char* szFile)
 		{
 			for (i =0; i < framerows; i++)
 			{
-				if (sel == row + i)
+				if ((sel == row + i)&& writable==YES)
 				{
 					pcur = p;
 					RenderBox(BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+i*FONTHEIGHT_SMALL , viewx- BORDERSIZE , 2*BORDERSIZE+FONTHEIGHT_BIG+(i+1)*FONTHEIGHT_SMALL, FILL, BLUE2);
@@ -2527,7 +2708,7 @@ void DoEditFile(char* szFile)
 	            if (p1 == NULL)
 	            {
 					i++;
-					if (sel == row + i)
+					if ((sel == row + i) && writable==YES)
 					{
 						pcur+=strlen(pcur);
 						RenderBox(BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+i*FONTHEIGHT_SMALL , viewx- BORDERSIZE , 2*BORDERSIZE+FONTHEIGHT_BIG+(i+1)*FONTHEIGHT_SMALL, FILL, BLUE2);
@@ -2544,31 +2725,39 @@ void DoEditFile(char* szFile)
 					break;
 				case RC_OK :
 				{
-					p1 = strchr(pcur,'\n');
-					int plen = (p1 ? p1-pcur: strlen(pcur));
-					strncpy(szInputBuffer,pcur,plen);
-					szInputBuffer[plen]=0x00;
-					RenderBox(0, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL-1 , viewx, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row+1)*FONTHEIGHT_SMALL+1, GRID, WHITE);
-					switch (DoEditString(BORDERSIZE,2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL, viewx- 2*BORDERSIZE ,1000,szInputBuffer,BIG/*SMALL*/,BLUE2))
+					if (writable == YES)
 					{
-						case RC_OK:
+						p1 = strchr(pcur,'\n');
+						int plen = (p1 ? p1-pcur: strlen(pcur));
+						strncpy(szInputBuffer,pcur,plen);
+						szInputBuffer[plen]=0x00;
+						RenderBox(0, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL-1 , viewx, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row+1)*FONTHEIGHT_SMALL+1, GRID, WHITE);
+						switch (DoEditString(BORDERSIZE,2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL, viewx- 2*BORDERSIZE ,1000,szInputBuffer,BIG/*SMALL*/,BLUE2))
 						{
-							if (*pcur==0x00) {*pcur = '\n'; pcur++;}
-							if (p1 && (plen != strlen(szInputBuffer)))
-							  memmove(pcur+strlen(szInputBuffer),p1,FILEBUFFER_SIZE-((pcur+strlen(szInputBuffer))-szFileBuffer));
-							memcpy(pcur,szInputBuffer,strlen(szInputBuffer));
-							changed = 1;
-							break;
+							case RC_OK:
+							{
+								if (*pcur==0x00 && sel>0) {*pcur = '\n'; pcur++; }
+								if (p1 && (plen != strlen(szInputBuffer)))
+								  memmove(pcur+strlen(szInputBuffer),p1,FILEBUFFER_SIZE-((pcur+strlen(szInputBuffer))-szFileBuffer));
+								memcpy(pcur,szInputBuffer,strlen(szInputBuffer));
+								changed = 1;
+								break;
+							}
+							default:
+								rccode = 0;
+								break;
 						}
-						default:
-							rccode = 0;
-							break;
+						colortool[0] = ACTION_DELLINE ;
+						colortool[1] = ACTION_INSLINE ;
+						colortool[2] = ACTION_NOACTION;
+						colortool[3] = ACTION_NOACTION;
+						RenderMenuLine(ACTION_EDIT-1, YES);
 					}
-					colortool[0] = ACTION_DELLINE ;
-					colortool[1] = ACTION_INSLINE ;
-					colortool[2] = ACTION_NOACTION;
-					colortool[3] = ACTION_NOACTION;
-					RenderMenuLine(ACTION_EDIT-1, YES);
+					else
+					{
+						sel+= framerows-1;
+						if (sel < count) row = sel;
+					}
 					break;
 				}
 				case RC_UP:
@@ -2592,19 +2781,27 @@ void DoEditFile(char* szFile)
 					sel = count;
 					break;
 				case RC_RED:
-					p1 = strchr(pcur,'\n');
-					if (p1)
+					if (writable == YES)
 					{
-						memmove(pcur,p1+1,FILEBUFFER_SIZE-(pcur-szFileBuffer));
-						changed = 1;
+						p1 = strchr(pcur,'\n');
+						if (p1)
+						{
+							memmove(pcur,p1+1,FILEBUFFER_SIZE-(pcur-szFileBuffer));
+						}
+						else
+							*pcur = 0x00;
 						if (count > 0 ) count--;
+						changed = 1;
 					}
 					break;
 				case RC_GREEN:
-					memmove(pcur+1,pcur,FILEBUFFER_SIZE-(pcur-szFileBuffer+1));
-					*pcur = '\n';
-					count++;
-					changed = 1;
+					if (writable == YES)
+					{
+						memmove(pcur+1,pcur,FILEBUFFER_SIZE-(pcur-szFileBuffer+1));
+						*pcur = '\n';
+						count++;
+						changed = 1;
+					}
 					break;
 
 			}
@@ -2684,7 +2881,7 @@ int CheckZip(char* szName)
 	int len = strlen(szName);
 	if (len < 4) return -1;
 	if (strcmp((char*)(szName+len-4),".tar") == 0) return TAR;
-//	if (strcmp((char*)(szName+len-4),".ftp") == 0) return FTP;
+	if (strcmp((char*)(szName+len-4),".ftp") == 0) return FTP;
 	if (len < 6) return -1;
 	if (strcmp((char*)(szName+len-6),".tar.Z") == 0) return COMPRESS;
 	if (len < 7) return -1;
@@ -2699,7 +2896,7 @@ int CheckZip(char* szName)
 
 void ReadZip(int typ)
 {
-//	if (typ == FTP) { OpenFTP(); return;}
+	if (typ == FTP) { OpenFTP(); return;}
 	MessageBox(msg[MSG_READ_ZIP_DIR*NUM_LANG+language],"",NOBUTTON);
 	FILE* pipe;
 	char szAction[400], szLine[400], name[FILENAME_MAX];
@@ -2755,7 +2952,7 @@ void ReadZip(int typ)
 			if (d == 'd') { pzfe1->fentry.st_mode |= S_IFDIR;pzfe1->fentry.st_size = 0;}
 			if (r == 'r')   pzfe1->fentry.st_mode |= S_IRUSR;
 			if (w == 'w')   pzfe1->fentry.st_mode |= S_IWUSR;
-			if (w == 'x')   pzfe1->fentry.st_mode |= S_IXUSR;
+			if (x == 'x')   pzfe1->fentry.st_mode |= S_IXUSR;
 
 			if (pzfe2 == NULL)
 			  finfo[curframe].allziplist = pzfe1;
@@ -2769,22 +2966,24 @@ void ReadZip(int typ)
 	fclose(pipe);
 
 }
-/*
+
+/******************************************************************************
+ * OpenFTP                                                                   *
+ ******************************************************************************/
+
 void OpenFTP()
 {
 	// read connection info from selected file
 	FILE *fp;
 	char *p;
 	char line[256];
-	char file[MAX_PATH];
-	char host[MAX_PATH];
-	char dir[MAX_PATH];
-	int  port = 21;
-	char user[100];
-	char pass[100];
+	char file[FILENAME_MAX];
+	char dir [FILENAME_MAX];
 
-	strcpy(user,"anonymous");
-	*pass = 0x00;
+	strcpy(dir,"/");
+	strcpy(finfo[curframe].ftpuser,"anonymous");
+	strcpy(finfo[curframe].ftppass,"tuxcom");
+	finfo[curframe].ftpport = 21;
 	sprintf(file,"%s%s",finfo[curframe].path,GetSelected(curframe)->name);
 	fp = fopen( file, "r" );
 	if ( !fp )
@@ -2805,112 +3004,163 @@ void OpenFTP()
 				continue;
 			*p=0;
 			p++;
-			if      ( !strcmp(line,"host") ) strcpy(host, p);
-			else if ( !strcmp(line,"port") ) port = atoi(p);
-			else if ( !strcmp(line,"user") ) strcpy(user, p);
-			else if ( !strcmp(line,"pass") ) strcpy(pass, p);
+			if      ( !strcmp(line,"host") ) strcpy(finfo[curframe].ftphost, p);
+			else if ( !strcmp(line,"port") ) finfo[curframe].ftpport = atoi(p);
+			else if ( !strcmp(line,"user") ) strcpy(finfo[curframe].ftpuser, p);
+			else if ( !strcmp(line,"pass") ) strcpy(finfo[curframe].ftppass, p);
+			else if ( !strcmp(line,"dir" ) ) strcpy(dir, p);
 		}
 		fclose(fp);
 	}
+	MessageBox(msg[MSG_FTP_CONN*NUM_LANG+language],finfo[curframe].ftphost,NOBUTTON);
 
 
 	// try to connect to ftp-server
-	struct sockaddr_in s_in;
 	struct hostent *he;
-
-	memset(s_in, 0, sizeof(struct sockaddr_in));
-	s_in->sin_family = AF_INET;
-	he = gethostbyname(host);
-	memcpy(&(s_in->sin_addr), he->h_addr_list[0], he->h_length);
-
-	s_in.sin_port = port;
-
 	char szMessage[400];
 
-	int s = socket(AF_INET, SOCK_STREAM, 0);
-	if (connect(s, &s_in, sizeof(struct sockaddr_in)) < 0)
+	memset(&finfo[curframe].s_in, 0, sizeof(struct sockaddr_in));
+	finfo[curframe].s_in.sin_family = AF_INET;
+	he = gethostbyname(finfo[curframe].ftphost);
+	if (he == NULL)
 	{
-		MessageBox(msg[MSG_FTP_NOCONN*NUM_LANG+language],host,OK);
+		MessageBox(msg[MSG_FTP_NOCONN*NUM_LANG+language],finfo[curframe].ftphost,OK);
 		return;
 	}
-	sprintf(szMessage, "%s[%s]:%d",host,inet_ntoa(s_in.sin_addr), ntohs(s_in.sin_port));
+	memcpy(&(finfo[curframe].s_in.sin_addr), he->h_addr_list[0], he->h_length);
+
+	finfo[curframe].s_in.sin_port = finfo[curframe].ftpport;
+
+
+	int sControl = socket(AF_INET, SOCK_STREAM, 0);
+	if (connect(sControl, (struct sockaddr *)&finfo[curframe].s_in, sizeof(finfo[curframe].s_in)) < 0)
+	{
+		MessageBox(msg[MSG_FTP_NOCONN*NUM_LANG+language],finfo[curframe].ftphost,OK);
+		return;
+	}
+	sprintf(szMessage, "%s[%s]:%d",finfo[curframe].ftphost,inet_ntoa(finfo[curframe].s_in.sin_addr), ntohs(finfo[curframe].s_in.sin_port));
 	MessageBox(msg[MSG_FTP_CONN*NUM_LANG+language],szMessage,NOBUTTON);
 
-
-	char buf[512];
-
-	finfo[curframe].ftpconn = fdopen(connect(s_in), "r+");
-	if (finfo[curframe].ftpconn == NULL) {
-		MessageBox(msg[MSG_FTP_NOCONN*NUM_LANG+language],host,OK);
+	finfo[curframe].ftpconn = fdopen(sControl, "r+");
+	if (finfo[curframe].ftpconn == NULL)
+	{
+		MessageBox("open stream failure",finfo[curframe].ftphost,OK);
 		return;
 	}
+	char buf[512];
+
 
 	if (FTPcmd(NULL, NULL, buf) != 220)
 	{
-		MessageBox(msg[MSG_FTP_NOCONN*NUM_LANG+language],host,OK);
+		fclose(finfo[curframe].ftpconn);
+		finfo[curframe].ftpconn = NULL;
+		MessageBox(msg[MSG_FTP_NOCONN*NUM_LANG+language],finfo[curframe].ftphost,OK);
 		return;
 	}
 
-	switch (FTPcmd("USER ", user, buf))
+	switch (FTPcmd("USER ", finfo[curframe].ftpuser, buf))
 	{
 		case 230:
 			break;
 		case 331:
-			if (FTPcmd("PASS ", server->password, control_stream, buf) != 230)
+			if (FTPcmd("PASS ", finfo[curframe].ftppass, buf) != 230)
 			{
-				MessageBox(msg[MSG_FTP_ERROR*NUM_LANG+language],"PASS",OK);
+				fclose(finfo[curframe].ftpconn);
+				finfo[curframe].ftpconn = NULL;
+				sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"PASS","");
+				MessageBox(szMessage,buf,OK);
 				return;
 			}
 			break;
 		default:
-			MessageBox(msg[MSG_FTP_ERROR*NUM_LANG+language],"USER",OK);
+			fclose(finfo[curframe].ftpconn);
+			finfo[curframe].ftpconn = NULL;
+			sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"USER","");
+			MessageBox(szMessage,buf,OK);
 			return;
 	}
-	FTPcmd("TYPE I", NULL, buf);
-
-	ReadFTPDir();
+	sprintf(finfo[curframe].zippath,"%s%s%s",(dir[0] != '/' ? "/":""), dir, (dir[strlen(dir)-1] != '/' ? "/":""));
+	strcpy(finfo[curframe].zipfile,GetSelected(curframe)->name);
 }
+
+/******************************************************************************
+ * ReadFTPDir                                                                 *
+ ******************************************************************************/
 
 void ReadFTPDir()
 {
-
-	FILE* pipe;
-	char szAction[400], szLine[400], name[FILENAME_MAX];
-	char* p;
-	char d,r,w,x;
-	struct zipfileentry* pzfe1 = NULL, *pzfe2 = NULL;
-	long size=0;
-
-	ClearZipEntries(curframe);
-	if      (typ == GZIP)
-		sprintf(szAction,"tar -tzv -f \"%s%s\"",finfo[curframe].path,GetSelected(curframe)->name);
-	else if (typ == BZIP2)
-		sprintf(szAction,"tar -tjv -f \"%s%s\"",finfo[curframe].path,GetSelected(curframe)->name);
-	else if (typ == COMPRESS)
-		sprintf(szAction,"tar -tZv -f \"%s%s\"",finfo[curframe].path,GetSelected(curframe)->name);
-	else if (typ == TAR)
-		sprintf(szAction,"tar -tv -f \"%s%s\"",finfo[curframe].path,GetSelected(curframe)->name);
-	else
-	    return;
-	strcpy(finfo[curframe].zipfile,GetSelected(curframe)->name);
-	strcpy(finfo[curframe].zippath,"/");
-	finfo[curframe].ziptype = typ;
-	pipe = OpenPipe(szAction);
-	if (pipe== NULL)
+	if (finfo[curframe].ftpconn == NULL) return;
+	struct zipfileentry * pzfe = finfo[curframe].allziplist;
+	char szDir[2000];
+	sprintf(szDir,"%s.",finfo[curframe].zippath);
+	while (pzfe != NULL)
 	{
-		printf("tuxcom: could not open pipe\n");
-		char message[1000];
-		sprintf(message,msg[MSG_EXEC_NOT_POSSIBLE*NUM_LANG+language],szAction);
-		MessageBox(message,"",OK);
+		if (strcmp(pzfe->name,szDir) == 0) return; // directory already read
+		pzfe = pzfe->next;
+	}
 
+	char buf[512], *p, name[FILENAME_MAX];
+	char d,r,w,x;
+	char szMessage[400];
+	struct sockaddr_in s_inlist;
+	struct zipfileentry* pzfe1 = NULL, *pzfe2 = finfo[curframe].allziplist;
+	long size = 0;
+	memcpy(&s_inlist,&finfo[curframe].s_in,sizeof(s_inlist));
+
+	MessageBox(msg[MSG_FTP_READDIR*NUM_LANG+language],finfo[curframe].zippath,NOBUTTON);
+
+	if (FTPcmd("CWD ", finfo[curframe].zippath, buf) != 250)
+	{
+		sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"CWD ",finfo[curframe].zippath);
+		MessageBox(szMessage,buf,OK);
 		return;
 	}
-	while( fgets( szLine, 400, pipe ) )
+
+	FTPcmd("TYPE A", NULL, buf);
+
+	if (FTPcmd("PASV", NULL, buf) != 227)
 	{
-		p=strchr(szLine,'\n');
+		fclose(finfo[curframe].ftpconn);
+		finfo[curframe].ftpconn = NULL;
+		sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"PASV","");
+		MessageBox(szMessage,buf,OK);
+		return;
+	}
+    char* s = strrchr(buf, ',');
+	*s = 0;
+	int port = atoi(s+1);
+	s = strrchr(buf, ',');
+	port += atoi(s+1) * 256;
+	s_inlist.sin_port = htons(port);
+	int sControl = socket(AF_INET, SOCK_STREAM, 0);
+	connect(sControl, (struct sockaddr *)&s_inlist, sizeof(s_inlist));
+	FILE* fData = fdopen(sControl, "r+");
+
+
+	FTPcmd("LIST", NULL, buf);
+
+
+	if (fData == NULL)
+	{
+		sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"LIST","");
+		MessageBox(szMessage,"open stream failure",OK);
+		return;
+	}
+	pzfe1 = malloc(sizeof(struct zipfileentry));
+
+	strcpy(pzfe1->name,szDir);
+	pzfe1->next = pzfe2;
+	memset(&pzfe1->fentry, 0, sizeof(struct stat));
+	finfo[curframe].allziplist = pzfe1;
+	pzfe2 = pzfe1;
+
+	do
+	{
+		if (fgets(buf, 510,fData) == NULL) break;
+		p=strchr(buf,'\n');
 		if ( p )
 			*p=0;
-		sscanf(szLine,"%c%c%c%c%*s%*s%lu%*s%*s%s",&d,&r,&w,&x,&size,name);
+		sscanf(buf,"%c%c%c%c%*s%*d%*s%*s%lu%*s%*s%*s%s",&d,&r,&w,&x,&size,name);
 
 
 		if (name[0] != 0x00)
@@ -2919,48 +3169,55 @@ void ReadFTPDir()
 
 			if (name[strlen(name)-1] == '/') name[strlen(name)-1]=0x00;
 			if (name[0] != '/')
-				sprintf(pzfe1->name,"/%s",name);
+				sprintf(pzfe1->name,"%s%s",finfo[curframe].zippath,name);
 			else
-				strcpy(pzfe1->name,name);
-			pzfe1->next = NULL;
+				sprintf(pzfe1->name,"%s%s",finfo[curframe].zippath,(char*)(name+1));
+			pzfe1->next = pzfe2;
 			memset(&pzfe1->fentry, 0, sizeof(struct stat));
 			pzfe1->fentry.st_size = size;
 			if (d == 'd') { pzfe1->fentry.st_mode |= S_IFDIR;pzfe1->fentry.st_size = 0;}
+			if (d == 'l') { pzfe1->fentry.st_mode |= S_IFLNK;pzfe1->fentry.st_size = 0;}
 			if (r == 'r')   pzfe1->fentry.st_mode |= S_IRUSR;
 			if (w == 'w')   pzfe1->fentry.st_mode |= S_IWUSR;
-			if (w == 'x')   pzfe1->fentry.st_mode |= S_IXUSR;
+			if (x == 'x')   pzfe1->fentry.st_mode |= S_IXUSR;
 
-			if (pzfe2 == NULL)
-			  finfo[curframe].allziplist = pzfe1;
-			else
-			  pzfe2->next = pzfe1;
+			finfo[curframe].allziplist = pzfe1;
 			pzfe2 = pzfe1;
 		}
+	} while (! isdigit(buf[0]) || buf[3] != ' ');
+	fclose(fData);
+	if (FTPcmd(NULL, NULL, buf) != 226)
+	{
+		sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"LIST","");
+		MessageBox(szMessage,buf,OK);
+		return;
 	}
 
-
-	fclose(pipe);
-
 }
+
+/******************************************************************************
+ * FTPcmd                                                                     *
+ ******************************************************************************/
+
 int FTPcmd(const char *s1, const char *s2, char *buf)
 {
 	if (s1) {
 		if (s2) {
-			fprintf(finfo[curframe].ftpconn, "%s%s\n", s1, s2);
+			fprintf(finfo[curframe].ftpconn, "%s%s\r\n", s1, s2);
 		} else {
-			fprintf(finfo[curframe].ftpconn, "%s\n", s1);
+			fprintf(finfo[curframe].ftpconn, "%s\r\n", s1);
 		}
+		fflush(finfo[curframe].ftpconn);
 	}
-
 	do {
-		if (fgets(buf, 510, finfo[curframe].ftpconn) == NULL) {
+		if ((fgets(buf, 510,finfo[curframe].ftpconn)) == NULL) {
 			return -1;
 		}
 	} while (! isdigit(buf[0]) || buf[3] != ' ');
 
 	return atoi(buf);
 }
-*/
+
 /******************************************************************************
  * ShowFile                                                                   *
  ******************************************************************************/
@@ -3131,6 +3388,10 @@ void ReadSettings()
 				finfo[RIGHTFRAME].sort = atoi(p);
 				if (finfo[RIGHTFRAME].sort == 0) finfo[RIGHTFRAME].sort = SORT_UP;
 			}
+			else if ( !strcmp(line,"screenmode") )
+			{
+				screenmode = atoi(p)%2;
+			}
 		}
 		fclose(fp);
 	}
@@ -3159,6 +3420,7 @@ void WriteSettings()
 		fprintf(fp,"rdir=%s\n",finfo[RIGHTFRAME].path);
 		fprintf(fp,"lsort=%d\n",finfo[LEFTFRAME ].sort);
 		fprintf(fp,"rsort=%d\n",finfo[RIGHTFRAME].sort);
+		fprintf(fp,"screenmode=%d\n",screenmode);
 		fclose(fp);
 	}
 }

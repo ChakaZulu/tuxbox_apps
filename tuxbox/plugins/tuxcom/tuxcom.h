@@ -3,20 +3,49 @@
  *                                                                            *
  *             (c) dbluelle 2004 (dbluelle@blau-weissoedingen.de)             *
  ******************************************************************************
- * Revision 1.1  2004/05/02
- * - changed some colors
- * - added german language
- * - possibility to keep buttons pressed (up/down, volume+/-, green button)
- * - 3 states of transparency
- * - set markers on files -> possibility to copy/move/delete multiple files
- * - Key for transparency now mute (green button needed for setting file marker)
+
+	21.06.2004 Version 1.3
+	 - FTP-Client added
+	 - minor bugfixes in editor
+	 - text input: jumping to next character when pressing another Number.
+	 - text input: removing last character when at end of line and pressing volume-
+	 - toggle between 4:3 and 16:9-mode with dream-button
+	 - Viewer:scrolling possible as in editor (for files up to 100k size)
+
+	05.06.2004 Version 1.2a
+	 - BugFix: missing characters in text input added.
+	 - text input in "sms-style" included
+
+	29.05.2004 Version 1.2
+	  - support for reading and extracting from "tar", "tar.Z", "tar.gz" and "tar.bz2" archives
+		does not work with many Archives in Original-Image 1..07.4 ( BusyBox-Version to old :( )
+	  - display current line in editor
+	  - using tuxtxt-position for display
+	  - big font when editing a line
+	  - change scrolling through characters in edit mode to match enigma standard (switch up/down)
+	  - Version of plugin available on Info-Button
+	  - confirm-messagebox when overwriting existing files.
+
+	08.05.2004 Version 1.1a
+	  - BugFix: No more spaces at the end of renamed files
+
+	02.05.2004 version 1.1
+	  - changed some colors
+	  - added german language
+	  - possibility to keep buttons pressed (up/down, left/right, volume+/-, green button)
+	  - 3 states of transparency
+	  - set markers on files -> possibility to copy/move/delete multiple files
+	  - Key for transparency now mute (green button needed for setting file marker)
+
+	03.04.2004 version 1.0 :
+	  first public version
  ******************************************************************************/
 
 // setting Program-Version
 // 3 = for DBox
 // 2 = for Dreambox with new Freetype
 // 1 = for Dreambox with old Freetype
-#define TUXCOM_DBOX_VERSION 3 
+#define TUXCOM_DBOX_VERSION 3
 
 #if TUXCOM_DBOX_VERSION == 3
 #include "config.h"
@@ -36,12 +65,14 @@
 #include <sys/stat.h>
 #include <plugin.h>
 
-/*
+#include <dbox/avs_core.h>
+#include <dbox/saa7126_core.h>
+
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-*/
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_CACHE_H
@@ -56,6 +87,8 @@
 #include <linux/input.h>
 #endif
 
+#define AVS "/dev/dbox/avs0"
+#define SAA "/dev/dbox/saa0"
 
 #define MENUROWS      10
 #define MENUITEMS     10
@@ -73,7 +106,7 @@
 
 #define FILEBUFFER_SIZE 100 * 1024 // Edit files up to 100k
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.2a\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.3\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -198,6 +231,7 @@ unsigned short rccode;
 
 //some data
 
+int avs, saa, fnc_old, saa_old, screenmode;
 int rc, fb;
 int sx, ex, sy, ey;
 int PosX, PosY, StartX, StartY, FrameWidth, NameWidth, SizeWidth;
@@ -218,6 +252,9 @@ char* szCommand;
 char* szZipCommand;
 char tmpzipdir[256];
 long commandsize;
+
+int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
+int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
 
 FILE *conf;
 int language;
@@ -292,10 +329,11 @@ enum {MSG_EXEC              ,
       MSG_FILE_EXISTS       ,
       MSG_LINE              ,
       MSG_READ_ZIP_DIR      ,
-      MSG_EXTRACT           };
-//      MSG_FTP_NOCONN        ,
-//      MSG_FTP_CONN          ,
-//      MSG_FTP_ERROR         };
+      MSG_EXTRACT           ,
+      MSG_FTP_NOCONN        ,
+      MSG_FTP_CONN          ,
+      MSG_FTP_ERROR         ,
+      MSG_FTP_READDIR       };
 
 enum {INFO_COPY   ,
       INFO_MOVE   ,
@@ -320,7 +358,7 @@ char *info[]   = { "(select 'hidden' to copy in background)"   ,"('versteckt' wä
                    "selected:%d"                               ,"markiert:%d" };
 
 char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen ?"                                ,
-                  "Cannot execute file"                        ,"Kann '%s' nicht ausführen"                       ,
+                  "Cannot execute file '%s'"                   ,"Kann '%s' nicht ausführen"                       ,
                   "Copy '%s' to '%s' ?"                        ,"'%s' nach '%s' kopieren ?"                       ,
                   "Copy %d file(s) to '%s' ?"                  ,"%d Datei(en) nach '%s' kopieren ?"               ,
                   "Copying file '%s' to '%s'..."               ,"kopiere '%s' nach '%s' ..."                      ,
@@ -340,10 +378,11 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
 				  "file '%s' already exists"                   ,"Datei '%s' existiert bereits"                    ,
 				  "line %d of %d"                              ,"Zeile %d von %d"                                 ,
 				  "reading archive directory..."               ,"Lese Archiv-Verzeichnis..."                      ,
-				  "extracting from file '%s'..."               ,"Entpacke aus Datei '%s'"                         };
-//				  "no connection to"                           ,"Keine Verbindung zu"                             ,
-//				  "connecting to"                              ,"Verbinde mit"                                    ,
-//				  "error in ftp command"                       ,"Fehler bei FTP-Kommando"                         };
+				  "extracting from file '%s'..."               ,"Entpacke aus Datei '%s'"                         ,
+				  "no connection to"                           ,"Keine Verbindung zu"                             ,
+				  "connecting to"                              ,"Verbinde mit"                                    ,
+				  "error in ftp command '%s%s'"                ,"Fehler bei FTP-Kommando '%s%s'"                  ,
+				  "reading directory"                          ,"Lese Verzeichnis"                                };
 
 char *menuline[]  = { ""      , ""           ,
                       "rights", "Rechte"     ,
@@ -414,7 +453,12 @@ struct frameinfo
 	char           			zipfile[FILENAME_MAX];
 	char           			zippath[FILENAME_MAX];
 	struct zipfileentry*	allziplist;
-//	FILE*                   ftpconn;
+	FILE*                   ftpconn;
+	struct sockaddr_in      s_in;
+	char 					ftphost[512];
+	int  					ftpport;
+	char 					ftpuser[100];
+	char 					ftppass[100];
 
 };
 
@@ -444,8 +488,8 @@ void	          	DoExecute(char* szAction, int showoutput);
 void 				DoCopy(struct fileentry* pfe, int typ);
 void 				DoZipCopyEnd();
 void 				DoMove(char* szFile, int typ);
-void	          	DoViewFile(char* szFile);
-void	          	DoEditFile(char* szFile);
+void	          	DoViewFile();
+void	          	DoEditFile(char* szFile, int writable);
 int               	DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, int back);
 int 	          	ShowProperties();
 void 		 	  	RenderButtons(int he, int mode);
@@ -457,6 +501,6 @@ void 			  	ShowFile(FILE* pipe, char* szAction);
 void 			  	ReadZip(int typ);
 int					CheckZip(char* szName);
 FILE*				OpenPipe(char* szAction);
-//void 				OpenFTP();
-//void 				ReadFTPDir();
-//int					FTPcmd(const char *s1, const char *s2, FILE *stream, char *buf);
+void 				OpenFTP();
+void 				ReadFTPDir();
+int					FTPcmd(const char *s1, const char *s2, char *buf);
