@@ -93,6 +93,14 @@
 			<eLabel position="360:367" size="230:40" text="sat1" font="NimbusSansL-Regular Sans L Regular;18" backgroundColor="osd_shadow" align="right"/>
 		</eWindow>
 	</object>
+	
+	<object name="enigma_lcd">
+		<eZapLCDMain position="0:0" size="120:64">
+			<eLabel position="0:0" size="70:16" font="NimbusSansL-Regular Sans L Regular;18" text="Enigma" />
+			<eLabel position="0:20" size="120:32" font="NimbusSansL-Regular Sans L Regular;18" wrap="on" name="service_name" />
+			<eLabel position="78:50" size="42:14" font="NimbusSansL-Regular Sans L Regular;18" name="clock" />
+		</eZapLCDMain>
+	</object> 
 
 	
 	<object name="ezap_main">
