@@ -71,7 +71,7 @@ void eNumber::keyDown(int key)
 	{
 		int oldac=active;
 		active++;
-		redraw(getNumberRect(oldac));
+		invalidate(getNumberRect(oldac));
 		if (active>=len)
 		{
 			if (key==eRCInput::RC_OK)
@@ -80,7 +80,7 @@ void eNumber::keyDown(int key)
 		}
 
 		if (active!=oldac)
-			redraw(getNumberRect(active));
+			invalidate(getNumberRect(active));
 		digit=0;
 		break;
 	}
@@ -88,11 +88,11 @@ void eNumber::keyDown(int key)
 	{
 		int oldac=active;
 		active--;
-		redraw(getNumberRect(oldac));
+		invalidate(getNumberRect(oldac));
 		if (active<0)
 			active=len-1;
 		if (active!=oldac)
-			redraw(getNumberRect(active));
+			invalidate(getNumberRect(active));
 		digit=0;
 		break;
 	}
@@ -103,12 +103,12 @@ void eNumber::keyDown(int key)
 		if (nn>=min && nn<=max)
 		{
 			number[active]=nn;
-			redraw(getNumberRect(active));
+			invalidate(getNumberRect(active));
 			digit++;
 			if ((digit>=maxdigits) || (nn==0))
 			{
 				active++;
-				redraw(getNumberRect(active-1));
+				invalidate(getNumberRect(active-1));
 				digit=0;
 			
 				if (active>=len)
@@ -117,7 +117,7 @@ void eNumber::keyDown(int key)
 					active=0;
 				}
 				else
-					redraw(getNumberRect(active));
+					invalidate(getNumberRect(active));
 			}
 		}
 		break;
@@ -129,7 +129,7 @@ void eNumber::gotFocus()
 {
 	have_focus++;
 	digit=isactive;
-	redraw(getNumberRect(active));
+	invalidate(getNumberRect(active));
 	if (parent && parent->LCDElement)
 	{
 		if (descr != "")
@@ -149,6 +149,9 @@ void eNumber::gotFocus()
 		}
 		((eNumber*)LCDTmp)->digit=digit;
 		((eNumber*)LCDTmp)->active=active;
+		((eNumber*)LCDTmp)->normal=0;
+		((eNumber*)LCDTmp)->cursor=255;
+		((eNumber*)LCDTmp)->have_focus=1;
 	}
 }
 
@@ -161,5 +164,5 @@ void eNumber::lostFocus()
 	}
 
 	have_focus--;
-	redraw(getNumberRect(active));
+	invalidate(getNumberRect(active));
 }

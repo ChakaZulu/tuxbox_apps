@@ -427,7 +427,10 @@ void eTextPara::blit(gPixmapDC &dc, const QPoint &offset)
 	if (target.bpp != 8)
 		qFatal("eTextPara::blit - can't render into %d bpp buffer", target.bpp);
 		
-	register int shift=target.clut?4:0;	// in grayscale modes use 8bit, else 4bit
+	register int shift=target.clut?4:0, opcode=0;	// in grayscale modes use 8bit, else 4bit
+	
+	if (!target.clut)
+		opcode=1;
 	
 	QRect clip(0, 0, target.x, target.y);
 	clip&=dc.getClip();
@@ -455,13 +458,26 @@ void eTextPara::blit(gPixmapDC &dc, const QPoint &offset)
 			{
 				register __u8 *td=d;
 				register int ax;
-				for (ax=0; ax<sx; ax++)
-				{	
-					register int b=(*s++)>>shift;
-					if(b)
-						*td++|=b;
-					else
-						td++;
+				if (!opcode)
+				{
+					for (ax=0; ax<sx; ax++)
+					{	
+						register int b=(*s++)>>shift;
+						if(b)
+							*td++|=b;
+						else
+							td++;
+					}
+				} else
+				{
+					for (ax=0; ax<sx; ax++)
+					{	
+						register int b=(*s++)>>shift;
+						if(b)
+							*td++^=b;
+						else
+							td++;
+					}
 				}
 				s+=glyph_bitmap->pitch-ax;
 				d+=buffer_stride;
