@@ -127,16 +127,26 @@ CFileBrowser::CFileBrowser()
 
 	width  = 500;
 	height = 380;
+   if((g_settings.screen_EndX- g_settings.screen_StartX) < width)
+      width=(g_settings.screen_EndX- g_settings.screen_StartX);
+	if((g_settings.screen_EndY- g_settings.screen_StartY) < height)
+      height=(g_settings.screen_EndY- g_settings.screen_StartY);
+	
 	foheight = 30;
 
 	theight  = g_Fonts->eventlist_title->getHeight();
 	fheight = g_Fonts->eventlist_itemLarge->getHeight();
 
 
-	listmaxshow = (height - theight - foheight)/fheight;
+	listmaxshow = max(1,(int)(height - theight - foheight)/fheight);
+
 	height = theight+foheight+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	if(x+width > 720)
+		x=720-width;
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	if(y+height > 576)
+		x=576-width;
 	
 	liststart = 0;
 }
