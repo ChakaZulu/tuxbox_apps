@@ -2359,7 +2359,7 @@ msgstr "Verlauf"
 
 #: src/enigma_main.cpp:6926
 msgid "Service Menu"
-msgstr "Video-F"
+msgstr "Service Menü"
 
 #: src/enigma_main.cpp:6938 src/sselect.cpp:128
 msgid "add service to playlist"
