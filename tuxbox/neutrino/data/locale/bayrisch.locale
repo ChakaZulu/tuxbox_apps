@@ -186,10 +186,10 @@ keybindingmenu.cancel Sendalistn zuamacha
 keybindingmenu.cancel_head Sendalistn zuamacha
 keybindingmenu.sort Sortierfoige ändan
 keybindingmenu.sort_head Sortierfoige ändan
-keybindingmenu.addrecord unset
-keybindingmenu.addrecord_head unset
-keybindingmenu.addremind unset
-keybindingmenu.addremind_head unset
+keybindingmenu.addrecord neie Aufnahm
+keybindingmenu.addrecord_head neie Aufnahm
+keybindingmenu.addremind neia Umschoittermin	
+keybindingmenu.addremind_head neia Umschoittermin
 keybindingmenu.channelup Senda aufi
 keybindingmenu.channelup_head Senda aufi Dasdn
 keybindingmenu.channeldown Senda obe
@@ -324,7 +324,7 @@ scants.bouquet Bouquets
 scants.bouquet_leave ned olanga
 scants.bouquet_create nei macha
 scants.bouquet_erase wegmacha
-scants.failed unset
+scants.failed Sendasuacha is gescheitat
 scants.finished Senda sand gfundn worn!
 
 flashupdate.head Aktualisiern
