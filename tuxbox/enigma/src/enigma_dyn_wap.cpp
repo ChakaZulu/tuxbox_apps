@@ -109,7 +109,7 @@ public:
 		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
 		{
 			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
-					 return;
+				return;
 		}
 #endif
 		eString serviceRef = ref2string(e);

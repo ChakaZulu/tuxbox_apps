@@ -1039,6 +1039,7 @@ void eSubServiceSelector::prev()
 }
 
 extern bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2 ); // implemented in timer.cpp
+extern bool canPlayService( const eServiceReference & ref ); // implemented in timer.cpp
 
 void eSubServiceSelector::play()
 {
@@ -1047,28 +1048,8 @@ void eSubServiceSelector::play()
 	{
 		eServiceReferenceDVB &ref=ss->service;
 #ifndef DISABLE_FILE
-		if ( eDVB::getInstance()->recorder &&
-			eDVB::getInstance()->recorder->recRef != ref )
-		{
-			int canHandleTwoScrambledServices=0;
-			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices",
-				canHandleTwoScrambledServices);
-
-			if ( !canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled )
-			{
-				if ( !eZapMain::getInstance()->handleState() )
-					return;
-			}
-			else
-			{
-				eServiceReferenceDVB &rec = eDVB::getInstance()->recorder->recRef;
-				if (!onSameTP(rec,ref))
-				{
-					if (!eZapMain::getInstance()->handleState())
-						return;
-				}
-			}
-		}
+		if ( !canPlayService(ref) && !eZapMain::getInstance()->handleState() )
+			return;
 #else
 		if ( !eZapMain::getInstance()->handleState() )
 #endif
@@ -2425,7 +2406,7 @@ void eZapMain::showServiceSelector(int dir, int newTarget )
 	eServiceReference ref = eServiceInterface::getInstance()->service;
 	if ( !service ||    // cancel pressed
 			( !extZap && ref &&
-				!(service->path.length() && mode == modeFile) &&
+				!(service->path && mode == modeFile) &&
 				!CheckService(*service) ) )
 	{
 		if ( !entered_playlistmode )
@@ -2973,7 +2954,7 @@ void eZapMain::pause()
 	eServiceReference &ref = eServiceInterface::getInstance()->service;
 	if (handler->getState() == eServiceHandler::statePause)
 		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
-	else
+	else if ( eSystemInfo::getInstance()->canTimeshift() )
 	{
 		if ( ref.type == eServiceReference::idDVB && !ref.path && !timeshift )
 		{
@@ -3308,6 +3289,8 @@ void eZapMain::startSkip(int dir)
 
 			if(!eServiceInterface::getInstance()->service.path)
 			{
+				if ( !eSystemInfo::getInstance()->canTimeshift() )
+					return;
 				if (state & stateRecording && eDVB::getInstance()->recorder
 					&& eDVB::getInstance()->recorder->recRef == eServiceInterface::getInstance()->service )
 				{
@@ -4399,26 +4382,11 @@ void eZapMain::playService(const eServiceReference &service, int flags)
 		goto zap;
 
 #ifndef DISABLE_FILE
-	if ( !service.path && eDVB::getInstance()->recorder
-		&& eDVB::getInstance()->recorder->recRef != service )
+	if ( !canPlayService(service) )
 	{
-		int canHandleTwoScrambledServices=0;
-		eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices",
-			canHandleTwoScrambledServices);
-
-		if ( !canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled )
-		{
-			if ( handleState() )
-				goto zap;
-			return;
-		}
-		if ( !onSameTP(eDVB::getInstance()->recorder->recRef, (eServiceReferenceDVB&)service) )
-		{
-			if ( handleState() )
-				goto zap;
-			else
-				return;
-		}
+		if ( handleState() )
+			goto zap;
+		return;
 	}
 #endif
 zap:

@@ -91,6 +91,7 @@ eString zap[5][5] =
 };
 
 extern bool onSameTP(const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref2); // implemented in timer.cpp
+extern bool canPlayService( const eServiceReference & ref ); // implemented in timer.cpp
 
 eString firmwareLevel(eString verid)
 {
@@ -379,21 +380,10 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 			return "-1";
 		eServiceReferenceDVB *ref = new eServiceReferenceDVB(eDVBNamespace(dvb_namespace), eTransportStreamID(transport_stream_id), eOriginalNetworkID(original_network_id), eServiceID(service_id), service_type);
 #ifndef DISABLE_FILE
-		if (eDVB::getInstance()->recorder && !ref->path)
+		if ( !canPlayService(*ref) )
 		{
-			int canHandleTwoScrambledServices = 0;
-			eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices", canHandleTwoScrambledServices);
-
-			if (!canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled)
-			{
-				delete ref;
-				return "-1";
-			}
-			if (!onSameTP(*ref,eDVB::getInstance()->recorder->recRef))
-			{
-				delete ref;
-				return "-1";
-			}
+			delete ref;
+			return "-1";
 		}
 #endif
 		if (playService(*ref))

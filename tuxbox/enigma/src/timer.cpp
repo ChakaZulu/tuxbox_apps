@@ -57,6 +57,35 @@ bool onSameTP( const eServiceReferenceDVB& ref1, const eServiceReferenceDVB &ref
 				ref1.getDVBNamespace() == ref2.getDVBNamespace() );
 }
 
+bool canPlayService( const eServiceReference & ref )
+{
+#ifndef DISABLE_FILE
+	if ( !eDVB::getInstance()->recorder )
+		return true;
+	eServiceReferenceDVB &recRef = eDVB::getInstance()->recorder->recRef;
+	if ( ref == recRef )
+		return true;
+	if ( ref.type == eServiceReference::idDVB )
+	{
+		if ( ref.path )
+			return eSystemInfo::getInstance()->canTimeshift();
+		int canHandleTwoScrambledServices=0;
+		eConfig::getInstance()->getKey("/ezap/ci/handleTwoServices", canHandleTwoScrambledServices);
+		if ( !canHandleTwoScrambledServices && eDVB::getInstance()->recorder->scrambled )
+			return false;
+		return onSameTP( (eServiceReferenceDVB&)ref, recRef );
+	}
+#endif
+	return true;
+}
+
+bool checkTimeshift( const eServiceReference &ref )
+{
+	if ( ref.type == eServiceReference::idDVB && ref.path )
+		return eSystemInfo::getInstance()->canTimeshift();
+	return true;
+}
+
 static time_t getNextEventStartTime( time_t t, int duration, int type, int last_activation=-1 )
 {
 	if ( type < ePlaylistEntry::isRepeating )
@@ -376,6 +405,7 @@ void eTimerManager::saveTimerList()
 	timerlist->save();
 }
 
+#if 0
 static eString typeToString(int type)
 {
 	std::stringstream s;
@@ -436,6 +466,7 @@ static eString typeToString(int type)
 		s << std::endl << "doGoSleep";
 	return s.str();
 }
+#endif
 
 void eTimerManager::timeChanged()
 {
@@ -478,7 +509,7 @@ void eTimerManager::actionHandler()
 			long t = getSecondsToBegin();
 			if ( (nextStartingEvent->type & ePlaylistEntry::recDVR)
 				&& t > HDD_PREPARE_TIME
-				&& rec && ( rec.path || ( canHandleTwoServices && onSameTP(rec, Ref) ) ) )
+				&& rec && ( checkTimeshift(rec) || ( canHandleTwoServices && onSameTP(rec, Ref) ) ) )
 			{
 		// we dont zap now.. playback is running.. will zap immediate before eventbegin
 				t -= HDD_PREPARE_TIME;
