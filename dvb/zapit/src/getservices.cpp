@@ -58,16 +58,15 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	if (atoi(services->GetAttributeValue("serviceType")) == serv_mode) {
 		char *name = services->GetAttributeValue("Name");
 		if (*name != ' ') {
-	  if (atoi(services->GetAttributeValue("serviceID")) > 0) { 
+	  
 	    //printf("Will build a channel of type %d.\n",serv_mode);
 	    tmp_chan = (chanptr) malloc(sizeof(channel));
 	    memset(tmp_chan, 0, sizeof(channel));
 	    if (tmp_chan == NULL) printf("tmp_chan konnte nicht erstellt werden.\n");
 	    
 	    channel_nr++;
-	    
 	    //printf("Now getting standards\n");	
-	    //				services = services->GetChild();
+	    //services = services->GetChild();
 	    //printf("Bin in standard.\n");
 	    //sscanf(services->GetAttributeValue("vpid"),"%x", &tmp_chan->vpid);
 	    //sscanf(services->GetAttributeValue("apid"),"%x", &tmp_chan->apid);
@@ -92,12 +91,12 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	    //printf("%d Kanalname: %s, Pmt: %04x\n",channel_nr, tmp_chan->name, tmp_chan->pmt);
 	    cur_c->next = tmp_chan;
 	    cur_c = tmp_chan;
-	  }
+	 
 	} else { 
 		//printf("Channelname is empty\n");
 	}
 	} else {
-	  //printf("Skipping channels which are not mode: %d .\n",serv_mode);
+	  //printf("Skipping channel %s which is not mode: %d .\n", services->GetAttributeValue("name"),serv_mode);
 	}
       }
       else printf("Not known. Skipping %s\n", services->GetType());	
