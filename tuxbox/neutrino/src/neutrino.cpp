@@ -3096,8 +3096,11 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_PluginList = new CPlugins;
 	g_PluginList->setPluginDir(PLUGINDIR);
 
+	// mount shares before scanning for plugins
+	CFSMounter::automount();
+
 	//load Pluginlist before main menu (only show script menu if at least one
-    // script is available
+	// script is available
 	g_PluginList->loadPlugins();
 
 
@@ -3112,8 +3115,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	ConsoleDestinationChanger = new CConsoleDestChangeNotifier;
 
 	colorSetupNotifier->changeNotify(NONEXISTANT_LOCALE, NULL);
-
-	CFSMounter::automount();
 
 	// setup recording device
 	if (g_settings.recording_type != RECORDING_OFF)
