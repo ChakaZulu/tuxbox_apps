@@ -8,6 +8,7 @@
 #include <lib/dvb/si.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/iso639.h>
+#include <lib/dvb/frontend.h>
 #ifndef DISABLE_CI
 	#include <lib/dvb/dvbci.h>
 #endif
@@ -84,11 +85,13 @@ eString getISO639Description(char *iso)
 eDVBServiceController::eDVBServiceController(eDVB &dvb)
 : eDVBController(dvb)
 , updateTDTTimer(eApp)
+, disableFrontendTimer(eApp)
 #ifndef DISABLE_CI
 , DVBCI(dvb.DVBCI)
 , DVBCI2(dvb.DVBCI2)
 #endif
 {
+	CONNECT(disableFrontendTimer.timeout, eDVBServiceController::disableFrontend);
 	CONNECT(updateTDTTimer.timeout, eDVBServiceController::startTDT);
 	CONNECT(dvb.tPAT.tableReady, eDVBServiceController::PATready);
 	CONNECT(dvb.tPMT.tableReady, eDVBServiceController::PMTready);
@@ -1029,8 +1032,13 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 		prevservice = eServiceReferenceDVB();
 	}
 
-	if ( !newservice && service.getServiceType() != 7 )
-		prevservice=service;  // save currentservice
+	if ( !newservice )
+	{
+		if ( service.getServiceType() != 7 )
+			prevservice=service;  // save currentservice
+		// when in 15 seconds no other dvb service is running disable frontend
+		disableFrontendTimer.start(15*1000, true);
+	}
 /////////////////////////////////
 
 	service=newservice;
@@ -1395,16 +1403,36 @@ void eDVBServiceController::clearCAlist()
 #endif
 }
 
+void eDVBServiceController::disableFrontend()
+{
+	if ( transponder && (!service || service.path) &&
+#ifndef DISABLE_FILE
+		!dvb.recorder &&
+#endif
+		!dvb.getScanAPI() )  // no more service need the frontend..
+	{
+		eDebug("no more dvb service running.. disable Frontend");
+		transponder=0;
+		eFrontend::getInstance()->savePower();
+		if ( eDVB::getInstance()->time_difference &&  // have valid time?
+			eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000
+			&& eSystemInfo::getInstance()->hasStandbyWakeupTimer() )
+		{
+			eDebug("set RTC when frontend is disabled..");
+			time_t nowTime=time(0)+eDVB::getInstance()->time_difference;
+			extern void setRTC(time_t); // defined in dvb/dvbservice.cpp
+			setRTC(nowTime);
+		}
+	}
+}
+
 void eDVBServiceController::startTDT()
 {
 	delete tdt;
 	tdt=0;
-	if ( !service.path.size() )
-	{
-		tdt=new TDT();
-		CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
-		tdt->start();
-	}
+	tdt=new TDT();
+	CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
+	tdt->start();
 }
 
 /*

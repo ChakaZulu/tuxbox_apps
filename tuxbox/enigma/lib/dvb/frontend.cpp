@@ -148,34 +148,16 @@ void eFrontend::checkRotorLock()
 
 int eFrontend::setFrontend()
 {
-	bool doSavePower=false;
-	eServiceHandler *handler= 
-		eServiceInterface::getInstance()->getService();
-	if ( handler )
+	if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
 	{
-		if (!eDVB::getInstance()->recorder && ( handler->getID() != eServiceReference::idDVB || eServiceInterface::getInstance()->service.path ) )
-				doSavePower=true;
+		eDebug("FE_SET_FRONTEND failed (%m)");
+		return -1;
 	}
-	else
-		doSavePower=true;
-	if ( doSavePower && !eDVB::getInstance()->getScanAPI() )
-	{
-		eDebug("no running dvb service.. disable frontend (2)");
-		savePower();
-	}
-	else
-	{
-		if (ioctl(fd, FE_SET_FRONTEND, &front)<0)
-		{
-			eDebug("FE_SET_FRONTEND failed (%m)");
-			return -1;
-		}
-		eDebug("FE_SET_FRONTEND OK");
+	eDebug("FE_SET_FRONTEND OK");
 #if HAVE_DVB_API_VERSION >= 3
-		// API V3 drivers have no working TIMEDOUT event.. 
-		timeout.start(3000,true);   
+	// API V3 drivers have no working TIMEDOUT event.. 
+	timeout.start(3000,true);   
 #endif
-	}
 	return 0;
 }
 

@@ -119,6 +119,7 @@ class eDVBServiceController
 	eServiceReferenceDVB parentservice,prevservice;
 	MHWEIT *tMHWEIT;
 	eTimer updateTDTTimer;
+	eTimer disableFrontendTimer;
 public:
 	int lastTpTimeDifference;
 	int service_state;
@@ -194,6 +195,7 @@ public:
 	void initCAlist();
 	void clearCAlist();
 	void startTDT();
+	void disableFrontend();
 };
 
 #endif
