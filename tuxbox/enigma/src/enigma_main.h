@@ -142,7 +142,7 @@ class eZapMain: public eWidget
 	eAudioSelector audiosel;
 	eEventDisplay *actual_eventDisplay;
 	int flags;
-	
+	int isVT;	
 	eZapLCD lcdmain;
 	
 	void redrawWidget(gPainter *, const QRect &where);
@@ -161,14 +161,13 @@ private slots:
 	void leaveService(eService *);
 	void clockUpdate();
 	void updateVolume(int vol);
-	void aspectRatioChanged(int aspect);
-	void scrambled(bool b);
-	void isAC3(bool b);
+	void set16_9Logo(int aspect);
+	void setSmartcardLogo(bool b);
+	void setAC3Logo(bool b);
+	void setVTButton(bool b);
 public:
 	eZapMain();
 	~eZapMain();
-signals: 
-  void AC3detected(bool);
 };
 
 #endif /* __enigma_main_h */

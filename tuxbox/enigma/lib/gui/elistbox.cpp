@@ -35,9 +35,12 @@ eListboxEntry::eListboxEntry(eListboxEntry *listboxentry, void *data): listboxen
 
 eListboxEntry::eListboxEntry(eListbox *listbox, void *data): listbox(listbox), data(data)
 {
-	parent=listbox;
-	listboxentry=0;
-	listbox->append(this);
+	if (listbox)
+	{
+		parent=listbox;
+		listboxentry=0;
+		listbox->append(this);
+	}
 }
 
 eListboxEntry::~eListboxEntry()

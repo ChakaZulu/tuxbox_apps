@@ -16,6 +16,8 @@
 #include "rc.h"
 #include "enigma.h"
 #include "enigma_lcd.h"
+#include "decoder.h"
+#include "enigma_plugins.h"
 
 static QString getISO639Description(char *iso)
 {
@@ -283,6 +285,7 @@ void eZapMain::eraseBackground(gPainter *painter, const QRect &where)
 
 eZapMain::eZapMain(): eWidget(0, 1)
 {
+	isVT=0;
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "ezap_main"))
 		qFatal("skin load of \"ezap_main\" failed");
@@ -361,13 +364,12 @@ eZapMain::eZapMain(): eWidget(0, 1)
 
 	cur_start=cur_duration=-1;
 
-	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(aspectRatioChanged(int)));
-	connect(this, SIGNAL(AC3detected(bool)), SLOT(isAC3(bool)));
+	connect(eStreamWatchdog::getInstance(), SIGNAL(AspectRatioChanged(int)), SLOT(set16_9Logo(int)));
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotEIT(EIT*,int)), SLOT(gotEIT(EIT*,int)));
 	connect(eDVB::getInstance(), SIGNAL(gotSDT(SDT*)), SLOT(gotSDT(SDT*)));
 	connect(eDVB::getInstance(), SIGNAL(gotPMT(PMT*)), SLOT(gotPMT(PMT*)));
-	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(scrambled(bool)));
+	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(setSmartcardLogo(bool)));
 	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
 	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
 	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(leaveService(eService*)));
@@ -383,7 +385,7 @@ eZapMain::~eZapMain()
 {
 }
 
-void eZapMain::aspectRatioChanged(int aspect)
+void eZapMain::set16_9Logo(int aspect)
 {
 	if (aspect)
 	{
@@ -396,7 +398,21 @@ void eZapMain::aspectRatioChanged(int aspect)
 	}
 }
 
-void eZapMain::isAC3(bool b)
+void eZapMain::setVTButton(bool b)
+{
+	if (b)
+	{
+		ButtonBlueDis->hide();
+		ButtonBlueEn->show();
+	}
+	else
+	{
+		ButtonBlueEn->hide();
+		ButtonBlueDis->show();
+	}
+}
+
+void eZapMain::setAC3Logo(bool b)
 {
 	if (b)
 	{
@@ -409,7 +425,7 @@ void eZapMain::isAC3(bool b)
 	}
 }
 
-void eZapMain::scrambled(bool b)
+void eZapMain::setSmartcardLogo(bool b)
 {
 	if (b)
 	{
@@ -618,7 +634,7 @@ void eZapMain::keyDown(int code)
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
 
-		qDebug("w is %p", w);
+//		qDebug("w is %p", w);
 		w->show();
 		int chnum=w->exec();
 		w->hide();
@@ -716,6 +732,16 @@ void eZapMain::keyUp(int code)
 		}
 		break;
 	}
+	case eRCInput::RC_BLUE:
+	{
+		if (isVT)
+		{
+			eZapPlugins plugins;
+			plugins.execPluginByName("tuxtxt.cfg");
+		}
+		break;
+	}
+
 	case eRCInput::RC_HELP:
 	{
 		if (!eDVB::getInstance()->service)
@@ -744,11 +770,16 @@ void eZapMain::keyUp(int code)
 
 void eZapMain::serviceChanged(eService *service, int err)
 {
+	isVT = Decoder::parms.tpid != -1;
+
+	setVTButton(isVT);
+
 	if (!service)
 		return;
 
 	if (service->service_type==4)
 		flags|=ENIGMA_NVOD;
+
 	ChannelName->setText(service->service_name);
 	
 	switch (err)
@@ -876,7 +907,7 @@ void eZapMain::gotPMT(PMT *pmt)
 	if (numaudio>1)
 		flags|=ENIGMA_AUDIO;
 		
-	emit AC3detected(isAc3);
+	setAC3Logo(isAc3);
 }
 
 void eZapMain::timeOut()

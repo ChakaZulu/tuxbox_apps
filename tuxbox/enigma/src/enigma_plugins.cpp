@@ -80,6 +80,7 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 	name=getInfo(cfgfile, "name");
 	if (!name)
 		name="(" + QString(cfgfile) + " is invalid)";
+		
 	desc=getInfo(cfgfile, "desc");
 	if (!desc)
 		desc="";
@@ -177,18 +178,16 @@ eZapPlugins::~eZapPlugins()
 	delete window;
 }
 
-void eZapPlugins::selected(eListboxEntry *lbe)
+void eZapPlugins::execPluginByName(const char* name)
 {
-	ePlugin *plugin=(ePlugin*)lbe;
-	
-	if (!plugin || plugin->isback)
-	{
-		window->close(0);
-		return;
-	}
+	QString PluginPath = PLUGINDIR "/";
+	PluginPath+=name;
+	ePlugin p(0, PluginPath);
+	execPlugin(&p);
+}
 
-	window->hide();
-	
+void eZapPlugins::execPlugin(ePlugin* plugin)
+{
 	void *libhandle[20];
 	int argc=0;
 	QString argv[20];
@@ -223,11 +222,6 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 
 	if (plugin->needrc)
 		MakeParam(P_ID_RCINPUT, eRCInput::getInstance()->lock());
-	else
-	{
-		qDebug("Close RC driver\n");
-		eRCInput::getInstance()->close();
-	}
 
 	if (plugin->needlcd)
 		MakeParam(P_ID_LCD, eLCD::getPrimary()->lock());
@@ -254,12 +248,12 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 		}
 	}
 
-	PluginParam *par = first;
+/*	PluginParam *par = first;
 	for( ; par; par=par->next )
 	{
 		printf ("id: %s - val: %s\n", par->id, par->val);
 		printf("%d\n", par->next);
-	}
+	}*/
 
 	for (i=0; i<argc; i++)
 	{
@@ -314,11 +308,6 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 	
 	if (plugin->needrc)
 		eRCInput::getInstance()->unlock();
-	else
-	{
-		if (eRCInput::getInstance()->open())
-			qDebug("RC driver open success\n");
-	}
 
 	if (plugin->needlcd)
 		eLCD::getPrimary()->unlock();
@@ -333,7 +322,24 @@ void eZapPlugins::selected(eListboxEntry *lbe)
 			ioctl(fd, AVIA_VBI_START_VTXT, Decoder::parms.tpid);
 			close(fd);
 		}
-  }
+	}
 
+}
+
+void eZapPlugins::selected(eListboxEntry *lbe)
+{
+	ePlugin *plugin=(ePlugin*)lbe;
+	
+	if (!plugin || plugin->isback)
+	{
+		window->close(0);
+		return;
+	}
+
+//	window->hide();
+	
+	execPlugin(plugin);
+
+	window->hide();
 	window->show();
 }

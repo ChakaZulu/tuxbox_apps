@@ -16,7 +16,7 @@ eStreamWatchdog *eStreamWatchdog::instance;
 eStreamWatchdog::eStreamWatchdog()
 {
 	connect(&timer, SIGNAL(timeout()), SLOT(checkstate()));
-	timer.start(1000);
+	timer.start(500);
 	last=-1;
 	
 	if (!instance)
