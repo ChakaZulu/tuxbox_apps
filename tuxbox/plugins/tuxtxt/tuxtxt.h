@@ -196,9 +196,16 @@ void *thread_result;
 
 unsigned short RCCode;
 
+struct _pid_table
+{
+	int	 vtxt_pid;
+	int	 service_id;
+	int	 service_name_len;
+	char service_name[24];
+}pid_table[128];
+
 //buffers
 
-int			   pid_table[100];
 unsigned char  backbuffer[720*576];
 unsigned char  timestring[8];
 unsigned char  page_char[PAGESIZE];

@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.20: show servicename instead of pid                                  *
  *    V1.19: added configmenu                                                 *
  *    V1.18: hide navbar in newsflash/subtitle mode, workaround for gtx-pig   *
  *    V1.17: some mods by AlexW                                               *
@@ -36,7 +37,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.19 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.20 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -348,21 +349,19 @@ int Init()
 
 		if(vtxtpid == 0)
 		{
-			ConfigMenu();
+			vtxtpid = pid_table[0].vtxt_pid;
 		}
-		else
-		{
-			dmx_flt.pid		= vtxtpid;
-			dmx_flt.input	= DMX_IN_FRONTEND;
-			dmx_flt.output	= DMX_OUT_TAP;
-			dmx_flt.pesType	= DMX_PES_OTHER;
-			dmx_flt.flags	= DMX_IMMEDIATE_START;
 
-			if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
-			{
-				perror("TuxTxt <DMX_SET_PES_FILTER>");
-				return 0;
-			}
+		dmx_flt.pid		= vtxtpid;
+		dmx_flt.input	= DMX_IN_FRONTEND;
+		dmx_flt.output	= DMX_OUT_TAP;
+		dmx_flt.pesType	= DMX_PES_OTHER;
+		dmx_flt.flags	= DMX_IMMEDIATE_START;
+
+		if(ioctl(dmx, DMX_SET_PES_FILTER, &dmx_flt) == -1)
+		{
+			perror("TuxTxt <DMX_SET_PES_FILTER>");
+			return 0;
 		}
 
 	//create decode-thread
@@ -456,9 +455,10 @@ void CleanUp()
 int GetVideotextPIDs()
 {
 	struct dmxSctFilterParams dmx_flt;
-	int pat_scan, pmt_scan, desc_scan, pmt_scan_start, pid_test;
+	int pat_scan, pmt_scan, sdt_scan, desc_scan, pmt_scan_start, pid_test, byte, diff;
 
 	unsigned char PAT[1024];
+	unsigned char SDT[1024];
 	unsigned char PMT[1024];
 
 	//read PAT to get all PMT's
@@ -470,7 +470,7 @@ int GetVideotextPIDs()
 		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 		dmx_flt.filter.filter[0]= 0x00;
 		dmx_flt.filter.mask[0]	= 0xFF;
-		dmx_flt.timeout			= 1000;
+		dmx_flt.timeout			= 5000;
 
 		if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
 		{
@@ -481,6 +481,26 @@ int GetVideotextPIDs()
 		if(read(dmx, PAT, sizeof(PAT)) == -1)
 		{
 			perror("TuxTxt <read PAT>");
+			return;
+		}
+
+	//read SDT to get servicenames
+
+		dmx_flt.pid				= 0x0011;
+		dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
+		dmx_flt.filter.filter[0]= 0x42;
+		dmx_flt.filter.mask[0]	= 0xFF;
+		dmx_flt.timeout			= 5000;
+
+		if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
+		{
+			perror("TuxTxt <DMX_SET_FILTER SDT>");
+			return;
+		}
+
+		if(read(dmx, SDT, sizeof(SDT)) == -1)
+		{
+			perror("TuxTxt <read SDT>");
 			return;
 		}
 
@@ -496,7 +516,7 @@ int GetVideotextPIDs()
 			dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
 			dmx_flt.filter.filter[0]= 0x02;
 			dmx_flt.filter.mask[0]	= 0xFF;
-			dmx_flt.timeout			= 1000;
+			dmx_flt.timeout			= 5000;
 
 			if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
 			{
@@ -520,14 +540,45 @@ int GetVideotextPIDs()
 						{
 							for(pid_test = 0; pid_test < pids_found; pid_test++)
 							{
-								if(pid_table[pid_test] == ((PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF)) goto skip_pid;
+								if(pid_table[pid_test].vtxt_pid == ((PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF)) goto skip_pid;
 							}
 
-							pid_table[pids_found] = (PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF;
+							pid_table[pids_found].vtxt_pid	 = (PMT[pmt_scan + 1]<<8 | PMT[pmt_scan + 2]) & 0x1FFF;
+							pid_table[pids_found].service_id = PMT[0x03]<<8 | PMT[0x04];
 							pids_found++;
 skip_pid:;
 						}
 					}
+				}
+			}
+		}
+
+	//scan SDT to get servicenames
+
+		for(sdt_scan = 0x0B; sdt_scan < ((SDT[1]<<8 | SDT[2]) & 0x0FFF) - 7; sdt_scan += 5 + ((SDT[sdt_scan + 3]<<8 | SDT[sdt_scan + 4]) & 0x0FFF))
+		{
+			for(pid_test = 0; pid_test < pids_found; pid_test++)
+			{
+				if((SDT[sdt_scan]<<8 | SDT[sdt_scan + 1]) == pid_table[pid_test].service_id && SDT[sdt_scan + 5] == 0x48)
+				{
+					diff = 0;
+					pid_table[pid_test].service_name_len = SDT[sdt_scan+9 + SDT[sdt_scan+8]];
+
+					for(byte = 0; byte < pid_table[pid_test].service_name_len; byte++)
+					{
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'Ä') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5B;
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'ä') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7B;
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'Ö') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5C;
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'ö') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7C;
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'Ü') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x5D;
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'ü') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7D;
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] == 'ß') SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] = 0x7E;
+
+						if(SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] >= 0x80 && SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte] <= 0x9F) diff--;
+						else pid_table[pid_test].service_name[byte + diff] = SDT[sdt_scan+10 + SDT[sdt_scan + 8] + byte];
+					}
+
+					pid_table[pid_test].service_name_len += diff;
 				}
 			}
 		}
@@ -559,7 +610,7 @@ void ConfigMenu()
 					"ã                            äéººººººººººººººººººººººººººººººŠ"
 					"ã      Videotextauswahl      äéº¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶ºŠ"
 					"ã                            äéººººººººººººººººººººººººººººººŠ"
-					"ãí          0x????          îäéIGGGGGGGGGGGGGGGGGGGGGGGGGGGGIŠ"
+					"ãí                          îäéIGGGGGGGGGGGGGGGGGGGGGGGGGGGGIŠ"
 					"ã                            äéººººººººººººººººººººººººººººººŠ"
 					"ã      Bildschirmformat      äéº¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶ºŠ"
 					"ã                            äéººººººººººººººººººººººººººººººŠ"
@@ -569,18 +620,18 @@ void ConfigMenu()
 					"åææææææææææææææææææææææææææææçéººººººººººººººººººººººººººººººŠ"
 					"ëìììììììììììììììììììììììììììììêŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠŠ";
 
-	//set current vtxt-pid
+	//set current vtxt
 
-		if(vtxtpid == 0) vtxtpid = pid_table[0];
+		if(vtxtpid == 0) vtxtpid = pid_table[0].vtxt_pid;
 		else
 		{
-			while(pid_table[current_pid] != vtxtpid)
+			while(pid_table[current_pid].vtxt_pid != vtxtpid)
 			{
 				current_pid++;
 			}
 		}
 
-		sprintf(&menu[6*62 + 14], "%.4X", vtxtpid);
+		memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
 
 		if(current_pid == 0 || pids_found == 1)				 menu[6*62 +  1] = ' ';
 		if(current_pid == pids_found - 1 || pids_found == 1) menu[6*62 + 28] = ' ';
@@ -723,7 +774,8 @@ void ConfigMenu()
 								{
 									current_pid--;
 
-									sprintf(&menu[6*62 + 14], "%.4X", pid_table[current_pid]);
+									memset(&menu[6*62 + 3], ' ', 24);
+									memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
 
 										if(pids_found > 1)
 										{
@@ -752,7 +804,8 @@ void ConfigMenu()
 								{
 									current_pid++;
 
-									sprintf(&menu[6*62 + 14], "%.4X", pid_table[current_pid]);
+									memset(&menu[6*62 + 3], ' ', 24);
+									memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
 
 									if(pids_found > 1)
 									{
@@ -825,7 +878,7 @@ void ConfigMenu()
 
 												//start demuxer with new vtxtpid
 
-													vtxtpid = pid_table[current_pid];
+													vtxtpid = pid_table[current_pid].vtxt_pid;
 
 													dmx_flt.pid		= vtxtpid;
 													dmx_flt.input	= DMX_IN_FRONTEND;
