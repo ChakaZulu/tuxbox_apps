@@ -1,0 +1,134 @@
+------
++++
+Title:
+Main Menu
++++
+Index:
+0
++++
+Entries:
+1 About
+2 Timer
+3 Recording
+4 PID
+6 Plugins
+* Setup
+7 Manual Update
+8 Internet Update
+9 General Setup
++++
+Actions:
+1:
+	Show_About
+2:
+	CONTROL Menu Mode 1
+4:
+	CONTROL Menu Mode 2
+6:
+	CONTROL Menu Mode 3
+7:
+	UPDATE: Manual_Update
+8:
+	UPDATE: Internet_Update
+9:
+	CONTROL Menu Mode 4
+------
++++
+Title:
+Timer
++++
+Index:
+1
++++
+Init:
+	TIMER: Add_Timers
+------
++++
+Title:
+PID
++++
+Index:
+2
++++
+Init:
+	Add_PIDs(VPID, APIDs)
+------
++++
+Title:
+Plugins
++++
+Index:
+3
++++
+Init:
+	Add_Plugins
+------
++++
+Title:
+General Setup
++++
+Index:
+4
++++
+Entries:
+!1 16:9 Format
+	Letterbox
+	Panscan
+	Centercut
+x2 RC Repeat
+!3 Scart
+	FBAS
+	RGB
+x4 Support Old RC
+x5 Switch on VCR
+* Scan-Options
+6 Update-Channel-Scan
+7 Full Channel-Scan
+8 Normal Channel-Scan
+* Setup-Stuff
+9 Box-Setup
+10 Save Settings
++++
+Values:
+1:
+	%SETTINGS_LETTERBOX
+	%SETTINGS_PANSCAN
+	%SETTINGS_CENTERCUT
+2:
+	%SETTINGS_RCREPEAT
+3:
+	%HARDWARE_FBAS
+	%HARDWARE_RGB
+4:
+	%SETTINGS_SUPPORTOLDRC
+5:
+	%SETTINGS_SWITCHVCR
++++
+Actions:
+1:
+	SETTINGS Set Letterbox 
+	SETTINGS Set Panscan
+	SETTINGS Set Centercut
+2:
+	SETTINGS Set RCRepeat
+3:
+	HARDWARE Set FBAS
+	HARDWARE Set RGB
+4:
+	SETTINGS Set SupportOldRC
+5:
+	SETTINGS Set SwitchVCR
+6:
+	SCAN Scan Update
+	#CHANNELS Save DVB
+7:
+	SCAN Scan Full
+	#CHANNELS Save DVB
+8:
+	SCAN Scan Normal
+	CHANNELS Save DVB
+9:
+	CONTROL Menu Mode 5
+10:
+	SETTINGS Settings Save
+------
