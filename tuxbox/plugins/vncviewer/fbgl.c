@@ -148,10 +148,11 @@ gl_fillbox(int x, int y, int w, int h, int col) {
 		
 		for (i=0; i<w; i++) {
 //			*(buf++) = col;
-			*(buf++) = 0x8000 | (col >> 1) | (col & 0x1F);
+			*(buf++) = 0x8000 | ((col & 0xF8) << 8) | ((col & 3) << 8) | ((col & 0xE000) >> 8) | ((col & 0x1F00) >> 8);
 		}
 	}
 	redraw_virt(x, y, w, h);
+//	printf("Fillbox %d\n",col);
 }
 
 void
@@ -167,11 +168,12 @@ gl_putbox(int x, int y, int w, int h, CARD8 *buf) {
 //		memcpy(dst, src, w * sizeof(Pixel));
 		for(k=0; k < w ; k++)
 		{
-			dst[k] = 0x8000 | (src[k] >> 1) | (src[k] & 0x1F);
+			dst[k] = 0x8000 | ((src[k] & 0xF8) << 8) | ((src[k] & 3) << 8) | ((src[k] & 0xE000) >> 8) | ((src[k] & 0x1F00) >> 8);
 		}
 		src += w;
 		dst += v_xsize;
 	}
 	redraw_virt(x, y, w, h);
+//	printf("Putbox \n");
 }
 
