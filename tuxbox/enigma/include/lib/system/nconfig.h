@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <lib/base/estring.h>
 
 /*
  * Superblock definitions
@@ -138,176 +139,7 @@ public:
 		void close();
 		
 		void flush(); // flush file if not mmap'ed
-		
-		/*
-		 * Create a new file
-		 * resize is filesize increment is system pages
-		 * dirent is directory increment
-		 * mchunks is memory block increment
-		 * Errors:
-		 * NC_ERR_PERM		file already exists
-		 * NC_ERR_NFILE		cannot create new file
-		 * NC_ERR_NVAL		file is already open
-		 */
-		int createNew(unsigned resize = 4, unsigned dirent = 32, unsigned mchunks = 32);
 
-		/*
-		 * Get an unsigned integer
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_NEXIST	the key does not exist
-		 * NC_ERR_TYPE		the key exists, but is of different type
-		 */
-		int getKey(const char *name, unsigned &value);
-		int getKey(const char *name, unsigned long long &value);
-
-		/*
-		 * Get a signed integer
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_NEXIST	the key does not exist
-		 * NC_ERR_TYPE		the key exists, but is of different type
-		 */
-		int getKey(const char *name, int &value);
-		int getKey(const char *name, signed long long &value);
-
-		/*
-		 * Get a string
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_NEXIST	the key does not exist
-		 * NC_ERR_TYPE		the key exists, but is of different type
-		 */
-		int getKey(const char *name, char *&value);
-
-		/*
-		 * Get a long double
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_NEXIST	the key does not exist
-		 * NC_ERR_TYPE		the key exists, but is of different type
-		 */
-		int getKey(const char *name, double &value);
-		int getKey(const char *name, long double &value);
-		
-		/*
-		 * Get raw data
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_NEXIST	the key does not exist
-		 * NC_ERR_TYPE		the key exists, but is of different type
-		 */
-		int getKey(const char *name, char *&value, unsigned &len);
-
-		/*
-		 * Insert an unsigned integer
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_RDONLY	file is open in read-only mode
-		 * NC_ERR_PERM		intermediate key is not a directory
-		 * NC_ERR_TYPE		key already exists, but is not an usigned integer
-		 * NC_ERR_NEXIST	key does not exist (should NEVER happen)
-		 */
-		int setKey(const char *name, const unsigned value);
-		int setKey(const char *name, const unsigned long long value);
-		
-		/*
-		 * Insert an integer
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_RDONLY	file is open in read-only mode
-		 * NC_ERR_PERM		intermediate key is not a directory
-		 * NC_ERR_TYPE		key already exists, but is not a signed integer
-		 * NC_ERR_NEXIST	key does not exist (should NEVER happen)
-		 */
-		int setKey(const char *name, const int value);
-		int setKey(const char *name, const signed long long value);
-		
-		/*
-		 * Insert a string
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_RDONLY	file is open in read-only mode
-		 * NC_ERR_PERM		intermediate key is not a directory
-		 * NC_ERR_TYPE		key already exists, but is not a string
-		 * NC_ERR_NEXIST	key does not exist (should NEVER happen)
-		 */
-		int setKey(const char *name, const char *value);
-
-		/*
-		 * Insert raw data
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_RDONLY	file is open in read-only mode
-		 * NC_ERR_PERM		intermediate key is not a directory
-		 * NC_ERR_TYPE		key already exists, but is not raw data
-		 * NC_ERR_NEXIST	key does not exist (should NEVER happen)
-		 */
-		int setKey(const char *name, const char *value, const unsigned len);
-		
-		/*
-		 * Insert a double
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_RDONLY	file is open in read-only mode
-		 * NC_ERR_PERM		intermediate key is not a directory
-		 * NC_ERR_TYPE		key already exists, but is not raw data
-		 * NC_ERR_NEXIST	key does not exist (should NEVER happen)
-		 */
-		int setKey(const char *name, const double value);
-		int setKey(const char *name, const long double value);
-		
-		/*
-		 * Rename a key
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_RDONLY	file is open read-only
-		 * NC_ERR_NEXIST	the key does not exist
-		 * NC_ERR_PERM		key with specified name already exists
-		 */
-		int renameKey(const char *oldname, const char *newname);
-
-		/*
-		 * Delete a key
-		 * No errors defined
-		 */
-		void delKey(const char *name);
-
-		/*
-		 * Create a directory
-		 * entries parameter specifies number of direntries to preallocate
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_RDONLY	file is open in read-only mode
-		 * NC_ERR_PERM		intermediate key is not a directory
-		 * NC_ERR_TYPE		key already exists, but is not a directory
-		 * NC_ERR_NEXIST	key does not exist (should NEVER happen)
-		 */
-		int createDir(const char *name, unsigned entries = 0);
-
-		/*
-		 * Change working directory
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_NDIR		target key is not a directory
-		 * NC_ERR_NEXIST	target key direcotry does not exist
-		 */
-		int chDir(const char *name);
-
-		/*
-		 * Print working directory
-		 * Errors:
-		 * Returns NULL on error
-		 */
-		const char *pwDir();
-
-		/*
-		 * List all keys in current/specified directory
-		 * Result is a NULL-terminated array of nc_ls_s
-		 * structures.
-		 * Errors:
-		 * Returns NULL on error
-		 * Note:
-		 * You need to free the returned pointer,
-		 * as well as all the names in it.
-		 */
-		struct nc_ls_s *ls(const char *dir = NULL);
-	
 		/*
 		 * Lock file
 		 * This will block until lock becomes available
@@ -325,38 +157,12 @@ public:
 		 * No errors defined
 		 */
 		void unLockFile();
-	
-		/*
-		 * Print out (to stderr) information about current file
-		 * No errors defined
-		 */
-		void status();
 
 		/*
-		 * Return version string
+		 * Convert registry to new enigma config file
 		 */
-		static char *version();
-
-		/*
-		 * Dump current file to XML
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_PERM		could not write XML output
-		 */
-		int toXML(const char *filename);
-
-		/*
-		 * Load XML to current file
-		 * a file has to be open
-		 * force can be
-		 * 	TRUE - existing keys will be deleted
-		 * 	FALSE - import will ignore a key if existing key type conflicts
-		 * Errors:
-		 * NC_ERR_NFILE		no file is open
-		 * NC_ERR_PERM		file is open read-only
-		 */
-		int fromXML(const char *filename, int force = TRUE);
-		
+		int convert(const char *filename);
+		void store(nc_de_s *de, FILE *f, eString path);
 protected:
 		int fd, omode, lock, careful;
 		char *fname, *data, *cname;
@@ -365,27 +171,18 @@ protected:
 		struct nc_sb_s *sb;
 		struct nc_de_s *rdir, *cdir;
 		struct nc_chunk_s *chunks;
-		
-		int _setKey(const char *, const unsigned, const char *, const unsigned);
-		void _delKey(const char *, struct nc_de_s *, int);
-		void expand(unsigned);
-		
-		void fast_free(unsigned);
-
-		unsigned getChunk(unsigned);
-		void freeChunk(unsigned);
-		static inline unsigned alignSize(unsigned);
 
 		struct nc_de_s *getDirEnt(const char *, struct nc_de_s * = NULL);
-		struct nc_de_s *insert(unsigned, struct nc_de_s *);
 		char *canonize(const char *);
-		char *getName(const struct nc_de_s *);
 
 		void _remap(const size_t, const size_t);
+};
 
-		inline unsigned crc(const char *, unsigned);
-		void store(nc_de_s *, FILE *);
-		void restore(void *, int);
+class eConfigOld: public NConfig
+{
+public:
+	eConfigOld();
+	~eConfigOld();
 };
 
 #endif /* NC_NCONFIG_H */
