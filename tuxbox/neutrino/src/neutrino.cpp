@@ -87,6 +87,11 @@
 #include "gui/timerlist.h"
 #include "gui/alphasetup.h"
 #include "gui/mp3player.h"
+
+#if HAVE_DVB_API_VERSION >= 3
+#include "gui/movieplayer.h"
+#endif
+
 #include "gui/nfs.h"
 #include "gui/pictureviewer.h"
 #include "gui/motorcontrol.h"
@@ -995,6 +1000,11 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem( new CMenuForwarder("mainmenu.scartmode", true, "", this, "scart", true, CRCInput::RC_yellow, "gelb.raw") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.games", true, "", new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, "blau.raw") );
 	mainMenu.addItem( new CMenuForwarder("mainmenu.mp3player", true, "", new CMP3PlayerGui(), "", true) );
+
+#if HAVE_DVB_API_VERSION >= 3
+	mainMenu.addItem( new CMenuForwarder("mainmenu.movieplayer", true, "", new CMoviePlayerGui(), "", true) );
+#endif
+
 	mainMenu.addItem( new CMenuForwarder("mainmenu.pictureviewer", true, "", new CPictureViewerGui(), "", true) );
 
 	mainMenu.addItem( new CMenuForwarder("mainmenu.sleeptimer", true, "", new CSleepTimerWidget, "",true) );
@@ -2842,6 +2852,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			lastMode=mode;
 			mode=mode_pic;
 		}
+		if((data &mode_mask)== mode_ts)
+		{
+			lastMode=mode;
+			mode=mode_ts;
+		}
 	}
 	else if( msg == NeutrinoMessages::VCR_ON )
 	{
@@ -2940,7 +2955,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
 		}
 	}
 
-	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic))
+	if( isEvent && ( mode != mode_scart ) && ( mode != mode_mp3) && ( mode != mode_pic) && (mode != mode_ts))
 	{
 		// anzeigen NUR, wenn es vom Event kommt
 		if( current_muted )
@@ -3385,7 +3400,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.453 2003/05/22 20:36:34 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.454 2003/05/24 00:36:46 gagga Exp $\n\n");
 
 	tzset();
 	initGlobals();
