@@ -48,6 +48,29 @@
 
 #define DELETE(WHAT) result.strReplace(#WHAT, "")
 
+static eString getRight(const eString& str, char c )
+{
+	unsigned int found = str.find(c);
+	unsigned int beg = ( found != eString::npos ? found : 0 );
+	unsigned int len = str.length();
+	if ( found != eString::npos )
+		beg++;
+	return str.mid( beg, len-beg );
+}
+
+static int getDate()
+{
+	time_t tmp = time(0)+eDVB::getInstance()->time_difference;
+	tm now = *localtime(&tmp);
+	return ((100+now.tm_mday)*1000000)+((100+now.tm_mon+1)*1000)+now.tm_year;
+}
+
+static eString getLeft( const eString& str, char c )
+{
+	unsigned int found = str.find(c);
+	return found != eString::npos ? str.left(found):str;
+}
+
 static eString getVersionInfo(const char *info)
 {
 	FILE *f=fopen("/.version", "rt");
@@ -1211,7 +1234,7 @@ static eString getcurepg(eString request, eString dirpath, eString opt, eHTTPCon
 	return result;
 }
 
-eString genRecordString(eServiceReference ref, EITEvent event, eString description)
+eString genRecordString(eServiceReference ref, EITEvent event)
 {
 	eString result = "";
 	result += "javascript:record(\"ref=" + ref2string(ref);
@@ -1266,7 +1289,7 @@ static eString getcurepg2(eString request, eString dirpath, eString opts, eHTTPC
 					tm* t = localtime(&event.start_time);
 					result += eString().sprintf("<!-- ID: %04x -->", event.event_id);
 					result += "<u><a href=\'";
-					result += genRecordString(ref, event, current->service_name);
+					result += genRecordString(ref, event);
 					result += "\'>Record</a></u>";
 					result += "&nbsp;&nbsp;";
 					result += eString().sprintf("<span class=\"epg\"><a  href=\"javascript:EPGDetails()\">%02d.%02d - %02d:%02d ", t->tm_mday, t->tm_mon+1, t->tm_hour, t->tm_min);
@@ -2007,7 +2030,13 @@ struct getEntryString: public std::unary_function<ePlaylistEntry*, void>
 		result += "<td>" + begin + "</td>";
 //		result += " (" + eString().sprintf("%d", se->duration / 60) + " min) ";
 		result += "<td>" + end + "</td>";
+
 		eString description = se->service.descr;
+		eString channel = getLeft(description, '/');
+		if (!channel)
+			channel = "No channel available";
+		result += "<td>" + channel + "</td>";
+		description = getRight(description, '/');
 		if (!description)
 			description = "No description available";
 		result += "<td>" + description + "</td>";
@@ -2036,6 +2065,9 @@ static eString showTimerList(eString request, eString dirpath, eString opt, eHTT
 		result += "</th>";
 		result += "<th align=\"left\">";
 		result += "End Time";
+		result += "</th>";
+		result += "<th align=\"left\">";
+		result += "Channel";
 		result += "</th>";
 		result += "<th align=\"left\">";
 		result += "Description";
@@ -2104,6 +2136,8 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 			}
 		}
 	}
+
+	description = current->service_name + "/" + description;
 
 	int timeroffset = 0;
 //	if ((eConfig::getInstance()->getKey("/enigma/timeroffset", timeroffset)) != 0)
