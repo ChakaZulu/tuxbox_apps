@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.60 2002/09/12 22:34:56 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.61 2002/09/15 23:39:18 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -105,8 +105,7 @@ void CBouquet::removeService(CZapitChannel* oldChannel)
 				channels = &radioChannels;
 				break;
 		}
-
-		remove(channels->begin(), channels->end(), oldChannel);
+		(*channels).erase(remove(channels->begin(), channels->end(), oldChannel), channels->end());
 	}
 }
 
