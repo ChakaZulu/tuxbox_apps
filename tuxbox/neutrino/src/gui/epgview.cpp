@@ -449,7 +449,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 																		epgData.eventID, epgData.epg_times.startzeit,
 																		epgData.epg_times.startzeit - (ANNOUNCETIME + 120 + (atoi(g_settings.record_safety_time_before)*60)),
 																		"", mode );
-							ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+							ShowMsg("timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
 						}
 						else
 							printf("timerd not available\n");
@@ -472,7 +472,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long id, time_t*
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
 																  epgData.eventID, epgData.epg_times.startzeit,
 																  "", mode);
-						ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+						ShowMsg("timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw", 450, -1, true); // UTF-8
 					}
 					else
 						printf("timerd not available\n");
@@ -686,10 +686,10 @@ void CEpgData::showTimerEventBar (bool show)
 	{			// display record button only if recording to server or vcr
 		pos = 0;
 		frameBuffer->paintIcon("rot.raw", x+8+cellwidth*pos, y+h_offset );
-		g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.recordevent").c_str(), COL_INFOBAR);
+		g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.recordevent"), COL_INFOBAR, 0, true); // UTF-8
 	}
     // Button: Timer Channelswitch
     pos = 2;
     frameBuffer->paintIcon("gelb.raw", x+8+cellwidth*pos, y+h_offset );
-    g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch").c_str(), COL_INFOBAR);
+    g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch"), COL_INFOBAR, 0, true); // UTF-8
 }

@@ -140,11 +140,6 @@ void CLocaleManager::loadLocale(std::string locale)
 			    ((buf[0] == 'f') && (
 						 (strcmp(buf, "flashupdate.actionreadflash") == 0) ||
 						 (strcmp(buf, "flashupdate.reallyflashmtd") == 0)
-						 )) ||
-			    ((buf[0] == 't') && (
-						 (strncmp(buf, "timerl", 6) != 0) &&
-						 (strncmp(buf, "timers", 6) != 0) &&
-						 (strncmp(buf, "timing", 6) != 0)
 						 ))
 			    )
 				text = CZapitClient::Utf8_to_Latin1(text);
