@@ -56,21 +56,20 @@ class CLCDDisplay
 		void resume();
 
 		void convert_data();
-		int sgn(int arg);
 		void setIconBasePath(std::string bp){iconBasePath=bp;};
 		bool isAvailable();
 
 		void update();
 
-		void draw_point (int x,int y, int state);
-		void draw_line (int x1, int y1, int x2, int y2, int state);
+		void draw_point(const int x, const int y, const int state);
+		void draw_line(const int x1, const int y1, const int x2, const int y2, const int state);
 		void draw_fill_rect (int left,int top,int right,int bottom,int state);
 		void draw_rectangle (int left,int top, int right, int bottom, int linestate,int fillstate);
 		void draw_polygon(int num_vertices, int *vertices, int state);
 
 		bool paintIcon(std::string filename, int x, int y, bool invert);
 		void dump_screen(raw_display_t *screen);
-		void load_screen(raw_display_t *screen);
+		void load_screen(const raw_display_t * const screen);
 };
 
 

@@ -26,6 +26,7 @@
 
 #include "lcddisplay.h"
 
+#include <stdint.h> /* uint8_t */
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -130,24 +131,13 @@ void CLCDDisplay::update()
 		}
 }
 
-int CLCDDisplay::sgn (int arg) 
+void CLCDDisplay::draw_point(const int x, const int y, const int state)
 {
-	if(arg<0)
-		return -1;
-	if(arg>0)
-		return 1;
-	return 0;
-}
+	if ((x < 0) || (x >= LCD_COLS) || (y < 0) || (y >= (LCD_ROWS * 8)))
+		return;
 
-
-void CLCDDisplay::draw_point (int x,int y, int state)
-{
-	if ((x<0) || (x>=LCD_COLS) || (y<0) || (y>=(LCD_ROWS*8))) return;
-	if(state == LCD_PIXEL_INV)
-	{
-		/* aus 1 mach 0 und aus 0 mach 1 */
-		raw[y][x] = LCD_PIXEL_ON - raw[y][x];
-	}
+	if (state == LCD_PIXEL_INV)
+		raw[y][x] ^= 1;
 	else
 		raw[y][x] = state;
 }
@@ -164,32 +154,85 @@ void CLCDDisplay::draw_point (int x,int y, int state)
  * state LCD_PIXEL_OFF/LCD_PIXEL_ON/LCD_PIXEL_INV
  * 
  */
+void CLCDDisplay::draw_line(const int x1, const int y1, const int x2, const int y2, const int state)  
+{
+	int dx = abs (x1 - x2);
+	int dy = abs (y1 - y2);
+	int x;
+	int y;
+	int End;
+	int step;
 
-void CLCDDisplay::draw_line (int x1, int y1, int x2, int y2, int state)  
-{   
-	int dx,dy,sdx,sdy,px,py,dxabs,dyabs,i;
-	float slope;
-   
-	dx=x2-x1+1;      
-	dy=y2-y1+1;      
-	dxabs=abs(dx);
-	dyabs=abs(dy);
-	sdx=sgn(dx);
-	sdy=sgn(dy);
-	if (dxabs>=dyabs) /* the line is more horizontal than vertical */ {
-		slope=(float)dy / (float)dx;
-		for(i=0;i!=dx;i+=sdx) {	     
-			px=i+x1;
-			py=int( slope*i+y1 );
-			draw_point(px,py,state);
+	if ( dx > dy )
+	{
+		int	p = 2 * dy - dx;
+		int	twoDy = 2 * dy;
+		int	twoDyDx = 2 * (dy-dx);
+
+		if ( x1 > x2 )
+		{
+			x = x2;
+			y = y2;
+			End = x1;
+			step = y1 < y2 ? -1 : 1;
+		}
+		else
+		{
+			x = x1;
+			y = y1;
+			End = x2;
+			step = y2 < y1 ? -1 : 1;
+		}
+
+		draw_point(x, y, state);
+
+		while( x < End )
+		{
+			x++;
+			if ( p < 0 )
+				p += twoDy;
+			else
+			{
+				y += step;
+				p += twoDyDx;
+			}
+			draw_point(x, y, state);
 		}
 	}
-	else /* the line is more vertical than horizontal */ {	
-		slope=(float)dx / (float)dy;
-		for(i=0;i!=dy;i+=sdy) {
-			px=int(slope*i+x1);
-			py=i+y1;
-			draw_point(px,py,state);
+	else
+	{
+		int	p = 2 * dx - dy;
+		int	twoDx = 2 * dx;
+		int	twoDxDy = 2 * (dx-dy);
+
+		if ( y1 > y2 )
+		{
+			x = x2;
+			y = y2;
+			End = y1;
+			step = x1 < x2 ? -1 : 1;
+		}
+		else
+		{
+			x = x1;
+			y = y1;
+			End = y2;
+			step = x2 < x1 ? -1 : 1;
+		}
+
+		draw_point(x, y, state);
+
+		while( y < End )
+		{
+			y++;
+			if ( p < 0 )
+				p += twoDx;
+			else
+			{
+				x += step;
+				p += twoDxDy;
+			}
+			draw_point(x, y, state);
 		}
 	}
 }
@@ -241,11 +284,21 @@ void CLCDDisplay::draw_polygon(int num_vertices, int *vertices, int state)
 }
 
 
+struct rawHeader
+{
+	uint8_t width_lo;
+	uint8_t width_hi;
+	uint8_t height_lo;
+	uint8_t height_hi;
+	uint8_t transp;
+} __attribute__ ((packed));
 
 bool CLCDDisplay::paintIcon(std::string filename, int x, int y, bool invert)
 {
-	short width, height;
-	unsigned char tr;
+	struct rawHeader header;
+	uint16_t         stride;
+	uint16_t         height;
+	unsigned char *  pixpos;
 
 	int fd;
 	filename = iconBasePath + filename;
@@ -258,34 +311,26 @@ bool CLCDDisplay::paintIcon(std::string filename, int x, int y, bool invert)
 		return false;
 	}
 
-	read(fd, &width,  2 );
-	read(fd, &height, 2 );
-	read(fd, &tr, 1 );
+	read(fd, &header, sizeof(struct rawHeader));
 
-	width= ((width & 0xff00) >> 8) | ((width & 0x00ff) << 8);
-	height=((height & 0xff00) >> 8) | ((height & 0x00ff) << 8);
+	stride = ((header.width_hi << 8) | header.width_lo) >> 1;
+	height = (header.height_hi << 8) | header.height_lo;
 
 	unsigned char pixbuf[200];
-	for (int count=0; count<height; count ++ )
+	while (height-- > 0)
 	{
-		read(fd, &pixbuf, width >> 1 );
-		unsigned char *pixpos = (unsigned char*) &pixbuf;
-		for (int count2=0; count2<width >> 1; count2 ++ )
+		read(fd, &pixbuf, stride);
+		pixpos = (unsigned char*) &pixbuf;
+		for (int count2 = 0; count2 < stride; count2++)
 		{
 			unsigned char compressed = *pixpos;
-			unsigned char pix1 = (compressed & 0xf0) >> 4;
-			unsigned char pix2 = (compressed & 0x0f);
 
-			if ((pix1 != tr) ^ invert)
-				draw_point(x+(count2<<1),y+count, PIXEL_ON);
-			else
-				draw_point (x+(count2<<1),y+count, PIXEL_OFF);
-			if ((pix2 != tr) ^ invert)
-				draw_point(x+(count2<<1)+1,y+count, PIXEL_ON);
-			else
-				draw_point (x+(count2<<1)+1,y+count, PIXEL_OFF);
+			draw_point(x + (count2 << 1)    , y, ((((compressed & 0xf0) >> 4) != header.transp) ^ invert) ? PIXEL_ON : PIXEL_OFF);
+			draw_point(x + (count2 << 1) + 1, y, (( (compressed & 0x0f)       != header.transp) ^ invert) ? PIXEL_ON : PIXEL_OFF);
+
 			pixpos++;
 		}
+		y++;
 	}
 	
 	close(fd);
@@ -296,6 +341,6 @@ void CLCDDisplay::dump_screen(raw_display_t *screen) {
 	memcpy(screen, raw, sizeof(raw_display_t));
 }
 
-void CLCDDisplay::load_screen(raw_display_t *screen) {
+void CLCDDisplay::load_screen(const raw_display_t * const screen) {
 	memcpy(raw, screen, sizeof(raw_display_t));
 }
