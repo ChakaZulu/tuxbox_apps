@@ -5,7 +5,7 @@ EXTRA_DIST = \
 	player_pause.png player_play.png player_rew.png player_start.png \
 	player_stop.png trash.gif dm7000.jpg blinking_red.gif \
 	format_on.png format_off.png dolby_on.png dolby_off.png \
-	crypt_on.png crypt_off.png \
+	crypt_on.png crypt_off.png mepg_cur_grad.png mountMgr.js \
 	bg.png but_grey.png \
 	mepg_grad.png edit.gif timer.js window.js topbalk2.png topbalk3.png \
 	topbalk4.png zap.js zapdata.js up.gif down.gif topbalk_small.png \

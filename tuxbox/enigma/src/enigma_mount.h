@@ -12,7 +12,7 @@ class eMountPoint
 {
 private:
 	bool fileSystemIsSupported(eString);
-	bool isMounted(eString);
+	bool isMounted(void);
 public:
 	int id;			//sequential number
 	eString	userName;	//username, only for CIFS

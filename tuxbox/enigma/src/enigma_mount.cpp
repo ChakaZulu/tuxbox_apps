@@ -41,7 +41,7 @@ eMountPoint::eMountPoint(CConfigFile *config, int i)
 	ownOptions = config->getString(eString().sprintf("ownoptions_%d", i));
 	eString sip = config->getString(eString().sprintf("ip_%d", i));
 	sscanf(sip.c_str(), "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]);
-	mounted    = isMounted(localDir);
+	mounted    = isMounted();
 	id         = i;
 }
 
@@ -123,7 +123,7 @@ bool eMountPoint::fileSystemIsSupported(eString fsname)
 	return false;
 }
 
-bool eMountPoint::isMounted(eString localdir)
+bool eMountPoint::isMounted()
 {
 	std::ifstream in;
 	eString mountDev;
@@ -179,7 +179,7 @@ int eMountPoint::mount()
 		pthread_mutex_init(&g_mut1, NULL);
 		pthread_cond_init(&g_cond1, NULL);
 		g_mntstatus1 = -1;
-		if (!isMounted(localDir))
+		if (!isMounted())
 		{
 			if (!(access(localDir.c_str(), R_OK)))
 				system(eString("mkdir" + localDir).c_str());
