@@ -3,6 +3,13 @@ TuxCom:
 Historie:
 ---------
 
+12.01.2005 Version 1.7
+ - kosmetische Fehler bei Farbgebung behoben
+ - Bugfix: Absturz bei Eingabe in letzter Zeile im Editor
+ - Speichern der aktuellen Einstellungen nicht automatisch beim Beenden (einstellbar im Hauptmenü)
+ - Auswahl der Sprache im Hauptmenü (für Neutrino, da dort automatische Auswahl nicht funktioniert)
+ - Neue Funktionalität im Editor: mehrere Zeilen markieren/kopieren/verschieben/löschen (analog Midnight-Commander)
+
 10.10.2004 Version 1.6
  - Bugfix: Fehlerhafter Text in Zwischenablage
  - neues Hauptmenü (über Dream-Taste)
@@ -14,7 +21,7 @@ Historie:
  - Bugfix: Ändern der Dateirechte auch mit Taste rot möglich
  
 22.09.2004 Version 1.5a
- - Bugfix: Absturz im Editor / nach Schließen des Editors
+ - Bugfix: Absturz im Editor / nach Schliessen des Editors
  - Bugfix: Absturz bei Verschieben (Button 6) von einzelnen Dateien
 
 30.08.2004 Version 1.5
@@ -176,6 +183,10 @@ volume -		Sprung zur letzten Zeile
 rot			Zeile löschen
 grün			Zeile einfügen
 blau			Umwandeln einer DOS/Win Textdatei in Linux-Format
+3			Starten/Beenden des Markierungsmodus
+5			Markierte Zeilen kopieren
+6			Markierte Zeilen verschieben
+8			Markierte Zeilen löschen
 
 in Viewer:
 
@@ -201,6 +212,12 @@ hoch/runter		Zeile zurück/vor
 volume +		Sprung zur 1. Zeile
 volume -		Sprung zur letzten Zeile
 ok			zur Datei springen
+
+in Hauptmenü:
+
+hoch/runter		Menüpunkt wählen
+links/rechts		Einstellung ändern
+ok			Menüpunkt ausführen
 
 in allen Dialogen: 
 

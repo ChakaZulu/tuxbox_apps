@@ -26,11 +26,9 @@
 // 3 = for DBox
 // 2 = for Dreambox with new Freetype
 // 1 = for Dreambox with old Freetype
-#define TUXCOM_DBOX_VERSION 3
+#define TUXCOM_DBOX_VERSION 1
 
-#if TUXCOM_DBOX_VERSION == 3
 #include <config.h>
-#endif
 #include <errno.h>
 #include <locale.h>
 #include <fcntl.h>
@@ -59,12 +57,8 @@
 #include FT_CACHE_H
 #include FT_CACHE_SMALL_BITMAPS_H
 
-#if TUXCOM_DBOX_VERSION < 3
-#include "config.h"
-#endif
 
-
-#if TUXCOM_DBOX_VERSION == 3
+#if TUXCOM_DBOX_VERSION >= 3
 #include <linux/input.h>
 #endif
 
@@ -88,7 +82,7 @@
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
 #define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.6\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.7\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -221,7 +215,7 @@ FT_Bool			use_kerning;
 
 
 enum {OK, OKCANCEL, OKHIDDENCANCEL,YESNOCANCEL,NOBUTTON,OVERWRITECANCEL,OVERWRITESKIPCANCEL,CANCELRUN};
-enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL,EDIT, RENAME, SEARCHRESULT};
+enum {YES, NO, HIDDEN,CANCEL, OVERWRITE, SKIP, OVERWRITEALL,SKIPALL,EDIT, RENAME, SEARCHRESULT, EDITOR};
 enum {GZIP,BZIP2,COMPRESS,TAR,FTP};
 
 #define FONTHEIGHT_VERY_SMALL 20
@@ -281,6 +275,7 @@ char* szZipCommand;
 char tmpzipdir[256];
 char szClipboard[256];
 char szSearchstring[FILENAME_MAX];
+char szTextSearchstring[FILENAME_MAX];
 char szPass[20];
 long commandsize;
 
@@ -288,7 +283,7 @@ int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
 int saamodes[] = {SAA_WSS_43F, SAA_WSS_169F};
 
 FILE *conf;
-int language;
+int language, langselect, autosave;
 
 #define ACTION_NOACTION 0
 #define ACTION_PROPS    1
@@ -329,6 +324,10 @@ int language;
 #define BTN_OVERWRITEALL  7
 #define BTN_SKIPALL       8
 #define BTN_RENAME        9
+#define BTN_ASK           10
+#define BTN_AUTO          11
+#define BTN_GERMAN        12
+#define BTN_ENGLISH       13
 
 #define SORT_UP    1
 #define SORT_DOWN -1
@@ -346,7 +345,7 @@ int language;
 
 #define NUM_LANG 2
 
-#define MAINMENU 4
+#define MAINMENU 7
 
 enum {MSG_EXEC              ,
       MSG_EXEC_NOT_POSSIBLE ,
@@ -380,19 +379,21 @@ enum {MSG_EXEC              ,
       MSG_PROCESSNAME       ,
       MSG_CANCELDOWNLOAD    ,
       MSG_APPENDDOWNLOAD    ,
-      MSG_SEARCHFILES       };
+      MSG_SEARCHFILES       ,
+      MSG_SAVESETTINGS		};
 
-enum {INFO_COPY   ,
-      INFO_MOVE   ,
-      INFO_EXEC   ,
-      INFO_MARKER ,
-      INFO_PROC   ,
-      INFO_PASS1  ,
-      INFO_PASS2  ,
-      INFO_PASS3  ,
-      INFO_PASS4  ,
-      INFO_SEARCH1,
-      INFO_SEARCH2};
+enum {INFO_COPY     ,
+      INFO_MOVE     ,
+      INFO_EXEC     ,
+      INFO_MARKER   ,
+      INFO_PROC     ,
+      INFO_PASS1    ,
+      INFO_PASS2    ,
+      INFO_PASS3    ,
+      INFO_PASS4    ,
+      INFO_SEARCH1  ,
+      INFO_SEARCH2  ,
+      INFO_SAVED    };
 
 
 char *numberchars[] = {  "0#!$%&?*()@\\",
@@ -416,7 +417,8 @@ char *info[]   = { "(select 'hidden' to copy in background)"               ,"('v
 				   "Please enter new password again"                       ,"Bitte neues Passwort wiederholen"                              ,
 				   "password has been changed"                             ,"Passwort wurde geändert"                                       ,
 				   "searching..."							               ,"Suche läuft..."                                                ,
-				   "search result"									       ,"Suchergebnis"                                                  };
+				   "search result"									       ,"Suchergebnis"                                                  ,
+				   "settings saved"                                        ,"Einstellungen gespeichert"                                     };
 
 char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen ?"                                ,
                   "Cannot execute file '%s'"                   ,"Kann '%s' nicht ausführen"                       ,
@@ -450,7 +452,8 @@ char *msg[]   = { "Execute '%s' ?"                             ,"'%s' ausführen 
 				  "process"                                    ,"Prozess"                                         ,
 				  "cancel download ?"                          ,"Download abbrechen ?"                            ,
 				  "append to file '%s' ?"                      ,"An Datei '%s' anhängen ?"                        ,
-				  "search in directory %s for file:"           ,"In Verzeichnis %s suchen nach Datei:"            };
+				  "search in directory %s for file:"           ,"In Verzeichnis %s suchen nach Datei:"            ,
+				  "save current settings ?"                    ,"Einstellungen speichern ?"                       };
 
 
 char *menuline[]  = { ""      , ""           ,
@@ -464,6 +467,17 @@ char *menuline[]  = { ""      , ""           ,
                       "delete", "löschen"    ,
                       "touch" , "neu"        ,
                       "link"  , "Verw."      };
+char *editorline[]= { ""      , ""           ,
+                      ""      , ""           ,
+                      ""      , ""           ,
+                      "mark"  , "mark."      ,
+                      ""      , ""           ,
+                      "copy"  , "kopier."    ,
+                      "move"  , "versch."    ,
+                      ""      , ""           ,
+                      "delete", "löschen"    ,
+                      ""      , ""           ,
+                      ""      , ""           };
 char *colorline[] = { ""               , "" ,
                       "execute command", "Kommando ausführen"       ,
                       "toggle marker"  , "Datei markieren"          ,
@@ -487,7 +501,12 @@ char *mbox[]     = { "OK"           , "OK"                ,
                      "skip"         , "überspringen"      ,
                      "overwrite all", "alle überschreiben",
                      "skip all"     , "alle überspringen" ,
-                     "rename"       , "umben."            };
+                     "rename"       , "umben."            ,
+                     "ask"          , "nachfragen"        ,
+                     "auto"			, "automatisch"       ,
+                     "Deutsch"      , "Deutsch"           ,
+                     "english"      , "english"           };
+
 char *props[]    = { "read"   , "lesen"    ,
                      "write"  , "schreiben",
                      "execute", "ausführen"};
@@ -498,10 +517,13 @@ char *ftpstr[]   = { "host"     , "Adresse"    ,
                      "password" , "Passwort"   ,
                      "directory", "Verzeichnis"};
 
-char *mainmenu[] = { "search files"    , "Dateien suchen"    ,
-                     "taskmanager"     , "Prozessübersicht"  ,
-                     "toggle 16:9 mode", "16:9-Modus setzen" ,
-                     "set password"    , "Passwort setzen"   };
+char *mainmenu[] = { "search files"               , "Dateien suchen"                            ,
+                     "taskmanager"                , "Prozessübersicht"                          ,
+                     "toggle 16:9 mode"           , "16:9-Modus setzen"                         ,
+                     "set password"               , "Passwort setzen"                           ,
+                     "language/Sprache: <%s>"     , "Sprache/language: <%s>"                    ,
+                     "save settings on exit: <%s>", "Einstellungen beim Beenden speichern: <%s>",
+                     "save settings now"          , "Einstellungen jetzt speichern"             };
 
 struct fileentry
 {

@@ -3,6 +3,13 @@ TuxCom:
 History:
 ---------
 
+12.01.2005 Version 1.7
+ - some colors changed
+ - bugfix: crash when entering text in last line in editor
+ - no automatic saving settings when leaving plugin (set in main menu)
+ - select language in main menu (for Neutrino, as automatic detection does not work there)
+ - new functionality in editor: mark/copy/move/delete multiple lines (as in Midnight-Commander)
+
 10.10.2004 Version 1.6
  - bugfix: wrong text in clipboard
  - new main menu (dream-button)
@@ -156,7 +163,7 @@ blue			insert text from clipboard
 in marking mode:
 
 left/right		change selected stringposition
-ok			copy marekd text in clipboard
+ok			copy marked text in clipboard
 lame			return to normal edit mode
 
 in properties:
@@ -176,6 +183,10 @@ volume -		jump to last line
 red			delete line
 green			insert line
 blue			convert DOS/Win-textfile to linux format
+3			start/stop marking mode
+5			copy marked rows
+6			move marked rows
+8			delete marked rows
 
 in Viewer:
 
@@ -201,6 +212,12 @@ up/down 		Line up/down
 volume +		jump to first line
 volume -		jump to last line
 ok			navigate to file
+
+in main menu:
+
+up/down 		select menu item
+left/right		change setting
+ok			choose menu item
 
 in all dialogs: 
 

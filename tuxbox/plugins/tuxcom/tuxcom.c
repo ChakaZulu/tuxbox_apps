@@ -470,7 +470,17 @@ void RenderBox(int sx, int sy, int ex, int ey, int mode, int color)
 			}
 	}
 }
-
+void SetLanguage()
+{
+	if (langselect == BTN_AUTO)
+	{
+		if (strncmp(setlocale( LC_ALL, NULL ),"de",2) == 0) language=LANG_DE; else language=LANG_INT;
+	}
+	else
+	{
+		language = (langselect == BTN_GERMAN ? LANG_DE : LANG_INT);
+	}
+}
 
 /******************************************************************************
  * plugin_exec                                                                *
@@ -627,6 +637,9 @@ void plugin_exec(PluginParam *par)
 	curvisibility = 0;
 	textuppercase = 0;
 	screenmode=0;
+	langselect = BTN_AUTO; // automatic
+	autosave = BTN_ASK; // ask on exit
+
 	commandsize =sysconf(_SC_ARG_MAX )-100;
 	szCommand = (char*)malloc(commandsize);
 	szCommand [0]= 0x00;
@@ -634,6 +647,7 @@ void plugin_exec(PluginParam *par)
 	szZipCommand [0]= 0x00;
 	szClipboard[0] = 0x00;
 	szSearchstring[0] = 0x00;
+	szTextSearchstring[0] = 0x00;
 	memset(tool, ACTION_NOACTION, sizeof(tool));
 	colortool[0] = ACTION_EXEC   ;
 	colortool[1] = ACTION_MARKER ;
@@ -658,10 +672,10 @@ void plugin_exec(PluginParam *par)
 	NameWidth = (FrameWidth / 3 ) * 2;
 	SizeWidth = (FrameWidth / 3 ) - 3* BORDERSIZE;
 
-	if (strncmp(setlocale( LC_ALL, NULL ),"de",2) == 0) language=LANG_DE; else language=LANG_INT;
 
 	ReadSettings();
-	printf("Settings read\n");
+
+	SetLanguage();
 
 	ioctl(saa, SAAIOGWSS, &saa_old);
 	ioctl(saa, SAAIOSWSS, &saamodes[screenmode]);
@@ -677,6 +691,7 @@ void plugin_exec(PluginParam *par)
 	fcntl(rc, F_SETFL, fcntl(rc, F_GETFL) &~ O_NONBLOCK);
 #endif
 
+	int dosave = autosave;
 	int firstentry = 1;
  	struct fileentry *pfe;
 	char action[256];
@@ -924,7 +939,7 @@ void plugin_exec(PluginParam *par)
 							colortool[1] = ACTION_INSLINE ;
 							colortool[2] = ACTION_NOACTION;
 							colortool[3] = ACTION_TOLINUX ;
-							RenderMenuLine(ACTION_EDIT-1, YES);
+							RenderMenuLine(-1, EDITOR);
 							DoEditFile(action, action, YES);
 						}
 						FillDir(1-curframe,SELECT_NOCHANGE);
@@ -1208,6 +1223,28 @@ void plugin_exec(PluginParam *par)
 				case RC_DBOX: // main menu
 					DoMainMenu();
 					break;
+				case RC_HOME:
+					if (autosave == BTN_ASK)
+					{
+						switch (MessageBox(msg[MSG_SAVESETTINGS*NUM_LANG+language],"",YESNOCANCEL))
+						{
+							case YES:
+								dosave = BTN_YES;
+								while (GetRCCode(RC_NORMAL) == 0);
+								rccode = RC_HOME;
+								break;
+							case NO:
+								dosave = BTN_NO;
+								while (GetRCCode(RC_NORMAL) == 0);
+								rccode = RC_HOME;
+								break;
+							case CANCEL:
+								dosave = BTN_NO;
+								rccode = -1;
+								break;
+						}
+					}
+					break;
 
 				default:
 					continue;
@@ -1226,6 +1263,8 @@ void plugin_exec(PluginParam *par)
 
 	}while(rccode != RC_HOME);
 
+	if (dosave == BTN_YES)
+		WriteSettings();
 
 	rccode = -1;
 	FTC_Manager_Done(manager);
@@ -1242,7 +1281,6 @@ void plugin_exec(PluginParam *par)
 
  	fcntl(rc, F_SETFL, O_NONBLOCK);
 
-	WriteSettings();
 	ClearEntries   (LEFTFRAME );
 	ClearEntries   (RIGHTFRAME);
 	ClearMarker    (LEFTFRAME );
@@ -1285,6 +1323,8 @@ void RenderMenuLine(int highlight, int refresh)
 			}
 
 		}
+		else if (refresh == EDITOR)
+			RenderString(editorline[tool[i]*NUM_LANG+language], menuitemwidth * i + menuitemnumber, viewy-(MENUSIZE/2 + FONT_OFFSET_BIG) , menuitemwidth-menuitemnumber, CENTER, SMALL, WHITE);
 		else
 			RenderString(menuline[tool[i]*NUM_LANG+language], menuitemwidth * i + menuitemnumber, viewy-(MENUSIZE/2 + FONT_OFFSET_BIG) , menuitemwidth-menuitemnumber, CENTER, SMALL, WHITE);
 
@@ -1596,8 +1636,8 @@ int MessageBox(const char* msg1, const char* msg2, int mode)
 					RenderBox(viewx/2 - BUTTONWIDTH/2                                , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT  , viewx/2 + BUTTONWIDTH/2                               ,viewy-(viewy-he)/2- 2* BORDERSIZE  , GRID, (sel == 1 ? WHITE : GREEN ));
 					RenderBox(viewx/2 - BUTTONWIDTH/2                              +1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 + BUTTONWIDTH/2                             -1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, (sel == 1 ? WHITE : GREEN ));
 
-					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2                , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT  , viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2  ,viewy-(viewy-he)/2- 2* BORDERSIZE  , GRID, (sel == 2 ? WHITE : YELLOW ));
-					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2              +1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2-1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, (sel == 2 ? WHITE : YELLOW ));
+					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2                , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT  , viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2  ,viewy-(viewy-he)/2- 2* BORDERSIZE  , GRID, (sel == 2 ? BLACK : YELLOW ));
+					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2              +1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2-1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, (sel == 2 ? BLACK : YELLOW ));
 					memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 					break;
 				case 4:
@@ -1607,8 +1647,8 @@ int MessageBox(const char* msg1, const char* msg2, int mode)
 					RenderBox(viewx/2 - BUTTONWIDTH/2                                , viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT  , viewx/2 + BUTTONWIDTH/2                               ,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT  , GRID, (sel == 1 ? WHITE : GREEN  ));
 					RenderBox(viewx/2 - BUTTONWIDTH/2                              +1, viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT+1, viewx/2 + BUTTONWIDTH/2                             -1,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT-1, GRID, (sel == 1 ? WHITE : GREEN  ));
 
- 					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2                , viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT  , viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2  ,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT  , GRID, (sel == 2 ? WHITE : YELLOW ));
- 					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2              +1, viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT+1, viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2-1,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT-1, GRID, (sel == 2 ? WHITE : YELLOW ));
+ 					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2                , viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT  , viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2  ,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT  , GRID, (sel == 2 ? BLACK : YELLOW ));
+ 					RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2              +1, viewy-(viewy-he)/2 - 4*BORDERSIZE - 2*BUTTONHEIGHT+1, viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2-1,viewy-(viewy-he)/2- 4* BORDERSIZE - BUTTONHEIGHT-1, GRID, (sel == 2 ? BLACK : YELLOW ));
 
 					RenderBox(viewx/2 - 4* BORDERSIZE - BUTTONWIDTH - BUTTONWIDTH/2  , viewy-(viewy-he)/2 - 2*BORDERSIZE -   BUTTONHEIGHT  , viewx/2 - 2* BORDERSIZE                               ,viewy-(viewy-he)/2- 2* BORDERSIZE                 , GRID, (sel == 3 ? WHITE : BLUE2  ));
 					RenderBox(viewx/2 - 4* BORDERSIZE - BUTTONWIDTH - BUTTONWIDTH/2+1, viewy-(viewy-he)/2 - 2*BORDERSIZE -   BUTTONHEIGHT+1, viewx/2 - 2* BORDERSIZE                             -1,viewy-(viewy-he)/2- 2* BORDERSIZE               -1, GRID, (sel == 3 ? WHITE : BLUE2  ));
@@ -1668,7 +1708,7 @@ void RenderButtons(int he, int mode)
 			RenderBox(viewx/2 + 4* BORDERSIZE + BUTTONWIDTH/2              , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT, viewx/2 + 4* BORDERSIZE +BUTTONWIDTH + BUTTONWIDTH/2,viewy-(viewy-he)/2- 2* BORDERSIZE, FILL, YELLOW);
 			RenderString(mbox[BTN_OVERWRITE*NUM_LANG+language],viewx/2 - 4* BORDERSIZE -BUTTONWIDTH - BUTTONWIDTH/2 , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
 			RenderString(mbox[BTN_CANCEL   *NUM_LANG+language],(viewx-BUTTONWIDTH)/2  , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
-			RenderString(mbox[BTN_RENAME   *NUM_LANG+language],viewx/2 + 4* BORDERSIZE +BUTTONWIDTH/2            , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, WHITE);
+			RenderString(mbox[BTN_RENAME   *NUM_LANG+language],viewx/2 + 4* BORDERSIZE +BUTTONWIDTH/2            , viewy-(viewy-he)/2 - 2*BORDERSIZE-FONT_OFFSET , BUTTONWIDTH, CENTER, BIG, BLACK);
 			RenderBox(viewx/2 -BUTTONWIDTH/2  , viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT  , viewx/2 + BUTTONWIDTH/2   ,viewy-(viewy-he)/2- 2* BORDERSIZE  , GRID, WHITE);
 			RenderBox(viewx/2 -BUTTONWIDTH/2+1, viewy-(viewy-he)/2 - 2*BORDERSIZE - BUTTONHEIGHT+1, viewx/2 + BUTTONWIDTH/2 -1,viewy-(viewy-he)/2- 2* BORDERSIZE-1, GRID, WHITE);
 			break;
@@ -2007,7 +2047,8 @@ void DoEditFTP(char* szFile,char* szTitle)
 void DoMainMenu()
 {
 	int pos = 0, i, wi , he = (MAINMENU+1) * BORDERSIZE + MAINMENU * FONTHEIGHT_BIG;
-	wi = 400;
+	wi = 500;
+	char szEntry[200];
 	if (wi > viewx - 4* BORDERSIZE) wi = viewx - 4* BORDERSIZE;
 
 	RenderBox((viewx-wi)/2 , (viewy-he) /2, viewx-(viewx-wi)/2, viewy-(viewy-he)/2, FILL, trans_map[curvisibility]);
@@ -2016,7 +2057,19 @@ void DoMainMenu()
 	for (i = 0; i < MAINMENU ; i++)
 	{
 		RenderBox((viewx-wi)/2+ BORDERSIZE   , (viewy-he)/2 + BORDERSIZE + (i)*FONTHEIGHT_BIG  , viewx-(viewx-wi)/2 - BORDERSIZE  , (viewy-he)/2 + BORDERSIZE + (i+1)*FONTHEIGHT_BIG  , FILL, (pos == i ? BLUE2 :trans_map[curvisibility]));
-		RenderString(mainmenu[i*NUM_LANG+language],(viewx-wi)/2+ BORDERSIZE , (viewy-he)/2 + BORDERSIZE + (i+1)*FONTHEIGHT_BIG-FONT_OFFSET , wi, CENTER, BIG, WHITE);
+		switch(i)
+		{
+			case 4: // set language
+				sprintf(szEntry,mainmenu[i*NUM_LANG+language],mbox[langselect*NUM_LANG+language]);
+				break;
+			case 5: // save settings
+				sprintf(szEntry,mainmenu[i*NUM_LANG+language],mbox[autosave  *NUM_LANG+language]);
+				break;
+			default:
+				strcpy(szEntry,mainmenu[i*NUM_LANG+language]);
+				break;
+		}
+		RenderString(szEntry,(viewx-wi)/2+ BORDERSIZE , (viewy-he)/2 + BORDERSIZE + (i+1)*FONTHEIGHT_BIG-FONT_OFFSET , wi, CENTER, BIG, WHITE);
 	}
 	memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 	int drawsel = 0;
@@ -2043,7 +2096,10 @@ void DoMainMenu()
 							case 3:
 								SetPassword();
 								return;
-					break;
+							case 6:
+								WriteSettings();
+								MessageBox(info[INFO_SAVED*NUM_LANG+language],"",OK);
+								return;
 						}
 					}
 					break;
@@ -2057,6 +2113,52 @@ void DoMainMenu()
 					if (pos >= MAINMENU) pos = 0;
 					drawsel = 1;
 					break;
+				case RC_LEFT:
+					switch (pos)
+					{
+						case 4:
+							switch (langselect)
+							{
+								case BTN_AUTO   : langselect = BTN_ENGLISH; break;
+								case BTN_GERMAN : langselect = BTN_AUTO   ; break;
+								case BTN_ENGLISH: langselect = BTN_GERMAN ; break;
+							}
+							SetLanguage();
+							break;
+						case 5:
+							switch (autosave)
+							{
+								case BTN_ASK    : autosave   = BTN_NO     ; break;
+								case BTN_YES    : autosave   = BTN_ASK    ; break;
+								case BTN_NO     : autosave   = BTN_YES    ; break;
+							}
+							break;
+					}
+					drawsel = 1;
+					break;
+				case RC_RIGHT:
+					switch (pos)
+					{
+						case 4:
+							switch (langselect)
+							{
+								case BTN_AUTO   : langselect = BTN_GERMAN ; break;
+								case BTN_GERMAN : langselect = BTN_ENGLISH; break;
+								case BTN_ENGLISH: langselect = BTN_AUTO   ; break;
+							}
+							SetLanguage();
+							break;
+						case 5:
+							switch (autosave)
+							{
+								case BTN_ASK    : autosave   = BTN_YES    ; break;
+								case BTN_YES    : autosave   = BTN_NO     ; break;
+								case BTN_NO     : autosave   = BTN_ASK    ; break;
+							}
+							break;
+					}
+					drawsel = 1;
+					break;
 				case RC_HOME:
 					rccode = -1;
 					return;
@@ -2068,7 +2170,19 @@ void DoMainMenu()
 			for (i = 0; i < MAINMENU; i++)
 			{
 				RenderBox((viewx-wi)/2+ BORDERSIZE   , (viewy-he)/2 + BORDERSIZE + (i)*FONTHEIGHT_BIG  , viewx-(viewx-wi)/2 - BORDERSIZE  , (viewy-he)/2 + BORDERSIZE + (i+1)*FONTHEIGHT_BIG  , FILL, (pos == i ? BLUE2 :trans_map[curvisibility]));
-				RenderString(mainmenu[i*NUM_LANG+language],(viewx-wi)/2+ BORDERSIZE , (viewy-he)/2 + BORDERSIZE + (i+1)*FONTHEIGHT_BIG-FONT_OFFSET , wi, CENTER, BIG, WHITE);
+				switch(i)
+				{
+					case 4: // set language
+						sprintf(szEntry,mainmenu[i*NUM_LANG+language],mbox[langselect*NUM_LANG+language]);
+						break;
+					case 5: // save settings
+						sprintf(szEntry,mainmenu[i*NUM_LANG+language],mbox[autosave  *NUM_LANG+language]);
+						break;
+					default:
+						strcpy(szEntry,mainmenu[i*NUM_LANG+language]);
+						break;
+				}
+				RenderString(szEntry,(viewx-wi)/2+ BORDERSIZE , (viewy-he)/2 + BORDERSIZE + (i+1)*FONTHEIGHT_BIG-FONT_OFFSET , wi, CENTER, BIG, WHITE);
 			}
 			memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 			drawsel = 0;
@@ -3273,14 +3387,24 @@ void DoViewFile()
 /******************************************************************************
  * DoEditFile                                                                 *
  ******************************************************************************/
-
+void InsertText(char* pStart, char* pEnd,char* szText, int sel, int* pcount)
+{
+	int oldlen = (pEnd ? pEnd-pStart: strlen(pStart));
+	int newlen = strlen(szText);
+	int movlen = (pEnd ? (FILEBUFFER_SIZE-newlen <= strlen(pEnd) ? FILEBUFFER_SIZE-newlen-1 : strlen(pEnd)) : 0);
+	if (pEnd && (oldlen != newlen) && movlen > 0)
+		memmove((void*)(pStart+newlen),pEnd,movlen);
+	if (sel > 0 && (*(pStart-1) != '\n')) {*pStart = '\n'; pStart++; (*pcount)++;}
+	strncpy(pStart,szText,newlen);
+	if (sel >= (*pcount)-1) *(pStart+newlen) = 0x00;
+}
 void DoEditFile(char* szFile, char* szTitle,  int writable)
 {
 	FILE* pFile = fopen(szFile,"r");
-	char *p = szFileBuffer, *p1, *pcur = szFileBuffer, *pStart = szFileBuffer, *pStop = NULL;
+	char *p = szFileBuffer, *p1, *pcur = szFileBuffer, *pStart = szFileBuffer, *pStop = NULL, *pMarkStart = NULL,*pMarkStop = NULL, *pMark = NULL;
 	char szInputBuffer[1001];
 	char szLineNumber[20];
-	int count = 0, curcount = 0, totalcount = 0;
+	int count = 0, curcount = 0, totalcount = 0, selstart = -1, selstop = -1;
 	int changed = 0;
 	int readall = NO;
 	int offset;
@@ -3308,7 +3432,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 		readall = YES;
 	}
 
-	int i,row = 0, sel = 0, presel=0, strsize;
+	int i,row = 0, sel = 0, presel=0, strsize, markmode=0;
 
 
 
@@ -3413,7 +3537,29 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 				{
 					pcur = p;
 					RenderBox(BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+i*FONTHEIGHT_SMALL , viewx- BORDERSIZE , 2*BORDERSIZE+FONTHEIGHT_BIG+(i+1)*FONTHEIGHT_SMALL, FILL, BLUE2);
+					if (markmode)
+					{
+						if (pcur >= pMark)
+						{
+							pMarkStart = pMark;
+							pMarkStop  = pcur;
+						}
+						else
+						{
+							pMarkStop  = pMark;
+							pMarkStart = pcur;
+						}
+					}
 				}
+				if (pMarkStop != NULL && pMarkStart != NULL && pMarkStop < pMarkStart)
+				{
+					char* ptmp = pMarkStart;
+					pMarkStart = pMarkStop;
+					pMarkStop = ptmp;
+				}
+				if (pMarkStop != NULL && pMarkStart != NULL && pMarkStart <=  p && pMarkStop >= p)
+					RenderBox(BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+i*FONTHEIGHT_SMALL , viewx- BORDERSIZE , 2*BORDERSIZE+FONTHEIGHT_BIG+(i+1)*FONTHEIGHT_SMALL, FILL, (sel == row + i)? GRAY : GRAY2);
+
           		RenderString(p,2*BORDERSIZE, 2*BORDERSIZE+FONTHEIGHT_BIG+(i+1)*FONTHEIGHT_SMALL -FONT_OFFSET, viewx-4*BORDERSIZE, LEFT, SMALL, WHITE);
           		p1=strchr(p,'\n');
 	            if (p1 == NULL)
@@ -3433,15 +3579,145 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 			while (GetRCCode(RC_NORMAL) == 0);
 			switch (rccode)
 			{
+				case RC_3:
+					if (writable == YES)
+					{
+						if (markmode)
+						{
+							selstop = sel;
+							pMarkStop = pcur;
+							pMark = NULL;
+						}
+						else
+						{
+							selstart = sel;
+							pMarkStart = pcur;
+							pMark = pcur;
+						}
+						markmode=1-markmode;
+						RenderMenuLine(markmode ? ACTION_VIEW-1:-1, EDITOR);
+					}
+					break;
+				case RC_5:
+					if (writable == YES)
+					{
+						if (markmode)
+						{
+							selstop = sel;
+							pMarkStop = pcur;
+							markmode=1-markmode;
+							RenderMenuLine(-1, EDITOR);
+						}
+						else
+						{
+							if (pMarkStart && pMarkStop)
+							{
+								p1 = strchr(pMarkStop,'\n');
+								if (p1 == NULL) p1 = pMarkStop+strlen(pMarkStop);
+								char * pTmpBuf = (char*)malloc(p1-pMarkStart+2); // temporary buffer for marked segment
+								strncpy(pTmpBuf,pMarkStart, p1-pMarkStart);
+								*(pTmpBuf+(p1-pMarkStart)) = '\n';
+								*(pTmpBuf+(p1-pMarkStart)+1) = 0x00;
+								InsertText(pcur, pcur,pTmpBuf, sel, &count);
+								count +=(selstop > selstart ?  selstop - selstart : selstart - selstop);
+								totalcount = count;
+								free(pTmpBuf);
+								changed = 1;
+							}
+						}
+					}
+					break;
+				case RC_6:
+					if (writable == YES)
+					{
+						if (markmode)
+						{
+							selstop = sel;
+							pMarkStop = pcur;
+							markmode=1-markmode;
+							RenderMenuLine(-1, EDITOR);
+						}
+						else
+						{
+							if (pMarkStart && pMarkStop)
+							{
+								p1 = strchr(pMarkStop,'\n');
+								if (p1 == NULL) p1 = pMarkStop+strlen(pMarkStop);
+								char * pTmpBuf = (char*)malloc(p1-pMarkStart+2); // temporary buffer for marked segment
+								strncpy(pTmpBuf,pMarkStart, p1-pMarkStart);
+								*(pTmpBuf+(p1-pMarkStart)) = '\n';
+								*(pTmpBuf+(p1-pMarkStart)+1) = 0x00;
+								if (pMarkStart > pcur && *(p1+1) != 0x00)
+									memmove(pMarkStart,p1+1,FILEBUFFER_SIZE-(p1+1-szFileBuffer));
+								int ctmp = count;
+								InsertText(pcur, pcur,pTmpBuf, sel, &ctmp);
+								free(pTmpBuf);
+								if (pMarkStart <= pcur && *(p1+1) != 0x00)
+									memmove(pMarkStart,p1+1,FILEBUFFER_SIZE-(p1+1-szFileBuffer));
+								if (pMarkStart < pcur) sel -=  (selstop > selstart ?  selstop - selstart : selstart - selstop)+1;
+								selstop  = sel + (selstop > selstart ?  selstop - selstart : selstart - selstop);
+								selstart = sel;
+								if (pMarkStart < pcur)
+								{
+									int marksize = (p1+1-pMarkStart);
+									pMarkStop  = pcur-marksize+(pMarkStop-pMarkStart) + (*(p1+1) != 0x00 ? 1 : 0);
+									pMarkStart = pcur-marksize;
+								}
+								else
+								{
+									pMarkStop  = pcur+(pMarkStop-pMarkStart);
+									pMarkStart = pcur;
+								}
+
+								changed = 1;
+							}
+						}
+					}
+					break;
+				case RC_8:
+					if (writable == YES)
+					{
+						if (markmode)
+						{
+							selstop = sel;
+							pMarkStop = pcur;
+							pMark = NULL;
+							markmode=1-markmode;
+							RenderMenuLine(-1, EDITOR);
+						}
+						if (pMarkStart && pMarkStop)
+						{
+							p1 = strchr(pMarkStop,'\n');
+							count -= (selstop > selstart ?  selstop - selstart : selstart - selstop)+1;
+							totalcount = count;
+							if (p1 == NULL) p1 = pMarkStop+strlen(pMarkStop);
+							memmove(pMarkStart,p1+1,FILEBUFFER_SIZE-(p1+1-szFileBuffer));
+							if (pMarkStart < pcur) sel -=  (selstop > selstart ?  selstop - selstart : selstart - selstop)+1;
+							pMarkStart = pMarkStop = NULL;
+							changed = 1;
+						}
+					}
+					break;
 				case RC_HOME :
 					break;
 				case RC_OK :
 				{
 					if (writable == YES)
 					{
+						if (markmode)
+						{
+							selstop = sel;
+							pMarkStop = pcur;
+							pMark = NULL;
+							markmode = 0;
+							RenderMenuLine(-1, EDITOR);
+							break;
+						}
+						markmode = 0;
+						pMarkStart = pMarkStop = NULL;
 						p1 = strchr(pcur,'\n');
+						if (p1) p1++;
 						int plen = (p1 ? p1-pcur: strlen(pcur));
-						int pnewlen,p1newlen;
 						strncpy(szInputBuffer,pcur,plen);
 						szInputBuffer[plen]=0x00;
 						RenderBox(0, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row)*FONTHEIGHT_SMALL-1 , viewx, 2*BORDERSIZE+FONTHEIGHT_BIG+(sel-row+1)*FONTHEIGHT_SMALL+1, GRID, WHITE);
@@ -3449,14 +3725,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 						{
 							case RC_OK:
 							{
-
-								pnewlen = strlen(szInputBuffer);
-								p1newlen = (FILEBUFFER_SIZE-pnewlen <= strlen(p1) ? FILEBUFFER_SIZE-pnewlen-1 : strlen(p1));
-								if (p1 && (plen != pnewlen))
-								    memmove((void*)(pcur+pnewlen),p1,p1newlen);//FILEBUFFER_SIZE-(((int)(pcur+pnewlen))-(int)szFileBuffer)-1);
-								if (sel > 0 && (*(pcur-1) != '\n')) {*pcur = '\n'; pcur++; count++;}
-								strncpy(pcur,szInputBuffer,pnewlen);
-								if (sel >= count-1) *(pcur+pnewlen) = 0x00;
+								InsertText(pcur, p1,szInputBuffer, sel, &count);
 								changed = 1;
 								break;
 							}
@@ -3468,7 +3737,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 						colortool[1] = ACTION_INSLINE ;
 						colortool[2] = ACTION_NOACTION;
 						colortool[3] = ACTION_TOLINUX ;
-						RenderMenuLine(ACTION_EDIT-1, YES);
+						RenderMenuLine(-1, EDITOR);
 					}
 					else if (writable == SEARCHRESULT)
 					{
@@ -4139,15 +4408,13 @@ void ReadFTPDir(int frame, char* seldir)
 		{
 			char* pname = name;
 			while (*pname == ' ') pname++;
-			while (!isprint(pname[strlen(pname)-1]))  pname[strlen(pname)-1] = 0x00;
+			while (!isspace(pname[strlen(pname)-1])) pname[strlen(pname)-1] = 0x00;
+
+			if (pname[0] == '/') pname++;
+			if (pname[strlen(pname)-1] == '/') pname[strlen(pname)-1]=0x00;
 			if (strcmp(pname,"..") == 0) continue;
 			pzfe1 = malloc(sizeof(struct zipfileentry));
-
-			if (name[strlen(pname)-1] == '/') name[strlen(name)-1]=0x00;
-			if (pname[0] != '/')
-				sprintf(pzfe1->name,"%s%s",finfo[frame].zippath,pname);
-			else
-				sprintf(pzfe1->name,"%s%s",finfo[frame].zippath,(char*)(pname+1));
+			sprintf(pzfe1->name,"%s%s",finfo[frame].zippath,pname);
 			pzfe1->next = pzfe2;
 			memset(&pzfe1->fentry, 0, sizeof(struct stat));
 			pzfe1->fentry.st_size = size;
@@ -4421,6 +4688,18 @@ void ReadSettings()
 			{
 				strcpy(szSearchstring, p);
 			}
+			else if ( !strcmp(line,"langselect") )
+			{
+				langselect = atoi(p);
+			}
+			else if ( !strcmp(line,"autosave") )
+			{
+				autosave = atoi(p);
+			}
+			else if ( !strcmp(line,"searchtext") )
+			{
+				strcpy(szTextSearchstring, p);
+			}
 		}
 		fclose(fp);
 	}
@@ -4457,13 +4736,16 @@ void WriteSettings()
 		fprintf(fp,"lsort=%d\n",finfo[LEFTFRAME ].sort);
 		fprintf(fp,"rsort=%d\n",finfo[RIGHTFRAME].sort);
 		fprintf(fp,"screenmode=%d\n",screenmode);
-		fprintf(fp,"lfile=%s\n",GetSelected(LEFTFRAME )->name);
-		fprintf(fp,"rfile=%s\n",GetSelected(RIGHTFRAME)->name);
+		fprintf(fp,"lfile=%s\n",(finfo[LEFTFRAME ].zipfile[0] != 0x00 ? finfo[LEFTFRAME ].zipfile : GetSelected(LEFTFRAME )->name));
+		fprintf(fp,"rfile=%s\n",(finfo[RIGHTFRAME].zipfile[0] != 0x00 ? finfo[RIGHTFRAME].zipfile : GetSelected(RIGHTFRAME)->name));
 		fprintf(fp,"lfirst=%lu\n",finfo[LEFTFRAME ].first);
 		fprintf(fp,"rfirst=%lu\n",finfo[RIGHTFRAME].first);
 		fprintf(fp,"clip=%s\n",szClipboard);
 		fprintf(fp,"pass=%s\n",szPass);
 		fprintf(fp,"search=%s\n",szSearchstring);
+		fprintf(fp,"langselect=%d\n",langselect);
+		fprintf(fp,"autosave=%d\n",autosave);
+		fprintf(fp,"searchtext=%s\n",szTextSearchstring);
 		fclose(fp);
 	}
 }
