@@ -36,11 +36,11 @@ eString getConfigMountMgr(void)
 static eString addChangeMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	t_mount mp;
-	
+
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString action = opt["action"];
 	eString id = opt["id"];
-	
+
 	mp.localDir = opt["localdir"];
 	mp.fstype = atoi(opt["fstype"].c_str());
 	mp.password = opt["password"];
@@ -166,7 +166,7 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 	{
 		if ((pos = mp.options.find(",")) != eString::npos)
 		{
-			option = mp.options.substr(0, pos + 1);
+			option = mp.options.substr(0, pos);
 			mp.options = mp.options.substr(pos + 1);
 		}
 		else
@@ -174,7 +174,7 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 			option = mp.options;
 			mp.options = "";
 		}
-	
+
 		if (option == "async")
 			async = "checked";
 		else
@@ -212,9 +212,9 @@ static eString mountPointWindow(eString request, eString dirpath, eString opts, 
 			soft = "checked";
 		else
 		if (option == "udp")
-			udp == "checked";
+			udp = "checked";
 	}
-	
+
 	result.strReplace("#LDIR#", mp.localDir);
 	result.strReplace("#FSTYPE#", eString().sprintf("%d", mp.fstype));
 	result.strReplace("#PW#", mp.password);
