@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.26: ups, forgot this one                                             *
  *    V1.25: fixed colors (color 0 transparent)                               *
  *    V1.2x: some mods by Homar                                               *
  *    V1.22: small zoom-fix                                                   *
@@ -41,7 +42,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.25 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
+		printf("\nTuxTxt 1.26 - Copyright (c) Thomas \"LazyT\" Loewe and the TuxBox-Team\n\n");
 
 	//get params
 
@@ -1821,7 +1822,7 @@ void RenderPageNotFound()
 		if(screenmode == 1)
 		{
 			fbcolor   = black;
-			timecolor = black;
+			timecolor = black<<4 | black;
 			menucolor = menu1;
 		}
 		else
