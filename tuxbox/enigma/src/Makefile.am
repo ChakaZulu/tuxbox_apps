@@ -25,7 +25,7 @@ enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/gdi/libgdi.la \
 	$(top_builddir)/enigma/src/core/system/libsystem.la \
 	$(top_builddir)/enigma/src/core/xml/libxml.la \
-	$(top_builddir)/edvb/miniqt/libminiqt.a \
+	$(top_builddir)/edvb/miniqt/libminiqt.la \
 	$(LIBSIGC_LIBS) \
 	-ldl -lpthread
 
@@ -54,6 +54,6 @@ $(top_builddir)/enigma/src/core/system/libsystem.la:
 $(top_builddir)/enigma/src/core/xml/libxml.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/xml
 
-$(top_builddir)/edvb/miniqt/libminiqt.a:
+$(top_builddir)/edvb/miniqt/libminiqt.la:
 	$(MAKE) -C $(top_builddir)/edvb/miniqt
 
