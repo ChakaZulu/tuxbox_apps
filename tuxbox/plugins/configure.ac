@@ -27,6 +27,7 @@ fx2/yahtzee/Makefile
 fx2/bouquet/Makefile
 fx2/lib/Makefile
 fx2/mines/Makefile
+fx2/outdoor/Makefile
 fx2/snake/Makefile
 fx2/sokoban/Makefile
 fx2/solitair/Makefile
