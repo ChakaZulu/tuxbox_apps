@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.59 2003/12/21 16:53:30 gagga Exp $
+  $Id: movieplayer.cpp,v 1.60 2003/12/21 17:08:36 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1139,7 +1139,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion:$Id: movieplayer.cpp,v 1.59 2003/12/21 16:53:30 gagga Exp $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.60 $\n\nMovieplayer (c) 2003 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1262,7 +1262,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion:$Id: movieplayer.cpp,v 1.59 2003/12/21 16:53:30 gagga Exp $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.60 $\n\nMovieplayer (c) 2003 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)
