@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.10  2001/12/12 15:48:35  TheDOC
+Segfault with too big numbers fixed (perhaps the oldest bug in lcars *g*)
+
 Revision 1.9  2001/12/12 15:28:10  TheDOC
 Segfault after Scan-Bug fixed (forgot scans in running lcars)
 
@@ -282,6 +285,7 @@ int main(int argc, char **argv)
 		{
 			printf("Emergency channel-scan\n");
 			channels = scan.scanChannels();
+			channels.setStuff(&eit, &cam, &hardware);
 			channels.saveDVBChannels();
 			while(rc.command_available())
 				rc.read_from_rc();
@@ -619,9 +623,17 @@ int main(int argc, char **argv)
 					if (tmp_number != -1)
 					{
 						final_number = final_number * 10 + tmp_number;
-						osd.setNumberEntry(final_number);
-						osd.setNumberText(channels.getServiceName(final_number));
-						osd.addCommand("SHOW number");
+						if (final_number > 9999)
+							finish = true;
+						else
+						{
+							osd.setNumberEntry(final_number);
+							if (final_number < channels.numberChannels() - 1)
+								osd.setNumberText(channels.getServiceName(final_number));
+							else
+								osd.setNumberText(channels.getServiceName(channels.numberChannels() - 1));
+							osd.addCommand("SHOW number");
+						}
 					}
 					else if (key == RC1_OK)
 						finish = true;
@@ -640,8 +652,8 @@ int main(int argc, char **argv)
 					}
 				}
 			} while (!finish);
-			if (channelnumber > channels.numberChannels() - 1)
-				channelnumber = channels.numberChannels();
+			if (final_number > channels.numberChannels() - 1)
+				final_number = channels.numberChannels();
 			old_channel = channelnumber;
 			channelnumber = final_number;
 			osd.addCommand("HIDE number");
