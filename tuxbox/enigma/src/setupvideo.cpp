@@ -17,6 +17,9 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	if (skin->build(this, "setup.video"))
 		qFatal("skin load of \"setup.video\" failed");*/
 
+	cresize( eSize(height(), width()) );
+	cmove( ePoint(0,0) );
+
 	if (eConfig::getInstance()->getKey("/elitedvb/video/colorformat", v_colorformat))
 		v_colorformat = 1;
 
@@ -29,7 +32,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	setText(_("Video Setup"));
 	move(ePoint(150, 136));
-	resize(eSize(350, 250));
+	resize(eSize(350, 280));
 
 	eLabel *l=new eLabel(this);
 	l->setText("Colorformat:");
@@ -45,6 +48,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	entrys[1]=new eListBoxEntryText(colorformat, _("RGB"), (void*)2);
 	entrys[2]=new eListBoxEntryText(colorformat, _("SVideo"), (void*)3);
 	colorformat->setCurrent(entrys[v_colorformat-1]);
+	colorformat->setHelpText(_("choose colorformat ( left, right )"));
 
   l=new eLabel(this);
 	l->setText("Aspect Ratio:");
@@ -55,6 +59,7 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 	pin8->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement | eListBox<eListBoxEntryText>::flagLoadDeco);
 	pin8->move(ePoint(160, 65));
 	pin8->resize(eSize(170, 35));
+	pin8->setHelpText(_("choose aspect ratio ( left, right )"));
 
 	entrys[0]=new eListBoxEntryText(pin8, _("4:3 letterbox"), (void*)0);
 	entrys[1]=new eListBoxEntryText(pin8, _("4:3 panscan"), (void*)1);
@@ -63,21 +68,30 @@ eZapVideoSetup::eZapVideoSetup(): eWindow(0)
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
-	ok->move(ePoint(20, 135));
+	ok->move(ePoint(20, 130));
 	ok->resize(eSize(90, fd+4));
+	ok->setHelpText(_("save settings and leave video setup"));
 
 	CONNECT(ok->selected, eZapVideoSetup::okPressed);		
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(140, 135));
+	abort->move(ePoint(140, 130));
 	abort->resize(eSize(100, fd+4));
+	abort->setHelpText(_("leave video setup (no changes are saved)"));
 
 	CONNECT(abort->selected, eZapVideoSetup::abortPressed);
+
+	status = new eStatusBar(this);	
+	status->move( ePoint(0, clientrect.height()-34) );
+	status->resize( eSize( clientrect.width(), 30) );
+	status->setFlags( eStatusBar::flagLoadDeco );
 }
 
 eZapVideoSetup::~eZapVideoSetup()
 {
+	if (status)
+		delete status;
 }
 
 void eZapVideoSetup::okPressed()

@@ -674,6 +674,7 @@ void eWidget::setFocus(eWidget *newfocus)
 	if (focus)
 		focus->event(eWidgetEvent(eWidgetEvent::gotFocus));
 	_focusList.setCurrent(focus);
+	/* emit */ focusChanged(focus);
 }
 
 void eWidget::setFont(const gFont &fnt)
@@ -850,7 +851,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		cresize(eSize(v[0], v[1]));
 	}
 	else if (prop=="text")
-	{
+/*	{
 		eString text;
 		
 		std::string::const_iterator p(value.begin());
@@ -887,7 +888,10 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 			p++;
 		}
 		setText(text);
-	}
+	}*/
+		setText(value);
+	else if (prop=="helptext")
+		setHelpText(value);
 	else if (prop=="font")
 		setFont(eSkin::getActive()->queryFont(value));	
 	else if (prop=="name")

@@ -14,6 +14,10 @@
 #include <core/dvb/frontend.h>
 #include <core/dvb/dvbservice.h>
 
+#include <core/gui/echeckbox.h>
+#include <core/gui/ebutton.h>
+
+
 int eStreaminfo::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)

@@ -94,8 +94,9 @@ public:
 	 * \sa eWidget::close
 	 */
 	void reject();
-	ePtrList<eWidget> childlist;
+	Signal1<void, const eWidget*> focusChanged;
 protected:
+	ePtrList<eWidget> childlist;
 	static eWidget *root;
 	eWidget *parent;
 	eString name;
@@ -175,6 +176,7 @@ protected:
 	
 	gPixmap *pixmap;
 
+	eString descr;
 public:
 	inline eWidget *getNonTransparentBackground()
 	{
@@ -187,11 +189,12 @@ public:
 	eWidget *LCDElement;
 	eWidget *LCDTmp;
 
-	inline ePoint getAbsolutePosition()
+	inline ePoint getAbsolutePosition() const
 	{
 		return (parent?(parent->getAbsolutePosition()+parent->clientrect.topLeft()+position):position);
 	}
-	inline ePoint getRelativePosition(eWidget *e)
+
+	inline ePoint getRelativePosition(eWidget *e) const
 	{
 		ePoint pos=position;
 		if (this != e)
@@ -199,7 +202,9 @@ public:
 				pos+=a->clientrect.topLeft();
 		return pos;
 	}
+
 	virtual void redrawWidget(gPainter *target, const eRect &area);
+
 	virtual void eraseBackground(gPainter *target, const eRect &area);
 
 	/**
@@ -265,28 +270,28 @@ public:
 	 *
 	 * \return Current size of the widget, relative to the position.
 	 */
-	eSize getSize() { return size; }
+	eSize getSize() const { return size; }
 	
 	/** 
 	 * \brief Returns the current position.
 	 *
 	 * \return Current position, relative to the parent's \c clientrect.
 	 */
-	ePoint getPosition() { return position; }
+	ePoint getPosition() const { return position; }
 	
 	/**
 	 * \brief Returns the size of the clientrect.
 	 *
 	 * \return The usable size for the childwidgets.
 	 */
-	eSize getClientSize() { return clientrect.size(); }
+	eSize getClientSize() const { return clientrect.size(); }
 	
 	/**
 	 * \brief Returns the clientrect.
 	 *
 	 * \return The area usable for the childwidgets.
 	 */
-	eRect getClientRect() { return clientrect; }
+	eRect getClientRect() const { return clientrect; }
 
 	/**
 	 * \brief Recursive redraw of a widget.
@@ -407,15 +412,19 @@ public:
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
 	void setName(const char *name);
 	eWidget*& getParent() { return parent; }
-	const gFont& getFont() { return font; }
+	const gFont& getFont() const { return font; }
 	
-	const gColor& getBackgroundColor() { return backgroundColor; }
-	const gColor& getForegroundColor() { return foregroundColor; }
+	const gColor& getBackgroundColor() const { return backgroundColor; }
+	const gColor& getForegroundColor() const { return foregroundColor; }
 	
 	int width() { return getSize().width(); }
 	int height() { return getSize().height(); }
 	
 	gPainter *getPainter(eRect area=eRect());
+
+	const eString& getHelpText() const	{	return helptext;	}
+
+	void setHelpText( const eString txt )	{	helptext = txt; }
 	
 	/**
 	 * \brief Sets a property.

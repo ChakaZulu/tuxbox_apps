@@ -130,9 +130,7 @@ int eAVSwitch::setInput(int v)
 	eDebug("setInput %d, fd=%d", v, fd);
 	switch (v)
 	{
-	case 0:
-		v = (Type == SAGEM)?0:((colorformat == cfRGB)?1:2);
-		ioctl(fd, AVSIOSFBLK, &v);
+	case 0:	//	Switch to DVB
 		ioctl(fd, AVSIOSVSW1, dvb);
 		ioctl(fd, AVSIOSASW1, dvb+1);
 		ioctl(fd, AVSIOSVSW2, dvb+2);
@@ -141,9 +139,10 @@ int eAVSwitch::setInput(int v)
 		ioctl(fd, AVSIOSASW3, dvb+5);
 		if (!eDVB::getInstance()->mute)
 			ioctl(fd, AVSIOSVOL, &eDVB::getInstance()->volume);
+		reloadSettings();
 		break;
-	case 1:
-		v = (colorformat == cfRGB)?1:0;
+	case 1:   // Switch to VCR
+		v = (Type == SAGEM)? 0 : 2;
 		ioctl(fd, AVSIOSFBLK, &v);
 		ioctl(fd, AVSIOSVSW1, scart);
 		ioctl(fd, AVSIOSASW1, scart+1);

@@ -13,6 +13,7 @@
 	</fonts>
 		
 	<fontalias>
+		<map name="eStatusBar" font="Nimbus" size="20" />
 		<map name="eWindow.TitleBar" font="Blue.Bold" size="32" />
 		<map name="eWindow.Childs" font="Blue.Regular" size="30" />
 
@@ -65,6 +66,9 @@
 	</colors>
 	
 	<colorscheme>
+		<map name="eStatusBar.background" color="content" />
+		<map name="eStatusBar.foreground" color="content+15" />
+
 		<map name="global.normal.background" color="content" />
 		<map name="global.normal.foreground" color="content+15" />
 
@@ -140,9 +144,26 @@
 		<img name="3DBorder.unselected.hor.light" src="3D_border_unselected_hor_light.png" />
 		<img name="3DBorder.unselected.ver.dark" src="3D_border_unselected_ver_dark.png" />		
 		<img name="3DBorder.unselected.ver.light" src="3D_border_unselected_ver_light.png" />
+		<!--img name="Statusbar.border.bottom/top" src="statusbar_border_bottom_top.png" />
+		<img name="Statusbar.border.left/right" src="statusbar_border_left_right.png" />
+		<img name="Statusbar.border.leftTop" src="statusbar_border_leftTop.png" />
+		<img name="Statusbar.border.rightTop" src="statusbar_border_rightTop.png" />
+		<img name="Statusbar.border.leftBottom" src="statusbar_border_leftBottom.png" />
+		<img name="Statusbar.border.rightBottom" src="statusbar_border_rightBottom.png" /-->
 	</images>
 
 	<imagealias>
+		<!--map name="eStatusBar.top" img="Statusbar.border.bottom/top" />
+		<map name="eStatusBar.bottom" img="Statusbar.border.bottom/top" />
+		<map name="eStatusBar.left" img="Statusbar.border.left/right" />
+		<map name="eStatusBar.right" img="Statusbar.border.left/right" />
+		<map name="eStatusBar.topLeft" img="Statusbar.border.leftTop" />
+		<map name="eStatusBar.bottomRight" img="Statusbar.border.rightBottom" />		
+		<map name="eStatusBar.topRight" img="Statusbar.border.rightTop" />
+		<map name="eStatusBar.bottomLeft" img="Statusbar.border.leftBottom" /-->		
+		<map name="eStatusBar.top" img="3DBorder.unselected.hor.light" />		
+		<map name="eStatusBar.bottom" img="3DBorder.unselected.hor.dark" />		
+			
 		<map name="eButton.top" img="3DBorder.unselected.hor.light" />
 		<map name="eButton.left" img="3DBorder.unselected.ver.light" />
 		<map name="eButton.topLeft" img="3DBorder.unselected.corner.light" />

@@ -6,7 +6,7 @@ EXTRA_DIST = \
 	3D_border_unselected_corner_darkLight.png 3D_border_unselected_corner_light.png \
 	3D_border_unselected_corner_lightDark.png 3D_border_unselected_corner_dark.png \
 	3D_border_unselected_ver_light.png 3D_border_unselected_ver_dark.png \
-	3D_border_unselected_hor_light.png 3D_border_unselected_hor_dark.png
+	3D_border_unselected_hor_light.png 3D_border_unselected_hor_dark.png		
 
 install-data-local:
 	install -d $(DATADIR)/enigma/pictures/chk_v2
