@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.172 2002/05/05 01:52:36 obi Exp $
+ * $Id: zapit.cpp,v 1.173 2002/05/08 13:02:00 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -276,6 +276,23 @@ channel_msg load_settings()
 	output_msg.chan_nr = config->getInt( valueName, 1);
 
 	return output_msg;
+}
+
+bool setAudioMute (bool mute)
+{
+	if ((audio_fd == -1) && ((audio_fd = open(AUDIO_DEV, O_RDWR)) < 0))
+	{
+		perror("[zapit] " AUDIO_DEV);
+		return false;
+	}
+
+	if (ioctl(audio_fd, AUDIO_SET_MUTE, mute) < 0)
+	{
+		perror("[zapit] AUDIO_SET_MUTE");
+		return false;
+	}
+
+	return true;
 }
 
 bool setAudioBypassMode (bool isAc3)
@@ -1436,8 +1453,15 @@ void parse_command ()
 				eventServer->unRegisterEvent( connfd );
 			break;
 
+			case CZapitClient::CMD_MUTE:
+				CZapitClient::commandBoolean msgBoolean;
+				read(connfd, &msgBoolean, sizeof(msgBoolean));
+				setAudioMute(msgBoolean.truefalse);
+				break;
+
 			default:
 				printf("[zapit] unknown command (version %d)\n", CZapitClient::ACTVERSION);
+				break;
 		}
 	}
 	else
@@ -1575,7 +1599,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.172 2002/05/05 01:52:36 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.173 2002/05/08 13:02:00 obi Exp $\n\n");
 
 	if (argc > 1)
 	{

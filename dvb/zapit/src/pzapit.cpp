@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.16 2002/04/21 20:17:43 obi Exp $
+ * $Id: pzapit.cpp,v 1.17 2002/05/08 13:02:00 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -45,6 +45,9 @@ int usage (std::string basename)
 	std::cout << "show satellites: " << basename << " -sh" << std::endl;
 	std::cout << "select satellites: " << basename << " -se <satmask> <diseqc order>" << std::endl;
 	std::cout << "start transponderscan: " << basename << " -st" << std::endl;
+	std::cout << std::endl;
+	std::cout << "mute audio: " << basename << " -mute" << std::endl;
+	std::cout << "unmute audio: " << basename << " -unmute" << std::endl;
 	return -1;
 }
 
@@ -61,6 +64,7 @@ int main (int argc, char** argv)
 	int diseqcType = -1;
 	int satmask = 0;
 	int audio = 0;
+	int mute = 0;
 	char* channelName = NULL;
 
 	bool playback = false;
@@ -119,6 +123,11 @@ int main (int argc, char** argv)
 			reload = true;
 			continue;
 		}
+		else if (!strncmp(argv[i], "-mute", 5))
+		{
+			mute = 1;
+			continue;
+		}
 		else if (!strncmp(argv[i], "-n", 2))
 		{
 			if (i < argc - 1)
@@ -174,6 +183,11 @@ int main (int argc, char** argv)
 			scan = true;
 			continue;
 		}
+		else if (!strncmp(argv[i], "-unmute", 7))
+		{
+			mute = 2;
+			continue;
+		}
 		else if (i < argc - 1)
 		{
 			if ((sscanf(argv[i], "%d", &bouquet) > 0) && (sscanf(argv[++i], "%d", &channel) > 0))
@@ -203,6 +217,22 @@ int main (int argc, char** argv)
 	{
 		perror("[pzapit] new");
 		return -1;
+	}
+
+	/* audio mute */
+	if (mute == 1)
+	{
+		std::cout << "mute" << std::endl;
+		zapit->muteAudio(true);
+		delete zapit;
+		return 0;
+	}
+	else if (mute == 2)
+	{
+		std::cout << "unmute" << std::endl;
+		zapit->muteAudio(false);
+		delete zapit;
+		return 0;
 	}
 
 	/* reload services */

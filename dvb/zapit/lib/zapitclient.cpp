@@ -62,7 +62,7 @@ bool CZapitClient::zapit_connect()
 
 	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
-  		perror("zapitclient: connect");
+		perror("zapitclient: connect");
 		return false;
 	}
 	return true;
@@ -88,9 +88,9 @@ bool CZapitClient::receive(char* data, int size)
 }
 
 /***********************************************/
-/*                                             */
-/* general functions for zapping               */
-/*                                             */
+/*					     */
+/* general functions for zapping	       */
+/*					     */
 /***********************************************/
 
 /* zaps to channel of specified bouquet */
@@ -422,11 +422,28 @@ void CZapitClient::reinitChannels()
 	zapit_close();
 }
 
+void CZapitClient::muteAudio (bool mute)
+{
+	commandHead msgHead;
+	commandBoolean msg;
+
+	msg.truefalse = mute;
+
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_MUTE;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+	zapit_close();
+
+}
+
 
 /***********************************************/
-/*                                             */
-/*  Scanning stuff                             */
-/*                                             */
+/*					     */
+/*  Scanning stuff			     */
+/*					     */
 /***********************************************/
 
 /* start TS-Scan */
@@ -538,9 +555,9 @@ void CZapitClient::setScanBouquetMode( bouquetMode mode)
 
 
 /***********************************************/
-/*                                             */
-/* Bouquet editing functions                   */
-/*                                             */
+/*					     */
+/* Bouquet editing functions		   */
+/*					     */
 /***********************************************/
 
 /* adds bouquet at the end of the bouquetlist*/
@@ -582,21 +599,21 @@ void CZapitClient::moveBouquet( unsigned int bouquet, unsigned int newPos)
 //
 unsigned int CZapitClient::existsBouquet( string name)
 {
-        commandHead msgHead;
-        commandExistsBouquet msg;
+	commandHead msgHead;
+	commandExistsBouquet msg;
 	responseGeneralInteger response;
 
-        msgHead.version=ACTVERSION;
-        msgHead.cmd=CMD_BQ_EXISTS_BOUQUET;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_BQ_EXISTS_BOUQUET;
 
-        strncpy( msg.name, name.c_str(), 30);
+	strncpy( msg.name, name.c_str(), 30);
 
-        zapit_connect();
-        send((char*)&msgHead, sizeof(msgHead));
-        send((char*)&msg, sizeof(msg));
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
 
 	receive((char* )&response, sizeof(response));
-        zapit_close();
+	zapit_close();
 	return (unsigned int) response.number;
 }
 
@@ -607,22 +624,22 @@ unsigned int CZapitClient::existsBouquet( string name)
 //
 bool CZapitClient::existsChannelInBouquet( unsigned int bouquet, unsigned int onid_sid)
 {
-        commandHead msgHead;
-        commandExistsChannelInBouquet msg;
+	commandHead msgHead;
+	commandExistsChannelInBouquet msg;
 	responseGeneralTrueFalse response;
 
-        msgHead.version=ACTVERSION;
-        msgHead.cmd=CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_BQ_EXISTS_CHANNEL_IN_BOUQUET;
 
 	msg.bouquet    = bouquet;
 	msg.onid_sid   = onid_sid;
 
-        zapit_connect();
-        send((char*)&msgHead, sizeof(msgHead));
-        send((char*)&msg, sizeof(msg));
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
 
 	receive((char* )&response, sizeof(response));
-        zapit_close();
+	zapit_close();
 	return (unsigned int) response.status;
 }
 
