@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.6 2003/03/17 16:15:11 obi Exp $
+$Id: descriptor.c,v 1.7 2003/05/03 02:51:08 obi Exp $
 
  -- Descriptor Section
  -- (c) rasc
@@ -8,6 +8,9 @@ $Id: descriptor.c,v 1.6 2003/03/17 16:15:11 obi Exp $
  -- all descriptors are returning their length used in buffer
 
 $Log: descriptor.c,v $
+Revision 1.7  2003/05/03 02:51:08  obi
+skip descriptors with length == 0
+
 Revision 1.6  2003/03/17 16:15:11  obi
 fixed infinite loop
 thanks to Johannes Stezenbach
@@ -66,10 +69,8 @@ int  descriptor  (u_char *b)
  out_S2B_NL (4,"DescriptorTag: ",b[0], dvbstrDescriptorTAG(b[0]));
  out_SW_NL  (5,"Descriptor_length: ",b[1]);
 
- if (b[1] == 0) {
-    out_nl (0,"  ==> ERROR: Descriptor_length == 0!!!  (abort)"); 
-    exit (0);
- }
+ if (b[1] == 0)
+	 return len;
 
  // print hex buf of descriptor
  printhex_buf (9, b,b[1]+2);
