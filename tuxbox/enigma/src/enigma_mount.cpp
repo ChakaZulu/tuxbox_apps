@@ -408,11 +408,11 @@ eString eMountMgr::listMountPoints(eString skelleton)
 	return result;
 }
 
-void eMountMgr::listMountPoints(eListBox<eListBoxEntryMount> *mountList)
+void eMountMgr::listMountPoints(eListBox<eListBoxEntryMountOSD> *mountList)
 {
 	if (mountPoints.size() > 0)
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
-			new eListBoxEntryMount(mountList, mp_it->mp.id);
+			new eListBoxEntryMountOSD(mountList, mp_it->mp.id);
 }
 
 void eMountMgr::addMountedFileSystems()

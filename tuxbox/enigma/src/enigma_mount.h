@@ -9,7 +9,7 @@
 
 #define	MOUNTCONFIGFILE	"/var/tuxbox/config/enigma/mount.conf"
 
-class eListBoxEntryMount;
+class eListBoxEntryMountOSD;
 
 typedef struct
 {
@@ -57,7 +57,7 @@ private:
 	void addMountedFileSystems(void);
 public:
 	eString listMountPoints(eString); // for webif
-	void listMountPoints(eListBox<eListBoxEntryMount> *); // for osd
+	void listMountPoints(eListBox<eListBoxEntryMountOSD> *); // for osd
 	void removeMountPoint(int);
 	int addMountPoint(t_mount);
 	void changeMountPoint(int, t_mount);

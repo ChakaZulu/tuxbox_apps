@@ -17,14 +17,14 @@
 
 eMountOSD *eMountOSD::instance = 0;
 
-gFont eListBoxEntryMount::ServerFont;
-gFont eListBoxEntryMount::LocalFont;
-gPixmap *eListBoxEntryMount::ok = 0;
-gPixmap *eListBoxEntryMount::failed = 0;
-int eListBoxEntryMount::ServerXSize = 0;
-int eListBoxEntryMount::LocalXSize = 0;
+gFont eListBoxEntryMountOSD::ServerFont;
+gFont eListBoxEntryMountOSD::LocalFont;
+gPixmap *eListBoxEntryMountOSD::ok = 0;
+gPixmap *eListBoxEntryMountOSD::failed = 0;
+int eListBoxEntryMountOSD::ServerXSize = 0;
+int eListBoxEntryMountOSD::LocalXSize = 0;
 
-eListBoxEntryMount::~eListBoxEntryMount()
+eListBoxEntryMountOSD::~eListBoxEntryMountOSD()
 {
 	if (paraLocal)
 		paraLocal->destroy();
@@ -39,7 +39,7 @@ eListBoxEntryMount::~eListBoxEntryMount()
 		paraAuto->destroy();
 }
 
-int eListBoxEntryMount::getEntryHeight()
+int eListBoxEntryMountOSD::getEntryHeight()
 {
 	if (!ServerFont.pointSize && !LocalFont.pointSize)
 	{
@@ -61,7 +61,7 @@ int eListBoxEntryMount::getEntryHeight()
 	return (calcFontHeight(ServerFont) + 4) * 2;
 }
 
-void eListBoxEntryMount::redrawEntry()
+void eListBoxEntryMountOSD::redrawEntry()
 {
 	paraServer->destroy();
 	paraServer = 0;
@@ -73,13 +73,13 @@ void eListBoxEntryMount::redrawEntry()
 	paraAuto = 0;
 }
 
-eListBoxEntryMount::eListBoxEntryMount(eListBox<eListBoxEntryMount> *listbox, int id)
+eListBoxEntryMountOSD::eListBoxEntryMountOSD(eListBox<eListBoxEntryMountOSD> *listbox, int id)
 		:eListBoxEntry((eListBox<eListBoxEntry>*)listbox),
 		paraLocal(0), paraServer(0), paraFS(0), paraAuto(0), id(id)
 {
 }
 
-const eString &eListBoxEntryMount::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
+const eString &eListBoxEntryMountOSD::redraw(gPainter *rc, const eRect& rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
 	t_mount entry = eMountMgr::getInstance()->getMountPointData(id);
 	drawEntryRect(rc, rect, coActiveB, coActiveF, coNormalB, coNormalF, hilited);
@@ -167,7 +167,7 @@ eMountOSD::eMountOSD():	eWindow(0)
 	cmove(ePoint(75, 100));
 	cresize(eSize(560, 400));
 
-	mountList = new eListBox<eListBoxEntryMount>(this);
+	mountList = new eListBox<eListBoxEntryMountOSD>(this);
 	mountList->move(ePoint(10, 10));
 	mountList->resize(eSize(540, 290));
 	mountList->loadDeco();
@@ -223,7 +223,7 @@ eMountOSD::eMountOSD():	eWindow(0)
 	statusbar->loadDeco();
 }
 
-void eMountOSD::mountSelected(eListBoxEntryMount *sel)
+void eMountOSD::mountSelected(eListBoxEntryMountOSD *sel)
 {
 	if (sel)
 	{

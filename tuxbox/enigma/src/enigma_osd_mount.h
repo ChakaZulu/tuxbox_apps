@@ -14,9 +14,9 @@
 #include <lib/gui/listbox.h>
 #include <enigma_mount.h>
 
-class eListBoxEntryMount: public eListBoxEntry
+class eListBoxEntryMountOSD: public eListBoxEntry
 {
-	friend class eListBox<eListBoxEntryMount>;
+	friend class eListBox<eListBoxEntryMountOSD>;
 	friend class eTimerListView;
 	friend struct _selectEvent;
 	static gFont LocalFont, ServerFont;
@@ -32,8 +32,8 @@ class eListBoxEntryMount: public eListBoxEntry
 public:
 	int id;
 	void redrawEntry();
-	eListBoxEntryMount(eListBox<eListBoxEntryMount> *listbox, int id);
-	~eListBoxEntryMount();
+	eListBoxEntryMountOSD(eListBox<eListBoxEntryMountOSD> *listbox, int id);
+	~eListBoxEntryMountOSD();
 };
 
 class eMountOSD: public eWindow
@@ -41,11 +41,11 @@ class eMountOSD: public eWindow
 private:
 	static eMountOSD *instance;
 
-	eListBox<eListBoxEntryMount> *mountList;
+	eListBox<eListBoxEntryMountOSD> *mountList;
 	eButton	*newmount, *remmount, *unmount, *mountnow;
 	eStatusBar *statusbar;
 
-	void mountSelected(eListBoxEntryMount *sel);
+	void mountSelected(eListBoxEntryMountOSD *sel);
 	void fieldSelected(int *number);
 	void addMount();
 	void removeMount();
