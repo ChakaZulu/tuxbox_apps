@@ -224,6 +224,7 @@ int CAudioPlayerGui::show()
 
 	bool loop=true;
 	bool update=true;
+	bool clear_before_update=false;
 	key_level=0;
 	while(loop)
 	{
@@ -251,12 +252,11 @@ int CAudioPlayerGui::show()
 
 		if (update)
 		{
-		  /* 
-		   * let's try without hide(); to save some painting and prevent flickering
-		   */
-		  /*
-			hide();
-		  */
+			if(clear_before_update)
+			{
+				hide();
+				clear_before_update=false;
+			}
 			update=false;
 			paint();
 		}
@@ -505,6 +505,7 @@ int CAudioPlayerGui::show()
 				playlist.clear();
 				current=-1;
 				selected=0;
+				clear_before_update=true;
 				update=true;
 			}
 			else
