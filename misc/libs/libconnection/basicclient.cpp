@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.12 2003/02/24 14:16:05 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.13 2003/02/24 21:14:15 thegoodguy Exp $
  *
  * Basic Client Class - The Tuxbox Project
  *
@@ -99,10 +99,20 @@ bool CBasicClient::send_data(const char* data, const size_t size)
 
 bool CBasicClient::receive_data(char* data, const size_t size)
 {
+	timeval timeout;
+
 	if (sock_fd == -1)
 		return false;
-	else
-		return (read(sock_fd, data, size) > 0);  // case size == 0 uncorrect handled ?
+	
+	timeout.tv_sec  = TIMEOUT_SEC;
+	timeout.tv_usec = TIMEOUT_USEC;
+	
+	if (::receive_data(sock_fd, data, size, timeout) == false)
+	{
+		printf("[CBasicClient] receive failed: %s\n", getSocketName());
+		return false;
+	}
+	return true;
 }
 
 bool CBasicClient::send(const unsigned char command, const char* data, const unsigned int size)

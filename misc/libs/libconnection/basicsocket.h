@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.h,v 1.1 2003/02/24 14:05:02 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicsocket.h,v 1.2 2003/02/24 21:14:15 thegoodguy Exp $
  *
  * Basic Socket Class - The Tuxbox Project
  *
@@ -29,5 +29,6 @@
 #include <sys/time.h>
 
 bool send_data(int fd, const void * data, const size_t size, const timeval timeout);
+bool receive_data(int fd, void * data, const size_t size, const timeval timeout);
 
 #endif
