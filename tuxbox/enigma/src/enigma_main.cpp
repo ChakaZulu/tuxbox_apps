@@ -2933,7 +2933,6 @@ void eZapMain::pause()
 			{
 				record();
 				timeshift=1;
-				usleep(1000*1000);
 				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, -1));
 			}
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
@@ -3745,7 +3744,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 	eServiceReference ref=sel->getSelected();
 	eServiceReference path=sel->getPath().current();
 
-	printf("path: '%s', ref: '%s', pathtype: %d, reftype: %d\n",path.toString().c_str(),ref.toString().c_str(),path.type,ref.type);
+	eDebug("path: '%s', ref: '%s', pathtype: %d, reftype: %d\n",path.toString().c_str(),ref.toString().c_str(),path.type,ref.type);
 
 /*  i think is not so good to delete normal providers
 		if (ref.data[0]==-3) // Provider

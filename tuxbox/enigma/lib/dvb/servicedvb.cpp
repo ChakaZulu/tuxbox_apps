@@ -857,6 +857,18 @@ int eServiceHandlerDVB::serviceCommand(const eServiceCommand &cmd)
 		{
 			if ( parm == -1 ) // pause with must seek to begin
 			{
+				int timeout = 8;
+				while(timeout--)
+				{
+					struct stat64 s;
+					if ( !stat64(current_filename.c_str(), &s) )
+					{
+						if ( s.st_size < 512*1024 )
+							usleep(250*1000);
+						else
+							break;
+					}
+				}
 				parm=0;
 				startPlayback(current_filename, 2);
 			}
