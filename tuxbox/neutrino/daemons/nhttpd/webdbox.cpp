@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.20 2002/04/18 01:59:25 dirch Exp $
+	$Id: webdbox.cpp,v 1.21 2002/04/18 12:27:14 field Exp $
 
 	License: GPL
 
@@ -136,7 +136,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 		request->SocketWrite(buf);
 		return true;
 	}
-	
+
 
 	if(request->Filename.compare("info") == 0)
 	{
@@ -165,7 +165,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			}
 			else
 			{
-				request->SocketWrite("error");	
+				request->SocketWrite("error");
 				return false;
 			}
 		}
@@ -216,7 +216,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			else
 			if(request->ParameterList["status"] != "")
 			{
-				request->SocketWrite( (char *) (controld.getMute()?"1":"0") );	//  mute 
+				request->SocketWrite( (char *) (controld.getMute()?"1":"0") );	//  mute
 				return true;
 			}
 			else
@@ -290,7 +290,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 				{
 					request->SocketWriteLn((char*)epg.title.c_str());
 					request->SocketWriteLn((char*)epg.info1.c_str());
-					request->SocketWriteLn((char*)epg.info2.c_str());					
+					request->SocketWriteLn((char*)epg.info2.c_str());
 				}
 			}
 			else
@@ -325,13 +325,13 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 			if(request->ParameterList["mode"] != "")			// TV oder RADIO - Mode
 			{
 				if(request->ParameterList["mode"] == "TV")
-				{				
+				{
 					zapit.setMode(CZapitClient::MODE_RADIO);
 					sleep(1);
 					UpdateBouquets();
 				}
 				else if(request->ParameterList["mode"] == "RADIO")
-				{				
+				{
 					zapit.setMode(CZapitClient::MODE_RADIO);
 					sleep(1);
 					UpdateBouquets();
@@ -390,7 +390,7 @@ void TWebDbox::Authenticate(CWebserverRequest* request)
 }
 
 bool TWebDbox::CheckAuth(CWebserverRequest* request)
-{ 
+{
 	if(request->HeaderList["Authorization"] == "")
 		return false;
 	string encodet = request->HeaderList["Authorization"].substr(6,request->HeaderList["Authorization"].length() - 6);
@@ -527,10 +527,10 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 					{
 						char *buffer2 = new char[1024];
 						sprintf(buffer2,"<H1>%s</H1><BR>\n<H2>%s</H2><BR>\n<B>%s</B><BR>\n\0",epg.title.c_str(),epg.info1.c_str(),epg.info2.c_str());
-						request->SocketWrite(buffer2);					
+						request->SocketWrite(buffer2);
 						delete[] buffer2;
 					}
-					
+
 				}
 				else if(request->ParameterList["epgid"] != "")
 				{
@@ -542,7 +542,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 
 					const char * timestr = request->ParameterList["startzeit"].c_str();
 					sscanf(timestr, "%x", &startzeit);
-	
+
 					CEPGData epg;
 					if(sectionsd.getEPGid(epgid,startzeit,&epg))
 					{
@@ -629,7 +629,7 @@ bool TWebDbox::Execute(CWebserverRequest* request)
 }
 
 //-------------------------------------------------------------------------
-// Get functions 
+// Get functions
 //-------------------------------------------------------------------------
 
 
@@ -638,8 +638,8 @@ void TWebDbox::GetChannelEvents()
 	eList = sectionsd.getChannelEvents();
 	CChannelEventList::iterator eventIterator;
 
-    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++ )
-		ChannelListEvents[(*eventIterator).serviceID] = &(*eventIterator);
+//    for( eventIterator = eList.begin(); eventIterator != eList.end(); eventIterator++ )
+//		ChannelListEvents[(*eventIterator).serviceID] = &(*eventIterator);
 }
 //-------------------------------------------------------------------------
 
@@ -654,7 +654,7 @@ char classname;
 int sock_fd;
 Tmconnect con;
 
-	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
+/*	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
 	{
 		sectionsd::msgRequestHeader req;
 		req.version = 2;
@@ -764,7 +764,7 @@ Tmconnect con;
 			request->SendHTMLFooter();
 		}
 	}
-
+*/
 }
 
 char* TWebDbox::GetServiceName(int onid_sid)
@@ -794,7 +794,7 @@ void TWebDbox::SendBouquet(CWebserverRequest *request,int BouquetNr)
 {
 char *buffer = new char[500];
 
-	for(int i = 0; i < BouquetsList[BouquetNr].size();i++) 
+	for(int i = 0; i < BouquetsList[BouquetNr].size();i++)
 	{
 		sprintf(buffer,"BouquetList[i]. nr: %ld onsid: %ld name: '%s'\n\0",(BouquetsList[BouquetNr])[i].nr,BouquetsList[BouquetNr][i].onid_sid,BouquetsList[BouquetNr][i].name);
 		request->SocketWrite(buffer);
@@ -803,10 +803,10 @@ char *buffer = new char[500];
 };
 //-------------------------------------------------------------------------
 void TWebDbox::SendChannelList(CWebserverRequest *request)
-{	
+{
 char *buffer = new char[500];
 
-	for(int i = 0; i < ChannelList.size();i++) 
+	for(int i = 0; i < ChannelList.size();i++)
 	{
 		sprintf(buffer,"%u %s\n",ChannelList[i].onid_sid,ChannelList[i].name);
 		request->SocketWrite(buffer);
@@ -913,7 +913,7 @@ void TWebDbox::SendSettings(CWebserverRequest* request)
 
 void TWebDbox::ShowSettings(CWebserverRequest *request)
 {
-	request->SendHTMLHeader("DBOX2-Neutrino Settings");	
+	request->SendHTMLHeader("DBOX2-Neutrino Settings");
 	SendSettings(request);
 }
 //-------------------------------------------------------------------------
@@ -927,7 +927,7 @@ char *buffer = new char[500];
 	request->SocketWrite(buffer);
 	request->SocketWrite("<tr><td><HR></td></tr>\n");
 
-	
+
 	for(int i = 0; i < BouquetList.size();i++)
 	{
 		sprintf(buffer,"<tr><td><h5><a class=b href=\"channellist.dbox2?bouquet=%d#akt\" target=\"content\">%s</a></h5></td></tr>\n",BouquetList[i].bouquet_nr,BouquetList[i].name);
@@ -949,7 +949,7 @@ void TWebDbox::ShowBouquet(CWebserverRequest* request,int BouquetNr = -1)
 		channellist = BouquetsList[BouquetNr];
 	else
 		channellist = ChannelList;
-	
+
 	GetChannelEvents();
 
 	request->SendHTMLHeader("DBOX2-Neutrino Kanalliste");
@@ -976,7 +976,7 @@ void TWebDbox::ShowBouquet(CWebserverRequest* request,int BouquetNr = -1)
 		request->SocketWrite(buffer);
 
 		if(ChannelListEvents[channellist[i].onid_sid])
-		{	
+		{
 			sprintf(buffer,"<tr><td class=\"%cepg\"><a href=epg.dbox2?epgid=%llx&startzeit=%lx>",classname[0],ChannelListEvents[channellist[i].onid_sid]->eventID,ChannelListEvents[channellist[i].onid_sid]->startTime);
 			request->SocketWrite(buffer);
 			request->SocketWrite((char *)ChannelListEvents[channellist[i].onid_sid]->description.c_str());
