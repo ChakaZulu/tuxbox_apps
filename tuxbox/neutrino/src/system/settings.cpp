@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.15 2003/05/12 04:56:02 digi_casi Exp $
+        $Id: settings.cpp,v 1.16 2003/05/13 07:05:21 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -150,46 +150,42 @@ void CScanSettings::useDefaults(const delivery_system_t _delivery_system)
 
 bool CScanSettings::loadSettings(const std::string fileName, const delivery_system_t _delivery_system)
 {
+	int satCount = 0;
+	int i = 0;
+	char tmp[20] = "";
+	
 	useDefaults(_delivery_system);
 
 	if(!configfile.loadConfig(fileName))
-	{
 		return false;
-	}
 
-	if (configfile.getInt32("delivery_system",-1) != delivery_system)
+	if (configfile.getInt32("delivery_system", -1) != delivery_system)
 	{
 		// configfile is not for this delivery system
 		configfile.clear();
 		return false;
 	}
 
-	diseqcMode   = (diseqc_t)                  configfile.getInt32("diseqcMode"  , diseqcMode);
-	diseqcRepeat =                             configfile.getInt32("diseqcRepeat", diseqcRepeat);
-	bouquetMode  = (CZapitClient::bouquetMode) configfile.getInt32("bouquetMode" , bouquetMode);
+	diseqcMode = (diseqc_t) configfile.getInt32("diseqcMode"  , diseqcMode);
+	diseqcRepeat = configfile.getInt32("diseqcRepeat", diseqcRepeat);
+	bouquetMode = (CZapitClient::bouquetMode) configfile.getInt32("bouquetMode" , bouquetMode);
 	strcpy(satNameNoDiseqc, configfile.getString("satNameNoDiseqc", satNameNoDiseqc).c_str());
+	satCount = configfile.getInt32("satCount", 0);
 
 	if (diseqcMode != NO_DISEQC)
 	{
-		int satCount = configfile.getInt32( "satCount", 0 );
-		for (int i=0; i<satCount; i++)
+		satCount = configfile.getInt32("satCount", 0);
+		for (i = 0; i < satCount; i++)
 		{
-			char tmp[10];
 			sprintf((char*)&tmp, "SatName%d", i);
-			strcpy( satName[i], configfile.getString( tmp, "" ).c_str() );
+			strcpy( satName[i], configfile.getString(tmp, "").c_str());
 			sprintf((char*)&tmp, "satDiseqc%d", i);
-			satDiseqc[i] = configfile.getInt32( tmp, -1 );
-		}
-		if (diseqcMode == DISEQC_1_2)
-		{
-			int satMotorPosCount = configfile.getInt32( "satMotorPosCount", 0 );
-			for (int i=0; i<satMotorPosCount; i++)
+			satDiseqc[i] = configfile.getInt32(tmp, -1);
+			
+			if (diseqcMode == DISEQC_1_2)
 			{
-				char tmp[10];
-				sprintf((char*)&tmp, "SatName%d", i);
-				strcpy( satName[i], configfile.getString( tmp, "" ).c_str() );
 				sprintf((char*)&tmp, "satMotorPos%d", i);
-				satMotorPos[i] = configfile.getInt32( tmp, -1 );
+				satMotorPos[i] = configfile.getInt32(tmp, -1);
 			}
 		}
 	}
@@ -198,66 +194,43 @@ bool CScanSettings::loadSettings(const std::string fileName, const delivery_syst
 
 bool CScanSettings::saveSettings(const std::string fileName)
 {
+	int satCount = 0;
+	char tmp[20] = "";
+	int i = 0;
+	
 	configfile.setInt32("delivery_system", delivery_system);
 	configfile.setInt32( "diseqcMode", diseqcMode );
 	configfile.setInt32( "diseqcRepeat", diseqcRepeat );
 	configfile.setInt32( "bouquetMode", bouquetMode );
 	configfile.setString( "satNameNoDiseqc", satNameNoDiseqc );
+	
 	if (diseqcMode != NO_DISEQC)
 	{
-		int satCount = 0;
-		for (int i=0; i<MAX_SATELLITES; i++)
-		{
-			if (satDiseqc[i] != -1)
-			{
-				satCount++;
-			}
-		}
-		configfile.setInt32( "satCount", satCount );
 		satCount = 0;
-		for (int i=0; i<MAX_SATELLITES; i++)
-		{
-			if (satDiseqc[i] != -1)
-			{
-				char tmp[10];
-				sprintf((char*)&tmp, "SatName%d", satCount);
-				configfile.setString( tmp, satName[i] );
-				sprintf((char*)&tmp, "satDiseqc%d", satCount);
-				configfile.setInt32( tmp, satDiseqc[i] );
+		for (i = 0; i < MAX_SATELLITES; i++)
+			if (satName[i] != "")
 				satCount++;
-			}
-		}
+
+		configfile.setInt32("satCount", satCount);
 		
-		if (diseqcMode == DISEQC_1_2)
+		for (int i = 0; i < satCount; i++)
 		{
-			satCount = 0;
-			for (int i=0; i<MAX_SATELLITES; i++)
+			sprintf((char*)&tmp, "SatName%d", i);
+			configfile.setString(tmp, satName[i]);
+			sprintf((char*)&tmp, "satDiseqc%d", i);
+			configfile.setInt32(tmp, satDiseqc[i]);
+
+			if (diseqcMode == DISEQC_1_2)
 			{
-				if (satMotorPos[i] != -1)
-				{
-					satCount++;
-				}
-			}
-			configfile.setInt32( "satMotorPosCount", satCount );
-			satCount = 0;
-			for (int i=0; i<MAX_SATELLITES; i++)
-			{
-				if (satMotorPos[i] != -1)
-				{
-					char tmp[10];
-					sprintf((char*)&tmp, "SatName%d", satCount);
-					configfile.setString( tmp, satName[i] );
-					sprintf((char*)&tmp, "satMotorPos%d", satCount);
-					configfile.setInt32( tmp, satMotorPos[i] );
-					satCount++;
-				}
+				sprintf((char*)&tmp, "satMotorPos%d", i);
+				configfile.setInt32(tmp, satMotorPos[i]);
 			}
 		}
 	}
 
 	if(configfile.getModifiedFlag())
 	{
-		printf("saveing neutrino scan-config\n");
+		printf("saving neutrino scan-config\n");
 		configfile.saveConfig(fileName);
 	}
 

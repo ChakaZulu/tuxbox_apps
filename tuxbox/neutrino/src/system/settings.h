@@ -257,6 +257,7 @@ class CScanSettings
 	CZapitClient::bouquetMode bouquetMode;
 	diseqc_t                  diseqcMode;
 	uint32_t                  diseqcRepeat;
+	int			  satCount;
 	char                      satNameNoDiseqc[30];
 	int                       satDiseqc[MAX_SATELLITES];
 	int	                  satMotorPos[MAX_SATELLITES];
