@@ -938,7 +938,7 @@ eDVB::eDVB()
 	availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
 	availableCASystems.push_back(0x1722);	// BetaCrypt D (cable)
 	availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)
-	
+
 	service=0;
 	tdt=0;
 
@@ -979,6 +979,8 @@ eDVB::eDVB()
 
 	bouquets.setAutoDelete(true);
 	calist.setAutoDelete(true);
+	
+	original_network_id=service_id=transport_stream_id=-1;
 
 	// tmbinc: das sollte man schon machen :-)
 /* --->>> */	recorder=0;
