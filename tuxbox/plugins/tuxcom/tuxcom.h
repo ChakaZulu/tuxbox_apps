@@ -4,6 +4,12 @@
  *             (c) dbluelle 2004 (dbluelle@blau-weissoedingen.de)             *
  ******************************************************************************
 
+	26.08.2004 Version 1.4b
+	 - Textinput: possibility to mark (green button) and insert text (blue button) (kind of a mini-clipboard :-) )
+	 - Editor: display \r as white box (DOS/Win-textfile) (blue button -> konvert to linux-format)
+	 - FTP-client: remove whitspace characters at end of filename when downloading
+	 - FTP-client: improved download-speed
+
 	11.08.2004 Version 1.4a
 	 - support of usb-keyboards (needs kernel-module hid.ko from BoxMan)
 	 - read .ftp-files even when created by windows
@@ -38,7 +44,7 @@
 
 	29.05.2004 Version 1.2
 	  - support for reading and extracting from "tar", "tar.Z", "tar.gz" and "tar.bz2" archives
-		does not work with many Archives in Original-Image 1..07.4 ( BusyBox-Version to old :( )
+		does not work with many Archives in Original-Image 1.07.4 ( BusyBox-Version to old :( )
 	  - display current line in editor
 	  - using tuxtxt-position for display
 	  - big font when editing a line
@@ -125,8 +131,9 @@
 #define charset " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#!$%&?*()@\\/=<>+-_,.;:"
 
 #define FILEBUFFER_SIZE (100 * 1024) // Edit files up to 100k
+#define FTPBUFFER_SIZE  (200 * 1024) // FTP Download Buffer size
 
-#define MSG_VERSION    "Tuxbox Commander Version 1.4a\n"
+#define MSG_VERSION    "Tuxbox Commander Version 1.4b\n"
 #define MSG_COPYRIGHT  "© dbluelle 2004"
 //rc codes
 
@@ -317,6 +324,7 @@ char szFileBuffer[FILEBUFFER_SIZE];
 char* szCommand;
 char* szZipCommand;
 char tmpzipdir[256];
+char szClipboard[256];
 long commandsize;
 
 int fncmodes[] = {AVS_FNCOUT_EXT43, AVS_FNCOUT_EXT169};
@@ -347,6 +355,9 @@ int language;
 #define ACTION_UPPERCASE 8
 #define ACTION_LOWERCASE 9
 #define ACTION_KILLPROC  10
+#define ACTION_TOLINUX   11
+#define ACTION_MARKTEXT  12
+#define ACTION_INSTEXT   13
 
 
 
@@ -483,7 +494,10 @@ char *colorline[] = { ""               , "" ,
                       "clear input"    , "Eingabe löschen"          ,
                       "set uppercase"  , "Grossbuchstaben"          ,
                       "set lowercase"  , "Kleinbuchstaben"          ,
-                      "kill process"   , "Prozess beenden"          };
+                      "kill process"   , "Prozess beenden"          ,
+                      "to linux format", "in Linux-Format"          ,
+                      "mark text"      , "Text markieren"           ,
+                      "insert text"    , "Text einfügen"            };
 char *mbox[]     = { "OK"           , "OK"                ,
                      "Cancel"       , "Abbrechen"         ,
                      "Hidden"       , "Versteckt"         ,
@@ -547,6 +561,7 @@ struct frameinfo finfo[2];
 
 //functions
 
+void 				RenderBox(int sx, int sy, int ex, int ey, int mode, int color);
 void 	          	RenderFrame(int frame);
 void 	          	RenderMenuLine(int highlight, int refresh);
 void 	          	FillDir(int frame, int selmode);

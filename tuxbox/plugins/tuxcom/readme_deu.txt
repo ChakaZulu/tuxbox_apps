@@ -3,6 +3,12 @@ TuxCom:
 Historie:
 ---------
 
+26.08.2004 Version 1.4b
+ - Texteingabe: Möglichkeit, Text zu markieren (Taste grün ) und einzufügen (Taste blau) (sozusagen eine mini-Zwischenablage :-) )
+ - Editor: Anzeigen von \r als weisses Kästchen (DOS/Win-Textdatei) (blaue Taste -> Umwandeln in Linux Format)
+ - FTP-Client: Entfernen von Whitespace-Zeichen am Ende des Dateinamens beim Download
+ - FTP-Client: Verbesserung der Download-Geschwindigkeit
+
 11.08.2004 Version 1.4a
  - Unterstützung für USB-Tastaturen (benötigt wird das Kernel-Modul hid.ko von BoxMan)
  - Lesen von .ftp-Dateien, auch wenn sie über Windows erstellt wurden...
@@ -16,7 +22,7 @@ Historie:
 25.07.2004 Version 1.4
  - Taskmanager eingebaut (über Info-Taste aufrufbar)
  - vor-/zurück-scrollen bei Kommandoausführung/Skriptausführung möglich
- - vor-/zurück-scrollen in Dateiansicht nicht mahr auf 100k-Dateien beschränkt
+ - vor-/zurück-scrollen in Dateiansicht nicht mehr auf 100k-Dateien beschränkt
  - aktuell ausgewählte Datei merken bei Verlassen des Plugins
  - Tastaturunterstützung für DMM-Tastatur eingebaut
  - Verzögerung bei gedrückter Taste eingebaut
@@ -118,9 +124,16 @@ ok			bestätigen
 volume +		neues Zeichen einfügen
 volume -		Zeichen entfernen
 rot			Eingabe löschen
+grün			in Markierungsmodus wechseln
 gelb			Wechseln zwischen Gross und Kleinbuchstaben
+blau			Text aus Zwischenablage einfügen
 0..9			Zeichenauswahl im "SMS-Stil" ( wie in der Enigma Texteingabe)
 
+in Markierungsmodus:
+
+links/rechts		Position wechseln
+ok			markierten Text in Zwischenablage übernehmen
+lame			Markierungsmodus verlassen
 
 in Eigenschaften:
 
@@ -139,6 +152,7 @@ volume +		Sprung zur 1. Zeile
 volume -		Sprung zur letzten Zeile
 rot			Zeile löschen
 grün			Zeile einfügen
+blau			Umwandeln einer DOS/Win Textdatei in Linux-Format
 
 in Viewer:
 

@@ -274,6 +274,19 @@ int RenderChar(FT_ULong currentchar, int sx, int sy, int ex, int color)
 	FT_Vector kerning;
 	FT_Error error;
 
+	if (currentchar == '\r') // display \r in windows edited files
+	{
+		if(color != -1)
+		{
+			if (sx+10 < ex)
+			{
+				RenderBox(sx,sy-10, sx+10,sy,GRID,color);
+			}
+			else
+				return -1;
+		}
+		return 10;
+	}
 	//load char
 
 		if(!(glyphindex = FT_Get_Char_Index(face, currentchar)))
@@ -620,6 +633,7 @@ void plugin_exec(PluginParam *par)
 	szCommand [0]= 0x00;
 	szZipCommand = (char*)malloc(commandsize);
 	szZipCommand [0]= 0x00;
+	szClipboard[0] = 0x00;
 	memset(tool, ACTION_NOACTION, sizeof(tool));
 	colortool[0] = ACTION_EXEC   ;
 	colortool[1] = ACTION_MARKER ;
@@ -877,7 +891,7 @@ void plugin_exec(PluginParam *par)
 						colortool[0] = ACTION_DELLINE ;
 						colortool[1] = ACTION_INSLINE ;
 						colortool[2] = ACTION_NOACTION;
-						colortool[3] = ACTION_NOACTION;
+						colortool[3] = ACTION_TOLINUX ;
 						RenderMenuLine(ACTION_EDIT-1, YES);
 						pfe = GetSelected(curframe);
 						sprintf(action,"%s%s",finfo[curframe].path, pfe->name);
@@ -1830,6 +1844,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 
 	int pos = 0, start = 0, slen, he = (vsize==BIG ? FONTHEIGHT_BIG : FONTHEIGHT_SMALL);
 	int prev_key = -1;
+	int markmode = 0, markpos=0;
 	char szbuf[maxchars+1];
 	char szdst[maxchars+1];
 	char * pch;
@@ -1846,9 +1861,9 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 	RenderString(szdst,x, y+he-FONT_OFFSET, width, LEFT, vsize, WHITE);
 
 	colortool[0] = ACTION_CLEAR ;
-	colortool[1] = ACTION_NOACTION;
+	colortool[1] = ACTION_MARKTEXT;
 	colortool[2] = (textuppercase == 0 ? ACTION_UPPERCASE : ACTION_LOWERCASE);
-	colortool[3] = ACTION_NOACTION;
+	colortool[3] = ACTION_INSTEXT;
 	RenderMenuLine(-1, EDIT);
 
 	memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
@@ -1856,7 +1871,7 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 	do{
 		while (GetRCCode(RC_EDIT) == 0);
 #if TUXCOM_DBOX_VERSION < 3
-		if (kbcode != 0)
+		if (kbcode != 0 && markmode == 0)
 		{
 			if (kbcode == 0x7f) // backspace
 			{
@@ -1891,13 +1906,25 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 		switch(rccode)
 		{
 				case RC_OK:
-					strncpy(str,szdst,maxchars);
-					while (str[strlen(str)-1] == ' ')
+					if (markmode == 0)
 					{
-						str[strlen(str)-1] = 0x00;
+						strncpy(str,szdst,maxchars);
+						while (str[strlen(str)-1] == ' ')
+						{
+							str[strlen(str)-1] = 0x00;
+						}
+						rccode = -1;
+						return RC_OK;
 					}
-					rccode = -1;
-					return RC_OK;
+					else
+					{
+						if (pos > markpos)
+							strncpy(szClipboard,(str+markpos),(pos-markpos));
+						else
+							strncpy(szClipboard,(str+pos),(markpos-pos));
+						markmode = 0;
+						break;
+					}
 				case RC_LEFT:
 					pos--;
 					prev_key = -1;
@@ -1907,46 +1934,58 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 					prev_key = -1;
 					break;
 				case RC_PLUS:
-					if (szdst[pos] != 0x00)
+					if (markmode == 0)
 					{
-						strcpy(szbuf,(char*)(szdst+pos));
-						szdst[pos] = ' ';
-						strcpy((char*)(szdst+pos+1),szbuf);
+						if (szdst[pos] != 0x00)
+						{
+							strcpy(szbuf,(char*)(szdst+pos));
+							szdst[pos] = ' ';
+							strcpy((char*)(szdst+pos+1),szbuf);
+						}
+						prev_key = -1;
 					}
-					prev_key = -1;
 					break;
 				case RC_MINUS:
-					if (pos== strlen(szdst)-1) // remove last char when at end of line
+					if (markmode == 0)
 					{
-						pos--;
-						szdst[pos] = 0x00;
+						if (pos== strlen(szdst)-1) // remove last char when at end of line
+						{
+							pos--;
+							szdst[pos] = 0x00;
+						}
+						else if (szdst[pos] != 0x00)
+						{
+							strcpy(szbuf,(char*)(szdst+pos+1));
+							strcpy((char*)(szdst+pos),szbuf);
+						}
+						prev_key = -1;
 					}
-					else if (szdst[pos] != 0x00)
-					{
-						strcpy(szbuf,(char*)(szdst+pos+1));
-						strcpy((char*)(szdst+pos),szbuf);
-					}
-					prev_key = -1;
 					break;
 				case RC_DOWN:
-					pch = strchr(charset,szdst[pos]);
-					if (pch == NULL) szdst[pos] = ' ';
-					else
+					if (markmode == 0)
 					{
-						if (pch == charset) szdst[pos] = charset[strlen(charset)-1];
-						else szdst[pos] = *((char*)pch-1);
+						pch = strchr(charset,szdst[pos]);
+						if (pch == NULL) szdst[pos] = ' ';
+						else
+						{
+							if (pch == charset) szdst[pos] = charset[strlen(charset)-1];
+							else szdst[pos] = *((char*)pch-1);
+						}
+						prev_key = -1;
 					}
-					prev_key = -1;
 					break;
 				case RC_UP:
-					pch = strchr(charset,szdst[pos]);
-					if (pch == NULL) szdst[pos] = ' ';
-					else
+					if (markmode == 0)
 					{
-						if (pch == &(charset[strlen(charset)-1])) szdst[pos] = charset[0];
-						else szdst[pos] = *((char*)pch+1);
+						pch = strchr(charset,szdst[pos]);
+						if (pch == NULL) szdst[pos] = ' ';
+						else
+						{
+							if (pch == &(charset[strlen(charset)-1])) szdst[pos] = charset[0];
+							else szdst[pos] = *((char*)pch+1);
+						}
+						prev_key = -1;
 					}
-					prev_key = -1;
 					break;
 				case RC_0:
 				case RC_1:
@@ -1958,37 +1997,73 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 				case RC_7:
 				case RC_8:
 				case RC_9:
-					if (prev_key != -1 && rccode != prev_key) // jump to next char when other number pressed
+					if (markmode == 0)
 					{
-						pos++;
-						if (pos >= strlen(szdst))
+						if (prev_key != -1 && rccode != prev_key) // jump to next char when other number pressed
 						{
-							if (pos > maxchars) pos = maxchars;
-							else
-								strcat(szdst," ");
+							pos++;
+							if (pos >= strlen(szdst))
+							{
+								if (pos > maxchars) pos = maxchars;
+								else
+									strcat(szdst," ");
+							}
 						}
-					}
-					prev_key = rccode;
-					pch = strchr(numberchars[rccode],tolower(szdst[pos]));
-					if (pch == NULL) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0] : toupper(numberchars[rccode][0]));
-					else
-					{
-						if (pch == &(numberchars[rccode][strlen(numberchars[rccode])-1])) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0]: toupper(numberchars[rccode][0]));
-						else szdst[pos] = (textuppercase == 0 ? *((char*)pch+1) : toupper(*((char*)pch+1)));
+						prev_key = rccode;
+						pch = strchr(numberchars[rccode],tolower(szdst[pos]));
+						if (pch == NULL) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0] : toupper(numberchars[rccode][0]));
+						else
+						{
+							if (pch == &(numberchars[rccode][strlen(numberchars[rccode])-1])) szdst[pos] = (textuppercase == 0 ? numberchars[rccode][0]: toupper(numberchars[rccode][0]));
+							else szdst[pos] = (textuppercase == 0 ? *((char*)pch+1) : toupper(*((char*)pch+1)));
+						}
 					}
 					break;
 				case RC_RED:
-					szdst[0] = 0x00;
-					pos = 0;
-					prev_key = -1;
+					if (markmode == 0)
+					{
+						szdst[0] = 0x00;
+						pos = 0;
+						prev_key = -1;
+					}
+					break;
+				case RC_GREEN:
+					if (markmode == 0)
+					{
+						markmode = 1;
+						markpos = pos;
+					}
 					break;
 				case RC_YELLOW:
-					textuppercase = 1-textuppercase;
-					szdst[pos] = (textuppercase == 0 ? tolower(szdst[pos]) : toupper(szdst[pos]));
+					if (markmode == 0)
+					{
+						textuppercase = 1-textuppercase;
+						szdst[pos] = (textuppercase == 0 ? tolower(szdst[pos]) : toupper(szdst[pos]));
+					}
+					break;
+				case RC_BLUE:
+					if (markmode == 0)
+					{
+						if (szdst[pos] != 0x00 && szClipboard[0] != 0x00)
+						{
+							strcpy(szbuf,(char*)(szdst+pos));
+							strcpy((char*)(szdst+pos),szClipboard);
+							strcpy((char*)(szdst+pos+strlen(szClipboard)),szbuf);
+						}
+					}
 					break;
 				case RC_HOME:
 					rccode = -1;
-					return RC_HOME;
+					if (markmode == 0)
+					{
+						return RC_HOME;
+					}
+					else
+					{
+						markmode = 0;
+						break;
+					}
+
 		}
 		if (pos <  0            ) pos = 0;
 		if (pos >= strlen(szdst))
@@ -2009,15 +2084,44 @@ int DoEditString(int x, int y, int width, int maxchars, char* str, int vsize, in
 				break;
 		}
 		strcpy(szbuf,(char*)(szdst+start));
-		szbuf[pos+1-start] = 0x00;
+		if (markmode == 0)
+			szbuf[pos+1-start] = 0x00;
+		else
+		{
+			if (pos > markpos)
+				szbuf[pos -start] = 0x00;
+			else
+				szbuf[markpos -start] = 0x00;
+		}
 		slen = GetStringLen(szbuf, vsize);
-		szbuf[pos-start] = 0x00;
+		if (markmode == 0)
+			szbuf[pos-start] = 0x00;
+		else
+		{
+			if (pos > markpos)
+				szbuf[markpos -start] = 0x00;
+			else
+				szbuf[pos -start] = 0x00;
+		}
 		int slen2=GetStringLen(szbuf, vsize);
 
 		RenderBox(x-1,y, x+width+1, y+he, FILL, back);
-		RenderBox(x+slen2-1,y, x+slen+1, y+he, FILL, RED);
+		RenderBox(x+slen2-1,y, x+slen+1, y+he, FILL, (markmode == 0 ? RED : GREEN));
 		RenderString((char*)(szdst+start),x, y+he-FONT_OFFSET, width, LEFT, vsize, WHITE);
-		colortool[2] = (textuppercase == 0 ? ACTION_UPPERCASE : ACTION_LOWERCASE);
+		if (markmode == 0)
+		{
+			colortool[0] = ACTION_CLEAR ;
+			colortool[1] = ACTION_MARKTEXT;
+			colortool[2] = (textuppercase == 0 ? ACTION_UPPERCASE : ACTION_LOWERCASE);
+			colortool[3] = ACTION_INSTEXT;
+		}
+		else
+		{
+			colortool[0] = ACTION_NOACTION;
+			colortool[1] = ACTION_NOACTION;
+			colortool[2] = ACTION_NOACTION;
+			colortool[3] = ACTION_NOACTION;
+		}
 		RenderMenuLine(-1, EDIT);
 		memcpy(lfb, lbb, var_screeninfo.xres*var_screeninfo.yres);
 	}while(1);
@@ -2494,7 +2598,7 @@ void DoCopy(struct fileentry* pfe, int typ)
 	char action[512], szFullFile[1000], tp;
 	if (finfo[curframe].ftpconn != NULL)
 	{
-		char szMessage[400],buf[512], szMessage2[400];
+		char szMessage[400],buf[512], szMessage2[400], xbuf[FTPBUFFER_SIZE];
 		sprintf(szMessage,msg[MSG_COPY_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
 		MessageBox(szMessage,"",NOBUTTON);
 
@@ -2553,12 +2657,12 @@ void DoCopy(struct fileentry* pfe, int typ)
 		}
 		do
 		{
-
-			r = fread (buf,1,510,fData);
-			rg += r;
 			sprintf(szMessage,msg[MSG_COPY_PROGRESS*NUM_LANG+language], pfe->name, finfo[1-curframe].path);
-			sprintf(szMessage2,"%lu/%lu", rg,size);
+			sprintf(szMessage2,"%lu/%lu Bytes (%d %%)", rg,size, (int)((((double)rg)/size)*100));
 			MessageBox(szMessage,szMessage2,NOBUTTON);
+
+			r = fread (xbuf,1,FTPBUFFER_SIZE-2,fData);
+			rg += r;
 			if (ferror(fData) || (feof(fData) && (rg < size)) || (r == 0))
 			{
 				sprintf(szMessage, msg[MSG_FTP_ERROR*NUM_LANG+language],"RETR ",pfe->name);
@@ -2792,8 +2896,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 	}
 	lstat(szFile,&st);
 
-	if (st.st_size < FILEBUFFER_SIZE && strlen(szFileBuffer) > 0 && szFileBuffer[strlen(szFileBuffer)-1] == '\n') count++;
-	if (st.st_size == 0) count++;
+	if (st.st_size < FILEBUFFER_SIZE && strlen(szFileBuffer) > 0) count++;
 	totalcount = count;
 
 
@@ -2944,6 +3047,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 							{
 								if (p1 && (plen != strlen(szInputBuffer)))
 								  memmove(pcur+strlen(szInputBuffer),p1,FILEBUFFER_SIZE-((pcur+strlen(szInputBuffer))-szFileBuffer));
+								if (sel > 0 && (*(pcur-1) != '\n')) {*pcur = '\n'; pcur++;}
 								memcpy(pcur,szInputBuffer,strlen(szInputBuffer));
 								if (sel >= count-1) *(pcur+strlen(szInputBuffer)) = 0x00;
 								changed = 1;
@@ -2956,7 +3060,7 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 						colortool[0] = ACTION_DELLINE ;
 						colortool[1] = ACTION_INSLINE ;
 						colortool[2] = ACTION_NOACTION;
-						colortool[3] = ACTION_NOACTION;
+						colortool[3] = ACTION_TOLINUX ;
 						RenderMenuLine(ACTION_EDIT-1, YES);
 					}
 					else
@@ -3028,7 +3132,21 @@ void DoEditFile(char* szFile, char* szTitle,  int writable)
 						changed = 1;
 					}
 					break;
-
+				case RC_BLUE:
+					if (writable == YES)
+					{
+						p1 = szFileBuffer;
+						while (p1)
+						{
+							p1 = strchr(p1,'\r');
+							if (p1)
+							{
+								memmove(p1,p1+1,FILEBUFFER_SIZE-(p1-szFileBuffer));
+								changed = 1;
+							}
+						}
+					}
+					break;
 			}
 			if (rccode == RC_HOME)
 			{
@@ -3592,6 +3710,7 @@ void ReadFTPDir(int frame, char* seldir)
 		{
 			char* pname = name;
 			while (*pname == ' ') pname++;
+			while (isspace(pname[strlen(pname)-1]))  pname[strlen(pname)-1] = 0x00;
 			pzfe1 = malloc(sizeof(struct zipfileentry));
 
 			if (name[strlen(pname)-1] == '/') name[strlen(name)-1]=0x00;
@@ -3840,6 +3959,10 @@ void ReadSettings()
 			{
 				rfirst = atoi(p);
 			}
+			else if ( !strcmp(line,"clip") )
+			{
+				strcpy(szClipboard, p);
+			}
 		}
 		fclose(fp);
 	}
@@ -3880,6 +4003,7 @@ void WriteSettings()
 		fprintf(fp,"rfile=%s\n",GetSelected(RIGHTFRAME)->name);
 		fprintf(fp,"lfirst=%lu\n",finfo[LEFTFRAME ].first);
 		fprintf(fp,"rfirst=%lu\n",finfo[RIGHTFRAME].first);
+		fprintf(fp,"clip=%s\n",szClipboard);
 		fclose(fp);
 	}
 }

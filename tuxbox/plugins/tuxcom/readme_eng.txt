@@ -3,6 +3,12 @@ TuxCom:
 History:
 ---------
 
+26.08.2004 Version 1.4b
+ - Textinput: possibility to mark (green button) and insert text (blue button) (kind of a mini-clipboard :-) )
+ - Editor: display \r as white box (DOS/Win-textfile) (blue button -> konvert to linux-format)
+ - FTP-client: remove whitspace characters at end of filename when downloading
+ - FTP-client: improved download-speed
+ 
 11.08.2004 Version 1.4a
  - support of usb-keyboards (needs kernel-module hid.ko from BoxMan)
  - read .ftp-files even when created by windows
@@ -37,7 +43,7 @@ History:
 
 29.05.2004 Version 1.2
  - support for reading and extracting from "tar", "tar.Z", "tar.gz" and "tar.bz2" archives
-   does not work with many Archives in Original-Image 1..07.4 ( BusyBox-Version to old :( )
+   does not work with many Archives in Original-Image 1.07.4 ( BusyBox-Version to old :( )
  - display current line in editor
  - using tuxtxt-position for display
  - big font when editing a line
@@ -119,8 +125,16 @@ ok			confirm changes
 volume +		insert new character
 volume -		remove character
 red			clear input
+green			enter marking mode
 yellow			change between uppercase/lowercase
+blue			insert text from clipboard
 0..9			select character in "sms-style" (as in enigma textinput)
+
+in marking mode:
+
+left/right		change selected stringposition
+ok			copy marekd text in clipboard
+lame			return to normal edit mode
 
 in properties:
 
@@ -138,6 +152,7 @@ volume +		jump to first line
 volume -		jump to last line
 red			delete line
 green			insert line
+blue			convert DOS/Win-textfile to linux format
 
 in Viewer:
 
