@@ -46,8 +46,8 @@ extern CRemoteControl * g_RemoteControl; /* neutrino.cpp */
 #include <time.h>
 #include <sys/param.h>
 
-#define COL_INFOBAR_BUTTONS			COL_INFOBAR_SHADOW_PLUS_1
-#define COL_INFOBAR_BUTTONS_GRAY		COL_INFOBAR_SHADOW_PLUS_1
+#define COL_INFOBAR_BUTTONS            (COL_INFOBAR_SHADOW + 1)
+#define COL_INFOBAR_BUTTONS_BACKGROUND (COL_INFOBAR_SHADOW_PLUS_1)
 
 #define ICON_LARGE_WIDTH 26
 #define ICON_SMALL_WIDTH 16
@@ -205,8 +205,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	frameBuffer->paintBackgroundBox(BoxEndX- 120, BoxStartY, BoxEndX, BoxStartY+ ChanHeight);
 
 	//number box
-	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
-	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
+	frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW_PLUS_0);
+	frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR_PLUS_0);
 
 	if ((!g_settings.infobar_sat_display) || (satellitePosition == 0))
 	{
@@ -266,7 +266,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		if ( BOTTOM_BAR_OFFSET> 0 )
 			frameBuffer->paintBackgroundBox(ChanInfoX, BoxEndInfoY, BoxEndX, BoxEndInfoY+ BOTTOM_BAR_OFFSET);
 
-       		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS);
+       		frameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS_BACKGROUND);
 		}
 
 		if ( !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_later | CSectionsdClient::epgflags::has_current |  CSectionsdClient::epgflags::not_broadcast ) ) )
@@ -305,8 +305,8 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 		}
 
 		// Schatten
-		frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
-		frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
+		frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW_PLUS_0);
+		frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW_PLUS_0);
 
 		neutrino_msg_t      msg;
 		neutrino_msg_data_t data;
@@ -808,7 +808,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 		//percent
 		if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_current)
 		{
-			frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
+			frameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW_PLUS_0); //border
 			frameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR_PLUS_7);//fill(active)
 			frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR_PLUS_3);//fill passive
 		}

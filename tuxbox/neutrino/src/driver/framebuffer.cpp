@@ -897,7 +897,13 @@ void CFrameBuffer::paintBackground()
 			memcpy(((uint8_t *)getFrameBufferPointer()) + i * stride, (background + i * BACKGROUNDIMAGEWIDTH), BACKGROUNDIMAGEWIDTH * sizeof(fb_pixel_t));
 	}
 	else
+	{
+#ifdef FB_USE_PALETTE
 		memset(getFrameBufferPointer(), backgroundColor, stride * 576);
+#else
+		paintBoxRel(0, 0, BACKGROUNDIMAGEWIDTH, 576, backgroundColor);
+#endif
+	}
 }
 
 void CFrameBuffer::SaveScreen(int x, int y, int dx, int dy, fb_pixel_t * const memp)
@@ -958,7 +964,9 @@ void CFrameBuffer::switch_signal (int signal)
 
 void CFrameBuffer::ClearFrameBuffer()
 {
+#ifdef FB_USE_PALETTE
 	setBackgroundColor(COL_BACKGROUND);
+#endif
 	useBackground(false);
 
 	paintBackground();

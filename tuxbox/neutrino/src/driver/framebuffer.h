@@ -32,7 +32,6 @@
 #include <stdint.h>
 #include <string>
 
-#define FB_USE_PALETTE 1
 #ifdef FB_USE_PALETTE
 #define fb_pixel_t uint8_t
 #else
