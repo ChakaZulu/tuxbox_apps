@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.18 2003/09/25 18:52:27 thegoodguy Exp $
+ * $Id: configfile.cpp,v 1.19 2003/11/23 19:16:03 obi Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -28,6 +28,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include <sys/stat.h>
 
 CConfigFile::CConfigFile(const char p_delimiter, const bool p_saveDefaults)
 {
@@ -97,6 +99,9 @@ const bool CConfigFile::saveConfig(const char * const filename)
 		}
 
 		configFile.close();
+
+		chmod(filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
 		return true;
 	}
 	else
