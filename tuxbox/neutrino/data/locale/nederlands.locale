@@ -99,6 +99,9 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
+audioplayer.head Audio Speellijst
+audioplayer.name Audioplayer
+audioplayerpicsettings.general Audioplayer/ beeldviewer
 bookmarkmanager.delete Verwijderen
 bookmarkmanager.name Favorieten
 bookmarkmanager.rename Hernoemen
@@ -150,6 +153,8 @@ colorstatusbar.text Infobar
 colorthememenu.classic_theme Classic thema
 colorthememenu.head Themakeuze
 colorthememenu.neutrino_theme Neutrino thema
+colorthememenu.dblue_theme Donkerblauw thema
+colorthememenu.dvb2k_theme DVB2000 thema
 date.Apr April
 date.Aug Augustus
 date.Dec December
@@ -174,6 +179,9 @@ epglist.noevents EPG is niet beschikbaar
 epgviewer.More_Screenings Meerdere Screenings op dit kanaal
 epgviewer.nodetailed Geen details beschikbaar
 epgviewer.notfound Geen EPG gevonden
+eventlistbar.channelswitch Planning
+eventlistbar.eventsort Sorteren
+eventlistbar.recordevent Opnemen
 favorites.addchannel Huidig kanaal zal toegevoegd worden \naan het boeket "mijn favorieten". \n Dit zal enkele seconden durens...
 favorites.bouquetname Mijn favorieten
 favorites.bqcreated Bouquet "Mijn favorieten" is gemaakt...\n
@@ -199,9 +207,7 @@ filebrowser.sort.name (bestandsname)
 filebrowser.sort.namedirsfirst (Dateiname2)
 filebrowser.sort.size (Grootte)
 filebrowser.sort.type (Type)
-flashupdate.action Actie:
 flashupdate.actionreadflash lezen
-flashupdate.actionwriteflash Schrijven
 flashupdate.cantopenfile Kan bestand niet openen
 flashupdate.cantopenmtd Kan het mtd-device niet openen
 flashupdate.checkupdate Zoek nieuwe versie
@@ -231,7 +237,7 @@ flashupdate.mtdselector Partitie kiezen
 flashupdate.programmingflash Programmeren van de flash
 flashupdate.proxypassword Paswoord
 flashupdate.proxypassword_hint1 Geef het paswoord voor de proxyserver
-flashupdate.proxypassword_hint2
+flashupdate.proxypassword_hint2 Leeg betekent geen proxy
 flashupdate.proxyserver Hostnaam
 flashupdate.proxyserver_hint1 Geef naam of IP proxyserver, Gebruik host: poort
 flashupdate.proxyserver_hint2 Geen invoer = geen proxy
@@ -243,9 +249,9 @@ flashupdate.readflash Lees de hele image
 flashupdate.readflashmtd Lees een partitie
 flashupdate.ready Klaar
 flashupdate.reallyflashmtd Wilt u echt flashen?\n\nAls er een fout optreed is de image niet\ngeldig, De Dbox zal niet starten na het flashen.\n\nImagename: %s\nTarget: %s
-flashupdate.reboot Herstarten box....
 flashupdate.savesuccess De image is succesvol bewaard \nonder %s.
 flashupdate.selectimage Beschikbare Images
+flashupdate.squashfs.noversion Versiecontrole van SquashFS gaat momenteel enkel via webupdating
 flashupdate.titlereadflash Lezen Flash
 flashupdate.titlewriteflash Writing Flash
 flashupdate.updatemode Updatemode
@@ -262,6 +268,7 @@ fontmenu.eventlist Eventlist
 fontmenu.gamelist Spellijst
 fontmenu.head Settings lettergrootte
 fontmenu.infobar Infobar
+fontsize.channel_num_zap Directe selectie
 fontsize.channellist Kanalenlijst
 fontsize.channellist_descr Omschrijving
 fontsize.channellist_number Nummer
@@ -286,7 +293,6 @@ fontsize.menu_info Menu Info
 fontsize.menu_title Menu Titel
 gtxalpha.alpha1 Alpha 1
 gtxalpha.alpha2 Alpha 2
-infoviewer.cantdecode Kanaal kan niet gedecodeert worden
 infoviewer.epgnotload EPG niet geladen....
 infoviewer.epgwait wachten op EPG...
 infoviewer.eventlist Event-Lijst
@@ -359,6 +365,7 @@ lcdmenu.statusline status lijn
 lcdmenu.statusline.both Volume/Speelduur
 lcdmenu.statusline.playtime Speelduur
 lcdmenu.statusline.volume Volume
+mainmenu.audioplayer Audioplayer
 mainmenu.games Spelletjes
 mainmenu.head Hoofdmenu
 mainmenu.movieplayer Filmspeler
@@ -382,11 +389,9 @@ mainsettings.language Taal
 mainsettings.lcd LCD-display
 mainsettings.misc Overige settings
 mainsettings.network Netwerk
-mainsettings.plugins Plugin Settings
 mainsettings.recording Opnemen
 mainsettings.savesettingsnow Bewaar de settings nu
 mainsettings.savesettingsnow_hint Even geduld, settings worden bewaard
-mainsettings.scan Scan settings
 mainsettings.streaming Filmspeler
 mainsettings.video Beeld
 menu.back Terug
@@ -398,13 +403,16 @@ messagebox.info Informatie
 messagebox.no Neen
 messagebox.yes Ja
 miscsettings.bootinfo Toon info bij starten
-miscsettings.boxtype Type DBox
+miscsettings.bootmenu Info tonen bij opstarten
+miscsettings.driver_boot Bootoptie's
 miscsettings.fb_destination Expert! Boot-Console
 miscsettings.general Algemeen
 miscsettings.head Overige settings
+miscsettings.hwsections Gebruik hardware secties
 miscsettings.infobar_sat_display Satelliet display in infobar
 miscsettings.shutdown_real standby
 miscsettings.shutdown_real_rcdelay vertraagde shutdown
+miscsettings.sptsmode Gebruik spts-mode
 miscsettings.startbhdriver load BH-Mode drivers
 motorcontrol.head Motor-Setup
 movieplayer.bookmark Favorieten
@@ -423,6 +431,7 @@ movieplayer.nostreamingserver De streamserver kon niet gevonden worden
 movieplayer.pesplayback PES Afspelen (Experiment)
 movieplayer.pleasewait Even geduld aub.\nBezig met verbinden met streamserver...
 movieplayer.toomanybookmarks U heeft te veel favorieten.\nEr moet een andere favoriet gewist worden.
+movieplayer.tshelp Rood/Home Stop\nGROEN Kies audio track\nGEEL Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minuten terug\n6 sla over ongeveer 5 minuten\n7 ongeveer 10 minuten terug\n9 sla ongeveer 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.tsplayback Speel TS
 movieplayer.vcdplayback (S)VCD
 movieplayer.vlchelp ROOD/Home Stop\nGROEN Resync\nGEEL Pause/verder\nBLAUW Favoriet instellen\n1 ca. 1 Minuut terug\n3 ca. 1 Minuut vooruit\n4 ca. 5 Minuten terug\n6 ca. 5 Minuten vooruit\n7 ca. 10 Minuten terug\n9 ca. 10 Minuten vooruit\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
@@ -435,6 +444,7 @@ mp3player.deleteall Wis alles
 mp3player.display_order display order
 mp3player.fastforward Vooruitspoelen
 mp3player.follow auto Kies huidig
+mp3player.highprio Hoge decoderingsprioriteit
 mp3player.id3scan Scannen van ID3 tags
 mp3player.keylevel key level
 mp3player.pause pauze
@@ -446,9 +456,11 @@ mp3player.shuffle shuffle
 mp3player.stop Stop
 mp3player.title_artist Titel, Artiest
 networkmenu.broadcast Broadcast
+networkmenu.dhcp DHCP
 networkmenu.gateway Standaard Gateway
 networkmenu.head Netwerkinstellingen
 networkmenu.ipaddress IP-Addres
+networkmenu.mount  NFS/CIFS
 networkmenu.nameserver Nameserver
 networkmenu.netmask Netmasker
 networkmenu.setupnow Netwerk nu activeren
@@ -498,11 +510,13 @@ parentallock.lockedprogram Gesloten programma (vanaf %d jaar en hoger)
 parentallock.lockedsender Locked sender...
 parentallock.never nooit
 parentallock.onsignal Bij uitzenden op slot
-parentallock.onstart bij starten
 parentallock.parentallock Kinderslot
 parentallock.prompt prompt voor PIN
 pictureviewer.defdir startdirectory
 pictureviewer.head Weergave van afbeeldingen
+pictureviewer.resize.color_average Geavanceerd
+pictureviewer.resize.none Geen
+pictureviewer.resize.simple Eenvoudig
 pictureviewer.scaling schaal
 pictureviewer.show Toon
 pictureviewer.slide_time toon tijd van slideshow
@@ -520,6 +534,9 @@ rclock.lockmsg Uw afstandsbediening van de DBox2 zal vergrendeld worden.\nOm de 
 rclock.menueadd Vergrendelen afstandsbediening
 rclock.title Vergrendel afstandsbediening
 rclock.unlockmsg Afstandsbediening van de DBOX2 in werking.
+recordingmenu.defdir Opnamefolder
+recordingmenu.file Direct (file)
+recordingmenu.filesettingsseparator Direct opnemen
 recordingmenu.head Opnameinstellingen
 recordingmenu.no_scart Verander niet naar Scart-mode
 recordingmenu.off Uit
@@ -530,10 +547,11 @@ recordingmenu.server_mac MAC adres
 recordingmenu.server_port Opname server port
 recordingmenu.server_wakeup recording server WOL
 recordingmenu.setupnow Activeer veranderingen
+recordingmenu.splitsize Max. grootte (MB)
 recordingmenu.stopplayback stop playback
 recordingmenu.stopsectionsd stop sectionsd
+recordingmenu.stream_all_audio_pids Alle audiopids opnemen
 recordingmenu.vcr vcr
-recordingmenu.vcr_devicename VCR naam (lirc)
 recordtimer.announce Opname start in enkele minuten
 repeatblocker.hint_1 Kortste tijd (in ms) tussen 2 drukken op de knop
 repeatblocker.hint_2 Druk op 0 om de blocker uit te zetten (rood is spatie)
@@ -544,7 +562,6 @@ satsetup.diseqc12 DiSEqC 1.2
 satsetup.diseqcrepeat DiSEqC-herhaling
 satsetup.extended DiSEqC-Settings
 satsetup.extended_lnb LNB-Settings
-satsetup.extended_motor Motorsettings
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.motorcontrol Manuele Setup van de motor
 satsetup.nodiseqc Geen DiSEqC
@@ -569,7 +586,6 @@ scants.numberofradioservices Radio:
 scants.numberoftotalservices Totaal:
 scants.numberoftvservices TV:
 scants.provider Provider:
-scants.services Services:
 scants.startnow Start scan
 scants.transponders Transponders:
 screensetup.lowerright groen = setup lower right
@@ -588,19 +604,22 @@ sleeptimerbox.hint1 Schakel uit in ...minuten. (000=uit)
 sleeptimerbox.hint2 dbox2 zal uitgaan na deze tijd.
 sleeptimerbox.title Sleeptimer
 streamfeatures.head Features
-streamfeatures.info Stream-Informatie
 streaminfo.aratio Aspect Ratio
 streaminfo.aratio_unknown Aspect Ratio: onbekend
 streaminfo.audiotype Audiotype
 streaminfo.audiotype_unknown Audiotype: onbekend
 streaminfo.bitrate Bitrate
-streaminfo.ecm_invalid ongeldig CA-system
 streaminfo.framerate Framerate
 streaminfo.framerate_unknown Framerate: onbekend
 streaminfo.head Stream-Informatie
-streaminfo.not_available Niet beschikbaar
 streaminfo.not_crypted Ongecodeerde uitzending
 streaminfo.resolution Resolutie
+streaming.buffer_overflow De opname is afgebroken \nomdat doelmap niet kon geopend worden.
+streaming.busy Een of meerdere opnames zijn bezig.\nAls U deze oodschap krijgt en er is geen opname\nbezig herstart dan Neutrino.
+streaming.dir_not_writable De opnamefolder is niet bereikbaar.\nOpnemen zal niet gaan.
+streaming.success De opname is met succes beëindigd
+streaming.write_error De opname is afgebroken \nomdat er een schrijffout opgetreden is.
+streaming.write_error_open De opname is afgebroken \nomdat de doelmap niet kon geopend worden.
 streamingmenu.352x288 352x288
 streamingmenu.352x576 352x576
 streamingmenu.480x576 480x576
@@ -637,7 +656,6 @@ timerlist.bouquetselect Kies boeket
 timerlist.channel Kanaal
 timerlist.channelselect Kies kanaal
 timerlist.delete Wis
-timerlist.empty Er zijn geen programmatie's op dit ogenblik.
 timerlist.menumodify Pas timer aan
 timerlist.menunew nieuwe timer
 timerlist.message Boodschap
