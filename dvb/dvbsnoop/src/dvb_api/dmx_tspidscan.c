@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.9 2003/12/15 22:41:28 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.10 2003/12/28 14:00:26 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,10 @@ $Id: dmx_tspidscan.c,v 1.9 2003/12/15 22:41:28 rasc Exp $
 
 
 $Log: dmx_tspidscan.c,v $
+Revision 1.10  2003/12/28 14:00:26  rasc
+bugfix: section read from input file
+some changes on packet header output
+
 Revision 1.9  2003/12/15 22:41:28  rasc
 pidscan improved, problems with max filters on demux
 
@@ -81,7 +85,7 @@ pidscan on transponder
 #define PID_TIMEOUT_HIGH	(30100 - PID_TIME_WAIT)
 
 // max filters (will be checked dynamically)
-#define MAX_PID_FILTER		64
+#define MAX_PID_FILTER		128
 
 // highest pid
 #define MAX_PID                 0x1FFF

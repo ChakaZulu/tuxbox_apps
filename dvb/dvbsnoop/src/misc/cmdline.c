@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.17 2003/12/28 00:01:14 rasc Exp $
+$Id: cmdline.c,v 1.18 2003/12/28 14:00:26 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,10 @@ $Id: cmdline.c,v 1.17 2003/12/28 00:01:14 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.18  2003/12/28 14:00:26  rasc
+bugfix: section read from input file
+some changes on packet header output
+
 Revision 1.17  2003/12/28 00:01:14  rasc
 some minor changes/adds...
 
@@ -135,7 +139,6 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
 
      if (!strcmp (argv[i],"-demux")) opt->devDemux = argv[++i];
      else if (!strcmp (argv[i],"-dvr")) opt->devDvr = argv[++i];
-     else if (!strcmp (argv[i],"-if")) opt->inpPidFile = argv[++i];
      else if (!strcmp (argv[i],"-f")) opt->filter = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-m")) opt->mask = str2i(argv[++i]);
      else if (!strcmp (argv[i],"-crc")) opt->crc = 1;
@@ -153,7 +156,10 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
      else if (!strcmp (argv[i],"-td")) opt->time_mode = DELTA_TIME;
      else if (!strcmp (argv[i],"-tn")) opt->time_mode = NO_TIME;
      else if (!strcmp (argv[i],"-help")) opt->help = 1;
-     else if (!strcmp (argv[i],"-s")) {
+     else if (!strcmp (argv[i],"-if")) {
+	 opt->inpPidFile = argv[++i];		// input filename
+	 opt->pid = DUMMY_PID;			// dummy to avoid usage output
+     } else if (!strcmp (argv[i],"-s")) {
          s = argv[++i];
          if (!strcmp (s,"sec")) opt->packet_mode = SECT;
          else if (!strcmp (s,"ts")) opt->packet_mode = TS;
@@ -161,14 +167,14 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
          else if (!strcmp (s,"bandwidth")) opt->packet_mode = PIDBANDWIDTH;
          else if (!strcmp (s,"pidscan")) {
 		 	opt->packet_mode = PIDSCAN;
-			opt->pid = 0;	// dummy to avoid usage output
+			opt->pid = DUMMY_PID;	// dummy to avoid usage output
 	 } else opt->help = 1;
      } else if (isdigit (argv[i][0])) {
-       /* PID */   
-       opt->pid = str2i(argv[i]);
+         opt->pid = str2i(argv[i]); 	// PID
+	 if (opt->pid > MAX_PID) opt->help = 1;
      } else {
-       opt->help = 1;
-       break;
+         opt->help = 1;
+         break;
      }
 
   } // while
@@ -191,7 +197,7 @@ int  cmdline_options (int argc, char **argv, OPTION *opt)
     return(0); 
   } 
 
-  if (argc==1 || opt->pid > 0x1FFF) {
+  if ((argc==1) || ((opt->pid > MAX_PID) && (opt->pid != DUMMY_PID)) ) {
     title ();
     printf("For help type 'dvbsnoop -help' ...\n");
     return(0); 

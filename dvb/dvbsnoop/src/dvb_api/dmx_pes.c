@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.13 2003/12/15 20:09:48 rasc Exp $
+$Id: dmx_pes.c,v 1.14 2003/12/28 14:00:25 rasc Exp $
 
  -- PE Streams
  --  For more information please see:
@@ -14,6 +14,10 @@ $Id: dmx_pes.c,v 1.13 2003/12/15 20:09:48 rasc Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.14  2003/12/28 14:00:25  rasc
+bugfix: section read from input file
+some changes on packet header output
+
 Revision 1.13  2003/12/15 20:09:48  rasc
 no message
 
@@ -65,7 +69,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/cmdline.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
-#include "misc/pkt_time.h" 
+#include "misc/print_header.h"
 
 #include "pes/pespacket.h"
 #include "dvb_api.h"
@@ -183,16 +187,17 @@ int  doReadPES (OPTION *opt)
     } else {
 
        indent (0);
+       print_packet_header (opt, "PES", opt->pid, count, n, skipped_bytes);
 
-       out_nl (1,"");
-       out_nl (1,"---------------------------------------------------------");
-       out_nl (1,"PES-Packet: %08ld   PID: %u (0x%04x), Length: %d (0x%04x)",
-		count, opt->pid,opt->pid,n,n);
-       out_receive_time (1, opt);
-       if (skipped_bytes) {
-	       out_nl (1,"Syncing PES... (%ld bytes skipped)",skipped_bytes);
-       }
-       out_nl (1,"---------------------------------------------------------");
+//       out_nl (1,"");
+//       out_nl (1,"---------------------------------------------------------");
+//       out_nl (1,"PES-Packet: %08ld   PID: %u (0x%04x), Length: %d (0x%04x)",
+//		count, opt->pid,opt->pid,n,n);
+//       out_receive_time (1, opt);
+//       if (skipped_bytes) {
+//	       out_nl (1,"Syncing PES... (%ld bytes skipped)",skipped_bytes);
+//       }
+//       out_nl (1,"---------------------------------------------------------");
 
 
        if (opt->printhex) {

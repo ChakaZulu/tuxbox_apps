@@ -7,7 +7,8 @@ noinst_HEADERS = \
 	helper.h \
 	hexprint.h \
 	output.h \
-	pkt_time.h 
+	pkt_time.h \
+	print_header.h 
 
 
 libmisc_a_SOURCES = \
@@ -15,6 +16,7 @@ libmisc_a_SOURCES = \
 	helper.c \
 	hexprint.c \
 	output.c \
-	pkt_time.c 
+	pkt_time.c \
+	print_header.c 
 
 

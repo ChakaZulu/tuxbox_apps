@@ -76,7 +76,7 @@ License:
 		-d:pserver:anonymous@cvs.tuxbox.org:/cvs/tuxbox -z3 co -ddvbsnoop-cvs -P
 		apps/dvb/dvbsnoop </I></P> 
 	 <H3> Cross Compiling for the dbox2 (ppc)</H3> 
-	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerfull digital
+	 <P>dvbsnoop is part of the dbox2 cdk. The dbox2 is a powerful digital
 		satellite receiver (set top box) with a network interface.<BR> Just follow the
 		installation instructions of the dbox2 cdk:</P> 
 	 <TABLE CELLPADDING="10"> 
@@ -228,6 +228,11 @@ make
 		  <TD>-HCP</TD> 
 		  <TD>&nbsp;</TD> 
 		  <TD>hide copyright and program info header at program start</TD> 
+		</TR>
+		<TR>
+		  <TD>-help</TD>
+		  <TD>&nbsp;</TD>
+		  <TD>usage information...</TD>
 		</TR> 
 	 </TABLE> 
 	 <P>(default values are in square brackets...)</P> 
@@ -236,10 +241,11 @@ make
 	 <H4>dvbsnoop 0x10;&nbsp; dvbsnoop 020;&nbsp; dvbsnoop -crc 16</H4> 
 	 <P>dump PID Hex 10 (sections mode). This command will dump the NIT
 		transmission within the dvb data stream.<BR>To ensure data integrity on
-		hardware/driver level, use the <I>-crc</I> option - otherwise you may get
-		garbage data analyzed... (E.g.: Trying to decode a mpeg2 video stream PID as
-		section, will fail with -crc switch on. With <I>-nocrc</I>) you may get odd
-		results!)</P> 
+		hardware/driver level, use the <I><B>-crc</B></I> option - otherwise you may
+		get garbage data analyzed... (E.g.: Trying to decode a mpeg2 video stream PID
+		as section, will fail with -crc switch on. With <I>-nocrc</I>) you may get odd
+		results!) Also on DVB-T signal strength may vary and result in garbage
+		sections....</P> 
 	 <TABLE CELLPADDING="10"> 
 		<TR> 
 		  <TD BGCOLOR="#e0e0e0"> 
@@ -524,9 +530,10 @@ CRC: 3952000829 (0xeb8ebf3d)
 		file.<BR>The raw datastream will be dumped in the specified stream mode (PES,
 		SECTION or TS).<BR>This file can be used, to postprocess the dvb data
 		streams.</P> 
-	 <H4>dvbsnoop -if ts-stream.pid0x00.file &nbsp; -s ts 0x00</H4> 
+	 <H4>dvbsnoop -if ts-stream.pid0x00.file &nbsp; -s ts</H4>
+	 <H4>dvbsnoop -if ts-stream.pid0x00.file &nbsp; -s ts &nbsp;0x00</H4> 
 	 <P>Read a data stream from file and analyze the stream.<BR>It is important
-		that you specify mode (si, pes, ...) and pid!</P> 
+		that you specify mode (si, pes, ts) and optional the pid !</P> 
 	 <P></P> 
 	 <H4>dvbsnoop -pd 3 -s pidscan</H4> 
 	 <H4>dvbsnoop -pd 9 -f 24 -s pidscan</H4> 
@@ -549,20 +556,27 @@ CRC: 3952000829 (0xeb8ebf3d)
 		option.</P> 
 	 <P><BR><BR><BR></P> 
 	 <H2>Pitfalls...</H2> 
-	 <P><B>dvbsnoop tries to decode every data it gets....</B><BR>E.g. if you
-		try to decode a video or audio stream in section mode - dvbsnoop may assume a
-		section table and will decode wrong data. In this case the decoding will be
-		garbage! Using the '-crc' option should prevent this (if supported at
-		hardware/driver level). Also the '-sync' option is very helpfull, when using
-		'-s pes' or '-s ts'. The '-sync' option tries to find TS or PES packet start
-		sync bytes before decoding...<BR><BR><B>Bugs and wrong
-		decoding:</B><BR>Currently I do not have the ISO 13818-6 (DSM-CC), so I try to
-		get these information out of other documents, which are freely available.
-		Unfortunatly these document are describing only a certain parts of the data
-		carousel, missunderstandings may be possible - If you see any odd output,
-		<B>please report</B> this. If you have the ISO 13818-6:1998 to spare, I would
-		be glad to have a look on it. (340 CHF at www.iso.ch is very expensive for a
-		small open source project...).<BR></P> 
+	 <UL>
+		<LI><B>dvbsnoop tries to decode every data it gets....</B><BR>E.g. if you
+		  try to decode a video or audio stream in section mode - dvbsnoop may assume a
+		  section table and will decode wrong data. In this case the decoding will be
+		  garbage! Using the '<B>-crc</B>' option should prevent this (if supported at
+		  hardware/driver level). Also the '-sync' option is very helpful, when using '-s
+		  pes' or '-s ts'. The '<B>-sync</B>' option tries to find TS or PES packet start
+		  sync bytes before decoding...<BR><BR></LI>
+		<LI><B>dvbsnoop doesn't do DVB stream validation....</B><BR>dvbsnoop
+		  assumes correct dvb streams. Getting garbage, corrupted streams or streams with
+		  wrong semantics (e.g. incorrect length information) will result in wrong
+		  decoding output. If you see such behavior, try to -crc or -sync streams.
+		  Otherwise please report a bug.<BR><BR></LI>
+		<LI><B>Bugs and wrong decoding:</B><BR>Currently I do not have the ISO
+		  13818-6 (DSM-CC), so I try to get these information out of other documents,
+		  which are freely available. Unfortunatly these document are describing only a
+		  certain parts of the data carousel, missunderstandings may be possible - If you
+		  see any odd output, <B>please report</B> this. If you have the ISO 13818-6:1998
+		  to spare, I would be glad to have a look on it. (340 CHF at www.iso.ch is very
+		  expensive for a small open source project...).</LI>
+	 </UL> 
 	 <P><BR><BR><BR></P> 
 	 <H2>Related Topic and Links</H2> 
 	 <P>Please visit the following websites for more information:</P> 
@@ -719,19 +733,22 @@ CRC: 3952000829 (0xeb8ebf3d)
 		- see also the history information in the source!!<BR><BR></P> 
 	 <P><BR><BR></P> 
 	 <H2>Where to send bugreports, requests?</H2> 
-	 <P>Please send bugreports with a detailed description to: &nbsp;&nbsp;
+	 <P>If you find a bug or odd behavior of dvbsnoop, please save the stream to
+		a binary file using option '-b ... &gt; file'. This way I could do a
+		post-analyze.<BR><BR>Please send bugreports with a detailed description to:
+		&nbsp;&nbsp;
 		<A
-		HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
+		 HREF="mailto:rasc@users.sourceforge.net?DVBSNOOP - Bugreport...">rasc@users.sourceforge.net</A><BR>Do
 		NOT send saved stream files or large files without permission via
 		email!<BR>Bugfixes, code snipsets, etc. are welcome</P> 
 	 <P><BR><BR></P> 
-	 <H2>Some keywords...</H2> 
-	 <P>DVB stream analyzer, mpeg stream analyzer, ts stream analyzer, MPEG,
-		MPG, descriptor, digital television, satellite TV, cable TV, dvb-c, dvb-s,
-		dvb-t, MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT, TDST, RST, SIT, DIT,
-		BAT, EMM, ECM, SI Tables, SSU, datagram, sections, transport stream analyzer,
-		packet elementary stream, DEMUX, ISO/IEC 13818-1, ISO/IEC 13818-6, ETSI EN 300
-		468, ETSI EN 301 162, ETSI TR 102 006, ITU H.222.0, data carousel, object
-		carousel, dvb snoop </P> 
+	 <H2>Some keywords related to dvbsnoop...</H2> 
+	 <P>DVB stream analyzer mpeg stream analyzer, ts stream analyzer, MPEG, MPG,
+		descriptor, digital television, satellite TV, cable TV, dvb-c, dvb-s, dvb-t,
+		MHP, DSM-CC, SI, PES, TOT, PAT, PMT, SDT, EIT, NIT, TDST, RST, SIT, DIT, BAT,
+		EMM, ECM, SI Tables, SSU, INT, UNT, datagram, sections, transport stream
+		analyzer, packet elementary stream, DEMUX, ISO/IEC 13818-1, ISO/IEC 13818-6,
+		ETSI EN 300468, ETSI EN 301162, ETSI TS 102006, ETSI EN 301192, ETSI TR 101202,
+		ITU H.222.0, data carousel, object carousel, dvb snoop </P> 
 	 <P><BR><BR><BR><BR>(c) 2001-2003 Rainer Scherg (rasc)<BR><BR></P> </BODY>
 </HTML>

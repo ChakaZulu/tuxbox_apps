@@ -1,11 +1,9 @@
 /*
-$Id: dvbsnoop.c,v 1.18 2003/12/15 20:09:48 rasc Exp $
+$Id: dvbsnoop.c,v 1.19 2003/12/28 14:00:25 rasc Exp $
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
@@ -16,6 +14,10 @@ $Id: dvbsnoop.c,v 1.18 2003/12/15 20:09:48 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.19  2003/12/28 14:00:25  rasc
+bugfix: section read from input file
+some changes on packet header output
+
 Revision 1.18  2003/12/15 20:09:48  rasc
 no message
 
@@ -122,12 +124,14 @@ int main(int argc, char **argv)
         out_nl (1, "%s -- %s ", DVBSNOOP_PROG_VERSION, DVBSNOOP_URL);
      }
 
-     out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
-     out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
-     out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
+     if (! opt.inpPidFile) {
+	out_nl (9, "   PID   : %d (0x%04x)",opt.pid,opt.pid);
+	out_nl (9, "   Filter: %d (0x%04x)",opt.filter,opt.filter);
+	out_nl (9, "   Mask  : %d (0x%04x)",opt.mask,opt.mask);
      
-     out_nl (9, "   DEMUX : %s",opt.devDemux);
-     out_nl (9, "   DVR   : %s",opt.devDvr);
+	out_nl (9, "   DEMUX : %s",opt.devDemux);
+	out_nl (9, "   DVR   : %s",opt.devDvr);
+     }
   }
 
 

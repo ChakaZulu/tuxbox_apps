@@ -1,13 +1,11 @@
 /*
-$Id: dmx_sect.c,v 1.11 2003/12/15 20:09:48 rasc Exp $
+$Id: dmx_sect.c,v 1.12 2003/12/28 14:00:25 rasc Exp $
 
 
 
  DVBSNOOP
 
  a dvb sniffer  and mpeg2 stream analyzer tool
- mainly for me to learn about dvb streams, mpeg2, mhp, dsm-cc, ...
-
  http://dvbsnoop.sourceforge.net/
 
  (c) 2001-2003   Rainer.Scherg@gmx.de
@@ -22,6 +20,10 @@ $Id: dmx_sect.c,v 1.11 2003/12/15 20:09:48 rasc Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.12  2003/12/28 14:00:25  rasc
+bugfix: section read from input file
+some changes on packet header output
+
 Revision 1.11  2003/12/15 20:09:48  rasc
 no message
 
@@ -66,7 +68,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "misc/cmdline.h"
 #include "misc/output.h"
 #include "misc/hexprint.h"
-#include "misc/pkt_time.h"
+#include "misc/print_header.h"
 
 #include "sections/sectables.h"
 #include "dvb_api.h"
@@ -75,6 +77,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 #define SECT_BUF_SIZE (64*1024)
 
+static long  sect_read (int fd, u_char *buf, long buflen);
 
 
 
@@ -141,7 +144,7 @@ int  doReadSECT (OPTION *opt)
     long   n;
 
 
-    n = read(fd,buf,sizeof(buf));
+    n = sect_read(fd,buf,sizeof(buf));
 
     // -- error or eof?
     if (n == -1) perror("read");
@@ -163,13 +166,14 @@ int  doReadSECT (OPTION *opt)
     } else {
 
        indent (0);
+       print_packet_header (opt, "SECT", opt->pid, count, n, 0);
 
-       out_nl (1,"");
-       out_nl (1,"---------------------------------------------------------");
-       out_nl (1,"SECT-Packet: %08ld   PID: %u (0x%04x), Length: %d (0x%04x)",
-		count, opt->pid,opt->pid,n,n);
-       out_receive_time (1, opt);
-       out_nl (1,"---------------------------------------------------------");
+//       out_nl (1,"");
+//       out_nl (1,"---------------------------------------------------------");
+//       out_nl (1,"SECT-Packet: %08ld   PID: %u (0x%04x), Length: %d (0x%04x)",
+//		count, opt->pid,opt->pid,n,n);
+//       out_receive_time (1, opt);
+//       out_nl (1,"---------------------------------------------------------");
 
 
        if (opt->printhex) {
@@ -219,5 +223,34 @@ int  doReadSECT (OPTION *opt)
 
 
 
+
+/*
+ * -- section read
+ * -- read one section
+ * -- return: equivalent to read();
+ */
+
+static long  sect_read (int fd, u_char *buf, long buflen)
+{
+    int    n;
+    int    sect_len;
+
+
+    n = read(fd,buf,3);				// read section header
+    if (n <= 0) return n;			// error or strange, abort
+
+    // section size
+    // -- table_id 	8  uimsbf
+    // -- some stuff   	4  bits
+    // -- sectionlength 12 uimsbf
+
+    sect_len = ((buf[1] & 0x0F) << 8) + buf[2];	// get section size
+    if (sect_len > (buflen-3)) return -1;	// something odd?
+
+    n = read(fd,buf+3,sect_len);		// read 1 section
+    if (n >=0) n += 3;				// we already read header bytes
+
+    return n;
+}
 
 
