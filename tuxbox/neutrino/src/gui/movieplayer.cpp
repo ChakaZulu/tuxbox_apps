@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.36 2003/09/07 13:38:35 thegoodguy Exp $
+        $Id: movieplayer.cpp,v 1.37 2003/09/08 18:37:36 gagga Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -687,6 +687,12 @@ PlayStreamThread (void *mrl)
   printf ("[movieplayer.cpp] Waiting for RCST to stop\n");
   pthread_join (rcst, NULL);
   printf ("[movieplayer.cpp] Seems that RCST was stopped succesfully\n");
+  
+  // Some memory clean up
+  ringbuffer_free(ringbuf);
+  delete bufferingBox;
+  delete hintBox;
+
   pthread_exit (NULL);
 }
 
