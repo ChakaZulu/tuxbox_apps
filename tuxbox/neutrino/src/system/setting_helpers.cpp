@@ -48,6 +48,7 @@
 // obsolete #include <gui/streaminfo.h>
 
 #include <gui/widget/messagebox.h>
+#include <gui/widget/hintbox.h>
 
 #include <gui/gamelist.h>
 #include <daemonc/remotecontrol.h>
