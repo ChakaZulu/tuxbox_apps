@@ -39,7 +39,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-
+FILE* soundfd;
 
 static inline signed int scale(mad_fixed_t sample)
 {
@@ -96,8 +96,8 @@ static enum mad_flow output(void *data,
 
     if (nchannels == 2) {
       sample = scale(*right_ch++);
-      putchar((sample >> 0) & 0xff);
-      putchar((sample >> 8) & 0xff);
+      fputc((sample >> 0) & 0xff,soundfd);
+      fputc((sample >> 8) & 0xff,soundfd);
     }
   }
 	return MAD_FLOW_CONTINUE;
@@ -137,6 +137,8 @@ void CMP3Player::play(){
 		return;
 	}
 
+	soundfd = fopen("/dev/sound/dsp", "w");
+
 	mad_decoder_init(&decoder, &buffer,
 		   input, 0 /* header */, 0 /* filter */, output,
 		   error, 0 /* message */);
@@ -144,6 +146,7 @@ void CMP3Player::play(){
 	buffer.start  = fdm;
 	buffer.length = stat.st_size;
 
+	printf("running mp3-decoder: %d\n", stat.st_size);
 	result = mad_decoder_run(&decoder, MAD_DECODER_MODE_SYNC);
 
 	mad_decoder_finish(&decoder);
@@ -156,6 +159,7 @@ void CMP3Player::play(){
 	}
 
 	close(fd);
+	fclose(soundfd);
 }
 
 
