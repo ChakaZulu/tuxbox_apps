@@ -1,10 +1,13 @@
 /*
-$Id: dvb_str.c,v 1.2 2001/10/02 21:52:44 rasc Exp $
+$Id: dvb_str.c,v 1.3 2001/10/05 17:43:37 rasc Exp $
 
   -- dvb decoder helper functions
 
 
 $Log: dvb_str.c,v $
+Revision 1.3  2001/10/05 17:43:37  rasc
+typo...
+
 Revision 1.2  2001/10/02 21:52:44  rasc
 - init der time_delta
 - PES erweitert, PES arbeitet im read() noch nicht richtig!!
@@ -1418,7 +1421,7 @@ char *dvbstrPESstream_ID (u_int i)
      {  0xBD, 0xBD,  "private_stream_1" },
      {  0xBE, 0xBE,  "padding_stream" },
      {  0xBF, 0xBF,  "private_stream_2" },
-     {  0xC0, 0xDF,  "ISO/IEC 13818-3 or ISO/IEC 11172-3 audioi stream" },
+     {  0xC0, 0xDF,  "ISO/IEC 13818-3 or ISO/IEC 11172-3 audio stream" },
      {  0xE0, 0xEF,  "ITU-T Rec. H.262 | ISO/IEC 13818-2 or ISO/IEC 11172-2 video stream" },
      {  0xF0, 0xF0,  "ECM_stream" },
      {  0xF1, 0xF1,  "EMM_stream" },
