@@ -1,4 +1,4 @@
-SUBDIRS = xml zapci zapost zapsi
+SUBDIRS = zapci zapost zapsi
 
 INCLUDES = \
 	-I$(top_srcdir)/include \
@@ -20,7 +20,6 @@ zapit_SOURCES = \
 zapit_LDADD = \
 	@CONFIGFILE_LIBS@ \
 	$(top_builddir)/lib/libzapitclient.la \
-	xml/libxml.a \
 	zapci/libzapci.a \
 	zapost/libzapost.a \
 	zapsi/libzapsi.a \
