@@ -16,15 +16,15 @@ struct PicViewerStyleSelectorActions
 	eActionMap map;
 	eAction infoPressed;
 	PicViewerStyleSelectorActions():
-		map("PicViewerStyleSelector", _("Picture Viewer Actions")),
-		infoPressed(map, "infoPressed", _("open the Picture Viewer with selected style"), eAction::prioDialog)
+		map("PicViewerStyleSelector", _("Slide Viewer Actions")),
+		infoPressed(map, "infoPressed", _("open the Slide Viewer with selected style"), eAction::prioDialog)
 	{
 	}
 };
-eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Picture Viewer Style Selector");
+eAutoInitP0<PicViewerStyleSelectorActions> i_PicViewerStyleSelectorActions(eAutoInitNumbers::actions, "Slide Viewer Style Selector");
 
 ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
-		:eListBoxWindow<eListBoxEntryText>(_("Picture Viewer 1.3 - Modes"), 5, 350, true)
+		:eListBoxWindow<eListBoxEntryText>(_("Slide Viewer 1.3 - Modes"), 5, 350, true)
 		,ssel(ssel)
 {
 	eListBoxEntrySeparator *sep;
@@ -34,7 +34,7 @@ ePicViewerStyleSelector::ePicViewerStyleSelector(int ssel)
 	eConfig::getInstance()->getKey("/picviewer/lastPicViewerStyle", last);
 	eListBoxEntryText *sel[3];
 	sel[0] = new eListBoxEntryText(&list,_("Slide"), (void *)0, 0, _("Show selected slide") );
-	sel[1] = new eListBoxEntryText(&list,_("Slideshow"), (void *)1, 0, _("Show slideshow (of all pictures in directory)"));
+	sel[1] = new eListBoxEntryText(&list,_("Slideshow"), (void *)1, 0, _("Show slideshow (of all slides in directory)"));
 	sep = new eListBoxEntrySeparator((eListBox<eListBoxEntry>*)&list, eSkin::getActive()->queryImage("listbox.separator"), 0, true);
 	sel[2] = new eListBoxEntryText(&list,_("Slideshow Settings"), (void *)2, 0, _("Customize your slideshow"));
 
@@ -141,10 +141,10 @@ ePicViewerSettings::ePicViewerSettings():eWindow(0)
 	y += dy;
 
 	start = new eCheckbox(this, startwithselectedpic, 1);
-	start->setText(_("Start with selected picture"));
+	start->setText(_("Start with selected slide"));
 	start->move(ePoint(10, y));
 	start->resize(eSize(300, h));
-	start->setHelpText(_("Start slideshow with selected picture"));
+	start->setHelpText(_("Start slideshow with selected slide"));
 
 	y += dy;
 

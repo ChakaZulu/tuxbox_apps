@@ -52,6 +52,23 @@ extern int fh_crw_load(const char *, unsigned char *, int, int);
 extern int fh_crw_id(const char *);
 #endif
 
+void ePictureViewer::nextPicture()
+{
+	if (++myIt == slideshowList.end())
+		myIt = slideshowList.begin();
+}
+
+void ePictureViewer::previousPicture()
+{
+	if (myIt == slideshowList.begin())
+	{
+		myIt = slideshowList.end();
+		myIt--;
+	}
+	else
+		myIt--;
+}
+
 ePictureViewer::ePictureViewer(const eString &filename)
 	:eWidget(0, 1), slideshowTimer(eApp), filename(filename)
 {
@@ -66,13 +83,12 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	l->move(ePoint(150, clientrect.height() / 2));
 	l->setFont(eSkin::getActive()->queryFont("epg.title"));
 	l->resize(eSize(clientrect.width() - 100, 30));
-	l->setText(_("Loading picture... please wait."));
+	l->setText(_("Loading slide... please wait."));
 
-	setText(_("Picture Viewer"));
+	setText(_("Slide Viewer"));
 
 	fh_root = NULL;
 	m_scaling = COLOR;
-//	m_aspect = 4.0 / 3;
 	m_CurrentPic_Name = "";
 	m_CurrentPic_Buffer = NULL;
 	m_CurrentPic_X = 0;
@@ -89,8 +105,6 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	m_NextPic_YPos = 0;
 	m_NextPic_XPan = 0;
 	m_NextPic_YPan = 0;
-	int xs = 0, ys = 0;
-	getCurrentRes(&xs, &ys);
 
 	m_startx = 20, m_starty = 20, m_endx = 699, m_endy = 555;
 	eConfig::getInstance()->getKey("/enigma/plugins/needoffsets/left", m_startx); // left
@@ -368,37 +382,36 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 	{
 		case eWidgetEvent::evtAction:
 		{
-			if (evt.action == &i_cursorActions->cancel ||
-			    ((evt.action == &i_cursorActions->ok) && !blockOK))
+			if (evt.action == &i_cursorActions->cancel)
 				close(0);
+			else
+			if (evt.action == &i_cursorActions->ok)
+			{
+			 	if (!blockOK)
+					close(0);
+				else
+					return eWidget::eventHandler(evt);
+			}
 			else
 			if (evt.action == &i_shortcutActions->yellow)
 			{
 				if (slideshowPaused)
 				{
-					if (++myIt == slideshowList.end())
-						myIt = slideshowList.begin();
+					nextPicture();
 					slideshowTimeout();
 					slideshowPaused = false;
 				}
 				else
 				{
 					slideshowTimer.stop();
-					if (myIt == slideshowList.begin())
-					{
-						myIt = slideshowList.end();
-						myIt--;
-					}
-					else
-						myIt--;
+					previousPicture();
 					slideshowPaused = true;
 				}
 			}
 			if (evt.action == &i_shortcutActions->green)
 			{
 				slideshowPaused = false;
-				if (++myIt == slideshowList.end())
-					myIt = slideshowList.begin();
+				nextPicture();
 				slideshowTimeout();
 			}
 			else
@@ -406,8 +419,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			    evt.action == &i_cursorActions->right ||
 			    evt.action == &i_shortcutActions->blue)
 			{
-				if (++myIt == slideshowList.end())
-					myIt = slideshowList.begin();
+				nextPicture();
 				DecodeImage(*myIt, false);
 				DisplayNextImage();
 			}
@@ -416,13 +428,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 			    evt.action == &i_cursorActions->left ||
 			    evt.action == &i_shortcutActions->red)
 			{
-				if (myIt == slideshowList.begin())
-				{
-					myIt = slideshowList.end();
-					myIt--;
-				}
-				else
-					myIt--;
+				previousPicture();
 				DecodeImage(*myIt, false);
 				DisplayNextImage();
 			}
@@ -632,8 +638,8 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 	eDebug("Show Busy{");
 
 	unsigned char rgb_buffer[3];
-	unsigned char* fb_buffer;
-	unsigned char* busy_buffer_wrk;
+	unsigned char *fb_buffer;
+	unsigned char *busy_buffer_wrk;
 	int cpp;
 	struct fb_var_screeninfo *var;
 	var = fbClass::getInstance()->getScreenInfo();
@@ -660,7 +666,7 @@ void ePictureViewer::showBusy(int sx, int sy, int width, char r, char g, char b)
 		return;
 	}
 	busy_buffer_wrk = m_busy_buffer;
-	unsigned char * fb = fbClass::getInstance()->lfb;
+	unsigned char *fb = fbClass::getInstance()->lfb;
 	unsigned int stride = fbClass::getInstance()->Stride();
 
 	for (int y = sy ; y < sy + width; y++)
@@ -685,9 +691,9 @@ void ePictureViewer::hideBusy()
 	eDebug("Hide Busy {");
 	if (m_busy_buffer != NULL)
 	{
-		unsigned char * fb = fbClass::getInstance()->lfb;
+		unsigned char *fb = fbClass::getInstance()->lfb;
 		unsigned int stride = fbClass::getInstance()->Stride();
-		unsigned char* busy_buffer_wrk = m_busy_buffer;
+		unsigned char *busy_buffer_wrk = m_busy_buffer;
 
 		for (int y = m_busy_y; y < m_busy_y + m_busy_width; y++)
 		{

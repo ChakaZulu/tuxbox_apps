@@ -28,6 +28,8 @@ class ePictureViewer: public eWidget
 	eString filename;
 	int eventHandler(const eWidgetEvent &evt);
 	void listDirectory(eString, int);
+	void nextPicture();
+	void previousPicture();
 	bool showBusySign;
 	bool slideshowPaused;
 	bool blockOK;
