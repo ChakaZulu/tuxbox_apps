@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.36 2001/07/25 11:42:15 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.37 2001/07/25 15:06:18 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.37  2001/07/25 15:06:18  fnbrd
+//  Added exception-handlers for better bug hunting.
+//
 //  Revision 1.36  2001/07/25 11:42:15  fnbrd
 //  Added support for 'unique keys' in services and events.
 //
@@ -668,6 +671,8 @@ int DMX::change(void)
   return 0;
 }
 
+// k.A. ob volatile im Kampf gegen Bugs trotz mutex's was bringt,
+// falsch ist es zumindest nicht
 static DMX dmxEIT(0x12, 0x4e, 0xfe, 0x50, 0xf0, 384);
 static DMX dmxSDT(0x11, 0x42, 0xff, 0x42, 0xff, 256);
 
@@ -1151,6 +1156,7 @@ static void *connectionThread(void *conn)
 {
 struct connectionData *client=(struct connectionData *)conn;
 
+  try {
   dprintf("Connection from %s\n", inet_ntoa(client->clientAddr.sin_addr));
   struct msgSectionsdRequestHeader header;
   memset(&header, 0, sizeof(header));
@@ -1199,6 +1205,13 @@ struct connectionData *client=(struct connectionData *)conn;
     dmxEIT.change(); // auf present/following umschalten
   }
 #endif
+  } // try
+  catch (std::exception& e) {
+    printf("Caught std-exception in connection-thread %s!\n", e.what());
+  }
+  catch (...) {
+    printf("Caught exception in connection-thread!\n");
+  }
   return 0;
 }
 
@@ -1212,6 +1225,7 @@ struct SI_section_header header;
 char *buf;
 const unsigned timeoutInSeconds=2;
 
+  try {
   dprintf("sdt-thread started.\n");
   dmxSDT.lock();
   if(dmxSDT.start()) // -> unlock
@@ -1268,6 +1282,13 @@ const unsigned timeoutInSeconds=2;
       delete[] buf;
   } // for
   dmxSDT.closefd();
+  } // try
+  catch (std::exception& e) {
+    printf("Caught std-exception in connection-thread %s!\n", e.what());
+  }
+  catch (...) {
+    printf("Caught exception in sdt-thread!\n");
+  }
   dprintf("sdt-thread ended\n");
   return 0;
 }
@@ -1367,6 +1388,7 @@ const unsigned timeoutInSeconds=31;
 char *buf;
 DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
 
+  try {
 //  pthread_detach(pthread_self());
   dprintf("time-thread started.\n");
   dmxTOT.lock();
@@ -1455,6 +1477,13 @@ DMX dmxTOT(0x14, 0x73, 0xff, 0x70, 0xff, 256, 1);
     while(rc)
       rc=sleep(rc);
   } // for
+  } // try
+  catch (std::exception& e) {
+    printf("Caught std-exception in connection-thread %s!\n", e.what());
+  }
+  catch (...) {
+    printf("Caught exception in time-thread!\n");
+  }
   dprintf("time-thread ended\n");
   return 0;
 }
@@ -1469,6 +1498,7 @@ struct SI_section_header header;
 char *buf;
 const unsigned timeoutInSeconds=2;
 
+  try {
   dprintf("eit-thread started.\n");
   dmxEIT.lock();
   if(dmxEIT.start()) // -> unlock
@@ -1556,6 +1586,13 @@ const unsigned timeoutInSeconds=2;
     else
       delete[] buf;
   } // for
+  } // try
+  catch (std::exception& e) {
+    printf("Caught std-exception in connection-thread %s!\n", e.what());
+  }
+  catch (...) {
+    printf("Caught exception in eit-thread!\n");
+  }
   dprintf("eit-thread ended\n");
   return 0;
 }
@@ -1566,6 +1603,7 @@ const unsigned timeoutInSeconds=2;
 //*********************************************************************
 static void *houseKeepingThread(void *)
 {
+  try {
   dprintf("housekeeping-thread started.\n");
   for(;;) {
     int rc=5*60;  // sleep 2 minutes
@@ -1624,6 +1662,15 @@ static void *houseKeepingThread(void *)
       dprintf("total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024));
     }
   } // for endlos
+  } // try
+  catch (std::exception& e) {
+    printf("Caught std-exception in connection-thread %s!\n", e.what());
+  }
+  catch (...) {
+    printf("Caught Exception in housekeeping-thread!\n");
+  }
+  dprintf("housekeeping-thread ended\n");
+  return 0;
 }
 
 static void printHelp(void)
@@ -1638,7 +1685,8 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.36 2001/07/25 11:42:15 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.37 2001/07/25 15:06:18 fnbrd Exp $\n");
+  try {
 
   if(argc!=1 && argc!=2) {
     printHelp();
@@ -1721,6 +1769,13 @@ struct sockaddr_in serverAddr;
       fprintf(stderr, "failed to create connection-thread (rc=%d)\n", rc);
       return 4;
     }
+  }
+  } // try
+  catch (std::exception& e) {
+    printf("Caught std-exception in connection-thread %s!\n", e.what());
+  }
+  catch (...) {
+    printf("Caught exception in main-thread!\n");
   }
   printf("sectionsd ended\n");
   return 0;
