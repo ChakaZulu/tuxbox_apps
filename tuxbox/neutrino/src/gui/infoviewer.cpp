@@ -199,7 +199,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
         frameBuffer->paintBoxRel(BoxStartX+10, BoxStartY+10, ChanWidth, ChanHeight, COL_INFOBAR_SHADOW);
         frameBuffer->paintBoxRel(BoxStartX,    BoxStartY,    ChanWidth, ChanHeight, COL_INFOBAR);
 
-	if ((!g_settings.infobar_sat_display) && (satellitePosition != 0))
+	if ((!g_settings.infobar_sat_display) || (satellitePosition == 0))
 	{
 		//channel number
         	char strChanNum[10];
