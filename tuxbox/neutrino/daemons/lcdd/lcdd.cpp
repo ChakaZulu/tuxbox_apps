@@ -38,54 +38,67 @@
 #include <time.h>
 #include "pthread.h"
 
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
+#include "lcdd.h"
 
 
-struct rmsg {
-  unsigned char version;
-  unsigned char cmd;
-  unsigned char param;
-  unsigned short param2;
-  char param3[30];
+struct lcdd_msg rmsg;
 
-} rmsg;
-
-CLCDDisplay			display;
+CLCDDisplay		display;
 fontRenderClass		*fontRenderer;
-FontsDef			fonts;
-pthread_t			thrTime;
+FontsDef		fonts;
+pthread_t		thrTime;
+
+bool			setup_mode;
+raw_display_t		icon_lcd;
+raw_display_t		icon_setup;
+
+char			channelname[30];
+unsigned char		volume;
+bool			muted;
 
 void show_channelname(char *);
 void show_volume(unsigned char);
-void parse_command()
-{
-  //byteorder!!!!!!
-  rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
+void set_setup(unsigned char);
 
-  if(rmsg.version!=1)
-  {
-    perror("unknown version\n");
-    return;
-  }
+void parse_command() {
+	//byteorder!!!!!!
+	rmsg.param2 = ntohs(rmsg.param2);
 
-  switch (rmsg.cmd)
-  {
-    case 1:
-      show_channelname( rmsg.param3 );
-      break;
-    case 2:
-      show_volume( rmsg.param );
-      break;
+	if(rmsg.version > LCDD_VERSION)
+	{
+		printf("unsupported protocol version %i, this lcdd"
+		    " supports only <=%i\n", rmsg.version, LCDD_VERSION);
+		return;
+	}
 
-    default:  
-	    printf("unknown command\n");
-  }
+	switch (rmsg.cmd)
+	{
+	case LC_CHANNEL:
+		channelname = rmsg.param3;
+		show_channelname(channelname);
+		break;
+	case LC_VOLUME:
+		volume = rmsg.param;
+		show_volume(volume);
+		break;
+	case LC_MUTE:
+		if (rmsg.param == LC_MUTE_ON)
+			muted = true;
+		else
+			muted = false;
+		show_volume(volume);
+		break;
+	case LC_SET_SETUP:
+		set_setup(rmsg.param);
+		break;
+	default: 
+		printf("unknown command %i\n", rmsg.cmd);
+	}
 }
-
 
 void show_channelname( char * name)
 {
+	if (setup_mode) return;
 	display.draw_fill_rect (0,26,120,50, CLCDDisplay::PIXEL_OFF);
 	fonts.channelname->RenderString(1,43, 130, name, CLCDDisplay::PIXEL_ON);
 	display.update();
@@ -95,6 +108,7 @@ void show_time()
 {
 	char timestr[50];
 	struct timeb tm;
+	if (setup_mode) return;
 	ftime(&tm);
 	strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
@@ -105,10 +119,40 @@ void show_time()
 
 void show_volume(unsigned char vol)
 {
-	display.draw_fill_rect (3,54,29,64, CLCDDisplay::PIXEL_ON);
-	display.draw_fill_rect (3+(vol>>2),54,29,64, CLCDDisplay::PIXEL_OFF);
+	if (setup_mode) return;
+	display.draw_fill_rect (3,54,29,64, CLCDDisplay::PIXEL_OFF);
+	display.draw_fill_rect (3,54,3+(vol>>2),64, CLCDDisplay::PIXEL_ON);
+	if (muted) {
+		display.draw_fill_rect (3,56,29,62, CLCDDisplay::PIXEL_OFF);
+	}
 	display.update();
 }
+
+void set_setup(unsigned char mode) {
+	//int y, t;
+	//raw_display_t s;
+	if (mode == LC_SET_SETUP_OFF) {
+		display.load_screen(&icon_lcd);
+		show_volume(volume);
+		show_channelname(channelname);
+		show_time();
+		setup_mode = false;
+	} else {
+		setup_mode = true;
+		/*display.dump_screen(&s);
+		for (t=0; t<23; t++) {
+			for (y=0; y<27-t; y++) {
+				memcpy(s[y], icon_lcd[y+t], LCD_COLS);
+			}
+			memset(s[27-t], 0, LCD_COLS);
+			display.load_screen(&s);
+			display.update();
+			usleep(10*1000);
+		}*/
+		display.load_screen(&icon_setup);
+		display.update();
+	}
+} 
 
 void * TimeThread (void *)
 {
@@ -137,15 +181,24 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
+	if (!display.paintIcon("neutrino_setup.raw",0,0,false))
 	{
-		printf("exit...(no icon)\n");
+		printf("exit...(no neutrino_setup.raw)\n");
 		exit(-1);
 	}
+	display.dump_screen(&icon_setup);
+
+	if (!display.paintIcon("neutrino_lcd.raw",0,0,false))
+	{
+		printf("exit...(no neutrino_lcd.raw)\n");
+		exit(-1);
+	}
+	display.dump_screen(&icon_lcd);
+	setup_mode = false;
 
 	show_time();
 
-	show_channelname("");
+	show_channelname("neutrinoNG");
 
 	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
 	{
@@ -153,42 +206,44 @@ int main(int argc, char **argv)
 	}
 
 
-  int listenfd, connfd;
-  socklen_t clilen;
-  SAI cliaddr, servaddr;
+	int listenfd, connfd;
+	socklen_t clilen;
+	SAI cliaddr, servaddr;
 
-  //network-setup
-  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+	//network-setup
+	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
-  memset(&servaddr, 0, sizeof(servaddr));
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(1510);
+	memset(&servaddr, 0, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	servaddr.sin_port = htons(LCDD_PORT);
 
-  if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
-  {
-    perror("bind failed...\n");
-    exit(-1);
-  }
+	if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
+	{
+		perror("bind failed...\n");
+		exit(-1);
+	}
 
 
-  if (listen(listenfd, 5) !=0)
-  {
-    perror("listen failed...\n");
-    exit( -1 );
-  }
+	if (listen(listenfd, 5) !=0)
+	{
+		perror("listen failed...\n");
+		exit( -1 );
+	}
 
+	//set_setup(LC_SET_SETUP_ON);
+	//set_setup(LC_SET_SETUP_OFF);
 	printf("\n");
-  while(1)
-  {
-    clilen = sizeof(cliaddr);
-    connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
+	while(1)
+	{
+		clilen = sizeof(cliaddr);
+		connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
 
-    memset(&rmsg, 0, sizeof(rmsg));
-    read(connfd,&rmsg,sizeof(rmsg));
-    parse_command();
-    close(connfd);
-  }
+		memset(&rmsg, 0, sizeof(rmsg));
+		read(connfd,&rmsg,sizeof(rmsg));
+		parse_command();
+		close(connfd);
+	}
 
 }
 

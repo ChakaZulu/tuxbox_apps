@@ -46,10 +46,7 @@
 #include "dbox/avs_core.h"
 #include <sys/ioctl.h>
  
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-
-
+#include "../lcdd/lcdd.h"
 
 struct rmsg {
   unsigned char version;
@@ -80,6 +77,29 @@ void setVideoRGB()
 	}
 }
 
+
+void sendto_lcdd(unsigned char cmd, unsigned char param) {
+	int sock_fd;
+	SAI servaddr;
+	struct lcdd_msg lmsg;
+	
+	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(LCDD_PORT);
+	inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr);
+
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))!=-1)
+	{
+		lmsg.version=LCDD_VERSION;
+		lmsg.cmd=cmd;
+		lmsg.param = param;
+		write(sock_fd,&lmsg,sizeof(lmsg));
+		close(sock_fd);
+	}
+
+}
+
 char gen_Volume;
 void setVolume(char volume)
 {
@@ -87,7 +107,7 @@ void setVolume(char volume)
 	gen_Volume = volume;
 
 	int i = 64-int(volume*64.0/100.0);
-	printf("set volume: %d ------------------\n", i );
+	printf("[controld] set volume: %d\n", i );
 	if (i < 0)
 	{
 		i=0;
@@ -110,32 +130,7 @@ void setVolume(char volume)
 	}
 	close(fd);
 
-	struct
-	{
-	  unsigned char version;
-	  unsigned char cmd;
-	  unsigned char param;
-	  unsigned short param2;
-	  char param3[30];
-	} rmsg;
-
-	int sock_fd;
-	SAI servaddr;
-	
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1510);
-	inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr);
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))!=-1)
-	{
-		rmsg.version=1;
-		rmsg.cmd=2;
-		rmsg.param = volume;
-		write(sock_fd,&rmsg,sizeof(rmsg));
-		close(sock_fd);
-	}
+	sendto_lcdd(LC_VOLUME, volume);
 }
 
 void Mute()
@@ -156,6 +151,8 @@ void Mute()
 		return;
 	}
 	close(fd);
+
+	sendto_lcdd(LC_MUTE, LC_MUTE_ON);
 }
 
 void UnMute()
@@ -176,6 +173,8 @@ void UnMute()
 		return;
 	}
 	close(fd);
+
+	sendto_lcdd(LC_MUTE, LC_MUTE_OFF);
 }
 
 
