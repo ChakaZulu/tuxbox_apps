@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.186 2002/05/23 21:55:44 McClean Exp $
+ * $Id: zapit.cpp,v 1.187 2002/05/23 22:31:52 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -108,7 +108,6 @@ bool current_is_nvod;
 int dmx_audio_fd = -1;
 int dmx_general_fd = -1;
 int dmx_pcr_fd = -1;
-int dmx_sct_fd = -1;
 int dmx_video_fd = -1;
 int vbi_fd = -1;
 
@@ -153,8 +152,6 @@ void CZapitDestructor()
 		close(dmx_audio_fd);
 	if (dmx_pcr_fd != -1)
 		close(dmx_pcr_fd);
-	if (dmx_sct_fd != -1)
-		close(dmx_sct_fd);
 	if (dmx_general_fd != -1)
 		close(dmx_general_fd);
 
@@ -301,7 +298,6 @@ channel_msg load_settings()
 int zapit (uint32_t onid_sid, bool in_nvod)
 {
 	std::map <uint, CZapitChannel>::iterator cit;
-	bool new_transponder;
 
 	if (in_nvod)
 	{
@@ -364,39 +360,28 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		{
 			return -1;
 		}
-		if(frontend->tuneChannel(channel) == true)
+
+		if (frontend->tuneChannel(channel) == false)
 		{
-			/* ... and succeed ... */
-			new_transponder = true;
-		}
-		else
-		{
-			//zap fail -> retry x times (böser böser fix)
-			int retrycount = 5;
-			bool tunedone = false;
-			while (retrycount>0)
+			unsigned char retries;
+
+			for (retries = 0; retries < 5; retries++)
 			{
-				printf("---------tune retry %d\n", retrycount);
-				if(frontend->tuneChannel(channel) == true)
+				printf("[zapit] tune retry %d\n", retries);
+
+				if (frontend->tuneChannel(channel) == true)
 				{
-					new_transponder = true;
-					tunedone = true;
-					retrycount = -1;
+					break;
 				}
-				retrycount--;
 			}
-			/* ... or fail. */
-			if(!tunedone)
+
+			if (retries == 5)
 			{
 				return -1;
 			}
 		}
 
 		cam->reset(channel->getOriginalNetworkId());
-	}
-	else
-	{
-		new_transponder = false;
 	}
 
 	if (channel->getServiceType() == NVOD_REFERENCE_SERVICE)
@@ -412,10 +397,13 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 #endif
 
 	{
+		bool failed = false;
+		int dmx_sct_fd;
+
 		debug("[zapit] looking up pids for onid:sid %04x:%04x\n", channel->getOriginalNetworkId(), channel->getServiceId());
 
 		/* open demux device */
-		if ((dmx_sct_fd == -1) && ((dmx_sct_fd = open(DEMUX_DEV, O_RDWR)) < 0))
+		if ((dmx_sct_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 		{
 			perror("[zapit] " DEMUX_DEV);
 			return -1;
@@ -424,45 +412,30 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		/* get program map table pid from program association table */
 		if (channel->getPmtPid() == NONE)
 		{
-			//hotfix 4bugy dmxdrivers
-			if (dmx_sct_fd != -1)
-			{
-				close (dmx_sct_fd);
-				if ((dmx_sct_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-				{
-					perror("[zapit] " DEMUX_DEV);
-					return -1;
-				}
-			}
 			if (parse_pat(dmx_sct_fd, channel) < 0)
 			{
 				debug("[zapit] pat parsing failed\n");
-				channel->resetPids();
-				return -1;
+				failed = true;
 			}
 		}
 
 		/* parse program map table and store pids */
-		//hotfix 4bugy dmxdrivers
-		if (dmx_sct_fd != -1)
-		{
-			close (dmx_sct_fd);
-			if ((dmx_sct_fd = open(DEMUX_DEV, O_RDWR)) < 0)
-			{
-				perror("[zapit] " DEMUX_DEV);
-				return -1;
-			}
-		}
-		if (parse_pmt(dmx_sct_fd, channel) < 0)
+		if ((!failed) && (parse_pmt(dmx_sct_fd, channel) < 0))
 		{
 			debug("[zapit] pmt parsing failed\n");
-			channel->resetPids();
-			return -1;
+			failed = true;
 		}
 
-		if ((channel->getAudioPid() == NONE) && (channel->getVideoPid() == NONE))
+		if ((!failed) && (channel->getAudioPid() == NONE) && (channel->getVideoPid() == NONE))
 		{
 			debug("[zapit] neither audio nor video pid found.\n");
+			failed = true;
+		}
+
+		close (dmx_sct_fd);
+
+		if (failed)
+		{
 			channel->resetPids();
 			return -1;
 		}
@@ -1150,7 +1123,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.186 2002/05/23 21:55:44 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.187 2002/05/23 22:31:52 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1640,7 +1613,6 @@ int stopPlayBack()
 	unsetDmxFilter(dmx_video_fd);
 	unsetDmxFilter(dmx_audio_fd);
 	unsetDmxFilter(dmx_pcr_fd);
-	unsetDmxFilter(dmx_sct_fd);
 
 	return 0;
 }
@@ -1681,7 +1653,6 @@ unsigned int zapTo_Onid_Sid (unsigned int onidSid, bool isSubService)
 
 	if (zapit(onidSid, isSubService) < 0)
 	{
-		printf("[zapit] ZAP FAILED -> CRASH FOLLOWS\n");
 		eventServer->sendEvent((isSubService ? CZapitClient::EVT_ZAP_SUB_FAILED : CZapitClient::EVT_ZAP_FAILED), CEventServer::INITID_ZAPIT, &onidSid, sizeof(onidSid));
 		return result;
 	}
