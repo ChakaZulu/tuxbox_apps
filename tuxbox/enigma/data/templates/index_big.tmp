@@ -1,0 +1,24 @@
+<html>
+	<head>
+		<title>Enigma Web Interface - #BOX#</title>
+	</head>
+	<frameset cols="*, 780, *">
+		<frame src="/blank" frameborder=1 marginwidth=0 marginheight=0 noresize>
+		<frameset rows="138, *">
+			<frame name="header" src="/header" scrolling=no frameborder=1 marginwidth=0 marginheight=0 noresize>
+			<frame name="body" src="/body" scrolling=yes frameborder=1 marginwidth=0 marginheight=0 noresize>
+		</frameset>
+		<frame src="/blank" frameborder=1 marginwidth=0 marginheight=0 noresize>
+		<noframes>
+			Sorry, your browser doesn't support frames.
+			<br>
+			Please use a browser that supports frames.
+			<br>
+			Thank you.
+		</noframes>
+	</frameset>
+	<body>
+		alert("body..");
+		document.location = "/?screenWidth="+screen.width;
+	</body>
+</html>
