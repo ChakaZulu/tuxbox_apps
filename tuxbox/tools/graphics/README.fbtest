@@ -1,0 +1,28 @@
+FBtest
+------
+
+Tries to set all possible modes on GTX/eNX and returns information which 
+modes are supported on the current device.
+Not all modes are supported on a GTX.
+
+For testing a simple 4-field colour image is drawn. 
+This should fill the whole screen, should be centered and should 
+look pretty much the same in all cases. Note that the fourth colour
+is "white" but set to full transparency, so this will look different.
+
+Entering just "fbtest" will cycle through all modes
+
+There are 3 options:
+-f : select one of the pixelformats (CLUT4,CLUT8,RGB332,ARGB1555,ARGB)
+	(RGB565 is also included but seems not to work, at least not on
+	my machine, more testing is necessary for this one...)
+-s : select one of the 16 FB-sizes. All combinations of
+	width: 320,360,640,720
+	height: 240,288,480,576
+     are possible (but take heed of graphics RAM limits)
+-n : inhibits clearing the framebuffer after each mode. This way you can
+    retain the image
+
+Example: "fbtest -s720x576 -fRGB332 -n"
+
+copyright Carsten Juttner (October 2003)
