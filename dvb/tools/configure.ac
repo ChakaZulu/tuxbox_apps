@@ -5,7 +5,6 @@ TUXBOX_APPS
 TUXBOX_APPS_DIRECTORY
 
 AC_PROG_CC
-AC_PROG_CXX
 
 TUXBOX_APPS_DVB
 
@@ -13,6 +12,7 @@ TUXBOX_APPS_LIB_PKGCONFIG(MPEGTOOLS,tuxbox-mpegtools)
 
 AC_OUTPUT([
 Makefile
+dvb_test/Makefile
 skyscan/Makefile
 stream/Makefile
 ])
