@@ -57,6 +57,7 @@ class CChannelList
 				int         	number;
 				t_channel_id    channel_id;
 				CChannelEvent	currentEvent;
+				const std::string getName() const { return name; };
 
 				// flag that tells if channel is staticly locked by bouquet-locking
 				bool bAlwaysLocked;
@@ -123,6 +124,10 @@ class CChannelList
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
 
 		int handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data);
+
+		int getSize() const;
+		int getSelectedChannelIndex() const;
+
 };
 
 

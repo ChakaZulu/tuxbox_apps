@@ -101,12 +101,28 @@
 #include "gui/pictureviewer.h"
 #include "gui/motorcontrol.h"
 
+
 #include <system/setting_helpers.h>
 #include <system/settings.h>
 #include <system/debug.h>
 #include <system/flashtool.h>
 
 #include <string.h>
+
+
+// uncomment if you want to have a "test" menue entry  (rasc)
+
+#define __EXPERIMENTAL_CODE__
+#ifdef __EXPERIMENTAL_CODE__
+
+#include "gui/ch_mosaic.h"
+#include "gui/epgplus.h"
+
+#endif
+
+
+
+
 
 CBouquetList   * bouquetList;
 CPlugins       * g_PluginList;
@@ -2437,9 +2453,22 @@ void CNeutrinoApp::ShowStreamFeatures()
 	oj->addOption(1, "options.on");
 	StreamFeatureSelector.addItem( oj );
 
-
 	// -- Stream Info
 	StreamFeatureSelector.addItem(new CMenuForwarder("streamfeatures.info", true, NULL, StreamFeaturesChanger, id, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL), false);
+
+
+	// ------
+#ifdef __EXPERIMENTAL_CODE__
+	// -- Experimental Code
+	// -- rasc (2003-12)
+
+	// StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CChMosaicHandler(), id, true, CRCInput::RC_nokey, ""), false);
+
+	// -- there will be a new EPG menue (red button) shown EPG CHANNEL (EPGList) & EPG Overview (PLUS) & INFO (=?)
+	StreamFeatureSelector.addItem(new CMenuForwarder("experimental", true, NULL, new CEPGplusHandler(), id, true, CRCInput::RC_nokey, ""), false);
+
+#endif
+	// ------
 
 	StreamFeatureSelector.exec(NULL, "");
 

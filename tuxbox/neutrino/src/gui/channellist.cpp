@@ -974,3 +974,22 @@ CChannelList::CChannel* CChannelList::getChannelFromChannelID(const t_channel_id
 	}
 	return NULL;
 }
+
+
+
+
+// for EPG+  (2004-03-05 rasc, code sent by vivamiga)
+
+int CChannelList::getSize() const
+{
+	return this->chanlist.size();
+}
+
+int CChannelList::getSelectedChannelIndex() const
+{
+	return this->selected;
+}
+
+
+
+
