@@ -79,9 +79,11 @@ eString getAttribute(eString filename, eString attribute)
 			if (buffer.find(attribute + "=") == 0)
 			{
 				result = getRight(buffer, '=');
+				if (result == "")
+					result = "&nbsp;";
 				break;
 			}
-		}	
+		}
 	}
 	return result;
 }
@@ -262,27 +264,30 @@ static eString tvMessageWindow(eString request, eString dirpath, eString opt, eH
 static eString getControlPlugins(void)
 {
 	std::stringstream result;
-	system("ls /lib/tuxbox/plugins/*.cfg > /tmp/plugins.tmp");
+	struct dirent **e;
 	eString line;
-	ifstream pluginsFile("/tmp/plugins.tmp");
-	if (pluginsFile)
+	int n = scandir("/lib/tuxbox/plugins", &e, 0, alphasort);
+	if (n > 0)
 	{
 		result << "<table width=100% border=1 cellspacing=0 cellpadding=0>";
-		while (getline(pluginsFile, line, '\n'))
+		for (int i = 0; i < n; i++)
 		{
-			result  << "<tr>"
-				<< "<td width=100>"
-				<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".so')")
-				<< "</td>"
-				<< "<td>"
-				<< getAttribute(line, "name")
-				<< "</td>"
-				<< "<td>"
-				<< getAttribute(line, "desc")
-				<< "</td>"
-				<< "</tr>";
+			line = e[i]->d_name;
+			if (line.find(".cfg") != eString::npos)
+			{
+				result  << "<tr>"
+					<< "<td width=100>"
+					<< button(100, "Start", GREEN, "javascript:startPlugin('" + getLeft(line, '.') + ".so')")
+					<< "</td>"
+					<< "<td>"
+					<< getAttribute("/lib/tuxbox/plugins/" + line, "name")
+					<< "</td>"
+					<< "<td>"
+					<< getAttribute("/lib/tuxbox/plugins/" + line, "desc")
+					<< "</td>"
+					<< "</tr>";
+			}
 		}
-		system("rm /tmp/plugins.tmp");
 		result << "</table>";
 		result << "<br>";
 		result << button(100, "Stop", RED, "javascript:stopPlugin()");
@@ -1141,7 +1146,7 @@ static eString getUpdates()
 	eString myCatalogURL = getAttribute("/.version", "catalog");
 	eString myComment = getAttribute("/.version", "comment");
 	eString myImageURL = getAttribute("/.version", "url");
-	
+
 	result << "<h2>Installed Image Information</h2>";
 	result << "<table width=100% border=1 cellpadding=0 cellspacing=0>";
 	result << "<tr><td>Version</td><td>" << firmwareLevel(myVersion) << "</td></tr>";
@@ -1151,7 +1156,7 @@ static eString getUpdates()
 	result << "</table>";
 	result << "<br>";
 	result << "For information about available updates select one of the categories on the left.";
-	
+
 	return result.str();
 }
 
@@ -1544,7 +1549,7 @@ static eString getZap(eString mode, eString path)
 #ifndef DISABLE_FILE
 static eString getDiskInfo(void)
 {
-	eString result;
+	std::stringstream result;
 	eString sharddisks = "none";
 	if (eSystemInfo::getInstance()->hasHDD())
 	{
@@ -1586,14 +1591,14 @@ static eString getDiskInfo(void)
 				sharddisks += ")";
 			}
 		}
-		result += "<tr>";
-		result += "<td>Harddisk:</td>";
-		result += "<td>" + sharddisks + "</td>";
-		result += "</tr>";
+		result  << "<tr>"
+			"<td>Harddisk:</td>"
+			"<td>" << sharddisks << "</td>"
+			"</tr>";
 	}
-	return result;
+	return result.str();
 }
-#endif //DISABLE_FILE	
+#endif //DISABLE_FILE
 
 #ifndef DISABLE_FILE
 static eString getConfigHDD(void)
@@ -1608,9 +1613,49 @@ static eString getConfigHDD(void)
 }
 #endif
 
+static eString getUSBInfo(void)
+{
+	std::stringstream result;
+	eString usbStick = "none";
+	system("cat /proc/scsi/usb-storage-0/0 > /tmp/usbstick.tmp");
+	eString line;
+	ifstream infile("/tmp/usbstick.tmp");
+	if (infile)
+	{
+		usbStick = "";
+		while (getline(infile, line, '\n'))
+		{
+			if (line.find("Vendor:") != eString::npos)
+				usbStick += "Vendor =" + getRight(line, ':');
+			if (line.find("Product:") != eString::npos)
+			{
+				usbStick += ", ";
+				usbStick += "Product =" + getRight(line, ':');
+			}
+			if (line.find("Attached:") != eString::npos)
+			{
+				usbStick += ", ";
+				usbStick += "Attached =" + getRight(line, ':');
+			}
+		}
+		result 	<< "<tr>"
+			"<td>USB Stick:</td>"
+			"<td>" << usbStick << "</td>"
+			"</tr>";
+		unlink("/tmp/usbstick.tmp");
+	}
+	return result.str();
+}
+
 static eString getConfigUSB(void)
 {
-	return readFile(TEMPLATE_DIR + "configUSB.tmp");
+	std::stringstream result;
+	result  << "<table border=0 cellspacing=0 cellpadding=0>"
+		<< getUSBInfo()
+		<< "</table>"
+		<< "<br>"
+		<< readFile(TEMPLATE_DIR + "configUSB.tmp");
+	return result.str();
 }
 
 static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTTPConnection *content)
@@ -1621,7 +1666,7 @@ static eString setConfigUSB(eString request, eString dirpath, eString opts, eHTT
 	eString swapUSBFile = opt["swapusbfile"];
 	eString bootUSB = opt["bootUSB"];
 	eString bootUSBImage = opt["bootusbimage"];
-	
+
 	return getMsgWindow("Info", "Function is not supported by installed flash image.");
 //	return "<script language=\"javascript\">window.close();</script>";
 }
@@ -1663,7 +1708,7 @@ static eString aboutDreambox(void)
 #ifndef DISABLE_FILE
 	result << getDiskInfo();
 #endif
-
+	result << getUSBInfo();
 	result  << "<tr><td>Firmware:</td><td>" << firmwareLevel(getAttribute("/.version", "version")) << "</td></tr>"
 		<< "<tr><td>Web Interface:</td><td>" << WEBXFACEVERSION << "</td></tr>"
 		<< "</table>";
