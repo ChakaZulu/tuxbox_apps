@@ -134,7 +134,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		void radioMode( bool rezap = true );
 		void scartMode( bool bOnOff );
 		void standbyMode( bool bOnOff );
-		void setVolume(int key, bool bDoPaint = true);
+		void setVolume(const uint key, const bool bDoPaint = true);
 		void AudioMute( bool newValue, bool isEvent= false );
 
 

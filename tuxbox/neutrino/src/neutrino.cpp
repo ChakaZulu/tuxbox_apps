@@ -2946,11 +2946,11 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				}
 			}
 	}
-	else if( msg == CRCInput::RC_plus ||
-		 msg == CRCInput::RC_minus )
+	else if ((msg == CRCInput::RC_plus) ||
+		 (msg == CRCInput::RC_minus) ||
+		 (msg == NeutrinoMessages::EVT_VOLCHANGED))
 	{
-		//volume
-		setVolume( msg, ( mode != mode_scart ) );
+		setVolume(msg, (mode != mode_scart));
 		return messages_return::handled;
 	}
 	else if( msg == CRCInput::RC_spkr )
@@ -2965,10 +2965,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 			//mute
 			AudioMute( !current_muted );
 		}
-		return messages_return::handled;
-	}
-	else if( msg == NeutrinoMessages::EVT_VOLCHANGED )
-	{
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::EVT_MUTECHANGED )
@@ -3348,7 +3344,7 @@ void CNeutrinoApp::AudioMute( bool newValue, bool isEvent )
    }
 }
 
-void CNeutrinoApp::setVolume(int key, bool bDoPaint)
+void CNeutrinoApp::setVolume(const uint key, const bool bDoPaint)
 {
 	uint msg = key;
 	if(g_settings.audio_avs_Control==2) //lirc
@@ -3390,41 +3386,42 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 		do
 	  	{
 			if (msg <= CRCInput::RC_MaxRC)
-				timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_infobar/ 2 );
-
-			if (msg == CRCInput::RC_plus)
 			{
-				if (current_volume < 100 - 5)
-					current_volume += 5;
+				if (msg == CRCInput::RC_plus)
+				{
+					if (current_volume < 100 - 5)
+						current_volume += 5;
+					else
+						current_volume = 100;
+				}
+				else if (msg == CRCInput::RC_minus)
+				{
+					if (current_volume > 5)
+						current_volume -= 5;
+					else
+						current_volume = 0;
+				}
 				else
-					current_volume = 100;
+				{
+					break;
+				}
 
 				g_Controld->setVolume(current_volume, g_settings.audio_avs_Control);
-			}
-			else if (msg == CRCInput::RC_minus)
-		  	{
-				if (current_volume > 5)
-					current_volume -= 5;
-				else
-					current_volume = 0;
 
-				g_Controld->setVolume(current_volume, g_settings.audio_avs_Control);
-			}
-			else if ((msg == CRCInput::RC_ok) || (msg == CRCInput::RC_home))
-			{
-				break;
+				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
 			}
 			else if (msg == NeutrinoMessages::EVT_VOLCHANGED)
 			{
 				current_volume = g_Controld->getVolume(g_settings.audio_avs_Control == 1);
+				timeoutEnd = CRCInput::calcTimeoutEnd(g_settings.timing_infobar / 2);
 			}
-			else if (handleMsg( msg, data ) & messages_return::unhandled)
+			else if (handleMsg(msg, data) & messages_return::unhandled)
 			{
-				g_RCInput->postMsg( msg, data );
-				msg= CRCInput::RC_timeout;
+				g_RCInput->postMsg(msg, data);
+				msg = CRCInput::RC_timeout;
 			}
 
-			if(bDoPaint)
+			if (bDoPaint)
 		  	{
 				int vol = current_volume << 1;
 				frameBuffer->paintBoxRel(x + 40      , y + 12, vol      , 15, COL_INFOBAR + 3);
@@ -3438,7 +3435,7 @@ void CNeutrinoApp::setVolume(int key, bool bDoPaint)
 			}
 
 		}
-		while( msg != CRCInput::RC_timeout );
+		while (msg != CRCInput::RC_timeout);
 
 		if( (bDoPaint) && (pixbuf!= NULL) )
 			frameBuffer->RestoreScreen(x, y, dx, dy, pixbuf);
