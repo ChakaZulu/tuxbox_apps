@@ -99,9 +99,9 @@ audiomenu.monoleft mono links
 audiomenu.monoright mono rechts
 audiomenu.ost ost
 audiomenu.stereo stereo
-audioplayerpicsettings.general Audioplayer / Bildbetrachter
 audioplayer.head Audio Playlist
 audioplayer.name Audioplayer
+audioplayerpicsettings.general Audioplayer / Bildbetrachter
 bookmarkmanager.delete Löschen
 bookmarkmanager.name Bookmarks
 bookmarkmanager.rename Umbenennen
@@ -151,10 +151,10 @@ colormenusetup.menuhead Titelleiste
 colorstatusbar.head Statusbalken-Farben
 colorstatusbar.text Statusbalken
 colorthememenu.classic_theme Klassik
-colorthememenu.head Theme auswählen
-colorthememenu.neutrino_theme Neutrino Theme
 colorthememenu.dblue_theme DarkBlue Theme
 colorthememenu.dvb2k_theme DVB2000 Theme
+colorthememenu.head Theme auswählen
+colorthememenu.neutrino_theme Neutrino Theme
 date.Apr  Apr
 date.Aug  Aug
 date.Dec  Dez
@@ -624,10 +624,10 @@ streaminfo.ecm_invalid ungültiges CA-System
 streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: unbekannt
 streaminfo.head Tech. Information
-streaminfo.signal  Empfangs-Signal
 streaminfo.not_available nicht verfügbar
 streaminfo.not_crypted nicht verschlüsselt
 streaminfo.resolution Auflösung
+streaminfo.signal Empfangssignal
 streaming.buffer_overflow Die Aufnahme wurde leider abgebrochen,\nda die Daten nicht schnell genug geschrieben werden konnten.
 streaming.busy Ein oder mehrere Aufnahmeprozesse sind aktiv.\nSollte die Aufnahme eigentlich beendet sein,\nschafft ein Neustart von Neutrino Abhilfe.
 streaming.dir_not_writable Das Aufnahmeverzeichnis ist nicht beschreibbar.\nAufnahmen sind daher nicht möglich.
