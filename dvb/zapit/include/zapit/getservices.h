@@ -58,8 +58,8 @@ struct transponder
 
 struct bouquet{
 	std::string name;
-	std::vector<channel> radio_channels;
-	std::vector<channel> tv_channels;
+	std::vector<channel*> radio_channels;
+	std::vector<channel*> tv_channels;
 	bouquet(std::string Name)
 	{
 		name = Name;
@@ -112,6 +112,6 @@ extern std::map<uint, channel> allchans_radio;
 extern std::map<uint, uint> numchans_radio;
 extern std::map<std::string, uint> namechans_radio;
 extern std::vector<unsigned long> sortlist_tv;
-extern std::map<uint, bouquet> allbouquets;
+extern std::vector<bouquet> allBouquets;
 
 #endif

@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.33 2001/11/15 21:00:10 Simplex Exp $
+  $Id: zapit.cpp,v 1.34 2001/11/15 23:06:54 Simplex Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -75,9 +75,11 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
-  Revision 1.33  2001/11/15 21:00:10  Simplex
-  Prepared for using bouquets
-  My first checkin :)
+  Revision 1.34  2001/11/15 23:06:54  Simplex
+  zapit now reads bouquets.xml,
+  knows what it means and
+  can give info about bouquets
+  (commands "q" and "r")
 
   Revision 1.32  2001/11/14 17:44:28  faralla
   some optimizations
@@ -258,7 +260,7 @@ void start_scan();
 volatile sig_atomic_t keep_going = 1; /* controls program termination */
 
 void sendBouquetList();
-void sendChannelListOfBouquet( int nBouquet);
+void sendChannelListOfBouquet( uint nBouquet);
 
 void termination_handler (int signum)
 {
@@ -1333,6 +1335,7 @@ int prepare_channels()
   std::map<std::string, uint>::iterator nameit;
   std::map<uint, channel>::iterator cit;
   int ls = LoadServices();
+  int lb = LoadBouquets();
 
   if (ls > 0)
     {
@@ -1992,7 +1995,7 @@ int main(int argc, char **argv) {
     }
 
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.33 2001/11/15 21:00:10 Simplex Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.34 2001/11/15 23:06:54 Simplex Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2099,7 +2102,7 @@ void sendBouquetList()
 	}
 	else
 	{
-		for (int i=0; i<allBouquets.size(); i++)
+		for (uint i=0; i<allBouquets.size(); i++)
 		{
 			// send bouquet only if there are channels in it
 			if ( (Radiomode_on) && (allBouquets[i].radio_channels.size()> 0) ||
@@ -2120,7 +2123,7 @@ void sendBouquetList()
 	}
 }
 
-void sendChannelListOfBouquet( int nBouquet)
+void sendChannelListOfBouquet( uint nBouquet)
 {
 	char* status;
 
@@ -2143,7 +2146,7 @@ void sendChannelListOfBouquet( int nBouquet)
 		return;
 	}
 
-	std::vector<channel> channels;
+	std::vector<channel*> channels;
 	if (Radiomode_on)
 		channels = allBouquets[nBouquet].radio_channels;
 	else
@@ -2157,12 +2160,12 @@ void sendChannelListOfBouquet( int nBouquet)
 			perror("[zapit] could not send any return\n");
 			return;
 		}
-		for (int i = 0; i < channels.size();i++)
+		for (uint i = 0; i < channels.size();i++)
 		{
 			channel_msg_2 chanmsg;
-			strncpy(chanmsg.name, channels[i].name.c_str(),30);
-			chanmsg.onid_tsid = (channels[i].onid<<16)|channels[i].sid;
-			chanmsg.chan_nr = channels[i].chan_nr;
+			strncpy(chanmsg.name, channels[i]->name.c_str(),30);
+			chanmsg.onid_tsid = (channels[i]->onid<<16)|channels[i]->sid;
+			chanmsg.chan_nr = channels[i]->chan_nr;
 
 			if (send(connfd, &chanmsg, sizeof(chanmsg),0) == -1)
 			{

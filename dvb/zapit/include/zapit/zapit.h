@@ -50,7 +50,7 @@ int dvb_device;
 int listenfd, connfd;
 socklen_t clilen;
 SAI cliaddr, servaddr;
-int offset=0; 
+int offset=0;
 int caid = 0;
 
 
@@ -73,6 +73,7 @@ typedef struct decode_struct{
 } decode_vals;
 
 int LoadServices();
+int LoadBouquets();
 int get_caid();
 int sdt(uint osid,bool scan_mode);
 int pat(uint oonid,std::map<uint,channel> *cmap);
