@@ -353,6 +353,7 @@ scants.bouquet_leave Non Cambiare
 scants.bouquet_create Crea Nuovi
 scants.bouquet_erase Cancellare
 scants.bouquet_satellite Bouquets Satellite
+scants.bouquet_update unset
 scants.failed Ricerca Canali fallita!
 scants.finished Ricerca Canali finita con Successo!
 

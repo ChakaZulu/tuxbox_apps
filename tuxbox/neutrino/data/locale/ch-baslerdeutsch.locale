@@ -353,6 +353,7 @@ scants.bouquet_leave nidd ändere
 scants.bouquet_create neu mache
 scants.bouquet_erase lösche
 scants.bouquet_satellite Satellite-Bouquet:
+scants.bouquet_update unset
 scants.failed Kanalsuechii fehlg'schlage!
 scants.finished Kanalsueche erfolgrich beändet!
 

@@ -353,6 +353,7 @@ scants.bouquet_leave ne promijeniti
 scants.bouquet_create novo sastaviti
 scants.bouquet_erase izbrisati
 scants.bouquet_satellite satelitski buket
+scants.bouquet_update unset
 scants.failed Neuspjesno traženje kanala!
 scants.finished Uspješno izvršeno traženje kanala!
 

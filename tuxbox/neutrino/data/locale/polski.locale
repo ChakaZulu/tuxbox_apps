@@ -139,7 +139,7 @@ streamingmenu.streaming_server_cddrive Naped DVD
 streamingmenu.streaming_server_startdir Volumin (VLC)
 streamingmenu.streaming_videorate Obraz-przeplywnosc
 streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
-streamingmenu.streaming_ac3_enabled unset
+streamingmenu.streaming_ac3_enabled Obsluga AC3
 streamingmenu.off Wyl
 streamingmenu.on Wl
 
@@ -234,7 +234,7 @@ colorchooser.alpha nasycenie
 lcdmenu.head Ustawienia LCD
 lcdmenu.inverse Inversja
 lcdmenu.power Wl / Wyl
-lcdmenu.autodimm unset
+lcdmenu.autodimm Auto-rozmiar
 lcdmenu.lcdcontroler Kontrast / Jasnosc
 lcdmenu.statusline Linia Statusowa
 lcdmenu.statusline.volume Glosnosc
@@ -353,6 +353,7 @@ scants.bouquet_leave pozostaw obecne
 scants.bouquet_create utworz nowe
 scants.bouquet_erase kasuj wszystkie
 scants.bouquet_satellite Bukiet satelity
+scants.bouquet_update unset
 scants.failed Brak transpondera!
 scants.finished Strojenie zakonczone sukcesem!
 
@@ -744,7 +745,7 @@ nfs.type_nfs NFS
 nfs.type_cifs CIFS
 nfs.username CIFS uzytkownik
 nfs.password CIFS haslo
-nfs.mounterror_notsup nie prawidlowy sytem plik򵉮fsmenu.head ustawienia NFS/CIFS
+nfs.mounterror_notsup nie prawidlowy sytem pliku
 nfsmenu.head ustawienia NFS/CIFS
 
 apids.hint_1 Podaj APIDy do odbioru w

@@ -353,6 +353,7 @@ scants.bouquet_leave ned olanga
 scants.bouquet_create nei macha
 scants.bouquet_erase wegmacha
 scants.bouquet_satellite Satelliten-Bouquet
+scants.bouquet_update unset
 scants.failed Sendasuacha is gescheitat
 scants.finished Senda sand gfundn worn!
 

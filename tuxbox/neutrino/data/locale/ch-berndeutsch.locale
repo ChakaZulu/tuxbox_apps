@@ -353,6 +353,7 @@ scants.bouquet_leave nid ändere
 scants.bouquet_create nöi erschtöuä
 scants.bouquet_erase lösche
 scants.bouquet_satellite Satelliten-Bouquet
+scants.bouquet_update unset
 scants.failed Kanausuächi fäugschlagä!
 scants.finished Kanausuächi erfougrich beändet!
 
