@@ -64,6 +64,7 @@ struct rmsg {
 struct Ssettings
 {
 	char volume;
+	char mute;
 	char videotype;
 	char videoformat;
 
@@ -270,6 +271,7 @@ void setVolume(char volume)
 
 void Mute()
 {
+	settings.mute = 1;
 	int i;
 	int fd;
 	i=AVS_MUTE;
@@ -292,6 +294,7 @@ void Mute()
 
 void UnMute()
 {
+	settings.mute = 0;
 	int i;
 	int fd;
 	i=AVS_UNMUTE;
@@ -365,10 +368,14 @@ void parse_command(int connfd)
 		write(connfd,&settings.volume,sizeof(settings.volume));
 		break;
 	case 129:
+                printf("[controld] get mute\n");
+                write(connfd,&settings.mute,sizeof(settings.mute));
+                break;
+	case 130:
 		printf("[controld] get videoformat (fnc)\n");
 		write(connfd,&settings.volume,sizeof(settings.videoformat));
 		break;
-	case 130:
+	case 131:
 		printf("[controld] get videotype (fblk)\n");
 		write(connfd,&settings.volume,sizeof(settings.videotype));
 		break;
@@ -428,6 +435,7 @@ int main(int argc, char **argv)
 	{
 		printf("[controld] useing defaults\n");
 		settings.volume = 100;
+		settings.mute = 0;
 		settings.videotype = 1; // fblk1 - rgb
 		settings.videoformat = 2; // fnc2 - 4:3
 	}
