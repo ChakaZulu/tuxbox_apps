@@ -121,42 +121,42 @@ int eRCDeviceDreambox2::getKeyCompatibleCode(const eRCKey &key) const
 {
 	switch (key.code&0xFF)
 	{
-	case 0x00: return eRCInput::RC_0;
-	case 0x01: return eRCInput::RC_1;
-	case 0x02: return eRCInput::RC_2;
-	case 0x03: return eRCInput::RC_3;
-	case 0x04: return eRCInput::RC_4;
-	case 0x05: return eRCInput::RC_5;
-	case 0x06: return eRCInput::RC_6;
-	case 0x07: return eRCInput::RC_7;
-	case 0x08: return eRCInput::RC_8;
-	case 0x09: return eRCInput::RC_9;
-	case 0x0a: return eRCInput::RC_PLUS;
-	case 0x0b: return eRCInput::RC_MINUS;
-	case 0x0c: return eRCInput::RC_HOME;
-	case 0x0d: return eRCInput::RC_PLUS;
-	case 0x0e: return eRCInput::RC_MINUS;
-	case 0x0f: return eRCInput::RC_STANDBY;
-	case 0x20: return eRCInput::RC_DBOX;
-	case 0x21: return eRCInput::RC_UP;
-	case 0x22: return eRCInput::RC_DOWN;
-	case 0x23: return eRCInput::RC_LEFT;
-	case 0x24: return eRCInput::RC_RIGHT;
-	case 0x25: return eRCInput::RC_OK;
-	case 0x26: return eRCInput::RC_YELLOW;
-	case 0x27: return eRCInput::RC_GREEN;
-	case 0x28: return eRCInput::RC_HELP;
-	case 0x40: return eRCInput::RC_RED;
-	case 0x41: return eRCInput::RC_GREEN;
-	case 0x42: return eRCInput::RC_YELLOW;
-	case 0x43: return eRCInput::RC_BLUE;
-	case 0x44: return eRCInput::RC_MUTE;
-	case 0x45: return eRCInput::RC_HOME;
-	case 0x50: return eRCInput::RC_RIGHT;
-	case 0x51: return eRCInput::RC_LEFT;
-	case 0x52: return eRCInput::RC_HELP;
-	case 0x53: return eRCInput::RC_STANDBY;
-	case 0x54: return eRCInput::RC_HELP;
+	case 0x00: return KEY_0;
+	case 0x01: return KEY_1;
+	case 0x02: return KEY_2;
+	case 0x03: return KEY_3;
+	case 0x04: return KEY_4;
+	case 0x05: return KEY_5;
+	case 0x06: return KEY_6;
+	case 0x07: return KEY_7;
+	case 0x08: return KEY_8;
+	case 0x09: return KEY_9;
+	case 0x0a: return KEY_VOLUMEUP;
+	case 0x0b: return KEY_VOLUMEDOWN;
+	case 0x0c: return KEY_HOME;
+	case 0x0d: return KEY_VOLUMEUP;
+	case 0x0e: return KEY_VOLUMEDOWN;
+	case 0x0f: return KEY_POWER;
+	case 0x20: return KEY_MENU;
+	case 0x21: return KEY_UP;
+	case 0x22: return KEY_DOWN;
+	case 0x23: return KEY_LEFT;
+	case 0x24: return KEY_RIGHT;
+	case 0x25: return KEY_OK;
+	case 0x26: return KEY_YELLOW;
+	case 0x27: return KEY_GREEN;
+	case 0x28: return KEY_HELP;
+	case 0x40: return KEY_RED;
+	case 0x41: return KEY_GREEN;
+	case 0x42: return KEY_YELLOW;
+	case 0x43: return KEY_BLUE;
+	case 0x44: return KEY_MUTE;
+	case 0x45: return KEY_HOME;
+	case 0x50: return KEY_RIGHT;
+	case 0x51: return KEY_LEFT;
+	case 0x52: return KEY_HELP;
+	case 0x53: return KEY_POWER;
+	case 0x54: return KEY_HELP;
 	}
 	return -1;
 }
@@ -219,9 +219,9 @@ int eRCDeviceDreamboxButton::getKeyCompatibleCode(const eRCKey &key) const
 {
 	switch (key.code)
 	{
-	case 1: return eRCInput::RC_LEFT;
-	case 2: return eRCInput::RC_RIGHT;
-	case 3: return eRCInput::RC_STANDBY;
+	case 1: return KEY_LEFT;
+	case 2: return KEY_RIGHT;
+	case 3: return KEY_POWER;
 	}
 	return -1;
 }

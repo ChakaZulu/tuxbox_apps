@@ -235,6 +235,10 @@ XMLTreeNode *eActionMapList::searchDevice(const eString &id)
 
 int eActionMapList::loadDevice(eRCDevice *device)
 {
+		/* Don't load any mappings for (ascii) console */
+	if (device->getIdentifier() == "Console")
+		return 0;
+		
 	XMLTreeNode *node=searchDevice(device->getIdentifier());
 
 	if (!node)
@@ -242,7 +246,7 @@ int eActionMapList::loadDevice(eRCDevice *device)
 
 	if (!node)
 	{
-		eDebug("couldn't load key bindings for device %s", device->getDescription());
+		eFatal("couldn't load key bindings for device %s", device->getDescription());
 		return -1;
 	}
 

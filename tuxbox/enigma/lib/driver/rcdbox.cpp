@@ -114,34 +114,34 @@ int eRCDeviceDBoxOld::getKeyCompatibleCode(const eRCKey &key) const
 	{
 		switch (key.code&0xFF)
 		{
-		case 0x0C: return eRCInput::RC_STANDBY;
-		case 0x20: return eRCInput::RC_HOME;
-		case 0x27: return eRCInput::RC_DBOX;
-		case 0x00: return eRCInput::RC_0;
-		case 0x01: return eRCInput::RC_1;
-		case 0x02: return eRCInput::RC_2;
-		case 0x03: return eRCInput::RC_3;
-		case 0x04: return eRCInput::RC_4;
-		case 0x05: return eRCInput::RC_5;
-		case 0x06: return eRCInput::RC_6;
-		case 0x07: return eRCInput::RC_7;
-		case 0x08: return eRCInput::RC_8;
-		case 0x09: return eRCInput::RC_9;
-		case 0x3B: return eRCInput::RC_BLUE;
-		case 0x52: return eRCInput::RC_YELLOW;
-		case 0x55: return eRCInput::RC_GREEN;
-		case 0x2D: return eRCInput::RC_RED;
-		case 0x54: return eRCInput::RC_UP_LEFT;
-		case 0x53: return eRCInput::RC_DOWN_LEFT;
-		case 0x0E: return eRCInput::RC_UP;
- 		case 0x0F: return eRCInput::RC_DOWN;
-		case 0x2F: return eRCInput::RC_LEFT;
- 		case 0x2E: return eRCInput::RC_RIGHT;
-		case 0x30: return eRCInput::RC_OK;
- 		case 0x16: return eRCInput::RC_PLUS;
- 		case 0x17: return eRCInput::RC_MINUS;
- 		case 0x28: return eRCInput::RC_MUTE;
- 		case 0x82: return eRCInput::RC_HELP;
+		case 0x0C: return KEY_POWER;
+		case 0x20: return KEY_HOME;
+		case 0x27: return KEY_MENU;
+		case 0x00: return KEY_0;
+		case 0x01: return KEY_1;
+		case 0x02: return KEY_2;
+		case 0x03: return KEY_3;
+		case 0x04: return KEY_4;
+		case 0x05: return KEY_5;
+		case 0x06: return KEY_6;
+		case 0x07: return KEY_7;
+		case 0x08: return KEY_8;
+		case 0x09: return KEY_9;
+		case 0x3B: return KEY_BLUE;
+		case 0x52: return KEY_YELLOW;
+		case 0x55: return KEY_GREEN;
+		case 0x2D: return KEY_RED;
+		case 0x54: return KEY_PAGEUP;
+		case 0x53: return KEY_PAGEDOWN;
+		case 0x0E: return KEY_UP;
+ 		case 0x0F: return KEY_DOWN;
+		case 0x2F: return KEY_LEFT;
+ 		case 0x2E: return KEY_RIGHT;
+		case 0x30: return KEY_OK;
+ 		case 0x16: return KEY_VOLUMEUP;
+ 		case 0x17: return KEY_VOLUMEDOWN;
+ 		case 0x28: return KEY_MUTE;
+ 		case 0x82: return KEY_HELP;
 		default:
 			return -1;
 		}
@@ -236,32 +236,32 @@ int eRCDeviceDBoxNew::getKeyCompatibleCode(const eRCKey &key) const
 {
 	switch (key.code&0xFF)
 	{
-		case 0: return eRCInput::RC_0;
-		case 1: return eRCInput::RC_1;
-    case 2: return eRCInput::RC_2;
-		case 3: return eRCInput::RC_3;
-		case 4: return eRCInput::RC_4;
-		case 5: return eRCInput::RC_5;
-		case 6: return eRCInput::RC_6;
-		case 7: return eRCInput::RC_7;
-		case 8: return eRCInput::RC_8;
-		case 9: return eRCInput::RC_9;
-		case 10: return eRCInput::RC_RIGHT;
-		case 11: return eRCInput::RC_LEFT;
-		case 12: return eRCInput::RC_UP;
-		case 13: return eRCInput::RC_DOWN;
-		case 14: return eRCInput::RC_OK;
-		case 15: return eRCInput::RC_MUTE;
-		case 16: return eRCInput::RC_STANDBY;
-		case 17: return eRCInput::RC_GREEN;
-		case 18: return eRCInput::RC_YELLOW;
-		case 19: return eRCInput::RC_RED;
-		case 21: return eRCInput::RC_PLUS;
-		case 20: return eRCInput::RC_BLUE;
-		case 22: return eRCInput::RC_MINUS;
-		case 23: return eRCInput::RC_HELP;
-		case 24: return eRCInput::RC_DBOX;
-		case 31: return eRCInput::RC_HOME;
+		case 0: return KEY_0;
+		case 1: return KEY_1;
+    case 2: return KEY_2;
+		case 3: return KEY_3;
+		case 4: return KEY_4;
+		case 5: return KEY_5;
+		case 6: return KEY_6;
+		case 7: return KEY_7;
+		case 8: return KEY_8;
+		case 9: return KEY_9;
+		case 10: return KEY_RIGHT;
+		case 11: return KEY_LEFT;
+		case 12: return KEY_UP;
+		case 13: return KEY_DOWN;
+		case 14: return KEY_OK;
+		case 15: return KEY_MUTE;
+		case 16: return KEY_POWER;
+		case 17: return KEY_GREEN;
+		case 18: return KEY_YELLOW;
+		case 19: return KEY_RED;
+		case 21: return KEY_VOLUMEUP;
+		case 20: return KEY_BLUE;
+		case 22: return KEY_VOLUMEDOWN;
+		case 23: return KEY_HELP;
+		case 24: return KEY_MENU;
+		case 31: return KEY_HOME;
 	}
 	return -1;
 }
@@ -320,9 +320,9 @@ int eRCDeviceDBoxButton::getKeyCompatibleCode(const eRCKey &key) const
 {
 	switch (key.code)
 	{
-	case 1: return eRCInput::RC_STANDBY;
-	case 2: return eRCInput::RC_RIGHT;
-	case 3: return eRCInput::RC_LEFT;
+	case 1: return KEY_POWER;
+	case 2: return KEY_RIGHT;
+	case 3: return KEY_LEFT;
 	}
 	return -1;
 }

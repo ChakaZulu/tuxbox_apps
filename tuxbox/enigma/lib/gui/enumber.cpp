@@ -244,10 +244,10 @@ int eNumber::keyDown(int key)
 #endif
 	switch (key)
 	{
-	case eRCInput::RC_0 ... eRCInput::RC_9:
+	case KEY_1 ... KEY_0:
 	{
 		int nn=(digit!=0)?number[active]*10:0;
-		nn+=key-eRCInput::RC_0;
+		nn+=(key == KEY_0) ? 0 : (key - KEY_1 + 1);
 		if (flags & flagTime)
 		{
 			if ( active )
@@ -286,7 +286,7 @@ int eNumber::keyDown(int key)
 
 	break;
 	}
-	case eRCInput::RC_PLUS:
+	case KEY_KPPLUS:
 		if (flags & flagPosNeg && neg )
 		{
 			neg=false;
@@ -294,7 +294,7 @@ int eNumber::keyDown(int key)
 		}
 	break;
 
-	case eRCInput::RC_MINUS:
+	case KEY_KPMINUS:
 		if (flags & flagPosNeg && !neg )
 		{
 			neg=true;

@@ -1,6 +1,4 @@
 #include <config.h>
-#if HAVE_DVB_API_VERSION == 3
-
 #include <lib/driver/rcinput.h>
 
 #include <sys/ioctl.h>
@@ -14,39 +12,53 @@
 void eRCDeviceInputDev::handleCode(int rccode)
 {
 	struct input_event *ev = (struct input_event *)rccode;
+
 	if (ev->type!=EV_KEY)
 		return;
 
-//	eDebug("%x %x %x", ev->value, ev->code, ev->type);
+	int km = iskeyboard ? input->getKeyboardMode() : eRCInput::kmNone;
+	
+	if (km == eRCInput::kmAll)
+		return;
+	
+	if (km == eRCInput::kmAscii)
+	{
+		eDebug("filtering..");
+		switch (ev->code)
+		{
+		case KEY_0: case KEY_1: case KEY_2: case KEY_3: case KEY_4: case KEY_5: case KEY_6: case KEY_7: case KEY_8: case KEY_9:
+		case KEY_A: case KEY_B: case KEY_C: case KEY_D: case KEY_E: case KEY_F: case KEY_G: case KEY_H: case KEY_I: case KEY_J:
+		case KEY_K: case KEY_L: case KEY_M: case KEY_N: case KEY_O: case KEY_P: case KEY_Q: case KEY_R: case KEY_S: case KEY_T:
+		case KEY_U: case KEY_V: case KEY_W: case KEY_X: case KEY_Y: case KEY_Z:
+		case KEY_SPACE:
+			/* FIXME: some are still missing */
+			return;
+		default:
+			break;
+		}
+		eDebug("passed!");
+	}
+
 	switch (ev->value)
 	{
 	case 0:
 		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagBreak));
-		repeattimer.stop();
 		break;
 	case 1:
 		/*emit*/ input->keyPressed(eRCKey(this, ev->code, 0));
-		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
 		memcpy(&cur, ev, sizeof(struct input_event) );
 		break;
 	case 2:
-// we use own repeat.. sorry.. but inputdev stuff
-// let not set repeat rate and repeat delay :(
-//		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagRepeat));
+		/*emit*/ input->keyPressed(eRCKey(this, ev->code, eRCKey::flagRepeat));
 		break;
 	}
 }
 
-void eRCDeviceInputDev::repeat()
-{
-	/*emit*/ input->keyPressed(eRCKey(this, cur.code, eRCKey::flagRepeat));
-	repeattimer.start(eRCInput::getInstance()->config.rrate, 1);
-}
-
 eRCDeviceInputDev::eRCDeviceInputDev(eRCInputEventDriver *driver)
-: eRCDevice(driver->getDeviceName(), driver), repeattimer(eApp)
+: eRCDevice(driver->getDeviceName(), driver)
 {
-	CONNECT(repeattimer.timeout, eRCDeviceInputDev::repeat);
+	iskeyboard = !!strcasestr(id.c_str(), "keyboard");
+	eDebug("Input device \"%s\" is %sa keyboard.", id.c_str(), iskeyboard ? "" : "not ");
 }
 
 const char *eRCDeviceInputDev::getDescription() const
@@ -96,36 +108,7 @@ const char *eRCDeviceInputDev::getKeyDescription(const eRCKey &key) const
 
 int eRCDeviceInputDev::getKeyCompatibleCode(const eRCKey &key) const
 {
-	switch (key.code)
-	{
-		case KEY_0: return eRCInput::RC_0;
-		case KEY_1: return eRCInput::RC_1;
-		case KEY_2: return eRCInput::RC_2;
-		case KEY_3: return eRCInput::RC_3;
-		case KEY_4: return eRCInput::RC_4;
-		case KEY_5: return eRCInput::RC_5;
-		case KEY_6: return eRCInput::RC_6;
-		case KEY_7: return eRCInput::RC_7;
-		case KEY_8: return eRCInput::RC_8;
-		case KEY_9: return eRCInput::RC_9;
-		case KEY_RIGHT: return eRCInput::RC_RIGHT;
-		case KEY_LEFT: return eRCInput::RC_LEFT;
-		case KEY_UP: return eRCInput::RC_UP;
-		case KEY_DOWN: return eRCInput::RC_DOWN;
-		case KEY_OK: return eRCInput::RC_OK;
-		case KEY_MUTE: return eRCInput::RC_MUTE;
-		case KEY_POWER: return eRCInput::RC_STANDBY;
-		case KEY_GREEN: return eRCInput::RC_GREEN;
-		case KEY_YELLOW: return eRCInput::RC_YELLOW;
-		case KEY_RED: return eRCInput::RC_RED;
-		case KEY_VOLUMEUP: return eRCInput::RC_PLUS;
-		case KEY_BLUE: return eRCInput::RC_BLUE;
-		case KEY_VOLUMEDOWN: return eRCInput::RC_MINUS;
-		case KEY_HELP: return eRCInput::RC_HELP;
-		case KEY_SETUP: return eRCInput::RC_DBOX;
-		case KEY_HOME: return eRCInput::RC_HOME;
-	}
-	return -1;
+	return key.code;
 }
 
 class eInputDeviceInit
@@ -139,5 +122,3 @@ public:
 };
 
 eAutoInitP0<eInputDeviceInit> init_rcinputdev(eAutoInitNumbers::rc+1, "input device driver");
-
-#endif // HAVE_DVB_API_VERSION == 3

@@ -6446,7 +6446,7 @@ int TextEditWindow::eventHandler( const eWidgetEvent &e )
 	switch (e.type)
 	{
 		case eWidgetEvent::execBegin:
-			input->toggleState();
+			input->setState(1, 0);
 			return 1;
 		case eWidgetEvent::evtAction:
 			if ( e.action != &i_cursorActions->help )

@@ -9,10 +9,14 @@
 #include <lib/base/ebase.h>
 #include <lib/base/estring.h>
 #include <libsig_comp.h>
+#include <linux/input.h>
 
 class eRCInput;
 class eRCDriver;
 class eRCKey;
+
+	// the offset of plain ascii codes coming out of the console (only when in keyboard mode)
+#define KEY_ASCII     0x1000
 
 /**
  * \brief A remote control.
@@ -59,11 +63,10 @@ public:
 	 */
 	virtual const char *getKeyDescription(const eRCKey &key) const=0;
 	/**
-	 * \brief Get a dbox2-compatible keycode.
+	 * \brief Get an input device keycode.
 	 *
-	 * THIS IS DEPRECATED! DON'T USE IT UNLESS YOU NEED IT!
-	 * \param key The key to get the compatible code for.
-	 * \result The dbox2-compatible code. (new RC as defined in enum).
+	 * \param key The key to get the input code for.
+	 * \result The Linux input device keycode
 	 */
 	virtual int getKeyCompatibleCode(const eRCKey &key) const;
 	const eRCDriver *getDriver() { return driver; }
@@ -124,7 +127,8 @@ public:
 			while ( ::read(handle, &buf, 1) );
 	}
 };
-#else
+#endif
+
 class eRCInputEventDriver: public eRCDriver
 {
 protected:
@@ -142,7 +146,6 @@ public:
 			while ( ::read(handle, &buf, 1) );
 	}
 };
-#endif
 
 class eRCKey
 {
@@ -163,22 +166,22 @@ public:
 	
 	bool operator<(const eRCKey &r) const
 	{
-		if (r.producer == producer)
-		{
-			if (r.code == code)
-			{
-				if (r.flags < flags)
-					return 1;
-				else
-					return 0;
-			} else if (r.code < code)
-				return 1;
-			else
-				return 0;
-		} else if (r.producer < producer)
-			return 1;
-		else
+		if (producer > r.producer)
 			return 0;
+		if (producer < r.producer)
+			return 1;
+		
+		if (code > r.code)
+			return 0;
+		if (code < r.code)
+			return 1;
+			
+		if (flags > r.flags)
+			return 0;
+		if (flags < r.flags)
+			return 1;
+
+		return 0;
 	}
 };
 
@@ -199,7 +202,7 @@ class eRCInput: public Object
 	int locked;	
 	int handle;
 	static eRCInput *instance;
-
+	int keyboardMode;
 public:
 	struct lstr
 	{
@@ -213,15 +216,6 @@ protected:
 	std::map<eString,eRCDevice*,lstr> devices;
 public:
 	Signal1<void, const eRCKey&> keyEvent;
-	enum
-	{
-		RC_0=0, RC_1=0x1, RC_2=0x2, RC_3=0x3, RC_4=0x4, RC_5=0x5, RC_6=0x6, RC_7=0x7,
-		RC_8=0x8, RC_9=0x9,
-		RC_RIGHT=10, RC_LEFT=11, RC_UP=12, RC_DOWN=13, RC_OK=14, RC_MUTE=15,
-		RC_STANDBY=16, RC_GREEN=17, RC_YELLOW=18, RC_RED=19, RC_BLUE=20, RC_PLUS=21, RC_MINUS=22,
-		RC_HELP=23, RC_DBOX=24,
-		RC_UP_LEFT=27, RC_UP_RIGHT=28, RC_DOWN_LEFT=29, RC_DOWN_RIGHT=30, RC_HOME=31
-	};
 	eRCInput();
 	~eRCInput();
 	
@@ -232,6 +226,31 @@ public:
 	bool open();
 
 	void setFile(int handle);
+	
+	
+	/* This is only relevant for "keyboard"-styled input devices,
+	   i.e. not plain remote controls. It's up to the input device
+	   driver to decide wheter an input device is a keyboard or
+	   not.
+	   
+	   kmNone will ignore all Ascii Characters sent from the 
+	   keyboard/console driver, only give normal keycodes to the
+	   application.
+	   
+	   kmAscii will filter out all keys which produce ascii characters,
+	   and send them instead. Note that Modifiers like shift will still
+	   be send. Control keys which produce escape codes are send using
+	   normal keycodes. 
+	   
+	   kmAll will ignore all keycodes, and send everything as ascii,
+	   including escape codes. Pretty much useless, since you should
+	   lock the console and pass this as the console fd for making the
+	   tc* stuff working.
+	*/
+	
+	enum { kmNone, kmAscii, kmAll };
+	void setKeyboardMode(int mode);
+	int  getKeyboardMode() { return keyboardMode; }
 
 	void keyPressed(const eRCKey &key)
 	{

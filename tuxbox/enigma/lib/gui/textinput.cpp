@@ -13,13 +13,14 @@
 struct texteditActions
 {
 	eActionMap map;
-	eAction capslock, swapnum, insertchar, deletechar, showHelp;
+	eAction capslock, swapnum, insertchar, deletechar, backspace, showHelp;
 	texteditActions():
 		map("textedit", "enigma global"),
 		capslock(map, "capslock", _("enable/disable capslock"), eAction::prioDialog),
 		swapnum(map, "swapnum", _("put numbers before/after characters"), eAction::prioDialog),
 		insertchar(map, "insertchar", _("insert blank at cursor position"), eAction::prioDialog),
 		deletechar(map, "deletechar", _("remove the character at the cursor position"), eAction::prioDialog),
+		backspace(map, "backspace", _("remove the character before the cursor position"), eAction::prioDialog),
 		showHelp(map, "showHelp", _("shows the textinputfield help"), eAction::prioDialog )
 	{
 	}
@@ -299,13 +300,14 @@ void eTextInputField::drawCursor()
 	delete painter;
 }
 
-void eTextInputField::toggleState()
+void eTextInputField::setState(int enable, int cancel)
 {
 	nextCharTimer.stop();
-	if ( editMode )
+	if (!enable)
 	{
 		editLabel->hide();
-		setText(editLabel->getText());
+		if (!cancel)
+			setText(editLabel->getText());
 		delete editLabel;
 		editLabel=0;
 
@@ -317,6 +319,7 @@ void eTextInputField::toggleState()
 		editMode=false;
 		/* emit */ selected();
 
+		eRCInput::getInstance()->setKeyboardMode(eRCInput::kmNone);
 		eWindow::globalCancel(eWindow::ON);
 	}
 	else
@@ -344,6 +347,7 @@ void eTextInputField::toggleState()
 		setHelpText(editHelpText);
 		curPos=0;
 		drawCursor();
+		eRCInput::getInstance()->setKeyboardMode(eRCInput::kmAscii);
 		eWindow::globalCancel(eWindow::OFF);
 	}
 }
@@ -397,6 +401,16 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 //						eDebug("curPos--");
 						--curPos;
 					}
+					updated();
+				}
+			}
+			else if (event.action == &i_texteditActions->backspace && editMode)
+			{
+				if ( isotext.length() && curPos)
+				{
+					lastKey=-1;
+					curPos--;
+					isotext.erase( curPos, 1 );
 					updated();
 				}
 			}
@@ -459,16 +473,10 @@ int eTextInputField::eventHandler( const eWidgetEvent &event )
 				nextChar();
 			}
 			else if (event.action == &i_cursorActions->ok)
-				toggleState();
+				setState(!editMode, 0);
 			else if ( editMode && event.action == &i_cursorActions->cancel )
 			{
-				delete editLabel;
-				editLabel=0;
-				nextCharTimer.stop();
-				editMode=false;
-				setText(oldText);
-				setHelpText(oldHelpText);
-				eWindow::globalCancel(eWindow::ON);
+				setState(0, 1);
 				if ( flags & flagCloseParent && parent )
 					parent->reject();
 				break;
@@ -641,6 +649,25 @@ eTextInputFieldHelpWidget::eTextInputFieldHelpWidget(eWidget *parent)
 	keys[11] = new eLabel(this); keys[11]->setName("special_two");
 	if (eSkin::getActive()->build(this, "eTextInputFieldHelpWidget"))
 		eWarning("TextInputFieldHelpWidget build failed!");
+}
+
+int eTextInputField::keyDown(int rc)
+{
+	if (editMode & (rc >= KEY_ASCII))
+	{
+		int ascii = rc - KEY_ASCII;
+		if ( strchr( useableChars.c_str(), ascii ) ) // char useable?
+		{
+			if ( curPos == (int)isotext.length() )
+				isotext += ascii;
+			else
+				isotext[curPos] = ascii;
+			updated();
+			nextChar();
+			return 1;
+		}
+	}
+	return 0;
 }
 
 static eWidget *create_eTextInputField(eWidget *parent)

@@ -5,9 +5,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
-#if HAVE_DVB_API_VERSION == 3
 #include <linux/input.h>
-#endif
 
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
@@ -105,6 +103,7 @@ eRCInput::eRCInput()
 	instance=this;
 	handle = -1;
 	locked = 0;
+	keyboardMode = kmNone;
 }
 
 eRCInput::~eRCInput()
@@ -167,6 +166,11 @@ eRCDevice *eRCInput::getDevice(const eString &id)
 	return i->second;
 }
 
+void eRCInput::setKeyboardMode(int mode)
+{
+	keyboardMode = mode;
+}
+
 std::map<eString,eRCDevice*,eRCInput::lstr> &eRCInput::getDevices()
 {
 	return devices;
@@ -212,7 +216,9 @@ void eRCShortDriver::keyPressed(int)
 				(*i)->handleCode(rccode);
 	}
 }
-#else
+
+#endif
+
 eRCInputEventDriver::eRCInputEventDriver(const char *filename): eRCDriver(eRCInput::getInstance())
 {
 	handle=open(filename, O_RDONLY|O_NONBLOCK);
@@ -262,4 +268,3 @@ eString eRCInputEventDriver::getDeviceName()
 	return name;
 }
 
-#endif
