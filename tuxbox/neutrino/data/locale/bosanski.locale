@@ -626,7 +626,7 @@ fontsize.infobar_info infromativna traka za informaciju
 fontsize.infobar_small mala infromativna traka
 fontsize.gamelist_itemLarge veliko
 fontsize.gamelist_itemSmall malo
-fontsize.filebrowser_item undef
+fontsize.filebrowser_item dio pretrazivaca datoteka
 
 fontmenu.head namjescenje velicine slova
 fontmenu.channellist lista kanala
@@ -670,6 +670,5 @@ nfs.umount nfs direktorij sada demontirati
 nfs.umounterror greska pri demontiranju
 nfs.alreadymounted direktorij je vec montiran
 
-apids.hint_1 undef
-apids.hint_2 undef
-
+apids.hint_1 Utipkajte heksadecimalne apids
+apids.hint_2 za streaming razdvojene sa ' '.

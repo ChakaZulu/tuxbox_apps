@@ -670,6 +670,5 @@ nfs.umount NFS Verzeichnis freigem
 nfs.umounterror Fähla beim Freigem
 nfs.alreadymounted Verzeichnis is scho gmounted
 
-apids.hint_1 undef
-apids.hint_2 undef
-
+apids.hint_1 Gems de APIDs zu streama getrend
+apids.hint_2 mid ' ' in hexadezimol ei
