@@ -73,7 +73,7 @@
 
  function openEPG(xy)
  {
-  win=window.open("/cgi-bin/getcurrentepg2"+xy, "epg", "width=500, height=600 left=0, top=0, scrollbars=yes, resizable=yes");
+  win=window.open("/cgi-bin/getcurrentepg2?ref="+xy, "epg", "width=500, height=600 left=0, top=0, scrollbars=yes, resizable=yes");
   win.focus();
  }
 
@@ -99,16 +99,17 @@
 <td width=780 valign=top>
 <TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 height=100%>
 	<TR>
-		<TD background="topbalk.png" style="height: 88">
+		<TD background="topbalk.png" style="height: 112">
 			<table width=770>
 				<tr>
 					<td width=350px>&nbsp;</td>
-					<td align=right style="line-height: 10px"><br><br><br>
+					<td align=right style="line-height: 10px">
 						<script language="javascript">
 							diskspace = '#DISKSPACE#';
 							document.write(diskspace);
 							volbar = '#VOLBAR#';
 							document.write(volbar);
+							document.write("<br><br><br>");
 							statbar = '#STATS#';
 							document.write(statbar);
 						</script>
