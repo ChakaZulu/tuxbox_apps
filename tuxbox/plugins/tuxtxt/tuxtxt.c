@@ -5,6 +5,7 @@
  *----------------------------------------------------------------------------*
  * History                                                                    *
  *                                                                            *
+ *    V1.7 (LazyT): speedup?, neutrino look ;)                                *
  *    V1.6 (LazyT): added transparency mode                                   *
  *    V1.5 (LazyT): added newsflash/subtitle support                          *
  *    V1.4 (LazyT): skip not received pages on +/-10, some mods               *
@@ -23,7 +24,7 @@ void plugin_exec(PluginParam *par)
 {
 	//show versioninfo
 
-		printf("\nTuxTxt 1.6 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox Team\n\n");
+		printf("\nTuxTxt 1.7 - Coypright (c) Thomas \"LazyT\" Loewe and the TuxBox Team\n\n");
 
 	//get params
 
@@ -67,7 +68,7 @@ void plugin_exec(PluginParam *par)
 
 	//init
 
-		if(Init() == 0)
+		if(!Init())
 		{
 			printf("TuxTxt aborted!\n\n");
 			return;
@@ -77,7 +78,7 @@ void plugin_exec(PluginParam *par)
 
 		do
 		{
-			if(GetRCCode() == 1)
+			if(GetRCCode())
 			{
 				switch(RCCode)
 				{
@@ -453,7 +454,7 @@ int Init()
 
 	//calculate screen position
 
-		if((ex-sx) - 40*fontwidth >= 0)
+		if(ex-sx >= 40*fontwidth)
 		{
 			StartX = sx + (((ex-sx) - 40*fontwidth) / 2);
 		}
@@ -462,7 +463,7 @@ int Init()
 			StartX = ex - 40*fontwidth;
 		}
 
-		if((ey-sy) - 24*fontheight >= 0)
+		if(ey-sy >= 24*fontheight)
 		{
 			StartY = sy + (((ey-sy) - 24*fontheight) / 2);
 		}
@@ -473,7 +474,7 @@ int Init()
 
 	//open demuxer
 
-		if((dmx = open("/dev/ost/demux0", O_RDWR)) == -1)
+		if((dmx = open("/dev/ost/demux0", O_RDWR | O_NONBLOCK)) == -1)
 		{
 			perror("open demuxer failed");
 			return 0;
@@ -777,9 +778,10 @@ void RenderPageNumber(int Char)
 
 void RenderString()
 {
-	char message_1[] = "7#####################################k";
-	char message_2[] = "5 Seite ??? nicht vorhanden: warte... j";
-	char message_3[] = "upppppppppppppppppppppppppppppppppppppz";
+	char message_1[] = "אבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבבגט";
+	char message_2[] = "ד Seite ??? nicht vorhanden: warte...הי";
+	char message_3[] = "וזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזזחי";
+	char message_4[] = "כלללללללללללללללללללללללללללללללללללללך";
 
 	int x;
 
@@ -797,27 +799,37 @@ void RenderString()
 
 	//render strings to framebuffer
 
-		PosX = StartX + fontwidth/2;
-		PosY = StartY + fontheight*11;
+		PosX = StartX + fontwidth-3;
+		PosY = StartY + fontheight*18;
+		for(x = 0; x < 38; x++)
+		{
+			RenderCharFB(message_1[x], menu1<<4 | menu2);
+		}
+		RenderCharFB(message_1[38], transp<<4 | menu2);
+
+		PosX = StartX + fontwidth-3;
+		PosY = StartY + fontheight*19;
+		RenderCharFB(message_2[0], menu1<<4 | menu2);
+		for(x = 1; x < 37; x++)
+		{
+			RenderCharFB(message_2[x], menu1<<4 | white);
+		}
+		RenderCharFB(message_2[37], menu1<<4 | menu2);
+		RenderCharFB(message_2[38], transp<<4 | menu2);
+
+		PosX = StartX + fontwidth-3;
+		PosY = StartY + fontheight*20;
+		for(x = 0; x < 38; x++)
+		{
+			RenderCharFB(message_3[x], menu1<<4 | menu2);
+		}
+		RenderCharFB(message_3[38], transp<<4 | menu2);
+
+		PosX = StartX + fontwidth-3;
+		PosY = StartY + fontheight*21;
 		for(x = 0; x < 39; x++)
 		{
-			RenderCharFB(message_1[x], 1<<8 | red<<4 | white);
-		}
-
-		PosX = StartX + fontwidth/2;
-		PosY = StartY + fontheight*12;
-		RenderCharFB(message_2[0], 1<<8 | red<<4 | white);
-		for(x = 1; x < 38; x++)
-		{
-			RenderCharFB(message_2[x], red<<4 | white);
-		}
-		RenderCharFB(message_2[38], 1<<8 | red<<4 | white);
-
-		PosX = StartX + fontwidth/2;
-		PosY = StartY + fontheight*13;
-		for(x = 0; x < 39; x++)
-		{
-			RenderCharFB(message_3[x], 1<<8 | red<<4 | white);
+			RenderCharFB(message_4[x], transp<<4 | menu2);
 		}
 }
 
@@ -902,10 +914,6 @@ void RenderPage()
 			RenderCharFB(248, transp<<4 | yellow);
 		}
 	}
-
-	//pause
-
-		usleep(1000000/100);
 }
 
 /******************************************************************************
@@ -1163,123 +1171,130 @@ void *DecodePacket(void *arg)
 
 		//read pes packet
 
-			read(dmx, &pes_packet, sizeof(pes_packet));
-
-		//analyze the vtxt-packet
-
-			for(line = 0; line < 4; line++)
+			if(read(dmx, &pes_packet, sizeof(pes_packet)) == sizeof(pes_packet))
 			{
-				if((pes_packet[line*0x2E] == 0x02 || pes_packet[line*0x2E] == 0x03) && (pes_packet[line*0x2E + 1] == 0x2C))
-				{
-					//clear vtxtline-buffer
+				//analyze the vtxt-packet
 
-						memset(&vtxt_line, 0, sizeof(vtxt_line));
-
-					//convert the vtxtline from lsb to msb (skip everything before magazin & packet)
-
-						for(byte = 3; byte <= sizeof(vtxt_line); byte++)
+					for(line = 0; line < 4; line++)
+					{
+						if((pes_packet[line*0x2E] == 0x02 || pes_packet[line*0x2E] == 0x03) && (pes_packet[line*0x2E + 1] == 0x2C))
 						{
-							for(bit = 0; bit <= 7; bit++)
-							{
-								if(pes_packet[line*0x2E + 1 + byte] & 1<<bit)
+							//clear vtxtline-buffer
+
+								memset(&vtxt_line, 0, sizeof(vtxt_line));
+
+							//convert the vtxtline from lsb to msb (skip everything before magazin & packet)
+
+								for(byte = 3; byte <= sizeof(vtxt_line); byte++)
 								{
-									vtxt_line[byte] |= 128>>bit;
-								}
-							}
-						}
-
-					//decode packet number
-
-						deham1 = (dehamming[vtxt_line[3]] & 8) >> 3;
-						deham2 = dehamming[vtxt_line[4]] << 1;
-
-						if(deham1 == 0xFF || deham2 == 0xFF)
-						{
-							printf("biterror in packet detected - skipping...\n");
-							goto SkipPacket;
-						}
-
-						packet_number = deham1 | deham2;
-
-					//analyze packet
-
-						if(packet_number == 0)								//page header
-						{
-							//remove parity bit from data bytes (dirty, i know...)
-
-								for(byte = 13; byte < 45; byte++)
-								{
-									vtxt_line[byte] &= 127;
+									for(bit = 0; bit <= 7; bit++)
+									{
+										if(pes_packet[line*0x2E + 1 + byte] & 1<<bit)
+										{
+											vtxt_line[byte] |= 128>>bit;
+										}
+									}
 								}
 
-							//decode pagenumber
+							//decode packet number
 
-								deham1 = (dehamming[vtxt_line[3]] & 7) << 8;
-								deham2 = dehamming[vtxt_line[6]] << 4;
-								deham3 = dehamming[vtxt_line[5]];
+								deham1 = (dehamming[vtxt_line[3]] & 8) >> 3;
+								deham2 = dehamming[vtxt_line[4]] << 1;
 
-								if(deham1 == 0xFF || deham2 == 0xFF || deham3 == 0xFF)
+								if(deham1 == 0xFF || deham2 == 0xFF)
 								{
-									printf("biterror in pageheader detected - skipping...\n");
-									current_page = -1;
+									printf("biterror in packet detected - skipping...\n");
 									goto SkipPacket;
 								}
 
-								current_page = deham1 | deham2 | deham3;
+								packet_number = deham1 | deham2;
 
-							//copy time info
+							//analyze packet
 
-								memcpy(&timestring[0], &vtxt_line[37], 8);
-
-							//mod pagenumber, skip hex-pages and set cachetable
-
-								if(current_page < 0x100)
+								if(packet_number == 0)								//page header
 								{
-									current_page += 0x800;
+									//remove parity bit from data bytes (dirty, i know...)
+
+										for(byte = 13; byte < 45; byte++)
+										{
+											vtxt_line[byte] &= 127;
+										}
+
+									//decode pagenumber
+
+										deham1 = (dehamming[vtxt_line[3]] & 7) << 8;
+										deham2 = dehamming[vtxt_line[6]] << 4;
+										deham3 = dehamming[vtxt_line[5]];
+
+										if(deham1 == 0xFF || deham2 == 0xFF || deham3 == 0xFF)
+										{
+											printf("biterror in pageheader detected - skipping...\n");
+											current_page = -1;
+											goto SkipPacket;
+										}
+
+										current_page = deham1 | deham2 | deham3;
+
+									//copy time info
+
+										memcpy(&timestring[0], &vtxt_line[37], 8);
+
+									//mod pagenumber, skip hex-pages and set cachetable
+
+										if(current_page < 0x100)
+										{
+											current_page += 0x800;
+										}
+
+										if(((current_page & 0x0F0) > 0x090) || ((current_page & 0x00F) > 0x009))
+										{
+											current_page = -1;
+											goto SkipPacket;
+										}
+
+										pagetable[current_page] = 1;
+
+									//get subpage
+
+										//todo?
+
+									//get controlbits
+
+										//todo?
+
+									//set update flag
+
+										if(current_page == Page && PageInputCount == 2)
+										{
+											update = 1;
+										}
 								}
-
-								if(((current_page & 0x0F0) > 0x090) || ((current_page & 0x00F) > 0x009))
+								else if(packet_number < 24 && current_page != -1)	//displayable packet for valid page
 								{
-									current_page = -1;
+									//remove parity bit from data bytes (dirty, i know...)
+
+										for(byte = 5; byte < 45; byte++)
+										{
+											vtxt_line[byte] &= 127;
+										}
+								}
+								else												//non displayable packet
+								{
 									goto SkipPacket;
 								}
 
-								pagetable[current_page] = 1;
+							//copy packet to pagebuffer
 
-							//get subpage
-
-								//todo
-
-							//get controlbits
-
-								//todo
-
-							//set update flag
-
-								if(current_page == Page && PageInputCount == 2)
-								{
-									update = 1;
-								}
-						}
-						else if(packet_number < 24 && current_page != -1)	//displayable packet for valid page
-						{
-							//remove parity bit from data bytes (dirty, i know...)
-
-								for(byte = 5; byte < 45; byte++)
-								{
-									vtxt_line[byte] &= 127;
-								}
-						}
-						else												//non displayable packet
-						{
-							goto SkipPacket;
-						}
-
-					//copy packet to pagebuffer
-
-						memcpy(&pagebuffer[current_page*40*24 + packet_number*40], &vtxt_line[5], 40);
+								memcpy(&pagebuffer[current_page*40*24 + packet_number*40], &vtxt_line[5], 40);
 SkipPacket:;
-				}
+						}
+					}
+			}
+			else
+			{
+				//no data available
+
+					usleep(1000000/100);
 			}
 	}
 }
@@ -1389,6 +1404,7 @@ int GetRCCode()
 		{
 			//no command received
 
+				usleep(1000000/100);
 				return 0;
 		}
 }
