@@ -1383,7 +1383,7 @@ public:
 		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
 		{
 			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
-					 return;
+				 return;
 		}
 #endif
 		result += "<tr bgcolor=\"";
@@ -1451,7 +1451,7 @@ public:
 		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
 		{
 			if (!onSameTP(eDVB::getInstance()->recorder->recRef,(eServiceReferenceDVB&)e))
-					 return;
+				return;
 		}
 #endif
 		eString short_description, event_start, event_duration;
@@ -3487,67 +3487,47 @@ static eString listDirectory(eString request, eString dirpath, eString opt, eHTT
 
 static eString makeDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt.find("&&") == eString::npos)
-	{
-		if (system(eString().sprintf("mkdir %s", httpUnescape(opt).c_str()).c_str()) >> 8)
-			return eString().sprintf("E: create directory %s failed", opt.c_str());
-		return "+ok";
-	}
-	return "E: invalid command";
+	if ( mkdir(httpUnescape(opt).c_str(),0755) )
+		return eString().sprintf("E: create directory %s failed", opt.c_str());
+	return "+ok";
 }
 
 static eString removeDirectory(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt.find("&&") == eString::npos)
-	{
-		if (system(eString().sprintf("rmdir %s", httpUnescape(opt).c_str()).c_str()) >> 8)
-			return eString().sprintf("E: remove directory %s failed", opt.c_str());
-		return "+ok";
-	}
-	return "E: invalid command";
+	if ( rmdir(httpUnescape(opt).c_str()) )
+		return eString().sprintf("E: remove directory %s failed", opt.c_str());
+	return "+ok";
 }
 
 static eString removeFile(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt.find("&&") == eString::npos)
-	{
-		if (system(eString().sprintf("rm %s", httpUnescape(opt).c_str()).c_str()) >> 8)
-			return eString().sprintf("E: remove file %s failed", opt.c_str());
-		return "+ok";
-	}
-	return "E: invalid command";
+	if ( unlink(httpUnescape(opt).c_str()) )
+		return eString().sprintf("E: remove file %s failed", opt.c_str());
+	return "+ok";
 }
 
 static eString moveFile(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt.find("&&") == eString::npos)
-	{
-		std::map<eString,eString> opts=getRequestOptions(opt, '&');
-		if (opts.find("source") == opts.end() || !opts["source"].length())
-			return "E: option source missing or empty source given";
-		if (opts.find("dest") == opts.end() || !opts["dest"].length())
-			return "E: option dest missing or empty dest given";
-		if (system(eString().sprintf("mv %s %s", opts["source"].c_str(), opts["dest"].c_str()).c_str()) >> 8)
-			return eString().sprintf("E: cannot move %s to %s", opts["source"].c_str(), opts["dest"].c_str());
-		return "+ok";
-	}
-	return "E: invalid command";
+	std::map<eString,eString> opts=getRequestOptions(opt, '&');
+	if (opts.find("source") == opts.end() || !opts["source"].length())
+		return "E: option source missing or empty source given";
+	if (opts.find("dest") == opts.end() || !opts["dest"].length())
+		return "E: option dest missing or empty dest given";
+	if ( rename(opts["source"].c_str(), opts["dest"].c_str()) )
+		return eString().sprintf("E: cannot move %s to %s", opts["source"].c_str(), opts["dest"].c_str());
+	return "+ok";
 }
 
 static eString createSymlink(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
-	if (opt.find("&&") == eString::npos)
-	{
-		std::map<eString,eString> opts=getRequestOptions(opt, '&');
-		if (opts.find("source") == opts.end() || !opts["source"].length())
-			return "E: option source missing or empty source given";
-		if (opts.find("dest") == opts.end() || !opts["dest"].length())
-			return "E: option dest missing or empty dest given";
-		if (system(eString().sprintf("ln -sf %s %s", opts["source"].c_str(), opts["dest"].c_str()).c_str()) >> 8)
-			return eString().sprintf("E: cannot create symlink %s to %s", opts["source"].c_str(), opts["dest"].c_str());
-		return "+ok";
-	}
-	return "E: invalid command";
+	std::map<eString,eString> opts=getRequestOptions(opt, '&');
+	if (opts.find("source") == opts.end() || !opts["source"].length())
+		return "E: option source missing or empty source given";
+	if (opts.find("dest") == opts.end() || !opts["dest"].length())
+		return "E: option dest missing or empty dest given";
+	if ( ::link( opts["source"].c_str(), opts["dest"].c_str()) )
+		return eString().sprintf("E: cannot create symlink %s to %s", opts["source"].c_str(), opts["dest"].c_str());
+	return "+ok";
 }
 
 void sendKey(int evd, unsigned int code, unsigned int value)
