@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.17 2004/01/02 00:00:37 rasc Exp $
+$Id: dmx_ts.c,v 1.18 2004/01/02 02:45:33 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dmx_ts.c,v 1.17 2004/01/02 00:00:37 rasc Exp $
 
 
 $Log: dmx_ts.c,v $
+Revision 1.18  2004/01/02 02:45:33  rasc
+no message
+
 Revision 1.17  2004/01/02 00:00:37  rasc
 error output for buffer overflow
 
@@ -190,7 +193,7 @@ int  doReadTS (OPTION *opt)
     	n = ts_SyncRead2 (fd_dvr,buf,sizeof(buf), &skipped_bytes);
         b = buf+(skipped_bytes % TS_PACKET_LEN);
     } else {
-    	n = read(fd_dvr,buf,sizeof(buf));
+    	n = read(fd_dvr,buf,TS_PACKET_LEN);
 	b = buf;
     }
 
