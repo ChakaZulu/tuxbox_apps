@@ -87,8 +87,12 @@ class CMoviePlayerGui : public CMenuTarget
 	int            y;
 	int            m_title_w;
 	int            m_LastMode;
+	const char     *filename;
 
-	int  PlayStream(bool isTS);
+	std::string Path;
+	CFileBrowser * filebrowser;
+
+	void PlayStream();
 	void paintItem(int pos);
 	void paint();
 	void paintHead();
