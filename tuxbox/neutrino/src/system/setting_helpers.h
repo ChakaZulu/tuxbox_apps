@@ -97,6 +97,12 @@ class CLcdNotifier : public CChangeObserver
 		bool changeNotify(string OptionName, void*);
 };
 
+class CPauseSectionsdNotifier : public CChangeObserver
+{
+	public:
+		bool changeNotify(string OptionName, void*);
+};
+
 class CStartNeutrinoDirectNotifier : public CChangeObserver
 {
 	public:

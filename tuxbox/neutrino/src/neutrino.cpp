@@ -2055,6 +2055,14 @@ void CNeutrinoApp::ShowStreamFeatures()
 	StreamFeatureSelector.addItem( new CMenuForwarder("timerlist.name", true, "",
 																	  new CTimerList(), id, true, CRCInput::RC_yellow, "gelb.raw"), false );
 
+	// -- Sectionsd pause
+	int dummy = g_Sectionsd->getIsScanningActive();
+	CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.pausesectionsd", &dummy, true, new CPauseSectionsdNotifier );
+	oj->addOption(0, "options.off");
+	oj->addOption(1, "options.on");
+	StreamFeatureSelector.addItem( oj );
+
+
 	// -- Stream Info
 	StreamFeatureSelector.addItem( new CMenuForwarder("streamfeatures.info", true, "",
 																	  StreamFeaturesChanger, id, true, CRCInput::RC_help, "help_small.raw"), false );
@@ -3428,7 +3436,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.470 2003/06/13 12:45:52 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.471 2003/06/18 13:21:59 alexw Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -214,6 +214,16 @@ bool CCableSpectalInversionNotifier::changeNotify(string OptionName, void* Data)
 	return true;
 }
 */
+bool CPauseSectionsdNotifier::changeNotify(string OptionName, void* Data)
+{
+	if( *((int*) Data)!=0)
+		g_Sectionsd->setPauseScanning(false);
+	else
+		g_Sectionsd->setPauseScanning(true);
+
+	return true;
+}
+
 bool CStartNeutrinoDirectNotifier::changeNotify(string OptionName, void* Data)
 {
 	if( *((int*) Data)!=0)
