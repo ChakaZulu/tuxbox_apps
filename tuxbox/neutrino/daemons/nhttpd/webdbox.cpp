@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.22 2002/04/20 16:43:31 dirch Exp $
+	$Id: webdbox.cpp,v 1.23 2002/04/20 17:37:58 dirch Exp $
 
 	License: GPL
 
@@ -118,7 +118,7 @@ bool TWebDbox::ExecuteCGI(CWebserverRequest* request)
 	if(request->Filename.compare("getservices") == 0)		// sendet die datei services.xml
 	{
 		request->SendPlainHeader();
-		request->SendFile("/var/tuxbox/config","services.xml");
+		request->SendFile("/var/tuxbox/config/zapit","services.xml");
 		return true;
 	}
 
@@ -702,7 +702,7 @@ char *buffer = new char[500];
 
 	for(int i = 0; i < BouquetList.size();i++)
 	{
-		sprintf(buffer,"BouquetList[i]. bouquet_nr: %ld name: '%s'\n",BouquetList[i].bouquet_nr,BouquetList[i].name);
+		sprintf(buffer,"%ld %s\n",BouquetList[i].bouquet_nr,BouquetList[i].name);
 		request->SocketWrite(buffer);
 	}
 	delete[] buffer;
@@ -714,7 +714,7 @@ char *buffer = new char[500];
 
 	for(int i = 0; i < BouquetsList[BouquetNr].size();i++)
 	{
-		sprintf(buffer,"BouquetList[i]. nr: %ld onsid: %ld name: '%s'\n\0",(BouquetsList[BouquetNr])[i].nr,BouquetsList[BouquetNr][i].onid_sid,BouquetsList[BouquetNr][i].name);
+		sprintf(buffer,"%ld %ld %s\n\0",(BouquetsList[BouquetNr])[i].nr,BouquetsList[BouquetNr][i].onid_sid,BouquetsList[BouquetNr][i].name);
 		request->SocketWrite(buffer);
 	}
 	delete[] buffer;
