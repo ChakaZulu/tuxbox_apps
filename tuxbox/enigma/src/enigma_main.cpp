@@ -18,6 +18,7 @@
 #include "enigma_lcd.h"
 #include "decoder.h"
 #include "enigma_plugins.h"
+#include "download.h"
 
 static QString getISO639Description(char *iso)
 {
@@ -279,9 +280,6 @@ void eZapMain::redrawWidget(gPainter *painter, const QRect &where)
 void eZapMain::eraseBackground(gPainter *painter, const QRect &where)
 {
 }
-
-#define ASSIGN(v, t, n)	\
-	v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
 
 eZapMain::eZapMain(): eWidget(0, 1)
 {
@@ -741,7 +739,17 @@ void eZapMain::keyUp(int code)
 		}
 		break;
 	}
-
+#if 0
+	case eRCInput::RC_RED:
+	{
+		hide();
+		eDownloadWindow down("http://www.elitedvb.net/files/tuner.so");
+		down.show();
+		down.exec();
+		down.hide();
+		show();
+	}
+#endif
 	case eRCInput::RC_HELP:
 	{
 		if (!eDVB::getInstance()->service)

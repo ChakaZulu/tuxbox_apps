@@ -122,6 +122,12 @@
 			<ePixmap position="0:61" size="120:3" pixmap="lcd_menu" />
 		</eZapLCDMenu>
 	</object>
+	
+	<object name="eDownloadWindow">
+		<eDownloadWindow position="50:70" size="600:300" text="HTTP Download">
+			<eProgress position="0:50" size="100:20" name="progress" />
+		</eDownloadWindow>
+	</object>
 
 	<object name="ezap_main">
 		<eZapMain position="50:355" size="670:180">

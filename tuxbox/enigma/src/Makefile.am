@@ -20,7 +20,8 @@ enigma_SOURCES = \
 	setupnetwork.cpp setupnetwork.moc.cpp \
 	setupvideo.cpp setupvideo.moc.cpp showbnversion.cpp \
 	showbnversion.moc.cpp sselect.cpp sselect.moc.cpp streaminfo.cpp \
-	streaminfo.moc.cpp enigma_mainmenu.cpp enigma_mainmenu.moc.cpp
+	streaminfo.moc.cpp enigma_mainmenu.cpp enigma_mainmenu.moc.cpp \
+	download.cpp download.moc.cpp
 
 enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/driver/libdriver.la \

@@ -10,9 +10,6 @@
 #include "emessage.h"
 #include "eskin.h"
 
-#define ASSIGN(v, t, n)	\
-	v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
-
 eZapLCD* eZapLCD::instance;
 
 eZapLCD::eZapLCD(): eWidget()
@@ -46,7 +43,7 @@ void eZapLCDMain::clockUpdate()
 
 void eZapLCDMain::volumeUpdate(int vol)
 {
-    Volume->setPerc((63-vol)*100/63);
+	Volume->setPerc((63-vol)*100/63);
 }
 
 void eZapLCDMain::serviceChanged(eService *service, int)

@@ -35,9 +35,6 @@ void eEventDisplay::keyUp(int rc)
 	}
 }
 
-#define ASSIGN(v, t, n)	\
-	v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
-
 eEventDisplay::eEventDisplay(QString service, const QList<EITEvent> &e): eWindow(1), service(service)
 	/*
 			kleine anmerkung:

@@ -70,4 +70,7 @@ public:
 	static eSkin *getActive();
 };
 
+#define ASSIGN(v, t, n) \
+  v =(t*)search(n); if (! v ) { qWarning("skin has undefined element: %s", n); v=new t(this); }
+
 #endif
