@@ -80,3 +80,4 @@ int pat(uint oonid,std::map<uint,channel> *cmap);
 void nit();
 int tune(uint tsid);
 void *start_scanthread(void *);
+int get_caver();

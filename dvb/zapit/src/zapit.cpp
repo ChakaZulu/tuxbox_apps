@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.39 2001/11/20 13:40:52 field Exp $
+  $Id: zapit.cpp,v 1.40 2001/11/22 00:01:38 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -58,7 +58,18 @@
 
   cmd = 'r' get list of channels of a specified bouquet
   param = id of bouquet
-
+  
+  cmd = 't' Get or-ed values for caid and ca-version. 
+  		caid 0x1722 == 1
+  		caid 0x1702 == 2
+  		caid 0x1762 == 4
+  		other caid == 8
+  		cam-type E == 16
+  		cam-type D == 32
+  		cam-type F == 64
+  		other cam-type == 128
+  		so valid are : 34, 17 and 68
+  		
   Bei Fehlschlagen eines Kommandos wird der negative Wert des kommandos zurückgegeben.
 
   License: GPL
@@ -78,6 +89,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.40  2001/11/22 00:01:38  faralla
+  check for caid and ca-ver
+
   Revision 1.39  2001/11/20 13:40:52  field
   Sorted List wieder rausgetan, Bouquets sind besser :)
 
@@ -1496,6 +1510,7 @@ void parse_command()
   std::map<uint,uint>::iterator sit;
   std::map<uint,channel>::iterator cit;
   int number = 0;
+  int caid_ver = 0;
   //printf ("parse_command\n");
 
   //byteorder!!!!!!
@@ -1980,6 +1995,32 @@ void parse_command()
 			return;
 		}
 		break;
+	case 't':
+		status = "00t";
+		if (send(connfd, status, strlen(status),0) == -1) {
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		switch (caid)
+		{
+			case 0x1722 : caid_ver = 1;
+				break;
+			case 0x1702 : caid_ver = 2;
+				break;
+			case 0x1762 : caid_ver = 4;
+				break;
+			default : caid_ver = 8;
+		}
+		caid_ver |= get_caver();
+		if (send(connfd, status, strlen(status),0) == -1) {
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		if (send(connfd, &caid_ver, sizeof(int),0) == -1) {
+			perror("[zapit] could not send any return\n");
+			return;
+		}
+		break;
 	default:
       status = "000";
       //printf("zapit is sending back a status-msg %s\n", status);
@@ -2043,7 +2084,7 @@ int main(int argc, char **argv) {
     }
 
   system("/usr/bin/killall camd");
-  printf("Zapit $Id: zapit.cpp,v 1.39 2001/11/20 13:40:52 field Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.40 2001/11/22 00:01:38 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
@@ -2055,7 +2096,7 @@ int main(int argc, char **argv) {
     Radiomode_on = true;
 
   caid = get_caid();
-
+  
   memset(&pids_desc, 0, sizeof(pids));
 
   if (prepare_channels() <0) {
@@ -2083,29 +2124,22 @@ int main(int argc, char **argv) {
 
   switch (fork ())
     {
-    case -1:                    /* can't fork */
+    case -1:                    // can't fork
       perror ("[zapit] fork()");
       exit (3);
-    case 0:                     /* child, process becomes a daemon: */
+    case 0:                     // child, process becomes a daemon: 
       //close (STDIN_FILENO);
       //close (STDOUT_FILENO);
       //close (STDERR_FILENO);
-      if (setsid () == -1)      /* request a new session (job control) */
+      if (setsid () == -1)      // request a new session (job control) 
 	{
 	  exit (4);
 	}
       break;
-    default:                    /* parent returns to calling process: */
+    default:                    // parent returns to calling process: 
       return 0;
     }
 
-  /* Establish signal handler to clean up before termination: */
-//  if (signal (SIGTERM, termination_handler) == SIG_IGN)
-//    signal (SIGTERM, SIG_IGN);
-//  signal (SIGINT, SIG_IGN);
-//  signal (SIGHUP, SIG_IGN);
-
-  /* Main program loop */
 
 //  descramble(0xffff,0xffff,0xffff,0xffff,0xffff, 0xffff,0xffff);
     pids _pids;
@@ -2124,6 +2158,7 @@ int main(int argc, char **argv) {
       parse_command();
       close(connfd);
     }
+    
   return 0;
 }
 
@@ -2163,6 +2198,7 @@ void sendBouquetList()
 			}
 		}
 	}
+	
 }
 
 void sendChannelListOfBouquet( uint nBouquet)
