@@ -2524,12 +2524,23 @@ void eZapMain::pause()
 	}
 	else
 	{
-		handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
-		if ( ref.type == eServiceReference::idDVB && ref.path )
+		if ( ref.type == eServiceReference::idDVB )
 		{
-			getPlaylistPosition();
-			Decoder::flushBuffer();
+			if ( ref.path )
+			{
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+				getPlaylistPosition();
+				Decoder::flushBuffer();
+			}
+			else if ( !eDVB::getInstance()->recorder )
+			{
+				record();
+				usleep(200*1000);
+				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+			}
 		}
+		else
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
 	}
 }
 
