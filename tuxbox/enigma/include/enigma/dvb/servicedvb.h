@@ -6,11 +6,11 @@
 class eServiceHandlerDVB: public eServiceHandler
 {
 	void scrambledStatusChanged(bool);
-	void switchedService(const eServiceReference &, int);
+	void switchedService(const eServiceReferenceDVB &, int);
 	void gotEIT(EIT *eit, int);
 	void gotSDT(SDT *sdt);
 	void gotPMT(PMT *pmt);
-	void leaveService(const eServiceReference &);
+	void leaveService(const eServiceReferenceDVB &);
 	void aspectRatioChanged(int ratio);
 	int flags, state, aspect, error;
 public:
@@ -37,6 +37,9 @@ public:
 	int getErrorInfo();
 
 	int stop();
+
+	void enterDirectory(const eServiceReference &dir, Signal0<void,const eServiceReference&> &callback);
+	void leaveDirectory(const eServiceReference &dir);
 };
 
 #endif

@@ -102,8 +102,7 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 			sapi->switchService(
-				eServiceReference(
-					eServiceReference::idDVB,
+				eServiceReferenceDVB(
 					eTransportStreamID(transport_stream_id), 
 					eOriginalNetworkID(original_network_id),
 					eServiceID(service_id),
@@ -116,7 +115,7 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 	return result;
 }
 
-struct listService: public std::unary_function<std::pair<eServiceReference,eService>&,void>
+struct listService: public std::unary_function<std::pair<eServiceReferenceDVB,eService>&,void>
 {
 	eString &result;
 	const eString &search;
@@ -392,7 +391,7 @@ static eString getVolBar()
 static eString getWatchContent(eString mode, int bouquetid)
 {
 	ePtrList<eBouquet>* bouquets;
-	std::list<eServiceReference> esref;
+	std::list<eServiceReferenceDVB> esref;
 	eService *es;
 	eString result("");
 	eString tmp("");
@@ -405,9 +404,9 @@ static eString getWatchContent(eString mode, int bouquetid)
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageTV(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
 		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			for(std::list<eServiceReference>::iterator s = i->list.begin(); s != i->list.end(); s++)
+			for(std::list<eServiceReferenceDVB>::iterator s = i->list.begin(); s != i->list.end(); s++)
 			{
-				if(s->service_type==1 || s->service_type==4)
+				if(s->getServiceType()==1 || s->getServiceType()==4)
 				{
 					tmp=eString(filter_string(i->bouquet_name.c_str()));
 					result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
@@ -428,7 +427,7 @@ static eString getWatchContent(eString mode, int bouquetid)
 		if(!act)
 			return eString("no bouquets");
 		esref=act->list;
-		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
+		for(std::list<eServiceReferenceDVB>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
 			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
 			if (es)
@@ -436,7 +435,7 @@ static eString getWatchContent(eString mode, int bouquetid)
 				if(es->service_type==1||es->service_type==4)
 				{
 					result+="<option value=\"";
-					tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
+					tmp.sprintf("%x:%x:%x:%x", j->getServiceID().get(), j->getTransportStreamID().get(), j->getOriginalNetworkID().get(), j->getServiceType());
 					result+=tmp;
 					result+="\">";
 					result+=filter_string(es->service_name.c_str());
@@ -454,9 +453,9 @@ static eString getWatchContent(eString mode, int bouquetid)
 		result+="<select name=\"bouquetid\" size=\"1\" onChange=\"javascript:getNewPageRadio(this.form.bouquetid.options[this.form.bouquetid.options.selectedIndex].value)\">";
 		for(ePtrList<eBouquet>::iterator i(*bouquets); i != bouquets->end(); ++i)
 		{
-			for(std::list<eServiceReference>::iterator s = i->list.begin(); s != i->list.end(); s++)
+			for(std::list<eServiceReferenceDVB>::iterator s = i->list.begin(); s != i->list.end(); s++)
 			{
-				if(s->service_type==2)
+				if(s->getServiceType()==2)
 				{
 					tmp=eString(filter_string(i->bouquet_name.c_str()));
 					result+="<option value=\"" + eString().setNum(i->bouquet_id, 10) + "\"";
@@ -474,7 +473,7 @@ static eString getWatchContent(eString mode, int bouquetid)
 		eBouquet *act;
 		act=getBouquet(bouquetid);
 		esref=act->list;
-		for(std::list<eServiceReference>::iterator j = esref.begin(); j != esref.end() ; j++)
+		for(std::list<eServiceReferenceDVB>::iterator j = esref.begin(); j != esref.end() ; j++)
 		{
 			es=eDVB::getInstance()->settings->getTransponders()->searchService(*j);
 			if (es)
@@ -482,7 +481,7 @@ static eString getWatchContent(eString mode, int bouquetid)
 				if(es->service_type==2)
 				{
 					result+="<option value=\"";
-					tmp.sprintf("%x:%x:%x:%x", j->service_id.get(), j->transport_stream_id.get(), j->original_network_id.get(), j->service_type);
+					tmp.sprintf("%x:%x:%x:%x", j->getServiceID().get(), j->getTransportStreamID().get(), j->getOriginalNetworkID().get(), j->getServiceType());
 					result+=tmp;
 					result+="\">";
 					result+=filter_string(es->service_name.c_str());
@@ -787,8 +786,7 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 		sapi->switchService(
-			eServiceReference(
-				eServiceReference::idDVB,
+			eServiceReferenceDVB(
 				eTransportStreamID(transport_stream_id), 
 				eOriginalNetworkID(original_network_id),
 				eServiceID(service_id),
@@ -822,7 +820,7 @@ static eString getbouq(eString request, eString path, eString opt, eHTTPConnecti
 	eString tmp;
 
 	ePtrList<eBouquet>* bouquets;
-	std::list<eServiceReference> esref;
+	std::list<eServiceReferenceDVB> esref;
 
 	content->local_header["Content-Type"]="text/html";
 
@@ -917,9 +915,9 @@ static eString getsi(eString request, eString path, eString opt, eHTTPConnection
 	apid=eString().sprintf("%04xh (%dd)", Decoder::parms.apid, Decoder::parms.apid);
 	pcrpid=eString().sprintf("%04xh (%dd)", Decoder::parms.pcrpid, Decoder::parms.pcrpid);
 	tpid=eString().sprintf("%04xh (%dd)", Decoder::parms.tpid, Decoder::parms.tpid);
-	tsid=eString().sprintf("%04xh", sapi->service.transport_stream_id.get());
-	onid=eString().sprintf("%04xh", sapi->service.original_network_id.get());
-	sid=eString().sprintf("%04xh", sapi->service.service_id.get());
+	tsid=eString().sprintf("%04xh", sapi->service.getTransportStreamID().get());
+	onid=eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
+	sid=eString().sprintf("%04xh", sapi->service.getServiceID().get());
 
 	FILE *bitstream=0;
 	

@@ -10,6 +10,16 @@ eServiceHandler::~eServiceHandler()
 {
 }
 
+void eServiceHandler::enterDirectory(const eServiceReference &dir, Signal0<void,const eServiceReference&> &callback)
+{
+	return;
+}
+
+void eServiceHandler::leaveDirectory(const eServiceReference &dir)
+{
+	return;
+}
+
 eServiceInterface *eServiceInterface::instance;
 
 eServiceInterface *eServiceInterface::getInstance()
@@ -80,7 +90,10 @@ eServiceHandler *eServiceInterface::getServiceHandler(int id)
 eService *eServiceInterface::lookupService(const eServiceReference &service)
 {
 	eServiceHandler *handler=getServiceHandler(service.type);
-	return handler->lookupService(service);
+	if (handler)
+		return handler->lookupService(service);
+	else
+		return 0;
 }
 
 int eServiceInterface::play(const eServiceReference &s)

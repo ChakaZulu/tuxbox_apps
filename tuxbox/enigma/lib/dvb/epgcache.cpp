@@ -46,7 +46,7 @@ int eEPGCache::sectionRead(__u8 *data)
 		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 		int eit_event_size;
 		int duration;
-		eServiceReference service(eServiceReference::idDVB, -1, original_network_id, service_id, -1);
+		eServiceReferenceDVB service(-1, original_network_id, service_id, -1);
 		time_t TM;
 		updateMap::iterator It;
 		
@@ -60,7 +60,7 @@ int eEPGCache::sectionRead(__u8 *data)
 
 		if (firstEventId == HILO( eit_event->event_id ) )  // EPGCache around....
 		{
-			stopEPG(*(eServiceReference*)0);
+			stopEPG(*(eServiceReferenceDVB*)0);
 			zapTimer.start(UPDATE_INTERVAL, 1);
 			eDebug("[EPGC] next update in %i min", UPDATE_INTERVAL / 60000);
 			
@@ -147,7 +147,7 @@ eEPGCache::~eEPGCache()
 			delete It->second;
 }
 
-/*EITEvent *eEPGCache::lookupEvent(const eServiceReference &service, int event_id)
+/*EITEvent *eEPGCache::lookupEvent(const eServiceReferenceDVB &service, int event_id)
 {
 	eventMap &service=eventDB[service];
 	eventMap::iterator event=service.find(event_id);
@@ -156,7 +156,7 @@ eEPGCache::~eEPGCache()
 	return new EITEvent(*event->second);
 } */
 
-EITEvent *eEPGCache::lookupCurrentEvent(const eServiceReference &service)
+EITEvent *eEPGCache::lookupCurrentEvent(const eServiceReferenceDVB &service)
 {
 	eventCache::iterator It =	eventDB.find(service);
 	if (It != eventDB.end())

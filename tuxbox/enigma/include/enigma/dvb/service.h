@@ -1,21 +1,6 @@
 #ifndef __core_dvb_service_h
 #define __core_dvb_service_h
 
-/*
-	muss können:
-	
-	switchService (OOH)
-	SubService-Verwaltung (uh oh)
-	Audiochannels benennen (laut EIT wg. componentTag)
-	Audiochannel wechseln
-	SubService-Wechseln (no prob)
-	Flags abfragen: Scrambled? Key Available? neue EIT? 
-	change volume
-	EIT list abfragen
-	ordentlichen namen vom service kriegen
-
-*/
-
 #include <map>
 #include <include/libsig_comp.h>
 #include <core/dvb/dvb.h>
@@ -98,6 +83,10 @@ public:
 	virtual int stop()=0;
 
 	Signal1<void, const eServiceEvent &> serviceEvent;
+
+		// service list functions
+	virtual void enterDirectory(const eServiceReference &dir, Signal0<void,const eServiceReference&> &callback);
+	virtual void leaveDirectory(const eServiceReference &dir);
 };
 
 class eService;

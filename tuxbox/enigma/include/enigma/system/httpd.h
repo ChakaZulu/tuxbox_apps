@@ -15,20 +15,6 @@ class eHTTPConnection;
 class eHTTPDataSource;
 class eHTTPD;
 
-class eHTTPGarbage
-{
-	eTimer garbage;
-	ePtrList<eHTTPConnection> *conn;
-	static eHTTPGarbage *instance;
-public:
-	void doGarbage();
-public:
-	void destruct(eHTTPConnection *c);
-	eHTTPGarbage();
-	~eHTTPGarbage();
-	static eHTTPGarbage *getInstance() { return instance; }
-};
-
 class eHTTPPathResolver
 {
 public:
@@ -70,12 +56,13 @@ class eHTTPConnection: public eSocket
 	eHTTPDataSource *data;
 	eHTTPD *parent;
 	
-	int buffersize, dying;
+	int buffersize;
 private:
 	void readData();
 	void gotError(int);
 	void bytesWritten(int);
 	void hostConnected();
+	void destruct();
 public:
 	Signal0<void> closing;
 	enum
@@ -98,7 +85,6 @@ public:
 	
 	eHTTPConnection(int socket, eHTTPD *parent);
 	eHTTPConnection(eString host, int port=80);
-	void die();
 	static eHTTPConnection *doRequest(const char *uri, int *error=0);
 	void start();
 	~eHTTPConnection();
@@ -122,10 +108,6 @@ class eHTTPD: public eServerSocket
 {
 	friend class eHTTPConnection;
 	ePtrList<eHTTPPathResolver> resolver;
-private:
-	void oneConnectionClosed();
-	eHTTPConnection *conn;
-	
 public:
 	eHTTPD(int port);
 	void newConnection(int socket);

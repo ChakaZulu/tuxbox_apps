@@ -78,7 +78,7 @@ void ShowBNVersion::willShow()
 		return;
 	}
 	
-	if (sapi->switchService(eServiceReference(eServiceReference::idDVB, eTransportStreamID(0x0001), eOriginalNetworkID(0x0085), eServiceID(0x0F03), -1)))
+	if (sapi->switchService(eServiceReferenceDVB(eTransportStreamID(0x0001), eOriginalNetworkID(0x0085), eServiceID(0x0F03), -1)))
 		text->setText("Transponder not found. Do a channelsearch first.");
 	else
 		text->setText("Tuning in transponder...");
@@ -112,8 +112,8 @@ void ShowBNVersion::eventOccured(const eDVBEvent &event)
 
 	if (event.type==eDVBServiceEvent::eventServiceSwitched)
 	{
-		if ((sapi->service.service_id==eServiceID(0x0F03)) &&
-				(sapi->service.original_network_id==eOriginalNetworkID(0x0085)))
+		if ((sapi->service.getServiceID()==eServiceID(0x0F03)) &&
+				(sapi->service.getOriginalNetworkID()==eOriginalNetworkID(0x0085)))
 		{
 			text->setText("Tuned in transponder.\nReading version information...");
 			PMT *pmt=eDVB::getInstance()->getPMT();

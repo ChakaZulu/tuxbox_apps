@@ -44,7 +44,7 @@ public:
 	eTransponder *currentTransponder;
 	int currentTransponderState;
 		/* current service */
-	eServiceReference service;	// meta-service
+	eServiceReferenceDVB service;	// meta-service
 	eTransponder *transponder;
 	int pmtpid;
 	int service_state;
@@ -82,7 +82,7 @@ public:
 	~eDVBServiceController();
 	void handleEvent(const eDVBEvent &event);
 
-	int switchService(const eServiceReference &service); /** -> eventServiceSwitched */
+	int switchService(const eServiceReferenceDVB &service); /** -> eventServiceSwitched */
 };
 
 #endif

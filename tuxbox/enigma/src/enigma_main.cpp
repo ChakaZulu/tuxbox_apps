@@ -232,7 +232,7 @@ void NVODStream::EITready(int error)
 		}
 	}
 	else
-		text << "Service " << std::setw(4) << std::hex << service.service_id.get();
+		text << "Service " << std::setw(4) << std::hex << service.getServiceID().get();
 
 	((eListBox<NVODStream>*)listbox)->sort(); // <<< without explicit cast the compiler nervs ;)
 
@@ -243,7 +243,7 @@ void NVODStream::EITready(int error)
 
 NVODStream::NVODStream(eListBox<NVODStream> *listbox, const NVODReferenceEntry *ref, int type)
 	: eListBoxEntryTextStream((eListBox<eListBoxEntryTextStream>*)listbox), 
-		service(eServiceReference::idDVB, eTransportStreamID(ref->transport_stream_id), eOriginalNetworkID(ref->original_network_id),
+		service(eTransportStreamID(ref->transport_stream_id), eOriginalNetworkID(ref->original_network_id),
 			eServiceID(ref->service_id), 5), eit(EIT::typeNowNext, ref->service_id, type)
 {
 	CONNECT(eit.tableReady, NVODStream::EITready);
@@ -272,10 +272,13 @@ void eNVODSelector::clear()
 
 void eNVODSelector::add(NVODReferenceEntry *ref)
 {
-	eServiceReference &service=eServiceInterface::getInstance()->service;
+	eServiceReference &s=eServiceInterface::getInstance()->service;
+	if (s.type != eServiceReference::idDVB)
+		return ;
+	eServiceReferenceDVB &service=(eServiceReferenceDVB&)s;
 
-	int type= ((service.transport_stream_id==eTransportStreamID(ref->transport_stream_id))
-			&&	(service.original_network_id==eOriginalNetworkID(ref->original_network_id))) ? EIT::tsActual:EIT::tsOther;
+	int type= ((service.getTransportStreamID()==eTransportStreamID(ref->transport_stream_id))
+			&&	(service.getOriginalNetworkID()==eOriginalNetworkID(ref->original_network_id))) ? EIT::tsActual:EIT::tsOther;
 	new NVODStream(&list, ref, type);
 }
 
@@ -352,7 +355,7 @@ void eAudioSelector::add(PMTEntry *pmt)
 
 SubService::SubService(eListBox<SubService> *listbox, const LinkageDescriptor *descr)
 	:eListBoxEntryText((eListBox<eListBoxEntryText>*) listbox),
-		service(eServiceReference::idDVB, eTransportStreamID(descr->transport_stream_id), 
+		service(eTransportStreamID(descr->transport_stream_id), 
 			eOriginalNetworkID(descr->original_network_id),
 			eServiceID(descr->service_id), 1)
 {
@@ -434,7 +437,7 @@ void eZapMain::eraseBackground(gPainter *painter, const eRect &where)
 {
 }
 
-eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), timeout(eApp), clocktimer(eApp)
+eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), message_notifier(eApp), timeout(eApp), clocktimer(eApp), messagetimeout(eApp)
 {
 	isVT=0;
 	eSkin *skin=eSkin::getActive();
@@ -502,9 +505,12 @@ eZapMain::eZapMain(): eWidget(0, 1), pMsg(0), timeout(eApp), clocktimer(eApp)
 
 	CONNECT(timeout.timeout, eZapMain::timeOut);
 	CONNECT(clocktimer.timeout, eZapMain::clockUpdate);
+	CONNECT(messagetimeout.timeout, eZapMain::nextMessage);
 
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapMain::clockUpdate);
 	CONNECT(eAVSwitch::getInstance()->volumeChanged, eZapMain::updateVolume);
+
+	CONNECT(message_notifier.recv_msg, eZapMain::gotMessage);
 
 	actual_eventDisplay=0;
 
@@ -918,12 +924,15 @@ void eZapMain::runVTXT()
 void eZapMain::showEPGList()
 {
 #if 1
+	eServiceReferenceDVB &service=(eServiceReferenceDVB&)eServiceInterface::getInstance()->service;
+	if (service.type != eServiceReference::idDVB)
+		return;
 	if (isEPG)
 	{
 		eZapLCD* pLCD = eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdMenu->show();
-		eEPGSelector wnd(eServiceInterface::getInstance()->service);
+		eEPGSelector wnd(service);
 		wnd.setLCD(pLCD->lcdMenu->Title, pLCD->lcdMenu->Element);
 		if (isVisible())
 		{
@@ -961,7 +970,7 @@ void eZapMain::showEPG()
 
 #ifdef USE_CACHED_EPG
 #error no
-	const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->original_network_id, service->service_id);
+	const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->getOriginalNetworkID(), service->getServiceID());
 
 	if (pMap && isEPG)  // EPG vorhanden
 	{
@@ -1016,12 +1025,7 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 	switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
-		if (pMsg)
-		{
-			pMsg->hide();
-			delete pMsg;
-			pMsg=0;
-		}
+		stopMessages();
 		if (event.action == &i_enigmaMainActions->showMainMenu)
 			showMainMenu();
 		else if (event.action == &i_enigmaMainActions->standby_press)
@@ -1061,7 +1065,11 @@ int eZapMain::eventHandler(const eWidgetEvent &event)
 		else if (event.action == &i_enigmaMainActions->toggleMute)
 			toggleMute();
 		else 
+		{
+			startMessages();
 			break;
+		}
+		startMessages();
 		return 1;
 	default:
 		break;
@@ -1108,9 +1116,14 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	}
 }
 
-void eZapMain::startService(const eServiceReference &serviceref, int err)
+void eZapMain::startService(const eServiceReference &_serviceref, int err)
 {
 	isVT = Decoder::parms.tpid != -1;
+
+	if (_serviceref.type != eServiceReference::idDVB)
+		return;
+	
+	const eServiceReferenceDVB &serviceref=(const eServiceReferenceDVB&)_serviceref;
 
 	setVTButton(isVT);
 
@@ -1119,7 +1132,7 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		// es wird nur dann versucht einen service als referenz-service zu uebernehmen, wenns den ueberhaupt
 		// gibt.
 	if (service)
-		switch (serviceref.service_type)
+		switch (serviceref.getServiceType())
 		{
 		case 1:	// TV
 		case 2: // radio
@@ -1132,7 +1145,7 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 	if (refservice != serviceref)
 		rservice=eDVB::getInstance()->settings->getTransponders()->searchService(refservice);
 	
-	if (refservice.service_type==4)
+	if (refservice.getServiceType()==4)
 		flags|=ENIGMA_NVOD;
 	else
 		flags&=~ENIGMA_NVOD;
@@ -1145,7 +1158,7 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 	if (service)
 		name+=service->service_name;
 	else
-		switch (serviceref.service_type)
+		switch (serviceref.getServiceType())
 		{
 		case 5: // nvod stream
 			name+="NVOD Stream";
@@ -1156,15 +1169,6 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 
 	ChannelName->setText(name);		
 
-	if (pMsg)
-	{
-		if (pMsg->isVisible())
-			pMsg->hide();
-
-		delete pMsg;
-		pMsg = 0;
-	}
-
 	switch (err)
 	{
 	case 0:
@@ -1172,42 +1176,39 @@ void eZapMain::startService(const eServiceReference &serviceref, int err)
 		break;
 	case -EAGAIN:
 		Description->setText(_("Einen Moment bitte..."));
-		pMsg = new eMessageBox( _("One moment please..."), _("Service Switch"), true);
+		postMessage(eZapMessage(0, _("switch"), _("One moment please...")), 1);
 		break;
 	case -ENOENT:
 		Description->setText(_("Sender konnte nicht gefunden werden."));
-		pMsg = new eMessageBox( _("Service could not be found !"), _("Service Switch"), true );
+		postMessage(eZapMessage(0, _("switch"), _("Service could not be found !")), 1);
 		eDebug("Sender konnte nicht gefunden werden.");
 		break;
 	case -ENOCASYS:
 		Description->setText(_("Dieser Sender kann nicht entschlüsselt werden."));
-		pMsg = new eMessageBox( _("This service could not be descrambled"), _("Service Switch"), true );
+		postMessage(eZapMessage(0, _("switch"), _("This service could not be descrambled")), 1);
 		eDebug("Dieser Sender kann nicht entschlüsselt werden.");
 		break;
 	case -ENOSTREAM:
 		Description->setText(_("Dieser Sender sendet (momentan) kein Signal."));
-		pMsg = new eMessageBox( _("This service sends (currently) no signal"), _("Service Switch"), true );
+		postMessage(eZapMessage(0, _("switch"), _("This service sends (currently) no signal")), 1);
 		eDebug("Dieser Sender sendet (momentan) kein Signal.");
 		break;
 	case -ENOSYS:
 		Description->setText(_("Dieser Inhalt kann nicht dargestellt werden."));
-		pMsg = new eMessageBox( _("This content could not be displayed"), _("Service Switch"), true );
 		eDebug("Dieser Inhalt kann nicht dargestellt werden.");
+		postMessage(eZapMessage(0, _("switch"), _("This content could not be displayed")), 1);
 		break;
 	case -ENVOD:
 		Description->setText(_("NVOD - Bitte Anfangszeit bestimmen!"));
-		pMsg = new eMessageBox( _("NVOD Service - select a starttime, please"), _("Service Switch"), true );
 		eDebug("NVOD - Bitte Anfangszeit bestimmen!");
+		postMessage(eZapMessage(0, _("switch"), _("NVOD Service - select a starttime, please")), 1);
 		break;
 	default:
 		Description->setText(_("<unbekannter Fehler>"));
-		pMsg = new eMessageBox( _("Unknown error !!"), _("Service Switch"), true );
 		eDebug("<unbekannter Fehler>");
+		postMessage(eZapMessage(0, _("switch"), _("Unknown error !!")), 1);
 		break;
 	}
-
-	if (pMsg)
-		pMsg->show();
 
 	int num=-1;
 	
@@ -1289,14 +1290,14 @@ void eZapMain::gotSDT()
 	if (!sdt)
 		return;
 
-	switch (eServiceInterface::getInstance()->service.service_type)
+	switch (((eServiceReferenceDVB&)eServiceInterface::getInstance()->service).getServiceType())
 	{
 	case 0x4:	// nvod reference
 	{
 		for (ePtrList<SDTEntry>::iterator i(sdt->entries); i != sdt->entries.end(); ++i)
 		{
 			SDTEntry *entry=*i;
-			if (eServiceID(entry->service_id)==eServiceInterface::getInstance()->service.service_id)
+			if (eServiceID(entry->service_id)==((eServiceReferenceDVB&)eServiceInterface::getInstance()->service).getServiceID())
 				handleNVODService(entry);
 		}
 		break;
@@ -1412,4 +1413,94 @@ void eZapMain::clockUpdate()
 void eZapMain::updateVolume(int vol)
 {
 	VolumeBar->setPerc((63-vol)*100/63);
+}
+
+void eZapMain::postMessage(const eZapMessage &message, int clear)
+{
+	eLocker l(messagelock);
+	int c=0;
+	if (clear)
+	{
+		for (std::list<eZapMessage>::iterator i(messages.begin()); i != messages.end(); )
+			if (message.isSameType(*i))
+			{
+				if (i == messages.begin())
+					c=1;
+				i = messages.erase(i);
+			} else
+				++i;
+	}
+	messages.push_back(message);
+	message_notifier.send(c);
+}
+
+void eZapMain::gotMessage(const int &c)
+{
+	pauseMessages();
+	if ((!c) && pMsg) // noch eine gueltige message vorhanden
+		return;
+	while (!messages.empty())
+	{
+		nextMessage();
+		if (pMsg)
+			return;
+	}
+	startMessages();
+}
+
+void eZapMain::nextMessage()
+{
+	eZapMessage msg;
+	messagelock.lock();
+
+	if (pMsg)
+	{
+#if 0
+		if (pMsg->in_loop)
+			pMsg->close();
+#endif 
+		pMsg->hide();
+		delete pMsg;
+		pMsg=0;
+	}
+
+	std::list<eZapMessage>::iterator i(messages.begin());
+ 	if (i != messages.end())
+ 	{
+ 		msg=messages.front();
+		messages.pop_front();
+		messagelock.unlock();
+		int showonly=msg.getTimeout()>=0;
+		if (!showonly)
+			hide();
+		pMsg = new eMessageBox(msg.getBody(), msg.getCaption(), showonly);
+		pMsg->show();
+		if (showonly)
+		{
+			pMsg->exec();
+			pMsg->hide();
+			delete pMsg;
+			pMsg=0;
+		} else if (msg.getTimeout())
+			messagetimeout.start(msg.getTimeout());
+	} else
+		messagelock.unlock();
+}
+
+void eZapMain::stopMessages()
+{
+	pauseMessages();
+	if (pMsg)
+		delete pMsg;
+	pMsg=0;
+}
+
+void eZapMain::startMessages()
+{
+	message_notifier.start();
+}
+
+void eZapMain::pauseMessages()
+{
+	message_notifier.stop();
 }

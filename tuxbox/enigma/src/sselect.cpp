@@ -17,6 +17,7 @@
 #include <core/dvb/epgcache.h>
 #include <core/driver/rc.h>
 #include <core/system/init.h>
+#include <core/dvb/service.h>
 
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
@@ -72,7 +73,7 @@ eListBoxEntryService::eListBoxEntryService(eListBox<eListBoxEntryService> *lb, c
 #if 0
 	sort=eString().sprintf("%06d", service->service_number);
 #else
-	const eService *pservice=eDVB::getInstance()->settings->getTransponders()->searchService(service);
+	const eService *pservice=eServiceInterface::getInstance()->lookupService(service);
 	sort=pservice?pservice->service_name:"";
 	sort.upper();
 #endif
@@ -96,37 +97,41 @@ int eListBoxEntryService::getHeight()
 
 void eListBoxEntryService::redraw(gPainter *rc, const eRect &rect, gColor coActiveB, gColor coActiveF, gColor coNormalB, gColor coNormalF, int hilited)
 {
-	const eService *pservice=eDVB::getInstance()->settings->getTransponders()->searchService(service);
 	eString sname;
-	if (pservice)
+	if (service.type == eServiceReference::idDVB)
 	{
-		sname=pservice->service_name;
-		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service);
-
-		eWidget* p = listbox->getParent();			
-		if (hilited && p && p->LCDElement)
-				p->LCDElement->setText(sort);
-
-		if (e)
+		const eService *pservice=eServiceInterface::getInstance()->lookupService(service);
+		if (pservice)
 		{
-			for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
-			{
-				Descriptor *descriptor=*d;
-				if (descriptor->Tag()==DESCR_SHORT_EVENT)
-				{
-					ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
-					sname+=" (";
-					sname+=ss->event_name;
-					sname+=")";
-					break;
-				}
-			}
-			delete e;
-		}
-	}
-	else
-		return;
+			sname=pservice->service_name;
+			EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent((const eServiceReferenceDVB&)service);
 
+			eWidget* p = listbox->getParent();			
+			if (hilited && p && p->LCDElement)
+					p->LCDElement->setText(sort);
+
+			if (e)
+			{
+				for (ePtrList<Descriptor>::iterator d(e->descriptor); d != e->descriptor.end(); ++d)
+				{
+					Descriptor *descriptor=*d;
+					if (descriptor->Tag()==DESCR_SHORT_EVENT)
+					{
+						ShortEventDescriptor *ss=(ShortEventDescriptor*)descriptor;
+						sname+=" (";
+						sname+=ss->event_name;
+						sname+=")";
+						break;
+					}
+				}
+				delete e;
+			}
+		}
+		else
+			return;
+	} else
+		sname="non-DVB";
+	
 	rc->setFont( serviceFont );
 
 	if ((coNormalB != -1 && !hilited) || (hilited && coActiveB != -1))
@@ -161,16 +166,19 @@ struct eServiceSelector_addService: public std::unary_function<eServiceReference
 	void operator()(const eServiceReference& c)
 	{
 		int useable=0;
-
-		if ( mode == eZap::TV)
+		
+		if (c.type == eServiceReference::idDVB)
 		{
-			if ( c.service_type == 1 || c.service_type == 4)
-				useable++;
+			const eServiceReferenceDVB &d=(const eServiceReferenceDVB&)c;
+			if ( mode == eZap::TV)
+			{
+				if ( d.getServiceType() == 1 || d.getServiceType() == 4)
+					useable++;
+			}
+			else
+				if (d.getServiceType() == 2)
+					useable++;
 		}
-		else
-			if (c.service_type == 2)
-				useable++;
-
 		if (useable)
 			new eListBoxEntryService(&list, c);
 	}
@@ -347,10 +355,12 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			}
 			else if (event.action == &i_serviceSelectorActions->showEPGSelector)
 			{
-				const eventMap* e = eEPGCache::getInstance()->getEventMap(selected);
+				const eventMap* e=0;
+				if (selected.type == eServiceReference::idDVB)
+				 	e = eEPGCache::getInstance()->getEventMap((eServiceReferenceDVB&)selected);
 				if (e && !e->empty())
 				{
-					eEPGSelector wnd(selected);
+					eEPGSelector wnd((eServiceReferenceDVB&)selected);
 
 					if (LCDElement && LCDTitle)
 						wnd.setLCD(LCDTitle, LCDElement);
@@ -479,17 +489,17 @@ void eServiceSelector::useBouquet(const eBouquet *bouquet)
 		setText(bouquet->bouquet_name);
 		
 		if (bouquet->bouquet_id != 9999) // all Services
-			for (std::list<eServiceReference>::const_iterator i( bouquet->list.begin() ); i != bouquet->list.end(); i++)
+			for (std::list<eServiceReferenceDVB>::const_iterator i( bouquet->list.begin() ); i != bouquet->list.end(); i++)
 			{
 				int addToList=0;
-
+		
 				if (eZap::getInstance()->getMode() == eZap::TV)
 				{
-					if (i->service_type == 1 || i->service_type == 4) // TV or Nvod
+					if (i->getServiceType() == 1 || i->getServiceType() == 4) // TV or Nvod
 						addToList++;
 				}
 				else
-					if (i->service_type == 2) //Radio
+					if (i->getServiceType() == 2) //Radio
 						addToList++;
 
 				if (addToList)

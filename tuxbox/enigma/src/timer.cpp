@@ -48,6 +48,7 @@ void eRecordingTimer::rec_ready()
 	{
 	case actionRecord:
 	{
+#if 0
 		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
 	
 		if (!sapi)
@@ -63,6 +64,7 @@ void eRecordingTimer::rec_ready()
 		recorder=new eDVBRecorder();
 		recorder->open(filename.c_str());
 		break;
+#endif
 	}
 	default:
 		break;
@@ -158,7 +160,7 @@ void eRecordingTimer::gotPMT(PMT *pmt)
 eRecordingTimer::eRecordingTimer()
 		: timer(eApp), start_time(0), recorder(0)
 {
-	CONNECT(eDVB::getInstance()->switchedService, eRecordingTimer::serviceChanged);
+//	CONNECT(eDVB::getInstance()->switchedService, eRecordingTimer::serviceChanged);
 	CONNECT(eDVB::getInstance()->gotPMT, eRecordingTimer::gotPMT);
 	CONNECT(timer.timeout, eRecordingTimer::timeout);
 	state=stateDisabled;

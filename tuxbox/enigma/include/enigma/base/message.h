@@ -53,6 +53,8 @@ public:
 	{
 		delete sn;
 	}
+	void start() { sn->start(); }
+	void stop() { sn->stop(); }
 };
 
 #endif

@@ -89,7 +89,7 @@ protected:
 	void dvbEvent(const eDVBEvent &event);
 	void dvbState(const eDVBState &event);
 	void updateTime();
-	void serviceFound( const eServiceReference &, bool );
+	void serviceFound( const eServiceReferenceDVB &, bool );
 	void addedTransponder( eTransponder* );
 public:
 	int tpScanned, newTVServices, newRadioServices, newDataServices, servicesScanned, newTransponders;

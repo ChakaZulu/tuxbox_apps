@@ -177,7 +177,6 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 			setActive(active);
 		} else if (event.action == &i_cursorActions->ok)
 		{
-			char *pixmap_name[]={"tv", "radio", "info", "shutdown", "setup", "games", "scart"};
 			switch (active)
 			{
 			case 0:

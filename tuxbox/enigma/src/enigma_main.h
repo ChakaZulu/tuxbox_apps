@@ -9,6 +9,7 @@
 #include <core/gui/listbox.h>
 #include <core/gui/multipage.h>
 #include <core/gui/emessage.h>
+#include <core/base/message.h>
 
 class eLabel;
 class eProgress;
@@ -21,6 +22,37 @@ class eNumber;
 class gPainter;
 class NVODReferenceEntry;
 
+class eZapMessage
+{
+	int type;
+	eString caption, body;
+	int timeout;
+public:
+	eZapMessage(int type, const eString &caption, const eString &body, int timeout=0)
+		: type(type), caption(caption), body(body), timeout(timeout)
+	{
+	}
+
+	eZapMessage::eZapMessage()
+	{
+	}
+
+	const eString & getCaption() { return caption; }
+	const eString & getBody() { return body; }
+	void setTimeout(int _timeout)
+	{
+		timeout=_timeout;
+	}
+	int getTimeout()
+	{
+		return timeout;
+	}
+	bool isSameType(const eZapMessage &msg) const
+	{
+		return type == msg.type;
+	}
+};
+
 class NVODStream: public eListBoxEntryTextStream
 {
 	friend class eListBox<NVODStream>;
@@ -29,7 +61,7 @@ private:
 	void EITready(int error);
 public:
 	NVODStream(eListBox<NVODStream> *listbox, const NVODReferenceEntry *ref, int type);
-	eServiceReference service;
+	eServiceReferenceDVB service;
 	EIT eit;
 };
 
@@ -77,7 +109,7 @@ class SubService: public eListBoxEntryText
 	friend class eSubServiceSelector;
 public:
 	SubService(eListBox<SubService> *listbox, const LinkageDescriptor *descr);
-	eServiceReference service;
+	eServiceReferenceDVB service;
 };
 
 class eSubServiceSelector: public eListBoxWindow<SubService>
@@ -124,7 +156,11 @@ class eZapMain: public eWidget
 	eProgress *Progress, *VolumeBar;
 	eMessageBox *pMsg;
 
-	eTimer timeout, clocktimer;
+	eLock messagelock;
+	std::list<eZapMessage> messages;
+	eFixedMessagePump<int> message_notifier;
+
+	eTimer timeout, clocktimer, messagetimeout;
 
 	int cur_start, cur_duration;
 	
@@ -132,7 +168,7 @@ class eZapMain: public eWidget
 	eSubServiceSelector subservicesel;
 	eAudioSelector audiosel;
 	eEventDisplay *actual_eventDisplay;
-	eServiceReference refservice;
+	eServiceReferenceDVB refservice;
 	int flags;
 	int isVT;
 	int isEPG;
@@ -184,6 +220,13 @@ private:
 	void setVTButton(bool b);
 	void setEPGButton(bool b);
 public:
+	void postMessage(const eZapMessage &message, int clear=0);
+	void gotMessage(const int &);
+	void startMessages();
+	void stopMessages();
+	void pauseMessages();
+	void nextMessage();
+
 	eZapMain();
 	~eZapMain();
 };

@@ -3,6 +3,8 @@
 
 #include "config.h"
 
+typedef std::list<eServiceReferenceDVB>::iterator ServiceReferenceDVBIterator;
+
 eDVBSettings::eDVBSettings(eDVB &dvb): dvb(dvb)
 {
 	transponderlist=0;
@@ -47,8 +49,7 @@ void eDVBSettings::addDVBBouquet(const BAT *bat)
 				const ServiceListDescriptor *s=(ServiceListDescriptor*)*i;
 				for (ePtrList<ServiceListDescriptorEntry>::const_iterator a(s->entries); a != s->entries.end(); ++a)
 					bouquet->add(
-						eServiceReference(
-							eServiceReference::idDVB,
+						eServiceReferenceDVB(
 							eTransportStreamID(be->transport_stream_id), 
 							eOriginalNetworkID(be->original_network_id), 
 							eServiceID(a->service_id), -1));
@@ -138,7 +139,7 @@ void eDVBSettings::revalidateBouquets()
 	eDebug("revalidating bouquets");
 	if (transponderlist)
 		for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-			for (ServiceReferenceIterator service = i->list.begin(); service != i->list.end(); ++service)
+			for (ServiceReferenceDVBIterator service = i->list.begin(); service != i->list.end(); ++service)
 				service->service=transponderlist->searchService(service);
 #endif
 	/*emit*/ dvb.bouquetListChanged();
@@ -171,7 +172,7 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 	void operator()(eService &service)
 	{
 		eBouquet *b = edvb.createBouquet(0, beautifyBouquetName(service.service_provider) );
-		b->add(eServiceReference(eServiceReference::idDVB, service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
+		b->add(eServiceReferenceDVB(service.transport_stream_id, service.original_network_id, service.service_id, service.service_type));
 	}
 };
 
@@ -309,8 +310,7 @@ void eDVBSettings::loadServices()
 		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
 		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
 		eService &s=transponderlist->createService(
-				eServiceReference(
-						eServiceReference::idDVB,
+				eServiceReferenceDVB(
 						eTransportStreamID(transport_stream_id), 
 						eOriginalNetworkID(original_network_id), 
 						eServiceID(service_id),
@@ -346,8 +346,8 @@ void eDVBSettings::saveBouquets()
 		eBouquet *b=*i;
 		fprintf(f, "%0d\n", b->bouquet_id);
 		fprintf(f, "%s\n", b->bouquet_name.c_str());
-		for (ServiceReferenceIterator s = b->list.begin(); s != b->list.end(); s++)
-			fprintf(f, "%04x:%04x:%04x:%d\n", s->service_id.get(), s->transport_stream_id.get(), s->original_network_id.get(), s->service_type);
+		for (ServiceReferenceDVBIterator s = b->list.begin(); s != b->list.end(); s++)
+			fprintf(f, "%04x:%04x:%04x:%d\n", s->getServiceID().get(), s->getTransportStreamID().get(), s->getOriginalNetworkID().get(), s->getServiceType());
 		fprintf(f, "/\n");
 	}
 	fprintf(f, "end\n");
@@ -399,8 +399,7 @@ void eDVBSettings::loadBouquets()
 			int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1;
 			sscanf(line, "%04x:%04x:%04x:%d", &service_id, &transport_stream_id, &original_network_id, &service_type);
 			bouquet->add(
-				eServiceReference(
-					eServiceReference::idDVB,
+				eServiceReferenceDVB(
 					eTransportStreamID(transport_stream_id), 
 					eOriginalNetworkID(original_network_id), 
 					eServiceID(service_id), 

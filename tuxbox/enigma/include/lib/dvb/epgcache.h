@@ -15,25 +15,25 @@
 #define ZAP_DELAY 4000          // 4 sek
 
 class eventData;
-class eServiceReference;
+class eServiceReferenceDVB;
 
 #define eventMap std::map<int, eventData*>
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 1  // check if gcc version >= 3.1
-	#define eventCache __gnu_cxx::hash_map<eServiceReference, eventMap, __gnu_cxx::hash<eServiceReference>, eServiceReference::equalONIDSID>
-	#define updateMap __gnu_cxx::hash_map<eServiceReference, time_t, __gnu_cxx::hash<eServiceReference>, eServiceReference::equalONIDSID >
+	#define eventCache __gnu_cxx::hash_map<eServiceReferenceDVB, eventMap, __gnu_cxx::hash<eServiceReferenceDVB>, eServiceReferenceDVB::equalONIDSID>
+	#define updateMap __gnu_cxx::hash_map<eServiceReferenceDVB, time_t, __gnu_cxx::hash<eServiceReferenceDVB>, eServiceReferenceDVB::equalONIDSID >
 	namespace __gnu_cxx
 #else																													// for older gcc use following
-	#define eventCache std::hash_map<eServiceReference, eventMap, std::hash<eServiceReference>, eServiceReference::equalONIDSID >
-	#define updateMap std::hash_map<eServiceReference, time_t, std::hash<eServiceReference>, eServiceReference::equalONIDSID >
+	#define eventCache std::hash_map<eServiceReferenceDVB, eventMap, std::hash<eServiceReferenceDVB>, eServiceReferenceDVB::equalONIDSID >
+	#define updateMap std::hash_map<eServiceReferenceDVB, time_t, std::hash<eServiceReferenceDVB>, eServiceReferenceDVB::equalONIDSID >
 	namespace std
 #endif
 {
-struct hash<eServiceReference>
+struct hash<eServiceReferenceDVB>
 {
-	inline size_t operator()(const eServiceReference &x) const
+	inline size_t operator()(const eServiceReferenceDVB &x) const
 	{
-		int v=(x.original_network_id.get()^x.service_id.get());
+		int v=(x.getOriginalNetworkID().get()^x.getServiceID().get());
 		v^=v>>8;
 		return v&0xFF;
 	}
@@ -75,7 +75,7 @@ public:
 class eEPGCache: public eSection
 {
 private:
-	eServiceReference current_service;
+	eServiceReferenceDVB current_service;
 	int current_sid;
 	int firstEventId;
 	int isRunning;
@@ -90,22 +90,22 @@ private:
 	eTimer zapTimer;
 public:
 	inline void startEPG();
-	inline void stopEPG(const eServiceReference &);
-	inline void enterService(const eServiceReference &, int);
+	inline void stopEPG(const eServiceReferenceDVB &);
+	inline void enterService(const eServiceReferenceDVB &, int);
 	void cleanLoop();
 	void timeUpdated();
 public:
 	eEPGCache();
 	~eEPGCache();
 	static eEPGCache *getInstance() { return instance; }
-//	EITEvent *lookupEvent(const eServiceReference &service, int event_id);
-	EITEvent *lookupCurrentEvent(const eServiceReference &service);
-	inline const eventMap* eEPGCache::getEventMap(const eServiceReference &service);
+//	EITEvent *lookupEvent(const eServiceReferenceDVB &service, int event_id);
+	EITEvent *lookupCurrentEvent(const eServiceReferenceDVB &service);
+	inline const eventMap* eEPGCache::getEventMap(const eServiceReferenceDVB &service);
 
 	Signal1<void, bool> EPGAvail;
 };
 
-inline void eEPGCache::enterService(const eServiceReference &service, int err)
+inline void eEPGCache::enterService(const eServiceReferenceDVB &service, int err)
 {
 	current_service = service;
 	firstEventId = 0;
@@ -157,7 +157,7 @@ inline void eEPGCache::startEPG()
 	}
 }
 
-inline void eEPGCache::stopEPG(const eServiceReference&)
+inline void eEPGCache::stopEPG(const eServiceReferenceDVB&)
 {
 	zapTimer.stop();
 	if (isRunning)
@@ -168,7 +168,7 @@ inline void eEPGCache::stopEPG(const eServiceReference&)
 	}
 }
 
-inline const eventMap* eEPGCache::getEventMap(const eServiceReference &service)
+inline const eventMap* eEPGCache::getEventMap(const eServiceReferenceDVB &service)
 {
 	eventCache::iterator It = eventDB.find(service);
 	return (It != eventDB.end())?(&(It->second)):0;

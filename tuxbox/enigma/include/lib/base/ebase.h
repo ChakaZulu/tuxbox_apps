@@ -141,7 +141,7 @@ class eMainloop;
 class eSocketNotifier
 {
 public:
-	enum { Read=POLLIN, Write=POLLOUT, http=POLLIN|POLLPRI };
+	enum { Read=POLLIN, Write=POLLOUT, Priority=POLLPRI, Error=POLLERR, Hungup=POLLHUP };
 private:
 	eMainloop &context;
 	int fd;
@@ -159,7 +159,7 @@ public:
 	~eSocketNotifier();
 
 	Signal1<void, int> activated;
-	void activate(int what) { /*emit*/ activated(fd); }
+	void activate(int what) { /*emit*/ activated(what); }
 
 	void start();
 	void stop();
@@ -167,6 +167,7 @@ public:
 
 	int getFD() { return fd; }
 	int getRequested() { return requested; }
+	void setRequested(int req) { requested=req; }
 };
 
 				// ... und Timer

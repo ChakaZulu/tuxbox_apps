@@ -19,7 +19,6 @@ eHTTPFile::eHTTPFile(eHTTPConnection *c, int _fd, const char *mime): eHTTPDataSo
 
 int eHTTPFile::doWrite(int bytes)
 {
-	eDebug("doWrite(%d)", bytes);
 	char buff[bytes];
 	if (!size)
 		return -1;
@@ -30,7 +29,10 @@ int eHTTPFile::doWrite(int bytes)
 	if (!len)
 		return -1;
 	size-=connection->writeBlock(buff, len);
-	return len;
+	if (!size)
+		return -1;
+	else
+		return 1;
 }
 
 eHTTPFile::~eHTTPFile()
@@ -54,7 +56,7 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 	eDebug("%s", path.c_str());
 	if (path[path.length()-1]=='/')
 		path+="index.html";
-	eDebug("%s", path.c_str());
+	eDebug("path: %s", path.c_str());
 	eHTTPDataSource *data=0;
 	for (ePtrList<eHTTPFilePath>::iterator i(translate); i != translate.end(); ++i)
 	{

@@ -79,14 +79,14 @@ bool eZap::setMode(int m)
 
 	if ( eDVB::getInstance()->settings->getTransponders() )
 	{
-		const eServiceReference *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(channel>>16), eServiceID(channel&0xFFFF));
+		const eServiceReferenceDVB *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(channel>>16), eServiceID(channel&0xFFFF));
 
 		if (eDVB::getInstance()->getServiceAPI())
 		{
 			if (mode == TV)	
-				lastRadioChannel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16) | eDVB::getInstance()->getServiceAPI()->service.service_id.get() );
+				lastRadioChannel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.getOriginalNetworkID().get() << 16) | eDVB::getInstance()->getServiceAPI()->service.getServiceID().get() );
 			else
-				lastTvChannel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16) | eDVB::getInstance()->getServiceAPI()->service.service_id.get() );
+				lastTvChannel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.getOriginalNetworkID().get() << 16) | eDVB::getInstance()->getServiceAPI()->service.getServiceID().get() );
 
 			if (ref)			
 				eServiceInterface::getInstance()->play(*ref);
@@ -103,7 +103,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 {
 	int bootcount;
 
-	const eServiceReference* currentService=0;
+	const eServiceReferenceDVB* currentService=0;
 
 	eZapLCD *pLCD;
 	eHTTPD *httpd;
@@ -224,8 +224,9 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	ezapInitializeDyn(dyn_resolver);
 
 	fileresolver = new eHTTPFilePathResolver();
-	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/");
 	fileresolver->addTranslation("/var/tuxbox/htdocs", "/www"); /* TODO: make user configurable */
+	fileresolver->addTranslation("/", "/h4x0r");  // *REMOVE* before commit!
+	fileresolver->addTranslation(DATADIR "/enigma/htdocs", "/");
 
 	eDebug("[ENIGMA] starting httpd");
 	httpd = new eHTTPD(80);
@@ -266,9 +267,9 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 eZap::~eZap()
 {
 	if (eDVB::getInstance()->getServiceAPI() &&
-			eDVB::getInstance()->getServiceAPI()->service != eServiceReference())
+			eDVB::getInstance()->getServiceAPI()->service != eServiceReferenceDVB())
 	{
-		__u32 channel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.original_network_id.get() << 16 ) | eDVB::getInstance()->getServiceAPI()->service.service_id.get() );
+		__u32 channel = (__u32) ( (eDVB::getInstance()->getServiceAPI()->service.getOriginalNetworkID().get() << 16 ) | eDVB::getInstance()->getServiceAPI()->service.getServiceID().get() );
 
 		eConfig::getInstance()->setKey("/ezap/ui/mode", mode);
 

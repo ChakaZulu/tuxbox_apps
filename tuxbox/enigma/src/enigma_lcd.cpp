@@ -112,7 +112,7 @@ void eZapLCDMain::updateProgress(int start,int duration)
 	clockUpdate();
 }
 
-void eZapLCDMain::serviceSwitched(const eServiceReference &sref, int err)
+void eZapLCDMain::serviceSwitched(const eServiceReferenceDVB &sref, int err)
 {
   eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sref);
 
@@ -122,7 +122,7 @@ void eZapLCDMain::serviceSwitched(const eServiceReference &sref, int err)
 		ServiceName->setText("unknown");
 }
 
-void eZapLCDMain::leaveService(const eServiceReference &service)
+void eZapLCDMain::leaveService(const eServiceReferenceDVB &service)
 {
 	if (Progress->isVisible())
 		Progress->hide();

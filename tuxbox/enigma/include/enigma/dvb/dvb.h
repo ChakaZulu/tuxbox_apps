@@ -31,8 +31,6 @@ class eServiceReference;
 class eLNB;
 class eSatellite;
 
-typedef std::list<eServiceReference>::iterator ServiceReferenceIterator;
-
 		// bitte KEINE operator int() definieren, sonst bringt das ganze nix!
 struct eTransportStreamID
 {
@@ -230,6 +228,7 @@ public:
 	};
 	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number=-1);
 	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number=-1);
+	eService(eServiceID service_id, const char *name);
 	void update(const SDTEntry *sdtentry);
 	
 	eTransportStreamID transport_stream_id;
@@ -275,80 +274,86 @@ struct eServiceReference
 	enum
 	{
 		idInvalid=-1,
-		idDVB=0,
+		idStructure,	// service_id == 0 is root
+		idDVB,
 		idUser=0x1000
 	};
 	int type;
-	
-	eTransportStreamID transport_stream_id;
-	eOriginalNetworkID original_network_id;
-	eServiceID service_id;
-	int service_type;
-	
-	eServiceReference(int type, eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type):
-		type(type), transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_type(service_type)
-	{
-	}
-	
-	eServiceReference():
-		type(-1), transport_stream_id(-1), original_network_id(-1), service_id(-1), service_type(-1)
+
+	int data[4];
+
+	eServiceReference()
+		: type(idInvalid)
 	{
 	}
 
+	eServiceReference(int type)
+		: type(type)
+	{
+		data[0]=data[1]=data[2]=data[3]=0;
+	}
 	bool operator==(const eServiceReference &c) const
 	{
-		return (type == c.type) &&
-				(transport_stream_id == c.transport_stream_id) && 
-				(original_network_id == c.original_network_id) && 
-				(service_id == c.service_id) &&
-				(service_type == c.service_type);
+		if (type != c.type)
+			return 0;
+		return memcmp(data, c.data, sizeof(int)*4)==0;
 	}
-	
 	bool operator!=(const eServiceReference &c) const
 	{
-		return ! ((*this) == c);
+		if (type != c.type)
+			return 1;
+		return !!memcmp(data, c.data, sizeof(int)*4);
 	}
-	
-	bool operator < (const eServiceReference &c) const
+	bool operator<(const eServiceReference &c) const
 	{
 		if (type < c.type)
 			return 1;
+
 		if (type > c.type)
 			return 0;
 
-		if (transport_stream_id < c.transport_stream_id)
-			return 1;
-		if (transport_stream_id > c.transport_stream_id)
-			return 0;
-		
-		if (original_network_id < c.original_network_id)
-			return 1;
-		if (original_network_id > c.original_network_id)
-			return 0;
-		
-		if (service_id < c.service_id)
-			return 1;
-		if (service_id > c.service_id)
-			return 0;
-		
-		if (service_type < c.service_type)
-			return 1;
-			
-		return 0;
+		return memcmp(data, c.data, sizeof(int)*4)<0;
 	}
-	
 	operator bool() const
 	{
-		return *this != eServiceReference();
+		return type != idInvalid;
 	}
-	
+};
+
+struct eServiceReferenceDVB: public eServiceReference
+{
+	int getServiceType() const { return data[0]; }
+	void setServiceType(int service_type) { data[0]=service_type; }
+
+	eServiceID getServiceID() const { return eServiceID(data[1]); }
+	void setServiceID(eServiceID service_id) { data[1]=service_id.get(); }
+
+	eTransportStreamID getTransportStreamID() const { return eTransportStreamID(data[2]); }
+	void setTransportStreamID(eTransportStreamID transport_stream_id) { data[2]=transport_stream_id.get(); }
+
+	eOriginalNetworkID getOriginalNetworkID() const { return eOriginalNetworkID(data[3]); }
+	void setOriginalNetworkID(eOriginalNetworkID original_network_id) { data[3]=original_network_id.get(); }
+
+	eServiceReferenceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type):
+		eServiceReference(eServiceReference::idDVB)
+	{
+		setTransportStreamID(transport_stream_id);
+		setOriginalNetworkID(original_network_id);
+		setServiceID(service_id);
+		setServiceType(service_type);
+	}
+
+	eServiceReferenceDVB()
+	{
+	}
+
 	struct equalONIDSID
 	{
-		bool operator()(const eServiceReference &a, const eServiceReference &b) const
+		bool operator()(const eServiceReferenceDVB &a, const eServiceReferenceDVB &b) const
 		{
 			return (a.type == b.type) &&
-					(a.service_id == b.service_id) &&
-					(a.original_network_id == b.original_network_id);
+					(a.getServiceID() == b.getServiceID()) &&
+					(a.getOriginalNetworkID() == b.getOriginalNetworkID());
 		}
 	};
 };
@@ -359,15 +364,15 @@ public:
 	const eBouquet *parent;
 	int bouquet_id;
 	eString bouquet_name;
-	std::list<eServiceReference> list;
+	std::list<eServiceReferenceDVB> list;
 
 	inline eBouquet(const eBouquet *parent, int bouquet_id, eString& bouquet_name)
 		:parent(parent), bouquet_id(bouquet_id), bouquet_name(bouquet_name)
 	{
 	}
 
-	void add(const eServiceReference &);
-	int remove(const eServiceReference &);
+	void add(const eServiceReferenceDVB &);
+	int remove(const eServiceReferenceDVB &);
 	bool operator == (const eBouquet &c) const
 	{
 		return bouquet_id==c.bouquet_id;
@@ -461,7 +466,7 @@ class eTransponderList
 {
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
-	std::map<eServiceReference,eService> services;
+	std::map<eServiceReferenceDVB,eService> services;
 	std::map<int,eService*> channel_number;
 	
 	std::list<eLNB> lnbs;
@@ -486,26 +491,26 @@ public:
 
 	void updateStats(int &transponders, int &scanned, int &services);
 	eTransponder &createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
-	eService &createService(const eServiceReference &service, int service_number=-1, bool *newService=0);
+	eService &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
 	int handleSDT(const SDT *sdt);
 	Signal1<void, eTransponder*> transponder_added;
-	Signal2<void, const eServiceReference &, bool> service_found;
+	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
 
 	eTransponder *searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eService *searchService(const eServiceReference &service);
-	const eServiceReference *searchService(eOriginalNetworkID original_network_id, eServiceID service_id);
+	const eServiceReferenceDVB *searchService(eOriginalNetworkID original_network_id, eServiceID service_id);
 	eService *searchServiceByNumber(int channel_number);
 	
 	template <class T> 
 	void forEachService(T ob)
 	{
-		for (std::map<eServiceReference,eService>::iterator i(services.begin()); i!=services.end(); ++i)
+		for (std::map<eServiceReferenceDVB,eService>::iterator i(services.begin()); i!=services.end(); ++i)
 			ob(i->second);
 	}
 	template <class T> 
 	void forEachServiceReference(T ob)
 	{
-		for (std::map<eServiceReference,eService>::iterator i(services.begin()); i!=services.end(); ++i)
+		for (std::map<eServiceReferenceDVB,eService>::iterator i(services.begin()); i!=services.end(); ++i)
 			ob(i->first);
 	}
 	template <class T> void forEachTransponder(T ob)

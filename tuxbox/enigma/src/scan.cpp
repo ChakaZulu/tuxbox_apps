@@ -579,7 +579,7 @@ void tsScan::updateTime()
 			timeleft->setText(eString().sprintf(_("%02i seconds left"), sek ));
 }
 
-void tsScan::serviceFound(const eServiceReference &service, bool newService)
+void tsScan::serviceFound(const eServiceReferenceDVB &service, bool newService)
 {
 	servicesScanned++;
 	

@@ -17,14 +17,14 @@ int eBouquetSelector::fillBouquetList()
 		{
       int useable=0;
 
-			for (std::list<eServiceReference>::iterator s = i->list.begin(); (!useable) && s != i->list.end(); s++)
+			for (std::list<eServiceReferenceDVB>::iterator s = i->list.begin(); (!useable) && s != i->list.end(); s++)
 				if ( eZap::getInstance()->getMode() == eZap::TV)
 				{
-					if (s->service_type == 1 || s->service_type == 4) // Nvod or TV
+					if (s->getServiceType() == 1 || s->getServiceType() == 4) // Nvod or TV
 						useable++;
 				}
 				else
-					if (s->service_type == 2) //Radio
+					if (s->getServiceType() == 2) //Radio
 						useable++;
 
 			if (!useable)

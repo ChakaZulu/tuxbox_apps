@@ -24,12 +24,12 @@ public:
 class eEPGSelector: public eWindow
 {
 	eListBox<eListBoxEntryEPG>* events;
-	eServiceReference current;
+	eServiceReferenceDVB current;
 private:
 	void fillEPGList();
 	void entrySelected(eListBoxEntryEPG *entry);
 public:
-	eEPGSelector(const eServiceReference &service);
+	eEPGSelector(const eServiceReferenceDVB &service);
 	inline ~eEPGSelector(){};
 };
 

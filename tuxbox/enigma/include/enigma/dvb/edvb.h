@@ -173,12 +173,12 @@ public:
 	Signal1<void, bool> scrambled;
 	Signal0<void> serviceListChanged;
 	Signal0<void> bouquetListChanged;
-	Signal1<void, const eServiceReference &> leaveService;
-	Signal1<void, const eServiceReference &> enterService;
+	Signal1<void, const eServiceReferenceDVB &> leaveService;
+	Signal1<void, const eServiceReferenceDVB &> enterService;
 	Signal1<void, eTransponder*> leaveTransponder;
 	Signal1<void, eTransponder*> enterTransponder;
 	Signal2<void, eTransponder*, int> switchedTransponder;
-	Signal2<void, const eServiceReference &, int> switchedService;
+	Signal2<void, const eServiceReferenceDVB &, int> switchedService;
 	Signal2<void, EIT*, int> gotEIT;
 	Signal1<void, SDT*> gotSDT;
 	Signal1<void, PMT*> gotPMT;

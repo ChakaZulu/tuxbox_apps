@@ -243,7 +243,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	tsid[0]->resize(eSize(230, fs+5));
 
 	tsid[1]=new eLabel(this);
-	tsid[1]->setText(eString().sprintf("%04xh", sapi->service.transport_stream_id.get()));
+	tsid[1]->setText(eString().sprintf("%04xh", sapi->service.getTransportStreamID().get()));
 	tsid[1]->move(ePoint(280, yOffs));
 	tsid[1]->resize(eSize(130, fs+5));
 	tsid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -255,7 +255,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	onid[0]->resize(eSize(210, fs+5));
 
 	onid[1]=new eLabel(this);
-	onid[1]->setText(eString().sprintf("%04xh", sapi->service.original_network_id.get()));
+	onid[1]->setText(eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get()));
 	onid[1]->move(ePoint(280, yOffs));
 	onid[1]->resize(eSize(130, fs+5));
 	onid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));
@@ -267,7 +267,7 @@ siPID::siPID(decoderParameters parms, eWidget *parent): eWidget(parent)
 	sid[0]->resize(eSize(185, fs+5));
 
 	sid[1]=new eLabel(this);
-	sid[1]->setText(eString().sprintf("%04xh", sapi->service.service_id.get()));
+	sid[1]->setText(eString().sprintf("%04xh", sapi->service.getServiceID().get()));
 	sid[1]->move(ePoint(280, yOffs));
 	sid[1]->resize(eSize(130, fs+5));
 	sid[1]->setFont(gFont("NimbusSansL-Regular Sans L Regular", fs));

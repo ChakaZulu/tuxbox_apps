@@ -466,7 +466,7 @@ int eTextPara::renderString(const eString &string, int rflags)
 			index=(rflags&RS_DIRECT)? *p : FT_Get_Char_Index(current_face, *p);
 
 			if (!index)
-				; // eDebug("unicode %d ('%c') not present", uc, uc);
+				eDebug("unicode %d ('%c') not present", *p, *p);
 			else
 				appendGlyph(index, flags);
 		}

@@ -12,7 +12,7 @@ class eZapLCDMenu;
 class eZapLCDScart;
 class eZapLCDStandby;
 class eZapLCDShutdown;
-class eServiceReference;
+class eServiceReferenceDVB;
 
 class eZapLCD: public eWidget
 {
@@ -37,8 +37,8 @@ class eZapLCDMain: public eWidget
 private:
 	void clockUpdate();
 	void volumeUpdate(int);
-	void serviceSwitched(const eServiceReference &, int err);
-	void leaveService(const eServiceReference &service);
+	void serviceSwitched(const eServiceReferenceDVB &, int err);
+	void leaveService(const eServiceReferenceDVB &service);
 public:
 	eLabel *ServiceName;
 	void updateProgress(int,int);
