@@ -4,7 +4,7 @@
 		<email>tmbinc@gmx.net</email>
 	</author>
 
-	<device identifier="DBOX-2 FP IR" >
+	<device identifier="DBox" >
 		<keys>
 			<key name="0" code="2" />
 			<key name="1" code="3" />
@@ -116,7 +116,7 @@
 			<action name="showMenu" key="red" flags="m" />
 			<action name="toggleStyle" key="green" flags="m" />
 			<action name="toggleFocus" key="yellow" flags="m" />
-			<action name="showFavourite" key="blue" flags="m" />
+			<action name="toggleRoot" key="blue" flags="m" />
 		</actionmap>
 
 		<actionmap name="numbers">
