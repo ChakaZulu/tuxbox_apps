@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.20 2002/07/17 02:16:50 obi Exp $
+ * $Id: pmt.cpp,v 1.21 2002/07/17 03:07:12 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -235,6 +235,15 @@ unsigned short parse_ES_info (unsigned char * buffer, CZapitChannel * channel, C
 	case 0x93:
 		break;
 
+	case 0xC0:
+		break;
+
+	case 0xC1:
+		break;
+
+	case 0xC6:
+		break;
+
 	default:
 		printf("[pmt.cpp] stream_type: %02x\n", esInfo->stream_type);
 		break;
@@ -333,8 +342,6 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 		ES_info_length = parse_ES_info(buffer + i, channel, caPmt, &ca_pmt_length);
 	}
 
-	printf("ca_pmt_length: %d\n", ca_pmt_length);
-
 	if (ca_pmt_length < 128)
 	{
 		caPmt->length_field.push_back(ca_pmt_length);
@@ -350,11 +357,7 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 			mask = (mask << 8) & 0xFF;
 		}
 
-		printf("length_field_size: %d, mask: %08x\n", length_field_size, mask);
-
 		caPmt->length_field.push_back((1 << 7) | length_field_size);
-
-		printf("length_field[0]: %02x, length_field.size(): %02x\n", caPmt->length_field[0], caPmt->length_field.size());
 
 		for (i = 0; i < length_field_size; i++)
 		{

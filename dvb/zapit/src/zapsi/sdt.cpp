@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.23 2002/05/13 17:17:05 obi Exp $
+ * $Id: sdt.cpp,v 1.24 2002/07/17 03:07:12 obi Exp $
  */
 
 /* system c */
@@ -166,7 +166,22 @@ int parse_sdt ()
 				case 0xC0: /* unknown, Eutelsat 13.0E */
 					break;
 
+				case 0xE4: /* unknown, Astra 19.2E */
+					break;
+
+				case 0xE5: /* unknown, Astra 19.2E */
+					break;
+					
 				case 0xE7: /* unknown, Eutelsat 13.0E */
+					break;
+					
+				case 0xED: /* unknown, Astra 19.2E */
+					break;
+					
+				case 0xF8: /* unknown, Astra 19.2E */
+					break;
+					
+				case 0xF9: /* unknown, Astra 19.2E */
 					break;
 
 				default:
