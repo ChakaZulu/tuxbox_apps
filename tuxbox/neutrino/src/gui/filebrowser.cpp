@@ -79,7 +79,7 @@ int CFile::getType()
 	if(S_ISDIR(Mode))
 		return FILE_DIR;
 
-	int ext_pos = Name.rfind(".");
+	int ext_pos = Name.rfind('.');
 	if( ext_pos > 0)
 	{
 		std::string extension;
@@ -102,7 +102,7 @@ int CFile::getType()
 
 std::string CFile::getFileName()		// return name.extension or folder name without trailing /
 {
-	int namepos = Name.rfind("/");
+	int namepos = Name.rfind('/');
 	if( namepos >= 0)
 	{
 		return Name.substr(namepos + 1);
@@ -116,15 +116,8 @@ std::string CFile::getFileName()		// return name.extension or folder name withou
 std::string CFile::getPath()			// return complete path including trailing /
 {
 	int pos = 0;
-	std::string tpath;
 
-	if((pos = Name.rfind("/")) > 1)
-	{
-		tpath = Name.substr(0,pos+1);
-	}
-	else
-		tpath = "/";
-	return (tpath);
+	return ((pos = Name.rfind('/')) > 1) ? Name.substr(0, pos + 1) : "/";
 }
 
 //------------------------------------------------------------------------
@@ -226,13 +219,13 @@ void CFileBrowser::ChangeDir(std::string filename)
 		unsigned int pos;
 		if(Path.find(VLC_URI)==0)
 		{
-			pos = Path.substr(strlen(VLC_URI), Path.length()-strlen(VLC_URI)-1).rfind("/");
+			pos = Path.substr(strlen(VLC_URI), Path.length()-strlen(VLC_URI)-1).rfind('/');
 			if (pos != std::string::npos)
 				pos += strlen(VLC_URI);
 		}
 		else
 		{
-			pos = Path.substr(0,Path.length()-1).rfind("/");
+			pos = Path.substr(0,Path.length()-1).rfind('/');
 		}
 		if(pos == std::string::npos)
 			pos = Path.length();
@@ -243,11 +236,11 @@ void CFileBrowser::ChangeDir(std::string filename)
 	{
 		newpath=filename;
 	}
-	if(newpath.rfind("/") != newpath.length()-1 ||
+	if(newpath.rfind('/') != newpath.length()-1 ||
       newpath.length() == 0 ||
 		newpath == VLC_URI)
 	{
-		newpath = newpath + "/";
+		newpath = newpath + '/';
 	}
 	filelist.clear();
 	Path = newpath;
@@ -326,14 +319,14 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 	/* cleanup curl stuff */
 	curl_easy_cleanup(curl_handle);
 	/* Convert \ to / */
-	for( unsigned int pos=answer.find("\\"); pos!=std::string::npos ; pos=answer.find("\\"))
+	for( unsigned int pos=answer.find('\\'); pos!=std::string::npos ; pos=answer.find('\\'))
 		answer[pos]='/';
 	// cout << "Answer:" << endl << "----------------" << endl << answer << endl;
 	/*!!! TODO check httpres and display error */
 	if (!answer.empty() && !httpres)
 	{
 		unsigned int start=0;
-		for (unsigned int pos=answer.find("\n",0) ; pos != std::string::npos ; pos=answer.find("\n",start))
+		for (unsigned int pos=answer.find('\n',0) ; pos != std::string::npos ; pos=answer.find('\n',start))
 		{
 			CFile file;
 			std::string entry = answer.substr(start, pos-start);
@@ -342,7 +335,7 @@ bool CFileBrowser::readDir_vlc(std::string dirname, CFileList* flist)
 				file.Mode = S_IFDIR + 0777 ;
 			else
 				file.Mode = S_IFREG + 0777 ;
-			unsigned int spos = entry.rfind("/");
+			unsigned int spos = entry.rfind('/');
 			if(spos!=std::string::npos)
 			{
 				file.Name = dirname + entry.substr(spos+1);
@@ -417,7 +410,7 @@ bool CFileBrowser::exec(std::string Dirname)
 
 	m_baseurl = "http://" + g_settings.streaming_server_ip +
 	            ":" + g_settings.streaming_server_port + "/admin/dboxfiles.html?dir=";
-	for( unsigned int pos=Dirname.find("\\"); pos!=std::string::npos ; pos=Dirname.find("\\"))
+	for( unsigned int pos=Dirname.find('\\'); pos!=std::string::npos ; pos=Dirname.find('\\'))
 		Dirname[pos]='/';
 	name = Dirname;
 	paintHead();
@@ -666,7 +659,7 @@ void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, b
 			{
 				progress->showGlobalStatus(100/n*i);
 			}
-			std::string basename = tmplist[i].Name.substr(tmplist[i].Name.rfind("/")+1);
+			std::string basename = tmplist[i].Name.substr(tmplist[i].Name.rfind('/')+1);
 			if( basename != ".." )
 			{
 				if(Filter != NULL && (!S_ISDIR(tmplist[i].Mode)) && use_filter)
