@@ -101,6 +101,12 @@ struct NeutrinoMessages {
 #endif
 		EVT_SCAN_FAILED           = CRCInput::RC_Events + 29,
 		EVT_SCAN_REPORT_NUM_SCANNED_TRANSPONDERS = CRCInput::RC_Events + 30,
+ 		EVT_SCAN_REPORT_FREQUENCY = CRCInput::RC_Events + 31,
+ 		EVT_SCAN_FOUND_RADIO_CHAN = CRCInput::RC_Events + 32,
+ 		EVT_SCAN_FOUND_DATA_CHAN = CRCInput::RC_Events + 33,
+ 		EVT_SCAN_FOUND_TV_CHAN = CRCInput::RC_Events + 34,
+ 		EVT_SCAN_FOUND_A_CHAN = CRCInput::RC_Events + 35,
+ 		EVT_SCAN_REPORT_FREQUENCYP = CRCInput::RC_Events + 36,
 
 		EVT_CURRENTEPG 		=	CRCInput::RC_WithData + 1,
 		EVT_SCAN_SATELLITE	=	CRCInput::RC_WithData + 2,
@@ -109,7 +115,8 @@ struct NeutrinoMessages {
 		EVT_TIMESET 		=	CRCInput::RC_WithData + 5,
 		EVT_POPUP			=	CRCInput::RC_WithData + 6,
 		EVT_EXTMSG			=	CRCInput::RC_WithData + 7,
-		EVT_START_PLUGIN	=	CRCInput::RC_WithData + 8
+		EVT_START_PLUGIN	=	CRCInput::RC_WithData + 8,
+		EVT_SCAN_SERVICENAME	=	CRCInput::RC_WithData + 9
 	};
 	enum
 	{
