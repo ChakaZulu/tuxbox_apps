@@ -13,6 +13,8 @@
 #include <colors.h>
 #include <sprite.h>
 
+#define LASTLEVEL	6
+
 #define max(a,b)	((a)>(b)?(a):(b))
 
 extern	int		doexit;
@@ -331,6 +333,7 @@ void	DrawLevelIntoBg( void )
 	{
 	case 1:
 	case 4:
+	case 6:
 		/* stein */
 		for( y=0; y<160; y+= 32 )
 			for( x=530; x < 1038; x+=32 )
@@ -449,7 +452,19 @@ void	DrawLevelIntoBg( void )
 			inBg(27,0,1068,18+6*i);
 
 		/** Die Torleiste */
-		inBg(11,0,726,0);
+		inBg(11,0,712,0);
+		break;
+	}
+	switch ( level )
+	{
+	case 6 :
+		/*loch*/
+		inBg(30,0,800,77);
+		inBg(30,0,800,67);
+		inBg(30,0,806,87);
+		for( i=0; i<5; i++ )
+			for(x=5-i; x>-1; x-- )
+				inBg(30,0,720+6*x+i*3,120+i*6);
 		break;
 	}
 }
@@ -458,15 +473,20 @@ void	DrawInfo( int what )
 {
 	char	text[64];
 
+	if ( what == 3 )
+	{
+		sprintf(text,"LEVEL %d/%d  ",level,LASTLEVEL);
+		FBDrawString(80,354,30,text,GREEN,STEELBLUE);
+	}
 	if ( what & 1 )
 	{
 		sprintf(text,"OUT %d  ",in_level);
-		FBDrawString(120,354,30,text,GREEN,STEELBLUE);
+		FBDrawString(220,354,30,text,GREEN,STEELBLUE);
 	}
 	if ( what & 2 )
 	{
 		sprintf(text,"IN %d%%   ",lem_in*100/lem_cnt);
-		FBDrawString(260,354,30,text,GREEN,STEELBLUE);
+		FBDrawString(320,354,30,text,GREEN,STEELBLUE);
 	}
 }
 
@@ -491,6 +511,7 @@ void	InitLevel( void )
 	{
 	case 1 :
 	case 4 :
+	case 6 :
 		/* deko */
 		deko[1]=CreateSprite(1,0,726,39);		// tor
 		deko[1]->anilocked=1;
@@ -508,15 +529,25 @@ void	InitLevel( void )
 		/* setup */
 		memset(lemm,0,sizeof(lemm));
 		memset(portfolio,0,sizeof(portfolio));
-		if ( level==1 )
+		switch( level )
+		{
+		case 6 :
+			portfolio[7]=2;
+			portfolio[3]=2;
+			portfolio[2]=2;
+			break;
+		case 1 :
 			portfolio[7]=10;
-		else
+			break;
+		case 4 :
 			portfolio[2]=5;
+			break;
+		}
 		haus_x=889;
 		haus_y1=117;
 		haus_y2=135;
-		to_rescue=5;
-		newspeed=50;
+		to_rescue=level==6?9:5;
+		newspeed=level==6?1:50;
 		lem_cnt=10;
 		break;
 	case 2 :
@@ -541,9 +572,9 @@ void	InitLevel( void )
 		haus_x=718;
 		haus_y1=139;
 		haus_y2=157;
-		to_rescue=50;
+		to_rescue=25;
 		newspeed=50;
-		lem_cnt=100;
+		lem_cnt=50;
 		break;
 	case 3 :
 		/* deko */
@@ -568,13 +599,13 @@ void	InitLevel( void )
 		haus_x=1018;
 		haus_y1=139;
 		haus_y2=157;
-		to_rescue=40;
+		to_rescue=50;
 		newspeed=50;
-		lem_cnt=40;
+		lem_cnt=50;
 		break;
 	case 5 :
 		/* deko */
-		deko[1]=CreateSprite(1,0,726,3);		// tor
+		deko[1]=CreateSprite(1,0,712,3);		// tor
 		deko[1]->anilocked=1;
 		deko[1]->backlocked=1;
 		/* zielhaus */
@@ -967,8 +998,9 @@ static	int		lastc=0;
 				}
 				if ( sel_type == TYP_STOPPER )
 				{
+					s->counter1=0;
 					SpriteChangePic( s, 4 );	// lemming2
-					bgRect( s->x, s->y, s->width, s->height-2, 150 );
+					bgRect( s->x+(s->width/2), s->y, 1, s->height-2, 150 );
 				}
 			}
 		}
@@ -1074,7 +1106,7 @@ static	int		blinkc=0;
 	if ( action==4 )
 	{
 		counter1++;
-		if ( counter1 < 8 )
+		if ( counter1 < 24 )
 			return;
 
 		if ( to_rescue > lem_in )
@@ -1085,7 +1117,7 @@ static	int		blinkc=0;
 		else
 		{
 			level++;
-			if ( level==6 )
+			if ( level>LASTLEVEL )
 			{
 				FBDrawString( 252, 142, 64, "all level solved", WHITE, 0 );
 				FBDrawString( 250, 140, 64, "all level solved", GREEN, 0 );
@@ -1183,10 +1215,12 @@ static	int		blinkc=0;
 			if ( s->countdown == -1 )
 			{
 				s->counter1=0;
-				bg2CopyImage( s->x-5, s->y-4, 21, 21, pbomb );
-				CopyBg2Screen( s->x-5,s->y-4, 21, 21);
+				bg2CopyImage( s->x-7, s->y-4, 21, 21, pbomb );
+				CopyBg2Screen( s->x-7,s->y-4, 21, 21);
 			}
 		}
+		if (( s->counter1 == 2 ) && ( s->type & TYP_STOPPER ))
+			bgRect( s->x+1, s->y, s->width-1, s->height-2, 150 );
 	}
 	DrawSprite( deko[2] );		// ziel
 	for( i=0; i<lem_run; i++ )
@@ -1274,8 +1308,8 @@ static	int		blinkc=0;
 				}
 				else
 				{	/* kein bodenkontakt ? */
-					if(!isBrick(s->x+2,s->y+s->height)&&
-					   !isBrick(s->x-3+s->width,
+					if(!isBrick(s->x+1,s->y+s->height)&&
+					   !isBrick(s->x-2+s->width,
 								s->y+s->height))
 					{
 						if( !( s->type&TYP_WALKER ) )
@@ -1357,8 +1391,8 @@ static	int		blinkc=0;
 							{
 								if(s->y<160)
 								{
-									bgRect( s->x+2, s->y, 8,
-										12-max(0,s->y-148), STEELBLUE );
+									bgRect( s->x+1, s->y+4, 10,
+										8-max(0,s->y-152), STEELBLUE );
 									s->y+=1;
 									cursor_get=1;
 								}
