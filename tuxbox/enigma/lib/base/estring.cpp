@@ -354,58 +354,58 @@ eString convertDVBUTF8(const unsigned char *data, int len, int table)
 
 eString convertUTF8DVB(const eString &string, int table)
 {
-	eString ss=eString();
-	
+	unsigned long *coding_table=0;
+
+	eString ss;
+
 	int len=string.length();
-	for(int i=0;i<len;i++){
+
+	for(int i=0;i<len;i++)
+	{
 		unsigned char c1=string[i];
 		unsigned int c;
 		if(c1<0x80)
 			c=c1;
-		else{
+		else
+		{
 			i++;
 			unsigned char c2=string[i];
 			c=((c1&0x3F)<<6) + (c2&0x3F);
-		}
-		// c = UNICODE
-		// now search it in table
-		if(c>=0x80){
-			for(unsigned int j=0;j<128;j++){
-				if ( table == 1 ) {
-					if(c88595[j]==c){            // now 8859-5 ....
-						c=0x80+j;
+			if (!coding_table)
+			{
+				switch(table)
+				{
+					case 1:
+						coding_table = c88595;
 						break;
-					}
+					case 2:
+						coding_table = c88596;
+						break;
+					case 3:
+						coding_table = c88597;
+						break;
+					case 4:
+						coding_table = c88598;
+						break;
+					case 5:
+						coding_table = c88599;
+						break;
+					default:
+						eFatal("unknown coding table\n");
+						break;
 				}
-				if ( table == 2 ) {
-					if(c88596[j]==c){            // now 8859-6 ....
-						c=0x80+j;
-						break;
-					}
-				}
-				if ( table == 3 ) {
-					if(c88597[j]==c){            // now 8859-7 ....
-						c=0x80+j;
-						break;
-					}
-				}
-				if ( table == 4 ) {
-					if(c88598[j]==c){            // now 8859-8 ....
-						c=0x80+j;
-						break;
-					}
-				}
-				if ( table == 5 ) {
-					if(c88599[j]==c){            // now 8859-9 ....
-						c=0x80+j;
-						break;
-					}
+			}
+			for(unsigned int j=0;j<128;j++)
+			{
+				if(coding_table[j]==c)
+				{
+					c=0x80+j;
+					break;
 				}
 			}
 		}
 		ss+=c;
 	}
-
 	return ss;
 }
 
