@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.253 2002/04/27 07:44:07 field Exp $
+        $Id: neutrino.cpp,v 1.254 2002/04/27 09:37:45 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1340,7 +1340,7 @@ void CNeutrinoApp::SelectNVOD()
 	if ( g_RemoteControl->subChannels.size()> 0 )
 	{
 		// NVOD/SubService- Kanal!
-		CMenuWidget NVODSelector( g_RemoteControl->are_subchannels?"nvodselector.subservice":"nvodselector.head", "video.raw", 400 );
+		CMenuWidget NVODSelector( g_RemoteControl->are_subchannels?"nvodselector.subservice":"nvodselector.head", "video.raw", 350);
 
 		NVODSelector.addItem( new CMenuSeparator() );
 
@@ -1384,11 +1384,21 @@ void CNeutrinoApp::SelectNVOD()
 			}
 			else
 			{
-				NVODSelector.addItem( new CMenuForwarder(e->subservice_name, true, "", NVODChanger, nvod_id, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
+				NVODSelector.addItem( new CMenuForwarder(e->subservice_name, true, "", NVODChanger, nvod_id, false, (count<10)? (count) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_subchannel) );
 			}
 
 			count++;
 		}
+
+		if ( g_RemoteControl->are_subchannels )
+		{
+			NVODSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+			CMenuOptionChooser* oj = new CMenuOptionChooser("nvodselector.directormode", &g_RemoteControl->director_mode, true, NULL, true, CRCInput::RC_yellow, "gelb.raw" );
+			oj->addOption(0, "options.off");
+			oj->addOption(1, "options.on");
+			NVODSelector.addItem( oj );
+		}
+
 		NVODSelector.exec(NULL, "");
 	}
 }
@@ -1651,7 +1661,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// noch nicht im Standby-Mode...
 				standbyMode( true );
 			}
-			g_RCInput->clearMsg();
+			g_RCInput->clearRCMsg();
 		}
 
 		if ( msg == NeutrinoMessages::STANDBY_OFF )
@@ -1661,7 +1671,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				// WAKEUP
 				standbyMode( false );
 			}
-			g_RCInput->clearMsg();
+			g_RCInput->clearRCMsg();
 		}
 
 		else if ( msg == NeutrinoMessages::SHUTDOWN )
@@ -1771,17 +1781,23 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				}
 				else if ( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ))
 				{ //numeric zap
-					channelList->numericZap( msg );
+					if ( g_RemoteControl->director_mode )
+					{
+						g_RemoteControl->setSubChannel(msg);
+						g_InfoViewer->showSubchan();
+					}
+					else
+						channelList->numericZap( msg );
 				}
 				else if ( msg == g_settings.key_subchannel_up )
 				{
-					string sc = g_RemoteControl->subChannelUp();
-					showSubchan(sc);
+					g_RemoteControl->subChannelUp();
+					g_InfoViewer->showSubchan();
 				}
 				else if ( msg == g_settings.key_subchannel_down )
 				{
-					string sc = g_RemoteControl->subChannelDown();
-					showSubchan(sc);
+					g_RemoteControl->subChannelDown();
+					g_InfoViewer->showSubchan();
 				}
 				else
 				{
@@ -2355,7 +2371,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.253 2002/04/27 07:44:07 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.254 2002/04/27 09:37:45 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

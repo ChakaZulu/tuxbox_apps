@@ -99,6 +99,8 @@ class CInfoViewer
 		void killTitle();
 		sectionsd::CurrentNextInfo getEPG( unsigned int onid_sid );
 
+		void showSubchan();
+
 		int handleMsg(uint msg, uint data);
 };
 

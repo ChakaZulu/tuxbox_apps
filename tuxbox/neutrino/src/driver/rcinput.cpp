@@ -156,7 +156,7 @@ void CRCInput::open()
 		exit(-1);
 	}
 	*/
-	fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
+	//fcntl(fd_keyb, F_SETFL, O_NONBLOCK );
 
 	//+++++++++++++++++++++++++++++++++++++++
 
@@ -168,6 +168,7 @@ void CRCInput::close()
 	if(fd_rc)
 	{
 		::close(fd_rc);
+		fd_rc = 0;
 	}
 /*
 	if(fd_keyb)
@@ -873,8 +874,18 @@ void CRCInput::postMsg(uint msg, uint data, bool Priority)
 }
 
 
-void CRCInput::clearMsg()
+void CRCInput::clearRCMsg()
 {
+	__u16 rc_key;
+	int status;
+
+	if (fd_rc)
+	{
+		do
+		{
+    		status = read(fd_rc, &rc_key, sizeof(rc_key));
+		} while (status== 2);
+	}
 }
 
 /**************************************************************************

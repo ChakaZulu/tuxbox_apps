@@ -211,6 +211,7 @@ apidselector.head Wybor Jezyka
 
 nvodselector.head Select starting-time
 nvodselector.subservice Select subservice
+nvodselector.directormode Direct-Mode
 
 ucodecheck.head UCode check
 ucodecheck.avia500 Avia 500

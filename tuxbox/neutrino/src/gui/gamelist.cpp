@@ -370,7 +370,7 @@ void CPlugins::startPlugin(int number)
 		if (!plugin_list[number].rc)
 		{
     		g_RCInput->restartInput();
-    		g_RCInput->clearMsg();
+    		g_RCInput->clearRCMsg();
     	}
 
     	if (plugin_list[number].fb)

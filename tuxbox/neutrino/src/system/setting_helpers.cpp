@@ -210,60 +210,14 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 }
 
 
-void showSubchan(string subChannelName)
-{
-	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
-	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
-
-	if(subChannelName!="")
-	{
-		int dx = g_Fonts->infobar_info->getRenderWidth(subChannelName.c_str()) + 20;
-		int dy = 30;
-		int x = g_settings.screen_EndX - dx -10;
-		int y = g_settings.screen_StartY + 10;
-		frameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
-		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
-
-		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
-		int res = messages_return::none;
-		uint msg; uint data;
-
-		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
-		{
-			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-			res = neutrino->handleMsg( msg, data );
-
-			if ( res == messages_return::unhandled )
-			{
-				// raus hier und im Hauptfenster behandeln...
-				g_RCInput->postMsg(  msg, data );
-				res = messages_return::cancel_info;
-			}
-			struct timeval tv;
-			gettimeofday( &tv, NULL );
-			long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-			if(timeNow>timeoutEnd)
-			{
-				res = messages_return::cancel_info;
-			}
-		}
-		frameBuffer->paintBackgroundBoxRel(x,y, dx,dy);
-	}
-	else
-	{
-		g_RCInput->postMsg( CRCInput::RC_help, 0 );
-	}
-}
-
-
 int CNVODChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 	//    printf("CNVODChangeExec exec: %s\n", actionKey.c_str());
 	unsigned sel= atoi(actionKey.c_str());
-	string sc = g_RemoteControl->setSubChannel(sel);
+	g_RemoteControl->setSubChannel(sel);
 
 	parent->hide();
-	showSubchan(sc);
+	g_InfoViewer->showSubchan();
 	return menu_return::RETURN_EXIT;
 }
 

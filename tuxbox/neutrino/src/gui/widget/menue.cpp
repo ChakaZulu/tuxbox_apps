@@ -126,6 +126,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 			{
 				if (titem->isSelectable())
 				{
+					items[selected]->paint( false );
 					selected= i;
 					msg= CRCInput::RC_ok;
 				}
@@ -315,7 +316,7 @@ void CMenuWidget::paint()
 
 
 
-CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
+CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing, uint DirectKey, string IconName)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	height= g_Fonts->menu->getHeight();
@@ -324,8 +325,8 @@ CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool
 	optionValue = OptionValue;
 	observ=Observ;
 	localizing= Localizing;
-	directKey = CRCInput::RC_nokey;
-	iconName = "";
+	directKey = DirectKey;
+	iconName = IconName;
 }
 
 
@@ -408,6 +409,20 @@ int CMenuOptionChooser::paint( bool selected )
 		}
 	}
 
+	if (iconName!="")
+	{
+		frameBuffer->paintIcon(iconName.c_str(), x + 10, y+ ((height- 20)>>1) );
+	}
+	else if ((directKey>= CRCInput::RC_0) && (directKey<= CRCInput::RC_9))
+	{
+		//number
+		char tmp[10];
+		sprintf((char*) tmp, "%d", directKey);
+
+		g_Fonts->channellist_number->RenderString(x + 10, y+ height, height, tmp, color, height);
+	}
+
+
 	string  l_optionName = g_Locale->getText(optionName);
 	string  l_option;
 	if ( localizing && !isNumber(option))
@@ -417,7 +432,7 @@ int CMenuOptionChooser::paint( bool selected )
 
 	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
 	int stringstartposName = x + offx + 10;
-	int stringstartposOption = x + offx + dx - stringwidth - 10;
+	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
 	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName.c_str(), color);
 	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option.c_str(), color);
@@ -503,7 +518,7 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
 	int stringstartposName = x + offx + 10;
-	int stringstartposOption = x + offx + dx - stringwidth - 10;
+	int stringstartposOption = x + dx - stringwidth - 10; //+ offx
 
 	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx- (stringstartposName - x), l_optionName.c_str(), color);
 	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption - x), l_option.c_str(), color);
@@ -593,7 +608,8 @@ int CMenuForwarder::paint(bool selected)
 	if(option)
 	{
 		int stringwidth = g_Fonts->menu->getRenderWidth(option);
-		int stringstartposOption = x + offx + dx - stringwidth - 10;
+		int stringstartposOption = x + dx - stringwidth - 10; //+ offx
+
 		g_Fonts->menu->RenderString(stringstartposOption, y+height,dx- (stringstartposOption- x),  option, color);
 	}
 

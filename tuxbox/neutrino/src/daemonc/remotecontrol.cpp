@@ -47,6 +47,7 @@ CRemoteControl::CRemoteControl()
 	has_ac3 = false;
 	selected_subchannel = -1;
 	needs_nvods = false;
+	director_mode = 0;
 	current_programm_timer = 0;
 	is_video_started= true;
 }
@@ -95,6 +96,7 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 
 				subChannels.clear();
 				selected_subchannel = -1;
+				director_mode = 0;
 				needs_nvods = ( msg == NeutrinoMessages:: EVT_ZAP_ISNVOD );
 
 				g_Sectionsd->setServiceChanged( current_onid_sid, true );
@@ -493,6 +495,7 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame, boo
 	subChannels.clear();
 	selected_subchannel = -1;
 	needs_nvods = false;
+	director_mode = 0;
 
 	#ifdef USEACTIONLOG
 		char buf[1000];

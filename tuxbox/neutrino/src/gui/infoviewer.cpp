@@ -50,6 +50,7 @@
 #define ICON_OFFSET (2*ICON_LARGE+ ICON_SMALL+ 5)
 #define BOTTOM_BAR_OFFSET 0
 #define SHADOW_OFFSET 6
+#define borderwidth 4
 
 // in us
 #define FADE_TIME 40000
@@ -397,6 +398,92 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid,
 
         }
 }
+
+
+void CInfoViewer::showSubchan()
+{
+	CFrameBuffer *frameBuffer = CFrameBuffer::getInstance();
+	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
+
+	string subChannelName = "";
+
+	if ( g_RemoteControl->selected_subchannel >= 0)
+		subChannelName = g_RemoteControl->subChannels[g_RemoteControl->selected_subchannel].subservice_name;
+
+	if ( subChannelName != "" )
+	{
+		char text[100];
+		sprintf( text, "%d - %s", g_RemoteControl->selected_subchannel, subChannelName.c_str() );
+
+		int dx = g_Fonts->infobar_info->getRenderWidth(text) + 20;
+		int dy = 25;
+
+		if ( g_RemoteControl->director_mode )
+		{
+			int w= 20+ g_Fonts->infobar_small->getRenderWidth(g_Locale->getText("nvodselector.directormode").c_str())+ 20;
+			if ( w> dx )
+				dx= w;
+			dy= dy* 2;
+		}
+		else
+			dy= dy +5;
+
+		int x = g_settings.screen_EndX - dx -10;
+		int y = g_settings.screen_StartY + 10;
+
+		unsigned char pixbuf[(dx+ 2* borderwidth) * (dy+ 2* borderwidth)];
+		frameBuffer->SaveScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);
+
+		// clear border
+		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, borderwidth);
+		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y+ dy, dx+ 2* borderwidth, borderwidth);
+		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, dy);
+		frameBuffer->paintBackgroundBoxRel(x+ dx, y, borderwidth, dy);
+
+		frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT);
+		g_Fonts->infobar_info->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT);
+
+		if ( g_RemoteControl->director_mode )
+		{
+			frameBuffer->paintIcon("gelb.raw", x+ 8, y+ dy- 20 );
+			g_Fonts->infobar_small->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText("nvodselector.directormode").c_str(), COL_MENUCONTENT);
+        }
+
+
+		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
+		int res = messages_return::none;
+		uint msg; uint data;
+
+		while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
+		{
+			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
+
+			if ( msg == CRCInput::RC_timeout )
+			{
+				res = messages_return::cancel_info;
+			}
+			else
+			{
+				res = neutrino->handleMsg( msg, data );
+
+				if ( res == messages_return::unhandled )
+				{
+					// raus hier und im Hauptfenster behandeln...
+					g_RCInput->postMsg(  msg, data );
+					res = messages_return::cancel_info;
+				}
+			}
+		}
+
+		frameBuffer->RestoreScreen(x- borderwidth, y- borderwidth, dx+ 2* borderwidth, dy+ 2* borderwidth, pixbuf);
+
+	}
+	else
+	{
+		g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
+	}
+}
+
 
 void CInfoViewer::showIcon_16_9()
 {

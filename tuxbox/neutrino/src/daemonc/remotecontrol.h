@@ -106,6 +106,7 @@ class CRemoteControl
 		int								selected_subchannel;
 		bool                        	are_subchannels;
 		bool							needs_nvods;
+		int								director_mode;
 
 		// Video / Parental-Lock
 		bool							is_video_started;

@@ -210,7 +210,8 @@ streamfeatures.info Stream-Information
 apidselector.head Sprachauswahl
 
 nvodselector.head Anfangszeit auswählen
-nvodselector.subservice Bildregie - Perspektiven
+nvodselector.subservice Perspektiven
+nvodselector.directormode Bildregie-Modus
 
 ucodecheck.head UCode Überprüfung
 ucodecheck.avia500 Avia 500

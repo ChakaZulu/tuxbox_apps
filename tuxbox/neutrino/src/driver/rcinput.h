@@ -128,7 +128,7 @@ class CRCInput
 		void getMsg_ms(uint *msg, uint* data, int Timeout, bool bAllowRepeatLR= false);     //get message, timeout in msecs :)
 		void getMsg_us(uint *msg, uint* data, unsigned long long Timeout, bool bAllowRepeatLR= false);     //get message, timeout in µsecs :)
 		void postMsg(uint msg, uint data, bool Priority = true );  // push message back into buffer
-		void clearMsg();						// Msgs aus der Schleife löschen - löscht zZ ALLES :(
+		void clearRCMsg();
 
 		int messageLoop( bool anyKeyCancels = false, int timeout= -1 );
 };

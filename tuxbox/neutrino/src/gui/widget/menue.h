@@ -199,7 +199,7 @@ class CMenuOptionChooser : public CMenuItem
 
 	public:
 		CMenuOptionChooser(){}
-		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
+		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true, uint DirectKey= CRCInput::RC_nokey, string IconName= "");
 		~CMenuOptionChooser();
 
 

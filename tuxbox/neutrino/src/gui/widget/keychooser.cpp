@@ -94,7 +94,7 @@ int CKeyChooserItem::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-	g_RCInput->clearMsg();
+	g_RCInput->clearRCMsg();
 
 	uint msg; uint data;
 	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_menu );
