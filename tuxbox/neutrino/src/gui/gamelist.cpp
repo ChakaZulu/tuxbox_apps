@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.20 2001/12/12 19:11:32 McClean Exp $
+$Id: gamelist.cpp,v 1.21 2001/12/25 11:40:30 McClean Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.21  2001/12/25 11:40:30  McClean
+better pushback handling
+
 Revision 1.20  2001/12/12 19:11:32  McClean
 prepare timing setup...
 
@@ -248,7 +251,12 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			{//exec the plugin :))
 				runGame( selected );
 			}
-		} else {
+		} 
+                else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
+                        || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+                        || (key==CRCInput::RC_standby)
+                        || (CRCInput::isNumeric(key)) )
+		{
 			g_RCInput->pushbackKey (key);
 			loop=false;
 		}

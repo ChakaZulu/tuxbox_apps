@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.15 2001/12/25 03:28:42 McClean Exp $
+ $Id: rcinput.cpp,v 1.16 2001/12/25 11:40:30 McClean Exp $
 
  Module for Remote Control Handling
 
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.16  2001/12/25 11:40:30  McClean
+ better pushback handling
+
  Revision 1.15  2001/12/25 03:28:42  McClean
  better pushback-handling
 
@@ -249,6 +252,9 @@ int CRCInput::getKeyInt()
 
             td = ( tv.tv_usec - tv_prev.tv_usec );
             td+= ( tv.tv_sec - tv_prev.tv_sec )* 1000000;
+
+            //printf("got key native key: %04x %04x\n", rccode, rccode&0x1f );
+
 
             if ( ( ( prevrccode&0x1F ) != ( rccode&0x1F ) ) ||
                  ( td > repeat_block ) )
