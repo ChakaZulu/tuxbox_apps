@@ -3,16 +3,11 @@
 #include <config.h>
 #include <plugin.h>
 
-#if HAVE_DVB_API_VERSION < 3
-#include <dbox/avia_gt_vbi.h>
-#endif
-
 #include <dlfcn.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
 
