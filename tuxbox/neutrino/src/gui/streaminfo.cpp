@@ -98,22 +98,20 @@ void CStreamInfo::paint()
 		return;
 	}
 
-	int bitInfo[10];
+	long bitInfo[10];
 
 	char *key,*tmpptr,buf[100], buf2[100];
-	int value, pos=0;
-	fgets(buf,29,fd);//dummy
+	long value;
+	int pos=0;
+	fgets(buf,35,fd);//dummy
 	while(!feof(fd))
 	{
-		if(fgets(buf,29,fd)!=NULL)
+		if(fgets(buf,35,fd)!=NULL)
 		{
 			buf[strlen(buf)-1]=0;
 			tmpptr=buf;
 			key=strsep(&tmpptr,":");
-			for(;tmpptr[0]==' ';tmpptr++)
-				;
-			value=atoi(tmpptr);
-			//printf("%s: %d\n",key,value);
+			value=strtoul(tmpptr,NULL,0);
 			bitInfo[pos]= value;
 			pos++;
 		}
@@ -123,12 +121,12 @@ void CStreamInfo::paint()
 
 	//paint msg...
 	ypos+= mheight;
-	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution"), bitInfo[0], bitInfo[1] );
+	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution"), (int)bitInfo[0], (int)bitInfo[1] );
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
 	ypos += mheight;
-	sprintf((char*) buf, "%s: %d bits/sec", g_Locale->getText("streaminfo.bitrate"), bitInfo[4]*50);
+	sprintf((char*) buf, "%s: %d bits/sec", g_Locale->getText("streaminfo.bitrate"), (int)bitInfo[4]*50);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
 
@@ -167,22 +165,24 @@ void CStreamInfo::paint()
 
 
 
-	switch ( bitInfo[6] )
-	{
-			case 1:
-			sprintf((char*) buf, "%s: single channel", g_Locale->getText("streaminfo.audiotype"));
-			break;
-			case 2:
-			sprintf((char*) buf, "%s: dual channel", g_Locale->getText("streaminfo.audiotype"));
-			break;
-			case 3:
-			sprintf((char*) buf, "%s: joint stereo", g_Locale->getText("streaminfo.audiotype"));
-			break;
-			case 4:
-			sprintf((char*) buf, "%s: stereo", g_Locale->getText("streaminfo.audiotype"));
-			break;
-			default:
-			strncpy(buf, g_Locale->getText("streaminfo.audiotype_unknown"), sizeof(buf));
+	if (!bitInfo[7]) strncpy(buf, g_Locale->getText("streaminfo.audiotype_unknown"), sizeof(buf));
+	else {
+		const char* layernames[4]={"res","III","II","I"};
+		const char* sampfreqnames[4]={"44,1k","48k","32k","res"};
+		const char* modenames[4]={"stereo","joint_st","dual_ch","single_ch"};
+
+		long header = bitInfo[7];
+
+		char layer =	(header>>17)&3;
+		char sampfreq = (header>>10)&3;
+		char mode =	(header>> 6)&3;
+		char copy =	(header>> 3)&1;
+
+		sprintf((char*) buf, "%s: %s (%s/%s) %s", g_Locale->getText("streaminfo.audiotype"),
+								modenames[mode],
+								sampfreqnames[sampfreq],
+								layernames[layer],
+								copy?"c":"");
 	}
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+ 10, ypos+ mheight, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 	ypos+= mheight+ 10;
