@@ -303,9 +303,10 @@ public:
 	 *
 	 * Redraws the widget including background. This is the function to use if you want to manually redraw something!
 	 * \param area The area which should be repaint. The default is to repaint the whole widget.
+	 * \param force Forces a parent-invalidate even on non-visible widgets. Shouldn't be used outside eWidget.
 	 * \sa eWidget::redraw
 	 */
-	void invalidate(eRect area=eRect());
+	void invalidate(eRect area=eRect(), int force=0);
 	
 	/**
 	 * \brief Enters modal message loop.
@@ -442,6 +443,9 @@ public:
 	eWidget *search(const eString &name);
 	
 	void makeRoot();
+	
+	void zOrderLower();
+	void zOrderRaise();
 };
 
 #endif

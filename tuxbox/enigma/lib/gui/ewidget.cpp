@@ -193,9 +193,9 @@ void eWidget::redraw(eRect area)		// area bezieht sich nicht auf die clientarea
 	}
 }
 
-void eWidget::invalidate(eRect area)
+void eWidget::invalidate(eRect area, int force)
 {
-	if (!(state & stateVisible))
+	if ( (!(state & stateVisible)) && (!force))
 		return;
 
 	if (area.isNull())
@@ -205,9 +205,10 @@ void eWidget::invalidate(eRect area)
 
 	// problem: überlappende, nicht transparente fenster
 
-	while (((int)w->getBackgroundColor())==-1)
-//	while (1)
+	while (force || (((int)w->getBackgroundColor())==-1))
+	//	while (1)
 	{
+		force=0;
 		if (!w->parent)	// spaetestens fuers TLW sollte backgroundcolor aber non-transparent sein
 			break;
 		area.moveBy(w->position.x(), w->position.y());
@@ -262,11 +263,14 @@ int eWidget::exec()
 
 void eWidget::clear()
 {
+#if 0
 	eWidget *root=this;
 	while (root->parent)
 		root=root->parent;
 	eRect me(getRelativePosition(root), size);
 	root->invalidate(me);
+#endif
+	invalidate(eRect(), 1);
 }
 
 void eWidget::close(int res)
@@ -924,6 +928,38 @@ eWidget *eWidget::search(const eString &sname)
 void eWidget::makeRoot()
 {
 	root=this;
+}
+
+void eWidget::zOrderLower()
+{
+	if (!parent)
+		return;
+	int isshown=0;
+	if (state & stateShow)
+	{
+		isshown=1;
+		hide();
+	}
+	parent->childlist.remove(this);
+	parent->childlist.push_front(this);
+	if (isshown)
+		show();
+}
+
+void eWidget::zOrderRaise()
+{
+	if (!parent)
+		return;
+	int isshown=0;
+	if (state & stateShow)
+	{
+		isshown=1;
+		hide();
+	}
+	parent->childlist.remove(this);
+	parent->childlist.push_back(this);
+	if (isshown)
+		show();
 }
 
 static eWidget *create_eWidget(eWidget *parent)

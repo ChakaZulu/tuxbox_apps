@@ -36,7 +36,8 @@ eMessageBox::eMessageBox(eString message, eString caption, bool display_only): e
 		b->resize(ext);
 		b->move(ePoint(clientrect.width()-ext.width(), clientrect.height()-fontsize-14));	// right align
 		CONNECT(b->selected, eMessageBox::okPressed);
-	}
+	} else
+		zOrderLower();
 }
 
 eMessageBox::~eMessageBox()
