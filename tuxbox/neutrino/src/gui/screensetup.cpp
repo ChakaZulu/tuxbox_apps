@@ -191,8 +191,8 @@ void CScreenSetup::paint()
 	int y=15*24;
 	g_FrameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUHEAD);
 	
-	g_Fonts->menu->RenderString(x+30,y+26, 15*23, "red = setup upper left", COL_MENUHEAD);
-	g_Fonts->menu->RenderString(x+30,y+46, 15*23, "green = setup lower right", COL_MENUHEAD);
+	g_Fonts->menu->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft").c_str(), COL_MENUHEAD);
+	g_Fonts->menu->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright").c_str(), COL_MENUHEAD);
 
 
 	paintBorderUL();

@@ -119,7 +119,6 @@ void CMenuWidget::paint()
 	y=(576-height)>>1;
 	int hheight = g_Fonts->menu_title->getHeight();
 	g_FrameBuffer->paintBoxRel(x,y, width,hheight, COL_MENUHEAD);
-	
 	g_Fonts->menu_title->RenderString(x+36,y+hheight, width, name.c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintIcon(iconfile.c_str(),x+8,y+6);
 
@@ -141,6 +140,7 @@ void CMenuWidget::paint()
 	}
 }
 
+//-------------------------------------------------------------------------------------------------------------------------------
 
 CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ)
 {
@@ -226,7 +226,7 @@ int CMenuOptionChooser::paint( bool selected )
 	return y+height;
 }
 
-//+++++++++++++++++++++++++++++++++++++
+//-------------------------------------------------------------------------------------------------------------------------------
 CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarget* Target, string ActionKey="")
 {
 	height=g_Fonts->menu->getHeight();
@@ -283,11 +283,14 @@ int CMenuForwarder::paint(bool selected)
 	return y+ height;
 }
 
-//+++++++++++++++++++++++++++++++++++++++
-
+//-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(int Type, string Text)
 {
     height = g_Fonts->menu->getHeight();
+	if(Text=="")
+	{
+		height = 10;
+	}
 	text = Text;
 
 	if ( (Type & ALIGN_LEFT) || (Type & ALIGN_CENTER) || (Type & ALIGN_RIGHT) )

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.26 2001/09/15 17:16:23 McClean Exp $
+        $Id: neutrino.cpp,v 1.27 2001/09/16 02:27:22 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.27  2001/09/16 02:27:22  McClean
+  make neutrino i18n
+
   Revision 1.26  2001/09/15 17:16:23  McClean
   i18n-module added
 
@@ -428,8 +431,8 @@ void CNeutrinoApp::setupDefaults()
 
 	//key bindings
 	g_settings.key_tvradio_mode = CRCInput::RC_nokey;
-	g_settings.key_channelList_pageup = CRCInput::RC_green;
-	g_settings.key_channelList_pagedown = CRCInput::RC_red;
+	g_settings.key_channelList_pageup = CRCInput::RC_red;
+	g_settings.key_channelList_pagedown = CRCInput::RC_green;
 	g_settings.key_channelList_cancel = CRCInput::RC_home;
 	g_settings.key_quickzap_up = CRCInput::RC_up;
 	g_settings.key_quickzap_down = CRCInput::RC_down;
@@ -562,7 +565,7 @@ void CNeutrinoApp::channelsInit()
 
 //deleting old channelList for mode-switching.	
 	delete channelList;
-	channelList = new CChannelList(1, "All Services");
+	channelList = new CChannelList(1, g_Locale->getText("channellist.head"));
 	
 		
 		sendmessage.version=1;
@@ -761,170 +764,170 @@ void CNeutrinoApp::InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audi
 				     CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings)
 {
 	mainSettings.addItem( new CMenuSeparator() );
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Run mode") );
-	mainSettings.addItem( new CMenuForwarder("Shutdown", true, "", this, "shutdown") );
-	mainSettings.addItem( new CMenuForwarder("TV-Mode", true, "", this, "tv"), true );
-	mainSettings.addItem( new CMenuForwarder("Radio-Mode", (zapit), "", this, "radio") );
-	mainSettings.addItem( new CMenuForwarder("MP3-Player", false, "", this, "mp3") );
-	mainSettings.addItem( new CMenuForwarder("Stream playback", false, "", this, "playback") );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("mainmenu.runmode")) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.shutdown"), true, "", this, "shutdown") );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.tvmode"), true, "", this, "tv"), true );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.radiomode"), (zapit), "", this, "radio") );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.mp3player"), false, "", this, "mp3") );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.splayback"), false, "", this, "playback") );
 
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Info") );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING,g_Locale->getText("mainmenu.info")) );
 
-	mainSettings.addItem( new CMenuForwarder("Stream Info", true, "", g_StreamInfo ) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.streaminfo"), true, "", g_StreamInfo ) );
 
-	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Settings") );
+	mainSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("mainmenu.settings")) );
 	mainSettings.addItem( new CMenuForwarder("Video", true, "", &videoSettings) );
 
-	mainSettings.addItem( new CMenuForwarder("Screen Setup", true, "", g_ScreenSetup ) );
-	mainSettings.addItem( new CMenuForwarder("Audio", true, "", &audioSettings) );
-	mainSettings.addItem( new CMenuForwarder("Network", true, "", &networkSettings) );
-	mainSettings.addItem( new CMenuForwarder("Colors", true,"", &colorSettings) );
-	mainSettings.addItem( new CMenuForwarder("Key binding", true,"", &keySettings) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.screensetup"), true, "", g_ScreenSetup ) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.audio"), true, "", &audioSettings) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.network"), true, "", &networkSettings) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.colors"), true,"", &colorSettings) );
+	mainSettings.addItem( new CMenuForwarder(g_Locale->getText("mainmenu.keybinding"), true,"", &keySettings) );
 }
 
 void CNeutrinoApp::InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier)
 {
 	audioSettings.addItem( new CMenuSeparator() );
-	audioSettings.addItem( new CMenuForwarder("back") );
+	audioSettings.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 	audioSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMenuOptionChooser* oj = new CMenuOptionChooser("Stereo", &g_settings.audio_Stereo, true, &audioSetupNotifier);
-		oj->addOption(0, "off");
-		oj->addOption(1, "on");
+		CMenuOptionChooser* oj = new CMenuOptionChooser(g_Locale->getText("audiomenu.stereo"), &g_settings.audio_Stereo, true, &audioSetupNotifier);
+		oj->addOption(0, g_Locale->getText("options.off"));
+		oj->addOption(1, g_Locale->getText("options.on"));
 	audioSettings.addItem( oj );
-		oj = new CMenuOptionChooser("Dolby Digital", &g_settings.audio_DolbyDigital, true, &audioSetupNotifier);
-		oj->addOption(0, "off");
-		oj->addOption(1, "on");
+		oj = new CMenuOptionChooser(g_Locale->getText("audiomenu.dolbydigital"), &g_settings.audio_DolbyDigital, true, &audioSetupNotifier);
+		oj->addOption(0, g_Locale->getText("options.off"));
+		oj->addOption(1, g_Locale->getText("options.on"));
 	audioSettings.addItem( oj );
 }
 
 void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier)
 {
 	videoSettings.addItem( new CMenuSeparator() );
-	videoSettings.addItem( new CMenuForwarder("back") );
+	videoSettings.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 	videoSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMenuOptionChooser* oj = new CMenuOptionChooser("Output signal", &g_settings.video_Signal, true, &videoSetupNotifier);
-		oj->addOption(0, "RGB");
-		oj->addOption(1, "S-Video");
-		oj->addOption(2, "FBAS");
+		CMenuOptionChooser* oj = new CMenuOptionChooser(g_Locale->getText("videomenu.videosignal"), &g_settings.video_Signal, true, &videoSetupNotifier);
+		oj->addOption(0, g_Locale->getText("videomenu.videosignal_rgb"));
+		oj->addOption(1, g_Locale->getText("videomenu.videosignal_svideo"));
+		oj->addOption(2, g_Locale->getText("videomenu.videosignal_composite"));
 	videoSettings.addItem( oj );
-		oj = new CMenuOptionChooser("Format", &g_settings.video_Format, true, &videoSetupNotifier);
-		oj->addOption(0, "4:3");
-		oj->addOption(1, "16:9");
+		oj = new CMenuOptionChooser(g_Locale->getText("videomenu.videoformat"), &g_settings.video_Format, true, &videoSetupNotifier);
+		oj->addOption(0, g_Locale->getText("videomenu.videoformat_43"));
+		oj->addOption(1, g_Locale->getText("videomenu.videoformat_169"));
 	videoSettings.addItem( oj );
 }
 
 void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier)
 {
 	networkSettings.addItem( new CMenuSeparator() );
-	networkSettings.addItem( new CMenuForwarder("back") );
+	networkSettings.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	networkSettings.addItem( new CMenuForwarder("setup network now", true, "", this, "network") );
+	networkSettings.addItem( new CMenuForwarder(g_Locale->getText("networkmenu.setupnow"), true, "", this, "network") );
 
-	CMenuOptionChooser* oj = new CMenuOptionChooser("setup network on startup", &g_settings.networkSetOnStartup, true, &networkSetupNotifier);
-		oj->addOption(0, "off");
-		oj->addOption(1, "on");
+	CMenuOptionChooser* oj = new CMenuOptionChooser(g_Locale->getText("networkmenu.setuponstartup"), &g_settings.networkSetOnStartup, true, &networkSetupNotifier);
+		oj->addOption(0, g_Locale->getText("options.off"));
+		oj->addOption(1, g_Locale->getText("options.on"));
 	networkSettings.addItem( oj );	
 
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CStringInput*	networkSettings_NetworkIP= new CStringInput("IP Address", g_settings.network_ip, 3*4+3);
-		CStringInput*	networkSettings_NetMask= new CStringInput("Network mask", g_settings.network_netmask, 3*4+3);
-		CStringInput*	networkSettings_Broadcast= new CStringInput("Broadcast", g_settings.network_broadcast, 3*4+3);
-		CStringInput*	networkSettings_Gateway= new CStringInput("Default gateway", g_settings.network_defaultgateway, 3*4+3);
-		CStringInput*	networkSettings_NameServer= new CStringInput("Nameserver", g_settings.network_nameserver, 3*4+3);
-	networkSettings.addItem( new CMenuForwarder("IP Address", true, g_settings.network_ip, networkSettings_NetworkIP ));
-	networkSettings.addItem( new CMenuForwarder("Netmask", true, g_settings.network_netmask, networkSettings_NetMask ));
-	networkSettings.addItem( new CMenuForwarder("Broadcast", true, g_settings.network_broadcast, networkSettings_Broadcast ));
+		CStringInput*	networkSettings_NetworkIP= new CStringInput(g_Locale->getText("networkmenu.ipaddress"), g_settings.network_ip, 3*4+3);
+		CStringInput*	networkSettings_NetMask= new CStringInput(g_Locale->getText("networkmenu.netmask"), g_settings.network_netmask, 3*4+3);
+		CStringInput*	networkSettings_Broadcast= new CStringInput(g_Locale->getText("networkmenu.broadcast"), g_settings.network_broadcast, 3*4+3);
+		CStringInput*	networkSettings_Gateway= new CStringInput(g_Locale->getText("networkmenu.gateway"), g_settings.network_defaultgateway, 3*4+3);
+		CStringInput*	networkSettings_NameServer= new CStringInput(g_Locale->getText("networkmenu.nameserver"), g_settings.network_nameserver, 3*4+3);
+	networkSettings.addItem( new CMenuForwarder(g_Locale->getText("networkmenu.ipaddress"), true, g_settings.network_ip, networkSettings_NetworkIP ));
+	networkSettings.addItem( new CMenuForwarder(g_Locale->getText("networkmenu.netmask"), true, g_settings.network_netmask, networkSettings_NetMask ));
+	networkSettings.addItem( new CMenuForwarder(g_Locale->getText("networkmenu.broadcast"), true, g_settings.network_broadcast, networkSettings_Broadcast ));
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	networkSettings.addItem( new CMenuForwarder("Default gateway", true, g_settings.network_defaultgateway, networkSettings_Gateway ));
-	networkSettings.addItem( new CMenuForwarder("Nameserver", true, g_settings.network_nameserver, networkSettings_NameServer ));
+	networkSettings.addItem( new CMenuForwarder(g_Locale->getText("networkmenu.gateway"), true, g_settings.network_defaultgateway, networkSettings_Gateway ));
+	networkSettings.addItem( new CMenuForwarder(g_Locale->getText("networkmenu.nameserver"), true, g_settings.network_nameserver, networkSettings_NameServer ));
 }
 
 void CNeutrinoApp::InitColorSettings(CMenuWidget &colorSettings)
 {
 	colorSettings.addItem( new CMenuSeparator() );
-	colorSettings.addItem( new CMenuForwarder("back") );
+	colorSettings.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 }
 
-void CNeutrinoApp::InitAudioThemesSettings(CMenuWidget &audioSettings_Themes)
+void CNeutrinoApp::InitColorThemesSettings(CMenuWidget &audioSettings_Themes)
 {
 	audioSettings_Themes.addItem( new CMenuSeparator() );
-	audioSettings_Themes.addItem( new CMenuForwarder("back") );
+	audioSettings_Themes.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 	audioSettings_Themes.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	audioSettings_Themes.addItem( new CMenuForwarder("Neutrino default theme", true, "", this, "theme_neutrino") );
-	audioSettings_Themes.addItem( new CMenuForwarder("Classic theme", true, "", this, "theme_classic") );
+	audioSettings_Themes.addItem( new CMenuForwarder(g_Locale->getText("colorthememenu.neutrino_theme"), true, "", this, "theme_neutrino") );
+	audioSettings_Themes.addItem( new CMenuForwarder(g_Locale->getText("colorthememenu.classic_theme"), true, "", this, "theme_classic") );
 }
 
 void CNeutrinoApp::InitColorSettingsMenuColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &colorSettings)
 {
 	colorSettings_menuColors.addItem( new CMenuSeparator() );
-	colorSettings_menuColors.addItem( new CMenuForwarder("back") );
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 
-    CColorChooser* chHeadcolor = new CColorChooser("background color", &g_settings.menu_Head_red, &g_settings.menu_Head_green, &g_settings.menu_Head_blue,
+    CColorChooser* chHeadcolor = new CColorChooser(g_Locale->getText("colormenu.background_head"), &g_settings.menu_Head_red, &g_settings.menu_Head_green, &g_settings.menu_Head_blue,
 					&g_settings.menu_Head_alpha, colorSetupNotifier);
-    CColorChooser* chHeadTextcolor = new CColorChooser("text color", &g_settings.menu_Head_Text_red, &g_settings.menu_Head_Text_green, &g_settings.menu_Head_Text_blue,
+    CColorChooser* chHeadTextcolor = new CColorChooser(g_Locale->getText("colormenu.textcolor_head"), &g_settings.menu_Head_Text_red, &g_settings.menu_Head_Text_green, &g_settings.menu_Head_Text_blue,
 					NULL, colorSetupNotifier);
-    CColorChooser* chContentcolor = new CColorChooser("background color", &g_settings.menu_Content_red, &g_settings.menu_Content_green, &g_settings.menu_Content_blue,
+    CColorChooser* chContentcolor = new CColorChooser(g_Locale->getText("colormenu.background_head"), &g_settings.menu_Content_red, &g_settings.menu_Content_green, &g_settings.menu_Content_blue,
 					&g_settings.menu_Content_alpha, colorSetupNotifier);
-    CColorChooser* chContentTextcolor = new CColorChooser("text color", &g_settings.menu_Content_Text_red, &g_settings.menu_Content_Text_green, &g_settings.menu_Content_Text_blue,
+    CColorChooser* chContentTextcolor = new CColorChooser(g_Locale->getText("colormenu.textcolor_head"), &g_settings.menu_Content_Text_red, &g_settings.menu_Content_Text_green, &g_settings.menu_Content_Text_blue,
 					NULL, colorSetupNotifier);
-    CColorChooser* chContentSelectedcolor = new CColorChooser("background color", &g_settings.menu_Content_Selected_red, &g_settings.menu_Content_Selected_green, &g_settings.menu_Content_Selected_blue,
+    CColorChooser* chContentSelectedcolor = new CColorChooser(g_Locale->getText("colormenu.background_head"), &g_settings.menu_Content_Selected_red, &g_settings.menu_Content_Selected_green, &g_settings.menu_Content_Selected_blue,
 					&g_settings.menu_Content_Selected_alpha, colorSetupNotifier);
-    CColorChooser* chContentSelectedTextcolor = new CColorChooser("text color", &g_settings.menu_Content_Selected_Text_red, &g_settings.menu_Content_Selected_Text_green, &g_settings.menu_Content_Selected_Text_blue,
+    CColorChooser* chContentSelectedTextcolor = new CColorChooser(g_Locale->getText("colormenu.textcolor_head"), &g_settings.menu_Content_Selected_Text_red, &g_settings.menu_Content_Selected_Text_green, &g_settings.menu_Content_Selected_Text_blue,
 					NULL, colorSetupNotifier);
-    CColorChooser* chContentInactivecolor = new CColorChooser("background color", &g_settings.menu_Content_inactive_red, &g_settings.menu_Content_inactive_green, &g_settings.menu_Content_inactive_blue,
+    CColorChooser* chContentInactivecolor = new CColorChooser(g_Locale->getText("colormenu.background_head"), &g_settings.menu_Content_inactive_red, &g_settings.menu_Content_inactive_green, &g_settings.menu_Content_inactive_blue,
 					&g_settings.menu_Content_inactive_alpha, colorSetupNotifier);
-    CColorChooser* chContentInactiveTextcolor = new CColorChooser("text color", &g_settings.menu_Content_inactive_Text_red, &g_settings.menu_Content_inactive_Text_green, &g_settings.menu_Content_inactive_Text_blue,
+    CColorChooser* chContentInactiveTextcolor = new CColorChooser(g_Locale->getText("colormenu.textcolor_head"), &g_settings.menu_Content_inactive_Text_red, &g_settings.menu_Content_inactive_Text_green, &g_settings.menu_Content_inactive_Text_blue,
 					NULL, colorSetupNotifier);
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu heads") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chHeadcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chHeadTextcolor ));
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chContentcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chContentTextcolor ));
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body - inactive") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chContentInactivecolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chContentInactiveTextcolor));
-	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Menu body - selected") );
-	colorSettings_menuColors.addItem( new CMenuForwarder("Background", true, "", chContentSelectedcolor ));
-	colorSettings_menuColors.addItem( new CMenuForwarder("Textcolor", true, "", chContentSelectedTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("colormenusetup.menuhead")) );
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.background"), true, "", chHeadcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.textcolor"), true, "", chHeadTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("colormenusetup.menucontent")) );
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.background"), true, "", chContentcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.textcolor"), true, "", chContentTextcolor ));
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("colormenusetup.menucontent_inactive")) );
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.background"), true, "", chContentInactivecolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.textcolor"), true, "", chContentInactiveTextcolor));
+	colorSettings_menuColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("colormenusetup.menucontent_selected")) );
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.background"), true, "", chContentSelectedcolor ));
+	colorSettings_menuColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.textcolor"), true, "", chContentSelectedTextcolor ));
 
-	colorSettings.addItem( new CMenuForwarder("menu colors", true, "", &colorSettings_menuColors) );
+	colorSettings.addItem( new CMenuForwarder(g_Locale->getText("colormenu.menucolors"), true, "", &colorSettings_menuColors) );
 }
 
 void CNeutrinoApp::InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_statusbarColors, CMenuWidget &colorSettings)
 {
 	colorSettings_statusbarColors.addItem( new CMenuSeparator() );
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("back") );
-			CColorChooser* chInfobarcolor = new CColorChooser("background color", &g_settings.infobar_red, &g_settings.infobar_green, &g_settings.infobar_blue,
+	colorSettings_statusbarColors.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
+			CColorChooser* chInfobarcolor = new CColorChooser(g_Locale->getText("colormenu.background_head"), &g_settings.infobar_red, &g_settings.infobar_green, &g_settings.infobar_blue,
 					&g_settings.infobar_alpha, colorSetupNotifier);
-			CColorChooser* chInfobarTextcolor = new CColorChooser("text color", &g_settings.infobar_Text_red, &g_settings.infobar_Text_green, &g_settings.infobar_Text_blue,
+			CColorChooser* chInfobarTextcolor = new CColorChooser(g_Locale->getText("colormenu.textcolor_head"), &g_settings.infobar_Text_red, &g_settings.infobar_Text_green, &g_settings.infobar_Text_blue,
 					NULL, colorSetupNotifier);
-	colorSettings_statusbarColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "Status bars") );
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("Background", true, "", chInfobarcolor ));
-	colorSettings_statusbarColors.addItem( new CMenuForwarder("Textcolor", true, "", chInfobarTextcolor ));
-	colorSettings.addItem( new CMenuForwarder("statusbar colors", true, "", &colorSettings_statusbarColors) );
+	colorSettings_statusbarColors.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("colorstatusbar.text")) );
+	colorSettings_statusbarColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.background"), true, "", chInfobarcolor ));
+	colorSettings_statusbarColors.addItem( new CMenuForwarder(g_Locale->getText("colormenu.textcolor"), true, "", chInfobarTextcolor ));
+	colorSettings.addItem( new CMenuForwarder(g_Locale->getText("colorstatusbar.head"), true, "", &colorSettings_statusbarColors) );
 }
 
 void CNeutrinoApp::InitKeySettings(CMenuWidget &keySettings)
 {
 	keySettings.addItem( new CMenuSeparator() );
-	keySettings.addItem( new CMenuForwarder("back") );
-		CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, "tv/radio mode key setup", "settings.raw");
-		CKeyChooser*	keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, "page up key setup", "settings.raw");
-		CKeyChooser*	keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, "page down key setup", "settings.raw");
-		CKeyChooser*	keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, "cancel key setup", "settings.raw");
-		CKeyChooser*	keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, "up key setup",   "settings.raw");
-		CKeyChooser*	keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, "down key setup", "settings.raw");
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mode change") );
-	keySettings.addItem( new CMenuForwarder("tv/radio mode", true, "", keySettings_tvradio_mode ));
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "channellist") );
-	keySettings.addItem( new CMenuForwarder("page up", true, "", keySettings_channelList_pageup ));
-	keySettings.addItem( new CMenuForwarder("page down", true, "", keySettings_channelList_pagedown ));
-	keySettings.addItem( new CMenuForwarder("cancel", true, "", keySettings_channelList_cancel ));
-	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "quickzap") );
-	keySettings.addItem( new CMenuForwarder("channel up", true, "", keySettings_quickzap_up ));
-	keySettings.addItem( new CMenuForwarder("channel down", true, "", keySettings_quickzap_down ));
+	keySettings.addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
+		CKeyChooser*	keySettings_tvradio_mode = new CKeyChooser(&g_settings.key_tvradio_mode, g_Locale->getText("keybindingmenu.tvradiomode_head"), "settings.raw");
+		CKeyChooser*	keySettings_channelList_pageup = new CKeyChooser(&g_settings.key_channelList_pageup, g_Locale->getText("keybindingmenu.pageup_head"), "settings.raw");
+		CKeyChooser*	keySettings_channelList_pagedown = new CKeyChooser(&g_settings.key_channelList_pagedown, g_Locale->getText("keybindingmenu.pagedown_head"), "settings.raw");
+		CKeyChooser*	keySettings_channelList_cancel = new CKeyChooser(&g_settings.key_channelList_cancel, g_Locale->getText("keybindingmenu.cancel_head"), "settings.raw");
+		CKeyChooser*	keySettings_quickzap_up = new CKeyChooser(&g_settings.key_quickzap_up, g_Locale->getText("keybindingmenu.channelup_head"),   "settings.raw");
+		CKeyChooser*	keySettings_quickzap_down = new CKeyChooser(&g_settings.key_quickzap_down, g_Locale->getText("keybindingmenu.channeldown_head"), "settings.raw");
+	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("keybindingmenu.modechange")) );
+	keySettings.addItem( new CMenuForwarder(g_Locale->getText("keybindingmenu.tvradiomode"), true, "", keySettings_tvradio_mode ));
+	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("keybindingmenu.channellist")) );
+	keySettings.addItem( new CMenuForwarder(g_Locale->getText("keybindingmenu.pageup"), true, "", keySettings_channelList_pageup ));
+	keySettings.addItem( new CMenuForwarder(g_Locale->getText("keybindingmenu.pagedown"), true, "", keySettings_channelList_pagedown ));
+	keySettings.addItem( new CMenuForwarder(g_Locale->getText("keybindingmenu.cancel"), true, "", keySettings_channelList_cancel ));
+	keySettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, g_Locale->getText("keybindingmenu.quickzap")) );
+	keySettings.addItem( new CMenuForwarder(g_Locale->getText("keybindingmenu.channelup"), true, "", keySettings_quickzap_up ));
+	keySettings.addItem( new CMenuForwarder(g_Locale->getText("keybindingmenu.channeldown"), true, "", keySettings_quickzap_down ));
 }
 
 void CNeutrinoApp::InitZapper()
@@ -1071,15 +1074,15 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	setupNetwork();
 
-	channelList = new CChannelList( 1, "All Services" );
+	channelList = new CChannelList( 1, g_Locale->getText("channellist.head") );
 
 	//Main settings
-	CMenuWidget mainSettings("Neutrino Setup", "settings.raw");
-	CMenuWidget videoSettings("Video Setup", "video.raw");
-	CMenuWidget audioSettings("Audio Setup", "audio.raw");
-	CMenuWidget networkSettings("Network Setup", "settings.raw");
-	CMenuWidget colorSettings("Color Setup", "settings.raw");
-	CMenuWidget keySettings("Key Setup", "settings.raw");
+	CMenuWidget mainSettings(g_Locale->getText("mainmenu.head"), "settings.raw");
+	CMenuWidget videoSettings(g_Locale->getText("videomenu.head"), "video.raw");
+	CMenuWidget audioSettings(g_Locale->getText("audiomenu.head"), "audio.raw");
+	CMenuWidget networkSettings(g_Locale->getText("networkmenu.head"), "settings.raw");
+	CMenuWidget colorSettings(g_Locale->getText("colormenu.head"), "settings.raw");
+	CMenuWidget keySettings(g_Locale->getText("keybindingmenu.head"), "settings.raw");
 //	CMenuWidget screenSettings("",fonts,"");
 
 	InitMainSettings(mainSettings, audioSettings, networkSettings, colorSettings, keySettings, videoSettings);
@@ -1096,19 +1099,19 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//color Setup
 	InitColorSettings(colorSettings);
 
-	CMenuWidget colorSettings_statusbarColors("Statusbar Colors", "settings.raw");
-	InitColorSettingsStatusBarColors(colorSettings_statusbarColors, colorSettings);
-
-	CMenuWidget audioSettings_Themes("Select a theme", "settings.raw");
-	InitAudioThemesSettings(audioSettings_Themes);
+	CMenuWidget colorSettings_Themes(g_Locale->getText("colorthememenu.head"), "settings.raw");
+	InitColorThemesSettings(colorSettings_Themes);
 
 	// Hacking Shit
-	colorSettings.addItem( new CMenuForwarder("select color theme", true, "", &audioSettings_Themes) );
+	colorSettings.addItem( new CMenuForwarder(g_Locale->getText("colormenu.themeselect"), true, "", &colorSettings_Themes) );
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	// Meno
 
-   	CMenuWidget colorSettings_menuColors("menu colors", "settings.raw");
+   	CMenuWidget colorSettings_menuColors(g_Locale->getText("colormenusetup.head"), "settings.raw");
 	InitColorSettingsMenuColors(colorSettings_menuColors, colorSettings);
+
+	CMenuWidget colorSettings_statusbarColors(g_Locale->getText("colormenu.statusbar"), "settings.raw");
+	InitColorSettingsStatusBarColors(colorSettings_statusbarColors, colorSettings);
 
 	//keySettings
 	InitKeySettings(keySettings);

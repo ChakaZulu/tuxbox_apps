@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.15 2001/09/14 16:18:46 field Exp $
+// $Id: infoviewer.cpp,v 1.16 2001/09/16 02:27:22 McClean Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.16  2001/09/16 02:27:22  McClean
+// make neutrino i18n
+//
 // Revision 1.15  2001/09/14 16:18:46  field
 // Umstellung auf globale Variablen...
 //
@@ -84,11 +87,11 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, bool CalledFromNumZap 
 	CurrentChannel = Channel;
     if ( CalledFromNumZap )
     {
-        EPG_NotFound_Text = "EPG noch nicht geladen.";
+        EPG_NotFound_Text = (char*) g_Locale->getText("infoviewer.epgnotload").c_str();
     }
     else
     {
-        EPG_NotFound_Text =  "Warte auf EPG...";
+        EPG_NotFound_Text =  (char*) g_Locale->getText("infoviewer.epgwait").c_str();
     }
     pthread_mutex_unlock( &epg_mutex );
 

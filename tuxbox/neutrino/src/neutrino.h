@@ -137,11 +137,11 @@ class CNeutrinoApp : public CMenuTarget
 	void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
 	void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier &audioSetupNotifier);
 	void InitColorSettings(CMenuWidget &);
+	void InitColorThemesSettings(CMenuWidget &);
 	void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
 	void InitNetworkSettings(CMenuWidget &networkSettings, CNetworkSetupNotifier &networkSetupNotifier);
 	void InitScreenSettings(CMenuWidget &);
 	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier &videoSetupNotifier);
-	void InitAudioThemesSettings(CMenuWidget &);
 	void InitMainSettings(CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings, CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings);
 	void ClearFrameBuffer();
 	void SetupFonts();

@@ -1,0 +1,114 @@
+menu.back zurück
+
+options.off aus
+options.on ein
+
+mainmenu.head Hauptmenü
+mainmenu.runmode Modus
+mainmenu.shutdown Ausschalten
+mainmenu.tvmode TV-Modus
+mainmenu.radiomode Radio-Modus
+mainmenu.mp3player MP3-Spieler
+mainmenu.splayback Stream Wiedergabe
+mainmenu.info Informationen
+mainmenu.streaminfo Sender/Kanal
+mainmenu.settings Einstellungen
+mainmenu.screensetup Sichtbaren Bildbereich einstellen
+mainmenu.audio Ton
+mainmenu.video Video
+mainmenu.network Netzwerk
+mainmenu.colors Farben/Themes
+mainmenu.keybinding Tastenbelegung
+
+audiomenu.head Ton-Einstellungen
+audiomenu.stereo Stereo
+audiomenu.dolbydigital Dolby Digital
+
+videomenu.head Video-Einstellungen
+videomenu.videosignal Video Signalart
+videomenu.videosignal_rgb RGB
+videomenu.videosignal_svideo S-Video
+videomenu.videosignal_composite Composite
+videomenu.videoformat Bildschirmformat
+videomenu.videoformat_43 4:3
+videomenu.videoformat_169 16:9
+
+networkmenu.head Netzwerk Einstellungen
+networkmenu.setupnow Netzwerkeinstellungen jetzt zuweisen
+networkmenu.setuponstartup Beim Starten Netzkerk setzen
+networkmenu.ipaddress IP-Adresse
+networkmenu.netmask Netzmaske
+networkmenu.broadcast Broadcast
+networkmenu.gateway Standard Gateway
+networkmenu.nameserver Nameserver
+
+colormenu.head Farb-Einstellungen
+colormenu.statusbar Statusbalken
+colormenu.themeselect Theme auswählen
+colormenu.menucolors Menüfarben
+colormenu.background Hintergrundfarbe
+colormenu.background_head Hintergrundfarbe
+colormenu.textcolor Textfarbe
+colormenu.textcolor_head Textfarbe
+
+colorthememenu.head Theme auswählen
+colorthememenu.neutrino_theme Neutrino Theme
+colorthememenu.classic_theme Klassik
+
+
+colormenusetup.head Menüfarben
+colormenusetup.menuhead Titelleiste
+colormenusetup.menucontent Fensterinhalt
+colormenusetup.menucontent_inactive Fensterinhalt deaktiviert
+colormenusetup.menucontent_selected Fensterinhalt selektiert
+
+colorstatusbar.head Statusbalken-Farben
+colorstatusbar.text Statusbalken
+
+keybindingmenu.head Tasten-Einstellungen
+keybindingmenu.modechange Modus wechsel
+keybindingmenu.channellist Kanalliste
+keybindingmenu.quickzap Schnellumschaltung
+keybindingmenu.tvradiomode Fernseh-/Radio-Modus
+keybindingmenu.tvradiomode_head Fernseh-/Radio-Modus
+keybindingmenu.pageup Seite hochblättern
+keybindingmenu.pageup_head Seite hochblättern
+keybindingmenu.pagedown Seite runterblättern
+keybindingmenu.pagedown_head Seite runterblättern
+keybindingmenu.cancel Kanalliste schliessen
+keybindingmenu.cancel_head Kanalliste schliessen
+keybindingmenu.channelup Kanal hoch
+keybindingmenu.channelup_head Kanal hoch Taste
+keybindingmenu.channeldown Kanal runter
+keybindingmenu.channeldown_head Kanal runter Taste
+
+colorchooser.red rot
+colorchooser.green grün
+colorchooser.blue blau
+colorchooser.alpha alpha
+
+keychoosermenu.setnew Neue Taste einstellen
+keychoosermenu.setnone Keine Taste
+keychoosermenu.currentkey Derzeitige Taste
+
+keychooser.head Neue Taste einstellen
+keychooser.text1 Bitte Taste drücken
+keychooser.text2 Zum abbrechen warten..
+
+screensetup.upperleft rot = Bildrand oben, links
+screensetup.lowerright grün = Bildrand unten, rechts
+
+channellist.head Alle Kanäle
+
+infoviewer.epgnotload EPG noch nicht geladen...
+infoviewer.epgwait Warte auf EPG...
+
+streaminfo.head Informationen
+streaminfo.resolution Auflösung
+streaminfo.bitrate Bitrate
+streaminfo.aratio Verhältnis
+streaminfo.aratio_unknown Verhältnis: unbekannt
+streaminfo.framerate Bildrate
+streaminfo.framerate_unknown Bildrate: unbekannt
+streaminfo.audiotype Audiotyp
+streaminfo.audiotype_unknown Audiotyp: unbekannt

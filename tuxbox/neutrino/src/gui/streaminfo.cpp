@@ -42,7 +42,7 @@ void CStreamInfo::paint()
 {
 	int ypos=y;
 	g_FrameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
-	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, "Streaminfo", COL_MENUHEAD);
+	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight, width, g_Locale->getText("streaminfo.head").c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
 
 	ypos+= hheight;
@@ -77,12 +77,12 @@ void CStreamInfo::paint()
 
 	
 	//paint msg...
-	sprintf((char*) buf, "Resolution: %dx%d", bitInfo[0], bitInfo[1] );
+	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution").c_str(), bitInfo[0], bitInfo[1] );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
 	ypos+= mheight;
 
-	sprintf((char*) buf, "Bitrate: %d bit/sec", bitInfo[4]*50);
+	sprintf((char*) buf, "%s: %d bit/sec", g_Locale->getText("streaminfo.bitrate").c_str(), bitInfo[4]*50);
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
 	ypos+= mheight;
@@ -90,10 +90,10 @@ void CStreamInfo::paint()
 
 	switch ( bitInfo[2] )
 	{
-		case 2: strcpy(buf, "Aspect Ratio: 4:3"); break;
-		case 3: strcpy(buf, "Aspect Ratio: 16:9"); break;
-		case 4: strcpy(buf, "Aspect Ratio: 2.21:1"); break;
-		default: strcpy(buf, "Aspect Ratio: unknown");
+		case 2: sprintf((char*) buf, "%s: 4:3", g_Locale->getText("streaminfo.aratio").c_str() ); break;
+		case 3: sprintf((char*) buf, "%s: 16:9", g_Locale->getText("streaminfo.aratio").c_str()); break;
+		case 4: sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText("streaminfo.aratio").c_str()); break;
+		default: sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.aratio_unknown").c_str());
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
@@ -102,9 +102,9 @@ void CStreamInfo::paint()
 
 	switch ( bitInfo[3] )
 	{
-		case 3: strcpy(buf, "Framerate: 25fps"); break;
-		case 6: strcpy(buf, "Framerate: 50fps"); break;
-		default: strcpy(buf, "Framerate: unknown");
+		case 3:  sprintf((char*) buf, "%s: 25fps", g_Locale->getText("streaminfo.framerate").c_str()); break;
+		case 6:  sprintf((char*) buf, "%s: 50fps", g_Locale->getText("streaminfo.framerate").c_str()); break;
+		default:  sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.framerate_unknown").c_str());
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
@@ -113,11 +113,11 @@ void CStreamInfo::paint()
 
 	switch ( bitInfo[6] )
 	{
-		case 1: strcpy(buf, "Audiotype:  single channel"); break;
-		case 2: strcpy(buf, "Audiotype:  dual channel"); break;
-		case 3: strcpy(buf, "Audiotype:  joint stereo"); break;
-		case 4: strcpy(buf, "Audiotype:  stereo"); break;
-		default: strcpy(buf, "Audiotype: unknown");
+		case 1: sprintf((char*) buf, "%s: single channel", g_Locale->getText("streaminfo.audiotype").c_str()); break;
+		case 2: sprintf((char*) buf, "%s: dual channel", g_Locale->getText("streaminfo.audiotype").c_str()); break;
+		case 3: sprintf((char*) buf, "%s: joint stereo", g_Locale->getText("streaminfo.audiotype").c_str()); break;
+		case 4: sprintf((char*) buf, "%s: stereo", g_Locale->getText("streaminfo.audiotype").c_str()); break;
+		default:  sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.audiotype_unknown").c_str()); 
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 

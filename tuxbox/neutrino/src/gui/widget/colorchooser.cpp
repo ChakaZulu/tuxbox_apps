@@ -73,24 +73,24 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 			}
 			if(selected<max)
 			{
-				paintSlider(x+10, y+ hheight, r, "red", false);
-				paintSlider(x+10, y+ hheight+ mheight, g, "green", false);
-				paintSlider(x+ 10, y+ hheight+ mheight* 2, b, "blue", false);
-				paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha,"alpha",false);
+				paintSlider(x+10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", false);
+				paintSlider(x+10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", false);
+				paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", false);
+				paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
 				selected++;
 				switch (selected)
 				{
 					case 0:
-						paintSlider(x+ 10, y+ hheight, r, "red", true);
+						paintSlider(x+ 10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", true);
 						break;
 					case 1:
-						paintSlider(x+ 10, y+ hheight+ mheight, g, "green", true);
+						paintSlider(x+ 10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", true);
 						break;
 					case 2:
-						paintSlider(x+ 10, y+ hheight+ mheight* 2, b, "blue", true);
+						paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", true);
 						break;
 					case 3:
-						paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha, "alpha", true);
+						paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha, g_Locale->getText("colorchooser.alpha"),"alpha", true);
 						break;
 				}
 			}
@@ -99,24 +99,24 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 		{
 			if(selected>0)
 			{
-				paintSlider(x+10, y+hheight, r,"red", false);
-				paintSlider(x+10, y+hheight+mheight, g,"green", false);
-				paintSlider(x+10, y+hheight+mheight*2, b,"blue", false);
-				paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",false);
+				paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", false);
+				paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", false);
+				paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", false);
+				paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
 				selected--;
 				switch (selected)
 				{
 					case 0:
-						paintSlider(x+10, y+hheight, r,"red", true);
+						paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
 						break;
 					case 1:
-						paintSlider(x+10, y+hheight+mheight, g,"green", true);
+						paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
 						break;
 					case 2:
-						paintSlider(x+10, y+hheight+mheight*2, b,"blue", true);
+						paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
 						break;
 					case 3:
-						paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",true);
+						paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
 						break;
 				}
 			}
@@ -129,7 +129,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*r<100)
 					{
 						*r+=5;
-						paintSlider(x+10, y+hheight, r,"red", true);
+						paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
 						setColor();
 					}
 					break;
@@ -137,7 +137,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*g<100)
 					{
 						*g+=5;
-						paintSlider(x+10, y+hheight+mheight, g,"green", true);
+						paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
 						setColor();
 					}
 					break;
@@ -145,7 +145,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*b<100)
 					{
 						*b+=5;
-						paintSlider(x+10, y+hheight+mheight*2, b,"blue", true);
+						paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
 						setColor();
 					}
 					break;
@@ -153,7 +153,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*alpha<100)
 					{
 						*alpha+=5;
-						paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",true);
+						paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
 						setColor();
 					}
 					break;
@@ -167,7 +167,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*r>0)
 					{
 						*r-=5;
-						paintSlider(x+10, y+hheight, r,"red", true);
+						paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
 						setColor();
 					}
 					break;
@@ -175,7 +175,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*g>0)
 					{
 						*g-=5;
-						paintSlider(x+10, y+hheight+mheight, g,"green", true);
+						paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
 						setColor();
 					}
 					break;
@@ -183,7 +183,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*b>0)
 					{
 						*b-=5;
-						paintSlider(x+10, y+hheight+mheight*2, b,"blue", true);
+						paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
 						setColor();
 					}
 					break;
@@ -191,7 +191,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 					if (*alpha>0)
 					{
 						*alpha-=5;
-						paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",true);
+						paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
 						setColor();
 					}
 					break;
@@ -215,17 +215,17 @@ void CColorChooser::paint()
 	g_Fonts->menu_title->RenderString(x+10,y+hheight, width, name.c_str(), COL_MENUHEAD);
 	g_FrameBuffer->paintBoxRel(x,y+hheight, width,height-hheight, COL_MENUCONTENT);
 
-	paintSlider(x+10, y+hheight, r,"red", true);
-	paintSlider(x+10, y+hheight+mheight, g,"green", false);
-	paintSlider(x+10, y+hheight+mheight*2, b,"blue", false);
-	paintSlider(x+10, y+hheight+mheight*3, alpha,"alpha",false);
+	paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
+	paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", false);
+	paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue",false);
+	paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",false);
 
 	//color preview
-	g_FrameBuffer->paintBoxRel(x+220,y+hheight, mheight*4,mheight*4, COL_MENUHEAD);
-	g_FrameBuffer->paintBoxRel(x+221,y+hheight+1, mheight*4-2,mheight*4-2, 254);
+	g_FrameBuffer->paintBoxRel(x+220,y+hheight+5,    mheight*4,   mheight*4-10,   COL_MENUHEAD);
+	g_FrameBuffer->paintBoxRel(x+222,y+hheight+2+5,  mheight*4-4 ,mheight*4-4-10, 254);
 }
 
-void CColorChooser::paintSlider(int x, int y, unsigned char *spos, string text, bool selected)
+void CColorChooser::paintSlider(int x, int y, unsigned char *spos, string text, string iconname, bool selected)
 {
 	if (!spos)
 		return;
@@ -233,7 +233,7 @@ void CColorChooser::paintSlider(int x, int y, unsigned char *spos, string text, 
 	g_FrameBuffer->paintIcon("volumebody.raw",x+70,y+2+mheight/4);
 	string iconfile = "volumeslider2";
 	if (selected)
-		iconfile += text;
+		iconfile += iconname;
 	iconfile +=".raw";
 	g_FrameBuffer->paintIcon(iconfile,x+73+(*spos),y+mheight/4);
 

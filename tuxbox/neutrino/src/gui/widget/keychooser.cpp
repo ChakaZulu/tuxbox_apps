@@ -5,15 +5,15 @@ CKeyChooser::CKeyChooser( int* Key, string title, string Icon )
 	: CMenuWidget(title, Icon)
 {
 	key = Key;
-	keyChooser = new CKeyChooserItem("key setup", key);
+	keyChooser = new CKeyChooserItem(g_Locale->getText("keychooser.head"), key);
 	keyDeleter = new CKeyChooserItemNoKey(key);
 
 	addItem( new CMenuSeparator(CMenuSeparator::STRING, " ") );
 	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	addItem( new CMenuForwarder("back") );
+	addItem( new CMenuForwarder(g_Locale->getText("menu.back")) );
 	addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-	addItem( new CMenuForwarder("setup new", true, "", keyChooser) );
-	addItem( new CMenuForwarder("set none", true, "", keyDeleter) );
+	addItem( new CMenuForwarder(g_Locale->getText("keychoosermenu.setnew"), true, "", keyChooser) );
+	addItem( new CMenuForwarder(g_Locale->getText("keychoosermenu.setnone"), true, "", keyDeleter) );
 }
 
 
@@ -28,7 +28,7 @@ void CKeyChooser::paint()
 {
 	CMenuWidget::paint();
 	
-	string text = "current key: " + CRCInput::getKeyName(*key);
+	string text = g_Locale->getText("keychoosermenu.currentkey") + ": " + CRCInput::getKeyName(*key);
 	g_Fonts->menu->RenderString(x+ 10, y+ 65, width, text.c_str(), COL_MENUCONTENT);
 }
 
@@ -77,8 +77,8 @@ void CKeyChooserItem::paint()
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height-hheight, COL_MENUCONTENT);
 
 	//paint msg...
-	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight, width, "please press the new key", COL_MENUCONTENT);
-	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight* 2, width, "wait a few seconds for cancel", COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight, width, g_Locale->getText("keychooser.text1").c_str(), COL_MENUCONTENT);
+	g_Fonts->menu->RenderString(x+ 10, y+ hheight+ mheight* 2, width, g_Locale->getText("keychooser.text2").c_str(), COL_MENUCONTENT);
 }
 
 

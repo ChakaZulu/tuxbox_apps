@@ -32,7 +32,7 @@ class CColorChooser : public CMenuTarget
 
 		void paint();
 		void setColor();
-		void paintSlider(int x, int y, unsigned char *spos, string text, bool selected);
+		void paintSlider(int x, int y, unsigned char *spos, string text, string iconname, bool selected);
 
 	public:
 
