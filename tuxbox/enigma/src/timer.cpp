@@ -98,16 +98,21 @@ static time_t getNextEventStartTime( time_t t, int duration, int type, int last_
 					continue;
 				}
 			}
-			int year = last_activation % 100,
+
+			int year = last_activation % 1000,
 					mon = (last_activation % 100000 ) / 1000,
-					day = (last_activation & 100000000) / 1000000;
-//			int activation=((100+tmp.tm_mday)*1000000)+((100+tmp.tm_mon+1)*1000)+tmp.tm_year;
-			if ( tmp.tm_year <= year && (tmp.tm_mon+1) <= mon && tmp.tm_mday <= day )
+					day = (last_activation % 100000000) / 1000000;
+//			eDebug("%d < %d || %d < %d || %d <= %d", 
+//				tmp.tm_year, year, 
+//				tmp.tm_mon+1, mon, 
+//				tmp.tm_mday, day );
+			if ( tmp.tm_year < year || (tmp.tm_mon+1) < mon || tmp.tm_mday <= day )
 			{
-//				eDebug("%d <= %d ... continue", activation, last_activation );
+//				eDebug("yes.. continue");
 				continue;
 			}
-//			eDebug("found");
+//			else
+//				eDebug("no.. found");
 			found = true;
 			break;
 		}
