@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.12 2001/07/15 15:05:09 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.13 2001/07/15 15:09:27 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.13  2001/07/15 15:09:27  fnbrd
+//  Informative Ausgabe.
+//
 //  Revision 1.12  2001/07/15 15:05:09  fnbrd
 //  Speichert jetzt alle Events die bis zu 24h in der Zukunft liegen.
 //
@@ -802,7 +805,8 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.12 2001/07/15 15:05:09 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.13 2001/07/15 15:09:27 fnbrd Exp $\n");
+  printf("caching %d hours\n", HOURS_TO_CACHE);
 
   tzset(); // TZ auswerten
 
