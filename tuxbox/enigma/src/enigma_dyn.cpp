@@ -2549,7 +2549,7 @@ static eString videopls(eString request, eString dirpath, eString opts, eHTTPCon
 		}
 	}
 
-	return "http://" + getIP() + ":31339/0," + pmtpid + "," + vpid  + apids + pcrpid;
+	return "http://" + getIP() + ":31339/0," + pmtpid + "," + vpid  + apids + "," + pcrpid;
 }
 
 #define CHANNELWIDTH 200
