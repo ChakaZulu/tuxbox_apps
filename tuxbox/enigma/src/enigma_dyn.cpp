@@ -175,7 +175,9 @@ static eString getControlPlugins(void)
 						<< "</td>"
 						<< "</tr>";
 				}
+				free(e[i]);
 			}
+			free(e);
 		}
 	}
 	if (tmp.str() == "")
@@ -3634,6 +3636,8 @@ struct addToString
 			eServiceDVB *service = eTransponderList::getInstance()->searchService(s);
 			if (service)
 			{
+				dest+=';';
+				dest+=filter_string(service->service_name);
 				for(int i = 0; i < (int)eServiceDVB::cacheMax; ++i)
 				{
 					int d=service->get((eServiceDVB::cacheID)i);
@@ -3660,6 +3664,61 @@ static eString getTransponderServices(eString request, eString dirpath, eString 
 			return "E: no other services on the current transponder";
 	}
 	return "E: no DVB service is running.. or this is a playback";
+}
+
+struct listContent: public Object
+{
+	eString &result;
+	eServiceInterface *iface;
+	listContent(const eServiceReference &service, eString &result)
+		:result(result), iface(eServiceInterface::getInstance())
+	{
+		Signal1<void, const eServiceReference&> cbSignal;
+		CONNECT(cbSignal, listContent::addToString);
+		iface->enterDirectory(service, cbSignal);
+		iface->leaveDirectory(service);
+	}
+	void addToString(const eServiceReference& ref)
+	{
+/*		if ( ref.path
+			|| ref.flags & eServiceReference::isDirectory
+			|| ref.type != eServiceReference::idDVB )
+			return;*/
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
+
+		eService *service = iface ? iface->addRef(ref) : 0;
+		result += ref.toString();
+		result += ";";
+		if ( ref.descr )
+			result += filter_string(ref.descr);
+		else if ( service )
+			result += filter_string(service->service_name);
+		else 
+			result += "unnamed service";
+		result += "\n";
+		if (service)
+			iface->removeRef(ref);
+	}
+};
+
+static eString getServices(eString request, eString dirpath, eString opt, eHTTPConnection *content)
+{
+	content->local_header["Content-Type"]="text/plain; charset=utf-8";
+	std::map<eString,eString> opts=getRequestOptions(opt, '&');
+
+	if ( !opts["ref"] )
+		return "E: no ref given";
+
+	eString result;
+	eServiceReference ref(opts["ref"]);
+	listContent t(ref, result);
+
+	if ( result )
+		return result;
+
+	return "E: error during list services";
 }
 
 struct appendonidsidnamestr
@@ -4371,7 +4430,9 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/cgi-bin/stopPlugin", stopPlugin, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/osdshot", osdshot, lockWeb);
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentService", getCurrentServiceRef, lockWeb);
+// functions needed by dreamtv
 	dyn_resolver->addDyn("GET", "/cgi-bin/currentTransponderServices", getTransponderServices, lockWeb);
+	dyn_resolver->addDyn("GET", "/cgi-bin/getServices", getServices, lockWeb);
 #ifndef DISABLE_FILE
 	dyn_resolver->addDyn("GET", "/cgi-bin/setFakeRecordingState", setFakeRecordingState, lockWeb);
 #endif
