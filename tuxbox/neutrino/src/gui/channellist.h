@@ -106,10 +106,7 @@ class CChannelList
 		int getKey(int);
 		const std::string& getActiveChannelName();
 		int getActiveChannelNumber();
-		unsigned int CChannelList::getActiveChannelOnid_sid()
-		{
-			return chanlist[selected]->onid_sid;
-		}
+		unsigned int CChannelList::getActiveChannelOnid_sid();
 		const string getActiveChannelID();
 		CChannel* getChannelFromOnidSid(int onidSid);
 		void zapTo(int pos);

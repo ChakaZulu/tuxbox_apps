@@ -163,7 +163,10 @@ int CChannelList::getKey(int id)
 
 const std::string& CChannelList::getActiveChannelName()
 {
-	return chanlist[selected]->name;
+	if (selected< chanlist.size())
+		return chanlist[selected]->name;
+	else
+		return "";
 }
 
 const std::string CChannelList::getActiveChannelID()
@@ -173,6 +176,14 @@ const std::string CChannelList::getActiveChannelID()
 	snprintf( anid, 10, "%x", getActiveChannelOnid_sid() );
 	id= anid;
 	return id;
+}
+
+unsigned int CChannelList::getActiveChannelOnid_sid()
+{
+	if (selected< chanlist.size())
+		return chanlist[selected]->onid_sid;
+	else
+		return 0;
 }
 
 int CChannelList::getActiveChannelNumber()
