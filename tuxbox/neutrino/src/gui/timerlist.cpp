@@ -853,8 +853,8 @@ int CTimerList::newTimer()
 	m6->addOption(0 , "timerlist.standby.off");
 	m6->addOption(1 , "timerlist.standby.on");
 
-	CStringInput timerSettings_msg("timerlist.message", timerNew.message, 30,"","",
-											 "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/");
+	CStringInputSMS timerSettings_msg("timerlist.message", timerNew.message, 30,"","",
+											 "abcdefghijklmnopqrstuvwxyz0123456789-.,:!?/ ");
 	CMenuForwarder *m7 = new CMenuForwarder("timerlist.message", false, NULL, &timerSettings_msg );
 
 	CTimerListNewNotifier notifier2(&((int)timerNew.eventType ),
