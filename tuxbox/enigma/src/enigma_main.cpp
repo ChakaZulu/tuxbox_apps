@@ -678,7 +678,7 @@ ePSAudioSelector::ePSAudioSelector()
 	ePoint p(0,40);
 	list.move(m_stereo_mono->getPosition()+p);
 
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( 0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-105));
 		m_dyncfg = new eAudioDynamicConfig(this);
@@ -841,7 +841,7 @@ eAudioSelector::eAudioSelector()
 	m_subtitles->loadDeco();
 	CONNECT(m_subtitles->selected, eAudioSelector::subtitleSelected);
 
-	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
+	if ( 0 && eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-140));
 		m_dyncfg = new eAudioDynamicConfig(this);
@@ -3838,7 +3838,7 @@ void eZapMain::createMarker(eServiceSelector *sel)
 	}
 }
 
-void eZapMain::copyProviderToBouquets(eServiceSelector *sel)
+	void eZapMain::copyProviderToBouquets(eServiceSelector *sel)
 {
 	eServiceReference ref=sel->getSelected();
 	eServiceReference path=sel->getPath().current();
