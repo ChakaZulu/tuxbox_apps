@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.155 2003/02/24 21:16:56 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.156 2003/02/27 22:10:17 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -60,7 +60,8 @@
 #include <connection/basicserver.h>
 
 // Daher nehmen wir SmartPointers aus der Boost-Lib (www.boost.org)
-#include <boost/shared_ptr.hpp>
+#include "boost/smart_ptr.hpp"
+//#include <boost/shared_ptr.hpp>
 
 #include <sectionsdclient/sectionsdMsg.h>
 #include <sectionsdclient/sectionsdclient.h>
@@ -1050,7 +1051,7 @@ static void commandDumpStatusInformation(int connfd, char *data, const unsigned 
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.155 2003/02/24 21:16:56 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.156 2003/02/27 22:10:17 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -2972,7 +2973,7 @@ static void *timeThread(void *)
 				dmxTOT.start(); // -> unlock
 			}
 
-			if (dmxTOT.change( true )) // von TOT nach TDT wechseln
+			if (dmxTOT.change(1)) // von TOT nach TDT wechseln
 
 				;
 
@@ -3046,9 +3047,10 @@ static void *timeThread(void *)
 
 		eventServer->sendEvent(CSectionsdClient::EVT_TIMESET, CEventServer::INITID_SECTIONSD, &tim, sizeof(tim) );
 
-		dmxTOT.closefd();
-
 		dprintf("dmxTOT: changing from TDT/TOT to TOT.\n");
+		dmxTOT.change(0);
+
+		dmxTOT.closefd();
 
 		// Jetzt wird die Uhrzeit nur noch per TOT gesetzt (CRC)
 		for (;;)
@@ -3656,7 +3658,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.155 2003/02/24 21:16:56 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.156 2003/02/27 22:10:17 thegoodguy Exp $\n");
 
 	try
 	{
