@@ -393,7 +393,7 @@ int eFrontend::SNR()
 	uint16_t snr=0;
 	if (ioctl(fd, FE_READ_SNR, &snr) < 0)
 		eDebug("FE_READ_SNR failed (%m)");
-#if 0
+	#if 0
 	if ((snr<0) || (snr>65535))
 	{
 		eWarning("buggy SNR driver (or old version) (%08x)", snr);
@@ -1994,7 +1994,7 @@ int eFrontend::tune_qam(eTransponder *trans,
 #else
 	front.inversion=(Inversion == 2 ? INVERSION_AUTO :
 		(Inversion?INVERSION_ON:INVERSION_OFF) );
-	front.frequency = Frequency;
+	front.frequency = Frequency / 1000; // dbox2 v3 drivers need frequency as Mhz
 	front.u.qam.modulation=getModulation(QAM);
 	front.u.qam.fec_inner=getFEC(FEC_inner);
 	front.u.qam.symbol_rate=SymbolRate;
