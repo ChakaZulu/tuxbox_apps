@@ -1452,7 +1452,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 			dummy=1;
 			fclose(fd);
 		}
-		oj = new CMenuOptionChooser("miscsettings.bootinfo", &dummy, true, new CStartNeutrinoDirectNotifier );
+		oj = new CMenuOptionChooser("miscsettings.bootinfo", &dummy, true, new CShowBootInfoNotifier );
 		oj->addOption(0, "options.off");
 		oj->addOption(1, "options.on");
 		miscSettings.addItem( oj );
