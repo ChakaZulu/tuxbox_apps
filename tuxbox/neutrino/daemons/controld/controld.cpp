@@ -311,7 +311,7 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 		//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
 		case AVS_FNCOUT_EXT169	:
 			videoDisplayFormat = VIDEO_CENTER_CUT_OUT;
-			wss = SAA_WSS_169F;	
+			wss = SAA_WSS_169F;
 			break;
 		case AVS_FNCOUT_EXT43	:
 			videoDisplayFormat = VIDEO_LETTER_BOX;
@@ -337,9 +337,9 @@ void setVideoFormat(int format, bool bSaveFormat = true )
 	}
 	close(fd);
 
-	if ( (fd = open("/dev/dbox/saa0",O_RDWR) < 0))
+	if ( (fd = open(SAA7126_DEVICE,O_RDWR)) < 0)
 	{
-		perror("open /dev/dbox/saa0");
+		perror("open " SAA7126_DEVICE);
 		return;
 	}
 	ioctl(fd,SAAIOSWSS,&wss);
@@ -762,7 +762,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.59 2002/08/04 15:15:03 wjoost Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.60 2002/08/12 17:11:58 wjoost Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())
