@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.87 2001/12/02 11:59:26 waldi Exp $
+        $Id: neutrino.cpp,v 1.88 2001/12/03 19:09:10 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.88  2001/12/03 19:09:10  McClean
+  fixed install targets
+
   Revision 1.87  2001/12/02 11:59:26  waldi
   - add config.h include
   - change dir for icons
@@ -932,11 +935,11 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 
 	for(int x=1; x<argc; x++)
 	{
-		if (! strcmp(argv[x], "-z")) {
+		if ( !strcmp(argv[x], "-z")) {
 			printf("Using zapit\n");
 			zapit = true;
 		}
-		else if (! strcmp(argv[x], "-su"))
+		else if ( !strcmp(argv[x], "-su"))
 		{
 			printf("Software update enabled\n");
 			softupdate = true;
@@ -1137,7 +1140,7 @@ void CNeutrinoApp::InitLanguageSettings(CMenuWidget &languageSettings)
 		int n;
 //		printf("scanning locale dir now....(perhaps)\n");
 
-		n = scandir("/usr/lib/locale", &namelist, 0, alphasort);
+		n = scandir(DATADIR "/neutrino/locale", &namelist, 0, alphasort);
 		if (n < 0)
 		{
 			perror("scandir");
@@ -1742,27 +1745,27 @@ int CNeutrinoApp::run(int argc, char **argv)
 		printf("using defaults...\n\n");
 	}
 
-    g_Fonts = new FontsDef;
+	g_Fonts = new FontsDef;
 	SetupFonts();
 
 	ClearFrameBuffer();
 
 	g_Locale = new CLocaleManager;
-    g_RCInput = new CRCInput;
-    g_lcdd = new CLCDD;
-    g_Controld = new CControld;
-    g_RemoteControl = new CRemoteControl;
-    g_EpgData = new CEpgData;
-    g_InfoViewer = new CInfoViewer;
-    g_StreamInfo = new CStreamInfo;
+	g_RCInput = new CRCInput;
+	g_lcdd = new CLCDD;
+	g_Controld = new CControld;
+	g_RemoteControl = new CRemoteControl;
+	g_EpgData = new CEpgData;
+	g_InfoViewer = new CInfoViewer;
+	g_StreamInfo = new CStreamInfo;
 	g_ScanTS = new CScanTs;
 	g_UcodeCheck = new CUCodeCheck;
-    g_ScreenSetup = new CScreenSetup;
-    g_EventList = new EventList;
+	g_ScreenSetup = new CScreenSetup;
+	g_EventList = new EventList;
 	g_Update = new CFlashUpdate;
 	g_WatchDog = new CStreamWatchDog;
 
-//    printf("\nCNeutrinoApp::run - objects initialized...\n\n");
+	//printf("\nCNeutrinoApp::run - objects initialized...\n\n");
 	g_Locale->loadLocale(g_settings.language);
 
 	colorSetupNotifier = new CColorSetupNotifier;
@@ -1771,7 +1774,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	APIDChanger        = new CAPIDChangeExec;
 	NVODChanger        = new CNVODChangeExec;
 
-    colorSetupNotifier->changeNotify("initial");
+	colorSetupNotifier->changeNotify("initial");
 
 	setupNetwork();
 
@@ -1829,7 +1832,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//init programm
 	InitZapper();
 
-    mute = false;
+	mute = false;
 	nRun = true;
 
 	RealRun(mainMenu);
@@ -1844,17 +1847,17 @@ void CNeutrinoApp::AudioMuteToggle()
 	int dy = 40;
 	int x = g_settings.screen_EndX-dx;
 	int y = g_settings.screen_StartY;
-    if ( !mute )
-    {
-    	g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
-    	g_FrameBuffer->paintIcon("mute.raw", x+5, y+5);
-    	g_Controld->Mute();
-    }
-    else
-    {
-        g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
-    	g_Controld->UnMute();
-    }
+	if ( !mute )
+	{
+		g_FrameBuffer->paintBoxRel(x, y, dx, dy, COL_INFOBAR);
+		g_FrameBuffer->paintIcon("mute.raw", x+5, y+5);
+		g_Controld->Mute();
+	}
+	else
+	{
+		g_FrameBuffer->paintBackgroundBoxRel(x, y, dx, dy);
+		g_Controld->UnMute();
+	}
 	mute = !mute;
 }
 
@@ -1869,7 +1872,7 @@ void CNeutrinoApp::setVolume(int key)
 
 	char volume = g_Controld->getVolume();
 
-    do
+	do
 	{
         if (key==CRCInput::RC_plus)
 		{
@@ -2004,7 +2007,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-    printf("NeutrinoNG $Id: neutrino.cpp,v 1.87 2001/12/02 11:59:26 waldi Exp $\n\n");
+    printf("NeutrinoNG $Id: neutrino.cpp,v 1.88 2001/12/03 19:09:10 McClean Exp $\n\n");
     tzset();
     initGlobals();
 	neutrino = new CNeutrinoApp;
