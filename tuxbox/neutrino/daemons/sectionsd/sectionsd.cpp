@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.124 2002/04/27 10:48:07 field Exp $
+//  $Id: sectionsd.cpp,v 1.125 2002/05/04 00:14:51 rasc Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.125  2002/05/04 00:14:51  rasc
+//  -- default cache 21 days, processor load should be no problem
+//
 //  Revision 1.124  2002/04/27 10:48:07  field
 //  Geschindigkeit gefixt
 //
@@ -424,7 +427,8 @@
 #define CHECK_RESTART_DMX_AFTER_TIMEOUTS 3
 
 // Wieviele Sekunden EPG gecached werden sollen
-static long secondsToCache=4*24*60L*60L; // 4 Tage - weniger Prozessorlast?!
+//static long secondsToCache=4*24*60L*60L; // 4 Tage - weniger Prozessorlast?!
+static long secondsToCache=21*24*60L*60L; // 21 Tage - Prozessorlast <3% (rasc)
 // Ab wann ein Event als alt gilt (in Sekunden)
 static long oldEventsAre=60*60L; // 1h
 static int debug=0;
@@ -1651,7 +1655,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.124 2002/04/27 10:48:07 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.125 2002/05/04 00:14:51 rasc Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -3960,7 +3964,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.124 2002/04/27 10:48:07 field Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.125 2002/05/04 00:14:51 rasc Exp $\n");
 	try
 	{
 
