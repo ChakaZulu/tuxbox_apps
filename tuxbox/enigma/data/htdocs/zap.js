@@ -1,3 +1,12 @@
+function zapKeyUp()
+{
+	var key = window.event.keyCode;
+	if (key == 38)
+		channelChange();
+	else
+	if (key == 40)
+		channelChange();
+}
 function zapHeaderReload()
 {
 	parent.header.location.reload();

@@ -8,7 +8,7 @@
 				<select style="width: 150px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=30></select>
 			</td>
 			<td>
-				<select style="width: 470px; font-weight: bold;" ondblClick=channelChange() name="channel" size=30></select>
+				<select style="width: 470px; font-weight: bold;" ondblClick=channelChange() onkeyup=zapKeyUP() name="channel" size=30></select>
 			</td>
 		</tr>
 	</table>

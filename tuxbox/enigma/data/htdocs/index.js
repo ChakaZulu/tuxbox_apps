@@ -25,11 +25,13 @@ function switchChannel(xy, bouquet, channel)
 		setTimeout("zapHeaderReload()", 3000);
 }
 
-function deleteMovie(xy)
+function deleteMovie()
 {
 	if (confirmAction('Do you really want to delete this movie?'))
 	{
-		document.location = "/cgi-bin/deleteMovie?ref="+xy;
+		var selChannel = document.channelselector.channel.selectedIndex;
+		var channel = document.channelselector.channel.options[selChannel].value;
+		document.location = "/cgi-bin/deleteMovie?ref="+channel;
 		setTimeout("reload()", 3000);
 	}
 }
