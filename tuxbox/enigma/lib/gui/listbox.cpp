@@ -387,8 +387,10 @@ void eListBoxBase::take(eListBoxEntry* entry, bool holdCurrent)
 	if (holdCurrent && current != entry)
 		cur = current;
 
+	unsigned int oldsize = childs.size();
 	childs.take(entry);
-	init();
+	if ( oldsize != childs.size() )
+		init();
 
 	if (cur)
 		setCurrent(cur);
