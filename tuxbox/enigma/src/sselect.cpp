@@ -149,7 +149,8 @@ int eServiceSelector::eventFilter(const eWidgetEvent &event)
 			{
 			case eRCInput::RC_RED:
 			{
-				if ( eEPGCache::getInstance()->lookupCurrentEvent(selected->original_network_id, selected->service_id ) != 0)
+				const eventMap* e = eEPGCache::getInstance()->getEventMap(selected->original_network_id, selected->service_id);
+				if (e && !e->empty())
 				{
 					eEPGWindow wnd(selected);
 					if (LCDElement && LCDTitle)

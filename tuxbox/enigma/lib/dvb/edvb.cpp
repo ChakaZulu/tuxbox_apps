@@ -935,6 +935,7 @@ eDVB::eDVB()
 	
 	setState(stateIdle);
 
+	availableCASystems.push_back(0x0602);	// Irdeto
 	availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
 	availableCASystems.push_back(0x1722);	// BetaCrypt D (cable)
 	availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)

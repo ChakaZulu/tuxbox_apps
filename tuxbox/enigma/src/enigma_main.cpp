@@ -795,23 +795,7 @@ void eZapMain::keyUp(int code)
 
 		const eventMap* pMap = eEPGCache::getInstance()->getEventMap(service->original_network_id, service->service_id);
 
-		if (!pMap)  // no events for this service in EPG Cache
-		{
-			EIT *eit=eDVB::getInstance()->getEIT();
-			QList<EITEvent> dummy;
-			{
-				eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
-				if (eit)
-					eit->unlock();		// HIER liegt der hund begraben.
-	
-				actual_eventDisplay=&ei;
-				ei.show();
-				ei.exec();
-				ei.hide();
-				actual_eventDisplay=0;
-			}
-		}
-		else	// events in EPG Cache found
+		if (isEPG)  // EPG vorhanden
 		{
 			eventMap::const_iterator It = pMap->begin();
 			QList<EITEvent> events;
@@ -825,6 +809,21 @@ void eZapMain::keyUp(int code)
 			ei.exec();
 			ei.hide();
 			actual_eventDisplay=0;
+		}
+		else	
+		{
+			EIT *eit=eDVB::getInstance()->getEIT();
+			QList<EITEvent> dummy;
+			{
+				eEventDisplay ei(service->service_name.c_str(), eit?&eit->events:&dummy);
+				if (eit)
+					eit->unlock();		// HIER liegt der hund begraben.
+				actual_eventDisplay=&ei;
+				ei.show();
+				ei.exec();
+				ei.hide();
+				actual_eventDisplay=0;
+			}
 		}
 		break;
 	}
