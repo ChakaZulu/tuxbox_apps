@@ -3136,12 +3136,14 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		eventinfo = (CTimerd::EventInfo *) data;
 		if(recordingstatus==0)
 		{
-			if(eventinfo->mode==CTimerd::MODE_RADIO && mode!=mode_radio)
+			bool isTVMode = g_Zapit->isChannelTVChannel(eventinfo->channel_id);
+
+			if ((!isTVMode) && (mode != mode_radio))
 			{
 				radioMode(false);
 				channelsInit();
 			}
-			else if(eventinfo->mode==CTimerd::MODE_TV && mode!=mode_tv)
+			else if (isTVMode && (mode != mode_tv))
 			{
 				tvMode(false);
 				channelsInit();
@@ -3907,10 +3909,6 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 				eventinfo.epgID = g_RemoteControl->current_EPGid;
 				eventinfo.epg_starttime = 0;
 				strcpy(eventinfo.apids, "");
-				if(getMode()==mode_radio)
-					eventinfo.mode = CTimerd::MODE_RADIO;
-				else
-					eventinfo.mode = CTimerd::MODE_TV;
 
 				if(CVCRControl::getInstance()->Record(&eventinfo)==false)
 				{

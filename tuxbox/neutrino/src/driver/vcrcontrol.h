@@ -158,15 +158,7 @@ class CVCRControl
 
 		int getDeviceState(){return Device->deviceState;};
 		bool Stop(){return Device->Stop();};
-		bool Record(CTimerd::RecordingInfo *eventinfo)
-		{
-			int mode;
-			if(eventinfo->mode==CTimerd::MODE_RADIO)
-				mode=NeutrinoMessages::mode_radio;
-			else
-				mode=NeutrinoMessages::mode_tv;
-			return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apids); 
-		};
+		bool Record(const CTimerd::RecordingInfo * const eventinfo);
 		bool Pause(){return Device->Pause();};
 		bool Resume(){return Device->Resume();};
 };

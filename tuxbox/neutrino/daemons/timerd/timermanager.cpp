@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.70 2004/02/25 00:28:11 thegoodguy Exp $
+   $Id: timermanager.cpp,v 1.71 2004/03/07 02:46:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -873,7 +873,7 @@ void CTimerEvent_Standby::saveToConfig(CConfigFile *config)
 CTimerEvent_Record::CTimerEvent_Record(time_t announceTime, time_t alarmTime, time_t stopTime, 
 				       t_channel_id channel_id,
 				       event_id_t epgID, 
-				       time_t epg_starttime, const std::string apids, CTimerd::CChannelMode mode,
+				       time_t epg_starttime, const std::string apids,
 				       CTimerd::CTimerEventRepeat evrepeat) :
 CTimerEvent(getEventType(), announceTime, alarmTime, stopTime, evrepeat)
 {
@@ -881,7 +881,6 @@ CTimerEvent(getEventType(), announceTime, alarmTime, stopTime, evrepeat)
 	eventInfo.epg_starttime = epg_starttime;
 	eventInfo.channel_id = channel_id;
 	eventInfo.apids = apids;
-	eventInfo.mode = mode;
 }
 //------------------------------------------------------------
 CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
@@ -894,7 +893,6 @@ CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
 	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
 	eventInfo.channel_id = config->getInt64("EVENT_INFO_CHANNEL_ID_"+id);
 	eventInfo.apids = config->getString("EVENT_INFO_APIDS_"+id);
-	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent_Record::fireEvent()
@@ -938,7 +936,6 @@ void CTimerEvent_Record::saveToConfig(CConfigFile *config)
 	config->setInt64("EVENT_INFO_EPG_ID_"+id, eventInfo.epgID);
 	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id, eventInfo.epg_starttime);
 	config->setInt64("EVENT_INFO_CHANNEL_ID_"+id, eventInfo.channel_id);
-	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 	config->setString("EVENT_INFO_APIDS_"+id, eventInfo.apids);
 }
 //------------------------------------------------------------
@@ -1031,7 +1028,6 @@ CTimerEvent(CTimerd::TIMER_NEXTPROGRAM, config, iId)
 	eventInfo.epg_starttime = config->getInt64("EVENT_INFO_EPG_STARTTIME_"+id);
 	eventInfo.channel_id = config->getInt64("EVENT_INFO_CHANNEL_ID_"+id);
 	eventInfo.apids = config->getString("EVENT_INFO_APIDS_"+id);
-	eventInfo.mode = (CTimerd::CChannelMode) config->getInt32("EVENT_INFO_CHANNEL_MODE_"+id);
 }
 //------------------------------------------------------------
 
@@ -1062,7 +1058,6 @@ void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
 	config->setInt64("EVENT_INFO_EPG_STARTTIME_"+id,eventInfo.epg_starttime);
 	config->setInt64("EVENT_INFO_CHANNEL_ID_"+id,eventInfo.channel_id);
 	config->setString("EVENT_INFO_APIDS_"+id,eventInfo.apids);
-	config->setInt32("EVENT_INFO_CHANNEL_MODE_"+id, (int) eventInfo.mode);
 }
 //------------------------------------------------------------
 void CTimerEvent_NextProgram::Reschedule()

@@ -982,11 +982,6 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 						#ifdef DEBUG_
 							std::cout << "add record timer 3" << std::endl;
 						#endif
-						CTimerd::CChannelMode mode;
-						if (CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_radio)
-							mode = CTimerd::MODE_RADIO;
-						else
-							mode = CTimerd::MODE_TV;
 
 						timerdclient.addRecordTimerEvent
 							( this->selectedChannelEntry->channel->channel_id
@@ -996,7 +991,6 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 							, (*It)->channelEvent.startTime
 							, (*It)->channelEvent.startTime - (ANNOUNCETIME + 120)
 							, ""
-							, mode
 							, true
 							);
 						ShowMsgUTF
@@ -1025,12 +1019,6 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 					CTimerdClient timerdclient;
 					if (timerdclient.isTimerdAvailable())
 					{
-						CTimerd::CChannelMode mode;
-						if (CNeutrinoApp::getInstance()->getMode() == NeutrinoMessages::mode_radio)
-							mode = CTimerd::MODE_RADIO;
-						else
-							mode = CTimerd::MODE_TV;
-
 						timerdclient.addZaptoTimerEvent
 							( this->selectedChannelEntry->channel->channel_id
 							, (*It)->channelEvent.startTime
@@ -1039,7 +1027,6 @@ int EpgPlus::exec ( CChannelList* channelList , int selectedChannelIndex) // UTF
 							, (*It)->channelEvent.eventID
 							, (*It)->channelEvent.startTime
 							, ""
-							, mode
 							);
 
 						ShowMsgUTF

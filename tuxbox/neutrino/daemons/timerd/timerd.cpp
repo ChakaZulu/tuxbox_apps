@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.52 2004/02/20 22:21:21 thegoodguy Exp $
+	$Id: timerd.cpp,v 1.53 2004/03/07 02:46:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -105,7 +105,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
 						strcpy(resp.apids, 
 								 static_cast<CTimerEvent_Record*>(event)->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
-						resp.mode = static_cast<CTimerEvent_Record*>(event)->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_RECORD)
 					{
@@ -114,7 +113,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.epg_starttime = ev->eventInfo.epg_starttime;
 						resp.channel_id = ev->eventInfo.channel_id;
 						strcpy(resp.apids, ev->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
-						resp.mode = ev->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_ZAPTO)
 					{
@@ -123,7 +121,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.epg_starttime = ev->eventInfo.epg_starttime;
 						resp.channel_id = ev->eventInfo.channel_id;
 						strcpy(resp.apids, ev->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
-						resp.mode = ev->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_REMIND)
 					{
@@ -163,7 +160,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
 						strcpy(resp.apids, 
 								 static_cast<CTimerEvent_Record*>(event)->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
-						resp.mode = static_cast<CTimerEvent_Record*>(event)->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_RECORD)
 					{
@@ -172,7 +168,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.epg_starttime = ev->eventInfo.epg_starttime;
 						resp.channel_id = ev->eventInfo.channel_id;
 						strcpy(resp.apids, ev->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
-						resp.mode = ev->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_ZAPTO)
 					{
@@ -181,7 +176,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.epg_starttime = ev->eventInfo.epg_starttime;
 						resp.channel_id = ev->eventInfo.channel_id;
 						strcpy(resp.apids, ev->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
-						resp.mode = ev->eventInfo.mode;
 					}
 					else if(event->eventType == CTimerd::TIMER_REMIND)
 					{
@@ -268,7 +262,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 															evInfo.epgID,
 															evInfo.epg_starttime,
 															evInfo.apids,
-															evInfo.mode,
 															msgAddTimer.eventRepeat);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
@@ -283,7 +276,6 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 															  evInfo.channel_id,
 															  evInfo.epgID,
 															  evInfo.epg_starttime,
-															  evInfo.mode,
 															  msgAddTimer.eventRepeat);
 						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					}

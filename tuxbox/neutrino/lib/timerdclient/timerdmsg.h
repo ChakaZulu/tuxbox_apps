@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.4 2003/11/30 13:21:04 zwen Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.5 2004/03/07 02:46:12 thegoodguy Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -38,7 +38,7 @@ class CTimerdMsg : public CBasicMessage
 	
  public:
 
-	static const CBasicMessage::t_version ACTVERSION = 1;
+	static const CBasicMessage::t_version ACTVERSION = 2;
 
 	enum commands
 		{

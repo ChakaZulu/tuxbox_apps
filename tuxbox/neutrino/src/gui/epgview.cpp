@@ -456,17 +456,12 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 						CTimerdClient timerdclient;
 						if(timerdclient.isTimerdAvailable())
 						{
-							CTimerd::CChannelMode mode;
-							if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
-								mode = CTimerd::MODE_RADIO;
-							else
-								mode = CTimerd::MODE_TV;
 							timerdclient.addRecordTimerEvent(channel_id,
 																		epgData.epg_times.startzeit,
 																		epgData.epg_times.startzeit + epgData.epg_times.dauer,
 																		epgData.eventID, epgData.epg_times.startzeit,
 																		epgData.epg_times.startzeit - (ANNOUNCETIME + 120 ),
-																		"", mode, true );
+																		"", true );
 							ShowMsgUTF("timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 						}
 						else
@@ -480,16 +475,11 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 					CTimerdClient timerdclient;
 					if(timerdclient.isTimerdAvailable())
 					{
-						CTimerd::CChannelMode mode;
-						if(CNeutrinoApp::getInstance()->getMode()==NeutrinoMessages::mode_radio)
-							mode = CTimerd::MODE_RADIO;
-						else
-							mode = CTimerd::MODE_TV;
 						timerdclient.addZaptoTimerEvent(channel_id,
 																  epgData.epg_times.startzeit,
 																  epgData.epg_times.startzeit - ANNOUNCETIME, 0,
 																  epgData.eventID, epgData.epg_times.startzeit,
-																  "", mode);
+																  "");
 						ShowMsgUTF("timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 					}
 					else

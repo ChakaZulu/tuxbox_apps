@@ -156,6 +156,14 @@ bool CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo
 }
 
 //-------------------------------------------------------------------------
+bool CVCRControl::Record(const CTimerd::RecordingInfo * const eventinfo)
+{
+	int mode = g_Zapit->isChannelTVChannel(eventinfo->channel_id) ? NeutrinoMessages::mode_tv : NeutrinoMessages::mode_radio;
+	return Device->Record(eventinfo->channel_id, mode, eventinfo->epgID, eventinfo->apids); 
+}
+
+
+//-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Stop()
 {
 	deviceState = CMD_VCR_STOP;

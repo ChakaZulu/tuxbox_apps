@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.12 2004/02/20 22:21:22 thegoodguy Exp $
+	$Id: timerdtypes.h,v 1.13 2004/03/07 02:46:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -27,10 +27,10 @@
 #ifndef __timerdtypes__
 #define __timerdtypes__
 
-#include <vector>
-
 #include <zapit/client/zapittypes.h>
 #include <sectionsdclient/sectionsdtypes.h>
+
+#include <vector>
 
 #define REMINDER_MESSAGE_MAXLEN 31
 #define TIMERD_APIDS_MAXLEN 50
@@ -69,11 +69,6 @@ class CTimerd
 			TIMERSTATE_HASFINISHED, 
 			TIMERSTATE_TERMINATED 
 		};
-		enum CChannelMode
-		{
-			MODE_TV=1,
-			MODE_RADIO
-		};
 
 		struct EventInfo
 		{
@@ -81,7 +76,6 @@ class CTimerd
 			time_t       epg_starttime;
 			t_channel_id channel_id;
 			std::string  apids;
-			CChannelMode mode;
 			bool         recordingSafety;
 		};
 		
@@ -91,7 +85,6 @@ class CTimerd
 			time_t       epg_starttime;
 			t_channel_id channel_id;
 			char         apids[TIMERD_APIDS_MAXLEN];
-			CChannelMode mode;
 			bool         recordingSafety;
 		};
 		
@@ -105,7 +98,6 @@ class CTimerd
 						channel_id = e.channel_id;
 						epgID = e.epgID;
 						epg_starttime = e.epg_starttime;
-						mode = e.mode;
 					};
 				RecordingInfo& operator = (EventInfo& e)
 					{
@@ -113,7 +105,6 @@ class CTimerd
 						channel_id = e.channel_id;
 						epgID = e.epgID;
 						epg_starttime = e.epg_starttime;
-						mode = e.mode;
 						return *this;
 					}
 				char apids[TIMERD_APIDS_MAXLEN];
@@ -138,7 +129,6 @@ class CTimerd
 			event_id_t        epgID;                            //only filled if applicable
 			time_t            epg_starttime;                    //only filled if applicable
 			char              apids[TIMERD_APIDS_MAXLEN];       //only filled if applicable
-			CChannelMode      mode;                             //only filled if applicable
 			bool              standby_on;                       //only filled if applicable
 			char              message[REMINDER_MESSAGE_MAXLEN]; //only filled if applicable
 			bool operator< (const responseGetTimer& a) const

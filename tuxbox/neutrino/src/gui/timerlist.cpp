@@ -193,7 +193,6 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		eventinfo.epgID=0;
 		eventinfo.epg_starttime=0;
 		eventinfo.channel_id=timerNew.channel_id;
-		eventinfo.mode = timerNew.mode;
 		eventinfo.apids = "";
 		eventinfo.recordingSafety = false;
 		timerNew.standby_on = (timerNew_standby_on == 1);
@@ -218,7 +217,8 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 									timerNew.stopTime,timerNew.eventRepeat);
 		return menu_return::RETURN_EXIT;
 	}
-	else if(actionKey.substr(0,4)=="SCT:")
+	else if ((actionKey.substr(0,4)=="SCT:") ||
+		 (actionKey.substr(0,4)=="SCR:"))
 	{
 		int delta;
 		sscanf(actionKey.substr(4).c_str(),
@@ -227,26 +227,10 @@ int CTimerList::exec(CMenuTarget* parent, const std::string & actionKey)
 		       &timerNew.channel_id,
 		       &delta);
 		strncpy(timerNew_channel_name,actionKey.substr(4 + delta + 1).c_str(),30);
-		timerNew.mode=CTimerd::MODE_TV;
 		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
 		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
 		return menu_return::RETURN_EXIT;
 	}
-	else if(actionKey.substr(0,4)=="SCR:")
-	{
-		int delta;
-		sscanf(actionKey.substr(4).c_str(),
-		       SCANF_CHANNEL_ID_TYPE
-		       "%n",
-		       &timerNew.channel_id,
-		       &delta);
-		strncpy(timerNew_channel_name,actionKey.substr(4 + delta + 1).c_str(),30);
-		timerNew.mode=CTimerd::MODE_RADIO;
-		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
-		g_RCInput->postMsg(CRCInput::RC_timeout,0); // leave underlying menu also
-		return menu_return::RETURN_EXIT;
-	}
-
 
 	if(parent)
 	{

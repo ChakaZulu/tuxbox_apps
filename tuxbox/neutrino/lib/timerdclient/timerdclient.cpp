@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.45 2003/11/30 13:21:04 zwen Exp $
+	$Id: timerdclient.cpp,v 1.46 2004/03/07 02:46:12 thegoodguy Exp $
 
 	License: GPL
 
@@ -241,7 +241,6 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 		tei.channel_id = ei->channel_id;
 		tei.epg_starttime	= ei->epg_starttime;
 		tei.epgID = ei->epgID;
-		tei.mode	= ei->mode;
 		tei.recordingSafety = ei->recordingSafety;
 		length = sizeof( CTimerd::TransferEventInfo);
 		data = &tei;

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.52 2004/03/06 10:43:52 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.53 2004/03/07 02:46:11 thegoodguy Exp $
 
 	License: GPL
 
@@ -503,7 +503,6 @@ bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 {
 	char classname;
 	int pos = 0;
-	char mode = (Parent->Zapit->getMode() == CZapitClient::MODE_RADIO) ? 'R' : 'T';
 	Parent->eList = Parent->Sectionsd->getEventsServiceKey(channel_id);
 	CChannelEventList::iterator eventIterator;
 	request->SendHTMLHeader("DBOX2-Neutrino Channellist");
@@ -520,13 +519,13 @@ bool CWebAPI::ShowEventList(CWebserverRequest *request,t_channel_id channel_id)
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
 		request->printf("<TR VALIGN=\"middle\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
 		request->printf("<TD><NOBR>");
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&amp;type=%d&amp;alarm=%u&amp;stop=%u&amp;mode=%c&amp;channel_id="
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&amp;type=%d&amp;alarm=%u&amp;stop=%u&amp;channel_id="
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-				"&amp;rs=1\">&nbsp;<IMG BORDER=0 SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,mode,
+				"&amp;rs=1\">&nbsp;<IMG BORDER=0 SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerd::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,
 				channel_id); 
-		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&amp;type=%d&amp;alarm=%u&amp;mode=%c&amp;channel_id="
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&amp;type=%d&amp;alarm=%u&amp;channel_id="
 				PRINTF_CHANNEL_ID_TYPE_NO_LEADING_ZEROS
-				"\">&nbsp;<IMG BORDER=0 SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,mode,
+				"\">&nbsp;<IMG BORDER=0 SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerd::TIMER_ZAPTO,(uint) eventIterator->startTime,
 				channel_id); 
 		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
@@ -880,45 +879,15 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 			case CTimerd::TIMER_ZAPTO :
 			case CTimerd::TIMER_RECORD :
 			{
-				if(timer->mode == CTimerd::MODE_RADIO)
-				{ // Radiokanal
-					if(channellist_radio.size()==0)
-					{
-						Parent->Zapit->getChannels(channellist_radio,CZapitClient::MODE_RADIO);
-					}
-					CZapitClient::BouquetChannelList::iterator channel = channellist_radio.begin();
-					for(; channel != channellist_radio.end();channel++)
-					{
-						if (channel->channel_id == timer->channel_id)
-						{
-							sAddData=channel->name;
-							break;
-						}
-					}
-					if(channel == channellist_radio.end())
-						sAddData="Unbekannter Radiokanal";
-				}
-				else
-				{ //TV Kanal
-					if(channellist_tv.size()==0)
-					{
-						Parent->Zapit->getChannels(channellist_tv, CZapitClient::MODE_TV);
-					}
-					CZapitClient::BouquetChannelList::iterator channel = channellist_tv.begin();
-					for(; channel != channellist_tv.end();channel++)
-					{
-						if (channel->channel_id == timer->channel_id)
-						{
-							sAddData=channel->name;
-							break;
-						}
-					}
-					if(channel == channellist_tv.end())
-						sAddData="Unbekannter TV-Kanal";
-				}
+				sAddData = Parent->Zapit->getChannelName(timer->channel_id);
+				if (sAddData.empty())
+					sAddData = Parent->Zapit->isChannelTVChannel(timer->channel_id) ? "Unbekannter TV-Kanal" : "Unbekannter Radiokanal";
+
 				if(strlen(timer->apids) > 0)
 				{
-					sAddData+= std::string("(") + timer->apids + ')';
+					sAddData += '(';
+					sAddData += timer->apids;
+					sAddData += ')';
 				}
 				if(timer->epgID!=0)
 				{
@@ -1375,8 +1344,6 @@ time_t	announceTimeT = 0,
 	sscanf(request->ParameterList["channel_id"].c_str(),
 	       SCANF_CHANNEL_ID_TYPE,
 	       &eventinfo.channel_id);
-
-	eventinfo.mode = Parent->Zapit->isChannelTVChannel(eventinfo.channel_id) ? CTimerd::MODE_TV : CTimerd::MODE_RADIO;
 
 	void *data=NULL;
 	if(type == CTimerd::TIMER_RECORD)
