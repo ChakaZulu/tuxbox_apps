@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.60 2004/08/25 19:51:09 rasc Exp $
+$Id: dvb_str.c,v 1.61 2004/08/25 21:33:41 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.60 2004/08/25 19:51:09 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.61  2004/08/25 21:33:41  rasc
+small fix: Priority wrong in Terr. Sys Delivery descriptor
+
 Revision 1.60  2004/08/25 19:51:09  rasc
  - Update: EN 300 468 v1.6.1 Terrestrial delivery system descriptor
 
@@ -1327,8 +1330,8 @@ char *dvbstrTerrTransmissionMode_FLAG (u_int i)
 char *dvbstrTerrPriority (u_int i)
 {
   STR_TABLE  Table[] = {
-     {  0x00, 0x00,  "HP (high priority)" },
-     {  0x01, 0x01,  "LP (low priority)" },
+     {  0x00, 0x00,  "LP (low priority)" },
+     {  0x01, 0x01,  "HP (high priority)" },
      {  0,0, NULL }
   };
 
