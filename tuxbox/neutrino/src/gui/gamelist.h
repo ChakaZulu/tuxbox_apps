@@ -65,7 +65,7 @@ class CPlugins
 			std::string name;
 			std::string description;
 			std::string depend;
-			int type;
+			plugin_type_t type;
 
 			bool fb;
 			bool rc;

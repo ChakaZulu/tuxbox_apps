@@ -1949,7 +1949,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	for(unsigned int count=0;count < (unsigned int) g_PluginList->getNumberOfPlugins();count++)
 	{
-		if( g_PluginList->getType(count)== 2 )
+		if (g_PluginList->getType(count)== PLUGIN_TYPE_TOOL)
 		{
 			// zB vtxt-plugins
 
@@ -3343,7 +3343,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.428 2003/03/19 20:59:02 thegoodguy Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.429 2003/03/26 12:04:06 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();

@@ -164,7 +164,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 	plugin_data->vtxtpid = false;
 	plugin_data->showpig = false;
 	plugin_data->needoffset = false;
-	plugin_data->type = 1;
+	plugin_data->type = PLUGIN_TYPE_DISABLED;
 
 	for (int i = 0; i < linecount; i++)
 	{
@@ -193,7 +193,7 @@ void CPlugins::parseCfg(plugin *plugin_data)
 		}
 		else if (cmd == "type")
 		{
-			plugin_data->type = atoi(parm.c_str());
+			plugin_data->type = (plugin_type_t)atoi(parm.c_str());
 		}
 		else if (cmd == "needfb")
 		{
@@ -499,14 +499,14 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 
 	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)
 	{
-    	if ( g_PluginList->getType(count)== 1 )
-    	{
-    		tmp = new game();
-    		tmp->number = count;
-    		tmp->name = g_PluginList->getName(count);
-    		tmp->desc = g_PluginList->getDescription(count);
-    		gamelist.insert(gamelist.end(), tmp);
-    	}
+		if (g_PluginList->getType(count) == PLUGIN_TYPE_GAME)
+		{
+			tmp = new game();
+			tmp->number = count;
+			tmp->name = g_PluginList->getName(count);
+			tmp->desc = g_PluginList->getDescription(count);
+			gamelist.push_back(tmp);
+		}
 	}
 
 	paint();
