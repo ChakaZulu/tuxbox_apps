@@ -765,21 +765,11 @@ void CFileBrowser::hide()
 
 void CFileBrowser::paintItem(unsigned int pos)
 {
+	int colwidth1, colwidth2, colwidth3, colwidth1_dir, colwidth2_dir;
 	int color;
 	int ypos = y+ theight+0 + pos*fheight;
 	CFile * actual_file = NULL;
 	std::string fileicon;
-  int colwidth1, colwidth2, colwidth3, colwidth1_dir, colwidth2_dir;
-
-	if (g_settings.filebrowser_showrights == 0){
-		colwidth2 = 0;
-		colwidth3 = 90;
-	}
-	else{
-		colwidth2 = 90;
-		colwidth3 = 90;
-	}
-	colwidth1 = width - 35 - colwidth2 - colwidth3 - 10;
 
 	colwidth2_dir = 180;
 	colwidth1_dir = width - 35 - colwidth2_dir - 10;
@@ -799,6 +789,18 @@ void CFileBrowser::paintItem(unsigned int pos)
 		actual_file = &filelist[liststart+pos];
 		if(actual_file->Marked)
 			color = color+2;
+
+		if (g_settings.filebrowser_showrights == 0 && S_ISREG(actual_file->Mode))
+		{
+			colwidth2 = 0;
+			colwidth3 = 90;
+		}
+		else
+		{
+			colwidth2 = 90;
+			colwidth3 = 90;
+		}
+		colwidth1 = width - 35 - colwidth2 - colwidth3 - 10;
 
 		frameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 

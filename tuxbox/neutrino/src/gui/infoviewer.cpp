@@ -814,7 +814,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 			if ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_anything )
 			{
 				frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_RED, BoxEndX- ICON_OFFSET- 4* ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2 + 2), g_Locale->getText("infoviewer.eventlist"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 4* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_RED_WIDTH + 2 + 2) + 8, g_Locale->getText("infoviewer.eventlist"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 			}
 		}
 
@@ -918,8 +918,8 @@ void CInfoViewer::showButton_Audio()
 	uint count = g_RemoteControl->current_PIDs.APIDs.size();
 	if ( count > 1 )
 	{
-		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, BoxEndX- ICON_OFFSET- 3* ButtonWidth + 2, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2), BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2 + 2), g_Locale->getText("infoviewer.languages"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
+		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_GREEN, BoxEndX- ICON_OFFSET- 3* ButtonWidth + 2 + 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth + (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2) + 8, BoxEndY - 2, ButtonWidth - (2 + NEUTRINO_ICON_BUTTON_GREEN_WIDTH + 2 + 2), g_Locale->getText("infoviewer.languages"), COL_INFOBAR_BUTTONS, 0, true); // UTF-8
 	};
 
 	const char * dd_icon;
