@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: system_settings.cpp,v 1.7 2004/06/23 08:34:34 ghostrider Exp $
+ * $Id: system_settings.cpp,v 1.8 2004/06/24 16:24:59 ghostrider Exp $
  */
 
 #include <system_settings.h>
@@ -45,9 +45,11 @@ eSystemSettings::eSystemSettings()
 	if ( eSystemInfo::getInstance()->hasRFMod() )
 		CONNECT((new eListBoxEntryMenu(&list, _("UHF Modulator"), eString().sprintf("(%d) %s", ++entry, _("open UHF-Modulator setup")) ))->selected, eSystemSettings::uhf_modulator);
 #endif
+#ifndef DISABLE_HDD
 #ifndef DISABLE_FILE
 	if ( eSystemInfo::getInstance()->hasHDD() )
 		CONNECT((new eListBoxEntryMenu(&list, _("Harddisc Setup"), eString().sprintf("(%d) %s", ++entry, _("open harddisc setup")) ))->selected, eSystemSettings::harddisc_setup);
+#endif
 #endif
 #ifdef ENABLE_KEYBOARD
 	if ( eSystemInfo::getInstance()->hasKeyboard() )
