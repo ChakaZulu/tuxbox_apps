@@ -158,6 +158,7 @@ void eDVBCI::gotMessage(const eDVBCIMessage &message)
 
 void eDVBCI::mmi_begin()
 {
+	stopTimer();
 	unsigned char buffer[10];
 	
 //	eDebug("start mmi");
@@ -167,6 +168,7 @@ void eDVBCI::mmi_begin()
 
 void eDVBCI::mmi_end()
 {
+	startTimer();
 	unsigned char buffer[10];
 
 //	eDebug("stop mmi");
@@ -177,10 +179,13 @@ void eDVBCI::mmi_end()
 void eDVBCI::mmi_enqansw(unsigned char *buf)
 {
 //	eDebug("got mmi_answer");
-	unsigned char buffer[ buf[0]+7 ];
-	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08",4);
-	memcpy(buffer+7, buf, buf[0] );
-	sendTPDU(0xA0,buf[0]+7,1,buffer);
+	unsigned char buffer[ buf[0]+8 ];
+	memcpy(buffer,"\x90\x2\x0\x4\x9f\x88\x08",7);
+	memcpy(buffer+7, buf, buf[0]+1 ); // add length byte itself..
+	sendTPDU(0xA0,buf[0]+8,1,buffer);
+	// buf[0] = length of following chars..  // done in enigma_mmi
+	// \x90\x2\x0\x4\x9f\x88\x08 = 7 bytes
+	// the length byte itself must added ... 7 + 1  =  8 :)
 }
 
 void eDVBCI::mmi_menuansw(int val)
