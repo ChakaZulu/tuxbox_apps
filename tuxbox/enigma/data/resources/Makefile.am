@@ -1,4 +1,4 @@
 installdir = $(DATADIR)/enigma/resources
 
-install_DATA = rcdboxnew.xml rcdboxold.xml rcdreambox.xml rcdboxbuttons.xml rcdreambox2.xml
+install_DATA = rcdbox.xml rcdreambox.xml rcdboxbuttons.xml rcdreambox2.xml
 
