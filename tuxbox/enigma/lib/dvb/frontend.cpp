@@ -173,7 +173,7 @@ int eFrontend::setFrontend()
 		eDebug("FE_SET_FRONTEND OK");
 #if HAVE_DVB_API_VERSION >= 3
 		// API V3 drivers have no working TIMEDOUT event.. 
-		timeout.start(2000,true);   
+		timeout.start(3000,true);   
 #endif
 	}
 	return 0;
@@ -302,14 +302,15 @@ void eFrontend::readFeEvent(int what)
 		}
 #if HAVE_DVB_API_VERSION < 3
 		case FE_FAILURE_EV:
-#else
-		else if ( ev.status & FE_TIMEDOUT )
-#endif
 		{
 			eDebug("[FE] evt. failure");
 			tuneFailed();
 			return;
 		}
+#else
+		else if ( ev.status & FE_TIMEDOUT )
+			eDebug("[FE].");
+#endif
 #if HAVE_DVB_API_VERSION < 3
 		default:
 			eDebug("[FE] unhandled event (type %d)", ev.type);
