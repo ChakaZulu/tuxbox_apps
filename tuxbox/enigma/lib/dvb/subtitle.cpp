@@ -224,10 +224,13 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 				page->page_version_number = -1;
 				// if no update, just skip this data.
 			if (page->page_version_number == page_version_number)
+			{
+				eDebug("skip data... ");
 				break;
+			}
 		}
 
-		//eDebug("page updated: old: %d, new: %d", page->page_version_number, page_version_number);
+//		eDebug("page updated: old: %d, new: %d", page->page_version_number, page_version_number);
 			// when acquisition point or mode change: remove all displayed pages.
 		if ((page_state == 1) || (page_state == 2))
 		{
@@ -238,12 +241,13 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 				page->page_regions = p;
 			}
 		}
-		
-		//eDebug("new page.. (%d)", page_state);
-		
-		page->page_time_out = time(0) + page_time_out;
+
+//		eDebug("new page.. (%d)", page_state);
+
+		page->page_time_out = page_time_out;
+
 		page->page_version_number = page_version_number;
-		
+
 		struct subtitle_page_region **r = &page->page_regions;
 		
 		//eDebug("%d  / %d data left", processed_length, segment_length);
@@ -573,6 +577,7 @@ int subtitle_process_segment(struct subtitle_ctx *sub, __u8 *segment)
 	}
 	case 0x80: // end of display set segment
 	{
+//		eDebug("end of display set segment");
 		if (sub->screen_enabled)
 			subtitle_redraw_all(sub);
 		break;
@@ -782,7 +787,7 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 			{
 				if (main_clut_id != clut_id)
 				{
-					eDebug("MULTIPLE CLUTS IN USE! prepare for pixelmuell!");
+//					eDebug("MULTIPLE CLUTS IN USE! prepare for pixelmuell!");
 //					exit(0);
 				}
 			}
@@ -809,17 +814,20 @@ void subtitle_redraw(struct subtitle_ctx *sub, int page_id)
 			if (y1 > sub->bbox_bottom)
 				sub->bbox_bottom = y1;
 
+			// start timeout... 
+			sub->timeout_timer->start(page->page_time_out*1000, true);
+
 			// do not draw when anyone has locked the 
 			// framebuffer ( non enigma plugins... )
 			if ( !fbClass::getInstance()->islocked() )
 				/* copy to screen */
-			for (y=0; y < reg->region_height; ++y)
-			{
-				memcpy(sub->screen_buffer + 
-					sub->screen_width * (y + region->region_vertical_address) + 
-					region->region_horizontal_address, 
-					reg->region_buffer + reg->region_width * y, reg->region_width);
-			}
+				for (y=0; y < reg->region_height; ++y)
+				{
+					memcpy(sub->screen_buffer + 
+						sub->screen_width * (y + region->region_vertical_address) + 
+						region->region_horizontal_address, 
+						reg->region_buffer + reg->region_width * y, reg->region_width);
+				}
 		} 
 		else
 			eDebug("region not found");

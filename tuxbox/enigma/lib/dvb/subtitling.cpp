@@ -108,6 +108,14 @@ void eSubtitleWidget::processPESPacket(unsigned char *pkt, int len)
 	subtitle_process_pes(subtitle, pesbuffer, peslen);
 }
 
+void eSubtitleWidget::displaying_timeout()
+{
+	eDebug("displaying timeout reached... hide visible subtitles");
+	subtitle_reset(subtitle);
+	if ( isVisible() )
+		subtitle_clear_screen(subtitle);
+}
+
 void eSubtitleWidget::processNext()
 {
 	if (queue.empty())
@@ -289,9 +297,11 @@ static void subtitle_set_palette(struct subtitle_clut *pal)
 	
 	gPainter p(*gFBDC::getInstance());
 	p.setPalette(palette, 240, pal->size);
+//	eDebug("palette changed");
 }
 
-eSubtitleWidget::eSubtitleWidget(): timer(eApp)
+eSubtitleWidget::eSubtitleWidget()
+	:timer(eApp), timeout(eApp)
 {
 	instance = this;
 	fd = -1;
@@ -303,16 +313,18 @@ eSubtitleWidget::eSubtitleWidget(): timer(eApp)
 	subtitle->bbox_top = 0;
 	subtitle->bbox_bottom = 0;
 	subtitle->screen_enabled = 0;
-	
+	subtitle->timeout_timer = &timeout;
+
 	gFBDC *fbdc = gFBDC::getInstance();
 	gPixmap *pixmap = &fbdc->getPixmap();
-	
+
 	subtitle->screen_width = pixmap->x;
 	subtitle->screen_height = pixmap->y;
 	subtitle->screen_buffer = (__u8*)pixmap->data;
 	subtitle->set_palette = subtitle_set_palette;
 	
 	CONNECT(timer.timeout, eSubtitleWidget::processNext);
+	CONNECT(timeout.timeout, eSubtitleWidget::displaying_timeout);
 	CONNECT(eWidget::globalFocusChanged, eSubtitleWidget::globalFocusHasChanged);
 }
 
@@ -334,6 +346,7 @@ void eSubtitleWidget::stop()
 	subtitle_reset(subtitle);
 	if (fd != -1)
 		::close(fd);
+	eSkin::getActive()->setPalette(gFBDC::getInstance());
 }
 
 void eSubtitleWidget::globalFocusHasChanged(const eWidget* newFocus)
@@ -341,7 +354,7 @@ void eSubtitleWidget::globalFocusHasChanged(const eWidget* newFocus)
 	if ( !sn ) // not running
 		return; 
 	if ( newFocus )
-			hide();
+		hide();
 	else
 		show();
 }

@@ -26,10 +26,11 @@ class eSubtitleWidget: public eWidget
 	
 	std::queue<pes_packet_s> queue;
 	
-	eTimer timer;
+	eTimer timer, timeout;
 	void processPESPacket(unsigned char *pkt, int len);
 	void processNext();
-	
+	void displaying_timeout();
+
 	unsigned char pesbuffer[65536];
 	int pos;
 	int peslen;

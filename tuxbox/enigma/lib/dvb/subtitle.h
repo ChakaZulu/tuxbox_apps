@@ -1,6 +1,8 @@
 #ifndef __subtitle_h
 #define __subtitle_h
 
+#include <lib/base/ebase.h>
+
 typedef unsigned char __u8;
 
 struct subtitle_clut_entry
@@ -74,13 +76,14 @@ struct subtitle_page
 struct subtitle_ctx
 {
 	struct subtitle_page *pages;
-	
+
 	int current_clut_id, current_clut_page_id;
-	
+
 	__u8 *screen_buffer;
 	int screen_width, screen_height;
 	int screen_enabled;
-	
+	eTimer *timeout_timer;
+
 	int bbox_left, bbox_top, bbox_right, bbox_bottom;
 	
 	void (*set_palette)(struct subtitle_clut *pal);

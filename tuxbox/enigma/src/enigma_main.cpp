@@ -784,11 +784,11 @@ eAudioSelector::eAudioSelector()
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-115));
 		m_dyncfg = new eAudioDynamicConfig(this);
-		m_dyncfg->move(ePoint(10, getClientSize().height()-75));
+		m_dyncfg->move(ePoint(10, getClientSize().height()-65));
 		m_dyncfg->resize(eSize(getClientSize().width()-20, 50));
-	
-		m_subtitles->move(ePoint(10, getClientSize().height()-110));
-	} else
+		m_subtitles->move(ePoint(10, getClientSize().height()-105));
+	}
+	else
 	{
 		list.resize(eSize(getClientSize().width()-20, getClientSize().height()-40));
 		m_subtitles->move(ePoint(getClientSize().height()-35, 10));
