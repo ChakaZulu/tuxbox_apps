@@ -57,7 +57,8 @@ class CEventServer
 		{
 			INITID_CONTROLD,
 			INITID_SECTIONSD,
-			INITID_ZAPIT
+			INITID_ZAPIT,
+			INITID_TIMERD
 		};
 
 		struct commandRegisterEvent
