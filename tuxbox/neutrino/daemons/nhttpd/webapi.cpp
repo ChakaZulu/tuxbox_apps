@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.7 2002/10/05 20:32:06 dirch Exp $
+	$Id: webapi.cpp,v 1.8 2002/10/06 01:18:49 dirch Exp $
 
 	License: GPL
 
@@ -195,11 +195,14 @@ string classname;
 	CZapitClient::BouquetList::iterator bouquet = Parent->BouquetList.begin();
 	for(; bouquet != Parent->BouquetList.end();bouquet++)
 	{
-		classname = ((bouquet->bouquet_nr + 1) == (uint) BouquetNr)?" CLASS=\"bouquet\"":"";
-		if(javascript)
-			request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"javascript:goto('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
-		else
-			request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),bouquet->name);
+		if(!bouquet->hidden)
+		{
+			classname = ((bouquet->bouquet_nr + 1) == (uint) BouquetNr)?" CLASS=\"bouquet\"":"";
+			if(javascript)
+				request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"javascript:goto('/fb/channellist.dbox2?bouquet=%d#akt','/fb/bouquetlist.dbox2?js=1&bouquet=%d');\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),(bouquet->bouquet_nr + 1),bouquet->name);
+			else
+				request->printf("<tr height=\"20\"%s><TD><NOBR><a CLASS=\"blist\" HREF=\"/fb/channellist.dbox2?bouquet=%d#akt\" TARGET=\"content\">%s</a></NOBR></TD></TR>\n",classname.c_str(),(bouquet->bouquet_nr + 1),bouquet->name);
+		}
 	}
 	request->SocketWrite("</TABLE>\n");
 	request->SendHTMLFooter();
@@ -474,9 +477,11 @@ int pos = 0;
 		char zbuffer[25] = {0};
 		struct tm *mtime = localtime(&eventIterator->startTime); //(const time_t*)eventIterator->startTime);
 		strftime(zbuffer,20,"%d.%m. %H:%M",mtime);
-		request->printf("<TR VALIGN=\"top\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
-		request->printf("<TD><A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;</TD>\n",CTimerEvent::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
-		request->printf("<TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
+		request->printf("<TR VALIGN=\"middle\" HEIGHT=\"%d\" CLASS=\"%c\">\n",(eventIterator->duration > 20 * 60)?(eventIterator->duration / 60):20 , classname);
+		request->printf("<TD><NOBR>");
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&stop=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/record.gif\" WIDTH=\"16\" HEIGHT=\"16\" ALT=\"Sendung aufnehmen\"></A>&nbsp;\n",CTimerEvent::TIMER_RECORD,(uint) eventIterator->startTime,(uint) eventIterator->startTime + eventIterator->duration,channel_id); 
+		request->printf("<A HREF=\"/fb/timer.dbox2?action=new&type=%d&alarm=%u&channel_id=%u\">&nbsp;<IMG SRC=\"/images/timer.gif\" WIDTH=\"21\" HEIGHT=\"21\" ALT=\"Timer setzen\"></A>&nbsp;\n",CTimerEvent::TIMER_ZAPTO,(uint) eventIterator->startTime,channel_id); 
+		request->printf("</NOBR></TD><TD><NOBR>%s&nbsp;<font size=\"-2\">(%d min)</font>&nbsp;</NOBR></TD>\n", zbuffer, eventIterator->duration / 60);
 		request->printf("<TD><A CLASS=\"elist\" HREF=epg.dbox2?eventid=%llx>%s</A></TD>\n</TR>\n", eventIterator->eventID, eventIterator->description.c_str());
 	}
 
@@ -1081,10 +1086,12 @@ time_t	announceTimeT = 0,
    else if(type==CTimerEvent::TIMER_NEXTPROGRAM || type==CTimerEvent::TIMER_ZAPTO ||
            type==CTimerEvent::TIMER_RECORD)
       data= &eventinfo;
-   if(type!=CTimerEvent::TIMER_RECORD)
+/*   
+	if(type!=CTimerEvent::TIMER_RECORD)
    {
       stopTimeT=0;
    }
+*/
    Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep);
 }
 

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.30 2002/10/05 20:32:06 dirch Exp $
+	$Id: request.cpp,v 1.31 2002/10/06 01:18:49 dirch Exp $
 
 	License: GPL
 
@@ -220,6 +220,7 @@ int ende, anfang, t;
 		{
 			URL = url.substr(0,t);
 			Param_String = url.substr(t+1,url.length() - (t+1));
+			URLDecode(Param_String);
 
 			return ParseParams(Param_String);
 		}

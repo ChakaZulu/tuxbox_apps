@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: bouqueteditapi.cpp,v 1.5 2002/10/05 20:32:06 dirch Exp $
+	$Id: bouqueteditapi.cpp,v 1.6 2002/10/06 01:18:49 dirch Exp $
 
 	License: GPL
 
@@ -86,7 +86,10 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 	request->SendHTMLHeader("Bouquet-Editor Main");
 	request->SocketWrite("<H2>Bouquet-Editor</H2>\n");
 	if (request->ParameterList["saved"] == "1")
+	{
 		request->SocketWrite("Bouquets gespeichert . . .<BR>");
+		request->SocketWriteLn("<SCRIPT LANGUAGE=\"JavaScript\">\n<!--\ntop.bouquets.location.reload();//-->\n</SCRIPT>");
+	}
 	request->SocketWrite("<P><A HREF=\"add\">[add Bouquet]</A> <A HREF=\"save\">[save]</A> </P>");
 	if (request->ParameterList["selected"] != "")
 	{
@@ -115,25 +118,23 @@ bool CBouqueteditAPI::showBouquets(CWebserverRequest* request)
 		request->printf("<TR CLASS=\"%c\">\n<TD>",(selected == (int) bouquet->bouquet_nr + 1)?'c':classname);
 		if (selected == (int) (bouquet->bouquet_nr + 1))
 			request->SocketWrite("<A NAME=\"akt\"></A>");
-
-		request->printf("<A HREF=\"edit?selected=%i\">%s</A></TD>", bouquet->bouquet_nr + 1, bouquet->name);
-//		request->printf("<TD><a href=\"edit?selected=%i\"><IMG SRC=\"../images/modify.gif\" ALT=\"Bouquet ändern\"></IMG></A></TD>\n",
-//			bouquet->bouquet_nr + 1);
-		request->printf("<TD WIDTH=\"160\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG SRC=\"../images/modify.gif\" ALT=\"Bouquet umbenennen\"></IMG></a>&nbsp;\n",bouquet->bouquet_nr + 1, bouquet->name);
-		request->printf("<A HREF=\"delete?selected=%i&name=%s\"><IMG src=\"../images/remove.gif\" ALT=\"Bouquet löschen\"></IMG></A>&nbsp;\n",
-			bouquet->bouquet_nr + 1, bouquet->name);
-		
 		// lock/unlock
 		if (bouquet->locked)
-			request->printf("<A HREF=\"set?selected=%i&action=unlock#akt\"><IMG src=\"../images/unlock.gif\" ALT=\"Bouquet entsperren\"></IMG></A>&nbsp;\n", bouquet->bouquet_nr + 1);
+			request->printf("<CENTER><A HREF=\"set?selected=%i&action=unlock#akt\"><IMG src=\"../images/lock.gif\" ALT=\"Bouquet entsperren\"></IMG></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 		else
-			request->printf("<A HREF=\"set?selected=%i&action=lock#akt\"><IMG src=\"../images/lock.gif\" ALT=\"Bouquet sperren\"></IMG></A>&nbsp;\n", bouquet->bouquet_nr + 1);
+			request->printf("<CENTER><A HREF=\"set?selected=%i&action=lock#akt\"><IMG src=\"../images/unlock.gif\" ALT=\"Bouquet sperren\"></IMG></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 
 		// hide/show
 		if (bouquet->hidden)
-			request->printf("<A HREF=\"set?selected=%i&action=show#akt\">show</A>&nbsp;\n", bouquet->bouquet_nr + 1);
+			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=show#akt\"><IMG src=\"../images/hidden.gif\" ALT=\"Bouquet entsperren\"></IMG></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
 		else
-			request->printf("<A HREF=\"set?selected=%i&action=hide#akt\">hide</A>&nbsp;\n", bouquet->bouquet_nr + 1);
+			request->printf("<TD><CENTER><A HREF=\"set?selected=%i&action=hide#akt\"><IMG src=\"../images/visible.gif\" ALT=\"Bouquet entsperren\"></IMG></A></CENTER></TD>\n", bouquet->bouquet_nr + 1);
+
+		request->printf("<TD><A HREF=\"edit?selected=%i&name=%s\">%s</A></TD>", bouquet->bouquet_nr + 1, bouquet->name, bouquet->name);
+		request->printf("<TD WIDTH=\"100\"><NOBR><A HREF=\"rename?selected=%i&name=%s\"><IMG SRC=\"../images/modify.gif\" ALT=\"Bouquet umbenennen\"></IMG></a>&nbsp;\n",bouquet->bouquet_nr + 1, bouquet->name);
+		request->printf("<A HREF=\"delete?selected=%i&name=%s\"><IMG src=\"../images/remove.gif\" ALT=\"Bouquet löschen\"></IMG></A>&nbsp;\n",
+			bouquet->bouquet_nr + 1, bouquet->name);
+		
 
 		// move down
 		if (bouquet->bouquet_nr + 1 < bouquetSize)
@@ -250,10 +251,9 @@ bool CBouqueteditAPI::saveBouquet(CWebserverRequest* request)
 
 bool CBouqueteditAPI::renameBouquet(CWebserverRequest* request)
 {
-	if (request->ParameterList["selected"] == "") 
+	if (request->ParameterList["selected"] != "") 
 	{
 		if (request->ParameterList["nameto"] == "") {
-			request->URLDecode(request->ParameterList["name"]);
 			request->SendPlainHeader("text/html");
 			request->SendHTMLHeader("Bouquet-Editor");
 			request->SocketWrite("<H2>Bouquet-Editor</H2><BR><H3>Bouquet umbenennen</H3>\n");
@@ -287,7 +287,7 @@ CZapitClient::BouquetChannelList::iterator channels;
 		request->SendPlainHeader("text/html");
 		request->SendHTMLHeader("Bouquet-Editor");
 		request->SocketWrite("<Script language=\"Javascript\" src=\"/channels.js\">\n</script>\n");
-		request->SocketWrite("<H2>Bouquet-Editor</H2><BR><H3>Bouquet bearbeiten</H3>\n");
+		request->printf("<H2>Bouquet-Editor</H2><BR><H3>Bouquet %s bearbeiten</H3>\n",request->ParameterList["name"].c_str());
 		request->SocketWrite("<FORM ACTION=\"editchannels\" METHOD=\"POST\" NAME=\"channels\" ENCTYPE=\"x-www-form-urlencoded\">\n");
 		request->SocketWrite("<INPUT TYPE=\"HIDDEN\" NAME=\"selected\" VALUE=\"");
 		request->SocketWrite(request->ParameterList["selected"].c_str());
@@ -366,6 +366,8 @@ bool CBouqueteditAPI::changeBouquet(CWebserverRequest* request)
 	}
 	return false;
 }
+
+//-------------------------------------------------------------------------
 
 bool CBouqueteditAPI::setBouquet(CWebserverRequest* request)
 {
