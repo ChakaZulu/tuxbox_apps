@@ -73,6 +73,9 @@ void CStreamInfo::hide()
 void CStreamInfo::paint()
 {
 	int ypos=y;
+
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("streaminfo.head"));
+
 	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
 	g_Fonts->menu_title->RenderString(x+10, ypos+ hheight+1, width, g_Locale->getText("streaminfo.head").c_str(), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintBoxRel(x, ypos+ hheight, width, height- hheight, COL_MENUCONTENT);
