@@ -1,5 +1,5 @@
 /*
- * $Id: cam.h,v 1.7 2002/04/17 09:30:49 obi Exp $
+ * $Id: cam.h,v 1.8 2002/04/17 09:45:54 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -55,8 +55,8 @@ class CCam
 		bool isInitialized() { return initialized; }
 
 		int reset ();
-		int setEcm (uint32_t tsidOnid, const pids *decodePids);
-		int setEmm (dvb_pid_t emmPid);
+		int setEcm (CZapitChannel *channel);
+		int setEmm (CZapitChannel *channel);
 };
 
 #endif /* __cam_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: cam.cpp,v 1.7 2002/04/17 09:30:49 obi Exp $
+ * $Id: cam.cpp,v 1.8 2002/04/17 09:45:54 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -121,37 +121,37 @@ int CCam::sendMessage (uint8_t *data, uint16_t length)
 	return 0;
 }
 
-int CCam::setEcm (uint32_t tsidOnid, const pids *decodePids)
+int CCam::setEcm (CZapitChannel *channel)
 {
 	uint8_t i;
-	uint8_t buffer[12 + (4 * (decodePids->count_vpids + decodePids->count_apids))];
+	uint8_t buffer[12 + (4 * (channel->getPids()->count_vpids + channel->getPids()->count_apids))];
 	uint8_t pos = 12;
 
 	buffer[0] = 0x0D;
-	buffer[1] = tsidOnid >> 8;
-	buffer[2] = tsidOnid & 0xFF;
-	buffer[3] = tsidOnid >> 24;
-	buffer[4] = (tsidOnid >> 16) & 0xFF;
+	buffer[1] = channel->getTsidOnid() >> 8;
+	buffer[2] = channel->getTsidOnid() & 0xFF;
+	buffer[3] = channel->getTsidOnid() >> 24;
+	buffer[4] = (channel->getTsidOnid() >> 16) & 0xFF;
 	buffer[5] = 0x01;
 	buffer[6] = 0x04;
 	buffer[7] = caSystemId >> 8;
 	buffer[8] = caSystemId & 0xFF;
-	buffer[9] = decodePids->ecmpid >> 8;
-	buffer[10] = decodePids->ecmpid & 0xFF;
-	buffer[11] = decodePids->count_vpids + decodePids->count_apids;
+	buffer[9] = channel->getEcmPid() >> 8;
+	buffer[10] = channel->getEcmPid() & 0xFF;
+	buffer[11] = channel->getPids()->count_vpids + channel->getPids()->count_apids;
 
-	for (i = 0; i < decodePids->count_vpids; i++)
+	for (i = 0; i < channel->getPids()->count_vpids; i++)
   	{
-		buffer[pos++] = decodePids->vpid >> 8;
-		buffer[pos++] = decodePids->vpid & 0xFF;
+		buffer[pos++] = channel->getVideoPid() >> 8;
+		buffer[pos++] = channel->getVideoPid() & 0xFF;
 		buffer[pos++] = 0x80;
 		buffer[pos++] = 0x00;
 	}
 
-	for (i = 0; i < decodePids->count_apids; i++)
+	for (i = 0; i < channel->getPids()->count_apids; i++)
 	{
-		buffer[pos++] = decodePids->apids[i].pid >> 8;
-		buffer[pos++] = decodePids->apids[i].pid & 0xFF;
+		buffer[pos++] = channel->getPids()->apids[i].pid >> 8;
+		buffer[pos++] = channel->getPids()->apids[i].pid & 0xFF;
 		buffer[pos++] = 0x80;
 		buffer[pos++] = 0x00;
 	}
@@ -159,7 +159,7 @@ int CCam::setEcm (uint32_t tsidOnid, const pids *decodePids)
 	return sendMessage(buffer, pos);
 }
 
-int CCam::setEmm (dvb_pid_t emmPid)
+int CCam::setEmm (CZapitChannel *channel)
 {
 	uint8_t buffer[7];
 
@@ -168,8 +168,8 @@ int CCam::setEmm (dvb_pid_t emmPid)
 	buffer[2] = 0x04;
 	buffer[3] = caSystemId >> 8;
 	buffer[4] = caSystemId & 0xFF;
-	buffer[5] = emmPid >> 8;
-	buffer[6] = emmPid & 0xFF;
+	buffer[5] = channel->getEmmPid() >> 8;
+	buffer[6] = channel->getEmmPid() & 0xFF;
 
 	return sendMessage(buffer, 7);
 }

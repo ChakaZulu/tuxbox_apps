@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.133 2002/04/17 09:30:49 obi Exp $
+ * $Id: zapit.cpp,v 1.134 2002/04/17 09:45:54 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -288,13 +288,13 @@ void *decode_thread(void *ptr)
 	if ((channel->getEcmPid() != NONE) && (channel->getEcmPid() != INVALID))
 	{
 		debug("[zapit] setting ecm pid %04x\n", channel->getEcmPid());
-		cam->setEcm(channel->getTsidOnid(), channel->getPids());
+		cam->setEcm(channel);
 	}
 
 	if ((vals->new_tp == true) && (channel->getEmmPid() != NONE) && (channel->getEmmPid() != INVALID))
 	{
 		debug("[zapit] setting emm pid %04x\n", channel->getEmmPid());
-		cam->setEmm(channel->getEmmPid());
+		cam->setEmm(channel);
 	}
 
 	delete vals;
@@ -2165,7 +2165,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.133 2002/04/17 09:30:49 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.134 2002/04/17 09:45:54 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
