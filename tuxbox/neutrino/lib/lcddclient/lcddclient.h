@@ -87,6 +87,8 @@ class CLcddClient
 		bool getInverse();
 
 		void update();			// applies new brightness, contrast, etc
+		void pause();			// for plugins only
+		void resume();			// for plugins only
 };
 
 #endif

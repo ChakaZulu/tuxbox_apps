@@ -329,6 +329,26 @@ void CLcddClient::update()
 	lcdd_close();
 }
 
+void CLcddClient::pause()
+{
+	CLcddMsg::commandHead msg;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_PAUSE;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	lcdd_close();
+}
+
+void CLcddClient::resume()
+{
+	CLcddMsg::commandHead msg;
+	msg.version=CLcddMsg::ACTVERSION;
+	msg.cmd=CLcddMsg::CMD_RESUME;
+	lcdd_connect();
+	send((char*)&msg, sizeof(msg));
+	lcdd_close();
+}
+
 const std::string CLcddClient::getSystemId ()
 {
 	char *id = getenv("dsID");

@@ -358,3 +358,13 @@ void CLCDPainter::update()
 {
 	setlcdparameter(lcd_brightness, lcd_contrast, lcd_power, lcd_inverse);
 }
+
+void CLCDPainter::resume()
+{
+	display.resume();
+}
+
+void CLCDPainter::pause()
+{
+	display.pause();
+}

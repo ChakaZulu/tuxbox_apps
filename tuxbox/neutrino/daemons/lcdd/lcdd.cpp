@@ -186,6 +186,12 @@ void CLCDD::parse_command(int connfd, CLcddMsg::commandHead rmsg)
 		case CLcddMsg::CMD_UPDATE:
 			lcdPainter.update();
 			break;
+		case CLcddMsg::CMD_PAUSE:
+			lcdPainter.pause();
+			break;
+		case CLcddMsg::CMD_RESUME:
+			lcdPainter.resume();
+			break;
 
 		default:
 			printf("unknown command %i\n", rmsg.cmd);
@@ -210,7 +216,7 @@ void CLCDD::sig_catch(int)
 int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.51 2002/07/10 16:29:08 LazyT Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.52 2002/08/14 20:02:01 alexw Exp $\n\n");
 
 	InitNewClock();
 

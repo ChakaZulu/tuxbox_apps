@@ -29,6 +29,7 @@
 
 CLCDDisplay::CLCDDisplay()
 {
+	paused=0;
 	available = false;
 	//open device
 	if((fd = open("/dev/dbox/lcd0",O_RDWR)) < 0)
@@ -40,7 +41,7 @@ CLCDDisplay::CLCDDisplay()
 	//clear the display
 	if ( ioctl(fd,LCD_IOCTL_CLEAR) < 0)
 	{
-		perror ( "clear failed");
+		perror("clear failed");
 		return;
 	}
 	
@@ -48,7 +49,7 @@ CLCDDisplay::CLCDDisplay()
 	int i=LCD_MODE_BIN;
 	if ( ioctl(fd,LCD_IOCTL_ASC_MODE,&i) < 0 )
 	{
-		perror ("graphic mode failed");
+		perror("graphic mode failed");
 		return;
 	}
 
@@ -64,6 +65,31 @@ bool CLCDDisplay::isAvailable()
 CLCDDisplay::~CLCDDisplay()
 {
 	close(fd);
+}
+
+void CLCDDisplay::pause()
+{
+	paused = 1;
+}
+
+void CLCDDisplay::resume()
+{
+	//clear the display
+	if ( ioctl(fd,LCD_IOCTL_CLEAR) < 0)
+	{
+		perror("clear failed");
+		return;
+	}
+	
+	//graphic (binary) mode 
+	int i=LCD_MODE_BIN;
+	if ( ioctl(fd,LCD_IOCTL_ASC_MODE,&i) < 0 )
+	{
+		perror("graphic mode failed");
+		return;
+	}
+
+	paused = 0;
 }
 
 void CLCDDisplay::convert_data ()
@@ -86,9 +112,12 @@ void CLCDDisplay::convert_data ()
 void CLCDDisplay::update()
 {
 	convert_data();
-	if ( write(fd, lcd, LCD_BUFFER_SIZE) < 0) {
-		perror("lcdd: CLCDDisplay::update(): write()");
-	}
+	if(paused)
+		return;
+	else
+		if ( write(fd, lcd, LCD_BUFFER_SIZE) < 0) {
+			perror("lcdd: CLCDDisplay::update(): write()");
+		}
 }
 
 int CLCDDisplay::sgn (int arg) 

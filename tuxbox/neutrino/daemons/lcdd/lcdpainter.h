@@ -97,6 +97,8 @@ class CLCDPainter
 		void setMuted(bool);
 
 		void update();	// applies new brightness, contrast, etc
+		void CLCDPainter::pause();	// for plugins only
+		void CLCDPainter::resume();	// for plugins only
 };
 
 

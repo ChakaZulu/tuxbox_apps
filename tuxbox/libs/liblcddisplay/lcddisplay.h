@@ -49,7 +49,7 @@ class CLCDDisplay
 	private:
 		raw_display_t raw;
 		unsigned char lcd[LCD_ROWS][LCD_COLS];
-		int		fd;
+		int	fd, paused;
 		string	iconBasePath;
 		bool	available;
 
@@ -57,13 +57,16 @@ class CLCDDisplay
 		
 		enum
 		{
-			PIXEL_ON = LCD_PIXEL_ON,
+			PIXEL_ON  = LCD_PIXEL_ON,
 			PIXEL_OFF = LCD_PIXEL_OFF,
-			PIXEL_INV =	LCD_PIXEL_INV
+			PIXEL_INV = LCD_PIXEL_INV
 		};
 		
 		CLCDDisplay();
 		~CLCDDisplay();
+
+		void pause();
+		void resume();
 
 		void convert_data();
 		int sgn(int arg);
