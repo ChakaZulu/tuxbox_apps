@@ -24,7 +24,7 @@
 #include <lib/system/info.h>
 
 tsSelectType::tsSelectType(eWidget *parent)
-	:eWidget(parent,1)
+	:eWidget(parent)
 {
 	list=new eListBox<eListBoxEntryText>(this);
 	list->setName("menu");
@@ -196,9 +196,8 @@ tsTryLock::tsTryLock(eWidget *parent, tpPacket *packet, eString ttext)
 		text+=ttext;
 		l->setText(text);
 	}
-
-	CONNECT(b_abort->selected, tsTryLock::reject);
 	CONNECT(eDVB::getInstance()->eventOccured, tsTryLock::dvbEvent);
+	CONNECT(b_abort->selected, eWidget::reject);
 }
 
 void tsTryLock::dvbEvent(const eDVBEvent &event)
@@ -209,9 +208,7 @@ void tsTryLock::dvbEvent(const eDVBEvent &event)
 	{
 		case eDVBScanEvent::eventTunedIn:
 			inProgress=0;
-			if (ret)
-				close(ret);
-			else if (event.err)
+			if (event.err)
 			{
 				inProgress=1;
 				if (nextTransponder(event.err))  
@@ -280,21 +277,19 @@ int tsTryLock::eventHandler(const eWidgetEvent &e)
 			setFocus(b_abort);
 			break;
 		case eWidgetEvent::wantClose:
-			inProgress=0;
-			if ( e.parameter == 1 ) // globalCancel
+			eFrontend::getInstance()->abortTune();
+			if ( e.parameter == 1 )  // cancel
 			{
 				eWidgetEvent ev = e;
 				ev.parameter=-1;
 				return eWidget::eventHandler(ev);
 			}
-		default:
-			break;
 	}
 	return eWidget::eventHandler(e);
 }
 
 tsAutomatic::tsAutomatic(eWidget *parent)
-	:eWidget(parent), ret(0), inProgress(0)
+	:eWidget(parent), inProgress(0)
 {
 	eLabel* l = new eLabel(this);
 	l->setName("lNet");
@@ -435,14 +430,11 @@ void tsAutomatic::dvbEvent(const eDVBEvent &event)
 	switch (event.type)
 	{
 		case eDVBScanEvent::eventScanCompleted:
-			eDebug("tsAutomatic eventScanCompleted");
-			close(ret);
+			close(0);
 			break;            
 		case eDVBScanEvent::eventTunedIn:
 			inProgress=0;
-			if (ret)
-				close(ret);
-			else if (event.err)
+			if (event.err)
 			{
 				inProgress=1;
 				tuneNext(event.err);
@@ -587,24 +579,20 @@ void tsAutomatic::openNetworkCombo()
 	l_network->onOkPressed();
 }
 
-int tsAutomatic::eventHandler(const eWidgetEvent &e)
+int tsAutomatic::eventHandler(const eWidgetEvent &event)
 {
-	switch(e.type)
+	switch (event.type)
 	{
-		case eWidgetEvent::wantClose:
-			if (b_start->isVisible() || !inProgress)
-				break;
-			else
-				ret=e.parameter;
-			return 1;
-		default:
-			break;
+	case eWidgetEvent::wantClose:
+		eFrontend::getInstance()->abortTune();
+	default:
+		break;
 	}
-	return eWidget::eventHandler(e);
+	return eWidget::eventHandler(event);
 }
 
 tsText::tsText(eString sheadline, eString sbody, eWidget *parent)
-	:eWidget(parent, 1)
+	:eWidget(parent,1)
 {
 	addActionMap(&i_cursorActions->map);
 	headline=new eLabel(this);
@@ -625,12 +613,11 @@ int tsText::eventHandler(const eWidgetEvent &event)
 		body->resize(eSize(size.width(), size.height()-40));
 		return 1;
 	case eWidgetEvent::evtAction:
-		if (event.action == &i_cursorActions->ok ||
-				event.action == &i_cursorActions->cancel)
+		if (event.action == &i_cursorActions->ok)
+		{
 			close(0);
-		else
-			break;
-		return 1;
+			return 1;
+		}
 	default:
 		break;
 	}
@@ -638,10 +625,8 @@ int tsText::eventHandler(const eWidgetEvent &event)
 }
 
 tsScan::tsScan(eWidget *parent, eString sattext)
-	:eWidget(parent, 1), timer(eApp), ret(0)
+	:eWidget(parent, 1), timer(eApp)
 {
-	addActionMap(&i_cursorActions->map);
-
 	services_scanned = new eLabel(this);
 	services_scanned->setName("services_scanned");
 
@@ -701,18 +686,18 @@ int tsScan::eventHandler(const eWidgetEvent &event)
 			sapi->start();
 		break;
 	}
-	case eWidgetEvent::evtAction:
-		if ( event.action == &i_cursorActions->cancel )
+	case eWidgetEvent::wantClose:
+		if ( event.parameter == 1 ) // global Cancel
 		{
 			eDVBScanController *sapi=eDVB::getInstance()->getScanAPI();
-			if ( sapi && sapi->abort() )
-				ret=2;
-			else
-				close(2);
-			return 1;
+			if ( sapi )
+				sapi->abort();
+			eWidgetEvent ev = event;
+			ev.parameter=2;
+			eFrontend::getInstance()->abortTune();
+			return eWidget::eventHandler(ev);
 		}
-		else
-			break;
+		eFrontend::getInstance()->abortTune();
 	default:
 		break;
 	}
@@ -826,7 +811,7 @@ void tsScan::dvbEvent(const eDVBEvent &event)
 		break;
 	case eDVBScanEvent::eventScanCompleted:
 			timer.stop();
-			close(ret);
+			close(0);
 		break;
 	default:
 		break;
@@ -937,20 +922,6 @@ struct copyNetwork
 void tsMultiSatScan::getSatsToScan( std::list<scanEntry> &target )
 {
 	satellites->forEachEntry( copyNetwork(target) );
-}
-
-int tsMultiSatScan::eventHandler( const eWidgetEvent &e )
-{
-	switch (e.type)
-	{
-	case eWidgetEvent::execBegin:
-		setFocus(satellites);
-		break;
-	default:
-		return eWidget::eventHandler( e );
-		break;
-	}
-	return 0;
 }
 
 void tsMultiSatScan::entrySelected( eListBoxEntrySat * e )
@@ -1310,6 +1281,7 @@ int TransponderScan::Exec()
 				str += eString().sprintf("        (%d/%d)", satScanned+1, toScan.size()+satScanned);
 
 				tsScan scan(this, str );
+				current = &scan;
 #ifndef DISABLE_LCD
 				scan.setLCD( LCDTitle, LCDElement);
 #endif
@@ -1319,6 +1291,7 @@ int TransponderScan::Exec()
 				scan.show();
 				statusbar->setText(_("Scan is in progress... please wait"));
 				int ret = scan.exec();
+				current=0;
 				scan.hide();
 
 				newTransponders += scan.newTransponders;
@@ -1363,6 +1336,7 @@ int TransponderScan::Exec()
 			}
 
 			tsScan scan(this);
+			current = &scan;
 #ifndef DISABLE_LCD
 			scan.setLCD( LCDTitle, LCDElement);
 #endif
@@ -1372,6 +1346,7 @@ int TransponderScan::Exec()
 			scan.show();
 			statusbar->setText(_("Scan is in progress... please wait"));
 			scan.exec();
+			current=0;
 			scan.hide();
 
 			text.sprintf(_("The transponder scan has finished and found \n   %i new Transponders,\n   %i new TV Services,\n   %i new Radio Services and\n   %i new Data Services.\n%i Transponders within %i Services scanned."), scan.newTransponders, scan.newTVServices, scan.newRadioServices, scan.newDataServices, scan.tpScanned, scan.servicesScanned );
@@ -1387,6 +1362,7 @@ int TransponderScan::Exec()
 		case stateDone:
 		{
 			tsText finish(_("Done."), text, this);
+			current = &finish;
 #ifndef DISABLE_LCD
 			finish.setLCD( LCDTitle, LCDElement);
 #endif
@@ -1395,10 +1371,12 @@ int TransponderScan::Exec()
 			finish.show();
 			statusbar->setText(_("Scan is in finished, press ok to close window"));
 			finish.exec();
+			current=0;
 			finish.hide();
 			if ( stateInitial == stateManual ||
 				eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 			{
+				eWindow::globalCancel( eWindow::ON );
 				eMessageBox mb(eString().sprintf(_("Do you want\nto scan another\n%s?"),stateInitial==stateManual?_("Transponder"):_("Satellite")),
 					_("Scan finished"),
 					eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion,
@@ -1414,6 +1392,7 @@ int TransponderScan::Exec()
 						state=stateInitial;
 				}
 				mb.hide();
+				eWindow::globalCancel( eWindow::OFF );
 				eDVB::getInstance()->setMode(eDVB::controllerService);
 				break;
 			}
@@ -1439,6 +1418,7 @@ int TransponderScan::eventHandler( const eWidgetEvent &event )
 				statusbar->setText(focus->getHelpText());
 			break;
 		case eWidgetEvent::execBegin:
+			eWindow::globalCancel( eWindow::OFF );
 			ret = Exec();
 			closeTimer.start(0,true);
 			break;
@@ -1454,6 +1434,7 @@ int TransponderScan::eventHandler( const eWidgetEvent &event )
 					eZapMain::getInstance()->playService(service, eZapMain::psDontAdd|eZapMain::psSetMode );
 				}
 			}
+			eWindow::globalCancel( eWindow::ON );
 			break;
 		case eWidgetEvent::evtAction:
 			if ( event.action == &i_cursorActions->cancel && current )  // don't ask !

@@ -1527,6 +1527,7 @@ eZapMain::eZapMain()
 	,clocktimer(eApp), messagetimeout(eApp), progresstimer(eApp)
 	,volumeTimer(eApp), recStatusBlink(eApp), doubleklickTimer(eApp)
 	,unusedTimer(eApp), currentSelectedUserBouquet(0), timeshift(0)
+	,skipping(0)
 	,state(0)
 	,wasSleeping(0)
 {

@@ -65,7 +65,6 @@ class tsTryLock: public eWidget
 	std::list<eTransponder>::iterator current_tp;
 	void dvbEvent(const eDVBEvent &event);
 	int nextTransponder(int next);
-
 	int eventHandler(const eWidgetEvent &);
 public:
 	tsTryLock(eWidget *parent, tpPacket *tppacket, eString ttext);
@@ -79,16 +78,15 @@ class tsAutomatic: public eWidget
 	eLabel *l_status;
 	std::list<eTransponder>::iterator current_tp, last_tp, first_tp;
 	int automatic;
-	int ret;
 	void start();
 	void networkSelected(eListBoxEntryText *l);
 	void dvbEvent(const eDVBEvent &event);
+	int eventHandler(const eWidgetEvent &event);
 	int loadNetworks();
 	int nextNetwork(int first=0);
 	int nextTransponder(int next);
 	int tuneNext(int next);
 	int inProgress;
-	int eventHandler(const eWidgetEvent &);
 public:
 	void openNetworkCombo();
 	tsAutomatic(eWidget *parent);
@@ -110,7 +108,6 @@ class tsScan: public eWidget
 	eLabel *timeleft, *service_name, *service_provider, *transponder_data, *services_scanned, *transponder_scanned;
 	eProgress *progress;
 	int tpLeft, scantime;
-	int ret;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 	void dvbEvent(const eDVBEvent &event);
@@ -143,7 +140,6 @@ class tsMultiSatScan: public eWidget
 {
 	eButton *start;
 	eListBox<eListBoxEntrySat> *satellites;
-	int eventHandler( const eWidgetEvent& );
 	void entrySelected( eListBoxEntrySat * );
 public:
 	tsMultiSatScan(eWidget *parent);
