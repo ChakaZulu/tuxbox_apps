@@ -12,7 +12,7 @@
 #endif
 #ifdef PLUGIN
 #include <configfile.h>
-#include <tuxbox/plugin.h>
+#include <plugin.h>
 #include <sys/mman.h>
 #include <linux/fb.h>
 #include <linux/input.h>

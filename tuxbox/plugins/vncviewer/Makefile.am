@@ -1,4 +1,5 @@
-INCLUDES = -I./rfb @CONFIGFILE_CFLAGS@
+INCLUDES = -I./rfb @CONFIGFILE_CFLAGS@ -I$(top_srcdir)/include
+
 
 noinst_LTLIBRARIES = vnc.la
 
