@@ -224,6 +224,26 @@ AC_DEFUN(TUXBOX_APPS_LIB_PKGCONFIG_CHECK,[
 _TUXBOX_APPS_LIB_PKGCONFIG($1,$2)
 ])
 
+AC_DEFUN(_TUXBOX_APPS_LIB_SYMBOL,[
+AC_CHECK_LIB($2,$3,HAVE_$1="yes",HAVE_$1="no")
+if test "$HAVE_$1" = "yes"; then
+	$1_LIBS=-l$2
+fi
+
+AC_SUBST($1_LIBS)
+])
+
+AC_DEFUN(TUXBOX_APPS_LIB_SYMBOL,[
+_TUXBOX_APPS_LIB_SYMBOL($1,$2,$3,ERROR)
+if test "$HAVE_$1" = "no"; then
+	AC_MSG_ERROR([could not find $2]);
+fi
+])
+
+AC_DEFUN(TUXBOX_APPS_LIB_CONFIG_SYMBOL,[
+_TUXBOX_APPS_LIB_SYMBOL($1,$2,$3,WARN)
+])
+
 AC_DEFUN(TUXBOX_APPS_GETTEXT,[
 AM_PATH_PROG_WITH_TEST(MSGFMT, msgfmt,
 	[$ac_dir/$ac_word --statistics /dev/null >/dev/null 2>&1 &&
