@@ -155,7 +155,7 @@ void CLCDPainter::show_time()
 			struct tm *t = localtime(&tm.time);
 
 			display.draw_fill_rect (-1,-1,120,64, CLCDDisplay::PIXEL_OFF);
-			ShowNewClock(&display, t->tm_hour, t->tm_min);
+			ShowNewClock(&display, t->tm_hour, t->tm_min, t->tm_wday, t->tm_mday, t->tm_mon);
 //			showBigClock(&display, t->tm_hour,t->tm_min);
 			/*
 			fonts.menutitle->RenderString(60,62, 60, timestr, CLCDPainterisplay::PIXEL_ON);
