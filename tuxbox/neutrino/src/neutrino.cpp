@@ -138,7 +138,6 @@
 CBouquetList   * bouquetList;
 CPlugins       * g_PluginList;
 CRemoteControl * g_RemoteControl;
-bool recordStatus=false;
 // Globale Variablen - to use import global.h
 
 // I don't like globals, I would have hidden them in classes,
@@ -3333,11 +3332,10 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 				}
 				else if((bouquetList!=NULL) && (bouqMode == 0/*bsmChannels*/))
 				{
-					recordStatus=recordingstatus;
 					int nNewChannel = bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->show();
 					if(nNewChannel>-1)
 					{
-						recordStatus ? channelList->zapTo(nNewChannel):  channelList->zapTo(bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->getKey(nNewChannel)-1);
+						recordingstatus ? channelList->zapTo(nNewChannel):  channelList->zapTo(bouquetList->Bouquets[bouquetList->getActiveBouquetNumber()]->channelList->getKey(nNewChannel)-1);
 					}
 				}
 				else
