@@ -163,6 +163,11 @@ struct SNeutrinoSettings
 
 	//BouquetHandling
 	int bouquetlist_mode;
+
+	// parentallock
+	int parentallock_prompt;
+	int parentallock_lockage;
+	char parentallock_pincode[4];
 };
 
 #endif
