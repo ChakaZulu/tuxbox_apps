@@ -96,12 +96,14 @@ int CAViAExt::iecState()
 		return -1;
 	}
 	res = ioctl(fd, AVIA_EXT_IEC_GET, &param);
+
+	close(fd);
+
 	if (res<0)
 	{
 		perror("aviaext: ioctl");
 		return -1;
 	}
-	close(fd);
 	return param;
 }	
 
