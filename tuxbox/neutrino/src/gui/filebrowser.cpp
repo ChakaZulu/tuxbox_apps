@@ -133,6 +133,7 @@ CFileBrowser::CFileBrowser()
 	Dirs_Selectable = false;
 	Dir_Mode = false;
 	selected = 0;
+	smode = 0;
 
 	width  = 500;
 	height = 380;
@@ -276,7 +277,6 @@ bool CFileBrowser::exec(string Dirname)
 {
 	bool res = false;
 
-	smode = 0;
 	name = Dirname;
 	paintHead();
 	readDir(Dirname);
