@@ -26,7 +26,8 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	int sourcefd;
 	int speed;
 	int slice;
-	
+	int audiotracks;    // num of audiotracks in file
+
 	int livemode; 		// used in timeshift where end-of-file is only temporary
 	eTimer liveupdatetimer;
 	void updatePosition();
@@ -45,6 +46,8 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 
 	void dvrFlush();
 	int openFile(int slice=0);
+	void seekTo(off64_t offset);
+	int getBufferSize();
 public:
 	struct eDVRPlayerThreadMessage
 	{
@@ -55,7 +58,8 @@ public:
 			setSpeed, // 0..
 			seek,	// 0..65536
 			seekreal,
-			seekmode
+			seekmode,
+			updateAudioTracks,
 		};
 		int type;
 		int parm;

@@ -81,6 +81,8 @@ eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *ha
 	inputsn=0;
 
 	slice=0;
+	audiotracks=1;
+
 	struct stat64 s;
 	filelength=0;
 	while (!stat64((filename + (slice ? eString().sprintf(".%03d", slice) : eString(""))).c_str(), &s))
@@ -339,7 +341,6 @@ void eDVRPlayerThread::updatePosition()
 		filelength+=s.st_size/1880;
 		slice++;
 	}
-
 	if (state == stateFileEnd)
 	{
 		eDebug("file end reached, retrying..");
@@ -354,7 +355,7 @@ void eDVRPlayerThread::updatePosition()
 int eDVRPlayerThread::getPosition(int real)
 {
 	singleLock s(poslock);
-	int ret = (position / 1880) + slice * (slicesize/1880);	
+	int ret = ((position-getBufferSize())/1880) + slice * (slicesize/1880);
 	if (!real)
 		ret /= 250;
 	return ret;
@@ -368,10 +369,60 @@ int eDVRPlayerThread::getLength(int real)
 	return filelength/250;
 }
 
+void eDVRPlayerThread::seekTo(off64_t offset)
+{
+	if ((offset / slicesize) != slice)
+	{
+		if (openFile(offset/slicesize))
+		{
+			eDebug("open slice %d failed\n", slice);
+			state=stateError;
+		}
+	}
+
+	if (state != stateError)
+	{
+		off64_t newpos=::lseek64(sourcefd, offset%slicesize, SEEK_SET);
+		dvrFlush();
+		singleLock s(poslock);
+		position=newpos;
+	}
+}
+
+int eDVRPlayerThread::getBufferSize()
+{
+	int buffersize=0, tmp=0;
+	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
+	if (bitstream)
+	{
+		char buf[100];
+		while (fgets(buf, 100, bitstream))
+		{
+			if (sscanf(buf, "VIDEO_BUF_SIZE: %d", &tmp) == 1)
+			{
+				buffersize+=tmp;
+//				eDebug("video buf size is %d", tmp);
+			}
+			else if (sscanf(buf, "AUDIO_BUF: %08x", &tmp) == 1)
+			{
+				buffersize+=tmp*audiotracks;
+//				eDebug("audio buf size is %d", tmp);
+			}
+		}
+		buffersize+=buffersize/8;   	// assume overhead..
+		buffersize+=buffer.size(); 		// enigma buffer
+		fclose(bitstream);
+	}
+	return buffersize;
+}
+
 void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 {
 	switch (message.type)
 	{
+	case eDVRPlayerThreadMessage::updateAudioTracks:
+		audiotracks = message.parm;
+		break;
 	case eDVRPlayerThreadMessage::start:
 		if (!(inputsn && outputsn))
 			break;
@@ -390,6 +441,8 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		quit();
 		break;
 	case eDVRPlayerThreadMessage::setSpeed:
+	{
+		static int buffsize;
 		if (!(inputsn && outputsn))
 			break;
 		speed=message.parm;
@@ -397,6 +450,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		{
 			if ((state==stateBuffering) || (state==stateBufferFull) || (state==statePlaying))
 			{
+				buffsize = getBufferSize();
 				inputsn->stop();
 				outputsn->stop();
 				state=statePause;
@@ -405,6 +459,13 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		}
 		else if (state == statePause)
 		{
+			off64_t offset=0;
+//			eDebug("%d bytes in buffer", buffsize);
+			offset+=position+slice*slicesize;
+			offset-=buffsize;	// calc buffersize
+			buffer.clear();  	// clear enigma dvr buffer
+			dvrFlush();			// clear audio and video rate buffer
+			seekTo(offset);
 			inputsn->start();
 			outputsn->start();
 			speed=message.parm;
@@ -417,6 +478,7 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			dvrFlush();
 		}
 		break;
+	}
 	case eDVRPlayerThreadMessage::seekmode:
 		if (!(inputsn && outputsn))
 			break;
@@ -458,25 +520,11 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 		} else
 		{
 			buffer.clear();
+			Decoder::flushBuffer();
 			offset=((off64_t)message.parm)*1880;
 		}
 
-		if ((offset / slicesize) != slice)
-		{
-			if (openFile(offset/slicesize))
-			{
-				eDebug("open slice %d failed\n", slice);
-				state=stateError;
-			}
-		}
-
-		if (state != stateError)
-		{
-			off64_t newpos=::lseek64(sourcefd, offset%slicesize, SEEK_SET);
-			dvrFlush();
-			singleLock s(poslock);
-			position=newpos;
-		}
+		seekTo(offset);
 
 		if (state == statePlaying)
 		{
@@ -592,6 +640,12 @@ void eServiceHandlerDVB::gotSDT(SDT *)
 void eServiceHandlerDVB::gotPMT(PMT *)
 {
 	serviceEvent(eServiceEvent(eServiceEvent::evtGotPMT));
+	if ( decoder )
+	{
+		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+		if ( sapi )
+			decoder->messages.send(eDVRPlayerThread::eDVRPlayerThreadMessage(eDVRPlayerThread::eDVRPlayerThreadMessage::updateAudioTracks, sapi->audioStreams.size()));
+	}
 }
 
 void eServiceHandlerDVB::leaveService(const eServiceReferenceDVB &e)
