@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.10 2004/04/27 15:28:08 ghostrider Exp $
+ * $Id: setup_extra.cpp,v 1.11 2004/04/27 15:41:58 ghostrider Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -53,7 +53,7 @@ eExpertSetup::eExpertSetup()
 	CONNECT((new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Don't open serial port"), "/ezap/extra/disableSerialOutput", _("don't write debug messages to /dev/tts/0")))->selected, eExpertSetup::serialDebugChanged );
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Auto bouquet change"), "/elitedvb/extra/autobouquetchange", _("change into next bouquet when end of current bouquet is reached"));
 	if ( eSystemInfo::getInstance()->getHwType() == eSystemInfo::DM7000 )
-		CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Enable fast zapping"),"/elitedvb/extra/fastzapping",_("show colored help buttons in service selector")))->selected, eExpertSetup::fastZappingChanged );
+		CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Enable fast zapping"),"/elitedvb/extra/fastzapping",_("enables faster zapping.. but with visible sync")))->selected, eExpertSetup::fastZappingChanged );
 	setHelpID(92);
 }
 
