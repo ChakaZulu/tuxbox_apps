@@ -414,24 +414,21 @@ int CChannelList::handleMsg(uint msg, uint data)
 				zapProtection->fsk = data;
 			else
 			{
-				if ( data>= (uint) g_settings.parentallock_lockage )
+				if ((data >= (uint)g_settings.parentallock_lockage) &&
+				    ((chanlist[selected]->last_unlocked_EPGid != g_RemoteControl->current_EPGid) || (g_RemoteControl->current_EPGid == 0)))
 				{
-					if ( ( chanlist[selected]->last_unlocked_EPGid != g_RemoteControl->current_EPGid ) ||
-						 ( g_RemoteControl->current_EPGid == 0 ) )
+					g_RemoteControl->stopvideo();
+					zapProtection = new CZapProtection( g_settings.parentallock_pincode, data );
+					
+					if ( zapProtection->check() )
 					{
-						g_RemoteControl->stopvideo();
-						zapProtection = new CZapProtection( g_settings.parentallock_pincode, data );
-
-						if ( zapProtection->check() )
-						{
-							g_RemoteControl->startvideo();
-
-							// remember it for the next time
-							chanlist[selected]->last_unlocked_EPGid= g_RemoteControl->current_EPGid;
-						}
-						delete zapProtection;
-						zapProtection = NULL;
+						g_RemoteControl->startvideo();
+						
+						// remember it for the next time
+						chanlist[selected]->last_unlocked_EPGid= g_RemoteControl->current_EPGid;
 					}
+					delete zapProtection;
+					zapProtection = NULL;
 				}
 				else
 					g_RemoteControl->startvideo();
