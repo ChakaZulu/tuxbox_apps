@@ -2642,6 +2642,8 @@ void eZapMain::volumeUp()
 				oldval = 100000;
 			eAudioDynamicCompression::getInstance()->setMax(oldval);
 		}
+	else if ( eZapStandby::getInstance() )
+		eAVSwitch::getInstance()->changeVCRVolume(0, -2);	
 	else
 		eAVSwitch::getInstance()->changeVolume(0, -2);
 
@@ -2674,6 +2676,8 @@ void eZapMain::volumeDown()
 				oldval = 0;
 			eAudioDynamicCompression::getInstance()->setMax(oldval);
 		}
+	else if ( eZapStandby::getInstance() )
+		eAVSwitch::getInstance()->changeVCRVolume(0, +2);	
 	else
 		eAVSwitch::getInstance()->changeVolume(0, +2);
 
@@ -2838,17 +2842,20 @@ void eZapMain::standbyRelease()
 	else
 	{
 standby:
-		eZapStandby standby;
-		hide();
-		standby.show();
-		state |= stateSleeping;
-		standbyTime.tv_sec=-1;
-		standby.exec();   // this blocks all main actions...
+		if ( !enigmaVCR::getInstance() )
+		{
+			eZapStandby standby;
+			hide();
+			standby.show();
+			state |= stateSleeping;
+			standbyTime.tv_sec=-1;
+			standby.exec();   // this blocks all main actions...
 /*
 	  ...... sleeeeeeeep
 */
-		standby.hide();   // here we are after wakeup
-		state &= ~stateSleeping;
+			standby.hide();   // here we are after wakeup
+			state &= ~stateSleeping;
+		}
 	}
 }
 
@@ -3272,15 +3279,18 @@ void eZapMain::stopSkip(int dir)
 
 int eZapMain::handleStandby(int i)
 {
-	int force=0;	
-	if ( i == 0 )
+	int force=0;
+	if ( i <= 0 )
 	{
 		if ( state & stateSleeping )
 		{
-			wakeUp();
+			if ( !i )
+			{
+				// this breakes the eZapStandby mainloop...
+				// and enigma wakes up
+				eZapStandby::getInstance()->wakeUp(1);
+			}
 			wasSleeping=3;
-			// this breakes the eZapStandby mainloop...
-			// and enigma wakes up
 		}
 		return 0;
 	}
@@ -3314,14 +3324,19 @@ int eZapMain::handleStandby(int i)
 		{
 			if ( !force && (eServiceInterface::getInstance()->service.path || timeshift) )
 				break;
-			eMessageBox mb(_("Go to Standby now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30 );
-			mb.show();
-			int ret = mb.exec();
-			mb.hide();
-			if (ret == eMessageBox::btYes)
-				// use message_notifier to goto sleep...
-				// we will not block the mainloop...
+			if ( !eZapStandby::getInstance() )
+			{
+				eMessageBox mb(_("Go to Standby now?"),_("Timer Message"), eMessageBox::btYes|eMessageBox::btNo|eMessageBox::iconQuestion, eMessageBox::btYes, 30 );
+				mb.show();
+				int ret = mb.exec();
+				mb.hide();
+				if (ret == eMessageBox::btYes)
+					// use message_notifier to goto sleep...
+					// we will not block the mainloop...
 					gotoStandby();
+			}
+			else
+				eZapStandby::getInstance()->renewSleep();
 			break;
 		}
 		default:
@@ -3477,6 +3492,7 @@ void eZapMain::deleteService( eServiceSelector *sel )
 				fname+="eit";
 				eDebug("unlink %s", fname.c_str());
 				::unlink(fname.c_str());
+				::unlink((it->service.path+".indexmarks").c_str());
 			}
 		}
 	} // bouquet (playlist) selected
@@ -3581,6 +3597,7 @@ void eZapMain::deleteFile( eServiceSelector *sel )
 				fname.erase(fname.length()-2,2);
 				fname+="eit";
 				::unlink(fname.c_str());
+				::unlink((ref.path+".indexmarks").c_str());
 			}
 			sel->removeCurrent(false);
 		}
@@ -3642,6 +3659,7 @@ void eZapMain::renameFile( eServiceSelector *sel )
 							break;
 						}
 					}
+					::rename((ref.path+".indexmarks").c_str(), (newFilePath+".indexmarks").c_str());
 					eString fname=ref.path;
 					fname.erase(fname.length()-2,2);
 					fname+="eit";
@@ -5808,6 +5826,8 @@ void eZapMain::gotMessage(const int &c)
 	{
 		if ( eZapStandby::getInstance() )
 			eZapStandby::getInstance()->wakeUp(1);
+		else if ( enigmaVCR::getInstance() )
+			enigmaVCR::getInstance()->switchBack();
 		return;
 	}
 #ifndef DISABLE_FILE

@@ -48,8 +48,8 @@ eAudioDynamicConfig::eAudioDynamicConfig(eWidget *parent): eWidget(parent), m_up
 	m_label->resize(eSize(240, 30));
 	m_label->move(ePoint(0, 0));
 	m_label->setText(_("Audio Level:"));
-	setShortcut("blue");
-	m_label->setShortcutPixmap("blue");
+	setShortcut("yellow");
+	m_label->setShortcutPixmap("yellow");
 }
 
 void eAudioDynamicConfig::toggle()

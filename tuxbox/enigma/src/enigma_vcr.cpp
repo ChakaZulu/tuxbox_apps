@@ -62,11 +62,11 @@ int enigmaVCR::eventHandler(const eWidgetEvent &event)
 
 enigmaVCR::~enigmaVCR()
 {
-	eAVSwitch::getInstance()->setInput(0);
 	if ( eZapStandby::getInstance() )
 		eAVSwitch::getInstance()->setTVPin8(0);
 	else
 	{
+		eAVSwitch::getInstance()->setInput(0);
 		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage
 		eStreamWatchdog::getInstance()->reloadSettings();
 	}

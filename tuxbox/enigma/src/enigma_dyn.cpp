@@ -232,6 +232,15 @@ static eString doStatus(eString request, eString dirpath, eString opt, eHTTPConn
 	return result;
 }
 
+static bool playService( const eServiceReference &ref )
+{
+	// ignore locked service
+	if ( ref.isLocked() && eConfig::getInstance()->pLockActive() )
+		return false;
+	eZapMain::getInstance()->playService(ref, eZapMain::psSetMode|eZapMain::psDontAdd);
+	return true;
+}
+
 #ifndef DISABLE_FILE
 static eString pause(eString request, eString dirpath, eString opt, eHTTPConnection *content)
 {
@@ -309,9 +318,11 @@ static eString switchService(eString request, eString dirpath, eString opt, eHTT
 			}
 		}
 #endif
-		eZapMain::getInstance()->playService(*ref, eZapMain::psSetMode|eZapMain::psDontAdd);
+		if ( playService(*ref) )
+			result = "0";
+		else
+			result = "-1";
 		delete ref;
-		result = "0";
 	}
 	else
 		result = "-1";
@@ -358,7 +369,7 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 		{
 			if (eZapStandby::getInstance())
 			{
-				eZapMain::getInstance()->wakeUp();
+				eZapStandby::getInstance()->wakeUp(1);
 				if (requester == "webif")
 					return "<html>" CHARSETMETA "<head><title>Wakeup</title></head><body>Enigma is waking up...</body></html>";
 				else
@@ -1364,8 +1375,13 @@ struct countDVBServices: public Object
 	{
 		if (ref.path
 			|| ref.flags & eServiceReference::isDirectory
-			|| ref.type != eServiceReference::idDVB)
+			|| ref.type != eServiceReference::idDVB )
 			return;
+
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
+
 		++count;
 	}
 };
@@ -1385,6 +1401,9 @@ public:
 	}
 	void addEntry(const eServiceReference &e)
 	{
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (e.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
 #ifndef DISABLE_FILE
 		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
 		{
@@ -1452,6 +1471,9 @@ public:
 	}
 	void addEntry(const eServiceReference &e)
 	{
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (e.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
 #ifndef DISABLE_FILE
 		if (eDVB::getInstance()->recorder && !e.path && !e.flags)
 		{
@@ -1526,7 +1548,7 @@ static eString getZapContent(eString mode, eString path)
 
 		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 		{
-			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+			playService(current_service);
 			result += "<script language=\"javascript\">window.close();</script>";
 		}
 		else
@@ -2562,6 +2584,10 @@ public:
 
 	void getcurepg(const eServiceReference &ref)
 	{
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (ref.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
+
 		std::stringstream result;
 		result << std::setfill('0');
 		eService* current;
@@ -3168,7 +3194,7 @@ static eString zapTo(eString request, eString dirpath, eString opts, eHTTPConnec
 	eServiceReference current_service = string2ref(spath);
 
 	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
-		eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
+		playService(current_service);
 
 	content->code=204;
 	content->code_descr="No Content";
@@ -3194,6 +3220,9 @@ public:
 	}
 	void addEntry(const eServiceReference &e)
 	{
+		// sorry.. at moment we dont show any directory.. or locked service in webif
+		if (e.isLocked() && eConfig::getInstance()->pLockActive())
+			return;
 		result += "<tr><td bgcolor=\"#";
 		if (num & 1)
 			result += "c0c0c0";
@@ -3266,9 +3295,10 @@ static eString navigator(eString request, eString dirpath, eString opt, eHTTPCon
 
 	if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 	{
-		eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
-//		iface->play(current_service);
-		res += "+ok, hear the music..";
+		if ( playService(current_service) )
+			res += "+ok, hear the music..";
+		else
+			res += "+error, service is parental locked..";
 	}
 	else
 	{

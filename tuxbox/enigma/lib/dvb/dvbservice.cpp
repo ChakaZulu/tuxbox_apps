@@ -1170,7 +1170,12 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 		{
 			found++;
 			CADescriptor *ca=(CADescriptor*)*i;
+
+#if 0
+// this is old unneeded code for camd call..
+// now we do this in eDVBCAHandler..
 			Decoder::addCADescriptor((__u8*)(ca->data));
+#endif 
 
 			int avail=0;
 			{

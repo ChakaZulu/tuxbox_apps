@@ -18,6 +18,7 @@
 
 #include <enigma.h>
 #include <enigma_main.h>
+#include <enigma_standby.h>
 #include <timer.h>
 #include <lib/driver/eavswitch.h>
 #include <lib/dvb/dvb.h>
@@ -83,7 +84,7 @@ static eString admin2(eString command)
 		eZap::getInstance()->quit(2);
 	else
 	if (command == "wakeup")
-		eZapMain::getInstance()->wakeUp();
+		eZapStandby::getInstance()->wakeUp(1);
 	else
 	if (command == "standby")
 		eZapMain::getInstance()->gotoStandby();

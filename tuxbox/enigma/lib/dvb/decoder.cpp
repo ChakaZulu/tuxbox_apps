@@ -66,6 +66,7 @@ int Decoder::locked=0;
 static void SetECM(int vpid, int apid, int pmtpid, int descriptor_length, __u8 *descriptors)
 {
 #if 0
+// to use this old code you should read my comment in addCADescriptor..
 	if ( eDVB::getInstance()->recorder && eServiceInterface::getInstance()->service.path )
 		return;
 
@@ -661,8 +662,14 @@ void Decoder::stopTrickmode()
 
 void Decoder::addCADescriptor(__u8 *descriptor)
 {
+#if 0
+	// this code is broken.. do not use this.. 
+	// on PMT updates parms.descriptor_length are not set to 0 ..
+	// so after many pmt updates parms.descriptor_length is longer than 2048.. 
+	// and then .. *booom*
 	memcpy(parms.descriptors+parms.descriptor_length, descriptor, descriptor[1]+2);
 	parms.descriptor_length+=descriptor[1]+2;
+#endif
 }
 
 int Decoder::displayIFrame(const char *frame, int len)

@@ -416,7 +416,10 @@ void eTimerManager::actionHandler()
 			if ( !(nextStartingEvent->type&ePlaylistEntry::doFinishOnly) )
 			{
 				writeToLogfile("call eZapMain::getInstance()->handleStandby()");
-				eZapMain::getInstance()->handleStandby();
+				if (nextStartingEvent->type & ePlaylistEntry::SwitchTimerEntry)
+					eZapMain::getInstance()->handleStandby();  // real wakeup needed
+				else
+					eZapMain::getInstance()->handleStandby(-1); 
 			}
 
 			if ( nextStartingEvent->service &&
@@ -1803,13 +1806,13 @@ eTimerListView::eTimerListView()
 	CONNECT(events->selected, eTimerListView::entrySelected );
 	events->setFlags(eListBoxBase::flagLostFocusOnFirst|eListBoxBase::flagLostFocusOnLast);
 
-	add = new eButton( this );
-	add->setName("add");
-	CONNECT( add->selected, eTimerListView::addPressed );
-
 	erase = new eButton( this );
 	erase->setName("remove");
 	CONNECT( erase->selected, eTimerListView::erasePressed );
+
+	add = new eButton( this );
+	add->setName("add");
+	CONNECT( add->selected, eTimerListView::addPressed );
 
 	cleanup = new eButton( this );
 	cleanup->setName("cleanup");

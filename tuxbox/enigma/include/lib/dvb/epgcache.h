@@ -25,22 +25,19 @@ class eServiceReferenceDVB;
 
 struct uniqueEPGKey
 {
-	int sid, onid, opos;
+	int sid, onid, tsid;
 	uniqueEPGKey( const eServiceReferenceDVB &ref )
 		:sid( ref.type != eServiceReference::idInvalid ? ref.getServiceID().get() : -1 )
 		,onid( ref.type != eServiceReference::idInvalid ? ref.getOriginalNetworkID().get() : -1 )
-		,opos( ref.type != eServiceReference::idInvalid ? ref.getDVBNamespace().get() >> 16 : -1 )
+		,tsid( ref.type != eServiceReference::idInvalid ? ref.getTransportStreamID().get() : -1 )
 	{
-		eTransponder *tp = eTransponderList::getInstance()->searchTS( ref.getDVBNamespace(), ref.getTransportStreamID(), ref.getOriginalNetworkID() );
-		if ( tp && tp->satellite.isValid() )
-			opos = tp->satellite.orbital_position;
 	}
 	uniqueEPGKey()
-		:sid(-1), onid(-1), opos(-1)
+		:sid(-1), onid(-1), tsid(-1)
 	{
 	}
-	uniqueEPGKey( int sid, int onid, int opos )
-		:sid(sid), onid(onid), opos(opos)
+	uniqueEPGKey( int sid, int onid, int tsid )
+		:sid(sid), onid(onid), tsid(tsid)
 	{
 	}
 	bool operator <(const uniqueEPGKey &a) const
@@ -49,7 +46,7 @@ struct uniqueEPGKey
 	}
 	operator bool() const
 	{ 
-		return !(sid == -1 && onid == -1 && opos == -1); 
+		return !(sid == -1 && onid == -1 && tsid == -1); 
 	}
 	bool operator==(const uniqueEPGKey &a) const
 	{
@@ -147,7 +144,7 @@ public:
 	{
 		CacheSize-=ByteSize;
 		delete [] EITdata;
-	}	
+	}
 	operator const eit_event_struct*() const
 	{
 		return (const eit_event_struct*) EITdata;
@@ -209,7 +206,7 @@ class eNowNext: public eSection
 class eEPGCache: public eMainloop, private eThread, public Object
 {
 public:
-	enum {SCHEDULE, NOWNEXT, SCHEDULE_OTHER};
+	enum {NOWNEXT, SCHEDULE, SCHEDULE_OTHER};
 	friend class eSchedule;
 	friend class eScheduleOther;
 	friend class eNowNext;

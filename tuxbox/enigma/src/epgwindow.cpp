@@ -220,6 +220,7 @@ void eEPGSelector::fillEPGList()
 			}
 		}
 	}
+#if 0
 	else if (current.data[0] == 4 ) //NVOD
 	{
 		for (; It != evt->end(); It++)
@@ -265,6 +266,7 @@ void eEPGSelector::fillEPGList()
 			}
 		}
 	}
+#endif
 	else for (It = evt->begin(); It != evt->end(); It++)
 		new eListBoxEntryEPG(*It->second, events, current);
 	eEPGCache::getInstance()->Unlock();

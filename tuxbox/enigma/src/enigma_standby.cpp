@@ -39,9 +39,33 @@ void eZapStandby::wakeUp(int norezap)
 	close(0);
 }
 
+void eZapStandby::renewSleep()
+{
+	eDebug("renewSleep");
+	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
+	rezap = 0;
+	if (handler)
+	{
+		ref = eServiceInterface::getInstance()->service;
+		if (handler->getFlags() & eServiceHandler::flagIsSeekable)
+			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
+		else
+		{
+			rezap=1;
+			eServiceInterface::getInstance()->stop();
+		}
+	}
+	eFrontend::getInstance()->savePower();
+	eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
+	if (sapi)
+		sapi->transponder=0;
+	::sync();
+	system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
+	system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
+}
+
 int eZapStandby::eventHandler(const eWidgetEvent &event)
 {
-	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 	switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
@@ -52,7 +76,6 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 		return 0;
 	case eWidgetEvent::execBegin:
 	{
-		eDebug("execBegin");
 		/*emit*/ enterStandby();
 		FILE *f = fopen("/var/etc/enigma_enter_standby.sh", "r");
 		if (f)
@@ -61,33 +84,14 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 			system("/var/etc/enigma_enter_standby.sh");
 		}
 #ifndef DISABLE_LCD
-		eDBoxLCD::getInstance()->switchLCD(0);
 		eZapLCD *pLCD=eZapLCD::getInstance();
 		pLCD->lcdMain->hide();
 		pLCD->lcdStandby->show();
+		eDBoxLCD::getInstance()->switchLCD(0);
 #endif
-		rezap = 0;
-		if (handler)
-		{
-			ref = eServiceInterface::getInstance()->service;
-			if (handler->getFlags() & eServiceHandler::flagIsSeekable)
-				handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 0));
-			else
-			{
-				rezap=1;
-				eServiceInterface::getInstance()->stop();
-			}
-		}
 		eAVSwitch::getInstance()->setInput(1);
 		eAVSwitch::getInstance()->setTVPin8(0);
-		eFrontend::getInstance()->savePower();
-		eDVBServiceController *sapi=eDVB::getInstance()->getServiceAPI();
-		if (sapi)
-			sapi->transponder=0;
-		::sync();
-		system("/sbin/hdparm -y /dev/ide/host0/bus0/target0/lun0/disc");
-		system("/sbin/hdparm -y /dev/ide/host0/bus0/target1/lun0/disc");
-
+		renewSleep();
 		if( !eSystemInfo::getInstance()->hasLCD() ) //  in standby
 		{
 			time_t c=time(0)+eDVB::getInstance()->time_difference;
@@ -111,7 +115,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 	}
 	case eWidgetEvent::execDone:
 	{
-		eDebug("execDone");
+		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 #ifndef DISABLE_LCD
 		eZapLCD *pLCD=eZapLCD::getInstance();
 		pLCD->lcdStandby->hide();
@@ -119,7 +123,7 @@ int eZapStandby::eventHandler(const eWidgetEvent &event)
 #endif
 		if (handler->getFlags() & eServiceHandler::flagIsSeekable)
 			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSetSpeed, 1));
-		if (rezap)
+		if (rezap && eServiceInterface::getInstance()->service != ref)
 			eServiceInterface::getInstance()->play(ref);
 		eAVSwitch::getInstance()->setInput(0);
 		eAVSwitch::getInstance()->setTVPin8(-1); // reset prev voltage

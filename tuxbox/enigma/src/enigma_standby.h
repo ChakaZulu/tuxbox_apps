@@ -13,6 +13,7 @@ class eZapStandby: public eWidget
 protected:
 	int eventHandler(const eWidgetEvent &);
 public:
+	void renewSleep();
 	void wakeUp(int norezap);
 	static eZapStandby *getInstance() { return instance; }
 	static Signal0<void> enterStandby, leaveStandby;

@@ -16,6 +16,36 @@ extern "C"
 #include <lib/dvb/lowlevel/pat.h>
 #include <lib/dvb/lowlevel/tdt.h>
 
+static int getEncodingTable( const char * language_code )
+{
+	int table=5;
+	if (!memcmp(language_code, "gre", 3))
+		table=3;
+	else 
+		if (!memcmp(language_code, "pol", 3) // Polish
+		|| !memcmp(language_code, "cze", 3)  // Czech
+		|| !memcmp(language_code, "ces", 3)
+		|| !memcmp(language_code, "slv", 3)  // Slovenian
+		|| !memcmp(language_code, "slo", 3)  // Slovak
+		|| !memcmp(language_code, "slk", 3)
+		|| !memcmp(language_code, "scr", 3)  // Croatian
+		|| !memcmp(language_code, "hrv", 3)
+		|| !memcmp(language_code, "rum", 3)  // Romanian
+		|| !memcmp(language_code, "ron", 3)
+		|| !memcmp(language_code, "wen", 3)) // Sorbian language
+			table=6;
+	else 
+		if (!memcmp(language_code,"rus", 3)  // Russian
+		|| !memcmp(language_code, "bul", 3)  // Bulgarian
+		|| !memcmp(language_code, "scc", 3)  // Serbian
+		|| !memcmp(language_code, "srp", 3)
+		|| !memcmp(language_code, "mac", 3)  // Macedonian 
+		|| !memcmp(language_code, "mkd", 3)
+		|| !memcmp(language_code, "ukr", 3)) // Ukrainian
+			table=1;
+	return table;
+}
+
 static eString qHex(int v)
 {
 	return eString().sprintf("%04x", v);
@@ -704,12 +734,8 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr)
 		ptr++;
 		len--;
 	}
-	
-	int table=5;
-	if (!memcmp(language_code, "gre", 3))
-		table=3;
-	if (!memcmp(language_code, "ru", 2))
-		table=1;
+
+	int table=getEncodingTable(language_code);
 
 	event_name=convertDVBUTF8((unsigned char*)data+ptr, len, table);
 	// filter newlines in ARD ShortEventDescriptor event_name
@@ -835,12 +861,8 @@ ExtendedEventDescriptor::ExtendedEventDescriptor(descr_gen_t *descr)
 	language_code[0]=evt->iso_639_2_language_code_1;
 	language_code[1]=evt->iso_639_2_language_code_2;
 	language_code[2]=evt->iso_639_2_language_code_3;
-	
-	int table=5;
-	if (!memcmp(language_code, "gre", 3))
-		table=3;
-	if (!memcmp(language_code, "ru", 2))
-		table=1;
+
+	int table=getEncodingTable(language_code);
 
 	int ptr = sizeof(struct eit_extended_descriptor_struct);
 	__u8* data = (__u8*) descr;
