@@ -147,15 +147,31 @@ int eConfig::setKey(const char *key, const char *s)
 	return 0;
 }
 
-
 void eConfig::delKey(const char *key)
 {
-	keys_int.erase(key);
-	keys_string.erase(key);
-	keys_uint.erase(key);
-	keys_double.erase(key);
+	std::map<eString, int> del_keys;
+	
+	for (std::map<eString, int>::iterator i(keys_int.begin()); i != keys_int.end(); ++i)		
+		if(strncmp(i->first.c_str(), key,  strlen(key))==0)
+			del_keys[i->first.c_str()] = 1;
+	for (std::map<eString, unsigned int>::iterator i(keys_uint.begin()); i != keys_uint.end(); ++i)
+		if(strncmp(i->first.c_str(), key,  strlen(key))==0)
+			del_keys[i->first.c_str()] = 1;
+	for (std::map<eString, double>::iterator i(keys_double.begin()); i != keys_double.end(); ++i)
+		if(strncmp(i->first.c_str(), key,  strlen(key))==0)
+			del_keys[i->first.c_str()] = 1;
+	for (std::map<eString, eString>::iterator i(keys_string.begin()); i != keys_string.end(); ++i)
+		if(strncmp(i->first.c_str(), key,  strlen(key))==0)
+			del_keys[i->first.c_str()] = 1;
+	
+	for (std::map<eString, int>::iterator i(del_keys.begin()); i != del_keys.end(); ++i)
+	{
+		keys_int.erase(i->first.c_str());
+		keys_string.erase(i->first.c_str());
+		keys_uint.erase(i->first.c_str());
+		keys_double.erase(i->first.c_str());
+	}
 }
-
 
 void eConfig::flush()
 {
