@@ -124,6 +124,7 @@ void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode =
 void sendChannels(CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT, CZapitClient::channelsOrder order = CZapitClient::SORT_BOUQUET);
 void startPlayBack();
 void stopPlayBack();
-void zapTo(unsigned int channel);
-void zapTo(unsigned int bouquet, unsigned int channel);
+unsigned int zapTo(unsigned int channel);
+unsigned int zapTo(unsigned int bouquet, unsigned int channel);
+unsigned int zapTo_ServiceID(unsigned int serviceID, bool isSubService );
 void sendAPIDs();

@@ -2,7 +2,7 @@
 
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.100 2002/03/22 17:12:59 field Exp $
+  $Id: zapit.cpp,v 1.101 2002/03/23 19:03:39 field Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -2475,6 +2475,31 @@ void parse_command()
 				zapTo(msgZaptoChannelNr.channel);
 			break;
 
+            case CZapitClient::CMD_ZAPTO_SERVICEID :
+            case CZapitClient::CMD_ZAPTO_SUBSERVICEID :
+            	CZapitClient::commandZaptoServiceID msgZaptoServiceID;
+                CZapitClient::responseZapComplete msgResponseZapComplete;
+				read( connfd, &msgZaptoServiceID, sizeof(msgZaptoServiceID));
+               	msgResponseZapComplete.zapStatus = zapTo_ServiceID( msgZaptoServiceID.serviceID , ( rmsg.cmd == CZapitClient::CMD_ZAPTO_SUBSERVICEID ) );
+				send(connfd, &msgResponseZapComplete, sizeof(msgResponseZapComplete), 0);
+			break;
+
+			case CZapitClient::CMD_SET_AUDIOCHAN :
+				CZapitClient::commandSetAudioChannel msgSetAudioChannel;
+				read( connfd, &msgSetAudioChannel, sizeof(msgSetAudioChannel));
+				changeapid( msgSetAudioChannel.channel );
+			break;
+
+			case CZapitClient::CMD_SET_MODE :
+				CZapitClient::commandSetMode msgSetMode;
+				read( connfd, &msgSetMode, sizeof(msgSetMode));
+
+				if ( msgSetMode.mode == CZapitClient::MODE_TV )
+					setTVMode();
+				else if ( msgSetMode.mode == CZapitClient::MODE_RADIO )
+					setRadioMode();
+			break;
+
 			case CZapitClient::CMD_GET_BOUQUETS :
 				CZapitClient::commandGetBouquets msgGetBouquets;
 				read( connfd, &msgGetBouquets, sizeof(msgGetBouquets));
@@ -2771,7 +2796,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("Zapit $Id: zapit.cpp,v 1.100 2002/03/22 17:12:59 field Exp $\n\n");
+	printf("Zapit $Id: zapit.cpp,v 1.101 2002/03/23 19:03:39 field Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -3056,12 +3081,15 @@ void stopPlayBack()
 	endzap();
 }
 
-void zapTo(unsigned int bouquet, unsigned int channel)
+unsigned zapTo(unsigned int bouquet, unsigned int channel)
 {
+	unsigned result = 0;
+
 	if ((bouquet < 1) || (bouquet > g_BouquetMan->Bouquets.size()))
 	{
 		printf( "[zapit] Invalid bouquet %d\n", bouquet);
-		return;
+		result|= CZapitClient::ZAP_INVALID_PARAM;
+		return ( result );
 	}
 
 	ChannelList channels;
@@ -3073,15 +3101,37 @@ void zapTo(unsigned int bouquet, unsigned int channel)
 	if ((channel < 1) || (channel > channels.size()))
 	{
 		printf( "[zapit] Invalid channel %d in bouquet %d\n", channel, bouquet);
-		return;
+		result|= CZapitClient::ZAP_INVALID_PARAM;
+		return ( result );
 	}
 
 	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
-	zapit( channels[channel-1]->OnidSid() , false);
+
+
+	result = zapTo_ServiceID ( channels[channel-1]->OnidSid(), false );
+
+    return ( result );
 }
 
-void zapTo(unsigned int channel)
+unsigned int zapTo_ServiceID(unsigned int serviceID, bool isSubService )
 {
+	unsigned result = 0;
+
+	if ( zapit( serviceID , isSubService ) > 0 )
+	{
+		result|= CZapitClient::ZAP_OK;
+
+		if (current_is_nvod)
+		 	result|= CZapitClient::ZAP_IS_NVOD;
+	}
+    return ( result );
+}
+
+
+unsigned zapTo(unsigned int channel)
+{
+	unsigned result = 0;
+
 	if (Radiomode_on)
 	{
 		CBouquetManager::radioChannelIterator radiocit = g_BouquetMan->radioChannelsBegin();
@@ -3092,7 +3142,7 @@ void zapTo(unsigned int channel)
 		}
 	//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
 		if (radiocit != g_BouquetMan->radioChannelsEnd())
-			zapit( (*radiocit)->OnidSid() , false);
+			result = zapTo_ServiceID ( (*radiocit)->OnidSid(), false );
 	}
 	else
 	{
@@ -3104,7 +3154,9 @@ void zapTo(unsigned int channel)
 		}
 	//	g_BouquetMan->saveAsLast( bouquet-1, channel-1);
 		if (tvcit != g_BouquetMan->tvChannelsEnd())
-			zapit( (*tvcit)->OnidSid() , false);
+			result = zapTo_ServiceID ( (*tvcit)->OnidSid(), false );
 	}
+
+	return ( result );
 }
 

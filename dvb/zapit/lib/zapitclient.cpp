@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.14 2002/03/22 17:12:59 field Exp $
+  $Id: zapitclient.cpp,v 1.15 2002/03/23 19:03:39 field Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.15  2002/03/23 19:03:39  field
+  Clientlib massiv ausgebaut
+
   Revision 1.14  2002/03/22 17:12:59  field
   Clientlib-Updates
 
@@ -156,6 +159,81 @@ void CZapitClient::zapTo( unsigned int channel )
 	zapit_close();
 }
 
+void CZapitClient::setAudioChannel( unsigned channel )
+{
+	commandHead msgHead;
+	commandSetAudioChannel msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SET_AUDIOCHAN;
+
+	msg.channel = channel;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+
+	zapit_close();
+}
+
+/* zaps to onid_sid, returns the "zap-status" */
+unsigned int CZapitClient::zapTo_serviceID( unsigned serviceID )
+{
+	commandHead msgHead;
+	commandZaptoServiceID msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_ZAPTO_SERVICEID;
+
+	msg.serviceID = serviceID;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+
+	responseZapComplete response;
+	receive((char* )&response, sizeof(response));
+
+	zapit_close();
+
+	return response.zapStatus;
+}
+
+unsigned int CZapitClient::zapTo_subServiceID( unsigned serviceID )
+{
+	commandHead msgHead;
+	commandZaptoServiceID msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_ZAPTO_SUBSERVICEID;
+
+	msg.serviceID = serviceID;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+
+	responseZapComplete response;
+	receive((char* )&response, sizeof(response));
+
+	zapit_close();
+
+	return response.zapStatus;
+}
+
+void CZapitClient::setMode( channelsMode mode )
+{
+	commandHead msgHead;
+	commandSetMode msg;
+	msgHead.version=ACTVERSION;
+	msgHead.cmd=CMD_SET_MODE;
+
+	msg.mode = mode;
+
+	zapit_connect();
+	send((char*)&msgHead, sizeof(msgHead));
+	send((char*)&msg, sizeof(msg));
+
+	zapit_close();
+}
+
 void CZapitClient::setSubServices( subServiceList& subServices )
 {
 	commandHead msgHead;
@@ -181,7 +259,7 @@ void CZapitClient::getPIDS( responseGetPIDs& pids )
 	send((char*)&msgHead, sizeof(msgHead));
 	responseGetOtherPIDs response;
     receive((char* )&response, sizeof(response));
-    memcpy(&response, &pids.PIDs, sizeof(response));
+    memcpy(&pids.PIDs, &response, sizeof(response));
 
 	responseGetAPIDs responseAPID;
 	pids.APIDs.clear();
