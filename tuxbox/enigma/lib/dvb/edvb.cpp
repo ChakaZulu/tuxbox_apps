@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dbox/info.h>
+#include <tuxbox/tuxbox.h>
 #include <algorithm>
 #include <string.h>
 
@@ -107,19 +108,27 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 	setMode(controllerService);
 
 		// init AV switch
-	int type=0;
-	type=atoi( getInfo("mID").c_str() );
-	
-	switch (type)
+	switch (tuxbox_get_model())
 	{
-	case 1:
+	case TUXBOX_MODEL_DBOX2:
+		switch (tuxbox_get_manufacturer())
+		{
+		case TUXBOX_MANUFACTURER_NOKIA:
+			new eAVSwitchNokia;
+			break;
+		case TUXBOX_MANUFACTURER_PHILIPS:
+			new eAVSwitchPhilips;
+			break;
+		case TUXBOX_MANUFACTURER_SAGEM:
+			new eAVSwitchSagem;
+			break;
+		default:
+			new eAVSwitchNokia;
+			break;
+		}
+	case TUXBOX_MODEL_DREAMBOX_DM7000:
+	case TUXBOX_MODEL_DREAMBOX_DM5600:
 		new eAVSwitchNokia;
-		break;
-	case 2:
-		new eAVSwitchPhilips;
-		break;
-	case 3:
-		new eAVSwitchSagem;
 		break;
 	default:
 		new eAVSwitchNokia;

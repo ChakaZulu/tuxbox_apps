@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/dvbci.h>
+#include <tuxbox/tuxbox.h>
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 {
@@ -11,7 +12,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 	CONNECT(dvb.tSDT.tableReady, eDVBServiceController::SDTready);
 	CONNECT(dvb.tEIT.tableReady, eDVBServiceController::EITready);
 
-	if ( dvb.getInfo("mID") != "05" && dvb.getInfo("mID") != "06" )  // no dreambox
+	if (tuxbox_get_manufacturer() != TUXBOX_MANUFACTURER_DREAM_MM)  // no dreambox
 	{
 		eDebug("add CAs");
 		availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
@@ -343,7 +344,7 @@ void eDVBServiceController::scanPMT()
 	
 	int isca=0;
 
-	if ( dvb.getInfo("mID") == "05" )
+	if (tuxbox_get_model() == TUXBOX_MODEL_DREAMBOX_DM7000)
 		calist.clear();
 
 	Decoder::parms.descriptor_length=0;
