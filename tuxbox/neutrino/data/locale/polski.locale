@@ -44,8 +44,8 @@ languagesetup.select Jezyk
 
 audiomenu.head Ustawienie Dzwieku
 audiomenu.analogout Analog Output
-audiomenu.monoright mono left
-audiomenu.monoleft mono right
+audiomenu.monoright mono right
+audiomenu.monoleft mono left
 audiomenu.stereo stereo
 audiomenu.dolbydigital Dolby Digital
 

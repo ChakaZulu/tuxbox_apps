@@ -44,8 +44,8 @@ languagesetup.select Langue
 
 audiomenu.head ajuster I'argile
 audiomenu.analogout Analog Output
-audiomenu.monoright mono left
-audiomenu.monoleft mono right
+audiomenu.monoright mono right
+audiomenu.monoleft mono left
 audiomenu.stereo Stéréo
 audiomenu.dolbydigital Dolby Digital
 
