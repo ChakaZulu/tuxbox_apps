@@ -20,6 +20,7 @@ void eStreamer::setServiceReference(eServiceReference psref)
 bool eStreamer::getServiceReference(eServiceReference& psref)
 {
 	psref = sref;
-	return !(system("pidof streamts"));
+//	return !system("pidof streamts");
+	return 0;
 }
 
