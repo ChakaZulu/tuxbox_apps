@@ -1,5 +1,5 @@
 //
-// $Id: SIsections.cpp,v 1.25 2001/11/03 03:13:52 field Exp $
+// $Id: SIsections.cpp,v 1.26 2001/11/03 15:39:57 field Exp $
 //
 // classes for SI sections (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIsections.cpp,v $
+// Revision 1.26  2001/11/03 15:39:57  field
+// Deadlock behoben, Perspektiven
+//
 // Revision 1.25  2001/11/03 03:13:52  field
 // Auf Perspektiven vorbereitet
 //
@@ -306,6 +309,7 @@ void SIsectionEIT::parse(void)
 //    printf("actpos: %p buf+bl: %p evtid: %hu desclen: %hu\n", actPos, buffer+bufferLength, evt->event_id, evt->descriptors_loop_length);
 //    printf("maxlen: %u (%s)\n", min((unsigned)(buffer+bufferLength-actPos), evt->descriptors_loop_length), (unsigned)(buffer+bufferLength-actPos)< evt->descriptors_loop_length ? "bufferLength" : "descriptor_loop_length");
     parseDescriptors(((const char *)evt)+sizeof(struct eit_event), min((unsigned)(buffer+bufferLength-actPos), evt->descriptors_loop_length), e);
+    //printf("lds: %d\n", e.linkage_descs.size());
     evts.insert(e);
     actPos+=sizeof(struct eit_event)+evt->descriptors_loop_length;
   }

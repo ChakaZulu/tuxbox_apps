@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.80 2001/11/03 03:13:53 field Exp $
+//  $Id: sectionsd.cpp,v 1.81 2001/11/03 15:39:57 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.81  2001/11/03 15:39:57  field
+//  Deadlock behoben, Perspektiven
+//
 //  Revision 1.80  2001/11/03 03:13:53  field
 //  Auf Perspektiven vorbereitet
 //
@@ -847,7 +850,9 @@ int DMX::pause(void)
   if(!fd)
     return 1;
   pthread_mutex_lock(&pauselock);
+    //dprintf("lock from pc: %d\n", pauseCounter);
   if(pauseCounter++) {
+
     pthread_mutex_unlock(&pauselock);
     return 0;
   }
@@ -859,7 +864,9 @@ int DMX::unpause(void)
 {
   if(!fd)
     return 1;
+
   pthread_mutex_lock(&pauselock);
+  //dprintf("unlock from pc: %d\n", pauseCounter);
   if(--pauseCounter) {
     pthread_mutex_unlock(&pauselock);
     return 0;
@@ -1356,7 +1363,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.80 2001/11/03 03:13:53 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.81 2001/11/03 15:39:57 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1551,6 +1558,10 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
 
         if(si!=mySIservicesOrderUniqueKey.end())
         {
+            if ( !si->second->eitScheduleFlag() )
+                dprintf("current service has no scheduled events\n");
+            if ( !si->second->eitPresentFollowingFlag() )
+                dprintf("current service has no present/following events\n");
             if ( ( !si->second->eitScheduleFlag() ) &&
                  ( !si->second->eitPresentFollowingFlag() ) )
             {
@@ -1575,18 +1586,16 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
     }
 
         nResultDataSize=
-            sizeof(unsigned char)+  //Flag
             sizeof(unsigned long long)+       // Unique-Key
             sizeof(sectionsd::sectionsdTime)+ // zeit
             strlen(evt.name.c_str())+1+	  // name + 0
             sizeof(unsigned long long)+       // Unique-Key
             sizeof(sectionsd::sectionsdTime)+ // zeit
             strlen(nextEvt.name.c_str())+1+   // name + 0
+            sizeof(unsigned char)+  //Flag
             sizeof(int);    // num. Component-Tags
-
         // current ComponentTags ...
         int countDescs= 0;
-        dprintf("evt.linkage_descs.size %d \n", evt.linkage_descs.size());
         for(SIlinkage_descs::iterator link=evt.linkage_descs.begin(); link!=evt.linkage_descs.end(); link++)
         {
             if (link->linkageType== 0xB0)
@@ -1598,7 +1607,6 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
                                   sizeof(unsigned short); //serviceId
             }
         }
-
         pResultData = new char[nResultDataSize];
         if(!pResultData)
         {
@@ -1608,9 +1616,6 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
             return;
         }
         char *p=pResultData;
-        *((unsigned char *)p)= flag;
-        p+=sizeof(unsigned char);
-
         *((unsigned long long *)p)=evt.uniqueKey();
         p+=sizeof(unsigned long long);
         sectionsd::sectionsdTime zeit;
@@ -1628,8 +1633,11 @@ static void commandCurrentNextInfoChannelID(struct connectionData *client, char 
         p+=sizeof(sectionsd::sectionsdTime);
         strcpy(p, nextEvt.name.c_str());
         p+=strlen(nextEvt.name.c_str())+1;
-        *((int *)p)=countDescs;
-        p+=sizeof(int);
+        *((unsigned char *)p)= flag;
+        p+=sizeof(unsigned char);
+
+        *((unsigned short *)p)= countDescs;
+        p+=sizeof(unsigned short);
 
         for(SIlinkage_descs::iterator link=evt.linkage_descs.begin(); link!=evt.linkage_descs.end(); link++)
         {
@@ -2138,6 +2146,8 @@ static void commandEPGepgID(struct connectionData *client, char *data, const uns
 	break;
     if(t==evt.times.end()) {
       dputs("EPG not found!");
+      unlockEvents();
+      dmxEIT.unpause(); // -> unlock
     }
     else {
       dputs("EPG found.");
@@ -3007,7 +3017,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.80 2001/11/03 03:13:53 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.81 2001/11/03 15:39:57 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
