@@ -123,7 +123,7 @@ function admin(xy)
 
 function openSI()
 {
-	NewWindow("cgi-bin/streaminfo?requester=webif", "si", "310", "290", "no");
+	NewWindow("cgi-bin/streaminfo", "si", "310", "300", "no");
 }
 
 function openChannelInfo()

@@ -2947,7 +2947,7 @@ static eString getcurepg(eString request, eString dirpath, eString opts, eHTTPCo
 static eString getstreaminfo(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::stringstream result;
-	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt;
+	eString name, provider, vpid, apid, pcrpid, tpid, vidform("n/a"), tsid, onid, sid, pmt, namespc;
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 
@@ -2969,6 +2969,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 	onid = eString().sprintf("%04xh", sapi->service.getOriginalNetworkID().get());
 	sid = eString().sprintf("%04xh", sapi->service.getServiceID().get());
 	pmt = eString().sprintf("%04xh", Decoder::current.pmtpid);
+	namespc = eString().sprintf("%04xh", sapi->service.getDVBNamespace().get());
 
 	FILE *bitstream = 0;
 
@@ -2977,7 +2978,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 	if (bitstream)
 	{
 		char buffer[100];
-		int xres = 0, yres = 0, aspect = 0;
+		int xres = 0, yres = 0, aspect = 0, framerate = 0;
 		while (fgets(buffer, 100, bitstream))
 		{
 			if (!strncmp(buffer, "H_SIZE:  ", 9))
@@ -2986,6 +2987,8 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 				yres=atoi(buffer+9);
 			if (!strncmp(buffer, "A_RATIO: ", 9))
 				aspect=atoi(buffer+9);
+			if (!strncmp(buffer, "F_RATE: ", 8))
+				framerate=atoi(buffer+8);
 		}
 		fclose(bitstream);
 		vidform.sprintf("%dx%d ", xres, yres);
@@ -2999,6 +3002,25 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 				vidform += "(16:9)"; break;
 			case 4:
 				vidform += "(20:9)"; break;
+		}
+		switch (framerate)
+		{
+			case 1:
+				vidform += ", 23.976 fps"; break;
+			case 2:
+				vidform += ", 24 fps"; break;
+			case 3:
+				vidform += ", 25 fps"; break;
+			case 4:
+				vidform += ", 29.97 fps"; break;
+			case 5:
+				vidform += ", 30 fps"; break;
+			case 6:
+				vidform += ", 50 fps"; break;
+			case 7:
+				vidform += ", 59.94 fps"; break;
+			case 8:
+				vidform += ", 80 fps"; break;
 		}
 	}
 
@@ -3020,6 +3042,7 @@ static eString getstreaminfo(eString request, eString dirpath, eString opts, eHT
 		"<tr><td>SID:</td><td>" << sid << "</td></tr>"
 		"<tr><td>PMT:</td><td>" << pmt << "</td></tr>"
 		"<tr><td>Video Format:<td>" << vidform << "</td></tr>"
+		"<tr><td>Namespace:<td>" << namespc << "</td></tr>"
 		"</table>"
 		"</body>"
 		"</html>";
@@ -3585,7 +3608,8 @@ static eString remoteControl(eString request, eString dirpath, eString opts, eHT
 		}
 
 		eString tmp = keyS;
-		if ((pos = tmp.find(":")) != eString::npos)
+		pos = tmp.find(":");
+		if (pos != eString::npos)
 		{
 			keyS = tmp.left(pos);
 			tmp = tmp.right(tmp.length() - pos - 1);
