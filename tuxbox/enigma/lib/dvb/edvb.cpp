@@ -28,16 +28,18 @@
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/decoder.h>
 #include <lib/dvb/record.h>
+#ifndef DISABLE_CI
+	#include <lib/dvb/dvbci.h>
+#endif
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/dvbscan.h>
+#include <lib/dvb/service.h>
+
 #include <lib/system/info.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 #include <lib/system/econfig.h>
-#ifndef DISABLE_CI
-	#include <lib/dvb/dvbci.h>
-#endif
 
-#include <lib/dvb/dvbservice.h>
-#include <lib/dvb/dvbscan.h>
 
 eDVBController::~eDVBController()
 {
