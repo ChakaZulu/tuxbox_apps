@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.18 2002/10/30 20:59:07 Zwen Exp $
+	$Id: webapi.cpp,v 1.19 2002/11/08 01:01:56 dirch Exp $
 
 	License: GPL
 
@@ -493,9 +493,9 @@ bool CWebAPI::ShowBouquet(CWebserverRequest* request, int BouquetNr)
 {
 	CZapitClient::BouquetChannelList *channellist;
 	if(BouquetNr > 0)
-		channellist = &(Parent->BouquetsList[BouquetNr]);
+		channellist = Parent->GetBouquet(BouquetNr,CZapitClient::MODE_CURRENT);
 	else
-		channellist = &Parent->ChannelList;
+		channellist = Parent->GetChannelList(CZapitClient::MODE_CURRENT);
 
 	Parent->GetChannelEvents();
 

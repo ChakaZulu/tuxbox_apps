@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: request.cpp,v 1.32 2002/10/15 20:39:47 woglinde Exp $
+	$Id: request.cpp,v 1.33 2002/11/08 01:01:56 dirch Exp $
 
 	License: GPL
 
@@ -710,7 +710,7 @@ bool CWebserverRequest::SocketWriteData( char* data, long length )
 		return false;
 	if((write(Socket, data, length) == -1) )
 	{
-		dprintf("request canceled\n");
+		perror("request canceled\n");
 		RequestCanceled = true;
 		return false;
 	}

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.43 2002/10/23 19:03:19 Zwen Exp $
+	$Id: webdbox.cpp,v 1.44 2002/11/08 01:01:56 dirch Exp $
 
 	License: GPL
 
@@ -51,10 +51,12 @@
 //-------------------------------------------------------------------------
 void CWebDbox::UpdateBouquets(void)
 {
-	GetBouquets();
+	BouquetList.clear();
+	Zapit->getBouquets(BouquetList,true); 
+
 	for(unsigned int i = 1; i <= BouquetList.size();i++)
-		GetBouquet(i);
-	GetChannelList();
+		UpdateBouquet(i);
+	UpdateChannelList();
 }
 //-------------------------------------------------------------------------
 
@@ -193,34 +195,60 @@ void CWebDbox::GetChannelEvents()
 //-------------------------------------------------------------------------
 string CWebDbox::GetServiceName(t_channel_id channel_id)
 {
-	for(unsigned int i = 0; i < ChannelList.size();i++)
-		if( ChannelList[i].channel_id == channel_id)
-			return ChannelList[i].name;
+	for(unsigned int i = 0; i < TVChannelList.size();i++)
+		if( TVChannelList[i].channel_id == channel_id)
+			return TVChannelList[i].name;
+	for(unsigned int i = 0; i < RadioChannelList.size();i++)
+		if( RadioChannelList[i].channel_id == channel_id)
+			return RadioChannelList[i].name;
 	return "";
 }
 
-//-------------------------------------------------------------------------
-bool CWebDbox::GetBouquets(void)
-{
-	BouquetList.clear();
-	Zapit->getBouquets(BouquetList,true); 
-	return true;
-}
 
 //-------------------------------------------------------------------------
-bool CWebDbox::GetBouquet(unsigned int BouquetNr)
+CZapitClient::BouquetChannelList * CWebDbox::GetBouquet(unsigned int BouquetNr, int Mode)
 {
-	BouquetsList[BouquetNr].clear();
-	Zapit->getBouquetChannels(BouquetNr - 1, BouquetsList[BouquetNr]);
-	return true;
+int mode;
+	if(Mode == CZapitClient::MODE_CURRENT )
+		mode = Zapit->getMode();
+	else
+		mode = Mode;
+	
+	if(mode == CZapitClient::MODE_TV)
+		return &TVBouquetsList[BouquetNr];
+	else
+		return &RadioBouquetsList[BouquetNr];
+}
+//-------------------------------------------------------------------------
+CZapitClient::BouquetChannelList * CWebDbox::GetChannelList(int Mode)
+{
+int mode;
+	if(Mode == CZapitClient::MODE_CURRENT )
+		mode = Zapit->getMode();
+	else
+		mode = Mode;
+	
+	if(mode == CZapitClient::MODE_TV)
+		return &TVChannelList;
+	else
+		return &RadioChannelList;
+}
+//-------------------------------------------------------------------------
+void CWebDbox::UpdateBouquet(unsigned int BouquetNr)
+{
+	TVBouquetsList[BouquetNr].clear();
+	RadioBouquetsList[BouquetNr].clear();
+	Zapit->getBouquetChannels(BouquetNr - 1, TVBouquetsList[BouquetNr], CZapitClient::MODE_TV);
+	Zapit->getBouquetChannels(BouquetNr - 1, RadioBouquetsList[BouquetNr], CZapitClient::MODE_RADIO);
 }
 //-------------------------------------------------------------------------
 
-bool CWebDbox::GetChannelList(void)
+void CWebDbox::UpdateChannelList(void)
 {
-	ChannelList.clear();
-	Zapit->getChannels(ChannelList);
-	return true;
+	TVChannelList.clear();
+	RadioChannelList.clear();
+	Zapit->getChannels(RadioChannelList, CZapitClient::MODE_RADIO);
+	Zapit->getChannels(TVChannelList, CZapitClient::MODE_TV);
 }
 //-------------------------------------------------------------------------
 

@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.34 2002/10/19 21:47:44 obi Exp $
+        $Id: webdbox.h,v 1.35 2002/11/08 01:01:56 dirch Exp $
 
         License: GPL
 
@@ -79,10 +79,11 @@ class CWebDbox
 	CTimerdClient	*Timerd;
 
 
-	CZapitClient::BouquetChannelList ChannelList;					// complete channellist
+	CZapitClient::BouquetChannelList RadioChannelList,TVChannelList;	// complete channellists
 	map<unsigned, CChannelEvent *> ChannelListEvents;				// events of actual channel
-	map<int, CZapitClient::BouquetChannelList> BouquetsList;		// List of available bouquets
-	CZapitClient::BouquetList BouquetList;							// List of current bouquet
+	map<int, CZapitClient::BouquetChannelList> TVBouquetsList;		// List of available tv bouquets
+	map<int, CZapitClient::BouquetChannelList> RadioBouquetsList;	// List of available radio bouquets
+	CZapitClient::BouquetList BouquetList;							// List of bouquets
 	CEventServer	*EventServer;
 
 
@@ -98,12 +99,14 @@ class CWebDbox
 	void GetChannelEvents();
 	bool GetStreamInfo(int bitinfo[10]);
 	string GetServiceName(t_channel_id channel_id);
-	bool GetBouquets(void);
-	bool GetBouquet(unsigned int BouquetNr);
-	bool GetChannelList(void);
+	CZapitClient::BouquetChannelList *GetBouquet(unsigned int BouquetNr, int Mode);
+	CZapitClient::BouquetChannelList *GetChannelList(int Mode);
 
 // support functions
 	void ZapTo(string target);
+
+	void UpdateBouquet(unsigned int BouquetNr);
+	void UpdateChannelList(void);
 	void UpdateBouquets(void);
 
 	void timerEventType2Str(CTimerd::CTimerEventTypes type, char *str,int len);

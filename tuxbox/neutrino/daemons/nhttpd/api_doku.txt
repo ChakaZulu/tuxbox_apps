@@ -648,13 +648,13 @@ Beispiel:
 **********************************************************************************************
 Handler: http://dbox/control/getbouquet
 
-Parameter: Bouquet Nr.
+Parameter: Bouquet Nr. und TV|RADIO
 Rückgabe:
 
 Es werden alle Sender des Bouquets zurückgeliefert
 
 Beispiel:
->>>http://dbox/control/getbouquet?1
+>>>http://dbox/control/getbouquet?bouquet=1&mode=TV
 1 93754 ARD-Online-Kanal
 2 93742 B1 Berlin
 3 93737 EinsExtra
