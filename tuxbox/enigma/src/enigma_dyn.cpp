@@ -3215,7 +3215,7 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	int eventid;
 	sscanf(eventID.c_str(), "%x", &eventid);
 	// printf("[CHANGETIMER] start: %d.%d. - %d:%d, end: %d.%d. - %d:%d\n", start.tm_mday, start.tm_mon, start.tm_hour, start.tm_min,
-									end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
+	//								end.tm_mday, end.tm_mon, end.tm_hour, end.tm_min);
 
 	EITEvent evt;
 	evt.start_time = eventStartTime;
