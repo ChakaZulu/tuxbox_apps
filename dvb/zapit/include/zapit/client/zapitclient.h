@@ -289,7 +289,7 @@ class CZapitClient:public CBasicClient
 	bool startScan();
 
 	/* query if ts-scan is ready - response gives status */
-	bool isScanReady(unsigned int &satellite, unsigned int &transponder, unsigned int &services );
+	bool isScanReady(unsigned int &satellite, unsigned int &processed_transponder, unsigned int &transponder, unsigned int &services );
 
 	/* query possible satellits*/
 	void getScanSatelliteList( SatelliteList& satelliteList );

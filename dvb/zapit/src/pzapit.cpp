@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.41 2003/01/30 19:15:49 obi Exp $
+ * $Id: pzapit.cpp,v 1.42 2003/03/03 23:24:42 mws Exp $
  *
  * simple commandline client for zapit
  *
@@ -414,14 +414,15 @@ int main (int argc, char** argv)
 	if (scan)
 	{
 		unsigned int satellite;
+		unsigned int processed_transponder;
 		unsigned int transponder;
 		unsigned int services;
-
+		
 		zapit.startScan();
 
-		while (zapit.isScanReady(satellite, transponder, services) == false)
+		while (zapit.isScanReady(satellite, processed_transponder, transponder, services) == false)
 		{
-			std::cout << "satellite: " << satellite << ", transponder: " << transponder << ", services: " << services << std::endl;
+			std::cout << "satellite: " << satellite << ", transponder: " << processed_transponder <<", of: " << transponder << ", services: " << services << std::endl;
 			sleep(1);
 		}
 

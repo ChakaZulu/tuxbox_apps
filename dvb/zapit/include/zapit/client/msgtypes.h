@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.12 2003/03/02 22:05:16 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.13 2003/03/03 23:24:41 mws Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -288,6 +288,7 @@ class CZapitMessages
 	{
 		bool scanReady;
 		unsigned int satellite;
+		unsigned int processed_transponder;
 		unsigned int transponder;
 		unsigned int services;
 	};
