@@ -2280,22 +2280,6 @@ void eZapMain::updateProgress()
 	}
 }
 
-void eZapMain::setPlaylistPosition()
-{
-	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-	if (!handler)
-		return;
-	if (playlist->current != playlist->getConstList().end())
-		if (playlist->current->current_position != -1)
-		{
-			eDebug("setPlaylistPosition");
-			Decoder::Pause();
-			handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, playlist->current->current_position));
-			Decoder::clearScreen();
-			Decoder::Resume();
-		}
-}
-
 void eZapMain::getPlaylistPosition()
 {
 	int time=-1;
@@ -4421,13 +4405,15 @@ zap:
 
 			if (i != playlist->getList().end())
 			{
-//				eDebug("we have stored PlaylistPosition.. get this... and set..");
 				eServiceHandler *handler=eServiceInterface::getInstance()->getService();
 				if (!handler)
 					return;
 				playlist->current=i;
 				if (playlist->current->current_position != -1)
+				{
+//					eDebug("we have stored PlaylistPosition.. get this... and set..");
 					handler->serviceCommand(eServiceCommand(eServiceCommand::cmdSeekReal, playlist->current->current_position));
+				}
 			}
 			else
 				addService(service);
@@ -5744,9 +5730,6 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 		{
 			playlist->current->current_position=-1;
 			++playlist->current;
-		}
-		if (playlist->current != playlist->getConstList().end() )
-		{
 			eServiceReference &ref = *playlist->current;
 			if ( ref.path )  // is the current playlist entry a file?
 			{

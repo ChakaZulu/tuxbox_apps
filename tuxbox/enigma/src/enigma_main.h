@@ -531,7 +531,6 @@ private:
 	void updateProgress();
 	void updateServiceNum( const eServiceReference& );
 	void getPlaylistPosition();
-	void setPlaylistPosition();
 	bool handleState(int justask=0);
 #ifndef DISABLE_FILE
 	void blinkRecord();
