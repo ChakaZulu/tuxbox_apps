@@ -95,8 +95,9 @@ bool CFlashTool::readFromMTD( string filename )
 		close(fd1);
 		return false;
 	}
+	
+	filesize = CMTDInfo::getInstance()->getMTDSize(mtdDevice);
 
-/*
 	char buf[1024];
 	long fsize = filesize;
 	while(fsize>0)
@@ -115,7 +116,7 @@ bool CFlashTool::readFromMTD( string filename )
 			statusViewer->showLocalStatus(prog);
 		}
 	}
-*/
+
 	if(statusViewer)
 	{
 		statusViewer->showLocalStatus(100);

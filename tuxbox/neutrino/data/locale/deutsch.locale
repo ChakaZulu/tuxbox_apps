@@ -301,6 +301,11 @@ flashupdate.proxypassword Passwort
 flashupdate.proxypassword_hint1 Geben sie das Proxy-Passwort ein
 flashupdate.proxypassword_hint2
 flashupdate.msgbox Es wurde folgendes neues Image gefunden: %d.%d.%s\nWollen Sie diese Version jetzt herunterladen und installieren?
+flashupdate.expertfunctions Experten-Funktionen
+flashupdate.readflash ganzes Flashimage auslesen
+flashupdate.writeflash ganzes Flashimage einspielen
+flashupdate.readflashmtd einzelne Partition auslesen
+flashupdate.writeflashmtd einzelne Partition einspielen
 
 bouqueteditor.name Bouquet-Verwaltung
 bouqueteditor.delete Löschen

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.263 2002/05/08 23:57:02 McClean Exp $
+        $Id: neutrino.cpp,v 1.264 2002/05/09 00:21:07 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1048,6 +1048,22 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( new CMenuForwarder("menu.back") );
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
+
+		//experten-funktionen für mtd lesen/schreiben
+		CMenuWidget* mtdexpert = new CMenuWidget("flashupdate.expertfunctions", "softupdate.raw");
+		mtdexpert->addItem( new CMenuSeparator() );
+		mtdexpert->addItem( new CMenuForwarder("menu.back") );
+		mtdexpert->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflash") );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflash") );
+		mtdexpert->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.readflashmtd") );
+		mtdexpert->addItem( new CMenuForwarder("flashupdate.writeflashmtd") );
+
+		updateSettings->addItem( new CMenuForwarder("flashupdate.expertfunctions", true, "", mtdexpert ) );
+		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+		
+
 		//get current flash-version
 		FILE* fd = fopen("/.version", "r");
 		strcpy(g_settings.softupdate_currentversion, "1.0.0");
@@ -1085,15 +1101,15 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
 
 		CMenuOptionChooser *oj = new CMenuOptionChooser("flashupdate.updatemode", &g_settings.softupdate_mode,true);
-		oj->addOption(0, "flashupdate.updatemode_manual");
-		oj->addOption(1, "flashupdate.updatemode_internet");
+			oj->addOption(0, "flashupdate.updatemode_manual");
+			oj->addOption(1, "flashupdate.updatemode_internet");
 		updateSettings->addItem( oj );
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
 
 		CStringInputSMS*	updateSettings_proxy= new CStringInputSMS("flashupdate.proxyserver", g_settings.softupdate_proxyserver, 23,
-		                                       "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2",
-		                                       "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
+		                         "flashupdate.proxyserver_hint1", "flashupdate.proxyserver_hint2",
+		                         "abcdefghijklmnopqrstuvwxyz0123456789-.: ");
 		updateSettings->addItem( new CMenuForwarder("flashupdate.proxyserver", true, g_settings.softupdate_proxyserver, updateSettings_proxy ) );
 
 		CStringInputSMS*	updateSettings_proxyuser= new CStringInputSMS("flashupdate.proxyusername", g_settings.softupdate_proxyusername, 23,
@@ -1110,7 +1126,11 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		updateSettings->addItem( new CMenuForwarder("flashupdate.checkupdate", true, "", new CFlashUpdate() ));
 
 		service.addItem( new CMenuForwarder("servicemenu.update", true, "", updateSettings ) );
+
 	}
+
+
+
 
 }
 
@@ -2513,7 +2533,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.263 2002/05/08 23:57:02 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.264 2002/05/09 00:21:07 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	return CNeutrinoApp::getInstance()->run(argc, argv);

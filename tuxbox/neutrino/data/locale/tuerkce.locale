@@ -300,6 +300,11 @@ flashupdate.proxypassword Password
 flashupdate.proxypassword_hint1 enter the proxyserver password
 flashupdate.proxypassword_hint2
 flashupdate.msgbox Found the following new image: %d.%d.%s\nDo you want to download and install this version now?
+flashupdate.expertfunctions Expert-functions
+flashupdate.readflash Read hole image
+flashupdate.writeflash Write hole image
+flashupdate.readflashmtd Read one partition
+flashupdate.writeflashmtd Write one partition
 
 bouqueteditor.name Bouquet-Editor
 bouqueteditor.delete Delete
