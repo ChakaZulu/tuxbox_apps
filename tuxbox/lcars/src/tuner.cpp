@@ -16,6 +16,9 @@
 /*
 
 $Log: tuner.cpp,v $
+Revision 1.22  2003/01/05 22:22:09  TheDOC
+stupid drivers
+
 Revision 1.21  2003/01/05 19:28:45  TheDOC
 lcars should be old-api-compatible again
 
@@ -327,6 +330,8 @@ int device;
 
 	if (setting->boxIsCable())
 	{
+		if (frequ < 1500) // sorry, but the old drivers are buggy :(
+			return false;
 		frontp.Frequency = frequ * 100;
 		frontp.u.qam.SymbolRate = symbol * 1000;
 		frontp.u.qam.FEC_inner = getFEC(fec);
