@@ -35,6 +35,7 @@ eRCDriver::~eRCDriver()
 
 void eRCShortDriver::keyPressed(int)
 {
+	printf("KEYPRESSED\n");
 	__u16 rccode;
 	while (1)
 	{
@@ -50,13 +51,13 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 	handle=open(filename, O_RDONLY|O_NONBLOCK);
 	if (handle<0)
 	{
-		qDebug("failed to open %s", filename);
+		printf("failed to open %s\n", filename);
 		sn=0;
 	} else
 	{
-		sn=new QSocketNotifier(handle, QSocketNotifier::Read);
+		sn=new eSocketNotifier(eApp, handle, eSocketNotifier::Read);
 //		connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
-		CONNECT(sn->activated_, eRCShortDriver::keyPressed);
+		CONNECT(sn->activated, eRCShortDriver::keyPressed);
 		eRCInput::getInstance()->setFile(handle);
 	}
 }
@@ -108,7 +109,7 @@ void eRCInput::setFile(int newh)
 
 void eRCInput::addDevice(const char *id, eRCDevice *dev)
 {
-	qDebug("adding driver %s -> %x", id, dev);
+	printf("adding driver %s -> %x\n", id, dev);
 	devices.insert(std::pair<const char*,eRCDevice*>(id, dev));
 }
 
@@ -119,14 +120,14 @@ void eRCInput::removeDevice(const char *id)
 
 eRCDevice *eRCInput::getDevice(const char *id)
 {
-	qDebug("searching for %s", id);
+	printf("searching for %s\n", id);
 	std::map<const char*,eRCDevice*>::iterator i=devices.find(id);
 	if (i == devices.end())
 	{
-		qDebug("nix");
+		printf("nix\n");
 		return 0;
 	}
-	qDebug("ok, %x", i->second);
+	printf("ok, %x\n", i->second);
 	return i->second;
 }
 

@@ -387,8 +387,8 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	CONNECT(eDVB::getInstance()->gotEIT, eZapMain::gotEIT);
 	CONNECT(eDVB::getInstance()->gotSDT, eZapMain::gotSDT);
 	CONNECT(eDVB::getInstance()->gotPMT, eZapMain::gotPMT);
-	CONNECT(timeout.time_out, eZapMain::timeOut);
-	CONNECT(clocktimer.time_out, eZapMain::clockUpdate);
+	CONNECT(timeout.timeout, eZapMain::timeOut);
+	CONNECT(clocktimer.timeout, eZapMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->leaveService, eZapMain::leaveService);
 	CONNECT(eDVB::getInstance()->volumeChanged, eZapMain::updateVolume);

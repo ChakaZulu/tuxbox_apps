@@ -23,8 +23,8 @@ eEPGCache::eEPGCache():eSection(0x12, 0x50, -1, -1, SECREAD_CRC|SECREAD_NOTIMEOU
 	CONNECT(eDVB::getInstance()->switchedService, eEPGCache::enterService);
 	CONNECT(eDVB::getInstance()->leaveService, eEPGCache::stopEPG);
 	CONNECT(eDVB::getInstance()->timeUpdated, eEPGCache::timeUpdated);
-	CONNECT(zapTimer.time_out, eEPGCache::startEPG);
-	CONNECT(CleanTimer.time_out, eEPGCache::cleanLoop);
+	CONNECT(zapTimer.timeout, eEPGCache::startEPG);
+	CONNECT(CleanTimer.timeout, eEPGCache::cleanLoop);
 	instance=this;
 }
 

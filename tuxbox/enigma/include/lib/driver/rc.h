@@ -2,8 +2,7 @@
 #define __rc_h
 
 //#include <qobject.h>
-#include <qsocketnotifier.h>
-#include <qtimer.h>
+#include <ebase.h>
 #include <list>
 #include <map>
 #include <libsig_comp.h>
@@ -53,7 +52,7 @@ class eRCShortDriver: public eRCDriver
 //	Q_OBJECT
 protected:
 	int handle;
-	QSocketNotifier *sn;
+	eSocketNotifier *sn;
 /*private slots:*/
 	void keyPressed(int);
 public:

@@ -2,13 +2,13 @@
 #define __enigma_h
 
 #include <qapplication.h>
-#include <qtimer.h>
 #include "rc.h"
 #include "fb.h"
 #include "ewidget.h"
 #include "elbwindow.h"
 #include "si.h"
 #include "lcd.h"
+#include <ebase.h>
 
 class gFBDC;
 class gLCDDC;
@@ -18,7 +18,7 @@ class eService;
 struct gRGB;
 class eInit;
 
-class eZap: public QApplication, public Object
+class eZap: public eApplication
 {
 //	Q_OBJECT
 	static eZap *instance;
@@ -39,7 +39,7 @@ private:
 	eServiceSelector *serviceSelector;
 
 	eZapMain *main;
-	QTimer statusTimer;
+	eTimer statusTimer;
 public:
 	static eZap *getInstance();
 	eWidget *focus;

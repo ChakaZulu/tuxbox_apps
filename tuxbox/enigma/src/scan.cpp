@@ -67,7 +67,7 @@ tsFindInit::tsFindInit(eWidget *parent): eWidget(parent, 1)
 	
 /*	connect(&sstimer, SIGNAL(timeout()), SLOT(showSignalStrength()));
 	connect(eFrontend::fe(), SIGNAL(tunedIn(eTransponder*,int)), SLOT(tunedIn(eTransponder*,int)));*/
-	CONNECT(sstimer.time_out, tsFindInit::showSignalStrength);
+	CONNECT(sstimer.timeout, tsFindInit::showSignalStrength);
 	CONNECT(eFrontend::fe()->tunedIn, tsFindInit::tunedIn);
 	state=sInactive;
 }
@@ -311,7 +311,7 @@ tsDoScan::tsDoScan(tsFindInit *init, eWidget *parent): eWidget(parent, 1), init(
 	connect(&etatimer, SIGNAL(timeout()), SLOT(updateETA()));*/
 	CONNECT(eDVB::getInstance()->stateChanged, tsDoScan::stateChanged);
 	CONNECT(eDVB::getInstance()->eventOccured, tsDoScan::eventOccured);
-	CONNECT(etatimer.time_out, tsDoScan::updateETA);
+	CONNECT(etatimer.timeout, tsDoScan::updateETA);
 }
 
 int tsDoScan::eventFilter(const eWidgetEvent &event)

@@ -4,10 +4,10 @@
 #include <asm/types.h>
 #include <qfile.h>
 #include <qlist.h>
+#include <ebase.h>
 #include <qserversocket.h>
 #include <map>
 #include <string>
-#include <qtimer.h>
 
 class eHTTPConnection;
 class eHTTPDataSource;
@@ -16,7 +16,7 @@ class eHTTPD;
 class eHTTPGarbage: public /*Q*/Object
 {
 //	Q_OBJECT
-	QTimer garbage;
+	eTimer garbage;
 	QList<eHTTPConnection> *conn;
 	static eHTTPGarbage *instance;
 public:// slots:

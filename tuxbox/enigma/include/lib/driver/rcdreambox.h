@@ -7,7 +7,7 @@ class eRCDeviceDreambox: public eRCDevice
 {
 //	Q_OBJECT
 	int last, ccode;
-	QTimer timeout, repeattimer;
+	eTimer timeout, repeattimer;
 private:// slots:
 	void timeOut();
 	void repeat();

@@ -1,8 +1,6 @@
 #ifndef __scan_h
 #define __scan_h
 
-//#include <qobject.h>
-#include <qtimer.h>
 #include "dvb.h"
 #include "multipage.h"
 #include "ewidget.h"
@@ -42,7 +40,7 @@ class tsFindInit: public eWidget
 //	Q_OBJECT
 	eLabel *headline, *body;
 	eProgress *signalbar;
-	QTimer sstimer;
+	eTimer sstimer;
 	QList<tpPacket> packets;
 	enum
 	{
@@ -66,7 +64,7 @@ public:
 class tsDoScan: public eWidget
 {
 //	Q_OBJECT
-	QTimer etatimer;
+	eTimer etatimer;
 	eLabel *transp_found, *transp_scanned, *known_services, *eta, *dummy1, *dummy2;
 	eProgress *bar, *dummybar;
 	
@@ -85,7 +83,7 @@ public:
 	void redrawWidget();
 };
 
-class TransponderScan: public QObject
+class TransponderScan/*: public QObject*/
 {
 //	Q_OBJECT
 	eWindow *window;

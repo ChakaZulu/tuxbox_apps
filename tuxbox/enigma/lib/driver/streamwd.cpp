@@ -36,9 +36,9 @@ eStreamWatchdog::eStreamWatchdog()
 		}
 		else
 		{
-			sn=new QSocketNotifier(handle, QSocketNotifier::Read);
+			sn=new eSocketNotifier(eApp, handle, eSocketNotifier::Read);
 //			connect(sn, SIGNAL(activated(int)), SLOT(check(int)));
-			CONNECT(sn->activated_, eStreamWatchdog::check);
+			CONNECT(sn->activated, eStreamWatchdog::check);
 		}
 	}
 

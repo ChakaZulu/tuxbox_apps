@@ -2,6 +2,7 @@
 #define __ewidget_h
 
 //#include <qobject.h>
+#include <ebase.h>
 #include "epoint.h"
 #include "esize.h"
 #include "erect.h"

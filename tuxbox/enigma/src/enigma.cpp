@@ -103,7 +103,7 @@ QString eZap::getVersion()
 
 #include "gfbdc.h"
 
-eZap::eZap(int argc, char **argv): QApplication(argc, argv, 0)
+eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 {
 	int bootcount;
 	int e;

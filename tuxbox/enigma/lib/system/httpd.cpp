@@ -1,6 +1,5 @@
 //#include <qobject.h>
 #include <qfile.h>
-#include <qtimer.h>
 #include <sys/socket.h>
 #include <error.h>
 #include <errno.h>
@@ -36,7 +35,7 @@ eHTTPGarbage::eHTTPGarbage()
 	instance=this;
 	conn=0;
 //	connect(&garbage, SIGNAL(timeout()), this, SLOT(doGarbage()));
-	CONNECT(garbage.time_out, eHTTPGarbage::doGarbage);
+	CONNECT(garbage.timeout, eHTTPGarbage::doGarbage);
 }
 
 eHTTPGarbage::~eHTTPGarbage()

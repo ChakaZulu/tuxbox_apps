@@ -102,7 +102,7 @@ class eServiceNumberWidget: public eWindow
 //	Q_OBJECT
 	eNumber *number;
 	int chnum;
-	QTimer *timer;
+	eTimer *timer;
 private:// slots:
 	void selected(int*);
 	void timeout();
@@ -133,7 +133,7 @@ class eZapMain: public eWidget
 	
 	eProgress *Progress, *VolumeBar;
 
-	QTimer timeout, clocktimer;
+	eTimer timeout, clocktimer;
 
 	int cur_start, cur_duration;
 	

@@ -1,7 +1,7 @@
 #ifndef __streamwd_h
 #define __streamwd_h
 
-#include "qsocketnotifier.h"
+#include <ebase.h>
 #include <libsig_comp.h>
 #include "si.h"
 #include "dvb.h"
@@ -9,7 +9,7 @@
 class eStreamWatchdog: public Object
 {
 //	Q_OBJECT
-	QSocketNotifier* sn;
+	eSocketNotifier* sn;
 	int handle;
 	static eStreamWatchdog *instance;
 private:// slots:

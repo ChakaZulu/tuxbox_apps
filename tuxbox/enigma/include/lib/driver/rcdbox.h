@@ -7,7 +7,7 @@ class eRCDeviceDBoxOld: public eRCDevice
 {
 //	Q_OBJECT
 	int last, ccode;
-	QTimer timeout, repeattimer;
+	eTimer timeout, repeattimer;
 private:// slots:
 	void timeOut();
 	void repeat();
@@ -24,7 +24,7 @@ class eRCDeviceDBoxNew: public eRCDevice
 {
 //	Q_OBJECT
 	int last, ccode;
-	QTimer timeout, repeattimer;
+	eTimer timeout, repeattimer;
 private:// slots:
 	void timeOut();
 	void repeat();
@@ -41,7 +41,7 @@ class eRCDeviceDBoxButton: public eRCDevice
 {
 //	Q_OBJECT
 	int last;
-	QTimer repeattimer;
+	eTimer repeattimer;
 private:// slots:
 	void repeat();
 public:

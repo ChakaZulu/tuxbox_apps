@@ -31,7 +31,7 @@ class eEPGWindow: public eLBWindow
 {
 //	Q_OBJECT
 	eService* current;
-	QTimer closeTimer;
+	eTimer closeTimer;
 protected:
 	int eventFilter(const eWidgetEvent &event);
 private:// slots:

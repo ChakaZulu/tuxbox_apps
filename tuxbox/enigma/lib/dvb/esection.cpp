@@ -163,9 +163,9 @@ eSection::eSection(int pid, int tableid, int tableidext, int version, int flags,
 	notifier=0;
 	section=0;
 	lockcount=0;
-	timer=new QTimer;
+	timer=new eTimer;
 //	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
-	CONNECT(timer->time_out, eSection::timeout);
+	CONNECT(timer->timeout, eSection::timeout);
 	if (!(flags&SECREAD_NOABORT))
 		active.append(this);
 }
@@ -216,9 +216,9 @@ int eSection::setFilter(int pid, int tableid, int tableidext, int version)
 	
 	if (notifier)
 		delete notifier;
-	notifier=new QSocketNotifier(reader.getHandle(), QSocketNotifier::Read);
+	notifier=new eSocketNotifier(eApp, reader.getHandle(), eSocketNotifier::Read);
 	//connect(notifier, SIGNAL(activated(int)), SLOT(data(int)));
-	CONNECT(notifier->activated_, eSection::data);
+	CONNECT(notifier->activated, eSection::data);
 }
 
 void eSection::closeFilter()

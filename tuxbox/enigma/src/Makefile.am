@@ -2,6 +2,7 @@ INCLUDES = \
 	-I$(DRIVER)/include \
 	-I$(top_srcdir)/enigma/src/core/gui \
 	-I$(top_srcdir)/edvb/miniqt \
+	-I$(top_srcdir)/enigma/src/core/base \
 	-I$(top_srcdir)/enigma/src/core/gdi \
 	-I$(top_srcdir)/enigma/src/core/system \
 	-I$(top_srcdir)/enigma/src/core/dvb \
@@ -20,6 +21,7 @@ enigma_SOURCES = \
 
 enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/driver/libdriver.la \
+	$(top_builddir)/enigma/src/core/base/libbase.la \
 	$(top_builddir)/enigma/src/core/dvb/libdvb.la \
 	$(top_builddir)/enigma/src/core/dvb/lowlevel/liblowlevel.la \
 	$(top_builddir)/enigma/src/core/gui/libgui.la \
@@ -33,6 +35,9 @@ enigma_LDADD = \
 enigma_LDFLAGS = -rpath $(LIBDIR)/enigma
 
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
+
+$(top_builddir)/enigma/src/core/base/libbase.la:
+	$(MAKE) -C $(top_builddir)/enigma/src/core/base
 
 $(top_builddir)/enigma/src/core/driver/libdriver.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/driver

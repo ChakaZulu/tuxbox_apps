@@ -75,7 +75,7 @@ eZapLCDMain::eZapLCDMain(eWidget *parent): eWidget(parent, 0)
 	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(clockUpdate()));
 	connect(eDVB::getInstance(), SIGNAL(volumeChanged(int)), SLOT(volumeUpdate(int)));
 	connect(eDVB::getInstance(), SIGNAL(switchedService(eService*,int)), SLOT(serviceChanged(eService*,int)));*/
-	CONNECT(clocktimer.time_out, eZapLCDMain::clockUpdate);
+	CONNECT(clocktimer.timeout, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->timeUpdated, eZapLCDMain::clockUpdate);
 	CONNECT(eDVB::getInstance()->volumeChanged, eZapLCDMain::volumeUpdate);
 	CONNECT(eDVB::getInstance()->switchedService, eZapLCDMain::serviceChanged);

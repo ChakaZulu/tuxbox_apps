@@ -40,8 +40,8 @@ eRCDeviceDreambox::eRCDeviceDreambox(eRCDriver *driver): eRCDevice("Dreambox", d
 	ccode=-1;
 	rrate=30;
 	rdelay=500;
-	CONNECT(timeout.time_out, eRCDeviceDreambox::timeOut);
-	CONNECT(repeattimer.time_out, eRCDeviceDreambox::repeat);
+	CONNECT(timeout.timeout, eRCDeviceDreambox::timeOut);
+	CONNECT(repeattimer.timeout, eRCDeviceDreambox::repeat);
 }
 
 const char *eRCDeviceDreambox::getDescription() const

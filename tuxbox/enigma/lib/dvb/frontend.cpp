@@ -16,9 +16,9 @@ eFrontend* eFrontend::frontend;
 eFrontend::eFrontend(int type, const char *demod, const char *sec): type(type)
 {
 	state=stateIdle;
-	timer=new QTimer;
+	timer=new eTimer;
 //	connect(timer, SIGNAL(timeout()), SLOT(timeout()));
-	CONNECT(timer->time_out, eFrontend::timeout);
+	CONNECT(timer->timeout, eFrontend::timeout);
 	fd=::open(demod, O_RDWR);
 	if (fd<0)
 	{

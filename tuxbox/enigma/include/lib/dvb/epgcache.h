@@ -79,9 +79,9 @@ private:
 	updateMap serviceLastUpdated;
 	updateMap temp;
 
-	QTimer CleanTimer;
-	QTimer zapTimer;
-	QTimer EPGUpdate;
+	eTimer CleanTimer;
+	eTimer zapTimer;
+	eTimer EPGUpdate;
 public:/* slots:*/
 	inline void startEPG();
 	inline void stopEPG(eService* e = 0);

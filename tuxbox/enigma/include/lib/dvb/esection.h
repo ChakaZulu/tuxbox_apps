@@ -1,9 +1,7 @@
 #ifndef __esection_h
 #define __esection_h
 
-//#include <qobject.h>
-#include <qsocketnotifier.h>
-#include <qtimer.h>
+#include <ebase.h>
 #include <qlist.h>
 #include <asm/types.h>
 #include <libsig_comp.h>
@@ -30,14 +28,14 @@ class eSection: public /*Q*/Object
 //	Q_OBJECT
 	eSectionReader reader;
 	static QList<eSection> active;
-	QSocketNotifier *notifier;
+	eSocketNotifier *notifier;
 	virtual int sectionRead(__u8 *data);
 	virtual void sectionFinish(int error);
 	
 	int pid, tableid, tableidext, tableidmask;
 	int maxsec, section, flags;
 	void closeFilter();
-	QTimer *timer;
+	eTimer *timer;
 	__u8 buf[65536];
 	int lockcount;
 	int setFilter(int pid, int tableid, int tableidext, int version);

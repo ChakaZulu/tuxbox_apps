@@ -1,5 +1,6 @@
 INCLUDES = \
 	-I$(top_srcdir)/edvb/miniqt \
+	-I$(top_srcdir)/enigma/src/core/base \
 	-I$(top_srcdir)/enigma/src/core/dvb \
 	-I$(top_srcdir)/enigma/src/core/xml \
 	-I$(top_srcdir)/enigma/src/apps/enigma \

@@ -2,6 +2,7 @@
 #define __si_h
 
 #include "esection.h"
+#include <qstring.h>
 #include <qlist.h>
 #include <vector>
 #include "lowlevel/sdt.h"

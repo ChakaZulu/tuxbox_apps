@@ -225,11 +225,12 @@ int eWidget::exec()
 		if (parent)		// ... allerdings die vom parent
 			result=parent->exec();	// ... der uns auch das result gibt.
 		else
-			qApp->enter_loop();		// oder wir machen das halt selber.
+			eApp->enter_loop();		// oder wir machen das halt selber.
 		in_loop=0; // nu sind wir jedenfalls draussen.
 	}
 	event(eWidgetEvent(eWidgetEvent::execDone));
-	return result;
+	
+	return 0;/* result;*/
 }
 
 void eWidget::clear()
@@ -259,7 +260,7 @@ void eWidget::close(int res)
 		if (in_loop==0)
 			qFatal("attempt to close non-execing widget");
 		if (in_loop==1)	// nur wenn das ne echte loop ist
-			qApp->exit_loop();
+			eApp->exit_loop();
 		result=res;
 	}
 }

@@ -54,8 +54,8 @@ eRCDeviceDBoxOld::eRCDeviceDBoxOld(eRCDriver *driver): eRCDevice("DBoxOld", driv
 	ccode=-1;
 	rrate=100;
 	rdelay=300;
-	CONNECT(timeout.time_out, eRCDeviceDBoxOld::timeOut);
-	CONNECT(repeattimer.time_out, eRCDeviceDBoxOld::repeat);
+	CONNECT(timeout.timeout, eRCDeviceDBoxOld::timeOut);
+	CONNECT(repeattimer.timeout, eRCDeviceDBoxOld::repeat);
 }
 
 const char *eRCDeviceDBoxOld::getDescription() const
@@ -180,8 +180,8 @@ eRCDeviceDBoxNew::eRCDeviceDBoxNew(eRCDriver *driver): eRCDevice("DBoxNew", driv
 	ccode=-1;
 	rrate=100;
 	rdelay=400;
-	CONNECT(timeout.time_out, eRCDeviceDBoxNew::timeOut);
-	CONNECT(repeattimer.time_out, eRCDeviceDBoxNew::repeat);
+	CONNECT(timeout.timeout, eRCDeviceDBoxNew::timeOut);
+	CONNECT(repeattimer.timeout, eRCDeviceDBoxNew::repeat);
 }
 
 const char *eRCDeviceDBoxNew::getDescription() const
@@ -293,7 +293,7 @@ eRCDeviceDBoxButton::eRCDeviceDBoxButton(eRCDriver *driver): eRCDevice("DBoxButt
 	rrate=100;
 	rdelay=300;
 	last=0;
-	CONNECT(repeattimer.time_out, eRCDeviceDBoxButton::repeat);
+	CONNECT(repeattimer.timeout, eRCDeviceDBoxButton::repeat);
 }
 
 const char *eRCDeviceDBoxButton::getDescription() const

@@ -6,8 +6,6 @@
 	 sec etc.
 */
 
-//#include <qobject.h>
-#include <qtimer.h>
 #include <stdlib.h>
 
 #include <ost/dmx.h>
@@ -29,7 +27,7 @@ class eFrontend: public /*Q*/Object
 	eTransponder *transponder;
 	eFrontend(int type, const char *demod="/dev/ost/frontend0", const char *sec="/dev/ost/sec0");
 	static eFrontend *frontend;
-	QTimer *timer;
+	eTimer *timer;
 	int tries;
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,

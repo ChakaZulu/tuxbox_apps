@@ -6,7 +6,6 @@
 #include "eprogress.h"
 #include "elabel.h"
 #include "multipage.h"
-#include "qtimer.h"
 
 class eService;
 class eZapLCDMain;
@@ -31,7 +30,7 @@ class eZapLCDMain: public eWidget
 //	Q_OBJECT
 	eLabel *Clock, *ServiceName;
 	eProgress *Volume;
-	QTimer clocktimer;
+	eTimer clocktimer;
 private:// slots:
 	void clockUpdate();
 	void volumeUpdate(int);
