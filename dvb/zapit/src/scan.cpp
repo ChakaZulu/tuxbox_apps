@@ -43,7 +43,23 @@ short scan_runs;
 short curr_sat;
 int issatbox()
 {
-	return atoi(getenv("fe"));
+	FILE *fp;
+	char buffer[100];
+	int fe = -1;
+	fp = fopen("/proc/bus/dbox", "r");
+	
+	if (fp == NULL)
+		return -1;
+	
+	while (!feof(fp))
+	{
+		fgets(buffer, 100, fp);
+		sscanf(buffer, "fe=%d", &fe);
+	
+	}	
+	fclose(fp);
+	
+	return fe;
 }
 
 void get_nits(int freq, int symbolrate, int polarity, int fec,int diseq, FILE *logfd)
@@ -244,8 +260,21 @@ void *start_scanthread(void *param)
 {
   FILE *fd = NULL;
   std::string transponder;
+  int is_satbox = issatbox();
   FILE *logfd = fopen(logfile.c_str(), "w");
   
+  if (is_satbox == -1)
+  {
+  	printf("Is your dbox properly set up?\n");
+  	if (logfd!=NULL)
+  		fclose(logfd);
+  	
+  	scan_runs = 1; //start_scan is waiting till scan_runs = 1
+  	usleep(500);
+  	scan_runs = 0;
+  	pthread_exit(0);
+ }
+
   if (logfd == NULL)
   {
   	perror("Could not create logfile. Please check if /tmp exists and space is available\nCancelling scan");
@@ -259,7 +288,7 @@ void *start_scanthread(void *param)
   unsigned short do_diseqc = *(unsigned short *) (param);
 
   scan_runs = 1;
-  if (!issatbox())
+  if (!is_satbox)
     {
     	fprintf(logfd, "Scanning cable\n");
     	
