@@ -160,7 +160,7 @@ chanptr LoadServices(int mode)
   FILE *in=fopen("/etc/services.xml", "r");
   if (!in)
     {
-      perror("services.xml");
+      perror("/etc/services.xml");
       return NULL;
     }
   
