@@ -5073,8 +5073,6 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 	}
 	case eServiceEvent::evtAddNewAudioStreamId:
 		eDebug("case eServiceEvent::evtAddNewAudioStreamId:.. %02x", event.param );
-		ButtonYellowDis->hide();
-		ButtonYellowEn->show();
 		flags|=ENIGMA_AUDIO_PS;
 		audioselps.add(event.param);
 		eServiceHandler *handler=eServiceInterface::getInstance()->getService();
@@ -5099,10 +5097,12 @@ void eZapMain::handleServiceEvent(const eServiceEvent &event)
 			Decoder::Resume(false);
 		}
 // new audio stream_id found.. when this is our saved stream_id.. then change
-		if ( audioselps.getCount() > 3 && audioStreamID
-			&& audioStreamID == (unsigned int)event.param )
+		if ( audioselps.getCount() > 3 )
 		{
-			handler->setAudioStream(event.param);
+			ButtonYellowDis->hide();
+			ButtonYellowEn->show();
+			if ( audioStreamID && audioStreamID == (unsigned int)event.param )
+				handler->setAudioStream(event.param);
 		}
 		break;
 #endif // DISABLE_FILE
@@ -5297,17 +5297,6 @@ void eZapMain::startService(const eServiceReference &_serviceref, int err)
 			ButtonGreenEn->hide();
 			ButtonGreenDis->show();
 		}
-
-		if (flags&ENIGMA_AUDIO)
-		{
-			ButtonYellowDis->hide();
-			ButtonYellowEn->show();
-		}
-		else
-		{
-			ButtonYellowEn->hide();
-			ButtonYellowDis->show();
-		}
 	}
 #ifndef DISABLE_FILE
 	else
@@ -5442,6 +5431,12 @@ void eZapMain::gotPMT()
 	for (ePtrList<PMTEntry>::iterator it(sapi->videoStreams); it != sapi->videoStreams.end(); ++it)
 		videosel.add(*it);
 
+	if (sapi->audioStreams.size()>1)
+	{
+		ButtonYellowDis->hide();
+		ButtonYellowEn->show();
+	}
+
 	if (sapi->audioStreams.size())
 		flags|=ENIGMA_AUDIO;
 	else
@@ -5477,7 +5472,10 @@ void eZapMain::leaveService()
 	ButtonYellowDis->show();
 	ButtonYellowEn->hide();
 
-	flags&=~(ENIGMA_NVOD|ENIGMA_SUBSERVICES|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);
+	if ( eDVB::getInstance()->recorder && eDVB::getInstance()->recorder->recRef.getServiceType() == 7 )
+		flags&=~(ENIGMA_NVOD|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);	
+	else
+		flags&=~(ENIGMA_NVOD|ENIGMA_SUBSERVICES|ENIGMA_AUDIO|ENIGMA_AUDIO_PS|ENIGMA_VIDEO);
 
 	ChannelName->setText("");
 //	ChannelNumber->setText("");

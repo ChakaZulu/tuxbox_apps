@@ -17,7 +17,9 @@
 #include <lib/system/init_num.h>
 
 enigmaCI::enigmaCI()
+	:ci_messages(eApp,1), ci2_messages(eApp,1)
 {
+	CONNECT(ci_messages.recv_msg, enigmaCI::updateCIinfo );
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
 	DVBCI=eDVB::getInstance()->DVBCI;
@@ -28,6 +30,7 @@ enigmaCI::enigmaCI()
 		move(ePoint(160, 90));
 		cresize(eSize(350, 330));
 		DVBCI2=eDVB::getInstance()->DVBCI2;
+		CONNECT(ci2_messages.recv_msg, enigmaCI::updateCI2info );
 	}
 	else
 	{
@@ -111,12 +114,12 @@ enigmaCI::enigmaCI()
 	status->resize( eSize( clientrect.width(), 50) );
 	status->loadDeco();
 
-	CONNECT(DVBCI->ci_progress, enigmaCI::updateCIinfo);
+	CONNECT(DVBCI->ci_progress, enigmaCI::gotCIinfoText);
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
 
 	if( eSystemInfo::getInstance()->hasCI() > 1 )
 	{
-		CONNECT(DVBCI2->ci_progress, enigmaCI::updateCI2info);
+		CONNECT(DVBCI2->ci_progress, enigmaCI::gotCI2infoText);
 		DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::init));
 	}
 }
@@ -132,13 +135,27 @@ void enigmaCI::handleTwoServicesChecked(int val)
 	eConfig::getInstance()->setKey("/ezap/ci/handleTwoServices", val);
 }
 
-void enigmaCI::updateCIinfo(const char *buffer)
+void enigmaCI::gotCIinfoText(const char *text)
+{
+	// called from CI thread !!
+	if (text)
+		ci_messages.send(text);
+}
+
+void enigmaCI::gotCI2infoText(const char *text)
+{
+	// called from CI2 thread !!
+	if (text)
+		ci2_messages.send(text);
+}
+
+void enigmaCI::updateCIinfo(const char * const &buffer)
 {
 	eDebug("new info %s",buffer);
 	app->setText(buffer);
 }
 
-void enigmaCI::updateCI2info(const char *buffer)
+void enigmaCI::updateCI2info(const char * const &buffer)
 {
 	eDebug("new info %s",buffer);
 	app2->setText(buffer);

@@ -21,7 +21,8 @@ class enigmaCI: public eWindow
 	eStatusBar *status;
 	eDVBCI *DVBCI;
 	eDVBCI *DVBCI2;
-
+	eFixedMessagePump<const char*> ci_messages;
+	eFixedMessagePump<const char*> ci2_messages;
 private:
 	void handleTwoServicesChecked(int);
 	void okPressed();
@@ -31,8 +32,10 @@ private:
 	void reset2Pressed();
 	void init2Pressed();
 	void app2Pressed();
-	void updateCIinfo(const char*);
-	void updateCI2info(const char*);
+	void gotCIinfoText(const char*);
+	void gotCI2infoText(const char*);
+	void updateCIinfo(const char* const&);
+	void updateCI2info(const char* const&);
 public:
 	enigmaCI();
 	~enigmaCI();
