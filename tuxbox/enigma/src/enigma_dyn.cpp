@@ -3492,9 +3492,7 @@ static eString wap_web_root(eString request, eString dirpath, eString opts, eHTT
 		if (!(current_service.flags&eServiceReference::isDirectory))	// is playable
 			eZapMain::getInstance()->playService(current_service, eZapMain::psSetMode|eZapMain::psDontAdd);
 
-		result = readFile(TEMPLATE_DIR + "wap.tmp");
-		result = getEITC2(result);
-		result.strReplace("#SERVICE#", getCurService());
+		result = "<?xml version=\"1.0\"?><!DOCTYPE wml PUBLIC \"-//WAPFORUM//DTD WML 1.1//EN\" \"http://www.wapforum.org/DTD/wml_1.1.xml\"><wml><card title=\"Info\"><p>Zap complete.</p></card></wml>";
 	}
 	else
 	if (mode == "epg")
