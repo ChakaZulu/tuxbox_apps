@@ -1,5 +1,5 @@
 /*
-$Id: dmx_sect.c,v 1.5 2003/05/28 01:35:01 obi Exp $
+$Id: dmx_sect.c,v 1.6 2003/10/16 19:02:28 rasc Exp $
 
  -- (c) 2001 rasc
  --  Sections Streams
@@ -10,6 +10,11 @@ $Id: dmx_sect.c,v 1.5 2003/05/28 01:35:01 obi Exp $
 
 
 $Log: dmx_sect.c,v $
+Revision 1.6  2003/10/16 19:02:28  rasc
+some updates to dvbsnoop...
+- small bugfixes
+- tables updates from ETR 162
+
 Revision 1.5  2003/05/28 01:35:01  obi
 fixed read() return code handling
 
@@ -50,12 +55,25 @@ int  doReadSECT (OPTION *opt)
   u_char  buf[SECT_BUF_SIZE]; /* data buffer */
   long    count;
   int     i;
+  char    *f;
+  int     openMode;
+  int     dmxMode;
 
 
 
+  if (opt->inpPidFile) {
+  	f        = opt->inpPidFile;
+  	openMode = O_RDONLY;
+        dmxMode  = 0;
+  } else {
+  	f        = opt->devDemux;
+  	openMode = O_RDWR;
+        dmxMode  = 1;
+  }
 
-  if((fd = open(opt->devDemux,O_RDWR)) < 0){
-      perror(opt->devDemux);
+
+  if((fd = open(f,openMode)) < 0){
+      perror(f);
       return -1;
   }
 
@@ -64,22 +82,22 @@ int  doReadSECT (OPTION *opt)
    -- init demux
   */
 
-{
-  struct dmx_sct_filter_params flt;
-  memset (&flt, 0, sizeof (struct dmx_sct_filter_params));
-  flt.pid = opt->pid;
-  flt.filter.filter[0] = opt->filter;
-  flt.filter.mask[0] = opt->mask;
-  flt.timeout = 60000;
-  flt.flags = DMX_IMMEDIATE_START;
-  if (opt->crc) flt.flags |= DMX_CHECK_CRC;
+  if (dmxMode) {
+    struct dmx_sct_filter_params flt;
+    memset (&flt, 0, sizeof (struct dmx_sct_filter_params));
+    flt.pid = opt->pid;
+    flt.filter.filter[0] = opt->filter;
+    flt.filter.mask[0] = opt->mask;
+    flt.timeout = 60000;
+    flt.flags = DMX_IMMEDIATE_START;
+    if (opt->crc) flt.flags |= DMX_CHECK_CRC;
 
-  if ((i=ioctl (fd, DMX_SET_FILTER, &flt)) < 0) {
-    perror ("DMX_SET_FILTER failed: ");
-    return -1;
+    if ((i=ioctl (fd, DMX_SET_FILTER, &flt)) < 0) {
+      perror ("DMX_SET_FILTER failed: ");
+      return -1;
+    }
+
   }
-
-}
 
 
 
@@ -95,15 +113,13 @@ int  doReadSECT (OPTION *opt)
 
     n = read(fd,buf,sizeof(buf));
 
-    /*
-      -- error ?
-    */
-
-    if (n == -1)
-	perror("read");
-
-    if (n <= 0)
-	continue;
+    // -- error or eof?
+    if (n == -1) perror("read");
+    if (n < 0)  continue;
+    if (n == 0) {
+	if (dmxMode) continue;	// dmxmode = no eof!
+	else break;		// filemode eof 
+    }
 
 
 
@@ -159,8 +175,10 @@ int  doReadSECT (OPTION *opt)
     -- Stop Demux
   */
 
+  if (dmxMode) {
     ioctl (fd, DMX_SET_FILTER, 0);
     ioctl (fd, DMX_STOP, 0);
+  }
 
 
   close(fd);

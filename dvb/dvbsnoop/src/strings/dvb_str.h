@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.7 2003/07/08 19:59:50 rasc Exp $ 
+$Id: dvb_str.h,v 1.8 2003/10/16 19:02:28 rasc Exp $ 
 
   dvbsnoop
   (c) Rainer Scherg 2001-2003
@@ -8,6 +8,11 @@ $Id: dvb_str.h,v 1.7 2003/07/08 19:59:50 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.8  2003/10/16 19:02:28  rasc
+some updates to dvbsnoop...
+- small bugfixes
+- tables updates from ETR 162
+
 Revision 1.7  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -15,6 +20,7 @@ trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18
 
 */
 
+char *dvbstrBouquetTable_ID (u_int i);
 char *dvbstrStreamContent_Component_TYPE (u_int i);
 char *dvbstrTableID (u_int id);
 char *dvbstrMPEGDescriptorTAG (u_int tag);
@@ -33,6 +39,7 @@ char *dvbstrStream_TYPE(u_int tag);
 char *dvbstrAudio_TYPE(u_int tag);
 char *dvbstrCASystem_ID(u_int id);
 char *dvbstrDataBroadcast_ID(u_int flag);
+char *dvbstrOriginalNetwork_ID (u_int i);
 char *dvbstrNetworkIdent_ID(u_int id);
 char *dvbstrBroadcast_ID(u_int id);
 char *dvbstrTeletext_TYPE(u_int id);
@@ -75,6 +82,9 @@ char *dvbstrPESstream_ID(u_int id);
 char *dvbstrPESscrambling_ctrl_TYPE(u_int id);
 
 
+/* -- Div Stuff */
+
+char *dvbstrCountryCode_ID (u_int i);
 
 // Todo: 
 // Bouquet IDs (ETR 162)

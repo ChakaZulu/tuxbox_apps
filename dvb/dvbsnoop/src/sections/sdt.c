@@ -1,5 +1,5 @@
 /*
-$Id: sdt.c,v 1.3 2002/08/17 20:36:12 obi Exp $
+$Id: sdt.c,v 1.4 2003/10/16 19:02:29 rasc Exp $
 
    -- SDT section 
    -- Service Description Table
@@ -9,6 +9,11 @@ $Id: sdt.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
 
 $Log: sdt.c,v $
+Revision 1.4  2003/10/16 19:02:29  rasc
+some updates to dvbsnoop...
+- small bugfixes
+- tables updates from ETR 162
+
 Revision 1.3  2002/08/17 20:36:12  obi
 no more compiler warnings
 
@@ -117,7 +122,7 @@ void decode_SDT (u_char *b, int len)
  out_SB_NL (3,"Last_Section_number: ",s.last_section_number);
 
  out_S2W_NL (3,"Original_network_ID:  ",s.original_network_id,
-      dvbstrNetworkIdent_ID(s.original_network_id)); 
+      dvbstrOriginalNetwork_ID(s.original_network_id)); 
  out_SB_NL (6,"reserved_4: ",s.reserved_4);
 
 

@@ -1,5 +1,5 @@
 /*
-   (c) rasc Rainer.Scherg@t-online.de
+   (c) rasc 
 
 
 */

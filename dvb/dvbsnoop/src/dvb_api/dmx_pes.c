@@ -1,5 +1,5 @@
 /*
-$Id: dmx_pes.c,v 1.6 2003/05/28 01:35:01 obi Exp $
+$Id: dmx_pes.c,v 1.7 2003/10/16 19:02:27 rasc Exp $
 
  -- (c) 2001 rasc
  -- PE Streams
@@ -10,6 +10,11 @@ $Id: dmx_pes.c,v 1.6 2003/05/28 01:35:01 obi Exp $
 
 
 $Log: dmx_pes.c,v $
+Revision 1.7  2003/10/16 19:02:27  rasc
+some updates to dvbsnoop...
+- small bugfixes
+- tables updates from ETR 162
+
 Revision 1.6  2003/05/28 01:35:01  obi
 fixed read() return code handling
 
@@ -54,45 +59,58 @@ int  doReadPES (OPTION *opt)
   u_char  buf[READ_BUF_SIZE]; /* data buffer */
   long    count;
   int     i;
+  char    *f;
+  int     openMode;
+  int     dmxMode;
 
 
 
+  if (opt->inpPidFile) {
+  	f        = opt->inpPidFile;
+  	openMode = O_RDONLY;
+        dmxMode  = 0;
+  } else {
+  	f        = opt->devDemux;
+  	openMode = O_RDWR;
+        dmxMode  = 1;
+  }
 
 
-  if((fd = open(opt->devDemux,O_RDWR)) < 0){
-      perror(opt->devDemux);
+  if((fd = open(f,openMode)) < 0){
+      perror(f);
       return -1;
   }
-  
+
+
 
 
   /*
    -- init demux
   */
 
-{
-  struct dmx_pes_filter_params flt;
+  if (dmxMode) {
+    struct dmx_pes_filter_params flt;
 
-  ioctl (fd,DMX_SET_BUFFER_SIZE, PES_BUF_SIZE);
-  memset (&flt, 0, sizeof (struct dmx_pes_filter_params));
+    ioctl (fd,DMX_SET_BUFFER_SIZE, PES_BUF_SIZE);
+    memset (&flt, 0, sizeof (struct dmx_pes_filter_params));
 
-  flt.pid = opt->pid;
-  flt.input  = DMX_IN_FRONTEND;
-  flt.output = DMX_OUT_TAP;
-  flt.pes_type = DMX_PES_OTHER;
-  flt.flags = 0;
+    flt.pid = opt->pid;
+    flt.input  = DMX_IN_FRONTEND;
+    flt.output = DMX_OUT_TAP;
+    flt.pes_type = DMX_PES_OTHER;
+    flt.flags = 0;
 
-  if ((i=ioctl(fd,DMX_SET_PES_FILTER,&flt)) < 0) {
-    perror ("DMX_SET_PES_FILTER failed: ");
-    return -1;
+    if ((i=ioctl(fd,DMX_SET_PES_FILTER,&flt)) < 0) {
+      perror ("DMX_SET_PES_FILTER failed: ");
+      return -1;
+    }
+
+    if ((i=ioctl(fd,DMX_START,&flt)) < 0) {
+      perror ("DMX_START failed: ");
+      return -1;
+    }
+
   }
-
-  if ((i=ioctl(fd,DMX_START,&flt)) < 0) {
-    perror ("DMX_START failed: ");
-    return -1;
-  }
-
-}
 
 
 
@@ -122,16 +140,13 @@ int  doReadPES (OPTION *opt)
     }
 
 
-    /*
-      -- error ?
-    */
-
-    if (n == -1)
-	perror("read");
-    
-    if (n <= 0)
-        continue;
-
+    // -- error or eof?
+    if (n == -1) perror("read");
+    if (n < 0)  continue;
+    if (n == 0) {
+	if (dmxMode) continue;	// dmxmode = no eof!
+	else break;		// filemode eof 
+    }
 
 
     count ++;
@@ -185,9 +200,10 @@ int  doReadPES (OPTION *opt)
   /*
     -- Stop Demux
   */
-
+  if (dmxMode) {
     ioctl (fd, DMX_SET_FILTER, 0);
     ioctl (fd, DMX_STOP, 0);
+  }
 
 
   close(fd);

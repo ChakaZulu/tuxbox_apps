@@ -1,14 +1,19 @@
 /*
-$Id: helper.c,v 1.9 2003/06/24 23:51:03 rasc Exp $
+$Id: helper.c,v 1.10 2003/10/16 19:02:29 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
  -- mainly for me to learn the dvb streams
 
- -- (c) rasc rainer.Scherg@t-online.de
+ -- (c) rasc
 
 
 $Log: helper.c,v $
+Revision 1.10  2003/10/16 19:02:29  rasc
+some updates to dvbsnoop...
+- small bugfixes
+- tables updates from ETR 162
+
 Revision 1.9  2003/06/24 23:51:03  rasc
 bugfixes and enhancements
 
@@ -96,8 +101,18 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
 u_char *getISO639_3 (u_char *str, u_char *buf)
 
 {
+  int i;
+
   strncpy (str, buf, 3);
   *(str+3) = '\0';
+
+  // secure print of string
+  for (i=0; i<3; i++) {
+     if (!isprint(*(str+i))) {
+	     *(str+i) = '.';
+     }
+  }
+  
   return str;
 }
 

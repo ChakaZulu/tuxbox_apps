@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.1 2003/07/08 19:59:50 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.2 2003/10/16 19:02:28 rasc Exp $ 
 
 
   dvbsnoop
@@ -14,6 +14,11 @@ $Id: dvb_descriptor.c,v 1.1 2003/07/08 19:59:50 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.2  2003/10/16 19:02:28  rasc
+some updates to dvbsnoop...
+- small bugfixes
+- tables updates from ETR 162
+
 Revision 1.1  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -682,6 +687,7 @@ void descriptorDVB_CountryAvail  (u_char *b)
  indent (+1);
  while (len > 0) {
     strncpy (country_code, b, 3);
+    *(country_code+3) = '\0';
     b   += 3;
     len -= 3;
 
@@ -742,7 +748,7 @@ void descriptorDVB_Linkage (u_char *b)
 
  out_SW_NL  (4,"Transport_stream_ID: ",d.transport_stream_id);
  out_S2W_NL (4,"Original_network_ID: ",d.original_network_id,
-	dvbstrNetworkIdent_ID(d.original_network_id));
+	dvbstrOriginalNetwork_ID(d.original_network_id));
  out_S2W_NL (4,"Service_ID: ",d.service_id,
       " --> refers to PMS program_number");
  out_S2B_NL (4,"Linkage_type: ",d.linkage_type,
@@ -849,7 +855,7 @@ void descriptorDVB_NVOD_Reference  (u_char *b)
 
     out_SW_NL  (4,"Transport_stream_ID: ",d2.transport_stream_id);
     out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
-	  dvbstrNetworkIdent_ID(d2.original_network_id));
+	  dvbstrOriginalNetwork_ID(d2.original_network_id));
     out_S2W_NL (4,"Service_ID: ",d2.service_id,
         " --> refers to PMS program_number");
     out_NL (4);
@@ -1299,8 +1305,7 @@ void descriptorDVB_Mosaic  (u_char *b)
 	d2.bouquet_id		 = getBits (b, 0, 0, 16);
 	b    += 2;
 	len1 -= 2;
-	out_SW_NL (4,"Bouquet_ID: ",d2.bouquet_id);
-//$$$ do bouquet_id
+	out_S2W_NL (4,"Bouquet_ID: ",d2.bouquet_id,dvbstrBouquetTable_ID(d2.bouquet_id));
 	break;
 
       case 0x02:
@@ -1314,7 +1319,7 @@ void descriptorDVB_Mosaic  (u_char *b)
 
  	out_SW_NL  (4,"Transport_stream_ID: ",d2.transport_stream_id);
 	out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
-	    dvbstrNetworkIdent_ID(d2.original_network_id));
+	    dvbstrOriginalNetwork_ID(d2.original_network_id));
 	out_S2W_NL (4,"Service_ID: ",d2.service_id,
           " --> refers to PMS program_number");
 
@@ -2221,9 +2226,8 @@ void descriptorDVB_PrivateDataSpecifier (u_char *b)
 
  d.private_data_specifier	 = getBits (b, 0, 16, 32);
 
- 
- out_SL_NL (4,"Private_data_specifier: ",d.private_data_specifier);
- // $$$$$  ref to table ?? todo
+ out_S2L_NL (4,"PrivateDataSpecifier: ",d.private_data_specifier,
+	dvbstrPrivateDataSpecifier_ID( d.private_data_specifier) );
 
 }
 
@@ -2267,7 +2271,7 @@ void descriptorDVB_ServiceMove  (u_char *b)
 
 
   out_S2W_NL (4,"New_original_network_ID: ",d.new_original_network_id,
-	dvbstrNetworkIdent_ID(d.new_original_network_id));
+	dvbstrOriginalNetwork_ID(d.new_original_network_id));
   out_SW_NL  (4,"New_transport_stream_ID: ",d.new_transport_stream_id);
   out_SW_NL (4,"Service_ID: ",d.new_service_id);
 
@@ -3001,7 +3005,7 @@ void descriptorDVB_AnnouncementSupport (u_char *b)
        len -= 7;
 
        out_S2W_NL (4,"Original_network_ID: ",d2.original_network_id,
-           dvbstrNetworkIdent_ID(d2.original_network_id));
+           dvbstrOriginalNetwork_ID(d2.original_network_id));
        out_SW_NL  (4,"Transport_stream_ID: ",d2.transport_stream_id);
        out_SW_NL  (4,"Service_ID: ",d2.service_id);
        out_SB_NL  (4,"Component_tag: ",d2.component_tag);

@@ -1,5 +1,5 @@
 /*
-$Id: bat.c,v 1.4 2002/08/17 20:36:12 obi Exp $
+$Id: bat.c,v 1.5 2003/10/16 19:02:26 rasc Exp $
 
    -- BAT section
    -- Bouquet Allocation Table
@@ -9,6 +9,11 @@ $Id: bat.c,v 1.4 2002/08/17 20:36:12 obi Exp $
 
 
 $Log: bat.c,v $
+Revision 1.5  2003/10/16 19:02:26  rasc
+some updates to dvbsnoop...
+- small bugfixes
+- tables updates from ETR 162
+
 Revision 1.4  2002/08/17 20:36:12  obi
 no more compiler warnings
 
@@ -108,8 +113,7 @@ void decode_BAT (u_char *b, int len)
  out_SB_NL (6,"reserved_1: ",t.reserved_1);
  out_SB_NL (6,"reserved_2: ",t.reserved_2);
  out_SW_NL (5,"Section_length: ",t.section_length);
- out_SW_NL (3,"Bouquet_ID: ",t.bouquet_id);
- // ETR 162  $$$ ToDo bouquet_id
+ out_S2W_NL (3,"Bouquet_ID: ",t.bouquet_id,dvbstrBouquetTable_ID(t.bouquet_id));
  out_SB_NL (6,"reserved_3: ",t.reserved_3);
  out_SB_NL (3,"Version_number: ",t.version_number);
  out_SB_NL (3,"Current_next_indicator: ",t.current_next_indicator);
@@ -155,7 +159,7 @@ void decode_BAT (u_char *b, int len)
    out_NL (3);
    out_SW_NL  (3,"Transport_stream_ID: ",t2.transport_stream_id);
    out_S2W_NL (3,"Original_network_ID: ",t2.original_network_id,
-        dvbstrNetworkIdent_ID(t2.original_network_id));
+        dvbstrOriginalNetwork_ID(t2.original_network_id));
    out_SB_NL  (6,"reserved_1: ",t2.reserved_1);
    out_SW_NL  (5,"Transport_descriptors_length: ",
         t2.transport_descriptors_length);
