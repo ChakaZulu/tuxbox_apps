@@ -203,11 +203,15 @@ class CMenuOptionChooser : public CMenuItem
 
 	public:
 		CMenuOptionChooser(){}
-
 		CMenuOptionChooser(string OptionName, int* OptionValue, bool Active = false, CChangeObserver* Observ = NULL, bool Localizing= true);
 		~CMenuOptionChooser();
 
+
 		void addOption(int key, string value);
+		void removeAllOptions();
+		void setOptionValue(int val);
+		int getOptionValue();
+
 		int paint(bool selected);
 		int getHeight()
 		{

@@ -323,6 +323,27 @@ void CMenuOptionChooser::addOption(int key, string value)
 	options.insert(options.end(), tmp);
 }
 
+void CMenuOptionChooser::removeAllOptions()
+{
+	for(unsigned int count=0;count<options.size();count++)
+	{
+		keyval* kv = options[count];
+		delete kv;
+	}
+	options.clear();
+}
+
+void CMenuOptionChooser::setOptionValue(int val)
+{
+	*optionValue = val;
+}
+
+int CMenuOptionChooser::getOptionValue()
+{
+	return *optionValue;
+}
+
+
 int CMenuOptionChooser::exec(CMenuTarget*)
 {
 	for(unsigned int count=0;count<options.size();count++)
