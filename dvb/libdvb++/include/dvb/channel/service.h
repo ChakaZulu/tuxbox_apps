@@ -1,5 +1,5 @@
 /*
- * $Id: service.h,v 1.1 2003/07/17 01:07:12 obi Exp $
+ * $Id: service.h,v 1.2 2004/02/13 16:18:23 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -24,7 +24,7 @@
 
 #include <string>
 #include <map>
-#include <dvb/descriptor/service_descriptor.h>
+#include <dvbsi++/service_descriptor.h>
 
 class Service
 {

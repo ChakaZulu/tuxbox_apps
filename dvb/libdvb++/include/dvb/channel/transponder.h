@@ -1,5 +1,5 @@
 /*
- * $Id: transponder.h,v 1.1 2003/07/17 01:07:12 obi Exp $
+ * $Id: transponder.h,v 1.2 2004/02/13 16:18:23 obi Exp $
  *
  * Copyright (C) 2002, 2003 Andreas Oberritter <obi@saftware.de>
  *
@@ -23,9 +23,9 @@
 #define __dvb_channel_transponder_h__
 
 #include <map>
-#include <dvb/descriptor/cable_delivery_system_descriptor.h>
-#include <dvb/descriptor/satellite_delivery_system_descriptor.h>
-#include <dvb/descriptor/terrestrial_delivery_system_descriptor.h>
+#include <dvbsi++/cable_delivery_system_descriptor.h>
+#include <dvbsi++/satellite_delivery_system_descriptor.h>
+#include <dvbsi++/terrestrial_delivery_system_descriptor.h>
 #include <dvb/types.h>
 #include "service.h"
 

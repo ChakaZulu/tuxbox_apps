@@ -9,9 +9,9 @@
  */
 
 #include <dvb/hardware/section_filter.h>
-#include <dvb/table/capmt.h>
-#include <dvb/table/pat.h>
-#include <dvb/table/pmt.h>
+#include <dvbsi++/ca_program_map_section.h>
+#include <dvbsi++/program_association_section.h>
+#include <dvbsi++/program_map_section.h>
 
 static void hexdump(unsigned char *buf, size_t len)
 {
@@ -20,7 +20,7 @@ static void hexdump(unsigned char *buf, size_t len)
 	printf("(%d)\n", len);
 }
 
-static void capmt2buf(CaProgramMapTable *capmt)
+static void capmt2buf(CaProgramMapSection *capmt)
 {
 	size_t len;
 	unsigned char buf[1024];
@@ -30,9 +30,9 @@ static void capmt2buf(CaProgramMapTable *capmt)
 	hexdump(buf, len);
 }
 
-static void pmt2capmt(ProgramMapTable *pmt, int first, int last)
+static void pmt2capmt(ProgramMapSection *pmt, int first, int last)
 {
-	CaProgramMapTable capmt(pmt, first + (2 * last), 1);
+	CaProgramMapSection capmt(pmt, first + (2 * last), 1);
 	capmt2buf(&capmt);
 }
 
@@ -42,7 +42,7 @@ static void process_pmt(const uint16_t program_number,
 	printf("program_number=%04x program_map_pid=%04x\n",
 		program_number, program_map_pid);
 
-	SectionFilter<ProgramMapTable> pmt;
+	SectionFilter<ProgramMapSection> pmt;
 	pmt.setTableIdExtension(program_number);
 	pmt.filter(program_map_pid);
 
@@ -56,14 +56,14 @@ static void process_pmt(const uint16_t program_number,
 
 	printf("pmt has %d section(s)\n", pmt.getSections()->size());
 
-	ProgramMapTableConstIterator pmtci;
+	ProgramMapSectionConstIterator pmtci;
 	for (pmtci = pmt.getSections()->begin(); pmtci != pmt.getSections()->end(); ++pmtci)
 		pmt2capmt(*pmtci, pmtci == pmt.getSections()->begin(), pmtci == pmt.getSections()->end() - 1);
 }
 
 int main(void)
 {
-	SectionFilter<ProgramAssociationTable> pat;
+	SectionFilter<ProgramAssociationSection> pat;
 	pat.filter();
 
 	while (!pat.isDone())
@@ -74,7 +74,7 @@ int main(void)
 		return 1;
 	}
 
-	ProgramAssociationTableConstIterator patci;
+	ProgramAssociationSectionConstIterator patci;
 	ProgramAssociationConstIterator paci;
 	for (patci = pat.getSections()->begin(); patci != pat.getSections()->end(); ++patci)
 		for (paci = (*patci)->getPrograms()->begin(); paci != (*patci)->getPrograms()->end(); ++paci)
