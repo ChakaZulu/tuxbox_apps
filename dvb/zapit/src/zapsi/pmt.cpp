@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.37 2003/11/21 19:59:12 alexw Exp $
+ * $Id: pmt.cpp,v 1.38 2004/03/08 16:43:34 zwen Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -19,15 +19,12 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-
-#ifdef UPDATE_PMT
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
 /* zapit */
 #include <zapit/settings.h>
-#endif
 #include <zapit/descriptors.h>
 #include <zapit/dmx.h>
 #include <zapit/debug.h>
@@ -322,7 +319,6 @@ int parse_pmt(CZapitChannel * const channel)
 	return 0;
 }
 
-#ifdef UPDATE_PMT
 int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 {
 	struct dmx_sct_filter_params dsfp;
@@ -359,4 +355,4 @@ int pmt_set_update_filter(CZapitChannel * const channel, int *fd)
 
 	return 0;
 }
-#endif
+

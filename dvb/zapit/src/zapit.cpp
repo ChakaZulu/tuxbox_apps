@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.345 2004/03/06 10:41:43 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.346 2004/03/08 16:43:32 zwen Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -25,9 +25,7 @@
 /* system headers */
 #include <csignal>
 #include <fcntl.h>
-#ifdef UPDATE_PMT
 #include <sys/poll.h>
-#endif
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -191,9 +189,8 @@ CZapitClient::responseGetLastChannel load_settings(void)
  */
 
 static uint32_t tuned_transponder_id = 0;
-#ifdef UPDATE_PMT
 static int pmt_update_fd = -1;
-#endif
+static bool update_pmt = false;
 
 int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 {
@@ -366,9 +363,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	cam->setCaPmt(thisChannel->getCaPmt());
 	saveSettings(false);
 
-#ifdef UPDATE_PMT
-	pmt_set_update_filter(thisChannel, &pmt_update_fd);
-#endif
+	if (update_pmt)
+		pmt_set_update_filter(thisChannel, &pmt_update_fd);
 
 	if (channel != thisChannel)
 		delete thisChannel;
@@ -1622,7 +1618,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.345 2004/03/06 10:41:43 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.346 2004/03/08 16:43:32 zwen Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1640,11 +1636,16 @@ int main(int argc, char **argv)
 			if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
 				close(fd);
 		}
+		else if (!strcmp(argv[i], "-u")) {
+			update_pmt=true;
+			printf("[zapit] PMT update enabled\n");
+		}
 		else {
 			fprintf(stderr,
 				"Usage: %s [-d] [-q]\n"
 				"-d : debug mode\n"
 				"-q : quiet mode\n"
+				"-u : enable update on PMT change\n"
 				"\n"
 				"Keys in config file "	CONFIGFILE ":\n"
 				"saveLastChannel" ", "
@@ -1719,34 +1720,34 @@ int main(int argc, char **argv)
 
 	leaveStandby();
 
-#ifdef UPDATE_PMT
-	while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
-		unsigned int i, pollnum = 0;
-		struct pollfd pfd[1];
+	if (update_pmt) {
+		while (zapit_server.run(parse_command, CZapitMessages::ACTVERSION, true)) {
+			unsigned int i, pollnum = 0;
+			struct pollfd pfd[1];
 
-		if (pmt_update_fd != -1) {
-			pfd[pollnum].fd = pmt_update_fd;
-			pfd[pollnum].events = (POLLIN | POLLPRI);
-			pollnum++;
-		}
+			if (pmt_update_fd != -1) {
+				pfd[pollnum].fd = pmt_update_fd;
+				pfd[pollnum].events = (POLLIN | POLLPRI);
+				pollnum++;
+			}
 
-		if (pollnum) {
-			if (poll(pfd, pollnum, 0) > 0) {
-				for (i = 0; i < pollnum; i++) {
-					if (pfd[i].fd == pmt_update_fd) {
-						zapit(channel->getChannelID(), current_is_nvod, 0);
+			if (pollnum) {
+				if (poll(pfd, pollnum, 0) > 0) {
+					for (i = 0; i < pollnum; i++) {
+						if (pfd[i].fd == pmt_update_fd) {
+							zapit(channel->getChannelID(), current_is_nvod, 0);
+						}
 					}
 				}
 			}
+			/* yuck, don't waste that much cpu time :) */
+			usleep(0);
 		}
-
-		/* yuck, don't waste that much cpu time :) */
-		usleep(0);
 	}
-#else
-	zapit_server.run(parse_command, CZapitMessages::ACTVERSION);
-#endif
-
+	else {
+		zapit_server.run(parse_command, CZapitMessages::ACTVERSION);
+	}
+	
 	enterStandby();
 
 	if (scanInputParser)
