@@ -460,11 +460,14 @@ void eEPGCache::startEPG()
 	{
 		if ( firstStart )
 		{
-			std::map<tsref,int>::iterator it = eTransponderList::getInstance()->TimeOffsetMap.find(*eDVB::getInstance()->getServiceAPI()->transponder);
+			eDVBServiceController *sapi = eDVB::getInstance()->getServiceAPI();
+			if ( !sapi || !sapi->transponder )
+				return;
+			std::map<tsref,int>::iterator it = eTransponderList::getInstance()->TimeOffsetMap.find(*sapi->transponder);
 			if ( it == eTransponderList::getInstance()->TimeOffsetMap.end() )
 			{
 //				eDebug("TRANSPONDER NOT IN TIMEOFFSETMAP");
-				/* emit */ timeNotValid( *eDVB::getInstance()->getServiceAPI()->transponder );
+				/* emit */ timeNotValid( *sapi->transponder );
 			}
 			firstStart=0;
 		}
