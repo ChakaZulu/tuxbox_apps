@@ -84,11 +84,11 @@ void CStreamInfo::paint()
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, head_string);
 	
 	ypos = y;
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+10, ypos+ hheight+1, width, head_string, COL_MENUHEAD, 0, true); // UTF-8
 
 	ypos+= hheight;
-	frameBuffer->paintBoxRel(x, ypos, width, height - hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos, width, height - hheight, COL_MENUCONTENT_PLUS_0);
 
 	ypos+= (mheight >>1);
 

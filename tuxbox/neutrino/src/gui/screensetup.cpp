@@ -201,7 +201,7 @@ void CScreenSetup::paintCoords()
 {
 	int x=15*19;
 	int y=15*16;
-	frameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y, 15*9,15*6, COL_MENUCONTENT_PLUS_0);
 	char xpos[30];
 	char ypos[30];
 	char xepos[30];
@@ -235,7 +235,7 @@ void CScreenSetup::paint()
 
 	int x=15*5;
 	int y=15*24;
-	frameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x,y, 15*23,15*4, COL_MENUCONTENT_PLUS_0);
 
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+29, 15*23, g_Locale->getText("screensetup.upperleft"), COL_MENUHEAD, 0, true); // UTF-8
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+30,y+49, 15*23, g_Locale->getText("screensetup.lowerright"), COL_MENUCONTENT, 0, true); // UTF-8

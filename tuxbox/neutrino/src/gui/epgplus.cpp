@@ -553,7 +553,7 @@ void EpgPlus::CFooter::paintButtons ( bool isStretchMode)
 		std::cout << "EpgPlus::CFooter::paintButtons1" << std::endl;
 	#endif
 
-	this->frameBuffer->paintBoxRel(this->x, this->y + this->height1 + this->height2, this->width, this->height3, COL_MENUHEAD);
+	this->frameBuffer->paintBoxRel(this->x, this->y + this->height1 + this->height2, this->width, this->height3, COL_MENUHEAD_PLUS_0);
 	#ifdef DEBUG_
 		std::cout << "EpgPlus::CFooter::paintButtons2" << std::endl;
 	#endif

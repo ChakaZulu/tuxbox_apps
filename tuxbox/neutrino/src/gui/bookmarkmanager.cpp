@@ -4,7 +4,7 @@
   Part of Movieplayer (c) 2003, 2004 by gagga
   Based on code by Zwen. Thanks.
 
-  $Id: bookmarkmanager.cpp,v 1.6 2004/03/12 20:54:26 thegoodguy Exp $
+  $Id: bookmarkmanager.cpp,v 1.7 2004/03/13 16:45:51 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -384,15 +384,25 @@ CBookmark * CBookmarkManager::getBookmark(CMenuTarget* parent)
 void CBookmarkManager::paintItem(int pos)
 {
 	int ypos = y+ theight+0 + pos*fheight*2;
-	int color;
-	if(pos % 2)
-		color = COL_MENUCONTENTDARK;
-	else
-		color	= COL_MENUCONTENT;
+	
+	uint8_t    color;
+	fb_pixel_t bgcolor;
 
-	if(liststart+pos==selected)
+	if (pos & 1)
 	{
-		color = COL_MENUCONTENTSELECTED;
+		color   = COL_MENUCONTENTDARK;
+		bgcolor = COL_MENUCONTENTDARK_PLUS_0;
+	}
+	else
+	{
+		color   = COL_MENUCONTENT;
+		bgcolor = COL_MENUCONTENT_PLUS_0;
+	}
+
+	if (liststart + pos == selected)
+	{
+		color   = COL_MENUCONTENTSELECTED;
+		bgcolor = COL_MENUCONTENTSELECTED_PLUS_0;
 	}
 
 	int real_width=width;
@@ -401,7 +411,7 @@ void CBookmarkManager::paintItem(int pos)
 		real_width-=15; //scrollbar
 	}
 	
-	frameBuffer->paintBoxRel(x,ypos, real_width, 2*fheight, color);
+	frameBuffer->paintBoxRel(x,ypos, real_width, 2*fheight, bgcolor);
 	if(liststart+pos<bookmarks.size())
 	{
 		CBookmark theBookmark = bookmarks[liststart+pos];
@@ -431,7 +441,7 @@ void CBookmarkManager::hide()
 //------------------------------------------------------------------------
 void CBookmarkManager::paintHead()
 {   
-	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintIcon("bookmarkmanager.raw",x+5,y+4);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+0, width- 45, g_Locale->getText("bookmarkmanager.name"), COL_MENUHEAD, 0, true); // UTF-8
 	frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
@@ -447,8 +457,8 @@ const struct button_label BookmarkmanagerButtons[2] =
 void CBookmarkManager::paintFoot()
 {
 	int ButtonWidth = (width - 20) / 4;
-	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD);
-	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW);
+	frameBuffer->paintBoxRel(x,y+height, width,buttonHeight, COL_MENUHEAD_PLUS_0);
+	frameBuffer->paintHLine(x, x+width,  y, COL_INFOBAR_SHADOW_PLUS_0);
 
 	if (bookmarks.empty()) {
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x+width- 1* ButtonWidth + 10, y+height);

@@ -225,14 +225,14 @@ void CScanTs::hide()
 
 void CScanTs::paintLine(int x, int * y, int width, char * txt)
 {
-	frameBuffer->paintBoxRel(x, *y, width, mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, *y, width, mheight, COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, *y + mheight, width, g_Locale->getText(txt), COL_MENUCONTENT, 0, true); // UTF-8
 	*y += mheight;
 }
 
 void CScanTs::paintLine(int x, int y, int width, char * txt)
 {
-	frameBuffer->paintBoxRel(x, y, width, mheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, y, width, mheight, COL_MENUCONTENT_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x, y + mheight, width, g_Locale->getText(txt), COL_MENUCONTENT, 0, true); // UTF-8
 }
 
@@ -240,9 +240,9 @@ void CScanTs::paint()
 {
 	ypos = y;
 	
-	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD);
+	frameBuffer->paintBoxRel(x, ypos, width, hheight, COL_MENUHEAD_PLUS_0);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(xpos1, ypos + hheight, width, g_Locale->getText("scants.head"), COL_MENUHEAD, 0, true); // UTF-8
-	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT);
+	frameBuffer->paintBoxRel(x, ypos + hheight, width, height - hheight, COL_MENUCONTENT_PLUS_0);
 	
 	frameBuffer->loadPal("radar.pal", 17, 37);
 	 

@@ -122,7 +122,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{
 			if ( show_dot )
-				frameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
+				frameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR_PLUS_0);
 			else
 				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
 			strcpy( old_timestr, timestr );
@@ -133,7 +133,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 
 			if ( !firstPaint )
 			{
-				frameBuffer->paintBoxRel(BoxEndX- time_width- 10, ChanNameY, time_width+ 10, time_height, COL_INFOBAR);
+				frameBuffer->paintBoxRel(BoxEndX- time_width- 10, ChanNameY, time_width+ 10, time_height, COL_INFOBAR_PLUS_0);
 			}
 
 			timestr[2]= 0;
@@ -141,7 +141,7 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(BoxEndX- time_left_width- 10, ChanNameY+ time_height, time_left_width, &timestr[3], COL_INFOBAR);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_CHANNAME]->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
 			if ( show_dot )
-				frameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR);
+				frameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2+2, COL_INFOBAR_PLUS_0);
 		}
 	}
 }
@@ -245,7 +245,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	int ChanNameX = BoxStartX + ChanWidth + 10;
 	int ChanNameY = BoxStartY + (ChanHeight>>1)   + 5; //oberkante schatten?
 
-       	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR);
+       	frameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
 
 	paintTime( false, true );
 
@@ -256,7 +256,7 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string & Channel, cons
 	int ChanInfoY = BoxStartY + ChanHeight+ 10;
 	ButtonWidth = (BoxEndX- ChanInfoX- ICON_OFFSET)>> 2;
 
-	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR);
+	frameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR_PLUS_0);
 
 
 	if ( showButtonBar )
@@ -489,7 +489,7 @@ void CInfoViewer::showSubchan()
 		frameBuffer->paintBackgroundBoxRel(x- borderwidth, y, borderwidth, dy);
 		frameBuffer->paintBackgroundBoxRel(x+ dx, y, borderwidth, dy);
 
-		frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT);
+		frameBuffer->paintBoxRel(x, y, dx, dy, COL_MENUCONTENT_PLUS_0);
 		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(x+10, y+ 30, dx-20, text, COL_MENUCONTENT);
 
 		if ( g_RemoteControl->director_mode )
@@ -825,14 +825,14 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 		height = g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->getHeight();
 		int xStart= BoxStartX + ChanWidth;
 
-		frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+		frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR_PLUS_0);
 
 		if ( ( info_CurrentNext.flags & CSectionsdClient::epgflags::not_broadcast ) ||
 			 ( ( calledFromEvent ) && !( info_CurrentNext.flags & ( CSectionsdClient::epgflags::has_next | CSectionsdClient::epgflags::has_current ) ) ) )
 		{
 			// no EPG available
 			ChanInfoY += height;
-			frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
+			frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR_PLUS_0);
 			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(BoxStartX + ChanWidth + 20,  ChanInfoY+height, BoxEndX- (BoxStartX + ChanWidth + 20), g_Locale->getText(gotTime?"infoviewer.noepg":"infoviewer.waittime"), COL_INFOBAR, 0, true); // UTF-8
 		}
 		else
@@ -852,7 +852,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 				ChanInfoY += height;
 
 				//info next
-				frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+				frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR_PLUS_0);
 
 				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
 				g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart,  ChanInfoY+height, duration2TextPos- xStart- 5, info_CurrentNext.next_name, COL_INFOBAR);
@@ -867,7 +867,7 @@ void CInfoViewer::show_Data( bool calledFromEvent)
 				ChanInfoY += height;
 
 				//info next
-				frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+				frameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR_PLUS_0);
 
 				if ( ( !is_nvod ) && ( info_CurrentNext.flags & CSectionsdClient::epgflags::has_next ) )
 				{
@@ -913,7 +913,7 @@ void CInfoViewer::showButton_Audio()
 								#endif
 						}
 
-                        frameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
+                        frameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR_PLUS_0);
                         g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_INFO]->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text, COL_INFOBAR, 0, true); // UTF-8
                         KillShowEPG = true;
                 };
