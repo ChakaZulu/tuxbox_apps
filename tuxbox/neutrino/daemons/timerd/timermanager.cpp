@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.21 2002/08/29 21:51:47 dirch Exp $
+	$Id: timermanager.cpp,v 1.22 2002/08/30 18:07:54 dirch Exp $
 
 	License: GPL
 
@@ -23,6 +23,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <unistd.h>
+#include <sstream>
 
 #include "timermanager.h"
 #include "debug.h"
@@ -78,6 +79,7 @@ void* CTimerManager::timerThread(void *arg)
 				{
 					event->setState(CTimerEvent::TIMERSTATE_PREANNOUNCE);
 					event->announceEvent();							// event specific announce handler
+					timerManager->saveEventsToConfig();
 				}
 			
 			if(event->alarmTime > 0 && (event->eventState == CTimerEvent::TIMERSTATE_SCHEDULED || event->eventState == CTimerEvent::TIMERSTATE_PREANNOUNCE) ) // if event wants to be fired
@@ -87,6 +89,7 @@ void* CTimerManager::timerThread(void *arg)
 					event->fireEvent();										// fire event specific handler
 					if(event->stopTime == 0)					// if event needs no stop event
 						event->setState(CTimerEvent::TIMERSTATE_HASFINISHED); 
+					timerManager->saveEventsToConfig();
 				}
 			
 			if(event->stopTime > 0 && event->eventState == CTimerEvent::TIMERSTATE_ISRUNNING  )		// check if stopevent is wanted
@@ -94,6 +97,7 @@ void* CTimerManager::timerThread(void *arg)
 				{
 					event->stopEvent();							//  event specific stop handler
 					event->setState(CTimerEvent::TIMERSTATE_HASFINISHED); 
+					timerManager->saveEventsToConfig();
 				}
 
 			if(event->eventState == CTimerEvent::TIMERSTATE_HASFINISHED)
@@ -102,12 +106,14 @@ void* CTimerManager::timerThread(void *arg)
 					event->Reschedule();
 				else
 					event->setState(CTimerEvent::TIMERSTATE_TERMINATED);
+				timerManager->saveEventsToConfig();
 			}
 
 			if(event->eventState == CTimerEvent::TIMERSTATE_TERMINATED)				// event is terminated, so delete it
 			{
 				delete pos->second;										// delete event
 				timerManager->events.erase( pos->first);				// remove from list
+				timerManager->saveEventsToConfig();
 			}
 		}
 
@@ -131,18 +137,22 @@ CTimerEvent* CTimerManager::getNextEvent()
 }
 
 //------------------------------------------------------------
-int CTimerManager::addEvent(CTimerEvent* evt)
+int CTimerManager::addEvent(CTimerEvent* evt, bool save)
 {
 	eventID++;						// increase unique event id
 	evt->eventID = eventID;
 	events[eventID] = evt;			// insert into events
+	if(save)
+	{
+	    saveEventsToConfig();
+	}
 	return eventID;					// return unique id
 }
 
 //------------------------------------------------------------
 bool CTimerManager::removeEvent(int eventID)
 {
-	if(events.find(eventID)!=events.end())	// if i have a event with this id
+        if(events.find(eventID)!=events.end())							// if i have a event with this id
 	{
 		if( (events[eventID]->eventState == CTimerEvent::TIMERSTATE_ISRUNNING) && (events[eventID]->stopTime > 0) )	
 			events[eventID]->stopEvent();	// if event is running an has stopTime 
@@ -182,6 +192,7 @@ int CTimerManager::modifyEvent(int eventID, time_t announceTime, time_t alarmTim
 		event->alarmTime = alarmTime;
 		event->stopTime = stopTime;
 		event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
+		saveEventsToConfig();
 	}
 	return eventID;
 }
@@ -198,10 +209,26 @@ int CTimerManager::rescheduleEvent(int eventID, time_t announceTime, time_t alar
 		if(event->stopTime > 0)
 			event->stopTime += stopTime;
 		event->eventState = CTimerEvent::TIMERSTATE_SCHEDULED;
+		saveEventsToConfig();
 	}
 	return eventID;
 }
 
+void CTimerManager::saveEventsToConfig()
+{
+    CConfigFile *config = new CConfigFile(',');
+    config->clear();
+    CTimerEventMap::iterator pos = events.begin();
+//    pos++;//Events start with 1
+    for(;pos != events.end();pos++)
+    {
+	    CTimerEvent *event = pos->second;
+            event->saveToConfig(config);
+    }
+    config->saveConfig(CONFIGFILE);
+    delete config;
+    
+}
 
 //------------------------------------------------------------
 //=============================================================
@@ -233,6 +260,25 @@ CTimerEvent::CTimerEvent( CTimerEventTypes evtype, int mon, int day, int hour, i
 	tmtime->tm_min = min;
 	
 	CTimerEvent(evtype, (time_t) 0, mktime(tmtime), (time_t)0, evrepeat);
+}
+//------------------------------------------------------------
+CTimerEvent::CTimerEvent(CTimerEventTypes evtype,CConfigFile *config, int iId)
+{
+   stringstream ostr;
+   ostr << iId;
+   string id=ostr.str();
+   time_t announcetime=config->getLong("ANNOUNCE_TIME_"+id);
+   time_t alarmtime=config->getLong("ALARM_TIME_"+id);
+   time_t stoptime=config->getLong("STOP_TIME_"+id);
+   CTimerEventRepeat evrepeat=(CTimerEventRepeat)config->getInt("EVENT_REPEAT_"+id);
+   eventRepeat = evrepeat;
+   eventState = TIMERSTATE_SCHEDULED; 
+   eventType = evtype;
+   announceTime = announcetime;
+   alarmTime = alarmtime;
+   stopTime = stoptime;
+   eventState = (CTimerEventStates ) config->getInt ("EVENT_STATE_"+id);
+   previousState = (CTimerEventStates) config->getInt("PREVIOUS_STATE_"+id);
 }
 //------------------------------------------------------------
 void CTimerEvent::Reschedule()
@@ -313,7 +359,33 @@ void CTimerEvent::printEvent(void)
 	}
 }
 //------------------------------------------------------------
+void CTimerEvent::saveToConfig(CConfigFile *config)
+{
+   vector<int> allIDs;
+   allIDs.clear();
+   if(config->getString ("IDS")!="")
+   {
+       // sonst bekomemn wir den bloeden 0er
+       allIDs=config->getIntVector("IDS");
+   }
 
+   allIDs.push_back(eventID);
+   //SetInt-Vector haengt komischerweise nur an, deswegen erst loeschen
+   config->setString("IDS","");
+   config->setIntVector ("IDS",allIDs);
+   
+   stringstream ostr;
+   ostr << eventID;
+   string id=ostr.str();
+   config->setInt("EVENT_TYPE_"+id, eventType);
+   config->setInt("EVENT_STATE_"+id, eventState);
+   config->setInt("PREVIOUS_STATE_"+id, previousState);
+   config->setInt("EVENT_REPEAT_"+id, eventRepeat);
+   config->setLong("ANNOUNCE_TIME_"+id, announceTime);
+   config->setLong("ALARM_TIME_"+id, alarmTime);
+   config->setLong("STOP_TIME_"+id, stopTime);
+
+}
 
 //=============================================================
 // Shutdown Event
@@ -335,6 +407,12 @@ void CTimerEvent_Shutdown::fireEvent()
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_SHUTDOWN,
 		CEventServer::INITID_TIMERD);
+}
+
+//------------------------------------------------------------
+void CTimerEvent_Shutdown::saveToConfig(CConfigFile *config)
+{
+   CTimerEvent::saveToConfig(config);
 }
 
 //=============================================================
@@ -359,9 +437,24 @@ void CTimerEvent_Sleeptimer::fireEvent()
 		CEventServer::INITID_TIMERD);
 }
 
+//------------------------------------------------------------
+void CTimerEvent_Sleeptimer::saveToConfig(CConfigFile *config)
+{
+   CTimerEvent::saveToConfig(config);
+}
+
 //=============================================================
 // Standby Event
 //=============================================================
+CTimerEvent_Standby::CTimerEvent_Standby(CConfigFile *config, int iId):
+CTimerEvent(TIMER_RECORD, config, iId)
+{
+   stringstream ostr;
+   ostr << iId;
+   string id=ostr.str();
+   standby_on = config->getLongLong ("STANDBY_ON_"+id);
+}
+//------------------------------------------------------------
 
 void CTimerEvent_Standby::announceEvent(){}
 //------------------------------------------------------------
@@ -376,10 +469,28 @@ void CTimerEvent_Standby::fireEvent()
 		CEventServer::INITID_TIMERD);
 }
 
+//------------------------------------------------------------
+void CTimerEvent_Standby::saveToConfig(CConfigFile *config)
+{
+   CTimerEvent::saveToConfig(config);
+   stringstream ostr;
+   ostr << eventID;
+   string id=ostr.str();
+   config->setBool("STANDBY_ON_"+id,standby_on);
+}
 //=============================================================
 // Record Event
 //=============================================================
-
+CTimerEvent_Record::CTimerEvent_Record(CConfigFile *config, int iId):
+CTimerEvent(TIMER_RECORD, config, iId)
+{
+   stringstream ostr;
+   ostr << iId;
+   string id=ostr.str();
+   eventInfo.epgID = config->getLongLong ("EVENT_INFO_EPG_ID_"+id);
+   eventInfo.onidSid = config->getInt("EVENT_INFO_ONID_SID_"+id);
+}
+//------------------------------------------------------------
 void CTimerEvent_Record::announceEvent()
 {
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
@@ -406,16 +517,34 @@ void CTimerEvent_Record::fireEvent()
 	dprintf("Record Timer fired\n"); 
 }
 
+//------------------------------------------------------------
+void CTimerEvent_Record::saveToConfig(CConfigFile *config)
+{
+   CTimerEvent::saveToConfig(config);
+   stringstream ostr;
+   ostr << eventID;
+   string id=ostr.str();
+   config->setLongLong ("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
+   config->setInt("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+}
 //=============================================================
 // Zapto Event
 //=============================================================
-
+CTimerEvent_Zapto::CTimerEvent_Zapto(CConfigFile *config, int iId):
+CTimerEvent(TIMER_RECORD, config, iId)
+{
+   stringstream ostr;
+   ostr << iId;
+   string id=ostr.str();
+   eventInfo.epgID = config->getLongLong ("EVENT_INFO_EPG_ID_"+id);
+   eventInfo.onidSid = config->getInt("EVENT_INFO_ONID_SID_"+id);
+}
+//------------------------------------------------------------
 void CTimerEvent_Zapto::announceEvent()
 {
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_ANNOUNCE_ZAPTO,
 		CEventServer::INITID_TIMERD);
-	dprintf("Zapto announcement\n"); 
 }
 //------------------------------------------------------------
 void CTimerEvent_Zapto::stopEvent(){}
@@ -426,13 +555,34 @@ void CTimerEvent_Zapto::fireEvent()
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 		CTimerdClient::EVT_ZAPTO,
 		CEventServer::INITID_TIMERD,
-		&eventInfo, sizeof(CTimerEvent::EventInfo));
-	dprintf("Zapto Timer fired\n"); 
- }
+		&eventInfo.onidSid,
+		sizeof(eventInfo.onidSid));
+}
 
+
+//------------------------------------------------------------
+void CTimerEvent_Zapto::saveToConfig(CConfigFile *config)
+{
+   CTimerEvent::saveToConfig(config);
+   stringstream ostr;
+   ostr << eventID;
+   string id=ostr.str();
+   config->setLongLong ("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
+   config->setInt("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
+}
 //=============================================================
 // NextProgram Event
 //=============================================================
+CTimerEvent_NextProgram::CTimerEvent_NextProgram(CConfigFile *config, int iId):
+CTimerEvent(TIMER_RECORD, config, iId)
+{
+   stringstream ostr;
+   ostr << iId;
+   string id=ostr.str();
+   eventInfo.epgID = config->getLongLong ("EVENT_INFO_EPG_ID_"+id);
+   eventInfo.onidSid = config->getInt("EVENT_INFO_ONID_SID_"+id);
+}
+//------------------------------------------------------------
 
 void CTimerEvent_NextProgram::announceEvent()
 {
@@ -453,6 +603,17 @@ void CTimerEvent_NextProgram::fireEvent()
 		CEventServer::INITID_TIMERD,
 		&eventInfo,
 		sizeof(eventInfo));
+}
+
+//------------------------------------------------------------
+void CTimerEvent_NextProgram::saveToConfig(CConfigFile *config)
+{
+   CTimerEvent::saveToConfig(config);
+   stringstream ostr;
+   ostr << eventID;
+   string id=ostr.str();
+   config->setLongLong ("EVENT_INFO_EPG_ID_"+id,eventInfo.epgID);
+   config->setInt("EVENT_INFO_ONID_SID_"+id,eventInfo.onidSid);
 }
 //=============================================================
 //=============================================================

@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.16 2002/08/29 21:51:47 dirch Exp $
+	$Id: timerdclient.cpp,v 1.17 2002/08/30 18:07:54 dirch Exp $
 
 	License: GPL
 
@@ -259,7 +259,6 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_
 
 	timerd_close();
 	return true;
-
 }
 //-------------------------------------------------------------------------
 
@@ -283,7 +282,6 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 }
 */
 //-------------------------------------------------------------------------
-
 int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat)
 {
 	dprintf("addTimerEvent(Type: %d, announce: %ld, alarm: %ld, stop: %ld repeat: %d\n",evType,announcetime,alarmtime,stoptime,evrepeat);
@@ -343,9 +341,7 @@ void CTimerdClient::removeTimerEvent( int evId)
 	send((char*)&msg, sizeof(msg));
 	send((char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
 
-	timerd_close();
-	dprintf("removed event %d\n",evId);
-	
+	timerd_close();	
 }
 //-------------------------------------------------------------------------
 
@@ -368,4 +364,5 @@ bool CTimerdClient::isTimerdAvailable()
 	}
 	timerd_close();
 }
+//-------------------------------------------------------------------------
 

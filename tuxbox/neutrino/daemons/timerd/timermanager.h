@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.h,v 1.15 2002/08/29 21:51:47 dirch Exp $
+	$Id: timermanager.h,v 1.16 2002/08/30 18:07:54 dirch Exp $
 
 	License: GPL
 
@@ -34,6 +34,10 @@
 
 //#include "timerdclient.h"
 #include "eventserver.h"
+#include "../../libconfigfile/configfile.h"
+#include "config.h"
+
+#define CONFIGFILE CONFIGDIR "/timerd.conf"
 
 using namespace std;
 
@@ -60,13 +64,13 @@ class CTimerManager
 		static CTimerManager* getInstance();
 
 		CEventServer* getEventServer() {return eventServer;};
-		int addEvent(CTimerEvent*);
+		int addEvent(CTimerEvent*,bool save = true);
 		bool removeEvent(int eventID);
 		CTimerEvent* getNextEvent();
 		bool listEvents(CTimerEventMap &Events);
 		int modifyEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
 		int rescheduleEvent(int eventID, time_t announceTime, time_t alarmTime, time_t stopTime);
-
+		void saveEventsToConfig();
 };
 
 
@@ -76,7 +80,7 @@ class CTimerEvent
 		struct EventInfo
 		{
 			unsigned long long epgID;
-			int      onidSid;
+			unsigned int      onidSid;
 		};
 		
 		enum CTimerEventRepeat 
@@ -123,6 +127,7 @@ class CTimerEvent
 
 		CTimerEvent( CTimerEventTypes evtype, int mon = 0, int day = 0, int hour = 0, int min = 0, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE);
 		CTimerEvent( CTimerEventTypes evtype, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE);
+                CTimerEvent( CTimerEventTypes evtype, CConfigFile *config, int iId);
 		
 		void setState(CTimerEventStates newstate){previousState = eventState; eventState = newstate;};
 
@@ -133,27 +138,33 @@ class CTimerEvent
 		virtual void fireEvent(){};
 		virtual void stopEvent(){};
 		virtual void announceEvent(){};
-
+                virtual void saveToConfig(CConfigFile *config);
 };
 
 class CTimerEvent_Shutdown : public CTimerEvent
 {
 	public:
 		CTimerEvent_Shutdown( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
-			CTimerEvent(TIMER_SHUTDOWN, announceTime, alarmTime, stopTime, evrepeat ){};
+                   CTimerEvent(TIMER_SHUTDOWN, announceTime, alarmTime, stopTime, evrepeat ){};
+                CTimerEvent_Shutdown(CConfigFile *config, int iId):
+                   CTimerEvent(TIMER_SHUTDOWN, config, iId){};
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
+                virtual void saveToConfig(CConfigFile *config);
 };
 
 class CTimerEvent_Sleeptimer : public CTimerEvent
 {
 	public:
 		CTimerEvent_Sleeptimer( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
-			CTimerEvent(TIMER_SLEEPTIMER, announceTime, alarmTime, stopTime,evrepeat ){};
+                   CTimerEvent(TIMER_SLEEPTIMER, announceTime, alarmTime, stopTime,evrepeat ){};
+                CTimerEvent_Sleeptimer(CConfigFile *config, int iId):
+                   CTimerEvent(TIMER_SLEEPTIMER, config, iId){};
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
+                virtual void saveToConfig(CConfigFile *config);
 };
 
 
@@ -164,9 +175,11 @@ class CTimerEvent_Standby : public CTimerEvent
 
 		CTimerEvent_Standby( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
 			CTimerEvent(TIMER_STANDBY, announceTime, alarmTime, stopTime, evrepeat){};
+                CTimerEvent_Standby(CConfigFile *config, int iId);
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
+                virtual void saveToConfig(CConfigFile *config);
 };
 
 class CTimerEvent_Record : public CTimerEvent
@@ -176,9 +189,11 @@ class CTimerEvent_Record : public CTimerEvent
 
 		CTimerEvent_Record( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
 			CTimerEvent(TIMER_RECORD, announceTime, alarmTime, stopTime, evrepeat){};
+                CTimerEvent_Record(CConfigFile *config, int iId);
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
+                virtual void saveToConfig(CConfigFile *config);
 };
 
 class CTimerEvent_NextProgram : public CTimerEvent
@@ -186,26 +201,28 @@ class CTimerEvent_NextProgram : public CTimerEvent
 	public:
 		CTimerEvent::EventInfo eventInfo;
 
-//		typedef map< int, CTimerEvent_NextProgram*> EventMap;
-//		static EventMap events;
-
 		CTimerEvent_NextProgram( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
 			CTimerEvent(TIMER_NEXTPROGRAM, announceTime, alarmTime, stopTime, evrepeat){};
+                CTimerEvent_NextProgram(CConfigFile *config, int iId);
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
+                virtual void saveToConfig(CConfigFile *config);
 };
 
 class CTimerEvent_Zapto : public CTimerEvent
 {
 	public:
+
 		CTimerEvent::EventInfo eventInfo;
 
 		CTimerEvent_Zapto( time_t announceTime, time_t alarmTime, time_t stopTime, CTimerEventRepeat evrepeat = TIMERREPEAT_ONCE) :
 			CTimerEvent(TIMER_ZAPTO, announceTime, alarmTime, stopTime, evrepeat){};
+                CTimerEvent_Zapto(CConfigFile *config, int iId);
 		virtual void fireEvent();
 		virtual void announceEvent();
 		virtual void stopEvent();
+                virtual void saveToConfig(CConfigFile *config);
 };
 
 

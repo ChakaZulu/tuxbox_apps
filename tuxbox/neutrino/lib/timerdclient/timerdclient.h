@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.14 2002/05/31 20:27:38 dirch Exp $
+	$Id: timerdclient.h,v 1.15 2002/08/30 18:07:54 dirch Exp $
 
 	License: GPL
 
@@ -126,6 +126,7 @@ class CTimerdClient
 				CTimerEvent::EventInfo eventInfo;
 				eventInfo.onidSid = onidSid;
 				eventInfo.epgID = epgID;
+				printf("[TIMERDCLIENTLIB] ONI-SID %d\n",eventInfo.onidSid );
 				return addTimerEvent(CTimerEvent::TIMER_RECORD, &eventInfo, announcetime, alarmtime, stoptime);
 			};
 

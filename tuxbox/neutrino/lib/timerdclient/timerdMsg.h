@@ -2,8 +2,8 @@
 	Timer Daemon  -   DBoxII-Project
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
-	
-	$Id: timerdMsg.h,v 1.12 2002/08/29 21:51:47 dirch Exp $
+
+	$Id: timerdMsg.h,v 1.13 2002/08/30 18:07:54 dirch Exp $
 
 	License: GPL
 
@@ -21,7 +21,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
 
 
 #ifndef __timerd__
@@ -134,8 +133,9 @@ class CTimerd
 			time_t							alarmTime;
 			time_t							announceTime;
 			time_t							stopTime;
-			unsigned int					data1;
-			unsigned int					data2;
+			unsigned int onidSid ; //only filled if applicable
+			unsigned long long epgID; //only filled if applicable
+			bool standby_on; //only filled if applicable
 		};
 		typedef std::vector<responseGetTimer> TimerList;
 
