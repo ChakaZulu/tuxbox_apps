@@ -380,7 +380,7 @@ int CMP3PlayerGui::show()
 				current=-1;
 			update=true;
 		}
-		else if( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ) && playlist.size() > 0)
+		else if( ( msg >= CRCInput::RC_1 ) && ( msg <= CRCInput::RC_9 ) && playlist.size() > 0)
 		{ //numeric zap
 			int x1=(g_settings.screen_EndX- g_settings.screen_StartX)/2 + g_settings.screen_StartX-50;
 			int y1=(g_settings.screen_EndY- g_settings.screen_StartY)/2 + g_settings.screen_StartY;
@@ -402,6 +402,14 @@ int CMP3PlayerGui::show()
 			if(msg==CRCInput::RC_ok)
 				selected=min((int)playlist.size(), val)-1;
 			update=true;
+		}
+		else if(msg==CRCInput::RC_0)
+		{
+			if(current>=0)
+			{
+				selected=current;
+				update=true;
+			}
 		}
 		else if(msg==CRCInput::RC_setup)
 		{
