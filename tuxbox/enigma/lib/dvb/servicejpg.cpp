@@ -31,7 +31,7 @@ eServiceHandlerJPG::~eServiceHandlerJPG()
 void eServiceHandlerJPG::addFile(void *node, const eString &filename)
 {
 	if (filename.right(4).upper() == ".JPG" ||
-	    filename.right(4).upper() == ".JPEG" ||
+	    filename.right(5).upper() == ".JPEG" ||
 	    filename.right(4).upper() == ".CRW" ||
 	    filename.right(4).upper() == ".GIF" ||
 	    filename.right(4).upper() == ".PNG" ||

@@ -67,7 +67,7 @@ ePictureViewer::ePictureViewer(const eString &filename)
 
 	fh_root = NULL;
 	m_scaling = COLOR;
-//	m_aspect = 4.0 / 3;
+	m_aspect = 4.0 / 3;
 	m_CurrentPic_Name = "";
 	m_CurrentPic_Buffer = NULL;
 	m_CurrentPic_X = 0;
@@ -97,9 +97,11 @@ ePictureViewer::ePictureViewer(const eString &filename)
 	eConfig::getInstance()->getKey("/picviewer/showbusysign", showbusysign);
 	showBusySign = (showbusysign == 1);
 
+#if 0
 	unsigned int v_pin8 = 0;
 	eConfig::getInstance()->getKey("/elitedvb/video/pin8", v_pin8);
 	m_aspect = (v_pin8 < 2) ? 4.0/3 : 16.0/9;
+#endif
 
 	m_busy_buffer = NULL;
 
@@ -423,7 +425,7 @@ void ePictureViewer::listDirectory(eString directory, int includesubdirs)
 				if (S_ISREG(s.st_mode))
 				{
 					if (filename.right(4).upper() == ".JPG" ||
-					    filename.right(4).upper() == ".JPEG" ||
+					    filename.right(5).upper() == ".JPEG" ||
 					    filename.right(4).upper() == ".CRW" ||
 					    filename.right(4).upper() == ".PNG" ||
 					    filename.right(4).upper() == ".BMP" ||
