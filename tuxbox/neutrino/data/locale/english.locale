@@ -755,7 +755,7 @@ movieplayer.pesplayback Play PES (Experimental)
 movieplayer.fileplayback File via VLC
 movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
-movieplayer.tshelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
+movieplayer.tshelp Red/Home Stop\nGREEN Select audio track\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.vlchelp Red/Home Stop\nGREEN Resync\nYELLOW Pause/Continue\nBLUE Create bookmark\nd-box Show progress\n1 approx. 1 minute back\n3 skip approx. 1 minute\n4 approx. 5 minutes back\n6 skip approx. 5 minutes\n7 approx. 10 minutes back\n9 skip approx. 10 minutes\nHelp: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.toomanybookmarks There are too many bookmarks.\nYou need to delete one of them first.
 movieplayer.bookmarkname Bookmarkname

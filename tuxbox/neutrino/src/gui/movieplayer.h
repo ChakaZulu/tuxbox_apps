@@ -62,7 +62,8 @@ class CMoviePlayerGui : public CMenuTarget
 		    RESYNC      =  7,
 		    JF          =  9,
 		    JB          = 10,
-			 SKIP       =  11,
+			SKIP        = 11,
+			AUDIOSELECT = 12,
 		    SOFTRESET   = 99
 		};
 
@@ -92,6 +93,12 @@ class CMoviePlayerGui : public CMenuTarget
 	int exec(CMenuTarget* parent, const std::string & actionKey);
 };
 
+
+class CAPIDSelectExec : public CMenuTarget
+{
+	public:
+		int exec(CMenuTarget* parent, const std::string & actionKey);
+};
 
 #endif
 

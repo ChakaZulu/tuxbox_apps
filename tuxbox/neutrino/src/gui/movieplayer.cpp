@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.88 2004/05/07 19:53:54 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.89 2004/05/14 23:28:26 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -128,6 +128,14 @@ std::string skipvalue;
 long long startposition;
 int jumpminutes = 1;
 int buffer_time = 0;
+
+unsigned short apids[10];
+unsigned short ac3flags[10];
+unsigned short numpida=0;
+unsigned int currentapid = 0, currentac3 = 0, apidchanged=0;
+bool showaudioselectdialog = false;
+
+
 //------------------------------------------------------------------------
 void checkAspectRatio (int vdec, bool init);
 
@@ -137,6 +145,22 @@ CurlDummyWrite (void *ptr, size_t size, size_t nmemb, void *data)
 	std::string* pStr = (std::string*) data;
 	*pStr += (char*) ptr;
 	return size * nmemb;
+}
+
+//------------------------------------------------------------------------
+
+int CAPIDSelectExec::exec(CMenuTarget* parent, const std::string & actionKey)
+{
+	apidchanged = 0;
+	unsigned int sel= atoi(actionKey.c_str());
+	if (currentapid != apids[sel-1] )
+	{
+		currentapid = apids[sel-1];
+		currentac3 = ac3flags[sel-1];
+		apidchanged = 1;
+        printf("[movieplayer.cpp] apid changed to %d\n",apids[sel-1]);
+	}
+	return menu_return::RETURN_EXIT;
 }
 
 //------------------------------------------------------------------------
@@ -955,6 +979,7 @@ PlayStreamThread (void *mrl)
 			case CMoviePlayerGui::REW:
 			case CMoviePlayerGui::JF:
 			case CMoviePlayerGui::JB:
+			case CMoviePlayerGui::AUDIOSELECT:
 				break;
 			}
 		}
@@ -1133,6 +1158,7 @@ PlayPESFileThread (void *filename)
 			case CMoviePlayerGui::PLAY:
 			case CMoviePlayerGui::STOPPED:
 			case CMoviePlayerGui::SKIP:
+			case CMoviePlayerGui::AUDIOSELECT:
 			    break;
 			}
 
@@ -1235,11 +1261,40 @@ PlayFileThread (void *filename)
 	// todo: check if file is valid ts or pes
 	if (isTS)
 	{
-		find_avpids (fd, &pidv, &pida);
+		currentapid = 0;
+		numpida=0;
+		find_all_avpids (fd, &pidv, apids, ac3flags, &numpida);
 		lseek(fd, 0, SEEK_SET);
-		ac3 = is_audio_ac3 (fd);
-		printf ("[movieplayer.cpp] found pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
-			pida, pidv, ac3);
+		int i;
+	    for (i=0; i<numpida;i++) {
+    	    printf ("[movieplayer.cpp] found pida[%d]: 0x%04X, ac3=%d\n", i,apids[i],ac3flags[i]);
+	    }
+	    if (numpida > 1) {
+    	    showaudioselectdialog = true;
+    	    while (showaudioselectdialog) {
+        	    if (playstate < CMoviePlayerGui::PLAY) {
+            	    // can actually never happen
+            	    close(fd);
+            	    pthread_exit (NULL);
+        	    }
+        	    usleep(100);
+    	    }
+	    }
+
+	    if (currentapid != 0) {
+    	    pida = currentapid;
+	        ac3 = currentac3;
+	        apidchanged = 0;
+        }
+        else {
+            pida = apids[0];
+            ac3 = ac3flags[0];
+            apidchanged = 0;
+            currentapid = pida;
+        }
+        
+	    printf ("[movieplayer.cpp] using pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
+		    pida, pidv, ac3);
 	}
 	else
 	{				// Play PES
@@ -1334,6 +1389,42 @@ PlayFileThread (void *filename)
 				speed = 1;
 				playstate = CMoviePlayerGui::PLAY;
 				break;
+            case CMoviePlayerGui::AUDIOSELECT:
+        		numpida=0;
+        		find_all_avpids (fd, &pidv, apids, ac3flags, &numpida);
+        		lseek(fd, fileposition, SEEK_SET);
+        		int i;
+        	    for (i=0; i<numpida;i++) {
+            	    printf ("[movieplayer.cpp] found pida[%d]: 0x%04X, ac3=%d\n", i,apids[i],ac3flags[i]);
+        	    }
+        	    showaudioselectdialog = true;
+        	    while (showaudioselectdialog) {
+            	    if (playstate < CMoviePlayerGui::PLAY) {
+                	    // can actually never happen
+                	    //close(fd);
+                	    //pthread_exit (NULL);
+                	    break;
+            	    }
+            	    usleep(100);
+        	    }
+        
+        	    if (currentapid != 0) {
+            	    pida = currentapid;
+        	        ac3 = currentac3;
+        	        apidchanged = 0;
+                }
+                else {
+                    pida = apids[0];
+                    ac3 = ac3flags[0];
+                    apidchanged = 0;
+                    currentapid = pida;
+                }
+                
+        	    printf ("[movieplayer.cpp] using pida: 0x%04X ; pidv: 0x%04X ; ac3: %d\n",
+        		    pida, pidv, ac3);
+                    
+                playstate = CMoviePlayerGui::SOFTRESET;
+                break;
 			case CMoviePlayerGui::STOPPED:
 			case CMoviePlayerGui::PREPARING:
 			case CMoviePlayerGui::STREAMERROR:
@@ -1691,7 +1782,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.vlchelp");
-			fullhelptext += "\nVersion: $Revision: 1.88 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.89 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1826,6 +1917,34 @@ CMoviePlayerGui::PlayFile (void)
 			playstate = CMoviePlayerGui::SOFTRESET;
 		}
 
+		if (showaudioselectdialog) {
+            CMenuWidget APIDSelector("apidselector.head", "audio.raw", 300);
+    		APIDSelector.addItem(GenericMenuSeparator);
+    		apidchanged = 0;
+    		CAPIDSelectExec *APIDChanger;
+    		APIDChanger = new CAPIDSelectExec;
+    		for( unsigned int count=0; count<numpida; count++ )
+    		{
+    			char apidnumber[3];
+    			sprintf(apidnumber, "%d", count+1);
+
+    			std::string apidtitle = "Stream ";
+    			apidtitle.append(apidnumber);
+    			if (ac3flags[count]) {
+        			apidtitle.append(" (AC3)");
+    			}
+    			    
+    			APIDSelector.addItem(new CMenuForwarder(apidtitle.c_str(), true, NULL, APIDChanger, apidnumber, 
+    			    false, (uint)(CRCInput::convertDigitToKey(count+1))), (count == 0));
+			}
+		    APIDSelector.exec(NULL, "");
+            if (currentapid == 0) {
+                currentapid = apids[0];
+                currentac3 = ac3flags[0];
+            }
+            showaudioselectdialog = false;
+        }
+        		
 		g_RCInput->getMsg (&msg, &data, 10);	// 1 secs..
 		if(FileTime.IsVisible())
 		{
@@ -1860,10 +1979,14 @@ CMoviePlayerGui::PlayFile (void)
 				DisplayErrorMessage(g_Locale->getText("movieplayer.toomanybookmarks")); // UTF-8
 			}
 		}
+		else if (msg == CRCInput::RC_green)
+		{
+    		playstate = CMoviePlayerGui::AUDIOSELECT;
+        }
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.88 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.89 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
