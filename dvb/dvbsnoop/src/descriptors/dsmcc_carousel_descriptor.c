@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.17 2004/02/09 21:24:57 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.18 2004/02/15 01:01:02 rasc Exp $ 
 
 
  DVBSNOOP
@@ -11,12 +11,18 @@ $Id: dsmcc_carousel_descriptor.c,v 1.17 2004/02/09 21:24:57 rasc Exp $
 
 
  -- Private TAG Space  DSM-CC
- -- DSM-CC Descriptors  ISO 13818-6  // TR 102 006
+ -- DSM-CC Descriptors
+ -- ISO 13818-6  // TR 102 006  //  TS 102 812
 
 
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.18  2004/02/15 01:01:02  rasc
+DSM-CC  DDB (DownloadDataBlock Message)
+DSM-CC  U-N-Message  started
+Carousel Descriptors completed
+
 Revision 1.17  2004/02/09 21:24:57  rasc
 AIT descriptors
 minor redesign on output routines
@@ -118,6 +124,10 @@ int  descriptorDSMCC_CAROUSEL (u_char *b)
      case 0x08:  descriptorDSMCC_group_link (b); break;
      case 0x09:  descriptorDSMCC_compressed_module (b); break;
      case 0x0A:  descriptorDSMCC_subgroup_association (b); break;
+
+	// MHP
+     case 0x70:  descriptorDSMCC_MHP_label (b); break;
+     case 0x71:  descriptorDSMCC_MHP_caching_priority (b); break;
 
      default: 
 	if (b[0] < 0x80) {
@@ -341,17 +351,38 @@ void descriptorDSMCC_subgroup_association (u_char *b)
 
 
 
+/*
+  0x70 -  MHP label descriptor
+  ETSI  TS 102 812  v 1.2.1
+*/
+
+void descriptorDSMCC_MHP_label (u_char *b)
+{
+  int len;
+
+  // tag	= b[0];
+  len	        = b[1];
+
+  print_text_UTF8 (4, "label: ", b+2, len);
+}
 
 
 
+/*
+  0x71 -  MHP caching priority descriptor
+  ETSI  TS 102 812  v 1.2.1
+*/
 
+void descriptorDSMCC_MHP_caching_priority (u_char *b)
+{
 
+  // tag	= b[0];
+  // len        = b[1];
 
-
-
-
-
-
+  outBit_Sx_NL (4,"priority_value: ", 		b, 0, 8);
+  outBit_S2x_NL(4,"transparency_level: ",	b, 8, 8,
+			(char *(*)(u_long)) dsmccStrMHP_caching_transparency_level);
+}
 
 
 

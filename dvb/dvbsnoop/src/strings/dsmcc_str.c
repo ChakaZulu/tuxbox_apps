@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.c,v 1.26 2004/02/14 01:24:45 rasc Exp $
+$Id: dsmcc_str.c,v 1.27 2004/02/15 01:01:04 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,11 @@ $Id: dsmcc_str.c,v 1.26 2004/02/14 01:24:45 rasc Exp $
 
 
 $Log: dsmcc_str.c,v $
+Revision 1.27  2004/02/15 01:01:04  rasc
+DSM-CC  DDB (DownloadDataBlock Message)
+DSM-CC  U-N-Message  started
+Carousel Descriptors completed
+
 Revision 1.26  2004/02/14 01:24:45  rasc
 DSM-CC started  (DSI/DII, DDB)
 
@@ -169,7 +174,9 @@ char *dsmccStrDSMCC_CAROUSEL_DescriptorTAG (u_int i)
      {  0x09, 0x09,  "compressed_module_descriptor" },
      {  0x0A, 0x0A,  "subgroup_association_descriptor" },
      {  0x0B, 0x6F,  "reserved for future use by DVB" },
-     {  0x70, 0x7F,  "reserved MHP" },
+     {  0x70, 0x70,  "label_descriptor" },		// MHP
+     {  0x71, 0x71,  "caching_priority_descriptor" },	// MHP
+     {  0x72, 0x7F,  "reserved MHP" },
      {  0x80, 0xFF,  "private_descriptor" },
      {  0,0, NULL }
   };
@@ -1056,11 +1063,11 @@ char *dsmccStr_messageID (u_int id)
 {
   STR_TABLE  TableIDs[] = {
 	{ 0x1001, 0x1001,   "DownloadInfoRequest" },
-	{ 0x1002, 0x1002,   "DownloadInfoResponse, DownloadInfoIndication" },
-	{ 0x1003, 0x1003,   "DownloadDataBlock" },
+	{ 0x1002, 0x1002,   "DownloadInfoResponse, DownloadInfoIndication (DII)" },
+	{ 0x1003, 0x1003,   "DownloadDataBlock (DDB)" },
 	{ 0x1004, 0x1004,   "DownloadDataRequest" },
 	{ 0x1005, 0x1005,   "DownloadCancel" },
-	{ 0x1006, 0x1006,   "DownloadServerInitiate" },
+	{ 0x1006, 0x1006,   "DownloadServerInitiate (DSI)" },
       	{  0,0, NULL }
   };
 
@@ -1091,6 +1098,26 @@ char *dsmccStr_transactionID_originator (u_int id)
 
 
 
+
+/*
+  -- DSM-CC  MHP caching transparency level
+  -- ISO/IEC 13816-6
+  -- TS 102 812  v1.2.1 B.2.7
+*/
+
+char *dsmccStrMHP_caching_transparency_level (u_int id)
+{
+  STR_TABLE  TableIDs[] = {
+	{ 0x00, 0x00,   "reserved" },
+	{ 0x01, 0x01,   "transparent caching" },
+	{ 0x02, 0x02,   "semi-transparent caching" },
+	{ 0x03, 0x03,   "static chaching" },
+	{ 0x04, 0xFF,   "reserved" },
+      	{  0,0, NULL }
+  };
+
+  return findTableID (TableIDs, id);
+}
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_str.h,v 1.23 2004/02/14 01:24:45 rasc Exp $ 
+$Id: dsmcc_str.h,v 1.24 2004/02/15 01:01:05 rasc Exp $ 
 
 
  DVBSNOOP
@@ -16,6 +16,11 @@ $Id: dsmcc_str.h,v 1.23 2004/02/14 01:24:45 rasc Exp $
 
 
 $Log: dsmcc_str.h,v $
+Revision 1.24  2004/02/15 01:01:05  rasc
+DSM-CC  DDB (DownloadDataBlock Message)
+DSM-CC  U-N-Message  started
+Carousel Descriptors completed
+
 Revision 1.23  2004/02/14 01:24:45  rasc
 DSM-CC started  (DSI/DII, DDB)
 
@@ -156,6 +161,9 @@ char *dsmccStr_adaptationType (u_int id);
 char *dsmccStr_dsmccType (u_int id);
 char *dsmccStr_messageID (u_int id);
 char *dsmccStr_transactionID_originator (u_int id);
+
+char *dsmccStrMHP_caching_transparency_level (u_int id);
+
 
 
 #endif

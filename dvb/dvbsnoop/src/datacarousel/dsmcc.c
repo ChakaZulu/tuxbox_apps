@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc.c,v 1.7 2004/02/14 01:24:44 rasc Exp $
+$Id: dsmcc.c,v 1.8 2004/02/15 01:01:00 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,11 @@ $Id: dsmcc.c,v 1.7 2004/02/14 01:24:44 rasc Exp $
 
 
 $Log: dsmcc.c,v $
+Revision 1.8  2004/02/15 01:01:00  rasc
+DSM-CC  DDB (DownloadDataBlock Message)
+DSM-CC  U-N-Message  started
+Carousel Descriptors completed
+
 Revision 1.7  2004/02/14 01:24:44  rasc
 DSM-CC started  (DSI/DII, DDB)
 
@@ -54,6 +59,8 @@ dsmcc section tables
 
 #include "dvbsnoop.h"
 #include "dsmcc.h"
+#include "dsmcc_ddb.h"
+#include "dsmcc_unm.h"
 #include "dsmcc_misc.h"
 #include "llc_snap.h"
 
@@ -121,29 +128,11 @@ void decode_DSMCC_section (u_char *b, int len)
 
  } else if (table_id == 0x3B) {
 
-	// dsmcc_userNetworkMessage()
-	// $$$ TODO
-	int x,l, mid, dtyp;
-	indent (+1);
-	x = dsmcc_MessageHeader (4, b, len1, &l, &mid, &dtyp);
-	b += x;
-	len1 -= x;
-	out_nl (1,"$$$ TODO... len1=%d  y=%d",len1,l);
-	printhexdump_buf (4, b, l);
-	indent (-1);
+	dsmcc_UserNetworkMessage (4, b, len1);
 
  } else if (table_id == 0x3C) {
 
-	// dsmcc_downloadDataMessage()
-	// $$$ TODO
-	int x,l, mid, dtyp;
-	indent (+1);
-	x = dsmcc_MessageHeader (4, b, len1, &l, &mid, &dtyp);
-	b += x;
-	len1 -= x;
-	out_nl (1,"$$$ TODO... len1=%d  y=%d",len1,l);
-	printhexdump_buf (4, b, l);
-	indent (-1);
+	dsmcc_DownloadDataMessage (4, b, len1);
 
  } else if (table_id == 0x3D) {
 
@@ -189,6 +178,45 @@ static void DSMCC_descriptor_list (u_char *b, int len)
 
 }
 
+
+
+
+
+
+/*
+ * $$$ TODO
+ *
+ *
+table_id_extension: This 16-bit field is set as shown below according to table_id field:
+When the value of the table_id field equals 0x3B, this field must convey a copy of the least
+significant two bytes of the transaction_id field .
+When the value of the table_id field equals 0x3C, this field must convey a copy of the module_id
+field.
+
+
+
+B.2.4.3.4 DSM-CC sections for DSMCC_descriptor_list()
+If the table_id .eld equals 0x3D the current_next_indicator bit shall be set to "1".
+B.2.4.3.5 Encoding of table id extension
+The section's table id extension .eld provides information on the stream descriptor(s)carried by the section:
+Table B.31 :Encoding of table id extension for DSMCC_descriptor_lists
+table_id_extension bits
+Payload of DSM-CC section with table ID 0x3D
+[15 ][14 ][13 …0 ]
+0 0 eventID [13 …0 ]Section carries a single "do it now"event
+0 1 xx xxxx xxxx Section carries NPT reference descriptors
+1 0 xx xxxx xxxx
+Section carries one or more other stream descriptors.I.e
+-Stream event descriptor(s)with a future eventNPTs
+-Stream mode descriptor (can be ignored in this speci .cation)
+-NPT endpoint descriptor (can be ignored in this speci .cation)
+1 1 reserved for future use
+
+The value of eventID for "do it now"events shall be in the range 0x0001 …0x3FFF.The value of eventID for scheduled
+events shall be in the range 0x8000 …0xBFFF.The value 0 is not allowed (see 5.5.2.2.1 in ISO/IEC 13818-6 [26 ]).
+
+
+*/
 
 
 

@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.h,v 1.3 2004/02/14 01:24:44 rasc Exp $
+$Id: dsmcc_misc.h,v 1.4 2004/02/15 01:01:01 rasc Exp $
 
 
  DVBSNOOP
@@ -14,7 +14,18 @@ $Id: dsmcc_misc.h,v 1.3 2004/02/14 01:24:44 rasc Exp $
 
 
 #ifndef __DSMCC_MISC_H
-#define __DSMCC_MISC_H 1
+#define __DSMCC_MISC_H 
+
+
+
+// U-N defines  (server messages only)
+
+#define DownloadInfoIndication		0x1002
+#define	DownloadDataBlock		0x1003
+#define DownloadCancel			0x1005
+#define	DownloadServerInitiate		0x1006
+
+
 
 
 int   dsmcc_pto_descriptor_loop (u_char *name, u_char *b);

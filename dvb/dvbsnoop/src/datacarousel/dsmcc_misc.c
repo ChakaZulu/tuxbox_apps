@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_misc.c,v 1.6 2004/02/14 01:24:44 rasc Exp $
+$Id: dsmcc_misc.c,v 1.7 2004/02/15 01:01:00 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,11 @@ $Id: dsmcc_misc.c,v 1.6 2004/02/14 01:24:44 rasc Exp $
 
 
 $Log: dsmcc_misc.c,v $
+Revision 1.7  2004/02/15 01:01:00  rasc
+DSM-CC  DDB (DownloadDataBlock Message)
+DSM-CC  U-N-Message  started
+Carousel Descriptors completed
+
 Revision 1.6  2004/02/14 01:24:44  rasc
 DSM-CC started  (DSI/DII, DDB)
 
@@ -195,18 +200,37 @@ int dsmcc_MessageHeader (int v, u_char *b, int len, int *msg_len,
 {
    u_char *b_start = b;
    int    adapt_len;
+   int    pdiscr;
 
+
+   	*dsmccType = 0;
+   	*messageId = 0;
 
 	out_nl (v, "DSM-CC Message Header:");
 	indent (+1);
-  	outBit_Sx_NL (v,"protocolDiscriminator: ", 	b  , 0, 8);   // $$$ TODO table ? has to be 0x11 here
+  	pdiscr = outBit_Sx_NL (v,"protocolDiscriminator: ", 	b  , 0, 8);   // $$$ TODO table 
+	if (pdiscr != 0x11) {
+		out_nl (v, " ==> wrong protocol discriminator (should be 0x11)");
+		print_databytes (4, "Message header bytes: ", b+1, len-1);
+		return len;
+	}
+
+
 
   	*dsmccType = outBit_S2x_NL (4,"dsmccType: ",	b+1, 0, 8,
 			(char *(*)(u_long))dsmccStr_dsmccType);
   
   	*messageId = outBit_S2x_NL (v,"messageId: ", 	b+2, 0, 16,
 			(char *(*)(u_long))dsmccStr_messageID);	
-	dsmcc_print_transactionID_32 (v, b+4);
+
+
+	if (*dsmccType == 0x03 && *messageId == DownloadDataBlock) {
+  		outBit_Sx_NL (v,"downloadId: ",		b+4, 0, 32);  // see ARIB STD B24 3.2	
+	} else {
+		dsmcc_print_transactionID_32 (v, b+4);
+	}
+
+
   	outBit_Sx_NL (v,"reserved: ",	 		b+8, 0,  8);
   	adapt_len = outBit_Sx_NL (v,"adaptionLength: ", b+9, 0,  8);
   	*msg_len  = outBit_Sx_NL (v,"messageLength: ", 	b+10,0, 16);

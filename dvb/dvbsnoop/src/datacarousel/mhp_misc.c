@@ -1,5 +1,5 @@
 /*
-$Id: mhp_misc.c,v 1.2 2004/02/12 21:21:19 rasc Exp $
+$Id: mhp_misc.c,v 1.3 2004/02/15 01:01:01 rasc Exp $
 
 
  DVBSNOOP
@@ -13,6 +13,11 @@ $Id: mhp_misc.c,v 1.2 2004/02/12 21:21:19 rasc Exp $
 
 
 $Log: mhp_misc.c,v $
+Revision 1.3  2004/02/15 01:01:01  rasc
+DSM-CC  DDB (DownloadDataBlock Message)
+DSM-CC  U-N-Message  started
+Carousel Descriptors completed
+
 Revision 1.2  2004/02/12 21:21:19  rasc
 MHP AIT descriptors
 some smaller changes
@@ -73,8 +78,6 @@ int  mhp_application_profile_version (int  v, u_char *b)
 
 
 
-
-// $$$ TODO details of transaction_id  TS 102 812  B.2.7
 
 
 
