@@ -1,3 +1,20 @@
+/*
+ $Id: scan.h,v 1.9 2002/04/04 14:41:08 rasc Exp $
+
+
+
+ $Log: scan.h,v $
+ Revision 1.9  2002/04/04 14:41:08  rasc
+ - New functions in zapitclient for handling favorites
+   - test if a bouquet exists
+ - Some Log - CVS Entries in modules
+
+
+
+*/
+
+
+
 #ifndef __scan_h__
 #define __scan_h__
 

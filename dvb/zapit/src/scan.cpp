@@ -1,3 +1,18 @@
+/*
+$Id: scan.cpp,v 1.33 2002/04/04 14:41:08 rasc Exp $
+
+
+
+$Log: scan.cpp,v $
+Revision 1.33  2002/04/04 14:41:08  rasc
+- New functions in zapitclient for handling favorites
+  - test if a bouquet exists
+- Some Log - CVS Entries in modules
+
+
+*/
+
+
 #include <stdio.h>
 #include <sys/poll.h>
 #include <sys/types.h>

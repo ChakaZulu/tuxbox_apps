@@ -1,3 +1,16 @@
+/*
+ $Id: zapit.h,v 1.43 2002/04/04 14:41:08 rasc Exp $
+
+
+$Log: zapit.h,v $
+Revision 1.43  2002/04/04 14:41:08  rasc
+- New functions in zapitclient for handling favorites
+  - test if a bouquet exists
+- Some Log - CVS Entries in modules
+
+
+*/
+
 #ifndef __zapit_h__
 #define __zapit_h__
 

@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: zapitclient.cpp,v 1.19 2002/04/02 23:08:04 rasc Exp $
+  $Id: zapitclient.cpp,v 1.20 2002/04/04 14:41:08 rasc Exp $
 
   License: GPL
 
@@ -20,6 +20,11 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapitclient.cpp,v $
+  Revision 1.20  2002/04/04 14:41:08  rasc
+  - New functions in zapitclient for handling favorites
+    - test if a bouquet exists
+  - Some Log - CVS Entries in modules
+
   Revision 1.19  2002/04/02 23:08:04  rasc
   -- ...existBouquet: check if Bouquet exists (returns true/false)
 
@@ -520,13 +525,13 @@ void CZapitClient::moveBouquet( unsigned int bouquet, unsigned int newPos)
 
 //
 // -- check if Bouquet-Name exists (2002-04-02 rasc)
-// -- Return true/false
+// -- Return: Bouquet-ID  or -1 
 //
-bool CZapitClient::existsBouquet( string name)
+int CZapitClient::existsBouquet( string name)
 {
         commandHead msgHead;
         commandExistsBouquet msg;
-	responseGeneralTrueFalse response;
+	responseGeneralInteger response;
 
         msgHead.version=ACTVERSION;
         msgHead.cmd=CMD_BQ_EXISTS_BOUQUET;
@@ -540,7 +545,7 @@ bool CZapitClient::existsBouquet( string name)
 #warning "Help me here! Please someone check this: simplex?? (rasc)"
 	receive((char* )&response, sizeof(response));
         zapit_close();
-	return response.status;
+	return response.number;
 }
  
 
