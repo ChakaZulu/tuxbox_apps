@@ -5,7 +5,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include <ost/dmx.h>
+#include <linux/dvb/dmx.h>
 
 int camfd;
 /*
@@ -175,17 +175,16 @@ void set_key(void)
 int find_emmpid(int ca_system_id) {
 	char buffer[1000];
 	int fd, r=1000,count;
-	struct dmxSctFilterParams flt;
+	struct dmx_sct_filter_params flt;
 
-	fd=open("/dev/dvb/card0/demux0", O_RDWR);
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/dvb/card0/demux0");
+		perror("/dev/dvb/adapter0/demux0");
 		return -fd;
 	}
 
-	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+	memset(&flt.filter, 0, sizeof(struct dmx_filter));	
 
 	flt.pid=1;
 	flt.filter.filter[0]=1;
@@ -253,19 +252,19 @@ int descramble_pids;
 int find_ecmpid(int pid,int ca_system_id) {
 	char buffer[1000];
 	int fd, r=1000,ecm_pid=0;
-	struct dmxSctFilterParams flt;
 
-	fd=open("/dev/dvb/card0/demux0", O_RDWR);
+	struct dmx_sct_filter_params flt;
+
+	fd=open("/dev/dvb/adapter0/demux0", O_RDWR);
 	if (fd<0)
 	{
-		perror("/dev/dvb/card0/demux0");
+		perror("/dev/dvb/adapter0/demux0");
 		return -fd;
 	}
-	
+
 	descramble_pids=0;
 
-	memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-	memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+	memset(&flt.filter, 0, sizeof(struct dmx_filter));
 
 	flt.pid=pid;
 	flt.filter.filter[0]=2;
