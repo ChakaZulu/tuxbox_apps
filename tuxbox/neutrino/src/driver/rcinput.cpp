@@ -857,7 +857,6 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			status = read(fd_rc, &ev, sizeof(struct input_event));
 			if (status==sizeof(struct input_event))
 			{
-				// Uns interessiert nur wenn eine Taste gedrueckt wurde - nicht wenn eine losgelassen wurde
 				if(ev.value)
 				{
 					//printf("got keydown native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
@@ -915,7 +914,15 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 
 				}
 				else
-				{	// clear rc_last_key on keyup event
+				{	
+					if (translate(ev.code) == RC_standby)
+					{
+						*msg = RC_standby_release;
+						*data = 0;
+						return;
+					}
+
+					// clear rc_last_key on keyup event
 					//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
 					rc_last_key = 0;
 				}
