@@ -172,6 +172,7 @@ audioplayer.rewind schneller Rückl.
 audioplayer.save_playlist Playlist speichern
 audioplayer.screensaver_timeout Bildschirmschoner (min, 0=aus)
 audioplayer.select_title_by_name Titelsuche nach Name (SMS)
+audioplayer.show_playlist Playlist anzeigen
 audioplayer.shuffle Shuffle
 audioplayer.stop Stopp
 audioplayer.title_artist Titel, Interpret

@@ -99,6 +99,7 @@ class CAudioPlayerGui : public CMenuTarget
 	time_t         m_time_played;
 	std::string    m_metainfo;
 	bool           m_select_title_by_name;
+	bool           m_show_playlist;
 
 	CPlayList      playlist;
 	CAudiofile     curr_audiofile;
@@ -190,5 +191,3 @@ class CAudioPlayerGui : public CMenuTarget
 
 
 #endif
-
-
