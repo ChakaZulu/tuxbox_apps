@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: controlapi.cpp,v 1.46 2004/12/25 23:56:37 chakazulu Exp $
+	$Id: controlapi.cpp,v 1.47 2005/01/03 21:34:23 chakazulu Exp $
 
 	License: GPL
 
@@ -986,6 +986,8 @@ void CControlAPI::SendAllCurrentVAPid(CWebserverRequest* request)
 	
 	if(pids.APIDs.empty())
 		request->printf("0\n"); // shouldnt happen, but print at least one apid 
+	if (pids.PIDs.pmtpid)
+		request->printf("%u pmt\n",pids.PIDs.pmtpid);
 }
 
 //-------------------------------------------------------------------------

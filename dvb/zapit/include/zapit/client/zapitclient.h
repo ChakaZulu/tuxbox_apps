@@ -171,6 +171,7 @@ class CZapitClient:public CBasicClient
 		uint		vtxtpid;
 		uint		pcrpid;
 		uint		selected_apid;
+		uint            pmtpid;
 	};
 
 	class CCurrentServiceInfo
@@ -186,6 +187,7 @@ class CZapitClient:public CBasicClient
 			unsigned int	tsfrequency;
 			unsigned char	polarisation;
 			unsigned char	diseqc;
+			unsigned short  pmtpid;
 		};
 
 	struct responseGetPIDs

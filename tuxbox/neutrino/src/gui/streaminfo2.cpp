@@ -476,6 +476,11 @@ void CStreamInfo2::paint_techinfo(int xpos, int ypos)
 			(si.polarisation == HORIZONTAL) ? 'h' : 'v');
 	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8
 
+	//pmtpid
+	ypos+= sheight;
+	sprintf((char*) buf, "%s: 0x%04x", "PMTpid", si.pmtpid);
+	g_Font[font_small]->RenderString(xpos, ypos, width-10, buf, COL_MENUCONTENT, 0, true); // UTF-8 
+
 	//vpid
 	ypos+= sheight;
 	if ( g_RemoteControl->current_PIDs.PIDs.vpid == 0 )
