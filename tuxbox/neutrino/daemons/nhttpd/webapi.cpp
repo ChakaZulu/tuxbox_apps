@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.61 2005/01/12 20:07:48 chakazulu Exp $
+	$Id: webapi.cpp,v 1.62 2005/01/30 14:18:10 chakazulu Exp $
 
 	License: GPL
 
@@ -1390,6 +1390,7 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
 		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
 	bool standby_on = (request->ParameterList["sbon"]=="1");
+	CTimerd::RecordingInfo recinfo;
 	CTimerd::EventInfo eventinfo;
 	eventinfo.epgID = 0;
 	eventinfo.epg_starttime = 0;
@@ -1405,9 +1406,14 @@ void CWebAPI::doNewTimer(CWebserverRequest *request)
 		announceTimeT-=120;
 	if(type == CTimerd::TIMER_STANDBY)
 		data=&standby_on;
-	else if(type==CTimerd::TIMER_NEXTPROGRAM || type==CTimerd::TIMER_ZAPTO ||
-			type==CTimerd::TIMER_RECORD)
+	else if(type==CTimerd::TIMER_NEXTPROGRAM || type==CTimerd::TIMER_ZAPTO)
 		data= &eventinfo;
+	else if (type==CTimerd::TIMER_RECORD)
+	{
+		recinfo = eventinfo;
+		strcpy(recinfo.recordingDir,"");
+		data = &recinfo;
+	}
 	else if(type==CTimerd::TIMER_REMIND)
 	{
 		char msg[REMINDER_MESSAGE_MAXLEN];
