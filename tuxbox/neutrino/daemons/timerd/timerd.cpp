@@ -39,7 +39,6 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <signal.h>
 
 #include "timermanager.h"
 #include "timerdMsg.h"
@@ -123,23 +122,31 @@ void parse_command(int connfd, CTimerd::commandHead* rmessage)
 	}
 }
 
-void sig_catch(int)
-{
-	//dummy
-}
-
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
+	struct sockaddr_un servaddr;
+	int clilen;
+
 	dprintf("startup\n\n");
 
-	if (fork() != 0)
+	switch (fork())
 	{
+	case -1:
+		perror("[timerd] fork");
+		return -1;
+	case 0:
+		break;
+	default:
 		return 0;
 	}
 
-	struct sockaddr_un servaddr;
-	int clilen;
+	if (setsid() == -1)
+	{
+		perror("[timerd] setsid");
+		return -1;
+	}
+
 	memset(&servaddr, 0, sizeof(struct sockaddr_un));
 	servaddr.sun_family = AF_UNIX;
 	strcpy(servaddr.sun_path, TIMERD_UDS_NAME);
@@ -163,13 +170,6 @@ int main(int argc, char **argv)
 		perror("listen failed...");
 		exit( -1 );
 	}
-
-	//busyBox
-
-	signal(SIGHUP,sig_catch);
-	signal(SIGINT,sig_catch);
-	signal(SIGQUIT,sig_catch);
-	signal(SIGTERM,sig_catch);
 
 	//startup Timer
 	try
