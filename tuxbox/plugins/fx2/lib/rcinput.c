@@ -30,6 +30,10 @@ void	KbInitialize( void )
 {
 	struct termios	ntios;
 
+#ifndef __i386__
+	return;
+#endif
+
 	kbfd = 0;
 
 	if ( tcgetattr(kbfd,&tios) == -1 )
@@ -38,7 +42,11 @@ void	KbInitialize( void )
 		return;
 	}
 	memset(&ntios,0,sizeof(ntios));
-	tcsetattr(kbfd,TCSANOW,&ntios);
+	if ( tcsetattr(kbfd,TCSANOW,&ntios) == -1 )
+	{
+		kbfd=-1;
+		return;
+	}
 
 	return;
 }
