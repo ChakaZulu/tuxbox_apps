@@ -370,6 +370,20 @@ static	int	locked = 0;
 		actcode=0xee;
 		return;
 	}
+	k=0;
+	switch( actcode )
+	{
+	case RC_7 : k++;
+	case RC_6 : k++;
+	case RC_5 : k++;
+	case RC_4 : k++;
+	case RC_3 : k++;
+	case RC_2 : k++;
+	case RC_1 : k++;
+		break;
+	}
+	if ( k )
+		ipos=k-1;
 	switch( actcode )
 	{
 	case RC_RIGHT :
@@ -392,6 +406,14 @@ static	int	locked = 0;
 			locked=1;
 		}
 		break;
+	case RC_7 :
+	case RC_6 :
+	case RC_5 :
+	case RC_4 :
+	case RC_3 :
+	case RC_2 :
+	case RC_1 :
+
 	case RC_OK :
 		locked=1;
 		if ( maze[ipos+35] )
@@ -407,29 +429,5 @@ static	int	locked = 0;
 		FBOverlayImage( ipos*48+64+6, 48+4, 36, 40, 0, 0, WHITE,
 				dred, 0,0,0);
 		break;
-#if 0
-	case RC_DOWN :
-		if ( mouse_y < 12 )
-		{
-			DrawField( mouse_x, mouse_y );
-			mouse_y++;
-			DrawMouse();
-			locked=1;
-		}
-		break;
-	case RC_UP :
-		if ( mouse_y > 3 )
-		{
-			DrawField( mouse_x, mouse_y );
-			mouse_y--;
-			DrawMouse();
-			locked=1;
-		}
-		break;
-	case RC_BLUE :
-		Flag( mouse_x, mouse_y );
-		locked=1;
-		break;
-#endif
 	}
 }
