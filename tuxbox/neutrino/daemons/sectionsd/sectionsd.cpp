@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.130 2002/09/24 22:29:06 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.131 2002/09/25 23:27:48 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.131  2002/09/25 23:27:48  thegoodguy
+//  Tiny code cleanup
+//
 //  Revision 1.130  2002/09/24 22:29:06  thegoodguy
 //  Code cleanup (kick out onid_sid)
 //
@@ -457,8 +460,8 @@ CEventServer *eventServer;
 //CTimerdClient   *timerdClient;
 //bool            timerd = false;
 
-#define dprintf(fmt, args...) {if(debug) printf(fmt, ## args);}
-#define dputs(str) {if(debug) puts(str);}
+#define dprintf(fmt, args...) { if (debug) { printf(fmt, ## args); fflush(stdout); } }
+#define dputs(str) {if (debug) { puts(str); fflush(stdout); }}
 
 static pthread_mutex_t eventsLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge events geschrieben und gelesen wird
 static pthread_mutex_t servicesLock = PTHREAD_MUTEX_INITIALIZER; // Unsere (fast-)mutex, damit nicht gleichzeitig in die Menge services geschrieben und gelesen wird
@@ -620,7 +623,10 @@ static void addEvent(const SIevent &evt)
 	SIevent *eptr = new SIevent(evt);
 
 	if (!eptr)
+	{
+		printf("[sectionsd::addEvent] new SIevent failed.\n");
 		throw std::bad_alloc();
+	}
 
 	SIeventPtr e(eptr);
 
@@ -709,7 +715,10 @@ static void addNVODevent(const SIevent &evt)
 	SIevent *eptr = new SIevent(evt);
 
 	if (!eptr)
+	{
+		printf("[sectionsd::addNVODevent] new SIevent failed.\n");
 		throw std::bad_alloc();
+	}
 
 	SIeventPtr e(eptr);
 
@@ -799,7 +808,10 @@ static void addService(const SIservice &s)
 	SIservice *sp = new SIservice(s);
 
 	if (!sp)
+	{
+		printf("[sectionsd::addService] new SIservice failed.\n");
 		throw std::bad_alloc();
+	}
 
 	SIservicePtr sptr(sp);
 
@@ -1322,7 +1334,10 @@ static unsigned findServiceUniqueKeyforServiceName(const char *serviceName)
 	SIservice *sp = new SIservice((unsigned short)0, (unsigned short)0);
 
 	if (!sp)
+	{
+		printf("[sectionsd::findServiceUniqueKeyforServiceName] new SIservice failed.\n");
 		throw std::bad_alloc();
+	}
 
 	SIservicePtr s(sp);
 
@@ -1876,7 +1891,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.130 2002/09/24 22:29:06 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.131 2002/09/25 23:27:48 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -4000,10 +4015,9 @@ static void *eitThread(void *)
 
 	try
 	{
-		dprintf("[eitThread] eit-thread started.\n");
+		dputs("[eitThread] start");
 		int timeoutsDMX = 0;
 		time_t lastRestarted = time(NULL);
-		double last_clock = 0;
 		dmxEIT.start(); // -> unlock
 
 		for (;;)
@@ -4169,13 +4183,13 @@ static void *eitThread(void *)
 			}
 
 			dmxEIT.lock();
+			dputs("[eitThread] read");
 			int rc = dmxEIT.read((char *) & header, sizeof(header), timeoutInMSeconds);
-			last_clock = clock();
 
 			if (!rc)
 			{
 				dmxEIT.unlock();
-				dprintf("[eitThread] dmxEIT.read timeout...\n");
+				dputs("[eitThread] dmxEIT.read timeout...");
 				timeoutsDMX++;
 				continue; // timeout -> kein EPG
 			}
@@ -4250,11 +4264,15 @@ static void *eitThread(void *)
 				                    }
 				                }
 				*/
+				dputs("[eitThread] Parsing");
+
 				SIsectionEIT eit(SIsection(sizeof(header) + header.section_length - 5, buf));
 
 				if (eit.header())
 				{
 					// == 0 -> kein event
+
+					dputs("[eitThread] adding events (begin)");
 
 					zeit = time(NULL);
 					// Nicht alle Events speichern
@@ -4288,18 +4306,15 @@ static void *eitThread(void *)
 								addNVODevent(*e);
 
 								unlockEvents();
-
-								unlockServices();
 							}
-							else
-							{
-								unlockServices();
-							}
+							unlockServices();
 						}
 
 
-
 					} // for
+
+					dputs("[eitThread] adding events (end)");
+
 				} // if
 
 				lockMessaging();
@@ -4400,14 +4415,14 @@ static void *eitThread(void *)
 	} // try
 	catch (std::exception& e)
 	{
-		fprintf(stderr, "[eitThread] Caught std-exception in connection-thread %s!\n", e.what());
+		fprintf(stderr, "[eitThread] Caught std-exception %s!\n", e.what());
 	}
 	catch (...)
 	{
-		fprintf(stderr, "[eitThread] Caught exception in eit-thread!\n");
+		fprintf(stderr, "[eitThread] Caught exception!\n");
 	}
 
-	dprintf("[eitThread] eit-thread ended\n");
+	dputs("[eitThread] end");
 	return 0;
 }
 
@@ -4490,14 +4505,14 @@ static void *houseKeepingThread(void *)
 	} // try
 	catch (std::exception& e)
 	{
-		fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+		fprintf(stderr, "Caught std-exception in housekeeping-thread %s!\n", e.what());
 	}
 	catch (...)
 	{
 		fprintf(stderr, "Caught Exception in housekeeping-thread!\n");
 	}
 
-	dprintf("housekeeping-thread ended\n");
+	dprintf("housekeeping-thread ended.\n");
 
 	return 0;
 }
@@ -4534,7 +4549,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.130 2002/09/24 22:29:06 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.131 2002/09/25 23:27:48 thegoodguy Exp $\n");
 
 	try
 	{
@@ -4690,7 +4705,10 @@ int main(int argc, char **argv)
 			struct connectionData *client = new connectionData; // Wird vom Thread freigegeben
 
 			if (!client)
+			{
+				printf("[sectionsd::main] new connectionData failed.\n");
 				throw std::bad_alloc();
+			}
 
 			do
 			{
@@ -4716,13 +4734,13 @@ int main(int argc, char **argv)
 	} // try
 	catch (std::exception& e)
 	{
-		fprintf(stderr, "[sectionsd] Caught std-exception in connection-thread %s!\n", e.what());
+		fprintf(stderr, "[sectionsd] Caught std-exception %s in main-thread!\n", e.what());
 	}
 	catch (...)
 	{
 		fprintf(stderr, "[sectionsd] Caught exception in main-thread!\n");
 	}
 
-	printf("[sectionsd] ended\n");
+	puts("[sectionsd] ended");
 	return 0;
 }
