@@ -120,7 +120,7 @@ Tmconnect con;
 		sectionsd::msgRequestHeader req;
 		req.version = 2;
 		req.command = sectionsd::pauseScanning;
-		req.dataLength = 2;
+		req.dataLength = 4;
 		write(sock_fd, &req, sizeof(req));
 		int stopit = off?1:0;
 		write(sock_fd, &stopit, req.dataLength);
@@ -204,8 +204,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 	printf("Execute CGI : %s\n",request->Filename->c_str());
 	if(strcmp(request->Filename->c_str(),"getdate") == 0)
 	{
-		request->SendPlainHeader();
-
 		if (request->ParameterList->Count==0)
 		{	//paramlos
 			char *timestr = new char[50];
@@ -221,8 +219,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"gettime") == 0)
 	{
-		request->SendPlainHeader();
-
 		if (request->ParameterList->Count==0)
 		{	//paramlos
 			char *timestr = new char[50];
@@ -237,8 +233,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"info") == 0)
 	{
-		request->SendPlainHeader();
-
 		if (request->ParameterList->Count == 0)
 		{	//paramlos
 			request->SocketWrite("Neutrino NG\n");
@@ -249,8 +243,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"shutdown") == 0)
 	{
-		request->SendPlainHeader();
-
 		if (request->ParameterList->Count == 0)
 		{	//paramlos
 			request->SocketWrite("shutdown");
@@ -264,8 +256,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"volume") == 0)
 	{
-		request->SendPlainHeader();
-
 		if (request->ParameterList->Count == 0)
 		{	//paramlos - aktuelles volume anzeigen
 			char buf[10];
@@ -275,7 +265,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 		else
 		if (request->ParameterList->Count == 1)
 		{
-			request->SendPlainHeader();
 			if(request->ParameterList->GetIndex("mute") != -1)
 			{
 				request->SocketWrite("mute");
@@ -309,7 +298,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 	{
 	char buf[250];
 		printf("Gebe channellist aus\n");
-		request->SendPlainHeader();
 		if(!ChannelList)
 			GetChannelList();
 		for(int i = 0; i < ChannelList->Count;i++)
@@ -326,7 +314,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(), "epg") == 0)
 	{
-		request->SendPlainHeader();
 		if(Parent->DEBUG) printf("EPG, Parameter: %d\n",request->ParameterList->Count);
 		if(request->ParameterList->Count == 1)
 		{
@@ -356,7 +343,6 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 
 	if(strcmp(request->Filename->c_str(),"zapto") == 0)
 	{
-		request->SendPlainHeader();
 		if (request->ParameterList->Count == 0)
 		{	//paramlos - aktuelles programm anzeigen
 			printf("zapto ohne params\n");
