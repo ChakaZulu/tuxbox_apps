@@ -371,6 +371,7 @@ eZapMain::eZapMain(): eWidget(0, 1)
 	connect(eDVB::getInstance(), SIGNAL(scrambled(bool)), SLOT(setSmartcardLogo(bool)));
 	connect(&timeout, SIGNAL(timeout()), SLOT(timeOut()));
 	connect(&clocktimer, SIGNAL(timeout()), SLOT(clockUpdate()));
+	connect(eDVB::getInstance(), SIGNAL(timeUpdated()), SLOT(clockUpdate()));
 	connect(eDVB::getInstance(), SIGNAL(leaveService(eService*)), SLOT(leaveService(eService*)));
 	connect(eDVB::getInstance(), SIGNAL(volumeChanged(int)), SLOT(updateVolume(int)));
 	actual_eventDisplay=0;
@@ -752,10 +753,11 @@ void eZapMain::keyUp(int code)
 				EITEvent* e = new EITEvent(*It->second);
  				tm* t = localtime(&e->start_time);
 				QString _long_description;
-				_long_description += QString().sprintf("Start = %02d:%02d", t->tm_hour, t->tm_min);
+				_long_description += QString().sprintf("Datum %d.%d.%4d, StartTime %02d:%02d, ", t->tm_mday, t->tm_mon+1, t->tm_year+1900, t->tm_hour, t->tm_min);
 				time_t endtime = e->start_time+e->duration;
 				localtime(&endtime);
-				_long_description += QString().sprintf("End %02d:%02d\n", t->tm_hour, t->tm_min);			
+				_long_description += QString().sprintf("EndTime %02d:%02d\n", t->tm_hour, t->tm_min);			
+
 				for (QListIterator<Descriptor> d(e->descriptor); d.current(); ++d)
 				{
 					Descriptor *descriptor=d.current();
