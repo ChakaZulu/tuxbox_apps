@@ -200,6 +200,8 @@ int CChannelList::show()
 		//evtl. anzeige dass keine kanalliste....
 		return res;
 	}
+	g_lcdd->setMode(CLcddClient::MODE_MENU, g_Locale->getText(name) );
+
 	paintHead();
 	updateEvents();
 	paint();
@@ -362,6 +364,8 @@ int CChannelList::show()
 		if ( bouquetList->exec( true ) == menu_return::RETURN_EXIT_ALL )
 			res = -2;
 	}
+
+	g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name) );
 
 	if(zapOnExit)
 	{
@@ -825,6 +829,12 @@ void CChannelList::paintItem(int pos)
 		//number
 		char tmp[10];
 		sprintf((char*) tmp, "%d", chan->number);
+
+		if (liststart+pos==selected)
+		{
+			g_lcdd->setMenuText(0, chan->name );
+			g_lcdd->setMenuText(1, chan->currentEvent.description );
+		}
 
 		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
