@@ -1,4 +1,5 @@
 #define RECORD_TELETEXT
+#define RECORD_SUBTITLES
 #include <lib/dvb/edvb.h>
 #include <config.h>
 #include <unistd.h>
@@ -15,6 +16,10 @@
 #endif
 #include <algorithm>
 #include <string.h>
+
+#ifndef DMX_LOW_BITRATE
+#define DMX_LOW_BITRATE 0x4000
+#endif
 
 #ifdef PROFILE
 	#include <sys/time.h>
@@ -269,17 +274,33 @@ void eDVB::recBegin(const char *filename, eServiceReferenceDVB service)
 			case 6:
 				for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
 				{
-					if (it->Tag() == DESCR_AC3)
-						record=1;
+					switch (it->Tag())
+					{
+						case DESCR_AC3:
+						{
+							record=1;
+							break;
+						}
 #ifdef RECORD_TELETEXT
-					if (it->Tag() == DESCR_TELETEXT)
-						record=1;
+						case DESCR_TELETEXT:
+						{
+							record=2;  // low bitrate
+							break;
+						}
 #endif
+#ifdef RECORD_SUBTITLES
+						case DESCR_SUBTITLING:
+						{
+							record=2;  // low bitrate
+							break;
+						}
+#endif
+					}
 				}
 				break;
 			}
 			if (record)
-				recorder->addNewPID(i->elementary_PID);
+				recorder->addNewPID(i->elementary_PID, record==2?DMX_LOW_BITRATE:0);
 #ifdef RECORD_ECM
 			for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
 				if (it->Tag() == 9)
@@ -714,6 +735,7 @@ void eDVB::configureNetwork()
 		{
 			eDebug("[eDVB] use DHCP");
 			delete udhcpc;
+			system("killall -9 udhcpc");
 			udhcpc = new eConsoleAppContainer("/bin/udhcpc -f");
 			CONNECT(udhcpc->dataAvail, eDVB::UDHCPC_DataAvail);
 			CONNECT(udhcpc->appClosed, eDVB::UDHCPC_Closed);

@@ -52,6 +52,7 @@ class eDVBRecorder: private eThread, public Object
 	{
 		int pid;
 		int fd;
+		int flags;
 		bool operator < (const pid_t &p) const
 		{
 			return pid < p.pid;
@@ -105,7 +106,7 @@ public:
 	 * This call will add a PID to record. Recording doesn't start until using \c start().
 	 * \sa eDVBRecorder::start
 	 */
-	std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> addPID(int pid);
+	std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> addPID(int pid, int flags=0);
 
 	/**
 	 * \brief Removes a PID.
@@ -151,7 +152,7 @@ public:
 	 * This call will add a new PID to a running record. After add all new PIDs .. \c validatePIDs() must be called.
 	 * \sa eDVBRecorder::addNewPID
 	 */
-	void addNewPID(int pid);
+	void addNewPID(int pid, int flags=0);
 
 	/**
 	 * \brief Validate all PIDs.

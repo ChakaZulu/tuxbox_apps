@@ -9,6 +9,10 @@
 #include <lib/dvb/dvbservice.h>
 #include <signal.h>
 
+#ifndef DMX_LOW_BITRATE
+#define DMX_LOW_BITRATE 0x4000
+#endif
+
 #if HAVE_DVB_API_VERSION < 3
 #include <ost/dmx.h>
 #define DVR_DEV "/dev/dvb/card0/dvr1"
@@ -162,23 +166,38 @@ void eDVBRecorder::PMTready(int error)
 					case 6:
 					for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
 					{
-						if (it->Tag() == DESCR_AC3)
+						switch (it->Tag())
 						{
-							record=1;
-							break;
-						}
+							case DESCR_AC3:
+							{
+								record=1;
+								break;
+							}
 #ifdef RECORD_TELETEXT
-						if (it->Tag() == DESCR_TELETEXT)
-						{
-							record=1;
-							break;
-						}
+							case DESCR_TELETEXT:
+							{
+								record=2;  // low bti
+								break;
+							}
 #endif
+#ifdef RECORD_SUBTITLES
+							case DESCR_SUBTITLING:
+							{
+								record=2;
+								break;
+							}
+#endif
+						}
 					}
 					break;
 				}
 				if (record)
-					addNewPID(i->elementary_PID);
+					addNewPID(i->elementary_PID, record==2?DMX_LOW_BITRATE:0);
+#ifdef RECORD_ECM
+				for (ePtrList<Descriptor>::iterator it(i->ES_info); it != i->ES_info.end(); ++it)
+					if (it->Tag() == 9)
+						addNewPID(((CADescriptor*)*it)->CA_PID);
+#endif
 			}
 			validatePIDs();
 
@@ -252,7 +271,7 @@ void eDVBRecorder::open(const char *_filename)
 		rmessagepump.send(eDVBRecorderMessage(eDVBRecorderMessage::rWriteError));
 }
 
-std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int pid)
+std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int pid, int flags)
 {
 	eDebug("eDVBRecorder::addPID(0x%x)", pid );
 	pid_t p;
@@ -279,7 +298,8 @@ std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int
 	flt.input=DMX_IN_FRONTEND;
 	flt.output=DMX_OUT_TS_TAP;
 
-	flt.flags=0;
+	flt.flags=flags;
+	eDebug("pid %04x flags %08x", pid, flags);
 
 	if (::ioctl(p.fd, DMX_SET_PES_FILTER, &flt)<0)
 	{
@@ -291,10 +311,11 @@ std::pair<std::set<eDVBRecorder::pid_t>::iterator,bool> eDVBRecorder::addPID(int
 	return pids.insert(p);
 }
 
-void eDVBRecorder::addNewPID(int pid)
+void eDVBRecorder::addNewPID(int pid, int flags)
 {
 	pid_t p;
 	p.pid = pid;
+	p.flags = flags;
 	newpids.insert(p);
 }
 
@@ -312,7 +333,7 @@ void eDVBRecorder::validatePIDs()
 	}
 	for (std::set<pid_t>::iterator it(newpids.begin()); it != newpids.end(); ++it )
 	{
-		std::pair<std::set<pid_t>::iterator,bool> newpid = addPID(it->pid);
+		std::pair<std::set<pid_t>::iterator,bool> newpid = addPID(it->pid, it->flags);
 		if ( newpid.second )
 		{
 			if ( state == stateRunning )
