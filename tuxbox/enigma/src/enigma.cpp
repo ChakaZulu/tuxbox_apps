@@ -228,6 +228,7 @@ eZap::eZap(int argc, char **argv)
 		swapfilename = "";
 	extern void activateSwapFile(eString);
 	activateSwapFile(eString(swapfilename));
+	free(swapfilename);
 #endif
 #endif
 	eDVB::getInstance()->configureNetwork();
