@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include "format_config.h"
 #ifdef FBV_SUPPORT_JPEG
 #include <lib/picviewer/pictureviewer.h>
@@ -159,4 +160,5 @@ int fh_jpeg_getsize(const char *filename, int *x, int *y, int wanted_width, int 
 //	dbout("fh_jpeg_getsize }\n");
 	return(FH_ERROR_OK);
 }
+#endif
 #endif

@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include "format_config.h"
 #ifdef FBV_SUPPORT_CRW
 #include <lib/picviewer/pictureviewer.h>
@@ -280,4 +281,5 @@ int fh_crw_getsize(const char *filename, int *x, int *y, int wanted_width, int w
 	return(FH_ERROR_OK);
 }
 
+#endif
 #endif

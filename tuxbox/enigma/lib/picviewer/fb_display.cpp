@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include <linux/fb.h>
 
 #include <stdio.h>
@@ -341,3 +342,4 @@ void* convertRGB2FB(unsigned char *rgbbuff, unsigned long count, int bpp, int *c
 	}
 	return fbbuff;
 }
+#endif

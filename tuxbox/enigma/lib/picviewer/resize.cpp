@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include <lib/picviewer/pictureviewer.h>
 
 unsigned char * simple_resize(unsigned char * orgin, int ox, int oy, int dx, int dy)
@@ -72,3 +73,4 @@ unsigned char * color_average_resize(unsigned char * orgin, int ox, int oy, int 
 //	dbout("color_average_resize}\n");
 	return(cr);
 }
+#endif

@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include "format_config.h"
 #ifdef FBV_SUPPORT_GIF
 #include <lib/picviewer/pictureviewer.h>
@@ -168,4 +169,5 @@ int fh_gif_getsize(const char *name, int *x, int *y, int wanted_width, int wante
 	DGifCloseFile(gft);
 	return(FH_ERROR_FORMAT);
 }
+#endif
 #endif

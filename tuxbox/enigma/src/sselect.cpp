@@ -831,6 +831,7 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 		}
 		eServiceReference ref=entry->service;
 
+#ifndef DISABLE_FILE
 		if ( ref.type == 0x2000 ) // picviewer
 		{
 			hide();
@@ -844,6 +845,7 @@ void eServiceSelector::serviceSelected(eListBoxEntryService *entry)
 			show();
 			return;
 		}
+#endif
 
 		if (plockmode)
 		{
@@ -1129,6 +1131,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				&& !movemode && !editMode && this == eZap::getInstance()->getServiceSelector() )
 			{
 				hide();
+#ifndef DISABLE_FILE
 				if (selected.type == 0x2000)  // Picture
 				{
 					ePicViewerSettings f;
@@ -1142,6 +1145,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 					show();
 				}
 				else
+#endif
 				{
 					eEPGStyleSelector e(1);
 #ifndef DISABLE_LCD

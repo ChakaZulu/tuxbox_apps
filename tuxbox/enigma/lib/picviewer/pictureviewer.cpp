@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include <config.h>
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
@@ -632,3 +633,4 @@ void ePictureViewer::hideBusy()
 	}
 	eDebug("Hide Busy}");
 }
+#endif

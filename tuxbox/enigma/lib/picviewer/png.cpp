@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include "format_config.h"
 
 #ifdef FBV_SUPPORT_PNG
@@ -154,4 +155,5 @@ int fh_png_getsize(const char *name, int *x, int *y, int wanted_width, int wante
 	fclose(fh);
 	return(FH_ERROR_OK);
 }
+#endif
 #endif

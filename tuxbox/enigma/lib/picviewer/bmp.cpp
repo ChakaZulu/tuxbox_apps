@@ -1,3 +1,4 @@
+#ifndef DISABLE_FILE
 #include "format_config.h"
 #ifdef FBV_SUPPORT_BMP
 #include <lib/picviewer/pictureviewer.h>
@@ -283,4 +284,5 @@ int fh_bmp_getsize(const char *name, int *x, int *y, int wanted_width, int wante
 //	dbout("fh_bmp_getsize }\n");
 	return(FH_ERROR_OK);
 }
+#endif
 #endif
