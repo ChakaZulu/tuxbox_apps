@@ -32,12 +32,10 @@
 #include <lib/dvb/record.h>
 
 eDVRPlayerThread::eDVRPlayerThread(const char *_filename, eServiceHandlerDVB *handler, int livemode )
-	:handler(handler), buffer(65424), livemode(livemode), liveupdatetimer(this)
+	:handler(handler), buffer(65424), livemode(livemode), liveupdatetimer(this), buffersize(0)
 	,inputsn(0), outputsn(0), messages(this, 1)
 {
 	state=stateInit;
-
-	pthread_mutex_init(&poslock, 0);
 
 	int count=0;
 	seekbusy=0;
@@ -164,7 +162,6 @@ int eDVRPlayerThread::openFile(int slice)
 		inputsn->start();
 		CONNECT(inputsn->activated, eDVRPlayerThread::readMore);
 
-		singleLock s(poslock);
 		this->slicesize = slicesize;
 		this->slice = slice;
 		position=0;
@@ -182,26 +179,20 @@ void eDVRPlayerThread::outputReady(int what)
 {
 	(void)what;
 
-#if 0
-	// i don't know if this is better.. or not.. please check..
-	// on dbox2 we write only blocks of 65424 bytes
-	if ( eSystemInfo::getInstance()->getHwType() < 3	// dbox2
-		&& buffer.size() < 65424		// no full block in buffer
-		&& state != stateFileEnd )	// not eof
-		return;
-#endif
-
-	seekbusy-=buffer.tofile(dvrfd,65424);
+	int wr=buffer.tofile(dvrfd,65424);
+	seekbusy-=wr;
+	int newbuffersize = buffersize - wr;
+	buffersize = newbuffersize;
 
 	if (seekbusy < 0)
 		seekbusy=0;
-	if ((state == stateBufferFull) && (buffer.size()<maxBufferSize))
+	if ((state == stateBufferFull) && (buffersize<maxBufferSize))
 	{
 		state=statePlaying;
 		if (inputsn)
 			inputsn->start();
 	}
-	if (buffer.empty())
+	if (!buffersize)
 	{
 		eDebug("buffer empty, state %d", state);
  		outputsn->stop();
@@ -250,10 +241,9 @@ void eDVRPlayerThread::readMore(int what)
 
 	int flushbuffer=0;
 
-	if (buffer.size() < maxBufferSize)
+	if (buffersize < maxBufferSize)
 	{
 		int rd = buffer.fromfile(sourcefd, maxBufferSize);
-
 		int next=0;
 		if ( rd < maxBufferSize)
 		{
@@ -277,16 +267,18 @@ void eDVRPlayerThread::readMore(int what)
 				flushbuffer=1;
 		}
 
+		int newbuffsize = buffersize + rd;
+		buffersize = newbuffsize;
 		if (!next)
 		{
-			singleLock s(poslock);
-			position+=rd;
+			off64_t newpos = position + rd;
+			position = newpos;
 		}
 	}
 
 	int bla = eSystemInfo::getInstance()->getHwType() < 3 ? 100000 : 16384;
 
-	if ( (state == stateBuffering && buffer.size() > bla) || flushbuffer )
+	if ( (state == stateBuffering && buffersize > bla) || flushbuffer )
 	{
 		state=statePlaying;
 		outputsn->start();
@@ -299,7 +291,7 @@ void eDVRPlayerThread::readMore(int what)
 			inputsn->stop();
 	}
 
-	if ((state == statePlaying) && (buffer.size() >= maxBufferSize))
+	if ((state == statePlaying) && (buffersize >= maxBufferSize))
 	{
 		state=stateBufferFull;
 		if (inputsn)
@@ -328,7 +320,6 @@ eDVRPlayerThread::~eDVRPlayerThread()
 		::close(dvrfd);
 	if (sourcefd >= 0)
 		::close(sourcefd);
-	pthread_mutex_destroy(&poslock);
 }
 
 void eDVRPlayerThread::updatePosition()
@@ -348,13 +339,11 @@ void eDVRPlayerThread::updatePosition()
 		if (inputsn)
 			inputsn->start();
 	}
-	singleLock l(poslock);
 	this->filelength=filelength;
 }
 
 int eDVRPlayerThread::getPosition(int real)
 {
-	singleLock s(poslock);
 	int ret = ((position-getBufferSize())/1880) + slice * (slicesize/1880);
 	if (!real)
 		ret /= 250;
@@ -363,7 +352,6 @@ int eDVRPlayerThread::getPosition(int real)
 
 int eDVRPlayerThread::getLength(int real)
 {
-	singleLock s(poslock);
 	if (real)
 		return filelength;
 	return filelength/250;
@@ -384,15 +372,13 @@ void eDVRPlayerThread::seekTo(off64_t offset)
 	{
 		off64_t newpos=::lseek64(sourcefd, offset%slicesize, SEEK_SET);
 		dvrFlush();
-		singleLock s(poslock);
 		position=newpos;
 	}
 }
 
 int eDVRPlayerThread::getBufferSize()
 {
-	int buffersize=buffer.size(),  // enigma buffer
-		tmp=0;
+	int buffersize=0, tmp=0;
 	FILE *bitstream=fopen("/proc/bus/bitstream", "rt");
 	if (bitstream)
 	{
@@ -413,6 +399,7 @@ int eDVRPlayerThread::getBufferSize()
 		buffersize+=buffersize/8;   	// assume overhead..
 		fclose(bitstream);
 	}
+	buffersize += this->buffersize;  // add size of enigma buffer..
 	return buffersize;
 }
 
@@ -471,11 +458,13 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 			speed=message.parm;
 			state=stateBuffering;
 			Decoder::Resume();
+			buffersize=0;
 		}
 		else
 		{
 			buffer.clear();
 			dvrFlush();
+			buffersize=0;
 		}
 		break;
 	}
@@ -517,11 +506,13 @@ void eDVRPlayerThread::gotMessage(const eDVRPlayerThreadMessage &message)
 				offset+=position+slice*slicesize;
 			if (offset<0)
 				offset=0;
+			buffersize=0;
 		} else
 		{
 			buffer.clear();
 			Decoder::flushBuffer();
 			offset=((off64_t)message.parm)*1880;
+			buffersize=0;
 		}
 
 		seekTo(offset);
