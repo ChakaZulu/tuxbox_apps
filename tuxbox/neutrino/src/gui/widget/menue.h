@@ -123,7 +123,8 @@ class CMenuItem
 		virtual void setActive(const bool Active)
 		{
 			active = Active;
-			paint();
+			if (x != -1)
+				paint();
 		};
 };
 
@@ -252,7 +253,6 @@ class CMenuWidget : public CMenuTarget
 		COnPaintNotifier*	onPaintNotifier;
 		std::vector<CMenuItem*>	items;
 		std::vector<unsigned int> page_start;
-		std::vector<unsigned int> page_end;
 		std::string			name;
 		std::string			iconfile;
 		bool			localizing;

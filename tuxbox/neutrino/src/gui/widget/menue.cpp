@@ -97,7 +97,6 @@ CMenuWidget::~CMenuWidget()
 	}
 	items.clear();
 	page_start.clear();
-	page_end.clear();
 }
 
 void CMenuWidget::addItem(CMenuItem* menuItem, const bool defaultselected)
@@ -190,7 +189,8 @@ int CMenuWidget::exec(CMenuTarget* parent, const std::string &)
 
 							if ( item->isSelectable() )
 							{
-								if(pos <= (int)page_end[current_page] && pos >= (int)page_start[current_page])
+								if ((pos < (int)page_start[current_page + 1]) &&
+								    (pos >= (int)page_start[current_page]))
 								{ // Item is currently on screen
 									//clear prev. selected
 									items[selected]->paint( false );
@@ -304,7 +304,6 @@ void CMenuWidget::paint()
 	int hheight = g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->getHeight();
 	int itemHeightTotal=0;
 	int heightCurrPage=0;
-	page_end.clear();
 	page_start.clear();
 	page_start.push_back(0);
 	total_pages=1;
@@ -315,13 +314,12 @@ void CMenuWidget::paint()
 		heightCurrPage+=item_height;
 		if(heightCurrPage > (height-hheight))
 		{
-			page_end.push_back(i - 1);
 			page_start.push_back(i);
 			total_pages++;
 			heightCurrPage=item_height;
 		}
 	}
-	page_end.push_back(items.size() - 1);
+	page_start.push_back(items.size());
 
 	iconOffset= 0;
 	for (unsigned int i= 0; i< items.size(); i++)
@@ -359,11 +357,11 @@ void CMenuWidget::paintItems()
 	int item_height=height-(item_start_y-y);
 	
 	//Item not currently on screen
-	if(selected>=0)
+	if (selected >= 0)
 	{
 		while(selected < (int)page_start[current_page])
 			current_page--;
-		while(selected > (int)page_end[current_page])
+		while(selected >= (int)page_start[current_page + 1])
 			current_page++;
 	}
 	
@@ -375,20 +373,29 @@ void CMenuWidget::paintItems()
 		frameBuffer->paintBoxRel(x+ width +2, item_start_y+ 2+ int(current_page* sbh), 11, int(sbh), COL_MENUCONTENT_PLUS_3);
 	}
 	frameBuffer->paintBoxRel(x,item_start_y, width,item_height, COL_MENUCONTENT_PLUS_0);
-	unsigned int count;
 	int ypos=item_start_y;
-	for(count=page_start[current_page]; count <= page_end[current_page];count++)
+	for (unsigned int count = 0; count < items.size(); count++)
 	{
 		CMenuItem* item = items[count];
-		item->init(x,ypos, width, iconOffset);
-		if( (item->isSelectable()) && (selected==-1) )
+		
+		if ((count >= page_start[current_page]) &&
+		    (count < page_start[current_page + 1]))
 		{
-			ypos = item->paint(true);
-			selected = count;
+			item->init(x, ypos, width, iconOffset);
+			if( (item->isSelectable()) && (selected==-1) )
+			{
+				ypos = item->paint(true);
+				selected = count;
+			}
+			else
+			{
+				ypos = item->paint(selected==((signed int) count) );
+			}
 		}
 		else
 		{
-			ypos = item->paint(selected==((signed int) count) );
+			/* x = -1 is a marker which prevents the item from being painted on setActive changes */
+			item->init(-1, 0, 0, 0);
 		}
 	}
 }
