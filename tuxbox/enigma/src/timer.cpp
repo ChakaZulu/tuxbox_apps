@@ -102,11 +102,10 @@ static time_t getNextEventStartTime( time_t t, int duration, int type, int last_
 			int year = last_activation % 1000,
 					mon = (last_activation % 100000 ) / 1000,
 					day = (last_activation % 100000000) / 1000000;
-//			eDebug("%d < %d || %d < %d || %d <= %d", 
-//				tmp.tm_year, year, 
-//				tmp.tm_mon+1, mon, 
-//				tmp.tm_mday, day );
-			if ( tmp.tm_year < year || (tmp.tm_mon+1) < mon || tmp.tm_mday <= day )
+			time_t last_act = (year*1000000)+((100+mon)*1000)+day+100;
+			int activation=(tmp.tm_year*1000000)+((100+tmp.tm_mon+1)*1000)+tmp.tm_mday+100;
+//			eDebug("%d <= %d ?", activation, last_act );
+			if ( activation <= last_act )
 			{
 //				eDebug("yes.. continue");
 				continue;
