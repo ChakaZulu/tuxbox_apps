@@ -1008,6 +1008,7 @@ static eString getEITC()
 	return result;
 }
 
+#ifndef DISABLE_FILE
 extern int freeRecordSpace(void);
 
 static eString getDiskSpace(void)
@@ -1038,6 +1039,7 @@ static eString getDiskSpace(void)
 	result += "</span><br><br>";
 	return result;
 }
+#endif
 
 static eString getStats()
 {
@@ -1666,7 +1668,9 @@ static eString web_root(eString request, eString dirpath, eString opts, eHTTPCon
 		DELETE(#SI#);
 		DELETE(#EIT#);
 	}
+#ifndef DISABLE_FILE
 	result.strReplace("#DISKSPACE#", getDiskSpace());
+#endif
 	result.strReplace("#VOLBAR#", getVolBar());
 
 	return result;
