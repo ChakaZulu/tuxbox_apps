@@ -2573,9 +2573,9 @@ static eString getContent(eString mode, eString path, eString opts)
 		tmp = "ZAP";
 		if (pdaScreen == 0)
 		{
-			if (zapMode >= 0)
+			if (zapMode >= 0 && zapMode <= 5)
 				tmp += ": " + zap[zapMode][ZAPMODENAME];
-			if (zapSubMode >= 2)
+			if (zapSubMode >= 2 && zapSubMode <= 4)
 				tmp += " - " + zapSubModes[zapSubMode];
 		}
 
