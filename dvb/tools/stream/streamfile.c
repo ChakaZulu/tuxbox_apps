@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.10 2004/04/29 18:32:32 thegoodguy Exp $
+ * $Id: streamfile.c,v 1.11 2004/04/29 19:48:35 diemade Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -317,7 +317,7 @@ main (int argc, char ** argv) {
 
 	written = ringbuffer_write(ringbuf, buf + offset, r - offset);
 	// TODO: Retry
-	if (written != todo) {
+	if (written != r - offset) {
 		dprintf("PANIC: wrote less than requested to ringbuffer, written %d, requested %d\n", written, r - offset);
 		exit_flag = 1;
 	}
