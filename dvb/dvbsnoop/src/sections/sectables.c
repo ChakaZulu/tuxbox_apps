@@ -1,5 +1,5 @@
 /*
-$Id: sectables.c,v 1.11 2003/10/29 20:54:57 rasc Exp $
+$Id: sectables.c,v 1.12 2003/11/09 22:54:16 rasc Exp $
 
  --  For more information please see: ISO 13818 (-1) and ETSI 300 468
  -- Verbose Level >= 2
@@ -7,6 +7,9 @@ $Id: sectables.c,v 1.11 2003/10/29 20:54:57 rasc Exp $
 
 
 $Log: sectables.c,v $
+Revision 1.12  2003/11/09 22:54:16  rasc
+no message
+
 Revision 1.11  2003/10/29 20:54:57  rasc
 more PES stuff, DSM descriptors, testdata
 
@@ -63,7 +66,7 @@ dvbsnoop v0.7  -- Commit to CVS
 #include "eit.h"
 #include "emm_ecm.h"
 #include "userdef.h"
-#include "datacarousel/datagram.h"
+#include "datacarousel/dsmcc_addr.h"
 #include "datacarousel/ints.h"
 #include "testdata/test0x1d.h"
 
@@ -215,7 +218,7 @@ static TABLE_ID_FUNC table_id_func[] = {
      {  0x02, 0x02,  decode_PMT	},
      {  0x03, 0x03,  decode_TSDT },
      /* res. */
-     {  0x3e, 0x3e,  decode_DATAGRAM_DSMCC },
+     {  0x3e, 0x3e,  decode_DSMCC_ADDR },
      {  0x40, 0x41,  decode_NIT	},
      {  0x42, 0x42,  decode_SDT	},
      /* res. */

@@ -1,4 +1,4 @@
 
 
-void decode_DATAGRAM_DSMCC (u_char *b, int len);
+void decode_DSMCC_ADDR (u_char *b, int len);
 
