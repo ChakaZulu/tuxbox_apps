@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.73 2001/10/24 23:41:15 field Exp $
+//  $Id: sectionsd.cpp,v 1.74 2001/10/25 10:32:04 field Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,8 +23,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
-//  Revision 1.73  2001/10/24 23:41:15  field
-//  dmxEIT restart verbessert
+//  Revision 1.74  2001/10/25 10:32:04  field
+//  kleiner Bug mit mehreren IP-Connections behoben (speed rocks :)
 //
 //  Revision 1.72  2001/10/24 17:03:42  field
 //  Deadlock behoben, Geschwindigkeit gesteigert
@@ -281,6 +281,9 @@
 
 // Gibt die Anzahl Timeouts an, nach der die Verbindung zum DMX neu gestartet wird (wegen evtl. buffer overflow)
 #define RESTART_DMX_AFTER_TIMEOUTS 15
+
+// Gibt die Anzahl Timeouts an, nach der überprüft wird, ob die Timeouts von einem Sender ohne EIT kommen oder nicht
+#define CHECK_RESTART_DMX_AFTER_TIMEOUTS 3
 
 // Wieviele Sekunden EPG gecached werden sollen
 static long secondsToCache=5*24*60L*60L; // 5 Tage
@@ -1319,7 +1322,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.73 2001/10/24 23:41:15 field Exp $\n"
+    "$Id: sectionsd.cpp,v 1.74 2001/10/25 10:32:04 field Exp $\n"
     "Current time: %s"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -2579,14 +2582,16 @@ const unsigned timeoutInSeconds=1;
 
     try
     {
-        dprintf("eit-thread started.\n");
+        dprintf("[eitThread] eit-thread started.\n");
         int timeoutsDMX=0;
+        time_t lastRestarted=time(NULL);
+        double sorttime, last_sorttime, last_clock;
         dmxEIT.lock();
         if(dmxEIT.start()) // -> unlock
             return 0;
         for(;;)
         {
-            if(timeoutsDMX>2)
+            if(timeoutsDMX>CHECK_RESTART_DMX_AFTER_TIMEOUTS-1)
             {
                 lockServices();
                 MySIservicesOrderUniqueKey::iterator si=mySIservicesOrderUniqueKey.end();
@@ -2601,44 +2606,55 @@ const unsigned timeoutInSeconds=1;
                         ((!si->second->eitPresentFollowingFlag())&&(!dmxEIT.isScheduled)))
                     {
                         timeoutsDMX=0;
-                        dprintf("timeoutsDMX for 0x%x reset to 0\n", currentServiceKey);
+                        dprintf("[eitThread] timeoutsDMX for 0x%x reset to 0\n", currentServiceKey);
                     }
                 }
                 unlockServices();
             }
 
-
-            //if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS)
-            if(timeoutsDMX>=3)
-            {
-                // sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
-                timeoutsDMX=0;
-                dmxEIT.stop(); // -> lock
-                lockEvents();
-                if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
-                {
-                    // kleiner als 1 Tag machen wir den Cache nicht,
-                    // da die timeouts ja auch von einem Sender ohne EPG kommen koennen
-                    // Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
-                    // Man koennte auch ab 3000 Events nur noch jedes 3 Event o.ae. einsortieren
-                    dmxSDT.pause();
-                    lockServices();
-                    unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
-                    secondsToCache-=5*60L*60L; // 5h weniger
-                    dprintf("decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
-                    removeNewEvents();
-                    removeOldEvents(oldEventsAre);
-                    if(anzEventsAlt>mySIeventsOrderUniqueKey.size())
-                        dprintf("Removed %u Events (%u -> %u)\n", anzEventsAlt-mySIeventsOrderUniqueKey.size(), anzEventsAlt, mySIeventsOrderUniqueKey.size());
-                    unlockServices();
-                    dmxSDT.unpause();
-                }
-                unlockEvents();
-                if(dmxEIT.start()) // -> unlock
-                    return 0;
-                dputs("dmxEIT restarted");
-            }
             time_t zeit=time(NULL);
+
+            if(timeoutsDMX>=CHECK_RESTART_DMX_AFTER_TIMEOUTS)
+            {
+                if(zeit>lastRestarted+3) // letzter restart länger als 3secs her, daher cache NICHT verkleinern
+                {
+                    dmxEIT.stop(); // -> lock
+                    if(dmxEIT.start()) // -> unlock
+                       return 0;
+                    dprintf("[eitThread] dmxEIT restarted, cache NOT decreased (dt=%ld)\n", (int)zeit-lastRestarted);
+                }
+                else
+                {
+                    // sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
+                    dmxEIT.stop(); // -> lock
+                    lockEvents();
+                    if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>3000)
+                    {
+                        // kleiner als 1 Tag machen wir den Cache nicht,
+                        // da die timeouts ja auch von einem Sender ohne EPG kommen koennen
+                        // Die 3000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
+                        // Man koennte auch ab 3000 Events nur noch jedes 3 Event o.ae. einsortieren
+                        dmxSDT.real_pause();
+                        lockServices();
+                        unsigned anzEventsAlt=mySIeventsOrderUniqueKey.size();
+                        secondsToCache-=5*60L*60L; // 5h weniger
+                        dprintf("[eitThread] decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
+                        removeNewEvents();
+                        removeOldEvents(oldEventsAre);
+                        if(anzEventsAlt>mySIeventsOrderUniqueKey.size())
+                            dprintf("[eitThread] Removed %u Events (%u -> %u)\n", anzEventsAlt-mySIeventsOrderUniqueKey.size(), anzEventsAlt, mySIeventsOrderUniqueKey.size());
+                        unlockServices();
+                        dmxSDT.real_unpause();
+                    }
+                    unlockEvents();
+                    if(dmxEIT.start()) // -> unlock
+                        return 0;
+                    dputs("[eitThread] dmxEIT restarted");
+                }
+                lastRestarted= zeit;
+                timeoutsDMX=0;
+            }
+
             if(timeset)
             { // Nur wenn ne richtige Uhrzeit da ist
                 if(dmxEIT.isScheduled)
@@ -2649,31 +2665,27 @@ const unsigned timeoutInSeconds=1;
                 else if(zeit>dmxEIT.lastChanged+TIME_EIT_PRESENT)
                     dmxEIT.change(); // -> lock, unlock
             }
-            //dprintf("eitThread: before dmxEIT.lock\n");
             dmxEIT.lock();
-            //dprintf("eitThread: after dmxEIT.lock\n");
+            last_sorttime= sorttime;
+            sorttime= (double) (clock() - last_clock) / CLOCKS_PER_SEC;
+
             int rc=dmxEIT.read((char *)&header, sizeof(header), timeoutInSeconds);
-            //dprintf("eitThread: after dmxEIT.read 1 (%d)\n", rc);
+            last_clock=clock();
+
             if(!rc)
             {
-                //dprintf("eitThread: before dmxEIT.unlock\n");
                 dmxEIT.unlock();
-                //dprintf("eitThread: after dmxEIT.unlock\n");
-                dputs("dmxEIT.read timeout");
+                dprintf("[eitThread] dmxEIT.read timeout, last sort-time: %f, %f\n", sorttime, last_sorttime);
                 timeoutsDMX++;
                 continue; // timeout -> kein EPG
             }
             else if(rc<0)
             {
-                //dprintf("eitThread: before 2 dmxEIT.unlock\n");
+                dputs("[eitThread] dmxEIT.read rc<0");
                 dmxEIT.unlock();
-                //dprintf("eitThread: after 2 dmxEIT.unlock\n");
                 // DMX neu starten
-                //dprintf("eitThread: before 2 dmxEIT.pause\n");
-                dmxEIT.pause();
-                //dprintf("eitThread: before 2 dmxEIT.unpause\n");
-                dmxEIT.unpause();
-                //dprintf("eitThread: after 2 dmxEIT.unpause\n");
+                dmxEIT.real_pause();
+                dmxEIT.real_unpause();
                 continue;
             }
             timeoutsDMX=0;
@@ -2682,20 +2694,17 @@ const unsigned timeoutInSeconds=1;
             {
                 dmxEIT.closefd();
                 dmxEIT.unlock();
-                fprintf(stderr, "Not enough memory!\n");
+                fprintf(stderr, "[eitThread] Not enough memory!\n");
                 break;
             }
             // Den Header kopieren
             memcpy(buf, &header, sizeof(header));
-            //dprintf("eitThread: before 3 dmxEIT.read\n");
             rc=dmxEIT.read(buf+sizeof(header), header.section_length-5, timeoutInSeconds);
-            //dprintf("eitThread: before 3 dmxEIT.unlock\n");
             dmxEIT.unlock();
-            //dprintf("eitThread: after 3 dmxEIT.unlock\n");
             if(!rc)
             {
                 delete[] buf;
-                dputs("dmxEIT.read timeout after header");
+                dputs("[eitThread] dmxEIT.read timeout after header");
                 // DMX neu starten, noetig, da bereits der Header gelesen wurde
                 dmxEIT.pause(); // -> lock
                 dmxEIT.unpause(); // -> unlock
@@ -2703,10 +2712,11 @@ const unsigned timeoutInSeconds=1;
             }
             else if(rc<0)
             {
+                dputs("[eitThread] dmxEIT.read rc<0 after header");
                 delete[] buf;
                 // DMX neu starten
-                dmxEIT.pause(); // -> lock
-                dmxEIT.unpause(); // -> unlock
+                dmxEIT.real_pause(); // -> lock
+                dmxEIT.real_unpause(); // -> unlock
                 continue;
             }
 
@@ -2767,7 +2777,9 @@ const unsigned timeoutInSeconds=1;
                                 unlockServices();
                             }
                             else
+                            {
                                 unlockServices();
+                            }
                         }
                     } // for
                 } // if serviceID
@@ -2775,21 +2787,19 @@ const unsigned timeoutInSeconds=1;
             else
             {
                 delete[] buf;
-                dprintf("skipped sections: pc %d\n", dmxEIT.pauseCounter);
-                if (dmxEIT.pauseCounter>1)
-                    break;
+                dprintf("[eitThread] skipped sections: pauseCounter %d\n", dmxEIT.pauseCounter);
             }
         } // for
     } // try
     catch (std::exception& e)
     {
-        fprintf(stderr, "Caught std-exception in connection-thread %s!\n", e.what());
+        fprintf(stderr, "[eitThread] Caught std-exception in connection-thread %s!\n", e.what());
     }
     catch (...)
     {
-        fprintf(stderr, "Caught exception in eit-thread!\n");
+        fprintf(stderr, "[eitThread] Caught exception in eit-thread!\n");
     }
-    dprintf("eit-thread ended\n");
+    dprintf("[eitThread] eit-thread ended\n");
     return 0;
 }
 
@@ -2899,7 +2909,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.73 2001/10/24 23:41:15 field Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.74 2001/10/25 10:32:04 field Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
