@@ -10,6 +10,7 @@ class eExpertSetup: public eSetupWindow
 	void ngrab_setup();
 	void software_update();
 #endif
+	void factory_reset();
 	void rc_setup();
 	void colorbuttonsChanged(bool);
 	void serialDebugChanged(bool);

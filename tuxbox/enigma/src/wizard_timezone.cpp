@@ -33,4 +33,4 @@ public:
 	}
 };
 
-eAutoInitP0<eWizardTimezoneInit> init_eWizardTimeZoneInit(eAutoInitNumbers::wizard+1, "wizard: timezone");
+eAutoInitP0<eWizardTimezoneInit> init_eWizardTimeZoneInit(eAutoInitNumbers::wizard+2, "wizard: timezone");
