@@ -29,9 +29,10 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "eventlist.hpp"
-#include "../global.h"
-#include "../neutrino.h"
+#include "global.h"
+
+#include "eventlist.h"
+#include "neutrino.h"
 
 
 EventList::EventList()

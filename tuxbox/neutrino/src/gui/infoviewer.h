@@ -37,7 +37,7 @@
 #include "driver/fontrenderer.h"
 
 #include "gui/color.h"
-#include "helpers/settings.h"
+#include "system/settings.h"
 #include "streaminfo.h"
 
 #include "pthread.h"

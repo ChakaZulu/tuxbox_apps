@@ -42,13 +42,13 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 
-#include "helpers/epgdata.h"
-#include "helpers/infoviewer.h"
-#include "helpers/locale.h"
-#include "helpers/settings.h"
+#include "system/locale.h"
+#include "system/settings.h"
 
+#include "gui/epgview.h"
+#include "gui/infoviewer.h"
 #include "gui/bouquetlist.h"
-#include "gui/eventlist.hpp"
+#include "gui/eventlist.h"
 #include "gui/gamelist.h"
 
 #ifndef NEUTRINO_CPP

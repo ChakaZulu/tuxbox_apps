@@ -31,7 +31,7 @@
 
 #include "global.h"
 
-#include "epgdata.h"
+#include "epgview.h"
 #include "neutrino.h"
 
 #include "gui/widget/hintbox.h"

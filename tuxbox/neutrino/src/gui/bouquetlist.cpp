@@ -37,13 +37,13 @@
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
 #include "daemonc/remotecontrol.h"
-#include "helpers/infoviewer.h"
-#include "helpers/settings.h"
-#include "eventlist.hpp"
+#include "system/settings.h"
+
 
 #include "gui/widget/menue.h"
 #include "gui/color.h"
-
+#include "gui/infoviewer.h"
+#include "gui/eventlist.h"
 
 
 

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.247 2002/04/25 19:29:38 McClean Exp $
+        $Id: neutrino.cpp,v 1.248 2002/04/25 20:47:55 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -56,21 +56,20 @@
 
 #include "gui/color.h"
 
-#include "gui/eventlist.hpp"
+#include "gui/bedit/bouqueteditor_bouquets.h"
+#include "gui/eventlist.h"
 #include "gui/channellist.h"
 #include "gui/screensetup.h"
 #include "gui/gamelist.h"
-#include "gui/bedit/bouqueteditor_bouquets.h"
-
-#include "helpers/infoviewer.h"
-#include "helpers/epgdata.h"
-#include "helpers/setting_helpers.h"
-#include "helpers/settings.h"
-#include "helpers/locale.h"
-#include "helpers/update.h"
-#include "helpers/scan.h"
-
+#include "gui/infoviewer.h"
+#include "gui/epgview.h"
+#include "gui/update.h"
+#include "gui/scan.h"
 #include "gui/favorites.h"
+
+#include "system/setting_helpers.h"
+#include "system/settings.h"
+#include "system/locale.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -2353,7 +2352,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.247 2002/04/25 19:29:38 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.248 2002/04/25 20:47:55 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 

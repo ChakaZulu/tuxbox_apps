@@ -37,11 +37,12 @@
 #include "driver/rcinput.h"
 #include "daemonc/remotecontrol.h"
 
-#include "helpers/infoviewer.h"
-#include "helpers/settings.h"
+#include "system/settings.h"
 
 #include "gui/widget/menue.h"
 #include "gui/color.h"
+#include "gui/infoviewer.h"
+
 #include "sectionsdclient.h"
 
 #include <string>

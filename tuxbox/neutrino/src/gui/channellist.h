@@ -33,7 +33,7 @@
 #define __channellist__
 
 #include "driver/framebuffer.h"
-#include "helpers/lastchannel.h"
+#include "system/lastchannel.h"
 
 #include <string>
 #include <vector>

@@ -29,15 +29,15 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __epgdata__
-#define __epgdata__
+#ifndef __epgview__
+#define __epgview__
 
 #include "driver/framebuffer.h"
 #include "driver/rcinput.h"
 #include "driver/fontrenderer.h"
 
 #include "gui/color.h"
-#include "helpers/settings.h"
+#include "system/settings.h"
 
 #include "sections/sectionsdMsg.h"
 #include "sectionsdclient.h"

@@ -36,7 +36,7 @@
 
 #include "driver/fontrenderer.h"
 #include "driver/rcinput.h"
-#include "helpers/settings.h"
+#include "system/settings.h"
 
 #include "gui/widget/messagebox.h"
 #include "gui/color.h"

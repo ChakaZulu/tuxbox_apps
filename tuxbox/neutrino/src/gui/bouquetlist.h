@@ -33,7 +33,7 @@
 #define __bouquetlist__
 
 #include "driver/framebuffer.h"
-#include "helpers/lastchannel.h"
+#include "system/lastchannel.h"
 #include "channellist.h"
 
 #include <string>
