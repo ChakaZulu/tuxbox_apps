@@ -154,6 +154,7 @@ void saveSettings()
 void shutdownBox()
 {
 	lcdd.shutdown();
+	zapit.shutdown();
 	saveSettings();
 
 	if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
@@ -753,7 +754,7 @@ void sig_catch(int signal)
 int main(int argc, char **argv)
 {
 	int listenfd, connfd;
-	printf("Controld  $Id: controld.cpp,v 1.62 2002/09/18 09:49:16 obi Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.63 2002/10/04 17:56:01 thegoodguy Exp $\n\n");
 
 	//printf("[controld] mainThread-pid: %d\n", getpid());
 	switch (fork())

@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.30 2002/10/03 19:05:12 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.31 2002/10/04 17:56:02 thegoodguy Exp $
  *
  * simple commandline client for zapit
  *
@@ -52,6 +52,7 @@ int usage (std::string basename)
 	std::cout << "unmute audio: " << basename << " -unmute" << std::endl;
 	std::cout << "set volume: " << basename << " -vol <0..64>" << std::endl;
 	std::cout << "register neutrino as event client: " << basename << " -rn" << std::endl;
+	std::cout << "shutdown zapit: " << basename << " -kill" << std::endl;
 	return -1;
 }
 
@@ -80,6 +81,7 @@ int main (int argc, char** argv)
 	bool show_satellites = false;
 	bool scan = false;
 	bool zapByName = false;
+	bool killzapit = false;
 	uint32_t diseqc[5];
 
 	/* command line */
@@ -123,6 +125,11 @@ int main (int argc, char** argv)
 		else if (!strncmp(argv[i], "-c", 2))
 		{
 			reload = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-kill", 5))
+		{
+			killzapit = true;
 			continue;
 		}
 		else if (!strncmp(argv[i], "-rn", 3))
@@ -231,6 +238,14 @@ int main (int argc, char** argv)
 	CZapitClient zapit;
 	std::vector<CZapitClient::responseGetBouquets> bouquets;
 	std::vector<CZapitClient::responseGetBouquetChannels> channels;
+
+	/* kill zapit*/
+	if (killzapit)
+	{
+		zapit.shutdown();
+		std::cout << "zapit shot down :)" << std::endl;
+		return 0;
+	}
 
 	/* audio mute */
 	if (mute != -1)
@@ -393,7 +408,7 @@ int main (int argc, char** argv)
 	{
 		/* read channel list */
 		if (bouquet)
-			zapit.getBouquetChannels(bouquet - 1, channels);
+			zapit.getBouquetChannels(bouquet, channels);
 
 		/* display bouquet list */
 		else
@@ -402,7 +417,7 @@ int main (int argc, char** argv)
 
 			std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
 			for (b_resp = bouquets.begin(); b_resp < bouquets.end(); b_resp++)
-				std::cout << (b_resp->bouquet_nr + 1) << ": " << b_resp->name << std::endl;
+				std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
 			return 0;
 		}
 
@@ -451,4 +466,3 @@ int main (int argc, char** argv)
 
 	return 0;
 }
-

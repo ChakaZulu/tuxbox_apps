@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.60 2002/10/03 19:31:03 thegoodguy Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.61 2002/10/04 17:56:01 thegoodguy Exp $ *
  *
  * Client-Interface für zapit - DBoxII-Project
  *
@@ -55,7 +55,14 @@ void CZapitClient::send(const unsigned char command, char* data = NULL, const un
 	    send_data(data, size);
 }
 
-/***********************************************/
+
+void CZapitClient::shutdown()
+{
+	send(CZapitMessages::CMD_SHUTDOWN);
+	zapit_close();
+}
+
+//***********************************************/
 /*					     */
 /* general functions for zapping	       */
 /*					     */

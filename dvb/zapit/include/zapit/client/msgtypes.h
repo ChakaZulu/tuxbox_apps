@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.1 2002/09/25 20:43:33 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.2 2002/10/04 17:56:01 thegoodguy Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -39,6 +39,7 @@ class CZapitMessages
 
 	enum commands
 		{
+			CMD_SHUTDOWN		 = 0,
 			CMD_ZAPTO		 = 1,
 			CMD_ZAPTO_CHANNELNR,
 			CMD_STOP_VIDEO,					// not supported yet

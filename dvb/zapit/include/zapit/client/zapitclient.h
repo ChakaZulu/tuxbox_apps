@@ -181,6 +181,13 @@ class CZapitClient:public CBasicClient
 	typedef std::vector<responseGetSatelliteList> SatelliteList;
 
  public:
+	/*****************************/
+	/*                           */
+	/* shutdown the zapit daemon */
+	/*                           */
+	/*****************************/
+	void shutdown();
+
 
 	/****************************************/
 	/*					*/
