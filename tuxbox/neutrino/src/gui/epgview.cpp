@@ -458,14 +458,14 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 					break;
 
 				case CRCInput::RC_red:
-					g_Timer->storeEvent (onid_sid, epgData.eventID, SwitchChannel|Record, epgData.epg_times.startzeit, epgData.epg_times.startzeit+epgData.epg_times.dauer);
+					g_Timer->storeEvent (onid_sid, epgData.eventID, CTimer::RecordEvent, epgData.epg_times.startzeit, epgData.epg_times.startzeit+epgData.epg_times.dauer);
 					ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					break;
 
 				// -- 2002-05-13 rasc  Switch Channel
 				case CRCInput::RC_yellow:
 					// $$ EPG ID muss noch mit rein...
-					g_Timer->storeEvent (onid_sid, epgData.eventID, SwitchChannel, epgData.epg_times.startzeit, 0);
+					g_Timer->storeEvent (onid_sid, epgData.eventID, CTimer::Switch2Event, epgData.epg_times.startzeit, 0);
 					ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					break;
 
