@@ -268,9 +268,17 @@ CAIdentifierDescriptor::CAIdentifierDescriptor(descr_gen_t *descr)
 	:Descriptor(descr)
 {
 	CA_system_ids=(len-2)/2;
-	CA_system_id=new __u16[CA_system_ids];
-	for (int i=0; i<CA_system_ids; i++)
-		CA_system_id[i]=(((__u8*)(descr+2))[i*2]<<8)|(((__u8*)(descr+2))[i*2+1]);
+	if ( CA_system_ids > 0 )
+	{
+		CA_system_id=new __u16[CA_system_ids];
+		for (int i=0; i<CA_system_ids; i++)
+			CA_system_id[i]=(((__u8*)(descr+2))[i*2]<<8)|(((__u8*)(descr+2))[i*2+1]);
+	}
+	else
+	{
+		CA_system_id=0;
+		CA_system_ids=0;
+	}
 }
 
 #ifdef SUPPORT_XML
@@ -301,12 +309,14 @@ LinkageDescriptor::LinkageDescriptor(descr_linkage_struct *descr)
 	if (linkage_type!=8)
 	{
 		priv_len=len-LINKAGE_LEN;
-		if (priv_len)
+		if (priv_len>0)
 		{
 			private_data=new __u8[priv_len+1];
 			private_data[priv_len]=0;
 			memcpy(private_data, ((__u8*)descr)+LINKAGE_LEN, priv_len);
 		}
+		else
+			priv_len=0;
 	} else
 	{
 		handover_type=descr->handover_type;
@@ -325,11 +335,14 @@ LinkageDescriptor::LinkageDescriptor(descr_linkage_struct *descr)
 			initial_service_id|=*ptr++;
 		}
 		priv_len=((__u8*)descr)+len-ptr;
-		if (priv_len)
+		if (priv_len>0)
 		{
-			private_data=new __u8[priv_len];
+			private_data=new __u8[priv_len+1];
+			private_data[priv_len]=0;
 			memcpy(private_data, ptr, priv_len);
 		}
+		else
+			priv_len=0;
 	}
 }
 
@@ -461,10 +474,15 @@ eString StreamIdentifierDescriptor::toString()
 CADescriptor::CADescriptor(ca_descr_t *descr)
 	:Descriptor((descr_gen_t*)descr)
 {
-	data=new __u8[len];
-	memcpy(data, descr, len);
-	CA_system_ID=HILO(descr->CA_system_ID);
-	CA_PID=HILO(descr->CA_PID);
+	if ( len > 0 )
+	{
+		data=new __u8[len];
+		memcpy(data, descr, len);
+		CA_system_ID=HILO(descr->CA_system_ID);
+		CA_PID=HILO(descr->CA_PID);
+	}
+	else
+		data=0;
 }
 
 CADescriptor::~CADescriptor()
@@ -1261,11 +1279,14 @@ int PMT::data(__u8 *data)
 
 	int program_info_len=HILO(pmt->program_info_length);
 	int len=HILO(pmt->section_length)+3-4;
+	if ( len < 0 )
+		len=0;
 	int ptr=PMT_LEN;
 	while (ptr<(program_info_len+PMT_LEN))
 	{
 		descr_gen_t *d=(descr_gen_t*)(data+ptr);
-		int len = d->descriptor_length+2;
+		int len = (__u8)d->descriptor_length;
+		len+=2;
 		program_info.push_back(Descriptor::create(d));
 
 		// store plain data
