@@ -11,7 +11,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
 #include <freetype/freetype.h>
 
 	/* the following header shouldn't be used in normal programs */
@@ -205,29 +204,6 @@ void Font::unlock()
 		delete this;
 }
 
-static const int num_glyph=2048;
-static pGlyph glyphs[num_glyph];
-static int cptr=0;
-
-pGlyph *allocateGlyph()
-{
-	int s=cptr;
-	do
-	{
-		if (!(glyphs[cptr].flags&GS_USED))
-		{
-			glyphs[cptr].flags=GS_USED;
-			return glyphs+cptr;
-		}
-		cptr++;
-		if (cptr==num_glyph)
-			cptr=0;
-	} while (s!=cptr);
-	pGlyph *g=new pGlyph;
-	g->flags=GS_USED|GS_HEAP;
-	return g;
-}
-
 int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 {
 	FTC_SBit glyph;
@@ -237,27 +213,28 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 	}
 	if ((flags&GS_MYWRAP) && (cursor.x()+ glyph->xadvance) >= area.right())
 	{
-		glyphs.last();
 		int cnt = 0;
-		while (glyphs.current())
+		glyphString::iterator i(glyphs.end());
+		--i;
+		while (i != glyphs.begin())
 		{
-			if (glyphs.current()->flags&(GS_ISSPACE|GS_ISFIRST))
+			if (i->flags&(GS_ISSPACE|GS_ISFIRST))
 				break;
 			cnt++;
-			glyphs.prev();
-		}
-		if (glyphs.current() && ((glyphs.current()->flags&(GS_ISSPACE|GS_ISFIRST))==GS_ISSPACE) && glyphs.next())		// skip space
+			--i;
+		} 
+		if (i != glyphs.begin() && ((i->flags&(GS_ISSPACE|GS_ISFIRST))==GS_ISSPACE) && (++i != glyphs.end()))		// skip space
 		{
-			int linelength=cursor.x()-glyphs.current()->x;
-			glyphs.current()->flags|=GS_ISFIRST;
-			QPoint offset=QPoint(glyphs.current()->x, glyphs.current()->y);
+			int linelength=cursor.x()-i->x;
+			i->flags|=GS_ISFIRST;
+			QPoint offset=QPoint(i->x, i->y);
 			newLine();
 			offset-=cursor;
-			while (glyphs.current())		// rearrange them into the next line
+			while (i != glyphs.end())		// rearrange them into the next line
 			{
-				glyphs.current()->x-=offset.x();
-				glyphs.current()->y-=offset.y();
-				glyphs.next();
+				i->x-=offset.x();
+				i->y-=offset.y();
+				++i;
 			}
 			cursor+=QPoint(linelength, 0);	// put the cursor after that line
 		} else
@@ -268,7 +245,6 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 				flags|=GS_ISFIRST;
 			}
 		}
-		glyphs.last();
 	}
 	int xadvance=glyph->xadvance, kern=0;
 	if (previous && use_kerning)
@@ -277,18 +253,18 @@ int eTextPara::appendGlyph(FT_UInt glyphIndex, int flags)
 		FT_Get_Kerning(current_face, previous, glyphIndex, ft_kerning_default, &delta);
 		kern=delta.x>>6;
 	}
-	pGlyph *ng=allocateGlyph();
-	if (!ng)
-		qFatal("too many glyphs active at once - increase limit in font.cpp!");
-	ng->x=cursor.x()+kern;
+
+	pGlyph ng;
+	ng.x=cursor.x()+kern;
 	xadvance+=kern;
-	ng->y=cursor.y();
-	ng->w=xadvance;
-	ng->font=current_font;
-	ng->font->lock();
-	ng->glyph_index=glyphIndex;
-	ng->flags|=flags;
-	glyphs.append(ng);
+	ng.y=cursor.y();
+	ng.w=xadvance;
+	ng.font=current_font;
+	ng.font->lock();
+	ng.glyph_index=glyphIndex;
+	ng.flags=flags;
+	glyphs.push_back(ng); 
+
 	cursor+=QPoint(xadvance, 0);
 	previous=glyphIndex;
 	return 0;
@@ -363,7 +339,7 @@ void eTextPara::setFont(Font *fnt)
 int eTextPara::renderString(const QString &qstring, int rflags)
 {
 	eLocker lock(ftlock);
-
+	
 	if (refcnt)
 		qFatal("mod. after lock");
 	if (!current_font)
@@ -371,6 +347,9 @@ int eTextPara::renderString(const QString &qstring, int rflags)
 	const QChar *string=qstring.unicode();
 	
 	int len=qstring.length();
+
+	glyphs.reserve(glyphs.size()+len);
+
 	while (len--)
 	{
 		int isprintable=1;
@@ -437,14 +416,13 @@ void eTextPara::blit(gPixmapDC &dc, const QPoint &offset)
 
 	int buffer_stride=target.stride;
 
-	for (QListIterator<pGlyph> i(glyphs); i.current(); ++i)
+	for (glyphString::iterator i(glyphs.begin()); i != glyphs.end(); ++i)
 	{
-		pGlyph *glyph=i.current();
 		static FTC_SBit glyph_bitmap;
-		if (fontRenderClass::instance->getGlyphBitmap(&glyph->font->font, glyph->glyph_index, &glyph_bitmap))
+		if (fontRenderClass::instance->getGlyphBitmap(&i->font->font, i->glyph_index, &glyph_bitmap))
 			continue;
-		int rx=glyph->x+glyph_bitmap->left + offset.x();
-		int ry=glyph->y-glyph_bitmap->top  + offset.y();
+		int rx=i->x+glyph_bitmap->left + offset.x();
+		int ry=i->y-glyph_bitmap->top  + offset.y();
 		__u8 *d=(__u8*)(target.data)+buffer_stride*ry+rx;
 		__u8 *s=glyph_bitmap->buffer;
 		register int sx=glyph_bitmap->width;
@@ -487,11 +465,10 @@ void eTextPara::blit(gPixmapDC &dc, const QPoint &offset)
 
 void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 {
-	QListIterator<pGlyph> begin(glyphs), c(begin), end(begin);
-	pGlyph *last;
+	glyphString::iterator begin(glyphs.begin()), c(glyphs.begin()), end(glyphs.begin()), last;
 	if (dir==dirLeft)
 		return;
-	while (c.current())
+	while (c != glyphs.end())
 	{
 		int linelength=0;
 		int numspaces=0, num=0;
@@ -499,20 +476,20 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 		
 			// zeilenende suchen
 		do {
-			last=end.current();
+			last=end;
 			++end;
-		} while (end.current() && (!(end.current()->flags&GS_ISFIRST)));
+		} while ((end != glyphs.end()) && (!(end->flags&GS_ISFIRST)));
 			// end zeigt jetzt auf begin der naechsten zeile
 			
 		for (c=begin; c!=end; ++c)
 		{
 				// space am zeilenende skippen
-			if ((c.current()==last) && (c.current()->flags&GS_ISSPACE))
+			if ((c==last) && (c->flags&GS_ISSPACE))
 				continue;
 
-			if (c.current()->flags&GS_ISSPACE)
+			if (c->flags&GS_ISSPACE)
 				numspaces++;
-			linelength+=c.current()->w;;
+			linelength+=c->w;;
 			num++;
 		}
 		if (!num)		// line mit nur einem space
@@ -528,14 +505,14 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 				offset/=2;
 			while (begin != end)
 			{
-				begin.current()->x+=offset;
+				begin->x+=offset;
 				++begin;
 			}
 			break;
 		}
 		case dirBlock:
 		{
-			if (!end.current())		// letzte zeile linksbuendig lassen
+			if (end == glyphs.end())		// letzte zeile linksbuendig lassen
 				continue;
 			int spacemode;
 			if (numspaces)
@@ -549,9 +526,9 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 			while (begin != end)
 			{
 				int doadd=0;
-				if ((!spacemode) || (begin.current()->flags&GS_ISSPACE))
+				if ((!spacemode) || (begin->flags&GS_ISSPACE))
 					doadd=1;
-				begin.current()->x+=curoff>>8;
+				begin->x+=curoff>>8;
 				if (doadd)
 					curoff+=off;
 				++begin;
@@ -565,13 +542,9 @@ void eTextPara::realign(int dir)	// der code hier ist ein wenig merkwuerdig.
 void eTextPara::clear()
 {
 	eLocker lock(ftlock);
-	for (glyphs.first(); glyphs.current(); glyphs.next())
+	for (glyphString::iterator i(glyphs.begin()); i!=glyphs.end(); ++i)
 	{
-		glyphs.current()->font->unlock();
-		if (glyphs.current()->flags&GS_HEAP)
-			delete glyphs.current();
-		else
-			glyphs.current()->flags=0;
+		i->font->unlock();
 	}
 	glyphs.clear();
 }

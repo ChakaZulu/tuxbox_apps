@@ -12,8 +12,8 @@
 #include <qsize.h>
 #include <qpoint.h>
 #include <qrect.h>
-#include <qvector.h>
 #include <qlist.h>
+#include <vector>
 
 class FontRenderClass;
 class Font;
@@ -69,6 +69,8 @@ struct pGlyph
 	int flags;
 };
 
+typedef std::vector<pGlyph> glyphString;
+
 class Font;
 class eLCD;
 
@@ -83,7 +85,7 @@ class eTextPara
 	QPoint cursor;
 	QSize maximum;
 	int left;
-	QList<pGlyph> glyphs;
+	glyphString glyphs;
 	int refcnt;
 
 	int appendGlyph(FT_UInt glyphIndex, int flags);
