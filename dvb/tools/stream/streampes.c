@@ -8,6 +8,7 @@
 #include <time.h>
 #include <sys/poll.h>
 #include <errno.h>
+#include <string.h>
 
 #include <ost/dmx.h>
 #include <ost/frontend.h>

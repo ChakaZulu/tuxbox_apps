@@ -8,6 +8,7 @@
 #include <time.h>
 #include <sys/poll.h>
 #include <errno.h>
+#include <string.h>
 
 #include <ost/dmx.h>
 #include <ost/frontend.h>
@@ -72,12 +73,13 @@ int main(int argc, char **argv)
 
 	while (1)
 	{
-		int pr=0, r,a;
-		int tr=BSIZE;
+		//int pr=0;
+		int r,a;
+		//int tr=BSIZE;
 
-		if (r=read(fd,buffer,3) <=0) perror("read");
+		if ((r=read(fd,buffer,3)) <=0) perror("read");
 		a=(((buffer[1] & 0xF)<<8) + buffer[2]);
-		if (r=read(fd,buffer+3,a) <=0) perror("read");
+		if ((r=read(fd,buffer+3,a)) <=0) perror("read");
 		//for(i=0;i<10;i++)printf("%02x ",buffer[i]);
 		//printf("\n");
 
