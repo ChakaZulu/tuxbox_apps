@@ -1,38 +1,41 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
-
+ 
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
-
+ 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 //
-// $Id: channellist.cpp,v 1.49 2001/12/30 23:16:15 Simplex Exp $
+// $Id: channellist.cpp,v 1.50 2002/01/03 20:03:20 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.50  2002/01/03 20:03:20  McClean
+// cleanup
+//
 // Revision 1.49  2001/12/30 23:16:15  Simplex
 // bugfix in adjusting bouquet's channellist to current channel
 //
@@ -224,10 +227,12 @@ CChannelList::~CChannelList()
 }
 
 void CChannelList::exec()
-{   int nNewChannel;
+{
+	int nNewChannel;
 
 	nNewChannel = show();
-	if (nNewChannel > -1){
+	if (nNewChannel > -1)
+	{
 		zapTo(nNewChannel);
 	}
 }
@@ -237,7 +242,7 @@ void CChannelList::updateEvents(void)
 {
 	char rip[]="127.0.0.1";
 
-//printf("\n START CChannelList::updateEvents \n\n");
+	//printf("\n START CChannelList::updateEvents \n\n");
 	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	SAI servaddr;
 	memset(&servaddr,0,sizeof(servaddr));
@@ -251,100 +256,100 @@ void CChannelList::updateEvents(void)
 		return;
 	}
 
-    sectionsd::msgRequestHeader req;
-    req.version = 2;
+	sectionsd::msgRequestHeader req;
+	req.version = 2;
 
-    req.command = sectionsd::actualEventListTVshortIDs;
-    req.dataLength = 0;
-    write(sock_fd,&req,sizeof(req));
+	req.command = sectionsd::actualEventListTVshortIDs;
+	req.dataLength = 0;
+	write(sock_fd,&req,sizeof(req));
 
-    sectionsd::msgResponseHeader resp;
-    memset(&resp, 0, sizeof(resp));
-    if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-    {
-        close(sock_fd);
-        return;
-    }
-    if(resp.dataLength<=0)
-    {
-        close(sock_fd);
-        return;
-    }
+	sectionsd::msgResponseHeader resp;
+	memset(&resp, 0, sizeof(resp));
+	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+	{
+		close(sock_fd);
+		return;
+	}
+	if(resp.dataLength<=0)
+	{
+		close(sock_fd);
+		return;
+	}
 
-    char* pData = new char[resp.dataLength] ;
-    if ( read(sock_fd, pData, resp.dataLength)<=0 )
-    {
-        delete[] pData;
-        close(sock_fd);
-        return;
-    }
+	char* pData = new char[resp.dataLength] ;
+	if ( read(sock_fd, pData, resp.dataLength)<=0 )
+	{
+		delete[] pData;
+		close(sock_fd);
+		return;
+	}
 
-    close(sock_fd);
+	close(sock_fd);
 
-    char *actPos = pData;
+	char *actPos = pData;
 
-    for(unsigned int count=0;count<chanlist.size();count++)
-        chanlist[count]->currentEvent.description="";
+	for(unsigned int count=0;count<chanlist.size();count++)
+		chanlist[count]->currentEvent.description="";
 
-//printf("\n read finished CChannelList::updateEvents \n\n");
+	//printf("\n read finished CChannelList::updateEvents \n\n");
 
-    if ( req.command == sectionsd::actualEventListTVshortIDs )
-    {
-        printf("data length: %u\n", resp.dataLength);
-        while(actPos<pData+resp.dataLength)
-        {
-            unsigned* serviceID = (unsigned*) actPos;
-            actPos+=4;
+	if ( req.command == sectionsd::actualEventListTVshortIDs )
+	{
+		printf("data length: %u\n", resp.dataLength);
+		while(actPos<pData+resp.dataLength)
+		{
+			unsigned* serviceID = (unsigned*) actPos;
+			actPos+=4;
 
-            unsigned long long* evt_id = (unsigned long long*) actPos;
-            actPos+=8;
+			unsigned long long* evt_id = (unsigned long long*) actPos;
+			actPos+=8;
 
-            // quick'n dirty, sollte man mal anders machen
-            for (unsigned int count=0;count<chanlist.size();count++)
-            {
-                if (chanlist[count]->onid_sid==*serviceID)
-                {
-                    chanlist[count]->currentEvent.id= *evt_id;
-                    chanlist[count]->currentEvent.description= actPos;
-                    //	printf("Channel found: %s\n", actPos);
-                    break;
-                }
-            }
-            actPos+=strlen(actPos)+1;
-        }
-    } // if sectionsd::actualEventListTVshortIDs
-    else
-    {
-        // old way
-        char epgID[20];
-        char channelName[50];
-        char channelDescription[1000];
-        while (*actPos && actPos<pData+resp.dataLength)
-        {
-            *epgID=0;
-            actPos = copyStringto( actPos, epgID, sizeof(epgID));
-            //    printf("id: %s\n", epgID);
-            *channelName=0;
-            actPos = copyStringto( actPos, channelName, sizeof(channelName));
-            //    printf("name: %s\n", channelName);
-            *channelDescription=0;
-            actPos = copyStringto( actPos, channelDescription, sizeof(channelDescription));
-            //    printf("desc: %s\n", channelDescription);
-            // quick'n dirty, sollte man mal anders machen
-            for(unsigned int count=0;count<chanlist.size();count++)
-            {
-                if(!strcasecmp(chanlist[count]->name.c_str(), channelName))
-                {
-                    chanlist[count]->currentEvent.description = channelDescription;
-                    //	printf("Channel found\n");
-                	break;
-                }
-            }
-        }
-    } // else zapit
-    delete[] pData;
-//printf("\n END CChannelList::updateEvents \n\n");
-    return;
+			// quick'n dirty, sollte man mal anders machen
+			for (unsigned int count=0;count<chanlist.size();count++)
+			{
+				if (chanlist[count]->onid_sid==*serviceID)
+				{
+					chanlist[count]->currentEvent.id= *evt_id;
+					chanlist[count]->currentEvent.description= actPos;
+					//	printf("Channel found: %s\n", actPos);
+					break;
+				}
+			}
+			actPos+=strlen(actPos)+1;
+		}
+	} // if sectionsd::actualEventListTVshortIDs
+	else
+	{
+		// old way
+		char epgID[20];
+		char channelName[50];
+		char channelDescription[1000];
+		while (*actPos && actPos<pData+resp.dataLength)
+		{
+			*epgID=0;
+			actPos = copyStringto( actPos, epgID, sizeof(epgID));
+			//    printf("id: %s\n", epgID);
+			*channelName=0;
+			actPos = copyStringto( actPos, channelName, sizeof(channelName));
+			//    printf("name: %s\n", channelName);
+			*channelDescription=0;
+			actPos = copyStringto( actPos, channelDescription, sizeof(channelDescription));
+			//    printf("desc: %s\n", channelDescription);
+			// quick'n dirty, sollte man mal anders machen
+			for(unsigned int count=0;count<chanlist.size();count++)
+			{
+				if(!strcasecmp(chanlist[count]->name.c_str(), channelName))
+				{
+					chanlist[count]->currentEvent.description = channelDescription;
+					//	printf("Channel found\n");
+					break;
+				}
+			}
+		}
+	} // else zapit
+	delete[] pData;
+	//printf("\n END CChannelList::updateEvents \n\n");
+	return;
 }
 
 void CChannelList::addChannel(int key, int number, const std::string& name, unsigned int ids)
@@ -353,7 +358,7 @@ void CChannelList::addChannel(int key, int number, const std::string& name, unsi
 	tmp->key=key;
 	tmp->number=number;
 	tmp->name=name;
-    tmp->onid_sid=ids;
+	tmp->onid_sid=ids;
 	chanlist.insert(chanlist.end(), tmp);
 }
 
@@ -374,11 +379,11 @@ const std::string& CChannelList::getActiveChannelName()
 
 const std::string CChannelList::getActiveChannelID()
 {
-    string  id;
-    char anid[10];
-    snprintf( anid, 10, "%x", getActiveChannelOnid_sid() );
-    id= anid;
-    return id;
+	string  id;
+	char anid[10];
+	snprintf( anid, 10, "%x", getActiveChannelOnid_sid() );
+	id= anid;
+	return id;
 }
 
 int CChannelList::getActiveChannelNumber()
@@ -433,7 +438,8 @@ int CChannelList::show()
 			{
 				selected = chanlist.size()-1;
 			}
-			else selected--;
+			else
+				selected--;
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -463,26 +469,26 @@ int CChannelList::show()
 			}
 		}
 		else if ((key==g_settings.key_bouquet_up) && (bouquetList!=NULL))
+		{
+			if (bouquetList->Bouquets.size() > 0)
 			{
-				if (bouquetList->Bouquets.size() > 0)
-				{
-					int nNext = (bouquetList->getActiveBouquetNumber()+1) % bouquetList->Bouquets.size();
-					bouquetList->activateBouquet(nNext);
-					bouquetList->showChannelList();
-					loop = false;
+				int nNext = (bouquetList->getActiveBouquetNumber()+1) % bouquetList->Bouquets.size();
+				bouquetList->activateBouquet(nNext);
+				bouquetList->showChannelList();
+				loop = false;
 
-				}
 			}
+		}
 		else if ((key==g_settings.key_bouquet_down) && (bouquetList!=NULL))
+		{
+			if (bouquetList->Bouquets.size() > 0)
 			{
-				if (bouquetList->Bouquets.size() > 0)
-				{
-					int nNext = (bouquetList->getActiveBouquetNumber()+bouquetList->Bouquets.size()-1) % bouquetList->Bouquets.size();
-					bouquetList->activateBouquet(nNext);
-					bouquetList->showChannelList();
-					loop = false;
-				}
+				int nNext = (bouquetList->getActiveBouquetNumber()+bouquetList->Bouquets.size()-1) % bouquetList->Bouquets.size();
+				bouquetList->activateBouquet(nNext);
+				bouquetList->showChannelList();
+				loop = false;
 			}
+		}
 		else if (key==CRCInput::RC_ok)
 		{
 			zapOnExit = true;
@@ -494,9 +500,9 @@ int CChannelList::show()
 			loop=false;
 		}
 		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-			|| (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
-			|| (key==CRCInput::RC_standby)
-			|| (CRCInput::isNumeric(key)) )
+		         || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+		         || (key==CRCInput::RC_standby)
+		         || (CRCInput::isNumeric(key)) )
 		{	//pushback key if...
 			selected = oldselected;
 			g_RCInput->pushbackKey (key);
@@ -558,18 +564,21 @@ void CChannelList::zapTo(int pos)
 
 void CChannelList::numericZap(int key)
 {
-    if(chanlist.size()==0)
-    {
-        //evtl. anzeige dass keine kanalliste....
-        return;
-    }
+	if(chanlist.size()==0)
+	{
+		//evtl. anzeige dass keine kanalliste....
+		return;
+	}
 
 	//schneller zap mit "0" taste zwischen den letzten beiden sendern...
-	if(key==0) {
-	  	int  ch;
+	if(key==0)
+	{
+		int  ch;
 
-		if( (ch=lastChList.getlast(1)) != -1) {
-			if ((unsigned int)ch != tuned) {
+		if( (ch=lastChList.getlast(1)) != -1)
+		{
+			if ((unsigned int)ch != tuned)
+			{
 				printf("quicknumtune(0)\n");
 				lastChList.clear_storedelay (); // ignore store delay
 				zapTo(ch);		        // zap to last
@@ -579,9 +588,9 @@ void CChannelList::numericZap(int key)
 	}
 
 	int ox=300;
-    int oy=200;
+	int oy=200;
 	int sx = g_Fonts->channel_num_zap->getRenderWidth("0000")+14;
-    int sy = g_Fonts->channel_num_zap->getHeight()+6;
+	int sy = g_Fonts->channel_num_zap->getHeight()+6;
 	char valstr[10];
 	int chn=key;
 	int pos=1;
@@ -591,64 +600,64 @@ void CChannelList::numericZap(int key)
 		sprintf((char*) &valstr, "%d", chn);
 		while(strlen(valstr)<4)
 		{
- 			strcat(valstr,"-");
+			strcat(valstr,"-");
 		}
 		g_FrameBuffer->paintBoxRel(ox, oy, sx, sy, COL_INFOBAR);
 		g_Fonts->channel_num_zap->RenderString(ox+7, oy+sy-3, sx, valstr, COL_INFOBAR);
 
-        showInfo(chn- 1);
+		showInfo(chn- 1);
 
 		if ( ( key=g_RCInput->getKey(30) ) == CRCInput::RC_timeout )
-        {
-            if ( ( chn > (int)chanlist.size() ) || (chn == 0) )
-                chn = tuned + 1;
-  			break;
-        }
+		{
+			if ( ( chn > (int)chanlist.size() ) || (chn == 0) )
+				chn = tuned + 1;
+			break;
+		}
 		else if ( (key>=0) && (key<=9) )
 		{ //numeric
-            if ( pos==4 )
-            {
-                chn = key;
-                pos = 0;
-            }
-            else
-    			chn = chn* 10 + key;
+			if ( pos==4 )
+			{
+				chn = key;
+				pos = 0;
+			}
+			else
+				chn = chn* 10 + key;
 
 			pos++;
 		}
 		else if (key==CRCInput::RC_ok)
 		{
-            if ( ( chn > (signed int) chanlist.size() ) || ( chn == 0 ) )
-            {
-        		chn = tuned + 1;
-	        }
+			if ( ( chn > (signed int) chanlist.size() ) || ( chn == 0 ) )
+			{
+				chn = tuned + 1;
+			}
 			break;
 		}
-        else if (key==g_settings.key_quickzap_down)
+		else if (key==g_settings.key_quickzap_down)
 		{
 			if ( chn == 1 )
 				chn = chanlist.size();
 			else
-            {
+			{
 				chn--;
 
-                if (chn > (int)chanlist.size())
-                    chn = (int)chanlist.size();
+				if (chn > (int)chanlist.size())
+					chn = (int)chanlist.size();
 			}
 		}
 		else if (key==g_settings.key_quickzap_up)
 		{
 			chn++;
 
-            if (chn > (int)chanlist.size())
-                chn = 1;
-        }
-        else if (key==CRCInput::RC_home || key==CRCInput::RC_left || key==CRCInput::RC_right)
-        {
-            // Abbruch ohne Channel zu wechseln
+			if (chn > (int)chanlist.size())
+				chn = 1;
+		}
+		else if (key==CRCInput::RC_home || key==CRCInput::RC_left || key==CRCInput::RC_right)
+		{
+			// Abbruch ohne Channel zu wechseln
 
-            chn = tuned + 1;
-            break;
+			chn = tuned + 1;
+			break;
 		};
 	}
 
@@ -662,28 +671,29 @@ void CChannelList::numericZap(int key)
 
 void CChannelList::quickZap(int key)
 {
-    if(chanlist.size()==0)
-    {
-        //evtl. anzeige dass keine kanalliste....
-        return;
-    }
+	if(chanlist.size()==0)
+	{
+		//evtl. anzeige dass keine kanalliste....
+		return;
+	}
 
-//	printf("quickzap start\n");
-    if (key==g_settings.key_quickzap_down)
-    {
-        if(selected==0)
-            selected = chanlist.size()-1;
-        else
-            selected--;
-//				channel* chan = chanlist[selected];
-    }
-    else if (key==g_settings.key_quickzap_up)
-    {
-        selected = (selected+1)%chanlist.size();
-//			channel* chan = chanlist[selected];
-    };
+	//	printf("quickzap start\n");
+	if (key==g_settings.key_quickzap_down)
+	{
+		if(selected==0)
+			selected = chanlist.size()-1;
+		else
+			selected--;
+		//				channel* chan = chanlist[selected];
+	}
+	else if (key==g_settings.key_quickzap_up)
+	{
+		selected = (selected+1)%chanlist.size();
+		//			channel* chan = chanlist[selected];
+	}
+	;
 
-    zapTo( selected );
+	zapTo( selected );
 }
 
 int CChannelList::hasChannel(int nChannelNr)
@@ -714,23 +724,23 @@ void CChannelList::paintItem(int pos)
 	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if(liststart+pos<chanlist.size())
 	{
-        channel* chan = chanlist[liststart+pos];
+		channel* chan = chanlist[liststart+pos];
 		//number
-        char tmp[10];
-        sprintf((char*) tmp, "%d", chan->number);
+		char tmp[10];
+		sprintf((char*) tmp, "%d", chan->number);
 
 		int numpos = x+5+numwidth- g_Fonts->channellist_number->getRenderWidth(tmp);
 		g_Fonts->channellist_number->RenderString(numpos,ypos+fheight, numwidth+5, tmp, color, fheight);
 		if(strlen(chan->currentEvent.description.c_str()))
 		{
-    		// name + description
+			// name + description
 			char nameAndDescription[100];
 			snprintf(nameAndDescription, sizeof(nameAndDescription), "%s - %s", chan->name.c_str(), chan->currentEvent.description.c_str());
 			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, nameAndDescription, color);
-        }
+		}
 		else
-		  //name
-		  g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name.c_str(), color);
+			//name
+			g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, chan->name.c_str(), color);
 	}
 }
 
@@ -752,30 +762,30 @@ void CChannelList::paint()
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
 
 	if(lastnum<10)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("0");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("0");
 	else if(lastnum<100)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("00");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("00");
 	else if(lastnum<1000)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("000");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("000");
 	else if(lastnum<10000)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
 	else // if(lastnum<100000)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
 		paintItem(count);
 	}
 
-    int ypos = y+ theight;
-    int sb = fheight* listmaxshow;
-    g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	int ypos = y+ theight;
+	int sb = fheight* listmaxshow;
+	g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
-    int sbc= ((chanlist.size()- 1)/ listmaxshow)+ 1;
-    float sbh= (sb- 4)/ sbc;
-    int sbs= (selected/listmaxshow);
+	int sbc= ((chanlist.size()- 1)/ listmaxshow)+ 1;
+	float sbh= (sb- 4)/ sbc;
+	int sbs= (selected/listmaxshow);
 
-    g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
 }
 

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -175,8 +175,8 @@ bool CFlashTool::erase()
 	{
 		/*
 		printf( "\rErasing %u Kibyte @ %x -- %2u %% complete.",
-                   meminfo.erasesize/1024, erase.start,
-                   erase.start*100/meminfo.size );
+		                 meminfo.erasesize/1024, erase.start,
+		                 erase.start*100/meminfo.size );
 		*/
 		if(statusViewer)
 		{
@@ -265,11 +265,11 @@ bool CHTTPUpdater::getInfo()
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
 	}
-//	printf("do flush\n");
+	//	printf("do flush\n");
 	fflush(headerfile);
-//	printf("do close\n");
-	fclose(headerfile); 
-//	printf("ready\n");
+	//	printf("do close\n");
+	fclose(headerfile);
+	//	printf("ready\n");
 	return res==0;
 }
 
@@ -280,7 +280,7 @@ bool CHTTPUpdater::getFile()
 	CURLcode res;
 	FILE *headerfile;
 	headerfile = fopen("/var/tmp/cramfs.img", "w");
-    res = (CURLcode) 1;
+	res = (CURLcode) 1;
 	curl = curl_easy_init();
 	if(curl)
 	{
@@ -306,12 +306,12 @@ bool CHTTPUpdater::getFile()
 		}
 		res = curl_easy_perform(curl);
 		curl_easy_cleanup(curl);
-	}	
-//	printf("do flush\n");
+	}
+	//	printf("do flush\n");
 	fflush(headerfile);
-//	printf("do close\n");
-	fclose(headerfile); 
-//	printf("ready\n");
+	//	printf("do close\n");
+	fclose(headerfile);
+	//	printf("ready\n");
 	return res==0;
 }
 
@@ -458,7 +458,7 @@ void CFlashUpdate::paint()
 	{
 		showStatusMessage( g_Locale->getText("flashupdate.getinfofileerror") );
 		close(fp_fd);
-		return;		
+		return;
 	}
 	char buf[100];
 	if(fgets(buf,sizeof(buf),fd)!=NULL)
@@ -496,7 +496,7 @@ void CFlashUpdate::paint()
 		return;
 	}
 
-	
+
 	//start update
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("flashupdate.globalprogress").c_str() , COL_MENUCONTENT);
 	ypos+= mheight;
@@ -520,7 +520,7 @@ void CFlashUpdate::paint()
 	//md5check...
 	unsigned char   md5buffer[16];
 	char            md5string[40]="";
-	
+
 	showStatusMessage(g_Locale->getText("flashupdate.md5check") );
 	if( md5_file("/var/tmp/cramfs.img", 1, (unsigned char*) &md5buffer))
 	{
@@ -541,7 +541,7 @@ void CFlashUpdate::paint()
 		close(fp_fd);
 		return;
 	}
-	
+
 	showGlobalStatus(50);
 	//flash it...
 	CFlashTool ft;
@@ -563,7 +563,7 @@ void CFlashUpdate::paint()
 	showStatusMessage( g_Locale->getText("flashupdate.ready") );
 
 	sleep(2);
-	
+
 	g_FrameBuffer->paintBoxRel(x, y+ hheight, width, height- hheight, COL_MENUCONTENT);
 	g_Fonts->menu->RenderString(x+ 10, y+ mheight*3, width, g_Locale->getText("flashupdate.reboot").c_str() , COL_MENUCONTENT);
 

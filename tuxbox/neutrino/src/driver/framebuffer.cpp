@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -30,33 +30,36 @@
 */
 
 /*
-
-$Id: framebuffer.cpp,v 1.13 2001/12/18 00:20:07 McClean Exp $
-
-
-
+ 
+$Id: framebuffer.cpp,v 1.14 2002/01/03 20:03:20 McClean Exp $
+ 
+ 
+ 
 $Log: framebuffer.cpp,v $
+Revision 1.14  2002/01/03 20:03:20  McClean
+cleanup
+
 Revision 1.13  2001/12/18 00:20:07  McClean
 update scanmenue
-
+ 
 Revision 1.12  2001/12/17 22:56:37  McClean
 add dump-function
-
+ 
 Revision 1.11  2001/12/17 01:28:26  McClean
 accelerate radiomode-logo-paint
-
+ 
 Revision 1.10  2001/11/15 11:42:41  McClean
 gpl-headers added
-
+ 
 Revision 1.9  2001/11/04 01:04:18  McClean
 fix transparency bug
-
+ 
 Revision 1.8  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
-
-
-
-
+ 
+ 
+ 
+ 
 */
 
 
@@ -89,7 +92,7 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 		perror("FBIOGET_VSCREENINFO");
 		goto nolfb;
 	}
-  
+
 	memcpy(&oldscreen, &screeninfo, sizeof(screeninfo));
 
 	fb_fix_screeninfo fix;
@@ -102,7 +105,7 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 	available=fix.smem_len;
 	printf("%dk video mem\n", available/1024);
 	lfb=(unsigned char*)mmap(0, available, PROT_WRITE|PROT_READ, MAP_SHARED, fd, 0);
-  
+
 	if (!lfb)
 	{
 		perror("mmap");
@@ -111,9 +114,9 @@ CFrameBuffer::CFrameBuffer(const char *fb)
 
 	return;
 
-	nolfb:
-		printf("framebuffer not available.\n");
-		lfb=0;
+nolfb:
+	printf("framebuffer not available.\n");
+	lfb=0;
 }
 
 
@@ -148,12 +151,12 @@ int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int n
 		perror("FBIOPUT_VSCREENINFO");
 		return -1;
 	}
-	
+
 	if ((screeninfo.xres!=nxRes) && (screeninfo.yres!=nyRes) && (screeninfo.bits_per_pixel!=nbpp))
 	{
 		printf("SetMode failed: wanted: %dx%dx%d, got %dx%dx%d\n",
-		nxRes, nyRes, nbpp,
-		screeninfo.xres, screeninfo.yres, screeninfo.bits_per_pixel);
+		       nxRes, nyRes, nbpp,
+		       screeninfo.xres, screeninfo.yres, screeninfo.bits_per_pixel);
 		return -1;
 	}
 
@@ -176,33 +179,33 @@ int CFrameBuffer::setMode(unsigned int nxRes, unsigned int nyRes, unsigned int n
 
 void CFrameBuffer::paletteFade(int i, __u32 rgb1, __u32 rgb2, int level)
 {
-  __u16 *r=cmap.red+i;
-  __u16 *g=cmap.green+i;
-  __u16 *b=cmap.blue+i;
-  *r= ((rgb2&0xFF0000)>>16)*level;
-  *g= ((rgb2&0x00FF00)>>8 )*level;
-  *b= ((rgb2&0x0000FF)    )*level;
-  *r+=((rgb1&0xFF0000)>>16)*(255-level);
-  *g+=((rgb1&0x00FF00)>>8 )*(255-level);
-  *b+=((rgb1&0x0000FF)    )*(255-level);
+	__u16 *r=cmap.red+i;
+	__u16 *g=cmap.green+i;
+	__u16 *b=cmap.blue+i;
+	*r= ((rgb2&0xFF0000)>>16)*level;
+	*g= ((rgb2&0x00FF00)>>8 )*level;
+	*b= ((rgb2&0x0000FF)    )*level;
+	*r+=((rgb1&0xFF0000)>>16)*(255-level);
+	*g+=((rgb1&0x00FF00)>>8 )*(255-level);
+	*b+=((rgb1&0x0000FF)    )*(255-level);
 }
 
 void CFrameBuffer::paletteGenFade(int in, __u32 rgb1, __u32 rgb2, int num, int tr)
 {
-  for (int i=0; i<num; i++)
-  {
-    paletteFade(in+i, rgb1, rgb2, i*(255/(num-1)));
-    cmap.transp[in+i]=tr;
-    tr++;
-  }
+	for (int i=0; i<num; i++)
+	{
+		paletteFade(in+i, rgb1, rgb2, i*(255/(num-1)));
+		cmap.transp[in+i]=tr;
+		tr++;
+	}
 }
 
 void CFrameBuffer::paletteSetColor(int i, __u32 rgb, int tr)
 {
-  cmap.red[i]    =(rgb&0xFF0000)>>8;
-  cmap.green[i]  =(rgb&0x00FF00)   ;
-  cmap.blue[i]   =(rgb&0x0000FF)<<8;
-  cmap.transp[i] =tr;
+	cmap.red[i]    =(rgb&0xFF0000)>>8;
+	cmap.green[i]  =(rgb&0x00FF00)   ;
+	cmap.blue[i]   =(rgb&0x0000FF)<<8;
+	cmap.transp[i] =tr;
 }
 
 void CFrameBuffer::paletteSet()
@@ -224,7 +227,7 @@ void CFrameBuffer::paintBoxRel(int x, int y, int dx, int dy, unsigned char col)
 void CFrameBuffer::paintBox(int xa, int ya, int xb, int yb, unsigned char col)
 {
 	unsigned char* pos = lfb + xa + stride*ya;
-	int dx = xb-xa; 
+	int dx = xb-xa;
 	int dy = yb-ya;
 	for(int count=0;count<dy;count++)
 	{
@@ -281,7 +284,7 @@ bool CFrameBuffer::paintIcon8(string filename, int x, int y, unsigned char offse
 	filename = iconBasePath + filename;
 
 	fd = open(filename.c_str(), O_RDONLY );
-	
+
 	if (fd==-1)
 	{
 		printf("error while loading icon: %s", filename.c_str() );
@@ -328,7 +331,7 @@ bool CFrameBuffer::paintIcon(string filename, int x, int y, unsigned char offset
 	filename = iconBasePath + filename;
 
 	fd = open(filename.c_str(), O_RDONLY );
-	
+
 	if (fd==-1)
 	{
 		printf("error while loading icon: %s", filename.c_str() );
@@ -370,7 +373,7 @@ bool CFrameBuffer::paintIcon(string filename, int x, int y, unsigned char offset
 		}
 		d += stride;
 	}
-	
+
 	close(fd);
 	return true;
 }
@@ -381,7 +384,7 @@ void CFrameBuffer::loadPal(string filename, unsigned char offset, unsigned char 
 	filename = iconBasePath + filename;
 
 	fd = open(filename.c_str(), O_RDONLY );
-	
+
 	if (fd==-1)
 	{
 		printf("error while loading palette: %s", filename.c_str() );
@@ -391,7 +394,7 @@ void CFrameBuffer::loadPal(string filename, unsigned char offset, unsigned char 
 	int pos = 0;
 	int readb = read(fd, &rgbdata,  sizeof(rgbdata) );
 	while(readb)
-	{ 
+	{
 		__u32 rgb = (rgbdata.r<<16) | (rgbdata.g<<8) | (rgbdata.b);
 		int colpos = offset+pos;
 		if( colpos>endidx)
@@ -506,7 +509,7 @@ bool CFrameBuffer::loadPicture2Mem(string filename, unsigned char* memp)
 	filename = iconBasePath + filename;
 
 	fd = open(filename.c_str(), O_RDONLY );
-	
+
 	if (fd==-1)
 	{
 		printf("error while loading icon: %s", filename.c_str() );
@@ -535,7 +538,7 @@ bool CFrameBuffer::savePictureFromMem(string filename, unsigned char* memp)
 	filename = iconBasePath + filename;
 
 	fd = open(filename.c_str(), O_WRONLY | O_CREAT);
-	
+
 	if (fd==-1)
 	{
 		printf("error while saving icon: %s", filename.c_str() );
@@ -561,14 +564,14 @@ bool CFrameBuffer::loadBackground(string filename, unsigned char col)
 	{
 		delete[] background;
 	}
-	
+
 	short width, height;
 	unsigned char tr;
 	int fd;
 	filename = iconBasePath + filename;
 
 	fd = open(filename.c_str(), O_RDONLY );
-	
+
 	if (fd==-1)
 	{
 		printf("error while loading icon: %s", filename.c_str() );
@@ -589,9 +592,9 @@ bool CFrameBuffer::loadBackground(string filename, unsigned char col)
 	}
 
 	background = new unsigned char[720*576];
-	
+
 	read(fd, background, 720*576);
-	
+
 	if(col!=0)//pic-offset
 	{
 		unsigned char *bpos = background;

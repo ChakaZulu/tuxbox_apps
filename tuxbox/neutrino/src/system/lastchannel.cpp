@@ -1,38 +1,41 @@
 /*
-$Id: lastchannel.cpp,v 1.2 2001/10/16 19:11:16 rasc Exp $
-
+$Id: lastchannel.cpp,v 1.3 2002/01/03 20:03:20 McClean Exp $
+ 
 Quarks -- Projekt
-
+ 
 (c) 2001 rasc
-
+ 
 Lizenz: GPL 
-
-
+ 
+ 
 Lastchannel History buffer
-
+ 
 Einfache Klasse fuer schnelles Zappen zum letzten Kanal.
 Ggf. laesst sich damit ein kleines ChannelHistory-Menue aufbauen-
-
+ 
 Das ganze ist als sich selbst ueberschreibender Ringpuffer realisiert,
 welcher nach dem LIFO-prinzip wieder ausgelesen wird.
 Es wird aber gecheckt, ob ein Neuer Wert ein Mindestzeitabstand zum alten
 vorherigen Wert hat, damit bei schnellem Hochzappen, die "Skipped Channels"
 nicht gespeichert werden.
-
-
-
+ 
+ 
+ 
 $Log: lastchannel.cpp,v $
+Revision 1.3  2002/01/03 20:03:20  McClean
+cleanup
+
 Revision 1.2  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
-
+ 
 Revision 1.1  2001/10/16 18:34:13  rasc
 -- QuickZap to last channel verbessert.
 -- Standard Kanal muss ca. 2-3 Sekunden aktiv sein fuer LastZap Speicherung.
 -- eigene Klasse fuer die Channel History...
-
-
-
-
+ 
+ 
+ 
+ 
 */
 
 
@@ -61,15 +64,16 @@ CLastChannel::CLastChannel (void)
 void CLastChannel::clear (void)
 
 {
-  int i;
+	int i;
 
 
-  for (i=0; i < (int)size_LASTCHANNELS; i++) {
-     lastchannels[i].channel   = -1;
-     lastchannels[i].timestamp = 0;
-  }
+	for (i=0; i < (int)size_LASTCHANNELS; i++)
+	{
+		lastchannels[i].channel   = -1;
+		lastchannels[i].timestamp = 0;
+	}
 
-  pos = 0;
+	pos = 0;
 }
 
 
@@ -77,28 +81,29 @@ void CLastChannel::clear (void)
 //
 // -- Store a channelnumber in Buffer
 // -- Store only if channel != last channel...
-// -- and time store delay is large enough 
+// -- and time store delay is large enough
 //
 
 void CLastChannel::store (int channel)
 
 {
-  struct timeval  tv;
+	struct timeval  tv;
 
 
-  gettimeofday (&tv, NULL);
+	gettimeofday (&tv, NULL);
 
-  if (    ((tv.tv_sec - lastchannels[pos].timestamp) > secs_diff_before_store)
-       && (lastchannels[pos].channel != channel) ) {
+	if (    ((tv.tv_sec - lastchannels[pos].timestamp) > secs_diff_before_store)
+	        && (lastchannels[pos].channel != channel) )
+	{
 
-        // -- store channel on next pos (new channel)
-	pos = (pos + 1) % size_LASTCHANNELS;
+		// -- store channel on next pos (new channel)
+		pos = (pos + 1) % size_LASTCHANNELS;
 
-  }
+	}
 
-  // -- remember time (secs)
-  lastchannels[pos].channel    = channel;
-  lastchannels[pos].timestamp  = tv.tv_sec;
+	// -- remember time (secs)
+	lastchannels[pos].channel    = channel;
+	lastchannels[pos].timestamp  = tv.tv_sec;
 
 }
 
@@ -113,7 +118,7 @@ void CLastChannel::store (int channel)
 void CLastChannel::clear_storedelay (void)
 
 {
-  lastchannels[pos].timestamp = 0;
+	lastchannels[pos].timestamp = 0;
 }
 
 
@@ -128,17 +133,19 @@ void CLastChannel::clear_storedelay (void)
 int CLastChannel::getlast (int n)
 
 {
-  int lastpos;
+	int lastpos;
 
 
-  // too large anyway
-  if (n > (int)size_LASTCHANNELS) return -1;
+	// too large anyway
+	if (n > (int)size_LASTCHANNELS)
+		return -1;
 
-  // get correct buffer pos   
-  lastpos = (pos - n);
-  if (lastpos < 0) lastpos += size_LASTCHANNELS;
+	// get correct buffer pos
+	lastpos = (pos - n);
+	if (lastpos < 0)
+		lastpos += size_LASTCHANNELS;
 
-  return lastchannels[lastpos].channel;
+	return lastchannels[lastpos].channel;
 }
 
 
@@ -150,12 +157,12 @@ int CLastChannel::getlast (int n)
 void CLastChannel::set_store_difftime (int secs)
 
 {
-   secs_diff_before_store = secs;
+	secs_diff_before_store = secs;
 }
 
 int CLastChannel::get_store_difftime (void)
 
 {
-   return    secs_diff_before_store;
+	return    secs_diff_before_store;
 }
 

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -88,7 +88,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 	{
 		int key = g_RCInput->getKey(300);
 		if(key==-1)
-		{//timeout, close 
+		{//timeout, close
 			loop = false;
 		}
 		else if (key==CRCInput::RC_ok)
@@ -111,16 +111,16 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 				selected++;
 				switch (selected)
 				{
-					case 0:
+						case 0:
 						paintSlider(x+ 10, y+ hheight, r, g_Locale->getText("colorchooser.red"),"red", true);
 						break;
-					case 1:
+						case 1:
 						paintSlider(x+ 10, y+ hheight+ mheight, g, g_Locale->getText("colorchooser.green"),"green", true);
 						break;
-					case 2:
+						case 2:
 						paintSlider(x+ 10, y+ hheight+ mheight* 2, b, g_Locale->getText("colorchooser.blue"),"blue", true);
 						break;
-					case 3:
+						case 3:
 						paintSlider(x+ 10, y+ hheight+ mheight* 3, alpha, g_Locale->getText("colorchooser.alpha"),"alpha", true);
 						break;
 				}
@@ -137,16 +137,16 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 				selected--;
 				switch (selected)
 				{
-					case 0:
+						case 0:
 						paintSlider(x+10, y+hheight, r,g_Locale->getText("colorchooser.red"),"red", true);
 						break;
-					case 1:
+						case 1:
 						paintSlider(x+10, y+hheight+mheight, g,g_Locale->getText("colorchooser.green"),"green", true);
 						break;
-					case 2:
+						case 2:
 						paintSlider(x+10, y+hheight+mheight*2, b,g_Locale->getText("colorchooser.blue"),"blue", true);
 						break;
-					case 3:
+						case 3:
 						paintSlider(x+10, y+hheight+mheight*3, alpha,g_Locale->getText("colorchooser.alpha"),"alpha",true);
 						break;
 				}
@@ -156,7 +156,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 		{
 			switch (selected)
 			{
-				case 0:
+					case 0:
 					if (*r<100)
 					{
 						*r+=5;
@@ -164,7 +164,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 						setColor();
 					}
 					break;
-				case 1:
+					case 1:
 					if (*g<100)
 					{
 						*g+=5;
@@ -172,7 +172,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 						setColor();
 					}
 					break;
-				case 2:
+					case 2:
 					if (*b<100)
 					{
 						*b+=5;
@@ -180,7 +180,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 						setColor();
 					}
 					break;
-				case 3:
+					case 3:
 					if (*alpha<100)
 					{
 						*alpha+=5;
@@ -194,7 +194,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 		{
 			switch (selected)
 			{
-				case 0:
+					case 0:
 					if (*r>0)
 					{
 						*r-=5;
@@ -202,7 +202,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 						setColor();
 					}
 					break;
-				case 1:
+					case 1:
 					if (*g>0)
 					{
 						*g-=5;
@@ -210,7 +210,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 						setColor();
 					}
 					break;
-				case 2:
+					case 2:
 					if (*b>0)
 					{
 						*b-=5;
@@ -218,7 +218,7 @@ int CColorChooser::exec(CMenuTarget* parent, string)
 						setColor();
 					}
 					break;
-				case 3:
+					case 3:
 					if (*alpha>0)
 					{
 						*alpha-=5;

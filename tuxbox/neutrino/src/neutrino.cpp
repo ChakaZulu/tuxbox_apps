@@ -1,6 +1,6 @@
 /*
  
-        $Id: neutrino.cpp,v 1.116 2002/01/03 19:33:33 McClean Exp $
+        $Id: neutrino.cpp,v 1.117 2002/01/03 20:03:20 McClean Exp $
  
 	Neutrino-GUI  -   DBoxII-Project
  
@@ -32,9 +32,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
   $Log: neutrino.cpp,v $
+  Revision 1.117  2002/01/03 20:03:20  McClean
+  cleanup
+
   Revision 1.116  2002/01/03 19:33:33  McClean
   remove unnedded stuff
-
+ 
   Revision 1.115  2002/01/02 04:56:27  McClean
   conf file unix-permission
  
@@ -2118,7 +2121,7 @@ int CNeutrinoApp::exec( CMenuTarget* parent, string actionKey )
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.116 2002/01/03 19:33:33 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.117 2002/01/03 20:03:20 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -30,13 +30,16 @@
 */
 
 //
-// $Id: eventlist.cpp,v 1.28 2001/12/12 19:11:32 McClean Exp $
+// $Id: eventlist.cpp,v 1.29 2002/01/03 20:03:20 McClean Exp $
 //
-//  -- EPG Event List // Vorschau 
+//  -- EPG Event List // Vorschau
 //
 //
 //
 // $Log: eventlist.cpp,v $
+// Revision 1.29  2002/01/03 20:03:20  McClean
+// cleanup
+//
 // Revision 1.28  2001/12/12 19:11:32  McClean
 // prepare timing setup...
 //
@@ -148,143 +151,145 @@ static char* copyStringto(const char* from, char* to, int len, char delim)
 // quick'n dirty
 void EventList::readEvents(unsigned onidSid, const std::string& channelname)
 {
-  char rip[]="127.0.0.1";
+	char rip[]="127.0.0.1";
 
-  int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-  SAI servaddr;
-  memset(&servaddr,0,sizeof(servaddr));
-  servaddr.sin_family=AF_INET;
-  servaddr.sin_port=htons(sectionsd::portNumber);
-  inet_pton(AF_INET, rip, &servaddr.sin_addr);
+	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SAI servaddr;
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(sectionsd::portNumber);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
-  if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1) {
-    perror("Couldn't connect to sectionsd!");
-    return;
-  }
-  sectionsd::msgRequestHeader req;
-  req.version = 2;
-  req.command = sectionsd::allEventsChannelID;
-  req.dataLength = 4;
-  write(sock_fd, &req, sizeof(req));
-  write(sock_fd, &onidSid, req.dataLength);
-  sectionsd::msgResponseHeader resp;
-  memset(&resp, 0, sizeof(resp));
-  if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0) {
-    close(sock_fd);
-    return;
-  }
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("Couldn't connect to sectionsd!");
+		return;
+	}
+	sectionsd::msgRequestHeader req;
+	req.version = 2;
+	req.command = sectionsd::allEventsChannelID;
+	req.dataLength = 4;
+	write(sock_fd, &req, sizeof(req));
+	write(sock_fd, &onidSid, req.dataLength);
+	sectionsd::msgResponseHeader resp;
+	memset(&resp, 0, sizeof(resp));
+	if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+	{
+		close(sock_fd);
+		return;
+	}
 
-    removeAllEvents(); // Alle gespeicherten Events loeschen
-    current_event = (unsigned int)-1;
+	removeAllEvents(); // Alle gespeicherten Events loeschen
+	current_event = (unsigned int)-1;
 
-    if ( resp.dataLength>0 )
-    {
-        char* pData = new char[resp.dataLength] ;
-        if(read(sock_fd, pData, resp.dataLength)<=0)
-        {
-            delete[] pData;
-            close(sock_fd);
-            printf("EventList::readEvents - read from socket failed!");
-            return;
-        }
-        char epgID[20];
-        char edate[6];
-        char etime[6];
-        char eduration[10];
-        char ename[100];
-        char tmpstr[256];
-        char *actPos=pData;
+	if ( resp.dataLength>0 )
+	{
+		char* pData = new char[resp.dataLength] ;
+		if(read(sock_fd, pData, resp.dataLength)<=0)
+		{
+			delete[] pData;
+			close(sock_fd);
+			printf("EventList::readEvents - read from socket failed!");
+			return;
+		}
+		char epgID[20];
+		char edate[6];
+		char etime[6];
+		char eduration[10];
+		char ename[100];
+		char tmpstr[256];
+		char *actPos=pData;
 
-        struct  tm tmZeit;
-        struct  tm *tmZeit_now;
-        int     evtTime, aktTime;
-        time_t  tZeit  = time(NULL);
-        tmZeit_now = localtime(&tZeit);
-        aktTime = (tmZeit_now->tm_mon+ 1)* 1000000+ (tmZeit_now->tm_mday)* 10000+ (tmZeit_now->tm_hour)* 100+ tmZeit_now->tm_min;
-        tmZeit = *tmZeit_now;
+		struct  tm tmZeit;
+		struct  tm *tmZeit_now;
+		int     evtTime, aktTime;
+		time_t  tZeit  = time(NULL);
+		tmZeit_now = localtime(&tZeit);
+		aktTime = (tmZeit_now->tm_mon+ 1)* 1000000+ (tmZeit_now->tm_mday)* 10000+ (tmZeit_now->tm_hour)* 100+ tmZeit_now->tm_min;
+		tmZeit = *tmZeit_now;
 
-        while(*actPos && actPos<pData+resp.dataLength)
-        {
-            *epgID=0;
-            actPos = copyStringto( actPos, epgID, sizeof(epgID), ' ');
-            *edate=0;
-            actPos = copyStringto( actPos, edate, sizeof(edate), ' ');
-            *etime=0;
-            actPos = copyStringto( actPos, etime, sizeof(etime), ' ');
-            *eduration=0;
-            actPos = copyStringto( actPos, eduration, sizeof(eduration), ' ');
-            *ename=0;
-            actPos = copyStringto( actPos, ename, sizeof(ename), '\n');
+		while(*actPos && actPos<pData+resp.dataLength)
+		{
+			*epgID=0;
+			actPos = copyStringto( actPos, epgID, sizeof(epgID), ' ');
+			*edate=0;
+			actPos = copyStringto( actPos, edate, sizeof(edate), ' ');
+			*etime=0;
+			actPos = copyStringto( actPos, etime, sizeof(etime), ' ');
+			*eduration=0;
+			actPos = copyStringto( actPos, eduration, sizeof(eduration), ' ');
+			*ename=0;
+			actPos = copyStringto( actPos, ename, sizeof(ename), '\n');
 
-            event* evt = new event();
-
-
-            sscanf(epgID, "%llx", &evt->epg.id);
-            sscanf(edate, "%02d.%02d", &tmZeit.tm_mday, &tmZeit.tm_mon);
-            tmZeit.tm_mon--;
-            sscanf(etime, "%02d:%02d", &tmZeit.tm_hour, &tmZeit.tm_min);
-            evtTime = (tmZeit.tm_mon+ 1)* 1000000+ (tmZeit.tm_mday)* 10000+ (tmZeit.tm_hour)* 100+ tmZeit.tm_min;
-            tmZeit.tm_sec= 0;
-
-            evt->epg.startzeit = mktime(&tmZeit);
-//            printf("Time: %02d.%02d %02d:%02d %lx\n", tmZeit.tm_mday, tmZeit.tm_mon+ 1, tmZeit.tm_hour, tmZeit.tm_min, evt->startzeit);
-
-            if ( (evtTime- aktTime) <= 0 )
-                current_event++;
-
-            evt->epg.description=std::string(ename);
-
-            // -- Create strings:   "Mon,  14:30, "      and   "23. Okt."
-            // -- and  duration string "[999 min]"
-            // -- rasc 2001-10-14
-
-            // -- localized day   (strftime has to return english values!
-            strftime(tmpstr,sizeof(tmpstr), "date.%a",&tmZeit);
-            evt->datetime1_str = std::string(g_Locale->getText(tmpstr));
-            strftime(tmpstr,sizeof(tmpstr), ". %H:%M, ",&tmZeit);
-            evt->datetime1_str += std::string(tmpstr);
-
-            strftime(tmpstr,sizeof(tmpstr), " %d. ",&tmZeit);
-            evt->datetime2_str = std::string(tmpstr);
-            strftime(tmpstr,sizeof(tmpstr), "date.%b",&tmZeit);
-            evt->datetime2_str += std::string(g_Locale->getText(tmpstr));
-            evt->datetime2_str += std::string(".");
+			event* evt = new event();
 
 
-            evt->duration_str=std::string("[");
-            evt->duration_str+=std::string(eduration);
-            evt->duration_str+=std::string(" min] ");
+			sscanf(epgID, "%llx", &evt->epg.id);
+			sscanf(edate, "%02d.%02d", &tmZeit.tm_mday, &tmZeit.tm_mon);
+			tmZeit.tm_mon--;
+			sscanf(etime, "%02d:%02d", &tmZeit.tm_hour, &tmZeit.tm_min);
+			evtTime = (tmZeit.tm_mon+ 1)* 1000000+ (tmZeit.tm_mday)* 10000+ (tmZeit.tm_hour)* 100+ tmZeit.tm_min;
+			tmZeit.tm_sec= 0;
+
+			evt->epg.startzeit = mktime(&tmZeit);
+			//            printf("Time: %02d.%02d %02d:%02d %lx\n", tmZeit.tm_mday, tmZeit.tm_mon+ 1, tmZeit.tm_hour, tmZeit.tm_min, evt->startzeit);
+
+			if ( (evtTime- aktTime) <= 0 )
+				current_event++;
+
+			evt->epg.description=std::string(ename);
+
+			// -- Create strings:   "Mon,  14:30, "      and   "23. Okt."
+			// -- and  duration string "[999 min]"
+			// -- rasc 2001-10-14
+
+			// -- localized day   (strftime has to return english values!
+			strftime(tmpstr,sizeof(tmpstr), "date.%a",&tmZeit);
+			evt->datetime1_str = std::string(g_Locale->getText(tmpstr));
+			strftime(tmpstr,sizeof(tmpstr), ". %H:%M, ",&tmZeit);
+			evt->datetime1_str += std::string(tmpstr);
+
+			strftime(tmpstr,sizeof(tmpstr), " %d. ",&tmZeit);
+			evt->datetime2_str = std::string(tmpstr);
+			strftime(tmpstr,sizeof(tmpstr), "date.%b",&tmZeit);
+			evt->datetime2_str += std::string(g_Locale->getText(tmpstr));
+			evt->datetime2_str += std::string(".");
+
+
+			evt->duration_str=std::string("[");
+			evt->duration_str+=std::string(eduration);
+			evt->duration_str+=std::string(" min] ");
 
 
 
-//            printf("id: %s - name: %s\n", epgID, evt->name.c_str());
-//    tmp->number=number;
-//    tmp->name=name;
-            if(evt->epg.description !="")
-                evtlist.insert(evtlist.end(), evt);
-        }
+			//            printf("id: %s - name: %s\n", epgID, evt->name.c_str());
+			//    tmp->number=number;
+			//    tmp->name=name;
+			if(evt->epg.description !="")
+				evtlist.insert(evtlist.end(), evt);
+		}
 
-        delete[] pData;
-    }
-    close(sock_fd);
+		delete[] pData;
+	}
+	close(sock_fd);
 
-    if ( evtlist.size() == 0 )
-    {
-        event* evt = new event();
+	if ( evtlist.size() == 0 )
+	{
+		event* evt = new event();
 
-        evt->epg.description= g_Locale->getText("epglist.noevents") ;
-        evt->datetime1_str = std::string("");
-        evt->datetime2_str = std::string("");
-        evt->duration_str  = std::string("");
-        evt->epg.id = 0;
-        evtlist.insert(evtlist.end(), evt);
+		evt->epg.description= g_Locale->getText("epglist.noevents") ;
+		evt->datetime1_str = std::string("");
+		evt->datetime2_str = std::string("");
+		evt->duration_str  = std::string("");
+		evt->epg.id = 0;
+		evtlist.insert(evtlist.end(), evt);
 
-    }
-    if (current_event == (unsigned int)-1)
-        current_event = 0;
-    selected= current_event;
+	}
+	if (current_event == (unsigned int)-1)
+		current_event = 0;
+	selected= current_event;
 
-    return;
+	return;
 }
 
 EventList::EventList()
@@ -293,12 +298,12 @@ EventList::EventList()
 	current_event = 0;
 
 	width = 580;
-//	height = 440;
+	//	height = 440;
 	height = 480;
 	theight= g_Fonts->eventlist_title->getHeight();
 	fheight1= g_Fonts->eventlist_itemLarge->getHeight();
 	{
-	  int h1,h2; 
+		int h1,h2;
 		h1 = g_Fonts->eventlist_itemSmall->getHeight();
 		h2 = g_Fonts->eventlist_datetime->getHeight();
 		fheight2 = (h1 > h2) ? h1 : h2;
@@ -317,24 +322,24 @@ EventList::EventList()
 
 void EventList::removeAllEvents(void)
 {
-  for(unsigned int count=0; count<evtlist.size(); count++)
-    delete evtlist[count];
-  evtlist.clear();
+	for(unsigned int count=0; count<evtlist.size(); count++)
+		delete evtlist[count];
+	evtlist.clear();
 }
 
 EventList::~EventList()
 {
-  removeAllEvents();
+	removeAllEvents();
 }
 
 void EventList::exec(unsigned onidSid, const std::string& channelname)
 {
-  int key;
-  name = channelname;
-  paintHead();
-  readEvents(onidSid, channelname);
-  paint();
-	
+	int key;
+	name = channelname;
+	paintHead();
+	readEvents(onidSid, channelname);
+	paint();
+
 	int oldselected = selected;
 	bool loop=true;
 	while (loop)
@@ -369,7 +374,8 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 			{
 				selected = evtlist.size()-1;
 			}
-			else selected--;
+			else
+				selected--;
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -402,35 +408,35 @@ void EventList::exec(unsigned onidSid, const std::string& channelname)
 		{
 			loop= false;
 		}
-        else if (key==CRCInput::RC_left)
-        {
-			loop= false;
-		}
-        else if (key==CRCInput::RC_red)
-        {
-			loop= false;
-		}
-   		else if (key==CRCInput::RC_help || key==CRCInput::RC_right)
+		else if (key==CRCInput::RC_left)
 		{
-            event* evt = evtlist[selected];
-            if ( evt->epg.id != 0 )
-            {
-    			hide();
+			loop= false;
+		}
+		else if (key==CRCInput::RC_red)
+		{
+			loop= false;
+		}
+		else if (key==CRCInput::RC_help || key==CRCInput::RC_right)
+		{
+			event* evt = evtlist[selected];
+			if ( evt->epg.id != 0 )
+			{
+				hide();
 
-    			g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
+				g_EpgData->show("", 0, evt->epg.id, &evt->epg.startzeit);
 
-                key = g_RCInput->getKey(0);
-                if ((key!=CRCInput::RC_red) &&
-                    (key!=CRCInput::RC_timeout))
-                    g_RCInput->pushbackKey(key);
+				key = g_RCInput->getKey(0);
+				if ((key!=CRCInput::RC_red) &&
+				        (key!=CRCInput::RC_timeout))
+					g_RCInput->pushbackKey(key);
 
-    			paintHead();
-    			paint();
-            }
+				paintHead();
+				paint();
+			}
 		}
 	}
 
-    hide();
+	hide();
 
 }
 
@@ -441,19 +447,19 @@ void EventList::hide()
 
 void EventList::paintItem(unsigned int pos)
 {
-    int color;
+	int color;
 	int ypos = y+ theight+0 + pos*fheight;
 
 	if (liststart+pos==selected)
 	{
 		color = COL_MENUCONTENTSELECTED;
 	}
-    else if (liststart+pos == current_event )
+	else if (liststart+pos == current_event )
 	{
 		color = COL_MENUCONTENT+ 1; //COL_MENUCONTENTINACTIVE+ 4;
 	}
-    else
-   	{
+	else
+	{
 		color = COL_MENUCONTENT;
 	}
 
@@ -463,31 +469,31 @@ void EventList::paintItem(unsigned int pos)
 	{
 		event* evt = evtlist[liststart+pos];
 
-//		printf("Rendering '%s'\n", evt->name.c_str());
-//		printf("date time duration '%s'\n", evt->datetimeduration.c_str());
+		//		printf("Rendering '%s'\n", evt->name.c_str());
+		//		printf("date time duration '%s'\n", evt->datetimeduration.c_str());
 
-//$$$ auch sollten wg. der besseren Darstellung andere Fontmappings benutzt werden...
+		//$$$ auch sollten wg. der besseren Darstellung andere Fontmappings benutzt werden...
 
 		//  datetime1_str  datetime2_str    duration_str
 		//  evt->epg.description
 
 		// 1st line
 		g_Fonts->eventlist_datetime->RenderString(x+5,         ypos+ fheight1+3, fwidth1+5,
-			evt->datetime1_str.c_str(), color);
+		        evt->datetime1_str.c_str(), color);
 		g_Fonts->eventlist_datetime->RenderString(x+5+fwidth1, ypos+ fheight1+3, width-fwidth1-10- 20,
-			evt->datetime2_str.c_str(), color);
+		        evt->datetime2_str.c_str(), color);
 		g_Fonts->eventlist_itemSmall->RenderString(x+width-fwidth2-5- 20, ypos+ fheight1+3, fwidth2,
-			evt->duration_str.c_str(), color);
+		        evt->duration_str.c_str(), color);
 		// 2nd line
 		g_Fonts->eventlist_itemLarge->RenderString(x+ 20, ypos+ fheight, width- 25- 20,
-			evt->epg.description.c_str(), color);
+		        evt->epg.description.c_str(), color);
 	}
 }
 
 void EventList::paintHead()
 {
-    char l_name[100];
-    snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str() );
+	char l_name[100];
+	snprintf(l_name, sizeof(l_name), g_Locale->getText("epglist.head").c_str(), name.c_str() );
 
 	g_FrameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD);
 	g_Fonts->eventlist_title->RenderString(x+10,y+theight+1, width, l_name, COL_MENUHEAD);
@@ -497,21 +503,21 @@ void EventList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
 
-	
+
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
 		paintItem(count);
 	}
 
-    int ypos = y+ theight;
-    int sb = fheight* listmaxshow;
-    g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
+	int ypos = y+ theight;
+	int sb = fheight* listmaxshow;
+	g_FrameBuffer->paintBoxRel(x+ width- 15,ypos, 15, sb,  COL_MENUCONTENT+ 1);
 
-    int sbc= ((evtlist.size()- 1)/ listmaxshow)+ 1;
-    float sbh= (sb- 4)/ sbc;
-    int sbs= (selected/listmaxshow);
+	int sbc= ((evtlist.size()- 1)/ listmaxshow)+ 1;
+	float sbh= (sb- 4)/ sbc;
+	int sbs= (selected/listmaxshow);
 
-    g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
+	g_FrameBuffer->paintBoxRel(x+ width- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT+ 3);
 
 }
 

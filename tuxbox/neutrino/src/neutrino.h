@@ -1,36 +1,39 @@
 /*
-//  $Id: neutrino.h,v 1.38 2001/12/29 02:17:00 McClean Exp $
-
+//  $Id: neutrino.h,v 1.39 2002/01/03 20:03:20 McClean Exp $
+ 
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
-
+ 
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
-
+ 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
+ 
 //  $Log: neutrino.h,v $
+//  Revision 1.39  2002/01/03 20:03:20  McClean
+//  cleanup
+//
 //  Revision 1.38  2001/12/29 02:17:00  McClean
 //  make some settings get from controld
 //
@@ -105,7 +108,7 @@
 //  Revision 1.15  2001/09/18 10:49:49  fnbrd
 //  Eventlist, quick'n dirty
 //
-
+ 
 */
 
 
@@ -167,89 +170,89 @@ using namespace std;
 
 class CNeutrinoApp : public CMenuTarget, COnPaintNotifier
 {
-  private:
-	enum
-	{
-		mode_tv = 1,
-		mode_radio = 2,
-		mode_scart = 3
+	private:
+		enum
+		{
+		    mode_tv = 1,
+		    mode_radio = 2,
+		    mode_scart = 3
 	};
 
-//    EventList *eventlist;
-	string				settingsFile;
+		//    EventList *eventlist;
+		string				settingsFile;
 
-	bool				nRun;
-	int				    mode;
-	bool				mute;
-	bool				softupdate;
+		bool				nRun;
+		int				    mode;
+		bool				mute;
+		bool				softupdate;
 
-    channel_msg         firstchannel;
-	st_rmsg				sendmessage;
+		channel_msg         firstchannel;
+		st_rmsg				sendmessage;
 
-	CColorSetupNotifier		*colorSetupNotifier;
-	CAudioSetupNotifier		*audioSetupNotifier;
-	CVideoSetupNotifier		*videoSetupNotifier;
-    CLanguageSetupNotifier  *languageSetupNotifier;
-    CKeySetupNotifier       *keySetupNotifier;
-    CAPIDChangeExec         *APIDChanger;
-    CNVODChangeExec         *NVODChanger;
+		CColorSetupNotifier		*colorSetupNotifier;
+		CAudioSetupNotifier		*audioSetupNotifier;
+		CVideoSetupNotifier		*videoSetupNotifier;
+		CLanguageSetupNotifier  *languageSetupNotifier;
+		CKeySetupNotifier       *keySetupNotifier;
+		CAPIDChangeExec         *APIDChanger;
+		CNVODChangeExec         *NVODChanger;
 
-	CChannelList		*channelList;
+		CChannelList		*channelList;
 
-	void PluginDemo(); //demo only --- remove!
+		void PluginDemo(); //demo only --- remove!
 
-	void isCamValid();
-	void firstChannel();
-	void setupDefaults();
-	void setupColors_classic();
-	void setupColors_neutrino();
-	void setupNetwork( bool force= false );
+		void isCamValid();
+		void firstChannel();
+		void setupDefaults();
+		void setupColors_classic();
+		void setupColors_neutrino();
+		void setupNetwork( bool force= false );
 
-    void saveSetup();
-	bool loadSetup();
+		void saveSetup();
+		bool loadSetup();
 
-	void tvMode();
-	void radioMode();
-	void scartMode();
-	void setVolume(int key);
-	void AudioMuteToggle();
+		void tvMode();
+		void radioMode();
+		void scartMode();
+		void setVolume(int key);
+		void AudioMuteToggle();
 
-	void ExitRun();
-	void RealRun(CMenuWidget &mainSettings);
-	void InitZapper();
-	void InitKeySettings(CMenuWidget &);
-	void InitServiceSettings(CMenuWidget &);
-	void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
-	void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
-	void InitColorSettings(CMenuWidget &);
-	void InitLanguageSettings(CMenuWidget &);
-	void InitColorThemesSettings(CMenuWidget &);
-	void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
-	void InitNetworkSettings(CMenuWidget &networkSettings);
-	void InitScreenSettings(CMenuWidget &);
-	void InitMiscSettings(CMenuWidget &);
-	void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
-	void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
-			CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
-	void ClearFrameBuffer();
-	void SetupFonts();
-	void SetupFrameBuffer();
-    void SelectAPID();
-    void SelectNVOD();
-	void CmdParser(int argc, char **argv);
+		void ExitRun();
+		void RealRun(CMenuWidget &mainSettings);
+		void InitZapper();
+		void InitKeySettings(CMenuWidget &);
+		void InitServiceSettings(CMenuWidget &);
+		void InitColorSettingsMenuColors(CMenuWidget &, CMenuWidget &);
+		void InitAudioSettings(CMenuWidget &audioSettings, CAudioSetupNotifier* audioSetupNotifier);
+		void InitColorSettings(CMenuWidget &);
+		void InitLanguageSettings(CMenuWidget &);
+		void InitColorThemesSettings(CMenuWidget &);
+		void InitColorSettingsStatusBarColors(CMenuWidget &colorSettings_menuColors, CMenuWidget &);
+		void InitNetworkSettings(CMenuWidget &networkSettings);
+		void InitScreenSettings(CMenuWidget &);
+		void InitMiscSettings(CMenuWidget &);
+		void InitVideoSettings(CMenuWidget &videoSettings, CVideoSetupNotifier* videoSetupNotifier);
+		void InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings, CMenuWidget &audioSettings, CMenuWidget &networkSettings,
+		                  CMenuWidget &colorSettings, CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, CMenuWidget &service);
+		void ClearFrameBuffer();
+		void SetupFonts();
+		void SetupFrameBuffer();
+		void SelectAPID();
+		void SelectNVOD();
+		void CmdParser(int argc, char **argv);
 
 
 	public:
 
-	CNeutrinoApp();
-	~CNeutrinoApp();
+		CNeutrinoApp();
+		~CNeutrinoApp();
 
-    void channelsInit();
-	int run(int argc, char **argv);
-	//callback stuff only....
-	int exec(CMenuTarget* parent, string actionKey);
-	//callback for menue
-	bool onPaintNotify(string MenuName);
+		void channelsInit();
+		int run(int argc, char **argv);
+		//callback stuff only....
+		int exec(CMenuTarget* parent, string actionKey);
+		//callback for menue
+		bool onPaintNotify(string MenuName);
 };
 
 #endif

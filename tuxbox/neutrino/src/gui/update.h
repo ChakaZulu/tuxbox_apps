@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -64,9 +64,15 @@ using namespace std;
 class CFlashTool_StatusViewer
 {
 	public:
-		virtual void showGlobalStatus(int prog){};
-		virtual void showLocalStatus(int prog){};
-		virtual void showStatusMessage(string text){};
+		virtual void showGlobalStatus(int prog)
+		{}
+		;
+		virtual void showLocalStatus(int prog)
+		{}
+		;
+		virtual void showStatusMessage(string text)
+		{}
+		;
 };
 
 
@@ -76,7 +82,7 @@ class CFlashTool
 		string mtdDevice;
 		string ErrorMessage;
 
-		bool erase();		
+		bool erase();
 
 	public:
 		CFlashTool();
@@ -85,8 +91,8 @@ class CFlashTool
 		void setMTDDevice( string mtddevice );
 		void setStatusViewer( CFlashTool_StatusViewer* statusview );
 
-		bool program( string filename );		
-	
+		bool program( string filename );
+
 };
 
 
@@ -100,7 +106,7 @@ class CHTTPUpdater
 	public:
 		CHTTPUpdater();
 		void setStatusViewer( CFlashTool_StatusViewer* statusview );
-	
+
 		bool getInfo();
 		bool getFile();
 
@@ -123,7 +129,7 @@ class CFlashUpdate : public CMenuTarget, CFlashTool_StatusViewer
 		char new_md5sum[50];
 
 		void paint();
-		
+
 		void showGlobalStatus(int prog);
 		void showLocalStatus(int prog);
 		void showStatusMessage(string text);

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -44,160 +44,167 @@ CScanTs::CScanTs()
 
 void CScanTs::sectionsdPauseScanning(int PauseIt)
 {
-    char rip[]="127.0.0.1";
+	char rip[]="127.0.0.1";
 
-    int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    SAI servaddr;
-    memset(&servaddr,0,sizeof(servaddr));
-    servaddr.sin_family=AF_INET;
-    servaddr.sin_port=htons(sectionsd::portNumber);
-    inet_pton(AF_INET, rip, &servaddr.sin_addr);
+	int sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	SAI servaddr;
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(sectionsd::portNumber);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
-    if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-    {
-        perror("CScanTs - PauseScanning - couldn't connect to sectionsd!\n");
-    }
-    else
-    {
-        sectionsd::msgRequestHeader req;
-        req.version = 2;
-        req.command = sectionsd::pauseScanning;
-        req.dataLength = 4;
-        write(sock_fd, &req, sizeof(req));
-        write(sock_fd, &PauseIt, req.dataLength);
-        sectionsd::msgResponseHeader resp;
-        memset(&resp, 0, sizeof(resp));
-        if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
-        {
-            close(sock_fd);
-            return;
-        }
-        close(sock_fd);
-    }
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("CScanTs - PauseScanning - couldn't connect to sectionsd!\n");
+	}
+	else
+	{
+		sectionsd::msgRequestHeader req;
+		req.version = 2;
+		req.command = sectionsd::pauseScanning;
+		req.dataLength = 4;
+		write(sock_fd, &req, sizeof(req));
+		write(sock_fd, &PauseIt, req.dataLength);
+		sectionsd::msgResponseHeader resp;
+		memset(&resp, 0, sizeof(resp));
+		if(read(sock_fd, &resp, sizeof(sectionsd::msgResponseHeader))<=0)
+		{
+			close(sock_fd);
+			return;
+		}
+		close(sock_fd);
+	}
 }
 
 bool CScanTs::scanReady(short* sat, int *ts, int *services)
 {
-		int sock_fd;
-		SAI servaddr;
-		char rip[]="127.0.0.1";
-		char *return_buf;
-		st_rmsg		sendmessage;
+	int sock_fd;
+	SAI servaddr;
+	char rip[]="127.0.0.1";
+	char *return_buf;
+	st_rmsg		sendmessage;
 
-		sendmessage.version=1;
-		sendmessage.cmd = 'h';
+	sendmessage.version=1;
+	sendmessage.cmd = 'h';
 
-		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		memset(&servaddr,0,sizeof(servaddr));
-		servaddr.sin_family=AF_INET;
-		servaddr.sin_port=htons(1505);
-		inet_pton(AF_INET, rip, &servaddr.sin_addr);
+	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(1505);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
-		#ifdef HAS_SIN_LEN
- 			servaddr.sin_len = sizeof(servaddr); // needed ???
-		#endif
+#ifdef HAS_SIN_LEN
+
+	servaddr.sin_len = sizeof(servaddr); // needed ???
+#endif
 
 
-		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("neutrino: connect(zapit)");
+		exit(-1);
+	}
+
+	write(sock_fd, &sendmessage, sizeof(sendmessage));
+	return_buf = (char*) malloc(4);
+	memset(return_buf, 0, 4);
+	if (recv(sock_fd, return_buf, 3,0) <= 0 )
+	{
+		perror("recv(zapit)");
+		exit(-1);
+	}
+
+	//printf("scan: %s", return_buf);
+	if (return_buf[0] == '-')
+	{
+		free(return_buf);
+		close(sock_fd);
+		return true;
+	}
+	else
+	{
+		if (recv(sock_fd, sat, sizeof(short),0) <= 0 )
 		{
- 	 		perror("neutrino: connect(zapit)");
-			exit(-1);
-		}
-
-		write(sock_fd, &sendmessage, sizeof(sendmessage));
-		return_buf = (char*) malloc(4);
-		memset(return_buf, 0, 4);
-		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
 			perror("recv(zapit)");
 			exit(-1);
 		}
-	
-		//printf("scan: %s", return_buf);
-		if (return_buf[0] == '-')
+		if (recv(sock_fd, ts, sizeof(int),0) <= 0 )
 		{
-			free(return_buf);
-			close(sock_fd);
-			return true;
+			perror("recv(zapit)");
+			exit(-1);
 		}
-		else
+		if (recv(sock_fd, services, sizeof(int),0) <= 0 )
 		{
-			if (recv(sock_fd, sat, sizeof(short),0) <= 0 ) {
-				perror("recv(zapit)");
-				exit(-1);
-			}
-			if (recv(sock_fd, ts, sizeof(int),0) <= 0 ) {
-				perror("recv(zapit)");
-				exit(-1);
-			}
-			if (recv(sock_fd, services, sizeof(int),0) <= 0 ) {
-				perror("recv(zapit)");
-				exit(-1);
-			}
-			//printf("Found transponders: %d\n", *ts);
-			//printf("Found channels: %d\n", *services);
-			free(return_buf);
-			close(sock_fd);
-			return false;
+			perror("recv(zapit)");
+			exit(-1);
 		}
+		//printf("Found transponders: %d\n", *ts);
+		//printf("Found channels: %d\n", *services);
+		free(return_buf);
+		close(sock_fd);
+		return false;
+	}
 
 }
 
 void CScanTs::startScan()
 {
-		int sock_fd;
-		SAI servaddr;
-		char rip[]="127.0.0.1";
-		char *return_buf;
-		st_rmsg		sendmessage;
+	int sock_fd;
+	SAI servaddr;
+	char rip[]="127.0.0.1";
+	char *return_buf;
+	st_rmsg		sendmessage;
 
-		sendmessage.version=1;
-		sendmessage.param2=g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_bouquet;
-		printf("sending scanparam: %d\n", sendmessage.param2 );
-		sendmessage.cmd = 'g';
+	sendmessage.version=1;
+	sendmessage.param2=g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_bouquet;
+	printf("sending scanparam: %d\n", sendmessage.param2 );
+	sendmessage.cmd = 'g';
 
-		sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		memset(&servaddr,0,sizeof(servaddr));
-		servaddr.sin_family=AF_INET;
-		servaddr.sin_port=htons(1505);
-		inet_pton(AF_INET, rip, &servaddr.sin_addr);
+	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	memset(&servaddr,0,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(1505);
+	inet_pton(AF_INET, rip, &servaddr.sin_addr);
 
-		#ifdef HAS_SIN_LEN
- 			servaddr.sin_len = sizeof(servaddr); // needed ???
-		#endif
+#ifdef HAS_SIN_LEN
+
+	servaddr.sin_len = sizeof(servaddr); // needed ???
+#endif
 
 
-		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-		{
- 	 		perror("neutrino: connect(zapit)");
-			exit(-1);
-		}
+	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
+	{
+		perror("neutrino: connect(zapit)");
+		exit(-1);
+	}
 
-		write(sock_fd, &sendmessage, sizeof(sendmessage));
-		return_buf = (char*) malloc(4);
-		memset(return_buf, 0, 4);
-		if (recv(sock_fd, return_buf, 3,0) <= 0 ) {
-			perror("recv(zapit)");
-			exit(-1);
-		}
-	
-		printf("startscan: %s", return_buf);
-		free(return_buf);
-		close(sock_fd);
+	write(sock_fd, &sendmessage, sizeof(sendmessage));
+	return_buf = (char*) malloc(4);
+	memset(return_buf, 0, 4);
+	if (recv(sock_fd, return_buf, 3,0) <= 0 )
+	{
+		perror("recv(zapit)");
+		exit(-1);
+	}
+
+	printf("startscan: %s", return_buf);
+	free(return_buf);
+	close(sock_fd);
 }
 
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
 	g_FrameBuffer->loadPal("scan.pal", 37, 199);
-//	g_FrameBuffer->paintIcon8("scan.raw",0,0, 37);
-//	g_FrameBuffer->savePictureFromMem("demoscan.raw", g_FrameBuffer->lfb);
+	//	g_FrameBuffer->paintIcon8("scan.raw",0,0, 37);
+	//	g_FrameBuffer->savePictureFromMem("demoscan.raw", g_FrameBuffer->lfb);
 	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->lfb);
 
 	sectionsdPauseScanning(1);
 	startScan();
 
 	paint();
-	
+
 	char strServices[100] = "";
 	char strTransponders[100] = "";
 	char strSatellite[100] = "";
@@ -235,7 +242,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		}
 
 		ypos= y+ hheight + (mheight >>1);
-	
+
 		char filename[30];
 		sprintf(filename, "radar%d.raw", pos);
 		pos = (pos+1)%10;
@@ -245,7 +252,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		if(strcmp(strLastTransponders, strTransponders)!=0)
 		{
 			g_FrameBuffer->paintBoxRel(xpos1, ypos, 80, mheight, COL_MENUCONTENT);
-			g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, strTransponders, COL_MENUCONTENT); 
+			g_Fonts->menu->RenderString(xpos1, ypos+ mheight, width, strTransponders, COL_MENUCONTENT);
 			strcpy(strLastTransponders, strTransponders);
 		}
 		ypos+= mheight;
@@ -263,19 +270,19 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		{	//sat only
 			switch (sat)
 			{
-				case 1: 
+					case 1:
 					strcpy(strSatellite, g_Locale->getText("scants.astra").c_str() );
 					break;
-				case 2: 
+					case 2:
 					strcpy(strSatellite, g_Locale->getText("scants.hotbird").c_str() );
 					break;
-				case 4: 
+					case 4:
 					strcpy(strSatellite, g_Locale->getText("scants.kopernikus").c_str() );
 					break;
-				case 8: 
+					case 8:
 					strcpy(strSatellite, g_Locale->getText("scants.digituerk").c_str() );
 					break;
-				default:
+					default:
 					strcpy(strSatellite,"unknown");
 			}
 			if(strcmp(strLastSatellite,strSatellite)!=0)
@@ -292,8 +299,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 
 	hide();
-    neutrino->channelsInit();
-    sectionsdPauseScanning(0);
+	neutrino->channelsInit();
+	sectionsdPauseScanning(0);
 	return CMenuTarget::RETURN_REPAINT;
 }
 

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -43,14 +43,14 @@ class CColorSetupNotifier : public CChangeObserver
 
 class CAudioSetupNotifier : public CChangeObserver
 {
-    public:
-    	bool changeNotify(string OptionName);
+	public:
+		bool changeNotify(string OptionName);
 };
 
 class CVideoSetupNotifier : public CChangeObserver
 {
-    public:
-    	bool changeNotify(string OptionName);
+	public:
+		bool changeNotify(string OptionName);
 };
 
 class CLanguageSetupNotifier : public CChangeObserver
@@ -74,13 +74,13 @@ class CKeySetupNotifier : public CChangeObserver
 class CAPIDChangeExec : public CMenuTarget
 {
 	public:
-        int exec(CMenuTarget* parent, string actionKey);
+		int exec(CMenuTarget* parent, string actionKey);
 };
 
 class CNVODChangeExec : public CMenuTarget
 {
 	public:
-        int exec(CMenuTarget* parent, string actionKey);
+		int exec(CMenuTarget* parent, string actionKey);
 };
 
 void setDefaultGateway(char* ip);

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -29,41 +29,44 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* 
-$Id: fontrenderer.cpp,v 1.19 2001/12/03 23:21:23 McClean Exp $
-
+/*
+$Id: fontrenderer.cpp,v 1.20 2002/01/03 20:03:20 McClean Exp $
+ 
 -- misc font / text rendering functions
-
+ 
 $Log: fontrenderer.cpp,v $
+Revision 1.20  2002/01/03 20:03:20  McClean
+cleanup
+
 Revision 1.19  2001/12/03 23:21:23  McClean
 hmm?
-
+ 
 Revision 1.18  2001/12/02 11:59:51  waldi
 - add config.h include
 - change dir for fonts
-
+ 
 Revision 1.17  2001/11/26 02:34:03  McClean
 include (.../../stuff) changed - correct unix-formated files now
-
+ 
 Revision 1.16  2001/11/15 11:42:41  McClean
 gpl-headers added
-
+ 
 Revision 1.15  2001/10/18 10:55:56  field
 Rendert jetzt auch Schriftfarben zwischen den Hauptfarben richtig (zb
 COLOR_MENUCONTENT+1)
-
+ 
 Revision 1.14  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
-
+ 
 Revision 1.13  2001/10/14 15:48:16  McClean
 use font-cache
-
+ 
 Revision 1.12  2001/10/14 14:30:47  rasc
 -- EventList Darstellung ueberarbeitet
 -- kleiner Aenderungen und kleinere Bugfixes
 -- locales erweitert..
-
-
+ 
+ 
 */
 
 #include <config.h>
@@ -80,9 +83,9 @@ Revision 1.12  2001/10/14 14:30:47  rasc
 
 
 FT_Error fontRenderClass::myFTC_Face_Requester(FTC_FaceID  face_id,
-                            FT_Library  library,
-                            FT_Pointer  request_data,
-                            FT_Face*    aface)
+        FT_Library  library,
+        FT_Pointer  request_data,
+        FT_Face*    aface)
 {
 	return ((fontRenderClass*)request_data)->FTC_Face_Requester(face_id, aface);
 }
@@ -128,8 +131,8 @@ fontRenderClass::fontRenderClass()
 		printf(" imagecache failed!\n");
 	}
 
-    pthread_mutex_init( &render_mutex, NULL );
-  
+	pthread_mutex_init( &render_mutex, NULL );
+
 	printf("\n");
 }
 
@@ -153,7 +156,7 @@ FT_Error fontRenderClass::FTC_Face_Requester(FTC_FaceID face_id, FT_Face* aface)
 		return error;
 	}
 	return 0;
-}                                                                                                                                
+}
 
 FTC_FaceID fontRenderClass::getFaceID(const char *family, const char *style)
 {
@@ -219,7 +222,7 @@ Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize)
 	font.image_type |= ftc_image_flag_autohinted;
 
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
-	{ 
+	{
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return;
 	}
@@ -243,7 +246,7 @@ Font::Font(fontRenderClass *render, FTC_FaceID faceid, int isize)
 	lower = -descender+halflinegap+1; // we add 1 at bottom
 	height=upper+lower;               // this is total height == distance of lines
 	// hack end
-	
+
 	//printf("glyph: hM=%d tM=%d hg=%d tg=%d ascender=%d descender=%d height=%d linegap/2=%d upper=%d lower=%d\n",
 	//       hM,tM,hg,tg,ascender,descender,height,halflinegap,upper,lower);
 	//printf("font metrics: height=%ld\n", (size->metrics.height+32) >> 6);
@@ -261,17 +264,17 @@ int Font::getHeight(void)
 
 void Font::RenderString(int x, int y, int width, const char *string, unsigned char color, int boxheight)
 {
-    pthread_mutex_lock( &renderer->render_mutex );
+	pthread_mutex_lock( &renderer->render_mutex );
 
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
-	{ 
+	{
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return;
 	}
 
 
 	int use_kerning=FT_HAS_KERNING(face);
-	
+
 	int left=x;
 	int step_y=height;
 
@@ -294,9 +297,9 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 	// **  -------------------------------- y=baseline+lower == YCALLER
 	//
 	// ----------------------------------- box lower end (this is NOT a font metric, this is our method for y centering)
-	
+
 	// height = ascender + -1*descender + linegap           // descender is negative!
-	
+
 	// now we adjust the given y value (which is the line marked as YCALLER) to be the baseline after adjustment:
 	y -= lower;
 	// y coordinate now gives font baseline which is used for drawing
@@ -304,17 +307,18 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 	// caution: this only works if we print a single line of text
 	// if we have multiple lines, don't use boxheight or specify boxheight==0.
 	// if boxheight is !=0, we further adjust y, so that text is y-centered in the box
-	if(boxheight){
+	if(boxheight)
+	{
 		if(boxheight>step_y)			// this is a real box (bigger than text)
 			y -= ((boxheight-step_y)>>1);
 		else if(boxheight<0)			// this normally would be wrong, so we just use it to define a "border"
 			y += (boxheight>>1);		// half of border value at lower end, half at upper end
 	}
-		
+
 	int lastindex=0; // 0 == missing glyph (never has kerning values)
 	FT_Vector kerning;
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
-  
+
 	for (; *string; string++)
 	{
 		FTC_SBit glyph;
@@ -331,39 +335,39 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 			printf("failed to get glyph bitmap.\n");
 			continue;
 		}
-    
+
 		// width clip
 		if(x+glyph->xadvance > left+width)
-        {
-            pthread_mutex_unlock( &renderer->render_mutex );
+		{
+			pthread_mutex_unlock( &renderer->render_mutex );
 			return;
-        }
+		}
 
 		//kerning
 		if(use_kerning)
 		{
-		    FT_Get_Kerning(face,lastindex,index,0,&kerning);
-		    x+=(kerning.x+32)>>6; // kerning!
+			FT_Get_Kerning(face,lastindex,index,0,&kerning);
+			x+=(kerning.x+32)>>6; // kerning!
 		}
 
 		int rx=x+glyph->left;
 		int ry=y-glyph->top;
-    
+
 		__u8 *d=g_FrameBuffer->lfb + g_FrameBuffer->Stride()*ry + rx;
 		__u8 *s=glyph->buffer;
-    
-        //color=((color+ 2)>>3)*8- 2;
-        int coff=(color+ 2)%8;
+
+		//color=((color+ 2)>>3)*8- 2;
+		int coff=(color+ 2)%8;
 		for (int ay=0; ay<glyph->height; ay++)
 		{
 			__u8 *td=d;
 			int w=glyph->width;
- 			int ax; 
+			int ax;
 			for (ax=0; ax<w; ax++)
 			{
 				int c = (*s++>>5)- coff; // c = 0..7
-                if (c< 0)
-                    c= 0;
+				if (c< 0)
+					c= 0;
 				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
 			}
 			s+=glyph->pitch-ax;
@@ -375,24 +379,24 @@ void Font::RenderString(int x, int y, int width, const char *string, unsigned ch
 		pen1=x;
 		lastindex=index;
 	}
-    pthread_mutex_unlock( &renderer->render_mutex );
+	pthread_mutex_unlock( &renderer->render_mutex );
 }
 
 int Font::getRenderWidth(const char *string)
 {
-    pthread_mutex_lock( &renderer->render_mutex );
+	pthread_mutex_lock( &renderer->render_mutex );
 
 	int use_kerning=FT_HAS_KERNING(face);
 	if (FTC_Manager_Lookup_Size(renderer->cacheManager, &font.font, &face, &size)<0)
-	{ 
+	{
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return -1;
 	}
 
 	int x=0;
-        int lastindex=0; // 0==missing glyph (never has kerning)
-        FT_Vector kerning;
-        int pen1=-1; // "pen" positions for kerning, pen2 is "x"
+	int lastindex=0; // 0==missing glyph (never has kerning)
+	FT_Vector kerning;
+	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
 	for (; *string; string++)
 	{
 		FTC_SBit glyph;
@@ -405,19 +409,20 @@ int Font::getRenderWidth(const char *string)
 			printf("failed to get glyph bitmap.\n");
 			continue;
 		}
-                //kerning
-		if(use_kerning){
+		//kerning
+		if(use_kerning)
+		{
 			FT_Get_Kerning(face,lastindex,index,0,&kerning);
 			x+=(kerning.x+32)>>6; // kerning!
 		}
-    
+
 		x+=glyph->xadvance+1;
 		if(pen1>x)
-		        x=pen1;
+			x=pen1;
 		pen1=x;
 		lastindex=index;
 	}
-    pthread_mutex_unlock( &renderer->render_mutex );
+	pthread_mutex_unlock( &renderer->render_mutex );
 
 	return x;
 }

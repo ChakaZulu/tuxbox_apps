@@ -1,29 +1,29 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
-
-
+ 
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
-
+ 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -32,9 +32,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.22 2001/12/22 19:34:58 Simplex Exp $
+// $Id: channellist.h,v 1.23 2002/01/03 20:03:20 McClean Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.23  2002/01/03 20:03:20  McClean
+// cleanup
+//
 // Revision 1.22  2001/12/22 19:34:58  Simplex
 // - selected channel in bouquetlist is correct after numzap and quickzap
 // - dbox-key in channellist shows bouquetlist
@@ -117,60 +120,63 @@ using namespace std;
 
 class CChannelList
 {
-    struct channel {
-        int         key;
-        int         number;
-        string      name;
-        unsigned int onid_sid;
-        epg_event   currentEvent;
-    };
+		struct channel
+		{
+			int         key;
+			int         number;
+			string      name;
+			unsigned int onid_sid;
+			epg_event   currentEvent;
+		};
 
 
-	unsigned int		selected;
-	unsigned int		tuned;
-	CLastChannel            lastChList;
-	unsigned int		liststart;
-	unsigned int		listmaxshow;
-	unsigned int		numwidth;
-	int			fheight; // Fonthoehe Channellist-Inhalt
-	int			theight; // Fonthoehe Channellist-Titel
+		unsigned int		selected;
+		unsigned int		tuned;
+		CLastChannel            lastChList;
+		unsigned int		liststart;
+		unsigned int		listmaxshow;
+		unsigned int		numwidth;
+		int			fheight; // Fonthoehe Channellist-Inhalt
+		int			theight; // Fonthoehe Channellist-Titel
 
-	int			key;
-	string			name;
-	vector<channel*>	chanlist;
+		int			key;
+		string			name;
+		vector<channel*>	chanlist;
 
-	int 			width;
-	int 			height;
-	int 			x;
-	int 			y;
+		int 			width;
+		int 			height;
+		int 			x;
+		int 			y;
 
-	void paintItem(int pos);
-	void paint();
-	void paintHead();
-	void hide();
+		void paintItem(int pos);
+		void paint();
+		void paintHead();
+		void hide();
 
 	public:
-    CChannelList(int Key=-1, const std::string& Name="");
-	~CChannelList();
-	void addChannel(int key, int number, const std::string& name, unsigned int ids = 0);
-	void setName(const std::string& Name);
-	int getKey(int);
-	const std::string& getActiveChannelName();
-	int getActiveChannelNumber();
-	unsigned int CChannelList::getActiveChannelOnid_sid() {
-          return chanlist[selected]->onid_sid;
-        }
-    const std::string getActiveChannelID();
-	void zapTo(int pos);
-	bool showInfo(int pos);
-	void updateEvents(void);
-	void numericZap(int key);
-	int  show();
-	void exec();
-	void quickZap(int key);
-	int  hasChannel(int nChannelNr);
-	void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
-};
+		CChannelList(int Key=-1, const std::string& Name="");
+		~CChannelList();
+		void addChannel(int key, int number, const std::string& name, unsigned int ids = 0);
+		void setName(const std::string& Name);
+		int getKey(int);
+		const std::string& getActiveChannelName();
+		int getActiveChannelNumber();
+		unsigned int CChannelList::getActiveChannelOnid_sid()
+		{
+			return chanlist[selected]->onid_sid;
+		}
+		const std::string getActiveChannelID();
+		void zapTo(int pos);
+		bool showInfo(int pos);
+		void updateEvents(void);
+		void numericZap(int key);
+		int  show();
+		void exec();
+		void quickZap(int key);
+		int  hasChannel(int nChannelNr);
+		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
+}
+;
 
 
 #endif

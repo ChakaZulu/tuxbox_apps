@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -30,31 +30,34 @@
 */
 
 /*
-$Id: streaminfo.cpp,v 1.12 2001/11/26 02:34:04 McClean Exp $
-
+$Id: streaminfo.cpp,v 1.13 2002/01/03 20:03:20 McClean Exp $
+ 
 Module StreamInfo
-
+ 
 History:
  $Log: streaminfo.cpp,v $
+ Revision 1.13  2002/01/03 20:03:20  McClean
+ cleanup
+
  Revision 1.12  2001/11/26 02:34:04  McClean
  include (.../../stuff) changed - correct unix-formated files now
-
+ 
  Revision 1.11  2001/11/15 11:42:41  McClean
  gpl-headers added
-
+ 
  Revision 1.10  2001/10/22 15:24:48  McClean
  small designupdate
-
+ 
  Revision 1.9  2001/10/09 21:48:37  McClean
  ucode-check
-
+ 
  Revision 1.8  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
    ==> harmonischeres Menuehandling
  - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
-
-
+ 
+ 
 */
 
 
@@ -80,18 +83,18 @@ int CStreamInfo::exec(CMenuTarget* parent, string)
 	}
 	paint();
 
-//	int key = g_RCInput->getKey(130);
+	//	int key = g_RCInput->getKey(130);
 
 	// -- just eat key and return
 
 	g_RCInput->getKey(130);
 
-//    if ( (key==CRCInput::RC_spkr) ||
-//	     (key==CRCInput::RC_plus) ||
-//         (key==CRCInput::RC_minus) )
-//    {
-//        g_RCInput->pushbackKey(key);
-//    }
+	//    if ( (key==CRCInput::RC_spkr) ||
+	//	     (key==CRCInput::RC_plus) ||
+	//         (key==CRCInput::RC_minus) )
+	//    {
+	//        g_RCInput->pushbackKey(key);
+	//    }
 
 	hide();
 	return CMenuTarget::RETURN_REPAINT;
@@ -111,7 +114,7 @@ void CStreamInfo::paint()
 
 	ypos+= hheight + (mheight >>1);
 
-	
+
 	FILE* fd = fopen("/proc/bus/bitstream", "rt");
 	if (fd==NULL)
 	{
@@ -124,14 +127,15 @@ void CStreamInfo::paint()
 	char *key,*tmpptr,buf[100];
 	int value, pos=0;
 	fgets(buf,29,fd);//dummy
-	while(!feof(fd)) 
+	while(!feof(fd))
 	{
 		if(fgets(buf,29,fd)!=NULL)
 		{
 			buf[strlen(buf)-1]=0;
 			tmpptr=buf;
 			key=strsep(&tmpptr,":");
-			for(;tmpptr[0]==' ';tmpptr++);
+			for(;tmpptr[0]==' ';tmpptr++)
+				;
 			value=atoi(tmpptr);
 			//printf("%s: %d\n",key,value);
 			bitInfo[pos]= value;
@@ -140,7 +144,7 @@ void CStreamInfo::paint()
 	}
 	fclose(fd);
 
-	
+
 	//paint msg...
 	sprintf((char*) buf, "%s: %dx%d", g_Locale->getText("streaminfo.resolution").c_str(), bitInfo[0], bitInfo[1] );
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
@@ -155,10 +159,17 @@ void CStreamInfo::paint()
 
 	switch ( bitInfo[2] )
 	{
-		case 2: sprintf((char*) buf, "%s: 4:3", g_Locale->getText("streaminfo.aratio").c_str() ); break;
-		case 3: sprintf((char*) buf, "%s: 16:9", g_Locale->getText("streaminfo.aratio").c_str()); break;
-		case 4: sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText("streaminfo.aratio").c_str()); break;
-		default: sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.aratio_unknown").c_str());
+			case 2:
+			sprintf((char*) buf, "%s: 4:3", g_Locale->getText("streaminfo.aratio").c_str() );
+			break;
+			case 3:
+			sprintf((char*) buf, "%s: 16:9", g_Locale->getText("streaminfo.aratio").c_str());
+			break;
+			case 4:
+			sprintf((char*) buf, "%s: 2.21:1", g_Locale->getText("streaminfo.aratio").c_str());
+			break;
+			default:
+			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.aratio_unknown").c_str());
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
@@ -167,9 +178,14 @@ void CStreamInfo::paint()
 
 	switch ( bitInfo[3] )
 	{
-		case 3:  sprintf((char*) buf, "%s: 25fps", g_Locale->getText("streaminfo.framerate").c_str()); break;
-		case 6:  sprintf((char*) buf, "%s: 50fps", g_Locale->getText("streaminfo.framerate").c_str()); break;
-		default:  sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.framerate_unknown").c_str());
+			case 3:
+			sprintf((char*) buf, "%s: 25fps", g_Locale->getText("streaminfo.framerate").c_str());
+			break;
+			case 6:
+			sprintf((char*) buf, "%s: 50fps", g_Locale->getText("streaminfo.framerate").c_str());
+			break;
+			default:
+			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.framerate_unknown").c_str());
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 
@@ -178,11 +194,20 @@ void CStreamInfo::paint()
 
 	switch ( bitInfo[6] )
 	{
-		case 1: sprintf((char*) buf, "%s: single channel", g_Locale->getText("streaminfo.audiotype").c_str()); break;
-		case 2: sprintf((char*) buf, "%s: dual channel", g_Locale->getText("streaminfo.audiotype").c_str()); break;
-		case 3: sprintf((char*) buf, "%s: joint stereo", g_Locale->getText("streaminfo.audiotype").c_str()); break;
-		case 4: sprintf((char*) buf, "%s: stereo", g_Locale->getText("streaminfo.audiotype").c_str()); break;
-		default:  sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.audiotype_unknown").c_str()); 
+			case 1:
+			sprintf((char*) buf, "%s: single channel", g_Locale->getText("streaminfo.audiotype").c_str());
+			break;
+			case 2:
+			sprintf((char*) buf, "%s: dual channel", g_Locale->getText("streaminfo.audiotype").c_str());
+			break;
+			case 3:
+			sprintf((char*) buf, "%s: joint stereo", g_Locale->getText("streaminfo.audiotype").c_str());
+			break;
+			case 4:
+			sprintf((char*) buf, "%s: stereo", g_Locale->getText("streaminfo.audiotype").c_str());
+			break;
+			default:
+			sprintf((char*) buf, "%s", g_Locale->getText("streaminfo.audiotype_unknown").c_str());
 	}
 	g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, buf, COL_MENUCONTENT);
 

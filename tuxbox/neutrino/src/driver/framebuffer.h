@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -30,28 +30,31 @@
 */
 
 /*
-$Id: framebuffer.h,v 1.10 2001/12/17 22:56:37 McClean Exp $
-
-
+$Id: framebuffer.h,v 1.11 2002/01/03 20:03:20 McClean Exp $
+ 
+ 
 $Log: framebuffer.h,v $
+Revision 1.11  2002/01/03 20:03:20  McClean
+cleanup
+
 Revision 1.10  2001/12/17 22:56:37  McClean
 add dump-function
-
+ 
 Revision 1.9  2001/12/17 01:28:26  McClean
 accelerate radiomode-logo-paint
-
+ 
 Revision 1.8  2001/11/26 02:34:03  McClean
 include (.../../stuff) changed - correct unix-formated files now
-
+ 
 Revision 1.7  2001/11/15 11:42:41  McClean
 gpl-headers added
-
+ 
 Revision 1.6  2001/10/16 19:11:16  rasc
 -- CR LF --> LF in einigen Modulen
-
-
-
-
+ 
+ 
+ 
+ 
 */
 
 
@@ -76,7 +79,7 @@ using namespace std;
 class CFrameBuffer
 {
 	private:
-	
+
 		struct rgbData
 		{
 			unsigned char r;
@@ -99,12 +102,19 @@ class CFrameBuffer
 		void paletteFade(int i, __u32 rgb1, __u32 rgb2, int level);
 
 	public:
-		int getFileHandle(){return fd;}; //only used for plugins (games) !!
+		int getFileHandle()
+		{
+			return fd;
+		}
+		; //only used for plugins (games) !!
 
 		//pointer to framebuffer
 		unsigned char *lfb;
-		unsigned int Stride() { return stride; }
-  
+		unsigned int Stride()
+		{
+			return stride;
+		}
+
 		CFrameBuffer(const char *fb="/dev/fb/0");
 		~CFrameBuffer();
 
@@ -118,7 +128,7 @@ class CFrameBuffer
 
 		//paint functions
 		void paintPixel(int x, int y, unsigned char col);
-		
+
 		void paintBox(int xa, int ya, int xb, int yb, unsigned char col);
 		void paintBoxRel(int x, int y, int dx, int dy, unsigned char col);
 

@@ -143,7 +143,8 @@ int CBouquetList::show()
 			{
 				selected = Bouquets.size()-1;
 			}
-			else selected--;
+			else
+				selected--;
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -177,10 +178,10 @@ int CBouquetList::show()
 			zapOnExit = true;
 			loop=false;
 		}
-                else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-                        || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
-			|| (key==CRCInput::RC_standby)
-                        || (CRCInput::isNumeric(key)) )
+		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
+		         || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+		         || (key==CRCInput::RC_standby)
+		         || (CRCInput::isNumeric(key)) )
 		{
 			selected = oldselected;
 			g_RCInput->pushbackKey (key);
@@ -216,7 +217,7 @@ void CBouquetList::paintItem(int pos)
 	g_FrameBuffer->paintBoxRel(x,ypos, width- 15, fheight, color);
 	if(liststart+pos<Bouquets.size())
 	{
-        CBouquet* bouq = Bouquets[liststart+pos];
+		CBouquet* bouq = Bouquets[liststart+pos];
 		//number
 
 		g_Fonts->channellist->RenderString(x+ 5+ numwidth+ 10, ypos+ fheight, width- numwidth- 20- 15, bouq->name.c_str(), color);
@@ -235,15 +236,15 @@ void CBouquetList::paint()
 	int lastnum =  liststart + listmaxshow;
 
 	if(lastnum<10)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("0");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("0");
 	else if(lastnum<100)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("00");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("00");
 	else if(lastnum<1000)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("000");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("000");
 	else if(lastnum<10000)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("0000");
 	else // if(lastnum<100000)
-	    numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
+		numwidth = g_Fonts->channellist_number->getRenderWidth("00000");
 
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -27,26 +27,29 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-$Id: gamelist.cpp,v 1.22 2002/01/02 04:49:36 McClean Exp $
-
+ 
+$Id: gamelist.cpp,v 1.23 2002/01/03 20:03:20 McClean Exp $
+ 
 $Log: gamelist.cpp,v $
+Revision 1.23  2002/01/03 20:03:20  McClean
+cleanup
+
 Revision 1.22  2002/01/02 04:49:36  McClean
 fix libfx2.so-location *grrr*
-
+ 
 Revision 1.21  2001/12/25 11:40:30  McClean
 better pushback handling
-
+ 
 Revision 1.20  2001/12/12 19:11:32  McClean
 prepare timing setup...
-
+ 
 Revision 1.19  2001/12/12 18:45:39  McClean
 fix gamelist-design, manual-update bug, add save settings now
-
+ 
 Revision 1.18  2001/12/05 21:38:09  rasc
 gamelist: eigener Fontdef fuer 2-zeiliges Menue
-
-
+ 
+ 
 */
 
 #include "gamelist.h"
@@ -65,11 +68,11 @@ CGameList::CGameList(string Name)
 	width = 500;
 	height = 440;
 	theight= g_Fonts->menu_title->getHeight();
-//
+	//
 	fheight1= g_Fonts->gamelist_itemLarge->getHeight();
 	fheight2= g_Fonts->gamelist_itemSmall->getHeight();
 	fheight = fheight1 + fheight2 + 2;
-//
+	//
 	listmaxshow = (height-theight-0)/fheight;
 	height = theight+0+listmaxshow*fheight; // recalc height
 	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
@@ -117,7 +120,7 @@ static	int	_loadInfo( const char *fname, struct SPluginInfo *info )
 			strcpy(info->desc,p);
 		else if ( !strcmp(buffer,"depend") )
 			strcpy(info->depend,p);
-// rest ist erstma egal
+		// rest ist erstma egal
 	}
 	fclose(fp);
 
@@ -144,7 +147,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	gamelist.clear();
 
 	game* tmp = new game();
-    tmp->name = g_Locale->getText("menu.back");
+	tmp->name = g_Locale->getText("menu.back");
 	gamelist.insert(gamelist.end(), tmp);
 
 	struct dirent **namelist;
@@ -170,9 +173,9 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 					continue;
 
 				game* tmp = new game();
-			    tmp->name = info.name;
-			    tmp->desc = info.desc;
-			    tmp->depend = info.depend;
+				tmp->name = info.name;
+				tmp->desc = info.desc;
+				tmp->depend = info.depend;
 				tmp->filename = pluginname;
 				gamelist.insert(gamelist.end(), tmp);
 			}
@@ -182,7 +185,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	}
 
 	paint();
-	
+
 	bool loop=true;
 	while (loop)
 	{
@@ -215,7 +218,8 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			{
 				selected = gamelist.size()-1;
 			}
-			else selected--;
+			else
+				selected--;
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -254,11 +258,11 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			{//exec the plugin :))
 				runGame( selected );
 			}
-		} 
-                else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
-                        || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
-                        || (key==CRCInput::RC_standby)
-                        || (CRCInput::isNumeric(key)) )
+		}
+		else if( (key==CRCInput::RC_spkr) || (key==CRCInput::RC_plus) || (key==CRCInput::RC_minus)
+		         || (key==CRCInput::RC_red) || (key==CRCInput::RC_green) || (key==CRCInput::RC_yellow) || (key==CRCInput::RC_blue)
+		         || (key==CRCInput::RC_standby)
+		         || (CRCInput::isNumeric(key)) )
 		{
 			g_RCInput->pushbackKey (key);
 			loop=false;
@@ -316,7 +320,7 @@ void CGameList::paintHead()
 void CGameList::paint()
 {
 	liststart = (selected/listmaxshow)*listmaxshow;
-	
+
 	for(unsigned int count=0;count<listmaxshow;count++)
 	{
 		paintItem(count);
@@ -352,7 +356,7 @@ void CGameList::runGame(int selected )
 			np = strchr(p,',');
 			if ( !np )
 				break;
-		
+
 			*np=0;
 			p=np+1;
 			if ( argc == 20 )	// mehr nicht !
@@ -363,9 +367,9 @@ void CGameList::runGame(int selected )
 	{
 		string libname = argv[i];
 		printf("try load shared lib : %s\n",argv[i]);
-		libhandle[i] = dlopen ( *argv[i] == '/' ? 
-			argv[i] : (PLUGINDIR "/" +libname).c_str(),
-			RTLD_NOW | RTLD_GLOBAL );
+		libhandle[i] = dlopen ( *argv[i] == '/' ?
+		                        argv[i] : (PLUGINDIR "/" +libname).c_str(),
+		                        RTLD_NOW | RTLD_GLOBAL );
 		if ( !libhandle )
 		{
 			fputs (dlerror(), stderr);
@@ -392,15 +396,15 @@ void CGameList::runGame(int selected )
 		g_RCInput->stopInput();
 		printf("try exec...\n");
 		execPlugin(g_FrameBuffer->getFileHandle(),
-						g_RCInput->getFileHandle(), -1,
-						0 /*cfgfile*/);
+		           g_RCInput->getFileHandle(), -1,
+		           0 /*cfgfile*/);
 		dlclose(handle);
 		printf("exec done...\n");
 		g_RCInput->restartInput();
 		g_RCInput->clear();
 		//restore framebuffer...
 		g_FrameBuffer->paletteSet();
-		g_FrameBuffer->paintBackgroundBox(0,0,720,576);		
+		g_FrameBuffer->paintBackgroundBox(0,0,720,576);
 		//redraw menue...
 		paintHead();
 		paint();

@@ -1,24 +1,24 @@
 /*
 	Neutrino-GUI  -   DBoxII-Project
-
+ 
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
-
+ 
 	Kommentar:
-
+ 
 	Diese GUI wurde von Grund auf neu programmiert und sollte nun vom
 	Aufbau und auch den Ausbaumoeglichkeiten gut aussehen. Neutrino basiert
 	auf der Client-Server Idee, diese GUI ist also von der direkten DBox-
 	Steuerung getrennt. Diese wird dann von Daemons uebernommen.
 	
-
+ 
 	License: GPL
-
+ 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
-
+ 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -30,67 +30,70 @@
 */
 
 /*
-$Id: menue.cpp,v 1.31 2001/12/31 16:27:13 McClean Exp $
-
-
+$Id: menue.cpp,v 1.32 2002/01/03 20:03:20 McClean Exp $
+ 
+ 
 History:
  $Log: menue.cpp,v $
+ Revision 1.32  2002/01/03 20:03:20  McClean
+ cleanup
+
  Revision 1.31  2001/12/31 16:27:13  McClean
  use lcddclient
-
+ 
  Revision 1.30  2001/12/29 02:17:00  McClean
  make some settings get from controld
-
+ 
  Revision 1.29  2001/12/25 11:40:30  McClean
  better pushback handling
-
+ 
  Revision 1.28  2001/12/25 03:28:42  McClean
  better pushback-handling
-
+ 
  Revision 1.27  2001/12/12 19:11:32  McClean
  prepare timing setup...
-
+ 
  Revision 1.26  2001/11/26 02:34:04  McClean
  include (.../../stuff) changed - correct unix-formated files now
-
+ 
  Revision 1.25  2001/11/15 11:42:41  McClean
  gpl-headers added
-
+ 
  Revision 1.24  2001/11/07 23:48:55  field
  Kleiner Bugfix (Sprachenmenue)
-
+ 
  Revision 1.23  2001/11/03 23:23:51  McClean
  radiomode background paint - bugfix
-
+ 
  Revision 1.22  2001/10/22 21:48:22  McClean
  design-update
-
+ 
  Revision 1.21  2001/10/22 15:00:18  McClean
  icon update
-
+ 
  Revision 1.20  2001/10/15 00:24:07  McClean
  lcd-optimize
-
+ 
  Revision 1.19  2001/10/11 21:04:58  rasc
  - EPG:
    Event: 2 -zeilig: das passt aber noch nicht  ganz (read comments!).
    Key-handling etwas harmonischer gemacht  (Left/Right/Exit)
  - Code etwas restrukturiert und eine Fettnaepfe meinerseits beseitigt
    (\r\n wg. falscher CSV Einstellung...)
-
+ 
  Revision 1.18  2001/10/10 01:20:10  McClean
  menue changed
-
+ 
  Revision 1.17  2001/10/01 20:41:08  McClean
  plugin interface for games - beta but nice.. :)
-
+ 
  Revision 1.16  2001/09/23 21:34:07  rasc
  - LIFObuffer Module, pushbackKey fuer RCInput,
  - In einige Helper und widget-Module eingebracht
    ==> harmonischeres Menuehandling
  - Infoviewer Breite fuer Channelsdiplay angepasst (>1000 Channels)
-
-
+ 
+ 
 */
 
 
@@ -133,111 +136,112 @@ void CMenuWidget::setOnPaintNotifier( COnPaintNotifier* nf )
 
 int CMenuWidget::exec(CMenuTarget* parent, string)
 {
-    int pos;
-    int key;
+	int pos;
+	int key;
 
 
-    if (parent) 
+	if (parent)
 		parent->hide();
 
 	if (onPaintNotifier)
 		onPaintNotifier->onPaintNotify(name);
 
-    paint();
-    int retval = CMenuItem::RETURN_REPAINT;
+	paint();
+	int retval = CMenuItem::RETURN_REPAINT;
 
-    do {
-	key = g_RCInput->getKey(g_settings.timing_menu);
+	do
+	{
+		key = g_RCInput->getKey(g_settings.timing_menu);
 
-	switch (key) {
+		switch (key)
+		{
 
-		case (CRCInput::RC_up) :
-		case (CRCInput::RC_down) :
-			{
-			   //search next / prev selectable item
-			   for (unsigned int count=1; count< items.size(); count++) {
+				case (CRCInput::RC_up) :
+				case (CRCInput::RC_down) :
+					//search next / prev selectable item
+					for (unsigned int count=1; count< items.size(); count++)
+					{
 
-				if (key==CRCInput::RC_up) {
-				    pos = selected- count;
-				    if ( pos<0 )
-					pos = items.size()-1;
-				} else {
-				    pos = (selected+ count)%items.size();
-				}
+						if (key==CRCInput::RC_up)
+						{
+							pos = selected- count;
+							if ( pos<0 )
+								pos = items.size()-1;
+						}
+						else
+						{
+							pos = (selected+ count)%items.size();
+						}
 
-				CMenuItem* item = items[pos];
+						CMenuItem* item = items[pos];
 
-				if ( item->isSelectable() ) {
-					//clear prev. selected
-					items[selected]->paint( false );
-					//select new
-					item->paint( true );
-					selected = pos;
+						if ( item->isSelectable() )
+						{
+							//clear prev. selected
+							items[selected]->paint( false );
+							//select new
+							item->paint( true );
+							selected = pos;
+							break;
+						}
+					}
 					break;
-				}
-			   }
-			}
-			break;
-		
-		case (CRCInput::RC_ok) :
-			{
-				//exec this item...
-				CMenuItem* item = items[selected];
-				int ret = item->exec( this );
-		
-				if(ret==CMenuItem::RETURN_EXIT) {
+				case (CRCInput::RC_ok) :
+					//exec this item...
+					CMenuItem* item = items[selected];
+					int ret = item->exec( this );
+
+					if(ret==CMenuItem::RETURN_EXIT)
+					{
+						key = CRCInput::RC_timeout;
+					}
+					else if(ret==CMenuItem::RETURN_EXIT_ALL)
+					{
+						retval = CMenuItem::RETURN_EXIT_ALL;
+						key = CRCInput::RC_timeout;
+					}
+					else if(ret==CMenuItem::RETURN_REPAINT)
+					{
+						paint();
+					}
+					break;
+
+				case (CRCInput::RC_home):
+							key = CRCInput::RC_timeout;
+					break;
+	
+				case (CRCInput::RC_right):
+					break;
+
+				case (CRCInput::RC_left):
+							key = CRCInput::RC_timeout;
+					break;
+
+				case (CRCInput::RC_timeout):
+					break;
+
+				//close menue on dbox-key
+				case (CRCInput::RC_setup):
 					key = CRCInput::RC_timeout;
-				} else if(ret==CMenuItem::RETURN_EXIT_ALL) {
 					retval = CMenuItem::RETURN_EXIT_ALL;
+					break;
+
+				//pushback only these Keys
+				case (CRCInput::RC_spkr):
+				case (CRCInput::RC_plus):
+				case (CRCInput::RC_minus):
+				case (CRCInput::RC_red):
+				case (CRCInput::RC_green):
+				case (CRCInput::RC_yellow):
+				case (CRCInput::RC_blue):
+				case (CRCInput::RC_standby):
+					g_RCInput->pushbackKey (key);
 					key = CRCInput::RC_timeout;
-				} else if(ret==CMenuItem::RETURN_REPAINT) {
-					paint();
-				}
-			}
-			break;
+					break;
+		}
 
-		case (CRCInput::RC_home):
-			key = CRCInput::RC_timeout;
-			break;
-
-		case (CRCInput::RC_right):
-			break;
-
-		case (CRCInput::RC_left):
-			key = CRCInput::RC_timeout;
-			break;
-
-		case (CRCInput::RC_timeout):
-			break;
-
-		//close menue on dbox-key
-		case (CRCInput::RC_setup):
-			key = CRCInput::RC_timeout;
- 			retval = CMenuItem::RETURN_EXIT_ALL;
-			break;
-
-		//pushback only these Keys
-		case (CRCInput::RC_spkr):
-		case (CRCInput::RC_plus):
-		case (CRCInput::RC_minus):
-		case (CRCInput::RC_red):
-		case (CRCInput::RC_green):
-		case (CRCInput::RC_yellow):
-		case (CRCInput::RC_blue):
-		case (CRCInput::RC_standby):
-			g_RCInput->pushbackKey (key);
-			key = CRCInput::RC_timeout;
-			break;
-		/*
-		default:
-			// unknown Key, push it back... and leave
-			g_RCInput->pushbackKey (key);
-			key = CRCInput::RC_timeout;
-			break;
-		*/
-        }
-
-   } while ( key!=CRCInput::RC_timeout );
+	}
+	while ( key!=CRCInput::RC_timeout );
 
 	hide();
 	if(!parent)
@@ -245,7 +249,7 @@ int CMenuWidget::exec(CMenuTarget* parent, string)
 		g_lcdd->setMode(CLcddClient::MODE_TVRADIO, g_Locale->getText(name));
 	}
 
-   return retval;
+	return retval;
 }
 
 void CMenuWidget::hide()
@@ -255,13 +259,13 @@ void CMenuWidget::hide()
 
 void CMenuWidget::paint()
 {
-    string  l_name = g_Locale->getText(name);
+	string  l_name = g_Locale->getText(name);
 	g_lcdd->setMode(CLcddClient::MODE_MENU, l_name);
 
-//	x=((720-width)>>1) -20;
+	//	x=((720-width)>>1) -20;
 	y=(576-height)>>1;
-    x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
-//	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
+	x=(((g_settings.screen_EndX- g_settings.screen_StartX)-width) / 2) + g_settings.screen_StartX;
+	//	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-height) / 2) + g_settings.screen_StartY;
 
 
 	int hheight = g_Fonts->menu_title->getHeight();
@@ -285,10 +289,14 @@ void CMenuWidget::paint()
 			ypos = item->paint(selected==((signed int) count) );
 		}
 	}
-//	height = ypos - y;
+	//	height = ypos - y;
 }
 
 //-------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 
 CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool Active, CChangeObserver* Observ, bool Localizing)
 {
@@ -297,7 +305,7 @@ CMenuOptionChooser::CMenuOptionChooser(string OptionName, int* OptionValue, bool
 	active = Active;
 	optionValue = OptionValue;
 	observ=Observ;
-    localizing= Localizing;
+	localizing= Localizing;
 }
 
 
@@ -312,10 +320,10 @@ CMenuOptionChooser::~CMenuOptionChooser()
 
 void CMenuOptionChooser::addOption(int key, string value)
 {
-		keyval *tmp = new keyval();
-		tmp->key=key;
-		tmp->value=value;
-		options.insert(options.end(), tmp);
+	keyval *tmp = new keyval();
+	tmp->key=key;
+	tmp->value=value;
+	options.insert(options.end(), tmp);
 }
 
 int CMenuOptionChooser::exec(CMenuTarget*)
@@ -359,12 +367,12 @@ int CMenuOptionChooser::paint( bool selected )
 		}
 	}
 
-    string  l_optionName = g_Locale->getText(optionName);
-    string  l_option;
-    if ( localizing )
-        l_option = g_Locale->getText(option);
-    else
-        l_option = option;
+	string  l_optionName = g_Locale->getText(optionName);
+	string  l_option;
+	if ( localizing )
+		l_option = g_Locale->getText(option);
+	else
+		l_option = option;
 
 	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
 	int stringstartposName = x + 10;
@@ -373,11 +381,11 @@ int CMenuOptionChooser::paint( bool selected )
 	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx,  l_optionName.c_str(), color);
 	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx,  l_option.c_str(), color);
 
-    if(selected)
-    {
+	if(selected)
+	{
 		g_lcdd->setMenuText(0, l_optionName);
 		g_lcdd->setMenuText(1, l_option);
-    }
+	}
 
 	return y+height;
 }
@@ -392,7 +400,7 @@ CMenuOptionStringChooser::CMenuOptionStringChooser(string OptionName, char* Opti
 	active = Active;
 	optionValue = OptionValue;
 	observ=Observ;
-    localizing= Localizing;
+	localizing= Localizing;
 }
 
 
@@ -408,7 +416,7 @@ void CMenuOptionStringChooser::addOption( string value)
 
 int CMenuOptionStringChooser::exec(CMenuTarget*)
 {
-    bool wantsRepaint = false;
+	bool wantsRepaint = false;
 	//select next value
 	for(unsigned int count=0;count<options.size();count++)
 	{
@@ -419,16 +427,16 @@ int CMenuOptionStringChooser::exec(CMenuTarget*)
 			break;
 		}
 	}
-	
+
 	paint(true);
 	if(observ)
 	{
 		wantsRepaint = observ->changeNotify( optionName );
 	}
-    if ( wantsRepaint)
-        return RETURN_REPAINT;
-    else
-        return 0;
+	if ( wantsRepaint)
+		return RETURN_REPAINT;
+	else
+		return 0;
 }
 
 int CMenuOptionStringChooser::paint( bool selected )
@@ -441,12 +449,12 @@ int CMenuOptionStringChooser::paint( bool selected )
 
 	g_FrameBuffer->paintBoxRel(x,y, dx, height, color );
 
-    string  l_optionName = g_Locale->getText(optionName);
-    string  l_option;
-    if ( localizing )
-        l_option = g_Locale->getText(optionValue);
-    else
-        l_option = optionValue;
+	string  l_optionName = g_Locale->getText(optionName);
+	string  l_option;
+	if ( localizing )
+		l_option = g_Locale->getText(optionValue);
+	else
+		l_option = optionValue;
 
 	int stringwidth = g_Fonts->menu->getRenderWidth(l_option.c_str());
 	int stringstartposName = x + 10;
@@ -455,11 +463,11 @@ int CMenuOptionStringChooser::paint( bool selected )
 	g_Fonts->menu->RenderString(stringstartposName,   y+height,dx, l_optionName.c_str(), color);
 	g_Fonts->menu->RenderString(stringstartposOption, y+height,dx, l_option.c_str(), color);
 
-    if(selected)
-    {
-        g_lcdd->setMenuText(0, l_optionName);
-        g_lcdd->setMenuText(1, l_option);
-    }
+	if(selected)
+	{
+		g_lcdd->setMenuText(0, l_optionName);
+		g_lcdd->setMenuText(1, l_option);
+	}
 
 	return y+height;
 }
@@ -475,7 +483,7 @@ CMenuForwarder::CMenuForwarder(string Text, bool Active, char* Option, CMenuTarg
 	active = Active;
 	jumpTarget = Target;
 	actionKey = ActionKey;
-    localizing = Localizing;
+	localizing = Localizing;
 }
 
 int CMenuForwarder::exec(CMenuTarget* parent)
@@ -493,24 +501,24 @@ int CMenuForwarder::exec(CMenuTarget* parent)
 
 int CMenuForwarder::paint(bool selected)
 {
-    string  l_text;
+	string  l_text;
 
-    if ( localizing )
-        l_text = g_Locale->getText(text);
-    else
-        l_text = text;
+	if ( localizing )
+		l_text = g_Locale->getText(text);
+	else
+		l_text = text;
 
 	int stringstartposX = x+10;
 
-        if(selected)
-        {
-            g_lcdd->setMenuText(0, l_text);
+	if(selected)
+	{
+		g_lcdd->setMenuText(0, l_text);
 
-    		if (option)
-                g_lcdd->setMenuText(1, option);
-            else
-                g_lcdd->setMenuText(1, "");
-        }
+		if (option)
+			g_lcdd->setMenuText(1, option);
+		else
+			g_lcdd->setMenuText(1, "");
+	}
 
 	unsigned char color = COL_MENUCONTENT;
 	if (selected)
@@ -534,7 +542,7 @@ int CMenuForwarder::paint(bool selected)
 //-------------------------------------------------------------------------------------------------------------------------------
 CMenuSeparator::CMenuSeparator(int Type, string Text)
 {
-    height = g_Fonts->menu->getHeight();
+	height = g_Fonts->menu->getHeight();
 	if(Text=="")
 	{
 		height = 10;
@@ -564,7 +572,7 @@ int CMenuSeparator::paint(bool selected)
 	}
 	if(type&STRING)
 	{
-        string  l_text = g_Locale->getText(text);
+		string  l_text = g_Locale->getText(text);
 		int stringwidth = g_Fonts->menu->getRenderWidth(l_text.c_str());
 		int stringstartposX = 0;
 
@@ -585,11 +593,11 @@ int CMenuSeparator::paint(bool selected)
 
 		g_Fonts->menu->RenderString(stringstartposX, y+height,dx, l_text.c_str(), COL_MENUCONTENT);
 
-        if(selected)
-        {
-            g_lcdd->setMenuText(0, l_text);
-            g_lcdd->setMenuText(1, "");
-        }
+		if(selected)
+		{
+			g_lcdd->setMenuText(0, l_text);
+			g_lcdd->setMenuText(1, "");
+		}
 	}
 	return y+ height;
 }
