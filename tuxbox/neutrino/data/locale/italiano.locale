@@ -136,6 +136,7 @@ streamingmenu.streaming_type streamingserver
 streamingmenu.server_ip ip streamingservera
 streamingmenu.server_port port streamingservera
 streamingmenu.streaming_server_cddrive dvd
+streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate brzina videa
 streamingmenu.streaming_audiorate brzina audia
 streamingmenu.off ugaseno
@@ -365,7 +366,7 @@ flashupdate.getupdatefileerror impossibbile caricare Update
 flashupdate.cantopenfile impossibbile aprire il File
 flashupdate.fileis0bytes il File e 0 Byte
 flashupdate.eraseingflash Cancella Flash
-flashupdate.erasefailed unset
+flashupdate.erasefailed Cancellazione Fallita
 flashupdate.programmingflash programmo Flash
 flashupdate.cantopenmtd impossibbile aprire MTD-Device
 flashupdate.ready Finito
@@ -697,21 +698,22 @@ mp3player.title_artist Titolo, Artista
 mp3player.display_order Visore
 mp3player.follow Selezionare Track attuale
 mp3player.screensaver_timeout Salvaschermo_Timeout
-mp3player.defdir unset
+mp3player.defdir Start-Directory.
 
 movieplayer.name movieplayer
 movieplayer.head movieplayer
 movieplayer.play Play
 movieplayer.choosets TS Play
 movieplayer.chooseps PS Play
-movieplayer.choosestream uset
+movieplayer.choosestream unset
 movieplayer.choosepes PES Play
 movieplayer.bookmark bookmark
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...
+movieplayer.choosestreamfile unset
+movieplayer.pleasewait Uspostavlja se veza sa streamingserverom.\nCekajte molim ...\nunset
 movieplayer.nostreamingserver Nije bilo moguce\nuspostaviti vezu sa streamingserverom.
-movieplayer.defdir unset
+movieplayer.defdir Start-Directory.
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on
@@ -733,7 +735,7 @@ nfs.mounttimeout greska pri montiranju: tajm-aut
 nfs.umount scarica NFS/CIFS
 nfs.umounterror errore scarica NFS/CIFS
 nfs.alreadymounted Directory gia caricato
-nfs.mount_options unset
+nfs.mount_options Opzioni-Mount
 nfs.type Typ
 nfs.type_nfs NFS
 nfs.type_cifs CIFS
@@ -752,4 +754,4 @@ pictureviewer.show Vedi
 pictureviewer.slideshow Vedi tipo Diashow
 pictureviewer.slide_time Diashow-Durata
 pictureviewer.scaling Graduazione
-pictureviewer.defdir unset
+pictureviewer.defdir Start-Directory

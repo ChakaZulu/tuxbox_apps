@@ -136,6 +136,7 @@ streamingmenu.streaming_type Streamingserver
 streamingmenu.server_ip Streamingserver IP
 streamingmenu.server_port Streamingserver Port
 streamingmenu.streaming_server_cddrive DVD Laufwerk
+streamingmenu.streaming_server_startdir Verzeichniss (VLC)
 streamingmenu.streaming_videorate Daterade Video
 streamingmenu.streaming_audiorate Daterade Audio
 streamingmenu.off Deaktiviert
@@ -704,12 +705,13 @@ movieplayer.head Movieplayer
 movieplayer.play Abspiele
 movieplayer.choosets TS abspiele
 movieplayer.chooseps PS abspiele
-movieplayer.choosestream uset
+movieplayer.choosestream unset
 movieplayer.choosepes PES abspiele
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'stellt.
+movieplayer.choosestreamfile unset
+movieplayer.pleasewait Bitte warde.\nD'Verbindig zuem Streamingserver wird herg'stellt.\nunset
 movieplayer.nostreamingserver Es het kei Verbindig\nzuem Streamingserver herg'stellt werde chönne.
 movieplayer.defdir Start-Verz.
 

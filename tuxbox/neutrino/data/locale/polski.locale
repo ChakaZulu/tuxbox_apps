@@ -136,6 +136,7 @@ streamingmenu.streaming_type Typ serwera
 streamingmenu.server_ip IP serwera
 streamingmenu.server_port Port serwera
 streamingmenu.streaming_server_cddrive Naped DVD
+streamingmenu.streaming_server_startdir volumin (VLC)
 streamingmenu.streaming_videorate Obraz-przeplywnosc
 streamingmenu.streaming_audiorate Dzwiek-przeplywnosc
 streamingmenu.off Wyl
@@ -704,12 +705,13 @@ movieplayer.head Odtwarzacz filmów
 movieplayer.play Start
 movieplayer.choosets Odtwarzaj TS
 movieplayer.chooseps Odtwarzaj PS
-movieplayer.choosestream uset
+movieplayer.choosestream unset
 movieplayer.choosepes Odtwarzaj PES
 movieplayer.bookmark Ulubione
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...
+movieplayer.choosestreamfile unset
+movieplayer.pleasewait Poczekaj.\nLaczenie do streaming serwera...\nunset
 movieplayer.nostreamingserver Sreaming serwer nieosiagalny.
 movieplayer.defdir folder startowy
 

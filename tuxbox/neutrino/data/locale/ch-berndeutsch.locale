@@ -136,6 +136,7 @@ streamingmenu.streaming_type Streamings�r
 streamingmenu.server_ip Streamings�r IP
 streamingmenu.server_port Streamings�r Port
 streamingmenu.streaming_server_cddrive DVD Loufw㱣h
+streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Daterate Video
 streamingmenu.streaming_audiorate Daterate Audio
 streamingmenu.off Deaktiviert
@@ -704,12 +705,13 @@ movieplayer.head Movieplayer
 movieplayer.play Abschpile
 movieplayer.choosets TS Abschpile
 movieplayer.chooseps PS Abschpile
-movieplayer.choosestream uset
+movieplayer.choosestream unset
 movieplayer.choosepes PES Abschpile
 movieplayer.bookmark Bookmarks
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.
+movieplayer.choosestreamfile unset
+movieplayer.pleasewait Bitte warte.\nd'Verbindig zum Streamingsörver wird härgschtöut.\nunset
 movieplayer.nostreamingserver Verbindig zum\n Streamingsörver fäugschlage.
 movieplayer.defdir Schtart-Verz.
 

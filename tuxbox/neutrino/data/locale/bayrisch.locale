@@ -136,6 +136,7 @@ streamingmenu.streaming_type Streamingserva
 streamingmenu.server_ip Streamingserva IP
 streamingmenu.server_port Streamingserva Port
 streamingmenu.streaming_server_cddrive DVD Laufwerk
+streamingmenu.streaming_server_startdir Verzeichnis (VLC)
 streamingmenu.streaming_videorate Datenrate Video
 streamingmenu.streaming_audiorate Datenrate Audio
 streamingmenu.off Ausgschoitn
@@ -704,12 +705,13 @@ movieplayer.head Fuimspuia
 movieplayer.play Spuin
 movieplayer.choosets TS Spuin
 movieplayer.chooseps PS Spuin
-movieplayer.choosestream uset
+movieplayer.choosestream unset
 movieplayer.choosepes PES spuin
 movieplayer.bookmark Vormerka
 movieplayer.choosestreamsvcd (S)VCD
 movieplayer.choosestreamdvd DVD
-movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergsteaid 
+movieplayer.choosestreamfile unset
+movieplayer.pleasewait Oan Moment, de Verbindung\nzum Streamingserva werd hergsteaid\nunset
 movieplayer.nostreamingserver Koa Vabindung\nzum Streamingserva m�ch.
 movieplayer.defdir Start-Verz.
 
