@@ -35,46 +35,12 @@ eString getConfigMountMgr(void)
 static eString addMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
-	eString localDir = opt["ldir"];
+	eString localDir = opt["localdir"];
 	eString fstype = opt["fstype"];
-	eString password = opt["pw"];
-	eString userName = opt["user"];
-	eString mountDir = opt["mdir"];
-	eString automount = opt["auto"];
-	eString rsize = opt["rsize"];
-	eString wsize = opt["wsize"];
-	eString options = opt["options"];
-	eString ownOptions = opt["ownoptions"];
-	eString ip0 = opt["ip0"];
-	eString ip1 = opt["ip1"];
-	eString ip2 = opt["ip2"];
-	eString ip3 = opt["ip3"];
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->addMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), false);
-	return "<html><body>Mount point added successfully.</body></html>";
-}
-
-static eString removeMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString,eString> opt = getRequestOptions(opts, '&');
-	eString id = opt["id"];
-
-	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->removeMountPoint(atoi(id.c_str()));
-
-	return "<html><body>Mount point removed successfully.</body></html>";
-}
-
-static eString changeMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
-{
-	std::map<eString,eString> opt = getRequestOptions(opts, '&');
-	eString localDir = opt["ldir"];
-	eString fstype = opt["fstype"];
-	eString password = opt["pw"];
-	eString userName = opt["user"];
-	eString mountDir = opt["mdir"];
-	eString automount = opt["auto"];
+	eString password = opt["password"];
+	eString userName = opt["username"];
+	eString mountDir = opt["mountdir"];
+	eString automount = opt["automount"];
 	eString rsize = opt["rsize"];
 	eString wsize = opt["wsize"];
 	eString ownOptions = opt["ownoptions"];
@@ -82,7 +48,6 @@ static eString changeMountPoint(eString request, eString dirpath, eString opts, 
 	eString ip1 = opt["ip1"];
 	eString ip2 = opt["ip2"];
 	eString ip3 = opt["ip3"];
-	eString id = opt["id"];
 	eString async = opt["async"];
 	eString sync = opt["sync"];
 	eString atime = opt["atime"];
@@ -96,7 +61,7 @@ static eString changeMountPoint(eString request, eString dirpath, eString opts, 
 	eString intr = opt["intr"];
 	eString soft = opt["soft"];
 	eString udp = opt["udp"];
-	
+
 	eString options;
 	if (async == "on")
 		options += "async,";
@@ -128,7 +93,84 @@ static eString changeMountPoint(eString request, eString dirpath, eString opts, 
 		options = options.left(options.length() - 1); //remove last comma
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->changeMountPoint(localDir, fstype, password, userName, mountDir, atoi(automount.c_str()), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), atoi(id.c_str()));
+	eMountMgr::getInstance()->addMountPoint(localDir, atoi(fstype.c_str()), password, userName, mountDir, (automount == "on"), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), false);
+	return "<html><body>Mount point added successfully.</body></html>";
+}
+
+static eString removeMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	eString id = opt["id"];
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eMountMgr::getInstance()->removeMountPoint(atoi(id.c_str()));
+
+	return "<html><body>Mount point removed successfully.</body></html>";
+}
+
+static eString changeMountPoint(eString request, eString dirpath, eString opts, eHTTPConnection *content)
+{
+	std::map<eString,eString> opt = getRequestOptions(opts, '&');
+	eString localDir = opt["localdir"];
+	eString fstype = opt["fstype"];
+	eString password = opt["password"];
+	eString userName = opt["username"];
+	eString mountDir = opt["mountdir"];
+	eString automount = opt["automount"];
+	eString rsize = opt["rsize"];
+	eString wsize = opt["wsize"];
+	eString ownOptions = opt["ownoptions"];
+	eString ip0 = opt["ip0"];
+	eString ip1 = opt["ip1"];
+	eString ip2 = opt["ip2"];
+	eString ip3 = opt["ip3"];
+	eString async = opt["async"];
+	eString sync = opt["sync"];
+	eString atime = opt["atime"];
+	eString autom = opt["autom"];
+	eString execm = opt["execm"];
+	eString noexec = opt["noexec"];
+	eString ro = opt["ro"];
+	eString rw = opt["rw"];
+	eString users = opt["users"];
+	eString nolock = opt["nolock"];
+	eString intr = opt["intr"];
+	eString soft = opt["soft"];
+	eString udp = opt["udp"];
+	eString id = opt["id"];
+
+	eString options;
+	if (async == "on")
+		options += "async,";
+	if (sync == "on")
+		options += "sync,";
+	if (atime == "on")
+		options += "atime,";
+	if (autom == "on")
+		options += "autom,";
+	if (execm == "on")
+		options += "execm,";
+	if (noexec == "on")
+		options += "noexec,";
+	if (ro == "on")
+		options += "ro,";
+	if (rw == "on")
+		options += "rw,";
+	if (users == "on")
+		options += "users,";
+	if (nolock == "on")
+		options += "nolock,";
+	if (intr == "on")
+		options += "intr,";
+	if (soft == "on")
+		options += "soft,";
+	if (udp == "on")
+		options += "udp,";
+	if (options.length() > 0)
+		options = options.left(options.length() - 1); //remove last comma
+
+	content->local_header["Content-Type"]="text/html; charset=utf-8";
+	eMountMgr::getInstance()->changeMountPoint(localDir, atoi(fstype.c_str()), password, userName, mountDir, (automount == "on"), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), atoi(id.c_str()));
 	return "<html><body>Mount point changed successfully.</body></html>";
 }
 
@@ -136,22 +178,26 @@ static eString addMountPointWindow(eString request, eString dirpath, eString opt
 {
 	eString localDir, password, userName, mountDir, options, ownOptions;
 	int fstype = 0, automount = 0, rsize = 4096, wsize = 4096, ip0 = 0, ip1 = 0, ip2 = 0, ip3 = 0;
-	eString async = "off", sync = "off", atime = "off", autom = "off", execm = "off", noexec = "off", ro = "off", rw = "off", 
-		users = "off", nolock = "on", intr = "on", soft = "on", udp = "on";
+	eString async = "", sync = "", atime = "", autom = "", execm = "", noexec = "", ro = "", rw = "",
+		users = "", nolock = "checked", intr = "checked", soft = "checked", udp = "checked";
 	int id = 99;
-	
+
 	eString result = readFile(TEMPLATE_DIR + "mountPointWindow.tmp");
 	result.strReplace("#TITLE#", "Add Mount Point");
+	result.strReplace("#ACTION#", "/control/addMountPoint");
 
 //	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	
+
 	result.strReplace("#LDIR#", localDir);
 	result.strReplace("#FSTYPE#", eString().sprintf("%d", fstype));
 	result.strReplace("#PW#", password);
 	result.strReplace("#USER#", userName);
 	result.strReplace("#MDIR#", mountDir);
-	result.strReplace("#AUTO#", eString().sprintf("%d", automount));
+	if (automount == 1)
+		result.strReplace("#AUTO#", "checked");
+	else
+		result.strReplace("#AUTO#", "");
 	result.strReplace("#RSIZE#", eString().sprintf("%d", rsize));
 	result.strReplace("#WSIZE#", eString().sprintf("%d", wsize));
 	result.strReplace("#OWNOPTIONS#", ownOptions);
@@ -181,11 +227,12 @@ static eString editMountPointWindow(eString request, eString dirpath, eString op
 {
 	eString localDir, password, userName, mountDir, options, ownOptions;
 	int fstype, automount, rsize, wsize, ip0, ip1, ip2, ip3;
-	eString async = "off", sync = "off", atime = "off", autom = "off", execm = "off", noexec = "off", ro = "off", rw = "off", 
-		users = "off", nolock = "off", intr = "off", soft = "off", udp = "off";
+	eString async = "", sync = "", atime = "", autom = "", execm = "", noexec = "", ro = "", rw = "",
+		users = "", nolock = "", intr = "", soft = "", udp = "";
 	
 	eString result = readFile(TEMPLATE_DIR + "mountPointWindow.tmp");
 	result.strReplace("#TITLE#", "Change Mount Point");
+	result.strReplace("#ACTION#", "/control/changeMountPoint");
 
 	std::map<eString,eString> opt = getRequestOptions(opts, '&');
 	eString id = opt["id"];
@@ -196,43 +243,43 @@ static eString editMountPointWindow(eString request, eString dirpath, eString op
 	{
 		eString option = getLeft(options, ',');
 		if (option == "async")
-			async = "on";
+			async = "checked";
 		else
 		if (option == "sync")
-			sync = "on";
+			sync = "checked";
 		else
 		if (option == "atime")
-			atime = "on";
+			atime = "checked";
 		else
 		if (option == "autom")
-			autom = "on";
+			autom = "checked";
 		else
 		if (option == "execm")
-			execm = "on";
+			execm = "checked";
 		else
 		if (option == "noexec")
-			noexec = "on";
+			noexec = "checked";
 		else
 		if (option == "ro")
-			ro = "on";
+			ro = "checked";
 		else
 		if (option == "rw")
-			rw = "on";
+			rw = "checked";
 		else
 		if (option == "users")
-			users = "on";
+			users = "checked";
 		else
 		if (option == "nolock")
-			nolock = "on";
+			nolock = "checked";
 		else
 		if (option == "intr")
-			intr = "on";
+			intr = "checked";
 		else
 		if (option == "soft")
-			soft = "on";
+			soft = "checked";
 		else
 		if (option == "udp")
-			udp == "on";
+			udp == "checked";
 	}
 	
 	result.strReplace("#LDIR#", localDir);
@@ -240,7 +287,10 @@ static eString editMountPointWindow(eString request, eString dirpath, eString op
 	result.strReplace("#PW#", password);
 	result.strReplace("#USER#", userName);
 	result.strReplace("#MDIR#", mountDir);
-	result.strReplace("#AUTO#", eString().sprintf("%d", automount));
+	if (automount == 1)
+		result.strReplace("#AUTO#", "checked");
+	else
+		result.strReplace("#AUTO#", "");
 	result.strReplace("#RSIZE#", eString().sprintf("%d", rsize));
 	result.strReplace("#WSIZE#", eString().sprintf("%d", wsize));
 	result.strReplace("#OWNOPTIONS#", ownOptions);

@@ -281,7 +281,7 @@ eMountMgr::eMountMgr()
 
 eMountMgr::~eMountMgr()
 {
-	
+
 }
 
 void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword, eString puserName, eString pmountDir, int pautomount, int prsize, int pwsize, eString poptions, eString pownOptions, int pip0, int pip1, int pip2, int pip3, bool pmounted)
@@ -289,6 +289,7 @@ void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword,
 	int pid = mountPoints.size();
 	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pip0, pip1, pip2, pip3, pmounted, pid));
 	save();
+	init();
 }
 
 void eMountMgr::getMountPointData(eString *plocalDir, int *pfstype, eString *ppassword, eString *puserName, eString *pmountDir, int *pautomount, int *prsize, int *pwsize, eString *poptions, eString *pownOptions, int *pip0, int *pip1, int *pip2, int *pip3, int pid)
@@ -340,6 +341,7 @@ void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppasswo
 		}
 	}
 	save();
+	init();
 }
 
 void eMountMgr::removeMountPoint(int id)
@@ -371,6 +373,7 @@ int eMountMgr::unmountMountPoint(int id)
 eString eMountMgr::listMountPoints(eString skelleton)
 {
 	eString result, mountStatus, action;
+	init();
 	if (mountPoints.size() > 0)
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		{
@@ -397,7 +400,13 @@ eString eMountMgr::listMountPoints(eString skelleton)
 			tmp.strReplace("#IP#", eString().sprintf("%3d.%3d.%3d.%3d", mp_it->ip[0], mp_it->ip[1], mp_it->ip[2], mp_it->ip[3]));
 			tmp.strReplace("#USER#", mp_it->userName);
 			tmp.strReplace("#PW#", mp_it->password);
-			tmp.strReplace("#FSTYPE#", (mp_it->fstype == 0) ? "NFS" : "CIFS");
+			eString type = "DEV";
+			if (mp_it->fstype == 0)
+				type = "NFS";
+			else
+			if (mp_it->fstype == 1)
+				type = "CIFS";
+			tmp.strReplace("#FSTYPE#", type);
 			tmp.strReplace("#AUTO#", eString().sprintf("%d", mp_it->automount));
 			eString options = mp_it->options;
 			if (mp_it->ownOptions != "")
