@@ -2660,7 +2660,7 @@ void ezapInitializeDyn(eHTTPDynPathResolver *dyn_resolver)
 	dyn_resolver->addDyn("GET", "/audio.m3u", audiom3u);
 	dyn_resolver->addDyn("GET", "/version", version);
 	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg", getcurepg);
-	dyn_resolver->addDyn("GET", "/cgi-bin/getcurrentepg2", getcurepg2);
+	dyn_resolver->addDyn("GET", "/getcurrentepg2", getcurepg2);
 	dyn_resolver->addDyn("GET", "/getMultiEPG", getMultiEPG);
 	dyn_resolver->addDyn("GET", "/cgi-bin/streaminfo", getsi);
 	dyn_resolver->addDyn("GET", "/channels/getcurrent", channels_getcurrent);

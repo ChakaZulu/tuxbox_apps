@@ -43,7 +43,7 @@ function switchChannel(xy)
 
 function openEPG(xy)
 {
-	NewWindow('/cgi-bin/getcurrentepg2?ref='+xy, 'EPG', '600', '700', 'yes');
+	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', '600', '700', 'yes');
 }
 
 function openMultiEPG(xy)
