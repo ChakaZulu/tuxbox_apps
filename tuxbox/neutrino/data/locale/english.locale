@@ -387,7 +387,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep Current version
 flashupdate.currentversiondate Date
 flashupdate.currentversiontime Time
-flashupdate.currentversionbaseversion Baseimage
+flashupdate.currentreleasecycle Release cycle
 flashupdate.currentversionsnapshot ImageType
 flashupdate.checkupdate search for new version
 flashupdate.versioncheck checking version

@@ -1372,7 +1372,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 
 		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversiondate", false, versionInfo.getDate()));
 		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversiontime", false, versionInfo.getTime()));
-		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversionbaseversion", false, versionInfo.getBaseImageVersion()));
+		updateSettings->addItem(new CMenuForwarder("flashupdate.currentreleasecycle", false, versionInfo.getReleaseCycle()));
 		/* versionInfo.getType() returns const char * which is never deallocated */
 		updateSettings->addItem(new CMenuForwarder("flashupdate.currentversionsnapshot", false, versionInfo.getType()));
 

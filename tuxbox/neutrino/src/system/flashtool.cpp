@@ -332,19 +332,19 @@ CFlashVersionInfo::CFlashVersionInfo(const std::string & versionString)
 	// recover type
 	snapshot = versionString[0];
 
-	// recover baseimage version
-	baseImageVersion[0] = versionString[1];
-	baseImageVersion[1] = '.';
+	// recover release cycle version
+	releaseCycle[0] = versionString[1];
+	releaseCycle[1] = '.';
 	if (versionString[2] == '0')
 	{
-	    baseImageVersion[2] = versionString[3];
-	    baseImageVersion[3] = 0;
+		releaseCycle[2] = versionString[3];
+		releaseCycle[3] = 0;
 	}
 	else
 	{
-	    baseImageVersion[2] = versionString[2];
-	    baseImageVersion[3] = versionString[3];
-	    baseImageVersion[4] = 0;
+		releaseCycle[2] = versionString[2];
+		releaseCycle[3] = versionString[3];
+		releaseCycle[4] = 0;
 	}
 
 	// recover date
@@ -369,22 +369,22 @@ CFlashVersionInfo::CFlashVersionInfo(const std::string & versionString)
 	time[5] = 0;
 }
 
-const char * const CFlashVersionInfo::getDate() const
+const char * const CFlashVersionInfo::getDate(void) const
 {
 	return date;
 }
 
-const char * const CFlashVersionInfo::getTime() const
+const char * const CFlashVersionInfo::getTime(void) const
 {
 	return time;
 }
 
-const char * const CFlashVersionInfo::getBaseImageVersion() const
+const char * const CFlashVersionInfo::getReleaseCycle(void) const
 {
-	return baseImageVersion;
+	return releaseCycle;
 }
 
-const char * const CFlashVersionInfo::getType() const
+const char * const CFlashVersionInfo::getType(void) const
 {
 	switch (snapshot)
 	{

@@ -387,7 +387,7 @@ flashupdate.updatemode_internet internet
 flashupdate.currentversion_sep Installierte Version
 flashupdate.currentversiondate Datum
 flashupdate.currentversiontime Uhrzeit
-flashupdate.currentversionbaseversion Basisimage
+flashupdate.currentreleasecycle Releasezyklus
 flashupdate.currentversionsnapshot ImageTyp
 flashupdate.checkupdate nach neuer Version suchen
 flashupdate.versioncheck Versionsüberprüfung
