@@ -1892,7 +1892,8 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 
 		if ( msg == NeutrinoMessages::ZAPTO)
 		{
-			channelList->zapToOnidSid(data);
+			CTimerEvent::EventInfo * eventinfo = (CTimerEvent::EventInfo *) data;
+			channelList->zapToOnidSid(eventinfo->onidSid);
 		}
 
 		if ( msg == NeutrinoMessages::ANNOUNCE_ZAPTO)
@@ -2643,7 +2644,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.291 2002/06/12 01:34:07 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.292 2002/06/24 23:20:50 dirch Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
