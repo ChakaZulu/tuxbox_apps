@@ -1,10 +1,16 @@
 Authors:
 
-(c) 2001   rasc   Rainer Scherg
+ Rainer Scherg         (rasc)   <rasc@users.sourceforge.net>
+ Andreas Oberritter    (obi)    <obi@saftware.de>  
 
-Change, bugfixes and adaptions to new DVB-API by members of the
+
+Change, bugfixes and adaptions also by members of the
 tuxbox (linux@dbox2) development team  (for more info please
 read the modification history in the files). 
 
 Tnx for all the help to the team.
+
+
+(c) 2001-2003   Rainer Scherg (rasc)
+
 
