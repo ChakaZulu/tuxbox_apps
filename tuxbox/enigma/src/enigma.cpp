@@ -136,16 +136,11 @@ eZap::eZap(int argc, char **argv)
 			tmp_name.append(namelist[n]->d_name);
 			if (!strcmp(namelist[n]->d_name, ".."))
 				break;
-			std::cout << tmp_name << std::endl;
 			eActionMapList::getInstance()->loadXML( tmp_name.c_str());
 			free(namelist[n]);
 		}
 		free(namelist);
 	}
-
-	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
-	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox2.xml");
-	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox.xml");
 
 	char *language=0;
 	if (eConfig::getInstance()->getKey("/elitedvb/language", language))
