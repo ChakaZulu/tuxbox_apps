@@ -30,12 +30,15 @@
 */
 
 /*
- $Id: rcinput.cpp,v 1.20 2002/01/08 12:34:28 McClean Exp $
+ $Id: rcinput.cpp,v 1.21 2002/01/08 23:22:08 McClean Exp $
  
  Module for Remote Control Handling
  
 History:
  $Log: rcinput.cpp,v $
+ Revision 1.21  2002/01/08 23:22:08  McClean
+ fix for old nokia-fb's
+
  Revision 1.20  2002/01/08 12:34:28  McClean
  better rc-handling - add flat-standby
 
@@ -180,53 +183,61 @@ int CRCInput::getKey(int Timeout)
 	{
 		int status = read(fd, &rc_key, sizeof(rc_key));
 		if (status==2)
-		{
-			//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
-			struct timeval tv;
-			unsigned long long now_pressed;
-			bool keyok = true;
-
-			gettimeofday( &tv, NULL );
-			now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
-			//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
-			
-			//test auf wiederholenden key (gedrückt gehalten)
-			if (rc_key == rc_last_key)
+		{	//loslassen bei alten nokia fb's
+			if(rc_key!=0x5cfe)
 			{
-				keyok = false;
-				//nur diese tasten sind wiederholbar 
-				int trkey = translate(rc_key);
-				if ((trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby))
+				//printf("got key native key: %04x %04x\n", rc_key, rc_key&0x1f );
+				struct timeval tv;
+				unsigned long long now_pressed;
+				bool keyok = true;
+
+				gettimeofday( &tv, NULL );
+				now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+				//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
+				
+				//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
+				if((rc_key&0xff00)==0x5c00)
 				{
-					if( rc_last_repeat_key!=rc_key)
+					rc_last_key = 0;
+				}
+				//test auf wiederholenden key (gedrückt gehalten)
+				if (rc_key == rc_last_key)
+				{
+					keyok = false;
+					//nur diese tasten sind wiederholbar 
+					int trkey = translate(rc_key);
+					if ((trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby))
 					{
-						if(now_pressed-last_keypress>repeat_block)
+						if( rc_last_repeat_key!=rc_key)
 						{
-							keyok = true;
-							rc_last_repeat_key = rc_key;
+							if(now_pressed-last_keypress>repeat_block)
+							{
+								keyok = true;
+								rc_last_repeat_key = rc_key;
+							}
+						}
+						else
+						{
+								keyok = true;
 						}
 					}
-					else
+				}
+				else
+				{
+					rc_last_repeat_key = 0;
+				}
+				rc_last_key = rc_key;
+
+				if(now_pressed-last_keypress>repeat_block_generic)
+				{
+					if(keyok)
 					{
-							keyok = true;
+						last_keypress = now_pressed;
+						return translate(rc_key);
 					}
 				}
+				//printf("!!!!!!!eat  native key: %04x %04x\n", rc_key, rc_key&0x1f );
 			}
-			else
-			{
-				rc_last_repeat_key = 0;
-			}
-			rc_last_key = rc_key;
-
-			if(now_pressed-last_keypress>repeat_block_generic)
-			{
-				if(keyok)
-				{
-					last_keypress = now_pressed;
-					return translate(rc_key);
-				}
-			}
-			//printf("!!!!!!!eat  native key: %04x %04x\n", rc_key, rc_key&0x1f );
 		}
 		Timeout--;
 		if (Timeout==-1)
