@@ -37,6 +37,7 @@
 #include "driver/mp3play.h"
 #include "gui/widget/menue.h"
 #include "gui/filebrowser.h"
+#include "id3tag.h"
 
 using namespace std;
 

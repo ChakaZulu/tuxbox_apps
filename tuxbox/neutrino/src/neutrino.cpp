@@ -524,6 +524,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.timing_chanlist = configfile.getInt32( "timing_chanlist", 60 );
 	g_settings.timing_epg = configfile.getInt32( "timing_epg", 2* 60 );
 	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", 6 );
+	g_settings.timing_filebrowser = configfile.getInt32( "timing_filebrowser", 60 );
 
 	if(configfile.getUnknownKeyQueryedFlag() && (erg==0))
 	{
@@ -726,6 +727,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "timing_chanlist", g_settings.timing_chanlist );
 	configfile.setInt32( "timing_epg", g_settings.timing_epg );
 	configfile.setInt32( "timing_infobar", g_settings.timing_infobar );
+	configfile.setInt32( "timing_filebrowser", g_settings.timing_filebrowser );
 
 	if(configfile.getModifiedFlag())
 	{
@@ -960,6 +962,8 @@ void CNeutrinoApp::SetupTiming()
 	sprintf(g_settings.timing_chanlist_string,"%d",g_settings.timing_chanlist);
 	sprintf(g_settings.timing_epg_string,"%d",g_settings.timing_epg);
 	sprintf(g_settings.timing_infobar_string,"%d",g_settings.timing_infobar);
+	sprintf(g_settings.timing_filebrowser_string,"%d",g_settings.timing_filebrowser);
+	
 }
 
 /**************************************************************************************
@@ -1762,6 +1766,7 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 	sprintf(g_settings.timing_chanlist_string,"%d",g_settings.timing_chanlist);
 	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
 	sprintf(g_settings.timing_menu_string,"%d",g_settings.timing_menu);
+	sprintf(g_settings.timing_filebrowser_string,"%d",g_settings.timing_filebrowser);
 
 	colorSettings_timing.addItem( new CMenuSeparator() );
 	colorSettings_timing.addItem( new CMenuForwarder("menu.back") );
@@ -1778,6 +1783,9 @@ void CNeutrinoApp::InitColorSettingsTiming(CMenuWidget &colorSettings_timing)
 
 	CStringInput*  colorSettings_timing_infobar = new CStringInput("timing.infobar", g_settings.timing_infobar_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
 	colorSettings_timing.addItem( new CMenuForwarder("timing.infobar", true,  g_settings.timing_infobar_string, colorSettings_timing_infobar ) );
+
+	CStringInput*  colorSettings_timing_filebrowser = new CStringInput("timing.filebrowser", g_settings.timing_filebrowser_string, 3, "timing.hint_1", "timing.hint_2", "0123456789 ", this);
+	colorSettings_timing.addItem( new CMenuForwarder("timing.filebrowser", true,  g_settings.timing_filebrowser_string, colorSettings_timing_filebrowser ) );
 }
 
 void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
@@ -3261,6 +3269,8 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 		g_settings.timing_chanlist = atoi(g_settings.timing_chanlist_string);
 		g_settings.timing_epg = atoi(g_settings.timing_epg_string);
 		g_settings.timing_infobar = atoi(g_settings.timing_infobar_string);
+		g_settings.timing_filebrowser = atoi(g_settings.timing_filebrowser_string);
+
 	}
 
 	else if(OptionName.substr(0,3).compare("mp3.") == 0)
@@ -3316,7 +3326,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.379 2002/12/19 13:55:18 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.380 2002/12/19 17:49:59 dirch Exp $\n\n");
 	//LCD-Init
 	CLCD::getInstance()->init();
 

@@ -58,6 +58,7 @@ struct CFile
 	off_t Size;
 	string Name;
 	mode_t Mode;
+
 };
 
 typedef std::vector<CFile> CCFileBrowser;
@@ -72,15 +73,15 @@ class CFileBrowser
 		unsigned int	current_event;
 		unsigned int	liststart;
 		unsigned int	listmaxshow;
-		int		fheight; // Fonthoehe Filelist-Inhalt
-		int		theight; // Fonthoehe Filelist-Titel
+		int 			fheight; // Fonthoehe Filelist-Inhalt
+		int 			theight; // Fonthoehe Filelist-Titel
 
-		string		name;
+		string			name;
 
-		int 		width;
-		int 		height;
-		int 		x;
-		int 		y;
+		int 			width;
+		int 			height;
+		int 			x;
+		int 			y;
 
 		void ChangeDir(string filename);
 

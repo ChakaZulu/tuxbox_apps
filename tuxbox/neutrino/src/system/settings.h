@@ -69,11 +69,12 @@ struct SNeutrinoSettings
 	int timing_chanlist;
 	int timing_epg;
 	int timing_infobar;
-
+	int	timing_filebrowser;
 	char timing_menu_string[4];
 	char timing_chanlist_string[4];
 	char timing_epg_string[4];
 	char timing_infobar_string[4];
+	char timing_filebrowser_string[4];
 
 	//widget settings
 	int	widget_fade;

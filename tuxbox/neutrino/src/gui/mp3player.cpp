@@ -190,7 +190,14 @@ int CMP3PlayerGui::show()
 					string extension;
 					extension = file.substr(ext_pos + 1, file.length() - ext_pos);
 					if(extension == "mp3")
+					{
+/*
+						struct id3_file *id3file = id3_file_open(file.c_str(), ID3_FILE_MODE_READONLY);
+						if(id3file)
+						id3_file_close(id3file);
+*/
 						playlist.push_back(file);
+					}
 				}
 			}
 			update=true;

@@ -140,7 +140,7 @@ string CFileBrowser::exec(const std::string& dirname)
 	#endif
 
 	uint msg; uint data;
-	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+	unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_filebrowser );
 
 	bool loop=true;
 	while (loop)
@@ -148,7 +148,7 @@ string CFileBrowser::exec(const std::string& dirname)
 		g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
 
 		if ( msg <= CRCInput::RC_MaxRC )
-			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_chanlist );
+			timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_filebrowser );
 
 		if ( msg == (uint) g_settings.key_channelList_pageup )
 		{
@@ -336,11 +336,23 @@ void CFileBrowser::paintItem(unsigned int pos, unsigned int spalte)
 						color = COL_MENUCONTENT;
 					}
 				}
+				int mode = actual_file->Mode & 0x777;
+				string modestring;
+				for(int m = 2; m >=0;m--)
+				{
+					modestring += string((mode & (4 << (m*8)))?"r":"-");
+					modestring += string((mode & (2 << (m*8)))?"w":"-");
+					modestring += string((mode & (1 << (m*8)))?"x":"-");
+				}
+				
+				g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight+3, width -(35+170) , actual_file->Name.c_str(), color);
 
-				g_Fonts->filebrowser_itemFile->RenderString(x+35, ypos+ fheight+3, width-40, actual_file->Name.c_str(), color);
+				g_Fonts->filebrowser_itemFile->RenderString(x + width - 160 , ypos+ fheight+3, 80, modestring.c_str(), color);
+
 				char tmpstr[256];
 				snprintf(tmpstr,sizeof(tmpstr),"%d kb", (int)((actual_file->Size / 1024) +0.9));
-				g_Fonts->filebrowser_itemFile->RenderString(width-40, ypos+ fheight+3, width, tmpstr, color);
+				int breite = g_Fonts->filebrowser_itemFile->getRenderWidth(tmpstr)< 70?g_Fonts->filebrowser_itemFile->getRenderWidth(tmpstr):60;
+				g_Fonts->filebrowser_itemFile->RenderString(x + width - 80 + (60 - breite), ypos+ fheight+3, breite, tmpstr, color);
 			}
 		}
 	}
