@@ -7,7 +7,7 @@ gFont eListBoxEntryTextStream::font;
 
 eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, int takefocus, int item_height, const char *deco )
 :   eDecoWidget(parent, takefocus, deco),
-		recalced(0), descr(descr),
+		removed_height_pixel(0), descr(descr),
 #ifndef DISABLE_LCD
 		tmpDescr(0),
 #endif
