@@ -740,6 +740,7 @@ movieplayer.dvdplayback DVD
 movieplayer.vcdplayback (S)VCD
 movieplayer.tshelp ROSSO/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\n
 movieplayer.vlchelp ROSSo/Home Stop\nVERDE Resync\nGIALLO Pausa/avanti\nBLU Inserire Bookmark\n1 ca. 1 Minuto indietro\n3 ca. 1 Minuto avanti\n4 ca. 5 Minuti indietro\n6 ca. 5 Minuti avanti\n7 ca. 10 Minuti indietro\n9 ca. 10 Minuti avanti\nAiuto: http://www.giggo.de/dbox2/movieplayer.html\nmovieplayer.toomanybookmarks Ha Inserito troppi Bookmarks.\nprima cancellare uno vecchio.
+movieplayer.toomanybookmarks Lei ha gia creato troppi Bookmarks.\nEs prima deve Cancellare un altro.
 movieplayer.bookmarkname Nome Bookmark
 movieplayer.bookmarkname_hint1 Inoltrare il Nome del nuovo Bookmark 
 movieplayer.bookmarkname_hint2 
@@ -748,6 +749,11 @@ movieplayer.goto Salta ad ...
 movieplayer.goto.h1 = -> Salto assoluto
 movieplayer.goto.h2 +,- -> Salto relativo
 movieplayer.wrongvlcversion Funzione con questa Versione di VLC non possibbile
+
+bookmarkmanager.name Bookmarks
+bookmarkmanager.delete Cancellare
+bookmarkmanager.rename Rinominare
+bookmarkmanager.select Sciegliere
 
 filebrowser.head filebrowser
 filebrowser.filter.active Filtro on
@@ -763,6 +769,9 @@ filebrowser.sort.size (Grandezza)
 filebrowser.nextpage Pagina Avanti
 filebrowser.prevpage Pagina Indietro
 filebrowser.showrights Attribbuti File
+filebrowser.delete Cancella
+filebrowser.dodelete1 Veramente
+filebrowser.dodelete2 Cancellare?
 
 nfs.mount carica directory
 nfs.ip NFS/CIFS Server IP
@@ -782,6 +791,7 @@ nfs.type_cifs CIFS
 nfs.username ime korisnika za cifs
 nfs.password lozinka za cifs
 nfs.mounterror_notsup Tipo File non sopportato
+nfs.remount Ricaricare Directory 
 nfsmenu.head Impostazioni NFS /CIFS
 
 apids.hint_1 Inoltrare i dati APIDs per Streamen,
@@ -801,3 +811,16 @@ rclock.menueadd Blocco Telecomando
 rclock.title Blocco Telecomando 
 rclock.lockmsg Il Telecomando viene Bloccato.\n per sbloccarlo, premete\n<Rosso> ed <DBOX> sul vostro Telecomando.
 rclock.unlockmsg Telecomando DBOX2 Riattivato...
+
+EPGMenu.head EPG -Informazione  Programma
+EPGMenu.eventinfo Info Programma
+EPGMenu.eventlist Previsione Programma Attuale
+EPGMenu.epgplus Lista Previsioni
+EPGMenu.streaminfo Informazione Tecnica
+
+EPGPlus.head Lista Previsione (EPG Plus)
+EPGPlus.record Registrazione
+EPGPlus.refresh_epg Attualizzare
+EPGPlus.remind Ricordare
+EPGPlus.scroll_mode Modo Scroll 
+EPGPlus.stretch_mode Modo Stretch 
