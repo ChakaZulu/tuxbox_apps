@@ -296,7 +296,7 @@ int Init()
 		}
 
 	//map framebuffer into memory
-    
+
 		lfb = (unsigned char*)mmap(0, fix_screeninfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fb, 0);
 
 		if(!lfb)
@@ -325,7 +325,7 @@ int Init()
 		next_100 = 0x100;
 		next_10  = 0x100;
 		subpage	 = 0;
-
+		SDT_ready = 1;
 		pageupdate = 0;
 
 		zap_subpage_manual = 0;
@@ -444,11 +444,11 @@ void CleanUp()
 /******************************************************************************
  * GetVideotextPIDs                                                           *
  ******************************************************************************/
- 
+
 int GetVideotextPIDs()
 {
 	struct dmxSctFilterParams dmx_flt;
-	int pat_scan, pmt_scan, sdt_scan, desc_scan, pmt_scan_start, pid_test, byte, diff;
+	int pat_scan, pmt_scan, sdt_scan, desc_scan, pid_test, byte, diff; //pmt_scan_start
 
 	unsigned char PAT[1024];
 	unsigned char SDT[1024];
@@ -468,13 +468,13 @@ int GetVideotextPIDs()
 		if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
 		{
 			perror("TuxTxt <DMX_SET_FILTER PAT>");
-			return;
+			return 0;
 		}
 
 		if(read(dmx, PAT, sizeof(PAT)) == -1)
 		{
 			perror("TuxTxt <read PAT>");
-			return;
+			return 0;
 		}
 
 	//read SDT to get servicenames
@@ -488,14 +488,15 @@ int GetVideotextPIDs()
 		if(ioctl(dmx, DMX_SET_FILTER, &dmx_flt) == -1)
 		{
 			perror("TuxTxt <DMX_SET_FILTER SDT>");
-			return;
+			SDT_ready = 0;
 		}
 
 		if(read(dmx, SDT, sizeof(SDT)) == -1)
 		{
 			perror("TuxTxt <read SDT>");
-			return;
+			SDT_ready = 0;
 		}
+
 
 	//scan each PMT for vtxt-pid
 
@@ -503,7 +504,7 @@ int GetVideotextPIDs()
 
 		for(pat_scan = 0x0A; pat_scan < 0x0A + (((PAT[0x01]<<8 | PAT[0x02]) & 0x0FFF) - 9); pat_scan += 4)
 		{
-			if((PAT[pat_scan - 2]<<8 | PAT[pat_scan - 1]) == 0) continue;
+			if(((PAT[pat_scan - 2]<<8) | (PAT[pat_scan - 1])) == 0) continue;
 
 			dmx_flt.pid				= (PAT[pat_scan]<<8 | PAT[pat_scan+1]) & 0x1FFF;
 			dmx_flt.flags			= DMX_ONESHOT | DMX_CHECK_CRC | DMX_IMMEDIATE_START;
@@ -547,7 +548,7 @@ skip_pid:;
 		}
 
 	//scan SDT to get servicenames
-
+		if (SDT_ready)
 		for(sdt_scan = 0x0B; sdt_scan < ((SDT[1]<<8 | SDT[2]) & 0x0FFF) - 7; sdt_scan += 5 + ((SDT[sdt_scan + 3]<<8 | SDT[sdt_scan + 4]) & 0x0FFF))
 		{
 			for(pid_test = 0; pid_test < pids_found; pid_test++)
@@ -624,7 +625,11 @@ void ConfigMenu()
 			}
 		}
 
-		memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+		if (SDT_ready)
+			memcpy(&menu[6*62 + 3 + (24-pid_table[current_pid].service_name_len)/2], &pid_table[current_pid].service_name, pid_table[current_pid].service_name_len);
+		else
+			memcpy(&menu[6*62 + 3 + 4], "Aktueller Sender", 16);
+
 
 		if(current_pid == 0 || pids_found == 1)				 menu[6*62 +  1] = ' ';
 		if(current_pid == pids_found - 1 || pids_found == 1) menu[6*62 + 28] = ' ';
@@ -1171,7 +1176,7 @@ void GetNextSubPage()
 							printf("TuxTxt <NextSubPage => %.3X-%.2X>\n", page, subpage);
 							return;
 					}
-				}			
+				}
 
 				printf("TuxTxt <NextSubPage => no other SubPage>\n");
 		}
@@ -1235,7 +1240,7 @@ void GetPrevSubPage()
 							printf("TuxTxt <PrevSubPage => %.3X-%.2X>\n", page, subpage);
 							return;
 					}
-				}			
+				}
 
 				printf("TuxTxt <PrevSubPage => no other SubPage>\n");
 		}
@@ -1370,7 +1375,7 @@ void PageCatching()
 
 void CatchNextPage(int Init)
 {
-	int tmp_page, pages_found;
+	int tmp_page, pages_found=0;
 
 	//init
 
@@ -1389,7 +1394,7 @@ void CatchNextPage(int Init)
 			{
 				if(!(page_atrb[catch_row*40 + catch_col] & 1<<8) && (page_char[catch_row*40 + catch_col] >= '0' && page_char[catch_row*40 + catch_col] <= '9' && page_char[catch_row*40 + catch_col + 1] >= '0' && page_char[catch_row*40 + catch_col + 1] <= '9' && page_char[catch_row*40 + catch_col + 2] >= '0' && page_char[catch_row*40 + catch_col + 2] <= '9') && (page_char[catch_row*40 + catch_col - 1] < '0' || page_char[catch_row*40 + catch_col - 1] > '9') && (page_char[catch_row*40 + catch_col + 3] < '0' || page_char[catch_row*40 + catch_col + 3] > '9'))
 				{
-					tmp_page = (page_char[catch_row*40 + catch_col] - '0')<<8 | (page_char[catch_row*40 + catch_col + 1] - '0')<<4 | page_char[catch_row*40 + catch_col + 2] - '0';
+					tmp_page = ((page_char[catch_row*40 + catch_col] - '0')<<8) | ((page_char[catch_row*40 + catch_col + 1] - '0')<<4) | (page_char[catch_row*40 + catch_col + 2] - '0');
 
 					if(tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
 					{
@@ -1434,7 +1439,7 @@ void CatchNextPage(int Init)
 
 void CatchPrevPage()
 {
-	int tmp_page, pages_found;
+	int tmp_page, pages_found=0;
 
 	//catch prev page
 
@@ -1444,7 +1449,7 @@ void CatchPrevPage()
 			{
 				if(!(page_atrb[catch_row*40 + catch_col] & 1<<8) && (page_char[catch_row*40 + catch_col] >= '0' && page_char[catch_row*40 + catch_col] <= '9' && page_char[catch_row*40 + catch_col + 1] >= '0' && page_char[catch_row*40 + catch_col + 1] <= '9' && page_char[catch_row*40 + catch_col + 2] >= '0' && page_char[catch_row*40 + catch_col + 2] <= '9') && (page_char[catch_row*40 + catch_col - 1] < '0' || page_char[catch_row*40 + catch_col - 1] > '9') && (page_char[catch_row*40 + catch_col + 3] < '0' || page_char[catch_row*40 + catch_col + 3] > '9'))
 				{
-					tmp_page = (page_char[catch_row*40 + catch_col] - '0')<<8 | (page_char[catch_row*40 + catch_col + 1] - '0')<<4 | page_char[catch_row*40 + catch_col + 2] - '0';
+					tmp_page = ((page_char[catch_row*40 + catch_col] - '0')<<8) | ((page_char[catch_row*40 + catch_col + 1] - '0')<<4) | (page_char[catch_row*40 + catch_col + 2] - '0');
 
 					if(tmp_page != catched_page && tmp_page >= 0x100 && tmp_page <= 0x899)
 					{
@@ -1520,9 +1525,9 @@ void RenderCatchedPage()
 		if(zoommode == 2) PosY = StartY + (catch_row-12)*fixfontheight*((zoom>>9)+1);
 		else			  PosY = StartY + catch_row*fixfontheight*((zoom>>9)+1);
 
-		RenderCharFB(page_char[catch_row*40 + catch_col    ], page_atrb[catch_row*40 + catch_col    ] & 1<<9 | (page_atrb[catch_row*40 + catch_col    ] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col    ] & 0xF0)>>4);
-		RenderCharFB(page_char[catch_row*40 + catch_col + 1], page_atrb[catch_row*40 + catch_col + 1] & 1<<9 | (page_atrb[catch_row*40 + catch_col + 1] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col + 1] & 0xF0)>>4);
-		RenderCharFB(page_char[catch_row*40 + catch_col + 2], page_atrb[catch_row*40 + catch_col + 2] & 1<<9 | (page_atrb[catch_row*40 + catch_col + 2] & 0x0F)<<4 | (page_atrb[catch_row*40 + catch_col + 2] & 0xF0)>>4);
+		RenderCharFB(page_char[catch_row*40 + catch_col    ], (page_atrb[catch_row*40 + catch_col    ] & 1<<9) | ((page_atrb[catch_row*40 + catch_col    ] & 0x0F)<<4) | ((page_atrb[catch_row*40 + catch_col    ] & 0xF0)>>4));
+		RenderCharFB(page_char[catch_row*40 + catch_col + 1], (page_atrb[catch_row*40 + catch_col + 1] & 1<<9) | ((page_atrb[catch_row*40 + catch_col + 1] & 0x0F)<<4) | ((page_atrb[catch_row*40 + catch_col + 1] & 0xF0)>>4));
+		RenderCharFB(page_char[catch_row*40 + catch_col + 2], (page_atrb[catch_row*40 + catch_col + 2] & 1<<9) | ((page_atrb[catch_row*40 + catch_col + 2] & 0x0F)<<4) | ((page_atrb[catch_row*40 + catch_col + 2] & 0xF0)>>4));
 }
 
 /******************************************************************************
@@ -1666,7 +1671,7 @@ void RenderCharFB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, 1+ Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char => 0x%.2X>\n", error);
 			PosX += fontwidth;
@@ -1745,7 +1750,7 @@ void RenderCharBB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, 1+ Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char %.3d => 0x%.2X>\n", Char, error);
 			PosX += fontwidth;
@@ -1987,7 +1992,7 @@ void CreateLine25()
 			}
 			while(subpagetable[prev_10] == 0xFF);
 		}
-		
+
 		line25[13] = (prev_10 >> 8) | '0';
 		line25[14] = ((prev_10 & 0x0F0)>>4) | '0';
 
