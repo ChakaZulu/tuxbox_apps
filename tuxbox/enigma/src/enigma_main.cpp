@@ -4431,7 +4431,7 @@ void eZapMain::showSelectorStyleEPG()
 		doubleklickTimer.stop();
 		doubleklickTimerConnection.disconnect();
 		hide();
-		eEPGStyleSelector e;
+		eEPGStyleSelector e(0);
 		e.show();
 		int ret = e.exec();
 		e.hide();
@@ -4465,8 +4465,8 @@ void eZapMain::showCurrentStyleEPG()
 		doubleklickTimerConnection.disconnect();
 		
 	int lastEPGStyle=1;
-	eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", lastEPGStyle);
-		
+	eConfig::getInstance()->getKey("/ezap/lastEPGStyle", lastEPGStyle);
+
 	switch ( lastEPGStyle )
 	{
 		case 1:

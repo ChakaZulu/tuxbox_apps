@@ -14,8 +14,9 @@ class eLabel;
 
 class eEPGStyleSelector: public eListBoxWindow<eListBoxEntryText>
 {
+	int ssel;
 public:
-	eEPGStyleSelector();
+	eEPGStyleSelector(int ssel=0);
 	int eventHandler( const eWidgetEvent &event );
 	void entrySelected( eListBoxEntryText* e );
 };

@@ -49,13 +49,17 @@ struct EPGStyleSelectorActions
 };
 eAutoInitP0<EPGStyleSelectorActions> i_EPGStyleSelectorActions(eAutoInitNumbers::actions, "EPG Style Selector actions");
 
-eEPGStyleSelector::eEPGStyleSelector()
+eEPGStyleSelector::eEPGStyleSelector(int ssel)
 		:eListBoxWindow<eListBoxEntryText>(_("EPG Style"), 5, 350, true)
+		,ssel(ssel)
 {
 	addActionMap( &i_EPGStyleSelectorActions->map );
 	move(ePoint(100, 100));
 	int last=1;
-	eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
+	if ( ssel )
+		eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
+	else
+		eConfig::getInstance()->getKey("/ezap/lastEPGStyle", last);
 	eListBoxEntryText *sel[3];
 	sel[0] = new eListBoxEntryText(&list,_("Channel EPG"), (void*)1, 0, _("open EPG for selected Channel") );
 	sel[1] = new eListBoxEntryText(&list,_("Multi EPG"), (void*)2, 0, _("open EPG for next five channels") );
@@ -90,10 +94,10 @@ void eEPGStyleSelector::entrySelected( eListBoxEntryText* e )
 {
 	if (e)
 	{
-		int last=1;
-		eConfig::getInstance()->getKey("/ezap/serviceselector/lastEPGStyle", last);
-		if ( last != (int) e->getKey() )
+		if ( ssel )
 			eConfig::getInstance()->setKey("/ezap/serviceselector/lastEPGStyle", (int)e->getKey());
+		else
+			eConfig::getInstance()->setKey("/ezap/lastEPGStyle", (int)e->getKey());
 		close( (int)e->getKey() );
 	}
 	else
@@ -1090,7 +1094,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				&& !movemode && !editMode && this == eZap::getInstance()->getServiceSelector() )
 			{
 				hide();
-				eEPGStyleSelector e;
+				eEPGStyleSelector e(1);
 #ifndef DISABLE_LCD
 				e.setLCD( LCDTitle, LCDElement );
 #endif
