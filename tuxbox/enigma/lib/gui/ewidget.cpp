@@ -136,6 +136,9 @@ void eWidget::redraw(QRect area)		// area bezieht sich nicht auf die clientarea
 
 void eWidget::invalidate(QRect area)
 {
+	if (!isVisible())
+		return;
+
 	if (area.isNull())
 		area=QRect(0, 0, size.width(), size.height());
 
