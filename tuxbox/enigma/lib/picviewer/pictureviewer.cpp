@@ -320,13 +320,13 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 
 bool ePictureViewer::ShowSlideshow(const std::string& filename, bool unscaled)
 {
-	eDebug("Show Slideshow {");
+	eDebug("Show Slideshow { ", filename.c_str());
 	slideshowList.clear();
 	// gen pic list for slideshow
 	int pos = filename.find_last_of("/");
 	if (pos == -1)
 		pos = filename.length() - 1;
-	eString directory = filename.substr(0, pos);
+	eString directory = pos?filename.substr(0, pos):"/";
 	eDebug("---directory: %s", directory.c_str());
 	DIR *d = opendir(directory.c_str());
 	if (d)
