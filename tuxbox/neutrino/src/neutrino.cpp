@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.224 2002/04/16 16:48:00 field Exp $
+        $Id: neutrino.cpp,v 1.225 2002/04/17 18:37:08 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1167,7 +1167,7 @@ void CNeutrinoApp::InitParentalLockSettings(CMenuWidget &parentallockSettings)
 	CMenuOptionChooser* oj = new CMenuOptionChooser("parentallock.prompt", &g_settings.parentallock_prompt, true);
 	oj->addOption(PARENTALLOCK_PROMPT_NEVER         , "parentallock.never");
 	oj->addOption(PARENTALLOCK_PROMPT_ONSTART       , "parentallock.onstart");
-	oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
+	//oj->addOption(PARENTALLOCK_PROMPT_CHANGETOLOCKED, "parentallock.changetolocked");
 	oj->addOption(PARENTALLOCK_PROMPT_ONSIGNAL      , "parentallock.onsignal");
 	parentallockSettings.addItem( oj );
 
@@ -1420,7 +1420,7 @@ void CNeutrinoApp::SelectAPID()
 			char apid[5];
 			sprintf(apid, "%d", count);
 			APIDSelector.addItem( new CMenuForwarder(g_RemoteControl->current_PIDs.APIDs[count].desc, true,
-								  "", APIDChanger, apid, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->selected_apid) );
+								  "", APIDChanger, apid, false, (count<9)? (count+1) : CRCInput::RC_nokey ), (count == g_RemoteControl->current_PIDs.PIDs.selected_apid) );
 		}
 		APIDSelector.exec(NULL, "");
 	}
@@ -1847,8 +1847,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 
 	res = res | g_RemoteControl->handleMsg(msg, data);
 	res = res | g_InfoViewer->handleMsg(msg, data);
-
-
+	res = res | channelList->handleMsg(msg, data);
 
 	if ( res != messages_return::unhandled )
 	{
@@ -2394,7 +2393,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.224 2002/04/16 16:48:00 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.225 2002/04/17 18:37:08 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

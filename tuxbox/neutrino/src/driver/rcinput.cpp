@@ -221,12 +221,18 @@ int CRCInput::addTimer(unsigned long long Interval, bool oneshot, bool correct_t
 		_newtimer.interval = 0;
 
 	_newtimer.id = timerid++;
-	_newtimer.times_out = timeNow+ Interval;
+	if ( correct_time )
+		_newtimer.times_out = timeNow+ Interval;
+	else
+		_newtimer.times_out = Interval;
+
 	_newtimer.correct_time = correct_time;
+
+	//printf("adding timer %d (0x%llx, 0x%llx)\n", _newtimer.id, _newtimer.times_out, Interval);
 
 	vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
-		if ( e->times_out< _newtimer.times_out )
+		if ( e->times_out> _newtimer.times_out )
 			break;
 
 	timers.insert(e, _newtimer);
@@ -239,8 +245,14 @@ int CRCInput::addTimer(struct timeval Timeout)
 	return addTimer( timesout, true, false );
 }
 
+int CRCInput::addTimer(const time_t *Timeout)
+{
+	return addTimer( (unsigned long long)*Timeout* (unsigned long long) 1000000, true, false );
+}
+
 void CRCInput::killTimer(int id)
 {
+	//printf("killing timer %d\n", id);
 	vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
 		if ( e->id == id )
@@ -261,9 +273,9 @@ int CRCInput::checkTimers()
 
 	vector<timer>::iterator e;
 	for ( e= timers.begin(); e!= timers.end(); ++e )
-		if ( e->times_out< timeNow+ 200 )
+		if ( e->times_out< timeNow+ 2000 )
 		{
-//			printf("timeout timer %d %lld %lld\n",e->id,e->times_out,timeNow );
+//			printf("timeout timer %d %llx %llx\n",e->id,e->times_out,timeNow );
 			_id = e->id;
 			if ( e->interval != 0 )
 			{
@@ -275,7 +287,7 @@ int CRCInput::checkTimers()
 
             	timers.erase(e);
 				for ( e= timers.begin(); e!= timers.end(); ++e )
-					if ( e->times_out< _newtimer.times_out )
+					if ( e->times_out> _newtimer.times_out )
 						break;
 
 				timers.insert(e, _newtimer);
@@ -286,7 +298,7 @@ int CRCInput::checkTimers()
 			break;
         }
 //        else
-//    		printf("skipped timer %d %lld %lld\n",e->id,e->times_out, timeNow );
+//    		printf("skipped timer %d %llx %llx\n",e->id,e->times_out, timeNow );
 	return _id;
 }
 
@@ -608,9 +620,10 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 		{
 			 			if (emsg.eventID==CTimerdClient::EVT_NEXTPROGRAM)
 			 			{
-			 				*msg = NeutrinoMessages::EVT_NEXTPROGRAM;
+/*			 				*msg = NeutrinoMessages::EVT_NEXTPROGRAM;
 			 				*data = (unsigned) p;
 			 				dont_delete_p = true;
+*/
 			 			}
 			 		}
 			 		else

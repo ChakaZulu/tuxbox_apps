@@ -97,7 +97,7 @@ class CInfoViewer
 
 		int	 	sec_timer_id;
 
-		void getEPG();
+		void getEPG( unsigned int onid_sid );
 
 		void show_Data( bool calledFromEvent = false );
 		void paintTime( bool show_dot, bool firstPaint );

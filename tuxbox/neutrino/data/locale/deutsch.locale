@@ -418,6 +418,9 @@ parentallock.never Nie
 parentallock.onstart Beim Start
 parentallock.changetolocked Bei vorgeperrten Bouquets
 parentallock.onsignal Bei gesendeter Vorsperre
+parentallock.lockedsender Vorgesperrter Sender...
+parentallock.lockedprogram Gesperrtes Programm (FSK ab %d)
+parentallock.head Jugendschutz PIN
 
 parentallock.lockage Sendungen
 parentallock.lockage12 ab 12 Jahren sperren

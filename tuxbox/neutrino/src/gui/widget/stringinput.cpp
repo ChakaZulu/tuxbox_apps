@@ -32,7 +32,7 @@
 #include "stringinput.h"
 #include "../global.h"
 
-CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ)
+CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, string Hint_2, char* Valid_Chars, CChangeObserver* Observ )
 {
 	name = Name;
 	value = Value;
@@ -45,13 +45,12 @@ CStringInput::CStringInput(string Name, char* Value, int Size,  string Hint_1, s
 	observ = Observ;
 	width = (Size*20)+40;
 
-
 	if (width<420)
 	{
 		width=420;
 	}
 
-	int neededWidth = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str());
+	int neededWidth = g_Fonts->menu_title->getRenderWidth( g_Locale->getText(name).c_str() );
 	if (neededWidth+20> width)
 	{
 		width= neededWidth+20;
@@ -403,5 +402,98 @@ void CPINInput::paintChar(int pos)
 	int xfpos = xpos + ((xs- g_Fonts->menu->getRenderWidth(ch.c_str()))>>1);
 
 	g_Fonts->menu->RenderString(xfpos,ypos+ys, width, ch.c_str(), color);
+}
+
+int CPLPINInput::exec( CMenuTarget* parent, string )
+{
+	char hint[100];
+	if ( fsk == 0x100 )
+		strcpy(hint, g_Locale->getText("parentallock.lockedsender").c_str());
+	else
+		sprintf(hint, g_Locale->getText("parentallock.lockedprogram").c_str(), fsk );
+
+	hint_1= hint;
+
+	int res = menu_return::RETURN_REPAINT;
+	char oldval[size];
+
+	if (parent)
+	{
+		parent->hide();
+	}
+
+	for(int count=strlen(value)-1;count<size-1;count++)
+		strcat(value, " ");
+	strcpy(oldval, value);
+
+	paint();
+
+	bool loop = true;
+	uint msg; uint data;
+
+	while(loop)
+	{
+		g_RCInput->getMsg( &msg, &data, 300 );
+
+		if (msg==CRCInput::RC_left)
+		{
+			keyLeftPressed();
+		}
+		else if (msg==CRCInput::RC_right)
+		{
+			keyRightPressed();
+		}
+		else if ( ( msg>= 0 ) && ( msg<= 9) )
+		{
+			int old_selected = selected;
+			key0_9Pressed( msg );
+			if ( old_selected == ( size- 1 ) )
+				loop=false;
+		}
+		else if ( (msg==CRCInput::RC_up) ||
+				  (msg==CRCInput::RC_down) )
+		{
+			g_RCInput->postMsg( msg, data );
+			res = menu_return::RETURN_EXIT;
+			loop=false;
+		}
+		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) || (msg==CRCInput::RC_ok) )
+		{
+			loop=false;
+		}
+		else if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
+		{
+			// trotzdem handlen
+			neutrino->handleMsg( msg, data );
+
+			if ( data != fsk )
+				loop = false; // raus hier
+		}
+		else if ( neutrino->handleMsg( msg, data ) & messages_return::cancel_all )
+		{
+			loop = false;
+			res = menu_return::RETURN_EXIT_ALL;
+		}
+	}
+
+	hide();
+
+	for(int count=size-1;count>=0;count--)
+	{
+		if((value[count]==' ') || (value[count]==0))
+		{
+			value[count]=0;
+		}
+		else
+			break;
+	}
+	value[size]=0;
+
+	if ( (observ) && (msg==CRCInput::RC_ok) )
+	{
+		observ->changeNotify( name, value );
+	}
+
+	return res;
 }
 

@@ -195,7 +195,7 @@ int CAPIDChangeExec::exec(CMenuTarget* parent, string actionKey)
 {
 	//    printf("CAPIDChangeExec exec: %s\n", actionKey.c_str());
 	int sel= atoi(actionKey.c_str());
-	if (g_RemoteControl->selected_apid!= sel )
+	if (g_RemoteControl->current_PIDs.PIDs.selected_apid!= sel )
 	{
 		g_RemoteControl->setAPID(sel);
 	}

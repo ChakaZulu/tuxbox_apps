@@ -309,7 +309,9 @@ class CZapProtection : public CPINProtection
 	protected:
 		virtual CMenuTarget* getParent() { return( NULL);};
 	public:
-		CZapProtection( char* validpin) : CPINProtection(validpin){};
+		int	fsk;
+
+		CZapProtection( char* validpin, int	FSK ) : CPINProtection(validpin){ fsk= FSK; };
 		bool check();
 };
 

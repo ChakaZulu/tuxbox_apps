@@ -1,5 +1,5 @@
 /*
-//  $Id: neutrino.h,v 1.77 2002/04/16 11:22:57 field Exp $
+//  $Id: neutrino.h,v 1.78 2002/04/17 18:37:08 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -142,11 +142,14 @@ struct NeutrinoMessages {
 			EVT_SCAN_NUM_CHANNELS =		CRCInput::RC_Events + 18,
 			EVT_SHUTDOWN =				CRCInput::RC_Events + 19,
 			EVT_TIMER =					CRCInput::RC_Events + 20,
+			EVT_NEXTPROGRAM		=		CRCInput::RC_Events + 21,
+			EVT_PROGRAMLOCKSTATUS	=	CRCInput::RC_Events + 22,
+			EVT_NOEPG_YET		=		CRCInput::RC_Events + 23,
 
 			EVT_CURRENTEPG 		=		CRCInput::RC_WithData + 1,
 			EVT_SCAN_SATELLITE	=		CRCInput::RC_WithData + 2,
 			EVT_SCAN_PROVIDER	=		CRCInput::RC_WithData + 3,
-			EVT_NEXTPROGRAM		=		CRCInput::RC_WithData + 4,
+			EVT_NEXTEPG 		=		CRCInput::RC_WithData + 4,
 			EVT_TIMESET 		= 		CRCInput::RC_WithData + 5
 		};
 };

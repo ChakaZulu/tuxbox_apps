@@ -421,6 +421,9 @@ parentallock.never never
 parentallock.onstart on start
 parentallock.changetolocked on locked bouquets
 parentallock.onsignal on broadcasted lock
+parentallock.lockedsender Locked sender...
+parentallock.lockedprogram Locked program (from %d years up)
+parentallock.head Enter Parental Lock PIN code
 
 parentallock.lockage lock program
 parentallock.lockage12 from 12 years up

@@ -44,6 +44,7 @@
 
 int time_left_width;
 int time_dot_width;
+int time_width;
 int time_height;
 char old_timestr[10];
 
@@ -69,8 +70,9 @@ void CInfoViewer::start()
 	aspectRatio = g_Controld->getAspectRatio();
 
 	time_height = g_Fonts->infobar_channame->getHeight()+5;
-	time_left_width = g_Fonts->infobar_channame->getRenderWidth("99");
+	time_left_width = g_Fonts->infobar_channame->getRenderWidth("22");
 	time_dot_width = g_Fonts->infobar_channame->getRenderWidth(":");
+	time_width = time_left_width* 2+ time_dot_width;
 }
 
 void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
@@ -88,20 +90,24 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 		if ( ( !firstPaint ) && ( strcmp( timestr, old_timestr ) == 0 ) )
 		{
 			if ( show_dot )
-        		g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2, COL_INFOBAR);
+        		g_FrameBuffer->paintBoxRel(BoxEndX- time_width+ time_left_width- 10, ChanNameY, time_dot_width, time_height/2, COL_INFOBAR);
         	else
-        		g_Fonts->infobar_channame->RenderString(BoxEndX-time_left_width- time_dot_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
+        		g_Fonts->infobar_channame->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
         	strcpy( old_timestr, timestr );
         }
         else
         {
         	strcpy( old_timestr, timestr );
 
-
     		if ( !firstPaint )
-    			g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width*2- time_dot_width- 10, ChanNameY, time_left_width*2+ time_dot_width, time_height, COL_INFOBAR);
+    		{
+    			g_FrameBuffer->paintBoxRel(BoxEndX- time_width- 10, ChanNameY, time_width+ 10, time_height, COL_INFOBAR);
+    		}
 
-			g_Fonts->infobar_channame->RenderString(BoxEndX-time_left_width*2- time_dot_width-10, ChanNameY+ time_height, time_left_width*2+ time_dot_width, timestr, COL_INFOBAR);
+			timestr[2]= 0;
+			g_Fonts->infobar_channame->RenderString(BoxEndX- time_width- 10, ChanNameY+ time_height, time_left_width, timestr, COL_INFOBAR);
+			g_Fonts->infobar_channame->RenderString(BoxEndX- time_left_width- 10, ChanNameY+ time_height, time_left_width, &timestr[3], COL_INFOBAR);
+			g_Fonts->infobar_channame->RenderString(BoxEndX- time_width+ time_left_width- 10, ChanNameY+ time_height, time_dot_width, ":", COL_INFOBAR);
             if ( show_dot )
         		g_FrameBuffer->paintBoxRel(BoxEndX- time_left_width- time_dot_width- 10, ChanNameY, time_dot_width, time_height/2, COL_INFOBAR);
 		}
@@ -148,13 +154,10 @@ neutrino->showProfiling("infoviewer showtitle");
 
        	g_FrameBuffer->paintBox(ChanNameX, ChanNameY, BoxEndX, BoxEndInfoY, COL_INFOBAR);
 
-        int height=time_height;
-        int timewidth= time_left_width* 2+ time_dot_width;
-
 		paintTime( false, true );
 
 		// ... with channel name
-        g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+height, BoxEndX- (ChanNameX+ 20)- timewidth- 15, Channel.c_str(), COL_INFOBAR);
+        g_Fonts->infobar_channame->RenderString(ChanNameX+ 10, ChanNameY+ time_height, BoxEndX- (ChanNameX+ 20)- time_width- 15, Channel.c_str(), COL_INFOBAR);
 
         ChanInfoX = BoxStartX + (ChanWidth / 3);
         int ChanInfoY = BoxStartY + ChanHeight+ 10;
@@ -176,7 +179,7 @@ neutrino->showProfiling("before if ( showButtonBar )");
 
 neutrino->showProfiling("before getEPG();");
 
-		getEPG();
+		getEPG( current_onid_sid );
 
 neutrino->showProfiling("after getEPG();");
 
@@ -237,7 +240,7 @@ neutrino->showProfiling("vor Schatten;");
 			while ( ! ( res & ( messages_return::cancel_info | messages_return::cancel_all ) ) )
 			{
 				g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
-                //printf(" g_RCInput->getMsgAbsoluteTimeout %x\n", msg);
+                //printf(" g_RCInput->getMsgAbsoluteTimeout %x %x\n", msg, data);
 
 				if ( msg == CRCInput::RC_help )
 				{
@@ -262,9 +265,10 @@ neutrino->showProfiling("vor Schatten;");
 					// Handle anyway!
 					neutrino->handleMsg( msg, data );
         			g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
+        			hideIt = false;
 					res = messages_return::cancel_all;
 				}
-				else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data = sec_timer_id ) )
+				else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == sec_timer_id ) )
 				{
         			paintTime( show_dot, false );
  					show_dot = !show_dot;
@@ -308,15 +312,14 @@ void CInfoViewer::showIcon_VTXT()
 
 int CInfoViewer::handleMsg(uint msg, uint data)
 {
-    if ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG )
+    if ( ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG ) ||
+		 ( msg == NeutrinoMessages::EVT_NEXTPROGRAM ) )
 	{
-		if ( data == current_onid_sid )
-		{
-            getEPG();
+		getEPG( data );
 
-			if ( is_visible )
-				show_Data( true );
-		}
+		if ( ( is_visible ) && ( data == current_onid_sid ) )
+			show_Data( true );
+
 	    return messages_return::handled;
 	}
     else if ( msg == NeutrinoMessages::EVT_ZAP_GOTAPIDS )
@@ -400,19 +403,18 @@ void CInfoViewer::showButton_SubServices()
 	}
 }
 
-void CInfoViewer::getEPG()
+void CInfoViewer::getEPG( unsigned int onid_sid )
 {
-	g_Sectionsd->getCurrentNextServiceKey( current_onid_sid, info_CurrentNext );
+	g_Sectionsd->getCurrentNextServiceKey( onid_sid, info_CurrentNext );
 
-	if ( ( info_CurrentNext.flags & sectionsd::epgflags::has_current ) &&
-		 ( showButtonBar ) )
+	if ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_next ) )
 	{
 		sectionsd::CurrentNextInfo*	_info = new sectionsd::CurrentNextInfo;
 		*_info = info_CurrentNext;
-		g_RCInput->postMsg( NeutrinoMessages::EVT_CURRENTEPG, (unsigned) _info, false );
+		g_RCInput->postMsg( ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current ) )? NeutrinoMessages::EVT_CURRENTEPG : NeutrinoMessages::EVT_NEXTEPG, (unsigned) _info, false );
 	}
-
-
+	else
+		g_RCInput->postMsg( NeutrinoMessages::EVT_NOEPG_YET, onid_sid, false );
 }
 
 
@@ -610,8 +612,8 @@ void CInfoViewer::showButton_Audio()
 		g_Fonts->infobar_small->RenderString(BoxEndX- ICON_OFFSET- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 30, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR_BUTTONS);
 	};
 
-	if ( ( g_RemoteControl->selected_apid < count ) &&
-	     ( g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->selected_apid].is_ac3 ) )
+	if ( ( g_RemoteControl->current_PIDs.PIDs.selected_apid < count ) &&
+	     ( g_RemoteControl->current_PIDs.APIDs[g_RemoteControl->current_PIDs.PIDs.selected_apid].is_ac3 ) )
 		g_FrameBuffer->paintIcon("dd.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
 	else if ( g_RemoteControl->has_ac3 )
 		g_FrameBuffer->paintIcon("dd_avail.raw", BoxEndX- ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );

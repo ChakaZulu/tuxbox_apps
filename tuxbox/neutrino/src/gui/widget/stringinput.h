@@ -73,7 +73,7 @@ class CStringInput : public CMenuTarget
 
 	public:
 
-		CStringInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL);
+		CStringInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789. ", CChangeObserver* Observ = NULL );
 
 		void hide();
 		int exec( CMenuTarget* parent, string actionKey );
@@ -104,10 +104,22 @@ class CStringInputSMS : public CStringInput
 
 class CPINInput : public CStringInput
 {
+	protected:
 		virtual void paintChar(int pos);
 	public:
 		CPINInput(string Name, char* Value, int Size, string Hint_1 = "", string Hint_2 = "", char* Valid_Chars= "0123456789", CChangeObserver* Observ = NULL)
 		 : CStringInput(Name, Value, Size, Hint_1, Hint_2, Valid_Chars, Observ) {};
+};
+
+class CPLPINInput : public CPINInput
+{
+	protected:
+		int	fsk;
+	public:
+		CPLPINInput(string Name, char* Value, int Size, string Hint_1, int FSK )
+		 : CPINInput(Name, Value, Size, " ", Hint_1) { fsk= FSK; };
+
+		int exec( CMenuTarget* parent, string actionKey );
 };
 
 class CPINChangeWidget : public CStringInput

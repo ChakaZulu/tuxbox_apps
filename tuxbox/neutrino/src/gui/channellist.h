@@ -100,6 +100,7 @@ class CChannelList
 
 		string			name;
 		vector<CChannel*>	chanlist;
+		CZapProtection* 	zapProtection;
 
 		int 			width;
 		int 			height;
@@ -142,6 +143,8 @@ class CChannelList
 		int  hasChannel(int nChannelNr);
 		void setSelected( int nChannelNr); // for adjusting bouquet's channel list after numzap or quickzap
 		bool handleLockage( CChannel* chan);
+
+		int handleMsg(uint msg, uint data);
 }
 ;
 

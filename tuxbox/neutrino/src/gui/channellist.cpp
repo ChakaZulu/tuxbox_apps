@@ -80,6 +80,7 @@ CChannelList::CChannelList( const std::string &Name )
 	y=(((g_settings.screen_EndY- g_settings.screen_StartY)-( height+ info_height) ) / 2) + g_settings.screen_StartY;
 	liststart = 0;
 	tuned=0xfffffff;
+	zapProtection= NULL;;
 }
 
 CChannelList::~CChannelList()
@@ -468,6 +469,42 @@ bool CChannelList::showInfo(int pos)
 	return true;
 }
 
+int CChannelList::handleMsg(uint msg, uint data)
+{
+	if ( msg == NeutrinoMessages::EVT_PROGRAMLOCKSTATUS )
+	{
+		// 0x100 als FSK-Status zeigt an, dass (noch) kein EPG zu einem Kanal der NICHT angezeigt wird da ist
+
+		//printf("program-lock-status: %d\n", data);
+
+		if ( g_settings.parentallock_prompt == PARENTALLOCK_PROMPT_ONSIGNAL )
+		{
+			if ( zapProtection != NULL )
+				zapProtection->fsk = data;
+			else
+			{
+				if ( data>= g_settings.parentallock_lockage )
+				{
+					g_RemoteControl->stopvideo();
+					zapProtection = new CZapProtection( g_settings.parentallock_pincode, data );
+
+					if ( zapProtection->check() )
+						g_RemoteControl->startvideo();
+					delete zapProtection;
+					zapProtection = NULL;
+				}
+				else
+					g_RemoteControl->startvideo();
+			}
+		}
+
+		return messages_return::handled;
+	}
+    else
+		return messages_return::unhandled;
+}
+
+
 bool CChannelList::handleLockage( CChannel* chan)
 {
 	printf("[neutrino] handleLockage\n");
@@ -475,7 +512,7 @@ bool CChannelList::handleLockage( CChannel* chan)
 	{
 		printf("[neutrino] channel is locked\n");
 //		g_Zapit->stopPlayBack();
-		CZapProtection zapProtection( g_settings.parentallock_pincode);
+		CZapProtection zapProtection( g_settings.parentallock_pincode,0  );
 		if (!zapProtection.check())
 		{
 			if (bouquetList != NULL)
@@ -521,11 +558,11 @@ void CChannelList::zapTo(int pos)
 		pos = 0;
 	}
 
-	if (!handleLockage( chanlist[pos]))
+/*	if (!handleLockage( chanlist[pos]))
 	{
 		return;
 	}
-
+*/
 	selected= pos;
 	CChannel* chan = chanlist[selected];
 	lastChList.store (selected);
@@ -533,7 +570,7 @@ void CChannelList::zapTo(int pos)
 	if ( pos!=(int)tuned )
 	{
 		tuned = pos;
-		g_RemoteControl->zapTo_onid_sid( chan->onid_sid, chan->name );
+		g_RemoteControl->zapTo_onid_sid( chan->onid_sid, chan->name, !chan->bAlwaysLocked );
 	}
 	g_RCInput->postMsg( NeutrinoMessages::SHOW_INFOBAR, 0 );
 
@@ -597,6 +634,7 @@ int CChannelList::numericZap(int key)
 			}
 
 			showInfo(chn- 1);
+			lastchan= chn;
 		}
 
 

@@ -40,11 +40,13 @@ CRemoteControl::CRemoteControl()
 	current_sub_onid_sid = 0;
 	zap_completion_timeout = 0;
 	current_EPGid= 0;
+	next_EPGid= 0;
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
-    selected_apid = 0;
 	has_ac3 = false;
 	selected_subchannel = -1;
 	needs_nvods = false;
+	current_programm_timer = 0;
+	is_video_started= true;
 }
 
 int CRemoteControl::handleMsg(uint msg, uint data)
@@ -75,18 +77,74 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 		{
 			//CURRENT-EPG für den aktuellen Kanal bekommen!;
 
-			current_EPGid= info_CN->current_uniqueKey;
-			if ( has_unresolved_ctags )
-				processAPIDnames();
+			if ( info_CN->current_uniqueKey != current_EPGid )
+			{
+			    if ( current_EPGid != 0 )
+			    {
+			    	// ist nur ein neues Programm, kein neuer Kanal
 
-			if ( info_CN->flags & sectionsd::epgflags::current_has_linkagedescriptors )
-				getSubChannels();
+			    	// PIDs neu holen
+			    	g_Zapit->getPIDS( current_PIDs );
 
-			if ( needs_nvods )
-				getNVODs();
+			    	// APID Bearbeitung neu anstossen
+			    	has_unresolved_ctags = true;
+			    }
 
+				current_EPGid= info_CN->current_uniqueKey;
+
+				if ( has_unresolved_ctags )
+					processAPIDnames();
+
+				if ( info_CN->flags & sectionsd::epgflags::current_has_linkagedescriptors )
+					getSubChannels();
+
+				if ( needs_nvods )
+					getNVODs();
+
+        		if ( current_programm_timer != 0 )
+					g_RCInput->killTimer( current_programm_timer );
+
+				time_t end_program= info_CN->current_zeit.startzeit+ info_CN->current_zeit.dauer;
+				current_programm_timer = g_RCInput->addTimer( &end_program );
+
+				g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, info_CN->current_fsk, false );
+			}
 		}
 	    return messages_return::handled;
+	}
+	else if ( msg == NeutrinoMessages::EVT_NEXTEPG )
+	{
+		sectionsd::CurrentNextInfo* info_CN = (sectionsd::CurrentNextInfo*) data;
+
+		if ( ( info_CN->next_uniqueKey >> 16) == current_onid_sid )
+		{
+			// next-EPG für den aktuellen Kanal bekommen, current ist leider net da?!;
+			if ( info_CN->next_uniqueKey != next_EPGid )
+			{
+			    next_EPGid= info_CN->next_uniqueKey;
+
+				// timer setzen
+
+	        	if ( current_programm_timer != 0 )
+					g_RCInput->killTimer( current_programm_timer );
+
+				time_t end_program= info_CN->next_zeit.startzeit;
+				current_programm_timer = g_RCInput->addTimer( &end_program );
+			}
+		}
+		if ( !is_video_started )
+			g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false );
+
+	    return messages_return::handled;
+	}
+	else if ( msg == NeutrinoMessages::EVT_NOEPG_YET )
+	{
+		if ( data == current_onid_sid )
+		{
+			if ( !is_video_started )
+    			g_RCInput->postMsg( NeutrinoMessages::EVT_PROGRAMLOCKSTATUS, 0x100, false );
+		}
+		return messages_return::handled;
 	}
 	else if ( ( msg == NeutrinoMessages::EVT_ZAP_COMPLETE ) || ( msg == NeutrinoMessages:: EVT_ZAP_SUB_COMPLETE ) )
 	{
@@ -103,17 +161,19 @@ int CRemoteControl::handleMsg(uint msg, uint data)
 	{
 		if ( data == current_onid_sid )
 		{
-			if ( current_EPGid == 0)
-			{
-				// epg noch nicht da -> Bedarf für NVOD-Zeiten anmelden!
-				needs_nvods = true;
-			}
-			else
-			{
+		    needs_nvods = true;
+
+			if ( current_EPGid != 0)
 				getNVODs();
-			}
 		}
 	    return messages_return::handled;
+	}
+	else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == current_programm_timer ) )
+	{
+		//printf("new program !\n");
+		g_RCInput->postMsg( NeutrinoMessages::EVT_NEXTPROGRAM, current_onid_sid, false );
+
+ 		return messages_return::handled;
 	}
 	else
 		return messages_return::unhandled;
@@ -151,8 +211,6 @@ void CRemoteControl::getNVODs()
 		sectionsd::NVODTimesList	NVODs;
 		if ( g_Sectionsd->getNVODTimesServiceKey( current_onid_sid, NVODs ) )
 		{
-            needs_nvods = false;
-
 			are_subchannels = false;
 			for (int i=0; i< NVODs.size(); i++)
 			{
@@ -174,7 +232,18 @@ void CRemoteControl::getNVODs()
 
 			copySubChannelsToZapit();
             g_RCInput->postMsg( NeutrinoMessages::EVT_ZAP_GOT_SUBSERVICES, current_onid_sid, false );
-			setSubChannel( subChannels.size()- 1 );
+
+
+            if ( selected_subchannel == -1 )
+            {
+            	// beim ersten Holen letzen NVOD-Kanal setzen!
+				setSubChannel( subChannels.size()- 1 );
+			}
+			else
+			{
+				// sollte nur passieren, wenn die aktuelle Sendung vorbei ist?!
+				selected_subchannel = -1;
+			}
 		}
 	}
 }
@@ -253,6 +322,11 @@ void CRemoteControl::processAPIDnames()
 							break;
 						}
 				}
+
+				if ( current_PIDs.PIDs.selected_apid >= current_PIDs.APIDs.size() )
+				{
+                	setAPID( 0 );
+				}
 			}
 		}
 	}
@@ -279,10 +353,10 @@ void CRemoteControl::copySubChannelsToZapit()
 
 void CRemoteControl::setAPID( int APID )
 {
-	if ((selected_apid == APID ) || (APID < 0) || (APID >= current_PIDs.APIDs.size()) )
+	if ((current_PIDs.PIDs.selected_apid == APID ) || (APID < 0) || (APID >= current_PIDs.APIDs.size()) )
 		return;
 
-	selected_apid = APID;
+	current_PIDs.PIDs.selected_apid = APID;
 	g_Zapit->setAudioChannel( APID );
 	#ifdef USEACTIONLOG
 		char buf[1000];
@@ -342,17 +416,18 @@ string CRemoteControl::subChannelDown()
 	}
 }
 
-void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
+void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame, bool start_video )
 {
 	current_onid_sid = onid_sid;
+	is_video_started= start_video;
 
     current_sub_onid_sid = 0;
 	current_EPGid = 0;
+	next_EPGid = 0;
 
 	memset(&current_PIDs.PIDs, 0, sizeof(current_PIDs.PIDs) );
 
 	current_PIDs.APIDs.clear();
-    selected_apid = 0;
 	has_ac3 = false;
 
 	subChannels.clear();
@@ -368,12 +443,35 @@ void CRemoteControl::zapTo_onid_sid( unsigned int onid_sid, string channame)
 	long long now = getcurrenttime();
 	if ( zap_completion_timeout < now )
 	{
-		printf("[remotecontrol]: doing zap to %x\n", onid_sid);
+		//printf("[remotecontrol]: doing zap to %x\n", onid_sid);
 		g_Zapit->zapTo_serviceID_NOWAIT( onid_sid );
 		zap_completion_timeout = now + 2 * (long long) 1000000;
+		if ( current_programm_timer != 0 )
+		{
+			g_RCInput->killTimer( current_programm_timer );
+			current_programm_timer = 0;
+		}
 	}
 }
 
+
+void CRemoteControl::startvideo()
+{
+	if ( !is_video_started )
+	{
+		is_video_started= true;
+		g_Zapit->startPlayBack();
+	}
+}
+
+void CRemoteControl::stopvideo()
+{
+	if ( is_video_started )
+	{
+		is_video_started= false;
+		g_Zapit->stopPlayBack();
+	}
+}
 
 void CRemoteControl::radioMode()
 {

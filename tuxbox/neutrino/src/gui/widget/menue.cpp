@@ -631,13 +631,31 @@ bool CPINProtection::check()
 		PINInput->exec( getParent(), "");
 		delete PINInput;
 		strcpy( hint, "pinprotection.wrongcode");
-	} while ((strcmp(cPIN,validPIN) != 0) && ( string(cPIN) != ""));
-	return ( strcmp(cPIN,validPIN) == 0);
+	} while ((strncmp(cPIN,validPIN,4) != 0) && ( string(cPIN) != ""));
+	return ( strncmp(cPIN,validPIN,4) == 0);
 }
 
 bool CZapProtection::check()
 {
-	return CPINProtection::check();
+	int res;
+	char cPIN[5] = "";
+	string hint2;
+
+	do
+	{
+		strcpy( cPIN, "" );
+
+		CPLPINInput* PINInput = new CPLPINInput( "parentallock.head", cPIN, 4, hint2.c_str(), fsk );
+		res = PINInput->exec( getParent(), "");
+		delete PINInput;
+
+		hint2= "pinprotection.wrongcode";
+	} while ( (strncmp(cPIN,validPIN,4) != 0) &&
+			  ( string(cPIN) != "" ) &&
+			  ( res == menu_return::RETURN_REPAINT ) &&
+			  ( fsk >= g_settings.parentallock_lockage ) );
+	return ( ( strncmp(cPIN,validPIN,4) == 0 ) ||
+			 ( fsk < g_settings.parentallock_lockage ) );
 }
 
 int CLockedMenuForwarder::exec(CMenuTarget* parent)

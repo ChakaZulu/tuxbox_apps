@@ -30,12 +30,15 @@
 */
 
 /*
-$Id: rcinput.h,v 1.30 2002/04/16 16:48:00 field Exp $
+$Id: rcinput.h,v 1.31 2002/04/17 18:37:08 field Exp $
 
  Module  RemoteControle Handling
 
 History:
  $Log: rcinput.h,v $
+ Revision 1.31  2002/04/17 18:37:08  field
+ Jugendschutz :)
+
  Revision 1.30  2002/04/16 16:48:00  field
  Kleinigkeiten / Timers
 
@@ -214,6 +217,8 @@ class CRCInput
 
 		int addTimer(unsigned long long Interval, bool oneshot= true, bool correct_time= true );
 		int addTimer(struct timeval Timeout);
+		int addTimer(const time_t *Timeout);
+
 		void killTimer(int id);
 
 		long long calcTimeoutEnd( int Timeout );
