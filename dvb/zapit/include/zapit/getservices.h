@@ -33,13 +33,10 @@ typedef struct pids{
 	uint vpid;
 	ushort count_apids;
 	uint apid[5];
-	char *apid0_desc;
-	char *apid1_desc;
-	char *apid2_desc;
-	char *apid3_desc;
-	char *apid4_desc;
+	char apid_desc[5][30];
 	uint ecmpid;
 }pids;
 
 #endif
+
 
