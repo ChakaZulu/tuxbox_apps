@@ -111,7 +111,7 @@ function downloadMovie()
 			if (pos >= 0)
 			{
 				var fileName = channel.substr(pos + 3, channel.length - pos - 3);
-				alert("downloading:"+fileName);
+				fileName = unescape(fileName);
 				document.location = "/rootX/" + fileName;
 			}
 			else 
