@@ -1,5 +1,5 @@
 #ifdef DBOX
-#define VIDEO_DEV	 "/dev/ost/video0"
+#define VIDEO_DEV "/dev/ost/video0"
 #define AUDIO_DEV "/dev/ost/audio0"
 #define DEMUX_DEV "/dev/ost/demux0"
 #else
@@ -80,13 +80,13 @@ static void SetECM(int vpid, int apid, int ecmpid, int emmpid, int pmtpid, int c
 		return;
 	case 0:
 	{ 
-#if 1
+#if 0
 		close(0);
 		close(1);
 		close(2);
 #endif
 #ifdef USE_CAMD
-		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[4], 
+		if (execlp("camd", "camd", buffer[0], buffer[1], buffer[4],
 #ifdef NEW_CAMD
 			descriptor, 
 #endif

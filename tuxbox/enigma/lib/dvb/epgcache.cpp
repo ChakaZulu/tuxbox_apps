@@ -40,7 +40,7 @@ int eEPGCache::sectionRead(__u8 *data)
 		sref SREF = sref(original_network_id,service_id);
 		time_t TM;
 
-		if (temp[SREF] <= 0)
+		if (!temp[SREF])
 		  temp[SREF] = time(0)+eDVB::getInstance()->time_difference;
 
 		if (firstEventId == HILO( eit_event->event_id ) )  // EPGCache around....

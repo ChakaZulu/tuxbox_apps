@@ -109,9 +109,15 @@ inline void eEPGCache::enterService(eService* service, int err)
 	sref SREF = sref(service->original_network_id,service->service_id);
 	time_t t = serviceLastUpdated[SREF];
 
+	int update;
+
 	if (!err)
 	{
-		int update = ( t>ZAP_DELAY ? ( UPDATE_INTERVAL - ( (time(0)+eDVB::getInstance()->time_difference-t) * 1000 ) ) : ZAP_DELAY );
+		update = ( t ? ( UPDATE_INTERVAL - ( (time(0)+eDVB::getInstance()->time_difference-t) * 1000 ) ) : ZAP_DELAY );
+
+		if (update < ZAP_DELAY)
+			update = ZAP_DELAY;
+
 		zapTimer.start(update, 1);
 		if (update >= 60000)
 			qDebug("[EPGC] next update in %i min", update/60000);
