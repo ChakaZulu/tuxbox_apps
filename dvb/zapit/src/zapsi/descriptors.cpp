@@ -129,6 +129,13 @@ uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id)
 	printf("[descriptor.cpp] frequency: %d\n", feparams.Frequency);
 	printf("[descriptor.cpp] modulation %d, symbol_rate %d, FEC_inner %d\n", feparams.u.qam.QAM, feparams.u.qam.SymbolRate, feparams.u.qam.FEC_inner);
 
+#if 0
+	if (feparams.u.qam.FEC_inner == FEC_NONE)
+	{
+		feparams.u.qam.FEC_inner = FEC_AUTO;
+	}
+#endif
+
 	if (scantransponders.count(transport_stream_id) == 0)
 	{
 		printf("[descriptor.cpp] new transponder - transport_stream_id: %04x\n", transport_stream_id);
