@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webdbox.cpp,v 1.50 2003/09/16 10:16:40 thegoodguy Exp $
+	$Id: webdbox.cpp,v 1.51 2004/02/01 20:11:25 carjay Exp $
 
 	License: GPL
 
@@ -155,6 +155,7 @@ CWebDbox::~CWebDbox(void)
 bool CWebDbox::GetStreamInfo(int bitInfo[10])
 {
 	char *key, *tmpptr, buf[100];
+	long value;
 	int pos = 0;
 
 	memset(bitInfo, 0, sizeof(bitInfo));
@@ -167,20 +168,19 @@ bool CWebDbox::GetStreamInfo(int bitInfo[10])
 		return false;
 	}
 
-	fgets(buf, 29, fd); //dummy
-
-	while (!feof(fd))
+	fgets(buf,35,fd);//dummy
+	while(!feof(fd))
 	{
-		if (fgets(buf, 29, fd) != NULL)
+		if(fgets(buf,35,fd)!=NULL)
 		{
-			buf[strlen(buf) - 1] = 0;
-			tmpptr = buf;
-			key = strsep(&tmpptr,":");
-			for (; tmpptr[0] == ' '; tmpptr++);
-			bitInfo[pos++] = atoi(tmpptr);
+			buf[strlen(buf)-1]=0;
+			tmpptr=buf;
+			key=strsep(&tmpptr,":");
+			value=strtoul(tmpptr,NULL,0);
+			bitInfo[pos]= value;
+			pos++;
 		}
 	}
-
 	fclose(fd);
 
 	return true;

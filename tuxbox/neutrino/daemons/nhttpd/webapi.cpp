@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.44 2003/11/30 23:53:04 thegoodguy Exp $
+	$Id: webapi.cpp,v 1.45 2004/02/01 20:11:25 carjay Exp $
 
 	License: GPL
 
@@ -469,14 +469,26 @@ bool CWebAPI::ShowCurrentStreamInfo(CWebserverRequest* request)
 		default: params["FPS"] = "unknown";
 	}
 
-	switch ( bitInfo[6] )
-	{
-		case 1: params["AudioType"] = "single channel"; break;
-		case 2: params["AudioType"] = "dual channel"; break;
-		case 3: params["AudioType"] = "joint stereo"; break;
-		case 4: params["AudioType"] = "stereo"; break;
-		default: params["AudioType"] = "unknown";
+	if (!bitInfo[7]) params["AudioType"]="unknown";
+	else {
+		const char* layernames[4]={"res","III","II","I"};
+		const char* sampfreqnames[4]={"44,1k","48k","32k","res"};
+		const char* modenames[4]={"stereo","joint_st","dual_ch","single_ch"};
+
+		long header = bitInfo[7];
+
+		char layer =	(header>>17)&3;
+		char sampfreq = (header>>10)&3;
+		char mode =	(header>> 6)&3;
+		char copy =	(header>> 3)&1;
+
+		sprintf((char*) buf, "%s (%s/%s) %s", modenames[mode],
+								sampfreqnames[sampfreq],
+								layernames[layer],
+								copy?"c":"");
+		params["AudioType"]=buf;
 	}
+
 	request->ParseFile("settings.html",params);
 	return true;
 }
