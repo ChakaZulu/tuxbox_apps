@@ -71,7 +71,7 @@
 class SMSKeyInput
 {
 	// time since last input
-	time_t m_oldKeyTime;
+	timeval m_oldKeyTime;
 
 	// last key input
 	unsigned char m_oldKey;
@@ -97,11 +97,21 @@ public:
 	/**
 	 * @return the last key calculated by #handleMsg(neutrino_msg_t)
 	 */
-	unsigned char getOldKey();
+	unsigned char getOldKey() const;
 	
-	time_t getOldKeyTime();
+	/**
+	 * Returns time of last key push.
+	 * resolution: usecs
+	 */
+	const timeval* getOldKeyTime() const;
 
-	int getTimeout();
+	/**
+	 * Returns time of last key push.
+	 * resolution: seconds
+	 */
+	time_t getOldKeyTimeSec() const;
+
+	int getTimeout() const;
 
 	/**
 	 * Sets the timeout.

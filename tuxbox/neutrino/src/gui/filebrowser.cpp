@@ -120,8 +120,18 @@ SMSKeyInput::SMSKeyInput()
 
 unsigned char SMSKeyInput::handleMsg(const neutrino_msg_t msg)
 {
-	time_t keyTime = time(NULL);
-	bool timeoutNotReached = (keyTime*1000 <= m_oldKeyTime*1000 + m_timeout);
+	timeval keyTime;
+	gettimeofday(&keyTime,NULL);
+	bool timeoutNotReached = (keyTime.tv_sec*1000+keyTime.tv_usec/1000 
+				  <= m_oldKeyTime.tv_sec*1000+m_oldKeyTime.tv_usec/1000 + m_timeout);
+
+// 	printf("act: %ld , old: %ld (diff: %ld ) , timeout: %ld => timout= %d\n",
+// 	       keyTime.tv_sec*1000+keyTime.tv_usec/1000,
+// 	       m_oldKeyTime.tv_sec*1000+m_oldKeyTime.tv_usec/1000,
+// 	       keyTime.tv_sec*1000+keyTime.tv_usec/1000 -
+// 	       m_oldKeyTime.tv_sec*1000+m_oldKeyTime.tv_usec/1000,
+// 	       m_timeout,!timeoutNotReached);
+
 	unsigned char key = 0;
 	if(msg == CRCInput::RC_1)
 	{
@@ -231,21 +241,28 @@ unsigned char SMSKeyInput::handleMsg(const neutrino_msg_t msg)
 
 void SMSKeyInput::resetOldKey()
 {
-	m_oldKeyTime = 0;
+	m_oldKeyTime.tv_sec = 0;
+	m_oldKeyTime.tv_usec = 0;
 	m_oldKey = 0;
 }
 
-unsigned char SMSKeyInput::getOldKey()
+unsigned char SMSKeyInput::getOldKey() const
 {
 	return m_oldKey;
 }
 
-time_t SMSKeyInput::getOldKeyTime()
+const timeval* SMSKeyInput::getOldKeyTime() const
 {
- 	return m_oldKeyTime;
+ 	return &m_oldKeyTime;
 }
 
-int SMSKeyInput::getTimeout()
+time_t SMSKeyInput::getOldKeyTimeSec() const
+{
+	return m_oldKeyTime.tv_sec;
+}
+
+
+int SMSKeyInput::getTimeout() const
 {
 	return m_timeout;
 }
