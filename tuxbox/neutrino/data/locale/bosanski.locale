@@ -11,7 +11,7 @@ mainmenu.tvmode tv
 mainmenu.radiomode radio
 mainmenu.scartmode av-scart ulaz
 mainmenu.games igre
-mainmenu.mp3player unset
+mainmenu.mp3player mp3 igrac
 mainmenu.sleeptimer vremenski brojac za ugasiti
 mainmenu.shutdown ugasiti
 mainmenu.settings namjescenje
@@ -108,7 +108,7 @@ recordingmenu.vcr video rikorder
 recordingmenu.server_wakeup server za snimanje wol
 recordingmenu.server_mac mac adresa
 recordingmenu.setupnow namjescenje sada preuzeti
-recordingmenu.no_scart unset
+recordingmenu.no_scart nema mijenjanja scarta
 
 ping.ok pristupan (ping)
 ping.unreachable nije pristupan (unreachable)
@@ -148,7 +148,7 @@ timing.menu izbor
 timing.chanlist lista kanala
 timing.epg epg
 timing.infobar infromativna traka
-timing.filebrowser unset
+timing.filebrowser pretrazivac datoteka
 timing.hint_1 vrijeme u sekundama u kojemu
 timing.hint_2 ce biti pokazana informativna traka
 
@@ -407,7 +407,7 @@ cam.wrong Paznja, vas cam_alpha.bin ne pase\nuz vasu smart-karticu!!!\n\nHocete 
 ucodes.failure Paznja, nisu nadjeni ucodesi!\n\nMolim sa ftpeom (ili dbox-bootmanagerom)\npostaviti, i dbox2 ponovno startovati!
 
 stringinput.caps velika/mala slova
-stringinput.clear unset
+stringinput.clear sve izbrisati
 
 streamingserver.noconnect Ne postoji veza sa streamingserverom.\nPrekid snimanja.
 
@@ -597,12 +597,12 @@ timerlist.modeselect izbor
 timerlist.modetv tv kanali
 timerlist.moderadio radio kanali
 timersettings.separator namjescenje vremenskog brojaca
-timersettings.record_safety_time ispraviti snimanje
-timersettings.record_safety_time.hint_1 vrijeme u minutama koje se odbija od
-timersettings.record_safety_time.hint_2  vremeskog brojaca (00=ugaseno)
-timersettings.record_safety_time_after unset
-timersettings.record_safety_time_after.hint_1 unset
-timersettings.record_safety_time_after.hint_2 unset
+timersettings.record_safety_time_before ispraviti pocetak snimanja
+timersettings.record_safety_time_before.hint_1 vrijeme u minutama koje se odbija od
+timersettings.record_safety_time_before.hint_2  pocetka vremeskog brojaca (00=ugaseno)
+timersettings.record_safety_time_after ispravljanje kraja snimanja
+timersettings.record_safety_time_after.hint_1 vrijeme u minutama koje se odbija od
+timersettings.record_safety_time_after.hint_2 kraja vremeskog brojaca (00=ugaseno)
 
 fontsize.menu tekst u izboru
 fontsize.menu_title naslov izbora
@@ -624,47 +624,47 @@ fontsize.infobar_number infromativna traka za broj
 fontsize.infobar_channame infromativna traka za kanal
 fontsize.infobar_info infromativna traka za informaciju
 fontsize.infobar_small mala infromativna traka
-fontsize.gamelist_itemLarge unset
-fontsize.gamelist_itemSmall unset
+fontsize.gamelist_itemLarge veliko
+fontsize.gamelist_itemSmall malo
 
 fontmenu.head namjescenje velicine slova
 fontmenu.channellist lista kanala
 fontmenu.eventlist lista dogadjaja
 fontmenu.epg epg
 fontmenu.infobar informativna traka
-fontmenu.gamelist unset
+fontmenu.gamelist lista igara
 
 colormenu.gtx_alpha providnost (gtx)
 gtxalpha.alpha1 alpha 1
 gtxalpha.alpha2 alpha 2
 
-mp3player.name MP3 Player
-mp3player.head Mp3
-mp3player.play unset
-mp3player.add unset
-mp3player.delete unset
-mp3player.stop unset
-mp3player.playall unset
-mp3player.shuffle unset
-mp3player.deleteall unset
-mp3player.title unset
-mp3player.artist unset
-mp3player.playing unset
-mp3player.id3scan unset
+mp3player.name mp3 igrac
+mp3player.head mp3 lista
+mp3player.play igrati
+mp3player.add dodati
+mp3player.delete izbrisati
+mp3player.stop zaustaviti
+mp3player.playall sve igrati
+mp3player.shuffle slucaj
+mp3player.deleteall sve izbrisati
+mp3player.title naslov
+mp3player.artist pjevac
+mp3player.playing pjesma
+mp3player.id3scan citaj id3-tag
 
-filebrowser.head unset
-filebrowser.filter unset
-filebrowser.select unset
-filebrowser.mark unset
-filebrowser.scan unset
+filebrowser.head pretrazivac datoteka
+filebrowser.filter filter
+filebrowser.select izabrati
+filebrowser.mark oznaciti
+filebrowser.scan pretrazi direktorije
 
-nfs.mount unset
-nfs.ip unset
-nfs.dir unset
-nfs.localdir unset
-nfs.automount unset
-nfs.mountnow unset
-nfs.mounterror unset
-nfs.umount unset
-nfs.umounterror unset
-nfs.alreadymounted unset
+nfs.mount montira nfs direktorij
+nfs.ip ip nfs servera
+nfs.dir nfs direktorij
+nfs.localdir lokalni direktorij
+nfs.automount pri startu montirati
+nfs.mountnow sada montirati
+nfs.mounterror greska pri montiranju
+nfs.umount nfs direktorij sada demontirati
+nfs.umounterror greska pri demontiranju
+nfs.alreadymounted direktorij je vec montiran
