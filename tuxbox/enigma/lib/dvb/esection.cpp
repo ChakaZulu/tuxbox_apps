@@ -44,8 +44,9 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags, c
 	flags=_flags;
 #if HAVE_DVB_API_VERSION < 3
 	dmxSctFilterParams secFilterParams;
-#endif
+#else
 	dmx_sct_filter_params secFilterParams;
+#endif
 
 	close();
 
