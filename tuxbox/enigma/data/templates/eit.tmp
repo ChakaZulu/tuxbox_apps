@@ -1,20 +1,41 @@
-<span style="width: 100%; background-color: #93A198">
-<font style="font-family: Verdana; font-size: 14pt; font-weight: bold">#SERVICENAME#</font> #EPG# #SI#
-</SPAN><br>
-<span style="width: 100%; background-color: #DEE6D6">
-<table width="100%" cellspacing="0" cellpadding="0" border="0">
-<tr>
-<td
-width="100%"><span class="epgzeit">#NOWT#</span> <span class="epgdur">#NOWD#min</span> <span class="epgname"><b>#NOWST#</b></span></td>
-</tr>
-<tr>
-<td width="100%"><span class="epgdesc">#NOWLT#</span><br><br><br></td>
-</tr>
-<tr>
-<td width="100%"><span class="epgzeit">#NEXTT#</span> <span class="epgdur">#NEXTD#min</span> <span class="epgname"><b>#NEXTST#</b></span></td>
-</tr>
-<tr>
-<td width="100%"><span class="epgdesc">#NEXTLT#</span><br><br><br></td>
-</tr>
-</table>
-</SPAN>
+<P STYLE="margin-bottom: 0cm"><SPAN STYLE="background: #93a198"><B><FONT SIZE=4><FONT FACE="Verdana">#SERVICENAME#</FONT></FONT></B>
+#EPG# #SI# </SPAN>
+</P>
+<TABLE WIDTH=100% BORDER=0 CELLPADDING=0 CELLSPACING=0>
+	<COL WIDTH=128*>
+	<COL WIDTH=128*>
+	<TR>
+		<TD COLSPAN=2 WIDTH=100%>
+			<P>#NOWT# #NOWD#min <B>#NOWST#</B> 
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=75%>
+			<P>#NOWLT#<BR><BR>
+			</P>
+		</TD>
+		<TD WIDTH=25%>
+			<P><BR>
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD COLSPAN=2 WIDTH=100%>
+			<P>#NEXTT# #NEXTD#min <B>#NEXTST#</B> 
+			</P>
+		</TD>
+	</TR>
+	<TR>
+		<TD WIDTH=75%>
+			<P>#NEXTLT#<BR><BR>
+			</P>
+		</TD>
+		<TD WIDTH=25%>
+			<P><BR>
+			</P>
+		</TD>
+	</TR>
+</TABLE>
+<P><BR><BR>
+</P>
