@@ -250,7 +250,7 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 
 			case CRCInput::RC_home:
 				if ( ( (contrast != contrast_alt) || (brightness != brightness_alt) || (brightnessstandby != brightnessstandby_alt) ) &&
-				     (ShowMsgUTF(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
+				     (ShowMsgUTF(name, g_Locale->getText(LOCALE_MESSAGEBOX_DISCARD), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
 					break;
 
 				// sonst abbruch...

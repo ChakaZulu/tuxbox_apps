@@ -359,7 +359,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	if (epgData.title.empty()) /* no epg info found */
 	{
-		ShowHintUTF("messagebox.info", g_Locale->getText(LOCALE_EPGVIEWER_NOTFOUND)); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_EPGVIEWER_NOTFOUND)); // UTF-8
 		return res;
 	}
 

@@ -180,7 +180,7 @@ int CColorChooser::exec(CMenuTarget* parent, const std::string &)
 		}
 		case CRCInput::RC_home:
 			if (((*value[VALUE_R] != r_alt) || (*value[VALUE_G] != g_alt) || (*value[VALUE_B] != b_alt) || ((value[VALUE_ALPHA]) && (*(value[VALUE_ALPHA]) != a_alt))) &&
-			    (ShowMsgUTF(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
+			    (ShowMsgUTF(name, g_Locale->getText(LOCALE_MESSAGEBOX_DISCARD), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
 				break;
 
 				// sonst abbruch...

@@ -51,7 +51,7 @@
 /* the following generic menu items are integrated into multiple menus at the same time */
 CMenuSeparator CGenericMenuSeparator;
 CMenuSeparator CGenericMenuSeparatorLine(CMenuSeparator::LINE);
-CMenuForwarder CGenericMenuBack("menu.back");
+CMenuForwarder CGenericMenuBack(LOCALE_MENU_BACK);
 CMenuSeparator * const GenericMenuSeparator = &CGenericMenuSeparator;
 CMenuSeparator * const GenericMenuSeparatorLine = &CGenericMenuSeparatorLine;
 CMenuForwarder * const GenericMenuBack = &CGenericMenuBack;

@@ -103,14 +103,6 @@ class CMiscNotifier : public CChangeObserver
 		bool changeNotify(const std::string & OptionName, void*);
 };
 
-/*
-class CCableSpectalInversionNotifier : public CChangeObserver
-{
-	public:
-		bool changeNotify(const std::string & OptionName, void*);
-};
-*/
-
 class CLcdNotifier : public CChangeObserver
 {
 	public:

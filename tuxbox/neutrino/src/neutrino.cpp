@@ -1241,7 +1241,7 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	mainMenu.addItem(new CMenuForwarder("mainmenu.shutdown", true, NULL, this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
 
 //	mainMenu.addItem(GenericMenuSeparatorLine);
-//	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, "", new CDBoxInfoWidget, "",true) );
+//	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, NULL, new CDBoxInfoWidget, "",true) );
 	
 	mainSettings.addItem(GenericMenuSeparator);
 	mainSettings.addItem(GenericMenuBack);
@@ -1496,9 +1496,8 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	CStringInput * pic_timeout= new CStringInput("pictureviewer.slide_time", g_settings.picviewer_slide_time, 2, NULL, NULL, "0123456789 ");
 	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "pictureviewer.head") );
 	mp3PicSettings.addItem( oj );
-	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout ));
-	mp3PicSettings.addItem( new CMenuForwarder("pictureviewer.defdir", true, g_settings.network_nfs_picturedir, 
-															 this, "picturedir"));
+	mp3PicSettings.addItem(new CMenuForwarder("pictureviewer.slide_time", true, g_settings.picviewer_slide_time, pic_timeout));
+	mp3PicSettings.addItem(new CMenuForwarder("pictureviewer.defdir", true, g_settings.network_nfs_picturedir, this, "picturedir"));
 
 	oj = new CMenuOptionChooser("mp3player.display_order", &g_settings.mp3player_display, true );
 	oj->addOption((int)CMP3PlayerGui::ARTIST_TITLE, "mp3player.artist_title");
@@ -1506,21 +1505,21 @@ void CNeutrinoApp::InitMp3PicSettings(CMenuWidget &mp3PicSettings)
 	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "mp3player.name") );
 	mp3PicSettings.addItem( oj );
   	oj = new CMenuOptionChooser("mp3player.follow", &g_settings.mp3player_follow, true );
-	oj->addOption(0, "messagebox.no");
-	oj->addOption(1, "messagebox.yes");
+	oj->addOption(0, LOCALE_MESSAGEBOX_NO);
+	oj->addOption(1, LOCALE_MESSAGEBOX_YES);
 	mp3PicSettings.addItem( oj );
 	CStringInput * mp3_screensaver= new CStringInput("mp3player.screensaver_timeout", g_settings.mp3player_screensaver, 2, NULL, NULL, "0123456789 ");
-	mp3PicSettings.addItem( new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver ));
+	mp3PicSettings.addItem(new CMenuForwarder("mp3player.screensaver_timeout", true, g_settings.mp3player_screensaver, mp3_screensaver));
   	oj = new CMenuOptionChooser("mp3player.highprio", &g_settings.mp3player_highprio, true );
-	oj->addOption(0, "messagebox.no");
-	oj->addOption(1, "messagebox.yes");
+	oj->addOption(0, LOCALE_MESSAGEBOX_NO);
+	oj->addOption(1, LOCALE_MESSAGEBOX_YES);
 	mp3PicSettings.addItem( oj );
-	mp3PicSettings.addItem( new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
+	mp3PicSettings.addItem(new CMenuForwarder("mp3player.defdir", true, g_settings.network_nfs_mp3dir, this, "mp3dir"));
 
-	mp3PicSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "filebrowser.head") );
-	oj = new CMenuOptionChooser("filebrowser.showrights", &g_settings.filebrowser_showrights, true );
-	oj->addOption(0, "messagebox.no");
-	oj->addOption(1, "messagebox.yes");
+	mp3PicSettings.addItem(new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, LOCALE_FILEBROWSER_HEAD));
+	oj = new CMenuOptionChooser(LOCALE_FILEBROWSER_SHOWRIGHTS, &g_settings.filebrowser_showrights, true);
+	oj->addOption(0, LOCALE_MESSAGEBOX_NO);
+	oj->addOption(1, LOCALE_MESSAGEBOX_YES);
 	mp3PicSettings.addItem( oj );
 
 }
@@ -1592,8 +1591,8 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	keySetupNotifier->changeNotify("initial", NULL);
 
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
-	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, g_settings.repeat_genericblocker, keySettings_repeatBlocker ));
- 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, g_settings.repeat_blocker, keySettings_repeat_genericblocker ));
+	miscSettings.addItem(new CMenuForwarder("keybindingmenu.repeatblock", true, g_settings.repeat_genericblocker, keySettings_repeatBlocker));
+ 	miscSettings.addItem(new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, g_settings.repeat_blocker, keySettings_repeat_genericblocker));
 	miscSettings.addItem( m1 );
 }
 
@@ -1678,7 +1677,7 @@ void CNeutrinoApp::InitVideoSettings(CMenuWidget &videoSettings)
 
 	CRGBCSyncControler* sc = new CRGBCSyncControler("videomenu.rgb_centering", &g_settings.video_csync);
 	bool bVisible = ( g_settings.video_Signal == 1 ) || ( g_settings.video_Signal == 3 ) || ( g_settings.video_Signal == 4 );  
-	CMenuForwarder* scf = new CMenuForwarder("videomenu.rgb_centering", bVisible, "", sc);
+	CMenuForwarder* scf = new CMenuForwarder("videomenu.rgb_centering", bVisible, NULL, sc);
 	
 	CVideoSetupNotifier		*videoSetupNotifier = new CVideoSetupNotifier(scf);
 	CMenuOptionChooser* oj = new CMenuOptionChooser("videomenu.videosignal", &g_settings.video_Signal, true, videoSetupNotifier);
@@ -1748,8 +1747,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	oj->addOption(1, "options.on");
 
 	networkSettings.addItem( oj );
-	networkSettings.addItem( new CMenuForwarder("networkmenu.test", true, NULL, this, "networktest"));
-	networkSettings.addItem( new CMenuForwarder("networkmenu.show", true, NULL, this, "networkshow"));
+	networkSettings.addItem(new CMenuForwarder("networkmenu.test", true, NULL, this, "networktest"));
+	networkSettings.addItem(new CMenuForwarder("networkmenu.show", true, NULL, this, "networkshow"));
 	CMenuForwarder *m0 = new CMenuForwarder("networkmenu.setupnow", true, NULL, this, "network");
 	networkSettings.addItem( m0 );
 
@@ -1784,8 +1783,8 @@ void CNeutrinoApp::InitNetworkSettings(CMenuWidget &networkSettings)
 	networkSettings.addItem( m4);
 	networkSettings.addItem( m5);
 	networkSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "NFS/CIFS") );
-	networkSettings.addItem( new CMenuForwarder("nfs.mount", true, NULL, new CNFSMountGui()));
-	networkSettings.addItem( new CMenuForwarder("nfs.umount", true, NULL, new CNFSUmountGui()));
+	networkSettings.addItem(new CMenuForwarder("nfs.mount", true, NULL, new CNFSMountGui()));
+	networkSettings.addItem(new CMenuForwarder("nfs.umount", true, NULL, new CNFSUmountGui()));
 }
 
 void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
@@ -1846,7 +1845,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	recordingSettings.addItem(GenericMenuSeparator);
 	recordingSettings.addItem(GenericMenuBack);
-	recordingSettings.addItem( new CMenuForwarder("recordingmenu.setupnow", true, NULL, this, "recording"));
+	recordingSettings.addItem(new CMenuForwarder("recordingmenu.setupnow", true, NULL, this, "recording"));
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj1);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
@@ -1887,16 +1886,16 @@ void CNeutrinoApp::InitStreamingSettings(CMenuWidget &streamingSettings)
 	CMenuForwarder* mf7 = new CMenuForwarder(LOCALE_MOVIEPLAYER_DEFDIR, true, g_settings.network_nfs_moviedir,this,"moviedir");
  
 	CMenuOptionChooser* oj1 = new CMenuOptionChooser("streamingmenu.streaming_transcode_audio", &g_settings.streaming_transcode_audio, true);
-	oj1->addOption(0, "messagebox.no");
-	oj1->addOption(1, "messagebox.yes");
+	oj1->addOption(0, LOCALE_MESSAGEBOX_NO);
+	oj1->addOption(1, LOCALE_MESSAGEBOX_YES);
                                              
 	CMenuOptionChooser* oj2 = new CMenuOptionChooser("streamingmenu.streaming_force_avi_rawaudio", &g_settings.streaming_force_avi_rawaudio, true);
-	oj2->addOption(0, "messagebox.no");
-	oj2->addOption(1, "messagebox.yes");
+	oj2->addOption(0, LOCALE_MESSAGEBOX_NO);
+	oj2->addOption(1, LOCALE_MESSAGEBOX_YES);
                                              
 	CMenuOptionChooser* oj3 = new CMenuOptionChooser("streamingmenu.streaming_force_transcode_video", &g_settings.streaming_force_transcode_video, true);
-	oj3->addOption(0, "messagebox.no");
-	oj3->addOption(1, "messagebox.yes");
+	oj3->addOption(0, LOCALE_MESSAGEBOX_NO);
+	oj3->addOption(1, LOCALE_MESSAGEBOX_YES);
 
 // not yet supported by VLC
 	CMenuOptionChooser* oj4 = new CMenuOptionChooser("streamingmenu.streaming_transcode_video_codec", &g_settings.streaming_transcode_video_codec, true);
@@ -2768,14 +2767,14 @@ int CNeutrinoApp::run(int argc, char **argv)
 	if(loadSettingsErg==1)
 	{
 		dprintf(DEBUG_INFO, "config file missing\n");
-		ShowHintUTF("messagebox.info", g_Locale->getText("settings.noconffile")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("settings.noconffile")); // UTF-8
 		configfile.setModifiedFlag(true);
 		saveSetup();
 	}
 	else if(loadSettingsErg==2)
 	{
 		dprintf(DEBUG_INFO, "parts of configfile missing\n");
-		ShowHintUTF("messagebox.info", g_Locale->getText("settings.missingoptionsconffile")); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("settings.missingoptionsconffile")); // UTF-8
 		configfile.setModifiedFlag(true);
 		saveSetup();
 	}
@@ -3215,7 +3214,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			standbyMode( false );
 		}
 		if( mode != mode_scart )
-			ShowHintUTF("messagebox.info", g_Locale->getText("zaptotimer.announce")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("zaptotimer.announce")); // UTF-8
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_RECORD)
@@ -3228,13 +3227,13 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 				perror("etherwake failed");
 		}
 		if( mode != mode_scart )
-			ShowHintUTF("messagebox.info", g_Locale->getText("recordtimer.announce")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("recordtimer.announce")); // UTF-8
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::ANNOUNCE_SLEEPTIMER)
 	{
 		if( mode != mode_scart )
-			ShowHintUTF("messagebox.info", g_Locale->getText("sleeptimerbox.announce")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("sleeptimerbox.announce")); // UTF-8
 		return messages_return::handled;
 	}
 	else if( msg == NeutrinoMessages::SLEEPTIMER)
@@ -3277,7 +3276,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 	{
 		if( mode != mode_scart )
-			skipShutdownTimer = (ShowMsgUTF("messagebox.info", g_Locale->getText("shutdowntimer.announce"), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes); // UTF-8
+			skipShutdownTimer = (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("shutdowntimer.announce"), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes); // UTF-8
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
 	{
@@ -3295,14 +3294,14 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if (msg == NeutrinoMessages::EVT_POPUP)
 	{
 		if (mode != mode_scart)
-			ShowHintUTF("messagebox.info", (const char *) data); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
 	else if (msg == NeutrinoMessages::EVT_EXTMSG)
 	{
 		if (mode != mode_scart)
-			ShowMsgUTF("messagebox.info", (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, (const char *) data, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 		delete (unsigned char*) data;
 		return messages_return::handled;
 	}
@@ -3323,7 +3322,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			else
 				goto skip_message;
 
-			ShowMsgUTF("messagebox.info", g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 		skip_message:
 			;
@@ -3871,7 +3870,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey=="savesettings")
 	{
-		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("mainsettings.savesettingsnow_hint")); // UTF-8
+		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("mainsettings.savesettingsnow_hint")); // UTF-8
 		hintBox->paint();
 
 		g_Controld->saveSettings();
@@ -3897,7 +3896,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey=="reloadchannels")
 	{
-	 	CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("servicemenu.reload_hint")); // UTF-8
+	 	CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("servicemenu.reload_hint")); // UTF-8
 		hintBox->paint();
 
 		g_Zapit->reinitChannels();
@@ -3992,7 +3991,7 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 
 	if (strncmp(OptionName, "fontsize.", 9) == 0)
 	{
-		CHintBox * hintBox = new CHintBox("messagebox.info", g_Locale->getText("fontsize.hint")); // UTF-8
+		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("fontsize.hint")); // UTF-8
 		hintBox->paint();
 
 		SetupFonts();

@@ -509,15 +509,16 @@ int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 
 	//scan4games here!
-    for(unsigned int count=0;count<gamelist.size();count++)
+	for(unsigned int count=0;count<gamelist.size();count++)
 	{
-    	delete gamelist[count];
+		delete gamelist[count];
 	}
-    gamelist.clear();
+	gamelist.clear();
 
-    game* tmp = new game();
-    tmp->name = ZapitTools::UTF8_to_Latin1(g_Locale->getText("menu.back"));
-    gamelist.push_back(tmp);
+#warning name should be UTF8 encoded
+	game* tmp = new game();
+	tmp->name = ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_MENU_BACK));
+	gamelist.push_back(tmp);
 
 	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)
 	{

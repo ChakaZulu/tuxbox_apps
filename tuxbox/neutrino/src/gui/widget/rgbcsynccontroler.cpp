@@ -119,7 +119,7 @@ int CRGBCSyncControler::exec(CMenuTarget* parent, const std::string &)
 
 			case CRCInput::RC_home:
 				if ( ( (*csync != csync_alt) ) &&
-				     (ShowMsgUTF(name, g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
+				     (ShowMsgUTF(name, g_Locale->getText(LOCALE_MESSAGEBOX_DISCARD), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
 					break;
 
 				// sonst abbruch...

@@ -129,7 +129,7 @@ int CScanTs::exec(CMenuTarget* parent, const std::string &)
 	
 	g_Sectionsd->setPauseScanning(false);
 	
-	ShowMsgUTF("messagebox.info", success ? g_Locale->getText("scants.finished") : g_Locale->getText("scants.failed"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, success ? g_Locale->getText("scants.finished") : g_Locale->getText("scants.failed"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
 
 	if(g_settings.video_Format != CControldClient::VIDEOFORMAT_4_3)
 		g_Controld->setVideoFormat(g_settings.video_Format);

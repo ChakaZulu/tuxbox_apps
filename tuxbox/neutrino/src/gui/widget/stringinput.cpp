@@ -275,7 +275,7 @@ int CStringInput::exec( CMenuTarget* parent, const std::string & )
 		else if ( (msg==CRCInput::RC_home) || (msg==CRCInput::RC_timeout) )
 		{
 			if ( ( strcmp(value, oldval) != 0) &&
-			     (ShowMsgUTF(name.c_str(), g_Locale->getText("messagebox.discard"), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
+			     (ShowMsgUTF(name.c_str(), g_Locale->getText(LOCALE_MESSAGEBOX_DISCARD), CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbCancel) == CMessageBox::mbrCancel)) // UTF-8
 				continue;
 
 			strcpy(value, oldval);

@@ -183,6 +183,12 @@ CNFSMountGui::FS_Support CNFSMountGui::fsSupported(const CNFSMountGui::FSType fs
 	return CNFSMountGui::FS_UNSUPPORTED;
 }
 
+const char * nfs_entry_printf_string[2] =
+{
+	"NFS %s:%s -> %s auto: %4s",
+	"CIFS //%s/%s -> %s auto: %4s"
+};
+
 int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 {
 //	printf("exec: %s\n", actionKey.c_str());
@@ -201,17 +207,17 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 		parent->hide();
 		for(int i=0 ; i< 4; i++)
 		{
-			std::string a = ZapitTools::UTF8_to_Latin1(g_Locale->getText(g_settings.network_nfs_automount[i] ? "messagebox.yes" : "messagebox.no"));
-			if(g_settings.network_nfs_type[i] == (int) NFS)
-			{
-				sprintf(m_entry[i],"NFS %s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
-						  g_settings.network_nfs_local_dir[i], a.c_str());
-			}
-			else
-			{
-				sprintf(m_entry[i],"CIFS //%s/%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
-						  g_settings.network_nfs_local_dir[i], a.c_str());
-			}
+			sprintf(m_entry[i],
+				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) NFS) ? 0 : 1],
+				g_settings.network_nfs_ip[i].c_str(),
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_dir[i]).c_str(),
+				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_local_dir[i]).c_str(),
+#else
+				g_settings.network_nfs_dir[i],
+				g_settings.network_nfs_local_dir[i],
+#endif
+				g_Locale->getText(g_settings.network_nfs_automount[i] ? LOCALE_MESSAGEBOX_YES : LOCALE_MESSAGEBOX_NO));
 		}
 		returnval = menu();
 	}
@@ -221,17 +227,17 @@ int CNFSMountGui::exec( CMenuTarget* parent, const std::string & actionKey )
 		returnval = menuEntry(actionKey[10]-'0');
 		for(int i=0 ; i< 4; i++)
 		{
-			std::string a = ZapitTools::UTF8_to_Latin1(g_Locale->getText(g_settings.network_nfs_automount[i] ? "messagebox.yes" : "messagebox.no"));
-			if(g_settings.network_nfs_type[i] == (int) NFS)
-			{
-				sprintf(m_entry[i],"NFS %s:%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
-						  g_settings.network_nfs_local_dir[i], a.c_str());
-			}
-			else
-			{
-				sprintf(m_entry[i],"CIFS //%s/%s -> %s auto: %4s",g_settings.network_nfs_ip[i].c_str(),g_settings.network_nfs_dir[i],
-						  g_settings.network_nfs_local_dir[i], a.c_str());
-			}
+			sprintf(m_entry[i],
+				nfs_entry_printf_string[(g_settings.network_nfs_type[i] == (int) NFS) ? 0 : 1],
+				g_settings.network_nfs_ip[i].c_str(),
+#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
+				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_dir[i]).c_str(),
+				ZapitTools::Latin1_to_UTF8(g_settings.network_nfs_local_dir[i]).c_str(),
+#else
+				g_settings.network_nfs_dir[i],
+				g_settings.network_nfs_local_dir[i],
+#endif
+				g_Locale->getText(g_settings.network_nfs_automount[i] ? LOCALE_MESSAGEBOX_YES : LOCALE_MESSAGEBOX_NO));
 		}
 	}
 	else if(actionKey.substr(0,7)=="domount")
@@ -268,7 +274,7 @@ int CNFSMountGui::menu()
 	for(int i=0 ; i < 4 ; i++)
 	{
 		sprintf(s2,"mountentry%d",i);
-		mountMenuW.addItem(new CMenuForwarder("", true, m_entry[i], this, s2));
+		mountMenuW.addItem(new CMenuForwarder("", true, ZapitTools::UTF8_to_Latin1(m_entry[i]), this, s2));
 	}
 	int ret=mountMenuW.exec(this,"");
 	return ret;
@@ -309,8 +315,8 @@ int CNFSMountGui::menuEntry(int nr)
 	CIPInput ipInput("nfs.ip", g_settings.network_nfs_ip[nr]);
 	CStringInputSMS dirInput("nfs.dir", dir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuOptionChooser *automountInput= new CMenuOptionChooser("nfs.automount", automount, true);
-	automountInput->addOption(0, "messagebox.no");
-	automountInput->addOption(1, "messagebox.yes");
+	automountInput->addOption(0, LOCALE_MESSAGEBOX_NO);
+	automountInput->addOption(1, LOCALE_MESSAGEBOX_YES);
 	CStringInputSMS options1("nfs.mount_options", g_settings.network_nfs_mount_options[0], 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
 	CMenuForwarder *options1_fwd = new CMenuForwarder("nfs.mount_options", true, g_settings.network_nfs_mount_options[0], &options1);
 	CStringInputSMS options2("nfs.mount_options", g_settings.network_nfs_mount_options[1], 30, NULL, NULL, "abcdefghijklmnopqrstuvwxyz0123456789-=.,:|!?/ ");
@@ -351,7 +357,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	if (sup == CNFSMountGui::FS_UNSUPPORTED)
 	{
 		printf("FS type %d not supported\n", (int) fstype);
-		ShowHintUTF("messagebox.info", (std::string(g_Locale->getText("nfs.mounterror_notsup")) + ((fstype == NFS) ? " (NFS)" : " (CIFS)")).c_str()); // UTF-8
+		ShowHintUTF(LOCALE_MESSAGEBOX_INFO, (std::string(g_Locale->getText("nfs.mounterror_notsup")) + ((fstype == NFS) ? " (NFS)" : " (CIFS)")).c_str()); // UTF-8
 		return;
 	}
 
@@ -369,7 +375,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 		if(strcmp(mountOn,local_dir)==0)
 	  	{
 			if(showerror)
-				ShowHintUTF( "messagebox.info",  g_Locale->getText("nfs.alreadymounted")); // UTF-8
+				ShowHintUTF(LOCALE_MESSAGEBOX_INFO,  g_Locale->getText("nfs.alreadymounted")); // UTF-8
 			printf("[neutrino]: NFS mount error %s already mounted\n", local_dir);
 			in.close();
 			return;
@@ -451,7 +457,7 @@ void CNFSMountGui::mount(const char * const ip, const char * const dir, const ch
 	if ( g_mntstatus != 0 )
 	{
 		if (showerror)
-			ShowHintUTF("messagebox.info", g_Locale->getText((retcode == ETIMEDOUT) ? "nfs.mounttimeout" : "nfs.mounterror")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText((retcode == ETIMEDOUT) ? "nfs.mounttimeout" : "nfs.mounterror")); // UTF-8
 		printf("[neutrino]: NFS mount error: \"%s\"\n", cmd.c_str());
 	}
 
@@ -529,7 +535,7 @@ void CNFSUmountGui::umount(const char * const dir)
 	{
 		if (umount2(dir, MNT_FORCE) != 0)
 		{
-			ShowHintUTF("messagebox.info", g_Locale->getText("nfs.umounterror")); // UTF-8
+			ShowHintUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("nfs.umounterror")); // UTF-8
 			return;
 		}
 	}

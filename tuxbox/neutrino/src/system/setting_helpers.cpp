@@ -234,34 +234,6 @@ bool CLcdNotifier::changeNotify(const std::string & OptionName, void *Data)
 	return true;
 }
 
-/*
-bool CCableSpectalInversionNotifier::changeNotify(const std::string & OptionName, void* Data)
-{
-	static bool messageShowed = false;
-	
-	if (!messageShowed)
-	{
-		ShowMsgUTF("messagebox.info", g_Locale->getText("cablesetup.spectralInversionWarning"), CMessageBox::mbrYes, CMessageBox::mbYes, "info.raw"); // UTF-8
-		messageShowed = true;
-	}
-
-	if( *((int*) Data)!=0)
-	{	//file anlegen (direktstart)
-		FILE* fd = fopen("/var/etc/.specinv", "w");
-		if(fd)
-		{
-			fclose(fd);
-		}
-		else
-			return false;
-	}
-	else
-	{
-		remove("/var/etc/.specinv");
-	}
-	return true;
-}
-*/
 bool CPauseSectionsdNotifier::changeNotify(const std::string & OptionName, void* Data)
 {
 	g_Sectionsd->setPauseScanning((*((int *)Data)) == 0);

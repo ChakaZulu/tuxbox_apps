@@ -218,13 +218,13 @@ bool (* const sortBy[FILEBROWSER_NUMBER_OF_SORT_VARIANTS])(const CFile& a, const
 	&sortBySize
 };
 
-const char * sortByNames[FILEBROWSER_NUMBER_OF_SORT_VARIANTS] =
+const neutrino_locale_t sortByNames[FILEBROWSER_NUMBER_OF_SORT_VARIANTS] =
 {
-	"filebrowser.sort.name",
-	"filebrowser.sort.namedirsfirst",
-	"filebrowser.sort.type",
-	"filebrowser.sort.date",
-	"filebrowser.sort.size"
+	LOCALE_FILEBROWSER_SORT_NAME,
+	LOCALE_FILEBROWSER_SORT_NAMEDIRSFIRST,
+	LOCALE_FILEBROWSER_SORT_TYPE,
+	LOCALE_FILEBROWSER_SORT_DATE,
+	LOCALE_FILEBROWSER_SORT_SIZE
 };
 
 //------------------------------------------------------------------------
@@ -617,14 +617,17 @@ bool CFileBrowser::exec(std::string Dirname)
 		}
 		else if ( msg == CRCInput::RC_spkr )
 		{
-			std::string msg = g_Locale->getText("filebrowser.dodelete1");
-			msg += " ";
+			std::string msg = g_Locale->getText(LOCALE_FILEBROWSER_DODELETE1);
+			msg += ' ';
 			if (filelist[selected].getFileName().length() > 10)
-				msg += filelist[selected].getFileName().substr(0,10) + "...";
+			{
+				msg += filelist[selected].getFileName().substr(0,10);
+				msg += "...";
+			}
 			else
 				msg += filelist[selected].getFileName();
-			msg += " ";
-			msg += g_Locale->getText("filebrowser.dodelete2");
+			msg += ' ';
+			msg += g_Locale->getText(LOCALE_FILEBROWSER_DODELETE2);
 			if (ShowMsgUTF("", msg, CMessageBox::mbrNo, CMessageBox::mbYes|CMessageBox::mbNo)==CMessageBox::mbrYes)
 			{
 				recursiveDelete(filelist[selected].Name.c_str());
@@ -687,7 +690,7 @@ bool CFileBrowser::exec(std::string Dirname)
 	if(res && Multi_Select)
 	{
 		CProgressWindow * progress = new CProgressWindow();
-		progress->setTitle(g_Locale->getText("filebrowser.scan"));
+		progress->setTitle(g_Locale->getText(LOCALE_FILEBROWSER_SCAN));
 		progress->exec(NULL,"");
 		for(unsigned int i = 0; i < filelist.size();i++)
 			if(filelist[i].Marked)
@@ -930,9 +933,9 @@ void CFileBrowser::paintHead()
 	frameBuffer->paintBoxRel(x,y, width,theight+0, COL_MENUHEAD_PLUS_0);
 
 #ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head"), Latin1_to_UTF8(name).c_str()); // UTF-8
+	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), Latin1_to_UTF8(name).c_str()); // UTF-8
 #else
-	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText("filebrowser.head"), name.c_str()); // UTF-8
+	snprintf(l_name, sizeof(l_name), "%s %s", g_Locale->getText(LOCALE_FILEBROWSER_HEAD), name.c_str()); // UTF-8
 #endif
 	g_Font[SNeutrinoSettings::FONT_TYPE_EVENTLIST_TITLE]->RenderString(x+10,y+theight+1, width-11, l_name, COL_MENUHEAD, 0, true); // UTF-8
 }
@@ -941,14 +944,14 @@ void CFileBrowser::paintHead()
 
 const struct button_label FileBrowserButtons[3] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED   , "filebrowser.nextpage"        },
-	{ NEUTRINO_ICON_BUTTON_GREEN , "filebrowser.prevpage"        },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, "filebrowser.mark"            },
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_FILEBROWSER_NEXTPAGE        },
+	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_FILEBROWSER_PREVPAGE        },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_FILEBROWSER_MARK            },
 };
 const struct button_label FileBrowserFilterButton[2] = 
 {
-	{ NEUTRINO_ICON_BUTTON_BLUE  , "filebrowser.filter.inactive" },
-	{ NEUTRINO_ICON_BUTTON_BLUE  , "filebrowser.filter.active"   },
+	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_FILEBROWSER_FILTER_INACTIVE },
+	{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_FILEBROWSER_FILTER_ACTIVE   },
 };
 
 void CFileBrowser::paintFoot()
@@ -974,7 +977,7 @@ void CFileBrowser::paintFoot()
 		if( (filelist[selected].getType() != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x +3 , by2 - 3);
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35, ty2, dx - 35, g_Locale->getText("filebrowser.select"), COL_INFOBAR, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35, ty2, dx - 35, g_Locale->getText(LOCALE_FILEBROWSER_SELECT), COL_INFOBAR, 0, true); // UTF-8
 		
 		}
 
@@ -984,7 +987,7 @@ void CFileBrowser::paintFoot()
 
 		//Mute-Button
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_MUTE_SMALL, x + (2 * dx), by2 - 3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (2 * dx), ty2, dx - 35, g_Locale->getText("filebrowser.delete"), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 35 + (2 * dx), ty2, dx - 35, g_Locale->getText(LOCALE_FILEBROWSER_DELETE), COL_INFOBAR, 0, true); // UTF-8
 
       if(m_oldKey!=0)
       {
@@ -1002,7 +1005,7 @@ void CFileBrowser::paint()
 
 //	if (filelist[0].Name.length() != 0)
 //		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ width- 30, y+ 5 );
-	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("filebrowser.head") );
+	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText(LOCALE_FILEBROWSER_HEAD));
 	
 	for(unsigned int count=0;count<listmaxshow;count++)
 		paintItem(count);
