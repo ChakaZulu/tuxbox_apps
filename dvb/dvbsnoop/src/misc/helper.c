@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.7 2003/02/09 23:11:07 rasc Exp $
+$Id: helper.c,v 1.8 2003/02/26 16:45:16 obi Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -9,6 +9,10 @@ $Id: helper.c,v 1.7 2003/02/09 23:11:07 rasc Exp $
 
 
 $Log: helper.c,v $
+Revision 1.8  2003/02/26 16:45:16  obi
+- make dvbsnoop work on little endian machines again
+- fixed mask in getBits for bitlen >= 32
+
 Revision 1.7  2003/02/09 23:11:07  rasc
 no message
 
@@ -46,29 +50,6 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-static int  little_endian_arch = 0;
-
-/*
-  -- check Little/big endian architecture
-  -- sets mode variable
-*/
-
-
-void setEndianArch (void)
-{
-	union {
-		unsigned long  l;		// assume 32 bit longs
-		unsigned char  b[4];
-	} mem;
-
-
-	mem.l = 0x01020304;
-        little_endian_arch = (mem.b[0] == 0x04) ? 1 : 0;
-}
-
-
-
-
 /* 
   -- get bits out of buffer
   -- (getting more than 24 bits is not save)
@@ -80,49 +61,23 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
 {
  u_char *b;
  unsigned long  v;
- int           bytepos;
  unsigned long mask;
  unsigned long tmp_long;
- //int           i;
- //int           xstartbit;
 
-
-//printf ("\ngetbits: byteoffset: %d , start: %d, len: %d\n", byte_offset, startbit, bitlen);
-
- b = (unsigned char *)buf;
-
- bytepos = byte_offset + (startbit / 8);
+ b = &buf[byte_offset + (startbit / 8)];
  startbit %= 8;
 
- b += bytepos;
- if (little_endian_arch) {
-	// intel arch
- 	tmp_long = (unsigned long)( (*b) + (*(b+1)<<8) +
-		 (*(b+2)<<16) + (*(b+3)<<24) );
- } else {
-	// dbox, motorola, ppc arch
- 	tmp_long = (unsigned long)( ((*b)<<24) + (*(b+1)<<16) +
+ tmp_long = (unsigned long)( ((*b)<<24) + (*(b+1)<<16) +
 		 (*(b+2)<<8) + *(b+3) );
- }
 
-//printf (" -- corrected1:: bytepos: %d , start: %d\n", bytepos, startbit);
  startbit = 32 - startbit - bitlen;
 
-
-//printf (" -- corrected2::  start: %d, len: %d\n", startbit, bitlen);
-//printf (" -- tmp_long: 0x%08lx\n",tmp_long);
-
  tmp_long = tmp_long >> startbit;
- mask = (1<<bitlen) - 1;
 
-
-//printf (" -- mask: 0x%08lx\n",mask);
-//printf (" -- shifted tmp_long: 0x%08lx\n",tmp_long);
+ // ja, das ULL muss so sein (fuer bitlen == 32 z.b.)...
+ mask = (1ULL << bitlen) - 1;
 
  v = tmp_long & mask;
-
-
-//printf (" -- ret value: 0x%08lx\n\n",v);
 
  return v;
 }

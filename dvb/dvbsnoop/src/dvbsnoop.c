@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.4 2003/02/09 22:59:33 rasc Exp $
+$Id: dvbsnoop.c,v 1.5 2003/02/26 16:45:16 obi Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -25,6 +25,10 @@ $Id: dvbsnoop.c,v 1.4 2003/02/09 22:59:33 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.5  2003/02/26 16:45:16  obi
+- make dvbsnoop work on little endian machines again
+- fixed mask in getBits for bitlen >= 32
+
 Revision 1.4  2003/02/09 22:59:33  rasc
 -- endian check (bug fix)
 
@@ -72,7 +76,6 @@ int main(int argc, char **argv)
 
   if (! cmdline_options (argc,argv, &opt) ) return (-1);
 
-  setEndianArch ();
   setVerboseLevel (opt.printdecode);
   setHexPrintMode (opt.printhex);
 
