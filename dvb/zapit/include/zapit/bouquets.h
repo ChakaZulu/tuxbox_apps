@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.34 2002/09/09 18:56:56 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.35 2002/09/11 07:34:18 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -52,17 +52,13 @@ class CBouquet
 		ChannelList tvChannels;
 
 		CBouquet(const string name) { Name=name; bHidden = false; bLocked = false; }
-		CBouquet(const CBouquet&);
-
-		~CBouquet();
 
 		void addService (CZapitChannel* newChannel);
 
 		void removeService (CZapitChannel* oldChannel);
 		void removeService (unsigned int onidSid, unsigned char serviceType = 0)			{removeService( getChannelByOnidSid( onidSid, serviceType));}
 
-//		void moveService (unsigned int onidSid, unsigned int newPosition);
-		void moveService (unsigned int oldPosition, unsigned int newPosition, unsigned char serviceType);
+		void moveService (const unsigned int oldPosition, const unsigned int newPosition, const unsigned char serviceType);
 
 		int recModeRadioSize( unsigned int);
 		int recModeTVSize( unsigned int);
@@ -75,8 +71,7 @@ class CBouquetManager
 {
 	private:
 		CBouquet* remainChannels;
-		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, __gnu_cxx::hash_set <uint32_t> *tvchans_processed, __gnu_cxx::hash_set <uint32_t> *radiochans_processed, const string strTitle);
-//		void makeRemainingChannelsBouquet(unsigned int tvChanNr, unsigned int radioChanNr, const string strTitle);
+		void makeRemainingChannelsBouquet();
 		void parseBouquetsXml(const XMLTreeNode *root);
 		string convertForXML( string s);
 		void storeBouquets();
@@ -115,7 +110,7 @@ class CBouquetManager
 		void deleteBouquet(const unsigned int id);
 		void deleteBouquet(const CBouquet* bouquet);
 		int  existsBouquet( string name);
-		void moveBouquet( unsigned int oldId, unsigned int newId);
+		void moveBouquet(const unsigned int oldId, const unsigned int newId);
 		bool existsChannelInBouquet( unsigned int bq_id, unsigned int onid_sid);
 
 		void saveAsLast( unsigned int BouquetId, unsigned int channelNr);
@@ -124,7 +119,7 @@ class CBouquetManager
 		void onTermination();
 		void onStart();
 
-		CZapitChannel* copyChannelByOnidSid(unsigned int onid_sid);
+		CZapitChannel* findChannelByOnidSid(const unsigned int onid_sid);
 
 };
 

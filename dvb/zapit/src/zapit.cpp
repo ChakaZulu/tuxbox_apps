@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.218 2002/09/11 02:34:36 obi Exp $
+ * $Id: zapit.cpp,v 1.219 2002/09/11 07:34:18 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -113,8 +113,8 @@ int dmx_pcr_fd = -1;
 int dmx_video_fd = -1;
 int vbi_fd = -1;
 
-/* channellists */
-tallchans allchans_tv, allchans_radio;         //  tallchans defined in "bouquets.h"
+/* list of all channels (services) */
+tallchans allchans;             //  tallchans defined in "bouquets.h"
 
 /* transponder scan */
 std::map <uint32_t, transponder>transponders;
@@ -289,10 +289,11 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	{
 		current_is_nvod = false;
 
+		cit = allchans.find(onid_sid);
+
 		if (currentMode & RADIO_MODE)
 		{
-			cit = allchans_radio.find(onid_sid);
-			if (cit == allchans_radio.end())
+			if ((cit == allchans.end()) || (cit->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE))
 			{
 				debug("[zapit] onid_sid %08x not found\n", onid_sid);
 				return -1;
@@ -300,8 +301,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		}
 		else
 		{
-			cit = allchans_tv.find(onid_sid);
-			if (cit == allchans_tv.end())
+			if (cit == allchans.end() || (cit->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE))
 			{
 				debug("[zapit] onid_sid %08x not found\n", onid_sid);
 				return -1;
@@ -520,8 +520,7 @@ int prepare_channels ()
 	// we clear all cannel lists, they are refilled
 	// by LoadServices() and LoadBouquets()
 	transponders.clear();
-	allchans_tv.clear();
-	allchans_radio.clear();
+	allchans.clear();
 	bouquetManager->clearAll();
 
 	if (LoadServices() < 0)
@@ -547,8 +546,6 @@ int start_scan ()
 	}
 
 	transponders.clear();
-	allchans_tv.clear();
-	allchans_radio.clear();
 	found_transponders = 0;
 	found_channels = 0;
 
@@ -1082,7 +1079,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.218 2002/09/11 02:34:36 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.219 2002/09/11 07:34:18 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1142,13 +1139,9 @@ int main (int argc, char **argv)
 	}
 
 	if (prepare_channels() < 0)
-	{
 		printf("[zapit] error parsing services!\n");
-	}
 	else
-	{
 		printf("[zapit] channels have been loaded succesfully\n");
-	}
 
 	/* initialize frontend */
 	frontend = new CFrontend();
@@ -1281,9 +1274,9 @@ int main (int argc, char **argv)
 void addChannelToBouquet(unsigned int bouquet, unsigned int onid_sid)
 {
 	printf("addChannelToBouquet(%d, %d)\n", bouquet, onid_sid);
-	CZapitChannel* chan = bouquetManager->copyChannelByOnidSid( onid_sid);
+	CZapitChannel* chan = bouquetManager->findChannelByOnidSid( onid_sid);
 	if (chan != NULL)
-		bouquetManager->Bouquets[bouquet-1]->addService( chan);
+		bouquetManager->Bouquets[bouquet-1]->addService(chan);
 	else
 		printf("onid_sid not found in channellist!\n");
 }
@@ -1393,13 +1386,15 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 	{
 		if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO))
 		{
-			for (tallchans_iterator it = allchans_radio.begin(); it != allchans_radio.end(); it++)
-				channels.push_back(&(it->second));
+			for (tallchans_iterator it = allchans.begin(); it != allchans.end(); it++)
+				if (it->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE) 
+					channels.push_back(&(it->second));
 		}
 		else
 		{
-			for (tallchans_iterator it = allchans_tv.begin(); it != allchans_tv.end(); it++)
-				channels.push_back(&(it->second));
+			for (tallchans_iterator it = allchans.begin(); it != allchans.end(); it++)
+				if (it->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE) 
+					channels.push_back(&(it->second));
 		}
 		sort(channels.begin(), channels.end(), CmpChannelByChName());
 	}
@@ -1549,18 +1544,14 @@ unsigned zapTo (unsigned int bouquet, unsigned int channel)
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
 
-	ChannelList channels;
+	ChannelList* channels;
 
 	if (currentMode & RADIO_MODE)
-	{
-		channels = bouquetManager->Bouquets[bouquet - 1]->radioChannels;
-	}
+		channels = &(bouquetManager->Bouquets[bouquet - 1]->radioChannels);
 	else
-	{
-		channels = bouquetManager->Bouquets[bouquet - 1]->tvChannels;
-	}
+		channels = &(bouquetManager->Bouquets[bouquet - 1]->tvChannels);
 
-	if ((channel < 1) || (channel > channels.size()))
+	if ((channel < 1) || (channel > channels->size()))
 	{
 		printf("[zapit] Invalid channel %d in bouquet %d\n", channel, bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
@@ -1568,7 +1559,7 @@ unsigned zapTo (unsigned int bouquet, unsigned int channel)
 
 	bouquetManager->saveAsLast(bouquet - 1, channel - 1);
 
-	return zapTo_Onid_Sid(channels[channel - 1]->getOnidSid(), false);
+	return zapTo_Onid_Sid((*channels)[channel - 1]->getOnidSid(), false);
 }
 
 unsigned int zapTo_Onid_Sid (unsigned int onidSid, bool isSubService)

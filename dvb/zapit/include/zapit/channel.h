@@ -1,5 +1,5 @@
 /*
- * $Id: channel.h,v 1.8 2002/09/09 18:56:56 thegoodguy Exp $
+ * $Id: channel.h,v 1.9 2002/09/11 07:34:18 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -41,9 +41,6 @@ class CZapitAudioChannel
 class CZapitChannel
 {
 	private:
-		/* is this channel a copy ? */
-		bool iscopy;
-
 		/* channel name */
 		std::string name;
 
@@ -101,7 +98,6 @@ class CZapitChannel
 		int addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag);
 
 		/* set methods */
-		void setIsCopy(const bool new_iscopy)			{ iscopy = new_iscopy; }
 		void setName(std::string pName)				{ name = pName; }
 		void setAudioChannel(unsigned char pAudioChannel)	{ if (pAudioChannel < audioChannels.size()) currentAudioChannel = pAudioChannel; }
 		void setPcrPid(unsigned short pPcrPid)			{ pcrPid = pPcrPid; }

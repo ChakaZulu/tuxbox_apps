@@ -1,5 +1,5 @@
 /*
- * $Id: channel.cpp,v 1.7 2002/09/09 18:56:56 thegoodguy Exp $
+ * $Id: channel.cpp,v 1.8 2002/09/11 07:34:18 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *	& Steffen Hehn <mcclean@berlios.de>
@@ -24,7 +24,6 @@
 
 CZapitChannel::CZapitChannel (std::string p_name, unsigned short p_sid, unsigned short p_tsid, unsigned short p_onid, unsigned char p_service_type, unsigned char p_DiSEqC)
 {
-	iscopy = false;
 	name = p_name;
 	serviceId = p_sid;
 	transportStreamId = p_tsid;
@@ -38,8 +37,6 @@ CZapitChannel::CZapitChannel (std::string p_name, unsigned short p_sid, unsigned
 
 CZapitChannel::~CZapitChannel ()
 {
-	if (iscopy) return;
-
 	resetPids();
 
 	if (caPmt)

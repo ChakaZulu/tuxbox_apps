@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.45 2002/09/09 18:56:56 thegoodguy Exp $
+ * $Id: getservices.cpp,v 1.46 2002/09/11 07:34:18 thegoodguy Exp $
  */
 
 #include <stdio.h>
@@ -12,7 +12,7 @@
 uint8_t curr_diseqc = 0;
 
 extern std::map <uint32_t, transponder> transponders;
-extern tallchans allchans_tv, allchans_radio;
+extern tallchans allchans;
 
 void ParseTransponders (XMLTreeNode *node, uint8_t DiSEqC)
 {
@@ -96,27 +96,8 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 		case DIGITAL_TELEVISION_SERVICE:
 		case NVOD_REFERENCE_SERVICE:
 		case NVOD_TIME_SHIFTED_SERVICE:
-			allchans_tv.insert
-			(
-				std::pair <uint32_t, CZapitChannel>
-				(
-					(original_network_id << 16) | service_id,
-					CZapitChannel
-					(
-						name,
-						service_id,
-						transport_stream_id,
-						original_network_id,
-						service_type,
-						DiSEqC
-					)
-				)
-			);
-
-			break;
-
 		case DIGITAL_RADIO_SOUND_SERVICE:
-			allchans_radio.insert
+			allchans.insert
 			(
 				std::pair <uint32_t, CZapitChannel>
 				(
@@ -132,6 +113,7 @@ void ParseChannels (XMLTreeNode *node, uint16_t transport_stream_id, uint16_t or
 					)
 				)
 			);
+
 			break;
 
 		default:
