@@ -50,15 +50,32 @@ void prev_dec(int *i)           /* counting down */
 		*i = 0x899;
 }
 
-int next_hex(int i) /* return next non-decimal */
+int is_dec(int i)
+{
+	return ((i & 0x00F) <= 9) && ((i & 0x0F0) <= 0x90);
+}
+
+int next_hex(int i) /* return next existing non-decimal page number */
 {
 	do
 	{
 		i++;
 		if (i > 0x8FF)
 			i = 0x10F;
-	} while (((i & 0x00F) <= 9) && ((i & 0x0F0) <= 0x90));
+	} while ((subpagetable[i] == 0xFF) || is_dec(i));
 	return i;
+}
+
+void FillRect(int x, int y, int w, int h, int color)
+{
+	unsigned char *p = lfb + x + y * var_screeninfo.xres;
+
+	if (w > 0)
+		for ( ; h > 0 ; h--)
+		{
+			memset(p, color, w);
+			p += var_screeninfo.xres;
+		}
 }
 
 int getIndexOfPageInHotlist()
@@ -394,7 +411,7 @@ void ClearB(int color)
 
 void plugin_exec(PluginParam *par)
 {
-	char cvs_revision[] = "$Revision: 1.67 $", versioninfo[16];
+	char cvs_revision[] = "$Revision: 1.68 $", versioninfo[16];
 
 	/* show versioninfo */
 	sscanf(cvs_revision, "%*s %s", versioninfo);
@@ -690,7 +707,7 @@ int Init()
 	StartY = sy + (((ey-sy) - 25*fontheight) / 2);
 
 	typettf.font.face_id = (FTC_FaceID) TUXTXTTTF;
-	typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+	typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 	typettf.font.pix_height = (FT_UShort) fontheight;
 #if HAVE_DVB_API_VERSION >= 3
 	typettf.flags = FT_LOAD_MONOCHROME;
@@ -927,7 +944,7 @@ void CleanUp()
 
 	if (--vendor < 3)	/* scart-parameters only known for 3 dboxes, FIXME: order must be like in info.h */
 	{
-		for (i = 1; i < 6; i += 2) /* restore audio to dvb */
+		for (i = 1; i < 6; i += 2) /* restore dvb audio */
 		{
 			n = avstable_dvb[vendor][i];
 			if ((ioctl(avs, avstable_ioctl[i], &n)) < 0)
@@ -2776,7 +2793,7 @@ void SwitchScreenMode(int newscreenmode)
 		
 #if CFGTTF 
 		fontwidth = fw;
-		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
 		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fw;
 		type0.font.pix_height = type1.font.pix_height = type2.font.pix_height = fh+1;
@@ -2813,7 +2830,7 @@ void SwitchScreenMode(int newscreenmode)
 
 #if CFGTTF 
 		fontwidth = fontwidth_normal;
-		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 		StartX = sx + (ex-sx - 40*fontwidth) / 2; /* center screen */
 #else	 /* !TTF */
 		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fontwidth_normal;
@@ -2881,18 +2898,6 @@ void SwitchHintMode()
 
 #if CFGTTF
 
-void FillRect(int x, int y, int w, int h, int color)
-{
-	unsigned char *p = lfb + x + y * var_screeninfo.xres;
-
-	if (w > 0)
-		for ( ; h > 0 ; h--)
-		{
-			memset(p, color, w);
-			p += var_screeninfo.xres;
-		}
-}
-
 void DrawVLine(int x, int y, int l, int color)
 {
 	unsigned char *p = lfb + x + y * var_screeninfo.xres;
@@ -2936,7 +2941,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 
 	/* get colors */
 	fgcolor = Attribute & 0x0F;
-	if (transpmode == 1)
+	if (transpmode == 1 && PosY < StartY + 24*fontheight)
 	{
 		if (fgcolor == transp) /* outside boxed elements (subtitles, news) completely transparent */
 			bgcolor = transp;
@@ -3350,7 +3355,7 @@ void RenderChar(int Char, int Attribute, int zoom, int yoffset)
 	{
 		unsigned char *p = lfb + PosX + (yoffset+PosY)*var_screeninfo.xres; /* running pointer into framebuffer */
 		fgcolor = Attribute & 0x0F;
-		if (transpmode == 1)
+		if (transpmode == 1 && PosY < StartY + 24*fontheight)
 		{
 			if (fgcolor == transp) /* outside boxed elements (subtitles, news) completely transparent */
 				bgcolor = transp;
@@ -3496,7 +3501,7 @@ void RenderCharLCDsmall(int Char, int XPos, int YPos)
 	typettf.font.pix_height = fontheight = fontwidth_small_lcd;
 	RenderChar(Char, 0, 0, -(YPos<<8 | XPos));
 	fontwidth = old_width;
-	typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+	typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 	typettf.font.pix_height = fontheight = old_height;
 }
 #endif
@@ -3684,16 +3689,60 @@ void RenderPage()
  * CreateLine25                                                               *
  ******************************************************************************/
 
+void showlink(int column, int linkpage, int Attrib)
+{
+	unsigned char *p, line[] = "   >???   ";
+	int oldfontwidth = fontwidth;
+	int yoffset;
+
+	if (var_screeninfo.yoffset)
+		yoffset = 0;
+	else
+		yoffset = var_screeninfo.yres;
+	
+	
+	PosX = StartX + column*oldfontwidth;
+	PosY = StartY + 24*fontheight;
+
+	if (boxed)
+	{
+		FillRect(PosX, PosY+yoffset, 40*oldfontwidth, fontheight, transp);
+		return;
+	}
+	
+	if (adip[linkpage][0])
+	{
+#if CFGTTF 
+		fontwidth = screenmode ? fontwidth_small : fontwidth_topmenumain;
+		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
+		FillRect(PosX, PosY+yoffset, 10*oldfontwidth, fontheight, Attrib >> 4);
+		if (!(screenmode && screen_mode2)) /* one space at start, if font smaller */
+			PosX += fontwidth;
+		for (p = adip[linkpage]; *p; p++)
+			RenderCharBB(*p, Attrib);
+		fontwidth = oldfontwidth;
+		typettf.font.pix_width = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
+#else	 /* !TTF */
+		for (p = adip[linkpage]; p < adip[linkpage]+10; p++)
+			RenderCharBB(*p, Attrib);
+#endif /* !TTF */
+	}
+	else
+	{
+		if (linkpage < page)
+		{
+			line[6] = '<';
+			hex2str(line + 5, linkpage);
+		}
+		else
+			hex2str(line + 6, linkpage);
+		for (p = line; p < line+10; p++)
+			RenderCharBB(*p, Attrib);
+	}
+}
+
 void CreateLine25()
 {
-	int byte;
-
-#if (LINE25MODE == 1)
-	char line25_1[] = "   ?00<      ??0<      >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
-#else
-	char line25_1[] = "   ?00<     >??0       >??0      >?00   ((((((((((1111111111AAAAAAAAAAXXXXXXXXXX";
-#endif
-
 	if (!bttok && cachetable[0x1f0][0] && cachetable[0x1f0][0][40+799]) /* btt received and not yet decoded */
 		decode_btt();
 	if (maxadippg >= 0)
@@ -3718,27 +3767,11 @@ void CreateLine25()
 #endif
 	next_100 = toptext_getnext(next_10, 1, 0);
 
-	/* FIXME: flexible widths? */
-	if (adip[prev_100][0])
-		memcpy(&line25_1[0], &adip[prev_100][0], 10);
-	else
-		hex2str(&line25_1[3+2], prev_100);
-
-	if (adip[prev_10][0])
-		memcpy(&line25_1[10], &adip[prev_10][0], 10);
-	else
-		hex2str(&line25_1[13+2], prev_10);
-
-	if (adip[next_10][0])
-		memcpy(&line25_1[20], &adip[next_10][0], 10);
-	else
-		hex2str(&line25_1[24+2], next_10);
-
-	if (adip[next_100][0])
-		memcpy(&line25_1[30], &adip[next_100][0], 10);
-	else
-		hex2str(&line25_1[34+2], next_100);
-
+	showlink(0, prev_100, red<<4 | white);
+	showlink(10, prev_10, green<<4 | black);
+	showlink(20, next_10, yellow<<4 | black);
+	showlink(30, next_100, blue<<4 | white);
+	
 	if (bttok && screenmode == 1) /* TOP-Info present, divided screen -> create TOP overview */
 	{
 		char line[TOPMENUCHARS];
@@ -3750,7 +3783,7 @@ void CreateLine25()
 
 #if CFGTTF 
 		fontwidth = fontwidth_topmenusmall;
-		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
 		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = fontwidth_topmenusmall;
 #endif /* !TTF */
@@ -3842,22 +3875,10 @@ void CreateLine25()
 		}
 #if CFGTTF 
 		fontwidth = screen_mode2 ? fontwidth_small : fontwidth_topmenumain;
-		typettf.font.pix_width  = (FT_UShort) fontwidth * 3/2; /* FIXME: otherwise too much space btw chars */
+		typettf.font.pix_width  = (FT_UShort) fontwidth * TTFWIDTHFACTOR;
 #else	 /* !TTF */
 		type0.font.pix_width = type1.font.pix_width = type2.font.pix_width = screen_mode2 ? fontwidth_small : fontwidth_topmenumain;
 #endif /* !TTF */
-	}
-
-	/* render line 25 */
-	PosX = StartX;
-	PosY = StartY + 24*fontheight;
-
-	for (byte = 0; byte < 40; byte++)
-	{
-		if (boxed)
-			RenderCharBB(' ', transp<<4 | transp);
-		else
-			RenderCharBB(line25_1[byte], line25_1[byte + 40]);
 	}
 }
 
@@ -4121,6 +4142,30 @@ void DecodePage()
 	else
 		memcpy(&page_char, " TuxTxt ", 8);
 
+	if (!is_dec(page))
+	{
+		unsigned char *p, c, n;
+		
+		/* show (usually nonexistent) page number for hex pages */
+		hex2str(page_char + 9 + 3, page);
+		/* decode parity/hamming */
+		for (p = page_char + 9 + 4; p < page_char + sizeof(page_char); p++)
+		{
+			if (0xFF != (c = dehamming[*p]))
+				hex2str(p, c);
+			else 
+			{
+				n = 0;
+				for (c = *p; c; c &= (c-1))
+					n ^= 1;
+				if (n)
+					*p &= 127;
+				else
+					*p = ' ';
+			}
+		}
+	}
+
 	/* decode */
 	for (row = 0; row < 24; row++)
 	{
@@ -4133,7 +4178,7 @@ void DecodePage()
 		hold         = 0;
 		held_mosaic  = ' ';
 
-		if (boxed == 1 && memchr(&page_char[row*40], start_box, 40) == 0)
+		if (boxed && memchr(&page_char[row*40], start_box, 40) == 0)
 		{
 			foreground = transp;
 			background = transp;
