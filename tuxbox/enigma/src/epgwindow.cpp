@@ -20,6 +20,10 @@ gPixmap *eListBoxEntryEPG::inTimerRec=0;
 int eListBoxEntryEPG::timeXSize=0;
 int eListBoxEntryEPG::dateXSize=0;
 
+eString LocalEventData::country;
+eString LocalEventData::primary_language;
+eString LocalEventData::secondary_language;
+
 eAutoInitP0<epgSelectorActions> i_epgSelectorActions(eAutoInitNumbers::actions, "epg selector actions");
 
 eListBoxEntryEPG::~eListBoxEntryEPG()
@@ -393,51 +397,77 @@ bool LocalEventData::language_exists(EITEvent *event, eString lang)
 	return retval;
 }
 
-const char MAX_LANG = 14;
+const char MAX_LANG = 37;
 /* OSD language (see /share/locales/locales) to iso639 conversion table */    
 eString ISOtbl[MAX_LANG][2] =
 {
-	{"fi_FI","fin"},
+	{"ar_AE","ara"},
 	{"C","eng"},
-	{"de_DE","deu"},     /* also 'ger' is valid iso639 code!! */
-	{"de_DE","ger"},
-	{"da_DK","dan"},
-	{"sv_SE","swe"},
-	{"no_NO","nor"},
-	{"fr_FR","fra"},
-	{"es_ES","esl"},     /* also 'spa' is ok */
-	{"es_ES","spa"},
-	{"it_IT","ita"},
 	{"cs_CZ","ces"},     /* or 'cze' */
 	{"cs_CZ","cze"},
-	{"hu_HU","hun"}
+	{"da_DK","dan"},
+	{"de_DE","deu"},     /* also 'ger' is valid iso639 code!! */
+	{"de_DE","ger"},
+	{"el_GR","gre"},     /* also 'ell' is valid */
+	{"el_GR","ell"},
+	{"es_ES","esl"},     /* also 'spa' is ok */
+	{"es_ES","spa"},
+	{"et_EE","est"},
+	{"fi_FI","fin"},
+	{"fr_FR","fra"},
+	{"hr_HR","hrv"},     /* or 'scr' */
+	{"hr_HR","scr"},
+	{"hu_HU","hun"},
+	{"is_IS","isl"},     /* or 'ice' */
+	{"is_IS","ice"},
+	{"it_IT","ita"},
+	{"lt_LT","lit"},
+	{"nl_NL","nld"},     /* or 'dut' */
+	{"nl_NL","dut"},
+	{"no_NO","nor"},
+	{"pl_PL","pol"},
+	{"pt_PT","por"},
+	{"ro_RO","ron"},     /* or 'rum' */
+	{"ro_RO","rum"},
+	{"ru_RU","rus"},
+	{"sk_SK","slk"},     /* or 'slo' */
+	{"sk_SK","slo"},
+	{"sl_SI","slv"},
+	{"sr_YU","srp"},     /* or 'scc' */
+	{"sr_YU","scc"},
+	{"sv_SE","swe"},
+	{"tr_TR","tur"},
+	{"ur_IN","urd"}
 };
 
 LocalEventData::LocalEventData()
 {
-	secondary_language=ISOtbl[1][1];  // one language is always english
-	char *str=0;
-	eConfig::getInstance()->getKey("/elitedvb/language", str); // fetch selected OSD country
-	if (!str)
+	if ( !country )
 	{
-		primary_language=secondary_language;
-		eDebug("No OSD-language found!");
+		char *str=0;
+		eConfig::getInstance()->getKey("/elitedvb/language", str); // fetch selected OSD country
+		if (!str)
+			eDebug("No OSD-language found!");
+		else
+		{
+			country=str;
+			free(str);
+			for (int i=0; i < MAX_LANG; i++)
+				if (country==ISOtbl[i][0])
+					if (!primary_language)
+						primary_language=ISOtbl[i][1];
+					else
+						secondary_language=ISOtbl[i][1];
+		}
+#if 0
+		if ( country )
+			eDebug("Country = %s",country.c_str());
+		if ( primary_language )
+			eDebug("Primary Language = %s",primary_language.c_str());
+		if ( secondary_language )
+			eDebug("Secondary Language = %s",secondary_language.c_str());
+#endif
 	}
-	else
-	{
-		country=str;
-		free(str);
-		for (int i=0; i < MAX_LANG; i++)
-			if (country==ISOtbl[i][0])
-				primary_language=ISOtbl[i][1];
-		if (!primary_language)
-			primary_language=secondary_language;
-	}
-	if (primary_language==secondary_language)
-		secondary_language=0;
-//	eDebug("Country = %s",country.c_str());
-//	eDebug("Primary Language = %s",primary_language.c_str());
-//	eDebug("Secondary Language = %s",secondary_language.c_str());
 }
 
 /* short event name, short event text and extended event text */
@@ -445,7 +475,8 @@ void LocalEventData::getLocalData(EITEvent *event, eString *name, eString *desc,
 {
 	if (!language_exists(event,primary_language))
 		if (!language_exists(event,secondary_language))
-			language_exists(event,0);
+			if (!language_exists(event,"eng"))
+				language_exists(event,0);
 	if ( name )
 		*name=ShortEventName;
 	if ( desc )

@@ -250,6 +250,8 @@ void eEventDisplay::setEvent(EITEvent *event)
 			lang=led.primary_language;
 		else if (led.language_exists(event,led.secondary_language))
 			lang=led.secondary_language;
+		else if (led.language_exists(event,"eng"))
+			lang="eng";
 
 		for (ePtrList<Descriptor>::iterator d(event->descriptor); d != event->descriptor.end(); ++d)
 		{

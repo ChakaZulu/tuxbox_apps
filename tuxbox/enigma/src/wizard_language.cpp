@@ -1,4 +1,5 @@
 #include "wizard_language.h"
+#include <src/epgwindow.h>
 #include <lib/gui/eskin.h>
 #include <lib/gui/listbox.h>
 #include <lib/gdi/font.h>
@@ -192,7 +193,10 @@ int eWizardLanguage::eventHandler( const eWidgetEvent &e )
 void eWizardLanguage::selected(eLanguageEntry *entry)
 {
 	if (entry)
+	{
 		accept();
+		LocalEventData::invalidate();
+	}
 	else
 		reject();
 }

@@ -49,15 +49,16 @@ public:
 
 class LocalEventData
 {
-	eString country;
+	static eString country;
 	eString ShortEventName;
 	eString ShortEventText;
 	eString ExtendedEventText;
 public:
+	static void invalidate() { primary_language=secondary_language=country=""; }
 	LocalEventData();
 	inline ~LocalEventData(){};
-	eString primary_language;
-	eString secondary_language;
+	static eString primary_language;
+	static eString secondary_language;
 	/* Search first for primary, then secondary or finally any other language descriptors */
 	void getLocalData(EITEvent *, eString * a=0, eString *b=0, eString *c=0); // return short event name, short event text, and extended text
 	bool language_exists(EITEvent *, eString);
