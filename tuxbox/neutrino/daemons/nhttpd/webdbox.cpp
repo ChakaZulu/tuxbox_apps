@@ -493,7 +493,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 	{
 		printf("Teste nun\n");
 		request->SendPlainHeader("text/html");
-		GetBouquetList();
+//		GetBouquetList();
 		updateEvents();
 		return true;
 	}
@@ -934,15 +934,6 @@ void TWebDbox::updateEvents(void)
 
 	char *actPos = pData;
 
-/*	FILE *file=fopen("channellist.list", "wb");
-        if(file) {
-            fwrite(pData,  resp.dataLength, 1, file);
-            fclose(file);
-        }
-*/
-//	for(unsigned int count=0;count<chanlist.size();count++)
-//		chanlist[count]->currentEvent.description="";
-
 	while(actPos<pData+resp.dataLength)
 	{
 		unsigned* serviceID = (unsigned*) actPos;
@@ -961,24 +952,47 @@ void TWebDbox::updateEvents(void)
 		actPos+=strlen(actPos)+1;
 		char *textt= actPos;
 		actPos+=strlen(actPos)+1;
-
-		printf("Kanal: %ld, event: %ld,Beschr: %s Text: %s\n",*serviceID,*evt_id,descriptiont,textt);
-/*
-		// quick'n dirty, sollte man mal anders machen
-		for (unsigned int count=0;count<chanlist.size();count++)
+		if(Parent->DEBUG)
 		{
-			if (chanlist[count]->onid_sid==*serviceID)
+			printf("Kanal: %ld, event: %ld\n",*serviceID,*evt_id);
+			if(strlen(descriptiont) > 0)
+				printf("Beschr: %s\n",descriptiont);
+			if(strlen(textt) > 0)
+				printf("Text: %s\n",textt);
+		}
+
+		// quick'n dirty, sollte man mal anders machen
+		TChannel *channel = ChannelList->Head;
+		for (unsigned int count=0;count<ChannelList->Count;count++)
+		{
+			if (channel->onid_tsid==*serviceID)
 			{
-				chanlist[count]->currentEvent.id= *evt_id;
-				chanlist[count]->currentEvent.description= descriptiont;
-				chanlist[count]->currentEvent.text_1= textt;
-				chanlist[count]->currentEvent.startzeit= *startt;
-				chanlist[count]->currentEvent.dauer= *dauert;
+				channel->EPG_ID = *evt_id;
+				if(channel->EPG)
+				{
+					delete channel->EPG;
+					channel->EPG = NULL;
+				}
+				if(strlen(descriptiont) > 0)
+					channel->EPG = new TString(descriptiont);
+
+				if(channel->ExtendedEPG)
+				{
+					delete channel->ExtendedEPG;
+					channel->ExtendedEPG = NULL;
+				}
+				if(strlen(textt) > 0)
+					channel->ExtendedEPG = new TString(textt);
+				channel->Starttime = *startt;
+				channel->Duration = *dauert;
+//				chanlist[count]->currentEvent.startzeit= *startt;
+//				chanlist[count]->currentEvent.dauer= *dauert;
 				//	printf("Channel found: %s\n", actPos);
 				break;
 			}
+			channel = channel->Next;
 		}
-*/
+
 	}
 
 	delete[] pData;
@@ -998,6 +1012,9 @@ Tmconnect con;
 		return;
 	}
 
+	updateEvents();
+	return;
+/*
 	if((EPGDate + 2 * 60L) > time(NULL))
 	{
 		if(Parent->DEBUG) printf("EPGListe ist aktuell\n");
@@ -1097,7 +1114,7 @@ Tmconnect con;
 		channel = channel->Next;
 		i++;
 	}while(channel && (i < ChannelList->Count));
-
+*/
 }
 //-------------------------------------------------------------------------
 

@@ -94,6 +94,7 @@ public:
 	TChannel *Next;
 	int Number;
 	unsigned int onid_tsid;
+	unsigned long long EPG_ID;
 	TString *EPG;
 	TString *ExtendedEPG;
 	time_t Starttime;
