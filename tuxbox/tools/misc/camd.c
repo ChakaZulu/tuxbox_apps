@@ -305,26 +305,39 @@ int main(int argc, char **argv)
 {
 	char cmd=0x03;
 	int initok=0, caid=0;
-	int SID=9, ONID=0x85, ECMPID=0, EMMPID=0,pmt=0;
+	int SID=9, ONID=0x85, ECMPID=0, EMMPID=0,vpid=0, apid=0, pmt=0;
 	
 	int cardslot0,cardslot1;
+
+	int descrlen;
+	char buf[2048];
 
 	cardslot0=0;
 	cardslot1=0;
 
 	camfd=open("/dev/dbox/cam0", O_RDWR);
 
-	if( camfd <= 0 )
+	if( camfd < 0 )
 	{
-		perror("open ca0");
+		perror("/dev/dbox/cam0");
 		return 1;
 	}
-	
-	if (argc>=4)
+
+	switch (argc)
 	{
+	case 5:
+		for (descrlen = 0; descrlen < strlen(argv[4]) / 2; descrlen++)
+		{
+			sscanf(argv[4]+(descrlen * 2), "%2hhx", buf+descrlen);
+		}
+		sscanf(argv[1], "%x", &vpid);
+		sscanf(argv[2], "%x", &apid);
+		break;
+	case 4:
 		sscanf(argv[3], "%x", &pmt);
-	}	else {
-		fprintf(stderr,"usage: %s <ign> <ign> <pmt>\n",argv[0]);
+		break;
+	default:
+		fprintf(stderr,"usage: %s <vpid> <apid> <pmtpid> [<ca_descr>]\n",argv[0]);
 		exit(1);
 	}
 	
@@ -402,7 +415,18 @@ int main(int argc, char **argv)
 		setemm(0x104, caid, EMMPID);
 		if (ECMPID == 0) {
 			printf("searching ECM-pid for ca_system_ID %04X\n",caid);
-			ECMPID=find_ecmpid(pmt,caid);
+			if (argc == 4)
+			{
+				ECMPID=find_ecmpid(pmt,caid);
+			}
+			else
+			{
+				ECMPID=descriptor(buf,descrlen,caid);
+				descramble_pid[0] = vpid;
+				descramble_pid[1] = apid;
+				descramble_pids = 2;
+			}
+
 			if (ECMPID == 0) {
 				printf("no ECM-pid found for ca_system_ID %04X\n",caid);
 				//printf("press enter to exit\n");
