@@ -111,7 +111,7 @@ uint32_t eFrontend::BER()
 
 int eFrontend::SignalStrength()
 {
-	uint16_t strength=-1;
+	uint16_t strength=0;
 	ioctl(fd, FE_READ_SIGNAL_STRENGTH, &strength);
 #if 0
 	if ((strength<0) || (strength>65535))
@@ -125,7 +125,7 @@ int eFrontend::SignalStrength()
 
 int eFrontend::SNR()
 {
-	uint16_t snr=-1;
+	uint16_t snr=0;
 	ioctl(fd, FE_READ_SNR, &snr);
 #if 0
 	if ((snr<0) || (snr>65535))

@@ -50,6 +50,8 @@ int eEventDisplay::eventHandler(const eWidgetEvent &event)
 			else
 				break;
 		return 1;
+		default:
+			break;
 	}
 	return eWindow::eventHandler(event);
 }

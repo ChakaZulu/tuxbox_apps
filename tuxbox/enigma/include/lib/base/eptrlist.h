@@ -275,7 +275,7 @@ ePtrList<T>::ePtrList()
 /////////////////// Copy Constructor /////////////////////////////
 template <class T>
 ePtrList<T>::ePtrList(const ePtrList& e)		
-	:std::list<T*>(e), autoDelete(false), cur(e.cur)		
+	:std::list<T*>(e), cur(e.cur), autoDelete(false)
 {		
 
 }
