@@ -32,7 +32,7 @@ static	void	setup_colors( void )
 	FBSetupColors( );
 }
 
-int mines_exec( int fdfb, int fdrc, int fdlcd )
+int mines_exec( int fdfb, int fdrc, int fdlcd, char *cfgfile )
 {
 	struct timeval	tv;
 	int				x;

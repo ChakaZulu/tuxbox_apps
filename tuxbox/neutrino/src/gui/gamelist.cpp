@@ -315,7 +315,8 @@ void CGameList::runGame(int selected )
 		g_RCInput->stopInput();
 		printf("try exec...\n");
 		execPlugin(g_FrameBuffer->getFileHandle(),
-						g_RCInput->getFileHandle(), -1);
+						g_RCInput->getFileHandle(), -1,
+						0 /*cfgfile*/);
 		dlclose(handle);
 		printf("exec done...\n");
 		g_RCInput->restartInput();
