@@ -1,5 +1,5 @@
 /*
-$Id: dmx_tspidscan.c,v 1.14 2004/01/13 21:04:20 rasc Exp $
+$Id: dmx_tspidscan.c,v 1.15 2004/01/31 01:24:26 rasc Exp $
 
 
  DVBSNOOP
@@ -13,7 +13,12 @@ $Id: dmx_tspidscan.c,v 1.14 2004/01/13 21:04:20 rasc Exp $
  -- scanpids principle is based on the sourcefile getpids.c from 'obi'
 
 
+
 $Log: dmx_tspidscan.c,v $
+Revision 1.15  2004/01/31 01:24:26  rasc
+PIDSCAN  redesign,
+try to show pid content  (PES streamID, SECTION tableID)
+
 Revision 1.14  2004/01/13 21:04:20  rasc
 BUGFIX: getbits overflow fixed...
 
@@ -77,6 +82,7 @@ pidscan on transponder
 
 
 #include "dvbsnoop.h"
+#include "strings/dvb_str.h"
 #include "misc/cmdline.h"
 #include "misc/helper.h"
 #include "misc/output.h"
@@ -84,6 +90,7 @@ pidscan on transponder
 #include "dvb_api.h"
 #include "dmx_error.h"
 #include "dmx_tspidscan.h"
+
 
 
 
@@ -97,7 +104,7 @@ pidscan on transponder
 
 // timeout in ms
 // TimoutHIGH will be used on PIDs < 0x20
-#define PID_TIMEOUT_LOW		(290 - PID_TIME_WAIT)
+#define PID_TIMEOUT_LOW		(250 - PID_TIME_WAIT)
 #define PID_TIMEOUT_HIGH	(30100 - PID_TIME_WAIT)
 
 // max filters (will be checked dynamically)
@@ -112,8 +119,20 @@ pidscan on transponder
 
 
 
-static int   *pidArray;
-static int   analyze_ts_pid (u_char *buf, int len);
+enum TS_TYPE { TS_NOPID, TS_SECTION, TS_PES, TS_UNKNOWN };
+
+typedef struct _TS_PID {
+	int	count;
+	int     type;
+	int     id;
+} TS_PID;
+
+
+static TS_PID *pidArray;
+static int    analyze_ts_pid (u_char *buf, int len);
+static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid);
+
+
 
 
 
@@ -125,6 +144,7 @@ int ts_pidscan (OPTION *opt)
   struct dmx_pes_filter_params flt;
   int 		*dmxfd;
   int 		timeout;
+  int 		timeout_corr;
   int		pid,pid_low;
   int    	i;
   int		filters;
@@ -150,14 +170,16 @@ int ts_pidscan (OPTION *opt)
 
 
    // alloc pids
-   pidArray = (int *) malloc ( (MAX_PID+1) * sizeof(int) );
+   pidArray = (TS_PID *) malloc ( (MAX_PID+1) * sizeof(TS_PID) );
   	if (!pidArray) {
 		IO_error("malloc");
 		return -1;
 	}
 
-  	for (i=0; i <= MAX_PID ; i++) 
-		pidArray[i] = 0;
+  	for (i=0; i <= MAX_PID ; i++)  {
+		(pidArray+i)->count = 0;
+		(pidArray+i)->type  = TS_NOPID;
+	}
 
 
    dmxfd = (int *) malloc(sizeof(int) * MAX_PID_FILTER);
@@ -176,10 +198,11 @@ int ts_pidscan (OPTION *opt)
    while (pid <= MAX_PID) {
 
 	pid_low = pid;
+	timeout_corr = 0;
+	rescan = 0;
 
 	do {
 		pid = pid_low;
-		rescan = 0;
 	   
 		// -- open DVR device for reading
 	   	pfd.events = POLLIN | POLLPRI;
@@ -208,7 +231,7 @@ int ts_pidscan (OPTION *opt)
 			// ioctl (dmxfd[i],DMX_SET_BUFFER_SIZE, sizeof(buf));
 
 			// -- skip already scanned pids (rescan-mode)
-			while ( (pidArray[pid] != 0) && (pid < MAX_PID) ) pid++;
+			while ( ((pidArray+pid)->type != TS_NOPID) && (pid < MAX_PID) ) pid++;
 	
 			flt.pid = pid;
 			flt.input = DMX_IN_FRONTEND;
@@ -235,23 +258,22 @@ int ts_pidscan (OPTION *opt)
 		} else {
 
 
+			// -- calc timeout;
+			// -- on lower pids: higher timeout
+			// -- (e.g. TOT/TDT will be sent within 30 secs)
+
+			timeout =  (opt->timeout_ms) ? opt->timeout_ms : PID_TIMEOUT_LOW;
+			if ( (pid_low) < 0x20) timeout = PID_TIMEOUT_HIGH;
+
+
 			if (rescan) out (8,"re-");
 			out (8,"scanning pid   0x%04x to 0x%04x",pid_low, pid-1);
 			out (9,"  (got %d dmx filters) ",filters);
 			out_NL (8);
 
 
-
-
-			// -- calc timeout;
-			// -- on lower pids: higher timeout
-			// -- (e.g. TOT/TDT will be sent within 30 secs)
-	
-			timeout = PID_TIMEOUT_LOW;
-			if ( (pid_low) < 0x20) timeout = PID_TIMEOUT_HIGH;
-
-			// give read a chance to collect some pids
-			usleep ((unsigned long) PID_TIME_WAIT);
+			// give read a chance to collect _some_ pids
+			usleep ((unsigned long) PID_TIME_WAIT * 1000);
 
 			pid_found = 0;
 			if (poll(&pfd, 1, timeout) > 0) {
@@ -267,13 +289,10 @@ int ts_pidscan (OPTION *opt)
 
 			// rescan should to be done?
 			if (pid_found) {
-			  int x;
-			  for (x=pid_low; x<pid; x++) {
-				  if (pidArray[x] > 0) {
-					  rescan = 1;
-					  break;
-				  }
-			  }
+			  rescan++;
+			  if (rescan > filters ) rescan = 0;	// abort rescans (if no TS-PUSI)
+			} else {
+			  rescan = 0;	
 			}
 
 		} // if (filters==0)
@@ -292,6 +311,37 @@ int ts_pidscan (OPTION *opt)
 		close(pfd.fd);
 
 	} while (rescan);
+
+
+	// -- output
+	for (i = pid_low; i < pid; i++) {
+		TS_PID *p = pidArray+i;
+
+		if ( p->count > 0) {
+			out (1,"PID found: %4d (0x%04x)  ",i,i);
+
+			switch  (p->type) {
+				case TS_SECTION:
+					out (3,"[SECTION: %s]",dvbstrTableID(p->id) );
+					break;
+
+				case TS_PES:
+					out (3,"[PES: %s]",dvbstrPESstream_ID(p->id) );
+					break;
+
+				case TS_UNKNOWN:
+					out (3,"[unknown]");
+					break;
+
+				default:
+					break;
+			}
+			out_NL (1);
+		}
+
+	}
+
+
    } // while
 
 
@@ -326,13 +376,13 @@ static int analyze_ts_pid (u_char *buf, int len)
 		if (buf[i] == TS_SYNC_BYTE) {
 			pid	 = getBits (buf, i, 11, 13);
 
-			pidArray[pid]++;
-			if (pidArray[pid] == 1) {
-				out_SW_NL (1,"PID found: ",pid);
+			(pidArray+pid)->count++;
+			if ((pidArray+pid)->type == TS_NOPID) {
 				found = 1;
+				ts_payload_check (buf+i, (pidArray+pid));
 			}
 
-		}
+		} // if syncbyte
 	}
 
 
@@ -341,9 +391,46 @@ static int analyze_ts_pid (u_char *buf, int len)
 
 
 
-/*
- * $$$ TODO 
- *  display PID content (Section Table, PES-streamID)
- */
+
+
+
+static TS_PID *ts_payload_check (u_char *b, TS_PID *tspid)
+{
+
+	int payload_start 	= getBits (b, 0, 9, 1);
+
+	if (payload_start != 0) {
+		int j;
+	  	int err_bit 		= getBits (b, 0, 8, 1);
+		int scrambled		= getBits (b, 0,24, 2);
+
+	  	if (err_bit == 0 && scrambled == 0) {
+	  		int adaption_field_ctrl	= getBits (b, 0,26, 2);
+
+			j = 4;
+			if (adaption_field_ctrl & 0x2)  j += b[j] + 1;	// add adapt.field.len
+
+			if (adaption_field_ctrl & 0x1) {
+				if (b[j]==0x00 && b[j+1]==0x00 && b[j+2]==0x01 && b[j+3]>=0xBC) {
+					// -- PES
+					tspid->type = TS_PES;
+					tspid->id   = b[j+3];
+				} else {
+					// -- section (eval pointer field)
+					int offset = j + b[j] +1;
+					tspid->type = TS_SECTION;
+					tspid->id   = b[offset];
+				}
+				return tspid;
+			}
+		}
+		tspid->type = TS_UNKNOWN;
+		return tspid;
+	}
+
+
+	return (TS_PID *) NULL;
+}
+
 
 
