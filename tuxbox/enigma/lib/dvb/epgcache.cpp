@@ -231,7 +231,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			}
 			
 			evt = new eventData(eit_event, eit_event_size, source);
-			
+			bool consistencyCheck=true;
 			if (ev_erase_count > 0 && tm_erase_count > 0) // 2 different pairs have been removed
 			{
 				// exempt memory
@@ -244,23 +244,68 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			{
 				// exempt memory
 				delete ev_it->second;
-				prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
+				tm_it=prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 				ev_it->second=evt;
 			}
 			else if (ev_erase_count > 0 && tm_erase_count == 0)
 			{
 				// exempt memory
 				delete tm_it->second;
-				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
+				ev_it=prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 				tm_it->second=evt;
 			}
 			else // added new eventData
 			{
+////////// DEBUG CODE... REMOVE LATER ////////////
+				consistencyCheck=false;
+//////////////////////////////////////////////////
 				prevEventIt=servicemap.first.insert( prevEventIt, std::pair<const __u16, eventData*>( event_id, evt) );
 				prevTimeIt=servicemap.second.insert( prevTimeIt, std::pair<const time_t, eventData*>( TM, evt ) );
 			}
+////////// DEBUG CODE... REMOVE LATER ////////////
+			if ( consistencyCheck )
+			{
+				if ( tm_it->second != evt || ev_it->second != evt )
+					eFatal("tm_it->second != ev_it->second");
+				else if ( tm_it->second->getStartTime() != tm_it->first )
+					eFatal("event start_time(%d) non equal timemap key(%d)", 
+						tm_it->second->getStartTime(), tm_it->first );
+				else if ( tm_it->first != TM )
+					eFatal("timemap key(%d) non equal TM(%d)", 
+						tm_it->first, TM);
+				else if ( ev_it->second->getEventID() != ev_it->first )
+					eFatal("event_id (%d) non equal event_map key(%d)",
+						ev_it->second->getEventID(), ev_it->first);
+				else if ( ev_it->first != event_id )
+					eFatal("eventmap key(%d) non equal event_id(%d)", 
+						ev_it->first, event_id );
+			}
+//////////////////////////////////////////////////
 		}
 next:
+////////// DEBUG CODE... REMOVE LATER ////////////
+		if ( servicemap.first.size() != servicemap.second.size() )
+		{
+			FILE *f = fopen("/hdd/event_map.txt", "w+");
+			int i=0;
+			for (eventMap::iterator it(servicemap.first.begin())
+				; it != servicemap.first.end(); ++it )
+				fprintf(f, "%d(key %d) -> time %d, event_id %d, data %p\n", 
+					i++, (int)it->first, (int)it->second->getStartTime(), (int)it->second->getEventID(), it->second );
+			fclose(f);
+			f = fopen("/hdd/time_map.txt", "w+");
+			i=0;
+			for (timeMap::iterator it(servicemap.second.begin())
+				; it != servicemap.second.end(); ++it )
+			fprintf(f, "%d(key %d) -> time %d, event_id %d, data %p\n", 
+				i++, (int)it->first, (int)it->second->getStartTime(), (int)it->second->getEventID(), it->second );
+			fclose(f);
+
+			eFatal("(1)map sizes not equal :( sid %04x tsid %04x onid %04x size %d size2 %d", 
+				service.sid, service.tsid, service.onid, 
+				servicemap.first.size(), servicemap.second.size() );
+		}
+//////////////////////////////////////////////////
 		ptr += eit_event_size;
 		eit_event=(eit_event_struct*)(((__u8*)eit_event)+eit_event_size);
 	}
