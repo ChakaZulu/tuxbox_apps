@@ -27,7 +27,7 @@ line_spacing=3
 # sets the default selection when lcdmenu starts by its index.
 # the first index is 0.
 #
-default_entry=0
+default_entry=1
 
 #
 # option: text_align (number)
@@ -69,7 +69,7 @@ pin_protect=
 # option: timeout (number)
 # default: 10 seconds
 #
-timeout=10
+timeout=1
 
 #
 # option: visible_entries (number)

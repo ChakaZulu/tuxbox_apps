@@ -3,8 +3,8 @@
 
 	Movieplayer (c) 2003 by giggo
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
-        
-        $Id: movieplayer.cpp,v 1.23 2003/07/15 21:37:21 gagga Exp $
+
+        $Id: movieplayer.cpp,v 1.24 2003/07/24 01:14:17 homar Exp $
 
 	Homepage: http://www.giggo.de/dbox
 
@@ -267,13 +267,14 @@ void* Play_Thread( void* filename )
 		failed = true;
 
 	fileposition = 0;
-        if( isTS && !failed )
+
+	if( isTS && !failed )
 	{
 		while( (r = read(fd, buf, cache)) > 0 && playstate >= PLAY )
 		{
 			done = 0;
 			wr = 0;
-                        fileposition+=r;
+			fileposition+=r;
 			switch( playstate )
 			{
 				case PAUSE:
@@ -291,22 +292,27 @@ void* Play_Thread( void* filename )
 					break;
 
 				case SOFTRESET:
-					speed = 1;
 					ioctl(vdec, VIDEO_STOP);
 					ioctl(adec, AUDIO_STOP);
 					ioctl(dmxv, DMX_STOP);
 					ioctl(dmxa, DMX_STOP);
-					ioctl(dmxv, DMX_START);
-					ioctl(dmxa, DMX_START);
 					ioctl(vdec, VIDEO_PLAY);
 					ioctl(adec, AUDIO_PLAY);
+					p.pid = pida;
+					p.pes_type = DMX_PES_AUDIO;
+					ioctl(dmxa, DMX_SET_PES_FILTER, &p);
+					p.pid = pidv;
+					p.pes_type = DMX_PES_VIDEO;
+					ioctl(dmxv, DMX_SET_PES_FILTER, &p);
+					ioctl(dmxv, DMX_START);
+					ioctl(dmxa, DMX_START);
+					speed = 1;
 					playstate = PLAY;
 			}
 
 			do
 			{
 				wr = write(dvr, &buf[done], r);
-				if ( playstate > PLAY) break;
 				if (!done ) cache = wr;
 				done += wr;
 				r -= wr;
