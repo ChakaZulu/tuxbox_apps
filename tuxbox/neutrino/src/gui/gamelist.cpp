@@ -39,6 +39,11 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 	paintHead();
 
 	//scan4games here!
+	for(unsigned int count=0;count<gamelist.size();count++)
+	{
+		delete gamelist[count];
+	}
+	gamelist.clear();
 
 	game* tmp = new game();
     tmp->name = g_Locale->getText("menu.back");
