@@ -1,4 +1,4 @@
-EXTRA_DIST = eit.tmp index.tmp
+EXTRA_DIST = eit.tmp index.tmp aboutDMM.tmp aboutDreambox.tmp linksOfficialSites.tmp linksOtherSites.tmp linksForums.tmp
 
 install-data-local:
 	install -d $(DATADIR)/enigma/templates
