@@ -195,9 +195,7 @@ void CScanTs::startScan()
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
-	g_FrameBuffer->loadPal("scan.pal", 37, 199);
-	//	g_FrameBuffer->paintIcon8("scan.raw",0,0, 37);
-	//	g_FrameBuffer->savePictureFromMem("demoscan.raw", g_FrameBuffer->lfb);
+	g_FrameBuffer->loadPal("scan.pal", 37, COL_MAXFREE);
 	g_FrameBuffer->loadPicture2Mem("scan.raw", g_FrameBuffer->lfb);
 
 	sectionsdPauseScanning(1);
@@ -306,7 +304,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 void CScanTs::hide()
 {
-	//g_FrameBuffer->paintBackgroundBoxRel(x,y, width,height);
+	g_FrameBuffer->loadPal("radiomode.pal", 18, COL_MAXFREE);
 	g_FrameBuffer->paintBackgroundBoxRel(0,0, 719,575);
 }
 
