@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.45 2002/10/20 00:04:18 Zwen Exp $
+   $Id: timermanager.cpp,v 1.46 2002/10/22 22:33:55 Zwen Exp $
 
 	License: GPL
 
@@ -401,8 +401,8 @@ CTimerEvent::CTimerEvent(CTimerd::CTimerEventTypes evtype,CConfigFile *config, i
 //------------------------------------------------------------
 void CTimerEvent::Reschedule()
 {
-	int diff = 0;
-	int TAG = 60 * 60 * 24;	// sek * min * std
+	time_t diff = 0;
+	time_t TAG = 60 * 60 * 24;	// sek * min * std
 	printf("Reschedule\n");
 	switch(eventRepeat)
 	{
@@ -421,14 +421,42 @@ void CTimerEvent::Reschedule()
 			diff = TAG * 28;
 			break;
 		case CTimerd::TIMERREPEAT_MONTHLY: 
-			// hehe, son mist, todo
-			diff = TAG * 28;
+		{
+			struct tm *t= localtime(&alarmTime);
+		   t->tm_mon++;
+			if(t->tm_mon==12)
+			{
+				t->tm_mon=0;
+				t->tm_year++;
+			}
+			diff = mktime(t)-alarmTime;
 			break;
+		}
 		case CTimerd::TIMERREPEAT_BYEVENTDESCRIPTION :
 			// todo !!
 			break;
 		default:
-			dprintf("unknown repeat type %d\n",eventRepeat);
+			if(eventRepeat >= CTimerd::TIMERREPEAT_WEEKDAYS)
+			{
+				int weekdays = ((int)eventRepeat) >> 9;
+				if(weekdays > 0)
+				{
+					bool weekday_arr[7];
+					weekday_arr[0]=((weekdays & 0x40) > 0); //So
+					weekday_arr[1]=((weekdays & 0x1) > 0); //Mo
+					weekday_arr[2]=((weekdays & 0x2) > 0); //Di
+					weekday_arr[3]=((weekdays & 0x4) > 0); //Mi
+					weekday_arr[4]=((weekdays & 0x8) > 0); //Do
+					weekday_arr[5]=((weekdays & 0x10) > 0); //Fr
+					weekday_arr[6]=((weekdays & 0x20) > 0); //Sa
+					struct tm *t= localtime(&alarmTime);
+					int day;
+					for(day=t->tm_wday+1 ; !weekday_arr[day%7] ; day++){}
+					diff = (day - t->tm_wday) * TAG;
+				}
+			}
+			else
+				dprintf("unknown repeat type %d\n",eventRepeat);
 	}
 	if(diff != 0)
 	{
@@ -453,7 +481,7 @@ void CTimerEvent::Reschedule()
 void CTimerEvent::printEvent(void)
 {
 	struct tm *alarmtime, *announcetime;
-	dprintf("eventID: %03d type: %d state: %d repeat: %d ",eventID,eventType,eventState,eventRepeat);
+	dprintf("eventID: %03d type: %d state: %d repeat: %d ",eventID,eventType,eventState,((int)eventRepeat)&0x1FF);
 	announcetime = localtime(&announceTime);
 	dprintf("announce: %u %02d.%02d. %02d:%02d:%02d ",(uint) announceTime,announcetime->tm_mday,announcetime->tm_mon+1,announcetime->tm_hour,announcetime->tm_min,announcetime->tm_sec);
 	alarmtime = localtime(&alarmTime);

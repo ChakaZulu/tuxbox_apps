@@ -104,7 +104,7 @@ int CLircdClient::SendOnce(string device, string key)
 {
 	return Send("SEND_ONCE",device,key);
 }
-int CLircdClient::SendUsecs(string device, string key, int usecs)
+int CLircdClient::SendUsecs(string device, string key, unsigned long usecs)
 {
 	int ret1=Send("SEND_START",device,key);
 	usleep(usecs);

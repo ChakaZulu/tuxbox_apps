@@ -271,10 +271,16 @@ bool CVCRControl::CServerDevice::Record(const t_channel_id channel_id, unsigned 
 {
 	printf("Record channel_id: %x epg: %llx, apid %u\n", channel_id, epgid, apid);
 	if(channel_id != 0)		// wenn ein channel angegeben ist
+	{
+		if(g_Zapit->getMode() != CZapitClient::MODE_TV)
+		{
+			CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::CHANGEMODE , NeutrinoMessages::mode_tv | NeutrinoMessages::norezap );
+		}
 		if(g_Zapit->getCurrentServiceID() != channel_id)	// und momentan noch nicht getuned ist
 		{
 			g_Zapit->zapTo_serviceID(channel_id);		// dann umschalten
 		}
+	}
 
 	if(StopPlayBack && g_Zapit->isPlayBackActive())	// wenn playback gestoppt werden soll und noch läuft
 		g_Zapit->stopPlayBack();					// dann playback stoppen

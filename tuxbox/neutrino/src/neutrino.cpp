@@ -2590,7 +2590,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		}
 		if((data & mode_mask)== mode_tv)
 		{
-			printf("Debug: %d %d %d\n",data,(data&norezap),norezap);
 			if( mode != mode_tv )
 				if((data & norezap)==norezap)
 					tvMode(false);
@@ -2929,9 +2928,9 @@ void CNeutrinoApp::radioMode( bool rezap)
 	frameBuffer->useBackground(true);
 	frameBuffer->paintBackground();
 
+	g_RemoteControl->radioMode();
 	if( rezap )
 	{
-		g_RemoteControl->radioMode();
 		firstChannel();
 		channelsInit();
 		channelList->zapTo( firstchannel.channelNumber -1 );
@@ -3065,7 +3064,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.347 2002/10/22 10:46:57 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.348 2002/10/22 22:33:55 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

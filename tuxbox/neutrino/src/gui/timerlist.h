@@ -62,6 +62,7 @@ class CTimerList : public CMenuTarget
 		CTimerd::responseGetTimer timerNew;
 		int timerNew_standby_on;
 		char m_apid[5];
+		char m_weekdaysStr[8];
 		
 		int 			width;
 		int 			height;

@@ -532,6 +532,17 @@ timerlist.repeat.fourweekly 4-wöchentlich
 timerlist.repeat.monthly monatlich
 timerlist.repeat.byeventdescription siehe timer
 timerlist.repeat.unknown unbekannt
+timerlist.repeat.weekdays An Wochentagen
+timerlist.repeat.sunday So
+timerlist.repeat.monday Mo
+timerlist.repeat.tuesday Di
+timerlist.repeat.wednesday Mi
+timerlist.repeat.thursday Do
+timerlist.repeat.friday Fr
+timerlist.repeat.saturday Sa
+timerlist.weekdays Wochentage
+timerlist.weekdays.hint_1 Mo Di Mi Do Fr Sa So
+timerlist.weekdays.hint_2 'X'=Timer '-' kein Timer
 timerlist.program.unknown Programm unbekannt
 timerlist.standby.off Aufwachen aus Standby
 timerlist.standby.on Auf Standby gehen

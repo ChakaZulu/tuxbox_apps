@@ -534,6 +534,17 @@ timerlist.repeat.fourweekly fourweekly
 timerlist.repeat.monthly monthly
 timerlist.repeat.byeventdescription see timer
 timerlist.repeat.unknown unknown
+timerlist.repeat.weekdays on weekdays
+timerlist.repeat.sunday Su
+timerlist.repeat.monday Mo
+timerlist.repeat.tuesday Tu
+timerlist.repeat.wednesday We
+timerlist.repeat.thursday Th
+timerlist.repeat.friday Fr
+timerlist.repeat.saturday Sa
+timerlist.weekdays Days of teh week
+timerlist.weekdays.hint_1 Mo Tu We Th Fr Sa Su
+timerlist.weekdays.hint_2 'X'=timer '-' no timer
 timerlist.program.unknown Program unknown
 timerlist.standby.off Leave standby
 timerlist.standby.on Enter standby

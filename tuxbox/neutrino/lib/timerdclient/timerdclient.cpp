@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.34 2002/10/20 12:32:45 thegoodguy Exp $
+	$Id: timerdclient.cpp,v 1.35 2002/10/22 22:33:55 Zwen Exp $
 
 	License: GPL
 
@@ -304,5 +304,40 @@ void CTimerdClient::modifyTimerAPid(int eventid, uint apid)
 	close_connection();
 }
 
+//-------------------------------------------------------------------------
+void CTimerdClient::getWeekdaysFromStr(int *rep, char* str)
+{
+	if(*rep >= (int)CTimerd::TIMERREPEAT_WEEKDAYS)
+	{
+		for(int n=0;n<7;n++)
+		{
+			if(str[n]=='X' || str[n]=='x')
+			{
+				*rep |= (1 << (n+9));
+			}
+			else
+			{
+				*rep &= (~(1 << (n+9)));
+			}
+		}
+	}
+}
+//-------------------------------------------------------------------------
+void CTimerdClient::setWeekdaysToStr(CTimerd::CTimerEventRepeat rep, char* str)
+{
+	if(rep >= CTimerd::TIMERREPEAT_WEEKDAYS)
+	{
+		for(int n=0;n<7;n++)
+		{
+			if(rep & (1 << (n+9)))
+				str[n]='X';
+			else
+				str[n]='-';
+		}
+		str[7]=0;
+	}
+	else
+		strcpy(str,"-------");
+}
 //-------------------------------------------------------------------------
 

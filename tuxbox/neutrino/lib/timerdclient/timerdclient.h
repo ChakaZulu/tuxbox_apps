@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.28 2002/10/19 21:47:45 obi Exp $
+	$Id: timerdclient.h,v 1.29 2002/10/22 22:33:55 Zwen Exp $
 
 	License: GPL
 
@@ -129,6 +129,10 @@ class CTimerdClient:private CBasicClient
 
 		// Exit timerd and programm wakeup
 		bool shutdown();
+
+		// Convert String of O and X to repeat type and vice versa
+		void getWeekdaysFromStr(int *rep, char* str);
+		void setWeekdaysToStr(CTimerd::CTimerEventRepeat rep, char* str);
 };
 
 #endif

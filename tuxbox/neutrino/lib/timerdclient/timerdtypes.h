@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.4 2002/10/19 21:47:45 obi Exp $
+	$Id: timerdtypes.h,v 1.5 2002/10/22 22:33:55 Zwen Exp $
 
 	License: GPL
 
@@ -46,7 +46,8 @@ class CTimerd
 			TIMERREPEAT_BIWEEKLY, 
 			TIMERREPEAT_FOURWEEKLY, 
 			TIMERREPEAT_MONTHLY, 
-			TIMERREPEAT_BYEVENTDESCRIPTION
+			TIMERREPEAT_BYEVENTDESCRIPTION,
+			TIMERREPEAT_WEEKDAYS = 0x100 // Bits 9-15 specify weekdays (9=mo,10=di,...)
 		};
 
 		enum CTimerEventTypes
