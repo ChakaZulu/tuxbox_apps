@@ -1,7 +1,7 @@
 /*
   Client-Interface für zapit  -   DBoxII-Project
 
-  $Id: sectionsdclient.cpp,v 1.31 2002/12/09 20:07:52 thegoodguy Exp $
+  $Id: sectionsdclient.cpp,v 1.32 2003/03/09 22:44:49 thegoodguy Exp $
 
   License: GPL
 
@@ -311,6 +311,7 @@ bool CSectionsdClient::getCurrentNextServiceKey(const t_channel_id channel_id, C
 	}
 	else
 	{
+		current_next.flags = 0;
 		close_connection();
 		return false;
 	}
