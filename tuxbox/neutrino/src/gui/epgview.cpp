@@ -35,6 +35,7 @@
 #include "neutrino.h"
 
 #include "gui/widget/hintbox.h"
+#include "gui/widget/messagebox.h"
 
 
 CEpgData::CEpgData()
@@ -456,14 +457,20 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 						showText(showPos,textypos);
 					break;
 
+				case CRCInput::RC_red:
+					g_Timer->storeEvent (onid_sid, epgData.eventID, SwitchChannel|Record, epgData.epg_times.startzeit, epgData.epg_times.startzeit+epgData.epg_times.dauer);
+					ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+					break;
+
 				// -- 2002-05-13 rasc  Switch Channel
 				case CRCInput::RC_yellow:
 					// $$ EPG ID muss noch mit rein...
 					g_Timer->storeEvent (onid_sid, epgData.eventID, SwitchChannel, epgData.epg_times.startzeit, 0);
+					ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 					break;
 
-				case CRCInput::RC_red:
-					g_RCInput->postMsg( msg, data );
+// das muss raus				case CRCInput::RC_red:
+// das muss rasc					g_RCInput->postMsg( msg, data );
 
 				case CRCInput::RC_ok:
 				case CRCInput::RC_help:
@@ -579,7 +586,6 @@ void CEpgData::GetPrevNextEPGData( unsigned long long id, time_t* startzeit )
 int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
 
 {
-  CChannelEventList	evtlist;
   CChannelEventList::iterator e;
   time_t		curtime;
   struct  tm		*tmStartZeit;
@@ -591,7 +597,7 @@ int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
 
   	count = 0;
 	screening_dates = "";
-	evtlist = g_Sectionsd->getEventsServiceKey( onid_sid );
+	// alredy read: evtlist = g_Sectionsd->getEventsServiceKey( onid_sid );
     	curtime = time(NULL);
 
 	for ( e= evtlist.begin(); e != evtlist.end(); ++e )
@@ -619,12 +625,9 @@ int CEpgData::FollowScreenings (unsigned int onid_sid, string title)
 			screening_dates += "    ";
 			screening_dates += datetime_str;
 			screening_dates += "\n";
-
-			//fprintf (stderr,"FollowScreen: %s \n",datetime_str.c_str() );
 		}
 	}
 
-	//fprintf (stderr,"FollowScreen: count %d \n",count );
 	if (count) processTextToArray( screening_dates );
 	else       processTextToArray( "---\n" );
 
@@ -642,7 +645,7 @@ void CEpgData::showTimerEventBar (bool show)
 {
   int  x,y,w,h;
   int  cellwidth;		// 4 cells
-  int  h_offset;
+  int  h_offset, pos;
 
   w = ox;
   h = 30;
@@ -659,12 +662,16 @@ void CEpgData::showTimerEventBar (bool show)
     frameBuffer->paintBoxRel(x,y,w,h, COL_INFOBAR_SHADOW+1);
 
 
+
+    // Button: Timer Record & Channelswitch
+    pos = 0;
+    frameBuffer->paintIcon("rot.raw", x+8+cellwidth*pos, y+h_offset );
+    g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.recordevent").c_str(), COL_INFOBAR);
+
     // Button: Timer Channelswitch
-
-    frameBuffer->paintIcon("gelb.raw", x+8, y+h_offset );
-
-    g_Fonts->infobar_small->RenderString(x + 29, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch").c_str(), COL_INFOBAR);
-
+    pos = 1;
+    frameBuffer->paintIcon("gelb.raw", x+8+cellwidth*pos, y+h_offset );
+    g_Fonts->infobar_small->RenderString(x+29+cellwidth*pos, y+h-h_offset, w-30, g_Locale->getText("timerbar.channelswitch").c_str(), COL_INFOBAR);
 
     
 }

@@ -474,4 +474,9 @@ sleeptimerbox.title Sleeptimer
 sleeptimerbox.hint1 Shutdown time in min. (000=off)
 sleeptimerbox.hint2 The dbox2 will shutdown after this time.
 
-timerbar.channelswitch Timed switch
+timerbar.channelswitch Schedule
+timerbar.recordevent Record
+timer.eventtimed.title Schedule Event
+timer.eventtimed.msg The event is scheduled.\nThe dbox2 will switch to this channel at the given time.
+timer.eventrecord.title Schedule Record
+timer.eventrecord.msg   ... TO be DONE, or not to be done
