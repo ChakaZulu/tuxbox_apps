@@ -121,11 +121,11 @@ protected:
 public:
 	eRCShortDriver(const char *filename);
 	~eRCShortDriver();
-	void flushBuffer()
+	void flushBuffer() const
 	{
-		unsigned char buf;
+		__u16 buf;
 		if (handle != -1)
-			while ( ::read(handle, &buf, 1) );
+			while ( ::read(handle, &buf, 2) );
 	}
 };
 #endif
@@ -140,11 +140,11 @@ public:
 	eString getDeviceName();
 	eRCInputEventDriver(const char *filename);
 	~eRCInputEventDriver();
-	void flushBuffer()
+	void flushBuffer() const
 	{
-		unsigned char buf;
+		struct input_event ev;
 		if (handle != -1)
-			while ( ::read(handle, &buf, 1) );
+			while ( ::read(handle, &ev, sizeof(struct input_event)));
 	}
 };
 
