@@ -17,7 +17,7 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU General Public License for more details.
- 
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -34,7 +34,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdio.h>
- 
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -44,8 +44,9 @@
 #include <stdio.h>
 
 #include "dbox/avs_core.h"
+#include "ost/video.h"
 #include <sys/ioctl.h>
- 
+
 #include "../lcdd/lcdd.h"
 
 
@@ -58,7 +59,7 @@ struct rmsg {
   unsigned short param;
   unsigned short param2;
   char param3[30];
- 
+
 } rmsg;
 
 struct Ssettings
@@ -81,7 +82,7 @@ int loadSettings()
 {
 	int fd;
 	fd = open(CONF_FILE, O_RDONLY );
-	
+
 	if (fd==-1)
 	{
 		printf("[controld] error while loading settings: %s\n", CONF_FILE );
@@ -100,7 +101,7 @@ void saveSettings()
 {
 	int fd;
 	fd = open(CONF_FILE, O_WRONLY | O_CREAT );
-	
+
 	if (fd==-1)
 	{
 		printf("[controld] error while saving settings: %s\n", CONF_FILE );
@@ -115,7 +116,7 @@ void sendto_lcdd(unsigned char cmd, unsigned char param) {
 	int sock_fd;
 	SAI servaddr;
 	struct lcdd_msg lmsg;
-	
+
 	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	memset(&servaddr,0,sizeof(servaddr));
 	servaddr.sin_family=AF_INET;
@@ -159,7 +160,7 @@ void setVideoType(int format)
 	}
 
 	settings.videotype = format;
-	
+
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
 		perror("open");
@@ -177,9 +178,11 @@ void setVideoType(int format)
 void setVideoFormat(int format)
 {
 	int fd;
+	int videoDisplayFormat;
+
 	/*
 		16:9 : fnc 1
-		4:3  : fnc 2 
+		4:3  : fnc 2
 	*/
 	if (format < 0)
 	{
@@ -203,12 +206,35 @@ void setVideoFormat(int format)
 		return;
 	}
 	close(fd);
+
+	switch( format)
+	{
+//	?	case AVS_FNCOUT_INTTV	: videoDisplayFormat = VIDEO_PAN_SCAN;
+		case AVS_FNCOUT_EXT169	: videoDisplayFormat = VIDEO_CENTER_CUT_OUT; break;
+		case AVS_FNCOUT_EXT43	: videoDisplayFormat = VIDEO_LETTER_BOX; break;
+		default: videoDisplayFormat = VIDEO_LETTER_BOX;
+//	?	case AVS_FNCOUT_EXT43_1	: videoDisplayFormat = VIDEO_PAN_SCAN;
+	}
+
+	if ((fd = open("/dev/ost/video0",O_RDWR)) <= 0)
+	{
+		perror("open");
+		return;
+	}
+
+	if ( ioctl(fd, VIDEO_SET_DISPLAY_FORMAT, videoDisplayFormat))
+	{
+		perror("VIDEO SET DISPLAY FORMAT:");
+		return;
+	}
+	close(fd);
+
 }
 
 void routeVideo(int a, int b, int nothing)
 {
 	int fd;
-	
+
 	if ((fd = open("/dev/dbox/avs0",O_RDWR)) <= 0)
 	{
 		perror("open");
@@ -321,22 +347,22 @@ void parse_command(int connfd)
   //byteorder!!!!!!
   rmsg.param = ((rmsg.param & 0x00ff) << 8) | ((rmsg.param & 0xff00) >> 8);
   rmsg.param2 = ((rmsg.param2 & 0x00ff) << 8) | ((rmsg.param2 & 0xff00) >> 8);
- 
- 
+
+
   printf("[controld] Command received\n");
   printf("[controld]   Version: %d\n", rmsg.version);
   printf("[controld]   Command: %d\n", rmsg.cmd);
   printf("[controld]   Param: %d\n", rmsg.param);
   printf("[controld]   Param2: %d\n", rmsg.param2);
   printf("[controld]   Param3: %s\n", rmsg.param3);
- 
- 
+
+
   if(rmsg.version!=1)
   {
     perror("[controld] unknown version\n");
     return;
   }
- 
+
   switch (rmsg.cmd)
   {
     case 1:
@@ -383,7 +409,7 @@ void parse_command(int connfd)
     default:
 		printf("[controld] unknown command\n");
   }
- 
+
 }
 
 
@@ -401,26 +427,26 @@ int main(int argc, char **argv)
 	int listenfd, connfd;
 	socklen_t clilen;
 	SAI cliaddr, servaddr;
- 
+
 	printf("Controld  0.1\n\n");
- 
+
 	if (fork() != 0) return 0;
- 
+
 	//network-setup
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
- 
+
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(1610);
- 
+
 	if ( bind(listenfd, (SA *) &servaddr, sizeof(servaddr)) !=0)
 	{
 		perror("[controld] bind failed...\n");
 		exit(-1);
 	}
- 
- 
+
+
 	if (listen(listenfd, 5) !=0)
 	{
 		perror("[controld] listen failed...\n");
@@ -441,7 +467,7 @@ int main(int argc, char **argv)
 	}
 
 
-	//init 
+	//init
 	setVolume(settings.volume);
 	setVideoType(settings.videotype);
 	setVideoFormat(settings.videoformat);
@@ -449,13 +475,13 @@ int main(int argc, char **argv)
 	{
 		clilen = sizeof(cliaddr);
 		connfd = accept(listenfd, (SA *) &cliaddr, &clilen);
- 
+
 		memset(&rmsg, 0, sizeof(rmsg));
 		read(connfd,&rmsg,sizeof(rmsg));
- 
+
 		parse_command(connfd);
- 
+
 		close(connfd);
   }
- 
+
 }
