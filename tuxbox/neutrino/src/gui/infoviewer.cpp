@@ -541,7 +541,7 @@ void CInfoViewer::showFailure()
 	ShowHint ( "messagebox.error", g_Locale->getText("infoviewer.notavailable"), "info.raw", 430 );
 }
 
-int CInfoViewer::handleMsg(uint msg, uint data)
+int CInfoViewer::handleMsg(uint msg, uint64_t data)
 {
     if ( ( msg == NeutrinoMessages::EVT_CURRENTNEXT_EPG ) ||
 		 ( msg == NeutrinoMessages::EVT_NEXTPROGRAM ) )
