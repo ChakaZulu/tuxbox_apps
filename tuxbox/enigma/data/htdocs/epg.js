@@ -11,5 +11,4 @@ function EPGDetails(xy)
 function switchChannel(xy)
 {
 	document.location = "/cgi-bin/zapTo?path="+xy;
-	parent.setTimeout("reload()", 3000);
 }
