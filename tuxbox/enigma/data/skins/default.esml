@@ -517,8 +517,7 @@
 
 	<object name="tsAutomatic_sat">
 		<tsAutomatic position="0:0" size="e:340">
-			<eLabel name="lNet" position="10:20" size="150:30" text="Network:" />
-			<eComboBox name="network" position="160:20" size="e-70:35" loadDeco="" helptext="choose satellite/cable provider (ok)" />
+			<eComboBox name="network" position="10:20" size="e-70:35" loadDeco="" helptext="choose satellite/cable provider (ok)" />
 			<eLabel name="status" position="10:70" size="e-10:90" />
 			<eFEStatus name="festatus" position="0:170" size="400:85" />
 			<eCheckbox text="only Free" name="onlyFree" position="10:e-80" size="160:30" helptext="add only unscrambled services" />
@@ -538,8 +537,7 @@
 
 	<object name="tsAutomatic_cable">
 		<tsAutomatic position="0:0" size="e:340">
-			<eLabel name="lNet" position="10:20" size="150:30" text="Network:" />
-			<eComboBox name="network" position="160:20" size="e-70:35" loadDeco="" helptext="choose satellite/cable provider (ok)" />
+			<eComboBox name="network" position="10:20" size="e-70:35" loadDeco="" helptext="choose satellite/cable provider (ok)" />
 			<eLabel name="status" position="10:70" size="e-10:90" />
 			<eCheckbox text="only Free" name="onlyFree" position="10:e-80" size="160:30" helptext="add only unscrambled services" />
 			<eFEStatus name="festatus" position="0:170" size="400:85" />
