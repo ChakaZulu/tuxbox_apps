@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.2 2001/12/30 18:38:37 Simplex Exp $
+  $Id: bouquets.cpp,v 1.3 2002/01/02 18:07:54 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.3  2002/01/02 18:07:54  Simplex
+  fixed bug with channels of servicetype 4
+
   Revision 1.2  2001/12/30 18:38:37  Simplex
   intregration of CBouquetManager (part I)
 
@@ -42,7 +45,8 @@ channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
 	ChannelList& channels = tvChannels;
 	switch (serviceType)
 	{
-		case 1: channels = tvChannels; break;
+		case 1:
+		case 4: channels = tvChannels; break;
 		case 2: channels = radioChannels; break;
 	}
 
@@ -64,7 +68,8 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType)
 	ChannelList& channels = tvChannels;
 	switch (serviceType)
 	{
-		case 1: channels = tvChannels; break;
+		case 1:
+		case 4: channels = tvChannels; break;
 		case 2: channels = radioChannels; break;
 	}
 
@@ -83,6 +88,7 @@ void CBouquet::addService( channel* newChannel)
 	switch (newChannel->service_type)
 	{
 		case 1:
+		case 4:
 			tvChannels.insert( tvChannels.end(), newChannel);
 		break;
 		case 2:
@@ -97,7 +103,8 @@ void CBouquet::removeService( channel* oldChannel)
 	ChannelList& channels = tvChannels;
 	switch (oldChannel->service_type)
 	{
-		case 1: channels = tvChannels; break;
+		case 1:
+		case 4: channels = tvChannels; break;
 		case 2: channels = radioChannels; break;
 	}
 
@@ -115,7 +122,8 @@ void CBouquet::moveService(  char* serviceName, uint newPosition, uint serviceTy
 	ChannelList& channels = tvChannels;
 	switch (serviceType)
 	{
-		case 1: channels = tvChannels; break;
+		case 1:
+		case 4: channels = tvChannels; break;
 		case 2: channels = radioChannels; break;
 	}
 
@@ -144,7 +152,8 @@ void CBouquet::moveService(  uint oldPosition, uint newPosition, uint serviceTyp
 	ChannelList& channels = tvChannels;
 	switch (serviceType)
 	{
-		case 1: channels = tvChannels; break;
+		case 1:
+		case 4: channels = tvChannels; break;
 		case 2: channels = radioChannels; break;
 	}
 	if ((oldPosition < channels.size()) && (newPosition < channels.size()))
