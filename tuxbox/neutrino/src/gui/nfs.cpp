@@ -313,7 +313,7 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(GenericMenuSeparator);
 	mountMenuEntryW.addItem(GenericMenuBack);
 	mountMenuEntryW.addItem(GenericMenuSeparatorLine);
-	CIPInput ipInput(LOCALE_NFS_IP, g_settings.network_nfs_ip[nr], "ipsetup.hint_1", "ipsetup.hint_2");
+	CIPInput ipInput(LOCALE_NFS_IP, g_settings.network_nfs_ip[nr], LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CStringInputSMS dirInput(LOCALE_NFS_DIR, dir, 30, NULL, NULL,"abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ ");
 	CMenuOptionChooser *automountInput= new CMenuOptionChooser(LOCALE_NFS_AUTOMOUNT, automount, true);
 	automountInput->addOption(0, LOCALE_MESSAGEBOX_NO);

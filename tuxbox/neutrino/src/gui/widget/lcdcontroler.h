@@ -54,18 +54,17 @@ class CLcdControler : public CMenuTarget
 		unsigned char brightness;
 		unsigned char brightnessstandby;
 
-
 		neutrino_locale_t name;
 
 		CChangeObserver* observer;
 
 		void paint();
 		void setLcd();
-		void paintSlider(int x, int y, unsigned int spos, float factor, const char * const text_to_localize, const char * const iconname, bool selected); // text in UTF-8
+		void paintSlider(int x, int y, unsigned int spos, float factor, const neutrino_locale_t text, const char * const iconname, bool selected);
 
 	public:
 
-		CLcdControler(const neutrino_locale_t Name, CChangeObserver* Observer=NULL); // UTF-8
+		CLcdControler(const neutrino_locale_t Name, CChangeObserver* Observer = NULL);
 
 		void hide();
 		int exec(CMenuTarget* parent, const std::string & actionKey);

@@ -44,6 +44,8 @@ typedef std::map<std::string, std::string> mapLocaleData;
 
 typedef const char * neutrino_locale_t;
 
+#define ARE_LOCALES_EQUAL(a,b) (strcmp(a,b) == 0)
+
 class CLocaleManager
 {
 	private:
@@ -272,10 +274,25 @@ class CLocaleManager
 #define LOCALE_FILEBROWSER_SORT_TYPE               "filebrowser.sort.type"
 
 
+#define LOCALE_IPSETUP_HINT_1                      "ipsetup.hint_1"
+#define LOCALE_IPSETUP_HINT_2                      "ipsetup.hint_2"
+
+
 #define LOCALE_LANGUAGESETUP_HEAD                  "languagesetup.head"
 #define LOCALE_LANGUAGESETUP_SELECT                "languagesetup.select"
-
-
+#define LOCALE_LCDCONTROLER_BRIGHTNESS             "lcdcontroler.brightness"
+#define LOCALE_LCDCONTROLER_BRIGHTNESSSTANDBY      "lcdcontroler.brightnessstandby"
+#define LOCALE_LCDCONTROLER_CONTRAST               "lcdcontroler.contrast"
+#define LOCALE_LCDCONTROLER_HEAD                   "lcdcontroler.head"
+#define LOCALE_LCDMENU_AUTODIMM                    "lcdmenu.autodimm"
+#define LOCALE_LCDMENU_HEAD                        "lcdmenu.head"
+#define LOCALE_LCDMENU_INVERSE                     "lcdmenu.inverse"
+#define LOCALE_LCDMENU_LCDCONTROLER                "lcdmenu.lcdcontroler"
+#define LOCALE_LCDMENU_POWER                       "lcdmenu.power"
+#define LOCALE_LCDMENU_STATUSLINE                  "lcdmenu.statusline"
+#define LOCALE_LCDMENU_STATUSLINE_BOTH             "lcdmenu.statusline.both"
+#define LOCALE_LCDMENU_STATUSLINE_PLAYTIME         "lcdmenu.statusline.playtime"
+#define LOCALE_LCDMENU_STATUSLINE_VOLUME           "lcdmenu.statusline.volume"
 #define LOCALE_MAINMENU_GAMES                      "mainmenu.games"
 #define LOCALE_MAINMENU_HEAD                       "mainmenu.head"
 #define LOCALE_MAINMENU_MOVIEPLAYER                "mainmenu.movieplayer"
@@ -390,6 +407,17 @@ class CLocaleManager
 #define LOCALE_NFS_UMOUNTERROR                     "nfs.umounterror"
 #define LOCALE_NFS_USERNAME                        "nfs.username"
 #define LOCALE_NFSMENU_HEAD                        "nfsmenu.head"
+#define LOCALE_NVOD_PERCENTAGE                     "nvod.proz"
+#define LOCALE_NVOD_STARTING                       "nvod.starting"
+#define LOCALE_NVODSELECTOR_DIRECTORMODE           "nvodselector.directormode"
+#define LOCALE_NVODSELECTOR_HEAD                   "nvodselector.head"
+#define LOCALE_NVODSELECTOR_SUBSERVICE             "nvodselector.subservice"
+#define LOCALE_OPTIONS_DEFAULT                     "options.default"
+#define LOCALE_OPTIONS_FB                          "options.fb"
+#define LOCALE_OPTIONS_NULL                        "options.null"
+#define LOCALE_OPTIONS_OFF                         "options.off"
+#define LOCALE_OPTIONS_ON                          "options.on"
+#define LOCALE_OPTIONS_SERIAL                      "options.serial"
 
 
 #define LOCALE_TIMING_CHANLIST                     "timing.chanlist"

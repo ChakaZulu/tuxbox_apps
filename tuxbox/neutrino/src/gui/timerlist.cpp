@@ -722,11 +722,11 @@ int CTimerList::modifyTimer()
 	CMenuForwarder *m0 = new CMenuForwarder("timerlist.type", false, type);
 	timerSettings.addItem( m0);
 
-	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &timer->alarmTime , "ipsetup.hint_1", "ipsetup.hint_2");
+	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &timer->alarmTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 	timerSettings.addItem( m1);
 
-   CDateInput timerSettings_stopTime("timerlist.stoptime", &timer->stopTime , "ipsetup.hint_1", "ipsetup.hint_2");
+   CDateInput timerSettings_stopTime("timerlist.stoptime", &timer->stopTime , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	if(timer->stopTime != 0)
 	{
 		CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", true, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
@@ -778,10 +778,10 @@ int CTimerList::newTimer()
 	timerSettings.addItem(GenericMenuBack);
 	timerSettings.addItem(GenericMenuSeparatorLine);
 
-	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &(timerNew.alarmTime) , "ipsetup.hint_1", "ipsetup.hint_2");
+	CDateInput timerSettings_alarmTime("timerlist.alarmtime", &(timerNew.alarmTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder *m1 = new CMenuForwarder("timerlist.alarmtime", true, timerSettings_alarmTime.getValue (), &timerSettings_alarmTime );
 
-	CDateInput timerSettings_stopTime("timerlist.stoptime", &(timerNew.stopTime) , "ipsetup.hint_1", "ipsetup.hint_2");
+	CDateInput timerSettings_stopTime("timerlist.stoptime", &(timerNew.stopTime) , LOCALE_IPSETUP_HINT_1, LOCALE_IPSETUP_HINT_2);
 	CMenuForwarder *m2 = new CMenuForwarder("timerlist.stoptime", false, timerSettings_stopTime.getValue (), &timerSettings_stopTime );
 
 	strcpy(m_weekdaysStr,"-------");

@@ -473,7 +473,7 @@ void CInfoViewer::showSubchan()
 
 		if ( g_RemoteControl->director_mode )
 		{
-			int w= 20+ g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText("nvodselector.directormode"), true) + 20; // UTF-8
+			int w= 20+ g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->getRenderWidth(g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE), true) + 20; // UTF-8
 			if ( w> dx )
 				dx= w;
 			dy= dy* 2;
@@ -499,7 +499,7 @@ void CInfoViewer::showSubchan()
 		if ( g_RemoteControl->director_mode )
 		{
 			frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_YELLOW, x+ 8, y+ dy- 20 );
-			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText("nvodselector.directormode"), COL_MENUCONTENT, 0, true); // UTF-8
+			g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 30, y+ dy- 2, dx- 40, g_Locale->getText(LOCALE_NVODSELECTOR_DIRECTORMODE), COL_MENUCONTENT, 0, true); // UTF-8
 		}
 
 
