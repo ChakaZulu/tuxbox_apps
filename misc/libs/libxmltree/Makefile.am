@@ -1,3 +1,6 @@
+INCLUDES = \
+        -Ixmltok
+
 lib_LTLIBRARIES = libxmltree.la
 
 libxmltree_la_SOURCES = \

@@ -308,7 +308,7 @@ static const struct normal_encoding latin1_encoding = {
   { VTABLE1, latin1_toUtf8, latin1_toUtf16, 1, 0, 0 },
   {
 #include "asciitab.h"
-#include "lat1tab.h"
+#include "latin1tab.h"
   }
 };
 
@@ -474,7 +474,7 @@ static const struct normal_encoding little2_encoding = {
   },
   {
 #include "asciitab.h"
-#include "lat1tab.h"
+#include "latin1tab.h"
   }
 };
 
@@ -484,7 +484,7 @@ static const struct normal_encoding internal_little2_encoding = {
   { VTABLE, 2, 0, 1 },
   {
 #include "iasctab.h"
-#include "lat1tab.h"
+#include "latin1tab.h"
   }
 };
 
@@ -541,7 +541,7 @@ static const struct normal_encoding big2_encoding = {
   },
   {
 #include "asciitab.h"
-#include "lat1tab.h"
+#include "latin1tab.h"
   }
 };
 
@@ -551,7 +551,7 @@ static const struct normal_encoding internal_big2_encoding = {
   { VTABLE, 2, 0, 1 },
   {
 #include "iasctab.h"
-#include "lat1tab.h"
+#include "latin1tab.h"
   }
 };
 
