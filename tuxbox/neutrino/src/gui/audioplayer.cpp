@@ -244,9 +244,9 @@ int CAudioPlayerGui::show()
 	{
 		if(!m_screensaver)
 		{
-			updateTimes();
 			updateMetaData();
 		}
+		updateTimes();
 
 		if(CNeutrinoApp::getInstance()->getMode()!=NeutrinoMessages::mode_audio)
 		{
@@ -565,13 +565,19 @@ int CAudioPlayerGui::show()
 			}
 			else
 			{
-			        if(m_state!=CAudioPlayerGui::STOP)
+				if(m_state!=CAudioPlayerGui::STOP)
 				{
 					key_level=1;
 					paintFoot();
-				} else {
-					if (!playlist.empty()) {
+				} 
+				else 
+				{
+					if (!playlist.empty()) 
+					{
 						savePlaylist();
+						CLCD::getInstance()->setMode(CLCD::MODE_AUDIO);
+						paintLCD();
+						update=true;
 					}
 				}
 			}
@@ -1247,30 +1253,33 @@ void CAudioPlayerGui::updateTimes(const bool force)
 			m_time_played = CAudioPlayer::getInstance()->getTimePlayed();
 			updatePlayed = true;
 		}
-		char tot_time[11];
-		snprintf(tot_time, 10, " / %ld:%02ld", m_time_total / 60, m_time_total % 60);
-		char tmp_time[8];
-		snprintf(tmp_time, 7, "%ld:00", m_time_total / 60);
-		char play_time[8];
-		snprintf(play_time, 7, "%ld:%02ld", m_time_played / 60, m_time_played % 60);
-
-		int w1 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tot_time);
-		int w2 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp_time);
-
-		if (updateTotal)
+		if(!m_screensaver)
 		{
-			frameBuffer->paintBoxRel(x+width-w1-10, y+4, w1+4, fheight, COL_MENUCONTENTSELECTED_PLUS_0);
-			if(m_time_total > 0)
-				g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-10, y+4 + fheight, w1, tot_time, COL_MENUCONTENTSELECTED);
-		}
-		if (updatePlayed || (m_state == CAudioPlayerGui::PAUSE))
-		{
-			frameBuffer->paintBoxRel(x+width-w1-w2-15, y+4, w2+4, fheight, COL_MENUCONTENTSELECTED_PLUS_0);
-			struct timeval tv;
-			gettimeofday(&tv, NULL);
-			if ((m_state != CAudioPlayerGui::PAUSE) || (tv.tv_sec & 1))
+			char tot_time[11];
+			snprintf(tot_time, 10, " / %ld:%02ld", m_time_total / 60, m_time_total % 60);
+			char tmp_time[8];
+			snprintf(tmp_time, 7, "%ld:00", m_time_total / 60);
+			char play_time[8];
+			snprintf(play_time, 7, "%ld:%02ld", m_time_played / 60, m_time_played % 60);
+			
+			int w1 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tot_time);
+			int w2 = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp_time);
+
+			if (updateTotal)
 			{
-				g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-w2-11, y+4 + fheight, w2, play_time, COL_MENUCONTENTSELECTED);
+				frameBuffer->paintBoxRel(x+width-w1-10, y+4, w1+4, fheight, COL_MENUCONTENTSELECTED_PLUS_0);
+				if(m_time_total > 0)
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-10, y+4 + fheight, w1, tot_time, COL_MENUCONTENTSELECTED);
+			}
+			if (updatePlayed || (m_state == CAudioPlayerGui::PAUSE))
+			{
+				frameBuffer->paintBoxRel(x+width-w1-w2-15, y+4, w2+4, fheight, COL_MENUCONTENTSELECTED_PLUS_0);
+				struct timeval tv;
+				gettimeofday(&tv, NULL);
+				if ((m_state != CAudioPlayerGui::PAUSE) || (tv.tv_sec & 1))
+				{
+					g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->RenderString(x+width-w1-w2-11, y+4 + fheight, w2, play_time, COL_MENUCONTENTSELECTED);
+				}
 			}
 		}
 		if((updatePlayed || updateTotal) && m_time_total!=0)
