@@ -159,7 +159,7 @@ void CChMosaic::doMosaic()
 	pig->show (coord[i].x,coord[i].y, coord[i].w, coord[i].h);
 	channellist->zapTo(channel);
 	capture->set_coord (coord[i].x, coord[i].y, coord[i].w, coord[i].h);
-	capture->set_output_size (coord[i].w, coord[i].h);
+//	capture->set_output_size (coord[i].w, coord[i].h);
 
 	sleep (2);
 
@@ -174,11 +174,9 @@ void CChMosaic::doMosaic()
 		printf ("pig inner loop: %d - %d \n",i,j);
 
 
-		if (msg == CRCInput::RC_timeout) {
-			printf ("pig inner loop timeout: \n");
 			// $$$ TEST
 			capture->readframe (frame_buf);
-			if (frame_buf[10] == 0x00)  continue;
+			//if (frame_buf[10] == 0x00)  continue;
 
 			int a;
 			for (a=0; a<0x10; a++) {
@@ -186,6 +184,9 @@ void CChMosaic::doMosaic()
 			}
 			printf ("\n");
 
+		if (msg == CRCInput::RC_timeout) {
+			printf ("pig inner loop timeout: \n");
+			i = i;
 		}
 
 

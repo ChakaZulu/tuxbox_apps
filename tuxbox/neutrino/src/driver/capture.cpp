@@ -224,7 +224,7 @@ void CCAPTURE::set_output_size (int w, int h)
 
 //
 // -- capture a frame
-// -- if buffer == NULL, then routine will alloc memory!
+// -- if buffer == NULL, routine will alloc memory!
 // -- destroy will not free this allocated memory!
 // -- otherwise buffer has to be large enough!
 //
@@ -255,7 +255,11 @@ u_char *CCAPTURE::readframe (u_char *buf)
 
 
 		n = read (fd, b, vid.fmt.pix.bytesperline*vid.fmt.pix.height);
-		if (n < 0)  perror ("Error reading buffer");
+		if (n < 0)  {
+			perror ("Error reading capture buffer");
+			if (!buf) free (b);
+			return (u_char *)NULL;
+		}
 
 		return b;
 	}
@@ -277,8 +281,13 @@ u_char *CCAPTURE::readframe (u_char *buf)
 			: (u_char *) malloc (stride * out_h);
 
 		n = read(fd, b, stride * out_h);
-		if (n < 0)  perror ("Error reading buffer");
   		capture_stop(fd);
+		if (n < 0)  {
+			perror ("Error reading capture buffer");
+			if (!buf) free (b);
+			return (u_char *)NULL;
+		}
+
 
 		return b;
 	}
