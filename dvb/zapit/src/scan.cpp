@@ -375,42 +375,42 @@ void *start_scanthread(void *param)
 			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
 			printf("[scan.cpp] SCANNING HOTBIRD\n");
-			get_nits(12692,27500,0,3,1);
-			get_nits(12539,27500,0,3,1);
-			get_nits(11746,27500,0,3,1);
-			get_nits(12168,27500,0,3,1);
-			get_nits(12034,27500,1,3,1);
-			get_nits(11919,27500,1,2,1);
-			get_nits(11804,27500,1,2,1);
-			get_nits(12169,27500,0,3,1);
-			get_nits(12539,27500,0,3,1);
-			get_nits(12111,27500,1,3,1);
-			get_nits(12168,27500,0,3,1);
-			get_nits(11283,27500,1,3,1);
-			get_nits(12283,27500,1,3,1);
-			get_nits(11331,6111,1,3,1);
-			get_nits(11412,6198,0,7,1);
-			get_nits(10723,29895,0,3,1);
-			get_nits(10775,28000,0,3,1);
-			get_nits(10975,4340,0,3,1);
-			get_nits(11060,6510,1,5,1);
-			get_nits(11131,5632,1,3,1);
-			get_nits(11178,21100,0,3,1);
-			get_nits(11196,9100,1,1,1);
-			get_nits(11205,4000,0,3,1);
-			get_nits(11304,30000,0,3,1);
-			get_nits(11338,5632,1,3,1);
-			get_nits(11457,6111,0,3,1);
-			get_nits(11464,4398,0,7,1);
+			get_nits(12692, 27500, 0, 3, 1);
+			get_nits(12539, 27500, 0, 3, 1);
+			get_nits(11746, 27500, 0, 3, 1);
+			get_nits(12168, 27500, 0, 3, 1);
+			get_nits(12034, 27500, 1, 3, 1);
+			get_nits(11919, 27500, 1, 2, 1);
+			get_nits(11804, 27500, 1, 2, 1);
+			get_nits(12169, 27500, 0, 3, 1);
+			get_nits(12539, 27500, 0, 3, 1);
+			get_nits(12111, 27500, 1, 3, 1);
+			get_nits(12168, 27500, 0, 3, 1);
+			get_nits(11283, 27500, 1, 3, 1);
+			get_nits(12283, 27500, 1, 3, 1);
+			get_nits(11331,  6111, 1, 3, 1);
+			get_nits(11412,  6198, 0, 7, 1);
+			get_nits(10723, 29895, 0, 3, 1);
+			get_nits(10775, 28000, 0, 3, 1);
+			get_nits(10975,  4340, 0, 3, 1);
+			get_nits(11060,  6510, 1, 5, 1);
+			get_nits(11131,  5632, 1, 3, 1);
+			get_nits(11178, 21100, 0, 3, 1);
+			get_nits(11196,  9100, 1, 1, 1);
+			get_nits(11205,  4000, 0, 3, 1);
+			get_nits(11304, 30000, 0, 3, 1);
+			get_nits(11338,  5632, 1, 3, 1);
+			get_nits(11457,  6111, 0, 3, 1);
+			get_nits(11464,  4398, 0, 7, 1);
 #if 0
-			get_nits(12211,5632,0,3,1);
-			get_nits(12220,6161,0,3,1);
-			get_nits(12236,13400,1,3,1);
-			get_nits(12198,12130,0,7,1);
-			get_nits(12484,8300,1,3,1);
-			get_nits(12573,5632,0,3,1);
-			get_nits(12581,5632,0,3,1);
-			get_nits(12590,5632,0,3,1);
+			get_nits(12211,  5632, 0, 3, 1);
+			get_nits(12220,  6161, 0, 3, 1);
+			get_nits(12236, 13400, 1, 3, 1);
+			get_nits(12198, 12130, 0, 7, 1);
+			get_nits(12484,  8300, 1, 3, 1);
+			get_nits(12573,  5632, 0, 3, 1);
+			get_nits(12581,  5632, 0, 3, 1);
+			get_nits(12590,  5632, 0, 3, 1);
 #endif
 			get_sdts();
 
@@ -486,48 +486,48 @@ void *start_scanthread(void *param)
       if (do_diseqc & 16)
       {
       	curr_sat = 16;
-		strcpy(satName, "SIRIUS5");
+		strcpy(satName, "SIRIUS");
     	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
-      printf("[scan.cpp] SCANNING SIRIUS5\n");
-      get_nits(12050,27500,1,3,2);
-      get_nits(11975,27500,1,3,2);
-      get_nits(12028,27500,0,3,2);
-      get_nits(11994,27500,0,3,2);
-      get_nits(11880,27500,0,3,2);
-      get_nits(11804,27500,0,3,2);
-      get_nits(11823,27500,1,3,2);
-      get_nits(12380,27500,0,3,2);
-      get_nits(11547,27500,0,3,2);
-      get_nits(11727,27500,0,3,2);
-      get_nits(11766,27500,0,3,2);
-      get_nits(12073,2537600,0,3,2);
-      get_nits(12153,7028,0,3,2);
-      get_nits(12188,24500,0,7,2);
-      get_nits(12226,25540,0,7,2);
-      get_nits(12245,27500,1,7,2);
-      get_nits(12280,27500,1,3,2);
-      get_nits(12303,25548,0,7,2);
-      get_nits(12340,20000,0,3,2);
-      get_nits(12415,25540,0,7,2);
-      get_nits(12450,18056,0,3,2);
-      get_nits(12469,5185,0,3,2);
-      get_nits(12590,6111,1,3,2);
-      get_nits(12600,6111,1,3,2);
-      get_nits(12608,6111,1,3,2);
-      get_nits(12616,6111,1,3,2);
-      get_nits(12629,3222,1,7,2);
-      get_nits(12633,3643,1,7,2);
-      get_nits(12640,4000,1,3,2);
-      get_nits(12644,3200,1,3,2);
-      get_nits(12649,3977,1,3,2);
-      get_nits(12661,6110,0,3,2);
-      get_nits(12674,6666,1,1,2);
-      get_nits(12674,6110,0,3,2);
-      get_nits(12683,6666,1,1,2);
-      get_nits(12686,3400,0,3,2);
-      get_nits(12690,3980,1,3,2);
-      get_nits(12718,4000,0,7,2);
+      printf("[scan.cpp] SCANNING SIRIUS\n");
+      get_nits(12050, 27500, 1, 3, 2);
+      get_nits(11975, 27500, 1, 3, 2);
+      get_nits(12028, 27500, 0, 3, 2);
+      get_nits(11994, 27500, 0, 3, 2);
+      get_nits(11880, 27500, 0, 3, 2);
+      get_nits(11804, 27500, 0, 3, 2);
+      get_nits(11823, 27500, 1, 3, 2);
+      get_nits(12380, 27500, 0, 3, 2);
+      get_nits(11547, 27500, 0, 3, 2);
+      get_nits(11727, 27500, 0, 3, 2);
+      get_nits(11766, 27500, 0, 3, 2);
+      get_nits(12073, 25376, 0, 3, 2);
+      get_nits(12153,  7028, 0, 3, 2);
+      get_nits(12188, 24500, 0, 7, 2);
+      get_nits(12226, 25540, 0, 7, 2);
+      get_nits(12245, 27500, 1, 7, 2);
+      get_nits(12280, 27500, 1, 3, 2);
+      get_nits(12303, 25548, 0, 7, 2);
+      get_nits(12340, 20000, 0, 3, 2);
+      get_nits(12415, 25540, 0, 7, 2);
+      get_nits(12450, 18056, 0, 3, 2);
+      get_nits(12469,  5185, 0, 3, 2);
+      get_nits(12590,  6111, 1, 3, 2);
+      get_nits(12600,  6111, 1, 3, 2);
+      get_nits(12608,  6111, 1, 3, 2);
+      get_nits(12616,  6111, 1, 3, 2);
+      get_nits(12629,  3222, 1, 7, 2);
+      get_nits(12633,  3643, 1, 7, 2);
+      get_nits(12640,  4000, 1, 3, 2);
+      get_nits(12644,  3200, 1, 3, 2);
+      get_nits(12649,  3977, 1, 3, 2);
+      get_nits(12661,  6110, 0, 3, 2);
+      get_nits(12674,  6666, 1, 1, 2);
+      get_nits(12674,  6110, 0, 3, 2);
+      get_nits(12683,  6666, 1, 1, 2);
+      get_nits(12686,  3400, 0, 3, 2);
+      get_nits(12690,  3980, 1, 3, 2);
+      get_nits(12718,  4000, 0, 7, 2);
       get_sdts();
 
        if (!scantransponders.empty())
@@ -544,7 +544,7 @@ void *start_scanthread(void *param)
 	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
       	  	fprintf(fd,"<ZAPIT>\n");
       	}
-	fprintf(fd, "<satellite name=\"Sirius5\" diseqc=\"2\">\n");
+	fprintf(fd, "<satellite name=\"Sirius 5.0E\" diseqc=\"2\">\n");
 	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
 	    {
 	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
@@ -557,6 +557,88 @@ void *start_scanthread(void *param)
        scantransponders.clear();
        }
 
+	if (do_diseqc & 18)
+	{
+		curr_sat = 18;
+		strcpy(satName, "THOR");
+		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+
+		printf("[scan.cpp] SCANNING THOR\n");
+		get_nits(10966,  2963, 1, 3, 3);
+		get_nits(10984,  6666, 1, 7, 3);
+		get_nits(10984,  5924, 1, 3, 3);
+		get_nits(10995, 10000, 1, 3, 3);
+		get_nits(11003, 13300, 1, 7, 3);
+		get_nits(11014, 26000, 0, 3, 3);
+		get_nits(11029,  2816, 1, 3, 3);
+		get_nits(11044,  5632, 1, 3, 3);
+		get_nits(11054,  6110, 1, 3, 3);
+		get_nits(11064,  6110, 1, 3, 3);
+		get_nits(11174, 22500, 0, 2, 3);
+		get_nits(11459,  3149, 0, 3, 3);
+		get_nits(11468,  5632, 0, 3, 3);
+		get_nits(11477,  5632, 0, 3, 3);
+		get_nits(11484,  6140, 0, 7, 3);
+		get_nits(11495,  5632, 0, 3, 3);
+		get_nits(11504,  6110, 1, 3, 3);
+		get_nits(11527,  4203, 0, 2, 3);
+		get_nits(11540, 26000, 1, 3, 3);
+		get_nits(11553, 26000, 0, 3, 3);
+		get_nits(11587,  5632, 0, 3, 3);
+		get_nits(11596,  6110, 0, 3, 3);
+		get_nits(11597,  6110, 1, 3, 3);
+		get_nits(11605,  6110, 1, 3, 3);
+		get_nits(11619,  2940, 1, 3, 3);
+		get_nits(11623,  2295, 1, 7, 3);
+		get_nits(11630,  8054, 1, 7, 3);
+		get_nits(11639,  4202, 1, 2, 3);
+		get_nits(11652,  4202, 1, 2, 3);
+		get_nits(11665,  6110, 1, 3, 3);
+		get_nits(11677, 26000, 0, 3, 3);
+		get_nits(11686, 11017, 1, 3, 3);
+		get_nits(11229, 24500, 0, 7, 3);
+		get_nits(11247, 24500, 1, 7, 3);
+		get_nits(11278, 24500, 1, 7, 3);
+		get_nits(11309, 24500, 1, 7, 3);
+		get_nits(11372, 24500, 1, 7, 3);
+		get_nits(11403, 24500, 1, 7, 3);
+		get_nits(12054, 28000, 0, 7, 3);
+		get_nits(12169, 28000, 0, 7, 3);
+		get_nits(12226, 28000, 1, 7, 3);
+		get_nits(12303, 27800, 1, 3, 3);
+		get_nits(12322, 27800, 0, 3, 3);
+		get_nits(12399, 28000, 0, 7, 3);
+		get_nits(12456, 28000, 1, 3, 3);
+		get_nits(12476, 27800, 0, 3, 3);
+		get_sdts();
+
+		if (!scantransponders.empty())
+		{
+			if (fd == NULL)
+			{
+				fd = fopen(services_xml.c_str(), "w" );
+					if (fd == NULL)
+				{
+					perror("[scan.cpp] open services.xml");
+					scan_runs = 0;
+					pthread_exit(0);
+				}
+					fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+				fprintf(fd,"<ZAPIT>\n");
+			}
+				fprintf(fd, "<satellite name=\"Thor 0.8W\" diseqc=\"3\">\n");
+			for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+			{
+				fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
+				write_transponder(tI->second.tsid,fd);
+				fprintf(fd, "</transponder>\n");
+			}
+			fprintf(fd, "</satellite>\n");
+		}
+			scanchannels.clear();
+		scantransponders.clear();
+	}
+
       if (do_diseqc & 8)
       {
       	curr_sat = 8;
@@ -564,28 +646,28 @@ void *start_scanthread(void *param)
     	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
       printf("[scan.cpp] SCANNING TÜRKSAT\n");
-      get_nits(10985,23420,0,3,3);
-      get_nits(11015,41790,0,3,3);
-      get_nits(11028,35720,0,5,3);
-      get_nits(11037,23420,0,5,3);
-      get_nits(11054,70000,1,3,3);
-      get_nits(11088,56320,1,3,3);
-      get_nits(11100,56320,1,3,3);
-      get_nits(11110,56320,1,3,3);
-      get_nits(11117,56320,1,3,3);
-      get_nits(11117,30550,1,3,3);
-      get_nits(11133,45550,1,5,3);
-      get_nits(11134,26000,0,7,3);
-      get_nits(11137,31500,0,5,3);
-      get_nits(11156,21730,1,5,3);
-      get_nits(11160,21730,1,5,3);
-      get_nits(11162,21730,1,5,3);
-      get_nits(11166,56320,1,5,3);
-      get_nits(11168,21730,1,5,3);
-      get_nits(11172,21730,1,5,3);
-      get_nits(11193,54980,1,5,3);
-      get_nits(11453,19830,0,7,3);
-      get_nits(11567,20000,0,3,3);
+      get_nits(10985, 23420, 0, 3, 3);
+      get_nits(11015, 41790, 0, 3, 3);
+      get_nits(11028, 35720, 0, 5, 3);
+      get_nits(11037, 23420, 0, 5, 3);
+      get_nits(11054, 70000, 1, 3, 3);
+      get_nits(11088, 56320, 1, 3, 3);
+      get_nits(11100, 56320, 1, 3, 3);
+      get_nits(11110, 56320, 1, 3, 3);
+      get_nits(11117, 56320, 1, 3, 3);
+      get_nits(11117, 30550, 1, 3, 3);
+      get_nits(11133, 45550, 1, 5, 3);
+      get_nits(11134, 26000, 0, 7, 3);
+      get_nits(11137, 31500, 0, 5, 3);
+      get_nits(11156, 21730, 1, 5, 3);
+      get_nits(11160, 21730, 1, 5, 3);
+      get_nits(11162, 21730, 1, 5, 3);
+      get_nits(11166, 56320, 1, 5, 3);
+      get_nits(11168, 21730, 1, 5, 3);
+      get_nits(11172, 21730, 1, 5, 3);
+      get_nits(11193, 54980, 1, 5, 3);
+      get_nits(11453, 19830, 0, 7, 3);
+      get_nits(11567, 20000, 0, 3, 3);
       get_sdts();
 
        if (!scantransponders.empty())

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.207 2002/03/27 12:26:41 flfs Exp $
+        $Id: neutrino.cpp,v 1.208 2002/03/29 00:49:25 flfs Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -276,6 +276,7 @@ void CNeutrinoApp::setupDefaults()
 	g_settings.scan_eutel = 0;
 	g_settings.scan_kopernikus = 0;
 	g_settings.scan_sirius = 0;
+	g_settings.scan_thor = 0;
         g_settings.scan_digituerk = 0;
 	g_settings.scan_bouquet = 1024; //erase bouquets
 
@@ -760,6 +761,10 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 		oj = new CMenuOptionChooser("scants.sirius", &g_settings.scan_sirius, true );
 		oj->addOption(0, "options.off");
 		oj->addOption(16, "options.on");
+		TSScan->addItem( oj );
+		oj = new CMenuOptionChooser("scants.thor", &g_settings.scan_thor, true );
+		oj->addOption(0, "options.off");
+		oj->addOption(18, "options.on");
 		TSScan->addItem( oj );
                 oj = new CMenuOptionChooser("scants.digituerk", &g_settings.scan_digituerk, true );
 		oj->addOption(0, "options.off");
@@ -2201,7 +2206,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.207 2002/03/27 12:26:41 flfs Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.208 2002/03/29 00:49:25 flfs Exp $\n\n");
 	tzset();
 	initGlobals();
 
