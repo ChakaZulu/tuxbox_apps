@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.7 2002/10/07 14:46:41 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/src/Attic/xmlinterface.cpp,v 1.8 2002/10/07 22:16:04 thegoodguy Exp $
  *
  * xmlinterface for zapit - d-box2 linux project
  *
@@ -22,6 +22,7 @@
  */
 
 #include "xmlinterface.h"
+#include <xmltok.h>
 
 #include <stdio.h>
 
@@ -68,13 +69,7 @@ std::string convert_to_UTF8_XML(const std::string s)
 	std::string t = convertForXML(s);
 	
 	for (std::string::iterator it = t.begin(); it != t.end(); it++)
-		if ((((unsigned char)*it) & 0x80) == 0)
-			r += *it;
-		else
-		{
-			r += (0xc0 | ((((unsigned char)*it) >> 6) & 0x03));
-			r += (0x80 | (((unsigned char)*it) & 0x3f));
-		}
+		r += Unicode_Character_to_Utf8((unsigned char)*it);
 		
 	return r;
 }
@@ -99,6 +94,12 @@ std::string Utf8_to_Latin1(const std::string s)
 	return r;
 }
 
+std::string Unicode_Character_to_Utf8(const int character)
+{
+    char buf[4];
+    int length = XmlUtf8Encode(character, buf);
+    return std::string(buf, length);
+}
 
 XMLTreeParser* parseXmlFile(const std::string filename)
 {

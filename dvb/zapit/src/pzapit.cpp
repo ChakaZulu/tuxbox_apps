@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.31 2002/10/04 17:56:02 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.32 2002/10/07 22:16:04 thegoodguy Exp $
  *
  * simple commandline client for zapit
  *
@@ -43,6 +43,7 @@ int usage (std::string basename)
 	std::cout << "change audio pid: " << basename << " -a <audio-number>" << std::endl;
 	std::cout << std::endl;
 	std::cout << "reload channels bouquets: " << basename << " -c" << std::endl;
+	std::cout << "save bouquets: " << basename << " -sb" << std::endl;
 	std::cout << std::endl;
 	std::cout << "show satellites: " << basename << " -sh" << std::endl;
 	std::cout << "select satellites: " << basename << " -se <satmask> <diseqc order>" << std::endl;
@@ -78,6 +79,7 @@ int main (int argc, char** argv)
 	bool radio = false;
 	bool reload = false;
 	bool register_neutrino = false;
+	bool savebouquets = false;
 	bool show_satellites = false;
 	bool scan = false;
 	bool zapByName = false;
@@ -168,6 +170,11 @@ int main (int argc, char** argv)
 		else if (!strncmp(argv[i], "-re", 3))
 		{
 			recordmode = true;
+			continue;
+		}
+		else if (!strncmp(argv[i], "-sb", 3))
+		{
+			savebouquets = true;
 			continue;
 		}
 		else if (!strncmp(argv[i], "-se", 3))
@@ -307,6 +314,12 @@ int main (int argc, char** argv)
 	if (recordmode)
 	{
 		zapit.setRecordMode(!zapit.isRecordModeActive());
+		return 0;
+	}
+
+	if (savebouquets)
+	{
+		zapit.saveBouquets();
 		return 0;
 	}
 
