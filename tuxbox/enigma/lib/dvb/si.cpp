@@ -690,6 +690,7 @@ eString MHWDataDescriptor::toString()
 	for (int i=0; i<8; i++)
 		res+=type[i];
 	res+="\n";
+	return res;
 }
 
 PAT::PAT(): eTable(PID_PAT, TID_PAT)
