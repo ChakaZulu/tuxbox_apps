@@ -5,37 +5,37 @@
 
 CInfoViewer::CInfoViewer()
 {
-        intTimer = 0;
-        intShowDuration = 15; //7,5 sec
-        frameBuffer = NULL;
-        fonts = NULL;
-		InfoHeightY = 170;
+	intTimer = 0;
+	intShowDuration = 15; //7,5 sec
+	frameBuffer = NULL;
+	fonts = NULL;
+	InfoHeightY = 170;
 
-		strcpy( running, "");
-		strcpy( next, "");
-		strcpy( runningStart, "");
-		strcpy( nextStart, "");
-		strcpy( runningDuration, "");
-		strcpy( nextDuration, "");
-		runningPercent = 0;
-		CurrentChannel = "";
-		epgReady = true;
+	strcpy( running, "");
+	strcpy( next, "");
+	strcpy( runningStart, "");
+	strcpy( nextStart, "");
+	strcpy( runningDuration, "");
+	strcpy( nextDuration, "");
+	runningPercent = 0;
+	CurrentChannel = "";
+	epgReady = true;
 }
 
 void CInfoViewer::start(CFrameBuffer *FrameBuffer, FontsDef *Fonts, SNeutrinoSettings *Settings )
 {
-        frameBuffer = FrameBuffer;
-        fonts = Fonts;
-		settings = Settings;
-        if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
-        {
-                perror("create failed\n");
-        }
+	frameBuffer = FrameBuffer;
+	fonts = Fonts;
+	settings = Settings;
+	if (pthread_create (&thrViewer, NULL, InfoViewerThread, (void *) this) != 0 )
+	{
+		perror("create failed\n");
+	}
 }
 
 void CInfoViewer::setDuration( int Duration )
 {
-        intShowDuration = Duration;
+	intShowDuration = Duration;
 }
 
 void CInfoViewer::showTitle( int ChanNum, string Channel )
@@ -98,7 +98,7 @@ void CInfoViewer::showData()
 	int ChanInfoX = settings->screen_StartX + 20+ (ChanWidth >>1);
 	int ChanInfoY = settings->screen_EndY-InfoHeightY + ChanHeight+10;
 	
-	//proz.
+	//percent
 	frameBuffer->paintBoxRel(BoxEndX-114, ChanNameY+10, 104, 24, COL_INFOBAR+7);
         frameBuffer->paintBoxRel(BoxEndX-112, ChanNameY+12, runningPercent+2, 20, COL_INFOBAR+5);
 	frameBuffer->paintBoxRel(BoxEndX-112+runningPercent, ChanNameY+12, 100-runningPercent, 20, COL_INFOBAR+2);
