@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.1 2001/05/16 15:23:47 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.2 2001/05/17 01:53:35 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.2  2001/05/17 01:53:35  fnbrd
+// Jetzt mit lokaler Zeit.
+//
 // Revision 1.1  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
@@ -64,7 +67,7 @@ class SIevent {
     unsigned short eventID;
     string name; // Name aus dem Short-Event-Descriptor
     string text; // Text aus dem Short-Event-Descriptor
-    time_t startzeit;
+    time_t startzeit; // lokale Zeit
     unsigned dauer; // in Sekunden
     unsigned short serviceID;
     // Der Operator zum sortieren

@@ -1,5 +1,5 @@
 //
-// $Id: SIutils.cpp,v 1.1 2001/05/16 15:23:47 fnbrd Exp $
+// $Id: SIutils.cpp,v 1.2 2001/05/17 01:53:35 fnbrd Exp $
 //
 // utility functions for the SI-classes (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIutils.cpp,v $
+// Revision 1.2  2001/05/17 01:53:35  fnbrd
+// Jetzt mit lokaler Zeit.
+//
 // Revision 1.1  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
@@ -157,5 +160,5 @@ time_t changeUTCtoCtime(const unsigned char *buffer)
 //    printf ("Startzeit: GMT: %.2d.%.2d.%.4d  %.2d:%.2d:%.2d\n",
 //      zeit.tm_mday, zeit.tm_mon+1, zeit.tm_year+1900,
 //      zeit.tm_hour, zeit.tm_min, zeit.tm_sec);
-    return mktime(&zeit);
+    return mktime(&zeit)+timezone;
 }
