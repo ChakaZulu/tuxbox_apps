@@ -160,8 +160,8 @@ void CLCDDisplay::draw_line (int x1, int y1, int x2, int y2, int state)
 	int dx,dy,sdx,sdy,px,py,dxabs,dyabs,i;
 	float slope;
    
-	dx=x2-x1;      
-	dy=y2-y1;      
+	dx=x2-x1+1;      
+	dy=y2-y1+1;      
 	dxabs=abs(dx);
 	dyabs=abs(dy);
 	sdx=sgn(dx);
