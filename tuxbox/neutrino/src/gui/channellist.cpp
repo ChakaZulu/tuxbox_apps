@@ -45,6 +45,7 @@ CChannelList::CChannel::CChannel()
 
 CChannelList::CChannelList( const std::string &Name )
 {
+	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
 	selected = 0;
 	width = 560;
