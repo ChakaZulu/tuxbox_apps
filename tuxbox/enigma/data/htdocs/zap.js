@@ -61,7 +61,7 @@ function zapChannelKeyUp()
 }
 function zapHeaderReload()
 {
-	parent.header.location.reload();
+	parent.update();
 	document.channelselector.channel.focus();
 }
 function zapBodyReload()

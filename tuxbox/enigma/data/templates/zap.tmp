@@ -5,21 +5,21 @@
 	<table border=0 cellpadding=0 cellspacing=0>
 		<tr>
 			<td>
-				<select style="width: 150px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=#SELSIZE#></select>
+				<select style="width: 200px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=#SELSIZE#></select>
 			</td>
 			<td>
-				<select style="width: 470px; font-weight: bold;" onChange=channelChange() name="channel" size=#SELSIZE#></select>
+				<select style="width: 430px; font-weight: bold;" onChange=channelChange() name="channel" size=#SELSIZE#></select>
 			</td>
 		</tr>
 	</table>
 </form>
 <table border=0 cellpadding=0 cellspacing=0>
 	<tr>
-		<td style="width: 210px">
-			<input name="mepg" type="button" style="width: 100px; height: 22px; background-color: #CB0303" value="EPG-Overview" onClick=javascript:mepg()>
+		<td style="width: 200px">
+			<input name="mepg" type="button" style="width: 100px; height: 22px; background-color: #CB0303; color: #FFFFFF;" value="EPG-Overview" onClick=javascript:mepg()>
 			<!--input name="epg" type="button" style="width: 100px; height: 22px; background-color: #12259E" value="EPG" onClick=javascript:epg()-->
 		</td>
-		<td style="width: 410px" align=center>
+		<td style="width: 430px" align=center>
 			<a href="javascript:zapChannelBackward()"><img src="up.gif" border="0"></a>
 			&nbsp;&nbsp;
 			<a href="javascript:zapChannelForward()"><img src="down.gif" border="0"></a>

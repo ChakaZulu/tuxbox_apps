@@ -3,4 +3,4 @@
 	#BODY#	
 </table>
 <br>
-<input name="addMountPoint" type="button" style="width: 100px; height: 22px; background-color: #1FCB12" value="Add" onClick=javascript:addMountPoint()>
+<input name="addMountPoint" type="button" style="width: 100px; height: 22px; background-color: #1FCB12; color: #FFFFFF" value="Add" onClick=javascript:addMountPoint()>

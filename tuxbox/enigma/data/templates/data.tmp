@@ -1,38 +1,37 @@
 <html>
 <head>
-<script type="text/javascript" src="dhtml.js"></script>
 <script type="text/javascript" src="data.js"></script>
 </head>
-<body>
+<body onLoad="init()">
 <script>
 	var updateCycleTime = #UPDATECYCLE#;
 	<!-- power state -->
 	var standby = #STANDBY#;
 	<!-- service & epg data -->
-	var serviceName = #SERVICENAME#;
-	var nowT = #NOWT#;
-	var nowD = #NOWD#;
-	var nowSt = #NOWST#;
-	var nextT = #NEXTT#;
-	var nextD = #NEXTD#;
-	var nextSt = #NEXTST#;
+	var serviceName = "#SERVICENAME#";
+	var nowT = "#NOWT#";
+	var nowD = "#NOWD#";
+	var nowSt = "#NOWST#";
+	var nextT = "#NEXTT#";
+	var nextD = "#NEXTD#";
+	var nextSt = "#NEXTST#";
 	<!-- status bar -->
-	var diskGB = #DISKGB#;
-	var diskH = #DISKH#;
-	var apid = #APID#;
-	var vpid = #VPID#;
-	var ip = #IP#;
-	var lock = #LOCK#;
-	var upTime = #UPTIME#;
+	var diskGB = "#DISKGB#";
+	var diskH = "#DISKH#";
+	var apid = "#APID#";
+	var vpid = "#VPID#";
+	var ip = "#IP#";
+	var lock = "#LOCK#";
+	var upTime = "#UPTIME#";
 	<!-- volume bar -->
 	var volume = #VOLUME#;
-	var mute = #MUTE#;
+	var mute = #MUTE2#;
 	<!-- channel stats -->
 	var dolby = #DOLBY#;
 	var crypt = #CRYPT#;
 	var format = #FORMAT#;
 	<!-- recording -->
-	var recording = #RECORDING#;
+	var recording = #RECORDING2#;
 </script>
 </body>
 </html>

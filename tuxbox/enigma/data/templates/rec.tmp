@@ -8,7 +8,7 @@
 				<select style="width: 0px; font-weight: bold;" onChange=bouquetChange() name="bouquet" size=0></select>
 			</td>
 			<td>
-				<select style="width: 620px; font-weight: bold;" onChange=channelChange() name="channel" size=#SELSIZE#></select>
+				<select style="width: 630px; font-weight: bold;" onChange=channelChange() name="channel" size=#SELSIZE#></select>
 			</td>
 		</tr>
 	</table>
