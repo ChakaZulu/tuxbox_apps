@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: scan.cpp,v $
+Revision 1.4  2001/12/07 20:08:06  rasc
+fix to diseqc Step 3.
+
 Revision 1.3  2001/12/07 14:10:33  rasc
 Fixes for SAT tuning and Diseqc. Diseqc doesn't work properly for me (diseqc 2.0 switch).
 Someone should check this please..
@@ -24,6 +27,7 @@ Revision 1.2  2001/11/15 00:43:45  TheDOC
 
 */
 #include <unistd.h>
+#include <stdio.h>
 #include <stdio.h>
 #include "scan.h"
 
@@ -116,10 +120,10 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 	{
 		int max_chans = 2;
 
-		int start_frq[10];
-		int start_sym[10];
-		int start_pol[10];
-		int start_fe[10];
+		int start_frq[20];
+		int start_sym[20];
+		int start_pol[20];
+		int start_fe[20];
 
 		FILE *fp;
 
@@ -127,19 +131,21 @@ channels scan::scanChannels(bool full = false, int start_frequency = -1, int sta
 		int co = 0;
 		while(!feof(fp))
 		{
-			char text[100];
+			char text[256];
 
 			printf("Starting at co: %d\n", co);
-			
+	
 			fgets(text, 255, fp);
-			start_frq[co] = atoi(text);
-			printf("%s - %d\n", text, start_frq[co]);
-			fgets(text, 255, fp);
-			start_sym[co] = atoi(text);
-			fgets(text, 255, fp);
-			start_pol[co] = atoi(text);
-			fgets(text, 255, fp);
-			start_fe[co++] = atoi(text);
+			if (!isdigit(*text)) continue;
+			sscanf (text,"%i,%i,%i,%i %s\n",
+				&start_frq[co], &start_sym[co],
+				&start_pol[co], &start_fe[co]);
+			printf ("Scandat: Freq:%d, SymR:%d, Pol:%d, FEC:%d\n",
+				start_frq[co], start_sym[co],
+				start_pol[co], start_fe[co]);
+			co++;
+			if (co >= (sizeof(start_fe)/sizeof(start_fe[0])) )
+				break;
 		}
 		max_chans = co;
 
