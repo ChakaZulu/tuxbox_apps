@@ -5,10 +5,15 @@
 	<body>
 		Send the following message to your TV:
 		<br><br>
-		<form action="/cgi-bin/message">
-			<input name="msg" type="text" size="100" maxlength="100">
+		<form name="msg" action="/cgi-bin/message">
+			<input name="text" type="text" size="100" maxlength="100">
 			<br><br>
 			<input type="submit" value="  Send  ">
+			&nbsp;&nbsp;
+			<input type="reset" value="  Clear  ">
 		</form>
+		<script>
+			document.msg.text.focus();
+		</script>
 	</body>
 </html>
