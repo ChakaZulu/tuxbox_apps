@@ -765,7 +765,7 @@ void CMP3PlayerGui::paintItem(int pos)
 void CMP3PlayerGui::paintHead()
 {
 //	printf("paintHead{\n");
-	std::string strCaption = g_Locale->getText("mp3player.head");
+	std::string strCaption = g_Locale->getText(LOCALE_MP3PLAYER_HEAD);
 	frameBuffer->paintBoxRel(x,y+title_height, width,theight, COL_MENUHEAD_PLUS_0);
 	frameBuffer->paintIcon("mp3.raw",x+7,y+title_height+10);
 	g_Font[SNeutrinoSettings::FONT_TYPE_MENU_TITLE]->RenderString(x+35,y+theight+title_height+0, width- 45, strCaption, COL_MENUHEAD, 0, true); // UTF-8
@@ -788,16 +788,16 @@ void CMP3PlayerGui::paintHead()
 const struct button_label MP3PlayerButtons[2][4] =
 {
 	{
-		{ NEUTRINO_ICON_BUTTON_RED   , "mp3player.stop"        },
-		{ NEUTRINO_ICON_BUTTON_GREEN , "mp3player.rewind"      },
-		{ NEUTRINO_ICON_BUTTON_YELLOW, "mp3player.pause"       },
-		{ NEUTRINO_ICON_BUTTON_BLUE  , "mp3player.fastforward" },
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_MP3PLAYER_STOP        },
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_MP3PLAYER_REWIND      },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_MP3PLAYER_PAUSE       },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_MP3PLAYER_FASTFORWARD },
 	},
 	{
-		{ NEUTRINO_ICON_BUTTON_RED   , "mp3player.delete"    },
-		{ NEUTRINO_ICON_BUTTON_GREEN , "mp3player.add"       },
-		{ NEUTRINO_ICON_BUTTON_YELLOW, "mp3player.deleteall" },
-		{ NEUTRINO_ICON_BUTTON_BLUE  , "mp3player.shuffle"   }
+		{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_MP3PLAYER_DELETE      },
+		{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_MP3PLAYER_ADD         },
+		{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_MP3PLAYER_DELETEALL   },
+		{ NEUTRINO_ICON_BUTTON_BLUE  , LOCALE_MP3PLAYER_SHUFFLE     }
 	}
 };
 
@@ -814,14 +814,12 @@ void CMP3PlayerGui::paintFoot()
 	if (!(playlist.empty()))
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_OKAY, x + 1* ButtonWidth2 + 25, y+(height-info_height-buttonHeight)-3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, 
-						     ButtonWidth2- 28, g_Locale->getText("mp3player.play"), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x + 1 * ButtonWidth2 + 53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_MP3PLAYER_PLAY), COL_INFOBAR, 0, true); // UTF-8
 	}
 	if(m_state!=CMP3PlayerGui::STOP)
 	{
 		frameBuffer->paintIcon(NEUTRINO_ICON_BUTTON_HELP, x+ 0* ButtonWidth + 25, y+(height-info_height-buttonHeight)-3);
-		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, 
-						     ButtonWidth2- 28, g_Locale->getText("mp3player.keylevel"), COL_INFOBAR, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_INFOBAR_SMALL]->RenderString(x+ 0* ButtonWidth +53 , y+(height-info_height-buttonHeight)+24 - 4, ButtonWidth2- 28, g_Locale->getText(LOCALE_MP3PLAYER_KEYLEVEL), COL_INFOBAR, 0, true); // UTF-8
 	}
 
 	if (key_level == 0)
@@ -848,7 +846,7 @@ void CMP3PlayerGui::paintInfo()
 		frameBuffer->paintBoxRel(x+2, y +2 , width-4, title_height-14, COL_MENUCONTENTSELECTED_PLUS_0);
 		char sNr[20];
 		sprintf(sNr, ": %2d", current+1);
-		std::string tmp = g_Locale->getText("mp3player.playing");
+		std::string tmp = g_Locale->getText(LOCALE_MP3PLAYER_PLAYING);
 		tmp += sNr ;
 		int w = g_Font[SNeutrinoSettings::FONT_TYPE_MENU]->getRenderWidth(tmp, true); // UTF-8
 		int xstart=(width-w)/2;

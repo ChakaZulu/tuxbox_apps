@@ -577,9 +577,9 @@ void CPictureViewerGui::paintHead()
 //------------------------------------------------------------------------
 const struct button_label PictureViewerButtons[4] =
 {
-	{ NEUTRINO_ICON_BUTTON_RED   , "mp3player.delete"        },
-	{ NEUTRINO_ICON_BUTTON_GREEN , "mp3player.add"           },
-	{ NEUTRINO_ICON_BUTTON_YELLOW, "mp3player.deleteall"     },
+	{ NEUTRINO_ICON_BUTTON_RED   , LOCALE_MP3PLAYER_DELETE        },
+	{ NEUTRINO_ICON_BUTTON_GREEN , LOCALE_MP3PLAYER_ADD           },
+	{ NEUTRINO_ICON_BUTTON_YELLOW, LOCALE_MP3PLAYER_DELETEALL     },
 	{ NEUTRINO_ICON_BUTTON_BLUE  , "pictureviewer.slideshow" }
 };
 

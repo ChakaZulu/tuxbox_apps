@@ -2,7 +2,7 @@
 #define __gui_widget_buttons_h__
 
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/buttons.h,v 1.1 2003/09/16 17:14:42 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/src/gui/widget/buttons.h,v 1.2 2004/05/25 07:44:16 thegoodguy Exp $
  *
  * (C) 2003 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -28,8 +28,8 @@
 
 typedef struct button_label
 {
-	const char * button;
-	const char * locale;
+	const char *      button;
+	neutrino_locale_t locale;
 } button_label_struct;
 
 void paintButtons(CFrameBuffer * const frameBuffer, Font * const font, const CLocaleManager * const localemanager, const int x, const int y, const unsigned int buttonwidth, const unsigned int count, const struct button_label * const content);
