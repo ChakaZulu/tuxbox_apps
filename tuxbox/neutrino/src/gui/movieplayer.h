@@ -58,13 +58,16 @@ extern "C" {
 class CMoviePlayerGui : public CMenuTarget
 {
  public:
-	enum State
+	enum state
 		{
-			PLAY=0,
-			STOP,
-			PAUSE,
-			FF,
-			REV
+		    STOPPED     =  0,
+		    PREPARING   =  1,
+		    STREAMERROR =  2,
+		    PLAY        =  3,
+		    PAUSE       =  4,
+		    FF          =  5,
+		    REW         =  6,
+		    SOFTRESET   = 99
 		};
 
  private:
@@ -80,9 +83,7 @@ class CMoviePlayerGui : public CMenuTarget
 	int            buttonHeight;
 	int            title_height;
 	int            info_height;
-	int            key_level;
 	bool           visible;
-        State          m_state;
 
 	int            width;
 	int            height;

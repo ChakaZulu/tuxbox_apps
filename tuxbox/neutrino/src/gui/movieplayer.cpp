@@ -4,7 +4,7 @@
 	Movieplayer (c) 2003 by gagga
 	Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-        $Id: movieplayer.cpp,v 1.42 2003/09/10 22:16:27 thegoodguy Exp $
+        $Id: movieplayer.cpp,v 1.43 2003/09/11 13:30:33 thegoodguy Exp $
 
 	Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -96,15 +96,6 @@
 #define AVIA_AV_STREAM_TYPE_PES         0x02
 #define AVIA_AV_STREAM_TYPE_ES          0x03
 
-#define STOPPED		0
-#define PREPARING	1
-#define STREAMERROR	2
-#define PLAY		3
-#define PAUSE		4
-#define FF		5
-#define REW		6
-#define SOFTRESET	99
-
 #define STREAMTYPE_DVD	1
 #define STREAMTYPE_SVCD	2
 #define STREAMTYPE_FILE	3
@@ -116,7 +107,7 @@
 #define MINREADSIZE 348*188
 
 
-static int playstate;
+static CMoviePlayerGui::state playstate;
 static bool isTS;
 int speed = 1;
 static long fileposition;
@@ -173,7 +164,6 @@ CMoviePlayerGui::~CMoviePlayerGui ()
 int
 CMoviePlayerGui::exec (CMenuTarget * parent, std::string actionKey)
 {
-  m_state = STOP;
   current = -1;
   selected = 0;
 
@@ -290,7 +280,7 @@ ReceiveStreamThread (void *mrl)
 	if (httpres != 0)
 	{
 		DisplayErrorMessage(g_Locale->getText("movieplayer.nostreamingserver")); // UTF-8
-		playstate = STOPPED;
+		playstate = CMoviePlayerGui::STOPPED;
 		pthread_exit (NULL);
 		// Assume safely that all succeeding HTTP requests are successful
 	}
@@ -370,7 +360,7 @@ ReceiveStreamThread (void *mrl)
       if (res < 0)
 	{
 	  perror ("SOCKET");
-	  playstate = STOPPED;
+	  playstate = CMoviePlayerGui::STOPPED;
 	  pthread_exit (NULL);
 	}
       fcntl (skt, O_NONBLOCK);
@@ -382,7 +372,7 @@ ReceiveStreamThread (void *mrl)
       if (send (skt, msg, msglen, 0) == -1)
 	{
 	  perror ("send()");
-	  playstate = STOPPED;
+	  playstate = CMoviePlayerGui::STOPPED;
 	  pthread_exit (NULL);
 	}
 
@@ -448,7 +438,7 @@ ReceiveStreamThread (void *mrl)
     {
       while ((size = ringbuffer_write_space (ringbuf)) == 0)
 	{
-	  if (playstate == STOPPED)
+	  if (playstate == CMoviePlayerGui::STOPPED)
 	    {
 	      close(skt);
 	      pthread_exit (NULL);
@@ -476,7 +466,7 @@ ReceiveStreamThread (void *mrl)
 	}
       //printf("[movieplayer.cpp] ringbuf write space:%d\n",size);
 
-      if (playstate == STOPPED)
+      if (playstate == CMoviePlayerGui::STOPPED)
 	{
 	  close(skt);
 	  pthread_exit (NULL);
@@ -491,7 +481,7 @@ ReceiveStreamThread (void *mrl)
 	  ((poller[0].revents & POLLNVAL) == POLLNVAL))
 	{
 	  perror ("Error while polling()");
-	  playstate = STOPPED;
+	  playstate = CMoviePlayerGui::STOPPED;
 	  close(skt);
 	  pthread_exit (NULL);
 	}
@@ -513,11 +503,11 @@ ReceiveStreamThread (void *mrl)
 	    }
 	}
       else {
-        if (playstate == PLAY) {
+        if (playstate == CMoviePlayerGui::PLAY) {
           nothingreceived++;
           if (nothingreceived > 200) {
             printf ("[movieplayer.cpp] PlayStreamthread: Didn't receive for a while. Stopping.\n");
-            playstate = STOPPED;	
+            playstate = CMoviePlayerGui::STOPPED;	
           }	
         }
       }
@@ -574,14 +564,14 @@ PlayStreamThread (void *mrl)
       failed = true;
     }
 
-  playstate = SOFTRESET;
+  playstate = CMoviePlayerGui::SOFTRESET;
   printf ("[movieplayer.cpp] read starting\n");
   size_t readsize, len;
   len = 0;
   bool driverready = false;
   std::string pauseurl;
   std::string unpauseurl;
-  while (playstate > STOPPED)
+  while (playstate > CMoviePlayerGui::STOPPED)
     {
       readsize = ringbuffer_read_space (ringbuf);
       if (readsize > MAXREADSIZE)
@@ -642,7 +632,7 @@ PlayStreamThread (void *mrl)
 
 	  switch (playstate)
 	    {
-	    case PAUSE:
+	    case CMoviePlayerGui::PAUSE:
 	      //ioctl (dmxv, DMX_STOP);
 	      ioctl (dmxa, DMX_STOP);
 
@@ -650,7 +640,7 @@ PlayStreamThread (void *mrl)
 	      pauseurl = baseurl + "?control=pause";
 	      httpres = sendGetRequest(pauseurl);
 
-	      while (playstate == PAUSE)
+	      while (playstate == CMoviePlayerGui::PAUSE)
 		{
 		  //ioctl (dmxv, DMX_STOP);	
 		  ioctl (dmxa, DMX_STOP);
@@ -661,7 +651,7 @@ PlayStreamThread (void *mrl)
 
 	      speed = 1;
 	      break;
-	    case PLAY:
+	    case CMoviePlayerGui::PLAY:
 	      if (len < MINREADSIZE)
 		{
 			bufferingBox->paint ();
@@ -679,7 +669,7 @@ PlayStreamThread (void *mrl)
 		  done += wr;
 		}
 	      break;
-	    case SOFTRESET:
+	    case CMoviePlayerGui::SOFTRESET:
 	      ioctl (vdec, VIDEO_STOP);
 	      ioctl (adec, AUDIO_STOP);
 	      ioctl (dmxv, DMX_STOP);
@@ -702,7 +692,7 @@ PlayStreamThread (void *mrl)
 	      ioctl (dmxv, DMX_START);
 	      ioctl (dmxa, DMX_START);
 	      speed = 1;
-	      playstate = PLAY;
+	      playstate = CMoviePlayerGui::PLAY;
 
 	    }
 	}
@@ -748,13 +738,13 @@ PlayFileThread (void *filename)
   size_t r = 0;
   if ((char *) filename == NULL)
     {
-      playstate = STOPPED;
+      playstate = CMoviePlayerGui::STOPPED;
       pthread_exit (NULL);
     }
 
   if ((fd = open ((char *) filename, O_RDONLY | O_LARGEFILE)) < 0)
     {
-      playstate = STOPPED;
+      playstate = CMoviePlayerGui::STOPPED;
       pthread_exit (NULL);
     }
 
@@ -794,26 +784,26 @@ PlayFileThread (void *filename)
   fileposition = 0;
   if (isTS && !failed)
     {
-      while ((r = read (fd, buf, cache)) > 0 && playstate >= PLAY)
+      while ((r = read (fd, buf, cache)) > 0 && playstate >= CMoviePlayerGui::PLAY)
 	{
 	  done = 0;
 	  wr = 0;
 	  fileposition += r;
 	  switch (playstate)
 	    {
-	    case PAUSE:
-	      while (playstate == PAUSE)
+	    case CMoviePlayerGui::PAUSE:
+	      while (playstate == CMoviePlayerGui::PAUSE)
 		{
 		  ioctl (dmxa, DMX_STOP);
 		}
 	      break;
-	    case FF:
-	    case REW:
+	    case CMoviePlayerGui::FF:
+	    case CMoviePlayerGui::REW:
 	      ioctl (dmxa, DMX_STOP);
 	      lseek (fd, cache * speed, SEEK_CUR);
 	      fileposition += cache * speed;
 	      break;
-	    case SOFTRESET:
+	    case CMoviePlayerGui::SOFTRESET:
 	      ioctl (vdec, VIDEO_STOP);
 	      ioctl (adec, AUDIO_STOP);
 	      ioctl (dmxv, DMX_STOP);
@@ -836,7 +826,7 @@ PlayFileThread (void *filename)
 	      ioctl (dmxv, DMX_START);
 	      ioctl (dmxa, DMX_START);
 	      speed = 1;
-	      playstate = PLAY;
+	      playstate = CMoviePlayerGui::PLAY;
 	    }
 
 	  do
@@ -863,7 +853,7 @@ PlayFileThread (void *filename)
       ioctl (adec, AUDIO_PLAY);
       ioctl (dmxv, DMX_START);
       ioctl (dmxa, DMX_START);
-      pes_to_ts2 (fd, dvr, pida, pidv, &playstate);	// VERY bad performance!!!
+      pes_to_ts2 (fd, dvr, pida, pidv, (const int *)&playstate);	// VERY bad performance!!!
     }
 
   ioctl (vdec, VIDEO_STOP);
@@ -876,9 +866,9 @@ PlayFileThread (void *filename)
   close (dvr);
   close (adec);
   close (vdec);
-  if (playstate != STOPPED)
+  if (playstate != CMoviePlayerGui::STOPPED)
     {
-      playstate = STOPPED;
+      playstate = CMoviePlayerGui::STOPPED;
       g_RCInput->postMsg (CRCInput::RC_red, 0);	// for faster exit in PlayStream(); do NOT remove!
     }
 
@@ -916,24 +906,24 @@ CMoviePlayerGui::PlayStream (int streamtype)
 
     }
 
-  playstate = STOPPED;
-  /* playstate == STOPPED         : stopped
-   * playstate == PREPARING       : preparing stream from server
-   * playstate == ERROR           : error setting up server
-   * playstate == PLAY            : playing
-   * playstate == PAUSE           : pause-mode
-   * playstate == FF              : fast-forward
-   * playstate == REW             : rewind
-   * playstate == SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
+  playstate = CMoviePlayerGui::STOPPED;
+  /* playstate == CMoviePlayerGui::STOPPED         : stopped
+   * playstate == CMoviePlayerGui::PREPARING       : preparing stream from server
+   * playstate == CMoviePlayerGui::ERROR           : error setting up server
+   * playstate == CMoviePlayerGui::PLAY            : playing
+   * playstate == CMoviePlayerGui::PAUSE           : pause-mode
+   * playstate == CMoviePlayerGui::FF              : fast-forward
+   * playstate == CMoviePlayerGui::REW             : rewind
+   * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
    */
   do
     {
       if (exit)
 	{
 	  exit = false;
-	  if (playstate >= PLAY)
+	  if (playstate >= CMoviePlayerGui::PLAY)
 	    {
-	      playstate = STOPPED;
+	      playstate = CMoviePlayerGui::STOPPED;
 	      break;
 	    }
 	}
@@ -971,7 +961,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	    }
 	  else
 	    {
-	      if (playstate == STOPPED)
+	      if (playstate == CMoviePlayerGui::STOPPED)
 		break;
 	    }
 
@@ -985,14 +975,14 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	  string lcd;
 	  switch (playstate)
 	    {
-	    case PAUSE:
+	    case CMoviePlayerGui::PAUSE:
 	      lcd = "|| (" + sel_filename + ")";
 	      break;
-	    case REW:
+	    case CMoviePlayerGui::REW:
 	      sprintf (tmp, "%dx<< ", speed);
 	      lcd = tmp + sel_filename;
 	      break;
-	    case FF:
+	    case CMoviePlayerGui::FF:
 	      sprintf (tmp, "%dx>> ", speed);
 	      lcd = tmp + sel_filename;
 	      break;
@@ -1010,9 +1000,9 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	  bufferfilled = false;
 	  avpids_found=false;
 	  
-	  if (playstate >= PLAY)
+	  if (playstate >= CMoviePlayerGui::PLAY)
 	    {
-	      playstate = STOPPED;
+	      playstate = CMoviePlayerGui::STOPPED;
 	      pthread_join (rct, NULL);
 	    }
 	  //TODO: Add Dialog (Remove Dialog later)
@@ -1022,7 +1012,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	    {
 	      break;
 	    }
-	  playstate = SOFTRESET;
+	  playstate = CMoviePlayerGui::SOFTRESET;
 	}
 
       g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
@@ -1033,16 +1023,16 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	}
       else if (msg == CRCInput::RC_yellow)
 	{
-	  if (playstate != PAUSE)
+	  if (playstate != CMoviePlayerGui::PAUSE)
 	    {
 	      update_info = true;
-	      playstate = PAUSE;
+	      playstate = CMoviePlayerGui::PAUSE;
 	    }
 	  else
 	    {
 	      // resume play
 	      update_info = true;
-	      playstate = SOFTRESET;
+	      playstate = CMoviePlayerGui::SOFTRESET;
 	    }
 	}
       else
@@ -1063,7 +1053,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 	  exit = true;
 	}
     }
-  while (playstate >= PLAY);
+  while (playstate >= CMoviePlayerGui::PLAY);
   pthread_join (rct, NULL);
 }
 
@@ -1074,22 +1064,22 @@ CMoviePlayerGui::PlayFile (void)
   string sel_filename;
   bool update_lcd = true, open_filebrowser =
     true, start_play = false, exit = false;
-  playstate = STOPPED;
-  /* playstate == STOPPED         : stopped
-   * playstate == PLAY            : playing
-   * playstate == PAUSE           : pause-mode
-   * playstate == FF              : fast-forward
-   * playstate == REW             : rewind
-   * playstate == SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
+  playstate = CMoviePlayerGui::STOPPED;
+  /* playstate == CMoviePlayerGui::STOPPED         : stopped
+   * playstate == CMoviePlayerGui::PLAY            : playing
+   * playstate == CMoviePlayerGui::PAUSE           : pause-mode
+   * playstate == CMoviePlayerGui::FF              : fast-forward
+   * playstate == CMoviePlayerGui::REW             : rewind
+   * playstate == CMoviePlayerGui::SOFTRESET       : softreset without clearing buffer (playstate toggle to 1)
    */
   do
     {
       if (exit)
 	{
 	  exit = false;
-	  if (playstate >= PLAY)
+	  if (playstate >= CMoviePlayerGui::PLAY)
 	    {
-	      playstate = STOPPED;
+	      playstate = CMoviePlayerGui::STOPPED;
 	      break;
 	    }
 	}
@@ -1112,7 +1102,7 @@ CMoviePlayerGui::PlayFile (void)
 	    }
 	  else
 	    {
-	      if (playstate == STOPPED)
+	      if (playstate == CMoviePlayerGui::STOPPED)
 		break;
 	    }
 
@@ -1126,14 +1116,14 @@ CMoviePlayerGui::PlayFile (void)
 	  string lcd;
 	  switch (playstate)
 	    {
-	    case PAUSE:
+	    case CMoviePlayerGui::PAUSE:
 	      lcd = "|| (" + sel_filename + ")";
 	      break;
-	    case REW:
+	    case CMoviePlayerGui::REW:
 	      sprintf (tmp, "%dx<< ", speed);
 	      lcd = tmp + sel_filename;
 	      break;
-	    case FF:
+	    case CMoviePlayerGui::FF:
 	      sprintf (tmp, "%dx>> ", speed);
 	      lcd = tmp + sel_filename;
 	      break;
@@ -1148,9 +1138,9 @@ CMoviePlayerGui::PlayFile (void)
       if (start_play)
 	{
 	  start_play = false;
-	  if (playstate >= PLAY)
+	  if (playstate >= CMoviePlayerGui::PLAY)
 	    {
-	      playstate = STOPPED;
+	      playstate = CMoviePlayerGui::STOPPED;
 	      pthread_join (rct, NULL);
 	    }
 
@@ -1159,7 +1149,7 @@ CMoviePlayerGui::PlayFile (void)
 	    {
 	      break;
 	    }
-	  playstate = SOFTRESET;
+	  playstate = CMoviePlayerGui::SOFTRESET;
 	}
 
       g_RCInput->getMsg (&msg, &data, 100);	// 10 secs..
@@ -1170,16 +1160,16 @@ CMoviePlayerGui::PlayFile (void)
 	}
       else if (msg == CRCInput::RC_yellow)
 	{
-	  if (playstate != PAUSE)
+	  if (playstate != CMoviePlayerGui::PAUSE)
 	    {
 	      update_lcd = true;
-	      playstate = PAUSE;
+	      playstate = CMoviePlayerGui::PAUSE;
 	    }
 	  else
 	    {
 	      // resume play
 	      update_lcd = true;
-	      playstate = SOFTRESET;
+	      playstate = CMoviePlayerGui::SOFTRESET;
 	    }
 	}
       else if (msg == CRCInput::RC_blue)
@@ -1199,7 +1189,7 @@ CMoviePlayerGui::PlayFile (void)
 	    speed = 1;
 	  speed *= -2;
 	  speed *= (speed > 1 ? -1 : 1);
-	  playstate = REW;
+	  playstate = CMoviePlayerGui::REW;
 	  update_lcd = true;
 	}
       else if (msg == CRCInput::RC_right)
@@ -1208,7 +1198,7 @@ CMoviePlayerGui::PlayFile (void)
 	  if (speed < 1)
 	    speed = 1;
 	  speed *= 2;
-	  playstate = FF;
+	  playstate = CMoviePlayerGui::FF;
 	  update_lcd = true;
 	}
       else if (msg == CRCInput::RC_up || msg == CRCInput::RC_down)
@@ -1221,10 +1211,10 @@ CMoviePlayerGui::PlayFile (void)
 	}
       else if (msg == CRCInput::RC_ok)
 	{
-	  if (playstate > PLAY)
+	  if (playstate > CMoviePlayerGui::PLAY)
 	    {
 	      update_lcd = true;
-	      playstate = SOFTRESET;
+	      playstate = CMoviePlayerGui::SOFTRESET;
 	    }
 	  else
 	    open_filebrowser = true;
@@ -1249,7 +1239,7 @@ CMoviePlayerGui::PlayFile (void)
 	  exit = true;
 	}
     }
-  while (playstate >= PLAY);
+  while (playstate >= CMoviePlayerGui::PLAY);
   pthread_join (rct, NULL);
 }
 
@@ -1259,7 +1249,6 @@ CMoviePlayerGui::show ()
   int res = -1;
   uint msg, data;
   bool loop = true, update = true;
-  key_level = 0;
   while (loop)
     {
       if (CNeutrinoApp::getInstance ()->
@@ -1358,10 +1347,6 @@ CMoviePlayerGui::show ()
 	}
     }
   hide ();
-  if (m_state != STOP)
-    {
-      //stop();
-    }
 
   return (res);
 }
@@ -1438,8 +1423,6 @@ CMoviePlayerGui::paintImg ()
 void
 CMoviePlayerGui::paintFoot ()
 {
-  if (m_state == STOP)		// insurance
-    key_level = 0;
   int ButtonWidth = (width - 20) / 4;
   frameBuffer->paintBoxRel (x,
 			    y + (height -
