@@ -97,7 +97,6 @@ void* CEventWatchDog::watchdogThread (void *arg)
 		CEventWatchDog* WatchDog = (CEventWatchDog*) arg;
 
 		int fd_ev;
-		int status;
 
 		fd_set rfds;
 		struct timeval tvselect;
@@ -174,6 +173,8 @@ void* CEventWatchDog::watchdogThread (void *arg)
 	{
 	    fprintf(stderr, "[controld] caught exception in eventwatchdog!\n");
   	}
+
+	pthread_exit(NULL);
 }
 
 void CEventWatchDog::registerNotifier( uint watchdogEvent, CEventWatchdogNotifier* notifier )
