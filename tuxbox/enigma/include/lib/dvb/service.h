@@ -38,7 +38,9 @@ public:
 
 		evtEnd,
 
-		evtRecordFailed
+		evtRecordFailed,
+		
+		evtPicViewer
 	};
 	int type;
 	int param;
