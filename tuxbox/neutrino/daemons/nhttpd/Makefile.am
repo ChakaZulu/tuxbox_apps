@@ -22,3 +22,12 @@ nhttpd_LDADD = \
 	@CONNECTION_LIBS@ \
 	@ZAPIT_LIBS@ \
 	-lpthread
+
+$(top_builddir)/lib/controldclient/libcontroldclient.la:
+	$(MAKE) -C $(top_builddir)/lib/controldclient
+
+$(top_builddir)/lib/timerdclient/libtimerdclient.la:
+	$(MAKE) -C $(top_builddir)/lib/timerdclient
+
+$(top_builddir)/lib/sectionsdclient/libsectionsdclient.la:
+	$(MAKE) -C $(top_builddir)/lib/sectionsdclient
