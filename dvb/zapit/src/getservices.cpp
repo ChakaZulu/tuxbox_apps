@@ -65,19 +65,12 @@ void ParseTransponder(XMLTreeNode *transponder) {
 	    if (tmp_chan == NULL) printf("tmp_chan konnte nicht erstellt werden.\n");
 	    
 	    channel_nr++;
-	    //printf("Now getting standards\n");	
-	    //services = services->GetChild();
-	    //printf("Bin in standard.\n");
-	    //sscanf(services->GetAttributeValue("vpid"),"%x", &tmp_chan->vpid);
-	    //sscanf(services->GetAttributeValue("apid"),"%x", &tmp_chan->apid);
-	    
-	    //services = services->GetParent();
-	    //printf("Bin wieder in transponder\n");
-	    
-	    //printf("PMT wird geparst\n");
+
 	    sscanf(services->GetAttributeValue("pmt"), "%x", &tmp_chan->pmt);
+	    sscanf(services->GetAttributeValue("ecmpid"), "%x", &tmp_chan->ecmpid);
+	    sscanf(services->GetAttributeValue("onid"), "%x", &tmp_chan->onid);
+	    sscanf(services->GetAttributeValue("tsid"), "%x", &tmp_chan->tsid);
 	    tmp_chan->prev = cur_c;
-	    //sscanf(services->GetAttributeValue("id"),"%u", &channel_nr);
 	    tmp_chan->chan_nr = channel_nr;
 	    tmp_chan->frequency = curr_freq;
 	    tmp_chan->symbolrate = curr_symbolrate;
@@ -206,26 +199,3 @@ chanptr LoadServices(int mode)
   return cur_c;
 }
 
-
-/*
-  int main(void) {
-  printf("getservices is starting\n");
-  chanptr servicelist = LoadServices(1);
-  printf("LoadServices() ist vorbei\n");
-  cur_c = top;
-  if (top->next ==  NULL) printf("top = NULL\n");
-  if (cur_c->next ==  NULL) printf("cur_c->next = NULL\n");
-  while (cur_c->next) {
-  //printf("Ausgabe sollte kommen: \n");
-  printf("Current Nr: %u, ", servicelist->chan_nr);
-  printf("Name: %s, ", servicelist->name);
-  printf("VPID: %x, ", servicelist->vpid);
-  printf("APID: %x, ", servicelist->apid);
-  printf("Frequency: %u, ", servicelist->frequency);
-  printf("Symbolrate: %u\n", servicelist->symbolrate);
-  servicelist = servicelist->next;
-  }
-  
-  }
-  
-*/
