@@ -11,7 +11,7 @@ struct gRGB;
 class eInit;
 class eRCKey;
 
-class eZap: public eApplication
+class eZap: public eApplication, public Object
 {
 	static eZap *instance;
 

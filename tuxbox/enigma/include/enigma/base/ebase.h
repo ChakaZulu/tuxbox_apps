@@ -206,7 +206,7 @@ public:
 };
 
 			// werden in einer mainloop verarbeitet
-class eMainloop : public Object
+class eMainloop
 {
 	std::map<int, eSocketNotifier*> notifiers;
 	ePtrList<eTimer> TimerList;
