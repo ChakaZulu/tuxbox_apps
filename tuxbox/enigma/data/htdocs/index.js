@@ -32,6 +32,11 @@ function switchChannel(xy, bouquet, channel)
 	}
 }
 
+function logging()
+{
+	parent.body.document.location = "/log/debug.html";
+}
+
 function remoteControl()
 {
 	NewWindow("/showRemoteControl", "RC", "293", "750", "no");
