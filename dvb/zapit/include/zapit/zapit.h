@@ -89,5 +89,5 @@ struct rmsg {
 int LoadServices();
 int get_caid();
 int sdt(uint osid);
-int pat(uint oonid);
+int pat(uint oonid,std::map<uint,channel> *cmap);
 void nit();

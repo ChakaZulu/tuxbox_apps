@@ -19,7 +19,7 @@ using namespace std;
 map<uint,channel> nvodchannels;
 map<uint,channel>::iterator cI;
 
-int pat(uint oonid)
+int pat(uint oonid,std::map<uint,channel> *cmap)
 {
 	struct dmxSctFilterParams flt;
 	int demux, pt;
@@ -86,10 +86,11 @@ int pat(uint oonid)
 		{
 			int p_nr = (buffer[current]<<8) | buffer[current+1];
 			int pid = ((buffer[current+2]&0x1f)<<8) | buffer[current+3];
+			
 			printf("P-Nr: %04x: %04x\n",p_nr,pid);
-			if (nvodchannels.count((oonid<<16)|p_nr) >0)
+			if ((*cmap).count((oonid<<16)|p_nr) >0)
 			{
-			  cI = nvodchannels.find((oonid<<16)|p_nr);
+			  cI = (*cmap).find((oonid<<16)|p_nr);
 			  cI->second.pmt = pid;
 			  printf("found p_nr: %04x\npmt: %04x\n", p_nr, pid);
 			}
