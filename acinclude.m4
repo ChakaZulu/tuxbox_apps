@@ -1,18 +1,24 @@
-AC_DEFUN([TUXBOX_APPS],
-[AM_CONFIG_HEADER(config.h)
+AC_DEFUN_ONCE([TUXBOX_APPS],[
+AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
+
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
+
+AC_DISABLE_STATIC
+AM_PROG_LIBTOOL
 
 AC_ARG_WITH(target,
 	[  --with-target=TARGET    target for compilation [[native,cdk]]],
-	[TARGET="$with_target"],[TARGET="native"])
+	[TARGET="$withval"],[TARGET="native"])
 
 AC_ARG_WITH(targetprefix,
 	[  --with-targetprefix=PATH prefix relative to target root [[PREFIX[for native], /[for cdk]]]],
-	[targetprefix="$with_target"],[targetprefix="NONE"])
+	[targetprefix="$withval"],[targetprefix="NONE"])
 
 AC_ARG_WITH(debug,
 	[  --without-debug         disable debugging code],
-	[DEBUG="$with_target"],[DEBUG="yes"])
+	[DEBUG="$withval"],[DEBUG="yes"])
 
 if test "$DEBUG" = "yes"; then
 	DEBUG_CFLAGS="-g3"
@@ -58,9 +64,6 @@ else
 	AC_MSG_ERROR([invalid target $TARGET, choose on from native,cdk]);
 fi
 
-AC_CANONICAL_BUILD
-AC_CANONICAL_HOST
-
 targetdatadir="\${targetprefix}/share"
 _targetdatadir="${_targetprefix}/share"
 targetsysconfdir="\${targetprefix}/etc"
@@ -74,6 +77,19 @@ AC_SUBST(targetdatadir)
 AC_SUBST(targetsysconfdir)
 AC_SUBST(targetlocalstatedir)
 
+AC_PROG_INSTALL
+])
+
+AC_DEFUN_ONCE([TUXBOX_APPS_LANG_C],[
+AC_PROG_CC
+])
+
+AC_DEFUN_ONCE([TUXBOX_APPS_LANG_CXX],[
+AC_PROG_CXX
+AC_HEADER_STDC
+])
+
+AC_DEFUN_ONCE([TUXBOX_APPS_DIRECTORY],[
 CONFIGDIR="\${localstatedir}/tuxbox/config"
 _CONFIGDIR="${_targetlocalstatedir}/tuxbox/config"
 AC_SUBST(CONFIGDIR)
@@ -108,18 +124,41 @@ AC_DEFINE_UNQUOTED(PLUGINDIR,"$_PLUGINDIR",[where to find the plugins])
 UCODEDIR="\${localstatedir}/tuxbox/ucodes"
 _UCODEDIR="${_targetlocalstatedir}/tuxbox/ucodes"
 AC_SUBST(UCODEDIR)
-AC_DEFINE_UNQUOTED(UCODEDIR,"$_UCODEDIR",[where to find the dbox2 ucodes (firmware)])
+AC_DEFINE_UNQUOTED(UCODEDIR,"$_UCODEDIR",[where to find the ucodes (firmware)])
+])
 
-AC_PROG_CC
-AC_PROG_CXX
-AC_PROG_INSTALL
-
-AC_HEADER_STDC
-
+AC_DEFUN_ONCE([TUXBOX_APPS_ENDIAN],[
 AC_CHECK_HEADERS(endian.h)
+AC_C_BIGENDIAN
+])
 
-AC_C_BIGENDIAN])
+AC_DEFUN_ONCE([TUXBOX_APPS_DVB],[
+AC_ARG_WITH(dvbincludes,
+	[  --with-dvbincludes=PATH path for dvb includes[[NONE]]],
+	[DVBINCLUDES="$withval"],[DVBINCLUDES=""])
 
-AC_DEFUN([TUXBOX_APPS_LIBTOOL],
-[AC_DISABLE_STATIC
-AM_PROG_LIBTOOL])
+orig_CFLAGS=$CFLAGS
+orig_CPPFLAGS=$CPPFLAGS
+if test "$DVBINCLUDES"; then
+	CFLAGS="-I$DVBINCLUDES"
+	CPPFLAGS="-I$DVBINCLUDES"
+else
+	CFLAGS=""
+	CPPFLAGS=""
+fi
+AC_CHECK_HEADERS(dvb/version.h,[DVB_VERSION_H="yes"])
+AC_CHECK_HEADERS(ost/dmx.h,[OST_DMX_H="yes"])
+if test "$DVB_VERSION_H"; then
+	AC_MSG_NOTICE([found dvb version 2 or later])
+elif test "$OST_DMX_H"; then
+	AC_MSG_NOTICE([found dvb version 1])
+else
+	AC_MSG_ERROR([can't find dvb headers])
+fi
+DVB_VERSION_H=
+OST_DMX_H=
+CFLAGS="$orig_CFLAGS -I$DVBINCLUDES"
+CPPFLAGS="$orig_CPPFLAGS -I$DVBINCLUDES"
+CXXFLAGS="$CXXFLAGS -I$DVBINCLUDES"
+])
+
