@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.4 2002/08/17 20:36:12 obi Exp $
+$Id: descriptor.c,v 1.5 2002/09/29 13:01:35 wjoost Exp $
 
  -- Descriptor Section
  -- (c) rasc
@@ -8,6 +8,9 @@ $Id: descriptor.c,v 1.4 2002/08/17 20:36:12 obi Exp $
  -- all descriptors are returning their length used in buffer
 
 $Log: descriptor.c,v $
+Revision 1.5  2002/09/29 13:01:35  wjoost
+kleiner Fehler
+
 Revision 1.4  2002/08/17 20:36:12  obi
 no more compiler warnings
 
@@ -2682,7 +2685,7 @@ void descriptor_TerrestDelivSys (u_char *b)
  d.reserved_2			 = getBits (b, 0, 72, 32);
 
 
- out_nl (4,"Center frequency: 0x%l08x (= %lu Hz)",d.centre_frequency,
+ out_nl (4,"Center frequency: 0x%08x (= %lu Hz)",d.centre_frequency,
 	 d.centre_frequency * 10 );
  out_S2B_NL (4,"Bandwidth: ",d.bandwidth,
 	 dvbstrTerrBandwidth_SCHEME (d.bandwidth));
