@@ -8,7 +8,8 @@
 eWindow::eWindow(int takefocus)
 	: eWidget(0, takefocus)
 {
-	
+	titleSize=10;
+	border=5;
 	setBackgroundColor(eSkin::getActive()->queryScheme("backgroundColor"));
 
 	iTopLeft=eSkin::getActive()->queryImage("eWindow.topLeft");
@@ -19,7 +20,6 @@ eWindow::eWindow(int takefocus)
 	iBottomLeft=eSkin::getActive()->queryImage("eWindow.bottomLeft");
 	iBottom=eSkin::getActive()->queryImage("eWindow.bottom");
 	iBottomRight=eSkin::getActive()->queryImage("eWindow.bottomRight");
-	border=5;
 	
 	if (iLeft)
 		if (border<iLeft->x)
@@ -29,6 +29,12 @@ eWindow::eWindow(int takefocus)
 			border=iRight->x;
 	if (iTopLeft)
 		titleSize=iTopLeft->y;
+	
+	border=eSkin::getActive()->queryValue("eWindow.borderSize", border);
+	titleSize=eSkin::getActive()->queryValue("eWindow.titleSize", 30);
+	titleOffsetX=eSkin::getActive()->queryValue("eWindow.titleOffsetX", 10);
+	titleOffsetY=eSkin::getActive()->queryValue("eWindow.titleOffsetY", 10);
+	titleFontSize=eSkin::getActive()->queryValue("eWindow.titleFontSize", 20);
 }
 
 eWindow::~eWindow()
@@ -130,8 +136,8 @@ void eWindow::drawTitlebar(gPainter *target)
 	
 	target->flush();
 
-	target->setFont(gFont("NimbusSansL-Regular Sans L Regular", titleSize-25));
-	target->renderText(QRect(border, 10, width(), titleSize), text);
+	target->setFont(gFont("NimbusSansL-Regular Sans L Regular", titleFontSize));
+	target->renderText(QRect(titleOffsetX, titleOffsetY, width()-titleOffsetX, titleSize), text);
 	target->flush();
 }
 

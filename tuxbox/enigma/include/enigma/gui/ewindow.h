@@ -11,7 +11,7 @@ class eWindow: public eWidget
 			*iTopRight, *iLeft, *iRight, 
 			*iBottomLeft, *iBottom, *iBottomRight;
 protected:
-	int titleSize, border;
+	int titleSize, border, titleOffsetX, titleOffsetY, titleFontSize;
 	void redrawWidget(gPainter *target, const QRect &where);
 	void drawTitlebar(gPainter *target);
   void OnFontSizeChanged(int NewFontSize);
