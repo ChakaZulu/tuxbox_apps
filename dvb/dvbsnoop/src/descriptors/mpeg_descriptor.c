@@ -1,5 +1,5 @@
 /*
-$Id: mpeg_descriptor.c,v 1.24 2004/08/12 22:57:18 rasc Exp $
+$Id: mpeg_descriptor.c,v 1.25 2004/08/13 11:05:29 rasc Exp $
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: mpeg_descriptor.c,v 1.24 2004/08/12 22:57:18 rasc Exp $
 
 
 $Log: mpeg_descriptor.c,v $
+Revision 1.25  2004/08/13 11:05:29  rasc
+Metadata_STD_descriptor
+
 Revision 1.24  2004/08/12 22:57:18  rasc
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
@@ -1644,7 +1647,9 @@ void descriptorMPEG_ContentLabeling (u_char *b)
   indent (-1);
 
 
-  maf = outBit_Sx_NL   (4,"metadata_application_format: ",  	b, 16, 16);   //$$$ TODO
+  maf = outBit_S2x_NL   (4,"metadata_application_format: ",  	b, 16, 16,
+  		   	(char *(*)(u_long)) dvbstrMPEG_metadata_application_format);
+
   b   += 4;
   len -= 2;
   if (maf == 0xFFFF) {
@@ -1655,7 +1660,8 @@ void descriptorMPEG_ContentLabeling (u_char *b)
 
 
   crirf = outBit_Sx_NL (4,"content_reference_id_record_flag: ",	b,  0,  1);
-  ctbi  = outBit_Sx_NL   (4,"content_time_base_indicator: ",  	b,  1,  4);
+  ctbi  = outBit_S2x_NL(4,"content_time_base_indicator: ",  	b,  1,  4,
+		 (char *(*)(u_long)) dvbstrMPEG_Content_time_base_indicator);
   outBit_Sx_NL   (6,"reserved: ",  				b,  5,  3);
   b++;
   len --;
@@ -1676,15 +1682,19 @@ void descriptorMPEG_ContentLabeling (u_char *b)
 
   	outBit_Sx_NL   (6,"reserved: ",  	b,  0,  7);
 	ll = getBits48 (b, 0,  7, 33);
-	out (4,"content_time_base_value: ");
-	print_timebase90kHz (4, ll);
-	out_NL (4);
+	out_S2LL_NL(4,"content_time_base_value: ",ll,"90kHz units");
+	// -- following is wrong, because of different unit measuring
+	// out (4,"content_time_base_value: ");
+	// print_timebase90kHz (4, ll);
+	// out_NL (4);
 
   	outBit_Sx_NL   (6,"reserved: ",  	b, 40,  7);
 	ll = getBits48 (b, 0,  47, 33);
-	out (4,"metadata_time_base_value: ");
-	print_timebase90kHz (4, ll);
-	out_NL (4);
+	out_S2LL_NL(4,"metadata_time_base_value: ",ll,"90kHz units");
+	// -- following is wrong, because of different unit measuring
+	// out (4,"metadata_time_base_value: ");
+	// print_timebase90kHz (4, ll);
+	// out_NL (4);
 
 	b   += 10;
 	len -= 10;
@@ -1767,15 +1777,15 @@ void descriptorMPEG_TVA_metadata (u_char *b)
 void descriptorMPEG_TVA_metadata_STD (u_char *b)
 
 {
-  int  len;
-
   // tag	= b[0];
-  len		= b[1];
+  // len	= b[1];
 
-
-  indent (+1);
-  printhex_buf (4, b+2, len);  // $$$ TODO 
-  indent (-1);
+  outBit_Sx_NL   (6,"reserved: ",  			b,  16,  2);
+  outBit_S2Tx_NL (4,"metadata_input_leak_rate: ",  	b,  18, 22,"(x 400 bit/s)");
+  outBit_Sx_NL   (6,"reserved: ",  			b,  40,  2);
+  outBit_S2Tx_NL (4,"metadata_buffer_size: ", 		b,  42, 22,"(x 1024 bytes)");
+  outBit_Sx_NL   (6,"reserved: ",  			b,  64,  2);
+  outBit_S2Tx_NL (4,"metadata_output_leak_rate: ",  	b,  66, 22,"(x 400 bit/s)");
 }
 
 

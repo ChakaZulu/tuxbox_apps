@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.57 2004/08/13 01:15:54 rasc Exp $
+$Id: dvb_str.c,v 1.58 2004/08/13 11:05:29 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.57 2004/08/13 01:15:54 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.58  2004/08/13 11:05:29  rasc
+Metadata_STD_descriptor
+
 Revision 1.57  2004/08/13 01:15:54  rasc
 small change in PID assignment display
 
@@ -297,7 +300,7 @@ char *dvbstrTableID (u_int id)
      {  0x03, 0x03,  "Transport Stream Description Table (TSDT)" },
      {  0x04, 0x04,  "ISO_IEC_14496_scene_description_section" },	/* $$$ TODO */
      {  0x05, 0x05,  "ISO_IEC_14496_object_description_section" },	/* $$$ TODO */
-     {  0x06, 0x06,  "Metadata_section" },				// $$$ TODO H.222.0 AMD1
+     {  0x06, 0x06,  "Metadata Table" },				// $$$ TODO H.222.0 AMD1
      {  0x07, 0x07,  "IPMP_Control_Information_section (ISO 13818-11)" }, // $$$ TODO H.222.0 AMD1
      {  0x08, 0x37,  "ITU-T Rec. H.222.0|ISO/IEC13818 reserved" },
      {  0x38, 0x39,  "ISO/IEC 13818-6 reserved" },
@@ -3215,6 +3218,53 @@ char *dvbstrTVA_content_id_type (u_int i)
      {  0x02, 0x02,  "context_id is a value of a value of network_id" },
      {  0x03, 0x7F,  "DVB reserved" },
      {  0x80, 0xFF,  "user defined" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+
+
+//
+// H.222.0 AMD1 - AMD3  update
+//
+
+
+/*
+ -- metadata_application_format 
+ -- H.222.0 AMD1
+*/
+
+char *dvbstrMPEG_metadata_application_format (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x0000, 0x00FF,  "reserved" },
+     {  0x0100, 0xFFFE,  "User defined" },
+     {  0xFFFF, 0xFFFF,  "Defined by the metadata_application_format_identifier" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, i);
+}
+
+
+
+/*
+ -- Content_time_base_indicator values 
+ -- H.222.0 AMD1
+*/
+
+char *dvbstrMPEG_Content_time_base_indicator (u_int i)
+{
+  STR_TABLE  Table[] = {
+     {  0x00, 0x00,  "No content time base defined" },
+     {  0x01, 0x01,  "Use of STC" },
+     {  0x02, 0x02,  "Use of NPT" },
+     {  0x03, 0x07,  "reserved" },
+     {  0x08, 0x0F,  "private use" },
      {  0,0, NULL }
   };
 

@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.h,v 1.26 2004/08/12 22:57:19 rasc Exp $ 
+$Id: dvb_str.h,v 1.27 2004/08/13 11:05:29 rasc Exp $ 
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: dvb_str.h,v 1.26 2004/08/12 22:57:19 rasc Exp $
 
 
 $Log: dvb_str.h,v $
+Revision 1.27  2004/08/13 11:05:29  rasc
+Metadata_STD_descriptor
+
 Revision 1.26  2004/08/12 22:57:19  rasc
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
@@ -220,6 +223,12 @@ char *dvbstrTVA_crid_location (u_int i);
 
 char *dvbstrTVA_content_id_type (u_int i);
 
+
+
+/* H.222.0 AMD1 - AMD3 update */
+
+char *dvbstrMPEG_metadata_application_format (u_int i);
+char *dvbstrMPEG_Content_time_base_indicator (u_int i);
 
 
 #endif

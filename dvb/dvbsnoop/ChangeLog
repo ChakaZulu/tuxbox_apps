@@ -1,4 +1,5 @@
 
+ - New: MPEG Metadata STD descriptor (H.222.0 AMD1)
  - New: MPEG Content Labeling descriptor  (H.222.0 AMD1)
  - New: PES update ITU-T H.222.0 AMD2
  - Bugfix: cell list descriptors (tnx to Karsten Siebert)
