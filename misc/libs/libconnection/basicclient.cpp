@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.3 2002/09/25 18:51:13 thegoodguy Exp $
+ * $Header: /cvs/tuxbox/apps/misc/libs/libconnection/basicclient.cpp,v 1.4 2002/10/07 10:59:48 thegoodguy Exp $
  *
  * Basic Client Class (Neutrino) - DBoxII-Project
  *
@@ -60,6 +60,7 @@ bool CBasicClient::open_connection(const char* socketname)
 	if (connect(sock_fd, (struct sockaddr*) &servaddr, clilen) < 0)
 	{
 		printf("[CBasicClient] connect failed.\n");
+		perror(socketname);
 		close_connection();
 		return false;
 	}
