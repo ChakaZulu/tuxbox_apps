@@ -206,7 +206,7 @@ class eMainloop : public Object
 	int loop_level;
 	void processOneEvent();
 public:
-	eMainloop():loop_level(0)	{	}
+	eMainloop():loop_level(0),app_quit_now(0)	{	}
 	void addSocketNotifier(eSocketNotifier *sn);
 	void removeSocketNotifier(eSocketNotifier *sn);
 	void addTimer(eTimer* e)	{		TimerList.push_back(e);		TimerList.sort(eTimer::less());	}

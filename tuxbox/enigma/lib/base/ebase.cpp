@@ -166,11 +166,11 @@ void eMainloop::processOneEvent()
 
 int eMainloop::exec()
 {
-		if (!loop_level)
-		{
-			app_quit_now = false;
-			enter_loop();
-		}
+	if (!loop_level)
+	{
+		app_quit_now = false;
+		enter_loop();
+	}
 }
 
 void eMainloop::enter_loop()
