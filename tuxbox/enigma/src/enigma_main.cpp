@@ -46,7 +46,7 @@
 #include <lib/dvb/dvbservice.h>
 #include <lib/gdi/lcd.h>
 #include <lib/gdi/glcddc.h>
-#include <tuxbox/tuxbox.h>
+#include <libtuxbox.h>
 
 		// bis waldi das in nen .h tut
 #define MOVIEDIR "/hdd/movie"
