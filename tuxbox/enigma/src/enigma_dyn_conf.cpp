@@ -178,9 +178,55 @@ eString setConfigMultiBoot(eString request, eString dirpath, eString opts, eHTTP
 	return closeWindow(content, "", 500);
 }
 
+void initHDDparms(void)
+{
+#ifndef DISABLE_FILE
+	eString cmd;
+	int ti = 0, ac = 0;
+
+	eConfig::getInstance()->getKey("/extras/hdparm-s", ti);
+	eConfig::getInstance()->getKey("/extras/hdparm-m", ac);
+	if (ac)
+	{
+		cmd.sprintf("hdparm -S %d /dev/ide/host0/bus0/target0/lun0/disc", ti);
+		system(cmd.c_str());
+	}
+	if (ti)
+	{
+		cmd.sprintf("hdparm -M %d /dev/ide/host0/bus0/target0/lun0/disc", ac);
+		system(cmd.c_str());
+	}
+#endif
+}
+
 eString setConfigSettings(eString request, eString dirpath, eString opts, eHTTPConnection *content)
 {
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
+	eString maxmtu = opt["maxmtu"];
+	eString samba = opt["samba"];
+	eString hddti = opt["hddstandby"];
+	eString hddac = opt["hddacoustics"];
+	eString timeroffset = opt["timeroffset"];
+	eString showsatpos = opt["showsatpos"];
+	eString webiflock = opt["webiflock"];
+	
+	int oldti = 0;
+	eConfig::getInstance()->getKey("/extras/hdparm-s", oldti);
+	int oldac = 0;
+	eConfig::getInstance()->getKey("/extras/hdparm-m", oldac);
+	
+//	eConfig::getInstance()->setKey("/extras/fastshutdown", (fastshutdown == "on" ? 1 : 0));
+	eConfig::getInstance()->setKey("/elitedvb/network/samba", (samba == "on" ? 1 : 0));
+	eConfig::getInstance()->setKey("/ezap/webif/webIfLock", (webiflock == "on" ? 1 : 0));
+	eConfig::getInstance()->setKey("/extras/showSatPos", (showsatpos == "on" ? 1 : 0));
+	eConfig::getInstance()->setKey("/enigma/timeroffset", atoi(timeroffset.c_str()));
+	eConfig::getInstance()->setKey("/elitedvb/network/maxmtu", atoi(maxmtu.c_str()));
+	system(eString("/sbin/ifconfig eth0 mtu " + maxmtu).c_str());
+	if (atoi(hddti.c_str()) != oldti)
+		eConfig::getInstance()->setKey("/extras/hdparm-s", atoi(hddti.c_str()));
+	if (atoi(hddac.c_str()) != oldac)
+		eConfig::getInstance()->setKey("/extras/hdparm-m", atoi(hddac.c_str()));
+	initHDDparms();
 
 	return closeWindow(content, "", 500);
 }
