@@ -32,7 +32,7 @@ static	int		actplayer=0;
 static	Player	player[9];
 static	char	pig_dis = 0;
 
-static	int		pig_x[] = { 500, 500, 150, 150 };
+static	int		pig_x[] = { 450, 450, 150, 150 };
 
 static	int		myrand( int idx )
 {
@@ -233,9 +233,9 @@ static	void	SelectForRoll( void )
 	y = 128;
 
 	FBDrawLine( x,y+27,x+15,y+32, RED );
-	FBDrawLine( x,y+28,x+15,y+32, RED );
+	FBDrawLine( x,y+28,x+13,y+32, RED );
 	FBDrawLine( x,y+37,x+15,y+32, RED );
-	FBDrawLine( x,y+36,x+15,y+32, RED );
+	FBDrawLine( x,y+36,x+13,y+32, RED );
 
 	while(( realcode != 0xee ) && !doexit )
 		RcGetActCode();
@@ -296,9 +296,9 @@ static	void	SelectForRoll( void )
 			nr=nnr;
 			y=nr*68+128;
 			FBDrawLine( x,y+27,x+15,y+32, RED );
-			FBDrawLine( x,y+28,x+15,y+32, RED );
+			FBDrawLine( x,y+28,x+13,y+32, RED );
 			FBDrawLine( x,y+37,x+15,y+32, RED );
-			FBDrawLine( x,y+36,x+15,y+32, RED );
+			FBDrawLine( x,y+36,x+13,y+32, RED );
 		}
 #ifdef USEX
 		FBFlushGrafic();

@@ -5,7 +5,7 @@
 #define	MAZEH	36
 
 #define _	WHITE
-#define W	BLACK
+#define W	BLUE
 
 static unsigned char	point[] = {
 _,W,W,W,W,W,_,

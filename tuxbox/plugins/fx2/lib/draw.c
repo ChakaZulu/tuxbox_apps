@@ -103,10 +103,10 @@ int	FBInitialize( int xRes, int yRes, int nbpp, int extfd )
 	if (ioctl(fd, FBIOGET_VSCREENINFO, &screeninfo)<0)
 		perror("failed - FBIOGET_VSCREENINFO");
 
-	FBSetColor( BLACK, 1, 1, 1 );
-    FBSetColor( BNR0, 1, 1, 1 ); 
-    FBSetColor( WHITE, 255, 255, 255 );
-    FBSetColor( RED, 255, 0, 0 );
+	FBSetColor( BLACK, 30, 30, 100 );
+	FBSetColor( BNR0, 1, 1, 1 ); 
+	FBSetColor( WHITE, 210, 210, 210 );
+	FBSetColor( RED, 240, 50, 80 );
 
 	if (ioctl(fd, FBIOPUTCMAP, &cmap )<0)
 		perror("FBSetCMap");
@@ -644,10 +644,10 @@ int	FBInitialize( int xRes, int yRes, int bpp, int extfd )
 	gc = XCreateGC( dpy, window, 0, 0 );
 	XSetFunction( dpy,gc,GXcopy);
 
-	FBSetColor( BLACK, 1, 1, 1 );
-    FBSetColor( BNR0, 1, 1, 1 ); 
-    FBSetColor( WHITE, 255, 255, 255 );
-    FBSetColor( RED, 255, 0, 0 );
+	FBSetColor( BLACK, 30, 30, 100 );
+	FBSetColor( BNR0, 1, 1, 1 ); 
+	FBSetColor( WHITE, 210, 210, 210 );
+	FBSetColor( RED, 240, 50, 80 );
 
 	XFlush(dpy);
 	return dpy ? 0 : -1;

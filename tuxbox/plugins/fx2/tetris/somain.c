@@ -324,10 +324,10 @@ static	void	ShowIHScore( void )
 
 static	void	setup_colors(void)
 {
-	FBSetColor( YELLOW, 255, 255, 0 );
-	FBSetColor( GREEN, 0, 255, 0 );
-	FBSetColor( STEELBLUE, 0, 0, 180 );
-	FBSetColor( BLUE, 130, 130, 255 );
+	FBSetColor( YELLOW, 235, 235, 30 );
+	FBSetColor( GREEN, 30, 235, 30 );
+	FBSetColor( STEELBLUE, 80, 80, 200 );
+	FBSetColor( BLUE, 80, 80, 230 );
 	FBSetColor( GRAY, 130, 130, 130 );
 	FBSetColor( DARK, 60, 60, 60 );
 	FBSetColor( RED1, 198, 131, 131 );
