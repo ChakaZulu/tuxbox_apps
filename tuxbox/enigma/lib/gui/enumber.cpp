@@ -32,9 +32,9 @@ eRect eNumber::getNumberRect(int n)
 
 void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 {
-	eRect pos =	getNumberRect(n);
+	eRect pos(getNumberRect(n));
 
-	if (!area.contains(pos) )
+	if (!area.intersects(pos))
 		return;
 
 	p->setForegroundColor((have_focus && n==active)?cursorB:normalB);
