@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.12 2001/07/25 20:46:21 fnbrd Exp $
+//  $Id: sectionsdMsg.h,v 1.13 2001/08/09 23:35:54 fnbrd Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,6 +25,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
+//  Revision 1.13  2001/08/09 23:35:54  fnbrd
+//  Moved the stuff into a struct.
+//
 //  Revision 1.12  2001/07/25 20:46:21  fnbrd
 //  Neue Kommandos, kleine interne Verbesserungen.
 //
@@ -60,32 +63,34 @@
 //
 //
 
-#define SECTIONSD_PORT_NUMBER 1600
+struct sectionsd {
+  static const unsigned short portNumber=1600;
 
-struct msgSectionsdRequestHeader {
-  char version;
-  char command;
-  unsigned short dataLength;
-};
+  struct msgRequestHeader {
+    char version;
+    char command;
+    unsigned short dataLength;
+  } __attribute__ ((packed)) ;
 
-struct msgSectionsdResponseHeader {
-  unsigned short dataLength;
-};
+  struct msgResponseHeader {
+    unsigned short dataLength;
+  } __attribute__ ((packed)) ;
 
-#define NUMBER_OF_SECTIONSD_COMMANDS 11
-
-enum sectionsdCommands {
-  actualEPGchannelName=0,
-  actualEventListTVshort,
-  currentNextInformation,
-  dumpStatusinformation,
-  allEventsChannelName,
-  setHoursToCache,
-  setEventsAreOldInMinutes,
-  dumpAllServices,
-  actualEventListRadioshort,
-  getNextEPG,
-  getNextShort
+  static const int numberOfCommands=12;
+  enum commands {
+    actualEPGchannelName=0,
+    actualEventListTVshort,
+    currentNextInformation,
+    dumpStatusinformation,
+    allEventsChannelName,
+    setHoursToCache,
+    setEventsAreOldInMinutes,
+    dumpAllServices,
+    actualEventListRadioshort,
+    getNextEPG,
+    getNextShort,
+    pauseScanning // for the grabbers ;)
+  };
 };
 
 //
@@ -173,5 +178,11 @@ enum sectionsdCommands {
 //   data of response:
 //     is a string (c-string) describing the Event in short terms:
 //     1. line unique key (long long, hex), 2. line name, 3. line start time GMT (ctime, hex ), 4 line  duration (seconds, hex)
+//
+// pauseScanning:
+//   data of request:
+//     int (1 = pause, 0 = continue)
+//   data of response:
+//     -
 //
 #endif // SECTIONSDMSG_H
