@@ -1,5 +1,5 @@
 /*
- * $Id: video.cpp,v 1.9 2003/03/14 07:31:51 obi Exp $
+ * $Id: video.cpp,v 1.10 2003/12/19 23:35:47 derget Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -104,5 +104,10 @@ video_play_state_t CVideo::getPlayState(void)
 	struct video_status status;
 	fop(ioctl, VIDEO_GET_STATUS, &status);
 	return status.play_state;
+}
+
+int CVideo::setVideoSystem(int video_system)
+{
+        return fop(ioctl, VIDEO_SET_SYSTEM, video_system);
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.66 2003/01/30 17:21:16 obi Exp $
+ * $Id: zapit.h,v 1.67 2003/12/19 23:35:45 derget Exp $
  */
 
 #ifndef __zapit_h__
@@ -31,5 +31,9 @@ unsigned int zapTo_ChannelID(const t_channel_id channel_id, const bool isSubServ
 void sendAPIDs(int connfd);
 void enterStandby(void);
 void leaveStandby(void);
+void setVideoSystem_t(int video_system);
+
+#define PAL	0
+#define NTSC	1
 
 #endif /* __zapit_h__ */

@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.48 2003/12/11 21:15:57 thegoodguy Exp $
+ * $Id: pzapit.cpp,v 1.49 2003/12/19 23:35:47 derget Exp $
  *
  * simple commandline client for zapit
  *
@@ -56,6 +56,8 @@ int usage (const char * basename)
 	std::cout << "shutdown zapit: " << basename << " -kill" << std::endl;
 	std::cout << "enter standby: " << basename << " -esb" << std::endl;
 	std::cout << "leave standby: " << basename << " -lsb" << std::endl;
+        std::cout << "set avia500/600 in ntsc mode: " << basename << " --ntsc" << std::endl;
+        std::cout << "set avia500/600 in pal mode: " << basename << " --pal" << std::endl;
 	std::cout << "send diseqc 1.2 motor command: " << basename << "-m <cmdtype> <addr> <cmd> <number of parameters> <parameter 1> <parameter 2>" << std::endl;
 	return -1;
 }
@@ -85,6 +87,8 @@ int main (int argc, char** argv)
 	bool register_neutrino = false;
 	bool savebouquets = false;
 	bool show_satellites = false;
+        bool set_pal = false;
+        bool set_ntsc = false;
 	bool scan = false;
 	bool zapByName = false;
 	bool killzapit = false;
@@ -238,6 +242,17 @@ int main (int argc, char** argv)
 			scan = true;
 			continue;
 		}
+                else if (!strncmp(argv[i], "--pal", 4))
+                {
+                        set_pal = true;
+                        continue;
+                }
+        
+                else if (!strncmp(argv[i], "--ntsc", 5))
+                {
+                        set_ntsc = true;
+                        continue;
+                }
 		else if (!strncmp(argv[i], "-unmute", 7))
 		{
 			mute = 0;
@@ -420,6 +435,23 @@ int main (int argc, char** argv)
 
 		return 0;
 	}
+
+        if (set_pal)
+        {
+                zapit.setVideoSystem_a(PAL);
+                zapit.stopPlayBack();
+                zapit.startPlayBack();
+                return 0;
+        }
+                 
+        if (set_ntsc)
+        {
+                zapit.setVideoSystem_a(NTSC);
+                zapit.stopPlayBack();
+                zapit.startPlayBack();
+                return 0;
+        }
+
 
 	/* choose source mode */
 	zapit.setMode(radio ? CZapitClient::MODE_RADIO : CZapitClient::MODE_TV);

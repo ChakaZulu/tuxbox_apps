@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.96 2003/11/27 00:32:08 homar Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.97 2003/12/19 23:35:46 derget Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -812,6 +812,16 @@ void CZapitClient::setStandby(const bool enable)
 	send(CZapitMessages::CMD_SET_STANDBY, (char*)&msg, sizeof(msg));
 	close_connection();
 }
+
+void CZapitClient::setVideoSystem_a(int video_system)
+{
+	if (video_system == 0)
+		send(CZapitMessages::CMD_SET_PAL);
+	else
+		send(CZapitMessages::CMD_SET_NTSC);
+	close_connection();
+}
+
 
 void CZapitClient::startPlayBack()
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.338 2003/11/27 00:32:07 homar Exp $
+ * $Id: zapit.cpp,v 1.339 2003/12/19 23:35:47 derget Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1012,6 +1012,18 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		break;
 	}
 
+	case CZapitMessages::CMD_SET_PAL:
+	{
+		setVideoSystem_t(0);
+		break;
+	}
+	
+	case CZapitMessages::CMD_SET_NTSC:
+	{
+		setVideoSystem_t(1);
+		break;
+	}
+
 	case CZapitMessages::CMD_SB_START_PLAYBACK:
 		playbackStopForced = false;
 		/* FIXME: nvod */
@@ -1411,6 +1423,14 @@ int stopPlayBack(void)
 	return 0;
 }
 
+void setVideoSystem_t(int video_system)
+{
+	if (video_system == 0) 
+		videoDecoder->setVideoSystem(PAL);
+	else
+		videoDecoder->setVideoSystem(NTSC);
+}
+
 void enterStandby(void)
 {
 	if (standby) {
@@ -1568,7 +1588,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.338 2003/11/27 00:32:07 homar Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.339 2003/12/19 23:35:47 derget Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {

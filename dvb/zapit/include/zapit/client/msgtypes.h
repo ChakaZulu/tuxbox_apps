@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.18 2003/11/27 00:32:06 homar Exp $
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/msgtypes.h,v 1.19 2003/12/19 23:35:46 derget Exp $
  *
  * types used for clientlib <-> zapit communication - d-box2 linux project
  *
@@ -112,6 +112,8 @@ class CZapitMessages
 			CMD_MUTE,
 			CMD_SET_VOLUME,
 			CMD_SET_STANDBY,
+			CMD_SET_PAL,
+			CMD_SET_NTSC,			
 
 			CMD_NVOD_SUBSERVICE_NUM,
 			CMD_SEND_MOTOR_COMMAND,

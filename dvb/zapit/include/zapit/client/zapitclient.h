@@ -420,6 +420,7 @@ class CZapitClient:public CBasicClient
 	bool isPlayBackActive();
 	void setDisplayFormat(const video_display_format_t mode);
 	void setAudioMode(int mode);
+	void setVideoSystem_a(int video_system);
 
 	/****************************************/
 	/*					*/
@@ -442,6 +443,8 @@ class CZapitClient:public CBasicClient
 	static std::string Utf8_to_Latin1(const std::string & s);
 };
 
+#define PAL	0
+#define NTSC	1
 
 
 #endif

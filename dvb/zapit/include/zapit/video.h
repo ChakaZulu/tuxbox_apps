@@ -1,5 +1,5 @@
 /*
- * $Id: video.h,v 1.5 2003/01/30 17:21:16 obi Exp $
+ * $Id: video.h,v 1.6 2003/12/19 23:35:45 derget Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -57,6 +57,9 @@ class CVideo
 		/* change video play state */
 		int start(void);
 		int stop(void);
+
+		/* set video_system */
+		int setVideoSystem(int video_system);
 };
 
 #endif /* __zapit_video_h__ */
