@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.13 2001/08/20 01:26:54 McClean Exp $
+        $Id: neutrino.cpp,v 1.14 2001/08/20 01:51:12 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,6 +32,9 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
+  Revision 1.14  2001/08/20 01:51:12  McClean
+  channellist bug fixed - faster channellist response
+
   Revision 1.13  2001/08/20 01:26:54  McClean
   stream info added
 
@@ -896,7 +899,6 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainSettings)
 			if (key==CRCInput::RC_ok)
 			{	//channellist
 				infoViewer.killTitle();
-				channelList->updateEvents();
 				channelList->exec(&frameBuffer,&fonts, &rcInput, &remoteControl, &infoViewer, &settings);
 			}
 			else if ((key==settings.key_quickzap_up) || (key==settings.key_quickzap_down))
@@ -974,7 +976,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//clear frame...
 	ClearFrameBuffer();
 
-	channelList = new CChannelList(&settings, 1,"All Services");
 
 	if(!loadSetup(&settings))
 	{
@@ -991,6 +992,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	colorSetupNotifier->changeNotify("initial");
 	setupNetwork(&settings);
 
+	channelList = new CChannelList(&settings, 1,"All Services");
 
 	//Main settings
 	CMenuWidget			mainSettings;

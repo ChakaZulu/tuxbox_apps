@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.8 2001/08/20 01:26:54 McClean Exp $
+// $Id: channellist.cpp,v 1.9 2001/08/20 01:51:12 McClean Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.9  2001/08/20 01:51:12  McClean
+// channellist bug fixed - faster channellist response
+//
 // Revision 1.8  2001/08/20 01:26:54  McClean
 // stream info added
 //
@@ -157,7 +160,10 @@ int CChannelList::getActiveChannelNumber()
 
 void CChannelList::exec(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput* rcInput, CRemoteControl *remoteControl, CInfoViewer *infoViewer, SNeutrinoSettings* settings)
 {
+	paintHead(frameBuffer, fonts);
+	updateEvents();
 	paint(frameBuffer, fonts);
+	
 	int oldselected = selected;
 	int zapOnExit = false;
 	bool loop=true;
@@ -380,16 +386,16 @@ void CChannelList::quickZap(CFrameBuffer* frameBuffer, FontsDef *fonts, CRCInput
 	}
 }
 
-void CChannelList::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+void CChannelList::paintHead(CFrameBuffer* frameBuffer, FontsDef *fonts)
 {
 	frameBuffer->paintBoxRel(x,y, width,30, COL_MENUHEAD);
 	frameBuffer->paintBoxRel(x,y+30, width,5, COL_MENUCONTENT);
-
 	fonts->menu_title->RenderString(x+10,y+23, width, name.c_str(), COL_MENUHEAD);
-	
+}
+
+void CChannelList::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
+{
 	liststart = (selected/listmaxshow)*listmaxshow;
-
-
 	int lastnum =  chanlist[liststart]->number + listmaxshow;
 	string map = "";
 	while(lastnum>0)
@@ -403,5 +409,4 @@ void CChannelList::paint(CFrameBuffer* frameBuffer, FontsDef *fonts)
 	{
 		paintItem(frameBuffer, fonts, count );
 	}
-
 }

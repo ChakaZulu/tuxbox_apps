@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.6 2001/08/20 01:26:54 McClean Exp $
+// $Id: channellist.h,v 1.7 2001/08/20 01:51:12 McClean Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.7  2001/08/20 01:51:12  McClean
+// channellist bug fixed - faster channellist response
+//
 // Revision 1.6  2001/08/20 01:26:54  McClean
 // stream info added
 //
@@ -58,6 +61,7 @@ class CChannelList
 
 		void paintItem(CFrameBuffer* fb, FontsDef *Fonts, int pos );
 		void paint(CFrameBuffer* fb, FontsDef *Fonts);
+		void paintHead(CFrameBuffer* fb, FontsDef *Fonts);
 		void hide(CFrameBuffer* fb);
 
 	public:
