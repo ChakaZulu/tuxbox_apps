@@ -1,7 +1,7 @@
 /*
   BouquetManager für zapit  -   DBoxII-Project
 
-  $Id: bouquets.cpp,v 1.12 2002/02/04 23:22:51 Simplex Exp $
+  $Id: bouquets.cpp,v 1.13 2002/02/06 23:56:13 Simplex Exp $
 
   License: GPL
 
@@ -20,6 +20,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: bouquets.cpp,v $
+  Revision 1.13  2002/02/06 23:56:13  Simplex
+  fixed bug with accessing radiochannel lists
+
   Revision 1.12  2002/02/04 23:22:51  Simplex
   fixed bug saving bouquets.xml
 
@@ -80,20 +83,20 @@ channel* CBouquet::getChannelByName(char* serviceName, uint serviceType)
 {
 	channel* result = NULL;
 
-	ChannelList& channels = tvChannels;
+	ChannelList* channels = &tvChannels;
 	switch (serviceType)
 	{
 		case 0:
 		case 1:
-		case 4: channels = tvChannels; break;
-		case 2: channels = radioChannels; break;
+		case 4: channels = &tvChannels; break;
+		case 2: channels = &radioChannels; break;
 	}
 
 	uint i;
-	for (i=0; i<channels.size(), channels[i]->name != string(serviceName); i++);
+	for (i=0; i<channels->size(), (*channels)[i]->name != string(serviceName); i++);
 
-	if (i<channels.size())
-		result = channels[i];
+	if (i<channels->size())
+		result = (*channels)[i];
 
 	if ((serviceType==0) && (result==NULL))
 		result = getChannelByName(serviceName, 2);
@@ -106,23 +109,28 @@ channel* CBouquet::getChannelByOnidSid(uint onidSid, uint serviceType = 0)
 	channel* result = NULL;
 
 	printf("searching channel\n");
-	ChannelList& channels = tvChannels;
+	ChannelList* channels = &tvChannels;
 	switch (serviceType)
 	{
 		case 0:
 		case 1:
-		case 4: channels = tvChannels; break;
-		case 2: channels = radioChannels; break;
+		case 4: channels = &tvChannels; break;
+		case 2: channels = &radioChannels; break;
 	}
 
 	uint i;
-	for (i=0; i<channels.size(), channels[i]->OnidSid() != onidSid; i++);
+	for (i=0; (i<channels->size()) && ((*channels)[i]->OnidSid() != onidSid); i++);
 
-	if (i<channels.size())
-		result = channels[i];
+	if (i<channels->size())
+		result = (*channels)[i];
 
 	if ((serviceType==0) && (result==NULL))
+	{
+		printf("Channel not found in default channellist\n");
 		result = getChannelByOnidSid(onidSid, 2);
+		if (result == NULL)
+			printf("Channel not found in default radiolist\n");
+	}
 
 	return( result);
 }
@@ -147,22 +155,22 @@ void CBouquet::removeService( channel* oldChannel)
 	if (oldChannel != NULL)
 	{
 		printf("removing channel %s\n", oldChannel->name.c_str());
-		ChannelList& channels = tvChannels;
+		ChannelList* channels = &tvChannels;
 		switch (oldChannel->service_type)
 		{
 			case 1:
-			case 4: channels = tvChannels; break;
-			case 2: channels = radioChannels; break;
+			case 4: channels = &tvChannels; break;
+			case 2: channels = &radioChannels; break;
 		}
 
-		ChannelList::iterator it = channels.begin();
-		while ((it<channels.end()) && !(*it == oldChannel))
+		ChannelList::iterator it = channels->begin();
+		while ((it<channels->end()) && !(*it == oldChannel))
 			it++;
-		if (it<channels.end())
+		if (it<channels->end())
 		{
 			printf("channel found:");
 			printf("%s - ", (*it)->name.c_str());
-			channels.erase(it);
+			channels->erase(it);
 			printf("erased ");
 			delete oldChannel;
 			printf("deleted ");
@@ -177,22 +185,22 @@ void CBouquet::removeService( channel* oldChannel)
 
 void CBouquet::moveService(  char* serviceName, uint newPosition, uint serviceType)
 {
-	ChannelList& channels = tvChannels;
+	ChannelList* channels = &tvChannels;
 	switch (serviceType)
 	{
 		case 1:
-		case 4: channels = tvChannels; break;
-		case 2: channels = radioChannels; break;
+		case 4: channels = &tvChannels; break;
+		case 2: channels = &radioChannels; break;
 	}
 
 	uint i;
-	ChannelList::iterator it = channels.begin();
-	while ((it<=channels.end()) && ((*it)->name != string(serviceName)))
+	ChannelList::iterator it = channels->begin();
+	while ((it<=channels->end()) && ((*it)->name != string(serviceName)))
 	{
 		it++;
 		i++;
 	}
-	if (it<channels.end())
+	if (it<channels->end())
 	{
 		moveService( i, newPosition, serviceType);
 	}
@@ -207,23 +215,23 @@ void CBouquet::moveService(  uint onidSid, uint newPosition)
 
 void CBouquet::moveService(  uint oldPosition, uint newPosition, uint serviceType)
 {
-	ChannelList& channels = tvChannels;
+	ChannelList* channels = &tvChannels;
 	switch (serviceType)
 	{
 		case 1:
-		case 4: channels = tvChannels; break;
-		case 2: channels = radioChannels; break;
+		case 4: channels = &tvChannels; break;
+		case 2: channels = &radioChannels; break;
 	}
-	if ((oldPosition < channels.size()) && (newPosition < channels.size()))
+	if ((oldPosition < channels->size()) && (newPosition < channels->size()))
 	{
 		ChannelList::iterator itOld, itNew;
 		uint i;
-		for (i=0, itOld = channels.begin(); i<oldPosition; i++, itOld++);
-		for (i=0, itNew = channels.begin(); i<newPosition; i++, itNew++);
+		for (i=0, itOld = channels->begin(); i<oldPosition; i++, itOld++);
+		for (i=0, itNew = channels->begin(); i<newPosition; i++, itNew++);
 
-		channel* tmp = channels[oldPosition];
-		channels.erase( itOld);
-		channels.insert( itNew, tmp);
+		channel* tmp = (*channels)[oldPosition];
+		channels->erase( itOld);
+		channels->insert( itNew, tmp);
 	}
 }
 
