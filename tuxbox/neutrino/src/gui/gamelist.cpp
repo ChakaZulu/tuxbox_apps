@@ -28,9 +28,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.21 2001/12/25 11:40:30 McClean Exp $
+$Id: gamelist.cpp,v 1.22 2002/01/02 04:49:36 McClean Exp $
 
 $Log: gamelist.cpp,v $
+Revision 1.22  2002/01/02 04:49:36  McClean
+fix libfx2.so-location *grrr*
+
 Revision 1.21  2001/12/25 11:40:30  McClean
 better pushback handling
 
@@ -361,7 +364,7 @@ void CGameList::runGame(int selected )
 		string libname = argv[i];
 		printf("try load shared lib : %s\n",argv[i]);
 		libhandle[i] = dlopen ( *argv[i] == '/' ? 
-			argv[i] : ("/lib/"+libname).c_str(),
+			argv[i] : (PLUGINDIR "/" +libname).c_str(),
 			RTLD_NOW | RTLD_GLOBAL );
 		if ( !libhandle )
 		{
