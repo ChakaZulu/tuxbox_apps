@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <string>
 #include <map>
+#include <sys/un.h>
 
 /* NAPI */
 #include <ost/dmx.h>
