@@ -1,13 +1,8 @@
 /*
- * $Id: sdt.cpp,v 1.39 2002/12/13 12:02:15 thegoodguy Exp $
+ * $Id: sdt.cpp,v 1.40 2002/12/13 12:41:13 thegoodguy Exp $
  */
 
-/* system c */
 #include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 /* zapit */
@@ -45,15 +40,9 @@ uint32_t get_sdt_TsidOnid ()
 		return 0;
 	}
 
-	if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
+	if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) ||
+	    (readDmx(demux_fd, buffer, SDT_SIZE) < 0))
 	{
-		close(demux_fd);
-		return 0;
-	}
-
-	if (read(demux_fd, buffer, SDT_SIZE) < 0)
-	{
-		ERROR("read");
 		close(demux_fd);
 		return 0;
 	}
@@ -92,15 +81,9 @@ ca_status_t get_sdt_free_CA_mode(const t_service_id p_service_id)
 		return free_CA_mode;
 	}
 
-	if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
+	if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) ||
+	    (readDmx(demux_fd, buffer, SDT_SIZE) < 0))
 	{
-		close(demux_fd);
-		return free_CA_mode;
-	}
-
-	if (read(demux_fd, buffer, SDT_SIZE) < 0)
-	{
-		ERROR("read");
 		close(demux_fd);
 		return free_CA_mode;
 	}
@@ -169,15 +152,9 @@ int parse_sdt(const uint8_t DiSEqC)
 
 	do
 	{
-		if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
+		if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) ||
+		    (readDmx(demux_fd, buffer, SDT_SIZE) < 0))
 		{
-			close(demux_fd);
-			return -1;
-		}
-
-		if (read(demux_fd, buffer, SDT_SIZE) < 0)
-		{
-			ERROR("read");
 			close(demux_fd);
 			return -1;
 		}

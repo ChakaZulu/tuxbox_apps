@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.11 2002/12/03 22:58:22 Homar Exp $
+ * $Id: bat.cpp,v 1.12 2002/12/13 12:41:13 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -18,14 +18,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
-
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 /* debug */
 #include <stdlib.h>
@@ -68,14 +60,9 @@ int parse_bat (int demux_fd)
 
 	do
 	{
-		if (setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0)
+		if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) ||
+		    (readDmx(demux_fd, buffer, BAT_SIZE) < 0))
 			return -1;
-
-		if (read(demux_fd, buffer, BAT_SIZE) < 0)
-		{
-			ERROR("read");
-			return -1;
-		}
 
 		section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
 		bouquet_id = (buffer[3] << 8) | buffer[4];

@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.12 2002/11/18 00:27:57 obi Exp $
+ * $Id: dmx.cpp,v 1.13 2002/12/13 12:41:08 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 #include <zapit/dmx.h>
 #include <zapit/debug.h>
@@ -280,3 +281,12 @@ int stopDmxFilter (int fd)
 	return 0;
 }
 
+int readDmx(int fd, unsigned char * buf, const size_t n)
+{
+	int return_value = read(fd, buf, n);
+	if (return_value < 0)
+	{
+		ERROR("DMX_READ");
+	}
+	return return_value;
+}

@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.28 2002/11/18 00:27:57 obi Exp $
+ * $Id: pmt.cpp,v 1.29 2002/12/13 12:41:13 thegoodguy Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -22,7 +22,6 @@
 
 /* system c */
 #include <stdio.h>
-#include <unistd.h>
 
 /* system c++ */
 #include <string>
@@ -280,16 +279,9 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 		return -1;
 	}
 
-	if (setDmxSctFilter(demux_fd, channel->getPmtPid(), filter, mask) < 0)
-	{
+	if ((setDmxSctFilter(demux_fd, channel->getPmtPid(), filter, mask) < 0) ||
+	    (readDmx(demux_fd, buffer, PMT_SIZE) < 0))
 		return -1;
-	}
-
-	if (read(demux_fd, buffer, PMT_SIZE) < 0)
-	{
-		ERROR("read");
-		return -1;
-	}
 
 	CCaPmt * caPmt = new CCaPmt();
 
