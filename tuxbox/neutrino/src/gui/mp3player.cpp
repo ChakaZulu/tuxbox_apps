@@ -40,6 +40,7 @@
 #include <neutrino.h>
 
 #include <assert.h>
+#include <driver/encoding.h>
 #include <driver/fontrenderer.h>
 #include <driver/rcinput.h>
 #include <daemonc/remotecontrol.h>
@@ -895,27 +896,6 @@ void CMP3PlayerGui::get_mp3info(CMP3 *mp3)
 }
 
 
-#ifdef FILESYSTEM_IS_ISO8859_1_ENCODED
-std::string Latin1_to_UTF8(const std::string s)
-{
-	std::string r;
-	
-	for (std::string::const_iterator it = s.begin(); it != s.end(); it++)
-	{
-		unsigned char c = *it;
-		if (c < 0x80)
-			r += c;
-		else
-		{
-			unsigned char d = 0xc0 | (c >> 6);
-			r += d;
-			d = 0x80 | (c & 0x3f);
-			r += d;
-		}
-	}		
-	return r;
-}
-#endif
 //------------------------------------------------------------------------
 void CMP3PlayerGui::get_id3(CMP3 *mp3)
 {

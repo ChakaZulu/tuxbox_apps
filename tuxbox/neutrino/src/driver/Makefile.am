@@ -12,6 +12,7 @@ INCLUDES = \
 noinst_LIBRARIES = libneutrino_driver.a
 
 libneutrino_driver_a_SOURCES = \
+	encoding.cpp \
 	fontrenderer.cpp framebuffer.cpp fb_window.cpp \
 	rcinput.cpp vcrcontrol.cpp mp3play.cpp irsend.cpp \
 	lcdd.cpp bigclock.cpp newclock.cpp pig.cpp
