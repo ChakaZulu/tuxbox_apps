@@ -1,10 +1,15 @@
 /*
-$Id: dvb_str.c,v 1.8 2002/08/17 20:36:12 obi Exp $
+$Id: dvb_str.c,v 1.9 2003/06/24 23:51:03 rasc Exp $
 
+  -- DVB-Strings
   -- dvb decoder helper functions
+  -- (c) rasc Rainer.Scherg@t-online.de
 
 
 $Log: dvb_str.c,v $
+Revision 1.9  2003/06/24 23:51:03  rasc
+bugfixes and enhancements
+
 Revision 1.8  2002/08/17 20:36:12  obi
 no more compiler warnings
 
@@ -197,7 +202,11 @@ char *dvbstrDescriptorTAG (u_int tag)
      {  0x6C, 0x6C,  "cell_list_descriptor" },
      {  0x6D, 0x6D,  "cell_frequency_list_descriptor" },
      {  0x6E, 0x6E,  "announcement_support_descriptor" },
-     {  0x6F, 0x7F,  "reserved_descriptor" },
+     {  0x6F, 0x6F,  "application_signalling_descriptor" },
+     {  0x70, 0x70,  "adaption_field_data_descriptor" },
+     {  0x71, 0x71,  "service_identifier_descriptor" },
+     {  0x72, 0x72,  "service_availability_descriptor" },
+     {  0x73, 0x7F,  "reserved_descriptor" },
      {  0x80, 0xFE,  "User defined" },
 
      {  0xFF, 0xFF,  "Forbidden" },
@@ -508,7 +517,7 @@ char *dvbstrCASystem_ID (u_int id)
      {  0x1900, 0x19FF,  "Titan Information Systems"},
      {  0x2000, 0x20FF,  "Telefónica Servicios Audiovisuales"},
      {  0x2100, 0x21FF,  "STENTOR (France Telecom, CNES and DGA)"},
-     {  0x2200, 0x22FF,  "Tadiran Scopus"},
+     {  0x2200, 0x22FF,  "Scopus Network Technologies"},
      {  0x2300, 0x23FF,  "BARCO AS"},
      {  0x2400, 0x24FF,  "StarGuide Digital Networks  "},
      {  0x2500, 0x25FF,  "Mentor Data System, Inc."},
@@ -520,13 +529,73 @@ char *dvbstrCASystem_ID (u_int id)
      {  0x4A10, 0x4A1F,  "Easycas"},
      {  0x4A20, 0x4A2F,  "AlphaCrypt"},
      {  0x4A30, 0x4A3F,  "DVN Holdings"},
-//$$$ some are missing and have to be hijacked from e.g. tmbinc
+     {  0x4A40, 0x4A4F,  "Shanghai Advanced Digital Technology Co. Ltd. (ADT)"},
+     {  0x4A50, 0x4A5F,  "Shenzhen Kingsky Company (China) Ltd"},
+     {  0x4A60, 0x4A6F,  "@SKY"},
+     {  0x4A70, 0x4A7F,  "DreamCrypt"},
+     {  0x4A80, 0x4A8F,  "THALESCrypt"},
+     {  0x4A90, 0x4A9F,  "Runcom Technologies"},
+     {  0x4AA0, 0x4AAF,  "SIDSA"},
      {  0,0, NULL }
   };
 
   return findTableID (Table, id);
 }
 
+
+/*
+ -- Data Broadcast ID
+*/ 
+
+char *dvbstrDataBroadcast_ID (u_int flag)
+
+{
+  STR_TABLE  Table[] = {
+     {  0x0000, 0x0000,  "reserved" },
+     {  0x0001, 0x0001,  "Data pipe" },
+     {  0x0002, 0x0002,  "Asynchronous data stream" },
+     {  0x0003, 0x0003,  "Synchronous data stream" },
+     {  0x0004, 0x0004,  "Synchronised data stream" },
+     {  0x0005, 0x0005,  "Multi protocol encapsulation" },
+     {  0x0006, 0x0006,  "Data carousel" },
+     {  0x0007, 0x0007,  "Object carousel" },
+     {  0x0008, 0x0008,  "DVB ATM streams" },
+     {  0x0009, 0x0009,  "Higher protocols based on asynchronous data streams" },
+     {  0x000A, 0x00EF,  "reserved" },
+     {  0x00F0, 0x00F0,  "MHP Object carousel" },
+     {  0x00F1, 0x00F1,  "MHP Multi Protocol Encapsulation" },
+     {  0x00F2, 0x00FE,  "MHP reserved" },
+     {  0x00FF, 0x00FF,  "DVB reserved" },
+     {  0x0100, 0x0100,  "Eutelsat data piping" },
+     {  0x0101, 0x0101,  "Eutelsat data streaming" },
+     {  0x0102, 0x0102,  "SAGEM IP encapsulation in MPEG-2 PES packets" },
+     {  0x0103, 0x0103,  "BARCO Data Broadcasting" },
+     {  0x0104, 0x0104,  "CyberCity Multiprotocol Encapsulation (New Media Communications Ltd.)" },
+     {  0x0105, 0x0105,  "CyberSat Multiprotocol Encapsulation (New Media Communications Ltd.)" },
+     {  0x0106, 0x0106,  "The Digital Network" },
+     {  0x0107, 0x0107,  "OpenTV Data Carousel" },
+     {  0x0108, 0x0108,  "Panasonic" },
+     {  0x0109, 0x0109,  "MSG MediaService GmbH" },
+     {  0x010A, 0x010A,  "TechnoTrend" },
+     {  0x010B, 0x010B,  "Canal + Technologies system software download" },
+     {  0x0110, 0x0110,  "Televizja Polsat" },
+     {  0x0111, 0x0111,  "UK DTG" },
+     {  0x0112, 0x0112,  "SKYMedia" },
+     {  0x0113, 0x0113,  "Intellibyte DataBroadcasting" },
+     {  0x0114, 0x0114,  "TeleWeb Data Carousel" },
+     {  0x0115, 0x0115,  "TeleWeb Object Carousel" },
+     {  0x0116, 0x0116,  "TeleWeb" },
+
+     {  0x4E4F, 0x4E4F,  "Nokia IP based software delivery" },
+     {  0xBBB1, 0xBBB1,  "BBG Data Carousel" },
+     {  0xBBB2, 0xBBB2,  "BBG Object Carousel" },
+     {  0xBBBB, 0xBBBB,  "Bertelsmann Broadband Group" },
+     {  0xFFFF, 0xFFFF,  "reserved" },
+     {  0,0, NULL }
+  };
+
+  return findTableID (Table, flag);
+}
 
 
 
@@ -544,12 +613,18 @@ char *dvbstrNetworkIdent_ID (u_int i)
      {  0x0001, 0x0001,  "Astra Satellite Network 19.2E / Satellite / SES" },
      {  0x0002, 0x0002,  "Astra Satellite Network 28.2E / Satellite / SES" },
      {  0x0002, 0x0020,  "Astra Satellite Network / Satellite / SES" },
+     {  0x0021, 0x0027,  "Hispasat Network / Satellite / Hispasat FSS" },
      {  0x0027, 0x0028,  "Hispasat 30W / Satellite / Hispasat FSS" },
      {  0x0028, 0x0028,  "Hispasat 30W / Satellite / Hispasat DBS" },
      {  0x0029, 0x0029,  "Hispasat 30W / Satellite / Hispasat America" },
+     {  0x002A, 0x002A,  "Multicabal / Satellite / Multicanal" },
      {  0x0035, 0x0035,  "TV Africa / Satellite / Telemedia (PTY) Ltd." },
      {  0x0085, 0x0085,  "- / Satellite / Beta Technik" },
-     {  0x013E, 0x013E,  "Eutel Satellite System 13.0E / Satellite / ETSO" },
+     {  0x013E, 0x013F,  "Eutelsat Satellite System 13.0E / Satellite / ETSO" },
+     {  0x016E, 0x016F,  "Eutelsat Satellite System 16.0E / Satellite / ETSO" },
+     {  0x022E, 0x022F,  "Eutelsat Satellite System 21.5E / Satellite / ETSO" },
+     {  0x047E, 0x047F,  "Eutelsat Satellite System 12.5W / Satellite / ETSO" },
+     {  0x052E, 0x052F,  "Eutelsat Satellite System  8.5W / Satellite / ETSO" },
 //$$$ lots are missing
      {  0,0, NULL }
   };
@@ -1496,3 +1571,23 @@ char *dvbstrPESscrambling_ctrl_TYPE (u_int i)
 }
 
 
+
+/*
+  --  Private Data Specifier Table  (from dvb.org)
+*/
+
+char *dvbstrPrivateDataSpecifier_ID (u_int i)
+
+{
+  STR_TABLE  Table[] = {
+// $$$$$$$$$$$$$$ TODO
+     {  0,0, NULL }
+  };
+
+
+  return findTableID (Table, i);
+}
+
+
+
+//$$$ Bouquet ID Table   ToDO

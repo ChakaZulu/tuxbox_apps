@@ -1,14 +1,17 @@
 /*
-$Id: helper.c,v 1.8 2003/02/26 16:45:16 obi Exp $
+$Id: helper.c,v 1.9 2003/06/24 23:51:03 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
  -- mainly for me to learn the dvb streams
 
- -- (c) rasc
+ -- (c) rasc rainer.Scherg@t-online.de
 
 
 $Log: helper.c,v $
+Revision 1.9  2003/06/24 23:51:03  rasc
+bugfixes and enhancements
+
 Revision 1.8  2003/02/26 16:45:16  obi
 - make dvbsnoop work on little endian machines again
 - fixed mask in getBits for bitlen >= 32
@@ -80,6 +83,22 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
  v = tmp_long & mask;
 
  return v;
+}
+
+
+
+/*
+  -- get ISO 639  (3char) language code into string[4]
+  -- terminate string with \0
+  -- return ptr to buf;
+ */
+
+u_char *getISO639_3 (u_char *str, u_char *buf)
+
+{
+  strncpy (str, buf, 3);
+  *(str+3) = '\0';
+  return str;
 }
 
 

@@ -1,5 +1,6 @@
 /*
   -- dvb decoder helper functions
+  -- (c) rasc Rainer.Scherg@t-online.de
 */
 
 char *dvbstrStreamContent_Component_TYPE (u_int i);
@@ -18,7 +19,9 @@ char *dvbstrService_TYPE(u_int tag);
 char *dvbstrStream_TYPE(u_int tag);
 char *dvbstrAudio_TYPE(u_int tag);
 char *dvbstrCASystem_ID(u_int id);
+char *dvbstrDataBroadcast_ID(u_int flag);
 char *dvbstrNetworkIdent_ID(u_int id);
+char *dvbstrBroadcast_ID(u_int id);
 char *dvbstrTeletext_TYPE(u_int id);
 char *dvbstrTerrBandwidth_SCHEME(u_int id);
 char *dvbstrTerrConstellation_FLAG(u_int id);

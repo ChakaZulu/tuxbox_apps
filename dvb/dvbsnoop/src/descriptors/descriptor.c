@@ -1,13 +1,19 @@
 /*
-$Id: descriptor.c,v 1.7 2003/05/03 02:51:08 obi Exp $
+$Id: descriptor.c,v 1.8 2003/06/24 23:51:03 rasc Exp $
 
  -- Descriptor Section
- -- (c) rasc
-
-
+ -- (c) rasc - Rainer.Scherg@t-online.de
+ --
  -- all descriptors are returning their length used in buffer
+ -- EN/ISO/TR document references in comments may habe been changed
+ -- during updates of documents by ETSI.
+
+
 
 $Log: descriptor.c,v $
+Revision 1.8  2003/06/24 23:51:03  rasc
+bugfixes and enhancements
+
 Revision 1.7  2003/05/03 02:51:08  obi
 skip descriptors with length == 0
 
@@ -142,6 +148,10 @@ int  descriptor  (u_char *b)
      case 0x6C:  descriptor_CellList(b);  break;
      case 0x6D:  descriptor_CellFrequencyLink(b);  break;
      case 0x6E:  descriptor_AnnouncementSupport(b);  break;
+     case 0x6F:  descriptor_ApplicationSignalling(b);  break;
+     case 0x70:  descriptor_AdaptionFieldData(b);  break;
+     case 0x71:  descriptor_ServiceIdentifier(b);  break;
+     case 0x72:  descriptor_ServiceAvailability(b);  break;
 
 
      default: 
@@ -200,7 +210,7 @@ void descriptor_any (u_char *b)
 
 /*
   0x02  VideoStream  descriptor 
-  ISO 13818-1   2.6.2
+  ISO 13818-1   2.6.xx
 */
 
 void descriptor_VideoStream (u_char *b)
@@ -600,7 +610,7 @@ void descriptor_ISO639_Lang (u_char *b)
  } descISO639;
 
  typedef struct  _descISO639List {
-    u_char      ISO_639_language_code[3];
+    u_char      ISO_639_language_code[4];
     u_int      audio_type;
  } descISO639List;
 
@@ -618,7 +628,7 @@ void descriptor_ISO639_Lang (u_char *b)
  b  += 2;
  indent (+1);
  while ( len > 0) {
-    strncpy (d2.ISO_639_language_code, b, 3);	
+    getISO639_3 (d2.ISO_639_language_code, b);	
     d2.audio_type		= getBits (b,0,24,8);
 
     b += 4;
@@ -640,7 +650,7 @@ void descriptor_ISO639_Lang (u_char *b)
 
 /*
   0x0B  System Clock  descriptor 
-  ISO 13818-1   2.6.20
+  ISO 13818-1   2.6.xx
 */
 
 void descriptor_SystemClock (u_char *b)
@@ -692,7 +702,7 @@ void descriptor_SystemClock (u_char *b)
 
 /*
   0x0C  Multiplex Buffer Utilization  descriptor 
-  ISO 13818-1   2.6.22
+  ISO 13818-1   2.6.xx
 */
 
 void descriptor_MultiplexBufUtil  (u_char *b)
@@ -742,7 +752,7 @@ void descriptor_MultiplexBufUtil  (u_char *b)
 
 /*
   0x0D  Copyright  descriptor 
-  ISO 13818-1   2.6.24
+  ISO 13818-1   2.6.xx
 */
 
 void descriptor_Copyright  (u_char *b)
@@ -788,7 +798,7 @@ void descriptor_Copyright  (u_char *b)
 
 /*
   0x0E  Maximum Bitrate  descriptor 
-  ISO 13818-1   2.6.26
+  ISO 13818-1   2.6.xx
 */
 
 void descriptor_MaxBitrate (u_char *b)
@@ -1036,7 +1046,7 @@ void descriptor_NetName (u_char *b)
 void descriptor_ServList (u_char *b)
 
 {
- /* ETSI 300 468  6.2.31 */
+ /* ETSI 300 468  6.2.xx */
 
  typedef struct  _descServList {
     u_int      descriptor_tag;
@@ -1112,7 +1122,7 @@ void descriptor_Stuffing (u_char *b)
 void descriptor_SatDelivSys (u_char *b)
 
 {
- /* ETSI 300 468    6.2.12.2*/
+ /* ETSI 300 468    6.2.xx */
 
  typedef struct  _descSDS {
     u_int      descriptor_tag;
@@ -1181,7 +1191,7 @@ void descriptor_SatDelivSys (u_char *b)
 void descriptor_CableDelivSys (u_char *b)
 
 {
- /* ETSI 300 468    6.2.12.1*/
+ /* ETSI 300 468    6.2.xx */
 
  typedef struct  _descCDS {
     u_int      descriptor_tag;
@@ -1292,9 +1302,8 @@ void descriptor_VBI_Data  (u_char *b)
     d2.data_service_descriptor_length   = b[1];
 
     out_NL (4); 
-    out (4, "Data_service_id: %u  [= %s]", d2.data_service_id,
+    out_nl (4, "Data_service_id: %u  [= %s]", d2.data_service_id,
 		dvbstrDataService_ID(d2.data_service_id));
-          out_nl (4," --> refers to PMS program_number");
 
     out_SB_NL (5,"Data_service_descriptor_length: ",
 		d2.data_service_descriptor_length);
@@ -1341,7 +1350,7 @@ void descriptor_VBI_Data  (u_char *b)
 
 /*
   0x46  VBI teletext descriptor 
-  ETSI EN 300 468   6.2.43
+  ETSI EN 300 468   6.2.xx
 */
 
 void descriptor_VBI_Teletext (u_char *b)
@@ -1357,7 +1366,7 @@ void descriptor_VBI_Teletext (u_char *b)
 
 /*
   0x47  Bouquet Name  descriptor 
-  ETSI EN 300 468    6.2.3
+  ETSI EN 300 468    6.2.xx
 */
 
 void descriptor_BouquetName  (u_char *b)
@@ -1394,7 +1403,7 @@ void descriptor_BouquetName  (u_char *b)
 
 /*
   0x48  Service  descriptor 
-  ETSI EN 300 468   6.2.30
+  ETSI EN 300 468   6.2.xx
 */
 
 void descriptor_Service  (u_char *b)
@@ -1457,7 +1466,7 @@ void descriptor_Service  (u_char *b)
 
 /*
   0x49  Country Availibility  descriptor 
-  ETSI EN 300 468   6.2.9
+  ETSI EN 300 468   6.2.xx
 */
 
 void descriptor_CountryAvail  (u_char *b)
@@ -1478,7 +1487,7 @@ void descriptor_CountryAvail  (u_char *b)
 
  descCountryAvail d;
  int              len;
- u_char           country_code[3];
+ u_char           country_code[4];
 
 
 
@@ -1520,7 +1529,7 @@ void descriptor_CountryAvail  (u_char *b)
 void descriptor_Linkage (u_char *b)
 
 {
- /* ETSI 300 468   6.2.16 */
+ /* ETSI 300 468   6.2.xx */
 
  typedef struct  _descLinkage {
     u_int      descriptor_tag;
@@ -1621,7 +1630,7 @@ void descriptor_Linkage (u_char *b)
 
 /*
   0x4B  NVOD Reference  descriptor 
-  ETSI EN 300 468  6.2.23
+  ETSI EN 300 468  6.2.xx
 */
 
 void descriptor_NVOD_Reference  (u_char *b)
@@ -1682,7 +1691,7 @@ void descriptor_NVOD_Reference  (u_char *b)
 
 /*
   0x4C  Time Shifted Service   descriptor 
-  ETSI EN 300 468     6.2.40
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_TimeShiftedService  (u_char *b)
@@ -1719,7 +1728,7 @@ void descriptor_TimeShiftedService  (u_char *b)
 
 /*
   0x4D  Short Event  descriptor 
-  ETSI EN 300 468     6.2.33
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_ShortEvent  (u_char *b)
@@ -1730,7 +1739,7 @@ void descriptor_ShortEvent  (u_char *b)
     u_int      descriptor_tag;
     u_int      descriptor_length;		
 
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
     u_int      event_name_length;
 
     // N   char event_name
@@ -1749,7 +1758,7 @@ void descriptor_ShortEvent  (u_char *b)
  d.descriptor_tag		 = b[0];
  d.descriptor_length       	 = b[1];
 
- strncpy (d.ISO639_2_language_code, b+2, 3);	
+ getISO639_3 (d.ISO639_2_language_code, b+2);
  out_nl (4,"  ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
 
 
@@ -1779,7 +1788,7 @@ void descriptor_ShortEvent  (u_char *b)
 
 /*
   0x4E  Extended Event  descriptor 
-  ETSI EN 300 468     6.2.14
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_ExtendedEvent  (u_char *b)
@@ -1792,7 +1801,7 @@ void descriptor_ExtendedEvent  (u_char *b)
 
     u_int      descriptor_number;
     u_int      last_descriptor_number;
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
     u_int      length_of_items;
 
     // N   Ext. Events List
@@ -1821,7 +1830,7 @@ void descriptor_ExtendedEvent  (u_char *b)
 
  d.descriptor_number		 = getBits (b, 0, 16, 4);
  d.last_descriptor_number	 = getBits (b, 0, 20, 4);
- strncpy (d.ISO639_2_language_code, b+3, 3);	
+ getISO639_3 (d.ISO639_2_language_code, b+3);	
  d.length_of_items		 = getBits (b, 0, 48, 8);
 
 
@@ -1886,7 +1895,7 @@ void descriptor_ExtendedEvent  (u_char *b)
 
 /*
   0x4F  Time Shifted Event  descriptor 
-  ETSI EN 300 468     6.2.39
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_TimeShiftedEvent  (u_char *b)
@@ -1927,7 +1936,7 @@ void descriptor_TimeShiftedEvent  (u_char *b)
 
 /*
   0x50  Component descriptor 
-  ETSI EN 300 468     6.2.7
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_Component  (u_char *b)
@@ -1942,7 +1951,7 @@ void descriptor_Component  (u_char *b)
     u_int      stream_content;
     u_int      component_type;
     u_int      component_tag;
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
 
     // N2  char Text
 
@@ -1960,7 +1969,7 @@ void descriptor_Component  (u_char *b)
  d.stream_content		 = getBits (b, 0, 20, 4);
  d.component_type		 = getBits (b, 0, 24, 8);
  d.component_tag		 = getBits (b, 0, 32, 8);
- strncpy (d.ISO639_2_language_code, b+5, 3);	
+ getISO639_3 (d.ISO639_2_language_code, b+5);	
 
  
  out_SB_NL (6,"reserved_1: ",d.reserved_1);
@@ -1988,7 +1997,7 @@ void descriptor_Component  (u_char *b)
 
 /*
   0x51  Mosaic  descriptor 
-  ETSI EN 300 468     6.2.18
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_Mosaic  (u_char *b)
@@ -2116,7 +2125,7 @@ void descriptor_Mosaic  (u_char *b)
 	b    += 2;
 	len1 -= 2;
 	out_SW_NL (4,"Bouquet_ID: ",d2.bouquet_id);
-//$$ do bouquet_id
+//$$$ do bouquet_id
 	break;
 
       case 0x02:
@@ -2167,7 +2176,7 @@ void descriptor_Mosaic  (u_char *b)
 
 /*
   0x52  Stream Identifier descriptor
-  ETSI EN 300 468  6.2.34
+  ETSI EN 300 468  6.2.xx
 
 */
 
@@ -2206,7 +2215,7 @@ void descriptor_StreamIdent (u_char *b)
 
 /*
   0x53  CA Identifier  descriptor 
-  ETSI EN 300 468   6.2.4
+  ETSI EN 300 468   6.2.xx
 */
 
 void descriptor_CAIdentifier  (u_char *b)
@@ -2259,7 +2268,7 @@ void descriptor_CAIdentifier  (u_char *b)
 
 /*
   0x54  Content  descriptor 
-  ETSI EN 300 468     6.2.8
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_Content  (u_char *b)
@@ -2327,7 +2336,7 @@ void descriptor_Content  (u_char *b)
 
 /*
   0x55  Parental Rating  descriptor 
-  ETSI EN 300 468     6.2.25
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_ParentalRating (u_char *b)
@@ -2340,7 +2349,7 @@ void descriptor_ParentalRating (u_char *b)
  } descParentalRating;
 
  typedef struct  _descParentalRating2 {
-    u_char     country_code[3];
+    u_char     country_code[4];
     u_int      rating;		
  } descParentalRating2;
 
@@ -2392,7 +2401,7 @@ void descriptor_ParentalRating (u_char *b)
 void descriptor_Teletext (u_char *b)
 
 {
- /* ETSI EN 300 468   6.2.38 */
+ /* ETSI EN 300 468   6.2.xx */
 
  typedef struct  _descTeletext {
     u_int      descriptor_tag;
@@ -2403,7 +2412,7 @@ void descriptor_Teletext (u_char *b)
  } descTeletext;
 
  typedef struct  _descTeletextList {
-    u_char      ISO_639_language_code[3];
+    u_char     ISO_639_language_code[4];
     u_int      teletext_type;
     u_int      teletext_magazine_number;
     u_int      teletext_page_number;
@@ -2424,7 +2433,7 @@ void descriptor_Teletext (u_char *b)
 
  indent (+1);
  while ( len > 0) {
-    strncpy (d2.ISO_639_language_code, b, 3);	
+    getISO639_3 (d2.ISO_639_language_code, b);	
     d2.teletext_type		= getBits (b,0,24,5);
     d2.teletext_magazine_number	= getBits (b,0,29,3);
     d2.teletext_page_number	= getBits (b,0,32,8);
@@ -2450,7 +2459,7 @@ void descriptor_Teletext (u_char *b)
 
 /*
   0x57  Telephone  descriptor 
-  ETSI EN 300 468     6.2.27
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_Telephone  (u_char *b)
@@ -2490,7 +2499,7 @@ void descriptor_Telephone  (u_char *b)
 
 /*
   0x58  Local Time Offset  descriptor 
-  ETSI EN 300 468     6.2.17
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_LocalTimeOffset  (u_char *b)
@@ -2505,7 +2514,7 @@ void descriptor_LocalTimeOffset  (u_char *b)
  } descLocalTimeOffset;
 
  typedef struct  _descLocalTimeOffset2 {
-   u_char        country_code[3];
+   u_char        country_code[4];
    u_int         country_region_id;
    u_int         reserved_1;
    u_int         local_time_offset_polarity;
@@ -2577,7 +2586,7 @@ void descriptor_LocalTimeOffset  (u_char *b)
 
 /*
   0x59  Subtitling  descriptor 
-  ETSI EN 300 468     6.2.36
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_Subtitling  (u_char *b)
@@ -2591,7 +2600,7 @@ void descriptor_Subtitling  (u_char *b)
  } descSubTitling;
 
  typedef struct  _descSubTitling2 {
-    u_char     ISO_639_language_code[3];
+    u_char     ISO_639_language_code[4];
     u_int      subtitling_type;
     u_int      composition_page_id;
     u_int      ancillary_page_id;
@@ -2613,7 +2622,7 @@ void descriptor_Subtitling  (u_char *b)
 
  indent (+1);
  while ( len > 0) {
-    strncpy (d2.ISO_639_language_code, b, 3);	
+    getISO639_3 (d2.ISO_639_language_code, b);	
     d2.subtitling_type		= getBits (b,0,24, 8);
     d2.composition_page_id	= getBits (b,0,32,16);
     d2.ancillary_page_id	= getBits (b,0,48,16);
@@ -2648,7 +2657,7 @@ void descriptor_Subtitling  (u_char *b)
 void descriptor_TerrestDelivSys (u_char *b)
 
 {
- /* ETSI 300 468    6.2.12.1*/
+ /* ETSI 300 468    6.2.xx */
 
  typedef struct  _descCDS {
     u_int      descriptor_tag;
@@ -2722,7 +2731,7 @@ void descriptor_TerrestDelivSys (u_char *b)
 
 /*
   0x5B  Multilingual Network Name  descriptor 
-  ETSI EN 300 468     6.2.21
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_MultilingNetworkName (u_char *b)
@@ -2738,7 +2747,7 @@ void descriptor_MultilingNetworkName (u_char *b)
  } descMultiNetName;
 
  typedef struct  _descMultiNetName2 {
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
     u_int      network_name_length;
 
     //  N2 ..  char
@@ -2763,7 +2772,7 @@ void descriptor_MultilingNetworkName (u_char *b)
  indent (+1);
  while (len1 > 0 ) {
 
-    strncpy (d2.ISO639_2_language_code, b, 3);	
+    getISO639_3 (d2.ISO639_2_language_code, b);
     d2.network_name_length	 = getBits (b, 0, 24, 8);
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
@@ -2790,7 +2799,7 @@ void descriptor_MultilingNetworkName (u_char *b)
 
 /*
   0x5C  Multilingual Bouquet Name  descriptor 
-  ETSI EN 300 468     6.2.19
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_MultilingBouquetName (u_char *b)
@@ -2806,7 +2815,7 @@ void descriptor_MultilingBouquetName (u_char *b)
  } descMultiBouqName;
 
  typedef struct  _descMultiBouqName2 {
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
     u_int      bouquet_name_length;
 
     //  N2 ..  char
@@ -2831,7 +2840,7 @@ void descriptor_MultilingBouquetName (u_char *b)
  indent (+1);
  while (len1 > 0 ) {
 
-    strncpy (d2.ISO639_2_language_code, b, 3);	
+    getISO639_3 (d2.ISO639_2_language_code, b);
     d2.bouquet_name_length	 = getBits (b, 0, 24, 8);
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
@@ -2856,7 +2865,7 @@ void descriptor_MultilingBouquetName (u_char *b)
 
 /*
   0x5D  Multilingual Service Name  descriptor 
-  ETSI EN 300 468     6.2.22
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_MultilingServiceName (u_char *b)
@@ -2872,7 +2881,7 @@ void descriptor_MultilingServiceName (u_char *b)
  } descMultiServiceName;
 
  typedef struct  _descMultiServiceName2 {
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
     u_int      service_provider_name_length;
 
     //  N2 ..  char
@@ -2901,7 +2910,7 @@ void descriptor_MultilingServiceName (u_char *b)
  indent (+1);
  while (len1 > 0 ) {
 
-    strncpy (d2.ISO639_2_language_code, b, 3);	
+    getISO639_3 (d2.ISO639_2_language_code, b);
     d2.service_provider_name_length	 = getBits (b, 0, 24, 8);
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
@@ -2938,7 +2947,7 @@ void descriptor_MultilingServiceName (u_char *b)
 
 /*
   0x5E  Multilingual Component  descriptor 
-  ETSI EN 300 468     6.2.20
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_MultilingComponent (u_char *b)
@@ -2956,7 +2965,7 @@ void descriptor_MultilingComponent (u_char *b)
  } descMultiComponent;
 
  typedef struct  _descMultiComponent2 {
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
     u_int      text_description_length;
 
     //  N2 ..  char
@@ -2985,7 +2994,7 @@ void descriptor_MultilingComponent (u_char *b)
  indent (+1);
  while (len1 > 0 ) {
 
-    strncpy (d2.ISO639_2_language_code, b, 3);	
+    getISO639_3 (d2.ISO639_2_language_code, b);
     d2.text_description_length	 = getBits (b, 0, 24, 8);
 
     out_nl    (4,"ISO639_2_language_code:  %3.3s", d2.ISO639_2_language_code);
@@ -3012,7 +3021,7 @@ void descriptor_MultilingComponent (u_char *b)
 
 /*
   0x5F  Private Data Specifier  descriptor 
-  ETSI EN 300 468     6.2.28
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_PrivateDataSpecifier (u_char *b)
@@ -3039,6 +3048,7 @@ void descriptor_PrivateDataSpecifier (u_char *b)
 
  
  out_SL_NL (4,"Private_data_specifier: ",d.private_data_specifier);
+ // $$$$$  ref to table ?? todo
 
 }
 
@@ -3050,7 +3060,7 @@ void descriptor_PrivateDataSpecifier (u_char *b)
 
 /*
   0x60  Service Move  descriptor 
-  ETSI EN 300 468     6.2.32
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_ServiceMove  (u_char *b)
@@ -3097,7 +3107,7 @@ void descriptor_ServiceMove  (u_char *b)
 
 /*
   0x61  Short Smoothing Buffer  descriptor 
-  ETSI EN 300 468     6.2.29
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_ShortSmoothingBuffer  (u_char *b)
@@ -3147,7 +3157,7 @@ void descriptor_ShortSmoothingBuffer  (u_char *b)
 
 /*
   0x62  Frequency List descriptor 
-  ETSI EN 300 468     6.2.15
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_FrequencyList  (u_char *b)
@@ -3226,7 +3236,7 @@ void descriptor_FrequencyList  (u_char *b)
 
 /*
   0x63  Partial Transport Stream Descriptor
-  ETSI EN 300 468     6.2.26
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_PartialTransportStream  (u_char *b)
@@ -3290,7 +3300,7 @@ void descriptor_PartialTransportStream  (u_char *b)
 
 /*
   0x64  DataBroadcast  descriptor 
-  ETSI EN 300 468    6.2.10
+  ETSI EN 300 468    6.2.xx
 */
 
 void descriptor_DataBroadcast (u_char *b)
@@ -3307,7 +3317,7 @@ void descriptor_DataBroadcast (u_char *b)
 
     // N   bytes
 
-    u_char     ISO639_2_language_code[3];
+    u_char     ISO639_2_language_code[4];
     u_int      text_length;
 
     // N2  char 
@@ -3328,7 +3338,7 @@ void descriptor_DataBroadcast (u_char *b)
 
  
  out_S2W_NL (4,"Data_broadcast_ID: ",d.data_broadcast_id,
-	dvbstrNetworkIdent_ID(d.data_broadcast_id));
+	dvbstrDataBroadcast_ID(d.data_broadcast_id));
 
  out_SB_NL (4,"Component_tag: ",d.component_tag);
  out_SB_NL (5,"Selector_length: ",d.selector_length);
@@ -3337,7 +3347,7 @@ void descriptor_DataBroadcast (u_char *b)
  printhexdump_buf (4,  b, d.selector_length);
 
  b += d.selector_length;
- strncpy (d.ISO639_2_language_code, b, 3);	
+ getISO639_3 (d.ISO639_2_language_code, b);
  d.text_length			 = getBits (b, 0, 24, 8);
 
  out_nl    (4,"ISO639_2_language_code:  %3.3s", d.ISO639_2_language_code);
@@ -3376,7 +3386,7 @@ void descriptor_CASystem (u_char *b)
 
 /*
   0x66  Data Broadcast ID  descriptor 
-  ETSI EN 300 468     6.2.11
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_DataBroadcastID  (u_char *b)
@@ -3404,10 +3414,13 @@ void descriptor_DataBroadcastID  (u_char *b)
 
  
  out_S2W_NL (4,"Data_broadcast_ID: ",d.data_broadcast_id,
-	dvbstrNetworkIdent_ID(d.data_broadcast_id));
+	dvbstrDataBroadcast_ID(d.data_broadcast_id));
+
+ // $$$ ID selector bytes may depend on databroadcast_id
+ // $$$ do further more selection here
 
  out_nl (4,"ID_selector_bytes: ");
-     printhexdump_buf (4, b+4, d.descriptor_length-4);
+     printhexdump_buf (4, b+4, d.descriptor_length-2);
 
 }
 
@@ -3417,7 +3430,7 @@ void descriptor_DataBroadcastID  (u_char *b)
 
 /*
   0x67  Transport Stream  descriptor 
-  ETSI EN 300 468     6.2.41
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_TransportStream  (u_char *b)
@@ -3454,7 +3467,7 @@ void descriptor_TransportStream  (u_char *b)
 
 /*
   0x68  DSNG  descriptor 
-  ETSI EN 300 468     6.2.13
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_DSNG  (u_char *b)
@@ -3485,7 +3498,7 @@ void descriptor_DSNG  (u_char *b)
 
 /*
   0x69  PDC  descriptor 
-  ETSI EN 300 468     6.2.27
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_PDC  (u_char *b)
@@ -3630,7 +3643,7 @@ void descriptor_AC3  (u_char *b)
 
 /*
   0x6B  Ancillary Data  descriptor 
-  ETSI EN 300 468     6.2.1
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_AncillaryData  (u_char *b)
@@ -3680,7 +3693,7 @@ void descriptor_AncillaryData  (u_char *b)
 
 /*
   0x6C  Cell List descriptor 
-  ETSI EN 300 468     6.2.6
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_CellList  (u_char *b)
@@ -3698,7 +3711,7 @@ void descriptor_CellList  (u_char *b)
 
 /*
   0x6D  Cell Frequency Link descriptor 
-  ETSI EN 300 468     6.2.5
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_CellFrequencyLink  (u_char *b)
@@ -3716,7 +3729,7 @@ void descriptor_CellFrequencyLink  (u_char *b)
 
 /*
   0x6E  Announcement Support descriptor 
-  ETSI EN 300 468     6.2.2
+  ETSI EN 300 468     6.2.xx
 */
 
 void descriptor_AnnouncementSupport (u_char *b)
@@ -3822,6 +3835,200 @@ void descriptor_AnnouncementSupport (u_char *b)
 
 }
 
+
+
+
+
+/*
+  0x6F  Application Signalling descriptor 
+  ETSI EN 300 468     6.2.x
+*/
+
+void descriptor_ApplicationSignalling (u_char *b)
+
+{
+
+ typedef struct  _descApplSignalling {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    // N  AppSignalling2
+
+ } descApplSignalling;
+
+ typedef struct  _descApplSignalling2 {
+    u_int      application_type;	// 16
+    u_int      reserved;		// 3
+    u_int      AIT_version_nr;		// 5
+ } descApplSignalling2;
+
+
+
+ descApplSignalling        d;
+ descApplSignalling2       d2;
+ int                       len;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ b   += 2;
+ len = d.descriptor_length - 0;
+
+ while ( len > 0) {
+    d2.application_type          = getBits (b, 0, 0, 16);
+    d2.reserved                  = getBits (b, 0,16,  3);
+    d2.AIT_version_nr            = getBits (b, 0,19,  5);
+
+    out_SW_NL (4,"Application type: ",d2.application_type);	// $$$ Application type text
+    out_SB_NL (6,"reserved: ",d2.reserved);
+    out_SB_NL (4,"AIT version nr.: ",d2.AIT_version_nr);
+
+    b += 3;
+    len -= 3;
+ }
+
+}
+
+
+
+
+/*
+  0x70  Adaption Field Data descriptor 
+  ETSI EN 300 468     6.2.x
+*/
+
+void descriptor_AdaptionFieldData (u_char *b)
+
+{
+
+ typedef struct  _descAdaptionFieldData {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_int      adaptionFieldDataIdentifier;
+
+    // ? .. 
+
+ } descAdaptionFieldData;
+
+
+
+ descAdaptionFieldData     d;
+ int                       len;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ d.adaptionFieldDataIdentifier   = getBits (b, 0, 16, 8);
+
+ b   += 3;
+ len = d.descriptor_length - 1;
+
+
+ out_SB_NL (4,"Adaption field data identifier: ",
+        d.adaptionFieldDataIdentifier);
+
+}
+
+
+
+
+
+/*
+  0x71  Service Identifier descriptor 
+  ETSI EN 300 468     6.2.x
+*/
+
+void descriptor_ServiceIdentifier (u_char *b)
+
+{
+
+ typedef struct  _descServiceIdentifier {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    // ? .. 
+
+ } descServiceIdentifier;
+
+
+
+ descServiceIdentifier     d;
+ int                       len;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+
+ b   += 2;
+ len = d.descriptor_length - 0;
+
+
+ out_nl (4,"Service Identifier:  [no encoding known ToDo, Report!] ");
+
+
+}
+
+
+
+/*
+  0x72  Service Availability descriptor 
+  ETSI EN 300 468     6.2.x
+*/
+
+void descriptor_ServiceAvailability (u_char *b)
+
+{
+
+ typedef struct  _descServiceAvailability {
+    u_int      descriptor_tag;
+    u_int      descriptor_length;		
+
+    u_int      availability_flag_1;
+    u_int      reserved_7;
+
+    //  0..N cell_ids 
+
+ } descServiceAvailability;
+
+
+
+ descServiceAvailability   d;
+ int                       len;
+
+
+
+ d.descriptor_tag		 = b[0];
+ d.descriptor_length       	 = b[1];
+
+ d.availability_flag_1           = getBits (b, 0, 16, 1);
+ d.reserved_7                    = getBits (b, 0, 16, 7);
+
+ b   += 3;
+ len = d.descriptor_length - 1;
+
+ out_SB_NL (4,"Availability flag: ", d.availability_flag_1);
+ out_SB_NL (6,"reserved_1: ",d.reserved_7);
+
+
+ indent (+1);
+ while ( len > 0) {
+    u_int cellid                 = getBits (b, 0, 0, 16);
+
+    b += 2;
+    len -= 2;
+
+    out_S2B_NL (4,"Cell-ID: ",cellid, "[identifies terrestrial cell]");
+ }
+ indent (-1);
+
+}
 
 
 

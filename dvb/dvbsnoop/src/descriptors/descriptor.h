@@ -68,4 +68,8 @@ void  descriptor_AncillaryData(u_char *b);
 void  descriptor_CellList(u_char *b);
 void  descriptor_CellFrequencyLink(u_char *b);
 void  descriptor_AnnouncementSupport(u_char *b);
+void  descriptor_ApplicationSignalling(u_char *b);
+void  descriptor_AdaptionFieldData(u_char *b);
+void  descriptor_ServiceIdentifier(u_char *b);
+void  descriptor_ServiceAvailability(u_char *b);
 

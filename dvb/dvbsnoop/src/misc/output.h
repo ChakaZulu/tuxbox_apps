@@ -40,7 +40,7 @@ void print_indent(void);
 
 /* out "String 128 (=0x80)  [=string]\n"  */
 #define out_S2L_NL(v,str,hex,str2)   out_nl((v),"%s%lu (0x%08lx)  [= %s]",(str),(hex),(hex),(str2))
-#define out_S2W_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%04x)  [=%s]",(str),(hex),(hex),(str2))
+#define out_S2W_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%04x)  [= %s]",(str),(hex),(hex),(str2))
 #define out_S2B_NL(v,str,hex,str2)   out_nl((v),"%s%u (0x%02x)  [= %s]",(str),(hex),(hex),(str2))
 
 
