@@ -24,19 +24,41 @@
 int CSleepTimerWidget::exec(CMenuTarget* parent, string)
 {
 	int    res = menu_return::RETURN_EXIT_ALL;
+	int    shutdown_min, t;
+	char   value[16];
+	CStringInput  *inbox;
 
 	if (parent)
 	{
 		parent->hide();
 	}
    
+	CTimerdClient * timerdclient = new CTimerdClient;
 
-	// retrieve old code from cvs please, if needed
+	shutdown_min = timerdclient->getSleepTimerRemaining();  // remaining shutdown time?
+//	if(shutdown_min == 0)		// no timer set
+//		shutdown_min = 10;		// set to 10 min default
 
-	ShowMsg ( "Sleeptimer", "timer module removed, this will re-coded later into the timerd", CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw" );
+	sprintf(value,"%03d",shutdown_min);
+	inbox = new CStringInput("sleeptimerbox.title",value,3,"sleeptimerbox.hint1","sleeptimerbox.hint2","0123456789 ");
+	inbox->exec (NULL, "");
+	inbox->hide ();
 
+	delete inbox;
 
-
+	shutdown_min = atoi (value);
+	printf("sleeptimer min: %d\n",shutdown_min);
+	if (shutdown_min == 0)			// if set to zero remove existing sleeptimer
+	{
+		if(timerdclient->getSleeptimerID() > 0)
+		{
+			timerdclient->removeTimerEvent(timerdclient->getSleeptimerID());
+			printf("removed\n");
+		}
+	}
+	else							// set the sleeptimer to actual time + shutdown mins
+		timerdclient->setSleeptimer(time(NULL) + ((shutdown_min -2) * 60),time(NULL) + shutdown_min * 60,0);
+	delete timerdclient;
 	return res;
 }
 
