@@ -71,18 +71,18 @@ int CEPGMenuHandler::exec(CMenuTarget* parent, const std::string &actionkey)
 int CEPGMenuHandler::doMenu ()
 {
 
-	CMenuWidget EPGSelector("EPGMenu.head", "features.raw", 350);
+	CMenuWidget EPGSelector(LOCALE_EPGMENU_HEAD, "features.raw", 350);
 	EPGSelector.addItem(GenericMenuSeparator);
 
 
-	EPGSelector.addItem(new CMenuForwarder("EPGMenu.eventlist", true, NULL, new CEventListHandler(), "", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), false);
+	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EVENTLIST, true, NULL, new CEventListHandler(), "", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), false);
 
-	EPGSelector.addItem(new CMenuForwarder("EPGMenu.epgplus", true, NULL, new CEPGplusHandler(), "", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
+	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EPGPLUS, true, NULL, new CEPGplusHandler(), "", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN), false);
 
-	EPGSelector.addItem(new CMenuForwarder("EPGMenu.eventinfo", true, NULL, new CEPGDataHandler(), "", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
+	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_EVENTINFO, true, NULL, new CEPGDataHandler(), "", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW), false);
 
 	// -- Stream Info
-	EPGSelector.addItem(new CMenuForwarder("EPGMenu.streaminfo", true, NULL, new CStreamInfo(), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE), false);
+	EPGSelector.addItem(new CMenuForwarder(LOCALE_EPGMENU_STREAMINFO, true, NULL, new CStreamInfo(), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE), false);
 
 
 	EPGSelector.addItem(GenericMenuSeparator);

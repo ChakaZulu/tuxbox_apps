@@ -170,96 +170,164 @@ void CEpgData::showText( int startPos, int ypos )
 	frameBuffer->paintBoxRel(sx+ ox- 13, ypos+ 2+ int(sbs* sbh) , 11, int(sbh),  COL_MENUCONTENT_PLUS_3);
 }
 
-std::string GetGenre(const char contentClassification) // UTF-8
+#define GENRE_MOVIE_COUNT 9
+const neutrino_locale_t genre_movie[GENRE_MOVIE_COUNT] =
 {
-	std::string res= "UNKNOWN";
-	char subClass[2];
-	sprintf( subClass, "%d", (contentClassification&0x0F) );
+	LOCALE_GENRE_MOVIE_0,
+	LOCALE_GENRE_MOVIE_1,
+	LOCALE_GENRE_MOVIE_2,
+	LOCALE_GENRE_MOVIE_3,
+	LOCALE_GENRE_MOVIE_4,
+	LOCALE_GENRE_MOVIE_5,
+	LOCALE_GENRE_MOVIE_6,
+	LOCALE_GENRE_MOVIE_7,
+	LOCALE_GENRE_MOVIE_8
+};
+#define GENRE_NEWS_COUNT 5
+const neutrino_locale_t genre_news[GENRE_NEWS_COUNT] =
+{
+	LOCALE_GENRE_NEWS_0,
+	LOCALE_GENRE_NEWS_1,
+	LOCALE_GENRE_NEWS_2,
+	LOCALE_GENRE_NEWS_3,
+	LOCALE_GENRE_NEWS_4
+};
+#define GENRE_SHOW_COUNT 4
+const neutrino_locale_t genre_show[GENRE_SHOW_COUNT] =
+{
+	LOCALE_GENRE_SHOW_0,
+	LOCALE_GENRE_SHOW_1,
+	LOCALE_GENRE_SHOW_2,
+	LOCALE_GENRE_SHOW_3
+};
+#define GENRE_SPORTS_COUNT 12
+const neutrino_locale_t genre_sports[GENRE_SPORTS_COUNT] =
+{
+	LOCALE_GENRE_SPORTS_0,
+	LOCALE_GENRE_SPORTS_1,
+	LOCALE_GENRE_SPORTS_2,
+	LOCALE_GENRE_SPORTS_3,
+	LOCALE_GENRE_SPORTS_4,
+	LOCALE_GENRE_SPORTS_5,
+	LOCALE_GENRE_SPORTS_6,
+	LOCALE_GENRE_SPORTS_7,
+	LOCALE_GENRE_SPORTS_8,
+	LOCALE_GENRE_SPORTS_9,
+	LOCALE_GENRE_SPORTS_10,
+	LOCALE_GENRE_SPORTS_11
+};
+#define GENRE_CHILDRENS_PROGRAMMES_COUNT 6
+const neutrino_locale_t genre_childrens_programmes[GENRE_CHILDRENS_PROGRAMMES_COUNT] =
+{
+	LOCALE_GENRE_CHILDRENS_PROGRAMMES_0,
+	LOCALE_GENRE_CHILDRENS_PROGRAMMES_1,
+	LOCALE_GENRE_CHILDRENS_PROGRAMMES_2,
+	LOCALE_GENRE_CHILDRENS_PROGRAMMES_3,
+	LOCALE_GENRE_CHILDRENS_PROGRAMMES_4,
+	LOCALE_GENRE_CHILDRENS_PROGRAMMES_5
+};
+#define GENRE_MUSIC_DANCE_COUNT 7
+const neutrino_locale_t genre_music_dance[GENRE_MUSIC_DANCE_COUNT] =
+{
+	LOCALE_GENRE_MUSIC_DANCE_0,
+	LOCALE_GENRE_MUSIC_DANCE_1,
+	LOCALE_GENRE_MUSIC_DANCE_2,
+	LOCALE_GENRE_MUSIC_DANCE_3,
+	LOCALE_GENRE_MUSIC_DANCE_4,
+	LOCALE_GENRE_MUSIC_DANCE_5,
+	LOCALE_GENRE_MUSIC_DANCE_6
+};
+#define GENRE_ARTS_COUNT 12
+const neutrino_locale_t genre_arts_dance[GENRE_ARTS_COUNT] =
+{
+	LOCALE_GENRE_ARTS_0,
+	LOCALE_GENRE_ARTS_1,
+	LOCALE_GENRE_ARTS_2,
+	LOCALE_GENRE_ARTS_3,
+	LOCALE_GENRE_ARTS_4,
+	LOCALE_GENRE_ARTS_5,
+	LOCALE_GENRE_ARTS_6,
+	LOCALE_GENRE_ARTS_7,
+	LOCALE_GENRE_ARTS_8,
+	LOCALE_GENRE_ARTS_9,
+	LOCALE_GENRE_ARTS_10,
+	LOCALE_GENRE_ARTS_11
+};
+#define GENRE_SOCIAL_POLITICAL_COUNT 4
+const neutrino_locale_t genre_social_political[GENRE_SOCIAL_POLITICAL_COUNT] =
+{
+	LOCALE_GENRE_SOCIAL_POLITICAL_0,
+	LOCALE_GENRE_SOCIAL_POLITICAL_1,
+	LOCALE_GENRE_SOCIAL_POLITICAL_2,
+	LOCALE_GENRE_SOCIAL_POLITICAL_3
+};
+#define GENRE_DOCUS_MAGAZINES_COUNT 8
+const neutrino_locale_t genre_docus_magazines[GENRE_DOCUS_MAGAZINES_COUNT] =
+{
+	LOCALE_GENRE_DOCUS_MAGAZINES_0,
+	LOCALE_GENRE_DOCUS_MAGAZINES_1,
+	LOCALE_GENRE_DOCUS_MAGAZINES_2,
+	LOCALE_GENRE_DOCUS_MAGAZINES_3,
+	LOCALE_GENRE_DOCUS_MAGAZINES_4,
+	LOCALE_GENRE_DOCUS_MAGAZINES_5,
+	LOCALE_GENRE_DOCUS_MAGAZINES_6,
+	LOCALE_GENRE_DOCUS_MAGAZINES_7
+};
+#define GENRE_TRAVEL_HOBBIES_COUNT 8
+const neutrino_locale_t genre_travel_hobbies[GENRE_TRAVEL_HOBBIES_COUNT] =
+{
+	LOCALE_GENRE_TRAVEL_HOBBIES_0,
+	LOCALE_GENRE_TRAVEL_HOBBIES_1,
+	LOCALE_GENRE_TRAVEL_HOBBIES_2,
+	LOCALE_GENRE_TRAVEL_HOBBIES_3,
+	LOCALE_GENRE_TRAVEL_HOBBIES_4,
+	LOCALE_GENRE_TRAVEL_HOBBIES_5,
+	LOCALE_GENRE_TRAVEL_HOBBIES_6,
+	LOCALE_GENRE_TRAVEL_HOBBIES_7
+};
+const unsigned char genre_sub_classes[10] =
+{
+	GENRE_MOVIE_COUNT,
+	GENRE_NEWS_COUNT,
+	GENRE_SHOW_COUNT,
+	GENRE_SPORTS_COUNT,
+	GENRE_CHILDRENS_PROGRAMMES_COUNT,
+	GENRE_MUSIC_DANCE_COUNT,
+	GENRE_ARTS_COUNT,
+	GENRE_SOCIAL_POLITICAL_COUNT,
+	GENRE_DOCUS_MAGAZINES_COUNT,
+	GENRE_TRAVEL_HOBBIES_COUNT
+};
+const neutrino_locale_t * genre_sub_classes_list[10] =
+{
+	genre_movie,
+	genre_news,
+	genre_show,
+	genre_sports,
+	genre_childrens_programmes,
+	genre_music_dance,
+	genre_arts_dance,
+	genre_social_political,
+	genre_docus_magazines,
+	genre_travel_hobbies
+};
 
-	switch (contentClassification&0x0F0)
+const char * GetGenre(const unsigned char contentClassification) // UTF-8
+{
+	neutrino_locale_t res;
+
+	unsigned char i = (contentClassification & 0x0F0);
+
+	if ((i >= 0x010) && (i < 0x0B0))
 	{
-		case 0x010: {
-						res="MOVIE.";
-						if ( (contentClassification&0x0F)< 9 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x020: {
-						res="NEWS.";
-						if ( (contentClassification&0x0F)< 5 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x030: {
-						res="SHOW.";
-						if ( (contentClassification&0x0F)< 4 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x040: {
-						res="SPORTS.";
-						if ( (contentClassification&0x0F)< 12 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x050: {
-						res="CHILDRENs_PROGRAMMES.";
-						if ( (contentClassification&0x0F)< 6 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x060: {
-						res="MUSIC_DANCE.";
-						if ( (contentClassification&0x0F)< 7 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x070: {
-						res="ARTS.";
-						if ( (contentClassification&0x0F)< 12 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x080: {
-						res="SOZIAL_POLITICAL.";
-						if ( (contentClassification&0x0F)< 4 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x090: {
-						res="DOCUS_MAGAZINES.";
-						if ( (contentClassification&0x0F)< 8 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
-		case 0x0A0: {
-						res="TRAVEL_HOBBIES.";
-						if ( (contentClassification&0x0F)< 8 )
-							res+= subClass;
-						else
-							res+= '0';
-					 	break;
-					}
+		i >>= 4;
+		i--;
+		res = genre_sub_classes_list[i][((contentClassification & 0x0F) < genre_sub_classes[i]) ? (contentClassification & 0x0F) : 0];
 	}
-	return g_Locale->getText("GENRE."+res);
+	else
+		res = LOCALE_GENRE_UNKNOWN;
+
+	return g_Locale->getText(res);
 }
 
 
