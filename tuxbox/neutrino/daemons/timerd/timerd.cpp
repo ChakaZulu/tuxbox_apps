@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.35 2002/12/02 13:41:42 thegoodguy Exp $
+	$Id: timerd.cpp,v 1.36 2002/12/02 14:38:52 thegoodguy Exp $
 
 	License: GPL
 
@@ -40,9 +40,7 @@
 #include <sectionsdclient/sectionsdMsg.h>
 #include <sectionsdclient/sectionsdclient.h>
 
-#include <connection/basicmessage.h>
-
-bool doLoop;
+#include <connection/basicserver.h>
 
 void loadTimersFromConfig()
 {
@@ -223,21 +221,14 @@ void loadTimersFromConfig()
 	CTimerManager::getInstance()->saveEventsToConfig();
 }
 
-void parse_command(int connfd, CBasicMessage::Header * rmessage)
+bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
-
-	if(rmessage->version!=CTimerd::ACTVERSION)
-	{
-		dperror("command with unknown version\n");
-		return;
-	}
-
 //	CTimerEvent_NextProgram::EventMap::iterator it = NULL;
 	CTimerEventMap events;
 	CTimerd::commandModifyTimer msgModifyTimer;
 	CTimerd::responseGetSleeptimer rspGetSleeptimer;
 	CTimerEventMap::iterator pos;
-	switch(rmessage->cmd)
+	switch (rmsg.cmd)
 	{
 		
 		case CTimerd::CMD_REGISTEREVENT :
@@ -519,7 +510,7 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 				CTimerd::responseStatus rspStatus;
 				rspStatus.status = ret;
 				write( connfd, &rspStatus, sizeof(rspStatus));
-				doLoop=false;
+				return false;
 			}
 			break;
 		case CTimerd::CMD_SETAPID:				  // apid setzen
@@ -532,16 +523,13 @@ void parse_command(int connfd, CBasicMessage::Header * rmessage)
 		default:
 			dprintf("unknown command\n");
 	}
+	return true;
 }
 
 int main(int argc, char **argv)
 {
-	int listenfd, connfd;
-	struct sockaddr_un servaddr;
-	int clilen;
 	bool do_fork = true;
 	bool no_wait = false;
-	doLoop=true;
 
 	dprintf("startup!!!\n\n");
 	if(argc > 1)
@@ -559,6 +547,11 @@ int main(int argc, char **argv)
 			}
 		}
 	}
+
+	CBasicServer timerd_server;
+
+	if (!timerd_server.prepare(TIMERD_UDS_NAME))
+		return -1;
 
 	if(do_fork)
 	{
@@ -579,30 +572,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, TIMERD_UDS_NAME);
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
-	unlink(TIMERD_UDS_NAME);
-
-	//network-setup
-	if((listenfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		dperror("error while socket create");
-	}
-
-	if( bind(listenfd, (struct sockaddr*) &servaddr, clilen) <0 )
-	{
-		dperror("bind failed...");
-		exit(-1);
-	}
-
-	if(listen(listenfd, 15) !=0)
-	{
-		perror("listen failed...");
-		exit( -1 );
-	}
-
 	if(!no_wait)
 	{
 		// wait for correct date to be set...
@@ -615,15 +584,7 @@ int main(int argc, char **argv)
 	//startup Timer
 	try
 	{
-		CBasicMessage::Header rmessage;
-		while(doLoop)							  // wait for incomming messages
-		{
-			connfd = accept(listenfd, (struct sockaddr*) &servaddr, (socklen_t*) &clilen);
-			memset(&rmessage, 0, sizeof(rmessage));
-			read(connfd,&rmessage,sizeof(rmessage));
-			parse_command(connfd, &rmessage);
-			close(connfd);
-		}
+		timerd_server.run(parse_command, CTimerd::ACTVERSION);
 	}
 	catch(std::exception& e)
 	{
