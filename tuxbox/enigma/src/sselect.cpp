@@ -12,7 +12,22 @@
 
 eListboxEntryService::eListboxEntryService(eService &service, eListbox *listbox): eListboxEntry(listbox), service(service)
 {
+#if 0
 	sort=QString().sprintf("%06d", service.service_number);
+#else
+	sort="";
+	for (unsigned p=0; p<service.service_name.length(); p++)
+	{
+		QChar ch=service.service_name[p];
+		if (ch.unicode()<32)
+			continue;
+		if (ch.unicode()==0x86)
+			continue;
+		if (ch.unicode()==0x87)
+			continue;
+		sort+=ch;
+	}
+#endif
 }
 
 eListboxEntryService::~eListboxEntryService()
@@ -39,6 +54,8 @@ QString eListboxEntryService::getText(int col=0) const
 				continue;
 			sname+=ch;
 		}
+		if (col==-1)
+			return sname;
 		EITEvent *e=eEPGCache::getInstance()->lookupCurrentEvent(service.original_network_id, service.service_id);
 		if (e)
 		{
@@ -86,6 +103,7 @@ void eServiceSelector::fillServiceList()
 	list->clearList();
 	if (eDVB::getInstance()->getTransponders())
 		eDVB::getInstance()->getTransponders()->forEachChannel(eServiceSelector_addService(list, result));
+	list->sort();
 	list->invalidate();
 }
 
