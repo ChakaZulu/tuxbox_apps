@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.147 2002/04/20 18:31:46 McClean Exp $
+ * $Id: zapit.cpp,v 1.148 2002/04/20 18:51:29 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -183,7 +183,7 @@ void signal_handler (int signum)
 	}
 }
 
-#ifndef DVBS
+#ifdef DBOX2
 int set_vtxt (dvb_pid_t teletext_pid)
 {
 	int fd;
@@ -260,7 +260,7 @@ int set_vtxt (dvb_pid_t teletext_pid)
 
 	return 0;
 }
-#endif /* DVBS */
+#endif /* DBOX2 */
 
 int save_settings (bool write)
 {
@@ -546,7 +546,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 		debug("[zapit] pids already known\n");
 	}
 
-#ifndef DVBS
+#ifdef DBOX2
 	if (in_nvod)
 	{
 		lcdd.setServiceName(nvodname);
@@ -555,7 +555,7 @@ int zapit (uint32_t onid_sid, bool in_nvod)
 	{
 		lcdd.setServiceName(cit->second.getName());
 	}
-#endif /* DVBS */
+#endif /* DBOX2 */
 
 
 #ifdef USE_EXTERNAL_CAMD
@@ -1917,7 +1917,7 @@ int main (int argc, char **argv)
 	int channelcount = 0;
 #endif /* DEBUG */
 
-	printf("$Id: zapit.cpp,v 1.147 2002/04/20 18:31:46 McClean Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.148 2002/04/20 18:51:29 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -2370,10 +2370,10 @@ int startPlayBack()
 	printf("[zapit] indicator: %d\n", indicator);
 #endif
 
-#ifndef DVBS
+#ifdef DBOX2
 	debug("[zapit] setting vtxt\n");
 	set_vtxt(channel->getTeletextPid());
-#endif /* DVBS */
+#endif /* DBOX2 */
 
 	return 0;
 }
@@ -2381,9 +2381,9 @@ int startPlayBack()
 int stopPlayBack()
 {
 
-#ifndef DVBS
+#ifndef DBOX2
 	set_vtxt(0);
-#endif /* DVBS */
+#endif /* DBOX2 */
 
 #ifdef USE_EXTERNAL_CAMD
 	if (camdpid != -1)

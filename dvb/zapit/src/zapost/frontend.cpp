@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.cpp,v 1.4 2002/04/19 14:53:29 obi Exp $
+ * $Id: frontend.cpp,v 1.5 2002/04/20 18:51:29 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -592,38 +592,55 @@ const bool CFrontend::sendMiniDiseqcCommand (secToneMode toneMode, secVoltage vo
 
 const bool CFrontend::sendDiseqcCommand (secToneMode toneMode, secVoltage voltage, uint8_t diseqc, uint32_t repeats)
 {
-	/*
-	 * note: current api and drivers always set the framing byte 
-	 * to 0xE0. repeated diseqc commands should set this to 0xE1.
-	 */
 	secCmdSequence *sequence = new secCmdSequence();
 	sequence->miniCommand = SEC_MINI_NONE;
 	sequence->continuousTone = toneMode;
 	sequence->voltage = voltage;
 
+#ifdef DBOX2
+	sequence->commands[0].type = SEC_CMDTYPE_DISEQC_RAW;
+	sequence->commands[0].u.diseqc_raw.cmdtype = 0xE0;	/* from master, no reply, 1st transmission */
+	sequence->commands[0].u.diseqc_raw.addr = 0x10;		/* any lnb switcher or smatv */
+	sequence->commands[0].u.diseqc_raw.cmd = 0x38;		/* write to port group 0 (committed switches) */
+	sequence->commands[0].u.diseqc_raw.numParams = 1;
+	sequence->commands[0].u.diseqc_raw.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+
+	for (sequence->numCommands = 1; sequence->numCommands < (repeats << 1) + 1; sequence->numCommands += 2)
+	{
+		sequence->commands[sequence->numCommands].type = SEC_CMDTYPE_DISEQC_RAW;
+		sequence->commands[sequence->numCommands].u.diseqc_raw.cmdtype = (sequence->numCommands - 1 ? 0xE1 : 0xE0);
+		sequence->commands[sequence->numCommands].u.diseqc_raw.addr = 0x10;
+		sequence->commands[sequence->numCommands].u.diseqc_raw.cmd = 0x39;		/* write to port group 1 (uncommitted switches) */
+		sequence->commands[sequence->numCommands].u.diseqc_raw.numParams = 1;
+		sequence->commands[sequence->numCommands].u.diseqc_raw.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+		sequence->commands[sequence->numCommands + 1].type = SEC_CMDTYPE_DISEQC_RAW;
+		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.cmdtype = 0xE1;	/* from master, no reply, repeated transmission */
+		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.addr = 0x10;
+		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.cmd = 0x38;
+		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.numParams = 1;
+		sequence->commands[sequence->numCommands + 1].u.diseqc_raw.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
+	}
+#else
 	sequence->commands[0].type = SEC_CMDTYPE_DISEQC;
-	//sequence->commands[0].u.diseqc.frame = 0xE0;	/* from master, no reply, 1st transmission */
-	sequence->commands[0].u.diseqc.addr = 0x10;	/* any lnb switcher or smatv */
-	sequence->commands[0].u.diseqc.cmd = 0x38;	/* write to port group 0 (committed switches) */
+	sequence->commands[0].u.diseqc.addr = 0x10;
+	sequence->commands[0].u.diseqc.cmd = 0x38;
 	sequence->commands[0].u.diseqc.numParams = 1;
 	sequence->commands[0].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
 
 	for (sequence->numCommands = 1; sequence->numCommands < (repeats << 1) + 1; sequence->numCommands += 2)
 	{
 		sequence->commands[sequence->numCommands].type = SEC_CMDTYPE_DISEQC;
-		//sequence->commands[sequence->numCommands].u.diseqc.frame = (sequence->numCommands - 1 ? 0xE1 : 0xE0);
-		sequence->commands[sequence->numCommands].u.diseqc.addr = 0x10;		/* any lnb switcher or smatv */
-		sequence->commands[sequence->numCommands].u.diseqc.cmd = 0x39;		/* write to port group 1 (uncommitted switches) */
+		sequence->commands[sequence->numCommands].u.diseqc.addr = 0x10;
+		sequence->commands[sequence->numCommands].u.diseqc.cmd = 0x39;
 		sequence->commands[sequence->numCommands].u.diseqc.numParams = 1;
 		sequence->commands[sequence->numCommands].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
 		sequence->commands[sequence->numCommands + 1].type = SEC_CMDTYPE_DISEQC;
-		//sequence->commands[sequence->numCommands + 1].u.diseqc.frame = 0xE1;	/* from master, no reply, repeated transmission */
-		sequence->commands[sequence->numCommands + 1].u.diseqc.addr = 0x10;	/* any lnb switcher or smatv */
-		sequence->commands[sequence->numCommands + 1].u.diseqc.cmd = 0x38;	/* write to port group 0 (committed switches) */
+		sequence->commands[sequence->numCommands + 1].u.diseqc.addr = 0x10;
+		sequence->commands[sequence->numCommands + 1].u.diseqc.cmd = 0x38;
 		sequence->commands[sequence->numCommands + 1].u.diseqc.numParams = 1;
 		sequence->commands[sequence->numCommands + 1].u.diseqc.params[0] = 0xF0 | ((diseqc << 2) & 0x0F) | (toneMode == SEC_TONE_ON ? 1 : 0) | (voltage == SEC_VOLTAGE_18 ? 2 : 0);
 	}
-
+#endif
 	secSendSequence(sequence);
 
 	delete sequence;
