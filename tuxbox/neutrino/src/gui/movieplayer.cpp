@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.104 2005/01/28 16:16:08 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.105 2005/02/19 16:52:02 metallica Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -2196,11 +2196,12 @@ void CMoviePlayerGui::PlayFile (int parental)
 
 			for( unsigned int count=0; count<numpida; count++ )
 			{
-				char apidnumber[3];
+				char apidnumber[3],show_pid_number[4];
 				sprintf(apidnumber, "%d", count+1);
+				sprintf(show_pid_number, "%u", apids[count]);
 
 				std::string apidtitle = "Stream ";
-				apidtitle.append(apidnumber);
+				apidtitle.append(show_pid_number);
 
 				if(ac3flags[count] == 2) 
 				{
@@ -2827,7 +2828,7 @@ void CMoviePlayerGui::showHelpTS()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_TSHELP12));
-	helpbox.addLine("Version: $Revision: 1.104 $");
+	helpbox.addLine("Version: $Revision: 1.105 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
@@ -2848,7 +2849,7 @@ void CMoviePlayerGui::showHelpVLC()
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_7, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP10));
 	helpbox.addLine(NEUTRINO_ICON_BUTTON_9, g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP11));
 	helpbox.addLine(g_Locale->getText(LOCALE_MOVIEPLAYER_VLCHELP12));
-	helpbox.addLine("Version: $Revision: 1.104 $");
+	helpbox.addLine("Version: $Revision: 1.105 $");
 	helpbox.addLine("Movieplayer (c) 2003, 2004 by gagga");
 	hide();
 	helpbox.show(LOCALE_MESSAGEBOX_INFO);
