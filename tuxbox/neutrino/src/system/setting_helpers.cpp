@@ -135,7 +135,7 @@ bool CStreamingNotifier::changeNotify(const std::string & OptionName, void*)
 
 CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem* i3,
                                         CMenuItem* i4, CMenuItem* i5, CMenuItem* i6,
-                                        CMenuItem* i7)
+                                        CMenuItem* i7, CMenuItem* i8)
 {
    toDisable[0]=i1;
    toDisable[1]=i2;
@@ -144,13 +144,21 @@ CRecordingNotifier::CRecordingNotifier( CMenuItem* i1, CMenuItem* i2, CMenuItem*
    toDisable[4]=i5;
    toDisable[5]=i6;
    toDisable[6]=i7;
+   toDisable[7]=i8;
 }
 bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
 {
-   if(g_settings.recording_type==0)
+   // 0 = aus
+   // 1 = server
+   // 2 = vcr
+   // 3 = file/nfs
+   
+   if(g_settings.recording_type==0 || g_settings.recording_type == 3)
    {
-      for(int i=0;i<7;i++)
+      for(int i=0;i<8;i++)
          toDisable[i]->setActive(false);
+      if (g_settings.recording_type==3)
+        toDisable[7]->setActive(true);
    }
    else if(g_settings.recording_type==1)
    {
@@ -161,6 +169,7 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[4]->setActive(true);
       toDisable[5]->setActive(true);
       toDisable[6]->setActive(false);
+      toDisable[7]->setActive(false);
    }
    else if(g_settings.recording_type==2)
    {
@@ -171,7 +180,19 @@ bool CRecordingNotifier::changeNotify(const std::string & OptionName, void*)
       toDisable[4]->setActive(false);
       toDisable[5]->setActive(false);
       toDisable[6]->setActive(true);
+      toDisable[7]->setActive(false);
    }
+   
+   if (g_settings.recording_type == 3) 
+   {
+        // set localhost as streaming server
+        g_settings.recording_server_ip = "127.0.0.1";
+        // set SPTS mode for drivers
+        FILE * fd = fopen("/var/etc/.spts_mode", "w");
+		if (fd)
+			fclose(fd);
+   }
+   
    return true;
 }
 

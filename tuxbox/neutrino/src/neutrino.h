@@ -88,6 +88,7 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		CScanSettings			scanSettings;
 		int                             network_dhcp;
 		int                             network_automatic_start;
+		int                             fserverpid;
 
 		neutrino_font_descr_struct      font;
 

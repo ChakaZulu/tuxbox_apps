@@ -44,6 +44,9 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <dlfcn.h>
+#include <signal.h>
+#include <sys/wait.h>
+
 
 #include <sys/socket.h>
 
@@ -518,6 +521,7 @@ int CNeutrinoApp::loadSetup()
 	strcpy( g_settings.network_nfs_mp3dir, configfile.getString( "network_nfs_mp3dir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_picturedir, configfile.getString( "network_nfs_picturedir", "" ).c_str() );
 	strcpy( g_settings.network_nfs_moviedir, configfile.getString( "network_nfs_moviedir", "" ).c_str() );
+	strcpy( g_settings.network_nfs_recordingdir, configfile.getString( "network_nfs_recordingdir", "" ).c_str() );
 
 	//recording (server + vcr)
 	g_settings.recording_type = configfile.getInt32( "recording_type", 0 );
@@ -835,6 +839,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setString( "network_nfs_mp3dir", g_settings.network_nfs_mp3dir);
 	configfile.setString( "network_nfs_picturedir", g_settings.network_nfs_picturedir);
 	configfile.setString( "network_nfs_moviedir", g_settings.network_nfs_moviedir);
+	configfile.setString( "network_nfs_recordingdir", g_settings.network_nfs_recordingdir);
 
 	//recording (server + vcr)
 	configfile.setInt32 ( "recording_type", g_settings.recording_type );
@@ -1828,14 +1833,17 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput * timerSettings_record_safety_time_after = new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ", RecordingSafetyNotifier);
 	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
+    CMenuForwarder* mf7 = new CMenuForwarder("recordingmenu.defdir", (g_settings.recording_type==3), g_settings.network_nfs_recordingdir,this,"recordingdir");
+	
 	CRecordingNotifier *RecordingNotifier =
-		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5);
+		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,oj5,mf7);
 
     CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type,
                                                     true, RecordingNotifier);
 	oj1->addOption(0, "recordingmenu.off");
 	oj1->addOption(1, "recordingmenu.server");
 	oj1->addOption(2, "recordingmenu.vcr");
+	oj1->addOption(3, "recordingmenu.file");
 
 	recordingSettings.addItem(GenericMenuSeparator);
 	recordingSettings.addItem(GenericMenuBack);
@@ -1851,9 +1859,11 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( oj4);
 	recordingSettings.addItem(GenericMenuSeparatorLine);
 	recordingSettings.addItem( oj5);
-	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "recordingmenu.fileseparator") );
 	recordingSettings.addItem( mf5);
 	recordingSettings.addItem( mf6);
+	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "recordingmenu.filesettingsseparator") );
+	recordingSettings.addItem( mf7);
 
 	recordingstatus = 0;
 }
@@ -2519,7 +2529,7 @@ void CNeutrinoApp::InitZapper()
 
 void CNeutrinoApp::setupRecordingDevice(void)
 {
-	if(g_settings.recording_type == 1)
+	if(g_settings.recording_type == 1 || g_settings.recording_type == 3)
 	{
 		CVCRControl::CServerDeviceInfo * info = new CVCRControl::CServerDeviceInfo;
 		int port;
@@ -2531,6 +2541,26 @@ void CNeutrinoApp::setupRecordingDevice(void)
 		info->Name = "ngrab";
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_SERVER,info);
 		delete info;
+		
+		if (g_settings.recording_type == 3) {
+    	    // start fserver process
+			fserverpid = fork();
+			if (fserverpid == -1) {
+				fprintf(stderr, "[neutrino.cpp] fork of fserver process failed\n");
+			}
+			if (fserverpid == 0) {
+    				char * f_arg[6];
+                	f_arg[0] = "/sbin/fserver";
+                	f_arg[1] = "-sport";
+                	f_arg[2] = g_settings.recording_server_port;
+                	f_arg[3] = "-o";
+                	f_arg[4] = g_settings.network_nfs_recordingdir;
+                	f_arg[5]= 0;
+	
+    				execvp(f_arg[0], f_arg);
+    				fprintf(stderr,"[neutrino.cpp] execv of %s failed", f_arg[0]);
+			}
+		}
 	}
 	else if(g_settings.recording_type == 2)
 	{
@@ -2550,6 +2580,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 int CNeutrinoApp::run(int argc, char **argv)
 {
 	CmdParser(argc, argv);
+	fserverpid = -1;
 
 	int loadSettingsErg = loadSetup();
 
@@ -3397,6 +3428,14 @@ void CNeutrinoApp::ExitRun()
 	if (frameBuffer != NULL)
 		delete frameBuffer;
 
+	if (fserverpid > 0) {
+	    if(kill(fserverpid,SIGTERM)) {
+		    fprintf(stderr,"\n[neutrino.cpp] fserver process not killed\n");
+		}
+		waitpid(fserverpid,0,0);
+		fprintf(stderr,"[neutrino.cpp] fserver stopped\n");
+	}
+		
 	exit(0);
 }
 
@@ -3890,6 +3929,16 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 		std::string startdir=g_settings.network_nfs_moviedir;
 		if (b.exec(startdir))
 			strncpy(g_settings.network_nfs_moviedir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_moviedir)-1);
+		return menu_return::RETURN_REPAINT;
+	}
+	else if(actionKey == "recordingdir")
+	{
+		parent->hide();
+		CFileBrowser b;
+		b.Dir_Mode=true;
+		std::string startdir=g_settings.network_nfs_recordingdir;
+		if (b.exec(startdir))
+			strncpy(g_settings.network_nfs_recordingdir, b.getSelectedFile()->Name.c_str(), sizeof(g_settings.network_nfs_recordingdir)-1);
 		return menu_return::RETURN_REPAINT;
 	}
 

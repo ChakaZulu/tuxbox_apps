@@ -132,6 +132,9 @@ recordingmenu.vcr_devicename VCR Name (lirc)
 recordingmenu.off off
 recordingmenu.server server
 recordingmenu.vcr vcr
+recordingmenu.file direct (file)
+recordingmenu.defdir recording directory
+recordingmenu.filesettingsseparator direct recording
 recordingmenu.server_wakeup recording server WOL
 recordingmenu.server_mac MAC address
 recordingmenu.setupnow activate changes
