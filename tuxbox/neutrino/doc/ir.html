@@ -9,23 +9,59 @@
 <div align="center">
 <h1><b>Neutrino LIRC Unterst&uuml;tzung</b></h1>
 </div>
-Konfiguration des lirc siehe 
-<A HREF="http://www.dbox2.info/doku/lirc/lirc_doku.html">
-http://www.dbox2.info/doku/lirc/lirc_doku.html</A><P>
-<B>Syntax der Lirc-Kommando Dateien:</B><BR>
+
+<br>
+<B>Setup</B><BR>
+<DL>
+<LI>Von <a href="http://www.lirc.org/remotes/" target="_blank">http://www.lirc.org/remotes/</a>
+eine zur Fernbedienung passende Datei ziehen und diese als 
+/var/tuxbox/config/lirc/lircd.conf in die Box packen.<br>
+Sollte keine zur Fernbedienung passende Datei dabei sein, kann man sie auch 
+selber erstellen, in dem man die Codes aufnimmt. Siehe
+<a href="http://www.lirc.org/" target="_blank">http://www.lirc.org/</a><br>
+<LI>Die Dateien aus record.lirc, stop.lirc, sleep.lirc, sbon.lirc, sboff.lirc, 
+volplus.lirc, volminus.lirc, mute.lirc in /var/tuxbox/config/lirc anlegen 
+(bzw. nur die Dateien f&uuml;r die gew&uuml;schten Funktionalit&auml;ten).
+<a href="#syntax">Syntax</a> und <a href="#bedeutung">Bedeutung</a>
+siehe unten.<br>
+<LI>Box neu starten<br>
+<br>
+Bei Fragen oder Problemen: <a HREF="https://tuxbox.org/forum/viewforum.php?f=2" target="_blank">Neutrino Forum</a> oder im #dbox2 Channel<br>
+<p>
+<B><a name="syntax">Syntax der Lirc-Kommando Dateien:</B><BR>
 Es können in einer Kommando-Datei beliebig viele Befehle der Form<BR>
-<PRE>&lt;device&gt; &lt;command&gt; (&lt;duration&gt;)</PRE>
+<PRE>&lt;device&gt; &lt;command&gt; (&lt;duration&gt;)
+  oder
+wait &lt;duration&gt;</PRE>
 vorkommen.<p>
 <B>&lt;device&gt;</B> = Name der Fernbedienung in der lirc.conf Datei<BR>
 <B>&lt;command&gt;</B> = Name der Taste einer Fernbedienung in lirc.conf<BR>
 <B>&lt;duration&gt;</B> = Dauer, die das Signal gesendet werden soll, in ms (optional). 
 Wenn nicht angegeben wird das Signal genau ein mal gesendet. 
 Werte zwischen 50ms und 500ms sind ein guter Anfang<BR>
+Das <b>wait</b> Kommando erzeugt eine Pause der angegeben Zeit in ms.<BR>
 <P>
-Folgende Neutrino-Aktionen können zusätzlich zum VCR Support mit IR-Signalen
+<a name="bedeutung">Folgende Neutrino-Aktionen k&ouml;nnen mit IR-Signalen
 versehen werden:<br>
 (ist die entsprechende Kommando-Datei vorhanden, werden die Kommandos gesendet,
 existiert die Datei nicht, passiert nichts.)
+<P>
+<B>VCR-Aufnahme</B><br>
+Beim Start einer VCR-Aufnahme werden die Codes aus der Datei record.lirc
+gesendet. Beim Stoppen der Aufnahme werden die Code aus der Datei stop.lirc
+gesendet.<br>
+Bsp. /var/tuxbox/config/lirc/record.lirc:
+<PRE>
+vcr power 500
+wait 500
+vcr av 500
+vcr record 500
+</PRE>
+Bsp. /var/tuxbox/config/lirc/stop.lirc:
+<PRE>
+vcr stop 500
+vcr power 500
+</PRE>
 <P>
 <B>Sleeptimer:</B><BR>
 Wenn der Sleeptimer die Box in den Standby bzw. Deep-Standby schickt,
