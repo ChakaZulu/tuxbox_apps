@@ -1,5 +1,5 @@
 /*
-$Id: ts2secpes.c,v 1.2 2004/04/15 04:08:49 rasc Exp $
+$Id: ts2secpes.c,v 1.3 2004/04/15 10:53:22 rasc Exp $
 
 
  DVBSNOOP
@@ -17,6 +17,9 @@ $Id: ts2secpes.c,v 1.2 2004/04/15 04:08:49 rasc Exp $
 
 
 $Log: ts2secpes.c,v $
+Revision 1.3  2004/04/15 10:53:22  rasc
+minor changes
+
 Revision 1.2  2004/04/15 04:08:49  rasc
 no message
 
@@ -207,9 +210,7 @@ void ts2SecPes_subdecode (u_char *b, int len)
 	if (payload_unit_start_indicator) {
 
 		// -- output data of prev. collected packets
-		if (packetMem_length (tsd.mem_handle) > 0) {
-			ts2SecPes_Output_subdecode ();
-		}
+		ts2SecPes_Output_subdecode ();
 
 		// -- first buffer data
 		ts2SecPes_AddPacketStart (pid, continuity_counter, b, (u_long)len);
@@ -238,7 +239,11 @@ void ts2SecPes_Output_subdecode (void)
      out_nl (3,"==========================");
 
 
-     if (tsd.invalid != TSD_no_error) {
+     if (! packetMem_length (tsd.mem_handle) ) {
+
+     	out_nl (3,"No data collected, no payload start");
+
+     } else if (tsd.invalid != TSD_no_error) {
    	char *s = "";
 
 	switch (tsd.invalid) {
@@ -249,7 +254,6 @@ void ts2SecPes_Output_subdecode (void)
 	   case TSD_mem_error:  	s = "subdecoding buffer (allocation) error"; break;
 	}
      	out_nl (3,"Packet cannot be sub-decoded: %s",s);
-        out_NL (3);
 
      } else {
    	u_char *b;
@@ -277,14 +281,16 @@ void ts2SecPes_Output_subdecode (void)
 		decodeSections_buf (b, len-pointer, tsd.pid);
 	    	indent (-1);
 	    }
-	    out_NL (3);
-	    out_NL (3);
 
+	} else {
+		out_nl (3,"No prev. packet start found...");
 	}
 
 
      }
 
+     out_NL (3);
+     out_NL (3);
      indent (-1);
 }
 

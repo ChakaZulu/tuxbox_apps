@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.50 2004/04/05 17:32:13 rasc Exp $
+$Id: dvb_str.c,v 1.51 2004/04/15 10:53:22 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.50 2004/04/05 17:32:13 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.51  2004/04/15 10:53:22  rasc
+minor changes
+
 Revision 1.50  2004/04/05 17:32:13  rasc
 mass typo fix adaption --> adaptation
 
@@ -421,7 +424,7 @@ char *dvbstrDVBDescriptorTAG (u_int tag)
      {  0x71, 0x71,  "service_identifier_descriptor" },
      {  0x72, 0x72,  "service_availability_descriptor" },
      {  0x73, 0x7F,  "reserved_descriptor" },
-     {  0x80, 0xAF,  "ATSC reserved" },		/* ETR 211e02 */
+     {  0x80, 0xAF,  "User defined/ATSC reserved" },		/* ETR 211e02 */
      {  0xB0, 0xFE,  "User defined" },
      {  0xFF, 0xFF,  "Forbidden" },
      {  0,0, NULL }
