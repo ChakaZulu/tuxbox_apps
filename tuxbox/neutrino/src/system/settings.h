@@ -248,7 +248,7 @@ const int PARENTALLOCK_PROMPT_ONSTART        = 1;
 const int PARENTALLOCK_PROMPT_CHANGETOLOCKED = 2;
 const int PARENTALLOCK_PROMPT_ONSIGNAL       = 3;
 
-#define MAX_SATELLITES 64 
+#define MAX_SATELLITES 64
 
 class CScanSettings
 {
@@ -269,6 +269,7 @@ class CScanSettings
 	int* diseqscOfSat( char* satname);
 	int* motorPosOfSat( char* satname);
 	char* CScanSettings::satOfDiseqc(int diseqc) const;
+	char* CScanSettings::satOfMotorPos(int32_t motorPos) const;
 	void toSatList( CZapitClient::ScanSatelliteList& ) const;
 	void toMotorPosList( CZapitClient::ScanMotorPosList& ) const;
 	

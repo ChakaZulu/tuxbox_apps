@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.26 2003/05/24 14:15:50 digi_casi Exp $
+        $Id: settings.cpp,v 1.27 2003/05/25 10:42:37 digi_casi Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -88,6 +88,16 @@ char * CScanSettings::satOfDiseqc(int diseqc) const
 	return "Unknown Satellite";
 }
 
+char * CScanSettings::satOfMotorPos(int32_t motorPos) const
+{
+	for (int i = 0; i < MAX_SATELLITES; i++) 
+	{
+		if (motorPos == satMotorPos[i]) 
+			return (char *)&satName[i];
+	}	
+	return "Unknown Satellite";
+}
+
 void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 {
 	satList.clear();
@@ -100,7 +110,7 @@ void CScanSettings::toSatList( CZapitClient::ScanSatelliteList& satList) const
 	}
 	else if  (diseqcMode == DISEQC_1_2)
 	{
-		strncpy( sat.satName, satNameNoDiseqc, 30);
+		strncpy(sat.satName, satNameNoDiseqc, 30);
 		sat.diseqc = -1;
 		for (int i = 0; i < MAX_SATELLITES; i++)
 		{
@@ -139,7 +149,7 @@ void CScanSettings::toMotorPosList(CZapitClient::ScanMotorPosList& motorPosList)
 			strncpy(sat.satName, satName[i], 30);
 			sat.motorPos = satMotorPos[i];
 			motorPosList.insert(motorPosList.end(), sat);
-		}	
+		}
 	}
 }
 
