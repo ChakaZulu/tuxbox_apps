@@ -434,7 +434,6 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
 	std::map<eString, eString> opt = getRequestOptions(opts, '&');
 	eString command = opt["command"];
-	eString requester = opt["requester"];
 	eString result =  "Unknown admin command. (valid commands are: shutdown, reboot, restart, standby, wakeup)";
 	if (command)
 	{
@@ -443,55 +442,50 @@ static eString admin(eString request, eString dirpath, eString opts, eHTTPConnec
 			if (eSystemInfo::getInstance()->canShutdown())
 			{
 				eZap::getInstance()->quit();
-				if (requester == "webif")
-					result = "Shutdown initiated...";
-				else
-					result = "Shutdown initiated.";
+				result = "Shutdown initiated...";
+			}
+			else
+			{
+				result = "No shutdown function available for this box.";
 			}
 		}
-		else if (command == "reboot")
+		else
+		if (command == "reboot")
 		{
 			eZap::getInstance()->quit(4);
-			if (requester == "webif")
-				result = "Reboot initiated...";
-			else
-				result = "Reboot initiated.";
+			result = "Reboot initiated...";
 		}
-		else if (command == "restart")
+		else
+		if (command == "restart")
 		{
 			eZap::getInstance()->quit(2);
-			if (requester == "webif")
-				result = "Restart initiated...";
-			else
-				result = "Restart initiated";
+			result = "Restart initiated...";
 		}
-		else if (command == "wakeup")
+		else
+		if (command == "wakeup")
 		{
 			if (eZapStandby::getInstance())
 			{
 				eZapStandby::getInstance()->wakeUp(1);
-				if (requester == "webif")
-					result = "Enigma is waking up...";
-				else
-					result = "enigma is waking up.";
+				result = "Enigma is waking up...";
 			}
-			if (requester == "webif")
-				result =  "Enigma doesn't sleep.";
 			else
-				result = "enigma doesn't sleep :)";
+			{
+				result = "Enigma doesn't sleep.";
+			}
 		}
-		else if (command == "standby")
+		else
+		if (command == "standby")
 		{
 			if (eZapStandby::getInstance())
-				if (requester == "webif")
-					result = "Enigma is already sleeping.";
-				else
-					result = "enigma is already sleeping";
-			eZapMain::getInstance()->gotoStandby();
-			if (requester == "webif")
-				result =  "Standby initiated...";
+			{
+				result = "Enigma is already sleeping.";
+			}
 			else
-				result =  "enigma is sleeping now</body></html>";
+			{
+				eZapMain::getInstance()->gotoStandby();
+				result = "Standby initiated...";
+			}
 		}
 	}
 	return "<html>" + eString(CHARSETMETA) + "<head><title>" + command + "</title></head><body>" + result + "</body></html>";
