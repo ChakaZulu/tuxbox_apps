@@ -1,7 +1,7 @@
 #ifndef SECTIONSDMSG_H
 #define SECTIONSDMSG_H
 //
-//  $Id: sectionsdMsg.h,v 1.18 2001/09/25 15:00:38 field Exp $
+//  $Id: sectionsdMsg.h,v 1.19 2001/09/26 09:54:50 field Exp $
 //
 //	sectionsdMsg.h (header file with msg-definitions for sectionsd)
 //	(dbox-II-project)
@@ -25,8 +25,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsdMsg.h,v $
-//  Revision 1.18  2001/09/25 15:00:38  field
-//  Wunsch-Kommando hinzugefuegt
+//  Revision 1.19  2001/09/26 09:54:50  field
+//  Neues Kommando (fuer Tontraeger-Auswahl)
 //
 //  Revision 1.17  2001/09/20 19:22:10  fnbrd
 //  Changed format of eventlists with IDs
@@ -93,7 +93,7 @@ struct sectionsd {
     unsigned dauer;
   } __attribute__ ((packed)) ;
 
-  static const int numberOfCommands=18;
+  static const int numberOfCommands=19;
   enum commands {
     actualEPGchannelName=0,
     actualEventListTVshort,
@@ -112,7 +112,8 @@ struct sectionsd {
     actualEventListRadioShortIDs,
     currentNextInformationID,
     epgEPGid,
-    epgEPGidShort
+    epgEPGidShort,
+    CurrentComponentTagsChannelID
   };
 };
 
@@ -258,20 +259,18 @@ struct sectionsd {
 //     is a string (c-string) describing the EPG:
 //     name  0xff text  0xff extended text 0xff
 //
-// Wunsch:
-//---------
 // CurrentComponentTags
 //   - gets all ComponentDescriptor-Tags for the currently running Event
 //
 //   data of request:
 //     is channel ID (4 byte onid<<16+sid)
 //   data of response:
-//      for each component-descriptor in irgendeiner Form (zB %1d %1d %1d %s)
+//      for each component-descriptor (zB %02hhx %02hhx %02hhx\n%s\n)
 //          componentTag
-//          streamContent
 //          componentType
+//          streamContent
 //          component.c_str
 //
 //  was auch noch nett wäre, ist bei actualEPGchannelID ein PrevID und NextID (+ jeweils Anfangzeit)
-
+//
 #endif // SECTIONSDMSG_H
