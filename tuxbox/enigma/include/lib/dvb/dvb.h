@@ -170,7 +170,7 @@ public:
 			if (valid != c.valid)
 				return 0;
 //   		eDebug("frequency %i - %i = %i", frequency, c.frequency, MAXDIFF(frequency,c.frequency) );
-			if ( abs( frequency-c.frequency ) > 1000 )
+			if ( abs( frequency-c.frequency ) > 3000 )
 				return 0;
 //   		eDebug("symbol_rate -> %i != %i", symbol_rate, c.symbol_rate );
 			if ( abs(symbol_rate-c.symbol_rate) > 2000 )
