@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.20 2001/07/17 12:39:18 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.21 2001/07/17 13:14:59 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,8 +23,8 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
-//  Revision 1.20  2001/07/17 12:39:18  fnbrd
-//  Neue Kommandos
+//  Revision 1.21  2001/07/17 13:14:59  fnbrd
+//  Noch ne Verbesserung in Bezug auf alte Events.
 //
 //  Revision 1.19  2001/07/17 02:38:56  fnbrd
 //  Fehlertoleranter
@@ -119,6 +119,8 @@
 #define PORT_NUMBER 1600
 // Wieviele Stunden EPG gecached werden sollen
 #define HOURS_TO_CACHE 24
+// Ab wann ein Event als alt gilt (in minuten)
+#define OLD_EVENTS_ARE 120
 
 static int debug=0;
 
@@ -440,12 +442,13 @@ char stati[1024];
   sprintf(stati,
     "Current time: %s"
     "Hours to cache: %d\n"
+    "Events are old %dmin after their end time\n"
     "Number of cached services: %d\n"
     "Number of cached Events: %d\n"
     "Total size of memory occupied by chunks handed out by malloc: %d\n"
     "Total bytes memory allocated with `sbrk' by malloc, in bytes: %d (%dkb, %.2fMB)\n",
     ctime(&zeit),
-    HOURS_TO_CACHE, anzServices, anzEvents, speicherinfo.uordblks,
+    HOURS_TO_CACHE, OLD_EVENTS_ARE, anzServices, anzEvents, speicherinfo.uordblks,
     speicherinfo.arena, speicherinfo.arena/1024, (float)speicherinfo.arena/(1024.*1024.)
     );
   struct msgSectionsdResponseHeader responseHeader;
@@ -1005,7 +1008,9 @@ const unsigned timeoutInSeconds=2;
       // Nich alle Events speichern
       for(SIevents::iterator e=eit.events().begin(); e!=eit.events().end(); e++)
         if(e->times.size()>0) {
-	  if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L) {
+	  if(e->times.begin()->startzeit<zeit+(long)HOURS_TO_CACHE*60L*60L &&
+	    e->times.begin()->startzeit+e->times.begin()->dauer>zeit-(long)OLD_EVENTS_ARE*60L
+	  ) {
             pthread_mutex_lock(&eventsLock);
             events.insert(*e);
             pthread_mutex_unlock(&eventsLock);
@@ -1139,7 +1144,7 @@ static void *houseKeepingThread(void *)
       printf("Removed %d time-shifted events.\n", anzEventsAlt-events.size());
 */
     anzEventsAlt=events.size();
-    events.removeOldEvents(60*60); // alte Events = aelter als 1 h
+    events.removeOldEvents(OLD_EVENTS_ARE*60); // alte Events
     if(events.size()!=anzEventsAlt)
       dprintf("Removed %d old events.\n", anzEventsAlt-events.size());
     dprintf("Number of events: %u\n", events.size());
@@ -1176,7 +1181,7 @@ int rc;
 int listenSocket;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.20 2001/07/17 12:39:18 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.21 2001/07/17 13:14:59 fnbrd Exp $\n");
 
   if(argc!=1 && argc!=2) {
     printHelp();
@@ -1191,7 +1196,7 @@ struct sockaddr_in serverAddr;
     }
   }
   printf("caching %d hours\n", HOURS_TO_CACHE);
-
+  printf("events are old %dmin after their end time\n", OLD_EVENTS_ARE);
   tzset(); // TZ auswerten
 
   if( fork()!= 0 ) // switching to background
