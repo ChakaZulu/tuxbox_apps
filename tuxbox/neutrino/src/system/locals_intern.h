@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.36 2004/12/20 14:40:00 diemade Exp $
+ * $Id: locals_intern.h,v 1.37 2004/12/25 23:56:38 chakazulu Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -855,6 +855,9 @@ const char * locale_real_names[] =
 	"timerlist.repeat.wednesday",
 	"timerlist.repeat.weekdays",
 	"timerlist.repeat.weekly",
+	"timerlist.repeatcount",
+	"timerlist.repeatcount.help1",
+	"timerlist.repeatcount.help2",
 	"timerlist.save",
 	"timerlist.standby",
 	"timerlist.standby.off",

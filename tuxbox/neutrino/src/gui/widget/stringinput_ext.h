@@ -204,8 +204,12 @@ class CTimeInput : public CExtendedInput
 
 class CIntInput : public CExtendedInput
 {
-	char myValueString[16];
-	long* myValue;
+#define MAX_CINTINPUT_SIZE 16
+
+	char myValueStringInput[MAX_CINTINPUT_SIZE];
+	char myValueStringOutput[MAX_CINTINPUT_SIZE];
+
+ 	long* myValue;
 	unsigned int m_size;
 	protected:
 		virtual void onBeforeExec();
@@ -216,7 +220,11 @@ class CIntInput : public CExtendedInput
 		 *@param Size how many digits can be entered
 		 */
 		CIntInput(const neutrino_locale_t Name, long& Value, const unsigned int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ = NULL);
+		char* getValue() {
+			return myValueStringOutput;
+		}
 };
+
 
 
 #endif

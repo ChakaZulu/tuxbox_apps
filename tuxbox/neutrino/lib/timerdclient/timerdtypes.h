@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdtypes.h,v 1.15 2004/12/18 17:46:25 chakazulu Exp $
+	$Id: timerdtypes.h,v 1.16 2004/12/25 23:56:37 chakazulu Exp $
 
 	License: GPL
 
@@ -125,6 +125,7 @@ class CTimerd
 			CTimerEventTypes  eventType;
 			CTimerEventStates eventState;
 			CTimerEventRepeat eventRepeat;
+			uint              repeatCount;
 			time_t            alarmTime;
 			time_t            announceTime;
 			time_t            stopTime;

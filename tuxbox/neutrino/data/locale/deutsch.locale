@@ -828,6 +828,9 @@ timerlist.repeat.unknown unbekannt
 timerlist.repeat.wednesday Mi
 timerlist.repeat.weekdays An Wochentagen
 timerlist.repeat.weekly wöchentlich
+timerlist.repeatcount Wiederholungen
+timerlist.repeatcount.help1 Anzahl der Timerausführungen
+timerlist.repeatcount.help2 0 für unbegrenzte Anzahl
 timerlist.save Timer speichern
 timerlist.standby SB Modus
 timerlist.standby.off Aufwachen aus Standby

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.8 2004/12/18 17:46:25 chakazulu Exp $
+ * $Header: /cvs/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdmsg.h,v 1.9 2004/12/25 23:56:37 chakazulu Exp $
  *
  * types used for clientlib <-> timerd communication - d-box2 linux project
  *
@@ -68,6 +68,7 @@ class CTimerdMsg : public CBasicMessage
 		time_t                     alarmTime;
 		time_t                     announceTime;
 		time_t                     stopTime;			
+		uint                       repeatCount;
 	};
 
 	struct commandGetTimer
@@ -82,6 +83,7 @@ class CTimerdMsg : public CBasicMessage
 		time_t                     alarmTime;
 		time_t                     stopTime;
 		CTimerd::CTimerEventRepeat eventRepeat;
+		uint                       repeatCount;
 	};
 
 	struct commandRemind

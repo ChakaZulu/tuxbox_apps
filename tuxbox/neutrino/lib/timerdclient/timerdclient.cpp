@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.50 2004/12/18 17:46:25 chakazulu Exp $
+	$Id: timerdclient.cpp,v 1.51 2004/12/25 23:56:37 chakazulu Exp $
 
 	License: GPL
 
@@ -154,7 +154,7 @@ void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID
 //-------------------------------------------------------------------------
 
 
-bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat)
+bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount)
 {
 	// set new time values for event eventid
 
@@ -164,7 +164,7 @@ bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t al
 	msgModifyTimer.alarmTime = alarmtime;
 	msgModifyTimer.stopTime = stoptime;
 	msgModifyTimer.eventRepeat = evrepeat;
-
+	msgModifyTimer.repeatCount = repeatcount;
 	send(CTimerdMsg::CMD_MODIFYTIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
 	CTimerdMsg::responseStatus response;
@@ -219,7 +219,7 @@ int CTimerdClient::addTimerEvent( CTimerEventTypes evType, void* data , int min,
 }
 */
 //-------------------------------------------------------------------------
-int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerd::CTimerEventRepeat evrepeat)
+int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerd::CTimerEventRepeat evrepeat, uint repeatcount)
 {
 	CTimerd::TransferEventInfo tei; 
 	CTimerdMsg::commandAddTimer msgAddTimer;
@@ -228,7 +228,7 @@ int CTimerdClient::addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, 
 	msgAddTimer.stopTime   = stoptime;
 	msgAddTimer.eventType = evType ;
 	msgAddTimer.eventRepeat = evrepeat;
-
+	msgAddTimer.repeatCount = repeatcount;
 	int length;
 	if( evType == CTimerd::TIMER_SHUTDOWN || evType == CTimerd::TIMER_SLEEPTIMER )
 	{

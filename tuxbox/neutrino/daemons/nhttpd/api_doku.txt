@@ -858,7 +858,7 @@ Rückgabe:
 
 Zeigt die Liste aller Timer
 
-Rückgabe-Format: eventID eventType eventRepeat announceTime alarmTime stopTime data
+Rückgabe-Format: eventID eventType eventRepeat repcount announceTime alarmTime stopTime data
 
 eventID ist der timer-Platz.
 eventType ist die Art des timers, die kann sein:
@@ -907,6 +907,8 @@ Dem zuvolge ist Montag+Mittwoch+Samstag
 Siehe dazu auch
 http://cvs.berlios.de/cgi-bin/viewcvs.cgi/tuxbox/apps/tuxbox/neutrino/lib/timerdclient/timerdtypes.h?rev=1.10&content-type=text/vnd.viewcvs-markup
 
+repcount bestimmt die Anzahl der Timeraufrufe, nach der der Timer automatisch gelöscht wird. 0 bedeutet, dass es keine Beschränkung gibt.
+Bei eventRepeat=ONCE hat diese Einstellung keine Auswirkungen. 
 
 announceTime ist die Zeit an der die Warnung for den timer auf den Bildschirm erscheint. siehe auch Kapittel 16: popup.
 alarmTime ist die Zeit des Timer-Starts
@@ -916,17 +918,17 @@ data ist der Name des Senders.
 Beispiel:
 
 >>>http://dbox/control/timer
-1 1 0 1034309516 1034309576 1034284376 555089
+1 1 1 4 1034309516 1034309576 1034284376 555089
 
-d.h. event 1, SHUTDOWN, ONCE , announcezeit, alarm/startzeit, stopzeit, kanal/daten
+d.h. event 1, SHUTDOWN, DAILY, nach 4 Timerausführungen wird der Timer gelöscht, announcezeit, alarm/startzeit, stopzeit, kanal/daten
 die zeiten sind time_t (Unix Zeitstempel)
 
 
 
-Parameter: action,[id],<alarm|ad,amo,ay,ah,ami>,<stop|sd,smo,sy,sh,smi>,announce,type,rep,channel_id,msg,rs
+Parameter: action,[id],<alarm|ad,amo,ay,ah,ami>,<stop|sd,smo,sy,sh,smi>,announce,type,rep,repcount,channel_id,msg,rs
 Rückgabe: ok / error
 
-announce, type und rep analog zum oben.
+announce, type, rep und repcount analog zum oben.
 
 action kann entweder new oder modify sein. Bei modify mus noch ein Parameter id angegeben werden um festzulegen welcher Timer modifizirt wird. 
 

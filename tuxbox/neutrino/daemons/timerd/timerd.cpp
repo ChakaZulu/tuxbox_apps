@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.56 2004/12/18 17:46:25 chakazulu Exp $
+	$Id: timerd.cpp,v 1.57 2004/12/25 23:56:37 chakazulu Exp $
 
 	License: GPL
 
@@ -95,6 +95,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					resp.announceTime = event->announceTime;
 					resp.alarmTime = event->alarmTime;
 					resp.stopTime = event->stopTime;
+					resp.repeatCount = event->repeatCount;
 
 					if(event->eventType == CTimerd::TIMER_STANDBY)
 						resp.standby_on = static_cast<CTimerEvent_Standby*>(event)->standby_on;
@@ -104,7 +105,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						resp.epg_starttime = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.epg_starttime;
 						resp.channel_id = static_cast<CTimerEvent_NextProgram*>(event)->eventInfo.channel_id;
 						strcpy(resp.apids, 
-								 static_cast<CTimerEvent_Record*>(event)->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
+						       static_cast<CTimerEvent_Record*>(event)->eventInfo.apids.substr(0,sizeof(resp.apids)-1).c_str());
 					}
 					else if(event->eventType == CTimerd::TIMER_RECORD)
 					{
@@ -156,6 +157,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					resp.announceTime = event->announceTime;
 					resp.alarmTime = event->alarmTime;
 					resp.stopTime = event->stopTime;
+					resp.repeatCount = event->repeatCount;
+
 					if(event->eventType == CTimerd::TIMER_STANDBY)
 						resp.standby_on = static_cast<CTimerEvent_Standby*>(event)->standby_on;
 					else if(event->eventType == CTimerd::TIMER_NEXTPROGRAM)
@@ -208,8 +211,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		case CTimerdMsg::CMD_MODIFYTIMER:				// neue zeiten setzen
 			{
 				CBasicServer::receive_data(connfd,&msgModifyTimer, sizeof(msgModifyTimer));
-				int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime, msgModifyTimer.stopTime,
-																  msgModifyTimer.eventRepeat);
+				int ret=CTimerManager::getInstance()->modifyEvent(msgModifyTimer.eventID,msgModifyTimer.announceTime,msgModifyTimer.alarmTime,
+										  msgModifyTimer.stopTime,msgModifyTimer.repeatCount,msgModifyTimer.eventRepeat);
 				CTimerdMsg::responseStatus rspStatus;
 				rspStatus.status = (ret!=0);
 				CBasicServer::send_data(connfd, &rspStatus, sizeof(rspStatus));
@@ -230,26 +233,29 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					CBasicServer::receive_data(connfd, &standby, sizeof(CTimerdMsg::commandSetStandby));
 
 					event = new CTimerEvent_Standby(
-															 msgAddTimer.announceTime,
-															 msgAddTimer.alarmTime,
-															 standby.standby_on,
-															 msgAddTimer.eventRepeat);
+						msgAddTimer.announceTime,
+						msgAddTimer.alarmTime,
+						standby.standby_on,
+						msgAddTimer.eventRepeat,
+						msgAddTimer.repeatCount);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				case CTimerd::TIMER_SHUTDOWN :
 					event = new CTimerEvent_Shutdown(
-															  msgAddTimer.announceTime,
-															  msgAddTimer.alarmTime,
-															  msgAddTimer.eventRepeat);
+						msgAddTimer.announceTime,
+						msgAddTimer.alarmTime,
+						msgAddTimer.eventRepeat,
+						msgAddTimer.repeatCount);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				case CTimerd::TIMER_SLEEPTIMER :
 					event = new CTimerEvent_Sleeptimer(
-																 msgAddTimer.announceTime,
-																 msgAddTimer.alarmTime,
-																 msgAddTimer.eventRepeat);
+						msgAddTimer.announceTime,
+						msgAddTimer.alarmTime,
+						msgAddTimer.eventRepeat,
+						msgAddTimer.repeatCount);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
@@ -264,28 +270,30 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 						msgAddTimer.stopTime += post;
 					}
 					event = new CTimerEvent_Record(
-															msgAddTimer.announceTime,
-															msgAddTimer.alarmTime,
-															msgAddTimer.stopTime,
-															evInfo.channel_id,
-															evInfo.epgID,
-															evInfo.epg_starttime,
-															evInfo.apids,
-															msgAddTimer.eventRepeat);
+						msgAddTimer.announceTime,
+						msgAddTimer.alarmTime,
+						msgAddTimer.stopTime,
+						evInfo.channel_id,
+						evInfo.epgID,
+						evInfo.epg_starttime,
+						evInfo.apids,
+						msgAddTimer.eventRepeat,
+						msgAddTimer.repeatCount);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 
 				case CTimerd::TIMER_IMMEDIATE_RECORD :
 					CBasicServer::receive_data(connfd, &evInfo, sizeof(CTimerd::TransferEventInfo));
 					event = new CTimerEvent_Record(
-															msgAddTimer.announceTime,
-															msgAddTimer.alarmTime,
-															msgAddTimer.stopTime,
-															evInfo.channel_id,
-															evInfo.epgID,
-															evInfo.epg_starttime,
-															evInfo.apids,
-															msgAddTimer.eventRepeat);
+						msgAddTimer.announceTime,
+						msgAddTimer.alarmTime,
+						msgAddTimer.stopTime,
+						evInfo.channel_id,
+						evInfo.epgID,
+						evInfo.epg_starttime,
+						evInfo.apids,
+						msgAddTimer.eventRepeat,
+						msgAddTimer.repeatCount);
 					event->eventState = CTimerd::TIMERSTATE_ISRUNNING;
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
@@ -295,12 +303,13 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					if(evInfo.channel_id > 0)
 					{
 						event = new CTimerEvent_Zapto(
-															  msgAddTimer.announceTime,
-															  msgAddTimer.alarmTime,
-															  evInfo.channel_id,
-															  evInfo.epgID,
-															  evInfo.epg_starttime,
-															  msgAddTimer.eventRepeat);
+							msgAddTimer.announceTime,
+							msgAddTimer.alarmTime,
+							evInfo.channel_id,
+							evInfo.epgID,
+							evInfo.epg_starttime,
+							msgAddTimer.eventRepeat,
+							msgAddTimer.repeatCount);
 						rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					}
 					break;
@@ -339,7 +348,8 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					event = new CTimerEvent_Remind(msgAddTimer.announceTime,
 								       msgAddTimer.alarmTime,
 								       remind.message,
-								       msgAddTimer.eventRepeat);
+								       msgAddTimer.eventRepeat,
+								       msgAddTimer.repeatCount);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 					
@@ -348,9 +358,10 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					CBasicServer::receive_data(connfd, &pluginMsg, sizeof(CTimerdMsg::commandExecPlugin));
 					dprintf("TIMERD: exec : %s",pluginMsg.name);
 					event = new CTimerEvent_ExecPlugin(msgAddTimer.announceTime,
-													   msgAddTimer.alarmTime,
-													   pluginMsg.name,
-													   msgAddTimer.eventRepeat);
+									   msgAddTimer.alarmTime,
+									   pluginMsg.name,
+									   msgAddTimer.eventRepeat,
+									   msgAddTimer.repeatCount);
 					rspAddTimer.eventID = CTimerManager::getInstance()->addEvent(event);
 					break;
 				default:

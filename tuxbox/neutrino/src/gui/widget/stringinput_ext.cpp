@@ -593,13 +593,23 @@ void CTimeInput::onAfterExec()
 //-----------------------------#################################-------------------------------------------------------
 
 CIntInput::CIntInput(const neutrino_locale_t Name, long& Value, const unsigned int Size, const neutrino_locale_t Hint_1, const neutrino_locale_t Hint_2, CChangeObserver* Observ)
-	: CExtendedInput(Name, myValueString, Hint_1, Hint_2, Observ)
+	: CExtendedInput(Name, myValueStringInput, Hint_1, Hint_2, Observ)
 {
 	myValue = &Value;
-	if (Size<16)
+
+	if (Size<MAX_CINTINPUT_SIZE)
 		m_size = Size;
 	else
-		m_size = 15;
+		m_size = MAX_CINTINPUT_SIZE-1;
+ 	if (*myValue == 0)
+ 	{
+		sprintf(myValueStringInput,"%-15ld",0l);
+		sprintf(myValueStringOutput,"%15ld",0l);
+ 	} else {
+		sprintf(myValueStringInput,"%-*ld",m_size,*myValue);
+		sprintf(myValueStringOutput,"%*ld",m_size,*myValue);
+	}
+
 	frameBuffer = CFrameBuffer::getInstance();
 	for (unsigned int i=0;i<Size;i++)
 	{
@@ -613,19 +623,18 @@ void CIntInput::onBeforeExec()
 {
  	if (*myValue == 0)
  	{
-		sprintf(value,"%-15ld",0l);
+		sprintf(myValueStringInput,"%-15ld",0l);
+		sprintf(myValueStringOutput,"%15ld",0l);
  	} else {
-		sprintf(value,"%-*ld",m_size,*myValue);
+		sprintf(myValueStringInput,"%-*ld",m_size,*myValue);
+		sprintf(myValueStringOutput,"%*ld",m_size,*myValue);
 	}
 }
 
 void CIntInput::onAfterExec()
 {
-	
-	sscanf(value, "%ld", myValue);
-	//printf("input was: %ld",*myValue);
+	sscanf(myValueStringInput, "%ld", myValue);
+	sprintf(myValueStringOutput,"%ld",*myValue);
 }
-
-
 
 //-----------------------------#################################-------------------------------------------------------

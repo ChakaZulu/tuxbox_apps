@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.43 2004/12/18 17:46:25 chakazulu Exp $
+	$Id: timerdclient.h,v 1.44 2004/12/25 23:56:37 chakazulu Exp $
 
 	License: GPL
 
@@ -64,7 +64,7 @@ class CTimerdClient:private CBasicClient
 
 		bool isTimerdAvailable();			// check if timerd is running
 
-		int addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t alarmtime,time_t announcetime = 0, time_t stoptime = 0, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
+		int addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, time_t alarmtime,time_t announcetime = 0, time_t stoptime = 0, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE, uint repeatcount = 0);
 //		int addTimerEvent( CTimerd::CTimerEventTypes evType, void* data, int min, int hour, int day = 0, int month = 0, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
 
 		void removeTimerEvent( int evId);	// remove timer event
@@ -74,7 +74,7 @@ class CTimerdClient:private CBasicClient
 		void getTimer( CTimerd::responseGetTimer &timer, unsigned timerID);		// returns specified timer
 
 		// modify existing timer event
-		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE);
+		bool modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerd::CTimerEventRepeat evrepeat = CTimerd::TIMERREPEAT_ONCE, uint repeatcount=0);
 		void modifyTimerAPid(int eventid, std::string apids);
 
 		// set existing sleeptimer to new times or create new sleeptimer with these times

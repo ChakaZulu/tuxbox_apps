@@ -3,7 +3,7 @@
 
 	Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-	$Id: webapi.cpp,v 1.58 2004/12/18 17:46:24 chakazulu Exp $
+	$Id: webapi.cpp,v 1.59 2004/12/25 23:56:37 chakazulu Exp $
 
 	License: GPL
 
@@ -839,6 +839,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Alarm-Zeit</TD>\n"
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Stop-Zeit</TD>\n"
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Wiederholung</TD>\n"
+	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Wiederholungen</TD>\n"
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Typ</TD>\n"
 	                     "<TD CLASS=\"ctimer\" align=\"center\"><b>Beschreibung</TD>\n"
 	                     "<TD CLASS=\"ctimer\"><TD CLASS=\"ctimer\"></TR>\n");
@@ -870,6 +871,10 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 		char zRep[20+1];
 		Parent->timerEventRepeat2Str(timer->eventRepeat,zRep,sizeof(zRep)-1);
 		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zRep);
+		if (timer->repeatCount == 0)
+			request->printf("<TD CLASS=\"%ctimer\" align=\"center\">&#x221E;</TD>",classname);
+		else
+			request->printf("<TD CLASS=\"%ctimer\" align=\"center\">%dx</TD>",classname, timer->repeatCount);
 		char zType[20+1];
 		Parent->timerEventType2Str(timer->eventType,zType,sizeof(zType)-1);
 		request->printf("<TD CLASS=\"%ctimer\" align=center>%s</TD>", classname, zType);
@@ -940,7 +945,7 @@ bool CWebAPI::ShowTimerList(CWebserverRequest* request)
 		request->printf("<img border=0 src=\"../images/modify.png\" alt=\"Timer ändern\"></a><NOBR></TD></TR>\n");
 	}
 	classname = (i++&1)?'a':'b';
-	request->printf("<TR><TD CLASS=\"%ctimer\" colspan=5><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD>\n<TD CLASS=\"%ctimer\" align=\"center\">\n",classname,classname);
+	request->printf("<TR><TD CLASS=\"%ctimer\" colspan=6><IMG SRC=/images/blank.gif WIDTH=1 HEIGHT=1></TD>\n<TD CLASS=\"%ctimer\" align=\"center\">\n",classname,classname);
 	request->SocketWrite("<a HREF=\"javascript:location.reload()\">\n");
 	request->SocketWrite("<img border=0 src=\"../images/reload.gif\" alt=\"Aktualisieren\"></a></TD>\n");   
 	request->printf("<TD CLASS=\"%ctimer\" align=\"center\">\n",classname);
@@ -970,6 +975,8 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	request->SocketWrite("function onEventChange() { tType=document.modify.rep.value;\n");
 	request->printf("  if (tType == \"%d\") my_show(\"WeekdaysRow\"); else my_hide(\"WeekdaysRow\");\n",
 		  (int)CTimerd::TIMERREPEAT_WEEKDAYS);
+	request->printf("  if (tType == \"%d\") my_hide(\"repcountRow\"); else my_show(\"repcountRow\");\n",
+			(int)CTimerd::TIMERREPEAT_ONCE);
 	request->SocketWrite("  focusNMark();}\n");
 	request->SocketWrite("</script>\n");
 	
@@ -1034,7 +1041,15 @@ void CWebAPI::modifyTimerForm(CWebserverRequest *request, unsigned timerId)
 	else
 		visibility="hidden";
 	request->printf(">%s\n",zRep);
-	request->SocketWrite("</select></TD></TR>\n");
+	request->SocketWrite("</select></TD>\n");
+
+	// timer repeats
+	request->SocketWrite("<TD id=\"repcountRow\" ");
+	if (timer.eventRepeat == CTimerd::TIMERREPEAT_ONCE)
+		request->SocketWrite("style=\"visibility:hidden;\" ");
+	request->SocketWrite("align=\"center\">Wiederholungen (0 = unbegrenzt) \n<INPUT type=\"text\" name=\"repcount\" id=\"repcount\" ");
+	request->printf("value=\"%d\" size=\"4\" maxlength=\"3\"></TD></TR>\n",timer.repeatCount);
+
 	// Weekdays
 	char weekdays[8];
 	Parent->Timerd->setWeekdaysToStr(timer.eventRepeat, weekdays);
@@ -1057,6 +1072,7 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	unsigned modyId = atoi(request->ParameterList["id"].c_str());
 	CTimerd::responseGetTimer timer;
 	Parent->Timerd->getTimer(timer, modyId);
+	unsigned int repCount = timer.repeatCount;
 
 	struct tm *alarmTime = localtime(&(timer.alarmTime));
 	if(request->ParameterList["ad"] != "")
@@ -1103,6 +1119,10 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	{
 		stopTime->tm_min = atoi(request->ParameterList["smi"].c_str());
 	}
+	if(request->ParameterList["repcount"] != "")
+	{
+		repCount = atoi(request->ParameterList["repcount"].c_str());
+	}
 	correctTime(stopTime);
 	time_t stopTimeT = mktime(stopTime);
 	time_t announceTimeT = alarmTimeT-60;
@@ -1112,7 +1132,7 @@ void CWebAPI::doModifyTimer(CWebserverRequest *request)
 	(CTimerd::CTimerEventRepeat) atoi(request->ParameterList["rep"].c_str());
 	if(((int)rep) >= ((int)CTimerd::TIMERREPEAT_WEEKDAYS) && request->ParameterList["wd"] != "")
 		Parent->Timerd->getWeekdaysFromStr((int*)&rep, request->ParameterList["wd"].c_str());
-	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep);
+	Parent->Timerd->modifyTimerEvent(modyId, announceTimeT, alarmTimeT, stopTimeT, rep,repCount);
 	if(request->ParameterList["ap"] != "")
 	{
 		std::string apids = request->ParameterList["ap"];
@@ -1146,15 +1166,18 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	request->SocketWrite("  focusNMark();}\n");
 	request->SocketWrite("function onEventChange2() { tType=document.NewTimerForm.rep.value;\n");
 	request->printf("  if (tType == \"%d\") my_show(\"WeekdaysRow\"); else my_hide(\"WeekdaysRow\");\n",
-		  (int)CTimerd::TIMERREPEAT_WEEKDAYS);
+			(int)CTimerd::TIMERREPEAT_WEEKDAYS);
+	request->printf("  if (tType == \"%d\") my_hide(\"repcountRow\"); else my_show(\"repcountRow\");\n",
+			(int)CTimerd::TIMERREPEAT_ONCE);
 	request->SocketWrite("}\n");
 	request->SocketWrite("</script>\n");
+
 	// head of TABLE
 	request->SocketWrite("<center><TABLE border=2 width=\"70%\"><tr CLASS=\"a\"><TD>\n");
 	// Form
 	request->SocketWrite("<form method=\"GET\" action=\"/fb/timer.dbox2\" name=\"NewTimerForm\">\n");
 	request->SocketWrite("<INPUT TYPE=\"hidden\" name=\"action\" value=\"new\">\n");
-	request->SocketWrite("<TABLE border=0 width=\"100%%\">\n");
+	request->SocketWrite("<TABLE border=\"0\" width=\"100%\">\n");
 	request->SocketWrite("<tr CLASS=\"c\"><TD colspan=\"2\" align=\"center\">NEUER TIMER</TD></TR>\n");
 	// Timer type
 	request->SocketWrite("<TR><TD align=\"center\">Timer-Typ\n");
@@ -1168,9 +1191,10 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 			request->printf("<option value=\"%d\">%s\n",i,zType);
 		}
 	}
-	request->SocketWrite("</select>\n");
+	request->SocketWrite("</select></TD></TR>\n");
+
 	// timer repeat
-	request->SocketWrite("<TD align=\"center\">Wiederholung\n");
+	request->SocketWrite("<TR><TD align=\"center\">Wiederholung\n");
 	request->SocketWrite("<select name=\"rep\" onchange=\"onEventChange2();\">\n");
 	char zRep[21];
 	for(int i=0; i<=6;i++)
@@ -1183,7 +1207,12 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 	}
 	Parent->timerEventRepeat2Str(CTimerd::TIMERREPEAT_WEEKDAYS, zRep, sizeof(zRep)-1);
 	request->printf("<option value=\"%d\">%s\n",(int)CTimerd::TIMERREPEAT_WEEKDAYS, zRep);
-	request->SocketWrite("</select>\n");
+	request->SocketWrite("</select></TD>\n");
+
+	// timer repeats
+	request->SocketWrite("<TD id=\"repcountRow\" style=\"visibility:hidden;\" align=\"center\">Wiederholungen (0 = unbegrenzt) \n");
+	request->SocketWrite("<INPUT type=\"text\" name=\"repcount\" id=\"repcount\" value=\"0\" size=\"4\" maxlength=\"3\"></TD></TR>\n");
+
 	
 	time_t now_t = time(NULL);
 	struct tm *now=localtime(&now_t);
@@ -1277,9 +1306,10 @@ void CWebAPI::newTimerForm(CWebserverRequest *request)
 //-------------------------------------------------------------------------
 void CWebAPI::doNewTimer(CWebserverRequest *request)
 {
-time_t	announceTimeT = 0,
+	time_t	announceTimeT = 0,
 		stopTimeT = 0,
 		alarmTimeT = 0;
+	unsigned int repCount = 0;
 
 	if(request->ParameterList["alarm"] != "")		// wenn alarm angegeben dann parameter im time_t format
 	{
@@ -1337,6 +1367,10 @@ time_t	announceTimeT = 0,
 		{
 		  stopTime->tm_min = atoi(request->ParameterList["smi"].c_str());
 		}
+		if(request->ParameterList["repcount"] != "")
+		{
+			repCount = atoi(request->ParameterList["repcount"].c_str());
+		}
 		correctTime(alarmTime);
 		stopTimeT = mktime(stopTime);
 	}
@@ -1381,7 +1415,7 @@ time_t	announceTimeT = 0,
 		strncpy(msg, request->ParameterList["PluginName"].c_str(),EXEC_PLUGIN_MESSAGE_MAXLEN-1);
 		data=msg;
 	}
-	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep);
+	Parent->Timerd->addTimerEvent(type,data,announceTimeT,alarmTimeT,stopTimeT,rep,repCount);
 }
 
 void CWebAPI::timeString(time_t time, char string[6])
