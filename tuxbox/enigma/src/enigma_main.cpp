@@ -1787,7 +1787,6 @@ void eZapMain::setEPGButton(bool b)
 	}
 	else
 	{
-		isEPG=0;
 		ButtonRedEn->hide();
 		ButtonRedDis->show();
 		isEPG = 0;
