@@ -68,7 +68,7 @@ CMP3PlayerGui::CMP3PlayerGui()
 
 	filebrowser = new CFileBrowser();
 	filebrowser->Multi_Select = true;
-	filebrowser->Select_Dirs = true;
+	filebrowser->Dirs_Selectable = true;
 	mp3filter.addFilter("mp3");
 	mp3filter.addFilter("m2a");
 	filebrowser->Filter = &mp3filter;
@@ -332,24 +332,13 @@ int CMP3PlayerGui::show()
 						}
 					}
 */
-					string file = files->Name;
-					
-					if(file.length() > 0)
+					if(files->getType() == CFile::FILE_MP3)
 					{
-						int ext_pos = file.rfind(".");
-						if( ext_pos > 0)
-						{
-							string extension;
-							extension = file.substr(ext_pos + 1, file.length() - ext_pos);
-							if(extension == "mp3" || extension=="m2a")
-							{
-								CMP3 mp3;
-								mp3.Filename = file;
-								//get_id3(&mp3);
-								//printf("id3: Title: '%s' Artist: '%s' Comment: '%s'\n", mp3.Title.c_str(), mp3.Artist.c_str(), mp3.Comment.c_str());
-								playlist.push_back(mp3);
-							}
-						}
+						CMP3 mp3;
+						mp3.Filename = files->Name;
+						//get_id3(&mp3);
+						//printf("id3: Title: '%s' Artist: '%s' Comment: '%s'\n", mp3.Title.c_str(), mp3.Artist.c_str(), mp3.Comment.c_str());
+						playlist.push_back(mp3);
 					}
 				}
 /*				if(progress != NULL)

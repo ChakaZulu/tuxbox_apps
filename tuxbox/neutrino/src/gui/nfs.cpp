@@ -35,6 +35,7 @@
 #include <global.h>
 
 #include "nfs.h"
+#include "filebrowser.h"
 #include "widget/menue.h"
 #include "widget/hintbox.h"
 #include "widget/stringinput.h"
@@ -82,6 +83,17 @@ int CNFSMountGui::exec( CMenuTarget* parent, string actionKey )
 		mount(g_settings.network_nfs_ip[nr], g_settings.network_nfs_dir[nr], g_settings.network_nfs_local_dir[nr],true);
 		returnval = menu_return::RETURN_EXIT;
 	}
+	else if(actionKey.substr(0,3)=="dir")
+	{
+		parent->hide();
+		int nr=atoi(actionKey.substr(3,1).c_str());
+		CFileBrowser b;
+		b.Dir_Mode=true;
+		string startdir=g_settings.network_nfs_local_dir[nr];
+		if (b.exec(startdir))
+			strcpy(g_settings.network_nfs_local_dir[nr], b.getSelectedFile()->Name.c_str());
+		returnval = menu_return::RETURN_REPAINT;
+	}
 	return returnval;
 }
 
@@ -107,12 +119,14 @@ int CNFSMountGui::menuEntry(int nr)
 	char *dir,*local_dir,*ip;
 	int* automount;
 	char cmd[9];
+	char cmd2[9];
 
 	ip = g_settings.network_nfs_ip[nr];
 	dir = g_settings.network_nfs_dir[nr];
 	local_dir = g_settings.network_nfs_local_dir[nr];
 	automount=&g_settings.network_nfs_automount[nr];
 	sprintf(cmd,"domount%d",nr);
+	sprintf(cmd2,"dir%d",nr);
 
 	CMenuWidget mountMenuEntryW("nfs.mount", "network.raw",720);
 	mountMenuEntryW.addItem(new CMenuSeparator()); 
@@ -122,8 +136,9 @@ int CNFSMountGui::menuEntry(int nr)
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.ip", true, ip, &ipInput));
 	CStringInputSMS  dirInput("nfs.dir", dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
 	mountMenuEntryW.addItem(new CMenuForwarder("nfs.dir", true, dir, &dirInput));
-	CStringInputSMS  localDirInput("nfs.localdir", local_dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
-	mountMenuEntryW.addItem(new CMenuForwarder("nfs.localdir", true, local_dir, &localDirInput)); 
+//	CStringInputSMS  localDirInput("nfs.localdir", local_dir, 30,"","","abcdefghijklmnopqrstuvwxyz0123456789-.,:|!?/ "); 
+
+	mountMenuEntryW.addItem(new CMenuForwarder("nfs.localdir", true, local_dir, this, cmd2)); 
 	CMenuOptionChooser *automountInput= new CMenuOptionChooser("nfs.automount", automount, true); 
 	automountInput->addOption(0, "messagebox.no");
 	automountInput->addOption(1, "messagebox.yes"); 

@@ -137,7 +137,8 @@ class CFileBrowser
 	public:
 		string			Path;
 		bool			Multi_Select;
-		bool			Select_Dirs;
+		bool			Dirs_Selectable;
+		bool        Dir_Mode;
 		CFileFilter *	Filter;
 
 		CFileBrowser();

@@ -52,7 +52,8 @@ int CFile::getType()
 	{
 		string extension;
 		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
-		if(extension == "mp3" || extension == "m2a")
+		if((strcasecmp(extension.c_str(),"mp3") == 0) || (strcasecmp(extension.c_str(),"m2a") == 0) ||
+			(strcasecmp(extension.c_str(),"mpa")))
 			return FILE_MP3;
 		if((strcasecmp(extension.c_str(),"txt") == 0) || (strcasecmp(extension.c_str(),"sh") == 0))
 			return FILE_TEXT;
@@ -122,7 +123,8 @@ CFileBrowser::CFileBrowser()
 	Filter = NULL;
 	use_filter = true;
 	Multi_Select = false;
-	Select_Dirs = false;
+	Dirs_Selectable = false;
+	Dir_Mode = false;
 	selected = 0;
 
 	width  = 500;
@@ -235,6 +237,11 @@ int n;
 						free(namelist[i]);
 						continue;
 					}
+				if(Dir_Mode && (!S_ISDIR(file.Mode)))
+				{
+					free(namelist[i]);
+					continue;
+				}
 				filelist.push_back(file);
 			}
 			free(namelist[i]);
@@ -284,7 +291,7 @@ bool CFileBrowser::exec(string Dirname)
 			{
 				if(filelist[selected].getFileName() != "..")
 				{
-					if( (S_ISDIR(filelist[selected].Mode) && Select_Dirs) || !S_ISDIR(filelist[selected].Mode) )
+					if( (S_ISDIR(filelist[selected].Mode) && Dirs_Selectable) || !S_ISDIR(filelist[selected].Mode) )
 					{
 						filelist[selected].Marked = !filelist[selected].Marked;
 						paintItem(selected - liststart);
@@ -388,13 +395,14 @@ bool CFileBrowser::exec(string Dirname)
 				string filename = filelist[selected].Name;
 				if ( filename.length() > 1 )
 				{
-					if((!Multi_Select) && S_ISDIR(filelist[selected].Mode))
+					if((!Multi_Select) && S_ISDIR(filelist[selected].Mode) && !Dir_Mode)
 					{
 						ChangeDir(filelist[selected].Name);
 					}
 					else
 					{
 						filelist[selected].Marked = true;
+						printf("Mark %s\n",filelist[selected].Name.c_str());
 						loop = false;
 						res = true;
 					}
