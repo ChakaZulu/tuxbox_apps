@@ -1,1 +1,1 @@
-SUBDIRS = c64emu lib mines pac tetris snake yahtzee bouquet
+SUBDIRS = c64emu lib mines pac tetris snake yahtzee bouquet master
