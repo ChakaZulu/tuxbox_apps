@@ -67,6 +67,7 @@ function zapHeaderReload()
 function channelChange()
 {
 	currentChannel = document.channelselector.channel.selectedIndex;
+	currentBouquet = document.channelselector.bouquet.selectedIndex;
 	if (currentChannel >= 0)
 	{
 		var channel = document.channelselector.channel.options[currentChannel].value;
@@ -154,7 +155,7 @@ function deleteChannelOptions()
 {
 	var j = document.channelselector.channel.options.length;
 	for (var i = j - 1 ; i >= 0; i--)
-		delete document.channelselector.channel.options[i];
+		document.channelselector.channel.options[i] = null;
 }
 function loadBouquets(bouquet)
 {
