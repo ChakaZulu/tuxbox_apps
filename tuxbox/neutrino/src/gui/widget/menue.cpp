@@ -700,23 +700,17 @@ CMenuSeparator::CMenuSeparator(const int Type, const char * const Text)
 	frameBuffer = CFrameBuffer::getInstance();
 	directKey = CRCInput::RC_nokey;
 	iconName = "";
+	type = Type;
 
-	height = g_Fonts->menu->getHeight();
-	if( Text == 0 )
+	if (Text == NULL)
 	{
 		height = 10;
 		text = "";
 	}
 	else
+	{
+		height = g_Fonts->menu->getHeight();
 		text = Text;
-
-	if( (Type & ALIGN_LEFT) || (Type & ALIGN_CENTER) || (Type & ALIGN_RIGHT) )
-	{
-		type=Type;
-	}
-	else
-	{
-		type= Type | ALIGN_CENTER;
 	}
 }
 
@@ -731,22 +725,17 @@ int CMenuSeparator::paint(bool selected)
 	}
 	if(type&STRING)
 	{
-		std::string  l_text = g_Locale->getText(text);
+		int stringstartposX;
+		std::string l_text = g_Locale->getText(text);
 		int stringwidth = g_Fonts->menu->getRenderWidth(l_text, true); // UTF-8
-		int stringstartposX = 0;
 
-		if(type&ALIGN_CENTER)
-		{
-			stringstartposX = (x + (dx >> 1)) - (stringwidth>>1);
-		}
-		else if(type&ALIGN_LEFT)
-		{
+		/* if no alignment is specified, align centered */
+		if (type & ALIGN_LEFT)
 			stringstartposX = x + 20;
-		}
-		else if(type&ALIGN_RIGHT)
-		{
+		else if (type & ALIGN_RIGHT)
 			stringstartposX = x + dx - stringwidth - 20;
-		}
+		else /* ALIGN_CENTER */
+			stringstartposX = x + (dx >> 1) - (stringwidth >> 1);
 
 		frameBuffer->paintBoxRel(stringstartposX-5, y, stringwidth+10, height, COL_MENUCONTENT );
 
