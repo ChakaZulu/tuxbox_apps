@@ -537,12 +537,17 @@ void	InitLevel( void )
 		{
 		case 6 :
 			portfolio[7]=2;
-			portfolio[4]=2;
 			portfolio[3]=2;
 			portfolio[2]=2;
 			break;
 		case 1 :
 			portfolio[7]=10;
+#if 0
+portfolio[6]=10;
+portfolio[4]=10;
+portfolio[3]=10;
+portfolio[2]=10;
+#endif
 			break;
 		case 4 :
 			portfolio[2]=5;
@@ -991,6 +996,9 @@ unsigned long	otype;
 			case 4 :
 				sel_type = TYP_BUILDER;
 				break;
+			case 6 :
+				sel_type = TYP_DIGDIAG;
+				break;
 			case 7 :
 				sel_type = TYP_DIGDOWN;
 				break;
@@ -1016,6 +1024,7 @@ unsigned long	otype;
 				s->type = sel_type;
 				portfolio[ afunc ]--;
 				DrawNumber( 106+afunc*32, 389, portfolio[afunc] );
+// erstmal die sprite-koordinaten wieder auf 0
 				if (( otype & TYP_BUILDER ) && ( s->counter2 < 12 ))
 				{
 					s->y+=3;
@@ -1024,8 +1033,20 @@ unsigned long	otype;
 				{
 					s->y-=2;
 				}
+				else if ( otype & TYP_DIGDIAG )
+				{
+					s->y+=5;
+					if ( !s->dir )
+						s->x+=7;
+				}
+				else if ( otype & TYP_DIGDOWN )
+				{
+					s->y+=2;
+				}
+// sprite-koordinaten eventl. verschieben
 				if ( sel_type == TYP_DIGDOWN )
 				{
+					s->y-=2;
 					SpriteChangePic( s, 5 );	// lemming3
 				}
 				if ( sel_type == TYP_STOPPER )
@@ -1038,8 +1059,7 @@ unsigned long	otype;
 				{
 					s->counter1=0;
 					s->counter2=0;
-					if ( otype & TYP_WALKER )
-						s->y -= 3;	// 2
+					s->y -= 3;	// 2
 					SpriteChangePic( s, 31 );	// builder
 					if ( s->dir )
 					{
@@ -1048,6 +1068,19 @@ unsigned long	otype;
 					}
 					else
 						s->x--;
+				}
+				if ( sel_type == TYP_DIGDIAG )
+				{
+					s->counter1=0;
+					s->counter2=0;
+					s->y -= 5;
+					SpriteChangePic( s, 33 );	// hacke
+					if ( s->dir )
+					{
+						MirrorSprite( s );
+					}
+					else
+						s->x-=7;
 				}
 			}
 		}
@@ -1141,6 +1174,7 @@ static	int		blinkc=0;
 	Sprite		*s;
 	int			cursor_get=0;
 	int			kab=0;
+	int			hbk=0;	// hat boden kontakt
 
 	blinkc++;
 
@@ -1361,10 +1395,27 @@ static	int		blinkc=0;
 				}
 				else
 				{	/* kein bodenkontakt ? */
-					if(!(s->type&TYP_BUILDER)&&
-						!isBrick(s->x+1,s->y+s->height,0)&&
-					   !isBrick(s->x-2+s->width,s->y+s->height,0))
+					switch( s->type & TYP_WORK )
 					{
+					case TYP_WALKER :
+					case TYP_DIGDOWN :
+						hbk=isBrick(s->x+1,s->y+s->height,0)||
+								isBrick(s->x-2+s->width,s->y+s->height,0);
+						break;
+					case TYP_STOPPER :
+						hbk=isBrick(s->x+1,s->y+s->height+1,0)||
+								isBrick(s->x-2+s->width,s->y+s->height+1,0);
+						break;
+					}
+					if ( !hbk )
+					{
+#if 0
+if ( s->type & TYP_STOPPER )
+{
+hhy=s->y+s->height;
+printf("kein boden on %d, %d\n",s->x,s->y+s->height);
+}
+#endif
 						if( !( s->type&TYP_WALKER ) )
 						{
 							if ( s->type & TYP_STOPPER )
@@ -1402,9 +1453,9 @@ static	int		blinkc=0;
 							{	/* wieder auf boden */
 								s->counter2=0;
 								/* laeufer - getestet wird oben */
-								if((isBrick(s->x,s->y+3,1)&&
+								if((isBrick(s->x,s->y+1,1)&&
 									(s->dir==1))||
-								   (isBrick(s->x+s->width,s->y+3,1)&&
+								   (isBrick(s->x+s->width,s->y+1,1)&&
 									(s->dir==0)))
 								{
 									MirrorSprite( s );
@@ -1504,6 +1555,24 @@ static	int		blinkc=0;
 								}
 							}
 						}	/* digger */
+						else if(s&&(s->type&TYP_DIGDIAG))
+						{
+							unsigned char	c=118;	// stair
+							if ( !s->ani )
+							{
+								s->y+=1;
+								if ( s->dir )
+								{
+									inBg(30,0,s->x,s->y);
+									s->x-=2;
+								}
+								else
+								{
+									inBg(30,0,s->x+3,s->y+3);
+									s->x+=2;
+								}
+							}
+						}
 					}	/* freier fall */
 				}	/* nicht am ziel */
 			}	/* countdown */
@@ -1532,13 +1601,9 @@ static	int		blinkc=0;
 
 		SpriteGetBackground( s );
 		DrawSprite( s );
-		if (( afunc != -1 ) && ( portfolio[ afunc ] ) &&
-			!(s->type&TYP_STOPPER) && !(s->type&TYP_FALLEN))
+		if ( SpriteCollide( s, deko[0]->x+7, deko[0]->y+7 ) )
 		{
-			if ( SpriteCollide( s, deko[0]->x+7, deko[0]->y+7 ) )
-			{
-				sel_sprite=i;
-			}
+			sel_sprite=i;
 		}
 	}
 	if ( cursor_get )
@@ -1552,5 +1617,9 @@ static	int		blinkc=0;
 		SpriteSelPic( deko[0], 0 );
 	}
 	DrawSprite( deko[0] );
+#if 0
+if ( hhy )
+FBDrawLine(32,hhy+hhy+32,656,hhy+hhy+32,RED);
+#endif
 	counter1++;
 }
