@@ -1508,7 +1508,8 @@ public:
 		if (service)
 		{
 			eDebug("[eWebNavigatorSearchService] searched_service: %s, service: %s\n", searched_service.c_str(), filter_string(service->service_name).c_str());
-			if (filter_string(service->service_name).find(searched_service) != eString::npos && !result)
+			eString serviceName = filter_string(service->service_name).upper();
+			if (serviceName.find(searched_service.upper()) != eString::npos && !result)
 			{
 				result = ref2string(e);
 				eDebug("[eWebNavigatorSearchService] service found: %s\n", searched_service.c_str());
