@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/poll.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +21,8 @@ extern std::string curr_chan_name;
 int sdt(uint osid, bool scan_mode)
 {
   struct dmxSctFilterParams flt;
-  int demux;
+  int demux,pt;
+  struct pollfd dmx_fd;
   
   demux=open(DEMUX_DEV, O_RDWR);
   if (demux<0) {
@@ -33,7 +35,7 @@ int sdt(uint osid, bool scan_mode)
   flt.pid              = 0x11;
   flt.filter.filter[0] = 0x42;
   flt.filter.mask[0]  =0xFF;
-  flt.timeout=10000;
+  flt.timeout=25000;
   flt.flags=DMX_IMMEDIATE_START | DMX_CHECK_CRC;
   
   if (ioctl(demux, DMX_SET_FILTER, &flt)<0)  {
@@ -42,6 +44,19 @@ int sdt(uint osid, bool scan_mode)
   
   ioctl(demux, DMX_START, 0);
   
+  dmx_fd.fd = demux;
+  dmx_fd.events = POLLIN;
+  dmx_fd.revents = 0;
+	
+  
+  pt = poll(&dmx_fd, 1, 20000);
+  
+  if (!pt)
+  {
+	printf("Poll timeout\n");
+	close(demux);
+	return -1;
+  }
   {
     char buffer[1024];
     int r;

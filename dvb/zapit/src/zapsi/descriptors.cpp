@@ -12,7 +12,6 @@ std::map<int,scanchannel> scanchannels;
 std::string curr_chan_name;
 int found_transponders;
 int found_channels;
-#define NVOD_HACK;
 
 int stuffing_desc(char *buffer)
 {
@@ -34,7 +33,7 @@ int priv_data_desc(char *buffer)
 int network_name_desc(char *buffer)
 {
 	int len = buffer[1];
-	int i;
+	//int i;
 	std::string name;
 	/*	
 	for (i=0;i<len;i++)

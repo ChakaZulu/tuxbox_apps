@@ -32,6 +32,7 @@ typedef std::map<int, transpondermap>::iterator stiterator;
 std::string curr_chan;
 #endif
 std::string services_xml = "/var/zapit/services.xml";
+int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr);
 int finaltune(int freq, int symbolrate, int polarity, int fec,int diseq);
 int nit();
 int sdt(uint osid, bool scan_mode);
@@ -156,9 +157,13 @@ void *start_scanthread(void *)
   scan_runs = 1;
   if (!issatbox())
     {
+      int symbolrate = 6900;
       for (int freq = 3300; freq<=4500; freq +=80)
 	{
-	  get_nits(freq,6900,0,0,0);
+	  if (finaltune(freq,symbolrate,0,0,0)>0)
+    		fake_pat(&scantransponders, freq, symbolrate);
+  	  else
+    		printf("No signal found on transponder\n"); 
 	}
 	get_sdts();
       
@@ -190,8 +195,8 @@ void *start_scanthread(void *)
       //printf("\n\nNext base-transponder\n\n");
       get_nits(12692, 22000, 0, 5, 0);
       get_nits(11913,27500,0,3,0);
-      get_nits(11954,27500,0,2,0);
-      get_nits(12051,27500,1,2,0);
+      get_nits(11954,27500,0,3,0);
+      get_nits(12051,27500,1,3,0);
 
       get_sdts();
 
@@ -211,16 +216,16 @@ void *start_scanthread(void *)
       scantransponders.clear();
       
       printf("---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
-      get_nits(12692,27500,0,3,0);
-      get_nits(12539,27500,0,3,0);
-      get_nits(11746,27500,0,3,0);
-      get_nits(12168,27500,0,3,0);
-      get_nits(12034,27500,1,3,0);
-      get_nits(11919,27500,1,2,0);
-      get_nits(11804,27500,1,2,0);
-      get_nits(12169,27500,0,3,0);
-      get_nits(12539,27500,0,3,0);
-      get_nits(12111,27500,1,3,0);
+      get_nits(12692,27500,0,3,1);
+      get_nits(12539,27500,0,3,1);
+      get_nits(11746,27500,0,3,1);
+      get_nits(12168,27500,0,3,1);
+      get_nits(12034,27500,1,3,1);
+      get_nits(11919,27500,1,2,1);
+      get_nits(11804,27500,1,2,1);
+      get_nits(12169,27500,0,3,1);
+      get_nits(12539,27500,0,3,1);
+      get_nits(12111,27500,1,3,1);
       get_sdts();
       
       if (!scantransponders.empty())
