@@ -1599,12 +1599,8 @@ eZapMain::eZapMain()
 #ifndef DISABLE_CI
 void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 {
-	if ( eApp->looplevel() == 1 &&
-			(
-				!eZap::getInstance()->focus ||
-				eZap::getInstance()->focus == this
-			)
-		 )
+	if ( !enigmaMMI::getInstance(
+		eDVB::getInstance()->DVBCI)->connected() )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -1616,12 +1612,8 @@ void eZapMain::receiveMMIMessageCI1( const char* data, int len )
 
 void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 {
-	if ( eApp->looplevel() == 1 &&
-			(
-				!eZap::getInstance()->focus ||
-				eZap::getInstance()->focus == this
-			)
-		 )
+	if ( !enigmaMMI::getInstance(
+		eDVB::getInstance()->DVBCI2)->connected() )
 	{
 		char *dest = new char[len];
 		memcpy( dest, data, len );
@@ -1633,14 +1625,14 @@ void eZapMain::receiveMMIMessageCI2( const char* data, int len )
 
 void eZapMain::handleMMIMessage( const eMMIMessage &msg )
 {
-	enigmaMMI m(msg.from);
+	if ( !memcmp( msg.data, "\x9f\x88\x00", 3 ) )
+		postMessage(eZapMessage(0), 1);
 
 	if ( !strncmp( msg.data, "INIT", 4 ) )
 		postMessage(eZapMessage(0,"Common Interface",_("please wait while initializing Common Interface ..."),8),0);
-	else if ( !strncmp( msg.data, "REMOVE", 6 ) )
-		postMessage(eZapMessage(0), 1);
-	else
-		m.handleMMIMessage( msg.data );
+	else if ( !enigmaMMI::getInstance(msg.from)->handleMMIMessage( msg.data ) )
+		return;
+
 	delete [] msg.data;
 }
 #endif

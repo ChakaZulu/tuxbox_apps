@@ -52,18 +52,23 @@ class enigmaMMI : public eWindow
 {
 	eDVBCI *ci;
 	eFixedMessagePump<eMMIMsg> mmi_messages;
-public:
+	eWidget *open;
 	Connection conn;
 	eLabel *lText;
-	eTimer responseTimer;
+	eTimer responseTimer, delayTimer;
+	const char *scheduledData;
+	static std::map<eDVBCI*,enigmaMMI*> exist;
+public:
 	enigmaMMI(eDVBCI *ci);
+	bool connected() { return conn.connected(); }
+	static enigmaMMI* getInstance( eDVBCI* ci );
 	int eventHandler( const eWidgetEvent &e );
-	void handleMMIMessage(const char *data);
+	bool handleMMIMessage(const char *data);
 	void gotMMIData(const char* data, int);
 	void handleMessage( const eMMIMsg &msg );
 	void showWaitForCIAnswer(int ret);
 	void hideWaitForCIAnswer();
-	~enigmaMMI();
+	void haveScheduledData();
 };
 
 class enigmaCI: public eWindow

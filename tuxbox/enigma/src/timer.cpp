@@ -1013,6 +1013,9 @@ bool msOverlap( const ePlaylistEntry &m, const ePlaylistEntry &s )
 	struct tm multiple = *localtime( &m.time_begin ),
 				 Entry = *localtime( &s.time_begin );
 
+	if ( m.last_activation == getDate() && m.type & ePlaylistEntry::stateError )
+		return false;
+
 /*				eDebug("multiple %02d:%02d, duration = %d, entry %02d:%02d, duration = %d",
 					multiple.tm_hour, multiple.tm_min, i->duration,
 					Entry.tm_hour, Entry.tm_min, entry.duration );*/
@@ -1645,7 +1648,7 @@ void eTimerEditView::createWidgets()
 		new eListBoxEntryText( *type, _("record DVR"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recDVR) );
 #endif
 #ifndef DISABLE_NETWORK
-	if ( !eSystemInfo::getInstance()->hasNetwork() )
+	if ( eSystemInfo::getInstance()->hasNetwork() )
 		new eListBoxEntryText( *type, _("Ngrab"), (void*) (ePlaylistEntry::RecTimerEntry|ePlaylistEntry::recNgrab) );
 #endif
 #ifndef DISABLE_LIRC

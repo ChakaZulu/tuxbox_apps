@@ -19,6 +19,8 @@
 #include <lib/system/init.h>
 #include <lib/system/init_num.h>
 
+std::map<eDVBCI*,enigmaMMI*> enigmaMMI::exist;
+
 enigmaCI::enigmaCI()
 {
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
@@ -155,7 +157,7 @@ void enigmaCI::appPressed()
 {
 	hide();
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_begin));
-	enigmaMMI( DVBCI ).exec();
+	enigmaMMI::getInstance(DVBCI)->exec();
 	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_end));
 	show();
 }
@@ -164,7 +166,7 @@ void enigmaCI::app2Pressed()
 {
 	hide();
 	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_begin));
-	enigmaMMI( DVBCI2 ).exec();
+	enigmaMMI::getInstance(DVBCI2)->exec();
 	DVBCI2->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_end));
 	show();
 }
@@ -173,7 +175,8 @@ void enigmaCI::app2Pressed()
 #define MAX_LENGTH_BYTES 4
 
 enigmaMMI::enigmaMMI(eDVBCI *ci)
-	:eWindow(0), ci(ci), mmi_messages(eApp, 1), responseTimer(eApp)
+	:eWindow(1), ci(ci), mmi_messages(eApp, 1), open(0),
+	responseTimer(eApp), delayTimer(eApp)
 {
 	eDebug("[enigmaMMI] created successfully");
 	cmove( ePoint(150,140) );
@@ -187,12 +190,15 @@ enigmaMMI::enigmaMMI(eDVBCI *ci)
 	lText->setAlign(eTextPara::dirCenter);
 	int newHeight = size.height() - getClientSize().height() + lText->getExtend().height() + 10 + 20;
 	resize( eSize( size.width(), newHeight ) );
+	CONNECT( mmi_messages.recv_msg, enigmaMMI::handleMessage );
+	CONNECT(responseTimer.timeout, eWidget::reject);
+	CONNECT(delayTimer.timeout, enigmaMMI::haveScheduledData );
 }
 
 void enigmaMMI::handleMessage( const eMMIMsg &msg )
 {
-	handleMMIMessage( msg.data );
-	delete [] msg.data;
+	if ( handleMMIMessage( msg.data ) )
+		delete [] msg.data;
 }
 
 void enigmaMMI::gotMMIData( const char* data, int len )
@@ -208,11 +214,9 @@ int enigmaMMI::eventHandler( const eWidgetEvent &e )
 	{
 		case eWidgetEvent::execBegin:
 			show();
-			responseTimer.start(10000);
+			responseTimer.start(30000);
 			mmi_messages.start();
 			conn = CONNECT(ci->ci_mmi_progress, enigmaMMI::gotMMIData );
-			CONNECT( mmi_messages.recv_msg, enigmaMMI::handleMessage );
-			CONNECT(responseTimer.timeout, eWidget::reject);
 			return 1;
 		case eWidgetEvent::execDone:
 			hide();
@@ -225,8 +229,12 @@ int enigmaMMI::eventHandler( const eWidgetEvent &e )
 	return eWindow::eventHandler(e);
 }
 
-enigmaMMI::~enigmaMMI()
+enigmaMMI* enigmaMMI::getInstance( eDVBCI* ci )
 {
+	std::map<eDVBCI*, enigmaMMI*>::iterator it = exist.find(ci);
+	if ( it == exist.end() )
+		exist[ci]=new enigmaMMI(ci);
+	return exist[ci];
 }
 
 long LengthField(unsigned char *lengthfield,long maxlength,int *fieldlen)
@@ -278,8 +286,17 @@ void enigmaMMI::hideWaitForCIAnswer()
 	}
 }
 
-void enigmaMMI::handleMMIMessage(const char *data)
+void enigmaMMI::haveScheduledData()
 {
+	// must create a copy of the pointer on lokal stack !!
+	const char * data = scheduledData;
+	if ( handleMMIMessage(data) )
+		delete [] data;
+}
+
+bool enigmaMMI::handleMMIMessage(const char *data)
+{
+	const unsigned char TAG_MMI_DISPLAY_CONTROL[]={0x9F,0x88,0x01};
 	const unsigned char TAG_MMI_TEXT_LAST[]={0x9F,0x88,0x03};
 	const unsigned char TAG_MMI_TEXT_MORE[]={0x9F,0x88,0x04};
 
@@ -294,6 +311,21 @@ void enigmaMMI::handleMMIMessage(const char *data)
 	int rp=0;
 	while ( data[rp] != 0x9F || data[rp+1] != 0x88 )
 		rp++;
+
+	if ( open )
+	{
+		open->hide();
+		open->close(-2);
+
+		// we must delay executing of the next mmi window while
+		// the open mmi window is still executed... open->close()
+		// set only the app_exit_loop boolean in the mainloop... but
+		// this takes not effect while the mainloop is busy...
+		scheduledData = data;
+		delayTimer.start(1,true);
+
+		return false;
+	}
 
 	if( !memcmp(data+rp,TAG_MMI_ENQ,TAG_LENGTH) )
 	{
@@ -341,7 +373,7 @@ void enigmaMMI::handleMMIMessage(const char *data)
 
 		rp+=size;
 	}
-	else if(memcmp(data+rp,TAG_MMI_MENU_LAST,TAG_LENGTH)==0 ||
+	else if( memcmp(data+rp,TAG_MMI_MENU_LAST,TAG_LENGTH)==0 ||
 		 memcmp(data+rp,TAG_MMI_LIST_LAST,TAG_LENGTH)==0)
 	{
 		eDebug("mmi_menu_last");
@@ -412,23 +444,41 @@ void enigmaMMI::handleMMIMessage(const char *data)
 		}
 		hideWaitForCIAnswer();
 		eMMIListWindow wnd(titleText, subTitleText, bottomText, entrys );
+		open = &wnd;
+		eDebug("open = %p", open);
 		int ret = wnd.exec();
-		if ( ret == -1 )
+		open = 0;
+		if ( ret > -2 )
 		{
-			ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,0));
-			if ( conn.connected() )
-				close(0);
+			if ( ret == -1 )
+			{
+				eDebug("ret = -1 this = %p",this);
+				ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,0));
+				if ( conn.connected() )
+				{
+					eDebug("do close");
+					close(0);
+				}
+			}
+			else
+				ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,wnd.getSelected()));
+			showWaitForCIAnswer(ret);
 		}
-		else
-			ci->messages.send( eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::mmi_menuansw,wnd.getSelected()));
-		showWaitForCIAnswer(ret);
 	}
-	else if(memcmp(data+rp,TAG_MMI_MENU_MORE,TAG_LENGTH)==0)
+	else if(!memcmp(data+rp,TAG_MMI_MENU_MORE,TAG_LENGTH))
 		eDebug("mmi_menu_more.. unhandled yet");
-	else if(memcmp(data+rp,TAG_MMI_LIST_MORE,TAG_LENGTH)==0)
+	else if(!memcmp(data+rp,TAG_MMI_LIST_MORE,TAG_LENGTH))
 		eDebug("mmi_list_more.. unhandled yet");
+	else if(!memcmp(data+rp,TAG_MMI_DISPLAY_CONTROL,TAG_LENGTH))
+		eDebug("DISPLAY CONTROL .. still answered in dvbci");
 	else
+	{
 		eDebug("unknown MMI_TAG:%02x%02x%02x",data[rp],data[rp+1],data[rp+2]);
+		if ( conn.connected() )
+			close(0);
+	}
+
+	return true;
 }
 
 eString &removeSpaces( eString &s )
