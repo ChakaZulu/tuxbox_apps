@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.49 2001/08/17 14:33:15 fnbrd Exp $
+//  $Id: sectionsd.cpp,v 1.50 2001/08/17 16:21:06 fnbrd Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.50  2001/08/17 16:21:06  fnbrd
+//  Intelligent cache decrease to prevent dmx buffer overflows.
+//
 //  Revision 1.49  2001/08/17 14:33:15  fnbrd
 //  Added a reopen of DMX connections after 15 timeouts to fix possible buffer overflows.
 //
@@ -387,6 +390,20 @@ static void addNVODevent(const SIevent &evt)
     mySIeventsOrderServiceUniqueKeyFirstStartTimeEventUniqueKey.insert(std::make_pair(e, e));
     mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.insert(std::make_pair(e, e));
   }
+}
+
+static void removeNewEvents(void)
+{
+  // Alte events loeschen
+  time_t zeit=time(NULL);
+
+  // Mal umgekehrt wandern
+  for(MySIeventsOrderFirstEndTimeServiceIDEventUniqueKey::iterator e=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.begin(); e!=mySIeventsOrderFirstEndTimeServiceIDEventUniqueKey.end(); e++)
+    if(e->first->times.begin()->startzeit>zeit+secondsToCache)
+      deleteEvent(e->first->uniqueKey());
+//    else
+//      break; // sortiert nach Endzeit, daher weiteres Suchen unnoetig
+  return;
 }
 
 static void removeOldEvents(const long seconds)
@@ -1028,7 +1045,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
   time_t zeit=time(NULL);
   char stati[2024];
   sprintf(stati,
-    "$Id: sectionsd.cpp,v 1.49 2001/08/17 14:33:15 fnbrd Exp $\n"
+    "$Id: sectionsd.cpp,v 1.50 2001/08/17 16:21:06 fnbrd Exp $\n"
     "Current time: %s\n"
     "Hours to cache: %ld\n"
     "Events are old %ldmin after their end time\n"
@@ -1647,7 +1664,7 @@ const unsigned timeoutInSeconds=2;
       dmxSDT.stop(); // -> lock
       if(dmxSDT.start()) // -> unlock
         return 0;
-      dputs("dmxSDT restartet");
+      dputs("dmxSDT restarted");
     }
     dmxSDT.lock();
     int rc=dmxSDT.read((char *)&header, sizeof(header), timeoutInSeconds);
@@ -1926,11 +1943,27 @@ const unsigned timeoutInSeconds=2;
     return 0;
   for(;;) {
     if(timeoutsDMX>=RESTART_DMX_AFTER_TIMEOUTS) {
+      // sectionsd ist zu langsam, da zu viele events -> cache kleiner machen
       timeoutsDMX=0;
       dmxEIT.stop(); // -> lock
+      lockEvents();
+      if(secondsToCache>24*60L*60L && mySIeventsOrderUniqueKey.size()>2000) {
+        // kleiner als 1 Tag machen wir den Cache nicht,
+	// da die timeouts ja auch von einem Sender ohne EPG kommen können
+	// Die 2000 sind ne Annahme und beruhen auf (wenigen) Erfahrungswerten
+        dmxSDT.pause();
+        lockServices();
+        secondsToCache-=5*60L*60L; // 5h weniger
+        dprintf("decreasing cache 5h (now %ldh)\n", secondsToCache/(60*60L));
+        removeNewEvents();
+        removeOldEvents(oldEventsAre);
+        unlockServices();
+        dmxSDT.unpause();
+      }
+      unlockEvents();
       if(dmxEIT.start()) // -> unlock
         return 0;
-      dputs("dmxEIT restartet");
+      dputs("dmxEIT restarted");
     }
     time_t zeit=time(NULL);
     if(timeset) { // Nur wenn ne richtige Uhrzeit da ist
@@ -2151,7 +2184,7 @@ pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 int rc;
 struct sockaddr_in serverAddr;
 
-  printf("$Id: sectionsd.cpp,v 1.49 2001/08/17 14:33:15 fnbrd Exp $\n");
+  printf("$Id: sectionsd.cpp,v 1.50 2001/08/17 16:21:06 fnbrd Exp $\n");
   try {
 
   if(argc!=1 && argc!=2) {
