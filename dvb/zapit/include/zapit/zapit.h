@@ -1,32 +1,11 @@
 /*
- * $Id: zapit.h,v 1.54 2002/04/20 16:23:47 obi Exp $
+ * $Id: zapit.h,v 1.55 2002/04/22 19:32:21 obi Exp $
  */
 
 #ifndef __zapit_h__
 #define __zapit_h__
 
-#include <dbox/avia_vbi.h>
-#include <fcntl.h>
-#include <ost/audio.h>
-#include <ost/video.h>
-#include <signal.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
 #include "bouquets.h"
-#include "cam.h"
-#include "cat.h"
-#include "frontend.h"
-#include "getservices.h"
-#include "pat.h"
-#include "pmt.h"
-
-#define AUDIO_DEV "/dev/ost/audio0"
-#define FRONT_DEV "/dev/ost/frontend0"
-#define VIDEO_DEV "/dev/ost/video0"
-
 #include "zapitclient.h"
 
 typedef struct decode_struct
