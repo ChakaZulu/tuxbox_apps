@@ -1299,7 +1299,7 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				// On Cable and Terrestrial Boxes dont handle green button.. expect in file mode..
 				if ( eSystemInfo::getInstance()->getFEType() != eSystemInfo::feSatellite && enterPath.size() &&
 					enterPath.bottom().data[0] == -4 ) // Satellite list..
-					enterPath.up(); // clear enterPath
+					enterPath=eServicePath(); // clear enterPath
 
 				if ( style == styleCombiColumn && eZapMain::getInstance()->getMode() != eZapMain::modeFile )
 					enterPath.down(eServiceReference());

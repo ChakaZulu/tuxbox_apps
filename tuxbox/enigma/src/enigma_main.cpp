@@ -6453,8 +6453,16 @@ void eZapMain::setMode(int newmode, int user)
 {
 	if ( newmode != -1 )
 	{
+		eServiceReference tmp = modeLast[newmode].bottom();
+		int i=listAll;
+		for (; i <=listBouquets; ++i)
+		{
+			if ( tmp == getRoot(i, newmode).bottom() )
+				break;
+		}
+		if ( i > listBouquets ) // invalid path stored.. restore..
+			modeLast[newmode]=getRoot(listAll,newmode);
 #ifndef DISABLE_FILE
-
 		// disable skipping
 		if(skipping)
 			endSkip();
