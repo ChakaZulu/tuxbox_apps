@@ -30,6 +30,8 @@ extern	int		FBDrawString( int xpos, int ypos, int height, char *msg,
 					unsigned char col,		/* text color */
 					unsigned char backcol );/* background 0==transp */
 extern	void	FBDrawFx2Logo( int x, int y );
+extern	char	*FBEnterWord( int xpos, int ypos, int height,int len,
+					unsigned char col);
 #ifdef USEX
 extern	void	FBFlushGrafic( void );
 #endif

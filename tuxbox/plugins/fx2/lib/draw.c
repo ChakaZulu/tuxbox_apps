@@ -43,7 +43,9 @@ static	unsigned short				green[ 256 ];
 static	unsigned short				blue[ 256 ];
 static	unsigned short				trans[ 256 ];
 static	int							lastcolor=0;
-extern	int							actcode;
+extern	unsigned short				actcode;
+extern	unsigned short				realcode;
+extern	int							doexit;
 
 void	FBSetColor( int idx, uchar r, uchar g, uchar b )
 {
@@ -453,6 +455,7 @@ void	FBMove( int x, int y, int x2, int y2, int dx, int dy )
 	free( back );
 }
 
+#if 0
 static	void	FBDrawClock()
 {
 	float			winkel;
@@ -502,6 +505,7 @@ static	void	FBDrawClock()
 
 	free( back );
 }
+#endif
 
 void	FBPause( void )
 {
@@ -548,7 +552,7 @@ static int			pos[64] =
 
 	while( actcode == 0xee )
 	{
-		tv.tv_usec = 300000;
+		tv.tv_usec = 100000;
 		tv.tv_sec = 0;
 		select(0,0,0,0,&tv);
 		RcGetActCode();
@@ -571,7 +575,7 @@ static int			pos[64] =
 
 		free(back);
 	}
-	FBDrawClock();
+/*	FBDrawClock(); */
 
 	Fx2PigResume();
 }
@@ -592,7 +596,9 @@ static	unsigned long	colors[ 256 ];
 static	int				planes=16;
 static	int				xres;
 static	int				yres;
-extern	int				actcode;
+extern	unsigned short	actcode;
+extern	unsigned short	realcode;
+extern	int				doexit;
 
 void	FBSetColor( int idx, uchar r, uchar g, uchar b )
 {
@@ -1900,4 +1906,142 @@ void	FBDrawFx2Logo( int x, int y )
 {
 	FBDrawString( x, y, 64, "fx", WHITE, 0 );
 	FBDrawString( x+21, y+9, 64, "2", RED, 0 );
+}
+
+static	char	*keyw[12] = {
+"-+.", "ABC", "DEF", "GHI", "JKL", "MNO", "PQRS", "TUV", "WXYZ", "", " ", ""
+};
+static	char	keywi[12] = {17,35,33,28,31,35,43,35,51,2,2,2};
+static	char	*keynum[12] ={"1","2","3","4","5","6","7","8","9","","0",""};
+static	char	keyn[12] = {6,13,13,13,12,12,13,13,12,9,13,6};
+static	char	text[128];
+
+char	*FBEnterWord( int xpos, int ypos, int height,int len,unsigned char col)
+{
+	struct timeval	tv;
+	int				xoffs=500;
+	int				yoffs=32;
+	int				x;
+	int				y;
+	int				i;
+	short			lastcode=0xee;
+	short			last=0xee;
+	int				idx=0;
+	int				subidx=0;
+	char			*pos;
+	int				dlen = 0;
+	char			blocker=0;
+
+	/* draw help */
+	FBDrawRect( xoffs,yoffs, 3*52,4*52+4,WHITE);
+	FBDrawRect( xoffs+1,yoffs+1, 3*52,4*52+4,WHITE);
+	for( i=0; i<12; i++ )
+	{
+		y=(i/3)*52 + yoffs + 20;
+		x=(i%3)*52 + xoffs + 26 - keyn[i]/2;
+		FBDrawString( x,y,44,keynum[i],RED,0);
+
+		y=(i/3)*52 + yoffs + 5;
+		x=(i%3)*52 + xoffs + 26 - keywi[i]/2;
+		FBDrawString( x,y,32,keyw[i],WHITE,0);
+		if ( !i )
+			FBDrawString( x+1,y+1,32,keyw[i],WHITE,0);
+	}
+	FBDrawHLine( xoffs,yoffs+56,3*52,WHITE);
+	FBDrawHLine( xoffs,yoffs+57,3*52,WHITE);
+	FBDrawHLine( xoffs,yoffs+108,3*52,WHITE);
+	FBDrawHLine( xoffs,yoffs+109,3*52,WHITE);
+	FBDrawHLine( xoffs,yoffs+160,3*52,WHITE);
+	FBDrawHLine( xoffs,yoffs+161,3*52,WHITE);
+	FBDrawVLine( xoffs + 52, yoffs, 4*52+4, WHITE );
+	FBDrawVLine( xoffs + 53, yoffs, 4*52+4, WHITE );
+	FBDrawVLine( xoffs + 104, yoffs, 4*52+4, WHITE );
+	FBDrawVLine( xoffs + 105, yoffs, 4*52+4, WHITE );
+
+	/* now read word */
+	*text=0;
+	memset(text,0,32);
+	pos=text-1;
+	i=0;
+	while( i<len && !doexit )
+	{
+		tv.tv_usec = 100000;
+		tv.tv_sec = 0;
+		select(0,0,0,0,&tv);
+
+		actcode=0xee;
+		RcGetActCode();
+
+		if ( realcode == 0xee )
+			blocker=0;
+
+		if ( blocker && ( actcode == last ))
+			continue;
+
+		last = actcode;
+		blocker=1;
+#ifdef USEX
+		FBFlushGrafic();
+#endif
+		if ( actcode <= 9 )	/* RC_0 .. RC_9 */
+		{
+			if ( actcode != lastcode )
+			{
+				pos++;
+				idx=actcode-1;
+				if ( idx == -1 )
+					idx=10;
+				subidx=0;
+				*pos=keyw[idx][subidx];
+				i++;
+				lastcode=actcode;
+			}
+			else
+			{
+				subidx++;
+				if ( keyw[idx][subidx] )
+				{
+					*pos=keyw[idx][subidx];
+				}
+				else
+				{
+					subidx=-1;
+					*pos=*keynum[idx];
+				}
+			}
+			*(pos+1)=' ';
+			dlen=FBDrawString( xpos, ypos, 64, text, WHITE, BLACK);
+		}
+		if ( actcode == RC_LEFT )
+		{
+			if ( i >= 0 )
+			{
+				*pos=' ';
+				*(pos+1)=0;
+				pos--;
+				i--;
+				FBFillRect( xpos, ypos, dlen, 64, BLACK );
+				dlen=FBDrawString( xpos, ypos, 64, text, WHITE, BLACK);
+			}
+		}
+		if ( actcode == RC_RIGHT )
+		{
+			pos++;
+			i++;
+			subidx=-1;
+			*(pos+1)=' ';
+		}
+		if ( actcode == RC_OK )
+		{
+			if ( i > 0 )
+			{
+				pos++;
+				i++;
+				break;
+			}
+		}
+	}
+	*pos=0;
+	FBFillRect( xoffs,yoffs, 3*52+3,4*52+4+2,BLACK);
+	return( text );
 }
