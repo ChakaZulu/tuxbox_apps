@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libdvbsi++
+Description: C++ parsing library for Service Information (SI) in DVB systems
+Version: @VERSION@
+Libs: -L${libdir} -ldvbsi++
+Cflags: -I${includedir}
