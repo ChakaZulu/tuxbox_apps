@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.42 2001/10/25 12:26:09 field Exp $
+// $Id: infoviewer.cpp,v 1.43 2001/11/03 03:13:10 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.43  2001/11/03 03:13:10  field
+// EPG Anzeige verbessert
+//
 // Revision 1.42  2001/10/25 12:26:09  field
 // NVOD-Zeiten im Infoviewer stimmen
 //
@@ -252,9 +255,6 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
         g_FrameBuffer->paintIcon("blau.raw", BoxEndX- ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 31, g_Locale->getText("infoviewer.streaminfo").c_str(), COL_INFOBAR);
 
-        g_FrameBuffer->paintIcon("rot.raw", BoxEndX- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
-        g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
-
         g_RemoteControl->CopyNVODs();
         showButtonNVOD();
         g_RemoteControl->CopyAPIDs();
@@ -350,7 +350,7 @@ void CInfoViewer::showButtonAudio()
 
         	//int ChanNameX = BoxStartX + ChanWidth + 10;
         	int ChanNameY = BoxStartY + ChanHeight + 10;
-        	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
+
 
             string  disp_text;
             if ( ( g_RemoteControl->GetECMPID()== 0 ) && ( g_RemoteControl->audio_chans.count_apids!= 0 ) )
@@ -358,6 +358,7 @@ void CInfoViewer::showButtonAudio()
             else
                 disp_text= g_Locale->getText("infoviewer.notavailable");
 
+        	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
             g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, disp_text.c_str(), COL_INFOBAR);
             KillShowEPG = true;
         };
@@ -397,6 +398,8 @@ void CInfoViewer::showData()
         runningPercent=(unsigned)((float)(time(NULL)-g_RemoteControl->nvods.nvods[sel].startzeit)/(float)g_RemoteControl->nvods.nvods[sel].dauer*100.);
         if (runningPercent>100)
             runningPercent=0;
+
+         Flag|=4;
         //printf("%s %s %d\n", runningDuration, runningStart, runningPercent);
     }
 	int height = g_Fonts->infobar_channame->getHeight()/3;
@@ -412,10 +415,18 @@ void CInfoViewer::showData()
     	int height2= 20;//int( g_Fonts->infobar_channame->getHeight()/1.7);
 
     //	g_FrameBuffer->paintBox(BoxEndX-130, BoxStartY, BoxEndX, ChanNameY+2, COL_INFOBAR+1); //bounding box (off)
+        if (Flag&4)
+        {
+        	g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
+        	g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
+        	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
+        }
+        if (Flag&1)
+        {
+            g_FrameBuffer->paintIcon("rot.raw", BoxEndX- 4* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+            g_Fonts->infobar_small->RenderString(BoxEndX- 4* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.eventlist").c_str(), COL_INFOBAR);
+        }
 
-    	g_FrameBuffer->paintBoxRel(BoxEndX-114, posy,   2+100+2, height2, COL_INFOBAR_SHADOW); //border
-    	g_FrameBuffer->paintBoxRel(BoxEndX-112, posy+2, runningPercent+2, height2-4, COL_INFOBAR+7);//fill(active)
-    	g_FrameBuffer->paintBoxRel(BoxEndX-112+runningPercent, posy+2, 100-runningPercent, height2-4, COL_INFOBAR+3);//fill passive
     }
 
 	//info running
@@ -423,26 +434,48 @@ void CInfoViewer::showData()
 	int duration1Width   = g_Fonts->infobar_info->getRenderWidth(runningDuration);
 	int duration1TextPos = BoxEndX-duration1Width-10;
     height = g_Fonts->infobar_info->getHeight();
+    int xStart= BoxStartX + ChanWidth + 30;
 
     if ( is_nvod )
         g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
 
-	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, runningStart, COL_INFOBAR);
-	g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 30,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, running, COL_INFOBAR);
-	g_Fonts->infobar_info->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningDuration, COL_INFOBAR);
-
-	ChanInfoY += height;
-
-	//info next
-    g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
-
-    if ( ( !is_nvod ) && (strcmp(next, "|")!= 0) )
+    if (Flag&8)
     {
-    	int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
-    	int duration2TextPos = BoxEndX-duration2Width-10;
-    	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
-    	g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 30,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, next, COL_INFOBAR);
-    	g_Fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
+        // kein EPG verfügbar
+        ChanInfoY += height;
+        g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
+        g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText("infoviewer.noepg").c_str(), COL_INFOBAR);
+    }
+    else
+    {
+        // irgendein EPG gefunden
+        if ( (Flag&2) && (!(Flag&4)) )
+        {
+            // spätere Events da, aber kein aktuelles...
+            ChanInfoY += height;
+            g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height, COL_INFOBAR);
+            g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, BoxEndX- xStart, g_Locale->getText("infoviewer.nocurrent").c_str(), COL_INFOBAR);
+        }
+        else
+        {
+            g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, runningStart, COL_INFOBAR);
+            g_Fonts->infobar_info->RenderString(xStart,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, running, COL_INFOBAR);
+            g_Fonts->infobar_info->RenderString(duration1TextPos,            ChanInfoY+height, duration1Width, runningDuration, COL_INFOBAR);
+
+            ChanInfoY += height;
+
+    	   //info next
+            g_FrameBuffer->paintBox(ChanInfoX+ 10, ChanInfoY, BoxEndX, ChanInfoY+ height , COL_INFOBAR);
+
+            if ( ( !is_nvod ) && (strcmp(next, "")!= 0) )
+            {
+            	int duration2Width   = g_Fonts->infobar_info->getRenderWidth(nextDuration);
+            	int duration2TextPos = BoxEndX-duration2Width-10;
+            	g_Fonts->infobar_info->RenderString(ChanInfoX+10,                ChanInfoY+height, 100, nextStart, COL_INFOBAR);
+            	g_Fonts->infobar_info->RenderString(BoxStartX + ChanWidth + 30,  ChanInfoY+height, duration1TextPos- (BoxStartX + ChanWidth + 40)-10, next, COL_INFOBAR);
+            	g_Fonts->infobar_info->RenderString(duration2TextPos,            ChanInfoY+height, duration2Width, nextDuration, COL_INFOBAR);
+            }
+        }
     }
 }
 
@@ -543,6 +576,7 @@ void * CInfoViewer::InfoViewerThread (void *arg)
 //                printf("CInfoViewer::InfoViewerThread getEPGData for %s\n", query.c_str());
 
                 gotEPG = InfoViewer->getEPGData(query, query_onid_tsid);
+                gotEPG = gotEPG && (InfoViewer->Flag&14);
 
                 pthread_mutex_trylock( &InfoViewer->epg_mutex );
 
@@ -614,6 +648,13 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
 		strcpy( runningDuration, "");
 		strcpy( nextDuration, "");
 		runningPercent = 0;
+        Flag= 0;
+
+        for(unsigned int count=0;count<SubServiceList.size();count++)
+    	{
+    		delete SubServiceList[count];
+    	}
+    	SubServiceList.clear();
 
 		if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
 		{
@@ -652,6 +693,9 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 sectionsd::sectionsdTime*   epg_times;
                 char* dp = pData;
 
+                Flag = (unsigned char)* dp;
+                dp+= sizeof(unsigned char);
+
                 // current
                 tmp_id = (unsigned long long)* dp;
                 dp+= sizeof(tmp_id);
@@ -678,6 +722,25 @@ bool CInfoViewer::getEPGData( string channelName, unsigned int onid_tsid )
                 pStartZeit = localtime(&epg_times->startzeit);
         		sprintf((char*) &nextStart, "%02d:%02d", pStartZeit->tm_hour, pStartZeit->tm_min);
                 strncpy(next, dp, sizeof(next));
+                dp+=strlen(dp)+1;
+
+                int SubServiceCount= (int)* dp;
+                dp+= sizeof(SubServiceCount);
+                for (int count= 0; count< SubServiceCount; count++)
+                {
+                    SubService* aSubService = new SubService();
+                    aSubService->name = dp;
+                    dp+= strlen(dp)+1;
+                    aSubService->transportStreamId= (unsigned short)* dp;
+                    dp+= sizeof(unsigned short);
+                    aSubService->originalNetworkId= (unsigned short)* dp;
+                    dp+= sizeof(unsigned short);
+                    aSubService->serviceId= (unsigned short)* dp;
+                    dp+= sizeof(unsigned short);
+
+	                SubServiceList.insert(SubServiceList.end(), aSubService);
+                }
+
 
         		delete[] pData;
         		retval = true;

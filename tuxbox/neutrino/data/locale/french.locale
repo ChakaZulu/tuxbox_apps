@@ -127,6 +127,8 @@ infoviewer.languages Choix linguistique
 infoviewer.notavailable Channel not available
 infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
 infoviewer.selecttime Timeselection
+infoviewer.nocurrent No info for current program available
+infoviewer.noepg EPG not available
 
 epgviewer.notfound pas d' EPG informations trouvé
 epgviewer.nodetailed No detailed informations available

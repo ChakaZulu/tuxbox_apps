@@ -41,6 +41,13 @@ using namespace std;
 
 class CInfoViewer
 {
+    struct SubService {
+        unsigned short  transportStreamId;
+        unsigned short  originalNetworkId;
+        unsigned short  serviceId;
+		string          name;
+    };
+
 	private:
 		int					intShowDuration;
         bool                KillShowEPG;
@@ -75,6 +82,8 @@ class CInfoViewer
 		char				runningDuration[10];
 		char				nextDuration[10];
 		char				runningPercent;
+        unsigned char       Flag;
+        vector<SubService*>	SubServiceList;
 
 		static void * InfoViewerThread (void *arg);
         static void * LangViewerThread (void *arg);

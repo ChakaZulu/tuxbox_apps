@@ -128,6 +128,8 @@ infoviewer.languages Audio
 infoviewer.notavailable Channel not available
 infoviewer.cantdecode Channel can't be decoded
 infoviewer.selecttime Timeselection
+infoviewer.nocurrent No info for current program available
+infoviewer.noepg EPG not available
 
 epgviewer.notfound no epg found
 epgviewer.nodetailed No detailed informations available

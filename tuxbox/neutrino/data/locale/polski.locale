@@ -127,6 +127,8 @@ infoviewer.languages Wybor Dzwieku
 infoviewer.notavailable Kanal (na razie) niedostepny
 infoviewer.cantdecode Kanal nie mozliwy do dekodowania
 infoviewer.selecttime Timeselection
+infoviewer.nocurrent No info for current program available
+infoviewer.noepg EPG not available
 
 epgviewer.notfound EPG-Informacje nie znalezione
 epgviewer.nodetailed Informacje nie sa dostepne
