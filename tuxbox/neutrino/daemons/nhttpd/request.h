@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: request.h,v 1.19 2002/10/18 12:32:51 thegoodguy Exp $
+        $Id: request.h,v 1.20 2002/10/18 12:51:02 thegoodguy Exp $
 
         License: GPL
 
@@ -37,7 +37,6 @@
 #include <config.h>
 
 #include <string>
-#include <vector>
 #include <map>
 
 #include "webserver.h"

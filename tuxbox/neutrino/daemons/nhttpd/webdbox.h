@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: webdbox.h,v 1.32 2002/10/16 10:30:47 dirch Exp $
+        $Id: webdbox.h,v 1.33 2002/10/18 12:51:02 thegoodguy Exp $
 
         License: GPL
 
@@ -33,7 +33,6 @@
 #include <time.h>
 #include <sys/timeb.h>
 
-#include <vector>
 #include <map>
 
 #include <zapit/zapitclient.h>
