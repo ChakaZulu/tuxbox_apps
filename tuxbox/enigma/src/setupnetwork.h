@@ -16,7 +16,7 @@ class eListBoxEntryText;
 #ifndef DISABLE_NFS
 class eNFSSetup: public eWindow
 {
-        eButton *ok, *mount, *umount, *prev, *next;
+	eButton *ok, *mount, *umount, *prev, *next;
 	eCheckbox *doamount;
 	eComboBox *combo_fstype, *combo_options;
 	eLabel *lpass , *luser;
