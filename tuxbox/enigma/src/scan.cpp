@@ -378,21 +378,21 @@ void tsAutomatic::start()
 	{
 		tpPacket *pkt=(tpPacket*)(l_network->getCurrent()->getKey());
 		eLNB *lnb=0;
-		if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
-		{
-			eSatellite *sat = eTransponderList::getInstance()->findSatellite( pkt->orbital_position );
-			if ( sat )
-				lnb = sat->getLNB();
-		}
+		eSatellite *sat = eTransponderList::getInstance()->findSatellite( pkt->orbital_position );
+		if ( sat )
+			lnb = sat->getLNB();
 
 		for (std::list<eTransponder>::iterator i(pkt->possibleTransponders.begin()); i != pkt->possibleTransponders.end(); ++i)
 		{
-			if(snocircular)
-				i->satellite.polarisation&=1;   // CEDR
-			if ( lnb && !i->satellite.useable( lnb ) )
+			if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feSatellite )
 			{
-				eDebug("skip %d", i->satellite.frequency );
-				continue;
+				if(snocircular)
+					i->satellite.polarisation&=1;   // CEDR
+				if ( lnb && !i->satellite.useable( lnb ) )
+				{
+					eDebug("skip %d", i->satellite.frequency );
+					continue;
+				}
 			}
 			sapi->addTransponder(*i);
 		}
@@ -560,11 +560,16 @@ int tsAutomatic::tuneNext(int next)
 			current_tp->satellite.symbol_rate/1000,
 			current_tp->satellite.polarisation?'V':'H');
 	}
-	else
+	else if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feCable )
 	{
 		progress += eString().sprintf("\n%d / %d",
 			current_tp->cable.frequency/1000,
 			current_tp->cable.symbol_rate/1000 );
+	}
+	else if ( eSystemInfo::getInstance()->getFEType() == eSystemInfo::feTerrestrial )
+	{
+		progress += eString().sprintf("\n%d Khz",
+			current_tp->terrestrial.centre_frequency);
 	}
 	l_status->setText(progress);
 
