@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.h,v 1.8 2003/07/08 19:59:50 rasc Exp $
+$Id: dvbsnoop.h,v 1.9 2003/10/13 23:35:35 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -8,6 +8,9 @@ $Id: dvbsnoop.h,v 1.8 2003/07/08 19:59:50 rasc Exp $
    (c) rasc
 
 $Log: dvbsnoop.h,v $
+Revision 1.9  2003/10/13 23:35:35  rasc
+Bugfix, verbose < 4 segfaulted, tnx to 'mws'  for reporting.
+
 Revision 1.8  2003/07/08 19:59:50  rasc
 restructuring... some new, some fixes,
 trying to include DSM-CC, Well someone a ISO13818-6 and latest version of ISO 18313-1 to spare?
@@ -37,7 +40,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 */
 
-#define DVBSNOOP_VERSION  "0.9c"
+#define DVBSNOOP_VERSION  "0.9d"
 
 
 #include <stdio.h>
