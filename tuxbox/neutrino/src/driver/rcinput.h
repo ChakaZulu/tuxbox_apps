@@ -90,7 +90,7 @@ class CRCInput
 			RC_page_up   = KEY_PAGEUP,          /* /include/linux/input.h: #define KEY_PAGEUP              104   */
 			RC_left      = KEY_LEFT,            /* /include/linux/input.h: #define KEY_LEFT                105   */
 			RC_right     = KEY_RIGHT,           /* /include/linux/input.h: #define KEY_RIGHT               106   */
-                        RC_down      = KEY_DOWN,            /* /include/linux/input.h: #define KEY_DOWN                108   */
+			RC_down      = KEY_DOWN,            /* /include/linux/input.h: #define KEY_DOWN                108   */
 			RC_page_down = KEY_PAGEDOWN,        /* /include/linux/input.h: #define KEY_PAGEDOWN            109   */
 			RC_spkr      = KEY_MUTE,            /* /include/linux/input.h: #define KEY_MUTE                113   */
 			RC_minus     = KEY_VOLUMEDOWN,      /* /include/linux/input.h: #define KEY_VOLUMEDOWN          114   */
@@ -123,6 +123,7 @@ class CRCInput
 
 
 		static bool isNumeric(const unsigned int key);
+		static int  getNumericValue(const unsigned int key);
 
 		static std::string getKeyName(int);
 

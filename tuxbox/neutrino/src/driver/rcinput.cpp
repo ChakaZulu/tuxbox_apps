@@ -997,10 +997,16 @@ void CRCInput::clearRCMsg()
 **************************************************************************/
 bool CRCInput::isNumeric(const unsigned int key)
 {
-	if ((key == RC_0) || ((key >= RC_1) && (key <= RC_9)))
-		return true;
-	else
-		return false;
+	return ((key == RC_0) || ((key >= RC_1) && (key <= RC_9)));
+}
+
+/**************************************************************************
+*       getNumericValue - return numeric value of the key or -1
+*
+**************************************************************************/
+int CRCInput::getNumericValue(const unsigned int key)
+{
+	return ((key == RC_0) ? 0 : (((key >= RC_1) && (key <= RC_9)) ? key - RC_1 + 1 : -1));
 }
 
 /**************************************************************************
