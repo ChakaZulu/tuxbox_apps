@@ -79,6 +79,7 @@ AC_ARG_WITH($1,[  $6$7 [[PREFIX$4$5]]],[
 	else
 		$2=$withval
 	fi
+	TARGET_$2=${$2}
 ],[
 	$2="\${$3}$5"
 	if test "$TARGET" = "cdk"; then
@@ -86,11 +87,13 @@ AC_ARG_WITH($1,[  $6$7 [[PREFIX$4$5]]],[
 	else
 		_$2=`eval echo "${$3}$5"`
 	fi
+	TARGET_$2=$_$2
 ])
 
 dnl automake <= 1.6 don't support this
 dnl AC_SUBST($2)
 AC_DEFINE_UNQUOTED($2,"$_$2",$7)
+AC_SUBST(TARGET_$2)
 ])
 
 AC_DEFUN([TUXBOX_APPS_DIRECTORY],[
