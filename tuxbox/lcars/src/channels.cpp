@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.10  2002/05/31 22:33:14  TheDOC
+i hate perspectives
+
 Revision 1.9  2002/05/27 12:00:32  TheDOC
 linkage-perspectives fix and stuff
 
@@ -117,6 +120,7 @@ int channels::currentNumberPerspectives()
 
 void channels::parsePerspectives()
 {
+	linkage_perspectives.clear();
 	int num = eit_obj->numberPerspectives();
 	for (int i = 0; i < num; i++)
 	{
@@ -143,7 +147,7 @@ void channels::setPerspective(int number)
 	current_mode = LINKAGE;
 
 	curr_perspective = number;
-	linkage tmp_link = linkage_perspectives[number];
+	tmp_link = linkage_perspectives[number];
 
 	//printf("----------------------\n");
 	//printf("APID: %d\n", apid);
@@ -365,7 +369,6 @@ void channels::zapCurrentAudio(int pid)
 	}
 	else if (current_mode == LINKAGE)
 	{
-		linkage tmp_link = linkage_perspectives[curr_perspective];	
 		zap_obj->zap_audio(tmp_link.VPID, tmp_link.APID[apid] , ECM, tmp_link.SID, tmp_link.ONID);
 		//zap_obj->zap_audio(getCurrentVPID(), getCurrentAPID(apid), ECM, getCurrentSID(), getCurrentONID());
 
@@ -740,10 +743,7 @@ int channels::getCurrentAPIDcount()
 	}
 	else if (current_mode == LINKAGE)
 	{
-		while(linkage_perspectives[curr_perspective].APID[count++] != 0)
-			if (count > 3)
-				break;
-		count--;
+		count = tmp_link.APIDcount;
 	}
 	return count;
 }

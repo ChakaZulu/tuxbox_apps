@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.8  2002/05/31 22:33:14  TheDOC
+i hate perspectives
+
 Revision 1.7  2002/05/27 12:01:43  TheDOC
 linkage-perspectives fix and stuff
 
@@ -176,6 +179,7 @@ class channels
 	int old_TS, old_ONID;
 	std::queue<int> last_channels;
 	std::vector<linkage> linkage_perspectives;
+	linkage tmp_link;
 public:	
 	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v);
 	channels(settings *setting, pat *p1, pmt *p2);
