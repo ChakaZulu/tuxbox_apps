@@ -408,7 +408,7 @@ void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_i
 	buffer[1]=0;
 	buffer[2]=tpdu_tag;
 
-	if(len>110)
+	if(len>127)
 	{
 		buffer[3]=0x82;
 		buffer[4]=((len+1)>>8);
@@ -465,63 +465,19 @@ void eDVBCI::sendTPDU(unsigned char tpdu_tag,unsigned int len,unsigned char tc_i
 	}
 }
 
-#define PAYLOAD_LEN	126				//fixme do it dynamic
 bool eDVBCI::sendData(unsigned char tc_id,unsigned char *data,unsigned int len)
 {
-	unsigned int bytesleft=len;
-	unsigned char lpdu[PAYLOAD_LEN+2];
-	unsigned int rp=0;
-
 	stopTimer();
 
-	lpdu[0]=tc_id;
-	
-	while(bytesleft)
+	if(write(fd,data,len)<0)
 	{
-		if(bytesleft>PAYLOAD_LEN)
-		{
-			lpdu[1]=0x80;
-			memcpy(lpdu+2,data+rp,PAYLOAD_LEN);
-			rp+=PAYLOAD_LEN;
-			bytesleft-=PAYLOAD_LEN;
-#if 0
-			int i;
-			for(i=0;i<PAYLOAD_LEN+2;i++)
-				printf("%02x ",lpdu[i]);
-			printf("\n");	
-#endif
-
-			if(write(fd,lpdu+2,PAYLOAD_LEN+2-2)<0)
-			{
-				if (errno == EBUSY)
-					return false;
-				eDebug("[DVBCI] write error");
-				ci_state=0;	
-				dataAvailable(0);
-			}
-		}
-		else
-		{
-			lpdu[1]=0x00;
-			memcpy(lpdu+2,data+rp,bytesleft+2);
-#if 0
-			int i;
-			for(i=0;i<(int)bytesleft+2;i++)
-				printf("%02x ",lpdu[i]);
-			printf("\n");	
-#endif
-			if(write(fd,lpdu+2,bytesleft+2-2)<0)
-			{
-				if (errno == EBUSY)
-					return false;
-				eDebug("[DVBCI] write error");
-				ci_state=0;	
-				dataAvailable(0);
-			}
-			bytesleft=0;	
-		}
+		if (errno == EBUSY)
+			return false;
+		eDebug("[DVBCI] write error");
+		ci_state=0;	
+		dataAvailable(0);
 	}
-//	startTimer(true);
+
 	return true;
 }
 
