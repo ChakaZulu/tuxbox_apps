@@ -1,5 +1,5 @@
 //
-// $Id: bat.cpp,v 1.2 2001/05/16 15:23:47 fnbrd Exp $
+// $Id: bat.cpp,v 1.3 2001/05/19 20:15:08 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: bat.cpp,v $
+// Revision 1.3  2001/05/19 20:15:08  fnbrd
+// Kleine Aenderungen (und epgXML).
+//
 // Revision 1.2  2001/05/16 15:23:47  fnbrd
 // Alles neu macht der Mai.
 //
@@ -37,7 +40,6 @@
 #include <algorithm>
 #include <string>
 
-#include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"

@@ -1,7 +1,7 @@
 #ifndef SIEVENTS_HPP
 #define SIEVENTS_HPP
 //
-// $Id: SIevents.hpp,v 1.4 2001/05/18 20:31:04 fnbrd Exp $
+// $Id: SIevents.hpp,v 1.5 2001/05/19 20:15:08 fnbrd Exp $
 //
 // classes SIevent and SIevents (dbox-II-project)
 //
@@ -24,6 +24,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: SIevents.hpp,v $
+// Revision 1.5  2001/05/19 20:15:08  fnbrd
+// Kleine Aenderungen (und epgXML).
+//
 // Revision 1.4  2001/05/18 20:31:04  fnbrd
 // Aenderungen fuer -Wall
 //
@@ -83,6 +86,11 @@ class SIcomponent {
       printf("Component type: 0x%02hhx\n", componentType);
       printf("Component tag: 0x%02hhx\n", componentTag);
     }
+    int saveXML(FILE *file) const {
+      if(fprintf(file, "    <component tag=\"0x%02hhx\" type=\"0x%02hhx\" stream_content=\"0x%02hhx\" />\n", componentTag, componentType, streamContent)<0)
+        return 1;
+      return 0;
+    }
     string component; // Text aus dem Component Descriptor
     unsigned char componentType; // Component Descriptor
     unsigned char componentTag; // Component Descriptor
@@ -95,37 +103,22 @@ struct printSIcomponent : public unary_function<SIcomponent, void>
   void operator() (const SIcomponent &c) { c.dump();}
 };
 
+// Fuer for_each
+struct saveSIcomponentXML : public unary_function<SIcomponent, void>
+{
+  FILE *f;
+  saveSIcomponentXML(FILE *fi) { f=fi;}
+  void operator() (const SIcomponent &c) { c.saveXML(f);}
+};
+
 
 typedef multiset <SIcomponent, less<SIcomponent> > SIcomponents;
 
 class SIevent {
   public:
-    SIevent(const struct eit_event *e) {
-      eventID=e->event_id;
-      startzeit=changeUTCtoCtime(((const unsigned char *)e)+2);
-      if(e->duration==0xffffff)
-        dauer=0; // keine Dauer
-      else
-        dauer=((e->duration)>>20)*10*3600L+(((e->duration)>>16)&0x0f)*3600L+
-          (((e->duration)>>12)&0x0f)*10*60L+(((e->duration)>>8)&0x0f)*60L+
-	  (((e->duration)>>4)&0x0f)*10+((e->duration)&0x0f);
-      serviceID=0;
-    }
+    SIevent(const struct eit_event *);
     // Std-Copy
-    SIevent(const SIevent &e) {
-      eventID=e.eventID;
-      name=e.name;
-      text=e.text;
-      startzeit=e.startzeit;
-      dauer=e.dauer;
-      serviceID=e.serviceID;
-      itemDescription=e.itemDescription;
-      item=e.item;
-      extendedText=e.extendedText;
-      contentClassification=e.contentClassification;
-      userClassification=e.userClassification;
-      components=e.components;
-    }
+    SIevent(const SIevent &);
     unsigned short eventID;
     string name; // Name aus dem Short-Event-Descriptor
     string text; // Text aus dem Short-Event-Descriptor
@@ -137,64 +130,52 @@ class SIevent {
     time_t startzeit; // lokale Zeit, 0 -> time shifted (cinedoms)
     unsigned dauer; // in Sekunden, 0 -> time shifted (cinedoms)
     unsigned short serviceID;
+    SIcomponents components;
     // Der Operator zum sortieren
     bool operator < (const SIevent& e) const {
       // Erst nach Service-ID, dann nach Event-ID sortieren
       return serviceID!=e.serviceID ? serviceID < e.serviceID : eventID < e.eventID;
     }
-    void dump(void) const {
-      if(serviceID)
-        printf("Service-ID: %hu\n", serviceID);
-      printf("Event-ID: %hu\n", eventID);
-      if(item.length())
-        printf("Item: %s\n", item.c_str());
-      if(itemDescription.length())
-        printf("Item-Description: %s\n", itemDescription.c_str());
-      if(name.length())
-        printf("Name: %s\n", name.c_str());
-      if(text.length())
-        printf("Text: %s\n", text.c_str());
-      if(extendedText.length())
-        printf("Extended-Text: %s\n", extendedText.c_str());
-      if(contentClassification.length()) {
-        printf("Content classification:");
-        for(unsigned i=0; i<contentClassification.length(); i++)
-          printf(" 0x%02hhx", contentClassification[i]);
-        printf("\n");
-      }
-      if(userClassification.length()) {
-        printf("User classification:");
-        for(unsigned i=0; i<userClassification.length(); i++)
-          printf(" 0x%02hhx", userClassification[i]);
-        printf("\n");
-      }
-      if(startzeit)
-        printf("Startzeit: %s", ctime(&startzeit));
-      if(dauer)
-        printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
-      printf("\n");
-      for_each(components.begin(), components.end(), printSIcomponent());
+    int saveXML(FILE *file) const { // saves the event
+      return saveXML0(file) || saveXML2(file);
     }
-    void dumpSmall(void) const {
-      if(name.length())
-        printf("Name: %s\n", name.c_str());
-      if(text.length())
-        printf("Text: %s\n", text.c_str());
-      if(extendedText.length())
-        printf("Extended-Text: %s\n", extendedText.c_str());
-      if(startzeit)
-        printf("Startzeit: %s", ctime(&startzeit));
-      if(dauer)
-        printf("Dauer: %02u:%02u:%02u (%umin, %us)\n", dauer/3600, (dauer%3600)/60, dauer%60, dauer/60, dauer);
-      printf("\n");
-    }
-    SIcomponents components;
+    int saveXML(FILE *file, const char *serviceName) const; // saves the event
+    void dump(void) const; // dumps the event to stdout
+    void dumpSmall(void) const; // dumps the event to stdout (not all information)
+  protected:
+    int saveXML0(FILE *f) const;
+    int saveXML2(FILE *f) const;
 };
 
 // Fuer for_each
 struct printSIevent : public unary_function<SIevent, void>
 {
   void operator() (const SIevent &e) { e.dump();}
+};
+
+// Fuer for_each
+struct saveSIeventXML : public unary_function<SIevent, void>
+{
+  FILE *f;
+  saveSIeventXML(FILE *fi) { f=fi;}
+  void operator() (const SIevent &e) { e.saveXML(f);}
+};
+
+// Fuer for_each
+struct saveSIeventXMLwithServiceName : public unary_function<SIevent, void>
+{
+  FILE *f;
+  const SIservices *s;
+  saveSIeventXMLwithServiceName(FILE *fi, const SIservices &svs) {f=fi; s=&svs;}
+  void operator() (const SIevent &e) {
+    SIservices::iterator k=s->find(SIservice(e.serviceID));
+    if(k!=s->end()) {
+      if(k->serviceName.length())
+      e.saveXML(f, k->serviceName.c_str());
+    }
+    else
+      e.saveXML(f);
+  }
 };
 
 // Fuer for_each

@@ -1,5 +1,5 @@
 //
-// $Id: epg.cpp,v 1.13 2001/05/18 13:11:46 fnbrd Exp $
+// $Id: epg.cpp,v 1.14 2001/05/19 20:15:08 fnbrd Exp $
 //
 // Beispiel zur Benutzung der SI class lib (dbox-II-project)
 //
@@ -22,6 +22,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 // $Log: epg.cpp,v $
+// Revision 1.14  2001/05/19 20:15:08  fnbrd
+// Kleine Aenderungen (und epgXML).
+//
 // Revision 1.13  2001/05/18 13:11:46  fnbrd
 // Fast komplett, fehlt nur noch die Auswertung der time-shifted events
 // (Startzeit und Dauer der Cinedoms).
@@ -66,7 +69,7 @@
 #include <algorithm>
 #include <string>
 
-#include "SIutils.hpp"
+//#include "SIutils.hpp"
 #include "SIservices.hpp"
 #include "SIevents.hpp"
 #include "SIsections.hpp"
