@@ -161,7 +161,6 @@ void CLocaleManager::loadLocale(std::string locale)
 			    (strncmp(buf, "timing", 6) != 0) &&
 			    ((strncmp(buf, "flashupdate", 11) != 0) || 
 			     ((strcmp(buf, "flashupdate.actionreadflash") == 0) ||
-			      (strncmp(buf, "flashupdate.msgbox", 18) == 0) ||
 			      (strcmp(buf, "flashupdate.reallyflashmtd") == 0) ||
 			      (strcmp(buf, "flashupdate.savesuccess") == 0))) &&
 			    ((strncmp(buf, "ma", 2) != 0) || (strcmp(buf, "mainsettings.savesettingsnow_hint") == 0)) &&

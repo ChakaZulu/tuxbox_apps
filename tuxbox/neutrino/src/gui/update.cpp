@@ -135,6 +135,10 @@ bool CFlashUpdate::getUpdateImage(std::string version)
 
 bool CFlashUpdate::checkVersion4Update()
 {
+	char msg[400];
+	CFlashVersionInfo * versionInfo;
+	const char * msg_body;
+
 	if(g_settings.softupdate_mode==1) //internet-update
 	{
 		if(!getInfo())
@@ -173,6 +177,15 @@ bool CFlashUpdate::checkVersion4Update()
 			ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.nonewversion")); // UTF-8
 			return false;
 		}
+	
+		showLocalStatus(100);
+		showGlobalStatus(20);
+		hide();
+		
+		//bestimmung der CramfsDaten
+		versionInfo = new CFlashVersionInfo(newVersion);
+
+		msg_body = "flashupdate.msgbox";
 	}
 	else
 	{
@@ -195,47 +208,18 @@ bool CFlashUpdate::checkVersion4Update()
 		char cramfsName[30];
 		cramfs_name( (char*) (string(gTmpPath+ImageFile)).c_str(), (char*) &cramfsName);
 
-		CFlashVersionInfo versionInfo(cramfsName);
+		versionInfo = new CFlashVersionInfo(cramfsName);
 
-		if ( strcmp("1.6", versionInfo.getBaseImageVersion().c_str()) )
-		{
-			ShowHintUTF( "messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
-			return false;
-		}
-
-		char msg[400];
-		sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox_manual").c_str(), versionInfo.getDate().c_str(), 
-				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.getType().c_str() );
-		if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
-		{
-			return false;
-		}
-
-		return true;
+		msg_body = "flashupdate.msgbox_manual";
 	}
-	
-	showLocalStatus(100);
-	showGlobalStatus(20);
-	hide();
-
-	//bestimmung der CramfsDaten
-	CFlashVersionInfo versionInfo(newVersion);
-
-	if ( strcmp("1.6", versionInfo.getBaseImageVersion().c_str()) )
+	sprintf((char*) &msg, g_Locale->getText(msg_body).c_str(), versionInfo->getDate(), versionInfo->getTime(), versionInfo->getBaseImageVersion(), versionInfo->getType());
+	delete versionInfo;
+	if (strcmp("1.6", versionInfo->getBaseImageVersion()))
 	{
 		ShowHintUTF("messagebox.error", g_Locale->getText("flashupdate.wrongbase")); // UTF-8
 		return false;
 	}
-	
-	char msg[250];
-	sprintf( (char*) &msg, g_Locale->getText("flashupdate.msgbox").c_str(), versionInfo.getDate().c_str(), 
-				versionInfo.getTime().c_str(), versionInfo.getBaseImageVersion().c_str(), versionInfo.getType().c_str() );
-    if ( ShowMsg ( "messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw" ) != CMessageBox::mbrYes )
-    {
-		return false;
-    }
-
-	return true;
+	return (ShowMsg("messagebox.info", msg, CMessageBox::mbrYes, CMessageBox::mbYes | CMessageBox::mbNo, "softupdate.raw", 450, -1, true) == CMessageBox::mbrYes); // UTF-8
 }
 
 int CFlashUpdate::exec(CMenuTarget* parent, string)

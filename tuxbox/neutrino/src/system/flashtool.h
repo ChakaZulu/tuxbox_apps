@@ -40,16 +40,14 @@
 #include <gui/widget/progressstatus.h>
 
 
-using namespace std;
-
 class CFlashTool
 {
 	private:
 	
 		int		fd_fp;
 		CProgress_StatusViewer* statusViewer;
-		string mtdDevice;
-		string ErrorMessage;
+		std::string mtdDevice;
+		std::string ErrorMessage;
 
 		bool erase(int globalProgressEnd=-1);
 
@@ -57,15 +55,15 @@ class CFlashTool
 		CFlashTool();
 		~CFlashTool();
 
-		string getErrorMessage();
+		std::string getErrorMessage();
 
-		void setMTDDevice( string mtddevice );
+		void setMTDDevice( std::string mtddevice );
 		void setStatusViewer( CProgress_StatusViewer* statusview );
 
-		bool program( string filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
-		bool readFromMTD( string filename, int globalProgressEnd=-1 );
+		bool program( std::string filename, int globalProgressEndErase=-1, int globalProgressEndFlash=-1 );
+		bool readFromMTD( std::string filename, int globalProgressEnd=-1 );
 
-		bool check_cramfs( string filename );
+		bool check_cramfs( std::string filename );
 
 		void reboot();
 };
@@ -75,18 +73,18 @@ class CFlashVersionInfo
 {
 	private:
 
-		string	date;
-		string	time;
-		string	baseImageVersion;
+		std::string	date;
+		std::string	time;
+		std::string	baseImageVersion;
 		char	snapshot;
 
 	public:
-		CFlashVersionInfo(string versionString);
+		CFlashVersionInfo(std::string versionString);
 
-		string getDate();
-		string getTime();
-		string getBaseImageVersion();
-		string getType();
+		const char * const getDate() const;
+		const char * const getTime() const;
+		const char * const getBaseImageVersion() const;
+		const char * const getType() const;
 };
 
 
@@ -98,11 +96,11 @@ class CMTDInfo
 		{
 			int size;
 			int erasesize;
-			string name;
-			string filename;
+			std::string name;
+			std::string filename;
 		};
 
-		vector<SMTDPartition*> mtdData;
+		std::vector<SMTDPartition*> mtdData;
 		
 		void getPartitionInfo();
 
@@ -115,18 +113,18 @@ class CMTDInfo
 		int getMTDCount();
 
 		//mtdinfos abfragen (nach mtdnummer)
-		string getMTDName( int pos );
-		string getMTDFileName( int pos );
+		std::string getMTDName( int pos );
+		std::string getMTDFileName( int pos );
 		int getMTDSize( int pos );
 		int getMTDEraseSize( int pos );
 
 		//mtdinfos abfragen (nach mtd-filename)
-		string getMTDName( string filename );
-		string getMTDFileName( string filename );
-		int getMTDSize( string filename );
-		int getMTDEraseSize( string filename );
+		std::string getMTDName( std::string filename );
+		std::string getMTDFileName( std::string filename );
+		int getMTDSize( std::string filename );
+		int getMTDEraseSize( std::string filename );
 
-		int findMTDNumber( string filename );
+		int findMTDNumber( std::string filename );
 
 };
 

@@ -1294,16 +1294,16 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service, CMenuWidget &scanSe
 		//updateSettings->addItem( new CMenuForwarder("flashupdate.currentversion", false, (char*) &g_settings.softupdate_currentversion, NULL ));
 		CFlashVersionInfo versionInfo(g_settings.softupdate_currentversion);
 		static char date[50];
-		strcpy(date, versionInfo.getDate().c_str());
+		strcpy(date, versionInfo.getDate());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversiondate", false, (char*) &date, NULL ));
 		static char time[50];
-		strcpy(time, versionInfo.getTime().c_str());
+		strcpy(time, versionInfo.getTime());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversiontime", false, (char*) &time, NULL ));
 		static char baseimage[50];
-		strcpy(baseimage, versionInfo.getBaseImageVersion().c_str());
+		strcpy(baseimage, versionInfo.getBaseImageVersion());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionbaseversion", false, (char*) &baseimage, NULL ));
 		static char releasetype[50];
-		strcpy(releasetype, versionInfo.getType().c_str());
+		strcpy(releasetype, versionInfo.getType());
 		updateSettings->addItem( new CMenuForwarder("flashupdate.currentversionsnapshot", false, (char*) &releasetype, NULL ));
 
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "flashupdate.proxyserver_sep") );
