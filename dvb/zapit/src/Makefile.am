@@ -16,7 +16,7 @@ pzapit_LDADD = \
 	$(top_builddir)/lib/libzapitclient.la
 
 zapit_SOURCES = \
-	zapit.cpp transponder.cpp channel.cpp bouquets.cpp getservices.cpp \
+	zapit.cpp channel.cpp bouquets.cpp getservices.cpp \
 	scan.cpp xmlinterface.cpp $(DBOX2)
 
 zapit_LDADD = \
