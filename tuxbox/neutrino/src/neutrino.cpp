@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.171 2002/02/26 17:24:16 field Exp $
+        $Id: neutrino.cpp,v 1.172 2002/02/26 19:05:25 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.171  2002/02/26 17:24:16  field
-  Key-Handling weiter umgestellt EIN/AUS= KAPUTT!
+  Revision 1.172  2002/02/26 19:05:25  field
+  Neues Event-Handling funktioniert
 
   Revision 1.170  2002/02/25 19:32:26  field
   Events <-> Key-Handling umgestellt! SEHR BETA!
@@ -2160,8 +2160,18 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 			else
 			{
 				// mode == mode_scart
-
-				handleMsg( msg, data );
+				if ( msg == CRCInput::RC_home )
+				{
+					if ( mode == mode_scart )
+					{
+						// noch nicht im Scart-Mode...
+						scartMode( false );
+					}
+				}
+				else
+				{
+					handleMsg( msg, data );
+				}
 			}
 		}
 	}
@@ -2170,7 +2180,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 int CNeutrinoApp::handleMsg(int msg, uint data)
 {
 
-    if ( msg == CRCInput::RC_spkr )
+/*    if ( msg == CRCInput::RC_spkr )
 	{
 		// NUR PROBEWEISE
 		if ( mode != mode_scart )
@@ -2179,7 +2189,9 @@ int CNeutrinoApp::handleMsg(int msg, uint data)
 			g_RCInput->pushbackMsg( messages::VCR_OFF, 0 );
 		return messages_return::cancel_all;
 	}
-	else if ( msg == CRCInput::RC_standby )
+	else
+*/
+	if ( msg == CRCInput::RC_standby )
 	{
 		// trigger StandBy
 		if ( mode == mode_standby )
@@ -2397,7 +2409,7 @@ void CNeutrinoApp::tvMode( bool rezap = true )
 		g_ActionLog->println("mode: tv");
 	#endif
 
-printf( "tv-mode\n" );
+	//printf( "tv-mode\n" );
 
 	memset(g_FrameBuffer->lfb, 255, g_FrameBuffer->Stride()*576);
 	g_FrameBuffer->useBackground(false);
@@ -2417,7 +2429,7 @@ void CNeutrinoApp::scartMode( bool bOnOff )
 		g_ActionLog->println( ( bOnOff ) ? "mode: scart on" : "mode: scart off" );
 	#endif
 
-printf( ( bOnOff ) ? "mode: scart on\n" : "mode: scart off\n" );
+	//printf( ( bOnOff ) ? "mode: scart on\n" : "mode: scart off\n" );
 
 	if ( bOnOff )
 	{
@@ -2435,19 +2447,20 @@ printf( ( bOnOff ) ? "mode: scart on\n" : "mode: scart off\n" );
 
 		g_Controld->setScartMode( 0 );
 
-		mode == mode_unknown;
-
 		//re-set mode
 		if ( lastMode == mode_radio )
 		{
+			mode = mode_unknown;
 			radioMode( false );
 		}
 		else if ( lastMode == mode_tv )
 		{
+			mode = mode_unknown;
 			tvMode( false );
 		}
 		else if ( lastMode == mode_standby )
 		{
+			usleep(10000);
 			standbyMode( true );
 		}
 	}
@@ -2459,7 +2472,7 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		g_ActionLog->println( ( bOnOff ) ? "mode: standby on" : "mode: standby off" );
 	#endif
 
-printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
+	//printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
 
 	if ( bOnOff )
 	{
@@ -2485,7 +2498,7 @@ printf( ( bOnOff ) ? "mode: standby on\n" : "mode: standby off\n" );
 		g_lcdd->setMode(CLcddClient::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 
-		mode == mode_unknown;
+		mode = mode_unknown;
 
 		//re-set mode
 		if ( lastMode == mode_radio )
@@ -2636,9 +2649,10 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.171 2002/02/26 17:24:16 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.172 2002/02/26 19:05:25 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
 	return neutrino->run(argc, argv);
 }
+
