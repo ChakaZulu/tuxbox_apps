@@ -1662,7 +1662,7 @@ msgstr "Datei"
 
 #: src/enigma_bouquet.cpp:38 src/enigma_setup.cpp:40
 msgid "Service Organising"
-msgstr "Service Verwaltung"
+msgstr "Serviceverwaltung"
 
 #: src/enigma_bouquet.cpp:42
 msgid "Create new bouquet"
