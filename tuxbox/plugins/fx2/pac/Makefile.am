@@ -1,15 +1,17 @@
 INCLUDES = -I../lib
 
-lib_LTLIBRARIES = libpac.la
+noinst_LTLIBRARIES = libpac.la
 
 libpac_la_SOURCES = main.c maze.c somain.c
 
-install-libLTLIBRARIES:
+libpac_la_LDFLAGS = -rpath $(PLUGINDIR)
+
+install-exec-local:
 	install -d $(PLUGINDIR)
-	install -m 0644  .libs/libpac.so $(PLUGINDIR)/pacman.so
+	install .libs/libpac.so $(PLUGINDIR)/pacman.so
 	install -m 0644  pacman.cfg $(PLUGINDIR)/pacman.cfg
 
-uninstall-libLTLIBRARIES:
+uninstall-local:
 	-rm $(PLUGINDIR)/pacman.so
 	-rm $(PLUGINDIR)/pacman.cfg
 	-rmdir $(PLUGINDIR)
