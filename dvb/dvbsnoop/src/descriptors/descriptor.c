@@ -1,5 +1,5 @@
 /*
-$Id: descriptor.c,v 1.5 2002/09/29 13:01:35 wjoost Exp $
+$Id: descriptor.c,v 1.6 2003/03/17 16:15:11 obi Exp $
 
  -- Descriptor Section
  -- (c) rasc
@@ -8,6 +8,10 @@ $Id: descriptor.c,v 1.5 2002/09/29 13:01:35 wjoost Exp $
  -- all descriptors are returning their length used in buffer
 
 $Log: descriptor.c,v $
+Revision 1.6  2003/03/17 16:15:11  obi
+fixed infinite loop
+thanks to Johannes Stezenbach
+
 Revision 1.5  2002/09/29 13:01:35  wjoost
 kleiner Fehler
 
@@ -1311,6 +1315,7 @@ void descriptor_VBI_Data  (u_char *b)
            out_SB_NL (6,"reserved_1: ",d3.reserved_1);
            out_SB_NL (4,"field_parity: ",d3.field_parity);
            out_SB_NL (4,"line_offset: ",d3.line_offset);
+	   len2--;
        } 
        indent (-1);
 
