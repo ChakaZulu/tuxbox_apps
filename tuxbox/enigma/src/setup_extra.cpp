@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_extra.cpp,v 1.7 2004/03/23 09:31:48 digi_casi Exp $
+ * $Id: setup_extra.cpp,v 1.8 2004/03/23 19:08:16 digi_casi Exp $
  */
 #include <enigma.h>
 #include <setup_extra.h>
@@ -25,12 +25,11 @@
 #include <setupnetwork.h>
 #include <software_update.h>
 #include <setup_rc.h>
-#include <flashtool.h>
 #include <lib/gui/emessage.h>
 #include <lib/system/info.h>
 
 eExpertSetup::eExpertSetup()
-	:eSetupWindow(_("Expert Setup"), 11, 400)
+	:eSetupWindow(_("Expert Setup"), 10, 400)
 {
 	cmove(ePoint(170, 115));
 
@@ -51,7 +50,6 @@ eExpertSetup::eExpertSetup()
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Auto show Infobar"), "/ezap/osd/showOSDOnEITUpdate", _("always show infobar when new event info is avail"));
 	new eListBoxEntryCheck( (eListBox<eListBoxEntry>*)&list, _("Show remaining Time"), "/ezap/osd/showCurrentRemaining", _("show event remaining time in the infobar"));
 	CONNECT((new eListBoxEntryCheck((eListBox<eListBoxEntry>*)&list,_("Serviceselector help buttons"),"/ezap/serviceselector/showButtons",_("show colored help buttons in service selector")))->selected, eExpertSetup::colorbuttonsChanged );
-	CONNECT((new eListBoxEntryMenu(&list, _("Flash Tool"), eString().sprintf("(%d) %s", ++entry, _("open flash tool")) ))->selected, eExpertSetup::flash_tool);
 	setHelpID(92);
 }
 
@@ -107,20 +105,6 @@ void eExpertSetup::rc_setup()
 {
 	hide();
 	eZapRCSetup setup;
-#ifndef DISABLE_LCD
-	setup.setLCD(LCDTitle, LCDElement);
-#endif
-	setup.show();
-	setup.exec();
-	setup.hide();
-	show();
-}
-
-
-void eExpertSetup::flash_tool()
-{
-	hide();
-	eFlashtoolMain setup;
 #ifndef DISABLE_LCD
 	setup.setLCD(LCDTitle, LCDElement);
 #endif

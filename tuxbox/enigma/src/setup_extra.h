@@ -11,7 +11,6 @@ class eExpertSetup: public eSetupWindow
 	void software_update();
 #endif
 	void rc_setup();
-	void flash_tool();
 	void colorbuttonsChanged(bool);
 public:
 	eExpertSetup();

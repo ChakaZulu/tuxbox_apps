@@ -9,6 +9,7 @@ private:
 #ifndef DISABLE_NETWORK
 	void internet_update();
 	void manual_update();
+	void flash_tool();
 #endif
 //	void satellite_update();
 public:
