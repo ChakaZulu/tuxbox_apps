@@ -413,7 +413,7 @@ void readln(int fd, char *buf)
 int parse_response(URL *url, void *opt, CSTATE *state)
 {
   char header[2049], str[255];
-  char *ptr, chr, lastchr;
+  char *ptr, chr=0, lastchr=0;
   int hlen = 0, response;
   int meta_interval = 0, rval;
   int fd = url->fd;
@@ -865,7 +865,7 @@ FILE *f_open(const char *filename, const char *acctype)
 			 sprintf(url.url, "http://www.shoutcast.com/sbin/shoutcast-playlist.pls?rn=%s&file=filename.pls", url.host);
 
   case MODE_PLS:	{
-  			    char *ptr, *ptr2, buf[4096], servers[25][1024];
+  			    char *ptr=NULL, *ptr2, buf[4096], servers[25][1024];
 			    int rval, i, retries = 15;
 
 			    /* fetch the playlist from the shoutcast directory with our own */
@@ -923,12 +923,17 @@ FILE *f_open(const char *filename, const char *acctype)
   default:	       fd = fopen(url.file, type);
 
 			 /* a smarter solution would be to get this info from /etc/mime.types */
-
-  			 if(strstr(url.file, ".ogg")) f_type(fd, "audio/ogg");
-  			 if(strstr(url.file, ".mp3")) f_type(fd, "audio/mpeg");
-  			 if(strstr(url.file, ".wav")) f_type(fd, "audio/wave");
-  			 if(strstr(url.file, ".aif")) f_type(fd, "audio/aifc");
-  			 if(strstr(url.file, ".snd")) f_type(fd, "audio/snd");
+			 char * ext = strrchr(url.file , '.');
+			 if (ext!=NULL)
+			 {
+  			 	if(strcasecmp(ext+1, "ogg")==0) f_type(fd, "audio/ogg");
+	  			if(strcasecmp(ext+1, "mp3")==0) f_type(fd, "audio/mpeg");
+	  			if(strcasecmp(ext+1, "mp2")==0) f_type(fd, "audio/mpeg");
+	  			if(strcasecmp(ext+1, "mpa")==0) f_type(fd, "audio/mpeg");
+  				if(strcasecmp(ext+1, "wav")==0) f_type(fd, "audio/wave");
+  				if(strcasecmp(ext+1, "aif")==0) f_type(fd, "audio/aifc");
+  				if(strcasecmp(ext+1, "snd")==0) f_type(fd, "audio/snd");
+  			 }
 
   			 break;
   }
