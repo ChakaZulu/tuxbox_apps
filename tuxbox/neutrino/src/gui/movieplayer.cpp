@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.75 2004/02/09 18:36:58 zwen Exp $
+  $Id: movieplayer.cpp,v 1.76 2004/02/10 15:41:48 gagga Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -185,6 +185,7 @@ CMoviePlayerGui::exec (CMenuTarget * parent, const std::string & actionKey)
     if (actionKey=="bookmarkplayback") {
         isBookmark = true;
         theBookmark = bookmarkmanager->getBookmark(NULL);
+        if (theBookmark == NULL) return menu_return::RETURN_REPAINT;
 	}
 	
 	
@@ -1572,7 +1573,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.75 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.76 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1744,7 +1745,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.75 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.76 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
  		else if (msg == CRCInput::RC_setup)
