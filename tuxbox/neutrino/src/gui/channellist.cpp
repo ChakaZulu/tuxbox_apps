@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.21 2001/09/20 14:10:10 field Exp $
+// $Id: channellist.cpp,v 1.22 2001/09/20 19:21:37 fnbrd Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.22  2001/09/20 19:21:37  fnbrd
+// Channellist mit IDs.
+//
 // Revision 1.21  2001/09/20 14:10:10  field
 // neues EPG-Handling abschaltbar
 //
@@ -90,7 +93,8 @@ void CChannelList::updateEvents(void)
 	}
   sectionsd::msgRequestHeader req;
   req.version = 2;
-  req.command = sectionsd::actualEventListTVshort;
+  req.command = sectionsd::actualEventListTVshortIDs;
+//  req.command = sectionsd::actualEventListTVshort;
   req.dataLength = 0;
   write(sock_fd,&req,sizeof(req));
 
@@ -112,13 +116,33 @@ void CChannelList::updateEvents(void)
     return;
   }
   close(sock_fd);
-//printf("\n read finished CChannelList::updateEvents \n\n");
+  char *actPos=pData;
   for(unsigned int count=0;count<chanlist.size();count++)
     chanlist[count]->currentEvent="";
+
+//printf("\n read finished CChannelList::updateEvents \n\n");
+  if(zapit) {
+  printf("data length: %u\n", resp.dataLength);
+  while(actPos<pData+resp.dataLength) {
+    unsigned serviceID=*((unsigned *)actPos);
+    actPos+=4;
+    actPos+=8; // eventID
+//    printf("desc: %s\n", actPos);
+    // quick'n dirty, sollte man mal anders machen
+    for(unsigned int count=0;count<chanlist.size();count++) {
+      if(chanlist[count]->onid_sid==serviceID) {
+        chanlist[count]->currentEvent=actPos;
+//	printf("Channel found: %s\n", actPos);
+	break;
+      }
+    }
+    actPos+=strlen(actPos)+1;
+  }
+  } // if zapit
+  else {
   char epgID[20];
   char channelName[50];
   char channelDescription[1000];
-  char *actPos=pData;
   while(*actPos && actPos<pData+resp.dataLength) {
     *epgID=0;
     actPos = copyStringto( actPos, epgID, sizeof(epgID));
@@ -138,6 +162,7 @@ void CChannelList::updateEvents(void)
       }
     }
   }
+  } // else zapit
   delete[] pData;
 //printf("\n END CChannelList::updateEvents \n\n");
   return;
@@ -175,7 +200,7 @@ void CChannelList::addChannel(int key, int number, const std::string& name, unsi
 	tmp->key=key;
 	tmp->number=number;
 	tmp->name=name;
-    tmp->onid_tsid=ids;
+    tmp->onid_sid=ids;
 	chanlist.insert(chanlist.end(), tmp);
 }
 
@@ -198,12 +223,6 @@ int CChannelList::getActiveChannelNumber()
 {
 	return selected+1;
 }
-
-unsigned int CChannelList::getActiveChannelOnid_tsid()
-{
-	return chanlist[selected]->onid_tsid;
-}
-
 
 void CChannelList::exec()
 {
@@ -306,7 +325,7 @@ bool CChannelList::showInfo(int pos)
 	}
 	selected=pos;
 	channel* chan = chanlist[selected];
-	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_tsid, true);
+	g_InfoViewer->showTitle(selected+1, chan->name, chan->onid_sid, true);
 	return true;
 }
 
@@ -324,7 +343,7 @@ void CChannelList::zapTo(int pos)
         tuned = pos;
     	g_RemoteControl->zapTo(chan->key, chan->name);
     }
-    g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_tsid);
+    g_InfoViewer->showTitle(selected+ 1, chan->name, chan->onid_sid);
 }
 
 void CChannelList::numericZap(int key)

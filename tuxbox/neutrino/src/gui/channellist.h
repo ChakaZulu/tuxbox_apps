@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.12 2001/09/20 00:36:32 field Exp $
+// $Id: channellist.h,v 1.13 2001/09/20 19:21:37 fnbrd Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.13  2001/09/20 19:21:37  fnbrd
+// Channellist mit IDs.
+//
 // Revision 1.12  2001/09/20 00:36:32  field
 // epg mit zaopit zum grossteil auf onid & s_id umgestellt
 //
@@ -49,15 +52,13 @@ using namespace std;
 
 class CChannelList
 {
-
-	struct channel
-	{
-		int	key;
-		int	number;
-		string	name;
-		string  currentEvent;
-        unsigned int    onid_tsid;
-	};
+  struct channel {
+    int key;
+    int number;
+    string name;
+    string currentEvent;
+    unsigned int onid_sid;
+  };
 
 
 	unsigned int		selected;
@@ -90,8 +91,9 @@ class CChannelList
 	int getKey(int);
 	const std::string& getActiveChannelName();
 	int getActiveChannelNumber();
-    unsigned int getActiveChannelOnid_tsid();
-
+	unsigned int CChannelList::getActiveChannelOnid_sid() {
+          return chanlist[selected]->onid_sid;
+        }
 	void zapTo(int pos);
 	bool showInfo(int pos);
 	void updateEvents(void);

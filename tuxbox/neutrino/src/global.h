@@ -1,7 +1,10 @@
 // 
-// $Id: global.h,v 1.6 2001/09/18 20:20:26 field Exp $
+// $Id: global.h,v 1.7 2001/09/20 19:21:37 fnbrd Exp $
 //
 // $Log: global.h,v $
+// Revision 1.7  2001/09/20 19:21:37  fnbrd
+// Channellist mit IDs.
+//
 // Revision 1.6  2001/09/18 20:20:26  field
 // Eventlist in den Infov. verschoben (gelber Knopf), Infov.-Anzeige auf Knoepfe
 // vorbereitet
@@ -31,6 +34,8 @@
 #ifndef NEUTRINO_CPP
 #define NEUTRINO_CPP extern
 #endif
+
+NEUTRINO_CPP bool zapit;
 
 NEUTRINO_CPP  CNeutrinoApp        *neutrino;
 NEUTRINO_CPP  SNeutrinoSettings   g_settings;
