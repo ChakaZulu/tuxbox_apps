@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.241 2002/04/22 01:56:44 McClean Exp $
+        $Id: neutrino.cpp,v 1.242 2002/04/23 14:37:30 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -639,6 +639,12 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 	fromflash = false;
 	g_settings.network_streaming_use = 0;
 
+	#define FONTNAME "Micron"
+	#define FONTFILE "micron"
+
+	fontName = FONTNAME;
+	fontFile = FONTDIR "/" FONTFILE;
+
 	for(int x=1; x<argc; x++)
 	{
 		if ( !strcmp(argv[x], "-su"))
@@ -660,9 +666,18 @@ void CNeutrinoApp::CmdParser(int argc, char **argv)
 			printf("enable flash\n");
 			fromflash = true;
 		}
+		else if ( !strcmp(argv[x], "-font"))
+		{
+			if ( ( x + 2 ) < argc )
+			{
+				fontFile = argv[x+ 1];
+				fontName = argv[x+ 2];
+			}
+            x=x+ 2;
+		}
 		else
 		{
-			printf("Usage: neutrino [-su]\n");
+			printf("Usage: neutrino [-su][-font \fontdir\fontfile fontname]\n");
 			exit(0);
 		}
 	}
@@ -685,41 +700,42 @@ void CNeutrinoApp::SetupFrameBuffer()
 
 void CNeutrinoApp::SetupFonts()
 {
-	#define FONTNAME "Micron"
+    printf("FontFile: %s\n", (fontFile+ ".ttf").c_str() );
+	printf("FontName: %s\n", fontName.c_str() );
 
-	g_fontRenderer->AddFont(FONTDIR "/micron.ttf");
-	g_fontRenderer->AddFont(FONTDIR "/micron_bold.ttf");
-	g_fontRenderer->AddFont(FONTDIR "/micron_italic.ttf");
-	
-	g_Fonts->menu =         g_fontRenderer->getFont(FONTNAME, "Bold", 20);
-	g_Fonts->menu_title =   g_fontRenderer->getFont(FONTNAME, "Bold", 30);
-	g_Fonts->menu_info =    g_fontRenderer->getFont(FONTNAME, "Regular", 16);
+	g_fontRenderer->AddFont((fontFile+ ".ttf").c_str() );
+	g_fontRenderer->AddFont((fontFile+ "_bold.ttf").c_str() );
+	g_fontRenderer->AddFont((fontFile+ "_italic.ttf").c_str() );
 
-	g_Fonts->epg_title =    g_fontRenderer->getFont(FONTNAME, "Regular", 25);
+	g_Fonts->menu =         g_fontRenderer->getFont(fontName.c_str(), "Bold", 20);
+	g_Fonts->menu_title =   g_fontRenderer->getFont(fontName.c_str(), "Bold", 30);
+	g_Fonts->menu_info =    g_fontRenderer->getFont(fontName.c_str(), "Regular", 16);
 
-	g_Fonts->epg_info1 =	g_fontRenderer->getFont(FONTNAME, "Italic", 17); // info1 must be same size as info2, but italic
-	g_Fonts->epg_info2 =	g_fontRenderer->getFont(FONTNAME, "Regular", 17);
+	g_Fonts->epg_title =    g_fontRenderer->getFont(fontName.c_str(), "Regular", 25);
 
-	g_Fonts->epg_date =		g_fontRenderer->getFont(FONTNAME, "Regular", 15);
-	g_Fonts->alert =		g_fontRenderer->getFont(FONTNAME, "Regular", 100);
+	g_Fonts->epg_info1 =	g_fontRenderer->getFont(fontName.c_str(), "Italic", 17); // info1 must be same size as info2, but italic
+	g_Fonts->epg_info2 =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 17);
 
-	g_Fonts->eventlist_title =		g_fontRenderer->getFont(FONTNAME, "Regular", 30);
-	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont(FONTNAME, "Bold", 20);
-	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont(FONTNAME, "Regular", 14);
-	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont(FONTNAME, "Regular", 16);
+	g_Fonts->epg_date =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 15);
+	g_Fonts->alert =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 100);
 
-	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont(FONTNAME, "Bold", 20);
-	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont(FONTNAME, "Regular", 16);
+	g_Fonts->eventlist_title =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 30);
+	g_Fonts->eventlist_itemLarge =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 20);
+	g_Fonts->eventlist_itemSmall =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 14);
+	g_Fonts->eventlist_datetime =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 16);
 
-	g_Fonts->channellist =			g_fontRenderer->getFont(FONTNAME, "Bold", 20);
-	g_Fonts->channellist_descr =	g_fontRenderer->getFont(FONTNAME, "Regular", 20);
-	g_Fonts->channellist_number =	g_fontRenderer->getFont(FONTNAME, "Bold", 14);
-	g_Fonts->channel_num_zap =		g_fontRenderer->getFont(FONTNAME, "Bold", 40);
+	g_Fonts->gamelist_itemLarge =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 20);
+	g_Fonts->gamelist_itemSmall =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 16);
 
-	g_Fonts->infobar_number =	g_fontRenderer->getFont(FONTNAME, "Bold", 50);
-	g_Fonts->infobar_channame =	g_fontRenderer->getFont(FONTNAME, "Bold", 30);
-	g_Fonts->infobar_info =		g_fontRenderer->getFont(FONTNAME, "Regular", 20);
-	g_Fonts->infobar_small =	g_fontRenderer->getFont(FONTNAME, "Regular", 14);
+	g_Fonts->channellist =			g_fontRenderer->getFont(fontName.c_str(), "Bold", 20);
+	g_Fonts->channellist_descr =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 20);
+	g_Fonts->channellist_number =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 14);
+	g_Fonts->channel_num_zap =		g_fontRenderer->getFont(fontName.c_str(), "Bold", 40);
+
+	g_Fonts->infobar_number =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 50);
+	g_Fonts->infobar_channame =	g_fontRenderer->getFont(fontName.c_str(), "Bold", 30);
+	g_Fonts->infobar_info =		g_fontRenderer->getFont(fontName.c_str(), "Regular", 20);
+	g_Fonts->infobar_small =	g_fontRenderer->getFont(fontName.c_str(), "Regular", 14);
 }
 
 
@@ -2334,7 +2350,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.241 2002/04/22 01:56:44 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.242 2002/04/23 14:37:30 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

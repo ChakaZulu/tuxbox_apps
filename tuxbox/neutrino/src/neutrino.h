@@ -78,11 +78,17 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		string				scanSettingsFile;
 		CScanSettings		scanSettings;
 
+		string				fontName;
+		string				fontFile;
+
 		int				    mode;
+
 		int					lastMode;
 		bool				softupdate;
 		bool				fromflash;
 		int					streamstatus;
+		bool				record_mode;
+
 		long long 			standby_pressed_at;
 
 		channel_msg         firstchannel;

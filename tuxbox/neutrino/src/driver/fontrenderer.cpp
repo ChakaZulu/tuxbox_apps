@@ -229,7 +229,6 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 		return;
 	}
 
-
 	int use_kerning=FT_HAS_KERNING(face);
 
 	int left=x;
@@ -276,6 +275,19 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 	FT_Vector kerning;
 	int pen1=-1; // "pen" positions for kerning, pen2 is "x"
 
+	int coff=(color+ 2)%8;
+	unsigned char colors[256];
+
+	for (int i= 0; i< 8; i++ )
+	{
+		int c = i- coff; // c = 0..7
+		if (c< 0)
+			c= 0;
+		c= color + c;
+		for (int j= i*32; j< (i+1)*32; j++)
+			colors[j]= c;
+	}
+
 	for (; *text; text++)
 	{
 		FTC_SBit glyph;
@@ -313,7 +325,7 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 		__u8 *d=frameBuffer->getFrameBufferPointer() + frameBuffer->getStride()*ry + rx;
 		__u8 *s=glyph->buffer;
 
-		int coff=(color+ 2)%8;
+
 
 		int w =	glyph->width;
 		int h =	glyph->height;
@@ -326,10 +338,12 @@ void Font::RenderString(int x, int y, int width, const char *text, unsigned char
 			int ax;
 			for (ax=0; ax<w; ax++)
 			{
-				int c = (*s++>>5)- coff; // c = 0..7
+/*				int c = (*s++>>5)- coff; // c = 0..7
 				if (c< 0)
 					c= 0;
 				*td++=color + c;   // we use color as "base color" plus 7 consecutive colors for anti-aliasing
+*/
+				*td++= colors[*s++];
 			}
 			s+= pitch- ax;
 			d+= stride;
