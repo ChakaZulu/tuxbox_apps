@@ -564,6 +564,8 @@ timerlist.message Nachricht
 timerlist.apid Audio PID
 timersettings.separator Timereinstellungen
 timersettings.record_safety_time Aufnahmekorrektur
+timersettings.record_safety_time.hint_1 Korrekturzeit in Min. (00=aus), die beim Start
+timersettings.record_safety_time.hint_2 des jeweiligen Timers abgezogen werden
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Titel

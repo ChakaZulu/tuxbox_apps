@@ -1513,7 +1513,7 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 //	CMenuForwarder *m1 = new CMenuForwarder("recordingmenu.vcr_devicename",true, g_settings.recording_vcr_devicename, recordingSettings_vcr_devicename );
 	recordingSettings.addItem( new CMenuForwarder("recordingmenu.vcr_devicename", true, g_settings.recording_vcr_devicename,recordingSettings_vcr_devicename));
 
-	CStringInput *timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	CStringInput *timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "timersettings.record_safety_time.hint_1", "timersettings.record_safety_time.hint_2","0123456789 ");
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
 	recordingSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
 
@@ -3068,7 +3068,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.349 2002/10/25 11:33:05 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.350 2002/10/25 13:37:33 alexw Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
