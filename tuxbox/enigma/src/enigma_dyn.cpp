@@ -4149,11 +4149,10 @@ static eString changeTimerEvent(eString request, eString dirpath, eString opts, 
 	{
 		oldType |= ePlaylistEntry::RecTimerEntry;
 
-		if (action == "dvr")
-			oldType |= ePlaylistEntry::recDVR;
-		else
 		if (action == "ngrab")
 			oldType |= ePlaylistEntry::recNgrab;
+		else
+			oldType |= ePlaylistEntry::recDVR;
 	}
 
 	if (oldType & ePlaylistEntry::isRepeating)
@@ -4323,11 +4322,10 @@ static eString addTimerEvent(eString request, eString dirpath, eString opts, eHT
 	{
 		type |= ePlaylistEntry::RecTimerEntry;
 
-		if (action == "dvr")
-			type |= ePlaylistEntry::recDVR;
-		else
 		if (action == "ngrab")
 			type |= ePlaylistEntry::recNgrab;
+		else
+			type |= ePlaylistEntry::recDVR;
 	}
 
 	if (timer == "repeating")
