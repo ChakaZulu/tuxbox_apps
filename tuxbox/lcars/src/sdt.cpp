@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: sdt.cpp,v $
+Revision 1.5  2002/06/12 23:30:03  TheDOC
+basic NVOD should work again
+
 Revision 1.4  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -187,6 +190,7 @@ void sdt::getNVODs(channels *channels)
 		int nvods = 0;
 		int nvod_SID[10];
 		int nvod_TS[10];
+		int nvod_ONID[10];
 
 		int length = ((buffer[start + 3] & 0xf) << 8) | buffer[start + 4], counter = 0;;
 		while (length > counter)
@@ -231,6 +235,7 @@ void sdt::getNVODs(channels *channels)
 				{
 					nvod_TS[i] = (buffer[start + 5 + counter + 2 + i * 6] << 8) | buffer[start + 5 + counter + 2 + i * 6 + 1];
 					nvod_SID[i] = (buffer[start + 5 + counter + 2 + i * 6 + 4] << 8) | buffer[start + 5 + counter + 2 + i * 6 + 5];
+					nvod_ONID[i] = (buffer[8] << 8) | buffer[9];
 				}
 			}
 
@@ -245,7 +250,7 @@ void sdt::getNVODs(channels *channels)
 			(*channels).clearCurrentNVODs();
 			(*channels).setCurrentNVODCount(nvods);
 			for (int i = 0; i < nvods; i++)
-				(*channels).addCurrentNVOD(nvod_TS[i], nvod_SID[i], i);
+				(*channels).addCurrentNVOD(nvod_TS[i], nvod_ONID[i], nvod_SID[i], i);
 			break;
 
 		}

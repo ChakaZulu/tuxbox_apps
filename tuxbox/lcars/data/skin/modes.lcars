@@ -67,6 +67,7 @@ VOLMINUS:
 	CONTROL Mode 11
 GREEN:
 	? %IS_MULTIPERSPECTIVE CONTROL Mode 10
+	? %IS_NVOD CONTROL Mode 12
 	?! NOOP
 RED:
 	CONTROL Mode 4
@@ -439,6 +440,51 @@ Init:
 	CHANNELS Perspectives Parse
 	CONTROL Var Set OLD_MODE 2
 	CONTROL Mode 2
+------
++++
+Title:
+NVOD Init
++++
+Index:
+12
++++
+Init:
+	OSD direct COMMAND perspective name Reading NVOD-Data...
+	OSD direct SHOW perspective
+	SDT Get NVODs
+	OSD direct COMMAND perspective name Select NVOD 1 - %NUMBER_NVODS
+	OSD direct SHOW perspective
+	CONTROL Mode 15
+------
++++
+Title:
+NVOD
++++
+Index:
+15
++++
+Init:
+	CONTROL Var Set OLD_MODE 15
++++
+Actions:
+GREEN:
+	CHANNELS Zap Zap
+	CONTROL Mode 1
+1:
+	CHANNELS Perspectives Zap 0
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+2:
+	CHANNELS Perspectives Zap 1
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
+3:
+	CHANNELS Perspectives Zap 2
+	OSD direct COMMAND perspective name %CURR_PERSPECTIVE_NAME
+	OSD direct SHOW perspective
+	CONTROL Mode 3
 ------
 +++
 Title:

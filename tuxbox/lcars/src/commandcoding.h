@@ -20,7 +20,8 @@ enum
     FB,
     IF,
     ELSE,
-    IR
+    IR,
+	SDT
 };
 
 // Commands

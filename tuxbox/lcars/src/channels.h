@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.h,v $
+Revision 1.11  2002/06/12 23:30:03  TheDOC
+basic NVOD should work again
+
 Revision 1.10  2002/06/02 14:23:36  TheDOC
 some fixes and changes
 
@@ -90,6 +93,7 @@ struct channel
 	int type; // 1->video, 2->radio, 4->NVOD-reference
 	int NVOD_count;
 	int NVOD_TS[10]; // Nur bei type = 4 - TSID des NVOD-services
+	int NVOD_ONID[10]; // Nur bei type = 4 - ONID des NVOD-services
 	int NVOD_SID[10]; // Nur bei type = 4 - SID des NVOD-services
 	char serviceName[100];
 	char providerName[100];
@@ -186,6 +190,7 @@ class channels
 	std::queue<int> last_channels;
 	std::vector<linkage> linkage_perspectives;
 	linkage tmp_link;
+	pmt_data NVOD_pmt;
 public:
 	channels(settings *setting, pat *p1, pmt *p2, eit *e, cam *c, hardware *h, osd *o, zap *z, tuner *t, variables *v);
 	channels(settings *setting, pat *p1, pmt *p2);
@@ -237,7 +242,7 @@ public:
 	void setCurrentEIT(int EIT);
 	void setCurrentType(int type);
 	void clearCurrentNVODs() { basic_channellist[cur_pos].NVOD_count = 0; }
-	void addCurrentNVOD(int NVOD_TS, int NVOD_SID, int number = -1);
+	void addCurrentNVOD(int NVOD_TS, int NVOD_ONID, int NVOD_SID, int number = -1);
 	void setCurrentNVODCount(int count);
 	void setCurrentServiceName(std::string serviceName);
 	void setCurrentProviderName(std::string serviceName);
@@ -263,7 +268,8 @@ public:
 	int getCurrentPMT();
 	int getCurrentVPID();
 	int getCurrentAPIDcount();
-	int getCurrentAPID(int number = 0);
+	int getCurrentAPID(int number);
+	int getCurrentAPID();
 	bool getCurrentDD(int number = 0);
 	int getCurrentPCR();
 	int getCurrentCAcount();
@@ -275,6 +281,7 @@ public:
 	int getType(int number) { return basic_channellist[number].type; };
 	int getCurrentNVODcount();
 	int getCurrentNVOD_TS(int number);
+	int getCurrentNVOD_ONID(int number);
 	int getCurrentNVOD_SID(int number);
 	std::string getCurrentServiceName();
 	std::string getCurrentProviderName();

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: main.cpp,v $
+Revision 1.22  2002/06/12 23:30:03  TheDOC
+basic NVOD should work again
+
 Revision 1.21  2002/06/02 14:23:36  TheDOC
 some fixes and changes
 
@@ -337,7 +340,7 @@ int main(int argc, char **argv)
 	hardware.setOutputMode(settings.getOutputFormat());
 	rc.start_thread(true);
 
-	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext);
+	control control(&osd, &rc, &hardware, &settings, &scan, &channels, &eit, &cam, &zap, &tuner, &update, &timer, &plugins, &checker, &fb, &variables, &ir, &pig, &teletext, &sdt);
 	
 	network network(&zap, &channels, &fb, &osd, &settings, &tuner, &pat, &pmt, &eit, &scan, &rc, &control, &variables);
 	network.startThread();

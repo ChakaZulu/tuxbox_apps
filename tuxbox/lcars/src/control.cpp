@@ -1,6 +1,6 @@
 #include "control.h"
 
-control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2)
+control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c, eit *e, cam *c1, zap *z, tuner *t, update *u, timer *t1, plugins *p, checker *c2, fbClass *f, variables *v, ir *i, pig *p1, teletext *t2, sdt *s2)
 {
 	osd_obj = o;
 	rc_obj = r;
@@ -21,6 +21,7 @@ control::control (osd *o, rc *r, hardware *h, settings *s, scan *s1, channels *c
 	ir_obj = i;
 	pig_obj = p1;
 	teletext_obj = t2;
+	sdt_obj = s2;
 
 	last_read.TS = -1;
 	last_read.ONID = -1;
@@ -148,6 +149,10 @@ command_class control::parseCommand(std::string cmd)
 	else if (tmp_string == "IR")
 	{
 		tmp_command.cmd_class = IR;
+	}
+	else if (tmp_string == "SDT")
+	{
+		tmp_command.cmd_class = SDT;
 	}
 	else
 	{
@@ -534,6 +539,15 @@ int control::runCommand(command_class command, bool val)
 
 
 		break;
+	case SDT:
+		if (command.command == C_Get)
+		{
+			if (command.args[0] == "NVODs")
+			{
+				sdt_obj->getNVODs(channels_obj);
+				vars->setvalue("%NUMBER_NVODS", channels_obj->getCurrentNVODcount());
+			}
+		}
 	case HARDWARE:
 		if (command.command == C_Set)
 		{
@@ -1430,7 +1444,7 @@ void control::runMode()
 	{
 		mode mode = modes.find(current_mode)->second;
 
-		//std::cout << "Running Mode #" << mode.index << " titled \"" << mode.title << "\"" << std::endl;
+		std::cout << "Running Mode #" << mode.index << " titled \"" << mode.title << "\"" << std::endl;
 
 		if (mode.init_commands.size() > 0)
 		{
@@ -1780,6 +1794,7 @@ void control::openMenu(int menuNumber)
 			//std::cout << "NUUUUMBER: " << number << std::endl;
 			osd_obj->addCommand("HIDE menu");
 			teletext_obj->stopReinsertion();
+			system("rmmod avia_gt_vbi");
 			if (plugins_obj->getShowPig(number - 1))
 			{
 				pig_obj->hide();
@@ -1803,6 +1818,7 @@ void control::openMenu(int menuNumber)
 			osd_obj->initPalette();
 			usleep(400000);
 			fb_obj->clearScreen();
+			system("insmod avia_gt_vbi");
 			if (channels_obj->getCurrentTXT() != 0)
 			{
 				teletext_obj->startReinsertion(channels_obj->getCurrentTXT());

@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: channels.cpp,v $
+Revision 1.16  2002/06/12 23:30:03  TheDOC
+basic NVOD should work again
+
 Revision 1.15  2002/06/12 17:46:53  TheDOC
 reinsertion readded
 
@@ -130,7 +133,17 @@ bool channels::currentIsMultiPerspective()
 
 int channels::currentNumberPerspectives()
 {
-	return linkage_perspectives.size();;
+	if (linkage_perspectives.size() == 0)
+	{
+		if (getCurrentNVODcount() > 0)
+		{
+			return getCurrentNVODcount();
+		}
+	}
+	else
+		return linkage_perspectives.size();
+
+	return 0;
 }
 
 void channels::parsePerspectives()
@@ -155,77 +168,162 @@ void channels::parsePerspectives()
 void channels::setPerspective(int number)
 {
 	//std::cout << "Switching to perspective number " << number << std::endl;
-	if ((unsigned int) number >= linkage_perspectives.size())
+	if (linkage_perspectives.size() > 0)
+	{
+		if ((unsigned int) number >= linkage_perspectives.size())
+			return;	
+		current_mode = LINKAGE;
+	}
+	else if (getCurrentNVODcount() > 0)
+	{
+		if ((unsigned int) number >= getCurrentNVODcount())
 		return;
+		current_mode = NVOD;
+	}
+	
 	pmt_data pmt_entry;
 
-	current_mode = LINKAGE;
-
 	curr_perspective = number;
-	tmp_link = linkage_perspectives[number];
-
-	////printf("----------------------\n");
-	////printf("APID: %d\n", apid);
-	////printf("Current perspective: %d\n", curr_perspective);
-	if (old_TS != tmp_link.TS || old_ONID != tmp_link.ONID)
+	if (current_mode == LINKAGE)
 	{
-		//std::cout << "New TS selected" << std::endl;
-		//std::cout << "The new TS is: " << tmp_link.TS << std::endl;
-		tune(tmp_link.TS, tmp_link.ONID);
-	}
-	old_ONID = tmp_link.ONID;
-	old_TS = tmp_link.TS;
+		tmp_link = linkage_perspectives[number];
 
-	zap_obj->close_dev();
-	pat_obj->readPAT();
-	ECM = 0;
-
-	memset (&pmt_entry, 0, sizeof (struct pmt_data));
-	tmp_link.PMT = pat_obj->getPMT(tmp_link.SID);
-	pmt_entry = pmt_obj->readPMT(tmp_link.PMT);
-	//channels.deleteCurrentAPIDs();
-	tmp_link.APIDcount = 0;
-	tmp_link.PCR = pmt_entry.PCR;
-	for (int i = 0; i < pmt_entry.pid_counter; i++)
-	{
-		if (pmt_entry.type[i] == 0x02)
-			tmp_link.VPID = pmt_entry.PID[i];
-		else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03 || pmt_entry.type[i] == 0x06)
+		////printf("----------------------\n");
+		////printf("APID: %d\n", apid);
+		////printf("Current perspective: %d\n", curr_perspective);
+		if (old_TS != tmp_link.TS || old_ONID != tmp_link.ONID)
 		{
-			//printf("an APID: %04x\n", pmt_entry.PID[i]);
-			tmp_link.APID[tmp_link.APIDcount++] = pmt_entry.PID[i];
+			//std::cout << "New TS selected" << std::endl;
+			//std::cout << "The new TS is: " << tmp_link.TS << std::endl;
+			tune(tmp_link.TS, tmp_link.ONID);
 		}
-		//printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
+		old_ONID = tmp_link.ONID;
+		old_TS = tmp_link.TS;
+	
+		zap_obj->close_dev();
+		pat_obj->readPAT();
+		ECM = 0;
+	
+		memset (&pmt_entry, 0, sizeof (struct pmt_data));
+		tmp_link.PMT = pat_obj->getPMT(tmp_link.SID);
+		pmt_entry = pmt_obj->readPMT(tmp_link.PMT);
+		//channels.deleteCurrentAPIDs();
+		tmp_link.APIDcount = 0;
+		tmp_link.PCR = pmt_entry.PCR;
+		for (int i = 0; i < pmt_entry.pid_counter; i++)
+		{
+			if (pmt_entry.type[i] == 0x02)
+				tmp_link.VPID = pmt_entry.PID[i];
+			else if (pmt_entry.type[i] == 0x04 || pmt_entry.type[i] == 0x03 || pmt_entry.type[i] == 0x06)
+			{
+				//printf("an APID: %04x\n", pmt_entry.PID[i]);
+				tmp_link.APID[tmp_link.APIDcount++] = pmt_entry.PID[i];
+			}
+			//printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
+		}
+	
+		//printf("ECMs: %d\n", pmt_entry.ecm_counter);
+	
+		for (int i = 0; i < pmt_entry.ecm_counter; i++)
+		{
+			if (setting->getCAID() == pmt_entry.CAID[i])
+				ECM = pmt_entry.ECM[i];
+			//printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
+		}
+		/*	osd_obj->addCommand("HIDE perspective");
+			osd_obj->createPerspective();
+			osd_obj->setPerspectiveName(tmp_link.name);
+			osd_obj->addCommand("SHOW perspective");*/
+		//printf("%s\n", tmp_link.name);
+		if (tmp_link.APIDcount == 1)
+			zap_obj->zap_to(pmt_entry, tmp_link.VPID, tmp_link.APID[apid], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS);
+		else
+			zap_obj->zap_to(pmt_entry, tmp_link.VPID, tmp_link.APID[0], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS, tmp_link.APID[1]);
 	}
-
-	//printf("ECMs: %d\n", pmt_entry.ecm_counter);
-
-	for (int i = 0; i < pmt_entry.ecm_counter; i++)
+	else if (current_mode == NVOD)	
 	{
-		if (setting->getCAID() == pmt_entry.CAID[i])
-			ECM = pmt_entry.ECM[i];
-		//printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
+		int TS = getCurrentNVOD_TS(number);
+		int ONID = getCurrentNVOD_ONID(number);
+		int SID = getCurrentNVOD_SID(number);
+		std::cout << "MARK1" << std::endl;
+		if (old_TS != TS || old_ONID != ONID)
+		{
+			//std::cout << "New TS selected" << std::endl;
+			//std::cout << "The new TS is: " << tmp_link.TS << std::endl;
+			tune(TS, ONID);
+		}
+		std::cout << "MARK2" << std::endl;
+		old_ONID = ONID;
+		old_TS = TS;
+	
+		zap_obj->close_dev();
+		pat_obj->readPAT();
+		ECM = 0;
+	
+		memset (&NVOD_pmt, 0, sizeof (struct pmt_data));
+		std::cout << "MARK3" << std::endl;
+		int PMT = pat_obj->getPMT(SID);
+		if (PMT < 1)
+			return;
+		NVOD_pmt = pmt_obj->readPMT(PMT);
+		std::cout << "MARK4" << std::endl;
+		//channels.deleteCurrentAPIDs();
+		int APIDcount = 0;
+		int PCR = NVOD_pmt.PCR;
+		int VPID = 0;
+		std::vector<int> APID;
+		std::cout << "MARK5" << std::endl;
+		for (int i = 0; i < NVOD_pmt.pid_counter; i++)
+		{
+			std::cout << "MARK6" << std::endl;
+			if (NVOD_pmt.type[i] == 0x02)
+				VPID = NVOD_pmt.PID[i];
+			else if (NVOD_pmt.type[i] == 0x04 || NVOD_pmt.type[i] == 0x03 || NVOD_pmt.type[i] == 0x06)
+			{
+				//printf("an APID: %04x\n", pmt_entry.PID[i]);
+				APID.insert(APID.end(), NVOD_pmt.PID[i]);
+				APIDcount++;
+			}
+			//printf("type: %d - PID: %04x\n", pmt_entry.type[i], pmt_entry.PID[i]);
+		}
+	
+		//printf("ECMs: %d\n", pmt_entry.ecm_counter);
+		std::cout << "MARK7" << std::endl;
+		for (int i = 0; i < NVOD_pmt.ecm_counter; i++)
+		{
+			if (setting->getCAID() == NVOD_pmt.CAID[i])
+				ECM = NVOD_pmt.ECM[i];
+			//printf("CAID: %04x - ECM: %04x\n", pmt_entry.CAID[i], pmt_entry.ECM[i]);
+		}
+		/*	osd_obj->addCommand("HIDE perspective");
+			osd_obj->createPerspective();
+			osd_obj->setPerspectiveName(tmp_link.name);
+			osd_obj->addCommand("SHOW perspective");*/
+		//printf("%s\n", tmp_link.name);
+		std::cout << "MARK8" << std::endl;
+		if (APIDcount == 1)
+			zap_obj->zap_to(NVOD_pmt, VPID, APID[apid], PCR, ECM, SID, ONID, TS);
+		else
+			zap_obj->zap_to(NVOD_pmt, VPID, APID[0], PCR, ECM, SID, ONID, TS, APID[1]);
+		std::cout << "MARK9" << std::endl;
 	}
-	/*	osd_obj->addCommand("HIDE perspective");
-		osd_obj->createPerspective();
-		osd_obj->setPerspectiveName(tmp_link.name);
-		osd_obj->addCommand("SHOW perspective");*/
-	//printf("%s\n", tmp_link.name);
-	if (tmp_link.APIDcount == 1)
-		zap_obj->zap_to(pmt_entry, tmp_link.VPID, tmp_link.APID[apid], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS);
-	else
-		zap_obj->zap_to(pmt_entry, tmp_link.VPID, tmp_link.APID[0], tmp_link.PCR, ECM, tmp_link.SID, tmp_link.ONID, tmp_link.TS, tmp_link.APID[1]);
 
 }
 
 std::string channels::getPerspectiveName(int number)
 {
-	return linkage_perspectives[number].name;
+	if (current_mode == LINKAGE)
+		return linkage_perspectives[number].name;
+	else if (current_mode == NVOD)
+		return "NVOD";
+		
 }
 
 void channels::zapCurrentChannel()
 {
 	zap_obj->zap_allstop();
+
+	linkage_perspectives.clear();
 
 	current_mode = CHANNEL;
 
@@ -652,13 +750,14 @@ void channels::setCurrentType(int type)
 	basic_channellist[cur_pos].type = type;
 }
 
-void channels::addCurrentNVOD(int NVOD_TS, int NVOD_SID, int number)
+void channels::addCurrentNVOD(int NVOD_TS, int NVOD_ONID, int NVOD_SID, int number)
 {
 	//printf("addCurrentNVOD to %d - %d\n", NVOD_TS, NVOD_SID);
 	if (number == -1)
 		number = basic_channellist[cur_pos].NVOD_count;
 	basic_channellist[cur_pos].NVOD_TS[number] = NVOD_TS;
 	basic_channellist[cur_pos].NVOD_SID[number] = NVOD_SID;
+	basic_channellist[cur_pos].NVOD_ONID[number] = NVOD_ONID;
 }
 
 void channels::setCurrentNVODCount(int count)
@@ -814,6 +913,16 @@ int channels::getCurrentAPID(int number)
 		return 0;
 }
 
+int channels::getCurrentAPID()
+{
+	if (current_mode == CHANNEL)
+		return basic_channellist[cur_pos].APID[apid];
+	else if (current_mode == LINKAGE)
+		return tmp_link.APID[apid];
+	else
+		return 0;
+}
+
 int channels::getCurrentPCR()
 {
 	if (current_mode == CHANNEL)
@@ -864,6 +973,11 @@ int channels::getCurrentNVODcount()
 int channels::getCurrentNVOD_TS(int number)
 {
 	return basic_channellist[cur_pos].NVOD_TS[number];
+}
+
+int channels::getCurrentNVOD_ONID(int number)
+{
+	return basic_channellist[cur_pos].NVOD_ONID[number];
 }
 
 int channels::getCurrentNVOD_SID(int number)
