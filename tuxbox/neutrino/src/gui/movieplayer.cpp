@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.49 2003/09/17 22:37:07 thegoodguy Exp $
+  $Id: movieplayer.cpp,v 1.50 2003/09/19 20:11:41 alexw Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -717,7 +717,13 @@ PlayStreamThread (void *mrl)
 				ioctl (dmxa, DMX_START);
 				speed = 1;
 				playstate = CMoviePlayerGui::PLAY;
-
+				break;
+			case CMoviePlayerGui::STOPPED:
+			case CMoviePlayerGui::PREPARING:
+			case CMoviePlayerGui::STREAMERROR:
+			case CMoviePlayerGui::FF:
+			case CMoviePlayerGui::REW:
+				break;
 			}
 		}
 	}
@@ -851,6 +857,12 @@ PlayFileThread (void *filename)
 				ioctl (dmxa, DMX_START);
 				speed = 1;
 				playstate = CMoviePlayerGui::PLAY;
+				break;
+			case CMoviePlayerGui::STOPPED:
+			case CMoviePlayerGui::PREPARING:
+			case CMoviePlayerGui::STREAMERROR:
+			case CMoviePlayerGui::PLAY:
+				break;
 			}
 
 			do
