@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.56 2002/12/02 22:39:54 Zwen Exp $
+   $Id: timermanager.cpp,v 1.57 2002/12/09 18:39:51 Zwen Exp $
 
 	License: GPL
 
@@ -67,6 +67,10 @@ CTimerManager* CTimerManager::getInstance()
 //------------------------------------------------------------
 void* CTimerManager::timerThread(void *arg)
 {
+	pthread_mutex_t dummy_mutex = PTHREAD_MUTEX_INITIALIZER;
+	pthread_cond_t dummy_cond = PTHREAD_COND_INITIALIZER;
+	struct timespec wait;
+
 	CTimerManager *timerManager = (CTimerManager*) arg;
 	int sleeptime=(debug)?10:20;
 	while(1)
@@ -83,7 +87,9 @@ void* CTimerManager::timerThread(void *arg)
 			else
 			{
 				dprintf("waiting for time to be set\n");
-				sleep(5);
+				wait.tv_sec = time(NULL) + 5 ;
+				wait.tv_nsec = 0;
+				pthread_cond_timedwait(&dummy_cond, &dummy_mutex, &wait);
 			}
 		}
 		else
@@ -147,9 +153,12 @@ void* CTimerManager::timerThread(void *arg)
 				timerManager->m_saveEvents=false;
 				timerManager->saveEventsToConfig();
 			}
-			int wait = sleeptime-(((int)time(NULL)) % sleeptime);
+/*			int wait = sleeptime-(((int)time(NULL)) % sleeptime);
 			if(wait==0) wait=sleeptime;
-			usleep(wait*1000000);
+			usleep(wait*1000000);*/
+			wait.tv_sec = (((time(NULL) / sleeptime) * sleeptime) + sleeptime);
+			wait.tv_nsec = 0;
+			pthread_cond_timedwait(&dummy_cond, &dummy_mutex, &wait);
 		}
 	}
 	return 0;
@@ -464,7 +473,11 @@ bool CTimerManager::shutdown()
 {
 
 	time_t nextAnnounceTime=0;
+	bool status=false;
 	CTimerEventMap::iterator pos = events.begin();
+	dprintf("Waiting for timermanager thread to terminate ...\n");
+	pthread_cancel(thrTimer);
+	dprintf("Timermanager thread terimanted\n");
 	if(m_saveEvents)
       saveEventsToConfig();
    for(;pos != events.end();pos++)
@@ -500,15 +513,14 @@ bool CTimerManager::shutdown()
 			{
 				dprintf("Error setting wakeup (%d)\n",erg);
 			}
-			return false;
 		}
 		else
 		{
 			dprintf("wakeup in %d min. programmed\n",minutes);
-			return true;
+			status=true;
 		}
 	}
-	return false;
+	return status;
 }
 //------------------------------------------------------------
 void CTimerManager::shutdownOnWakeup()

@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerd.cpp,v 1.39 2002/12/03 11:15:11 thegoodguy Exp $
+	$Id: timerd.cpp,v 1.40 2002/12/09 18:39:51 Zwen Exp $
 
 	License: GPL
 
@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sstream>
-
+#include <signal.h>
 #include <unistd.h>
 
 #include <configfile.h>
@@ -37,6 +37,12 @@
 
 #include <connection/basicserver.h>
 #include <timerdclient/timerdmsg.h>
+
+static void signalHandler(int signum)
+{
+	CTimerManager::getInstance()->shutdown();
+	exit(0);
+}
 
 bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 {
@@ -383,6 +389,15 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
+
+	//catch all signals
+	signal(SIGHUP, signalHandler);
+	signal(SIGINT, signalHandler);
+	signal(SIGQUIT, signalHandler);
+	signal(SIGTERM, signalHandler);
+
+	// Start timer thread
+	CTimerManager::getInstance();
 
 	//startup Timer
 	try
