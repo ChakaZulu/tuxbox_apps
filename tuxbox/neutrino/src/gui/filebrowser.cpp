@@ -558,9 +558,9 @@ bool CFileBrowser::exec(const char * const dirname)
 			m_oldKey=0;
 		}
 		
-      if ( msg == CRCInput::RC_yellow )
+		if (msg == CRCInput::RC_yellow)
 		{
-			if(Multi_Select)
+			if ((Multi_Select) && (selected < filelist.size()))
 			{
 				if(filelist[selected].getFileName() != "..")
 				{
@@ -574,12 +574,12 @@ bool CFileBrowser::exec(const char * const dirname)
 			}
 		}
 
-		if ( msg == CRCInput::RC_red )
+		if (msg == CRCInput::RC_red)
 		{
-			selected+=listmaxshow;
-			if (selected>filelist.size()-1)
-				selected=0;
-			liststart = (selected/listmaxshow)*listmaxshow;
+			selected += listmaxshow;
+			if (selected >= filelist.size())
+				selected = 0;
+			liststart = (selected / listmaxshow) * listmaxshow;
 			paint();
 		}
 		else if ( msg == CRCInput::RC_green )
