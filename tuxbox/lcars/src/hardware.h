@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.h,v $
+Revision 1.7  2002/06/02 15:39:40  TheDOC
+video data viewable
+
 Revision 1.6  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -80,6 +83,9 @@ public:
 	int getAvsStatus();
 	int getVCRStatus();
 	int getARatio();
+	int getVideoSizeX();
+	int getVideoSizeY();
+	int getAudioType();
 
 	void switch_mute();
 	bool isMuted() { return muted; }

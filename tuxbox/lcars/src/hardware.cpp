@@ -15,6 +15,9 @@
  ***************************************************************************/
 /*
 $Log: hardware.cpp,v $
+Revision 1.7  2002/06/02 15:39:40  TheDOC
+video data viewable
+
 Revision 1.6  2002/06/02 12:18:47  TheDOC
 source reformatted, linkage-pids correct, xmlrpc removed, all debug-messages removed - 110k smaller lcars with -Os :)
 
@@ -90,6 +93,48 @@ int hardware::getARatio()
 	{
 		fgets(buffer, 100, fp);
 		sscanf(buffer, "A_RATIO: %d", &check);
+	}
+	fclose(fp);
+	return check;
+}
+
+int hardware::getVideoSizeX()
+{
+	int check = 0;
+	char buffer[100];
+	FILE* fp = fopen("/proc/bus/bitstream", "r");
+	while (!feof(fp))
+	{
+		fgets(buffer, 100, fp);
+		sscanf(buffer, "H_SIZE: %d", &check);
+	}
+	fclose(fp);
+	return check;
+}
+
+int hardware::getVideoSizeY()
+{
+	int check = 0;
+	char buffer[100];
+	FILE* fp = fopen("/proc/bus/bitstream", "r");
+	while (!feof(fp))
+	{
+		fgets(buffer, 100, fp);
+		sscanf(buffer, "V_SIZE: %d", &check);
+	}
+	fclose(fp);
+	return check;
+}
+
+int hardware::getAudioType()
+{
+	int check = 0;
+	char buffer[100];
+	FILE* fp = fopen("/proc/bus/bitstream", "r");
+	while (!feof(fp))
+	{
+		fgets(buffer, 100, fp);
+		sscanf(buffer, "A_TYPE: %d", &check);
 	}
 	fclose(fp);
 	return check;
