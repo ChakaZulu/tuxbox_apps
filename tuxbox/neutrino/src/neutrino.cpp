@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.231 2002/04/20 02:59:45 McClean Exp $
+        $Id: neutrino.cpp,v 1.232 2002/04/20 12:04:52 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -837,9 +837,9 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 {
 	CMenuOptionChooser* ojBouquets = new CMenuOptionChooser("scants.bouquet", &((int)(scanSettings.bouquetMode)), true );
-	ojBouquets->addOption( CScanSettings::deleteBouquets, "scants.bouquet_erase");
-	ojBouquets->addOption( CScanSettings::createBouquets, "scants.bouquet_create");
-	ojBouquets->addOption( CScanSettings::donttouchBouquets, "scants.bouquet_leave");
+	ojBouquets->addOption( CZapitClient::BM_DELETEBOUQUETS, "scants.bouquet_erase");
+	ojBouquets->addOption( CZapitClient::BM_CREATEBOUQUETS, "scants.bouquet_create");
+	ojBouquets->addOption( CZapitClient::BM_DONTTOUCHBOUQUETS, "scants.bouquet_leave");
 
 	//kabel-lnb-settings
 	if (atoi(getenv("fe"))==1)
@@ -850,17 +850,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		CZapitClient::SatelliteList satList;
 		g_Zapit->getScanSatelliteList(satList);
-/*		for ( uint i=0; i<satList.size(); i++)
-		{
-			cout << satList[i].satName << endl;
-			if( !strcmp( satList[i].satName, scanSettings.satellites[0].name))
-			{
-				cout << "found" << satList[i].satName << endl;
-				sat = i;
-				break;
-			}
-		}
-*/
 		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser("satsetup.satellite", (char*)&scanSettings.satNameNoDiseqc, scanSettings.diseqcMode == NO_DISEQC/*, new CSatelliteNotifier*/, NULL, false);
 		for ( uint i=0; i< satList.size(); i++)
 		{
@@ -2407,7 +2396,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.231 2002/04/20 02:59:45 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.232 2002/04/20 12:04:52 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 

@@ -51,7 +51,16 @@ int CScanTs::exec(CMenuTarget* parent, string)
 	frameBuffer->loadPicture2Mem("scan.raw", frameBuffer->getFrameBufferPointer());
 
 	g_Sectionsd->setPauseScanning( true );
-	g_Zapit->startScan( g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_sirius | g_settings.scan_thor | g_settings.scan_tuerksat | g_settings.scan_bouquet );
+
+	g_Zapit->setDiseqcType( CNeutrinoApp::getInstance()->getScanSettings().diseqcMode);
+	g_Zapit->setDiseqcRepeat( CNeutrinoApp::getInstance()->getScanSettings().diseqcRepeat);
+	g_Zapit->setScanBouquetMode( CNeutrinoApp::getInstance()->getScanSettings().bouquetMode);
+
+	CZapitClient::ScanSatelliteList satList;
+	CNeutrinoApp::getInstance()->getScanSettings().toSatList( satList);
+	g_Zapit->setScanSatelliteList( satList);
+
+	g_Zapit->startScan();
 
 	paint();
 

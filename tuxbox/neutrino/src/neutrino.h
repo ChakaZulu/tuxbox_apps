@@ -156,7 +156,7 @@ struct NeutrinoMessages {
 class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 {
 	private:
-		
+
 		CFrameBuffer	*frameBuffer;
 
 		enum
@@ -258,10 +258,12 @@ class CNeutrinoApp : public CMenuTarget, COnPaintNotifier, CChangeObserver
 		~CNeutrinoApp();
 
 	public:
+		const CScanSettings& getScanSettings(){ return scanSettings;};
+
 		CChannelList				*channelList;
 
 		static CNeutrinoApp* getInstance();
-		
+
 		void channelsInit();
 		int run(int argc, char **argv);
 		//callback stuff only....
