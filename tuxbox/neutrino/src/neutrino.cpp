@@ -2540,7 +2540,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 	{
 		CVCRControl::CFileDeviceInfo * info = new CVCRControl::CFileDeviceInfo;
 		unsigned int splitsize;
-		sscanf(g_settings.recording_server_port, "%u", &splitsize);
+		sscanf(g_settings.recording_splitsize, "%u", &splitsize);
 		info->SplitSize = splitsize;
 		info->Directory = g_settings.network_nfs_recordingdir;
 		info->StopPlayBack = (g_settings.recording_stopplayback == 1);
