@@ -40,6 +40,7 @@ satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Wiederholungen
 satsetup.savesettingsnow Einstellungen jetzt speichern
+satsetup.motorcontrol Manueller Motor-Setup
 
 mainsettings.head Einstellungen
 mainsettings.savesettingsnow Einstellungen jetzt speichern
@@ -341,7 +342,6 @@ scants.bouquet_create neu erstellen
 scants.bouquet_erase löschen
 scants.failed Kanalsuche fehlgeschlagen!
 scants.finished Kanalsuche erfolgreich beendet!
-scants.motorcontrol Manueller Motor-Setup
 
 motorcontrol.head Motor-Setup
 
