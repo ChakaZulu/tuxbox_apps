@@ -8,6 +8,8 @@
 #include <time.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
+#include <string>
+#include <map>
 
 /* NAPI */
 #include <ost/dmx.h>
@@ -83,16 +85,5 @@ struct rmsg {
 } rmsg;
 
 
-
-
-
-extern chanptr LoadServices(int serv_mode);
-
+int LoadServices();
 int get_caid();
-
-/*
-void *start_camd(void *args);
-void end_cam();
-int descriptor(char *buffer, int len, int ca_system_id);
-*/
-
