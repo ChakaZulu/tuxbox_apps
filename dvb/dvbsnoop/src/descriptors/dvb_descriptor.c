@@ -1,5 +1,5 @@
 /*
-$Id: dvb_descriptor.c,v 1.27 2004/02/09 21:24:57 rasc Exp $ 
+$Id: dvb_descriptor.c,v 1.28 2004/02/09 22:56:59 rasc Exp $ 
 
 
  DVBSNOOP
@@ -18,6 +18,9 @@ $Id: dvb_descriptor.c,v 1.27 2004/02/09 21:24:57 rasc Exp $
 
 
 $Log: dvb_descriptor.c,v $
+Revision 1.28  2004/02/09 22:56:59  rasc
+Bugfix VBI Data descriptor
+
 Revision 1.27  2004/02/09 21:24:57  rasc
 AIT descriptors
 minor redesign on output routines
@@ -485,84 +488,50 @@ void descriptorDVB_CableDelivSys (u_char *b)
 void descriptorDVB_VBI_Data  (u_char *b)
 
 {
-
- typedef struct  _descVBIData {
-    u_int      descriptor_tag;
-    u_int      descriptor_length;		
-
-    // N ... DataList 1
- } descVBIData;
-
- typedef struct  _descVBIData2 {
-    u_int      data_service_id;		
-    u_int      data_service_descriptor_length;		
-
-    //    N ... DataList 3
-    // or N ... reserved bytes
- } descVBIData2;
-
- typedef struct  _descVBIData3 {
-    u_int      reserved_1;		
-    u_int      field_parity;		
-    u_int      line_offset;		
- } descVBIData3;
+ int           len1;
 
 
-
- descVBIData   d;
- descVBIData2  d2;
- descVBIData3  d3;
- int           len1,len2;
-
-
-
- d.descriptor_tag		 = b[0];
- d.descriptor_length       	 = b[1];
-
+ // dtag	 = b[0];
+ len1       	 = b[1];
  b += 2;
- len1 = d.descriptor_length;
 
 
  indent (+1);
  while (len1 > 0) {
+	int  ds_id;
+	int  len2;
 
-    d2.data_service_id		       = b[0];
-    d2.data_service_descriptor_length   = b[1];
+    	out_NL (4); 
+	ds_id =	outBit_S2x_NL (4,"Data_service_id: ",			b,  0,  8,
+			(char *(*)(u_long)) dvbstrDataService_ID);
+	len2 = outBit_Sx_NL   (4,"Data_service_descriptor_length: ",	b,  8,  8);
 
-    out_NL (4); 
-    out_nl (4, "Data_service_id: %u  [= %s]", d2.data_service_id,
-		dvbstrDataService_ID(d2.data_service_id));
+	b    += 2;
+	len1 -= 2;
 
-    out_SB_NL (5,"Data_service_descriptor_length: ",
-		d2.data_service_descriptor_length);
+	if ((ds_id >= 1 && ds_id <= 7) && (ds_id != 3) ) {
+
+		indent (+1);
+		while (len2 > 0) {
+           		out_NL (4);
+			outBit_Sx_NL   (6,"reserved_1: ",	b,  0,  2);
+			outBit_Sx_NL   (4,"field_parity: ",	b,  2,  1);
+			outBit_Sx_NL   (4,"line_offset: ",	b,  3,  5);
+
+			b++;
+	   		len2--;
+			len1--;
+		} 
+		indent (-1);
+
+	} else {
+
+		print_databytes (6,"Reserved Data:", b,len2);
+		b += len2;
+		len1 -= len2;
 
 
-    b    += 2;
-    len1 -= 2;
-    len2  = d2.data_service_descriptor_length;
-
-    if (d2.data_service_id >= 1 && d2.data_service_id <= 7) {
-
-       indent (+1);
-       while (len2 > 0) {
-           d3.reserved_1		 = getBits (b, 0, 0, 2);
-           d3.field_parity		 = getBits (b, 0, 2, 1);
-           d3.line_offset		 = getBits (b, 0, 3, 5);
-
-           out_NL (4);
-           out_SB_NL (6,"reserved_1: ",d3.reserved_1);
-           out_SB_NL (4,"field_parity: ",d3.field_parity);
-           out_SB_NL (4,"line_offset: ",d3.line_offset);
-	   len2--;
-       } 
-       indent (-1);
-
-    } else {
-
-       print_databytes (6,"Reserved Data:", b,len2);
-
-    }
-
+	}
 
  }
  indent (-1);

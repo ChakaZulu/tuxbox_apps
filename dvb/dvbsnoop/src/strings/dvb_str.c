@@ -1,5 +1,5 @@
 /*
-$Id: dvb_str.c,v 1.42 2004/02/09 21:25:01 rasc Exp $
+$Id: dvb_str.c,v 1.43 2004/02/09 22:57:01 rasc Exp $
 
 
  DVBSNOOP
@@ -19,6 +19,9 @@ $Id: dvb_str.c,v 1.42 2004/02/09 21:25:01 rasc Exp $
 
 
 $Log: dvb_str.c,v $
+Revision 1.43  2004/02/09 22:57:01  rasc
+Bugfix VBI Data descriptor
+
 Revision 1.42  2004/02/09 21:25:01  rasc
 AIT descriptors
 minor redesign on output routines
@@ -2492,6 +2495,8 @@ char *dvbstrPESDataIdentifier (u_int i)
   -- dvbstrPES_EBUDataUnitID  (Teletext, VPS, WSS, etc.)
   -- EN 300 472  and EN 301 775.
 */
+
+// $$$ TODO same as data_service_id ??  (EN 300 468)
 
 char *dvbstrPES_EBUDataUnitID (u_int i)
 {

@@ -1,5 +1,5 @@
 /*
-$Id: pespacket.c,v 1.22 2004/02/02 23:34:08 rasc Exp $
+$Id: pespacket.c,v 1.23 2004/02/09 22:57:00 rasc Exp $
 
 
  DVBSNOOP
@@ -16,6 +16,9 @@ $Id: pespacket.c,v 1.22 2004/02/02 23:34:08 rasc Exp $
 
 
 $Log: pespacket.c,v $
+Revision 1.23  2004/02/09 22:57:00  rasc
+Bugfix VBI Data descriptor
+
 Revision 1.22  2004/02/02 23:34:08  rasc
 - output indent changed to avoid \r  (which sucks on logged output)
 - EBU PES data started (teletext, vps, wss, ...)
@@ -171,14 +174,6 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 		PES_decodePSM (b, p.PES_packet_length);
 		break;
 
-//	case 0xBD:		// Data Stream, privat_stream_1 (EN301192-1.3.1 S.11)
-	// $$$ TODO  this is a wrong here ???
-//    		out_nl (3,"PES_data_packet:");
-//		indent (+1);
-//		PES_decodeDATA (b, p.PES_packet_length);
-//		indent (-1);
-//		break;
-
 	case 0xBE:		// padding stream!
 		print_databytes (3,"Padding_bytes:", b, p.PES_packet_length);
 		break;
@@ -219,7 +214,6 @@ void decodePES_buf (u_char *b, u_int len, int pid)
 
  		} else {
 
-			// $$$ TODO  DATA sync VTX, etc... wie hier machen?
 			indent (+1);
 			PES_decode_std (b, p.PES_packet_length, p.stream_id);
 			indent (-1);
