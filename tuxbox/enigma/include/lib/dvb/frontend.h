@@ -13,6 +13,7 @@
 #include <ost/video.h>
 
 #include <lib/base/ebase.h>
+#include <lib/base/estring.h>
 
 class eTransponder;
 class eSatellite;
@@ -37,7 +38,7 @@ class eFrontend: public Object
 	eTransponder *transponder;
 	eFrontend(int type, const char *demod="/dev/dvb/card0/frontend0", const char *sec="/dev/dvb/card0/sec0");
 	static eFrontend *frontend;
-	eTimer *timer;
+	eTimer *timer, timer2;
 	int tries;
 	int tune(eTransponder *transponder, 
 			uint32_t Frequency, int polarisation,
@@ -46,7 +47,9 @@ class eFrontend: public Object
 private:
 	void timeout();
 public:
-	Signal2<void, eTransponder*, int> tunedIn;
+  int sendDiSEqCCmd( int addr, int cmd, eString params="", int frame=0xE0 );
+  
+  Signal2<void, eTransponder*, int> tunedIn;
 	~eFrontend();
 
 	enum
@@ -62,7 +65,9 @@ public:
 	
 	int Status();
 	int Locked() { return Status()&FE_HAS_LOCK; }
-	
+  void Reset();
+  void readInputPower();
+     	
 	uint32_t BER();
 	/**
 	 * \brief Returns the signal strength (or AGC).

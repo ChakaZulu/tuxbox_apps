@@ -50,7 +50,7 @@ eZapNetworkSetup::eZapNetworkSetup():
 	l->resize(eSize(150, fd+4));
 
 	unpack(sip, de);
-	ip=new eNumber(this, 4, 0, 255, 3, de, 0, l);
+	ip=new eNumber(this, 4, 0, 9, 1, 0, 0, l);
 	ip->move(ePoint(160, 20));
 	ip->resize(eSize(200, fd+10));
 	ip->setFlags(eNumber::flagDrawPoints);

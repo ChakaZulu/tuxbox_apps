@@ -30,7 +30,7 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	eString t;
 	if (flags & flagFillWithZeros)
 	{
-		eString s = "%0"+eString().setNum(maxdigits)+(base==10?"d":"X");
+    eString s = "%0"+eString().setNum(maxdigits)+(base==10?"d":"X");
 		const char* p = s.c_str();
 		char* tmp = new char[10];
 		strcpy( tmp, p );
@@ -45,6 +45,9 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 			t.sprintf("%X", number[n]);
 	}
 
+  if (!n && flags & flagPosNeg && neg)
+    t="-"+t;
+  
 	if (n && (flags & flagDrawPoints))
 		t="."+t;
 	
@@ -83,7 +86,7 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->left)
 		{
-			int oldac=active;
+      int oldac=active;
 			active--;
 			invalidate(getNumberRect(oldac));
 			if (active<0)
@@ -93,7 +96,7 @@ int eNumber::eventHandler(const eWidgetEvent &event)
 			digit=0;
 		} else if ((event.action == &i_cursorActions->right) || (event.action == &i_cursorActions->ok))
 		{
-			int oldac=active;
+      int oldac=active;
 			active++;
 			invalidate(getNumberRect(oldac));
 			if (active>=len)
@@ -122,7 +125,8 @@ eNumber::eNumber(eWidget *parent, int _len, int _min, int _max, int _maxdigits, 
 	cursorF(eSkin::getActive()->queryScheme("global.selected.foreground")),	
 	normalB(eSkin::getActive()->queryScheme("global.normal.background")),	
 	normalF(eSkin::getActive()->queryScheme("global.normal.foreground")),	
-	have_focus(0), digit(isactive), isactive(isactive), descr(descr), tmpDescr(0)
+	have_focus(0), digit(isactive), isactive(isactive), descr(descr), tmpDescr(0),
+  neg(false)
 {
 	setNumberOfFields(_len);
 	setLimits(_min, _max);
@@ -175,7 +179,23 @@ int eNumber::keyDown(int key)
 			}
 		}
 		break;
+
+  break;
 	}
+  case eRCInput::RC_PLUS:
+    if (flags & flagPosNeg && neg )
+    {
+      neg=false;
+      invalidate(getNumberRect(0));
+    }
+  break;
+
+  case eRCInput::RC_MINUS:
+    if (flags & flagPosNeg && !neg )
+    {
+      neg=true;
+      invalidate(getNumberRect(0));
+    }
 	default:
 		return 0;
 	}
@@ -286,7 +306,7 @@ void eNumber::setBase(int _base)
 
 void eNumber::setNumber(int n)
 {
-	for (int i=len-1; i>=0; --i)
+  for (int i=len-1; i>=0; --i)
 	{
 		number[i]=n%base;
 		n/=base;
@@ -301,6 +321,5 @@ int eNumber::getNumber()
 		n*=base;
 		n+=number[i];
 	}
-	return n;
-
+	return flags&flagPosNeg && neg ? -n : n;
 }

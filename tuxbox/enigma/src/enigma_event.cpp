@@ -105,7 +105,6 @@ eEventDisplay::eEventDisplay(eString service, const ePtrList<EITEvent>* e, EITEv
 	else if (evt)
 		setEvent(evt);
 
-	addActionMap(&i_cursorActions->map);
 }
 
 eEventDisplay::~eEventDisplay()

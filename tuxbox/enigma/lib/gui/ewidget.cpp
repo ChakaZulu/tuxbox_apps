@@ -670,7 +670,9 @@ void eWidget::focusNext(int dir)
 
 void eWidget::setFocus(eWidget *newfocus)
 {
-	if (parent && parent->parent)
+  // used for statusbar and always emitted when setFocus is called...
+  
+  if (parent && parent->parent)
 		return getTLW()->setFocus(newfocus);
 
 	if (focus == newfocus)
@@ -685,8 +687,7 @@ void eWidget::setFocus(eWidget *newfocus)
 		focus->event(eWidgetEvent(eWidgetEvent::gotFocus));
 
 	_focusList.setCurrent(focus);
-
-	/* emit */ focusChanged(focus);
+  /* emit */ focusChanged(focus);
 }
 
 void eWidget::setHelpText( const eString& e)

@@ -14,7 +14,7 @@ int eMultipage::prev()
 		list.current()->hide();
 	list.prev();
 	list.current()->show();
-	return 0;
+ return 0;
 }
 
 int eMultipage::next()

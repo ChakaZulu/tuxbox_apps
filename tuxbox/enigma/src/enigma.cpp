@@ -159,8 +159,7 @@ eZap::eZap(int argc, char **argv)
 	eDebug("[ENIGMA] starting httpd");
 	httpd = new eHTTPD(80);
 	eDebug("[ENIGMA] starting httpd on serial port...");
-	
-	{
+  {
 		int fd=::open("/dev/tts/0", O_RDWR);
 		serialhttpd=0;
 		if (fd < 0)

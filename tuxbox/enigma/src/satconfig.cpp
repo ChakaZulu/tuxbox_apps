@@ -5,6 +5,8 @@
 #include <lib/gui/ebutton.h>
 #include <lib/gui/emessage.h>
 #include <lib/gui/echeckbox.h>
+#include <lib/dvb/frontend.h>
+#include <lib/dvb/dvbwidgets.h>
 //#include <lib/driver/rc.h>
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
@@ -244,7 +246,7 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 //			c->move( ePoint( hx, y ) );
 	c->resize( eSize( 90, 30 ) );
 	c->setHelpText( _("press ok to select another 22kHz mode") );
-	new eListBoxEntryText( *c, "Auto(Hi/Lo)", (void*)eSwitchParameter::HILO, 0, _("22kHz signal is automaticaly switched") );
+	new eListBoxEntryText( *c, "Hi/Lo", (void*)eSwitchParameter::HILO, 0, _("22kHz signal is automaticaly switched") );
 	new eListBoxEntryText( *c, "On", (void*)eSwitchParameter::ON, 0, _("22kHz is always enabled (high band)") );
 	new eListBoxEntryText( *c, "Off", (void*)eSwitchParameter::OFF, 0, _("22kHz is always disabled (low band)") );
 	c->setCurrent( (void*) (int) s->getSwitchParams().HiLoSignal );
@@ -258,7 +260,7 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 //			c->move( ePoint( vx, y ) );
 	c->resize( eSize( 90, 30 ) );
 	c->setHelpText( _("press ok to select another LNB Voltage mode") );
-	new eListBoxEntryText( *c, "Auto(H/V)", (void*)eSwitchParameter::HV, 0, _("Voltage is automaticaly changed") );
+	new eListBoxEntryText( *c, "H/V", (void*)eSwitchParameter::HV, 0, _("Voltage is automaticaly changed") );
   new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_14V, 0, _("Voltage is always 14V (vertical)") );
 	new eListBoxEntryText( *c, "18V", (void*)eSwitchParameter::_18V, 0, _("Voltage is always 18V (horizontal") );
 	new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_0V, 0, _("Voltage is always 14V (vertical)") );
@@ -300,7 +302,8 @@ void eSatelliteConfigurationManager::newPressed()
 		lnb->setLOFHi(10600000);
 		lnb->setLOFLo(9750000);
 		lnb->setLOFThreshold(11700000);
-		lnb->getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
+    lnb->setIncreasedVoltage(0);
+    lnb->getDiSEqC().MiniDiSEqCParam=eDiSEqC::NO;
     lnb->getDiSEqC().DiSEqCParam=eDiSEqC::AA;
 		lnb->getDiSEqC().DiSEqCMode=eDiSEqC::V1_0;
 		lnb->getDiSEqC().DiSEqCRepeats=0;
@@ -326,7 +329,7 @@ void eSatelliteConfigurationManager::newPressed()
 
 int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 {
-	switch (event.type)
+  switch (event.type)
 	{
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_focusActions->left)
@@ -339,7 +342,136 @@ int eSatelliteConfigurationManager::eventHandler(const eWidgetEvent &event)
 			focusNext(eWidget::focusDirS);
 		else
 			break;
-		return 1;
+	 return 1;
+
+	default:
+		break;
+	}
+	return eWindow::eventHandler(event);
+}
+
+eLNBSetup::eLNBSetup( eSatellite* sat )
+  :sat(sat)
+{
+  eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "eLNBSetup"))
+		eFatal("skin load of \"eLNBSetup\" failed");
+
+  DiSEqCPage = new eDiSEqCPage( this, sat );
+  LNBPage = new eLNBPage( this, sat );
+  RotorPage = new eRotorPage( this, sat );
+  
+  DiSEqCPage->hide();
+  LNBPage->hide();
+  RotorPage->hide();
+  mp.addPage( LNBPage );    
+  mp.addPage( DiSEqCPage );
+  mp.addPage( RotorPage );
+
+/*	statusbar=new eStatusBar(this);
+  statusbar->setName("statusbar");*/
+  
+// here we can not use the Makro CONNECT ... slot (*this, .... is here not okay..
+  LNBPage->lnb_list->selchanged.connect( slot( *LNBPage, &eLNBPage::lnbChanged) );
+  LNBPage->lnb_list->selchanged.connect( slot( *DiSEqCPage, &eDiSEqCPage::lnbChanged) );
+  LNBPage->lnb_list->selchanged.connect( slot( *RotorPage, &eRotorPage::lnbChanged) );
+    
+  CONNECT( DiSEqCPage->next->selected, eLNBSetup::onNext );
+  CONNECT( LNBPage->next->selected, eLNBSetup::onNext );
+  CONNECT( DiSEqCPage->prev->selected, eLNBSetup::onPrev );  
+  CONNECT( LNBPage->save->selected, eLNBSetup::onSave );
+  CONNECT( LNBPage->cancel->selected, eLNBSetup::reject);
+  CONNECT( DiSEqCPage->save->selected, eLNBSetup::onSave);
+  CONNECT( DiSEqCPage->cancel->selected, eLNBSetup::reject);
+  CONNECT( RotorPage->prev->selected, eLNBSetup::onPrev );
+  CONNECT( RotorPage->save->selected, eLNBSetup::onSave );
+  CONNECT( RotorPage->cancel->selected, eLNBSetup::reject);
+} 
+
+struct savePosition: public std::unary_function< eListBoxEntryText&, void>
+{
+  std::map<int,int> &map;
+
+	savePosition(std::map<int,int> &map): map(map)
+	{
+	}
+
+	bool operator()(eListBoxEntryText& s)
+	{
+    if ( (int)s.getKey() == 0xFFFF )
+      break; // ignore sample Entry... delete me...
+    int num = atoi( s.getText().left( s.getText().find('/') ).c_str() );
+    map[ (int)s.getKey() ] = num;
+		return 0;
+	}
+};
+
+void eLNBSetup::onSave()
+{
+  eLNB *p = (eLNB*) LNBPage->lnb_list->getCurrent()->getKey();
+
+	if ( !p )  // then we must create new LNB; (New is selected)
+	{
+    eTransponderList::getInstance()->getLNBs().push_back( eLNB( *eTransponderList::getInstance() ) );  // add new LNB
+		p = &eTransponderList::getInstance()->getLNBs().back();   // get adresse from the new lnb
+//		eDebug("now we have a new LNB Created = %p", p );
+	}
+/*	else
+		eDebug("do not create LNB");*/
+
+	p->setLOFLo( LNBPage->lofL->getNumber() * 1000 );
+	p->setLOFHi( LNBPage->lofH->getNumber() * 1000 );
+	p->setLOFThreshold( LNBPage->threshold->getNumber() * 1000 );
+  p->setIncreasedVoltage( LNBPage->increased_voltage->isChecked() );
+
+	p->getDiSEqC().MiniDiSEqCParam = (eDiSEqC::tMiniDiSEqCParam) (int) DiSEqCPage->MiniDiSEqCParam->getCurrent()->getKey();
+  p->getDiSEqC().DiSEqCMode = (eDiSEqC::tDiSEqCMode) (int) DiSEqCPage->DiSEqCMode->getCurrent()->getKey();
+	p->getDiSEqC().DiSEqCParam = (int) DiSEqCPage->DiSEqCParam->getCurrent()->getKey();
+	p->getDiSEqC().DiSEqCRepeats = (int) DiSEqCPage->DiSEqCRepeats->getCurrent()->getKey();
+  p->getDiSEqC().SeqRepeat = DiSEqCPage->SeqRepeat->isChecked();
+  p->getDiSEqC().uncommitted_switch = DiSEqCPage->uncommitted->isChecked();
+  p->getDiSEqC().uncommitted_gap = DiSEqCPage->uncommitted_gap->isChecked();
+  p->getDiSEqC().useGotoXX = RotorPage->useGotoXX->isChecked();
+  p->getDiSEqC().rotorOffset = RotorPage->RotorOffset->getNumber();
+  p->getDiSEqC().RotorTable.clear();
+  RotorPage->positions->forEachEntry( savePosition( p->getDiSEqC().RotorTable ) );
+                
+	if ( p != sat->getLNB() )  // the satellite must removed from the old lnb and inserts in the new
+	{
+		p->addSatellite( sat->getLNB()->takeSatellite( sat ) );
+/*		eDebug("remove satellite from lnb... now %i satellites left", sat->getLNB()->getSatelliteList().size() );
+		eDebug("added satellite to lnb... now %i satellites in lnb", p->getSatelliteList().size() );		*/
+
+		if ( !sat->getLNB()->getSatelliteList().size() )   // the lnb that have no more satellites must delete
+		{
+//			eDebug("delete no more used lnb");
+		  eTransponderList::getInstance()->getLNBs().remove( *sat->getLNB() );
+		}
+/*		else
+			eDebug("lnb not deleted");*/
+
+		// now we must set the LNB Pointer in eSatellite...
+		sat->setLNB(p);
+
+		close(-1); // we must reposition control elements in eSatelliteConfigurationManager
+	}
+	else
+		close(0); // we must not reposition...
+
+  eFrontend::getInstance()->Reset();
+}
+
+
+int eLNBSetup::eventHandler(const eWidgetEvent &event)
+{
+	switch (event.type)
+	{
+	case eWidgetEvent::execBegin:
+    mp.first();
+    LNBPage->lnbChanged( LNBPage->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...
+    DiSEqCPage->lnbChanged( LNBPage->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...
+    RotorPage->lnbChanged( LNBPage->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...        
+	break;
 
 	default:
 		break;
@@ -367,130 +499,31 @@ struct eLNBPage::selectlnb: public std::unary_function<const eListBoxEntryText&,
 	}
 };
 
-
-eLNBSetup::eLNBSetup( eSatellite* sat )
-  :sat(sat)
-{
-	addActionMap(&i_focusActions->map);
-
-  eSkin *skin=eSkin::getActive();
-	if (skin->build(this, "eLNBSetup"))
-		eFatal("skin load of \"eLNBSetup\" failed");
-
-  DiSEqCPage = new eDiSEqCPage( this, sat );
-  LNBPage = new eLNBPage( this, sat );
-  DiSEqCPage->hide();
-  LNBPage->hide();
-  mp.addPage( LNBPage );    
-  mp.addPage( DiSEqCPage );
-
-// here we can not use the Makro CONNECT ... slot (*this, .... is here not okay..
-  ((eLNBPage*)LNBPage)->lnb_list->selchanged.connect( slot( *LNBPage, &eLNBPage::lnbChanged) );
-  ((eLNBPage*)LNBPage)->lnb_list->selchanged.connect( slot( *DiSEqCPage, &eDiSEqCPage::lnbChanged) );
-
-  CONNECT( ((eLNBPage*)LNBPage)->next->selected, eLNBSetup::onNext );
-  CONNECT( ((eDiSEqCPage*)DiSEqCPage)->prev->selected, eLNBSetup::onPrev );  
-  CONNECT( ((eLNBPage*)LNBPage)->save->selected, eLNBSetup::onSave );
-  CONNECT( ((eLNBPage*)LNBPage)->cancel->selected, eLNBSetup::reject);
-  CONNECT( ((eDiSEqCPage*)DiSEqCPage)->save->selected, eLNBSetup::onSave);
-  CONNECT( ((eDiSEqCPage*)DiSEqCPage)->cancel->selected, eLNBSetup::reject);
-}
-
-void eLNBSetup::onSave()
-{
-  eLNBPage *lnbpage = (eLNBPage*) LNBPage;
-  eDiSEqCPage *diseqcpage = (eDiSEqCPage*) DiSEqCPage;  
-
-  eLNB *p = (eLNB*) lnbpage->lnb_list->getCurrent()->getKey();
-//	eDebug("onSave lnb_list->getCurrent()->getKey() = %p", p );
-
-	if ( !p )  // then we must create new LNB; (New is selected)
-	{
-    eTransponderList::getInstance()->getLNBs().push_back( eLNB( *eTransponderList::getInstance() ) );  // add new LNB
-		p = &eTransponderList::getInstance()->getLNBs().back();   // get adresse from the new lnb
-//		eDebug("now we have a new LNB Created = %p", p );
-	}
-/*	else
-		eDebug("do not create LNB");*/
-
-	p->setLOFLo( lnbpage->lofL->getNumber() * 1000 );
-	p->setLOFHi( lnbpage->lofH->getNumber() * 1000 );
-	p->setLOFThreshold( lnbpage->threshold->getNumber() * 1000 );
-
-	p->getDiSEqC().MiniDiSEqCParam = (eDiSEqC::tMiniDiSEqCParam) (int) diseqcpage->MiniDiSEqCParam->getCurrent()->getKey();
-  p->getDiSEqC().DiSEqCMode = (eDiSEqC::tDiSEqCMode) (int) diseqcpage->DiSEqCMode->getCurrent()->getKey();
-	p->getDiSEqC().DiSEqCParam = (int) diseqcpage->DiSEqCParam->getCurrent()->getKey();
-	p->getDiSEqC().DiSEqCRepeats = (int) diseqcpage->DiSEqCRepeats->getCurrent()->getKey();
-  p->getDiSEqC().SeqRepeat = diseqcpage->SeqRepeat->isChecked();
-  p->getDiSEqC().uncommitted_switch = diseqcpage->uncommitted->isChecked();
-  p->getDiSEqC().uncommitted_gap = diseqcpage->uncommitted_gap->isChecked();
-  p->getDiSEqC().useGotoXX = diseqcpage->useGotoXX->isChecked();
-  p->getDiSEqC().rotorOffset = diseqcpage->rotorOffset->getNumber();
-        
-	if ( p != sat->getLNB() )  // the satellite must removed from the old lnb and inserts in the new
-	{
-		p->addSatellite( sat->getLNB()->takeSatellite( sat ) );
-/*		eDebug("remove satellite from lnb... now %i satellites left", sat->getLNB()->getSatelliteList().size() );
-		eDebug("added satellite to lnb... now %i satellites in lnb", p->getSatelliteList().size() );		*/
-
-		if ( !sat->getLNB()->getSatelliteList().size() )   // the lnb that have no more satellites must delete
-		{
-//			eDebug("delete no more used lnb");
-		  eTransponderList::getInstance()->getLNBs().remove( *sat->getLNB() );
-		}
-/*		else
-			eDebug("lnb not deleted");*/
-
-		// now we must set the LNB Pointer in eSatellite...
-		sat->setLNB(p);
-
-		close(-1); // we must reposition control elements in eSatelliteConfigurationManager
-	}
-	else
-		close(0); // we must not reposition...
-}
-
-
-int eLNBSetup::eventHandler(const eWidgetEvent &event)
-{
-	switch (event.type)
-	{
-	case eWidgetEvent::execBegin:
-    mp.first();
-    ((eLNBPage*)LNBPage)->lnbChanged( ((eLNBPage*)LNBPage)->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...
-    ((eDiSEqCPage*)DiSEqCPage)->lnbChanged( ((eLNBPage*)LNBPage)->lnb_list->getCurrent() );   // fake selchanged for initialize lofl, lofh, threshold...    
-	break;
-
-	default:
-		break;
-	}
-	return eWindow::eventHandler(event);
-}
-
-
 eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
   :eWidget(parent), sat(sat)
 {
-  addActionMap(&i_focusActions->map);
   lnb_list = new eListBox<eListBoxEntryText>(this);
 	lnb_list->setFlags( eListBoxBase::flagNoPageMovement );
 	lnb_list->setName("lnblist");
 
   eLabel *l = new eLabel(this);
 	l->setName("lLofL");
-	lofL = new eNumber(this, 5, 0, 9, 1, 0, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
+	lofL = new eNumber(this, 5, 0, 9, 1, 0, 0, l);  // todo descr label im skin mit name versehen für lcd anzeige
 	lofL->setName("lofL");
 
   l = new eLabel(this);
 	l->setName("lLofH");
-	lofH = new eNumber(this, 5, 0, 9, 1, 0, 0, l, 1 );  // todo descr label im skin mit name versehen für lcd anzeige
+	lofH = new eNumber(this, 5, 0, 9, 1, 0, 0, l);  // todo descr label im skin mit name versehen für lcd anzeige
 	lofH->setName("lofH");
 
   l = new eLabel(this);
   l->setName("lThreshold");
-	threshold = new eNumber(this, 5, 0 ,9, 1, 0, 0, l, 1);
+	threshold = new eNumber(this, 5, 0 ,9, 1, 0, 0, l);
 	threshold->setName("threshold");
-                    
+
+  increased_voltage = new eCheckbox( this );
+  increased_voltage->setName("increased_voltage");
+                                        
 	save = new eButton(this);
 	save->setName("save");
 
@@ -500,8 +533,8 @@ eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
   next = new eButton(this);
   next->setName("next");
 
-	statusbar=new eStatusBar(this);
-  statusbar->setName("statusbar");
+/*	statusbar=new eStatusBar(this);
+  statusbar->setName("statusbar");*/
     
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eLNBPage"))
@@ -522,7 +555,18 @@ eLNBPage::eLNBPage( eWidget *parent, eSatellite* sat )
 	CONNECT( lofH->selected, eLNBPage::numSelected);
 	CONNECT( threshold->selected, eLNBPage::numSelected);
 	CONNECT( lnb_list->selected, eLNBPage::lnbSelected);
+  CONNECT( focusChanged, eLNBPage::updateText);
 	// on exec we begin in eventHandler execBegin
+}
+
+void eLNBPage::updateText(const eWidget* w)  // for Statusbar....
+{
+	if (w)
+	{
+		setHelpText( w->getHelpText() );
+		if (parent)
+			parent->focusChanged( this );
+	}
 }
 
 void eLNBPage::lnbSelected( eListBoxEntryText*)
@@ -535,16 +579,19 @@ void eLNBPage::lnbChanged( eListBoxEntryText *lnb )
   int l1 = 9750000;
 	int l2 = 10600000;
 	int l3 = 11700000;
-	if ( lnb && lnb->getKey() )
+  int incVoltage = 0;
+  if ( lnb && lnb->getKey() )
 	{
 		l1 = ((eLNB*)lnb->getKey())->getLOFLo();
 		l2 = ((eLNB*)lnb->getKey())->getLOFHi();
 		l3 = ((eLNB*)lnb->getKey())->getLOFThreshold();
-	}
+    incVoltage = ((eLNB*)lnb->getKey())->getIncreasedVoltage();
+  }
 	lofL->setNumber( l1 / 1000 );
 	lofL->invalidate();
 	lofH->setNumber( l2 / 1000 );
 	lofH->invalidate();
+  increased_voltage->setCheck( incVoltage );
 	threshold->setNumber( l3 / 1000 );
 	threshold->invalidate();
 }
@@ -554,34 +601,9 @@ void eLNBPage::numSelected(int*)
 	focusNext( eWidget::focusDirNext );
 }
 
-int eLNBPage::eventHandler(const eWidgetEvent &event)
-{
-  switch (event.type)
-	{
-	case eWidgetEvent::evtAction:
-		if (focus != lofL && focus != lofH && focus != threshold && event.action == &i_focusActions->left)
-			focusNext(eWidget::focusDirW);
-		else if (focus != lofL && focus != lofH && focus != threshold && event.action == &i_focusActions->right)
-			focusNext(eWidget::focusDirE);
-		else if (focus != lnb_list && event.action == &i_focusActions->up)
-			focusNext(eWidget::focusDirN);
-		else if (focus != lnb_list && event.action == &i_focusActions->down)
-			focusNext(eWidget::focusDirS);
-		else
-			break;
-		return 1;
-	
-	default:
-		break;
-	}
-	return eWidget::eventHandler(event);
-}
-
 eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
   :eWidget(parent), sat(sat)
 {
-	addActionMap(&i_focusActions->map);
-
   eLabel *l = new eLabel(this);
   l->setName("lMiniDiSEqCPara");
   MiniDiSEqCParam = new eComboBox( this, 4, l );
@@ -599,9 +621,8 @@ eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
 	new eListBoxEntryText( *DiSEqCMode, "Version 1.0", (void*)eDiSEqC::V1_0, 0, _("Use DiSEqC Version 1.0") );
 	new eListBoxEntryText( *DiSEqCMode, "Version 1.1", (void*)eDiSEqC::V1_1, 0, _("Use DiSEqC Version 1.1") );
  	new eListBoxEntryText( *DiSEqCMode, "Version 1.2", (void*)eDiSEqC::V1_2, 0, _("Use DiSEqC Version 1.2") );
-
   // no SMATV at the moment... we can do this when anyone ask...
-// 	new eListBoxEntryText( *DiSEqCMode, "SMATV", (void*)eDiSEqC::SMATV, 0, _("Use SMATV Remote Tuning") );
+  // 	new eListBoxEntryText( *DiSEqCMode, "SMATV", (void*)eDiSEqC::SMATV, 0, _("Use SMATV Remote Tuning") );
 
   lDiSEqCParam = new eLabel(this);
 	lDiSEqCParam->setName("lDiSEqCParam");
@@ -635,7 +656,8 @@ eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
   new eListBoxEntryText( *DiSEqCRepeats, _("None"), (void*)0, 0, _("sends no DiSEqC repeats") );
   new eListBoxEntryText( *DiSEqCRepeats, _("One"), (void*)1, 0, _("sends one repeat") );
 	new eListBoxEntryText( *DiSEqCRepeats, _("Two"), (void*)2, 0, _("sends two repeats") );
-
+	new eListBoxEntryText( *DiSEqCRepeats, _("Three"), (void*)3, 0, _("sends three repeats") );
+  
   SeqRepeat = new eCheckbox(this);
   SeqRepeat->setName("SeqRepeat");
 
@@ -645,32 +667,43 @@ eDiSEqCPage::eDiSEqCPage( eWidget *parent, eSatellite *sat)
   uncommitted_gap = new eCheckbox(this);
   uncommitted_gap->setName("uncommitted_gap");
 
-  useGotoXX = new eCheckbox(this);
-  useGotoXX->setName("useGotoXX");
-
-  lRotorOffset = new eLabel( this );
-  lRotorOffset->setName("lRotorOffset");
-  rotorOffset = new eNumber(this, 3, 0, 360, 3, 0, 0, lRotorOffset, 1 );
-  rotorOffset->setName("rotorOffset");
-  rotorOffset->setFlags( 0 );
-      
+  next = new eButton(this);
+  next->setName("next");
+            
   prev = new eButton(this);
   prev->setName("prev");
-
+  
   save = new eButton(this);
 	save->setName("save");
 
   cancel = new eButton(this);
 	cancel->setName("cancel");
 
-  statusbar=new eStatusBar(this);
-  statusbar->setName("statusbar");
+/*  statusbar=new eStatusBar(this);
+  statusbar->setName("statusbar");*/
  
   eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eDiSEqCPage"))
 		eFatal("skin load of \"eDiSEqCPage\" failed");
 
   CONNECT( DiSEqCMode->selchanged, eDiSEqCPage::DiSEqCModeChanged );
+  CONNECT( focusChanged, eDiSEqCPage::updateText);
+	addActionMap(&i_focusActions->map);
+}
+
+void eDiSEqCPage::updateText(const eWidget* w)  // for Statusbar....
+{
+	if (w)
+	{
+		setHelpText( w->getHelpText() );
+		if (parent)
+			parent->focusChanged( this );
+	}
+}
+
+void eDiSEqCPage::numSelected(int*)
+{
+	focusNext( eWidget::focusDirNext );
 }
 
 void eDiSEqCPage::DiSEqCModeChanged( eListBoxEntryText* e )
@@ -678,9 +711,7 @@ void eDiSEqCPage::DiSEqCModeChanged( eListBoxEntryText* e )
   switch( (int) e->getKey() )
   {
     case eDiSEqC::V1_2:
-      useGotoXX->show();
-      rotorOffset->show();
-      lRotorOffset->show();
+      next->show();
     case eDiSEqC::V1_1:
       lDiSEqCRepeats->show();
       DiSEqCRepeats->show();
@@ -705,9 +736,7 @@ void eDiSEqCPage::DiSEqCModeChanged( eListBoxEntryText* e )
       uncommitted->hide();
       uncommitted_gap->hide();
     case eDiSEqC::V1_1:
-      useGotoXX->hide();
-      rotorOffset->hide();
-      lRotorOffset->hide();
+      next->hide();
     case eDiSEqC::V1_2: // hide nothing
     break;
   }
@@ -724,8 +753,6 @@ void eDiSEqCPage::lnbChanged( eListBoxEntryText *lnb )
     SeqRepeat->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().SeqRepeat );
     uncommitted->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().uncommitted_switch );
     uncommitted_gap->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().uncommitted_gap );
-    useGotoXX->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().useGotoXX );
-    rotorOffset->setNumber( (int) ((eLNB*)lnb->getKey())->getDiSEqC().rotorOffset );
   }
 	else
   {
@@ -736,31 +763,172 @@ void eDiSEqCPage::lnbChanged( eListBoxEntryText *lnb )
     SeqRepeat->setCheck( 0 );
     uncommitted->setCheck( 0 );
     uncommitted_gap->setCheck( 0 );
-    useGotoXX->setCheck( 1 );
-    rotorOffset->setNumber( 0 );
   }
   DiSEqCModeChanged( (eListBoxEntryText*) DiSEqCMode->getCurrent() );
 }
 
-int eDiSEqCPage::eventHandler(const eWidgetEvent &event)
+eRotorPage::eRotorPage( eWidget *parent, eSatellite *sat )
+  :eWidget(parent), sat(sat)
 {
-  switch (event.type)
-	{
-  	case eWidgetEvent::evtAction:
-		if (event.action == &i_focusActions->left)
-			focusNext(eWidget::focusDirW);
-		else if (event.action == &i_focusActions->right)
-			focusNext(eWidget::focusDirE);
-		else if (event.action == &i_focusActions->up)
-			focusNext(eWidget::focusDirN);
-		else if (event.action == &i_focusActions->down)
-			focusNext(eWidget::focusDirS);
-		else
-			break;
-		return 1;
+  useGotoXX = new eCheckbox(this);
+  useGotoXX->setName("useGotoXX");
 
-	default:
-		break;
-	}
-	return eWidget::eventHandler(event);
+  lRotorOffset = new eLabel( this );
+  lRotorOffset->setName("lRotorOffset");
+
+  RotorOffset = new eNumber(this, 1, 0, 360, 3, 0, 0, lRotorOffset );
+  RotorOffset->setFlags( eNumber::flagPosNeg );
+  RotorOffset->setName("RotorOffset");
+
+  positions = new eListBox< eListBoxEntryText >( this );  
+	positions->setFlags( eListBoxBase::flagNoPageMovement );
+  positions->setName("positions");
+  
+  eLabel *l = new eLabel(this);
+  l->setName("lStoredRotorNo");
+  number = new eNumber( this, 1, 0, 255, 3, 0, 0, l);
+  number->setName("StoredRotorNo");
+
+  l = new eLabel(this);
+  l->setName("lOrbitalPosition");
+  orbital_position = new eNumber( this, 1, 0, 450, 3, 0, 0, l);
+  orbital_position->setName("OrbitalPosition");
+  
+  l = new eLabel(this);
+  l->setName("lDirection");
+  direction = new eComboBox( this, 2, l );
+  direction->setName("Direction");
+  new eListBoxEntryText( *direction, _("East"), (void*)0, 0, _("East") );
+  new eListBoxEntryText( *direction, _("West"), (void*)1, 0, _("West") );
+  
+  add = new eButton( this );
+  add->setName("add");
+
+  remove = new eButton ( this );
+  remove->setName("remove");
+  
+/*  feState = new eFEStatusWidget( this, eFrontend::getInstance() );
+  feState->setName("feState");*/
+    
+  prev = new eButton(this);
+  prev->setName("prev");
+
+  save = new eButton(this);
+	save->setName("save");
+
+  cancel = new eButton(this);
+	cancel->setName("cancel");
+
+/*  statusbar=new eStatusBar(this);
+  statusbar->setName("statusbar");*/
+   
+	eSkin *skin=eSkin::getActive();
+	if (skin->build(this, "eRotorPage"))
+		eFatal("skin load of \"eRotorPage\" failed");
+
+  CONNECT( RotorOffset->selected, eRotorPage::numSelected );    
+  CONNECT( orbital_position->selected, eRotorPage::numSelected );
+  CONNECT( number->selected, eRotorPage::numSelected );    
+  CONNECT( add->selected, eRotorPage::onAdd );
+  CONNECT( remove->selected, eRotorPage::onRemove );
+  CONNECT( positions->selchanged, eRotorPage::posChanged );
+  CONNECT( focusChanged, eRotorPage::updateText );
+  
+  addActionMap(&i_focusActions->map);
 }
+
+void eRotorPage::updateText(const eWidget* w)  // for Statusbar....
+{
+	if (w)
+	{
+		setHelpText( w->getHelpText() );
+		if (parent)
+			parent->focusChanged( this );
+	}
+}
+
+void eRotorPage::lnbChanged( eListBoxEntryText *lnb )
+{
+  curlnb=(eLNB*)lnb->getKey();
+
+  positions->beginAtomic();
+
+  positions->clearList();
+  eDiSEqC &DiSEqC = ((eLNB*)lnb->getKey())->getDiSEqC();
+  
+  if ( lnb && lnb->getKey() )
+  {
+    for ( std::map<int, int>::iterator it ( DiSEqC.RotorTable.begin() ); it != DiSEqC.RotorTable.end(); it++ )
+      new eListBoxEntryText( positions, eString().sprintf(" %d / %03d %c", it->second, abs(it->first), it->first > 0 ? 'E' : 'W'), (void*) it->first );
+
+    useGotoXX->setCheck( (int) ((eLNB*)lnb->getKey())->getDiSEqC().useGotoXX );
+    RotorOffset->setNumber( (int) ((eLNB*)lnb->getKey())->getDiSEqC().rotorOffset );
+  }
+  else
+  {
+    useGotoXX->setCheck( 1 );
+    RotorOffset->setNumber( 0 );
+  }
+
+  if ( positions->getCount() )
+  {
+    positions->sort();
+    positions->moveSelection(eListBox<eListBoxEntryText>::dirFirst);
+  }
+  else
+  {
+    new eListBoxEntryText( positions, _("delete me"), (void*) 0xFFFF );    
+    posChanged(0);
+  }
+
+  positions->endAtomic();
+}
+
+void eRotorPage::posChanged( eListBoxEntryText *e )
+{
+  if ( e )
+  {
+    direction->setCurrent( e->getText().right( 1 ) == "E" ? 0 : 1 );
+    int bla = abs ( (int) e->getKey() );
+    orbital_position->setNumber( bla );
+    number->setNumber( atoi( e->getText().mid( 1 , e->getText().find('/')-1 ).c_str()) );
+  }
+  else
+  {
+    orbital_position->setNumber( 0 );
+    number->setNumber( 0 );
+    direction->setCurrent( 0 );
+  }
+  orbital_position->invalidate();
+  number->invalidate();
+}
+
+void eRotorPage::numSelected(int*)
+{
+  focusNext( eWidget::focusDirNext );
+}
+
+void eRotorPage::onAdd()
+{
+  positions->beginAtomic();
+
+  new eListBoxEntryText( positions,
+                         eString().sprintf(" %d / %03d %c",
+                                          number->getNumber(),
+                                          orbital_position->getNumber(),
+                                          direction->getCurrent()->getKey() ? 'W':'E'
+                                          ), (void*) ( direction->getCurrent()->getKey() ? - orbital_position->getNumber() : orbital_position->getNumber() ) );
+  positions->sort();
+  positions->invalidate();
+  positions->endAtomic();
+}
+
+void eRotorPage::onRemove()
+{
+  positions->beginAtomic();
+  if (positions->getCurrent())
+    positions->remove( positions->getCurrent() );
+  positions->invalidate();
+  positions->endAtomic();
+}
+

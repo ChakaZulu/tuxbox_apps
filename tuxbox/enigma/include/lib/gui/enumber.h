@@ -25,6 +25,7 @@ private:
 	int base;
 	eWidget* descr;
 	eLabel* tmpDescr; // used for description Label in LCD
+  bool neg;
 protected:
 	int getActive()	{ return active; }
 	int keyDown(int key);
@@ -45,7 +46,8 @@ public:
 		flagDrawPoints=1,
 		flagDrawBoxes=2,
 		flagFillWithZeros=4,
-		flagTime=8
+		flagTime=8,
+    flagPosNeg=16
 	};
 	void setFlags(int flags);
 	void setBase(int base);

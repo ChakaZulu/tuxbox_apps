@@ -145,7 +145,6 @@ void ShowBNVersion::eventOccured(const eDVBEvent &event)
 
 ShowBNVersion::ShowBNVersion(): eWindow(1)
 {
-	addActionMap(&i_cursorActions->map);
 	setText("Show current BN version");
 	cmove(ePoint(150, 150));
 	cresize(eSize(400, 300));

@@ -370,7 +370,6 @@ void siCA::redrawWidget()
 
 eStreaminfo::eStreaminfo(int mode, decoderParameters *parms): eWindow(1), statusbar(this)
 {
-	addActionMap(&i_cursorActions->map);
 	setText(mode?"Record mode - read manual":"Streaminfo");
 	cmove(ePoint(100, 80));
 	cresize(eSize(450, 450));

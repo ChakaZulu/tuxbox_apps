@@ -19,7 +19,7 @@ eCheckbox::~eCheckbox()
 
 void eCheckbox::sel()
 {
-	setCheck(ischecked^1);
+	setCheck(ischecked?0:1);
 	/*emit*/ checked(ischecked);
 }
 
@@ -62,7 +62,7 @@ void eCheckbox::setCheck(int c)
 		return;
 
 	ischecked=c;
-	
+  	
 	setPixmap(eSkin::getActive()->queryImage(ischecked?"eCheckbox.checked":"eCheckbox.unchecked"));
 
 	if (LCDTmp)

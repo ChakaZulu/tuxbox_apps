@@ -221,6 +221,7 @@
 
   <object name="eLNBSetup">
     <eLNBSetup text="LNB Configuration" position="100:50" csize="550:400">
+      <eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
     </eLNBSetup>
   </object>
   
@@ -233,10 +234,11 @@
 			<eNumber name="lofH" position="350:55" size="e-10:35" helptext="enter lnb highband offset frequency (0..9, ok)" loadDeco="" />
   		<eLabel text="Threshold:" name="lThreshold" position="130:100" size="200:35" vcenter="on"/>
 			<eNumber name="threshold" position="350:100" size="e-10:35" helptext="enter lnb threshold frequency (0..9, ok)" loadDeco="" />
-      <eButton name="save" text="save" position="10:e-85" size="170:40" helptext="use current selected lnb for the choosen satellite" loadDeco="" />
-			<eButton name="cancel" text="cancel" position="190:e-85" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
-      <eButton name="next" text="next page" position="370:e-85" size="170:40" helptext="goto next page (DiSEqC)" loadDeco="" />
-      <eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+      <eCheckbox name="increased_voltage" text="increased voltage" position="130:145" size="e-10:30" helptext="0,5V higher LNB Voltage (for long cables) (ok)" loadDeco="" />
+      <eButton name="save" text="save" position="10:e-80" size="170:40" helptext="save changes and use current selected lnb for the choosen satellite" loadDeco="" />
+			<eButton name="cancel" text="cancel" position="190:e-80" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
+      <eButton name="next" text="next page" position="370:e-80" size="170:40" helptext="goto next page (DiSEqC)" loadDeco="" />
+      <!--eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" /-->
 		</eLNBPage>
 	</object>
 
@@ -247,21 +249,51 @@
       <eLabel text="DiSEqC Mode:" name="lDiSEqCMode" position="10:55" size="290:35" vcenter="on"/>
       <eComboBox name="DiSEqCMode" position="310:55" size="e-10:35" helptext="select DiSEqC mode (ok)" loadDeco="" />
 			<eLabel text="DiSEqC Parameter:" name="lDiSEqCParam" position="10:100" size="290:35" vcenter="on"/>
-			<eComboBox name="DiSEqCParam" position="310:100" size="e-10:35" helptext="select DiSEqC parameter (ok) - select DiSEqC Mode above" loadDeco="" />
+			<eComboBox name="DiSEqCParam" position="310:100" size="e-10:35" helptext="select DiSEqC parameter (ok)" loadDeco="" />
 			<eLabel text="DiSEqC Repeats:" name="lDiSEqCRepeats" position="10:145" size="290:35" vcenter="on"/>
-			<eComboBox name="DiSEqCRepeats" position="310:145" size="e-10:35" helptext="select DiSEqC repeats (ok) ( DiSEqC higher level 1.0 )" loadDeco="" />
+			<eComboBox name="DiSEqCRepeats" position="310:145" size="e-10:35" helptext="select DiSEqC repeats (ok)" loadDeco="" />
       <eCheckbox text="Sequence repeat" name="SeqRepeat" position="10:190" size="290:30" helptext="send the complete DiSEqC sequence dupe" />
       <eCheckbox text="Uncommitted switch" name="uncommitted" position="10:230" size="290:30" helptext="send to an uncommitted DiSEqC switch" />
       <eCheckbox text="Uncommitted gap" name="uncommitted_gap" position="310:230" size="e-10:30" helptext="fill DiSEqC repeat gap with uncommitted command" />
-      <eCheckbox text="Rotor support gotoXX" name="useGotoXX" position="10:270" size="290:30" helptext="when the rotor support this, then use this" />
-      <eNumber name="rotorOffset" position="310:270" size="50:35" helptext="enter Rotor Offset (0..9, ok)" loadDeco="" />
-      <eLabel text="Rotor offset" name="lRotorOffset" position="370:270" size="e-10:30" vcenter="on" />      
-      <eButton name="prev" text="prev. page" position="10:e-85" size="170:40" helptext="goto prev page (LNB)" loadDeco="" />
-      <eButton name="save" text="save" position="190:e-85" size="170:40" helptext="use current selected lnb for the choosen satellite" loadDeco="" />
-			<eButton name="cancel" text="cancel" position="370:e-85" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
-      <eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+      <eButton name="next" text="Rotor Setup" position="10:270" size="e-10:40" helptext="opens the Rotor Setup" loadDeco="" />
+      <eButton name="prev" text="prev. page" position="10:e-80" size="170:40" helptext="goto prev page (LNB)" loadDeco="" />
+      <eButton name="save" text="save" position="190:e-80" size="170:40" helptext="save changes and use the selected lnb (in first page) for the choosen satellite" loadDeco="" />
+			<eButton name="cancel" text="cancel" position="370:e-80" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
+      <!--eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" /-->
 		</eDiSEqCPage>
 	</object>
+
+  <object name="eRotorPage">
+    <eRotorPage position="0:0" size="550:400" >
+      <eCheckbox text="Use gotoXX Function" name="useGotoXX" position="10:10" size="260:35" helptext="when the rotor support this, then use this" vcenter="on" />
+      <eLabel text="GotoXX offset" name="lRotorOffset" position="320:10" size="150:35" vcenter="on" />
+      <eNumber name="RotorOffset" position="480:10" size="60:35" helptext="enter Rotor Offset (0..9, +, -, ok)" loadDeco="" />
+
+      <eLabel text="If your rotor doesn't support gotoXX, add all orbital positions with storage location below." position="10:55" size="e-10:70" wrap="on" />
+      
+      <eListbox name="positions" position="10:125" size="170:175" helptext="choose entry to edit or remove" loadDeco="" />
+
+      <eLabel name="lStoredRotorNo" text="Number in Rotor:" position="190:125" size="e-80:35" vcenter="on" />
+      <eNumber name="StoredRotorNo" position="e-70:125" size="e-10:35" helptext="enter where this orbital position is (to) stored in Rotor" loadDeco="" />
+
+      <eLabel name="lOrbitalPosition" text="Orbital Position:" position="190:170" size="e-80:35" vcenter="on" />
+      <eNumber name="OrbitalPosition" position="e-70:170" size="e-10:35" helptext="enter orbital position without dot (19.2° = 192)" loadDeco="" />
+
+      <eLabel name="lDirection" text="Direction:" position="190:215" size="e-150:35" vcenter="on" />
+      <eComboBox name="Direction" position="e-140:215" size="e-10:35" helptext="choose direction" loadDeco="" />
+
+      <eButton name="add" text="add" position="190:260" size="170:40" helptext="add to table/existing is overwritten" loadDeco="" />
+      <eButton name="remove" text="remove" position="370:260" size="170:40" helptext="remove selected entry" loadDeco="" />
+
+      <!--eFEStatus name="feState" position="170:195" size="e:85" /-->
+      
+      <eButton name="prev" text="prev. page" position="10:e-80" size="170:40" helptext="goto prev page (LNB)" loadDeco="" />
+      <eButton name="save" text="save" position="190:e-80" size="170:40" helptext="save changes and use the selected lnb (in first page) for the choosen satellite" loadDeco="" />
+			<eButton name="cancel" text="cancel" position="370:e-80" size="170:40" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
+
+      <!--eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" /-->
+    </eRotorPage>
+  </object>
 
 	<object name="tsSelectType">
 		<tsSelectType cposition="0:0" csize="e:300">

@@ -11,7 +11,7 @@
 #include <lib/gui/listbox.h>
 #include <lib/dvb/dvb.h>
 
-class eButton;
+class eFEStatusWidget;
 
 struct SatelliteEntry
 {
@@ -34,7 +34,6 @@ class eSatelliteConfigurationManager: public eWindow, public existNetworks
 	void createControlElements();
 	void addSatellite(eSatellite* sat);
 	void repositionWidgets();
-public:
 	void closePressed();
 	void newPressed();
 	void lnbSelected(eButton *who);
@@ -42,14 +41,20 @@ public:
 	void hiloChanged(eComboBox *who, eListBoxEntryText *le);
 	void voltageChanged(eComboBox *who, eListBoxEntryText *le);
 public:
-	eSatelliteConfigurationManager();
+  eSatelliteConfigurationManager();
 	~eSatelliteConfigurationManager();
 };
 
+class eLNBPage;
+class eDiSEqCPage;
+class eRotorPage;
+                 
 class eLNBSetup : public eWindow // Selitor = "Sel"ector + Ed"itor" :-)
 {
   eMultipage mp;
-  eWidget *DiSEqCPage, *LNBPage;
+  eDiSEqCPage *DiSEqCPage;
+  eLNBPage *LNBPage;
+  eRotorPage *RotorPage;
   eSatellite* sat;
   void onSave();
   void onNext() { mp.next(); }
@@ -69,15 +74,15 @@ class eLNBPage : public eWidget
 	eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
 	eButton *cancel; // close the window without apply changes
   eButton *next; // shows the DiSEqC Configuration Dialog
+  eCheckbox *increased_voltage;
   eStatusBar *statusbar;
     
-  int eventHandler(const eWidgetEvent &event);
   void numSelected(int*);
   void lnbChanged( eListBoxEntryText* );
 	void lnbSelected(eListBoxEntryText*);
+  void updateText(const eWidget* w);  // for Statusbar....
 public:
   eLNBPage( eWidget *parent, eSatellite *sat );
-
 };
 
 class eDiSEqCPage : public eWidget
@@ -85,31 +90,44 @@ class eDiSEqCPage : public eWidget
   friend class eLNBSetup;
   eSatellite *sat;
 	eComboBox *DiSEqCMode, *DiSEqCParam, *MiniDiSEqCParam, *DiSEqCRepeats;
-  eCheckbox *SeqRepeat, *uncommitted, *uncommitted_gap, *useGotoXX;
-  eNumber *rotorOffset;
+  eCheckbox *SeqRepeat, *uncommitted, *uncommitted_gap;
   eButton *save; 	 // use this LNB for Satelite and close LNBSelitor
 	eButton *cancel; // close the window without apply changes
   eButton *prev; // shows the LNB Configuration Dialog
-  eLabel *lRotorOffset, *lDiSEqCRepeats, *lDiSEqCParam;
+  eButton *next; // shows the Rotor Setup (for non GotoXX Rotors)
+  eLabel *lDiSEqCRepeats, *lDiSEqCParam;
   eStatusBar *statusbar;
           
-  int eventHandler(const eWidgetEvent &event);
   void lnbChanged( eListBoxEntryText* );
   void DiSEqCModeChanged( eListBoxEntryText* );
+  void numSelected(int*);
+  void updateText(const eWidget* w);  // for Statusbar....
 public:
   eDiSEqCPage( eWidget *parent, eSatellite *sat );
 };
 
-/*
+
 class eRotorPage : public eWidget
 {
-  friend class eLNBSetup
+  friend class eLNBSetup;
   eSatellite *sat;
-  eListBox *positions;
-  eNumber *orbital_position, *number;
-  eButton *add, *remove;
-  eCheckbox *fine;  // if is checked.. then left..right is for finetuning
-  eFEStatusWidget *state
-};*/     
+  eLNB *curlnb;
+  eListBox<eListBoxEntryText> *positions;
+  eLabel *lRotorOffset;
+  eNumber *orbital_position, *number, *RotorOffset;
+  eButton *add, *remove, *prev, *save, *cancel;
+  eCheckbox *fine, *useGotoXX;  // if is checked.. then left..right is for finetuning
+  eComboBox *direction;
+  eFEStatusWidget *feState;
+  eStatusBar* statusbar;
+  void onAdd();
+  void onRemove();
+  void numSelected(int*);
+  void lnbChanged( eListBoxEntryText* );
+  void posChanged( eListBoxEntryText* );
+  void updateText(const eWidget* w);  // for Statusbar....
+public:  
+  eRotorPage( eWidget *parent, eSatellite *sat );
+};
 
 #endif
