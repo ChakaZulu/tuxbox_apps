@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.317 2003/05/29 07:02:35 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.318 2003/06/01 17:38:59 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -112,7 +112,7 @@ extern short curr_sat;
 extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
-extern std::map <string, uint8_t> motorPositions;
+extern std::map <t_satellite_position, uint8_t> motorPositions;
 extern std::map <string, int32_t> satellitePositions;
 
 bool standby = true;
@@ -218,13 +218,13 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	stopPlayBack();
 	
 	/* have motor move satellite dish to satellite's position if necessary */
-	if ((diseqcType == DISEQC_1_2) && (motorPositions[channel->getSatelliteName()] != 0))
+	if ((diseqcType == DISEQC_1_2) && (motorPositions[channel->getSatellitePosition()] != 0))
 	{
 		if (frontend->getCurrentSatellitePosition() != channel->getSatellitePosition())
 		{
 			printf("[zapit] currentSatellitePosition = %d, satellitePosition = %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
-			printf("[zapit] motorPosition = %d\n", motorPositions[channel->getSatelliteName()]);
-			frontend->positionMotor(motorPositions[channel->getSatelliteName()]);
+			printf("[zapit] motorPosition = %d\n", motorPositions[channel->getSatellitePosition()]);
+			frontend->positionMotor(motorPositions[channel->getSatellitePosition()]);
 		
 			waitForMotor = abs(channel->getSatellitePosition() - frontend->getCurrentSatellitePosition()) / motorRotationSpeed; //assuming 1.8 degrees/second motor rotation speed for the time being...
 			printf("[zapit] waiting %d seconds for motor to turn satellite dish.\n", waitForMotor);
@@ -435,7 +435,7 @@ void unsetRecordMode(void)
 	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
-int prepare_channels(uint32_t diseqctype)
+int prepare_channels(diseqc_t diseqcType)
 {
 	// for the case this function is NOT called for the first time (by main())
 	// we clear all cannel lists, they are refilled
@@ -443,7 +443,7 @@ int prepare_channels(uint32_t diseqctype)
 	transponders.clear();
 	bouquetManager->clearAll();
 	allchans.clear();  // <- this invalidates all bouquets, too!
-	if (LoadServices(diseqctype) < 0)
+	if (LoadServices(diseqcType) < 0)
 		return -1;
 
 	INFO("LoadServices: success");
@@ -680,7 +680,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	case CZapitMessages::CMD_REINIT_CHANNELS:
 	{
 		CZapitMessages::responseCmd response;
-		prepare_channels(config.getInt32("diseqcType", NO_DISEQC));
+		prepare_channels((diseqc_t)config.getInt32("diseqcType", NO_DISEQC));
 		response.cmd = CZapitMessages::CMD_READY;
 		CBasicServer::send_data(connfd, &response, sizeof(response));
 		eventServer->sendEvent(CZapitClient::EVT_BOUQUETS_CHANGED, CEventServer::INITID_ZAPIT);
@@ -736,12 +736,15 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			while ((search = xmlGetNextOccurence(search, frontendname)) != NULL)
 			{
 				satname = xmlGetAttribute(search, "name");
-				strncpy(sat.satName, satname, 29);
-				sat.satPosition = satellitePositions[satname];
-				satlength = sizeof(sat);
-				CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
-				CBasicServer::send_data(connfd, (char *)&sat, satlength);
-				search = search->xmlNextNode;
+				if (strlen(satname) != 0)
+				{
+					strncpy(sat.satName, satname, 29);
+					sat.satPosition = satellitePositions[satname];
+					satlength = sizeof(sat);
+					CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
+					CBasicServer::send_data(connfd, (char *)&sat, satlength);
+					search = search->xmlNextNode;
+				}
 			}
 		satlength = SATNAMES_END_MARKER;
 		CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
@@ -767,9 +770,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		
 		while (CBasicServer::receive_data(connfd, &pos, sizeof(pos))) 
 		{
-			DBG("adding %s (motorPos %d)", pos.satName, pos.motorPos);
-			changed |= (motorPositions[pos.satName] != pos.motorPos);
-			motorPositions[pos.satName] = pos.motorPos;
+			DBG("adding %d (motorPos %d)", pos.satPosition, pos.motorPos);
+			changed |= (motorPositions[pos.satPosition] != pos.motorPos);
+			motorPositions[pos.satPosition] = pos.motorPos;
 		}
 		
 		if (changed)
@@ -777,11 +780,11 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			// save to motor.conf
 			printf("[zapit] saving motor.conf\n");
 			fd = fopen(MOTORCONFIGFILE, "w");
-			std::map<std::string, uint8_t>::iterator it;
+			std::map<t_satellite_position, uint8_t>::iterator it;
 			for (it = motorPositions.begin(); it != motorPositions.end(); it++)
 			{
-				printf("[zapit] saving %s: %d\n", it->first.c_str(), it->second);
-				fprintf(fd, "%s:%d\n", it->first.c_str(), it->second);
+				printf("[zapit] saving %d: %d\n", it->first, it->second);
+				fprintf(fd, "%d %d\n", it->first, it->second);
 			}
 			fclose(fd);
 		}
@@ -790,11 +793,9 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	
 	case CZapitMessages::CMD_SCANSETDISEQCTYPE:
 	{
-		diseqc_t diseqc;
-		CBasicServer::receive_data(connfd, &diseqc, sizeof(diseqc));
-		frontend->setDiseqcType(diseqc);
-		diseqcType = diseqc;
-		DBG("set diseqc type %d", diseqc);
+		CBasicServer::receive_data(connfd, &diseqcType, sizeof(diseqcType));
+		frontend->setDiseqcType(diseqcType);
+		DBG("set diseqc type %d", diseqcType);
 		break;
 	}
 	
@@ -1508,7 +1509,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.317 2003/05/29 07:02:35 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.318 2003/06/01 17:38:59 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
@@ -1550,7 +1551,7 @@ int main(int argc, char **argv)
 	else
 		setTVMode();
 
-	if (prepare_channels(config.getInt32("diseqcType", NO_DISEQC)) < 0)
+	if (prepare_channels((diseqc_t)config.getInt32("diseqcType", NO_DISEQC)) < 0)
 		WARN("error parsing services");
 	else
 		INFO("channels have been loaded succesfully");
