@@ -362,7 +362,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
 	g_settings.show_camwarning = configfile.getInt32( "show_camwarning", 1 );
-	strcpy(g_settings.record_safety_time, configfile.getString( "record_safety_time", "00").c_str());
+	strcpy(g_settings.record_safety_time_before, configfile.getString( "record_safety_time_before", "00").c_str());
+	strcpy(g_settings.record_safety_time_after, configfile.getString( "record_safety_time_after", "00").c_str());
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -448,6 +449,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	strcpy( g_settings.recording_vcr_devicename, configfile.getString( "recording_vcr_devicename", "ORION").c_str() );
+	g_settings.recording_vcr_no_scart = configfile.getInt32( "recording_vcr_no_scart", false);
 
 	//rc-key configuration
 	g_settings.key_tvradio_mode = configfile.getInt32( "key_tvradio_mode", CRCInput::RC_nokey );
@@ -562,7 +564,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
 	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock );
 	configfile.setInt32( "show_camwarning", g_settings.show_camwarning );
-	configfile.setString( "record_safety_time", g_settings.record_safety_time );
+	configfile.setString( "record_safety_time_before", g_settings.record_safety_time_before );
+	configfile.setString( "record_safety_time_after", g_settings.record_safety_time_after );
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -647,6 +650,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32 ( "recording_server_wakeup", g_settings.recording_server_wakeup );
 	configfile.setString( "recording_server_mac", g_settings.recording_server_mac );
 	configfile.setString( "recording_vcr_devicename", g_settings.recording_vcr_devicename );
+	configfile.setInt32 ( "recording_vcr_no_scart", g_settings.recording_vcr_no_scart );
 
 	//rc-key configuration
 	configfile.setInt32( "key_tvradio_mode", g_settings.key_tvradio_mode );
@@ -1536,11 +1540,18 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	CStringInput*  recordingSettings_vcr_devicename= new CStringInputSMS("recordingmenu.vcr_devicename", g_settings.recording_vcr_devicename, 20, "ipsetup.hint_1", "ipsetup.hint_2","abcdefghijklmnopqrstuvwxyz0123456789-. ");
 	CMenuForwarder *mf4 = new CMenuForwarder("recordingmenu.vcr_devicename", (g_settings.recording_type==2), g_settings.recording_vcr_devicename, recordingSettings_vcr_devicename );
 
-	CStringInput *timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "timersettings.record_safety_time.hint_1", "timersettings.record_safety_time.hint_2","0123456789 ");
-	CMenuForwarder *mf5 = new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time );
+	CMenuOptionChooser* oj5 = new CMenuOptionChooser("recordingmenu.no_scart", &g_settings.recording_vcr_no_scart, (g_settings.recording_type==2));
+	oj5->addOption(0, "options.off");
+	oj5->addOption(1, "options.on");
+
+	CStringInput *timerSettings_record_safety_time_before= new CStringInput("timersettings.record_safety_time_before", g_settings.record_safety_time_before, 2, "timersettings.record_safety_time_before.hint_1", "timersettings.record_safety_time_before.hint_2","0123456789 ");
+	CMenuForwarder *mf5 = new CMenuForwarder("timersettings.record_safety_time_before", true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
+	
+	CStringInput *timerSettings_record_safety_time_after= new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ");
+	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
 	CRecordingNotifier *RecordingNotifier = 
-		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,mf4);
+		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,mf4,oj5);
 	
    CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type, 
                                                     true, RecordingNotifier);
@@ -1562,8 +1573,10 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 	recordingSettings.addItem( oj4);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	recordingSettings.addItem( mf4);
+	recordingSettings.addItem( oj5);
 	recordingSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
 	recordingSettings.addItem( mf5);
+	recordingSettings.addItem( mf6);
 
 	recordingstatus = 0;
 }
@@ -2016,6 +2029,7 @@ void CNeutrinoApp::setupRecordingDevice(void)
 	{
 		CVCRControl::CVCRDeviceInfo * info = new CVCRControl::CVCRDeviceInfo;
 		info->Name = g_settings.recording_vcr_devicename;
+		info->SwitchToScart = (g_settings.recording_vcr_no_scart==0);
 		CVCRControl::getInstance()->registerDevice(CVCRControl::DEVICE_VCR,info);
       delete info;
 	}
@@ -2555,11 +2569,6 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 		{
 			if(CVCRControl::getInstance()->isDeviceRegistered())
 			{
-				CVCRControl::CServerDeviceInfo serverinfo;
-				serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
-				serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
-
-				CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
 				recording_id = ((CTimerd::RecordingInfo *) data)->eventID;
 				if(CVCRControl::getInstance()->Record((CTimerd::RecordingInfo *) data))
 					recordingstatus = 1;
@@ -3121,11 +3130,6 @@ void CNeutrinoApp::startNextRecording()
 	{
 		if(CVCRControl::getInstance()->isDeviceRegistered())
 		{
-			CVCRControl::CServerDeviceInfo serverinfo;
-			serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
-			serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
-
-			CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
 			recording_id = nextRecordingInfo->eventID;
 			if(CVCRControl::getInstance()->Record(nextRecordingInfo))
 				recordingstatus = 1;
@@ -3235,11 +3239,6 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 				else
 					eventinfo.mode = CTimerd::MODE_TV;
 
-				CVCRControl::CServerDeviceInfo serverinfo;
-				serverinfo.StopPlayBack = (g_settings.recording_stopplayback == 1);
-				serverinfo.StopSectionsd = (g_settings.recording_stopsectionsd == 1);
-				CVCRControl::getInstance()->setDeviceOptions(&serverinfo);
-
 				if(CVCRControl::getInstance()->Record(&eventinfo)==false)
 				{
 					recordingstatus=0;
@@ -3269,7 +3268,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.367 2002/12/02 20:03:04 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.368 2002/12/03 19:59:35 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");

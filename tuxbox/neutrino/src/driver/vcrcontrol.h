@@ -85,8 +85,7 @@ class CVCRControl
 		{
 			public:
 				CVCRDeviceInfo() : CDeviceInfo(){};
-				// nothing so far
-				// perhaps ir stuff here
+				bool  SwitchToScart;
 		};
 		
 		class CServerDeviceInfo : public CDeviceInfo		
@@ -122,6 +121,7 @@ class CVCRControl
 		{
 			bool ParseFile(std::string filename);
 			public:
+				bool SwitchToScart;
 				virtual bool Stop(); 
 				virtual bool Record(const t_channel_id channel_id = 0, int mode=1, unsigned long long epgid = 0, uint apid = 0);	
 				virtual bool Pause();

@@ -106,6 +106,7 @@ recordingmenu.vcr vcr
 recordingmenu.server_wakeup recording server WOL
 recordingmenu.server_mac MAC address
 recordingmenu.setupnow activate changes
+recordingmenu.no_scart do not switch to scart mode
 
 ping.ok is reachable (ping)
 ping.unreachable is unreachable
@@ -539,7 +540,7 @@ timer.eventtimed.title Schedule Event
 timer.eventtimed.msg The event is scheduled.\nThe dbox2 will power on and \nswitch to this channel at the given time.
 timer.eventrecord.title Schedule Record
 timer.eventrecord.msg   ... TO be DONE, or not to be done
-timerlist.name Timerlist
+timerlist.name Timer list
 timerlist.delete Delete
 timerlist.empty There are no timers at the moment
 timerlist.type.shutdown Shutdown
@@ -566,17 +567,17 @@ timerlist.repeat.wednesday We
 timerlist.repeat.thursday Th
 timerlist.repeat.friday Fr
 timerlist.repeat.saturday Sa
-timerlist.weekdays Days of teh week
+timerlist.weekdays Days of the week
 timerlist.weekdays.hint_1 Mo Tu We Th Fr Sa Su
 timerlist.weekdays.hint_2 'X'=timer '-' no timer
 timerlist.program.unknown Program unknown
 timerlist.standby.off Leave standby
 timerlist.standby.on Enter standby
-timerlist.alarmtime Alarmtime
-timerlist.stoptime Stoptime
+timerlist.alarmtime Alarm time
+timerlist.stoptime Stop time
 timerlist.new New timer
 timerlist.menumodify Modify timer
-timerlist.type Timertyp
+timerlist.type Timer typ
 timerlist.repeat Repeat
 timerlist.save Save timer
 timerlist.standby SB mode
@@ -591,10 +592,13 @@ timerlist.channelselect choose channel
 timerlist.modeselect Mode selection
 timerlist.modetv TV channels
 timerlist.moderadio Radio channels
-timersettings.separator Timersettings
-timersettings.record_safety_time Record time correction
-timersettings.record_safety_time.hint_1 Correction time in min. (00=off).
-timersettings.record_safety_time.hint_2 This time will be deducted of every timer.
+timersettings.separator Timer settings
+timersettings.record_safety_time_before Record start time correction
+timersettings.record_safety_time_before.hint_1 Correction time in min. (00=off). This time
+timersettings.record_safety_time_before.hint_2 will be deducted of every record timer.
+timersettings.record_safety_time_after Record stop time correction
+timersettings.record_safety_time_after.hint_1 Correction time in min. (00=off). This time
+timersettings.record_safety_time_after.hint_2 will added to stop time of every record timer.
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Title

@@ -91,6 +91,14 @@ void CVCRControl::setDeviceOptions(CDeviceInfo *deviceInfo)
 			device->StopPlayBack = serverinfo->StopPlayBack;
 			device->StopSectionsd = serverinfo->StopSectionsd;
 		}
+		else if(Device->deviceType == DEVICE_VCR)
+		{
+			CVCRDevice * device = (CVCRDevice *) Device;
+			CVCRDeviceInfo *serverinfo = (CVCRDeviceInfo *) deviceInfo;
+			if(serverinfo->Name.length() > 0)
+				device->Name = serverinfo->Name;
+			device->SwitchToScart = serverinfo->SwitchToScart;
+		}
 	}
 }
 //-------------------------------------------------------------------------
@@ -121,8 +129,8 @@ bool CVCRControl::registerDevice(CVCRDevices deviceType, CDeviceInfo *deviceInfo
 	else if(deviceType == DEVICE_VCR)
 	{
 		CVCRDevice * device = new CVCRDevice();
-		device->Name = deviceInfo->Name;
 		Device = (CDevice*) device;
+		setDeviceOptions(deviceInfo);
 		printf("CVCRControl registered new vcrdevice: %s\n",device->Name.c_str());
 		return true;
 	}
@@ -232,11 +240,15 @@ bool CVCRControl::CVCRDevice::Record(const t_channel_id channel_id, int mode, un
 	else
 		g_Zapit->setAudioChannel(0); //sonst apid 0, also auf jeden fall ac3 aus !!!
 
-	// Auf Scart schalten
-	CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::VCR_ON, 0 );
-	// Das ganze nochmal in die queue, da obiges RC_timeout erst in der naechsten ev. loop ausgeführt wird
-	// und dann das menu widget das display falsch rücksetzt
-	g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
+	if(SwitchToScart)
+	{
+		// Auf Scart schalten
+		CNeutrinoApp::getInstance()->handleMsg( NeutrinoMessages::VCR_ON, 0 );
+		// Das ganze nochmal in die queue, da obiges RC_timeout erst in der naechsten ev. loop ausgeführt wird
+		// und dann das menu widget das display falsch rücksetzt
+		g_RCInput->postMsg( NeutrinoMessages::VCR_ON, 0 );
+	}
+
 	deviceState = CMD_VCR_RECORD;
 	// Send IR
 	return ParseFile(LIRCDIR "record.lirc");

@@ -106,7 +106,7 @@ recordingmenu.vcr Video Rekorder
 recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
 recordingmenu.setupnow Einstellungen jetzt übernehmen
-
+recordingmenu.no_scart Unterdrücke Scart-Umschaltung
 ping.ok ist erreichbar (ping)
 ping.unreachable ist nicht erreichbar (unreachable)
 ping.protocol ist nicht erreichbar (Host or protocol error)
@@ -592,9 +592,12 @@ timerlist.modeselect Modus-Auswahl
 timerlist.modetv TV Kanäle
 timerlist.moderadio Radio Kanäle
 timersettings.separator Timereinstellungen
-timersettings.record_safety_time Aufnahmekorrektur
-timersettings.record_safety_time.hint_1 Korrekturzeit in Min. (00=aus), die beim Start
-timersettings.record_safety_time.hint_2 des jeweiligen Timers abgezogen werden
+timersettings.record_safety_time_before Aufnahmestart-Korrektur
+timersettings.record_safety_time_before.hint_1 Korrekturzeit in Min. (00=aus), die beim Start
+timersettings.record_safety_time_before.hint_2 des jeweiligen Timers abgezogen werden
+timersettings.record_safety_time_after Aufnahmeende-Korrektur
+timersettings.record_safety_time_after.hint_1 Korrekturzeit in Min. (00=aus), die auf die End-
+timersettings.record_safety_time_after.hint_2 zeit des jeweiligen Timers addiert wird
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Titel

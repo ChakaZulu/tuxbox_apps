@@ -50,7 +50,8 @@ struct SNeutrinoSettings
 	int shutdown_real;
 	int shutdown_showclock;
 	int show_camwarning;
-	char record_safety_time[3];
+	char record_safety_time_before[3];
+	char record_safety_time_after[3];
 
 	//audio
 	int audio_AnalogMode;
@@ -149,6 +150,7 @@ struct SNeutrinoSettings
 	int  recording_server_wakeup;
 	char recording_server_mac[31];
 	char recording_vcr_devicename[50];
+	int  recording_vcr_no_scart;
 
 	//key configuration
 	int key_tvradio_mode;
