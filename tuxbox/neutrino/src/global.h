@@ -51,10 +51,10 @@
 #include "gui/eventlist.hpp"
 #include "gui/gamelist.h"
 
-
 #ifndef NEUTRINO_CPP
-#define NEUTRINO_CPP extern
+  #define NEUTRINO_CPP extern
 #endif
+
 
 NEUTRINO_CPP int		NeutrinoMode;
 
@@ -80,7 +80,6 @@ NEUTRINO_CPP CLocaleManager		*g_Locale;
 
 NEUTRINO_CPP CBouquetList		*bouquetList;
 NEUTRINO_CPP CPlugins   		*g_PluginList;
-
 
 
 #ifdef USEACTIONLOG

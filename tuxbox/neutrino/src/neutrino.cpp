@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.246 2002/04/25 19:03:29 McClean Exp $
+        $Id: neutrino.cpp,v 1.247 2002/04/25 19:29:38 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -36,6 +36,7 @@
 #include <config.h>
 
 #define NEUTRINO_CPP
+
 #include "global.h"
 #include "neutrino.h"
 
@@ -2352,7 +2353,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.246 2002/04/25 19:03:29 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.247 2002/04/25 19:29:38 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
