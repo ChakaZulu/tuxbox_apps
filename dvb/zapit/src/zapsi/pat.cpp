@@ -8,9 +8,11 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <string>
+#include <ost/dmx.h>
+
+#include "pat.h"
 #include "sdt.h"
 #include "scan.h"
-#include <ost/dmx.h>
 
 #define DEMUX_DEV	"/dev/ost/demux0"
 #define PAT_LENGTH	1024
@@ -21,18 +23,16 @@ map<uint,channel> nvodchannels;
 map<uint,channel>::iterator cI;
 extern int found_transponders;
 
-int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd)
+int fake_pat(std::map<int,transpondermap> *tmap, int frequency, int symbol_rate)
 {
 	struct dmxSctFilterParams flt;
-	int demux;
+	int demux_fd;
 	uint8_t buffer[PAT_LENGTH];
-  	uint16_t tsid;
+  	uint16_t transport_stream_id;
 
-	fprintf(logfd, "Starting fake_pat\n");
-
-  	if ((demux = open(DEMUX_DEV, O_RDWR)) < 0)
+  	if ((demux_fd = open(DEMUX_DEV, O_RDWR)) < 0)
 	{
-    		perror(DEMUX_DEV);
+    		perror("[pat.cpp] " DEMUX_DEV);
     		return -1;
   	}
 
@@ -43,28 +43,27 @@ int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd)
   	flt.timeout = 1000;
   	flt.flags = DMX_CHECK_CRC | DMX_ONESHOT | DMX_IMMEDIATE_START;
  
-  	if (ioctl(demux, DMX_SET_FILTER, &flt) < 0)
+  	if (ioctl(demux_fd, DMX_SET_FILTER, &flt) < 0)
 	{
-    		perror("DMX_SET_FILTER");
+    		perror("[pat.cpp] DMX_SET_FILTER");
+		close(demux_fd);
+		return -1;
   	}
 
-	if (read(demux, buffer, PAT_LENGTH) < 0)
+	if (read(demux_fd, buffer, PAT_LENGTH) < 0)
 	{
-   		perror("[pat.cpp] read Pat");
-   		fprintf(logfd ,"Error reading Pat\n");
-    		close(demux);
+   		perror("[pat.cpp] read");
+    		close(demux_fd);
     		return -1;
     	}
  
-	close(demux);
+	close(demux_fd);
 
-	tsid = (buffer[3] << 8) | buffer[4];
+	transport_stream_id = (buffer[3] << 8) | buffer[4];
 
-	(*tmap).insert(std::pair<int,transpondermap>(tsid,transpondermap(tsid, freq, sr, 0)));
-	fprintf(logfd ,"Adding Transponder %x to list\n", tsid);
+	(*tmap).insert(std::pair<int, transpondermap>(transport_stream_id, transpondermap(transport_stream_id, frequency, symbol_rate, 0)));
 	found_transponders++;
 
-	fprintf(logfd, "Ending fake_pat\n");
 	return 23;
 }
 

@@ -1,3 +1,6 @@
+#ifndef __zapit_h__
+#define __zapit_h__
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -35,17 +38,17 @@
 
 #include "bouquets.h"
 #include "getservices.h"
+#include "ca-ids.h"
+#include "nit.h"
+#include "pat.h"
 #include "sdt.h"
+#include "tune.h"
 #include "zapitclient.h"
 #include "eventserver.h"
 
 #include "config.h"
 
-#ifdef OLD_TUNER_API
-#define FRONT_DEV "/dev/ost/qpskfe0"
-#else
 #define FRONT_DEV "/dev/ost/frontend0"
-#endif
 #define DEMUX_DEV "/dev/ost/demux0"
 #define SEC_DEV   "/dev/ost/sec0"
 #define VIDEO_DEV "/dev/ost/video0"
@@ -58,30 +61,6 @@
 #define USE_EXTERNAL_CAMD
 #endif
 
-int dvb_device;
-
-#define SA struct sockaddr
-#define SAI struct sockaddr_in
-
-struct sockaddr_un servaddr;
-int listenfd, connfd;
-int clilen;
-
-int lofHigh=10600;
-int lofLow=9750;
-int offset=0;
-int caid = 0;
-int caver = 0;
-
-struct rmsg {
-  		unsigned char version;
-  		unsigned char cmd;
-  		unsigned char param;
-  		unsigned short param2;
-  		char param3[30];
-
-} rmsg;
-
 typedef struct decode_struct{
 	uint onid;
 	uint tsid;
@@ -92,23 +71,12 @@ typedef struct decode_struct{
 } decode_vals;
 
 int LoadServices();
-void nit();
-int pat(uint oonid,std::map<uint,channel> *cmap);
-int sdt(uint osid,bool scan_mode);
-int tune(uint tsid);
 void *start_scanthread(void *);
 
 #ifndef USE_EXTERNAL_CAMD
-int get_caid();
-int get_caver();
+int writecam(uint8_t *data, uint8_t len);
+int cam_reset();
 #endif
-
-struct {
-	char         mode;          // 't' TV, 'r' Radio
-	unsigned int tv;
-	unsigned int radio;
-} lastChannel;
-
 
 /**************************************************************/
 /*                                                            */
@@ -130,3 +98,5 @@ unsigned int zapTo(unsigned int channel);
 unsigned int zapTo(unsigned int bouquet, unsigned int channel);
 unsigned int zapTo_ServiceID(unsigned int serviceID, bool isSubService );
 void sendAPIDs();
+
+#endif /* __zapit_h__ */

@@ -1,11 +1,12 @@
 #ifndef __sdt__
 #define __sdt__
 
+#include <stdint.h>
 #include <map>
-#include <getservices.h>
+#include "getservices.h"
 
 using namespace std;
 
-extern map<uint, channel> nvodchannels;
+int sdt (uint16_t osid, bool scan_mode);
 
 #endif

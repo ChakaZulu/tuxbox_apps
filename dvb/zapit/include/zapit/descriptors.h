@@ -1,30 +1,32 @@
 #ifndef __descriptors__
 #define __descriptors__
 
-int stuffing_desc(char *buffer, FILE *logfd);
-int linkage_desc(char *buffer, FILE *logfd);
-int priv_data_desc(char *buffer, FILE *logfd);
-int network_name_desc(char *buffer, FILE *logfd);
-int service_list_desc(char *buffer, FILE *logfd);
-int cable_deliv_system_desc(char *buffer, int tsid, FILE *logfd);
-int sat_deliv_system_desc(char *buffer, int tsid, int diseqc, FILE *logfd);
-int terr_deliv_system_desc(char *buffer, FILE *logfd);
-int multilingual_network_name_desc(char *buffer, FILE *logfd);
-int freq_list_desc(char *buffer, FILE *logfd);
-int cell_list_desc(char *buffer, FILE *logfd);
-int announcement_support_desc(char *buffer, FILE *logfd);
-int service_name_desc(char *buffer, int sid, int tsid, int onid,bool scan_mode, FILE *logfd);
-int bouquet_name_desc(char *buffer, FILE *logfd);
-int country_availability_desc(char *buffer, FILE *logfd);
-int nvod_ref_desc(char *buffer,int tsid,bool scan_mode, FILE *logfd);
-int time_shift_service_desc(char *buffer, FILE *logfd);
-int mosaic_desc(char *buffer, FILE *logfd);
-int ca_ident_desc(char *buffer, FILE *logfd);
-int telephone_desc(char *buffer, FILE *logfd);
-int multilingual_service_name_desc(char *buffer, FILE *logfd);
-int data_broadcast_desc(char *buffer, FILE *logfd);
-int network_name_desc(char *buffer, FILE *logfd);
-int cell_freq_list_desc(char *buffer, FILE *logfd);
+#include <stdint.h>
+
+uint8_t stuffing_desc(uint8_t *buffer);
+uint8_t linkage_desc(uint8_t *buffer);
+uint8_t priv_data_desc(uint8_t *buffer);
+uint8_t network_name_desc(uint8_t *buffer);
+uint8_t service_list_desc(uint8_t *buffer);
+uint8_t cable_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id);
+uint8_t sat_deliv_system_desc(uint8_t *buffer, uint16_t transport_stream_id, int diseqc);
+uint8_t terr_deliv_system_desc(uint8_t *buffer);
+uint8_t multilingual_network_name_desc(uint8_t *buffer);
+uint8_t freq_list_desc(uint8_t *buffer);
+uint8_t cell_list_desc(uint8_t *buffer);
+uint8_t announcement_support_desc(uint8_t *buffer);
+uint8_t service_name_desc(uint8_t *buffer, uint16_t service_id, uint16_t transport_stream_id, uint16_t onid, bool scan_mode);
+uint8_t bouquet_name_desc(uint8_t *buffer);
+uint8_t country_availability_desc(uint8_t *buffer);
+uint8_t nvod_ref_desc(uint8_t *buffer, uint16_t transport_stream_id, bool scan_mode);
+uint8_t time_shift_service_desc(uint8_t *buffer);
+uint8_t mosaic_desc(uint8_t *buffer);
+uint8_t ca_ident_desc(uint8_t *buffer);
+uint8_t telephone_desc(uint8_t *buffer);
+uint8_t multilingual_service_name_desc(uint8_t *buffer);
+uint8_t data_broadcast_desc(uint8_t *buffer);
+uint8_t network_name_desc(uint8_t *buffer);
+uint8_t cell_freq_list_desc(uint8_t *buffer);
 
 
 #endif

@@ -19,6 +19,12 @@
 #include <ost/video.h>
 #include <ost/ca.h>
 
+#include "nit.h"
+#include "pat.h"
+#include "sdt.h"
+#include "tune.h"
+
+
 #define FRONT_DEV "/dev/ost/qpskfe0"
 #define DEMUX_DEV "/dev/ost/demux0"
 #define SEC_DEV   "/dev/ost/sec0"
@@ -26,18 +32,12 @@
 typedef std::map<int, scanchannel>::iterator sciterator;
 typedef std::map<int, transpondermap>::iterator stiterator;
 typedef std::multimap<std::string, bouquet_mulmap>::iterator sbiterator;
-#ifdef NVOD_HACK
-std::string curr_chan;
-#endif
 std::string services_xml = CONFIGDIR "/zapit/services.xml";
 std::string logfile = "/tmp/zapit_scan.log";
-int fake_pat(std::map<int,transpondermap> *tmap, int freq, int sr, FILE *logfd);
-int finaltune(int freq, int symbolrate, int polarity, int fec,int diseq);
-int nit(int diseqc, FILE *logfd);
-int sdt(uint osid, bool scan_mode, FILE *logfd);
 int prepare_channels();
 short scan_runs;
 short curr_sat;
+
 int issatbox()
 {
 	FILE *fp;
@@ -59,48 +59,40 @@ int issatbox()
 	return fe;
 }
 
-void get_nits(int freq, int symbolrate, int polarity, int fec,int diseq, FILE *logfd)
+void get_nits(int frequency, int symbol_rate, int polarity, int FEC_inner, int DiSEqC)
 {
-  if (finaltune(freq,symbolrate,polarity,fec,diseq)>0)
-  	nit(diseq,logfd);
-  else
-  {
-    printf("No signal found on transponder\n");
-    }
-}
-
-void get_sdts(FILE *logfd)
-{
-
-  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-    {
-    	int sdt_tries = 0;
-      if (finaltune(tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,tI->second.diseqc) > 0)
-      {
-        //if (pat(tI->second.freq,tI->second.symbolrate) >0)
-	//{
-	  printf("GETTING SDT FOR TSID: %04x\n",tI->second.tsid);
-	  fprintf(logfd, "Got lock on transponder %x, freq: %d, SR: %d, Pol: %d, Fec: %d, Diseqc: %d\n",tI->second.tsid, tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,tI->second.diseqc);
-	  fprintf(logfd,"GETTING SDT FOR TSID: %04x\n",tI->second.tsid);
-	  while (sdt(tI->second.tsid,true,logfd) == -2 && sdt_tries != 5)
-	  	sdt_tries++;
-	//}
-	}
+	if (finaltune(frequency, symbol_rate, polarity, FEC_inner, DiSEqC) > 0)
+		nit(DiSEqC);
 	else
-	{
-    		printf("No signal found on transponder\n");
-    		fprintf(logfd, "No signal found transponder %x, freq: %d, SR: %d, Pol: %d, Fec: %d, Diseqc: %d\n",tI->second.tsid , tI->second.freq,tI->second.symbolrate,tI->second.polarization,tI->second.fec_inner,tI->second.diseqc);
-    	}
-    }
+		printf("No signal found on transponder\n");
 }
 
+void get_sdts()
+{
+	int sdt_tries;
+	
+	for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+	{
+		sdt_tries = 0;
 
+		if (finaltune(tI->second.freq, tI->second.symbolrate, tI->second.polarization, tI->second.fec_inner, tI->second.diseqc) > 0)
+		{
+			//if (pat(tI->second.freq,tI->second.symbolrate) >0)
+			//{
+				printf("GETTING SDT FOR TSID: %04x\n", tI->second.tsid);
+				while (sdt(tI->second.tsid, true) == -2 && sdt_tries != 5)
+				sdt_tries++;
+			//}
+		}
+		else
+			printf("No signal found on transponder\n");
+	}
+}
 
 void write_fake_bouquets(FILE *fd)
 {
-  fprintf(fd, "<Bouquet name=\"dummy\">\n\t<channel id=\"0000\"/>\n</Bouquet>\n");
+	fprintf(fd, "<Bouquet name=\"dummy\">\n\t<channel id=\"0000\"/>\n</Bouquet>\n");
 }
-
 
 void write_bouquets(unsigned short mode)
 {
@@ -244,7 +236,6 @@ void write_transponder(int tsid, FILE *fd)
 //	      transponder += "\" channelNR=\"0\" ecmpid=\"0\">\n";
 //	      transponder += "\" channelNR=\"0\">\n";
 	      transponder += "\" channelNR=\"0\" />\n";
-//	      transponder += "\t\t\t<standard vpid=\"1fff\" apid=\"8191\" />\n";
 //	      transponder += "\t\t</channel>\n";
 
 
@@ -257,282 +248,202 @@ void write_transponder(int tsid, FILE *fd)
 
 void *start_scanthread(void *param)
 {
-  FILE *fd = NULL;
-  std::string transponder;
-  int is_satbox = issatbox();
-  FILE *logfd = fopen(logfile.c_str(), "w");
+	FILE *fd = NULL;
+	std::string transponder;
+	int is_satbox = issatbox();
+	char satName[50];
+	unsigned short do_diseqc = *(unsigned short *) (param);
 
-  char	satName[50];
-
-  if (is_satbox == -1)
-  {
-  	printf("Is your dbox properly set up?\n");
-  	if (logfd!=NULL)
-  		fclose(logfd);
-
-  	scan_runs = 1; //start_scan is waiting till scan_runs = 1
-  	usleep(500);
-  	scan_runs = 0;
-  	pthread_exit(0);
- }
-
-  if (logfd == NULL)
-  {
-  	perror("Could not create logfile. Please check if /tmp exists and space is available\nCancelling scan");
-  	scan_runs = 1; //start_scan is waiting till scan_runs = 1
-  	usleep(500);
-  	scan_runs = 0;
-  	pthread_exit(0);
-  }
-  setlinebuf(logfd);
-
-  unsigned short do_diseqc = *(unsigned short *) (param);
-
-  scan_runs = 1;
-  if (!is_satbox)
-    {
-    	fprintf(logfd, "Scanning cable\n");
-    	strcpy(satName, "cable");
-    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
-
-    	curr_sat = 0;
-      int symbolrate = 6900;
-      int symbolrate2 = 6875;
-      for (int freq = 3300; freq<=4600; freq +=80)
+	if (is_satbox == -1)
 	{
-	  if (finaltune(freq,symbolrate,0,0,0)>0)
-	  {
-	  	fprintf(logfd, "Tuning to Freq: %d, SR: %d was succesfull\n", freq*100, symbolrate*1000);
+		printf("Is your dbox properly set up?\n");
+		scan_runs = 1; //start_scan is waiting till scan_runs = 1
+		usleep(500);
+		scan_runs = 0;
+		pthread_exit(0);
+	}
+	
+	scan_runs = 1;
 
-    	  	fake_pat(&scantransponders, freq, symbolrate, logfd);
-    	}
-  	  else
-  	  {
-    		printf("No signal found on transponder\nTrying SR 6875\n");
-    		fprintf(logfd, "Tuning to Freq: %d, SR: %d was UNsuccesfull\n", freq*100, symbolrate*1000);
-    		if (finaltune(freq,symbolrate2,0,0,0)>0)
-	  	{
-	  		fprintf(logfd, "Tuning to Freq: %d, SR: %d was succesfull\n", freq*100, symbolrate2*1000);
+	if (!is_satbox)
+	{
+		strcpy(satName, "cable");
+		eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName) + 1);
 
-    	  		fake_pat(&scantransponders, freq, symbolrate2, logfd);
-    		}
-  	  	else
-  	  	{
-    			printf("No signal found on transponder\n");
-    			fprintf(logfd, "Tuning to Freq: %d, SR: %d was UNsuccesfull\n", freq*100, symbolrate2*1000);
+		curr_sat = 0;
+		int symbolrate = 6900;
+		int symbolrate2 = 6875;
+
+		for (int freq = 3300; freq <= 4600; freq += 80)
+		{
+			if (finaltune(freq, symbolrate, 0, 0, 0) > 0)
+			{
+				fake_pat(&scantransponders, freq, symbolrate);
+			}
+			else
+			{
+				printf("[scan.cpp] No signal found on transponder. Trying SR 6875\n");
+
+				if (finaltune(freq, symbolrate2, 0, 0, 0) > 0)
+					fake_pat(&scantransponders, freq, symbolrate2);
+				else
+					printf("[scan.cpp] No signal found on transponder\n");
+			}
 		}
+
+		get_sdts();
+
+		if (!scantransponders.empty())
+		{
+			fd = fopen(services_xml.c_str(), "w" );
+
+			if (fd == NULL)
+			{
+				perror("[zapit.cpp] open services.xml");
+				scan_runs = 0;
+				pthread_exit(0);
+			}
+
+			fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+			fprintf(fd,"<ZAPIT>\n<cable>\n");
+			for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+			{
+				fprintf(fd, "<transponder transportID=\"%05d\" networkID=\"0\">\n", tI->second.tsid);
+				write_transponder(tI->second.tsid, fd);
+				fprintf(fd, "</transponder>\n");
+			}
+			fprintf(fd,"</cable>\n");
+		}
+
+		scantransponders.clear();
+		scanchannels.clear();
 	}
-
-	}
-
-	get_sdts(logfd);
-	fprintf(logfd, "Writing cable-tranponders and channels now\n");
-
-      if (!scantransponders.empty())
-      {
-      	fd = fopen(services_xml.c_str(), "w" );
-
-      	if (fd == NULL)
-      	{
-      		perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
-      		fclose(logfd);
-      		scan_runs = 0;
-  		pthread_exit(0);
-  	}
-
-        fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-      fprintf(fd,"<ZAPIT>\n<cable>\n");
-      for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+	else
 	{
-	  fprintf(fd, "<transponder transportID=\"%05d\" networkID=\"0\">\n", tI->second.tsid);
-	  write_transponder(tI->second.tsid, fd);
-	  fprintf(fd, "</transponder>\n");
-	}
-      fprintf(fd,"</cable>\n");
-      }
-      fprintf(logfd, "Wrote all cable-transponders and channels\n");
+		if (do_diseqc & 1)
+		{
+			curr_sat = 1;
+			strcpy(satName, "ASTRA");
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
-      scantransponders.clear();
-      scanchannels.clear();
-      fprintf(logfd, "Cleared all cable-transponders and channels\n");
+			printf("[scan.cpp] SCANNING ASTRA\n");
+			get_nits(11797, 27500, 0, 0, 0);
+			get_nits(12551, 22000, 1, 5, 0);
+			get_nits(12168, 27500, 1, 3, 0);
+			get_nits(12692, 22000, 0, 5, 0);
+			get_nits(11913, 27500, 0, 3, 0);
+			get_nits(11954, 27500, 0, 3, 0);
+			get_nits(12051, 27500, 1, 3, 0);
+			get_sdts();
 
-    }
-  else
-    {
-      fprintf(logfd, "scanning-mode: %d\n", do_diseqc);
-      if (do_diseqc & 1)
-      {
-      	curr_sat = 1;
-      	strcpy(satName, "ASTRA");
-    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
+			if (!scantransponders.empty())
+			{
+				if (fd == NULL)
+				{
+					fd = fopen(services_xml.c_str(), "w" );
 
-      printf("---------------------------\nSCANNING ASTRA\n---------------------------\n");
-      fprintf(logfd, "---------------------------\nSCANNING ASTRA\n---------------------------\n");
+					if (fd == NULL)
+					{
+						perror("[scan.cpp] open services.xml");
+						scan_runs = 0;
+						pthread_exit(0);
+					}
 
-      fprintf(logfd, "get_nits(11797, 27500, 0, 0, 0, logfd);\n");
-      get_nits(11797, 27500, 0, 0, 0, logfd);
-      fprintf(logfd, "get_nits(12551, 22000, 1, 5, 0, logfd);\n");
-      get_nits(12551, 22000, 1, 5, 0, logfd);
-      fprintf(logfd, "get_nits(12168, 27500, 1, 3, 0, logfd);\n");
-      get_nits(12168, 27500, 1, 3, 0, logfd);
-      fprintf(logfd, "get_nits(12692, 22000, 0, 5, 0, logfd);\n");
-      get_nits(12692, 22000, 0, 5, 0, logfd);
-      fprintf(logfd, "get_nits(11913,27500,0,3,0, logfd);\n");
-      get_nits(11913,27500,0,3,0, logfd);
-      fprintf(logfd, "get_nits(11954,27500,0,3,0, logfd);\n");
-      get_nits(11954,27500,0,3,0, logfd);
-      fprintf(logfd, "get_nits(12051,27500,1,3,0, logfd);\n");
-      get_nits(12051,27500,1,3,0, logfd);
+					fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+					fprintf(fd,"<ZAPIT>\n");
+				}
 
-      fprintf(logfd, "Got alle Nits\n");
-      get_sdts(logfd);
+				fprintf(fd, "<satellite name=\"Astra 19.2E\" diseqc=\"0\">\n");
+				for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+				{
+					fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
+					write_transponder(tI->second.tsid,fd);
+					fprintf(fd, "</transponder>\n");
+				}
+				fprintf(fd, "</satellite>\n");
+			}
 
-      if (!scantransponders.empty())
-	{
-	  if (fd == NULL)
-	  {
-	  	fd = fopen(services_xml.c_str(), "w" );
-	  	if (fd == NULL)
-      		{
-      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
-      			fclose(logfd);
-      			scan_runs = 0;
-  			pthread_exit(0);
-  		}
+			scanchannels.clear();
+			scantransponders.clear();
+		}
 
-	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-      	  	fprintf(fd,"<ZAPIT>\n");
-      	  }
+		if (do_diseqc & 2)
+		{
+			curr_sat = 2;
+			strcpy(satName, "HOTBIRD");
 
-	  fprintf(fd, "<satellite name=\"Astra 19.2E\" diseqc=\"0\">\n");
-	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-	    {
-	      fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-	      write_transponder(tI->second.tsid,fd);
-	      fprintf(fd, "</transponder>\n");
-	    }
-	  fprintf(fd, "</satellite>\n");
-	}
+			eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
+			printf("[scan.cpp] SCANNING HOTBIRD\n");
+			get_nits(12692,27500,0,3,1);
+			get_nits(12539,27500,0,3,1);
+			get_nits(11746,27500,0,3,1);
+			get_nits(12168,27500,0,3,1);
+			get_nits(12034,27500,1,3,1);
+			get_nits(11919,27500,1,2,1);
+			get_nits(11804,27500,1,2,1);
+			get_nits(12169,27500,0,3,1);
+			get_nits(12539,27500,0,3,1);
+			get_nits(12111,27500,1,3,1);
+			get_nits(12168,27500,0,3,1);
+			get_nits(11283,27500,1,3,1);
+			get_nits(12283,27500,1,3,1);
+			get_nits(11331,6111,1,3,1);
+			get_nits(11412,6198,0,7,1);
+			get_nits(10723,29895,0,3,1);
+			get_nits(10775,28000,0,3,1);
+			get_nits(10975,4340,0,3,1);
+			get_nits(11060,6510,1,5,1);
+			get_nits(11131,5632,1,3,1);
+			get_nits(11178,21100,0,3,1);
+			get_nits(11196,9100,1,1,1);
+			get_nits(11205,4000,0,3,1);
+			get_nits(11304,30000,0,3,1);
+			get_nits(11338,5632,1,3,1);
+			get_nits(11457,6111,0,3,1);
+			get_nits(11464,4398,0,7,1);
+#if 0
+			get_nits(12211,5632,0,3,1);
+			get_nits(12220,6161,0,3,1);
+			get_nits(12236,13400,1,3,1);
+			get_nits(12198,12130,0,7,1);
+			get_nits(12484,8300,1,3,1);
+			get_nits(12573,5632,0,3,1);
+			get_nits(12581,5632,0,3,1);
+			get_nits(12590,5632,0,3,1);
+#endif
+			get_sdts();
 
+			if (!scantransponders.empty())
+			{
+				if (fd == NULL)
+				{
+					fd = fopen(services_xml.c_str(), "w" );
+					
+					if (fd == NULL)
+					{
+						perror("[scan.cpp] open services.xml");
+						scan_runs = 0;
+						pthread_exit(0);
+					}
 
-      scanchannels.clear();
-      scantransponders.clear();
-      fprintf(logfd,"Scanning Astra ready\n");
-	}
+					fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
+					fprintf(fd,"<ZAPIT>\n");
+				}
 
-      if (do_diseqc & 2)
-      {
-      	curr_sat = 2;
-      	strcpy(satName, "HOTBIRD");
-    	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
-      printf("---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
-      	fprintf(logfd,	"---------------------------\nSCANNING HOTBIRD\n---------------------------\n");
+				fprintf(fd, "<satellite name=\"Hotbird 13.0E\" diseqc=\"1\">\n");
+				for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
+				{
+					fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
+					write_transponder(tI->second.tsid,fd);
+					fprintf(fd,"</transponder>\n");
+				}
+				fprintf(fd, "</satellite>\n");
+			}
 
-      fprintf(logfd,"get_nits(12692,27500,0,3,1, logfd);\n");
-      get_nits(12692,27500,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12539,27500,0,3,1, logfd);\n");
-      get_nits(12539,27500,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(11746,27500,0,3,1, logfd);\n");
-      get_nits(11746,27500,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12168,27500,0,3,1, logfd);\n");
-      get_nits(12168,27500,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12034,27500,1,3,1, logfd);\n");
-      get_nits(12034,27500,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(11919,27500,1,2,1, logfd);\n");
-      get_nits(11919,27500,1,2,1, logfd);
-      fprintf(logfd,	"get_nits(11804,27500,1,2,1, logfd);\n");
-      get_nits(11804,27500,1,2,1, logfd);
-      fprintf(logfd,	"get_nits(12169,27500,0,3,1, logfd);\n");
-      get_nits(12169,27500,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12539,27500,0,3,1, logfd);\n");
-      get_nits(12539,27500,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12111,27500,1,3,1, logfd);\n");
-      get_nits(12111,27500,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(12168,27500,0,3,1, logfd);\n");
-      get_nits(12168,27500,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(11283,27500,1,3,1, logfd);\n");
-      get_nits(11283,27500,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(12283,27500,1,3,1, logfd);\n");
-      get_nits(12283,27500,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(11331,6111,1,3,1, logfd);\n");
-      get_nits(11331,6111,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(11412,6198,0,7,1, logfd);\n");
-      get_nits(11412,6198,0,7,1, logfd);
-      fprintf(logfd,	"get_nits(10723,29895,0,3,1, logfd);\n");
-      get_nits(10723,29895,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(10775,28000,0,3,1, logfd);\n");
-      get_nits(10775,28000,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(10975,4340,0,3,1, logfd);\n");
-      get_nits(10975,4340,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(11060,6510,1,5,1, logfd);\n");
-      get_nits(11060,6510,1,5,1, logfd);
-      fprintf(logfd,	"get_nits(11131,5632,1,3,1, logfd);\n");
-      get_nits(11131,5632,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(11178,21100,0,3,1, logfd);\n");
-      get_nits(11178,21100,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(11196,9100,1,1,1, logfd);\n");
-      get_nits(11196,9100,1,1,1, logfd);
-      fprintf(logfd,	"get_nits(11205,4000,0,3,1, logfd);\n");
-      get_nits(11205,4000,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(11304,30000,0,3,1, logfd);\n");
-      get_nits(11304,30000,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(11338,5632,1,3,1, logfd);\n");
-      get_nits(11338,5632,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(11457,6111,0,3,1, logfd);\n");
-      get_nits(11457,6111,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(11464,4398,0,7,1, logfd);\n");
-      get_nits(11464,4398,0,7,1, logfd);
-/*      fprintf(logfd,	"get_nits(12211,5632,0,3,1, logfd);\n");
-      get_nits(12211,5632,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12220,6161,0,3,1, logfd);\n");
-      get_nits(12220,6161,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12236,13400,1,3,1, logfd);\n");
-      get_nits(12236,13400,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(12198,12130,0,7,1, logfd);\n");
-      get_nits(12198,12130,0,7,1, logfd);
-      fprintf(logfd,	"get_nits(12484,8300,1,3,1, logfd);\n");
-      get_nits(12484,8300,1,3,1, logfd);
-      fprintf(logfd,	"get_nits(12573,5632,0,3,1, logfd);\n");
-      get_nits(12573,5632,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12581,5632,0,3,1, logfd);\n");
-      get_nits(12581,5632,0,3,1, logfd);
-      fprintf(logfd,	"get_nits(12590,5632,0,3,1, logfd);\n");
-      get_nits(12590,5632,0,3,1, logfd);
-*/
-      fprintf(logfd, "Got alle Nits\n");
-      get_sdts(logfd);
-
-      if (!scantransponders.empty())
-	{
-	if (fd == NULL)
-	  {
-	  	fd = fopen(services_xml.c_str(), "w" );
-	  	if (fd == NULL)
-      		{
-      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
-      			fclose(logfd);
-      			scan_runs = 0;
-  			pthread_exit(0);
-  		}
-
-	  	fprintf(fd,"<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
-      	 	fprintf(fd,"<ZAPIT>\n");
-      	}
-	fprintf(fd, "<satellite name=\"Hotbird 13.0E\" diseqc=\"1\">\n");
-	  for (stiterator tI = scantransponders.begin(); tI != scantransponders.end(); tI++)
-	    {
-	    fprintf(fd, "<transponder transportID=\"%d\" networkID=\"0\">\n", tI->second.tsid);
-	      write_transponder(tI->second.tsid,fd);
-	      fprintf(fd,"</transponder>\n");
-	    }
-	  fprintf(fd, "</satellite>\n");
-	}
-
-      scanchannels.clear();
-      scantransponders.clear();
-      fprintf(logfd,"Scanning Hotbird ready\n");
-      }
+			scanchannels.clear();
+			scantransponders.clear();
+		}
 
       if (do_diseqc & 4)
       {
@@ -540,16 +451,10 @@ void *start_scanthread(void *param)
       	strcpy(satName, "KOPERNIKUS");
     	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
-      printf("---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
-      fprintf(logfd,"---------------------------\nSCANNING KOPERNIKUS\n---------------------------\n");
-
-      fprintf(logfd,"get_nits(12655,27500,1,3,2, logfd);\n");
-      get_nits(12655,27500,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12521,27500,1,3,2, logfd);\n");
-      get_nits(12521,27500,1,3,2, logfd);
-
-      fprintf(logfd, "Got alle Nits\n");
-      get_sdts(logfd);
+      printf("[scan.cpp] SCANNING KOPERNIKUS\n");
+      get_nits(12655,27500,1,3,2);
+      get_nits(12521,27500,1,3,2);
+      get_sdts();
 
        if (!scantransponders.empty())
 	{
@@ -558,8 +463,7 @@ void *start_scanthread(void *param)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	if (fd == NULL)
       		{
-      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
-      			fclose(logfd);
+			perror("[scan.cpp] open services.xml");
       			scan_runs = 0;
   			pthread_exit(0);
   		}
@@ -577,7 +481,6 @@ void *start_scanthread(void *param)
 	}
        scanchannels.clear();
        scantransponders.clear();
-       fprintf(logfd,"Scanning Kopernikus ready\n");
        }
 
       if (do_diseqc & 16)
@@ -586,88 +489,46 @@ void *start_scanthread(void *param)
 		strcpy(satName, "SIRIUS5");
     	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
-      printf("---------------------------\nSCANNING SIRIUS5\n---------------------------\n");
-      fprintf(logfd,"---------------------------\nSCANNING SIRIUS5\n---------------------------\n");
-
-      fprintf(logfd,"get_nits(12047,27500,1,3,2, logfd);\n");
-      get_nits(12050,27500,1,3,2, logfd);
-      fprintf(logfd,"get_nits(11971,27500,1,3,2, logfd);\n");
-      get_nits(11975,27500,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12028,27500,0,3,2, logfd);\n");
-      get_nits(12028,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(11990,27500,0,3,2, logfd);\n");
-      get_nits(11994,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(11875,27500,0,3,2, logfd);\n");
-      get_nits(11880,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(11798,27500,0,3,2, logfd);\n");
-      get_nits(11804,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(11817,27500,1,3,2, logfd);\n");
-      get_nits(11823,27500,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12380,27500,0,3,2, logfd);\n");
-      get_nits(12380,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(11547,27500,0,3,2, logfd);\n");
-      get_nits(11547,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(11727,27500,0,3,2, logfd);\n");
-      get_nits(11727,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(11766,27500,0,3,2, logfd);\n");
-      get_nits(11766,27500,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12073,25376,0,7,2, logfd);\n");
-      get_nits(12073,2537600,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12153,7028,0,3,2, logfd);\n");
-      get_nits(12153,7028,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12188,24500,0,7,2, logfd);\n");
-      get_nits(12188,24500,0,7,2, logfd);
-      fprintf(logfd,"get_nits(12226,25540,0,7,2, logfd);\n");
-      get_nits(12226,25540,0,7,2, logfd);
-      fprintf(logfd,"get_nits(12245,27500,1,7,2, logfd);\n");
-      get_nits(12245,27500,1,7,2, logfd);
-      fprintf(logfd,"get_nits(12280,27500,1,3,2, logfd);\n");
-      get_nits(12280,27500,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12303,25548,0,7,2, logfd);\n");
-      get_nits(12303,25548,0,7,2, logfd);
-      fprintf(logfd,"get_nits(12340,20000,0,3,2, logfd);\n");
-      get_nits(12340,20000,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12415,25540,0,7,2, logfd);\n");
-      get_nits(12415,25540,0,7,2, logfd);
-      fprintf(logfd,"get_nits(12450,18056,0,3,2, logfd);\n");
-      get_nits(12450,18056,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12469,5185,0,3,2, logfd);\n");
-      get_nits(12469,5185,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12590,6111,1,3,2, logfd);\n");
-      get_nits(12590,6111,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12600,6111,1,3,2, logfd);\n");
-      get_nits(12600,6111,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12608,6111,1,3,2, logfd);\n");
-      get_nits(12608,6111,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12616,6111,1,3,2, logfd);\n");
-      get_nits(12616,6111,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12629,3222,1,7,2, logfd);\n");
-      get_nits(12629,3222,1,7,2, logfd);
-      fprintf(logfd,"get_nits(12633,3643,1,7,2, logfd);\n");
-      get_nits(12633,3643,1,7,2, logfd);
-      fprintf(logfd,"get_nits(12640,4000,1,3,2, logfd);\n");
-      get_nits(12640,4000,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12644,3200,1,3,2, logfd);\n");
-      get_nits(12644,3200,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12649,3977,1,3,2, logfd);\n");
-      get_nits(12649,3977,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12661,6110,0,3,2, logfd);\n");
-      get_nits(12661,6110,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12674,6666,1,1,2, logfd);\n");
-      get_nits(12674,6666,1,1,2, logfd);
-      fprintf(logfd,"get_nits(12674,6110,0,3,2, logfd);\n");
-      get_nits(12674,6110,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12683,6666,1,1,2, logfd);\n");
-      get_nits(12683,6666,1,1,2, logfd);
-      fprintf(logfd,"get_nits(12686,3400,0,3,2, logfd);\n");
-      get_nits(12686,3400,0,3,2, logfd);
-      fprintf(logfd,"get_nits(12690,3980,1,3,2, logfd);\n");
-      get_nits(12690,3980,1,3,2, logfd);
-      fprintf(logfd,"get_nits(12718,4000,0,7,2, logfd);\n");
-      get_nits(12718,4000,0,7,2, logfd);
-
-      fprintf(logfd, "Got alle Nits\n");
-      get_sdts(logfd);
+      printf("[scan.cpp] SCANNING SIRIUS5\n");
+      get_nits(12050,27500,1,3,2);
+      get_nits(11975,27500,1,3,2);
+      get_nits(12028,27500,0,3,2);
+      get_nits(11994,27500,0,3,2);
+      get_nits(11880,27500,0,3,2);
+      get_nits(11804,27500,0,3,2);
+      get_nits(11823,27500,1,3,2);
+      get_nits(12380,27500,0,3,2);
+      get_nits(11547,27500,0,3,2);
+      get_nits(11727,27500,0,3,2);
+      get_nits(11766,27500,0,3,2);
+      get_nits(12073,2537600,0,3,2);
+      get_nits(12153,7028,0,3,2);
+      get_nits(12188,24500,0,7,2);
+      get_nits(12226,25540,0,7,2);
+      get_nits(12245,27500,1,7,2);
+      get_nits(12280,27500,1,3,2);
+      get_nits(12303,25548,0,7,2);
+      get_nits(12340,20000,0,3,2);
+      get_nits(12415,25540,0,7,2);
+      get_nits(12450,18056,0,3,2);
+      get_nits(12469,5185,0,3,2);
+      get_nits(12590,6111,1,3,2);
+      get_nits(12600,6111,1,3,2);
+      get_nits(12608,6111,1,3,2);
+      get_nits(12616,6111,1,3,2);
+      get_nits(12629,3222,1,7,2);
+      get_nits(12633,3643,1,7,2);
+      get_nits(12640,4000,1,3,2);
+      get_nits(12644,3200,1,3,2);
+      get_nits(12649,3977,1,3,2);
+      get_nits(12661,6110,0,3,2);
+      get_nits(12674,6666,1,1,2);
+      get_nits(12674,6110,0,3,2);
+      get_nits(12683,6666,1,1,2);
+      get_nits(12686,3400,0,3,2);
+      get_nits(12690,3980,1,3,2);
+      get_nits(12718,4000,0,7,2);
+      get_sdts();
 
        if (!scantransponders.empty())
 	{
@@ -676,8 +537,7 @@ void *start_scanthread(void *param)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	if (fd == NULL)
       		{
-      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
-      			fclose(logfd);
+			perror("[scan.cpp] open services.xml");
       			scan_runs = 0;
   			pthread_exit(0);
   		}
@@ -695,7 +555,6 @@ void *start_scanthread(void *param)
 	}
        scanchannels.clear();
        scantransponders.clear();
-       fprintf(logfd,"Scanning Sirius5 ready\n");
        }
 
       if (do_diseqc & 8)
@@ -704,56 +563,30 @@ void *start_scanthread(void *param)
       	strcpy(satName, "TÜRKSAT");
     	eventServer->sendEvent(CZapitClient::EVT_SCAN_SATELLITE, CEventServer::INITID_ZAPIT, &satName, strlen(satName)+ 1 );
 
-      printf("---------------------------\nSCANNING TÜRKSAT\n---------------------------\n");
-      fprintf(logfd,"Scanning Kopernikus ready\n");
-
-      fprintf(logfd,"get_nits(10985,23420,0,3,3, logfd);\n");
-      get_nits(10985,23420,0,3,3, logfd);
-      fprintf(logfd,"get_nits(11015,41790,0,3,3, logfd);\n");
-      get_nits(11015,41790,0,3,3, logfd);
-      fprintf(logfd,"get_nits(11028,35720,0,5,3, logfd);\n");
-      get_nits(11028,35720,0,5,3, logfd);
-      fprintf(logfd,"get_nits(11037,23420,0,5,3, logfd);\n");
-      get_nits(11037,23420,0,5,3, logfd);
-      fprintf(logfd,"get_nits(11054,70000,1,3,3, logfd);\n");
-      get_nits(11054,70000,1,3,3, logfd);
-      fprintf(logfd,"get_nits(11088,56320,1,3,3, logfd);\n");
-      get_nits(11088,56320,1,3,3, logfd);
-      fprintf(logfd,"get_nits(11100,56320,1,3,3, logfd);\n");
-      get_nits(11100,56320,1,3,3, logfd);
-      fprintf(logfd,"get_nits(11110,56320,1,3,3, logfd);\n");
-      get_nits(11110,56320,1,3,3, logfd);
-      fprintf(logfd,"get_nits(11117,56320,1,3,3, logfd);\n");
-      get_nits(11117,56320,1,3,3, logfd);
-      fprintf(logfd,"get_nits(11117,30550,1,3,3, logfd);\n");
-      get_nits(11117,30550,1,3,3, logfd);
-      fprintf(logfd,"get_nits(11133,45550,1,5,3, logfd);\n");
-      get_nits(11133,45550,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11134,26000,0,7,3, logfd);\n");
-      get_nits(11134,26000,0,7,3, logfd);
-      fprintf(logfd,"get_nits(11137,31500,0,5,3, logfd);\n");
-      get_nits(11137,31500,0,5,3, logfd);
-      fprintf(logfd,"get_nits(11156,21730,1,5,3, logfd);\n");
-      get_nits(11156,21730,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11160,21730,1,5,3, logfd);\n");
-      get_nits(11160,21730,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11162,21730,1,5,3, logfd);\n");
-      get_nits(11162,21730,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11166,56320,1,5,3, logfd);\n");
-      get_nits(11166,56320,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11168,21730,1,5,3, logfd);\n");
-      get_nits(11168,21730,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11172,21730,1,5,3, logfd);\n");
-      get_nits(11172,21730,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11193,54980,1,5,3, logfd);\n");
-      get_nits(11193,54980,1,5,3, logfd);
-      fprintf(logfd,"get_nits(11453,19830,0,7,3, logfd);\n");
-      get_nits(11453,19830,0,7,3, logfd);
-      fprintf(logfd,"get_nits(11567,20000,0,3,3, logfd);\n");
-      get_nits(11567,20000,0,3,3, logfd);
-
-      fprintf(logfd, "Got alle Nits\n");
-      get_sdts(logfd);
+      printf("[scan.cpp] SCANNING TÜRKSAT\n");
+      get_nits(10985,23420,0,3,3);
+      get_nits(11015,41790,0,3,3);
+      get_nits(11028,35720,0,5,3);
+      get_nits(11037,23420,0,5,3);
+      get_nits(11054,70000,1,3,3);
+      get_nits(11088,56320,1,3,3);
+      get_nits(11100,56320,1,3,3);
+      get_nits(11110,56320,1,3,3);
+      get_nits(11117,56320,1,3,3);
+      get_nits(11117,30550,1,3,3);
+      get_nits(11133,45550,1,5,3);
+      get_nits(11134,26000,0,7,3);
+      get_nits(11137,31500,0,5,3);
+      get_nits(11156,21730,1,5,3);
+      get_nits(11160,21730,1,5,3);
+      get_nits(11162,21730,1,5,3);
+      get_nits(11166,56320,1,5,3);
+      get_nits(11168,21730,1,5,3);
+      get_nits(11172,21730,1,5,3);
+      get_nits(11193,54980,1,5,3);
+      get_nits(11453,19830,0,7,3);
+      get_nits(11567,20000,0,3,3);
+      get_sdts();
 
        if (!scantransponders.empty())
 	{
@@ -762,8 +595,7 @@ void *start_scanthread(void *param)
 	  	fd = fopen(services_xml.c_str(), "w" );
 	  	if (fd == NULL)
       		{
-      			perror("Could not create " CONFIGDIR "/zapit/services.xml. Please check if " CONFIGDIR "/zapit exists and space is available\nCancelling scan");
-      			fclose(logfd);
+			perror("[scan.cpp] open services.xml");
       			scan_runs = 0;
   			pthread_exit(0);
   		}
@@ -781,31 +613,29 @@ void *start_scanthread(void *param)
 	}
        scanchannels.clear();
        scantransponders.clear();
-       fprintf(logfd,"Scanning Türksat ready\n");
        }
 
 
 
       }
-      write_fake_bouquets(fd);
-  fprintf(fd,"</ZAPIT>\n");
-  if (fd != NULL)
-  	fclose(fd);
-  fprintf(logfd, "Writing bouquets now\n");
+	
 
-  write_bouquets(do_diseqc);
-  if (prepare_channels() <0)
-  {
-    printf("Error parsing Services\n");
-    exit(-1);
-   }
-  printf("Channels have been loaded succesfully\n");
+	write_fake_bouquets(fd);
+	fprintf(fd,"</ZAPIT>\n");
+	fclose(fd);
 
-  fprintf(logfd, "Scan ended\n");
+	write_bouquets(do_diseqc);
 
-  fclose(logfd);
+	if (prepare_channels() < 0)
+	{
+		printf("[scan.cpp] Error parsing Services\n");
+		pthread_exit(0);
+	}
 
-  scan_runs = 0;
-  eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT );
-  pthread_exit(0);
+	printf("[scan.cpp] Channels have been loaded succesfully\n");
+
+	scan_runs = 0;
+	eventServer->sendEvent(CZapitClient::EVT_SCAN_COMPLETE, CEventServer::INITID_ZAPIT );
+	pthread_exit(0);
 }
+

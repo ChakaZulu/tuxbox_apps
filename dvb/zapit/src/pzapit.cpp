@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.4 2002/03/24 16:34:39 obi Exp $
+ * $Id: pzapit.cpp,v 1.5 2002/03/28 18:07:34 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -24,11 +24,12 @@
 #include "clientlib/zapitclient.h"
 #include <iostream>
 
-void usage(char *basename)
+int usage(char *basename)
 {
-	printf("usage: %s -b\n", basename);
-	printf("       %s -b bouquet-number\n", basename);
-	printf("       %s bouquet-number channel-number\n", basename);
+	printf("usage: %s                               - show bouquets\n", basename);
+	printf("       %s bouquet-number                - show channels\n", basename);
+	printf("       %s bouquet-number channel-number - zap\n", basename);
+	return -1;
 }
 
 int main (int argc, char** argv)
@@ -39,45 +40,39 @@ int main (int argc, char** argv)
 	bool show_bouquets;
 	bool show_channels;
 	bool zap;
-		
 
 	/* commandline parameters */
-	if ((argc < 2) || (argc > 3))
+	if (argc == 1)
 	{
-		usage(argv[0]);
-		return -1;
+		zap = false;
+		show_bouquets = true;
+		show_channels = false;
 	}
 	else if (argc == 2)
 	{
-		if (!strncmp(argv[1], "-b", 2))
+		if ((!strncmp(argv[1], "-h", 2)) || (!strncmp(argv[1], "--help", 6)))
 		{
-			zap = false;
-			show_bouquets = true;
-			show_channels = false;
+			return usage(argv[0]);
 		}
 		else
-		{
-			usage(argv[0]);
-			return -1;
-		}
-	}
-	else
-	{
-		if (!strncmp(argv[1], "-b", 2))
 		{
 			zap = false;
 			show_bouquets = false;
 			show_channels = true;
-			sscanf(argv[2], "%d", &bouquet);
-		}
-		else
-		{
-			zap = true;
-			show_bouquets = false;
-			show_channels = false;
 			sscanf(argv[1], "%d", &bouquet);
-        		sscanf(argv[2], "%d", &channel);
 		}
+	}
+	else if (argc == 3)
+	{
+		zap = true;
+		show_bouquets = false;
+		show_channels = false;
+		sscanf(argv[1], "%d", &bouquet);
+       		sscanf(argv[2], "%d", &channel);
+	}
+	else
+	{
+		return usage(argv[0]);
 	}
 
 	std::vector<CZapitClient::responseGetBouquets> bouquets;
@@ -98,7 +93,7 @@ int main (int argc, char** argv)
 	{
 		std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
 		for (ch_resp = channels.begin(), count = 1; ch_resp < channels.end(); ch_resp++, count++)
-			cout << count << ": " << ch_resp->name << "(" << ch_resp->onid_sid << ")" << endl;
+			cout << count << ": " << ch_resp->name << endl;
 	}
 
 	if (zap)
