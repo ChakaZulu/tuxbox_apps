@@ -1,5 +1,5 @@
 /*
- * $Id: configfile.cpp,v 1.5 2002/05/07 22:53:00 McClean Exp $
+ * $Id: configfile.cpp,v 1.6 2002/05/16 23:37:02 obi Exp $
  *
  * configuration object for the d-box 2 linux project
  *
@@ -95,7 +95,7 @@ const bool CConfigFile::loadConfig(string p_filename)
 	return true;
 }
 
-string CConfigFile::getString (string p_keyName, const string defaultValue = "")
+string CConfigFile::getString (string p_keyName, const string defaultValue)
 {
 	if ( configData.find( p_keyName) == configData.end())
 	{
@@ -121,7 +121,7 @@ void CConfigFile::setString (string p_keyName, string p_keyValue)
 	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
 }
 
-int CConfigFile::getInt (string p_keyName, const int defaultValue = 0)
+int CConfigFile::getInt (string p_keyName, const int defaultValue)
 {
 	if ( configData.find( p_keyName) == configData.end())
 	{
@@ -150,7 +150,7 @@ void CConfigFile::setInt (string p_keyName, int p_keyValue)
 	unknownKeyQueryedFlag = tmpUnknownKeyQueryedFlag;
 }
 
-bool CConfigFile::getBool (string p_keyName, const bool defaultValue = false)
+bool CConfigFile::getBool (string p_keyName, const bool defaultValue)
 {
 	if ( configData.find( p_keyName) == configData.end())
 	{
