@@ -21,11 +21,11 @@
 				<td><input type="checkbox" name="automount" value="#AUTO#"></td>
 			</tr>
 			<tr>
-				<td>Server Directory: </td>
+				<td>Client Directory: </td>
 				<td><input name="localdir" type="text" size="50" maxlength="50" value="#LDIR#"></td>
 			</tr>
 			<tr>
-				<td>Client Directory: </td>
+				<td>Server Directory: </td>
 				<td><input name="mountdir" type="text" size="50" maxlength="50" value="#MDIR#"></td>
 			</tr>
 			<tr>

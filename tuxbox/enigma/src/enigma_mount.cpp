@@ -289,7 +289,6 @@ void eMountMgr::addMountPoint(eString plocalDir, int pfstype, eString ppassword,
 	int pid = mountPoints.size();
 	mountPoints.push_back(eMountPoint(plocalDir, pfstype, ppassword, puserName, pmountDir, pautomount, prsize, pwsize, poptions, pownOptions, pip0, pip1, pip2, pip3, pmounted, pid));
 	save();
-	init();
 }
 
 void eMountMgr::getMountPointData(eString *plocalDir, int *pfstype, eString *ppassword, eString *puserName, eString *pmountDir, int *pautomount, int *prsize, int *pwsize, eString *poptions, eString *pownOptions, int *pip0, int *pip1, int *pip2, int *pip3, int pid)
@@ -341,7 +340,6 @@ void eMountMgr::changeMountPoint(eString plocalDir, int pfstype, eString ppasswo
 		}
 	}
 	save();
-	init();
 }
 
 void eMountMgr::removeMountPoint(int id)
@@ -373,7 +371,6 @@ int eMountMgr::unmountMountPoint(int id)
 eString eMountMgr::listMountPoints(eString skelleton)
 {
 	eString result, mountStatus, action;
-	init();
 	if (mountPoints.size() > 0)
 		for (mp_it = mountPoints.begin(); mp_it != mountPoints.end(); mp_it++)
 		{

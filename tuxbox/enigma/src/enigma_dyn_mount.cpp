@@ -93,7 +93,7 @@ static eString addMountPoint(eString request, eString dirpath, eString opts, eHT
 		options = options.left(options.length() - 1); //remove last comma
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->addMountPoint(localDir, atoi(fstype.c_str()), password, userName, mountDir, (automount == "on"), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), false);
+	eMountMgr::getInstance()->addMountPoint(localDir, atoi(fstype.c_str()), password, userName, mountDir, (int)(automount == "on"), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), false);
 	return "<html><body>Mount point added successfully.</body></html>";
 }
 
@@ -170,7 +170,7 @@ static eString changeMountPoint(eString request, eString dirpath, eString opts, 
 		options = options.left(options.length() - 1); //remove last comma
 
 	content->local_header["Content-Type"]="text/html; charset=utf-8";
-	eMountMgr::getInstance()->changeMountPoint(localDir, atoi(fstype.c_str()), password, userName, mountDir, (automount == "on"), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), atoi(id.c_str()));
+	eMountMgr::getInstance()->changeMountPoint(localDir, atoi(fstype.c_str()), password, userName, mountDir, (int)(automount == "on"), atoi(rsize.c_str()), atoi(wsize.c_str()), options, ownOptions, atoi(ip0.c_str()), atoi(ip1.c_str()), atoi(ip2.c_str()), atoi(ip3.c_str()), atoi(id.c_str()));
 	return "<html><body>Mount point changed successfully.</body></html>";
 }
 

@@ -8,7 +8,7 @@ function unmountMountPoint(id)
 	NewWindow('/control/unmountMountPoint?id='+id, 'unmount', '200', '200', 'no', '5000');
 }
 
-function removeMountPoint(id)
+function deleteMountPoint(id)
 {
 	NewWindow('/control/removeMountPoint?id='+id, 'removeMountPoint', '200', '200', 'no', '5000');
 }
