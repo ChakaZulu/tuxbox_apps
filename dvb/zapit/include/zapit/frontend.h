@@ -1,5 +1,5 @@
 /*
- * $Id: frontend.h,v 1.21 2002/12/26 07:08:52 obi Exp $
+ * $Id: frontend.h,v 1.22 2003/01/11 20:14:38 rasc Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -31,7 +31,7 @@
 /* zapit */
 #include <zapit/types.h>
 
-#define MAX_LNBS	4
+#define MAX_LNBS	64	/* due to Diseqc 1.1  (2003-01-10 rasc) */
 
 class CFrontend
 {
