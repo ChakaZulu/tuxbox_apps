@@ -692,11 +692,17 @@ const unsigned char map_volume(const unsigned char volume, const bool to_AVS)
 	};
 	if (to_AVS)
 	{
-		return settings.scale_logarithmic_avs ? invlog63[volume] : 63 - ((((unsigned int)volume) * 63) / 100);
+		if (volume>100) 
+			return invlog63[0];
+		else
+			return settings.scale_logarithmic_avs ? invlog63[volume] : 63 - ((((unsigned int)volume) * 63) / 100);
 	}
 	else
 	{
-		return (volume ? (settings.scale_logarithmic ? log255[volume] : ((((unsigned int)volume) * 255) / 100)) : 0);
+		if (volume>100) 
+			return log255[0];
+		else
+			return (volume ? (settings.scale_logarithmic ? log255[volume] : ((((unsigned int)volume) * 255) / 100)) : 0);
 	}
 }
 
@@ -915,7 +921,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.116 2004/05/21 01:46:41 carjay Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.117 2004/05/22 14:34:09 carjay Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
