@@ -53,7 +53,7 @@ using namespace std;
 #include <fcntl.h>
 
 #include <include/plugin.h>
-#include <dbox/avia_vbi.h>
+#include <dbox/avia_gt_vbi.h>
 
 class CPlugins
 {
