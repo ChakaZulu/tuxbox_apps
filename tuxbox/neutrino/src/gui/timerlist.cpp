@@ -311,10 +311,10 @@ int CTimerList::show()
 		{
 			update=true;
 		}
-		else if((msg==CRCInput::RC_blue) ||
+		else if((msg==CRCInput::RC_blue)||
 				  (msg==CRCInput::RC_setup) ||
 				  (CRCInput::isNumeric(msg)) )
-		{
+	   {
 			//pushback key if...
 			g_RCInput->postMsg( msg, data );
 			loop=false;

@@ -50,6 +50,7 @@ struct SNeutrinoSettings
 	int shutdown_real;
 	int shutdown_showclock;
 	int show_camwarning;
+	char record_safety_time[3];
 
 	//audio
 	int audio_AnalogMode;

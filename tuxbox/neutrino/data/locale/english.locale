@@ -541,6 +541,8 @@ timerlist.channel Channel
 timerlist.menunew New timer
 timerlist.reload Reload
 timerlist.modify Modify
+timersettings.separator Timersettings
+timersettings.record_safety_time Record time correction
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Title

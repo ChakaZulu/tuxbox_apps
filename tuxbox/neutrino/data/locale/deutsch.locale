@@ -538,6 +538,8 @@ timerlist.channel Kanal
 timerlist.menunew Neuer Timer
 timerlist.reload Aktualisieren
 timerlist.modify Bearbeiten
+timersettings.separator Timereinstellungen
+timersettings.record_safety_time Aufnahmekorrektur
 
 fontsize.menu Menutext
 fontsize.menu_title Menu Titel

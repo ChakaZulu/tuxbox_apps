@@ -354,6 +354,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", 1 );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
 	g_settings.show_camwarning = configfile.getInt32( "show_camwarning", 1 );
+	strcpy(g_settings.record_safety_time, configfile.getString( "record_safety_time", "00").c_str());
 
 	//audio
 	g_settings.audio_AnalogMode = configfile.getInt32( "audio_AnalogMode", 0 );
@@ -543,6 +544,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "shutdown_real", g_settings.shutdown_real );
 	configfile.setInt32( "shutdown_showclock", g_settings.shutdown_showclock );
 	configfile.setInt32( "show_camwarning", g_settings.show_camwarning );
+	configfile.setString( "record_safety_time", g_settings.record_safety_time );
 
 	//audio
 	configfile.setInt32( "audio_AnalogMode", g_settings.audio_AnalogMode );
@@ -1285,6 +1287,10 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "keybindingmenu.RC") );
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblock", true, "", keySettings_repeatBlocker ));
 	miscSettings.addItem( new CMenuForwarder("keybindingmenu.repeatblockgeneric", true, "", keySettings_repeat_genericblocker ));
+	
+	CStringInput*	timerSettings_record_safety_time= new CStringInput("timersettings.record_safety_time", g_settings.record_safety_time, 2, "ipsetup.hint_1", "ipsetup.hint_2","0123456789 ");
+	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "timersettings.separator") );
+   miscSettings.addItem( new CMenuForwarder("timersettings.record_safety_time", true, g_settings.record_safety_time, timerSettings_record_safety_time ));
 }
 
 
@@ -3089,7 +3095,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.336 2002/10/08 20:32:49 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.337 2002/10/09 19:51:47 Zwen Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
