@@ -253,7 +253,14 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
  	{
 		// versuche, den gtx/enx_vbi zu stoppen	
 		eDebug("try to stop gtx/enx_vbi");
-		MakeParam(P_ID_VTXTPID, Decoder::parms.tpid);
+		if(Decoder::parms.tpid==-1)
+		{
+			MakeParam(P_ID_VTXTPID, 0);
+		}
+		else
+		{
+			MakeParam(P_ID_VTXTPID, Decoder::parms.tpid);
+		}
 		int fd = open("/dev/dbox/vbi0", O_RDWR);
 		if (fd > 0)
 		{
