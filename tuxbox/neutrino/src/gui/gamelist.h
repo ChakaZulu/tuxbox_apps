@@ -35,6 +35,7 @@
 #include <gui/widget/menue.h>
 
 #include <driver/framebuffer.h>
+#include <system/localize.h>
 
 #include <plugin.h>
 
@@ -55,8 +56,8 @@ class CPlugins
 			std::string cfgfile;
 			std::string sofile;
 			int version;
-			std::string name;
-			std::string description;
+			std::string name;                // UTF-8 encoded
+			std::string description;         // UTF-8 encoded
 			std::string depend;
 			plugin_type_t type;
 
@@ -105,7 +106,7 @@ class CPlugins
 
 
 		int getNumberOfPlugins() { return plugin_list.size(); }
-		std::string getName(int number) { return plugin_list[number].name; }
+		const char * getName(int number) { return plugin_list[number].name.c_str(); }
 		std::string getDescription(int number) { return plugin_list[number].description; }
 		int getVTXT(int number) { return plugin_list[number].vtxtpid; }
 		int getShowPig(int number) { return plugin_list[number].showpig; }
@@ -130,17 +131,17 @@ class CGameList : public CMenuTarget
 
 		struct game
 		{
-			int	number;
-			std::string	name;
-			std::string	desc;
+			int         number;
+			std::string name;   // UTF-8 encoded
+			std::string desc;   // UTF-8 encoded
 		};
 
-		unsigned int	liststart;
-		unsigned int	listmaxshow;
-		unsigned int	selected;
-		int		key;
-		std::string		name;
-		std::vector<game*>   gamelist;
+		unsigned int	    liststart;
+		unsigned int	    listmaxshow;
+		unsigned int	    selected;
+		int		    key;
+		neutrino_locale_t   name;
+		std::vector<game *> gamelist;
 
 
 		int		fheight; // Fonthoehe Channellist-Inhalt
@@ -160,7 +161,7 @@ class CGameList : public CMenuTarget
 
 	public:
 
-		CGameList(const char * const Name);
+		CGameList(const neutrino_locale_t Name);
 		~CGameList();
 
 		void hide();

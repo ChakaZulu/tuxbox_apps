@@ -1203,16 +1203,16 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
 	mainMenu.addItem(GenericMenuSeparator);
 
-	mainMenu.addItem(new CMenuForwarder("mainmenu.tvmode", true, NULL, this, "tv", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true );
-	mainMenu.addItem(new CMenuForwarder("mainmenu.radiomode", true, NULL, this, "radio", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN) );
-	mainMenu.addItem(new CMenuForwarder("mainmenu.scartmode", true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW) );
-	mainMenu.addItem(new CMenuForwarder("mainmenu.games", true, NULL, new CGameList("mainmenu.games"), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE) );
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_TVMODE, true, NULL, this, "tv", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED), true);
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_RADIOMODE, true, NULL, this, "radio", true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SCARTMODE, true, NULL, this, "scart", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_GAMES, true, NULL, new CGameList(LOCALE_MAINMENU_GAMES), "", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	mainMenu.addItem(GenericMenuSeparatorLine);
-	mainMenu.addItem(new CMenuForwarder("mainmenu.mp3player", true, NULL, new CMP3PlayerGui(), NULL, true, CRCInput::RC_1 ));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MP3PLAYER, true, NULL, new CMP3PlayerGui(), NULL, true, CRCInput::RC_1));
 
 	#if HAVE_DVB_API_VERSION >= 3
-	//mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, new CMoviePlayerGui()));
-	mainMenu.addItem(new CMenuForwarder("mainmenu.movieplayer", true, NULL, &moviePlayer, NULL, true, CRCInput::RC_2 ));
+	//mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, new CMoviePlayerGui()));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_MOVIEPLAYER, true, NULL, &moviePlayer, NULL, true, CRCInput::RC_2));
 
 	moviePlayer.addItem(GenericMenuSeparator);
 	moviePlayer.addItem(GenericMenuBack);
@@ -1226,43 +1226,40 @@ void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_DVDPLAYBACK, true, NULL, moviePlayerGui, "dvdplayback", true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
 	moviePlayer.addItem(new CMenuForwarder(LOCALE_MOVIEPLAYER_VCDPLAYBACK, true, NULL, moviePlayerGui, "vcdplayback", true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
 	moviePlayer.addItem(GenericMenuSeparatorLine);
-	moviePlayer.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &streamingSettings, NULL, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
+	moviePlayer.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &streamingSettings, NULL, true, CRCInput::RC_help, NEUTRINO_ICON_BUTTON_HELP_SMALL));
 	moviePlayer.addItem(new CMenuForwarder("nfsmenu.head", true, NULL, new CNFSSmallMenu(), NULL, true, CRCInput::RC_setup, NEUTRINO_ICON_BUTTON_DBOX_SMALL));
 #endif
 
-	mainMenu.addItem(new CMenuForwarder("mainmenu.pictureviewer", true, NULL, new CPictureViewerGui(), NULL, true, CRCInput::RC_3));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_PICTUREVIEWER, true, NULL, new CPictureViewerGui(), NULL, true, CRCInput::RC_3));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 	
-	mainMenu.addItem(new CMenuForwarder("mainmenu.settings", true, NULL, &mainSettings, NULL, true, CRCInput::RC_4));
-	mainMenu.addItem(new CLockedMenuForwarder("mainmenu.service", g_settings.parentallock_pincode, false, true, NULL, &service, NULL, true, CRCInput::RC_5) );
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SETTINGS, true, NULL, &mainSettings, NULL, true, CRCInput::RC_4));
+	mainMenu.addItem(new CLockedMenuForwarder(LOCALE_MAINMENU_SERVICE, g_settings.parentallock_pincode, false, true, NULL, &service, NULL, true, CRCInput::RC_5));
 	mainMenu.addItem(GenericMenuSeparatorLine);
 
-	mainMenu.addItem(new CMenuForwarder("mainmenu.sleeptimer", true, NULL, new CSleepTimerWidget, NULL, true, CRCInput::RC_6));
-	mainMenu.addItem(new CMenuForwarder("mainmenu.shutdown", true, NULL, this, "shutdown", true, CRCInput::RC_standby, "power.raw") );
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SLEEPTIMER, true, NULL, new CSleepTimerWidget, NULL, true, CRCInput::RC_6));
+	mainMenu.addItem(new CMenuForwarder(LOCALE_MAINMENU_SHUTDOWN, true, NULL, this, "shutdown", true, CRCInput::RC_standby, "power.raw"));
 
-//	mainMenu.addItem(GenericMenuSeparatorLine);
-//	mainMenu.addItem( new CMenuForwarder("mainmenu.info", true, NULL, new CDBoxInfoWidget, "",true) );
-	
 	mainSettings.addItem(GenericMenuSeparator);
 	mainSettings.addItem(GenericMenuBack);
 	mainSettings.addItem(GenericMenuSeparatorLine);
-	mainSettings.addItem(new CMenuForwarder("mainsettings.savesettingsnow", true, NULL, this, "savesettings", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_SAVESETTINGSNOW, true, NULL, this, "savesettings", true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED));
 	mainSettings.addItem(GenericMenuSeparatorLine);
-	mainSettings.addItem(new CMenuForwarder("mainsettings.video", true, NULL, &videoSettings, NULL, true, CRCInput::RC_1));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.audio", true, NULL, &audioSettings, NULL, true, CRCInput::RC_2));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_VIDEO     , true, NULL, &videoSettings    , NULL, true, CRCInput::RC_1));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_AUDIO     , true, NULL, &audioSettings    , NULL, true, CRCInput::RC_2));
 	if(g_settings.parentallock_prompt)
 		mainSettings.addItem(new CLockedMenuForwarder("parentallock.parentallock", g_settings.parentallock_pincode, true, true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_3));
 	else
 		mainSettings.addItem(new CMenuForwarder("parentallock.parentallock", true, NULL, &parentallockSettings, NULL, true, CRCInput::RC_4));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.network", true, NULL, &networkSettings, NULL, true, CRCInput::RC_5));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.recording", true, NULL, &recordingSettings, NULL, true, CRCInput::RC_6));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.streaming", true, NULL, &streamingSettings, NULL, true, CRCInput::RC_7));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.language", true, NULL, &languageSettings, NULL, true, CRCInput::RC_8));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.colors", true, NULL, &colorSettings, NULL, true, CRCInput::RC_9));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.lcd", true, NULL, &lcdSettings, NULL, true, CRCInput::RC_0));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.keybinding", true, NULL, &keySettings, NULL, true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
-	mainSettings.addItem(new CMenuForwarder("mp3picsettings.general", true, NULL, &mp3picSettings, NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
-	mainSettings.addItem(new CMenuForwarder("mainsettings.misc", true, NULL, &miscSettings, NULL, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_NETWORK   , true, NULL, &networkSettings  , NULL, true, CRCInput::RC_5));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_RECORDING , true, NULL, &recordingSettings, NULL, true, CRCInput::RC_6));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_STREAMING , true, NULL, &streamingSettings, NULL, true, CRCInput::RC_7));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LANGUAGE  , true, NULL, &languageSettings , NULL, true, CRCInput::RC_8));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_COLORS    , true, NULL, &colorSettings    , NULL, true, CRCInput::RC_9));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_LCD       , true, NULL, &lcdSettings      , NULL, true, CRCInput::RC_0));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_KEYBINDING, true, NULL, &keySettings      , NULL, true, CRCInput::RC_blue, NEUTRINO_ICON_BUTTON_BLUE));
+	mainSettings.addItem(new CMenuForwarder("mp3picsettings.general"      , true, NULL, &mp3picSettings   , NULL, true, CRCInput::RC_yellow, NEUTRINO_ICON_BUTTON_YELLOW));
+	mainSettings.addItem(new CMenuForwarder(LOCALE_MAINSETTINGS_MISC      , true, NULL, &miscSettings     , NULL, true, CRCInput::RC_green, NEUTRINO_ICON_BUTTON_GREEN));
 }
 
 
@@ -2435,8 +2432,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 			enabled_count++;
 
-#warning TODO: make sure g_PluginList->getName(count) is UTF-8 encoded
-			StreamFeatureSelector.addItem( new CMenuForwarder((g_PluginList->getName(count)).c_str(), true, NULL, StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue :(uint)(CRCInput::convertDigitToKey(enabled_count-1 )), (cnt== 0)?NEUTRINO_ICON_BUTTON_BLUE:""), (cnt == 0) );
+			StreamFeatureSelector.addItem(new CMenuForwarder(g_PluginList->getName(count), true, NULL, StreamFeaturesChanger, id, false, (cnt== 0) ? CRCInput::RC_blue :(uint)(CRCInput::convertDigitToKey(enabled_count-1 )), (cnt== 0)?NEUTRINO_ICON_BUTTON_BLUE:""), (cnt == 0) );
 			cnt++;
 		}
 	}
@@ -2454,9 +2450,9 @@ void CNeutrinoApp::ShowStreamFeatures()
 	// start/stop recording
 	if (g_settings.recording_type != RECORDING_OFF)
 	{
-		CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.recording", &recordingstatus, true, this, true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
-		oj->addOption(0, "mainmenu.recording_start");
-		oj->addOption(1, "mainmenu.recording_stop");
+		CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_RECORDING, &recordingstatus, true, this, true, CRCInput::RC_red, NEUTRINO_ICON_BUTTON_RED);
+		oj->addOption(0, LOCALE_MAINMENU_RECORDING_START);
+		oj->addOption(1, LOCALE_MAINMENU_RECORDING_STOP);
 		StreamFeatureSelector.addItem( oj );
 	}
 	// -- Timer Liste
@@ -2469,7 +2465,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 
 	// -- Sectionsd pause
 	int dummy = g_Sectionsd->getIsScanningActive();
-	CMenuOptionChooser* oj = new CMenuOptionChooser("mainmenu.pausesectionsd", &dummy, true, new CPauseSectionsdNotifier );
+	CMenuOptionChooser* oj = new CMenuOptionChooser(LOCALE_MAINMENU_PAUSESECTIONSD, &dummy, true, new CPauseSectionsdNotifier );
 	oj->addOption(0, "options.off");
 	oj->addOption(1, "options.on");
 	StreamFeatureSelector.addItem( oj );
@@ -2644,8 +2640,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 	dprintf( DEBUG_NORMAL, "menue setup\n");
 	//Main settings
-	CMenuWidget mainMenu("mainmenu.head", "mainmenue.raw");
-	CMenuWidget mainSettings("mainsettings.head", NEUTRINO_ICON_SETTINGS);
+	CMenuWidget mainMenu(LOCALE_MAINMENU_HEAD, "mainmenue.raw");
+	CMenuWidget mainSettings(LOCALE_MAINSETTINGS_HEAD, NEUTRINO_ICON_SETTINGS);
 	CMenuWidget languageSettings("languagesetup.head", "language.raw");
 	CMenuWidget videoSettings("videomenu.head", "video.raw");
 	CMenuWidget audioSettings(LOCALE_AUDIOMENU_HEAD, "audio.raw");
@@ -3330,10 +3326,10 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 		if ((* (stream2file_status_t *) data) != STREAM2FILE_STATUS_IDLE)
 		{
 			/* 
-			 * note that changeNotify does not distinguish between "mainmenu.recording_start" and "mainmenu.recording_stop"
+			 * note that changeNotify does not distinguish between LOCALE_MAINMENU_RECORDING_START and LOCALE_MAINMENU_RECORDING_STOP
 			 * instead it checks the state of the variable recordingstatus
 			 */ 
-			changeNotify("mainmenu.recording_start", NULL);
+			changeNotify(LOCALE_MAINMENU_RECORDING_START, NULL);
 		}
 
 		delete (unsigned char*) data;
@@ -3870,7 +3866,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	else if(actionKey=="savesettings")
 	{
-		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText("mainsettings.savesettingsnow_hint")); // UTF-8
+		CHintBox * hintBox = new CHintBox(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_MAINSETTINGS_SAVESETTINGSNOW_HINT)); // UTF-8
 		hintBox->paint();
 
 		g_Controld->saveSettings();
@@ -3999,7 +3995,7 @@ bool CNeutrinoApp::changeNotify(const char * const OptionName, void * data)
 		hintBox->hide();
 		delete hintBox;
 	}
-	else if (strncmp(OptionName, "mainmenu.recording", 18) == 0)
+	else if ((strcmp(OptionName, LOCALE_MAINMENU_RECORDING_START) == 0) || (strcmp(OptionName, LOCALE_MAINMENU_RECORDING_STOP) == 0))
 	{
 		CTimerd::RecordingInfo eventinfo;
 

@@ -461,7 +461,7 @@ void CPlugins::startPlugin(int number)
 
 // CGameList ...
 
-CGameList::CGameList(const char * const Name)
+CGameList::CGameList(const neutrino_locale_t Name)
 {
 	frameBuffer = CFrameBuffer::getInstance();
 	name = Name;
@@ -488,11 +488,10 @@ CGameList::CGameList(const char * const Name)
 CGameList::~CGameList()
 {
 	for(unsigned int count=0;count<gamelist.size();count++)
-    {
-    	delete gamelist[count];
+	{
+		delete gamelist[count];
 	}
-    gamelist.clear();
-
+	gamelist.clear();
 }
 
 
@@ -515,9 +514,8 @@ int CGameList::exec(CMenuTarget* parent, const std::string & actionKey)
 	}
 	gamelist.clear();
 
-#warning name should be UTF8 encoded
 	game* tmp = new game();
-	tmp->name = ZapitTools::UTF8_to_Latin1(g_Locale->getText(LOCALE_MENU_BACK));
+	tmp->name = g_Locale->getText(LOCALE_MENU_BACK);
 	gamelist.push_back(tmp);
 
 	for(unsigned int count=0;count < (unsigned int)g_PluginList->getNumberOfPlugins();count++)
@@ -670,9 +668,9 @@ void CGameList::paintItem(int pos)
 
 	if(liststart+pos<gamelist.size())
 	{
-    	game* aktgame = gamelist[liststart+pos];
-		g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMLARGE]->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name, color);
-		g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMSMALL]->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc, color);
+		game* aktgame = gamelist[liststart+pos];
+		g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMLARGE]->RenderString(x+10, ypos+fheight1+3, width-20, aktgame->name, color, 0, true); // UTF-8
+		g_Font[SNeutrinoSettings::FONT_TYPE_GAMELIST_ITEMSMALL]->RenderString(x+20, ypos+fheight,    width-20, aktgame->desc, color, 0, true); // UTF-8
 	}
 }
 
