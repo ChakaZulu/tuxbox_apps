@@ -4,11 +4,13 @@
 #include <pthread.h>
 #include <sounds.h>
 #include <sys/soundcard.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 static	unsigned char	*sounds[6] =
 { snd_die, snd_door, snd_oing, snd_ohno, snd_explode, snd_letsgo };
 static	int	ssz[6] =
-{ 857, 1991, 1191, 2699, 482, 2486 };
+{ 5708, 5360, 4084, 5621, 1364, 9929 };
 
 static	int				sound_fd=-1;
 static	pthread_t		pth;
@@ -38,7 +40,15 @@ static	void	_run_sound( void *ptr )
 
 		data=sounds[i];
 		sz=ssz[i];
-		write(sound_fd,data,sz);
+
+		while( sz )
+		{
+		   i=sz>1022?1022:sz;
+		   write(sound_fd, data, i);
+		   sz-=i;
+		   data+=i;
+		}
+
 		i=1;
 		if ( !playidx )
 			ioctl(sound_fd,SNDCTL_DSP_SYNC,&i);
@@ -51,17 +61,21 @@ static	void	_run_sound( void *ptr )
 void	SoundStart( void )
 {
 	int					rc;
+	int format = AFMT_S8;	// signed, 8 Bit
+	int channels = 1;	// 1=mono, 2=stereo
+	int speed = 11025;
 
 	if ( sound_fd == -1 )
-		sound_fd=open("/dev/audio",O_WRONLY);
+		sound_fd=open("/dev/dsp",O_WRONLY);
 	if ( sound_fd == -1 )
 		sound_fd = -2;
 
 	if ( sound_fd == -2 )
 		return;
 
-	rc=AFMT_U8;
-	ioctl(sound_fd,SNDCTL_DSP_SETFMT,&rc);
+	ioctl(sound_fd, SNDCTL_DSP_SETFMT, &format);
+	ioctl(sound_fd, SNDCTL_DSP_CHANNELS, &channels);
+	ioctl(sound_fd, SNDCTL_DSP_SPEED, &speed);
 
 	memset(&pth,0,sizeof(pth));
 	pthread_cond_init (&cond, NULL);
