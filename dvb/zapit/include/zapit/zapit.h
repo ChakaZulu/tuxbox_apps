@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.h,v 1.53 2002/04/20 12:02:04 Simplex Exp $
+ * $Id: zapit.h,v 1.54 2002/04/20 16:23:47 obi Exp $
  */
 
 #ifndef __zapit_h__
@@ -53,8 +53,8 @@ void sendBouquets(bool emptyBouquetsToo);
 void internalSendChannels(ChannelList* channels);
 void sendBouquetChannels(unsigned int bouquet, CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT);
 void sendChannels(CZapitClient::channelsMode mode = CZapitClient::MODE_CURRENT, CZapitClient::channelsOrder order = CZapitClient::SORT_BOUQUET);
-void startPlayBack();
-void stopPlayBack();
+int startPlayBack();
+int stopPlayBack();
 unsigned int zapTo(unsigned int channel);
 unsigned int zapTo(unsigned int bouquet, unsigned int channel);
 unsigned int zapTo_ServiceID(unsigned int serviceID, bool isSubService);
