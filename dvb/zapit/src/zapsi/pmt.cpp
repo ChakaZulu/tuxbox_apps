@@ -1,5 +1,5 @@
 /*
- * $Id: pmt.cpp,v 1.13 2002/05/05 01:52:36 obi Exp $
+ * $Id: pmt.cpp,v 1.14 2002/05/11 22:09:27 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * (C) 2002 by Frank Bormann <happydude@berlios.de>
@@ -266,7 +266,10 @@ int parse_pmt (int demux_fd, CZapitChannel * channel)
 		return -1;
 	}
 
-	setDmxSctFilter(demux_fd, channel->getPmtPid(), 0x02, channel->getServiceId() >> 8, channel->getServiceId());
+	if (setDmxSctFilter(demux_fd, channel->getPmtPid(), 0x02, channel->getServiceId() >> 8, channel->getServiceId()) < 0)
+	{
+		return -1;
+	}
 
 	if (read(demux_fd, buffer, PMT_SIZE) < 0)
 	{
