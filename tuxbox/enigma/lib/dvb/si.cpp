@@ -164,8 +164,12 @@ ServiceDescriptor::~ServiceDescriptor()
 eString ServiceDescriptor::toString()
 {
 	eString res="ServiceDescriptor\n	service_type: " + qHex(service_type) + " (" + decode_service_type(service_type) + ")";
-	res+="	service_provider: " + eString(service_provider) + "\n";
-	res+="	service_name: " + eString(service_name) + "\n";
+	res+="	service_provider: ";
+	res+=service_provider;
+	res+='\n';
+	res+="	service_name: ";
+	res+=service_name;
+	res+='\n';
 	return res;
 }
 
@@ -517,8 +521,8 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr): Descriptor(DESCR
 eString ShortEventDescriptor::toString()
 {
 	eString res="ShortEventDescriptor\n";
-	res+=eString().sprintf("  event_name: %s\n", (const char*)event_name);
-	res+=eString().sprintf("  text: %s\n", (const char*)text);
+	res+="  event_name: "+event_name+'\n';
+	res+="  text: "+text+'\n';
 	return res;
 }
 
@@ -640,7 +644,7 @@ eString ComponentDescriptor::toString()
 	res+=eString().sprintf("  stream_content: %d\n", stream_content);
 	res+=eString().sprintf("  component_type: %d\n", component_type);
 	res+=eString().sprintf("  component_tag: %d\n", component_tag);
-	res+=eString().sprintf("  text: %s\n", (const char*)text);
+	res+="  text: "+text+'\n';
 	return res;
 }
 

@@ -94,12 +94,12 @@ inline eListboxEntry::~eListboxEntry()
 
 inline int eListboxEntry::operator<(const eListboxEntry &o) const
 {
-	return stricmp( getText(-1).c_str(), o.getText(-1).c_str() ) < 0;
+	return getText(-1).icompare(o.getText(-1)) < 0;
 }
 
 inline int eListboxEntry::operator==(const eListboxEntry &o) const
 {
-	return !stricmp( getText(-1).c_str(), o.getText(-1).c_str() );
+	return !getText(-1).icompare(o.getText(-1));
 }
 
 inline void eListboxEntry::renderInto(gPainter *rc, eRect area) const

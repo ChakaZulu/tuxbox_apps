@@ -46,7 +46,7 @@ int BNDirectory::sectionRead(__u8 *d)
 		while (l--)
 			version+=*d++;
 		d+=17;
-		eDebug("%s/%s/%s/%s", (const char*)dst, (const char*)file, (const char*)dst2, (const char*)version);
+		eDebug("%s/%s/%s/%s", dst.c_str(), file.c_str(), dst2.c_str(), version.c_str());
 		if (versions.find(version)==-1)
 		{
 			if (!first)

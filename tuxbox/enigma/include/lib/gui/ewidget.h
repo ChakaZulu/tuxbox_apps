@@ -85,7 +85,7 @@ protected:
 	}
 	inline eWidget *getNonTransparentBackground()
 	{
-		if (getBackgroundColor()!=-1)
+		if (backgroundColor != -1)
 			return this;
 		return parent?parent->getNonTransparentBackground():this;
 	}
@@ -170,7 +170,7 @@ public:
 	 * Sets the size of the widget to the given size. The event \c changedSize event will be generated.
 	 * \param size The new size, relative to the position.
 	 */
-	void resize(eSize size);
+	void resize(const eSize& size);
 	
 	/**
 	 * \brief Resizes clientrect (and the widget).
@@ -179,7 +179,7 @@ public:
 	 * these requirement. The event \c changedSize event will be generated.
 	 * \param size The new size of the clientrect, relative to the position.
 	 */
-	void cresize(eSize size);
+	void cresize(const eSize& size);
 	
 	/**
 	 * \brief Moves the widget.
@@ -187,7 +187,7 @@ public:
 	 * Set the new position of the widget to the given position. The \c changedPosition event will be generated.
 	 * \param position The new position, relative to the parent's \c clientrect.
 	 */
-	void move(ePoint position);
+	void move(const ePoint& position);
 	
 	/**
 	 * \brief Moves the clientrect (and the widget).
@@ -195,7 +195,7 @@ public:
 	 * Set the new position of the clientrect to the given position. The \c changedPosition event will be generated.
 	 * \param position The new position, relative to the parent's \c clientrect.
 	 */
-	void cmove(ePoint position);
+	void cmove(const ePoint& position);
 	
 	/**
 	 * \brief Returns the current size.
@@ -224,7 +224,7 @@ public:
 	 * \return The area usable for the childwidgets.
 	 */
 	eRect getClientRect() { return clientrect; }
-	
+
 	/**
 	 * \brief Recursive redraw of a widget.
 	 *
@@ -326,15 +326,15 @@ public:
 	void setText(const eString &label);
 	
 	const	eString& getText() { return text; }
-	void setBackgroundColor(gColor color);
-	void setForegroundColor(gColor color);
+	void setBackgroundColor(const gColor& color);
+	void setForegroundColor(const gColor& color);
 	void setPixmap(gPixmap *pmap);
 	void setTarget(gDC *target);
 	void setLCD(eWidget *lcdtitle, eWidget *lcdelement);
 	void setName(const char *name);
 	
-	gColor getBackgroundColor() { return backgroundColor; }
-	gColor getForegroundColor() { return foregroundColor; }
+	const gColor& getBackgroundColor() { return backgroundColor; }
+	const gColor& getForegroundColor() { return foregroundColor; }
 	
 	int width() { return getSize().width(); }
 	int height() { return getSize().height(); }

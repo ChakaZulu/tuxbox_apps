@@ -21,7 +21,7 @@ static QMap<eString,eString> getRequestOptions(eString opt)
 {
 	QMap<eString,eString> result;
 	
-	if (opt.at(0)=='?')
+	if (opt[0]=='?')
 		opt=opt.mid(1);
 	while (opt.length())
 	{
@@ -68,7 +68,7 @@ static eString switchService(eString request, eString path, eString opt, eHTTPCo
 	if (opt.find("="))
 		opt=opt.mid(opt.find("=")+1);
 	if (opt.length())
-		sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
+		sscanf(opt.c_str(), "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
 	eString result="";
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
@@ -148,14 +148,14 @@ static eString audio(eString request, eString path, eString opts, eHTTPConnectio
 	eString volume=opt["volume"];
 	if (volume)
 	{
-		int vol=atoi(volume);
+		int vol=atoi(volume.c_str());
 		eDVB::getInstance()->changeVolume(1, vol);
 		result+="Volume set.<br>\n";
 	}
 	eString mute=opt["mute"];
 	if (mute)
 	{
-		int m=atoi(mute);
+		int m=atoi(mute.c_str());
 		eDVB::getInstance()->changeVolume(3, m);
 		result+="mute set<br>\n";
 	}
@@ -243,7 +243,7 @@ static eString setVolume(eString request, eString path, eString opts, eHTTPConne
 	}
 
 	if(volume) {
-		vol=atoi(volume);
+		vol=atoi(volume.c_str());
 	} else {
 		result+="[no params]";
 		return result;
@@ -265,7 +265,7 @@ static eString read_file(eString filename)
 {
 #define BLOCKSIZE 8192
 	int fd;
-	fd=open(filename, O_RDONLY);
+	fd=open(filename.c_str(), O_RDONLY);
 	if(!fd)
 		return eString("file: "+filename+" not found\n");
 	
@@ -289,7 +289,7 @@ static eString getIP()
 	memset(&ip, 0, sizeof(ip));
 	tmp=read_file("/proc/net/tcp");
 	
-	if(sscanf(tmp, "%02x%02x%02x%02x:0050", &ip[0], &ip[1], &ip[2], &ip[3])==4) {
+	if(sscanf(tmp.c_str(), "%02x%02x%02x%02x:0050", &ip[0], &ip[1], &ip[2], &ip[3])==4) {
 		return eString().sprintf("%d.%d.%d.%d", ip);
 	}
 	return "?.?.?.?";
@@ -321,7 +321,7 @@ eBouquet *getBouquet(int bouquet_id)
 static eString getVolBar()
 {
 	eString result="";
-	int volume=atoi(getVolume());
+	int volume=atoi(getVolume().c_str());
 
 	result+="<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">";
 	result+="<tr>";
@@ -466,7 +466,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	if(opt["bouquetid"])
 		bid=opt["bouquetid"];
 
-	int bouquetid=atoi(bid);
+	int bouquetid=atoi(bid.c_str());
 
 	result+=read_file(TEMPLATE_DIR+"index.tmp");
 
@@ -480,7 +480,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 	int bootcount=0;
 	
 	stats+="<span class=\"white\">";
-	int sec=atoi(read_file("/proc/uptime"));
+	int sec=atoi(read_file("/proc/uptime").c_str());
 	stats+=eString().sprintf("%d:%02dm up", sec/3600, (sec%3600)/60);
 	stats+="</span> | ";
 
@@ -653,7 +653,7 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 	if (opt.find("="))
 		opt=opt.mid(opt.find("=")+1);
 	if(opt)
-		sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
+		sscanf(opt.c_str(), "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
 	eString result="";
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))

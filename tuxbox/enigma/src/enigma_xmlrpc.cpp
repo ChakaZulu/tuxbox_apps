@@ -52,7 +52,7 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 	
 	eString &param=*params[0]->getString();
 	
-	qDebug("getList(%s);", (const char*)param);
+	eDebug("getList(%s);", param.c_str());
 	
 	if (!param.length())		// root
 	{
@@ -85,9 +85,9 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		nv->resize(l.count());
 		l.toVector(nv);
 		result.append(new eXMLRPCVariant(nv));
-	} else if (param.at(0)=='B')
+	} else if (param[0]=='B')
 	{
-		eBouquet *b=getBouquetByID(param);
+		eBouquet *b=getBouquetByID(param.c_str());
 		if (!b)
 			xmlrpc_fault(result, 3, "invalid handle");
 		else
@@ -125,9 +125,9 @@ static int getList(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 			l.toVector(nv);
 			result.append(new eXMLRPCVariant(nv));
 		}
-	} else if (param.at(0)=='S')
+	} else if (param[0]=='S')
 	{
-		eService *service=getServiceByID(param);
+		eService *service=getServiceByID(param.c_str());
 		if (!service)
 		{
 			xmlrpc_fault(result, 3, "invalid handle");
@@ -213,9 +213,9 @@ static int zapTo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> &r
 
 	eString &param=*params[0]->getString();
 
-	qDebug("zapTo(%s);", (const char*)param);
+	eDebug("zapTo(%s);", param.c_str());
 	
-	eService *s=getServiceByID(param);
+	eService *s=getServiceByID(param.c_str());
 	if (!s)
 		xmlrpc_fault(result, 3, "invalid handle");
 	else
@@ -230,18 +230,18 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 
 	eString &param=*params[0]->getString();
 
-	qDebug("getInfo(%s);", (const char*)param);
+	eDebug("getInfo(%s);", param.c_str());
 	
 	eService *service=0;
 	
 	if (!param.length())    // currently running
 	{
 			// mal gucken
-  } else if (param.at(0)=='S')
+  } else if (param[0]=='S')
   {
 		QMap<eString, eXMLRPCVariant*> *s=new QMap<eString, eXMLRPCVariant*>;
 
-		eService *service=getServiceByID(param);
+		eService *service=getServiceByID(param.c_str());
 		if (!service)
 		{
 			xmlrpc_fault(result, 3, "invalid handle");
@@ -346,7 +346,7 @@ static int getInfo(const QVector<eXMLRPCVariant> &params, QList<eXMLRPCVariant> 
 		
 		eString res="";
 		result.first()->toXML(res);
-		qDebug("%s", (const char*)res);
+		eDebug("%s", res.c_str());
 	} else
 		xmlrpc_fault(result, 3, "nene nur service bitte");
 	return 0;

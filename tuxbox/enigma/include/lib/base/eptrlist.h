@@ -90,6 +90,18 @@ public:
 	{
 		return **std::list<T*>::iterator::operator->();
 	}
+	
+	void operator+=(int i)
+	{
+		while (i--)
+			operator++();
+	}
+
+	void operator-=(int i)
+	{
+		while (i--)
+			operator--();
+	}
 };
 
 /////////////////// const_iterator class /////////////////////////////
@@ -110,6 +122,19 @@ public:
 	{
 		return **std::list<T*>::const_iterator::operator->();
 	}
+
+	void operator+=(int i)
+	{
+		while (i--)
+			operator++();
+	}
+
+	void operator-=(int i)
+	{
+		while (i--)
+			operator--();
+	}
+
 };
 
 /////////////////// reverse_iterator class /////////////////////////////
@@ -131,6 +156,18 @@ public:
 		return **std::list<T*>::reverse_iterator::operator->();
 	}
 
+	void operator+=(int i)
+	{
+		while (i--)
+			operator++();
+	}
+
+	void operator-=(int i)
+	{
+		while (i--)
+			operator--();
+	}
+
 };
 
 /////////////////// const_reverse_iterator class /////////////////////////////
@@ -150,6 +187,18 @@ public:
 	operator T&() const
 	{
 		return **std::list<T*>::const_reverse_iterator::operator->();
+	}
+
+	void operator+=(int i)
+	{
+		while (i--)
+			operator++();
+	}
+
+	void operator-=(int i)
+	{
+		while (i--)
+			operator--();
 	}
 };
 

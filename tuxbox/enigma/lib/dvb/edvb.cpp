@@ -1,3 +1,4 @@
+#include "edvb.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -6,24 +7,27 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifdef PROFILE
-#include <sys/time.h>
-#endif
-#include "edvb.h"
-#include "esection.h"
-#include "si.h"
-#include "frontend.h"
-#include "dvb.h"
-#include "decoder.h"
-#include <qfile.h>
 #include <dbox/info.h>
-#include "eavswitch.h"
-#include "init.h"
-#include "config.h"
 #include <algorithm>
-#include "streamwd.h"
+#include <string.h>
+
+#ifdef PROFILE
+	#include <sys/time.h>
+#endif
+
+#include "config.h"
+
+#include <core/driver/eavswitch.h>
+#include <core/driver/streamwd.h>
+#include <core/dvb/esection.h>
+#include <core/dvb/si.h>
+#include <core/dvb/frontend.h>
+#include <core/dvb/dvb.h>
+#include <core/dvb/decoder.h>
+#include <core/dvb/record.h>
+#include <core/system/init.h>
 #include <core/system/econfig.h>
-#include "record.h"
+
 
 eDVB *eDVB::instance;
 
@@ -38,12 +42,12 @@ void eDVB::removeDVBBouquets()
 	{
 		if ( i->bouquet_id >= 0)
 		{
-			printf("removing bouquet '%s'\n", i->bouquet_name.c_str());
+			eDebug("removing bouquet '%s'", i->bouquet_name.c_str());
 			i = bouquets.erase(i);
 		}
 		else
 		{
-			printf("leaving bouquet '%s'\n", i->bouquet_name.c_str());
+			eDebug("leaving bouquet '%s'", i->bouquet_name.c_str());
 			i++;
 		}
 	}
@@ -51,7 +55,7 @@ void eDVB::removeDVBBouquets()
 
 void eDVB::addDVBBouquet(BAT *bat)
 {
-	printf("wir haben da eine bat, id %x\n", bat->bouquet_id);
+	eDebug("wir haben da eine bat, id %x", bat->bouquet_id);
 	eString bouquet_name="Weiteres Bouquet";
 	for (ePtrList<Descriptor>::iterator i(bat->bouquet_descriptors); i != bat->bouquet_descriptors.end(); ++i)
 	{
@@ -98,7 +102,7 @@ static eString beautifyBouquetName(eString bouquet_name)
 eBouquet *eDVB::getBouquet(eString bouquet_name)
 {
 	for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
-		if (!stricmp(i->bouquet_name.c_str(), bouquet_name.c_str()))
+		if (!i->bouquet_name.icompare(bouquet_name))
 			return *i;
 	return 0;
 }
@@ -142,13 +146,13 @@ int eDVB::getUnusedBouquetID(int range)
 
 void eDVB::revalidateBouquets()
 {
-	printf("revalidating bouquets\n");
+	eDebug("revalidating bouquets");
 	if (transponderlist)
 		for (ePtrList<eBouquet>::iterator i(bouquets); i != bouquets.end(); i++)
 			for (ServiceReferenceIterator service = i->list.begin(); service != i->list.end(); service++)
 				service->service=transponderlist->searchService(service->original_network_id, service->service_id);
 	/*emit*/ bouquetListChanged();
-	printf("ok\n");
+	eDebug("ok");
 }
 
 int eDVB::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors)
@@ -203,7 +207,7 @@ void eDVB::scanEvent(int event)
 		/*emit*/ serviceListChanged();
 		if (!initialTransponders)
 		{
-			qFatal("no initial transponders");
+			eFatal("no initial transponders");
 			scanEvent(eventScanCompleted);
 			break;
 		}
@@ -242,16 +246,16 @@ void eDVB::scanEvent(int event)
 	case eventScanGotPAT:
 	{
 		if (state!=stateScanGetPAT)
-			qFatal("unexpected gotPAT");
+			eFatal("unexpected gotPAT");
 
 		if (!tPAT.ready())
-			qFatal("tmb suckt -> no pat");
+			eFatal("tmb suckt -> no pat");
 		PAT *pat=tPAT.getCurrent();
 		int nitpid;
 		PATEntry *pe=pat->searchService(0);
 		if (!pe)
 		{
-			printf("no NIT-PMTentry, assuming 0x10\n");
+			eDebug("no NIT-PMTentry, assuming 0x10");
 			nitpid=0x10;
 		}	else
 			nitpid=pe->program_map_PID;
@@ -297,7 +301,7 @@ void eDVB::scanEvent(int event)
 			sdt->unlock();
 		}
 		scanOK|=1;
-		printf("scanOK %d\n", scanOK);
+		eDebug("scanOK %d", scanOK);
 		if (scanOK==15)
 			scanEvent(eventScanComplete);
 		break;
@@ -345,7 +349,7 @@ void eDVB::scanEvent(int event)
 			nit->unlock();
 		}
 		scanOK|=(event==eventScanGotNIT)?2:8;
-		printf("scanOK %d\n", scanOK);
+		eDebug("scanOK %d", scanOK);
 		if (scanOK==15)
 			scanEvent(eventScanComplete);
 		break;
@@ -359,15 +363,15 @@ void eDVB::scanEvent(int event)
 			bat->unlock();
 		}
 		scanOK|=4;
-		printf("scanOK %d\n", scanOK);
+		eDebug("scanOK %d", scanOK);
 		if (scanOK==15)
 			scanEvent(eventScanComplete);
 		break;
 	}
 	case eventScanError:
-		printf("with error\n");
+		eDebug("with error");
 	case eventScanComplete:
-		printf("completed\n");
+		eDebug("completed");
 		if (transponder)
 		{
 			if (event==eventScanError)
@@ -378,7 +382,7 @@ void eDVB::scanEvent(int event)
 		scanEvent(eventScanNext);
 		break;
 	case eventScanCompleted:
-		printf("scan has finally completed.\n");
+		eDebug("scan has finally completed.");
 		saveServices();
 		sortInChannels();
 		/*emit*/ serviceListChanged();
@@ -415,31 +419,36 @@ void eDVB::serviceEvent(int event)
 
 	}
 	
-	printf("[PROFILE] [%s] +%dus\n", what, diff);
+	eDebug("[PROFILE] [%s] +%dus", what, diff);
 #endif
 	switch (event)
 	{
 	case eventServiceSwitch:
 	{
+		eDebug("Begin");
 		if (!transponderlist)
 		{
 			service_state=ENOENT;
 			serviceEvent(eventServiceFailed);
 			return;
 		}
+		eDebug("nach !Transponderlist");
 		eTransponder *n=transponderlist->searchTS(original_network_id, transport_stream_id);
+		eDebug("n = %p", n);
 		if (!n)
 		{
 			setState(eventServiceTuneFailed);
 			break;
 		}
+		eDebug("n = %p", n);
 		if (n->state!=eTransponder::stateOK)
 		{
-			printf("couldn't tune\n");
+			eDebug("couldn't tune");
 			service_state=ENOENT;
 			serviceEvent(eventServiceFailed);
 			return;
 		}
+
 		if (n==transponder)
 		{
 //			setState(stateServiceTune);
@@ -453,7 +462,7 @@ void eDVB::serviceEvent(int event)
 			else
 				setState(stateServiceTune);
 		}
-		printf("<-- tuned\n");
+		eDebug("<-- tuned");
 		break;
 	}
 	case eventServiceTuneOK:
@@ -488,13 +497,13 @@ void eDVB::serviceEvent(int event)
 		}
 		break;
 	case eventServiceTuneFailed:
-		printf("[TUNE] tune failed\n");
+		eDebug("[TUNE] tune failed");
 		service_state=ENOENT;
 		serviceEvent(eventServiceFailed);
 		break;
 	case eventServiceGotPAT:
 	{
-		printf("eventServiceGotPAT\n");
+		eDebug("eventServiceGotPAT");
 		PAT *pat=tPAT.getCurrent();
 		PATEntry *pe=pat->searchService(service_id);
 		if (!pe)
@@ -505,7 +514,7 @@ void eDVB::serviceEvent(int event)
 		pat->unlock();
 		if (pmtpid==-1)
 		{
-			printf("[PAT] no pat entry\n");
+			eDebug("[PAT] no pat entry");
 			service_state=ENOENT;
 			serviceEvent(eventServiceFailed);
 			return;
@@ -515,7 +524,7 @@ void eDVB::serviceEvent(int event)
 		break;
 	}	
 	case eventServiceGotPMT:
-		printf("eventServiceGotPMT\n");
+		eDebug("eventServiceGotPMT");
 		service_state=0;
 		scanPMT();
 		{
@@ -529,11 +538,11 @@ void eDVB::serviceEvent(int event)
 		if (state==stateServiceGetPMT)
 			serviceEvent(eventServiceSwitched);
 		else
-			printf("nee, doch nicht\n");
+			eDebug("nee, doch nicht");
 		break;
 	case eventServiceGotSDT:
 	{
-		printf("eventServiceGotSDT\n");
+		eDebug("eventServiceGotSDT");
 		SDT *sdt=tSDT.ready()?tSDT.getCurrent():0;
 		if (sdt)
 		{
@@ -564,7 +573,7 @@ void eDVB::scanPMT()
 	PMT *pmt=tPMT.ready()?tPMT.getCurrent():0;
 	if (!pmt)
 	{
-		printf("scanPMT with no available pmt\n");
+		eDebug("scanPMT with no available pmt");
 		return;
 	}
 	Decoder::parms.pmtpid=pmtpid;
@@ -621,7 +630,7 @@ void eDVB::scanPMT()
 					MHWDataDescriptor *mhwd=(MHWDataDescriptor*)*i;
 					if (!strncmp(mhwd->type, "PILOTE", 6))
 					{
-						printf("starting MHWEIT on pid %x, sid %x\n", pe->elementary_PID, service_id);
+						eDebug("starting MHWEIT on pid %x, sid %x", pe->elementary_PID, service_id);
 						tMHWEIT=new MHWEIT(pe->elementary_PID, service_id);
 						CONNECT(tMHWEIT->ready, eDVB::MHWEITready);
 						tMHWEIT->start();
@@ -641,7 +650,7 @@ void eDVB::scanPMT()
 
 	if (isca && !calist)
 	{
-		printf("NO CASYS\n");
+		eDebug("NO CASYS");
 		service_state=ENOCASYS;
 	}
 
@@ -650,7 +659,7 @@ void eDVB::scanPMT()
 
 	for (ePtrList<CA>::iterator i(calist); i != calist.end(); ++i)
 	{
-		printf("CA %04x ECMPID %04x\n", i->casysid, i->ecmpid);
+		eDebug("CA %04x ECMPID %04x", i->casysid, i->ecmpid);
 	}
 
 	pmt->unlock();
@@ -685,7 +694,7 @@ void eDVB::tunedIn(eTransponder *trans, int err)
 			serviceEvent(err?eventServiceTuneFailed:eventServiceTuneOK);
 		break;		
 	default:
-		printf("wrong state %d\n", state);
+		eDebug("wrong state %d", state);
 	}
 }
 
@@ -694,21 +703,21 @@ void eDVB::PATready(int error)
 	switch (state)
 	{
 	case stateScanGetPAT:
-		printf("stateScanGetPAT\n");
+		eDebug("stateScanGetPAT");
 		scanEvent(error?eventScanError:eventScanGotPAT);
 		break;
 	case stateServiceGetPAT:
-		printf("stateServiceGetPAT\n");
+		eDebug("stateServiceGetPAT");
 		serviceEvent(error?eventServiceFailed:eventServiceGotPAT);
 		break;
 	default:
-		printf("anderer: %d\n", state);
+		eDebug("anderer: %d", state);
 	}
 }
 
 void eDVB::SDTready(int error)
 {
-	printf("SDTready %s\n", strerror(-error));
+	eDebug("SDTready %s", strerror(-error));
 	switch (state)
 	{
 	case stateScanWait:
@@ -731,7 +740,7 @@ void eDVB::SDTready(int error)
 
 void eDVB::PMTready(int error)
 {
-	printf("PMTready %s\n", strerror(-error));
+	eDebug("PMTready %s", strerror(-error));
 	switch (state)
 	{
 	case stateIdle:
@@ -743,7 +752,7 @@ void eDVB::PMTready(int error)
 
 void eDVB::NITready(int error)
 {
-	printf("NITready %s\n", strerror(-error));
+	eDebug("NITready %s", strerror(-error));
 	switch (state)
 	{
 	case stateScanWait:
@@ -754,7 +763,7 @@ void eDVB::NITready(int error)
 
 void eDVB::ONITready(int error)
 {
-	printf("ONITready %s\n", strerror(-error));
+	eDebug("ONITready %s", strerror(-error));
 	switch (state)
 	{
 	case stateScanWait:
@@ -765,7 +774,7 @@ void eDVB::ONITready(int error)
 
 void eDVB::EITready(int error)
 {
-	printf("EITready %s\n", strerror(-error));
+	eDebug("EITready %s", strerror(-error));
 	if (!error)
 	{
 		EIT *eit=tEIT.getCurrent();
@@ -777,10 +786,10 @@ void eDVB::EITready(int error)
 
 void eDVB::TDTready(int error)
 {
-	printf("TDTready %d\n", error);
+	eDebug("TDTready %d", error);
 	if (!error)
 	{
-		printf("[TIME] time update to %s\n", ctime(&tdt->UTC_time));
+		eDebug("[TIME] time update to %s", ctime(&tdt->UTC_time));
 		time_difference=tdt->UTC_time-time(0);
 		/*emit*/ timeUpdated();
 	}
@@ -788,7 +797,7 @@ void eDVB::TDTready(int error)
 
 void eDVB::BATready(int error)
 {
-	printf("BATready %s\n", strerror(-error));
+	eDebug("BATready %s", strerror(-error));
 	switch (state)
 	{
 	case stateScanWait:
@@ -845,7 +854,7 @@ int eDVB::startScan(const ePtrList<eTransponder> &initial, int flags)
 {
 	if (state!=stateIdle)
 	{
-		qFatal("BUSY");
+		eFatal("BUSY");
 		return -EBUSY;
 	}
 	scanflags=flags;
@@ -872,7 +881,7 @@ int eDVB::switchService(int nservice_id, int noriginal_network_id, int ntranspor
 	service_type=nservice_type;
 	
 	serviceEvent(eventServiceSwitch);
-	printf("<--- switch service event\n");
+	eDebug("<--- switch service event");
 	return 1;
 }
 
@@ -882,13 +891,13 @@ eDVB::eDVB()
 	if (eConfig::getInstance()->getKey("/elitedvb/DVB/useBAT", useBAT))
 		useBAT=0;
 	if (instance)
-		qFatal("eDVB already initialized!");
+		eFatal("eDVB already initialized!");
 	instance=this;
 	eString frontend=getInfo("fe");
 	int fe;
 	if (!frontend.length())
 	{
-		qWarning("WARNING: couldn't determine frontend-type, assuming satellite...\n");
+		eDebug("WARNING: couldn't determine frontend-type, assuming satellite...");
 		fe=eFrontend::feSatellite;
 	} else
 	{
@@ -901,13 +910,13 @@ eDVB::eDVB()
 			fe=eFrontend::feSatellite;
 			break;
 		default:
-			qWarning("COOL: dvb-t is out. less cool: eDVB doesn't support it yet...\n");
+			eDebug("COOL: dvb-t is out. less cool: eDVB doesn't support it yet...");
 			fe=eFrontend::feCable;
 			break;
 		}
 	}
 	if (eFrontend::open(fe)<0)
-		qFatal("couldn't open frontend");
+		eFatal("couldn't open frontend");
 	CONNECT(eFrontend::fe()->tunedIn, eDVB::tunedIn);
 
 	transponderlist=0;
@@ -934,9 +943,8 @@ eDVB::eDVB()
 	tdt=0;
 
 	int type=0;
-	eString mid=getInfo("mID");
-	if (mid.length())
-		type=atoi(mid.c_str());
+	
+	type=atoi( getInfo("mID").c_str() );
 	
 	switch (type)
 	{
@@ -954,7 +962,7 @@ eDVB::eDVB()
 		break;
 	}
 	
-	printf("instance: %p\n",  eAVSwitch::getInstance());
+	eDebug("instance: %p",  eAVSwitch::getInstance());
 	eAVSwitch::getInstance()->setInput(0);
 	eAVSwitch::getInstance()->setActive(1);
 	eStreamWatchdog::getInstance()->reloadSettings();
@@ -975,7 +983,7 @@ eDVB::eDVB()
 	// tmbinc: das sollte man schon machen :-)
 /* --->>> */	recorder=0;
 	
-	printf("eDVB::eDVB done.\n");
+	eDebug("eDVB::eDVB done.");
 }
 
 eDVB::~eDVB()
@@ -1121,7 +1129,7 @@ struct sortinChannel: public std::unary_function<const eService&, void>
 
 void eDVB::sortInChannels()
 {
-	printf("sorting in channels\n");
+	eDebug("sorting in channels");
 	removeDVBBouquets();
 	getTransponders()->forEachService(sortinChannel(*this));
 	revalidateBouquets();
@@ -1133,7 +1141,7 @@ struct saveService: public std::unary_function<const eService&, void>
 	FILE *f;
 	saveService(FILE *out): f(out)
 	{
-		fprintf(f, "services\n");
+	 	fprintf(f, "services\n");
 	}
 	void operator()(eService& s)
 	{
@@ -1175,7 +1183,7 @@ void eDVB::saveServices()
 {
 	FILE *f=fopen(CONFIGDIR "/enigma/services", "wt");
 	if (!f)
-		qFatal("couldn't open servicefile - create " CONFIGDIR "/enigma!");
+		eFatal("couldn't open servicefile - create " CONFIGDIR "/enigma!");
 	fprintf(f, "eDVB services - modify as long as you pay for the damage!\n");
 
 	getTransponders()->forEachTransponder(saveTransponder(f));
@@ -1192,13 +1200,13 @@ void eDVB::loadServices()
 	char line[256];
 	if ((!fgets(line, 256, f)) || strncmp(line, "eDVB services", 13))
 	{
-		printf("not a servicefile\n");
+		eDebug("not a servicefile");
 		return;
 	}
-	printf("reading services\n");
+	eDebug("reading services");
 	if ((!fgets(line, 256, f)) || strcmp(line, "transponders\n"))
 	{
-		printf("services invalid, no transponders\n");
+		eDebug("services invalid, no transponders");
 		return;
 	}
 	if (transponderlist)
@@ -1237,7 +1245,7 @@ void eDVB::loadServices()
 
 	if ((!fgets(line, 256, f)) || strcmp(line, "services\n"))
 	{
-		printf("services invalid, no services\n");
+		eDebug("services invalid, no services");
 		return;
 	}
 	
@@ -1265,18 +1273,18 @@ void eDVB::loadServices()
 		s.service_provider=line;
 	}
 	
-	printf("loaded %d services\n", count);
+	eDebug("loaded %d services", count);
 	
 	fclose(f);
 }
 
 void eDVB::saveBouquets()
 {
-	printf("saving bouquets...\n");
+	eDebug("saving bouquets...");
 	
 	FILE *f=fopen(CONFIGDIR "/enigma/bouquets", "wt");
 	if (!f)
-		qFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
+		eFatal("couldn't open bouquetfile - create " CONFIGDIR "/enigma!");
 	fprintf(f, "eDVB bouquets - modify as long as you don't blame me!\n");
 	fprintf(f, "bouquets\n");
 	for (ePtrList<eBouquet>::iterator i(*getBouquets()); i != getBouquets()->end(); ++i)
@@ -1291,7 +1299,7 @@ void eDVB::saveBouquets()
 	fprintf(f, "end\n");
 	fprintf(f, "Have a lot of fun!\n");
 	fclose(f);
-	printf("done\n");
+	eDebug("done");
 }
 
 void eDVB::loadBouquets()
@@ -1302,13 +1310,13 @@ void eDVB::loadBouquets()
 	char line[256];
 	if ((!fgets(line, 256, f)) || strncmp(line, "eDVB bouquets", 13))
 	{
-		printf("not a bouquetfile\n");
+		eDebug("not a bouquetfile");
 		return;
 	}
-	printf("reading bouquets\n");
+	eDebug("reading bouquets");
 	if ((!fgets(line, 256, f)) || strcmp(line, "bouquets\n"))
 	{
-		printf("settings invalid, no transponders\n");
+		eDebug("settings invalid, no transponders\n");
 		return;
 	}
 
@@ -1326,7 +1334,7 @@ void eDVB::loadBouquets()
 		if (!fgets(line, 256, f))
 			break;
 		if (parent_id != -1)
-			parent=getBouquet(parent_id); 
+			parent=getBouquet(parent_id);
 		line[strlen(line)-1]=0;
 		eBouquet *bouquet=createBouquet(parent, bouquet_id, line);
 		while (!feof(f))
@@ -1340,12 +1348,12 @@ void eDVB::loadBouquets()
 		}
 	}
 
-	printf("loaded %d bouquets\n", getBouquets()->size());
+	eDebug("loaded %d bouquets", getBouquets()->size());
 	
 	fclose(f);
 	
 	revalidateBouquets();
-	printf("ok\n");
+	eDebug("ok");
 }
 
 void eDVB::changeVolume(int abs, int vol)
@@ -1406,7 +1414,7 @@ void eDVB::configureNetwork()
 	{
 		FILE *f=fopen("/etc/resolv.conf", "wt");
 		if (!f)
-			printf("couldn't write resolv.conf\n");
+			eDebug("couldn't write resolv.conf");
 		else
 		{
 			fprintf(f, "# Generated by enigma\nnameserver %d.%d.%d.%d\n", dns[0], dns[1], dns[2], dns[3]);
@@ -1414,14 +1422,14 @@ void eDVB::configureNetwork()
 		}
 		eString buffer;
 		buffer.sprintf("/sbin/ifconfig eth0 %d.%d.%d.%d up netmask %d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3], netmask[0], netmask[1], netmask[2], netmask[3]);
-		if (system(buffer)>>8)
-			printf("'%s' failed.\n", (const char*)buffer);
+		if (system(buffer.c_str())>>8)
+			eDebug("'%s' failed.", buffer.c_str());
 		else
 		{
 			system("/bin/route del default 2> /dev/null");
 			buffer.sprintf("/bin/route add default gw %d.%d.%d.%d", gateway[0], gateway[1], gateway[2], gateway[3]);
-			if (system(buffer)>>8)
-				printf("'%s' failed\n", (const char*)buffer);
+			if (system(buffer.c_str())>>8)
+				eDebug("'%s' failed", buffer.c_str());
 		}
 	}
 }

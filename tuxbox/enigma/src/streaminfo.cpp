@@ -286,7 +286,7 @@ siCA::siCA(eWidget *parent): eWidget(parent)
 			availcas+="...\n";
 			break;
 		}
-		availcas+= eString().sprintf( "%04xh:  %s\n", *i, (const char*) getCAName(*i));
+		availcas+= eString().sprintf( "%04xh:  %s\n", *i, getCAName(*i).c_str());
 	}
 	if (!numsys)
 		numsys++;

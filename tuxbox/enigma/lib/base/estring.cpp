@@ -1,5 +1,6 @@
 #include "estring.h"
-#include <stdlib.h>
+#include <ctype.h>
+#include <limits.h>
 
 ///////////////////////////////////////// eString sprintf /////////////////////////////////////////////////
 eString& eString::sprintf(char *fmt, ...)
@@ -9,7 +10,7 @@ eString& eString::sprintf(char *fmt, ...)
 	char buf[1024];
 	va_list ap;
 	va_start(ap, fmt);
-	vsnprintf(buf, 1024, fmt, ap);
+	std::vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
 	assign(buf);
 	return *this;
@@ -23,9 +24,9 @@ eString& eString::setNum(int val, int sys)
 	char buf[16];
 	
 	if (sys == 10)
-		snprintf(buf, 16, "%i", val);
+		std::snprintf(buf, 16, "%i", val);
 	else if (sys == 16)
-		snprintf(buf, 16, "%X", val);		
+		std::snprintf(buf, 16, "%X", val);		
 	
 	assign(buf);
 	return *this;
@@ -47,23 +48,23 @@ eString& eString::removeChars(char fchar)
 eString& eString::upper()
 {
 //	convert all lowercase characters to uppercase, and returns a reference to itself
-	for (int i=0; i < length(); i++)
-		switch(*this[i])
+	for (iterator it = begin(); it != end(); it++)
+		switch(*it)
 		{
 			case 'a' ... 'z' :
-				at(i) = at(i) - 32;
+				*it -= 32;
 			break;
 
 			case 'ä' :
-				at(i) = 'Ä';
+				*it = 'Ä';
 			break;
 			
 			case 'ü' :
-				at(i) = 'Ü';
+				*it = 'Ü';
 			break;
 			
 			case 'ö' :
-				at(i) = 'Ö';
+				*it = 'Ö';
 			break;
 		}
 
@@ -80,4 +81,20 @@ eString& eString::strReplace(const char* fstr, const eString& rstr)
 		replace(index++, fstrlen, rstr);
 	
 	return *this;
+}
+
+/////////////////////////////////////// eString icompare(const eString&) ////////////////////////////////////////////////
+int eString::icompare(const eString& s)
+{
+//	makes a case insensitive string compare
+	std::string::const_iterator p = begin(),
+															p2 = s.begin();
+
+	while ( p != end() && p2 != s.end() )
+		if ( tolower(*p) != tolower(*p2) )
+			return tolower(*p) < tolower(*p2) ? -1 : 1;
+		else
+			p++, p2++;
+
+	return 0;
 }

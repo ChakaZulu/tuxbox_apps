@@ -78,7 +78,7 @@ int eHTTPError::doWrite(int w)
 	eString html;
 	html+="<html><head><title>Error "+eString().setNum(connection->code)+"</title></head>"+
 		"<body><h1>Error "+eString().setNum(errcode)+": "+connection->code_descr+"</h1></body></html>\n";
-	connection->writeBlock(html, html.length());
+	connection->writeBlock(html.c_str(), html.length());
 	return -1;
 }
 
@@ -276,7 +276,7 @@ int eHTTPConnection::processLocalState()
 		{
 			eDebug("local request");
 			eString req=request+" "+requestpath+" "+httpversion+"\r\n";
-			writeBlock((const char*)req, req.length());
+			writeBlock(req.c_str(), req.length());
 			localstate=stateHeader;
 			remotestate=stateResponse;
 			break;
@@ -437,7 +437,7 @@ int eHTTPConnection::processRemoteState()
 			{
 				int del=line.find(": ");
 				eString name=line.left(del), value=line.mid(del+2);
-				remote_header[std::string((const char*)name)]=value;
+				remote_header[name]=value;
 				const char *ct="Content-Type";
 			}
 			done=1;

@@ -1,16 +1,13 @@
 #ifndef __eskin_h
 #define __eskin_h
 
-#include <xmltree.h>
-#include <estring.h>
-#include <qmap.h>
-#include <qdict.h>
-#include <qlist.h>
-#include "grc.h"
-
 #include <list>
-#include <core/base/eptrlist.h>
+#include <map>
 
+#include <core/base/estring.h>
+#include <core/base/eptrlist.h>
+#include <core/gdi/grc.h>
+#include <core/xml/xmltree.h>
 
 class eWidget;
 class gPixmap;
@@ -30,7 +27,7 @@ class eSkin
 	parserList parsers;
 	void clear();
 	
-	int parseColor(const char *name, const char *color, gRGB &col);
+	int parseColor(const eString& name, const char *color, gRGB &col);
 	int parseColors(XMLTreeNode *colors);
 	int parseScheme(XMLTreeNode *scheme);
 	int parseImages(XMLTreeNode *images);
@@ -44,15 +41,15 @@ class eSkin
 	gImage *paldummy;
 	int *colorused;
 	
-	static QMap<eString,tWidgetCreator> eSkin::widget_creator;
+	static std::map< eString, tWidgetCreator > widget_creator;
 	int build(eWidget *widget, XMLTreeNode *rootwidget);
 	
 	std::list<eNamedColor> colors;
-	QDict<gColor> scheme;
-	QDict<gPixmap> images;
-	
-	QDict<int> values;
-	eNamedColor *searchColor(const char *name);
+	std::map<eString, gColor> scheme;
+	std::map<eString, gPixmap*> images;
+	std::map<eString, int> values;
+
+	eNamedColor *searchColor(const eString &name);
 
 	static eSkin *active;
 public:

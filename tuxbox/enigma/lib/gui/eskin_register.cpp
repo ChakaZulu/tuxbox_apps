@@ -1,8 +1,11 @@
 #include "eskin_register.h"
-#include "eskin.h"
-#include "gfbdc.h"
-#include "init.h"
 #include "config.h"
+
+#include <core/gui/eskin.h>
+#include <core/gdi/gfbdc.h>
+#include <core/system/init.h>
+
+
 
 class eSkinInit
 {
@@ -11,9 +14,9 @@ public:
 	eSkinInit()
 	{
 		if (default_skin.load( DATADIR "/enigma/skins/default.esml"))
-			qFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
+			eFatal("skin load failed (" DATADIR "/enigma/skins/default.esml)");
 		if (default_skin.load( DATADIR "/enigma/skins/neutrino.esml"))
-			qWarning("skin load failed (" DATADIR "/enigma/skins/neutrino.esml)");
+			eDebug("skin load failed (" DATADIR "/enigma/skins/neutrino.esml)");
 /*		if (default_skin.load( DATADIR "/enigma/skins/dream.esml"))
 			qWarning("skin load failed (" DATADIR "/enigma/skins/dream.esml)"); */
 /*		if (default_skin.load( DATADIR "/enigma/skins/chkdesign.esml"))

@@ -17,32 +17,32 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_setup.cpp,v 1.12 2002/05/06 16:17:16 tmbinc Exp $
+ * $Id: enigma_setup.cpp,v 1.13 2002/05/12 16:22:25 Ghostrider Exp $
  */
 
 #include "enigma_setup.h"
+#include "enigma_scan.h"
 #include "setupnetwork.h"
 #include "setupvideo.h"
 #include "setup_language.h"
-#include "elistbox.h"
-#include "ewindow.h"
-#include "edvb.h"
-#include "eskin.h"
-#include "elabel.h"
-#include "enigma_scan.h"
 
 #include <core/base/i18n.h>
+#include <core/dvb/edvb.h>
+#include <core/gui/elistbox.h>
+#include <core/gui/eskin.h>
+#include <core/gui/elabel.h>
+#include <core/gui/ewindow.h>
 
 eZapSetup::eZapSetup()
-	:eLBWindow(_("Setup"), eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
+	:eLBWindow(_("Setup"), 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
 {
 	move(ePoint(150, 136));
-	CONNECT((new eListboxEntryText(list, _("[back]")))->selected, eZapSetup::sel_close);
-	CONNECT((new eListboxEntryText(list, _("Channels...")))->selected, eZapSetup::sel_channels);
-	CONNECT((new eListboxEntryText(list, _("Network...")))->selected, eZapSetup::sel_network);
+	CONNECT((new eListboxEntryText(&list, _("[back]")))->selected, eZapSetup::sel_close);
+	CONNECT((new eListboxEntryText(&list, _("Channels...")))->selected, eZapSetup::sel_channels);
+	CONNECT((new eListboxEntryText(&list, _("Network...")))->selected, eZapSetup::sel_network);
 //	CONNECT((list, _("Audio...")))->selected, sel_sound);
-	CONNECT((new eListboxEntryText(list, _("Video...")))->selected, eZapSetup::sel_video);
-	CONNECT((new eListboxEntryText(list, _("Language...")))->selected, eZapSetup::sel_language);
+	CONNECT((new eListboxEntryText(&list, _("Video...")))->selected, eZapSetup::sel_video);
+	CONNECT((new eListboxEntryText(&list, _("Language...")))->selected, eZapSetup::sel_language);
 }
 
 eZapSetup::~eZapSetup()

@@ -17,29 +17,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.1 2002/05/06 16:17:16 tmbinc Exp $
+ * $Id: enigma_info.cpp,v 1.2 2002/05/12 16:22:25 Ghostrider Exp $
  */
 
 #include "enigma_info.h"
 #include "streaminfo.h"
 #include "showbnversion.h"
-#include "elistbox.h"
-#include "ewindow.h"
-#include "edvb.h"
-#include "eskin.h"
-#include "elabel.h"
-#include "emessage.h"
 
+#include <core/gui/elistbox.h>
+#include <core/gui/ewindow.h>
+#include <core/dvb/edvb.h>
+#include <core/gui/eskin.h>
+#include <core/gui/elabel.h>
+#include <core/gui/emessage.h>
 #include <core/base/i18n.h>
 
 eZapInfo::eZapInfo()
-	:eLBWindow(_("Infos"), eListbox::tBorder, 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
+	:eLBWindow(_("Infos"), 8, eSkin::getActive()->queryValue("fontsize", 20), 220)
 {
 	move(ePoint(150, 136));
-	CONNECT((new eListboxEntryText(list, _("[back]")))->selected, eZapInfo::sel_close);
-	CONNECT((new eListboxEntryText(list, _("Streaminfo")))->selected, eZapInfo::sel_streaminfo);
-	CONNECT((new eListboxEntryText(list, _("Show BN version")))->selected, eZapInfo::sel_bnversion);
-	CONNECT((new eListboxEntryText(list, _("About...")))->selected, eZapInfo::sel_about);
+	CONNECT((new eListboxEntryText(&list, _("[back]")))->selected, eZapInfo::sel_close);
+	CONNECT((new eListboxEntryText(&list, _("Streaminfo")))->selected, eZapInfo::sel_streaminfo);
+	CONNECT((new eListboxEntryText(&list, _("Show BN version")))->selected, eZapInfo::sel_bnversion);
+	CONNECT((new eListboxEntryText(&list, _("About...")))->selected, eZapInfo::sel_about);
 	
 }
 

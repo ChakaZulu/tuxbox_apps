@@ -205,7 +205,7 @@ static void ncXmlStartElement(void *user_data, const CHAR *name, const CHAR **at
 			if (!xmlStrcmp(*attrs, (const xmlChar *)"name"))
 				n = attrs[1];
 			if (!xmlStrcmp(*attrs, (const xmlChar *)"type"))
-				type = atoi((const char *)attrs[1]);
+				type = atoi(attrs[1]);
 			attrs += 2;
 		}
 #ifdef NC_DEBUG_XML

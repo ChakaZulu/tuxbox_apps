@@ -1,10 +1,9 @@
 #include "ewindow.h"
-#include "enigma.h"
-#include "grc.h"
-#include "eskin.h"
-#include "init.h"
-#include "epng.h"
-#include "elabel.h"
+#include <core/gdi//grc.h>
+#include <core/gui/eskin.h>
+#include <core/system/init.h>
+#include <core/gdi/epng.h>
+#include <core/gui/elabel.h>
 
 eWindow::eWindow(int takefocus)
 	:eWidget(0, takefocus)
@@ -44,10 +43,6 @@ eWindow::eWindow(int takefocus)
 }
 
 eWindow::~eWindow()
-{
-}
-
-void eWindow::OnFontSizeChanged(int NewFontSize)
 {
 }
 

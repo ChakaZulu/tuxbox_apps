@@ -19,7 +19,7 @@ public:
 int eListboxEntryEPG::operator<(const eListboxEntry & q) const
 {
 	// much faster as string compare
-	return ( event->start_time < ((eListboxEntryEPG*) &q)->event->start_time );
+	return 0;//( event->start_time < ((eListboxEntryEPG*) &q)->event->start_time );
 }
 
 int eListboxEntryEPG::operator==(const eListboxEntry & q) const

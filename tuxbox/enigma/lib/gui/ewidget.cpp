@@ -91,7 +91,7 @@ void eWidget::setPalette()
 {
 }
 
-void eWidget::resize(eSize nsize)
+void eWidget::resize(const eSize& nsize)
 {
 	size=nsize;
 	recalcClientRect();
@@ -99,20 +99,20 @@ void eWidget::resize(eSize nsize)
 	recalcClip();
 }
 
-void eWidget::move(ePoint nposition)
+void eWidget::move(const ePoint& nposition)
 {
 	position=nposition;
 	event(eWidgetEvent(eWidgetEvent::changedPosition));
 	recalcClip();
 }
 
-void eWidget::cresize(eSize nsize)
+void eWidget::cresize(const eSize& nsize)
 {
 	recalcClientRect();
 	resize(eSize(nsize.width()+size.width()-clientrect.width(), nsize.height()+size.height()-clientrect.height()));
 }
 
-void eWidget::cmove(ePoint nposition)
+void eWidget::cmove(const ePoint& nposition)
 {
 	recalcClientRect();
 	move(ePoint(nposition.x()-clientrect.x(), nposition.y()-clientrect.y()));
@@ -527,7 +527,7 @@ void eWidget::setText(const eString &label)
 	}
 }
 
-void eWidget::setBackgroundColor(gColor color)
+void eWidget::setBackgroundColor(const gColor& color)
 {
 	if (color!=backgroundColor)
 	{
@@ -536,7 +536,7 @@ void eWidget::setBackgroundColor(gColor color)
 	}
 }
 
-void eWidget::setForegroundColor(gColor color)
+void eWidget::setForegroundColor(const gColor& color)
 {
 	if (color != foregroundColor)
 	{
@@ -580,32 +580,42 @@ gPainter *eWidget::getPainter(eRect area)
 	return p;
 }
 
-static int parse(const char *p, int *v, int *e, int max)
+static int parse(const char* p, int *v, int *e, int max)
 {
 	int i=0;
-	while ((i<max) && (*p))
+
+	while ( (i<max) && (*p) )
 	{
 		int ea=0;
+
 		if (*p=='e')
 		{
 			p++;
 			ea=1;
 		}
+
 		char *x;
 		v[i]=strtol(p, &x, 10);
 		p=x;
+
 		if (*p && *p!=':')
 			 return -3;
+
 		if (*p==':')
 			p++;
+
 		if (ea)
 			v[i]+=e[i];
+
 		i++;
 	}
+
 	if (*p)
 		return -1;
+
 	if (i<max)
 		return -2;
+
 	return 0;
 }
 
@@ -619,11 +629,12 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 			e[0]=parent->clientrect.width();
 			e[1]=parent->clientrect.height();
 		}
-		int err=parse(value, v, e, 2);
+		int err=parse(value.c_str(), v, e, 2);
 		if (err)
 			return err;
 		move(ePoint(v[0], v[1]));
-	} else if (prop=="cposition")
+	}
+	else if (prop=="cposition")
 	{
 		int v[2], e[2];
 		e[0]=e[1]=0;
@@ -632,12 +643,13 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 			e[0]=parent->clientrect.width();
 			e[1]=parent->clientrect.height();
 		}
-		int err=parse(value, v, e, 2);
+		int err=parse(value.c_str(), v, e, 2);
 		if (err)
 			return err;
 
 		cmove(ePoint(v[0], v[1]));
-	} else if (prop=="size")
+	}
+	else if (prop=="size")
 	{
 		int v[2], e[2];
 		e[0]=e[1]=0;
@@ -646,11 +658,12 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 			e[0]=parent->clientrect.width()-position.x();
 			e[1]=parent->clientrect.height()-position.y();
 		}
-		int err=parse(value, v, e, 2);
+		int err=parse(value.c_str(), v, e, 2);
 		if (err)
 			return err;		
 		resize(eSize(v[0], v[1]));
-	} else if (prop=="csize")
+	}
+	else if (prop=="csize")
 	{
 		int v[2], e[2];
 		e[0]=e[1]=0;
@@ -659,19 +672,20 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 			e[0]=parent->clientrect.width()-position.x();
 			e[1]=parent->clientrect.height()-position.y();
 		}
-		int err=parse(value, v, e, 2);
+		int err=parse(value.c_str(), v, e, 2);
 		if (err)
 			return err;
 		cresize(eSize(v[0], v[1]));
-	} else if (prop=="text")
+	}
+	else if (prop=="text")
 	{
 		eString text;
-		const char *v=value.c_str();
-		for (unsigned int i=0; i<value.length(); i++, v++)
+
+		for (std::string::const_iterator it = value.begin(); it != value.end(); it++)
 		{
-			if (*v=='\\')
+			if (*it=='\\')
 			{
-				switch (*++v)
+				switch (*(++it))
 				{
 				case 'n':
 					text+='\n';
@@ -692,12 +706,13 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 					text+='?';
 					break;
 				}
-			} else
-				text+=*v;
+			}
+			else
+				text+=*it;
 		}
-			
 		setText(text);
-	} else if (prop=="font")
+	}
+	else if (prop=="font")
 	{
 		eString family=value;
 		int sem=value.rfind(';');
@@ -706,12 +721,13 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		{
 			family=family.left(sem);
 			eString r=value.mid(sem+1);
-			size=atoi(r);
+			size=atoi(r.c_str());
 			if (size<=0)
 				size=16;
 		}
 		setFont(gFont(family, size));
-	} else if (prop=="name")
+	}
+	else if (prop=="name")
 		name=value;
 	else if (prop=="pixmap")
 		setPixmap(eSkin::getActive()->queryImage(value));
@@ -721,7 +737,7 @@ int eWidget::setProperty(const eString &prop, const eString &value)
 		setBackgroundColor(eSkin::getActive()->queryColor(value));
 	else
 	{
-		eFatal("skin property %s does not exist", (const char*)prop);
+		eFatal("skin property %s does not exist", prop.c_str());
 		return -ENOENT;
 	}
 	return 0;

@@ -128,14 +128,14 @@ public:
 	Table *getCurrent()
 	{
 		if (!current)
-			qFatal("getCurrent - and nothing ready!");
+			eFatal("getCurrent - and nothing ready!");
 		current->lock();
 		return current;
 	}
 	
 	void abort()
 	{
-		printf("eAUTable: aborted!\n");
+		eDebug("eAUTable: aborted!");
 		if (next)
 			next->abort();
 		delete next;
@@ -181,7 +181,7 @@ public:
 		first=0;
 		
 		if (!current->ready)
-			qFatal("was soll das denn? not ready? ICH GLAUBE ES HACKT!");
+			eFatal("was soll das denn? not ready? ICH GLAUBE ES HACKT!");
 			
 		/*emit*/ tableReady(0);
 

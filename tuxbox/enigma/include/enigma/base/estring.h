@@ -21,13 +21,13 @@ public:
 // operators
 	inline operator bool() const;
 	inline bool operator!() const;
-	inline operator const char*() const;
 // methods with implementation in estring.cpp
-	eString& eString::sprintf(char *fmt, ...);
+	eString& sprintf(char *fmt, ...);
 	eString& setNum(int val, int sys=10);
 	eString& removeChars(const char fchar);
 	eString& strReplace(const char* fstr, const eString& rstr);
 	eString& upper();
+	int icompare(const eString& s);
 };
 
 /////////////////////////////////////////////// Copy Constructors ////////////////////////////////////////////////
@@ -53,14 +53,6 @@ inline bool eString::operator!() const
 {
 // Returns a bool that contains true if the string ist empty otherwise false;
 	return empty();
-}
-
-///////////////////////////////////////// eString operator! ////////////////////////////////////////////////////
-inline eString::operator const char*() const
-{
-// Makes the eString compatibel with all functions and methods they accept const char*
-// i hope this cause no ambiguouses
-	return c_str();
 }
 
 ///////////////////////////////////////// eString left //////////////////////////////////////////////////////////

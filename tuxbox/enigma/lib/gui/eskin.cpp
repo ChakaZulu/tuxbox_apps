@@ -1,26 +1,29 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
-#include "eskin.h"
-#include "ewidget.h"
 
-#include "gfbdc.h"
-#include "glcddc.h"
-#include "epng.h"
 #include <config.h>
-#include <eerror.h>
+
+#include <core/gui/eskin.h>
+#include <core/gui/ewidget.h>
+#include <core/gdi/gfbdc.h>
+#include <core/gdi/glcddc.h>
+#include <core/gdi/epng.h>
+#include <core/base/eerror.h>
 #include <core/gdi/font.h>
 #include <core/base/eptrlist.h>
 
-QMap<eString,tWidgetCreator> eSkin::widget_creator;
+std::map< eString,tWidgetCreator > eSkin::widget_creator;
 
 eSkin *eSkin::active;
 
-eNamedColor *eSkin::searchColor(const char *name)
+eNamedColor *eSkin::searchColor(const eString &name)
 {
 	for (std::list<eNamedColor>::iterator i(colors.begin()); i != colors.end(); ++i)
-		if (!strcmp(i->name, name))
+	{
+		if (!i->name.compare(name))
 			return &*i;
+	}
 	return 0;
 }
 
@@ -30,22 +33,22 @@ void eSkin::clear()
 
 void eSkin::addWidgetCreator(const eString &name, tWidgetCreator creator)
 {
-	widget_creator.insert(name, creator);
+	widget_creator[name] = creator; // add this tWidgetCreator to map... if exist.. overwrite
 }
 
 void eSkin::removeWidgetCreator(const eString &name, tWidgetCreator creator)
 {
-	widget_creator.remove(name);
+	widget_creator.erase(name);
 }
 
-int eSkin::parseColor(const char *name, const char *color, gRGB &col)
+int eSkin::parseColor(const eString &name, const char* color, gRGB &col)
 {
 	if (color[0]=='#')
 	{
 		unsigned long vcol=0;
 		if (sscanf(color+1, "%lx", &vcol)!=1)
 		{
-			eDebug("invalid color named \"%s\" (value: %s)", name, color+1);
+			eDebug("invalid color named \"%s\" (value: %s)", name.c_str(), color+1);
 			return -1;
 		}
 		col.r=(vcol>>16)&0xFF;
@@ -57,7 +60,7 @@ int eSkin::parseColor(const char *name, const char *color, gRGB &col)
 		eNamedColor *n=searchColor(color);
 		if (!n)
 		{
-			eDebug("invalid color named \"%s\" (alias to: \"%s\")", name, color);
+			eDebug("invalid color named \"%s\" (alias to: \"%s\")", name.c_str(), color);
 			return -1;
 		}
 		col=n->value;
@@ -177,16 +180,16 @@ int eSkin::parseScheme(XMLTreeNode *xscheme)
 		int offset=0, p;
 		if ((p=base.find('+'))!=-1)
 		{
-			offset=atoi(base.mid(p));
+			offset=atoi(base.mid(p).c_str());
 			base=base.left(p);
 		}
 		eNamedColor *n=searchColor(base);
 		if (!n)
 		{
-			eDebug("illegal color \"%s\" specified", (const char*) base);
+			eDebug("illegal color \"%s\" specified", base.c_str());
 			return -1;
 		}
-		scheme.insert(name, new gColor(n->index+offset));
+		scheme[name] = gColor(n->index+offset);
 	}
 	return 0;
 }
@@ -220,10 +223,10 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			continue;
 		}
 		eString filename=basepath + eString(src);
-		gPixmap *image=loadPNG(filename);
+		gPixmap *image=loadPNG(filename.c_str());
 		if (!image)
 		{
-			eDebug("image/img=\"%s\" - %s: file not found", name, (const char*)filename);
+			eDebug("image/img=\"%s\" - %s: file not found", name, filename.c_str());
 			continue;
 		}
 		if (paldummy && !node->GetAttributeValue("nomerge"))
@@ -232,7 +235,7 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			gPainter p(mydc);
 			p.mergePalette(*paldummy);
 		}
- 		images.insert(name, image);
+ 		images[name]=image;
 	}
 	return 0;
 }
@@ -258,7 +261,7 @@ int eSkin::parseValues(XMLTreeNode *xvalues)
 			eDebug("values entry has no value");
 			continue;
 		}
-		values.insert(name, new int(atoi(value)));
+		values[name]=atoi(value);
 	}
 }
 
@@ -316,17 +319,22 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 	for (XMLTreeNode *c=node->GetChild(); c; c=c->GetNext())
 	{
 		eWidget *w=0;
+
 		const char *name=c->GetAttributeValue("name");
+
 		if (name)
 			w=widget->search(name);
+
 		if (!w)
 		{
-			if (!widget_creator.contains(c->GetType()))
+			std::map< eString, tWidgetCreator >::iterator it = widget_creator.find(c->GetType());
+
+			if ( it == widget_creator.end() )
 			{
 				eDebug("widget class %s does not exist", c->GetType());
 				return -ENOENT;
 			}
-			w=widget_creator[c->GetType()](widget);
+			w = (it->second)(widget);
 		}
 		if (!w)
 		{
@@ -356,18 +364,20 @@ eSkin::eSkin()
 	colorused=new int[maxcolors];
 	memset(colorused, 0, maxcolors*sizeof(int));
 
-	scheme.setAutoDelete(true);
-	images.setAutoDelete(true);
-	parsers.setAutoDelete(true);
 }
 
 eSkin::~eSkin()
 {
 	if (active==this)
 		active=0;
+
 	clear();
 
 	delete colorused;
+
+	for (std::map<eString, gPixmap*>::iterator it(images.begin()); it != images.end(); it++)
+		delete it->second;	
+
 	if (paldummy)
 		delete paldummy;
 }
@@ -437,7 +447,7 @@ int eSkin::build(eWidget *widget, const char *name)
 			if (!strcmp(node->GetType(), "object"))
 			{
 				const char *oname=node->GetAttributeValue("name");
-				if (!qstrcmp(name, oname))
+				if (!std::strcmp(name, oname))
 				{
 					node=node->GetChild();
 					return build(widget, node);
@@ -459,25 +469,10 @@ void eSkin::setPalette(gPixmapDC *pal)
 	}
 }
 
-gColor eSkin::queryColor(const eString& name)
-{
-	char *end;
-	int numcol=strtol(name, &end, 10);
-	if (!*end)
-		return gColor(numcol);
-	eNamedColor *col=searchColor(name);
-	if (!col)
-	{
-		eDebug("requested color %s does not exist", (const char*)name);
-		return gColor(0);
-	} else
-		return col->index;
-}
-
 eSkin *eSkin::getActive()
 {
 	if (!active)
-		qFatal("no active skin");
+		eFatal("no active skin");
 	return active;
 }
 
@@ -488,32 +483,57 @@ void eSkin::makeActive()
 
 gColor eSkin::queryScheme(const eString& name) const
 {
-	eString base=name;
-	int offset=0, p;
-	if ((p=base.find('+'))!=-1)
-	{
-		base=name.left(p);
-		offset=atoi(name.mid(p));
-	}
-	gColor *n=scheme.find((const char*)name);
-	if (!n)
-	{
-		eDebug("%s does not exist", (const char*)name);
-		return gColor(0);
-	} else
-		return *n;
+	std::map<eString, gColor>::const_iterator it = scheme.find(name);
+
+	if (it != scheme.end())
+		return it->second;
+
+	eDebug("%s does not exist", name.c_str());
+	
+	return gColor(0);
 }
 
 gPixmap *eSkin::queryImage(const eString& name) const
 {
-	return images.find((const char*)name);
+	std::map<eString, gPixmap*>::const_iterator it = images.find(name);
+
+	if (it != images.end())
+		return it->second;
+	
+	eDebug("%s does not exist", name.c_str());
+
+	return 0;
 }
 
 int eSkin::queryValue(const eString& name, int d) const
 {
-	int *v=values.find((const char*)name);
-	if (v)
-		return *v;
-	else
-		return d;
+	std::map<eString, int>::const_iterator it = values.find(name);
+
+	if (it != values.end())
+		return it->second;
+	
+	eDebug("%s does not exist", name.c_str());
+
+	return d;
 }
+
+gColor eSkin::queryColor(const eString& name)
+{
+	char *end;
+
+	int numcol=strtol(name.c_str(), &end, 10);
+
+	if (!*end)
+		return gColor(numcol);
+
+	eNamedColor *col=searchColor(name);
+
+	if (!col)
+	{
+		eDebug("requested color %s does not exist", name.c_str());
+		return gColor(0);
+	}
+	else
+		return col->index;
+}
+

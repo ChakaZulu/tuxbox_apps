@@ -58,9 +58,9 @@ eHTTPDataSource *eHTTPFilePathResolver::getDataSource(eString request, eString p
 			eString newpath=i->path+path.mid(i->root.length());
 			if (newpath.find('?'))
 				newpath=newpath.left(newpath.find('?'));
-			eDebug("translated %s to %s", (const char*)path, (const char*)newpath);
+			eDebug("translated %s to %s", path.c_str(), newpath.c_str());
 
-			int fd=open(newpath, O_RDONLY);
+			int fd=open(newpath.c_str(), O_RDONLY);
 
 			if (fd==-1)
 			{

@@ -318,7 +318,7 @@ int eXMLRPCResponse::doCall()
 		return -3;
 	}
 	
-	qDebug("methodName: %s", (const char*)methodName);
+	qDebug("methodName: %s", methodName.c_str() );
 	
 	result="<?xml version=\"1.0\"?>\n"
 		"<methodResponse>";

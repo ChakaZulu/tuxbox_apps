@@ -168,7 +168,7 @@ eZap::eZap(int argc, char **argv): eApplication(/*argc, argv, 0*/)
 	httpd->addResolver(dyn_resolver);
 	httpd->addResolver(fileresolver);
 
-	qDebug("[ENIGMA] loading default keymaps...");
+	eDebug("[ENIGMA] loading default keymaps...");
 	
 	eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdreambox.xml");
 

@@ -106,14 +106,13 @@ ePlugin::ePlugin(eListbox *parent, const char *cfgfile): eListboxEntry(parent)
 					aneedvidformat=getInfo(cfgfile, "needvidformat"),
 					apigon=getInfo(cfgfile, "pigon");
 
-	needfb=(aneedfb.isNull()?false:atoi(aneedfb));
-	needlcd=(aneedlcd.isNull()?false:atoi(aneedlcd));
-	needrc=(aneedrc.isNull()?false:atoi(aneedrc));
-	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid));
-	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets));
-	needvidformat=(aneedvidformat.isNull()?false:atoi(aneedvidformat));
-	version=(apluginVersion.isNull()?0:atoi(apluginVersion));
-	showpig=(apigon.isNull()?false:atoi(apigon));
+	needfb=(aneedfb.isNull()?false:atoi(aneedfb.c_str()));
+	needlcd=(aneedlcd.isNull()?false:atoi(aneedlcd.c_str()));
+	needrc=(aneedrc.isNull()?false:atoi(aneedrc.c_str()));
+	needvtxtpid=(aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()));
+	needoffsets=(aneedoffsets.isNull()?false:atoi(aneedoffsets.c_str()));
+	version=(apluginVersion.isNull()?0:atoi(apluginVersion.c_str()));
+	showpig=(apigon.isNull()?false:atoi(apigon.c_str()));
 
 	sopath=eString(cfgfile).left(strlen(cfgfile)-4)+".so";	// uarg
 
@@ -135,11 +134,11 @@ eString ePlugin::getText(int t) const
 
 eZapPlugins::eZapPlugins(eWidget* lcdTitle, eWidget* lcdElement)
 {
-	window=new eLBWindow("Plugins", eListbox::tBorder, 10, eSkin::getActive()->queryValue("fontsize", 20), 400);
+	window=new eLBWindow("Plugins", 10, eSkin::getActive()->queryValue("fontsize", 20), 400);
 	window->move(ePoint(150, 136));
 	window->setLCD(lcdTitle, lcdElement);
-	new ePlugin(window->list, 0);
-	CONNECT(window->list->selected, eZapPlugins::selected);
+	new ePlugin(&window->list, 0);
+	CONNECT(window->list.selected, eZapPlugins::selected);
 }
 
 int eZapPlugins::exec()
@@ -147,7 +146,7 @@ int eZapPlugins::exec()
 	const eString PluginPath = PLUGINDIR "/";
 	struct dirent **namelist;
 
-	int n = scandir(PluginPath, &namelist, 0, alphasort);
+	int n = scandir(PLUGINDIR "/", &namelist, 0, alphasort);
 
 	if (n < 0)
 	{
@@ -174,7 +173,7 @@ int eZapPlugins::exec()
 			eString	FileName = namelist[count]->d_name;
 
 			if ( FileName.find(".cfg") != -1 )
-				new ePlugin(window->list, (PluginPath+FileName).c_str());		
+				new ePlugin(&window->list, (PluginPath+FileName).c_str());		
 
 			free(namelist[count]);
 	  }
@@ -196,7 +195,7 @@ void eZapPlugins::execPluginByName(const char* name)
 {
 	eString PluginPath = PLUGINDIR "/";
 	PluginPath+=name;
-	ePlugin p(0, PluginPath);
+	ePlugin p(0, PluginPath.c_str());
 	execPlugin(&p);
 }
 
@@ -212,9 +211,10 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 		char	*p;
 		char	*np;
 
-		strcpy(depstring,(const char*)plugin->depend);
+		strcpy(depstring, plugin->depend.c_str());
 
 		p=depstring;
+
 		while(p)
 		{
 			np=strchr(p,',');
@@ -229,7 +229,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	argv[argc++]=plugin->sopath;
 
 	int i;
-	eDebug("pluginname is %s", (const char*)plugin->pluginname);
+	eDebug("pluginname is %s", plugin->pluginname.c_str());
 
 	if (plugin->needfb)
 		MakeParam(P_ID_FBUFFER, fbClass::getInstance()->lock());
@@ -276,8 +276,8 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 
 	for (i=0; i<argc; i++)
 	{
-		eDebug("loading %s" ,(const char*)argv[i]);
-		libhandle[i]=dlopen(argv[i], RTLD_NOW|RTLD_GLOBAL);
+		eDebug("loading %s" , argv[i].c_str());
+		libhandle[i]=dlopen(argv[i].c_str(), RTLD_NOW|RTLD_GLOBAL);
 		if (!libhandle[i])
 		{
 			const char *de=dlerror();
@@ -292,7 +292,7 @@ void eZapPlugins::execPlugin(ePlugin* plugin)
 	
 	if (i==argc)
 	{
-		eDebug("would exec plugin %s", (const char*)plugin->sopath);
+		eDebug("would exec plugin %s", plugin->sopath.c_str());
 
 		PluginExec execPlugin = (PluginExec) dlsym(libhandle[i-1], "plugin_exec");
 		if (!execPlugin)

@@ -9,7 +9,7 @@
 
 void eBouquetSelector::fillBouquetList()
 {
-	list->clearList();
+	list.clearList();
 	if (eDVB::getInstance()->getBouquets())
 	{
 		for (ePtrList<eBouquet>::iterator i(*eDVB::getInstance()->getBouquets()); i != eDVB::getInstance()->getBouquets()->end(); ++i)
@@ -27,13 +27,13 @@ void eBouquetSelector::fillBouquetList()
 				continue;
 
 			eBouquet *c=*i;
-			eListboxEntry *l=new eListboxEntryText(list, c->bouquet_name.c_str(), "", c);
+			eListboxEntry *l=new eListboxEntryText(&list, c->bouquet_name.c_str(), "", c);
 			if (c==result)
-				list->setCurrent(l);
+				list.setCurrent(l);
 		}
-		list->sort();
+		list.sort();
 	}
-	list->invalidate();
+	list.invalidate();
 }
 
 void eBouquetSelector::entrySelected(eListboxEntry *entry)
@@ -46,12 +46,10 @@ void eBouquetSelector::entrySelected(eListboxEntry *entry)
 }
 
 eBouquetSelector::eBouquetSelector()
-								:eLBWindow("Select Bouquet...", eListbox::tLitebar, 17, eSkin::getActive()->queryValue("fontsize", 20), 400)
+								:eLBWindow("Select Bouquet...", 17, eSkin::getActive()->queryValue("fontsize", 20), 400)
 {
 	move(ePoint(80, 60));
-/*	connect(list, SIGNAL(selected(eListboxEntry*)), SLOT(entrySelected(eListboxEntry*)));
-	connect(eDVB::getInstance(), SIGNAL(bouquetListChanged()), SLOT(fillBouquetList()));*/
-	CONNECT(list->selected, eBouquetSelector::entrySelected);
+	CONNECT(list.selected, eBouquetSelector::entrySelected);
 	CONNECT(eDVB::getInstance()->bouquetListChanged, eBouquetSelector::fillBouquetList);
 	fillBouquetList();
 }
@@ -78,7 +76,7 @@ eBouquet *eBouquetSelector::choose(eBouquet *current, int irc)
 
 eBouquet *eBouquetSelector::next()
 {
-	eListboxEntry *s=list->goNext();
+	eListboxEntry *s=list.goNext();
 	if (s)
 		return (eBouquet*)s->data;
 	else
@@ -87,7 +85,7 @@ eBouquet *eBouquetSelector::next()
 
 eBouquet *eBouquetSelector::prev()
 {
-	eListboxEntry *s=list->goPrev();
+	eListboxEntry *s=list.goPrev();
 	if (s)
 		return (eBouquet*)s->data;
 	else

@@ -334,7 +334,7 @@ void eTextPara::setFont(Font *fnt)
 	use_kerning=FT_HAS_KERNING(current_face);
 }
 
-int eTextPara::renderString(const eString &qstring, int rflags)
+int eTextPara::renderString(const eString &string, int rflags)
 {
 	eLocker lock(ftlock);
 
@@ -343,32 +343,25 @@ int eTextPara::renderString(const eString &qstring, int rflags)
 	if (!current_font)
 		return -1;
 
+	glyphs.reserve(glyphs.size()+string.length());
+
 	if (FTC_Manager_Lookup_Size(fontRenderClass::instance->cacheManager, &current_font->font.font, &current_face, &current_font->size)<0)
 	{
 		printf("FTC_Manager_Lookup_Size failed!\n");
 		return -1;
 	}
 
-	const char *string=qstring.c_str();
-	
-	int len=qstring.length();
-
-	glyphs.reserve(glyphs.size()+len);
-
-	while (len--)
+	for (	eString::const_iterator it = string.begin(); it != string.end(); it++)
 	{
 		int isprintable=1;
-
 		int flags=0;
-		
+	
 		if (rflags&RS_WRAP)
 			 flags|=GS_MYWRAP;
 		
-		if (rflags&RS_DIRECT)
-			isprintable=1;
-		else
+		if (!(rflags&RS_DIRECT))
 		{
-			switch (*string)
+			switch (*it)
 			{
 			case '\t':
 				isprintable=0;
@@ -392,14 +385,14 @@ int eTextPara::renderString(const eString &qstring, int rflags)
 		if (isprintable)
 		{
 			FT_UInt index;
-			
-			index=(rflags&RS_DIRECT)?*string:FT_Get_Char_Index(current_face, *string);
+
+			index=(rflags&RS_DIRECT)? *it : FT_Get_Char_Index(current_face, *it);
+
 			if (!index)
 				; // qDebug("unicode %d ('%c') not present", uc, uc);
 			else
 				appendGlyph(index, flags);
 		}
-		string++;
 	}
 	return 0;
 }

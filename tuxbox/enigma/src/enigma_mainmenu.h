@@ -1,24 +1,21 @@
 #ifndef __enigma_mainmenu_h
 #define __enigma_mainmenu_h
 
-#include <core/gui/elbwindow.h>
+#include <core/gui/eListBox.h>
 #include <include/libsig_comp.h>
-
-class eListBoxEntry;
 
 class eMainMenu: public Object
 {
-	eLBWindow* window;
+	eListBoxWindow<eListBoxEntryMenu> window;
 private:
-	void sel_close(eListboxEntry *);
-	void sel_vcr(eListboxEntry *);
-	void sel_setup(eListboxEntry *);
-	void sel_info(eListboxEntry *);	
-	void sel_quit(eListboxEntry *);
-	void sel_plugins(eListboxEntry *);
+	void sel_close();
+	void sel_vcr();
+	void sel_setup();
+	void sel_info();	
+	void sel_quit();
+	void sel_plugins();
 public:
 	eMainMenu();
-	~eMainMenu();
 	void setLCD(eWidget *a, eWidget *b);
 	int exec();
 };

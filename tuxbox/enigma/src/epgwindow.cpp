@@ -1,9 +1,12 @@
 #include "epgwindow.h"
-#include "rc.h"
-#include "eskin.h"
-#include <algorithm>
-#include "edvb.h"
 #include "enigma_event.h"
+
+#include <algorithm>
+
+#include <core/driver/rc.h>
+#include <core/gui/eskin.h>
+#include <core/dvb/edvb.h>
+
 
 eString eListboxEntryEPG::getText(int col=0) const
 {
@@ -29,7 +32,7 @@ void eEPGWindow::fillEPGList()
 	const eventMap* evt = eEPGCache::getInstance()->getEventMap(current->original_network_id, current->service_id);
 	eventMap::const_iterator It;
 	for (It = evt->begin(); It != evt->end(); It++)
-		new eListboxEntryEPG(new EITEvent(*It->second) , list);
+		new eListboxEntryEPG(new EITEvent(*It->second) , &list);
 }
 
 void eEPGWindow::entrySelected(eListboxEntry *entry)
@@ -85,12 +88,12 @@ void eEPGWindow::closeWnd()
 }
 
 eEPGWindow::eEPGWindow(eService* service):current(service), closeTimer(eApp),
-								eLBWindow("Select Service...", eListbox::tLitebar, 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
+								eLBWindow("Select Service...", 16, eSkin::getActive()->queryValue("fontsize", 20), 600)
 {
 	move(ePoint(50, 50));
-	list->setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
+	list.setActiveColor(eSkin::getActive()->queryScheme("eServiceSelector.highlight"));
 	CONNECT(closeTimer.timeout, eEPGWindow::closeWnd);
-	CONNECT(list->selected, eEPGWindow::entrySelected);
+	CONNECT(list.selected, eEPGWindow::entrySelected);
 
 	fillEPGList();
 }
