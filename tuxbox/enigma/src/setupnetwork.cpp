@@ -785,6 +785,7 @@ void eZapNetworkSetup::okPressed()
 
 #ifdef USE_IFUPDOWN
 	system("ifdown eth0");
+	system("killall -9 udhcpc");
 	if ( automatic_start )
 	{
 		pid_t pid;
@@ -795,7 +796,7 @@ void eZapNetworkSetup::okPressed()
 				break;
 			case 0:
 				for (unsigned int i=3; i < 90; ++i )
-					close(i);
+					::close(i);
 				system("ifup eth0");
 				_exit(0);
 				break;
