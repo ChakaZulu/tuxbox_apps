@@ -26,8 +26,9 @@ protected:
 	int len;
 public:
 	inline Descriptor(descr_gen_t *descr)
-		:tag(*((__u8*)descr)), len((__u8)descr->descriptor_length+2)
+		:tag(*((__u8*)descr)), len((__u8)descr->descriptor_length)
 	{
+		len+=2;
 	};
 	inline virtual ~Descriptor(){};
 
