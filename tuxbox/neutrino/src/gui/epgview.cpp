@@ -378,9 +378,6 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 	int textypos = sy;
 	showText(showPos, textypos);
 
-	// show Timer Event Buttons
-	showTimerEventBar (true);
-
 	//show progressbar
 	if ( epg_done!= -1 )
 	{
@@ -457,20 +454,10 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 						showText(showPos,textypos);
 					break;
 
+
+
 				case CRCInput::RC_red:
-					g_Timer->storeEvent (onid_sid, epgData.eventID, CTimer::RecordEvent, epgData.epg_times.startzeit, epgData.epg_times.startzeit+epgData.epg_times.dauer);
-					ShowMsg ( "timer.eventrecord.title", g_Locale->getText("timer.eventrecord.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
-					break;
-
-				// -- 2002-05-13 rasc  Switch Channel
-				case CRCInput::RC_yellow:
-					// $$ EPG ID muss noch mit rein...
-					g_Timer->storeEvent (onid_sid, epgData.eventID, CTimer::Switch2Event, epgData.epg_times.startzeit, 0);
-					ShowMsg ( "timer.eventtimed.title", g_Locale->getText("timer.eventtimed.msg"), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
-					break;
-
-// das muss raus				case CRCInput::RC_red:
-// das muss rasc					g_RCInput->postMsg( msg, data );
+					g_RCInput->postMsg( msg, data );
 
 				case CRCInput::RC_ok:
 				case CRCInput::RC_help:
@@ -500,7 +487,6 @@ int CEpgData::show( unsigned int onid_sid, unsigned long long id, time_t* startz
 void CEpgData::hide()
 {
 	frameBuffer->paintBackgroundBox (sx, sy- toph, sx+ ox, sy+ oy);
-        showTimerEventBar (false);
 	#ifdef USEACTIONLOG
 		g_ActionLog->println("epg: closed");
 	#endif

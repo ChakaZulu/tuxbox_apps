@@ -44,7 +44,6 @@
 
 #include "system/localize.h"
 #include "system/settings.h"
-#include "system/timer.h"
 
 #include "gui/epgview.h"
 #include "gui/infoviewer.h"
@@ -65,7 +64,6 @@ NEUTRINO_CPP  CControldClient	*g_Controld;
 NEUTRINO_CPP  CZapitClient		*g_Zapit;
 NEUTRINO_CPP  CSectionsdClient	*g_Sectionsd;
 NEUTRINO_CPP  CTimerdClient		*g_Timerd;
-NEUTRINO_CPP  CTimer			*g_Timer;   // internal timer
 NEUTRINO_CPP  CRemoteControl	*g_RemoteControl;
 
 NEUTRINO_CPP  fontRenderClass	*g_fontRenderer;

@@ -113,7 +113,6 @@ static void initGlobals(void)
 	g_lcdd = NULL;
 	g_Controld = NULL;
 	g_Timerd = NULL;
-	g_Timer = NULL;  // internal Timer 
 	g_Zapit = NULL;
 	g_RemoteControl = NULL;
 
@@ -479,11 +478,6 @@ int CNeutrinoApp::loadSetup()
 		scanSettings.useDefaults();
 	}
 
-	if(!g_Timer->loadTimerEvents(CONFIGDIR "/neutrino.timerevents.conf"))
-	{
-		dprintf(DEBUG_NORMAL,"error while loading timerevents, using defaults!\n");
-	}
-
 
 	return erg;
 }
@@ -495,11 +489,6 @@ int CNeutrinoApp::loadSetup()
 **************************************************************************************/
 void CNeutrinoApp::saveSetup()
 {
-
-	if(!g_Timer->saveTimerEvents(CONFIGDIR "/neutrino.timerevents.conf"))
-	{
-		dprintf(DEBUG_NORMAL,"error while saving timerevents!\n");
-	}
 
 
 	if(!scanSettings.saveSettings(scanSettingsFile))
@@ -1682,7 +1671,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 	//printf("box_Type: %d, gtxID: %d, enxID: %d, fe: %d\n", g_info.box_Type, g_info.gtx_ID, g_info.enx_ID, g_info.fe);
 
 
-	g_Timer = new CTimer;		// internal Timer (init prio to load settings!)
 
 
 	int loadSettingsErg = loadSetup();
@@ -2269,12 +2257,6 @@ void CNeutrinoApp::ExitRun()
 	frameBuffer->loadPal("shutdown.pal");
 
 	saveSetup();
-	{ time_t   nextTimerEvent;
-	   nextTimerEvent = g_Timer->getNextTimerEventStart();
-	   if (nextTimerEvent) {
-		   g_Timer->setBoxWakeupTime (nextTimerEvent-120);
-	   }
-	}
 	g_Controld->shutdown();
 	sleep(55555);
 }
@@ -2652,7 +2634,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.280 2002/05/21 13:09:46 dirch Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.281 2002/05/21 18:36:11 rasc Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
