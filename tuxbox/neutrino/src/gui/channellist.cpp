@@ -746,6 +746,7 @@ int CChannelList::numericZap(int key)
 	}
 	else
 	{
+		showInfo(tuned);
 		g_InfoViewer->killTitle();
 
 		// Rote Taste zeigt EPG fuer gewaehlten Kanal an
