@@ -1,5 +1,5 @@
 /*
-$Id: cmdline.c,v 1.25 2004/02/15 22:22:28 rasc Exp $
+$Id: cmdline.c,v 1.26 2004/02/16 22:45:37 rasc Exp $
 
 
  DVBSNOOP
@@ -15,6 +15,9 @@ $Id: cmdline.c,v 1.25 2004/02/15 22:22:28 rasc Exp $
 
 
 $Log: cmdline.c,v $
+Revision 1.26  2004/02/16 22:45:37  rasc
+small bugfix: crc is 32 bit
+
 Revision 1.25  2004/02/15 22:22:28  rasc
 cmd option: -hexdumpbuffer -nohexdumpbuffer
 
@@ -294,7 +297,7 @@ static void usage (void)
     printf("                   0=none, 1=hexdump, 2=hex line 3=ascii line 4=hexdump2\n");
     printf("   -nph:         don't print hex dump of buffer [= -nohexdumpbuffer -ph 0]\n");
     printf("   -hexdumpbuffer:    print hex dump of read buffer [-hexdumpbuffer]\n");
-    printf("   -nnohexdumpbuffer: don't print hex dump of read buffer [-hexdumpbuffer]\n");
+    printf("   -nohexdumpbuffer: don't print hex dump of read buffer [-hexdumpbuffer]\n");
     printf("   -pd verbose:  print stream decode (verbose level 0..9) [-pd 7]\n");
     printf("   -npd:         don't print decoded stream (= -pd 0) \n");
     printf("   -t[n|d|f]:    print timestamp (no, delta, full) [-tf] \n");
