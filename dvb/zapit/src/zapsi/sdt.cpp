@@ -1,5 +1,22 @@
 /*
- * $Id: sdt.cpp,v 1.41 2002/12/17 22:02:37 obi Exp $
+ * $Id: sdt.cpp,v 1.42 2003/01/17 16:26:42 obi Exp $
+ *
+ * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
 
 #include <fcntl.h>
@@ -16,7 +33,8 @@
 
 #define SDT_SIZE 1024
 
-uint32_t get_sdt_TsidOnid ()
+
+uint32_t get_sdt_TsidOnid(void)
 {
 	int demux_fd;
 	unsigned char buffer[SDT_SIZE];
@@ -55,78 +73,6 @@ uint32_t get_sdt_TsidOnid ()
 	return ((transport_stream_id << 16) | original_network_id );
 }
 
-ca_status_t get_sdt_free_CA_mode(
-	const t_transport_stream_id p_transport_stream_id,
-	const t_original_network_id p_original_network_id,
-	const t_service_id p_service_id)
-{
-	ca_status_t free_CA_mode = CA_STATUS_CLEAR;  // <- return CA_STATUS_CLEAR if something fails
-
-#ifndef SKIP_CA_STATUS
-
-	int demux_fd;
-	unsigned char buffer[SDT_SIZE];
-
-	unsigned short section_length;
-	unsigned short service_id;
-	unsigned short descriptors_loop_length;
-	unsigned short pos;
-
-	unsigned char filter[DMX_FILTER_SIZE];
-	unsigned char mask[DMX_FILTER_SIZE];
-
-	filter[0] = 0x42;
-	filter[1] = (p_transport_stream_id >> 8) & 0xff;
-	filter[2] = p_transport_stream_id & 0xff;
-	filter[3] = 0x00;
-	filter[4] = 0x00;
-	filter[5] = 0x00;
-	filter[6] = (p_original_network_id >> 8) & 0xff;
-	filter[7] = p_original_network_id & 0xff;
-	memset(&filter[8], 0x00, 8);
-
-	mask[0] = 0xFF;
-	mask[1] = 0xFF;
-	mask[2] = 0xFF;
-	mask[3] = 0x00;
-	mask[4] = 0xFF;
-	mask[5] = 0x00;
-	mask[6] = 0xFF;
-	mask[7] = 0xFF;
-	memset(&mask[8], 0x00, 8);
-
-	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
-		ERROR(DEMUX_DEVICE);
-		return free_CA_mode;
-	}
-
-	do {
-		if ((setDmxSctFilter(demux_fd, 0x0011, filter, mask) < 0) || (readDmx(demux_fd, buffer, SDT_SIZE) < 0)) {
-			close(demux_fd);
-			return free_CA_mode;
-		}
-
-		section_length = ((buffer[1] & 0x0F) << 8) | buffer[2];
-
-		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5) {
-
-			service_id = (buffer[pos] << 8) | buffer[pos + 1];
-			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
-
-			if (service_id == p_service_id) {
-				free_CA_mode = (buffer [pos + 3] & 0x10) == 0 ? CA_STATUS_FTA : CA_STATUS_LOCK;
-				break;
-			}
-		}
-
-	} while (filter[4]++ != buffer[7]);
-
-	close(demux_fd);
-
-#endif /* SKIP_CA_STATUS */
-
-	return free_CA_mode;
-}
 
 int parse_sdt(
 	const t_transport_stream_id p_transport_stream_id,
@@ -147,13 +93,6 @@ int parse_sdt(
 	unsigned short service_id;
 	unsigned short descriptors_loop_length;
 	unsigned short running_status;
-	/*	Value	Meaning
-		  0 	undefined
-		  1 	not running
-		  2 	starts in a few seconds (e.g. for video recording)
-		  3 	pausing
-		  4 	running
-	*/
 
 	bool EIT_schedule_flag;
 	bool EIT_present_following_flag;
@@ -303,8 +242,10 @@ int parse_sdt(
 					break;
 
 				default:
+					/*
 					DBG("descriptor_tag: %02x", buffer[pos2]);
 					generic_descriptor(buffer + pos2);
+					*/
 					break;
 				}
 			}

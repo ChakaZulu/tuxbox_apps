@@ -1,7 +1,5 @@
 INCLUDES = -I$(top_srcdir)/include \
-	   @LIBXML_CFLAGS@ \
-           @XMLTREE_CFLAGS@
-
+	   @XML_CFLAGS@
 
 noinst_LTLIBRARIES = libzapost.la
 

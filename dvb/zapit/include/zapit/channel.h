@@ -1,8 +1,8 @@
 /*
- * $Id: channel.h,v 1.17 2002/12/10 00:44:00 Homar Exp $
+ * $Id: channel.h,v 1.18 2003/01/17 16:26:41 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
- *	& Steffen Hehn <mcclean@berlios.de>
+ * (C) 2002 by Steffen Hehn <mcclean@berlios.de>
+ * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ class CZapitAudioChannel
 {
 	public:
 		unsigned short		pid;
-		bool				isAc3;
-		std::string			description;
+		bool			isAc3;
+		std::string		description;
 		unsigned char		componentTag;
 };
 
@@ -56,16 +56,13 @@ class CZapitChannel
 		/* set true when pids are set up */
 		bool pidsFlag;
 
-		/* set true if channel scrambled */
-		ca_status_t				CA_STATUS;
-
 		/* last selected audio channel */
 		unsigned char			currentAudioChannel;
 
 		/* read only properties, set by constructor */
 		t_service_id			service_id;
-		t_transport_stream_id	transport_stream_id;
-		t_original_network_id	original_network_id;
+		t_transport_stream_id		transport_stream_id;
+		t_original_network_id		original_network_id;
 		t_network_id			network_id;
 		unsigned char			DiSEqC;
 
@@ -73,53 +70,51 @@ class CZapitChannel
 		unsigned char			serviceType;
 
 		/* the conditional access program map table of this channel */
-		CCaPmt * 				caPmt;
+		CCaPmt * 			caPmt;
 
 	public:
 		/* constructor, desctructor */
-		CZapitChannel (std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC, ca_status_t p_CA_STATUS);
-		~CZapitChannel ();
+		CZapitChannel(std::string p_name, t_service_id p_sid, t_transport_stream_id p_tsid, t_original_network_id p_onid, unsigned char p_service_type, unsigned char p_DiSEqC);
+		~CZapitChannel(void);
 
 		/* get methods - read only variables */
-		t_network_id			getNetworkID()			const { return network_id; }
-		t_service_id			getServiceId()         	const { return service_id; }
-		t_transport_stream_id	getTransportStreamId() 	const { return transport_stream_id; }
-		t_original_network_id	getOriginalNetworkId() 	const { return original_network_id; }
-		unsigned char        	getServiceType()       	const { return serviceType; }
-		unsigned char        	getDiSEqC()            	const { return DiSEqC; }
-		t_channel_id         	getChannelID()         	const { return CREATE_CHANNEL_ID; }
-		uint32_t             	getTsidOnid()          	const { return (transport_stream_id << 16) | original_network_id; }
+		t_network_id		getNetworkID(void)		const { return network_id; }
+		t_service_id		getServiceId(void)         	const { return service_id; }
+		t_transport_stream_id	getTransportStreamId(void) 	const { return transport_stream_id; }
+		t_original_network_id	getOriginalNetworkId(void) 	const { return original_network_id; }
+		unsigned char        	getServiceType(void)       	const { return serviceType; }
+		unsigned char        	getDiSEqC(void)            	const { return DiSEqC; }
+		t_channel_id         	getChannelID(void)         	const { return CREATE_CHANNEL_ID; }
+		uint32_t             	getTsidOnid(void)          	const { return (transport_stream_id << 16) | original_network_id; }
 
 		/* get methods - read and write variables */
-		const std::string		getName()				const { return name; }
-		unsigned char 			getAudioChannelCount()	{ return audioChannels.size(); }
-		unsigned short			getPcrPid()				{ return pcrPid; }
-		unsigned short			getPmtPid()				{ return pmtPid; }
-		unsigned short			getTeletextPid()		{ return teletextPid; }
-		unsigned short			getVideoPid()			{ return videoPid; }
-		bool					getPidsFlag()			{ return pidsFlag; }
-		CCaPmt *				getCaPmt()				{ return caPmt; }
-		ca_status_t				getCA_STATUS()			{ return CA_STATUS; }
+		const std::string	getName(void)			const { return name; }
+		unsigned char 		getAudioChannelCount(void)	{ return audioChannels.size(); }
+		unsigned short		getPcrPid(void)			{ return pcrPid; }
+		unsigned short		getPmtPid(void)			{ return pmtPid; }
+		unsigned short		getTeletextPid(void)		{ return teletextPid; }
+		unsigned short		getVideoPid(void)		{ return videoPid; }
+		bool			getPidsFlag(void)		{ return pidsFlag; }
+		CCaPmt *		getCaPmt(void)			{ return caPmt; }
 
-		CZapitAudioChannel * 	getAudioChannel	(unsigned char index = 0xFF);
-		unsigned short 			getAudioPid (unsigned char index = 0xFF);
-		unsigned char  			getAudioChannelIndex()	{ return currentAudioChannel; }
+		CZapitAudioChannel * 	getAudioChannel(unsigned char index = 0xFF);
+		unsigned short 		getAudioPid(unsigned char index = 0xFF);
+		unsigned char  		getAudioChannelIndex(void)	{ return currentAudioChannel; }
 
 		int addAudioChannel(unsigned short pid, bool isAc3, std::string description, unsigned char componentTag);
 
 		/* set methods */
-		void setServiceType(const unsigned char pserviceType)   { serviceType = pserviceType; }
-		void setName(std::string pName)							{ name = pName; }
-		void setAudioChannel(unsigned char pAudioChannel)		{ if (pAudioChannel < audioChannels.size()) currentAudioChannel = pAudioChannel; }
-		void setPcrPid(unsigned short pPcrPid)					{ pcrPid = pPcrPid; }
-		void setPmtPid(unsigned short pPmtPid)					{ pmtPid = pPmtPid; }
-		void setTeletextPid(unsigned short pTeletextPid)		{ teletextPid = pTeletextPid; }
-		void setVideoPid(unsigned short pVideoPid)				{ videoPid = pVideoPid; }
-		void setPidsFlag()										{ pidsFlag = true; }
-		void setCaPmt(CCaPmt * pCaPmt)							{ caPmt = pCaPmt; }
-		void setCA_STATUS (ca_status_t pCA_STATUS)				{ CA_STATUS = pCA_STATUS; }
+		void setServiceType(const unsigned char pserviceType)	{ serviceType = pserviceType; }
+		void setName(std::string pName)				{ name = pName; }
+		void setAudioChannel(unsigned char pAudioChannel)	{ if (pAudioChannel < audioChannels.size()) currentAudioChannel = pAudioChannel; }
+		void setPcrPid(unsigned short pPcrPid)			{ pcrPid = pPcrPid; }
+		void setPmtPid(unsigned short pPmtPid)			{ pmtPid = pPmtPid; }
+		void setTeletextPid(unsigned short pTeletextPid)	{ teletextPid = pTeletextPid; }
+		void setVideoPid(unsigned short pVideoPid)		{ videoPid = pVideoPid; }
+		void setPidsFlag(void)					{ pidsFlag = true; }
+		void setCaPmt(CCaPmt *pCaPmt)				{ caPmt = pCaPmt; }
 		/* cleanup methods */
-		void resetPids();
+		void resetPids(void);
 };
 
 #endif /* __channel_h__ */

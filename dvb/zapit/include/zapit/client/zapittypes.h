@@ -1,9 +1,10 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/include/zapit/client/zapittypes.h,v 1.7 2003/01/02 13:14:03 obi Exp $
+ * $Id: zapittypes.h,v 1.8 2003/01/17 16:26:41 obi Exp $
  *
  * zapit's types which are used by the clientlib - d-box2 linux project
  *
  * (C) 2002 by thegoodguy <thegoodguy@berlios.de>
+ * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,13 +54,6 @@ typedef enum {
 	DISEQC_2_1,
 	DISEQC_2_2
 } diseqc_t;
-
-/* CA_STATUS types */
-typedef enum {
-	CA_STATUS_LOCK,
-	CA_STATUS_CLEAR,
-	CA_STATUS_FTA
-} ca_status_t;
 
 /* dvb transmission types */
 typedef enum {

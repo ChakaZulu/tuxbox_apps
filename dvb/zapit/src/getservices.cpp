@@ -1,8 +1,23 @@
 /*
- * $Id: getservices.cpp,v 1.66 2002/12/27 17:01:39 obi Exp $
+ * $Id: getservices.cpp,v 1.67 2003/01/17 16:26:41 obi Exp $
+ *
+ * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  */
-
-#include <stdio.h>
 
 #include <zapit/bouquets.h>
 #include <zapit/channel.h>
@@ -112,8 +127,7 @@ void ParseChannels(xmlNodePtr node, const t_transport_stream_id transport_stream
 						transport_stream_id,
 						original_network_id,
 						service_type,
-						DiSEqC,
-						CA_STATUS_FTA
+						DiSEqC
 					)
 				)
 			);

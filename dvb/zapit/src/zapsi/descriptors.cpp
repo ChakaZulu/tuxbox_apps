@@ -1,7 +1,7 @@
 /*
- * $Id: descriptors.cpp,v 1.53 2002/12/10 00:44:00 Homar Exp $
+ * $Id: descriptors.cpp,v 1.54 2003/01/17 16:26:42 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -476,8 +476,7 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 				transport_stream_id,
 				original_network_id,
 				service_type,
-				DiSEqC,
-				free_CA_mode?CA_STATUS_FTA:CA_STATUS_LOCK
+				DiSEqC
 			)
 		)
 	);
@@ -509,7 +508,7 @@ uint8_t service_descriptor (uint8_t *buffer, const t_service_id service_id, cons
 		else
 			bouquet = scanBouquetManager->Bouquets[bouquetId];
 
-		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0, free_CA_mode?CA_STATUS_FTA:CA_STATUS_LOCK));
+		bouquet->addService(new CZapitChannel(serviceName, service_id, transport_stream_id, original_network_id, service_type, 0));
 		break;
 	}
 

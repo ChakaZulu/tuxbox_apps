@@ -1,11 +1,10 @@
 /*
- * $Id: zapit.cpp,v 1.286 2003/01/04 20:07:27 alexw Exp $
+ * $Id: zapit.cpp,v 1.287 2003/01/17 16:26:41 obi Exp $
  *
  * zapit - d-box2 linux project
  *
  * (C) 2001, 2002 by Philipp Leusmann <faralla@berlios.de>
- *
- * based on code from older applications of the d-box2 linux project.
+ * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +34,10 @@
 
 /* tuxbox headers */
 #include <configfile.h>
+#include <connection/basicserver.h>
 
 /* zapit headers */
 #include <zapit/audio.h>
-#include <connection/basicserver.h>
 #include <zapit/cam.h>
 #include <zapit/client/msgtypes.h>
 #include <zapit/dmx.h>
@@ -57,7 +56,7 @@
 /* the conditional access module */
 CCam * cam = NULL;
 /* the configuration file */
-CConfigFile config(',');
+CConfigFile config(',', false);
 /* the event server */
 CEventServer * eventServer = NULL;
 /* the dvb audio device */
@@ -77,17 +76,14 @@ CBouquetManager * bouquetManager = NULL;
 std::map <uint8_t, std::string> scanProviders;
 
 /* current zapit mode */
-enum
-{
+enum {
 	TV_MODE = 0x01,
 	RADIO_MODE = 0x02,
 	RECORD_MODE = 0x04
 };
 
 int currentMode;
-
 bool playbackStopForced = false;
-
 int debug = 0;
 
 /* near video on demand */
@@ -115,10 +111,9 @@ CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
 bool standby = true;
 
-void saveSettings (bool write)
+void saveSettings(bool write)
 {
-	if (channel != NULL)
-	{
+	if (channel) {
 		config.setInt32("lastChannelMode", (currentMode & RADIO_MODE) ? 1 : 0);
 
 		// now save the lowest channel number with the current channel_id
@@ -128,15 +123,14 @@ void saveSettings (bool write)
 			config.setInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", c);
 	}
 
-	if (write)
-	{
+	if (write) {
 		config.setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
 		config.setInt32("diseqcType", frontend->getDiseqcType());
 		config.saveConfig(CONFIGFILE);
 	}
 }
 
-CZapitClient::responseGetLastChannel load_settings()
+CZapitClient::responseGetLastChannel load_settings(void)
 {
 	CZapitClient::responseGetLastChannel lastchannel;
 
@@ -146,9 +140,9 @@ CZapitClient::responseGetLastChannel load_settings()
 		lastchannel.mode = 't';
 
 	lastchannel.channelNumber = config.getInt32((currentMode & RADIO_MODE) ? "lastChannelRadio" : "lastChannelTV", 0);
-
 	return lastchannel;
 }
+
 
 /*
  * - find transponder
@@ -167,36 +161,27 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 	bool transponder_change;
 	tallchans_iterator cit;
 
-	if (in_nvod)
-	{
+	if (in_nvod) {
 		current_is_nvod = true;
-
 		cit = nvodchannels.find(channel_id);
 
-		if (cit == nvodchannels.end())
-		{
+		if (cit == nvodchannels.end()) {
 			DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 			return -1;
 		}
 	}
-	else
-	{
+	else {
 		current_is_nvod = false;
-
 		cit = allchans.find(channel_id);
 
-		if (currentMode & RADIO_MODE)
-		{
-			if ((cit == allchans.end()) || (cit->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE))
-			{
+		if (currentMode & RADIO_MODE) {
+			if ((cit == allchans.end()) || (cit->second.getServiceType() != DIGITAL_RADIO_SOUND_SERVICE)) {
 				DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 				return -1;
 			}
 		}
-		else
-		{
-			if (cit == allchans.end() || (cit->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE))
-			{
+		else {
+			if (cit == allchans.end() || (cit->second.getServiceType() == DIGITAL_RADIO_SOUND_SERVICE)) {
 				DBG("channel_id " PRINTF_CHANNEL_ID_TYPE " not found", channel_id);
 				return -1;
 			}
@@ -212,8 +197,8 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		channel = &(cit->second);
 
 	/* if channel's transponder does not match frontend's tuned transponder ... */
-	if (channel->getTsidOnid() != frontend->getTsidOnid())
-	{
+	if (channel->getTsidOnid() != frontend->getTsidOnid()) {
+
 		/* ... tune to it if not in record mode ... */
 		if (currentMode & RECORD_MODE)
 			return -1;
@@ -221,8 +206,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		if (!frontend->tuneTsidOnid(channel->getTsidOnid()))
 			return -1;
 
-		if (channel->getTsidOnid() != frontend->getTsidOnid())
-		{
+		if (channel->getTsidOnid() != frontend->getTsidOnid()) {
 			WARN("zigzag tuning probably failed");
 			DBG("requested tsid/onid %08x but frontend is at tsid/onid %08x", channel->getTsidOnid(), frontend->getTsidOnid());
 			return -1;
@@ -230,13 +214,11 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 
 		transponder_change = true;
 	}
-	else
-	{
+	else {
 		transponder_change = false;
 	}
 
-	if (channel->getServiceType() == NVOD_REFERENCE_SERVICE)
-	{
+	if (channel->getServiceType() == NVOD_REFERENCE_SERVICE) {
 		current_is_nvod = true;
 		saveSettings(false);
 		return 0;
@@ -246,7 +228,6 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 #ifdef USE_PID_CACHE
 	if (channel->getPidsFlag() == false)
 #endif
-
 	{
 		bool failed = false;
 		int dmx_sct_fd;
@@ -254,70 +235,52 @@ int zapit(const t_channel_id channel_id, bool in_nvod)
 		DBG("looking up pids for channel_id " PRINTF_CHANNEL_ID_TYPE, channel->getChannelID());
 
 		/* open demux device */
-		if ((dmx_sct_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
-		{
+		if ((dmx_sct_fd = open(DEMUX_DEVICE, O_RDWR)) < 0) {
 			ERROR(DEMUX_DEVICE);
 			return -1;
 		}
 
 		/* get program map table pid from program association table */
 		if (channel->getPmtPid() == NONE)
-		{
-			if (parse_pat(dmx_sct_fd, channel) < 0)
-			{
+			if (parse_pat(dmx_sct_fd, channel) < 0) {
 				WARN("pat parsing failed");
 				failed = true;
 			}
-		}
 
 		/* parse program map table and store pids */
-		if ((!failed) && (parse_pmt(dmx_sct_fd, channel) < 0))
-		{
+		if ((!failed) && (parse_pmt(dmx_sct_fd, channel) < 0)) {
 			WARN("pmt parsing failed");
 			failed = true;
 		}
 
-		if ((!failed) && (channel->getAudioPid() == NONE) && (channel->getVideoPid() == NONE))
-		{
+		if ((!failed) && (channel->getAudioPid() == NONE) && (channel->getVideoPid() == NONE)) {
 			WARN("neither audio nor video pid found");
 			failed = true;
 		}
 
 		close (dmx_sct_fd);
 
-		if (failed)
-		{
+		if (failed) {
 			channel->resetPids();
 			return -1;
 		}
 	}
 
 	if (transponder_change == true)
-	{
 		channel->getCaPmt()->ca_pmt_list_management = 0x03;
-	}
 	else
-	{
 		channel->getCaPmt()->ca_pmt_list_management = 0x04;
-	}
 
 	startPlayBack();
-
 	cam->setCaPmt(channel->getCaPmt());
-
 	saveSettings(false);
-
 	return 0;
 }
 
-/*
- * return 0 on success
- * return -1 otherwise
- */
-int changeapid (uint8_t index)
+
+int change_audio_pid(uint8_t index)
 {
-	if (channel == NULL)
-	{
+	if (!channel) {
 		WARN("No current channel");
 		return -1;
 	}
@@ -334,13 +297,16 @@ int changeapid (uint8_t index)
 
 	/* set bypass mode */
 	CZapitAudioChannel * currentAudioChannel = channel->getAudioChannel();
-	if (currentAudioChannel == NULL)
+	
+	if (!currentAudioChannel) {
 		WARN("No current audio channel");
+		return -1;
+	}
+	
+	if (currentAudioChannel->isAc3)
+		audio->enableBypass();
 	else
-		if (currentAudioChannel->isAc3)
-			audio->enableBypass();
-		else
-			audio->disableBypass();
+		audio->disableBypass();
 
 	/* set demux filter */
 	if (setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid()) < 0)
@@ -350,51 +316,46 @@ int changeapid (uint8_t index)
 	audio->start();
 
 	/* start demux filter */
-	INFO("audio dmx start");
 	if (startDmxFilter(dmx_audio_fd) < 0)
 		return -1;
 
 	return 0;
 }
 
-void setRadioMode ()
+void setRadioMode(void)
 {
 	currentMode |= RADIO_MODE;
 	currentMode &= ~TV_MODE;
 }
 
-void setTVMode ()
+void setTVMode(void)
 {
 	currentMode |= TV_MODE;
 	currentMode &= ~RADIO_MODE;
 }
 
-int getMode ()
+int getMode(void)
 {
-	if(currentMode & TV_MODE)
+	if (currentMode & TV_MODE)
 		return CZapitClient::MODE_TV;
-	if(currentMode & RADIO_MODE)
+	if (currentMode & RADIO_MODE)
 		return CZapitClient::MODE_RADIO;
 	return 0;
 }
 
-void setRecordMode ()
+void setRecordMode(void)
 {
 	currentMode |= RECORD_MODE;
 	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_ACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
-void unsetRecordMode ()
+void unsetRecordMode(void)
 {
 	currentMode &= ~RECORD_MODE;
 	eventServer->sendEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, CEventServer::INITID_ZAPIT );
 }
 
-/*
- * return 0 on success
- * return -1 otherwise
- */
-int prepare_channels ()
+int prepare_channels(void)
 {
 	// for the case this function is NOT called for the first time (by main())
 	// we clear all cannel lists, they are refilled
@@ -402,19 +363,16 @@ int prepare_channels ()
 	transponders.clear();
 	bouquetManager->clearAll();
 	allchans.clear();  // <- this invalidates all bouquets, too!
-
 	if (LoadServices() < 0)
 		return -1;
 
 	INFO("LoadServices: success");
-
 	bouquetManager->loadBouquets();
-
 	return 0;
 }
 
 
-void parseScanInputXml()
+void parseScanInputXml(void)
 {
 	switch (frontend->getInfo()->type) {
 	case FE_QPSK:
@@ -439,14 +397,11 @@ void parseScanInputXml()
  * return 0 on success
  * return -1 otherwise
  */
-int start_scan ()
+int start_scan(void)
 {
-	if (scanInputParser == NULL)
-	{
+	if (!scanInputParser) {
 		parseScanInputXml();
-
-		if (scanInputParser == NULL)
-		{
+		if (!scanInputParser) {
 			WARN("scan not configured");
 			return -1;
 		}
@@ -455,16 +410,13 @@ int start_scan ()
 	transponders.clear();
 	bouquetManager->clearAll();
 	allchans.clear();  // <- this invalidates all bouquets, too!
+	stopPlayBack();
 
 	found_transponders = 0;
 	found_channels = 0;
-
-	stopPlayBack();
-
 	scan_runs = 1;
 
-	if (pthread_create(&scan_thread, 0, start_scanthread, NULL))
-	{
+	if (pthread_create(&scan_thread, 0, start_scanthread, NULL)) {
 		ERROR("pthread_create");
 		scan_runs = 0;
 		return -1;
@@ -534,7 +486,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 	{
 		CZapitMessages::commandSetAudioChannel msgSetAudioChannel;
 		read(connfd, &msgSetAudioChannel, sizeof(msgSetAudioChannel));
-		changeapid(msgSetAudioChannel.channel);
+		change_audio_pid(msgSetAudioChannel.channel);
 		break;
 	}
 	
@@ -933,8 +885,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 					    msgAddSubService.transport_stream_id,
 					    original_network_id,
 					    1,
-					    channel->getDiSEqC(),
-					    channel->getCA_STATUS()
+					    channel->getDiSEqC()
 					)
 				)
 			);
@@ -1127,7 +1078,7 @@ void sendChannels(int connfd, const CZapitClient::channelsMode mode, const CZapi
 	internalSendChannels(connfd, &channels, 0);
 }
 
-int startPlayBack()
+int startPlayBack(void)
 {
 	bool have_pcr = false;
 	bool have_audio = false;
@@ -1163,7 +1114,7 @@ int startPlayBack()
 	if (channel->getTeletextPid() != 0)
 		have_teletext = true;
 
-	if ((!have_audio) && (!have_video))
+	if ((!have_audio) && (!have_video) && (!have_teletext))
 		return -1;
 
 	/* set demux filters */
@@ -1198,46 +1149,26 @@ int startPlayBack()
 		audio->start();
 	}
 
-	if (channel->getCA_STATUS() == CA_STATUS_LOCK)
-	{
-		INFO("CA_LOCK");
-		eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_LOCK, CEventServer::INITID_ZAPIT);
-	}
-	else
-	{
-		INFO("CA_FTA");
-		eventServer->sendEvent(CZapitClient::EVT_ZAP_CA_FTA, CEventServer::INITID_ZAPIT);
-	}
-	// TODO: camauswertung muss noch rein
-
 	/* start demux filters */
-	if (have_pcr) {
-		INFO("pcr dmx start");
+	if (have_pcr)
 		if (startDmxFilter(dmx_pcr_fd) < 0)
 			return -1;
-	}
-	if (have_audio) {
-		INFO("audio dmx start");
+	if (have_audio)
 		if (startDmxFilter(dmx_audio_fd) < 0)
 			return -1;
-	}
-	if (have_video) {
-		INFO("video dmx start");
+	if (have_video)
 		if (startDmxFilter(dmx_video_fd) < 0)
 			return -1;
-	}
-	if (have_teletext) {
-		INFO("teletext dmx start");
+	if (have_teletext)
 		if (startDmxFilter(dmx_teletext_fd) < 0)
 			return -1;
-	}
 
 	return 0;
 }
 
-int stopPlayBack()
+int stopPlayBack(void)
 {
-	if (playbackStopForced == true)
+	if (playbackStopForced)
 		return -1;
 
 	audio->stop();
@@ -1253,8 +1184,7 @@ int stopPlayBack()
 
 void enterStandby(void)
 {
-	if (standby)
-	{
+	if (standby) {
 		sleep(1);
 		return;
 	}
@@ -1262,24 +1192,20 @@ void enterStandby(void)
 	standby = true;
 
 	saveSettings(true);
-
 	stopPlayBack();
 
 	if (dmx_audio_fd != -1) {
 		close(dmx_audio_fd);
 		dmx_audio_fd = -1;
 	}
-	
 	if (dmx_pcr_fd != -1) {
 		close(dmx_pcr_fd);
 		dmx_pcr_fd = -1;
 	}
-
 	if (dmx_teletext_fd != -1) {
 		close(dmx_teletext_fd);
 		dmx_teletext_fd = -1;
 	}
-
 	if (dmx_video_fd != -1) {
 		close(dmx_video_fd);
 		dmx_video_fd = -1;
@@ -1289,17 +1215,14 @@ void enterStandby(void)
 		delete audio;
 		audio = NULL;
 	}
-
 	if (cam) {
 		delete cam;
 		cam = NULL;
 	}
-
 	if (frontend) {
 		delete frontend;
 		frontend = NULL;
 	}
-
 	if (video) {
 		delete video;
 		video = NULL;
@@ -1312,15 +1235,12 @@ void leaveStandby(void)
 		audio = new CAudio();
 		audio->unmute();
 	}
-
 	if (!cam) {
 		cam = new CCam();
 	}
-
 	if (!frontend) {
 		frontend = new CFrontend();
 	}
-
 	if (!video) {
 		video = new CVideo();
 	}
@@ -1353,21 +1273,19 @@ void leaveStandby(void)
 
 unsigned zapTo(const unsigned int bouquet, const unsigned int channel)
 {
-	if (bouquet >= bouquetManager->Bouquets.size())
-	{
+	if (bouquet >= bouquetManager->Bouquets.size()) {
 		WARN("Invalid bouquet %d", bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
 
-	ChannelList* channels;
+	ChannelList *channels;
 
 	if (currentMode & RADIO_MODE)
 		channels = &(bouquetManager->Bouquets[bouquet]->radioChannels);
 	else
 		channels = &(bouquetManager->Bouquets[bouquet]->tvChannels);
 
-	if (channel >= channels->size())
-	{
+	if (channel >= channels->size()) {
 		WARN("Invalid channel %d in bouquet %d", channel, bouquet);
 		return CZapitClient::ZAP_INVALID_PARAM;
 	}
@@ -1399,8 +1317,6 @@ unsigned int zapTo_ChannelID(t_channel_id channel_id, bool isSubService)
 	else
 		eventServer->sendEvent(CZapitClient::EVT_ZAP_COMPLETE, CEventServer::INITID_ZAPIT, &channel_id, sizeof(channel_id));
 
-	channel->setCA_STATUS(get_sdt_free_CA_mode(channel->getTransportStreamId(), channel->getOriginalNetworkId(), channel->getServiceId()));
-	INFO("CA STATUS: %d", channel->getCA_STATUS());
 	return result;
 }
 
@@ -1413,7 +1329,7 @@ unsigned zapTo(const unsigned int channel)
 		return 0;
 }
 
-void signal_handler (int signum)
+void signal_handler(int signum)
 {
 	switch (signum) {
 	case SIGUSR1:
@@ -1425,39 +1341,29 @@ void signal_handler (int signum)
 	}
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
-	CZapitClient::responseGetLastChannel test_lastchannel;
-	int i;
+	fprintf(stdout, "$Id: zapit.cpp,v 1.287 2003/01/17 16:26:41 obi Exp $\n");
 
-	fprintf(stdout, "$Id: zapit.cpp,v 1.286 2003/01/04 20:07:27 alexw Exp $\n");
+	for (int i = 1; i < argc ; i++) {
+		if (!strcmp(argv[i], "-d")) {
+			debug = true;
+		}
+		else if (!strcmp(argv[i], "-q")) {
+			/* don't say anything */
+			int fd;
 
-	if (argc > 1)
-	{
-		for (i = 1; i < argc ; i++)
-		{
-			if (!strcmp(argv[i], "-d"))
-			{
-				debug = true;
-			}
-			else if (!strcmp(argv[i], "-q"))
-			{
-				/* don't say anything */
-				int fd;
+			close(STDOUT_FILENO);
+			if ((fd = open("/dev/null", O_WRONLY)) != STDOUT_FILENO)
+				close(fd);
 
-				close(STDOUT_FILENO);
-				if ((fd = open("/dev/null", O_WRONLY)) != STDOUT_FILENO)
-					close(fd);
-
-				close(STDERR_FILENO);
-				if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
-					close(fd);
-			}
-			else
-			{
-				fprintf(stdout, "Usage: %s [-d] [-q]\n", argv[0]);
-				exit(0);
-			}
+			close(STDERR_FILENO);
+			if ((fd = open("/dev/null", O_WRONLY)) != STDERR_FILENO)
+				close(fd);
+		}
+		else {
+			fprintf(stderr, "Usage: %s [-d] [-q]\n", argv[0]);
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -1473,7 +1379,7 @@ int main (int argc, char **argv)
 	/* create bouquet manager */
 	bouquetManager = new CBouquetManager();
 
-	test_lastchannel = load_settings();
+	CZapitClient::responseGetLastChannel test_lastchannel = load_settings();
 
 	if (test_lastchannel.mode == 'r')
 		setRadioMode();
@@ -1494,26 +1400,20 @@ int main (int argc, char **argv)
 	if (!zapit_server.prepare(ZAPIT_UDS_NAME))
 		return -1;
 
-	if (debug == false)
-	{
-		switch (fork())
-		{
-			case -1: /* can't fork */
-				ERROR("fork");
+	if (!debug)
+		switch (fork()) {
+		case -1: /* can't fork */
+			ERROR("fork");
+			return -1;
+		case 0: /* child, process becomes a daemon */
+			if (setsid() == -1) {
+				ERROR("setsid");
 				return -1;
-
-			case 0: /* child, process becomes a daemon */
-				if (setsid() == -1)
-				{
-					ERROR("setsid");
-					return -1;
-				}
-				break;
-
-			default: /* parent returns to calling process */
-				return 0;
+			}
+			break;
+		default: /* parent returns to calling process */
+			return 0;
 		}
-	}
 
 	// create eventServer
 	eventServer = new CEventServer;
@@ -1524,11 +1424,11 @@ int main (int argc, char **argv)
 
 	enterStandby();
 
-	if (scanInputParser != NULL)
+	if (scanInputParser)
 		xmlFreeDoc(scanInputParser);
 
 	delete bouquetManager;
 	delete eventServer;
-
 	return 0;
 }
+

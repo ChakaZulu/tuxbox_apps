@@ -1,7 +1,7 @@
 /*
- * $Id: sdt.h,v 1.14 2002/12/17 22:02:36 obi Exp $
+ * $Id: sdt.h,v 1.15 2003/01/17 16:26:41 obi Exp $
  *
- * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
+ * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,12 @@
  *
  */
 
-#ifndef __sdt_h__
-#define __sdt_h__
+#ifndef __zapit_sdt_h__
+#define __zapit_sdt_h__
 
 #include "types.h"
 
-enum service_type_e
-{
+enum service_type_e {
 	RESERVED,
 	DIGITAL_TELEVISION_SERVICE,
 	DIGITAL_RADIO_SOUND_SERVICE,
@@ -46,12 +45,11 @@ enum service_type_e
 };
 
 struct sdt_generic_descriptor {
-        u_char  descriptor_tag                  : 8;
-        u_char  descriptor_length               : 8;
+        unsigned descriptor_tag		: 8;
+        unsigned descriptor_length	: 8;
 };
 
 int parse_sdt(const t_transport_stream_id, const t_original_network_id, const uint8_t DiSEqC);
-unsigned int get_sdt_TsidOnid();
-ca_status_t get_sdt_free_CA_mode(const t_transport_stream_id, const t_original_network_id, const t_service_id);
+unsigned int get_sdt_TsidOnid(void);
 
-#endif /* __sdt_h__ */
+#endif /* __zapit_sdt_h__ */

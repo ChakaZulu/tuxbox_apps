@@ -4,8 +4,7 @@ INCLUDES = \
 	-I$(top_srcdir)/include \
 	@CONFIGFILE_CFLAGS@ \
 	@CONNECTION_CFLAGS@ \
-	@LIBXML_CFLAGS@ \
-	@XMLTREE_CFLAGS@
+	@XML_CFLAGS@
 
 bin_PROGRAMS = pzapit zapit
 
@@ -24,8 +23,7 @@ zapit_SOURCES = \
 zapit_LDADD = \
 	@CONFIGFILE_LIBS@ \
 	@CONNECTION_LIBS@ \
-	@LIBXML_LIBS@ \
-	@XMLTREE_LIBS@ \
+	@XML_LIBS@ \
 	$(top_builddir)/lib/libzapitclient.la \
 	zapci/libzapci.la \
 	zapost/libzapost.la \
