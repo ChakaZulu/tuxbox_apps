@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.221 2002/04/14 08:42:27 Simplex Exp $
+        $Id: neutrino.cpp,v 1.222 2002/04/14 20:00:37 Simplex Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -783,8 +783,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		CZapitClient::SatelliteList satList;
 		g_Zapit->getScanSatelliteList(satList);
-		static int sat = 0;
-		for ( uint i=0; i<satList.size(); i++)
+/*		for ( uint i=0; i<satList.size(); i++)
 		{
 			cout << satList[i].satName << endl;
 			if( !strcmp( satList[i].satName, scanSettings.satellites[0].name))
@@ -794,41 +793,50 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 				break;
 			}
 		}
-
-		CMenuOptionChooser* ojSat = new CMenuOptionChooser("satsetup.satellite", &sat, scanSettings.diseqcMode == CScanSettings::noDiSEqC/*, new CSatelliteNotifier*/, NULL, false);
+*/
+		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser("satsetup.satellite", (char*)&scanSettings.satNameNoDiseqc, scanSettings.diseqcMode == NO_DISEQC/*, new CSatelliteNotifier*/, NULL, false);
 		for ( uint i=0; i< satList.size(); i++)
 		{
-			ojSat->addOption(i, satList[i].satName);
+			ojSat->addOption(satList[i].satName);
 		}
 
+		CMenuOptionChooser* ojDiseqcRepeats = new CMenuOptionChooser("satsetup.diseqcrepeat", &((int)(scanSettings.diseqcRepeat)), scanSettings.diseqcMode != NO_DISEQC/*, new CSatelliteNotifier*/, NULL, false);
+		for ( uint i=0; i<=2; i++)
+		{
+			char ii[2];
+			sprintf( ii, "%d", i);
+			ojDiseqcRepeats->addOption(i, ii);
+		}
 
 		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", "settings.raw");
 		extSatSettings->addItem( new CMenuSeparator() );
 		extSatSettings->addItem( new CMenuForwarder("menu.back") );
 		extSatSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", scanSettings.diseqcMode != CScanSettings::noDiSEqC, "", extSatSettings);
+		CMenuForwarder* ojExtSatSettings = new CMenuForwarder("satsetup.extended", scanSettings.diseqcMode != NO_DISEQC, "", extSatSettings);
 		for ( uint i=0; i< satList.size(); i++)
 		{
-			static int dummy = 0;
-			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, &dummy, true/*, new CSatelliteNotifier*/);
-			oj->addOption( 0, "options.off");
-			for ( int j=1; j<=32; j++)
+			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
+			oj->addOption( -1, "options.off");
+			for ( int j=0; j<=3; j++)
 			{
-				char jj[3];
+				char jj[2];
 				sprintf( jj, "%d", j);
 				oj->addOption( j, jj);
 			}
 			extSatSettings->addItem( oj);
 		}
 
-		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", &((int)(scanSettings.diseqcMode)), true, new CSatDiseqcNotifier( ojExtSatSettings, ojSat));
-		ojDiseqc->addOption( CScanSettings::noDiSEqC,   "satsetup.nodiseqc");
-		ojDiseqc->addOption( CScanSettings::miniDiSEqC, "satsetup.minidiseqc");
-		ojDiseqc->addOption( CScanSettings::DiSEqC,     "satsetup.stddiseqc");
+		CMenuOptionChooser* ojDiseqc = new CMenuOptionChooser("satsetup.disqeqc", &((int)(scanSettings.diseqcMode)), true, new CSatDiseqcNotifier( ojSat, ojExtSatSettings, ojDiseqcRepeats));
+		ojDiseqc->addOption( NO_DISEQC,   "satsetup.nodiseqc");
+		ojDiseqc->addOption( MINI_DISEQC, "satsetup.minidiseqc");
+		ojDiseqc->addOption( DISEQC_1_0,  "satsetup.diseqc10");
+		ojDiseqc->addOption( DISEQC_1_1,  "satsetup.diseqc11");
+		ojDiseqc->addOption( SMATV_REMOTE_TUNING,  "satsetup.smatvremote");
 
 		settings.addItem( ojDiseqc );
 		settings.addItem( ojBouquets);
 		settings.addItem( ojSat);
+		settings.addItem( ojDiseqcRepeats );
 		settings.addItem( ojExtSatSettings);
 
 	}
@@ -851,7 +859,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 
 		CZapitClient::SatelliteList providerList;
 		g_Zapit->getScanSatelliteList(providerList);
-		static int cableProvider = 0;
+/*		static int cableProvider = 0;
 		for ( uint i=0; i<providerList.size(); i++)
 		{
 			if( !strcmp( providerList[i].satName, scanSettings.satellites[0].name))
@@ -860,11 +868,11 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 				break;
 			}
 		}
-		CMenuOptionChooser* oj = new CMenuOptionChooser("cablesetup.provider", &cableProvider, true/*, new CCableProviderNotifier*/);
+*/		CMenuOptionStringChooser* oj = new CMenuOptionStringChooser("cablesetup.provider", (char*)&scanSettings.satNameNoDiseqc, true/*, new CCableProviderNotifier*/);
 
 		for ( uint i=0; i< providerList.size(); i++)
 		{
-			oj->addOption(i, providerList[i].satName);
+			oj->addOption( providerList[i].satName);
 		}
 		settings.addItem( ojBouquets);
 		settings.addItem( ojInv );
@@ -2365,7 +2373,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.221 2002/04/14 08:42:27 Simplex Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.222 2002/04/14 20:00:37 Simplex Exp $\n\n");
 	tzset();
 	initGlobals();
 
@@ -2373,41 +2381,3 @@ int main(int argc, char **argv)
 	return neutrino->run(argc, argv);
 }
 
-ostream &operator<<(ostream& os, const CScanSettings& settings)
-{
-	os << settings.bouquetMode << endl;
-	os << settings.diseqcMode << endl;
-	for (uint i=0; i<settings.satellites.size(); i++)
-	{
-		os << '"' << settings.satellites[i].name << '"' << endl << settings.satellites[i].diseqc << endl;
-	}
-	return os;
-}
-
-istream &operator>>(istream& is, CScanSettings& settings)
-{
-	string token;
-	settings.satellites.clear();
-	is >> (int)settings.bouquetMode;
-	is >> (int)settings.diseqcMode;
-	while (!is.eof())
-	{
-		is >> token;
-		string satname = token;
-		int diseqc;
-		while ( satname[ satname.length()-1] != '"')
-		{
-			is >> token;
-			satname += " " + token;
-		}
-		CScanSettings::SSatellite sat;
-		is >> sat.diseqc;
-		strncpy( sat.name, satname.substr(1, satname.length()-2).c_str(), 30);
-		settings.satellites.insert( settings.satellites.end(), sat);
-
-		cout << "[sat]:" << sat.name << "|" << sat.diseqc << endl;
-	}
-	// for an unknown reason the last entry is waste
-	settings.satellites.erase( settings.satellites.end()--);
-	return is;
-}
