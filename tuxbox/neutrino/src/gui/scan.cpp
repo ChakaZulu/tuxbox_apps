@@ -94,7 +94,7 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		pos = (pos+1)%10;
 		g_FrameBuffer->paintIcon8(filename, x+300,ypos+15, 17);
 
-		long long timeoutEnd = g_RCInput->calcTimeoutEnd_MS( 250 );
+		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd_MS( 250 );
 		msg = CRCInput::RC_nokey;
 
 		while ( ! ( msg == CRCInput::RC_timeout ) )

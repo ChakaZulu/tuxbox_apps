@@ -207,12 +207,12 @@ void CRCInput::restartInput()
 	open();
 }
 
-int CRCInput::addTimer(long long Interval, bool oneshot)
+int CRCInput::addTimer(unsigned long long Interval, bool oneshot)
 {
 	struct timeval tv;
 
 	gettimeofday( &tv, NULL );
-	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
 	timer _newtimer;
 	if (!oneshot)
@@ -233,7 +233,7 @@ int CRCInput::addTimer(long long Interval, bool oneshot)
 
 int CRCInput::addTimer(struct timeval Timeout)
 {
-	long long timesout = (long long) Timeout.tv_usec + (long long)((long long) Timeout.tv_sec * (long long) 1000000);
+	unsigned long long timesout = (unsigned long long) Timeout.tv_usec + (unsigned long long)((unsigned long long) Timeout.tv_sec * (unsigned long long) 1000000);
 	addTimer( timesout );
 }
 
@@ -244,7 +244,7 @@ long long CRCInput::calcTimeoutEnd( int Timeout )
 	struct timeval tv;
 
 	gettimeofday( &tv, NULL );
-	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
 	return ( timeNow + Timeout* 1000000 );
 }
@@ -254,50 +254,52 @@ long long CRCInput::calcTimeoutEnd_MS( int Timeout )
 	struct timeval tv;
 
 	gettimeofday( &tv, NULL );
-	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+
+
+	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
 	return ( timeNow + Timeout* 1000 );
 }
 
 
-void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, long long *TimeoutEnd, bool bAllowRepeatLR)
+void CRCInput::getMsgAbsoluteTimeout(uint *msg, uint* data, unsigned long long *TimeoutEnd, bool bAllowRepeatLR)
 {
 	struct timeval tv;
 
 	gettimeofday( &tv, NULL );
-	long long timeNow = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+	unsigned long long timeNow = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
-	long long diff = ( *TimeoutEnd - timeNow );
+	unsigned long long diff = ( *TimeoutEnd - timeNow );
 
-	if ( diff < 0 )
-		diff = 0;
+	if ( diff < 250 )
+		diff = 250;  // Minimum Differenz...
 
 	getMsg_us( msg, data, diff, bAllowRepeatLR );
 
 	if ( *msg == NeutrinoMessages::EVT_TIMESET )
 	{
 		// recalculate timeout....
-		long long ta= *TimeoutEnd;
+		unsigned long long ta= *TimeoutEnd;
 		*TimeoutEnd= *TimeoutEnd + *(long long*) *data;
 
-		printf("[getMsgAbsoluteTimeout]: EVT_TIMESET - recalculate timeout\n%llx - %llx - %llx/%llx\n", timeNow, *(long long*) *data, *TimeoutEnd, ta );
+		printf("[getMsgAbsoluteTimeout]: EVT_TIMESET - recalculate timeout\n%llx/%llx - %llx/%llx\n", timeNow, *(long long*) *data, *TimeoutEnd, ta );
 	}
 }
 
 void CRCInput::getMsg(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, data, (Timeout== -1)?-1:(long long) Timeout * 100* 1000, bAllowRepeatLR );
+	getMsg_us( msg, data, (Timeout== -1)?(unsigned long long)-1:(unsigned long long) Timeout * 100* 1000, bAllowRepeatLR );
 }
 
 void CRCInput::getMsg_ms(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR)
 {
-	getMsg_us( msg, data, (Timeout== -1)?-1:(long long) Timeout * 1000, bAllowRepeatLR );
+	getMsg_us( msg, data, (Timeout== -1)?(unsigned long long)-1:(unsigned long long) Timeout * 1000, bAllowRepeatLR );
 }
 
-void CRCInput::getMsg_us(uint *msg, uint *data, long long Timeout, bool bAllowRepeatLR)
+void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool bAllowRepeatLR)
 {
 	static long long last_keypress=0;
-	long long getKeyBegin;
+	unsigned long long getKeyBegin;
 	static __u16 rc_last_key = 0;
 	static __u16 rc_last_repeat_key = 0;
 
@@ -310,7 +312,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, long long Timeout, bool bAllowRe
 	//set 0
 	*data = 0;
 
-	if(Timeout==-1)
+	if(Timeout==(unsigned long long)-1)
 	{
 		tvslectp = NULL;
 	}
@@ -321,7 +323,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, long long Timeout, bool bAllowRe
 
 	// wiederholung reinmachen - dass wirklich die ganze zeit bis timeout gewartet wird!
 	gettimeofday( &tv, NULL );
-	getKeyBegin = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+	getKeyBegin = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 
 	while(1)
 	{

@@ -189,7 +189,7 @@ neutrino->showProfiling("vor Schatten;");
         {
         	neutrino->showProfiling("start infoviewer loop");
        		bool hideIt = true;
-			long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
+			unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
 
 			int res = messages_return::none;
 

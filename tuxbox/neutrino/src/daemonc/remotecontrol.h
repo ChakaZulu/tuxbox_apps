@@ -100,7 +100,7 @@ typedef std::vector<CSubService> CSubServiceListSorted;
 
 class CRemoteControl
 {
-		long long						zap_completion_timeout;
+		unsigned long long				zap_completion_timeout;
 
 		void getNVODs();
 		void processAPIDnames();

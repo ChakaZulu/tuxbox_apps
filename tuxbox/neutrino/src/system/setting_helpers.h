@@ -129,6 +129,6 @@ void setNameServer(char* ip);
 void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
 , char* nameserver);
 
-long long getcurrenttime();
+unsigned long long getcurrenttime();
 
 #endif

@@ -214,7 +214,7 @@ void showSubchan(string subChannelName)
 		g_FrameBuffer->paintBoxRel(x,y, dx,dy, COL_MENUCONTENT);
 		g_Fonts->infobar_info->RenderString(x+10, y+30, dx-20, subChannelName.c_str(), COL_MENUCONTENT);
 
-		long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
+		unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( 2 );
 		int res = messages_return::none;
 		uint msg; uint data;
 
@@ -377,10 +377,10 @@ void testNetworkSettings(char* ip, char* netmask, char* broadcast, char* gateway
 	ShowMsg( "networkmenu.test", text, CMessageBox::mbrBack, CMessageBox::mbBack );
 }
 
-long long getcurrenttime()
+unsigned long long getcurrenttime()
 {
 	struct timeval tv;
 	gettimeofday( &tv, NULL );
-	return (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
+	return (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
 }
 
