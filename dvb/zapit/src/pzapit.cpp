@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.12 2002/04/18 23:46:08 obi Exp $
+ * $Id: pzapit.cpp,v 1.13 2002/04/20 11:56:19 Simplex Exp $
  *
  * simple commandline client for zapit
  *
@@ -14,11 +14,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *  
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- * 
+ *
  */
 
 #include <iostream>
@@ -240,7 +240,7 @@ int main (int argc, char** argv)
 		unsigned int transponder;
 		unsigned int services;
 
-		zapit->startScan(0);
+		zapit->startScan();
 
 		while (zapit->isScanReady(satellite, transponder, services) == false)
 		{
