@@ -65,7 +65,6 @@ include/lib/gui/Makefile
 include/lib/socket/Makefile
 include/lib/system/Makefile
 lib/Makefile
-lib/picviewer/Makefile
 lib/base/Makefile
 lib/driver/Makefile
 lib/codecs/Makefile
