@@ -47,7 +47,7 @@
 #include <configfile.h>
 #include <controldclient/controldclient.h>
 #include <controldclient/controldMsg.h>
-#include <lcddclient/lcddclient.h>
+//#include <lcddclient/lcddclient.h>
 #include <timerdclient/timerdclient.h>
 
 #include "eventwatchdog.h"
@@ -58,7 +58,6 @@
 #define SAA7126_DEVICE "/dev/dbox/saa0"
 
 
-CLcddClient	lcdd;
 CZapitClient	zapit;
 CTimerdClient	timerd;
 CEventServer	*eventServer;
@@ -107,7 +106,7 @@ void saveSettings()
 
 void shutdownBox()
 {
-	lcdd.shutdown();
+	//lcdd.shutdown();
 
 	zapit.shutdown();
 
@@ -496,11 +495,11 @@ void setScartMode(bool onoff)
 {
 	if(onoff)
 	{
-		lcdd.setMode(CLcddTypes::MODE_SCART);
+		//lcdd.setMode(CLcddTypes::MODE_SCART);
 	}
 	else
 	{
-		lcdd.setMode(CLcddTypes::MODE_TVRADIO);
+		//lcdd.setMode(CLcddTypes::MODE_TVRADIO);
 	}
 	switch_vcr( onoff );
 }
@@ -629,7 +628,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			config->setInt32("volume_avs", settings.volume_avs);
 			audioControl::setVolume(map_volume(msg_commandVolume.volume, true));
 		}
-		lcdd.setVolume(msg_commandVolume.volume);
+		//lcdd.setVolume(msg_commandVolume.volume);
 		eventServer->sendEvent(CControldClient::EVT_VOLUMECHANGED, CEventServer::INITID_CONTROLD, &msg_commandVolume.volume, sizeof(msg_commandVolume.volume));
 		break;
 
@@ -637,28 +636,28 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		settings.mute = true;
 		config->setBool("mute", settings.mute);
 		zapit.muteAudio(true);
-		lcdd.setMute(true);
+		//lcdd.setMute(true);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 		break;
 	case CControld::CMD_MUTE_AVS:
 		settings.mute_avs = true;
 		config->setBool("mute_avs", settings.mute_avs);
 		audioControl::setMute(true);
-		lcdd.setMute(true);
+		//lcdd.setMute(true);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
 		break;
 	case CControld::CMD_UNMUTE:
 		settings.mute = false;
 		config->setBool("mute", settings.mute);
 		zapit.muteAudio(false);
-		lcdd.setMute(settings.mute_avs);
+		//lcdd.setMute(settings.mute_avs);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute_avs, sizeof(settings.mute_avs));
 		break;
 	case CControld::CMD_UNMUTE_AVS:
 		settings.mute_avs = false;
 		config->setBool("mute_avs", settings.mute_avs);
 		audioControl::setMute(false);
-		lcdd.setMute(settings.mute);
+		//lcdd.setMute(settings.mute);
 		eventServer->sendEvent(CControldClient::EVT_MUTECHANGED, CEventServer::INITID_CONTROLD, &settings.mute, sizeof(settings.mute));
 		break;
 		
@@ -768,7 +767,7 @@ int main(int argc, char **argv)
 {
 	CBasicServer controld_server;
 
-	printf("Controld  $Id: controld.cpp,v 1.80 2002/12/07 23:07:19 thegoodguy Exp $\n\n");
+	printf("Controld  $Id: controld.cpp,v 1.81 2002/12/17 23:19:34 McClean Exp $\n\n");
 
 	if (!controld_server.prepare(CONTROLD_UDS_NAME))
 		return -1;
@@ -824,11 +823,11 @@ int main(int argc, char **argv)
 	//init
 	audioControl::setVolume(map_volume(settings.volume_avs, true));
 	zapit.setVolume(map_volume(settings.volume, false), map_volume(settings.volume, false));
-	lcdd.setVolume(settings.volume_avs);    // we could also display settings.volume at startup
+	//lcdd.setVolume(settings.volume_avs);    // we could also display settings.volume at startup
 
 	audioControl::setMute(settings.mute_avs);
 	zapit.muteAudio(settings.mute);
-	lcdd.setMute(settings.mute || settings.mute_avs);
+	//lcdd.setMute(settings.mute || settings.mute_avs);
 
 	setvideooutput(settings.videooutput);
 	setVideoFormat(settings.videoformat, false);
