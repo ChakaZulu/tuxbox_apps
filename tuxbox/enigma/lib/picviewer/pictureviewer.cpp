@@ -392,7 +392,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				slideshowTimeout();
 			}
 			else
-			if (evt.action == &i_cursorActions->up ||
+			if (evt.action == &i_cursorActions->down ||
 			    evt.action == &i_cursorActions->right ||
 			    evt.action == &i_shortcutActions->blue)
 			{
@@ -401,7 +401,7 @@ int ePictureViewer::eventHandler(const eWidgetEvent &evt)
 				DisplayNextImage();
 			}
 			else
-			if (evt.action == &i_cursorActions->down ||
+			if (evt.action == &i_cursorActions->up ||
 			    evt.action == &i_cursorActions->left ||
 			    evt.action == &i_shortcutActions->red)
 			{
