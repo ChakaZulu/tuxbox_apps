@@ -41,9 +41,10 @@ function bouquetChange()
 }
 function epg()
 {
-	if (currentChannel >= 0)
+	var selChannel = document.channelselector.channel.selectedIndex;
+	if (selChannel >= 0)
 	{
-		var channel = document.channelselector.channel.options[currentChannel].value;
+		var channel = document.channelselector.channel.options[selChannel].value;
 		openEPG(channel);
 	}
 	else
