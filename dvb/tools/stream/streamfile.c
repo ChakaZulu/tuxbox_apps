@@ -1,5 +1,5 @@
 /*
- * $Id: streamfile.c,v 1.15 2004/04/30 09:55:07 thegoodguy Exp $
+ * $Id: streamfile.c,v 1.16 2004/04/30 12:58:54 thegoodguy Exp $
  * 
  * streaming ts to file/disc
  * 
@@ -360,6 +360,9 @@ main (int argc, char ** argv) {
 	}
 	todo = IN_SIZE - (r - offset);
 
+	if (todo == 0)
+		todo = IN_SIZE;
+
 	while (!exit_flag)
 	{
 		ringbuffer_get_write_vector(ringbuf, &(vec[0]));
@@ -378,14 +381,19 @@ main (int argc, char ** argv) {
 			todo = vec[0].len;
 		}
 
-		while ((!exit_flag) && (todo))
+		while (!exit_flag)
 		{
 			r = read(dvrfd, vec[0].buf, todo);
 			
 			if (r > 0)
 			{
+				ringbuffer_write_advance(ringbuf, r);
+
 				if (todo == r)
 				{
+					if (todo2 == 0)
+						goto next;
+
 					todo = todo2;
 					todo2 = 0;
 					vec[0].buf = vec[1].buf;
@@ -395,11 +403,9 @@ main (int argc, char ** argv) {
 					vec[0].buf += r;
 					todo -= r;
 				}
-
-				ringbuffer_write_advance(ringbuf, r);
 			}
 		}
-
+	next:
 		todo = IN_SIZE;
 	}
 	//sleep(1); // give FileThread some time to write remaining content of ringbuffer to file
