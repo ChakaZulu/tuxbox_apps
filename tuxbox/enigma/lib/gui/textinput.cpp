@@ -42,10 +42,10 @@ eTextInputField::eTextInputField( eWidget *parent, eLabel *descr, eTextInputFiel
 	addActionMap(&i_texteditActions->map);
 	flags=0;
 	align=eTextPara::dirLeft;
-	table=5;	
+	table=5;
 	char *language=0;
 	eConfig::getInstance()->getKey("/elitedvb/language", language);
-	if (strstr(language,"ru_RU"))
+	if (language && strstr(language,"ru_RU"))
 		table=1;
 	updateHelpWidget();
 }
