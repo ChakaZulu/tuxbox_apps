@@ -30,9 +30,12 @@
 */
 
 //
-// $Id: global.h,v 1.22 2002/02/10 12:29:23 McClean Exp $
+// $Id: global.h,v 1.23 2002/02/22 16:01:16 field Exp $
 //
 // $Log: global.h,v $
+// Revision 1.23  2002/02/22 16:01:16  field
+// Plugin-Interface weiter verbessert
+//
 // Revision 1.22  2002/02/10 12:29:23  McClean
 // simplify (wortspiel *hrhr*) bouquet-edit
 //
@@ -114,6 +117,7 @@
 #include "widget/eventlist.hpp"
 #include "helpers/locale.h"
 #include "helpers/update.h"
+#include "widget/gamelist.h"
 
 
 #ifndef NEUTRINO_CPP
@@ -148,6 +152,7 @@ NEUTRINO_CPP  CScreenSetup		*g_ScreenSetup;
 NEUTRINO_CPP CLocaleManager		*g_Locale;
 
 NEUTRINO_CPP CBouquetList		*bouquetList;
+NEUTRINO_CPP CPlugins   		*g_PluginList;
 
 
 

@@ -28,11 +28,11 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-$Id: gamelist.cpp,v 1.27 2002/02/22 14:56:43 field Exp $
+$Id: gamelist.cpp,v 1.28 2002/02/22 16:01:16 field Exp $
 
 $Log: gamelist.cpp,v $
-Revision 1.27  2002/02/22 14:56:43  field
-neues Plugin-Interface
+Revision 1.28  2002/02/22 16:01:16  field
+Plugin-Interface weiter verbessert
 
 Revision 1.26  2002/01/29 17:26:51  field
 Jede Menge Updates :)
@@ -73,7 +73,7 @@ gamelist: eigener Fontdef fuer 2-zeiliges Menue
 #include <fstream>
 #include <iostream.h>
 
-void plugins::loadPlugins()
+void CPlugins::loadPlugins()
 {
 	printf("Checking plugins-directory\n");
 	printf("Dir: %s\n", PLUGINDIR "/");
@@ -112,17 +112,17 @@ void plugins::loadPlugins()
 
 }
 
-plugins::~plugins()
+CPlugins::~CPlugins()
 {
 	plugin_list.clear();
 }
 
-void plugins::addParm(std::string cmd, std::string value)
+void CPlugins::addParm(std::string cmd, std::string value)
 {
 	params[cmd] = value;
 }
 
-void plugins::addParm(std::string cmd, int value)
+void CPlugins::addParm(std::string cmd, int value)
 {
 	char aval[10];
 	sprintf( aval, "%d", value );
@@ -130,27 +130,27 @@ void plugins::addParm(std::string cmd, int value)
 	addParm(cmd, aval);
 }
 
-void plugins::setfb(int fd)
+void CPlugins::setfb(int fd)
 {
 	addParm(P_ID_FBUFFER, fd);
 }
 
-void plugins::setrc(int fd)
+void CPlugins::setrc(int fd)
 {
 	addParm(P_ID_RCINPUT, fd);
 }
 
-void plugins::setlcd(int fd)
+void CPlugins::setlcd(int fd)
 {
 	addParm(P_ID_LCD, fd);
 }
 
-void plugins::setvtxtpid(int fd)
+void CPlugins::setvtxtpid(int fd)
 {
 	addParm(P_ID_VTXTPID, fd);
 }
 
-void plugins::parseCfg(plugin *plugin_data)
+void CPlugins::parseCfg(plugin *plugin_data)
 {
 	FILE *fd;
 
@@ -222,7 +222,7 @@ void plugins::parseCfg(plugin *plugin_data)
 	inFile.close();
 }
 
-PluginParam* plugins::makeParam(std::string id, PluginParam *next)
+PluginParam* CPlugins::makeParam(std::string id, PluginParam *next)
 {
 	cout << "Adding " << id << " With Value " << params.find(id)->second.c_str() << " and next: " << (int) next << endl;
 
@@ -237,7 +237,7 @@ PluginParam* plugins::makeParam(std::string id, PluginParam *next)
 	return startparam;
 }
 
-void plugins::startPlugin(int number)
+void CPlugins::startPlugin(int number)
 {
 	PluginExec execPlugin;
 	char depstring[129];
@@ -257,7 +257,6 @@ void plugins::startPlugin(int number)
 	tmpparam = startparam;
 
 	setfb( g_FrameBuffer->getFileHandle() );
-	setrc( g_RCInput->getFileHandle() );
 	setlcd(0);
 
 	if (plugin_list[number].fb)
@@ -271,10 +270,15 @@ void plugins::startPlugin(int number)
 	}
 	if (plugin_list[number].rc)
 	{
+		setrc( g_RCInput->getFileHandle() );
 		cout << "With RC " << params.find(P_ID_RCINPUT)->second.c_str() << endl;
-
 		startparam = makeParam(P_ID_RCINPUT, startparam);
 	}
+	else
+	{
+		g_RCInput->stopInput();
+	}
+
 	if (plugin_list[number].lcd)
 	{
 		cout << "With LCD " << endl;
@@ -360,7 +364,7 @@ void plugins::startPlugin(int number)
 		//restore framebuffer...
 
 
-		if (plugin_list[number].rc)
+		if (!plugin_list[number].rc)
 		{
     		g_RCInput->restartInput();
     		g_RCInput->clear();
@@ -384,6 +388,8 @@ void plugins::startPlugin(int number)
 			break;
 	}
 }
+
+// CGameList ...
 
 CGameList::CGameList(string Name)
 {
@@ -420,8 +426,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 
 	//scan4games here!
 
-	plugin_list.setPluginDir(PLUGINDIR);
-	plugin_list.loadPlugins();
+	g_PluginList->loadPlugins();
 
 	paint();
 
@@ -436,7 +441,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==g_settings.key_channelList_pageup)
 		{
 			selected+=listmaxshow;
-			if (selected>plugin_list.getNumberOfPlugins())
+			if (selected>g_PluginList->getNumberOfPlugins())
 				selected=0;
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
@@ -444,7 +449,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==g_settings.key_channelList_pagedown)
 		{
 			if ((int(selected)-int(listmaxshow))<0)
-				selected=plugin_list.getNumberOfPlugins();
+				selected=g_PluginList->getNumberOfPlugins();
 			else
 				selected -= listmaxshow;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -455,7 +460,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 			int prevselected=selected;
 			if(selected==0)
 			{
-				selected = plugin_list.getNumberOfPlugins();
+				selected = g_PluginList->getNumberOfPlugins();
 			}
 			else
 				selected--;
@@ -474,7 +479,7 @@ int CGameList::exec(CMenuTarget* parent, string actionKey)
 		else if (key==CRCInput::RC_down)
 		{
 			int prevselected=selected;
-			selected = (selected+1)%(plugin_list.getNumberOfPlugins()+1);
+			selected = (selected+1)%(g_PluginList->getNumberOfPlugins()+1);
 			paintItem(prevselected - liststart);
 			unsigned int oldliststart = liststart;
 			liststart = (selected/listmaxshow)*listmaxshow;
@@ -547,10 +552,10 @@ void CGameList::paintItem(int pos)
 
 
 
-		if(liststart+pos-1<plugin_list.getNumberOfPlugins())
+		if(liststart+pos-1<g_PluginList->getNumberOfPlugins())
 		{
-			g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, plugin_list.getName(liststart+pos-1).c_str(), color);
-			g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, plugin_list.getDescription(liststart+pos-1).c_str(), color);
+			g_Fonts->gamelist_itemLarge->RenderString(x+10, ypos+fheight1+3, width-20, g_PluginList->getName(liststart+pos-1).c_str(), color);
+			g_Fonts->gamelist_itemSmall->RenderString(x+20, ypos+fheight,    width-20, g_PluginList->getDescription(liststart+pos-1).c_str(), color);
 
 		}
 	}
@@ -580,8 +585,8 @@ void CGameList::runGame(int selected )
 	#endif
 
 	g_RemoteControl->CopyPIDs();
-	plugin_list.setvtxtpid( g_RemoteControl->vpid );
-	plugin_list.startPlugin( selected );
+	g_PluginList->setvtxtpid( g_RemoteControl->vtxtpid );
+	g_PluginList->startPlugin( selected );
 
     //redraw menue...
     paintHead();
