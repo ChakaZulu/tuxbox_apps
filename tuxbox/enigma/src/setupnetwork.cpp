@@ -721,11 +721,11 @@ void eZapNetworkSetup::nfsPressed()
 
 static void errorMessage(const eString message, int type=0)
 {
-        int flags;
+	int flags;
 	if(type==1)
-	    flags = eMessageBox::iconInfo|eMessageBox::btOK;
+		flags = eMessageBox::iconInfo|eMessageBox::btOK;
 	else	
-	    flags = eMessageBox::iconWarning|eMessageBox::btOK;
+		flags = eMessageBox::iconWarning|eMessageBox::btOK;
 	eMessageBox mb(message, _("Info"), flags);
 	mb.show();
 	mb.exec();
@@ -1045,12 +1045,14 @@ void eNFSSetup::okPressed()
 	}
 	
 	eMessageBox msg(
-_               ("NFS-Entry stored. Further entry?\n"),
-_		("NFS-Setup..."),
+		_("NFS-Entry stored. Further entry?\n"),
+		_("NFS-Setup..."),
 		eMessageBox::btYes|eMessageBox::btNo, eMessageBox::btNo);
-		msg.show();
-		int res=msg.exec();
-		msg.hide();
+
+	msg.show();
+	int res=msg.exec();
+	msg.hide();
+
 	if (res != eMessageBox::btYes)
 		close(0);
 	else

@@ -202,6 +202,12 @@ eMainMenu::eMainMenu()
 	setHelpID(10);
 }
 
+void eMainMenu::setLCD( eWidget *LCDTitle, eWidget *LCDElement )
+{
+	eWidget::setLCD(LCDTitle, LCDElement);
+	wnd.setLCD(LCDTitle,LCDElement);
+}
+
 void eMainMenu::sel_tv()
 {
 	eZapMain::getInstance()->setMode(eZapMain::modeTV, 1);

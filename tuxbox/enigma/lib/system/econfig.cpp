@@ -34,18 +34,19 @@ eConfig::eConfig()
 			case 'u': keys_uint[key] = strtoul(opt, 0, 0x10); break;
 			case 'd':
 			{
-				char *endptr;
+				char *endptr=0;
 				keys_double[key] = strtod(opt, &endptr);
-				if ( endptr )
+				if ( endptr && *endptr )
 				{
 					if ( *endptr == ',' )
 						*endptr = '.';
 					else if (*endptr == '.' )
 						*endptr = ',';
+					endptr=0;
 					keys_double[key] = strtod(opt, &endptr);
+					if ( endptr && *endptr )
+						eDebug("failed to parse %s %s", key, opt);
 				}
-				if ( endptr )
-					eDebug("failed to parse %s %s", key, opt);
 				break;
 			}
 			case 'i':

@@ -1,4 +1,3 @@
-#define DIR_V
 #include "enigma_epg.h"
 #include "enigma.h"
 #include "sselect.h"
@@ -36,10 +35,13 @@ static eString buildShortName( const eString &str )
 	return tmp;
 }
 
-eZapEPG::eZapEPG(): 
-	eWindow(1), offs(0), focusColumn(0), hours(3), numservices(5), eventWidget(0)
+eZapEPG::eZapEPG() 
+	:eWidget(0,1), offs(0), focusColumn(0), hours(3)
+	,numservices(8), eventWidget(0), NowTimeLineXPos(-1)
 {
-	setText(_("Programm Guide"));
+	move(ePoint(70, 50));
+	resize(eSize(590, 470));
+	timeLine.setAutoDelete(true);
 	timeFont = eSkin::getActive()->queryFont("epg.time");
 	titleFont = eSkin::getActive()->queryFont("epg.title");
 	descrFont = eSkin::getActive()->queryFont("epg.description");
@@ -55,7 +57,8 @@ eZapEPG::eZapEPG():
 	eZap::getInstance()->getServiceSelector()->forEachServiceRef( callback, false );
 	curS = curE = services.begin();
 	sbar = new eStatusBar(this);
-	sbar->setFlags( eStatusBar::flagOwnerDraw );
+
+	sbar->setFlags( eStatusBar::flagOwnerDraw|RS_WRAP);
 	setHelpID(13);
 }
 
@@ -70,27 +73,35 @@ eZapEPG::entry::entry(eWidget *parent, gFont &timeFont, gFont &titleFont,
 	: eWidget(parent), timeFont(timeFont),
 	titleFont(titleFont), descrFont(descrFont), entryColor(entryColor), 
 	entryColorSelected(entryColorSelected),
-	sbar(sbar)
+	sbar(sbar), para(0), xOffs(0), yOffs(0)
 {
 	setBackgroundColor(entryColor);
 };
 
 eZapEPG::entry::~entry()
 {
+	if(para)
+	{
+		para->destroy();
+		para=0;
+	}
 	delete event;
 }
 
 void eZapEPG::entry::redrawWidget(gPainter *target, const eRect &area)
 {
-	eString time="";
-	tm *begin=start!=-1?localtime(&start):0;
-	if (begin)
-		time.sprintf("%02d:%02d (%dmin)", begin->tm_hour, begin->tm_min, duration / 60);
-	target->setFont(timeFont);
-	target->renderText(eRect(0, 0, size.width(), 18), time);
+	if ( !para )
+	{
+		para=new eTextPara( eRect(0, 0, size.width(), size.height() ) );
+		para->setFont(titleFont);
+		para->renderString(title, RS_WRAP);
+		int bboxHeight = para->getBoundBox().height();
+		int bboxWidth = para->getBoundBox().width();
+		yOffs = (bboxHeight < size.height()) ? (( size.height() - bboxHeight ) / 2) - para->getBoundBox().top() : 0;
+		xOffs = (bboxWidth < size.width()) ? (( size.width() - bboxWidth ) / 2) - para->getBoundBox().left() : 0;
+	}
 
-	target->setFont(titleFont);
-	target->renderText(eRect(0, 18, size.width(), size.height()-18), title, RS_WRAP);
+	target->renderPara(*para, ePoint( area.left()+xOffs, area.top()+yOffs) );
 
 	ePlaylistEntry* p=0;
 	if ( (p = eTimerManager::getInstance()->findEvent( &service->service, (EITEvent*)event )) )
@@ -104,12 +115,14 @@ void eZapEPG::entry::redrawWidget(gPainter *target, const eRect &area)
 	target->setForegroundColor(gColor(entryColorSelected));
 	target->fill(eRect(0, size.height()-1, size.width(), 1));
 	target->fill(eRect(size.width()-1, 0, 1, size.height()));
+	if (backgroundColor==entryColorSelected)
+		redrawed();
 }
 
 void eZapEPG::entry::gotFocus()
 {
 	sbar->setText( helptext );
-	setBackgroundColor(entryColorSelected);
+ setBackgroundColor(entryColorSelected);
 }
 
 void eZapEPG::entry::lostFocus()
@@ -125,8 +138,8 @@ int eZapEPG::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::execBegin:
 		if ( sbar->getPosition().isNull() )
 		{
-			sbar->move( ePoint(0, clientrect.height()-30) );
-			sbar->resize( eSize( clientrect.width(), 30) );
+			sbar->move( ePoint(0, clientrect.height()-50) );
+			sbar->resize( eSize( clientrect.width(), 50) );
 			sbar->loadDeco();
 		}
 		break;
@@ -138,39 +151,25 @@ int eZapEPG::eventHandler(const eWidgetEvent &event)
 		if ( servicevalid && current_service->current_entry != current_service->entries.end())
 			eventvalid = 1;
 		if ( (addtype = i_epgSelectorActions->checkTimerActions( event.action )) != -1 )
-				;
+			;
 		else if (event.action == &i_epgSelectorActions->removeTimerEvent)
 		{
 			if (eventvalid)
 				if ( eTimerManager::getInstance()->removeEventFromTimerList( this, &current_service->service, current_service->current_entry->event ) )
-            current_service->current_entry->invalidate();
+						current_service->current_entry->invalidate();
 		}
 		else if (event.action == &i_focusActions->left)
-		#ifdef DIR_V
-			selService(-1);
-		#else
 			selEntry(-1);
-		#endif
 		else if (event.action == &i_focusActions->right)
-		#ifdef DIR_V
-			selService(+1);
-		#else
 			selEntry(+1);
-		#endif
 		else if (event.action == &i_focusActions->up)
-		#ifdef DIR_V
-			selEntry(-1);
-		#else
 			selService(-1);
-		#endif
 		else if (event.action == &i_focusActions->down)
-		#ifdef DIR_V
-			selEntry(+1);
-		#else
 			selService(+1);
-		#endif
 		else if (event.action == &i_cursorActions->ok)
 			close(eventvalid?0:-1);
+		else if (event.action == &i_cursorActions->cancel)
+			close(-1);
 		else if ((event.action == &i_epgSelectorActions->showExtendedInfo) && eventvalid)
 		{
 			eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(current_service->service);
@@ -198,6 +197,7 @@ int eZapEPG::eventHandler(const eWidgetEvent &event)
 			}
 			ei.hide();
 			show();
+			drawTimeLines();
 		} else
 			break;
 		if (eventvalid && (addtype != -1))
@@ -217,111 +217,96 @@ int eZapEPG::eventHandler(const eWidgetEvent &event)
 	default:
 		break;
 	}
-	return eWindow::eventHandler(event);
+	return eWidget::eventHandler(event);
 }
 
-
-void eZapEPG::buildService(serviceentry &service, time_t start, time_t end)
+void eZapEPG::buildService(serviceentry &service)
 {
-#ifdef DIR_V
-	int height = service.pos.height();
-#else
 	int width = service.pos.width();
-#endif
 	service.entries.setAutoDelete(1);
 	eEPGCache *epgcache=eEPGCache::getInstance();
 	const timeMap *evmap = epgcache->getTimeMap(service.service);
 	if (!evmap)
 		return;
+
 	timeMap::const_iterator ibegin = evmap->lower_bound(start);
-	if ((ibegin != evmap->end()) && (ibegin != evmap->begin()))
-		--ibegin;
+	if ((ibegin != evmap->end()) && (ibegin != evmap->begin()) )
+	{
+		if ( ibegin->first != start )
+			--ibegin;
+	}
 	else
 		ibegin=evmap->begin();
 
-	timeMap::const_iterator iend = evmap->upper_bound(end);
-	if (iend != evmap->end())
-		++iend;
+	timeMap::const_iterator iend = evmap->lower_bound(end);
 
 	for (timeMap::const_iterator event(ibegin); event != iend; ++event)
 	{
 		EITEvent *ev = new EITEvent(*event->second);
 		if (((ev->start_time+ev->duration)>= start) && (ev->start_time <= end))
 		{
+			eString description;
 			entry *e = new entry(eventWidget, timeFont, titleFont, descrFont, entryColor, entryColorSelected, sbar);
 			e->service = &service;
-			e->start = ev->start_time;
-			e->duration = ev->duration;
-			e->event_id = ev->event_id;
-#ifdef DIR_V
-			int ypos = (e->start - start) * height / (end - start);
-			int eheight = (e->start + e->duration - start) * height / (end - start);
-			eheight -= ypos;
-			
-			if (ypos < 0)
-			{
-				eheight += ypos;
-				ypos = 0;
-			}
-			
-			if ((ypos+eheight) > height)
-				eheight = height - ypos;
-				
-			e->move(ePoint(service.pos.x(), service.pos.y() + ypos));
-			e->resize(eSize(service.pos.width(), eheight));
-#else
-			int xpos = (e->start - start) * width / (end - start);
-			int ewidth = (e->start + e->duration - start) * width / (end - start);
+			int xpos = (ev->start_time - start) * width / (end - start);
+			int ewidth = (ev->start_time + ev->duration - start) * width / (end - start);
 			ewidth -= xpos;
-			
+
 			if (xpos < 0)
 			{
 				ewidth += xpos;
 				xpos = 0;
 			}
-			
+
 			if ((xpos+ewidth) > width)
 				ewidth = width - xpos;
-				
+
 			e->move(ePoint(service.pos.x() + xpos, service.pos.y()));
 			e->resize(eSize(ewidth, service.pos.height()));
-#endif
+			CONNECT( e->redrawed, eZapEPG::drawTimeLines );
 			service.entries.push_back(e);
-			
+
 			for (ePtrList<Descriptor>::const_iterator d(ev->descriptor); d != ev->descriptor.end(); ++d)
 				if (d->Tag()==DESCR_SHORT_EVENT)
 				{
 					const ShortEventDescriptor *s=(const ShortEventDescriptor*)*d;
 					e->title=s->event_name;
-					e->description=s->text;
+					description=s->text;
 					break;
 				}
-			tm *begin=ev->start_time!=-1?localtime(&ev->start_time):0;
-			eString descr = e->description;
-			while ( descr[0] == ' ' )
-				descr.erase(0);
-			if ( descr != e->title )
+			tm *begin=localtime(&ev->start_time);
+			while ( description[0] == ' ' )
+				description.erase(0);
+			if ( description != e->title )
 			{
-				if ( descr )
-					descr = " - "+descr;
+				if ( description )
+					description = " - "+description;
 			}
 			else
-				descr="";
-			e->setHelpText( eString().sprintf("%02d.%02d. %02d:%02d %s%s",
+				description="";
+			eString tmp;
+			tmp.sprintf("%02d.%02d. %02d:%02d - ",
 				begin->tm_mday,
 				begin->tm_mon+1,
 				begin->tm_hour,
-				begin->tm_min,
-				e->title.c_str(),
-				descr.c_str() ));
+				begin->tm_min);
+
+			time_t endTime = ev->start_time + ev->duration;
+			tm *end=localtime(&endTime);
+			tmp+=eString().sprintf("%02d:%02d %s%s",
+				end->tm_hour, end->tm_min,
+				e->title.c_str(), description.c_str());
+
+			e->setHelpText(tmp);
 			e->event = ev;
-		} else
+		}
+		else
 			delete ev;
 	}
 }
 
 void eZapEPG::selService(int dir)
-{	
+{
 	if (serviceentries.begin() == serviceentries.end())
 		return;
 	int isok;
@@ -358,7 +343,7 @@ void eZapEPG::selService(int dir)
 	if (isok)
 	{
 		l->lostFocus();
-		last_time = l->start;
+		last_time = l->event->start_time;
 	}
 	
 	if (current_service->current_entry != current_service->entries.end())
@@ -370,10 +355,10 @@ void eZapEPG::selService(int dir)
 			for (ePtrList<entry>::iterator i(current_service->entries.begin()); 
 					i != current_service->entries.end(); ++i)
 			{
-				if ((best == current_service->entries.end()) || abs(i->start-last_time) < best_diff)
+				if ((best == current_service->entries.end()) || abs(i->event->start_time-last_time) < best_diff)
 				{
 					best = i;
-					best_diff = abs(i->start-last_time);
+					best_diff = abs(i->event->start_time-last_time);
 				}
 			}
 			
@@ -444,21 +429,24 @@ void eZapEPG::buildPage(int direction)
 			direction 4  ->  down  */
 	if ( eventWidget )
 		eventWidget->hide();
+	timeLine.clear();
 	serviceentries.clear();
 	current_service = serviceentries.end();
 	delete eventWidget;
 	eventWidget = new eWidget( this );
 	eventWidget->move(ePoint(0,0));
-	eSize tmp = clientrect.size();
-	tmp.setHeight( clientrect.height()-30 );
-	eventWidget->resize( tmp );
+	eSize tmps = clientrect.size();
+	tmps.setHeight( clientrect.height()-50 );
+	eventWidget->resize( tmps );
 
 #ifndef DISABLE_LCD
 	eventWidget->setLCD( LCDTitle, LCDElement );
 #endif
 
-	time_t now=time(0)+eDVB::getInstance()->time_difference+offs,
-				 end=now+hours*3600;
+	start=time(0)+eDVB::getInstance()->time_difference+offs;
+	unsigned int tmp = start % 1800;  // align to half hours
+	start -= tmp;
+	end=start+hours*3600;
 
 	if ( direction == 1 )
 		// go left.. we must count "numservices" back
@@ -469,7 +457,7 @@ void eZapEPG::buildPage(int direction)
 		{
 			if ( s == services.end() )
 				break;
-			const EITEvent *e = eEPGCache::getInstance()->lookupEvent( *s, now );
+			const EITEvent *e = eEPGCache::getInstance()->lookupEvent( *s, (time_t)(start+tmp) );
 			if ( e )
 			{
 				delete e;
@@ -495,35 +483,40 @@ void eZapEPG::buildPage(int direction)
 	else if ( direction > 2 )  // up or down
 		curE=curS;
 
-#ifdef DIR_V
-	int height = clientrect.height()-30; // sub statusbar height
-	int servicewidth = clientrect.width() / numservices;
-#else
 	int width = clientrect.width();
-	int serviceheight = clientrect.height() / numservices;
-#endif
-	
+	int serviceheight = (eventWidget->height()-40) / numservices;
+
+	time_t tmpTime=start;
+	int timeWidth = (width - 100) / (hours*2);
+	for (unsigned int i=0; i < hours*2; ++i)
+	{
+		tmpTime+=i?1800:0;
+		eLabel *l = new eLabel(eventWidget);
+		l->move(ePoint( i*timeWidth-(timeWidth/2)+100, 0));
+		l->resize(eSize(timeWidth,30));
+		l->setFlags(eLabel::flagVCenter);
+		l->setAlign(eTextPara::dirCenter);
+		tm *bla = localtime(&tmpTime);
+		l->setText(eString().sprintf("%d:%02d", bla->tm_hour, bla->tm_min));
+		timeLine.push_back(l);
+	}
+
 	int p = 0;
 	do
 	{
 		if ( curE == services.end() )
 			break;
-		const EITEvent *e = eEPGCache::getInstance()->lookupEvent( *curE, now );
+		const EITEvent *e = eEPGCache::getInstance()->lookupEvent( *curE, (time_t)(start+tmp) );
 		if ( e )
 		{
 			delete e;
 			serviceentries.push_back(serviceentry());
 			serviceentry &service = serviceentries.back();
 			service.header = new eLabel(eventWidget);
-#ifdef DIR_V
-			service.header->move(ePoint(p * servicewidth, 0));
-			service.header->resize(eSize(servicewidth, 30));
-			service.pos = eRect(p++ * servicewidth, 30, servicewidth, height - 30);
-#else
-			service.header->move(ePoint(0, p * serviceheight));
-			service.header->resize(eSize(100, serviceheight));
-			service.pos = eRect(100, p++ * serviceheight, width - 100, serviceheight);
-#endif
+			service.header->move(ePoint(0, p * serviceheight + 35));
+			service.header->resize(eSize(90, serviceheight));
+			service.pos = eRect(100, p++ * serviceheight + 35, width - 100, serviceheight );
+
 			eString stext;
 			if ( curE->descr )   // have changed service name?
 				stext=curE->descr;  // use this...
@@ -541,12 +534,13 @@ void eZapEPG::buildPage(int direction)
 
 			// set column service name
 			service.header->setText(stext);
+			service.header->setFlags( eLabel::flagVCenter );
 
-			buildService(service, now, end);
+			buildService(service);
 
-   // set focus line
+			// set focus line
 			if ( direction == 3 )  // up pressed
-    // set focus to last line
+			// set focus to last line
 				service.current_entry = --service.entries.end();
 			else  // set focus to first line
 				service.current_entry = service.entries.begin();
@@ -576,4 +570,38 @@ void eZapEPG::buildPage(int direction)
 	}
 	if (current_service->current_entry != current_service->entries.end())
 		current_service->current_entry->gotFocus();
+}
+
+void eZapEPG::drawTimeLines()
+{
+	if ( eventWidget && eventWidget->isVisible() && timeLine.size() )
+	{
+		gPainter *p = getPainter(eRect(eventWidget->getPosition(),eventWidget->getSize()));
+		int incWidth=((eventWidget->width()-100)/(hours*2));
+		int pos=100;
+		int lineheight = eventWidget->height();
+		if ( NowTimeLineXPos != -1 )
+		{
+			int tmp=NowTimeLineXPos;
+			NowTimeLineXPos=-1;
+			invalidate( eRect( tmp,30,2,lineheight) );
+		}
+		p->setForegroundColor( eSkin::getActive()->queryColor("epg.timeline") );
+		for (ePtrList<eLabel>::iterator it(timeLine); it != timeLine.end(); ++it)
+		{
+			p->fill(eRect(pos,30,1,lineheight));
+			pos+=incWidth;
+		}
+
+		time_t now=time(0)+eDVB::getInstance()->time_difference;
+		if ( now >= start && now < end )
+		{
+			int bla = ((eventWidget->width()-100)*1000) / (hours*60);
+			NowTimeLineXPos = ((now/60) - (start/60)) * bla / 1000;
+			NowTimeLineXPos+=100;
+			p->setForegroundColor( eSkin::getActive()->queryColor("epg.timeline.now") );
+			p->fill(eRect(NowTimeLineXPos,30,2,lineheight));
+		}
+		delete p;
+	}
 }

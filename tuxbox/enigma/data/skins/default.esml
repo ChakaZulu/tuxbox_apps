@@ -71,7 +71,7 @@
 		<map name="partitionCheck.status" font="Nimbus" size="20" />
 
 		<map name="head" font="Nimbus" size="32" />
-		
+
 		<map name="epg.time" font="Nimbus" size="16" />
 		<map name="epg.title" font="Nimbus" size="18" />
 		<map name="epg.description" font="Nimbus" size="16" />
@@ -232,14 +232,12 @@
 		<color name="std_red"    color="#ff0000" />
 		<color name="std_green"  color="#00ff00" />
 		<color name="std_blue"   color="#0000ff" />
-
 		<color name="std_dyellow"  color="#c0c000" />
 		<color name="std_dcyan"    color="#00c0c0" />
 		<color name="std_dgreen"   color="#00c000" />
 		<color name="std_dmagenta" color="#c000c0" />
 		<color name="std_dred"     color="#c00000" />
 		<color name="std_dblue"    color="#0000c0" />
-
 		<color name="std_gray"     color="#000000" end="#ffffff" size="8" />
 
 		<color name="blue_nontrans" color="#1e003f80" end="#00003f80" size="4" />
@@ -257,6 +255,7 @@
 		<color name="folder5" color="#efe6e6" />
 		<color name="eServiceSelector.entrySelectedToMove" color="#ff0303" />
 		<color name="eServiceSelector.entryHilited" color="#ff0303" />
+		<color name="epg.timeline.now" color="#A01010" />
 	</colors>
 
 	<colorscheme>
@@ -268,6 +267,7 @@
 		<map name="epg.entry.background" color="volume3" />
 		<map name="indexmark" color="std_red" />
 		<map name="textinput.helpwindow.border" color="std_gray+4" />
+		<map name="epg.timeline" color="std_gray+2" />
 	</colorscheme>
 
 	<object name="eZapMainMenu">
@@ -434,7 +434,7 @@
 
 			</eSatfind>
 	</object>
-	
+
 	<object name="RotorConfig">
 		<RotorConfig text="Motor Config" cposition="80:100" csize="550:400" >
 			<eCheckbox text="Use Motor Input Power" name="useRotorInPower" position="10:10" size="300:35" helptext="Use motor input power for running detection.. else use timeout" />

@@ -4,35 +4,39 @@
 #include <lib/gui/ewidget.h>
 #include <lib/gui/ewindow.h>
 #include <lib/gui/elabel.h>
+#include <lib/gui/ebutton.h>
 #include <lib/dvb/dvb.h>
 
 class EITEvent;
 class eStatusBar;
 
-class eZapEPG: public eWindow
+class eZapEPG: public eWidget
 {
 	gFont timeFont, titleFont, descrFont;
 	gColor entryColor, entryColorSelected;
 	unsigned int offs, focusColumn, hours, numservices;
+	ePtrList<eLabel> timeLine;
 	eStatusBar *sbar;
 	eWidget *eventWidget;
+	int NowTimeLineXPos;
+	time_t start, end;
 	struct serviceentry;
 	struct entry: public eWidget
 	{
 		gFont &timeFont, &titleFont, &descrFont;
 		gColor entryColor, entryColorSelected;
 		eWidget *sbar;
+		eTextPara *para;
+		eString title;
+		unsigned int xOffs, yOffs;
 		void redrawWidget(gPainter *target, const eRect &area);
 		void gotFocus();
 		void lostFocus();
 	public:
+		Signal0<void> redrawed;
 		struct serviceentry *service;
 		static gPixmap *inTimer;
 		static gPixmap *inTimerRec;
-		time_t start;
-		int duration;
-		int event_id;
-		eString title, description;
 		void setActive(int active);
 		const EITEvent *event;
 		entry(eWidget *parent, gFont &timeFont, gFont &titleFont, gFont &descrFont, gColor entryColor, gColor entryColorSelected, eWidget *sbar );
@@ -54,9 +58,10 @@ class eZapEPG: public eWindow
 	std::list<serviceentry> serviceentries;
 	std::list<serviceentry>::iterator current_service;
 	int eventHandler(const eWidgetEvent &event);
-	void buildService(serviceentry &service, time_t start, time_t end);
+	void buildService(serviceentry &service);
 	void selService(int dir);
 	void selEntry(int dir);
+	void drawTimeLines();
 public:
 	std::list<serviceentry>::iterator& getCurSelected() { return current_service; }
 	void addToList( const eServiceReference& ref );
