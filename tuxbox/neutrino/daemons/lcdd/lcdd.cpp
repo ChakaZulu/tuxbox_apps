@@ -126,7 +126,7 @@ void show_time()
 	strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
 	display.draw_fill_rect (90,54,120,64, CLCDDisplay::PIXEL_OFF);
-	fonts.time->RenderString(92,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+	fonts.time->RenderString(92,63, 50, timestr, CLCDDisplay::PIXEL_ON);
 	display.update();
 }
 
@@ -161,9 +161,8 @@ void show_volume(unsigned char vol)
 void show_menu(lcdd_msg msg) {
 	int i;
 
+	if (mode != LCDM_MENU) return;
 	/* WARNING: interface change; if something doesn't work, read lcdd.h */
-	mode = LCDM_MENU;
-	//display.load_screen(&icon_setup);
 	// reload specified line
 	i = msg.param;
 	display.draw_fill_rect(-1,21+14*i,120,36+14*i, CLCDDisplay::PIXEL_OFF);
@@ -220,7 +219,7 @@ int main(int argc, char **argv)
 
 	fontRenderer = new fontRenderClass( &display );
 	fonts.channelname=fontRenderer->getFont("Arial", "Regular", 12);
-	fonts.time=fontRenderer->getFont("Arial", "Regular", 8);
+	fonts.time=fontRenderer->getFont("Arial", "Regular", 10);
 	fonts.menutitle=fontRenderer->getFont("Arial", "Regular", 15);
 	fonts.menu=fontRenderer->getFont("Arial", "Regular", 13);
 	display.setIconBasePath("/usr/lib/icons/");
