@@ -621,7 +621,7 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*data = (unsigned) p;
 									dont_delete_p = true;
 								break;
-							case NeutrinoMessages::CHANGEMODE :	// Change 
+							case NeutrinoMessages::CHANGEMODE :	// Change
 									*msg = NeutrinoMessages::CHANGEMODE;
 									*data = *(unsigned*) p;
 								break;
@@ -739,6 +739,10 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 									*msg = NeutrinoMessages::EVT_BOUQUETSCHANGED;
 									*data = 0;
 								break;
+							case CZapitClient::EVT_ZAP_CA_STATUS :
+									*msg = NeutrinoMessages::EVT_ZAP_CA_STATUS;
+									*data = *(unsigned*) p;
+								break;
 							default :
 								printf("[neutrino] event INITID_ZAPIT - unknown eventID 0x%x\n",  emsg.eventID );
 						}
@@ -765,19 +769,19 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 								break;
 							case CTimerdClient::EVT_ANNOUNCE_ZAPTO :
 									*msg = NeutrinoMessages::ANNOUNCE_ZAPTO;
-									*data = 0;							
+									*data = 0;
 								break;
 							case CTimerdClient::EVT_ANNOUNCE_SHUTDOWN :
 									*msg = NeutrinoMessages::ANNOUNCE_SHUTDOWN;
-									*data = 0;							
+									*data = 0;
 								break;
 							case CTimerdClient::EVT_ANNOUNCE_SLEEPTIMER :
 									*msg = NeutrinoMessages::ANNOUNCE_SLEEPTIMER;
-									*data = 0;							
+									*data = 0;
 								break;
 							case CTimerdClient::EVT_SLEEPTIMER :
 									*msg = NeutrinoMessages::SLEEPTIMER;
-									*data = 0;							
+									*data = 0;
 								break;
 							case CTimerdClient::EVT_RECORD_START :
 									*msg = NeutrinoMessages::RECORD_START;

@@ -50,12 +50,13 @@ class CInfoViewer
 	private:
 		CFrameBuffer	*frameBuffer;
 
-		bool		gotTime;
-		bool		recordModeActive;
+		bool	gotTime;
+		bool	recordModeActive;
+		bool	CA_Status;
 
 		int		InfoHeightY;
 		int		InfoHeightY_Info;
-		bool		showButtonBar;
+		bool	showButtonBar;
 
 		int		BoxEndX;
 		int		BoxEndY;
@@ -67,42 +68,44 @@ class CInfoViewer
 		int		ChanHeight;
 		int		ChanInfoX;
 
-		string		CurrentChannel;
+		string	CurrentChannel;
 		sectionsd::CurrentNextInfo	info_CurrentNext;
-        	t_channel_id    channel_id;
+        t_channel_id	channel_id;
 
-		char aspectRatio;
+		char	aspectRatio;
 
 		uint	sec_timer_id;
-		uint 	fadeTimer;
+		uint	fadeTimer;
 
-		void show_Data( bool calledFromEvent = false );
-		void paintTime( bool show_dot, bool firstPaint );
+		void	show_Data( bool calledFromEvent = false );
+		void	paintTime( bool show_dot, bool firstPaint );
 
 
-		void showButton_Audio();
-		void showButton_SubServices();
+		void	showButton_Audio();
+		void	showButton_SubServices();
 
-		void showIcon_16_9();
-		void showIcon_VTXT();
-		void showRecordIcon( bool show );
+		void	showIcon_16_9();
+		void	showIcon_CA_Status();
+		void	showIcon_VTXT();
+		void	showRecordIcon( bool show );
 
-		void showFailure();
+		void	showFailure();
 	public:
 
 		bool	is_visible;
 
 		CInfoViewer();
 
-		void start();
+		void	start();
 
-		void showTitle( int ChanNum, string Channel, const t_channel_id new_channel_id = 0, bool calledFromNumZap = false );
-		void killTitle();
-		sectionsd::CurrentNextInfo getEPG(const t_channel_id for_channel_id);
+		void	showTitle( int ChanNum, string Channel, const t_channel_id new_channel_id = 0, bool calledFromNumZap = false );
+		void	killTitle();
+		sectionsd::CurrentNextInfo	getEPG(const t_channel_id for_channel_id);
 
-		void showSubchan();
+		void	showSubchan();
+		void	Set_CA_Status(int Status);
 
-		int handleMsg(uint msg, uint data);
+		int		handleMsg(uint msg, uint data);
 };
 
 

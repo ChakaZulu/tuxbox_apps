@@ -1,5 +1,5 @@
 /*
- * $Id: nit.cpp,v 1.30 2002/11/18 00:27:57 obi Exp $
+ * $Id: nit.cpp,v 1.31 2002/12/03 22:58:22 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -57,6 +57,7 @@ int parse_nit (unsigned char DiSEqC)
 	unsigned short transport_stream_loop_length;
 	unsigned short transport_stream_id;
 	unsigned short original_network_id;
+	unsigned short network_id;
 
 	unsigned char filter[DMX_FILTER_SIZE];
 	unsigned char mask[DMX_FILTER_SIZE];
@@ -91,16 +92,17 @@ int parse_nit (unsigned char DiSEqC)
 		}
 
 		section_length = ((buffer[1] & 0x0F) << 8) + buffer[2];
+		network_id = ((buffer[3] << 8)| buffer [4]);
 		network_descriptors_length = ((buffer[8] & 0x0F) << 8) | buffer[9];
 
 		for (pos = 10; pos < network_descriptors_length + 10; pos += buffer[pos + 1] + 2)
 		{
 			switch (buffer[pos])
 			{
-			case 0x0F:
+/*			case 0x0F:
 				Private_data_indicator_descriptor(buffer + pos);
 				break;
-
+*/
 			case 0x40:
 				network_name_descriptor(buffer + pos);
 				break;
@@ -109,10 +111,14 @@ int parse_nit (unsigned char DiSEqC)
 				linkage_descriptor(buffer + pos);
 				break;
 
-			case 0x5F:
-				private_data_specifier_descriptor(buffer + pos);
+			case 0x5B:
+				multilingual_network_name_descriptor(buffer + pos);
 				break;
 
+/*			case 0x5F:
+				private_data_specifier_descriptor(buffer + pos);
+				break;
+*/
 			case 0x80: /* unknown, Eutelsat 13.0E */
 				break;
 
@@ -120,7 +126,7 @@ int parse_nit (unsigned char DiSEqC)
 				break;
 
 			default:
-				DBG("descriptor_tag: %02x", buffer[pos]);
+				DBG("first_descriptor_tag: %02x", buffer[pos]);
 				break;
 			}
 		}
@@ -151,6 +157,10 @@ int parse_nit (unsigned char DiSEqC)
 						service_list_descriptor(buffer + pos2, original_network_id);
 						break;
 
+					case 0x42:
+						stuffing_descriptor(buffer + pos2);
+						break;
+
 					case 0x43:
 						if(!satellite_delivery_system_descriptor(buffer + pos2, transport_stream_id, original_network_id, DiSEqC)) return -2;
 						break;
@@ -163,11 +173,15 @@ int parse_nit (unsigned char DiSEqC)
 						private_data_specifier_descriptor(buffer + pos2);
 						break;
 
+					case 0x62:
+						frequency_list_descriptor(buffer + pos2);
+						break;
+
 					case 0x82: /* unknown, Eutelsat 13.0E */
 						break;
 
 					default:
-						DBG("descriptor_tag: %02x", buffer[pos2]);
+						DBG("second_descriptor_tag: %02x", buffer[pos2]);
 						break;
 					}
 				}

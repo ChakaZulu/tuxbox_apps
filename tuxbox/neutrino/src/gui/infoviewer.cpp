@@ -69,7 +69,8 @@ CInfoViewer::CInfoViewer()
 	is_visible		= false;
 	showButtonBar	= false;
 	gotTime 		= g_Sectionsd->getIsTimeSet();
-	CurrentChannel = "";
+	CurrentChannel	= "";
+	CA_Status		= false;
 }
 
 void CInfoViewer::start()
@@ -243,6 +244,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new
 
 			showButton_Audio();
 			showButton_SubServices();
+			showIcon_CA_Status();
 			showIcon_16_9();
 			showIcon_VTXT();
         }
@@ -261,8 +263,8 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, const t_channel_id new
         frameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
         frameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
 
-        uint msg; 
-	uint data;
+        uint msg;
+		uint data;
 
 
         if ( !calledFromNumZap )
@@ -610,6 +612,12 @@ int CInfoViewer::handleMsg(uint msg, uint data)
 		gotTime = true;
 		return messages_return::handled;
 	}
+	else if ( msg == NeutrinoMessages::EVT_ZAP_CA_STATUS )
+	{
+		CA_Status = true;
+		return messages_return::handled;
+	}
+
 
 	return messages_return::unhandled;
 }
@@ -861,4 +869,16 @@ void CInfoViewer::killTitle()
 		is_visible = false;
 		frameBuffer->paintBackgroundBox(BoxStartX, BoxStartY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET );
 	}
+}
+
+void CInfoViewer::showIcon_CA_Status()
+{
+	frameBuffer->paintIcon( ( CA_Status)?"ca.raw":"fta.raw", BoxEndX- 3* ICON_LARGE- ICON_SMALL, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
+}
+
+void CInfoViewer::Set_CA_Status(int Status)
+{
+	CA_Status = Status;
+	if ( is_visible && showButtonBar )
+		showIcon_CA_Status();
 }

@@ -95,6 +95,7 @@ struct NeutrinoMessages {
 		EVT_NOEPG_YET		=	CRCInput::RC_Events + 23,
 		EVT_RECORDMODE		=	CRCInput::RC_Events + 24,
 		EVT_ZAP_SUB_FAILED	=	CRCInput::RC_Events + 25,
+		EVT_ZAP_CA_STATUS	=	CRCInput::RC_Events + 26,
 
 		EVT_CURRENTEPG 		=	CRCInput::RC_WithData + 1,
 		EVT_SCAN_SATELLITE	=	CRCInput::RC_WithData + 2,

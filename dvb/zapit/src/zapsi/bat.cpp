@@ -1,5 +1,5 @@
 /*
- * $Id: bat.cpp,v 1.10 2002/11/18 00:27:57 obi Exp $
+ * $Id: bat.cpp,v 1.11 2002/12/03 22:58:22 Homar Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -97,7 +97,15 @@ int parse_bat (int demux_fd)
 				linkage_descriptor(buffer + pos);
 				break;
 
-			case 0x5F:
+			case 0x53:
+				CA_identifier_descriptor(buffer + pos);
+				break;
+
+			case 0x5C:
+				multilingual_bouquet_name_descriptor(buffer + pos);
+				break;
+
+/*			case 0x5F:
 				private_data_specifier_descriptor(buffer + pos);
 				break;
 
@@ -105,9 +113,9 @@ int parse_bat (int demux_fd)
 			case 0x91:
 			case 0xF0:
 				break;
-
+*/
 			default:
-				DBG("descriptor_tag: %02x", buffer[pos]);
+				DBG("first_descriptor_tag: %02x", buffer[pos]);
 				generic_descriptor(buffer + pos);
 				break;
 			}
@@ -137,16 +145,16 @@ int parse_bat (int demux_fd)
 					private_data_specifier_descriptor(buffer + pos3);
 					break;
 
-				case 0x80:
+/*				case 0x80:
 				case 0x81:
 				case 0x83:
 				case 0x93:
 				case 0xC9:
 				case 0xD3:
 					break;
-
+*/
 				default:
-					DBG("descriptor_tag: %02x", buffer[pos3]);
+					DBG("second_descriptor_tag: %02x", buffer[pos3]);
 					generic_descriptor(buffer + pos3);
 					break;
 				}

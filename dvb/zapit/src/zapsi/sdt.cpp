@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.cpp,v 1.35 2002/11/18 00:27:57 obi Exp $
+ * $Id: sdt.cpp,v 1.36 2002/12/03 22:58:22 Homar Exp $
  */
 
 /* system c */
@@ -38,7 +38,7 @@ uint32_t get_sdt_TsidOnid ()
 
 	filter[0] = 0x42;
 	mask[0] = 0xFF;
-	
+
 	if ((demux_fd = open(DEMUX_DEVICE, O_RDWR)) < 0)
 	{
 		ERROR(DEMUX_DEVICE);
@@ -81,6 +81,18 @@ int parse_sdt(const uint8_t DiSEqC)
 	unsigned short original_network_id;
 	unsigned short service_id;
 	unsigned short descriptors_loop_length;
+	unsigned short running_status;
+	/*	Value	Meaning
+		  0 	undefined
+		  1 	not running
+		  2 	starts in a few seconds (e.g. for video recording)
+		  3 	pausing
+		  4 	running
+	*/
+
+	bool EIT_schedule_flag;
+	bool EIT_present_following_flag;
+	bool free_CA_mode;
 
 	unsigned char filter[DMX_FILTER_SIZE];
 	unsigned char mask[DMX_FILTER_SIZE];
@@ -121,6 +133,10 @@ int parse_sdt(const uint8_t DiSEqC)
 		for (pos = 11; pos < section_length - 1; pos += descriptors_loop_length + 5)
 		{
 			service_id = (buffer[pos] << 8) | buffer[pos + 1];
+			EIT_schedule_flag = buffer[pos + 2] & 0x02;
+			EIT_present_following_flag = buffer[pos + 2] & 0x01;
+			running_status = buffer [pos + 3] & 0xE0;
+			free_CA_mode = buffer [pos + 3] & 0x10;
 			descriptors_loop_length = ((buffer[pos + 3] & 0x0F) << 8) | buffer[pos + 4];
 
 			for (pos2 = pos + 5; pos2 < pos + descriptors_loop_length + 5; pos2 += ((sdt_generic_descriptor*)(&buffer[pos2]))->descriptor_length + sizeof(sdt_generic_descriptor))
@@ -131,8 +147,12 @@ int parse_sdt(const uint8_t DiSEqC)
 					ISO_639_language_descriptor(buffer + pos2);
 					break;
 
-				case 0x40:
+/*				case 0x40:
 					network_name_descriptor(buffer + pos2);
+					break;
+*/
+				case 0x42:
+					stuffing_descriptor(buffer + pos2);
 					break;
 
 				case 0x47:
@@ -157,6 +177,10 @@ int parse_sdt(const uint8_t DiSEqC)
 
 				case 0x4C:
 					time_shifted_service_descriptor(buffer + pos2);
+					break;
+
+				case 0x51:
+					mosaic_descriptor(buffer + pos2);
 					break;
 
 				case 0x53:

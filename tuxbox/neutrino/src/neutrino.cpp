@@ -357,7 +357,7 @@ int CNeutrinoApp::loadSetup()
 	//fb-alphawerte für gtx
 	g_settings.gtx_alpha1 = configfile.getInt32( "gtx_alpha1", 0);
 	g_settings.gtx_alpha2 = configfile.getInt32( "gtx_alpha2", 1);
-	
+
 	//misc
 	g_settings.shutdown_real = configfile.getInt32( "shutdown_real", true );
 	g_settings.shutdown_showclock = configfile.getInt32( "shutdown_showclock", 1 );
@@ -445,7 +445,7 @@ int CNeutrinoApp::loadSetup()
 	g_settings.recording_stopplayback = configfile.getInt32( "recording_stopplayback", 0 );
 	g_settings.recording_stopsectionsd = configfile.getInt32( "recording_stopsectionsd", 1 );
 	strcpy( g_settings.recording_server_ip, configfile.getString( "recording_server_ip", "10.10.10.10").c_str() );
-	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );	
+	strcpy( g_settings.recording_server_port, configfile.getString( "recording_server_port", "4000").c_str() );
 	g_settings.recording_server_wakeup = configfile.getInt32( "recording_server_wakeup", 0 );
 	strcpy( g_settings.recording_server_mac, configfile.getString( "recording_server_mac", "11:22:33:44:55:66").c_str() );
 	strcpy( g_settings.recording_vcr_devicename, configfile.getString( "recording_vcr_devicename", "ORION").c_str() );
@@ -717,7 +717,7 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "parentallock_prompt", g_settings.parentallock_prompt );
 	configfile.setInt32( "parentallock_lockage", g_settings.parentallock_lockage );
 	configfile.setString( "parentallock_pincode", g_settings.parentallock_pincode );
-	
+
 	// timing
 	configfile.setInt32( "timing_menu", g_settings.timing_menu );
 	configfile.setInt32( "timing_chanlist", g_settings.timing_chanlist );
@@ -911,7 +911,7 @@ void CNeutrinoApp::SetupFonts()
 	g_fontRenderer->AddFont((fontFile+ "_bold.ttf").c_str() );
 	g_fontRenderer->AddFont((fontFile+ "_italic.ttf").c_str() );
 
-	g_Fonts->menu =         g_fontRenderer->getFont(fontName.c_str(), "Bold", atoi(g_settings.fontsize_menu)); 
+	g_Fonts->menu =         g_fontRenderer->getFont(fontName.c_str(), "Bold", atoi(g_settings.fontsize_menu));
 	g_Fonts->menu_title =   g_fontRenderer->getFont(fontName.c_str(), "Bold", atoi(g_settings.fontsize_menu_title));
 	g_Fonts->menu_info =    g_fontRenderer->getFont(fontName.c_str(), "Regular", atoi(g_settings.fontsize_menu_info));
 
@@ -1006,7 +1006,7 @@ void CNeutrinoApp::ClearFrameBuffer()
 
 void CNeutrinoApp::InitMainMenu(CMenuWidget &mainMenu, CMenuWidget &mainSettings,  CMenuWidget &audioSettings, CMenuWidget &parentallockSettings,
 										  CMenuWidget &networkSettings, CMenuWidget &recordingSettings, CMenuWidget &colorSettings, CMenuWidget &lcdSettings,
-										  CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings, 
+										  CMenuWidget &keySettings, CMenuWidget &videoSettings, CMenuWidget &languageSettings, CMenuWidget &miscSettings,
 										  CMenuWidget &service, CMenuWidget &fontSettings)
 {
 	dprintf(DEBUG_DEBUG, "init mainmenue\n");
@@ -1546,19 +1546,19 @@ void CNeutrinoApp::InitRecordingSettings(CMenuWidget &recordingSettings)
 
 	CStringInput *timerSettings_record_safety_time_before= new CStringInput("timersettings.record_safety_time_before", g_settings.record_safety_time_before, 2, "timersettings.record_safety_time_before.hint_1", "timersettings.record_safety_time_before.hint_2","0123456789 ");
 	CMenuForwarder *mf5 = new CMenuForwarder("timersettings.record_safety_time_before", true, g_settings.record_safety_time_before, timerSettings_record_safety_time_before );
-	
+
 	CStringInput *timerSettings_record_safety_time_after= new CStringInput("timersettings.record_safety_time_after", g_settings.record_safety_time_after, 2, "timersettings.record_safety_time_after.hint_1", "timersettings.record_safety_time_after.hint_2","0123456789 ");
 	CMenuForwarder *mf6 = new CMenuForwarder("timersettings.record_safety_time_after", true, g_settings.record_safety_time_after, timerSettings_record_safety_time_after );
 
-	CRecordingNotifier *RecordingNotifier = 
+	CRecordingNotifier *RecordingNotifier =
 		new CRecordingNotifier(mf1,mf2,oj2,mf3,oj3,oj4,mf4,oj5);
-	
-   CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type, 
+
+   CMenuOptionChooser* oj1 = new CMenuOptionChooser("recordingmenu.recording_type", &g_settings.recording_type,
                                                     true, RecordingNotifier);
 	oj1->addOption(0, "recordingmenu.off");
 	oj1->addOption(1, "recordingmenu.server");
 	oj1->addOption(2, "recordingmenu.vcr");
-	
+
 	recordingSettings.addItem( new CMenuSeparator() );
 	recordingSettings.addItem( new CMenuForwarder("menu.back") );
 	recordingSettings.addItem( new CMenuForwarder("recordingmenu.setupnow", true, "", this, "recording"));
@@ -1605,13 +1605,13 @@ void CNeutrinoApp::InitFontSettings(CMenuWidget &fontSettings,CMenuWidget &fontS
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemlarge", g_settings.fontsize_eventlist_itemlarge);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_itemsmall", g_settings.fontsize_eventlist_itemsmall);
 	AddFontSettingItem(fontSettings_Eventlist, "fontsize.eventlist_datetime", g_settings.fontsize_eventlist_datetime);
-	
+
 	fontSettings_Gamelist.addItem( new CMenuSeparator() );
 	fontSettings_Gamelist.addItem( new CMenuForwarder("menu.back") );
 	fontSettings_Gamelist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemLarge", g_settings.fontsize_gamelist_itemlarge);
 	AddFontSettingItem(fontSettings_Gamelist, "fontsize.gamelist_itemSmall", g_settings.fontsize_gamelist_itemsmall);
-	
+
 	fontSettings_Channellist.addItem( new CMenuSeparator() );
 	fontSettings_Channellist.addItem( new CMenuForwarder("menu.back") );
 	fontSettings_Channellist.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
@@ -1981,7 +1981,7 @@ void CNeutrinoApp::ShowStreamFeatures()
 		StreamFeatureSelector.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	}
 	// -- Timer Liste
-	StreamFeatureSelector.addItem( new CMenuForwarder("timerlist.name", true, "", 
+	StreamFeatureSelector.addItem( new CMenuForwarder("timerlist.name", true, "",
 																	  new CTimerList(), id, true, CRCInput::RC_yellow, "gelb.raw"), false );
 
 	// -- Stream Info
@@ -2160,7 +2160,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 
 
 	InitMainMenu(mainMenu, mainSettings, audioSettings, parentallockSettings, networkSettings, recordingSettings,
-					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings, 
+					 colorSettings, lcdSettings, keySettings, videoSettings, languageSettings, miscSettings,
 					 service, fontSettings);
 
 	//service
@@ -2202,6 +2202,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_COMPLETE_IS_NVOD, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_COMPLETE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_SUB_FAILED, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_ZAP_CA_STATUS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_COMPLETE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_TRANSPONDERS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SATELLITE, 222, NEUTRINO_UDS_NAME);
@@ -2622,7 +2623,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	}
 	else if( msg == NeutrinoMessages::ZAPTO)
 	{
-		CTimerd::EventInfo * eventinfo; 
+		CTimerd::EventInfo * eventinfo;
 		eventinfo = (CTimerd::EventInfo *) data;
 		if(recordingstatus==0)
 		{
@@ -2636,7 +2637,7 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 				tvMode(false);
 				channelsInit();
 			}
-			channelList->zapTo_ChannelID(eventinfo->channel_id);  
+			channelList->zapTo_ChannelID(eventinfo->channel_id);
 		}
 		delete (unsigned char*) data;
 		return messages_return::handled;
@@ -2711,9 +2712,9 @@ int CNeutrinoApp::handleMsg(uint msg, uint data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 	{
 		if( mode != mode_scart )
-			skipShutdownTimer = (ShowMsg ( "messagebox.info", 
-													 g_Locale->getText("shutdowntimer.announce") , 
-													 CMessageBox::mbrNo, 
+			skipShutdownTimer = (ShowMsg ( "messagebox.info",
+													 g_Locale->getText("shutdowntimer.announce") ,
+													 CMessageBox::mbrNo,
 													 CMessageBox::mbYes | CMessageBox::mbNo, "",450,5)
 										==CMessageBox::mbrYes);
 	}
@@ -3059,8 +3060,8 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 
 		lastMode = mode;
 		mode = mode_standby;
-		
-		//Send ir 
+
+		//Send ir
 		CIRSend irs("sbon");
 		irs.Send();
 	}
@@ -3071,10 +3072,10 @@ void CNeutrinoApp::standbyMode( bool bOnOff )
 		g_lcdd->setMode(CLcddTypes::MODE_TVRADIO);
 		g_Controld->videoPowerDown(false);
 
-		//Send ir 
+		//Send ir
 		CIRSend irs("sboff");
 		irs.Send();
-		
+
 		mode = mode_unknown;
 
 		//re-set mode
@@ -3268,7 +3269,7 @@ bool CNeutrinoApp::changeNotify(string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.369 2002/12/03 20:08:41 Zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.370 2002/12/03 22:54:09 Homar Exp $\n\n");
 
 	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
 	system("killall -9 udhcpc >/dev/null 2>/dev/null");
