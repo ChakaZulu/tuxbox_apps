@@ -94,6 +94,9 @@ void CAlphaSetup::setAlpha()
 
 int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 	if (parent)
 	{
@@ -108,7 +111,6 @@ int CAlphaSetup::exec(CMenuTarget* parent, const std::string &)
 	int selected = 0;
 	int max = 1;
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;

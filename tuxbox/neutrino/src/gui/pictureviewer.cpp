@@ -178,12 +178,14 @@ int CPictureViewerGui::exec(CMenuTarget* parent, const std::string & actionKey)
 
 int CPictureViewerGui::show()
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = -1;
 
 	CLCD::getInstance()->setMode(CLCD::MODE_MENU_UTF8, g_Locale->getText("pictureviewer.head") );
 	m_state=MENU;
 
-	uint msg; uint data;
 	int timeout;
 
 	bool loop=true;

@@ -467,6 +467,9 @@ bool CFileBrowser::readDir_std(const std::string & dirname, CFileList* flist)
 
 bool CFileBrowser::exec(std::string Dirname)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	bool res = false;
 
 	m_baseurl = "http://" + g_settings.streaming_server_ip +
@@ -487,7 +490,6 @@ bool CFileBrowser::exec(std::string Dirname)
 		g_ActionLog->println(buf);
 	#endif
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_filebrowser );
 
 	bool loop=true;
@@ -637,7 +639,7 @@ bool CFileBrowser::exec(std::string Dirname)
 
 			paint();
 		}
-		else if(CRCInput::isNumeric(msg))
+		else if (CRCInput::isNumeric(msg))
 		{
 			SMSInput(msg);
 		}
@@ -682,9 +684,13 @@ bool CFileBrowser::exec(std::string Dirname)
 
 void CFileBrowser::addRecursiveDir(CFileList * re_filelist, std::string rpath, bool bRootCall, CProgressWindow * progress)
 {
-	printf("addRecursiveDir %s\n",rpath.c_str());
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int n;
-	uint msg, data;
+
+	printf("addRecursiveDir %s\n",rpath.c_str());
+
 	if (bRootCall) bCancel=false;
 	
 	g_RCInput->getMsg_us(&msg, &data, 1);
@@ -973,7 +979,7 @@ void CFileBrowser::paint()
 }
 
 //------------------------------------------------------------------------
-void CFileBrowser::SMSInput(uint msg)
+void CFileBrowser::SMSInput(const neutrino_msg_t msg)
 {
 	time_t keyTime = time(NULL);
 	unsigned char key = 0;

@@ -183,10 +183,10 @@ class CRCInput
 		~CRCInput();     //destructor - closes rc-device
 
 
-		static bool isNumeric(const unsigned int key);
-		static int getNumericValue(const unsigned int key);
+		static bool isNumeric(const neutrino_msg_t key);
+		static int getNumericValue(const neutrino_msg_t key);
 		static unsigned int convertDigitToKey(const unsigned int digit);
-		static int getUnicodeValue(const unsigned int key);
+		static int getUnicodeValue(const neutrino_msg_t key);
 
 		static const char * getSpecialKeyName(const unsigned int key);
 		static std::string getKeyName(const unsigned int key);

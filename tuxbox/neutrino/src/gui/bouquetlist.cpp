@@ -162,6 +162,9 @@ int CBouquetList::exec( bool bShowChannelList)
 
 int CBouquetList::show()
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = -1;
 	if(Bouquets.size()==0)
 	{
@@ -183,7 +186,6 @@ int CBouquetList::show()
 	unsigned int chn= 0;
 	int pos= maxpos;
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
 	bool loop=true;
@@ -194,13 +196,13 @@ int CBouquetList::show()
 		if ( msg <= CRCInput::RC_MaxRC )
 			timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_chanlist );
 
-		if ( ( msg == CRCInput::RC_timeout ) ||
-			 ( msg == (uint) g_settings.key_channelList_cancel ) )
+		if ((msg == CRCInput::RC_timeout                             ) ||
+		    (msg == (neutrino_msg_t)g_settings.key_channelList_cancel))
 		{
 			selected = oldselected;
 			loop=false;
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pageup )
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pageup )
 		{
 			selected+=listmaxshow;
 			if (selected>Bouquets.size()-1)
@@ -208,7 +210,7 @@ int CBouquetList::show()
 			liststart = (selected/listmaxshow)*listmaxshow;
 			paint();
 		}
-		else if ( msg == (uint) g_settings.key_channelList_pagedown )
+		else if ( msg == (neutrino_msg_t)g_settings.key_channelList_pagedown )
 		{
 			if ((int(selected)-int(listmaxshow))<0)
 				selected=Bouquets.size()-1;

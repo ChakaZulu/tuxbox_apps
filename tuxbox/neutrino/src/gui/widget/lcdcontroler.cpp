@@ -74,6 +74,9 @@ void CLcdControler::setLcd()
 
 int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int selected, res = menu_return::RETURN_REPAINT;
 	unsigned int contrast_alt, brightness_alt, brightnessstandby_alt, autodimm_alt;
 
@@ -91,7 +94,6 @@ int CLcdControler::exec(CMenuTarget* parent, const std::string &)
 	CLCD::getInstance()->setAutoDimm(0);	// autodimm deactivated to control and see the real settings
 	paint();
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;

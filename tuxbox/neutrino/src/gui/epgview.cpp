@@ -394,11 +394,15 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 	if ( doLoop )
 	{
-		bool loop=true;
+		neutrino_msg_t      msg;
+		neutrino_msg_data_t data;
+
 		int scrollCount;
 
-		uint msg; uint data;
+		bool loop = true;
+
 		unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_epg );
+
 		while(loop)
 		{
 			g_RCInput->getMsgAbsoluteTimeout( &msg, &data, &timeoutEnd );
@@ -515,7 +519,7 @@ int CEpgData::show(const t_channel_id channel_id, unsigned long long a_id, time_
 
 				default:
 					// konfigurierbare Keys handlen...
-					if ( msg == (uint) g_settings.key_channelList_cancel )
+					if (msg == (neutrino_msg_t)g_settings.key_channelList_cancel)
 						loop = false;
 					else
 					{

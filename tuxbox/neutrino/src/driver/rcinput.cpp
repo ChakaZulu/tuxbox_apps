@@ -1254,7 +1254,7 @@ void CRCInput::clearRCMsg()
 *       isNumeric - test if key is 0..9
 *
 **************************************************************************/
-bool CRCInput::isNumeric(const unsigned int key)
+bool CRCInput::isNumeric(const neutrino_msg_t key)
 {
 	return ((key == RC_0) || ((key >= RC_1) && (key <= RC_9)));
 }
@@ -1263,7 +1263,7 @@ bool CRCInput::isNumeric(const unsigned int key)
 *       getNumericValue - return numeric value of the key or -1
 *
 **************************************************************************/
-int CRCInput::getNumericValue(const unsigned int key)
+int CRCInput::getNumericValue(const neutrino_msg_t key)
 {
 	return ((key == RC_0) ? (int)0 : (((key >= RC_1) && (key <= RC_9)) ? (int)(key - RC_1 + 1) : (int)-1));
 }
@@ -1289,7 +1289,7 @@ static const int unicode_value[UNICODE_VALUE_SIZE] = {-1 , -1 , '1', '2', '3', '
 						      'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', -1 /* FIXME */, -1 /* FIXME */, -1 , '\\', 'Z', 'X', 'C', 'V',
 						      'B', 'N', 'M', ',', '.', '/', -1, -1, -1, ' '};
 
-int CRCInput::getUnicodeValue(const unsigned int key)
+int CRCInput::getUnicodeValue(const neutrino_msg_t key)
 {
 	if (key < UNICODE_VALUE_SIZE)
 		return unicode_value[key];

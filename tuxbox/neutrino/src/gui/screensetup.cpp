@@ -49,6 +49,9 @@ CScreenSetup::CScreenSetup()
 
 int CScreenSetup::exec(CMenuTarget* parent, const std::string &)
 {
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	int res = menu_return::RETURN_REPAINT;
 
 	if (parent)
@@ -57,15 +60,14 @@ int CScreenSetup::exec(CMenuTarget* parent, const std::string &)
 	}
 
 	x_coord[0] = g_settings.screen_StartX;
-    x_coord[1] = g_settings.screen_EndX;
-    y_coord[0] = g_settings.screen_StartY;
-    y_coord[1] = g_settings.screen_EndY;
+	x_coord[1] = g_settings.screen_EndX;
+	y_coord[0] = g_settings.screen_StartY;
+	y_coord[1] = g_settings.screen_EndY;
 
 	paint();
 
 	selected = 0;
 
-	uint msg; uint data;
 	unsigned long long timeoutEnd = CRCInput::calcTimeoutEnd( g_settings.timing_menu );
 
 	bool loop=true;

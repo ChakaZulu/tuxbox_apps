@@ -64,8 +64,9 @@ CMotorControl::CMotorControl()
 
 int CMotorControl::exec(CMenuTarget* parent, const std::string &)
 {
-	uint msg;
-	uint data;
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	bool istheend = false;
 	
 	if (!frameBuffer->getActive())

@@ -4,7 +4,7 @@
   Movieplayer (c) 2003, 2004 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.72 2004/02/07 21:50:09 gagga Exp $
+  $Id: movieplayer.cpp,v 1.73 2004/02/08 14:25:35 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1289,7 +1289,9 @@ void updateLcd(const std::string & sel_filename)
 void
 CMoviePlayerGui::PlayStream (int streamtype)
 {
-	uint msg, data;
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	std::string sel_filename;
 	bool update_info = true, start_play = false, exit =
 		false, open_filebrowser = true, skipping = false;
@@ -1535,7 +1537,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.vlchelp");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.72 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.73 $\n\nMovieplayer (c) 2003, 2004 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1562,7 +1564,9 @@ CMoviePlayerGui::PlayStream (int streamtype)
 void
 CMoviePlayerGui::PlayFile (void)
 {
-	uint msg, data;
+	neutrino_msg_t      msg;
+	neutrino_msg_data_t data;
+
 	std::string sel_filename;
 	bool update_lcd = true, open_filebrowser =
 		true, start_play = false, exit = false;
@@ -1700,7 +1704,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
 			std::string fullhelptext = g_Locale->getText("movieplayer.tshelp");
-			fullhelptext += "\nVersion: $Revision: 1.72 $\n\nMovieplayer (c) 2003, 2004 by gagga";
+			fullhelptext += "\nVersion: $Revision: 1.73 $\n\nMovieplayer (c) 2003, 2004 by gagga";
 			ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else if (msg == CRCInput::RC_left)
