@@ -136,14 +136,16 @@ void show_time()
 {
 	char timestr[50];
 	struct timeb tm;
-	if (mode!=LCDM_TV) return;
-	ftime(&tm);
-	strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
+	if ((mode==LCDM_TV) || (mode==LCDM_SCART))
+	{
+		ftime(&tm);
+		strftime((char*) &timestr, 20, "%H:%M", localtime(&tm.time) );
 
 
-	display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
-	fonts.time->RenderString(82,62, 50, timestr, CLCDDisplay::PIXEL_ON);
-	display.update();
+		display.draw_fill_rect (81,50,120,64, CLCDDisplay::PIXEL_OFF);
+		fonts.time->RenderString(82,62, 50, timestr, CLCDDisplay::PIXEL_ON);
+		display.update();
+	}
 }
 
 
@@ -165,23 +167,22 @@ void show_signal() {
 
 void show_volume(unsigned char vol)
 {
-	if (mode!=LCDM_TV) return;
-	display.draw_fill_rect (1,51,73,63, CLCDDisplay::PIXEL_OFF);
-	//strichlin
-	if (muted)
+if ((mode==LCDM_TV) || (mode==LCDM_SCART))
 	{
-		display.draw_line (2,52,73,63, CLCDDisplay::PIXEL_ON);
-	}
-	else
-	{
-		int dp = int( vol/100.0*72.0);
-		for(int x = 2;x< dp;x+=2)
+		display.draw_fill_rect (1,52,73,61, CLCDDisplay::PIXEL_OFF);
+		//strichlin
+		if (muted)
 		{
-			display.draw_line (x,51,x,63, CLCDDisplay::PIXEL_ON);
+			display.draw_line (1,52,73,61, CLCDDisplay::PIXEL_ON);
 		}
-	}
+		else
+		{
+			int dp = int( vol/100.0*72.0);
+			display.draw_fill_rect (0,52,dp,61, CLCDDisplay::PIXEL_ON);
+		}
 
-	display.update();
+		display.update();
+	}
 }
 
 void show_menu(lcdd_msg msg) {
@@ -191,8 +192,8 @@ void show_menu(lcdd_msg msg) {
 	/* WARNING: interface change; if something doesn't work, read lcdd.h */
 	// reload specified line
 	i = msg.param;
-	display.draw_fill_rect(-1,21+14*i,120,36+14*i, CLCDDisplay::PIXEL_OFF);
-	fonts.menu->RenderString(0,33+14*i, 140, msg.param3,
+	display.draw_fill_rect(-1,35+14*i,120,35+14+14*i, CLCDDisplay::PIXEL_OFF);
+	fonts.menu->RenderString(0,35+11+14*i, 140, msg.param3,
 	    CLCDDisplay::PIXEL_INV, msg.param2);
 	display.update();
 }
@@ -210,10 +211,17 @@ void set_mode(lcdd_mode m, char *title) {
 		show_time();
 		display.update();
 		break;
+	case LCDM_SCART:
+		display.load_screen(&icon_lcd);
+		mode = m;
+		show_volume(volume);
+		show_time();
+		display.update();
+		break;
 	case LCDM_MENU:
 		mode = m;
 		display.load_screen(&icon_setup);
-		fonts.menutitle->RenderString(-1,17, 140, title,
+		fonts.menutitle->RenderString(-1,28, 140, title,
 		    CLCDDisplay::PIXEL_ON);
 		display.update();
 		break;

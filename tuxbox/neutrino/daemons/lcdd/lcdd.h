@@ -67,6 +67,7 @@ enum lcdd_cmd {
  */
 enum lcdd_mode {
 	LCDM_TV,
+	LCDM_SCART,
 	LCDM_MENU,
 	LCDM_SAVER,
 	LCDM_POWEROFF,
