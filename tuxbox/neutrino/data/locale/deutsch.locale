@@ -106,7 +106,7 @@ recordingmenu.stopsectionsd Sectionsd anhalten
 recordingmenu.vcr_devicename VCR Name (lirc)
 recordingmenu.off aus
 recordingmenu.server Server
-recordingmenu.vcr Videorecorder
+recordingmenu.vcr Videorekorder
 recordingmenu.server_wakeup Aufnahmeserver WOL
 recordingmenu.server_mac Mac Adresse
 recordingmenu.setupnow Einstellungen jetzt übernehmen
@@ -669,10 +669,13 @@ mp3player.display_order Anzeige
 mp3player.follow Selektiere akt. Track
 
 filebrowser.head Filebrowser
-filebrowser.filter Filter
+filebrowser.filter.active Filter an
+filebrowser.filter.inactive Filter aus
 filebrowser.select Auswählen
 filebrowser.mark Markieren
 filebrowser.scan Durchsuche Verzeichnisse
+filebrowser.sort.name (Dateiname)
+filebrowser.sort.date (Datum)
 
 nfs.mount NFS Verzeichnis mounten
 nfs.ip NFS Server IP

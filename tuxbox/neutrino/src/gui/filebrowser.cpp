@@ -108,14 +108,17 @@ bool sortByName (const CFile& a, const CFile& b)
 		return a.Name < b.Name ;
 }
 
-//------------------------------------------------------------------------
-
 bool sortByType (const CFile& a, const CFile& b)
 {
 	if(a.Mode == b.Mode)
 		return a.Name > b.Name;
 	else
 		return a.Mode < b.Mode ;
+}
+
+bool sortByDate (const CFile& a, const CFile& b)
+{
+	return a.Time < b.Time ;
 }
 
 //------------------------------------------------------------------------
@@ -220,13 +223,13 @@ int n;
 	filelist.clear();
 	n = scandir(Path.c_str(), &namelist, 0, alphasort);
 	if (n < 0)
-   {
+	{
 		perror(("Filebrowser scandir: "+Path).c_str());
-      Path = "/";
-      name = "/";
-      paintHead();
-      n = scandir(Path.c_str(), &namelist, 0, alphasort);
-   }
+		Path = "/";
+		name = "/";
+		paintHead();
+		n = scandir(Path.c_str(), &namelist, 0, alphasort);
+	}
    for(int i = 0; i < n;i++)
    {
       CFile file;
@@ -256,7 +259,10 @@ int n;
       free(namelist[i]);
    }
    free(namelist);
-//	sort(filelist.begin(),filelist.end(),sortByType);
+	if( smode == 0 )
+		sort(filelist.begin(), filelist.end(), sortByName);
+	else
+		sort(filelist.begin(), filelist.end(), sortByDate);
 
 	selected = 0;
 	return true;
@@ -415,6 +421,17 @@ bool CFileBrowser::exec(string Dirname)
 					}
 				}
 			}
+		}
+		else if (msg==CRCInput::RC_help)
+		{
+			smode++;
+			if( smode > 1 )
+				smode = 0;
+			if( smode == 0 )
+				sort(filelist.begin(), filelist.end(), sortByName);
+			else
+				sort(filelist.begin(), filelist.end(), sortByDate);
+			paint();
 		}
 		else
 		{
@@ -627,11 +644,20 @@ void CFileBrowser::paintFoot()
 
 	if(filelist.size()>0)
 	{
+		string nextsort;
+
 		if( (type != CFile::FILE_UNKNOWN) || (S_ISDIR(filelist[selected].Mode)) )
 		{
 			frameBuffer->paintIcon("ok.raw", x +3 , by -3);
 			g_Fonts->infobar_small->RenderString(x + 35, ty, dx - 35, g_Locale->getText("filebrowser.select").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		}
+
+		frameBuffer->paintIcon("help.raw", x + (1 * dx), by -3);
+		if( smode == 1 )
+			nextsort = g_Locale->getText("filebrowser.sort.name");
+		else
+			nextsort = g_Locale->getText("filebrowser.sort.date");
+		g_Fonts->infobar_small->RenderString(x + 35 + (1 * dx), ty, dx - 35, nextsort.c_str(), COL_INFOBAR, 0, true); // UTF-8
 
 		if(Multi_Select)
 		{
@@ -643,7 +669,7 @@ void CFileBrowser::paintFoot()
 		if(Filter != NULL)
 		{
 			frameBuffer->paintIcon("blau.raw", x + (3 * dx), by);
-			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, g_Locale->getText("filebrowser.filter").c_str(), COL_INFOBAR, 0, true); // UTF-8
+			g_Fonts->infobar_small->RenderString(x + 25 + (3 * dx), ty, dx - 25, use_filter?g_Locale->getText("filebrowser.filter.active").c_str():g_Locale->getText("filebrowser.filter.inactive").c_str(), COL_INFOBAR, 0, true); // UTF-8
 		}
 	}
 }

@@ -669,10 +669,13 @@ mp3player.display_order display order
 mp3player.follow auto select current
 
 filebrowser.head Filebrowser
-filebrowser.filter Filter
+filebrowser.filter.active Filter on
+filebrowser.filter.inactive Filter off
 filebrowser.select Select
 filebrowser.mark Mark
 filebrowser.scan Scaning folder
+filebrowser.sort.name (filename)
+filebrowser.sort.date (date)
 
 nfs.mount Mount NFS volume
 nfs.ip NFS Server IP

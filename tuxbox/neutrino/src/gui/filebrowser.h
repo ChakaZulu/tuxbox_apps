@@ -112,12 +112,13 @@ class CFileBrowser
 		bool			readDir(string dirname);
 		void			addRecursiveDir(CFileList * re_filelist, string path, CProgressWindow * progress = NULL);
 
-		unsigned int	selected;
-		unsigned int	liststart;
-		unsigned int	listmaxshow;
+		unsigned int		selected;
+		unsigned int		liststart;
+		unsigned int		listmaxshow;
 		int 			fheight;	// Fonthoehe Filelist-Inhalt
 		int 			theight;	// Fonthoehe Filelist-Titel
-		int				foheight;	// Hoehe der button leiste
+		int			foheight;	// Hoehe der button leiste
+		int			smode;		// Sortierungsart
 
 		string			name;
 		int 			width;
