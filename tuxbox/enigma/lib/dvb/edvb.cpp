@@ -22,6 +22,7 @@
 #include "init.h"
 
 #include "config.h"
+#include <algorithm>
 
 eDVB *eDVB::instance;
 
@@ -194,7 +195,10 @@ void eDVB::scanEvent(int event)
 			break;
 		}
 		for (QListIterator<eTransponder> i(*initialTransponders); i.current(); ++i)
-			transponderlist->addTransponder(new eTransponder(*i.current()));
+		{
+			eTransponder &t=transponderlist->createTransponder(i.current()->transport_stream_id, i.current()->original_network_id);
+			t.set(*i.current());
+		}
 		currentONID=-1;
 		knownNetworks.clear();
 		scanEvent(eventScanNext);
@@ -299,16 +303,16 @@ void eDVB::scanEvent(int event)
 			for (QListIterator<NITEntry> i(nit->entries); i.current(); ++i)
 			{
 				NITEntry *entry=i.current();
-				eTransponder *transponder=transponderlist->create(entry->transport_stream_id, entry->original_network_id);
+				eTransponder &transponder=transponderlist->createTransponder(entry->transport_stream_id, entry->original_network_id);
 				for (QListIterator<Descriptor> d(entry->transport_descriptor); d.current(); ++d)
 				{
 					switch (d.current()->Tag())
 					{
 					case DESCR_SAT_DEL_SYS:
-						transponder->setSatellite((SatelliteDeliverySystemDescriptor*)d.current());
+						transponder.setSatellite((SatelliteDeliverySystemDescriptor*)d.current());
 						break;
 					case DESCR_CABLE_DEL_SYS:
-						transponder->setCable((CableDeliverySystemDescriptor*)d.current());
+						transponder.setCable((CableDeliverySystemDescriptor*)d.current());
 						break;
 					}
 				}
@@ -972,11 +976,6 @@ eTransponderList *eDVB::getTransponders()
 	return transponderlist;
 }
 
-QList<eService> *eDVB::getServices()
-{
-	return transponderlist?transponderlist->getServices():0;
-}
-
 QList<eBouquet> *eDVB::getBouquets()
 {
 	return &bouquets;
@@ -1070,15 +1069,17 @@ EIT *eDVB::getEIT()
 	return tEIT.ready()?tEIT.getCurrent():0;
 }
 
-void eDVB::sortInChannels()
+struct sortinChannel: public std::unary_function<const eService&, void>
 {
-	qDebug("sorting in channels");
-	removeDVBBouquets();
-	for (QListIterator<eService> i(*getServices()); i.current(); ++i)
+	eDVB &edvb;
+	sortinChannel(eDVB &edvb): edvb(edvb)
 	{
-		eService *service=i.current();
+	}
+	void operator()(std::pair<const sref, eService>& x)
+	{
+		eService &service=x.second;
 		QString add;
-		switch (service->service_type)
+		switch (service.service_type)
 		{
 		case 1:
 		case 4:
@@ -1091,12 +1092,65 @@ void eDVB::sortInChannels()
 		default:
 			add=" [Data]";
 		}
-		eBouquet *b=createBouquet(beautifyBouquetName(service->service_provider)+add);
-		b->add(service->transport_stream_id, service->original_network_id, service->service_id);
+		eBouquet *b=edvb.createBouquet(beautifyBouquetName(service.service_provider)+add);
+		b->add(service.transport_stream_id, service.original_network_id, service.service_id);
 	}
+};
+
+void eDVB::sortInChannels()
+{
+	qDebug("sorting in channels");
+	removeDVBBouquets();
+	getTransponders()->forEachService(sortinChannel(*this));
 	revalidateBouquets();
 	saveBouquets();
 }
+
+struct saveService: public std::unary_function<const eService&, void>
+{
+	FILE *f;
+	saveService(FILE *out): f(out)
+	{
+		fprintf(f, "services\n");
+	}
+	void operator()(std::pair<const sref, eService>& x)
+	{
+		eService &s=x.second;
+		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id, s.transport_stream_id,
+				s.original_network_id, s.service_type, s.service_number);
+		fprintf(f, "%s\n", (const char*)s.service_name);
+		fprintf(f, "%s\n", (const char*)s.service_provider);
+	}
+	~saveService()
+	{
+		fprintf(f, "end\n");
+	}
+};
+
+struct saveTransponder: public std::unary_function<const eTransponder&, void>
+{
+	FILE *f;
+	saveTransponder(FILE *out): f(out)
+	{
+		fprintf(f, "transponders\n");
+	}
+	void operator()(std::pair<const tsref, eTransponder>& x)
+	{
+		eTransponder &t=x.second;
+		if (t.state!=eTransponder::stateOK)
+			return;
+		fprintf(f, "%04x:%04x %d\n", t.transport_stream_id, t.original_network_id, t.state);
+		if (t.cable.valid)
+			fprintf(f, "\tc %d:%d\n", t.cable.frequency, t.cable.symbol_rate);
+		if (t.satellite.valid)
+			fprintf(f, "\ts %d:%d:%d:%d:%d\n", t.satellite.frequency, t.satellite.symbol_rate, t.satellite.polarisation, t.satellite.fec, t.satellite.sat);
+		fprintf(f, "/\n");
+	}
+	~saveTransponder()
+	{
+		fprintf(f, "end\n");
+	}
+};
 
 void eDVB::saveServices()
 {
@@ -1104,30 +1158,9 @@ void eDVB::saveServices()
 	if (!f)
 		qFatal("couldn't open servicefile - create " CONFIGDIR "/enigma!");
 	fprintf(f, "eDVB services - modify as long as you pay for the damage!\n");
-	fprintf(f, "transponders\n");
-	for (QListIterator<eTransponder> i(*transponderlist->getTransponders()); i.current(); ++i)
-	{
-		eTransponder *t=i.current();
-		if (t->state!=eTransponder::stateOK)
-			continue;
-		fprintf(f, "%04x:%04x %d\n", t->transport_stream_id, t->original_network_id, t->state);
-		if (t->cable.valid)
-			fprintf(f, "\tc %d:%d\n", t->cable.frequency, t->cable.symbol_rate);
-		if (t->satellite.valid)
-			fprintf(f, "\ts %d:%d:%d:%d:%d\n", t->satellite.frequency, t->satellite.symbol_rate, t->satellite.polarisation, t->satellite.fec, t->satellite.sat);
-		fprintf(f, "/\n");
-	}
-	fprintf(f, "end\n");
-	fprintf(f, "services\n");
-	for (QListIterator<eService> i(*transponderlist->getServices()); i.current(); ++i)
-	{
-		eService *s=i.current();
-		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s->service_id, s->transport_stream_id,
-				s->original_network_id, s->service_type, s->service_number);
-		fprintf(f, "%s\n", (const char*)s->service_name);	// ich kille denjenigen, der ein \n in seinem servicenamen hat 
-		fprintf(f, "%s\n", (const char*)s->service_provider);
-	}
-	fprintf(f, "end\n");
+
+	getTransponders()->forEachTransponder(saveTransponder(f));
+	getTransponders()->forEachService(saveService(f));
 	fprintf(f, "Have a lot of fun!\n");
 	fclose(f);
 }
@@ -1161,8 +1194,8 @@ void eDVB::loadServices()
 			break;
 		int transport_stream_id=-1, original_network_id=-1, state=-1;
 		sscanf(line, "%04x:%04x %d", &transport_stream_id, &original_network_id, &state);
-		eTransponder *t=transponderlist->create(transport_stream_id, original_network_id);
-		t->state=state;
+		eTransponder &t=transponderlist->createTransponder(transport_stream_id, original_network_id);
+		t.state=state;
 		while (!feof(f))
 		{
 			fgets(line, 256, f);
@@ -1172,13 +1205,13 @@ void eDVB::loadServices()
 			{
 				int frequency, symbol_rate, polarisation, fec, sat;
 				sscanf(line+2, "%d:%d:%d:%d:%d", &frequency, &symbol_rate, &polarisation, &fec, &sat);
-				t->setSatellite(frequency, symbol_rate, polarisation, fec, sat);
+				t.setSatellite(frequency, symbol_rate, polarisation, fec, sat);
 			}
 			if (line[1]=='c')
 			{
 				int frequency, symbol_rate;
 				sscanf(line+2, "%d:%d", &frequency, &symbol_rate);
-				t->setCable(frequency, symbol_rate);
+				t.setCable(frequency, symbol_rate);
 			}
 		}
 	}
@@ -1188,6 +1221,8 @@ void eDVB::loadServices()
 		qDebug("services invalid, no services");
 		return;
 	}
+	
+	int count=0;
 
 	while (!feof(f))
 	{
@@ -1198,22 +1233,22 @@ void eDVB::loadServices()
 
 		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
 		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
-		eService *s=transponderlist->createService(transport_stream_id, original_network_id, service_id, service_number);
-		s->service_type=service_type;
+		eService &s=transponderlist->createService(transport_stream_id, original_network_id, service_id, service_number);
+		count++;
+		s.service_type=service_type;
 		fgets(line, 256, f);
 		if (strlen(line))
 			line[strlen(line)-1]=0;
-		s->service_name=line;
+		s.service_name=line;
 		fgets(line, 256, f);
 		if (strlen(line))
 			line[strlen(line)-1]=0;
-		s->service_provider=line;
+		s.service_provider=line;
 	}
 	
-	qDebug("loaded %d services", transponderlist->getServices()->count());
+	qDebug("loaded %d services", count);
 	
 	fclose(f);
-	qDebug("ok");
 }
 
 void eDVB::saveBouquets()

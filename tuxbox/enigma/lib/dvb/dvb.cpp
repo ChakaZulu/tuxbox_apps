@@ -225,53 +225,48 @@ void eService::update(SDTEntry *sdtentry)
 
 eTransponderList::eTransponderList()
 {
-	transponders.setAutoDelete(true);
-	services.setAutoDelete(true);
 	lowest_channelnum=200;
 }
 
-eTransponder *eTransponderList::create(int transport_stream_id, int original_network_id)
+eTransponder &eTransponderList::createTransponder(int transport_stream_id, int original_network_id)
 {
-	for (QListIterator<eTransponder> i(transponders); i.current(); ++i)
-		if (((i.current()->transport_stream_id)==transport_stream_id) &&
-				((i.current()->original_network_id)==original_network_id))
-		{
-			return i.current();
-		}
-	eTransponder *n;
-	transponders.append(n=new eTransponder(transport_stream_id, original_network_id));
-	return n;
+	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(original_network_id,transport_stream_id));
+	if (i==transponders.end())
+		i=transponders.insert(
+				std::pair<tsref,eTransponder>
+					(tsref(original_network_id, transport_stream_id),
+						eTransponder(original_network_id,transport_stream_id)
+					)
+			).first;
+	return (*i).second;
 }
 
-void eTransponderList::addTransponder(eTransponder *tp)
+eService &eTransponderList::createService(int transport_stream_id, int original_network_id, int service_id, int chnum)
 {
-	transponders.append(tp);
-}
-
-eService *eTransponderList::createService(int transport_stream_id, int original_network_id, int service_id, int chnum)
-{
-	for (QListIterator<eService> i(services); i.current(); ++i)
-		if (((i.current()->service_id)==service_id) &&
-				((i.current()->original_network_id)==original_network_id))
-		{
-			return i.current();
-		}
-	if (chnum==-1)
+	std::map<sref,eService>::iterator i=services.find(sref(original_network_id,service_id));
+	if (i==services.end())
 	{
-		chnum=beautifyChannelNumber(transport_stream_id, original_network_id, service_id);
 		if (chnum==-1)
-			chnum=lowest_channelnum++;
-		else
-			while (searchServiceByNumber(chnum))
-				chnum++;
+		{
+			chnum=beautifyChannelNumber(transport_stream_id, original_network_id, service_id);
+			if (chnum==-1)
+				chnum=lowest_channelnum++;
+			else
+				while (searchServiceByNumber(chnum))
+					chnum++;
+		}
+		return services.insert(
+					std::pair<sref,eService>
+						(sref(original_network_id,service_id), 
+						eService(transport_stream_id, original_network_id, service_id, chnum))
+					).first->second;
 	}
-	eService *n;
-	services.append(n=new eService(transport_stream_id, original_network_id, service_id, chnum));
-	return n;
+	return (*i).second;
 }
 
 void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nservices)
 {
+#if 0
 	numtransponders=0;
 	scanned=0;
 	nservices=services.count();
@@ -285,6 +280,7 @@ void eTransponderList::updateStats(int &numtransponders, int &scanned, int &nser
 		if (i.current()->state==eTransponder::stateOK)
 			scanned++;
 	}
+#endif
 }
 
 void eTransponderList::handleSDT(SDT *sdt)
@@ -293,43 +289,37 @@ void eTransponderList::handleSDT(SDT *sdt)
 	for (QListIterator<SDTEntry> i(sdt->entries); i.current(); ++i)
 	{
 		SDTEntry *entry=i.current();
-		eService *service=createService(sdt->transport_stream_id, sdt->original_network_id, entry->service_id);
-		service->update(entry);
+		eService &service=createService(sdt->transport_stream_id, sdt->original_network_id, entry->service_id);
+		service.update(entry);
 	}
 }
 
 eTransponder *eTransponderList::searchTS(int original_network_id, int transport_stream_id)
 {
-	for (QListIterator<eTransponder> i(transponders); i.current(); ++i)
-		if ((i.current()->original_network_id==original_network_id) &&
-				(i.current()->transport_stream_id==transport_stream_id))
-			return i.current();
-	return 0;
+	std::map<tsref,eTransponder>::iterator i=transponders.find(tsref(original_network_id,transport_stream_id));
+	if (i==transponders.end())
+		return 0;
+	return &i->second;
 }
 
 eService *eTransponderList::searchService(int original_network_id, int service_id)
 {
-	for (QListIterator<eService> i(services); i.current(); ++i)
-		if ((i.current()->original_network_id==original_network_id) &&
-/*				(i.current()->transport_stream_id==transport_stream_id) && */
-				(i.current()->service_id==service_id))
-			return i.current();
-	return 0;
+	std::map<sref,eService>::iterator i=services.find(sref(original_network_id,service_id));
+	if (i==services.end())
+		return 0;
+	return &i->second;
 }
 
 eService *eTransponderList::searchServiceByNumber(int channel_number)
 {
-	for (QListIterator<eService> i(services); i.current(); ++i)
-		if (i.current()->service_number==channel_number)
-			return i.current();
 	return 0;
 }
 
 eTransponder *eTransponderList::getFirstTransponder(int state)
 {
-	for (QListIterator<eTransponder> i(transponders); i.current(); ++i)
-		if (i.current()->state==state)
-			return i.current();
+	for (std::map<tsref,eTransponder>::iterator i(transponders.begin()); i!=transponders.end(); ++i)
+		if (i->second.state==state)
+			return &i->second;
 	return 0;
 }
 

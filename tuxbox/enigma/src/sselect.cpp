@@ -5,34 +5,45 @@
 #include "dvb.h"
 #include "rc.h"
 #include "eskin.h"
+#include <algorithm>
+
+struct eServiceSelector_addService: public std::unary_function<std::pair<sref,eService>&,void>
+{
+	eListbox *list;
+	eService *result;
+	eServiceSelector_addService(eListbox *list, eService *result): list(list), result(result)
+	{
+	}
+	void operator()(std::pair<const sref,eService>& r)
+	{
+		eService &c=r.second;
+		if ((c.service_type!=1) && (c.service_type!=2) && (c.service_type!=4))
+			return;
+		QString sname;
+		for (unsigned p=0; p<c.service_name.length(); p++)
+		{
+			QChar ch=c.service_name[p];
+			if (ch.unicode()<32)
+				continue;
+			if (ch.unicode()==0x86)
+				continue;
+			if (ch.unicode()==0x87)
+				continue;
+			sname+=ch;
+		}
+		eListboxEntry *l=new eListboxEntryText(list, sname, QString().sprintf("%06d", c.service_number), &c);
+		if (&c==result)
+			list->setCurrent(l);
+	}
+};
 
 void eServiceSelector::fillServiceList()
 {
 	setText("full services");
 	list->clearList();
-	if (eDVB::getInstance()->getServices())
+	if (eDVB::getInstance()->getTransponders())
 	{
-		for (QListIterator<eService> i(*eDVB::getInstance()->getServices()); i.current(); ++i)
-		{
-			eService *c=i.current();
-			if ((c->service_type!=1) && (c->service_type!=2) && (c->service_type!=4))
-				continue;
-			QString sname;
-			for (unsigned p=0; p<c->service_name.length(); p++)
-			{
-				QChar ch=c->service_name[p];
-				if (ch.unicode()<32)
-					continue;
-				if (ch.unicode()==0x86)
-					continue;
-				if (ch.unicode()==0x87)
-					continue;
-				sname+=ch;
-			}
-			eListboxEntry *l=new eListboxEntryText(list, sname, QString().sprintf("%06d", c->service_number), c);
-			if (c==result)
-				list->setCurrent(l);
-		}
+		eDVB::getInstance()->getTransponders()->forEachService(eServiceSelector_addService(list, result));
 		list->sort();
 	}
 	list->redraw();

@@ -11,6 +11,40 @@
 
 class eDVB;
 
+#include <map>
+#include <utility>
+#include <functional>
+
+struct tsref: public std::pair<int,int>
+{
+	bool operator<(const tsref &c)
+	{
+		if (first < c.first)
+			return 1;
+		if (second < c.second)
+			return 1;
+		return 0;
+	}
+	tsref(int a, int b): std::pair<int,int>(a,b)
+	{
+	}
+};
+
+struct sref: public std::pair<int,int>
+{
+	bool operator<(const sref &c)
+	{
+		if (first < c.first)
+			return 1;
+		if (second < c.second)
+			return 1;
+		return 0;
+	}
+	sref(int a, int b): std::pair<int,int>(a,b)
+	{
+	}
+};
+
 class eTransponder
 {
 public:
@@ -37,6 +71,13 @@ public:
 	void setCable(CableDeliverySystemDescriptor *descr) { cable.set(descr); }
 	void setSatellite(int frequency, int symbol_rate, int polarisation, int fec, int sat);
 	void setCable(int frequency, int symbol_rate);
+	
+	void set(const eTransponder &ref)
+	{
+		cable=ref.cable;
+		satellite=ref.satellite;
+		state=ref.state;
+	}
 	int tune();
 	int isValid(); 
 		
@@ -46,6 +87,16 @@ public:
 		stateListed, stateError, stateOK
 	};
 	int state;
+	
+	bool operator<(const eTransponder &c) const
+	{
+		if (original_network_id < c.original_network_id)
+			return 1;
+		if (transport_stream_id < c.transport_stream_id)
+			return 1;
+		return 0;
+	}
+
 };
 
 class eService
@@ -61,6 +112,15 @@ public:
 	QString service_name, service_provider;
 	
 	int service_number;		// gleichzeitig sortierkriterium.
+	
+	bool operator<(const eService &c) const
+	{
+		if (original_network_id < c.original_network_id)
+			return 1;
+		if (service_id < c.service_id)
+			return 1;
+		return 0;
+	}
 };
 
 struct eServiceReference
@@ -90,25 +150,25 @@ public:
 
 class eTransponderList
 {
-	QList<eTransponder> transponders;
-	QList<eService> services;
+	std::map<tsref,eTransponder> transponders;
+	std::map<sref,eService> services;
 	int lowest_channelnum;
+
 public:
 	eTransponderList();
 
 	void updateStats(int &transponders, int &scanned, int &services);
-	eTransponder *create(int transport_stream_id, int original_network_id);
-	void addTransponder(eTransponder *transponder);
-	eService *createService(int transport_stream_id, int original_network_id, int service_id, int service_number=-1);
+	eTransponder &createTransponder(int transport_stream_id, int original_network_id);
+	eService &createService(int transport_stream_id, int original_network_id, int service_id, int service_number=-1);
 	void handleSDT(SDT *sdt);
 
-	QList<eService> *getServices() { return &services; }
-	QList<eTransponder> *getTransponders() { return &transponders; }
-	
 	void serialize(FILE *out, int ind);
 	eTransponder *searchTS(int original_network_id, int transport_stream_id);
 	eService *searchService(int original_network_id, int service_id);
 	eService *searchServiceByNumber(int channel_number);
+	
+	template <class T> void forEachService(T ob) { for_each(services.begin(), services.end(), ob); }
+	template <class T> void forEachTransponder(T ob) { for_each(transponders.begin(), transponders.end(), ob); }
 
 	eTransponder *getFirstTransponder(int state);
 };

@@ -44,6 +44,7 @@ class eDVB: public QObject
 	Q_OBJECT
 	static eDVB *instance;
 protected:
+	friend class sortinChannel;
 		/** the main transponder/servicelist */
 	eTransponderList *transponderlist;
 	
@@ -201,7 +202,6 @@ public:
 	eDVB();
 	~eDVB();
 	eTransponderList *getTransponders();
-	QList<eService> *getServices();
 	QList<eBouquet> *getBouquets();
 	static eDVB *getInstance()
 	{

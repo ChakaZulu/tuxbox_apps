@@ -70,14 +70,7 @@ static QString switchService(QString request, QString path, QString opt, eHTTPCo
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 		eService *meta=0;
-		for (QListIterator<eService> i(*eDVB::getInstance()->getServices()); i.current(); ++i)
-		{
-			if ((i.current()->service_id==service_id) &&
-					(i.current()->original_network_id==original_network_id) &&
-					(i.current()->transport_stream_id==transport_stream_id) &&
-					(i.current()->service_type==service_type))
-				meta=i.current();
-		}
+		eDVB::getInstance()->getTransponders()->searchService(original_network_id, service_id);
 		if (meta)
 			eDVB::getInstance()->switchService(meta);
 		else
@@ -89,6 +82,25 @@ static QString switchService(QString request, QString path, QString opt, eHTTPCo
 	}
 	return result;
 }
+
+struct listService: public std::unary_function<std::pair<sref,eService>&,void>
+{
+	QString &result;
+	const QString &search;
+	listService(QString &result, const QString &search): result(result), search(search)
+	{
+	}
+	void operator()(std::pair<const sref,eService> &r)
+	{
+		eService &service=r.second;
+		if (search && (service.service_name.find(search)==-1))
+			continue;
+		QString sc;
+		sc.sprintf("%x:%x:%x:%x", service.service_id, service.transport_stream_id, service.original_network_id, service.service_type);
+		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service.service_name + "</a></td>"
+						"<td>" + QString().setNum(service.service_type, 0x10) + "</td></tr>\n";
+	}
+};
 
 static QString listServices(QString request, QString path, QString opts, eHTTPConnection *content)
 {
@@ -104,16 +116,8 @@ static QString listServices(QString request, QString path, QString opts, eHTTPCo
 		"<body>\n"
 		"<h1>EliteDVB channel list</h1>\n"
 		"<table>\n";
-	for (QListIterator<eService> i(*eDVB::getInstance()->getServices()); i.current(); ++i)
-	{
-		eService *service=i.current();
-		if (search && (service->service_name.find(search)==-1))
-			continue;
-		QString sc;
-		sc.sprintf("%x:%x:%x:%x", service->service_id, service->transport_stream_id, service->original_network_id, service->service_type);
-		result+="<tr><td><a href=\"/cgi-bin/switchService?service=" + sc + "\">" + service->service_name + "</a></td>"
-						"<td>" + QString().setNum(service->service_type, 0x10) + "</td></tr>\n";
-	}
+		
+	eDVB::getInstance()->getTransponders()->forEachService(listService(result, search));
 	result+="</table>\n"
 		"</body>\n"
 		"</html>\n";
@@ -654,21 +658,16 @@ static QString switchServiceWeb(QString request, QString path, QString opt, eHTT
 	int service_id=-1, original_network_id=-1, transport_stream_id=-1, service_type=-1;
 	if (opt.find("="))
 		opt=opt.mid(opt.find("=")+1);
-        if(opt)
- 	 sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
+	if(opt)
+		sscanf(opt, "%x:%x:%x:%x", &service_id, &transport_stream_id, &original_network_id, &service_type);
 	QString result="";
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
 		eService *meta=0;
-		for (QListIterator<eService> i(*eDVB::getInstance()->getServices()); i.current(); ++i)
-		{
-			if ((i.current()->service_id==service_id) &&
-					(i.current()->original_network_id==original_network_id) &&
-					(i.current()->transport_stream_id==transport_stream_id) &&
-					(i.current()->service_type==service_type))
-				meta=i.current();
-		}
+
+		eDVB::getInstance()->getTransponders()->searchService(original_network_id, service_id);
+
 		if (meta)
 			eDVB::getInstance()->switchService(meta);
 		else
