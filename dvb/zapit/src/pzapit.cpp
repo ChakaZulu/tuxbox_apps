@@ -1,5 +1,5 @@
 /*
- * $Id: pzapit.cpp,v 1.1 2002/02/20 18:44:16 obi Exp $
+ * $Id: pzapit.cpp,v 1.2 2002/03/24 13:28:21 obi Exp $
  *
  * simple commandline client for zapit
  *
@@ -28,39 +28,54 @@ int main (int argc, char** argv)
 {
 	unsigned int bouquet;
 	unsigned int channel;
+	bool zap = true;
 
-	if (argc != 3)
+	/* commandline parameters */
+	if ((argc < 3) || (argc > 4))
 	{
-		printf("usage: %s <bouquet-nr> <channel-nr>\n", argv[0]);
+		printf("usage: %s [-d] bouquet-number channel-number\n", argv[0]);
 		return -1;
 	}
+	else if (argc == 3)
+	{
+		sscanf(argv[1], "%d", &bouquet);
+        	sscanf(argv[2], "%d", &channel);
+	}
+	else if (argc == 4)
+	{
+		if (!strncmp(argv[1], "-d", 2))
+			zap = false;
+		else
+			return -1;
 
-        sscanf(argv[1], "%d", &bouquet);
-        sscanf(argv[2], "%d", &channel);
+		sscanf(argv[2], "%d", &bouquet);
+        	sscanf(argv[3], "%d", &channel);
+	}
 
+	/* create objects */
 	CZapitClient *zapit = new CZapitClient();
-
-#if 0
 	CZapitClient::BouquetList *bouquets = new CZapitClient::BouquetList();
 	CZapitClient::BouquetChannelList *channels = new CZapitClient::BouquetChannelList();
 
+	/* get and show bouquets */
+	std::vector<CZapitClient::responseGetBouquets>::iterator b_resp;
 	zapit->getBouquets(*bouquets, true);
-
-	struct CZapitClient::responseGetBouquets *b_resp;
-
 	for (b_resp = bouquets->begin(); b_resp < bouquets->end(); b_resp++)
 		std::cout << b_resp->bouquet_nr << ": " << b_resp->name << std::endl;
 
+	/* get and show channels */
+	std::vector<CZapitClient::responseGetBouquetChannels>::iterator ch_resp;
 	zapit->getBouquetChannels(bouquet, *channels);
-
-	struct CZapitClient::responseGetBouquetChannels *ch_resp;
-
 	for (ch_resp = channels->begin(); ch_resp < channels->end(); ch_resp++)
 		cout << ch_resp->nr << ": " << ch_resp->name << "(" << ch_resp->onid_sid << ")" << endl;
-#endif
 
-	zapit->zapTo(bouquet, channel);
+	/* zap */
+	if (zap == true)
+	{
+		zapit->zapTo(bouquet, channel);
+	}
 
+	/* bla */
 	std::cout << "this is the end... my only friend, the end..." << std::endl;
 
 	return 0;
