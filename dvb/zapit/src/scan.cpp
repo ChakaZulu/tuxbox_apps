@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.116 2003/05/22 12:10:42 digi_casi Exp $
+ * $Id: scan.cpp,v 1.117 2003/06/01 17:06:12 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -56,10 +56,11 @@ extern uint32_t found_data_chans;
 extern CFrontend *frontend;
 extern xmlDocPtr scanInputParser;
 extern std::map <uint8_t, std::string> scanProviders;
-extern std::map <string, int32_t> satellitePositions;
-extern std::map <string, uint8_t> motorPositions;
+extern std::map <string, int16_t> satellitePositions;
+extern std::map <int16_t, uint8_t> motorPositions;
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
+extern diseqc_t diseqcType;
 
 void cp(char * from, char * to)
 {
@@ -234,7 +235,7 @@ void write_xml_footer(FILE *fd)
 	fclose(fd);
 }
 
-void write_bouquets(void)
+void write_bouquets(diseqc_t diseqcType)
 {
 	if (bouquetMode == CZapitClient::BM_DELETEBOUQUETS) 
 	{
@@ -319,7 +320,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 	return;
 }
 
-int write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t DiSEqC)
+int write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t DiSEqC, uint16_t satellitePosition)
 {
 	int status = -1;
 	
@@ -334,7 +335,7 @@ int write_provider(FILE *fd, const char *type, const char *provider_name, const 
 		/* satellite tag */
 		else
 		{
-			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\">\n", type, provider_name, DiSEqC);
+			fprintf(fd, "\t<%s name=\"%s\" diseqc=\"%hd\" position=\"%hd\">\n", type, provider_name, DiSEqC, satellitePosition);
 		}
 
 		/* channels */
@@ -471,8 +472,8 @@ void *start_scanthread(void *)
  	found_tv_chans = 0;
  	found_radio_chans = 0;
  	found_data_chans = 0;
- 	int32_t currentSatellitePosition = 0;
- 	int32_t satellitePosition = 0;
+ 	t_satellite_position currentSatellitePosition = 0;
+ 	t_satellite_position satellitePosition = 0;
 
 
 	curr_sat = 0;
@@ -535,18 +536,18 @@ void *start_scanthread(void *)
 				currentSatellitePosition = frontend->getCurrentSatellitePosition();
 				satellitePosition = satellitePositions[providerName];
 				printf("[scan] satellitePosition = %d, currentSatellitePosition = %d\n", satellitePosition, currentSatellitePosition);
-				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition) && (motorPositions[providerName] != 0))
+				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition) && (motorPositions[satellitePosition] != 0))
 				{
 					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
-					printf("[scan] motor position: %d\n", motorPositions[providerName]);
-					frontend->positionMotor(motorPositions[providerName]);
+					printf("[scan] motor position: %d\n", motorPositions[satellitePosition]);
+					frontend->positionMotor(motorPositions[satellitePosition]);
 					frontend->setCurrentSatellitePosition(satellitePosition);
 				}
 						
 				scan_provider(search, providerName, satfeed, diseqc_pos);
 					
 				/* write services */
-				scan_status = write_provider(fd, type, providerName, diseqc_pos);
+				scan_status = write_provider(fd, type, providerName, diseqc_pos, satellitePosition);
 			
 				if (fd1)		
 					copy_to_end(fd, fd1, providerName);
@@ -571,7 +572,7 @@ void *start_scanthread(void *)
 
 	/* write bouquets if services were found */
 	if (scan_status != -1)
-		write_bouquets();
+		write_bouquets(diseqcType);
 
 	/* report status */
 	INFO("found %d transponders and %d channels", found_transponders, found_channels);
