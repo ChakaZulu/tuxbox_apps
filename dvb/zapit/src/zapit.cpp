@@ -1,7 +1,7 @@
 /*
   Zapit  -   DBoxII-Project
 
-  $Id: zapit.cpp,v 1.45 2001/12/17 19:11:48 faralla Exp $
+  $Id: zapit.cpp,v 1.46 2001/12/17 19:17:09 faralla Exp $
 
   Done 2001 by Philipp Leusmann using many parts of code from older
   applications by the DBoxII-Project.
@@ -90,6 +90,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: zapit.cpp,v $
+  Revision 1.46  2001/12/17 19:17:09  faralla
+  small fix
+
   Revision 1.45  2001/12/17 19:11:48  faralla
   diseqc-stuff
 
@@ -1924,8 +1927,7 @@ void parse_command()
 	}
       break;
       case 'g':
-        //start_scan(rmsg.param2);
-        start_scan(2);
+        start_scan(rmsg.param2);
 
       	status = "00g";
       	if (send(connfd, status, strlen(status),0) == -1) {
@@ -2220,7 +2222,7 @@ int main(int argc, char **argv) {
 
   system("/usr/bin/killall camd");
   system("cp /var/zapit/last_chan /tmp/zapit_last_chan");
-  printf("Zapit $Id: zapit.cpp,v 1.45 2001/12/17 19:11:48 faralla Exp $\n\n");
+  printf("Zapit $Id: zapit.cpp,v 1.46 2001/12/17 19:17:09 faralla Exp $\n\n");
   //  printf("Zapit 0.1\n\n");
   scan_runs = 0;
   found_transponders = 0;
