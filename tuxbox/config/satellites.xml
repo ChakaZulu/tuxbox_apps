@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- useable flags are
+		1		->	Network Scan
+		2		->	use BAT
+		4		->	use ONIT	
+and combinations of this -->
+
 <satellites>
 	<sat name="Arabsat 30.5E">
 		<transponder frequency="12566000" symbol_rate="7029000" polarization="1" fec_inner="3"/>
@@ -6,14 +13,14 @@
 	<sat name="Arabsat 36.0E">
 		<transponder frequency="11727000" symbol_rate="24571000" polarization="0" fec_inner="5"/>
 	</sat>
-	<sat name="Astra 19.2E">
+	<sat name="Astra 19.2E" flags="1">
 		<transponder frequency="10876000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
 		<transponder frequency="12187500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12551000" symbol_rate="22000000" polarization="1" fec_inner="4"/>
 	</sat>
 	<sat name="Astra 23.5E">
 		<transponder frequency="11540000" symbol_rate="6110000" polarisation="1" fec_inner="3"/>
-		<transponder frequency="11592000"	symbol_rate="27500000" polarisation="1" fec_inner="3"/>
+		<transponder frequency="11592000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
 		<transponder frequency="11635000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
 		<transponder frequency="11675000" symbol_rate="27500000" polarisation="0" fec_inner="3"/>
 		<transponder frequency="11675000" symbol_rate="27500000" polarisation="1" fec_inner="3"/>
@@ -34,9 +41,17 @@
 	<sat name="Eutelsat 10.0E">
 		<transponder frequency="10957000" symbol_rate="3050000" polarization="0" fec_inner="5"/>
 	</sat>
-	<sat name="Eutelsat 13.0E">
-		<transponder frequency="12168000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+	<sat name="Eutelsat 13.0E" flags="4">
+		<transponder frequency="12692000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 		<transponder frequency="12539000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="11746000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12168500" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12034000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11919000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11804000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
+		<transponder frequency="12169000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12539000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12111000" symbol_rate="27500000" polarization="1" fec_inner="3"/>
 	</sat>
 	<sat name="HispaSat 30.0W">
 		<transponder frequency="11811000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
