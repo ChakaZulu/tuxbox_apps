@@ -34,6 +34,7 @@
 /****************************************************************************
  * Includes																	*
  ****************************************************************************/
+#include "global.h"
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -526,11 +527,13 @@ void* CMP3Player::PlayThread(void * filename)
 	FILE *soundfd=::fopen("/dev/sound/dsp","w");
 	CMP3Player::getInstance()->ResetDSP(soundfd);
 
+	g_Sectionsd->setPauseScanning(true);
 	/* Decode stdin to stdout. */
 	int Status = CMP3Player::getInstance()->MpegAudioDecoder(fp,soundfd);
 	if(Status > 0)
 		fprintf(stderr,"Error %d occured during decoding.\n",Status);
-
+	
+	g_Sectionsd->setPauseScanning(false);
 	fclose(fp);
 	fclose(soundfd);
 	return NULL;
@@ -538,9 +541,8 @@ void* CMP3Player::PlayThread(void * filename)
 
 bool CMP3Player::play(const char *filename)
 {
-
 	ProgName=__FILE__;
-	if(false)
+	if(true)
 	{
 		if (pthread_create (&thrPlay, NULL, PlayThread,(void *) filename) != 0 )
 		{
