@@ -11,6 +11,4 @@ install_DATA = \
 	rot.raw scan.pal scan.raw settings.raw shutdown.pal shutdown.raw softupdate.raw \
 	streaming.raw timer.raw video.raw volume.raw volumebody.raw volumeslider2.raw \
 	volumeslider2alpha.raw volumeslider2blue.raw volumeslider2green.raw \
-	volumeslider2red.raw vtxt.raw vtxt_gray.raw movie.raw movieplayerbg.pal \
-	 movieplayerbg.raw  movieplayer.raw
-
+	volumeslider2red.raw vtxt.raw vtxt_gray.raw movie.raw movieplayer.raw
