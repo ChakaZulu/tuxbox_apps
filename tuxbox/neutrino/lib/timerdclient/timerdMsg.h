@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 
-	$Id: timerdMsg.h,v 1.22 2002/10/13 11:35:03 woglinde Exp $
+	$Id: timerdMsg.h,v 1.23 2002/10/13 19:40:56 thegoodguy Exp $
 
 	License: GPL
 
@@ -63,7 +63,6 @@ class CTimerd
 		//command structures
 		struct commandHead
 		{
-			unsigned char messageType;
 			unsigned char version;
 			unsigned char cmd;
 		};

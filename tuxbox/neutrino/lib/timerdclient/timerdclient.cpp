@@ -3,7 +3,7 @@
 
 	Copyright (C) 2002 Dirk Szymanski 'Dirch'
 	
-	$Id: timerdclient.cpp,v 1.25 2002/10/13 11:35:03 woglinde Exp $
+	$Id: timerdclient.cpp,v 1.26 2002/10/13 19:40:57 thegoodguy Exp $
 
 	License: GPL
 
@@ -23,13 +23,7 @@
 */
 
 #include <stdio.h>
-#include <unistd.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#include <sys/socket.h>
 //#include <netinet/in.h>
 //#include <netinet/in_systm.h>
 //#include <netinet/ip.h>
@@ -40,99 +34,50 @@
 #include <timerdclient/debug.h>
 
 
-CTimerdClient::CTimerdClient()
+bool CTimerdClient::send(const unsigned char command, char* data = NULL, const unsigned int size = 0)
 {
-	sock_fd = 0;
-}
-//-------------------------------------------------------------------------
+	CTimerd::commandHead msgHead;
+	msgHead.version = CTimerd::ACTVERSION;
+	msgHead.cmd     = command;
 
-bool CTimerdClient::timerd_connect()
-{
-	timerd_close();
+	open_connection(TIMERD_UDS_NAME);
 
-	struct sockaddr_un servaddr;
-	int clilen;
-	memset(&servaddr, 0, sizeof(struct sockaddr_un));
-	servaddr.sun_family = AF_UNIX;
-	strcpy(servaddr.sun_path, TIMERD_UDS_NAME);
-	clilen = sizeof(servaddr.sun_family) + strlen(servaddr.sun_path);
+	if (!send_data((char*)&msgHead, sizeof(msgHead)))
+	    return false;
+	
+	if (size != 0)
+	    return send_data(data, size);
 
-	if ((sock_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-	{
-		perror("timerdclient: socket");
-		return false;
-	}
-
-	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
-	{
-  		perror("timerdclient: connect");
-		return false;
-	}
 	return true;
 }
-//-------------------------------------------------------------------------
 
-bool CTimerdClient::timerd_close()
-{
-	if(sock_fd!=0)
-	{
-		close(sock_fd);
-		sock_fd=0;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-//-------------------------------------------------------------------------
-
-bool CTimerdClient::send(char* data, int size)
-{
-	return( write(sock_fd, data, size) == size);
-}
-//-------------------------------------------------------------------------
-
-bool CTimerdClient::receive(char* data, int size)
-{
-	return( read(sock_fd, data, size) == size);
-}
 //-------------------------------------------------------------------------
 
 void CTimerdClient::registerEvent(unsigned int eventID, unsigned int clientID, string udsName)
 {
-	CTimerd::commandHead msg;
 	CEventServer::commandRegisterEvent msg2;
-
-	msg.version = CTimerd::ACTVERSION;
-	msg.cmd = CTimerd::CMD_REGISTEREVENT;
 
 	msg2.eventID = eventID;
 	msg2.clientID = clientID;
 
 	strcpy(msg2.udsName, udsName.c_str());
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
-	send((char*)&msg2, sizeof(msg2));
-	timerd_close();
+
+	send(CTimerd::CMD_REGISTEREVENT, (char*)&msg2, sizeof(msg2));
+
+	close_connection();
 }
 //-------------------------------------------------------------------------
 
 void CTimerdClient::unRegisterEvent(unsigned int eventID, unsigned int clientID)
 {
-	CTimerd::commandHead msg;
 	CEventServer::commandUnRegisterEvent msg2;
-
-	msg.version = CTimerd::ACTVERSION;
-	msg.cmd = CTimerd::CMD_UNREGISTEREVENT;
 
 	msg2.eventID = eventID;
 	msg2.clientID = clientID;
 
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
-	send((char*)&msg2, sizeof(msg2));
-	timerd_close();
+	send(CTimerd::CMD_UNREGISTEREVENT, (char*)&msg2, sizeof(msg2));
+
+	close_connection();
 }
 //-------------------------------------------------------------------------
 
@@ -162,15 +107,11 @@ int timerID;
 
 int CTimerdClient::getSleeptimerID()
 {
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_GETSLEEPTIMER;
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
+	send(CTimerd::CMD_GETSLEEPTIMER);
 	CTimerd::responseGetSleeptimer response;
-	if (!receive((char*)&response, sizeof(CTimerd::responseGetSleeptimer)))
+	if (!receive_data((char*)&response, sizeof(CTimerd::responseGetSleeptimer)))
 		response.eventID =0;
-	timerd_close();	
+	close_connection();	
 	return response.eventID;
 }
 //-------------------------------------------------------------------------
@@ -194,37 +135,26 @@ int CTimerdClient::getSleepTimerRemaining()
 
 void CTimerdClient::getTimerList( CTimerd::TimerList &timerlist)
 {
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_GETTIMERLIST;
-
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
+	send(CTimerd::CMD_GETTIMERLIST);
 	timerlist.clear();
 	CTimerd::responseGetTimer response;
-	while ( receive((char*)&response, sizeof(CTimerd::responseGetTimer)))
+	while ( receive_data((char*)&response, sizeof(CTimerd::responseGetTimer)))
 	{
 		if(response.eventState != CTimerEvent::TIMERSTATE_TERMINATED)
 			timerlist.insert( timerlist.end(), response);
 	}
-	timerd_close();
+	close_connection();
 }
 //-------------------------------------------------------------------------
 
 void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID)
 {
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_GETTIMER;
-
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
-	send((char*)&timerID, sizeof(timerID));
+	send(CTimerd::CMD_GETTIMER, (char*)&timerID, sizeof(timerID));
 
 	CTimerd::responseGetTimer response;
-	receive((char*)&response, sizeof(CTimerd::responseGetTimer));
+	receive_data((char*)&response, sizeof(CTimerd::responseGetTimer));
 	timer = response;
-	timerd_close();
+	close_connection();
 }
 //-------------------------------------------------------------------------
 
@@ -232,9 +162,6 @@ void CTimerdClient::getTimer( CTimerd::responseGetTimer &timer, unsigned timerID
 bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t alarmtime, time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat)
 {
 	// set new time values for event eventid
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_MODIFYTIMER;
 
 	CTimerd::commandModifyTimer msgModifyTimer;
 	msgModifyTimer.eventID = eventid;
@@ -243,14 +170,12 @@ bool CTimerdClient::modifyTimerEvent(int eventid, time_t announcetime, time_t al
 	msgModifyTimer.stopTime = stoptime;
 	msgModifyTimer.eventRepeat = evrepeat;
 
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
-	send((char*) &msgModifyTimer, sizeof(msgModifyTimer));
+	send(CTimerd::CMD_MODIFYTIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
 
 	CTimerd::responseStatus response;
-	receive((char*)&response, sizeof(response));
+	receive_data((char*)&response, sizeof(response));
 
-	timerd_close();
+	close_connection();
 	return true;
 }
 //-------------------------------------------------------------------------
@@ -264,24 +189,18 @@ bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t diff)
 
 bool CTimerdClient::rescheduleTimerEvent(int eventid, time_t announcediff, time_t alarmdiff, time_t stopdiff)
 {
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_RESCHEDULETIMER;
-	
 	CTimerd::commandModifyTimer msgModifyTimer;
 	msgModifyTimer.eventID = eventid;
 	msgModifyTimer.announceTime = announcediff;
 	msgModifyTimer.alarmTime = alarmdiff;
 	msgModifyTimer.stopTime = stopdiff;
 
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
-	send((char*) &msgModifyTimer, sizeof(msgModifyTimer));
+	send(CTimerd::CMD_RESCHEDULETIMER, (char*) &msgModifyTimer, sizeof(msgModifyTimer));
 	
 	CTimerd::responseStatus response;
-	receive((char*)&response, sizeof(response));
+	receive_data((char*)&response, sizeof(response));
 
-	timerd_close();
+	close_connection();
 	return response.status;
 }
 //-------------------------------------------------------------------------
@@ -309,10 +228,6 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* data, time_t announcetime, time_t alarmtime,time_t stoptime, CTimerEvent::CTimerEventRepeat evrepeat)
 {
 	dprintf("addTimerEvent(Type: %d, announce: %ld, alarm: %ld, stop: %ld repeat: %d\n",evType,announcetime,alarmtime,stoptime,evrepeat);
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_ADDTIMER;
-
 
 	CTimerd::commandAddTimer msgAddTimer;
 	msgAddTimer.alarmTime  = alarmtime;
@@ -343,15 +258,13 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 		length = 0;
 	}
 
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
-	send((char*)&msgAddTimer, sizeof(msgAddTimer));
+	send(CTimerd::CMD_ADDTIMER, (char*)&msgAddTimer, sizeof(msgAddTimer));
 	if((data != NULL) && (length > 0))
-		send((char*)data, length);
+		send_data((char*)data, length);
 
 	CTimerd::responseAddTimer response;
-	receive((char*)&response, sizeof(response));
-	timerd_close();
+	receive_data((char*)&response, sizeof(response));
+	close_connection();
 
 	return( response.eventID);
 }
@@ -359,55 +272,35 @@ int CTimerdClient::addTimerEvent( CTimerEvent::CTimerEventTypes evType, void* da
 
 void CTimerdClient::removeTimerEvent( int evId)
 {
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_REMOVETIMER;
 	CTimerd::commandRemoveTimer msgRemoveTimer;
+
 	msgRemoveTimer.eventID  = evId;
  
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
-	send((char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
+	send(CTimerd::CMD_REMOVETIMER, (char*) &msgRemoveTimer, sizeof(msgRemoveTimer));
 
-	timerd_close();	
+	close_connection();	
 }
 //-------------------------------------------------------------------------
 
 bool CTimerdClient::isTimerdAvailable()
 {
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_TIMERDAVAILABLE;
-	timerd_connect();
-	try
-	{
-		send((char*)&msg, sizeof(msg));
-		CTimerd::responseAvailable response;
-		bool ret=receive((char*)&response, sizeof(response));
-		timerd_close();
-		return ret;
-	}
-	catch (...)
-	{
-		printf("[timerdclient] isTimerdAvailable() caught exception");
-		timerd_close();
+	if (!send(CTimerd::CMD_TIMERDAVAILABLE))
 		return false;
-	}
+
+	CTimerd::responseAvailable response;
+	bool ret=receive_data((char*)&response, sizeof(response));
+	close_connection();
+	return ret;
 }
 //-------------------------------------------------------------------------
 bool CTimerdClient::shutdown()
 {
-	CTimerd::commandHead msg;
-	msg.version=CTimerd::ACTVERSION;
-	msg.cmd=CTimerd::CMD_SHUTDOWN;
- 
-	timerd_connect();
-	send((char*)&msg, sizeof(msg));
+	send(CTimerd::CMD_SHUTDOWN);
 	
 	CTimerd::responseStatus response;
-	receive((char*)&response, sizeof(response));
+	receive_data((char*)&response, sizeof(response));
 
-	timerd_close();
+	close_connection();
 	return response.status;
 }
 //-------------------------------------------------------------------------
