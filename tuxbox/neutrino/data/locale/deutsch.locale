@@ -165,6 +165,9 @@ streaminfo.framerate Bildrate
 streaminfo.framerate_unknown Bildrate: unbekannt
 streaminfo.audiotype Audiotyp
 streaminfo.audiotype_unknown Audiotyp: unbekannt
+streaminfo.not_crypted nicht verschlüsselt
+streaminfo.ecm_invalid ungültiges CA-System
+streaminfo.not_available nicht verfügbar
 
 apidselector.head Sprachauswahl
 

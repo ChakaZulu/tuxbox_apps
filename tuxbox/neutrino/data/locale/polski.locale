@@ -165,6 +165,9 @@ streaminfo.framerate Przekaz
 streaminfo.framerate_unknown Przekaz: nieznany
 streaminfo.audiotype Typ Dzwieku
 streaminfo.audiotype_unknown Typ Dzwieku: nieznany
+streaminfo.not_crypted not crypted
+streaminfo.ecm_invalid invalid CA-system
+streaminfo.not_available not available
 
 apidselector.head Wybor Jezyka
 
