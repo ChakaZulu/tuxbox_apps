@@ -32,6 +32,7 @@
 #include "scan.h"
 #include "../global.h"
 
+
 CScanTs::CScanTs()
 {
 	width = 400;
@@ -41,123 +42,6 @@ CScanTs::CScanTs()
 	x=((720-width) >> 1) -20;
 	y=(576-height)>>1;
 }
-/*
-bool CScanTs::scanReady(short* sat, int *ts, int *services)
-{
-	int sock_fd;
-	SAI servaddr;
-	char rip[]="127.0.0.1";
-	char *return_buf;
-	st_rmsg		sendmessage;
-
-	sendmessage.version=1;
-	sendmessage.cmd = 'h';
-
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1505);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-#ifdef HAS_SIN_LEN
-
-	servaddr.sin_len = sizeof(servaddr); // needed ???
-#endif
-
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("neutrino: connect(zapit)");
-		exit(-1);
-	}
-
-	write(sock_fd, &sendmessage, sizeof(sendmessage));
-	return_buf = (char*) malloc(4);
-	memset(return_buf, 0, 4);
-	if (recv(sock_fd, return_buf, 3,0) <= 0 )
-	{
-		perror("recv(zapit)");
-		exit(-1);
-	}
-
-	//printf("scan: %s", return_buf);
-	if (return_buf[0] == '-')
-	{
-		free(return_buf);
-		close(sock_fd);
-		return true;
-	}
-	else
-	{
-		if (recv(sock_fd, sat, sizeof(short),0) <= 0 )
-		{
-			perror("recv(zapit)");
-			exit(-1);
-		}
-		if (recv(sock_fd, ts, sizeof(int),0) <= 0 )
-		{
-			perror("recv(zapit)");
-			exit(-1);
-		}
-		if (recv(sock_fd, services, sizeof(int),0) <= 0 )
-		{
-			perror("recv(zapit)");
-			exit(-1);
-		}
-		//printf("Found transponders: %d\n", *ts);
-		//printf("Found channels: %d\n", *services);
-		free(return_buf);
-		close(sock_fd);
-		return false;
-	}
-
-}
-
-void CScanTs::startScan()
-{
-	int sock_fd;
-	SAI servaddr;
-	char rip[]="127.0.0.1";
-	char *return_buf;
-	st_rmsg		sendmessage;
-
-	sendmessage.version=1;
-	sendmessage.param2=g_settings.scan_astra | g_settings.scan_eutel | g_settings.scan_kopernikus | g_settings.scan_digituerk | g_settings.scan_bouquet;
-	printf("sending scanparam: %d\n", sendmessage.param2 );
-	sendmessage.cmd = 'g';
-
-	sock_fd=socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	memset(&servaddr,0,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(1505);
-	inet_pton(AF_INET, rip, &servaddr.sin_addr);
-
-#ifdef HAS_SIN_LEN
-
-	servaddr.sin_len = sizeof(servaddr); // needed ???
-#endif
-
-
-	if(connect(sock_fd, (SA *)&servaddr, sizeof(servaddr))==-1)
-	{
-		perror("neutrino: connect(zapit)");
-		exit(-1);
-	}
-
-	write(sock_fd, &sendmessage, sizeof(sendmessage));
-	return_buf = (char*) malloc(4);
-	memset(return_buf, 0, 4);
-	if (recv(sock_fd, return_buf, 3,0) <= 0 )
-	{
-		perror("recv(zapit)");
-		exit(-1);
-	}
-
-	printf("startscan: %s", return_buf);
-	free(return_buf);
-	close(sock_fd);
-}
-*/
 
 int CScanTs::exec(CMenuTarget* parent, string)
 {
