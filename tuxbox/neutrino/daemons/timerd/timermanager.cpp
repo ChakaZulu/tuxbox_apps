@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timermanager.cpp,v 1.35 2002/10/03 13:00:36 Zwen Exp $
+	$Id: timermanager.cpp,v 1.36 2002/10/03 13:02:00 Zwen Exp $
 
 	License: GPL
 
@@ -293,6 +293,7 @@ bool CTimerManager::shutdown()
            return true;
         }
 */        
+return false;
 }
 
 //------------------------------------------------------------
