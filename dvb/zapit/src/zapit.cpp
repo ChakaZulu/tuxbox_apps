@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.310 2003/05/11 09:50:55 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.311 2003/05/11 15:23:04 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -125,6 +125,7 @@ void saveSettings(bool write)
 	}
 
 	if (write) {
+		config.setInt32("lastSatellitePosition", frontend->getCurrentSatellitePosition());
 		config.setInt32("diseqcRepeats", frontend->getDiseqcRepeats());
 		config.setInt32("diseqcType", frontend->getDiseqcType());
 		config.saveConfig(CONFIGFILE);
@@ -1367,6 +1368,7 @@ void leaveStandby(void)
 		videoDecoder = new CVideo();
 	}
 
+	frontend->setCurrentSatellitePosition(config.getInt32("lastSatellitePosition", 192));
 	frontend->setDiseqcType((diseqc_t) config.getInt32("diseqcType", NO_DISEQC));
 	frontend->setDiseqcRepeats(config.getInt32("diseqcRepeats", 0));
 
@@ -1457,7 +1459,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.310 2003/05/11 09:50:55 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.311 2003/05/11 15:23:04 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
