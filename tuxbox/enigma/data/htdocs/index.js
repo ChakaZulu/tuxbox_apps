@@ -36,7 +36,7 @@ function deleteMovie(xy)
 
 function openEPG(xy)
 {
-	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', '780', '700', 'yes');
+	NewWindow('/getcurrentepg2?ref='+xy, 'EPG', screen.width, screen.height, 'yes');
 }
 
 function openMultiEPG(xy)

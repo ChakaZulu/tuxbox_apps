@@ -5,7 +5,7 @@
 		<script language="javascript" type="text/javascript" src="/window.js"></script>
 		<script language="javascript" type="text/javascript" src="/epg.js"></script>
 	</head>
-	<body>
+	<body onLoad="maximizeWindow()">
 		<table id="epg" width=100% border=0 cellspacing=0 cellpadding=5>
 			<thead>
 				<tr>

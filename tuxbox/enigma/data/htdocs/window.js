@@ -36,5 +36,6 @@ function maximizeWindow()
 		top.window.outerHeight = screen.availHeight;
 		top.window.outerWidth = screen.availWidth;
 	}
+	top.window.focus();
 }
 
