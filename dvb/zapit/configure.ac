@@ -53,6 +53,7 @@ src/xml/Makefile
 src/zapci/Makefile
 src/zapost/Makefile
 src/zapsi/Makefile
-zapitclient.pc
+tuxbox-zapit.pc
+tuxbox-zapitclient.pc
 ])
 
