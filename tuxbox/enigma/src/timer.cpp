@@ -2061,15 +2061,15 @@ eTimerEditView::eTimerEditView( ePlaylistEntry* e)
 
 	if ( e )
 	{
-		multipleChanged( e->type&ePlaylistEntry::isRepeating );
 		fillInData( e->time_begin, e->duration, e->type, e->service );
+		multipleChanged( e->type&ePlaylistEntry::isRepeating );
 	}
 	else
 	{
-		multipleChanged( 0 );
 		time_t now = time(0)+eDVB::getInstance()->time_difference;
 		int type = eSystemInfo::getInstance()->getDefaultTimerType();
 		fillInData( now, 0, type, eServiceInterface::getInstance()->service );
+		multipleChanged( 0 );
 	}
 	setHelpID(98);
 }
