@@ -3772,7 +3772,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 	else if( msg == NeutrinoMessages::ANNOUNCE_SHUTDOWN)
 	{
 		if( mode != mode_scart )
-			skipShutdownTimer = (ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(LOCALE_SHUTDOWNTIMER_ANNOUNCE), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes);
+			skipShutdownTimer = (ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, LOCALE_SHUTDOWNTIMER_ANNOUNCE, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo, NULL, 450, 5) == CMessageBox::mbrYes);
 	}
 	else if( msg == NeutrinoMessages::SHUTDOWN )
 	{
@@ -3823,7 +3823,7 @@ int CNeutrinoApp::handleMsg(const neutrino_msg_t msg, neutrino_msg_data_t data)
 			 * in case of STREAM2FILE_STATUS_IDLE we might even have to immediately start the next recording
 			 */
 #warning TODO: it might make some sense to have some log-file (but where do we store this information? nfs/flash/ram?) that collects these messages and maybe a menu-entry to view the lasted XXX messages
-			ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(msgbody), CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO, 450, 5); // UTF-8
+			ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, msgbody, CMessageBox::mbrBack, CMessageBox::mbBack, NEUTRINO_ICON_INFO, 450, 5);
 
 		skip_message:
 			;
@@ -4349,7 +4349,7 @@ int CNeutrinoApp::exec(CMenuTarget* parent, const std::string & actionKey)
 
 	if(actionKey == "help_recording")
 	{
-		ShowMsgUTF(LOCALE_SETTINGS_HELP, g_Locale->getText(LOCALE_RECORDINGMENU_HELP), CMessageBox::mbrBack, CMessageBox::mbBack); // UTF-8
+		ShowLocalizedMessage(LOCALE_SETTINGS_HELP, LOCALE_RECORDINGMENU_HELP, CMessageBox::mbrBack, CMessageBox::mbBack);
 	}
 	else if(actionKey=="shutdown")
 	{

@@ -237,6 +237,11 @@ int ShowMsgUTF(const neutrino_locale_t Caption, const char * const Text, const C
 	return res;
 }
 
+int ShowLocalizedMessage(const neutrino_locale_t Caption, const neutrino_locale_t Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
+{
+	return ShowMsgUTF(Caption, g_Locale->getText(Text), Default, ShowButtons, Icon, Width, timeout);
+}
+
 int ShowMsgUTF(const neutrino_locale_t Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon, const int Width, const int timeout)
 {
 	return ShowMsgUTF(Caption, Text.c_str(), Default, ShowButtons, Icon, Width, timeout);

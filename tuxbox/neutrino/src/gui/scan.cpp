@@ -161,7 +161,7 @@ if(get_set.TP_scan)
 		while (!(msg == CRCInput::RC_timeout));
 	}
 
-	ShowMsgUTF(LOCALE_MESSAGEBOX_INFO, g_Locale->getText(success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+	ShowLocalizedMessage(LOCALE_MESSAGEBOX_INFO, success ? LOCALE_SCANTS_FINISHED : LOCALE_SCANTS_FAILED, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 
 	hide();
 	
@@ -177,7 +177,6 @@ if(get_set.TP_scan)
 int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 {
 	char buffer[32];
-	int result;
 	switch (msg)
 	{
 		case NeutrinoMessages::EVT_SCAN_SATELLITE:
@@ -244,7 +243,7 @@ int CScanTs::handleMsg(neutrino_msg_t msg, neutrino_msg_data_t data)
 			if(get_set.TP_scan)
 				break;
 
-			if (ShowMsgUTF(LOCALE_SCANTS_ABORT_HEADER, g_Locale->getText(LOCALE_SCANTS_ABORT_BODY), CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo) == CMessageBox::mbrYes)
+			if (ShowLocalizedMessage(LOCALE_SCANTS_ABORT_HEADER, LOCALE_SCANTS_ABORT_BODY, CMessageBox::mbrNo, CMessageBox::mbYes | CMessageBox::mbNo) == CMessageBox::mbrYes)
 			{
 				g_Zapit->stopScan();
 			}

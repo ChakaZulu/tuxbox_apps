@@ -74,6 +74,7 @@ class CMessageBox : public CHintBoxExt
 };
 
 // Text is always UTF-8 encoded
+int ShowLocalizedMessage(const neutrino_locale_t Caption, const neutrino_locale_t Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1);
 int ShowMsgUTF(const neutrino_locale_t Caption, const char * const Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
 int ShowMsgUTF(const neutrino_locale_t Caption, const std::string & Text, const CMessageBox::result_ Default, const uint ShowButtons, const char * const Icon = NULL, const int Width = 450, const int timeout = -1); // UTF-8
 

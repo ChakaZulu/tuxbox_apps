@@ -115,7 +115,7 @@ int CFavorites::exec(CMenuTarget* parent, const std::string &)
 		parent->hide();
 	
 	if (!bouquetList) {
-		ShowMsgUTF(LOCALE_FAVORITES_BOUQUETNAME, g_Locale->getText(LOCALE_FAVORITES_NOBOUQUETS), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
+		ShowLocalizedMessage(LOCALE_FAVORITES_BOUQUETNAME, LOCALE_FAVORITES_NOBOUQUETS, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 		return res;
 	}
 

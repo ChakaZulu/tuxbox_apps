@@ -52,18 +52,13 @@ int CRCLock::exec(CMenuTarget* parent, const std::string &)
 	if (parent)
 		parent->hide();
 
-
-	ShowMsgUTF(LOCALE_RCLOCK_TITLE, g_Locale->getText(LOCALE_RCLOCK_LOCKMSG  ), CMessageBox::mbrYes , CMessageBox::mbYes , "info.raw");
-
-
+	ShowLocalizedMessage(LOCALE_RCLOCK_TITLE, LOCALE_RCLOCK_LOCKMSG  , CMessageBox::mbrYes , CMessageBox::mbYes , "info.raw");
 
 	// -- Lockup Box
 	
 	lockBox ();
 
-
-
-	ShowMsgUTF(LOCALE_RCLOCK_TITLE, g_Locale->getText(LOCALE_RCLOCK_UNLOCKMSG), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
+	ShowLocalizedMessage(LOCALE_RCLOCK_TITLE, LOCALE_RCLOCK_UNLOCKMSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 
 	return  menu_return::RETURN_EXIT_ALL;
 }

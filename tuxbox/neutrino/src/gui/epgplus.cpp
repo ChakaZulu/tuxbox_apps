@@ -2195,13 +2195,7 @@ int EpgPlus::MenuTargetAddReminder::exec
 				, ""
 				);
 
-			ShowMsgUTF
-				( LOCALE_TIMER_EVENTTIMED_TITLE
-				, g_Locale->getText(LOCALE_TIMER_EVENTTIMED_MSG)
-				, CMessageBox::mbrBack
-				, CMessageBox::mbBack
-				, "info.raw"
-				); // UTF-8
+			ShowLocalizedMessage(LOCALE_TIMER_EVENTTIMED_TITLE, LOCALE_TIMER_EVENTTIMED_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 		}
 		else
 			printf("timerd not available\n");
@@ -2250,13 +2244,7 @@ int EpgPlus::MenuTargetAddRecordTimer::exec
 				, ""
 				, true
 				);
-			ShowMsgUTF
-				( LOCALE_TIMER_EVENTRECORD_TITLE
-				, g_Locale->getText(LOCALE_TIMER_EVENTRECORD_MSG)
-				, CMessageBox::mbrBack
-				, CMessageBox::mbBack
-				, "info.raw"
-				); // UTF-8
+			ShowLocalizedMessage(LOCALE_TIMER_EVENTRECORD_TITLE, LOCALE_TIMER_EVENTRECORD_MSG, CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw");
 		}
 		else
 			printf("timerd not available\n");

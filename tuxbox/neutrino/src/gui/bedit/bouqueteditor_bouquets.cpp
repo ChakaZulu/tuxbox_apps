@@ -217,7 +217,7 @@ int CBEBouquetWidget::exec(CMenuTarget* parent, const std::string & actionKey)
 			{
 				if (bouquetsChanged)
 				{
-					int result = ShowMsgUTF(LOCALE_BOUQUETEDITOR_NAME, g_Locale->getText(LOCALE_BOUQUETEDITOR_SAVECHANGES), CMessageBox::mbrYes, CMessageBox::mbAll); // UTF-8
+					int result = ShowLocalizedMessage(LOCALE_BOUQUETEDITOR_NAME, LOCALE_BOUQUETEDITOR_SAVECHANGES, CMessageBox::mbrYes, CMessageBox::mbAll);
 
 					switch( result )
 					{
