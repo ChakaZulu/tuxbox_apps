@@ -799,7 +799,14 @@ void CChannelList::paintItem2DetailsLine (int pos, int ch_index)
 		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 1,ypos2a-ypos1a+4, col2);
 
 		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-16, ypos1a, 12,1, col2);
-		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2); //--
+		g_FrameBuffer->paintBoxRel(xpos+ConnectLineBox_Width-12, ypos2a, 8,1, col2);
+
+		// -- small Frame around infobox
+                g_FrameBuffer->paintBoxRel(x,         ypos2, 2,info_height, col1);
+                g_FrameBuffer->paintBoxRel(x+width-2, ypos2, 2,info_height, col1);
+                g_FrameBuffer->paintBoxRel(x        , ypos2, width-2,2,     col1);
+                g_FrameBuffer->paintBoxRel(x        , ypos2+info_height-2, width-2,2, col1);
+
 	}
 
 }
