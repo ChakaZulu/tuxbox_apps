@@ -543,9 +543,6 @@ void	InitLevel( void )
 			break;
 		case 1 :
 			portfolio[7]=10;
-//portfolio[4]=10;
-//portfolio[3]=10;
-//portfolio[2]=10;
 			break;
 		case 4 :
 			portfolio[2]=5;
@@ -998,12 +995,35 @@ unsigned long	otype;
 				sel_type = TYP_DIGDOWN;
 				break;
 			}
-			if ( !( s->type & TYP_STOPPER ) && !( s->type & TYP_FALLEN ))
+			otype=s->type & TYP_WORK;
+			while( 1 )
+			{
+				if ( otype == sel_type )
+				{
+					if (( otype == TYP_BUILDER ) && ( s->counter2 > 11 ))
+						break;
+					sel_type = 0;
+					break;
+				}
+				if ( !( otype & TYP_STOPPER ) && !( s->type & TYP_FALLEN ))
+					break;
+				sel_type = 0;
+				break;
+			}
+			if ( sel_type )
 			{
 				otype = s->type;
 				s->type = sel_type;
 				portfolio[ afunc ]--;
 				DrawNumber( 106+afunc*32, 389, portfolio[afunc] );
+				if (( otype & TYP_BUILDER ) && ( s->counter2 < 12 ))
+				{
+					s->y+=3;
+				}
+				else if (( otype & TYP_BUILDER ) && ( s->counter2 == 12 ))
+				{
+					s->y-=2;
+				}
 				if ( sel_type == TYP_DIGDOWN )
 				{
 					SpriteChangePic( s, 5 );	// lemming3
@@ -1011,16 +1031,13 @@ unsigned long	otype;
 				if ( sel_type == TYP_STOPPER )
 				{
 					s->counter1=0;
-					if (( otype & TYP_BUILDER ) && ( s->counter2 < 12 ))
-					{
-						s->y+=3;
-					}
 					SpriteChangePic( s, 4 );	// lemming2
 					bgRect( s->x+(s->width/2), s->y, 1, s->height-2, 150 );
 				}
 				if ( sel_type == TYP_BUILDER )
 				{
 					s->counter1=0;
+					s->counter2=0;
 					if ( otype & TYP_WALKER )
 						s->y -= 3;	// 2
 					SpriteChangePic( s, 31 );	// builder
@@ -1344,7 +1361,8 @@ static	int		blinkc=0;
 				}
 				else
 				{	/* kein bodenkontakt ? */
-					if(!isBrick(s->x+1,s->y+s->height,0)&&
+					if(!(s->type&TYP_BUILDER)&&
+						!isBrick(s->x+1,s->y+s->height,0)&&
 					   !isBrick(s->x-2+s->width,s->y+s->height,0))
 					{
 						if( !( s->type&TYP_WALKER ) )
@@ -1514,7 +1532,8 @@ static	int		blinkc=0;
 
 		SpriteGetBackground( s );
 		DrawSprite( s );
-		if (( afunc != -1 ) && ( portfolio[ afunc ] ))
+		if (( afunc != -1 ) && ( portfolio[ afunc ] ) &&
+			!(s->type&TYP_STOPPER) && !(s->type&TYP_FALLEN))
 		{
 			if ( SpriteCollide( s, deko[0]->x+7, deko[0]->y+7 ) )
 			{

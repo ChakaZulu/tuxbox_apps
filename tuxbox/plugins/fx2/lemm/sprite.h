@@ -47,6 +47,7 @@ extern	void	SpriteChangePic( Sprite *s, int picid );
 #define	TYP_DIGHORI		(1L<<5)		// 0020
 #define	TYP_DIGDIAG		(1L<<6)		// 0040
 #define	TYP_DIGDOWN		(1L<<7)		// 0080
+#define TYP_WORK		0xf1
 #define TYP_WALKER		(1L<<8)		// 0100
 #define TYP_FALLEN		(1L<<9)		// 0200
 #define TYP_ATHOME		(1L<<10)	// 0400
