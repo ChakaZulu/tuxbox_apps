@@ -626,15 +626,15 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string
 
 {
   CChannelEventList::iterator e;
-  time_t		curtime;
+  time_t			curtime;
   struct  tm		*tmStartZeit;
-  std::string		screening_dates;
-  int			count;
+  std::string		screening_dates,screening_nodual;
+  int				count;
   char			tmpstr[256];
 
 
   	count = 0;
-	screening_dates = "";
+	screening_dates = screening_nodual = "";
 	// alredy read: evtlist = g_Sectionsd->getEventsServiceKey( channel_id );
     	curtime = time(NULL);
 
@@ -646,10 +646,10 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string
 			count++;
 			tmStartZeit = localtime(&(e->startTime));
 
-			screening_dates = "    ";
+			screening_dates += "    ";
 
 			strftime(tmpstr, sizeof(tmpstr), "date.%a", tmStartZeit );
-			screening_dates += g_Locale->getText(tmpstr);
+			screening_dates = g_Locale->getText(tmpstr);
 			screening_dates += '.';
 
 			strftime(tmpstr, sizeof(tmpstr), "  %d.", tmStartZeit );
@@ -660,14 +660,14 @@ int CEpgData::FollowScreenings (const t_channel_id channel_id, const std::string
 
 			strftime(tmpstr, sizeof(tmpstr), ".  %H:%M ", tmStartZeit );
 			screening_dates += tmpstr;
-
-			processTextToArray(screening_dates); // UTF-8
+		if (screening_dates != screening_nodual){
+			screening_nodual=screening_dates;
+			processTextToArray(screening_dates ); // UTF-8
+			}
 		}
 	}
-
 	if (count == 0)
 		processTextToArray("---\n"); // UTF-8
-
 	return count;
 }
 
