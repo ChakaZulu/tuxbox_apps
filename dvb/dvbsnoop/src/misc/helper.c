@@ -1,5 +1,5 @@
 /*
-$Id: helper.c,v 1.3 2002/08/17 20:36:12 obi Exp $
+$Id: helper.c,v 1.4 2003/02/09 22:59:33 rasc Exp $
 
  -- dvbsnoop
  -- a dvb sniffer tool
@@ -9,6 +9,9 @@ $Id: helper.c,v 1.3 2002/08/17 20:36:12 obi Exp $
 
 
 $Log: helper.c,v $
+Revision 1.4  2003/02/09 22:59:33  rasc
+-- endian check (bug fix)
+
 Revision 1.3  2002/08/17 20:36:12  obi
 no more compiler warnings
 
@@ -34,12 +37,33 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
+static little_endian_arch = 0;
+
+/*
+  -- check Little/big endian architecture
+  -- sets mode variable
+*/
+
+
+void setEndianArch (void)
+{
+	union {
+		unsigned long  l;		// assume 32 bit longs
+		unsigned char  b[4];
+	} mem;
+
+
+	mem.l = 0x01020304;
+        little_endian_arch = (mem.b[0] == 0x04) ? 1 : 0;
+}
+
+
 
 
 /* 
   -- get bits out of buffer
   -- This code is system dependend (works not on Intel!)
-  -- startbit ist von links nacvh rechts im buffer!!!!
+  -- startbit ist von links nach rechts im buffer!!!!
   -- return: value
 */
 
@@ -63,8 +87,15 @@ unsigned long getBits (u_char *buf, int byte_offset, int startbit, int bitlen)
  startbit %= 8;
 
  b += bytepos;
- tmp_long = (unsigned long)( ((*b)<<24) + (*(b+1)<<16) +
-	 (*(b+2)<<8) + *(b+3) );
+ if (little_endian_arch) {
+	// intel arch
+ 	tmp_long = (unsigned long)( (*b) + (*(b+1)<<8) +
+		 (*(b+2)<<16) + (*(b+3)<<24) );
+ } else {
+	// dbox, motorola, ppc arch
+ 	tmp_long = (unsigned long)( ((*b)<<24) + (*(b+1)<<16) +
+		 (*(b+2)<<8) + *(b+3) );
+ }
 
 //printf (" -- corrected1:: bytepos: %d , start: %d\n", bytepos, startbit);
  startbit = 32 - startbit - bitlen;
