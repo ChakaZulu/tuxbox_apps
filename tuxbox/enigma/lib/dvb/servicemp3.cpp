@@ -781,24 +781,22 @@ eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 
 int eServiceHandlerMP3::play(const eServiceReference &service)
 {
-	FILE *f = fopen( service.path.c_str(), "r" );
 	if ( service.path )
 	{
+		FILE *f = fopen( service.path.c_str(), "r" );
 		if (!f)
 		{
-			eString tmp = service.path;
-			tmp.upper();
-			if ( tmp.find("HTTP://") == eString::npos )
+			if ( service.path.find("://") == eString::npos )
 			{
 				eDebug("file %s not exist.. don't play", service.path.c_str() );
 				return -1;
 			}
 		}
+		else
+			fclose(f);
 	}
 	else
 		return -1;
-
-	fclose(f);
 
 	decoder=new eMP3Decoder(service.data[0], service.path.c_str(), this);
 	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::start));
