@@ -1,5 +1,5 @@
 //
-//  $Id: sectionsd.cpp,v 1.135 2002/10/04 16:31:25 thegoodguy Exp $
+//  $Id: sectionsd.cpp,v 1.136 2002/10/08 22:09:10 thegoodguy Exp $
 //
 //	sectionsd.cpp (network daemon for SI-sections)
 //	(dbox-II-project)
@@ -23,6 +23,9 @@
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 //  $Log: sectionsd.cpp,v $
+//  Revision 1.136  2002/10/08 22:09:10  thegoodguy
+//  Code cleanup (SDTThread & EITThread now use common read routine)
+//
 //  Revision 1.135  2002/10/04 16:31:25  thegoodguy
 //  Bugfix: In the event of a timeout with part of the section read, the eitthread should use the correct commands to restart the dmx, too
 //
@@ -1076,6 +1079,97 @@ public:
 	pthread_cond_t	change_cond;
 	pthread_mutex_t	start_stop_mutex;
 
+	char * getSection(unsigned timeoutInMSeconds, int &timeouts) // section with size < 3 + 5 are skipped !
+		{
+			struct minimal_section_header {
+				unsigned char table_id : 8;
+				// 1 byte
+				unsigned char section_syntax_indicator : 1;
+				unsigned char reserved_future_use : 1;
+				unsigned char reserved1 : 2;
+				unsigned short section_length : 12;
+				// 3 bytes
+			} __attribute__ ((packed));
+
+			minimal_section_header initial_header;
+			char * buf;
+			int    rc;
+
+			lock();
+
+			rc = read((char *) &initial_header, 3, timeoutInMSeconds);
+
+			if (rc <= 0)
+			{
+				unlock();
+				if (rc == 0)
+				{
+					dprintf("dmx.read timeout - filter: %x", filters[filter_index].filter);
+					timeouts++;
+				}
+				else
+				{
+					dprintf("dmx.read rc: %d - filter: %x", rc, filters[filter_index].filter);
+					// restart DMX
+					real_pause();
+					real_unpause();
+				}
+				return NULL;
+			}
+
+			timeouts = 0;
+			buf = new char[3 + initial_header.section_length];
+			
+			if (!buf)
+			{
+				unlock();
+				closefd();
+				fprintf(stderr, "[sectionsd] FATAL: Not enough memory: filter: %x\n", filters[filter_index].filter);
+				throw std::bad_alloc();
+				return NULL;
+			}
+			    
+			if (initial_header.section_length > 0)
+				rc = read(buf + 3, initial_header.section_length, timeoutInMSeconds);
+
+			unlock();
+
+			if (rc <= 0)
+			{
+				delete[] buf;
+				if (rc == 0)
+				{
+					dprintf("dmx.read timeout after header - filter: %x", filters[filter_index].filter);
+				}
+				else
+				{
+					dprintf("dmx.read rc: %d after header - filter: %x", rc, filters[filter_index].filter);
+				}
+				// DMX restart required, since part of the header has been read
+				real_pause();
+				real_unpause();
+				return NULL;
+			}
+			
+			// check if the filter worked correctly
+			if (((initial_header.table_id ^ filters[filter_index].filter) & filters[filter_index].mask) != 0)
+			{
+				delete[] buf;
+				dprintf("[sectionsd] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", filters[filter_index].filter, filters[filter_index].mask, initial_header.table_id);
+				return NULL;
+			}
+
+			if (initial_header.section_length < 5)  // skip sections which are too short
+			{
+				delete[] buf;
+				return NULL;
+			}
+
+			memcpy(buf, &initial_header, 3);
+
+			return buf;
+		}
+
 private:
 	int fd;
 	pthread_mutex_t pauselock;
@@ -1903,7 +1997,7 @@ static void commandDumpStatusInformation(struct connectionData *client, char *da
 	char stati[2024];
 
 	sprintf(stati,
-	        "$Id: sectionsd.cpp,v 1.135 2002/10/04 16:31:25 thegoodguy Exp $\n"
+	        "$Id: sectionsd.cpp,v 1.136 2002/10/08 22:09:10 thegoodguy Exp $\n"
 	        "Current time: %s"
 	        "Hours to cache: %ld\n"
 	        "Events are old %ldmin after their end time\n"
@@ -3519,60 +3613,13 @@ static void *sdtThread(void *)
 				dputs("dmxSDT restarted");
 			}
 
-			dmxSDT.lock();
-			int rc = dmxSDT.read((char *) & header, sizeof(header), timeoutInMSeconds);
+			buf = dmxSDT.getSection(timeoutInMSeconds, timeoutsDMX);
 
-			if (!rc)
-			{
-				dmxSDT.unlock();
-				dputs("dmxSDT.read timeout");
-				timeoutsDMX++;
-				continue; // timeout -> kein EPG
-			}
-			else if (rc < 0)
-			{
-				dmxSDT.unlock();
-				// DMX neu starten
-				dmxSDT.real_pause();
-				dmxSDT.real_unpause(); // leaves unlocked
+			if (buf == NULL)
 				continue;
-			}
 
-			timeoutsDMX = 0;
-			buf = new char[sizeof(header) + header.section_length - 5];
-
-			if (!buf)
-			{
-				dmxSDT.unlock();
-				fprintf(stderr, "Not enough memory!\n");
-				break;
-			}
-
-			// Den Header kopieren
-			memcpy(buf, &header, sizeof(header));
-
-			rc = dmxSDT.read(buf + sizeof(header), header.section_length - 5, timeoutInMSeconds);
-
-			dmxSDT.unlock();
-
-			if (!rc)
-			{
-				delete[] buf;
-				dputs("dmxSDT.read timeout after header");
-				// DMX neu starten, noetig, da bereits der Header gelesen wurde
-
-				dmxSDT.real_pause();
-				dmxSDT.real_unpause(); // leaves unlocked
-				continue; // timeout -> kein EPG
-			}
-			else if (rc < 0)
-			{
-				delete[] buf;
-				// DMX neu starten
-				dmxSDT.real_pause(); // -> lock
-				dmxSDT.real_unpause(); // -> unlock
-				continue;
-			}
+			// copy the header
+			memcpy(&header, buf, min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
 
 			if ((header.current_next_indicator) && (!dmxSDT.pauseCounter))
 			{
@@ -4194,74 +4241,13 @@ static void *eitThread(void *)
 				};
 			}
 
-			dmxEIT.lock();
-			dputs("[eitThread] read");
-			int rc = dmxEIT.read((char *) &header, 3, timeoutInMSeconds);
-
-			if (!rc)
-			{
-				dmxEIT.unlock();
-				dputs("[eitThread] dmxEIT.read timeout...");
-				timeoutsDMX++;
-				continue; // timeout -> kein EPG
-			}
-			else if (rc < 0)
-			{
-				dputs("[eitThread] dmxEIT.read rc<0");
-				dmxEIT.unlock();
-				// DMX neu starten
-				dmxEIT.real_pause();
-				dmxEIT.real_unpause();
-				continue;
-			}
-
-			timeoutsDMX = 0;
-			buf = new char[3 + header.section_length];
+			buf = dmxEIT.getSection(timeoutInMSeconds, timeoutsDMX);
 			
-			if (!buf)
-			{
-				dmxEIT.closefd();
-				dmxEIT.unlock();
-				fprintf(stderr, "[eitThread] Not enough memory!\n");
-				break;
-			}
-			    
-			if (header.section_length > 0)
-				rc = dmxEIT.read(buf + 3, header.section_length, timeoutInMSeconds);
-
-			dmxEIT.unlock();
-
-			if (rc <= 0)
-			{
-				delete[] buf;
-				if (rc == 0)
-				{
-					dputs("[eitThread] dmxEIT.read timeout after header");
-				}
-				else
-					dputs("[eitThread] dmxEIT.read rc < 0 after header");
-				// DMX neu starten, noetig, da bereits der Header gelesen wurde
-				dmxEIT.real_pause(); // -> lock
-				dmxEIT.real_unpause(); // -> unlock
+			if (buf == NULL)
 				continue;
-			}
 
-			if (header.section_length < 5)
-			{
-				delete[] buf;
-				continue;
-			}
-
-			if (((header.table_id ^ dmxEIT.filters[dmxEIT.filter_index].filter) & dmxEIT.filters[dmxEIT.filter_index].mask) != 0)
-			{
-				dprintf("[eitThread] filter 0x%x mask 0x%x -> skip sections for table 0x%x\n", dmxEIT.filters[dmxEIT.filter_index].filter, dmxEIT.filters[dmxEIT.filter_index].mask, header.table_id);
-				delete[] buf;
-				continue;
-			}
-
-			// Den Header kopieren
-			memcpy(buf, &header, 3);
-			memcpy(((char *)&header) + 3, buf + 3, min((unsigned int)header.section_length, sizeof(header) - 3));
+			// copy the header
+			memcpy(&header, buf, min((unsigned)((SI_section_header*)buf)->section_length + 3, sizeof(header)));
 
 			if ((header.current_next_indicator) && (!dmxEIT.pauseCounter ))
 			{
@@ -4287,9 +4273,8 @@ static void *eitThread(void *)
 				                    }
 				                }
 				*/
-				dputs("[eitThread] Parsing");
 
-				SIsectionEIT eit(SIsection(sizeof(header) + header.section_length - 5, buf));
+				SIsectionEIT eit(SIsection(3 + header.section_length, buf));
 
 				if (eit.header())
 				{
@@ -4572,7 +4557,7 @@ int main(int argc, char **argv)
 	pthread_t threadTOT, threadEIT, threadSDT, threadHouseKeeping;
 	int rc;
 
-	printf("$Id: sectionsd.cpp,v 1.135 2002/10/04 16:31:25 thegoodguy Exp $\n");
+	printf("$Id: sectionsd.cpp,v 1.136 2002/10/08 22:09:10 thegoodguy Exp $\n");
 
 	try
 	{
