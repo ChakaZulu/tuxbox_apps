@@ -117,7 +117,7 @@ void eDVBRecorder::s_open(const char *_filename)
 		outfd=-1;
 		return;
 	}
-	::ioctl(dvrfd, DMX_SET_BUFFER_SIZE, 1024*1024);
+	::ioctl(dvrfd, DMX_SET_BUFFER_SIZE, 256 * 1024);
 
 	eDebug("eDVBRecorder::s_start();");	
 	if (outfd >= 0)

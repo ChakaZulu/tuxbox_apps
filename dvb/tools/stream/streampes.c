@@ -1,5 +1,5 @@
 /*
- * $Id: streampes.c,v 1.5 2002/11/12 08:05:10 obi Exp $
+ * $Id: streampes.c,v 1.6 2003/01/07 00:43:59 obi Exp $
  *
  * Copyright (C) 2001 by tmbinc
  * Copyright (C) 2001 by kwon
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 		return -fd;
 	}
 
-	ioctl(fd, DMX_SET_BUFFER_SIZE, 1024*1024);
+	ioctl(fd, DMX_SET_BUFFER_SIZE, 256 * 1024);
 	sscanf(bp, "%hx", &pid);
 
 	flt.pid = pid;

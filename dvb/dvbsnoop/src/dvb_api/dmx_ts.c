@@ -1,5 +1,5 @@
 /*
-$Id: dmx_ts.c,v 1.4 2002/11/01 20:38:40 Jolt Exp $
+$Id: dmx_ts.c,v 1.5 2003/01/07 00:43:58 obi Exp $
 
  -- (c) 2001 rasc
  -- Transport Streams
@@ -9,6 +9,9 @@ $Id: dmx_ts.c,v 1.4 2002/11/01 20:38:40 Jolt Exp $
  -- Verbose Level >= 1
 
 $Log: dmx_ts.c,v $
+Revision 1.5  2003/01/07 00:43:58  obi
+set buffer size to 256kb
+
 Revision 1.4  2002/11/01 20:38:40  Jolt
 Changes for the new API
 
@@ -34,7 +37,7 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 
-#define TS_BUF_SIZE  (1024*1024)
+#define TS_BUF_SIZE  (256 * 1024)
 #define READ_BUF_SIZE (188)          /* TS RDSIZE is fixed !! */
 
 
