@@ -3,7 +3,7 @@
 
         Copyright (C) 2001/2002 Dirk Szymanski 'Dirch'
 
-        $Id: controlapi.h,v 1.2 2002/10/15 20:39:47 woglinde Exp $
+        $Id: controlapi.h,v 1.3 2002/10/18 12:42:13 thegoodguy Exp $
 
         License: GPL
 
@@ -27,18 +27,12 @@
 #ifndef __controlapi__
 #define __controlapi__
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <sys/timeb.h>
 
 #include "request.h"
 #include "webdbox.h"
-
-
-using namespace std;
-
 
 
 class CControlAPI
