@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.351 2004/05/06 06:45:36 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.352 2004/05/06 12:44:40 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -1259,7 +1259,7 @@ void sendBouquets(int connfd, const bool emptyBouquetsToo)
 	}
 }
 
-bool send_data_count(int connfd, int data_count)
+bool send_data_count(const int connfd, const int data_count)
 {
 	CZapitMessages::responseGeneralInteger responseInteger;
 	responseInteger.number = data_count;
@@ -1273,7 +1273,15 @@ bool send_data_count(int connfd, int data_count)
 
 void internalSendChannels(int connfd, ChannelList* channels, const unsigned int first_channel_nr)
 {
-	if (!send_data_count(connfd, channels->size()))
+	int data_count = channels->size();
+	if (currentMode & RECORD_MODE)
+	{
+		for (uint32_t i = 0; i < channels->size(); i++)
+			if ((*channels)[i]->getTsidOnid() != channel->getTsidOnid())
+				data_count--;
+	}
+
+	if (!send_data_count(connfd, data_count))
 		return;
 
 	for (uint32_t i = 0; i < channels->size();i++)
@@ -1624,7 +1632,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.351 2004/05/06 06:45:36 thegoodguy Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.352 2004/05/06 12:44:40 thegoodguy Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
