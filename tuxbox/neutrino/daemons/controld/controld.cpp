@@ -42,16 +42,19 @@
 #include <signal.h>
 
 #include "dbox/avs_core.h"
+#include "dbox/fp.h"
 #include "saa7126/saa7126_core.h"
 #include "ost/video.h"
 #include "eventwatchdog.h"
 #include "controldclient.h"
 #include "lcddclient.h"
+#include "zapitclient.h"
 
 #define CONF_FILE CONFIGDIR "/controld.conf"
 #define SAA7126_DEVICE "/dev/dbox/saa0"
 
 CLcddClient lcdd;
+CZapitClient zapit;
 
 
 struct Ssettings
@@ -367,6 +370,34 @@ void disableVideoOutput(bool disable)
 		return;
 	}
 	close(fd);
+/*
+	arg=disable?0:0xf;
+	if((fd = open("/dev/dbox/fp0",O_RDWR|O_NONBLOCK)) < 0)
+	{
+		perror("[controld] FP DEVICE: ");
+		return;
+	}
+
+	if ( (ioctl(fd,FP_IOCTL_LCD_DIMM,&arg) < 0))
+	{
+		perror("[controld] IOCTL: ");
+		close(fd);
+		return;
+	}
+	close(fd);
+*/
+	if(!disable)
+	{
+		setvideooutput(settings.videooutput);
+		setVideoFormat(settings.videoformat);
+		zapit.stopPlayBack();
+	}
+	else
+	{
+		setvideooutput(0);
+		setVideoFormat(0);
+		zapit.startPlayBack();
+	}
 }
 
 void setBoxType(char type)
