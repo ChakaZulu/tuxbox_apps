@@ -1,5 +1,5 @@
 /*
- * $Id: multilingual_bouquet_name_descriptor.cpp,v 1.1 2004/02/13 15:27:47 obi Exp $
+ * $Id: multilingual_bouquet_name_descriptor.cpp,v 1.2 2004/06/18 19:05:19 sestegra Exp $
  *
  * Copyright (C) 2002-2004 Andreas Oberritter <obi@saftware.de>
  *
@@ -40,7 +40,7 @@ const std::string &MultilingualBouquetName::getBouquetName(void) const
 
 MultilingualBouquetNameDescriptor::MultilingualBouquetNameDescriptor(const uint8_t * const buffer) : Descriptor(buffer)
 {
-	for (size_t i = 0; i < descriptorLength; i += buffer[i + 3] + 2)
+	for (size_t i = 0; i < descriptorLength; i += buffer[i + 5] + 4)
 		multilingualBouquetNames.push_back(new MultilingualBouquetName(&buffer[i + 2]));
 }
 
