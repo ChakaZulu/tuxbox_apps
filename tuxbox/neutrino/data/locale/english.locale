@@ -655,3 +655,15 @@ filebrowser.filter Filter
 filebrowser.select Select
 filebrowser.mark Mark
 filebrowser.scan Scaning folder
+
+nfs.mount Mount NFS volume
+nfs.ip NFS Server IP
+nfs.dir NFS directory
+nfs.localdir local dir
+nfs.automount mount on startup
+nfs.mountnow mount now
+nfs.mounterror mount error
+nfs.umount Umount NFS volume
+nfs.umounterror error umounting volume
+nfs.alreadymounted directory already mounted
+

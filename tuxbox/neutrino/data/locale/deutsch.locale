@@ -655,3 +655,15 @@ filebrowser.filter Filter
 filebrowser.select Auswählen
 filebrowser.mark Markieren
 filebrowser.scan Durchsuche Verzeichnisse
+
+nfs.mount NFS Verzeichniss mounten
+nfs.ip NFS Server IP
+nfs.dir NFS Verzeichniss
+nfs.localdir lokales Verzeichniss
+nfs.automount Beim Start mounten
+nfs.mountnow Jetzt mounten
+nfs.mounterror Mount-Fehler
+nfs.umount NFS Verzeichniss unmounten
+nfs.umounterror Umount-Fehler
+nfs.alreadymounted Verzeichniss bereits gemountet
+
