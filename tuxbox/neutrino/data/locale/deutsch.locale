@@ -306,6 +306,8 @@ flashupdate.readflash ganzes Flashimage auslesen
 flashupdate.writeflash ganzes Flashimage einspielen
 flashupdate.readflashmtd einzelne Partition auslesen
 flashupdate.writeflashmtd einzelne Partition einspielen
+flashupdate.savesuccess Das Image wurde erfolgreich unter dem\nDateinamen %s gespeichert.
+
 
 bouqueteditor.name Bouquet-Verwaltung
 bouqueteditor.delete Löschen

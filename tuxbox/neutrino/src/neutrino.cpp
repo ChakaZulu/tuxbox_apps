@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.266 2002/05/09 02:00:17 McClean Exp $
+        $Id: neutrino.cpp,v 1.267 2002/05/09 11:20:24 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -2534,7 +2534,9 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.266 2002/05/09 02:00:17 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.267 2002/05/09 11:20:24 McClean Exp $\n\n");
+	//dhcp-client beenden, da sonst neutrino beim hochfahren stehenbleibt
+	system("killall -9 udhcpc >/dev/null 2>/dev/null");
 	tzset();
 	initGlobals();
 	return CNeutrinoApp::getInstance()->run(argc, argv);

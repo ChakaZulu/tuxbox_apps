@@ -34,6 +34,7 @@
 #include "update.h"
 #include "neutrino.h"
 #include "gui/widget/messagebox.h"
+#include "gui/widget/hintbox.h"
 #include "system/flashtool.h"
 #include "system/httptool.h"
 
@@ -465,12 +466,18 @@ int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 		if(!ft.readFromMTD("/tmp/flashimage.img"))
 		{
 			showStatusMessage( ft.getErrorMessage() );
+			sleep(10);
 		}
 		else
 		{
+			showGlobalStatus(100);
 			showStatusMessage( g_Locale->getText("flashupdate.ready"));
+			char message[500];
+			sprintf(message, g_Locale->getText("flashupdate.savesuccess").c_str(), "/tmp/flashimage.img");
+			sleep(1);
+			hide();
+			ShowHint ( "messagebox.info", message );
 		}
-		showGlobalStatus(100);
 	}
 	else if(actionKey=="writeflash")
 	{
@@ -482,7 +489,6 @@ int CFlashExpert::exec( CMenuTarget* parent, string actionKey )
 	{
 	}
 
-	sleep(10);
 	hide();
 	return menu_return::RETURN_REPAINT;
 }
