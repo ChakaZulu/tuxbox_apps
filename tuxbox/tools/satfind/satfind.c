@@ -36,15 +36,13 @@
 #include "icons.h"
 #include "font.h"
 
-#include <ost/dmx.h> 
-#include <ost/frontend.h> 
-#include <ost/sec.h>
+#include <linux/dvb/dmx.h> 
+#include <linux/dvb/frontend.h> 
 
 #define LCD "/dev/dbox/lcd0"
 #define FP "/dev/dbox/fp0"
-#define DMX "/dev/dvb/card0/demux0"
-#define QPSK "/dev/dvb/card0/frontend0"
-#define SEC "/dev/dvb/card0/sec0"
+#define DMX "/dev/dvb/adapter0/demux0"
+#define FE "/dev/dvb/adapter0/frontend0"
 
 typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
@@ -52,9 +50,9 @@ typedef unsigned char screen_t[LCD_BUFFER_SIZE];
 
 struct signal {
   uint32_t ber;
-  int32_t snr;
-  int32_t strength;
-  FrontendStatus status;
+  uint16_t snr;
+  uint16_t strength;
+  fe_status_t status;
 };
 
 int max_values[3]={0,0xFFFF,0xFFFF};
@@ -244,15 +242,15 @@ void prepare_main(screen_t screen) {
 }
 
 int main(int argc, char **argv) {
-  int lcd_fd;//,fp_fd;
-  int qpsk_fd,dmx_fd;//,sec_fd
+  int lcd_fd;
+  int fe_fd,dmx_fd;
   int lcd_mode;
   fd_set rfds;
   int result;
   screen_t screen;
   struct timeval tv;
   struct signal signal_quality,old_signal;
-  struct dmxSctFilterParams flt;
+  struct dmx_sct_filter_params flt;
   unsigned char buf[1024];
   char network_name[31],old_name[31];
 
@@ -261,30 +259,17 @@ int main(int argc, char **argv) {
     fprintf(stderr,"lcd open - Can't open LCD: %d\n",errno);
     return -1;
   }
-  /*
-  if((fp_fd=open(FP,O_RDWR))<0) {
-    perror("Can't open FP");
-    return -1;
-  }
-  */
 
   /* open nokia-api specific devices (demux,tuner and sat-control) */
-  
   if((dmx_fd=open(DMX,O_RDWR))<0) {
     perror("Can't open Demux");
     return -1;
   }
   
-  if((qpsk_fd=open(QPSK,O_RDWR))<0) {
+  if((fe_fd=open(FE,O_RDWR))<0) {
     fprintf(stderr,"frontend open - Can't open Tuner: %d\n",errno);
     return -1;
   }
-  /*
-  if((sec_fd=open(SEC,O_RDWR))<0) {
-    perror("Can't open SEC");
-    return -1;
-  }
-  */
 
   /* switch LCD to binary mode and clear it */
   lcd_mode=LCD_MODE_BIN;
@@ -296,9 +281,8 @@ int main(int argc, char **argv) {
   memset(&old_signal,0,sizeof(old_signal));
   
   /* initialize demux to get the NIT */
-  
-  memset(&flt.filter.filter, 0, DMX_FILTER_SIZE);
-  memset(&flt.filter.mask, 0, DMX_FILTER_SIZE);
+ 
+  memset(&flt, 0, sizeof(flt));
   
   flt.pid=0x10;
   flt.filter.filter[0]=0x40;
@@ -351,7 +335,7 @@ int main(int argc, char **argv) {
     tv.tv_sec=0;
     tv.tv_usec=10000;
 
-    get_signal(&signal_quality,qpsk_fd);
+    get_signal(&signal_quality,fe_fd);
     draw_signal(&signal_quality,&old_signal,screen);
     draw_screen(screen,lcd_fd);
     printf("%s %d %d %d [%c%c]\n",network_name,signal_quality.ber,signal_quality.snr,signal_quality.strength,signal_quality.status&FE_HAS_SIGNAL? 'S':' ',signal_quality.status&FE_HAS_LOCK? 'L':' ');
@@ -359,11 +343,8 @@ int main(int argc, char **argv) {
 
   /* close devices */
   close(lcd_fd);
-  //  close(fp_fd);
-  
   close(dmx_fd);
-  close(qpsk_fd);
-  //close(sec_fd);
+  close(fe_fd);
   
   return 0;
 }

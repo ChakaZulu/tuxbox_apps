@@ -1,5 +1,5 @@
 /*
- * $Id: sdt.c,v 1.3 2002/08/27 19:00:45 obi Exp $
+ * $Id: sdt.c,v 1.4 2002/11/03 02:18:27 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -22,7 +22,6 @@
 #ifdef LOOKUP_ONID
 
 #include <fcntl.h>
-#include <ost/dmx.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -30,10 +29,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <linux/dvb/dmx.h>
+
 #include "sdt.h"
 
 #define SDT_SIZE 10
-#define DEMUX_DEV "/dev/dvb/card0/demux0"
+#define DEMUX_DEV "/dev/dvb/adapter0/demux0"
 
 /*
  * parse service description table
@@ -46,10 +47,9 @@ unsigned short parse_sdt ()
 	unsigned char buf[SDT_SIZE];
 	int dmx_fd;
 
-	struct dmxSctFilterParams sctFilterParams;
+	struct dmx_sct_filter_params sctFilterParams;
 
-	memset(&sctFilterParams.filter.filter, 0x00, DMX_FILTER_SIZE);
-	memset(&sctFilterParams.filter.mask, 0x00, DMX_FILTER_SIZE);
+	memset(&sctFilterParams, 0x00, sizeof(struct dmx_sct_filter_params));
 
 	sctFilterParams.filter.filter[0] = 0x42;
 	sctFilterParams.filter.mask[0] = 0xFF;
