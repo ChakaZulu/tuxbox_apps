@@ -94,6 +94,8 @@ repeatblocker.hint_2 0 schaltet den Blocker aus (Rot ist " ")
 
 keybindingmenu.RC Fernbedienung
 keybindingmenu.repeatblock Tasten-Wiederholblocker
+keybindingmenu.repeatblock Wdh.-verzögerung
+keybindingmenu.repeatblockgeneric Anfangsverzögerung
 keybindingmenu.head Tasten-Einstellungen
 keybindingmenu.modechange Modus wechsel
 keybindingmenu.channellist Kanalliste
@@ -104,8 +106,8 @@ keybindingmenu.pageup Seite hochblättern
 keybindingmenu.pageup_head Seite hochblättern
 keybindingmenu.pagedown Seite runterblättern
 keybindingmenu.pagedown_head Seite runterblättern
-keybindingmenu.cancel Kanalliste schliessen
-keybindingmenu.cancel_head Kanalliste schliessen
+keybindingmenu.cancel Kanalliste schließen
+keybindingmenu.cancel_head Kanalliste schließen
 keybindingmenu.channelup Kanal hoch
 keybindingmenu.channelup_head Kanal hoch Taste
 keybindingmenu.channeldown Kanal runter

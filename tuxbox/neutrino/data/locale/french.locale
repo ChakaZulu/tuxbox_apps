@@ -95,6 +95,8 @@ repeatblocker.hint_2 0 met hors circuit l' amortissement  (Rouge est " ")
 
 keybindingmenu.RC Télécommande
 keybindingmenu.repeatblock bloquer des clés doubles
+keybindingmenu.repeatblock repeat delay
+keybindingmenu.repeatblockgeneric generic delay
 keybindingmenu.head Réglage de clé
 keybindingmenu.modechange Changez le Mode
 keybindingmenu.channellist Liste d'émetteur
@@ -248,12 +250,12 @@ flashupdate.md5check checking image
 flashupdate.md5sumerror image has errors
 flashupdate.proxyserver_sep Proxyserver
 flashupdate.proxyserver Hostname
-flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port 
+flashupdate.proxyserver_hint1 enter proxyserver name or ip, use host:port
 flashupdate.proxyserver_hint2 a empty entry means no proxy
 flashupdate.proxyusername Username
-flashupdate.proxyusername_hint1 enter the proxyserver username 
+flashupdate.proxyusername_hint1 enter the proxyserver username
 flashupdate.proxyusername_hint2 a empty entry means no proxy-auth
 flashupdate.proxypassword Password
-flashupdate.proxypassword_hint1 enter the proxyserver password 
-flashupdate.proxypassword_hint2 
+flashupdate.proxypassword_hint1 enter the proxyserver password
+flashupdate.proxypassword_hint2
 
