@@ -21,6 +21,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdio.h>
+
 #include "eventserver.h"
 
 void CEventServer::registerEvent2(unsigned int eventID, unsigned int ClientID, string udsName)
@@ -86,8 +88,8 @@ bool CEventServer::sendEvent2Client(unsigned int eventID, unsigned int initiator
 
 	if(connect(sock_fd, (struct sockaddr*) &servaddr, clilen) <0 )
 	{
-  		perror("[eventserver]: connect");
-  		close(sock_fd);
+		perror("[eventserver]: connect");
+		close(sock_fd);
 		return false;
 	}
 
