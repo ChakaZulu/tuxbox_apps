@@ -8,6 +8,10 @@
 #include <qlist.h>
 #include "grc.h"
 
+#include <list>
+#include <core/base/eptrlist.h>
+
+
 class eWidget;
 class gPixmap;
 typedef eWidget *(*tWidgetCreator)(eWidget *parent);
@@ -22,7 +26,8 @@ struct eNamedColor
 
 class eSkin
 {
-	XMLTreeParser *parser;
+	typedef ePtrList<XMLTreeParser> parserList;
+	parserList parsers;
 	void clear();
 	
 	int parseColor(const char *name, const char *color, gRGB &col);
@@ -35,18 +40,19 @@ class eSkin
 	gDC *getDCbyName(const char *name);
 	
 	gRGB *palette;
-	int numcolors;
+	int maxcolors;
 	gImage *paldummy;
+	int *colorused;
 	
 	static QMap<eString,tWidgetCreator> eSkin::widget_creator;
 	int build(eWidget *widget, XMLTreeNode *rootwidget);
 	
-	QList<eNamedColor> colors;
+	std::list<eNamedColor> colors;
 	QDict<gColor> scheme;
 	QDict<gPixmap> images;
 	
 	QDict<int> values;
-	eNamedColor *searchColor(const char *name) const;
+	eNamedColor *searchColor(const char *name);
 
 	static eSkin *active;
 public:
@@ -61,7 +67,7 @@ public:
 	int build(eWidget *widget, const char *name);
 	void setPalette(gPixmapDC *pal);
 
-	gColor queryColor(const eString &name) const;
+	gColor queryColor(const eString &name);
 	gColor queryScheme(const eString &name) const;
 	gPixmap *queryImage(const eString &name) const;
 	int queryValue(const eString &name, int d) const;

@@ -10,26 +10,22 @@
 #include <config.h>
 #include <eerror.h>
 #include <core/gdi/font.h>
+#include <core/base/eptrlist.h>
 
 QMap<eString,tWidgetCreator> eSkin::widget_creator;
 
 eSkin *eSkin::active;
 
-eNamedColor *eSkin::searchColor(const char *name) const
+eNamedColor *eSkin::searchColor(const char *name)
 {
-	for (QListIterator<eNamedColor> i(colors); i.current(); ++i)
-		if (!strcmp(i.current()->name, name))
-			return i.current();
+	for (std::list<eNamedColor>::iterator i(colors.begin()); i != colors.end(); ++i)
+		if (!strcmp(i->name, name))
+			return &*i;
 	return 0;
 }
 
 void eSkin::clear()
 {
-	if (palette)
-		delete[] palette;
-	if (parser)
-		delete parser;
-	parser=0;
 }
 
 void eSkin::addWidgetCreator(const eString &name, tWidgetCreator creator)
@@ -73,10 +69,7 @@ int eSkin::parseColors(XMLTreeNode *xcolors)
 {
 	XMLTreeNode *node;
 	
-	if (palette)
-		delete[] palette;
-	
-	int numnamed=0;
+	std::list<eNamedColor>::iterator newcolors=colors.end();
 	
 	for (node=xcolors->GetChild(); node; node=node->GetNext())
 	{
@@ -94,91 +87,73 @@ int eSkin::parseColors(XMLTreeNode *xcolors)
 			continue;
 		}
 
-		eNamedColor *col=new eNamedColor;
-		col->name=name;
+		eNamedColor col;
+		col.name=name;
 
 		const char *size=node->GetAttributeValue("size");
 
 		if (size)
-			col->size=atoi(size);
+			col.size=atoi(size);
 		else
-			col->size=0;
+			col.size=0;
 		
-		if (!col->size)
-			col->size=1;
+		if (!col.size)
+			col.size=1;
 		
-		if ((col->size>1) && (!end))
+		if ((col.size>1) && (!end))
 		{
 			eDebug("no end specified in \"%s\" but is gradient", name);
-			delete col;
 			continue;
 		}
 
-		if (parseColor(name, color, col->value))
-		{
-			delete col;
+		if (parseColor(name, color, col.value))
 			continue;
-		}
 
-		if (end && parseColor(name, end, col->end))
-		{
-			delete col;
+		if (end && parseColor(name, end, col.end))
 			continue;
-		}
 
-		colors.append(col);
-		numnamed++;
+		colors.push_back(col);
+		if (newcolors == colors.end())
+			--newcolors;
 	}
 	
-	const int maxcolors=numcolors;
-	
-	int colorused[maxcolors];
-	memset(colorused, 0, maxcolors*sizeof(int));
-	palette=new gRGB[maxcolors];
-	memset(palette, 0, sizeof(gRGB)*maxcolors);
-	
-	for (QListIterator<eNamedColor> i(colors); i.current(); ++i)
+	for (std::list<eNamedColor>::iterator i(newcolors); i != colors.end(); ++i)
 	{
-		eNamedColor *col=i.current();
+		eNamedColor &col=*i;
 		int d;
-		for (d=0; d<maxcolors; d+=col->size)
+		for (d=0; d<maxcolors; d+=col.size)
 		{
 			int s;
-			for (s=0; s<col->size; s++)
+			for (s=0; s<col.size; s++)
 				if ((d+s>maxcolors) || colorused[d+s])
 					break;
-			if (s==col->size)
+			if (s==col.size)
 				break;
 		}
 		if (d==maxcolors)
 			continue;
-		col->index=gColor(d);
-		for (int s=0; s<col->size; s++, d++)
+		col.index=gColor(d);
+		for (int s=0; s<col.size; s++, d++)
 		{
 			colorused[d]=1;
 			if (s)
 			{
-				int rdiff=-col->value.r+col->end.r;
-				int gdiff=-col->value.g+col->end.g;
-				int bdiff=-col->value.b+col->end.b;
-				int adiff=-col->value.a+col->end.a;
-				rdiff*=s; rdiff/=(col->size-1);
-				gdiff*=s; gdiff/=(col->size-1);
-				bdiff*=s; bdiff/=(col->size-1);
-				adiff*=s; adiff/=(col->size-1);
-				palette[d].r=col->value.r+rdiff;
-				palette[d].g=col->value.g+gdiff;
-				palette[d].b=col->value.b+bdiff;
-				palette[d].a=col->value.a+adiff;
+				int rdiff=-col.value.r+col.end.r;
+				int gdiff=-col.value.g+col.end.g;
+				int bdiff=-col.value.b+col.end.b;
+				int adiff=-col.value.a+col.end.a;
+				rdiff*=s; rdiff/=(col.size-1);
+				gdiff*=s; gdiff/=(col.size-1);
+				bdiff*=s; bdiff/=(col.size-1);
+				adiff*=s; adiff/=(col.size-1);
+				palette[d].r=col.value.r+rdiff;
+				palette[d].g=col.value.g+gdiff;
+				palette[d].b=col.value.b+bdiff;
+				palette[d].a=col.value.a+adiff;
 			} else
-				palette[d]=col->value;
+				palette[d]=col.value;
 		}
 	}
-	if (paldummy)
-		delete paldummy;
-	paldummy=new gImage(eSize(1, 1), 8);
-	paldummy->clut=palette;
-	paldummy->colors=maxcolors;
 	return 0;
 }
 
@@ -256,7 +231,7 @@ int eSkin::parseImages(XMLTreeNode *inode)
 			gPainter p(mydc);
 			p.mergePalette(*paldummy);
 		}
-		images.insert(name, image);
+ 		images.insert(name, image);
 	}
 	return 0;
 }
@@ -368,13 +343,21 @@ int eSkin::build(eWidget *widget, XMLTreeNode *node)
 
 eSkin::eSkin()
 {
-	parser=0;
-	palette=0;
-	numcolors=256;
-	paldummy=0;
-	colors.setAutoDelete(true);
+	maxcolors=256;
+
+	palette=new gRGB[maxcolors];
+	
+	memset(palette, 0, sizeof(gRGB)*maxcolors);
+	paldummy=new gImage(eSize(1, 1), 8);
+	paldummy->clut=palette;
+	paldummy->colors=maxcolors;
+
+	colorused=new int[maxcolors];
+	memset(colorused, 0, maxcolors*sizeof(int));
+
 	scheme.setAutoDelete(true);
 	images.setAutoDelete(true);
+	parsers.setAutoDelete(true);
 }
 
 eSkin::~eSkin()
@@ -382,38 +365,41 @@ eSkin::~eSkin()
 	if (active==this)
 		active=0;
 	clear();
+
+	delete colorused;
 	if (paldummy)
 		delete paldummy;
 }
 
 int eSkin::load(const char *filename)
 {
+	eDebug("loading skin: %s", filename);
 	FILE *in=fopen(filename, "rt");
 	if (!in)
 		return -1;
 
-	parser=new XMLTreeParser("ISO-8859-1");
+	parsers.push_front(new XMLTreeParser("ISO-8859-1"));
+	XMLTreeParser &parser=*parsers.front();
 	char buf[2048];
-	
+
 	int done;
 	do
 	{
 		unsigned int len=fread(buf, 1, sizeof(buf), in);
 		done=len<sizeof(buf);
-		if (!parser->Parse(buf, len, done))
+		if (!parser.Parse(buf, len, done))
 		{
 			eDebug("parse error: %s at line %d",
-				parser->ErrorString(parser->GetErrorCode()),
-				parser->GetCurrentLineNumber());
-			delete parser;
-			parser=0;
+				parser.ErrorString(parser.GetErrorCode()),
+				parser.GetCurrentLineNumber());
+			parsers.pop_front();
 			fclose(in);
 			return -1;
 		}
 	} while (!done);
 	fclose(in);
 
-	XMLTreeNode *root=parser->RootNode();
+	XMLTreeNode *root=parser.RootNode();
 	if (!root)
 		return -1;
 	if (strcmp(root->GetType(), "eskin"))
@@ -422,7 +408,7 @@ int eSkin::load(const char *filename)
 		return -1;
 	}
 	
-	XMLTreeNode *node=parser->RootNode();
+	XMLTreeNode *node=parser.RootNode();
 	
 	for (node=node->GetChild(); node; node=node->GetNext())
 		if (!strcmp(node->GetType(), "colors"))
@@ -441,20 +427,23 @@ int eSkin::load(const char *filename)
 
 int eSkin::build(eWidget *widget, const char *name)
 {
-	XMLTreeNode *node=parser->RootNode();
-	node=node->GetChild();
-	while (node)
+	for (parserList::iterator i(parsers.begin()); i!=parsers.end(); ++i)
 	{
-		if (!strcmp(node->GetType(), "object"))
+		XMLTreeNode *node=i->RootNode();
+		node=node->GetChild();
+		while (node)
 		{
-			const char *oname=node->GetAttributeValue("name");
-			if (!qstrcmp(name, oname))
+			if (!strcmp(node->GetType(), "object"))
 			{
-				node=node->GetChild();
-				return build(widget, node);
+				const char *oname=node->GetAttributeValue("name");
+				if (!qstrcmp(name, oname))
+				{
+					node=node->GetChild();
+					return build(widget, node);
+				}
 			}
+			node=node->GetNext();
 		}
-		node=node->GetNext();
 	}
 	eDebug("didn't found it");
 	return -ENOENT;
@@ -469,7 +458,7 @@ void eSkin::setPalette(gPixmapDC *pal)
 	}
 }
 
-gColor eSkin::queryColor(const eString& name) const
+gColor eSkin::queryColor(const eString& name)
 {
 	char *end;
 	int numcol=strtol(name, &end, 10);
