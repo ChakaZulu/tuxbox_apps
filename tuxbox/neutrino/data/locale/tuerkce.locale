@@ -49,6 +49,7 @@ miscsettings.head SECENEKLER
 miscsettings.shutdown_real Enable Standby
 miscsettings.boxtype DBox ÜRETICI
 miscsettings.startneutrinodirect start neutrino directly
+miscsettings.general General
 
 languagesetup.head DIL AYARI
 languagesetup.select MENÜ DIL

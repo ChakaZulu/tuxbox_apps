@@ -193,6 +193,15 @@ void CFrameBuffer::paletteFade(int i, __u32 rgb1, __u32 rgb2, int level)
 	*b+=((rgb1&0x0000FF)    )*(255-level);
 }
 
+void CFrameBuffer::setAlphaFade(int in, int num, int tr)
+{
+	for (int i=0; i<num; i++)
+	{
+		cmap.transp[in+i]=tr;
+		//tr++;
+	}
+}
+
 void CFrameBuffer::paletteGenFade(int in, __u32 rgb1, __u32 rgb2, int num, int tr)
 {
 	for (int i=0; i<num; i++)

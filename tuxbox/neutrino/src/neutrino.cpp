@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.228 2002/04/19 09:41:49 field Exp $
+        $Id: neutrino.cpp,v 1.229 2002/04/19 11:39:38 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1067,7 +1067,7 @@ void CNeutrinoApp::InitMiscSettings(CMenuWidget &miscSettings)
 {
 	miscSettings.addItem( new CMenuSeparator() );
 	miscSettings.addItem( new CMenuForwarder("menu.back") );
-	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
+	miscSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE | CMenuSeparator::STRING, "miscsettings.general" ) );
 
 	CMenuOptionChooser *oj = new CMenuOptionChooser("miscsettings.boxtype", &g_settings.box_Type, false, NULL, false );
 	oj->addOption(1, "Nokia");
@@ -1671,7 +1671,7 @@ int CNeutrinoApp::run(int argc, char **argv)
 	colorSettings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	// Meno
 
-	CMenuWidget colorSettings_menuColors("colormenusetup.head", "settings.raw");
+	CMenuWidget colorSettings_menuColors("colormenusetup.head", "settings.raw", 400, 400);
 	InitColorSettingsMenuColors(colorSettings_menuColors, colorSettings);
 
 	CMenuWidget colorSettings_statusbarColors("colormenu.statusbar", "settings.raw");
@@ -2393,7 +2393,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.228 2002/04/19 09:41:49 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.229 2002/04/19 11:39:38 field Exp $\n\n");
 	tzset();
 	initGlobals();
 

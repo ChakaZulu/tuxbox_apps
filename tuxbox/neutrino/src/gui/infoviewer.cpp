@@ -116,11 +116,16 @@ void CInfoViewer::paintTime( bool show_dot, bool firstPaint )
 
 void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_sid, bool calledFromNumZap )
 {
-neutrino->showProfiling("infoviewer showtitle");
 
         CurrentChannel = Channel;
         current_onid_sid = onid_sid;
         showButtonBar = !calledFromNumZap;
+
+        bool fadeIn = ( !is_visible ) && showButtonBar;
+        bool fadeOut = false;
+        int fadeTimer = 0;
+        int fadeValue;
+
         is_visible = true;
 
         BoxStartX = g_settings.screen_StartX+ 20;
@@ -132,6 +137,19 @@ neutrino->showProfiling("infoviewer showtitle");
 
  		if ( !gotTime )
  			gotTime = g_Sectionsd->getIsTimeSet();
+
+		getEPG( current_onid_sid );
+
+        if ( fadeIn )
+        {
+        	fadeValue = 100;
+        	g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
+        	g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
+        	g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
+			g_FrameBuffer->paletteSet();
+        }
+        else
+        	fadeValue= g_settings.infobar_alpha;
 
 		// kill linke seite
         g_FrameBuffer->paintBackgroundBox(BoxStartX, BoxStartY+ ChanHeight, BoxStartX + (ChanWidth/3), BoxStartY+ ChanHeight+ InfoHeightY_Info+ 10);
@@ -165,7 +183,6 @@ neutrino->showProfiling("infoviewer showtitle");
 
         g_FrameBuffer->paintBox(ChanInfoX, ChanInfoY, ChanNameX, BoxEndInfoY, COL_INFOBAR);
 
-neutrino->showProfiling("before if ( showButtonBar )");
 
         if ( showButtonBar )
         {
@@ -177,12 +194,6 @@ neutrino->showProfiling("before if ( showButtonBar )");
        		g_FrameBuffer->paintBox(ChanInfoX, BoxEndInfoY+ BOTTOM_BAR_OFFSET, BoxEndX, BoxEndY, COL_INFOBAR_BUTTONS);
 		}
 
-neutrino->showProfiling("before getEPG();");
-
-		getEPG( current_onid_sid );
-
-neutrino->showProfiling("after getEPG();");
-
 		if ( !( info_CurrentNext.flags & ( sectionsd::epgflags::has_later | sectionsd::epgflags::has_current |  sectionsd::epgflags::not_broadcast ) ) )
 		{
 			// nicht gefunden / noch nicht geladen
@@ -191,7 +202,6 @@ neutrino->showProfiling("after getEPG();");
 		else
 			show_Data();
 
-neutrino->showProfiling("after showData();");
 
         if ( showButtonBar )
         {
@@ -204,7 +214,6 @@ neutrino->showProfiling("after showData();");
 			showIcon_16_9();
 			showIcon_VTXT();
 
-neutrino->showProfiling("g_Sectionsd->setServiceChanged");
 			if ( ( ( info_CurrentNext.flags & sectionsd::epgflags::has_next ) &&
 				   ( info_CurrentNext.flags & ( sectionsd::epgflags::has_current | sectionsd::epgflags::has_no_current ) ) ) ||
 				 ( info_CurrentNext.flags & sectionsd::epgflags::not_broadcast ) )
@@ -219,7 +228,6 @@ neutrino->showProfiling("g_Sectionsd->setServiceChanged");
 			}
         }
 
-neutrino->showProfiling("vor Schatten;");
 		// Schatten
         g_FrameBuffer->paintBox(BoxEndX, ChanNameY+ SHADOW_OFFSET, BoxEndX+ SHADOW_OFFSET, BoxEndY, COL_INFOBAR_SHADOW);
         g_FrameBuffer->paintBox(ChanInfoX+ SHADOW_OFFSET, BoxEndY, BoxEndX+ SHADOW_OFFSET, BoxEndY+ SHADOW_OFFSET, COL_INFOBAR_SHADOW);
@@ -230,8 +238,9 @@ neutrino->showProfiling("vor Schatten;");
         if ( !calledFromNumZap )
         {
             bool show_dot= true;
+			if ( fadeIn )
+            	fadeTimer = g_RCInput->addTimer(40000, false);
 
-        	neutrino->showProfiling("start infoviewer loop");
        		bool hideIt = true;
 			unsigned long long timeoutEnd = g_RCInput->calcTimeoutEnd( g_settings.timing_infobar >> 1 );
 
@@ -247,11 +256,63 @@ neutrino->showProfiling("vor Schatten;");
 					g_RCInput->postMsg( NeutrinoMessages::SHOW_EPG, 0 );
 					res = messages_return::cancel_info;
 				}
-				else if ( ( msg == CRCInput::RC_timeout ) ||
-				          ( msg == CRCInput::RC_ok ) ||
-				          ( msg == CRCInput::RC_home ) )
+				else if ( ( msg == NeutrinoMessages::EVT_TIMER ) && ( data == fadeTimer ) )
 				{
-					res = messages_return::cancel_info;
+					if ( fadeOut )
+					{
+						fadeValue+= 15;
+
+						if ( fadeValue>= 100 )
+		            	{
+	    	        		fadeValue= 100;
+	        	    		g_RCInput->killTimer(fadeTimer);
+	            			res = messages_return::cancel_info;
+	            			g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(100) );
+		            	}
+		            	else
+	    	        		g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
+					}
+					else
+					{
+        				fadeValue-= 15;
+
+	        			if ( fadeValue<= g_settings.infobar_alpha )
+		            	{
+	    	        		fadeValue= g_settings.infobar_alpha;
+	        	    		g_RCInput->killTimer(fadeTimer);
+	            			fadeIn = false;
+	            			g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+		            	}
+		            	else
+	    	        		g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(fadeValue) );
+	    	        }
+
+					g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(fadeValue) );
+					g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(fadeValue) );
+					g_FrameBuffer->paletteSet();
+				}
+				else if ( ( msg == CRCInput::RC_ok ) ||
+				          ( msg == CRCInput::RC_home ) ||
+						  ( msg == CRCInput::RC_timeout ) )
+    			{
+    				if ( fadeIn )
+    				{
+    					g_RCInput->killTimer(fadeTimer);
+    					fadeIn = false;
+    				}
+    				if (!fadeOut)
+    				{
+                    	fadeOut = true;
+                    	fadeTimer = g_RCInput->addTimer(80000, false);
+                    	//g_RCInput->postMsg( NeutrinoMessages::EVT_TIMER, fadeTimer );
+            			timeoutEnd = g_RCInput->calcTimeoutEnd( 1 );
+    				}
+    				else
+    				{
+    					if ( msg != CRCInput::RC_timeout )
+    						g_RCInput->postMsg( msg, data );
+		            	res = messages_return::cancel_info;
+		            }
 				}
 				else if ( ( msg == g_settings.key_quickzap_up ) ||
                	 	 	  ( msg == g_settings.key_quickzap_down ) )
@@ -284,7 +345,6 @@ neutrino->showProfiling("vor Schatten;");
 						res = messages_return::cancel_info;
 					}
 				}
-				neutrino->showProfiling("end infoviewer loop");
 			}
 
 
@@ -292,9 +352,18 @@ neutrino->showProfiling("vor Schatten;");
 				killTitle();
 
             g_RCInput->killTimer(sec_timer_id);
-        }
 
-	neutrino->showProfiling("end infoviewer");
+
+            if ( fadeIn || fadeOut )
+            {
+            	g_RCInput->killTimer(fadeTimer);
+           		g_FrameBuffer->setAlphaFade(COL_INFOBAR, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+           		g_FrameBuffer->setAlphaFade(COL_INFOBAR_SHADOW, 8, convertSetupAlpha2Alpha(g_settings.infobar_alpha) );
+           		g_FrameBuffer->setAlphaFade(0, 16, convertSetupAlpha2Alpha(0) );
+           		g_FrameBuffer->paletteSet();
+			}
+
+        }
 }
 
 void CInfoViewer::showIcon_16_9()

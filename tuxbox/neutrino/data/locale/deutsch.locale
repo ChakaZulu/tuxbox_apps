@@ -49,6 +49,7 @@ miscsettings.head Diverse Einstellungen
 miscsettings.shutdown_real Standbymodus
 miscsettings.boxtype DBox Hersteller
 miscsettings.startneutrinodirect Neutrino direkt starten
+miscsettings.general Allgemein
 
 languagesetup.head Spracheinstellungen
 languagesetup.select Sprache
@@ -175,7 +176,7 @@ infoviewer.epgnotload Informationen noch nicht geladen...
 infoviewer.epgwait Warte auf EPG-Informationen...
 infoviewer.streaminfo Features
 infoviewer.eventlist Programm
-infoviewer.languages Tonauswahl
+infoviewer.languages Tonwahl
 infoviewer.notavailable Kanal (zur Zeit) nicht verfügbar
 infoviewer.cantdecode Kanal kann nicht entschlüsselt werden
 infoviewer.selecttime Startzeiten

@@ -93,6 +93,7 @@ class CFrameBuffer
 		unsigned int getStride(); //stride (anzahl bytes die eine Zeile im Framebuffer belegt)
 
 		//Palette stuff
+		void setAlphaFade(int in, int num, int tr);
 		void paletteGenFade(int in, __u32 rgb1, __u32 rgb2, int num, int tr=0);
 		void paletteSetColor(int i, __u32 rgb, int tr);
 		void paletteSet();
