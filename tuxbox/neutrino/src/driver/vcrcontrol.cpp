@@ -29,6 +29,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <sys/un.h>
+#include <string.h>
 
 #include <global.h>
 
@@ -176,6 +177,7 @@ bool CVCRControl::CVCRDevice::ParseFile(string filename)
 FILE *inp;
 char buffer[101];
 char outbuffer[200];
+int wait_time;
 
 	if( (inp = fopen(filename.c_str(),"r")) > 0)
 	{
@@ -186,11 +188,19 @@ char outbuffer[200];
 		{
 			if(fgets(buffer,100,inp) != NULL)
 			{
-				sprintf(outbuffer,"SEND_ONCE %s %s \n",Name.c_str(),buffer);
-				printf("lirc send line: '%s'\n",outbuffer);
-//				ostr << "SEND_ONCE " << Name << " " << buffer << std::endl << std::ends;
-				write(sock_fd, outbuffer, strlen(outbuffer)+1);
-				sleep(1);
+				if(strncmp(buffer,"WAIT",4) == 0)		
+				{			// if wait command then sleep for n seconds
+					sscanf(&buffer[4],"%d",&wait_time);
+					if(wait_time > 0)
+						sleep(wait_time);
+				}
+				else
+				{
+					sprintf(outbuffer,"SEND_ONCE %s %s \n",Name.c_str(),buffer);
+					printf("lirc send line: '%s'\n",outbuffer);
+	//				ostr << "SEND_ONCE " << Name << " " << buffer << std::endl << std::ends;
+					write(sock_fd, outbuffer, strlen(outbuffer)+1);
+				}
 			}
 		}
 		IRDeviceDisconnect();
@@ -220,13 +230,13 @@ IR Send RECOTR
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Pause()
 {
-	return true;
+	return ParseFile(LIRCDIR "pause.lirc");
 }
 
 //-------------------------------------------------------------------------
 bool CVCRControl::CVCRDevice::Resume()
 {
-	return true;
+	return ParseFile(LIRCDIR "resume.lirc");
 }
 
 //-------------------------------------------------------------------------
