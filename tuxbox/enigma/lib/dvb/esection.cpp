@@ -27,7 +27,6 @@
 #endif
 
 
-
 ePtrList<eSection> eSection::active;
 
 eSectionReader::eSectionReader()
@@ -63,7 +62,6 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 	if (handle<0)
 	{
 		perror(DEMUX);
-		eDebug("DEMUX OPEN FAILED");
 		return -errno;
 	}
 
@@ -169,7 +167,7 @@ int eSectionReader::read(__u8 *buf)
 	return 0;
 }
 
-eSection::eSection(int pid, int tableid, int tableidext, int version, int flags, int tableidmask): pid(pid), tableid(tableid), tableidext(tableidext), tableidmask(tableidmask), flags(flags), version(version)
+eSection::eSection(int _pid, int _tableid, int _tableidext, int _version, int _flags, int _tableidmask): pid(_pid), tableid(_tableid), tableidext(_tableidext), tableidmask(_tableidmask), flags(_flags), version(_version)
 {
 	notifier=0;
 	section=0;
@@ -188,6 +186,8 @@ eSection::eSection()
 
 eSection::~eSection()
 {
+	if (timer)
+		delete timer;
 	closeFilter();
 	if (lockcount)
 		eDebug("deleted still locked table");
@@ -287,6 +287,7 @@ void eSection::data(int socket)
 
 void eSection::timeout()
 {
+	eDebug("Section timeout");
 	closeFilter();
 	sectionFinish(-ETIMEDOUT);
 }

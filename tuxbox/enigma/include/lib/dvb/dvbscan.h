@@ -79,39 +79,7 @@ public:
 
 	void handleEvent(const eDVBEvent &event);
 	
-	bool addTransponder(const eTransponder &transponder)
-	{
-//		eDebug("TP TO ADD -> freq = %i, srate = %i, pol = %i, fec = %i, svalid = %i, cvalid = %i, onid = %i, tsid = %i, inv = %i, op = %i",transponder.satellite.frequency, transponder.satellite.symbol_rate, transponder.satellite.polarisation, transponder.satellite.fec,  transponder.satellite.valid, transponder.cable.valid, transponder.original_network_id.get(), transponder.transport_stream_id.get(), transponder.satellite.inversion, transponder.satellite.orbital_position);
-
-		if ( transponder.satellite.orbital_position != knownTransponder.front().satellite.orbital_position && flags & flagSkipOtherOrbitalPositions )
-//		{
-//			eDebug("Skip Transponder from other orbital position");
-			return false;
-//		}
-
-		for ( std::list<eTransponder>::iterator n(changedTransponder.begin()); n != changedTransponder.end(); ++n)
-//		{
-			if (*n == transponder)
-				return false;
-//		}
-
-		for (std::list<eTransponder>::iterator n(knownTransponder.begin()); n != knownTransponder.end(); ++n)
-//		{
-//			eDebug("COMPARE WITH -> freq = %i, srate = %i, pol = %i, fec = %i, svalid = %i, cvalid = %i, onid = %i, tsid = %i, inv = %i, op = %i",n->satellite.frequency, n->satellite.symbol_rate, n->satellite.polarisation, n->satellite.fec,  n->satellite.valid, n->cable.valid, n->original_network_id.get(), n->transport_stream_id.get(), n->satellite.inversion, n->satellite.orbital_position);
-			if (*n == transponder)  // no dupe Transponders
-//			{
-	//			eDebug("Transponder is already in list");
-				return false;
-//			}
-//	}
-//		eDebug("Transponder added");
-
-		eTransponder t=transponder;
-		t.state=eTransponder::stateToScan;
-		knownTransponder.push_back(t);
-		return true;
-	}
-
+	bool addTransponder(const eTransponder &transponder);
 	int getknownTransponderSize()	{ return knownTransponder.size(); }
 	
 	void setUseONIT(int useonit);

@@ -11,16 +11,17 @@
  */
 class eProgress: public eWidget
 {
+protected:
 	int perc, border;
 	gColor left, right;
 public:
-	eProgress(eWidget *parent);
+	eProgress(eWidget *parent, int takeFocus=0);
 	~eProgress();
 	
 	/**
 	 * \brief Sets the value. 
 	 *
-	 * \param perc The range is \c 0..100.
+	 * \param perc The range is \c 0..100
 	 */
 	void setPerc(int perc);
 	void redrawWidget(gPainter *target, const eRect &area);

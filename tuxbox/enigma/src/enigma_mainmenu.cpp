@@ -1,4 +1,5 @@
 #include <apps/enigma/enigma.h>
+#include <apps/enigma/enigma_main.h>
 #include <apps/enigma/enigma_mainmenu.h>
 #include <apps/enigma/enigma_setup.h>
 #include <apps/enigma/enigma_plugins.h>
@@ -13,11 +14,13 @@
 #include <core/base/i18n.h>
 #include <core/gui/guiactions.h>
 
+#define MENU_ENTRIES	8
+
 void eMainMenu::setActive(int i)
 {
 	for (int a=0; a<7; a++)
 	{
-		int c=(i+a+7-3)%7;
+		int c=(i+a+MENU_ENTRIES-3)%MENU_ENTRIES;
 		if (a != 3)
 			label[a]->setPixmap(pixmaps[c][0]);	// unselected
 		else
@@ -27,25 +30,28 @@ void eMainMenu::setActive(int i)
 	switch (i)
 	{
 	case 0:
-		description->setText(_("audiovisuell."));
+		description->setText(_("TV mode"));
 		break;
 	case 1:
-		description->setText(_("audio."));
+		description->setText(_("Radio mode"));
 		break;
 	case 2:
-		description->setText(_("informell."));
+		description->setText(_("File mode"));
 		break;
 	case 3:
-		description->setText(_("genug."));
+		description->setText(_("information"));
 		break;
 	case 4:
-		description->setText(_("anders."));
+		description->setText(_("shutdown"));
 		break;
 	case 5:
-		description->setText(_("abwechslung."));
+		description->setText(_("setup"));
 		break;
 	case 6:
-		description->setText(_("analog."));
+		description->setText(_("games"));
+		break;
+	case 7:
+		description->setText(_("VCR"));
 		break;
 	}
 
@@ -84,9 +90,9 @@ eMainMenu::eMainMenu()
 	if (eSkin::getActive()->build(this, "eZapMainMenu"))
 		eFatal("unable to load main menu");
 	
-	char *pixmap_name[]={"tv", "radio", "info", "shutdown", "setup", "games", "scart"};
+	char *pixmap_name[]={"tv", "radio", "file", "info", "shutdown", "setup", "games", "scart"};
 
-	for (int i=0; i<7; i++)
+	for (int i=0; i<MENU_ENTRIES; i++)
 	{
 		pixmaps[i][0]=eSkin::getActive()->queryImage(eString("mainmenu.") + eString(pixmap_name[i]) );
 		pixmaps[i][1]=eSkin::getActive()->queryImage(eString("mainmenu.") + eString(pixmap_name[i]) + ".sel" );
@@ -96,18 +102,24 @@ eMainMenu::eMainMenu()
 			eFatal("error, mainmenu bug, mainmenu.%s.sel not defined", pixmap_name[i]);
 	}
 
-	setActive(active=0);
+	setActive(active=eZapMain::getInstance()->getRealMode());
 }
 
 void eMainMenu::sel_tv()
 {
-  eZap::getInstance()->setMode(eZap::TV);
+  eZapMain::getInstance()->setMode(eZapMain::modeTV, 1);
 	close(0);
 }
 
 void eMainMenu::sel_radio()
 {
-  eZap::getInstance()->setMode(eZap::Radio);
+  eZapMain::getInstance()->setMode(eZapMain::modeRadio, 1);
+	close(0);
+}
+
+void eMainMenu::sel_file()
+{
+  eZapMain::getInstance()->setMode(eZapMain::modeFile, 1);
 	close(0);
 }
 
@@ -173,13 +185,13 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->left)
 		{
-			active+=6;
-			active%=7;
+			active+=MENU_ENTRIES-1;
+			active%=MENU_ENTRIES;
 			setActive(active);
 		} else if (event.action == &i_cursorActions->right)
 		{
 			active++;
-			active%=7;
+			active%=MENU_ENTRIES;
 			setActive(active);
 		} else if (event.action == &i_cursorActions->ok)
 		{
@@ -192,18 +204,21 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 				sel_radio();
 				break;
 			case 2:
-				sel_info();
+				sel_file();
 				break;
 			case 3:
-				sel_quit();
+				sel_info();
 				break;
 			case 4:
-				sel_setup();
+				sel_quit();
 				break;
 			case 5:
-				sel_plugins();
+				sel_setup();
 				break;
 			case 6:
+				sel_plugins();
+				break;
+			case 7:
 				sel_vcr();
 				break;
 			}

@@ -59,7 +59,6 @@ eRCShortDriver::eRCShortDriver(const char *filename): eRCDriver(eRCInput::getIns
 	} else
 	{
 		sn=new eSocketNotifier(eApp, handle, eSocketNotifier::Read);
-//		connect(sn, SIGNAL(activated(int)), SLOT(keyPressed(int)));
 		CONNECT(sn->activated, eRCShortDriver::keyPressed);
 		eRCInput::getInstance()->setFile(handle);
 	}
@@ -78,18 +77,30 @@ eRCConfig::eRCConfig()
 	reload();
 }
 
+eRCConfig::~eRCConfig()
+{
+	save();
+}
+
+void eRCConfig::set( int delay, int repeat )
+{
+	rdelay = delay;
+	rrate = repeat;
+}
+
 void eRCConfig::reload()
 {
 	rdelay=500;
 	rrate=100;
-	eConfig::getInstance()->getKey("/ezap/rc/repeatRate", rrate);
-	eConfig::getInstance()->getKey("/ezap/rc/repeatDelay", rrate);
+	if ( eConfig::getInstance()->getKey("/ezap/rc/repeatRate", rrate) )
+		save();
+	eConfig::getInstance()->getKey("/ezap/rc/repeatDelay", rdelay);
 }
 
 void eRCConfig::save()
 {
 	eConfig::getInstance()->setKey("/ezap/rc/repeatRate", rrate);
-	eConfig::getInstance()->setKey("/ezap/rc/repeatDelay", rrate);
+	eConfig::getInstance()->setKey("/ezap/rc/repeatDelay", rdelay);
 }
 
 eRCInput *eRCInput::instance;

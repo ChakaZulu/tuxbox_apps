@@ -155,6 +155,10 @@ int Decoder::Set()
 #else
 	demux_pes_para pes_filter;
 #endif
+
+	if (parms.flushbuffer)
+		changed|=9;
+	parms.flushbuffer=0;
 	
 	if (parms.vpid != current.vpid)
 		changed|=1;

@@ -16,7 +16,8 @@ eListBoxBase::eListBoxBase(eWidget* parent, const eWidget* descr, const char *de
 		tmpDescr(0),
 		colorActiveB(eSkin::getActive()->queryScheme("global.selected.background")),
 		colorActiveF(eSkin::getActive()->queryScheme("global.selected.foreground")),
-		flags(0)
+		flags(0),
+		in_atomic(0)
 {
 }
 

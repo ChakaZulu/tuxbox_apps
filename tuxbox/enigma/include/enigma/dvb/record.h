@@ -36,7 +36,24 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 		eDVBRecorderMessage(eCode code, int pid): code(code), pid(pid) { }
 	};
 	
-	std::set<int> pids;
+	struct pid_t
+	{
+		int pid;
+		int fd;
+		bool operator < (const pid_t &p) const
+		{
+			return pid < p.pid;
+		}
+	};
+	
+	std::set<pid_t> pids;
+	
+	int dvrfd;
+	int outfd;
+	
+	eSocketNotifier *sn;
+	
+	void dataAvailable(int what);
 
 	eFixedMessagePump<eDVBRecorderMessage> messagepump;
 	void thread();

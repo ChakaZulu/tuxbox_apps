@@ -62,18 +62,18 @@ int eStatusBar::setProperty(const eString &prop, const eString &value)
 
 void eStatusBar::redrawWidget(gPainter *target, const eRect& where)
 {
-	eDebug("redrawWidget eStatusbar");
+/*	eDebug("redrawWidget eStatusbar");
 	eDebug("where left = %i, top = %i, width = %i, height = %i", where.left(), where.top(), where.width(), where.height() );
-	eDebug("left = 0, top = 0, width = %i, bottom = %i", width(), height() );
+	eDebug("left = 0, top = 0, width = %i, bottom = %i", width(), height() );*/
 	if ( deco && where.contains( eRect(0, 0, width(), height() ) ) )
 		deco.drawDecoration(target, ePoint(width(), height()));
-	else
-		eDebug("do not redraw Deco");
+/*	else
+		eDebug("do not redraw Deco");*/
 	
 	if ( (!(flags & flagOwnerDraw)) && current && where.contains( clientrect ) )
 		client.setText( current->getHelpText() );
-	else
-		eDebug("do not redraw Deco");
+/*	else
+		eDebug("do not redraw Deco");*/
 }
 
 int eStatusBar::eventHandler(const eWidgetEvent &event)

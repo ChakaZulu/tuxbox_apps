@@ -4,13 +4,14 @@
 #include <core/gui/ewindow.h>
 #include <core/gui/statusbar.h>
 
-class eProgress;
+class eLabel;
 class eButton;
+class eSlider;
 
 class eZapLCDSetup: public eWindow
 {
-	eProgress *p_brightness, *p_contrast, *p_standby;
-	eButton *bbrightness, *bcontrast, *bstandby;
+	eSlider *p_brightness, *p_contrast, *p_standby;
+	eLabel *bbrightness, *bcontrast, *bstandby;
 	eStatusBar* statusbar;
 	
 	int lcdbrightness;
@@ -18,13 +19,12 @@ class eZapLCDSetup: public eWindow
 	int lcdstandby;
 	                	
 	eButton *ok, *abort;
-protected:
-	int eventHandler(const eWidgetEvent &event);
-	void update();
-private:
-	void fieldSelected(int *number);
 	void okPressed();
 	void abortPressed();
+	void brightnessChanged( int );
+	void contrastChanged( int );
+	void standbyChanged( int );
+	void update();
 public:
 	eZapLCDSetup();
 	~eZapLCDSetup();

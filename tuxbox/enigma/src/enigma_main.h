@@ -9,7 +9,9 @@
 #include <core/gui/listbox.h>
 #include <core/gui/multipage.h>
 #include <core/gui/emessage.h>
+#include <core/gui/numberactions.h>
 #include <core/base/message.h>
+#include <core/dvb/service.h>
 
 class eLabel;
 class eProgress;
@@ -21,6 +23,7 @@ class PMTEntry;
 class eNumber;
 class gPainter;
 class NVODReferenceEntry;
+class eServiceSelector;
 
 class eZapMessage
 {
@@ -150,8 +153,13 @@ public:
 class eEventDisplay;
 class eServiceEvent;
 
+class ePlaylist;
+
 class eZapMain: public eWidget
 {
+public:
+	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
+private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
 		*EINowDuration, *EINextDuration, *EINowTime, *EINextTime,
 		*Description,
@@ -161,6 +169,7 @@ class eZapMain: public eWidget
 		*ButtonBlueEn, *ButtonBlueDis;
 	
 	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
+	eLabel mute;
 	
 	eProgress *Progress, *VolumeBar;
 	eMessageBox *pMsg;
@@ -169,7 +178,7 @@ class eZapMain: public eWidget
 	std::list<eZapMessage> messages;
 	eFixedMessagePump<int> message_notifier;
 
-	eTimer timeout, clocktimer, messagetimeout;
+	eTimer timeout, clocktimer, messagetimeout, progresstimer;
 
 	int cur_start, cur_duration;
 	
@@ -178,10 +187,22 @@ class eZapMain: public eWidget
 	eAudioSelector audiosel;
 	eEventDisplay *actual_eventDisplay;
 	eServiceReferenceDVB refservice;
+	
+	ePlaylist *curlist;		// history / current playlist entries
+	eServiceReference playlistref;
+	ePlaylist *favourite[modeFile+1];
+	eServiceReference favouriteref[modeFile+1];
+	ePlaylist *timerlist;
+	eServiceReference timerlistref;
+	int playlistmode; // curlist is a list controlled by the user (not just a history).
+	int entered_playlistmode;
+	
 	int flags;
 	int isVT;
 	int isEPG;
 	int showOSDOnEITUpdate;
+	int serviceFlags;
+	int isSeekable() const { return serviceFlags & eServiceHandler::flagIsSeekable; }
 	eZapLCD lcdmain;
 	
 	void redrawWidget(gPainter *, const eRect &where);
@@ -191,8 +212,10 @@ class eZapMain: public eWidget
 	
 	// actions
 	void showServiceSelector(int dir);
-	void nextService();
+	void nextService(int add=0);
 	void prevService();
+	void playlistNextService();
+	void playlistPrevService();
 	void volumeUp();
 	void volumeDown();
 	void toggleMute();
@@ -210,8 +233,38 @@ class eZapMain: public eWidget
 	void showEPG();
 	void showInfobar();
 	void hideInfobar();
+	
+	void play();
+	void stop();
+	void pause();
+	int recording;
+	void record();
+	enum { skipForward, skipReverse };
+	int skipcounter;
+	int skipping;
+	void startSkip(int dir);
+	void repeatSkip(int dir);
+	void stopSkip(int dir);
+	
+	void showServiceMenu(eServiceSelector*);
+	void showFavourite(eServiceSelector*);
+	
+	enum { 
+		psAdd=1,	// just add, to not change current
+		psRemove=2, // remove before add
+		psActivate=4, // use existing entry if available
+		psDontAdd=8, // just play
+	};
+	void playService(const eServiceReference &service, int flags);
+	void addService(const eServiceReference &service);
+	
+	void doPlaylistAdd(const eServiceReference &service);
+	void addServiceToFavourite(eServiceSelector *s);
 
 	static eZapMain *instance;
+	
+	eServicePath modeLast[modeEnd];
+	int mode, last_mode;
 protected:
 	int eventHandler(const eWidgetEvent &event);
 private:
@@ -229,6 +282,9 @@ private:
 	void setAC3Logo(bool b);
 	void setVTButton(bool b);
 	void setEPGButton(bool b);
+	void updateProgress();
+	void getPlaylistPosition();
+	void setPlaylistPosition();
 public:
 	void postMessage(const eZapMessage &message, int clear=0);
 	void gotMessage(const int &);
@@ -237,9 +293,24 @@ public:
 	void pauseMessages();
 	void nextMessage();
 	static eZapMain *getInstance() { return instance; }
+	
+	void setMode(int mode, int user=0); // user made change?
+	void setModeD(int mode);
+	int getRealMode() { return last_mode==-1 ? mode : last_mode; }
+	
+	void setServiceSelectorPath(eServicePath path);
+	void getServiceSelectorPath(eServicePath &path);
 
 	eZapMain();
 	~eZapMain();
+};
+
+class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
+{
+	eServiceReference ref;
+	void entrySelected(eListBoxEntryText *s);
+public:
+	eServiceContextMenu(const eServiceReference &ref);
 };
 
 #endif /* __enigma_main_h */

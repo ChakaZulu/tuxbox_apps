@@ -8,8 +8,8 @@
 #include <core/gui/eskin.h>
 #include <core/system/init.h>
 
-eProgress::eProgress(eWidget *parent)
-	: eWidget(parent)
+eProgress::eProgress(eWidget *parent, int takefocus)
+	: eWidget(parent, takefocus)
 {
 	left=eSkin::getActive()->queryScheme("eProgress.left");
 	right=eSkin::getActive()->queryScheme("eProgress.right");

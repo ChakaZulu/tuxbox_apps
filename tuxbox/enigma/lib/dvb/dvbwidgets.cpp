@@ -22,6 +22,8 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 			new eListBoxEntryText(sat, s->getDescription().c_str(), (void*) *s);
+	
+//	new eListBoxEntryText(sat, "not specified", -1);
 
 	l = new eLabel(this);
 	l->setName( "lFreq" );

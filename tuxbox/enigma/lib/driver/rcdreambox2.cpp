@@ -3,16 +3,28 @@
 
 #include <core/system/init.h>
 #include <core/base/eerror.h>
+#include <sys/time.h>
+
+/* static void dumpreltime()
+{
+	static timeval lasttv;
+	timeval tv;
+	gettimeofday(&tv, 0);
+	
+	int ms=(tv.tv_sec - lasttv.tv_sec)*1000+(tv.tv_usec-lasttv.tv_usec)/1000;
+	eDebug("+ %d ms", ms);
+	lasttv=tv;
+} */
 
 	/* ----------------------- dreambox fernbedienung ---------------------- */
 void eRCDeviceDreambox2::handleCode(int rccode)
 {
-	timeout.start(300, 1);
+	timeout.start(150, 1);
 	int old=ccode;
 	ccode=rccode;
 	if ((old!=-1) && ( ((old&0x7FFF)!=(rccode&0x7FFF)) || !(rccode&0x8000)) )
 		/*emit*/ input->keyPressed(eRCKey(this, (old&0x7FFF), eRCKey::flagBreak));
-	if (old != rccode)
+	if ((old^rccode)&0x7FFF)
 	{
 		repeattimer.start(eRCInput::getInstance()->config.rdelay, 1);
 		input->keyPressed(eRCKey(this, rccode&0x7FFF, 0));

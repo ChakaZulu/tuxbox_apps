@@ -1,4 +1,4 @@
-// for debugging use: 
+// for debugging use:
 // #define SYNC_PAINT
 #include "grc.h"
 

@@ -7,12 +7,13 @@ INCLUDES = \
 bin_PROGRAMS = enigma
 
 enigma_SOURCES = \
-	bselect.cpp enigma.cpp enigma_dyn.cpp enigma_event.cpp enigma_lcd.cpp \
+	enigma.cpp enigma_dyn.cpp enigma_event.cpp enigma_lcd.cpp channelinfo.cpp\
 	enigma_main.cpp enigma_plugins.cpp enigma_setup.cpp enigma_xmlrpc.cpp scan.cpp \
 	setupnetwork.cpp setupvideo.cpp showbnversion.cpp sselect.cpp streaminfo.cpp \
 	enigma_mainmenu.cpp satconfig.cpp epgwindow.cpp setup_language.cpp enigma_info.cpp \
-	enigma_scan.cpp setupskin.cpp setup_osd.cpp timer.cpp setup_lcd.cpp enigma_vcr.cpp
-
+	enigma_scan.cpp setupskin.cpp setup_osd.cpp timer.cpp setup_lcd.cpp enigma_vcr.cpp \
+	setup_rc.cpp
+	
 enigma_LDADD = \
 	$(top_builddir)/enigma/src/core/driver/libenigma_driver.la \
 	$(top_builddir)/enigma/src/core/base/libenigma_base.la \
@@ -29,6 +30,7 @@ enigma_LDADD = \
 # -lmpatrolmt -lbfd -liberty 
 
 AM_CXXFLAGS = $(LIBFREETYPE_CFLAGS) $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
+AM_CPPFLAGS = -DDBOX
 
 $(top_builddir)/enigma/src/core/base/libenigma_base.la:
 	$(MAKE) -C $(top_builddir)/enigma/src/core/base

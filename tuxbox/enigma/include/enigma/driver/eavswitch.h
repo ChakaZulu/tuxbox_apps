@@ -62,7 +62,6 @@ public:
 	int setAspectRatio(eAVAspectRatio as);
 	int setActive(int active);
 	int setInput(int v);	// 0: dbox, 1: vcr
-
 	void changeVCRVolume(int abs, int vol);
 	void toggleMute();
 };

@@ -145,9 +145,10 @@ class eRCConfig
 {
 public:
 	eRCConfig();
+	~eRCConfig();
 	void reload();
 	void save();
-	
+	void set(int delay, int repeat);
 	int rdelay, // keypress delay after first keypress to begin of repeat (in ms)
 		rrate;		// repeat rate (in ms)
 };

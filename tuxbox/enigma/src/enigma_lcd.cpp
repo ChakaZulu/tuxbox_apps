@@ -20,6 +20,7 @@ eZapLCD::eZapLCD(): eWidget(eZap::getInstance()->getDesktop(eZap::desktopLCD))
 	resize(eSize(120, 64));
 
 	lcdMain = new eZapLCDMain(this);
+	eDebug("lcdMain created: %p", lcdMain);
 	lcdMenu = new eZapLCDMenu(this);
 	lcdScart = new eZapLCDScart(this);
 	lcdStandby = new eZapLCDStandby(this);
@@ -32,7 +33,9 @@ eZapLCD::eZapLCD(): eWidget(eZap::getInstance()->getDesktop(eZap::desktopLCD))
 
 eZapLCD::~eZapLCD()
 {
+	eDebug("about to delete lcdMain (%p)", lcdMain);
 	delete lcdMain;
+	eDebug("ok.");
 	delete lcdMenu;
 	delete lcdScart;
 	delete lcdStandby;
@@ -126,6 +129,7 @@ void eZapLCDMain::leaveService(const eServiceReferenceDVB &service)
 {
 	if (Progress->isVisible())
 		Progress->hide();
+	ServiceName->setText("");
 }
 
 eZapLCDMenu::eZapLCDMenu(eWidget *parent): eWidget(parent, 0)

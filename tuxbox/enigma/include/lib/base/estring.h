@@ -14,6 +14,7 @@ public:
 // constructors
 	inline eString()	{}	
 	inline eString(const char* p);
+	inline eString(const char* p, int cnt);
 	inline eString(const std::string &s);
 // methods
 	inline eString left(unsigned int len) const;
@@ -40,6 +41,11 @@ inline eString::eString(const std::string &s)
 
 inline eString::eString(const char* p)
 	:std::string(p?p:"")	 // when the char* p is null, than use ""... otherwise crash...
+{
+}
+
+inline eString::eString(const char* p, int cnt)
+	:std::string(p, cnt)
 {
 }
 

@@ -240,6 +240,7 @@ void eDVB::recBegin(const char *filename)
 	if (recorder)
 		recEnd();
 	recorder=new eDVBRecorder();
+	recorder->open(filename);
 	if (Decoder::parms.apid != -1)		// todo! get pids from PMT
 		recorder->addPID(Decoder::parms.apid);
 	if (Decoder::parms.vpid != -1)
@@ -251,7 +252,6 @@ void eDVB::recBegin(const char *filename)
 	recorder->addPID(0);
 	if (Decoder::parms.pmtpid != -1)
 		recorder->addPID(Decoder::parms.pmtpid);
-	recResume();
 }
 
 void eDVB::recPause()
@@ -268,7 +268,6 @@ void eDVB::recEnd()
 {
 	if (!recorder)
 		return;
-	recPause();
 	recorder->close();
 	delete recorder;
 	recorder=0;

@@ -11,8 +11,13 @@
 ]>
 <eskin>
 	<fonts>
-		<font file="unmrs.pfa" name="Nimbus"/>
+		<font file="unmrs.pfa" name="Nimbus" />
 	</fonts>
+
+	<values>
+		  <value name="mute.pos.x" value="100" />
+			<value name="mute.pos.y" value="100" />
+	</values>
 
 	<fontalias>
 		<map name="global.normal" font="Nimbus" size="24" />
@@ -23,8 +28,8 @@
 		<map name="eListBox.EntryText.normal" font="Nimbus" size="24" />
 
 		<map name="eServiceSelector.Entry.Name" font="Nimbus" size="24" />
-		<map name="eServiceSelector.Entry.Number" font="Nimbus" size="22" />
-		<map name="eServiceSelector.Entry.Description" font="Nimbus" size="22" />
+		<map name="eServiceSelector.Entry.Number" font="Nimbus" size="20" />
+		<map name="eServiceSelector.Entry.Description" font="Nimbus" size="20" />
 
 		<map name="eBouquetSelector.Entry.Name" font="Nimbus" size="24" />
 
@@ -70,11 +75,21 @@
 		<img name="mainmenu.tv.sel" src="mainmenu/tv_sel-fs8.png" />
 		<img name="mainmenu.radio" src="mainmenu/radio-fs8.png" />
 		<img name="mainmenu.radio.sel" src="mainmenu/radio_sel-fs8.png" />
+		<img name="mainmenu.file" src="mainmenu/file-fs8.png" />
+		<img name="mainmenu.file.sel" src="mainmenu/file_sel-fs8.png" />
+	
+		<img name="sselect_dolby" src="dolby_on.png" />
+		<img name="sselect_stereo" src="stereo_on.png" />
+		<img name="sselect_format" src="format_on_small.png" />
+		<img name="sselect_crypt" src="crypt_on_small.png" />
+		<img name="mute_symbol" src="mute-fs8.png" />
 	</images>
 	
 	<colors>
 		<color name="background" color="#ff000000" />
-		<color name="white_trans" color="#40ffffff" />
+		<color name="white_trans" color="#1effffff" />
+		<color name="white_blue" color="#1effffff" end="#1e0003f80" size="16" />
+		<color name="blue_nontrans" color="#1e003f80" end="#00003f80" size="4" />
 	</colors>
 	
 	<object name="eZapMainMenu">
@@ -87,7 +102,7 @@
 			<eLabel position="443:22" size="70:70" name="r1" alphatest="on" />
 			<eLabel position="537:34" size="70:70" name="r2" alphatest="on" />
 			<eLabel position="629:54" size="70:70" name="r3" alphatest="on" />
-			<eLabel position="200:200" size="320:48" align="center" font="eWindow.TitleBar"	foregroundColor="eWindow.titleBar" backgroundColor="white_trans"	name="description" />
+			<eLabel position="200:200" size="320:48" align="center" font="eWindow.TitleBar"	foregroundColor="eWindow.titleBar" backgroundColor="white_trans" name="description" />
 		</eWidget>
 	</object>
  
@@ -150,6 +165,7 @@
 			<eLabel text="22Khz" position="370:10" size="90:30" align="center"/>
 			<eLabel text="Voltage" position="470:10" size="90:30" align="center"/>
 			<eWidget name="buttons" position="100:50" size="e-10:e-10" />
+			<eButton name="new" position="10:e-110" size="80:30" text="new" helptext="add a new Satellite" loadDeco="" />
 			<eButton name="close" position="10:e-70" size="80:30" text="close" helptext="close Satelliteconfiguration" loadDeco="" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
 		</eSatelliteConfigurationManager>
@@ -160,14 +176,14 @@
 			<eListbox name="lnblist" helptext="choose the LNB you wish to apply or edit" position="10:10" size="100:e-45" loadDeco="" />
 			<eLabel text="LOF/L:" name="lLofL" position="130:10" size="150:35" vcenter="on" />
 			<eNumber name="lofL" position="280:10" size="e-10:35" helptext="enter lnb lowband offset frequency (0..9, ok)" loadDeco="" />
-  		<eLabel text="LOF/H:" name="lLofH" position="130:60" size="150:35" vcenter="on" />
-			<eNumber name="lofH" position="280:60" size="e-10:35" helptext="enter lnb highband offset frequency (0..9, ok)" loadDeco="" />
-  		<eLabel text="Threshold:" name="lThreshold" position="130:110" size="150:35" vcenter="on"/>
-			<eNumber name="threshold" position="280:110" size="e-10:35" helptext="enter lnb threshold frequency (0..9, ok)" loadDeco="" />
-			<eLabel text="DISEqC Mode:" name="lDISEqCMode" position="130:160" size="150:35" vcenter="on"/>
-			<eComboBox name="DISEqCMode" position="280:160" size="e-10:35" helptext="select DISEqC mode (ok)" loadDeco="" />
-			<eLabel text="DISEqC Para:" name="lDISEqCPara" position="130:210" size="150:35" vcenter="on"/>
-			<eComboBox name="DISEqCParam" position="280:210" size="e-10:35" helptext="select DISEqC parameter (ok)" loadDeco="" />
+  		<eLabel text="LOF/H:" name="lLofH" position="130:55" size="150:35" vcenter="on" />
+			<eNumber name="lofH" position="280:55" size="e-10:35" helptext="enter lnb highband offset frequency (0..9, ok)" loadDeco="" />
+  		<eLabel text="Threshold:" name="lThreshold" position="130:100" size="150:35" vcenter="on"/>
+			<eNumber name="threshold" position="280:100" size="e-10:35" helptext="enter lnb threshold frequency (0..9, ok)" loadDeco="" />
+			<eLabel text="DiSEqC Mode:" name="lDiSEqCMode" position="130:145" size="150:35" vcenter="on"/>
+			<eComboBox name="DiSEqCMode" position="280:145" size="e-10:35" helptext="select DiSEqC mode (ok)" loadDeco="" />
+			<eLabel text="DiSEqC Para:" name="lDiSEqCPara" position="130:190" size="150:35" vcenter="on"/>
+			<eComboBox name="DiSEqCParam" position="280:190" size="e-10:35" helptext="select DiSEqC parameter (ok)" loadDeco="" />
 			<eButton name="save" text="save" position="130:e-75" size="100:30" helptext="use current selected lnb for the choosen satellite" loadDeco="" />
 			<eButton name="cancel" text="cancel" position="250:e-75" size="100:30" helptext="leave lnb-setup (no changes are saved)" loadDeco="" />
 			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
@@ -197,9 +213,10 @@
 	<object name="tsAutomatic">
 		<tsAutomatic position="0:0" size="e:350">
 			<eLabel name="lNet" position="10:40" size="150:30" text="Network:" />
-			<eListbox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satelite/cable provider (left, right)" />
+			<eListBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satelite/cable provider (left, right)" />
 			<eFEStatus name="festatus" position="0:100" size="400:85" />
-			<eLabel name="status" position="10:190" size="e-10:e-30" />
+			<eLabel name="status" position="10:190" size="e-10:e-80" />
+			<eCheckBox name="eraseall" text="erase all" position="10:e-70" size="150:30" helptext="erase bouquets and services before scan" />
   		<eButton text="start scan" name="start" position="10:e-30" size="200:30" align="center" helptext="starts the transponderscan" loadDeco="" />
 			<eButton text="abort" name="abort" position="e-100:e-30" size="90:30" helptext="close window and do not scan" loadDeco="" />
 		</tsAutomatic>

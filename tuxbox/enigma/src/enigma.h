@@ -2,8 +2,10 @@
 #define __enigma_h
 
 #include <core/base/ebase.h>
+#include <apps/enigma/sselect.h>
 
 class eServiceSelector;
+class eServicePath;
 class eZapMain;
 class eService;
 class eWidget;
@@ -15,9 +17,6 @@ class eZap: public eApplication, public Object
 {
 	static eZap *instance;
 
-	__u32 lastTvChannel, lastRadioChannel;
-	int mode; // 0 = TV, 1 = Radio
-	
 	eWidget *desktop_lcd, *desktop_fb;
 
 private:
@@ -31,17 +30,11 @@ private:
 	__u32 Fade(__u32 val, int h);
 	
 	eInit *init;
-	
 	eServiceSelector *serviceSelector;
 
 	eZapMain *main;
 //	eTimer statusTimer;
 public:
-	enum {	TV,		Radio	};
-
-	bool setMode(int mode);
- 	int getMode() { return mode; }
- 	
  	enum { desktopLCD, desktopFB };
  	
  	eWidget *getDesktop(int nr)
@@ -60,6 +53,7 @@ public:
 	eWidget *focus;
 	eServiceSelector *getServiceSelector()
 	{
+		ASSERT(serviceSelector);
 		return serviceSelector;
 	}
 	

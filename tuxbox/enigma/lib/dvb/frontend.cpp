@@ -187,7 +187,7 @@ int eFrontend::tune(eTransponder *trans,
 	FrontendParameters front;
 	secCmdSequence seq;
 	secCommand cmd;
-	secDiseqcCmd diseqc;
+	secDiseqcCmd DiSEqC;
 	int hi;
 	
 	Decoder::Flush();
@@ -207,7 +207,7 @@ int eFrontend::tune(eTransponder *trans,
 	if (lnb)
 	{
 		if ( swParams->HiLoSignal == eSwitchParameter::ON || ( swParams->HiLoSignal == eSwitchParameter::HILO && Frequency > lnb->getLOFThreshold() ) )
-		{
+	 	{
 			front.Frequency=Frequency-lnb->getLOFHi();
 			seq.continuousTone = SEC_TONE_ON;
 			hi=1;
@@ -217,13 +217,12 @@ int eFrontend::tune(eTransponder *trans,
 			seq.continuousTone = SEC_TONE_OFF;
 			hi=0;
 		}
+		DiSEqC.addr=0x10;
+		DiSEqC.cmd=0x38;
+		DiSEqC.numParams=1;
+		DiSEqC.params[0]=0xF0;
 
-		diseqc.addr=0x10;
-		diseqc.cmd=0x38;
-		diseqc.numParams=1;
-		diseqc.params[0]=0xF0;
-
-		if ( lnb->getDISEqC().DISEqCMode == eDISEqC::MINI )
+		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::MINI )
 			cmd.type = SEC_MINI_NONE;
 		else
 			cmd.type = SEC_CMDTYPE_DISEQC;
@@ -233,43 +232,42 @@ int eFrontend::tune(eTransponder *trans,
 			seq.voltage=SEC_VOLTAGE_13;
 		} else if ( swParams->VoltageMode == eSwitchParameter::_18V || ( polarisation==polHor && swParams->VoltageMode == eSwitchParameter::HV)  )
 		{
-			diseqc.params[0]|=2;
+			DiSEqC.params[0] |= 2;
 			seq.voltage=SEC_VOLTAGE_18;
 		} else
 			eDebug("BLA was ist dass denn fuer eine pol.");
 
 		if (hi)
-			diseqc.params[0]|=1;
+			DiSEqC.params[0] |= 1;
 
-		diseqc.params[0]|=lnb->getDISEqC().DISEqCParam<<2;
+		DiSEqC.params[0] |= lnb->getDiSEqC().DiSEqCParam<<2;
 
-		cmd.u.diseqc=diseqc;
+		cmd.u.diseqc=DiSEqC;
 
 		ioctl(fd, FE_SET_POWER_STATE, FE_POWER_ON);
 
-		if ((diseqc.params[0]^lastcsw))		// only when changing satellites or pol.
+		if ((DiSEqC.params[0] ^ lastcsw))		// only when changing satellites or pol.
 		{
 #ifdef SPAUN_NOT_WORKING_BUT_FASTER_ZAP
-			int changelnb=(diseqc.params[0]^lastcsw)&~3;
+			int changelnb=(DiSEqC.params[0]^lastcsw)&~3;
 #else
 			int changelnb=1;
 #endif
-			lastcsw=diseqc.params[0];
+			lastcsw=DiSEqC.params[0];
 		
-			if (changelnb && lnb->getDISEqC().DISEqCMode == eDISEqC::MINI )  // Mini DISEqC
+			if (changelnb && lnb->getDiSEqC().DiSEqCMode == eDiSEqC::MINI )  // Mini DiSEqC
 			{
-				if ( lnb->getDISEqC().DISEqCParam == eDISEqC::AA )
+				if ( lnb->getDiSEqC().DiSEqCParam == eDiSEqC::AA )
 					seq.miniCommand=SEC_MINI_A;
 				else
 					seq.miniCommand=SEC_MINI_B;
 				seq.commands=0;
 				seq.numCommands=0;
-				eDebug("we send no Diseqc Commands (MiniDiseqc mode ");
 			}
 			else
 			{
 				seq.miniCommand=SEC_MINI_NONE;
-				seq.numCommands=changelnb?1:0;
+				seq.numCommands=changelnb ? 1 : 0;
 				seq.commands=&cmd;
 			}
 
@@ -316,8 +314,8 @@ int eFrontend::tune_qpsk(eTransponder *transponder,
 		uint32_t SymbolRate, 		// symbolrate in symbols/s (e.g. 27500000)
 		uint8_t FEC_inner,			// FEC_inner (-1 for none, 0 for auto, but please don't use that)
 		int Inversion,					// spectral inversion, INVERSION_OFF / _ON / _AUTO (but please...)
-		eLNB &lnb,							// diseqc satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
-		eSwitchParameter &swParams) // 22Khz(hi/lo, on, off), minidiseq(true,false), diseqcParameter(A/A, A/B, B/A, B/B), Voltage ( h/v, 14, 18 )
+		eLNB &lnb,							// DiSEqC satellite, &1 -> SAT_A/B, &2 -> OPT_A/B
+		eSwitchParameter &swParams) // 22Khz(hi/lo, on, off), minidiseq(true,false), DiSEqCParameter(A/A, A/B, B/A, B/B), Voltage ( h/v, 14, 18 )
 {
 	return tune(transponder, Frequency, polarisation, SymbolRate, getFEC(FEC_inner), Inversion?INVERSION_ON:INVERSION_OFF, &lnb, &swParams, QPSK);
 }

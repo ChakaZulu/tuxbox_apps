@@ -40,7 +40,7 @@
 			<action name="left" key="left" flags="mr" />
 			<action name="right" key="right" flags="mr" />
 			<action name="ok" key="ok" flags="m" />
-			<action name="cancel" key="?" flags="m" />
+			<action name="cancel" key="home" flags="m" />
 		</actionmap>
 	
 		<actionmap name="focus">
@@ -73,14 +73,19 @@
 			<action name="volumeUp" key="+" flags="mr" />
 			<action name="volumeDown" key="-" flags="mr" />
 			<action name="toggleMute" key="mute" flags="mr" />
+			<!--action name="playlistNextService" key="3" flags="mr" />
+			<action name="playlistPrevService" key="1" flags="mr" /-->
 		</actionmap>
 
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
 			<action name="showBouquetSelector" key="d-box" flags="m" />
-			<action name="showEPGSelector" key="red" flags="m" />
-			<action name="showAllServices" key="home" flags="m" />
+			<action name="showEPGSelector" key="?" flags="m" />
+			<action name="addService" key="yellow" flags="m" />
+			<action name="showMenu" key="red" flags="m" />
+			<action name="showFavourite" key="blue" flags="m" />
+			<action name="addServiceToFavourite" key="green" flags="m" />
 		</actionmap>
 
 		<actionmap name="numbers">

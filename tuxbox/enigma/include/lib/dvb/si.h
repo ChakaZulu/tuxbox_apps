@@ -18,7 +18,7 @@
 time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5);
 int fromBCD(int bcd);
 
-class Descriptor: public Object
+class Descriptor
 {
 public:
 	inline Descriptor(int tag):tag(tag){};
@@ -241,6 +241,14 @@ public:
 	eString text;
 };
 
+class ContentDescriptor: public Descriptor
+{
+public:
+	ContentDescriptor(descr_gen_t *descr);
+	ePtrList< descr_content_entry_struct > contentList;	
+	eString toString();
+};
+
 class LesRadiosDescriptor: public Descriptor
 {
 public:
@@ -258,6 +266,14 @@ public:
 	eString toString();
 	
 	char type[8];
+};
+
+class ParentalRatingDescriptor: public Descriptor
+{
+public:
+	ParentalRatingDescriptor(descr_gen_struct *descr);
+	eString toString();
+	std::map< eString, int > entryMap; // Country Code : age
 };
 
 class PATEntry
@@ -299,7 +315,7 @@ public:
 	int EIT_present_following_flag;
 	int running_status;
 	int free_CA_mode;
-	ePtrList<Descriptor> descriptors;
+	ePtrList< Descriptor > descriptors;
 };
 
 class SDT: public eTable
@@ -320,7 +336,7 @@ public:
 	PMTEntry(pmt_info_t* info);
 	int stream_type;
 	int elementary_PID;
-	ePtrList<Descriptor> ES_info;
+	ePtrList< Descriptor > ES_info;
 };
 
 class PMT: public eTable
@@ -329,12 +345,11 @@ protected:
   int data(__u8 *data);
 public:
   PMT(int pid, int service_id);
-  PMT::~PMT() { } ;
 
   int program_number;
   int PCR_PID;
   int pid;
-  ePtrList<Descriptor> program_info;
+  ePtrList< Descriptor > program_info;
   ePtrList<PMTEntry> streams;
 };
 
@@ -344,7 +359,7 @@ public:
   NITEntry(nit_ts_t* ts);
 
 	__u16 transport_stream_id, original_network_id;
-	ePtrList<Descriptor> transport_descriptor;
+	ePtrList< Descriptor > transport_descriptor;
 };
 
 class NIT: public eTable
@@ -359,7 +374,7 @@ public:
 	NIT(int pid, int type=0);
 	int network_id;
 	ePtrList<NITEntry> entries;
-	ePtrList<Descriptor> network_descriptor;
+	ePtrList< Descriptor > network_descriptor;
 };
 
 class EITEvent
@@ -372,7 +387,7 @@ public:
 	int duration;
 	int running_status;
 	int free_CA_mode;
-	ePtrList<Descriptor> descriptor;
+	ePtrList< Descriptor > descriptor;
 };
 
 class EIT: public eTable
@@ -412,7 +427,7 @@ class BATEntry
 public:
 	BATEntry(bat_loop_struct *data);
 	int transport_stream_id, original_network_id;
-	ePtrList<Descriptor> transport_descriptors;
+	ePtrList< Descriptor > transport_descriptors;
 };
 
 class BAT: public eTable
@@ -423,7 +438,7 @@ public:
 	BAT();
 	
 	int bouquet_id;
-	ePtrList<Descriptor> bouquet_descriptors;
+	ePtrList< Descriptor > bouquet_descriptors;
 	ePtrList<BATEntry> entries;
 };
 

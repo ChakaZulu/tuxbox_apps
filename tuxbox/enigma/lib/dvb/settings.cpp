@@ -8,7 +8,7 @@ typedef std::list<eServiceReferenceDVB>::iterator ServiceReferenceDVBIterator;
 eDVBSettings::eDVBSettings(eDVB &dvb): dvb(dvb)
 {
 	transponderlist=0;
-	clearList();
+	transponderlist=new eTransponderList;
 	loadServices();
 	loadBouquets();
 	bouquets.setAutoDelete(true);
@@ -69,21 +69,27 @@ static eString beautifyBouquetName(eString bouquet_name)
 	if ( (bouquet_name.find("ARD") != eString::npos)
 		  || (bouquet_name.find("ZDF") != eString::npos)
 			|| (bouquet_name.find("RTL") != eString::npos)
-			|| (bouquet_name.find("ntv") != eString::npos)
+			|| (bouquet_name.find("n-tv") != eString::npos)
 			|| (bouquet_name.find("ProSieben") != eString::npos)
 			|| (bouquet_name.find("VIVA") != eString::npos) )
 		bouquet_name="German Free";		
-	if (bouquet_name=="ABsat")
+	else if (bouquet_name.find("POLSAT") != eString::npos)
+		bouquet_name="POLSAT";
+	else if (bouquet_name.find("HRT") != eString::npos)
+		bouquet_name="HRT Zagreb";
+	else if (bouquet_name.find("TVP") != eString::npos)
+		bouquet_name="TVP";
+	else if (bouquet_name.find("RVTS") != eString::npos)
+		bouquet_name="RVTS";
+	else if (bouquet_name=="ABsat")
 		bouquet_name="AB sat";
-	if (bouquet_name=="Astra-Net")
+	else if (bouquet_name=="Astra-Net")
 		bouquet_name="ASTRA";
-	if (bouquet_name=="CSAT")
+	else if (bouquet_name=="CSAT")
 		bouquet_name="CANALSATELLITE";
-	if (bouquet_name.find("SES")!=eString::npos)
+	else if (bouquet_name.find("SES")!=eString::npos)
 		bouquet_name="SES Multimedia";
-	if (bouquet_name=="\x05ZDF.vision")	// ja ich weiss was \x05 bedeutet - SPÄTER
-		bouquet_name="ZDF.vision";
-	if (!bouquet_name)
+	else if (!bouquet_name)
 		bouquet_name="no name";
 	return bouquet_name;
 }
@@ -194,7 +200,7 @@ struct saveService: public std::unary_function<const eService&, void>
 	}
 	void operator()(eService& s)
 	{
-		fprintf(f, "%04x:%04x:%04x:%d:%d\n", s.service_id.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type, s.service_number);
+		fprintf(f, "%04x:%04x:%04x:%d\n", s.service_id.get(), s.transport_stream_id.get(), s.original_network_id.get(), s.service_type/*, s.service_number*/);
 		fprintf(f, "%s\n", s.service_name.c_str());
 		fprintf(f, "%s\n", s.service_provider.c_str());
 	}
@@ -258,9 +264,11 @@ void eDVBSettings::loadServices()
 		eDebug("services invalid, no transponders");
 		return;
 	}
-	if (transponderlist)
+/*	if (transponderlist)
 		delete transponderlist;
-	transponderlist=new eTransponderList;
+	transponderlist=new eTransponderList;*/
+	if (transponderlist)
+		transponderlist->clearTransponders();
 
 	while (!feof(f))
 	{
@@ -297,6 +305,9 @@ void eDVBSettings::loadServices()
 		eDebug("services invalid, no services");
 		return;
 	}
+
+	if (transponderlist)
+		transponderlist->clearServices();
 	
 	int count=0;
 
@@ -307,14 +318,14 @@ void eDVBSettings::loadServices()
 		if (!strcmp(line, "end\n"))
 			break;
 
-		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1, service_number=-1;
-		sscanf(line, "%04x:%04x:%04x:%d:%d", &service_id, &transport_stream_id, &original_network_id, &service_type, &service_number);
+		int service_id=-1, transport_stream_id=-1, original_network_id=-1, service_type=-1/*, service_number=-1*/;
+		sscanf(line, "%04x:%04x:%04x:%d", &service_id, &transport_stream_id, &original_network_id, &service_type/*, &service_number*/);
 		eService &s=transponderlist->createService(
 				eServiceReferenceDVB(
 						eTransportStreamID(transport_stream_id), 
 						eOriginalNetworkID(original_network_id), 
 						eServiceID(service_id),
-						service_type), service_number);
+						service_type)/*, service_number*/);
 		count++;
 		s.service_type=service_type;
 		fgets(line, 256, f);
@@ -417,9 +428,16 @@ void eDVBSettings::loadBouquets()
 
 void eDVBSettings::clearList()
 {
+/*	if (transponderlist)
+		delete transponderlist;*/
 	if (transponderlist)
-		delete transponderlist;
-	transponderlist=new eTransponderList;
+	{
+		transponderlist->clearTransponders();
+		transponderlist->clearServices();
+		removeDVBBouquets(); // user Bouquets do not delete...
+	}
+	else
+		eDebug("no transponderList");
 
 	/*emit*/ dvb.bouquetListChanged();
 }

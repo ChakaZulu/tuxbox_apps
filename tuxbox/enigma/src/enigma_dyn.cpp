@@ -311,9 +311,9 @@ static eString channels_getcurrent(eString request, eString path, eString opt, e
 		
 	eService *service=eDVB::getInstance()->settings->getTransponders()->searchService(sapi->service);
 	
-	if (service)
+/*	if (service)
 		result+=eString().sprintf("%d", service->service_number);
-	else
+	else*/
 		result+="-1";
 	return result+"\r\n";
 }
@@ -575,7 +575,7 @@ static eString getWatchContent(eString mode, int bouquetid)
 static eString getContent(eString mode, int bouquetid)
 {
 	eString result("");
-
+#if 0
 	if(mode=="tv"||mode=="radio")
 	{
 		if(!bouquetid)
@@ -602,6 +602,7 @@ static eString getContent(eString mode, int bouquetid)
 
 	if(result.length()<3)
 		result="not ready yet";
+#endif
 
 	return result;
 }
@@ -824,7 +825,7 @@ static eString web_root(eString request, eString path, eString opts, eHTTPConnec
 
 	if(!mode)
 	{
-		switch(eZap::getInstance()->getMode())
+		switch(0) // eZap::getInstance()->getMode())
 		{
 			case 0:
 				mode="tv";
@@ -889,7 +890,9 @@ static eString switchServiceWeb(eString request, eString path, eString opt, eHTT
 	
 	if ((service_id!=-1) && (original_network_id!=-1) && (transport_stream_id!=-1) && (service_type!=-1))
 	{
+#if 0
 		eZap::getInstance()->getServiceSelector()->actualize();
+#endif
 		if(eDVB::getInstance()->settings->getTransponders())
 		{
 			const eServiceReferenceDVB *ref=eDVB::getInstance()->settings->getTransponders()->searchService(eOriginalNetworkID(original_network_id), eServiceID(service_id));
@@ -1136,26 +1139,13 @@ static eString record_on(eString request, eString path, eString opt, eHTTPConnec
 
 static eString ref2string(const eServiceReference &r)
 {
-	eString ret;
-	ret+=eString().sprintf("%d:", r.type);
-	ret+=eString().sprintf("%d", r.flags);
-	for (unsigned int i=0; i<sizeof(r.data)/sizeof(*r.data); ++i)
-		ret+=":"+eString().sprintf("%x", r.data[i]);
-	ret+=":"+r.path;
-	return httpEscape(ret);
+	return httpEscape(r.toString());
 }
 
 static eServiceReference string2ref(const eString &service)
 {
-	eServiceReference ret;
 	eString str=httpUnescape(service);
-	const char *c=str.c_str();
-	int path=-1;
-	
-	sscanf(c, "%d:%d:%x:%x:%x:%x:%n", &ret.type, &ret.flags, &ret.data[0], &ret.data[1], &ret.data[2], &ret.data[3], &path);
-	if (path)
-		ret.path=c+path;
-	return ret;
+	return eServiceReference(str);
 }
 
 #define NAVIGATOR_PATH "/cgi-bin/navigator"
@@ -1185,11 +1175,12 @@ public:
 
 		result+=eString("<a href=\"" NAVIGATOR_PATH ) + "?path=" + path + ref2string(e) +"\">" ;
 
-		eService *service=iface.lookupService(e);
+		eService *service=iface.addRef(e);
 		if (!service)
 			result+="N/A";
 		else
 			result+=service->service_name;
+		iface.removeRef(e);
 
 		result+="</a></font></td></tr>\n";
 		eDebug("ok");

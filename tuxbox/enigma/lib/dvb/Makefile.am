@@ -11,7 +11,7 @@ libenigma_dvb_la_SOURCES = \
 	esection.cpp frontend.cpp si.cpp record.cpp \
 	dvbwidgets.cpp dvbservice.cpp settings.cpp \
 	dvbscan.cpp service.cpp servicedvb.cpp servicestructure.cpp \
-	servicefile.cpp servicemp3.cpp
+	servicefile.cpp servicemp3.cpp serviceplaylist.cpp
 
 #servicemp3.cpp
 

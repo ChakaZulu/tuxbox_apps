@@ -15,6 +15,7 @@ private:
 	void sel_skin();
 	void sel_osd();
 	void sel_lcd();
+	void sel_rc();
 	void onSelChanged( eListBoxEntryMenu* );
 public:
 	eZapSetup();

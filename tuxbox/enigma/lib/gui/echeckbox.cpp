@@ -92,7 +92,6 @@ int eCheckbox::eventHandler(const eWidgetEvent &event)
 			text_position=ePoint(0,0);
 			invalidate();
 			validate();
-			eRect rc = para->getBoundBox();
 			pixmap_position=ePoint( para->getBoundBox().right()+5, (size.height()-pixmap->y) / 2 );
 		}
 		else

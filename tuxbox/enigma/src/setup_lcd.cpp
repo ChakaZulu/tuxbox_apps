@@ -1,6 +1,6 @@
 #include "setup_lcd.h"
 
-#include <core/gui/eprogress.h>
+#include <core/gui/slider.h>
 #include <core/gui/ebutton.h>
 #include <core/gui/elabel.h>
 #include <core/gui/enumber.h>
@@ -10,70 +10,29 @@
 #include <core/dvb/dvbwidgets.h>
 #include <core/gdi/lcd.h>
 
-void eZapLCDSetup::update()
+void eZapLCDSetup::brightnessChanged( int i )
 {
-	p_brightness->setPerc(lcdbrightness*100/LCD_BRIGHTNESS_MAX);
-	p_contrast->setPerc(lcdcontrast*100/LCD_CONTRAST_MAX);
-	p_standby->setPerc(lcdstandby*100/LCD_BRIGHTNESS_MAX);
-	eDBoxLCD::getInstance()->setLCDParameter(lcdbrightness, lcdcontrast);
+	eDebug("Brightness changed to %i", i);
+	lcdbrightness = i;
+	update();
 }
 
-int eZapLCDSetup::eventHandler(const eWidgetEvent &event)
+void eZapLCDSetup::contrastChanged( int i )
 {
-	switch(event.type)
-	{
-	case eWidgetEvent::evtAction:
-		if(event.action == &i_cursorActions->right)
-		{
-			if(this->focus==bbrightness)
-			{
-				lcdbrightness+=4;
-				if(lcdbrightness>LCD_BRIGHTNESS_MAX)
-					lcdbrightness=LCD_BRIGHTNESS_MAX;
-			} else
-			if(this->focus==bstandby)
-			{
-				lcdstandby+=4;
-				if(lcdstandby>LCD_BRIGHTNESS_MAX)
-					lcdstandby=LCD_BRIGHTNESS_MAX;
-			} else
-			if(this->focus==bcontrast)
-			{
-				lcdcontrast+=2;
-				if(lcdcontrast>LCD_CONTRAST_MAX)
-					lcdcontrast=LCD_CONTRAST_MAX;
-			} else
-			break;
-		} else
-		if(event.action == &i_cursorActions->left)
-		{
-			if(this->focus==bbrightness)
-			{
-				lcdbrightness-=4;
-				if(lcdbrightness<(LCD_BRIGHTNESS_MIN+1))
-					lcdbrightness=LCD_BRIGHTNESS_MIN+1;
-			} else
-			if(this->focus==bstandby)
-			{
-				lcdstandby-=4;
-				if(lcdstandby<LCD_BRIGHTNESS_MIN)
-					lcdstandby=LCD_BRIGHTNESS_MIN;
-			} else
-			if(this->focus==bcontrast)
-			{
-				lcdcontrast-=2;
-				if(lcdcontrast<(LCD_CONTRAST_MIN+1))
-					lcdcontrast=LCD_CONTRAST_MIN+1;
-			} else
-			break;
-		} else
-			break;
-		update();
-		return(1);
-	default:break;
-	}
+	eDebug("contrast changed to %i", i);
+	lcdcontrast = i;
+	update();
+}
 
-	return eWindow::eventHandler(event);
+void eZapLCDSetup::standbyChanged( int i )
+{
+	eDebug("standby changed to %i", i);
+	lcdstandby = i;
+}
+
+void eZapLCDSetup::update()
+{
+	eDBoxLCD::getInstance()->setLCDParameter(lcdbrightness, lcdcontrast);
 }
 
 eZapLCDSetup::eZapLCDSetup(): eWindow(0)
@@ -83,47 +42,48 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	resize(eSize(400, 300));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
-	
-	lcdstandby=0;
-	
+
 	eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
-	eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby);
 
-	bbrightness=new eButton(this, 0, 1);
+	if ( eConfig::getInstance()->getKey("/ezap/lcd/standby", lcdstandby ) )
+		lcdstandby=0;
+
+	bbrightness=new eLabel(this);
 	bbrightness->setText(_("Brightness:"));
 	bbrightness->move(ePoint(20, 20));
 	bbrightness->resize(eSize(110, fd+4));
-	bbrightness->setHelpText(_("set LCD brightness ( left / right )"));
 
-	bcontrast=new eButton(this, 0, 1);
+	bcontrast=new eLabel(this);
 	bcontrast->setText(_("Contrast:"));
 	bcontrast->move(ePoint(20, 60));
 	bcontrast->resize(eSize(110, fd+4));
-	bcontrast->setHelpText(_("set LCD contrast ( left / right )"));
 
-	bstandby=new eButton(this, 0, 1);
+	bstandby=new eLabel(this);
 	bstandby->setText(_("Standby:"));
 	bstandby->move(ePoint(20, 100));
 	bstandby->resize(eSize(110, fd+4));
-	bstandby->setHelpText(_("set LCD brightness for Standby Mode ( left / right )"));
 
-	p_brightness=new eProgress(this);
+	p_brightness=new eSlider(this, bbrightness, 0, LCD_BRIGHTNESS_MAX );
 	p_brightness->setName("brightness");
 	p_brightness->move(ePoint(140, 20));
 	p_brightness->resize(eSize(220, fd+4));
+	p_brightness->setHelpText(_("set LCD brightness ( left / right )"));
+	CONNECT( p_brightness->changed, eZapLCDSetup::brightnessChanged );
 
-	p_contrast=new eProgress(this);
+	p_contrast=new eSlider(this, bcontrast, 0, LCD_CONTRAST_MAX );
 	p_contrast->setName("contrast");
 	p_contrast->move(ePoint(140, 60));
 	p_contrast->resize(eSize(220, fd+4));
+	p_contrast->setHelpText(_("set LCD contrast ( left / right )"));
+	CONNECT( p_contrast->changed, eZapLCDSetup::contrastChanged );
 
-	p_standby=new eProgress(this);
+	p_standby=new eSlider(this, bstandby, 0, LCD_BRIGHTNESS_MAX );
 	p_standby->setName("standby");
 	p_standby->move(ePoint(140, 100));
 	p_standby->resize(eSize(220, fd+4));
-
-	update();
+	p_standby->setHelpText(_("set LCD brightness for Standby Mode ( left / right )"));
+	CONNECT( p_standby->changed, eZapLCDSetup::standbyChanged );
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
@@ -145,15 +105,14 @@ eZapLCDSetup::eZapLCDSetup(): eWindow(0)
 	statusbar->move( ePoint(0, clientrect.height()-30 ) );
 	statusbar->resize( eSize( clientrect.width(), 30) );
 	statusbar->loadDeco();
+
+	p_brightness->setValue(lcdbrightness);
+	p_contrast->setValue(lcdcontrast);
+	p_standby->setValue(lcdstandby);
 }
 
 eZapLCDSetup::~eZapLCDSetup()
 {
-}
-
-void eZapLCDSetup::fieldSelected(int *number)
-{
-	focusNext(eWidget::focusDirNext);
 }
 
 void eZapLCDSetup::okPressed()
@@ -168,6 +127,6 @@ void eZapLCDSetup::abortPressed()
 {
 	eConfig::getInstance()->getKey("/ezap/lcd/brightness", lcdbrightness);
 	eConfig::getInstance()->getKey("/ezap/lcd/contrast", lcdcontrast);
-	eDBoxLCD::getInstance()->setLCDParameter(lcdbrightness, lcdcontrast);
+	update();
 	close(0);
 }

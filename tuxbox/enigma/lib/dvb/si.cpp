@@ -96,11 +96,13 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 		return new LesRadiosDescriptor((descr_lesradios_struct*)descr);
 	case DESCR_MHW_DATA:
 		return new MHWDataDescriptor((descr_mhw_data_struct*)descr);
+	case DESCR_PARENTAL_RATING:
+		return new ParentalRatingDescriptor((descr_gen_struct*)descr);
+	case DESCR_CONTENT:
+		return new ContentDescriptor((descr_gen_struct*)descr);
 	case DESCR_COUNTRY_AVAIL:
 	case DESCR_TIME_SHIFTED_EVENT:
 	case DESCR_MOSAIC:
-	case DESCR_CONTENT:
-	case DESCR_PARENTAL_RATING:
 	case DESCR_TELETEXT:
 	case DESCR_TELEPHONE:
 	case DESCR_LOCAL_TIME_OFF:
@@ -502,27 +504,24 @@ ShortEventDescriptor::ShortEventDescriptor(descr_gen_t *descr): Descriptor(DESCR
 	memcpy(language_code, data+2, 3);
 	int ptr=5;
 	int len=data[ptr++];
-	if (data[ptr]<0x20)			// ignore charset
+
+	if (len && (data[ptr]<0x20))			// ignore charset
 	{
 		ptr++;
 		len--;
 	}
-
-/*	for (int i=0; i<len; i++)
-		event_name+=data[ptr++];*/
 
 	event_name.append( (char*) data+ptr, len);
 	ptr+=len;
 
 	len=data[ptr++];
 
-	if (data[ptr]<0x20)			// ignore charset
+	if (len && (data[ptr]<0x20))			// ignore charset
 	{
 		ptr++;
 		len--;
 	}
-/*	for (int i=0; i<len; i++)
-		text+=data[ptr++];*/
+
 	text.append( (char*) data+ptr, len);
 }
 
@@ -655,6 +654,31 @@ eString ComponentDescriptor::toString()
 	return res;
 }
 
+ContentDescriptor::ContentDescriptor(descr_gen_t *descr):Descriptor(DESCR_CONTENT)
+{
+	int len=descr->descriptor_length;
+	contentList.setAutoDelete(true);
+	__u8 *data=((__u8*)descr)+sizeof(descr_gen_t);
+	__u8 *work=data;
+
+  while( work < data+len )
+	{
+		descr_content_entry_struct *tmp = new descr_content_entry_struct();
+		memcpy(tmp, work, sizeof(descr_content_entry_struct) );
+		contentList.push_back( tmp );
+		work+=2;
+	}
+}
+
+eString ContentDescriptor::toString()
+{
+	eString res="ContentDescriptor\n";
+	for (ePtrList<descr_content_entry_struct>::iterator it( contentList.begin() ); it != contentList.end(); it++)
+		res+=eString().sprintf("nibble1 = %02x, nibble2 = %02x, user1 = %02x, user2 = %02x\n",
+																	it->content_nibble_level_1, it->content_nibble_level_2, it->user_nibble_1, it->user_nibble_2 );
+	return res;
+}	
+
 LesRadiosDescriptor::LesRadiosDescriptor(descr_lesradios_struct *descr): Descriptor(DESCR_LESRADIOS)
 {
 	int len=descr->descriptor_length+2;
@@ -690,6 +714,28 @@ eString MHWDataDescriptor::toString()
 	for (int i=0; i<8; i++)
 		res+=type[i];
 	res+="\n";
+	return res;
+}
+
+ParentalRatingDescriptor::ParentalRatingDescriptor( descr_gen_struct *descr)
+	: Descriptor(DESCR_PARENTAL_RATING)
+{
+  const char *data = ((char*)descr)+sizeof(struct descr_gen_struct);
+	const char *work = data;
+	int len=descr->descriptor_length;
+
+  while( work < data+len )
+	{
+    entryMap[ eString(work, 3) ] = *(work+3)+3;
+    work+=4;
+  }
+}
+
+eString ParentalRatingDescriptor::toString()
+{
+	eString res="ParentalRatingDescriptor";
+	for ( std::map<eString,int>::iterator it(entryMap.begin()); it != entryMap.end(); it++)
+		res += eString().sprintf("\n  Country: %s, Age: %i",it->first.c_str(), it->second);
 	return res;
 }
 

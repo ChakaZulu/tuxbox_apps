@@ -7,9 +7,10 @@
 #include <core/dvb/si.h>
 #include <core/dvb/frontend.h>
 #include <core/system/econfig.h>
+#include <core/dvb/servicestructure.h>
 
 eTransponderList* eTransponderList::instance=0;
-
+/*
 static struct
 {
 	int original_network_id, service_id, channel_number;
@@ -43,13 +44,13 @@ static int beautifyChannelNumber(int transport_stream_id, int original_network_i
 		return 30;
 
 	if (original_network_id==0x0085)
-			/*
-				eigentlich mag ich das ja nicht so gerne, weil auf diese weise der komplette kirch-krams oben steht.
-				aber anders gehts wohl leider nicht.
-			*/
+
+//				eigentlich mag ich das ja nicht so gerne, weil auf diese weise der komplette kirch-krams oben steht.
+//				aber anders gehts wohl leider nicht.
+
 		return 100;
 	return -1;
-}
+}*/
 
 #if 0
 static std::string escape(const std::string s)
@@ -119,6 +120,7 @@ int eTransponder::satellite::tune(eTransponder *trans)
 {
 	eDebug("[TUNE] tuning to %d/%d/%s/%d@%d", frequency, symbol_rate, polarisation?"V":"H", fec, orbital_position);
 	int inv=0;
+	
 	eSatellite *sat=trans->tplist.findSatellite(orbital_position);
 	if (!sat)
 	{
@@ -126,11 +128,11 @@ int eTransponder::satellite::tune(eTransponder *trans)
 		return -ENOENT;
 	}
 
-	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, sat->getLNB(), sat->getSwitchParams() );
+	return eFrontend::getInstance()->tune_qpsk(trans, frequency, polarisation, symbol_rate, fec, inv, *sat->getLNB(), sat->getSwitchParams() );
 }
 
-eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number):
-		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id), service_number(service_number)
+eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id/*, int service_number*/):
+		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_id(service_id)//, service_number(service_number)
 {
 	clearCache();
 }
@@ -140,8 +142,8 @@ eService::eService(eServiceID service_id, const char *name)
 {
 }
 
-eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number):
-		transport_stream_id(transport_stream_id), original_network_id(original_network_id), service_number(service_number)
+eService::eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry/*, int service_number*/):
+		transport_stream_id(transport_stream_id), original_network_id(original_network_id)//, service_number(service_number)
 {
 	clearCache();
 	service_id=sdtentry->service_id;
@@ -265,7 +267,7 @@ void eService::update(const SDTEntry *sdtentry)
 }
 
 eSatellite::eSatellite(eTransponderList &tplist, int orbital_position, eLNB &lnb):
-		tplist(tplist), orbital_position(orbital_position), lnb(lnb)
+		tplist(tplist), orbital_position(orbital_position), lnb(&lnb)
 {
 	tpiterator=tplist.satellites.insert(std::pair<int,eSatellite*>(orbital_position,this)).first;
 }
@@ -274,6 +276,14 @@ eSatellite::~eSatellite()
 {
 	tplist.satellites.erase(tpiterator);
 }
+
+void eSatellite::setOrbitalPosition(int orbital_position)
+{
+	tplist.satellites.erase(tpiterator);		// we must renew the entry in the map in eTransponderList
+	this->orbital_position=orbital_position;
+	tplist.satellites.insert( std::pair< int, eSatellite*>( orbital_position, this ));
+}
+
 
 eSatellite *eLNB::addSatellite(int orbital_position)
 {
@@ -321,7 +331,7 @@ eTransponder &eTransponderList::createTransponder(eTransportStreamID transport_s
 	return (*i).second;
 }
 
-eService &eTransponderList::createService(const eServiceReferenceDVB &service, int chnum, bool *newService)
+eService &eTransponderList::createService(const eServiceReferenceDVB &service/*, int chnum*/, bool *newService)
 {
 	std::map<eServiceReferenceDVB,eService>::iterator i=services.find(service);
                                                   	
@@ -330,7 +340,7 @@ eService &eTransponderList::createService(const eServiceReferenceDVB &service, i
 
 	if ( i == services.end() )
 	{
-		if (chnum==-1)
+/*		if (chnum==-1)
 			chnum=beautifyChannelNumber(service.getTransportStreamID().get(), service.getOriginalNetworkID().get(), service.getServiceID().get());
 		
 		if (chnum==-1)
@@ -347,15 +357,15 @@ eService &eTransponderList::createService(const eServiceReferenceDVB &service, i
 		}
 
 		while (channel_number.find(chnum)!=channel_number.end())
-			chnum++;
+			chnum++;*/
 	
 		eService *n=&services.insert(
 					std::pair<eServiceReferenceDVB,eService>
 						(service,
-						eService(service.getTransportStreamID(), service.getOriginalNetworkID(), service.getServiceID(), chnum))
+						eService(service.getTransportStreamID(), service.getOriginalNetworkID(), service.getServiceID()/*, chnum*/))
 					).first->second;
 
-		channel_number.insert(std::pair<int,eService*>(chnum,n));
+//		channel_number.insert(std::pair<int,eService*>(chnum,n));
 		
 		return *n;
 	}
@@ -364,6 +374,7 @@ eService &eTransponderList::createService(const eServiceReferenceDVB &service, i
 
 int eTransponderList::handleSDT(const SDT *sdt)
 {
+	eDebug("TransponderList handleSDT");
 	std::set<eServiceID> s;
 	int changed=0;
 	bool newAdded;
@@ -376,6 +387,7 @@ int eTransponderList::handleSDT(const SDT *sdt)
 			{
 				const ServiceDescriptor *nd=(ServiceDescriptor*)*d;
 				service_type=nd->service_type;
+				break;
 			}
 
 		if (service_type == -1)
@@ -388,10 +400,11 @@ int eTransponderList::handleSDT(const SDT *sdt)
 					eServiceID(i->service_id),
 					service_type);
 
-		eService &service=createService(sref, -1, &newAdded);
+		eService &service=createService(sref/*, -1*/, &newAdded);
 		service.update(*i);
 		s.insert(eServiceID(i->service_id));
 
+//		eDebug("service_found, newadded = %i", newAdded);
 		/*emit*/ service_found(sref, newAdded);
 	}
 
@@ -401,12 +414,12 @@ int eTransponderList::handleSDT(const SDT *sdt)
 				(!s.count(i->first.getServiceID()))) // but does not exist
 			{
 				services.erase(i->first);
-				for (std::map<int,eService*>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
+/*				for (std::map<int,eService*>::iterator m(channel_number.begin()); m != channel_number.end(); ++m)
 					if (m->second == &i->second)
 					{
 						channel_number.erase(m);
 						break;
-					}
+					}*/
 				i=services.begin();
 				changed=1;
 			}
@@ -441,13 +454,13 @@ const eServiceReferenceDVB *eTransponderList::searchService(eOriginalNetworkID o
 	return 0;
 }
 
-eService *eTransponderList::searchServiceByNumber(int chnum)
+/*eService *eTransponderList::searchServiceByNumber(int chnum)
 {
 	std::map<int,eService*>::iterator i=channel_number.find(chnum);
 	if (i==channel_number.end())
 		return 0;
 	return i->second;
-}
+} */
 
 eTransponder *eTransponderList::getFirstTransponder(int state)
 {
@@ -490,11 +503,11 @@ void eTransponderList::readLNBData()
 		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/lofThreshold").c_str(), tmp);
 		lnb.setLOFThreshold(tmp);
 
-		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DISEqCMode").c_str(), tmpint );
-		lnb.getDISEqC().DISEqCMode = (eDISEqC::tDISEqCMode) tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DiSEqCMode").c_str(), tmpint );
+		lnb.getDiSEqC().DiSEqCMode = (eDiSEqC::tDiSEqCMode) tmpint;
 
-		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DISEqCParam").c_str(), tmpint );
-		lnb.getDISEqC().DISEqCParam = (eDISEqC::tDISEqCParam) tmpint;
+		eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbread)+"/DiSEqCParam").c_str(), tmpint );
+		lnb.getDiSEqC().DiSEqCParam = (eDiSEqC::tDiSEqCParam) tmpint;
 
 		int satread=0;
 		while(1)
@@ -529,8 +542,8 @@ void eTransponderList::readLNBData()
 			lnb.setLOFHi(10600000);
 			lnb.setLOFLo(9750000);
 			lnb.setLOFThreshold(11700000);
-			lnb.getDISEqC().DISEqCParam=eDISEqC::AA;
-			lnb.getDISEqC().DISEqCMode=eDISEqC::V1_0;		
+			lnb.getDiSEqC().DiSEqCParam=eDiSEqC::AA;
+			lnb.getDiSEqC().DiSEqCMode=eDiSEqC::V1_0;		
 			eSatellite *sat = lnb.addSatellite(192);
 			sat->setDescription("Astra 19.2E");
 			eSwitchParameter &sParams = sat->getSwitchParams();
@@ -543,8 +556,8 @@ void eTransponderList::readLNBData()
 			lnb.setLOFHi(10600000);
 			lnb.setLOFLo(9750000);
 			lnb.setLOFThreshold(11700000);
-			lnb.getDISEqC().DISEqCParam=eDISEqC::AB;
-			lnb.getDISEqC().DISEqCMode=eDISEqC::V1_0;		
+			lnb.getDiSEqC().DiSEqCParam=eDiSEqC::AB;
+			lnb.getDiSEqC().DiSEqCMode=eDiSEqC::V1_0;		
 			eSatellite *sat = lnb.addSatellite(130);
 			sat->setDescription("Eutelsat 13.0E");
 			eSwitchParameter &sParams = sat->getSwitchParams();
@@ -565,8 +578,8 @@ void eTransponderList::writeLNBData()
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), it->getLOFHi() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofL").c_str(), it->getLOFLo() );
 		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/lofThreshold").c_str(), it->getLOFThreshold() );
-		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DISEqCMode").c_str(), (int) it->getDISEqC().DISEqCMode );
-		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DISEqCParam").c_str(), (int) it->getDISEqC().DISEqCParam );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCMode").c_str(), (int) it->getDiSEqC().DiSEqCMode );
+		eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/DiSEqCParam").c_str(), (int) it->getDiSEqC().DiSEqCParam );
 		int satwrite=0;
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 		{
@@ -577,10 +590,101 @@ void eTransponderList::writeLNBData()
 			eConfig::getInstance()->setKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/HiLoSignal").c_str(), (int) sParams.HiLoSignal );
 			satwrite++;
 		}
+		// we must delete no more exist Satellites from registry...
+		int tmp;
+		while ( !eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite)+"/OrbitalPosition").c_str(), tmp ) )
+		{
+			eConfig::getInstance()->delKey( (basepath+eString().setNum(lnbwrite)+"/satellites/"+eString().setNum(satwrite++)).c_str() );
+			eDebug("delete satellite");
+		}
+		///////////////////////
 		lnbwrite++;
 	}
 	eDebug("%i LNBs written", lnbwrite);
+	// we must delete no more exist lnbs from registry
 	unsigned int tmp;
-	while (	!eConfig::getInstance()->getKey( (basepath+eString().setNum(++lnbwrite)+"/lofH").c_str(), tmp) )	// erase no more exist lnbs...
-		eConfig::getInstance()->delKey( (basepath+eString().setNum(++lnbwrite)).c_str() );
+	while (	!eConfig::getInstance()->getKey( (basepath+eString().setNum(lnbwrite)+"/lofH").c_str(), tmp) )	// erase no more exist lnbs...
+	{
+		eConfig::getInstance()->delKey( (basepath+eString().setNum(lnbwrite++)).c_str() );
+		eDebug("delete lnb");		
+	}
+	////////////////////////
 }
+
+
+eServiceReference::eServiceReference(const eString &string)
+{
+	const char *c=string.c_str();
+	int pathl=-1;
+	
+	sscanf(c, "%d:%d:%x:%x:%x:%x:%n", &type, &flags, &data[0], &data[1], &data[2], &data[3], &pathl);
+	if (pathl)
+		path=c+pathl;
+}
+
+eString eServiceReference::toString() const
+{
+	eString ret;
+	ret+=eString().sprintf("%d:", type);
+	ret+=eString().sprintf("%d", flags);
+	for (unsigned int i=0; i<sizeof(data)/sizeof(*data); ++i)
+		ret+=":"+eString().sprintf("%x", data[i]);
+	ret+=":"+path;
+	return ret;
+}
+
+void eServicePath::setString( const eString& str )
+{
+	// Method to build from an serialized eServicePath string a eServicePath object
+	unsigned int i=0,i2;
+	while( ( i2 = str.find(';', i ) ) != eString::npos )
+	{
+		eServiceReference e(str.mid( i, i2-i ));
+		path.push( e );
+		i=i2;
+		i++;
+	}
+}
+
+eServicePath::eServicePath( const eString& str )
+{
+	setString(str);
+}
+
+eServicePath::eServicePath(const eServiceReference &ref)
+{
+	path.push(ref);
+}
+
+eString eServicePath::toString()
+{
+	// Method to serialize a eServicePath object to a string
+	eString erg;
+	if ( path.size() )
+	{
+		eString tmp = path.top().toString()+";";
+		path.pop();
+		erg=toString()+=tmp;
+	}
+	return erg;
+}
+
+void eServicePath::up()
+{
+	if (path.size()>1)
+		path.pop();
+}
+
+void eServicePath::down(const eServiceReference &ref)
+{
+	path.push(ref);
+}
+
+eServiceReference eServicePath::current() const
+{
+	if (path.size())
+		return path.top();
+	eDebug("empty path... returning real root.");
+	return eServiceStructureHandler::getRoot(eServiceStructureHandler::modeRoot);
+}
+

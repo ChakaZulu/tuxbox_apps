@@ -155,7 +155,7 @@ void eRCDeviceDBoxNew::handleCode(int rccode)
 		/*emit*/ input->keyPressed(eRCKey(this, old&0x3F, eRCKey::flagBreak));
 	if (old != rccode)
 	{
-		repeattimer.start(eRCInput::getInstance()->config.rdelay+500, 1);
+		repeattimer.start(eRCInput::getInstance()->config.rdelay/*+500*/, 1);
 		input->keyPressed(eRCKey(this, rccode&0x3F, 0));
 	}
 }

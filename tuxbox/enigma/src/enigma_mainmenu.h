@@ -9,12 +9,13 @@ class eLabel;
 
 class eMainMenu: public eWidget
 {
-	gPixmap *pixmaps[7][2];
+	gPixmap *pixmaps[8][2];
 	eLabel *label[7], *description;
 	int active;
 	void setActive(int i);
 	void sel_tv();
 	void sel_radio();
+	void sel_file();
 	void sel_vcr();
 	void sel_setup();
 	void sel_info();	

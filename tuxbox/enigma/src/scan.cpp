@@ -159,6 +159,10 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	l_status=new eLabel(this, RS_WRAP);
 	l_status->setName("status");
 
+	c_eraseall=new eCheckbox(this);
+	c_eraseall->setName("eraseall");
+	c_eraseall->hide();
+
 	b_start=new eButton(this);
 	b_start->setName("start");
 	b_start->hide();
@@ -190,8 +194,15 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	if (loadNetworks())
 		eFatal("loading networks failed");
 
-		// todo: text aendern
-	l_status->setText(_("To begin searching for a valid satellite, enter correct LNB and either select satellite or automatic and press OK"));
+	switch (eFrontend::getInstance()->Type())
+	{
+		case eFrontend::feSatellite:
+			l_status->setText(_("To begin searching for a valid satellite press OK, or choose your wished satellite manually and press OK"));
+		break;
+		case eFrontend::feCable:
+			l_status->setText(_("To begin searching for a valid cable provider press OK, or choose your wished cable provider manually and press OK"));
+		break;
+	}
 	
 	setFocus(l_network);
 }
@@ -218,7 +229,7 @@ void tsAutomatic::start()
 		// macht nur Probleme...bzw dauert recht lang...
 		sapi->setSkipOtherOrbitalPositions(1);
 
-		sapi->setClearList(0);
+		sapi->setClearList(c_eraseall->isChecked());
 
 		close(0);
 	}
@@ -252,9 +263,10 @@ void tsAutomatic::dvbEvent(const eDVBEvent &event)
 			tuneNext(1);
 		} else
 		{
+			c_eraseall->show();
 			b_start->show();
-			setFocus(b_start);
-			l_status->setText(_("A valid transponder has been found. Verify that it's the correct LNB and satellite, and press OK to start scanning"));
+			setFocus(c_eraseall);
+			l_status->setText(_("A valid transponder has been found. Verify that the right network is selected"));
 		}
 		break;
 	default:
@@ -348,9 +360,15 @@ int existNetworks::addNetwork(tpPacket &packet, XMLTreeNode *node, int type)
 
 	const char *flags=node->GetAttributeValue("flags");
 	if (flags)
+	{
 		packet.scanflags=atoi(flags);
+		eDebug("name = %s, scanflags = %i", name, packet.scanflags );
+	}
 	else
+	{
 		packet.scanflags=1; // default use Network ??
+		eDebug("packet has no scanflags... we use default scanflags (1)");
+	}
 	
 	const char *position=node->GetAttributeValue("position");
 	if (!position)
@@ -807,6 +825,7 @@ int TransponderScan::exec()
 			scan.resize(size);
 			
 			scan.show();
+			statusbar->getLabel().setText(_("Scan is in progress... please wait"));
 			scan.exec();
 			scan.hide();
 
@@ -822,6 +841,7 @@ int TransponderScan::exec()
   		finish.move(ePoint(0, 0));
 			finish.resize(size);
 			finish.show();
+			statusbar->getLabel().setText(_("Scan is in finished, press ok to close window"));
 			finish.exec();
 			finish.hide();
 			state=stateEnd;

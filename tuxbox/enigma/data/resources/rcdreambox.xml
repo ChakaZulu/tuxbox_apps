@@ -85,18 +85,36 @@
 			<action name="showEPG" key="info" flags="m" />
 			<action name="nextService" key="chdown" flags="mr" />
 			<action name="prevService" key="chup" flags="mr" />
+			<action name="playlistNextService" key="next" flags="mr" />
+			<action name="playlistPrevService" key="prev" flags="mr" />
 			<action name="serviceListDown" key="down" flags="m" />
 			<action name="serviceListUp" key="up" flags="m" />
 			<action name="volumeUp" key="volup" flags="mr" />
 			<action name="volumeDown" key="voldown" flags="mr" />
 			<action name="toggleMute" key="mute" flags="mr" />
+			
+			<action name="play" key="guide" flags="m" />
+			<action name="pause" key="audio" flags="m" />
+			<action name="stop" key="video" flags="m" />
+
+			<action name="record" key="a" flags="m" />
+			
+			<action name="startSkipF" key="right" flags="m" />
+			<action name="repeatSkipF" key="right" flags="r" />
+			<action name="stopSkipF" key="right" flags="b" />
+
+			<action name="startSkipR" key="left" flags="m" />
+			<action name="repeatSkipR" key="left" flags="r" />
+			<action name="stopSkipR" key="left" flags="b" />
+
 		</actionmap>
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="next" flags="mr" />
 			<action name="prevBouquet" key="prev" flags="mr" />
 			<action name="showBouquetSelector" key="guide" flags="m" />
 			<action name="showEPGSelector" key="info" flags="m" />
-			<action name="showAllServices" key="tv" flags="m" />
+			<action name="showMenu" key="tv" flags="m" />
+			<action name="addService" key="red" flags="m" />
 		</actionmap>
 		<actionmap name="numbers">
 			<action name="0" key="0" flags="mr" />

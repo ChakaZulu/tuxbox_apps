@@ -2,6 +2,7 @@
 #define __core_base_message_h
 
 #include "ebase.h"
+#include <unistd.h>
 
 /**
  * \brief A generic messagepump.
@@ -36,21 +37,26 @@ class eFixedMessagePump: private eMessagePump, public Object
 		T msg;
 		recv(&msg, sizeof(msg));
 		/*emit*/ recv_msg(msg);
+		msg_count--;
 	}
+	int msg_count;
 public:
 	Signal1<void,const T&> recv_msg;
 	void send(const T &msg)
 	{
 		eMessagePump::send(&msg, sizeof(msg));
+		msg_count++;
 	}
 	eFixedMessagePump(eMainloop *context)
 	{
+		msg_count=0;
 		sn=new eSocketNotifier(context, getOutputFD(), eSocketNotifier::Read);
 		CONNECT(sn->activated, eFixedMessagePump<T>::do_recv);
 		sn->start();
 	}
 	~eFixedMessagePump()
 	{
+		while (msg_count) usleep(50);
 		delete sn;
 	}
 	void start() { sn->start(); }

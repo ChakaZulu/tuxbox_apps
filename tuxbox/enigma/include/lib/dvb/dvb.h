@@ -15,6 +15,7 @@ class eDVB;
 #include <functional>
 #include <string>
 #include <set>
+#include <stack>
 
 #ifndef MIN
 	#define MIN(a,b) (a < b ? a : b)
@@ -226,8 +227,8 @@ public:
 	{
 		cVPID, cAPID, cTPID, cPCRPID, cacheMax
 	};
-	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry, int service_number=-1);
-	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_number=-1);
+	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, const SDTEntry *sdtentry/*, int service_number=-1*/);
+	eService(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id/*, int service_number=-1*/);
 	eService(eServiceID service_id, const char *name);
 	void update(const SDTEntry *sdtentry);
 	
@@ -238,7 +239,7 @@ public:
 	
 	std::string service_name, service_provider;
 	
-	int service_number;		// gleichzeitig sortierkriterium.
+//	int service_number;		// gleichzeitig sortierkriterium.
 	
 	int cache[cacheMax];
 	
@@ -286,8 +287,23 @@ struct eServiceReference
 	int flags;
 	enum
 	{
-		isDirectory=1,
+		isDirectory=1,		// SHOULD enter  (implies mustDescent)
+		mustDescent=2,		// cannot be played directly - often used with "isDirectory" (implies canDescent)
+		/*
+			for example:
+				normal services have none of them - they can be fed directly into the "play"-handler.
+				normal directories have both of them set - you cannot play a directory directly and the UI should descent into it.
+				playlists have "mustDescent", but not "isDirectory" - you don't want the user to browse inside the playlist (unless he really wants)
+				services with sub-services have none of them, instead the have the "canDecsent" flag (as all of the above)
+		*/
+		canDescent=4,			// supports enterDirectory/leaveDirectory
+		flagDirectory=isDirectory|mustDescent|canDescent,
+		shouldSort=8,			// should be ASCII-sorted according to service_name. great for directories.
+		hasSortKey=16,		// has a sort key in data[3]. not having a sort key implies 0.
+		sort1=32					// sort key is 1 instead of 0
 	};
+
+	inline int getSortKey() const { return (flags & hasSortKey) ? data[3] : ((flags & sort1) ? 1 : 0); }
 
 	int data[4];
 	eString path;
@@ -336,6 +352,8 @@ struct eServiceReference
 	{
 		data[0]=data[1]=data[2]=data[3]=0;
 	}
+	eServiceReference(const eString &string);
+	eString toString() const;
 	bool operator==(const eServiceReference &c) const
 	{
 		if (type != c.type)
@@ -370,6 +388,20 @@ struct eServiceReference
 	}
 };
 
+class eServicePath
+{
+	std::stack<eServiceReference> path;
+public:
+	eServicePath()	{	}
+	eServicePath( const eString& data );
+	eServicePath(const eServiceReference &ref);
+	void setString( const eString& data );
+	eString toString();
+	void up();
+	void down(const eServiceReference &ref);
+	eServiceReference current() const;
+};
+
 struct eServiceReferenceDVB: public eServiceReference
 {
 	int getServiceType() const { return data[0]; }
@@ -384,8 +416,8 @@ struct eServiceReferenceDVB: public eServiceReference
 	eOriginalNetworkID getOriginalNetworkID() const { return eOriginalNetworkID(data[3]); }
 	void setOriginalNetworkID(eOriginalNetworkID original_network_id) { data[3]=original_network_id.get(); }
 
-	eServiceReferenceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type):
-		eServiceReference(eServiceReference::idDVB, 0)
+	eServiceReferenceDVB(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id, eServiceID service_id, int service_type)
+		:eServiceReference(eServiceReference::idDVB, 0)
 	{
 		setTransportStreamID(transport_stream_id);
 		setOriginalNetworkID(original_network_id);
@@ -396,16 +428,6 @@ struct eServiceReferenceDVB: public eServiceReference
 	eServiceReferenceDVB()
 	{
 	}
-
-	struct equalONIDSID
-	{
-		bool operator()(const eServiceReferenceDVB &a, const eServiceReferenceDVB &b) const
-		{
-			return (a.type == b.type) &&
-					(a.getServiceID() == b.getServiceID()) &&
-					(a.getOriginalNetworkID() == b.getOriginalNetworkID());
-		}
-	};
 };
 
 class eBouquet
@@ -447,9 +469,9 @@ class eSatellite
 	int orbital_position;
 	eString description;
 	eSwitchParameter switchParams;
-	eLNB &lnb;
+	eLNB *lnb;
+	std::map<int, eSatellite*>::iterator tpiterator;
 	friend class eLNB;
-	std::map<int,eSatellite*>::iterator tpiterator;
 public:
 	eSatellite(eTransponderList &tplist, int orbital_position, eLNB &lnb);
 	~eSatellite();
@@ -474,16 +496,18 @@ public:
 		return switchParams;
 	}	
 
-	eLNB &getLNB() const
+	eLNB *getLNB() const
 	{
 		return lnb;
 	}
-	
-	void setOrbitalPosition(int orbital_position)
+
+	void setLNB( eLNB* _lnb )
 	{
-		this->orbital_position=orbital_position;
+		lnb = _lnb;
 	}
 	
+	void setOrbitalPosition(int orbital_position);
+
 	bool operator<(const eSatellite &sat) const
 	{
 		return orbital_position < sat.orbital_position;
@@ -495,12 +519,12 @@ public:
 	}
 };
 
-struct eDISEqC
+struct eDiSEqC
 {
-	enum tDISEqCParam	{	AA=0, AB=1, BA=2, BB=3, USER=4 }; // DISEqC Parameter
-	enum tDISEqCMode	{	MINI=0, V1_0=1, V1_1=2, V1_2=3 }; // DISEqC Mode
-	tDISEqCParam DISEqCParam;
-	tDISEqCMode DISEqCMode;
+	enum tDiSEqCParam	{	AA=0, AB=1, BA=2, BB=3, USER=4 }; // DiSEqC Parameter
+	enum tDiSEqCMode	{	MINI=0, V1_0=1, V1_1=2, V1_2=3 }; // DiSEqC Mode
+	tDiSEqCParam DiSEqCParam;
+	tDiSEqCMode DiSEqCMode;
 };
 
 class eLNB
@@ -508,7 +532,7 @@ class eLNB
 	unsigned int lof_hi, lof_lo, lof_threshold;
 	ePtrList<eSatellite> satellites;
 	eTransponderList &tplist;
-	eDISEqC DISEqC;
+	eDiSEqC DiSEqC;
 public:
 
 	eLNB(eTransponderList &tplist): tplist(tplist)
@@ -522,7 +546,7 @@ public:
 	unsigned int getLOFHi() const { return lof_hi; }
 	unsigned int getLOFLo() const { return lof_lo; }
 	unsigned int getLOFThreshold() const { return lof_threshold; }
-	eDISEqC& getDISEqC() { return DISEqC; }	
+	eDiSEqC& getDiSEqC() { return DiSEqC; }	
 	eSatellite *addSatellite(int orbital_position);
 	void deleteSatellite(eSatellite *satellite);
 	void addSatellite( eSatellite *satellite);
@@ -536,13 +560,15 @@ class eTransponderList
 	static eTransponderList* instance;
 	std::map<tsref,eTransponder> transponders;
 	std::map<eServiceReferenceDVB,eService> services;
-	std::map<int,eService*> channel_number;
 	
-	std::list<eLNB> lnbs;
 	std::map<int,eSatellite*> satellites;
+	std::list<eLNB> lnbs;
 	friend class eLNB;
 	friend class eSatellite;
 public:
+	void clearServices()	{	services.clear(); }
+	void clearTransponders()	{	transponders.clear(); }
+
 	static eTransponderList* getInstance()	{ return instance; }
 	eTransponderList();
 
@@ -557,9 +583,8 @@ public:
 	void readLNBData();
 	void writeLNBData();
 
-	void updateStats(int &transponders, int &scanned, int &services);
 	eTransponder &createTransponder(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
-	eService &createService(const eServiceReferenceDVB &service, int service_number=-1, bool *newService=0);
+	eService &createService(const eServiceReferenceDVB &service/*, int service_number=-1*/, bool *newService=0);
 	int handleSDT(const SDT *sdt);
 	Signal1<void, eTransponder*> transponder_added;
 	Signal2<void, const eServiceReferenceDVB &, bool> service_found;
@@ -567,7 +592,7 @@ public:
 	eTransponder *searchTS(eTransportStreamID transport_stream_id, eOriginalNetworkID original_network_id);
 	eService *searchService(const eServiceReference &service);
 	const eServiceReferenceDVB *searchService(eOriginalNetworkID original_network_id, eServiceID service_id);
-	eService *searchServiceByNumber(int channel_number);
+//	eService *searchServiceByNumber(int channel_number);
 	
 	template <class T> 
 	void forEachService(T ob)

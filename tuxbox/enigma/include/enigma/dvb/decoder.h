@@ -9,6 +9,8 @@ struct decoderParameters
 {
 	int vpid, apid, tpid, pcrpid, ecmpid, emmpid, pmtpid, casystemid;
 	int audio_type;
+
+	int flushbuffer;
 	
 	int recordmode;
 	
@@ -30,6 +32,7 @@ public:
 	static void Flush();
 	static void addCADescriptor(__u8 *descriptor);
 	static int Set();
+	static void flushBuffer() { parms.flushbuffer=1; }
 };
 
 #endif

@@ -17,6 +17,7 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 	transponder=0;
 	tdt=0;
 	tMHWEIT=0;
+	calist.setAutoDelete(true);
 }
 
 eDVBServiceController::~eDVBServiceController()
@@ -62,51 +63,54 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	case eDVBServiceEvent::eventServiceSwitch:
 	{
-		Decoder::Flush();
-		if (!dvb.settings->transponderlist)
+		if (service.getTransportStreamID().get() >= 0) // a normal service, not a replay
 		{
-			eDebug("no tranponderlist");
-			service_state=ENOENT;
-			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
-			return;
-		}
-		eTransponder *n=dvb.settings->transponderlist->searchTS(service.getTransportStreamID(), service.getOriginalNetworkID());
-		if (!n)
-		{
-			eDebug("no transponder %x %x", service.getOriginalNetworkID().get(), service.getTransportStreamID().get());
-			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
-			break;
-		}
-		if (n->state!=eTransponder::stateOK)
-		{
-			eDebug("couldn't tune");
-			service_state=ENOENT;
-			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
-			return;
-		}
+			if (!dvb.settings->transponderlist)
+			{
+				eDebug("no tranponderlist");
+				service_state=ENOENT;
+				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
+				return;
+			}
+			eTransponder *n=dvb.settings->transponderlist->searchTS(service.getTransportStreamID(), service.getOriginalNetworkID());
+			if (!n)
+			{
+				eDebug("no transponder %x %x", service.getOriginalNetworkID().get(), service.getTransportStreamID().get());
+				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
+				break;
+			}
+			if (n->state!=eTransponder::stateOK)
+			{
+				eDebug("couldn't tune");
+				service_state=ENOENT;
+				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceFailed));
+				return;
+			}
 
-		if (n==transponder)
-		{
-//			dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceTune));
-			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneOK));
+			if (n==transponder)
+			{
+//				dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceTune));
+				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneOK, 0, n));
+			} else
+			{
+				/*emit*/ dvb.leaveTransponder(transponder);
+				transponder=n;
+				if (n->tune())
+				{
+					eDebug("tune failed");
+					dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
+				} else
+					dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceTune));
+			}
+			eDebug("<-- tuned");
 		} else
 		{
-			/*emit*/ dvb.leaveTransponder(transponder);
-			transponder=n;
-			if (n->tune())
-			{
-				eDebug("tune failed");
-				dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneFailed));
-			} else
-				dvb.setState(eDVBServiceState(eDVBServiceState::stateServiceTune));
+			eDebug("won't tune, since its a replay.");
+			dvb.event(eDVBServiceEvent(eDVBServiceEvent::eventServiceTuneOK, 0, 0));
 		}
-		eDebug("<-- tuned");
 		break;
 	}
 	case eDVBServiceEvent::eventServiceTuneOK:
-		currentTransponder=event.transponder;
-		currentTransponderState=event.err;
-
 		/*emit*/ dvb.enterTransponder(event.transponder);
 		dvb.tPAT.start(new PAT());
 		if (tdt)
@@ -118,7 +122,6 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		CONNECT(tdt->tableReady, eDVBServiceController::TDTready);
 		tdt->start();
 
-		/*emit*/ dvb.enterTransponder(transponder);
 		dvb.tSDT.start(new SDT());
 		switch (service.getServiceType())
 		{
@@ -285,6 +288,7 @@ int eDVBServiceController::switchService(const eServiceReferenceDVB &newservice)
 		return 0;
 	}
 	
+	Decoder::Flush();
 	/*emit*/ dvb.leaveService(service);
 	
 	service=newservice;
@@ -303,7 +307,10 @@ void eDVBServiceController::scanPMT()
 		return;
 	}
 	Decoder::parms.pmtpid=pmtpid;
-	Decoder::parms.pcrpid=pmt->PCR_PID;
+	if (service.getTransportStreamID() != -1)
+		Decoder::parms.pcrpid=pmt->PCR_PID;
+	else
+		Decoder::parms.pcrpid=-1;
 	Decoder::parms.ecmpid=Decoder::parms.emmpid=Decoder::parms.casystemid=-1;
 	Decoder::parms.vpid=Decoder::parms.apid=-1;
 	

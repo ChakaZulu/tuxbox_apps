@@ -19,7 +19,7 @@ struct enigmaVCRActions
 eAutoInitP0<enigmaVCRActions> i_enigmaVCRActions(5, "enigma vcr actions");
 
 enigmaVCR::enigmaVCR(eString string, eString caption)
-	:eMessageBox(string,caption,false)
+	:eMessageBox(string,caption)
 {
 	addActionMap(&i_enigmaVCRActions->map);
 }

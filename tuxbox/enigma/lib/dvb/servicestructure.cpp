@@ -1,11 +1,16 @@
 #include <core/dvb/servicestructure.h>
 #include <core/system/init.h>
+#include <core/base/i18n.h>
 
 eServiceStructureHandler::eServiceStructureHandler(): eServiceHandler(eServiceReference::idStructure), cache(*this)
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
-	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::isDirectory, 0), new eService(0, "root node"));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeRoot), new eService(0, _("root node")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeTV), new eService(0, _("TV mode")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeRadio), new eService(0, _("Radio Mode")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeFile), new eService(0, _("File Mode")));
+	cache.addPersistentService(eServiceReference(eServiceReference::idStructure, eServiceReference::flagDirectory|eServiceReference::shouldSort, modeFavourite), new eService(0, _("Favourites")));
 }
 
 eServiceStructureHandler::~eServiceStructureHandler()
@@ -33,9 +38,14 @@ eService *eServiceStructureHandler::createService(const eServiceReference &node)
 	return 0;
 }
 
-eService* eServiceStructureHandler::lookupService(const eServiceReference &c)
+eService* eServiceStructureHandler::addRef(const eServiceReference &c)
 {
-	return cache.lookupService(c);
+	return cache.addRef(c);
+}
+
+void eServiceStructureHandler::removeRef(const eServiceReference &c)
+{
+	cache.removeRef(c);
 }
 
 eAutoInitP0<eServiceStructureHandler> i_eServiceStructureHandler(6, "eServiceStructureHandler");

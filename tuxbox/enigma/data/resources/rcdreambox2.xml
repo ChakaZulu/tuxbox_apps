@@ -36,6 +36,7 @@
 			<key name="yellow" code="42" />
 			<key name="blue" code="43" />
 			<key name="mute" code="44" />
+			<key name="text" code="45" />
 			<key name="next" code="50" />
 			<key name="prev" code="51" />
 			<key name="LAME" code="52" />
@@ -74,6 +75,8 @@
 			<action name="pluginVTXT" key="blue" flags="m" />
 			<action name="showEPGList" key="red" flags="m" />
 			<action name="showEPG" key="info" flags="m" />
+			<action name="playlistNextService" key="next" flags="mr" />
+			<action name="playlistPrevService" key="prev" flags="mr" />
 			<action name="nextService" key="right" flags="mr" />
 			<action name="prevService" key="left" flags="mr" />
 			<action name="serviceListDown" key="down" flags="m" />
@@ -81,6 +84,21 @@
 			<action name="volumeUp" key="volup" flags="mr" />
 			<action name="volumeDown" key="voldown" flags="mr" />
 			<action name="toggleMute" key="mute" flags="mr" />
+
+			<action name="play" key="green" flags="m" />
+			<action name="pause" key="yellow" flags="m" />
+			<action name="stop" key="tv" flags="m" />
+
+			<action name="record" key="radio" flags="m" />
+			
+			<action name="startSkipF" key="blue" flags="m" />
+			<action name="repeatSkipF" key="blue" flags="r" />
+			<action name="stopSkipF" key="blue" flags="b" />
+
+			<action name="startSkipR" key="red" flags="m" />
+			<action name="repeatSkipR" key="red" flags="r" />
+			<action name="stopSkipR" key="red" flags="b" />
+
 		</actionmap>
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="next" flags="mr" />
@@ -88,7 +106,15 @@
 			<action name="showBouquetSelector" key="bouqup" flags="m" />
 			<action name="showBouquetSelector" key="bouqdown" flags="m" />
 			<action name="showEPGSelector" key="info" flags="m" />
-			<action name="showAllServices" key="tv" flags="m" />
+
+			<action name="showMenu" key="red" flags="m" />
+			<action name="showFavourite" key="blue" flags="m" />
+			<action name="addService" key="yellow" flags="m" />
+			<action name="addServiceToFavourite" key="green" flags="m" />
+			
+			<action name="modeTV" key="tv" flags="m" />
+			<action name="modeRadio" key="radio" flags="m" />
+			<action name="modeFile" key="text" flags="m" />
 		</actionmap>
 		<actionmap name="numbers">
 			<action name="0" key="0" flags="mr" />

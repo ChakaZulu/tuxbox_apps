@@ -26,7 +26,7 @@
 	of luck. shouldn't happen.
 */
 
-eMP3Decoder::eMP3Decoder(const char *filename): input(32*1024), output(64*1024), messages(this)
+eMP3Decoder::eMP3Decoder(const char *filename, eServiceHandlerMP3 *handler): handler(handler), input(8*1024), output(256*1024), messages(this)
 {
 	state=stateInit;
 
@@ -42,6 +42,11 @@ eMP3Decoder::eMP3Decoder(const char *filename): input(32*1024), output(64*1024),
 		state=stateError;
 	}
 	
+	filelength=::lseek(sourcefd, 0, SEEK_END);
+	length=-1;
+	avgbr=-1;
+	lseek(sourcefd, 0, SEEK_SET);
+
 	pcmsettings.reconfigure=1;
 	
 	dspfd=::open("/dev/sound/dsp", O_WRONLY|O_NONBLOCK);
@@ -59,6 +64,9 @@ eMP3Decoder::eMP3Decoder(const char *filename): input(32*1024), output(64*1024),
 	CONNECT(messages.recv_msg, eMP3Decoder::gotMessage);
 	
 	maxOutputBufferSize=256*1024;
+	
+	speed=1;
+	framecnt=0;
 
 	if (state != stateError)
 		run();
@@ -80,6 +88,7 @@ void eMP3Decoder::outputReady(int what)
 		pcmsettings.channels=synth.pcm.channels;
 		pcmsettings.reconfigure=0;
 		pcmsettings.format=AFMT_S16_BE;
+		outputbr=synth.pcm.samplerate*synth.pcm.channels*16;
 		::ioctl(dspfd, SNDCTL_DSP_SPEED, &pcmsettings.samplerate);
 		::ioctl(dspfd, SNDCTL_DSP_CHANNELS, &pcmsettings.channels);
 		::ioctl(dspfd, SNDCTL_DSP_SETFMT, &pcmsettings.format);
@@ -98,8 +107,16 @@ void eMP3Decoder::outputReady(int what)
 		if (state!=stateFileEnd)
 			state=stateBuffering;
 		else
+		{
 			eDebug("ok, everything played..");
+			handler->messages.send(eServiceHandlerMP3::eMP3DecoderMessage(eServiceHandlerMP3::eMP3DecoderMessage::done));
+		}
 	}
+}
+
+void eMP3Decoder::dspSync()
+{
+	::ioctl(dspfd, SNDCTL_DSP_RESET);
 }
 
 static inline unsigned short MadFixedToUshort(mad_fixed_t Fixed)
@@ -171,8 +188,29 @@ void eMP3Decoder::decodeMore(int what)
 					status=2;
 					break;
 				}
-		
+				
 		mad_timer_add(&timer, frame.header.duration);
+		{
+			eLocker l(poslock);
+			if (avgbr==-1)
+				avgbr=frame.header.bitrate;
+			else
+				avgbr=(avgbr*7+frame.header.bitrate)>>3;
+			if (avgbr)
+			{
+				length=filelength/(avgbr>>3);
+				position=::lseek(sourcefd, 0, SEEK_CUR);
+				if (position > 0 )
+					position/=(avgbr>>3);
+				else
+					position=-1;
+			} else
+				length=position=-1;
+		}
+
+		if (++framecnt < speed)
+			continue;
+		framecnt=0;
 
 		mad_synth_frame(&synth, &frame);
 		unsigned short outbuffer[OUTPUT_BUFFER_SIZE];
@@ -228,7 +266,7 @@ void eMP3Decoder::decodeMore(int what)
 		inputsn->stop();
 	}
 	
-	if ((state == statePlaying) && (output.size() > maxOutputBufferSize))
+	if ((state == statePlaying) && (output.size() >= maxOutputBufferSize))
 	{
 		state=stateBufferFull;
 		inputsn->stop();
@@ -265,11 +303,104 @@ void eMP3Decoder::gotMessage(const eMP3DecoderMessage &message)
 		eDebug("got quit message..");
 		quit();
 		break;
+	case eMP3DecoderMessage::setSpeed:
+		speed=message.parm;
+		if (message.parm == 0)
+		{
+			if ((state==stateBuffering) || (state==stateBufferFull) || (statePlaying))
+			{
+				inputsn->stop();
+				outputsn->stop();
+				state=statePause;
+				dspSync();
+			}
+		} else if (state == statePause)
+		{
+			inputsn->start();
+			outputsn->start();
+			speed=message.parm;
+			state=stateBuffering;
+		} else
+		{
+			output.clear();
+			dspSync();
+		}
+		break;
+	case eMP3DecoderMessage::seek:
+	case eMP3DecoderMessage::seekreal:
+	case eMP3DecoderMessage::skip:
+	{
+		int offset=0;
+		eDebug("cmd");
+		
+		if (message.type != eMP3DecoderMessage::seekreal)
+		{
+			int br=avgbr;
+			if (br <= 0)
+				br=192000;
+			br/=8;
+		
+			br*=message.parm;
+			offset=input.size();
+			input.clear();
+			offset+=br/1000;
+			eDebug("skipping %d bytes (br: %d)..", offset, br);
+			if (message.type == eMP3DecoderMessage::skip)
+				offset+=::lseek(sourcefd, 0, SEEK_CUR);
+			if (offset<0)
+				offset=0;
+		} else
+		{
+			input.clear();
+			offset=message.parm;
+		}
+
+		eDebug("seeking to %d", offset);
+		::lseek(sourcefd, offset, SEEK_SET);
+		dspSync();
+		output.clear();
+		if (stream.buffer)
+			mad_stream_sync(&stream);
+		
+		if (state == statePlaying)
+		{
+			inputsn->start();
+			state=stateBuffering;
+		}
+		
+		break;
+	}
+	}
+}
+
+int eMP3Decoder::getPosition(int real)
+{
+	eLocker l(poslock);
+	if (real)
+		return ::lseek(sourcefd, 0, SEEK_CUR)-input.size();
+	return position;
+}
+
+int eMP3Decoder::getLength(int real)
+{
+	eLocker l(poslock);
+	if (real)
+		return filelength;
+	return length+output.size()/(outputbr/8);
+}
+
+void eServiceHandlerMP3::gotMessage(const eMP3DecoderMessage &message)
+{
+	if (message.type == eMP3DecoderMessage::done)
+	{
+		state=stateStopped;
+		serviceEvent(eServiceEvent(eServiceEvent::evtEnd));
 	}
 }
 
 eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 {
+#if 0
 	id3_file *file;
 	
 	file=::id3_file_open(service.path.c_str(), ID3_FILE_MODE_READONLY);
@@ -360,25 +491,72 @@ eService *eServiceHandlerMP3::createService(const eServiceReference &service)
 	id3_file_close(file);
 
 	return new eService(eServiceID(0), description.c_str());
+#else
+	eString l=service.path.mid(service.path.rfind('/')+1);
+	return new eService(eServiceID(0), l.c_str());
+#endif
 }
 
 int eServiceHandlerMP3::play(const eServiceReference &service)
 {
 	state=statePlaying;
 	
-	decoder=new eMP3Decoder(service.path.c_str());
+	decoder=new eMP3Decoder(service.path.c_str(), this);
 	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::start));
 	
 	serviceEvent(eServiceEvent(eServiceEvent::evtStart));
+	serviceEvent(eServiceEvent(eServiceEvent::evtFlagsChanged) );
 
 	return 0;
 }
 
-eServiceHandlerMP3::eServiceHandlerMP3(): eServiceHandler(0x1000)
+int eServiceHandlerMP3::serviceCommand(const eServiceCommand &cmd)
+{
+	if (!decoder)
+	{
+		eDebug("no decoder");
+		return 0;
+	}
+	switch (cmd.type)
+	{
+	case eServiceCommand::cmdSetSpeed:
+		if ((state == statePlaying) || (state == statePause) || (state == stateSkipping))
+		{
+			if (cmd.parm < 0)
+				return -1;
+			decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::setSpeed, cmd.parm));
+			if (cmd.parm == 0)
+				state=statePause;
+			else if (cmd.parm == 1)
+				state=statePlaying;
+			else
+				state=stateSkipping;
+		} else
+			return -2;
+		break;
+	case eServiceCommand::cmdSkip:
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::skip, cmd.parm));
+		break;
+	case eServiceCommand::cmdSeekAbsolute:
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::seek, cmd.parm));
+		break;
+	case eServiceCommand::cmdSeekReal:
+		eDebug("seekreal");
+		decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::seekreal, cmd.parm));
+		break;
+	default:
+		return -1;
+	}
+	return 0;
+}
+
+eServiceHandlerMP3::eServiceHandlerMP3(): eServiceHandler(0x1000), messages(eApp)
 {
 	if (eServiceInterface::getInstance()->registerHandler(id, this)<0)
 		eFatal("couldn't register serviceHandler %d", id);
 	CONNECT(eServiceFileHandler::getInstance()->fileHandlers, eServiceHandlerMP3::addFile);
+	CONNECT(messages.recv_msg, eServiceHandlerMP3::gotMessage);
+	decoder=0;
 }
 
 eServiceHandlerMP3::~eServiceHandlerMP3()
@@ -392,14 +570,19 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 		eServiceFileHandler::getInstance()->addReference(node, eServiceReference(id, 0, filename));
 }
 
-eService *eServiceHandlerMP3::lookupService(const eServiceReference &service)
+eService *eServiceHandlerMP3::addRef(const eServiceReference &service)
 {
-	return eServiceFileHandler::getInstance()->lookupService(service);
+	return eServiceFileHandler::getInstance()->addRef(service);
+}
+
+void eServiceHandlerMP3::removeRef(const eServiceReference &service)
+{
+	return eServiceFileHandler::getInstance()->removeRef(service);
 }
 
 int eServiceHandlerMP3::getFlags()
 {
-	return 0;
+	return flagIsSeekable|flagSupportPosition;
 }
 
 int eServiceHandlerMP3::getState()
@@ -412,25 +595,32 @@ int eServiceHandlerMP3::getErrorInfo()
 	return 0;
 }
 
-#if 0
-void eServiceHandlerMP3::internalstop()
-{
-	if (state == statePlaying)
-	{
-		eDebug("MP3: stop");
-//		serviceEvent(eServiceEvent(eServiceEvent::evtEnd));
-	
-		state=stateStopped;
-	}
-}
-#endif
-
 int eServiceHandlerMP3::stop()
 {
 	decoder->messages.send(eMP3Decoder::eMP3DecoderMessage(eMP3Decoder::eMP3DecoderMessage::exit));
 	delete decoder;
+	decoder=0;
 	serviceEvent(eServiceEvent(eServiceEvent::evtStop));
 	return 0;
+}
+
+int eServiceHandlerMP3::getPosition(int what)
+{
+	if (!decoder)
+		return -1;
+	switch (what)
+	{
+	case posQueryLength:
+		return decoder->getLength(0);
+	case posQueryCurrent:
+		return decoder->getPosition(0);
+	case posQueryRealLength:
+		return decoder->getLength(1);
+	case posQueryRealCurrent:
+		return decoder->getPosition(1);
+	default:
+		return -1;
+	}
 }
 
 eAutoInitP0<eServiceHandlerMP3> i_eServiceHandlerMP3(7, "eServiceHandlerMP3");

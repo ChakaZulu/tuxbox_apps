@@ -65,11 +65,11 @@ void eWidget::takeFocus()
 	{
 		oldTLfocus=eZap::getInstance()->focus;
 		eZap::getInstance()->focus=this;
-		if (oldTLfocus)
+/*		if (oldTLfocus)
 		{
 			eDebug("focus problem");
 			eFatal("da hat %s den focus und %s will ihn haben", oldTLfocus->getText().c_str(), getText().c_str());
-		}
+		} */
 		addActionMap(&i_focusActions->map);
 	}
 	have_focus++;

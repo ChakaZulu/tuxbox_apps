@@ -20,6 +20,11 @@ int eServiceHandler::play(const eServiceReference &service)
 	return -1;
 }
 
+int eServiceHandler::serviceCommand(const eServiceCommand &cmd)
+{
+	return -1;
+}
+
 PMT *eServiceHandler::getPMT()
 {
 	return 0;
@@ -65,6 +70,11 @@ int eServiceHandler::stop()
 	return 0;
 }
 
+int eServiceHandler::getPosition(int)
+{
+	return -1;
+}
+
 void eServiceHandler::enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback)
 {
 	return;
@@ -73,6 +83,25 @@ void eServiceHandler::enterDirectory(const eServiceReference &dir, Signal1<void,
 void eServiceHandler::leaveDirectory(const eServiceReference &dir)
 {
 	return;
+}
+
+int eServiceHandler::deleteService(const eServiceReference &dir, const eServiceReference &ref)
+{
+	return -1;
+}
+
+int eServiceHandler::moveService(const eServiceReference &dir, const eServiceReference &ref, int dr)
+{
+	return -1;
+}
+
+eService *eServiceHandler::addRef(const eServiceReference &service)
+{
+	return 0;
+}
+
+void eServiceHandler::removeRef(const eServiceReference &service)
+{
 }
 
 eServiceInterface *eServiceInterface::instance;
@@ -145,15 +174,6 @@ eServiceHandler *eServiceInterface::getServiceHandler(int id)
 	return i->second;
 }
 
-eService *eServiceInterface::lookupService(const eServiceReference &service)
-{
-	eServiceHandler *handler=getServiceHandler(service.type);
-	if (handler)
-		return handler->lookupService(service);
-	else
-		return 0;
-}
-
 int eServiceInterface::play(const eServiceReference &s)
 {
 	if (switchServiceHandler(s.type))
@@ -162,6 +182,7 @@ int eServiceInterface::play(const eServiceReference &s)
 		return -1;
 	}
 	service=s;
+	addRef(s);
 	return currentServiceHandler->play(s);
 }
 
@@ -169,9 +190,11 @@ int eServiceInterface::stop()
 {
 	if (!currentServiceHandler)
 		return -1;
+	removeRef(service);
 	int res=currentServiceHandler->stop();
 	conn.disconnect();
 	currentServiceHandler=0;
+	service=eServiceReference();
 	return res;
 }
 
@@ -185,6 +208,40 @@ void eServiceInterface::leaveDirectory(const eServiceReference &dir)
 {
 	for (std::map<int,eServiceHandler*>::iterator i(handlers.begin()); i != handlers.end(); ++i)
 		i->second->leaveDirectory(dir);
+}
+
+eService *eServiceInterface::addRef(const eServiceReference &service)
+{
+	eServiceHandler *handler=getServiceHandler(service.type);
+	if (handler)
+		return handler->addRef(service);
+	else
+		return 0;
+}
+
+int eServiceInterface::deleteService(const eServiceReference &dir, const eServiceReference &ref)
+{
+	eServiceHandler *handler=getServiceHandler(dir.type);
+	if (handler)
+		return handler->deleteService(dir, ref);
+	else
+		return -1;
+}
+
+int eServiceInterface::moveService(const eServiceReference &dir, const eServiceReference &ref, int dr)
+{
+	eServiceHandler *handler=getServiceHandler(service.type);
+	if (handler)
+		return handler->moveService(dir, ref, dr);
+	else
+		return -1;
+}
+
+void eServiceInterface::removeRef(const eServiceReference &service)
+{
+	eServiceHandler *handler=getServiceHandler(service.type);
+	if (handler)
+		return handler->removeRef(service);
 }
 
 eAutoInitP0<eServiceInterface> i_eServiceInteface(5, "eServiceInterface");

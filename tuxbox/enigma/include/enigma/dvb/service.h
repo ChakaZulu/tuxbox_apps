@@ -33,6 +33,27 @@ public:
 	int type;
 };
 
+class eServiceCommand
+{
+public:
+	eServiceCommand(int type): type(type) { }
+	eServiceCommand(int type, int parm): type(type), parm(parm) { }
+	enum
+	{
+		cmdRecordOpen,
+		cmdRecordStart,
+		cmdRecordStop,
+		cmdRecordClose,
+
+		cmdSetSpeed,		// parm : ratio.. 1 normal, 0 pause, >1 fast forward, <0 reverse (if supported)
+		cmdSkip,				// parm : in ms (~)
+		cmdSeekAbsolute,	// parm : percentage ~
+		cmdSeekReal			// parm : service specific, as given by queryRealPosition
+	};
+	int type;
+	int parm;
+};
+
 class PMTEntry;
 class eService;
 class EIT;
@@ -50,10 +71,12 @@ public:
 		flagIsScrambled=1, 
 		flagHaveSubservices=2, 
 		flagHaveMultipleAudioStreams=4,
+		flagIsSeekable=8,
+		flagSupportPosition=16
 	};
 	enum
 	{
-		statePlaying, stateError, stateScrambled, stateStopped
+		statePlaying, stateError, stateScrambled, stateStopped, statePause, stateSkipping
 	};
 	eServiceHandler(int id);
 	int getID()
@@ -61,13 +84,12 @@ public:
 		return id;
 	}
 	virtual ~eServiceHandler();
-	virtual eService *lookupService(const eServiceReference &service)=0;
-
 	virtual eService *createService(const eServiceReference &node);
 
 	virtual int play(const eServiceReference &service);
 
 		// current service
+	virtual int serviceCommand(const eServiceCommand &cmd);
 
 		// for DVB audio channels:
 	virtual PMT *getPMT();
@@ -88,12 +110,27 @@ public:
 	virtual int getErrorInfo();
 	
 	virtual int stop();
+	
+		// position query
+	enum {
+		posQueryLength,	// query length (in seconds)
+		posQueryCurrent, // query current position
+		posQueryRealLength, // service specific length, e.g. file length in bytes
+		posQueryRealCurrent // service specific current position, e.g. file position in bytes
+	};
+	virtual int getPosition(int what);	// -1 means: not available
 
 	Signal1<void, const eServiceEvent &> serviceEvent;
 
 		// service list functions
 	virtual void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
 	virtual void leaveDirectory(const eServiceReference &dir);
+
+	virtual int deleteService(const eServiceReference &dir, const eServiceReference &ref);
+	virtual int moveService(const eServiceReference &dir, const eServiceReference &ref, int dr);
+	
+	virtual eService *addRef(const eServiceReference &service);
+	virtual void removeRef(const eServiceReference &service);
 };
 
 class eService;
@@ -117,12 +154,9 @@ public:
 	int unregisterHandler(int id);
 	eServiceHandler *getServiceHandler(int id);
 
-	eService *lookupService(const eServiceReference &service);
-
 	int play(const eServiceReference &service);
 	
 		// service related functions
-	
 	Signal1<void,const eServiceEvent &> serviceEvent;
 	
 	eServiceHandler *getService()
@@ -137,6 +171,15 @@ public:
 		// service list functions
 	void enterDirectory(const eServiceReference &dir, Signal1<void,const eServiceReference&> &callback);
 	void leaveDirectory(const eServiceReference &dir);
+	
+		// stuff for modifiying ...
+
+	int deleteService(const eServiceReference &dir, const eServiceReference &ref);
+	enum { dirUp, dirDown };
+	int moveService(const eServiceReference &dir, const eServiceReference &ref, int dr);
+
+	eService *addRef(const eServiceReference &service);
+	void removeRef(const eServiceReference &service);
 };
 
 #endif

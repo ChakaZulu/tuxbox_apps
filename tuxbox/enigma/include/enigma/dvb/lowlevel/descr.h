@@ -176,6 +176,21 @@ struct descr_component_struct {
 	u_char	lang_code3		: 8;
 };
 
+struct descr_content_entry_struct
+{
+#if BYTE_ORDER == BIG_ENDIAN
+	u_char	content_nibble_level_1	: 4;
+	u_char	content_nibble_level_2	: 4;
+	u_char	user_nibble_1		: 4;
+	u_char	user_nibble_2		: 4;
+#else
+	u_char	content_nibble_level_2	: 4;
+	u_char	content_nibble_level_1	: 4;
+	u_char	user_nibble_2		: 4;
+	u_char	user_nibble_1		: 4;
+#endif
+};
+
 struct descr_lesradios_struct
 {
 	u_char descriptor_tag : 8;

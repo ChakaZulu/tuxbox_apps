@@ -524,10 +524,26 @@ void eTextPara::blit(gPixmapDC &dc, const ePoint &offset, const gRGB &background
 		__u8 *s=glyph_bitmap->buffer;
 		register int sx=glyph_bitmap->width;
 		int sy=glyph_bitmap->height;
-		if ((sy+ry) > clip.bottom())
-			sy=clip.bottom()-ry+1;
-		if ((sx+rx) > clip.right())
-			sx=clip.right()-rx+1;
+		if ((sy+ry) >= clip.bottom())
+			sy=clip.bottom()-ry;
+		if ((sx+rx) >= clip.right())
+			sx=clip.right()-rx;
+		if (rx < clip.left())
+		{
+			int diff=clip.left()-ry;
+			s+=diff;
+			sx-=diff;
+			rx+=diff;
+			d+=diff;
+		}
+		if (ry < clip.top())
+		{
+			int diff=clip.top()-ry;
+			s+=diff*glyph_bitmap->pitch;
+			sy-=diff;
+			ry+=diff;
+			d+=diff*buffer_stride;
+		}
 		if (sx>0)
 			for (int ay=0; ay<sy; ay++)
 			{

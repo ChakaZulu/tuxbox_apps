@@ -101,12 +101,24 @@ void eAVSwitch::reloadSettings()
 
 int eAVSwitch::setVolume(int vol)
 {
+	eString s = eDVB::getInstance()->getInfo("mID");
+
 	vol=63-vol/(65536/64);
 	if (vol<0)
 		vol=0;
 	if (vol>63)
 		vol=63;
 
+	if (s == "5")  // Dreambox
+	{
+		audioMixer_t mix;
+		mix.volume_left=vol;
+		mix.volume_right=vol;
+	
+		if(ioctl(fdost, AUDIO_SET_MIXER, &mix))
+			perror("AUDIO_SET_MIXER");
+	}
+	
 	return ioctl(fd, AVSIOSVOL, &vol);
 }
 

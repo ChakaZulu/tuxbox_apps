@@ -62,6 +62,7 @@ class tsAutomatic: public existNetworks, public eWidget
 {
 	eButton *b_start, *b_abort;
 	eListBox<eListBoxEntryText> *l_network;
+	eCheckbox *c_eraseall;
 	eLabel *l_status;
 	std::list<eTransponder>::iterator current_tp, last_tp;
 	int automatic;

@@ -289,9 +289,14 @@ ePtrList<T>::ePtrList()
 /////////////////// Copy Constructor /////////////////////////////
 template <class T>
 ePtrList<T>::ePtrList(const ePtrList& e)		
-	:std::list<T*>(e), cur(e.cur), autoDelete(false)
+	:std::list<T*>(e), cur(e.cur), autoDelete( false )
 {		
-
+	if ( e.autoDelete )	
+		if ( e.size() )
+			eDebug("Warning !! We make a Copy of a non empty ePtrList, with autoDelete enabled"
+						 "We disable autoDelete in the new ePtrList !!");
+		else
+			autoDelete=true;
 }
 
 /////////////////// ePtrList Destructor /////////////////////////////

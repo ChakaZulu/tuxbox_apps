@@ -40,9 +40,6 @@ public:
 class eDVBServiceController: public eDVBController, public Object
 {
 public:
-		/* currently tuned in */
-	eTransponder *currentTransponder;
-	int currentTransponderState;
 		/* current service */
 	eServiceReferenceDVB service;	// meta-service
 	eTransponder *transponder;

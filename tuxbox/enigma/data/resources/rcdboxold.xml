@@ -42,8 +42,7 @@
 			<action name="left" key="left" flags="mr" />
 			<action name="right" key="right" flags="mr" />
 			<action name="ok" key="ok" flags="m" />
-			<action name="cancel" key="?" flags="m" />
-			<action name="cancel" key="d-box" flags="m" />
+			<action name="cancel" key="home" flags="m" />
 		</actionmap>
 
 		<actionmap name="focus">
@@ -85,9 +84,8 @@
 		<actionmap name="serviceSelector">
 			<action name="nextBouquet" key="+" flags="mr" />
 			<action name="prevBouquet" key="-" flags="mr" />
-			<action name="showBouquetSelector" key="mute" flags="m" />
+			<action name="showBouquetSelector" key="d-box" flags="m" />
 			<action name="showEPGSelector" key="red" flags="m" />
-			<action name="showAllServices" key="home" flags="m" />
 		</actionmap>
 
 		<actionmap name="numbers">

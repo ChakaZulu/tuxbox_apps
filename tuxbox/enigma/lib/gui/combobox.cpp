@@ -53,18 +53,24 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 				return eButton::eventHandler( event );
 		break;
 
+		case eWidgetEvent::changedPosition:
 		case eWidgetEvent::changedSize:
 		{
+			eListBoxEntryText* cur = listbox.getCurrent();
+
 			if (deco)
-			{
-				button.move( ePoint( crect.right()-25, crect.top() ) );
 				button.resize( eSize(25, crect.height()) );
-				button.pixmap_position = ePoint( (button.getSize().width() - pm->x) / 2, (button.getSize().height() - pm->y) / 2 );
-			}
+			listbox.resize( eSize( getSize().width(), eListBoxEntryText::getEntryHeight()*entries+listbox.getDeco().borderBottom+listbox.getDeco().borderTop ) );
+			button.move( ePoint( crect.right()-25, crect.top() ) );		
+			button.pixmap_position = ePoint( (button.getSize().width() - pm->x) / 2, (button.getSize().height() - pm->y) / 2 );
 			ePoint pt = getAbsolutePosition();
-			eRect rc( ePoint( pt.x(), pt.y()+getSize().height() ), eSize( getSize().width(), eListBoxEntryText::getEntryHeight()*entries+listbox.getDeco().borderTop+listbox.getDeco().borderBottom ) );
-			listbox.move( ePoint( rc.left(), rc.top() ) );
-			listbox.resize( rc.size() );
+			if ( pt.y() + getSize().height() + listbox.getSize().height() > 520)
+				listbox.move( ePoint( pt.x(), pt.y()-listbox.getSize().height() ) );
+			else
+				listbox.move( ePoint( pt.x(), pt.y()+getSize().height() ) );
+
+      if (cur)
+				listbox.setCurrent(cur);
 		}
 		default:
 			return eButton::eventHandler( event );	
