@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-	$Id: timerdclient.h,v 1.30 2002/10/23 19:03:19 Zwen Exp $
+	$Id: timerdclient.h,v 1.31 2002/10/29 21:13:52 Zwen Exp $
 
 	License: GPL
 
@@ -117,6 +117,7 @@ class CTimerdClient:private CBasicClient
 			CTimerd::EventInfo eventInfo;
 			eventInfo.channel_id = channel_id;
 			eventInfo.epgID = epgID;
+			eventInfo.apid = 0;
 			return addTimerEvent(CTimerd::TIMER_ZAPTO, &eventInfo, announcetime, alarmtime, stoptime);
 		};
 
