@@ -1,7 +1,10 @@
 /*
-  $Id: libucodes.c,v 1.17 2002/08/30 09:03:08 obi Exp $
+  $Id: libucodes.c,v 1.18 2002/09/03 18:05:11 obi Exp $
   
   $Log: libucodes.c,v $
+  Revision 1.18  2002/09/03 18:05:11  obi
+  two new ucodes
+
   Revision 1.17  2002/08/30 09:03:08  obi
   added some missing microcodes
 
@@ -44,7 +47,6 @@ struct Sucode
 	char name[20];
 };
 
-
 static struct Sucode ucodes[] = 
 {
 	{"965d834c7bb743df6841f4fda5b4e790","avia500v083"},
@@ -54,9 +56,11 @@ static struct Sucode ucodes[] =
 	{"da492146ba7e177883feadaa0cf89aa5","avia600vb017"},
 	{"c31dc570cf941afb6fc4813f561aa378","avia600vb018"},
 	{"6a748fb28000738cafeb9e27443ac623","avia600vb022"},
+	{"f8577c6a7056590ca5847520d81339fc","avia600vb028"},
 	{"53c5bc4081dfadab9935ad256e4d6239","ucode_0000"},
 	{"66627c5ddf269a1f3a9f9f3c22fbd41b","ucode_0013"},
 	{"6582a89e7e13e410c366e47b4ef9d38e","ucode_0014"},
+	{"e8fb834466d34cb75bb0e64ef08b5544","ucode_001A"},
 	{"d4c12df0d4ce8ba9eb858509d832df65","ucode_B107"},
 	{"4e080873126f156a0b489af176520620","ucode_B121"},
 	{"ff6fafbd2aa1f29afe232a72fac57870","cam_01_01_001D"},
