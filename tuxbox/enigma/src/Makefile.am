@@ -12,22 +12,32 @@ enigma_SOURCES = \
 	setup_rc.cpp channelinfo.cpp setup_harddisk.cpp enigma_ci.cpp upgrade.cpp satfind.cpp \
 	rotorconfig.cpp setup_rfmod.cpp
 
+enigma_LDADD_WHOLE = \
+	$(top_builddir)/lib/driver/libenigma_driver.a \
+	$(top_builddir)/lib/base/libenigma_base.a \
+	$(top_builddir)/lib/codecs/libenigma_codecs.a \
+	$(top_builddir)/lib/dvb/libenigma_dvb.a \
+	$(top_builddir)/lib/dvb/lowlevel/libenigma_dvb_lowlevel.a \
+	$(top_builddir)/lib/gui/libenigma_gui.a \
+	$(top_builddir)/lib/gdi/libenigma_gdi.a \
+	$(top_builddir)/lib/socket/libenigma_socket.a \
+	$(top_builddir)/lib/system/libenigma_system.a
+
 enigma_LDADD = \
-	$(top_builddir)/lib/driver/libenigma_driver.la \
-	$(top_builddir)/lib/base/libenigma_base.la \
-	$(top_builddir)/lib/codecs/libenigma_codecs.la \
-	$(top_builddir)/lib/dvb/libenigma_dvb.la \
-	$(top_builddir)/lib/dvb/lowlevel/libenigma_dvb_lowlevel.la \
-	$(top_builddir)/lib/gui/libenigma_gui.la \
-	$(top_builddir)/lib/gdi/libenigma_gdi.la \
-	$(top_builddir)/lib/socket/libenigma_socket.la \
-	$(top_builddir)/lib/system/libenigma_system.la \
+	@FREETYPE_LIBS@ \
 	@ID3TAG_LIBS@ \
 	@MAD_LIBS@ \
 	@MD5SUM_LIBS@ \
+	@PNG_LIBS@ \
 	@SIGC_LIBS@ \
 	@TUXBOX_LIBS@ \
 	@XMLTREE_LIBS@ \
 	-ldl -lpthread -lcrypt -lresolv
+
 #\
 #	/dbox2/cdkroot/lib/libmpatrolmt.a -lpthread -lbfd -liberty
+
+enigma$(EXEEXT): $(enigma_OBJECTS) $(enigma_DEPENDENCIES) $(enigma_LDADD_WHOLE)
+	@rm -f enigma$(EXEEXT)
+	$(CXXLINK) $(enigma_LDFLAGS) $(enigma_OBJECTS) -Wl,--whole-archive $(enigma_LDADD_WHOLE) -Wl,--no-whole-archive $(enigma_LDADD) $(LIBS)
+
