@@ -23,6 +23,7 @@
 */
 
 #include "lcdd.h"
+#include "newclock.h"
 
 #include <config.h>
 
@@ -209,7 +210,9 @@ void CLCDD::sig_catch(int)
 int CLCDD::main(int argc, char **argv)
 {
 	debugoutput = true;
-	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.50 2002/07/07 17:44:07 dirch Exp $\n\n");
+	printf("Network LCD-Driver $Id: lcdd.cpp,v 1.51 2002/07/10 16:29:08 LazyT Exp $\n\n");
+
+	InitNewClock();
 
 	loadConfig();
 
