@@ -282,7 +282,7 @@ void CLCD::showTime()
 void CLCD::showVolume(char vol)
 {
 	volume = vol;
-	if ((mode==MODE_TVRADIO) || (mode==MODE_SCART))
+	if ((mode==MODE_TVRADIO) || (mode==MODE_SCART) || (mode==MODE_MP3))
 	{
 		display.draw_fill_rect (11,53,73,61, CLCDDisplay::PIXEL_OFF);
 		//strichlin
@@ -364,7 +364,6 @@ void CLCD::setMode(MODES m, std::string title)
 			mode = m;
 			showclock = true;
 			display.draw_fill_rect (0,14,120,48, CLCDDisplay::PIXEL_OFF);
-// 		fonts.menu->RenderString(94,28, 40, "MP3", CLCDDisplay::PIXEL_ON, 0);
 			int x=106,y=14;
 			display.draw_line(x  ,y  ,x  ,y+6,CLCDDisplay::PIXEL_ON);
 			display.draw_line(x  ,y  ,x+2,y+2,CLCDDisplay::PIXEL_ON);
@@ -382,7 +381,7 @@ void CLCD::setMode(MODES m, std::string title)
 			display.draw_line(x+11,y+6,x+13,y+6,CLCDDisplay::PIXEL_ON);
 
 			showMP3Play(false);
-			//showVolume(volume);
+			showVolume(volume);
 			showTime();
 			display.update();
 		   break;

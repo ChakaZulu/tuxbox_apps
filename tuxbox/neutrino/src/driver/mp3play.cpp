@@ -515,7 +515,8 @@ void  CMP3Player::ResetDSP(FILE *soundfd)
 void CMP3Player::stop()
 {
 	do_loop = false;
-	pthread_join(thrPlay,NULL);
+//	pthread_join(thrPlay,NULL);
+	pthread_cancel(thrPlay);
 }
 
 CMP3Player* CMP3Player::getInstance()
