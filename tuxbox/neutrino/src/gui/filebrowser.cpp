@@ -86,32 +86,28 @@ size_t CurlWriteToString(void *ptr, size_t size, size_t nmemb, void *data)
 	return size*nmemb;
 }
 
-const struct file_type_list_t
+/* ATTENTION: the array file_extension_list MUST BE SORTED ASCENDING (cf. sort, man bsearch) - otherwise bsearch will not work correctly! */
+const char * const file_extension_list[] =
 {
-	const char * const extension;
-	CFile::FileType    type;
-} file_type_list[] =
+	"bmp"                , "cdr"                , "crw"                , "gif"                , "imu"                ,
+	"jpeg"               , "jpg"                , "m2a"                , "m3u"                , "mp2"                ,
+	"mp3"                , "mpa"                , "ogg"                , "png"                , "sh"                 ,
+	"txt"                , "url"                , "wav"                ,
+};
+/* ATTENTION: the array file_extension_list MUST BE SORTED ASCENDING (cf. sort, man bsearch) - otherwise bsearch will not work correctly! */
+
+const CFile::FileType file_type_list[] =
 {
-	{ "ogg" , CFile::FILE_OGG       },
-	{ "mp3" , CFile::FILE_MP3       },
-	{ "m2a" , CFile::FILE_MP3       },
-	{ "mpa" , CFile::FILE_MP3       },
-	{ "mp2" , CFile::FILE_MP3       },
-	{ "m3u" , CFile::FILE_PLAYLIST  },
-	{ "url" , CFile::STREAM_MP3     },
-	{ "txt" , CFile::FILE_TEXT      },
-	{ "sh"  , CFile::FILE_TEXT      },
-	{ "png" , CFile::FILE_PICTURE   },
-	{ "jpg" , CFile::FILE_PICTURE   },
-	{ "jpeg", CFile::FILE_PICTURE   },
-	{ "bmp" , CFile::FILE_PICTURE   },
-	{ "gif" , CFile::FILE_PICTURE   },
-	{ "crw" , CFile::FILE_PICTURE   },
-	{ "imu" , CFile::STREAM_PICTURE },
-	{ "cdr" , CFile::FILE_CDR       },
-	{ "wav" , CFile::FILE_WAV       },
+	CFile::FILE_PICTURE  , CFile::FILE_CDR      , CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::STREAM_PICTURE,
+	CFile::FILE_PICTURE  , CFile::FILE_PICTURE  , CFile::FILE_MP3      , CFile::FILE_PLAYLIST , CFile::FILE_MP3      ,
+	CFile::FILE_MP3      , CFile::FILE_MP3      , CFile::FILE_OGG      , CFile::FILE_PICTURE  , CFile::FILE_TEXT     ,
+	CFile::FILE_TEXT     , CFile::STREAM_MP3    , CFile::FILE_WAV      ,
 };
 
+int mycasecmp(const void * a, const void * b)
+{
+	return strcasecmp(*(const char * *)a, *(const char * *)b);
+}
 
 //------------------------------------------------------------------------
 CFile::FileType CFile::getType(void) const
@@ -119,15 +115,16 @@ CFile::FileType CFile::getType(void) const
 	if(S_ISDIR(Mode))
 		return FILE_DIR;
 
-	int ext_pos = Name.rfind('.');
-	if (ext_pos > 0)
+	std::string::size_type ext_pos = Name.rfind('.');
+
+	if (ext_pos != std::string::npos)
 	{
-		std::string extension;
-		extension = Name.substr(ext_pos + 1, Name.length() - ext_pos);
+		const char * key = &(Name.c_str()[ext_pos + 1]);
+
+		void * result = ::bsearch(&key, file_extension_list, sizeof(file_extension_list) / sizeof(const char *), sizeof(const char *), mycasecmp);
 		
-		for (unsigned int i = 0; i < sizeof(file_type_list) / sizeof(struct file_type_list_t); i++)
-			if (strcasecmp(extension.c_str(), file_type_list[i].extension) == 0)
-				return file_type_list[i].type;
+		if (result != NULL)
+			return file_type_list[(const char * *)result - (const char * *)&file_extension_list];
 	}
 	return FILE_UNKNOWN;
 }
@@ -892,17 +889,22 @@ void CFileBrowser::paintItem(unsigned int pos)
 #endif                                   
 			switch(actual_file->getType())
 			{
-				case CFile::FILE_MP3 : 
-						fileicon = "mp3.raw";
-//						color = COL_MENUCONTENT;
-					break;
-				case CFile::FILE_DIR : 
-						fileicon = "folder.raw";
-					break;
-				case CFile::FILE_PICTURE:
-				case CFile::FILE_TEXT:
-				default:
-						fileicon = "file.raw";
+			case CFile::FILE_CDR:
+			case CFile::FILE_MP3:
+			case CFile::FILE_OGG:
+			case CFile::FILE_WAV:
+				fileicon = "mp3.raw";
+//				color = COL_MENUCONTENT;
+				break;
+
+			case CFile::FILE_DIR:  
+				fileicon = "folder.raw";
+				break;
+
+			case CFile::FILE_PICTURE:
+			case CFile::FILE_TEXT:
+			default:
+				fileicon = "file.raw";
 			}
 			frameBuffer->paintIcon(fileicon, x+5 , ypos + (fheight-16) / 2 );
 	
