@@ -23,7 +23,7 @@ void *gRC::thread_wrapper(void *ptr)
 
 gRC *gRC::instance=0;
 
-gRC::gRC(): queuelock(MAXSIZE), queue(2048)
+gRC::gRC(): queue(2048), queuelock(MAXSIZE)
 {
 	ASSERT(!instance);
 	instance=this;
@@ -36,7 +36,9 @@ gRC::gRC(): queuelock(MAXSIZE), queue(2048)
 gRC::~gRC()
 {
 	fbClass::getInstance()->lock();
+#ifndef DISABLE_LCD
 	eDBoxLCD::getInstance()->lock();
+#endif
 	instance=0;
 	gOpcode o;
 	o.dc=0;
