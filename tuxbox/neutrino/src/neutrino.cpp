@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.165 2002/02/23 19:39:04 field Exp $
+        $Id: neutrino.cpp,v 1.166 2002/02/23 20:19:51 field Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -32,8 +32,8 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   $Log: neutrino.cpp,v $
-  Revision 1.165  2002/02/23 19:39:04  field
-  Version auslesen angepasst
+  Revision 1.166  2002/02/23 20:19:51  field
+  version-filename angepasst
 
   Revision 1.164  2002/02/23 17:34:28  field
   Update gefixt, Fronttasten implementiert ;)
@@ -1362,7 +1362,7 @@ void CNeutrinoApp::InitServiceSettings(CMenuWidget &service)
 		updateSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
 		//get current flash-version
-		FILE* fd = fopen("/version", "r");
+		FILE* fd = fopen("/.version", "r");
 		strcpy(g_settings.softupdate_currentversion, "1.0.0");
 
 		if(!fd)
@@ -2494,7 +2494,7 @@ void CNeutrinoBouquetEditorEvents::onBouquetsChanged()
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.165 2002/02/23 19:39:04 field Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.166 2002/02/23 20:19:51 field Exp $\n\n");
 	tzset();
 	initGlobals();
 	neutrino = new CNeutrinoApp;
