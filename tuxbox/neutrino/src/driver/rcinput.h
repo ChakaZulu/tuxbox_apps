@@ -102,7 +102,12 @@ class CRCInput
 
 		int 		fd_pipe_high_priority[2];
 		int 		fd_pipe_low_priority[2];
-		int         	fd_rc;
+#ifdef OLD_RC_API
+#define NUMBER_OF_EVENT_DEVICES 1
+#else /* OLD_RC_API */
+#define NUMBER_OF_EVENT_DEVICES 2
+#endif /* OLD_RC_API */
+		int         	fd_rc[NUMBER_OF_EVENT_DEVICES];
 		int		fd_keyb;
 		int		fd_event;
 
@@ -112,7 +117,7 @@ class CRCInput
 		void close();
 		int translate(int code);
 
-		void calculateMaxFd();
+		void calculateMaxFd(void);
 
 		int checkTimers();
 
@@ -163,16 +168,15 @@ class CRCInput
 			RC_nokey	= 0xFFFFFFFE
 		};
 
-		//only used for plugins (games) !!
-		int getFileHandle()
+		inline int getFileHandle(void) /* used for plugins (i.e. games) only */
 		{
-			return fd_rc;
+			return fd_rc[0];
 		}
 		void stopInput();
 		void restartInput();
 
-		int repeat_block;
-		int repeat_block_generic;
+		unsigned long long repeat_block;
+		unsigned long long repeat_block_generic;
 		CRCInput();      //constructor - opens rc-device and starts needed threads
 		~CRCInput();     //destructor - closes rc-device
 

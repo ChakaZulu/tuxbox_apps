@@ -60,11 +60,11 @@
 #include <neutrino.h>
 
 #ifdef OLD_RC_API
-#define RC_EVENT_DEVICE "/dev/dbox/rc0"
+const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/dbox/rc0"};
 #define RC_standby_release (KEY_MAX + 1)
 typedef struct { __u16 code; } t_input_event;
 #else /* OLD_RC_API */
-#define RC_EVENT_DEVICE "/dev/input/event0"
+const char * const RC_EVENT_DEVICE[NUMBER_OF_EVENT_DEVICES] = {"/dev/input/event0", "/dev/input/event1"};
 typedef struct input_event t_input_event;
 #endif /* OLD_RC_API */
 
@@ -136,7 +136,7 @@ CRCInput::CRCInput()
 		exit( -1 );
 	}
 
-
+	fd_rc[0] = fd_rc[1] = -1;
 	open();
 }
 
@@ -144,17 +144,18 @@ void CRCInput::open()
 {
 	close();
 
-	//+++++++++++++++++++++++++++++++++++++++
-	fd_rc=::open(RC_EVENT_DEVICE, O_RDONLY);
-	if (fd_rc<0)
+	for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
 	{
-		perror(RC_EVENT_DEVICE);
-		//exit(-1);
-	}
+		if ((fd_rc[i] = ::open(RC_EVENT_DEVICE[i], O_RDONLY)) == -1)
+			perror(RC_EVENT_DEVICE[i]);
+		else
+		{
 #ifdef OLD_RC_API
-	ioctl(fd_rc, RC_IOCTL_BCODES, 1);
+			ioctl(fd_rc[i], RC_IOCTL_BCODES, 1);
 #endif /* OLD_RC_API */
-	fcntl(fd_rc, F_SETFL, O_NONBLOCK );
+			fcntl(fd_rc[i], F_SETFL, O_NONBLOCK);
+		}
+	}
 
 	//+++++++++++++++++++++++++++++++++++++++
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
@@ -198,10 +199,13 @@ void CRCInput::open()
 
 void CRCInput::close()
 {
-	if(fd_rc)
+	for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
 	{
-		::close(fd_rc);
-		fd_rc = 0;
+		if (fd_rc[i] != -1)
+		{
+			::close(fd_rc[i]);
+			fd_rc[i] = -1;
+		}
 	}
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
 	if (saved_orig_termio)
@@ -221,9 +225,12 @@ void CRCInput::close()
 
 void CRCInput::calculateMaxFd()
 {
-	fd_max = fd_rc;
-	if(fd_event > fd_max)
-		fd_max = fd_event;
+	fd_max = fd_event;
+
+	for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
+		if (fd_rc[i] > fd_max)
+			fd_max = fd_rc[i];
+	
 	if(fd_pipe_high_priority[0] > fd_max)
 		fd_max = fd_pipe_high_priority[0];
 	if(fd_pipe_low_priority[0] > fd_max)
@@ -476,7 +483,7 @@ void CRCInput::getMsg_ms(uint *msg, uint *data, int Timeout, bool bAllowRepeatLR
 
 void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool bAllowRepeatLR)
 {
-	static long long last_keypress=0;
+	static unsigned long long last_keypress = 0;
 	unsigned long long getKeyBegin;
 
 	static __u16 rc_last_key = 0;
@@ -529,8 +536,11 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
         //printf("targetTimeout= %d:%d\n", tvselect.tv_sec,tvselect.tv_usec);
 
 		FD_ZERO(&rfds);
-		if (fd_rc> 0)
-			FD_SET(fd_rc, &rfds);
+		for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
+		{
+			if (fd_rc[i] != -1)
+				FD_SET(fd_rc[i], &rfds);
+		}
 #ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
 		if (true)
 #else
@@ -541,7 +551,6 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 		FD_SET(fd_event, &rfds);
 		FD_SET(fd_pipe_high_priority[0], &rfds);
 		FD_SET(fd_pipe_low_priority[0], &rfds);
-		calculateMaxFd();
 
 		int status =  select(fd_max+1, &rfds, NULL, NULL, &tvselect);
 
@@ -1058,78 +1067,71 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			}
 		}
 
-#ifdef KEYBOARD_INSTEAD_OF_REMOTE_CONTROL
-		if (false)
-#else
-		if(FD_ISSET(fd_rc, &rfds))
-#endif /* KEYBOARD_INSTEAD_OF_REMOTE_CONTROL */
+		for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
 		{
-			status = read(fd_rc, &ev, sizeof(t_input_event));
-			if (status == sizeof(t_input_event))
+			if ((fd_rc[i] != -1) &&
+			    (FD_ISSET(fd_rc[i], &rfds)))
 			{
-#ifdef OLD_RC_API
-				if (ev.code != 0x5cfe)
-#else /* OLD_RC_API */
-				if (ev.value)
-#endif /* OLD_RC_API */
+				if (read(fd_rc[i], &ev, sizeof(t_input_event)) == sizeof(t_input_event))
 				{
-					//printf("got keydown native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str());
-					long long now_pressed;
-					bool keyok = true;
+					uint trkey = translate(ev.code);
 
+					if (trkey != RC_nokey)
+					{
 #ifdef OLD_RC_API
-					gettimeofday( &tv, NULL );
+						if (ev.code != 0x5cfe)
 #else /* OLD_RC_API */
-					tv = ev.time;
+						if (ev.value)
 #endif /* OLD_RC_API */
-					now_pressed = (long long) tv.tv_usec + (long long)((long long) tv.tv_sec * (long long) 1000000);
-					//printf("diff: %lld - %lld = %lld should: %d\n", now_pressed, last_keypress, now_pressed-last_keypress, repeat_block);
+						{
+							unsigned long long now_pressed;
+							bool keyok = true;
+
 #ifdef OLD_RC_API
-					//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
-					if((ev.code & 0xff00) == 0x5c00)
-					{
-						rc_last_key = 0;
-					}
+							gettimeofday( &tv, NULL );
+#else /* OLD_RC_API */
+							tv = ev.time;
+#endif /* OLD_RC_API */
+							now_pressed = (unsigned long long) tv.tv_usec + (unsigned long long)((unsigned long long) tv.tv_sec * (unsigned long long) 1000000);
+#ifdef OLD_RC_API
+							//alter nokia-rc-code - lastkey löschen weil sonst z.b. nicht zweimal nacheinander ok gedrückt werden kann
+							if ((ev.code & 0xff00) == 0x5c00)
+								rc_last_key = 0;
 #endif /* OLD_RC_API */
 
-					//test auf wiederholenden key (gedrückt gehalten)
-					if (ev.code == rc_last_key)
-					{
-						keyok = false;
-						//nur diese tasten sind wiederholbar
-						int trkey = translate(ev.code);
-						if  ((trkey==RC_up) || (trkey==RC_down) || (trkey==RC_plus) || (trkey==RC_minus) || (trkey==RC_standby) ||
-						     ((bAllowRepeatLR) && ((trkey==RC_left) || (trkey==RC_right))) )
-						{
-							if (rc_last_repeat_key != ev.code)
+							if (ev.code == rc_last_key)
 							{
-								if (abs(now_pressed-last_keypress)>repeat_block)
+								/* only allow selected keys to be repeated */
+								/* (why?)                                  */
+								if  ((trkey == RC_up     ) ||
+								     (trkey == RC_down   ) ||
+								     (trkey == RC_plus   ) ||
+								     (trkey == RC_minus  ) ||
+								     (trkey == RC_standby) ||
+								     ((bAllowRepeatLR) && ((trkey == RC_left ) ||
+											   (trkey == RC_right))))
 								{
-									keyok = true;
-									rc_last_repeat_key = ev.code;
+									if (rc_last_repeat_key != ev.code)
+									{
+										if (now_pressed > last_keypress + repeat_block)
+											rc_last_repeat_key = ev.code;
+										else
+											keyok = false;
+									}
 								}
+								else
+									keyok = false;
 							}
 							else
+								rc_last_repeat_key = 0;
+
+							rc_last_key = ev.code;
+
+							if (keyok &&
+							    (now_pressed > last_keypress + repeat_block_generic))
 							{
-									keyok = true;
-							}
-						}
-					}
-					else
-					{
-						rc_last_repeat_key = 0;
-					}
-					rc_last_key = ev.code;
-                    //printf("!!!!!!!  native key: %04x %04x\n", ev.code, ev.code&0x1f );
-					if(abs(now_pressed-last_keypress)>repeat_block_generic)
-					{
-						if(keyok)
-						{
-							last_keypress = now_pressed;
-							uint trkey= translate(ev.code);
-							//printf("--!!!!!  translated key: %04x\n", trkey );
-							if (trkey!=RC_nokey)
-							{
+								last_keypress = now_pressed;
+
 #ifdef OLD_RC_API
 								*msg  = (trkey == RC_standby_release) ? RC_standby : trkey;
 								*data = (trkey == RC_standby_release) ? 1 : 0; /* <- button released / pressed */
@@ -1140,25 +1142,24 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 								return;
 							}
 						}
-					}
-
-				}
 #ifndef OLD_RC_API
-				else
-				{	
-					// clear rc_last_key on keyup event
-					//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
-					rc_last_key = 0;
-					if (translate(ev.code) == RC_standby)
-					{
-						*msg = RC_standby;
-						*data = 1; /* <- button released */
-						return;
+						else
+						{
+							// clear rc_last_key on keyup event
+							//printf("got keyup native key: %04x %04x, translate: %04x -%s-\n", ev.code, ev.code&0x1f, translate(ev.code), getKeyName(translate(ev.code)).c_str() );
+							rc_last_key = 0;
+							if (trkey == RC_standby)
+							{
+								*msg = RC_standby;
+								*data = 1; /* <- button released */
+								return;
+							}
+						}
+#endif /* OLD_RC_API */
 					}
 				}
-#endif /* OLD_RC_API */
 			}
-		}
+		} 
 
 		if(FD_ISSET(fd_pipe_low_priority[0], &rfds))
 		{
@@ -1211,14 +1212,14 @@ void CRCInput::postMsg(uint msg, uint data, bool Priority)
 void CRCInput::clearRCMsg()
 {
 	t_input_event ev;
-	int status;
 
-	if (fd_rc)
+	for (int i = 0; i < NUMBER_OF_EVENT_DEVICES; i++)
 	{
-		do
+		if (fd_rc[i] != -1)
 		{
-			status = read(fd_rc, &ev, sizeof(t_input_event));
-		} while (status == sizeof(t_input_event));
+			while (read(fd_rc[i], &ev, sizeof(t_input_event)) == sizeof(t_input_event))
+				;
+		}
 	}
 }
 
