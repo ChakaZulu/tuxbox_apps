@@ -430,11 +430,13 @@ static eString videocontrol(eString request, eString dirpath, eString opts, eHTT
 	eString command = opt["command"];
 	if (command == "rewind")
 	{
+		// not working... different solution required
 		eZapMain::getInstance()->startSkip(eZapMain::skipReverse);
 	}
 	else
 	if (command == "forward")
 	{
+		// not working... different solution required
 		eZapMain::getInstance()->startSkip(eZapMain::skipForward);
 	}
 	else
@@ -845,12 +847,14 @@ static eString getVideoBar()
 	std::stringstream result;
 	int videopos = 0;
 	int min = 0, sec = 0;
+	int total = 0, current = 0;
 
-	eServiceHandler *handler=eServiceInterface::getInstance()->getService();
-	if (!handler)
-		return "";
-	int total=handler->getPosition(eServiceHandler::posQueryLength);
-	int current=handler->getPosition(eServiceHandler::posQueryCurrent);
+	if (eServiceHandler *handler = eServiceInterface::getInstance()->getService())
+	{
+		total = handler->getPosition(eServiceHandler::posQueryLength);
+		current = handler->getPosition(eServiceHandler::posQueryCurrent);
+	}
+
 	if ((total > 0) && (current != -1))
 	{
 		min = total - current;
@@ -862,18 +866,18 @@ static eString getVideoBar()
 	result << "<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\">"
 		"<tr>";
 
-	for (int i = 1; i <= (videopos / 10); i++)
+	for (int i = 1; i <= videopos; i++)
 	{
 		result << "<td width=15 height=8><a class=\"vidblue\" href=\"javascript:setVid(" << i << ")\">"
 			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
-	for (int i = (videopos / 10) + 1; i <= 10; i++)
+	for (int i = videopos + 1; i <= 10; i++)
 	{
 		result << "<td width=15 height=8><a class=\"vidnot\" href=\"javascript:setVid(" << i << ")\">"
 			"<img src=\"trans.gif\" border=0></a></span></td>";
 	}
 
-	result << "&nbsp;&nbsp;-" << min << ":" << sec;
+	result << "<td>&nbsp;&nbsp;" << min << ":" << sec << "</td>";
 	result << "</tr>"
 		"</table>";
 	return result.str();
@@ -973,7 +977,7 @@ public:
 			result += LIGHTGREY;
 		else
 			result += DARKGREY;
-		result += "\"><td width=50>";
+		result += "\"><td width=50 align=center>";
 
 		eString serviceRef = ref2string(e);
 		if (!(e.flags & eServiceReference::isDirectory))
