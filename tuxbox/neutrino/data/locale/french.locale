@@ -36,6 +36,7 @@ videomenu.videosignal_composite Composite
 videomenu.videoformat Format de Télévision
 videomenu.videoformat_43 4:3
 videomenu.videoformat_169 16:9
+videomenu.epgold EPG the old way...
 
 networkmenu.head Ajuster un Réseau 
 networkmenu.setupnow utiliser maintenant des réglages de Réseau 
@@ -116,8 +117,10 @@ infoviewer.epgwait attendent EPG...
 infoviewer.streaminfo Stream-Informations
 infoviewer.eventlist l' événement énumérerait
 infoviewer.languages Choix linguistique
+infoviewer.notavailable Channel not available
 
 epgviewer.notfound pas d' EPG informations trouvé
+epgviewer.nodetailed No detailed informations available
 epglist.head l' événement énumérerait - %s
 epglist.noevents Pas d'cEpg disponible ...
 
@@ -132,4 +135,4 @@ streaminfo.audiotype Argile version
 streaminfo.audiotype_unknown Argile version: inconnu
 
 apidselector.head Choix linguistique
-apidselector.hint ! Zapit rend encore mauvais cela  !
+

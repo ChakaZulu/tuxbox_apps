@@ -1,7 +1,10 @@
 //
-// $Id: infoviewer.cpp,v 1.24 2001/09/20 14:10:10 field Exp $
+// $Id: infoviewer.cpp,v 1.25 2001/09/22 14:57:45 field Exp $
 //
 // $Log: infoviewer.cpp,v $
+// Revision 1.25  2001/09/22 14:57:45  field
+// Anzeige, wenn Kanal nicht verfuegbar
+//
 // Revision 1.24  2001/09/20 14:10:10  field
 // neues EPG-Handling abschaltbar
 //
@@ -128,6 +131,7 @@ void CInfoViewer::showTitle( int ChanNum, string Channel, unsigned int onid_tsid
     else
         EPG_NotFound_Text =  (char*) g_Locale->getText("infoviewer.epgwait").c_str();
     is_visible = true;
+    KillShowEPG = false;
 
     pthread_mutex_unlock( &epg_mutex );
 
@@ -245,10 +249,24 @@ void CInfoViewer::showButtons()
         g_FrameBuffer->paintIcon("gruen.raw", BoxEndX- 3* ButtonWidth+ 8, BoxEndY- ((InfoHeightY_Info+ 16)>>1) );
         g_Fonts->infobar_small->RenderString(BoxEndX- 3* ButtonWidth+ 29, BoxEndY - 2, ButtonWidth- 26, g_Locale->getText("infoviewer.languages").c_str(), COL_INFOBAR);
     }
+    else if ( g_RemoteControl->apid_info.count_apids== 0 )
+    {
+        int height = g_Fonts->infobar_info->getHeight();
+        int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
+        int xStart= BoxStartX + ChanWidth + 30;
+
+    	int ChanNameX = BoxStartX + ChanWidth + 10;
+    	int ChanNameY = BoxStartY + ChanHeight + 10;
+    	g_FrameBuffer->paintBox(ChanInfoX, ChanNameY, BoxEndX, ChanInfoY, COL_INFOBAR);
+
+        g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, g_Locale->getText("infoviewer.notavailable").c_str(), COL_INFOBAR);
+        KillShowEPG = true;
+    }
 }
 
 void CInfoViewer::showData()
 {
+
 	int height;
 	int ChanNameY = BoxStartY + (ChanHeight>>1)+3;
 	int ChanInfoY = BoxStartY + ChanHeight+ 15; //+10
@@ -284,12 +302,14 @@ void CInfoViewer::showData()
 
 void CInfoViewer::showWarte()
 {
+
 	int height = g_Fonts->infobar_info->getHeight();
     int ChanInfoY = BoxStartY + ChanHeight+ 15+ 2* height;
     int xStart= BoxStartX + ChanWidth + 30;
 
     pthread_mutex_trylock( &epg_mutex );
-	g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
+    if ( !KillShowEPG )
+	   g_Fonts->infobar_info->RenderString(xStart, ChanInfoY, BoxEndX- xStart, EPG_NotFound_Text, COL_INFOBAR);
     pthread_mutex_unlock( &epg_mutex );
 }
 
@@ -386,9 +406,12 @@ void * CInfoViewer::InfoViewerThread (void *arg)
                 if (query!=InfoViewer->CurrentChannel)
                     repCount = 10;
 
+                if ( InfoViewer->KillShowEPG )
+                    repCount = 0;
+
                 pthread_mutex_unlock( &InfoViewer->epg_mutex );
 
-                if ( ( !requeryEPG) && ( InfoViewer->is_visible ) )
+                if ( ( !requeryEPG) && ( InfoViewer->is_visible ) && ( !InfoViewer->KillShowEPG) )
 				{
 //                    printf("CInfoViewer::InfoViewerThread success\n");
 					InfoViewer->showData();

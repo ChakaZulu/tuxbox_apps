@@ -43,6 +43,7 @@ class CInfoViewer
 {
 	private:
 		int					intShowDuration;
+        bool                KillShowEPG;
 
 		pthread_t			thrViewer;
         pthread_cond_t      epg_cond;

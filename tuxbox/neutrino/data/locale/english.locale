@@ -118,6 +118,7 @@ infoviewer.epgwait waiting for EPG...
 infoviewer.streaminfo Stream-Info
 infoviewer.eventlist Event-List
 infoviewer.languages Languages
+infoviewer.notavailable Channel not available
 
 epgviewer.notfound no epg found
 epgviewer.nodetailed No detailed informations available
