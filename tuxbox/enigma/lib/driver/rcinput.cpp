@@ -6,6 +6,8 @@
 
 #include <lib/base/ebase.h>
 #include <lib/system/init.h>
+#include <lib/system/init_num.h>
+#include "input_fake.h"
 
 void eRCDeviceInputDev::handleCode(int rccode)
 {
@@ -64,10 +66,12 @@ const char *eRCDeviceInputDev::getKeyDescription(const eRCKey &key) const
 	case KEY_VOLUMEDOWN: return "Lautstaerke minus";
 	case KEY_HELP: return "?";
 	case KEY_SETUP: return "d-Box";
+#if 0
 	case KEY_TOPLEFT: return "oben links";
 	case KEY_TOPRIGHT: return "oben rechts";
 	case KEY_BOTTOMLEFT: return "unten links";
 	case KEY_BOTTOMRIGHT: return "unten rechts";
+#endif
 	case KEY_HOME: return "home";
 	default: return 0;
 	}
@@ -108,14 +112,14 @@ int eRCDeviceInputDev::getKeyCompatibleCode(const eRCKey &key) const
 }
 
 
-class eDBoxRCHardware
+class eInputDeviceInit
 {
 	eRCInputEventDriver driver;
 	eRCDeviceInputDev deviceInputDev;
 public:
-	eDBoxRCHardware(): driver("/dev/input/event0"), deviceInputDev(&driver)
+	eInputDeviceInit(): driver("/dev/input/event0"), deviceInputDev(&driver)
 	{
 	}
 };
 
-eAutoInitP0<eDBoxRCHardware> init_rcdbox(2, "input device driver");
+eAutoInitP0<eInputDeviceInit> init_rcinputdev(eAutoInitNumbers::rc+1, "input device driver");

@@ -104,6 +104,9 @@ eZap::eZap(int argc, char **argv)
 	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcdbox.xml") )
 		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcdbox.xml");
 
+	if ( eActionMapList::getInstance()->loadXML( CONFIGDIR "/enigma/resources/rcgeneric.xml") )
+		eActionMapList::getInstance()->loadXML( DATADIR "/enigma/resources/rcgeneric.xml");
+
 	eDebug("[ENIGMA] loading default keymaps...");
 	for(std::map<eString,eRCDevice*>::iterator i(eRCInput::getInstance()->getDevices().begin());
 			i != eRCInput::getInstance()->getDevices().end(); ++i)
