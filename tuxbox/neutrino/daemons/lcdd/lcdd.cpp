@@ -255,9 +255,9 @@ void * TimeThread (void *)
 	return NULL;
 }
 
-void sig_catch(int sig)
+void sig_catch(int)
 {
-	printf("[lcdd] Signal: %d\n", sig);
+	//printf("[lcdd] Signal: %d\n", sig);
 }
 
 
@@ -340,9 +340,10 @@ int main(int argc, char **argv)
 	if (fork() != 0) return 0;
 
 	//workarround for buggy busybox :(
-	for(int x=0;x<32;x++)
-		 signal(x,sig_catch);
-	//signal(SIGINT,sig_catch);
+	signal(SIGHUP,sig_catch);
+	signal(SIGINT,sig_catch);
+	signal(SIGQUIT,sig_catch);
+
 
 	/* Thread erst nach dem forken erstellen, da sonst Abbruch */
 	if (pthread_create (&thrTime, NULL, TimeThread, NULL) != 0 )
