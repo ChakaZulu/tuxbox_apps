@@ -34,8 +34,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-
- 
 #include <sys/types.h>
 #include <stdio.h>
 
@@ -43,18 +41,7 @@
 #include "webserver.h"
 #include "request.h"
 #include "helper.h"
-/*
-#include "cgi/volume.h"
-#include "cgi/channellist.h"
-#include "cgi/epg.h"
-#include "cgi/zapto.h"
-#include "cgi/shutdown.h"
-#include "cgi/gettime.h"
-#include "cgi/getdate.h"
-#include "cgi/info.h"
-#include "cgi/browser.h"
-*/
-
+#include "avcontrol.h"
 
 #define SA struct sockaddr
 #define SAI struct sockaddr_in
@@ -356,7 +343,7 @@ bool TWebDbox::ExecuteCGI(TWebserverRequest* request)
 			else
 			{	//eventlist for a chan
 				unsigned id = atol( request->ParameterList->Head->Name->c_str() );
-				GetEventList( request, id ,true);
+				GetEventList( request, NULL, id, true);
 			}
 		}
 		else if (request->ParameterList->Count == 3)
@@ -474,14 +461,43 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 	if(strcmp(request->Filename->c_str(),"test.dbox2") == 0)
 	{
 		printf("Teste nun\n");
-
 		request->SendPlainHeader("text/html");
-
-		TParameterList *params = new TParameterList;
-		params->Add((char *) "test=15\0",7);
-		params->Add((char *) "tt=26\0",5);
-		ParseString(request,"test1   %%test%% test2 %%tt%%\n",params);
 		return true;
+	}
+	if(strcmp(request->Filename->c_str(),"avcontrol.dbox2") == 0)
+	{
+		request->SendPlainHeader("text/html");
+		if (request->ParameterList->Count == 4)
+		{
+			int vcrvideo,vcraudio,tvvideo,tvaudio,auxaudio;
+			if(request->ParameterList->GetIndex("TV_AUDIO") != -1)
+			{
+				tvaudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("TV_AUDIO")));
+				if(request->ParameterList->GetIndex("TV_VIDEO") != -1)
+				{
+					tvvideo = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("TV_VIDEO")));
+					if(request->ParameterList->GetIndex("VCR_AUDIO") != -1)
+					{
+						vcraudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("VCR_AUDIO")));
+						if(request->ParameterList->GetIndex("VCR_VIDEO") != -1)
+						{
+							vcraudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("VCR_AUDIO")));
+							if(request->ParameterList->GetIndex("AUX_AUDIO") != -1)
+							{
+								auxaudio = atoi(request->ParameterList->GetValue(request->ParameterList->GetIndex("AUX_AUDIO")));	
+								TAvControl *av = new TAvControl();
+								av->Set_TV_Sources(tvvideo,tvaudio);
+								av->Set_VCR_Sources(vcrvideo,vcraudio);
+								av->Set_AUX_Sources(auxaudio);
+								delete av;
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 	if(strcmp(request->Filename->c_str(),"upload.dbox2") == 0)
 	{
@@ -510,7 +526,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 		{	//funktionen für controlpanel links
 			if (request->ParameterList->Count > 0)
 			{	
-				request->ParameterList->PrintParameterList();
+//				request->ParameterList->PrintParameterList();
 				if( request->ParameterList->GetIndex("volumemute") != -1)
 				{
 //					printf("Muting . . \n");
@@ -595,6 +611,8 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 					GetEPG( request, id );
 
 				}
+				else
+					printf("Fehler\n");
 				request->SocketWriteLn("</body></html>");
 				return true;
 			}
@@ -618,17 +636,19 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 					request->SocketWrite("Location: switch.dbox2?eventlist=");
 					request->SocketWriteLn(request->ParameterList->GetValue(request->ParameterList->GetIndex("channel")));
 					request->SocketWriteLn("Content-Type: text/html\n");
+					return true;
 				}
 				else
 				{
 					request->SocketWriteLn("Parameter Fehler");
+					return false;
 				}
 			}
 			else
 			{
 				request->SendPlainHeader("text/html");
 				ShowTimerList(request);
-//				request->SocketWriteLn("Parameter fehlen");
+				return true;
 			}
 
 
@@ -650,7 +670,7 @@ bool TWebDbox::Execute(TWebserverRequest* request)
 				{
 					request->SendPlainHeader("text/html");
 					unsigned id = atol( request->ParameterList->GetValue(request->ParameterList->GetIndex("eventlist")) );
-					GetEventList( request, id );
+					GetEventList( request, NULL, id );
 					return true;
 				}
 				
@@ -815,10 +835,10 @@ void TWebDbox::ShowChannelList(TWebserverRequest* request)
 		char teststr[] = "<tr><td class=\"%%CLASS%%\">%%AKT%%<a href=\"switch.dbox2?zapto=%%CHANNEL_ID%%\">%%CHANNEL_NR%%. %%CHANNEL_NAME%%</a> <a href=\"switch.dbox2?eventlist=%%CHANNEL_ID%%\"><img src=\"../images/elist.gif\" border=\"0\"></a></td></tr>\n\0";
 		ParseString(request,teststr,params);
 		delete params;
-
+	
 		if(channel->EPG != NULL)
 		{
-			sprintf(buffer,"<tr><td class=\"%cepg\"><a href=epg.dbox2?channel=%d>%s</a> <font size=-3>(%d von %d min)</font></td></tr>\n",classname[0],channel->onid_tsid,channel->EPG->c_str(),(time(NULL)-channel->Starttime)/60,channel->Duration / 60);
+			sprintf(buffer,"<tr><td class=\"%cepg\"><a href=epg.dbox2?channel=%d>%s</a> <font size=-3>(%d von %d min, %d\%)</font></td></tr>\n",classname[0],channel->onid_tsid,channel->EPG->c_str(),(time(NULL)-channel->Starttime)/60,channel->Duration / 60,100 * (time(NULL)-channel->Starttime) / channel->Duration  );
 			request->SocketWrite(buffer);
 		}
 		i++;
@@ -1001,7 +1021,7 @@ Tmconnect con;
 			close(sock_fd);
 	}
 }
-void TWebDbox::GetEventList(TWebserverRequest *request,unsigned onidSid, bool cgi = false)
+void TWebDbox::GetEventList(TWebserverRequest *request,TEventList *Events,unsigned onidSid, bool cgi = false)
 {
 char epgID[20];
 char edate[6];
@@ -1125,7 +1145,7 @@ int sock_fd;
 Tmconnect con;
 	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
 	{
-	//	printf("Connected to sectionsd\n");
+		printf("Connected to sectionsd\n");
 		sectionsd::msgRequestHeader req;
 	//	printf("Versuche Daten zu lesen\n");
 		req.version = 2;
@@ -1151,28 +1171,17 @@ Tmconnect con;
 				printf("Fehler\n");
 				return;
 			}
-	//		printf("%d Bytes gelesen\n",buffer_len);
-			char * anfang, *ende;
-			char *titel,*titel2,*text,*von;
-			int i;
-			for(i = 0; (i < buffer_len) && (buffer[i] != 255);i++);
-			buffer[i] = 0;
-			titel = &buffer[i+1];
-			for(i = i + 1; (i < buffer_len) && (buffer[i] != 255);i++);
-			buffer[i] = 0;
-			titel2 = &buffer[i+1];
-			for(i = i + 1; (i < buffer_len) && (buffer[i] != 255);i++);
-			buffer[i] = 0;
-			text = &buffer[i+1];
-			for(i = i + 1; (i < buffer_len) && (buffer[i] != '\n');i++);
-			buffer[i] = 0;
-			von = &buffer[i+1];
-			for(i = i + 1; (i < buffer_len) && (buffer[i] != 255);i++);
-			buffer[i] = 0;
+			printf("%d Bytes gelesen\n",buffer_len);
+			char *titel,*titel2,*text;
+			titel = buffer + sizeof(long long);
+			titel2 = titel + strlen(titel) + 1;
+			text = titel2 + strlen(titel2) + 1;
+			sectionsd::sectionsdTime *epg_times = (sectionsd::sectionsdTime*) (text + strlen(text) + 1);
+			
 			char *buffer2 = new char[buffer_len + 400];
 			buffer[0]=0;
-//			sprintf(buffer2,"Titel: %s<BR>\nTitel2: %s<BR>\nText: %s<BR>\nVon: %s<BR>\n\0",titel,titel2,text,von);
-			sprintf(buffer2,"<H1>%s</H1><BR>\n<H2>%s</H2><BR>\n<B>%s</B><BR><BR>\n%s<BR>\n\0",titel,titel2,text,von);
+//			sprintf(buffer2,"Titel: %s<BR>\nTitel2: %s<BR>\nText: %s<BR>\n<BR>\n\0",titel,titel2,text);
+			sprintf(buffer2,"<H1>%s</H1><BR>\n<H2>%s</H2><BR>\n<B>%s</B><BR>\0",titel,titel2,text);
 			request->SocketWrite(buffer2);
 
 			delete[] buffer2;
@@ -1191,7 +1200,7 @@ Tmconnect con;
 	if((sock_fd = Parent->SocketConnect(&con,sectionsd::portNumber)) != -1)
 	{
 
-	//	printf("Connected to sectionsd\n");
+//		printf("Connected to sectionsd\n");
 		sectionsd::msgRequestHeader req;
 	//	printf("Versuche Daten zu lesen\n");
 		req.version = 2;
@@ -1208,6 +1217,7 @@ Tmconnect con;
 			close(sock_fd);
 			return;
 		}
+		Parent->DEBUG=true;
 		if(Parent->DEBUG) printf("GetEPG: response gelesen:%ld\n",resp.dataLength);
 		if ( resp.dataLength>0 )
 		{
