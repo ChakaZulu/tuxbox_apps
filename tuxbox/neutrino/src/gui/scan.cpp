@@ -48,9 +48,29 @@ bool CScanTs::scanReady(int *ts, int *services)
 		}
 	
 		printf("scan: %s", return_buf);
-		free(return_buf);
-		close(sock_fd);
-		return false;
+		if (return_buf[0] == '-')
+		{
+			free(return_buf);
+			close(sock_fd);
+			return true;
+		}
+		else
+		{
+			if (recv(sock_fd, ts, sizeof(int),0) <= 0 ) {
+				perror("recv(zapit)");
+				exit(-1);
+			}
+			if (recv(sock_fd, services, sizeof(int),0) <= 0 ) {
+				perror("recv(zapit)");
+				exit(-1);
+			}
+			printf("Found transponders: %d\n", *ts);
+			printf("Found channels: %d\n", *services);
+			free(return_buf);
+			close(sock_fd);
+			return false;
+		}
+
 }
 
 void CScanTs::startScan()
@@ -112,8 +132,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 
 	startScan();
 
-	int ts;
-	int services;
+	int ts = 0;
+	int services = 0;
 	while (!scanReady(&ts, &services))
 	{
 		int ypos=y;
@@ -124,7 +144,8 @@ int CScanTs::exec(CMenuTarget* parent, string)
 		ypos+= mheight;
 
 		g_Fonts->menu->RenderString(x+ 10, ypos+ mheight, width, g_Locale->getText("scants.services").c_str(), COL_MENUCONTENT);
-		g_RCInput->getKey(190);
+		//g_RCInput->getKey(190);
+		sleep(3);
 	}
 
 
