@@ -1,7 +1,7 @@
 #ifndef __showbnversion_h_
 #define __showbnversion_h_
 
-#include <core/gui/ewindow.h>
+#include <lib/gui/ewindow.h>
 
 class eLabel;
 class BNDirectory;

@@ -1,10 +1,12 @@
-#include "rcdbox.h"
+#include <lib/driver/rcdbox.h>
 
 #include <sys/ioctl.h>
 #include <dbox/fp.h>
+#include <sys/stat.h>
 
-#include <core/base/ebase.h>
-#include <core/system/init.h>
+
+#include <lib/base/ebase.h>
+#include <lib/system/init.h>
 
 	/* ----------------------- alte fernbedienung ---------------------- */
 void eRCDeviceDBoxOld::handleCode(int rccode)
@@ -337,6 +339,11 @@ class eDBoxRCHardware
 public:
   eDBoxRCHardware(): deviceOld(&driver), deviceNew(&driver), deviceButton(&driver)
   {
+		struct stat s;
+		if (stat("/dev/rawir2", &s))
+			driver.enable(1);
+		else
+			driver.enable(0);
   }
 };
 

@@ -1,8 +1,8 @@
 #ifndef __enigma_scan_h
 #define __enigma_scan_h
 
-#include <core/gui/ewidget.h>
-#include <core/gui/listbox.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/listbox.h>
 
 class eListboxEntry;
 

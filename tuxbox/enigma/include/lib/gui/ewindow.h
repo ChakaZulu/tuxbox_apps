@@ -1,8 +1,8 @@
 #ifndef __ewindow_h
 #define __ewindow_h
 
-#include <core/gui/ewidget.h>
-#include <core/gui/decoration.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/decoration.h>
 
 /**
  * \brief A (decorated) top level widget.

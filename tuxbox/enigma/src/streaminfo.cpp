@@ -1,21 +1,21 @@
-#include "streaminfo.h"
+#include <streaminfo.h>
 
 #include <stdlib.h>
 
-#include <core/driver/rc.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/decoder.h>
-#include <core/gdi/font.h>
-#include <core/gui/multipage.h>
-#include <core/gui/eskin.h>
-#include <core/gui/guiactions.h>
-#include <core/gui/elabel.h>
-#include <core/gui/echeckbox.h>
-#include <core/gui/ebutton.h>
-#include <core/dvb/dvbwidgets.h>
-#include <core/dvb/frontend.h>
-#include <core/dvb/dvbservice.h>
+#include <lib/driver/rc.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/decoder.h>
+#include <lib/gdi/font.h>
+#include <lib/gui/multipage.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/guiactions.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/echeckbox.h>
+#include <lib/gui/ebutton.h>
+#include <lib/dvb/dvbwidgets.h>
+#include <lib/dvb/frontend.h>
+#include <lib/dvb/dvbservice.h>
 
 
 int eStreaminfo::eventHandler(const eWidgetEvent &event)

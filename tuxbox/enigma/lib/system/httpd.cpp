@@ -1,4 +1,4 @@
-#include "httpd.h"
+#include <lib/system/httpd.h>
 
 #include <sys/socket.h>
 #include <error.h>
@@ -6,7 +6,7 @@
 #include <time.h>
 #include <ctype.h>
 
-#include <core/dvb/edvb.h>
+#include <lib/dvb/edvb.h>
 
 eHTTPDataSource::eHTTPDataSource(eHTTPConnection *c): connection(c)
 {

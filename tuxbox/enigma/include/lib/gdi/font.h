@@ -10,11 +10,11 @@
 #include <freetype/cache/ftlru.h>
 #include <vector>
 
-#include <core/gdi/fb.h>
-#include <core/base/esize.h>
-#include <core/base/epoint.h>
-#include <core/base/erect.h>
-#include <core/base/estring.h>
+#include <lib/gdi/fb.h>
+#include <lib/base/esize.h>
+#include <lib/base/epoint.h>
+#include <lib/base/erect.h>
+#include <lib/base/estring.h>
 
 class FontRenderClass;
 class Font;

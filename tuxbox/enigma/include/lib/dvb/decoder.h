@@ -10,9 +10,8 @@ struct decoderParameters
 	int vpid, apid, tpid, pcrpid, ecmpid, emmpid, pmtpid, casystemid;
 	int audio_type;
 
-	int flushbuffer;
-	
 	int recordmode;
+	int flushbuffer;
 	
 	__u8 descriptors[2048];
 	int descriptor_length;
@@ -32,9 +31,13 @@ public:
 	static int Initialize();
 	static void Close();
 	static void Flush();
+	static void Pause();
+	static void Resume();
 	static void addCADescriptor(__u8 *descriptor);
 	static int Set();
-	static void flushBuffer() { parms.flushbuffer=1; }
+	static void flushBuffer();
+	static void startTrickmode();
+	static void stopTrickmode();
 	static void setVideoFormat( int format );
 };
 

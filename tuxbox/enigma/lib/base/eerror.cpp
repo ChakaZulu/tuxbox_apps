@@ -1,7 +1,11 @@
-#include "eerror.h"
+#include <lib/base/eerror.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <lib/gui/emessage.h>
+
+int infatal=0;
 
 void eFatal(const char* fmt, ...)
 {
@@ -11,10 +15,17 @@ void eFatal(const char* fmt, ...)
 	vsnprintf(buf, 1024, fmt, ap);
 	va_end(ap);
 	fprintf(stderr, "%s\n",buf );
+	if (!infatal)
+	{
+		infatal=1;
+		eMessageBox msg(buf, "FATAL ERROR", eMessageBox::iconError|eMessageBox::btOK);
+		msg.show();
+		msg.exec();
+	}
 	exit(0);
 }
 
-#ifdef __DEBUG__
+#ifdef DEBUG
 void eDebug(const char* fmt, ...)
 {
 	char buf[1024];
@@ -44,4 +55,4 @@ void eWarning(const char* fmt, ...)
 	va_end(ap);
 	fprintf(stderr, "%s\n",buf );
 }
-#endif // __DEBUG__
+#endif // DEBUG

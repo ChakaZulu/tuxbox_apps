@@ -1,17 +1,17 @@
-#include "setupnetwork.h"
+#include <setupnetwork.h>
 
 #include <netinet/in.h>
 
-#include <core/base/i18n.h>
+#include <lib/base/i18n.h>
 
-#include <core/dvb/edvb.h>
-#include <core/gui/elabel.h>
-#include <core/gui/enumber.h>
-#include <core/gui/ebutton.h>
-#include <core/gui/echeckbox.h>
-#include <core/gui/eskin.h>
-#include <core/driver/rc.h>
-#include <core/system/econfig.h>
+#include <lib/dvb/edvb.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/enumber.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/echeckbox.h>
+#include <lib/gui/eskin.h>
+#include <lib/driver/rc.h>
+#include <lib/system/econfig.h>
 
 static void unpack(__u32 l, int *t)
 {

@@ -1,12 +1,12 @@
-#include "eprogress.h"
+#include <lib/gui/eprogress.h>
 
 #include <stdlib.h>
 
-#include <core/base/erect.h>
-#include <core/gdi/fb.h>
-#include <core/gdi/lcd.h>
-#include <core/gui/eskin.h>
-#include <core/system/init.h>
+#include <lib/base/erect.h>
+#include <lib/gdi/fb.h>
+#include <lib/gdi/lcd.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/init.h>
 
 eProgress::eProgress(eWidget *parent, int takefocus)
 	: eWidget(parent, takefocus)

@@ -1,7 +1,5 @@
-#include "settings.h"
-#include <core/dvb/edvb.h>
-
-#include "config.h"
+#include <lib/dvb/settings.h>
+#include <lib/dvb/edvb.h>
 
 typedef std::list<eServiceReferenceDVB>::iterator ServiceReferenceDVBIterator;
 

@@ -1,7 +1,7 @@
 #ifndef __enumber_h
 #define __enumber_h
 
-#include <core/gui/ewidget.h>
+#include <lib/gui/ewidget.h>
 
 class eLabel;
 class gPainter;
@@ -43,7 +43,9 @@ public:
 	enum
 	{
 		flagDrawPoints=1,
-		flagDrawBoxes=2
+		flagDrawBoxes=2,
+		flagFillWithZeros=4,
+		flagTime=8
 	};
 	void setFlags(int flags);
 	void setBase(int base);
@@ -51,23 +53,5 @@ public:
 	void setNumber(int n);
 	int getNumber();
 };
-/*
-class eDateTime: public eNumber
-{
-	void redrawNumber(gPainter *, int n, const eRect &rect);
-	void redrawWidget(gPainter *, const eRect &rect);
-	time_t datetime;
-public:
-	eDateTime( time_t t )
-	{
-		setDateTime(t);
-	}
-	time_t getDateTime()
-	{
-	}
-	void setDateTime( time_t )
-	{
-	}		
-};
-*/
+
 #endif

@@ -2,8 +2,8 @@
 #define __lcd_h
 
 #include <asm/types.h>
-#include <core/base/esize.h>
-#include <core/base/erect.h>
+#include <lib/base/esize.h>
+#include <lib/base/erect.h>
 
 #define LCD_CONTRAST_MIN 0
 #define LCD_CONTRAST_MAX 63

@@ -1,8 +1,7 @@
-#include "econfig.h"
-#include "init.h"
-#include "config.h"
+#include <lib/base/eerror.h>
+#include <lib/system/econfig.h>
+#include <lib/system/init.h>
 #include <sys/stat.h>
-#include <core/base/eerror.h>
 
 eConfig *eConfig::instance;
 

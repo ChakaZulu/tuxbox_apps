@@ -1,5 +1,8 @@
-#include "gfbdc.h"
-#include <core/system/init.h>
+#include <lib/gdi/gfbdc.h>
+
+#include <lib/dvb/edvb.h>
+#include <lib/system/init.h>
+#include <lib/system/econfig.h>
 
 gFBDC *gFBDC::instance;
 
@@ -25,6 +28,7 @@ gFBDC::gFBDC()
 	
 	pixmap->clut.colors=256;
 	pixmap->clut.data=new gRGB[pixmap->clut.colors];
+	reloadSettings();
 }
 
 gFBDC::~gFBDC()
@@ -34,23 +38,70 @@ gFBDC::~gFBDC()
 	instance=0;
 }
 
+void gFBDC::calcRamp()
+{
+#if 0
+	float fgamma=gamma ? gamma : 1;
+	fgamma/=10.0;
+	fgamma=1/log(fgamma);
+	for (int i=0; i<256; i++)
+	{
+		float raw=i/255.0; // IIH, float.
+		float corr=pow(raw, fgamma) * 256.0;
+
+		int d=corr * (float)(256-brightness) / 256 + brightness;
+		if (d < 0)
+			d=0;
+		if (d > 255)
+			d=255;
+		ramp[i]=d;
+		
+		rampalpha[i]=i*alpha/256;
+	}
+#endif
+	for (int i=0; i<256; i++)
+	{
+		int d;
+		d=i;
+		d=(d-128)*(gamma+64)/(128+64)+128;
+		d+=brightness-128; // brightness correction
+		if (d<0)
+			d=0;
+		if (d>255)
+			d=255;
+		ramp[i]=d;
+
+		if ( eDVB::getInstance()->getInfo("mID") == "01" )
+			rampalpha[i]=i*alpha/65535;
+		else
+			rampalpha[i]=i*alpha/256;
+	}
+
+	rampalpha[255]=255; // transparent BLEIBT bitte so.
+}
+
+void gFBDC::setPalette()
+{
+	for (int i=0; i<256; ++i)
+	{
+		fb->CMAP()->red[i]=ramp[pixmap->clut.data[i].r]<<8;
+		fb->CMAP()->green[i]=ramp[pixmap->clut.data[i].g]<<8;
+		fb->CMAP()->blue[i]=ramp[pixmap->clut.data[i].b]<<8;
+		fb->CMAP()->transp[i]=rampalpha[pixmap->clut.data[i].a]<<8;
+		if (!fb->CMAP()->red[i])
+			fb->CMAP()->red[i]=0x100;
+	}
+	fb->PutCMAP();
+}
+
 void gFBDC::exec(gOpcode *o)
 {
 	switch (o->opcode)
 	{
 	case gOpcode::setPalette:
 	{
-		for (int i=o->parm.setPalette->palette->start; i<o->parm.setPalette->palette->colors; i++)
-		{
-			fb->CMAP()->red[i]=o->parm.setPalette->palette->data[i].r<<8;
-			fb->CMAP()->green[i]=o->parm.setPalette->palette->data[i].g<<8;
-			fb->CMAP()->blue[i]=o->parm.setPalette->palette->data[i].b<<8;
-			fb->CMAP()->transp[i]=o->parm.setPalette->palette->data[i].a<<8;
-			if (!fb->CMAP()->red[i])
-				fb->CMAP()->red[i]=0x100;
-		}
-		fb->PutCMAP();
 		gPixmapDC::exec(o);
+		setPalette();
 		break;
 	}
 	default:
@@ -62,6 +113,50 @@ void gFBDC::exec(gOpcode *o)
 gFBDC *gFBDC::getInstance()
 {
 	return instance;
+}
+
+void gFBDC::setAlpha(int a)
+{
+	alpha=a;
+
+	calcRamp();
+	setPalette();
+}
+
+void gFBDC::setBrightness(int b)
+{
+	brightness=b;
+
+	calcRamp();
+	setPalette();
+}
+
+void gFBDC::setGamma(int g)
+{
+	gamma=g;
+
+	calcRamp();
+	setPalette();
+}
+
+void gFBDC::saveSettings()
+{
+	eConfig::getInstance()->setKey("/ezap/osd/alpha", alpha);
+	eConfig::getInstance()->setKey("/ezap/osd/gamma", gamma);
+	eConfig::getInstance()->setKey("/ezap/osd/brightness", brightness);
+}
+
+void gFBDC::reloadSettings()
+{
+	if (eConfig::getInstance()->getKey("/ezap/osd/alpha", alpha))
+		alpha=255;
+	if (eConfig::getInstance()->getKey("/ezap/osd/gamma", gamma))
+		gamma=128;
+	if (eConfig::getInstance()->getKey("/ezap/osd/brightness", brightness))
+		brightness=128;
+
+	calcRamp();
+	setPalette();
 }
 
 eAutoInitP0<gFBDC> init_gFBDC(1, "GFBDC");

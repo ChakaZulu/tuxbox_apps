@@ -1,11 +1,11 @@
-#include "dvbwidgets.h"
-#include <core/gui/eskin.h>
-#include <core/gui/enumber.h>
-#include <core/gui/listbox.h>
-#include <core/gui/echeckbox.h>
-#include <core/gui/eprogress.h>
-#include "frontend.h"
-#include "dvb.h"
+#include <lib/dvb/dvbwidgets.h>
+#include <lib/dvb/frontend.h>
+#include <lib/dvb/dvb.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/enumber.h>
+#include <lib/gui/combobox.h>
+#include <lib/gui/echeckbox.h>
+#include <lib/gui/eprogress.h>
 
 eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 	:eWidget(parent), type(type), edit(edit)
@@ -20,12 +20,12 @@ eTransponderWidget::eTransponderWidget(eWidget *parent, int edit, int type)
 		l = new eLabel(this);
 		l->setName( "lSat" );
 
-		sat=new eListBox<eListBoxEntryText>(this, l);
+		sat=new eComboBox(this, 4, l);
 		sat->setName("sat");
 
 		for ( std::list<eLNB>::iterator it( eTransponderList::getInstance()->getLNBs().begin() ); it != eTransponderList::getInstance()->getLNBs().end(); it++)
 			for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
-				new eListBoxEntryText(sat, s->getDescription().c_str(), (void*) *s);
+				new eListBoxEntryText(*sat, s->getDescription().c_str(), (void*) *s);
 
 		CONNECT(sat->selchanged, eTransponderWidget::updated1);
 	}
@@ -127,9 +127,9 @@ int eTransponderWidget::load()
 struct selectSat: public std::unary_function<eListBoxEntryText&, void>
 {
 	const eTransponder* t;
-	eListBox<eListBoxEntryText> *l;
+	eComboBox *l;
 
-	selectSat(const eTransponder *t, eListBox<eListBoxEntryText>* l ): t(t), l(l)
+	selectSat(const eTransponder *t, eComboBox* l ): t(t), l(l)
 	{
 	}
 
@@ -244,6 +244,7 @@ void eFEStatusWidget::update()
 {
 	p_agc->setPerc(fe->SignalStrength()*100/65536);
 	p_snr->setPerc((fe->SNR())*100/65536);
+	eDebug("snr:%d",fe->SNR());
 	int status=fe->Status();
 	c_lock->setCheck(!!(status & FE_HAS_LOCK));
 	c_sync->setCheck(!!(status & FE_HAS_SYNC));

@@ -1,14 +1,14 @@
-#include "setup_rc.h"
+#include <setup_rc.h>
 
-#include <core/gui/slider.h>
-#include <core/gui/ebutton.h>
-#include <core/gui/elabel.h>
-#include <core/gui/enumber.h>
-#include <core/gui/eskin.h>
-#include <core/system/econfig.h>
-#include <core/base/i18n.h>
-#include <core/dvb/dvbwidgets.h>
-#include <core/driver/rc.h>
+#include <lib/gui/slider.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/enumber.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/econfig.h>
+#include <lib/base/i18n.h>
+#include <lib/dvb/dvbwidgets.h>
+#include <lib/driver/rc.h>
 
 void eZapRCSetup::repeatChanged( int i )
 {

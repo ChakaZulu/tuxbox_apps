@@ -1,8 +1,8 @@
 #ifndef __CORE_GUI_STATUSBAR__
 #define __CORE_GUI_STATUSBAR__
 
-#include <core/gui/ewidget.h>
-#include <core/gui/elabel.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/elabel.h>
 
 class eStatusBar : public eDecoWidget
 {

@@ -5,10 +5,10 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <memory.h>
-
-#include <core/system/econfig.h>
 #include <linux/kd.h>
-#include "fb.h"
+
+#include <lib/system/econfig.h>
+#include <lib/gdi/fb.h>
 
 fbClass *fbClass::instance;
 

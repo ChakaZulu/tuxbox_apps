@@ -1,7 +1,7 @@
 #ifndef __echeckbox_h
 #define __echeckbox_h
 
-#include <core/gui/ebutton.h>
+#include <lib/gui/ebutton.h>
 
 class eCheckbox: public eButton
 {

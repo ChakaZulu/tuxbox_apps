@@ -1,6 +1,6 @@
-#include "epixmap.h"
-#include "eskin.h"
-#include "init.h"
+#include <lib/gui/epixmap.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/init.h>
 
 ePixmap::ePixmap(eWidget *parent): eWidget(parent)
 {

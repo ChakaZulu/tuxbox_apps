@@ -3,8 +3,8 @@
 
 #include <asm/types.h>
 
-#include <include/libsig_comp.h>
-#include <core/base/ebase.h>
+#include <libsig_comp.h>
+#include <lib/base/ebase.h>
 
 #define SECREAD_INORDER	1			// read them in order (read full tables)
 #define SECREAD_CRC			2			// check CRCs

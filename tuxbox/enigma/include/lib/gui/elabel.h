@@ -1,8 +1,8 @@
 #ifndef __elabel_h
 #define __elabel_h
 
-#include <core/gui/ewidget.h>
-#include <core/gdi/grc.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gdi/grc.h>
 
 // Definition Blit Flags
 #define BF_ALPHATEST 1

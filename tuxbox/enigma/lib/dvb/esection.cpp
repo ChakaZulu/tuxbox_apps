@@ -1,4 +1,4 @@
-#include "esection.h"
+#include <lib/dvb/esection.h>
 
 #include <unistd.h>
 #include <stdio.h>
@@ -8,24 +8,12 @@
 #include <time.h>
 #include <sys/ioctl.h>
 
-#include <core/base/ebase.h>
-#include <core/base/eerror.h>
+#include <lib/base/ebase.h>
+#include <lib/base/eerror.h>
 
-#ifdef DBOX
-	#define DEMUX "/dev/dvb/card0/demux0"
-#else
-	#define DEMUX "/dev/demuxapi0"
-#endif
+#define DEMUX "/dev/dvb/card0/demux0"
 
-#ifdef DBOX
-	#include <ost/dmx.h>
-#else
-	extern "C"
-	{
-		#include <xp/xp_osd_user.h>
-	}
-#endif
-
+#include <ost/dmx.h>
 
 ePtrList<eSection> eSection::active;
 
@@ -49,12 +37,7 @@ void eSectionReader::close()
 int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 {
 	flags=flags;
-#ifdef DBOX
 	dmxSctFilterParams secFilterParams;
-#else
-	demux_filter_para secFilterParams;
-#endif
-
 	close();
 
 	handle=::open(DEMUX, O_RDWR|O_NONBLOCK);
@@ -66,7 +49,7 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 	}
 
 	secFilterParams.pid=pid;
-#ifdef DBOX
+
 	const int maxsize=DMX_FILTER_SIZE;
 	memset(secFilterParams.filter.filter, 0, maxsize);
 	memset(secFilterParams.filter.mask, 0, maxsize);
@@ -97,52 +80,11 @@ int eSectionReader::open(int pid, __u8 *data, __u8 *mask, int len, int _flags)
 		::close(handle);
 		return -1;
 	}
-#else
-	if (len>FILTER_LENGTH)
-		len=FILTER_LENGTH;
-	memset(secFilterParams.filter, 0, FILTER_LENGTH);
-	memset(secFilterParams.mask, 0, FILTER_LENGTH);
-	for (int i=0; i<len; i++)
-	{
-		int src=i;
-		int dst=i;
-		if (dst)
-			dst+=2;
-		secFilterParams.filter[dst]=data[src];
-		secFilterParams.mask[dst]=mask[src];
-	}
-
-	if (len>1)
-		len+=2;
-
-	secFilterParams.filter_length=len;
-	eDebugNoNewLine("%02x: ", pid);
-	for (int i=0; i<len; i++)
-		eDebugNoNewLine("%02x ", secFilterParams.filter[i]);
-	eDebugNoNewLine("\n    ");
-	for (int i=0; i<len; i++)
-		eDebugNoNewLine("%02x ", secFilterParams.mask[i]);
-	eDebug("");
-	if (ioctl(handle, DEMUX_FILTER_SET, &secFilterParams))
-	{
-		perror("DEMUX_FILTER_SET\n");
-		::close(handle);
-		return -1;
-	}
-	if (ioctl(handle, DEMUX_START, 0))
-	{
-		perror("DEMUX_START\n");
-		::close(handle);
-		return -1;
-	}
-#endif
-
 	return 0;
 }
 
 int eSectionReader::read(__u8 *buf)
 {
-#ifdef DBOX
 	if (::read(handle, buf, 3)<0)
 	{
 		if (errno==EAGAIN)
@@ -155,15 +97,6 @@ int eSectionReader::read(__u8 *buf)
 	seclen |= (buf[2] & 0xFF);
 	::read(handle, buf+3, seclen);
 	seclen+=3;
-#else
-	if (::read(handle, buf, 16384)<0)
-	{
-		if (errno==EAGAIN)
-			return errno; 
-		perror("read section");
-		return errno;
-	}
-#endif
 	return 0;
 }
 

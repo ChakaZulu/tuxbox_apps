@@ -1,10 +1,10 @@
-#include "epgcache.h"
+#include <lib/dvb/epgcache.h>
 
 #include <time.h>
 #include <unistd.h>  // for usleep
-#include <core/system/init.h>
-#include <core/dvb/lowlevel/dvb.h>
-#include <core/dvb/si.h>
+#include <lib/system/init.h>
+#include <lib/dvb/lowlevel/dvb.h>
+#include <lib/dvb/si.h>
 
 int eventData::CacheSize=0;
 
@@ -39,17 +39,25 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		eit_event_struct* eit_event = (eit_event_struct*) (data+ptr);
 		int eit_event_size;
 		int duration;
-		time_t TM;
-		
+
+		time_t TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);
+
 	  temp[service] = std::pair< time_t, int> (time(0)+eDVB::getInstance()->time_difference, source);
 
-		int eventId = HILO( eit_event->event_id );
+		uniqueEvent event( TM, HILO(eit_event->event_id), service );
 
 		if ( source == SCHEDULE )
 		{
-			if ( firstScheduleEventId == -1)
-				firstScheduleEventId = eventId;
-			else if (firstScheduleEventId == eventId )
+//			eDebug("beginTime = %d, event_id = %d, service.sid = %d, service.onid = %d", event.beginTime, event.event_id, event.service.sid, event.service.onid );
+//			eDebug("firstScheduleEvent beginTime = %d, event_id = %d, service.sid = %d, service.onid = %d", firstScheduleEvent.beginTime, firstScheduleEvent.event_id, firstScheduleEvent.service.sid, firstScheduleEvent.service.onid );
+
+			if ( !firstScheduleEvent.valid() )
+			{
+				firstScheduleEvent=event;
+//				eDebug("Schedule begin = %d, event_id = %d, service.sid = %d, service.onid = %d", event.beginTime, event.event_id, event.service.sid, event.service.onid );
+//				eDebug("Schedule begin = %d, %d, %d, %d, %d", eit_event->start_time_1, eit_event->start_time_2, eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5 );
+			}
+			else if ( firstScheduleEvent == event )  // epg around
 			{
 				eDebug("[EPGC] schedule data ready");
 				scheduleReader.abort();
@@ -58,9 +66,16 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 		}
 		else // if ( source == NOWNEXT )
 		{
-			 if ( firstNowNextEventId == -1 )
-					firstNowNextEventId = eventId;
-			else if ( firstNowNextEventId == eventId ) // now next ready
+//			eDebug("beginTime = %d, event_id = %d, service.sid = %d, service.onid = %d", event.beginTime, event.event_id, event.service.sid, event.service.onid );
+//hakl			eDebug("firstNowNexEvent beginTime = %d, event_id = %d, service.sid = %d, service.onid = %d", firstNowNextEvent.beginTime, firstNowNextEvent.event_id, firstNowNextEvent.service.sid, firstNowNextEvent.service.onid );
+
+			if ( !firstNowNextEvent.valid() )
+			{
+//				eDebug("NowNext begin = %d, %d, %d, %d, %d", eit_event->start_time_1, eit_event->start_time_2, eit_event->start_time_3, eit_event->start_time_4, eit_event->start_time_5 );
+//				eDebug("NowNext begin = %d, event_id = %d, service.sid = %d, service.onid = %d", event.beginTime, event.event_id, event.service.sid, event.service.onid );
+				firstNowNextEvent = event;
+			}
+			else if ( firstNowNextEvent == event ) // now next ready
 			{
 				eDebug("[EPGC] nownext data ready");
 				nownextReader.abort();
@@ -73,6 +88,7 @@ int eEPGCache::sectionRead(__u8 *data, int source)
 			eit_event_size = HILO(eit_event->descriptors_loop_length)+EIT_LOOP_SIZE;
 
 			duration = fromBCD(eit_event->duration_1)*3600+fromBCD(eit_event->duration_2)*60+fromBCD(eit_event->duration_3);
+
 			TM = parseDVBtime( eit_event->start_time_1, eit_event->start_time_2,	eit_event->start_time_3, eit_event->start_time_4,	eit_event->start_time_5);
 
 			if ( (time(0)+eDVB::getInstance()->time_difference) <= (TM+duration) )  // old events should not be cached
@@ -104,7 +120,7 @@ bool eEPGCache::finishEPG()
 	
 			while (It != temp.end())
 			{
-				if ( It->second.second == SCHEDULE || ( It->second.second == NOWNEXT && firstScheduleEventId == -1 ) )
+				if ( It->second.second == SCHEDULE || ( It->second.second == NOWNEXT && !firstScheduleEvent.valid() ) )
 					serviceLastUpdated[It->first]=It->second.first;
 				if ( eventDB.find( It->first ) == eventDB.end() )
 					temp.erase(It++->first);
@@ -266,8 +282,8 @@ void eEPGCache::startEPG()
 	{
 		temp.clear();
 		eDebug("[EPGC] start caching events");
-		firstScheduleEventId = -1;
-		firstNowNextEventId = -1;
+		firstScheduleEvent.invalidate();
+		firstNowNextEvent.invalidate();
 		scheduleReader.start();
 		isRunning |= 1;
 		nownextReader.start();

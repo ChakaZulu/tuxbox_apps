@@ -1,8 +1,8 @@
 #ifndef __enigma_mainmenu_h
 #define __enigma_mainmenu_h
 
-#include <include/libsig_comp.h>
-#include <core/gui/ewidget.h>
+#include <libsig_comp.h>
+#include <lib/gui/ewidget.h>
 
 class gPixmap;
 class eLabel;

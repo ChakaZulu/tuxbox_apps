@@ -1,7 +1,7 @@
 #ifndef __enigma_setup_h
 #define __enigma_setup_h
 
-#include <core/gui/listbox.h>
+#include <lib/gui/listbox.h>
 
 class eZapSetup: public eListBoxWindow<eListBoxEntryMenu>
 {
@@ -17,6 +17,7 @@ private:
 	void sel_lcd();
 	void sel_rc();
 	void sel_timer();
+	void sel_harddisk();
 	void onSelChanged( eListBoxEntryMenu* );
 public:
 	eZapSetup();

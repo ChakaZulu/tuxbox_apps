@@ -1,7 +1,7 @@
 #ifndef __SRC_CORE_GUI_SLIDER_
 #define __SRC_CORE_GUI_SLIDER_
 
-#include <core/gui/eprogress.h>
+#include <lib/gui/eprogress.h>
 
 class eSlider: public eProgress
 {

@@ -1,7 +1,7 @@
 #ifndef __rcdreambox_h
 #define __rcdreambox_h
 
-#include <core/driver/rc.h>
+#include <lib/driver/rc.h>
 
 class eRCDeviceDreambox: public eRCDevice
 {

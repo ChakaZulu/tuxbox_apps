@@ -1,4 +1,4 @@
-#include <core/gui/emessage.h>
+#include <lib/gui/emessage.h>
 
 class enigmaVCR : public eMessageBox
 {

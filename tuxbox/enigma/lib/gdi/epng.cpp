@@ -1,6 +1,6 @@
 #include <png.h>
 #include <stdio.h>
-#include "epng.h"
+#include <lib/gdi/epng.h>
 
 gImage *loadPNG(const char *filename)
 {

@@ -1,18 +1,19 @@
 #ifndef __enigma_main_h
 #define __enigma_main_h
 
-#include <apps/enigma/epgwindow.h>
-#include <apps/enigma/enigma_lcd.h>
-#include <core/dvb/si.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/edvb.h>
-#include <core/gui/ewindow.h>
-#include <core/gui/listbox.h>
-#include <core/gui/multipage.h>
-#include <core/gui/emessage.h>
-#include <core/gui/numberactions.h>
-#include <core/base/message.h>
-#include <core/dvb/service.h>
+#include <epgwindow.h>
+#include <enigma_lcd.h>
+#include <lib/dvb/si.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/listbox.h>
+#include <lib/gui/multipage.h>
+#include <lib/gui/emessage.h>
+#include <lib/gui/numberactions.h>
+#include <lib/base/message.h>
+#include <lib/dvb/service.h>
+
 
 class eLabel;
 class eProgress;
@@ -25,6 +26,7 @@ class eNumber;
 class gPainter;
 class NVODReferenceEntry;
 class eServiceSelector;
+class eRecordingStatus;
 
 class eZapMessage
 {
@@ -160,9 +162,8 @@ class eZapMain: public eWidget
 {
 public:
 	enum { modeTV, modeRadio, modeFile, modePlaylist, modeEnd };
-	enum { stateRunning, stateSleeping, stateRunningTimerEvent };
-// todo handle ServiceZapping in TimerMode.... msgbox... do you in Timermode...
-// bla... this stops the Timer... really zap ?
+	enum { stateNormal, stateSleeping, stateInTimerMode, stateRecording, recDVR=8, recVCR=16 };
+
 private:
 	eLabel 	*ChannelNumber, *ChannelName, *Clock, *EINow, *EINext,
 		*EINowDuration, *EINextDuration, *EINowTime, *EINextTime,
@@ -174,6 +175,8 @@ private:
 	
 	eLabel *DolbyOn, *DolbyOff, *CryptOn, *CryptOff, *WideOn, *WideOff;
 	eLabel mute, volume;
+	
+	eRecordingStatus *recstatus;
 	
 	eProgress *Progress, VolumeBar;
 	eMessageBox *pMsg;
@@ -246,7 +249,6 @@ private:
 	void play();
 	void stop();
 	void pause();
-	int recording;
 	enum { skipForward, skipReverse };
 	int skipcounter;
 	int skipping;
@@ -261,6 +263,9 @@ private:
 	
 	void doPlaylistAdd(const eServiceReference &service);
 	void addServiceToFavourite(eServiceSelector *s);
+	
+	void showFavourites();
+	void showBouquetList(int sellast);
 
 	static eZapMain *instance;
 	
@@ -286,6 +291,7 @@ private:
 	void updateProgress();
 	void getPlaylistPosition();
 	void setPlaylistPosition();
+	bool handleState();
 public:
 	void postMessage(const eZapMessage &message, int clear=0);
 	void gotMessage(const int &);
@@ -303,7 +309,7 @@ public:
 		psDontAdd=8, // just play
 	};
 	void playService(const eServiceReference &service, int flags);
-	void record();	// starts recording
+	void recordDVR(int user);	// starts recording
 //////////////////////////////
 
 	void setMode(int mode, int user=0); // user made change?
@@ -327,6 +333,12 @@ class eServiceContextMenu: public eListBoxWindow<eListBoxEntryText>
 	void entrySelected(eListBoxEntryText *s);
 public:
 	eServiceContextMenu(const eServiceReference &ref, const eServiceReference &path);
+};
+
+class eRecordingStatus: public eDecoWidget
+{
+public:
+	eRecordingStatus();
 };
 
 #endif /* __enigma_main_h */

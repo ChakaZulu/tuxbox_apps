@@ -1,11 +1,11 @@
-#include "showbnversion.h"
-#include <core/driver/rc.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/si.h>
-#include <core/gui/elabel.h>
-#include <core/dvb/dvbservice.h>
-#include <core/gui/guiactions.h>
-#include <core/gdi/font.h>
+#include <showbnversion.h>
+#include <lib/driver/rc.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/si.h>
+#include <lib/gui/elabel.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/gui/guiactions.h>
+#include <lib/gdi/font.h>
 
 /*
 	was hier fehlt: parsen der BAT (batid: 5001) auf 0001:0085. daher wird 0001:0085:0F03 assumed.

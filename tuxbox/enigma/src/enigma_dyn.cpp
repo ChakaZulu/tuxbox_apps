@@ -1,4 +1,4 @@
-#include "enigma_dyn.h"
+#include <enigma_dyn.h>
 
 #include <map>
 #include <time.h>
@@ -14,26 +14,25 @@
 #include <arpa/inet.h>
 #include <linux/if_ether.h>
 
-#include <config.h>
-#include <apps/enigma/enigma.h>
-#include <apps/enigma/enigma_main.h>
-#include <apps/enigma/sselect.h>
+#include <enigma.h>
+#include <enigma_main.h>
+#include <sselect.h>
 
-#include <core/system/http_dyn.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/epgcache.h>
-#include <core/system/econfig.h>
-#include <core/gdi/fb.cpp>
-#include <core/dvb/decoder.h>
-#include <core/dvb/dvbservice.h>
-#include <core/dvb/service.h>
-#include <core/gui/emessage.h>
-#include <core/driver/eavswitch.h>
-#include <core/dvb/service.h>
+#include <lib/system/http_dyn.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/epgcache.h>
+#include <lib/system/econfig.h>
+#include <lib/gdi/fb.h>
+#include <lib/dvb/decoder.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/service.h>
+#include <lib/gui/emessage.h>
+#include <lib/driver/eavswitch.h>
+#include <lib/dvb/service.h>
 
 
-// #include <core/dvr/dvrsocket.h>
+// #include <lib/dvr/dvrsocket.h>
 
 #define TEMPLATE_DIR DATADIR+eString("/enigma/templates/")
 

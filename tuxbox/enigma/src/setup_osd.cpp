@@ -1,15 +1,16 @@
-#include "setup_osd.h"
+#include <setup_osd.h>
 
-#include <core/gui/echeckbox.h>
-#include <core/gui/eskin.h>
-#include <core/system/econfig.h>
-#include <core/base/i18n.h>
+#include <lib/gui/echeckbox.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/econfig.h>
+#include <lib/base/i18n.h>
+#include <lib/gdi/gfbdc.h>
 
 eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 {
 	setText("On Screen Display Setup");
 	move(ePoint(150, 136));
-	resize(eSize(400, 280));
+	resize(eSize(460, 400));
 
 	int fd=eSkin::getActive()->queryValue("fontsize", 20);
 
@@ -26,13 +27,54 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 	eConfig::getInstance()->getKey("/ezap/osd/showConsoleOnFB", state);
 	showConsoleOnFB = new eCheckbox(this, state, fd);
 	showConsoleOnFB->setText(_("Show Console on Framebuffer"));
-	showConsoleOnFB->move(ePoint(20, 75));
+	showConsoleOnFB->move(ePoint(20, 65));
 	showConsoleOnFB->resize(eSize(fd+4+300, fd+4));
 	showConsoleOnFB->setHelpText(_("shows the linux console on TV"));
+	
+	showConsoleOnFB->hide();
+
+	alpha = gFBDC::getInstance()->getAlpha();
+	eLabel* l = new eLabel(this);
+	l->setText(_("Alpha:"));
+	l->move(ePoint(20, 125));
+	l->resize(eSize(110, fd+4));
+	sAlpha = new eSlider( this, l, 0, 512 );
+	sAlpha->setIncrement( 10 ); // Percent !
+	sAlpha->move( ePoint( 140, 125 ) );
+	sAlpha->resize(eSize( 300, fd+4 ) );
+	sAlpha->setHelpText(_("change the transparency correction"));
+	sAlpha->setValue( alpha);
+	CONNECT( sAlpha->changed, eZapOsdSetup::alphaChanged );
+
+	brightness = gFBDC::getInstance()->getBrightness();
+	l = new eLabel(this);
+	l->setText(_("Brightness:"));
+	l->move(ePoint(20, 165));
+	l->resize(eSize(110, fd+4));
+	sBrightness = new eSlider( this, l, 0, 255 );
+	sBrightness->setIncrement( 5 ); // Percent !
+	sBrightness->move( ePoint( 140, 165 ) );
+	sBrightness->resize(eSize( 300, fd+4 ) );
+	sBrightness->setHelpText(_("change the brightness correction"));
+	sBrightness->setValue( brightness);
+	CONNECT( sBrightness->changed, eZapOsdSetup::brightnessChanged );
+
+	gamma = gFBDC::getInstance()->getGamma();
+	l = new eLabel(this);
+	l->setText(_("Contrast:"));
+	l->move(ePoint(20, 205));
+	l->resize(eSize(110, fd+4));
+	sGamma = new eSlider( this, l, 0, 255 );
+	sGamma->setIncrement( 5 ); // Percent !
+	sGamma->move( ePoint( 140, 205 ) );
+	sGamma->resize(eSize( 300, fd+4 ) );
+	sGamma->setHelpText(_("change the contrast"));
+	sGamma->setValue( gamma);
+	CONNECT( sGamma->changed, eZapOsdSetup::gammaChanged );
 
 	ok=new eButton(this);
 	ok->setText(_("save"));
-	ok->move(ePoint(20, 135));
+	ok->move(ePoint(20, 265));
 	ok->resize(eSize(90, fd+4));
 	ok->setHelpText(_("close window and save changes"));
 	ok->loadDeco();
@@ -41,7 +83,7 @@ eZapOsdSetup::eZapOsdSetup(): eWindow(0)
 
 	abort=new eButton(this);
 	abort->setText(_("abort"));
-	abort->move(ePoint(140, 135));
+	abort->move(ePoint(140, 265));
 	abort->resize(eSize(100, fd+4));
 	abort->setHelpText(_("close window (no changes are saved)"));
 	abort->loadDeco();
@@ -58,6 +100,24 @@ eZapOsdSetup::~eZapOsdSetup()
 {
 }
 
+void eZapOsdSetup::alphaChanged( int i )
+{
+	alpha = i;
+	gFBDC::getInstance()->setAlpha(alpha);
+}
+
+void eZapOsdSetup::brightnessChanged( int i )
+{
+	brightness = i;
+	gFBDC::getInstance()->setBrightness(brightness);
+}
+
+void eZapOsdSetup::gammaChanged( int i )
+{
+	gamma = i;
+	gFBDC::getInstance()->setGamma(gamma);
+}
+
 void eZapOsdSetup::fieldSelected(int *number)
 {
 	focusNext(eWidget::focusDirNext);
@@ -65,13 +125,16 @@ void eZapOsdSetup::fieldSelected(int *number)
 
 void eZapOsdSetup::okPressed()
 {
+	gFBDC::getInstance()->saveSettings();
 	eConfig::getInstance()->setKey("/ezap/osd/showOSDOnEITUpdate", showOSDOnEITUpdate->isChecked());
 	eConfig::getInstance()->setKey("/ezap/osd/showConsoleOnFB", showConsoleOnFB->isChecked());
+
 	eConfig::getInstance()->flush();
 	close(1);
 }
 
 void eZapOsdSetup::abortPressed()
 {
+	gFBDC::getInstance()->reloadSettings();
 	close(0);
 }

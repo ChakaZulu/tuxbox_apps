@@ -1,10 +1,10 @@
-#include "emessage.h"
+#include <lib/gui/emessage.h>
 
-#include <core/gui/elabel.h>
-#include <core/gui/ebutton.h>
-#include <core/gui/eskin.h>
-#include <core/gdi/font.h>
-#include <core/base/i18n.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/eskin.h>
+#include <lib/gdi/font.h>
+#include <lib/base/i18n.h>
 
 eMessageBox::eMessageBox(eString message, eString caption, int flags, int def): eWindow(0), icon(0)
 {

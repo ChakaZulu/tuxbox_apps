@@ -1,7 +1,7 @@
 #ifndef __econfig_h
 #define __econfig_h
 
-#include <core/system/nconfig.h>
+#include <lib/system/nconfig.h>
 
 class eConfig: public NConfig
 {

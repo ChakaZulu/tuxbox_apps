@@ -1,8 +1,8 @@
-#include "statusbar.h"
+#include <lib/gui/statusbar.h>
 
-#include <core/system/init.h>
-#include <core/gui/eskin.h>
-#include <core/gdi/font.h>
+#include <lib/system/init.h>
+#include <lib/gui/eskin.h>
+#include <lib/gdi/font.h>
 
 eStatusBar::eStatusBar( eWidget* parent, const char *deco)
 	:eDecoWidget(parent, 0, deco), flags(0), client(this), current(0)
@@ -19,6 +19,7 @@ void eStatusBar::initialize()
 {
 	if ( !(flags & flagOwnerDraw) )
 	{
+		eDebug("CONNECT PARENT");
 		if (parent)
 			CONNECT( parent->focusChanged, eStatusBar::update );
 	}
@@ -28,6 +29,7 @@ void eStatusBar::initialize()
 
 void eStatusBar::update( const eWidget* p )
 {
+	eDebug("update p = %p", p);
 	if (p)
 	{
 		current = p;
@@ -62,11 +64,19 @@ int eStatusBar::setProperty(const eString &prop, const eString &value)
 
 void eStatusBar::redrawWidget(gPainter *target, const eRect& where)
 {
+	eDebug("redrawWidget where left = %d, top = %d, right = %d, bottom = %d", where.left(), where.top(), where.right(), where.bottom() );
 	if ( deco )
+	{
 		deco.drawDecoration(target, ePoint(width(), height()) );
+		eDebug("draw Deco");
+	}
 	
 	if ( (!(flags & flagOwnerDraw)) && current && where.contains( clientrect ) )
+	{
+		eDebug("setText");
 		client.setText( current->getHelpText() );
+	}
+	eDebug("redrawWidget ende");
 }
 
 int eStatusBar::eventHandler(const eWidgetEvent &event)

@@ -1,8 +1,8 @@
 #ifndef ERECT_H
 #define ERECT_H
 
-#include <core/base/esize.h>
-#include <core/base/epoint.h>
+#include <lib/base/esize.h>
+#include <lib/base/epoint.h>
 
 
 // x2 = x1 + width  (AND NOT, NEVER, NEVER EVER +1 or -1 !!!!)

@@ -1,14 +1,14 @@
-#include "setupvideo.h"
+#include <setupvideo.h>
 
-#include <core/base/i18n.h>
+#include <lib/base/i18n.h>
 
-#include <core/driver/eavswitch.h>
-#include <core/driver/rc.h>
-#include <core/driver/streamwd.h>
-#include <core/gui/elabel.h>
-#include <core/gui/ebutton.h>
-#include <core/gui/eskin.h>
-#include <core/system/econfig.h>
+#include <lib/driver/eavswitch.h>
+#include <lib/driver/rc.h>
+#include <lib/driver/streamwd.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/econfig.h>
 
 
 eZapVideoSetup::eZapVideoSetup(): eWindow(0)

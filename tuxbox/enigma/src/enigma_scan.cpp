@@ -17,22 +17,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_scan.cpp,v 1.8 2002/08/20 15:13:13 Ghostrider Exp $
+ * $Id: enigma_scan.cpp,v 1.9 2002/10/15 23:31:29 Ghostrider Exp $
  */
 
-#include "enigma_scan.h"
+#include <enigma_scan.h>
 
-#include <apps/enigma/satconfig.h>
-#include <apps/enigma/scan.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/frontend.h>
-#include <core/gui/ewindow.h>
-#include <core/gui/eskin.h>
-#include <core/gui/elabel.h>
-#include <core/base/i18n.h>
+#include <satconfig.h>
+#include <scan.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/frontend.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/elabel.h>
+#include <lib/base/i18n.h>
 
 eZapScan::eZapScan()
-	:eListBoxWindow<eListBoxEntryMenu>(_("Channels"), 8, 220)
+	:eListBoxWindow<eListBoxEntryMenu>(_("Channels"), 4, 220)
 {
 	move(ePoint(150, 136));
 	CONNECT((new eListBoxEntryMenu(&list, _("[back]")))->selected, eZapScan::sel_close);

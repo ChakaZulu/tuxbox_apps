@@ -1,10 +1,10 @@
-#include "actions.h"
+#include <lib/gui/actions.h>
 
 #include <xmltree.h>
-#include <core/base/eerror.h>
-#include <core/dvb/edvb.h>
-#include <core/system/init.h>
-#include <core/system/nconfig.h>
+#include <lib/base/eerror.h>
+#include <lib/dvb/edvb.h>
+#include <lib/system/init.h>
+#include <lib/system/nconfig.h>
 
 eAction::eAction(eActionMap &map, char *identifier, char *description, int priority)
 		: description(description), identifier(identifier), map(&map), priority(priority)

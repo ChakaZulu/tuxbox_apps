@@ -1,4 +1,4 @@
-#include "lcd.h"
+#include <lib/gdi/lcd.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -7,10 +7,10 @@
 #include <dbox/fp.h>
 #include <dbox/lcd-ks0713.h>
 
-#include <core/base/esize.h>
-#include <core/system/init.h>
-#include <core/gdi/glcddc.h>
-#include <core/system/econfig.h>
+#include <lib/base/esize.h>
+#include <lib/system/init.h>
+#include <lib/gdi/glcddc.h>
+#include <lib/system/econfig.h>
 
 eDBoxLCD *eDBoxLCD::instance;
 

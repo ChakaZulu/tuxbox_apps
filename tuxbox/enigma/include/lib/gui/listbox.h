@@ -3,14 +3,14 @@
 
 #include <sstream>
 
-#include <core/driver/rc.h>
-#include <core/gdi/grc.h>
-#include <core/gdi/fb.h>
-#include <core/gui/ewidget.h>
-#include <core/gui/eskin.h>
-#include <core/gui/ewindow.h>
-#include <core/gui/guiactions.h>
-#include <core/gui/statusbar.h>
+#include <lib/driver/rc.h>
+#include <lib/gdi/grc.h>
+#include <lib/gdi/fb.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/guiactions.h>
+#include <lib/gui/statusbar.h>
 
 int calcFontHeight( const gFont& font );
 
@@ -150,18 +150,20 @@ protected:
 	eTextPara *para;
 	int yOffs;
 	static gFont font;
+	int keytype;
 public:
+	enum { value, ptr };
 	static int getEntryHeight();
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0, const char* hlptxt=0 )
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const char* txt=0, void *key=0, int align=0, const char* hlptxt=0, int keytype = value )
 		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb, hlptxt ), text(txt),
-		 key(key), align(align), para(0)
+		 key(key), align(align), para(0), keytype(keytype)
 	{
 	}
 
-	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0, const char* hlptxt=0 )
+	eListBoxEntryText(eListBox<eListBoxEntryText>* lb, const eString& txt, void* key=0, int align=0, const char* hlptxt=0, int keytype = value )
 		:eListBoxEntry( (eListBox<eListBoxEntry>*)lb, hlptxt ), text(txt),
-		 key(key), align(align), para(0)
+		 key(key), align(align), para(0), keytype(keytype)
 	{
 	}
 
@@ -169,7 +171,7 @@ public:
 	
 	bool operator < ( const eListBoxEntryText& e) const
 	{
-		if (key == e.key)
+		if (key == e.key || keytype == ptr)
 			return text < e.text;	
 		else
 			return key < e.key;
@@ -427,6 +429,8 @@ inline void eListBox<T>::init()
 template <class T>
 inline int eListBox<T>::moveSelection(int dir)
 {
+	int direction=0, forceredraw=0;
+	
 	if (childs.empty())
 		return 0;
 
@@ -435,6 +439,7 @@ inline int eListBox<T>::moveSelection(int dir)
 	switch (dir)
 	{
 		case dirPageDown:
+			direction=+1;
 			for (int i = 0; i < MaxEntries; i++)
 			{
 				if (++current == bottom) // unten (rechts) angekommen? page down
@@ -457,6 +462,7 @@ inline int eListBox<T>::moveSelection(int dir)
 		break;
 
 		case dirPageUp:
+			direction=-1;
 			for (int i = 0; i < MaxEntries; ++i)
 			{
 				if (current == childs.begin())
@@ -482,12 +488,16 @@ inline int eListBox<T>::moveSelection(int dir)
 		case dirUp:
 			if ( current == childs.begin() )				// wrap around?
 			{
-				current = --childs.end();					// select last
+				direction=+1;
+				current = childs.end();					// select last
+				--current;
 				top = bottom = childs.end();
 				for (int i = 0; i < MaxEntries*columns; i++, top--)
 					if (top == childs.begin())
 						break;
 			} else
+			{
+				direction=-1;
 				if (current-- == top) // new top must set
 				{
 					for (int i = 0; i < MaxEntries*columns; i++, top--)
@@ -498,11 +508,13 @@ inline int eListBox<T>::moveSelection(int dir)
 						if (bottom == childs.end())
 							break;
 				}
+			}
 		break;
 
 		case dirDown:
-			if ( current == --childs.end() )				// wrap around?
+			if ( current == --ePtrList_T_iterator(childs.end()) )				// wrap around?
 			{
+				direction=-1;
 				top = current = bottom = childs.begin(); 	// goto first
 				for (int i = 0; i < MaxEntries * columns; ++i, ++bottom)
 					if ( bottom == childs.end() )
@@ -510,6 +522,7 @@ inline int eListBox<T>::moveSelection(int dir)
 			}
 			else
 			{
+				direction=+1;
 				if (++current == bottom)   // ++current ??
 				{
 					for (int i = 0; i<MaxEntries * columns; ++i)
@@ -523,6 +536,7 @@ inline int eListBox<T>::moveSelection(int dir)
 			}
 			break;
 		case dirFirst:
+			direction=-1;
 			top = current = bottom = childs.begin(); 	// goto first;
 			for (int i = 0; i < MaxEntries * columns; i++, bottom++)
 				if ( bottom == childs.end() )
@@ -535,7 +549,40 @@ inline int eListBox<T>::moveSelection(int dir)
 	if (current != oldptr)  // current has changed
 	{
 		if (movemode)
-			std::iter_swap(current, oldptr);
+		{
+				// feel free to rewrite using stl::copy[_backward], but i didn't succeed.
+			typename std::list<T*>::iterator o=oldptr;
+			typename std::list<T*>::iterator c=current;
+			typename std::list<T*>::iterator curi=current;
+			typename std::list<T*>::iterator oldi=oldptr;
+			int count=0;
+			
+			T* old=*o;
+
+			if (direction > 0)
+			{
+				++o;
+				++c;
+				while (o != c)
+				{
+					*oldi++=*o++;
+					count++;
+				}
+			} else
+			{
+				while (o != curi)
+				{
+					*oldi--=*--o;
+					count++;
+				}
+			}
+			
+			if (count > 1)
+				forceredraw=1;
+			
+			*curi=old;
+		}
+
 		if (!in_atomic)
 			selchanged(*current);
 		else
@@ -547,7 +594,7 @@ inline int eListBox<T>::moveSelection(int dir)
 
 	if (isVisible())
 	{
-		if (oldtop != top)
+		if ((oldtop != top) || forceredraw)
 		{
 			if (in_atomic)
 				atomic_redraw=arAll;
@@ -779,6 +826,7 @@ template <class T>
 inline eListBoxWindow<T>::eListBoxWindow(eString Title, int Entrys, int width, bool sbar)
 	: eWindow(0), Entrys(Entrys), width(width), list(this), statusbar(sbar?new eStatusBar(this):0)
 {
+	list.setFlags( eListBoxBase::flagShowEntryHelp );
 	setText(Title);
 	cresize( eSize(width, (sbar?40:10)+Entrys*T::getEntryHeight() ) );
 	list.move(ePoint(10, 5));

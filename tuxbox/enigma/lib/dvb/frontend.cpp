@@ -1,4 +1,4 @@
-#include "frontend.h"
+#include <lib/dvb/frontend.h>
 
 #include <errno.h>
 #include <stdio.h>
@@ -8,11 +8,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <core/base/ebase.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/esection.h>
-#include <core/dvb/decoder.h>
-#include <core/system/econfig.h>
+#include <lib/base/ebase.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/esection.h>
+#include <lib/dvb/decoder.h>
+#include <lib/system/econfig.h>
 
 eFrontend* eFrontend::frontend;
 
@@ -135,6 +135,8 @@ int eFrontend::SNR()
 		snr=0;
 	}
 #endif
+	eDebug("SNR:%d",snr);
+
 	return snr;
 }
 
@@ -211,7 +213,7 @@ int eFrontend::tune(eTransponder *trans,
 	secDiseqcCmd DiSEqC;
 	int hi;
 	
-//	Decoder::Flush();
+	Decoder::Flush();
 	eSection::abortAll();
 	timer->stop();
 	if (state==stateTuning)
@@ -246,7 +248,10 @@ int eFrontend::tune(eTransponder *trans,
 		if ( lnb->getDiSEqC().DiSEqCMode == eDiSEqC::MINI )
 			cmd.type = SEC_MINI_NONE;
 		else
-			cmd.type = SEC_CMDTYPE_DISEQC;
+		{
+			cmd.type = SEC_CMDTYPE_DISEQC_RAW;
+			DiSEqC.cmdtype=0xE0;
+		}
 
 		if ( swParams->VoltageMode == eSwitchParameter::_14V || ( polarisation == polVert && swParams->VoltageMode == eSwitchParameter::HV )  )
 		{

@@ -1,9 +1,9 @@
-#ifndef __core_dvb_servicecache_h
-#define __core_dvb_servicecache_h
+#ifndef __lib_dvb_servicecache_h
+#define __lib_dvb_servicecache_h
 
 #include <map>
 #include <list>
-#include <core/dvb/service.h>
+#include <lib/dvb/service.h>
 
 class eService;
 

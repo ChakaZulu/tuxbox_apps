@@ -1,14 +1,14 @@
-#ifndef __core_dvb_serviceplaylist_h
-#define __core_dvb_serviceplaylist_h
+#ifndef __lib_dvb_serviceplaylist_h
+#define __lib_dvb_serviceplaylist_h
 
-#include <core/dvb/service.h>
+#include <lib/dvb/service.h>
 #include <list>
 
 struct ePlaylistEntry
 {
 	enum
 	{
-		PlaylistEntry=1, SwitchTimerEntry=2, RecTimerEntry=4,	
+		PlaylistEntry=1, SwitchTimerEntry=2, RecTimerEntry=4,	recDVR=8, recVCR=16,
 		stateWaiting=32, stateRunning=64,	statePaused=128, stateFinished=256, stateError=512,
 		errorNoSpaceLeft=1024, errorUserAborted=2048, errorZapFailed=4096, errorOutdated=8192,
 		boundFile=16384, typeSmartTimer=32768

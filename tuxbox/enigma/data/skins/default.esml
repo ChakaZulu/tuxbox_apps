@@ -33,6 +33,8 @@
 		<map name="eWindow.Childs" font="Nimbus" size="24" />
 
 		<map name="eListBox.EntryText.normal" font="Nimbus" size="24" />
+		
+		<map name="eAboutScreen.machine" font="Nimbus" size="40" />
 
 		<map name="eServiceSelector.Entry.Description" font="Nimbus" size="20" />
 		<map name="eServiceSelector.singleColumn.Entry.Name" font="Nimbus" size="24" />
@@ -47,6 +49,7 @@
 
 		<map name="lcd.main.service_name" font="Nimbus" size="16" />
 		<map name="lcd.main.clock" font="Nimbus" size="14" />
+		<map name="lcd.standby.clock" font="Nimbus" size="30" />
 
 		<map name="lcd.menu.title" font="Nimbus" size="14" />
 		<map name="lcd.menu.element" font="Nimbus" size="12" />
@@ -101,7 +104,8 @@
 		<img name="timer_symbol" src="clock-fs8.png" />
 		<img name="timer_rec_symbol" src="clock_rec-fs8.png" />
 		<img name="ok_symbol" src="event_ok-fs8.png" />
-		<img name="failed_symbol" src="event_failed-fs8.png" />	
+		<img name="failed_symbol" src="event_failed-fs8.png" />
+		<img name="dreamlogo" src="dreamlogo-fs8.png" />
 	</images>
 	
 	<colors>
@@ -176,10 +180,18 @@
 		</eZapLCDScart>
 	</object>
 
+<!--
 	<object name="enigma_lcd_standby">
 		<eZapLCDScart position="0:0" size="120:64">
 		  <eLabel position="0:0" size="e:e" pixmap="lcd_standby" />	
 		</eZapLCDScart>
+	</object>
+-->
+	<object name="enigma_lcd_standby">
+		<eZapLCDStandby position="0:0" size="120:64">
+ 		  <eLabel position="25:15" size="e:e" font="lcd.standby.clock" name="clock" />	
+		  <eLabel position="0:0" size="e:e" pixmap="lcd_standby" />	
+		</eZapLCDStandby>
 	</object>
 
 	<object name="enigma_lcd_shutdown">
@@ -249,7 +261,7 @@
 	<object name="tsAutomatic">
 		<tsAutomatic position="0:0" size="e:350">
 			<eLabel name="lNet" position="10:40" size="150:30" text="Network:" />
-			<eListBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satelite/cable provider (left, right)" />
+			<eComboBox name="network" position="160:40" size="e-70:35" loadDeco="" helptext="choose satelite/cable provider (ok)" />
 			<eFEStatus name="festatus" position="0:100" size="400:85" />
 			<eLabel name="status" position="10:190" size="e-10:e-80" />
 			<eCheckBox name="eraseall" text="erase all" position="10:e-70" size="150:30" helptext="erase bouquets and services before scan" />
@@ -286,7 +298,7 @@
 	<object name="transpondersettings.satellite">
 		<eTranspondersettings position="0:0" size="400:160">
 			<eLabel text="Satellite:" name="lSat" position="10:10" size="140:34" vcenter="on" />
-			<eListbox name="sat" position="150:10" size="e-10:34" loadDeco="" helptext="choose wished satellite (left, right)" noUpDownMovement="on" />
+			<eComboBox name="sat" position="150:10" size="e-10:34" loadDeco="" helptext="choose wished satellite (ok)" />
 
 			<eLabel  name="lFreq" text="Frequency:" position="10:50" size="140:32" vcenter="on" />
 			<eNumber name="frequency" position="150:50" size="e-150:32" helptext="enter transponder frequeny (0..9, left, right)" loadDeco="" />
@@ -366,4 +378,60 @@
 		</eBouquetSelector>
 	</object>
 
+	<object name="eTimerView">
+		<eTimerView cposition="70:100" csize="590:420" text="EPG">
+			<eListbox name="events" position="10:10" size="e-10:e-220" loadDeco="" helptext="press ok to edit the selected event" />
+			<eComboBox name="b_year" openEntries="5" position="10:e-210" size="90:35" helptext="select year (ok)" loadDeco="" />
+			<eComboBox name="b_month" openEntries="6" position="110:e-210" size="150:35" helptext="select month (ok)" loadDeco="" />
+			<eComboBox name="b_day" openEntries="10" position="270:e-210" size="e-92:35" helptext="select day (ok)" loadDeco="" />
+			<eNumber name="b_time" position="e-82:e-210" size="72:35" helptext="edit the begin time (0..9, left, right)" loadDeco="" />
+			<eComboBox name="e_year" openEntries="5" position="10:e-165" size="90:35" helptext="select year (ok)" loadDeco="" />
+			<eComboBox name="e_month" openEntries="6" position="110:e-165" size="150:35" helptext="select month (ok)" loadDeco="" />
+			<eComboBox name="e_day" openEntries="10" position="270:e-165" size="e-92:35" helptext="select day (ok)" loadDeco="" />
+			<eNumber name="e_time" position="e-82:e-165" size="72:35" helptext="edit the end time (0..9, left, right)" loadDeco="" />
+			<eComboBox name="type" openEntries="2" position="10:e-120" size="150:35" helptext="select the timer type (ok)" loadDeco="" />
+			<eComboBox name="services" openEntries="10" position="170:e-120" size="e-10:35" helptext="select the service (ok)" loadDeco="" sorted="" />
+			<eButton name="close" text="close" position="10:e-75" size="150:35" helptext="close timer menu (ok)" loadDeco="" />
+			<eButton name="update" text="update" position="170:e-75" size="150:35" helptext="update the current selected timer (ok)" loadDeco="" />
+			<eButton name="add" text="add" position="e-260:e-75" size="90:35" helptext="add new Timer (ok)" loadDeco="" />
+			<eButton name="remove" text="remove" position="e-160:e-75" size="150:35" helptext="delete the current selected timer (ok)" loadDeco="" />
+			<eStatusBar name="statusbar" position="0:e-30" size="e:e" loadDeco="" />
+		</eTimerView>
+	</object>
+	
+	<object name="eRecordingStatus">
+		<eRecordingStatus cposition="140:50" csize="300:100" loadDeco="">
+			<eLabel pixmap="button_red" position="0:0" csize="50:e" />
+			<eLabel text="recording... press shift+record to end!" position="50:0" size="e:30" />
+			<eLabel text="remaining disk space:" position="50:30" size="e:e" />
+		</eRecordingStatus>
+	</object>
+	
+	<object name="eAboutScreen">
+		<eAboutScreen text="About..." cposition="140:200" csize="350:300">
+			<eLabel name="vendor" position="10:0" csize="e:25"/>
+			<eLabel name="machine" position="30:25" font="eAboutScreen.machine" csize="e:50"/>
+			<eLabel name="processor" text="processor: " position="10:80" csize="e:30" />
+			<eLabel name="frontend" text="frontend: " position="10:110" csize="e:30" />
+			<eLabel text="harddisk: " position="10:140" csize="e:30" />
+			<eLabel name="harddisks" position="10:170" csize="e:60" />
+			<eButton name="okButton" position="20:e-50" csize="50:30" text="ok" loadDeco="" />
+			<eLabel name="dreamlogo" pixmap="dreamlogo" position="e-160:e-95" csize="143:75" alphatest="on" />
+		</eAboutScreen>
+	</object>
+	
+	<object name="eHarddiskMenu">
+		<eHarddiskMenu name="Harddisk" cposition="140:200" csize="450:210">
+			<eLabel text="model:" position="10:10" size="150:30" />
+			<eLabel name="model" position="160:10" size="e:30" />
+			<eLabel text="capacity:" position="10:40" size="150:30" />
+			<eLabel name="capacity" position="160:40" size="e:30" />
+			<eLabel text="connected:" position="10:70" size="150:30" />
+			<eLabel name="bus" position="160:70" size="e:30" />
+			<eLabel text="status:" position="10:110" size="70:30" />
+			<eLabel name="status" position="80:110" size="e:30" />
+			<eButton name="close" text="close" position="10:170" size="150:30" loadDeco="" />
+			<eButton name="format" text="format" position="160:170" size="150:30" loadDeco="" />
+		</eHarddiskMenu>
+	</object>
 </eskin>

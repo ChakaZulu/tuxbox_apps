@@ -2,16 +2,14 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include <config.h>
-
-#include <core/gui/eskin.h>
-#include <core/gui/ewidget.h>
-#include <core/gdi/gfbdc.h>
-#include <core/gdi/glcddc.h>
-#include <core/gdi/epng.h>
-#include <core/base/eerror.h>
-#include <core/gdi/font.h>
-#include <core/base/eptrlist.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gdi/gfbdc.h>
+#include <lib/gdi/glcddc.h>
+#include <lib/gdi/epng.h>
+#include <lib/base/eerror.h>
+#include <lib/gdi/font.h>
+#include <lib/base/eptrlist.h>
 
 std::map< eString,tWidgetCreator > eSkin::widget_creator;
 
@@ -377,6 +375,12 @@ int eSkin::parseValues(XMLTreeNode *xvalues)
 			eDebug("values entry has no value");
 			continue;
 		}
+		std::map<eString, int>::iterator it = values.find(name);
+		if (it != values.end())
+		{
+			eDebug("value %s does exist, skip make value %s=%i", name, value);
+			continue;
+		}
 		values[name]=atoi(value);
 	}
 	return 0;
@@ -586,7 +590,7 @@ int eSkin::build(eWidget *widget, const char *name)
 	for (parserList::iterator i(parsers.begin()); i!=parsers.end(); ++i)
 	{
 		XMLTreeNode *node=i->RootNode();
-		node=node->GetChild();
+			node=node->GetChild();
 		while (node)
 		{
 			if (!strcmp(node->GetType(), "object"))

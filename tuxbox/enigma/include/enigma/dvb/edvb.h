@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include <list>
 
-#include <include/libsig_comp.h>
-#include <core/dvb/esection.h>
-#include <core/system/econfig.h>
-#include <core/base/estring.h>
-#include <core/base/eptrlist.h>
-#include <core/dvb/settings.h>
+#include <libsig_comp.h>
+#include <lib/dvb/esection.h>
+#include <lib/system/econfig.h>
+#include <lib/base/estring.h>
+#include <lib/base/eptrlist.h>
+#include <lib/dvb/settings.h>
+#include <lib/dvb/dvbci.h>
 
 class eService;
 class eTransponder;
@@ -39,6 +40,8 @@ class eDVBScanController;
 class eDVB;
 
 class eTransponder;
+
+class eDVBCI;
 
 class eDVBEvent
 {
@@ -99,6 +102,7 @@ public:
 	eAUTable<BAT> tBAT;
 	
 	eDVBRecorder *recorder;
+	eDVBCI *DVBCI;
 
 public:
 	enum

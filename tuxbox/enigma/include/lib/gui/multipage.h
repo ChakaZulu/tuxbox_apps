@@ -1,7 +1,7 @@
 #ifndef __multipage_h_
 #define __multipage_h_
 
-#include <core/base/eptrlist.h>
+#include <lib/base/eptrlist.h>
 class eWidget;
 
 class eMultipage

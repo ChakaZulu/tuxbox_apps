@@ -1,8 +1,8 @@
 #ifndef __ebutton_h
 #define __ebutton_h
 
-#include <core/gui/elabel.h>
-#include <core/gdi/grc.h>
+#include <lib/gui/elabel.h>
+#include <lib/gdi/grc.h>
 
 /**
  * \brief A widget which acts like a button.

@@ -1,7 +1,7 @@
-#include <core/dvb/servicemp3.h>
-#include <core/dvb/servicefile.h>
-#include <core/system/init.h>
-#include <core/base/i18n.h>
+#include <lib/dvb/servicemp3.h>
+#include <lib/dvb/servicefile.h>
+#include <lib/system/init.h>
+#include <lib/base/i18n.h>
 
 #include <unistd.h>
 #include <fcntl.h>

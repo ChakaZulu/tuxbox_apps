@@ -1,8 +1,8 @@
-#ifndef __core_gui_decoration_h
-#define __core_gui_decoration_h
+#ifndef __lib_gui_decoration_h
+#define __lib_gui_decoration_h
 
-#include <core/base/erect.h>
-#include <core/base/estring.h>
+#include <lib/base/erect.h>
+#include <lib/base/estring.h>
 class gPixmap;
 class gPainter;
 

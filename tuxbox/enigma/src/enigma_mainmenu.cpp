@@ -1,18 +1,18 @@
-#include <apps/enigma/enigma.h>
-#include <apps/enigma/enigma_main.h>
-#include <apps/enigma/enigma_mainmenu.h>
-#include <apps/enigma/enigma_setup.h>
-#include <apps/enigma/enigma_plugins.h>
-#include <apps/enigma/enigma_info.h>
-#include <apps/enigma/enigma_lcd.h>
-#include <apps/enigma/enigma_vcr.h>
+#include <enigma.h>
+#include <enigma_main.h>
+#include <enigma_mainmenu.h>
+#include <enigma_setup.h>
+#include <enigma_plugins.h>
+#include <enigma_info.h>
+#include <enigma_lcd.h>
+#include <enigma_vcr.h>
 
-#include <core/gui/eskin.h>
-#include <core/driver/eavswitch.h>
-#include <core/gui/elabel.h>
-#include <core/dvb/epgcache.h>
-#include <core/base/i18n.h>
-#include <core/gui/guiactions.h>
+#include <lib/gui/eskin.h>
+#include <lib/driver/eavswitch.h>
+#include <lib/gui/elabel.h>
+#include <lib/dvb/epgcache.h>
+#include <lib/base/i18n.h>
+#include <lib/gui/guiactions.h>
 
 #define MENU_ENTRIES	8
 
@@ -101,8 +101,6 @@ eMainMenu::eMainMenu()
 		if (!pixmaps[i][1])
 			eFatal("error, mainmenu bug, mainmenu.%s.sel not defined", pixmap_name[i]);
 	}
-
-	setActive(active=eZapMain::getInstance()->getRealMode());
 }
 
 void eMainMenu::sel_tv()
@@ -182,6 +180,10 @@ int eMainMenu::eventHandler(const eWidgetEvent &event)
 {
 	switch (event.type)
 	{
+	case eWidgetEvent::willShow:
+		setActive(active=eZapMain::getInstance()->getRealMode());		
+	break;
+
 	case eWidgetEvent::evtAction:
 		if (event.action == &i_cursorActions->left)
 		{

@@ -1,9 +1,9 @@
 #include <errno.h>
-#include <core/dvb/dvbservice.h>
-#include <core/dvb/service.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/edvb.h>
-#include <core/system/xmlrpc.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/service.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
+#include <lib/system/xmlrpc.h>
 
 static eBouquet *getBouquetByID(const char *id)
 {

@@ -1,17 +1,17 @@
 #ifndef __ewidget_h
 #define __ewidget_h
 
-#include <core/base/ebase.h>
-#include <core/base/estring.h>
-#include <core/base/epoint.h>
-#include <core/base/esize.h>
-#include <core/base/erect.h>
-#include <core/base/eptrlist.h>
-#include <include/libsig_comp.h>
-#include <core/gdi/grc.h>
-#include <core/driver/rc.h>
-#include <core/gui/actions.h>
-#include <core/gui/decoration.h>
+#include <lib/base/ebase.h>
+#include <lib/base/estring.h>
+#include <lib/base/epoint.h>
+#include <lib/base/esize.h>
+#include <lib/base/erect.h>
+#include <lib/base/eptrlist.h>
+#include <libsig_comp.h>
+#include <lib/gdi/grc.h>
+#include <lib/driver/rc.h>
+#include <lib/gui/actions.h>
+#include <lib/gui/decoration.h>
 #include <list>
 
 class eWidgetEvent

@@ -3,11 +3,11 @@
 #include <ctype.h>
 #include <set>
 
-#include <core/dvb/dvb.h>
-#include <core/dvb/si.h>
-#include <core/dvb/frontend.h>
-#include <core/system/econfig.h>
-#include <core/dvb/servicestructure.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/si.h>
+#include <lib/dvb/frontend.h>
+#include <lib/system/econfig.h>
+#include <lib/dvb/servicestructure.h>
 
 eTransponderList* eTransponderList::instance=0;
 /*

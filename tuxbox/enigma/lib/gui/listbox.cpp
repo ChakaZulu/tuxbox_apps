@@ -1,6 +1,5 @@
-#include "listbox.h"
-
-#include <core/gdi/font.h>
+#include <lib/gui/listbox.h>
+#include <lib/gdi/font.h>
 
 gFont eListBoxEntryText::font;
 gFont eListBoxEntryTextStream::font;

@@ -1,4 +1,4 @@
-#include "si.h"
+#include <lib/dvb/si.h>
 
 #include <stdio.h>
 #include <time.h>
@@ -10,10 +10,10 @@ extern "C"
 	time_t my_mktime (struct tm *tp);
 }
 #define HILO(x) (x##_hi << 8 | x##_lo) 
-#include <core/dvb/lowlevel/decode.h>
-#include <core/dvb/lowlevel/dvb.h>
-#include <core/dvb/lowlevel/pat.h>
-#include <core/dvb/lowlevel/tdt.h>
+#include <lib/dvb/lowlevel/decode.h>
+#include <lib/dvb/lowlevel/dvb.h>
+#include <lib/dvb/lowlevel/pat.h>
+#include <lib/dvb/lowlevel/tdt.h>
 
 static eString qHex(int v)
 {

@@ -1,4 +1,4 @@
-#include "serversocket.h"
+#include <lib/socket/serversocket.h>
 
 bool eServerSocket::ok()
 {

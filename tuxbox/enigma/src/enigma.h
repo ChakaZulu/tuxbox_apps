@@ -1,8 +1,8 @@
 #ifndef __enigma_h
 #define __enigma_h
 
-#include <core/base/ebase.h>
-#include <apps/enigma/sselect.h>
+#include <lib/base/ebase.h>
+#include <sselect.h>
 
 class eServiceSelector;
 class eServicePath;

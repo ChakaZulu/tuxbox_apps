@@ -1,5 +1,5 @@
-#include "glcddc.h"
-#include "lcd.h"
+#include <lib/gdi/glcddc.h>
+#include <lib/gdi/lcd.h>
 
 gLCDDC *gLCDDC::instance;
 

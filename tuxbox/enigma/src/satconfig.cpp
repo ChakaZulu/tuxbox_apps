@@ -1,10 +1,10 @@
-#include "satconfig.h"
+#include <satconfig.h>
 
-#include <core/base/i18n.h>
-#include <core/gui/eskin.h>
-#include <core/gui/ebutton.h>
-#include <core/gui/emessage.h>
-//#include <core/driver/rc.h>
+#include <lib/base/i18n.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/emessage.h>
+//#include <lib/driver/rc.h>
 
 eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 	:refresh(0), deleteThisEntry( 0 )
@@ -19,6 +19,7 @@ eSatelliteConfigurationManager::eSatelliteConfigurationManager()
 
 	w_buttons=new eWidget(this);
 	w_buttons->setName("buttons");
+	w_buttons->setLCD( LCDTitle, LCDElement );
 
 	eSkin *skin=eSkin::getActive();
 	if (skin->build(this, "eSatelliteConfigurationManager"))
@@ -234,10 +235,10 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 	c->loadDeco();
 //			c->move( ePoint( hx, y ) );
 	c->resize( eSize( 90, 30 ) );
-	c->setHelpText( _("press ok to select another 22Khz mode") );
-	new eListBoxEntryText( *c, "Auto", (void*)eSwitchParameter::HILO, 0, _("22khz signal is automaticaly switched") );
-	new eListBoxEntryText( *c, "Hi", (void*)eSwitchParameter::ON, 0, _("22Khz is always enabled (high band)") );
-	new eListBoxEntryText( *c, "Lo", (void*)eSwitchParameter::OFF, 0, _("22khz is always disabled (low band)") );
+	c->setHelpText( _("press ok to select another 22kHz mode") );
+	new eListBoxEntryText( *c, "Auto", (void*)eSwitchParameter::HILO, 0, _("22kHz signal is automaticaly switched") );
+	new eListBoxEntryText( *c, "Hi", (void*)eSwitchParameter::ON, 0, _("22kHz is always enabled (high band)") );
+	new eListBoxEntryText( *c, "Lo", (void*)eSwitchParameter::OFF, 0, _("22kHz is always disabled (low band)") );
 	c->setCurrent( (void*) (int) s->getSwitchParams().HiLoSignal );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::hiloChanged);
 
@@ -248,8 +249,8 @@ void eSatelliteConfigurationManager::addSatellite( eSatellite *s )
 	c->resize( eSize( 90, 30 ) );
 	c->setHelpText( _("press ok to select another LNB Voltage mode") );
 	new eListBoxEntryText( *c, "Auto", (void*)eSwitchParameter::HV, 0, _("Voltage is automaticaly changed") );
-	new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_14V, 0, _("Voltage is always 14V (horizontal)") );
-	new eListBoxEntryText( *c, "18V", (void*)eSwitchParameter::_18V, 0, _("Voltage is always 18V (vertical") );
+	new eListBoxEntryText( *c, "14V", (void*)eSwitchParameter::_14V, 0, _("Voltage is always 14V (vertical)") );
+	new eListBoxEntryText( *c, "18V", (void*)eSwitchParameter::_18V, 0, _("Voltage is always 18V (horizontal") );
 	c->setCurrent( (void*) (int) s->getSwitchParams().VoltageMode );
 	CONNECT( c->selchanged_id, eSatelliteConfigurationManager::voltageChanged);
 	entryMap.insert( std::pair <eSatellite*, SatelliteEntry> ( s, sat ) );

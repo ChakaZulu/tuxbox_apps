@@ -1,14 +1,14 @@
 #ifndef __sselect_h
 #define __sselect_h
 
-#include <core/gui/ewindow.h>
-#include <core/gui/listbox.h>
-#include <core/gui/statusbar.h>
-#include <core/dvb/epgcache.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/listbox.h>
+#include <lib/gui/statusbar.h>
+#include <lib/dvb/epgcache.h>
 #include "channelinfo.h"
 
 #include <stack>
-#include <core/dvb/service.h>
+#include <lib/dvb/service.h>
 
 class eService;
 class eLabel;

@@ -11,10 +11,10 @@
 #include <deque>
 #include <stack>
 
-#include <core/base/estring.h>
-#include <core/base/erect.h>
-#include <core/system/elock.h>
-#include <core/gdi/gpixmap.h>
+#include <lib/base/estring.h>
+#include <lib/base/erect.h>
+#include <lib/system/elock.h>
+#include <lib/gdi/gpixmap.h>
 
 
 class eTextPara;

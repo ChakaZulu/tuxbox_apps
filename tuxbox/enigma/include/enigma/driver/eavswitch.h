@@ -1,7 +1,7 @@
 #ifndef __eavswitch_h
 #define __eavswitch_h
 
-#include <core/base/ebase.h>
+#include <lib/base/ebase.h>
 
 enum eAVAspectRatio
 {

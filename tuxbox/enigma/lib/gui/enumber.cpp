@@ -1,10 +1,10 @@
-#include "enumber.h"
-#include <core/driver/rc.h>
-#include <core/gui/eskin.h>
-#include <core/gui/elabel.h>
-#include <core/gdi/fb.h>
-#include <core/gdi/grc.h>
-#include <core/gui/guiactions.h>
+#include <lib/gui/enumber.h>
+#include <lib/driver/rc.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/elabel.h>
+#include <lib/gdi/fb.h>
+#include <lib/gdi/grc.h>
+#include <lib/gui/guiactions.h>
 
 eRect eNumber::getNumberRect(int n)
 {
@@ -28,10 +28,22 @@ void eNumber::redrawNumber(gPainter *p, int n, const eRect &area)
 	p->setFont(font);
 	
 	eString t;
-	if (base==10)
-		t.sprintf("%d", number[n]);
-	else if (base==0x10)
-		t.sprintf("%X", number[n]);
+	if (flags & flagFillWithZeros)
+	{
+		eString s = "%0"+eString().setNum(maxdigits)+(base==10?"d":"X");
+		const char* p = s.c_str();
+		char* tmp = new char[10];
+		strcpy( tmp, p );
+		t.sprintf(tmp, number[n]);
+		delete tmp;
+	}
+	else
+	{
+		if (base==10)
+			t.sprintf("%d", number[n]);
+		else if (base==0x10)
+			t.sprintf("%X", number[n]);
+	}
 
 	if (n && (flags & flagDrawPoints))
 		t="."+t;
@@ -137,6 +149,11 @@ int eNumber::keyDown(int key)
 	{
 		int nn=(digit!=0)?number[active]*10:0;
 		nn+=key-eRCInput::RC_0;
+		if (flags & flagTime)
+			if ( active == 0 )
+				min=0, max = 23;
+			else
+				min=0, max = 59;
 		if (nn>=min && nn<=max)
 		{
 			number[active]=nn;

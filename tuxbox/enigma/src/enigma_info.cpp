@@ -17,20 +17,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: enigma_info.cpp,v 1.5 2002/07/02 00:19:33 Ghostrider Exp $
+ * $Id: enigma_info.cpp,v 1.6 2002/10/15 23:31:29 Ghostrider Exp $
  */
 
-#include "enigma_info.h"
+#include <enigma_info.h>
 
-#include <apps/enigma/streaminfo.h>
-#include <apps/enigma/showbnversion.h>
+#include <streaminfo.h>
+#include <showbnversion.h>
 
-#include <core/dvb/edvb.h>
-#include <core/gui/ewindow.h>
-#include <core/gui/eskin.h>
-#include <core/gui/elabel.h>
-#include <core/gui/emessage.h>
-#include <core/base/i18n.h>
+#include <lib/dvb/edvb.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/emessage.h>
+#include <lib/gui/ebutton.h>
+#include <lib/base/i18n.h>
 
 eZapInfo::eZapInfo()
 	:eListBoxWindow<eListBoxEntryMenu>(_("Infos"), 8, 220)
@@ -74,12 +75,173 @@ void eZapInfo::sel_bnversion()
 	show();
 }
 
+class eAboutScreen: public eWindow
+{
+	eLabel *machine, *processor, *frontend, *harddisks, *vendor, *dreamlogo;
+	eButton *okButton;
+public:
+	eAboutScreen()
+	{
+		int mID=atoi( eDVB::getInstance()->getInfo("mID").c_str());
+		
+		machine=new eLabel(this);
+		machine->setName("machine");
+
+		vendor=new eLabel(this);
+		vendor->setName("vendor");
+
+		processor=new eLabel(this);
+		processor->setName("processor");
+		
+		frontend=new eLabel(this);
+		frontend->setName("frontend");
+
+		harddisks=new eLabel(this);
+		harddisks->setName("harddisks");
+		
+		okButton=new eButton(this);
+		okButton->setName("okButton");
+		
+		dreamlogo=new eLabel(this);
+		dreamlogo->setName("dreamlogo");
+
+		if (eSkin::getActive()->build(this, "eAboutScreen"))
+			eFatal("skin load of \"eAboutScreen\" failed");
+		
+		dreamlogo->hide();
+		
+		switch (mID)
+		{
+		case 1:
+			vendor->setText("Nokia");
+			break;
+		case 2:
+			vendor->setText("Philips");
+			break;
+		case 3:
+			vendor->setText("Sagem");
+			break;
+		case 4:
+			vendor->setText(_("Unknown"));
+		break;
+		case 5:
+		case 6:
+			vendor->setText("Dream-Multimedia-TV");
+			dreamlogo->show();
+			break;
+		default:
+			vendor->setText(_("my"));
+			break;
+		}
+		
+		switch (mID)
+		{
+		case 1:
+		case 2:
+		case 3:
+			processor->setText(_("Processor: XPC823, 66MHz"));
+			break;
+		case 4:
+			processor->setText(_("Processor: XPC823, 80MHz"));
+			break;
+		case 5:
+			processor->setText(_("Processor: STB04500, 252MHz"));
+			break;
+		case 6:
+			processor->setText(_("Processor: STB25xxx, 252MHz"));
+			break;
+		}
+		
+		switch (mID)
+		{
+		case 1:
+		case 2:
+		case 3:
+			machine->setText("d-Box 2");
+			break;
+		case 4:
+			machine->setText("d-Box");
+			break;
+		case 5:
+			machine->setText("DM7000");
+			break;
+		case 6:
+			machine->setText("DM5600");
+			break;
+		}
+		
+		int fe=atoi(eDVB::getInstance()->getInfo("fe").c_str());
+		switch (fe)
+		{
+		case 1:
+			frontend->setText(_("Frontend: Satellite"));
+			break;
+		case 2:
+			frontend->setText(_("Frontend: Cable"));
+			break;
+		case 3:
+			frontend->setText(_("Frontend: Terrestric"));
+			break;
+		case 4:
+			frontend->setText(_("Frontend: Simulator"));
+			break;
+		}
+		
+		eString sharddisks;
+		
+		for (int c='a'; c<'h'; c++)
+		{
+			char line[1024];
+			int ok=1;
+			FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/media", c).c_str(), "r");
+			if (!f)
+				continue;
+			if ((!fgets(line, 1024, f)) || strcmp(line, "disk\n"))
+				ok=0;
+			fclose(f);
+			if (ok)
+			{
+				FILE *f=fopen(eString().sprintf("/proc/ide/hd%c/model", c).c_str(), "r");
+				if (!f)
+					continue;
+				*line=0;
+				fgets(line, 1024, f);
+				fclose(f);
+				if (!*line)
+					continue;
+				line[strlen(line)-1]=0;
+				sharddisks+=line;
+				f=fopen(eString().sprintf("/proc/ide/hd%c/capacity", c).c_str(), "r");
+				if (!f)
+					continue;
+				int capacity=0;
+				fscanf(f, "%d", &capacity);
+				fclose(f);
+				sharddisks+=" (";
+				if (c&1)
+					sharddisks+="master";
+				else
+					sharddisks+="slave";
+				if (capacity)
+					sharddisks+=eString().sprintf(", %d MB", capacity/2048);
+				sharddisks+=")\n";
+			}
+		}
+		
+		if (sharddisks == "")
+			sharddisks="keine";
+		harddisks->setText(sharddisks);
+
+		CONNECT(okButton->selected, eWidget::accept);
+	}
+};
+
 void eZapInfo::sel_about()
 {
 	hide();
-	eMessageBox msgbox("insert non-peinlichen ABOUT text here...","About enigma");
-	msgbox.show();
-	msgbox.exec();
-	msgbox.hide();
+	eAboutScreen about;
+	about.show();
+	about.exec();
+	about.hide();
 	show();
 }

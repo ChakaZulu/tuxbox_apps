@@ -1,11 +1,10 @@
-#include "channelinfo.h"
-
-#include <core/base/i18n.h>
-#include <core/system/init.h>
-#include <core/gui/eskin.h>
-#include <core/gdi/font.h>
-#include <core/dvb/epgcache.h>
-#include <core/dvb/dvbservice.h>
+#include <channelinfo.h>
+#include <lib/base/i18n.h>
+#include <lib/system/init.h>
+#include <lib/gui/eskin.h>
+#include <lib/gdi/font.h>
+#include <lib/dvb/epgcache.h>
+#include <lib/dvb/dvbservice.h>
 #include <time.h>
 
 eChannelInfo::eChannelInfo( eWidget* parent, const char *deco)

@@ -1,8 +1,8 @@
 #ifndef __setupnetwork_h
 #define __setupnetwork_h
 
-#include <core/gui/ewindow.h>
-#include <core/gui/statusbar.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/statusbar.h>
 
 class eNumber;
 class eButton;

@@ -1,7 +1,7 @@
-#ifndef __src_core_dvb_settings_h
-#define __src_core_dvb_settings_h
+#ifndef __src_lib_dvb_settings_h
+#define __src_lib_dvb_settings_h
 
-#include <core/dvb/dvb.h>
+#include <lib/dvb/dvb.h>
 
 class eDVB;
 

@@ -1,5 +1,5 @@
-#ifndef __src_core_base_buffer_h
-#define __src_core_base_buffer_h
+#ifndef __src_lib_base_buffer_h
+#define __src_lib_base_buffer_h
 
 #include <asm/types.h>
 #include <list>

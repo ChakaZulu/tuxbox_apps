@@ -1,7 +1,8 @@
-#include "dvbservice.h"
-#include "si.h"
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/si.h>
 #include <errno.h>
-#include <core/dvb/decoder.h>
+#include <lib/dvb/decoder.h>
+#include <lib/dvb/dvbci.h>
 
 eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 {
@@ -10,10 +11,13 @@ eDVBServiceController::eDVBServiceController(eDVB &dvb): eDVBController(dvb)
 	CONNECT(dvb.tSDT.tableReady, eDVBServiceController::SDTready);
 	CONNECT(dvb.tEIT.tableReady, eDVBServiceController::EITready);
 
-	availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
-	availableCASystems.push_back(0x1722);	// BetaCrypt D (cable)
-	availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)
-	
+	if ( dvb.getInfo("mID") != "05" )  // no dreambox
+	{
+		availableCASystems.push_back(0x1702);	// BetaCrypt C (sat)
+		availableCASystems.push_back(0x1722);	// BetaCrypt D (cable)
+		availableCASystems.push_back(0x1762);	// BetaCrypt F (ORF)
+	}
+
 	transponder=0;
 	tdt=0;
 	tMHWEIT=0;
@@ -63,7 +67,7 @@ void eDVBServiceController::handleEvent(const eDVBEvent &event)
 		break;
 	case eDVBServiceEvent::eventServiceSwitch:
 	{
-		if (service.getTransportStreamID().get() >= 0) // a normal service, not a replay
+		if (!service.path.size()) // a normal service, not a replay
 		{
 			if (!dvb.settings->transponderlist)
 			{
@@ -307,7 +311,7 @@ void eDVBServiceController::scanPMT()
 		return;
 	}
 	Decoder::parms.pmtpid=pmtpid;
-	if (service.getTransportStreamID() != -1)
+	if (!service.path.size())
 		Decoder::parms.pcrpid=pmt->PCR_PID;
 	else
 		Decoder::parms.pcrpid=-1;
@@ -318,8 +322,13 @@ void eDVBServiceController::scanPMT()
 	
 	calist.clear();
 	Decoder::parms.descriptor_length=0;
+	
+	DVBCI=eDVB::getInstance()->DVBCI;
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::flush));
 
 	isca+=checkCA(calist, pmt->program_info);
+
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::es));
 	
 	PMTEntry *audio=0, *video=0, *teletext=0;
 	
@@ -330,15 +339,21 @@ void eDVBServiceController::scanPMT()
 		{
 		case 1:	// ISO/IEC 11172 Video
 		case 2: // ITU-T Rec. H.262 | ISO/IEC 13818-2 Video or ISO/IEC 11172-2 constrained parameter video stream
-			isca+=checkCA(calist, pe->ES_info);
 			if (!video)
+			{
 				video=pe;
+				DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addVideo,pe->elementary_PID));
+			}
+			isca+=checkCA(calist, pe->ES_info);
 			break;
 		case 3:	// ISO/IEC 11172 Audio
 		case 4: // ISO/IEC 13818-3 Audio
-			isca+=checkCA(calist, pe->ES_info);
 			if (!audio)
+			{
 				audio=pe;
+				DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addAudio,pe->elementary_PID));
+			}
+			isca+=checkCA(calist, pe->ES_info);
 			break;
 		case 6:
 		{
@@ -374,6 +389,8 @@ void eDVBServiceController::scanPMT()
 		}
 		}
 	}
+
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::go));
 
 	setPID(video);
 	setPID(audio);
@@ -503,7 +520,10 @@ int eDVBServiceController::checkCA(ePtrList<CA> &list, const ePtrList<Descriptor
 			int avail=0;
 			for (std::list<int>::iterator i = availableCASystems.begin(); i != availableCASystems.end() && !avail; i++)
 				if (*i == ca->CA_system_ID)
+				{
+					DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::addDescr,ca->data));
 					avail++;
+				}	
 
 			if (avail)
 			{

@@ -12,7 +12,7 @@
 #include <ost/sec.h>
 #include <ost/video.h>
 
-#include <core/base/ebase.h>
+#include <lib/base/ebase.h>
 
 class eTransponder;
 class eLNB;

@@ -1,8 +1,8 @@
 #ifndef __enigma_event_h
 #define __enigma_event_h
 
-#include <core/gui/ewindow.h>
-#include <core/dvb/si.h>
+#include <lib/gui/ewindow.h>
+#include <lib/dvb/si.h>
 
 class eLabel;
 

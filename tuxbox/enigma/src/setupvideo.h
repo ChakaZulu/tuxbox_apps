@@ -1,10 +1,10 @@
 #ifndef __setupvideo_h
 #define __setupvideo_h
 
-#include <core/gui/ewindow.h>
-#include <core/gui/listbox.h>
-#include <core/gui/statusbar.h>
-#include <core/driver/eavswitch.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/listbox.h>
+#include <lib/gui/statusbar.h>
+#include <lib/driver/eavswitch.h>
 
 class eNumber;
 class eButton;

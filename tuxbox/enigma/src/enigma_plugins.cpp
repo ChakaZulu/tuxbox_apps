@@ -1,6 +1,5 @@
-#include "enigma_plugins.h"
+#include <enigma_plugins.h>
 
-#include "config.h"
 #include <plugin.h>
 #include <dbox/avia_gt_vbi.h>
 
@@ -13,16 +12,16 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#include <apps/enigma/enigma.h>
-#include <core/base/eerror.h>
-#include <core/gdi/lcd.h>
-#include <core/gdi/font.h>
-#include <core/driver/rc.h>
-#include <core/driver/streamwd.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/decoder.h>
-#include <core/gui/emessage.h>
-#include <core/gui/eskin.h>
+#include <enigma.h>
+#include <lib/base/eerror.h>
+#include <lib/gdi/lcd.h>
+#include <lib/gdi/font.h>
+#include <lib/driver/rc.h>
+#include <lib/driver/streamwd.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/decoder.h>
+#include <lib/gui/emessage.h>
+#include <lib/gui/eskin.h>
 
 eString getInfo(const char *file, const char *info)
 {
@@ -139,8 +138,8 @@ int eZapPlugins::exec()
 
 	if (n < 0)
 	{
-		eDebug("Error Read Plugin Directory");
-		eMessageBox msg("Error Read Plugin Directory", "Error");
+		eDebug("Read Plugin Directory");
+		eMessageBox msg(_("Couldn't read plugin directory"), _("Error"), eMessageBox::iconError|eMessageBox::btOK );
 		msg.show();
 		msg.exec();
 		msg.hide();

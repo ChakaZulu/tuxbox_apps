@@ -1,9 +1,9 @@
-#include "slider.h"
+#include <lib/gui/slider.h>
 
-#include <core/gui/eskin.h>
-#include <core/gui/elabel.h>
-#include <core/gui/guiactions.h>
-#include <core/system/init.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/guiactions.h>
+#include <lib/system/init.h>
 
 inline void swap( gColor& a, gColor& b )
 {

@@ -1,8 +1,8 @@
-#include "echeckbox.h"
+#include <lib/gui/echeckbox.h>
 
-#include <core/gdi/font.h>
-#include <core/system/init.h>
-#include <core/gui/eskin.h>
+#include <lib/gdi/font.h>
+#include <lib/system/init.h>
+#include <lib/gui/eskin.h>
 
 eCheckbox::eCheckbox(eWidget *parent, int checked, int takefocus, bool swapTxtPixmap, const char *deco)
 	:eButton(parent, 0, takefocus, deco), swapTxtPixmap(swapTxtPixmap)

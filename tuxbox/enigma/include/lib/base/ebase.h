@@ -8,8 +8,8 @@
 #include <asm/types.h>
 #include <time.h>
 
-#include <include/libsig_comp.h>
-#include <core/base/eptrlist.h>
+#include <lib/base/eptrlist.h>
+#include <libsig_comp.h>
 
 class eApplication;
 
@@ -148,13 +148,13 @@ private:
 	int state;
 	int requested;		// requested events (POLLIN, ...)
 public:
-	/** 
+	/**
 	 * \brief Constructs a eSocketNotifier.
 	 * \param context The thread where to bind the socketnotifier to. The signal is emitted from that thread.
 	 * \param fd The filedescriptor to monitor. Can be a device or a socket.
 	 * \param req The events to watch to, normally either \c Read or \c Write. You can specify any events that \c poll supports.
 	 * \param startnow Specifies if the socketnotifier should start immediately.
-	 */ 
+	 */
 	eSocketNotifier(eMainloop *context, int fd, int req, bool startnow=true);
 	~eSocketNotifier();
 

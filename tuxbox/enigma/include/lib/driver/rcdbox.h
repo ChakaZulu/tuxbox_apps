@@ -1,7 +1,7 @@
 #ifndef __rcdbox_h
 #define __rcdbox_h
 
-#include <core/driver/rc.h>
+#include <lib/driver/rc.h>
 
 class eRCDeviceDBoxOld: public eRCDevice
 {

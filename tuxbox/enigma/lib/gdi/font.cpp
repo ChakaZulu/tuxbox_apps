@@ -1,4 +1,4 @@
-#include "font.h"
+#include <lib/gdi/font.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,13 +11,11 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "config.h"
-
-#include <core/base/eerror.h>
-#include <core/gdi/lcd.h>
-#include <core/gdi/grc.h>
-#include <core/system/elock.h>
-#include <core/system/init.h>
+#include <lib/base/eerror.h>
+#include <lib/gdi/lcd.h>
+#include <lib/gdi/grc.h>
+#include <lib/system/elock.h>
+#include <lib/system/init.h>
 
 #include <map>
 
@@ -144,7 +142,7 @@ fontRenderClass::fontListEntry::~fontListEntry()
 fontRenderClass::fontRenderClass(): fb(fbClass::getInstance())
 {
 	instance=this;
-	eDebug("[FONT] initializing core...");
+	eDebug("[FONT] initializing lib...");
 	{
 		if (FT_Init_FreeType(&library))
 		{

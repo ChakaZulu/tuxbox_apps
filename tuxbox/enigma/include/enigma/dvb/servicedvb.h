@@ -1,11 +1,11 @@
-#ifndef __core_dvb_servicedvb_h
-#define __core_dvb_servicedvb_h
+#ifndef __lib_dvb_servicedvb_h
+#define __lib_dvb_servicedvb_h
 
-#include <core/dvb/service.h>
-#include <core/dvb/servicecache.h>
-#include <core/base/thread.h>
-#include <core/base/buffer.h>
-#include <core/base/message.h>
+#include <lib/dvb/service.h>
+#include <lib/dvb/servicecache.h>
+#include <lib/base/thread.h>
+#include <lib/base/buffer.h>
+#include <lib/base/message.h>
 
 class eServiceHandlerDVB;
 
@@ -21,13 +21,23 @@ class eDVRPlayerThread: public eThread, public eMainloop, public Object
 	int dvrfd;
 	int sourcefd;
 	int speed;
+	int slice;
+
+	int filelength; // in 1880 packets
+	int position;
+	eLock poslock;
+
+	off64_t slicesize;
+	eString filename;
 	eSocketNotifier *inputsn, *outputsn;
 	void readMore(int what);
 	void outputReady(int what);
 	int maxBufferSize;
+	int seekbusy, seeking;
 	eLock lock;
 	
 	void dvrFlush();
+	int openFile(int slice=0);
 public:
 	struct eDVRPlayerThreadMessage
 	{
@@ -37,7 +47,8 @@ public:
 			skip,
 			setSpeed, // 0..
 			seek,	// 0..65536
-			seekreal
+			seekreal,
+			seekmode
 		};
 		int type;
 		int parm;
@@ -51,6 +62,9 @@ public:
 	
 	eDVRPlayerThread(const char *filename, eServiceHandlerDVB *handler);
 	~eDVRPlayerThread();
+
+	int getPosition(int);
+	int getLength(int);
 	
 	void thread();
 };
@@ -88,7 +102,7 @@ class eServiceHandlerDVB: public eServiceHandler
 	void leaveService(const eServiceReferenceDVB &);
 	void aspectRatioChanged(int ratio);
 	int flags, state, aspect, error;
-	
+
 	eServiceCache<eServiceHandlerDVB> cache;
 public:
 	int getID() const;
@@ -126,6 +140,8 @@ public:
 
 	eService *addRef(const eServiceReference &service);
 	void removeRef(const eServiceReference &service);
+
+	int getPosition(int what);
 };
 
 #endif

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "init.h"
+#include <lib/system/init.h>
 
 int eInit::rl=-1;
 std::list<std::pair<int,eAutoInit*> > *eInit::cl;

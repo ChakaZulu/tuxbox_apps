@@ -1,4 +1,4 @@
-#include "message.h"
+#include <lib/base/message.h>
 #include <unistd.h>
 
 eMessagePump::eMessagePump(int mt): content(1024*1024), ismt(mt)

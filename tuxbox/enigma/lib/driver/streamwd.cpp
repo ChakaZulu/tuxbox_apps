@@ -1,5 +1,5 @@
-#include "streamwd.h"
-#include "eavswitch.h"
+#include <lib/driver/streamwd.h>
+#include <lib/driver/eavswitch.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,10 +9,10 @@
 #include "ost/video.h"
 #include <dbox/event.h>
 
-#include <core/base/eerror.h>
-#include <core/dvb/edvb.h>
-#include <core/system/init.h>
-#include <core/system/econfig.h>
+#include <lib/base/eerror.h>
+#include <lib/dvb/edvb.h>
+#include <lib/system/init.h>
+#include <lib/system/econfig.h>
 
 #define EVENT_DEVICE "/dev/dbox/event0"
 #define WDE_VIDEOMODE 		(uint)1

@@ -1,9 +1,9 @@
-#ifndef __src__core__gui__guiactions_h__
-#define __src__core__gui__guiactions_h__
+#ifndef __src__lib__gui__guiactions_h__
+#define __src__lib__gui__guiactions_h__
 
-#include <core/system/init.h>
-#include <core/base/i18n.h>
-#include <core/gui/actions.h>
+#include <lib/system/init.h>
+#include <lib/base/i18n.h>
+#include <lib/gui/actions.h>
 
 struct cursorActions
 {

@@ -1,10 +1,10 @@
 #ifndef __streaminfo_h
 #define __streaminfo_h
 
-#include <core/gui/ewindow.h>
-#include <core/gui/multipage.h>
-#include <core/gui/listbox.h>
-#include <core/gui/statusbar.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/multipage.h>
+#include <lib/gui/listbox.h>
+#include <lib/gui/statusbar.h>
 
 class eLabel;
 class eMultipage;

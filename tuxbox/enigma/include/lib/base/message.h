@@ -1,9 +1,9 @@
-#ifndef __core_base_message_h
-#define __core_base_message_h
+#ifndef __lib_base_message_h
+#define __lib_base_message_h
 
-#include <core/base/ebase.h>
+#include <lib/base/ebase.h>
 #include <unistd.h>
-#include <core/system/elock.h>
+#include <lib/system/elock.h>
 
 /**
  * \brief A generic messagepump.

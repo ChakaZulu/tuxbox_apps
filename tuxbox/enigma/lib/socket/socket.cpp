@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <core/socket/socket.h>
+#include <lib/socket/socket.h>
 
 void eSocket::close()
 {

@@ -1,10 +1,10 @@
 #ifndef __enigma_lcd_h
 #define __enigma_lcd_h
 
-#include <core/gui/ewidget.h>
-#include <core/gui/eprogress.h>
-#include <core/gui/elabel.h>
-#include <core/gui/multipage.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/eprogress.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/multipage.h>
 
 class eService;
 class eZapLCDMain;
@@ -30,18 +30,16 @@ public:
 
 class eZapLCDMain: public eWidget
 {
-	eLabel *Clock;
-	eProgress *Volume, *Progress;
-	eTimer clocktimer;
+	eProgress *Volume;
 	int cur_start,cur_duration;
 private:
-	void clockUpdate();
 	void volumeUpdate(int);
-	void serviceSwitched(const eServiceReferenceDVB &, int err);
 	void leaveService(const eServiceReferenceDVB &service);
 public:
+	eLabel *Clock;
+	eProgress *Progress;
+	void setServiceName(eString name);
 	eLabel *ServiceName;
-	void updateProgress(int,int);
 	eZapLCDMain(eWidget *parent);
 };
 
@@ -64,6 +62,7 @@ public:
 class eZapLCDStandby: public eWidget
 {
 public:
+	eLabel *Clock;
 	eZapLCDStandby(eWidget *parent);
 };
 

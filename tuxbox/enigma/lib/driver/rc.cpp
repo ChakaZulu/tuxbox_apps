@@ -1,13 +1,13 @@
-#include "rc.h"
+#include <lib/driver/rc.h>
 
 #include <asm/types.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <core/system/init.h>
-#include <core/system/econfig.h>
-#include <core/base/eerror.h>
+#include <lib/system/init.h>
+#include <lib/system/econfig.h>
+#include <lib/base/eerror.h>
 
 int eRCDevice::getKeyCompatibleCode(const eRCKey &) const
 {
@@ -27,7 +27,7 @@ eRCDevice::~eRCDevice()
 	eRCInput::getInstance()->removeDevice(id);
 }
 
-eRCDriver::eRCDriver(eRCInput *input): input(input)
+eRCDriver::eRCDriver(eRCInput *input): input(input), enabled(1)
 {
 }
 
@@ -44,8 +44,9 @@ void eRCShortDriver::keyPressed(int)
 	{
 		if (read(handle, &rccode, 2)!=2)
 			break;
-		for (std::list<eRCDevice*>::iterator i(listeners.begin()); i!=listeners.end(); ++i)
-			(*i)->handleCode(rccode);
+		if (enabled && !input->islocked())
+			for (std::list<eRCDevice*>::iterator i(listeners.begin()); i!=listeners.end(); ++i)
+				(*i)->handleCode(rccode);
 	}
 }
 
@@ -128,6 +129,7 @@ bool eRCInput::open()
 
 int eRCInput::lock()
 {
+	locked=1;
 	return handle;
 }
 

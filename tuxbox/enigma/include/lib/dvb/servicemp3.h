@@ -1,14 +1,14 @@
-#ifndef __core_dvb_servicemp3_h
-#define __core_dvb_servicemp3_h
+#ifndef __lib_dvb_servicemp3_h
+#define __lib_dvb_servicemp3_h
 
-#include <core/dvb/service.h>
-#include <core/base/buffer.h>
+#include <lib/dvb/service.h>
+#include <lib/base/buffer.h>
 
 #include <mad.h>
-#include <core/base/ebase.h>
-#include <core/base/thread.h>
-#include <core/base/message.h>
-#include <core/system/elock.h>
+#include <lib/base/ebase.h>
+#include <lib/base/thread.h>
+#include <lib/base/message.h>
+#include <lib/system/elock.h>
 
 class eServiceHandlerMP3;
 

@@ -1,22 +1,22 @@
 #include <time.h>
-#include "scan.h"
-#include "enigma.h"
+#include <scan.h>
+#include <enigma.h>
 
-#include <core/dvb/frontend.h>
-#include <core/dvb/si.h>
-#include <core/dvb/dvb.h>
-#include <core/gui/elabel.h>
-#include <core/gui/ewindow.h>
-#include <core/gdi/font.h>
-#include <core/gui/eprogress.h>
-#include <core/dvb/edvb.h>
-#include <core/driver/rc.h>
-#include <core/gui/echeckbox.h>
-#include <core/gui/listbox.h>
-#include <core/gui/guiactions.h>
-#include <core/dvb/dvbwidgets.h>
-#include <core/dvb/dvbscan.h>
-#include <core/dvb/dvbservice.h>
+#include <lib/dvb/frontend.h>
+#include <lib/dvb/si.h>
+#include <lib/dvb/dvb.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gdi/font.h>
+#include <lib/gui/eprogress.h>
+#include <lib/dvb/edvb.h>
+#include <lib/driver/rc.h>
+#include <lib/gui/echeckbox.h>
+#include <lib/gui/combobox.h>
+#include <lib/gui/guiactions.h>
+#include <lib/dvb/dvbwidgets.h>
+#include <lib/dvb/dvbscan.h>
+#include <lib/dvb/dvbservice.h>
 
 #include <string>
 
@@ -149,9 +149,8 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 {
 	eLabel* l = new eLabel(this);
 	l->setName("lNet");
-	l_network=new eListBox<eListBoxEntryText>(this, l);
+	l_network=new eComboBox(this, 4, l);
 	l_network->setName("network");
-	l_network->setFlags(eListBox<eListBoxEntryText>::flagNoUpDownMovement);
 
 	eFEStatusWidget *festatus_widget=new eFEStatusWidget(this, eFrontend::getInstance());
 	festatus_widget->setName("festatus");
@@ -174,7 +173,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 	if (skin->build(this, "tsAutomatic"))
 		eFatal("skin load of \"tsAutomatic\" failed");
 
-	l_network->setCurrent(new eListBoxEntryText(l_network, _("automatic"), (void*)0, eTextPara::dirCenter) );
+	l_network->setCurrent(new eListBoxEntryText(*l_network, _("automatic"), (void*)0, eTextPara::dirCenter) );
 
 #if 0
 	new eListBoxEntryText(l_network, "Astra 19.2°E fake", (void*)"astra192");
@@ -187,7 +186,7 @@ tsAutomatic::tsAutomatic(eWidget *parent): eWidget(parent)
 
 	CONNECT(b_start->selected, tsAutomatic::start);
 	CONNECT(b_abort->selected, tsAutomatic::abort);
-	CONNECT(l_network->selected, tsAutomatic::networkSelected);
+	CONNECT(l_network->selchanged, tsAutomatic::networkSelected);
 
 	CONNECT(eDVB::getInstance()->eventOccured, tsAutomatic::dvbEvent);
 	
@@ -437,7 +436,7 @@ int tsAutomatic::loadNetworks()
 		for ( ePtrList<eSatellite>::iterator s ( it->getSatelliteList().begin() ); s != it->getSatelliteList().end(); s++)
 			for (std::list<tpPacket>::const_iterator i(networks.begin()); i != networks.end(); ++i)
 				if ( ( i->possibleTransponders.front().satellite.orbital_position == s->getOrbitalPosition() ) || (fetype == eFrontend::feCable) )
-					new eListBoxEntryText(l_network, i->name, (void*)&*i, eTextPara::dirCenter);
+					new eListBoxEntryText(*l_network, i->name, (void*)&*i, eTextPara::dirCenter);
 
 	return 0;
 }

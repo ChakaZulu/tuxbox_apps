@@ -1,10 +1,10 @@
-#include "ewindow.h"
-#include <core/gdi/grc.h>
-#include <core/gui/eskin.h>
-#include <core/system/init.h>
-#include <core/gdi/epng.h>
-#include <core/gui/elabel.h>
-#include <core/gui/guiactions.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gdi/grc.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/init.h>
+#include <lib/gdi/epng.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/guiactions.h>
 
 eWindow::eWindow(int takefocus)
 	:eWidget(0, takefocus)

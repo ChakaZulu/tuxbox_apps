@@ -1,8 +1,8 @@
-#include "rcdreambox2.h"
+#include <lib/driver/rcdreambox2.h>
 #include <dbox/fp.h>
 
-#include <core/system/init.h>
-#include <core/base/eerror.h>
+#include <lib/system/init.h>
+#include <lib/base/eerror.h>
 #include <sys/time.h>
 
 /* static void dumpreltime()

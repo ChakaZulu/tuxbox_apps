@@ -7,8 +7,8 @@
 #include <functional>
 #include <set>
 
-#include <include/libsig_comp.h>
-#include <core/driver/rc.h>
+#include <libsig_comp.h>
+#include <lib/driver/rc.h>
 
 class eActionMap;
 

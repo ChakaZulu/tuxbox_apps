@@ -1,8 +1,8 @@
-#include "enigma_vcr.h"
+#include <enigma_vcr.h>
 
-#include <core/gui/actions.h>
-#include <core/system/init.h>
-#include <core/driver/eavswitch.h>
+#include <lib/gui/actions.h>
+#include <lib/system/init.h>
+#include <lib/driver/eavswitch.h>
 
 struct enigmaVCRActions
 {

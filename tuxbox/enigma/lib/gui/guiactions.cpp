@@ -1,5 +1,5 @@
-#include <core/system/init.h>
-#include "guiactions.h"
+#include <lib/system/init.h>
+#include <lib/gui/guiactions.h>
 
 eAutoInitP0<cursorActions> i_cursorActions(5, "cursor actions");
 eAutoInitP0<focusActions> i_focusActions(5, "focus actions");

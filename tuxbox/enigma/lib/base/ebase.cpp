@@ -1,8 +1,9 @@
-#include "ebase.h"
+#include <lib/base/ebase.h>
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <core/base/eerror.h>
+
+#include <lib/base/eerror.h>
 
 eSocketNotifier::eSocketNotifier(eMainloop *context, int fd, int requested, bool startnow): context(*context), fd(fd), state(0), requested(requested)
 {

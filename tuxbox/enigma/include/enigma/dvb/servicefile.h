@@ -1,8 +1,8 @@
-#ifndef __core_dvb_servicefile_h
-#define __core_dvb_servicefile_h
+#ifndef __lib_dvb_servicefile_h
+#define __lib_dvb_servicefile_h
 
-#include <core/dvb/service.h>
-#include <core/dvb/servicecache.h>
+#include <lib/dvb/service.h>
+#include <lib/dvb/servicecache.h>
 #include <list>
 
 class eServiceFileHandler: public eServiceHandler

@@ -1,14 +1,14 @@
-#include "epgwindow.h"
-#include "enigma_event.h"
+#include <epgwindow.h>
+#include <enigma_event.h>
 
 #include <algorithm>
 
-#include <apps/enigma/timer.h>
-#include <apps/enigma/enigma_lcd.h>
-#include <core/gui/eskin.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/dvbservice.h>
-#include <core/gdi/font.h>
+#include <timer.h>
+#include <enigma_lcd.h>
+#include <lib/gui/eskin.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/gdi/font.h>
 
 gFont eListBoxEntryEPG::TimeFont;
 gFont eListBoxEntryEPG::DescrFont;
@@ -212,8 +212,16 @@ int eEPGSelector::eventHandler(const eWidgetEvent &event)
 		case eWidgetEvent::evtAction:
 			if (event.action == &i_epgSelectorActions->addTimerEvent)
 			{
-				if ( eTimerManager::getInstance()->addEventToTimerList( this, &current, &events->getCurrent()->event ) )
-					invalidateEntry( events->getCurrent() );
+				if ( eTimerManager::getInstance()->addEventToTimerList( this, (eServiceReference*)&current, &events->getCurrent()->event ) )
+				{
+					hide();
+					eTimerView v( eTimerManager::getInstance()->findEvent( (eServiceReference*)&current, &events->getCurrent()->event ) );
+					v.show();
+					v.exec();
+					v.hide();
+					invalidate();
+					show();
+				}
 			}
 			else if (event.action == &i_epgSelectorActions->removeTimerEvent)
 			{

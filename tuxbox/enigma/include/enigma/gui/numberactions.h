@@ -1,9 +1,9 @@
 #ifndef __CORE_GUI_NUMBERACTIONS__
 #define __CORE_GUI_NUMBERACTIONS__
 
-#include <core/gui/actions.h>
-#include <core/base/i18n.h>
-#include <core/system/init.h>
+#include <lib/gui/actions.h>
+#include <lib/base/i18n.h>
+#include <lib/system/init.h>
 
 struct numberActions
 {

@@ -1,6 +1,6 @@
-#include "thread.h"
+#include <lib/base/thread.h>
 #include <stdio.h>
-#include <core/base/eerror.h>
+#include <lib/base/eerror.h>
 
 void *eThread::wrapper(void *ptr)
 {

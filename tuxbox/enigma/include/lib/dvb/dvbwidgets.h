@@ -1,15 +1,16 @@
-#ifndef __src_core_dvb_dvbwidgets_h
-#define __src_core_dvb_dvbwidgets_h
+#ifndef __src_lib_dvb_dvbwidgets_h
+#define __src_lib_dvb_dvbwidgets_h
 
-#include <core/gui/ewidget.h>
-#include <core/gui/listbox.h>
-#include <core/base/ebase.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/listbox.h>
+#include <lib/base/ebase.h>
 
 class eNumber;
 class eTransponder;
 class eCheckbox;
 class eProgress;
 class eFrontend;
+class eComboBox;
 
 class eTransponderWidget: public eWidget
 {
@@ -18,7 +19,8 @@ class eTransponderWidget: public eWidget
 	int type, edit;
 	eListBoxEntryText *fecEntry[6], *polarityEntry[4];
 	
-	eListBox<eListBoxEntryText> *fec, *polarity, *sat;
+	eListBox<eListBoxEntryText> *fec, *polarity;
+	eComboBox *sat;
 	void nextField0(int *);
 	void updated1(eListBoxEntryText *);
 	void updated2(int);

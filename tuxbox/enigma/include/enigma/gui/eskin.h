@@ -5,9 +5,9 @@
 #include <map>
 #include <xmltree.h>
 
-#include <core/base/estring.h>
-#include <core/base/eptrlist.h>
-#include <core/gdi/grc.h>
+#include <lib/base/estring.h>
+#include <lib/base/eptrlist.h>
+#include <lib/gdi/grc.h>
 
 class eWidget;
 class gPixmap;

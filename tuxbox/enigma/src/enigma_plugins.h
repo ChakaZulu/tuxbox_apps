@@ -1,7 +1,7 @@
 #ifndef __enigma_plugins_h
 #define __enigma_plugins_h
 
-#include <core/gui/listbox.h>
+#include <lib/gui/listbox.h>
 
 class ePlugin: public eListBoxEntryText
 {

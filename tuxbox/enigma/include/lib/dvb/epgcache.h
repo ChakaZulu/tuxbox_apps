@@ -38,6 +38,42 @@ struct uniqueEPGKey
 	};
 };
 
+class uniqueEvent
+{
+public:
+	time_t beginTime;
+	int event_id;
+	uniqueEPGKey service;		
+	uniqueEvent()
+		:beginTime(-1), event_id(0)
+	{
+	}
+	uniqueEvent( time_t t, int id, uniqueEPGKey key )
+		:beginTime(t), event_id(id), service(key)
+	{
+	}
+	bool valid()
+	{
+		return beginTime > -1;
+	}
+	bool operator == ( const uniqueEvent& e )
+	{
+		return (beginTime == e.beginTime) && (event_id == e.event_id) && (service.sid == e.service.sid) && (service.onid == e.service.onid);
+	}
+	uniqueEvent& operator = ( const uniqueEvent& e )
+	{
+		beginTime = e.beginTime;
+		event_id = e.event_id;
+		service = e.service;
+		return *this;
+	}
+	void invalidate()
+	{
+		beginTime=-1;
+	}
+};
+
+
 #define eventMap std::map<int, eventData*>
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && __GNUC_MINOR__ >= 1  // check if gcc version >= 3.1
@@ -129,8 +165,8 @@ public:
 private:
 	uniqueEPGKey current_service;
 	int current_sid;
-	int firstScheduleEventId;
-	int firstNowNextEventId;
+	uniqueEvent firstScheduleEvent,
+							firstNowNextEvent;
 	int isRunning;
 	int paused;
 	int sectionRead(__u8 *data, int source);
@@ -188,7 +224,7 @@ inline void eSchedule::sectionFinish(int err)
 	if ( (e->isRunning & 1) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		e->isRunning &= ~1;
-		if ( e->firstScheduleEventId != -1 || e->firstNowNextEventId != -1 )
+		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() )
 			e->finishEPG();
 	}
 }
@@ -199,7 +235,7 @@ inline void eNowNext::sectionFinish(int err)
 	if ( (e->isRunning & 2) && (err == -ETIMEDOUT || err == -ECANCELED ) )
 	{
 		e->isRunning &= ~2;
-		if ( e->firstScheduleEventId != -1 || e->firstNowNextEventId != -1 )
+		if ( e->firstScheduleEvent.valid() || e->firstNowNextEvent.valid() )
 			e->finishEPG();
 	}
 }

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include "nconfig.h"
+#include <lib/system/nconfig.h>
 
 #include <fcntl.h>
 #include <string.h>

@@ -1,10 +1,8 @@
-#include "eskin_register.h"
-#include "config.h"
-
-#include <core/gui/eskin.h>
-#include <core/gdi/gfbdc.h>
-#include <core/system/init.h>
-#include <core/system/econfig.h>
+#include <lib/gui/eskin_register.h>
+#include <lib/gui/eskin.h>
+#include <lib/gdi/gfbdc.h>
+#include <lib/system/init.h>
+#include <lib/system/econfig.h>
 
 #define DEFAULTSKIN "chk_blue2.esml"
 

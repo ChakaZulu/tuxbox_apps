@@ -1,6 +1,6 @@
-#include <core/dvb/servicestructure.h>
-#include <core/system/init.h>
-#include <core/base/i18n.h>
+#include <lib/dvb/servicestructure.h>
+#include <lib/system/init.h>
+#include <lib/base/i18n.h>
 
 eServiceStructureHandler::eServiceStructureHandler(): eServiceHandler(eServiceReference::idStructure), cache(*this)
 {

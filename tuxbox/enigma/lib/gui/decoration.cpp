@@ -1,7 +1,7 @@
-#include "decoration.h"
-#include <core/gdi/gpixmap.h>
-#include <core/gdi/grc.h>
-#include <core/gui/eskin.h>
+#include <lib/gui/decoration.h>
+#include <lib/gdi/gpixmap.h>
+#include <lib/gdi/grc.h>
+#include <lib/gui/eskin.h>
 
 /*
 

@@ -1,7 +1,9 @@
-#ifndef __src_core_dvb_dvbservice_h
-#define __src_core_dvb_dvbservice_h
+#ifndef __src_lib_dvb_dvbservice_h
+#define __src_lib_dvb_dvbservice_h
 
-#include <core/dvb/edvb.h>
+#include <lib/dvb/edvb.h>
+
+class eDVBCI;
 
 class eDVBServiceEvent: public eDVBEvent
 {
@@ -59,6 +61,8 @@ public:
 	ePtrList<CA> calist;		/** currently used ca-systems */
 	
 	int checkCA(ePtrList<CA> &list, const ePtrList<Descriptor> &descriptors);
+	
+	eDVBCI *DVBCI;
 
 	void scanPMT();
 

@@ -3,12 +3,12 @@
 
 #include <list>
 
-#include <apps/enigma/scan.h>
-#include <core/gui/ebutton.h>
-#include <core/gui/combobox.h>
-#include <core/gui/enumber.h>
-#include <core/gui/listbox.h>
-#include <core/dvb/dvb.h>
+#include <scan.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/combobox.h>
+#include <lib/gui/enumber.h>
+#include <lib/gui/listbox.h>
+#include <lib/dvb/dvb.h>
 
 
 class eButton;

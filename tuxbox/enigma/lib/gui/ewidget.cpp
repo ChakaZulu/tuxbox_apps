@@ -1,15 +1,15 @@
 #include <errno.h>
 
-#include <apps/enigma/enigma.h>
-#include <core/base/eptrlist.h>
-#include <core/base/eerror.h>
-#include <core/gdi/gfbdc.h>
-#include <core/gdi/epng.h>
-#include <core/gui/actions.h>
-#include <core/gui/eskin.h>
-#include <core/gui/ewidget.h>
-#include <core/gui/guiactions.h>
-#include <core/system/init.h>
+#include <enigma.h>
+#include <lib/base/eptrlist.h>
+#include <lib/base/eerror.h>
+#include <lib/gdi/gfbdc.h>
+#include <lib/gdi/epng.h>
+#include <lib/gui/actions.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/guiactions.h>
+#include <lib/system/init.h>
 
 eWidget *eWidget::root;
 

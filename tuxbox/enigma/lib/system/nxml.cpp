@@ -1,6 +1,9 @@
-#include <config.h>
-#include "nconfig.h"
+#include <lib/system/nconfig.h>
 #include <string.h>
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #ifdef HAVE_TIME_H
 #include <time.h>

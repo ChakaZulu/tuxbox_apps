@@ -17,14 +17,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setup_language.cpp,v 1.9 2002/10/06 00:25:26 Ghostrider Exp $
+ * $Id: setup_language.cpp,v 1.10 2002/10/15 23:31:29 Ghostrider Exp $
  */
 
-#include "setup_language.h"
+#include <setup_language.h>
 
-#include <core/base/i18n.h>
-#include <core/gui/eskin.h>
-#include <core/system/econfig.h>
+#include <lib/base/i18n.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/econfig.h>
 
 eZapLanguageSetup::eZapLanguageSetup(): eWindow(0)
 {

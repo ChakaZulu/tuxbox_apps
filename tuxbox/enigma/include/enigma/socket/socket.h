@@ -8,11 +8,11 @@
 #include <netdb.h>
 #include <fcntl.h>
 
-#include <core/base/ebase.h>
-#include <core/base/eerror.h>
-#include <core/base/estring.h>
-#include <include/libsig_comp.h>
-#include <core/base/buffer.h>
+#include <lib/base/ebase.h>
+#include <lib/base/eerror.h>
+#include <lib/base/estring.h>
+#include <libsig_comp.h>
+#include <lib/base/buffer.h>
 
 class eSocket: public Object
 {

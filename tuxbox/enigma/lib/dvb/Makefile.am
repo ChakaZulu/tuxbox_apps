@@ -1,9 +1,7 @@
 SUBDIRS = lowlevel
 
 INCLUDES = \
-	-I$(DRIVER)/include \
-	-I$(top_srcdir)/enigma/src \
-	-I$(top_srcdir)/libxmltree
+	-I$(top_srcdir)/include
 
 lib_LTLIBRARIES = libenigma_dvb.la
 
@@ -12,10 +10,7 @@ libenigma_dvb_la_SOURCES = \
 	esection.cpp frontend.cpp si.cpp record.cpp \
 	dvbwidgets.cpp dvbservice.cpp settings.cpp \
 	dvbscan.cpp service.cpp servicedvb.cpp servicestructure.cpp \
-	servicefile.cpp servicemp3.cpp serviceplaylist.cpp
+	servicefile.cpp servicemp3.cpp serviceplaylist.cpp dvbci.cpp
 
-#servicemp3.cpp
-
-AM_CPPFLAGS = -DPROFILE -DDBOX 
-AM_CXXFLAGS = $(LIBSIGC_CFLAGS) -fno-rtti -fno-exceptions
+AM_CPPFLAGS = -DPROFILE
 

@@ -1,8 +1,8 @@
 #ifndef __apps_enigma_setupskin_h
 #define __apps_enigma_setupskin_h
 
-#include <core/gui/listbox.h>
-#include <core/gui/statusbar.h>
+#include <lib/gui/listbox.h>
+#include <lib/gui/statusbar.h>
 
 class eButton;
 

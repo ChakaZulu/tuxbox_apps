@@ -1,11 +1,11 @@
 #ifndef __APPS_ENIGMA_CHANNELINFO__
 #define __APPS_ENIGMA_CHANNELINFO__
 
-#include <core/gui/ewidget.h>
-#include <core/gui/elabel.h>
-#include <core/dvb/si.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/service.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/elabel.h>
+#include <lib/dvb/si.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/service.h>
 
 class eChannelInfo : public eDecoWidget
 {	

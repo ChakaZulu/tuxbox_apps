@@ -1,9 +1,9 @@
-#ifndef __core_dvb_service_h
-#define __core_dvb_service_h
+#ifndef __lib_dvb_service_h
+#define __lib_dvb_service_h
 
 #include <map>
-#include <include/libsig_comp.h>
-#include <core/dvb/dvb.h>
+#include <libsig_comp.h>
+#include <lib/dvb/dvb.h>
 
 class eServiceReference;
 
@@ -45,6 +45,8 @@ public:
 		cmdRecordStop,
 		cmdRecordClose,
 
+		cmdSeekBegin,
+		cmdSeekEnd,
 		cmdSetSpeed,		// parm : ratio.. 1 normal, 0 pause, >1 fast forward, <0 reverse (if supported)
 		cmdSkip,				// parm : in ms (~)
 		cmdSeekAbsolute,	// parm : percentage ~

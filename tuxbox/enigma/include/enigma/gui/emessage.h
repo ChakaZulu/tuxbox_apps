@@ -1,7 +1,7 @@
 #ifndef __emessage_h
 #define __emessage_h
 
-#include <core/gui/ewindow.h>
+#include <lib/gui/ewindow.h>
 
 class eLabel;
 

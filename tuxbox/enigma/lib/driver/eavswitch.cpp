@@ -1,7 +1,8 @@
+#include <lib/driver/eavswitch.h>
+
 #define VIDEO_DEV "/dev/dvb/card0/video0"
 #define AUDIO_DEV "/dev/dvb/card0/audio0"
 
-#include "eavswitch.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <dbox/avs_core.h>
@@ -9,11 +10,9 @@
 #include <ost/video.h>
 #include <sys/ioctl.h>
 
-#include "config.h"
-
-#include <core/system/econfig.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/decoder.h>
+#include <lib/system/econfig.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/decoder.h>
 
 /* sucks */
 
@@ -110,7 +109,7 @@ int eAVSwitch::setVolume(int vol)
 	if (vol>63)
 		vol=63;
 
-	if (s == "05")  // Dreambox
+	if (s == "05" || s == "06")  // Dreambox
 	{
 		audioMixer_t mix;
 		mix.volume_left=(vol*vol)/64;
@@ -207,7 +206,7 @@ void eAVSwitch::toggleMute()
 	if (mute)
 	{
 //		setVolume(63);
-		if ( s == "05" )
+		if ( s == "05" || s == "06" )
 			muteOstAudio(1);
 		else
 			muteAvsAudio(1);
@@ -215,7 +214,7 @@ void eAVSwitch::toggleMute()
 	else
 	{
 //		changeVolume(1,volume);
-		if ( s == "05" )
+		if ( s == "05" || s == "06" )
 			muteOstAudio(0);
 		else
 			muteAvsAudio(0);

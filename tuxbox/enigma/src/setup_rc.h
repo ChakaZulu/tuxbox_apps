@@ -1,8 +1,8 @@
 #ifndef __setuprc_h
 #define __setuprc_h
 
-#include <core/gui/ewindow.h>
-#include <core/gui/statusbar.h>
+#include <lib/gui/ewindow.h>
+#include <lib/gui/statusbar.h>
 
 class eLabel;
 class eButton;

@@ -1,11 +1,12 @@
 #ifndef __record_h
 #define __record_h
 
-#include <include/libsig_comp.h>
-#include <core/base/ebase.h>
-#include <core/base/message.h>
-#include <core/base/thread.h>
-#include <core/base/eerror.h>
+#include <libsig_comp.h>
+#include <lib/base/ebase.h>
+#include <lib/base/message.h>
+#include <lib/base/thread.h>
+#include <lib/base/eerror.h>
+#include <lib/base/estring.h>
 
 #include <set>
 
@@ -54,7 +55,11 @@ class eDVBRecorder: private eThread, eMainloop, public Object
 	eSocketNotifier *sn;
 	
 	eLock lock;
+	eString filename;
+	int splits, splitsize;
+	int size;
 	
+	void openFile(int suffix=0);
 	void dataAvailable(int what);
 
 	eFixedMessagePump<eDVBRecorderMessage> messagepump;

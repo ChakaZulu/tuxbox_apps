@@ -1,8 +1,8 @@
 #ifndef __download_h
 #define __download_h
 
-#include <core/system/httpd.h>
-#include <core/gui/ewindow.h>
+#include <lib/system/httpd.h>
+#include <lib/gui/ewindow.h>
 	
 class eDownloadWindow: public eWindow
 {

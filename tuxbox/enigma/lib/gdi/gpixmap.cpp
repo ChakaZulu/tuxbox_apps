@@ -1,4 +1,4 @@
-#include "gpixmap.h"
+#include <lib/gdi/gpixmap.h>
 
 gLookup::gLookup()
 {

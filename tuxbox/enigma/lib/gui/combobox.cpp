@@ -1,8 +1,8 @@
-#include "combobox.h"
-#include <core/gdi/font.h>
+#include <lib/gui/combobox.h>
+#include <lib/gdi/font.h>
 
-eComboBox::eComboBox( eWidget* parent, int OpenEntries, const char *deco )
-	:eButton(parent, 0, 1, deco), listbox(0), button( this, 0, 0), pm(0), entries(OpenEntries)
+eComboBox::eComboBox( eWidget* parent, int OpenEntries, eLabel* desc, const char *deco )
+	:eButton(parent, 0, 1, deco), listbox(0), button( this, desc, 0), pm(0), entries(OpenEntries)
 {
 	align=eTextPara::dirLeft;
 	button.loadDeco();
@@ -35,6 +35,8 @@ int eComboBox::setProperty( const eString& prop, const eString& val )
 {
 	if ( prop == "sorted" )
 		flags |= flagSorted;
+	else if (prop == "openEntries" )
+		entries = atoi( val.c_str() );
 	else if (prop == "showEntryHelp" )
 		flags |= flagShowEntryHelp;
 	else
@@ -47,8 +49,8 @@ int eComboBox::eventHandler( const eWidgetEvent& event )
 	switch (event.type)
 	{
 		case eWidgetEvent::evtAction:
-			if (event.action == &i_cursorActions->cancel )
-				eDebug("cancel pressed");
+			if (event.action == &i_cursorActions->cancel)
+				;
 			else
 				return eButton::eventHandler( event );
 		break;
@@ -99,6 +101,13 @@ void eComboBox::onSelChanged(eListBoxEntryText* le)
 {
 	if (flags & flagShowEntryHelp )	
 		setHelpText( le->getHelpText() );
+	if ( parent )
+	{
+		if ( LCDTmp )
+			LCDTmp->setText( le->getText() );
+		else if ( parent->LCDElement )
+			parent->LCDElement->setText( le->getText() );
+	}
 }
 
 void eComboBox::removeEntry( eListBoxEntryText* le )
@@ -211,6 +220,9 @@ struct selectEntryByKey: public std::unary_function<const eListBoxEntryText&, vo
 
 int eComboBox::setCurrent( void* key )
 {
+	if (!listbox.getCount())
+		return E_INVALID_ENTRY;
+
 	eListBoxEntryText* cur = listbox.getCurrent();
 
 	int err;

@@ -1,4 +1,4 @@
-#include "dvbscan.h"
+#include <lib/dvb/dvbscan.h>
 
 eDVBScanController::eDVBScanController(eDVB &dvb): eDVBController(dvb)
 {

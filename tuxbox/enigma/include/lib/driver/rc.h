@@ -4,8 +4,8 @@
 #include <list>
 #include <map>
 
-#include <core/base/ebase.h>
-#include <include/libsig_comp.h>
+#include <lib/base/ebase.h>
+#include <libsig_comp.h>
 
 class eRCInput;
 class eRCDriver;
@@ -68,6 +68,7 @@ class eRCDriver: public Object
 protected:
 	std::list<eRCDevice*> listeners;
 	eRCInput *input;
+	int enabled;
 public:
 	/**
 	 * \brief Constructs a driver.
@@ -91,6 +92,8 @@ public:
 		listeners.remove(dev);
 	}
 	~eRCDriver();
+	
+	void enable(int en) { enabled=en; }
 };
 
 class eRCShortDriver: public eRCDriver
@@ -184,6 +187,7 @@ public:
 	
 	int lock();
 	void unlock();
+	int islocked() { return locked; }
 	void close();
 	bool open();
 

@@ -1,7 +1,7 @@
-#include <core/dvb/serviceplaylist.h>
-#include <core/dvb/servicefile.h>
-#include <core/system/init.h>
-#include <core/base/i18n.h>
+#include <lib/dvb/serviceplaylist.h>
+#include <lib/dvb/servicefile.h>
+#include <lib/system/init.h>
+#include <lib/base/i18n.h>
 #include <unistd.h>
 
 /*
@@ -146,7 +146,18 @@ int ePlaylist::deleteService(std::list<ePlaylistEntry>::iterator it)
 	if (it != list.end())
 	{
 		if ((it->type & ePlaylistEntry::boundFile) && (it->service.path.size()))
-			::unlink(it->service.path.c_str());
+		{
+			int slice=0;
+			while (1)
+			{
+				eString filename=it->service.path;
+				if (slice)
+					filename+=eString().sprintf(".%03d", slice);
+				slice++;
+				if (::unlink(filename.c_str()))
+					break;
+			}
+		}
 		list.erase(it);
 		return 0;
 	}

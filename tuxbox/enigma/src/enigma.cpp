@@ -6,33 +6,31 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-#include <config.h>
+#include <lib/base/i18n.h>
+#include <lib/driver/rc.h>
+#include <lib/dvb/service.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/edvb.h>
+#include <lib/gdi/gfbdc.h>
+#include <lib/gdi/glcddc.h>
+#include <lib/gui/emessage.h>
+#include <lib/gui/actions.h>
+#include <lib/system/econfig.h>
+#include <lib/system/httpd.h>
+#include <lib/system/http_file.h>
+#include <lib/system/http_dyn.h>
+#include <lib/system/init.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/actions.h>
+#include <lib/driver/rc.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/decoder.h>
 
-#include <core/base/i18n.h>
-#include <core/driver/rc.h>
-#include <core/dvb/service.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/edvb.h>
-#include <core/gdi/gfbdc.h>
-#include <core/gdi/glcddc.h>
-#include <core/gui/emessage.h>
-#include <core/gui/actions.h>
-#include <core/system/econfig.h>
-#include <core/system/httpd.h>
-#include <core/system/http_file.h>
-#include <core/system/http_dyn.h>
-#include <core/system/init.h>
-#include <core/gui/ebutton.h>
-#include <core/gui/actions.h>
-#include <core/driver/rc.h>
-#include <core/dvb/dvbservice.h>
-#include <core/dvb/decoder.h>
-
-#include <core/system/xmlrpc.h>
-#include <apps/enigma/enigma.h>
-#include <apps/enigma/enigma_dyn.h>
-#include <apps/enigma/enigma_xmlrpc.h>
-#include <apps/enigma/enigma_main.h>
+#include <lib/system/xmlrpc.h>
+#include <enigma.h>
+#include <enigma_dyn.h>
+#include <enigma_xmlrpc.h>
+#include <enigma_main.h>
 
 // #include <mcheck.h>
 

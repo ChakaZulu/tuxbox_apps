@@ -2,10 +2,10 @@
 #define __gpixmap_h
 
 #include <pthread.h>
-#include <core/base/estring.h>
-#include <core/base/erect.h>
-#include <core/gdi/fb.h>
-#include <core/system/elock.h>
+#include <lib/base/estring.h>
+#include <lib/base/erect.h>
+#include <lib/gdi/fb.h>
+#include <lib/system/elock.h>
 
 struct gColor
 {

@@ -1,6 +1,6 @@
-#include <core/dvb/servicefile.h>
-#include <core/dvb/servicestructure.h>
-#include <core/system/init.h>
+#include <lib/dvb/servicefile.h>
+#include <lib/dvb/servicestructure.h>
+#include <lib/system/init.h>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -1,7 +1,7 @@
-#ifndef __src_core_dvb_dvbscan_h
-#define __src_core_dvb_dvbscan_h
+#ifndef __src_lib_dvb_dvbscan_h
+#define __src_lib_dvb_dvbscan_h
 
-#include <core/dvb/edvb.h>
+#include <lib/dvb/edvb.h>
 
 #include <set>
 	

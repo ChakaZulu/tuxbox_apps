@@ -1,12 +1,12 @@
-#include "enigma_event.h"
+#include <enigma_event.h>
 
 #include <time.h>
-#include <core/base/eerror.h>
-#include <core/driver/rc.h>
-#include <core/gdi/font.h>
-#include <core/gui/elabel.h>
-#include <core/gui/eskin.h>
-#include <core/gui/guiactions.h>
+#include <lib/base/eerror.h>
+#include <lib/driver/rc.h>
+#include <lib/gdi/font.h>
+#include <lib/gui/elabel.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/guiactions.h>
 
 void eEventDisplay::nextEvent()
 {

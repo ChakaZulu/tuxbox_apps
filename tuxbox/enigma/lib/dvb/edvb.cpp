@@ -1,4 +1,4 @@
- #include "edvb.h"
+#include <lib/dvb/edvb.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
@@ -15,21 +15,19 @@
 	#include <sys/time.h>
 #endif
 
-#include "config.h"
+#include <lib/driver/eavswitch.h>
+#include <lib/driver/streamwd.h>
+#include <lib/dvb/esection.h>
+#include <lib/dvb/si.h>
+#include <lib/dvb/frontend.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/decoder.h>
+#include <lib/dvb/record.h>
+#include <lib/system/init.h>
+#include <lib/system/econfig.h>
 
-#include <core/driver/eavswitch.h>
-#include <core/driver/streamwd.h>
-#include <core/dvb/esection.h>
-#include <core/dvb/si.h>
-#include <core/dvb/frontend.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/decoder.h>
-#include <core/dvb/record.h>
-#include <core/system/init.h>
-#include <core/system/econfig.h>
-
-#include "dvbservice.h"
-#include "dvbscan.h"
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/dvbscan.h>
 
 eDVBController::~eDVBController()
 {
@@ -39,7 +37,7 @@ eDVB *eDVB::instance;
 
 eString eDVB::getVersion()
 {
-	return "eDVB core 1.0, compiled " __DATE__;
+	return "eDVB lib 1.0, compiled " __DATE__;
 }
 
 void eDVB::event(const eDVBEvent &event)
@@ -131,7 +129,10 @@ eDVB::eDVB(): state(eDVBState::stateIdle)
 
 		// init dvb recorder
 	recorder=0;
-	
+
+	DVBCI=new eDVBCI();
+	DVBCI->messages.send(eDVBCI::eDVBCIMessage(eDVBCI::eDVBCIMessage::start));
+		
 	eDebug("eDVB::eDVB done.");
 }
 
@@ -237,7 +238,6 @@ void eDVB::configureNetwork()
 
 void eDVB::recBegin(const char *filename)
 {
-	eDebug("recBegin");
 	if (recorder)
 		recEnd();
 	recorder=new eDVBRecorder();
@@ -306,4 +306,4 @@ eDVBScanController *eDVB::getScanAPI()
 	return (eDVBScanController*)controller;
 }
 
-eAutoInitP0<eDVB> init_dvb(4, "eDVB core");
+eAutoInitP0<eDVB> init_dvb(4, "eDVB lib");

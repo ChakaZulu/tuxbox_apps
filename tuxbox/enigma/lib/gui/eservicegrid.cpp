@@ -1,4 +1,4 @@
-#include "eservicegrid.h"
+#include <lib/gui/eservicegrid.h>
 
 eServiceGrid::eServiceGrid(eWidget *parent): eWidget(parent)
 {

@@ -17,17 +17,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * $Id: setupskin.cpp,v 1.10 2002/10/06 00:25:26 Ghostrider Exp $
+ * $Id: setupskin.cpp,v 1.11 2002/10/15 23:31:29 Ghostrider Exp $
  */
 
-#include "setupskin.h"
+#include <setupskin.h>
 
 #include <dirent.h>
-#include "config.h"
-
-#include <core/gui/ebutton.h>
-#include <core/gui/emessage.h>
-#include <core/system/econfig.h>
+#include <lib/gui/ebutton.h>
+#include <lib/gui/emessage.h>
+#include <lib/system/econfig.h>
 
 extern eString getInfo(const char *file, const char *info);
 

@@ -1,7 +1,7 @@
-#include "estring.h"
+#include <lib/base/estring.h>
 #include <ctype.h>
 #include <limits.h>
-#include <core/system/elock.h>
+#include <lib/system/elock.h>
 
 static eLock lock;
 

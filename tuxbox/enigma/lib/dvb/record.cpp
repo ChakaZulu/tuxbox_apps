@@ -1,4 +1,4 @@
-#include "record.h"
+#include <lib/dvb/record.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <ost/dmx.h>
@@ -14,7 +14,9 @@ void eDVBRecorder::dataAvailable(int what)
 		eDebug("reading failed..(err %d)", -r);
 		return;
 	}
-	::write(outfd, buffer, r);
+	size+=::write(outfd, buffer, r);
+	if (size > splitsize)
+		openFile(++splits);
 }
 
 void eDVBRecorder::thread()
@@ -57,19 +59,34 @@ void eDVBRecorder::gotMessage(const eDVBRecorderMessage &msg)
 	}
 }
 
-void eDVBRecorder::s_open(const char *filename)
+void eDVBRecorder::openFile(int suffix)
 {
-	eDebug("eDVBRecorder::s_open(%s)", filename);
-	pids.clear();
-	unlink(filename);
-	outfd=::creat(filename, 0555);
+	eString tfilename=filename;
+	if (suffix)
+		tfilename+=eString().sprintf(".%03d", suffix);
+		
+	size=0;
+		
+	if (outfd >= 0)
+		::close(outfd);
+
+	::unlink(tfilename.c_str());
+	outfd=::open(tfilename.c_str(), O_CREAT|O_WRONLY|O_TRUNC|O_LARGEFILE, 0555);
 	if (outfd < 0)
-	{
-		eDebug("failed to open DVR file: %s (%m)", filename);
-		delete[] filename;
-		return;
-	}
-	delete[] filename;
+		eDebug("failed to open DVR file: %s (%m)", tfilename.c_str());	
+}
+
+void eDVBRecorder::s_open(const char *_filename)
+{
+	eDebug("eDVBRecorder::s_open(%s)", _filename);
+	pids.clear();
+
+	filename=eString(_filename);
+	delete[] _filename;
+	
+	splitsize=1024*1024*1024; // 1G
+	outfd=-1;
+	openFile(splits=0);
 
 	dvrfd=::open("/dev/dvb/card0/dvr1", O_RDONLY|O_NONBLOCK);
 	if (dvrfd < 0)

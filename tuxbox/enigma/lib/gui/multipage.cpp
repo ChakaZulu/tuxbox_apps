@@ -1,6 +1,6 @@
 #include <errno.h>
-#include "multipage.h"
-#include "ewidget.h"
+#include <lib/gui/multipage.h>
+#include <lib/gui/ewidget.h>
 
 eMultipage::eMultipage()
 {

@@ -1,8 +1,8 @@
-#include "ebutton.h"
-#include "eskin.h"
-#include <core/system/init.h>
-#include <core/gdi/font.h>
-#include "guiactions.h"
+#include <lib/gui/ebutton.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/init.h>
+#include <lib/gdi/font.h>
+#include <lib/gui/guiactions.h>
 
 eButton::eButton(eWidget *parent, eLabel* desc, int takefocus, const char *deco)
 	:eLabel(parent, 0, takefocus, deco), tmpDescr(0),

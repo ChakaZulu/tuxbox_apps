@@ -1,4 +1,4 @@
-#include "http_dyn.h"
+#include <lib/system/http_dyn.h>
 
 eHTTPDyn::eHTTPDyn(eHTTPConnection *c, eString result): eHTTPDataSource(c), result(result)
 {

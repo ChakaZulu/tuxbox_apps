@@ -1,5 +1,5 @@
-#include <core/base/buffer.h>
-#include <core/base/eerror.h>
+#include <lib/base/buffer.h>
+#include <lib/base/eerror.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>

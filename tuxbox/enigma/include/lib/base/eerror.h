@@ -9,7 +9,7 @@ void eFatal(const char* fmt, ...);
 #undef ASSERT
 #endif
 
-#ifdef __DEBUG__
+#ifdef DEBUG
     void eDebug(const char* fmt, ...);
     void eDebugNoNewLine(const char* fmt, ...);
     void eWarning(const char* fmt, ...);
@@ -27,6 +27,6 @@ void eFatal(const char* fmt, ...);
     {
     }
     #define ASSERT(x) do { } while (0)
-#endif //__DEBUG__
+#endif //DEBUG
 
 #endif // __E_ERROR__

@@ -3,17 +3,17 @@
 
 #include <vector>
 
-#include <core/dvb/esection.h>
-#include <core/base/estring.h>
-#include <core/base/eerror.h>
-#include <core/base/eptrlist.h>
-#include <core/dvb/lowlevel/sdt.h>
-#include <core/dvb/lowlevel/descr.h>
-#include <core/dvb/lowlevel/ca.h>
-#include <core/dvb/lowlevel/pmt.h>
-#include <core/dvb/lowlevel/nit.h>
-#include <core/dvb/lowlevel/eit.h>
-#include <core/dvb/lowlevel/bat.h>
+#include <lib/dvb/esection.h>
+#include <lib/base/estring.h>
+#include <lib/base/eerror.h>
+#include <lib/base/eptrlist.h>
+#include <lib/dvb/lowlevel/sdt.h>
+#include <lib/dvb/lowlevel/descr.h>
+#include <lib/dvb/lowlevel/ca.h>
+#include <lib/dvb/lowlevel/pmt.h>
+#include <lib/dvb/lowlevel/nit.h>
+#include <lib/dvb/lowlevel/eit.h>
+#include <lib/dvb/lowlevel/bat.h>
 
 time_t parseDVBtime(__u8 t1, __u8 t2, __u8 t3, __u8 t4, __u8 t5);
 int fromBCD(int bcd);

@@ -1,10 +1,10 @@
-#include "elabel.h"
+#include <lib/gui/elabel.h>
 
-#include <core/gdi/fb.h>
-#include <core/gdi/font.h>
-#include <core/gdi/lcd.h>
-#include <core/gui/eskin.h>
-#include <core/system/init.h>
+#include <lib/gdi/fb.h>
+#include <lib/gdi/font.h>
+#include <lib/gdi/lcd.h>
+#include <lib/gui/eskin.h>
+#include <lib/system/init.h>
 
 eLabel::eLabel(eWidget *parent, int flags, int takefocus, const char *deco ):
 	eDecoWidget(parent, takefocus, deco), blitFlags(0), flags(flags), para(0), align( eTextPara::dirLeft )

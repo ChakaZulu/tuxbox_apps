@@ -1,24 +1,24 @@
 #include <algorithm>
 #include <list>
 
-#include <apps/enigma/enigma.h>
-#include <apps/enigma/enigma_main.h>
-#include <apps/enigma/sselect.h>
-#include <apps/enigma/epgwindow.h>
+#include <enigma.h>
+#include <enigma_main.h>
+#include <sselect.h>
+#include <epgwindow.h>
 
-#include <core/base/i18n.h>
-#include <core/gdi/font.h>
-#include <core/gui/actions.h>
-#include <core/gui/eskin.h>
-#include <core/gui/elabel.h>
-#include <core/dvb/edvb.h>
-#include <core/dvb/dvb.h>
-#include <core/dvb/dvbservice.h>
-#include <core/dvb/epgcache.h>
-#include <core/driver/rc.h>
-#include <core/system/init.h>
-#include <core/dvb/service.h>
-#include <core/gui/numberactions.h>
+#include <lib/base/i18n.h>
+#include <lib/gdi/font.h>
+#include <lib/gui/actions.h>
+#include <lib/gui/eskin.h>
+#include <lib/gui/elabel.h>
+#include <lib/dvb/edvb.h>
+#include <lib/dvb/dvb.h>
+#include <lib/dvb/dvbservice.h>
+#include <lib/dvb/epgcache.h>
+#include <lib/driver/rc.h>
+#include <lib/system/init.h>
+#include <lib/dvb/service.h>
+#include <lib/gui/numberactions.h>
 
 gFont eListBoxEntryService::serviceFont;
 gFont eListBoxEntryService::descrFont;
@@ -620,8 +620,12 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 			{
 				if (path.size() > ( (style == styleCombiColumn) ? 2 : 1) )
 				{
+					services->beginAtomic();
+					eServiceReference last=path.current();
 					path.up();
 					actualize();
+					selectService( last );
+					services->endAtomic();
 				} else if (style == styleCombiColumn)
 					setFocus(bouquets);
 			}
@@ -656,7 +660,15 @@ int eServiceSelector::eventHandler(const eWidgetEvent &event)
 				setMode(eZapMain::modeRadio);
 			else if (event.action == &i_serviceSelectorActions->modeFile && !movemode)
 				setMode(eZapMain::modeFile);
-			else
+			else if ((event.action == &i_cursorActions->cancel) && movemode)
+			{	
+				services->setMoveMode(0);
+				movemode=0;
+				services->beginAtomic();
+				actualize();
+				selectService(selected);
+				services->endAtomic();
+			} else
 				break;
 			return 1;
 		default:
@@ -904,7 +916,6 @@ void eServiceSelector::setPath(const eServicePath &newpath, const eServiceRefere
 
 void eServiceSelector::setMoveMode(int mode)
 {
-	eDebug("begin move mode");
 	movemode=mode;
 	services->setMoveMode(mode);
 }

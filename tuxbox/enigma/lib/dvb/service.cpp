@@ -1,6 +1,6 @@
-#include "service.h"
-#include <core/dvb/dvb.h>
-#include <core/system/init.h>
+#include <lib/dvb/service.h>
+#include <lib/dvb/dvb.h>
+#include <lib/system/init.h>
 
 eServiceHandler::eServiceHandler(int id): id(id)
 {

@@ -1,10 +1,10 @@
 #ifndef __scan_h
 #define __scan_h
 
-#include <core/dvb/dvb.h>
-#include <core/gui/ewidget.h>
-#include <core/gui/listbox.h>
-#include <core/gui/statusbar.h>
+#include <lib/dvb/dvb.h>
+#include <lib/gui/ewidget.h>
+#include <lib/gui/combobox.h>
+#include <lib/gui/statusbar.h>
 
 class eWindow;
 class eLabel;
@@ -61,7 +61,7 @@ protected:
 class tsAutomatic: public existNetworks, public eWidget
 {
 	eButton *b_start, *b_abort;
-	eListBox<eListBoxEntryText> *l_network;
+	eComboBox *l_network;
 	eCheckbox *c_eraseall;
 	eLabel *l_status;
 	std::list<eTransponder>::iterator current_tp, last_tp;

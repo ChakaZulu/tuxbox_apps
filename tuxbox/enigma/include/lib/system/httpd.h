@@ -4,12 +4,12 @@
 #include <asm/types.h>
 #include <map>
 
-#include <core/base/eptrlist.h>
-#include <core/base/ebase.h>
-#include <core/base/estring.h>
-#include <core/base/eerror.h>
-#include <core/socket/socket.h>
-#include <core/socket/serversocket.h>
+#include <lib/base/eptrlist.h>
+#include <lib/base/ebase.h>
+#include <lib/base/estring.h>
+#include <lib/base/eerror.h>
+#include <lib/socket/socket.h>
+#include <lib/socket/serversocket.h>
 
 class eHTTPConnection;
 class eHTTPDataSource;
