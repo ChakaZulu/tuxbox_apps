@@ -1,5 +1,5 @@
 /*
-$Id: dsmcc_carousel_descriptor.c,v 1.3 2003/10/24 22:45:04 rasc Exp $ 
+$Id: dsmcc_carousel_descriptor.c,v 1.4 2003/10/24 23:01:41 rasc Exp $ 
 
 
   dvbsnoop
@@ -11,6 +11,9 @@ $Id: dsmcc_carousel_descriptor.c,v 1.3 2003/10/24 22:45:04 rasc Exp $
 
 
 $Log: dsmcc_carousel_descriptor.c,v $
+Revision 1.4  2003/10/24 23:01:41  rasc
+code reorg...
+
 Revision 1.3  2003/10/24 22:45:04  rasc
 code reorg...
 
@@ -53,7 +56,7 @@ int  descriptorDSMCC  (u_char *b)
   out_NL (4);
 //  out_S2B_NL (4,"DSM-CC-DescriptorTag: ",id, dvbstrDSMCCDescriptorTAG(id));
 //  out_SW_NL  (5,"Descriptor_length: ",b[1]);
-out_NL ("not yet done");
+out_nl (1," ... TODO... $$$ not yet done");
 return len;
 
   // empty ??

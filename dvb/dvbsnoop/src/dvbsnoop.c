@@ -1,5 +1,5 @@
 /*
-$Id: dvbsnoop.c,v 1.9 2003/10/24 22:17:13 rasc Exp $
+$Id: dvbsnoop.c,v 1.10 2003/10/24 23:01:40 rasc Exp $
 
 
 
@@ -24,6 +24,9 @@ $Id: dvbsnoop.c,v 1.9 2003/10/24 22:17:13 rasc Exp $
 
 
 $Log: dvbsnoop.c,v $
+Revision 1.10  2003/10/24 23:01:40  rasc
+code reorg...
+
 Revision 1.9  2003/10/24 22:17:13  rasc
 code reorg...
 
@@ -62,13 +65,14 @@ dvbsnoop v0.7  -- Commit to CVS
 
 
 #include "dvbsnoop.h"
-#include "dvb_api/dmx_sect.h"
-#include "dvb_api/dmx_pes.h"
-#include "dvb_api/dmx_ts.h"
+
 #include "misc/cmdline.h"
 #include "misc/hexprint.h"
 #include "misc/pkt_time.h"
 
+#include "dvb_api/dmx_sect.h"
+#include "dvb_api/dmx_pes.h"
+#include "dvb_api/dmx_ts.h"
 
 
 
