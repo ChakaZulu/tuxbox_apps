@@ -2,7 +2,7 @@
 #define __locals_intern__
 
 /*
- * $Id: locals_intern.h,v 1.17 2004/07/30 00:52:26 chakazulu Exp $
+ * $Id: locals_intern.h,v 1.18 2004/08/01 12:24:58 sepp776 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -808,6 +808,7 @@ const char * locale_real_names[] =
 	"timing.hint_2",
 	"timing.infobar",
 	"timing.menu",
+	"timing.numericzap",
 	"ucodecheck.avia500",
 	"ucodecheck.avia600",
 	"ucodecheck.cam-alpha",

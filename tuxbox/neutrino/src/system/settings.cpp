@@ -1,6 +1,6 @@
 /*
 
-        $Id: settings.cpp,v 1.34 2004/06/06 18:01:56 thegoodguy Exp $
+        $Id: settings.cpp,v 1.35 2004/08/01 12:24:58 sepp776 Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -33,7 +33,8 @@ const int default_timing[TIMING_SETTING_COUNT] =
 	60,
 	240,
 	6,
-	60
+	60,
+  3
 };
 
 const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT] =
@@ -42,7 +43,8 @@ const neutrino_locale_t timing_setting_name[TIMING_SETTING_COUNT] =
 	LOCALE_TIMING_CHANLIST,
 	LOCALE_TIMING_EPG,
 	LOCALE_TIMING_INFOBAR,
-	LOCALE_TIMING_FILEBROWSER
+	LOCALE_TIMING_FILEBROWSER,
+  LOCALE_TIMING_NUMERICZAP
 };
 
 

@@ -580,7 +580,7 @@ int CChannelList::numericZap(int key)
 	// -- (--> girl friend complained about the history menue, so be it...)
 	// -- we should be able to configure this in the future, so "0"
 	// -- will do quizap or history...
-	if (key == (neutrino_msg_t) g_settings.key_lastchannel) {
+	if (key == g_settings.key_lastchannel) {
 		int  ch;
 
 		if( (ch=lastChList.getlast(1)) != -1)
@@ -597,7 +597,7 @@ int CChannelList::numericZap(int key)
 
 	// -- zap history bouquet, similar to "0" quickzap,
 	// -- but shows a menue of last channels
-	if (key == (neutrino_msg_t) g_settings.key_zaphistory) {
+	if (key == g_settings.key_zaphistory) {
 
 	    if (this->lastChList.size() > 1) {
 		CChannelList channelList("Zapping history", true);
@@ -638,7 +638,6 @@ int CChannelList::numericZap(int key)
 	bool doZap = true;
 	bool showEPG = false;
 
-
 	while(1)
 	{
 		if (lastchan != chn)
@@ -659,8 +658,7 @@ int CChannelList::numericZap(int key)
 			lastchan= chn;
 		}
 
-
-		g_RCInput->getMsg( &msg, &data, 30 );
+		g_RCInput->getMsg( &msg, &data, g_settings.timing[SNeutrinoSettings::TIMING_NUMERICZAP] * 10 );
 
 		if ( msg == CRCInput::RC_timeout )
 		{

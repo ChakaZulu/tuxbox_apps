@@ -743,6 +743,7 @@ timing.hint_1 Time in sec. After this time the
 timing.hint_2 infobar will be faded out.
 timing.infobar Infobar
 timing.menu Menu
+timing.numericzap Numeric Zap
 ucodecheck.avia500 Avia 500
 ucodecheck.avia600 Avia 600
 ucodecheck.cam-alpha Cam-Alpha

@@ -64,13 +64,14 @@ struct SNeutrinoSettings
 	char language[25];
 
 	//timing
-#define TIMING_SETTING_COUNT 5
+#define TIMING_SETTING_COUNT 6
 	enum TIMING_SETTINGS {
 		TIMING_MENU        = 0,
 		TIMING_CHANLIST    = 1,
 		TIMING_EPG         = 2,
 		TIMING_INFOBAR     = 3,
-		TIMING_FILEBROWSER = 4
+		TIMING_FILEBROWSER = 4,
+    TIMING_NUMERICZAP  = 5
 	};
 
 	int  timing       [TIMING_SETTING_COUNT]   ;

@@ -2,7 +2,7 @@
 #define __locals__
 
 /*
- * $Id: locals.h,v 1.15 2004/07/30 00:52:26 chakazulu Exp $
+ * $Id: locals.h,v 1.16 2004/08/01 12:24:58 sepp776 Exp $
  *
  * (C) 2004 by thegoodguy <thegoodguy@berlios.de>
  *
@@ -808,6 +808,7 @@ typedef enum
 	LOCALE_TIMING_HINT_2,
 	LOCALE_TIMING_INFOBAR,
 	LOCALE_TIMING_MENU,
+	LOCALE_TIMING_NUMERICZAP,
 	LOCALE_UCODECHECK_AVIA500,
 	LOCALE_UCODECHECK_AVIA600,
 	LOCALE_UCODECHECK_CAM_ALPHA,

@@ -782,6 +782,7 @@ timing.hint_1 Einblendzeit in Sek., die das OSD
 timing.hint_2 auf dem TV angezeigt wird
 timing.infobar Infobar
 timing.menu Menu
+timing.numericzap Umschalten mit Zifferntasten
 ucodecheck.avia500 Avia 500
 ucodecheck.avia600 Avia 600
 ucodecheck.cam-alpha Cam-Alpha
