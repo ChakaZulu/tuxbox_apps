@@ -218,9 +218,9 @@ lcdmenu.head LCD Eistellunga
 lcdmenu.inverse Invertieren
 lcdmenu.power Pauwa
 lcdmenu.lcdcontroler Kontrast / Helligkeid
-lcdmenu.statusline unset
-lcdmenu.statusline.volume unset
-lcdmenu.statusline.playtime unset
+lcdmenu.statusline Statuszeiln
+lcdmenu.statusline.volume Lautstärkn
+lcdmenu.statusline.playtime Spuizeit
 
 lcdcontroler.head LCD Eistellunga
 lcdcontroler.contrast Kontrast
@@ -673,8 +673,8 @@ mp3player.display_order Ozoagn
 mp3player.follow aktuelle Liad
 
 filebrowser.head Datiesucha
-filebrowser.filter.active unset
-filebrowser.filter.inactive unset
+filebrowser.filter.active Fuita o
+filebrowser.filter.inactive Fuita aus
 filebrowser.select auswaehn
 filebrowser.mark markiern
 filebrowser.scan Verzeichnisse durchsuacha
