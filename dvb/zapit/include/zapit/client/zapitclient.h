@@ -143,7 +143,7 @@ class CZapitClient:public CBasicClient
 		unsigned int nr;
 		t_channel_id channel_id;
 		char	 name[30];
-		char	 satellite[30];
+		t_satellite_position satellitePosition;
 		unsigned char service_type;
 	};
 
@@ -195,7 +195,8 @@ class CZapitClient:public CBasicClient
 	struct responseGetSatelliteList
 	{
 		char satName[30];
-		int32_t satPosition;
+		t_satellite_position satPosition;
+		int satDiseqc;
 	};
 	typedef std::vector<responseGetSatelliteList> SatelliteList;
 

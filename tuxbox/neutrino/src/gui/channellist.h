@@ -52,7 +52,7 @@ class CChannelList
 			private:
 				unsigned long long	last_unlocked_EPGid;
 				string      	        name;
-				string			satellite;
+				t_satellite_position	satellitePosition;
 				int         	        key;
 
 			public:
@@ -64,7 +64,7 @@ class CChannelList
 				bool bAlwaysLocked;
 
 				// constructor
-				CChannel(const int key, const int number, const std::string& name, const std::string& satellite, const t_channel_id ids);
+				CChannel(const int key, const int number, const std::string& name, const t_satellite_position& satellitePosition, const t_channel_id ids);
 
 				friend class CChannelList;
 		};
@@ -100,14 +100,14 @@ class CChannelList
 	public:
 		CChannelList( const std::string& Name="" );
 		~CChannelList();
-		void addChannel(int key, int number, const std::string& name, const std::string& satellite, t_channel_id ids = 0); // UTF-8
+		void addChannel(int key, int number, const std::string& name, const t_satellite_position& satellitePosition, t_channel_id ids = 0); // UTF-8
 		void addChannel(CChannel* chan);
 		CChannel* getChannel( int number);
 		CChannel* operator[]( uint index) { if (chanlist.size() > index) return chanlist[index]; else return NULL;};
 		const std::string getName() const { return name; };
 		int getKey(int);
 		std::string getActiveChannelName(); // UTF-8
-		std::string getActiveSatelliteName();
+		t_satellite_position getActiveSatellitePosition();
 		int getActiveChannelNumber();
 		t_channel_id CChannelList::getActiveChannel_ChannelID();
 //		const string getActiveChannelID();

@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.90 2003/05/28 20:23:45 digi_casi Exp $ *
+ * $Header: /cvs/tuxbox/apps/dvb/zapit/lib/zapitclient.cpp,v 1.91 2003/06/02 22:22:07 digi_casi Exp $ *
  *
  * Zapit client interface - DBoxII-Project
  *
@@ -359,9 +359,6 @@ bool CZapitClient::receive_channel_list(BouquetChannelList& channels, const bool
 				buffer[30] = (char) 0x00;
 				strncpy(buffer, response.name, 30);
 				strncpy(response.name, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
-				
-				strncpy(buffer, response.satellite, 30);
-				strncpy(response.satellite, Utf8_to_Latin1(std::string(buffer)).c_str(), 30);
 			}
 			channels.push_back(response);
 		}
@@ -537,6 +534,7 @@ void CZapitClient::getScanSatelliteList(SatelliteList& satelliteList)
 		if (!CBasicClient::receive_data((char*)&(response), satlength))
 			break;
 		
+		//printf("[zapitclient] received %s, %d\n", response.satName, response.satPosition);
 		satelliteList.push_back(response);
 	}
 

@@ -109,6 +109,8 @@
 // I don't like globals, I would have hidden them in classes,
 // but if you wanna do it so... ;)
 
+CZapitClient::SatelliteList satList;
+CZapitClient::SatelliteList::iterator satList_it;
 
 static void initGlobals(void)
 {
@@ -804,7 +806,7 @@ void CNeutrinoApp::channelsInit()
 	g_Zapit->getChannels(zapitChannels, CZapitClient::MODE_CURRENT, CZapitClient::SORT_BOUQUET, true); // UTF-8
 	for(uint i=0; i<zapitChannels.size(); i++)
 	{
-		channelList->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellite, zapitChannels[i].channel_id); // UTF-8
+		channelList->addChannel(zapitChannels[i].nr, zapitChannels[i].nr, zapitChannels[i].name, zapitChannels[i].satellitePosition, zapitChannels[i].channel_id); // UTF-8
 	}
 	dprintf(DEBUG_DEBUG, "got channels\n");
 
@@ -1053,19 +1055,29 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( new CMenuForwarder("menu.back") );
 		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 
-		CZapitClient::SatelliteList satList;
+		satList.clear();
 		g_Zapit->getScanSatelliteList(satList);
 		
-		int32_t currentSatellitePosition = g_Zapit->getCurrentSatellitePosition();
+		t_satellite_position currentSatellitePosition = g_Zapit->getCurrentSatellitePosition();
 		
 		if (scanSettings.diseqcMode == DISEQC_1_2)
 		{
+			//printf("[neutrino] received %d sats\n", satList.size());
 			for (uint i = 0; i < satList.size(); i++)
+			{
+				//printf("[neutrino] received %d: %s, %d\n", i, satList[i].satName, satList[i].satPosition);
+				scanSettings.satPosition[i] = satList[i].satPosition;
+				strcpy(scanSettings.satName[i], satList[i].satName);
+				scanSettings.satDiseqc[i] = satList[i].satDiseqc;
 				if (satList[i].satPosition == currentSatellitePosition) 
-				{
 					strcpy(scanSettings.satNameNoDiseqc, satList[i].satName);
-					break;
-				}
+			}
+			for (uint i = satList.size(); i < MAX_SATELLITES; i++)
+			{
+				scanSettings.satName[i][0] = 0;
+				scanSettings.satPosition[i] = 0;
+				scanSettings.satDiseqc[i] = -1;
+			}
 		}
 		
 		CMenuOptionStringChooser* ojSat = new CMenuOptionStringChooser("satsetup.satellite", scanSettings.satNameNoDiseqc, (scanSettings.diseqcMode == DISEQC_1_2)/*, new CSatelliteNotifier*/, NULL, false);
@@ -1083,6 +1095,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 			ojDiseqcRepeats->addOption(i, ii);
 		}
 
+		CMenuForwarder* ojExtMotorControl = new CMenuForwarder("satsetup.motorcontrol", (scanSettings.diseqcMode == DISEQC_1_2), "", new CMotorControl());
 		CMenuWidget* extSatSettings = new CMenuWidget("satsetup.extended", "settings.raw");
 		extSatSettings->addItem( new CMenuSeparator() );
 		extSatSettings->addItem( new CMenuForwarder("menu.back") );
@@ -1093,7 +1106,7 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.diseqscOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
 			oj->addOption( -1, "options.off");
-			for(uint j=0; j<satList.size(); j++)
+			for(uint j=0; j < satList.size(); j++)
 			{
 				char jj[2 + 1];
 				sprintf( jj, "%d", j + 1);
@@ -1106,10 +1119,11 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		extMotorSettings->addItem( new CMenuSeparator() );
 		extMotorSettings->addItem( new CMenuForwarder("menu.back") );
 		extMotorSettings->addItem( new CMenuForwarder("satsetup.savesettingsnow", true, "", this, "savesettings") );
+		extMotorSettings->addItem( ojExtMotorControl );
 		extMotorSettings->addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 		
 		CMenuForwarder* ojExtMotorSettings = new CMenuForwarder("satsetup.extended_motor", (scanSettings.diseqcMode == DISEQC_1_2), "", extMotorSettings);
-		CMenuForwarder* ojExtMotorControl = new CMenuForwarder("satsetup.motorcontrol", (scanSettings.diseqcMode == DISEQC_1_2), "", new CMotorControl() );
+
 		for( uint i=0; i < satList.size(); i++)
 		{
 			CMenuOptionChooser* oj = new CMenuOptionChooser( satList[i].satName, scanSettings.motorPosOfSat( satList[i].satName), true/*, new CSatelliteNotifier*/);
@@ -1137,8 +1151,6 @@ void CNeutrinoApp::InitScanSettings(CMenuWidget &settings)
 		settings.addItem( ojDiseqcRepeats );
 		settings.addItem( ojExtSatSettings );
 		settings.addItem( ojExtMotorSettings );
-		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
-		settings.addItem( ojExtMotorControl );
 		settings.addItem( new CMenuSeparator(CMenuSeparator::LINE) );
 	}
 	else
@@ -2426,7 +2438,7 @@ void CNeutrinoApp::RealRun(CMenuWidget &mainMenu)
 						( msg == NeutrinoMessages::SHOW_INFOBAR ) )
 			{
 				// show Infoviewer
-				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatelliteName(), channelList->getActiveChannel_ChannelID()); // UTF-8
+				g_InfoViewer->showTitle(channelList->getActiveChannelNumber(), channelList->getActiveChannelName(), channelList->getActiveSatellitePosition(), channelList->getActiveChannel_ChannelID()); // UTF-8
 			}
 			else if( ( msg >= CRCInput::RC_0 ) && ( msg <= CRCInput::RC_9 ))
 			{ //numeric zap
@@ -3413,7 +3425,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.458 2003/05/28 19:12:59 digi_casi Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.459 2003/06/02 22:22:45 digi_casi Exp $\n\n");
 
 	tzset();
 	initGlobals();

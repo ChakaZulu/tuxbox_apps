@@ -61,6 +61,9 @@ int time_width;
 int time_height;
 char old_timestr[10];
 
+extern CZapitClient::SatelliteList satList;
+extern CZapitClient::SatelliteList::iterator satList_it;
+
 CInfoViewer::CInfoViewer()
 {
 	frameBuffer      = CFrameBuffer::getInstance();
@@ -150,7 +153,7 @@ void CInfoViewer::showRecordIcon(const bool show)
 	}
 }
 
-void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const std::string Satellite, const t_channel_id new_channel_id, const bool calledFromNumZap)
+void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const t_satellite_position satellitePosition, const t_channel_id new_channel_id, const bool calledFromNumZap)
 {
 	CNeutrinoApp *neutrino = CNeutrinoApp::getInstance();
 
@@ -213,11 +216,20 @@ void CInfoViewer::showTitle(const int ChanNum, const std::string Channel, const 
         	g_Fonts->infobar_number->RenderString(ChanNumXPos, BoxStartY+ChanHeight + 10, ChanWidth, strChanNum, COL_INFOBAR);
         
        		//satellite
-       		int satNameWidth = g_Fonts->infobar_small->getRenderWidth(Satellite.c_str());
+       		char satelliteName[30];
+       		for (satList_it = satList.begin(); satList_it != satList.end(); satList_it++)
+       			if (satList_it->satPosition == satellitePosition)
+       			{
+       				strcpy(satelliteName, satList_it->satName);
+       				break;
+       			}
+		printf("satelliteName = %s, satellitePosition = %d\n", satelliteName, satellitePosition);
+		
+       		int satNameWidth = g_Fonts->infobar_small->getRenderWidth(satelliteName);
        		if (satNameWidth > ChanWidth)
        			satNameWidth = ChanWidth;
         	int ChanSatXPos = BoxStartX + ((ChanWidth - satNameWidth)>>1);
-        	g_Fonts->infobar_small->RenderString(ChanSatXPos, BoxStartY + 22, ChanWidth, Satellite.c_str(), COL_INFOBAR);
+        	g_Fonts->infobar_small->RenderString(ChanSatXPos, BoxStartY + 22, ChanWidth, satelliteName, COL_INFOBAR);
 	}
 
         //infobox

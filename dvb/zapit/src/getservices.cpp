@@ -1,5 +1,5 @@
 /*
- * $Id: getservices.cpp,v 1.76 2003/06/02 09:34:44 digi_casi Exp $
+ * $Id: getservices.cpp,v 1.77 2003/06/02 22:22:07 digi_casi Exp $
  *
  * (C) 2002, 2003 by Andreas Oberritter <obi@tuxbox.org>
  *
@@ -35,6 +35,9 @@ std::map<string, t_satellite_position>::iterator spos_it;
 
 std::map<t_satellite_position, uint8_t> motorPositions; //stored satellitepositions in diseqc 1.2 motor
 std::map<t_satellite_position, uint8_t>::iterator mpos_it;
+
+std::map<string, int> satelliteDiseqcs; //diseqcs per satellite
+std::map<string, int>::iterator satdiseqc_it;
 
 void ParseTransponders(xmlNodePtr node, const uint8_t DiSEqC, std::string satellite, t_satellite_position satellitePosition)
 {
@@ -196,6 +199,7 @@ int LoadMotorPositions(void)
 	
 	printf("[getservices] loading motor positions...\n");
 	
+	motorPositions.clear();
 	if ((fd = fopen(MOTORCONFIGFILE, "r")))
 	{
 		fgets(buffer, 255, fd);
@@ -211,7 +215,7 @@ int LoadMotorPositions(void)
 		fclose(fd);
 		
 		for (mpos_it = motorPositions.begin(); mpos_it != motorPositions.end(); mpos_it++)
-		printf("satellitePosition = %d, motorPosition = %d\n", mpos_it->first, mpos_it->second);
+			printf("satellitePosition = %d, motorPosition = %d\n", mpos_it->first, mpos_it->second);
 	}
 	else
 		printf("[getservices] motor.conf not found.\n");
@@ -225,6 +229,9 @@ int LoadSatellitePositions(void)
 	t_satellite_position satellitePosition;
 	
 	printf("[getservices] loading satellite positions...\n");
+	
+	satellitePositions.clear();
+	
 	xmlDocPtr parser = parseXmlFile(string(SATELLITES_XML));
 
 	if (parser == NULL)
@@ -257,11 +264,10 @@ int LoadSatellitePositions(void)
 
 int LoadServices(diseqc_t diseqcType)
 {
+	LoadSatellitePositions();
+	
 	if (diseqcType == DISEQC_1_2)
-	{
-		LoadSatellitePositions();
 		LoadMotorPositions();
-	}
 	
 	xmlDocPtr parser = parseXmlFile(string(SERVICES_XML));
 

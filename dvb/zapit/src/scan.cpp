@@ -1,5 +1,5 @@
 /*
- * $Id: scan.cpp,v 1.117 2003/06/01 17:06:12 digi_casi Exp $
+ * $Id: scan.cpp,v 1.118 2003/06/02 22:22:07 digi_casi Exp $
  *
  * (C) 2002-2003 Andreas Oberritter <obi@tuxbox.org>
  *
@@ -55,9 +55,14 @@ extern uint32_t found_data_chans;
 /* zapit.cpp */
 extern CFrontend *frontend;
 extern xmlDocPtr scanInputParser;
+
 extern std::map <uint8_t, std::string> scanProviders;
-extern std::map <string, int16_t> satellitePositions;
-extern std::map <int16_t, uint8_t> motorPositions;
+extern std::map<t_satellite_position, uint8_t> motorPositions;
+extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
+
+extern std::map<string, t_satellite_position> satellitePositions;
+extern std::map<string, t_satellite_position>::iterator spos_it;
+
 extern CZapitClient::bouquetMode bouquetMode;
 extern CEventServer *eventServer;
 extern diseqc_t diseqcType;
@@ -320,7 +325,7 @@ void write_transponder(FILE *fd, t_transport_stream_id transport_stream_id, t_or
 	return;
 }
 
-int write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t DiSEqC, uint16_t satellitePosition)
+int write_provider(FILE *fd, const char *type, const char *provider_name, const uint8_t DiSEqC, t_satellite_position satellitePosition)
 {
 	int status = -1;
 	
@@ -535,13 +540,12 @@ void *start_scanthread(void *)
 				/* position satellite dish if provider is on a different satellite */
 				currentSatellitePosition = frontend->getCurrentSatellitePosition();
 				satellitePosition = satellitePositions[providerName];
-				printf("[scan] satellitePosition = %d, currentSatellitePosition = %d\n", satellitePosition, currentSatellitePosition);
 				if ((frontend->getDiseqcType() == DISEQC_1_2) && (currentSatellitePosition != satellitePosition) && (motorPositions[satellitePosition] != 0))
 				{
 					printf("[scan] start_scanthread: moving satellite dish from satellite position %d to %d\n", currentSatellitePosition, satellitePosition);
-					printf("[scan] motor position: %d\n", motorPositions[satellitePosition]);
+					printf("[scan] motorPosition = %d\n", motorPositions[satellitePosition]);
 					frontend->positionMotor(motorPositions[satellitePosition]);
-					frontend->setCurrentSatellitePosition(satellitePosition);
+					frontend->setCurrentSatellitePosition(currentSatellitePosition);
 				}
 						
 				scan_provider(search, providerName, satfeed, diseqc_pos);

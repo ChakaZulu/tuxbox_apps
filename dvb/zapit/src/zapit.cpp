@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.318 2003/06/01 17:38:59 digi_casi Exp $
+ * $Id: zapit.cpp,v 1.319 2003/06/02 22:22:07 digi_casi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -77,9 +77,6 @@ CDemux *pcrDemux = NULL;
 CDemux *teletextDemux = NULL;
 CDemux *videoDemux = NULL;
 
-/* the map which stores the wanted cable/satellites */
-std::map<uint8_t, std::string> scanProviders;
-
 /* current zapit mode */
 enum {
 	TV_MODE = 0x01,
@@ -112,8 +109,17 @@ extern short curr_sat;
 extern short scan_runs;
 CZapitClient::bouquetMode bouquetMode = CZapitClient::BM_CREATEBOUQUETS;
 
-extern std::map <t_satellite_position, uint8_t> motorPositions;
-extern std::map <string, int32_t> satellitePositions;
+/* the map which stores the wanted cable/satellites */
+std::map<uint8_t, std::string> scanProviders;
+/* the map which stores the diseqc 1.2 motor positions */
+extern std::map<t_satellite_position, uint8_t> motorPositions;
+extern std::map<t_satellite_position, uint8_t>::iterator mpos_it;
+
+extern std::map<string, t_satellite_position> satellitePositions;
+extern std::map<string, t_satellite_position>::iterator spos_it;
+
+extern std::map<string, int> satelliteDiseqcs; //diseqcs per satellite
+extern std::map<string, int>::iterator satdiseqc_it;
 
 bool standby = true;
 
@@ -220,7 +226,7 @@ int zapit(const t_channel_id channel_id, bool in_nvod, uint32_t tsid_onid)
 	/* have motor move satellite dish to satellite's position if necessary */
 	if ((diseqcType == DISEQC_1_2) && (motorPositions[channel->getSatellitePosition()] != 0))
 	{
-		if (frontend->getCurrentSatellitePosition() != channel->getSatellitePosition())
+		if ((frontend->getCurrentSatellitePosition() != channel->getSatellitePosition()))
 		{
 			printf("[zapit] currentSatellitePosition = %d, satellitePosition = %d\n", frontend->getCurrentSatellitePosition(), channel->getSatellitePosition());
 			printf("[zapit] motorPosition = %d\n", motorPositions[channel->getSatellitePosition()]);
@@ -736,15 +742,14 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 			while ((search = xmlGetNextOccurence(search, frontendname)) != NULL)
 			{
 				satname = xmlGetAttribute(search, "name");
-				if (strlen(satname) != 0)
-				{
-					strncpy(sat.satName, satname, 29);
-					sat.satPosition = satellitePositions[satname];
-					satlength = sizeof(sat);
-					CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
-					CBasicServer::send_data(connfd, (char *)&sat, satlength);
-					search = search->xmlNextNode;
-				}
+				strncpy(sat.satName, satname, 29);
+				sat.satPosition = satellitePositions[satname];
+				sat.satDiseqc = satelliteDiseqcs[satname];
+				satlength = sizeof(sat);
+				//printf("[zapit] sending %s, %d\n", sat.satName, sat.satPosition);
+				CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
+				CBasicServer::send_data(connfd, (char *)&sat, satlength);
+				search = search->xmlNextNode;
 			}
 		satlength = SATNAMES_END_MARKER;
 		CBasicServer::send_data(connfd, &satlength, sizeof(satlength));
@@ -770,7 +775,7 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		
 		while (CBasicServer::receive_data(connfd, &pos, sizeof(pos))) 
 		{
-			DBG("adding %d (motorPos %d)", pos.satPosition, pos.motorPos);
+			//printf("adding %d (motorPos %d)\n", pos.satPosition, pos.motorPos);
 			changed |= (motorPositions[pos.satPosition] != pos.motorPos);
 			motorPositions[pos.satPosition] = pos.motorPos;
 		}
@@ -778,13 +783,12 @@ bool parse_command(CBasicMessage::Header &rmsg, int connfd)
 		if (changed)
 		{
 			// save to motor.conf
-			printf("[zapit] saving motor.conf\n");
+			//printf("[zapit] saving motor.conf\n");
 			fd = fopen(MOTORCONFIGFILE, "w");
-			std::map<t_satellite_position, uint8_t>::iterator it;
-			for (it = motorPositions.begin(); it != motorPositions.end(); it++)
+			for (mpos_it = motorPositions.begin(); mpos_it != motorPositions.end(); mpos_it++)
 			{
-				printf("[zapit] saving %d: %d\n", it->first, it->second);
-				fprintf(fd, "%d %d\n", it->first, it->second);
+				//printf("[zapit] saving %d %d\n", mpos_it->first, mpos_it->second);
+				fprintf(fd, "%d %d\n", mpos_it->first, mpos_it->second);
 			}
 			fclose(fd);
 		}
@@ -1178,7 +1182,7 @@ void internalSendChannels(int connfd, ChannelList* channels, const unsigned int 
 
 		CZapitClient::responseGetBouquetChannels response;
 		strncpy(response.name, ((*channels)[i]->getName()).c_str(), 30);
-		strncpy(response.satellite, ((*channels)[i]->getSatelliteName()).c_str(), 30);
+		response.satellitePosition = (*channels)[i]->getSatellitePosition();
 		response.channel_id = (*channels)[i]->getChannelID();
 		response.nr = first_channel_nr + i;
 		response.service_type = (*channels)[i]->getServiceType();
@@ -1509,7 +1513,7 @@ void signal_handler(int signum)
 
 int main(int argc, char **argv)
 {
-	fprintf(stdout, "$Id: zapit.cpp,v 1.318 2003/06/01 17:38:59 digi_casi Exp $\n");
+	fprintf(stdout, "$Id: zapit.cpp,v 1.319 2003/06/02 22:22:07 digi_casi Exp $\n");
 
 	for (int i = 1; i < argc ; i++) {
 		if (!strcmp(argv[i], "-d")) {
