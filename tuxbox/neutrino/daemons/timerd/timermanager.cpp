@@ -4,7 +4,7 @@
 	Copyright (C) 2001 Steffen Hehn 'McClean'
 	Homepage: http://dbox.cyberphoria.org/
 
-   $Id: timermanager.cpp,v 1.44 2002/10/15 22:42:11 Zwen Exp $
+   $Id: timermanager.cpp,v 1.45 2002/10/20 00:04:18 Zwen Exp $
 
 	License: GPL
 
@@ -315,7 +315,39 @@ bool CTimerManager::shutdown()
 	}
 	return false;
 }
-
+//------------------------------------------------------------
+void CTimerManager::shutdownOnWakeup()
+{
+	time_t nextAnnounceTime=0;
+	CTimerEventMap::iterator pos = events.begin();
+	for(;pos != events.end();pos++)
+	{
+		CTimerEvent *event = pos->second;
+		if((event->eventType == CTimerd::TIMER_RECORD ||
+			 event->eventType == CTimerd::TIMER_ZAPTO ) &&
+			event->eventState == CTimerd::TIMERSTATE_SCHEDULED)
+		{
+			// Wir wachen nur für Records und Zaptos wieder auf
+			if(event->announceTime < nextAnnounceTime || nextAnnounceTime==0)
+			{
+				nextAnnounceTime=event->announceTime;
+			}
+		}
+	}
+	time_t now = time(NULL);
+	if((nextAnnounceTime-now) > 600 || nextAnnounceTime==0)
+	{ // in den naechsten 10 min steht nix an
+		//teste auf wakeup
+		int wakeup;
+		int fd = open("/dev/dbox/fp0", O_RDWR);
+		ioctl(fd, FP_IOCTL_IS_WAKEUP, &wakeup);
+		if(wakeup)
+		{
+			CTimerEvent_Shutdown* event = new CTimerEvent_Shutdown(now+120, now+180);
+			addEvent(event);
+		}
+	}
+}
 //------------------------------------------------------------
 //=============================================================
 // event functions
@@ -609,6 +641,8 @@ void CTimerEvent_Record::stopEvent()
 	CTimerManager::getInstance()->getEventServer()->sendEvent(
 																				CTimerdClient::EVT_RECORD_STOP,
 																				CEventServer::INITID_TIMERD);
+	// Programmiere shutdwon timer, wenn in wakeup state und kein record/zapto timer in 10 min
+	CTimerManager::getInstance()->shutdownOnWakeup();
 	dprintf("Recording stopped\n"); 
 }
 //------------------------------------------------------------
