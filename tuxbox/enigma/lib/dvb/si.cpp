@@ -166,6 +166,7 @@ Descriptor *Descriptor::create(descr_gen_t *descr)
 	case DESCR_TELEPHONE:
 	case DESCR_LOCAL_TIME_OFF:
 	case DESCR_SUBTITLING:
+		return new SubtitlingDescriptor((descr_gen_struct*)descr);
 	case DESCR_ML_NW_NAME:
 	case DESCR_ML_BQ_NAME:
 	case DESCR_ML_SERVICE_NAME:
@@ -1047,6 +1048,41 @@ eString RegistrationDescriptor::toString()
 	res+="</format_identifier><additional_identification_info>";
 	res+=additional_identification_info;
 	res+="</additional_identification_info></RegistrationDescriptor>\n";
+	return res;
+}
+#endif
+
+SubtitleEntry::SubtitleEntry(__u8* data)
+{
+	memcpy(language_code, data, 3);
+	subtitling_type = *(data+3);
+	composition_page_id = (*(data+4) << 8) | *(data+5);
+	ancillary_page_id = (*(data+6) << 8) | *(data+7);
+}
+
+SubtitlingDescriptor::SubtitlingDescriptor(descr_gen_struct *descr)
+	:Descriptor(descr)
+{
+	entries.setAutoDelete(true);
+	int len=descr->descriptor_length;
+	for (int i=0; i<len; i+=8)
+		entries.push_back(new SubtitleEntry(((__u8*)descr)+2+i));
+}
+
+#ifdef SUPPORT_XML
+eString SubtitlingDescriptor::toString()
+{
+	eString res;
+	res += "<SubtitlingDescriptor>";
+	for ( ePtrList<SubtitleEntry>::iterator it(entries.begin()); it != entries.end(); ++it )
+		res+=eString().sprintf(
+			"<ISO639_language_code>%c%c%c</ISO639_language_code>"
+			"<subtitling_type>%d</subtitling_type>"
+			"<composition_page_id>%d</composition_page_id>"
+			"<ancillary_page_id>%d</ancillary_page_id",
+			it->language_code[0], it->language_code[1], it->language_code[2],
+			it->subtitling_type, it->composition_page_id, it->ancillary_page_id);
+	res += "</SubtitlingDescriptor>";
 	return res;
 }
 #endif

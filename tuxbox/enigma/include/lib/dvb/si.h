@@ -345,6 +345,24 @@ public:
 	eString additional_identification_info;
 };
 
+class SubtitleEntry
+{
+public:
+	SubtitleEntry(__u8 *data);
+	char language_code[3];
+	int subtitling_type;
+	int composition_page_id;
+	int ancillary_page_id;
+};
+
+class SubtitlingDescriptor: public Descriptor
+{
+public:
+	SubtitlingDescriptor(descr_gen_struct *descr);
+	eString toString();
+	ePtrList<SubtitleEntry> entries;
+};
+
 class PATEntry
 {
 public:
