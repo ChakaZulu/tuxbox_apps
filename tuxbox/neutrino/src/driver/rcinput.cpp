@@ -567,7 +567,19 @@ void CRCInput::getMsg_us(uint *msg, uint *data, unsigned long long Timeout, bool
 			 		else if ( emsg.initiatorID == CEventServer::INITID_ZAPIT )
 			 		{
 			 			//printf("[neutrino] event - from ZAPIT %x %x\n", emsg.eventID, *(unsigned*) p);
-			 			if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE)
+			 			if (emsg.eventID==CZapitClient::EVT_RECORDMODE_ACTIVATED)
+			 			{
+			 				*msg = NeutrinoMessages::EVT_RECORDMODE_ACTIVATED;
+			 				*data = 0;
+							printf("recorde started!!!!!!!!!!!!\n");
+			 			}
+			 			else if (emsg.eventID==CZapitClient::EVT_RECORDMODE_DEACTIVATED)
+			 			{
+			 				*msg = NeutrinoMessages::EVT_RECORDMODE_DEACTIVATED;
+			 				*data = 0;
+							printf("recorde ended!!!!!!!!!!!!\n");
+			 			}
+						else if (emsg.eventID==CZapitClient::EVT_ZAP_COMPLETE)
 			 			{
 			 				*msg = NeutrinoMessages::EVT_ZAP_COMPLETE;
 			 				*data = *(unsigned*) p;

@@ -1,6 +1,6 @@
 /*
 
-        $Id: neutrino.cpp,v 1.237 2002/04/20 20:23:24 McClean Exp $
+        $Id: neutrino.cpp,v 1.238 2002/04/20 22:56:03 McClean Exp $
 
 	Neutrino-GUI  -   DBoxII-Project
 
@@ -1615,6 +1615,8 @@ int CNeutrinoApp::run(int argc, char **argv)
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_SATELLITE, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_NUM_CHANNELS, 222, NEUTRINO_UDS_NAME);
 	g_Zapit->registerEvent(CZapitClient::EVT_SCAN_PROVIDER, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_ACTIVATED, 222, NEUTRINO_UDS_NAME);
+	g_Zapit->registerEvent(CZapitClient::EVT_RECORDMODE_DEACTIVATED, 222, NEUTRINO_UDS_NAME);
 
 	g_Timerd->registerEvent(CTimerdClient::EVT_SHUTDOWN, 222, NEUTRINO_UDS_NAME);
 	g_Timerd->registerEvent(CTimerdClient::EVT_NEXTPROGRAM, 222, NEUTRINO_UDS_NAME);
@@ -2358,7 +2360,7 @@ bool CNeutrinoApp::changeNotify(string OptionName)
 **************************************************************************************/
 int main(int argc, char **argv)
 {
-	printf("NeutrinoNG $Id: neutrino.cpp,v 1.237 2002/04/20 20:23:24 McClean Exp $\n\n");
+	printf("NeutrinoNG $Id: neutrino.cpp,v 1.238 2002/04/20 22:56:03 McClean Exp $\n\n");
 	tzset();
 	initGlobals();
 
