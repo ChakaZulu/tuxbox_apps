@@ -1046,6 +1046,7 @@ void eServiceHandlerMP3::addFile(void *node, const eString &filename)
 	} else if ((filename.right(5).upper()==".MPEG")
 		|| (filename.right(4).upper()==".MPG")
 		|| (filename.right(4).upper()==".VOB")
+		|| (filename.right(4).upper()==".DAT")
 		|| (filename.right(4).upper()==".BIN")
 		|| (filename.right(4).upper()==".VDR"))
 	{
