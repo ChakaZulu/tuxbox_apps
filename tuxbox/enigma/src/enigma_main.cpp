@@ -1458,15 +1458,21 @@ void eZapMain::runVTXT()
 			return;
 		}
 
+		int executed=0;
 		for(int count=0;count<n;count++)
 		{
 			eString	FileName(PLUGINDIR "/");
 			FileName+=namelist[count]->d_name;
-			if ( FileName.find(".cfg") != eString::npos )
+			if ( !executed && FileName.find(".cfg") != eString::npos )
 			{
 				eString aneedvtxtpid=getInfo(FileName.c_str(), "needvtxtpid");
-				if ( aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()) )
+				eString aneedlcd=getInfo(FileName.c_str(), "needlcd");
+				// we search tuxtxt... this use lcd and vtxtpid... not perfekt... but i havo no other idea
+				if ( aneedvtxtpid.isNull()?false:atoi(aneedvtxtpid.c_str()) && aneedlcd.isNull()?false:atoi(aneedlcd.c_str()) )
+				{
 					plugins.execPluginByName(namelist[count]->d_name);
+					executed++;
+				}
 			}
 			free(namelist[count]);
 	  }
