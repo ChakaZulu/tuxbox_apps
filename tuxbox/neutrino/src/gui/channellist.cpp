@@ -1,7 +1,10 @@
 //
-// $Id: channellist.cpp,v 1.17 2001/09/17 12:45:12 field Exp $
+// $Id: channellist.cpp,v 1.18 2001/09/18 11:48:43 fnbrd Exp $
 //
 // $Log: channellist.cpp,v $
+// Revision 1.18  2001/09/18 11:48:43  fnbrd
+// Changed some parameter to const string&
+//
 // Revision 1.17  2001/09/17 12:45:12  field
 // Sprache online umstellbar, kleine Aufraeumarbeiten
 //
@@ -128,7 +131,7 @@ void CChannelList::updateEvents(void)
   return;
 }
 
-CChannelList::CChannelList(int Key=-1, string Name="")
+CChannelList::CChannelList(int Key=-1, const std::string &Name)
 {
 	key = Key;
 	name = Name;
@@ -154,7 +157,7 @@ CChannelList::~CChannelList()
 	chanlist.clear();
 }
 
-void CChannelList::addChannel(int key, int number, string name)
+void CChannelList::addChannel(int key, int number, const std::string& name)
 {
 	channel* tmp = new channel();
 	tmp->key=key;
@@ -163,7 +166,7 @@ void CChannelList::addChannel(int key, int number, string name)
 	chanlist.insert(chanlist.end(), tmp);
 }
 
-void CChannelList::setName(string Name)
+void CChannelList::setName(const std::string& Name)
 {
 	name = Name;
 }
@@ -173,7 +176,7 @@ int CChannelList::getKey(int id)
 	return chanlist[id]->key;
 }
 
-string CChannelList::getActiveChannelName()
+const std::string& CChannelList::getActiveChannelName()
 {
 	return chanlist[selected]->name;
 }

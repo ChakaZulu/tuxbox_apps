@@ -1,9 +1,12 @@
 #ifndef __channellist__
 #define __channellist__
 //
-// $Id: channellist.h,v 1.10 2001/09/14 16:18:46 field Exp $
+// $Id: channellist.h,v 1.11 2001/09/18 11:48:43 fnbrd Exp $
 //
 // $Log: channellist.h,v $
+// Revision 1.11  2001/09/18 11:48:43  fnbrd
+// Changed some parameter to const string&
+//
 // Revision 1.10  2001/09/14 16:18:46  field
 // Umstellung auf globale Variablen...
 //
@@ -76,12 +79,12 @@ class CChannelList
 	void hide();
 
 	public:
-    CChannelList(int Key=-1, string Name="");
+    CChannelList(int Key=-1, const std::string& Name="");
 	~CChannelList();
-	void addChannel(int key, int number, string name);
-	void setName(string Name);
+	void addChannel(int key, int number, const std::string& name);
+	void setName(const std::string& Name);
 	int getKey(int);
-	string getActiveChannelName();
+	const std::string& getActiveChannelName();
 	int getActiveChannelNumber();
 
 	void zapTo(int pos);
@@ -94,4 +97,5 @@ class CChannelList
 
 
 #endif
+
 
