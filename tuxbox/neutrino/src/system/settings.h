@@ -238,13 +238,18 @@ struct SNeutrinoSettings
 	};
 
 	// lcdd
-	int lcd_brightness;
-	int lcd_standbybrightness;
-	int lcd_contrast;
-	int lcd_power;
-	int lcd_inverse;
-   	int lcd_show_volume;
-   	int lcd_autodimm;
+#define LCD_SETTING_COUNT 7
+	enum LCD_SETTINGS {
+		LCD_BRIGHTNESS         = 0,
+		LCD_STANDBY_BRIGHTNESS = 1,
+		LCD_CONTRAST           = 2,
+		LCD_POWER              = 3,
+		LCD_INVERSE            = 4,
+		LCD_SHOW_VOLUME        = 5,
+		LCD_AUTODIMM           = 6
+	};
+
+	int lcd_setting[LCD_SETTING_COUNT];
 
 	// pictureviewer
 	char   picviewer_slide_time[3];

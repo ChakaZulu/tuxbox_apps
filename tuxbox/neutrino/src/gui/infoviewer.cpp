@@ -957,7 +957,7 @@ void CInfoViewer::Set_CA_Status(int Status)
 
 void CInfoViewer::showLcdPercentOver()
 {
-	if(g_settings.lcd_show_volume != 1)
+	if (g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME] != 1)
 	{
 		int runningPercent=-1;
 		time_t jetzt=time(NULL);

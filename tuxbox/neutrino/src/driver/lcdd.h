@@ -42,8 +42,6 @@ class CLCD
 		{
 			MODE_TVRADIO,
 			MODE_SCART,
-			UNUSED_LEGACY_MODE, /* MODE_MENU */
-			MODE_SAVER,
 			MODE_SHUTDOWN,
 			MODE_STANDBY,
 			MODE_MENU_UTF8,
@@ -74,11 +72,8 @@ class CLCD
 		LcdFontRenderClass		*fontRenderer;
 		FontsDef			fonts;
 
-		raw_display_t		icon_lcd;
-		raw_display_t		icon_lcd2;
-		raw_display_t		icon_lcd3;
-		raw_display_t		icon_setup;
-		raw_display_t		icon_power;
+#define LCD_NUMBER_OF_BACKGROUNDS 5
+		raw_display_t                   background[LCD_NUMBER_OF_BACKGROUNDS];
 
 		MODES				mode;
 
@@ -91,17 +86,16 @@ class CLCD
 		pthread_t			thrTime;
 
 		CLCD();
-		~CLCD();
 
 		static void* TimeThread(void*);
-		bool lcdInit(const char * fontfile, const char * fontname, const bool _setlcdparameter);
+		bool lcdInit(const char * fontfile, const char * fontname);
 		void setlcdparameter(int dimm, int contrast, int power, int inverse);
+		void setlcdparameter(void);
 
 	public:
 
 		static CLCD* getInstance();
-		void init(const char * fontfile, const char * fontname, const bool _setlcdparameter);
-		void setlcdparameter(void);
+		void init(const char * fontfile, const char * fontname);
 
 		void setMode(const MODES m, const char * const title = "");
 

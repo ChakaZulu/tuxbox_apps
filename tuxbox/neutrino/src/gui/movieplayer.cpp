@@ -4,7 +4,7 @@
   Movieplayer (c) 2003 by gagga
   Based on code by Dirch, obi and the Metzler Bros. Thanks.
 
-  $Id: movieplayer.cpp,v 1.60 2003/12/21 17:08:36 gagga Exp $
+  $Id: movieplayer.cpp,v 1.61 2004/01/01 22:39:57 thegoodguy Exp $
 
   Homepage: http://www.giggo.de/dbox2/movieplayer.html
 
@@ -1139,7 +1139,7 @@ CMoviePlayerGui::PlayStream (int streamtype)
 		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.60 $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.61 $\n\nMovieplayer (c) 2003 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
 		else
@@ -1262,7 +1262,7 @@ CMoviePlayerGui::PlayFile (void)
  		else if (msg == CRCInput::RC_help)
  		{
      		std::string helptext = g_Locale->getText("movieplayer.help");
-     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.60 $\n\nMovieplayer (c) 2003 by gagga";
+     		std::string fullhelptext = helptext + "\nVersion: $Revision: 1.61 $\n\nMovieplayer (c) 2003 by gagga";
      		ShowMsgUTF("messagebox.info", fullhelptext.c_str(), CMessageBox::mbrBack, CMessageBox::mbBack, "info.raw"); // UTF-8
  		}
         else if (msg == CRCInput::RC_left)
@@ -1544,7 +1544,7 @@ CMoviePlayerGui::paint ()
 {
 	CLCD * lcd = CLCD::getInstance();
 	lcd->setMode(CLCD::MODE_TVRADIO);
-	lcd->showServicename("Movieplayer");
+	lcd->showServicename(g_Locale->getText("mainmenu.movieplayer"));
 
 	frameBuffer->loadPal ("radiomode.pal", 18, COL_MAXFREE);
 	frameBuffer->loadBackground ("radiomode.raw");

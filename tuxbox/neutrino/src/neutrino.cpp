@@ -345,6 +345,23 @@ const font_sizes_struct neutrino_font[FONT_TYPE_COUNT] =
 	{"fontsize.filebrowser_item"   ,  16, FONT_STYLE_BOLD   , 1}
 };
 
+typedef struct lcd_setting_t
+{
+	const char * const name;
+	const unsigned int default_value;
+} lcd_setting_struct_t;
+
+const lcd_setting_struct_t lcd_setting[LCD_SETTING_COUNT] =
+{
+	{"lcd_brightness"       , DEFAULT_LCD_BRIGHTNESS       },
+	{"lcd_standbybrightness", DEFAULT_LCD_STANDBYBRIGHTNESS},
+	{"lcd_contrast"         , DEFAULT_LCD_CONTRAST         },
+	{"lcd_power"            , DEFAULT_LCD_POWER            },
+	{"lcd_inverse"          , DEFAULT_LCD_INVERSE          },
+	{"lcd_show_volume"      , DEFAULT_LCD_SHOW_VOLUME      },
+	{"lcd_autodimm"         , DEFAULT_LCD_AUTODIMM         }
+};
+
 
 /**************************************************************************************
 *                                                                                     *
@@ -562,14 +579,8 @@ int CNeutrinoApp::loadSetup()
 	g_settings.timing_infobar = configfile.getInt32( "timing_infobar", DEFAULT_TIMING_INFOBAR );
 	g_settings.timing_filebrowser = configfile.getInt32( "timing_filebrowser", DEFAULT_TIMING_FILEBROWSER );
 
-	//lcdd
-	g_settings.lcd_brightness =  configfile.getInt32("lcd_brightness", DEFAULT_LCD_BRIGHTNESS);
-	g_settings.lcd_standbybrightness = configfile.getInt32("lcd_standbybrightness", DEFAULT_LCD_STANDBYBRIGHTNESS);
-	g_settings.lcd_contrast = configfile.getInt32("lcd_contrast", DEFAULT_LCD_CONTRAST);
-	g_settings.lcd_power = configfile.getInt32("lcd_power", DEFAULT_LCD_POWER);
-	g_settings.lcd_inverse = configfile.getInt32("lcd_inverse", DEFAULT_LCD_INVERSE);
-	g_settings.lcd_show_volume = configfile.getInt32("lcd_show_volume", DEFAULT_LCD_SHOW_VOLUME);
-	g_settings.lcd_autodimm = configfile.getInt32("lcd_autodimm", DEFAULT_LCD_AUTODIMM);
+	for (int i = 0; i < LCD_SETTING_COUNT; i++)
+		g_settings.lcd_setting[i] = configfile.getInt32(lcd_setting[i].name, lcd_setting[i].default_value);
 
 	//Picture-Viewer
 	strcpy( g_settings.picviewer_slide_time, configfile.getString( "picviewer_slide_time", "10" ).c_str() );
@@ -647,10 +658,10 @@ int CNeutrinoApp::loadSetup()
 void CNeutrinoApp::saveSetup()
 {
 	//uboot; write config only on changes
-	if( fromflash &&
-		((g_settings.uboot_console_bak != g_settings.uboot_console) ||
-		(g_settings.uboot_lcd_inverse  != g_settings.lcd_inverse) ||
-		(g_settings.uboot_lcd_contrast != g_settings.lcd_contrast)) )
+	if (fromflash &&
+	    ((g_settings.uboot_console_bak != g_settings.uboot_console) ||
+	     (g_settings.uboot_lcd_inverse  != g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE]) ||
+	     (g_settings.uboot_lcd_contrast != g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST])))
 	{
 		FILE* fd = fopen("/var/tuxbox/boot/boot.conf", "w");
 
@@ -658,8 +669,8 @@ void CNeutrinoApp::saveSetup()
 		{
 			const char * buffer;
 			g_settings.uboot_console_bak    = g_settings.uboot_console;
-			g_settings.uboot_lcd_inverse	= g_settings.lcd_inverse;
-			g_settings.uboot_lcd_contrast	= g_settings.lcd_contrast;
+			g_settings.uboot_lcd_inverse	= g_settings.lcd_setting[SNeutrinoSettings::LCD_INVERSE];
+			g_settings.uboot_lcd_contrast	= g_settings.lcd_setting[SNeutrinoSettings::LCD_CONTRAST];
 
 			switch(g_settings.uboot_console)
 			{
@@ -874,14 +885,8 @@ void CNeutrinoApp::saveSetup()
 	configfile.setInt32( "timing_infobar", g_settings.timing_infobar );
 	configfile.setInt32( "timing_filebrowser", g_settings.timing_filebrowser );
 
-	//lcdd
-	configfile.setInt32( "lcd_brightness", g_settings.lcd_brightness );
-	configfile.setInt32( "lcd_standbybrightness", g_settings.lcd_standbybrightness );
-	configfile.setInt32( "lcd_contrast", g_settings.lcd_contrast );
-	configfile.setInt32( "lcd_power", g_settings.lcd_power );
-	configfile.setInt32( "lcd_inverse", g_settings.lcd_inverse );
-	configfile.setInt32( "lcd_show_volume", g_settings.lcd_show_volume );
-	configfile.setInt32( "lcd_autodimm", g_settings.lcd_autodimm );
+	for (int i = 0; i < LCD_SETTING_COUNT; i++)
+		configfile.setInt32(lcd_setting[i].name, g_settings.lcd_setting[i]);
 
 	//Picture-Viewer
 	configfile.setString( "picviewer_slide_time", g_settings.picviewer_slide_time );
@@ -2166,7 +2171,7 @@ void CNeutrinoApp::InitLcdSettings(CMenuWidget &lcdSettings)
 	lcdSettings.addItem( new CMenuForwarder("lcdmenu.lcdcontroler", true, NULL, lcdsliders));
 
 	lcdSettings.addItem(GenericMenuSeparatorLine);
-	oj = new CMenuOptionChooser("lcdmenu.statusline", &g_settings.lcd_show_volume, true );
+	oj = new CMenuOptionChooser("lcdmenu.statusline", &g_settings.lcd_setting[SNeutrinoSettings::LCD_SHOW_VOLUME], true );
 	oj->addOption(0, "lcdmenu.statusline.playtime");
 	oj->addOption(1, "lcdmenu.statusline.volume");
 	oj->addOption(2, "lcdmenu.statusline.both");
@@ -2482,19 +2487,13 @@ int CNeutrinoApp::run(int argc, char **argv)
 		fontsSizeOffset = predefined_font[use_true_unicode_font].size_offset;
 	}
 
-	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName, false);
+	CLCD::getInstance()->init((fontFile + ".ttf").c_str(), fontName);
+	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control == 1));
+	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control == 1));
 
 	g_info.box_Type = g_Controld->getBoxType();
 
 	dprintf( DEBUG_DEBUG, "[neutrino] box_Type: %d\n", g_info.box_Type);
-
-
-
-
-	//lcd aktualisieren
-	CLCD::getInstance()->setlcdparameter();
-	CLCD::getInstance()->showVolume(g_Controld->getVolume(g_settings.audio_avs_Control == 1));
-	CLCD::getInstance()->setMuted(g_Controld->getMute(g_settings.audio_avs_Control == 1));
 
 	SetupTiming();
 
@@ -2674,7 +2673,6 @@ int CNeutrinoApp::run(int argc, char **argv)
 		saveSetup();
 	}
 
-	CLCD::getInstance()->showServicename("Waiting...");
 	//init programm
 	InitZapper();
 
@@ -3278,8 +3276,7 @@ void CNeutrinoApp::ExitRun()
 		frameBuffer->paletteSetColor(x, 0x000000, 0xffff);
 	frameBuffer->paletteSet();
 
-	if(frameBuffer->getActive())
-		frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
+	frameBuffer->loadPicture2FrameBuffer("shutdown.raw");
 	frameBuffer->loadPal("shutdown.pal");
 
 	networkConfig.automatic_start = (network_automatic_start == 1);
