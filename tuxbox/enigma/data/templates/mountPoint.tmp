@@ -1,10 +1,10 @@
 <tr>
-	<td>#MOUNTED#</td>
-	<td width=75>#ACTIONBUTTON#</td>
-	<td width=75>#CHANGEBUTTON#</td>
-	<td width=75>#DELETEBUTTON#</td>
+	<td align="center">#MOUNTED#</td>
+	<td width="75">#ACTIONBUTTON#</td>
+	<td width="30" align="center"><a href="javascript:changeMountPoint('#CHANGEID#')"><img src="edit.gif" border="0" height="20"></a></td>
+	<td width="30" align="center"><a href="javascript:deleteMountPoint('#DELETEID#')"><img src="trash.gif" border="0" height="20"></a></td>
 	<td>#FSTYPE#</td>
 	<td>#LDIR#</td>
 	<td>#MDIR#</td>
-	<td>#AUTO#</td>
+	<td align="center">#AUTO#</td>
 </tr>
