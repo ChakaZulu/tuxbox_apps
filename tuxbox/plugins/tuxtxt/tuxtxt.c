@@ -1671,7 +1671,7 @@ void RenderCharFB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, 1+ Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char => 0x%.2X>\n", error);
 			PosX += fontwidth;
@@ -1750,7 +1750,7 @@ void RenderCharBB(int Char, int Attribute)
 
 	//load char
 
-		if((error = FT_Load_Char(face, 1+ Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
+		if((error = FT_Load_Char(face, Char + ((Attribute>>8 & 1) * (128-32)), FT_LOAD_RENDER | FT_LOAD_MONOCHROME)) != 0)
 		{
 			printf("TuxTxt <FT_Load_Char %.3d => 0x%.2X>\n", Char, error);
 			PosX += fontwidth;
