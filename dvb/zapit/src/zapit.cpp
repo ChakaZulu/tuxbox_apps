@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.249 2002/10/02 12:04:10 thegoodguy Exp $
+ * $Id: zapit.cpp,v 1.250 2002/10/03 02:04:22 obi Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -465,6 +465,9 @@ int changeapid (uint8_t index)
 	if (stopDmxFilter(dmx_audio_fd) < 0)
 		return -1;
 
+	/* stop audio playback */
+	//audio->stop();
+
 	/* update current channel */
 	channel->setAudioChannel(index);
 
@@ -474,10 +477,14 @@ int changeapid (uint8_t index)
 	else
 		audio->disableBypass();
 
-	/* start demux filter */
+	/* set demux filter */
 	if (setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid()) < 0)
 		return -1;
 
+	/* start audio playback */
+	//audio->start();
+
+	/* start demux filter */
 	if (startDmxFilter(dmx_audio_fd) < 0)
 		return -1;
 
@@ -1056,7 +1063,7 @@ int main (int argc, char **argv)
 	CZapitClient::responseGetLastChannel test_lastchannel;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.249 2002/10/02 12:04:10 thegoodguy Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.250 2002/10/03 02:04:22 obi Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1373,6 +1380,10 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 
 int startPlayBack()
 {
+	bool have_audio = false;
+	bool have_pcr = false;
+	bool have_video = false;
+
 	if (playbackStopForced == true)
 		return -1;
 
@@ -1394,31 +1405,65 @@ int startPlayBack()
 		return -1;
 	}
 
-	/* start demux filters */
-	setDmxPesFilter(dmx_pcr_fd, DMX_OUT_DECODER, DMX_PES_PCR, channel->getPcrPid());
-	setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid());
-	if ((channel->getVideoPid() > 0) && (currentMode & TV_MODE))
+	if (channel->getAudioPid() != 0)
+		have_audio = true;
+
+	if (channel->getPcrPid() != 0)
+		have_pcr = true;
+
+	if ((channel->getVideoPid() != 0) && (currentMode & TV_MODE))
+		have_video = true;
+
+	if ((!have_audio) && (!have_video))
+		return -1;
+
+	/* set demux filters */
+	if (have_pcr)
+		setDmxPesFilter(dmx_pcr_fd, DMX_OUT_DECODER, DMX_PES_PCR, channel->getPcrPid());
+
+	if (have_audio)
+		setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, channel->getAudioPid());
+#ifdef DBOX2
+	/* FIXME: what happens on other devices, when setting an invalid pid? */
+	else
+		setDmxPesFilter(dmx_audio_fd, DMX_OUT_DECODER, DMX_PES_AUDIO, 0xFFFF);
+#endif
+
+	if (have_video)
 		setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, channel->getVideoPid());
+#ifdef DBOX2
+	/* FIXME: what happens on other devices, when setting an invalid pid? */
+	else
+		setDmxPesFilter(dmx_video_fd, DMX_OUT_DECODER, DMX_PES_VIDEO, 0xFFFF);
+#endif
 
-	video->setSource(VIDEO_SOURCE_DEMUX);
-	video->start();
+	if (have_video) {
+		/* start video */
+		video->setSource(VIDEO_SOURCE_DEMUX);
+		video->start();
+	}
 
-	startDmxFilter(dmx_pcr_fd);
-	startDmxFilter(dmx_audio_fd);
-	if ((channel->getVideoPid() > 0) && (currentMode & TV_MODE))
-		startDmxFilter(dmx_video_fd);
-
-	/* set bypass mode */
-	if (channel->getAudioChannel())
+	if (have_audio) {
+		/* select audio output */
 		if (channel->getAudioChannel()->isAc3)
 			audio->enableBypass();
 		else
 			audio->disableBypass();
 
-	audio->start();
+		/* start audio */
+		audio->setSource(AUDIO_SOURCE_DEMUX);
+		audio->start();
+	}
+
+	/* start demux filters */
+	if (have_pcr)
+		startDmxFilter(dmx_pcr_fd);
+	if (have_audio)
+		startDmxFilter(dmx_audio_fd);
+	if (have_video)
+		startDmxFilter(dmx_video_fd);
 
 #if 0
-
 	if ((dmx_general_fd == -1) && (dmx_general_fd = open(DEMUX_DEVICE, O_RDWR)))
 	{
 		perror("[zapit] " DEMUX_DEVICE);
@@ -1485,7 +1530,6 @@ int startPlayBack()
 #endif
 
 #ifdef DBOX2
-
 	startVbi();
 #endif /* DBOX2 */
 

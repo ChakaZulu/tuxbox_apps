@@ -1,5 +1,5 @@
 /*
- * $Id: audio.cpp,v 1.6 2002/09/21 20:20:05 thegoodguy Exp $
+ * $Id: audio.cpp,v 1.7 2002/10/03 02:04:22 obi Exp $
  *
  * (C) 2002 by Steffen Hehn 'McClean' &
  *	Andreas Oberritter <obi@tuxbox.org>
@@ -157,6 +157,24 @@ int CAudio::setVolume (unsigned char left, unsigned char right)
 	}
 
 	return -1;
+}
+
+int CAudio::setSource (audioStreamSource_t source)
+{
+	if (status.streamSource == source)
+		return 0;
+
+	if (status.playState != AUDIO_STOPPED)
+		return -1;
+
+	if (ioctl(fd, AUDIO_SELECT_SOURCE, source) < 0)
+	{
+		perror("AUDIO_SELECT_SOURCE");
+		return -1;
+	}
+
+	status.streamSource = source;
+	return 0;
 }
 
 int CAudio::start ()

@@ -1,5 +1,5 @@
 /*
- * $Id: dmx.cpp,v 1.7 2002/09/22 14:58:58 obi Exp $
+ * $Id: dmx.cpp,v 1.8 2002/10/03 02:04:22 obi Exp $
  *
  * (C) 2002 by Andreas Oberritter <obi@tuxbox.org>
  * 
@@ -227,7 +227,7 @@ int setDmxPesFilter (int fd, dmxOutput_t output, dmxPesType_t pesType, unsigned 
 	if (fd < 0)
 		return -1;
 
-	if ((pid < 0x0020) || (pid > 0x1FFB))
+	if ((pid < 0x0020) || ((pid > 0x1FFB) && (pid != 0xFFFF)))
 		return -1;
 
 	pesFilterParams.pid = pid;
