@@ -34,6 +34,7 @@ satsetup.nodiseqc nessun DiSEqC
 satsetup.minidiseqc Mini-DiSEqC
 satsetup.diseqc10 DiSEqC 1.0
 satsetup.diseqc11 DiSEqC 1.1
+satsetup.diseqc12 DiSEqC 1.2
 satsetup.smatvremote SMATV Remote Tuning
 satsetup.diseqcrepeat DiSEqC-Ripetizioni
 
@@ -59,6 +60,7 @@ miscsettings.boxtype DBox Costruttore
 miscsettings.startneutrinodirect Esecuzione diretta Neutrino
 miscsettings.general Generale
 miscsettings.fb_destination EXPERT! Boot-Konsole
+miscsettings.infobar_sat_display unset
 
 languagesetup.head Impostazioni Lingua
 languagesetup.select Lingua
