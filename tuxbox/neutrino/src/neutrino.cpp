@@ -2866,8 +2866,6 @@ void CNeutrinoApp::ExitRun()
 	saveSetup();
 	g_Controld->shutdown();
 
-	sleep(55);
-
 	if (g_RCInput != NULL)
 		delete g_RCInput;
 
@@ -3345,7 +3343,7 @@ bool CNeutrinoApp::changeNotify(std::string OptionName, void *Data)
 int main(int argc, char **argv)
 {
 	setDebugLevel(DEBUG_NORMAL);
-	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.427 2003/03/17 18:11:13 zwen Exp $\n\n");
+	dprintf( DEBUG_NORMAL, "NeutrinoNG $Id: neutrino.cpp,v 1.428 2003/03/19 20:59:02 thegoodguy Exp $\n\n");
 
 	tzset();
 	initGlobals();

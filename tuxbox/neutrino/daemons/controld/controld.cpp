@@ -111,18 +111,9 @@ void saveSettings()
 
 void shutdownBox()
 {
-	//lcdd.shutdown();
-
-	zapit.shutdown();
-
 	timerd.shutdown();
 
 	saveSettings();
-
-	if (execlp("/sbin/halt", "/sbin/halt", 0)<0)
-	{
-		perror("exec failed - halt\n");
-	}
 }
 
 void setvideooutput(int format, bool bSaveSettings = true)
@@ -794,7 +785,7 @@ int main(int argc, char **argv)
 
 	CBasicServer controld_server;
 
-	printf("$Id: controld.cpp,v 1.103 2003/03/17 23:33:32 thegoodguy Exp $\n\n");
+	printf("$Id: controld.cpp,v 1.104 2003/03/19 20:59:02 thegoodguy Exp $\n\n");
 
 	for (int i = 1; i < argc; i++)
 	{
