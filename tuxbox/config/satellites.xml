@@ -15,13 +15,15 @@
 		<transponder frequency="12051000" symbol_rate="27500000" polarization="1" fec_inner="2"/>
 	</sat>
 	<sat name="Eutelsat 7.0E">
-		<transponder frequency="10964000" symbol_rate="13333000" polarization="0" fec_inner="5"/>
+		<transponder frequency="11575000" symbol_rate="30000000" polarization="1" fec_inner="3"/>
+		<transponder frequency="11596000" symbol_rate="30000000" polarization="0" fec_inner="3"/>
 	</sat>
 	<sat name="Eutelsat 10.0E">
 		<transponder frequency="10957000" symbol_rate="3050000" polarization="0" fec_inner="5"/>
 	</sat>
 	<sat name="Eutelsat 13.0E">
-		<transponder frequency="10723000" symbol_rate="29900000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12168000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
+		<transponder frequency="12539000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
 	</sat>
 	<sat name="Kopernikus 23.5E">
 		<transponder frequency="11466000" symbol_rate="27500000" polarization="0" fec_inner="3"/>
