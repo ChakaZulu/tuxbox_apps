@@ -1,5 +1,5 @@
 /*
- * $Id: zapit.cpp,v 1.199 2002/08/27 15:50:33 obi Exp $
+ * $Id: zapit.cpp,v 1.200 2002/08/29 09:27:52 thegoodguy Exp $
  *
  * zapit - d-box2 linux project
  *
@@ -238,7 +238,7 @@ void save_settings (bool write)
 	{
 		if (currentMode & RADIO_MODE)
 		{
-			CBouquetManager::radioChannelIterator cit = bouquetManager->radioChannelsFind(channel->getOnidSid());
+			CBouquetManager::ChannelIterator cit = bouquetManager->radioChannelsFind(channel->getOnidSid());
 			if (cit != bouquetManager->radioChannelsEnd())
 			{
 				config->setInt("lastChannelRadio", (*cit)->getChannelNumber());
@@ -247,7 +247,7 @@ void save_settings (bool write)
 		}
 		else
 		{
-			CBouquetManager::tvChannelIterator cit = bouquetManager->tvChannelsFind(channel->getOnidSid());
+			CBouquetManager::ChannelIterator cit = bouquetManager->tvChannelsFind(channel->getOnidSid());
 			if (cit != bouquetManager->tvChannelsEnd())
 			{
 				config->setInt("lastChannelTV", (*cit)->getChannelNumber());
@@ -1133,7 +1133,7 @@ int main (int argc, char **argv)
 	channel_msg testmsg;
 	int i;
 
-	printf("$Id: zapit.cpp,v 1.199 2002/08/27 15:50:33 obi Exp $\n\n");
+	printf("$Id: zapit.cpp,v 1.200 2002/08/29 09:27:52 thegoodguy Exp $\n\n");
 
 	if (argc > 1)
 	{
@@ -1445,17 +1445,13 @@ void sendChannels( CZapitClient::channelsMode mode, CZapitClient::channelsOrder 
 	{
 		if (((currentMode & RADIO_MODE) && (mode == CZapitClient::MODE_CURRENT)) || (mode==CZapitClient::MODE_RADIO))
 		{
-			for (CBouquetManager::radioChannelIterator radiocit = bouquetManager->radioChannelsBegin(); radiocit != bouquetManager->radioChannelsEnd(); radiocit++)
-			{
-				channels.insert(channels.end(), (*radiocit));
-			}
+			for (CBouquetManager::ChannelIterator radiocit = bouquetManager->radioChannelsBegin(); radiocit != bouquetManager->radioChannelsEnd(); radiocit++)
+				channels.push_back(*radiocit);
 		}
 		else
 		{
-			for (CBouquetManager::tvChannelIterator tvcit = bouquetManager->tvChannelsBegin(); tvcit != bouquetManager->tvChannelsEnd(); tvcit++)
-			{
-				channels.insert(channels.end(), (*tvcit));
-			}
+			for (CBouquetManager::ChannelIterator tvcit = bouquetManager->tvChannelsBegin(); tvcit != bouquetManager->tvChannelsEnd(); tvcit++)
+				channels.push_back(*tvcit);
 		}
 	}
 	else if (order == CZapitClient::SORT_ALPHA)
@@ -1679,7 +1675,7 @@ unsigned zapTo (unsigned int channel)
 
 	if (currentMode & RADIO_MODE)
 	{
-		CBouquetManager::radioChannelIterator radiocit = bouquetManager->radioChannelsBegin();
+		CBouquetManager::ChannelIterator radiocit = bouquetManager->radioChannelsBegin();
 		while ((radiocit != bouquetManager->radioChannelsEnd()) && (channel>1))
 		{
 			radiocit++;
@@ -1691,7 +1687,7 @@ unsigned zapTo (unsigned int channel)
 	}
 	else
 	{
-		CBouquetManager::tvChannelIterator tvcit = bouquetManager->tvChannelsBegin();
+		CBouquetManager::ChannelIterator tvcit = bouquetManager->tvChannelsBegin();
 		while ((tvcit != bouquetManager->tvChannelsEnd()) && (channel>1))
 		{
 			tvcit++;

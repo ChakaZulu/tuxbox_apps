@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.cpp,v 1.31 2002/08/28 23:01:09 thegoodguy Exp $
+ * $Id: bouquets.cpp,v 1.32 2002/08/29 09:27:52 thegoodguy Exp $
  *
  * BouquetManager for zapit - d-box2 linux project
  *
@@ -791,86 +791,51 @@ CZapitChannel* CBouquetManager::copyChannelByOnidSid( unsigned int onid_sid)
 	return( chan);
 }
 
-CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsBegin()
+CBouquetManager::ChannelIterator CBouquetManager::ChannelIterator::operator ++(int)
 {
-	return tvChannelIterator(this, 0, -1)++;
+	if ((c != -2) || (b != 0))   // we can add if it's not the end marker
+	{
+		c++;
+		if ((unsigned int) c >= getBouquet()->size())
+			for (; b < Owner->Bouquets.size(); b++)
+				if (getBouquet()->size() != 0)
+				{
+					c = 0;
+					goto end;
+				}
+		b = 0; c = -2;
+	}
+ end:
+	return(*this);
 }
 
-CBouquetManager::tvChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)
+CZapitChannel* CBouquetManager::ChannelIterator::operator *()
 {
-	tvChannelIterator it = tvChannelsBegin();
+	return (*getBouquet())[c];               // returns junk if we are an end marker !!
+}
+
+bool CBouquetManager::ChannelIterator::operator != (const ChannelIterator& it) const
+{
+	return( (b != it.b) || (c != it.c));    // not quite correct (might have different Owner and/or be radio/tv iterator!)
+}
+
+bool CBouquetManager::ChannelIterator::operator == (const ChannelIterator& it) const
+{
+	return( (b == it.b) && (c == it.c));    // not quite correct (might have different Owner and/or be radio/tv iterator!)
+}
+
+CBouquetManager::ChannelIterator CBouquetManager::tvChannelsFind( unsigned int onid_sid)
+{
+	ChannelIterator it = tvChannelsBegin();
 	while ((it != tvChannelsEnd()) && ((*it)->getOnidSid() != onid_sid))
 		it++;
 	return( it);
 }
 
-CBouquetManager::tvChannelIterator CBouquetManager::tvChannelIterator::operator ++(int)
+CBouquetManager::ChannelIterator CBouquetManager::radioChannelsFind( unsigned int onid_sid)
 {
-	if ((b != -1) || (c != -1))   // we can add if it's not the end marker
-	{
-		c++;
-		if ((unsigned int) c >= Owner->Bouquets[b]->tvChannels.size())
-			for (; (unsigned int) b < Owner->Bouquets.size(); b++)
-				if (Owner->Bouquets[b]->tvChannels.size() != 0)
-				{
-					c = 0;
-					goto end;
-				}
-		b = -1; c = -1;
-	}
- end:
-	return(*this);
-}
-
-CZapitChannel* CBouquetManager::tvChannelIterator::operator *()
-{
-	return( Owner->Bouquets[b]->tvChannels[c]);
-}
-
-bool CBouquetManager::ChannelIterator::operator != (const ChannelIterator& it) const
-{
-	return( (b != it.b) || (c != it.c));    // not quite correct (might have different Owner!)
-}
-
-bool CBouquetManager::ChannelIterator::operator == (const ChannelIterator& it) const
-{
-	return( (b == it.b) && (c == it.c));    // not quite correct (might have different Owner!)
-}
-
-CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsBegin()
-{
-	return radioChannelIterator(this, 0, -1)++;
-}
-
-CBouquetManager::radioChannelIterator CBouquetManager::radioChannelsFind( unsigned int onid_sid)
-{
-	radioChannelIterator it = radioChannelsBegin();
+	ChannelIterator it = radioChannelsBegin();
 	while ((it != radioChannelsEnd()) && ((*it)->getOnidSid() != onid_sid))
-	{
 		it++;
-	}
 	return( it);
-}
-
-CBouquetManager::radioChannelIterator CBouquetManager::radioChannelIterator::operator ++(int)
-{
-	if ((b != -1) || (c != -1))   // we can add if it's not the end marker
-	{
-		c++;
-		if ((unsigned int) c >= Owner->Bouquets[b]->radioChannels.size())
-			for (; (unsigned int) b < Owner->Bouquets.size(); b++)
-				if (Owner->Bouquets[b]->radioChannels.size() != 0)
-				{
-					c = 0;
-					goto end;
-				}
-		b = -1; c = -1;
-	}
- end:
-	return(*this);
-}
-
-CZapitChannel* CBouquetManager::radioChannelIterator::operator *()
-{
-	return( Owner->Bouquets[b]->radioChannels[c]);
 }

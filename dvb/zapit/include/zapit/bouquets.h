@@ -1,5 +1,5 @@
 /*
- * $Id: bouquets.h,v 1.20 2002/08/28 23:01:09 thegoodguy Exp $
+ * $Id: bouquets.h,v 1.21 2002/08/29 09:27:52 thegoodguy Exp $
  */
 
 #ifndef __bouquets_h__
@@ -88,40 +88,27 @@ class CBouquetManager
 	public:
 		class ChannelIterator
 		{
-			protected:
+			private:
 				CBouquetManager* Owner;
-				int b;
+				unsigned int b;
 				int c;
+				bool tv;           // true -> tvChannelIterator, false -> radioChannelIterator
+				ChannelList* getBouquet() { return (tv ? &(Owner->Bouquets[b]->tvChannels) : &(Owner->Bouquets[b]->radioChannels)); };
 			public:
-				ChannelIterator(CBouquetManager* owner, int B=0, int C=0) { Owner = owner; b=B;c=C;};
+				ChannelIterator(CBouquetManager* owner, unsigned int B=0, int C=0, bool TV=true) { Owner = owner; b=B; c=C; tv = TV; };
 				bool operator != (const ChannelIterator& it) const;
 				bool operator == (const ChannelIterator& it) const;
-				virtual CZapitChannel* operator *() =0;         // abstract
-		};
-
-		class tvChannelIterator : public ChannelIterator
-		{
-			public:
-				tvChannelIterator(CBouquetManager* owner, int B=0, int C=0) : ChannelIterator(owner, B, C) {};
-				tvChannelIterator operator ++(int);
+				ChannelIterator operator ++(int);
 				CZapitChannel* operator *();
 		};
 
-		tvChannelIterator tvChannelsBegin();
-		tvChannelIterator tvChannelsEnd(){ return tvChannelIterator(this, -1, -1);};
-		tvChannelIterator tvChannelsFind(unsigned int onid_sid);
+		ChannelIterator tvChannelsBegin() { return ChannelIterator(this, 0, -1, true)++; };
+		ChannelIterator tvChannelsEnd()   { return ChannelIterator(this, 0, -2, true);   };
+		ChannelIterator tvChannelsFind(unsigned int onid_sid);
 
-		class radioChannelIterator : public ChannelIterator
-		{
-			public:
-				radioChannelIterator(CBouquetManager* owner, int B=0, int C=0) : ChannelIterator(owner, B, C) {};
-				radioChannelIterator operator ++(int);
-				CZapitChannel* operator *();
-		};
-
-		radioChannelIterator radioChannelsBegin();
-		radioChannelIterator radioChannelsEnd(){ return radioChannelIterator(this, -1, -1);};
-		radioChannelIterator radioChannelsFind(unsigned int onid_sid);
+		ChannelIterator radioChannelsBegin() { return ChannelIterator(this, 0, -1, false)++; };
+		ChannelIterator radioChannelsEnd()   { return ChannelIterator(this, 0, -2, false);   };
+		ChannelIterator radioChannelsFind(unsigned int onid_sid);
 
 		BouquetList Bouquets;
 		BouquetList storedBouquets;
